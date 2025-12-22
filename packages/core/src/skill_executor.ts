@@ -345,7 +345,7 @@ export class SkillExecutor {
       });
       // 增加充能
       if (skillInfo.definition.initiativeSkillConfig.gainEnergy) {
-        if (ch.variables.alive) {
+        if (ch.variables.alive && !ch.definition.specialEnergy) {
           this.mutator.log(
             DetailLogType.Other,
             `using skill gain 1 energy for ${stringifyState(ch)}`,
