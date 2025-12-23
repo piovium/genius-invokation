@@ -50,6 +50,7 @@ export const NATION_TAGS = [
   "monster",
   "hilichurl",
   "sacread",
+  "calamity",
 ] as const;
 
 export type NationTag = (typeof NATION_TAGS)[number];

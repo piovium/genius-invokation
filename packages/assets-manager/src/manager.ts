@@ -145,6 +145,7 @@ export class AssetsManager {
       fatui: "GCG_TAG_CAMP_FATUI",
       eremite: "GCG_TAG_CAMP_EREMITE",
       sacread: "GCG_TAG_CAMP_SACREAD",
+      calamity: "GCG_TAG_CAMP_CALAMITY",
       //
       pneuma: "GCG_TAG_ARKHE_PNEUMA",
       ousia: "GCG_TAG_ARKHE_OUSIA",

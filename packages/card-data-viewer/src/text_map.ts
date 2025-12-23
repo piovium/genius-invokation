@@ -45,6 +45,7 @@ export const TEXT_MAP: Record<string, string> = {
   GCG_TAG_CAMP_KAIRAGI: "海乱鬼",
   GCG_TAG_CAMP_EREMITE: "镀金旅团",
   GCG_TAG_CAMP_SACREAD: "圣骸兽",
+  GCG_TAG_CAMP_CALAMITY: "寰宇劫灭",
   GCG_TAG_WEAPON_NONE: "其他武器",
   GCG_TAG_WEAPON_CATALYST: "法器",
   GCG_TAG_WEAPON_BOW: "弓",
