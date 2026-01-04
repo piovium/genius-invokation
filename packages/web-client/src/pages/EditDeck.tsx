@@ -214,66 +214,33 @@ export default function EditDeck() {
 
   return (
     <Layout mainFlex={!mobile()}>
-      <div class="container mx-auto h-full flex flex-col min-h-0">
-        <div class="flex-shrink-0 flex flex-row flex-wrap gap-3 mb-5 min-h-0">
+      <div class="container mx-auto h-full flex flex-col min-h-0 px-2">
+        <div class="flex-shrink-0 flex flex-row flex-wrap items-center gap-1 md:gap-3 mb-3 md:mb-5 min-h-0">
           <Show
             when={editingName()}
             fallback={
-              <>
-                <h2 class="text-2xl font-bold min-w-0 overflow-hidden whitespace-nowrap text-ellipsis flex-shrink-0">
+              <div class="flex flex-row items-center gap-2">
+                <h2 class="text-xl md:text-2xl font-bold min-w-0 overflow-hidden whitespace-nowrap text-ellipsis flex-shrink-0">
                   {deckName()}
                 </h2>
-                <button class="btn btn-ghost" onClick={startEditingName}>
+                <button class="btn btn-ghost h-8 w-8 p-1" onClick={startEditingName}>
                   <i class="i-mdi-pencil-outline" />
                 </button>
-                <button
-                  class="flex-shrink-0 btn btn-outline-blue"
-                  onClick={importCode}
-                >
-                  导入分享码
-                </button>
-                <button
-                  class="flex-shrink-0 btn btn-outline"
-                  onClick={exportCode}
-                >
-                  生成分享码
-                </button>
-                <button
-                  class="flex-shrink-0 btn btn-solid-green min-w-22"
-                  disabled={!valid() || uploading()}
-                  onClick={async () => {
-                    if (await saveDeck()) {
-                      if (isNew) {
-                        navigateBack();
-                      }
-                    }
-                  }}
-                >
-                  <Switch>
-                    <Match when={uploading()}>
-                      <i class="i-mdi-loading animate-spin" />
-                    </Match>
-                    <Match when={uploadDone()}>
-                      <i class="i-mdi-check" />
-                    </Match>
-                    <Match when={true}>保存牌组</Match>
-                  </Switch>
-                </button>
-              </>
+              </div>
             }
           >
-            <form onSubmit={saveName} class="flex flex-row gap-3">
+            <form onSubmit={saveName} class="flex flex-row gap-1 md:gap-3 text-3.2 md:text-3.5">
               <input
                 type="text"
                 required
                 ref={setNameInputEl}
                 onFocus={(e) => e.target.select()}
                 name="name"
-                class="input input-outline w-50 h-8 text-1rem"
+                class="input input-outline min-w-40 md:w-50 h-8 text-1rem"
               />
               <button
                 type="submit"
-                class="btn btn-ghost-green min-w-12"
+                class="btn btn-soft-green h-8 w-12"
                 disabled={uploading()}
               >
                 <Show when={uploading()} fallback="保存">
@@ -281,20 +248,55 @@ export default function EditDeck() {
                 </Show>
               </button>
               <button
-                class="btn btn-ghost-red"
+                class="btn btn-soft-red h-8 w-12"
                 onClick={() => setEditingName(false)}
               >
                 取消
               </button>
             </form>
           </Show>
-          <span class="flex-grow" />
-          <button
-            class="flex-shrink-0 btn btn-ghost-blue"
-            onClick={() => navigateBack()}
-          >
-            返回
-          </button>
+          <div class="flex flex-row flex-1 gap-1 md:gap-3 text-3.2 md:text-3.5">
+            <button
+              class="btn btn-outline-blue"
+              onClick={importCode}
+            >
+              导入分享码
+            </button>
+            <button
+              class="btn btn-outline"
+              onClick={exportCode}
+            >
+              生成分享码
+            </button>
+            <button
+              class="flex-shrink-0 btn btn-solid-green min-w-18 md:min-w-22"
+              disabled={!valid() || uploading()}
+              onClick={async () => {
+                if (await saveDeck()) {
+                  if (isNew) {
+                    navigateBack();
+                  }
+                }
+              }}
+            >
+              <Switch>
+                <Match when={uploading()}>
+                  <i class="i-mdi-loading animate-spin" />
+                </Match>
+                <Match when={uploadDone()}>
+                  <i class="i-mdi-check" />
+                </Match>
+                <Match when={true}>保存牌组</Match>
+              </Switch>
+            </button>
+            <span class="flex-grow" />
+            <button
+              class="flex-shrink-0 btn btn-outline-red"
+              onClick={() => navigateBack()}
+            >
+              返回
+            </button>
+          </div>
         </div>
         <Switch>
           <Match when={userDeckData.loading}>正在加载中...</Match>

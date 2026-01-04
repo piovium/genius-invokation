@@ -27,19 +27,19 @@ export function Header() {
   const navigate = useNavigate();
   const { status, logout } = useAuth();
   return (
-    <header class="fixed top-0 left-0 w-100dvw flex flex-row h-[calc(4rem+var(--root-padding-top))] pt-[var(--root-padding-top)] bg-white z-200 px-4 shadow-md items-center gap-2">
-      <img src={Logo} class="h-12" />
-      <div class="flex-grow flex flex-col md:flex-row items-start md:items-end gap-2">
-        <h1 class="text-xl line-height-none font-bold ">
+    <header class="fixed top-0 left-0 w-100dvw flex flex-row h-[calc(3rem+var(--root-padding-top))] md:h-[calc(4rem+var(--root-padding-top))] pt-[var(--root-padding-top)] bg-white z-200 px-4 shadow-md items-center gap-2">
+      <img src={Logo} class="h-10 md:h-12" />
+      <div class="flex-grow flex flex-col md:flex-row items-start md:items-end gap-1 md:gap-2">
+        <h1 class="text-xl line-height-none font-bold">
           <A href="/">
             <Show when={USE_LOGO} fallback="七圣召唤模拟对战平台">
-              <img src={Title} class="h-6" alt="雨酱牌！" />
+              <img src={Title} class="h-5 md:h-6" alt="雨酱牌！" />
             </Show>
           </A>
         </h1>
         <div class="flex flex-row gap-2">
           <Show when={IS_BETA}>
-            <span class="text-10px badge badge-soft-error">
+            <span class="text-8px md:text-10px badge badge-soft-error">
               Incl. unreleased data
             </span>
           </Show>
@@ -48,10 +48,10 @@ export function Header() {
       <Show when={status().type !== "notLogin"}>
         <Show when={status().type === "user"}>
           <A href={`/user/${status().id}`}>
-            <div class="rounded-full w-12 h-12 b-solid b-1 b-gray-200 flex items-center justify-center">
+            <div class="rounded-full w-10 h-10 md:w-12 md:h-12 b-solid b-1 b-gray-200 flex items-center justify-center">
               <img
                 src={getAvatarUrl(status().id as number)}
-                class="w-10 h-10 [clip-path:circle()]"
+                class="w-85% h-85% [clip-path:circle()]"
               />
             </div>
           </A>

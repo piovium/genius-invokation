@@ -27,7 +27,7 @@ export function Layout(props: LayoutProps) {
     <div class="w-full h-full flex flex-col">
       <Header />
       <main
-        class="flex-grow w-full p-8 mt-16"
+        class="flex-grow w-full p-4 md:p-8 mt-12"
         classList={{ "min-h-0": props.mainFlex }}
       >
         <ErrorBoundary
