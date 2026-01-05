@@ -48,7 +48,7 @@ export const NATION_TAG_IMG_NAME_MAP: Record<string, string> = {
   GCG_TAG_NATION_NATLAN: "Faction_Natlan",
   // GCG_TAG_NATION_SNEZHNAYA: "Faction_Snezhnaya",
   GCG_TAG_NATION_COSMIC_CALAMITY: "Faction_CosmicCalamity",
-  // GCG_TAG_CAMP_ERIMITE: "Faction_Erimite",
+  GCG_TAG_CAMP_EREMITE: "Faction_Eremite",
   GCG_TAG_CAMP_FATUI: "Faction_Fatui",
   GCG_TAG_CAMP_MONSTER: "Faction_Monster",
   GCG_TAG_CAMP_SACREAD: "Faction_Sacred",
