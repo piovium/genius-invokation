@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { For, Index, Show, createEffect } from "solid-js";
+import { For, Index, Show, createEffect, createSignal } from "solid-js";
 import type { AllCardsProps } from "./AllCards";
 import { Card } from "./Card";
 import { createStore, produce } from "solid-js/store";
@@ -21,6 +21,7 @@ import type {
   DeckDataActionCardInfo,
   DeckDataCharacterInfo,
 } from "@gi-tcg/assets-manager";
+import type { b } from "../../core/dist/log-QibsbrKo";
 
 export function CurrentDeck(props: AllCardsProps) {
   const [current, setCurrent] = createStore({
@@ -33,6 +34,8 @@ export function CurrentDeck(props: AllCardsProps) {
       () => null,
     ) as (DeckDataActionCardInfo | null)[],
   });
+
+  const [deckPage, setDeckPage] = createSignal<boolean>(false);
 
   createEffect(() => {
     const selectedChs = props.deck.characters
@@ -74,13 +77,22 @@ export function CurrentDeck(props: AllCardsProps) {
   };
 
   return (
-    <div class="flex-shrink-0 flex flex-col items-center justify-center gap-3">
+    <div 
+      class="flex-shrink-0 flex flex-col items-center justify-center gap-3 fixed left-0 bottom-0 w-100vw h-60 z-2 bg-white b-t-1 data-[deck-page=true]:h-160 md:relative md:w-auto md:h-auto md:b-0"
+      data-deck-page={deckPage()}
+      onClick={(e) => {
+        if (e.currentTarget === e.target) {
+          setDeckPage(!deckPage());
+        }
+      }}
+    >
       <div>
         <ul class="flex flex-row gap-3">
           <For each={current.characters}>
             {(ch, idx) => (
               <li
-                class="w-[75px] aspect-ratio-[7/12] relative group"
+                class="w-8 h-8 relative group data-[deck-page=true]:w-75px data-[deck-page=true]:h-auto data-[deck-page=true]:aspect-ratio-[7/12] md:w-75px md:h-auto md:aspect-ratio-[7/12]"
+                data-deck-page={deckPage()}
                 data-warn={ch && ch.version > props.version}
                 onClick={() => ch && removeCharacter(idx())}
               >
@@ -108,11 +120,15 @@ export function CurrentDeck(props: AllCardsProps) {
         </ul>
       </div>
       <div>
-        <ul class="grid grid-cols-6 gap-2">
+        <ul 
+          class="grid grid-cols-10 gap-1 data-[deck-page=true]:grid-cols-6 data-[deck-page=true]:gap-2 md:grid-cols-6 md:gap-2"
+          data-deck-page={deckPage()}
+        >
           <For each={current.cards}>
             {(ac, idx) => (
               <li
-                class="w-[50px] aspect-ratio-[7/12] relative group"
+                class="w-8 aspect-ratio-[7/12] relative group data-[deck-page=true]:w-50px md:w-50px"
+                data-deck-page={deckPage()}
                 data-warn={ac && ac.version > props.version}
                 onClick={() => ac && removeActionCard(idx())}
               >
