@@ -353,7 +353,7 @@ function doMutation(state: GameState, m: Mutation): GameState {
     }
     case "moveEntity": {
       return produce(state, (draft) => {
-        removeEntity(draft, m.value.id);
+        const latestState = removeEntity(draft, m.value.id);
         const { target: to, targetIndex } = m;
         let area: Draft<EntityState[]>;
         if (to.type === "characters") {
@@ -374,15 +374,18 @@ function doMutation(state: GameState, m: Mutation): GameState {
           targetIndex < 0 ||
           targetIndex > area.length
         ) {
-          area.push(m.value as Draft<EntityState>);
+          area.push(latestState as Draft<EntityState>);
         } else {
-          area.splice(targetIndex, 0, m.value as Draft<EntityState>);
+          area.splice(targetIndex, 0, latestState as Draft<EntityState>);
         }
       });
     }
     case "removeEntity": {
       return produce(state, (draft) => {
-        removeEntity(draft, m.oldState.id);
+        const removed = removeEntity(draft, m.oldState.id);
+        draft.players[m.from.who].removedEntities.push(
+          removed as Draft<AnyState>,
+        );
       });
     }
     case "modifyEntityVar": {
