@@ -318,10 +318,10 @@ export function checkImmune(state: GameState, e: ZeroHealthEventArg) {
 }
 
 /**
- * @nodiscard
- * @param state 
- * @param id 
- * @returns 
+ * Remove an entity by its id from the given game state.
+ * @param state The mutable game state draft.
+ * @param id The id of the entity to remove.
+ * @returns The removed entity; callers should use this return value.
  */
 export function removeEntity(state: Draft<GameState>, id: number): AnyState {
   for (const player of state.players) {
