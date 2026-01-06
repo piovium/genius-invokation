@@ -143,6 +143,7 @@ export const AgileSwitch = combatStatus(170)
  * 已完成过一次冒险。
  */
 export const AdventureCompleted = combatStatus(171)
+  .usageCanAppend(1, Infinity)
   .done();
 
 /**
