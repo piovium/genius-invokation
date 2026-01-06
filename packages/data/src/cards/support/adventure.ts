@@ -56,6 +56,11 @@ export const ChenyuVale = card(321032)
     const healValue = 999; // interesting.
     c.heal(healValue, targetCh);
     c.increaseMaxHealth(2, targetCh);
+    c. combatStatus(finishAdventure, "my", {
+    overrideVariables: {
+      usage: 1
+    }
+  })
     c.finishAdventure();
   })
   .done();
@@ -83,5 +88,10 @@ export const TowerOfIpsissimus = card(321033)
   .on("adventure", (c) => c.getVariable("exp") >= 12)
   .usage(1, { name: "stage12", autoDispose: false, visible: false })
   .createHandCard(ReforgeTheHolyBlade)
+  . combatStatus(finishAdventure, "my", {
+    overrideVariables: {
+      usage: 1
+    }
+  })
   .finishAdventure()
   .done();
