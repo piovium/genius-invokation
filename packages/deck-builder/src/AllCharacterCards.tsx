@@ -133,7 +133,7 @@ export function AllCharacterCards(props: AllCardsProps) {
           )}
         </For>
       </div>
-      <ul class="flex-grow overflow-auto flex flex-row flex-wrap gap-2">
+      <ul class="flex-grow overflow-auto flex flex-row flex-wrap gap-2 group-[xxx.mobile]:pb-2!">
         <Key each={props.characters.values().toArray()} by="id">
           {(ch) => (
             <li

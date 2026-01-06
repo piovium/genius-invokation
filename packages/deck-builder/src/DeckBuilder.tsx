@@ -48,7 +48,7 @@ interface DeckBuilderContextValue {
   showCard: (
     e: MouseEvent,
     type: "actionCard" | "character",
-    id: number,
+    id: number
   ) => void;
 }
 
@@ -73,6 +73,8 @@ export function DeckBuilder(props: DeckBuilderProps) {
     createCardDataViewer({
       assetsManager: untrack(() => local.assetsManager),
     });
+
+  const [deckPage, setDeckPage] = createSignal<boolean>(false);
   const [cardDataViewerOffsetX, setCardDataViewerOffsetX] = createSignal(0);
   const [cardDataViewerOffsetY, setCardDataViewerOffsetY] = createSignal(0);
 
@@ -102,10 +104,10 @@ export function DeckBuilder(props: DeckBuilderProps) {
           // 当点击事件发生在靠近左侧位置时，在鼠标右下角显示；否则在左上角显示
           if (rect.left - containerRect.left < 320) {
             setCardDataViewerOffsetX(
-              rect.left + rect.width / 2 - containerRect.left,
+              rect.left + rect.width / 2 - containerRect.left
             );
             setCardDataViewerOffsetY(
-              rect.top + rect.height / 2 - containerRect.top,
+              rect.top + rect.height / 2 - containerRect.top
             );
           } else {
             setCardDataViewerOffsetX(0);
@@ -119,9 +121,12 @@ export function DeckBuilder(props: DeckBuilderProps) {
         },
       }}
     >
-      <div class={`gi-tcg-deck-builder groupxxx reset ${local.class}`} ref={container}>
+      <div
+        class={`gi-tcg-deck-builder groupxxx reset ${local.class}`}
+        ref={container}
+      >
         <div
-          class="w-full h-full flex flex-row group-[xxx.mobile]:flex-col items-stretch gap-3 select-none"
+          class="w-full h-full flex flex-row group-[xxx.mobile]:flex-col items-stretch gap-3 group-[xxx.mobile]:gap-0 select-none"
           {...rest}
           onClick={() => hide()}
         >
@@ -138,6 +143,7 @@ export function DeckBuilder(props: DeckBuilderProps) {
                   version={version()}
                   versionSpecified={versionSpecified()}
                   deck={props.deck ?? EMPTY_DECK}
+                  deckPage={deckPage()}
                   onChangeDeck={props.onChangeDeck}
                   onSetVersion={setVersion}
                   {...deckData()}
@@ -145,8 +151,27 @@ export function DeckBuilder(props: DeckBuilderProps) {
               )}
             </Match>
           </Switch>
-          <div class="b-r-1 b-b-1 b-gray" />
-          <div />
+          <div
+            class="b-r-1 b-b-1 b-gray group-[xxx.mobile]:data-[deck-page=true]:mt-3"
+            data-deck-page={deckPage()}
+          />
+          <div
+            class="h-3 w-full hidden group-[xxx.mobile]:flex relative data-[deck-page=true]:mb-3"
+            data-deck-page={deckPage()}
+          >
+            <div
+              class="absolute h-12 w-12 rounded-full b-solid b-t-1 bg-white top-0 right-10% translate-y--1/3"
+              onClick={(e) => {
+                // e.stopPropagation();
+                setDeckPage(!deckPage());
+              }}
+            >
+              <div
+                class="absolute top-3 left-4 h-4 w-4 rounded-lt-1 b-t-3 b-l-3 b-yellow-5! rotate-45 data-[deck-page=true]:rotate-225 data-[deck-page=true]:top-2"
+                data-deck-page={deckPage()}
+              />
+            </div>
+          </div>
           <Show when={deckData()}>
             {(deckData) => (
               <CurrentDeck
@@ -154,6 +179,7 @@ export function DeckBuilder(props: DeckBuilderProps) {
                 deck={props.deck ?? EMPTY_DECK}
                 onChangeDeck={props.onChangeDeck}
                 {...deckData()}
+                deckPage={deckPage()}
               />
             )}
           </Show>

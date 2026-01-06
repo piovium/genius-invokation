@@ -23,6 +23,7 @@ export interface AllCardsProps extends DeckData {
   deck: Deck;
   version: number;
   versionSpecified?: boolean;
+  deckPage?: boolean;
   onChangeDeck?: (deck: Deck) => void;
   onSwitchTab?: (tab: number) => void;
   onSetVersion?: (version: number) => void;
@@ -30,9 +31,13 @@ export interface AllCardsProps extends DeckData {
 
 export function AllCards(props: AllCardsProps) {
   const [tab, setTab] = createSignal(0);
+  const deckPage = () => props.deckPage ?? false;
 
   return (
-    <div class="min-w-0 flex-grow h-full group-[xxx.mobile]:h-50dvh group-[xxx.mobile]:flex-shrink-0 flex flex-col min-h-0">
+    <div 
+      class="min-w-0 flex-grow h-full group-[xxx.mobile]:h-50dvh group-[xxx.mobile]:flex-shrink-0 flex flex-col min-h-0 group-[xxx.mobile]:data-[deck-page=true]:hidden"
+      data-deck-page={deckPage()}
+    >
       <div class="flex flex-row gap-2 mb-2">
         <button
           class="data-[active=true]:font-bold"

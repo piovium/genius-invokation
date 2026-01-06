@@ -34,7 +34,7 @@ export function CurrentDeck(props: AllCardsProps) {
     ) as (DeckDataActionCardInfo | null)[],
   });
 
-  const [deckPage, setDeckPage] = createSignal<boolean>(false);
+  const deckPage = () => props.deckPage ?? false;
 
   createEffect(() => {
     const selectedChs = props.deck.characters
@@ -79,11 +79,6 @@ export function CurrentDeck(props: AllCardsProps) {
     <div 
       class="flex-shrink-0 flex flex-col items-center justify-center gap-3"
       data-deck-page={deckPage()}
-      onClick={(e) => {
-        if (e.currentTarget === e.target) {
-          setDeckPage(!deckPage());
-        }
-      }}
     >
       <div>
         <ul class="flex flex-row gap-3">

@@ -170,7 +170,7 @@ export function AllActionCards(props: AllCardsProps) {
           </For>
         </select>
       </div>
-      <ul class="flex-grow overflow-auto flex flex-row flex-wrap gap-2">
+      <ul class="flex-grow overflow-auto flex flex-row flex-wrap gap-2 group-[xxx.mobile]:pb-2!">
         <Key each={props.actionCards.values().toArray()} by="id">
           {(ac) => (
             <li
