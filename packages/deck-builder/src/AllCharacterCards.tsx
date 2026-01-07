@@ -24,6 +24,7 @@ import {
 } from "./TagIcon";
 import { Key } from "@solid-primitives/keyed";
 import type { DeckDataCharacterInfo } from "@gi-tcg/assets-manager";
+import FilterIcon from "./Filter.svg";
 
 export function AllCharacterCards(props: AllCardsProps) {
   const [elementTag, setElementTag] = createSignal<string | null>(null);
@@ -98,13 +99,56 @@ export function AllCharacterCards(props: AllCardsProps) {
   };
   return (
     <div class="h-full flex flex-col">
-      <div class="flex-shrink-0 h-12 flex flex-row overflow-x-auto overflow-y-hidden gap-1 mb-2 [scrollbar-width:thin]">
+      <div class="h-8 w-full flex-row mb-2 hidden group-[xxx.mobile]:flex">
+        <div class="mr--2 pl-1.5 h-8 w-22 rounded-full bg-purple-300 text-white flex items-center justify-center flex-shrink-0 z-1">
+          <span class="text-4 font-bold">筛选</span>
+          <img src={FilterIcon} class="w-5 h-5" />
+        </div>
+        <div class="h-8 flex-1 rounded-r-full b-purple-200! b-2 b-l-0 b-solid flex-grow overflow-hidden">
+          <div class="flex-shrink-0 h-full flex flex-row overflow-x-auto overflow-y-hidden gap-1 mb-2 p-l-3 p-r-1 items-center box-border scrollbar-hidden">
+            <For each={Object.keys(ELEMENT_TAG_IMG_NAME_MAP)}>
+              {(tag) => (
+                <button
+                  onClick={() => toggleElementTag(tag)}
+                  data-selected={elementTag() === tag}
+                  class="flex-shrink-0 bg-gray-100 opacity-25 data-[selected=true]:opacity-100 w-7 h-7 flex flex-col items-center justify-center rounded-full"
+                >
+                  <TagIcon tagName={tag} />
+                </button>
+              )}
+            </For>
+            <For each={Object.keys(WEAPON_TAG_IMG_NAME_MAP)}>
+              {(tag) => (
+                <button
+                  onClick={() => toggleWeaponTag(tag)}
+                  data-selected={weaponTag() === tag}
+                  class="flex-shrink-0 bg-gray-100 opacity-25 children:filter-invert data-[selected=true]:opacity-100 w-7 h-7 flex flex-col items-center justify-center rounded-full"
+                >
+                  <TagIcon tagName={tag} />
+                </button>
+              )}
+            </For>
+            <For each={Object.keys(NATION_TAG_IMG_NAME_MAP)}>
+              {(tag) => (
+                <button
+                  onClick={() => toggleNationTag(tag)}
+                  data-selected={nationTag() === tag}
+                  class="flex-shrink-0 bg-gray-100 opacity-25 children:filter-invert data-[selected=true]:opacity-100 w-7 h-7 flex flex-col items-center justify-center rounded-full"
+                >
+                  <TagIcon tagName={tag} />
+                </button>
+              )}
+            </For>
+          </div>
+        </div>
+      </div>
+      <div class="flex-shrink-0 flex flex-row overflow-x-auto overflow-y-hidden gap-1 mb-2 group-[xxx.mobile]:hidden flex-wrap">
         <For each={Object.keys(ELEMENT_TAG_IMG_NAME_MAP)}>
           {(tag) => (
             <button
               onClick={() => toggleElementTag(tag)}
               data-selected={elementTag() === tag}
-              class="flex-shrink-0 bg-gray-100 data-[selected=true]:bg-black w-10 h-full flex flex-col items-center justify-center"
+              class="flex-shrink-0 bg-gray-200 opacity-30 data-[selected=true]:opacity-100 data-[selected=true]:b-3 b-purple-400! w-10 h-10 flex flex-col items-center justify-center rounded-full children:w-8"
             >
               <TagIcon tagName={tag} />
             </button>
@@ -115,7 +159,7 @@ export function AllCharacterCards(props: AllCardsProps) {
             <button
               onClick={() => toggleWeaponTag(tag)}
               data-selected={weaponTag() === tag}
-              class="flex-shrink-0 bg-gray-900 data-[selected=false]:filter-invert w-10 h-full flex flex-col items-center justify-center"
+              class="flex-shrink-0 bg-gray-200 opacity-30 children:filter-invert data-[selected=true]:opacity-100 data-[selected=true]:b-3 b-purple-400! w-10 h-10 flex flex-col items-center justify-center rounded-full children:w-8"
             >
               <TagIcon tagName={tag} />
             </button>
@@ -126,7 +170,7 @@ export function AllCharacterCards(props: AllCardsProps) {
             <button
               onClick={() => toggleNationTag(tag)}
               data-selected={nationTag() === tag}
-              class="flex-shrink-0 bg-gray-900 data-[selected=false]:filter-invert w-10 h-full flex flex-col items-center justify-center"
+              class="flex-shrink-0 bg-gray-200 opacity-30 children:filter-invert data-[selected=true]:opacity-100 data-[selected=true]:b-3 b-purple-400! w-10 h-10 flex flex-col items-center justify-center rounded-full children:w-8"
             >
               <TagIcon tagName={tag} />
             </button>
