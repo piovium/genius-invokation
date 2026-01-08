@@ -118,7 +118,7 @@ export function Card(props: CardProps) {
           src={url()}
           alt={props.name}
           draggable="false"
-          class="w-full h-full object-cover"
+          class="w-full h-full object-cover pointer-events-none"
         />
       </Show>
       <Show when={pressing()}>
