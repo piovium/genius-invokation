@@ -240,7 +240,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         const previousIndex = damageEventIndexInResultBasedOnTarget.get(
           arg.target.id,
         );
-        if (previousIndex !== undefined) {
+        if (typeof previousIndex !== "undefined") {
           // combine current event with previous event
           const previousArg = result[
             previousIndex
