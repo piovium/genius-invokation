@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { For, Index, Show, createEffect, createSignal } from "solid-js";
+import { For, Index, Show, createEffect } from "solid-js";
 import type { AllCardsProps } from "./AllCards";
 import { Card } from "./Card";
 import { createStore, produce } from "solid-js/store";
@@ -21,16 +21,17 @@ import type {
   DeckDataActionCardInfo,
   DeckDataCharacterInfo,
 } from "@gi-tcg/assets-manager";
+import DeleteIcon from "./Delete.svg";
 
 export function CurrentDeck(props: AllCardsProps) {
   const [current, setCurrent] = createStore({
     characters: Array.from(
       { length: 3 },
-      () => null,
+      () => null
     ) as (DeckDataCharacterInfo | null)[],
     cards: Array.from(
       { length: 30 },
-      () => null,
+      () => null
     ) as (DeckDataActionCardInfo | null)[],
   });
 
@@ -52,7 +53,7 @@ export function CurrentDeck(props: AllCardsProps) {
         for (let i = 0; i < 30; i++) {
           prev.cards[i] = selectedAcs[i] ?? null;
         }
-      }),
+      })
     );
   });
 
@@ -76,7 +77,7 @@ export function CurrentDeck(props: AllCardsProps) {
   };
 
   return (
-    <div 
+    <div
       class="flex-shrink-0 flex flex-col items-center justify-center gap-3"
       data-deck-page={deckPage()}
     >
@@ -85,7 +86,7 @@ export function CurrentDeck(props: AllCardsProps) {
           <For each={current.characters}>
             {(ch, idx) => (
               <li
-                class="group-[xxx.mobile]:w-8 group-[xxx.mobile]:h-8 relative group group-[xxx.mobile]:data-[deck-page=true]:w-70px group-[xxx.mobile]:data-[deck-page=true]:h-120px w-75px aspect-ratio-[7/12]"
+                class="group-[xxx.mobile]:w-8 group-[xxx.mobile]:h-8 relative group group-[xxx.mobile]:data-[deck-page=true]:w-70px group-[xxx.mobile]:data-[deck-page=true]:h-120px w-75px"
                 data-deck-page={deckPage()}
                 data-warn={ch && ch.version > props.version}
                 onClick={() => ch && removeCharacter(idx())}
@@ -93,17 +94,22 @@ export function CurrentDeck(props: AllCardsProps) {
                 <Show
                   when={ch}
                   fallback={
-                    <div class="w-full h-full rounded-lg bg-gray-200" />
+                    <div class="w-full b-gray-3! border-2 rounded-lg overflow-clip">
+                      <div class="w-full aspect-ratio-[7/12] bg-gray-200" />
+                    </div>
                   }
                 >
                   {(ch) => (
                     <>
                       <Card id={ch().id} type="character" name={ch().name} />
-                      <div class="absolute left-1/2 top-1/2 translate-x--1/2 translate-y--1/2 text-2xl group-data-[warn=true]:block hidden pointer-events-none">
+                      <div class="absolute left-1/2 top-1/2 translate-x--1/2 translate-y--1/2 text-2xl line-height-10 text-black text-center bg-yellow-4 h-10 w-10 rounded-full group-data-[warn=true]:block hidden pointer-events-none">
                         &#9888;
                       </div>
-                      <div class="absolute left-1/2 top-1/2 translate-x--1/2 translate-y--1/2 text-2xl group-hover:block hidden pointer-events-none text-red-500">
-                        &#10060;
+                      <div class="absolute left-0 bottom-0 bg-red-500/90 rounded-b-lg h-25% w-full items-center justify-center hidden md:group-hover:flex">
+                        <img
+                          src={DeleteIcon}
+                          class="h-5 w-5 pointer-events-none"
+                        />
                       </div>
                     </>
                   )}
@@ -114,14 +120,14 @@ export function CurrentDeck(props: AllCardsProps) {
         </ul>
       </div>
       <div>
-        <ul 
+        <ul
           class="grid group-[xxx.mobile]:grid-cols-10 group-[xxx.mobile]:gap-1 group-[xxx.mobile]:data-[deck-page=true]:grid-cols-6 group-[xxx.mobile]:data-[deck-page=true]:gap-2 grid-cols-6 gap-2"
           data-deck-page={deckPage()}
         >
           <For each={current.cards}>
             {(ac, idx) => (
               <li
-                class="group-[xxx.mobile]:w-7 aspect-ratio-[7/12] relative group group-[xxx.mobile]:data-[deck-page=true]:w-49px w-50px"
+                class="group-[xxx.mobile]:w-7 relative group group-[xxx.mobile]:data-[deck-page=true]:w-49px w-50px"
                 data-deck-page={deckPage()}
                 data-warn={ac && ac.version > props.version}
                 onClick={() => ac && removeActionCard(idx())}
@@ -129,17 +135,22 @@ export function CurrentDeck(props: AllCardsProps) {
                 <Show
                   when={ac}
                   fallback={
-                    <div class="w-full h-full rounded-lg bg-gray-200" />
+                    <div class="w-full b-gray-3! border-2 rounded-lg overflow-clip">
+                      <div class="w-full aspect-ratio-[7/12] bg-gray-200" />
+                    </div>
                   }
                 >
                   {(ac) => (
                     <>
                       <Card id={ac().id} type="actionCard" name={ac().name} />
-                      <div class="absolute left-1/2 top-1/2 translate-x--1/2 translate-y--1/2 text-2xl group-data-[warn=true]:block hidden pointer-events-none">
+                      <div class="absolute left-1/2 top-1/2 translate-x--1/2 translate-y--1/2 text-2xl line-height-10 text-black text-center bg-yellow-4 h-10 w-10 rounded-full group-data-[warn=true]:block hidden pointer-events-none">
                         &#9888;
                       </div>
-                      <div class="absolute left-1/2 top-1/2 translate-x--1/2 translate-y--1/2 text-2xl group-hover:block hidden pointer-events-none text-red-500">
-                        &#10060;
+                      <div class="absolute left-0 bottom-0 bg-red-500/90 rounded-b-lg h-25% w-full items-center justify-center hidden md:group-hover:flex">
+                        <img
+                          src={DeleteIcon}
+                          class="h-5 w-5 pointer-events-none"
+                        />
                       </div>
                     </>
                   )}

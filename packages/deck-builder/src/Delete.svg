@@ -1,0 +1,10 @@
+<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+    <path d="M16.1211 6L47.6211 6" stroke="white" stroke-width="5" />
+    <path d="M24.1211 21L26.1211 58" stroke="white" stroke-width="5" />
+    <path d="M40.1211 21L38.1211 58" stroke="white" stroke-width="5" />
+    <path d="M4.12109 16L60.1211 16" stroke="white" stroke-width="5" />
+    <path
+        d="M12.1211 20L15.9326 56.2094C16.0398 57.2273 16.8981 58 17.9216 58L46.3206 58C47.3441 58 48.2024 57.2273 48.3096 56.2094L52.1211 20"
+        stroke="white" stroke-width="5" />
+</svg>

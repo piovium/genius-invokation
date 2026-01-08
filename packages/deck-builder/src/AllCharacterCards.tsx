@@ -193,11 +193,6 @@ export function AllCharacterCards(props: AllCardsProps) {
                   name={ch().name}
                   selected={selected(ch().id)}
                 />
-                <Show when={selected(ch().id)}>
-                  <div class="absolute left-1/2 top-1/2 translate-x--1/2 translate-y--1/2 text-2xl z-1 pointer-events-none">
-                    &#9989;
-                  </div>
-                </Show>
               </div>
             </li>
           )}

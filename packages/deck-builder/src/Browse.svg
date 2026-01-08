@@ -1,0 +1,8 @@
+<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+    <path
+        d="M24 3.5C35.3218 3.5 44.5 12.6782 44.5 24C44.5 35.3218 35.3218 44.5 24 44.5C12.6782 44.5 3.5 35.3218 3.5 24C3.5 12.6782 12.6782 3.5 24 3.5Z"
+        stroke="white" stroke-width="7" />
+    <path d="M36.1211 36L44.1211 44" stroke="white" stroke-width="7" />
+    <path d="M44.1211 44L60.1211 60" stroke="white" stroke-width="11" />
+</svg>

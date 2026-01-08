@@ -46,7 +46,7 @@ export interface DeckBuilderProps extends JSX.HTMLAttributes<HTMLDivElement> {
 interface DeckBuilderContextValue {
   assetsManager: AssetsManager;
   showCard: (
-    e: MouseEvent,
+    e: MouseEvent | TouchEvent,
     type: "actionCard" | "character",
     id: number
   ) => void;

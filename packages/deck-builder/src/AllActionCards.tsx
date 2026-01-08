@@ -186,21 +186,8 @@ export function AllActionCards(props: AllCardsProps) {
                   name={ac().name}
                   selected={selected(ac().id)}
                   partialSelected={partialSelected(ac().id)}
+                  selectedCount={count(ac().id)}
                 />
-                <Show when={count(ac().id)}>
-                  <Show
-                    when={selected(ac().id)}
-                    fallback={
-                      <div class="absolute left-1/2 top-1/2 translate-x--1/2 translate-y--1/2 text-2xl z-1 pointer-events-none">
-                        &#128993;
-                      </div>
-                    }
-                  >
-                    <div class="absolute left-1/2 top-1/2 translate-x--1/2 translate-y--1/2 text-2xl z-1 pointer-events-none">
-                      &#9989;
-                    </div>
-                  </Show>
-                </Show>
               </div>
             </li>
           )}

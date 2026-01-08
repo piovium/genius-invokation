@@ -13,8 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Show, createResource, createSignal, onCleanup } from "solid-js";
+import { Show, Switch, Match, createResource, createSignal, onCleanup } from "solid-js";
 import { useDeckBuilderContext } from "./DeckBuilder";
+import BrowseIcon from "./Browse.svg";
 
 export interface CardProps {
   id: number;
@@ -22,6 +23,7 @@ export interface CardProps {
   name: string;
   partialSelected?: boolean;
   selected?: boolean;
+  selectedCount?: number;
 }
 
 const LONG_PRESS_DELAY = 500; // ms
@@ -98,9 +100,7 @@ export function Card(props: CardProps) {
   return (
     <div
       title={props.name}
-      data-selected={props.selected}
-      data-partial-selected={props.partialSelected}
-      class="w-full rounded-lg overflow-clip data-[selected=true]:border-green data-[partial-selected=true]:border-yellow border-2 border-transparent relative group"
+      class="w-full rounded-lg overflow-clip b-gray-5! border-2 relative group overflow-clip"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -109,31 +109,53 @@ export function Card(props: CardProps) {
       <Show
         when={url.state === "ready"}
         fallback={
-          <div class="w-full aspect-ratio-[7/12] bg-gray-200">
-            {props.name}
-          </div>
+          <div class="w-full aspect-ratio-[7/12] bg-gray-200">{props.name}</div>
         }
       >
         <img
           src={url()}
           alt={props.name}
           draggable="false"
-          class="w-full h-full object-cover pointer-events-none"
+          class="w-full object-cover pointer-events-none data-[selected=true]:brightness-40"
+          data-selected={props.selected}
+          data-partial-selected={props.partialSelected}
         />
       </Show>
+      <Switch>
+        <Match when={props.type === "character" && props.selected}>
+          <div
+            class="absolute left-0 bottom-0 bg-gray-500/90 pointer-events-none h-25% w-full items-center justify-center text-white font-bold text-sm flex"
+            data-selected={props.selected}
+          >
+            已选
+          </div>
+        </Match>
+        <Match when={props.type === "actionCard" && (props.selected || props.partialSelected)}>
+          <div
+            class="absolute left-0 bottom-0 bg-gray-500/90 pointer-events-none h-25% w-full items-center justify-center text-white font-bold text-sm flex"
+            data-selected={props.selected}
+          >
+            已选{props.selectedCount}张
+          </div>
+        </Match>
+      </Switch>
       <Show when={pressing()}>
-        <div class="absolute inset-0 bg-black/50 pointer-events-none" />
+        <div class="absolute inset-0 bg-black/50 pointer-events-none flex justify-center items-start">
+          <img
+            src={BrowseIcon}
+            class="w-80% h-auto opacity-75 pointer-events-none mt-25%"
+          />
+        </div>
       </Show>
       <div
-        class="absolute right-0 top-0 bg-white rounded-full h-6 w-6 line-height-none items-center justify-center hidden group-hover:flex"
+        class="absolute left-0 top-0 bg-gray-500/90 h-25% w-full items-center justify-center hidden md:group-hover:flex"
         onClick={(e) => {
           e.stopPropagation();
           showCard(e, props.type, props.id);
         }}
       >
-        &#128269;
+        <img src={BrowseIcon} class="h-5 w-5 pointer-events-none" />
       </div>
     </div>
   );
 }
-
