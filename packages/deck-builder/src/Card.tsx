@@ -100,7 +100,7 @@ export function Card(props: CardProps) {
   return (
     <div
       title={props.name}
-      class="w-full rounded-lg overflow-clip b-gray-5! border-2 relative group overflow-clip"
+      class="w-full rounded-lg overflow-clip b-gray-4! border-2 relative group overflow-clip"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -156,6 +156,64 @@ export function Card(props: CardProps) {
       >
         <img src={BrowseIcon} class="h-5 w-5 pointer-events-none" />
       </div>
+    </div>
+  );
+}
+
+export interface TinyCardProps {
+  id: number;
+}
+
+export function TinyCharacterCard(props: TinyCardProps) {
+  const { assetsManager } = useDeckBuilderContext();
+
+  const [url] = createResource(() =>
+    assetsManager.getImageUrl(props.id, { type: "icon", thumbnail: true })
+  );
+
+  return (
+    <div
+      class="w-full h-full rounded-full overflow-clip b-gray-4! border-2 relative group overflow-clip"
+    >
+      <Show
+        when={url.state === "ready"}
+        fallback={
+          <div class="w-full h-full bg-gray-200" />
+        }
+      >
+        <img
+          src={url()}
+          draggable="false"
+          class="w-full object-cover pointer-events-none"
+        />
+      </Show>
+    </div>
+  );
+}
+
+export function TinyActionCard(props: TinyCardProps) {
+  const { assetsManager } = useDeckBuilderContext();
+
+  const [url] = createResource(() =>
+    assetsManager.getImageUrl(props.id, { thumbnail: true })
+  );
+
+  return (
+    <div
+      class="w-full rounded-md overflow-clip b-gray-4! border-2 relative group overflow-clip"
+    >
+      <Show
+        when={url.state === "ready"}
+        fallback={
+          <div class="w-full aspect-ratio-[7/12] bg-gray-200" />
+        }
+      >
+        <img
+          src={url()}
+          draggable="false"
+          class="w-full object-cover pointer-events-none"
+        />
+      </Show>
     </div>
   );
 }
