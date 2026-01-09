@@ -101,11 +101,18 @@ export function DeckBuilder(props: DeckBuilderProps) {
         showCard: (e, type, id) => {
           const rect = (e.target as HTMLElement).getBoundingClientRect();
           const containerRect = container.getBoundingClientRect();
-          // 当点击事件发生在靠近左侧位置时，在鼠标右下角显示；否则在左上角显示
-          if (rect.left - containerRect.left < 320) {
+          // 当点击事件发生在靠近左侧位置时，在鼠标右下角显示；否则在左上角显示          
+          if (e.type === "touchend") {
+            setCardDataViewerOffsetX((containerRect.width - 300) / 2);
+            if (containerRect.bottom - rect.bottom < 200) {
+              setCardDataViewerOffsetY(0);
+            } else {
+              setCardDataViewerOffsetY(rect.bottom - containerRect.top - 25);
+            }
+          } else if (rect.left - containerRect.left < 320) {
             setCardDataViewerOffsetX(
               rect.left + rect.width / 2 - containerRect.left
-            );
+            ); 
             setCardDataViewerOffsetY(
               rect.top + rect.height / 2 - containerRect.top
             );
