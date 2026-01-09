@@ -101,6 +101,8 @@ jobs:
             arch: arm64
           - os: windows-2022
             arch: arm64
+          - os: macos-15
+            arch: x86_64
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -153,8 +155,6 @@ jobs:
             tag: manylinux_2_34_x86_64
           - platform: macOS-arm64
             tag: macosx_15_0_arm64
-          - platform: macOS-x86_64
-            tag: macosx_13_0_x86_64
     steps:
       - uses: astral-sh/setup-uv@v4
         with:
@@ -250,7 +250,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: ubuntu-latest
             platform: Linux-x86_64
@@ -258,8 +258,6 @@ jobs:
             platform: Windows-x86_64
           - os: macos-latest
             platform: macOS-arm64
-          - os: macos-13
-            platform: macOS-x86_64
     steps:
       - uses: actions/setup-dotnet@v4
         with:
