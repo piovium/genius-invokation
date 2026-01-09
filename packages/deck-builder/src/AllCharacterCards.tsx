@@ -177,7 +177,7 @@ export function AllCharacterCards(props: AllCardsProps) {
           )}
         </For>
       </div>
-      <ul class="flex-grow overflow-auto flex flex-row flex-wrap gap-2 group-[xxx.mobile]:pb-2!">
+      <ul class="flex-grow overflow-auto grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-2 group-[xxx.mobile]:pb-2! [scrollbar-width:thin]">
         <Key each={props.characters.values().toArray()} by="id">
           {(ch) => (
             <li
@@ -186,14 +186,12 @@ export function AllCharacterCards(props: AllCardsProps) {
               data-disabled={fullCharacters() && !selected(ch().id)}
               onClick={() => toggleCharacter(ch().id)}
             >
-              <div class="w-[60px]">
-                <Card
-                  id={ch().id}
-                  type="character"
-                  name={ch().name}
-                  selected={selected(ch().id)}
-                />
-              </div>
+              <Card
+                id={ch().id}
+                type="character"
+                name={ch().name}
+                selected={selected(ch().id)}
+              />
             </li>
           )}
         </Key>

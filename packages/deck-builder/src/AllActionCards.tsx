@@ -170,7 +170,7 @@ export function AllActionCards(props: AllCardsProps) {
           </For>
         </select>
       </div>
-      <ul class="flex-grow overflow-auto flex flex-row flex-wrap gap-2 group-[xxx.mobile]:pb-2!">
+      <ul class="flex-grow overflow-auto grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-2 group-[xxx.mobile]:pb-2!">
         <Key each={props.actionCards.values().toArray()} by="id">
           {(ac) => (
             <li
@@ -179,16 +179,14 @@ export function AllActionCards(props: AllCardsProps) {
               data-disabled={fullCards() && !count(ac().id)}
               onClick={() => toggleCard(ac().id)}
             >
-              <div class="w-[60px]">
-                <Card
-                  id={ac().id}
-                  type="actionCard"
-                  name={ac().name}
-                  selected={selected(ac().id)}
-                  partialSelected={partialSelected(ac().id)}
-                  selectedCount={count(ac().id)}
-                />
-              </div>
+              <Card
+                id={ac().id}
+                type="actionCard"
+                name={ac().name}
+                selected={selected(ac().id)}
+                partialSelected={partialSelected(ac().id)}
+                selectedCount={count(ac().id)}
+              />
             </li>
           )}
         </Key>
