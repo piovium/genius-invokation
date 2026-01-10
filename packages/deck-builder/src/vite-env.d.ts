@@ -14,9 +14,3 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
-
-declare const AVATARS: string[];
-
-interface Window {
-  githubOAuthPopup?: Window | undefined;
-}
