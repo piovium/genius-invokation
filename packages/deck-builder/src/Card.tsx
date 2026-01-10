@@ -13,7 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Show, Switch, Match, createResource, createSignal, onCleanup } from "solid-js";
+import {
+  Show,
+  Switch,
+  Match,
+  createResource,
+  createSignal,
+  onCleanup,
+} from "solid-js";
 import { useDeckBuilderContext } from "./DeckBuilder";
 import BrowseIcon from "./Browse.svg";
 
@@ -100,11 +107,13 @@ export function Card(props: CardProps) {
   return (
     <div
       title={props.name}
-      class="w-full rounded-lg overflow-clip b-gray-4! border-2 relative group overflow-clip"
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      onTouchCancel={onTouchCancel}
+      class="card w-full rounded-lg overflow-clip b-[var(--border-color)] b-2 relative group"
+      // onTouchStart={onTouchStart}
+      // onTouchMove={onTouchMove}
+      // onTouchEnd={onTouchEnd}
+      // onTouchCancel={onTouchCancel}
+      bool:data-selected={props.selected}
+      bool:data-partial-selected={props.partialSelected}
     >
       <Show
         when={url.state === "ready"}
@@ -116,23 +125,26 @@ export function Card(props: CardProps) {
           src={url()}
           alt={props.name}
           draggable="false"
-          class="w-full object-cover pointer-events-none data-[selected=true]:brightness-40"
-          data-selected={props.selected}
-          data-partial-selected={props.partialSelected}
+          class="w-full object-cover data-[selected]:brightness-40"
         />
       </Show>
       <Switch>
         <Match when={props.type === "character" && props.selected}>
           <div
-            class="absolute left-0 bottom-0 bg-gray-500/90 pointer-events-none h-25% w-full items-center justify-center text-white font-bold text-sm flex"
+            class="absolute left-0 bottom-0 bg-[var(--border-color)] h-25% w-full items-center justify-center text-white font-bold text-sm flex"
             data-selected={props.selected}
           >
             已选
           </div>
         </Match>
-        <Match when={props.type === "actionCard" && (props.selected || props.partialSelected)}>
+        <Match
+          when={
+            props.type === "actionCard" &&
+            (props.selected || props.partialSelected)
+          }
+        >
           <div
-            class="absolute left-0 bottom-0 bg-gray-500/90 pointer-events-none h-25% w-full items-center justify-center text-white font-bold text-sm flex"
+            class="absolute left-0 bottom-0 bg-[var(--border-color)] h-25% w-full items-center justify-center text-white font-bold text-sm flex"
             data-selected={props.selected}
           >
             已选{props.selectedCount}张
@@ -140,10 +152,11 @@ export function Card(props: CardProps) {
         </Match>
       </Switch>
       <Show when={pressing()}>
-        <div class="absolute inset-0 bg-black/50 pointer-events-none flex justify-center items-start">
+        <div class="absolute inset-0 bg-black/50 flex justify-center items-start">
           <img
             src={BrowseIcon}
-            class="w-80% h-auto opacity-75 pointer-events-none mt-25%"
+            draggable="false"
+            class="w-80% h-auto opacity-75 mt-25%"
           />
         </div>
       </Show>
@@ -154,7 +167,7 @@ export function Card(props: CardProps) {
           showCard(e, props.type, props.id);
         }}
       >
-        <img src={BrowseIcon} class="w-35% h-auto pointer-events-none" />
+        <img src={BrowseIcon} draggable="false" class="w-35% h-auto" />
       </div>
     </div>
   );
@@ -172,19 +185,15 @@ export function TinyCharacterCard(props: TinyCardProps) {
   );
 
   return (
-    <div
-      class="w-full h-full rounded-full overflow-clip b-gray-4! border-2 relative group overflow-clip"
-    >
+    <div class="w-full h-full rounded-full overflow-clip b-gray-4! border-2 relative group overflow-clip">
       <Show
         when={url.state === "ready"}
-        fallback={
-          <div class="w-full h-full bg-gray-200" />
-        }
+        fallback={<div class="w-full h-full bg-gray-200" />}
       >
         <img
           src={url()}
           draggable="false"
-          class="w-full object-cover pointer-events-none"
+          class="w-full object-cover"
         />
       </Show>
     </div>
@@ -199,19 +208,15 @@ export function TinyActionCard(props: TinyCardProps) {
   );
 
   return (
-    <div
-      class="w-full rounded-md overflow-clip b-gray-4! border-2 relative group overflow-clip"
-    >
+    <div class="w-full rounded-md overflow-clip b-gray-4! border-2 relative group overflow-clip">
       <Show
         when={url.state === "ready"}
-        fallback={
-          <div class="w-full aspect-ratio-[7/12] bg-gray-200" />
-        }
+        fallback={<div class="w-full aspect-ratio-[7/12] bg-gray-200" />}
       >
         <img
           src={url()}
           draggable="false"
-          class="w-full object-cover pointer-events-none"
+          class="w-full object-cover"
         />
       </Show>
     </div>

@@ -1,92 +1,109 @@
 @import "@gi-tcg/card-data-viewer/style.css";
 
-.gi-tcg-deck-builder {
-  /* Apply some useful reset. See https://github.com/unocss/unocss/blob/main/packages-presets/reset/tailwind-compat.css */
+@layer base {
+  .gi-tcg-deck-builder {
+    /* Apply some useful reset. See https://github.com/unocss/unocss/blob/main/packages-presets/reset/tailwind-compat.css */
 
-  line-height: 1.5; 
-  -webkit-text-size-adjust: 100%; 
-  -moz-tab-size: 4; 
-  tab-size: 4; 
-  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; 
-  font-feature-settings: normal; 
-  font-variation-settings: normal;
-  -webkit-tap-highlight-color: transparent;
-  position: relative;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    -moz-tab-size: 4;
+    tab-size: 4;
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-feature-settings: normal;
+    font-variation-settings: normal;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
 
-  *,
-  ::before,
-  ::after {
-    box-sizing: border-box; 
-    /* border-width: 0;  */
-    border-style: solid; 
-    border-color: var(--un-default-border-color, #e5e7eb);
+    *,
+    ::before,
+    ::after {
+      box-sizing: border-box;
+      /* border-width: 0;  */
+      border-style: solid;
+      border-color: var(--un-default-border-color, #e5e7eb);
+    }
+
+    ol,
+    ul,
+    menu {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    button,
+    input,
+    optgroup,
+    select,
+    textarea {
+      font-family: inherit;
+      font-feature-settings: inherit;
+      font-variation-settings: inherit;
+      font-size: 100%;
+      font-weight: inherit;
+      line-height: inherit;
+      color: inherit;
+      margin: 0;
+      padding: 0;
+    }
+
+    button,
+    select {
+      text-transform: none;
+    }
+
+    button,
+    [type="button"],
+    [type="reset"],
+    [type="submit"] {
+      appearance: none;
+      /* https://github.com/unocss/unocss/issues/2127 */
+      /* background-color: transparent; */
+      background-image: none;
+    }
+
+    img,
+    svg,
+    video,
+    canvas,
+    audio,
+    iframe,
+    embed,
+    object {
+      display: block;
+      vertical-align: middle;
+    }
   }
-
-  ol,
-  ul,
-  menu {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  button,
-  input,
-  optgroup,
-  select,
-  textarea {
-    font-family: inherit; 
-    font-feature-settings: inherit;
-    font-variation-settings: inherit; 
-    font-size: 100%; 
-    font-weight: inherit; 
-    line-height: inherit; 
-    color: inherit; 
-    margin: 0; 
-    padding: 0; 
-  }
-
-  button,
-  select {
-    text-transform: none;
-  }
-
-  button,
-  [type="button"],
-  [type="reset"],
-  [type="submit"] {
-    -webkit-appearance: button; 
-    /* https://github.com/unocss/unocss/issues/2127 */
-    /* background-color: transparent; */
-    background-image: none; 
-  }
-
-  img,
-  svg,
-  video,
-  canvas,
-  audio,
-  iframe,
-  embed,
-  object {
-    display: block;
-    vertical-align: middle;
-  }
-
   img,
   video {
     max-width: 100%;
     height: auto;
   }
-
 }
 
-.scrollbar-hidden::-webkit-scrollbar {
-  display: none;
-}
+.gi-tcg-deck-builder {
+  user-select: none;
+  -webkit-touch-callout: none;
+  
+  .card {
+    --border-color: rgb(107 114 128 / 0.9);
+  }
 
-.scrollbar-hidden {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  .card[data-partial-selected] {
+    --border-color: rgb(234 179 8 / 0.9);
+  }
+
+  .card[data-selected]:not([data-partial-selected]) {
+    --border-color: rgb(34 197 94 / 0.9);
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }

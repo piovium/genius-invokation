@@ -107,10 +107,11 @@ export function CurrentDeck(props: AllCardsProps) {
                     <div class="absolute left-1/2 top-1/2 translate-x--1/2 translate-y--1/2 text-2xl line-height-10 text-black text-center bg-yellow-4 h-10 w-10 rounded-full group-data-[warn=true]:block hidden pointer-events-none">
                       &#9888;
                     </div>
-                    <div class="absolute left-0 bottom-0 bg-red-500/50 rounded-b-lg h-75% w-full items-start justify-center hidden md:group-hover:flex">
+                    <div class="absolute left-0 bottom-0 bg-red-500/50 rounded-b-lg h-75% pt-20% w-full items-start justify-center hidden md:group-hover:flex">
                       <img
                         src={DeleteIcon}
-                        class="w-80% h-auto opacity-75 pointer-events-none mt-5%"
+                        draggable="false"
+                        class="cursor-pointer w-80% h-auto opacity-75 mt-5%"
                       />
                     </div>
                   </>
@@ -146,10 +147,11 @@ export function CurrentDeck(props: AllCardsProps) {
                     <div class="absolute left-1/2 top-1/2 translate-x--1/2 translate-y--1/2 text-2xl line-height-10 text-black text-center bg-yellow-4 h-10 w-10 rounded-full group-data-[warn=true]:block hidden pointer-events-none">
                       &#9888;
                     </div>
-                    <div class="absolute left-0 bottom-0 bg-red-500/50 rounded-b-lg h-75% w-full items-start justify-center hidden md:group-hover:flex">
+                    <div class="absolute left-0 bottom-0 bg-red-500/50 rounded-b-lg h-75% pt-20% w-full items-start justify-center hidden md:group-hover:flex">
                       <img
                         src={DeleteIcon}
-                        class="w-80% h-auto opacity-75 pointer-events-none mt-5%"
+                        draggable="false"
+                        class="cursor-pointer w-80% h-auto opacity-75 mt-5%"
                       />
                     </div>
                   </>

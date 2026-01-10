@@ -34,22 +34,22 @@ export function AllCards(props: AllCardsProps) {
   const deckPage = () => props.deckPage ?? false;
 
   return (
-    <div 
+    <div
       class="min-w-0 flex-grow h-full group-[xxx.mobile]:h-[calc(100dvh-20rem)] group-[xxx.mobile]:flex-shrink-0 flex flex-col min-h-0 group-[xxx.mobile]:data-[deck-page=true]:hidden"
       data-deck-page={deckPage()}
     >
       <div class="flex flex-row mb-2">
         <button
-          class="data-[active=true]:font-bold rounded-l-full w-22 b-1 b-r-0 b-inset data-[active=true]:b-0 data-[active=true]:bg-blue-100"
+          class="data-[active]:font-bold rounded-l-full w-22 h-8 b-1 b-r-0 data-[active]:b-0 data-[active]:bg-blue-100"
           onClick={() => setTab(0)}
-          data-active={tab() === 0}
+          bool:data-active={tab() === 0}
         >
           角色牌
         </button>
         <button
-          class="data-[active=true]:font-bold rounded-r-full w-22 b-1 b-l-0 b-inset data-[active=true]:b-0 data-[active=true]:bg-blue-100"
+          class="data-[active]:font-bold rounded-r-full w-22 h-8 b-1 b-l-0 data-[active]:b-0 data-[active]:bg-blue-100"
           onClick={() => setTab(1)}
-          data-active={tab() === 1}
+          bool:data-active={tab() === 1}
         >
           行动牌
         </button>
@@ -68,7 +68,9 @@ export function AllCards(props: AllCardsProps) {
           >
             <Index each={props.allVersions.toReversed()}>
               {(versionStr, index) => (
-                <option value={props.allVersions.length - 1 - index}>{versionStr()}</option>
+                <option value={props.allVersions.length - 1 - index}>
+                  {versionStr()}
+                </option>
               )}
             </Index>
           </select>

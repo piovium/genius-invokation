@@ -51,9 +51,6 @@ export function AllCharacterCards(props: AllCardsProps) {
     );
   };
 
-  const [filterMenuVisible, setFilterMenuVisible] =
-    createSignal<boolean>(false);
-
   const toggleElementTag = (tag: string) => {
     if (elementTag() === tag) {
       setElementTag(null);
@@ -103,14 +100,11 @@ export function AllCharacterCards(props: AllCardsProps) {
   };
   return (
     <div class="h-full flex flex-col">
-      <div class="h-8 w-full flex-row mb-2 hidden group-[xxx.mobile]:flex relative">
+      <div class="h-8 w-full flex-row mb-2 flex relative">
         <Show
           when={elementTag() || weaponTag() || nationTag()}
           fallback={
-            <div
-              class="mr--2 pl-1.5 h-8 w-22 rounded-full bg-purple-300 text-white flex items-center justify-center flex-shrink-0 z-1"
-              onClick={() => setFilterMenuVisible(true)}
-            >
+            <div class="mr--2 pl-1.5 h-8 w-22 rounded-full bg-purple-300 text-white flex items-center justify-center flex-shrink-0 z-1">
               <span class="text-4 font-bold">筛选</span>
               <img src={FilterIcon} class="w-5 h-5" />
             </div>
@@ -126,10 +120,7 @@ export function AllCharacterCards(props: AllCardsProps) {
           >
             <span class="text-4 font-bold">清除</span>
             <img src={DeleteIcon} class="w-5 h-5" />
-            <div
-              class="absolute bottom-0 left-50% translate-x--50% translate-y-50% flex-shrink-0 rounded-full h-3 flex flex-row gap-1 items-center data-[filter-menu=true]:hidden"
-              data-filter-menu={filterMenuVisible()}
-            >
+            <div class="absolute bottom-0 left-50% translate-x--50% translate-y-50% flex-shrink-0 rounded-full h-3 flex flex-row gap-1 items-center">
               <For each={Object.keys(ELEMENT_TAG_IMG_NAME_MAP)}>
                 {(tag) => (
                   <div
@@ -163,70 +154,14 @@ export function AllCharacterCards(props: AllCardsProps) {
             </div>
           </div>
         </Show>
-        <Show when={filterMenuVisible()}>
-          <div class="absolute z-1 top-9 left-0 w-full rounded-lg b-2 bg-white hidden group-[xxx.mobile]:flex flex-col p-2">
-            <div class="text-4 text-black">元素类型</div>
-            <div class="flex-shrink-0 flex flex-row gap-1 my-1 flex-wrap">
-              <For each={Object.keys(ELEMENT_TAG_IMG_NAME_MAP)}>
-                {(tag) => (
-                  <button
-                    onClick={() => toggleElementTag(tag)}
-                    data-selected={elementTag() === tag}
-                    class="flex-shrink-0 bg-gray-200 opacity-30 data-[selected=true]:opacity-100 data-[selected=true]:b-3 b-purple-400! w-10 h-10 flex flex-col items-center justify-center rounded-full children:w-8"
-                  >
-                    <TagIcon tagName={tag} />
-                  </button>
-                )}
-              </For>
-            </div>
-            <div class="text-4 text-black">武器类型</div>
-            <div class="flex-shrink-0 flex flex-row gap-1 my-1 flex-wrap">
-              <For each={Object.keys(WEAPON_TAG_IMG_NAME_MAP)}>
-                {(tag) => (
-                  <button
-                    onClick={() => toggleWeaponTag(tag)}
-                    data-selected={weaponTag() === tag}
-                    class="flex-shrink-0 bg-gray-200 opacity-30 children:filter-invert data-[selected=true]:opacity-100 data-[selected=true]:b-3 b-purple-400! w-10 h-10 flex flex-col items-center justify-center rounded-full children:w-8"
-                  >
-                    <TagIcon tagName={tag} />
-                  </button>
-                )}
-              </For>
-            </div>
-            <div class="text-4 text-black">所属阵营</div>
-            <div class="flex-shrink-0 flex flex-row gap-1 my-1 flex-wrap">
-              <For each={Object.keys(NATION_TAG_IMG_NAME_MAP)}>
-                {(tag) => (
-                  <button
-                    onClick={() => toggleNationTag(tag)}
-                    data-selected={nationTag() === tag}
-                    class="flex-shrink-0 bg-gray-200 opacity-30 children:filter-invert data-[selected=true]:opacity-100 data-[selected=true]:b-3 b-purple-400! w-10 h-10 flex flex-col items-center justify-center rounded-full children:w-8"
-                  >
-                    <TagIcon tagName={tag} />
-                  </button>
-                )}
-              </For>
-            </div>
-            <div
-              class="h-6 w-full rounded-full bg-blue-100 text-blue-500 text-sm line-height-6 text-center"
-              onClick={() => setFilterMenuVisible(false)}
-            >
-              收起
-            </div>
-          </div>
-        </Show>
         <div class="h-8 flex-1 rounded-r-full b-purple-200! b-2 b-l-0 b-solid flex-grow overflow-hidden">
-          <div
-            class="flex-shrink-0 h-full flex flex-row overflow-x-auto overflow-y-hidden gap-1 mb-2 p-l-3 p-r-1 items-center data-[filter-menu=true]:justify-end box-border scrollbar-hidden"
-            data-filter-menu={filterMenuVisible()}
-          >
+          <div class="flex-shrink-0 h-full flex flex-row overflow-x-auto overflow-y-hidden gap-1 mb-2 p-l-3 p-r-1 items-center box-border scrollbar-hidden">
             <For each={Object.keys(ELEMENT_TAG_IMG_NAME_MAP)}>
               {(tag) => (
                 <button
                   onClick={() => toggleElementTag(tag)}
-                  data-selected={elementTag() === tag}
-                  data-filter-menu={filterMenuVisible()}
-                  class="flex-shrink-0 bg-gray-100 opacity-25 data-[selected=true]:opacity-100 w-7 h-7 data-[filter-menu=true]:data-[selected=false]:hidden flex flex-col items-center justify-center rounded-full"
+                  bool:data-selected={elementTag() === tag}
+                  class="flex-shrink-0 bg-gray-100 opacity-25 data-[selected]:opacity-100 w-7 h-7 flex flex-col items-center justify-center rounded-full"
                 >
                   <TagIcon tagName={tag} />
                 </button>
@@ -236,9 +171,8 @@ export function AllCharacterCards(props: AllCardsProps) {
               {(tag) => (
                 <button
                   onClick={() => toggleWeaponTag(tag)}
-                  data-selected={weaponTag() === tag}
-                  data-filter-menu={filterMenuVisible()}
-                  class="flex-shrink-0 bg-gray-100 opacity-25 children:filter-invert data-[selected=true]:opacity-100 w-7 h-7 data-[filter-menu=true]:data-[selected=false]:hidden flex flex-col items-center justify-center rounded-full"
+                  bool:data-selected={weaponTag() === tag}
+                  class="flex-shrink-0 bg-gray-100 opacity-25 children:filter-invert data-[selected]:opacity-100 w-7 h-7 flex flex-col items-center justify-center rounded-full"
                 >
                   <TagIcon tagName={tag} />
                 </button>
@@ -248,9 +182,8 @@ export function AllCharacterCards(props: AllCardsProps) {
               {(tag) => (
                 <button
                   onClick={() => toggleNationTag(tag)}
-                  data-selected={nationTag() === tag}
-                  data-filter-menu={filterMenuVisible()}
-                  class="flex-shrink-0 bg-gray-100 opacity-25 children:filter-invert data-[selected=true]:opacity-100 w-7 h-7 data-[filter-menu=true]:data-[selected=false]:hidden flex flex-col items-center justify-center rounded-full"
+                  bool:data-selected={nationTag() === tag}
+                  class="flex-shrink-0 bg-gray-100 opacity-25 children:filter-invert data-[selected]:opacity-100 w-7 h-7 flex flex-col items-center justify-center rounded-full"
                 >
                   <TagIcon tagName={tag} />
                 </button>
@@ -258,41 +191,6 @@ export function AllCharacterCards(props: AllCardsProps) {
             </For>
           </div>
         </div>
-      </div>
-      <div class="flex-shrink-0 flex flex-row gap-1 mb-2 group-[xxx.mobile]:hidden flex-wrap">
-        <For each={Object.keys(ELEMENT_TAG_IMG_NAME_MAP)}>
-          {(tag) => (
-            <button
-              onClick={() => toggleElementTag(tag)}
-              data-selected={elementTag() === tag}
-              class="flex-shrink-0 bg-gray-200 opacity-30 data-[selected=true]:opacity-100 data-[selected=true]:b-3 b-purple-400! w-10 h-10 flex flex-col items-center justify-center rounded-full children:w-8"
-            >
-              <TagIcon tagName={tag} />
-            </button>
-          )}
-        </For>
-        <For each={Object.keys(WEAPON_TAG_IMG_NAME_MAP)}>
-          {(tag) => (
-            <button
-              onClick={() => toggleWeaponTag(tag)}
-              data-selected={weaponTag() === tag}
-              class="flex-shrink-0 bg-gray-200 opacity-30 children:filter-invert data-[selected=true]:opacity-100 data-[selected=true]:b-3 b-purple-400! w-10 h-10 flex flex-col items-center justify-center rounded-full children:w-8"
-            >
-              <TagIcon tagName={tag} />
-            </button>
-          )}
-        </For>
-        <For each={Object.keys(NATION_TAG_IMG_NAME_MAP)}>
-          {(tag) => (
-            <button
-              onClick={() => toggleNationTag(tag)}
-              data-selected={nationTag() === tag}
-              class="flex-shrink-0 bg-gray-200 opacity-30 children:filter-invert data-[selected=true]:opacity-100 data-[selected=true]:b-3 b-purple-400! w-10 h-10 flex flex-col items-center justify-center rounded-full children:w-8"
-            >
-              <TagIcon tagName={tag} />
-            </button>
-          )}
-        </For>
       </div>
       <ul class="flex-grow overflow-auto grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-2 group-[xxx.mobile]:pb-2! [scrollbar-width:thin]">
         <Key each={props.characters.values().toArray()} by="id">
