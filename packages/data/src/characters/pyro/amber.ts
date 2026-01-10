@@ -25,6 +25,7 @@ import { character, skill, summon, card, DamageType, SummonHandle } from "@gi-tc
  */
 export const BaronBunny: SummonHandle = summon(113041)
   .tags("barrier")
+  .hint(DamageType.Pyro, "2")
   .on("decreaseDamaged", (c, e) => e.target.isActive())
   .usage(1, { autoDispose: false })
   .decreaseDamage(2)

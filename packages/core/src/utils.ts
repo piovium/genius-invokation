@@ -317,13 +317,19 @@ export function checkImmune(state: GameState, e: ZeroHealthEventArg) {
   return false;
 }
 
-export function removeEntity(state: Draft<GameState>, id: number) {
+/**
+ * Remove an entity by its id from the given game state.
+ * @param state The mutable game state draft.
+ * @param id The id of the entity to remove.
+ * @returns The removed entity; callers should use this return value.
+ */
+export function removeEntity(state: Draft<GameState>, id: number): AnyState {
   for (const player of state.players) {
     for (const ch of player.characters) {
       const idx = ch.entities.findIndex((e) => e.id === id);
       if (idx !== -1) {
-        player.removedEntities.push(...ch.entities.splice(idx, 1));
-        return;
+        const [removed] = ch.entities.splice(idx, 1);
+        return removed;
       }
     }
     for (const key of [
@@ -336,8 +342,8 @@ export function removeEntity(state: Draft<GameState>, id: number) {
       const area = player[key];
       const idx = area.findIndex((e) => e.id === id);
       if (idx !== -1) {
-        player.removedEntities.push(...area.splice(idx, 1));
-        return;
+        const [removed] = area.splice(idx, 1);
+        return removed;
       }
     }
   }
