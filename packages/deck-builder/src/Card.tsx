@@ -154,7 +154,7 @@ export function Card(props: CardProps) {
           showCard(e, props.type, props.id);
         }}
       >
-        <img src={BrowseIcon} class="h-5 w-5 pointer-events-none" />
+        <img src={BrowseIcon} class="w-35% h-auto pointer-events-none" />
       </div>
     </div>
   );
