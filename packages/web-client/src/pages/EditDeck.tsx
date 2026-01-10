@@ -214,7 +214,7 @@ export default function EditDeck() {
 
   return (
     <Layout mainFlex={!mobile()}>
-      <div class="container mx-auto md:h-full h-[calc(100vh-4rem-var(--root-padding-top)-var(--root-padding-bottom))] flex flex-col min-h-0 px-2">
+      <div class="container mx-auto h-full flex flex-col min-h-0 px-2">
         <div class="flex-shrink-0 flex flex-row flex-wrap items-center gap-1 md:gap-3 mb-3 md:mb-5 min-h-0">
           <Show
             when={editingName()}
