@@ -18,49 +18,24 @@ import { Card } from "./Card";
 import type { AllCardsProps } from "./AllCards";
 import { Key } from "@solid-primitives/keyed";
 import type { DeckData, DeckDataActionCardInfo } from "@gi-tcg/assets-manager";
+import FilterIcon from "./Filter.svg";
+import DeleteIcon from "./Delete.svg";
+import { CARD_TAG_IMG_NAME_MAP, TagIcon } from "./TagIcon";
 
 const AC_TYPE_TEXT = {
-  GCG_CARD_MODIFY: {
-    name: "装备牌",
-    tags: {
-      GCG_TAG_WEAPON: "武器",
-      GCG_TAG_WEAPON_BOW: "弓",
-      GCG_TAG_WEAPON_SWORD: "单手剑",
-      GCG_TAG_WEAPON_CLAYMORE: "双手剑",
-      GCG_TAG_WEAPON_POLE: "长柄武器",
-      GCG_TAG_WEAPON_CATALYST: "法器",
-      GCG_TAG_ARTIFACT: "圣遗物",
-      GCG_TAG_VEHICLE: "特技",
-      GCG_TAG_TALENT: "天赋",
-    },
-  },
-  GCG_CARD_EVENT: {
-    name: "事件牌",
-    tags: {
-      GCG_TAG_LEGEND: "秘传",
-      GCG_TAG_FOOD: "食物",
-      GCG_TAG_RESONANCE: "元素共鸣",
-      GCG_TAG_TALENT: "天赋",
-    },
-  },
-  GCG_CARD_ASSIST: {
-    name: "支援牌",
-    tags: {
-      GCG_TAG_PLACE: "场地",
-      GCG_TAG_ALLY: "伙伴",
-      GCG_TAG_ITEM: "道具",
-    },
-  },
+  GCG_CARD_MODIFY: "装备牌",
+  GCG_CARD_EVENT: "事件牌",
+  GCG_CARD_ASSIST: "支援牌",
 };
 
 const LEGEND_TAG = "GCG_TAG_LEGEND";
 
 export function AllActionCards(props: AllCardsProps) {
-  const [acType, setAcType] =
-    createSignal<keyof typeof AC_TYPE_TEXT>("GCG_CARD_MODIFY");
-  const [acTag, setAcTag] = createSignal<string>("");
+  const [acType, setAcType] = createSignal<string | null>(null);
+  const [acTag, setAcTag] = createSignal<string | null>(null);
 
-  const availableTags = () => AC_TYPE_TEXT[acType()].tags as Record<string, string>;
+  const [filterMenuVisible, setFilterMenuVisible] =
+  createSignal<boolean>(false);
 
   const count = (id: number) => {
     return props.deck.cards.filter((c) => c === id).length;
@@ -122,6 +97,21 @@ export function AllActionCards(props: AllCardsProps) {
     return true;
   };
 
+  const toggleType = (tag: string) => {
+    if (acType() === tag) {
+      setAcType(null);
+    } else {
+      setAcType(tag);
+    }
+  };
+  const toggleTag = (tag: string) => {
+    if (acTag() === tag) {
+      setAcTag(null);
+    } else {
+      setAcTag(tag);
+    }
+  };
+
   const shown = (ac: DeckDataActionCardInfo) => {
     const ty = acType();
     const tag = acTag();
@@ -131,7 +121,7 @@ export function AllActionCards(props: AllCardsProps) {
     if (ty !== null && ac.type !== ty) {
       return false;
     }
-    if (tag !== "" && !ac.tags.includes(tag)) {
+    if (tag !== null && !ac.tags.includes(tag)) {
       return false;
     }
     return valid(ac);
@@ -143,32 +133,148 @@ export function AllActionCards(props: AllCardsProps) {
 
   return (
     <div class="h-full flex flex-col">
-      <div class="flex flex-row gap-2 mb-2">
-        <For each={Object.keys(AC_TYPE_TEXT)}>
-          {(ty, i) => (
-            <button
-              onClick={() => (
-                setAcType(ty as keyof typeof AC_TYPE_TEXT), setAcTag("")
-              )}
-              data-selected={acType() === ty}
-              class="flex-shrink-0 data-[selected=true]:font-bold"
+      <div class="h-8 w-full flex-row mb-2 hidden group-[xxx.mobile]:flex relative">
+        <Show
+          when={acType() || acTag()}
+          fallback={
+            <div
+              class="mr--2 pl-1.5 h-8 w-22 rounded-full bg-purple-300 text-white flex items-center justify-center flex-shrink-0 z-1"
+              onClick={() => setFilterMenuVisible(true)}
             >
-              {AC_TYPE_TEXT[ty as keyof typeof AC_TYPE_TEXT].name}
+              <span class="text-4 font-bold">筛选</span>
+              <img src={FilterIcon} class="w-5 h-5" />
+            </div>
+          }
+        >
+          <div
+            class="mr--2 pl-1.5 h-8 w-22 rounded-full bg-red-300 text-white flex items-center justify-center flex-shrink-0 z-1 relative"
+            onClick={() => {
+              setAcType(null);
+              setAcTag(null);
+            }}
+          >
+            <span class="text-4 font-bold">清除</span>
+            <img src={DeleteIcon} class="w-5 h-5" />
+            <div
+              class="absolute bottom-0 left-50% translate-x--50% translate-y-50% flex-shrink-0 rounded-full h-3 flex flex-row gap-1 items-center data-[filter-menu=true]:hidden"
+              data-filter-menu={filterMenuVisible()}
+            >
+              <For each={Object.keys(AC_TYPE_TEXT)}>
+                {(tag) => (
+                  <div
+                    data-selected={acType() === tag}
+                    class="flex-shrink-0 bg-gray-100 w-7 h-3 hidden data-[selected=true]:flex flex-col items-center justify-center rounded-full text-black/50 text-2 text-center"
+                  >
+                    {AC_TYPE_TEXT[tag as keyof typeof AC_TYPE_TEXT]}
+                  </div>
+                )}
+              </For>
+              <For each={Object.keys(CARD_TAG_IMG_NAME_MAP)}>
+                {(tag) => (
+                  <div
+                    data-selected={acTag() === tag}
+                    class="flex-shrink-0 bg-gray-100 children:opacity-50 children:filter-invert w-3 h-3 hidden data-[selected=true]:flex flex-col items-center justify-center rounded-full"
+                  >
+                    <TagIcon tagName={tag} />
+                  </div>
+                )}
+              </For>
+            </div>
+          </div>
+        </Show>
+        <Show when={filterMenuVisible()}>
+          <div class="absolute z-1 top-9 left-0 w-full rounded-lg b-2 bg-white hidden group-[xxx.mobile]:flex flex-col p-2">
+            <div class="text-4 text-black">卡牌类型</div>
+            <div class="flex-shrink-0 flex flex-row gap-1 my-1 flex-wrap">
+              <For each={Object.keys(AC_TYPE_TEXT)}>
+                {(tag) => (
+                  <button
+                    onClick={() => toggleType(tag)}
+                    data-selected={acType() === tag}
+                    class="flex-shrink-0 bg-gray-200 opacity-30 data-[selected=true]:opacity-100 data-[selected=true]:b-3 b-purple-400! w-20 h-10 flex flex-col items-center justify-center rounded-full"
+                  >
+                    <span class="text-lg font-bold text-gray-700">{AC_TYPE_TEXT[tag as keyof typeof AC_TYPE_TEXT]}</span>
+                  </button>
+                )}
+              </For>
+            </div>
+            <div class="text-4 text-black">卡牌标签</div>
+            <div class="flex-shrink-0 flex flex-row gap-1 my-1 flex-wrap">
+              <For each={Object.keys(CARD_TAG_IMG_NAME_MAP)}>
+                {(tag) => (
+                  <button
+                    onClick={() => toggleTag(tag)}
+                    data-selected={acTag() === tag}
+                    class="flex-shrink-0 bg-gray-200 opacity-30 children:filter-invert data-[selected=true]:opacity-100 data-[selected=true]:b-3 b-purple-400! w-10 h-10 flex flex-col items-center justify-center rounded-full children:w-8"
+                  >
+                    <TagIcon tagName={tag} />
+                  </button>
+                )}
+              </For>
+            </div>
+            <div
+              class="h-6 w-full rounded-full bg-blue-100 text-blue-500 text-sm line-height-6 text-center"
+              onClick={() => setFilterMenuVisible(false)}
+            >
+              收起
+            </div>
+          </div>
+        </Show>
+        <div class="h-8 flex-1 rounded-r-full b-purple-200! b-2 b-l-0 b-solid flex-grow overflow-hidden">
+          <div
+            class="flex-shrink-0 h-full flex flex-row overflow-x-auto overflow-y-hidden gap-1 mb-2 p-l-3 p-r-1 items-center data-[filter-menu=true]:justify-end box-border scrollbar-hidden"
+            data-filter-menu={filterMenuVisible()}
+          >
+            <For each={Object.keys(AC_TYPE_TEXT)}>
+              {(tag) => (
+                <button
+                  onClick={() => toggleType(tag)}
+                  data-selected={acType() === tag}
+                  data-filter-menu={filterMenuVisible()}
+                  class="flex-shrink-0 bg-gray-100 opacity-25 data-[selected=true]:opacity-100 w-12 h-7 data-[filter-menu=true]:data-[selected=false]:hidden flex flex-col items-center justify-center rounded-full"
+                >
+                  <span class="text-3.5 font-bold text-gray-700">{AC_TYPE_TEXT[tag as keyof typeof AC_TYPE_TEXT]}</span>
+                </button>
+              )}
+            </For>
+            <For each={Object.keys(CARD_TAG_IMG_NAME_MAP)}>
+              {(tag) => (
+                <button
+                  onClick={() => toggleTag(tag)}
+                  data-selected={acTag() === tag}
+                  data-filter-menu={filterMenuVisible()}
+                  class="flex-shrink-0 bg-gray-100 opacity-25 children:filter-invert data-[selected=true]:opacity-100 w-7 h-7 data-[filter-menu=true]:data-[selected=false]:hidden flex flex-col items-center justify-center rounded-full"
+                >
+                  <TagIcon tagName={tag} />
+                </button>
+              )}
+            </For>
+          </div>
+        </div>
+      </div>
+      <div class="flex-shrink-0 flex flex-row gap-1 mb-2 group-[xxx.mobile]:hidden flex-wrap">
+        <For each={Object.keys(AC_TYPE_TEXT)}>
+          {(tag) => (
+            <button
+              onClick={() => toggleType(tag)}
+              data-selected={acType() === tag}
+              class="flex-shrink-0 bg-gray-200 opacity-30 data-[selected=true]:opacity-100 data-[selected=true]:b-3 b-purple-400! w-20 h-10 flex flex-col items-center justify-center rounded-full"
+            >
+              <span class="text-lg font-bold text-gray-700">{AC_TYPE_TEXT[tag as keyof typeof AC_TYPE_TEXT]}</span>
             </button>
           )}
         </For>
-        <select
-          class="flex-grow border-black border-1px"
-          value={acTag()}
-          onChange={(e) => setAcTag(e.target.value)}
-        >
-          <option value="">不限标签</option>
-          <For each={Object.keys(availableTags())}>
-            {(tag) => (
-              <option value={tag}>{availableTags()[(tag)]}</option>
-            )}
-          </For>
-        </select>
+        <For each={Object.keys(CARD_TAG_IMG_NAME_MAP)}>
+          {(tag) => (
+            <button
+              onClick={() => toggleTag(tag)}
+              data-selected={acTag() === tag}
+              class="flex-shrink-0 bg-gray-200 opacity-30 children:filter-invert data-[selected=true]:opacity-100 data-[selected=true]:b-3 b-purple-400! w-10 h-10 flex flex-col items-center justify-center rounded-full children:w-8"
+            >
+              <TagIcon tagName={tag} />
+            </button>
+          )}
+        </For>
       </div>
       <ul class="flex-grow overflow-auto grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-2 group-[xxx.mobile]:pb-2! [scrollbar-width:thin]">
         <Key each={props.actionCards.values().toArray()} by="id">

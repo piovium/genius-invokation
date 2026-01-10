@@ -55,10 +55,24 @@ export const NATION_TAG_IMG_NAME_MAP: Record<string, string> = {
   GCG_TAG_CAMP_HILICHURL: "Faction_Hili",
 };
 
+export const CARD_TAG_IMG_NAME_MAP: Record<string, string> = {
+  GCG_TAG_WEAPON: "Card_Weapon",
+  GCG_TAG_ARTIFACT: "Card_Relic",
+  GCG_TAG_TALENT: "Card_Talent",
+  GCG_TAG_VEHICLE: "Card_Vehicle",
+  GCG_TAG_LEGEND: "Card_Legend",
+  GCG_TAG_FOOD: "Card_Food",
+  GCG_TAG_RESONANCE: "Card_Sync",
+  GCG_TAG_PLACE: "Card_Location",
+  GCG_TAG_ALLY: "Card_Ally",
+  GCG_TAG_ITEM: "Card_Item",
+};
+
 const ALL_TAG_IMG_NAME_MAP: Record<string, string> = {
   ...ELEMENT_TAG_IMG_NAME_MAP,
   ...WEAPON_TAG_IMG_NAME_MAP,
   ...NATION_TAG_IMG_NAME_MAP,
+  ...CARD_TAG_IMG_NAME_MAP,
 };
 
 export function TagIcon(props: DiceIconProps) {
