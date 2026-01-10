@@ -38,16 +38,16 @@ export function AllCards(props: AllCardsProps) {
       class="min-w-0 flex-grow h-full group-[xxx.mobile]:h-50dvh group-[xxx.mobile]:flex-shrink-0 flex flex-col min-h-0 group-[xxx.mobile]:data-[deck-page=true]:hidden"
       data-deck-page={deckPage()}
     >
-      <div class="flex flex-row gap-2 mb-2">
+      <div class="flex flex-row mb-2">
         <button
-          class="data-[active=true]:font-bold"
+          class="data-[active=true]:font-bold rounded-l-full w-22 b-1 b-r-0 b-inset data-[active=true]:b-0 data-[active=true]:bg-blue-100"
           onClick={() => setTab(0)}
           data-active={tab() === 0}
         >
           角色牌
         </button>
         <button
-          class="data-[active=true]:font-bold"
+          class="data-[active=true]:font-bold rounded-r-full w-22 b-1 b-l-0 b-inset data-[active=true]:b-0 data-[active=true]:bg-blue-100"
           onClick={() => setTab(1)}
           data-active={tab() === 1}
         >
@@ -56,13 +56,13 @@ export function AllCards(props: AllCardsProps) {
         <Show
           when={!props.versionSpecified}
           fallback={
-            <span class="text-gray-500">
+            <span class="text-gray-500 ml-2">
               当前仅显示 {props.allVersions[props.version]} 及更低版本
             </span>
           }
         >
           <select
-            class="flex-grow border-black border-1px"
+            class="flex-grow b-1 rounded-full ml-2!"
             value={props.version}
             onChange={(e) => props.onSetVersion?.(Number(e.target.value))}
           >
