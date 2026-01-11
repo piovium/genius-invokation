@@ -96,8 +96,11 @@ export function FilterBar(props: FilterBarProps) {
                       onClick={() => fs.onSelect(tag)}
                       bool:data-selected={fs.selected === tag}
                       bool:data-capsule={tag.startsWith("GCG_CARD_")}
-                      class={`flex-shrink-0 bg-gray-200 w-10 h-10 flex flex-col items-center justify-center rounded-full text-lg line-height-8 font-bold
-                          opacity-30 data-[selected]:opacity-100 data-[selected=true]:b-3 b-purple-400! data-[capsule]:w-20 children:h-8`}
+                      class={`flex-shrink-0 bg-gray-200 
+                        w-10 h-10 flex flex-col items-center justify-center rounded-full 
+                        text-lg line-height-8 children:h-8 font-bold opacity-30 b-purple-400!
+                        data-[selected]:opacity-100 data-[selected]:b-3  
+                        data-[capsule]:w-20`}
                     >
                       <TagIcon tagName={tag} />
                     </button>
@@ -116,7 +119,10 @@ export function FilterBar(props: FilterBarProps) {
       </div>
       <div class="h-8 flex-1 rounded-r-full b-purple-200! b-2 b-l-0 b-solid flex-grow overflow-hidden md:hidden">
         <div
-          class="flex-shrink-0 h-full flex flex-row overflow-x-auto overflow-y-hidden gap-1 mb-2 p-l-3 p-r-1 items-center data-[menu]:justify-end box-border scrollbar-hidden"
+          class={`flex-shrink-0 mb-2 p-l-3 p-r-1 
+            h-full flex flex-row items-center overflow-x-auto overflow-y-hidden 
+            gap-1 
+            data-[menu]:justify-end scrollbar-hidden`}
           bool:data-menu={filterMenuVisible()}
         >
           <For each={props.filterSelections}>
@@ -128,8 +134,12 @@ export function FilterBar(props: FilterBarProps) {
                     bool:data-selected={fs.selected === tag}
                     bool:data-capsule={tag.startsWith("GCG_CARD_")}
                     bool:data-menu={filterMenuVisible()}
-                    class={`flex-shrink-0 bg-gray-100 opacity-25 data-[selected]:opacity-100 data-[capsule]:w-12 w-7 h-7 
-                      flex flex-col items-center justify-center rounded-full text-3.5 font-bold data-[menu]:hidden data-[selected]:flex`}
+                    class={`flex-shrink-0 bg-gray-100 
+                      w-7 h-7 flex flex-col items-center justify-center 
+                      opacity-25 data-[selected]:opacity-100
+                      data-[capsule]:w-12 
+                      rounded-full text-3.5 font-bold
+                      data-[menu]:hidden data-[selected]:flex`}
                   >
                     <TagIcon tagName={tag} />
                   </button>
