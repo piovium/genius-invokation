@@ -13,19 +13,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { For, Show, createSignal } from "solid-js";
+import { createSignal } from "solid-js";
 import { PoolCard } from "./Card";
 import type { AllCardsProps } from "./AllCards";
 import {
   ELEMENT_TAG_IMG_NAME_MAP,
   NATION_TAG_IMG_NAME_MAP,
-  TagIcon,
   WEAPON_TAG_IMG_NAME_MAP,
 } from "./TagIcon";
+import { FilterBar } from "./FilterBar";
 import { Key } from "@solid-primitives/keyed";
 import type { DeckDataCharacterInfo } from "@gi-tcg/assets-manager";
-import FilterIcon from "./Filter.svg";
-import DeleteIcon from "./Delete.svg";
 
 export function AllCharacterCards(props: AllCardsProps) {
   const [elementTag, setElementTag] = createSignal<string | null>(null);
@@ -51,21 +49,21 @@ export function AllCharacterCards(props: AllCardsProps) {
     );
   };
 
-  const toggleElementTag = (tag: string) => {
+  const toggleElementTag = (tag: string | null) => {
     if (elementTag() === tag) {
       setElementTag(null);
     } else {
       setElementTag(tag);
     }
   };
-  const toggleWeaponTag = (tag: string) => {
+  const toggleWeaponTag = (tag: string | null) => {
     if (weaponTag() === tag) {
       setWeaponTag(null);
     } else {
       setWeaponTag(tag);
     }
   };
-  const toggleNationTag = (tag: string) => {
+  const toggleNationTag = (tag: string | null) => {
     if (nationTag() === tag) {
       setNationTag(null);
     } else {
@@ -100,98 +98,28 @@ export function AllCharacterCards(props: AllCardsProps) {
   };
   return (
     <div class="h-full flex flex-col">
-      <div class="h-8 w-full flex-row mb-2 flex relative">
-        <Show
-          when={elementTag() || weaponTag() || nationTag()}
-          fallback={
-            <div class="mr--2 pl-1.5 h-8 w-22 rounded-full bg-purple-300 text-white flex items-center justify-center flex-shrink-0 z-1">
-              <span class="text-4 font-bold">筛选</span>
-              <img src={FilterIcon} class="w-5 h-5" />
-            </div>
-          }
-        >
-          <div
-            class="mr--2 pl-1.5 h-8 w-22 rounded-full bg-red-300 text-white flex items-center justify-center flex-shrink-0 z-1 relative"
-            onClick={() => {
-              setElementTag(null);
-              setWeaponTag(null);
-              setNationTag(null);
-            }}
-          >
-            <span class="text-4 font-bold">清除</span>
-            <img src={DeleteIcon} class="w-5 h-5" />
-            <div class="absolute bottom-0 left-50% translate-x--50% translate-y-50% flex-shrink-0 rounded-full h-3 flex flex-row gap-1 items-center">
-              <For each={Object.keys(ELEMENT_TAG_IMG_NAME_MAP)}>
-                {(tag) => (
-                  <div
-                    data-selected={elementTag() === tag}
-                    class="flex-shrink-0 bg-gray-100 children:opacity-50 w-3 h-3 hidden data-[selected=true]:flex flex-col items-center justify-center rounded-full"
-                  >
-                    <TagIcon tagName={tag} />
-                  </div>
-                )}
-              </For>
-              <For each={Object.keys(WEAPON_TAG_IMG_NAME_MAP)}>
-                {(tag) => (
-                  <div
-                    data-selected={weaponTag() === tag}
-                    class="flex-shrink-0 bg-gray-100 children:opacity-50 children:filter-invert w-3 h-3 hidden data-[selected=true]:flex flex-col items-center justify-center rounded-full"
-                  >
-                    <TagIcon tagName={tag} />
-                  </div>
-                )}
-              </For>
-              <For each={Object.keys(NATION_TAG_IMG_NAME_MAP)}>
-                {(tag) => (
-                  <div
-                    data-selected={nationTag() === tag}
-                    class="flex-shrink-0 bg-gray-100 children:opacity-50 children:filter-invert w-3 h-3 hidden data-[selected=true]:flex flex-col items-center justify-center rounded-full"
-                  >
-                    <TagIcon tagName={tag} />
-                  </div>
-                )}
-              </For>
-            </div>
-          </div>
-        </Show>
-        <div class="h-8 flex-1 rounded-r-full b-purple-200! b-2 b-l-0 b-solid flex-grow overflow-hidden">
-          <div class="flex-shrink-0 h-full flex flex-row overflow-x-auto overflow-y-hidden gap-1 mb-2 p-l-3 p-r-1 items-center box-border scrollbar-hidden">
-            <For each={Object.keys(ELEMENT_TAG_IMG_NAME_MAP)}>
-              {(tag) => (
-                <button
-                  onClick={() => toggleElementTag(tag)}
-                  bool:data-selected={elementTag() === tag}
-                  class="flex-shrink-0 bg-gray-100 opacity-25 data-[selected]:opacity-100 w-7 h-7 flex flex-col items-center justify-center rounded-full"
-                >
-                  <TagIcon tagName={tag} />
-                </button>
-              )}
-            </For>
-            <For each={Object.keys(WEAPON_TAG_IMG_NAME_MAP)}>
-              {(tag) => (
-                <button
-                  onClick={() => toggleWeaponTag(tag)}
-                  bool:data-selected={weaponTag() === tag}
-                  class="flex-shrink-0 bg-gray-100 opacity-25 children:filter-invert data-[selected]:opacity-100 w-7 h-7 flex flex-col items-center justify-center rounded-full"
-                >
-                  <TagIcon tagName={tag} />
-                </button>
-              )}
-            </For>
-            <For each={Object.keys(NATION_TAG_IMG_NAME_MAP)}>
-              {(tag) => (
-                <button
-                  onClick={() => toggleNationTag(tag)}
-                  bool:data-selected={nationTag() === tag}
-                  class="flex-shrink-0 bg-gray-100 opacity-25 children:filter-invert data-[selected]:opacity-100 w-7 h-7 flex flex-col items-center justify-center rounded-full"
-                >
-                  <TagIcon tagName={tag} />
-                </button>
-              )}
-            </For>
-          </div>
-        </div>
-      </div>
+      <FilterBar
+        filterSelections={[
+          {
+            name: "元素类型",
+            selected: elementTag(),
+            onSelect: (value) => toggleElementTag(value),
+            option: ELEMENT_TAG_IMG_NAME_MAP,
+          },
+          {
+            name: "武器类型",
+            selected: weaponTag(),
+            onSelect: (value) => toggleWeaponTag(value),
+            option: WEAPON_TAG_IMG_NAME_MAP,
+          },
+          {
+            name: "所属阵营",
+            selected: nationTag(),
+            onSelect: (value) => toggleNationTag(value),
+            option: NATION_TAG_IMG_NAME_MAP,
+          },
+        ]}
+      />
       <ul class="flex-grow overflow-auto grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-2 group-[xxx.mobile]:pb-2! [scrollbar-width:thin]">
         <Key each={props.characters.values().toArray()} by="id">
           {(ch) => (
