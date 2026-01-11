@@ -18,7 +18,6 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 
 export interface LayoutProps {
-  mainFlex?: boolean;
   children?: JSX.Element;
 }
 
@@ -27,8 +26,7 @@ export function Layout(props: LayoutProps) {
     <div class="w-full h-full flex flex-col">
       <Header />
       <main
-        class="flex-grow w-full p-4 md:p-8 mt-12 md:mt-16"
-        classList={{ "min-h-0": props.mainFlex }}
+        class="flex-grow flex-shrink-0 min-h-0 w-full p-4 md:p-8 mt-12 md:mt-16"
       >
         <ErrorBoundary
           fallback={(err) => (

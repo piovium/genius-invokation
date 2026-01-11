@@ -213,9 +213,9 @@ export default function EditDeck() {
   };
 
   return (
-    <Layout mainFlex={!mobile()}>
-      <div class="container mx-auto h-full flex flex-col min-h-0 px-2">
-        <div class="flex-shrink-0 flex flex-row flex-wrap items-center gap-1 md:gap-3 mb-3 md:mb-5 min-h-0">
+    <Layout>
+      <div class="container mx-auto h-full flex flex-col px-2 @container">
+        <div class="flex flex-row flex-wrap items-center gap-1 md:gap-3 mb-3 md:mb-5 min-h-0">
           <Show
             when={editingName()}
             fallback={
@@ -308,7 +308,7 @@ export default function EditDeck() {
           </Match>
           <Match when={status().type !== "notLogin"}>
             <DeckBuilder
-              class={`min-h-0 h-full w-full ${mobile() ? "mobile" : ""}`}
+              class={`h-[calc(100dvh-8rem)] @3xl:h-auto w-full flex-grow min-h-0`}
               deck={deckValue()}
               onChangeDeck={(v) => (setDeckValue(v), setDirty(true))}
             />
