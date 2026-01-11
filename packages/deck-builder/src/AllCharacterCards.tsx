@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { For, Show, createSignal } from "solid-js";
-import { Card } from "./Card";
+import { PoolCard } from "./Card";
 import type { AllCardsProps } from "./AllCards";
 import {
   ELEMENT_TAG_IMG_NAME_MAP,
@@ -201,7 +201,7 @@ export function AllCharacterCards(props: AllCardsProps) {
               data-disabled={fullCharacters() && !selected(ch().id)}
               onClick={() => toggleCharacter(ch().id)}
             >
-              <Card
+              <PoolCard
                 id={ch().id}
                 type="character"
                 name={ch().name}

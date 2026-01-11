@@ -15,7 +15,7 @@
 
 import { For, Index, Show, createEffect } from "solid-js";
 import type { AllCardsProps } from "./AllCards";
-import { Card, TinyActionCard, TinyCharacterCard } from "./Card";
+import { DeckCard, TinyActionCard, TinyCharacterCard } from "./Card";
 import { createStore, produce } from "solid-js/store";
 import type {
   DeckDataActionCardInfo,
@@ -90,7 +90,6 @@ export function CurrentDeck(props: AllCardsProps) {
             <li
               class="relative group data-[deck-page=true]:w-70px w-75px"
               data-deck-page={deckPage()}
-              data-warn={ch && ch.version > props.version}
               onClick={() => ch && removeCharacter(idx())}
             >
               <Show
@@ -102,19 +101,12 @@ export function CurrentDeck(props: AllCardsProps) {
                 }
               >
                 {(ch) => (
-                  <>
-                    <Card id={ch().id} type="character" name={ch().name} />
-                    <div class="absolute left-1/2 top-1/2 translate-x--1/2 translate-y--1/2 text-2xl line-height-10 text-black text-center bg-yellow-4 h-10 w-10 rounded-full group-data-[warn=true]:block hidden pointer-events-none">
-                      &#9888;
-                    </div>
-                    <div class="absolute left-0 bottom-0 bg-red-500/50 rounded-b-lg h-75% pt-20% w-full items-start justify-center hidden md:group-hover:flex">
-                      <img
-                        src={DeleteIcon}
-                        draggable="false"
-                        class="cursor-pointer w-80% h-auto opacity-75 mt-5%"
-                      />
-                    </div>
-                  </>
+                  <DeckCard
+                    id={ch().id}
+                    type="character"
+                    name={ch().name}
+                    warn={ch().version > props.version}
+                  />
                 )}
               </Show>
             </li>
@@ -130,7 +122,6 @@ export function CurrentDeck(props: AllCardsProps) {
             <li
               class="relative group data-[deck-page=true]:w-45px w-50px"
               data-deck-page={deckPage()}
-              data-warn={ac && ac.version > props.version}
               onClick={() => ac && removeActionCard(idx())}
             >
               <Show
@@ -142,19 +133,12 @@ export function CurrentDeck(props: AllCardsProps) {
                 }
               >
                 {(ac) => (
-                  <>
-                    <Card id={ac().id} type="actionCard" name={ac().name} />
-                    <div class="absolute left-1/2 top-1/2 translate-x--1/2 translate-y--1/2 text-2xl line-height-10 text-black text-center bg-yellow-4 h-10 w-10 rounded-full group-data-[warn=true]:block hidden pointer-events-none">
-                      &#9888;
-                    </div>
-                    <div class="absolute left-0 bottom-0 bg-red-500/50 rounded-b-lg h-75% pt-20% w-full items-start justify-center hidden md:group-hover:flex">
-                      <img
-                        src={DeleteIcon}
-                        draggable="false"
-                        class="cursor-pointer w-80% h-auto opacity-75 mt-5%"
-                      />
-                    </div>
-                  </>
+                  <DeckCard
+                    id={ac().id}
+                    type="actionCard"
+                    name={ac().name}
+                    warn={ac().version > props.version}
+                  />
                 )}
               </Show>
             </li>
@@ -169,7 +153,6 @@ export function CurrentDeck(props: AllCardsProps) {
           {(ch, idx) => (
             <li
               class="w-10 h-10 rounded-full relative group"
-              data-warn={ch && ch.version > props.version}
               onClick={() => ch && removeCharacter(idx())}
             >
               <Show
@@ -179,12 +162,10 @@ export function CurrentDeck(props: AllCardsProps) {
                 }
               >
                 {(ch) => (
-                  <>
-                    <TinyCharacterCard id={ch().id} />
-                    <div class="absolute inset-0 bg-red-500/50 rounded-full pointer-events-none text-lg line-height-10 text-white text-center group-data-[warn=true]:block hidden pointer-events-none">
-                      &#9888;
-                    </div>
-                  </>
+                  <TinyCharacterCard
+                    id={ch().id}
+                    warn={ch().version > props.version}
+                  />
                 )}
               </Show>
             </li>
@@ -200,7 +181,6 @@ export function CurrentDeck(props: AllCardsProps) {
             <li
               class="w-7 relative group"
               data-deck-page={deckPage()}
-              data-warn={ac && ac.version > props.version}
               onClick={() => ac && removeActionCard(idx())}
             >
               <Show
@@ -212,12 +192,10 @@ export function CurrentDeck(props: AllCardsProps) {
                 }
               >
                 {(ac) => (
-                  <>
-                    <TinyActionCard id={ac().id} />
-                    <div class="absolute inset-0 bg-red-500/50 rounded-md pointer-events-none text-lg line-height-10 text-white text-center group-data-[warn=true]:block hidden pointer-events-none">
-                      &#9888;
-                    </div>
-                  </>
+                  <TinyActionCard
+                    id={ac().id}
+                    warn={ac().version > props.version}
+                  />
                 )}
               </Show>
             </li>

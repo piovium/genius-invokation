@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { For, Show, createEffect, createMemo, createSignal } from "solid-js";
-import { Card } from "./Card";
+import { PoolCard } from "./Card";
 import type { AllCardsProps } from "./AllCards";
 import { Key } from "@solid-primitives/keyed";
 import type { DeckData, DeckDataActionCardInfo } from "@gi-tcg/assets-manager";
@@ -209,7 +209,7 @@ export function AllActionCards(props: AllCardsProps) {
               data-disabled={fullCards() && !count(ac().id)}
               onClick={() => toggleCard(ac().id)}
             >
-              <Card
+              <PoolCard
                 id={ac().id}
                 type="actionCard"
                 name={ac().name}

@@ -86,16 +86,19 @@
   user-select: none;
   -webkit-touch-callout: none;
   
-  .card {
+  .pool-card {
     --border-color: rgb(107 114 128 / 0.9);
   }
 
-  .card[data-partial-selected] {
-    --border-color: rgb(234 179 8 / 0.9);
+  .pool-card[data-partial-selected] {
+    --border-color: rgb(202 138 4 / 0.9);
   }
 
-  .card[data-selected]:not([data-partial-selected]) {
-    --border-color: rgb(34 197 94 / 0.9);
+  .pool-card[data-selected]:not([data-partial-selected]) {
+    --border-color: rgb(22 163 74 / 0.9);
+    img {
+      filter: brightness(0.4);
+    }
   }
 
   .scrollbar-hidden::-webkit-scrollbar {
