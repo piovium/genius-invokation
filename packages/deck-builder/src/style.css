@@ -83,6 +83,7 @@
 }
 
 .gi-tcg-deck-builder {
+  contain: strict;
   user-select: none;
   -webkit-touch-callout: none;
   

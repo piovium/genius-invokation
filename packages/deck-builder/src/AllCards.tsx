@@ -35,7 +35,9 @@ export function AllCards(props: AllCardsProps) {
 
   return (
     <div
-      class="min-w-0 flex-grow h-full group-[xxx.mobile]:h-[calc(100dvh-18.5rem)] group-[xxx.mobile]:flex-shrink-0 flex flex-col min-h-0 group-[xxx.mobile]:data-[deck-page=true]:hidden"
+      class={`min-w-0 min-h-0 @3xl:flex-grow 
+        h-[calc(100cqh-18.5rem)] @3xl:h-full 
+        flex flex-col data-[deck-page=true]:hidden @3xl:flex flex-shrink-0`}
       data-deck-page={deckPage()}
     >
       <div class="flex flex-row mb-2">
@@ -78,8 +80,8 @@ export function AllCards(props: AllCardsProps) {
       </div>
       <div class="min-h-0">
         <div
-          data-visible={tab() === 0}
-          class="h-full hidden data-[visible=true]:block"
+          bool:data-visible={tab() === 0}
+          class="h-full hidden data-[visible]:block"
         >
           <AllCharacterCards
             {...props}
@@ -87,8 +89,8 @@ export function AllCards(props: AllCardsProps) {
           />
         </div>
         <div
-          data-visible={tab() === 1}
-          class="h-full hidden data-[visible=true]:block"
+          bool:data-visible={tab() === 1}
+          class="h-full hidden data-[visible]:block"
         >
           <AllActionCards {...props} onSwitchTab={(tabNo) => setTab(tabNo)} />
         </div>

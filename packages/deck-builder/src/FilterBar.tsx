@@ -37,12 +37,12 @@ export function FilterBar(props: FilterBarProps) {
   });
 
   return (
-    <div class="group-[xxx.mobile]:h-8 w-full flex-row mb-2 flex relative">
+    <div class="@3xl:h-auto h-8 w-full flex-row mb-2 flex relative">
       <Show
         when={selected()}
         fallback={
           <div
-            class="mr--2 pl-1.5 h-8 w-22 rounded-full bg-purple-300 text-white flex items-center justify-center flex-shrink-0 z-1 md:hidden"
+            class="mr--2 pl-1.5 h-8 w-22 rounded-full bg-purple-300 text-white flex items-center justify-center flex-shrink-0 z-1 @3xl:hidden"
             onClick={() => setFilterMenuVisible(!filterMenuVisible())}
           >
             <span class="text-4 font-bold">筛选</span>
@@ -51,7 +51,7 @@ export function FilterBar(props: FilterBarProps) {
         }
       >
         <div
-          class="mr--2 pl-1.5 h-8 w-22 rounded-full bg-red-300 text-white flex items-center justify-center flex-shrink-0 z-1 relative md:hidden"
+          class="mr--2 pl-1.5 h-8 w-22 rounded-full bg-red-300 text-white flex items-center justify-center flex-shrink-0 z-1 relative @3xl:hidden"
           onClick={() => {
             props.filterSelections.forEach((fs) => fs.onSelect(null));
           }}
@@ -79,14 +79,14 @@ export function FilterBar(props: FilterBarProps) {
         </div>
       </Show>
       <div
-        class={`hidden group-[xxx.mobile]:data-[menu]:flex md:flex absolute z-1 top-9 left-0 md:relative md:top-0
-          w-full rounded-lg group-[xxx.mobile]:b-2 bg-white flex-col group-[xxx.mobile]:p-2 gap-2`}
+        class={`hidden data-[menu]:flex @3xl:flex absolute z-1 top-9 left-0 @3xl:relative @3xl:top-0
+          w-full rounded-lg @3xl:b-0 b-2 bg-white flex-col @3xl:p-0 p-2 gap-2`}
         bool:data-menu={filterMenuVisible()}
       >
         <For each={props.filterSelections}>
           {(fs) => (
-            <div class="flex flex-col gap-1 md:flex-row">
-              <div class="text-4 text-black text-nowrap md:line-height-10 flex-shrink-0">
+            <div class="flex flex-col gap-1 @3xl:flex-row">
+              <div class="text-4 text-black text-nowrap @3xl:line-height-10 flex-shrink-0">
                 {fs.name}
               </div>
               <div class="flex flex-row gap-1 flex-wrap min-w-0">
@@ -111,13 +111,13 @@ export function FilterBar(props: FilterBarProps) {
           )}
         </For>
         <div
-          class="h-6 w-full rounded-full bg-blue-100 text-blue-500 text-sm line-height-6 text-center md:hidden"
+          class="h-6 w-full rounded-full bg-blue-100 text-blue-500 text-sm line-height-6 text-center @3xl:hidden"
           onClick={() => setFilterMenuVisible(false)}
         >
           收起
         </div>
       </div>
-      <div class="h-8 flex-1 rounded-r-full b-purple-200! b-2 b-l-0 b-solid flex-grow overflow-hidden md:hidden">
+      <div class="h-8 flex-1 rounded-r-full b-purple-200! b-2 b-l-0 b-solid flex-grow overflow-hidden @3xl:hidden">
         <div
           class={`flex-shrink-0 mb-2 p-l-3 p-r-1 
             h-full flex flex-row items-center overflow-x-auto overflow-y-hidden 

@@ -136,7 +136,7 @@ export function Card(props: CardProps) {
         </div>
       </Show>
       <div
-        class="absolute left-0 top-0 bg-gray-500/90 h-25% w-full items-center justify-center hidden md:group-hover:flex"
+        class="absolute left-0 top-0 bg-gray-500/90 h-25% w-full items-center justify-center hidden @3xl:group-hover:flex"
         onClick={(e) => {
           e.stopPropagation();
           showCard(e, props.type, props.id);
@@ -205,7 +205,7 @@ export function DeckCard(props: DeckCardProps) {
       >
         <span class="text-4xl font-bold text-white text-center">&#9888;</span>
       </div>
-      <div class="absolute left-0 bottom-0 bg-red-500/50 rounded-b-lg h-75% w-full items-center justify-center hidden md:group-hover:flex">
+      <div class="absolute left-0 bottom-0 bg-red-500/50 rounded-b-lg h-75% w-full items-center justify-center hidden @3xl:group-hover:flex">
         <img
           src={DeleteIcon}
           draggable="false"

@@ -78,18 +78,18 @@ export function CurrentDeck(props: AllCardsProps) {
 
   return (
     <div
-      class="flex-shrink-0 flex flex-col items-center justify-center gap-3 group-[xxx.mobile]:data-[deck-page=false]:gap-1"
-      data-deck-page={deckPage()}
+      class="flex-shrink-0 flex flex-col flex-grow items-center justify-center gap-1 data-[deck-page]:gap-3 @3xl:gap-3"
+      bool:data-deck-page={deckPage()}
     >
       <ul
-        class="flex flex-row gap-3 group-[xxx.mobile]:data-[deck-page=false]:hidden"
-        data-deck-page={deckPage()}
+        class="hidden @3xl:flex data-[deck-page]:flex flex-row gap-3"
+        bool:data-deck-page={deckPage()}
       >
         <For each={current.characters}>
           {(ch, idx) => (
             <li
-              class="relative group data-[deck-page=true]:w-70px w-75px"
-              data-deck-page={deckPage()}
+              class="relative group w-18 @3xl:w-19 data-[deck-page]:w-19"
+              bool:data-deck-page={deckPage()}
               onClick={() => ch && removeCharacter(idx())}
             >
               <Show
@@ -114,14 +114,14 @@ export function CurrentDeck(props: AllCardsProps) {
         </For>
       </ul>
       <ul
-        class="grid grid-cols-6 gap-2 group-[xxx.mobile]:data-[deck-page=false]:hidden"
-        data-deck-page={deckPage()}
+        class="hidden @3xl:grid data-[deck-page]:grid grid-cols-6 gap-2 "
+        bool:data-deck-page={deckPage()}
       >
         <For each={current.cards}>
           {(ac, idx) => (
             <li
-              class="relative group data-[deck-page=true]:w-45px w-50px"
-              data-deck-page={deckPage()}
+              class="relative group data-[deck-page]:w-45px w-50px"
+              bool:data-deck-page={deckPage()}
               onClick={() => ac && removeActionCard(idx())}
             >
               <Show
@@ -146,8 +146,8 @@ export function CurrentDeck(props: AllCardsProps) {
         </For>
       </ul>
       <ul
-        class="hidden flex-row gap-2 group-[xxx.mobile]:data-[deck-page=false]:flex"
-        data-deck-page={deckPage()}
+        class="flex @3xl:hidden data-[deck-page]:hidden flex-row gap-2"
+        bool:data-deck-page={deckPage()}
       >
         <For each={current.characters}>
           {(ch, idx) => (
@@ -173,8 +173,8 @@ export function CurrentDeck(props: AllCardsProps) {
         </For>
       </ul>
       <ul
-        class="hidden grid-cols-15 gap-1 group-[xxx.mobile]:data-[deck-page=false]:grid"
-        data-deck-page={deckPage()}
+        class="grid @3xl:hidden data-[deck-page]:hidden grid-cols-15 gap-1"
+        bool:data-deck-page={deckPage()}
       >
         <For each={current.cards}>
           {(ac, idx) => (

@@ -139,13 +139,13 @@ export function AllActionCards(props: AllCardsProps) {
           },
         ]}
       />
-      <ul class="flex-grow overflow-auto grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-2 group-[xxx.mobile]:pb-2! [scrollbar-width:thin]">
+      <ul class="flex-grow overflow-auto grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-2 pb-2 @3xl:pb-0 [scrollbar-width:thin]">
         <Key each={props.actionCards.values().toArray()} by="id">
           {(ac) => (
             <li
-              class="hidden data-[shown=true]-block relative cursor-pointer data-[disabled=true]:cursor-not-allowed data-[disabled=true]:opacity-60 data-[disabled=true]:filter-none hover:brightness-110"
-              data-shown={shown(ac())}
-              data-disabled={fullCards() && !count(ac().id)}
+              class="hidden data-[shown]-block relative cursor-pointer data-[disabled]:cursor-not-allowed data-[disabled]:opacity-60 data-[disabled]:filter-none hover:brightness-110"
+              bool:data-shown={shown(ac())}
+              bool:data-disabled={fullCards() && !count(ac().id)}
               onClick={() => toggleCard(ac().id)}
             >
               <PoolCard
