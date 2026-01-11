@@ -167,7 +167,7 @@ export function DeckBuilder(props: DeckBuilderProps) {
             data-deck-page={deckPage()}
           >
             <div
-              class="absolute h-16 w-16 rounded-full b-1 b-white b-t-gray bg-white top-0 right-0 translate-y--15%"
+              class="absolute h-16 w-16 rounded-full b-1 b-white b-t-gray bg-white top-0 right-0 translate-y--15.5%"
               onClick={(e) => {
                 // e.stopPropagation();
                 setDeckPage(!deckPage());

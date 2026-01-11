@@ -35,7 +35,7 @@ export function AllCards(props: AllCardsProps) {
 
   return (
     <div
-      class="min-w-0 flex-grow h-full group-[xxx.mobile]:h-[calc(100dvh-20rem)] group-[xxx.mobile]:flex-shrink-0 flex flex-col min-h-0 group-[xxx.mobile]:data-[deck-page=true]:hidden"
+      class="min-w-0 flex-grow h-full group-[xxx.mobile]:h-[calc(100dvh-18.5rem)] group-[xxx.mobile]:flex-shrink-0 flex flex-col min-h-0 group-[xxx.mobile]:data-[deck-page=true]:hidden"
       data-deck-page={deckPage()}
     >
       <div class="flex flex-row mb-2">

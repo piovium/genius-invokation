@@ -78,7 +78,7 @@ export function CurrentDeck(props: AllCardsProps) {
 
   return (
     <div
-      class="flex-shrink-0 flex flex-col items-center justify-center gap-3 group-[xxx.mobile]:data-[deck-page=false]:gap-1 group-[xxx.mobile]:data-[deck-page=false]:mb-4"
+      class="flex-shrink-0 flex flex-col items-center justify-center gap-3 group-[xxx.mobile]:data-[deck-page=false]:gap-1"
       data-deck-page={deckPage()}
     >
       <ul
