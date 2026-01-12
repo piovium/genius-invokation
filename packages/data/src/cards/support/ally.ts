@@ -815,5 +815,9 @@ export const BonaAndCocouik = card(322032)
   .since("v6.3.0")
   .costVoid(2)
   .support("ally")
-  // TODO
+  .on("enter")
+  .adventure()
+  .on("useTechnique")
+  .usagePerRound(1)
+  .adventure()
   .done();

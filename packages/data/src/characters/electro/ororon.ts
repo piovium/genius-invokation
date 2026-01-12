@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, combatStatus, card, DamageType } from "@gi-tcg/core/builder";
+import { character, skill, summon, status, combatStatus, card, DamageType, Reaction } from "@gi-tcg/core/builder";
 
 /**
  * @id 114161
@@ -25,7 +25,13 @@ import { character, skill, summon, status, combatStatus, card, DamageType } from
  */
 export const SupersonicOculus = summon(114161)
   .since("v6.3.0")
-  // TODO
+  .tags("barrier")
+  .endPhaseDamage(DamageType.Electro, 1)
+  .usage(3)
+  .on("decreaseDamaged", (c, e) => e.target.isActive())
+  .usagePerRound(1)
+  .decreaseDamage(1)
+  .consumeUsage(1)
   .done();
 
 /**
@@ -37,7 +43,7 @@ export const SupersonicOculus = summon(114161)
  */
 export const NightsoulsBlessing = status(114163)
   .since("v6.3.0")
-  // TODO
+  .nightsoulsBlessing(2, { autoDispose: true })
   .done();
 
 /**
@@ -49,7 +55,9 @@ export const NightsoulsBlessing = status(114163)
  */
 export const SpiritOrb = combatStatus(114162)
   .since("v6.3.0")
-  // TODO
+  .on("actionPhase")
+  .usage(1)
+  .damage(DamageType.Electro, 1)
   .done();
 
 /**
@@ -62,7 +70,7 @@ export const SpiritvesselSnapshot = skill(14161)
   .type("normal")
   .costElectro(1)
   .costVoid(2)
-  // TODO
+  .damage(DamageType.Physical, 2)
   .done();
 
 /**
@@ -74,7 +82,8 @@ export const SpiritvesselSnapshot = skill(14161)
 export const NightsSling = skill(14162)
   .type("elemental")
   .costElectro(3)
-  // TODO
+  .damage(DamageType.Electro, 2)
+  .combatStatus(SpiritOrb)
   .done();
 
 /**
@@ -87,7 +96,8 @@ export const DarkVoicesEcho = skill(14163)
   .type("burst")
   .costElectro(3)
   .costEnergy(2)
-  // TODO
+  .damage(DamageType.Electro, 2)
+  .summon(SupersonicOculus)
   .done();
 
 /**
@@ -99,7 +109,16 @@ export const DarkVoicesEcho = skill(14163)
  */
 export const NightshadeSynesthesia = skill(14164)
   .type("passive")
-  // TODO
+  .on("dealReaction", (c, e) => e.type === Reaction.ElectroCharged && (c.self.hasNightsoulsBlessing()?.variables.nightsoul ?? 0) >= 2)
+  .listenToPlayer()
+  .consumeNightsoul("@self", 2)
+  .damage(DamageType.Electro, 1)
+  .on("dealDamage", (c, e) => 
+    ([DamageType.Electro, DamageType.Hydro] as DamageType[]).includes(e.type) &&
+    Math.floor(e.via.definition.id) !== Math.floor(c.skillInfo.definition.id))
+  .listenToPlayer()
+  .usagePerRound(1, { name: "usagePerRound1" })
+  .gainNightsoul("@self", 1)
   .done();
 
 /**
@@ -109,10 +128,9 @@ export const NightshadeSynesthesia = skill(14164)
  * 【被动】我方触发感电反应后：如果可能，消耗2点「夜魂值」，造成1点雷元素伤害。
  * 我方造成此技能以外的水元素伤害或雷元素伤害后，自身进入夜魂加持，并获得1点「夜魂值」。（每回合1次）
  */
-export const NightshadeSynesthesia = skill(14165)
+export const NightshadeSynesthesia01 = skill(14165)
   .type("passive")
-  // TODO
-  .done();
+  .reserve();
 
 /**
  * @id 1416
@@ -125,7 +143,7 @@ export const Ororon = character(1416)
   .tags("electro", "bow", "natlan")
   .health(10)
   .energy(2)
-  .skills(SpiritvesselSnapshot, NightsSling, DarkVoicesEcho, NightshadeSynesthesia, NightshadeSynesthesia)
+  .skills(SpiritvesselSnapshot, NightsSling, DarkVoicesEcho, NightshadeSynesthesia)
   .done();
 
 /**
@@ -139,6 +157,9 @@ export const Ororon = character(1416)
 export const TrailsAmidstTheForestFog = card(214161)
   .since("v6.3.0")
   .costElectro(1)
-  .talent(Ororon)
-  // TODO
+  .talent(Ororon, "none")
+  .on("modifyReaction", (c, e) => e.type === Reaction.ElectroCharged && e.reactionInfo.fromDamage && e.caller.isMine())
+  .listenToAll()
+  .usagePerRound(1)
+  .increasePiercingOtherDamage(1)
   .done();

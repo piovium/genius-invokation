@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, card, DamageType } from "@gi-tcg/core/builder";
+import { BonecrunchersEnergyBlock } from "../../cards/event/other";
 
 /**
  * @id 22071
@@ -25,7 +26,7 @@ export const FangBite = skill(22071)
   .type("normal")
   .costHydro(1)
   .costVoid(2)
-  // TODO
+  .damage(DamageType.Physical, 2)
   .done();
 
 /**
@@ -37,7 +38,12 @@ export const FangBite = skill(22071)
 export const SawtoothedSurge = skill(22072)
   .type("elemental")
   .costHydro(3)
-  // TODO
+  .do((c) => {
+    c.damage(DamageType.Hydro, 3)
+    const undrawn = c.maxCostHands(1);
+    c.undrawCards(undrawn, "bottom");
+    c.createHandCard(BonecrunchersEnergyBlock);
+  })
   .done();
 
 /**
@@ -50,7 +56,16 @@ export const ReptilianRage = skill(22073)
   .type("burst")
   .costHydro(3)
   .costEnergy(2)
-  // TODO
+  .do((c) => {
+    c.damage(DamageType.Hydro, 4);
+    const blocks = c.player.hands.filter((card) => card.definition.id === BonecrunchersEnergyBlock).slice(0, 3);
+    c.disposeCard(...blocks);
+    const target = c.$(`my characters order by health - maxHealth limit 1`);
+    if (target) {
+      c.heal(blocks.length, target);
+      c.increaseMaxHealth(blocks.length, target);
+    }
+  })
   .done();
 
 /**
@@ -61,7 +76,10 @@ export const ReptilianRage = skill(22073)
  */
 export const ConsecratedSenses = skill(22074)
   .type("passive")
-  // TODO
+  .on("playCard", (c, e) => e.card.definition.id === BonecrunchersEnergyBlock)
+  .heal(1, `my characters order by health - maxHealth limit 1`)
+  .on("disposeCard", (c, e) => e.entity.definition.id === BonecrunchersEnergyBlock)
+  .heal(1, `my characters order by health - maxHealth limit 1`)
   .done();
 
 /**
@@ -90,6 +108,9 @@ export const ConsecratedHornedCrocodile = character(2207)
 export const DeathlyOverflow = card(222071)
   .since("v6.3.0")
   .costHydro(1)
-  .talent(ConsecratedHornedCrocodile)
-  // TODO
+  .talent(ConsecratedHornedCrocodile, "none")
+  .on("enter")
+  .createHandCard(BonecrunchersEnergyBlock)
+  .on("playCard", (c, e) => e.card.definition.id === BonecrunchersEnergyBlock)
+  .heal(1, `my characters order by health - maxHealth limit 1`)
   .done();

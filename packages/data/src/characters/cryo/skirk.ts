@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType } from "@gi-tcg/core/builder";
+import { character, skill, status, card, DamageType, diceCostOfCard, SkillHandle, DiceType, Reaction } from "@gi-tcg/core/builder";
 
 /**
  * @id 111162
@@ -25,7 +25,26 @@ import { character, skill, status, card, DamageType } from "@gi-tcg/core/builder
  */
 export const SevenphaseFlash = status(111162)
   .since("v6.3.0")
-  // TODO
+  .duration(1)
+  .on("deductVoidDiceSkill", (c, e) => e.isSkillType("normal") && c.self.master.getVariable("serpentsSubtlety"))
+  .do((c, e) => {
+    const costSubtelty = Math.min(2, c.self.master.getVariable("serpentsSubtlety"));
+    c.self.master.addVariable("serpentsSubtlety", -costSubtelty);
+    e.deductVoidCost(costSubtelty);
+  })
+  .on("modifySkillDamageType", (c, e) => e.viaSkillType("normal"))
+  .changeDamageType(DamageType.Cryo)
+  .on("enter")
+  .do((c) => {
+    c.transformDefinition(c.self.master, Skirk01);
+  })
+  .on("selfDispose")
+  .do((c) => {
+    const ch = c.$(`my character with definition id ${Skirk01}`);
+    if (ch) {
+      c.transformDefinition(ch, Skirk);
+    }
+  })
   .done();
 
 /**
@@ -36,7 +55,52 @@ export const SevenphaseFlash = status(111162)
  */
 export const DeathsCrossing = status(111164)
   .since("v6.3.0")
-  // TODO
+  .once("increaseSkillDamage")
+  .increaseDamage(1)
+  .done();
+
+/**
+ * @id 111161
+ * @name 诸武相授
+ * @description
+ * 我方丝柯克附属七相一闪，并且下次造成的伤害+1。
+ * 回合开始或我方执行切换后：舍弃此牌，获得1点蛇之狡谋。
+ */
+export const MutualWeaponsMentorship = card(111161)
+  .addTarget(`my character with definition id 1116`)
+  .characterStatus(SevenphaseFlash, "@targets.0")
+  .characterStatus(DeathsCrossing, "@targets.0")
+  .onArbitraryEvent("actionPhase", {
+    operation: (c) => {
+      c.disposeCard(c.self);
+      c.$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`)
+        ?.addVariableWithMax("serpentsSubtlety", 1, 7);
+    }
+  })
+  .onArbitraryEvent("switchActive", {
+    operation: (c) => {
+      c.disposeCard(c.self);
+      c.$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`)
+        ?.addVariableWithMax("serpentsSubtlety", 1, 7);
+    }
+  })
+  .done();
+
+/**
+ * @id 111163
+ * @name 虚境裂隙
+ * @description
+ * 舍弃1张原本元素骰费用为3的手牌，丝柯克获得2点蛇之狡谋。
+ */
+export const VoidRift = card(111163)
+  .do((c) => {
+    const hand = c.player.hands.find((card) => diceCostOfCard(card.definition) === 3);
+    if (hand) {
+      c.disposeCard(hand);
+      const skirk = c.$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`);
+      skirk?.addVariableWithMax("serpentsSubtlety", 2, 7);
+    }
+  })
   .done();
 
 /**
@@ -49,7 +113,7 @@ export const HavocSunder = skill(11161)
   .type("normal")
   .costCryo(1)
   .costVoid(2)
-  // TODO
+  .damage(DamageType.Physical, 2)
   .done();
 
 /**
@@ -58,10 +122,37 @@ export const HavocSunder = skill(11161)
  * @description
  * 获得2点蛇之狡谋，生成手牌诸武相授。（每回合1次）
  */
-export const HavocWarp = skill(11162)
+export const HavocWarp: SkillHandle = skill(11162)
   .type("elemental")
   .costCryo(2)
-  // TODO
+  .filter((c) => c.self.definition.id === Skirk && c.self.getVariable("canE"))
+  .do((c) => {
+    c.self.addVariableWithMax("serpentsSubtlety", 2, 7);
+    c.createHandCard(MutualWeaponsMentorship);
+    c.self.setVariable("canE", 0);
+  })
+  .done();
+
+/**
+ * @id 11165
+ * @name 极恶技·尽
+ * @description
+ * 将2个非万能元素骰转化为冰元素骰，舍弃至多2张原本元素骰花费为0骰的卡牌，每舍弃1张，丝柯克获得1点蛇之狡谋。
+ */
+export const HavocExtinction = skill(11165)
+  .type("burst")
+  .costCryo(1)
+  .do((c) => {
+    // 假定（大抵确实如此）先转换基础骰子再转换万能骰子
+    const nonOmniCount =  c.player.dice.filter((d) => d !== DiceType.Omni).length;
+    const convertCount = Math.min(2, nonOmniCount);
+    c.convertDice(DiceType.Cryo, convertCount);
+    const hands = c.player.hands.filter((card) => diceCostOfCard(card.definition) === 0).slice(0, 2);
+    if (hands.length > 0) {
+      c.disposeCard(...hands);
+      c.self.addVariableWithMax("serpentsSubtlety", hands.length, 7);
+    }
+  })
   .done();
 
 /**
@@ -73,8 +164,18 @@ export const HavocWarp = skill(11162)
 export const HavocRuin = skill(11163)
   .type("burst")
   .costCryo(3)
-  .cost_special_energy(2)
-  // TODO
+  // .cost_special_energy(2)
+  .filter((c) => c.self.getVariable("serpentsSubtlety") >= 2)
+  .do((c) => {
+    const subtilty = c.self.getVariable("serpentsSubtlety");
+    c.self.setVariable("serpentsSubtlety", 0);
+    if (subtilty >= 7) {
+      c.damage(DamageType.Piercing, 3, "opp standby");
+    } else {
+      c.damage(DamageType.Piercing, 2, "opp standby");
+    }
+    c.damage(DamageType.Cryo, subtilty);
+  })
   .done();
 
 /**
@@ -86,7 +187,14 @@ export const HavocRuin = skill(11163)
  */
 export const ReasonBeyondReason = skill(11164)
   .type("passive")
-  // TODO
+  .variable("serpentsSubtlety", 0)
+  .variable("canE", 1)
+  .on("dealReaction", (c, e) => ([Reaction.Frozen, Reaction.SwirlCryo, Reaction.Superconduct, Reaction.CrystallizeCryo] as Reaction[]).includes(e.type))
+  .listenToPlayer()
+  .usagePerRound(3, { name: "usagePerRound1" })
+  .createHandCard(VoidRift)
+  .on("roundEnd")
+  .setVariable("canE", 1)
   .done();
 
 /**
@@ -96,10 +204,9 @@ export const ReasonBeyondReason = skill(11164)
  * 【被动】丝柯克无法获得充能，改为可以积累蛇之狡谋，最多7点。
  * 我方触发冻结/冰扩散/超导/冰结晶反应后：生成手牌 虚境裂隙。（每回合3次）
  */
-export const ReasonBeyondReason = skill(11167)
+export const ReasonBeyondReason01 = skill(11167)
   .type("passive")
-  // TODO
-  .done();
+  .reserve();
 
 /**
  * @id 1116
@@ -112,7 +219,21 @@ export const Skirk = character(1116)
   .tags("cryo", "sword", "calamity")
   .health(10)
   .energy(0)
-  .skills(HavocSunder, HavocWarp, HavocRuin, ReasonBeyondReason, ReasonBeyondReason)
+  .skills(HavocSunder, HavocWarp, HavocRuin, ReasonBeyondReason)
+  .done();
+
+/**
+ * @id 6605
+ * @name 丝柯克
+ * @description
+ * 
+ */
+export const Skirk01 = character(6605)
+  .since("v6.3.0")
+  .tags("cryo", "sword", "calamity")
+  .health(10)
+  .energy(0)
+  .skills(HavocSunder, HavocWarp, HavocExtinction, ReasonBeyondReason)
   .done();
 
 /**
@@ -126,20 +247,16 @@ export const Skirk = character(1116)
 export const FarToFall = card(211161)
   .since("v6.3.0")
   .costCryo(1)
-  .talent(Skirk)
-  // TODO
-  .done();
-
-/**
- * @id 11165
- * @name 极恶技·尽
- * @description
- * 将2个非万能元素骰转化为冰元素骰，舍弃至多2张原本元素骰花费为0骰的卡牌，每舍弃1张，丝柯克获得1点蛇之狡谋。
- */
-export const HavocExtinction = skill(11165)
-  .type("burst")
-  .costCryo(1)
-  // TODO
+  .talent([Skirk, Skirk01], "none")
+  .variable("usagePerRound", 1)
+  .on("playCard", (c, e) => c.getVariable("usagePerRound") && e.card.definition.id === VoidRift)
+  .damage(DamageType.Cryo, 1, "opp active")
+  .setVariable("usagePerRound", 0)
+  .on("disposeCard", (c, e) => c.getVariable("usagePerRound") && e.entity.definition.id === VoidRift)
+  .damage(DamageType.Cryo, 1, "opp active")
+  .setVariable("usagePerRound", 0)
+  .on("roundEnd")
+  .setVariable("usagePerRound", 1)
   .done();
 
 /**
@@ -149,21 +266,6 @@ export const HavocExtinction = skill(11165)
  * 【被动】丝柯克无法获得充能，改为可以积累蛇之狡谋，最多7点。
  * 我方触发冻结/冰扩散/超导/冰结晶反应后：生成手牌 虚境裂隙。（每回合3次）
  */
-export const ReasonBeyondReason = skill(11166)
+export const ReasonBeyondReason02 = skill(11166)
   .type("passive")
-  // TODO
-  .done();
-
-/**
- * @id 6605
- * @name 丝柯克
- * @description
- * 
- */
-export const Skirk = character(6605)
-  .since("v6.3.0")
-  .tags("cryo", "sword", "calamity")
-  .health(10)
-  .energy(0)
-  .skills(HavocSunder, HavocWarp, HavocExtinction, ReasonBeyondReason, ReasonBeyondReason, ReasonBeyondReason)
-  .done();
+  .reserve();

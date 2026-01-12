@@ -147,6 +147,19 @@ export const AdventureCompleted = combatStatus(171)
   .done();
 
 /**
+ * @id 172
+ * @name 战斗计划
+ * @description
+ * 所附属角色下次使用技能少花费1个元素骰。
+ * 可用次数：1（可叠加，没有上限）
+ */
+export const BattlePlan = status(172)
+  .on("deductOmniDiceSkill")
+  .usageCanAppend(1, Infinity)
+  .deductOmniCost(1)
+  .done();
+  
+/**
  * @id 303300
  * @name 饱腹
  * @description

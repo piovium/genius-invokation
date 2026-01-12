@@ -283,5 +283,18 @@ export const FlameforgedInsight = card(311310)
   .since("v6.3.0")
   .costVoid(2)
   .weapon("claymore")
-  // TODO
+  .variable("thought", 0)
+  .on("increaseSkillDamage", (c, e) => e.viaSkillType("burst"))
+  .increaseDamage(2)
+  .on("increaseSkillDamage", (c, e) => e.getReaction())
+  .increaseDamage(1)
+  .on("dealReaction")
+  .listenToPlayer()
+  .do((c) => {
+    c.addVariable("thought", 1);
+    if (c.getVariable("thought") >= 2) {
+      c.addVariable("thought", -2);
+      c.gainEnergy(1, "@master");
+    }
+  })
   .done();

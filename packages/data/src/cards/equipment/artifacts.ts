@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DamageType, DiceType, Reaction, card, combatStatus, status } from "@gi-tcg/core/builder";
-import { AdventureCompleted, BondOfLife, BurningFlame } from "../../commons";
+import { AdventureCompleted, BondOfLife, BurningFlame, EfficientSwitch } from "../../commons";
 
 /**
  * @id 312101
@@ -1236,5 +1236,10 @@ export const DyedTassel = card(312044)
   .since("v6.3.0")
   .costVoid(2)
   .artifact()
-  // TODO
+  .on("increaseSkillDamage", (c, e) => e.viaChargedAttack())
+  .usagePerRound(1)
+  .increaseDamage(1)
+  .on("useSkill", (c, e) => e.isPlungingAttack())
+  .usagePerRound(1)
+  .combatStatus(EfficientSwitch)
   .done();

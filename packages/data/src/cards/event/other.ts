@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { EntityDefinition, CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, pair, status, summon } from "@gi-tcg/core/builder";
+import { EntityDefinition, CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, pair, status, summon, diceCostOfCard } from "@gi-tcg/core/builder";
 import { BurningFlame, CatalyzingField, DendroCore, EfficientSwitch, ResistantForm } from "../../commons";
 import { BountifulCore } from "../../characters/hydro/nilou";
 
@@ -2147,7 +2147,7 @@ export const DisperseTheCalamity = card(300008)
   .do((c) => {
     const cards = c.maxCostHands(1, { who: "opp" });
     c.undrawCards(cards, "bottom", "opp");
-  })  // TODO
+  })
   .done();
 
 /**
@@ -2283,7 +2283,14 @@ export const PlanToSaveTheWorld = card(332058)
 export const BrokenSea = card(332053)
   .since("v6.3.0")
   .costSame(1)
-  // TODO
+  .addTarget("my supports")
+  .do((c, e) => {
+    c.dispose(e.targets[0]);
+    for (const summon of c.$$(SIMULANKA_QUERY)) {
+      summon.addVariable("effect", 1);
+      summon.addVariable("usage", 1);
+    }
+  })
   .done();
 
 /**
@@ -2295,5 +2302,14 @@ export const BrokenSea = card(332053)
  */
 export const AnAdventureThroughTheMorningMist = card(332059)
   .since("v6.3.0")
-  // TODO
+  .onDispose((c) => {
+    c.adventure();
+  })
+  .do((c) => {
+    const minCostCards = c.player.hands
+      .toSorted((a, b) => diceCostOfCard(a.definition) - diceCostOfCard(b.definition))
+      .slice(0, 2);
+    c.undrawCards(minCostCards, "bottom");
+    c.drawCards(minCostCards.length);
+  })
   .done();
