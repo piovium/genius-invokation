@@ -138,7 +138,7 @@ export const Resentment02 = skill(23056)
 export const LordOfErodedPrimalFire = character(2305)
   .since("v6.0.0")
   .tags("pyro", "monster")
-  .health(12)
+  .health(11)
   .energy(2)
   .skills(VoidClawStrike, ErodedFlamingFeathers, SeveringPrimalFire, ResentmentPassive)
   .done();

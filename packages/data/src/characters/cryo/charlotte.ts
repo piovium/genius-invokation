@@ -97,7 +97,7 @@ export const StillPhotoComprehensiveConfirmation = skill(11103)
 export const Charlotte = character(1110)
   .since("v4.5.0")
   .tags("cryo", "catalyst", "fontaine", "ousia")
-  .health(10)
+  .health(11)
   .energy(2)
   .skills(CoolcolorCapture, FramingFreezingPointComposition, StillPhotoComprehensiveConfirmation)
   .done();

@@ -197,7 +197,7 @@ export const ForestRegalia = card(311307)
   .characterStatus(ForestRegaliaInEffect, "@master")
   .done();
 
-const NonInitialPlayedCardExtension = extension(311308, { defIds: pair(new Set<number>()) })
+export const NonInitialPlayedCardExtension = extension(311308, { defIds: pair(new Set<number>()) })
   .description("记录双方打出过的名称不存在于本局最初牌组中的不同名的行动牌")
   .mutateWhen("onPlayCard", (c, e) => {
     if (e.onTimeState.players[e.who].initialPile.every((card) => card.id !== e.card.definition.id)) {
@@ -212,11 +212,6 @@ const NonInitialPlayedCardExtension = extension(311308, { defIds: pair(new Set<n
  * @description
  * 此牌会记录本局游戏中你打出过的名称不存在于本局最初牌组中的不同名的行动牌数量，称为「声援」。
  * 如果此牌的「声援」至少为2/4/9，则角色造成的伤害+1/2/3。
- * （「双手剑」角色才能装备。角色最多装备1件「武器」）
- * 【此卡含描述变量】
- * @outdated
- * 此牌会记录本局游戏中你打出过的名称不存在于本局最初牌组中的不同名的行动牌数量，称为「声援」。
- * 如果此牌的「声援」至少为2/4/8，则角色造成的伤害+1/2/3。
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  * 【此卡含描述变量】
  */
@@ -238,7 +233,7 @@ export const UltimateOverlordsMegaMagicSword = card(311308)
   .on("increaseSkillDamage")
   .do((c, e) => {
     const supp = c.getVariable("supp");
-    if (supp >= 8) {
+    if (supp >= 9) {
       e.increaseDamage(3);
     } else if (supp >= 4) {
       e.increaseDamage(2);

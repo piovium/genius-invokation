@@ -108,7 +108,7 @@ export const CrimsonOoyoroi: SkillHandle = skill(13113)
 export const Thoma = character(1311)
   .since("v4.4.0")
   .tags("pyro", "pole", "inazuma")
-  .health(10)
+  .health(12)
   .energy(2)
   .skills(SwiftshatterSpear, BlazingBlessing, CrimsonOoyoroi)
   .done();
