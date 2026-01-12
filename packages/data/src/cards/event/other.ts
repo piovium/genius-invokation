@@ -1019,6 +1019,8 @@ export const [FlickeringFourleafSigil] = card(332027)
  * @id 332028
  * @name 机关铸成之链
  * @description
+ * 对我方「出战角色」造成1点物理伤害。从牌组中随机抽取1张「圣遗物」牌。
+ * @outdated
  * 目标我方角色每次受到伤害或治疗后：累积1点「备战度」（最多累积2点）。
  * 我方打出原本费用不多于「备战度」的「武器」或「圣遗物」时：移除所有「备战度」，以免费打出该牌。
  */
@@ -1534,6 +1536,9 @@ export const MelusineSupport = card(302218)
  * @id 332036
  * @name 「看到那小子挣钱…」
  * @description
+ * 本回合中，对方每获得1个元素骰时，如果你未宣布回合结束，则你生成1个万能元素；否则，生成1点护盾。
+ * 可用次数：3
+ * @outdated
  * 本回合中，每当对方获得2个元素骰，你就获得1个万能元素。（此效果提供的元素骰除外）
  */
 export const [IdRatherLoseMoneyMyself] = card(332036)
@@ -1649,6 +1654,8 @@ export const EremiteTeatime = card(332040)
  * @id 332041
  * @name 强劲冲浪拍档！
  * @description
+ * 战斗行动：双方场上至少存在合计2个「召唤物」时，才能打出，随机触发我方和敌方各1个「召唤物」的「结束阶段」效果。
+ * @outdated
  * 双方场上至少存在合计2个「召唤物」时，才能打出：随机触发我方和敌方各1个「召唤物」的「结束阶段」效果。
  */
 export const UltimateSurfingBuddy = card(332041)
@@ -2270,4 +2277,28 @@ export const PlanToSaveTheWorld = card(332058)
   .since("v6.2.0")
   .costSame(2)
   .combatStatus(PlanToSaveTheWorldInEffect)
+  .done();
+
+/**
+ * @id 332053
+ * @name 破碎之海
+ * @description
+ * 选择一张我方支援区的牌，将其弃置。然后使我方所有「希穆兰卡」召唤物的可用次数和效果量+1。
+ */
+export const BrokenSea = card(332053)
+  .since("v6.3.0")
+  .costSame(1)
+  // TODO
+  .done();
+
+/**
+ * @id 332059
+ * @name 「穿越晨霭的冒险」
+ * @description
+ * 将费用最低的至多2张手牌置入牌组底，然后抓等量的牌。
+ * 此牌被舍弃后：冒险1次。
+ */
+export const AnAdventureThroughTheMorningMist = card(332059)
+  .since("v6.3.0")
+  // TODO
   .done();

@@ -75,6 +75,8 @@ export const SignedEdict = skill(13082)
  * @id 13083
  * @name 凭此结契
  * @description
+ * 造成4点火元素伤害，本角色附属丹火印和灼灼。
+ * @outdated
  * 造成3点火元素伤害，本角色附属丹火印和灼灼。
  */
 export const DoneDeal = skill(13083)

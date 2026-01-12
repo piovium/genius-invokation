@@ -1223,3 +1223,18 @@ export const NymphsDream = card(312043)
   .on("increaseSkillDamage", (c) => c.$(`my combat status with definition id ${AdventureCompleted}`))
   .increaseDamage(1)
   .done();
+
+/**
+ * @id 312044
+ * @name 被浸染的缨盔
+ * @description
+ * 附属角色重击时：造成的伤害+1。（每回合1次）
+ * 附属角色下落攻击后：生成1层高效切换。（每回合1次）
+ * （角色最多装备1件「圣遗物」）
+ */
+export const DyedTassel = card(312044)
+  .since("v6.3.0")
+  .costVoid(2)
+  .artifact()
+  // TODO
+  .done();

@@ -24,6 +24,10 @@ import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other";
  * @description
  * 冒险经历达到2时：生成2张手牌沉玉茶露。
  * 冒险经历达到4时：我方获得3层高效切换和敏捷切换。
+ * 冒险经历达到8时：我方全体角色附着水元素，治疗我方受伤最多的角色至最大生命值，并使其获得2点最大生命值，然后弃置此牌。
+ * @outdated
+ * 冒险经历达到2时：生成2张手牌沉玉茶露。
+ * 冒险经历达到4时：我方获得3层高效切换和敏捷切换。
  * 冒险经历达到7时：我方全体角色附着水元素，治疗我方受伤最多的角色至最大生命值，并使其获得2点最大生命值，然后弃置此牌。
  */
 export const ChenyuVale = card(321032)
@@ -84,4 +88,20 @@ export const TowerOfIpsissimus = card(321033)
   .usage(1, { name: "stage12", autoDispose: false, visible: false })
   .createHandCard(ReforgeTheHolyBlade)
   .finishAdventure()
+  .done();
+
+/**
+ * @id 321034
+ * @name 天蛇船
+ * @description
+ * 冒险经历增加时：将1个元素骰转换为万能元素。
+ * 冒险经历达到2时：抓1张牌。
+ * 冒险经历达到4时：我方出战角色附属2层战斗计划。
+ * 冒险经历达到6时：弃置敌方场上1个随机召唤物，召唤回天的圣主，然后弃置此牌。
+ */
+export const Tonatiuh = card(321034)
+  .since("v6.3.0")
+  .tags("adventureSpot")
+  .adventureSpot()
+  // TODO
   .done();

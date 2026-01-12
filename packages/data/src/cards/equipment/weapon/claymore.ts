@@ -211,6 +211,11 @@ const NonInitialPlayedCardExtension = extension(311308, { defIds: pair(new Set<n
  * @name 「究极霸王超级魔剑」
  * @description
  * 此牌会记录本局游戏中你打出过的名称不存在于本局最初牌组中的不同名的行动牌数量，称为「声援」。
+ * 如果此牌的「声援」至少为2/4/9，则角色造成的伤害+1/2/3。
+ * （「双手剑」角色才能装备。角色最多装备1件「武器」）
+ * 【此卡含描述变量】
+ * @outdated
+ * 此牌会记录本局游戏中你打出过的名称不存在于本局最初牌组中的不同名的行动牌数量，称为「声援」。
  * 如果此牌的「声援」至少为2/4/8，则角色造成的伤害+1/2/3。
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  * 【此卡含描述变量】
@@ -269,4 +274,19 @@ export const PortablePowerSaw = card(311309)
     c.drawCards(c.getVariable("stoic"));
     c.setVariable("stoic", 0);
   })
+  .done();
+
+/**
+ * @id 311310
+ * @name 拾慧铸熔
+ * @description
+ * 角色使用「元素爆发」造成的伤害+2。
+ * 我方引发元素反应时：累计1层盛放的思绪，当盛放的思绪不低于2层时，消耗2层盛放的思绪使所附属角色获得1点充能。
+ * （「双手剑」角色才能装备。角色最多装备1件「武器」）
+ */
+export const FlameforgedInsight = card(311310)
+  .since("v6.3.0")
+  .costVoid(2)
+  .weapon("claymore")
+  // TODO
   .done();
