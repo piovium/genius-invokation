@@ -277,3 +277,34 @@ export const EverlastingMoonglow = card(311111)
   .on("enter")
   .increaseMaxHealth(1, "@master")
   .done();
+
+/**
+ * @id 301113
+ * @name 祭星者之望（生效中）
+ * @description
+ * 每层使所附属角色下次造成的伤害+1。（可叠加，最多叠加到2）
+ */
+export const StarcallersWatchInEffect = status(301113)
+  .variableCanAppend("increaseDmg", 1, 2)
+  .once("increaseSkillDamage")
+  .do((c, e) => {
+    e.increaseDamage(c.getVariable("increaseDmg"));
+  })
+  .done();
+
+/**
+ * @id 311112
+ * @name 祭星者之望
+ * @description
+ * 我方每回合首次打出名称不属于初始牌组的牌时：少花费1个元素骰，所附属角色下次造成的伤害+1。（可叠加，最多叠加到2）
+ * （「法器」角色才能装备。角色最多装备1件「武器」）
+ */
+export const StarcallersWatch = card(311112)
+  .since("v6.3.0")
+  .costSame(1)
+  .weapon("catalyst")
+  .on("deductOmniDiceCard", (c, e) => !c.isInInitialPile(e.action.skill.caller))
+  .usagePerRound(1)
+  .deductOmniCost(1)
+  .characterStatus(StarcallersWatchInEffect, "@master")
+  .done();

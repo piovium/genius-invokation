@@ -803,3 +803,21 @@ export const Seymour = card(322031)
   .usagePerRound(1)
   .adventure()
   .done();
+
+/**
+ * @id 322032
+ * @name 玻娜与「绿松石」
+ * @description
+ * 入场时：冒险1次。
+ * 我方使用「特技」后：冒险1次。（每回合1次）
+ */
+export const BonaAndCocouik = card(322032)
+  .since("v6.3.0")
+  .costVoid(2)
+  .support("ally")
+  .on("enter")
+  .adventure()
+  .on("useTechnique")
+  .usagePerRound(1)
+  .adventure()
+  .done();

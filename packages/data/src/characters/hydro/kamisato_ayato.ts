@@ -43,8 +43,12 @@ export const TakimeguriKanka: StatusHandle = status(112061)
   .on("increaseSkillDamage", (c, e) => e.viaSkillType("normal"))
   .usage(3)
   .increaseDamage(1)
-  .if((c, e) => c.self.master.hasEquipment(KyoukaFuushi) && e.target.health <= 6)
-  .increaseDamage(2)
+  .do((c) => {
+    const talent = c.self.master.hasEquipment(KyoukaFuushi);
+    if (talent) {
+      talent.setVariable("skillIsUsedWithKanka", 1);
+    }
+  })
   .done();
 
 /**
@@ -96,9 +100,27 @@ export const KamisatoArtSuiyuu = skill(12063)
 export const KamisatoAyato = character(1206)
   .since("v3.6.0")
   .tags("hydro", "sword", "inazuma")
-  .health(10)
+  .health(11)
   .energy(2)
   .skills(KamisatoArtMarobashi, KamisatoArtKyouka, KamisatoArtSuiyuu)
+  .done();
+
+/**
+ * @id 212062
+ * @name 镜华风姿（生效中）
+ * @description
+ * 本回合中，所附属角色下次「普通攻击」少花费2个无色元素。
+ */
+export const KyoukaFuushiInEffect = status(212062)
+  .oneDuration()
+  .once("deductVoidDiceSkill", (c, e) => e.isSkillType("normal"))
+  .deductVoidCost(2)
+  .do((c) => {
+    const talent = c.self.master.hasEquipment(KyoukaFuushi);
+    if (talent) {
+      talent.setVariable("deductEffectHasBeenTriggeredFromThisCard", 1);
+    }
+  })
   .done();
 
 /**
@@ -107,13 +129,23 @@ export const KamisatoAyato = character(1206)
  * @description
  * 战斗行动：我方出战角色为神里绫人时，装备此牌。
  * 神里绫人装备此牌后，立刻使用一次神里流·镜花。
- * 装备有此牌的神里绫人触发泷廻鉴花的效果时：对于生命值不多于6的敌人伤害额外+2。
+ * 附属有泷廻鉴花的神里绫人「普通攻击」后：所附属角色本回合中下次「普通攻击」少花费2个无色元素。（该次普通攻击不会重复触发此卡牌的效果）
  * （牌组中包含神里绫人，才能加入牌组）
  */
 export const KyoukaFuushi = card(212061)
   .since("v3.6.0")
   .costHydro(3)
   .talent(KamisatoAyato)
+  .variable("deductEffectHasBeenTriggeredFromThisCard", 0)
+  .variable("skillIsUsedWithKanka", 0)
   .on("enter")
   .useSkill(KamisatoArtKyouka)
+  .on("useSkill", (c, e) => e.isSkillType("normal"))
+  .do((c) => {
+    if (c.getVariable("skillIsUsedWithKanka") && !c.getVariable("deductEffectHasBeenTriggeredFromThisCard")) {
+      c.characterStatus(KyoukaFuushiInEffect, "@master");
+    }
+    c.setVariable("deductEffectHasBeenTriggeredFromThisCard", 0);
+    c.setVariable("skillIsUsedWithKanka", 0);
+  })
   .done();

@@ -13,9 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, DamageType } from "@gi-tcg/core/builder";
+import { card, DamageType, DiceType, summon } from "@gi-tcg/core/builder";
 import { ChenyuBrew } from "../event/food";
-import { AgileSwitch, EfficientSwitch } from "../../commons";
+import { AgileSwitch, BattlePlan, EfficientSwitch } from "../../commons";
 import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other";
 
 /**
@@ -24,7 +24,7 @@ import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other";
  * @description
  * 冒险经历达到2时：生成2张手牌沉玉茶露。
  * 冒险经历达到4时：我方获得3层高效切换和敏捷切换。
- * 冒险经历达到7时：我方全体角色附着水元素，治疗我方受伤最多的角色至最大生命值，并使其获得2点最大生命值，然后弃置此牌。
+ * 冒险经历达到8时：我方全体角色附着水元素，治疗我方受伤最多的角色至最大生命值，并使其获得2点最大生命值，然后弃置此牌。
  */
 export const ChenyuVale = card(321032)
   .since("v6.1.0")
@@ -45,7 +45,7 @@ export const ChenyuVale = card(321032)
       usage: 3
     }
   })
-  .on("adventure", (c) => c.getVariable("exp") >= 7)
+  .on("adventure", (c) => c.getVariable("exp") >= 8)
   .usage(1, { name: "stage3", visible: false })
   .apply(DamageType.Hydro, "all my characters")
   .do((c) => {
@@ -85,3 +85,56 @@ export const TowerOfIpsissimus = card(321033)
   .createHandCard(ReforgeTheHolyBlade)
   .finishAdventure()
   .done();
+
+/**
+ * @id 301041
+ * @name 回天的圣主
+ * @description
+ * 结束阶段：造成2点穿透伤害。
+ * 此卡牌被弃置时，对双方场上生命值最多的角色造成5点穿透伤害。可用次数：3
+ */
+export const TideTurningSacredLord = summon(301041)
+  .hint(DamageType.Physical, "2")
+  .on("endPhase")
+  .damage(DamageType.Piercing, 2)
+  .usage(3)
+  .on("selfDispose")
+  .damage(DamageType.Piercing, 5, "all characters order by 0 - health limit 1")
+  .done();
+
+/**
+ * @id 321034
+ * @name 天蛇船
+ * @description
+ * 冒险经历增加时：将1个元素骰转换为万能元素。
+ * 冒险经历达到2时：抓1张牌。
+ * 冒险经历达到4时：我方出战角色附属2层战斗计划。
+ * 冒险经历达到6时：弃置敌方场上1个随机召唤物，召唤回天的圣主，然后弃置此牌。
+ */
+export const Tonatiuh = card(321034)
+  .since("v6.3.0")
+  .tags("adventureSpot")
+  .adventureSpot()
+  .on("adventure")
+  .convertDice(DiceType.Omni, 1)
+  .on("adventure", (c) => c.getVariable("exp") >= 2)
+  .usage(1, { name: "stage1", visible: false })
+  .drawCards(1)
+  .on("adventure", (c) => c.getVariable("exp") >= 4)
+  .usage(1, { name: "stage2", visible: false })
+  .characterStatus(BattlePlan, "my active", {
+    overrideVariables: { usage: 2 }
+  })
+  .on("adventure", (c) => c.getVariable("exp") >= 6)
+  .usage(1, { name: "stage3", visible: false })
+  .do((c) => {
+    const summons = c.$$("opp summons");
+    if (summons.length > 0) {
+      const summon = c.random(summons);
+      c.dispose(summon);
+    }
+    c.summon(TideTurningSacredLord);
+    c.finishAdventure();
+  })
+  .done();
+

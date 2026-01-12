@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { EntityDefinition, CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, pair, status, summon } from "@gi-tcg/core/builder";
+import { EntityDefinition, CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, pair, status, summon, diceCostOfCard } from "@gi-tcg/core/builder";
 import { BurningFlame, CatalyzingField, DendroCore, EfficientSwitch, ResistantForm } from "../../commons";
 import { BountifulCore } from "../../characters/hydro/nilou";
 
@@ -1019,23 +1019,13 @@ export const [FlickeringFourleafSigil] = card(332027)
  * @id 332028
  * @name 机关铸成之链
  * @description
- * 目标我方角色每次受到伤害或治疗后：累积1点「备战度」（最多累积2点）。
- * 我方打出原本费用不多于「备战度」的「武器」或「圣遗物」时：移除所有「备战度」，以免费打出该牌。
+ * 对我方「出战角色」造成1点物理伤害。从牌组中随机抽取1张「圣遗物」牌。
  */
-export const [MachineAssemblyLine] = card(332028)
+export const MachineAssemblyLine = card(332028)
   .since("v4.4.0")
-  .addTarget("my characters")
-  .toStatus(303228, "@targets.0")
-  .variable("readiness", 0)
-  .on("damagedOrHealed")
-  .addVariableWithMax("readiness", 1, 2)
-  .once("deductOmniDiceCard", (c, e) =>
-    e.hasOneOfCardTag("weapon", "artifact") &&
-    e.originalDiceCostSize() <= c.getVariable("readiness"))
-  .do((c, e) => {
-    e.deductOmniCost(e.diceCostSize());
-    c.setVariable("readiness", 0);
-  })
+  .costSame(1)
+  .damage(DamageType.Physical, 1, "my active")
+  .drawCards(1, { withTag: "artifact" })
   .done();
 
 /**
@@ -1531,25 +1521,36 @@ export const MelusineSupport = card(302218)
   .reserve();
 
 /**
+ * @id 303236
+ * @name 「看到那小子挣钱…」（生效中）
+ * @description
+ * 本回合中，对方每获得1个元素骰时，如果你未宣布回合结束，则你生成1个万能元素；否则，生成1点护盾。
+ * 可用次数：3
+ */
+export const IdRatherLoseMoneyMyselfInEffect = combatStatus(303236)
+  .oneDuration()
+  .on("generateDice", (c, e) => e.who !== c.self.who)
+  .usage(3)
+  .listenToAll()
+  .do((c) => {
+    if (!c.player.declaredEnd) {
+      c.generateDice(DiceType.Omni, 1);
+    } else {
+      c.combatStatus(Shield);
+    }
+  })
+  .done();
+
+/**
  * @id 332036
  * @name 「看到那小子挣钱…」
  * @description
- * 本回合中，每当对方获得2个元素骰，你就获得1个万能元素。（此效果提供的元素骰除外）
+ * 本回合中，对方每获得1个元素骰时，如果你未宣布回合结束，则你生成1个万能元素；否则，生成1点护盾。
+ * 可用次数：3
  */
-export const [IdRatherLoseMoneyMyself] = card(332036)
+export const IdRatherLoseMoneyMyself = card(332036)
   .since("v4.8.0")
-  .toCombatStatus(303236)
-  .oneDuration()
-  .variable("count", 0)
-  .on("generateDice", (c, e) => e.who !== c.self.who && e.via.caller.definition.id !== c.self.definition.id)
-  .listenToAll()
-  .do((c) => {
-    c.addVariable("count", 1);
-    if (c.getVariable("count") === 2) {
-      c.generateDice(DiceType.Omni, 1);
-      c.setVariable("count", 0);
-    }
-  })
+  .combatStatus(IdRatherLoseMoneyMyselfInEffect)
   .done();
 
 /**
@@ -1649,10 +1650,11 @@ export const EremiteTeatime = card(332040)
  * @id 332041
  * @name 强劲冲浪拍档！
  * @description
- * 双方场上至少存在合计2个「召唤物」时，才能打出：随机触发我方和敌方各1个「召唤物」的「结束阶段」效果。
+ * 战斗行动：双方场上至少存在合计2个「召唤物」时，才能打出，随机触发我方和敌方各1个「召唤物」的「结束阶段」效果。
  */
 export const UltimateSurfingBuddy = card(332041)
   .since("v5.2.0")
+  .tags("action")
   .filter((c) => c.$$(`all summons`).length >= 2)
   .abortPreview()
   .do((c) => {
@@ -2145,7 +2147,7 @@ export const DisperseTheCalamity = card(300008)
   .do((c) => {
     const cards = c.maxCostHands(1, { who: "opp" });
     c.undrawCards(cards, "bottom", "opp");
-  })  // TODO
+  })
   .done();
 
 /**
@@ -2270,4 +2272,44 @@ export const PlanToSaveTheWorld = card(332058)
   .since("v6.2.0")
   .costSame(2)
   .combatStatus(PlanToSaveTheWorldInEffect)
+  .done();
+
+/**
+ * @id 332053
+ * @name 破碎之海
+ * @description
+ * 选择一张我方支援区的牌，将其弃置。然后使我方所有「希穆兰卡」召唤物的可用次数和效果量+1。
+ */
+export const BrokenSea = card(332053)
+  .since("v6.3.0")
+  .costSame(1)
+  .addTarget("my supports")
+  .do((c, e) => {
+    c.dispose(e.targets[0]);
+    for (const summon of c.$$(SIMULANKA_QUERY)) {
+      summon.addVariable("effect", 1);
+      summon.addVariable("usage", 1);
+    }
+  })
+  .done();
+
+/**
+ * @id 332059
+ * @name 「穿越晨霭的冒险」
+ * @description
+ * 将费用最低的至多2张手牌置入牌组底，然后抓等量的牌。
+ * 此牌被舍弃后：冒险1次。
+ */
+export const AnAdventureThroughTheMorningMist = card(332059)
+  .since("v6.3.0")
+  .onDispose((c) => {
+    c.adventure();
+  })
+  .do((c) => {
+    const minCostCards = c.player.hands
+      .toSorted((a, b) => diceCostOfCard(a.definition) - diceCostOfCard(b.definition))
+      .slice(0, 2);
+    c.undrawCards(minCostCards, "bottom");
+    c.drawCards(minCostCards.length);
+  })
   .done();

@@ -184,4 +184,3 @@ export const AHeroOfJusticesTriumph: EquipmentHandle = card(214151)
   .on("increaseSkillDamage", (c, e) => e.viaSkillType("burst"))
   .increaseDamage(1)
   .done();
-

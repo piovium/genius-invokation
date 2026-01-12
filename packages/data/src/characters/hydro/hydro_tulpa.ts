@@ -214,7 +214,7 @@ export const ThunderingTide02 = skill(22068)
 export const HydroTulpa = character(2206)
   .since("v6.1.0")
   .tags("hydro", "monster")
-  .health(12)
+  .health(11)
   .energy(3)
   .skills(SavageSwell, StormSurge, ThunderingTide, BranchingFlow)
   .done();
