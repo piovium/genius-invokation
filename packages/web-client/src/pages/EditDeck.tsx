@@ -308,7 +308,7 @@ export default function EditDeck() {
           </Match>
           <Match when={status().type !== "notLogin"}>
             <DeckBuilder
-              class={`h-[calc(100dvh-8rem)] @3xl:h-auto w-full flex-grow min-h-0`}
+              class={`h-[calc(100dvh-9rem)] @3xl:h-auto w-full flex-grow min-h-0`}
               deck={deckValue()}
               onChangeDeck={(v) => (setDeckValue(v), setDirty(true))}
             />
