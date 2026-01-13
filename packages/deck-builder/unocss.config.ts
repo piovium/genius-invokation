@@ -17,7 +17,18 @@ import { defineConfig, presetWind3, transformerDirectives } from "unocss";
 
 export default defineConfig({
   presets: [presetWind3()],
-  
+  variants: [
+    (matcher) => {
+      if (!matcher.startsWith("DP:")) {
+        return matcher;
+      }
+      return {
+        matcher: matcher.slice(3),
+        layer: 'reactive',
+        selector: s => `${s}:is(.gi-tcg-deck-builder:has(.deck-page-control:checked) *)`
+      }
+    }
+  ],
   // https://github.com/unocss/unocss/discussions/3444
   postprocess: (obj) => {
     const scope = ".gi-tcg-deck-builder";

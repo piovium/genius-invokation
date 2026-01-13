@@ -35,8 +35,6 @@ export function CurrentDeck(props: AllCardsProps) {
     ) as (DeckDataActionCardInfo | null)[],
   });
 
-  const deckPage = () => props.deckPage ?? false;
-
   createEffect(() => {
     const selectedChs = props.deck.characters
       .map((id) => props.characters.get(id))
@@ -82,39 +80,63 @@ export function CurrentDeck(props: AllCardsProps) {
     //   bool:data-deck-page={deckPage()}
     // >
     <div
-      class={`p-4 relative flex flex-col justify-center aspect-[4/7] h-full w-auto min-w-0 max-w-100`}
+      class={`p-4 relative min-w-0 
+        flex flex-col justify-center
+        w-full
+        @3xl:w-auto 
+        @3xl:aspect-[4/7] DP:aspect-[4/7] 
+        @3xl:h-full DP:h-full 
+        @3xl:max-w-100 DP:max-w-100`}
       style={{ color: "white" }}
     >
-      <div class="relative aspect-[4/7] w-full h-auto max-h-full flex flex-col items-center ">
-        <ul class="flex justify-between w-[75%] mb-12px">
+      <div class="relative @3xl:aspect-[4/7] DP:aspect-[4/7] w-full h-auto max-h-full flex flex-col items-center">
+        <ul class={`flex justify-between mb-12px gap-3 @3xl:w-full @4xl:w-[75%] DP:w-[75%]`}>
           <For each={current.characters}>
             {(ch) => (
-              <li class={`relative aspect-[7/12] w-[30%]`}>
+              <li
+                class={`relative
+                  aspect-square w-10 h-10
+                  min-w-10
+                  @3xl:w-auto DP:w-auto
+                  @3xl:h-auto DP:h-auto
+                  @3xl:aspect-[7/12] DP:aspect-[7/12]
+                  @3xl:flex-grow DP:flex-grow`}
+              >
                 <Show
                   when={ch}
                   fallback={
-                    <div class="w-full b-gray-3! border-2 rounded-lg">
-                      <div class="w-full aspect-ratio-[7/12] bg-gray-200" />
+                    <div class="w-full b-gray-3 border-2 overflow-clip rounded-full @3xl:rounded-lg DP:rounded-lg">
+                      <div class="w-full aspect-square @3xl:aspect-[7/12] DP:aspect-[7/12] bg-gray-200" />
                     </div>
                   }
                 >
                   {(ch) => (
-                    <DeckCard
-                      id={ch().id}
-                      type="character"
-                      name={ch().name}
-                      warn={ch().version > props.version}
-                    />
+                    <>
+                      <DeckCard
+                        class="hidden @3xl:block DP:block"
+                        id={ch().id}
+                        type="character"
+                        name={ch().name}
+                        warn={ch().version > props.version}
+                      />
+                      <TinyCharacterCard
+                        id={ch().id}
+                        warn={ch().version > props.version}
+                      />
+                    </>
                   )}
                 </Show>
               </li>
             )}
           </For>
         </ul>
-        <ul class="grid grid-cols-6 w-full gap-2">
+        <ul class={`grid w-full
+          grid-cols-15 gap-1
+          @3xl:grid-cols-6 DP:grid-cols-6
+          @3xl:gap-2 DP:gap-2`}>
           <For each={current.cards}>
             {(ac) => (
-              <li class={`relative aspect-[7/12] w-full`}>
+              <li class={`relative aspect-[7/12] min-w-8 @3xl:w-full DP:w-full`}>
                 <Show
                   when={ac}
                   fallback={
@@ -124,12 +146,19 @@ export function CurrentDeck(props: AllCardsProps) {
                   }
                 >
                   {(ac) => (
-                    <DeckCard
-                      id={ac().id}
-                      type="actionCard"
-                      name={ac().name}
-                      warn={ac().version > props.version}
-                    />
+                    <>
+                      <DeckCard
+                        class="hidden @3xl:block DP:block"
+                        id={ac().id}
+                        type="actionCard"
+                        name={ac().name}
+                        warn={ac().version > props.version}
+                      />
+                      <TinyActionCard
+                        id={ac().id}
+                        warn={ac().version > props.version}
+                      />
+                    </>
                   )}
                 </Show>
               </li>
@@ -204,10 +233,6 @@ export function CurrentDeck(props: AllCardsProps) {
                 }
               >
                 {(ch) => (
-                  <TinyCharacterCard
-                    id={ch().id}
-                    warn={ch().version > props.version}
-                  />
                 )}
               </Show>
             </li>
@@ -234,10 +259,6 @@ export function CurrentDeck(props: AllCardsProps) {
                 }
               >
                 {(ac) => (
-                  <TinyActionCard
-                    id={ac().id}
-                    warn={ac().version > props.version}
-                  />
                 )}
               </Show>
             </li>

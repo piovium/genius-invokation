@@ -25,6 +25,7 @@ import {
   createResource,
   Switch,
   Match,
+  createUniqueId,
 } from "solid-js";
 import { AllCards } from "./AllCards";
 import { CurrentDeck } from "./CurrentDeck";
@@ -48,7 +49,7 @@ interface DeckBuilderContextValue {
   showCard: (
     e: MouseEvent | TouchEvent,
     type: "actionCard" | "character",
-    id: number
+    id: number,
   ) => void;
 }
 
@@ -74,7 +75,6 @@ export function DeckBuilder(props: DeckBuilderProps) {
       assetsManager: untrack(() => local.assetsManager),
     });
 
-  const [deckPage, setDeckPage] = createSignal<boolean>(false);
   const [cardDataViewerOffsetX, setCardDataViewerOffsetX] = createSignal(0);
   const [cardDataViewerOffsetY, setCardDataViewerOffsetY] = createSignal(0);
 
@@ -93,6 +93,8 @@ export function DeckBuilder(props: DeckBuilderProps) {
     }
   });
 
+  const deckPageControlId = createUniqueId();
+
   return (
     <DeckBuilderContext.Provider
       value={{
@@ -101,7 +103,7 @@ export function DeckBuilder(props: DeckBuilderProps) {
         showCard: (e, type, id) => {
           const rect = (e.target as HTMLElement).getBoundingClientRect();
           const containerRect = container.getBoundingClientRect();
-          // 当点击事件发生在靠近左侧位置时，在鼠标右下角显示；否则在左上角显示          
+          // 当点击事件发生在靠近左侧位置时，在鼠标右下角显示；否则在左上角显示
           if (e.type === "touchend") {
             setCardDataViewerOffsetX((containerRect.width - 300) / 2);
             if (containerRect.bottom - rect.bottom < 200) {
@@ -111,10 +113,10 @@ export function DeckBuilder(props: DeckBuilderProps) {
             }
           } else if (rect.left - containerRect.left < 320) {
             setCardDataViewerOffsetX(
-              rect.left + rect.width / 2 - containerRect.left
-            ); 
+              rect.left + rect.width / 2 - containerRect.left,
+            );
             setCardDataViewerOffsetY(
-              rect.top + rect.height / 2 - containerRect.top
+              rect.top + rect.height / 2 - containerRect.top,
             );
           } else {
             setCardDataViewerOffsetX(0);
@@ -132,6 +134,7 @@ export function DeckBuilder(props: DeckBuilderProps) {
         class={`gi-tcg-deck-builder @container groupxxx reset ${local.class}`}
         ref={container}
       >
+        <input type="checkbox" id={deckPageControlId} class="deck-page-control" hidden />
         <div
           class="w-full h-full flex flex-col @3xl:flex-row items-stretch gap-0 @3xl:gap-3 select-none"
           {...rest}
@@ -150,7 +153,6 @@ export function DeckBuilder(props: DeckBuilderProps) {
                   version={version()}
                   versionSpecified={versionSpecified()}
                   deck={props.deck ?? EMPTY_DECK}
-                  deckPage={deckPage()}
                   onChangeDeck={props.onChangeDeck}
                   onSetVersion={setVersion}
                   {...deckData()}
@@ -158,25 +160,10 @@ export function DeckBuilder(props: DeckBuilderProps) {
               )}
             </Match>
           </Switch>
-          <div
-            class="b-r-1 b-b-1 b-gray @3xl:mt-0 data-[deck-page=true]:mt-3"
-            data-deck-page={deckPage()}
-          />
-          <div
-            class="h-3 w-full @3xl:hidden flex relative data-[deck-page=true]:mb-3"
-            data-deck-page={deckPage()}
-          >
-            <div
-              class="absolute h-16 w-16 rounded-full b-1 b-white b-t-gray bg-white top-0 right-0 translate-y--15.5%"
-              onClick={(e) => {
-                // e.stopPropagation();
-                setDeckPage(!deckPage());
-              }}
-            >
-              <div
-                class="absolute top-3 left-6 h-4 w-4 rounded-lt-1 b-t-3 b-l-3 b-yellow-5! rotate-45 data-[deck-page=true]:rotate-225 data-[deck-page=true]:top-2"
-                data-deck-page={deckPage()}
-              />
+          <div class="b-r-1 b-b-1 b-gray DP:mt-3 @3xl:mt-0" />
+          <div class="h-3 w-full @3xl:hidden flex relative DP:mb-3">
+            <div class="absolute h-16 w-16 rounded-full b-1 b-white b-t-gray bg-white top-0 right-0 translate-y--15.5%">
+              <label for={deckPageControlId} class="absolute top-3 left-6 h-4 w-4 rounded-lt-1 b-t-3 b-l-3 b-yellow-5 rotate-45 DP:rotate-225 DP:top-2" />
             </div>
           </div>
           <Show when={deckData()}>
@@ -186,7 +173,6 @@ export function DeckBuilder(props: DeckBuilderProps) {
                 deck={props.deck ?? EMPTY_DECK}
                 onChangeDeck={props.onChangeDeck}
                 {...deckData()}
-                deckPage={deckPage()}
               />
             )}
           </Show>

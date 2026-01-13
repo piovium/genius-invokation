@@ -136,7 +136,7 @@ export function Card(props: CardProps) {
         </div>
       </Show>
       <div
-        class="absolute left-0 top-0 bg-gray-500/90 h-25% w-full items-center justify-center hidden @3xl:group-hover:flex"
+        class="absolute left-0 top-0 bg-gray-500/90 h-25% w-full items-center justify-center hidden @3xl:group-hover:flex DP:group-hover:flex"
         onClick={(e) => {
           e.stopPropagation();
           showCard(e, props.type, props.id);
@@ -191,12 +191,13 @@ export function PoolCard(props: PoolCardProps) {
 }
 
 export interface DeckCardProps extends CardProps {
+  class?: string;
   warn: boolean;
 }
 
 export function DeckCard(props: DeckCardProps) {
   return (
-    <div class="w-full rounded-lg overflow-clip b-gray-500 b-2 relative">
+    <div class={`w-full rounded-lg overflow-clip b-gray-500 b-2 relative ${props.class ?? ""}`}>
       <Card id={props.id} type={props.type} name={props.name} />
       <div
         class={`absolute inset-0 data-[warn]:flex hidden group-hover:hidden pointer-events-none
@@ -205,7 +206,7 @@ export function DeckCard(props: DeckCardProps) {
       >
         <span class="text-4xl font-bold text-white text-center">&#9888;</span>
       </div>
-      <div class="absolute left-0 bottom-0 bg-red-500/50 rounded-b-lg h-75% w-full items-center justify-center hidden @3xl:group-hover:flex">
+      <div class="absolute left-0 bottom-0 bg-red-500/50 rounded-b-lg h-75% w-full items-center justify-center hidden @3xl:group-hover:flex DP:group-hover:flex">
         <img
           src={DeleteIcon}
           draggable="false"
@@ -229,7 +230,7 @@ export function TinyCharacterCard(props: TinyCardProps) {
   );
 
   return (
-    <div class="w-full h-full rounded-full overflow-clip b-gray-500 border-2 relative group">
+    <div class="@3xl:hidden DP:hidden w-full h-full rounded-full overflow-clip b-gray-500 border-2 relative group">
       <Show
         when={url.state === "ready"}
         fallback={<div class="w-full h-full bg-gray-200" />}
@@ -255,7 +256,7 @@ export function TinyActionCard(props: TinyCardProps) {
   );
 
   return (
-    <div class="w-full rounded-md overflow-clip b-gray-500 border-2 relative group">
+    <div class="@3xl:hidden DP:hidden w-full rounded-md overflow-clip b-gray-500 border-2 relative group">
       <Show
         when={url.state === "ready"}
         fallback={<div class="w-full aspect-ratio-[7/12] bg-gray-200" />}
