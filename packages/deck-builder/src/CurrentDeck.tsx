@@ -27,11 +27,11 @@ export function CurrentDeck(props: AllCardsProps) {
   const [current, setCurrent] = createStore({
     characters: Array.from(
       { length: 3 },
-      () => null
+      () => null,
     ) as (DeckDataCharacterInfo | null)[],
     cards: Array.from(
       { length: 30 },
-      () => null
+      () => null,
     ) as (DeckDataActionCardInfo | null)[],
   });
 
@@ -53,7 +53,7 @@ export function CurrentDeck(props: AllCardsProps) {
         for (let i = 0; i < 30; i++) {
           prev.cards[i] = selectedAcs[i] ?? null;
         }
-      })
+      }),
     );
   });
 
@@ -77,10 +77,70 @@ export function CurrentDeck(props: AllCardsProps) {
   };
 
   return (
+    // <div
+    //   class="flex-shrink-0 flex flex-col flex-grow items-center justify-center gap-1 data-[deck-page]:gap-3 @3xl:gap-3"
+    //   bool:data-deck-page={deckPage()}
+    // >
     <div
-      class="flex-shrink-0 flex flex-col flex-grow items-center justify-center gap-1 data-[deck-page]:gap-3 @3xl:gap-3"
-      bool:data-deck-page={deckPage()}
+      class={`p-4 relative flex flex-col justify-center aspect-[4/7] h-full w-auto min-w-0 max-w-100`}
+      style={{ color: "white" }}
     >
+      <div class="relative aspect-[4/7] w-full h-auto max-h-full flex flex-col items-center ">
+        <ul class="flex justify-between w-[75%] mb-12px">
+          <For each={current.characters}>
+            {(ch) => (
+              <li class={`relative aspect-[7/12] w-[30%]`}>
+                <Show
+                  when={ch}
+                  fallback={
+                    <div class="w-full b-gray-3! border-2 rounded-lg">
+                      <div class="w-full aspect-ratio-[7/12] bg-gray-200" />
+                    </div>
+                  }
+                >
+                  {(ch) => (
+                    <DeckCard
+                      id={ch().id}
+                      type="character"
+                      name={ch().name}
+                      warn={ch().version > props.version}
+                    />
+                  )}
+                </Show>
+              </li>
+            )}
+          </For>
+        </ul>
+        <ul class="grid grid-cols-6 w-full gap-2">
+          <For each={current.cards}>
+            {(ac) => (
+              <li class={`relative aspect-[7/12] w-full`}>
+                <Show
+                  when={ac}
+                  fallback={
+                    <div class="w-full b-gray-3! border-2 rounded-lg">
+                      <div class="w-full aspect-ratio-[7/12] bg-gray-200" />
+                    </div>
+                  }
+                >
+                  {(ac) => (
+                    <DeckCard
+                      id={ac().id}
+                      type="actionCard"
+                      name={ac().name}
+                      warn={ac().version > props.version}
+                    />
+                  )}
+                </Show>
+              </li>
+            )}
+          </For>
+        </ul>
+      </div>
+    </div>
+  );
+  {
+    /*
       <ul
         class="hidden @3xl:flex data-[deck-page]:flex flex-row gap-3"
         bool:data-deck-page={deckPage()}
@@ -92,23 +152,6 @@ export function CurrentDeck(props: AllCardsProps) {
               bool:data-deck-page={deckPage()}
               onClick={() => ch && removeCharacter(idx())}
             >
-              <Show
-                when={ch}
-                fallback={
-                  <div class="w-full b-gray-3! border-2 rounded-lg overflow-clip">
-                    <div class="w-full aspect-ratio-[7/12] bg-gray-200" />
-                  </div>
-                }
-              >
-                {(ch) => (
-                  <DeckCard
-                    id={ch().id}
-                    type="character"
-                    name={ch().name}
-                    warn={ch().version > props.version}
-                  />
-                )}
-              </Show>
             </li>
           )}
         </For>
@@ -120,8 +163,7 @@ export function CurrentDeck(props: AllCardsProps) {
         <For each={current.cards}>
           {(ac, idx) => (
             <li
-              class="relative group data-[deck-page]:w-45px w-50px"
-              bool:data-deck-page={deckPage()}
+              class="relative group data-[deck-page]:w-45bool:data-deck-page={deckPage()}
               onClick={() => ac && removeActionCard(idx())}
             >
               <Show
@@ -202,6 +244,8 @@ export function CurrentDeck(props: AllCardsProps) {
           )}
         </For>
       </ul>
-    </div>
-  );
+      */
+  }
+  // </div>
+  // );
 }

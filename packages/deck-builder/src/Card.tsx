@@ -114,7 +114,7 @@ export function Card(props: CardProps) {
       <Show
         when={url.state === "ready"}
         fallback={
-          <div class="w-full aspect-ratio-[7/12] bg-gray-200 overflow-clip">
+          <div class="w-full aspect-ratio-[7/12] bg-gray-200 text-black whitespace-pre overflow-clip">
             {props.name}
           </div>
         }
