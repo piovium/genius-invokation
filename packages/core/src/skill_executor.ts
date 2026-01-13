@@ -308,22 +308,6 @@ export class SkillExecutor {
         emittedEvents.push(
           ...this.handleEventShallow(["modifyZeroHealth", arg]),
         );
-        if (arg._immuneInfo !== null) {
-          const { skill: via, newHealth } = arg._immuneInfo;
-          this.mutator.log(
-            DetailLogType.Primitive,
-            `${stringifyState(
-              arg.target,
-            )} is immune to defeated. Revive him to ${newHealth}`,
-          );
-          const ch = getEntityById(this.state, arg.target.id) as CharacterState;
-          const events = this.mutator.heal(newHealth, ch, {
-            via,
-            kind: "immuneDefeated",
-          });
-          await this.mutator.notifyAndPause();
-          emittedEvents.push(...this.handleEventShallow(...events));
-        }
       }
     } while (emittedEvents.length > 0);
 

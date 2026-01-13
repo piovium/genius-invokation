@@ -509,6 +509,13 @@ export class StateMutator {
         // Cannot apply non-revive heal on a dead character
         return [];
       }
+    } else if (
+      (targetState.variables.health === 0) !==
+      (opt.kind === "immuneDefeated")
+    ) {
+      throw new GiTcgCoreInternalError(
+        `Cannot apply heal kind '${opt.kind}' on character with health ${targetState.variables.health}.`,
+      );
     }
     using l = this.subLog(
       DetailLogType.Primitive,

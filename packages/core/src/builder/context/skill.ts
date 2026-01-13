@@ -38,6 +38,7 @@ import {
   constructEventAndRequestArg,
   type UseSkillRequestOption,
   BeforeNightsoulEventArg,
+  ZeroHealthEventArg,
 } from "../../base/skill";
 import {
   type CharacterState as CharacterStateO,
@@ -626,6 +627,24 @@ export class SkillContext<Meta extends ContextMetaBase> {
       });
     }
     return this.enableShortcut();
+  }
+
+  immune(newHealth: number) {
+    if (!(this.eventArg instanceof ZeroHealthEventArg)) {
+      throw new GiTcgDataError(
+        `The .immune() must called in .on("beforeDefeated")`,
+      );
+    }
+    this.mutator.log(
+      DetailLogType.Primitive,
+      `Immune character to ${newHealth} health`,
+    );
+    const target = this.get(this.eventArg.damageInfo.target).latest();
+    this.callAndEmit("heal", newHealth, target, {
+      via: this.skillInfo,
+      kind: "immuneDefeated",
+    });
+    this.eventArg.markImmune();
   }
 
   /** 增加最大生命值 */
@@ -1771,6 +1790,7 @@ type SkillContextMutativeProps =
   | "switchActive"
   | "gainEnergy"
   | "heal"
+  | "immune"
   | "increaseMaxHealth"
   | "damage"
   | "apply"

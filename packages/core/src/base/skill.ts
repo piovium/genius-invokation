@@ -1159,21 +1159,21 @@ export class ModifyReactionEventArg extends ReactionEventArg {
 
 export interface ImmuneInfo {
   skill: SkillInfo;
-  newHealth: number;
 }
 
 export class ZeroHealthEventArg extends ModifyDamage1EventArg {
   _immuneInfo: null | ImmuneInfo = null;
   _log = "";
 
-  immune(newHealth: number) {
+  // return 0 makes TS do not provide this as shortcut
+  markImmune(): 0 {
     this._log += `${stringifyState(
       this.caller,
-    )} makes the character immune to defeated, and heals him to ${newHealth}.\n`;
+    )} makes the character immune to defeated.\n`;
     this._immuneInfo = {
       skill: this._currentSkillInfo!,
-      newHealth,
     };
+    return 0;
   }
 
   override get damageInfo(): DamageInfo {
