@@ -30,7 +30,7 @@ function App() {
     console.log(deck());
   });
   const assetsManager = new AssetsManager({
-    apiEndpoint: `https://static-data.7shengzhaohuan.online/api/v4`
+    apiEndpoint: `https://static-data.piovium.org/api/v4`
   })
   return (
     <DeckBuilder

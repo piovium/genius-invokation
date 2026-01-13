@@ -95,12 +95,12 @@ export function CurrentDeck(props: AllCardsProps) {
             {(ch) => (
               <li
                 class={`relative
-                  aspect-square w-10 h-10
+                  aspect-square w-10 h-10 flex-shrink-0
                   min-w-10
                   @3xl:w-auto DP:w-auto
                   @3xl:h-auto DP:h-auto
                   @3xl:aspect-[7/12] DP:aspect-[7/12]
-                  @3xl:flex-grow DP:flex-grow`}
+                  @3xl:flex-1 DP:flex-1`}
               >
                 <Show
                   when={ch}
