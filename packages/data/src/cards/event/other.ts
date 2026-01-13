@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { EntityDefinition, CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, pair, status, summon, diceCostOfCard } from "@gi-tcg/core/builder";
-import { BurningFlame, CatalyzingField, DendroCore, EfficientSwitch, ResistantForm } from "../../commons";
+import { BurningFlame, CatalyzingField, DendroCore, EfficientSwitch, ResistantForm, Shield } from "../../commons";
 import { BountifulCore } from "../../characters/hydro/nilou";
 
 /**
@@ -257,7 +257,7 @@ export const ElementalResonanceImpetuousWinds = card(331502)
  * @description
  * 为我方出战角色提供3点护盾。
  */
-export const Shield = combatStatus(303162)
+export const ResonanceShield = combatStatus(303162)
   .shield(3)
   .done();
 
@@ -272,7 +272,7 @@ export const ElementalResonanceEnduringRock = card(331602)
   .since("v3.3.0")
   .costGeo(1)
   .tags("resonance")
-  .combatStatus(Shield)
+  .combatStatus(ResonanceShield)
   .done();
 
 /**

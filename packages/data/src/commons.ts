@@ -158,7 +158,17 @@ export const BattlePlan = status(172)
   .usageCanAppend(1, Infinity)
   .deductOmniCost(1)
   .done();
-  
+
+/**
+ * @id 203
+ * @name 护盾
+ * @description
+ * 为我方出战角色提供1点护盾。（可叠加，没有上限）
+ */
+export const Shield = combatStatus(203)
+  .shield(1, Infinity)
+  .done();;
+
 /**
  * @id 303300
  * @name 饱腹
