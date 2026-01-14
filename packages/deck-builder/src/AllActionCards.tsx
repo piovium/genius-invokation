@@ -127,13 +127,13 @@ export function AllActionCards(props: AllCardsProps) {
         filterSelections={[
           {
             name: "卡牌类型",
-            selected: acType(),
+            selected: acType,
             onSelect: (value) => toggleType(value),
             option: CARD_TYPE_TEXT_MAP,
           },
           {
             name: "卡牌标签",
-            selected: acTag(),
+            selected: acTag,
             onSelect: (value) => toggleTag(value),
             option: CARD_TAG_IMG_NAME_MAP,
           },

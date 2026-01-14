@@ -102,19 +102,19 @@ export function AllCharacterCards(props: AllCardsProps) {
         filterSelections={[
           {
             name: "元素类型",
-            selected: elementTag(),
+            selected: elementTag,
             onSelect: (value) => toggleElementTag(value),
             option: ELEMENT_TAG_IMG_NAME_MAP,
           },
           {
             name: "武器类型",
-            selected: weaponTag(),
+            selected: weaponTag,
             onSelect: (value) => toggleWeaponTag(value),
             option: WEAPON_TAG_IMG_NAME_MAP,
           },
           {
             name: "所属阵营",
-            selected: nationTag(),
+            selected: nationTag,
             onSelect: (value) => toggleNationTag(value),
             option: NATION_TAG_IMG_NAME_MAP,
           },

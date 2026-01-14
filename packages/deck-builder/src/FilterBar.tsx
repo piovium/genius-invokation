@@ -13,14 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { For, Show, createMemo, createSignal, createUniqueId } from "solid-js";
+import { For, Show, createMemo, createSignal, createUniqueId, type Accessor } from "solid-js";
 import FilterIcon from "./Filter.svg";
 import DeleteIcon from "./Delete.svg";
 import { TagIcon } from "./TagIcon";
 
 export interface FilterSelection {
   name: string;
-  selected: string | null;
+  selected: Accessor<string | null>;
   onSelect: (value: string | null) => void;
   option: Record<string, string>;
 }
@@ -31,7 +31,7 @@ export interface FilterBarProps {
 
 export function FilterBar(props: FilterBarProps) {
   const selected = createMemo(() => {
-    return props.filterSelections.some((fs) => fs.selected !== null);
+    return props.filterSelections.some((fs) => fs.selected() !== null);
   });
   const filterMenuControlId = createUniqueId();
 
@@ -97,7 +97,7 @@ export function FilterBar(props: FilterBarProps) {
                   {(tag) => (
                     <button
                       onClick={() => fs.onSelect(tag)}
-                      bool:data-selected={fs.selected === tag}
+                      bool:data-selected={fs.selected() === tag}
                       bool:data-capsule={tag.startsWith("GCG_CARD_")}
                       class={`flex-shrink-0 bg-gray-200 
                         w-7 h-7
@@ -140,7 +140,7 @@ export function FilterBar(props: FilterBarProps) {
         `}>
         <For each={props.filterSelections}>
           {(fs) => (
-            <Show when={fs.selected}>
+            <Show when={fs.selected()}>
               {(tag) => (
                 <div
                   class={`
