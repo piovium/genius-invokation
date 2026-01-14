@@ -33,10 +33,11 @@ export function AllCards(props: AllCardsProps) {
 
   return (
     <div
-      class={`min-w-0 min-h-0 flex-grow 
+      class={`min-w-0 min-h-0 flex-grow flex-shrink-0
         h-[calc(100cqh-18.5rem)] @3xl:h-full 
-        flex flex-col data-[deck-page=true]:hidden @3xl:flex flex-shrink-0`}
-      // data-deck-page={deckPage()}
+        flex flex-col
+        DP:hidden DP:h-0
+        @3xl:flex DP:@3xl:flex`}
     >
       <div class="flex flex-row mb-2">
         <button

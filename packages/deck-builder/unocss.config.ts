@@ -13,21 +13,32 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineConfig, presetWind3, transformerDirectives } from "unocss";
+import {
+  defineConfig,
+  presetWind3,
+  transformerDirectives,
+  Variant,
+} from "unocss";
 
 export default defineConfig({
   presets: [presetWind3()],
   variants: [
-    (matcher) => {
-      if (!matcher.startsWith("DP:")) {
-        return matcher;
-      }
-      return {
-        matcher: matcher.slice(3),
-        layer: 'reactive',
-        selector: s => `${s}:is(.gi-tcg-deck-builder:has(.deck-page-control:checked) *)`
-      }
-    }
+    ...Object.entries({
+      DP: "deck-page-control",
+      FM: "filter-menu-control",
+    }).map<Variant>(([prefix, cls]) => {
+      return (matcher) => {
+        if (!matcher.startsWith(`${prefix}:`)) {
+          return matcher;
+        }
+        return {
+          matcher: matcher.slice(prefix.length + 1),
+          layer: "reactive",
+          selector: (s) =>
+            `${s}:is(.gi-tcg-deck-builder:has(.${cls}:checked) *)`,
+        };
+      };
+    }),
   ],
   // https://github.com/unocss/unocss/discussions/3444
   postprocess: (obj) => {

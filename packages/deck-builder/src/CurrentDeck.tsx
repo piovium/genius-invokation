@@ -80,14 +80,14 @@ export function CurrentDeck(props: AllCardsProps) {
     //   bool:data-deck-page={deckPage()}
     // >
     <div
-      class={`p-4 relative min-w-0 
+      class={`p-4 relative min-w-0
         flex flex-col justify-center
-        w-full
-        @3xl:w-auto 
-        @3xl:aspect-[4/7] DP:aspect-[4/7] 
-        @3xl:h-full DP:h-full 
+        w-full 
+        DP:flex-1 DP:self-center DP:max-h-full DP:max-w-full
+        @3xl:w-auto DP:w-auto
+        @3xl:aspect-[4/7] DP:aspect-[4/7]
+        @3xl:h-full DP:h-full
         @3xl:max-w-100 DP:max-w-100`}
-      style={{ color: "white" }}
     >
       <div class="relative @3xl:aspect-[4/7] DP:aspect-[4/7] w-full h-auto max-h-full flex flex-col items-center">
         <ul class={`flex justify-between mb-12px gap-3 @3xl:w-full @4xl:w-[75%] DP:w-[75%]`}>
