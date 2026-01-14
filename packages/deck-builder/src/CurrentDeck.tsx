@@ -82,6 +82,7 @@ export function CurrentDeck(props: AllCardsProps) {
       class={`p-4 relative min-w-0
         flex flex-col justify-center
         w-full 
+        flex-shrink-0 @3xl:flex-shrink-1
         DP:flex-1 DP:self-center DP:max-h-full DP:max-w-full
         @3xl:w-auto DP:w-auto
         @3xl:aspect-[4/7] DP:aspect-[4/7]
@@ -90,7 +91,7 @@ export function CurrentDeck(props: AllCardsProps) {
     >
       <div class="relative @3xl:aspect-[4/7] DP:aspect-[4/7] w-full h-auto max-h-full flex flex-col items-center">
         <ul
-          class={`flex justify-between mb-12px gap-3 @3xl:w-full @4xl:w-[75%] DP:w-[75%]`}
+          class={`flex justify-between mb-12px gap-3 @3xl:w-[90%] @4xl:w-[75%] DP:w-[75%]`}
         >
           <For each={current.characters}>
             {(ch, idx) => (

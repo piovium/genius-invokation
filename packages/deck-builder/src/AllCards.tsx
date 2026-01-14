@@ -33,8 +33,8 @@ export function AllCards(props: AllCardsProps) {
 
   return (
     <div
-      class={`min-w-0 min-h-0 flex-grow flex-shrink-0
-        h-[calc(100cqh-18.5rem)] @3xl:h-full 
+      class={`min-w-0 min-h-0 flex-1
+        h-[calc(100cqh-18.5rem)] @3xl:h-full DP:@3xl:h-full
         flex flex-col
         DP:hidden DP:h-0
         @3xl:flex DP:@3xl:flex`}

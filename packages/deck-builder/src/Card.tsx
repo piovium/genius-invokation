@@ -31,9 +31,6 @@ export interface CardProps {
   name: string;
 }
 
-const LONG_PRESS_DELAY = 500; // ms
-const MOVE_THRESHOLD = 10; // px
-
 export function Card(props: CardProps) {
   const { assetsManager, showCard } = useDeckBuilderContext();
 
@@ -41,78 +38,17 @@ export function Card(props: CardProps) {
     assetsManager.getImageUrl(props.id, { thumbnail: true })
   );
 
-  const [pressing, setPressing] = createSignal(false);
-
-  let longPressTimer: number | undefined;
-  let startX = 0;
-  let startY = 0;
-  let moved = false;
-
-  const clearTimer = () => {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      longPressTimer = undefined;
-    }
-  };
-
-  const onTouchStart = (e: TouchEvent) => {
-    if (e.touches.length !== 1) return;
-
-    const touch = e.touches[0];
-    startX = touch.clientX;
-    startY = touch.clientY;
-    moved = false;
-
-    clearTimer();
-    longPressTimer = window.setTimeout(() => {
-      setPressing(true);
-    }, LONG_PRESS_DELAY);
-  };
-
-  const onTouchMove = (e: TouchEvent) => {
-    if (!longPressTimer || e.touches.length !== 1) return;
-
-    const touch = e.touches[0];
-    const dx = Math.abs(touch.clientX - startX);
-    const dy = Math.abs(touch.clientY - startY);
-
-    if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
-      moved = true;
-      clearTimer();
-      setPressing(false);
-    }
-  };
-
-  const onTouchEnd = (e: TouchEvent) => {
-    const wasPressing = pressing();
-    clearTimer();
-    setPressing(false);
-
-    if (!moved && wasPressing) {
-      showCard(e, props.type, props.id);
-    }
-  };
-
-  const onTouchCancel = () => {
-    clearTimer();
-    setPressing(false);
-  };
-
-  onCleanup(() => {
-    clearTimer();
-  });
+  const [pressing, setPressing] = createSignal<number | null>(null);
+  let pressingTimeout: number | null = null;
 
   return (
     <div
       title={props.name}
       class="w-full relative group"
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      onTouchCancel={onTouchCancel}
       onContextMenu={(e) => {
-        if (pressing()) {
+        if (e.pointerType !== "mouse") {
           e.preventDefault();
+          showCard(e, props.type, props.id);
         }
       }}
     >
@@ -130,15 +66,6 @@ export function Card(props: CardProps) {
           draggable="false"
           class="w-full object-cover"
         />
-      </Show>
-      <Show when={pressing()}>
-        <div class="absolute inset-0 bg-black/50 flex justify-center items-start">
-          <img
-            src={BrowseIcon}
-            draggable="false"
-            class="w-80% h-auto opacity-75 mt-25%"
-          />
-        </div>
       </Show>
       <div
         class="absolute left-0 top-0 bg-gray-500/90 h-25% w-full items-center justify-center hidden @3xl:group-hover:flex DP:group-hover:flex"
@@ -202,7 +129,11 @@ export interface DeckCardProps extends CardProps {
 
 export function DeckCard(props: DeckCardProps) {
   return (
-    <div class={`w-full rounded-lg overflow-clip b-gray-500 b-2 relative group ${props.class ?? ""}`}>
+    <div
+      class={`w-full rounded-lg overflow-clip b-gray-500 b-2 relative group ${
+        props.class ?? ""
+      }`}
+    >
       <Card id={props.id} type={props.type} name={props.name} />
       <div
         class={`absolute inset-0 data-[warn]:flex hidden group-hover:hidden pointer-events-none
