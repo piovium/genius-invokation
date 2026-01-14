@@ -106,10 +106,15 @@ export function Card(props: CardProps) {
     <div
       title={props.name}
       class="w-full relative group"
-      // onTouchStart={onTouchStart}
-      // onTouchMove={onTouchMove}
-      // onTouchEnd={onTouchEnd}
-      // onTouchCancel={onTouchCancel}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchCancel}
+      onContextMenu={(e) => {
+        if (pressing()) {
+          e.preventDefault();
+        }
+      }}
     >
       <Show
         when={url.state === "ready"}
@@ -197,7 +202,7 @@ export interface DeckCardProps extends CardProps {
 
 export function DeckCard(props: DeckCardProps) {
   return (
-    <div class={`w-full rounded-lg overflow-clip b-gray-500 b-2 relative ${props.class ?? ""}`}>
+    <div class={`w-full rounded-lg overflow-clip b-gray-500 b-2 relative group ${props.class ?? ""}`}>
       <Card id={props.id} type={props.type} name={props.name} />
       <div
         class={`absolute inset-0 data-[warn]:flex hidden group-hover:hidden pointer-events-none

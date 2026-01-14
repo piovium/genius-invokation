@@ -21,17 +21,16 @@ import type {
   DeckDataActionCardInfo,
   DeckDataCharacterInfo,
 } from "@gi-tcg/assets-manager";
-import DeleteIcon from "./Delete.svg";
 
 export function CurrentDeck(props: AllCardsProps) {
   const [current, setCurrent] = createStore({
     characters: Array.from(
       { length: 3 },
-      () => null,
+      () => null
     ) as (DeckDataCharacterInfo | null)[],
     cards: Array.from(
       { length: 30 },
-      () => null,
+      () => null
     ) as (DeckDataActionCardInfo | null)[],
   });
 
@@ -51,7 +50,7 @@ export function CurrentDeck(props: AllCardsProps) {
         for (let i = 0; i < 30; i++) {
           prev.cards[i] = selectedAcs[i] ?? null;
         }
-      }),
+      })
     );
   });
 
@@ -90,9 +89,11 @@ export function CurrentDeck(props: AllCardsProps) {
         @3xl:max-w-100 DP:max-w-100`}
     >
       <div class="relative @3xl:aspect-[4/7] DP:aspect-[4/7] w-full h-auto max-h-full flex flex-col items-center">
-        <ul class={`flex justify-between mb-12px gap-3 @3xl:w-full @4xl:w-[75%] DP:w-[75%]`}>
+        <ul
+          class={`flex justify-between mb-12px gap-3 @3xl:w-full @4xl:w-[75%] DP:w-[75%]`}
+        >
           <For each={current.characters}>
-            {(ch) => (
+            {(ch, idx) => (
               <li
                 class={`relative
                   aspect-square w-10 h-10 flex-shrink-0
@@ -101,6 +102,7 @@ export function CurrentDeck(props: AllCardsProps) {
                   @3xl:h-auto DP:h-auto
                   @3xl:aspect-[7/12] DP:aspect-[7/12]
                   @3xl:flex-1 DP:flex-1`}
+                onClick={() => ch && removeCharacter(idx())}
               >
                 <Show
                   when={ch}
@@ -130,13 +132,18 @@ export function CurrentDeck(props: AllCardsProps) {
             )}
           </For>
         </ul>
-        <ul class={`grid w-full
+        <ul
+          class={`grid w-full
           grid-cols-15 gap-1
           @3xl:grid-cols-6 DP:grid-cols-6
-          @3xl:gap-2 DP:gap-2`}>
+          @3xl:gap-2 DP:gap-2`}
+        >
           <For each={current.cards}>
-            {(ac) => (
-              <li class={`relative aspect-[7/12] min-w-8 @3xl:w-full DP:w-full`}>
+            {(ac, idx) => (
+              <li
+                class={`relative aspect-[7/12] min-w-8 @3xl:w-full DP:w-full`}
+                onClick={() => ac && removeActionCard(idx())}
+              >
                 <Show
                   when={ac}
                   fallback={
@@ -168,105 +175,4 @@ export function CurrentDeck(props: AllCardsProps) {
       </div>
     </div>
   );
-  {
-    /*
-      <ul
-        class="hidden @3xl:flex data-[deck-page]:flex flex-row gap-3"
-        bool:data-deck-page={deckPage()}
-      >
-        <For each={current.characters}>
-          {(ch, idx) => (
-            <li
-              class="relative group w-18 @3xl:w-19 data-[deck-page]:w-19"
-              bool:data-deck-page={deckPage()}
-              onClick={() => ch && removeCharacter(idx())}
-            >
-            </li>
-          )}
-        </For>
-      </ul>
-      <ul
-        class="hidden @3xl:grid data-[deck-page]:grid grid-cols-6 gap-2 "
-        bool:data-deck-page={deckPage()}
-      >
-        <For each={current.cards}>
-          {(ac, idx) => (
-            <li
-              class="relative group data-[deck-page]:w-45bool:data-deck-page={deckPage()}
-              onClick={() => ac && removeActionCard(idx())}
-            >
-              <Show
-                when={ac}
-                fallback={
-                  <div class="w-full b-gray-3! border-2 rounded-lg overflow-clip">
-                    <div class="w-full aspect-ratio-[7/12] bg-gray-200" />
-                  </div>
-                }
-              >
-                {(ac) => (
-                  <DeckCard
-                    id={ac().id}
-                    type="actionCard"
-                    name={ac().name}
-                    warn={ac().version > props.version}
-                  />
-                )}
-              </Show>
-            </li>
-          )}
-        </For>
-      </ul>
-      <ul
-        class="flex @3xl:hidden data-[deck-page]:hidden flex-row gap-2"
-        bool:data-deck-page={deckPage()}
-      >
-        <For each={current.characters}>
-          {(ch, idx) => (
-            <li
-              class="w-10 h-10 rounded-full relative group"
-              onClick={() => ch && removeCharacter(idx())}
-            >
-              <Show
-                when={ch}
-                fallback={
-                  <div class="w-full h-full rounded-full b-gray-3! border-2 bg-gray-200 overflow-clip" />
-                }
-              >
-                {(ch) => (
-                )}
-              </Show>
-            </li>
-          )}
-        </For>
-      </ul>
-      <ul
-        class="grid @3xl:hidden data-[deck-page]:hidden grid-cols-15 gap-1"
-        bool:data-deck-page={deckPage()}
-      >
-        <For each={current.cards}>
-          {(ac, idx) => (
-            <li
-              class="w-7 relative group"
-              data-deck-page={deckPage()}
-              onClick={() => ac && removeActionCard(idx())}
-            >
-              <Show
-                when={ac}
-                fallback={
-                  <div class="w-full b-gray-3! border-2 rounded-md overflow-clip">
-                    <div class="w-full aspect-ratio-[7/12] bg-gray-200" />
-                  </div>
-                }
-              >
-                {(ac) => (
-                )}
-              </Show>
-            </li>
-          )}
-        </For>
-      </ul>
-      */
-  }
-  // </div>
-  // );
 }
