@@ -49,11 +49,15 @@ const AC_TYPE_TEXT = {
       GCG_TAG_PLACE: "场地",
       GCG_TAG_ALLY: "伙伴",
       GCG_TAG_ITEM: "道具",
+      GCG_TAG_CARD_BLESSING: "元素幻变",
     },
   },
 };
 
-const LEGEND_TAG = "GCG_TAG_LEGEND";
+const SINGLETON_REQUIRED_TAGS = [
+  "GCG_TAG_LEGEND",
+  "GCG_TAG_CARD_BLESSING",
+];
 
 export function AllActionCards(props: AllCardsProps) {
   const [acType, setAcType] =
@@ -81,7 +85,9 @@ export function AllActionCards(props: AllCardsProps) {
     }
   });
   const maxCount = (id: number) => {
-    return props.actionCards.get(id)?.tags.includes(LEGEND_TAG) ? 1 : 2;
+    return props.actionCards.get(id)?.tags.some(
+      (tag) => SINGLETON_REQUIRED_TAGS.includes(tag)
+    ) ? 1 : 2;
   };
 
   const toggleCard = (id: number) => {
