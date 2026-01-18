@@ -46,6 +46,7 @@ export const NATION_TAG_IMG_NAME_MAP: Record<string, string> = {
   GCG_TAG_NATION_SUMERU: "Faction_Sumeru",
   GCG_TAG_NATION_FONTAINE: "Faction_Fontaine",
   GCG_TAG_NATION_NATLAN: "Faction_Natlan",
+  GCG_TAG_NATION_NODKRAI: "Faction_NodKrai",
   // GCG_TAG_NATION_SNEZHNAYA: "Faction_Snezhnaya",
   GCG_TAG_NATION_COSMIC_CALAMITY: "Faction_CosmicCalamity",
   GCG_TAG_CAMP_EREMITE: "Faction_Eremite",
@@ -66,6 +67,7 @@ export const CARD_TAG_IMG_NAME_MAP: Record<string, string> = {
   GCG_TAG_PLACE: "Card_Location",
   GCG_TAG_ALLY: "Card_Ally",
   GCG_TAG_ITEM: "Card_Item",
+  GCG_TAG_CARD_BLESSING: "Card_Blessing",
 };
 
 export const CARD_TYPE_TEXT_MAP: Record<string, string> = {
