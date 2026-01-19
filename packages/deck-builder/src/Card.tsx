@@ -130,7 +130,7 @@ export interface DeckCardProps extends CardProps {
 export function DeckCard(props: DeckCardProps) {
   return (
     <div
-      class={`w-full rounded-lg overflow-clip b-gray-500 b-2 relative group ${
+      class={`w-full overflow-clip b-gray-500 b-2 relative group ${
         props.class ?? ""
       }`}
     >

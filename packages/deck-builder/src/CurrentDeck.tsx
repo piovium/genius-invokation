@@ -79,9 +79,9 @@ export function CurrentDeck(props: AllCardsProps) {
     //   bool:data-deck-page={deckPage()}
     // >
     <div
-      class={`p-4 relative min-w-0
+      class={`relative min-w-0
         flex flex-col justify-center
-        w-full 
+        w-full
         flex-shrink-0 @3xl:flex-shrink-1
         DP:flex-1 DP:self-center DP:max-h-full DP:max-w-full
         @3xl:w-auto DP:w-auto
@@ -89,9 +89,9 @@ export function CurrentDeck(props: AllCardsProps) {
         @3xl:h-full DP:h-full
         @3xl:max-w-100 DP:max-w-100`}
     >
-      <div class="relative @3xl:aspect-[4/7] DP:aspect-[4/7] w-full h-auto max-h-full flex flex-col items-center">
+      <div class="relative @3xl:aspect-[4/7] DP:aspect-[4/7] w-full h-auto max-h-full flex flex-col items-center p-4">
         <ul
-          class={`flex justify-between mb-12px gap-3 @3xl:w-[90%] @4xl:w-[75%] DP:w-[75%]`}
+          class={`flex justify-between mb-12px gap-3 @3xl:w-[75%] DP:w-[75%]`}
         >
           <For each={current.characters}>
             {(ch, idx) => (
@@ -108,7 +108,7 @@ export function CurrentDeck(props: AllCardsProps) {
                 <Show
                   when={ch}
                   fallback={
-                    <div class="w-full b-gray-3 border-2 overflow-clip rounded-full @3xl:rounded-lg DP:rounded-lg">
+                    <div class="w-full b-gray-3 border-2 overflow-clip rounded-full @3xl:rounded-xl DP:rounded-xl">
                       <div class="w-full aspect-square @3xl:aspect-[7/12] DP:aspect-[7/12] bg-gray-200" />
                     </div>
                   }
@@ -116,7 +116,7 @@ export function CurrentDeck(props: AllCardsProps) {
                   {(ch) => (
                     <>
                       <DeckCard
-                        class="hidden @3xl:block DP:block"
+                        class="rounded-xl hidden @3xl:block DP:block"
                         id={ch().id}
                         type="character"
                         name={ch().name}
@@ -134,7 +134,7 @@ export function CurrentDeck(props: AllCardsProps) {
           </For>
         </ul>
         <ul
-          class={`grid w-full
+          class={`grid h-full
           grid-cols-15 gap-1
           @3xl:grid-cols-6 DP:grid-cols-6
           @3xl:gap-2 DP:gap-2`}
@@ -148,7 +148,7 @@ export function CurrentDeck(props: AllCardsProps) {
                 <Show
                   when={ac}
                   fallback={
-                    <div class="w-full b-gray-3! border-2 rounded-lg">
+                    <div class="w-full b-gray-3! border-2 overflow-clip rounded-md @3xl:rounded-lg DP:rounded-lg">
                       <div class="w-full aspect-ratio-[7/12] bg-gray-200" />
                     </div>
                   }
@@ -156,7 +156,7 @@ export function CurrentDeck(props: AllCardsProps) {
                   {(ac) => (
                     <>
                       <DeckCard
-                        class="hidden @3xl:block DP:block"
+                        class="rounded-lg hidden @3xl:block DP:block"
                         id={ac().id}
                         type="actionCard"
                         name={ac().name}
