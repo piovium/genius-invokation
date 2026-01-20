@@ -142,7 +142,7 @@ export function DeckCard(props: DeckCardProps) {
       >
         <span class="text-4xl font-bold text-white text-center">&#9888;</span>
       </div>
-      <div class="absolute left-0 bottom-0 bg-red-500/50 rounded-b-lg h-75% w-full items-center justify-center hidden @3xl:group-hover:flex DP:group-hover:flex">
+      <div class="absolute left-0 bottom-0 bg-red-500/50 h-75% w-full items-center justify-center hidden @3xl:group-hover:flex DP:group-hover:flex">
         <img
           src={DeleteIcon}
           draggable="false"
