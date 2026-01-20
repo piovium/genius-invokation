@@ -81,7 +81,7 @@ export function CurrentDeck(props: AllCardsProps) {
     <div
       class={`relative min-w-0
         flex flex-col justify-center
-        w-full
+        w-full z-10
         flex-shrink-0 @3xl:flex-shrink-1
         DP:flex-1 DP:self-center DP:max-h-full DP:max-w-full
         @3xl:w-auto DP:w-auto
@@ -89,9 +89,15 @@ export function CurrentDeck(props: AllCardsProps) {
         @3xl:h-full DP:h-full
         @3xl:max-w-100 DP:max-w-100`}
     >
-      <div class="relative @3xl:aspect-[4/7] DP:aspect-[4/7] w-full h-auto max-h-full flex flex-col items-center p-4">
+      <div 
+        class={`relative
+          @3xl:aspect-[4/7] DP:aspect-[4/7]
+          w-full h-auto max-h-full
+          flex flex-col items-center
+          DP:p-2% @3xl:px-2 @3xl:py-3.5`}
+      >
         <ul
-          class={`flex justify-between mb-12px gap-3 @3xl:w-[75%] DP:w-[75%]`}
+          class={`flex justify-between gap-3 @3xl:w-[75%] DP:w-[75%] mb-2 @3xl:mb-2% DP:mb-2%`}
         >
           <For each={current.characters}>
             {(ch, idx) => (
@@ -134,10 +140,13 @@ export function CurrentDeck(props: AllCardsProps) {
           </For>
         </ul>
         <ul
-          class={`grid h-full
-          grid-cols-15 gap-1
+          class={`grid w-full
+          grid-cols-15
           @3xl:grid-cols-6 DP:grid-cols-6
-          @3xl:gap-2 DP:gap-2`}
+          gap-x-0 gap-y-1
+          @3xl:gap-x-1.5% @3xl:gap-y-0.5% DP:gap-x-1.5% DP:gap-y-0.5%
+          pr-[calc(100%-calc(calc(100%-2rem)/14*15))]
+          @3xl:pr-0 DP:pr-0`}
         >
           <For each={current.cards}>
             {(ac, idx) => (
