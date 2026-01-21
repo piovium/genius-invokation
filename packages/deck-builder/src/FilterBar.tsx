@@ -71,7 +71,7 @@ export function FilterBar(props: FilterBarProps) {
       {/* 筛选菜单 */}
       <div
         class={`grid-area-[1/2] FM:grid-area-[1/1/1/3]
-          FM:absolute FM:z-20 FM:top-9 FM:left-0 
+          FM:absolute FM:z-30 FM:top-9 FM:left-0 
           relative @3xl:FM:relative
           top-0 left-0 @3xl:FM:top-0 @3xl:FM:left-0
           b-0 p-0 p-l-3 p-r-1
