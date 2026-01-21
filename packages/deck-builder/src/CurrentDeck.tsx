@@ -79,23 +79,22 @@ export function CurrentDeck(props: AllCardsProps) {
     //   bool:data-deck-page={deckPage()}
     // >
     <div
-      // the DP:max-h-[calc(100%-1.5rem)] is calculated by subtracting mt-3 of split line and mb-3 of toggle button
+      // the DP:max-h-[calc(100%-25px)] is calculated by subtracting b-t-1 of split line, mt-3 of split line, h-3 of toggle button and mb-2 of toggle button
       class={`relative min-w-0
         flex flex-col justify-center
-        w-full z-10
+        w-full @3xl:w-auto DP:w-auto
         flex-shrink-0 @3xl:flex-shrink-1
-        DP:flex-1 DP:self-center DP:max-h-[calc(100%-1.5rem)] DP:max-w-full
-        @3xl:w-auto DP:w-auto
+        DP:flex-1 DP:self-center DP:max-h-[calc(100%-33px)]
         @3xl:aspect-[4/7] DP:aspect-[4/7]
-        @3xl:h-full DP:h-full
-        @3xl:max-w-100 DP:max-w-100`}
+        @3xl:h-full DP:h-[calc(100%-33px)]
+        @3xl:max-w-100 DP:max-w-[min(100%,25rem)]`}
     >
       <div 
         class={`relative
           @3xl:aspect-[4/7] DP:aspect-[4/7]
           w-full h-auto max-h-full
           flex flex-col items-center
-          DP:p-2% @3xl:px-2 @3xl:py-3.5`}
+          DP:px-2% DP:py-2% @3xl:px-2 @3xl:py-3.5`}
       >
         <ul
           class={`flex justify-between gap-3 @3xl:w-[75%] DP:w-[75%] mb-2 @3xl:mb-2% DP:mb-2%`}
@@ -103,7 +102,7 @@ export function CurrentDeck(props: AllCardsProps) {
           <For each={current.characters}>
             {(ch, idx) => (
               <li
-                class={`relative
+                class={`relative z-20 @3xl:z-0
                   aspect-square w-10 h-10 flex-shrink-0
                   min-w-10
                   @3xl:w-auto DP:w-auto
@@ -152,7 +151,7 @@ export function CurrentDeck(props: AllCardsProps) {
           <For each={current.cards}>
             {(ac, idx) => (
               <li
-                class={`relative aspect-[7/12] min-w-8 @3xl:w-full DP:w-full`}
+                class={`relative z-20 @3xl:z-0 aspect-[7/12] min-w-8 @3xl:w-full DP:w-full`}
                 onClick={() => ac && removeActionCard(idx())}
               >
                 <Show

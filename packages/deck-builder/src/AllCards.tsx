@@ -63,7 +63,7 @@ export function AllCards(props: AllCardsProps) {
           }
         >
           <select
-            class="flex-grow b-1 rounded-full ml-2!"
+            class="flex-grow b-1 rounded-full ml-2! outline-none focus:b-0 focus:bg-blue-100"
             value={props.version}
             onChange={(e) => props.onSetVersion?.(Number(e.target.value))}
           >
