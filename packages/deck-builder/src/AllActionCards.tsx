@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createMemo, createSignal } from "solid-js";
 import { PoolCard } from "./Card";
 import type { AllCardsProps } from "./AllCards";
 import { Key } from "@solid-primitives/keyed";
@@ -56,7 +56,6 @@ export function AllActionCards(props: AllCardsProps) {
 
   const toggleCard = (id: number) => {
     const cnt = count(id);
-    console.log(id);
     if (cnt >= maxCount(id)) {
       props.onChangeDeck?.({
         ...props.deck,
@@ -119,8 +118,18 @@ export function AllActionCards(props: AllCardsProps) {
     if (tag !== null && !ac.tags.includes(tag)) {
       return false;
     }
-    return valid(ac);
+    return true;
   };
+
+  const sortedActionCards = createMemo(() => {
+    return props.actionCards.values().toArray().toSorted((a, b) => {
+      const aValid = valid(a);
+      const bValid = valid(b);
+      if (aValid && !bValid) return -1;
+      if (!aValid && bValid) return 1;
+      return 0;
+    });
+  });
 
   const selected = (id: number) => maxCount(id) === count(id);
   const partialSelected = (id: number) =>
@@ -145,18 +154,23 @@ export function AllActionCards(props: AllCardsProps) {
         ]}
       />
       <ul class="flex-grow overflow-auto grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-2 pb-2 @3xl:pb-0 [scrollbar-width:thin]">
-        <Key each={props.actionCards.values().toArray()} by="id">
+        <Key each={sortedActionCards()} by="id">
           {(ac) => (
             <li
               class="hidden data-[shown]-block relative cursor-pointer data-[disabled]:cursor-not-allowed data-[disabled]:opacity-60 data-[disabled]:filter-none hover:brightness-110"
               bool:data-shown={shown(ac())}
               bool:data-disabled={fullCards() && !count(ac().id)}
-              onClick={() => toggleCard(ac().id)}
+              onClick={() => {
+                if (valid(ac())) {
+                  toggleCard(ac().id)
+                }
+              }}
             >
               <PoolCard
                 id={ac().id}
                 type="actionCard"
                 name={ac().name}
+                valid={valid(ac())}
                 selected={selected(ac().id)}
                 partialSelected={partialSelected(ac().id)}
                 selectedCount={count(ac().id)}

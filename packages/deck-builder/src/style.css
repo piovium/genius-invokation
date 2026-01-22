@@ -93,15 +93,18 @@
     --border-color: rgb(107 114 128 / 0.9);
   }
 
+  .pool-card[data-invalid] {
+    --border-color: rgb(209 213 219 / 0.9);
+    --card-opacity: 0.4;
+  }
+
   .pool-card[data-partial-selected] {
     --border-color: rgb(202 138 4 / 0.9);
   }
 
   .pool-card[data-selected]:not([data-partial-selected]) {
     --border-color: rgb(22 163 74 / 0.9);
-    img {
-      filter: brightness(0.4);
-    }
+    --card-brightness: 0.4;
   }
 
   .scrollbar-hidden::-webkit-scrollbar {

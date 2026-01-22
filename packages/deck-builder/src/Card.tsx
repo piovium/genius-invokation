@@ -64,7 +64,7 @@ export function Card(props: CardProps) {
           src={url()}
           alt={props.name}
           draggable="false"
-          class="w-full object-cover"
+          class="w-full object-cover brightness-[var(--card-brightness,1)] opacity-[var(--card-opacity,1)]"
         />
       </Show>
       <div
@@ -81,6 +81,7 @@ export function Card(props: CardProps) {
 }
 
 export interface PoolCardProps extends CardProps {
+  valid?: boolean;
   partialSelected?: boolean;
   selected?: boolean;
   selectedCount?: number;
@@ -92,9 +93,18 @@ export function PoolCard(props: PoolCardProps) {
       class="pool-card w-full rounded-lg overflow-clip b-[var(--border-color)] b-2 relative"
       bool:data-selected={props.selected}
       bool:data-partial-selected={props.partialSelected}
+      bool:data-invalid={props.valid === false}
     >
       <Card id={props.id} type={props.type} name={props.name} />
       <Switch>
+        <Match when={props.valid === false}>
+          <div
+            class="absolute left-0 bottom-0 bg-[var(--border-color)] h-25% w-full items-center justify-center text-red font-bold text-sm flex"
+            bool:data-invalid={props.valid === false}
+          >
+            失效
+          </div>
+        </Match>
         <Match when={props.type === "character" && props.selected}>
           <div
             class="absolute left-0 bottom-0 bg-[var(--border-color)] h-25% w-full items-center justify-center text-white font-bold text-sm flex"
