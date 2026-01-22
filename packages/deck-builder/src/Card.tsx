@@ -25,6 +25,8 @@ import { useDeckBuilderContext } from "./DeckBuilder";
 import BrowseIcon from "./Browse.svg";
 import DeleteIcon from "./Delete.svg";
 
+import "long-press-event";
+
 export interface CardProps {
   id: number;
   type: "character" | "actionCard";
@@ -35,23 +37,14 @@ export function Card(props: CardProps) {
   const { assetsManager, showCard } = useDeckBuilderContext();
 
   const [url] = createResource(() =>
-    assetsManager.getImageUrl(props.id, { thumbnail: true })
+    assetsManager.getImageUrl(props.id, { thumbnail: true }),
   );
 
   const [pressing, setPressing] = createSignal<number | null>(null);
   let pressingTimeout: number | null = null;
 
   return (
-    <div
-      title={props.name}
-      class="w-full relative group"
-      onContextMenu={(e) => {
-        if (e.pointerType !== "mouse") {
-          e.preventDefault();
-          showCard(e, props.type, props.id);
-        }
-      }}
-    >
+    <div title={props.name} class="w-full relative group">
       <Show
         when={url.state === "ready"}
         fallback={
@@ -76,6 +69,13 @@ export function Card(props: CardProps) {
       >
         <img src={BrowseIcon} draggable="false" class="w-35% h-auto" />
       </div>
+      <div
+        class="absolute inset-0 bg-transparent @3xl:none"
+        data-long-press-delay="500"
+        on:long-press={(e: CustomEvent) => {
+          showCard(e, props.type, props.id);
+        }}
+      />
     </div>
   );
 }
@@ -172,7 +172,7 @@ export function TinyCharacterCard(props: TinyCardProps) {
   const { assetsManager } = useDeckBuilderContext();
 
   const [url] = createResource(() =>
-    assetsManager.getImageUrl(props.id, { type: "icon", thumbnail: true })
+    assetsManager.getImageUrl(props.id, { type: "icon", thumbnail: true }),
   );
 
   return (
@@ -198,7 +198,7 @@ export function TinyActionCard(props: TinyCardProps) {
   const { assetsManager } = useDeckBuilderContext();
 
   const [url] = createResource(() =>
-    assetsManager.getImageUrl(props.id, { thumbnail: true })
+    assetsManager.getImageUrl(props.id, { thumbnail: true }),
   );
 
   return (

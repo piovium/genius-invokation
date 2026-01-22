@@ -29,7 +29,8 @@
     "@gi-tcg/card-data-viewer": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
-    "@solid-primitives/keyed": "^1.4.0"
+    "@solid-primitives/keyed": "^1.4.0",
+    "long-press-event": "^2.5.0"
   },
   "devDependencies": {
     "@gi-tcg/config": "workspace:*",
