@@ -71,6 +71,7 @@ export function Card(props: CardProps) {
         data-long-press-delay="500"
         on:long-press={(e: CustomEvent) => {
           showCard(e, props.type, props.id);
+          alert("long-press")
         }}
       />
     </div>
