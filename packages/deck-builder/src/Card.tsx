@@ -40,9 +40,6 @@ export function Card(props: CardProps) {
     assetsManager.getImageUrl(props.id, { thumbnail: true }),
   );
 
-  const [pressing, setPressing] = createSignal<number | null>(null);
-  let pressingTimeout: number | null = null;
-
   return (
     <div title={props.name} class="w-full relative group">
       <Show
@@ -61,7 +58,7 @@ export function Card(props: CardProps) {
         />
       </Show>
       <div
-        class="absolute left-0 top-0 bg-gray-500/90 h-25% w-full items-center justify-center hidden @3xl:group-hover:flex DP:group-hover:flex"
+        class="absolute left-0 top-0 bg-gray-500/90 h-25% w-full items-center justify-center hidden group-hover:flex"
         onClick={(e) => {
           e.stopPropagation();
           showCard(e, props.type, props.id);
@@ -70,7 +67,7 @@ export function Card(props: CardProps) {
         <img src={BrowseIcon} draggable="false" class="w-35% h-auto" />
       </div>
       <div
-        class="absolute inset-0 bg-transparent @3xl:none"
+        class="absolute inset-0 bg-transparent @3xl:hidden"
         data-long-press-delay="500"
         on:long-press={(e: CustomEvent) => {
           showCard(e, props.type, props.id);
