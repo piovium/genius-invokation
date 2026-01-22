@@ -25,6 +25,8 @@ import { useDeckBuilderContext } from "./DeckBuilder";
 import BrowseIcon from "./Browse.svg";
 import DeleteIcon from "./Delete.svg";
 
+import "long-press-event";
+
 export interface CardProps {
   id: number;
   type: "character" | "actionCard";
@@ -37,20 +39,6 @@ export function Card(props: CardProps) {
   const [url] = createResource(() =>
     assetsManager.getImageUrl(props.id, { thumbnail: true }),
   );
-
-  let longPressTimer: number | null = null;
-  const longPressDown = (e: PointerEvent) => {
-    longPressTimer = window.setTimeout(() => {
-      showCard(e, props.type, props.id);
-      longPressTimer = null;
-    }, 500);
-  }
-  const longPressUp = (e: PointerEvent) => {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      longPressTimer = null;
-    }
-  }
 
   return (
     <div title={props.name} class="w-full relative group">
@@ -79,12 +67,13 @@ export function Card(props: CardProps) {
         <img src={BrowseIcon} draggable="false" class="w-35% h-auto" />
       </div>
       <div
-        class="absolute inset-0 bg-transparent @3xl:hidden"
-        onPointerDown={longPressDown}
-        onPointerUp={longPressUp}
-        onPointerMove={longPressUp}
-        onPointerLeave={longPressUp}
-        onPointerCancel={longPressUp}
+        class="absolute inset-0 z-100 bg-transparent @3xl:hidden"
+        onContextMenu={(e) => e.preventDefault()}
+        data-long-press-delay="500"
+        on:long-press={(e: CustomEvent) => {
+          e.preventDefault();
+          showCard(e, props.type, props.id);
+        }}
       />
     </div>
   );

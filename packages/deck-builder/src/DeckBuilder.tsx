@@ -100,7 +100,7 @@ export function DeckBuilder(props: DeckBuilderProps) {
           const rect = (e.target as HTMLElement).getBoundingClientRect();
           const containerRect = container.getBoundingClientRect();
           // 当点击事件发生在靠近左侧位置时，在鼠标右下角显示；否则在左上角显示
-          if ("longPress" in e) {
+          if (e.type === "long-press") {
             setCardDataViewerOffsetX((containerRect.width - 300) / 2);
             if (containerRect.bottom - rect.bottom < 200) {
               setCardDataViewerOffsetY(0);
@@ -128,7 +128,6 @@ export function DeckBuilder(props: DeckBuilderProps) {
     >
       <div
         class={`gi-tcg-deck-builder @container groupxxx reset ${local.class}`}
-        onContextMenu={(e) => e.preventDefault()}
         ref={container}
       >
         <input
