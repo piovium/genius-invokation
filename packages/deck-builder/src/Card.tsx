@@ -68,10 +68,10 @@ export function Card(props: CardProps) {
       </div>
       <div
         class="absolute inset-0 bg-transparent @3xl:hidden"
+        onContextMenu={(e) => e.preventDefault()}
         data-long-press-delay="500"
         on:long-press={(e: CustomEvent) => {
           showCard(e, props.type, props.id);
-          alert("long-press")
         }}
       />
     </div>

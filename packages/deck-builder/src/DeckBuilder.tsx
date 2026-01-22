@@ -129,7 +129,6 @@ export function DeckBuilder(props: DeckBuilderProps) {
       <div
         class={`gi-tcg-deck-builder @container groupxxx reset ${local.class}`}
         ref={container}
-        onContextMenu={(e) => e.preventDefault()}
       >
         <input
           type="checkbox"
