@@ -151,7 +151,6 @@
         "@gi-tcg/typings": "workspace:*",
         "@gi-tcg/utils": "workspace:*",
         "@solid-primitives/keyed": "^1.4.0",
-        "long-press-event": "^2.5.0",
       },
       "devDependencies": {
         "@gi-tcg/config": "workspace:*",
@@ -1958,8 +1957,6 @@
     "log-symbols": ["log-symbols@4.1.0", "", { "dependencies": { "chalk": "^4.1.0", "is-unicode-supported": "^0.1.0" } }, "sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg=="],
 
     "long": ["long@5.3.2", "", {}, "sha512-mNAgZ1GmyNhD7AuqnTG3/VQ26o760+ZYBPKjPvugO8+nLbYfX6TVpJPseBvopbdY+qpZ/lKUnmEc1LeZYS3QAA=="],
-
-    "long-press-event": ["long-press-event@2.5.0", "", {}, "sha512-ku7TWKETdiRlgs66rnYk1UjZXVmYXHzY8ZTo/3xbw/kms+uZHte89X5jAQtQjsOJaYl6lLbAT9CW3gcMIooikA=="],
 
     "lru-cache": ["lru-cache@10.4.3", "", {}, "sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ=="],
 
