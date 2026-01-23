@@ -632,7 +632,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   immune(newHealth: number) {
     if (!(this.eventArg instanceof ZeroHealthEventArg)) {
       throw new GiTcgDataError(
-        `The .immune() must called in .on("beforeDefeated")`,
+        `The .immune() must be called in .on("beforeDefeated")`,
       );
     }
     this.mutator.log(
