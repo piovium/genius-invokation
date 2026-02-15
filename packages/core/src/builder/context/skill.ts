@@ -1879,7 +1879,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
   private shuffleTail<T>(items: readonly T[], count: number): T[] {
     const itemsCopy = [...items];
-    for (let i = itemsCopy.length - 1; i >= itemsCopy.length - count; i--) {
+    const stopIndex = Math.max(0, itemsCopy.length - count);
+    for (let i = itemsCopy.length - 1; i >= stopIndex; i--) {
       const j = this.mutator.stepRandom() % (i + 1);
       [itemsCopy[i], itemsCopy[j]] = [itemsCopy[j], itemsCopy[i]];
     }
@@ -1890,7 +1891,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
   randomSubset<T>(items: readonly T[], count: number): T[] {
     if (count <= 0) return [];
-    const partiallyShuffled = this.shuffleTail(items, count);
+    const partiallyShuffled = this.shuffleTail(
+      items,
+      Math.min(count, items.length),
+    );
     return partiallyShuffled.slice(-count);
   }
 }
