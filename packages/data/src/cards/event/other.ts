@@ -2339,7 +2339,7 @@ export const GeniussUpgradeTechnique = card(332060)
  * @id 332061
  * @name 叮铃哐啷军团
  * @description
- * 生成3张随机的当前元素骰费用等于3的卡牌加入手牌。
+ * 生成3张随机原本元素骰费用等于3的卡牌加入手牌。
  * 如果此卡牌被赋予了赋能，则赋予3张当前元素骰费用最高的手牌赋能。
  */
 export const ClinkClankLegion = card(332061)

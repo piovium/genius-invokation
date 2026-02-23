@@ -358,8 +358,7 @@ export const StrictProhibited = combatStatus(301018)
  * @id 321018
  * @name 梅洛彼得堡
  * @description
- * 我方出战角色受到伤害或治疗后：此牌累积1点「禁令」。
- * 如果此牌已有5点禁令，则消耗5点，赋予对方1张随机手牌无效化。
+ * 我方出战角色受到伤害或治疗后：此牌累积1点「禁令」（可叠加，最多叠加到5）。如果此牌已有5点禁令，则消耗5点，赋予对方1张随机手牌无效化。
  */
 export const FortressOfMeropide = card(321018)
   .since("v4.5.0")
@@ -368,7 +367,7 @@ export const FortressOfMeropide = card(321018)
   .variable("forbidden", 0)
   .on("damagedOrHealed", (c, e) => e.target.isActive())
   .do((c) => {
-    c.addVariable("forbidden", 1);
+    c.addVariableWithMax("forbidden", 1, 5);
     if (c.getVariable("forbidden") >= 5) {
       c.addVariable("forbidden", -5);
       if (c.oppPlayer.hands.length > 0) {

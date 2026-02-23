@@ -120,7 +120,7 @@ export const InEveryHouseAStove = card(330005)
  * @name 裁定之时
  * @description
  * 本回合中，敌方下次打出事件牌后：赋予敌方手牌中所有事件牌无效化。
- * 本回合中，敌方舍弃卡牌后：将敌方手牌中2张当前元素骰费用最高的卡牌置入牌组底。
+ * 本回合中，敌方舍弃手牌后：将敌方手牌中2张当前元素骰费用最高的卡牌置入牌组底。
  * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  */
 export const [PassingOfJudgment] = card(330006)
@@ -137,7 +137,7 @@ export const [PassingOfJudgment] = card(330006)
       }
     }
   })
-  .on("disposeCard")
+  .on("disposeCard", (c, e) => e.from.type === "hands")
   .do((c) => {
     const maxCostHands = c.maxCostHands(2);
     c.undrawCards(maxCostHands, "bottom");

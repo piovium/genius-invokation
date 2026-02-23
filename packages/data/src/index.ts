@@ -196,6 +196,7 @@ import "./old_versions/v5.8.0";
 import "./old_versions/v6.0.0";
 import "./old_versions/v6.1.0";
 import "./old_versions/v6.2.0";
+import "./old_versions/v6.3.0";
 
 export * from "./end";
 export { default } from "./end";
