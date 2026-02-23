@@ -112,8 +112,7 @@ export const getVersionBehavior = (version: Version): VersionBehavior => ({
   defaultRecreateBehavior: versionLt(version, "v3.5.0") ? "overwrite" : "takeMax",
   foodOmitInjuredOnly: !versionLt(version, "v6.1.0"),
   disposeMaxCostHandsAbortPreview: !versionLt(version, "v6.1.0"),
-  // TODO v6.4.0 done
-  diceCostApplyAttachments: !versionLt(version, "v6.3.1" as Version),
+  diceCostApplyAttachments: !versionLt(version, "v6.4.0"),
 });
 
 export interface IteratorState {
