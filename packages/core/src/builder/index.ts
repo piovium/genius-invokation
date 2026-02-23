@@ -17,6 +17,7 @@ export { character } from "./character";
 export { skill, ListenTo } from "./skill";
 export { card } from "./card";
 export { summon, status, combatStatus } from "./entity";
+export { attachment } from "./attachment";
 export { extension } from "./extension";
 export {
   Registry,
@@ -43,14 +44,11 @@ export type {
   PlainCharacterState as CharacterState,
   PlainEntityState as EntityState,
 } from "./context/utils";
-export type {
-  CharacterDefinition,
-  EntityDefinition,
-} from "../base/state";
+export type { CharacterDefinition, EntityDefinition } from "../base/state";
 export {
   type CustomEvent,
   createCustomEvent as customEvent,
 } from "../base/custom_event";
 
-export { playSkillOfCard, diceCostOfCard } from "../utils";
+export { originalDiceCostSizeOfCard as originalDiceCostOfCard } from "../utils";
 export { flip, pair } from "@gi-tcg/utils";

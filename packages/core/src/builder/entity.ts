@@ -30,6 +30,7 @@ import {
   registerEntity,
   registerPassiveSkill,
   builderWeakRefs,
+  registerAttachment,
 } from "./registry";
 import {
   withShortcut,
@@ -55,7 +56,12 @@ import type {
 } from "./type";
 import { GiTcgCoreInternalError, GiTcgDataError } from "../error";
 import { createVariable, createVariableCanAppend } from "./utils";
-import { getEntityArea, getEntityById, type Writable } from "../utils";
+import {
+  getEntityArea,
+  getEntityById,
+  type Writable,
+  type CreateEntityOptions,
+} from "../utils";
 import type { EntityState, GameState } from "../base/state";
 import {
   type Version,
@@ -65,7 +71,7 @@ import {
 } from "../base/version";
 import type { TypedSkillContext } from "./context/skill";
 import type { CustomEvent } from "../base/custom_event";
-import type { CreateEntityOptions } from "../mutator";
+import type { AttachmentTag, ModificationGetter } from "../base/attachment";
 
 export interface AppendOptions {
   /** 重复创建时的累积值上限 */
@@ -128,7 +134,7 @@ export interface PrepareOption {
 }
 
 export class EntityBuilder<
-  CallerType extends "character" | EntityType,
+  CallerType extends "character" | EntityType | "attachment",
   CallerVars extends string,
   AssociatedExt extends ExtensionHandle,
   FromCard extends boolean,
@@ -139,7 +145,7 @@ export class EntityBuilder<
   private _defaultDispose = true;
   readonly _skillListBeforeDefaultDispose: SkillDefinition[] = [];
   _usagePerRoundIndex = 0;
-  private readonly _tags: EntityTag[] = [];
+  private readonly _tags: (EntityTag | AttachmentTag)[] = [];
   _varConfigs: Writable<EntityVariableConfigs> = {};
   _obtainable = false;
   private _disposeWhenUsageIsZero = false;
@@ -574,7 +580,7 @@ export class EntityBuilder<
       .endOn();
   }
 
-  tags(...tags: EntityTag[]): this {
+  tags(...tags: (EntityTag | AttachmentTag)[]): this {
     this._tags.push(...tags);
     return this;
   }
@@ -831,6 +837,19 @@ export class EntityBuilder<
         varConfigs: this._varConfigs,
         skills,
       });
+    } else if (this._type === "attachment") {
+      registerAttachment({
+        __definition: "attachments",
+        id: this.id,
+        visibleVarName: this._visibleVarName,
+        varConfigs: this._varConfigs,
+        version: this._versionInfo,
+        skills,
+        modifications: this.getAttachmentModifications(),
+        tags: this._tags as AttachmentTag[],
+        type: this._type,
+        descriptionDictionary: this._descriptionDictionary,
+      });
     } else {
       registerEntity({
         __definition: "entities",
@@ -841,8 +860,9 @@ export class EntityBuilder<
         varConfigs: this._varConfigs,
         disposeWhenUsageIsZero: this._disposeWhenUsageIsZero,
         hintText: this._hintText,
+        disableTuning: false,
         skills,
-        tags: this._tags,
+        tags: this._tags as EntityTag[],
         type: this._type,
         descriptionDictionary: this._descriptionDictionary,
       });
@@ -854,12 +874,16 @@ export class EntityBuilder<
     }
   }
 
+  protected getAttachmentModifications(): ModificationGetter {
+    throw new GiTcgCoreInternalError(`Unreachable; AttachmentBuilder should override this`);
+  }
+
   /** 此定义未被使用。 */
   reserve(): void {}
 }
 
 export type EntityBuilderPublic<
-  CallerType extends EntityType | "character",
+  CallerType extends EntityType | "character" | "attachment",
   Vars extends string = never,
   AssociatedExt extends ExtensionHandle = never,
   FromCard extends boolean = false,

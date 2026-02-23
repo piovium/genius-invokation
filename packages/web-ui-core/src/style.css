@@ -233,7 +233,7 @@
   }
 
   .card[data-playable] {
-    --playable-shadow: 0 0 5px 5px rgb(252 240 168 / 0.7);
+    --playable-shadow: 0 0 2px 2px rgb(252 240 168 / 0.8);
   }
 
   .card[data-transition-transform] {
@@ -703,7 +703,7 @@
     --blink-opacity: 0.5;
   }
 
-  .cardback-debuff {
+  .abyss-debuff {
     background-color: #6b21a828;
     filter: brightness(0.8);
     box-shadow:
@@ -712,6 +712,26 @@
       inset #581c8780 0 0 6px 6px;
     animation: blink 8s ease-in-out infinite;
     --blink-opacity: 0.6;
+  }
+
+  .electric-shocks-debuff {
+      position: absolute;
+      border-radius: 8px;
+      pointer-events: none;
+      --mask-angle: 0deg;
+      mask-image: conic-gradient(from var(--mask-angle), transparent 0% 25%, #000 30% 45%, transparent 50% 75%, #000 80% 95%, transparent 100%);
+      animation: electric-shocks-rotate 5s linear infinite, electric-shocks-ping 2.5s ease-in-out infinite;
+  }
+
+  .electric-shocks-debuff-inner {
+      position: absolute;
+      inset: 15%;
+      box-shadow: #7d50e8 0 0 1px 1px;
+      border: 1px solid #cbbaf4;
+      border-radius: inherit;
+      filter: var(--filter-electric-shocks);
+      margin-top: -4px;
+      margin-left: -4px;
   }
 
   .bond-of-life-health {
@@ -1665,4 +1685,23 @@
   100% {
     opacity: 0;
   }
+}
+
+@keyframes electric-shocks-rotate {
+    0% {
+        --mask-angle: 0deg;
+    }
+    100% {
+        --mask-angle: 180deg;
+    }
+}
+
+@keyframes electric-shocks-ping {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.1;
+    }
 }

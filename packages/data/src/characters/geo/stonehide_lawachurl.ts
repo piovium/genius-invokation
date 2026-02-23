@@ -109,7 +109,7 @@ export const InfusedStonehide = skill(26014)
 export const StonehideLawachurl = character(2601)
   .since("v3.3.0")
   .tags("geo", "monster", "hilichurl")
-  .health(8)
+  .health(10)
   .energy(2)
   .skills(PlamaLawa, MovoLawa, UpaShato, InfusedStonehide)
   .done();

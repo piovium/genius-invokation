@@ -54,6 +54,7 @@ export const cssPropertyOfTransform = (
 export interface CardStaticUiState extends StaticUiState {
   readonly type: "cardStatic";
   readonly transform: Transform;
+  readonly triggered: boolean;
   // 当拖拽结束时，应用一个消失动画
   readonly draggingEndAnimation: boolean;
 }

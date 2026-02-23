@@ -31,9 +31,9 @@ import { AssetsManager } from "@gi-tcg/assets-manager";
 import { DetailLogViewer } from "@gi-tcg/detail-log-viewer";
 
 const deck0: DeckConfig = {
-  characters: [1105, 1511, 1709],
+  characters: [1417, 1511, 1709],
   cards: [
-    115114, 115115, 115116, 321024, 321011, 322012, 332045, 332042, 331802,
+    214171, 332060, 215111, 214171, 214171, 322012, 332045, 332042, 331802,
     332006, 332042, 223041, 223041, 226031, 226031, 312009, 312009, 312010,
     312010, 313002, 313002, 321002, 321004, 321017, 321017, 322008, 322012,
     322012, 322025, 332004, 332004, 332006, 332032, 332032, 332041, 332041,
@@ -41,12 +41,12 @@ const deck0: DeckConfig = {
   noShuffle: import.meta.env.DEV,
 };
 const deck1: DeckConfig = {
-  characters: [2304, 1502, 1208],
+  characters: [1101, 1116, 1409],
   cards: [
-    331804, 323008, 332003, 332040, 322008, 332037, 333006, 332004, 312023,
+    330006, 323008, 332003, 332040, 322008, 332037, 333006, 332004, 312023,
     330006, 332011, 321004, 321004, 321024, 321024, 322018, 322018, 331202,
     331202, 332004, 332004, 332006, 332006, 332025, 332031, 332032, 332032,
-    332040, 332040, 333015, 333015,
+    332040, 332040, 333015, 331004,
   ],
   noShuffle: import.meta.env.DEV,
 };
@@ -72,10 +72,10 @@ function App() {
 
     const game = new Game(state);
 
-    const io0Opp = io0.oppController.open();
+    // const io0Opp = io0.oppController.open();
 
     game.players[0].io = io0;
-    game.players[1].io = mergeIo(io1, io0Opp);
+    game.players[1].io = io1 // mergeIo(io1, io0Opp);
     game.players[0].config.alwaysOmni = true;
     game.players[0].config.allowTuningAnyDice = true;
     game.onIoError = console.error;
@@ -87,7 +87,7 @@ function App() {
 
   return (
     <>
-      <Chessboard0
+      {/*<Chessboard0
         rotation={0}
         style={{ width: "80vw", height: "80vh" }}
         autoHeight={false}
@@ -96,7 +96,7 @@ function App() {
           avatarUrl: "https://http.cat/404",
           name: "啊啊啊宝宝你是一个松松软软香香甜甜的小蛋糕",
         }}
-      />
+      />*/}
       <Chessboard0
         rotation={0}
         style={{ width: "80vw", height: "80vh" }}
@@ -108,9 +108,8 @@ function App() {
         }}
       />
       <Chessboard1
-        style={{ width: "30vw", height: "96vw" }}
+        style={{ width: "80vw", height: "30vw" }}
         autoHeight={false}
-        rotation={90}
         timer={{ current: 114, total: 514 }}
       />
       <DetailLogViewer logs={logs()} />

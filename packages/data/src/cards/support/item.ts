@@ -110,13 +110,13 @@ export const TreasureseekingSeelie = card(323004)
  * @id 323005
  * @name 化种匣
  * @description
- * 我方打出原本元素骰费用至少为2的支援牌时：少花费1个元素骰。（每回合1次）
+ * 我方打出当前元素骰费用至少为2的支援牌时：少花费1个元素骰。（每回合1次）
  * 可用次数：2
  */
 export const SeedDispensary = card(323005)
   .since("v4.3.0")
   .support("item")
-  .on("deductOmniDiceCard", (c, e) => e.originalDiceCostSize() >= 2 && e.action.skill.caller.definition.type === "support")
+  .on("deductOmniDiceCard", (c, e) => e.currentDiceCostSize() >= 2 && e.action.skill.caller.definition.type === "support")
   .usagePerRound(1)
   .usage(2)
   .deductOmniCost(1)
@@ -189,7 +189,7 @@ export const LumenstoneAdjuvant = card(323007)
  * @id 323008
  * @name 苦舍桓
  * @description
- * 行动阶段开始时：舍弃最多2张原本元素骰费用最高的手牌，每舍弃1张，此牌就累积1点「记忆和梦」。（最多2点）
+ * 行动阶段开始时：舍弃最多2张当前元素骰费用最高的手牌，每舍弃1张，此牌就累积1点「记忆和梦」。（最多2点）
  * 我方角色使用技能时：如果我方本回合未打出过行动牌，则消耗1点「记忆和梦」，以使此技能少花费1个元素骰。
  */
 export const Kusava = card(323008)

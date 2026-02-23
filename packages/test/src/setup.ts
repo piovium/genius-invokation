@@ -320,6 +320,7 @@ export function setup(state: JSX.Element): TestController {
             id,
             definition,
             variables,
+            attachments: [],
           };
           entities.push(state as Draft<EntityState>);
         }
@@ -361,6 +362,8 @@ export function setup(state: JSX.Element): TestController {
               ([name, { initialValue }]) => [name, initialValue]
             )
           ),
+          // TODO attachments
+          attachments: [],
         };
         const area = pile ? "pile" : "hands";
         player[area].push(state as Draft<EntityState>);
@@ -398,6 +401,7 @@ export function setup(state: JSX.Element): TestController {
           id,
           definition,
           variables,
+          attachments: [],
         };
         const area =
           comp === CombatStatus

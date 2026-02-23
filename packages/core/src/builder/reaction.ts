@@ -28,6 +28,7 @@ const Crystallize = 111 as CombatStatusHandle;
 const BurningFlame = 115 as SummonHandle;
 const DendroCore = 116 as CombatStatusHandle;
 const CatalyzingField = 117 as CombatStatusHandle;
+const Thundercloud = 205 as SummonHandle;
 
 export interface ReactionDescriptionEventArg {
   /** 元素反应发生于 */
@@ -149,6 +150,12 @@ function initialize() {
   reaction(Reaction.Quicken)
     .do((c, e) => {
       c.combatStatus(CatalyzingField, e.here);
+    })
+    .done();
+
+  reaction(Reaction.LunarElectroCharged)
+    .do((c, e) => {
+      c.summon(Thundercloud, e.here);
     })
     .done();
 }

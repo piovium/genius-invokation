@@ -47,7 +47,7 @@ function getCardArea(
     value,
   }: PbExposedMutation["mutation"] & {
     $case: "createEntity" | "moveEntity" | "removeEntity";
-  }
+  },
 ): CardDestination | null {
   let area: PbEntityArea | null = null;
   let who: 0 | 1 = 0;
@@ -101,7 +101,7 @@ export interface ParsedMutation {
 
 export function parseMutations(
   mutations: PbExposedMutation[],
-  oppController?: OppChessboardController
+  oppController?: OppChessboardController,
 ): ParsedMutation {
   const oppKnownCardState =
     !oppController || oppController.closed ? null : oppController.handCards;
@@ -134,7 +134,7 @@ export function parseMutations(
   const handleCardOps = (
     mutation: PbExposedMutation["mutation"] & {
       $case: "createEntity" | "moveEntity" | "removeEntity";
-    }
+    },
   ) => {
     const areas: PbEntityArea[] = [];
     if (mutation.$case === "moveEntity") {
@@ -144,7 +144,7 @@ export function parseMutations(
     }
     if (
       !areas.some(
-        (area) => area === PbEntityArea.HAND || area === PbEntityArea.PILE
+        (area) => area === PbEntityArea.HAND || area === PbEntityArea.PILE,
       )
     ) {
       return;
@@ -159,6 +159,8 @@ export function parseMutations(
         [
           PbRemoveEntityReason.EVENT_CARD_PLAYED,
           PbRemoveEntityReason.EVENT_CARD_PLAY_NO_EFFECT,
+          PbRemoveEntityReason.EQUIP_OVERRIDDEN,
+          PbRemoveEntityReason.CREATE_SUPPORT_OVERRIDDEN,
         ].includes(mutation.value.reason)
       ) {
         playingCard = {
@@ -173,7 +175,7 @@ export function parseMutations(
     } else if (mutation.$case === "moveEntity") {
       if (
         [PbMoveEntityReason.EQUIP, PbMoveEntityReason.CREATE_SUPPORT].includes(
-          mutation.value.reason
+          mutation.value.reason,
         )
       ) {
         playingCard = {
@@ -277,7 +279,12 @@ export function parseMutations(
       }
       case "skillUsed": {
         triggeringEntities.push(mutation.value.callerId);
-        if (mutation.value.skillType !== PbSkillType.TRIGGERED) {
+        if (
+          ![
+            PbSkillType.TRIGGERED,
+            PbSkillType.TRIGGERED_FROM_ITS_ATTACHMENT,
+          ].includes(mutation.value.skillType)
+        ) {
           notificationBox = {
             type: "useSkill",
             who: mutation.value.who as 0 | 1,
@@ -309,6 +316,11 @@ export function parseMutations(
         } else {
           enteringEntities.push(id);
         }
+        break;
+      }
+      case "createAttachment": {
+        const id = mutation.value.masterCardId;
+        triggeringEntities.push(id);
         break;
       }
       case "moveEntity": {
@@ -346,7 +358,7 @@ export function parseMutations(
       case "changePhase": {
         if (
           [PbPhaseType.ROLL, PbPhaseType.ACTION, PbPhaseType.END].includes(
-            mutation.value.newPhase
+            mutation.value.newPhase,
           )
         ) {
           roundAndPhase.value = mutation.value.newPhase;

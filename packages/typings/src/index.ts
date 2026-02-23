@@ -29,11 +29,13 @@ export {
   PhaseType as PbPhaseType,
   CharacterState as PbCharacterState,
   EntityState as PbEntityState,
+  AttachmentState as PbAttachmentState,
   PlayerState as PbPlayerState,
   SkillInfo as PbSkillInfo,
   State as PbGameState,
   EquipmentType as PbEquipmentType,
   PlayerStatus as PbPlayerStatus,
+  EntityType as PbEntityType,
 } from "./gen/state";
 
 export { Notification } from "./gen/notification";
@@ -47,6 +49,7 @@ export {
   ChangePhaseEM,
   CreateCharacterEM,
   CreateEntityEM,
+  CreateAttachmentEM,
   MoveEntityEM,
   HealKind as PbHealKind,
   DamageEM,

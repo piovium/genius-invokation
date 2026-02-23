@@ -1,4 +1,4 @@
-import { Aura, CardHandle, DamageType, DiceType, card, combatStatus, diceCostOfCard, skill, status, summon } from "@gi-tcg/core/builder";
+import { Aura, CardHandle, DamageType, DiceType, card, combatStatus, skill, status, summon } from "@gi-tcg/core/builder";
 import { BonecrunchersEnergyBlockCombatStatus } from "../cards/event/other";
 import { Cyno } from "../characters/electro/cyno";
 import { LightningRoseSummon } from "../characters/electro/lisa";
@@ -93,8 +93,7 @@ const BurstScan = combatStatus(117082)
   .usageCanAppend(1, 3)
   .do((c, e) => {
     c.$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`)?.consumeUsage(1);
-    const cardDef = e.entity.definition;
-    const cost = diceCostOfCard(cardDef);
+    const cost = e.entity.diceCost();
     c.damage(DamageType.Dendro, cost + 1);
     c.emitCustomEvent(ShouldTriggerTalent, e.entity.latest());
   })
@@ -117,7 +116,7 @@ const StarfallShower = skill(22042)
     const [card] = c.disposeMaxCostHands(1);
     if (card) {
       if (c.self.hasEquipment(LightlessFeeding)) {
-        c.heal(diceCostOfCard(card.definition), "@self");
+        c.heal(card.diceCost(), "@self");
       }
     }
   })

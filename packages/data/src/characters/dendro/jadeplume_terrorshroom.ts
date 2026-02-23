@@ -104,7 +104,7 @@ export const RadicalVitality = skill(27014)
 export const JadeplumeTerrorshroom = character(2701)
   .since("v3.3.0")
   .tags("dendro", "monster")
-  .health(10)
+  .health(12)
   .energy(2)
   .skills(MajesticDance, VolatileSporeCloud, FeatherSpreading, RadicalVitality)
   .done();

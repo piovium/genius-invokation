@@ -16,6 +16,7 @@
 /** This file provides a wrapper of getEntityById/getEntityArea with getRaw */
 
 import type {
+  AttachmentState,
   CharacterState,
   EntityState,
   GameState,
@@ -42,13 +43,21 @@ export {
   nationOfCharacter,
   weaponOfCharacter,
   allSkills,
-  diceCostOfCard,
+  diceCostSizeOfCard,
   isCharacterInitiativeSkill,
   sortDice,
 } from "../../utils";
 
 export type PlainCharacterState = Omit<CharacterState, StateSymbol>;
 export type PlainEntityState = Omit<EntityState, StateSymbol>;
-export type PlainAnyState = PlainCharacterState | PlainEntityState;
+export type PlainAttachmentState = Omit<AttachmentState, StateSymbol>;
+export type PlainAnyState =
+  | PlainCharacterState
+  | PlainEntityState
+  | PlainAttachmentState;
 export type ExPlainEntityState<TypeT extends ExEntityType> =
-  TypeT extends "character" ? PlainCharacterState : PlainEntityState;
+  TypeT extends "character"
+    ? PlainCharacterState
+    : TypeT extends "attachment"
+      ? PlainAttachmentState
+      : PlainEntityState;

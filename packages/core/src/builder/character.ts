@@ -30,6 +30,7 @@ import {
   type VersionMetadata,
   DEFAULT_VERSION_INFO,
 } from "../base/version";
+import type { LunarReaction } from "@gi-tcg/typings";
 
 export class CharacterBuilder {
   private readonly _tags: CharacterTag[] = [];
@@ -38,6 +39,7 @@ export class CharacterBuilder {
   private _varConfigs: Record<number, VariableConfig> = {};
   private readonly _skillIds: number[] = [];
   private _associatedNightsoulsBlessingId: number | null = null;
+  private _enabledLunarReactions: LunarReaction[] = [];
   private _specialEnergy: SpecialEnergyConfig | null = null;
   constructor(private readonly id: number) {
     builderWeakRefs.add(new WeakRef(this));
@@ -88,6 +90,10 @@ export class CharacterBuilder {
     this._associatedNightsoulsBlessingId = nightsoulsBlessing;
     return this;
   }
+  enableLunarReactions(...reactions: LunarReaction[]) {
+    this._enabledLunarReactions.push(...reactions);
+    return this;
+  }
 
   done(): CharacterHandle {
     registerCharacter({
@@ -108,6 +114,7 @@ export class CharacterBuilder {
       skillIds: this._skillIds,
       associatedNightsoulsBlessingId: this._associatedNightsoulsBlessingId,
       specialEnergy: this._specialEnergy,
+      enabledLunarReactions: this._enabledLunarReactions,
     });
     return this.id as CharacterHandle;
   }

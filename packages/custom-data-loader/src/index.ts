@@ -18,11 +18,11 @@ import {
   resolveOfficialVersion,
   SkillDefinition,
   Version,
+  playSkillOfCard,
 } from "@gi-tcg/core";
 import type { CustomData, CustomSkill } from "@gi-tcg/assets-manager";
 
 import getOfficialData, { registry as baseRegistry } from "@gi-tcg/data";
-import { playSkillOfCard } from "@gi-tcg/core/builder";
 import { BuilderContext } from "./builder_context";
 
 export { getOfficialData };
@@ -32,7 +32,7 @@ function b64EncodeUnicode(str: string) {
   return btoa(
     encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
       return String.fromCharCode(parseInt(p1, 16));
-    })
+    }),
   );
 }
 
@@ -92,7 +92,7 @@ export class CustomDataLoader {
     const gameData = this.registry.resolve(
       (items) => resolveOfficialVersion(items, this.version),
       (items) =>
-        items.find((item) => item.version.from === "customData") ?? null
+        items.find((item) => item.version.from === "customData") ?? null,
     );
     const customData: CustomData = {
       actionCards: [],
@@ -151,7 +151,7 @@ export class CustomDataLoader {
           obtainable: et.obtainable,
           tags: [...et.tags],
           playCost: new Map(
-            playSkillOfCard(et)?.initiativeSkillConfig.requiredCost
+            playSkillOfCard(et)?.initiativeSkillConfig.requiredCost,
           ),
         });
       }

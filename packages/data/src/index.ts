@@ -1,4 +1,4 @@
-// Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -18,6 +18,7 @@
 
 import "./begin";
 
+import "./commons";
 import "./cards/equipment/artifacts";
 import "./cards/equipment/techniques";
 import "./cards/equipment/weapon/bow";
@@ -30,6 +31,7 @@ import "./cards/event/legend";
 import "./cards/event/other";
 import "./cards/support/adventure";
 import "./cards/support/ally";
+import "./cards/support/blessing";
 import "./cards/support/item";
 import "./cards/support/place";
 import "./characters/anemo/chasca";
@@ -65,6 +67,7 @@ import "./characters/cryo/kaeya";
 import "./characters/cryo/kamisato_ayaka";
 import "./characters/cryo/la_signora";
 import "./characters/cryo/layla";
+import "./characters/cryo/mika";
 import "./characters/cryo/qiqi";
 import "./characters/cryo/rosaria";
 import "./characters/cryo/shenhe";
@@ -94,6 +97,7 @@ import "./characters/electro/electro_hypostasis";
 import "./characters/electro/fatui_electro_cicin_mage";
 import "./characters/electro/fischl";
 import "./characters/electro/iansan";
+import "./characters/electro/ineffa";
 import "./characters/electro/keqing";
 import "./characters/electro/kujou_sara";
 import "./characters/electro/kuki_shinobu";
@@ -153,6 +157,7 @@ import "./characters/pyro/emperor_of_fire_and_iron";
 import "./characters/pyro/eremite_scorching_loremaster";
 import "./characters/pyro/fatui_pyro_agent";
 import "./characters/pyro/gaming";
+import "./characters/pyro/goldflame_qucusaur_tyrant";
 import "./characters/pyro/hu_tao";
 import "./characters/pyro/klee";
 import "./characters/pyro/lord_of_eroded_primal_fire";

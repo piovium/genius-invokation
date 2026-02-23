@@ -44,6 +44,7 @@ export {
   mergeIo,
 } from "./io";
 export * from "./error";
+export { getEntityById, getEntityArea, playSkillOfCard } from "./utils";
 export * from "@gi-tcg/typings";
 
 import type {

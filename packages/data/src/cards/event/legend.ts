@@ -15,6 +15,7 @@
 
 import { DiceType, card, extension, flip, pair, status } from "@gi-tcg/core/builder";
 import { DisperseTheCalamity, SanctifyTheDefiled } from "./other";
+import { IneffectiveWhenPlayed } from "../../commons";
 
 /**
  * @id 330001
@@ -118,18 +119,29 @@ export const InEveryHouseAStove = card(330005)
  * @id 330006
  * @name 裁定之时
  * @description
- * 本回合中，对方牌手打出的3张事件牌无效。
+ * 本回合中，敌方下次打出事件牌后：赋予敌方手牌中所有事件牌无效化。
+ * 本回合中，敌方舍弃卡牌后：将敌方手牌中2张当前元素骰费用最高的卡牌置入牌组底。
  * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  */
 export const [PassingOfJudgment] = card(330006)
   .since("v4.3.0")
-  .costSame(1)
   .legend()
   .toCombatStatus(300003, "opp")
-  .tags("eventEffectless")
   .oneDuration()
   .on("playCard", (c, e) => e.card.definition.type === "eventCard")
-  .usage(3)
+  .usage(1, { autoDispose: false, visible: false })
+  .do((c) => {
+    for (const hand of c.player.hands) {
+      if (hand.definition.type === "eventCard") {
+        c.attach(IneffectiveWhenPlayed, hand);
+      }
+    }
+  })
+  .on("disposeCard")
+  .do((c) => {
+    const maxCostHands = c.maxCostHands(2);
+    c.undrawCards(maxCostHands, "bottom");
+  })
   .done();
 
 /**
@@ -335,7 +347,7 @@ export const FightForDeath = card(330011)
  * @name 「沙中遗事」
  * @description
  * 挑选一项：
- * 将敌方1张费用最高的手牌置于牌组底。
+ * 将敌方1张当前元素骰费用最高的手牌置于牌组底。
  * 或
  * 将我方所有手牌置于牌组底，然后抓相同数量+1张手牌。
  */

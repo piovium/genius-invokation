@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { status, combatStatus, summon, DamageType } from "@gi-tcg/core/builder";
+import { status, combatStatus, summon, DamageType, attachment, DiceType } from "@gi-tcg/core/builder";
 
 /**
  * @id 100
@@ -160,6 +160,28 @@ export const BattlePlan = status(172)
   .done();
 
 /**
+ * @id 201
+ * @name 费用增加
+ * @description
+ * 此牌的元素骰费用增加1。（可叠加，没有上限）
+ */
+export const CostIncrease = attachment(201)
+  .variableCanAppend("layer", 1, Infinity)
+  .addCost((st, self) => self.variables.layer)
+  .done();
+
+/**
+ * @id 202
+ * @name 费用降低
+ * @description
+ * 此牌的元素骰费用降低1。（可叠加，没有上限）
+ */
+export const CostReduction = attachment(202)
+  .variableCanAppend("layer", 1, Infinity)
+  .deductCost((st, self) => self.variables.layer)
+  .done();
+
+/**
  * @id 203
  * @name 护盾
  * @description
@@ -167,7 +189,81 @@ export const BattlePlan = status(172)
  */
 export const Shield = combatStatus(203)
   .shield(1, Infinity)
-  .done();;
+  .done();
+
+/**
+ * @id 204
+ * @name 电击
+ * @description
+ * 结束阶段：如果此牌在手牌中，则对我方生命值最高角色造成等同于自身层数的穿透伤害。(可叠加，没有上限）
+ */
+export const Conductive = attachment(204)
+  .tags("conductive")
+  .variableCanAppend("layer", 1, Infinity)
+  .on("endPhase", (c, e) => c.self.area.type === "hands")
+  .do((c) => {
+    const target = c.$(`my characters order by 0 - health limit 1`);
+    if (target) {
+      c.damage(DamageType.Piercing, c.getVariable("layer"), target);
+    }
+  })
+  .done();
+
+/**
+ * @id 205
+ * @name 雷暴云
+ * @description
+ * 结束阶段：造成2点雷元素伤害。
+ * 可用次数：1（可叠加，没有上限）
+ * 自身入场或可用次数增加时：赋予敌方随机1张手牌电击。
+ */
+export const Thundercloud = summon(205)
+  .defineSnippet("giveOppRandomCardConductive", (c) => {
+    if (c.oppPlayer.hands.length === 0) {
+      return;
+    }
+    const targetHand = c.random(c.oppPlayer.hands);
+    c.attach(Conductive, targetHand);
+  })
+  .endPhaseDamage(DamageType.Electro, 2)
+  .usageCanAppend(1, Infinity)
+  .on("enter")
+  .callSnippet("giveOppRandomCardConductive")
+  .on("gainUsage", (c, e) => e.entity.id === c.self.id)
+  .callSnippet("giveOppRandomCardConductive")
+  .done();
+
+/**
+ * @id 206
+ * @name 赋能
+ * @description
+ * 此牌费用改为花费对应数量的任意元素骰
+ * 调和此牌时：转换的元素类型改为万能元素。
+ */
+export const Empowerment = attachment(206)
+  .changeCostType(DiceType.Void)
+  .changeTuningTarget(DiceType.Omni)
+  .done();
+
+/**
+ * @id 207
+ * @name 不可调和
+ * @description
+ * 此牌无法进行调和。
+ */
+export const NoTuningAllowed = attachment(207)
+  .disableTuning()
+  .done();
+
+/**
+ * @id 208
+ * @name 无效化
+ * @description
+ * 此牌打出效果无效。
+ */
+export const IneffectiveWhenPlayed = attachment(208)
+  .makeEffectless()
+  .done();
 
 /**
  * @id 303300

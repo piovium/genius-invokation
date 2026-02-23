@@ -117,6 +117,7 @@ interface SkillContext {
   // opt.who 决定哪一方抽牌
   // opt.withTag 要求抽出的手牌必须带有的标签
   drawCards(count: number, opt: DrawCardsOpt): void;
+  drawCards(...cards: CardState[]): void;
 
   // 将牌从手牌放回牌堆
   undrawCards(cards: CardState[], strategy: InsertPileStrategy): void;

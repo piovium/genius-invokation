@@ -43,6 +43,7 @@ export async function generateImports() {
 
 import "./begin";
 
+import "./commons";
 ${imports}
 
 export * from "./end";

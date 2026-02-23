@@ -100,7 +100,7 @@ export class SkillExecutor {
       `skill caller: ${stringifyState(skillInfo.caller)}`,
     );
     const skillDef = skillInfo.definition;
-    const { who } = getEntityArea(this.state, skillInfo.caller.id);
+    const callerArea = getEntityArea(this.state, skillInfo.caller.id);
 
     // 重置下落攻击判定。
     // 官方描述：“角色被切换为「出战角色」后，本回合内的下一次使用技能（非特技）若为「普通攻击」，则被视为「下落攻击」”
@@ -108,7 +108,7 @@ export class SkillExecutor {
     if (isCharacterInitiativeSkill(skillInfo)) {
       this.mutate({
         type: "setPlayerFlag",
-        who,
+        who: callerArea.who,
         flagName: "canPlunging",
         value: false,
       });
@@ -148,17 +148,28 @@ export class SkillExecutor {
         default: {
           if (skillInfo.caller.definition.type === "character") {
             skillType = PbSkillType.CHARACTER_PASSIVE;
+          } else if (skillInfo.caller.definition.type === "attachment") {
+            skillType = PbSkillType.TRIGGERED_FROM_ITS_ATTACHMENT;
           } else {
             skillType = PbSkillType.TRIGGERED;
           }
         }
       }
       if (skillDef.initiativeSkillConfig || newState !== oldState) {
+        let callerId = skillInfo.caller.id;
+        const callerDefinitionId = skillInfo.caller.definition.id;
+        if (
+          skillInfo.caller.definition.type === "attachment" &&
+          "cardId" in callerArea
+        ) {
+          // 若附属状态触发技能，则 callerId 应为其所属卡牌的 id
+          callerId = callerArea.cardId;
+        }
         prependMutations.push({
           $case: "skillUsed",
-          who,
-          callerId: skillInfo.caller.id,
-          callerDefinitionId: skillInfo.caller.definition.id,
+          who: callerArea.who,
+          callerId,
+          callerDefinitionId,
           skillDefinitionId: skillDef.id,
           skillType,
           triggeredOn: skillDef.triggerOn,
@@ -202,6 +213,7 @@ export class SkillExecutor {
             const zeroHealthEventArg = new ZeroHealthEventArg(
               arg.onTimeState,
               arg.damageInfo,
+              arg.option,
             );
             if (checkImmune(this.state, zeroHealthEventArg)) {
               zeroHealthEventArgs.push(zeroHealthEventArg);

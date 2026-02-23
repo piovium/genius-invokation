@@ -944,7 +944,7 @@ export const ConductorsTopHatInEffect = status(301204)
  * @id 312030
  * @name 指挥的礼帽
  * @description
- * 我方切换到所附属角色后：舍弃原本元素骰费用最高的1张手牌，将2个元素骰转换为万能元素，并使角色下次使用技能或打出「天赋」时少花费1个元素骰。（每回合1次）
+ * 我方切换到所附属角色后：舍弃1张当前元素骰费用最高的手牌，将2个元素骰转换为万能元素，并使角色下次使用技能或打出「天赋」时少花费1个元素骰。（每回合1次）
  * （角色最多装备1件「圣遗物」）
  */
 export const ConductorsTopHat = card(312030)
@@ -983,7 +983,7 @@ export const MaidensFadingBeauty = card(312031)
  */
 export const DemonwarriorsFeatherMask = card(312032)
   .since("v5.3.0")
-  .costVoid(2)
+  .costSame(1)
   .artifact()
   .on("useTechnique")
   .usagePerRound(1)

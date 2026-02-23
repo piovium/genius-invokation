@@ -112,7 +112,7 @@ export const Breakthrough = skill(12094)
 export const Yelan = character(1209)
   .since("v4.3.0")
   .tags("hydro", "bow", "liyue")
-  .health(10)
+  .health(11)
   .energy(3)
   .skills(StealthyBowshot, LingeringLifeline, DepthclarionDice, Breakthrough)
   .done();

@@ -84,6 +84,16 @@ message CharacterState {
   optional string special_energy_name = 58;
 }
 
+enum EntityType {
+  ENTITY_TYPE_UNSPECIFIED = 0;
+  ENTITY_TYPE_EVENT_CARD = 1;
+  ENTITY_TYPE_STATUS = 2;
+  ENTITY_TYPE_COMBAT_STATUS = 3;
+  ENTITY_TYPE_SUMMON = 4;
+  ENTITY_TYPE_SUPPORT = 5;
+  ENTITY_TYPE_EQUIPMENT = 6;
+}
+
 message EntityState {
   sint32 id = 1;
   int32 definition_id = 2;
@@ -92,6 +102,8 @@ message EntityState {
   // 若为行动牌，指示原本费用
   repeated DiceRequirement definition_cost = 5;
   uint32 tags = 6;
+  repeated AttachmentState attachment = 7;
+  EntityType type = 8;
   
   // 显示于召唤物、支援牌右上角的变量名和变量值
   optional string variable_name = 51;
@@ -104,6 +116,17 @@ message EntityState {
   bool has_usage_per_round = 55;
   // 若为装备，则提供此字段以显示装备类型
   optional EquipmentType equipment = 56;
+}
+
+message AttachmentState {
+  sint32 id = 1;
+  int32 definition_id = 2;
+  // 指示如何替换文本描述中的变量名 
+  map<string, string> description_dictionary = 4;
+  
+  // 显示于角落的变量名和变量值
+  optional string variable_name = 51;
+  optional int32 variable_value = 52;
 }
 
 enum EquipmentType {

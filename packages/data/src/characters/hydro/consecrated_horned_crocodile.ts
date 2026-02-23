@@ -33,7 +33,7 @@ export const FangBite = skill(22071)
  * @id 22072
  * @name 鳄齿锐波
  * @description
- * 造成3点水元素伤害，将至多1张原本元素骰费用最高的手牌置入牌组底，生成手牌噬骸能量块。
+ * 造成3点水元素伤害，将至多1张当前元素骰费用最高的手牌置入牌组底，生成手牌噬骸能量块。
  */
 export const SawtoothedSurge = skill(22072)
   .type("elemental")
@@ -72,7 +72,7 @@ export const ReptilianRage = skill(22073)
  * @id 22074
  * @name 圣骸感应
  * @description
- * 【被动】我方打出或弃置噬骸能量块后，治疗我方受伤最多的角色1点。
+ * 【被动】我方打出或舍弃噬骸能量块后，治疗我方受伤最多的角色1点。
  */
 export const ConsecratedSenses = skill(22074)
   .type("passive")

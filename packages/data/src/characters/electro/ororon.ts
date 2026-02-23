@@ -104,12 +104,14 @@ export const DarkVoicesEcho = skill(14163)
  * @id 14164
  * @name 夜翳的通感
  * @description
- * 【被动】我方触发感电反应后：如果可能，消耗2点「夜魂值」，造成1点雷元素伤害。
+ * 【被动】我方触发感电或月感电反应后：如果可能，消耗2点「夜魂值」，造成1点雷元素伤害。
  * 我方造成此技能以外的水元素伤害或雷元素伤害后，自身进入夜魂加持，并获得1点「夜魂值」。（每回合1次）
  */
 export const NightshadeSynesthesia = skill(14164)
   .type("passive")
-  .on("dealReaction", (c, e) => e.type === Reaction.ElectroCharged && (c.self.hasNightsoulsBlessing()?.variables.nightsoul ?? 0) >= 2)
+  .on("dealReaction", (c, e) => 
+    ([Reaction.ElectroCharged, Reaction.LunarElectroCharged] as Reaction[]).includes(e.type) && 
+    (c.self.hasNightsoulsBlessing()?.variables.nightsoul ?? 0) >= 2)
   .listenToPlayer()
   .consumeNightsoul("@self", 2)
   .damage(DamageType.Electro, 1)
@@ -125,7 +127,7 @@ export const NightshadeSynesthesia = skill(14164)
  * @id 14165
  * @name 夜翳的通感
  * @description
- * 【被动】我方触发感电反应后：如果可能，消耗2点「夜魂值」，造成1点雷元素伤害。
+ * 【被动】我方触发感电或月感电反应后：如果可能，消耗2点「夜魂值」，造成1点雷元素伤害。
  * 我方造成此技能以外的水元素伤害或雷元素伤害后，自身进入夜魂加持，并获得1点「夜魂值」。（每回合1次）
  */
 export const NightshadeSynesthesia01 = skill(14165)

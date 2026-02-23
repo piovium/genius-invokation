@@ -129,11 +129,12 @@ const VALID_DEF_KEYS = [
   "characters",
   "entities",
   "extensions",
+  "attachments",
 ] as const;
 type ValidDefKeys = (typeof VALID_DEF_KEYS)[number];
 
 function isValidDefKey(defKey: unknown): defKey is ValidDefKeys {
-  return ["characters", "entities", "extensions"].includes(
+  return ["characters", "entities", "extensions", "attachments"].includes(
     defKey as string,
   );
 }
@@ -232,6 +233,9 @@ export function deserializeGameStateLog(
         ...player.pile,
       ]) {
         e[StateSymbol] = "entity";
+        for (const att of e.attachments) {
+          att[StateSymbol] = "attachment";
+        }
       }
     }
     for (const ext of restoredState.extensions) {

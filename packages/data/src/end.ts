@@ -16,8 +16,6 @@
 import { resolveOfficialVersion, type Version } from "@gi-tcg/core";
 import { registry, scope } from "./begin";
 
-import "./commons";
-
 scope.end();
 registry.freeze();
 

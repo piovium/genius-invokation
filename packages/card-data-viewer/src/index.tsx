@@ -25,6 +25,7 @@ import {
 } from "./CardDataViewer";
 import { createSignal } from "solid-js";
 import type {
+  PbAttachmentState,
   PbCharacterState,
   PbEntityState,
 } from "@gi-tcg/typings";
@@ -74,7 +75,7 @@ export function createCardDataViewer(
   };
 
   const mapStateToInput = (
-    st: PbCharacterState | PbEntityState,
+    st: PbCharacterState | PbEntityState | PbAttachmentState,
     type: StateType,
   ): ViewerInput => ({
     from: "state",
@@ -120,6 +121,9 @@ export function createCardDataViewer(
           ? state.entity.map((st) =>
               mapStateToInput(st, st.equipment ? "equipment" : "status"),
             )
+          : []),
+        ...("attachment" in state
+          ? state.attachment.map((st) => mapStateToInput(st, "attachment"))
           : []),
         // combat statuses (2nd argument)
         ...(combatStatuses ?? []).map((st) =>

@@ -17,7 +17,11 @@ import { flip } from "@gi-tcg/utils";
 import type { MatchResult, Node, NonterminalNode } from "ohm-js";
 
 import grammar, { type QueryLangActionDict } from "./query.ohm-bundle";
-import type { AnyState as AnyStateOriginal, CharacterState, GameState } from "../base/state";
+import type {
+  AnyState as AnyStateOriginal,
+  CharacterState,
+  GameState,
+} from "../base/state";
 import type { ContextMetaBase, SkillContext } from "../builder/context/skill";
 import { CharacterBase } from "../builder/context/character";
 import { getEntityArea } from "../utils";
@@ -27,7 +31,7 @@ import { GiTcgQueryError } from "../error";
 // If we pass an reactive state into it, then area will be presented
 type AnyState = AnyStateOriginal & {
   area?: EntityArea;
-}
+};
 
 type AnySkillContext = SkillContext<ContextMetaBase>;
 
@@ -402,7 +406,7 @@ const tagSpecifierDict: QueryLangActionDict<string[]> = {
       );
       console?.trace();
     }
-    const tags = result.flatMap((st) => st.definition.tags);
+    const tags = result.flatMap((st) => st.definition.tags as string[]);
 
     const category =
       qualifier.numChildren > 0 ? qualifier.children[0].sourceString : "";

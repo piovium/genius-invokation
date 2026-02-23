@@ -25,6 +25,7 @@ import type {
   AnyState,
   CharacterState,
   EntityState,
+  EntityVariables,
   GameState,
   PlayerState,
 } from "./base/state";
@@ -56,6 +57,7 @@ import {
 } from "./error";
 import type { ActionInfoWithModification } from "./preview";
 import type { PlayerConfig } from "./player";
+import type { MoveEntityM } from "./base/mutation";
 
 export type Writable<T> = {
   -readonly [P in keyof T]: T[P];
@@ -86,6 +88,14 @@ export function getEntityById(state: GameState, id: number): AnyState {
         if (entity.id === id) {
           return entity;
         }
+        // might exists in hands, cards, or removedEntities.
+        if ("attachments" in entity) {
+          for (const attachment of entity.attachments) {
+            if (attachment.id === id) {
+              return attachment;
+            }
+          }
+        }
       }
     }
   }
@@ -93,11 +103,15 @@ export function getEntityById(state: GameState, id: number): AnyState {
 }
 
 /**
- * 查找所有可响应技能的实体，按照通常响应顺序排序。不含牌堆和已移除的实体。
+ * 查找所有实体(含牌堆)，按照通常响应顺序排序
  * @param state 游戏状态
+ * @param inclRemoved 是否包含已移除的实体
  * @returns 实体状态列表
  */
-function allEntitiesCanTrigger(state: GameState): AnyState[] {
+export function getAllEntities(
+  state: GameState,
+  inclRemoved = false,
+): AnyState[] {
   const result: AnyState[] = [];
   for (const who of [state.currentTurn, flip(state.currentTurn)]) {
     const player = state.players[who];
@@ -127,27 +141,14 @@ function allEntitiesCanTrigger(state: GameState): AnyState[] {
       }
     }
     result.push(...player.summons, ...player.supports);
-    result.push(...player.hands);
+    for (const card of [...player.hands, ...player.pile.toReversed()]) {
+      result.push(card, ...card.attachments);
+    }
+    if (inclRemoved) {
+      result.push(...player.removedEntities);
+    }
   }
   return result;
-}
-
-/**
- * 查找所有实体(含牌堆)，按照通常响应顺序排序和
- * @param state 游戏状态
- * @param inclRemoved 是否包含已移除的实体
- * @returns 实体状态列表
- */
-export function getAllEntities(
-  state: GameState,
-  inclRemoved = false,
-): AnyState[] {
-  return [
-    ...allEntitiesCanTrigger(state),
-    ...state.players[state.currentTurn].pile,
-    ...state.players[flip(state.currentTurn)].pile,
-    ...(inclRemoved ? state.players.flatMap((p) => p.removedEntities) : []),
-  ];
 }
 
 export interface CallerAndTriggeredSkill {
@@ -229,7 +230,7 @@ export function allSkills(
       }
     }
   }
-  for (const entity of allEntitiesCanTrigger(state)) {
+  for (const entity of getAllEntities(state)) {
     for (const skill of entity.definition.skills) {
       if (skill.triggerOn === triggerOn) {
         result.push({ caller: entity, skill });
@@ -256,14 +257,17 @@ export function getEntityArea(state: GameState, id: number): EntityArea {
       "summons",
       "supports",
       "hands",
-      "removedEntities",
       "pile",
+      "removedEntities",
     ] as const) {
-      if (player[key].find((e) => e.id === id)) {
-        return {
-          type: key,
-          who,
-        };
+      for (const entity of player[key]) {
+        if (
+          entity.id === id ||
+          ("attachments" in entity &&
+            entity.attachments.find((a) => a.id === id))
+        ) {
+          return { type: key, who, cardId: entity.id };
+        }
       }
     }
   }
@@ -278,12 +282,17 @@ export function allEntitiesAtArea(
   const player = state.players[area.who];
   if (area.type === "characters") {
     const characters = player.characters;
-    const idx = characters.findIndex((ch) => ch.id === area.characterId);
-    if (idx === -1) {
+    const ch = characters.find((ch) => ch.id === area.characterId);
+    if (!ch) {
       throw new GiTcgCoreInternalEntityNotFoundError(state, area.characterId);
     }
-    result.push(characters[idx]);
-    result.push(...characters[idx].entities);
+    result.push(ch, ...ch.entities);
+  } else if (area.type === "hands" || area.type === "pile") {
+    const card = player[area.type].find((c) => c.id === area.cardId);
+    if (!card) {
+      throw new GiTcgCoreInternalEntityNotFoundError(state, area.cardId);
+    }
+    result.push(card, ...card.attachments);
   } else {
     result.push(...player[area.type]);
   }
@@ -298,7 +307,7 @@ export function allEntitiesAtArea(
  * @returns
  */
 export function checkImmune(state: GameState, e: ZeroHealthEventArg) {
-  const clonedE = new ZeroHealthEventArg(state, e.damageInfo);
+  const clonedE = new ZeroHealthEventArg(state, e.damageInfo, e.option);
   for (const { caller, skill } of allSkills(state, "modifyZeroHealth")) {
     const skillInfo = defineSkillInfo({
       caller,
@@ -340,10 +349,20 @@ export function removeEntity(state: Draft<GameState>, id: number): AnyState {
       "pile",
     ] as const) {
       const area = player[key];
-      const idx = area.findIndex((e) => e.id === id);
-      if (idx !== -1) {
-        const [removed] = area.splice(idx, 1);
-        return removed;
+      for (let i = 0; i < area.length; i++) {
+        if (area[i].id === id) {
+          const [removed] = area.splice(i, 1);
+          return removed;
+        }
+        if (key === "hands" || key === "pile") {
+          const attachmentIdx = area[i].attachments.findIndex(
+            (a) => a.id === id,
+          );
+          if (attachmentIdx !== -1) {
+            const [removed] = area[i].attachments.splice(attachmentIdx, 1);
+            return removed;
+          }
+        }
       }
     }
   }
@@ -434,6 +453,102 @@ export function shouldEnterOverride<T extends AnyState>(
   }
   // 状态、装备、出战状态、召唤物 可叠加
   return existOne;
+}
+
+export interface CreateEntityOptions {
+  /** 若覆盖创建，只修改 `overrideVariables` 中指定的变量 */
+  readonly modifyOverriddenVariablesOnly?: boolean;
+  /** 创建实体时，覆盖默认变量 */
+  readonly overrideVariables?: Partial<EntityVariables>;
+}
+
+export interface InsertEntityOptions extends CreateEntityOptions {
+  /** 移动实体原因 */
+  readonly moveReason?: MoveEntityM["reason"];
+}
+
+export function getInsertedStateVariables<T extends AnyState>({
+  state,
+  oldState,
+  newStateTemplate,
+  opt,
+}: {
+  /** 对局状态，用于获取 versionBehavior */
+  state: GameState;
+  /** 是否覆盖了同名状态 */
+  oldState: T | null;
+  /** 带创建的实体，提供 variables 和 definitions */
+  newStateTemplate: Partial<T> & { definition: {} };
+  opt?: InsertEntityOptions;
+}): EntityVariables {
+  const definition = newStateTemplate.definition;
+  const incomingVariables =
+    newStateTemplate.variables ?? opt?.overrideVariables ?? {};
+  if (oldState) {
+    const { varConfigs } = definition;
+    const newValues: Record<string, number> = {};
+    // refresh exist entity's variable
+    for (const name in varConfigs) {
+      if (opt?.modifyOverriddenVariablesOnly && !(name in incomingVariables)) {
+        continue;
+      }
+      let { initialValue, recreateBehavior } = varConfigs[name];
+      if (typeof incomingVariables[name] === "number") {
+        initialValue = incomingVariables[name];
+      }
+      const oldValue = oldState.variables[name] ?? 0;
+      switch (recreateBehavior.type) {
+        case "default": {
+          const defaultBehaviorType =
+            state.versionBehavior.defaultRecreateBehavior;
+          if (defaultBehaviorType === "overwrite") {
+            newValues[name] = initialValue;
+          } else if (defaultBehaviorType === "takeMax") {
+            newValues[name] = Math.max(initialValue, oldValue);
+          }
+          break;
+        }
+        case "keep": {
+          // just skip this variable
+          break;
+        }
+        case "overwrite": {
+          newValues[name] = initialValue;
+          break;
+        }
+        case "takeMax": {
+          newValues[name] = Math.max(initialValue, oldValue);
+          break;
+        }
+        case "append": {
+          if (oldValue > recreateBehavior.appendLimit) {
+            // 如果当前值已经超过可叠加的上限，则不再叠加
+            break;
+          }
+          const appendValue =
+            incomingVariables[name] ?? recreateBehavior.appendValue;
+          const appendResult = appendValue + oldValue;
+          newValues[name] = Math.min(
+            appendResult,
+            recreateBehavior.appendLimit,
+          );
+          break;
+        }
+        default: {
+          const _check: never = recreateBehavior;
+          break;
+        }
+      }
+    }
+    return newValues;
+  } else {
+    return Object.fromEntries(
+      Object.entries(definition.varConfigs).map(([name, { initialValue }]) => [
+        name,
+        incomingVariables[name] ?? initialValue,
+      ]),
+    );
+  }
 }
 
 export function isChargedPlunging(skill: SkillDefinition, player: PlayerState) {
@@ -548,10 +663,29 @@ export function diceCostSize(req: ReadonlyDiceRequirement): number {
     );
 }
 
-export function diceCostOfCard(card: EntityDefinition): number {
+export function originalDiceCostSizeOfCard(
+  definition: EntityDefinition,
+): number {
   return (
-    playSkillOfCard(card)?.initiativeSkillConfig.computed$diceCostSize ?? 0
+    playSkillOfCard(definition)?.initiativeSkillConfig.computed$diceCostSize ??
+    0
   );
+}
+
+export function diceCostSizeOfCard(
+  state: GameState,
+  card: EntityState,
+): number {
+  const definition = card.definition;
+  if (
+    !state.versionBehavior.diceCostApplyAttachments ||
+    card.attachments.length === 0
+  ) {
+    // shortcut path, return static value
+    return originalDiceCostSizeOfCard(definition);
+  }
+  const { requiredCost } = applyAttachmentModifications(state, card);
+  return diceCostSize(requiredCost);
 }
 
 export function assertValidActionCard(entity: EntityDefinition): void {
@@ -560,8 +694,134 @@ export function assertValidActionCard(entity: EntityDefinition): void {
       entity.type,
     )
   ) {
-    throw new Error(`Invalid action card type: ${entity.type}`);
+    throw new GiTcgCoreInternalError(
+      `Invalid action card type: ${entity.type}`,
+    );
   }
+}
+
+export interface ModifiedHandCardInformation {
+  readonly requiredCost: ReadonlyDiceRequirement;
+  readonly shouldFast: boolean;
+  readonly disableTuning: boolean;
+  readonly willBeEffectless: boolean;
+  /** undefined for default behavior (current active character's element) */
+  readonly tunedToType: DiceType | undefined;
+}
+
+/**
+ * 对 `cost` 应用减骰算法。
+ * @param cost 待修改的骰子需求 Map
+ * @param availableType 允许减少的骰子类型，按优先级排列
+ * @param count 减少骰子的个数
+ * @returns 修改后的 `cost`
+ */
+export function deductCost(
+  cost: DiceRequirement,
+  availableType: DiceType[],
+  count: number,
+) {
+  for (const type of availableType) {
+    const currentCount = cost.get(type) ?? 0;
+    cost.set(type, Math.max(0, currentCount - count));
+    count -= currentCount;
+    if (count <= 0) {
+      return;
+    }
+  }
+  return cost;
+}
+
+export function appendCost(
+  cost: DiceRequirement,
+  availableType: DiceType[],
+  count: number,
+) {
+  for (const type of availableType) {
+    const currentEntry = cost.get(type);
+    if (typeof currentEntry !== "undefined") {
+      cost.set(type, currentEntry + count);
+      return;
+    }
+  }
+  cost.set(DiceType.Aligned, count);
+}
+
+export function applyAttachmentModifications(
+  state: GameState,
+  card: EntityState,
+): ModifiedHandCardInformation {
+  const { who } = getEntityArea(state, card.id);
+  const playSkill = playSkillOfCard(card.definition);
+  let costs: DiceRequirement = new Map(
+    playSkill?.initiativeSkillConfig.requiredCost ?? EMPTY_MAP,
+  );
+  let shouldFast = playSkill?.initiativeSkillConfig.shouldFast ?? false;
+  let disableTuning = card.definition.disableTuning;
+  // 6.3- 旧逻辑：带 eventEffectless 出战状态的玩家会无效化事件牌效果
+  let willBeEffectless =
+    state.players[who].combatStatuses.some((st) =>
+      st.definition.tags.includes("eventEffectless"),
+    ) && card.definition.type === "eventCard";
+  let tunedToType: DiceType | undefined = undefined;
+  let changedCostType: DiceType | null = null;
+  const modifications = card.attachments.flatMap((at) =>
+    (0, at.definition.modifications)(state, at.id),
+  );
+  const priority = [
+    DiceType.Aligned,
+    DiceType.Cryo,
+    DiceType.Hydro,
+    DiceType.Pyro,
+    DiceType.Electro,
+    DiceType.Anemo,
+    DiceType.Geo,
+    DiceType.Dendro,
+    DiceType.Void,
+  ];
+  for (const mod of modifications) {
+    switch (mod.type) {
+      case "increaseCardCost": {
+        appendCost(costs, priority, mod.value);
+        break;
+      }
+      case "decreaseCardCost": {
+        deductCost(costs, priority, mod.value);
+        break;
+      }
+      case "changeCardCostType": {
+        changedCostType = mod.toType;
+        break;
+      }
+      case "changeCardTuningTarget": {
+        tunedToType = mod.tuningTarget;
+        break;
+      }
+      case "disableCardTuning": {
+        disableTuning = true;
+        break;
+      }
+      case "makeEffectless": {
+        willBeEffectless = true;
+        break;
+      }
+      default: {
+        const _check: never = mod;
+        break;
+      }
+    }
+  }
+  if (changedCostType !== null) {
+    const totalSize = costSize(costs);
+    costs = new Map([[changedCostType, totalSize]]);
+  }
+  return {
+    requiredCost: normalizeCost(costs),
+    shouldFast,
+    disableTuning,
+    willBeEffectless,
+    tunedToType,
+  };
 }
 
 export function elementOfCharacter(ch: CharacterDefinition): DiceType {

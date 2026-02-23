@@ -67,6 +67,7 @@ import {
   type Writable,
   applyAutoSelectedDiceToAction,
   isChargedPlunging,
+  applyAttachmentModifications,
 } from "./utils";
 import type { GameData } from "./builder/registry";
 import {
@@ -175,6 +176,7 @@ function initPlayerState(
           ([name, { initialValue }]) => [name, initialValue],
         ),
       ),
+      attachments: [],
     });
   }
   return {
@@ -780,16 +782,11 @@ export class Game {
               "onBeforePlayCard",
               new PlayCardEventArg(this.state, actionInfo),
             );
-            // 应用“禁用事件牌”效果
-            if (
-              player().combatStatuses.find((st) =>
-                st.definition.tags.includes("eventEffectless"),
-              ) &&
-              card.definition.type === "eventCard"
-            ) {
+            // 无效化
+            if (actionInfo.willBeEffectless) {
               this.mutate({
                 type: "removeEntity",
-                from: { who, type: "hands" },
+                from: { who, type: "hands", cardId: card.id },
                 oldState: card,
                 reason: "eventCardPlayNoEffect",
               });
@@ -813,16 +810,16 @@ export class Game {
               this.state,
               actionInfo.card,
               "elementalTuning",
-              { who, type: "hands" },
+              { who, type: "hands", cardId: actionInfo.card.id },
               null,
             );
             this.mutate({
               type: "removeEntity",
-              from: { who, type: "hands" },
+              from: { who, type: "hands", cardId: actionInfo.card.id },
               oldState: actionInfo.card,
               reason: "elementalTuning",
             });
-            const targetDice = elementOfCharacter(activeCh().definition);
+            const targetDice = actionInfo.result;
             this.mutate({
               type: "resetDice",
               who,
@@ -969,64 +966,85 @@ export class Game {
       }
     }
 
-    // Cards
+    // Cards & Elemental Tuning
+    const defaultTunedToType = elementOfCharacter(activeCh.definition);
     for (const card of player.hands) {
       let allTargets: InitiativeSkillEventArg[];
+      const {
+        disableTuning,
+        willBeEffectless,
+        shouldFast,
+        requiredCost,
+        tunedToType = defaultTunedToType,
+      } = applyAttachmentModifications(this.state, card);
       const skillDef = playSkillOfCard(card.definition);
-      if (!skillDef) {
-        console?.warn(`Card ${card.definition.id} has no play skill defined.`);
-        continue;
-      }
-      const skillInfo = defineSkillInfo({
-        caller: card,
-        definition: skillDef,
-      });
-      const actionInfoBase = {
-        type: "playCard" as const,
-        who,
-        skill: skillInfo,
-        cost: skillDef.initiativeSkillConfig.requiredCost,
-        fast: skillDef.initiativeSkillConfig.shouldFast,
-        autoSelectedDice: [],
-        targets: [],
-        willBeEffectless: false,
-      };
-      // 当支援区满时，卡牌目标为“要离场的支援牌”
-      if (
-        card.definition.type === "support" &&
-        player.supports.length === this.state.config.maxSupportsCount
-      ) {
-        allTargets = player.supports.map((st) => ({ targets: [st] }));
-      } else {
-        allTargets = (0, skillDef.initiativeSkillConfig.getTarget)(
-          this.state,
-          skillInfo,
-        );
-      }
-      if (allTargets.length === 0) {
-        const fakeActionInfo: ActionInfo = {
-          ...actionInfoBase,
-          validity: ActionValidity.NO_TARGET,
+      if (skillDef) {
+        const skillInfo = defineSkillInfo({
+          caller: card,
+          definition: skillDef,
+        });
+        const actionInfoBase = {
+          type: "playCard" as const,
+          who,
+          skill: skillInfo,
+          cost: requiredCost,
+          fast: shouldFast,
+          autoSelectedDice: [],
+          targets: [],
+          willBeEffectless,
         };
-        result.push(fakeActionInfo);
-        continue;
-      }
-      for (const arg of allTargets) {
-        if (!(0, skillDef.filter)(this.state, skillInfo, arg)) {
+        // 当支援区满时，卡牌目标为“要离场的支援牌”
+        if (
+          card.definition.type === "support" &&
+          player.supports.length === this.state.config.maxSupportsCount
+        ) {
+          allTargets = player.supports.map((st) => ({ targets: [st] }));
+        } else {
+          allTargets = (0, skillDef.initiativeSkillConfig.getTarget)(
+            this.state,
+            skillInfo,
+          );
+        }
+        if (allTargets.length === 0) {
           const fakeActionInfo: ActionInfo = {
             ...actionInfoBase,
-            validity: ActionValidity.CONDITION_NOT_MET,
+            validity: ActionValidity.NO_TARGET,
           };
           result.push(fakeActionInfo);
-          continue;
+        } else {
+          for (const arg of allTargets) {
+            if (!(0, skillDef.filter)(this.state, skillInfo, arg)) {
+              const fakeActionInfo: ActionInfo = {
+                ...actionInfoBase,
+                validity: ActionValidity.CONDITION_NOT_MET,
+              };
+              result.push(fakeActionInfo);
+              continue;
+            }
+            const actionInfo: ActionInfo = {
+              ...actionInfoBase,
+              targets: arg.targets,
+              validity: ActionValidity.VALID,
+            };
+            result.push(actionInfo);
+          }
         }
-        const actionInfo: ActionInfo = {
-          ...actionInfoBase,
-          targets: arg.targets,
-          validity: ActionValidity.VALID,
-        };
-        result.push(actionInfo);
+      } else {
+        console?.warn(`Card ${card.definition.id} has no play skill defined.`);
       }
+
+      result.push({
+        type: "elementalTuning" as const,
+        card,
+        who,
+        result: tunedToType,
+        fast: true,
+        cost: VOID_1_DICE_REQUIREMENT,
+        autoSelectedDice: [],
+        validity: disableTuning
+          ? ActionValidity.DISABLED
+          : ActionValidity.VALID,
+      });
     }
 
     // Switch Active
@@ -1044,23 +1062,6 @@ export class Game {
           autoSelectedDice: [],
           validity: ActionValidity.VALID,
         })),
-    );
-
-    // Elemental Tuning
-    const resultDiceType = elementOfCharacter(activeCh.definition);
-    result.push(
-      ...player.hands.map((c) => ({
-        type: "elementalTuning" as const,
-        card: c,
-        who,
-        result: resultDiceType,
-        fast: true,
-        cost: VOID_1_DICE_REQUIREMENT,
-        autoSelectedDice: [],
-        validity: c.definition.tags.includes("noTuning")
-          ? ActionValidity.DISABLED
-          : ActionValidity.VALID,
-      })),
     );
 
     // Declare End

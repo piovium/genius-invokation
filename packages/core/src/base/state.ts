@@ -37,6 +37,7 @@ import type {
 import { randomSeed } from "../random";
 import type { Version } from "..";
 import { versionLt } from "./version";
+import type { AttachmentDefinition } from "./attachment";
 
 // 为不同层级的 state object 添加 marker symbol
 export type StateKind =
@@ -45,7 +46,8 @@ export type StateKind =
   | "card"
   | "character"
   | "entity"
-  | "extension";
+  | "extension"
+  | "attachment";
 export const StateSymbol: unique symbol = Symbol("GiTcgCoreState");
 export type StateSymbol = typeof StateSymbol;
 
@@ -98,12 +100,20 @@ export interface VersionBehavior {
    * @note v6.1.0 起设置为 `true`
    */
   readonly disposeMaxCostHandsAbortPreview: boolean;
+
+  /**
+   * 计算卡牌元素骰费用时，使用“原本元素骰费用”还是“当前元素骰费用”。
+   * @note v6.4.0 起设置为 `true`
+   */
+  readonly diceCostApplyAttachments: boolean;
 }
 
 export const getVersionBehavior = (version: Version): VersionBehavior => ({
   defaultRecreateBehavior: versionLt(version, "v3.5.0") ? "overwrite" : "takeMax",
   foodOmitInjuredOnly: !versionLt(version, "v6.1.0"),
   disposeMaxCostHandsAbortPreview: !versionLt(version, "v6.1.0"),
+  // TODO v6.4.0 done
+  diceCostApplyAttachments: !versionLt(version, "v6.3.1" as Version),
 });
 
 export interface IteratorState {
@@ -175,11 +185,19 @@ export interface EntityState {
   readonly id: number;
   readonly definition: EntityDefinition;
   readonly variables: EntityVariables;
+  readonly attachments: AttachmentState[];
 }
 
 export type EntityVariables = VariableOfConfig<EntityVariableConfigs>;
 
-export type AnyState = CharacterState | EntityState;
+export interface AttachmentState {
+  readonly [StateSymbol]: "attachment";
+  readonly id: number;
+  readonly definition: AttachmentDefinition;
+  readonly variables: EntityVariables;
+}
+
+export type AnyState = CharacterState | EntityState | AttachmentState;
 
 export interface ExtensionState {
   readonly [StateSymbol]: "extension";

@@ -25,8 +25,6 @@ import {
   type JSX,
   createResource,
   createMemo,
-  onMount,
-  on,
   createEffect,
   untrack,
 } from "solid-js";
@@ -120,6 +118,7 @@ const renderHistoryChild = (
     combatStatus: "生成出战状态",
     status: "附属状态：",
     equipment: "附属装备：",
+    attachment: "附属状态：",
     summon: "生成召唤物",
     support: "生成支援区卡牌",
   };
@@ -127,7 +126,8 @@ const renderHistoryChild = (
     combatStatus: "出战状态消失",
     status: "失去状态：",
     equipment: "失去装备：",
-    summon: "召唤物卡牌弃置",
+    attachment: "失去状态：",
+    summon: "召唤物弃置",
     support: "支援区卡牌弃置",
   };
   const createCardTextMap: Record<string, string> = {
@@ -212,7 +212,7 @@ const renderHistoryChild = (
       break;
     }
     case "createEntity": {
-      if (child.entityType === "status" || child.entityType === "equipment") {
+      if (["status", "equipment", "attachment"].includes(child.entityType)) {
         result = {
           opp: opp(child.who),
           imageId: child.masterDefinitionId,
@@ -549,7 +549,7 @@ const renderHistoryChild = (
         content: (
           <>
             <span>{subject(opp(child.who))}</span>
-            <span>将{child.count}个元素骰转换为</span>
+            <span>将{!!child.count ? `${child.count}个` : `若干`}元素骰转换为</span>
             <Show when={child.diceType > 0}>
               <DiceIcon size={14} type={child.diceType} selected={false} />
             </Show>
@@ -581,6 +581,33 @@ const renderHistoryChild = (
         content: (
           <>
             <span>{TransformTextMap[child.stage]}</span>
+          </>
+        ),
+      };
+      break;
+    }
+    case "swapCharacterPosition": {
+      result = {
+        opp: opp(child.who),
+        imageId: child.character0DefinitionId,
+        title: renderName(child.character0DefinitionId),
+        content: (
+          <>
+            <span>与{renderName(child.character1DefinitionId)}交换位置</span>
+          </>
+        ),
+      };
+      break;
+    }
+    case "overflowCard": {
+      result = {
+        opp: opp(child.who),
+        imageId: child.cardDefinitionId,
+        imageType: "cardFace",
+        title: renderName(child.cardDefinitionId),
+        content: (
+          <>
+            <span>因刻意的游戏设计而回归地脉</span>
           </>
         ),
       };
@@ -691,8 +718,16 @@ interface CharacterSummary {
 interface CardSummary {
   cardDefinitionId: number;
   who: 0 | 1;
-  type: ("removeCard" | "removeEntity" | "createEntity")[];
+  type: (
+    | "removeCard"
+    | "createCard"
+    | "overflowCard"
+    | "removeEntity"
+    | "createEntity"
+    | "createAttachment"
+  )[];
   children: CardHistoryChildren[];
+  attachment: number[];
 }
 
 function getOrCreateCharacterSummary(
@@ -741,6 +776,7 @@ function getOrCreateCardSummary(
       who: who,
       type: [],
       children: [],
+      attachment: [],
     });
   }
   return cardMap.get(key)!;
@@ -830,7 +866,24 @@ function buildSummary(children: HistoryChildren[]): HistoryChildrenSummary {
           c as Extract<CreateEntityHistoryChild, { entityType: "support" }>,
         );
         summary.type.push(c.type);
+      } else if (c.entityType === "attachment") {
+        summary = getOrCreateCardSummary(cardMap, {
+          cardDefinitionId: c.masterDefinitionId!,
+          who: c.who,
+        });
+        summary.children.push(
+          c as Extract<CreateEntityHistoryChild, { entityType: "attachment" }>,
+        );
+        summary.type.push("createAttachment");
+        summary.attachment.push(c.entityDefinitionId);
       }
+    } else if (c.type === "createCard" && c.target === "hands") {
+      summary = getOrCreateCardSummary(cardMap, c);
+      summary.children.push(c);
+      summary.type.push(c.type);
+    } else if (c.type === "overflowCard") {
+      summary = getOrCreateCardSummary(cardMap, c);
+      summary.type.push(c.type);
     } else if (c.type === "removeCard") {
       summary = getOrCreateCardSummary(cardMap, c);
       summary.children.push(c);
@@ -884,8 +937,10 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
     switch: [] as CharacterSummary[],
     status: [] as CharacterSummary[],
     discard: [] as CardSummary[],
+    getcard: [] as CardSummary[],
     create: [] as CardSummary[],
     remove: [] as CardSummary[],
+    attachment: [] as CardSummary[],
   } as const;
   const INNER_MAP: Partial<Record<ShotType, SummaryShot["inner"]>> = {
     damage: "damage",
@@ -919,7 +974,7 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
     return ["damage", "heal", "apply", "switch", "status"].includes(e.KEY);
   };
   const isCardSummary = (e: ShotGroupEntry): e is CardSummaryEntry => {
-    return ["discard", "create", "remove"].includes(e.KEY);
+    return ["discard", "getcard", "create", "remove", "attachment"].includes(e.KEY);
   };
 
   for (const c of characterSummary) {
@@ -983,13 +1038,23 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
     }
   }
   for (const c of cardSummary) {
-    if (c.type.length === 1) {
-      if (c.type[0] === "removeCard") {
-        shotGroups.discard.push(c);
-      } else if (c.type[0] === "createEntity") {
-        shotGroups.create.push(c);
-      } else if (c.type[0] === "removeEntity") {
-        shotGroups.remove.push(c);
+    if (c.type.includes("createAttachment")) {
+      shotGroups.attachment.push(c);
+    }
+    if (!c.type.includes("createCard") || !c.type.includes("removeCard")) {
+      if (c.type.includes("createCard") && !c.type.includes("overflowCard")) {
+        shotGroups.getcard.push({ ...c, attachment: [] });
+      }
+      if (c.type.includes("removeCard")) {
+        shotGroups.discard.push({ ...c, attachment: [] });
+      }
+    }
+    if (!c.type.includes("createEntity") || !c.type.includes("removeEntity")) {
+      if (c.type.includes("createEntity")) {
+        shotGroups.create.push({ ...c, attachment: [] });
+      }
+      if (c.type.includes("removeEntity")) {
+        shotGroups.remove.push({ ...c, attachment: [] });
       }
     }
   }
@@ -1025,6 +1090,17 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
     }
     return more;
   };
+  const makeAttachment = (l: CardSummary[]) => {
+    const all = l.flatMap((c) => c.attachment);
+    if (!all.length) {
+      return;
+    }
+    return l.length === 1
+      ? l[0].cardDefinitionId || all.length === 1
+        ? all
+        : "more"
+      : "more";
+  };
 
   const summaryShot: SummaryShot[] = [];
   for (const list of allSummaries()) {
@@ -1054,7 +1130,9 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
           : type === "heal"
             ? makeValue(list, "revive", void 0)
             : void 0,
-      status: isCharacterSummary(list) ? makeStatus(list) : void 0,
+      status: isCharacterSummary(list)
+        ? makeStatus(list)
+        : makeAttachment(list),
       combat: isCharacterSummary(list) ? makeCombat(list) : void 0,
     };
     summaryShot.push(shot);
@@ -1259,7 +1337,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           0, // 可填写maxEnergy
         ),
         status:
-          block.entityType === "status"
+          block.entityType === "status" || block.entityType === "attachment"
             ? block.callerOrSkillDefinitionId
             : undefined,
         combatStatus:
@@ -1468,14 +1546,16 @@ function HistoryChildBox(props: { data: HistoryChildData }) {
               >
                 <Show when={healthChange().special}>
                   <div class="relative overflow-visible h-3 w-4 flex-shrink-0">
-                    <Switch>
-                      <Match when={healthChange().type === "heal"}>
-                        <RevivePreviewIcon class="absolute h-5 w-5 top-50% left-50% -translate-x-50% -translate-y-50%" />
-                      </Match>
-                      <Match when={healthChange().type === "damage"}>
-                        <DefeatedPreviewIcon class="absolute h-5 w-5 top-50% left-50% -translate-x-50% -translate-y-50%" />
-                      </Match>
-                    </Switch>
+                    <div class="absolute h-5 w-5 top-50% left-50% -translate-x-50% -translate-y-50%">
+                      <Switch>
+                        <Match when={healthChange().type === "heal"}>
+                          <RevivePreviewIcon />
+                        </Match>
+                        <Match when={healthChange().type === "damage"}>
+                          <DefeatedPreviewIcon />
+                        </Match>
+                      </Switch>
+                    </div>
                   </div>
                 </Show>
                 <StrokedText
@@ -1587,7 +1667,9 @@ function HistorySummaryShot(props: { data: SummaryShot }) {
               <div class="h-4 w-12 flex flex-row gap-0.5 items-center justify-center text-white text-3 rounded-full b-1 b-black bg-#d14f51">
                 <Show when={props.data.innerValueSpecial}>
                   <div class="relative overflow-visible h-3 w-4 flex-shrink-0">
-                    <DefeatedPreviewIcon class="absolute h-5 w-5 top-50% left-50% -translate-x-50% -translate-y-50%" />
+                    <div class="absolute w-5 h-5 top-50% left-50% -translate-x-50% -translate-y-50%">
+                      <DefeatedPreviewIcon />                    
+                    </div>
                   </div>
                 </Show>
                 <StrokedText
@@ -1605,7 +1687,9 @@ function HistorySummaryShot(props: { data: SummaryShot }) {
               <div class="h-4 w-12 flex flex-row gap-0.5 items-center justify-center text-white text-3 rounded-full b-1 b-black bg-#6e9b3a">
                 <Show when={props.data.innerValueSpecial}>
                   <div class="relative overflow-visible h-3 w-4 flex-shrink-0">
-                    <RevivePreviewIcon class="absolute h-5 w-5 top-50% left-50% -translate-x-50% -translate-y-50%" />
+                    <div class="absolute w-5 h-5 top-50% left-50% -translate-x-50% -translate-y-50%">
+                      <RevivePreviewIcon />
+                    </div>
                   </div>
                 </Show>
                 <StrokedText
@@ -1898,7 +1982,6 @@ export function HistoryPanel(props: HistoryPanelProps) {
     }
   });
 
-
   return (
     <WhoContext.Provider value={who}>
       <div
@@ -2007,7 +2090,7 @@ function HistoryBlockDetailPanel(props: {
               class="absolute top-1px left-1px w-3.5 h-3.5 rounded-lt-1 bg-#806440 data-[opp]:bg-#48678b history-card-hint"
               bool:data-opp={renderBlock().content.opp}
             />
-            <div class="w-14.5 h-22 p-2">
+            <div class="w-14.5 h-22 p-2 flex-shrink-0">
               <Show
                 when={renderBlock().content.imageId}
                 fallback={<CardbackNormal class="w-10.5 h-18" />}

@@ -153,13 +153,13 @@ export const ChonghuaFrostField01 = combatStatus(111042)
   .duration(3)
   .on("modifySkillDamageType", (c, e) => {
     if (e.type !== DamageType.Physical) return false;
-    const { tags } = e.via.caller.definition;
+    const { tags } = e.source.cast<"character">().definition;
     return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
   })
   .changeDamageType(DamageType.Cryo)
   .on("increaseSkillDamage", (c, e) => {
     if (!e.viaSkillType("normal")) return false;
-    const { tags } = e.via.caller.definition;
+    const { tags } = e.source.cast<"character">().definition;
     return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
   })
   .increaseDamage(1)

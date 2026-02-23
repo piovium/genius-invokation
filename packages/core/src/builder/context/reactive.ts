@@ -24,10 +24,12 @@ import {
   ReactiveStateSymbol,
 } from "./reactive_base";
 import type { ExEntityState, ExEntityType } from "../type";
+import { Attachment, type TypedAttachment } from "./attachment";
 
 type ReactiveClassMap<Meta extends ContextMetaBase> = {
   character: TypedCharacter<Meta>;
   entity: TypedEntity<Meta>;
+  attachment: TypedAttachment<Meta>;
 };
 type ReactiveClassCtor = new (
   skillContext: SkillContext<any>,
@@ -132,6 +134,7 @@ export function applyReactive<Meta extends ContextMetaBase, T>(
   const REACTIVE_CLASS_MAP: Partial<Record<StateKind, ReactiveClassCtor>> = {
     character: Character,
     entity: Entity,
+    attachment: Attachment,
   };
   if (
     StateSymbol in value &&

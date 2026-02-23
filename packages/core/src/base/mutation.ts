@@ -27,6 +27,7 @@ import {
   type AnyState,
   StateSymbol,
   type StateKind,
+  type AttachmentState,
 } from "./state";
 import { removeEntity, getEntityById, sortDice, getEntityArea } from "../utils";
 import {
@@ -101,6 +102,12 @@ export interface CreateEntityM {
   readonly value: IdWritable<EntityState>;
 }
 
+export interface CreateAttachmentM {
+  readonly type: "createAttachment";
+  readonly target: EntityArea & { cardId: number };
+  readonly value: IdWritable<AttachmentState>;
+}
+
 export interface MoveEntityM {
   readonly type: "moveEntity";
   readonly value: EntityState;
@@ -130,6 +137,8 @@ export interface RemoveEntityM {
     | "cardDisposed" // 舍弃
     | "eventCardPlayed"
     | "eventCardDrawn"
+    | "equipOverridden"
+    | "createSupportOverridden"
     | "elementalTuning"
     | "overflow"
     | "eventCardPlayNoEffect"
@@ -222,6 +231,7 @@ export type Mutation =
   | SwapCharacterPositionM
   | CreateCharacterM
   | CreateEntityM
+  | CreateAttachmentM
   | MoveEntityM
   | RemoveEntityM
   | ModifyEntityVarM
@@ -350,6 +360,30 @@ function doMutation(state: GameState, m: Mutation): GameState {
           }
         });
       }
+    }
+    case "createAttachment": {
+      const { target: where, value } = m;
+      if (where.type !== "hands" && where.type !== "pile") {
+        throw new GiTcgCoreInternalError(
+          `Attachments can only be created in hands or pile, got: ${where.type}`,
+        );
+      }
+      if (!where.cardId) {
+        throw new GiTcgCoreInternalError(
+          `Attachments must be created with specified cardId`,
+        );
+      }
+      return produce(state, (draft) => {
+        const targetCard = getEntityById(
+          draft,
+          where.cardId,
+        ) as Draft<EntityState>;
+        if (value.id === 0) {
+          value.id = draft.iterators.id--;
+        }
+        const draftedValue = createDraft<AttachmentState>("attachment", value);
+        targetCard.attachments.push(draftedValue);
+      });
     }
     case "moveEntity": {
       return produce(state, (draft) => {
@@ -530,6 +564,11 @@ export function stringifyMutation(m: Mutation): string | null {
       return `Create entity ${stringifyState(m.value)} in ${stringifyEntityArea(
         m.target,
       )}`;
+    }
+    case "createAttachment": {
+      return `Create attachment ${stringifyState(
+        m.value,
+      )} in ${stringifyEntityArea(m.target)}`;
     }
     case "moveEntity": {
       return `Move entity ${stringifyState(m.value)} to ${stringifyEntityArea(

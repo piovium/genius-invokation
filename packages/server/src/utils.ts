@@ -63,6 +63,8 @@ const getData = <T extends AnyData>(id: number): Promise<T | undefined> => {
   return ASSETS_MANAGER.getData(id) as Promise<T | undefined>;
 };
 
+const SINGLETON_REQUIRED_TAGS = ["GCG_TAG_LEGEND", "GCG_TAG_CARD_BLESSING"];
+
 /**
  * 校验牌组合法性
  * @param param0 牌组
@@ -114,7 +116,11 @@ export async function verifyDeck({
         `card id ${cardId} not found`,
       );
     }
-    const cardMaxCount = card?.tags.includes("GCG_TAG_LEGEND") ? 1 : 2;
+    const cardMaxCount = SINGLETON_REQUIRED_TAGS.some(
+      (tag) => card?.tags.includes(tag),
+    )
+      ? 1
+      : 2;
     if (cardCounts.has(cardId)) {
       const count = cardCounts.get(cardId)! + 1;
       if (count > cardMaxCount) {

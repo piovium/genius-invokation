@@ -57,7 +57,10 @@ class PreviewContext {
   private stateMutations: Mutation[] = [];
   private exposedMutations: ExposedMutation[] = [];
   public stopped = false;
-  constructor(private readonly initialState: GameState, private readonly skipError: boolean) {
+  constructor(
+    private readonly initialState: GameState,
+    private readonly skipError: boolean,
+  ) {
     this.mutator = new StateMutator(initialState, {
       onNotify: ({ stateMutations, exposedMutations }) => {
         this.stateMutations.push(...stateMutations);
@@ -88,7 +91,7 @@ class PreviewContext {
     } catch (e) {
       if (e instanceof GiTcgPreviewAbortedError) {
         this.stopped = true;
-      } else if ((e instanceof GiTcgError) && this.skipError) {
+      } else if (e instanceof GiTcgError && this.skipError) {
         // skip.
       } else {
         throw e;
@@ -278,16 +281,10 @@ export class ActionPreviewer {
           "onBeforePlayCard",
           new PlayCardEventArg(ctx.state, newActionInfo),
         );
-        if (
-          player().combatStatuses.find((st) =>
-            st.definition.tags.includes("eventEffectless"),
-          ) &&
-          card.definition.type === "eventCard"
-        ) {
-          newActionInfo.willBeEffectless = true;
+        if (newActionInfo.willBeEffectless) {
           ctx.mutate({
             type: "removeEntity",
-            from: { who: this.who, type: "hands" },
+            from: { who: this.who, type: "hands", cardId: card.id },
             oldState: card,
             reason: "eventCardPlayNoEffect",
           });
@@ -314,12 +311,12 @@ export class ActionPreviewer {
           ctx.state,
           card,
           "elementalTuning",
-          { who: this.who, type: "hands" },
+          { who: this.who, type: "hands", cardId: card.id },
           null,
         );
         ctx.mutate({
           type: "removeEntity",
-          from: { who: this.who, type: "hands" },
+          from: { who: this.who, type: "hands", cardId: card.id },
           oldState: card,
           reason: "elementalTuning",
         });

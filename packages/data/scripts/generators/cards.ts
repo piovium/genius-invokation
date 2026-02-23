@@ -30,6 +30,7 @@ export function getCardTypeAndTags(card: ActionCardRawData) {
     GCG_TAG_WEAPON_CATALYST: "catalyst",
     GCG_TAG_ALLY: "ally",
     GCG_TAG_PLACE: "place",
+    GCG_TAG_CARD_BLESSING: "blessing",
     GCG_TAG_ADVENTURE_PLACE: "adventureSpot",
     GCG_TAG_RESONANCE: "resonance",
     GCG_TAG_WEAPON_POLE: "pole",
@@ -97,6 +98,7 @@ export async function generateCards() {
     place: [],
     adventureSpot: [],
     item: [],
+    blessing: [],
     other: [],
   };
   let foods: SourceInfo[] = [];
@@ -214,6 +216,7 @@ export async function generateCards() {
       INIT_CARD_CODE,
       supportCode.adventureSpot
     ),
+    writeSourceCode("cards/support/blessing.ts", INIT_CARD_CODE, supportCode.blessing),
     // writeSourceCode("cards/support/other.ts", INIT_CARD_CODE, supportCode.other),
   ]);
 }

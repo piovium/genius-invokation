@@ -42,12 +42,16 @@ import {
   PbResetDiceReason,
   PbHealKind,
   PbPlayerStatus,
-  CARD_TAG_NO_TUNING,
+  CARD_TAG_ABYSS,
   CHARACTER_TAG_BOND_OF_LIFE,
   PbMoveEntityReason,
   PbRemoveEntityReason,
+  PbAttachmentState,
+  CARD_TAG_CONDUCTIVE,
+  PbEntityType,
 } from "@gi-tcg/typings";
 import type {
+  AttachmentState,
   CharacterState,
   EntityState,
   EntityTag,
@@ -68,8 +72,13 @@ import type {
   InitiativeSkillDefinition,
 } from "./base/skill";
 import { GiTcgIoError } from "./error";
-import { USAGE_PER_ROUND_VARIABLE_NAMES, type EntityArea } from "./base/entity";
+import {
+  USAGE_PER_ROUND_VARIABLE_NAMES,
+  type EntityArea,
+  type EntityType,
+} from "./base/entity";
 import { costOfCard, getEntityById, initiativeSkillsOfPlayer } from "./utils";
+import type { AttachmentTag } from "./base/attachment";
 
 export interface PlayerIO {
   notify: (notification: Notification) => void;
@@ -198,6 +207,27 @@ function exposeEntityWhere(where: EntityArea["type"]): PbEntityArea {
   return PbEntityArea.UNSPECIFIED;
 }
 
+function exposeEntityType(type: EntityType): PbEntityType {
+  switch (type) {
+    case "eventCard":
+      return PbEntityType.EVENT_CARD;
+    case "status":
+      return PbEntityType.STATUS;
+    case "combatStatus":
+      return PbEntityType.COMBAT_STATUS;
+    case "summon":
+      return PbEntityType.SUMMON;
+    case "support":
+      return PbEntityType.SUPPORT;
+    case "equipment":
+      return PbEntityType.EQUIPMENT;
+    default: {
+      const exhaustiveCheck: never = type;
+      throw new Error(`Unhandled entity type: ${exhaustiveCheck}`);
+    }
+  }
+}
+
 export function exposeMutation(
   who: 0 | 1,
   m: Mutation,
@@ -272,6 +302,15 @@ export function exposeMutation(
           m.target.type === "characters" ? m.target.characterId : void 0,
       };
     }
+    case "createAttachment": {
+      return {
+        $case: "createAttachment",
+        who: m.target.who,
+        where: exposeEntityWhere(m.target.type),
+        attachment: exposeAttachment(null, m.value),
+        masterCardId: m.target.cardId,
+      };
+    }
     case "moveEntity": {
       const fromWhere = exposeEntityWhere(m.from.type);
       const toWhere = exposeEntityWhere(m.target.type);
@@ -297,12 +336,20 @@ export function exposeMutation(
         fromWhere,
         toWho: m.target.who,
         toWhere,
+        toMasterCharacterId:
+          m.target.type === "characters" ? m.target.characterId : void 0,
         targetIndex: m.targetIndex,
         entity: exposeEntity(null, m.value, hidden),
         reason: REASON_MAP[m.reason] ?? PbMoveEntityReason.UNSPECIFIED,
       };
     }
     case "removeEntity": {
+      if (
+        m.oldState.definition.type === "character" ||
+        m.oldState.definition.type === "attachment"
+      ) {
+        return null;
+      }
       const hidden =
         m.from.who !== who &&
         ["hands", "pile"].includes(m.from.type) &&
@@ -314,6 +361,9 @@ export function exposeMutation(
           eventCardDrawn: PbRemoveEntityReason.EVENT_CARD_DRAWN,
           eventCardPlayed: PbRemoveEntityReason.EVENT_CARD_PLAYED,
           eventCardPlayNoEffect: PbRemoveEntityReason.EVENT_CARD_PLAY_NO_EFFECT,
+          equipOverridden: PbRemoveEntityReason.EQUIP_OVERRIDDEN,
+          createSupportOverridden:
+            PbRemoveEntityReason.CREATE_SUPPORT_OVERRIDDEN,
           overflow: PbRemoveEntityReason.OVERFLOW,
           other: PbRemoveEntityReason.UNSPECIFIED,
         };
@@ -449,8 +499,24 @@ export function exposeEntity(
       });
     }
   }
+  const EXPOSED_TAGS: Partial<Record<EntityTag | AttachmentTag, number>> = {
+    abyss: CARD_TAG_ABYSS,
+    conductive: CARD_TAG_CONDUCTIVE,
+  };
+  const tags = [
+    ...e.definition.tags,
+    ...e.attachments.flatMap((att) => att.definition.tags),
+  ];
+  let pbTags = 0;
+  for (const tag of tags) {
+    const bit = EXPOSED_TAGS[tag];
+    if (bit) {
+      pbTags |= bit;
+    }
+  }
   return {
     id: e.id,
+    type: hide ? PbEntityType.UNSPECIFIED : exposeEntityType(e.definition.type),
     definitionId: hide ? 0 : e.definition.id,
     variableValue: e.definition.visibleVarName
       ? e.variables[e.definition.visibleVarName] ?? void 0
@@ -462,8 +528,34 @@ export function exposeEntity(
     equipment,
     descriptionDictionary,
     definitionCost,
-    // TODO: using a lookup table instead
-    tags: e.definition.tags.includes("noTuning") ? CARD_TAG_NO_TUNING : 0,
+    tags: pbTags,
+    attachment: hide
+      ? []
+      : e.attachments.map((att) => exposeAttachment(state, att)),
+  };
+}
+
+function exposeAttachment(
+  state: GameState | null,
+  att: Omit<AttachmentState, StateSymbol>,
+): PbAttachmentState {
+  const descriptionDictionary =
+    state === null
+      ? {}
+      : Object.fromEntries(
+          Object.entries(att.definition.descriptionDictionary).map(([k, v]) => [
+            k,
+            v(state, att.id),
+          ]),
+        );
+  return {
+    id: att.id,
+    definitionId: att.definition.id,
+    descriptionDictionary,
+    variableName: att.definition.visibleVarName ?? void 0,
+    variableValue: att.definition.visibleVarName
+      ? att.variables[att.definition.visibleVarName] ?? void 0
+      : void 0,
   };
 }
 

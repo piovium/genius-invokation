@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { EntityDefinition, CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, pair, status, summon, diceCostOfCard } from "@gi-tcg/core/builder";
-import { BurningFlame, CatalyzingField, DendroCore, EfficientSwitch, ResistantForm, Shield } from "../../commons";
+import { EntityDefinition, CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, pair, status, summon, originalDiceCostOfCard } from "@gi-tcg/core/builder";
+import { BurningFlame, CatalyzingField, DendroCore, EfficientSwitch, Empowerment, ResistantForm, Shield } from "../../commons";
 import { BountifulCore } from "../../characters/hydro/nilou";
 
 /**
@@ -735,7 +735,7 @@ export const QuickKnit = card(332012)
  */
 export const SendOff = card(332013)
   .since("v3.3.0")
-  .costSame(2)
+  .costVoid(2)
   .addTarget("opp summon")
   .do((c, e) => {
     e.targets[0].consumeUsage(2);
@@ -1149,7 +1149,7 @@ export const BonecrunchersEnergyBlockCombatStatus = combatStatus(124053)
  * @id 124051
  * @name 噬骸能量块
  * @description
- * 随机舍弃1张原本元素骰费用最高的手牌，生成1个我方出战角色类型的元素骰。（每回合最多打出1张）
+ * 随机舍弃1张当前元素骰费用最高的手牌，生成1个我方出战角色类型的元素骰。（每回合最多打出1张）
  */
 export const BonecrunchersEnergyBlock = card(124051)
   .since("v4.7.0")
@@ -1182,7 +1182,8 @@ export const ForbiddenKnowledgeCoolDown = combatStatus(301021)
  */
 export const ForbiddenKnowledge = card(301020)
   .since("v4.7.0")
-  .tags("noTuning")
+  .tags("abyss")
+  .disableTuning()
   .filter((c) => !c.$(`my combat status with definition id ${ForbiddenKnowledgeCoolDown}`))
   .damage(DamageType.Piercing, 1, "my active")
   .drawCards(1)
@@ -1683,7 +1684,7 @@ export const [AbundantPhlogiston, AbundantPhlogistonInEffect] = card(332042)
   .oneDuration()
   .once("consumeNightsoul")
   .do((c, e) => {
-    c.gainNightsoul(e.character, 1);
+    c.gainNightsoul(e.entity.cast<"status">().master, 1);
   })
   .done();
 
@@ -1755,7 +1756,7 @@ export const ArtOfSleepyMeditation = card(332045)
  * @id 332046
  * @name 飞行队出击！
  * @description
- * 随机舍弃至多2张原本元素骰费用最高的手牌，随后抓牌直至手牌中有4张牌。
+ * 随机舍弃至多2张当前元素骰费用最高的手牌，随后抓牌直至手牌中有4张牌。
  * 此牌在手牌被舍弃后：抓1张牌。
  */
 export const FlyingSquadAttack = card(332046)
@@ -2297,7 +2298,7 @@ export const BrokenSea = card(332053)
  * @id 332059
  * @name 「穿越晨霭的冒险」
  * @description
- * 将费用最低的至多2张手牌置入牌组底，然后抓等量的牌。
+ * 将当前元素骰费用最低的至多2张手牌置入牌组底，然后抓等量的牌。
  * 此牌被舍弃后：冒险1次。
  */
 export const AnAdventureThroughTheMorningMist = card(332059)
@@ -2307,9 +2308,57 @@ export const AnAdventureThroughTheMorningMist = card(332059)
   })
   .do((c) => {
     const minCostCards = c.player.hands
-      .toSorted((a, b) => diceCostOfCard(a.definition) - diceCostOfCard(b.definition))
+      .toSorted((a, b) => a.diceCost() - b.diceCost())
       .slice(0, 2);
     c.undrawCards(minCostCards, "bottom");
     c.drawCards(minCostCards.length);
+  })
+  .done();
+
+/**
+ * @id 332060
+ * @name 天才的改造法
+ * @description
+ * 生成1张随机「道具」牌，赋予我方当前元素骰费用最高的2张手牌赋能。
+ */
+export const GeniussUpgradeTechnique = card(332060)
+  .since("v6.3.54-beta")
+  .do((c) => {
+    const itemCards = c.allCardDefinitions("item");
+    c.createHandCard(c.random(itemCards).id as CardHandle);
+    const hands = c.maxCostHands(2, {
+      filter: (card) => !c.get(card).empowered(),
+    });
+    for (const card of hands) {
+      c.attach(Empowerment, card);
+    }
+  })
+  .done();
+
+/**
+ * @id 332061
+ * @name 叮铃哐啷军团
+ * @description
+ * 生成3张随机的当前元素骰费用等于3的卡牌加入手牌。
+ * 如果此卡牌被赋予了赋能，则赋予3张当前元素骰费用最高的手牌赋能。
+ */
+export const ClinkClankLegion = card(332061)
+  .since("v6.3.54-beta")
+  .costSame(1)
+  .do((c) => {
+    const allCards = c
+      .allCardDefinitions()
+      .filter((card) => !card.tags.includes("talent") && originalDiceCostOfCard(card) === 3);
+    for (let i = 0; i < 3; i++) {
+      c.createHandCard(c.random(allCards).id as CardHandle);
+    }
+    if (c.self.empowered()) {
+      const hands = c.maxCostHands(3, {
+        filter: (card) => !c.get(card).empowered(),
+      });
+      for (const card of hands) {
+        c.attach(Empowerment, card);
+      }
+    }
   })
   .done();

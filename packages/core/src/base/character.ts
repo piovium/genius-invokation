@@ -17,6 +17,7 @@ import { Aura } from "@gi-tcg/typings";
 import type { SkillDefinition } from "./skill";
 import type { EntityDefinition, VariableConfig } from "./entity";
 import type { WithVersionInfo } from "./version";
+import type { LunarReaction } from "@gi-tcg/typings";
 
 export type ElementTag =
   | "cryo"
@@ -45,6 +46,7 @@ export const NATION_TAGS = [
   "sumeru",
   "fontaine",
   "natlan",
+  "nodkrai",
   "fatui",
   "eremite",
   "monster",
@@ -74,6 +76,7 @@ export interface CharacterDefinition extends WithVersionInfo {
   readonly varConfigs: CharacterVariableConfigs;
   readonly skills: readonly SkillDefinition[];
   readonly associatedNightsoulsBlessing: EntityDefinition | null;
+  readonly enabledLunarReactions: readonly LunarReaction[];
   readonly specialEnergy: SpecialEnergyConfig | null;
 }
 

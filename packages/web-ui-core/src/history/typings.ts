@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { Aura, DamageType, DiceType, Reaction } from "@gi-tcg/typings";
+import type { EntityType } from "./parser";
 
 export type HistoryDetailBlock =
   | PocketHistoryBlock
@@ -50,7 +51,9 @@ export type HistoryChildren =
   | VariableChangeHistoryChild
   | RemoveEntityHistoryChild
   | PlayCardNoEffectHistoryChild
-  | TransformDefinitionHistoryChild;
+  | TransformDefinitionHistoryChild
+  | SwapCharacterPositionHistoryChild
+  | OverflowCardHistoryChild;
 
 export type CharacterHistoryChildren =
   | SwitchActiveHistoryChild
@@ -62,6 +65,7 @@ export type CharacterHistoryChildren =
 export type CardHistoryChildren =
   | Extract<CreateEntityHistoryChild, { entityType: "summon" }>
   | RemoveCardHistoryChild
+  | CreateCardHistoryChild
   | Extract<RemoveEntityHistoryChild, { entityType: "summon" | "support" }>;
 
 /////////////// block部分 ////////////////
@@ -138,7 +142,7 @@ export interface TriggeredHistoryBlock {
   who: 0 | 1;
   masterOrCallerDefinitionId: number;
   callerOrSkillDefinitionId: number;
-  entityType?: "combatStatus" | "status" | "equipment" | "summon" | "support";
+  entityType: EntityType;
   children: HistoryChildren[];
 }
 
@@ -232,7 +236,7 @@ export interface StealHandHistoryChild {
 export interface CreateEntityHistoryChild {
   type: "createEntity";
   who: 0 | 1;
-  entityType: "combatStatus" | "status" | "equipment" | "summon" | "support";
+  entityType: EntityType;
   masterDefinitionId?: number;
   entityDefinitionId: number;
 }
@@ -388,7 +392,7 @@ export interface VariableChangeHistoryChild {
 export interface RemoveEntityHistoryChild {
   type: "removeEntity";
   who: 0 | 1;
-  entityType: "combatStatus" | "status" | "equipment" | "summon" | "support";
+  entityType: EntityType;
   masterDefinitionId?: number; // 状态、装备：所属角色区
   entityDefinitionId: number;
 }
@@ -409,6 +413,23 @@ export interface TransformDefinitionHistoryChild {
   who: 0 | 1;
   cardDefinitionId: number; // 对应新旧形态
   stage: "old" | "new";
+}
+
+/////////////// 非官方 ////////////////
+
+// 交换角色位置
+export interface SwapCharacterPositionHistoryChild {
+  type: "swapCharacterPosition";
+  who: 0 | 1;
+  character0DefinitionId: number;
+  character1DefinitionId: number;
+}
+
+// 爆牌
+export interface OverflowCardHistoryChild {
+  type: "overflowCard";
+  who: 0 | 1;
+  cardDefinitionId: number;
 }
 
 /////////////// 用于生成赛后统计的全局记录量，我也不知道怎么实现 ////////////////

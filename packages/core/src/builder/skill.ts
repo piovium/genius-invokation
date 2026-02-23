@@ -260,6 +260,11 @@ function isDebuff(state: GameState, damageInfo: DamageInfo): boolean {
 }
 
 /**
+ * 可以触发 modifyChangeVariable / onChangeVariable 事件的变量名列表。
+ */
+export const VARIABLE_NAME_CAN_EMIT_EVENTS = ["usage", "nightsoul"];
+
+/**
  * 定义数据描述中的触发事件名。
  *
  * 系统内部的事件名数量较少，
@@ -554,7 +559,9 @@ export const detailedEventDictionary = {
     return checkRelative(e.onTimeState, e.entity.id, r);
   }),
   dispose: defineDescriptor("onDispose", (e, r) => {
-    return !e.isDisposeCardOrTuning() && checkRelative(e.onTimeState, e.entity.id, r);
+    return (
+      !e.isDisposeCardOrTuning() && checkRelative(e.onTimeState, e.entity.id, r)
+    );
   }),
   selfDispose: defineDescriptor("onDispose", (e, r) => {
     return e.entity.id === r.callerId;
@@ -573,22 +580,33 @@ export const detailedEventDictionary = {
   generateDice: defineDescriptor("onGenerateDice", (e, r) => {
     return checkRelative(e.onTimeState, { who: e.who }, r);
   }),
-  cancelConsumeNightsoul: defineDescriptor("modifyChangeNightsoul", (e, r) => {
+  cancelConsumeNightsoul: defineDescriptor("modifyChangeVariable", (e, r) => {
     return (
-      checkRelative(e.onTimeState, e.character.id, r) &&
-      e.info.type === "consume" &&
+      e.info.varName === "nightsoul" &&
+      checkRelative(e.onTimeState, e.area, r) &&
+      e.info.direction === "decrease" &&
       !e.info.cancelled
     );
   }),
-  consumeNightsoul: defineDescriptor("onChangeNightsoul", (e, r) => {
+  consumeNightsoul: defineDescriptor("onChangeVariable", (e, r) => {
     return (
-      checkRelative(e.onTimeState, e.character.id, r) &&
-      e.info.type === "consume"
+      e.info.varName === "nightsoul" &&
+      checkRelative(e.onTimeState, e.area, r) &&
+      e.info.direction === "decrease"
     );
   }),
-  gainNightsoul: defineDescriptor("onChangeNightsoul", (e, r) => {
+  gainNightsoul: defineDescriptor("onChangeVariable", (e, r) => {
     return (
-      checkRelative(e.onTimeState, e.character.id, r) && e.info.type === "gain"
+      e.info.varName === "nightsoul" &&
+      checkRelative(e.onTimeState, e.area, r) &&
+      e.info.direction === "increase"
+    );
+  }),
+  gainUsage: defineDescriptor("onChangeVariable", (e, r) => {
+    return (
+      e.info.varName === "usage" &&
+      checkRelative(e.onTimeState, e.area, r) &&
+      e.info.direction === "increase"
     );
   }),
   selectCard: defineDescriptor("onSelectCard", (e, r) => {
@@ -849,7 +867,7 @@ export interface UsageOptions<Name extends string> extends VariableOptions {
 
 export class TriggeredSkillBuilder<
   EventArgType,
-  CallerType extends "character" | EntityType,
+  CallerType extends ExEntityType,
   CallerVars extends string,
   AssociatedExt extends ExtensionHandle,
   ParentFromCard extends boolean,
@@ -857,6 +875,17 @@ export class TriggeredSkillBuilder<
 > extends SkillBuilder<
   CreateSkillBuilderMeta<EventArgType, CallerType, CallerVars, AssociatedExt>
 > {
+  private _delayedToSkill = false;
+  private _beforeDefaultDispose = false;
+  private _enableHandTriggering = false;
+  private _enablePileTriggering = false;
+  private _usageOpt: { name: string; autoDecrease: boolean } | null = null;
+  private _usagePerRoundOpt: {
+    name: UsagePerRoundVariableNames;
+    autoDecrease: boolean;
+  } | null = null;
+  private _listenTo: ListenTo = ListenTo.SameArea;
+
   constructor(
     id: number,
     private readonly detailedEventName: DetailedEventNames | CustomEvent,
@@ -878,17 +907,10 @@ export class TriggeredSkillBuilder<
   ) {
     super(id);
     this.associatedExtensionId = this.parent._associatedExtensionId;
+    this._enableHandTriggering = parent._type === "attachment";
+    this._enablePileTriggering = parent._type === "attachment";
   }
-  private _delayedToSkill = false;
-  private _beforeDefaultDispose = false;
-  private _enableHandTriggering = false;
-  private _usageOpt: { name: string; autoDecrease: boolean } | null = null;
-  private _usagePerRoundOpt: {
-    name: UsagePerRoundVariableNames;
-    autoDecrease: boolean;
-  } | null = null;
-  private _listenTo: ListenTo = ListenTo.SameArea;
-
+  
   delayedToSkill() {
     const allowedEventNames: (DetailedEventNames | CustomEvent)[] = [
       "dealDamage",
@@ -999,6 +1021,10 @@ export class TriggeredSkillBuilder<
     this._enableHandTriggering = true;
     return this;
   }
+  enablePileTriggering() {
+    this._enablePileTriggering = true;
+    return this;
+  }
 
   /** 调用之前在 `EntityBuilder` 中定义的“小程序” */
   declare callSnippet: CallSnippet<
@@ -1049,6 +1075,11 @@ export class TriggeredSkillBuilder<
     if (!this._enableHandTriggering) {
       this.filters.push((c) => {
         return c.self.area.type !== "hands";
+      });
+    }
+    if (!this._enablePileTriggering) {
+      this.filters.push((c) => {
+        return c.self.area.type !== "pile";
       });
     }
     // 3. 基于 listenTo 的 filter

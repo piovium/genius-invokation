@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, combatStatus, card, DamageType, diceCostOfCard, customEvent, EntityState } from "@gi-tcg/core/builder";
+import { character, skill, summon, status, combatStatus, card, DamageType, customEvent, EntityState } from "@gi-tcg/core/builder";
 
 // 入场时：获得我方已吞噬卡牌中最高元素骰费用值的「攻击力」，获得该费用的已吞噬卡牌数量的可用次数。
 
@@ -21,7 +21,7 @@ import { character, skill, summon, status, combatStatus, card, DamageType, diceC
  * @id 122043
  * @name 黑色幻影
  * @description
- * 入场时：获得我方已吞噬卡牌中最高元素骰费用值的「攻击力」，获得该费用的已吞噬卡牌数量的可用次数。
+ * 入场时：获得我方已吞噬卡牌中最高当前元素骰费用的「攻击力」，获得该费用的已吞噬卡牌数量的可用次数。
  * 结束阶段：造成此牌「攻击力」值的雷元素伤害。
  * 我方出战角色受到伤害时：抵消1点伤害，然后此牌可用次数-2。
  */
@@ -70,7 +70,7 @@ export const AnomalousAnatomy = status(122042)
  * @id 122045
  * @name 吞噬冲动
  * @description
- * 回合开始时：舍弃原本元素骰费用最高的2张手牌，治疗该角色1点生命值，并抓1张牌。
+ * 回合开始时：舍弃当前元素骰费用最高的2张手牌，治疗该角色1点生命值，并抓1张牌。
  */
 export const DevourersImpulse = status(122045)
   .reserve();
@@ -79,7 +79,7 @@ export const DevourersImpulse = status(122045)
  * @id 122044
  * @name 吞噬本能
  * @description
- * 回合开始时：舍弃原本元素骰费用最高的1张手牌。
+ * 回合开始时：舍弃当前元素骰费用最高的1张手牌。
  */
 export const DevourersInstinct = status(122044)
   .reserve();
@@ -89,7 +89,7 @@ export const DevourersInstinct = status(122044)
  * @name 深噬之域
  * @description
  * 我方从手牌中舍弃或调和的卡牌，会被吞噬。
- * 每吞噬3张牌：吞星之鲸在回合结束时获得1点额外最大生命；如果其中存在原本元素骰费用值相同的牌，则额外获得1点；如果3张均相同，再额外获得1点。
+ * 每吞噬3张牌：吞星之鲸在回合结束时获得1点额外最大生命；如果其中存在当前元素骰费用相同的牌，则额外获得1点；如果3张均相同，再额外获得1点。
  * 【此卡含描述变量】
  */
 export const DeepDevourersDomain = combatStatus(122041)
@@ -167,7 +167,7 @@ const StarfallShowerDisposeCard = customEvent<EntityState>("alldevouringNarwhal/
  * @id 22042
  * @name 迸落星雨
  * @description
- * 造成1点水元素伤害，此角色每有3点无尽食欲提供的额外最大生命，此伤害+1（最多+3）。然后舍弃1张原本元素骰费用最高的手牌。
+ * 造成1点水元素伤害，此角色每有3点无尽食欲提供的额外最大生命，此伤害+1（最多+3）。然后舍弃1张当前元素骰费用最高的手牌。
  */
 export const StarfallShower = skill(22042)
   .type("elemental")
@@ -220,7 +220,7 @@ export const InsatiableAppetite = skill(22044)
 export const AlldevouringNarwhal = character(2204)
   .since("v4.7.0")
   .tags("hydro", "monster")
-  .health(5)
+  .health(6)
   .energy(2)
   .skills(ShatteringWaves, StarfallShower, RavagingDevourer, InsatiableAppetite)
   .done();
@@ -231,7 +231,7 @@ export const AlldevouringNarwhal = character(2204)
  * @description
  * 战斗行动：我方出战角色为吞星之鲸时，装备此牌。
  * 吞星之鲸装备此牌后，立刻使用一次迸落星雨。
- * 装备有此牌的吞星之鲸使用迸落星雨舍弃1张手牌后：治疗此角色该手牌元素骰费用的点数。（每回合1次）
+ * 装备有此牌的吞星之鲸使用迸落星雨舍弃1张手牌后：治疗此角色，其数值等同于所舍弃手牌的当前元素骰费用。（每回合1次）
  * （牌组中包含吞星之鲸，才能加入牌组）
  */
 export const LightlessFeeding = card(222041)
@@ -243,6 +243,6 @@ export const LightlessFeeding = card(222041)
   .on(StarfallShowerDisposeCard)
   .usagePerRound(1)
   .do((c, e) => {
-    c.heal(diceCostOfCard(e.arg.definition), "@master")
+    c.heal(c.get(e.arg).diceCost(), "@master")
   })
   .done();

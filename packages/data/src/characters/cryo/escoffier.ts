@@ -213,7 +213,7 @@ export const ConstantOffthecuffCookery = skill(11154)
 export const Escoffier = character(1115)
   .since("v6.2.0")
   .tags("cryo", "pole", "fontaine", "pneuma")
-  .health(11)
+  .health(10)
   .energy(2)
   .skills(KitchenSkills, LowtemperatureCooking, ScoringCuts, ConstantOffthecuffCookery)
   .done();

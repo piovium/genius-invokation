@@ -36,7 +36,7 @@ import {
   weaponOfCharacter,
   type PlainEntityState,
 } from "./utils";
-import { isSkillDisabled } from "../../utils";
+import { isSkillDisabled, type CreateEntityOptions } from "../../utils";
 import type { ContextMetaBase, HealOption, SkillContext } from "./skill";
 import { Aura, DamageType, DiceType } from "@gi-tcg/typings";
 import type {
@@ -44,7 +44,6 @@ import type {
   EquipmentHandle,
   StatusHandle,
 } from "../type";
-import type { CreateEntityOptions } from "../../mutator";
 import {
   LatestStateSymbol,
   RawStateSymbol,
@@ -247,9 +246,11 @@ export class ReadonlyCharacter<
     );
   }
   hasNightsoulsBlessing() {
-    return this.entities.find((v) =>
-      v.definition.tags.includes("nightsoulsBlessing"),
-    ) ?? null;
+    return (
+      this.entities.find((v) =>
+        v.definition.tags.includes("nightsoulsBlessing"),
+      ) ?? null
+    );
   }
   isSkillDisabled(): boolean {
     return isSkillDisabled(this.state);
@@ -274,21 +275,28 @@ export class Character<
   addStatus(status: StatusHandle, opt?: CreateEntityOptions) {
     this.skillContext.createEntity("status", status, this.area, opt);
   }
-  equip(equipment: EquipmentHandle | PlainEntityState, opt?: CreateEntityOptions) {
+  equip(
+    equipment: EquipmentHandle | PlainEntityState,
+    opt?: CreateEntityOptions,
+  ) {
     this.skillContext.equip(equipment, this.state, opt);
   }
   private unequip(state: EntityState) {
     this.skillContext.unequip(state);
   }
   unequipArtifact() {
-    const artifact = this.state.entities.find((et) => et.definition.tags.includes("artifact"));
+    const artifact = this.state.entities.find((et) =>
+      et.definition.tags.includes("artifact"),
+    );
     if (!artifact) {
       return;
     }
     this.unequip(artifact);
   }
   unequipWeapon() {
-    const weapon = this.state.entities.find((et) => et.definition.tags.includes("weapon"));
+    const weapon = this.state.entities.find((et) =>
+      et.definition.tags.includes("weapon"),
+    );
     if (!weapon) {
       return;
     }

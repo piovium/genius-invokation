@@ -14,10 +14,21 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { AnyState } from "@gi-tcg/core";
-import { createMemo, createSignal, ErrorBoundary, For, Show } from "solid-js";
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  ErrorBoundary,
+  For,
+  Show,
+} from "solid-js";
 import { ActionCard, Character, Entity, Keyword, Skill } from "./Entity";
 
-export type StateType = AnyState["definition"]["type"] | "card" | "skill" | "keyword";
+export type StateType =
+  | AnyState["definition"]["type"]
+  | "card"
+  | "skill"
+  | "keyword";
 
 export type ViewerInput =
   | {
@@ -57,7 +68,7 @@ function CardDataViewer(props: CardDataViewerProps) {
   const grouped = createMemo(() => Object.groupBy(props.inputs, (i) => i.type));
   const hasStatuses = () => {
     const g = grouped();
-    return g.equipment || g.status || g.combatStatus;
+    return g.equipment || g.status || g.combatStatus || g.attachment;
   };
   const equipmentAndStatuses = () => [
     ...(grouped().equipment ?? []),
@@ -151,6 +162,20 @@ function CardDataViewer(props: CardDataViewerProps) {
                 <h3 class="text-yellow-7 mb-2">出战状态</h3>
               </Show>
               <For each={grouped().combatStatus}>
+                {(input) => (
+                  <Entity
+                    class="b-yellow-3 b-1 rounded-md mb-2"
+                    {...props}
+                    input={input}
+                    asChild
+                    onRequestExplain={onRequestExplain}
+                  />
+                )}
+              </For>
+              <Show when={grouped().attachment?.length}>
+                <h3 class="text-yellow-7 mb-2">附着效果状态</h3>
+              </Show>
+              <For each={grouped().attachment}>
                 {(input) => (
                   <Entity
                     class="b-yellow-3 b-1 rounded-md mb-2"

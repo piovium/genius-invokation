@@ -29,8 +29,10 @@ import {
   type CharacterState,
   type EntityState,
   type GameState,
+  type AttachmentState,
   stringifyState,
 } from "./state";
+import type { Mutation } from "./mutation";
 import {
   REACTION_RELATIVES,
   type SwirlableElement,
@@ -38,7 +40,6 @@ import {
   isReactionRelatedTo,
   isReactionSwirl,
 } from "../base/reaction";
-import type { CharacterDefinition } from "./character";
 import { GiTcgCoreInternalError, GiTcgDataError } from "../error";
 import type {
   CardTag,
@@ -50,8 +51,10 @@ import type {
   UsagePerRoundVariableNames,
 } from "./entity";
 import {
+  appendCost,
   costSize,
-  diceCostOfCard,
+  deductCost,
+  diceCostSizeOfCard,
   diceCostSize,
   getEntityArea,
   getEntityById,
@@ -64,12 +67,13 @@ import type { CustomEvent } from "./custom_event";
 import { getRaw, NoReactiveSymbol } from "../builder/context/reactive";
 import type { PlainCharacterState } from "../builder/context/utils";
 import type { AppliableDamageType } from "../builder/type";
-import type { Mutation } from "..";
 import type { MoveEntityM, RemoveEntityM } from "./mutation";
+import type { LunarReaction } from "@gi-tcg/typings";
+import type { DamageOption } from "../mutator";
 
 export interface SkillDefinitionBase<Arg> {
   readonly type: "skill";
-  readonly ownerType: EntityType | "character" | "card" | "extension";
+  readonly ownerType: EntityType | "character" | "attachment" | "extension";
   readonly id: number;
   readonly action: SkillDescription<Arg>;
   readonly filter: SkillActionFilter<Arg>;
@@ -311,8 +315,8 @@ export type WithActionDetail<T extends ActionInfoBase> = T & {
 export type ActionInfo = WithActionDetail<ActionInfoBase>;
 
 export interface EnterEventInfo {
-  readonly newState: EntityState | CharacterState;
-  readonly overridden: EntityState | null;
+  readonly newState: AnyState;
+  readonly overridden: EntityState | AttachmentState | null;
 }
 
 export class EventArg {
@@ -401,23 +405,16 @@ export class ActionEventArg<
       this.action.cost,
     )}, fast: ${this.action.fast}`;
   }
-  protected originalDiceCost(): ReadonlyDiceRequirement {
+  /** *当前* 元素骰费用（不含已经处理的打出时费用增减，含附属状态增减费）。 */
+  currentDiceCostSize(): number {
     if (
-      (this.isUseSkill() || this.isPlayCard()) &&
-      this.action.skill.definition.initiativeSkillConfig
-    ) {
-      return this.action.skill.definition.initiativeSkillConfig.requiredCost;
-    } else {
-      throw new GiTcgCoreInternalError("originalDiceCost not available");
-    }
-  }
-  originalDiceCostSize(): number {
-    if (
-      (this.isUseSkill() || this.isPlayCard()) &&
+      this.isUseSkill() &&
       this.action.skill.definition.initiativeSkillConfig
     ) {
       return this.action.skill.definition.initiativeSkillConfig
         .computed$diceCostSize;
+    } else if (this.isPlayCard()) {
+      return diceCostSizeOfCard(this.onTimeState, this.action.skill.caller);
     } else {
       return 0;
     }
@@ -531,14 +528,7 @@ export class ModifyActionEventArgBase<
   }
 
   protected doDeductCost(availableType: DiceType[], count: number) {
-    for (const type of availableType) {
-      const currentCount = this._cost.get(type) ?? 0;
-      this._cost.set(type, Math.max(0, currentCount - count));
-      count -= currentCount;
-      if (count <= 0) {
-        return;
-      }
-    }
+    deductCost(this._cost, availableType, count);
   }
 
   isFast() {
@@ -572,20 +562,26 @@ export class ModifyAction0EventArg<
       this.caller,
     )} add ${count} [dice:${type}] to cost.\n`;
     if (type === DiceType.Omni) {
-      // 增加 Omni 类型：假设原本要求为单色*n，增加该类型的元素骰
-      const originalCost = this.originalDiceCost()
-        .entries()
-        .filter(([dice, cost]) => dice !== DiceType.Energy)
-        .toArray();
-      if (originalCost.length !== 1) {
-        throw new GiTcgDataError(
-          "Cannot addCost omni to action whose original dice requirement do not have single dice type",
-        );
-      }
-      type = originalCost[0][0];
+      // 找到第一种可用颜色，将 count 添加至其中
+      appendCost(
+        this._cost,
+        [
+          DiceType.Aligned,
+          DiceType.Cryo,
+          DiceType.Hydro,
+          DiceType.Pyro,
+          DiceType.Electro,
+          DiceType.Anemo,
+          DiceType.Geo,
+          DiceType.Dendro,
+          DiceType.Void,
+        ],
+        count,
+      );
+    } else {
+      const currentCount = this._cost.get(type) ?? 0;
+      this._cost.set(type, currentCount + count);
     }
-    const currentCount = this._cost.get(type) ?? 0;
-    this._cost.set(type, currentCount + count);
   }
 }
 
@@ -757,14 +753,21 @@ export class DamageOrHealEventArg<
   InfoT extends DamageInfo | HealInfo,
 > extends EventArg {
   public readonly sourceWho: 0 | 1;
+  public readonly enabledLunarReactions: readonly LunarReaction[];
   public readonly targetWho: 0 | 1;
   constructor(
     state: GameState,
     private readonly _damageInfo: InfoT,
+    public readonly option: DamageOption | "HEAL",
   ) {
     super(state);
-    this.sourceWho = getEntityArea(state, _damageInfo.source.id).who;
+    this.sourceWho =
+      typeof option === "object"
+        ? option.callerWho
+        : getEntityArea(state, _damageInfo.source.id).who;
     this.targetWho = getEntityArea(state, _damageInfo.target.id).who;
+    this.enabledLunarReactions =
+      typeof option === "object" ? option.enabledLunarReactions ?? [] : [];
   }
   toString() {
     return stringifyDamageInfo(this.damageInfo).split("\n")[0];
@@ -799,19 +802,24 @@ export class DamageOrHealEventArg<
     if (!this.isDamageTypeDamage()) {
       return null;
     }
-    return getReaction(this.damageInfo as DamageInfo);
+    const { targetAura, type } = this.damageInfo;
+    return getReaction({
+      type,
+      targetAura,
+      enabledLunarReactions: this.enabledLunarReactions,
+    }).reaction;
   }
   isReactionRelatedTo(target: DamageType): boolean {
     if (!this.isDamageTypeDamage()) {
       return false;
     }
-    return isReactionRelatedTo(this.damageInfo as DamageInfo, target);
+    return isReactionRelatedTo(this.damageInfo, target);
   }
   isSwirl(): SwirlableElement | null {
     if (!this.isDamageTypeDamage()) {
       return null;
     }
-    return isReactionSwirl(this.damageInfo as DamageInfo);
+    return isReactionSwirl(this.damageInfo);
   }
   viaSkillType(skillType: CommonSkillType): boolean {
     return this.via.definition.initiativeSkillConfig?.skillType === skillType;
@@ -940,7 +948,10 @@ export class ModifyDamage0EventArg extends ModifyDamageEventArgBase {
 export class ModifyDamageByReactionEventArg extends ModifyDamageEventArgBase {
   increaseDamageByReaction() {
     const damageInfo = super.damageInfo;
-    const reaction = getReaction(damageInfo);
+    const { reaction } = getReaction({
+      ...damageInfo,
+      enabledLunarReactions: this.enabledLunarReactions,
+    });
     switch (reaction) {
       case Reaction.Melt:
       case Reaction.Vaporize:
@@ -1070,8 +1081,9 @@ export class DisposeEventArg extends EntityEventArg<EntityState> {
   }
 
   diceCost() {
-    return diceCostOfCard(this.entity.definition);
+    return diceCostSizeOfCard(this.onTimeState, this.entity);
   }
+
   override toString(): string {
     return `player ${this.who} ${this.reason} card ${stringifyState(
       this.entity,
@@ -1187,11 +1199,11 @@ export class ZeroHealthEventArg extends ModifyDamage1EventArg {
 
 export class TransformDefinitionEventArg extends EventArg {
   public readonly who: 0 | 1;
-  public readonly oldDefinition: CharacterDefinition | EntityDefinition;
+  public readonly oldDefinition: AnyState["definition"];
   constructor(
     state: GameState,
     public readonly entity: AnyState,
-    public readonly newDefinition: CharacterDefinition | EntityDefinition,
+    public readonly newDefinition: AnyState["definition"],
   ) {
     super(state);
     const area = getEntityArea(state, entity.id);
@@ -1237,29 +1249,30 @@ export class GenerateDiceEventArg extends PlayerEventArg {
   }
 }
 
-export interface NightsoulValueChangeInfo {
+export interface VariableValueChangeInfo {
+  readonly varName: string;
   readonly oldValue: number;
-  readonly consumedValue: number;
+  readonly diffValue: number;
   readonly newValue: number;
-  readonly type: "consume" | "gain";
+  readonly direction: "increase" | "decrease";
   readonly cancelled: boolean;
 }
 
-export class NightsoulEventArg extends CharacterEventArg {
+export class VariableEventArg extends EntityEventArg {
   constructor(
     state: GameState,
-    character: CharacterState,
-    public readonly _info: NightsoulValueChangeInfo,
+    readonly entity: AnyState,
+    public readonly _info: VariableValueChangeInfo,
   ) {
-    super(state, character);
+    super(state, entity);
   }
   protected _cancelled = false;
   get info() {
     return this._info;
   }
 }
-export class BeforeNightsoulEventArg extends NightsoulEventArg {
-  /** @deprecated TODO 似乎玛薇卡不会取消夜魂值消耗 */
+export class BeforeVariableEventArg extends VariableEventArg {
+  // TODO 似乎玛薇卡不会取消夜魂值消耗
   cancel() {
     this._cancelled = true;
   }
@@ -1282,13 +1295,15 @@ export class SelectCardEventArg extends PlayerEventArg {
 }
 
 export class CustomEventEventArg<T = unknown> extends EntityEventArg {
+  arg: T extends {} ? T & { [NoReactiveSymbol]: true } : T;
   constructor(
     state: GameState,
     entity: AnyState,
     public readonly customEvent: CustomEvent<T>,
-    public readonly arg: T,
+    arg: T,
   ) {
     super(state, entity);
+    this.arg = arg as any;
   }
 
   toString() {
@@ -1325,8 +1340,8 @@ export const EVENT_MAP = {
   onReaction: ReactionEventArg,
   onTransformDefinition: TransformDefinitionEventArg,
   onGenerateDice: GenerateDiceEventArg,
-  modifyChangeNightsoul: BeforeNightsoulEventArg,
-  onChangeNightsoul: NightsoulEventArg,
+  modifyChangeVariable: BeforeVariableEventArg,
+  onChangeVariable: VariableEventArg,
 
   onSelectCard: SelectCardEventArg,
 
@@ -1358,7 +1373,7 @@ export type InlineEventNames =
   | "modifyDamage3"
   | "modifyHeal0"
   | "modifyHeal1"
-  | "modifyChangeNightsoul"
+  | "modifyChangeVariable"
   | "modifyReaction";
 
 export type EventArgOf<E extends EventNames> = InstanceType<EventMap[E]>;

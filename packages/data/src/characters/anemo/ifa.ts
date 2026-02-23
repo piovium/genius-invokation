@@ -187,7 +187,7 @@ export const Ifa = character(1515)
  * @name 温敷战术包扎
  * @description
  * 快速行动：装备给我方的伊法，治疗我方受伤最多的角色1点。
- * 装备有此牌的伊法在场时，我方触发风元素相关反应或感电反应后，治疗我方受伤最多的角色1点。（每回合2次）
+ * 装备有此牌的伊法在场时，我方触发风元素相关反应、感电或月感电反应后，治疗我方受伤最多的角色1点。（每回合2次）（每回合2次）
  * （牌组中包含伊法，才能加入牌组）
  */
 export const TacticalWarmCompressBandaging = card(215151)
@@ -196,7 +196,9 @@ export const TacticalWarmCompressBandaging = card(215151)
   .talent(Ifa, "none")
   .on("enter")
   .heal(1, `my characters order by health - maxHealth limit 1`)
-  .on("dealReaction", (c, e) => e.relatedTo(DamageType.Anemo) || e.type === Reaction.ElectroCharged)
+  .on("dealReaction", (c, e) =>
+    e.relatedTo(DamageType.Anemo) || 
+    ([Reaction.ElectroCharged, Reaction.LunarElectroCharged] as Reaction[]).includes(e.type))
   .listenToPlayer()
   .usagePerRound(2)
   .heal(1, `my characters order by health - maxHealth limit 1`)

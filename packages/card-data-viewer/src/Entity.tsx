@@ -409,7 +409,7 @@ export function Reference(props: ReferenceProps) {
                 classList={{
                   "skill-icon":
                     data.state === "ready" &&
-                    data()?.type.startsWith("GCG_SKILL_"),
+                    data()?.type?.startsWith("GCG_SKILL_"),
                 }}
               />
             )}

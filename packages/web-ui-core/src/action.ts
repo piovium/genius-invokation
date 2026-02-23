@@ -278,7 +278,10 @@ function parsePreviewData(previewData: PreviewData[]): ParsedPreviewData {
         break;
       }
       case "damage": {
-        if (value.healKind === PbHealKind.IMMUNE_DEFEATED || value.healKind === PbHealKind.REVIVE) {
+        if (
+          value.healKind === PbHealKind.IMMUNE_DEFEATED ||
+          value.healKind === PbHealKind.REVIVE
+        ) {
           const info = getPreviewingCharacter(value.targetId);
           info.revived = true;
           info.negativeHealth = null;
@@ -883,7 +886,7 @@ function createElementalTuningActionState(
     realCosts: root.realCosts,
     showHands: false,
     showSkillButtons: false,
-    hintText: `调和为${"_冰水火雷风岩草"[targetDice]}元素骰子`,
+    hintText: `调和为${targetDice === DiceType.Omni ? "万能" : "_冰水火雷风岩草"[targetDice]}元素骰子`,
     dicePanel: "visible",
     autoSelectedDice: ctx.action.autoSelectedDice as DiceType[],
     maxSelectedDiceCount: 1,

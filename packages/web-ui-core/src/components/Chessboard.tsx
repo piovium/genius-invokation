@@ -16,6 +16,7 @@
 import {
   Aura,
   DiceType,
+  PbAttachmentState,
   PbDiceRequirement,
   PbDiceType,
   PbExposedMutation,
@@ -181,11 +182,15 @@ export interface CharacterInfo {
   clickStep: ClickEntityActionStep | null;
 }
 
-export interface StatusInfo {
+export interface StatusViewInfo {
   id: number;
-  data: PbEntityState;
+  data: PbEntityState | PbAttachmentState;
   animation: "none" | "entering" | "disposing";
   triggered: boolean;
+}
+
+export interface StatusInfo extends StatusViewInfo {
+  data: PbEntityState;
 }
 
 export interface EntityInfo extends StatusInfo {
@@ -311,6 +316,7 @@ interface CardInfoCalcContext {
   who: 0 | 1;
   size: Size;
   myHandState: MyHandState;
+  triggeringEntities: number[];
   hoveringHand: CardInfo | null;
   draggingHand: DraggingCardInfo | null;
   availableSteps: ActionStep[];
@@ -325,6 +331,7 @@ function calcCardsInfo(
     who,
     size,
     myHandState,
+    triggeringEntities,
     hoveringHand,
     availableSteps,
     hasOppChessboard,
@@ -346,6 +353,7 @@ function calcCardsInfo(
         uiState: {
           type: "cardStatic",
           isAnimating: false,
+          triggered: triggeringEntities.includes(card.id),
           draggingEndAnimation: false,
           transform: {
             x,
@@ -430,6 +438,7 @@ function calcCardsInfo(
         uiState: {
           type: "cardStatic",
           isAnimating: false,
+          triggered: triggeringEntities.includes(card.id),
           transform: {
             x,
             y,
@@ -468,6 +477,7 @@ function calcCardsInfo(
       uiState: {
         type: "cardStatic",
         isAnimating: false,
+        triggered: triggeringEntities.includes(id),
         transform: {
           x,
           y,
@@ -663,6 +673,7 @@ function rerenderChildren(opt: {
     draggingHand,
     availableSteps,
     hasOppChessboard: hasOppChessboard,
+    triggeringEntities: data.triggeringEntities,
   });
 
   if (animatingCards.length > 0) {
@@ -674,6 +685,7 @@ function rerenderChildren(opt: {
       draggingHand,
       availableSteps: [],
       hasOppChessboard: hasOppChessboard,
+      triggeringEntities: data.triggeringEntities,
     });
     const showingCards = Map.groupBy(animatingCards, (x) => x.delay);
     let totalDelayMs = 0;

@@ -28,15 +28,19 @@ export type EquipmentTag =
   | "weapon"
   | WeaponCardTag;
 
-export type SupportTag = "ally" | "place" | "item" | "adventureSpot";
+export type SupportTag =
+  | "ally"
+  | "place"
+  | "item"
+  | "blessing"
+  | "adventureSpot";
 
 export type CardTag =
   | "legend" // 秘传
   | "action" // 出战行动
   | "food"
   | "resonance" // 元素共鸣
-  | "noTuning" // 禁用调和
-  ;
+  | "abyss"; // 显示深渊特效
 export type CommonEntityTag =
   | "shield" // 护盾 & 显示黄盾特效
   | "barrier" // 紫盾 & 显示蓝盾特效
@@ -49,7 +53,7 @@ export type StatusTag =
   | "preparingSkill"; // 角色将准备技能（仅角色状态）
 
 export type CombatStatusTag =
-  | "eventEffectless" // 禁用事件牌效果（仅出战状态）
+  | "eventEffectless" // 禁用事件牌效果（6.3 及之前）
   | "nightsoulsBlessing"; // 夜魂加持（仅角色状态）
 
 export type EntityTagMap = {
@@ -59,9 +63,11 @@ export type EntityTagMap = {
   equipment: EquipmentTag;
   support: SupportTag;
   summon: never;
-}
+};
 
-export type EntityTag<Type extends EntityType = EntityType> = CommonEntityTag | EntityTagMap[Type];
+export type EntityTag<Type extends EntityType = EntityType> =
+  | CommonEntityTag
+  | EntityTagMap[Type];
 
 export type EntityType =
   | "eventCard"
@@ -80,6 +86,7 @@ export interface EntityDefinition {
   readonly visibleVarName: string | null;
   readonly tags: readonly EntityTag[];
   readonly hintText: string | null;
+  readonly disableTuning: boolean;
   readonly varConfigs: EntityVariableConfigs;
   readonly disposeWhenUsageIsZero: boolean;
   readonly skills: readonly SkillDefinition[];
@@ -89,13 +96,16 @@ export interface EntityDefinition {
 export type EntityArea =
   | {
       readonly type:
-        | "pile"
-        | "hands"
         | "combatStatuses"
         | "supports"
         | "summons"
         | "removedEntities";
       readonly who: 0 | 1;
+    }
+  | {
+      readonly type: "pile" | "hands";
+      readonly who: 0 | 1;
+      readonly cardId: number;
     }
   | {
       readonly type: "characters";
@@ -173,6 +183,8 @@ export type DescriptionDictionary = Readonly<
 
 export function stringifyEntityArea(area: EntityArea) {
   return `${
-    area.type === "characters" ? `character (${area.characterId})` : area.type
+    area.type === "characters"
+      ? `character (${area.characterId})`
+      : area.type + ("cardId" in area && area.cardId ? ` (${area.cardId})` : "")
   } of player ${area.who}`;
 }

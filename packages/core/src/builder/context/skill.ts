@@ -24,7 +24,7 @@ import {
 } from "../../base/entity";
 import type { MoveEntityM, Mutation, RemoveEntityM } from "../../base/mutation";
 import {
-  type NightsoulValueChangeInfo,
+  type VariableValueChangeInfo,
   type DamageInfo,
   DamageOrHealEventArg,
   type DisposeOrTuneMethod,
@@ -37,12 +37,13 @@ import {
   type SkillInfoOfContextConstruction,
   constructEventAndRequestArg,
   type UseSkillRequestOption,
-  BeforeNightsoulEventArg,
+  BeforeVariableEventArg,
   ZeroHealthEventArg,
 } from "../../base/skill";
 import {
   type CharacterState as CharacterStateO,
   type EntityState as EntityStateO,
+  type AttachmentState as AttachmentStateO,
   type GameData,
   type GameState,
   type PhaseType,
@@ -52,13 +53,14 @@ import {
 } from "../../base/state";
 import {
   getEntityById,
-  diceCostOfCard,
+  diceCostSizeOfCard,
   isCharacterInitiativeSkill,
   sortDice,
   type PlainCharacterState,
   type PlainEntityState,
   type PlainAnyState,
   type ExPlainEntityState,
+  type PlainAttachmentState,
 } from "./utils";
 import { executeQuery } from "../../query";
 import type {
@@ -74,6 +76,7 @@ import type {
   SummonHandle,
   EquipmentHandle,
   SupportHandle,
+  AttachmentHandle,
 } from "../type";
 import type { GuessedTypeOfQuery } from "../../query/types";
 import { CALLED_FROM_REACTION } from "../reaction";
@@ -81,7 +84,6 @@ import { flip } from "@gi-tcg/utils";
 import { GiTcgDataError } from "../../error";
 import { DetailLogType } from "../../log";
 import {
-  type CreateEntityOptions,
   GiTcgPreviewAbortedError,
   type InsertPileStrategy,
   type InternalHealOption,
@@ -99,6 +101,9 @@ import {
   type RxEntityState,
 } from "./reactive";
 import { ReactiveStateSymbol } from "./reactive_base";
+import type { CreateEntityOptions } from "../../utils";
+import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "../skill";
+import type { LunarReaction } from "@gi-tcg/typings";
 
 type CharacterTargetArg = PlainCharacterState | PlainCharacterState[] | string;
 type EntityTargetArg = PlainEntityState | PlainEntityState[] | string;
@@ -107,6 +112,7 @@ type EntityDefinitionFilterFn = (card: EntityDefinition) => boolean;
 
 interface MaxCostHandsOpt {
   who?: "my" | "opp";
+  filter?: (card: PlainEntityState) => boolean;
   useTieBreak?: boolean;
 }
 
@@ -114,6 +120,8 @@ interface DrawCardsOpt {
   who?: "my" | "opp";
   /** 抽取带有特定标签的牌 */
   withTag?: EntityTag | null;
+  /** 抽取带有特定附着效果的牌 */
+  withAttachment?: AttachmentHandle | null;
   /** 抽取选定定义的牌。设置此选项会忽略 withTag */
   withDefinition?: CardHandle | null;
 }
@@ -259,6 +267,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
           result[previousIndex][1] = new DamageOrHealEventArg(
             previousArg.onTimeState,
             combinedDamageInfo,
+            previousArg.option,
           );
         } else {
           damageEventIndexInResultBasedOnTarget.set(
@@ -365,15 +374,16 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return executeQuery(this, arg);
   }
 
+  get<T extends ExEntityType>(id: number): RxEntityState<Meta, T>;
   get<T extends ExEntityType>(
     rxState: RxEntityState<Meta, T>,
   ): RxEntityState<Meta, T>;
   get(state: PlainEntityState): ApplyReactive<Meta, EntityStateO>;
   get(state: PlainCharacterState): ApplyReactive<Meta, CharacterStateO>;
+  get(state: PlainAttachmentState): ApplyReactive<Meta, AttachmentStateO>;
   get<T extends ExEntityType>(
     state: ExPlainEntityState<T>,
   ): RxEntityState<Meta, T>;
-  get<T extends ExEntityType>(id: number): RxEntityState<Meta, T>;
   get(x: number | PlainAnyState): unknown {
     if (typeof x === "number") {
       return applyReactive(this, getEntityById(this.rawState, x));
@@ -440,40 +450,44 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   /**
-   * 某方玩家手牌，并按照原本元素骰费用降序排序
+   * 某方玩家手牌，并按照元素骰费用降序排序
    * @param who 我方还是对方
    * @param useTiebreak 是否使用“破平值”，若否，使用“手牌序”（即摸上来的顺序）
    */
-  private costSortedHands(
-    who: "my" | "opp",
-    useTieBreak: boolean,
-  ): RxEntityState<Meta, EntityType>[] {
+  private costSortedHands({
+    who = "my",
+    filter = () => true,
+    useTieBreak = false,
+  }: MaxCostHandsOpt): RxEntityState<Meta, EntityType>[] {
     const player = who === "my" ? this.player : this.oppPlayer;
     const tb = useTieBreak
-      ? (card: RxEntityState<Meta, EntityType>) => {
+      ? (card: EntityStateO) => {
           return nextRandom(card.id) ^ this.rawState.iterators.random;
         }
-      : (_: RxEntityState<Meta, EntityType>) => 0;
+      : (_: EntityStateO) => 0;
     const sortData = new Map(
-      player.hands.map(
+      this.getRawPlayer(who).hands.map(
         (c) =>
-          [c.id, { cost: -diceCostOfCard(c.definition), tb: tb(c) }] as const,
+          [
+            c.id,
+            { cost: -diceCostSizeOfCard(this.rawState, c), tb: tb(c) },
+          ] as const,
       ),
     );
-    return player.hands.toSortedBy((card) => [
-      sortData.get(card.id)!.cost,
-      sortData.get(card.id)!.tb,
-    ]);
+    return player.hands
+      .filter(filter)
+      .toSortedBy((card) => [
+        sortData.get(card.id)!.cost,
+        sortData.get(card.id)!.tb,
+      ]);
   }
 
-  /** 我方或对方原本元素骰费用最多的 `count` 张手牌 */
+  /** 我方或对方当前元素骰费用最多的 `count` 张手牌 */
   maxCostHands(
     count: number,
     opt: MaxCostHandsOpt = {},
   ): RxEntityState<Meta, EntityType>[] {
-    const who = opt.who ?? "my";
-    const useTieBreak = opt.useTieBreak ?? false;
-    return this.costSortedHands(who, useTieBreak).slice(0, count);
+    return this.costSortedHands(opt).slice(0, count);
   }
 
   isInInitialPile(card: PlainEntityState, who: "my" | "opp" = "my"): boolean {
@@ -673,6 +687,14 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return this.enableShortcut();
   }
 
+  // 发生在A玩家头上的反应是否转换为月反应需要看B玩家的角色有没有启用
+  private getEnabledLunarReactions(targetWho: 0 | 1): LunarReaction[] {
+    const lunarLookupWho = flip(targetWho);
+    return this.state.players[lunarLookupWho].characters.flatMap(
+      (ch) => ch.definition.enabledLunarReactions,
+    );
+  }
+
   damage(
     type: DamageType,
     value: number,
@@ -712,6 +734,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
           callerWho: this.callerArea.who,
           targetWho: target.who,
           targetIsActive: target.isActive(),
+          enabledLunarReactions: this.getEnabledLunarReactions(target.who),
         },
       );
       if (isSkillMainDamage) {
@@ -739,6 +762,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         callerWho: this.callerArea.who,
         targetWho: ch.who,
         targetIsActive: ch.isActive(),
+        enabledLunarReactions: this.getEnabledLunarReactions(ch.who),
       });
     }
     return this.enableShortcut();
@@ -885,7 +909,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     this.mutate({
       type: "moveEntity",
       from: area,
-      target: { who: area.who, type: "hands" },
+      target: { who: area.who, type: "hands", cardId: state.id },
       value: state,
       reason: "unequip",
     });
@@ -908,6 +932,14 @@ export class SkillContext<Meta extends ContextMetaBase> {
         opt,
       );
     }
+    return this.enableShortcut();
+  }
+  attach(def: AttachmentHandle, target: PlainEntityState) {
+    const definition = this.state.data.attachments.get(def);
+    if (typeof definition === "undefined") {
+      throw new GiTcgDataError(`Unknown attachment definition id ${def}`);
+    }
+    this.callAndEmit("createAttachment", this.get(target).latest(), definition);
     return this.enableShortcut();
   }
 
@@ -992,27 +1024,15 @@ export class SkillContext<Meta extends ContextMetaBase> {
     target: PlainAnyState,
   ): ShortcutReturn<Meta>;
   setVariable(prop: Meta["callerVars"], value: number): ShortcutReturn<Meta>;
-  setVariable(prop: any, value: number, target?: PlainAnyState) {
+  setVariable(prop: string, value: number, target?: PlainAnyState) {
     target ??= this.self;
-    using l = this.mutator.subLog(
-      DetailLogType.Primitive,
-      `Set ${stringifyState(target)}'s variable ${prop} to ${value}`,
-    );
-    const MAX_VALUE = 2 ** 31 - 1; // 2147483647
-    if (value > MAX_VALUE) {
-      this.mutator.log(
-        DetailLogType.Other,
-        `Variable value ${value} exceeds max limit, omitted`,
-      );
-      return;
-    }
-    const state = this.get(target).latest();
-    this.mutate({
-      type: "modifyEntityVar",
-      state,
+    this.setVariableImpl(target, {
       varName: prop,
-      value: value,
-      direction: null,
+      oldValue: target.variables[prop],
+      newValue: value,
+      diffValue: value - target.variables[prop],
+      direction: value >= target.variables[prop] ? "increase" : "decrease",
+      cancelled: false,
     });
     return this.enableShortcut();
   }
@@ -1095,12 +1115,60 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return this.enableShortcut();
   }
 
-  transformDefinition<DefT extends ExEntityType>(
+  private setVariableImpl(
+    target: PlainAnyState,
+    info: VariableValueChangeInfo,
+  ) {
+    using l = this.mutator.subLog(
+      DetailLogType.Primitive,
+      `Set ${stringifyState(target)}'s variable ${info.varName} to ${
+        info.newValue
+      } (diff: ${info.diffValue}, direction: ${info.direction})`,
+    );
+
+    const MAX_VALUE = 2 ** 31 - 1; // 2147483647
+    if (info.newValue > MAX_VALUE) {
+      this.mutator.log(
+        DetailLogType.Other,
+        `Variable value ${info.newValue} exceeds max limit, omitted`,
+      );
+      return;
+    }
+    let state = this.get(target).latest();
+    if (VARIABLE_NAME_CAN_EMIT_EVENTS.includes(info.varName)) {
+      const modifyEventArg = new BeforeVariableEventArg(
+        this.rawState,
+        state,
+        info,
+      );
+      this.callAndEmit(
+        "handleInlineEvent",
+        this.skillInfo,
+        "modifyChangeVariable",
+        modifyEventArg,
+      );
+      info = modifyEventArg.info;
+      if (info.cancelled) {
+        return;
+      }
+    }
+    this.mutate({
+      type: "modifyEntityVar",
+      state,
+      varName: info.varName,
+      value: info.newValue,
+      direction: info.direction,
+    });
+    state = this.get(target).latest();
+    this.emitEvent("onChangeVariable", this.rawState, state, info);
+  }
+
+  transformDefinition<DefT extends EntityType | "character">(
     target: ExPlainEntityState<DefT>,
     newDefId: HandleT<DefT>,
   ): ShortcutReturn<Meta>;
   transformDefinition(target: string, newDefId: number): ShortcutReturn<Meta>;
-  transformDefinition<DefT extends ExEntityType>(
+  transformDefinition<DefT extends EntityType | "character">(
     x: string | ExPlainEntityState<DefT>,
     newDefId: number,
   ) {
@@ -1306,19 +1374,63 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return this.enableShortcut(this.get(state));
   }
 
-  drawCards(count: number, opt: DrawCardsOpt = {}) {
-    const { withTag = null, withDefinition = null, who: myOrOpt = "my" } = opt;
+  drawCards(count: number, opt?: DrawCardsOpt): ShortcutReturn<Meta>;
+  drawCards(...cards: PlainEntityState[]): ShortcutReturn<Meta>;
+  drawCards(
+    countOrCard: number | PlainEntityState,
+    optOrCard?: DrawCardsOpt | PlainEntityState,
+    ...cards: PlainEntityState[]
+  ) {
+    if (typeof countOrCard !== "number") {
+      const cardList: PlainEntityState[] = [countOrCard];
+      if (typeof optOrCard !== "undefined") {
+        cardList.push(optOrCard as PlainEntityState);
+      }
+      cardList.push(...cards);
+      for (const card of cardList) {
+        const cardEntity = this.get(card);
+        const cardState = cardEntity.latest();
+        const area = cardEntity.area;
+        if (area.type !== "pile") {
+          throw new GiTcgDataError(
+            `Cannot draw card ${stringifyState(cardState)} from ${stringifyEntityArea(
+              area,
+            )}`,
+          );
+        }
+        using l = this.mutator.subLog(
+          DetailLogType.Primitive,
+          `Player ${area.who} draw card ${stringifyState(cardState)}`,
+        );
+        this.callAndEmit("insertHandCard", {
+          type: "moveEntity",
+          from: { who: area.who, type: "pile", cardId: cardState.id },
+          target: { who: area.who, type: "hands", cardId: cardState.id },
+          value: cardState,
+          reason: "draw",
+        });
+      }
+      return this.enableShortcut();
+    }
+    const {
+      withTag = null,
+      withAttachment = null,
+      withDefinition = null,
+      who: myOrOpt = "my",
+    } = (optOrCard ?? {}) as DrawCardsOpt;
     const who =
       myOrOpt === "my" ? this.callerArea.who : flip(this.callerArea.who);
     using l = this.mutator.subLog(
       DetailLogType.Primitive,
-      `Player ${who} draw ${count} cards, ${
-        withTag ? `(with tag ${withTag})` : ""
-      }`,
+      `Player ${who} draw ${countOrCard} cards, withTag=${withTag}, withAttachment=${withAttachment}, withDefinition=${withDefinition}`,
     );
-    if (withTag === null && withDefinition === null) {
+    if (
+      withTag === null &&
+      withAttachment === null &&
+      withDefinition === null
+    ) {
       // 如果没有限定，则从牌堆顶部摸牌
-      this.callAndEmit("drawCardsPlain", who, count);
+      this.callAndEmit("drawCardsPlain", who, countOrCard);
     } else {
       const check = (card: PlainEntityState) => {
         if (withDefinition !== null) {
@@ -1327,11 +1439,16 @@ export class SkillContext<Meta extends ContextMetaBase> {
         if (withTag !== null) {
           return card.definition.tags.includes(withTag);
         }
+        if (withAttachment !== null) {
+          return card.attachments.some(
+            (a) => a.definition.id === withAttachment,
+          );
+        }
         return false;
       };
       // 否则，随机选中一张满足条件的牌
       const player = () => this.rawState.players[who];
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < countOrCard; i++) {
         const candidates = player().pile.filter(check);
         if (candidates.length === 0) {
           break;
@@ -1339,8 +1456,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
         const chosen = this.random(candidates);
         this.callAndEmit("insertHandCard", {
           type: "moveEntity",
-          from: { who, type: "pile" },
-          target: { who, type: "hands" },
+          from: { who, type: "pile", cardId: chosen.id },
+          target: { who, type: "hands", cardId: chosen.id },
           value: chosen,
           reason: "draw",
         });
@@ -1369,13 +1486,14 @@ export class SkillContext<Meta extends ContextMetaBase> {
       id: 0,
       definition: cardDef,
       variables: {},
+      attachments: [],
     };
     const payloads = Array.from(
       { length: count },
       () =>
         ({
           type: "createEntity",
-          target: { who, type: "pile" },
+          target: { who, type: "pile", cardId: 0 },
           value: { ...cardTemplate },
         }) as const,
     );
@@ -1399,8 +1517,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
       (card) =>
         ({
           type: "moveEntity",
-          from: { who, type: "hands" },
-          target: { who, type: "pile" },
+          from: { who, type: "hands", cardId: card.id },
+          target: { who, type: "pile", cardId: card.id },
           value: this.get(card).latest(),
           reason: "undraw",
         }) as const,
@@ -1415,8 +1533,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
     const who = flip(this.callerArea.who);
     this.mutate({
       type: "moveEntity",
-      from: { who, type: "hands" },
-      target: { who: this.callerArea.who, type: "hands" },
+      from: { who, type: "hands", cardId: card.id },
+      target: { who: this.callerArea.who, type: "hands", cardId: card.id },
       value: cardState,
       reason: "steal",
     });
@@ -1424,7 +1542,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     if (this.oppPlayer.hands.length > this.state.config.maxHandsCount) {
       this.mutate({
         type: "removeEntity",
-        from: { who, type: "hands" },
+        from: { who, type: "hands", cardId: card.id },
         oldState: cardState,
         reason: "overflow",
       });
@@ -1446,8 +1564,12 @@ export class SkillContext<Meta extends ContextMetaBase> {
     for (const card of oppHands) {
       this.mutate({
         type: "moveEntity",
-        from: { who: flip(this.callerArea.who), type: "hands" },
-        target: { who: this.callerArea.who, type: "hands" },
+        from: {
+          who: flip(this.callerArea.who),
+          type: "hands",
+          cardId: card.id,
+        },
+        target: { who: this.callerArea.who, type: "hands", cardId: card.id },
         value: card,
         reason: "swap",
       });
@@ -1463,8 +1585,12 @@ export class SkillContext<Meta extends ContextMetaBase> {
     for (const card of myHands) {
       this.mutate({
         type: "moveEntity",
-        from: { who: this.callerArea.who, type: "hands" },
-        target: { who: flip(this.callerArea.who), type: "hands" },
+        from: { who: this.callerArea.who, type: "hands", cardId: card.id },
+        target: {
+          who: flip(this.callerArea.who),
+          type: "hands",
+          cardId: card.id,
+        },
         value: card,
         reason: "swap",
       });
@@ -1515,7 +1641,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   /**
-   * 弃置我方原本元素骰费用最多的 `count` 张牌
+   * 弃置我方当前元素骰费用最多的 `count` 张牌
    * @param count 弃置的牌数
    * @param option.allowPreview 总是允许预览（即使版本行为 `disposeMaxCostHandsAbortPreview = true` 也如此）
    */
@@ -1543,35 +1669,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       if (st) {
         const oldValue = this.getVariable("nightsoul", st);
         const newValue = Math.max(0, oldValue - count);
-        let info: NightsoulValueChangeInfo = {
-          type: "consume",
-          oldValue,
-          newValue,
-          consumedValue: count,
-          cancelled: false,
-        };
-        const modifyEventArg = new BeforeNightsoulEventArg(
-          this.rawState,
-          target.latest(),
-          info,
-        );
-        this.callAndEmit(
-          "handleInlineEvent",
-          this.skillInfo,
-          "modifyChangeNightsoul",
-          modifyEventArg,
-        );
-        info = modifyEventArg.info;
-        if (info.cancelled) {
-          continue;
-        }
-        this.setVariable("nightsoul", info.newValue, st);
-        this.emitEvent(
-          "onChangeNightsoul",
-          this.rawState,
-          target.latest(),
-          info,
-        );
+        this.setVariable("nightsoul", newValue, st);
       }
     }
     return this.enableShortcut();
@@ -1588,26 +1686,42 @@ export class SkillContext<Meta extends ContextMetaBase> {
       if (!target.definition.associatedNightsoulsBlessing) {
         continue;
       }
-      const oldValue = target.hasNightsoulsBlessing()?.variables.nightsoul ?? 0;
-      this.characterStatus(
-        target.definition.associatedNightsoulsBlessing.id as StatusHandle,
-        target,
-        {
-          modifyOverriddenVariablesOnly: true,
-          overrideVariables: {
-            nightsoul: count,
+      let nightsoulStatus = target.hasNightsoulsBlessing();
+      if (!nightsoulStatus) {
+        nightsoulStatus = this.createEntity(
+          "status",
+          target.definition.associatedNightsoulsBlessing.id as StatusHandle,
+          target.area,
+          {
+            modifyOverriddenVariablesOnly: true,
+            overrideVariables: {
+              nightsoul: 0,
+            },
           },
-        },
+        );
+        if (!nightsoulStatus) {
+          console?.warn(
+            `Failed to create nightsouls blessing for ${stringifyState(
+              target,
+            )}`,
+          );
+          continue;
+        }
+      }
+      // awkward...
+      // TODO: make setVariable clamped to some configs
+      const oldValue = nightsoulStatus.variables.nightsoul ?? 0;
+      const { recreateBehavior } =
+        nightsoulStatus.definition.varConfigs.nightsoul ?? {};
+      const maxValue =
+        recreateBehavior?.type === "append"
+          ? recreateBehavior.appendLimit
+          : Infinity;
+      this.setVariable(
+        "nightsoul",
+        Math.min(maxValue, oldValue + count),
+        nightsoulStatus,
       );
-      const newValue = target.hasNightsoulsBlessing()?.variables.nightsoul ?? 0;
-      const info: NightsoulValueChangeInfo = {
-        type: "gain",
-        oldValue,
-        newValue,
-        consumedValue: count,
-        cancelled: false,
-      };
-      this.emitEvent("onChangeNightsoul", this.rawState, target.latest(), info);
     }
     return this.enableShortcut();
   }
@@ -1765,8 +1879,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
   private shuffleTail<T>(items: readonly T[], count: number): T[] {
     const itemsCopy = [...items];
-    const stopIndex = Math.max(0, itemsCopy.length - count);
-    for (let i = itemsCopy.length - 1; i >= stopIndex; i--) {
+    for (let i = itemsCopy.length - 1; i >= itemsCopy.length - count; i--) {
       const j = this.mutator.stepRandom() % (i + 1);
       [itemsCopy[i], itemsCopy[j]] = [itemsCopy[j], itemsCopy[i]];
     }
@@ -1777,10 +1890,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
   randomSubset<T>(items: readonly T[], count: number): T[] {
     if (count <= 0) return [];
-    const partiallyShuffled = this.shuffleTail(
-      items,
-      Math.min(count, items.length),
-    );
+    const partiallyShuffled = this.shuffleTail(items, count);
     return partiallyShuffled.slice(-count);
   }
 }
@@ -1805,6 +1915,7 @@ type SkillContextMutativeProps =
   | "combatStatus"
   | "characterStatus"
   | "equip"
+  | "attach"
   | "dispose"
   | "transferEntity"
   | "setVariable"

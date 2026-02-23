@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, combatStatus, card, DamageType, diceCostOfCard } from "@gi-tcg/core/builder";
+import { character, skill, combatStatus, card, DamageType } from "@gi-tcg/core/builder";
 
 /**
  * @id 113123
@@ -55,7 +55,7 @@ export const DanceOnFire = skill(13121)
  * @id 13122
  * @name 热情拂扫
  * @description
- * 造成2点火元素伤害，随机舍弃1张原本元素骰费用最高的手牌，生成热情护盾。
+ * 造成2点火元素伤害，随机舍弃1张当前元素骰费用最高的手牌，生成热情护盾。
  */
 export const SweepingFervor = skill(13122)
   .type("elemental")
@@ -79,7 +79,7 @@ export const RiffRevolution = skill(13123)
   .damage(DamageType.Physical, 3)
   .abortPreview()
   .do((c) => {
-    const cards = c.player.hands.toSorted((a, b) => diceCostOfCard(b.definition) - diceCostOfCard(a.definition));
+    const cards = c.player.hands.toSorted((a, b) => b.diceCost() - a.diceCost());
     c.disposeCard(...cards);
   })
   .combatStatus(FestiveFires)

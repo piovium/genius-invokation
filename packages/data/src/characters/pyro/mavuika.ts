@@ -50,7 +50,7 @@ export const CrucibleOfDeathAndLife = status(113152)
   .listenToPlayer()
   .do((c, e) => {
     e.cancel();
-    c.consumeUsage(e.info.consumedValue);
+    c.consumeUsage(e.info.diffValue);
   })
   .done();
 

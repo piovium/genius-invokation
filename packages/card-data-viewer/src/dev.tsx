@@ -48,6 +48,7 @@ function App() {
             descriptionDictionary: {
               "[GCG_TOKEN_SHIELD]": "1",
             },
+            attachment: [],
           },
         ],
       },
@@ -61,6 +62,7 @@ function App() {
           descriptionDictionary: {},
           definitionCost: [],
           tags: 0,
+          attachment: [],
         },
       ],
     );
@@ -73,6 +75,15 @@ function App() {
       },
       tags: 0,
       hasUsagePerRound: false,
+      attachment: [
+        {
+          id: -5000002,
+          definitionId: 204,
+          descriptionDictionary: {},
+          variableName: "usage",
+          variableValue: 1,
+        },
+      ],
     });
     // showState("summon", {
     //   id: -5000001,
@@ -82,8 +93,8 @@ function App() {
     //   variableName: "usage",
     //   variableValue: 2,
     // });
-    showCard(212111);
-    showCharacter(1610);
+    // showCard(212111);
+    // showCharacter(1610);
     // showSkill(12111);
   });
   return <CardDataViewer />;

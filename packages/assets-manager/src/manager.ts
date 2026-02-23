@@ -174,7 +174,7 @@ export class AssetsManager {
       item: "GCG_TAG_ITEM",
       technique: "GCG_TAG_VEHICLE",
       action: "GCG_TAG_SLOWLY",
-      noTuning: "",
+      abyss: "",
       adventureSpot: "GCG_TAG_ADVENTURE_PLACE",
     };
     const ENTITY_TYPE_MAP: Record<EntityType, string> = {

@@ -21,12 +21,18 @@ import {
   type CardAnimatingUiState,
   type Transform,
 } from "../ui_state";
-import type { CardInfo } from "./Chessboard";
-import { type PbDiceRequirement, CARD_TAG_NO_TUNING } from "@gi-tcg/typings";
+import { type CardInfo, type StatusViewInfo } from "./Chessboard";
+import {
+  type PbDiceRequirement,
+  CARD_TAG_ABYSS,
+  CARD_TAG_CONDUCTIVE,
+} from "@gi-tcg/typings";
 import { WithDelicateUi } from "../primitives/delicate_ui";
 import SelectingIcon from "../svg/SelectingIcon.svg?fb";
 import CardFrameNormal from "../svg/CardFrameNormal.svg?fb";
 import CardbackNormal from "../svg/CardbackNormal.svg?fb";
+import { StatusGroup } from "./StatusGroup";
+import { ElectricShocks } from "./ElectricShocks";
 
 export interface CardProps extends CardInfo {
   selected: boolean;
@@ -154,9 +160,40 @@ export function Card(props: CardProps) {
     }
   });
 
-  const backfaceDebuff = createMemo(
-    () => props.kind === "oppHand" && !!(props.data.tags & CARD_TAG_NO_TUNING),
+  const abyssDebuff = createMemo(
+    () => props.kind === "oppHand" && !!(props.data.tags & CARD_TAG_ABYSS),
   );
+  const conductiveDebuff = createMemo(
+    () =>
+      ["oppHand", "myHand"].includes(props.kind) &&
+      !!(props.data.tags & CARD_TAG_CONDUCTIVE),
+  );
+
+  const EFFECTLESS_PLACEHOLDER: StatusViewInfo = {
+    id: 0,
+    data: {
+      id: 0,
+      definitionId: 208,
+      tags: 0,
+      descriptionDictionary: {},
+    },
+    animation: "none",
+    triggered: false,
+  };
+
+  const attachmentInfo = createMemo<StatusViewInfo[]>(() => {
+    const result = props.data.attachment.map<StatusViewInfo>((data) => ({
+      id: data.id,
+      data,
+      animation: "none",
+      triggered: false,
+    }));
+    // attachment 引入之前的 effectless 效果需要手动添加
+    if (result.length === 0 && props.playStep?.isEffectless) {
+      result.push(EFFECTLESS_PLACEHOLDER);
+    }
+    return result;
+  });
 
   // onMount(() => {
   //   console.log(el);
@@ -239,6 +276,13 @@ export function Card(props: CardProps) {
         props.onPointerDown?.(e, e.currentTarget);
       }}
     >
+      <div
+        class="absolute inset-0 pointer-events-none h-full w-full rounded-1.2 entity-animation-1"
+        bool:data-triggered={
+          props.uiState.type === "cardStatic" && props.uiState.triggered
+        }
+      />
+
       <CardFace definitionId={data().definitionId} />
       <Switch>
         <Match when={props.toBeSwitched}>
@@ -263,13 +307,11 @@ export function Card(props: CardProps) {
           </div>
         </Match>
       </Switch>
-      <Show when={props.playStep?.isEffectless}>
-        <Image
-          imageId={300003}
-          class="absolute left-50% translate-x--50% top-0.5 w-7 h-7"
-          fallback="alert"
-        />
-      </Show>
+      <StatusGroup
+        class="absolute top-0.5 attachments w-full justify-center"
+        statuses={attachmentInfo()}
+        maxCount={2}
+      />
       <DiceCost
         class="absolute left-1.8 top--1 translate-x--50% backface-hidden flex flex-col gap-1 [&:where([data-opp-hand]>*)]:rotate-180"
         cost={data().definitionCost}
@@ -277,8 +319,17 @@ export function Card(props: CardProps) {
         realCost={realCost()}
       />
       <CardbackNormal class="absolute h-full w-full backface-hidden rotate-y-180 translate-z--0.1px pointer-events-none" />
-      <Show when={backfaceDebuff()}>
-        <div class="absolute h-full w-full backface-hidden rotate-y-180 translate-z--0.2px rounded-1.2 cardback-debuff" />
+      <Show when={abyssDebuff()}>
+        <div class="absolute h-full w-full backface-hidden rotate-y-180 translate-z--0.2px rounded-1.2 abyss-debuff" />
+      </Show>
+      <Show when={conductiveDebuff()}>
+        <ElectricShocks
+          class={`${
+            props.kind === "oppHand"
+              ? "translate-z--0.2px inset--18%"
+              : "inset--20%"
+          }`}
+        />
       </Show>
     </div>
   );

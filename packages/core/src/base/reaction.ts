@@ -15,6 +15,7 @@
 
 import { Reaction as R, Aura as A, DamageType as D } from "@gi-tcg/typings";
 import type { DamageInfo } from "../base/skill";
+import type { LunarReaction } from "@gi-tcg/typings";
 
 export type NontrivialDamageType = Exclude<
   D,
@@ -26,7 +27,7 @@ export type ReactionMap = Record<
   Record<NontrivialDamageType, [A, R | null]>
 >;
 
-export const REACTION_MAP: ReactionMap = {
+const REACTION_MAP: ReactionMap = {
   [A.None]: {
     [D.Cryo]: [A.Cryo, null],
     [D.Hydro]: [A.Hydro, null],
@@ -110,26 +111,43 @@ export const REACTION_RELATIVES: Record<R, readonly [D, D]> = {
   [R.Burning]: [D.Pyro, D.Dendro],
   [R.Bloom]: [D.Dendro, D.Hydro],
   [R.Quicken]: [D.Dendro, D.Electro],
+  [R.LunarElectroCharged]: [D.Hydro, D.Electro],
+  [R.LunarBloom]: [D.Dendro, D.Hydro],
+  [R.LunarCrystallizeHydro]: [D.Hydro, D.Geo],
 };
 
-export function getReaction(damageInfo: DamageInfo): R | null {
-  if (damageInfo.type === D.Physical || damageInfo.type === D.Piercing) {
-    return null;
+const LUNA_REMAPPING: Partial<Record<R, R>> = {
+  [R.ElectroCharged]: R.LunarElectroCharged,
+  [R.Bloom]: R.LunarBloom,
+  [R.CrystallizeHydro]: R.LunarCrystallizeHydro,
+};
+
+interface ReactionQuery extends Pick<DamageInfo, "type" | "targetAura"> {
+  enabledLunarReactions?: readonly LunarReaction[];
+}
+
+export function getReaction(info: Required<ReactionQuery>): {
+  newAura: A;
+  reaction: R | null;
+} {
+  if (info.type === D.Physical || info.type === D.Piercing) {
+    return { newAura: info.targetAura, reaction: null };
   }
-  const [, reactionType] =
-    REACTION_MAP[damageInfo.targetAura][damageInfo.type];
-  return reactionType;
+  const [newAura, r] = REACTION_MAP[info.targetAura][info.type];
+  if (!r) {
+    return { newAura, reaction: null };
+  }
+  const lunarizedReactionType = LUNA_REMAPPING[r] ?? r;
+  const reaction = ((info.enabledLunarReactions ?? []) as R[]).includes(
+    lunarizedReactionType,
+  )
+    ? lunarizedReactionType
+    : r;
+  return { newAura, reaction };
 }
 
-export function isReaction(damageInfo: DamageInfo, reaction: R): boolean {
-  return getReaction(damageInfo) === reaction;
-}
-
-export function isReactionRelatedTo(
-  damageInfo: DamageInfo,
-  target: D,
-): boolean {
-  const reaction = getReaction(damageInfo);
+export function isReactionRelatedTo(info: ReactionQuery, target: D): boolean {
+  const { reaction } = getReaction({ ...info, enabledLunarReactions: [] });
   if (reaction === null) return false;
   return REACTION_RELATIVES[reaction].includes(target);
 }
@@ -140,10 +158,8 @@ export type SwirlableElement =
   | typeof D.Pyro
   | typeof D.Electro;
 
-export function isReactionSwirl(
-  damageInfo: DamageInfo,
-): SwirlableElement | null {
-  switch (getReaction(damageInfo)) {
+export function isReactionSwirl(info: ReactionQuery): SwirlableElement | null {
+  switch (getReaction({ ...info, enabledLunarReactions: [] }).reaction) {
     case R.SwirlCryo:
       return D.Cryo;
     case R.SwirlElectro:

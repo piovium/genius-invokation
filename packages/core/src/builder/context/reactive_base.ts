@@ -34,6 +34,7 @@ export type EntityTypeToStateKind = {
   support: "entity";
   eventCard: "entity";
   extension: "extension";
+  attachment: "attachment";
 };
 
 export abstract class ReactiveStateBase {

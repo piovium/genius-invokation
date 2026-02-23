@@ -119,7 +119,7 @@ export const StealthMaster = skill(23014)
 export const FatuiPyroAgent = character(2301)
   .since("v3.3.0")
   .tags("pyro", "fatui")
-  .health(9)
+  .health(11)
   .energy(2)
   .skills(Thrust, Prowl, BladeAblaze, StealthMaster)
   .done();

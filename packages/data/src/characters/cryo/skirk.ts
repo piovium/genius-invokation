@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, diceCostOfCard, SkillHandle, DiceType, Reaction } from "@gi-tcg/core/builder";
+import { character, skill, status, card, DamageType, SkillHandle, DiceType, Reaction, originalDiceCostOfCard } from "@gi-tcg/core/builder";
 
 /**
  * @id 111162
@@ -90,11 +90,11 @@ export const MutualWeaponsMentorship = card(111161)
  * @id 111163
  * @name 虚境裂隙
  * @description
- * 舍弃1张原本元素骰费用为3的手牌，丝柯克获得2点蛇之狡谋。
+ * 舍弃1张当前元素骰费用为3的手牌，丝柯克获得2点蛇之狡谋。
  */
 export const VoidRift = card(111163)
   .do((c) => {
-    const hand = c.player.hands.find((card) => diceCostOfCard(card.definition) === 3);
+    const hand = c.player.hands.find((card) => card.diceCost() === 3);
     if (hand) {
       c.disposeCard(hand);
       const skirk = c.$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`);
@@ -137,7 +137,7 @@ export const HavocWarp: SkillHandle = skill(11162)
  * @id 11165
  * @name 极恶技·尽
  * @description
- * 将2个非万能元素骰转化为冰元素骰，舍弃至多2张原本元素骰花费为0骰的卡牌，每舍弃1张，丝柯克获得1点蛇之狡谋。
+ * 将2个非万能元素骰转化为冰元素骰，舍弃至多2张当前元素骰费用为0骰的卡牌，每舍弃1张，丝柯克获得1点蛇之狡谋。
  */
 export const HavocExtinction = skill(11165)
   .type("burst")
@@ -147,7 +147,7 @@ export const HavocExtinction = skill(11165)
     const nonOmniCount =  c.player.dice.filter((d) => d !== DiceType.Omni).length;
     const convertCount = Math.min(2, nonOmniCount);
     c.convertDice(DiceType.Cryo, convertCount);
-    const hands = c.player.hands.filter((card) => diceCostOfCard(card.definition) === 0).slice(0, 2);
+    const hands = c.player.hands.filter((card) => card.diceCost() === 0).slice(0, 2);
     if (hands.length > 0) {
       c.disposeCard(...hands);
       c.self.addVariableWithMax("serpentsSubtlety", hands.length, 7);

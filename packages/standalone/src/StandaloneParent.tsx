@@ -263,7 +263,7 @@ export function StandaloneParent(props: StandaloneParentProps) {
     window.addEventListener("message", childGiveUpHandler);
     if (Array.isArray(props.logs)) {
       setStateLog(props.logs);
-      setViewingLogIndex(0);
+      setViewingLogIndex(props.logs.length - 2);
       setFromImport(true);
     } else {
       startGame();

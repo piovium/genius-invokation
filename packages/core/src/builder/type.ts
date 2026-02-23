@@ -16,7 +16,11 @@
 import type { DamageType } from "@gi-tcg/typings";
 import type { CharacterTag } from "../base/character";
 import type { EntityTag, EntityType } from "../base/entity";
-import type { CharacterState, EntityState } from "../base/state";
+import type {
+  AttachmentState,
+  CharacterState,
+  EntityState,
+} from "../base/state";
 
 export type CharacterHandle = number & { readonly _char: unique symbol };
 export type SkillHandle = number & { readonly _skill: unique symbol };
@@ -35,33 +39,41 @@ export type SupportHandle = EntityHandle &
 export type EquipmentHandle = EntityHandle &
   CardHandle & { readonly _equip: unique symbol };
 
+export type AttachmentHandle = number & { readonly _attach: unique symbol };
+
 export type ExtensionHandle<T = unknown> = number & {
   readonly _extSym: unique symbol;
   readonly type: T;
 };
 
-export type ExEntityType = "character" | EntityType;
+export type ExEntityType = "character" | EntityType | "attachment";
 
 export type ExEntityState<TypeT extends ExEntityType> =
-  TypeT extends "character" ? CharacterState : EntityState;
+  TypeT extends "character"
+    ? CharacterState
+    : TypeT extends "attachment"
+      ? AttachmentState
+      : EntityState;
 
 export type HandleT<T extends ExEntityType> = T extends "character"
   ? CharacterHandle
-  : T extends "eventCard"
-    ? CardHandle
-    : T extends "combatStatus"
-      ? CombatStatusHandle
-      : T extends "status"
-        ? StatusHandle
-        : T extends "equipment"
-          ? EquipmentHandle
-          : T extends "summon"
-            ? SummonHandle
-            : T extends "support"
-              ? SupportHandle
-              : T extends "passiveSkill"
-                ? SkillHandle
-                : never;
+  : T extends "attachment"
+    ? AttachmentHandle
+    : T extends "eventCard"
+      ? CardHandle
+      : T extends "combatStatus"
+        ? CombatStatusHandle
+        : T extends "status"
+          ? StatusHandle
+          : T extends "equipment"
+            ? EquipmentHandle
+            : T extends "summon"
+              ? SummonHandle
+              : T extends "support"
+                ? SupportHandle
+                : T extends "passiveSkill"
+                  ? SkillHandle
+                  : never;
 
 export type ExTag<TypeT extends ExEntityType> = TypeT extends "character"
   ? CharacterTag

@@ -129,6 +129,24 @@ export const REACTION_TEXT_MAP: Record<number, ReactionRenderingData> = {
     fgColor: "#00ea55",
     bgColor: "#3b6208",
   },
+  [R.LunarElectroCharged]: {
+    elements: [D.Electro, D.Hydro],
+    name: "月感电",
+    fgColor: "#e19bff",
+    bgColor: "#7f2dee",
+  },
+  [R.LunarBloom]: {
+    elements: [D.Dendro, D.Hydro],
+    name: "月绽放",
+    fgColor: "#00ea55",
+    bgColor: "#3b6208",
+  },
+  [R.LunarCrystallizeHydro]: {
+    elements: [D.Hydro, D.Geo],
+    name: "月结晶",
+    fgColor: "#ffd766",
+    bgColor: "#664408",
+  },
 };
 
 export interface ReactionProps {

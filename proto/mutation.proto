@@ -48,6 +48,7 @@ message ExposedMutation {
     SelectCardDoneEM select_card_done = 26;
     HandleEventEM handle_event = 27;
     MoveEntityEM move_entity = 28;
+    CreateAttachmentEM create_attachment = 29;
   }
   reserved 17;
 }
@@ -102,6 +103,14 @@ message CreateEntityEM {
   optional sint32 master_character_id = 6;
 }
 
+message CreateAttachmentEM {
+  int32 who = 1;
+  reserved 2, 3;
+  EntityArea where = 4;
+  AttachmentState attachment = 5;
+  sint32 master_card_id = 6;
+}
+
 enum MoveEntityReason {
   MOVE_ENTITY_REASON_UNSPECIFIED = 0;
   MOVE_ENTITY_REASON_SWITCH = 1;
@@ -124,6 +133,7 @@ message MoveEntityEM {
   optional int32 target_index = 7;
   EntityState entity = 8;
   MoveEntityReason reason = 9;
+  optional sint32 to_master_character_id = 10;
 }
 
 enum RemoveEntityReason {
@@ -134,6 +144,8 @@ enum RemoveEntityReason {
   REMOVE_ENTITY_REASON_CARD_DISPOSED = 4;
   REMOVE_ENTITY_REASON_EVENT_CARD_PLAY_NO_EFFECT = 5;
   REMOVE_ENTITY_REASON_EVENT_CARD_DRAWN = 6;
+  REMOVE_ENTITY_REASON_EQUIP_OVERRIDDEN = 7;
+  REMOVE_ENTITY_REASON_CREATE_SUPPORT_OVERRIDDEN = 8;
 }
 
 message RemoveEntityEM {
@@ -222,6 +234,7 @@ enum SkillType {
   SKILL_TYPE_ELEMENTAL = 3;
   SKILL_TYPE_BURST = 4;
   SKILL_TYPE_TECHNIQUE = 5;
+  SKILL_TYPE_TRIGGERED_FROM_ITS_ATTACHMENT = 6;
 }
 
 // 使用或触发了技能

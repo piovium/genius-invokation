@@ -38,6 +38,10 @@ import {
   PbResetDiceReason,
   PbRemoveEntityReason,
   PbMoveEntityReason,
+  CreateAttachmentEM,
+  PbAttachmentState,
+  PbEntityType,
+  MoveEntityEM,
 } from "@gi-tcg/typings";
 import type {
   AbsorbDiceHistoryChild,
@@ -82,13 +86,31 @@ class VariableRecord {
   }
 }
 
-type Area = { who: 0 | 1; masterDefinitionId: number | null };
-type EntityType =
+interface Area {
+  who: 0 | 1;
+  onStage: boolean;
+  masterDefinitionId: number | null;
+}
+export type EntityType =
   | "equipment"
   | "status"
   | "combatStatus"
   | "summon"
-  | "support";
+  | "support"
+  | "eventCard"
+  | "unknown"
+  | "character"
+  | "attachment";
+
+const PB_ENTITY_TYPE_MAP: Record<PbEntityType, EntityType> = {
+  [PbEntityType.UNSPECIFIED]: "unknown",
+  [PbEntityType.EVENT_CARD]: "eventCard",
+  [PbEntityType.STATUS]: "status",
+  [PbEntityType.COMBAT_STATUS]: "combatStatus",
+  [PbEntityType.SUMMON]: "summon",
+  [PbEntityType.SUPPORT]: "support",
+  [PbEntityType.EQUIPMENT]: "equipment",
+};
 
 /**
  * 收集所有的 ModifyEntityVarEM，以记录 VariableChangeHistoryChild
@@ -102,7 +124,11 @@ export class StateRecorder {
   readonly maxEnergies = new Map<number, number>();
   readonly entityInitStates = new Map<
     number,
-    PbEntityState & { type: EntityType }
+    {
+      variableName?: string;
+      definitionId: number;
+      type: EntityType;
+    }
   >();
   readonly area = new Map<number, Area>();
   readonly activeCharacterDefinitionIds = [void 0, void 0] as [
@@ -124,13 +150,23 @@ export class StateRecorder {
         this.initializeCharacter(who, ch);
       }
       for (const prop of ["combatStatus", "summon", "support"] as const) {
-        const area = { who, masterDefinitionId: null };
+        const area = { who, onStage: true, masterDefinitionId: null };
         for (const entity of player[prop]) {
           this.initializeEntity(area, entity, prop);
         }
       }
       for (const card of [...player.pileCard, ...player.handCard]) {
-        this.area.set(card.id, { who, masterDefinitionId: null });
+        this.area.set(card.id, {
+          who,
+          onStage: false,
+          masterDefinitionId: card.definitionId,
+        });
+        for (const attachment of card.attachment) {
+          this.initializeAttachment(
+            { who, onStage: false, masterDefinitionId: card.definitionId },
+            attachment,
+          );
+        }
       }
       this.dice[who] = [...player.dice] as DiceType[];
     }
@@ -151,8 +187,26 @@ export class StateRecorder {
     }
   }
 
+  private initializeAttachment(area: Area, attachment: PbAttachmentState) {
+    this.area.set(attachment.id, area);
+    this.entityInitStates.set(attachment.id, {
+      ...attachment,
+      type: "attachment",
+    });
+    if (attachment.variableName) {
+      this.visibleVarRecords.set(
+        attachment.id,
+        new VariableRecord(attachment.variableValue ?? 0),
+      );
+    }
+  }
+
   private initializeCharacter(who: 0 | 1, character: PbCharacterState) {
-    const area = { who, masterDefinitionId: character.definitionId };
+    const area = {
+      who,
+      onStage: true,
+      masterDefinitionId: character.definitionId,
+    };
     this.area.set(character.id, area);
     this.energyVarRecords.set(
       character.id,
@@ -301,7 +355,8 @@ export class StateRecorder {
   getMasterDefinitionId(entityId: number) {
     const { who = 0, masterDefinitionId = null } =
       this.area.get(entityId) ?? {};
-    if (this.entityInitStates.get(entityId)?.type === "combatStatus") {
+    const type = this.entityInitStates.get(entityId)?.type;
+    if (type === "combatStatus") {
       return this.activeCharacterDefinitionIds[who];
     }
     return masterDefinitionId ?? void 0;
@@ -311,37 +366,33 @@ export class StateRecorder {
     const { who, where, masterCharacterId, entity } = mut as CreateEntityEM & {
       entity: PbEntityState;
     };
+
+    const entityType = PB_ENTITY_TYPE_MAP[entity.type];
     let masterDefinitionId: number | null = null;
     if (masterCharacterId) {
       masterDefinitionId =
         this.area.get(masterCharacterId)?.masterDefinitionId ?? null;
-    }
-    let entityType:
-      | "equipment"
-      | "status"
-      | "combatStatus"
-      | "summon"
-      | "support";
-    if (where === PbEntityArea.CHARACTER) {
-      if (typeof entity.equipment === "number") {
-        entityType = "equipment";
-      } else {
-        entityType = "status";
-      }
-    } else if (where === PbEntityArea.COMBAT_STATUS) {
-      entityType = "combatStatus";
-    } else if (where === PbEntityArea.SUMMON) {
-      entityType = "summon";
-    } else if (where === PbEntityArea.SUPPORT) {
-      entityType = "support";
     } else {
-      throw new Error(`Unknown entity area: ${where}`);
+      masterDefinitionId = entity.definitionId;
     }
+    const onStage = ![PbEntityArea.HAND, PbEntityArea.PILE].includes(where);
     this.initializeEntity(
-      { who: who as 0 | 1, masterDefinitionId },
+      { who: who as 0 | 1, onStage, masterDefinitionId },
       entity,
       entityType,
     );
+  }
+  renewEntityArea(mut: MoveEntityEM) {
+    const { entity, toWho, toWhere, toMasterCharacterId } = mut;
+    const area = this.area.get(entity!.id);
+    if (area) {
+      area.who = toWho as 0 | 1;
+      area.onStage = ![PbEntityArea.HAND, PbEntityArea.PILE].includes(toWhere);
+      if (toMasterCharacterId) {
+        area.masterDefinitionId =
+          this.area.get(toMasterCharacterId)?.masterDefinitionId ?? null;
+      }
+    }
   }
   onNewCharacter(mut: CreateCharacterEM) {
     const { who, character } = mut as CreateCharacterEM & {
@@ -349,11 +400,13 @@ export class StateRecorder {
     };
     this.initializeCharacter(who as 0 | 1, character);
   }
-  onNewCard(mut: CreateEntityEM) {
-    this.area.set(mut.entity!.id, {
-      who: mut.who as 0 | 1,
-      masterDefinitionId: null,
-    });
+  onNewAttachment(mut: CreateAttachmentEM) {
+    const masterDefinitionId =
+      this.area.get(mut.masterCardId)?.masterDefinitionId ?? null;
+    this.initializeAttachment(
+      { who: mut.who as 0 | 1, onStage: false, masterDefinitionId },
+      mut.attachment!,
+    );
   }
   onSwitchActive(mut: SwitchActiveEM) {
     this.activeCharacterDefinitionIds[mut.who as 0 | 1] =
@@ -476,18 +529,18 @@ export function updateHistory(
           break;
         }
         case "createEntity": {
+          history.recorder.onNewEntity(m);
+          const { definitionId, id } = m.entity!;
+          const { type } = history.recorder.entityInitStates.get(id)!;
+
           if (m.where === PbEntityArea.HAND || m.where === PbEntityArea.PILE) {
-            history.recorder.onNewCard(m as CreateEntityEM);
             children.push({
               type: "createCard",
               who: m.who as 0 | 1,
-              cardDefinitionId: m.entity!.definitionId,
+              cardDefinitionId: definitionId,
               target: m.where === PbEntityArea.HAND ? "hands" : "pile",
             });
           } else {
-            history.recorder.onNewEntity(m);
-            const { definitionId, id } = m.entity!;
-            const { type } = history.recorder.entityInitStates.get(id)!;
             children.push({
               type: "createEntity",
               who: m.who as 0 | 1,
@@ -498,6 +551,18 @@ export function updateHistory(
           }
           break;
         }
+        case "createAttachment": {
+          history.recorder.onNewAttachment(m);
+          const { definitionId, id } = m.attachment!;
+          children.push({
+            type: "createEntity",
+            who: m.who as 0 | 1,
+            masterDefinitionId: history.recorder.getMasterDefinitionId(id),
+            entityDefinitionId: definitionId,
+            entityType: "attachment",
+          });
+          break;
+        }
         case "createCharacter": {
           history.recorder.onNewCharacter(m);
           break;
@@ -505,9 +570,13 @@ export function updateHistory(
         case "removeEntity": {
           if (m.where === PbEntityArea.HAND || m.where === PbEntityArea.PILE) {
             const definitionId = m.entity!.definitionId;
+            const { onStage = false } =
+              history.recorder.area.get(m.entity!.id) ?? {};
             if (
               m.reason === PbRemoveEntityReason.EVENT_CARD_PLAYED ||
-              m.reason === PbRemoveEntityReason.EVENT_CARD_PLAY_NO_EFFECT
+              m.reason === PbRemoveEntityReason.EVENT_CARD_PLAY_NO_EFFECT ||
+              m.reason === PbRemoveEntityReason.EQUIP_OVERRIDDEN ||
+              m.reason === PbRemoveEntityReason.CREATE_SUPPORT_OVERRIDDEN
             ) {
               mainBlock = {
                 type: "playCard",
@@ -531,7 +600,13 @@ export function updateHistory(
                 children: [],
                 indent: history.currentIndent,
               };
-            } else if (m.reason !== PbRemoveEntityReason.OVERFLOW) {
+            } else if (m.reason === PbRemoveEntityReason.OVERFLOW && !onStage) {
+              children.push({
+                type: "overflowCard",
+                who: m.who as 0 | 1,
+                cardDefinitionId: definitionId,
+              });
+            } else if (m.reason === PbRemoveEntityReason.CARD_DISPOSED) {
               children.push({
                 type: "removeCard",
                 who: m.who as 0 | 1,
@@ -564,6 +639,11 @@ export function updateHistory(
         }
         case "switchActive": {
           history.recorder.onSwitchActive(m);
+          if (phase < PbPhaseType.ROLL) {
+            // we have chooseActiveDone for initial selection
+            // @CherryC9H13N do not want the children here.
+            break;
+          }
           const who = m.who as 0 | 1;
           if (m.fromAction === PbSwitchActiveFromAction.NONE) {
             children.push({
@@ -585,13 +665,14 @@ export function updateHistory(
           break;
         }
         case "moveEntity": {
-          if (phase < PbPhaseType.ACTION) {
+          if (phase < PbPhaseType.ROLL) {
             break;
           }
           if (
             m.reason === PbMoveEntityReason.EQUIP ||
             m.reason === PbMoveEntityReason.CREATE_SUPPORT
           ) {
+            history.recorder.renewEntityArea(m);
             mainBlock = {
               type: "playCard",
               who: m.fromWho as 0 | 1,
@@ -663,35 +744,58 @@ export function updateHistory(
             {
               type: "transformDefinition",
               who: area?.who ?? 0,
-              cardDefinitionId: m.newEntityDefinitionId,
+              // TransformDefinitionEM cannot hide new definition ID. Lets do that in frontend.
+              cardDefinitionId: oldDefinitionId ? m.newEntityDefinitionId : 0,
               stage: "new",
             },
           );
           break;
         }
         case "skillUsed": {
-          if (m.skillType === PbSkillType.TRIGGERED) {
-            const { type } =
+          if (
+            m.skillType === PbSkillType.TRIGGERED ||
+            m.skillType === PbSkillType.TRIGGERED_FROM_ITS_ATTACHMENT
+          ) {
+            const { type = "unknown" } =
               history.recorder.entityInitStates.get(m.callerId) ?? {};
+            const { onStage = false } =
+              history.recorder.area.get(m.callerId) ?? {};
+            const isAttachment =
+              m.skillType === PbSkillType.TRIGGERED_FROM_ITS_ATTACHMENT;
+            const masterDefinitionId =
+              history.recorder.getMasterDefinitionId(m.callerId) ??
+              m.callerDefinitionId;
             mainBlock = {
               type: "triggered",
               who: m.who as 0 | 1,
-              masterOrCallerDefinitionId:
-                history.recorder.getMasterDefinitionId(m.callerId) ??
-                m.callerDefinitionId,
-              callerOrSkillDefinitionId: m.callerDefinitionId,
+              masterOrCallerDefinitionId: masterDefinitionId,
+              callerOrSkillDefinitionId:
+                onStage || isAttachment
+                  ? m.callerDefinitionId
+                  : masterDefinitionId,
               children: [],
               indent: history.currentIndent,
-              entityType: type,
+              entityType: isAttachment ? "attachment" : type,
             };
-            const parentBlock = history.blocks.findLast(
-              (b) => "indent" in b && b.indent < history.currentIndent,
-            );
+            let parentBlock: HistoryBlock | null = null;
+            for (let i = history.blocks.length - 1; i >= 0; i--) {
+              parentBlock = history.blocks[i];
+              if (!("indent" in parentBlock)) {
+                // a changePhase or action, the trigger event cannot propagates
+                break;
+              }
+              if (parentBlock.indent < history.currentIndent) {
+                break;
+              }
+            }
             if (parentBlock && "children" in parentBlock) {
               parentBlock.children.push({
                 type: "willTriggered",
                 who: m.who as 0 | 1,
-                callerDefinitionId: m.callerDefinitionId,
+                callerDefinitionId:
+                  onStage || isAttachment
+                    ? m.callerDefinitionId
+                    : masterDefinitionId,
               });
             }
           } else if (m.skillType === PbSkillType.CHARACTER_PASSIVE) {
@@ -701,6 +805,7 @@ export function updateHistory(
               masterOrCallerDefinitionId: m.callerDefinitionId,
               callerOrSkillDefinitionId: Math.floor(m.skillDefinitionId),
               children: [],
+              entityType: "character",
               indent: history.currentIndent,
             };
           } else {
@@ -804,9 +909,17 @@ export function updateHistory(
           }
           break;
         }
-        case "switchTurn":
-        case "setWinner":
         case "swapCharacterPosition": {
+          children.push({
+            type: "swapCharacterPosition",
+            who: m.who as 0 | 1,
+            character0DefinitionId: m.character0DefinitionId,
+            character1DefinitionId: m.character1DefinitionId,
+          });
+          break;
+        }
+        case "switchTurn":
+        case "setWinner": {
           break;
         }
         default: {

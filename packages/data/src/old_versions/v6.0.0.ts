@@ -1,4 +1,4 @@
-import { card, combatStatus, DamageType, diceCostOfCard, DiceType, skill, summon } from "@gi-tcg/core/builder";
+import { card, combatStatus, DamageType, DiceType, skill, summon } from "@gi-tcg/core/builder";
 import { AlldevouringNarwhal, AnomalousAnatomy } from "../characters/hydro/alldevouring_narwhal";
 import { FestiveFires } from "../characters/pyro/xinyan";
 
@@ -225,7 +225,7 @@ const RiffRevolution = skill(13123)
   .damage(DamageType.Piercing, 2, "opp standby")
   .damage(DamageType.Physical, 3)
   .do((c) => {
-    const cards = c.player.hands.toSorted((a, b) => diceCostOfCard(b.definition) - diceCostOfCard(a.definition));
+    const cards = c.player.hands.toSorted((a, b) => b.diceCost() - a.diceCost());
     c.disposeCard(...cards);
   })
   .combatStatus(FestiveFires)

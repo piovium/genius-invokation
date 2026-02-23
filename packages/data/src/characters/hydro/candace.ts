@@ -68,7 +68,7 @@ export const PrayerOfTheCrimsonCrown01 = combatStatus(112073)
   .increaseDamage(1)
   .on("modifySkillDamageType", (c, e) => {
     if (e.type !== DamageType.Physical) return false;
-    const { tags } = e.via.caller.definition;
+    const { tags } = e.source.cast<"character">().definition;
     return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
   })
   .changeDamageType(DamageType.Hydro)
@@ -96,7 +96,7 @@ export const PrayerOfTheCrimsonCrown = combatStatus(112072)
   .increaseDamage(1)
   .on("modifySkillDamageType", (c, e) => {
     if (e.type !== DamageType.Physical) return false;
-    const { tags } = e.via.caller.definition;
+    const { tags } = e.source.cast<"character">().definition;
     return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
   })
   .changeDamageType(DamageType.Hydro)

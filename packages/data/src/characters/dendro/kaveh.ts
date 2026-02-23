@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { EntityState, character, skill, status, combatStatus, card, DamageType, diceCostOfCard, CardHandle, customEvent } from "@gi-tcg/core/builder";
+import { EntityState, character, skill, status, combatStatus, card, DamageType, CardHandle, customEvent } from "@gi-tcg/core/builder";
 import { BountifulCore } from "../hydro/nilou";
 import { DendroCore } from "../../commons";
 
@@ -22,7 +22,7 @@ export const ShouldTriggerTalent = customEvent<EntityState>("kaveh/shouldTrigger
  * @id 117082
  * @name 迸发扫描
  * @description
- * 双方选择行动前：如果我方场上存在草原核或丰穰之核，则使其可用次数-1，并舍弃我方牌库顶的1张卡牌。然后，造成所舍弃卡牌原本元素骰费用的草元素伤害。
+ * 双方选择行动前：如果我方场上存在草原核或丰穰之核，则使其可用次数-1，并舍弃我方牌库顶的1张卡牌。然后，造成所舍弃卡牌当前元素骰费用的草元素伤害。
  * 可用次数：1（可叠加，最多叠加到3次）
  */
 export const BurstScan = combatStatus(117082)
@@ -35,8 +35,7 @@ export const BurstScan = combatStatus(117082)
   .usageCanAppend(1, 3)
   .do((c, e) => {
     c.$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`)?.consumeUsage(1);
-    const cardDef = e.entity.definition;
-    const cost = diceCostOfCard(cardDef);
+    const cost = e.entity.diceCost();
     c.damage(DamageType.Dendro, cost);
     c.emitCustomEvent(ShouldTriggerTalent, e.entity.latest());
   })

@@ -82,6 +82,7 @@ import {
 } from "../base/version";
 import type { EntityDefinition } from ".";
 import { registerEntity } from "./registry";
+import type { DiceType } from "@gi-tcg/typings";
 
 type DisposeCardBuilderMeta<
   CallerVars extends string,
@@ -175,6 +176,7 @@ export interface CardOnArbitraryOption<
     associatedExtension: AssociatedExt;
   }>;
   listenTo?: ListenTo;
+  enableTriggerInPile?: boolean;
   operation: SkillOperation<{
     callerType: "eventCard";
     callerVars: CallerVars;
@@ -213,6 +215,7 @@ export class CardBuilder<
   > | null = null;
   private _descriptionDictionary: Writable<DescriptionDictionary> = {};
   private _arbitraryTriggeredSkills: SkillDefinition[] = [];
+  private _disableTuning = false;
 
   constructor(private readonly cardId: number) {
     super(cardId);
@@ -276,6 +279,10 @@ export class CardBuilder<
 
   unobtainable(): this {
     this._obtainable = false;
+    return this;
+  }
+  disableTuning(): this {
+    this._disableTuning = true;
     return this;
   }
 
@@ -376,6 +383,38 @@ export class CardBuilder<
     return this.unobtainable()
       .support("place", "adventureSpot")
       .variableCanAppend("exp", 1, Infinity);
+  }
+
+  elementalBlessing(type1: DiceType, type2: DiceType): EntityBuilderPublic<"support"> {
+    return this.unobtainable()
+      .support("blessing")
+      .on("actionPhase", (c, e) => {
+        if (c.self.area.type === "supports") {
+          return false;
+        }
+        const elements = new Set(c.player.characters.flatMap((ch) => ch.element()));
+        return elements.size === 2 && elements.has(type1) && elements.has(type2);
+      })
+      .enableHandTriggering()
+      .enablePileTriggering()
+      .do((c) => {
+        // 若在牌库里，先抓到手上
+        if (c.self.area.type === "pile") {
+          c.drawCards(c.self);
+        }
+        // 若不在手上（爆牌），就啥也别干了
+        if (c.self.area.type !== "hands") {
+          return;
+        }
+        c.disposeCard(c.self);
+        c.createEntity("support", c.self.definition.id as SupportHandle, {
+          who: c.self.area.who,
+          type: "supports",
+        });
+        c.convertDice(type1, 2);
+        c.convertDice(type2, 2);
+      })
+      .endOn();
   }
 
   /**
@@ -598,7 +637,12 @@ export class CardBuilder<
     detailedEventName: E,
     option: CardOnArbitraryOption<E, CallerVars, AssociatedExt>,
   ) {
-    const { filter, listenTo = ListenTo.SameArea, operation } = option;
+    const {
+      filter,
+      listenTo = ListenTo.SameArea,
+      operation,
+      enableTriggerInPile,
+    } = option;
     const [eventName, filterDescriptor] =
       detailedEventDictionary[detailedEventName];
     const filters: SkillOperationFilter<any>[] = [];
@@ -614,6 +658,11 @@ export class CardBuilder<
         c.rawState,
       );
     });
+    if (!enableTriggerInPile) {
+      filters.push(function (c, e) {
+        return c.self.area.type !== "pile";
+      });
+    }
     if (filter) {
       filters.push(filter);
     }
@@ -625,7 +674,7 @@ export class CardBuilder<
         this.cardId +
         0.04 +
         Object.keys(this._descriptionDictionary).length * 0.0001,
-      ownerType: "card",
+      ownerType: this._type,
       triggerOn: eventName,
       initiativeSkillConfig: null,
       filter: filterFn as any,
@@ -648,6 +697,22 @@ export class CardBuilder<
     }
     const skills: SkillDefinition[] = [...this._arbitraryTriggeredSkills];
 
+    const prependPlayingOp: (typeof this.operations)[number] = function (c) {
+      if (c.self.definition.type === "eventCard") {
+        c.dispose(c.self, "eventCardPlayed");
+      } else {
+        // 打出时移除附属效果
+        for (const att of c.self.attachments) {
+          c.mutate({
+            type: "removeEntity",
+            from: c.self.area,
+            oldState: att,
+            reason: "other", // TODO: maybe better reason?
+          });
+        }
+      }
+    };
+
     const targetGetter = this.buildTargetGetter();
     if (this._doSameWhenDisposed || this._disposeOperation !== null) {
       const disposeOps: SkillOperation<any>[] = this._disposeOperation
@@ -664,7 +729,7 @@ export class CardBuilder<
       const disposeDef: TriggeredSkillDefinition<"onDispose"> = {
         type: "skill",
         id: this.cardId + 0.02,
-        ownerType: "card",
+        ownerType: this._type,
         triggerOn: "onDispose",
         initiativeSkillConfig: null,
         action: disposeAction,
@@ -687,6 +752,7 @@ export class CardBuilder<
       if (hciOp) {
         drawAction = this.buildAction<HandCardInsertedEventArg>([hciOp]);
         filter = this.buildFilter();
+        this.operations.unshift(prependPlayingOp);
         action = this.buildAction();
       } else {
         this.do((c) => {
@@ -699,7 +765,7 @@ export class CardBuilder<
       const drawSkillDef: TriggeredSkillDefinition<"onHandCardInserted"> = {
         type: "skill",
         id: this.cardId + 0.03,
-        ownerType: "card",
+        ownerType: this._type,
         triggerOn: "onHandCardInserted",
         initiativeSkillConfig: null,
         filter: (st, info, arg) => {
@@ -711,7 +777,7 @@ export class CardBuilder<
       const skillDef: InitiativeSkillDefinition = {
         type: "skill",
         id: this.cardId + 0.01,
-        ownerType: "card",
+        ownerType: this._type,
         triggerOn: "initiative",
         initiativeSkillConfig: {
           skillType: "playCard",
@@ -732,17 +798,13 @@ export class CardBuilder<
       };
       skills.push(skillDef, drawSkillDef);
     } else {
-      this.operations.unshift((c) => {
-        if (c.self.definition.type === "eventCard") {
-          c.dispose(c.self, "eventCardPlayed");
-        }
-      });
+      this.operations.unshift(prependPlayingOp);
       const action = this.buildAction<InitiativeSkillEventArg>();
       const filter = this.buildFilter<InitiativeSkillEventArg>();
       const skillDef: InitiativeSkillDefinition = {
         type: "skill",
         id: this.cardId + 0.01,
-        ownerType: "card",
+        ownerType: this._type,
         triggerOn: "initiative",
         initiativeSkillConfig: {
           skillType: "playCard",
@@ -780,6 +842,7 @@ export class CardBuilder<
       descriptionDictionary: this._descriptionDictionary,
       visibleVarName: null,
       hintText: null,
+      disableTuning: this._disableTuning,
       disposeWhenUsageIsZero: false,
     };
     registerEntity(cardDef);

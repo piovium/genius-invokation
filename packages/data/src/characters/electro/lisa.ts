@@ -35,7 +35,7 @@ export const LightningRoseSummon = summon(114092)
  * 结束阶段：叠加1层「引雷」。
  * 所附属角色受到苍雷或蔷薇雷光的伤害时：移除此状态，每层「引雷」使此伤害+1。
  */
-export const Conductive = status(114091)
+export const ConductiveLisa = status(114091)
   .variableCanAppend("conductive", 2, 4, 1)
   .on("endPhase")
   .addVariableWithMax("conductive", 1, 4)
@@ -59,7 +59,7 @@ export const LightningTouch = skill(14091)
   .costElectro(1)
   .costVoid(2)
   .damage(DamageType.Electro, 1)
-  .characterStatus(Conductive, "opp active")
+  .characterStatus(ConductiveLisa, "opp active")
   .done();
 
 /**
@@ -72,8 +72,8 @@ export const VioletArc: SkillHandle = skill(14092)
   .type("elemental")
   .costElectro(3)
   .damage(DamageType.Electro, 2)
-  .if((c) => !c.$(`status with definition id ${Conductive} at opp active`))
-  .characterStatus(Conductive, "opp active")
+  .if((c) => !c.$(`status with definition id ${ConductiveLisa} at opp active`))
+  .characterStatus(ConductiveLisa, "opp active")
   .done();
 
 /**
@@ -88,7 +88,7 @@ export const LightningRose = skill(14093)
   .costEnergy(2)
   .damage(DamageType.Electro, 2)
   .summon(LightningRoseSummon)
-  .characterStatus(Conductive, "opp active")
+  .characterStatus(ConductiveLisa, "opp active")
   .done();
 
 /**
@@ -118,5 +118,5 @@ export const PulsatingWitch = card(214091)
   .talent(Lisa, "none")
   .on("switchActive", (c, e) => e.switchInfo.to.id === c.self.master.id)
   .usagePerRound(1)
-  .characterStatus(Conductive, "opp active")
+  .characterStatus(ConductiveLisa, "opp active")
   .done();

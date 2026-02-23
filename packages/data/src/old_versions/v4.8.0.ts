@@ -1,4 +1,4 @@
-import { card, combatStatus, DamageType, diceCostOfCard, DiceType, skill, status } from "@gi-tcg/core/builder";
+import { card, combatStatus, DamageType, skill, status } from "@gi-tcg/core/builder";
 import { Cyno, PactswornPathclearer, SecretRiteChasmicSoulfarer } from "../characters/electro/cyno";
 import { AlldevouringNarwhal, AnomalousAnatomy, LightlessFeeding } from "../characters/hydro/alldevouring_narwhal";
 
@@ -96,7 +96,7 @@ const StarfallShower = skill(22042)
     const [card] = c.disposeMaxCostHands(1);
     if (card) {
       if (c.self.hasEquipment(LightlessFeeding)) {
-        c.heal(diceCostOfCard(card.definition), "@self");
+        c.heal(card.diceCost(), "@self");
       }
     }
   })

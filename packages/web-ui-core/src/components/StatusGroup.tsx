@@ -14,17 +14,21 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { Key } from "@solid-primitives/keyed";
-import type { StatusInfo } from "./Chessboard";
+import type { StatusViewInfo } from "./Chessboard";
 import { Image } from "./Image";
 import { createMemo, Show } from "solid-js";
 
-interface StatusProps extends StatusInfo {}
+interface StatusProps extends StatusViewInfo {}
 
 function Status(props: StatusProps) {
   const data = createMemo(() => props.data);
   const defId = createMemo(() => props.data.definitionId);
+  const hasUsagePerRound = createMemo(() => {
+    const d = data();
+    return "hasUsagePerRound" in d && d.hasUsagePerRound;
+  });
   return (
-    <div class="pointer-events-auto h-5 w-5 rounded-full relative">
+    <div class="pointer-events-auto h-5 w-5 [.attachments_&]:h-6 [.attachments_&]:w-6 rounded-full relative">
       <Image
         imageId={defId()}
         class="h-full w-full status"
@@ -32,13 +36,13 @@ function Status(props: StatusProps) {
         bool:data-disposing={props.animation === "disposing"}
       />
       <Show when={typeof data().variableValue === "number"}>
-        <div class="w-3 h-3 text-3 text-white line-height-none absolute bottom--1 right--1 rounded-full bg-black/50 flex items-center justify-center ">
+        <div class="[.attachments_&]:hidden w-3 h-3 text-3 text-white line-height-none absolute bottom--1 right--1 rounded-full bg-black/50 flex items-center justify-center">
           {data().variableValue}
         </div>
       </Show>
       <div
         class="absolute h-full w-full rounded-full top-0 left-0 status-usage"
-        bool:data-usable={data().hasUsagePerRound}
+        bool:data-usable={hasUsagePerRound()}
       />
       <div
         class="absolute h-full w-full rounded-full top-0 left-0 status-animation"
@@ -52,13 +56,16 @@ function Status(props: StatusProps) {
 
 export interface StatusGroupProps {
   class?: string;
-  statuses: StatusInfo[];
+  statuses: StatusViewInfo[];
+  maxCount?: number;
 }
 
 export function StatusGroup(props: StatusGroupProps) {
-  const showEllipsis = () => props.statuses.length > 4;
+  const showEllipsis = () => props.statuses.length > (props.maxCount ?? 4);
   const statuses = createMemo(() =>
-    showEllipsis() ? props.statuses.slice(0, 3) : props.statuses,
+    showEllipsis()
+      ? props.statuses.slice(0, (props.maxCount ?? 4) - 1)
+      : props.statuses,
   );
   return (
     <div class={`flex flex-row ${props.class ?? ""}`}>
@@ -67,7 +74,7 @@ export function StatusGroup(props: StatusGroupProps) {
       </Key>
       <Show when={showEllipsis()}>
         <img
-          class="pointer-events-auto h-5 w-5"
+          class="pointer-events-auto h-5 w-5 [.attachments_&]:h-6 [.attachments_&]:w-6"
           // TODO: replace this with an API endpoint
           src="https://assets.gi-tcg.guyutongxue.site/assets/UI_Gcg_Buff_Common_More.webp"
         />

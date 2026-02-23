@@ -60,11 +60,10 @@ export const Itzpapa: CombatStatusHandle = combatStatus(111143)
   })
   .combatStatus(OpalShield)
   .on("gainNightsoul", (c, e) => {
-    if (e.character.definition.id !== Citlali) {
+    if (e.entity.definition.id !== NightsoulsBlessing) {
       return false;
     }
-    const st = e.character.hasNightsoulsBlessing();
-    return st && st.getVariable("nightsoul") === 2;
+    return e.entity.getVariable("nightsoul") === 2;
   })
   .damage(DamageType.Cryo, 1, "opp characters with health > 0 limit 1")
   .done();

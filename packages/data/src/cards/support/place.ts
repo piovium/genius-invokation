@@ -13,8 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DamageType, DiceType, EntityState, card, combatStatus, diceCostOfCard, status } from "@gi-tcg/core/builder";
+import { DamageType, DiceType, EntityState, card, combatStatus, originalDiceCostOfCard, status } from "@gi-tcg/core/builder";
 import { ForbiddenKnowledge, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SIMULANKA_QUERY, SIMULANKA_SUMMONS, ToyGuard, ToyGuardSummon } from "../event/other";
+import { BattlePlan, CostIncrease, CostReduction, Empowerment, IneffectiveWhenPlayed, NoTuningAllowed } from "../../commons";
 
 /**
  * @id 321001
@@ -242,7 +243,7 @@ export const ChinjuForest = card(321012)
  * @id 321013
  * @name 黄金屋
  * @description
- * 我方打出原本元素骰费用至少为3的「武器」或「圣遗物」手牌时：少花费1个元素骰。（每回合1次）
+ * 我方打出当前元素骰费用至少为3的「武器」或「圣遗物」手牌时：少花费1个元素骰。（每回合1次）
  * 可用次数：2
  */
 export const GoldenHouse = card(321013)
@@ -250,7 +251,7 @@ export const GoldenHouse = card(321013)
   .support("place")
   .on("deductOmniDiceCard", (c, e) =>
     e.hasOneOfCardTag("weapon", "artifact") &&
-    e.originalDiceCostSize() >= 3)
+    e.currentDiceCostSize() >= 3)
   .usagePerRound(1)
   .usage(2)
   .deductOmniCost(1)
@@ -289,7 +290,7 @@ export const StormterrorsLair = card(321015)
   .drawCards(1, { withTag: "talent" })
   .on("deductOmniDice", (c, e) => {
     return e.hasCardTag("talent") ||
-      (e.isUseSkill() && e.originalDiceCostSize() >= 4);
+      (e.isUseSkill() && e.currentDiceCostSize() >= 4);
   })
   .usage(3)
   .usagePerRound(1)
@@ -326,7 +327,7 @@ export const OperaEpiclese = card(321017)
   .on("beforeAction", (c) => {
     function costOfEquipment(equipment: EntityState) {
       const cardDef = c.data.entities.get(equipment.definition.id)!;
-      return diceCostOfCard(cardDef);
+      return originalDiceCostOfCard(cardDef);
     }
     const myCost = c.$$(`my equipments`).map((entity) => costOfEquipment(entity)).reduce((a, b) => a + b, 0);
     const oppCost = c.$$(`opp equipments`).map((entity) => costOfEquipment(entity)).reduce((a, b) => a + b, 0);
@@ -357,8 +358,8 @@ export const StrictProhibited = combatStatus(301018)
  * @id 321018
  * @name 梅洛彼得堡
  * @description
- * 我方出战角色受到伤害或治疗后：此牌累积1点「禁令」。（最多累积到4点）
- * 行动阶段开始时：如果此牌已有4点「禁令」，则消耗4点，在对方场上生成严格禁令。（本回合中打出的1张事件牌无效）
+ * 我方出战角色受到伤害或治疗后：此牌累积1点「禁令」。
+ * 如果此牌已有5点禁令，则消耗5点，赋予对方1张随机手牌无效化。
  */
 export const FortressOfMeropide = card(321018)
   .since("v4.5.0")
@@ -366,10 +367,16 @@ export const FortressOfMeropide = card(321018)
   .support("place")
   .variable("forbidden", 0)
   .on("damagedOrHealed", (c, e) => e.target.isActive())
-  .addVariableWithMax("forbidden", 1, 4)
-  .on("actionPhase", (c) => c.getVariable("forbidden") >= 4)
-  .combatStatus(StrictProhibited, "opp")
-  .addVariable("forbidden", -4)
+  .do((c) => {
+    c.addVariable("forbidden", 1);
+    if (c.getVariable("forbidden") >= 5) {
+      c.addVariable("forbidden", -5);
+      if (c.oppPlayer.hands.length > 0) {
+        const target = c.random(c.oppPlayer.hands);
+        c.attach(IneffectiveWhenPlayed, target);
+      }
+    }
+  })
   .done();
 
 /**
@@ -573,13 +580,13 @@ export const StageTepetl = card(321023)
  * @id 321024
  * @name 「悬木人」
  * @description
- * 我方打出名称不存在于本局最初牌组的牌时：如果打出的牌原本元素骰费用不低于此牌的「极限运动点」，则生成1个随机基础元素骰，然后此牌累积1个「极限运动点」。
+ * 我方打出名称不存在于本局最初牌组的牌时：如果打出的牌当前元素骰费用不低于此牌的「极限运动点」，则生成1个随机基础元素骰，然后此牌累积1个「极限运动点」。
  */
 export const ScionsOfTheCanopy = card(321024)
   .since("v5.2.0")
   .support("place")
   .variable("point", 1) // 神奇
-  .on("playCard", (c, e) => !c.isInInitialPile(e.card) && diceCostOfCard(e.card.definition) >= c.getVariable("point"))
+  .on("playCard", (c, e) => !c.isInInitialPile(e.card) && e.card.diceCost() >= c.getVariable("point"))
   .generateDice("randomElement", 1)
   .addVariable("point", 1)
   .done();
@@ -654,7 +661,7 @@ export const MastersOfTheNightwind = card(321027)
   })
   .on("actionPhase", (c) => c.getVariable("intuition") === 0)
   .do((c) => {
-    const cards = c.allCardDefinitions("support").filter((card) => diceCostOfCard(card) === 2);
+    const cards = c.allCardDefinitions("support").filter((card) => originalDiceCostOfCard(card) === 2);
     const candidates = c.randomSubset(cards, 3);
     c.selectAndPlay(candidates);
     c.dispose();
@@ -742,12 +749,12 @@ export const ConstellationMetropoleInEffect01 = combatStatus(301032)
   .done();
 
 /**
- * @id 321037
+ * @id 301037
  * @name 星轨王城（生效中）
  * @description
  * 下次打出的积木小人效果量+1。
  */
-export const ConstellationMetropoleInEffect02 = combatStatus(321037)
+export const ConstellationMetropoleInEffect02 = combatStatus(301037)
   .once("enterRelative", (c, e) => e.entity.definition.id === ToyGuardSummon)
   .do((c, e) => {
     e.entity.cast<"summon">().addVariable("effect", 1);
@@ -795,4 +802,126 @@ export const AdventurersGuild = card(321031)
   .adventure()
   .on("adventure", (c) => c.getVariable("usage") === 0)
   .dispose()
+  .done();
+
+/**
+ * @id 321035
+ * @name 银月之庭
+ * @description
+ * 我方卡牌被赋予费用降低或赋能时：累计1点计数。
+ * 行动阶段开始，且此卡牌计数达到3时：移除3点计数，生成1个随机基础元素骰。
+ */
+export const SilvermoonHall = card(321035)
+  .since("v6.3.54-beta")
+  .support("place")
+  .variable("count", 0)
+  .on("enterRelative", (c, e) => ([CostReduction, Empowerment] as number[]).includes(e.entity.definition.id))
+  .addVariable("count", 1)
+  .on("actionPhase", (c) => c.getVariable("count") >= 3)
+  .addVariable("count", -3)
+  .generateDice("randomElement", 1)
+  .done();
+
+/**
+ * @id 321036
+ * @name 汐印石
+ * @description
+ * 行动阶段开始时：赋予敌方随机1张手牌费用增加和不可调和。
+ * 可用次数：2
+ */
+export const TidesealStone = card(321036)
+  .since("v6.3.54-beta")
+  .support("place")
+  .on("actionPhase", (c) => c.oppPlayer.hands.length > 0)
+  .usage(2)
+  .do((c) => {
+    const target = c.random(c.oppPlayer.hands);
+    c.attach(CostIncrease, target);
+    c.attach(NoTuningAllowed, target);
+  })
+  .done();
+
+/**
+ * @id 321037
+ * @name 霜月之坊
+ * @description
+ * 入场时：抓2张牌，治疗我方受伤最多的角色2点。
+ * 结束阶段：赋予我方随机2张当前元素骰费用不为0的手牌费用降低。
+ * 可用次数：2
+ */
+export const FrostmoonEnclave = card(321037)
+  .since("v6.3.54-beta")
+  .costSame(4)
+  .support("place")
+  .on("enter")
+  .drawCards(2)
+  .heal(2, "my characters order by health - maxHealth limit 1")
+  .on("endPhase")
+  .usage(2)
+  .do((c) => {
+    const candidates = c.player.hands.filter((card) => card.diceCost() > 0);
+    const chosen = c.randomSubset(candidates, 2);
+    for (const card of chosen) {
+      c.attach(CostReduction, card);
+    }
+  })
+  .done();
+
+/**
+ * @id 321038
+ * @name 那夏镇
+ * @description
+ * 结束阶段：赋予我方随机2张当前元素骰费用大于等于2的手牌赋能。
+ * 可用次数：2
+ * 此卡牌被弃置时：如果可用次数为0，造成2点物理伤害。
+ */
+export const NashaTown = card(321038)
+  .since("v6.3.54-beta")
+  .costSame(1)
+  .support("place")
+  .on("endPhase")
+  .usage(2)
+  .do((c) => {
+    const candidates = c.player.hands.filter(
+      (card) => card.diceCost() >= 2 && !card.empowered()
+    );
+    const chosen = c.randomSubset(candidates, 2);
+    for (const card of chosen) {
+      c.attach(Empowerment, card);
+    }
+  })
+  .on("selfDispose")
+  .do((c) => {
+    if (c.getVariable("usage") === 0) {
+      c.damage(DamageType.Physical, 2);
+    }
+  })
+  .done();
+
+/**
+ * @id 321039
+ * @name 月矩力试验设计局
+ * @description
+ * 结束阶段：赋予我方牌组中随机2张牌赋能。
+ * 可用次数：2
+ * 此卡牌在场上被弃置时：抓2张赋予了赋能的卡牌，并使我方出战角色附属1层战斗计划。
+ */
+export const KuuvahkiExperimentalDesignBureau = card(321039)
+  .since("v6.3.54-beta")
+  .costSame(2)
+  .support("place")
+  .on("endPhase")
+  .usage(2)
+  .do((c) => {
+    const chosen = c.randomSubset(
+      c.player.pile.filter((card) => !card.empowered()),
+      2
+    );
+    for (const card of chosen) {
+      c.attach(Empowerment, card);
+    }
+  })
+  .on("selfDispose")
+  .drawCards(2, { withAttachment: Empowerment })
+  .characterStatus(BattlePlan, "my active")
   .done();

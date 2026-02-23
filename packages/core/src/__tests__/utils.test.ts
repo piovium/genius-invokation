@@ -58,6 +58,7 @@ test("sort dice", () => {
           },
           associatedNightsoulsBlessing: null,
           specialEnergy: null,
+          enabledLunarReactions: [],
         },
       },
       {
@@ -81,6 +82,7 @@ test("sort dice", () => {
           },
           associatedNightsoulsBlessing: null,
           specialEnergy: null,
+          enabledLunarReactions: [],
         },
       },
     ],

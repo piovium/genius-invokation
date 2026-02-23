@@ -41,7 +41,7 @@ export const BASE_PATH = path.resolve(
   "../../src",
 ).replace(/\\/g, "/");
 
-export const LICENSE = `// Copyright (C) 2024-2025 Guyutongxue
+export const LICENSE = `// Copyright (C) 2026 Piovium Labs
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as

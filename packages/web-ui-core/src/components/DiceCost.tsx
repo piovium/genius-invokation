@@ -52,7 +52,14 @@ export function DiceCost(props: DiceCostProps) {
                 ? "decreased"
                 : "normal";
           result.push([type, realCount, color]);
+          realCostMap.delete(type);
         }
+        result.push(
+          ...realCostMap
+            .entries()
+            .filter(([, count]) => count > 0)
+            .map(([type, count]) => [type, count, "increased"] as const),
+        );
       } else {
         result = costMap
           .entries()

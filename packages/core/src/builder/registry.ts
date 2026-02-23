@@ -20,6 +20,7 @@ import type { InitiativeSkillDefinition, SkillDefinition } from "../base/skill";
 import { GiTcgDataError } from "../error";
 import { type VersionInfo } from "../base/version";
 import { freeze } from "immer";
+import type { AttachmentDefinition } from "../base/attachment";
 
 export type VersionResolver = <T extends DefinitionMap[RegisterCategory]>(
   items: T[],
@@ -39,6 +40,7 @@ export class Registry {
       initiativeSkills: new Map(),
       passiveSkills: new Map(),
       extensions: new Map(),
+      attachments: new Map(),
     };
   }
 
@@ -94,6 +96,7 @@ export class Registry {
     const initiativeSkills = applyResolvers("initiativeSkills");
     const passiveSkills = applyResolvers("passiveSkills");
     const entities = applyResolvers("entities");
+    const attachments = applyResolvers("attachments");
     const characters = applyResolvers(
       "characters",
       (chEntry): CharacterDefinition => {
@@ -127,6 +130,7 @@ export class Registry {
       extensions,
       entities,
       characters,
+      attachments,
     });
   }
 }
@@ -228,6 +232,7 @@ type DefinitionMap = {
   extensions: ExtensionDefinition;
   initiativeSkills: CharacterInitiativeSkillEntry;
   passiveSkills: CharacterPassiveSkillEntry;
+  attachments: AttachmentDefinition;
 };
 
 type RegisterCategory = keyof DefinitionMap;
@@ -240,6 +245,7 @@ export interface GameData {
   readonly extensions: ReadonlyMap<number, ExtensionDefinition>;
   readonly characters: ReadonlyMap<number, CharacterDefinition>;
   readonly entities: ReadonlyMap<number, EntityDefinition>;
+  readonly attachments: ReadonlyMap<number, AttachmentDefinition>;
 }
 
 export function registerCharacter(value: CharacterEntry) {
@@ -247,6 +253,9 @@ export function registerCharacter(value: CharacterEntry) {
 }
 export function registerEntity(value: EntityDefinition) {
   RegistrationScope.register("entities", value);
+}
+export function registerAttachment(value: AttachmentDefinition) {
+  RegistrationScope.register("attachments", value);
 }
 export function registerPassiveSkill(value: CharacterPassiveSkillEntry) {
   RegistrationScope.register("passiveSkills", value);
