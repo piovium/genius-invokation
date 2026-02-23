@@ -1687,6 +1687,12 @@
   }
 }
 
+@property --mask-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
 @keyframes electric-shocks-rotate {
     0% {
         --mask-angle: 0deg;

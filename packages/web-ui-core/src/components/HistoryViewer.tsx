@@ -1096,7 +1096,7 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
       return;
     }
     return l.length === 1
-      ? l[0].cardDefinitionId || all.length === 1
+      ? (l[0].cardDefinitionId) || (all.length === 1)
         ? all
         : "more"
       : "more";
