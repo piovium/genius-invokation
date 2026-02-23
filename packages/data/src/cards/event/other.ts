@@ -2322,7 +2322,7 @@ export const AnAdventureThroughTheMorningMist = card(332059)
  * 生成1张随机「道具」牌，赋予我方当前元素骰费用最高的2张手牌赋能。
  */
 export const GeniussUpgradeTechnique = card(332060)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .do((c) => {
     const itemCards = c.allCardDefinitions("item");
     c.createHandCard(c.random(itemCards).id as CardHandle);
@@ -2343,7 +2343,7 @@ export const GeniussUpgradeTechnique = card(332060)
  * 如果此卡牌被赋予了赋能，则赋予3张当前元素骰费用最高的手牌赋能。
  */
 export const ClinkClankLegion = card(332061)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .costSame(1)
   .do((c) => {
     const allCards = c

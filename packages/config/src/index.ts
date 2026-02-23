@@ -14,9 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /** Toggle this when editing beta version. */
-export const IS_BETA = true;
+export const IS_BETA = false;
 
-export const BETA_VERSION = "v6.3.54-beta";
+export const BETA_VERSION = "v9999.0.0-beta";
 
 export const WEB_CLIENT_BASE_PATH = import.meta.env.WEB_CLIENT_BASE_PATH || "/";
 export const SERVER_HOST = import.meta.env.DEV

@@ -812,7 +812,7 @@ export const AdventurersGuild = card(321031)
  * 行动阶段开始，且此卡牌计数达到3时：移除3点计数，生成1个随机基础元素骰。
  */
 export const SilvermoonHall = card(321035)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .support("place")
   .variable("count", 0)
   .on("enterRelative", (c, e) => ([CostReduction, Empowerment] as number[]).includes(e.entity.definition.id))
@@ -830,7 +830,7 @@ export const SilvermoonHall = card(321035)
  * 可用次数：2
  */
 export const TidesealStone = card(321036)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .support("place")
   .on("actionPhase", (c) => c.oppPlayer.hands.length > 0)
   .usage(2)
@@ -850,7 +850,7 @@ export const TidesealStone = card(321036)
  * 可用次数：2
  */
 export const FrostmoonEnclave = card(321037)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .costSame(4)
   .support("place")
   .on("enter")
@@ -876,7 +876,7 @@ export const FrostmoonEnclave = card(321037)
  * 此卡牌被弃置时：如果可用次数为0，造成2点物理伤害。
  */
 export const NashaTown = card(321038)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .costSame(1)
   .support("place")
   .on("endPhase")
@@ -907,7 +907,7 @@ export const NashaTown = card(321038)
  * 此卡牌在场上被弃置时：抓2张赋予了赋能的卡牌，并使我方出战角色附属1层战斗计划。
  */
 export const KuuvahkiExperimentalDesignBureau = card(321039)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .costSame(2)
   .support("place")
   .on("endPhase")

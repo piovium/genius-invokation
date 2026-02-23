@@ -25,7 +25,7 @@ import type { EntityType } from "@gi-tcg/core";
  * 可用次数：2
  */
 export const Birgitta = summon(114171)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .endPhaseDamage(DamageType.Electro, 1)
   .usage(2)
   .done();
@@ -107,7 +107,7 @@ export const MoonsignBenedictionAssemblageHub01 = skill(14175)
  * 白铁锻身，赤心铸魂。
  */
 export const Ineffa = character(1417)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .tags("electro", "pole", "nodkrai")
   .health(10)
   .energy(2)
@@ -125,7 +125,7 @@ export const Ineffa = character(1417)
  * （牌组中包含伊涅芙，才能加入牌组）
  */
 export const RectifyingProcessor = card(214171)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .costElectro(1)
   .talent(Ineffa, "none")
   .on("enter")

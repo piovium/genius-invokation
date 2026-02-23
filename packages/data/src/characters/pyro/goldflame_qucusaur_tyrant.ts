@@ -23,7 +23,7 @@ import { character, skill, status, card, DamageType } from "@gi-tcg/core/builder
  * 可用次数：1（可叠加，没有上限）
  */
 export const GoldflameState = status(123061)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .on("endPhase", (c, e) => c.self.master.isActive())
   .usageCanAppend(1, Infinity)
   .do((c) => {
@@ -48,7 +48,7 @@ export const GoldflameState = status(123061)
  * 可用次数：1（可叠加，没有上限）
  */
 export const FlyingSwirl = status(123062)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .tags("barrier")
   .on("decreaseDamaged")
   .usageCanAppend(1, Infinity)
@@ -119,7 +119,7 @@ export const AncientBloodline = skill(23064)
  * 因承受了如今龙众的身躯无法驭使的伟力，而拥有超然形体的异种绒翼龙。
  */
 export const GoldflameQucusaurTyrant = character(2306)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .tags("pyro", "monster")
   .health(11)
   .energy(2)
@@ -136,7 +136,7 @@ export const GoldflameQucusaurTyrant = character(2306)
  * （牌组中包含金焰绒翼龙暴君，才能加入牌组）
  */
 export const FlamelordsBlessing = card(223061)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .costPyro(3)
   .costEnergy(2)
   .talent(GoldflameQucusaurTyrant)

@@ -69,7 +69,7 @@ export const SuperconductBlessingElectricSurge = card(303042)
  * 我方触发超导反应后：弃置此牌并从超导祝佑·极寒和超导祝佑·电冲中挑选一项加入手牌。
  */
 export const ElementalTransfigurationSuperconductBlessing = card(331004)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .costSame(2)
   .elementalBlessing(DiceType.Cryo, DiceType.Electro)
   .on("roll")
@@ -150,7 +150,7 @@ export const VaporizeBlessingSearingBurn = card(303052)
  * 我方触发蒸发反应后：弃置此牌并从蒸发祝佑·狂浪和蒸发祝佑·炽燃中挑选一项加入手牌。
  */
 export const ElementalTransfigurationVaporizeBlessing = card(331005)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .costSame(2)
   .elementalBlessing(DiceType.Hydro, DiceType.Pyro)
   .on("roll")

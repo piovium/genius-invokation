@@ -22,7 +22,7 @@ import { character, skill, status, combatStatus, card, DamageType, CombatStatusH
  * 本回合所附属角色下次「普通攻击」少花费2个无色元素。
  */
 export const NAttackCostReduction = status(111174)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .oneDuration()
   .once("deductVoidDiceSkill", (c, e) => e.isSkillType("normal"))
   .deductVoidCost(2)
@@ -35,7 +35,7 @@ export const NAttackCostReduction = status(111174)
  * 本回合所附属角色下次「普通攻击」造成的物理伤害+2。
  */
 export const PhysicalDmgIncrease01 = status(111175)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .oneDuration()
   .once("increaseSkillDamage", (c, e) => e.viaSkillType("normal") && e.type === DamageType.Physical)
   .increaseDamage(2)
@@ -49,7 +49,7 @@ export const PhysicalDmgIncrease01 = status(111175)
  * 可用次数：1
  */
 export const WindOfBlessing: CombatStatusHandle = combatStatus(111171)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .on("useSkill", (c, e) => e.isSkillType("normal"))
   .usage(1)
   .characterStatus(NAttackCostReduction, "@event.skillCaller")
@@ -65,7 +65,7 @@ export const WindOfBlessing: CombatStatusHandle = combatStatus(111171)
  * 可用次数：2
  */
 export const Eagleplume = combatStatus(111172)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .on("deductOmniDiceSkill", (c, e) => e.isSkillType("normal"))
   .usage(2)
   .deductOmniCost(1)
@@ -79,7 +79,7 @@ export const Eagleplume = combatStatus(111172)
  * 可用次数：1
  */
 export const PhysicalDmgIncrease = combatStatus(111173)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .on("increaseDamage", (c, e) => e.type === DamageType.Physical)
   .usage(1)
   .increaseDamage(1)
@@ -93,7 +93,7 @@ export const PhysicalDmgIncrease = combatStatus(111173)
  * 可用次数：2
  */
 export const EagleplumeBlessing = combatStatus(111176)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .on("useSkill", (c, e) => e.isSkillType("normal"))
   .usage(2)
   .heal(1, "@event.skillCaller")
@@ -160,7 +160,7 @@ export const ReconnaissanceExperience = skill(11174)
  * 翎羽如穗，绘摹殊境。
  */
 export const Mika = character(1117)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .tags("cryo", "pole", "mondstadt")
   .health(10)
   .energy(2)
@@ -177,7 +177,7 @@ export const Mika = character(1117)
  * （牌组中包含米卡，才能加入牌组）
  */
 export const CompanionsCounsel = card(211171)
-  .since("v6.3.54-beta")
+  .since("v6.4.0")
   .costCryo(3)
   .talent(Mika)
   .on("enter")
