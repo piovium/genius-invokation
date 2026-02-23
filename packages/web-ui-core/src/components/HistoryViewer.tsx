@@ -1041,7 +1041,7 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
     if (c.type.includes("createAttachment")) {
       shotGroups.attachment.push(c);
     }
-    if (!c.type.includes("createCard") || !c.type.includes("removeCard")) {
+    if (!(c.type.includes("createCard") && c.type.includes("removeCard"))) {
       if (c.type.includes("createCard") && !c.type.includes("overflowCard")) {
         shotGroups.getcard.push({ ...c, attachment: [] });
       }
@@ -1049,7 +1049,7 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
         shotGroups.discard.push({ ...c, attachment: [] });
       }
     }
-    if (!c.type.includes("createEntity") || !c.type.includes("removeEntity")) {
+    if (!(c.type.includes("createEntity") && c.type.includes("removeEntity"))) {
       if (c.type.includes("createEntity")) {
         shotGroups.create.push({ ...c, attachment: [] });
       }
