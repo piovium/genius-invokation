@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, card, extension, flip, pair, status } from "@gi-tcg/core/builder";
+import { DiceType, card, combatStatus, extension, flip, pair, status } from "@gi-tcg/core/builder";
 import { DisperseTheCalamity, SanctifyTheDefiled } from "./other";
 import { IneffectiveWhenPlayed } from "../../commons";
 
@@ -116,17 +116,13 @@ export const InEveryHouseAStove = card(330005)
   .done();
 
 /**
- * @id 330006
- * @name 裁定之时
+ * @id 300003
+ * @name 裁定之时（生效中）
  * @description
- * 本回合中，敌方下次打出事件牌后：赋予敌方手牌中所有事件牌无效化。
- * 本回合中，敌方舍弃手牌后：将敌方手牌中2张当前元素骰费用最高的卡牌置入牌组底。
- * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
+ * 本回合中，我方打出事件牌后：赋予我方手牌中所有事件牌无效化。
+ * 本回合中，我方舍弃手牌后：将我方手牌中2张当前元素骰费用最高的卡牌置入牌组底。
  */
-export const [PassingOfJudgment] = card(330006)
-  .since("v4.3.0")
-  .legend()
-  .toCombatStatus(300003, "opp")
+export const PassingOfJudgmentInEffect = combatStatus(300003)
   .oneDuration()
   .on("playCard", (c, e) => e.card.definition.type === "eventCard")
   .usage(1, { autoDispose: false, visible: false })
@@ -142,6 +138,20 @@ export const [PassingOfJudgment] = card(330006)
     const maxCostHands = c.maxCostHands(2);
     c.undrawCards(maxCostHands, "bottom");
   })
+  .done();
+
+/**
+ * @id 330006
+ * @name 裁定之时
+ * @description
+ * 本回合中，敌方下次打出事件牌后：赋予敌方手牌中所有事件牌无效化。
+ * 本回合中，敌方舍弃手牌后：将敌方手牌中2张当前元素骰费用最高的卡牌置入牌组底。
+ * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
+ */
+export const PassingOfJudgment = card(330006)
+  .since("v4.3.0")
+  .legend()
+  .combatStatus(PassingOfJudgmentInEffect, "opp")
   .done();
 
 /**

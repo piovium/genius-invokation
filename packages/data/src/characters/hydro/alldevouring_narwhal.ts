@@ -219,7 +219,7 @@ export const InsatiableAppetite = skill(22044)
  */
 export const AlldevouringNarwhal = character(2204)
   .since("v4.7.0")
-  .tags("hydro", "monster")
+  .tags("hydro", "monster", "calamity")
   .health(6)
   .energy(2)
   .skills(ShatteringWaves, StarfallShower, RavagingDevourer, InsatiableAppetite)
