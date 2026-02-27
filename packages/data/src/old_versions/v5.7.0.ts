@@ -189,6 +189,7 @@ const EdictOfAbsolutionInEffect = status(300005)
  */
 const EdictOfAbsolution = card(330009)
   .until("v5.7.0")
+  .unobtainable()
   .legend()
   .addTarget("my characters")
   .characterStatus(EdictOfAbsolutionInEffect, "@targets.0")

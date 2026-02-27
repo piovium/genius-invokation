@@ -13,6 +13,7 @@ import { AdeptusArtPreserverOfFortune, Qiqi } from "../characters/cryo/qiqi";
  */
 const InEveryHouseAStove = card(330005)
   .until("v4.6.1")
+  .unobtainable()
   .legend()
   .do((c) => {
     const count = Math.min(c.roundNumber - 1, 4);

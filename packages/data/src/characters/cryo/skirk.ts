@@ -67,6 +67,7 @@ export const DeathsCrossing = status(111164)
  * 回合开始或我方执行切换后：舍弃此牌，获得1点蛇之狡谋。
  */
 export const MutualWeaponsMentorship = card(111161)
+  .unobtainable() 
   .addTarget(`my character with definition id 1116`)
   .characterStatus(SevenphaseFlash, "@targets.0")
   .characterStatus(DeathsCrossing, "@targets.0")
@@ -93,6 +94,7 @@ export const MutualWeaponsMentorship = card(111161)
  * 舍弃1张当前元素骰费用为3的手牌，丝柯克获得2点蛇之狡谋。
  */
 export const VoidRift = card(111163)
+  .unobtainable()
   .do((c) => {
     const hand = c.player.hands.find((card) => card.diceCost() === 3);
     if (hand) {

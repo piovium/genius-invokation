@@ -10,6 +10,7 @@ import { StrifefulLightning, ThunderManifestation, ThunderingShacklesSummon } fr
  */
 const InEveryHouseAStove = card(330005)
   .until("v4.3.0")
+  .unobtainable()
   .legend()
   .do((c) => {
     const count = Math.min(c.roundNumber, 4);

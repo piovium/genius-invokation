@@ -1077,6 +1077,7 @@ export const ControlledDirectionalBlast = card(332030)
  */
 export const TaroumarusSavings = card(302202)
   .since("v4.6.0")
+  .unobtainable()
   .generateDice(DiceType.Omni, 1)
   .done();
 
@@ -1088,6 +1089,7 @@ export const TaroumarusSavings = card(302202)
  */
 export const [CalledInForCleanup] = card(302203)
   .since("v4.6.0")
+  .unobtainable()
   .toCombatStatus(302204)
   .variableCanAppend("damage", 1, 2)
   .once("increaseSkillDamage")
@@ -1114,6 +1116,7 @@ const UnderseaTreasureOnCD = status(303231)
  */
 export const UnderseaTreasure = card(303230)
   .since("v4.6.0")
+  .unobtainable()
   .generateDice("randomElement", 1)
   .do((c) => {
     if (!c.$(`my active has status with definition id ${UnderseaTreasureOnCD}`)) {
@@ -1153,6 +1156,7 @@ export const BonecrunchersEnergyBlockCombatStatus = combatStatus(124053)
  */
 export const BonecrunchersEnergyBlock = card(124051)
   .since("v4.7.0")
+  .unobtainable()
   .filter((c) => !c.$(`my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`))
   .abortPreview()
   .do((c) => {
@@ -1182,6 +1186,7 @@ export const ForbiddenKnowledgeCoolDown = combatStatus(301021)
  */
 export const ForbiddenKnowledge = card(301020)
   .since("v4.7.0")
+  .unobtainable()
   .tags("abyss")
   .disableTuning()
   .filter((c) => !c.$(`my combat status with definition id ${ForbiddenKnowledgeCoolDown}`))
@@ -1216,6 +1221,7 @@ export const CountdownToTheShow3 = card(332032)
  */
 export const CountdownToTheShow2 = card(332033)
   .since("v4.7.0")
+  .unobtainable()
   .costSame(2)
   .convertDice(DiceType.Omni, "all")
   .drawCards(4)
@@ -1233,6 +1239,7 @@ export const CountdownToTheShow2 = card(332033)
  */
 export const CountdownToTheShow1 = card(332034)
   .since("v4.7.0")
+  .unobtainable()
   .costSame(1)
   .convertDice(DiceType.Omni, "all")
   .drawCards(4)
@@ -1249,6 +1256,7 @@ export const CountdownToTheShow1 = card(332034)
  */
 export const TheShowBegins = card(332035)
   .since("v4.7.0")
+  .unobtainable()
   .convertDice(DiceType.Omni, "all")
   .drawCards(4)
   .done();

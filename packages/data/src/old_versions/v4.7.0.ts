@@ -19,6 +19,7 @@ import { AnomalousAnatomy, LightlessFeeding } from "../characters/hydro/alldevou
  */
 const BonecrunchersEnergyBlock = card(124051)
   .until("v4.7.0")
+  .unobtainable()
   .filter((c) => !c.$(`my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`))
   .do((c) => {
     c.disposeMaxCostHands(1);

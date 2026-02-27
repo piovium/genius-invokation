@@ -186,6 +186,7 @@ export const ElectroHypostasis = character(2401)
  */
 export const AbsorbingPrism = card(224011)
   .since("v3.7.0")
+  .unobtainable()
   .costElectro(2)
   .eventTalent(ElectroHypostasis)
   .heal(3, "my active")
