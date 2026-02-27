@@ -165,7 +165,6 @@ export const SourceSampleElectro = status(116117)
  */
 export const CombatBladingGear = card(116112)
   .since("v5.6.0")
-  .unobtainable()
   .nightsoulTechnique()
   .on("modifySkillDamageType", (c, e) => e.type === DamageType.Physical)
   .changeDamageType(DamageType.Geo)

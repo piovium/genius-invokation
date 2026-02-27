@@ -27,7 +27,6 @@ import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto";
  */
 const JoyousCelebration = card(330003)
   .until("v4.1.0")
-  .unobtainable()
   .costSame(1)
   .legend()
   .filter((c) => ([DiceType.Cryo, DiceType.Hydro, DiceType.Pyro, DiceType.Electro, DiceType.Dendro] as (DiceType | undefined)[]).includes(c.$("my active")?.element()))
@@ -117,7 +116,6 @@ const GloriousSeason = card(212011)
  */
 const AbsorbingPrism = card(224011)
   .until("v4.1.0")
-  .unobtainable()
   .costElectro(3)
   .eventTalent(ElectroHypostasis)
   .heal(3, "my active")

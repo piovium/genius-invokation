@@ -56,7 +56,6 @@ export const BiteTarget = status(112143)
  */
 export const BiteyShark = card(112142)
   .since("v5.3.0")
-  .unobtainable()
   .nightsoulTechnique()
   .on("switchActive", (c) => c.self.master.isActive())
   .listenToAll()

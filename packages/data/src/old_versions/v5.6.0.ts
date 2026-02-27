@@ -25,7 +25,6 @@ import { AbiogenesisSolarIsotoma, FavoniusBladeworkWeiss, RiteOfProgenitureTecto
  */
 const TurboTwirly = card(116102)
   .until("v5.6.0")
-  .unobtainable()
   .nightsoulTechnique()
   .on("switchActive", (c, e) => e.switchInfo.from?.id === c.self.master.id)
   .consumeNightsoul("@master")

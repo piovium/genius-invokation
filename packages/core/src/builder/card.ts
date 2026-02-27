@@ -385,15 +385,22 @@ export class CardBuilder<
       .variableCanAppend("exp", 1, Infinity);
   }
 
-  elementalBlessing(type1: DiceType, type2: DiceType): EntityBuilderPublic<"support"> {
+  elementalBlessing(
+    type1: DiceType,
+    type2: DiceType,
+  ): EntityBuilderPublic<"support"> {
     return this.unobtainable()
       .support("blessing")
       .on("actionPhase", (c, e) => {
         if (c.self.area.type === "supports") {
           return false;
         }
-        const elements = new Set(c.player.characters.flatMap((ch) => ch.element()));
-        return elements.size === 2 && elements.has(type1) && elements.has(type2);
+        const elements = new Set(
+          c.player.characters.flatMap((ch) => ch.element()),
+        );
+        return (
+          elements.size === 2 && elements.has(type1) && elements.has(type2)
+        );
       })
       .enableHandTriggering()
       .enablePileTriggering()
@@ -475,7 +482,9 @@ export class CardBuilder<
   }
 
   legend(): this {
-    return this.tags("legend").filter((c) => !c.player.legendUsed);
+    return this.unobtainable()
+      .tags("legend")
+      .filter((c) => !c.player.legendUsed);
   }
 
   /**
@@ -522,7 +531,7 @@ export class CardBuilder<
     requires: TalentRequirement = "actionSkill",
   ) {
     const equipQuery = this.prepareTalent(ch, requires);
-    return this.equipment(equipQuery).tags("talent");
+    return this.unobtainable().equipment(equipQuery).tags("talent");
   }
 
   eventTalent(
@@ -530,7 +539,7 @@ export class CardBuilder<
     requires: TalentRequirement = "action",
   ) {
     const targetQuery = this.prepareTalent(ch, requires);
-    return this.addTarget(targetQuery);
+    return this.unobtainable().addTarget(targetQuery);
   }
 
   /** 增加 food 标签；设置目标为我方非饱腹角色 */

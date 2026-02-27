@@ -26,7 +26,6 @@ const WindAndFreedom = card(331801)
  */
 const JoyousCelebration = card(330003)
   .until("v4.2.0")
-  .unobtainable()
   .costSame(1)
   .legend()
   .filter((c) => ([DiceType.Cryo, DiceType.Hydro, DiceType.Pyro, DiceType.Electro, DiceType.Dendro] as (DiceType | undefined)[]).includes(c.$("my active")?.element()))

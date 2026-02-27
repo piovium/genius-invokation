@@ -95,7 +95,6 @@ export const SedationMarkElectro = status(115156)
  */
 export const Cacucu = card(115152)
   .since("v6.1.0")
-  .unobtainable()
   .nightsoulTechnique()
   .provideSkill(1151521)
   .costVoid(2)

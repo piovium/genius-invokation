@@ -28,7 +28,6 @@ import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other";
  */
 export const ChenyuVale = card(321032)
   .since("v6.1.0")
-  .unobtainable()
   .adventureSpot()
   .on("adventure", (c) => c.getVariable("exp") >= 2)
   .usage(1, { name: "stage1", visible: false })
@@ -72,7 +71,6 @@ export const ChenyuVale = card(321032)
  */
 export const TowerOfIpsissimus = card(321033)
   .since("v6.2.0")
-  .unobtainable()
   .adventureSpot()
   .on("enter", (c, e) => !e.overridden)
   .damage(DamageType.Piercing, 1, "all my characters")
@@ -114,7 +112,6 @@ export const TideTurningSacredLord = summon(301041)
  */
 export const Tonatiuh = card(321034)
   .since("v6.3.0")
-  .unobtainable()
   .adventureSpot()
   .on("adventure")
   .convertDice(DiceType.Omni, 1)

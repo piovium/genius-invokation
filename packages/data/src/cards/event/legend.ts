@@ -26,7 +26,6 @@ import { IneffectiveWhenPlayed } from "../../commons";
  */
 export const [AncientCourtyard] = card(330001)
   .since("v3.8.0")
-  .unobtainable()
   .legend()
   .filter((c) => c.$("my character has equipment with tag (weapon) or my character has equipment with tag (artifact)"))
   .toCombatStatus(300001)
@@ -44,7 +43,6 @@ export const [AncientCourtyard] = card(330001)
  */
 export const CovenantOfRock = card(330002)
   .since("v3.8.0")
-  .unobtainable()
   .legend()
   .filter((c) => c.player.dice.length === 0)
   .generateDice("randomElement", 2)
@@ -59,7 +57,6 @@ export const CovenantOfRock = card(330002)
  */
 export const JoyousCelebration = card(330003)
   .since("v4.0.0")
-  .unobtainable()
   .legend()
   .filter((c) => ([DiceType.Cryo, DiceType.Hydro, DiceType.Pyro, DiceType.Electro, DiceType.Dendro] as (DiceType | undefined)[]).includes(c.$("my active")?.element()))
   .do((c) => {
@@ -81,7 +78,6 @@ export const JoyousCelebration = card(330003)
  */
 export const [FreshWindOfFreedom] = card(330004)
   .since("v4.1.0")
-  .unobtainable()
   .legend()
   .toCombatStatus(300002)
   .oneDuration()
@@ -102,7 +98,6 @@ export const [FreshWindOfFreedom] = card(330004)
  */
 export const InEveryHouseAStove = card(330005)
   .since("v4.2.0")
-  .unobtainable()
   .legend()
   .replaceDescription("[T]", (st) => st.roundNumber)
   .do((c) => {
@@ -155,7 +150,6 @@ export const PassingOfJudgmentInEffect = combatStatus(300003)
  */
 export const PassingOfJudgment = card(330006)
   .since("v4.3.0")
-  .unobtainable()
   .legend()
   .combatStatus(PassingOfJudgmentInEffect, "opp")
   .done();
@@ -169,7 +163,6 @@ export const PassingOfJudgment = card(330006)
  */
 export const [DayOfResistanceMomentOfShatteredDreams] = card(330007)
   .since("v4.5.0")
-  .unobtainable()
   .legend()
   .addTarget("my character")
   .toStatus(300004, "@targets.0")
@@ -189,7 +182,6 @@ export const [DayOfResistanceMomentOfShatteredDreams] = card(330007)
  */
 export const ViciousAncientBattle = card(330008)
   .since("v4.7.0")
-  .unobtainable()
   .legend()
   .do((c) => {
     c.$("opp active")?.loseEnergy(1);
@@ -220,7 +212,6 @@ export const EdictOfAbsolutionInEffect = status(300005)
  */
 export const EdictOfAbsolution = card(330009)
   .since("v5.0.0")
-  .unobtainable()
   .costSame(1)
   .legend()
   .addTarget("my characters")
@@ -313,7 +304,6 @@ export const FlamesOfWarExtension = extension(300006, {
  */
 export const PilgrimageOfTheReturnOfTheSacredFlame = card(330010)
   .since("v5.3.0")
-  .unobtainable()
   .legend()
   .do((c) => {
     const myExistsFlame = c.$(`my support with definition id ${FlamesOfWar}`);
@@ -350,7 +340,6 @@ export const PilgrimageOfTheReturnOfTheSacredFlame = card(330010)
  */
 export const FightForDeath = card(330011)
   .since("v5.7.0")
-  .unobtainable()
   .costSame(1)
   .legend()
   .drawCards(1)
@@ -374,7 +363,6 @@ export const FightForDeath = card(330011)
  */
 export const LostLegaciesInTheSand = card(330012)
   .since("v6.2.0")
-  .unobtainable()
   .legend()
   .selectAndPlay([DisperseTheCalamity, SanctifyTheDefiled])
   .done();

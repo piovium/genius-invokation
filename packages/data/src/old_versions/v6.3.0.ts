@@ -166,7 +166,6 @@ const PassingOfJudgmentInEffect = combatStatus(300003)
  */
 const PassingOfJudgment = card(330006)
   .until("v6.3.0")
-  .unobtainable()
   .costSame(1)
   .legend()
   .combatStatus(PassingOfJudgmentInEffect, "opp")

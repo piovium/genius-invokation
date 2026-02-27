@@ -286,7 +286,6 @@ export const AzhdahaElectro = character(6604)
  */
 export const LunarCyclesUnending = card(226022)
   .since("v4.3.0")
-  .unobtainable()
   .costSame(2)
   .eventTalent([Azhdaha, AzhdahaCryo, AzhdahaHydro, AzhdahaPyro, AzhdahaElectro])
   .characterStatus(StoneFacetsElementalCrystallization, "@targets.0")

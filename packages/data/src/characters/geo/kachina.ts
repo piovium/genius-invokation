@@ -69,7 +69,6 @@ export const NightsoulsBlessing = status(116104)
  */
 export const TurboTwirly = card(116102)
   .since("v5.5.0")
-  .unobtainable()
   .nightsoulTechnique()
   .on("switchActive", (c, e) => e.switchInfo.from?.id === c.self.master.id)
   .consumeNightsoul("@master")
