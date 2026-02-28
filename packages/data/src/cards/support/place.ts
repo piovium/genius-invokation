@@ -368,10 +368,11 @@ export const FortressOfMeropide = card(321018)
   .on("damagedOrHealed", (c, e) => e.target.isActive())
   .do((c) => {
     c.addVariableWithMax("forbidden", 1, 5);
-    if (c.getVariable("forbidden") >= 5) {
+    if (c.getVariable("forbidden") >= 5 && c.oppPlayer.hands.length > 0) {
       c.addVariable("forbidden", -5);
-      if (c.oppPlayer.hands.length > 0) {
-        const target = c.random(c.oppPlayer.hands);
+      const candidates = c.oppPlayer.hands.filter((card) => !card.withIneffective());
+      const target = c.random(candidates);
+      if (target) {
         c.attach(IneffectiveWhenPlayed, target);
       }
     }
