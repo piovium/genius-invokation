@@ -79,7 +79,7 @@ class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
   }
   withIneffective() {
     // IneffectiveWhenPlayed: 208
-    return this.state.attachments.some((att => att.definition.id === 207));
+    return this.state.attachments.some((att => att.definition.id === 208));
   }
 
   get master() {
