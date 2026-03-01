@@ -396,7 +396,7 @@ export function setup(state: JSX.Element): TestController {
               ([name, { initialValue }]) => [name, initialValue]
             )
           ),
-          attachments: attachments as unknown as AttachmentState[],
+          attachments: attachments as AttachmentState[],
         };
         const area = pile ? "pile" : "hands";
         player[area].push(state as Draft<EntityState>);
