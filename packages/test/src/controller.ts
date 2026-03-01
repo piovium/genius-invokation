@@ -168,7 +168,7 @@ class IoController {
       const action = actions[chosenActionIndex];
       const usedDice = this.generateCost(
         action.requiredCost.reduce(
-          (a, { type, count }) => (a + type === DiceType.Energy ? 0 : count),
+          (a, { type, count }) => a + (type === DiceType.Energy ? 0 : count),
           0,
         ),
       );
@@ -228,7 +228,7 @@ class IoController {
       const action = actions[chosenActionIndex];
       const usedDice = this.generateCost(
         action.requiredCost.reduce(
-          (a, { type, count }) => (a + type === DiceType.Energy ? 0 : count),
+          (a, { type, count }) => a + (type === DiceType.Energy ? 0 : count),
           0,
         ),
       );
