@@ -812,8 +812,12 @@ export function applyAttachmentModifications(
     }
   }
   if (changedCostType !== null) {
-    const totalSize = costSize(costs);
-    costs = new Map([[changedCostType, totalSize]]);
+    const diceSize = diceCostSize(costs);
+    const energyCost = costs.get(DiceType.Energy) ?? 0;
+    costs = new Map([[changedCostType, diceSize]]);
+    if (energyCost > 0) {
+      costs.set(DiceType.Energy, energyCost);
+    }
   }
   return {
     requiredCost: normalizeCost(costs),

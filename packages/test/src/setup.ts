@@ -23,6 +23,7 @@ import {
   PlayerState,
   CharacterState,
   EntityState,
+  AttachmentState,
   Version,
   CharacterVariables,
   ExtensionState,
@@ -33,6 +34,7 @@ import {
 } from "@gi-tcg/core";
 import {
   Aura,
+  AttachmentHandle,
   CardHandle,
   CharacterHandle,
   CombatStatusHandle,
@@ -140,10 +142,20 @@ export namespace Card {
     pile?: boolean;
     /** 并非来自初始牌堆 */
     notInitial?: boolean;
+    children?: JSX.Element[] | JSX.Element;
   }
 }
 export function Card(props: Card.Prop): JSX.Element {
   return { comp: Card, prop: props };
+}
+
+export namespace Attachment {
+  export interface Prop {
+    def: AttachmentHandle;
+  }
+}
+export function Attachment(props: Attachment.Prop): JSX.Element {
+  return { comp: Attachment, prop: props };
 }
 
 export namespace DeclaredEnd {
@@ -342,7 +354,7 @@ export function setup(state: JSX.Element): TestController {
         break;
       }
       case Card: {
-        const { ref, def, pile, notInitial } = prop as OmitProp<Card.Prop>;
+        const { ref, def, pile, notInitial, children } = prop as OmitProp<Card.Prop>;
         const id = ref?.id ?? nextId();
         if (!def) {
           throw new Error(
@@ -353,6 +365,28 @@ export function setup(state: JSX.Element): TestController {
         if (!definition) {
           throw new Error(`Card ${def} not found`);
         }
+        const attachments: Draft<AttachmentState>[] = [];
+        for (const child of childrenToArray(children)) {
+          if (!([Attachment] as Function[]).includes(child.comp)) {
+            throw new Error(`Card can only have Attachment children`);
+          }
+          const { def: attachDef } = child.prop as Attachment.Prop;
+          const attachDefinition = data.attachments.get(attachDef);
+          if (!attachDefinition) {
+            throw new Error(`Attachment ${attachDef} not found`);
+          }
+          const attachState: AttachmentState = {
+            [StateSymbol]: "attachment",
+            id: nextId(),
+            definition: attachDefinition,
+            variables: Object.fromEntries(
+              Object.entries(attachDefinition.varConfigs).map(
+                ([name, { initialValue }]) => [name, initialValue]
+              )
+            ),
+          };
+          attachments.push(attachState as Draft<AttachmentState>);
+        }
         const state: EntityState = {
           [StateSymbol]: "entity",
           id,
@@ -362,8 +396,7 @@ export function setup(state: JSX.Element): TestController {
               ([name, { initialValue }]) => [name, initialValue]
             )
           ),
-          // TODO attachments
-          attachments: [],
+          attachments: attachments as AttachmentState[],
         };
         const area = pile ? "pile" : "hands";
         player[area].push(state as Draft<EntityState>);

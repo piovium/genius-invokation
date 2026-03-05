@@ -27,6 +27,7 @@ export {
   type IRegistrationScope,
 } from "./registry";
 export type {
+  AttachmentHandle,
   CardHandle,
   CharacterHandle,
   CombatStatusHandle,
