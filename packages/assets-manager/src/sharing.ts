@@ -28,6 +28,7 @@ const BLOCK_WORDS = [
   /hjt/i,
   /j8/i,
   /jba/i,
+  /jiz/i,
   /jzm/i,
   /ntr/i,
   /pcp/i, // might be removed
