@@ -33,6 +33,7 @@ const BLOCK_WORDS = [
   /ntr/i,
   /pcp/i, // might be removed
   /rbq/i,
+  /uki/i,
   /xjp/i,
 ];
 
