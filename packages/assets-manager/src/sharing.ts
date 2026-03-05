@@ -32,8 +32,8 @@ const BLOCK_WORDS = [
   /jzm/i,
   /ntr/i,
   /pcp/i, // might be removed
+  /puki/i,
   /rbq/i,
-  /uki/i,
   /xjp/i,
 ];
 
