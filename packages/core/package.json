@@ -22,7 +22,7 @@
   "scripts": {
     "check": "tsc --noEmit",
     "test": "bun test",
-    "build:ohm": "ohm generateBundles -et src/query/query.ohm",
+    "build:ohm": "ohm generateBundles -et src/query-legacy/query.ohm",
     "build": "bun build:ohm && tsup"
   },
   "dependencies": {
@@ -34,6 +34,7 @@
   "devDependencies": {
     "@gi-tcg/config": "workspace:*",
     "@ohm-js/cli": "^2.0.0",
-    "prettier": "3.1.1"
+    "prettier": "3.1.1",
+    "tsd": "^0.33.0"
   }
 }

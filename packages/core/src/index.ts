@@ -36,7 +36,7 @@ export {
   resolveOfficialVersion,
   resolveManuallySelectedOfficialVersion,
 } from "./base/version";
-export { executeQueryOnState } from "./query";
+export { executeQueryOnState } from "./query-legacy";
 export {
   type PlayerIO,
   type CancellablePlayerIO,

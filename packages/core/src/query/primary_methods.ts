@@ -1,0 +1,431 @@
+import type { CharacterTag, EntityTag, EntityType } from "..";
+import type { AttachmentTag } from "../base/attachment";
+import type {
+  AttachmentHandle,
+  CardHandle,
+  CharacterHandle,
+  EquipmentHandle,
+  ExEntityType,
+  HandleT,
+  StatusHandle,
+  SummonHandle,
+  SupportHandle,
+} from "../builder/type";
+import type { PrimaryMethodsInternal, PrimaryQuery } from "./primary_query";
+import {
+  type AttachmentReq,
+  type CardReq,
+  type CharacterReq,
+  type Computed,
+  type Constructor,
+  type EntityOnCharacterReq,
+  type HeterogeneousMetaBase,
+  type InferResult,
+  type IQuery,
+  type IsExtends,
+  type MetaBase,
+  type AllPropsNotStrictlySuperTypeOf,
+  type RelatedToReq,
+  type StaticAssert,
+  type StrictlySuperTypeOf,
+  type TypingInfoFromMeta,
+  type AnyTuple,
+  toExpression,
+} from "./utils";
+
+type EventCardHandle = number & { readonly _eventCard: unique symbol };
+
+type PositionPatch<T extends MetaBase["position"]> = {
+  type: "character";
+  areaType: "characters";
+  position: T;
+};
+
+type DefPatch<T extends HandleT<ExEntityType>> = (T extends EquipmentHandle
+  ? {
+      type: "equipment";
+      areaType: "characters" | "hands" | "pile";
+    }
+  : T extends SupportHandle
+    ? {
+        type: "support";
+        areaType: "supports" | "hands" | "pile";
+      }
+    : T extends StatusHandle
+      ? {
+          type: "status";
+          areaType: "characters";
+        }
+      : T extends SummonHandle
+        ? {
+            type: "summon";
+            areaType: "summons";
+          }
+        : T extends CharacterHandle
+          ? {
+              type: "character";
+              areaType: "characters";
+            }
+          : T extends AttachmentHandle
+            ? {
+                type: "attachment";
+                areaType: "hands" | "pile";
+              }
+            : T extends EventCardHandle
+              ? {
+                  type: "eventCard";
+                  areaType: "hands" | "pile";
+                }
+              : {}) & {
+  definition: T & { readonly _defSpecified: unique symbol };
+};
+
+type HandsOrPileEntityType =
+  | "eventCard"
+  | "equipment"
+  | "support"
+  | "attachment";
+
+type TagOfImpl<Ty extends ExEntityType> = Ty extends EntityType
+  ? EntityTag
+  : Ty extends "character"
+    ? CharacterTag
+    : Ty extends "attachment"
+      ? AttachmentTag
+      : never;
+
+type TagOf<Meta extends HeterogeneousMetaBase> = {
+  [K in Meta["type"]]: TagOfImpl<K>;
+}[Meta["type"]];
+
+type Assign<
+  T extends HeterogeneousMetaBase,
+  Patch extends Partial<HeterogeneousMetaBase> = {},
+  NewHyperType extends MetaBase["hyperType"] = T["hyperType"],
+  NewHyperAreaType extends MetaBase["hyperAreaType"] = T["hyperAreaType"],
+> = PrimaryQuery<
+  Computed<
+    Omit<T, `hyper${string}`> &
+      Patch & {
+        hyperType: NewHyperType;
+        hyperAreaType: NewHyperAreaType;
+      },
+    HeterogeneousMetaBase
+  >
+>;
+
+export { type Assign as AssignedPrimaryQuery };
+
+type AssignVar<T extends HeterogeneousMetaBase, Name extends string> = Assign<
+  T,
+  { variables: { [K in Name]: 0 } }
+>;
+
+type RelationOp = "<" | "<=" | "=" | ">=" | ">" | "!=";
+
+// Make CodeQL happy
+const charMap: Record<string, string> = {
+  "<": "\\u003C",
+  ">": "\\u003E",
+  "/": "\\u002F",
+  "\\": "\\\\",
+  "\b": "\\b",
+  "\f": "\\f",
+  "\n": "\\n",
+  "\r": "\\r",
+  "\t": "\\t",
+  "\0": "\\0",
+  "\u2028": "\\u2028",
+  "\u2029": "\\u2029",
+};
+function escapeUnsafeChars(str: string) {
+  return str.replace(/[<>\b\f\n\r\t\0\u2028\u2029]/g, (x) => charMap[x]);
+}
+
+class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
+  private get _self(): any {
+    return this;
+  }
+  private declare _internal: PrimaryMethodsInternal;
+  // who
+  get my(): Assign<Meta, { who: "my" }> {
+    this._internal.addConstraint(["who", "my"]);
+    return this._self;
+  }
+  get opp(): Assign<Meta, { who: "opp" }> {
+    this._internal.addConstraint(["who", "opp"]);
+    return this._self;
+  }
+  // type/area
+  get character(): Assign<
+    Meta,
+    { type: "character"; areaType: "characters" },
+    "character",
+    "onStage"
+  > {
+    this._internal.addConstraint(["type", "character"]);
+    return this._self;
+  }
+  get equipment(): Assign<
+    Meta,
+    { type: "equipment"; areaType: "characters" },
+    "entity"
+  > {
+    this._internal.addConstraint(["type", "equipment"]);
+    return this._self;
+  }
+  get status(): Assign<
+    Meta,
+    { type: "status"; areaType: "characters" },
+    "entity",
+    "onStage"
+  > {
+    this._internal.addConstraint(["type", "status"]);
+    return this._self;
+  }
+  get combatStatus(): Assign<
+    Meta,
+    { type: "combatStatus"; areaType: "combatStatuses" },
+    "entity",
+    "onStage"
+  > {
+    this._internal.addConstraint(["type", "combatStatus"]);
+    return this._self;
+  }
+  get summon(): Assign<
+    Meta,
+    { type: "summon"; areaType: "summons" },
+    "entity",
+    "onStage"
+  > {
+    this._internal.addConstraint(["type", "summon"]);
+    return this._self;
+  }
+  get support(): Assign<
+    Meta,
+    { type: "support"; areaType: "supports" },
+    "entity"
+  > {
+    this._internal.addConstraint(["type", "support"]);
+    return this._self;
+  }
+  get eventCard(): Assign<
+    Meta,
+    { type: "eventCard"; areaType: "hands" | "pile" },
+    "entity",
+    "offStage"
+  > {
+    this._internal.addConstraint(["type", "eventCard"]);
+    return this._self;
+  }
+  get attachment(): Assign<
+    Meta,
+    { type: "attachment"; areaType: "hands" | "pile" },
+    "attachment",
+    "offStage"
+  > {
+    this._internal.addConstraint(["type", "attachment"]);
+    return this._self;
+  }
+  get hand(): Assign<
+    Meta,
+    { type: HandsOrPileEntityType; areaType: "hands" },
+    Meta["hyperType"],
+    "offStage"
+  > {
+    this._internal.addConstraint(["area", "hands"]);
+    return this._self;
+  }
+  get pile(): Assign<
+    Meta,
+    { type: HandsOrPileEntityType; areaType: "pile" },
+    Meta["hyperType"],
+    "offStage"
+  > {
+    this._internal.addConstraint(["area", "pile"]);
+    return this._self;
+  }
+  // position
+  get active(): Assign<Meta, PositionPatch<"active">, "character", "onStage"> {
+    this._internal.addConstraint(["position", "active"]);
+    return this._self;
+  }
+  get prev(): Assign<Meta, PositionPatch<"prev">, "character", "onStage"> {
+    this._internal.addConstraint(["position", "prev"]);
+    return this._self;
+  }
+  get next(): Assign<Meta, PositionPatch<"next">, "character", "onStage"> {
+    this._internal.addConstraint(["position", "next"]);
+    return this._self;
+  }
+  get standby(): Assign<
+    Meta,
+    PositionPatch<"standby">,
+    "character",
+    "onStage"
+  > {
+    this._internal.addConstraint(["position", "standby"]);
+    return this._self;
+  }
+  // defeated
+  get onlyDefeated(): Assign<
+    Meta,
+    { type: "character"; areaType: "characters"; defeated: "only" },
+    "character",
+    "onStage"
+  > {
+    this._internal.setDefeatedConstraint("defeatedOnly");
+    return this._self;
+  }
+  get includesDefeated(): Assign<
+    Meta,
+    { type: "character"; areaType: "characters"; defeated: "includes" },
+    "character",
+    "onStage"
+  > {
+    this._internal.setDefeatedConstraint("all");
+    return this._self;
+  }
+  // with
+  var<const Name extends string>(
+    name: Name,
+    value: number,
+  ): AssignVar<Meta, Name>;
+  var<const Name extends string>(
+    name: Name,
+    op: RelationOp,
+    value: number,
+  ): AssignVar<Meta, Name>;
+  var<const Name extends string>(
+    name: Name,
+    pred: (value: number) => unknown,
+  ): AssignVar<Meta, Name>;
+  var<const Name extends string>(
+    pred: (values: Record<string, number>) => unknown,
+  ): AssignVar<Meta, Name>;
+  var(
+    ...args:
+      | [string, number]
+      | [string, RelationOp, number]
+      | [string, (value: number) => unknown]
+      | [(values: Record<string, number>) => unknown]
+  ): any {
+    if (typeof args[0] === "string") {
+      const [name, opOrValue, valueOrUndefined] = args;
+      if (typeof opOrValue === "number") {
+        this._internal.addConstraint([
+          "variables",
+          ["expr", ["=", name, opOrValue]],
+        ]);
+      } else if (typeof opOrValue === "string") {
+        this._internal.addConstraint([
+          "variables",
+          ["expr", [opOrValue, name, valueOrUndefined]],
+        ]);
+      } else if (typeof opOrValue === "function") {
+        const fnSource = opOrValue.toString();
+        const prop = escapeUnsafeChars(JSON.stringify(name));
+        const wrappedSource = `(v) => (${fnSource})(v[${prop}])`;
+        this._internal.addConstraint(["variables", ["fn", wrappedSource]]);
+      } else {
+        const _exhaustiveCheck: never = opOrValue!;
+        throw new Error("Invalid arguments");
+      }
+    } else {
+      const [pred] = args;
+      const fnSource = pred.toString();
+      this._internal.addConstraint(["variables", ["fn", fnSource]]);
+    }
+    return this._self;
+  }
+  id<const Id extends number>(
+    id: Id,
+  ): Assign<Meta, { id: Id & { readonly _idSpecified: unique symbol } }> {
+    this._internal.addConstraint(["id", id]);
+    return this._self;
+  }
+  def<T extends HandleT<Meta["type"]>>(id: T): Assign<Meta, DefPatch<T>>;
+  def<T extends number>(id: number extends T ? number : never): Meta;
+  def(id: number): unknown {
+    this._internal.addConstraint(["definition", id]);
+    return this._self;
+  }
+  tag(...tags: TagOf<Meta>[]): Assign<Meta> {
+    this._internal.addConstraint(
+      ...tags.map((tag) => ["tag" as const, tag] satisfies AnyTuple),
+    );
+    return this._self;
+  }
+  tagOf<T extends IQuery>(
+    type: "weapon" | "element",
+    query: RelatedToReq<InferResult<T>, CharacterReq> extends true ? T : never,
+  ): Assign<Meta> {
+    this._internal.addConstraint(["tagOf", type, query[toExpression]()]);
+    return this._self;
+  }
+}
+
+type PrimaryMethodRestrictionConfig = {
+  my: { who: "my" };
+  opp: { who: "opp" };
+  character: { type: "character"; areaType: "characters" };
+  equipment: { type: "equipment"; areaType: "characters" | "hands" | "pile" };
+  status: { type: "status"; areaType: "characters" };
+  combatStatus: { type: "combatStatus"; areaType: "combatStatuses" };
+  summon: { type: "summon"; areaType: "summons" };
+  support: { type: "support"; areaType: "supports" | "hands" | "pile" };
+  eventCard: { type: "eventCard"; areaType: "hands" | "pile" };
+  active: { type: "character"; position: "active" };
+  prev: { type: "character"; position: "prev" };
+  next: { type: "character"; position: "next" };
+  standby: { type: "character"; position: "standby" };
+  onlyDefeated: { type: "character"; defeated: "only" };
+  includesDefeated: { type: "character"; defeated: "includes" };
+};
+
+type _Check = StaticAssert<
+  IsExtends<
+    PrimaryMethodRestrictionConfig,
+    {
+      [K in keyof PrimaryMethodRestrictionConfig]: Partial<HeterogeneousMetaBase>;
+    }
+  >
+>;
+
+type PrimaryMethodsOmit<Meta extends HeterogeneousMetaBase> = {
+  [K in PrimaryMethodNames]: K extends keyof PrimaryMethodRestrictionConfig
+    ? AllPropsNotStrictlySuperTypeOf<
+        Meta,
+        PrimaryMethodRestrictionConfig[K]
+      > extends true
+      ? K
+      : never
+    : K extends "id"
+      ? StrictlySuperTypeOf<number, Meta["id"]> extends true
+        ? K
+        : never
+      : K extends "def"
+        ? StrictlySuperTypeOf<number, Meta["definition"]> extends true
+          ? K
+          : never
+        : never;
+}[PrimaryMethodNames];
+
+export const PrimaryMethods = PrimaryMethodsImpl as Constructor<
+  PrimaryMethods<any>
+>;
+export type PrimaryMethods<Meta extends HeterogeneousMetaBase> = Omit<
+  PrimaryMethodsImpl<Meta>,
+  PrimaryMethodsOmit<Meta>
+>;
+
+export type PrimaryMethodNames = keyof PrimaryMethodsImpl<any> & {};
+
+export const PRIMARY_METHODS = Object.getOwnPropertyDescriptors(
+  PrimaryMethodsImpl.prototype,
+) as {
+  [K in PrimaryMethodNames]: PropertyDescriptor;
+} & {
+  ["constructor"]?: PropertyDescriptor;
+};
+delete PRIMARY_METHODS.constructor;

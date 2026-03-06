@@ -14,9 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { test, expect } from "bun:test";
-import { shuffle, sortDice } from "../utils";
+import { shuffle, sortDice } from "../src/utils";
 import { DiceType } from "@gi-tcg/typings";
-import { StateSymbol, type PlayerState } from "../base/state";
+import { StateSymbol, type PlayerState } from "../src/base/state";
 
 test("sort dice", () => {
   const dice = [

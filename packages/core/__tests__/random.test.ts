@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { test, expect } from "bun:test";
-import { nextRandom, randomSeed } from "../random";
+import { nextRandom, randomSeed } from "../src/random";
 
 test("random seed", () => {
   const x = randomSeed();

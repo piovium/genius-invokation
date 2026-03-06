@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { test, expect } from "bun:test";
-import { DetailLogType, DetailLogger } from "../log";
+import { DetailLogType, DetailLogger } from "../src/log";
 
 test("detail logger", () => {
   const logger = new DetailLogger();

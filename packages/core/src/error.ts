@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { GameState } from "./base/state";
-import type { QueryArgs } from "./query/semantic";
+import type { QueryArgs } from "./query-legacy/semantic";
 
 export abstract class GiTcgError extends Error {}
 

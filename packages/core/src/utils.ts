@@ -969,6 +969,12 @@ type MixinResult<
   ...args: ConstructorParameters<T>
 ) => InstanceType<T> & InstanceOfConstructors<Us>;
 
+/**
+ * Construct a mixin class from `derivedCtor`, then attach all methods from `constructors` to it.
+ * @param derivedCtor The base class to extend from.
+ * @param constructors Other class methods to attached from. These class's constructor **WON'T** be executed, including `[[define]]` of the class field's initializer.
+ * @returns 
+ */
 export function mixins<
   T extends Constructor,
   const Us extends AbstractConstructor[],

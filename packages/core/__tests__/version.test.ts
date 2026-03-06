@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
-import { resolveOfficialVersion, type WithVersionInfo } from "../base/version";
-import "../utils";
+import { resolveOfficialVersion, type WithVersionInfo } from "../src/base/version";
+import "../src/utils";
 
 test("find version", () => {
   const versions: (WithVersionInfo & { id: number })[] = [
