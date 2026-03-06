@@ -163,6 +163,8 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     "character",
     "onStage"
   > {
+    this._internal.setHyperType("character");
+    this._internal.setHyperAreaType("onStage");
     this._internal.addConstraint(["type", "character"]);
     return this._self;
   }
@@ -171,6 +173,7 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     { type: "equipment"; areaType: "characters" },
     "entity"
   > {
+    this._internal.setHyperType("entity");
     this._internal.addConstraint(["type", "equipment"]);
     return this._self;
   }
@@ -180,6 +183,8 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     "entity",
     "onStage"
   > {
+    this._internal.setHyperType("entity");
+    this._internal.setHyperAreaType("onStage");
     this._internal.addConstraint(["type", "status"]);
     return this._self;
   }
@@ -189,6 +194,8 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     "entity",
     "onStage"
   > {
+    this._internal.setHyperType("entity");
+    this._internal.setHyperAreaType("onStage");
     this._internal.addConstraint(["type", "combatStatus"]);
     return this._self;
   }
@@ -198,6 +205,8 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     "entity",
     "onStage"
   > {
+    this._internal.setHyperType("entity");
+    this._internal.setHyperAreaType("onStage");
     this._internal.addConstraint(["type", "summon"]);
     return this._self;
   }
@@ -206,6 +215,7 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     { type: "support"; areaType: "supports" },
     "entity"
   > {
+    this._internal.setHyperType("entity");
     this._internal.addConstraint(["type", "support"]);
     return this._self;
   }
@@ -215,6 +225,8 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     "entity",
     "offStage"
   > {
+    this._internal.setHyperType("entity");
+    this._internal.setHyperAreaType("offStage");
     this._internal.addConstraint(["type", "eventCard"]);
     return this._self;
   }
@@ -224,6 +236,8 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     "attachment",
     "offStage"
   > {
+    this._internal.setHyperType("attachment");
+    this._internal.setHyperAreaType("offStage");
     this._internal.addConstraint(["type", "attachment"]);
     return this._self;
   }
@@ -233,6 +247,7 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     Meta["hyperType"],
     "offStage"
   > {
+    this._internal.setHyperAreaType("offStage");
     this._internal.addConstraint(["area", "hands"]);
     return this._self;
   }
@@ -242,19 +257,26 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     Meta["hyperType"],
     "offStage"
   > {
+    this._internal.setHyperAreaType("offStage");
     this._internal.addConstraint(["area", "pile"]);
     return this._self;
   }
   // position
   get active(): Assign<Meta, PositionPatch<"active">, "character", "onStage"> {
+    this._internal.setHyperType("character");
+    this._internal.setHyperAreaType("onStage");
     this._internal.addConstraint(["position", "active"]);
     return this._self;
   }
   get prev(): Assign<Meta, PositionPatch<"prev">, "character", "onStage"> {
+    this._internal.setHyperType("character");
+    this._internal.setHyperAreaType("onStage");
     this._internal.addConstraint(["position", "prev"]);
     return this._self;
   }
   get next(): Assign<Meta, PositionPatch<"next">, "character", "onStage"> {
+    this._internal.setHyperType("character");
+    this._internal.setHyperAreaType("onStage");
     this._internal.addConstraint(["position", "next"]);
     return this._self;
   }
@@ -264,6 +286,8 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     "character",
     "onStage"
   > {
+    this._internal.setHyperType("character");
+    this._internal.setHyperAreaType("onStage");
     this._internal.addConstraint(["position", "standby"]);
     return this._self;
   }
@@ -274,6 +298,8 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     "character",
     "onStage"
   > {
+    this._internal.setHyperType("character");
+    this._internal.setHyperAreaType("onStage");
     this._internal.setDefeatedConstraint("defeatedOnly");
     return this._self;
   }
@@ -283,6 +309,8 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     "character",
     "onStage"
   > {
+    this._internal.setHyperType("character");
+    this._internal.setHyperAreaType("onStage");
     this._internal.setDefeatedConstraint("all");
     return this._self;
   }
