@@ -154,22 +154,8 @@ export type HeterogeneousMetaBase = MetaBase & {
   returns: "identical" | TypingInfoBase;
 };
 export interface MetaBase {
-  /**
-   * An implicit context for current `type`.
-   * The `$` will implicitly have hyperType: "entity", and subsequent methods
-   * can effectively rewrite it to "character" or "attachment".
-   */
-  hyperType: "character" | "entity" | "attachment";
   type: ExEntityType;
-
-  /**
-   * An implicit context for current `areaType`.
-   * The `$` will implicitly have hyperType: "onStage", and subsequent methods
-   * can effectively rewrite it to "offStage".
-   */
-  hyperAreaType: "onStage" | "offStage";
   areaType: EntityAreaType;
-
   who: "my" | "opp";
   definition: number;
   position: "active" | "prev" | "next" | "standby";
@@ -178,21 +164,9 @@ export interface MetaBase {
   variables: {};
 }
 
-
-type AllowedTypeOfHyperType = {
-  character: "character";
-  entity: EntityType;
-  attachment: "attachment";
-};
-
-type AllowedAreaOfHyperArea = {
-  onStage: "characters" | "combatStatuses" | "summons" | "supports";
-  offStage: "hands" | "pile";
-};
-
 export type TypingInfoFromMeta<M extends MetaBase> = {
-  type: Extract<M["type"], AllowedTypeOfHyperType[M["hyperType"]]>;
-  areaType: Extract<M["areaType"], AllowedAreaOfHyperArea[M["hyperAreaType"]]>;
+  type: M["type"];
+  areaType: M["areaType"];
   variables: Extract<keyof M["variables"], string>;
 };
 
@@ -208,33 +182,23 @@ export type ReturnOfMeta<M extends MetaBase> = Computed<
 >;
 
 export type CharacterReq = {
-  hyperType: "character";
-  hyperAreaType: "onStage";
   type: "character";
   areaType: "characters";
 };
 export type EntityOnCharacterReq = {
-  hyperType: "entity";
-  hyperAreaType: "onStage";
   type: "status" | "equipment";
   areaType: "characters";
 };
 export type CardReq = {
-  hyperType: "entity";
-  hyperAreaType: "offStage";
   type: "eventCard" | "equipment" | "support";
   areaType: "hands" | "pile";
 };
 export type AttachmentReq = {
-  hyperType: "attachment";
-  hyperAreaType: "offStage";
   type: "attachment";
   areaType: "hands" | "pile";
 };
 
 type ReqBase = {
-  hyperType: MetaBase["hyperType"];
-  hyperAreaType: MetaBase["hyperAreaType"];
   type: MetaBase["type"];
   areaType: MetaBase["areaType"];
 };

@@ -44,15 +44,13 @@ type AllRelationMethods<Meta extends HeterogeneousMetaBase> = {
       : never,
   ) => AssignedPrimaryQuery<
     Meta,
-    RelationMethodMetas[K]["subject"],
-    RelationMethodMetas[K]["subject"]["hyperType"],
-    RelationMethodMetas[K]["subject"]["hyperAreaType"]
+    RelationMethodMetas[K]["subject"]
   >;
 };
 
 type RelationMethodsOmit<Meta extends HeterogeneousMetaBase> = {
   [K in RelationMethodNames]: RelatedToReq<
-    TypingInfoFromMeta<Meta & { hyperType: unknown; hyperAreaType: unknown }>,
+    TypingInfoFromMeta<Meta>,
     RelationMethodMetas[K]["subject"]
   > extends true
     ? never

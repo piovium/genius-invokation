@@ -17,19 +17,8 @@ import {
 type DefeatedKeyword = "defeatedOnly" | "noDefeated" | "all";
 
 export class PrimaryMethodsInternal {
-  private _hyperType: HeterogeneousMetaBase["hyperType"] | null = null;
-  private _hyperAreaType: HeterogeneousMetaBase["hyperAreaType"] | null = null;
   private _constraints: SExprSchema.UnorderedQuery[] = [];
   private _defeatedKeyword: DefeatedKeyword = "noDefeated";
-
-  setHyperType(hyperType: HeterogeneousMetaBase["hyperType"] | null): void {
-    this._hyperType = hyperType;
-  }
-  setHyperAreaType(
-    hyperAreaType: HeterogeneousMetaBase["hyperAreaType"] | null,
-  ): void {
-    this._hyperAreaType = hyperAreaType;
-  }
 
   setDefeatedConstraint(kw: "defeatedOnly" | "all"): void {
     this._defeatedKeyword = kw;
@@ -39,14 +28,6 @@ export class PrimaryMethodsInternal {
   }
   [toExpression](): SExprSchema.CompositeQuery {
     const finalConstraints: SExprSchema.UnorderedQuery[] = [];
-    if (this._hyperType) {
-      finalConstraints.push(["is", this._hyperType]);
-    }
-    if (this._hyperAreaType === "onStage") {
-      finalConstraints.push(["onStage"]);
-    } else if (this._hyperAreaType === "offStage") {
-      finalConstraints.push(["offStage"]);
-    }
     if (this._defeatedKeyword === "defeatedOnly") {
       finalConstraints.push(["defeated", "only"]);
     } else if (this._defeatedKeyword === "noDefeated") {
@@ -58,8 +39,6 @@ export class PrimaryMethodsInternal {
 
 export interface PrimaryQueryInitOptions {
   leadingUnaryOp?: UnaryOperator | null;
-  hyperType?: HeterogeneousMetaBase["hyperType"] | null;
-  hyperAreaType?: HeterogeneousMetaBase["hyperAreaType"] | null;
 }
 
 class PrimaryQueryImpl<Meta extends HeterogeneousMetaBase>
@@ -72,8 +51,6 @@ class PrimaryQueryImpl<Meta extends HeterogeneousMetaBase>
   constructor(options: PrimaryQueryInitOptions) {
     this._internal = new PrimaryMethodsInternal();
     this._leadingUnaryOp = options.leadingUnaryOp ?? null;
-    this._internal.setHyperType(options.hyperType ?? null);
-    this._internal.setHyperAreaType(options.hyperAreaType ?? null);
   }
 
   [toExpression](): Expression {

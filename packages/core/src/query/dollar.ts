@@ -54,8 +54,6 @@ class Dollar {
           get() {
             return createPrimaryQuery({
               leadingUnaryOp: null,
-              hyperType: "entity",
-              hyperAreaType: "onStage",
             })[method];
           },
         });
@@ -65,8 +63,6 @@ class Dollar {
             return (
               createPrimaryQuery({
                 leadingUnaryOp: null,
-                hyperType: "entity",
-                hyperAreaType: "onStage",
               })[method] as (...args: unknown[]) => unknown
             )(...args);
           },
@@ -79,14 +75,10 @@ class Dollar {
         const callingForm = (q: IQuery) => {
           return createPrimaryQuery({
             leadingUnaryOp: name,
-            hyperType: "entity",
-            hyperAreaType: "onStage",
           });
         };
         const returns = createPrimaryQuery({
           leadingUnaryOp: name,
-          hyperType: "entity",
-          hyperAreaType: "onStage",
         });
         Object.setPrototypeOf(callingForm, returns);
         return callingForm;
@@ -101,8 +93,6 @@ class Dollar {
   get any(): PrimaryQuery<AnyMeta> {
     return createPrimaryQuery<AnyMeta>({
       leadingUnaryOp: null,
-      hyperType: null,
-      hyperAreaType: null,
     });
   }
 
@@ -120,9 +110,7 @@ class Dollar {
 }
 
 type InitialPrimaryMeta = Computed<
-  Omit<MetaBase, `hyper${string}`> & {
-    hyperType: "entity";
-    hyperAreaType: "onStage";
+  MetaBase & {
     returns: "identical";
   },
   MetaBase

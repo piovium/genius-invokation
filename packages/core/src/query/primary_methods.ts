@@ -101,18 +101,7 @@ type TagOf<Meta extends HeterogeneousMetaBase> = {
 type Assign<
   T extends HeterogeneousMetaBase,
   Patch extends Partial<HeterogeneousMetaBase> = {},
-  NewHyperType extends MetaBase["hyperType"] = T["hyperType"],
-  NewHyperAreaType extends MetaBase["hyperAreaType"] = T["hyperAreaType"],
-> = PrimaryQuery<
-  Computed<
-    Omit<T, `hyper${string}`> &
-      Patch & {
-        hyperType: NewHyperType;
-        hyperAreaType: NewHyperAreaType;
-      },
-    HeterogeneousMetaBase
-  >
->;
+> = PrimaryQuery<Computed<T & Patch, HeterogeneousMetaBase>>;
 
 export { type Assign as AssignedPrimaryQuery };
 
@@ -159,158 +148,106 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
   // type/area
   get character(): Assign<
     Meta,
-    { type: "character"; areaType: "characters" },
-    "character",
-    "onStage"
+    { type: "character"; areaType: "characters" }
   > {
-    this._internal.setHyperType("character");
-    this._internal.setHyperAreaType("onStage");
     this._internal.addConstraint(["type", "character"]);
     return this._self;
   }
   get equipment(): Assign<
     Meta,
-    { type: "equipment"; areaType: "characters" },
-    "entity"
+    { type: "equipment"; areaType: "characters" }
   > {
-    this._internal.setHyperType("entity");
     this._internal.addConstraint(["type", "equipment"]);
     return this._self;
   }
   get status(): Assign<
     Meta,
-    { type: "status"; areaType: "characters" },
-    "entity",
-    "onStage"
+    { type: "status"; areaType: "characters" }
   > {
-    this._internal.setHyperType("entity");
-    this._internal.setHyperAreaType("onStage");
     this._internal.addConstraint(["type", "status"]);
     return this._self;
   }
   get combatStatus(): Assign<
     Meta,
-    { type: "combatStatus"; areaType: "combatStatuses" },
-    "entity",
-    "onStage"
+    { type: "combatStatus"; areaType: "combatStatuses" }
   > {
-    this._internal.setHyperType("entity");
-    this._internal.setHyperAreaType("onStage");
     this._internal.addConstraint(["type", "combatStatus"]);
     return this._self;
   }
   get summon(): Assign<
     Meta,
-    { type: "summon"; areaType: "summons" },
-    "entity",
-    "onStage"
+    { type: "summon"; areaType: "summons" }
   > {
-    this._internal.setHyperType("entity");
-    this._internal.setHyperAreaType("onStage");
     this._internal.addConstraint(["type", "summon"]);
     return this._self;
   }
   get support(): Assign<
     Meta,
-    { type: "support"; areaType: "supports" },
-    "entity"
+    { type: "support"; areaType: "supports" }
   > {
-    this._internal.setHyperType("entity");
     this._internal.addConstraint(["type", "support"]);
     return this._self;
   }
   get eventCard(): Assign<
     Meta,
-    { type: "eventCard"; areaType: "hands" | "pile" },
-    "entity",
-    "offStage"
+    { type: "eventCard"; areaType: "hands" | "pile" }
   > {
-    this._internal.setHyperType("entity");
-    this._internal.setHyperAreaType("offStage");
     this._internal.addConstraint(["type", "eventCard"]);
     return this._self;
   }
   get attachment(): Assign<
     Meta,
-    { type: "attachment"; areaType: "hands" | "pile" },
-    "attachment",
-    "offStage"
+    { type: "attachment"; areaType: "hands" | "pile" }
   > {
-    this._internal.setHyperType("attachment");
-    this._internal.setHyperAreaType("offStage");
     this._internal.addConstraint(["type", "attachment"]);
     return this._self;
   }
   get hand(): Assign<
     Meta,
-    { type: HandsOrPileEntityType; areaType: "hands" },
-    Meta["hyperType"],
-    "offStage"
+    { type: HandsOrPileEntityType; areaType: "hands" }
   > {
-    this._internal.setHyperAreaType("offStage");
     this._internal.addConstraint(["area", "hands"]);
     return this._self;
   }
   get pile(): Assign<
     Meta,
-    { type: HandsOrPileEntityType; areaType: "pile" },
-    Meta["hyperType"],
-    "offStage"
+    { type: HandsOrPileEntityType; areaType: "pile" }
   > {
-    this._internal.setHyperAreaType("offStage");
     this._internal.addConstraint(["area", "pile"]);
     return this._self;
   }
   // position
-  get active(): Assign<Meta, PositionPatch<"active">, "character", "onStage"> {
-    this._internal.setHyperType("character");
-    this._internal.setHyperAreaType("onStage");
+  get active(): Assign<Meta, PositionPatch<"active">> {
     this._internal.addConstraint(["position", "active"]);
     return this._self;
   }
-  get prev(): Assign<Meta, PositionPatch<"prev">, "character", "onStage"> {
-    this._internal.setHyperType("character");
-    this._internal.setHyperAreaType("onStage");
+  get prev(): Assign<Meta, PositionPatch<"prev">> {
     this._internal.addConstraint(["position", "prev"]);
     return this._self;
   }
-  get next(): Assign<Meta, PositionPatch<"next">, "character", "onStage"> {
-    this._internal.setHyperType("character");
-    this._internal.setHyperAreaType("onStage");
+  get next(): Assign<Meta, PositionPatch<"next">> {
     this._internal.addConstraint(["position", "next"]);
     return this._self;
   }
   get standby(): Assign<
     Meta,
-    PositionPatch<"standby">,
-    "character",
-    "onStage"
+    PositionPatch<"standby">
   > {
-    this._internal.setHyperType("character");
-    this._internal.setHyperAreaType("onStage");
     this._internal.addConstraint(["position", "standby"]);
     return this._self;
   }
   // defeated
   get onlyDefeated(): Assign<
     Meta,
-    { type: "character"; areaType: "characters"; defeated: "only" },
-    "character",
-    "onStage"
+    { type: "character"; areaType: "characters"; defeated: "only" }
   > {
-    this._internal.setHyperType("character");
-    this._internal.setHyperAreaType("onStage");
     this._internal.setDefeatedConstraint("defeatedOnly");
     return this._self;
   }
   get includesDefeated(): Assign<
     Meta,
-    { type: "character"; areaType: "characters"; defeated: "includes" },
-    "character",
-    "onStage"
+    { type: "character"; areaType: "characters"; defeated: "includes" }
   > {
-    this._internal.setHyperType("character");
-    this._internal.setHyperAreaType("onStage");
     this._internal.setDefeatedConstraint("all");
     return this._self;
   }

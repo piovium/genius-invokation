@@ -61,23 +61,6 @@ class NonTerminalsConfig {
   PrimaryQuery = defineNonTerminal({
     rules: [
       {
-        leading: "is",
-        args: [
-          {
-            name: "hyperTypeSpec",
-            enum: ["character", "entity", "attachment"],
-          },
-        ],
-      },
-      {
-        leading: "onStage",
-        args: [],
-      },
-      {
-        leading: "offStage",
-        args: [],
-      },
-      {
         leading: "who",
         args: [{ name: "whoSpec", enum: ["my", "opp"] }],
       },
