@@ -96,7 +96,20 @@ class NonTerminalsConfig {
               "pile",
             ],
           },
+          {
+            name: "byPath",
+            enum: ["true", "false"],
+            description: `Whether use the \`path\` semantics to filter the area, which means the equipments/statuses attached to characters and attachments attached on hand/pile cards are not considered when byPath is true`,
+          }
         ],
+      },
+      {
+        leading: "onStage",
+        args: [],
+      },
+      {
+        leading: "offStage",
+        args: [],
       },
       {
         leading: "position",

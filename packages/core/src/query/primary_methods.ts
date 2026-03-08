@@ -83,8 +83,7 @@ type DefPatch<T extends HandleT<ExEntityType>> = (T extends EquipmentHandle
 type HandsOrPileEntityType =
   | "eventCard"
   | "equipment"
-  | "support"
-  | "attachment";
+  | "support";
 
 type TagOfImpl<Ty extends ExEntityType> = Ty extends EntityType
   ? EntityTag
@@ -145,54 +144,48 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     this._internal.addConstraint(["who", "opp"]);
     return this._self;
   }
-  // type/area
+  // on/off stage
+  get onStage(): Assign<Meta, {
+    type: EntityType | "character",
+    areaType: "characters" | "combatStatuses" | "summons" | "supports"
+  }> {
+    this._internal.addConstraint(["onStage"]);
+    return this._self;
+  }
+  get offStage(): Assign<Meta, {
+    type: HandsOrPileEntityType | "attachment",
+    areaType: "hands" | "pile"
+  }> {
+    this._internal.addConstraint(["offStage"]);
+    return this._self;
+  }
+  // area (by path)
   get character(): Assign<
     Meta,
     { type: "character"; areaType: "characters" }
   > {
-    this._internal.addConstraint(["type", "character"]);
-    return this._self;
-  }
-  get equipment(): Assign<
-    Meta,
-    { type: "equipment"; areaType: "characters" }
-  > {
-    this._internal.addConstraint(["type", "equipment"]);
-    return this._self;
-  }
-  get status(): Assign<
-    Meta,
-    { type: "status"; areaType: "characters" }
-  > {
-    this._internal.addConstraint(["type", "status"]);
+    this._internal.addConstraint(["area", "characters", "true"]);
     return this._self;
   }
   get combatStatus(): Assign<
     Meta,
     { type: "combatStatus"; areaType: "combatStatuses" }
   > {
-    this._internal.addConstraint(["type", "combatStatus"]);
+    this._internal.addConstraint(["area", "combatStatuses", "true"]);
     return this._self;
   }
   get summon(): Assign<
     Meta,
     { type: "summon"; areaType: "summons" }
   > {
-    this._internal.addConstraint(["type", "summon"]);
+    this._internal.addConstraint(["area", "summons", "true"]);
     return this._self;
   }
   get support(): Assign<
     Meta,
     { type: "support"; areaType: "supports" }
   > {
-    this._internal.addConstraint(["type", "support"]);
-    return this._self;
-  }
-  get eventCard(): Assign<
-    Meta,
-    { type: "eventCard"; areaType: "hands" | "pile" }
-  > {
-    this._internal.addConstraint(["type", "eventCard"]);
+    this._internal.addConstraint(["area", "supports", "true"]);
     return this._self;
   }
   get attachment(): Assign<
@@ -206,14 +199,66 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     Meta,
     { type: HandsOrPileEntityType; areaType: "hands" }
   > {
-    this._internal.addConstraint(["area", "hands"]);
+    this._internal.addConstraint(["area", "hands", "true"]);
     return this._self;
   }
   get pile(): Assign<
     Meta,
     { type: HandsOrPileEntityType; areaType: "pile" }
   > {
-    this._internal.addConstraint(["area", "pile"]);
+    this._internal.addConstraint(["area", "pile", "true"]);
+    return this._self;
+  }
+  // area (not path)
+  get vCharacter(): Assign<
+    Meta,
+    { type: "character" | "status" | "equipment", areaType: "characters" }
+  > {
+    this._internal.addConstraint(["area", "characters", "false"]);
+    return this._self;
+  }
+  
+  get vHand(): Assign<
+    Meta,
+    { type: HandsOrPileEntityType | "attachment"; areaType: "hands" }
+  > {
+    this._internal.addConstraint(["area", "hands", "false"]);
+    return this._self;
+  }
+  get vPile(): Assign<
+    Meta,
+    { type: HandsOrPileEntityType | "attachment"; areaType: "pile" }
+  > {
+    this._internal.addConstraint(["area", "pile", "false"]);
+    return this._self;
+  }
+  // type
+  get typeEquipment(): Assign<
+    Meta,
+    { type: "equipment"; areaType: "characters" | "hands" | "pile" }
+  > {
+    this._internal.addConstraint(["type", "equipment"]);
+    return this._self;
+  }
+  get typeSupport(): Assign<
+    Meta,
+    { type: "support"; areaType: "supports" | "hands" | "pile" }
+  > {
+    this._internal.addConstraint(["type", "support"]);
+    return this._self;
+  }
+  get typeStatus(): Assign<
+    Meta,
+    { type: "status"; areaType: "characters" }
+  > {
+    this._internal.addConstraint(["type", "status"]);
+    return this._self;
+  }
+  get typeEventCard(): Assign<
+    Meta,
+    { type: "eventCard"; areaType: "hands" | "pile" }
+  > {
+    this._internal.addConstraint(["type", "eventCard"]);
     return this._self;
   }
   // position

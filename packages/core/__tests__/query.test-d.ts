@@ -24,12 +24,12 @@ const expectEntityType =
   ) => {};
 
 // basic entity types
-expectEntityType<"equipment">()($.equipment);
-expectEntityType<"status">()($.status);
+expectEntityType<"equipment">()($.typeEquipment);
+expectEntityType<"status">()($.typeStatus);
 expectEntityType<"combatStatus">()($.combatStatus);
 expectEntityType<"summon">()($.summon);
 expectEntityType<"support">()($.support);
-expectEntityType<"eventCard">()($.eventCard);
+expectEntityType<"eventCard">()($.typeEventCard);
 expectEntityType<"attachment">()($.attachment);
 
 expectEntityType<"eventCard" | "equipment" | "support">()($.hand);
@@ -40,9 +40,8 @@ expectEntityType<"character">()($.active);
 expectEntityType<"character">()($.prev);
 expectEntityType<"character">()($.next);
 
-// any
 expectEntityType<"eventCard" | "equipment" | "support" | "attachment">()(
-  $.any.hand,
+  $.vHand,
 );
 
 // @ts-expect-error
@@ -53,7 +52,7 @@ expectAssignable<{}>(infer($.my));
 expectAssignable<{}>(infer($.my.combatStatus));
 expectAssignable<{}>(infer($.my.support));
 expectAssignable<{}>(infer($.opp.pile));
-expectAssignable<{}>(infer($.opp.equipment));
+expectAssignable<{}>(infer($.opp.onStage.typeEquipment));
 // @ts-expect-error
 expectError(infer($.my.my));
 // @ts-expect-error
@@ -78,9 +77,9 @@ expectAssignable<{ variables: "foo" }>(infer($.var("foo", (x) => x >= 1)));
 
 // unary operators
 expectEntityType<"character">()($.recentFrom($.opp.active));
-expectEntityType<"character">()($.has($.status));
-expectEntityType<"character">()($.has.status);
-expectEntityType<"character">()($.has.equipment);
+expectEntityType<"character">()($.has($.typeStatus));
+expectEntityType<"character">()($.has.typeStatus);
+expectEntityType<"character">()($.has.typeEquipment);
 expectEntityType<"equipment" | "status">()($.at.my.active);
 // @ts-expect-error
 expectError(infer($.has($.character)));
@@ -99,8 +98,8 @@ type X = typeof x;
 
 // hasAt method
 declare const characterId: CharacterHandle;
-expectEntityType<"character">()($.character.has($.equipment));
-expectEntityType<"status">()($.my.status.at($.def(characterId)));
+expectEntityType<"character">()($.character.has($.typeEquipment));
+expectEntityType<"status">()($.my.typeStatus.at($.def(characterId)));
 // @ts-expect-error
 expectError(infer($.equipment.at($.summon)));
 // @ts-expect-error
@@ -122,13 +121,13 @@ expectEntityType<"character">()($.opp.next.orElse($.opp.active));
 expectEntityType<"status" | "combatStatus" | "summon">()(
   $.intersection(
     $.opp,
-    $.union($.status, $.combatStatus, $.summon),
+    $.union($.typeStatus, $.combatStatus, $.summon),
     $.union($.tag("barrier"), $.tag("shield")),
   ),
 );
 // Java style
 expectEntityType<"status" | "combatStatus" | "summon">()(
   $.opp
-    .intersection($.status.union($.combatStatus).union($.summon))
+    .intersection($.typeStatus.union($.combatStatus).union($.summon))
     .intersection($.tag("barrier").union($.tag("shield"))),
 );
