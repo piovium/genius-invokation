@@ -176,7 +176,7 @@ export const StarfallShower = skill(22042)
     const st = c.self.hasStatus(AnomalousAnatomy);
     const extraDmg = st ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 3) : 0;
     c.damage(DamageType.Hydro, 1 + extraDmg);
-    const [card] = c.disposeMaxCostHands(1, { allowPreview: true });
+    const [card] = c.disposeMaxCostHands(1);
     if (card){
       c.emitCustomEvent(StarfallShowerDisposeCard, card.latest());
     }
