@@ -38,9 +38,8 @@ export const CrystalShrapnel = card(116081)
  */
 export const RosulaDorataSalute = summon(116082)
   .since("v4.8.0")
-  .on("endPhase")
+  .endPhaseDamage(DamageType.Geo, 1)
   .usage(2)
-  .damage(DamageType.Geo, 1)
   .drawCards(1, { withDefinition: CrystalShrapnel })
   .done();
 

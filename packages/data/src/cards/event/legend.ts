@@ -100,6 +100,17 @@ export const InEveryHouseAStove = card(330005)
   .since("v4.2.0")
   .legend()
   .replaceDescription("[T]", (st) => st.roundNumber)
+  .filter((c) => {
+    if (c.roundNumber === 1) {
+      return new Set(
+        c.player.initialPile
+          .filter((card) => card.tags.includes("talent"))
+          .map((card) => card.id)
+      ).size >= 2;
+    } else {
+      return true;
+    }
+  })
   .do((c) => {
     if (c.roundNumber === 1) {
       const initTalentDefIds = c.player.initialPile
