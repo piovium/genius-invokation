@@ -171,3 +171,73 @@ export function stringifySExpr(expr: Expression): string {
   }
   throw new Error("Invalid expression type.");
 }
+
+function canBeBareSExprString(value: string): boolean {
+  if (value === "") {
+    return false;
+  }
+  if (/^["']/.test(value)) {
+    return false;
+  }
+  if (/[\s()\[\]{};"\\]/.test(value)) {
+    return false;
+  }
+  return isNaN(parseFloat(value));
+}
+
+function stringifySExprAtom(expr: string | number): string {
+  if (typeof expr === "number") {
+    return expr.toString();
+  }
+  return canBeBareSExprString(expr) ? expr : JSON.stringify(expr);
+}
+
+export function prettyStringifySExpr(
+  expr: Expression,
+  indent = "  ",
+): string {
+  function format(current: Expression, depth: number, column: number): string {
+    if (typeof current === "string" || typeof current === "number") {
+      return stringifySExprAtom(current);
+    }
+
+    if (!Array.isArray(current)) {
+      throw new Error("Invalid expression type.");
+    }
+
+    if (current.length === 0) {
+      return "()";
+    }
+
+    if (current.every((item) => !Array.isArray(item))) {
+      return `(${current.map((item) => format(item, depth + 1, column + 1)).join(" ")})`;
+    }
+
+    const head = current[0];
+    if (typeof head === "string" || typeof head === "number") {
+      const headText = stringifySExprAtom(head);
+      if (current.length === 1) {
+        return `(${headText})`;
+      }
+
+      const continuationColumn = column + 1 + headText.length + 1;
+      const continuationIndent = " ".repeat(continuationColumn);
+      const [firstArg, ...restArgs] = current.slice(1);
+      const firstArgText = format(firstArg, depth + 1, continuationColumn);
+      const restText = restArgs.map(
+        (item) => `\n${continuationIndent}${format(item, depth + 1, continuationColumn)}`,
+      );
+      return `(${headText} ${firstArgText}${restText.join("")})`;
+    }
+
+    const currentIndent = indent.repeat(depth);
+    const childIndent = indent.repeat(depth + 1);
+    const lines = current.map(
+      (item) => `${childIndent}${format(item, depth + 1, childIndent.length)}`,
+    );
+    return `(\n${lines.join("\n")}\n${currentIndent})`;
+  }
+
+  return format(expr, 0, 0);
+}
+

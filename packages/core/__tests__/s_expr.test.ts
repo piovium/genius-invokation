@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { parseSExpr } from "../src/query/s_expr";
+import { parseSExpr, prettyStringifySExpr } from "../src/query/s_expr";
 
 describe("S-expression Parser", () => {
   test("basic", () => {
@@ -45,6 +45,47 @@ describe("S-expression Parser", () => {
     expect(parseSExpr("-")).toEqual("-");
     expect(() => parseSExpr("-1f")).toThrow(
       "Invalid number format '-1f' at position 0.",
+    );
+  });
+
+  test("pretty stringify with indentation", () => {
+    expect(
+      prettyStringifySExpr([
+        "config",
+        ["port", 8080],
+        ["host", "api.example.com"],
+        ["features", ["feature-a", "feature-b"]],
+      ]),
+    ).toBe(`(config (port 8080)
+        (host api.example.com)
+        (features (feature-a feature-b)))`);
+  });
+
+  test("pretty stringify aligns nested cdr items", () => {
+    expect(
+      prettyStringifySExpr([
+        "leading-item",
+        ["first-arg", ["nested-call", "value"], ["another-call", "value"]],
+        ["second-arg", "tail"],
+      ]),
+    ).toBe(`(leading-item (first-arg (nested-call value)
+                         (another-call value))
+              (second-arg tail))`);
+  });
+
+  test("pretty stringify only quotes strings when needed", () => {
+    expect(
+      prettyStringifySExpr([
+        "plain",
+        "api.example.com",
+        "+",
+        "1.2.3",
+        "hello world",
+        'he said "hi"',
+        "",
+      ]),
+    ).toBe(
+      '(plain api.example.com + "1.2.3" "hello world" "he said \\"hi\\"" "")',
     );
   });
 });
