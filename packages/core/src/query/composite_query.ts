@@ -51,6 +51,8 @@ class CompositeQueryImpl<Ty extends TypingInfoBase> implements IQuery<Ty> {
       this.type === "not" ||
       this.type === "has" ||
       this.type === "at" ||
+      this.type === "with" ||
+      this.type === "on" ||
       this.type === "recentFrom"
     ) {
       if (this.operands.length !== 1) {
@@ -58,12 +60,12 @@ class CompositeQueryImpl<Ty extends TypingInfoBase> implements IQuery<Ty> {
       }
       return [this.type, this.operands[0][toExpression]()];
     }
-    if (this.type === "orElse") {
+    if (this.type === "orElse" || this.type === "exclude") {
       if (this.operands.length !== 2) {
-        throw new Error("orElse operator requires exactly 2 operands");
+        throw new Error(`${this.type} operator requires exactly 2 operands`);
       }
       return [
-        "orElse",
+        this.type,
         this.operands[0][toExpression](),
         this.operands[1][toExpression](),
       ];

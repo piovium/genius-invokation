@@ -164,6 +164,13 @@ class NonTerminalsConfig {
         ],
       },
       {
+        leading: "exclude",
+        args: [
+          { name: "lhs", use: "UnorderedQuery" },
+          { name: "rhs", use: "UnorderedQuery" },
+        ],
+      },
+      {
         leading: "not",
         args: [{ name: "operand", use: "UnorderedQuery" }],
       },

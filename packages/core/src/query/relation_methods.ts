@@ -1,6 +1,8 @@
+import type { SExprSchema } from "./expr_schema";
 import type { AssignedPrimaryQuery } from "./primary_methods";
 import type { PrimaryMethodsInternal } from "./primary_query";
 import {
+  RELATIONAL_METHODS,
   toExpression,
   type AttachmentReq,
   type CardReq,
@@ -42,10 +44,7 @@ type AllRelationMethods<Meta extends HeterogeneousMetaBase> = {
     > extends true
       ? Q
       : never,
-  ) => AssignedPrimaryQuery<
-    Meta,
-    RelationMethodMetas[K]["subject"]
-  >;
+  ) => AssignedPrimaryQuery<Meta, RelationMethodMetas[K]["subject"]>;
 };
 
 type RelationMethodsOmit<Meta extends HeterogeneousMetaBase> = {
@@ -62,15 +61,17 @@ export type RelationMethods<Meta extends HeterogeneousMetaBase> = Omit<
   RelationMethodsOmit<Meta>
 >;
 
-const HAS_AT_METHODS = ["has", "at", "with", "on"] as const;
-
 class RelationMethodsImpl {
   static {
-    for (const methodName of HAS_AT_METHODS) {
+    for (const methodName of RELATIONAL_METHODS) {
       Object.defineProperty(RelationMethodsImpl.prototype, methodName, {
         value: function (object: IQuery) {
+          const constraint: SExprSchema.CompositeQuery = [
+            methodName,
+            object[toExpression](),
+          ];
           const internal: PrimaryMethodsInternal = this._internal;
-          internal.addConstraint([methodName, object[toExpression]()]);
+          internal.addConstraint(constraint);
           return this;
         },
       });

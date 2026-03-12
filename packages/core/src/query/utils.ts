@@ -1,5 +1,6 @@
 import type { EntityArea, EntityType } from "../base/entity";
 import type { ExEntityType } from "../builder/type";
+import type { SExprSchema } from "./expr_schema";
 
 export type IsExtends<T, U> = [T] extends [U] ? true : false;
 export type Related<T, U> = IsExtends<T, U> extends true
@@ -142,7 +143,7 @@ export interface TypingInfoBase {
 
 export interface IQuery<Ty extends TypingInfoBase = TypingInfoBase> {
   [typingInfo]: Ty;
-  [toExpression]: () => Expression;
+  [toExpression]: () => SExprSchema.UnorderedQuery;
 }
 
 export type InferResult<Q extends IQuery> = Computed<
@@ -203,8 +204,13 @@ type ReqBase = {
   areaType: MetaBase["areaType"];
 };
 
-export type UnaryOperator = "not" | "has" | "at" | "recentFrom";
-export type BinaryOperator = "orElse" | "union" | "intersection";
+export const RELATIONAL_METHODS = ["has", "at", "with", "on"] as const;
+
+export const UNARY_OPERATORS = ["has", "at", "with", "on", "not", "recentFrom"] as const;
+export type UnaryOperator = typeof UNARY_OPERATORS[number];
+
+export const BINARY_OPERATORS = ["orElse", "exclude", "union", "intersection"] as const;
+export type BinaryOperator = typeof BINARY_OPERATORS[number];
 
 export type CompositeOperator = UnaryOperator | BinaryOperator;
 

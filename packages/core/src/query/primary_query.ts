@@ -39,6 +39,7 @@ export class PrimaryMethodsInternal {
 
 export interface PrimaryQueryInitOptions {
   leadingUnaryOp?: UnaryOperator | null;
+  initExpression?: SExprSchema.UnorderedQuery[];
 }
 
 class PrimaryQueryImpl<Meta extends HeterogeneousMetaBase>
@@ -51,11 +52,18 @@ class PrimaryQueryImpl<Meta extends HeterogeneousMetaBase>
   constructor(options: PrimaryQueryInitOptions) {
     this._internal = new PrimaryMethodsInternal();
     this._leadingUnaryOp = options.leadingUnaryOp ?? null;
+    if (options.initExpression) {
+      this._internal.addConstraint(...options.initExpression);
+    }
   }
 
-  [toExpression](): Expression {
+  [toExpression](): SExprSchema.UnorderedQuery {
     if (this._leadingUnaryOp !== null) {
-      return [this._leadingUnaryOp, this._internal[toExpression]()];
+      const queryWithOp: SExprSchema.CompositeQuery = [
+        this._leadingUnaryOp,
+        this._internal[toExpression](),
+      ];
+      return queryWithOp;
     }
     return this._internal[toExpression]();
   }

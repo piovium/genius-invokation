@@ -6,7 +6,7 @@ test("query", () => {
   console.log(
     prettyStringifySExpr(
       queryToExpression(
-        $.my.hand.intersection($.not.with($.def(206 as AttachmentHandle))),
+        $.my.hand.exclude($.with($.def(206 as AttachmentHandle))),
       ),
     ),
   );

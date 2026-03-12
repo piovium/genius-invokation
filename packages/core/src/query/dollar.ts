@@ -10,22 +10,25 @@ import {
   type PrimaryMethodNames,
 } from "./primary_methods";
 import { createPrimaryQuery, type PrimaryQuery } from "./primary_query";
-import type {
-  Computed,
-  HeterogeneousMetaBase,
-  InferResult,
-  IQuery,
-  MetaBase,
-  NotFunctionPrototype,
-  RelatedToReq,
-  TypingInfoBase,
-  TypingInfoFromMeta,
-  UnaryOperatorMetas,
+import {
+  toExpression,
+  UNARY_OPERATORS,
+  type Computed,
+  type HeterogeneousMetaBase,
+  type InferResult,
+  type IQuery,
+  type MetaBase,
+  type NotFunctionPrototype,
+  type RelatedToReq,
+  type TypingInfoBase,
+  type TypingInfoFromMeta,
+  type UnaryOperatorMetas,
 } from "./utils";
 
 type DollarUnaryOperatorMethods = {
   [K in keyof UnaryOperatorMetas]: {
     <T extends IQuery>(
+      // TODO: must be unordered
       arg: RelatedToReq<
         InferResult<T>,
         UnaryOperatorMetas[K]["operand"]
@@ -40,8 +43,6 @@ type DollarUnaryOperatorMethods = {
   > &
     NotFunctionPrototype;
 };
-
-const UNARY_OPS = ["has", "at", "not", "recentFrom"] as const;
 
 class Dollar {
   static {
@@ -70,11 +71,12 @@ class Dollar {
       }
     }
     // creating leading unary operator methods
-    for (const name of UNARY_OPS) {
+    for (const name of UNARY_OPERATORS) {
       const chainForm = () => {
         const callingForm = (q: IQuery) => {
           return createPrimaryQuery({
             leadingUnaryOp: name,
+            initExpression: [q[toExpression]()],
           });
         };
         const returns = createPrimaryQuery({
