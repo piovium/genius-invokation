@@ -875,7 +875,7 @@ export const FrostmoonEnclave = card(321037)
  * @description
  * 结束阶段：赋予我方随机2张当前元素骰费用大于等于2的手牌赋能。
  * 可用次数：2
- * 此卡牌被弃置时：如果可用次数为0，造成2点物理伤害。
+ * 此卡牌被弃置时：造成2点物理伤害。
  */
 export const NashaTown = card(321038)
   .since("v6.4.0")
@@ -895,9 +895,7 @@ export const NashaTown = card(321038)
   // 官方实现中，此牌作为打出支援牌前的目标被弃置时，不会触发此效果；与描述不符。
   .on("selfDispose", (c, e) => e.reason !== "targetOfSupportPlayed")
   .do((c) => {
-    if (c.getVariable("usage") === 0) {
-      c.damage(DamageType.Physical, 2);
-    }
+    c.damage(DamageType.Physical, 2);
   })
   .done();
 
