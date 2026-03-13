@@ -1008,7 +1008,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   /**
    * 为弃置支援牌特化的 dispose。
    * 在弃置目标有 usage 的前提下，使用 consumeUsage 方式来触发弃置，从而正确触发那夏镇
-   * @param target 
+   * @param target
    */
   disposeSupport(target: EntityTargetArg) {
     const targets = this.queryOrGet<"support">(target);
@@ -1021,9 +1021,15 @@ export class SkillContext<Meta extends ContextMetaBase> {
       }
       using l = this.mutator.subLog(
         DetailLogType.Primitive,
-        `Dispose ${stringifyState(target)} (specialized for support, reason = other)`,
+        `Dispose ${stringifyState(
+          target,
+        )} (specialized for support, reason = other)`,
       );
-      if (Reflect.has(target.definition.varConfigs, "usage") && target.definition.disposeWhenUsageIsZero) {
+      if (
+        target.variables.usage &&
+        target.variables.usage > 0 &&
+        target.definition.disposeWhenUsageIsZero
+      ) {
         this.consumeUsage(target.variables.usage, target);
       } else {
         this.dispose(target, "other");
@@ -1420,9 +1426,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
         const area = cardEntity.area;
         if (area.type !== "pile") {
           throw new GiTcgDataError(
-            `Cannot draw card ${stringifyState(cardState)} from ${stringifyEntityArea(
-              area,
-            )}`,
+            `Cannot draw card ${stringifyState(
+              cardState,
+            )} from ${stringifyEntityArea(area)}`,
           );
         }
         using l = this.mutator.subLog(
