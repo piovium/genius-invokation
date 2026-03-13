@@ -1008,7 +1008,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   /**
    * 为弃置支援牌特化的 dispose。
    * 在弃置目标有 usage 的前提下，使用 consumeUsage 方式来触发弃置，从而正确触发那夏镇
-   * @param target
+   * @param target 要弃置的支援目标，可以是实体或查询字符串
    */
   disposeSupport(target: EntityTargetArg) {
     const targets = this.queryOrGet<"support">(target);
