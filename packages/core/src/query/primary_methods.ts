@@ -80,10 +80,7 @@ type DefPatch<T extends HandleT<ExEntityType>> = (T extends EquipmentHandle
   definition: T & { readonly _defSpecified: unique symbol };
 };
 
-type HandsOrPileEntityType =
-  | "eventCard"
-  | "equipment"
-  | "support";
+type HandsOrPileEntityType = "eventCard" | "equipment" | "support";
 
 type TagOfImpl<Ty extends ExEntityType> = Ty extends EntityType
   ? EntityTag
@@ -112,22 +109,11 @@ type AssignVar<T extends HeterogeneousMetaBase, Name extends string> = Assign<
 type RelationOp = "<" | "<=" | "=" | ">=" | ">" | "!=";
 
 // Make CodeQL happy
-const charMap: Record<string, string> = {
-  "<": "\\u003C",
-  ">": "\\u003E",
-  "/": "\\u002F",
-  "\\": "\\\\",
-  "\b": "\\b",
-  "\f": "\\f",
-  "\n": "\\n",
-  "\r": "\\r",
-  "\t": "\\t",
-  "\0": "\\0",
-  "\u2028": "\\u2028",
-  "\u2029": "\\u2029",
-};
 function escapeUnsafeChars(str: string) {
-  return str.replace(/[<>\/\\\b\f\n\r\t\0\u2028\u2029]/g, (x) => charMap[x]);
+  return str.replace(
+    /[<>]/g,
+    (x) => `\\u${x.codePointAt(0)!.toString(16).padStart(4, "0")}`,
+  );
 }
 
 class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
@@ -145,25 +131,28 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     return this._self;
   }
   // on/off stage
-  get onStage(): Assign<Meta, {
-    type: EntityType | "character",
-    areaType: "characters" | "combatStatuses" | "summons" | "supports"
-  }> {
+  get onStage(): Assign<
+    Meta,
+    {
+      type: EntityType | "character";
+      areaType: "characters" | "combatStatuses" | "summons" | "supports";
+    }
+  > {
     this._internal.addConstraint(["onStage"]);
     return this._self;
   }
-  get offStage(): Assign<Meta, {
-    type: HandsOrPileEntityType | "attachment",
-    areaType: "hands" | "pile"
-  }> {
+  get offStage(): Assign<
+    Meta,
+    {
+      type: HandsOrPileEntityType | "attachment";
+      areaType: "hands" | "pile";
+    }
+  > {
     this._internal.addConstraint(["offStage"]);
     return this._self;
   }
   // area (by path)
-  get character(): Assign<
-    Meta,
-    { type: "character"; areaType: "characters" }
-  > {
+  get character(): Assign<Meta, { type: "character"; areaType: "characters" }> {
     this._internal.addConstraint(["area", "characters", "true"]);
     return this._self;
   }
@@ -174,17 +163,11 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     this._internal.addConstraint(["area", "combatStatuses", "true"]);
     return this._self;
   }
-  get summon(): Assign<
-    Meta,
-    { type: "summon"; areaType: "summons" }
-  > {
+  get summon(): Assign<Meta, { type: "summon"; areaType: "summons" }> {
     this._internal.addConstraint(["area", "summons", "true"]);
     return this._self;
   }
-  get support(): Assign<
-    Meta,
-    { type: "support"; areaType: "supports" }
-  > {
+  get support(): Assign<Meta, { type: "support"; areaType: "supports" }> {
     this._internal.addConstraint(["area", "supports", "true"]);
     return this._self;
   }
@@ -195,29 +178,23 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     this._internal.addConstraint(["type", "attachment"]);
     return this._self;
   }
-  get hand(): Assign<
-    Meta,
-    { type: HandsOrPileEntityType; areaType: "hands" }
-  > {
+  get hand(): Assign<Meta, { type: HandsOrPileEntityType; areaType: "hands" }> {
     this._internal.addConstraint(["area", "hands", "true"]);
     return this._self;
   }
-  get pile(): Assign<
-    Meta,
-    { type: HandsOrPileEntityType; areaType: "pile" }
-  > {
+  get pile(): Assign<Meta, { type: HandsOrPileEntityType; areaType: "pile" }> {
     this._internal.addConstraint(["area", "pile", "true"]);
     return this._self;
   }
   // area (not path)
   get vCharacter(): Assign<
     Meta,
-    { type: "character" | "status" | "equipment", areaType: "characters" }
+    { type: "character" | "status" | "equipment"; areaType: "characters" }
   > {
     this._internal.addConstraint(["area", "characters", "false"]);
     return this._self;
   }
-  
+
   get vHand(): Assign<
     Meta,
     { type: HandsOrPileEntityType | "attachment"; areaType: "hands" }
@@ -247,10 +224,7 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     this._internal.addConstraint(["type", "support"]);
     return this._self;
   }
-  get typeStatus(): Assign<
-    Meta,
-    { type: "status"; areaType: "characters" }
-  > {
+  get typeStatus(): Assign<Meta, { type: "status"; areaType: "characters" }> {
     this._internal.addConstraint(["type", "status"]);
     return this._self;
   }
@@ -274,10 +248,7 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     this._internal.addConstraint(["position", "next"]);
     return this._self;
   }
-  get standby(): Assign<
-    Meta,
-    PositionPatch<"standby">
-  > {
+  get standby(): Assign<Meta, PositionPatch<"standby">> {
     this._internal.addConstraint(["position", "standby"]);
     return this._self;
   }
