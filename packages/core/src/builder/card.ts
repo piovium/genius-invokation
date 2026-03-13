@@ -359,7 +359,7 @@ export class CardBuilder<
       // 支援牌的目标是要弃置的支援区卡牌
       const targets = e.targets as readonly EntityState[];
       if (targets.length > 0 && c.$(`my support with id ${targets[0].id}`)) {
-        c.dispose(targets[0]);
+        c.dispose(targets[0], "targetOfSupportPlayed");
       }
       c.moveEntity(
         c.self,
