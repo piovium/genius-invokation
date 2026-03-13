@@ -1005,6 +1005,33 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return this.enableShortcut();
   }
 
+  /**
+   * 为弃置支援牌特化的 dispose。
+   * 在弃置目标有 usage 的前提下，使用 consumeUsage 方式来触发弃置，从而正确触发那夏镇
+   * @param target 
+   */
+  disposeSupport(target: EntityTargetArg) {
+    const targets = this.queryOrGet<"support">(target);
+    for (const t of targets) {
+      const target = t.latest();
+      if (target.definition.type !== "support") {
+        throw new GiTcgDataError(
+          `Only support entities can be disposed by disposeSupport`,
+        );
+      }
+      using l = this.mutator.subLog(
+        DetailLogType.Primitive,
+        `Dispose ${stringifyState(target)} (specialized for support, reason = other)`,
+      );
+      if (Reflect.has(target.definition.varConfigs, "usage") && target.definition.disposeWhenUsageIsZero) {
+        this.consumeUsage(target.variables.usage, target);
+      } else {
+        this.dispose(target, "other");
+      }
+    }
+    return this.enableShortcut();
+  }
+
   // NOTICE: getVariable/setVariable/addVariable 应当将 caller 的严格版声明放在最后一个
   // 因为 (...args: infer R) 只能获取到重载列表中的最后一个，而严格版是 BuilderWithShortcut 需要的
 

@@ -1038,7 +1038,7 @@ export const MachineAssemblyLine = card(332028)
 export const [SunyataFlower] = card(332029)
   .since("v4.4.0")
   .addTarget("my supports")
-  .dispose("@targets.0")
+  .disposeSupport("@targets.0")
   .do((c) => {
     const candidates = c.allCardDefinitions("support");
     const card0 = c.random(candidates);
@@ -2306,7 +2306,7 @@ export const BrokenSea = card(332053)
   .costSame(1)
   .addTarget("my supports")
   .do((c, e) => {
-    c.dispose(e.targets[0]);
+    c.disposeSupport(e.targets[0]);
     for (const summon of c.$$(SIMULANKA_QUERY)) {
       summon.addVariable("effect", 1);
       summon.addVariable("usage", 1);

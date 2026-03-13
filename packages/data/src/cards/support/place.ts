@@ -892,11 +892,8 @@ export const NashaTown = card(321038)
       c.attach(Empowerment, card);
     }
   })
-  // 官方实现中，此牌作为打出支援牌前的目标被弃置时，不会触发此效果；与描述不符。
-  .on("selfDispose", (c, e) => e.reason !== "targetOfSupportPlayed")
-  .do((c) => {
-    c.damage(DamageType.Physical, 2);
-  })
+  .on("selfDispose", (c, e) => c.getVariable("usage") === 0)
+  .damage(DamageType.Physical, 2)
   .done();
 
 /**
