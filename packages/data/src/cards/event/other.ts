@@ -2028,7 +2028,7 @@ export const DisposedSupportAndSummonsCountExtension = extension(332051, pair({
 }))
   .description("记录本场对局中双方支援区和召唤区弃置卡牌的数量")
   .mutateWhen("onDispose", (st, e) => {
-    if (e.isDisposeCardOrTuning()) {
+    if (e.isDiscardOrTuning()) {
       return;
     }
     if (e.entity.definition.type === "support") {

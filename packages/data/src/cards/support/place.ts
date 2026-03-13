@@ -923,7 +923,7 @@ export const KuuvahkiExperimentalDesignBureau = card(321039)
       c.attach(Empowerment, card);
     }
   })
-  .on("selfDispose")
+  .on("selfDispose", (c, e) => !e.isDiscardOrTuning())
   .drawCards(2, { withAttachment: Empowerment })
   .characterStatus(BattlePlan, "my active")
   .done();

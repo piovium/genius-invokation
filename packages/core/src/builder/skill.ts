@@ -513,7 +513,7 @@ export const detailedEventDictionary = {
   }),
   disposeOrTuneCard: defineDescriptor("onDispose", (e, r) => {
     return (
-      e.isDisposeCardOrTuning() &&
+      e.isDiscardOrTuning() &&
       checkRelative(e.onTimeState, { who: e.who }, r)
     );
   }),
@@ -560,7 +560,7 @@ export const detailedEventDictionary = {
   }),
   dispose: defineDescriptor("onDispose", (e, r) => {
     return (
-      !e.isDisposeCardOrTuning() && checkRelative(e.onTimeState, e.entity.id, r)
+      !e.isDiscardOrTuning() && checkRelative(e.onTimeState, e.entity.id, r)
     );
   }),
   selfDispose: defineDescriptor("onDispose", (e, r) => {

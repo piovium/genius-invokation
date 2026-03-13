@@ -468,7 +468,7 @@ export const DisposedSupportCountExtension = extension(322022, {
 })
   .description("记录本场对局中双方支援区弃置卡牌的数量")
   .mutateWhen("onDispose", (st, e) => {
-    if (e.isDisposeCardOrTuning()) {
+    if (e.isDiscardOrTuning()) {
       return;
     }
     if (e.entity.definition.type === "support") {
