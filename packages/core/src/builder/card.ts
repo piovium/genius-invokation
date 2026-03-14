@@ -359,7 +359,10 @@ export class CardBuilder<
       // 支援牌的目标是要弃置的支援区卡牌
       const targets = e.targets as readonly EntityState[];
       if (targets.length > 0 && c.$(`my support with id ${targets[0].id}`)) {
-        c.dispose(targets[0], "targetOfSupportPlayed");
+        c.dispose(targets[0], {
+          reason: "targetOfSupportPlayed",
+          direct: true,
+        });
       }
       c.moveEntity(
         c.self,
@@ -710,7 +713,10 @@ export class CardBuilder<
 
     const prependPlayingOp: (typeof this.operations)[number] = function (c) {
       if (c.self.definition.type === "eventCard") {
-        c.dispose(c.self, "eventCardPlayed");
+        c.dispose(c.self, {
+          reason: "eventCardPlayed",
+          direct: true,
+        });
       } else {
         // 打出时移除附属效果
         for (const att of c.self.attachments) {
@@ -767,7 +773,10 @@ export class CardBuilder<
         action = this.buildAction();
       } else {
         this.do((c) => {
-          c.dispose(c.self, "eventCardDrawn");
+          c.dispose(c.self, {
+            reason: "eventCardDrawn",
+            direct: true,
+          });
         });
         drawAction = this.buildAction<HandCardInsertedEventArg>();
         filter = () => false;

@@ -132,6 +132,17 @@ export interface HealOption {
   kind?: HealKind;
 }
 
+export interface DisposeOption {
+  reason?: RemoveEntityM["reason"];
+  /**
+   * 是否直接弃置。
+   * 
+   * 默认情况下，在弃置目标有 usage 的前提下，会先清空 usage 后再弃置，从而正确触发那夏镇等；
+   * 在部分系统内置结算中（如弃置已有支援区实体以打出支援牌时）不适用，此时需设置 `direct: true`
+   */
+  direct?: boolean;
+}
+
 export interface GenerateDiceOption {
   randomIncludeOmni?: boolean;
   randomAllowDuplicate?: boolean;
@@ -882,7 +893,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
           const exist = t.entities.find((v) => v.definition.tags.includes(tag));
           if (exist) {
             // TODO: maybe better reason
-            this.dispose(exist, "overflow");
+            this.dispose(exist, {
+              reason: "overflow",
+              direct: true,
+            });
           }
         }
       }
@@ -973,7 +987,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
 
   dispose(
     target: EntityTargetArg = "@self",
-    reason: RemoveEntityM["reason"] = "other",
+    { reason = "other", direct }: DisposeOption = {},
   ) {
     const targets = this.queryOrGet(target);
     for (const t of targets) {
@@ -995,45 +1009,22 @@ export class SkillContext<Meta extends ContextMetaBase> {
         t.area,
         this.skillInfo,
       );
+
+      if (
+        !direct &&
+        target.definition.type !== "attachment" &&
+        target.variables.usage &&
+        target.variables.usage > 0 &&
+        target.definition.disposeWhenUsageIsZero
+      ) {
+        this.setVariable("usage", 0, target);
+      }
       this.mutate({
         type: "removeEntity",
         from: t.area,
         oldState: target,
         reason,
       });
-    }
-    return this.enableShortcut();
-  }
-
-  /**
-   * 为弃置支援牌特化的 dispose。
-   * 在弃置目标有 usage 的前提下，使用 consumeUsage 方式来触发弃置，从而正确触发那夏镇
-   * @param target 要弃置的支援目标，可以是实体或查询字符串
-   */
-  disposeSupport(target: EntityTargetArg) {
-    const targets = this.queryOrGet<"support">(target);
-    for (const t of targets) {
-      const target = t.latest();
-      if (target.definition.type !== "support") {
-        throw new GiTcgDataError(
-          `Only support entities can be disposed by disposeSupport`,
-        );
-      }
-      using l = this.mutator.subLog(
-        DetailLogType.Primitive,
-        `Dispose ${stringifyState(
-          target,
-        )} (specialized for support, reason = other)`,
-      );
-      if (
-        target.variables.usage &&
-        target.variables.usage > 0 &&
-        target.definition.disposeWhenUsageIsZero
-      ) {
-        this.consumeUsage(target.variables.usage, target);
-      } else {
-        this.dispose(target, "other");
-      }
     }
     return this.enableShortcut();
   }
@@ -1128,7 +1119,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         target.definition.disposeWhenUsageIsZero &&
         this.getVariable("usage", target) <= 0
       ) {
-        this.dispose(target);
+        this.dispose(target, { direct: true });
       }
     }
     return RET;
