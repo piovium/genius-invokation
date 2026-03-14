@@ -6,6 +6,7 @@
       "devDependencies": {
         "@arethetypeswrong/cli": "^0.16.4",
         "@bufbuild/buf": "^1.47.2",
+        "@gi-tcg/config": "workspace:*",
         "@microsoft/api-extractor": "^7.53.1",
         "@types/bun": "^1.3.0",
         "bun": "^1.3.0",
@@ -377,7 +378,7 @@
   "overrides": {
     "ajv": "8.5.0",
     "babel-plugin-jsx-dom-expressions": "0.39.6",
-    "caniuse-lite": "1.0.30001690",
+    "caniuse-lite": "1.0.30001778",
     "esbuild": "0.19.11",
   },
   "catalog": {
@@ -1385,7 +1386,7 @@
 
     "callsites": ["callsites@3.1.0", "", {}, "sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ=="],
 
-    "caniuse-lite": ["caniuse-lite@1.0.30001690", "", {}, "sha512-5ExiE3qQN6oF8Clf8ifIDcMRCRE/dMGcETG/XGMD8/XiXm6HXQgQTh1yZYLXXpSOsEUlJm1Xr7kGULZTuGtP/w=="],
+    "caniuse-lite": ["caniuse-lite@1.0.30001778", "", {}, "sha512-PN7uxFL+ExFJO61aVmP1aIEG4i9whQd4eoSCebav62UwDyp5OHh06zN4jqKSMePVgxHifCw1QJxdRkA1Pisekg=="],
 
     "case-anything": ["case-anything@2.1.13", "", {}, "sha512-zlOQ80VrQ2Ue+ymH5OuM/DlDq64mEm+B9UTdHULv5osUMD6HalNTblf2b1u/m6QecjsnOkBpqVZ+XPwIVsy7Ng=="],
 

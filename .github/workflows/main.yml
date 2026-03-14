@@ -8,6 +8,10 @@ on:
   pull_request:
     branches: ["main"]
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   Build-Core:
     name: ⚙️ Build TypeScript Core
@@ -79,7 +83,6 @@ jobs:
       - name: Install deps & Publish
         env:
           PUBLISH: 1
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           bun install
           bun run build

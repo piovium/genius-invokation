@@ -11,6 +11,7 @@
     "build:prod": "bun scripts/build.ts -n"
   },
   "devDependencies": {
+    "@gi-tcg/config": "workspace:*",
     "@arethetypeswrong/cli": "^0.16.4",
     "@bufbuild/buf": "^1.47.2",
     "@microsoft/api-extractor": "^7.53.1",
@@ -23,7 +24,7 @@
   },
   "overrides": {
     "esbuild": "0.19.11",
-    "caniuse-lite": "1.0.30001690",
+    "caniuse-lite": "1.0.30001778",
     "babel-plugin-jsx-dom-expressions": "0.39.6",
     "ajv": "8.5.0"
   },
