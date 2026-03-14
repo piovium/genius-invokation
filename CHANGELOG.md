@@ -2,6 +2,13 @@
 
 **仅记录破坏性改动。**
 
+## 0.18.0
+- 支持 Attachments
+- 完成手牌的 Entity 化，导致 ExposedMutation 重构：
+  - CreateCard 合入 CreateEntity；
+  - MoveCard 合入 MoveEntity；
+  - RemoveCard 等整合为 MoveEntity（打出支援或装备）/ RemoveEntity（其它）。
+
 ## 0.17.0
 - 修改了 Protobuf TypeScript 的生成方式，现在使用 Tagged Union ADT。
 - 修改了大量 `ExposedMutation` 的结构，主要包括：
