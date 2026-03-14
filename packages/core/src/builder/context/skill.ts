@@ -991,7 +991,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   ) {
     const targets = this.queryOrGet(target);
     for (const t of targets) {
-      const target = t.latest();
+      let target = t.latest();
       if (target.definition.type === "character") {
         throw new GiTcgDataError(
           `Character caller cannot be disposed. You may forget an argument when calling \`dispose\``,
@@ -1001,15 +1001,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
         DetailLogType.Primitive,
         `Dispose ${stringifyState(target)} for ${reason}`,
       );
-      this.emitEvent(
-        "onDispose",
-        this.rawState,
-        target as EntityStateO,
-        reason,
-        t.area,
-        this.skillInfo,
-      );
-
       if (
         !direct &&
         target.definition.type !== "attachment" &&
@@ -1018,7 +1009,16 @@ export class SkillContext<Meta extends ContextMetaBase> {
         target.definition.disposeWhenUsageIsZero
       ) {
         this.setVariable("usage", 0, target);
+        target = t.latest();
       }
+      this.emitEvent(
+        "onDispose",
+        this.rawState,
+        target as EntityStateO,
+        reason,
+        t.area,
+        this.skillInfo,
+      );
       this.mutate({
         type: "removeEntity",
         from: t.area,
