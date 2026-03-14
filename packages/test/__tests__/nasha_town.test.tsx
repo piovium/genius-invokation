@@ -35,7 +35,7 @@ test("nasha town: triggered when disposed by broken sea", async () => {
   c.expect(target).toHaveVariable({ health: 8 });
 });
 
-test("nasha town: triggered when disposed by playing another support", async () => {
+test("nasha town: not triggered when disposed by playing another support", async () => {
   const target = ref();
   const nashaTown = ref();
   const c = setup(
