@@ -18,7 +18,7 @@
     },
     "packages/assets-manager": {
       "name": "@gi-tcg/assets-manager",
-      "version": "0.18.3",
+      "version": "0.18.4",
       "dependencies": {
         "@gi-tcg/typings": "workspace:*",
         "p-limit": "^7.1.1",
@@ -30,7 +30,7 @@
     },
     "packages/card-data-viewer": {
       "name": "@gi-tcg/card-data-viewer",
-      "version": "0.18.3",
+      "version": "0.18.4",
       "dependencies": {
         "@gi-tcg/assets-manager": "workspace:*",
         "@gi-tcg/utils": "workspace:*",
@@ -73,7 +73,7 @@
     },
     "packages/core": {
       "name": "@gi-tcg/core",
-      "version": "0.18.3",
+      "version": "0.18.4",
       "dependencies": {
         "@gi-tcg/typings": "workspace:*",
         "@gi-tcg/utils": "workspace:*",
@@ -88,7 +88,7 @@
     },
     "packages/custom-data-loader": {
       "name": "@gi-tcg/custom-data-loader",
-      "version": "0.18.3-6-0-0",
+      "version": "0.18.4-6-0-0",
       "dependencies": {
         "@gi-tcg/data": "workspace:*",
       },
@@ -109,7 +109,7 @@
     },
     "packages/data": {
       "name": "@gi-tcg/data",
-      "version": "0.18.3-6-4-0",
+      "version": "0.18.4-6-4-0",
       "devDependencies": {
         "@gi-tcg/assets-manager": "workspace:*",
         "@gi-tcg/config": "workspace:*",
@@ -145,7 +145,7 @@
     },
     "packages/deck-builder": {
       "name": "@gi-tcg/deck-builder",
-      "version": "0.18.3",
+      "version": "0.18.4",
       "dependencies": {
         "@gi-tcg/assets-manager": "workspace:*",
         "@gi-tcg/card-data-viewer": "workspace:*",
@@ -194,7 +194,7 @@
     },
     "packages/server": {
       "name": "@gi-tcg/server",
-      "version": "0.18.3",
+      "version": "0.18.4",
       "dependencies": {
         "@fastify/etag": "^5.2.0",
         "@gi-tcg/assets-manager": "workspace:*",
@@ -272,14 +272,14 @@
     },
     "packages/typings": {
       "name": "@gi-tcg/typings",
-      "version": "0.18.3",
+      "version": "0.18.4",
       "dependencies": {
         "@bufbuild/protobuf": "^2.2.2",
       },
     },
     "packages/utils": {
       "name": "@gi-tcg/utils",
-      "version": "0.18.3",
+      "version": "0.18.4",
       "devDependencies": {
         "@gi-tcg/typings": "workspace:*",
       },
@@ -323,7 +323,7 @@
     },
     "packages/web-ui": {
       "name": "@gi-tcg/web-ui",
-      "version": "0.18.3",
+      "version": "0.18.4",
       "devDependencies": {
         "@gi-tcg/detail-log-viewer": "workspace:*",
         "@gi-tcg/web-ui-core": "workspace:*",
@@ -336,7 +336,7 @@
     },
     "packages/web-ui-core": {
       "name": "@gi-tcg/web-ui-core",
-      "version": "0.18.3",
+      "version": "0.18.4",
       "dependencies": {
         "@gi-tcg/assets-manager": "workspace:*",
         "@gi-tcg/card-data-viewer": "workspace:*",
