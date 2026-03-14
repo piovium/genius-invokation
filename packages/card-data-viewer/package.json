@@ -1,6 +1,6 @@
 {
   "name": "@gi-tcg/card-data-viewer",
-  "version": "0.18.2",
+  "version": "0.18.3",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

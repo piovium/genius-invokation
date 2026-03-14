@@ -1,6 +1,6 @@
 {
   "name": "@gi-tcg/core",
-  "version": "0.18.2",
+  "version": "0.18.3",
   "type": "module",
   "description": "Genius Invokation TCG Simulator core library",
   "types": "./dist/index.d.ts",

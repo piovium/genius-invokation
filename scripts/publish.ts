@@ -38,7 +38,7 @@ const packages = [
   "web-ui-core",
   "web-ui",
 ];
-const VERSION = "0.18.2";
+const VERSION = "0.18.3";
 
 const doPublish = !!process.env.PUBLISH;
 if (!doPublish) {
@@ -150,6 +150,6 @@ for (const { packageJson, directory } of packageInfos) {
   // Bro attw is so strict
   await $`bunx --bun attw --pack ${publishDir}`.nothrow();
   if (doPublish) {
-    await $`bunx npm publish --provenance --access public`.cwd(publishDir);
+    await $`bunx npm@latest publish --provenance --access public`.cwd(publishDir);
   }
 }
