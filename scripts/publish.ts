@@ -38,7 +38,7 @@ const packages = [
   "web-ui-core",
   "web-ui",
 ];
-const VERSION = "0.18.1";
+const VERSION = "0.18.2";
 
 const doPublish = !!process.env.PUBLISH;
 if (!doPublish) {
@@ -63,7 +63,7 @@ function transferWorkspaceDeps(deps: Partial<Record<string, string>> = {}) {
       }
       deps[key] = foundDep.packageJson.version;
     } else if (value === "catalog:") {
-      deps[key] = rootPackageJson.catalog[key];
+      deps[key] = (rootPackageJson.catalog as Record<string, string>)[key];
     }
   }
 }
@@ -111,8 +111,11 @@ for (const pkg of packages) {
     delete packageJson.devDependencies;
   }
   packageJson.exports = removeBunFromExport(packageJson.exports);
-  packageJson.author = "Guyutongxue";
-  packageJson.repository = "github:Guyutongxue/genius-invokation";
+  packageJson.author = "Piovium Labs";
+  packageJson.repository = {
+    type: "git",
+    url: "git+https://github.com/piovium/genius-invokation.git",
+  };
   packageJson.license = "AGPL-3.0-or-later";
   packageInfos.push({ directory, packageJson });
   if (!existsSync(`${directory}/dist`)) {
@@ -147,6 +150,6 @@ for (const { packageJson, directory } of packageInfos) {
   // Bro attw is so strict
   await $`bunx --bun attw --pack ${publishDir}`.nothrow();
   if (doPublish) {
-    await $`bunx npm publish --access public`.cwd(publishDir);
+    await $`bunx npm publish --provenance --access public`.cwd(publishDir);
   }
 }

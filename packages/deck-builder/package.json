@@ -1,6 +1,6 @@
 {
   "name": "@gi-tcg/deck-builder",
-  "version": "0.18.1",
+  "version": "0.18.2",
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
