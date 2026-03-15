@@ -197,6 +197,7 @@ function initPlayerState(
     hasDefeated: false,
     legendUsed: false,
     skipNextTurn: false,
+    defeatedSwitching: false,
     roundSkillLog: new Map(),
     removedEntities: [],
   };
@@ -840,15 +841,15 @@ export class Game {
             break;
           }
         }
-        await this.handleEvent(
-          "onAction",
-          new ActionEventArg(this.state, actionInfo),
-        );
         if (!actionInfo.fast) {
           this.mutate({
             type: "switchTurn",
           });
         }
+        await this.handleEvent(
+          "onAction",
+          new ActionEventArg(this.state, actionInfo),
+        );
       }
     }
     if (

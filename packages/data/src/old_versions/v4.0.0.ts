@@ -317,7 +317,10 @@ const EmblemOfSeveredFate = card(312008)
 const WindAndFreedomInEffect = combatStatus(303181) 
   .until("v4.0.0")
   .oneDuration()
-  .on("defeated", (c, e) => c.isMyTurn() && !e.target.isMine())
+  .on("defeated", (c, e) =>
+    c.isMyTurn() && 
+    !e.target.isMine() && 
+    (c.phase === "action" || c.player.defeatedSwitching || c.oppPlayer.defeatedSwitching))
   .listenToAll()
   .usage(1)
   .continueNextTurn()

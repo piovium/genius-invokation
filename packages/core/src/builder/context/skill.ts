@@ -1754,15 +1754,12 @@ export class SkillContext<Meta extends ContextMetaBase> {
   continueNextTurn(who: "my" | "opp" = "my") {
     const skipWho =
       who === "my" ? flip(this.callerArea.who) : this.callerArea.who;
-    const playerToSkip = this.rawState.players[skipWho];
-    if (!playerToSkip.declaredEnd) {
-      this.mutate({
-        type: "setPlayerFlag",
-        who: skipWho,
-        flagName: "skipNextTurn",
-        value: true,
-      });
-    }
+    this.mutate({
+      type: "setPlayerFlag",
+      who: skipWho,
+      flagName: "skipNextTurn",
+      value: true,
+    });
     return this.enableShortcut();
   }
 

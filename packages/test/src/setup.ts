@@ -218,6 +218,7 @@ function emptyPlayerState(who: 0 | 1): Draft<PlayerState> {
     hasDefeated: false,
     legendUsed: false,
     skipNextTurn: false,
+    defeatedSwitching: false,
     roundSkillLog: new Map(),
   };
 }
