@@ -319,6 +319,7 @@ const WindAndFreedomInEffect = combatStatus(303181)
   .oneDuration()
   .on("defeated", (c, e) =>
     c.isMyTurn() && 
+    !c.oppPlayer.declaredEnd &&
     !e.target.isMine() && 
     (c.phase === "action" || c.player.defeatedSwitching || c.oppPlayer.defeatedSwitching))
   .listenToAll()

@@ -13,13 +13,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Equipment, Card, Summon, CombatStatus, DeclaredEnd } from "#test";
+import { ref, setup, Character, State, Equipment, Card, Summon, CombatStatus, DeclaredEnd, Support } from "#test";
+import { GamblersEarrings } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { FreshWindOfFreedom, FreshWindOfFreedomInEffect } from "@gi-tcg/data/internal/cards/event/legend";
+import { CountdownToTheShow2, IdRatherLoseMoneyMyself } from "@gi-tcg/data/internal/cards/event/other";
+import { Vanarana } from "@gi-tcg/data/internal/cards/support/place";
 import { LargeWindSpirit, Sucrose, WindSpiritCreation } from "@gi-tcg/data/internal/characters/anemo/sucrose";
 import { CeremonialBladework, Icicle, Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";
 import { SesshouSakura, SpiritfoxSineater, YaeMiko } from "@gi-tcg/data/internal/characters/electro/yae_miko";
 import { Chevreuse, SecondaryExplosiveShells } from "@gi-tcg/data/internal/characters/pyro/chevreuse";
 import { Guoba, Xiangling } from "@gi-tcg/data/internal/characters/pyro/xiangling";
+import { Shield } from "@gi-tcg/data/internal/commons";
 import { Aura } from "@gi-tcg/typings";
 import { expect, test } from "bun:test";
 
@@ -165,3 +169,36 @@ test("FreshWindOfFreedom: do NOT triggered by SesshouSakura", async () => {
   await c.me.skill(SpiritfoxSineater);
   expect(c.state.currentTurn).toBe(1);
 });
+
+// “看到那小子挣钱”的“bug”和新风有紧密联系，也在这里写下单测
+test("IdRatherLoseMoneyMyself: on endPhase, trigger generateDice", async () => {
+  const oppNext = ref();
+  const c = setup(
+    <State>
+      <Card opp def={IdRatherLoseMoneyMyself} />
+      <Card opp def={CountdownToTheShow2} />
+      <Support opp def={Vanarana} />
+      <Character opp active def={Kaeya} health={1} />
+      <Character opp ref={oppNext} />
+      <Character my active def={Xiangling}>
+        <Equipment def={GamblersEarrings} />
+      </Character>
+      <Summon my def={Guoba} />
+    </State>
+  );
+  await c.me.end();
+  await c.opp.card(IdRatherLoseMoneyMyself);
+  // 把骰子耗光
+  await c.opp.skill(CeremonialBladework);
+  await c.opp.skill(CeremonialBladework);
+  await c.opp.card(CountdownToTheShow2);
+  expect(c.state.players[1].dice).toBeArrayOfSize(0);
+
+  await c.opp.end();
+  // 锅巴击倒对面出战，选人
+  await c.opp.chooseActive(oppNext);
+
+  // 对方赚钱没有触发生成护盾
+  c.expect(`opp combat status with definition id ${Shield}`).toNotExist();
+  expect(c.state.players[1].dice).toBeArrayOfSize(10);
+})
