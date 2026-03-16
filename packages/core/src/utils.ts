@@ -184,7 +184,7 @@ export function initiativeSkillsOfPlayer(
         .filter(
           (sk): sk is InitiativeSkillDefinition =>
             sk.triggerOn === "initiative" &&
-            sk.initiativeSkillConfig.skillType !== "playCard" &&
+            sk.skillType !== "playCard" &&
             (includesHidden || !sk.initiativeSkillConfig.hidden),
         )
         .map((sk) => ({
@@ -380,7 +380,7 @@ export function isCharacterInitiativeSkill(
   }
   return (
     skill.definition.triggerOn === "initiative" &&
-    allowSkillType.includes(skill.definition.initiativeSkillConfig.skillType)
+    allowSkillType.includes(skill.definition.skillType as SkillType)
   );
 }
 
@@ -557,7 +557,7 @@ export function isChargedPlunging(skill: SkillDefinition, player: PlayerState) {
   }
   let charged = skill.initiativeSkillConfig.alwaysCharged;
   let plunging = skill.initiativeSkillConfig.alwaysPlunging;
-  const isNormal = skill.initiativeSkillConfig.skillType === "normal";
+  const isNormal = skill.skillType === "normal";
   if (!isNormal) {
     return { charged, plunging };
   }
@@ -622,8 +622,7 @@ export function playSkillOfCard(
   card: EntityDefinition,
 ): InitiativeSkillDefinition | null {
   const skillDefinition = card.skills.find(
-    (sk): sk is InitiativeSkillDefinition =>
-      sk.initiativeSkillConfig?.skillType === "playCard",
+    (sk): sk is InitiativeSkillDefinition => sk.skillType === "playCard",
   );
   return skillDefinition ?? null;
 }

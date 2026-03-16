@@ -689,6 +689,7 @@ export class CardBuilder<
         0.04 +
         Object.keys(this._descriptionDictionary).length * 0.0001,
       ownerType: this._type,
+      skillType: null,
       triggerOn: eventName,
       initiativeSkillConfig: null,
       filter: filterFn as any,
@@ -747,6 +748,7 @@ export class CardBuilder<
         type: "skill",
         id: this.cardId + 0.02,
         ownerType: this._type,
+        skillType: null,
         triggerOn: "onDispose",
         initiativeSkillConfig: null,
         action: disposeAction,
@@ -786,6 +788,7 @@ export class CardBuilder<
         type: "skill",
         id: this.cardId + 0.03,
         ownerType: this._type,
+        skillType: null,
         triggerOn: "onHandCardInserted",
         initiativeSkillConfig: null,
         filter: (st, info, arg) => {
@@ -798,9 +801,9 @@ export class CardBuilder<
         type: "skill",
         id: this.cardId + 0.01,
         ownerType: this._type,
+        skillType: "playCard",
         triggerOn: "initiative",
         initiativeSkillConfig: {
-          skillType: "playCard",
           requiredCost: normalizeCost(this._cost),
           computed$costSize: costSize(this._cost),
           computed$diceCostSize: diceCostSize(this._cost),
@@ -825,9 +828,9 @@ export class CardBuilder<
         type: "skill",
         id: this.cardId + 0.01,
         ownerType: this._type,
+        skillType: "playCard",
         triggerOn: "initiative",
         initiativeSkillConfig: {
-          skillType: "playCard",
           requiredCost: normalizeCost(this._cost),
           computed$costSize: costSize(this._cost),
           computed$diceCostSize: diceCostSize(this._cost),

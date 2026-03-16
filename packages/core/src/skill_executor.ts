@@ -129,10 +129,10 @@ export class SkillExecutor {
     const prependMutations: ExposedMutation[] = [];
     if (
       skillDef.ownerType !== "extension" &&
-      skillDef.initiativeSkillConfig?.skillType !== "playCard"
+      skillDef.skillType !== "playCard"
     ) {
       let skillType: PbSkillType;
-      switch (skillDef.initiativeSkillConfig?.skillType) {
+      switch (skillDef.skillType) {
         case "normal":
           skillType = PbSkillType.NORMAL;
           break;

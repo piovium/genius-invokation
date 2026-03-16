@@ -69,6 +69,7 @@ export class ExtensionBuilder<ExtStateType extends object> {
       initiativeSkillConfig: null,
       id: this.generateSkillId(),
       ownerType: "extension",
+      skillType: null,
       triggerOn: event,
       filter: () => true,
       action,

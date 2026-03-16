@@ -136,7 +136,7 @@ export interface DisposeOption {
   reason?: RemoveEntityM["reason"];
   /**
    * 是否直接弃置。
-   * 
+   *
    * 默认情况下，在弃置目标有 usage 的前提下，会先清空 usage 后再弃置，从而正确触发那夏镇等；
    * 在部分系统内置结算中（如弃置已有支援区实体以打出支援牌时）不适用，此时需设置 `direct: true`
    */
@@ -1799,7 +1799,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     let skillId: number;
     if (skill === "normal") {
       const normalSkill = this.$("my active")!.definition.skills.find(
-        (sk) => sk.initiativeSkillConfig?.skillType === "normal",
+        (sk) => sk.skillType === "normal",
       );
       if (normalSkill) {
         skillId = normalSkill.id;
