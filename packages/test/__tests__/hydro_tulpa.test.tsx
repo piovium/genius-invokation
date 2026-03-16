@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Equipment, CombatStatus, Card } from "#test";
+import { ref, setup, Character, State, Card } from "#test";
 import { TandooriRoastChicken } from "@gi-tcg/data/internal/cards/event/food";
 import { HydroTulpa, StormSurge } from "@gi-tcg/data/internal/characters/hydro/hydro_tulpa";
-import { expect, test } from "bun:test";
+import { test } from "bun:test";
 
 test("hydro tulpa: E can be increaseSkillDamage'd", async () => {
   const tulpa = ref();
