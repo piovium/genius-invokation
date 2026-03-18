@@ -41,7 +41,7 @@ await app.register(frontend);
 if (process.env.NODE_ENV !== "production") {
   app.enableCors({
     origin: "*",
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    methods: ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"],
   });
 }
 
