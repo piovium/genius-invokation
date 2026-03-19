@@ -45,13 +45,6 @@ class NonTerminalsConfig {
         args: [
           { name: "targetQuery", use: "UnorderedQuery" },
           { name: "orderBySpec", list: { use: "OrderBySpec" } },
-        ],
-      },
-      {
-        leading: "orderBy",
-        args: [
-          { name: "targetQuery", use: "UnorderedQuery" },
-          { name: "orderBySpec", list: { use: "OrderBySpec" } },
           { name: "limit", arbitrary: "number" },
         ],
       },
@@ -100,7 +93,7 @@ class NonTerminalsConfig {
             name: "byPath",
             enum: ["true", "false"],
             description: `Whether use the \`path\` semantics to filter the area, which means the equipments/statuses attached to characters and attachments attached on hand/pile cards are not considered when byPath is true`,
-          }
+          },
         ],
       },
       {
@@ -357,29 +350,31 @@ type InferRule<R extends Rule, Visited extends string = never> = R extends {
   use: infer U extends NonTerminalName;
 }
   ? InferNonTerminal<U, Visited>
-  : R extends { enum: infer E extends string[] }
-    ? E[number]
-    : R extends { arbitrary: infer A extends "string" | "number" }
-      ? A extends "string"
-        ? string
-        : number
-      : R extends {
-            leading: infer L extends string;
-            args: infer Args extends Argument[];
-          }
-        ? InferExpr<L, Args, undefined, Visited>
+  : R extends { list: infer L extends Rule }
+    ? InferRule<L, Visited>[]
+    : R extends { enum: infer E extends string[] }
+      ? E[number]
+      : R extends { arbitrary: infer A extends "string" | "number" }
+        ? A extends "string"
+          ? string
+          : number
         : R extends {
               leading: infer L extends string;
               args: infer Args extends Argument[];
-              restArgs: infer RestArgs extends Argument;
             }
-          ? InferExpr<L, Args, RestArgs, Visited>
+          ? InferExpr<L, Args, undefined, Visited>
           : R extends {
                 leading: infer L extends string;
+                args: infer Args extends Argument[];
                 restArgs: infer RestArgs extends Argument;
               }
-            ? InferExpr<L, undefined, RestArgs, Visited>
-            : never;
+            ? InferExpr<L, Args, RestArgs, Visited>
+            : R extends {
+                  leading: infer L extends string;
+                  restArgs: infer RestArgs extends Argument;
+                }
+              ? InferExpr<L, undefined, RestArgs, Visited>
+              : never;
 
 type InferExpr<
   L extends string,
