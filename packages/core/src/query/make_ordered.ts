@@ -1,14 +1,25 @@
+import type { CharacterVariableConfigs } from "../base/character";
 import type { SExprSchema } from "./expr_schema";
 import {
   toExpression,
   toExpressionUnordered,
   type IUnorderedQuery,
+  type NonIndexKeyOf,
   type TypingInfoBase,
 } from "./utils";
 
 const isUnorderedQuery = (query: unknown): query is IUnorderedQuery => {
   return !!query && typeof query === "object" && toExpressionUnordered in query;
 };
+
+type A = NonIndexKeyOf<CharacterVariableConfigs>;
+
+type VarName<Ty extends TypingInfoBase> =
+  | Ty["variables"]
+  | (Ty["type"] extends "character"
+      ? NonIndexKeyOf<CharacterVariableConfigs>
+      : never);
+// | (string & {});
 
 export class MakeOrderedMethods<Ty extends TypingInfoBase> {
   private _unorderedQuery: SExprSchema.UnorderedQuery;
@@ -29,19 +40,19 @@ export class MakeOrderedMethods<Ty extends TypingInfoBase> {
       throw new Error("Expected an unordered query");
     }
   }
-  sortByFn(
-    fn: (variables: Record<Ty["variables"], number>) => number,
+  orderByFn(
+    fn: (variables: Record<VarName<Ty>, number>) => number,
   ): MakeOrderedMethods<Ty> {
     this._orderBySpecs.push(["fn", fn.toString()]);
     return this._makeThisOrdered();
   }
-  sortBy<V extends Ty["variables"]>(variable: V): MakeOrderedMethods<Ty>;
-  sortBy<V1 extends Ty["variables"], V2 extends Ty["variables"]>(
+  orderBy<V extends VarName<Ty>>(variable: V): MakeOrderedMethods<Ty>;
+  orderBy<V1 extends VarName<Ty>, V2 extends VarName<Ty>>(
     lhs: V1 | number,
     op: "+" | "-" | "*" | "/" | "%",
     rhs: V2 | number,
   ): MakeOrderedMethods<Ty>;
-  sortBy(
+  orderBy(
     lhs: string | number,
     op?: "+" | "-" | "*" | "/" | "%",
     rhs?: string | number,
@@ -53,7 +64,7 @@ export class MakeOrderedMethods<Ty extends TypingInfoBase> {
     }
     return this._makeThisOrdered();
   }
-  sortByRaw(...specs: SExprSchema.OrderBySpec[]) {
+  orderByRaw(...specs: SExprSchema.OrderBySpec[]) {
     this._orderBySpecs.push(...specs);
     return this._makeThisOrdered();
   }

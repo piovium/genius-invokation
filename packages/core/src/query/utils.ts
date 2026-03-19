@@ -88,6 +88,16 @@ type _CheckFunctionPrototypePropertyExhausted = StaticAssert<
   IsExtends<keyof Function, keyof NotFunctionPrototype>
 >;
 
+export type NonIndexKeyOf<T> = keyof {
+  [K in keyof T as string extends K
+    ? never
+    : number extends K
+      ? never
+      : symbol extends K
+        ? never
+        : K]: 0;
+};
+
 export type AnyTuple = [unknown, ...unknown[]] | [];
 
 export type Constructor<T = any> = new (...args: any[]) => T;
@@ -154,7 +164,7 @@ export interface IUnorderedQuery<Ty extends TypingInfoBase = TypingInfoBase>
   [toExpressionUnordered]: () => SExprSchema.UnorderedQuery;
 }
 
-export type InferResult<Q extends IUnorderedQuery> = Computed<
+export type InferResult<Q extends IQuery> = Computed<
   Q[TypingInfoSymbol],
   TypingInfoBase
 >;

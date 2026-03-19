@@ -131,3 +131,6 @@ expectEntityType<"status" | "combatStatus" | "summon">()(
     .intersection($.typeStatus.union($.combatStatus).union($.summon))
     .intersection($.tag("barrier").union($.tag("shield"))),
 );
+
+// orderBy & limit
+$.my.character.orderBy("health").limit(1);
