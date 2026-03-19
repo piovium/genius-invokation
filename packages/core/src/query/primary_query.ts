@@ -1,6 +1,7 @@
 import { mixins } from "../utils";
 import { BinaryMethods } from "./binary_methods";
 import type { SExprSchema } from "./expr_schema";
+import { MakeOrderedMethods } from "./make_ordered";
 import { PrimaryMethods } from "./primary_methods";
 import { RelationMethods } from "./relation_methods";
 import {
@@ -77,6 +78,7 @@ const PrimaryQuery = mixins(PrimaryQueryImpl, [
   PrimaryMethods,
   RelationMethods,
   BinaryMethods,
+  MakeOrderedMethods,
 ]) as any;
 
 export const createPrimaryQuery = <Meta extends HeterogeneousMetaBase>(
@@ -95,6 +97,7 @@ export type PrimaryQuery<Meta extends HeterogeneousMetaBase> = Computed<
       returns: "identical";
     }
       ? BinaryMethods<ReturnOfMeta<Meta>>
-      : {}),
+      : {}) &
+    MakeOrderedMethods<ReturnOfMeta<Meta>>,
   IUnorderedQuery<ReturnOfMeta<Meta>>
 > & { META: Meta };

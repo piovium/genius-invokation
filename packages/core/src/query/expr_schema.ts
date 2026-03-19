@@ -220,7 +220,7 @@ class NonTerminalsConfig {
           {
             name: "fnCode",
             arbitrary: "string",
-            description: `JS Function body, receives two object containing variable values of each, returns -1, 0 or 1`,
+            description: `JS Function body, receives a object containing variable values, returns number`,
           },
         ],
       },

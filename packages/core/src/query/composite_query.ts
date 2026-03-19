@@ -1,6 +1,7 @@
 import { mixins } from "../utils";
 import { BinaryMethods } from "./binary_methods";
 import type { SExprSchema } from "./expr_schema";
+import { MakeOrderedMethods } from "./make_ordered";
 import {
   toExpression,
   toExpressionUnordered,
@@ -41,7 +42,9 @@ export type IntersectionTy<Metas extends TypingInfoBase[]> = Computed<
   TypingInfoBase
 >;
 
-class CompositeQueryImpl<Ty extends TypingInfoBase> implements IUnorderedQuery<Ty> {
+class CompositeQueryImpl<Ty extends TypingInfoBase>
+  implements IUnorderedQuery<Ty>
+{
   declare [typingInfo]: Ty;
   constructor(
     private readonly type: CompositeOperator,
@@ -71,14 +74,21 @@ class CompositeQueryImpl<Ty extends TypingInfoBase> implements IUnorderedQuery<T
         this.operands[1][toExpressionUnordered](),
       ];
     }
-    return [this.type, ...this.operands.map((op) => op[toExpressionUnordered]())];
+    return [
+      this.type,
+      ...this.operands.map((op) => op[toExpressionUnordered]()),
+    ];
   }
   [toExpression](): SExprSchema.Query {
     return this[toExpressionUnordered]();
   }
 }
 
-const CompositeQuery = mixins(CompositeQueryImpl, [BinaryMethods]) as any;
+const CompositeQuery = mixins(CompositeQueryImpl, [
+  BinaryMethods,
+  MakeOrderedMethods,
+]) as any;
+
 export const createCompositeQuery = <Ty extends TypingInfoBase>(
   type: CompositeOperator,
   operands: IUnorderedQuery[],
@@ -87,6 +97,6 @@ export const createCompositeQuery = <Ty extends TypingInfoBase>(
 };
 
 export type CompositeQuery<Ty extends TypingInfoBase> = Computed<
-  CompositeQueryImpl<Ty> & BinaryMethods<Ty>,
+  CompositeQueryImpl<Ty> & BinaryMethods<Ty> & MakeOrderedMethods<Ty>,
   IUnorderedQuery<Ty>
 >;
