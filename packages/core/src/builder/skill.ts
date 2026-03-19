@@ -370,7 +370,7 @@ export const detailedEventDictionary = {
     return (
       e.type !== DamageType.Piercing &&
       checkRelative(e.onTimeState, e.source.id, r) &&
-      e.via.definition.initiativeSkillConfig?.skillType === "technique" &&
+      e.via.definition.skillType === "technique" &&
       e.damageInfo.fromReaction === null
     );
   }),
@@ -875,6 +875,7 @@ export class TriggeredSkillBuilder<
 > extends SkillBuilder<
   CreateSkillBuilderMeta<EventArgType, CallerType, CallerVars, AssociatedExt>
 > {
+  private _asSkillType: CommonSkillType | null = null;
   private _delayedToSkill = false;
   private _beforeDefaultDispose = false;
   private _enableHandTriggering = false;
@@ -909,6 +910,14 @@ export class TriggeredSkillBuilder<
     this.associatedExtensionId = this.parent._associatedExtensionId;
     this._enableHandTriggering = parent._type === "attachment";
     this._enablePileTriggering = parent._type === "attachment";
+  }
+
+  asSkillType(skillType: CommonSkillType) {
+    if (this.parent._type !== "character") {
+      throw new GiTcgDataError("Only character's triggered skill can specify skill type.");
+    }
+    this._asSkillType = skillType;
+    return this;
   }
   
   delayedToSkill() {
@@ -1144,6 +1153,7 @@ export class TriggeredSkillBuilder<
         type: "skill",
         id: this.id,
         ownerType: this.parent._type,
+        skillType: this._asSkillType,
         triggerOn: "onUseSkill",
         initiativeSkillConfig: null,
         filter: useSkillFilter,
@@ -1171,6 +1181,7 @@ export class TriggeredSkillBuilder<
         type: "skill",
         id: this.id,
         ownerType: this.parent._type,
+        skillType: this._asSkillType,
         triggerOn,
         initiativeSkillConfig: null,
         filter,
@@ -1542,8 +1553,8 @@ export class InitiativeSkillBuilder<
         type: "skill",
         id: this.skillId,
         ownerType: "character",
+        skillType: this._skillType,
         initiativeSkillConfig: {
-          skillType: this._skillType,
           requiredCost: normalizeCost(this._cost),
           computed$costSize: costSize(this._cost),
           computed$diceCostSize: diceCostSize(this._cost),
@@ -1690,9 +1701,9 @@ export class TechniqueBuilder<
       type: "skill",
       id: this.id,
       ownerType: "equipment",
+      skillType: "technique",
       triggerOn: "initiative",
       initiativeSkillConfig: {
-        skillType: "technique",
         requiredCost: normalizeCost(this._cost),
         computed$costSize: costSize(this._cost),
         computed$diceCostSize: diceCostSize(this._cost),

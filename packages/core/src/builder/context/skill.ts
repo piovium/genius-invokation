@@ -132,6 +132,17 @@ export interface HealOption {
   kind?: HealKind;
 }
 
+export interface DisposeOption {
+  reason?: RemoveEntityM["reason"];
+  /**
+   * 是否直接弃置。
+   *
+   * 默认情况下，在弃置目标有 usage 的前提下，会先清空 usage 后再弃置，从而正确触发那夏镇等；
+   * 在部分系统内置结算中（如弃置已有支援区实体以打出支援牌时）不适用，此时需设置 `direct: true`
+   */
+  direct?: boolean;
+}
+
 export interface GenerateDiceOption {
   randomIncludeOmni?: boolean;
   randomAllowDuplicate?: boolean;
@@ -882,7 +893,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
           const exist = t.entities.find((v) => v.definition.tags.includes(tag));
           if (exist) {
             // TODO: maybe better reason
-            this.dispose(exist, "overflow");
+            this.dispose(exist, {
+              reason: "overflow",
+              direct: true,
+            });
           }
         }
       }
@@ -973,11 +987,11 @@ export class SkillContext<Meta extends ContextMetaBase> {
 
   dispose(
     target: EntityTargetArg = "@self",
-    reason: RemoveEntityM["reason"] = "other",
+    { reason = "other", direct }: DisposeOption = {},
   ) {
     const targets = this.queryOrGet(target);
     for (const t of targets) {
-      const target = t.latest();
+      let target = t.latest();
       if (target.definition.type === "character") {
         throw new GiTcgDataError(
           `Character caller cannot be disposed. You may forget an argument when calling \`dispose\``,
@@ -987,6 +1001,16 @@ export class SkillContext<Meta extends ContextMetaBase> {
         DetailLogType.Primitive,
         `Dispose ${stringifyState(target)} for ${reason}`,
       );
+      if (
+        !direct &&
+        target.definition.type !== "attachment" &&
+        target.variables.usage &&
+        target.variables.usage > 0 &&
+        target.definition.disposeWhenUsageIsZero
+      ) {
+        this.setVariable("usage", 0, target);
+        target = t.latest();
+      }
       this.emitEvent(
         "onDispose",
         this.rawState,
@@ -1095,7 +1119,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         target.definition.disposeWhenUsageIsZero &&
         this.getVariable("usage", target) <= 0
       ) {
-        this.dispose(target);
+        this.dispose(target, { direct: true });
       }
     }
     return RET;
@@ -1393,9 +1417,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
         const area = cardEntity.area;
         if (area.type !== "pile") {
           throw new GiTcgDataError(
-            `Cannot draw card ${stringifyState(cardState)} from ${stringifyEntityArea(
-              area,
-            )}`,
+            `Cannot draw card ${stringifyState(
+              cardState,
+            )} from ${stringifyEntityArea(area)}`,
           );
         }
         using l = this.mutator.subLog(
@@ -1730,15 +1754,12 @@ export class SkillContext<Meta extends ContextMetaBase> {
   continueNextTurn(who: "my" | "opp" = "my") {
     const skipWho =
       who === "my" ? flip(this.callerArea.who) : this.callerArea.who;
-    const playerToSkip = this.rawState.players[skipWho];
-    if (!playerToSkip.declaredEnd) {
-      this.mutate({
-        type: "setPlayerFlag",
-        who: skipWho,
-        flagName: "skipNextTurn",
-        value: true,
-      });
-    }
+    this.mutate({
+      type: "setPlayerFlag",
+      who: skipWho,
+      flagName: "skipNextTurn",
+      value: true,
+    });
     return this.enableShortcut();
   }
 
@@ -1778,7 +1799,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     let skillId: number;
     if (skill === "normal") {
       const normalSkill = this.$("my active")!.definition.skills.find(
-        (sk) => sk.initiativeSkillConfig?.skillType === "normal",
+        (sk) => sk.skillType === "normal",
       );
       if (normalSkill) {
         skillId = normalSkill.id;

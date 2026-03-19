@@ -892,12 +892,8 @@ export const NashaTown = card(321038)
       c.attach(Empowerment, card);
     }
   })
-  .on("selfDispose")
-  .do((c) => {
-    if (c.getVariable("usage") === 0) {
-      c.damage(DamageType.Physical, 2);
-    }
-  })
+  .on("selfDispose", (c, e) => c.getVariable("usage") === 0)
+  .damage(DamageType.Physical, 2)
   .done();
 
 /**

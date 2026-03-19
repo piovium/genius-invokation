@@ -197,6 +197,7 @@ function initPlayerState(
     hasDefeated: false,
     legendUsed: false,
     skipNextTurn: false,
+    defeatedSwitching: false,
     roundSkillLog: new Map(),
     removedEntities: [],
   };
@@ -859,6 +860,18 @@ export class Game {
         type: "changePhase",
         newPhase: "end",
       });
+      // 进入结束阶段时，清空双方的宣布结束 flag。
+      // 这会完全模拟“看到那小子挣钱”在结束阶段仍然触发生骰的行为
+      // 也会保证“自由的新风”在结束阶段可以生效使下回合连续行动一次
+      // 参见 test package 的 fresh_wind_of_freedom.test.tsx
+      for (const who of [0, 1] as const) {
+        this.mutate({
+          type: "setPlayerFlag",
+          who,
+          flagName: "declaredEnd",
+          value: false,
+        });
+      }
     }
   }
   private async endPhase() {
@@ -873,11 +886,7 @@ export class Game {
     }
     await this.handleEvent("onRoundEnd", new EventArg(this.state));
     for (const who of [0, 1] as const) {
-      for (const flagName of [
-        "hasDefeated",
-        "canPlunging",
-        "declaredEnd",
-      ] as const) {
+      for (const flagName of ["hasDefeated", "canPlunging"] as const) {
         this.mutate({
           type: "setPlayerFlag",
           who,

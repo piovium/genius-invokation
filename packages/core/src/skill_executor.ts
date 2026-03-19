@@ -129,10 +129,10 @@ export class SkillExecutor {
     const prependMutations: ExposedMutation[] = [];
     if (
       skillDef.ownerType !== "extension" &&
-      skillDef.initiativeSkillConfig?.skillType !== "playCard"
+      skillDef.skillType !== "playCard"
     ) {
       let skillType: PbSkillType;
-      switch (skillDef.initiativeSkillConfig?.skillType) {
+      switch (skillDef.skillType) {
         case "normal":
           skillType = PbSkillType.NORMAL;
           break;
@@ -372,6 +372,9 @@ export class SkillExecutor {
     if (criticalDamageEvents.length === 0) {
       return;
     }
+    const savedSwitchingFlags = this.state.players.map(
+      (p) => p.defeatedSwitching,
+    );
     const switchPromises: [
       null | Promise<SwitchActiveInfo>,
       null | Promise<SwitchActiveInfo>,
@@ -388,6 +391,12 @@ export class SkillExecutor {
         DetailLogType.Other,
         `Active character of player ${who} is defeated. Waiting user choice`,
       );
+      this.mutator.mutate({
+        type: "setPlayerFlag",
+        who,
+        flagName: "defeatedSwitching",
+        value: true,
+      });
       switchPromises[who] = this.mutator.chooseActive(who).then((to) => ({
         type: "switchActive",
         who,
@@ -418,6 +427,14 @@ export class SkillExecutor {
     }
     for (const who of [currentTurn, flip(currentTurn)]) {
       await this.handleEvent(...switchEvents[who]);
+    }
+    for (const who of [0, 1] as const) {
+      this.mutator.mutate({
+        type: "setPlayerFlag",
+        who,
+        flagName: "defeatedSwitching",
+        value: savedSwitchingFlags[who],
+      });
     }
   }
 

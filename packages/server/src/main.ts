@@ -39,7 +39,10 @@ app.setGlobalPrefix(`${WEB_CLIENT_BASE_PATH}api`);
 await app.register(frontend);
 
 if (process.env.NODE_ENV !== "production") {
-  app.enableCors({ origin: "*" });
+  app.enableCors({
+    origin: "*",
+    methods: ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"],
+  });
 }
 
 await app.listen(process.env.PORT ?? 3000, "::", (err, address) => {

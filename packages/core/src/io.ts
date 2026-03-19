@@ -357,6 +357,8 @@ export function exposeMutation(
       const REASON_MAP: Record<RemoveEntityM["reason"], PbRemoveEntityReason> =
         {
           cardDisposed: PbRemoveEntityReason.CARD_DISPOSED,
+          targetOfSupportPlayed:
+            PbRemoveEntityReason.TARGET_OF_SUPPORT_PLAYED,
           elementalTuning: PbRemoveEntityReason.ELEMENTAL_TUNING,
           eventCardDrawn: PbRemoveEntityReason.EVENT_CARD_DRAWN,
           eventCardPlayed: PbRemoveEntityReason.EVENT_CARD_PLAYED,

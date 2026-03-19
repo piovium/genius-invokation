@@ -74,6 +74,7 @@ import type { DamageOption } from "../mutator";
 export interface SkillDefinitionBase<Arg> {
   readonly type: "skill";
   readonly ownerType: EntityType | "character" | "attachment" | "extension";
+  readonly skillType: SkillType | null;
   readonly id: number;
   readonly action: SkillDescription<Arg>;
   readonly filter: SkillActionFilter<Arg>;
@@ -127,7 +128,6 @@ export type InitiativeSkillTargetGetter = (
 ) => InitiativeSkillEventArg[];
 
 export interface InitiativeSkillConfig {
-  readonly skillType: SkillType;
   readonly requiredCost: ReadonlyDiceRequirement;
   readonly computed$costSize: number;
   readonly computed$diceCostSize: number;
@@ -448,7 +448,7 @@ export class ActionEventArg<
       const skillDef = this.action.skill.definition;
       return (
         character.definition.skills.some((sk) => sk.id === skillDef.id) &&
-        (!skillType || skillDef.initiativeSkillConfig.skillType === skillType)
+        (!skillType || skillDef.skillType === skillType)
       );
     } else if (this.isPlayCard()) {
       return !!(
@@ -463,7 +463,7 @@ export class ActionEventArg<
   isSkillType(skillType: CommonSkillType): boolean {
     if (this.isUseSkill()) {
       return (
-        this.action.skill.definition.initiativeSkillConfig.skillType ===
+        this.action.skill.definition.skillType ===
         skillType
       );
     } else {
@@ -679,7 +679,7 @@ export class UseSkillEventArg extends PlayerEventArg {
   }
   get techniqueCaller() {
     if (
-      this._skillInfo.definition.initiativeSkillConfig.skillType !== "technique"
+      this._skillInfo.definition.skillType !== "technique"
     ) {
       throw new GiTcgDataError(`techniqueCaller only available on technique`);
     }
@@ -697,7 +697,7 @@ export class UseSkillEventArg extends PlayerEventArg {
     return `use skill [skill:${this.skill.definition.id}]`;
   }
   isSkillType(skillType: CommonSkillType): boolean {
-    return this.skill.definition.initiativeSkillConfig?.skillType === skillType;
+    return this.skill.definition.skillType === skillType;
   }
   isChargedAttack(): this is ActionEventArg<UseSkillInfo> {
     return this.skill.charged;
@@ -822,7 +822,7 @@ export class DamageOrHealEventArg<
     return isReactionSwirl(this.damageInfo);
   }
   viaSkillType(skillType: CommonSkillType): boolean {
-    return this.via.definition.initiativeSkillConfig?.skillType === skillType;
+    return this.via.definition.skillType === skillType;
   }
   viaChargedAttack(): boolean {
     return this.via.charged;

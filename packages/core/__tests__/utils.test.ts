@@ -99,6 +99,7 @@ test("sort dice", () => {
     skipNextTurn: false,
     hasDefeated: false,
     legendUsed: false,
+    defeatedSwitching: false,
     roundSkillLog: new Map(),
     removedEntities: [],
   };

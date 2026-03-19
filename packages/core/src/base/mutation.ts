@@ -135,6 +135,7 @@ export interface RemoveEntityM {
   readonly oldState: AnyState;
   readonly reason:
     | "cardDisposed" // 舍弃
+    | "targetOfSupportPlayed"
     | "eventCardPlayed"
     | "eventCardDrawn"
     | "equipOverridden"

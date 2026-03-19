@@ -76,12 +76,16 @@ export const JoyousCelebration = card(330003)
  * 可用次数：1
  * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  */
-export const [FreshWindOfFreedom] = card(330004)
+export const [FreshWindOfFreedom, FreshWindOfFreedomInEffect] = card(330004)
   .since("v4.1.0")
   .legend()
   .toCombatStatus(300002)
   .oneDuration()
-  .on("defeated", (c, e) => c.isMyTurn() && !e.target.isMine())
+  .on("defeated", (c, e) =>
+    c.isMyTurn() && 
+    !c.oppPlayer.declaredEnd &&
+    !e.target.isMine() && 
+    (c.phase === "action" || c.player.defeatedSwitching || c.oppPlayer.defeatedSwitching))
   .listenToAll()
   .usage(1)
   .continueNextTurn()

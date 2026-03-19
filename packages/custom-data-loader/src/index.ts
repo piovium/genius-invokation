@@ -101,7 +101,7 @@ export class CustomDataLoader {
     };
     const parseSkill = (skill: SkillDefinition): CustomSkill => {
       const name = this.names.get(skill.id) ?? "";
-      const skillType = skill.initiativeSkillConfig?.skillType ?? "passive";
+      const skillType = skill.skillType ?? "passive";
       return {
         id: skill.id,
         type: skillType === "playCard" ? "passive" : skillType,

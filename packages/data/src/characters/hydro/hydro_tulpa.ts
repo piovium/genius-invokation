@@ -147,6 +147,7 @@ export const BranchingFlow = skill(22064)
   })
   // 汛波：造成2点水元素伤害；如果自身生命值不低于2，就造成1点穿透伤害
   .on("useSkill", (c, e) => e.skill.definition.id === StormSurge)
+  .asSkillType("elemental")
   .damage(DamageType.Hydro, 2)
   .if((c) => c.self.health >= 2)
   .damage(DamageType.Piercing, 1, "@self")

@@ -162,6 +162,11 @@ export interface PlayerState {
   readonly legendUsed: boolean;
   readonly skipNextTurn: boolean;
   /**
+   * 正在处于出战角色被击倒的重新选择角色的结算过程中。
+   * 官方实现可能是作为 `phase` 的特殊值，这里我们令其正交。
+   */
+  readonly defeatedSwitching: boolean;
+  /**
    * 每回合使用技能列表。
    * 键为技能发起者的角色定义 id，值为该定义下使用过的技能 id 列表
    */

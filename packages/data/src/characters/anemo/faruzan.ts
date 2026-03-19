@@ -39,10 +39,7 @@ export const DazzlingPolyhedron = summon(115093)
  * 行动阶段开始时：移除此效果，生成1个风元素。
  */
 export const TheWondrousPathOfTruthActive = combatStatus(115095)
-  .on("actionPhase")
-  .generateDice(DiceType.Anemo, 1)
-  .dispose()
-  .done();
+  .reserve();
 
 /**
  * @id 115096
@@ -60,9 +57,8 @@ export const DazzlingPolyhedron01 = summon(115096)
   .on("increaseDamaged", (c, e) => !e.target.isMine() && e.type === DamageType.Anemo)
   .listenToAll()
   .increaseDamage(1)
-  .on("enter")
+  .on("actionPhase")
   .generateDice(DiceType.Anemo, 1)
-  .combatStatus(TheWondrousPathOfTruthActive)
   .done();
 
 /**
@@ -137,10 +133,14 @@ export const TheWindsSecretWays: SkillHandle = skill(15093)
   .costAnemo(3)
   .costEnergy(2)
   .damage(DamageType.Anemo, 1)
-  .if((c) => c.self.hasEquipment(TheWondrousPathOfTruth))
-  .summon(DazzlingPolyhedron01)
-  .else()
-  .summon(DazzlingPolyhedron)
+  .do((c) => {
+    if (c.self.hasEquipment(TheWondrousPathOfTruth)) {
+      c.summon(DazzlingPolyhedron01);
+      c.generateDice(DiceType.Anemo, 1);
+    } else {
+      c.summon(DazzlingPolyhedron);
+    }
+  })
   .done();
 
 /**
