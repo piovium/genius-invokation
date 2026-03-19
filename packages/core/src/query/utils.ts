@@ -128,6 +128,9 @@ type Explode<T> = ExplodeImpl<T> extends infer O
 
 export type Expression = string | number | Expression[];
 
+export const toExpressionUnordered: unique symbol = Symbol(
+  "toExpressionUnordered",
+);
 export const toExpression: unique symbol = Symbol("toExpression");
 export const typingInfo: unique symbol = Symbol("meta");
 
@@ -143,10 +146,15 @@ export interface TypingInfoBase {
 
 export interface IQuery<Ty extends TypingInfoBase = TypingInfoBase> {
   [typingInfo]: Ty;
-  [toExpression]: () => SExprSchema.UnorderedQuery;
+  [toExpression](): SExprSchema.Query;
 }
 
-export type InferResult<Q extends IQuery> = Computed<
+export interface IUnorderedQuery<Ty extends TypingInfoBase = TypingInfoBase>
+  extends IQuery<Ty> {
+  [toExpressionUnordered]: () => SExprSchema.UnorderedQuery;
+}
+
+export type InferResult<Q extends IUnorderedQuery> = Computed<
   Q[TypingInfoSymbol],
   TypingInfoBase
 >;
@@ -206,11 +214,23 @@ type ReqBase = {
 
 export const RELATIONAL_METHODS = ["has", "at", "with", "on"] as const;
 
-export const UNARY_OPERATORS = ["has", "at", "with", "on", "not", "recentFrom"] as const;
-export type UnaryOperator = typeof UNARY_OPERATORS[number];
+export const UNARY_OPERATORS = [
+  "has",
+  "at",
+  "with",
+  "on",
+  "not",
+  "recentFrom",
+] as const;
+export type UnaryOperator = (typeof UNARY_OPERATORS)[number];
 
-export const BINARY_OPERATORS = ["orElse", "exclude", "union", "intersection"] as const;
-export type BinaryOperator = typeof BINARY_OPERATORS[number];
+export const BINARY_OPERATORS = [
+  "orElse",
+  "exclude",
+  "union",
+  "intersection",
+] as const;
+export type BinaryOperator = (typeof BINARY_OPERATORS)[number];
 
 export type CompositeOperator = UnaryOperator | BinaryOperator;
 

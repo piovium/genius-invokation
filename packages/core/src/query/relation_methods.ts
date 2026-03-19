@@ -3,7 +3,7 @@ import type { AssignedPrimaryQuery } from "./primary_methods";
 import type { PrimaryMethodsInternal } from "./primary_query";
 import {
   RELATIONAL_METHODS,
-  toExpression,
+  toExpressionUnordered,
   type AttachmentReq,
   type CardReq,
   type CharacterReq,
@@ -11,7 +11,7 @@ import {
   type EntityOnCharacterReq,
   type HeterogeneousMetaBase,
   type InferResult,
-  type IQuery,
+  type IUnorderedQuery,
   type RelatedToReq,
   type TypingInfoFromMeta,
 } from "./utils";
@@ -37,7 +37,7 @@ type RelationMethodMetas = {
 type RelationMethodNames = keyof RelationMethodMetas & {};
 
 type AllRelationMethods<Meta extends HeterogeneousMetaBase> = {
-  [K in RelationMethodNames]: <Q extends IQuery>(
+  [K in RelationMethodNames]: <Q extends IUnorderedQuery>(
     object: RelatedToReq<
       InferResult<Q>,
       RelationMethodMetas[K]["object"]
@@ -65,10 +65,10 @@ class RelationMethodsImpl {
   static {
     for (const methodName of RELATIONAL_METHODS) {
       Object.defineProperty(RelationMethodsImpl.prototype, methodName, {
-        value: function (object: IQuery) {
+        value: function (object: IUnorderedQuery) {
           const constraint: SExprSchema.CompositeQuery = [
             methodName,
-            object[toExpression](),
+            object[toExpressionUnordered](),
           ];
           const internal: PrimaryMethodsInternal = this._internal;
           internal.addConstraint(constraint);

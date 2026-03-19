@@ -4,14 +4,15 @@ import type { SExprSchema } from "./expr_schema";
 import { PrimaryMethods } from "./primary_methods";
 import { RelationMethods } from "./relation_methods";
 import {
-  toExpression,
+  toExpressionUnordered,
   type Computed,
   type Expression,
   type HeterogeneousMetaBase,
-  type IQuery,
+  type IUnorderedQuery,
   type typingInfo,
   type ReturnOfMeta,
   type UnaryOperator,
+  toExpression,
 } from "./utils";
 
 type DefeatedKeyword = "defeatedOnly" | "noDefeated" | "all";
@@ -26,7 +27,7 @@ export class PrimaryMethodsInternal {
   addConstraint(...constraints: SExprSchema.UnorderedQuery[]): void {
     this._constraints.push(...constraints);
   }
-  [toExpression](): SExprSchema.CompositeQuery {
+  [toExpressionUnordered](): SExprSchema.CompositeQuery {
     const finalConstraints: SExprSchema.UnorderedQuery[] = [];
     if (this._defeatedKeyword === "defeatedOnly") {
       finalConstraints.push(["defeated", "only"]);
@@ -43,7 +44,7 @@ export interface PrimaryQueryInitOptions {
 }
 
 class PrimaryQueryImpl<Meta extends HeterogeneousMetaBase>
-  implements IQuery<ReturnOfMeta<Meta>>
+  implements IUnorderedQuery<ReturnOfMeta<Meta>>
 {
   declare [typingInfo]: ReturnOfMeta<Meta>;
   private _internal: PrimaryMethodsInternal;
@@ -57,15 +58,18 @@ class PrimaryQueryImpl<Meta extends HeterogeneousMetaBase>
     }
   }
 
-  [toExpression](): SExprSchema.UnorderedQuery {
+  [toExpressionUnordered](): SExprSchema.UnorderedQuery {
     if (this._leadingUnaryOp !== null) {
       const queryWithOp: SExprSchema.CompositeQuery = [
         this._leadingUnaryOp,
-        this._internal[toExpression](),
+        this._internal[toExpressionUnordered](),
       ];
       return queryWithOp;
     }
-    return this._internal[toExpression]();
+    return this._internal[toExpressionUnordered]();
+  }
+  [toExpression](): SExprSchema.Query {
+    return this[toExpressionUnordered]();
   }
 }
 
@@ -92,5 +96,5 @@ export type PrimaryQuery<Meta extends HeterogeneousMetaBase> = Computed<
     }
       ? BinaryMethods<ReturnOfMeta<Meta>>
       : {}),
-  IQuery<ReturnOfMeta<Meta>>
+  IUnorderedQuery<ReturnOfMeta<Meta>>
 > & { META: Meta };

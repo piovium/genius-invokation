@@ -11,12 +11,12 @@ import {
 } from "./primary_methods";
 import { createPrimaryQuery, type PrimaryQuery } from "./primary_query";
 import {
-  toExpression,
+  toExpressionUnordered,
   UNARY_OPERATORS,
   type Computed,
   type HeterogeneousMetaBase,
   type InferResult,
-  type IQuery,
+  type IUnorderedQuery,
   type MetaBase,
   type NotFunctionPrototype,
   type RelatedToReq,
@@ -27,8 +27,7 @@ import {
 
 type DollarUnaryOperatorMethods = {
   [K in keyof UnaryOperatorMetas]: {
-    <T extends IQuery>(
-      // TODO: must be unordered
+    <T extends IUnorderedQuery>(
       arg: RelatedToReq<
         InferResult<T>,
         UnaryOperatorMetas[K]["operand"]
@@ -73,10 +72,10 @@ class Dollar {
     // creating leading unary operator methods
     for (const name of UNARY_OPERATORS) {
       const chainForm = () => {
-        const callingForm = (q: IQuery) => {
+        const callingForm = (q: IUnorderedQuery) => {
           return createPrimaryQuery({
             leadingUnaryOp: name,
-            initExpression: [q[toExpression]()],
+            initExpression: [q[toExpressionUnordered]()],
           });
         };
         const returns = createPrimaryQuery({
@@ -99,13 +98,13 @@ class Dollar {
   }
 
   intersection<T extends TypingInfoBase[]>(
-    ...args: { [K in keyof T]: IQuery<T[K]> }
+    ...args: { [K in keyof T]: IUnorderedQuery<T[K]> }
   ): CompositeQuery<IntersectionTy<T>> {
     return createCompositeQuery("intersection", args);
   }
 
   union<T extends TypingInfoBase[]>(
-    ...args: { [K in keyof T]: IQuery<T[K]> }
+    ...args: { [K in keyof T]: IUnorderedQuery<T[K]> }
   ): CompositeQuery<UnionTy<T>> {
     return createCompositeQuery("union", args);
   }

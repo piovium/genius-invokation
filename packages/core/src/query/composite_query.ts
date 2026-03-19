@@ -3,10 +3,11 @@ import { BinaryMethods } from "./binary_methods";
 import type { SExprSchema } from "./expr_schema";
 import {
   toExpression,
+  toExpressionUnordered,
   type CompositeOperator,
   type Computed,
   type Expression,
-  type IQuery,
+  type IUnorderedQuery,
   type typingInfo,
   type TypingInfoBase,
 } from "./utils";
@@ -40,13 +41,13 @@ export type IntersectionTy<Metas extends TypingInfoBase[]> = Computed<
   TypingInfoBase
 >;
 
-class CompositeQueryImpl<Ty extends TypingInfoBase> implements IQuery<Ty> {
+class CompositeQueryImpl<Ty extends TypingInfoBase> implements IUnorderedQuery<Ty> {
   declare [typingInfo]: Ty;
   constructor(
     private readonly type: CompositeOperator,
-    private readonly operands: IQuery[],
+    private readonly operands: IUnorderedQuery[],
   ) {}
-  [toExpression](): SExprSchema.CompositeQuery {
+  [toExpressionUnordered](): SExprSchema.CompositeQuery {
     if (
       this.type === "not" ||
       this.type === "has" ||
@@ -58,7 +59,7 @@ class CompositeQueryImpl<Ty extends TypingInfoBase> implements IQuery<Ty> {
       if (this.operands.length !== 1) {
         throw new Error(`${this.type} operator requires exactly 1 operands`);
       }
-      return [this.type, this.operands[0][toExpression]()];
+      return [this.type, this.operands[0][toExpressionUnordered]()];
     }
     if (this.type === "orElse" || this.type === "exclude") {
       if (this.operands.length !== 2) {
@@ -66,23 +67,26 @@ class CompositeQueryImpl<Ty extends TypingInfoBase> implements IQuery<Ty> {
       }
       return [
         this.type,
-        this.operands[0][toExpression](),
-        this.operands[1][toExpression](),
+        this.operands[0][toExpressionUnordered](),
+        this.operands[1][toExpressionUnordered](),
       ];
     }
-    return [this.type, ...this.operands.map((op) => op[toExpression]())];
+    return [this.type, ...this.operands.map((op) => op[toExpressionUnordered]())];
+  }
+  [toExpression](): SExprSchema.Query {
+    return this[toExpressionUnordered]();
   }
 }
 
 const CompositeQuery = mixins(CompositeQueryImpl, [BinaryMethods]) as any;
 export const createCompositeQuery = <Ty extends TypingInfoBase>(
   type: CompositeOperator,
-  operands: IQuery[],
+  operands: IUnorderedQuery[],
 ): CompositeQuery<Ty> => {
   return new CompositeQuery(type, operands);
 };
 
 export type CompositeQuery<Ty extends TypingInfoBase> = Computed<
   CompositeQueryImpl<Ty> & BinaryMethods<Ty>,
-  IQuery<Ty>
+  IUnorderedQuery<Ty>
 >;

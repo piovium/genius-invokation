@@ -21,7 +21,7 @@ import {
   type EntityOnCharacterReq,
   type HeterogeneousMetaBase,
   type InferResult,
-  type IQuery,
+  type IUnorderedQuery,
   type IsExtends,
   type MetaBase,
   type AllPropsNotStrictlySuperTypeOf,
@@ -30,7 +30,7 @@ import {
   type StrictlySuperTypeOf,
   type TypingInfoFromMeta,
   type AnyTuple,
-  toExpression,
+  toExpressionUnordered,
 } from "./utils";
 
 type EventCardHandle = number & { readonly _eventCard: unique symbol };
@@ -337,11 +337,11 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     );
     return this._self;
   }
-  tagOf<T extends IQuery>(
+  tagOf<T extends IUnorderedQuery>(
     type: "weapon" | "element",
     query: RelatedToReq<InferResult<T>, CharacterReq> extends true ? T : never,
   ): Assign<Meta> {
-    this._internal.addConstraint(["tagOf", type, query[toExpression]()]);
+    this._internal.addConstraint(["tagOf", type, query[toExpressionUnordered]()]);
     return this._self;
   }
 }

@@ -8,7 +8,7 @@ import {
   BINARY_OPERATORS,
   type BinaryOperator,
   type Constructor,
-  type IQuery,
+  type IUnorderedQuery,
   type MetaBase,
   type TypingInfoBase,
 } from "./utils";
@@ -25,8 +25,7 @@ type BinaryOperatorResult<
 
 export type BinaryMethods<T extends TypingInfoBase> = {
   [K in BinaryOperator]: <U extends TypingInfoBase>(
-    // TODO: must be unordered
-    rhs: IQuery<U>,
+    rhs: IUnorderedQuery<U>,
   ) => CompositeQuery<BinaryOperatorResult<T, U>[K]>;
 };
 
@@ -34,7 +33,7 @@ class BinaryMethodsImpl {
   static {
     for (const methodName of BINARY_OPERATORS) {
       Object.defineProperty(BinaryMethodsImpl.prototype, methodName, {
-        value: function (this: IQuery, rhs: IQuery) {
+        value: function (this: IUnorderedQuery, rhs: IUnorderedQuery) {
           return createCompositeQuery(methodName, [this, rhs]);
         },
       });
