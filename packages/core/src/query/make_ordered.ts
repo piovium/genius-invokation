@@ -1,7 +1,10 @@
 
 
 class MakeOrderedMethods {
-  sortBy() {
+  sortByFn(fn: unknown) {
+
+  }
+  sortByVariable(variable: string, negative = false) {
 
   }
 }
