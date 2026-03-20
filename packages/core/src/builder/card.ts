@@ -775,10 +775,12 @@ export class CardBuilder<
         action = this.buildAction();
       } else {
         this.do((c) => {
-          c.dispose(c.self, {
-            reason: "eventCardDrawn",
-            direct: true,
-          });
+          if (c.self.area.type !== "removedEntities") {
+            c.dispose(c.self, {
+              reason: "eventCardDrawn",
+              direct: true,
+            });
+          }
         });
         drawAction = this.buildAction<HandCardInsertedEventArg>();
         filter = () => false;
@@ -792,7 +794,10 @@ export class CardBuilder<
         triggerOn: "onHandCardInserted",
         initiativeSkillConfig: null,
         filter: (st, info, arg) => {
-          return info.caller.id === arg.card.id;
+          return (
+            getEntityArea(st, info.caller.id).type !== "pile" &&
+            info.caller.id === arg.card.id
+          );
         },
         action: drawAction,
         usagePerRoundVariableName: null,
