@@ -66,6 +66,10 @@ function serializeImpl(store: StoreEntry[], v: unknown): any {
     };
   }
   if (typeof v === "object") {
+    const proto = Object.getPrototypeOf(v);
+    if (proto !== Object.prototype && proto !== null) {
+      return null; // Non-plain objects are not serialized
+    }
     if ("__definition" in v && "id" in v) {
       const result: any = {
         $$: v.__definition,

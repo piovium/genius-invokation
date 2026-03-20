@@ -39,7 +39,12 @@ import {
 import type { CharacterDefinition } from "./character";
 import { GiTcgCoreInternalError } from "../error";
 import { nextRandom } from "../random";
-import type { DamageInfo, ReactionInfo } from "./skill";
+import type {
+  DamageInfo,
+  DamageOrHealEventArg,
+  ReactionEventArg,
+  ReactionInfo,
+} from "./skill";
 
 enableMapSet();
 
@@ -211,11 +216,11 @@ export interface ClearRoundLogsM {
 }
 export interface PushPhaseDamageLogM {
   readonly type: "pushPhaseDamageLog";
-  readonly damageInfo: DamageInfo;
+  readonly damageEvent: DamageOrHealEventArg<DamageInfo>;
 }
 export interface PushPhaseReactionLogM {
   readonly type: "pushPhaseReactionLog";
-  readonly reactionInfo: ReactionInfo;
+  readonly reactionEvent: ReactionEventArg;
 }
 export interface ClearPhaseLogsM {
   readonly type: "clearPhaseLogs";
@@ -526,15 +531,17 @@ function doMutation(state: GameState, m: Mutation): GameState {
       });
     }
     case "pushPhaseDamageLog": {
-      const { who } = getEntityArea(state, m.damageInfo.source.id);
       return produce(state, (draft) => {
-        draft.players[who].phaseDamageLog.push(m.damageInfo);
+        draft.players[m.damageEvent.sourceWho].phaseDamageLog.push(
+          m.damageEvent,
+        );
       });
     }
     case "pushPhaseReactionLog": {
-      const { who } = getEntityArea(state, m.reactionInfo.via.caller.id);
       return produce(state, (draft) => {
-        draft.players[who].phaseReactionLog.push(m.reactionInfo);
+        draft.players[m.reactionEvent.who].phaseReactionLog.push(
+          m.reactionEvent,
+        );
       });
     }
     case "clearPhaseLogs": {

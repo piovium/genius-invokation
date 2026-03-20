@@ -667,9 +667,14 @@ export class StateMutator {
         ],
       });
     }
+    const damageEvent = new DamageOrHealEventArg(this.state, damageInfo, opt);
+    this.mutate({
+      type: "pushPhaseDamageLog",
+      damageEvent
+    })
     events.push([
       "onDamageOrHeal",
-      new DamageOrHealEventArg(this.state, damageInfo, opt),
+      damageEvent,
     ]);
     if (
       damageInfo.type !== DamageType.Physical &&

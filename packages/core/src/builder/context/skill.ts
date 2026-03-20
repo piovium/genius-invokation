@@ -1,4 +1,5 @@
 // Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -39,6 +40,7 @@ import {
   type UseSkillRequestOption,
   BeforeVariableEventArg,
   ZeroHealthEventArg,
+  ReactionEventArg,
 } from "../../base/skill";
 import {
   type CharacterState as CharacterStateO,
@@ -458,6 +460,38 @@ export class SkillContext<Meta extends ContextMetaBase> {
       this.player.roundSkillLog.get(characterId)?.filter((e) => e === skillId)
         .length ?? 0
     );
+  }
+
+  hasPhaseDamage(
+    scope: "my" | "all",
+    filter: (e: DamageOrHealEventArg<DamageInfo>) => boolean = () => true,
+  ): boolean {
+    const damages =
+      scope === "my"
+        ? this.getRawPlayer("my").phaseDamageLog
+        : [
+            ...this.getRawPlayer("my").phaseDamageLog,
+            ...this.getRawPlayer("opp").phaseDamageLog,
+          ];
+    return damages.some(
+      (d) =>
+        d instanceof DamageOrHealEventArg &&
+        d.isDamageTypeDamage() &&
+        filter(d),
+    );
+  }
+  hasPhaseReaction(
+    scope: "my" | "all",
+    filter: (e: ReactionEventArg) => boolean = () => true,
+  ): boolean {
+    const reactions =
+      scope === "my"
+        ? this.getRawPlayer("my").phaseReactionLog
+        : [
+            ...this.getRawPlayer("my").phaseReactionLog,
+            ...this.getRawPlayer("opp").phaseReactionLog,
+          ];
+    return reactions.some((r) => r instanceof ReactionEventArg && filter(r));
   }
 
   /**

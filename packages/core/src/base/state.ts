@@ -1,4 +1,5 @@
 // Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -33,8 +34,6 @@ import type {
   SkillDefinition,
   InitiativeSkillDefinition,
   TriggeredSkillDefinition,
-  DamageInfo,
-  ReactionInfo,
 } from "./skill";
 import { randomSeed } from "../random";
 import type { Version } from "..";
@@ -111,7 +110,9 @@ export interface VersionBehavior {
 }
 
 export const getVersionBehavior = (version: Version): VersionBehavior => ({
-  defaultRecreateBehavior: versionLt(version, "v3.5.0") ? "overwrite" : "takeMax",
+  defaultRecreateBehavior: versionLt(version, "v3.5.0")
+    ? "overwrite"
+    : "takeMax",
   foodOmitInjuredOnly: !versionLt(version, "v6.1.0"),
   disposeMaxCostHandsAbortPreview: !versionLt(version, "v6.1.0"),
   diceCostApplyAttachments: !versionLt(version, "v6.4.0"),

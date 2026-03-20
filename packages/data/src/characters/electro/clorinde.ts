@@ -150,7 +150,7 @@ export const DarkshatteringFlame = card(214121)
   .on("enter")
   .useSkill(HuntersVigil)
   .endOn()
-  .onDelayedSkillReaction((c, e) => e.relatedTo(DamageType.Electro))
+  .on("useSkill", (c) => c.hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Electro)))
   .listenToPlayer()
   .characterStatus(DarkshatteringFlameInEffect, "@master")
   .done();
