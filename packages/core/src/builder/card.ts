@@ -792,7 +792,10 @@ export class CardBuilder<
         triggerOn: "onHandCardInserted",
         initiativeSkillConfig: null,
         filter: (st, info, arg) => {
-          return info.caller.id === arg.card.id;
+          return (
+            getEntityArea(st, info.caller.id).type !== "pile" &&
+            info.caller.id === arg.card.id
+          );
         },
         action: drawAction,
         usagePerRoundVariableName: null,

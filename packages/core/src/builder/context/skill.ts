@@ -250,6 +250,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   /**
    * 对技能返回的事件列表预处理。
    * - 将重复目标的“伤害事件”合并。
+   * - 对未导致爆牌的 HCI 事件，若目标牌已弃置，则删除之
    */
   private preprocessEventList() {
     const result: EventAndRequest[] = [];
@@ -285,6 +286,12 @@ export class SkillContext<Meta extends ContextMetaBase> {
             arg.target.id,
             result.length,
           );
+          result.push(event);
+        }
+      } else if (name === "onHandCardInserted") {
+        const shouldDrop =
+          !arg.overflowed && this.get(arg.card).area.type === "removedEntities";
+        if (!shouldDrop) {
           result.push(event);
         }
       } else {
