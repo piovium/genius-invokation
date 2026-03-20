@@ -43,7 +43,6 @@ import type {
   DamageInfo,
   DamageOrHealEventArg,
   ReactionEventArg,
-  ReactionInfo,
 } from "./skill";
 
 enableMapSet();
@@ -539,7 +538,7 @@ function doMutation(state: GameState, m: Mutation): GameState {
     }
     case "pushPhaseReactionLog": {
       return produce(state, (draft) => {
-        draft.players[m.reactionEvent.who].phaseReactionLog.push(
+        draft.players[m.reactionEvent.viaWho].phaseReactionLog.push(
           m.reactionEvent,
         );
       });
