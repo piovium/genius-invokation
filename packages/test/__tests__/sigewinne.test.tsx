@@ -108,4 +108,4 @@ test("sigwinne bubble: disposed before HCI event", async () => {
   await c.me.skill(SweepingFervor);
   c.expect(myActive).toHaveVariable({ health: 1 });
   c.expect(`opp pile`).toBeCount(0);
-})
+});
