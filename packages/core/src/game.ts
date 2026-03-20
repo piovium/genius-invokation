@@ -664,6 +664,9 @@ export class Game {
         "onBeforeAction",
         new PlayerEventArg(this.state, who),
       );
+      // A test reported that there do have a clearPhaseLog between onBeforeAction and action.
+      // See packages/test/__tests__/superconduct_blessing.test.tsx involving Heizou's one
+      this.mutate({ type: "clearPhaseLogs" });
       const replaceActionEventArg = new PlayerEventArg(this.state, who);
       const replacedSkill = findReplaceAction(
         this.state,

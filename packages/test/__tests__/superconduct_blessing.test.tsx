@@ -5,6 +5,7 @@ import {
   ref,
   setup,
   State,
+  Status,
   Summon,
   Support,
 } from "#test";
@@ -12,11 +13,13 @@ import { EntityState } from "@gi-tcg/core";
 import { ToyGuardSummon } from "@gi-tcg/data/internal/cards/event/other";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
 import { SuperconductBlessingDeepFreeze } from "@gi-tcg/data/internal/cards/support/blessing";
+import { ShikanoinHeizou, WindmusterIrisCryo } from "@gi-tcg/data/internal/characters/anemo/shikanoin_heizou";
 import {
   Charlotte,
   CoolcolorCapture,
 } from "@gi-tcg/data/internal/characters/cryo/charlotte";
 import { Fischl, Oz } from "@gi-tcg/data/internal/characters/electro/fischl";
+import { SpiritfoxSineater, YaeMiko } from "@gi-tcg/data/internal/characters/electro/yae_miko";
 import {
   RiffRevolution,
   Xinyan,
@@ -70,5 +73,20 @@ describe("superconduct blessing: deep freeze", () => {
       )?.attachments.find((a) => a.definition.id === CostIncrease)?.variables
         .layer,
     ).toBe(2);
+  });
+
+  test("heizou's onBeforeAction won't recorded for next action", async () => {
+    const deepFreeze = ref();
+    const c = setup(
+      <State>
+        <Character opp def={ShikanoinHeizou} />
+        <Support my def={SuperconductBlessingDeepFreeze} ref={deepFreeze} />
+        <Character my def={YaeMiko}>
+          <Status def={WindmusterIrisCryo} />
+        </Character>
+      </State>
+    );
+    await c.me.skill(SpiritfoxSineater);
+    c.expect(deepFreeze).toHaveVariable({ usagePerRound: 2 });
   });
 });
