@@ -106,6 +106,9 @@ test("sigwinne bubble: disposed before HCI event", async () => {
     </State>
   );
   await c.me.skill(SweepingFervor);
-  c.expect(myActive).toHaveVariable({ health: 1 });
+  // 希格雯水泡抽上来且舍弃掉
+  c.expect(`my pile or my hands`).toBeCount(0);
+  // 但是不会触发效果
   c.expect(`opp pile`).toBeCount(0);
+  c.expect(myActive).toHaveVariable({ health: 1 });
 });

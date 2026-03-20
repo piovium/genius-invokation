@@ -97,6 +97,7 @@ export const BestialAscent = skill(13162)
   .costPyro(3)
   .damage(DamageType.Pyro, 1)
   .characterStatus(WushouArts, "@self")
+  .switchActive("my next")
   .done();
 
 /**
@@ -120,10 +121,7 @@ export const SuannisGildedDance = skill(13163)
  * 造成D__KEY__DAMAGE点D__KEY__ELEMENT。
  */
 export const BestialAscentPassive = skill(13165)
-  .type("passive")
-  .on("useSkill", (c, e) => e.skill.definition.id === BestialAscent)
-  .switchActive("my next")
-  .done();
+  .reserve();
 
 /**
  * @id 1316
@@ -136,7 +134,7 @@ export const Gaming = character(1316)
   .tags("pyro", "claymore", "liyue")
   .health(10)
   .energy(3)
-  .skills(StellarRend, BestialAscent, SuannisGildedDance, CharmedCloudstrider, BestialAscentPassive)
+  .skills(StellarRend, BestialAscent, SuannisGildedDance, CharmedCloudstrider)
   .done();
 
 /**
