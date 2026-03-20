@@ -99,7 +99,7 @@ test("sigwinne bubble: disposed before HCI event", async () => {
   const c = setup(
     <State>
       <Character my active def={Xinyan} health={1} ref={myActive}>
-        <Equipment def={PortablePowerSaw} v={{ barrier: 1 }} />
+        <Equipment def={PortablePowerSaw} v={{ stoic: 1 }} />
       </Character>
       <Character my def={Sigewinne} />
       <Card my pile def={LargeBolsteringBubblebalm} /> 
