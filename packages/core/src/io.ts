@@ -236,11 +236,12 @@ export function exposeMutation(
     case "stepRandom":
     case "stepId":
     case "mutateExtensionState":
-    case "pushRoundSkillLog":
-    case "clearRoundSkillLog":
     case "clearRemovedEntities":
-    case "pushDelayingEvent":
-    case "clearDelayingEvent":
+    case "pushRoundSkillLog":
+    case "clearRoundLogs":
+    case "pushPhaseDamageLog":
+    case "pushPhaseReactionLog":
+    case "clearPhaseLogs":
     case "resetVariables":
     case "switchActive": // We will manually handle this
       return null;

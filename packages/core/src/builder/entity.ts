@@ -669,33 +669,6 @@ export class EntityBuilder<
     }
   }
 
-  /** 角色使用技能后，若 listening scope 造成了伤害 */
-  onDelayedSkillDamage(
-    filter?: SkillOperationFilter<
-      CreateSkillBuilderMeta<
-        DetailedEventArgOf<"dealDamage">,
-        CallerType,
-        CallerVars,
-        AssociatedExt
-      >
-    >,
-  ) {
-    return this.on("dealDamage", filter).delayedToSkill();
-  }
-  /** 角色引发元素反应后（i.e. 角色使用技能后，若 listening scope 引发了元素反应） */
-  onDelayedSkillReaction(
-    filter?: SkillOperationFilter<
-      CreateSkillBuilderMeta<
-        DetailedEventArgOf<"reaction">,
-        CallerType,
-        CallerVars,
-        AssociatedExt
-      >
-    >,
-  ) {
-    return this.on("dealReaction", filter).delayedToSkill();
-  }
-
   usage(
     count: number,
     opt: GlobalUsageOptions = {},

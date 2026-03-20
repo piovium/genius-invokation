@@ -39,6 +39,7 @@ import {
 import type { CharacterDefinition } from "./character";
 import { GiTcgCoreInternalError } from "../error";
 import { nextRandom } from "../random";
+import type { DamageInfo, ReactionInfo } from "./skill";
 
 enableMapSet();
 
@@ -205,20 +206,22 @@ export interface PushRoundSkillLogM {
   readonly caller: CharacterState;
   readonly skillId: number;
 }
-export interface ClearRoundSkillLogM {
-  readonly type: "clearRoundSkillLog";
-  readonly who: 0 | 1;
+export interface ClearRoundLogsM {
+  readonly type: "clearRoundLogs";
+}
+export interface PushPhaseDamageLogM {
+  readonly type: "pushPhaseDamageLog";
+  readonly damageInfo: DamageInfo;
+}
+export interface PushPhaseReactionLogM {
+  readonly type: "pushPhaseReactionLog";
+  readonly reactionInfo: ReactionInfo;
+}
+export interface ClearPhaseLogsM {
+  readonly type: "clearPhaseLogs";
 }
 export interface ClearRemovedEntitiesM {
   readonly type: "clearRemovedEntities";
-}
-export interface PushDelayingEventM {
-  readonly type: "pushDelayingEvent";
-  readonly eventName: string;
-  readonly eventArg: unknown;
-}
-export interface ClearDelayingEventM {
-  readonly type: "clearDelayingEvent";
 }
 
 export type Mutation =
@@ -242,10 +245,11 @@ export type Mutation =
   | SetPlayerFlagM
   | MutateExtensionStateM
   | PushRoundSkillLogM
-  | ClearRoundSkillLogM
+  | ClearRoundLogsM
   | ClearRemovedEntitiesM
-  | PushDelayingEventM
-  | ClearDelayingEventM;
+  | PushPhaseDamageLogM
+  | PushPhaseReactionLogM
+  | ClearPhaseLogsM;
 
 function createDraft<T extends { readonly id: number }>(
   sym: StateKind,
@@ -509,9 +513,10 @@ function doMutation(state: GameState, m: Mutation): GameState {
         player.roundSkillLog.get(key)!.push(m.skillId);
       });
     }
-    case "clearRoundSkillLog": {
+    case "clearRoundLogs": {
       return produce(state, (draft) => {
-        draft.players[m.who].roundSkillLog.clear();
+        draft.players[0].roundSkillLog.clear();
+        draft.players[1].roundSkillLog.clear();
       });
     }
     case "clearRemovedEntities": {
@@ -520,14 +525,24 @@ function doMutation(state: GameState, m: Mutation): GameState {
         draft.players[1].removedEntities = [];
       });
     }
-    case "pushDelayingEvent": {
+    case "pushPhaseDamageLog": {
+      const { who } = getEntityArea(state, m.damageInfo.source.id);
       return produce(state, (draft) => {
-        draft.delayingEventArgs.push([m.eventName, m.eventArg]);
+        draft.players[who].phaseDamageLog.push(m.damageInfo);
       });
     }
-    case "clearDelayingEvent": {
+    case "pushPhaseReactionLog": {
+      const { who } = getEntityArea(state, m.reactionInfo.via.caller.id);
       return produce(state, (draft) => {
-        draft.delayingEventArgs = [];
+        draft.players[who].phaseReactionLog.push(m.reactionInfo);
+      });
+    }
+    case "clearPhaseLogs": {
+      return produce(state, (draft) => {
+        for (const who of [0, 1] as const) {
+          draft.players[who].phaseDamageLog = [];
+          draft.players[who].phaseReactionLog = [];
+        }
       });
     }
     default: {

@@ -513,8 +513,7 @@ export const detailedEventDictionary = {
   }),
   disposeOrTuneCard: defineDescriptor("onDispose", (e, r) => {
     return (
-      e.isDiscardOrTuning() &&
-      checkRelative(e.onTimeState, { who: e.who }, r)
+      e.isDiscardOrTuning() && checkRelative(e.onTimeState, { who: e.who }, r)
     );
   }),
   dealDamage: defineDescriptor("onDamageOrHeal", (e, r) => {
@@ -876,7 +875,6 @@ export class TriggeredSkillBuilder<
   CreateSkillBuilderMeta<EventArgType, CallerType, CallerVars, AssociatedExt>
 > {
   private _asSkillType: CommonSkillType | null = null;
-  private _delayedToSkill = false;
   private _beforeDefaultDispose = false;
   private _enableHandTriggering = false;
   private _enablePileTriggering = false;
@@ -914,25 +912,11 @@ export class TriggeredSkillBuilder<
 
   asSkillType(skillType: CommonSkillType) {
     if (this.parent._type !== "character") {
-      throw new GiTcgDataError("Only character's triggered skill can specify skill type.");
-    }
-    this._asSkillType = skillType;
-    return this;
-  }
-  
-  delayedToSkill() {
-    const allowedEventNames: (DetailedEventNames | CustomEvent)[] = [
-      "dealDamage",
-      "dealReaction",
-    ];
-    if (!allowedEventNames.includes(this.detailedEventName)) {
       throw new GiTcgDataError(
-        `delayedToSkill is only allowed at following events: ${allowedEventNames.join(
-          ", ",
-        )}`,
+        "Only character's triggered skill can specify skill type.",
       );
     }
-    this._delayedToSkill = true;
+    this._asSkillType = skillType;
     return this;
   }
 
@@ -1130,66 +1114,18 @@ export class TriggeredSkillBuilder<
     // 【构造技能定义并向父级实体添加】
     const filter = this.buildFilter();
     const action = this.buildAction();
-    if (this._delayedToSkill) {
-      const [, useSkillDescriptor] = detailedEventDictionary["useSkill"];
-      // 手动指定监听 useSkill 事件的 filter：只处理 listenOn
-      const useSkillFilter = function (
-        state: GameState,
-        skill: SkillInfo,
-        e: UseSkillEventArg,
-      ) {
-        const callerArea = getEntityArea(state, skill.caller.id);
-        return useSkillDescriptor(
-          e,
-          {
-            callerArea,
-            callerId: skill.caller.id,
-            listenTo,
-          },
-          state,
-        );
-      };
-      const def: TriggeredSkillDefinition<"onUseSkill"> = {
-        type: "skill",
-        id: this.id,
-        ownerType: this.parent._type,
-        skillType: this._asSkillType,
-        triggerOn: "onUseSkill",
-        initiativeSkillConfig: null,
-        filter: useSkillFilter,
-        action: (state, skillInfo, arg) => {
-          for (const [name, e] of state.delayingEventArgs) {
-            if (
-              name === triggerOn &&
-              filter(state, skillInfo, e as EventArgType)
-            ) {
-              return action(state, skillInfo, e as EventArgType);
-            }
-          }
-          return [state, EMPTY_SKILL_RESULT];
-        },
-        usagePerRoundVariableName: this._usagePerRoundOpt?.name ?? null,
-      };
-      // For debug
-      Object.defineProperty(def, "delayedToSkill", {
-        value: triggerOn,
-        enumerable: true,
-      });
-      parentSkillList.push(def);
-    } else {
-      const def: TriggeredSkillDefinition<any> = {
-        type: "skill",
-        id: this.id,
-        ownerType: this.parent._type,
-        skillType: this._asSkillType,
-        triggerOn,
-        initiativeSkillConfig: null,
-        filter,
-        action,
-        usagePerRoundVariableName: this._usagePerRoundOpt?.name ?? null,
-      };
-      parentSkillList.push(def);
-    }
+    const def: TriggeredSkillDefinition<any> = {
+      type: "skill",
+      id: this.id,
+      ownerType: this.parent._type,
+      skillType: this._asSkillType,
+      triggerOn,
+      initiativeSkillConfig: null,
+      filter,
+      action,
+      usagePerRoundVariableName: this._usagePerRoundOpt?.name ?? null,
+    };
+    parentSkillList.push(def);
   }
 
   endOn() {

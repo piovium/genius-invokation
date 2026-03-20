@@ -199,6 +199,8 @@ function initPlayerState(
     skipNextTurn: false,
     defeatedSwitching: false,
     roundSkillLog: new Map(),
+    phaseDamageLog: [],
+    phaseReactionLog: [],
     removedEntities: [],
   };
 }
@@ -282,7 +284,6 @@ export class Game {
       roundNumber: 0,
       winner: null,
       extensions,
-      delayingEventArgs: [],
     };
     return state;
   }
@@ -398,6 +399,7 @@ export class Game {
               break;
           }
           this.mutate({ type: "clearRemovedEntities" });
+          this.mutate({ type: "clearPhaseLogs" });
           await this.mutator.notifyAndPause({ canResume: true });
         }
       } catch (e) {
@@ -894,11 +896,10 @@ export class Game {
           value: false,
         });
       }
-      this.mutate({
-        type: "clearRoundSkillLog",
-        who,
-      });
     }
+    this.mutate({
+      type: "clearRoundLogs",
+    });
     this.mutate({
       type: "stepRound",
     });

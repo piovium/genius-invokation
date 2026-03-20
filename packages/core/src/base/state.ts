@@ -33,6 +33,8 @@ import type {
   SkillDefinition,
   InitiativeSkillDefinition,
   TriggeredSkillDefinition,
+  DamageInfo,
+  ReactionInfo,
 } from "./skill";
 import { randomSeed } from "../random";
 import type { Version } from "..";
@@ -140,7 +142,6 @@ export interface GameState {
   readonly winner: 0 | 1 | null;
   readonly players: readonly [PlayerState, PlayerState];
   readonly extensions: readonly ExtensionState[];
-  readonly delayingEventArgs: readonly (readonly [string, unknown])[];
 }
 
 export interface PlayerState {
@@ -171,6 +172,14 @@ export interface PlayerState {
    * 键为技能发起者的角色定义 id，值为该定义下使用过的技能 id 列表
    */
   readonly roundSkillLog: ReadonlyMap<number, number[]>;
+  /**
+   * 我方在当前阶段造成的伤害 DamageEventArg 记录列表
+   */
+  readonly phaseDamageLog: unknown[];
+  /**
+   * 我方在当前阶段造成的反应 ReactionEventArg 记录列表
+   */
+  readonly phaseReactionLog: unknown[];
   readonly removedEntities: readonly AnyState[];
 }
 
