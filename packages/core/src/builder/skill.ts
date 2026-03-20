@@ -40,6 +40,7 @@ import {
   CustomEventEventArg,
   EMPTY_SKILL_RESULT,
   UseSkillEventArg,
+  DamageOrHealEventArg,
 } from "../base/skill";
 import type {
   AnyState,
@@ -624,6 +625,9 @@ export const detailedEventDictionary = {
 } satisfies Record<string, Descriptor<any>>;
 
 type OverrideEventArgType = {
+  damaged: DamageOrHealEventArg<DamageInfo>;
+  defeated: DamageOrHealEventArg<DamageInfo>;
+  dealDamage: DamageOrHealEventArg<DamageInfo>;
   deductOmniDiceSwitch: ModifyAction2EventArg<SwitchActiveInfo>;
   deductOmniDiceCard: ModifyAction2EventArg<PlayCardInfo>;
   beforeFastSwitch: ModifyAction2EventArg<SwitchActiveInfo>;
