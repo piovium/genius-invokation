@@ -705,21 +705,6 @@ export class SkillExecutor {
           await this.finalizeSkill(skillInfo, eventArg);
         }
       } else {
-        // onDamageOrHeal / onReaction 事件可以被延迟到 onUseSkill 事件后处理
-        // 故在发生事件时将 events 记录，并在 useSkill 之前清空记录
-        /** @see TriggeredSkillBuilder#delayedToSkill */
-        if (name === "onDamageOrHeal" || name === "onReaction") {
-          this.mutate({
-            type: "pushDelayingEvent",
-            eventName: name,
-            eventArg: arg,
-          });
-        }
-        if (name === "onBeforeUseSkill") {
-          this.mutate({
-            type: "clearDelayingEvent",
-          });
-        }
         using l = this.mutator.subLog(
           DetailLogType.Event,
           `Handling event ${name} (${arg.toString()}):`,

@@ -220,6 +220,8 @@ function emptyPlayerState(who: 0 | 1): Draft<PlayerState> {
     skipNextTurn: false,
     defeatedSwitching: false,
     roundSkillLog: new Map(),
+    phaseDamageLog: [],
+    phaseReactionLog: [],
   };
 }
 
@@ -515,7 +517,6 @@ export function setup(state: JSX.Element): TestController {
     roundNumber: stateProp.roundNumber ?? 1,
     winner: null,
     players,
-    delayingEventArgs: [],
   };
   const c = new TestController(gameState);
   c._start();
