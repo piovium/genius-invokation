@@ -54,9 +54,10 @@ import {
   GluttonousYumkasaurMountainKing,
   TheAlldevourer,
 } from "@gi-tcg/data/internal/characters/dendro/gluttonous_yumkasaur_mountain_king";
-import { TheMausoleumOfKingDeshret } from "@gi-tcg/data/internal/cards/support/place";
-import { Navia } from "@gi-tcg/data/internal/characters/geo/navia";
+import { TheMausoleumOfKingDeshret, TheMausoleumOfKingDeshretInEffect } from "@gi-tcg/data/internal/cards/support/place";
+import { CrystalShrapnel, Navia } from "@gi-tcg/data/internal/characters/geo/navia";
 import { CostIncrease } from "@gi-tcg/data/internal/commons";
+import { Baizhu, SeamlessShield } from "@gi-tcg/data/internal/characters/dendro/baizhu";
 
 describe("HCI stuff", () => {
   test("sigewinne and yumkasaur interaction", async () => {
@@ -228,5 +229,33 @@ describe("HCI stuff", () => {
     c.expect(myActive).toHaveVariable({ health: 5 });
     c.expect(`my hands limit 1`).toBeDefinition(ShadowhuntShell);
   });
+
+  test("Bubblebalm/PuffPops behavior with discard between HCI events emission and handling", async () => {
+    const c = setup(
+      <State>
+        <Character opp active def={Baizhu} />
+        <CombatStatus opp def={SeamlessShield} />
+        <Character my active def={Navia} health={5} >
+          <Equipment def={PortablePowerSaw} />
+          <Status my def={PuffPopsInEffect} />
+        </Character>
+        <CombatStatus my def={TheMausoleumOfKingDeshretInEffect} />
+        <Card my def={CrystalShrapnel} />
+        <Card my pile notInitial def={LargeBolsteringBubblebalm} />
+      </State>
+    );
+    await c.me.card(CrystalShrapnel);
+    // 弹片：出伤 & 抓牌
+    // > 内联伤害时：盾弃置
+    // > 盾弃置后：
+    // --- 对我方出战打 1->0 草
+    // --- > 内联伤害时：舍弃大水泡
+    // --- > 舍弃后：
+    // > 抓牌后
+    // --- 大水泡不触发、ddpp 触发、赤王陵不触发
+    c.expect(`my hands or my pile`).toBeCount(0);
+    c.expect(`my active`).toHaveVariable({ health: 6, aura: Aura.Dendro });
+    c.expect(`my status with definition id ${PuffPopsInEffect}`).toHaveVariable({ usage: 2 });
+  })
 
 });
