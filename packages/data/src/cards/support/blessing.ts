@@ -30,7 +30,10 @@ export const SuperconductBlessingDeepFreeze = card(303041)
   .on("roll")
   .fixDice(DiceType.Cryo, 2)
   .fixDice(DiceType.Electro, 2)
-  .on("dealDamage", (c, e) => ([DamageType.Physical, DamageType.Cryo] as DamageType[]).includes(e.type))
+  .on("damaged", (c, e) => 
+    !e.target.isMine() &&
+    c.hasPhaseDamage("my", (e) => ([DamageType.Physical, DamageType.Cryo] as DamageType[]).includes(e.type)))
+  .listenToAll()
   .usagePerRound(2)
   .do((c) => {
     const target = c.random(c.oppPlayer.hands);
