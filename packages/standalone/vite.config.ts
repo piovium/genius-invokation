@@ -17,16 +17,21 @@ import { defaultClientConditions, defineConfig } from "vite";
 import solid from "vite-plugin-solid";
 import babel from "@rollup/plugin-babel";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import svgWithFallback from "./svg-with-fallback";
 
 export default defineConfig({
   esbuild: {
     target: "ES2020",
   },
+  resolve: {
+    conditions: ["bun", ...defaultClientConditions],
+  },
   plugins: [
     solid(),
+    svgWithFallback(),
     babel({
       babelHelpers: "bundled",
-    }),
+    }) as unknown as any,
     viteStaticCopy({
       watch: null,
       silent: true,
@@ -34,9 +39,9 @@ export default defineConfig({
         {
           src: "../data-code-analyzer/src/result.json",
           rename: "data-code-analyze-result.json",
-          dest: "."
-        }
-      ]
-    })
+          dest: ".",
+        },
+      ],
+    }),
   ],
 });

@@ -1032,11 +1032,14 @@ export function Chessboard(props: ChessboardProps) {
   let chessboardElement!: HTMLDivElement;
   const [transformScale, setTransformScale] = createSignal(1);
 
-  const { assetsManager } = useUiContext();
-  const { CardDataViewer, ...dataViewerController } = createCardDataViewer({
-    includesImage: true,
-    assetsManager,
-  });
+  const { assetsManager, locale, t } = useUiContext();
+  const { CardDataViewer, ...dataViewerController } = createCardDataViewer(
+    {
+      includesImage: true,
+      assetsManager,
+      locale,
+    } as any,
+  );
   const [selectingItem, setSelectingItem] = createSignal<SelectingItem | null>(
     null,
   );
@@ -1957,7 +1960,7 @@ export function Chessboard(props: ChessboardProps) {
               <Show when={localProps.data.state.phase !== PbPhaseType.GAME_END}>
                 <ExitButton
                   onClick={async () => {
-                    if (await confirm("确定放弃对局吗？")) {
+                    if (await confirm(t("confirmGiveUpGame"))) {
                       localProps.onGiveUp?.();
                     }
                   }}
@@ -1984,7 +1987,7 @@ export function Chessboard(props: ChessboardProps) {
         <Show when={localProps.opp && localProps.liveStreamingMode}>
           <div class="absolute top-2.5 right-[calc(var(--chessboard-right-offset)+0.625rem)] flex flex-row-reverse gap-2">
             <div class="h-8 w-24 flex items-center justify-center rounded-full b-2 line-height-none font-bold bg-#e9e2d3 text-black/70 b-black/70">
-              直播模式
+              {t("liveStreamingMode")}
             </div>
           </div>
         </Show>
@@ -1996,8 +1999,8 @@ export function Chessboard(props: ChessboardProps) {
           <div class="absolute inset-0 bg-black/85 flex items-center justify-center flex-col z-50">
             <div class="font-bold text-4xl text-white my-10">
               {localProps.data.state.winner === localProps.who
-                ? "对局胜利"
-                : "对局失败"}
+                ? t("gameVictory")
+                : t("gameDefeat")}
             </div>
             {localProps.gameEndExtra}
           </div>

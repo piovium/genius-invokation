@@ -14,13 +14,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Layout } from "../layouts/Layout";
+import { useI18n } from "../i18n";
 
 export default function NotFound() {
+  const { t } = useI18n();
   return (
     <Layout>
       <div class="flex flex-col items-center justify-center h-full">
         <h1 class="text-4xl font-bold">404 Not Found</h1>
-        <p class="text-lg">页面未找到</p>
+        <p class="text-lg">{t("pageNotFound")}</p>
       </div>
     </Layout>
   );

@@ -33,8 +33,10 @@ import { RoomInfo } from "../components/RoomInfo";
 import { useDecks } from "./Decks";
 import { Login } from "../components/Login";
 import { useAuth } from "../auth";
+import { useI18n } from "../i18n";
 
 export default function Home() {
+  const { t } = useI18n();
   const {
     status,
     loading: userLoading,
@@ -65,7 +67,7 @@ export default function Home() {
 
   const createRoom = () => {
     if (!decks().count) {
-      alert("请先创建一组牌组");
+      alert(t("createDeckFirst"));
       navigate("/decks/new");
       return;
     }
@@ -74,7 +76,7 @@ export default function Home() {
   const joinRoomBySubmitCode = async (e: SubmitEvent) => {
     e.preventDefault();
     if (!decks().count) {
-      alert("请先创建一组牌组");
+      alert(t("createDeckFirst"));
       navigate("/decks/new");
       return;
     }
@@ -95,7 +97,7 @@ export default function Home() {
   };
   const joinRoomByInfo = (roomInfo: any) => {
     if (!decks().count) {
-      alert("请先创建一组牌组");
+      alert(t("createDeckFirst"));
       navigate("/decks/new");
       return;
     }
@@ -108,17 +110,19 @@ export default function Home() {
       <div class="container mx-auto h-full">
         <Switch>
           <Match when={userLoading()}>
-            <div class="text-gray-500">Loading now, please wait...</div>
+            <div class="text-gray-500">{t("loadingNow")}</div>
           </Match>
           <Match when={userError()}>
             <div class="text-red-500">
               <p>
-                用户信息加载失败：{userError()?.message ?? String(userError())}
+                {t("userInfoLoadFailed", {
+                  message: userError()?.message ?? String(userError()),
+                })}
               </p>
               <p>
-                请尝试{" "}
+                {t("pleaseTry")}{" "}
                 <button class="btn btn-outline-red" onClick={logout}>
-                  退出登录
+                  {t("logout")}
                 </button>
               </p>
             </div>
@@ -127,8 +131,11 @@ export default function Home() {
             <div class="flex flex-col h-full min-h-0">
               <div class="flex-shrink-0 mb-8">
                 <h2 class="text-3xl font-light">
-                  {status().type === "guest" ? "游客 " : ""}
-                  {status().name}，欢迎你！
+                  {t("welcomeUser", {
+                    guestPrefix:
+                      status().type === "guest" ? t("guestPrefix") : " ",
+                    name: status().name ?? "",
+                  })}
                 </h2>
               </div>
               <div class="flex flex-grow flex-col-reverse md:flex-row gap-8 min-h-0">
@@ -137,16 +144,17 @@ export default function Home() {
                     href="/decks"
                     class="text-xl font-bold text-blue-500 hover:underline mb-4"
                   >
-                    我的牌组
+                    {t("myDecks")}
                   </A>
                   <Switch>
                     <Match when={decksLoading()}>
-                      <div class="text-gray-500">牌组信息加载中…</div>
+                      <div class="text-gray-500">{t("deckInfoLoading")}</div>
                     </Match>
                     <Match when={decksError()}>
                       <div class="text-gray-500">
-                        牌组信息加载失败：
-                        {decksError()?.message ?? String(decksError())}
+                        {t("deckInfoLoadFailed", {
+                          message: decksError()?.message ?? String(decksError()),
+                        })}
                       </div>
                     </Match>
                     <Match when={true}>
@@ -155,9 +163,9 @@ export default function Home() {
                           each={decks().data}
                           fallback={
                             <div class="text-gray-500">
-                              暂无牌组，
+                              {t("noDecks")}
                               <A href="/decks/new" class="text-blue-500">
-                                前往添加
+                                {t("goAdd")}
                               </A>
                             </div>
                           }
@@ -170,7 +178,7 @@ export default function Home() {
                 </div>
                 <div class="b-r-gray-200 b-1 hidden md:block" />
                 <div class="flex-grow flex flex-col">
-                  <h4 class="text-xl font-bold mb-5">开始游戏</h4>
+                  <h4 class="text-xl font-bold mb-5">{t("startGame")}</h4>
                   <Show
                     when={!currentRoom()}
                     fallback={
@@ -184,9 +192,9 @@ export default function Home() {
                         class="flex-shrink-0 w-full md:w-35 btn btn-solid-green h-2.3rem"
                         onClick={createRoom}
                       >
-                        创建房间…
+                        {t("createRoom")}
                       </button>
-                      <span class="flex-shrink-0">或者</span>
+                      <span class="flex-shrink-0">{t("or")}</span>
                       <form
                         class="flex-grow flex flex-row w-full md:w-unset"
                         onSubmit={joinRoomBySubmitCode}
@@ -195,7 +203,7 @@ export default function Home() {
                           type="text"
                           class="input input-solid rounded-r-0 b-r-0 flex-grow md:flex-grow-0 text-1rem line-height-none h-2.3rem"
                           name="roomCode"
-                          placeholder="输入房间号"
+                          placeholder={t("enterRoomCode")}
                           inputmode="numeric"
                           pattern="\d{4}"
                           onInput={(e) =>
@@ -209,13 +217,13 @@ export default function Home() {
                           class="flex-shrink-0 w-20 sm:w-35 btn btn-solid rounded-l-0 h-2.3rem"
                           disabled={!roomCodeValid()}
                         >
-                          加入房间…
+                          {t("joinRoom")}
                         </button>
                       </form>
                     </div>
                   </Show>
                   <h4 class="text-xl font-bold mb-5 flex flex-row items-center gap-2">
-                    当前对局
+                    {t("currentGames")}
                     <button
                       class="btn btn-ghost-primary p-1"
                       onClick={refreshAllRooms}
@@ -226,20 +234,22 @@ export default function Home() {
                   <ul class="flex gap-2 flex-row flex-wrap">
                     <Switch>
                       <Match when={allRooms.loading}>
-                        <div class="text-gray-500">对局信息加载中…</div>
+                        <div class="text-gray-500">{t("roomInfoLoading")}</div>
                       </Match>
                       <Match when={allRooms.error}>
                         <div class="text-red-500">
-                          对局信息加载失败：
-                          {allRooms.error instanceof AxiosError
-                            ? allRooms.error.response?.data.message
-                            : allRooms.error}
+                          {t("roomInfoLoadFailed", {
+                            message:
+                              allRooms.error instanceof AxiosError
+                                ? allRooms.error.response?.data.message
+                                : allRooms.error,
+                          })}
                         </div>
                       </Match>
                       <Match when={true}>
                         <For
                           each={allRooms()}
-                          fallback={<div class="text-gray-500">暂无对局</div>}
+                          fallback={<div class="text-gray-500">{t("noGames")}</div>}
                         >
                           {(roomInfo) => (
                             <li>

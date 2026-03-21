@@ -16,6 +16,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { render } from "solid-js/web";
+import { I18nProvider } from "./i18n";
 
 import "./style.css";
 import "virtual:uno.css";
@@ -62,7 +63,14 @@ async function main() {
 
   const app = document.getElementById("app")!;
   const { default: App } = await import("./App");
-  render(() => <App />, app);
+  render(
+    () => (
+      <I18nProvider>
+        <App />
+      </I18nProvider>
+    ),
+    app,
+  );
 }
 
 main();

@@ -16,9 +16,13 @@
 import { createClient } from "@gi-tcg/web-ui-core";
 import "@gi-tcg/web-ui-core/style.css";
 import { onCleanup, onMount } from "solid-js";
+import { useI18n } from "./i18n";
 
 export function StandaloneChild() {
+  const { t, assetsManager, locale } = useI18n();
   const [uiIo, Chessboard] = createClient(0, {
+    assetsManager: assetsManager(),
+    locale,
     onGiveUp: () => {
       window.opener?.postMessage({
         giTcg: "1.0",
@@ -84,7 +88,7 @@ export function StandaloneChild() {
   return (
     <div>
       <div class="title-row">
-        <span class="title">先手方棋盘</span>
+        <span class="title">{t("firstPlayerBoard")}</span>
       </div>
       <Chessboard />
     </div>

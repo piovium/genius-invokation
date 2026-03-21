@@ -20,27 +20,42 @@ import { getAvatarUrl } from "../utils";
 import Logo from "./Logo.svg";
 import Title from "./Title.svg";
 import { useAuth } from "../auth";
+import { useI18n } from "../i18n";
+import { useAppI18n } from "../App";
 
 const USE_LOGO = true;
 
 export function Header() {
   const navigate = useNavigate();
   const { status, logout } = useAuth();
+  const { t } = useI18n();
+  const { locale, setLocale } = useAppI18n();
   return (
     <header class="fixed top-0 left-0 w-100dvw flex flex-row h-[calc(3rem+var(--root-padding-top))] md:h-[calc(4rem+var(--root-padding-top))] pt-[var(--root-padding-top)] bg-white z-200 px-4 shadow-md items-center gap-2">
       <img src={Logo} class="h-10 md:h-12" />
       <div class="flex-grow flex flex-col md:flex-row items-start md:items-end gap-1 md:gap-2">
         <h1 class="text-xl line-height-none font-bold">
           <A href="/">
-            <Show when={USE_LOGO} fallback="七圣召唤模拟对战平台">
-              <img src={Title} class="h-5 md:h-6" alt="雨酱牌！" />
+            <Show when={USE_LOGO} fallback={t("platformTitle")}>
+              <img src={Title} class="h-5 md:h-6" alt={t("platformLogoAlt")} />
             </Show>
           </A>
         </h1>
         <div class="flex flex-row gap-2">
+          <select
+            class="text-xs border rounded px-2 py-1 bg-white"
+            value={locale()}
+            onChange={(e) =>
+              setLocale(e.currentTarget.value as "zh-CN" | "en-US")
+            }
+            aria-label={t("languageLabel")}
+          >
+            <option value="zh-CN">{t("languageChinese")}</option>
+            <option value="en-US">{t("languageEnglish")}</option>
+          </select>
           <Show when={IS_BETA}>
             <span class="text-8px md:text-10px badge badge-soft-error">
-              Incl. unreleased data
+              {t("includeUnreleasedData")}
             </span>
           </Show>
         </div>
@@ -64,7 +79,7 @@ export function Header() {
           }}
         >
           <i class="i-mdi-logout" />
-          <span class="hidden sm:inline">退出登录</span>
+          <span class="hidden sm:inline">{t("logout")}</span>
         </button>
       </Show>
     </header>

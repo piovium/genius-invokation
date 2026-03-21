@@ -29,15 +29,20 @@ import { useNavigate } from "@solidjs/router";
 import { useAuth } from "../auth";
 import { useVersionContext } from "../App";
 import { useGuestDecks, useGuestInfo } from "../guest";
-import { DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
+import type { AssetsManager } from "@gi-tcg/assets-manager";
+import { useI18n } from "../i18n";
 
 function SelectableDeckInfo(
-  props: DeckInfoProps & Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "id">,
+  props: DeckInfoProps &
+    Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "id"> & {
+      assetsManager: AssetsManager;
+    },
 ) {
   const [deckInfo, inputProps] = splitProps(props, [
     "characters",
     "name",
     "id",
+    "assetsManager",
   ]);
   return (
     <label class="relative group cursor-pointer min-w-15">
@@ -54,7 +59,7 @@ function SelectableDeckInfo(
             {(id) => (
               <img
                 class="h-12 w-12 b-2 b-yellow-100 rounded-full"
-                src={DEFAULT_ASSETS_MANAGER.getImageUrlSync(id, {
+                src={deckInfo.assetsManager.getImageUrlSync(id, {
                   type: "icon",
                 })}
               />
@@ -82,7 +87,7 @@ export interface RoomDialogProps {
 }
 
 interface TimeConfig {
-  name: string;
+  nameKey: "timeConfigMinimal" | "timeConfigStandard" | "timeConfigDouble" | "timeConfigLong" | "timeConfigEndless";
   estimationTime: number;
   initTotalActionTime: number;
   rerollTime: number;
@@ -92,7 +97,7 @@ interface TimeConfig {
 
 const TIME_CONFIGS: TimeConfig[] = [
   {
-    name: "最小",
+    nameKey: "timeConfigMinimal",
     estimationTime: 3,
     initTotalActionTime: 20,
     rerollTime: 25,
@@ -100,7 +105,7 @@ const TIME_CONFIGS: TimeConfig[] = [
     actionTime: 25,
   },
   {
-    name: "标准",
+    nameKey: "timeConfigStandard",
     estimationTime: 5,
     initTotalActionTime: 45,
     rerollTime: 40,
@@ -108,7 +113,7 @@ const TIME_CONFIGS: TimeConfig[] = [
     actionTime: 25,
   },
   {
-    name: "双倍",
+    nameKey: "timeConfigDouble",
     estimationTime: 10,
     initTotalActionTime: 20,
     rerollTime: 60,
@@ -116,7 +121,7 @@ const TIME_CONFIGS: TimeConfig[] = [
     actionTime: 45,
   },
   {
-    name: "超长",
+    nameKey: "timeConfigLong",
     estimationTime: 20,
     initTotalActionTime: 60,
     rerollTime: 120,
@@ -124,7 +129,7 @@ const TIME_CONFIGS: TimeConfig[] = [
     actionTime: 90,
   },
   {
-    name: "≈无尽",
+    nameKey: "timeConfigEndless",
     estimationTime: 60,
     initTotalActionTime: 60,
     rerollTime: 300,
@@ -134,6 +139,7 @@ const TIME_CONFIGS: TimeConfig[] = [
 ];
 
 export function RoomDialog(props: RoomDialogProps) {
+  const { t, assetsManager } = useI18n();
   const { status } = useAuth();
   const [guestInfo, setGuestInfo] = useGuestInfo();
   const [guestDecks] = useGuestDecks();
@@ -262,21 +268,21 @@ export function RoomDialog(props: RoomDialogProps) {
   return (
     <dialog
       ref={(el) => (dialogEl = el) && (props.ref as any)?.(el)}
-      class="max-h-unset max-w-unset h-100dvh w-100dvw overflow-auto pt-[calc(0.75rem+var(--root-padding-top))] md:pt-3 md:m-x-auto md:my-3rem md:h-[calc(100vh-6rem)] md:w-min md:max-h-180 md:rounded-xl md:shadow-xl p-6 scrollbar-hidden"
+      class="max-h-unset max-w-unset h-100dvh w-100dvw overflow-auto pt-[calc(0.75rem+var(--root-padding-top))] md:pt-3 md:m-x-auto md:my-2rem md:h-auto md:w-min md:max-h-[calc(100vh-4rem)] md:rounded-xl md:shadow-xl p-6 scrollbar-hidden"
     >
-      <div class="flex flex-col md:min-h-full md:h-min w-full gap-5">
-        <h3 class="flex-shrink-0 text-xl font-bold">房间配置</h3>
+      <div class="flex flex-col md:h-auto w-full gap-5 md:gap-6">
+        <h3 class="flex-shrink-0 text-xl font-bold">{t("roomConfig")}</h3>
         <div
           class="flex-grow min-h-0 flex flex-col md:flex-row gap-4 data-[disabled=true]:cursor-not-allowed mb-[calc(4.5rem+var(--root-padding-bottom))] md:mb-0"
           data-disabled={!editable()}
         >
           <div
-            class="flex flex-col w-80 md:data-[editable=true]:w-130"
+            class="flex flex-col w-80 md:data-[editable=true]:w-140"
             data-editable={editable()}
           >
             <Show when={versionInfo()}>
               <div class="mb-3 flex flex-row gap-4 items-center">
-                <h4 class="text-lg">游戏版本</h4>
+                <h4 class="text-lg">{t("gameVersion")}</h4>
                 <select
                   class="disabled:pointer-events-none appearance-none"
                   value={version()}
@@ -288,9 +294,13 @@ export function RoomDialog(props: RoomDialogProps) {
                   </For>
                 </select>
               </div>
-              <h4 class="text-lg mb-3">思考时间</h4>
+              <h4 class="text-lg mb-3">{t("thinkingTime")}</h4>
               <div
-                class="grid grid-cols-3 gap-2 mb-3 data-[disabled=true]:pointer-events-none"
+                class="grid gap-2 mb-3 data-[disabled=true]:pointer-events-none"
+                classList={{
+                  "grid-cols-3": !props.joiningRoomInfo,
+                  "grid-cols-1": !!props.joiningRoomInfo,
+                }}
                 data-disabled={!editable()}
               >
                 <For
@@ -302,33 +312,35 @@ export function RoomDialog(props: RoomDialogProps) {
                 >
                   {(config) => (
                     <div
-                      class="b-1 b-gray-400 rounded-lg p-2 md:p-12px group data-[active=true]:b-slate-500 data-[active=true]:b-2 md:data-[active=true]:p-11px cursor-pointer data-[active=true]:cursor-default select-none transition-colors"
+                      class="b-1 b-gray-400 rounded-lg p-3 md:p-4 group data-[active=true]:b-slate-500 data-[active=true]:b-2 md:data-[active=true]:p-[calc(1rem-1px)] cursor-pointer data-[active=true]:cursor-default select-none transition-colors"
                       data-active={
                         !!props.joiningRoomInfo || config === timeConfig()
                       }
                       onClick={() => setTimeConfig(config)}
                     >
-                      <h5 class="font-bold text-gray-400 group-data-[active=true]:text-black transition-colors">
-                        {config.name ??
+                      <h5 class="font-bold text-gray-400 group-data-[active=true]:text-black transition-colors leading-tight min-h-10 flex items-start">
+                        {t(config.nameKey) ??
                           `${config.roundTotalActionTime} + ${config.actionTime}`}
                       </h5>
-                      <h5 class="text-gray-400 group-data-[active=true]:text-gray-600 transition-colors md:mb-1 font-size-80%">
-                        {config.estimationTime
-                          ? `预计每回合 ${config.estimationTime}min`
-                          : ""}
-                      </h5>
-                      <ul class="hidden md:block pl-3 list-disc text-gray-400 font-size-80% text-sm group-data-[active=true]:text-slate-500 transition-colors">
-                        <li>初始化总时间：{config.initTotalActionTime}s</li>
-                        <li>每重投时间：{config.rerollTime}s</li>
-                        <li>每回合总时间：{config.roundTotalActionTime}s</li>
-                        <li>每行动时间：{config.actionTime}s</li>
+                      <Show when={config.estimationTime}>
+                        <h5 class="text-gray-400 group-data-[active=true]:text-gray-600 transition-colors md:mb-2 font-size-80% leading-tight">
+                          {t("estimatedEachRound", {
+                            minutes: config.estimationTime,
+                          })}
+                        </h5>
+                      </Show>
+                      <ul class="hidden md:block pl-4 list-disc text-gray-400 font-size-80% text-sm group-data-[active=true]:text-slate-500 transition-colors leading-relaxed">
+                        <li>{t("initTotalActionTime", { seconds: config.initTotalActionTime })}</li>
+                        <li>{t("rerollTime", { seconds: config.rerollTime })}</li>
+                        <li>{t("roundTotalActionTime", { seconds: config.roundTotalActionTime })}</li>
+                        <li>{t("actionTime", { seconds: config.actionTime })}</li>
                       </ul>
                     </div>
                   )}
                 </For>
               </div>
               <div class="mb-3 flex flex-row gap-4 items-center">
-                <h4 class="text-lg">公开房间</h4>
+                <h4 class="text-lg">{t("publicRoom")}</h4>
                 <ToggleSwitch
                   checked={
                     props.joiningRoomInfo
@@ -340,7 +352,7 @@ export function RoomDialog(props: RoomDialogProps) {
                 />
               </div>
               <div class="mb-3 flex flex-row gap-4 items-center">
-                <h4 class="text-lg">允许观战</h4>
+                <h4 class="text-lg">{t("watchable")}</h4>
                 <ToggleSwitch
                   checked={
                     props.joiningRoomInfo?.config.watchable ?? watchable()
@@ -351,7 +363,7 @@ export function RoomDialog(props: RoomDialogProps) {
               </div>
               <Show when={editable() && !guestInfo()}>
                 <div class="mb-3 flex flex-row gap-4 items-center">
-                  <h4 class="text-lg">允许游客加入</h4>
+                  <h4 class="text-lg">{t("allowGuestJoin")}</h4>
                   <ToggleSwitch
                     checked={allowGuest()}
                     onChange={(e) => setAllowGuest(e.target.checked)}
@@ -361,27 +373,29 @@ export function RoomDialog(props: RoomDialogProps) {
               <Show when={editable() ? allowGuest() : guestInfo()}>
                 <div class="mb-3 alert alert-border-warning">
                   <p class="alert-description break-all">
-                    有游客参与的对局记录将不会保存。如果您希望将对局中遇到的问题反馈给开发者，建议您
-                    {editable() && !guestInfo()
-                      ? "关闭“允许游客加入”"
-                      : "使用 GitHub 登录"}
-                    。
+                    {t("guestRecordWarning", {
+                      suggestion:
+                        editable() && !guestInfo()
+                          ? t("disableGuestJoin")
+                          : t("useGithubLogin"),
+                    })}
                   </p>
                 </div>
               </Show>
             </Show>
           </div>
           <div class="b-r-gray-200 b-1" />
-          <div class="flex flex-col min-w-52 relative">
-            <h4 class="text-lg mb-3">选择出战牌组</h4>
-            <ul class="flex-grow-1 flex flex-row md:flex-col flex-wrap md:flex-nowrap min-h-0 max-h-75dvh md:max-h-135 overflow-auto deck-ul-scrollbar">
+          <div class="flex flex-col min-w-56 relative">
+            <h4 class="text-lg mb-3">{t("chooseDeck")}</h4>
+            <ul class="flex-grow-1 flex flex-row md:flex-col flex-wrap md:flex-nowrap min-h-0 max-h-75dvh md:max-h-150 overflow-auto deck-ul-scrollbar pr-1">
               <For
                 each={availableDecks()}
-                fallback={<li class="text-gray-500">暂无该版本可用牌组</li>}
+                fallback={<li class="text-gray-500">{t("noDeckForVersion")}</li>}
               >
                 {(deck) => (
                   <li>
                     <SelectableDeckInfo
+                      assetsManager={assetsManager()}
                       {...deck}
                       checked={selectedDeck() === deck.id}
                       onChange={(e) =>
@@ -396,13 +410,13 @@ export function RoomDialog(props: RoomDialogProps) {
               class="absolute inset-0 opacity-0 bg-white text-gray-500 pointer-events-none data-[loading=true]:opacity-80 transition flex items-center justify-center"
               data-loading={loadingDecks()}
             >
-              加载中…
+              {t("loadingEllipsis")}
             </div>
           </div>
         </div>
         <div class="fixed md:static left-0 right-0 bottom-0 bg-white b-t-gray-200 b-1 md:b-0 px-6 pb-[var(--root-padding-bottom)] h-[calc(4.5rem+var(--root-padding-bottom))] md:h-min md:p-0 flex-shrink-0 flex flex-row justify-end items-center gap-4">
           <button class="btn btn-ghost-red" onClick={closeDialog}>
-            取消
+            {t("cancel")}
           </button>
           <button
             class="btn btn-solid-green"
@@ -410,12 +424,12 @@ export function RoomDialog(props: RoomDialogProps) {
             disabled={selectedDeck() === null || entering()}
           >
             {selectedDeck() === null
-              ? "请先选择牌组"
+              ? t("selectDeckFirst")
               : entering()
-                ? "正在加入房间…"
+                ? t("joiningRoom")
                 : editable()
-                  ? "创建房间"
-                  : "加入房间"}
+                  ? t("createRoomPlain")
+                  : t("joinRoomPlain")}
           </button>
         </div>
       </div>

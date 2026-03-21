@@ -21,10 +21,12 @@ import { parseMutations } from "./mutations";
 import { AssetsManager, DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
 import { updateHistory, type HistoryData } from "./history/parser";
 import type { HistoryBlock } from "./history/typings";
+import { detectLocale, t as translate } from "./i18n";
 
 export interface StandaloneChessboardProps extends ComponentProps<"div"> {
   who: 0 | 1;
   assetsManager?: AssetsManager;
+  locale?: "zh-CN" | "en-US";
   state: PbGameState;
   mutations: PbExposedMutation[];
 }
@@ -33,6 +35,7 @@ export function StandaloneChessboard(props: StandaloneChessboardProps) {
   const [localProps, elProps] = splitProps(props, [
     "who",
     "assetsManager",
+    "locale",
     "state",
     "mutations",
   ]);
@@ -54,6 +57,9 @@ export function StandaloneChessboard(props: StandaloneChessboardProps) {
       value={{
         assetsManager:
           untrack(() => localProps.assetsManager) ?? DEFAULT_ASSETS_MANAGER,
+        locale: localProps.locale ?? detectLocale(),
+        t: (key, params) =>
+          translate(key, params, localProps.locale ?? detectLocale()),
       }}
     >
       <Chessboard
