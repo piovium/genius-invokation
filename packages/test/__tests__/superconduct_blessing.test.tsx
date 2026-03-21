@@ -77,16 +77,18 @@ describe("superconduct blessing: deep freeze", () => {
 
   test("heizou's onBeforeAction won't recorded for next action", async () => {
     const deepFreeze = ref();
+    const myActive = ref();
     const c = setup(
       <State>
         <Character opp def={ShikanoinHeizou} />
         <Support my def={SuperconductBlessingDeepFreeze} ref={deepFreeze} />
-        <Character my def={YaeMiko}>
+        <Character my active def={YaeMiko} ref={myActive} health={10}>
           <Status def={WindmusterIrisCryo} />
         </Character>
       </State>
     );
     await c.me.skill(SpiritfoxSineater);
+    c.expect(myActive).toHaveVariable({ health: 9, aura: Aura.Cryo });
     c.expect(deepFreeze).toHaveVariable({ usagePerRound: 2 });
   });
 });
