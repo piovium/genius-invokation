@@ -112,7 +112,54 @@ export function getAllEntities(
   state: GameState,
   inclRemoved = false,
 ): AnyState[] {
+  return getAllEntitiesImpl(state, inclRemoved, false);
+}
+
+export interface EntityWithArea {
+  state: AnyState;
+  area: EntityArea;
+}
+
+/**
+ * 查找所有实体(含牌堆)，按照通常响应顺序排序，并附带实体所在区域信息。
+ * @param state 游戏状态
+ * @param inclRemoved 是否包含已移除的实体
+ * @returns 实体与区域信息列表
+ */
+export function getAllEntitiesWithArea(
+  state: GameState,
+  inclRemoved = false,
+): EntityWithArea[] {
+  return getAllEntitiesImpl(state, inclRemoved, true);
+}
+
+function getAllEntitiesImpl(
+  state: GameState,
+  inclRemoved: boolean,
+  withArea: true,
+): EntityWithArea[];
+function getAllEntitiesImpl(
+  state: GameState,
+  inclRemoved: boolean,
+  withArea: false,
+): AnyState[];
+function getAllEntitiesImpl(
+  state: GameState,
+  inclRemoved: boolean,
+  withArea: boolean,
+): (AnyState | EntityWithArea)[] {
   const result: AnyState[] = [];
+  const resultWithArea: EntityWithArea[] = [];
+  let append: (entity: AnyState, area: EntityArea) => void;
+  if (withArea) {
+    append = (entity: AnyState, area: EntityArea) => {
+      resultWithArea.push({ state: entity, area });
+    };
+  } else {
+    append = (entity: AnyState, _area: EntityArea) => {
+      result.push(entity);
+    };
+  }
   for (const who of [state.currentTurn, flip(state.currentTurn)]) {
     const player = state.players[who];
     let activeIdx = 0;
@@ -129,26 +176,94 @@ export function getAllEntities(
     // 先列出倒下角色区上实体
     for (const ch of standby) {
       if (ch.variables.alive === 0) {
-        result.push(ch, ...ch.entities);
+        const area: EntityArea = {
+          type: "characters",
+          who,
+          characterId: ch.id,
+        };
+        append(ch, area);
+        for (const entity of ch.entities) {
+          append(entity, area);
+        }
       }
     }
 
-    result.push(active, ...active.entities);
-    result.push(...player.combatStatuses);
+    const activeArea: EntityArea = {
+      type: "characters",
+      who,
+      characterId: active.id,
+    };
+    append(active, activeArea);
+    for (const entity of active.entities) {
+      append(entity, activeArea);
+    }
+    const combatStatusArea: EntityArea = {
+      type: "combatStatuses",
+      who,
+    };
+    for (const combatStatus of player.combatStatuses) {
+      append(combatStatus, combatStatusArea);
+    }
     for (const ch of standby) {
       if (ch.variables.alive === 1) {
-        result.push(ch, ...ch.entities);
+        const area: EntityArea = {
+          type: "characters",
+          who,
+          characterId: ch.id,
+        };
+        append(ch, area);
+        for (const entity of ch.entities) {
+          append(entity, area);
+        }
       }
     }
-    result.push(...player.summons, ...player.supports);
-    for (const card of [...player.hands, ...player.pile.toReversed()]) {
-      result.push(card, ...card.attachments);
+    const summonsArea: EntityArea = {
+      type: "summons",
+      who,
+    };
+    for (const summon of player.summons) {
+      append(summon, summonsArea);
+    }
+    const supportsArea: EntityArea = {
+      type: "supports",
+      who,
+    };
+    for (const support of player.supports) {
+      append(support, supportsArea);
+    }
+    for (const card of player.hands) {
+      const area: EntityArea = {
+        type: "hands",
+        who,
+        cardId: card.id,
+      };
+      append(card, area);
+      for (const attachment of card.attachments) {
+        append(attachment, area);
+      }
+    }
+    for (const card of player.pile.toReversed()) {
+      const area: EntityArea = {
+        type: "pile",
+        who,
+        cardId: card.id,
+      };
+      append(card, area);
+      for (const attachment of card.attachments) {
+        append(attachment, area);
+      }
     }
     if (inclRemoved) {
-      result.push(...player.removedEntities);
+      const removedArea: EntityArea = {
+        type: "removedEntities",
+        who,
+      };
+      for (const removedEntity of player.removedEntities) {
+        append(removedEntity, removedArea);
+      }
     }
   }
-  return result;
+  return withArea ? resultWithArea : result;
 }
 
 export interface CallerAndTriggeredSkill {
