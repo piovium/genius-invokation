@@ -12,24 +12,27 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
-import type { AnyState } from "../base/state";
-import type { EntityArea } from "../base/entity";
+
+import type { AnyState, GameState } from "../base/state";
 import { toExpression, type Expression, type IQuery } from "./utils";
+import { getAllEntitiesWithArea, type EntityWithArea } from "../utils";
 
 export function queryToExpression(query: IQuery): Expression {
   return query[toExpression]();
 }
 
-interface EntityEntry {
-  state: AnyState;
-  area: EntityArea;
-}
-
 class QueryRuntime {
-  private entities: Map<number, EntityEntry> = new Map();
+  readonly entities: ReadonlyMap<number, EntityWithArea>;
+  readonly state: GameState;
+  readonly who: 0 | 1;
+
+  constructor(state: GameState, who: 0 | 1) {
+    this.entities = new Map(
+      getAllEntitiesWithArea(state).map((e) => [e.state.id, e]),
+    );
+    this.state = state;
+    this.who = who;
+  }
 }
 
-interface UnorderedQueryResult {
-
-}
+interface UnorderedQueryResult {}
