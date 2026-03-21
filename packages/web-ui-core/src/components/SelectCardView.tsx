@@ -37,7 +37,7 @@ export interface SelectCardViewProps {
 }
 
 export function SelectCardView(props: SelectCardViewProps) {
-  const { t, assetsManager } = useUiContext();
+  const { t, getName } = useUiContext();
   const [selectedId, setSelectedId] = createSignal<number | null>(null);
 
   return (
@@ -70,7 +70,7 @@ export function SelectCardView(props: SelectCardViewProps) {
                 <AsyncCardName
                   id={cardId}
                   fallbackName={props.nameGetter(cardId)}
-                  assetsManager={assetsManager}
+                  getName={getName}
                 />
               </div>
             </li>
@@ -105,8 +105,8 @@ export interface DiceCostAsyncProps {
 export const DiceCostAsync = (props: DiceCostAsyncProps) => {
   const { assetsManager } = useUiContext();
   const [data] = createResource(
-    () => props.cardDefinitionId,
-    (id) => assetsManager.getData(id),
+    () => [props.cardDefinitionId, assetsManager()] as const,
+    ([id, manager]) => manager.getData(id),
   );
   const COST_MAP: Record<string, number> = {
     GCG_COST_DICE_VOID: DiceType.Void,
@@ -152,11 +152,7 @@ export const DiceCostAsync = (props: DiceCostAsyncProps) => {
 function AsyncCardName(props: {
   id: number;
   fallbackName?: string;
-  assetsManager: ReturnType<typeof useUiContext>["assetsManager"];
+  getName: ReturnType<typeof useUiContext>["getName"];
 }) {
-  const [data] = createResource(
-    () => props.id,
-    (id) => props.assetsManager.getData(id),
-  );
-  return <>{data()?.name ?? props.fallbackName ?? props.id}</>;
+  return <>{props.getName(props.id) ?? props.fallbackName ?? props.id}</>;
 }

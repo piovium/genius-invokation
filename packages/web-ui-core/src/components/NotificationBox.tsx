@@ -15,7 +15,7 @@
 
 import type { NotificationBoxInfo } from "./Chessboard";
 import { Image } from "./Image";
-import { Show, createResource } from "solid-js";
+import { Show } from "solid-js";
 import { PbSkillType } from "@gi-tcg/typings";
 import { useUiContext } from "../hooks/context";
 
@@ -25,23 +25,12 @@ export interface NotificationBoxProps {
 }
 
 export function NotificationBox(props: NotificationBoxProps) {
-  const { t, assetsManager } = useUiContext();
-  const [skillData] = createResource(
-    () => props.data.skillDefinitionId,
-    (id) => (typeof id === "number" ? assetsManager.getData(Math.floor(id)) : null),
-  );
-  const [characterData] = createResource(
-    () => props.data.characterDefinitionId,
-    (id) => assetsManager.getData(id),
-  );
+  const { t, getName } = useUiContext();
   const skillName = () =>
-    skillData()?.name ??
-    (typeof props.data.skillDefinitionId === "number"
-      ? assetsManager.getNameSync(Math.floor(props.data.skillDefinitionId))
-      : undefined);
-  const characterName = () =>
-    characterData()?.name ??
-    assetsManager.getNameSync(props.data.characterDefinitionId);
+    typeof props.data.skillDefinitionId === "number"
+      ? getName(Math.floor(props.data.skillDefinitionId))
+      : undefined;
+  const characterName = () => getName(props.data.characterDefinitionId);
   const typeText = (
     type: NotificationBoxInfo["skillType"],
   ): string | undefined => {

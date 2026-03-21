@@ -32,8 +32,9 @@ import { createActionState, type ActionState } from "./action";
 import type { ChessboardViewType } from "./components/Chessboard";
 
 export interface OppChessboardControllerOption {
-  assetsManager: AssetsManager;
-  locale: "zh-CN" | "en-US";
+  assetsManager: () => AssetsManager;
+  locale: () => "zh-CN" | "en-US";
+  getName: (definitionId?: number) => string;
   who: 0 | 1;
   onUpdate: (info: OppInfo | null) => void;
 }
@@ -89,9 +90,10 @@ export class OppChessboardController implements IOppChessboardController {
     const rpcDispatcher: RpcDispatcher = {
       action: ({ action }) => {
         this.#actionState = createActionState(
-          this.opt.assetsManager,
+          this.opt.assetsManager(),
           action,
-          this.opt.locale,
+          this.opt.locale(),
+          this.opt.getName,
         );
         this.onUpdate();
         return Promise.reject("opp chessboard");
