@@ -23,6 +23,7 @@ import {
   Show,
 } from "solid-js";
 import { ActionCard, Character, Entity, Keyword, Skill } from "./Entity";
+import { useAssetsManager } from "./context";
 
 export type StateType =
   | AnyState["definition"]["type"]
@@ -65,6 +66,7 @@ export function CardDataViewerContainer(props: CardDataViewerContainerProps) {
 }
 
 function CardDataViewer(props: CardDataViewerProps) {
+  const { t } = useAssetsManager();
   const grouped = createMemo(() => Object.groupBy(props.inputs, (i) => i.type));
   const hasStatuses = () => {
     const g = grouped();
@@ -85,7 +87,7 @@ function CardDataViewer(props: CardDataViewerProps) {
       <ErrorBoundary
         fallback={(err) => (
           <div class="card-panel">
-            <p>加载失败</p>
+            <p>{t("loadFailed")}</p>
             <pre class="whitespace-pre-wrap">
               {"message" in err ? err.message : `${err}`}
             </pre>
@@ -145,7 +147,7 @@ function CardDataViewer(props: CardDataViewerProps) {
           <Show when={hasStatuses()}>
             <div class="card-panel">
               <Show when={equipmentAndStatuses().length}>
-                <h3 class="text-yellow-7 mb-2">装备与状态</h3>
+                <h3 class="text-yellow-7 mb-2">{t("equipmentAndStatus")}</h3>
               </Show>
               <For each={equipmentAndStatuses()}>
                 {(input) => (
@@ -159,7 +161,7 @@ function CardDataViewer(props: CardDataViewerProps) {
                 )}
               </For>
               <Show when={grouped().combatStatus?.length}>
-                <h3 class="text-yellow-7 mb-2">出战状态</h3>
+                <h3 class="text-yellow-7 mb-2">{t("combatStatus")}</h3>
               </Show>
               <For each={grouped().combatStatus}>
                 {(input) => (
@@ -173,7 +175,7 @@ function CardDataViewer(props: CardDataViewerProps) {
                 )}
               </For>
               <Show when={grouped().attachment?.length}>
-                <h3 class="text-yellow-7 mb-2">附着效果状态</h3>
+                <h3 class="text-yellow-7 mb-2">{t("attachmentStatus")}</h3>
               </Show>
               <For each={grouped().attachment}>
                 {(input) => (

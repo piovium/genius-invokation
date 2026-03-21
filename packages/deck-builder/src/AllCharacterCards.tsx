@@ -24,8 +24,10 @@ import {
 import { FilterBar } from "./FilterBar";
 import { Key } from "@solid-primitives/keyed";
 import type { DeckDataCharacterInfo } from "@gi-tcg/assets-manager";
+import { useDeckBuilderContext } from "./DeckBuilder";
 
 export function AllCharacterCards(props: AllCardsProps) {
+  const { t } = useDeckBuilderContext();
   const [elementTag, setElementTag] = createSignal<string | null>(null);
   const [weaponTag, setWeaponTag] = createSignal<string | null>(null);
   // 还是做成单选吧
@@ -101,19 +103,19 @@ export function AllCharacterCards(props: AllCardsProps) {
       <FilterBar
         filterSelections={[
           {
-            name: "元素类型",
+            name: t("elementType"),
             selected: elementTag,
             onSelect: (value) => toggleElementTag(value),
             option: ELEMENT_TAG_IMG_NAME_MAP,
           },
           {
-            name: "武器类型",
+            name: t("weaponType"),
             selected: weaponTag,
             onSelect: (value) => toggleWeaponTag(value),
             option: WEAPON_TAG_IMG_NAME_MAP,
           },
           {
-            name: "所属阵营",
+            name: t("faction"),
             selected: nationTag,
             onSelect: (value) => toggleNationTag(value),
             option: NATION_TAG_IMG_NAME_MAP,

@@ -20,18 +20,19 @@ import { DeckInfo } from "../pages/Decks";
 import { useGuestDecks } from "../guest";
 import { useAuth } from "../auth";
 import { copyToClipboard } from "../utils";
-import { DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
+import type { AssetsManager } from "@gi-tcg/assets-manager";
+import { useI18n } from "../i18n";
 
 export interface DeckInfoProps extends DeckInfo {
   editable?: boolean;
   onDelete?: () => void;
 }
 
-function CharacterAvatar(props: { id: number }) {
+function CharacterAvatar(props: { id: number; assetsManager: AssetsManager }) {
   const [url] = createResource(
-    () => props.id,
-    (id) =>
-      DEFAULT_ASSETS_MANAGER.getImageUrl(id, {
+    () => [props.id, props.assetsManager] as const,
+    ([id, assetsManager]) =>
+      assetsManager.getImageUrl(id, {
         type: "icon",
         thumbnail: true,
       }),
@@ -43,12 +44,13 @@ function CharacterAvatar(props: { id: number }) {
     <img
       class="h-14 w-14 b-2 b-yellow-100 rounded-full"
       src={url()}
-      alt={DEFAULT_ASSETS_MANAGER.getNameSync(props.id)}
+      alt={props.assetsManager.getNameSync(props.id)}
     />
   );
 }
 
 export function DeckBriefInfo(props: DeckInfoProps) {
+  const { t, assetsManager } = useI18n();
   const navigate = useNavigate();
   const { status } = useAuth();
   const [, { removeGuestDeck }] = useGuestDecks();
@@ -61,13 +63,13 @@ export function DeckBriefInfo(props: DeckInfoProps) {
   const copyCode = async (e: MouseEvent) => {
     e.stopPropagation();
     await copyToClipboard(props.code);
-    alert(`已复制分享码：${props.code}`);
+    alert(t("shareCodeCopied", { code: props.code }));
   };
 
   const deleteDeck = async (e: MouseEvent) => {
     e.stopPropagation();
     const { type } = status();
-    if (confirm(`确定要删除牌组 ${props.name} 吗？`)) {
+    if (confirm(t("deleteDeckConfirm", { name: props.name }))) {
       try {
         if (type === "guest") {
           await removeGuestDeck(props.id);
@@ -94,13 +96,13 @@ export function DeckBriefInfo(props: DeckInfoProps) {
           {props.name}
         </h5>
         <div class="flex-shrink-0">
-          <button class="btn btn-ghost" title="复制分享码" onClick={copyCode}>
+          <button class="btn btn-ghost" title={t("copyShareCode")} onClick={copyCode}>
             <i class="i-mdi-clipboard-outline" />
           </button>
           <Show when={props.editable}>
             <button
               class="btn btn-ghost-red"
-              title="删除牌组"
+              title={t("deleteDeck")}
               onClick={deleteDeck}
             >
               <i class="i-mdi-delete" />
@@ -109,7 +111,9 @@ export function DeckBriefInfo(props: DeckInfoProps) {
         </div>
       </div>
       <div class="p-2 flex flex-row items-center justify-around">
-        <For each={props.characters}>{(id) => <CharacterAvatar id={id} />}</For>
+        <For each={props.characters}>
+          {(id) => <CharacterAvatar id={id} assetsManager={assetsManager()} />}
+        </For>
       </div>
     </div>
   );

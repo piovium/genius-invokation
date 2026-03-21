@@ -34,6 +34,10 @@ import {
   type AssetsManager,
   DEFAULT_ASSETS_MANAGER,
 } from "@gi-tcg/assets-manager";
+import {
+  type Locale,
+  translateCardDataViewer,
+} from "./i18n";
 
 export interface RegisterResult {
   readonly CardDataViewer: () => JSX.Element;
@@ -53,13 +57,30 @@ export interface RegisterResult {
 }
 
 export interface CreateCardDataViewerOption {
-  assetsManager?: AssetsManager;
+  assetsManager?: AssetsManager | (() => AssetsManager);
   includesImage?: boolean;
+  locale?: Locale | (() => Locale);
 }
 
 export function createCardDataViewer(
   option: CreateCardDataViewerOption = {},
 ): RegisterResult {
+  const localeGetter: () => Locale = (() => {
+    if (typeof option.locale === "function") {
+      const getter = option.locale;
+      return () => getter();
+    }
+    const fixedLocale = option.locale ?? "zh-CN";
+    return () => fixedLocale;
+  })();
+  const assetsManagerGetter: () => AssetsManager = (() => {
+    if (typeof option.assetsManager === "function") {
+      const getter = option.assetsManager;
+      return () => getter();
+    }
+    const fixedAssetsManager = option.assetsManager ?? DEFAULT_ASSETS_MANAGER;
+    return () => fixedAssetsManager;
+  })();
   const [shown, setShown] = createSignal(false);
   const [inputs, setInputs] = createSignal<ViewerInput[]>([]);
 
@@ -90,7 +111,11 @@ export function createCardDataViewer(
   return {
     CardDataViewer: () => (
       <AssetsContext.Provider
-        value={option.assetsManager ?? DEFAULT_ASSETS_MANAGER}
+          value={{
+          assetsManager: assetsManagerGetter,
+          locale: localeGetter,
+          t: (key) => translateCardDataViewer(localeGetter(), key),
+        }}
       >
         <CardDataViewerContainer
           shown={shown()}

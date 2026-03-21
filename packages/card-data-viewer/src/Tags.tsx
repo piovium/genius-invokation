@@ -14,20 +14,24 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { For } from "solid-js";
-import { TEXT_MAP } from "./text_map";
+import { getCardDataViewerText } from "./i18n";
+import { useAssetsManager } from "./context";
 
 export interface TagProps {
   tags: string[];
 }
 
 export function Tags(props: TagProps) {
+  const { locale } = useAssetsManager();
   return (
     <ul class="flex flex-row gap-2 flex-wrap mb-3">
       <For each={props.tags}>
         {(tag) => (
-          <li class="bg-yellow-8 py-0.5 px-1 text-yellow-1 text-xs rounded-sm">{TEXT_MAP[tag]}</li>
-        )}
-      </For>
+            <li class="bg-yellow-8 py-0.5 px-1 text-yellow-1 text-xs rounded-sm">
+            {getCardDataViewerText(locale(), tag)}
+            </li>
+          )}
+        </For>
     </ul>
   );
 }

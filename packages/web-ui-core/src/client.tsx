@@ -26,12 +26,7 @@ import {
   PbPhaseType,
   PbPlayerStatus,
 } from "@gi-tcg/typings";
-import {
-  createSignal,
-  type Component,
-  type ComponentProps,
-  type JSX,
-} from "solid-js";
+import { createSignal, type Component, type ComponentProps, type JSX } from "solid-js";
 import {
   Chessboard,
   type ChessboardViewType,
@@ -66,6 +61,8 @@ import type { Rotation } from "./components/TransformWrapper";
 import type { CancellablePlayerIO } from "@gi-tcg/core";
 import { OppChessboardController, type IOppChessboardController, type OppInfo } from "./opp";
 import { flip } from "@gi-tcg/utils";
+import { detectLocale, t as translate } from "./i18n";
+import type { Locale } from "./i18n";
 
 const EMPTY_PLAYER_DATA: PbPlayerState = {
   activeCharacterId: 0,
@@ -93,6 +90,7 @@ export interface ClientOption {
   onGiveUp?: () => void;
   rpc?: Partial<RpcDispatcher>;
   assetsManager?: AssetsManager;
+  locale?: Locale | (() => Locale);
   disableDelicateUi?: boolean;
   disableAction?: boolean;
 }
@@ -125,6 +123,14 @@ export interface ClientChessboardProps extends ComponentProps<"div"> {
 
 export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   const assetsManager = option.assetsManager ?? DEFAULT_ASSETS_MANAGER;
+  const getLocale: () => Locale = (() => {
+    if (typeof option.locale === "function") {
+      const getter = option.locale;
+      return () => getter();
+    }
+    const fixedLocale = option.locale ?? detectLocale();
+    return () => fixedLocale;
+  })();
   const [data, setData] = createSignal<ChessboardData>({
     raw: [],
     roundAndPhase: {
@@ -167,7 +173,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     chooseActive: async ({ candidateIds }) => {
       const resolver = Promise.withResolvers<ChooseActiveResponse>();
       actionResolvers.chooseActive = resolver;
-      const acState = createChooseActiveState(candidateIds);
+      const acState = createChooseActiveState(candidateIds, getLocale());
       setActionState(acState);
       try {
         return await resolver.promise;
@@ -178,7 +184,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     action: async ({ action }) => {
       const resolver = Promise.withResolvers<ActionResponse>();
       actionResolvers.action = resolver;
-      const acState = createActionState(assetsManager, action);
+      const acState = createActionState(assetsManager, action, getLocale());
       setActionState(acState);
       try {
         return await resolver.promise;
@@ -270,6 +276,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
 
   const oppController = new OppChessboardController({
     assetsManager,
+    locale: getLocale(),
     who: flip(who),
     onUpdate: async (info) => {
       await uiQueue.push(async () => {});
@@ -371,6 +378,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       value={{
         ...option,
         assetsManager,
+        locale: getLocale(),
+        t: (key, params) => translate(key, params, getLocale()),
       }}
     >
       <Chessboard

@@ -71,6 +71,7 @@ export interface AssetsManagerOption {
 }
 
 export const DEFAULT_ASSETS_API_ENDPOINT =
+  import.meta.env.VITE_DEFAULT_ASSETS_API_ENDPOINT ||
   import.meta.env.DEFAULT_ASSETS_API_ENDPOINT ||
   "https://gi-tcg-assets-api-hf.guyutongxue.site/api/v4";
 
