@@ -19,8 +19,7 @@ test("'Fluent API' building tests", () => {
                            (who my)
                            (area hands true))
              (with (intersection (defeated ignore)
-                                 (intersection (defeated ignore)
-                                               (definition 206)))))
+                                 (definition 206))))
   `);
 
   expect(

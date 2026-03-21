@@ -18,6 +18,15 @@ import {
 
 type DefeatedKeyword = "defeatedOnly" | "noDefeated" | "all";
 
+const DEFEATED_ONLY = [
+  "defeated",
+  "only",
+] as const satisfies SExprSchema.PrimaryQuery;
+const NO_DEFEATED = [
+  "defeated",
+  "ignore",
+] as const satisfies SExprSchema.PrimaryQuery;
+
 export class PrimaryMethodsInternal {
   private _constraints: SExprSchema.UnorderedQuery[] = [];
   private _defeatedKeyword: DefeatedKeyword = "noDefeated";
@@ -28,14 +37,27 @@ export class PrimaryMethodsInternal {
   addConstraint(...constraints: SExprSchema.UnorderedQuery[]): void {
     this._constraints.push(...constraints);
   }
-  [toExpressionUnordered](): SExprSchema.CompositeQuery {
+  [toExpressionUnordered](): SExprSchema.UnorderedQuery {
     const finalConstraints: SExprSchema.UnorderedQuery[] = [];
     if (this._defeatedKeyword === "defeatedOnly") {
-      finalConstraints.push(["defeated", "only"]);
+      finalConstraints.push(DEFEATED_ONLY);
     } else if (this._defeatedKeyword === "noDefeated") {
-      finalConstraints.push(["defeated", "ignore"]);
+      finalConstraints.push(NO_DEFEATED);
     }
-    return ["intersection", ...finalConstraints, ...this._constraints];
+    finalConstraints.push(...this._constraints);
+    // An optimization to avoid unnecessary nesting of "intersection"
+    if (finalConstraints.length === 1) {
+      return finalConstraints[0];
+    } else {
+      return [
+        "intersection",
+        ...new Set(
+          finalConstraints.flatMap((constr) =>
+            constr[0] === "intersection" ? constr.slice(1) : [constr],
+          ),
+        ),
+      ];
+    }
   }
 }
 
