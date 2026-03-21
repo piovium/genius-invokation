@@ -64,6 +64,43 @@ import { flip } from "@gi-tcg/utils";
 import { detectLocale, t as translate } from "./i18n";
 import type { Locale } from "./i18n";
 
+const localizedNameCache = new Map<string, string>();
+
+function createLocalizedNameGetter(
+  getAssetsManager: () => AssetsManager,
+  getLocale: () => Locale,
+) {
+  return (definitionId?: number) => {
+    if (!definitionId) {
+      return "???";
+    }
+    const locale = getLocale();
+    const assetsManager = getAssetsManager();
+    const key = `${locale}:${definitionId}`;
+    const cached = localizedNameCache.get(key);
+    if (cached) {
+      return cached;
+    }
+    try {
+      const syncData = assetsManager.getDataSync(definitionId);
+      if (syncData?.name) {
+        localizedNameCache.set(key, syncData.name);
+        return syncData.name;
+      }
+    } catch {}
+    const fallback = assetsManager.getNameSync(definitionId) ?? `${definitionId}`;
+    void assetsManager
+      .getData(definitionId)
+      .then((data) => {
+        if (data?.name) {
+          localizedNameCache.set(key, data.name);
+        }
+      })
+      .catch(() => void 0);
+    return fallback;
+  };
+}
+
 const EMPTY_PLAYER_DATA: PbPlayerState = {
   activeCharacterId: 0,
   dice: [],
@@ -89,7 +126,7 @@ export const EMPTY_GAME_STATE: PbGameState = {
 export interface ClientOption {
   onGiveUp?: () => void;
   rpc?: Partial<RpcDispatcher>;
-  assetsManager?: AssetsManager;
+  assetsManager?: AssetsManager | (() => AssetsManager);
   locale?: Locale | (() => Locale);
   disableDelicateUi?: boolean;
   disableAction?: boolean;
@@ -122,7 +159,14 @@ export interface ClientChessboardProps extends ComponentProps<"div"> {
 }
 
 export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
-  const assetsManager = option.assetsManager ?? DEFAULT_ASSETS_MANAGER;
+  const getAssetsManager: () => AssetsManager = (() => {
+    if (typeof option.assetsManager === "function") {
+      const getter = option.assetsManager;
+      return () => getter();
+    }
+    const fixedAssetsManager = option.assetsManager ?? DEFAULT_ASSETS_MANAGER;
+    return () => fixedAssetsManager;
+  })();
   const getLocale: () => Locale = (() => {
     if (typeof option.locale === "function") {
       const getter = option.locale;
@@ -131,6 +175,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     const fixedLocale = option.locale ?? detectLocale();
     return () => fixedLocale;
   })();
+  const getName = createLocalizedNameGetter(getAssetsManager, getLocale);
+
   const [data, setData] = createSignal<ChessboardData>({
     raw: [],
     roundAndPhase: {
@@ -184,7 +230,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     action: async ({ action }) => {
       const resolver = Promise.withResolvers<ActionResponse>();
       actionResolvers.action = resolver;
-      const acState = createActionState(assetsManager, action, getLocale());
+      const acState = createActionState(getAssetsManager(), action, getLocale(), getName);
       setActionState(acState);
       try {
         return await resolver.promise;
@@ -275,8 +321,9 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   });
 
   const oppController = new OppChessboardController({
-    assetsManager,
-    locale: getLocale(),
+    assetsManager: getAssetsManager,
+    locale: getLocale,
+    getName,
     who: flip(who),
     onUpdate: async (info) => {
       await uiQueue.push(async () => {});
@@ -377,9 +424,10 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     <UiContext.Provider
       value={{
         ...option,
-        assetsManager,
-        locale: getLocale(),
+        assetsManager: getAssetsManager,
+        locale: getLocale,
         t: (key, params) => translate(key, params, getLocale()),
+        getName,
       }}
     >
       <Chessboard

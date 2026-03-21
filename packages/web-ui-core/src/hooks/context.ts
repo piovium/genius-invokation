@@ -18,9 +18,10 @@ import { createContext, useContext } from "solid-js";
 import type { Locale, WebUiTranslationKey } from "../i18n";
 
 export interface UiContextValue {
-  assetsManager: AssetsManager;
-  locale: Locale;
+  assetsManager: () => AssetsManager;
+  locale: () => Locale;
   t: (key: WebUiTranslationKey, params?: Record<string, string | number>) => string;
+  getName: (definitionId?: number) => string;
   disableDelicateUi?: boolean;
 }
 

@@ -54,53 +54,29 @@ import { StrokedText } from "./StrokedText";
 import { DAMAGE_COLOR } from "./Damage";
 import { REACTION_TEXT_MAP } from "./Reaction";
 
-const nameCache = new Map<string, string>();
-
-const getCachedLocalizedName = (
-  assetsManager: ReturnType<typeof useUiContext>["assetsManager"],
-  locale: ReturnType<typeof useUiContext>["locale"],
-  definitionId?: number,
-) => {
-  if (!definitionId) {
-    return "???";
-  }
-  const key = `${locale}:${definitionId}`;
-  const cached = nameCache.get(key);
-  if (cached) {
-    return cached;
-  }
-  const fallback = assetsManager.getNameSync(definitionId) ?? `${definitionId}`;
-  void assetsManager.getData(definitionId).then((data) => {
-    if (data?.name) {
-      nameCache.set(key, data.name);
-    }
-  }).catch(() => void 0);
-  return fallback;
-};
-
 const getDiceTypeText = (type: DiceType) => {
   const { assetsManager, t } = useUiContext();
   if (type === DiceType.Void) {
     return t("unknownDie");
   }
   if (type === DiceType.Omni) {
-    return assetsManager.getNameSync(-411);
+    return assetsManager().getNameSync(-411);
   }
-  return assetsManager.getNameSync(-300 - type);
+  return assetsManager().getNameSync(-300 - type);
 };
 
 const getDamageTypeText = (type: DamageType) => {
   const { assetsManager } = useUiContext();
   if (type === DamageType.Piercing) {
-    return assetsManager.getNameSync(-5);
+    return assetsManager().getNameSync(-5);
   } else {
-    return assetsManager.getNameSync(-100 - type);
+    return assetsManager().getNameSync(-100 - type);
   }
 };
 
 const getApplyTypeText = (type: DamageType) => {
   const { assetsManager } = useUiContext();
-  return assetsManager.getNameSync(-300 - type);
+  return assetsManager().getNameSync(-300 - type);
 };
 
 interface ChildHealthChange {
@@ -124,8 +100,8 @@ export function useWho() {
 }
 
 const renderName = (definitionId?: number) => {
-  const { assetsManager, locale } = useUiContext();
-  return getCachedLocalizedName(assetsManager, locale, definitionId);
+  const { getName } = useUiContext();
+  return getName(definitionId);
 };
 
 const renderHistoryChild = (
@@ -1176,8 +1152,8 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
 const CardDescriptionPart = (props: { cardDefinitionId: number }) => {
   const { assetsManager, t } = useUiContext();
   const [data] = createResource(
-    () => props.cardDefinitionId,
-    (id) => assetsManager.getData(id),
+    () => [props.cardDefinitionId, assetsManager()] as const,
+    ([id, manager]) => manager.getData(id),
   );
   return (
     <Switch>

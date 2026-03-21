@@ -65,34 +65,6 @@ function getElementName(type: DiceType, locale: Locale) {
   }
 }
 
-const localizedNameCache = new Map<string, string>();
-
-function getLocalizedDefinitionName(
-  assetsManager: AssetsManager,
-  locale: Locale,
-  definitionId: number,
-) {
-  const key = `${locale}:${definitionId}`;
-  const cached = localizedNameCache.get(key);
-  if (cached) {
-    return cached;
-  }
-  try {
-    const syncData = assetsManager.getDataSync(definitionId);
-    if (syncData?.name) {
-      localizedNameCache.set(key, syncData.name);
-      return syncData.name;
-    }
-  } catch {}
-  const fallback = assetsManager.getNameSync(definitionId) ?? "???";
-  void assetsManager.getData(definitionId).then((data) => {
-    if (data?.name) {
-      localizedNameCache.set(key, data.name);
-    }
-  }).catch(() => void 0);
-  return fallback;
-}
-
 export function getHintTextOfCardOrSkill(
   assetsManager: AssetsManager,
   definitionId: number,
@@ -473,6 +445,7 @@ function appendMultiStepNode<T>(
 interface MultiStepRootNodeContext<T> {
   assetsManager: AssetsManager;
   locale?: Locale;
+  getName?: (definitionId?: number) => string;
   /** 是否是使用技能（否则为打出卡牌） */
   isSkill: boolean;
   /** 行动树根节点 */
@@ -488,6 +461,7 @@ interface MultiStepRootNodeContext<T> {
 interface CreatePlayCardActionStateContext {
   assetsManager: AssetsManager;
   locale?: Locale;
+  getName?: (definitionId?: number) => string;
   // 单步打出（直接打出或者直接选骰）对应的 step 行为加入此 map
   cardSingleSteps: Map<PlayCardActionStep, () => StepActionResult>;
   // 多步打出对应的 context 加入此 map，后续构建成状态树
@@ -553,6 +527,7 @@ function createPlayCardActionState(
       ctx.cardMultiSteps.set(id, {
         assetsManager: ctx.assetsManager,
         locale: ctx.locale,
+        getName: ctx.getName,
         isSkill: false,
         node: { type: "branch", children: new Map() },
         autoSelectedDice: ctx.action.autoSelectedDice as DiceType[],
@@ -598,11 +573,7 @@ function createPlayCardActionState(
     hintText: t(
       "playCardHint",
       {
-        name: getLocalizedDefinitionName(
-          ctx.assetsManager,
-          ctx.locale ?? "zh-CN",
-          ctx.action.value.cardDefinitionId,
-        ),
+        name: ctx.getName?.(ctx.action.value.cardDefinitionId) ?? "???",
       },
       ctx.locale,
     ),
@@ -853,6 +824,7 @@ function createMultiStepState<T>(
 interface CreateUseSkillActionStateContext {
   assetsManager: AssetsManager;
   locale?: Locale;
+  getName?: (definitionId?: number) => string;
   skillSingleStepStates: Map<ClickSkillButtonActionStep, ActionState>;
   skillMultiSteps: Map<number, MultiStepRootNodeContext<UseSkillAction>>;
   action: Action & { value: UseSkillAction };
@@ -870,6 +842,7 @@ function createUseSkillActionState(
       ctx.skillMultiSteps.set(id, {
         assetsManager: ctx.assetsManager,
         locale: ctx.locale,
+        getName: ctx.getName,
         isSkill: true,
         node: { type: "branch", children: new Map() },
         autoSelectedDice: ctx.action.autoSelectedDice as DiceType[],
@@ -955,6 +928,7 @@ function createUseSkillActionState(
 interface CreateElementalTuningActionStateContext {
   assetsManager: AssetsManager;
   locale?: Locale;
+  getName?: (definitionId?: number) => string;
   action: Action & { value: ElementalTuningAction };
   index: number;
 }
@@ -1017,6 +991,7 @@ function createElementalTuningActionState(
 interface CreateSwitchActiveActionStateContext {
   assetsManager: AssetsManager;
   locale?: Locale;
+  getName?: (definitionId?: number) => string;
   // 在根状态下，点击角色进入“显示切换出战按钮”的状态
   outerLevelStates: Map<ClickEntityActionStep, ActionState>;
   // 在“显示切换出战按钮”状态下，点击按钮/选中角色可提交行动；或点击其他角色切换目标
@@ -1069,11 +1044,7 @@ function createSwitchActiveActionState(
     hintText: t(
       "switchRoleHint",
       {
-        name: getLocalizedDefinitionName(
-          ctx.assetsManager,
-          ctx.locale ?? "zh-CN",
-          ctx.action.value.characterDefinitionId,
-        ),
+        name: ctx.getName?.(ctx.action.value.characterDefinitionId) ?? "???",
       },
       ctx.locale,
     ),
@@ -1165,6 +1136,7 @@ export function createActionState(
   assetsManager: AssetsManager,
   actions: Action[],
   locale: Locale = "zh-CN",
+  getName?: (definitionId?: number) => string,
 ): ActionState {
   assetsManager.prepareForSync();
   const realCosts: RealCosts = {
@@ -1222,6 +1194,7 @@ export function createActionState(
         createUseSkillActionState(root, {
           assetsManager,
           locale,
+          getName,
           skillSingleStepStates: useSkillSingleStepStates,
           skillMultiSteps: useSkillMultiSteps,
           action: { value: action.value, ...actions[i] },
@@ -1234,6 +1207,7 @@ export function createActionState(
         createPlayCardActionState(root, {
           assetsManager,
           locale,
+          getName,
           cardSingleSteps: playCardSingleSteps,
           cardMultiSteps: playCardMultiSteps,
           action: { value: action.value, ...actions[i] },
@@ -1246,6 +1220,7 @@ export function createActionState(
         createSwitchActiveActionState(root, {
           assetsManager,
           locale,
+          getName,
           outerLevelStates: switchActiveOuterStates,
           innerLevelStates: switchActiveInnerStates,
           action: { value: action.value, ...actions[i] },
@@ -1264,6 +1239,7 @@ export function createActionState(
         const state = createElementalTuningActionState(root, {
           assetsManager,
           locale,
+          getName,
           action: { value: action.value, ...actions[i] },
           index: i,
         });
