@@ -37,7 +37,7 @@ export interface SelectCardViewProps {
 }
 
 export function SelectCardView(props: SelectCardViewProps) {
-  const { t } = useUiContext();
+  const { t, assetsManager } = useUiContext();
   const [selectedId, setSelectedId] = createSignal<number | null>(null);
 
   return (
@@ -67,7 +67,11 @@ export function SelectCardView(props: SelectCardViewProps) {
                 />
               </div>
               <div class="mt-2 w-36 font-size-3.5 text-center leading-tight whitespace-normal break-words color-black/60 font-bold">
-                {props.nameGetter(cardId)}
+                <AsyncCardName
+                  id={cardId}
+                  fallbackName={props.nameGetter(cardId)}
+                  assetsManager={assetsManager}
+                />
               </div>
             </li>
           )}
@@ -144,3 +148,15 @@ export const DiceCostAsync = (props: DiceCostAsyncProps) => {
     </Switch>
   );
 };
+
+function AsyncCardName(props: {
+  id: number;
+  fallbackName?: string;
+  assetsManager: ReturnType<typeof useUiContext>["assetsManager"];
+}) {
+  const [data] = createResource(
+    () => props.id,
+    (id) => props.assetsManager.getData(id),
+  );
+  return <>{data()?.name ?? props.fallbackName ?? props.id}</>;
+}

@@ -127,7 +127,7 @@ export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
         <MiniView
           viewType="selecting"
           ids={props.selectCardCandidates}
-          nameGetter={(name) => assetsManager.getNameSync(name)}
+          nameGetter={() => undefined}
           opp={props.opp}
         />
       </Show>

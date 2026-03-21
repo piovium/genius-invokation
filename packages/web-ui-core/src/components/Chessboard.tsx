@@ -1896,7 +1896,7 @@ export function Chessboard(props: ChessboardProps) {
               localProps.onSelectCard?.(id);
               dataViewerController.hide();
             }}
-            nameGetter={(name) => assetsManager.getNameSync(name)}
+            nameGetter={(name) => undefined}
           />
         </Show>
         <Show when={props.viewType === "switchHands" && specialViewVisible()}>

@@ -23,8 +23,6 @@ export default defineConfig({
   dts: !process.env.NO_TYPING,
   minify: true,
   env: {
-    VITE_DEFAULT_ASSETS_API_ENDPOINT:
-      process.env.VITE_DEFAULT_ASSETS_API_ENDPOINT || "",
     DEFAULT_ASSETS_API_ENDPOINT: process.env.DEFAULT_ASSETS_API_ENDPOINT || "",
   },
   publicDir: "src/data",

@@ -65,6 +65,34 @@ function getElementName(type: DiceType, locale: Locale) {
   }
 }
 
+const localizedNameCache = new Map<string, string>();
+
+function getLocalizedDefinitionName(
+  assetsManager: AssetsManager,
+  locale: Locale,
+  definitionId: number,
+) {
+  const key = `${locale}:${definitionId}`;
+  const cached = localizedNameCache.get(key);
+  if (cached) {
+    return cached;
+  }
+  try {
+    const syncData = assetsManager.getDataSync(definitionId);
+    if (syncData?.name) {
+      localizedNameCache.set(key, syncData.name);
+      return syncData.name;
+    }
+  } catch {}
+  const fallback = assetsManager.getNameSync(definitionId) ?? "???";
+  void assetsManager.getData(definitionId).then((data) => {
+    if (data?.name) {
+      localizedNameCache.set(key, data.name);
+    }
+  }).catch(() => void 0);
+  return fallback;
+}
+
 export function getHintTextOfCardOrSkill(
   assetsManager: AssetsManager,
   definitionId: number,
@@ -570,9 +598,11 @@ function createPlayCardActionState(
     hintText: t(
       "playCardHint",
       {
-        name:
-          ctx.assetsManager.getNameSync(ctx.action.value.cardDefinitionId) ??
-          "???",
+        name: getLocalizedDefinitionName(
+          ctx.assetsManager,
+          ctx.locale ?? "zh-CN",
+          ctx.action.value.cardDefinitionId,
+        ),
       },
       ctx.locale,
     ),
@@ -1039,9 +1069,11 @@ function createSwitchActiveActionState(
     hintText: t(
       "switchRoleHint",
       {
-        name:
-          ctx.assetsManager.getNameSync(ctx.action.value.characterDefinitionId) ??
-          "???",
+        name: getLocalizedDefinitionName(
+          ctx.assetsManager,
+          ctx.locale ?? "zh-CN",
+          ctx.action.value.characterDefinitionId,
+        ),
       },
       ctx.locale,
     ),

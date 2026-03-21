@@ -54,6 +54,30 @@ import { StrokedText } from "./StrokedText";
 import { DAMAGE_COLOR } from "./Damage";
 import { REACTION_TEXT_MAP } from "./Reaction";
 
+const nameCache = new Map<string, string>();
+
+const getCachedLocalizedName = (
+  assetsManager: ReturnType<typeof useUiContext>["assetsManager"],
+  locale: ReturnType<typeof useUiContext>["locale"],
+  definitionId?: number,
+) => {
+  if (!definitionId) {
+    return "???";
+  }
+  const key = `${locale}:${definitionId}`;
+  const cached = nameCache.get(key);
+  if (cached) {
+    return cached;
+  }
+  const fallback = assetsManager.getNameSync(definitionId) ?? `${definitionId}`;
+  void assetsManager.getData(definitionId).then((data) => {
+    if (data?.name) {
+      nameCache.set(key, data.name);
+    }
+  }).catch(() => void 0);
+  return fallback;
+};
+
 const getDiceTypeText = (type: DiceType) => {
   const { assetsManager, t } = useUiContext();
   if (type === DiceType.Void) {
@@ -100,8 +124,8 @@ export function useWho() {
 }
 
 const renderName = (definitionId?: number) => {
-  const { assetsManager } = useUiContext();
-  return definitionId ? assetsManager.getNameSync(definitionId) : "???";
+  const { assetsManager, locale } = useUiContext();
+  return getCachedLocalizedName(assetsManager, locale, definitionId);
 };
 
 const renderHistoryChild = (
@@ -520,7 +544,7 @@ const renderHistoryChild = (
                 class="h-3.5 w-3.5"
                 fallback="state"
               />
-              <span>{assetsManager.getNameSync(child.entityDefinitionId)}</span>
+              <span>{renderName(child.entityDefinitionId)}</span>
             </>
           ),
         };
@@ -1314,7 +1338,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
                     />
                   </div>
                   <span class="text-#fff3e0/98 text-3">
-                    {assetsManager.getNameSync(block.skillDefinitionId)}
+                    {renderName(block.skillDefinitionId)}
                   </span>
                 </div>
               </div>
