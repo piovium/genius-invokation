@@ -13,10 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { getNameSync } from "@gi-tcg/assets-manager";
 import type { NotificationBoxInfo } from "./Chessboard";
 import { Image } from "./Image";
-import { Show } from "solid-js";
+import { Show, createResource } from "solid-js";
 import { PbSkillType } from "@gi-tcg/typings";
 import { useUiContext } from "../hooks/context";
 
@@ -26,7 +25,23 @@ export interface NotificationBoxProps {
 }
 
 export function NotificationBox(props: NotificationBoxProps) {
-  const { t } = useUiContext();
+  const { t, assetsManager } = useUiContext();
+  const [skillData] = createResource(
+    () => props.data.skillDefinitionId,
+    (id) => (typeof id === "number" ? assetsManager.getData(Math.floor(id)) : null),
+  );
+  const [characterData] = createResource(
+    () => props.data.characterDefinitionId,
+    (id) => assetsManager.getData(id),
+  );
+  const skillName = () =>
+    skillData()?.name ??
+    (typeof props.data.skillDefinitionId === "number"
+      ? assetsManager.getNameSync(Math.floor(props.data.skillDefinitionId))
+      : undefined);
+  const characterName = () =>
+    characterData()?.name ??
+    assetsManager.getNameSync(props.data.characterDefinitionId);
   const typeText = (
     type: NotificationBoxInfo["skillType"],
   ): string | undefined => {
@@ -65,9 +80,7 @@ export function NotificationBox(props: NotificationBoxProps) {
             fallback={
               <>
                 <h5 class="font-bold color-#ede4d8 leading-tight whitespace-normal break-words pr-2">
-                  {getNameSync(
-                    Math.floor(props.data.skillDefinitionId as number),
-                  )}
+                  {skillName()}
                 </h5>
                 <p
                   class="text-[var(--text-color)] font-size-80% font-bold leading-tight whitespace-normal break-words"
@@ -97,7 +110,7 @@ export function NotificationBox(props: NotificationBoxProps) {
             <h5 class="font-bold color-#ede4d8 leading-tight whitespace-normal break-words pr-2">
               {props.opp ? t("oppSide") : t("mySide")}
               {t("switchRole")}:
-              {getNameSync(props.data.characterDefinitionId)}
+              {characterName()}
             </h5>
             <Show when={props.data.skillDefinitionId}>
               {(skillDefinitionId) => (
@@ -106,7 +119,7 @@ export function NotificationBox(props: NotificationBoxProps) {
                     class="text-[var(--text-color)] font-size-80% font-bold leading-tight whitespace-normal break-words"
                     data-opp={props.opp}
                   >
-                    {getNameSync(props.data.characterDefinitionId)}
+                    {characterName()}
                   </p>
                   <div
                     class="absolute h-8 w-8 rounded-full bg-[var(--inner-background-color)] b-[var(--inner-border-color)] border-1 translate-x-50% translate-y--50% right-0 top-50% justify-center items-center p-0.3"

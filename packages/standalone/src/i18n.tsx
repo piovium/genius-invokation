@@ -153,10 +153,13 @@ export function I18nProvider(props: ParentProps) {
   });
 
   const assetsManager = createMemo(
-    () =>
-      new AssetsManager({
+    () => {
+      const manager = new AssetsManager({
         language: locale() === "zh-CN" ? "CHS" : "EN",
-      }),
+      });
+      void manager.prepareForSync().catch(() => void 0);
+      return manager;
+    },
   );
 
   const value: I18nContextValue = {
