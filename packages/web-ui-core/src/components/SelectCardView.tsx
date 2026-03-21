@@ -37,11 +37,12 @@ export interface SelectCardViewProps {
 }
 
 export function SelectCardView(props: SelectCardViewProps) {
+  const { t } = useUiContext();
   const [selectedId, setSelectedId] = createSignal<number | null>(null);
 
   return (
     <div class="absolute inset-0 flex flex-col items-center justify-center gap-10 select-none">
-      <h3 class="font-bold text-3xl">挑选卡牌</h3>
+      <h3 class="max-w-70 px-4 text-center leading-tight font-bold text-2xl">{t("chooseCard")}</h3>
       <ul class="flex flex-row gap-1">
         <For each={props.candidateIds}>
           {(cardId) => (
@@ -65,7 +66,7 @@ export function SelectCardView(props: SelectCardViewProps) {
                   class="left-1.8 top--1"
                 />
               </div>
-              <div class="mt-2 w-36 font-size-4 text-center color-black/60 font-bold">
+              <div class="mt-2 w-36 font-size-3.5 text-center leading-tight whitespace-normal break-words color-black/60 font-bold">
                 {props.nameGetter(cardId)}
               </div>
             </li>
@@ -84,7 +85,7 @@ export function SelectCardView(props: SelectCardViewProps) {
             }
           }}
         >
-          确定
+          {t("confirm")}
         </Button>
       </div>
     </div>

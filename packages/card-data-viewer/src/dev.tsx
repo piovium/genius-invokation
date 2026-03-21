@@ -45,6 +45,7 @@ function App() {
             equipment: 1,
             definitionCost: [],
             tags: 0,
+            type: 2,
             descriptionDictionary: {
               "[GCG_TOKEN_SHIELD]": "1",
             },
@@ -62,6 +63,7 @@ function App() {
           descriptionDictionary: {},
           definitionCost: [],
           tags: 0,
+          type: 0,
           attachment: [],
         },
       ],
@@ -75,6 +77,7 @@ function App() {
       },
       tags: 0,
       hasUsagePerRound: false,
+      type: 3,
       attachment: [
         {
           id: -5000002,

@@ -18,12 +18,16 @@ import { Show } from "solid-js";
 import dayjs from "dayjs";
 import localize from "dayjs/plugin/localizedFormat";
 import "dayjs/locale/zh-cn";
+import "dayjs/locale/en";
 import { useVersionContext } from "../App";
+import { useI18n } from "../i18n";
 
-dayjs.extend(localize).locale("zh-cn");
+dayjs.extend(localize);
 
 export function Footer() {
   const { versionInfo } = useVersionContext();
+  const { t, dayjsLocale } = useI18n();
+  dayjs.locale(dayjsLocale());
   return (
     <footer class="flex flex-col md:flex-row gap-4 p-4 text-sm text-gray-500">
       <div class="flex flex-row gap-4">
@@ -37,7 +41,7 @@ export function Footer() {
         </a>
       </div>
       <div>
-        许可{" "}
+        {t("license")}{" "}
         <a
           class="text-blue-400"
           href="https://www.gnu.org/licenses/agpl-3.0.html"
@@ -48,15 +52,15 @@ export function Footer() {
       </div>
       <Show when={versionInfo()}>
         <div>
-          游戏版本{" "}
+          {t("gameVersion")}{" "}
           {IS_BETA ? (
-            <span class="text-red-300">最新测试版</span>
+            <span class="text-red-300">{t("latestBeta")}</span>
           ) : (
             versionInfo().currentGameVersion
           )}
         </div>
         <div>
-          模拟器版本 {versionInfo().coreVersion} (
+          {t("simulatorVersion")} {versionInfo().coreVersion} (
           <a
             title={versionInfo().revision.message}
             class="text-blue-400"
@@ -76,7 +80,7 @@ export function Footer() {
           href="https://qm.qq.com/q/svHK8eJulW"
           target="_blank"
         >
-          点击加入用户QQ群
+          {t("joinQQGroup")}
         </a>
       </div>
     </footer>

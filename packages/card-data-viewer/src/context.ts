@@ -15,6 +15,13 @@
 
 import type { AssetsManager } from "@gi-tcg/assets-manager";
 import { createContext, useContext } from "solid-js";
+import type { CardDataViewerTranslationKey, Locale } from "./i18n";
 
-export const AssetsContext = createContext<AssetsManager>();
+export interface AssetsContextValue {
+  assetsManager: () => AssetsManager;
+  locale: () => Locale;
+  t: (key: CardDataViewerTranslationKey) => string;
+}
+
+export const AssetsContext = createContext<AssetsContextValue>();
 export const useAssetsManager = () => useContext(AssetsContext)!;

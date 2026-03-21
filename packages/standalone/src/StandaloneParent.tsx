@@ -30,6 +30,7 @@ import "@gi-tcg/web-ui-core/style.css";
 import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
 import { DetailLogViewer } from "@gi-tcg/detail-log-viewer";
 import { DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
+import { useI18n } from "./i18n";
 
 export interface StandaloneParentProps {
   logs?: GameStateLogEntry[];
@@ -42,7 +43,10 @@ const CHILD_WHO = 0;
 const PARENT_WHO = 1;
 
 export function StandaloneParent(props: StandaloneParentProps) {
+  const { t, assetsManager, locale } = useI18n();
   const [uiIo, Chessboard] = createClient(1, {
+    assetsManager: assetsManager(),
+    locale,
     onGiveUp: () => {
       game?.giveUp(PARENT_WHO);
     },
@@ -179,9 +183,9 @@ export function StandaloneParent(props: StandaloneParentProps) {
     if (!from || from === game) {
       console.error(e);
       alert(
-        `游戏出现了内部错误！请点击主窗口下方“导出日志”按钮生成日志文件，并反馈至 GitHub Issue，thanks~\n${
-          e instanceof Error ? e.message : String(e)
-        }`,
+        t("internalError", {
+          message: e instanceof Error ? e.message : String(e),
+        }),
       );
     }
   };
@@ -280,9 +284,9 @@ export function StandaloneParent(props: StandaloneParentProps) {
         fallback={
           <>
             <div class="title-row">
-              <span class="title">后手方棋盘</span>
+              <span class="title">{t("secondPlayerBoard")}</span>
               <button disabled={stateLog().length <= 1} onClick={enableLog}>
-                查看历史
+                {t("viewHistory")}
               </button>
             </div>
             <Chessboard />
@@ -293,21 +297,23 @@ export function StandaloneParent(props: StandaloneParentProps) {
           <>
             <div class="title-row">
               <span class="title">
-                {viewingWho() ? "后" : "先"}手方棋盘（查看历史中）
+                {t("viewingBoardHistory", {
+                  side: t(viewingWho() ? "sideSecond" : "sideFirst"),
+                })}
               </span>
               <Show
                 when={viewingLogIndex() <= maxLogIndex() && state().canResume}
               >
-                <button onClick={resumeGame}>从此处继续</button>
+                <button onClick={resumeGame}>{t("resumeFromHere")}</button>
               </Show>
               <button onClick={() => setViewingWho((i) => (1 - i) as 0 | 1)}>
-                切换玩家
+                {t("switchPlayer")}
               </button>
               <button
                 disabled={viewingLogIndex() <= 0}
                 onClick={() => setViewingLogIndex((i) => i - 1)}
               >
-                后退一步
+                {t("stepBackward")}
               </button>
               <span>
                 {viewingLogIndex() + 1} / {stateLog().length}
@@ -316,17 +322,19 @@ export function StandaloneParent(props: StandaloneParentProps) {
                 disabled={viewingLogIndex() >= maxLogIndex()}
                 onClick={() => setViewingLogIndex((i) => i + 1)}
               >
-                前进一步
+                {t("stepForward")}
               </button>
               <button
                 disabled={fromImport()}
                 onClick={() => setViewingLogIndex(-1)}
               >
-                返回游戏
+                {t("backToGame")}
               </button>
             </div>
             <StandaloneChessboard
               class="grayscale"
+              assetsManager={assetsManager()}
+              locale={locale()}
               who={viewingWho()}
               state={exposeState(viewingWho(), state().state)}
               mutations={[]}
@@ -335,12 +343,12 @@ export function StandaloneParent(props: StandaloneParentProps) {
         )}
       </Show>
       <button disabled={stateLog().length === 0} onClick={exportLog}>
-        导出日志
+        {t("exportLog")}
       </button>
-      <button onClick={showDetail}>显示细节</button>
+      <button onClick={showDetail}>{t("showDetails")}</button>
       <dialog ref={detailDialog!}>
         <DetailLogViewer logs={detailLog()} />
-        <button onClick={closeDetail}>关闭</button>
+        <button onClick={closeDetail}>{t("closeDetails")}</button>
       </dialog>
     </div>
   );
