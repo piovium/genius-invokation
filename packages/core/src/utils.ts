@@ -149,14 +149,17 @@ function getAllEntitiesImpl(
   withArea: boolean,
 ): (AnyState | EntityWithArea)[] {
   const result: AnyState[] = [];
-  const append = (entity: AnyState, area: EntityArea) => {
-    if (withArea) {
-      resultWithArea.push({ state: entity, area });
-    } else {
-      result.push(entity);
-    }
-  };
   const resultWithArea: EntityWithArea[] = [];
+  let append: (entity: AnyState, area: EntityArea) => void;
+  if (withArea) {
+    append = (entity: AnyState, area: EntityArea) => {
+      resultWithArea.push({ state: entity, area });
+    };
+  } else {
+    append = (entity: AnyState, _area: EntityArea) => {
+      result.push(entity);
+    };
+  }
   for (const who of [state.currentTurn, flip(state.currentTurn)]) {
     const player = state.players[who];
     let activeIdx = 0;
