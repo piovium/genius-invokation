@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { defaultClientConditions, defineConfig } from "vite";
+import unoCss from "unocss/vite";
 import solid from "vite-plugin-solid";
 import babel from "@rollup/plugin-babel";
 import { viteStaticCopy } from "vite-plugin-static-copy";
@@ -27,6 +28,7 @@ export default defineConfig({
     conditions: ["bun", ...defaultClientConditions],
   },
   plugins: [
+    unoCss(),
     solid(),
     svgWithFallback(),
     babel({
