@@ -1,9 +1,9 @@
 import type { AnyState } from "../base/state";
 import type { EntityArea } from "../base/entity";
-import { toExpressionUnordered, type Expression, type IUnorderedQuery } from "./utils";
+import { toExpression, type Expression, type IQuery } from "./utils";
 
-export function queryToExpression(query: IUnorderedQuery): Expression {
-  return query[toExpressionUnordered]();
+export function queryToExpression(query: IQuery): Expression {
+  return query[toExpression]();
 }
 
 interface EntityEntry {

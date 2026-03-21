@@ -3,6 +3,8 @@ import type { SExprSchema } from "./expr_schema";
 import {
   toExpression,
   toExpressionUnordered,
+  typingInfo,
+  type IQuery,
   type IUnorderedQuery,
   type NonIndexKeyOf,
   type TypingInfoBase,
@@ -21,7 +23,9 @@ type VarName<Ty extends TypingInfoBase> =
       : never);
 // | (string & {});
 
-export class MakeOrderedMethods<Ty extends TypingInfoBase> {
+export class MakeOrderedMethods<Ty extends TypingInfoBase> implements IQuery<Ty> {
+  declare [typingInfo]: Ty;
+
   private _unorderedQuery: SExprSchema.UnorderedQuery;
   private _limitCount = Number.POSITIVE_INFINITY;
   private _orderBySpecs: SExprSchema.OrderBySpec[] = [];
@@ -43,8 +47,9 @@ export class MakeOrderedMethods<Ty extends TypingInfoBase> {
   orderByFn(
     fn: (variables: Record<VarName<Ty>, number>) => number,
   ): MakeOrderedMethods<Ty> {
-    this._orderBySpecs.push(["fn", fn.toString()]);
-    return this._makeThisOrdered();
+    const self = this._makeThisOrdered();
+    self._orderBySpecs.push(["fn", fn.toString()]);
+    return self;
   }
   orderBy<V extends VarName<Ty>>(variable: V): MakeOrderedMethods<Ty>;
   orderBy<V1 extends VarName<Ty>, V2 extends VarName<Ty>>(
@@ -57,21 +62,24 @@ export class MakeOrderedMethods<Ty extends TypingInfoBase> {
     op?: "+" | "-" | "*" | "/" | "%",
     rhs?: string | number,
   ): MakeOrderedMethods<Ty> {
+    const self = this._makeThisOrdered();
     if (!op) {
-      this._orderBySpecs.push(["expr", lhs]);
+      self._orderBySpecs.push(["expr", lhs]);
     } else {
-      this._orderBySpecs.push(["expr", [op, lhs, rhs!]]);
+      self._orderBySpecs.push(["expr", [op, lhs, rhs!]]);
     }
-    return this._makeThisOrdered();
+    return self;
   }
   orderByRaw(...specs: SExprSchema.OrderBySpec[]) {
-    this._orderBySpecs.push(...specs);
-    return this._makeThisOrdered();
+    const self = this._makeThisOrdered();
+    self._orderBySpecs.push(...specs);
+    return self;
   }
 
   limit(count: number): MakeOrderedMethods<Ty> {
-    this._limitCount = count;
-    return this._makeThisOrdered();
+    const self = this._makeThisOrdered();
+    self._limitCount = count;
+    return self;
   }
 
   [toExpression](): SExprSchema.OrderedQuery {

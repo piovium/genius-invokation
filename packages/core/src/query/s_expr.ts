@@ -163,11 +163,7 @@ export function stringifySExpr(expr: Expression): string {
     return expr.toString();
   }
   if (Array.isArray(expr)) {
-    return (
-      "(" +
-      expr.map((elem) => stringifySExpr(elem)).join(" ") +
-      ")"
-    );
+    return "(" + expr.map((elem) => stringifySExpr(elem)).join(" ") + ")";
   }
   throw new Error("Invalid expression type.");
 }
@@ -192,11 +188,8 @@ function stringifySExprAtom(expr: string | number): string {
   return canBeBareSExprString(expr) ? expr : JSON.stringify(expr);
 }
 
-export function prettyStringifySExpr(
-  expr: Expression,
-  indent = "  ",
-): string {
-  function format(current: Expression, depth: number, column: number): string {
+export function prettyStringifySExpr(expr: Expression): string {
+  function format(current: Expression, column: number): string {
     if (typeof current === "string" || typeof current === "number") {
       return stringifySExprAtom(current);
     }
@@ -210,7 +203,7 @@ export function prettyStringifySExpr(
     }
 
     if (current.every((item) => !Array.isArray(item))) {
-      return `(${current.map((item) => format(item, depth + 1, column + 1)).join(" ")})`;
+      return `(${current.map((item) => format(item, column + 1)).join(" ")})`;
     }
 
     const head = current[0];
@@ -223,21 +216,20 @@ export function prettyStringifySExpr(
       const continuationColumn = column + 1 + headText.length + 1;
       const continuationIndent = " ".repeat(continuationColumn);
       const [firstArg, ...restArgs] = current.slice(1);
-      const firstArgText = format(firstArg, depth + 1, continuationColumn);
+      const firstArgText = format(firstArg, continuationColumn);
       const restText = restArgs.map(
-        (item) => `\n${continuationIndent}${format(item, depth + 1, continuationColumn)}`,
+        (item) => `\n${continuationIndent}${format(item, continuationColumn)}`,
       );
       return `(${headText} ${firstArgText}${restText.join("")})`;
+    } else {
+      const continuationColumn = column + 1;
+      const currentIndent = " ".repeat(continuationColumn);
+      const lines = current.map(
+        (item) => format(item, continuationColumn),
+      );
+      return `[${lines.join(`\n${currentIndent}`)}]`;
     }
-
-    const currentIndent = indent.repeat(depth);
-    const childIndent = indent.repeat(depth + 1);
-    const lines = current.map(
-      (item) => `${childIndent}${format(item, depth + 1, childIndent.length)}`,
-    );
-    return `(\n${lines.join("\n")}\n${currentIndent})`;
   }
 
-  return format(expr, 0, 0);
+  return format(expr, 0);
 }
-
