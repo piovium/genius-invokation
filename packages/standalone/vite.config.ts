@@ -24,7 +24,7 @@ export default defineConfig({
     target: "ES2020",
   },
   resolve: {
-    conditions: ["bun", ...defaultClientConditions],
+    conditions: [...defaultClientConditions],
   },
   plugins: [
     solid(),
