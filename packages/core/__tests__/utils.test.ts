@@ -100,8 +100,10 @@ test("sort dice", () => {
     hasDefeated: false,
     legendUsed: false,
     defeatedSwitching: false,
-    roundSkillLog: new Map(),
     removedEntities: [],
+    roundSkillLog: new Map(),
+    phaseDamageLog: [],
+    phaseReactionLog: [],
   };
   const sorted = sortDice(playerState, shuffled);
   expect(sorted).toEqual(dice);

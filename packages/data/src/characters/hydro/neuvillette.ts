@@ -167,7 +167,7 @@ export const HeirToTheAncientSeasAuthority = card(212101)
   .on("enter")
   .useSkill(AsWaterSeeksEquilibrium)
   .endOn()
-  .onDelayedSkillReaction((c, e) => e.relatedTo(DamageType.Hydro))
+  .on("useSkill", (c) => c.hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Hydro)))
   .listenToPlayer()
   .characterStatus(PastDraconicGlories, "@master")
   .done();

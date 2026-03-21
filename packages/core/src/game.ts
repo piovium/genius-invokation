@@ -1,4 +1,5 @@
 // Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -199,6 +200,8 @@ function initPlayerState(
     skipNextTurn: false,
     defeatedSwitching: false,
     roundSkillLog: new Map(),
+    phaseDamageLog: [],
+    phaseReactionLog: [],
     removedEntities: [],
   };
 }
@@ -282,7 +285,6 @@ export class Game {
       roundNumber: 0,
       winner: null,
       extensions,
-      delayingEventArgs: [],
     };
     return state;
   }
@@ -398,6 +400,7 @@ export class Game {
               break;
           }
           this.mutate({ type: "clearRemovedEntities" });
+          this.mutate({ type: "clearPhaseLogs" });
           await this.mutator.notifyAndPause({ canResume: true });
         }
       } catch (e) {
@@ -661,6 +664,9 @@ export class Game {
         "onBeforeAction",
         new PlayerEventArg(this.state, who),
       );
+      // A test reported that there do have a clearPhaseLog between onBeforeAction and action.
+      // See packages/test/__tests__/superconduct_blessing.test.tsx involving Heizou's one
+      this.mutate({ type: "clearPhaseLogs" });
       const replaceActionEventArg = new PlayerEventArg(this.state, who);
       const replacedSkill = findReplaceAction(
         this.state,
@@ -894,11 +900,10 @@ export class Game {
           value: false,
         });
       }
-      this.mutate({
-        type: "clearRoundSkillLog",
-        who,
-      });
     }
+    this.mutate({
+      type: "clearRoundLogs",
+    });
     this.mutate({
       type: "stepRound",
     });

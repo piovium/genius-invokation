@@ -26,7 +26,8 @@ export const ParametricTransformer = card(323001)
   .costVoid(2)
   .support("item")
   .variable("progress", 0)
-  .onDelayedSkillDamage((c, e) => e.type !== DamageType.Piercing && e.type !== DamageType.Physical)
+  .on("useSkill", (c) =>
+    c.hasPhaseDamage("all", (e) => e.type !== DamageType.Piercing && e.type !== DamageType.Physical))
   .listenToAll()
   .do((c) => {
     c.addVariable("progress", 1);

@@ -17,11 +17,13 @@ import {
   Card,
   Character,
   CombatStatus,
+  Equipment,
   ref,
   setup,
   State,
   Status,
 } from "#test";
+import { PortablePowerSaw } from "@gi-tcg/data/internal/cards/equipment/weapon/claymore";
 import {
   RainbowMacaronsInEffect,
   SingYourHeartOut,
@@ -35,9 +37,11 @@ import {
 } from "@gi-tcg/data/internal/characters/electro/keqing";
 import {
   DetailedDiagnosisThoroughTreatmentStatus,
+  LargeBolsteringBubblebalm,
   ReboundHydrotherapy,
   Sigewinne,
 } from "@gi-tcg/data/internal/characters/hydro/sigewinne";
+import { SweepingFervor, Xinyan } from "@gi-tcg/data/internal/characters/pyro/xinyan";
 import { BondOfLife, Satiated } from "@gi-tcg/data/internal/commons";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "bun:test";
@@ -88,4 +92,23 @@ test("sigwinne: bubble", async () => {
   // 抓三张，水泡自动弃置
   c.expect("my hand cards").toBeCount(2);
   c.expect(target).toHaveVariable({ health: 4 });
+});
+
+test("sigwinne bubble: disposed before HCI event", async () => {
+  const myActive = ref();
+  const c = setup(
+    <State>
+      <Character my active def={Xinyan} health={1} ref={myActive}>
+        <Equipment def={PortablePowerSaw} v={{ stoic: 1 }} />
+      </Character>
+      <Character my def={Sigewinne} />
+      <Card my pile def={LargeBolsteringBubblebalm} /> 
+    </State>
+  );
+  await c.me.skill(SweepingFervor);
+  // 希格雯水泡抽上来且舍弃掉
+  c.expect(`my pile or my hands`).toBeCount(0);
+  // 但是不会触发效果
+  c.expect(`opp pile`).toBeCount(0);
+  c.expect(myActive).toHaveVariable({ health: 1 });
 });

@@ -1,4 +1,5 @@
 // Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -109,7 +110,9 @@ export interface VersionBehavior {
 }
 
 export const getVersionBehavior = (version: Version): VersionBehavior => ({
-  defaultRecreateBehavior: versionLt(version, "v3.5.0") ? "overwrite" : "takeMax",
+  defaultRecreateBehavior: versionLt(version, "v3.5.0")
+    ? "overwrite"
+    : "takeMax",
   foodOmitInjuredOnly: !versionLt(version, "v6.1.0"),
   disposeMaxCostHandsAbortPreview: !versionLt(version, "v6.1.0"),
   diceCostApplyAttachments: !versionLt(version, "v6.4.0"),
@@ -140,7 +143,6 @@ export interface GameState {
   readonly winner: 0 | 1 | null;
   readonly players: readonly [PlayerState, PlayerState];
   readonly extensions: readonly ExtensionState[];
-  readonly delayingEventArgs: readonly (readonly [string, unknown])[];
 }
 
 export interface PlayerState {
@@ -171,6 +173,14 @@ export interface PlayerState {
    * 键为技能发起者的角色定义 id，值为该定义下使用过的技能 id 列表
    */
   readonly roundSkillLog: ReadonlyMap<number, number[]>;
+  /**
+   * 我方在当前阶段造成的伤害 DamageEventArg 记录列表
+   */
+  readonly phaseDamageLog: unknown[];
+  /**
+   * 我方在当前阶段造成的反应 ReactionEventArg 记录列表
+   */
+  readonly phaseReactionLog: unknown[];
   readonly removedEntities: readonly AnyState[];
 }
 

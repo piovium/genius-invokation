@@ -195,28 +195,18 @@ export const Liben = card(322008)
 export const ChangTheNinth = card(322009)
   .since("v3.3.0")
   .support("ally")
-  .variable("triggered", 0) // 穿透或物理技能触发后，不再因元素反应触发
   .variable("inspiration", 0)
-  .defineSnippet((c) => {
+  .on("useSkill", (c) =>
+    c.hasPhaseDamage("all", (e) => e.type === DamageType.Piercing || e.type === DamageType.Physical) || 
+    c.hasPhaseReaction("all"))
+  .listenToAll()
+  .do((c) => {
     c.addVariable("inspiration", 1);
     if (c.getVariable("inspiration") >= 3) {
       c.drawCards(2);
       c.dispose();
     }
   })
-  .onDelayedSkillDamage(
-    (c, e) => e.type === DamageType.Piercing || e.type === DamageType.Physical,
-  )
-  .listenToAll()
-  .callSnippet()
-  .setVariable("triggered", 1)
-  .endOn()
-  .onDelayedSkillReaction((c, e) => !c.getVariable("triggered"))
-  .listenToAll()
-  .callSnippet()
-  .on("useSkill") // reset triggered
-  .listenToAll()
-  .setVariable("triggered", 0)
   .done();
 
 /**

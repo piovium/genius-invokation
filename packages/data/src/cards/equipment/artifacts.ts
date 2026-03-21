@@ -337,7 +337,7 @@ export const InstructorsCap = card(312005)
   .since("v3.3.0")
   .costVoid(2)
   .artifact()
-  .onDelayedSkillReaction()
+  .on("useSkill", (c) => c.hasPhaseReaction("my"))
   .usagePerRound(3)
   .do((c) => {
     c.generateDice(c.self.master.element(), 1);

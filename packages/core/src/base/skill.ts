@@ -1106,15 +1106,21 @@ export class CharacterEventArg extends EventArg {
 }
 
 export class ReactionEventArg extends CharacterEventArg {
+  private readonly _callerArea: EntityArea;
   constructor(
     state: GameState,
     protected readonly _reactionInfo: ReactionInfo,
   ) {
     super(state, _reactionInfo.target);
+    this._callerArea = getEntityArea(state, _reactionInfo.via.caller.id);
   }
 
   get reactionInfo() {
     return this._reactionInfo;
+  }
+
+  get viaWho() {
+    return this._callerArea.who;
   }
 
   get caller() {

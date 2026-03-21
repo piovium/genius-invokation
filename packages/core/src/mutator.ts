@@ -450,10 +450,12 @@ export class StateMutator {
       );
       this.handleInlineEvent(opt.via, "modifyReaction", modifyEventArg);
       reactionInfo = modifyEventArg.reactionInfo;
-      events.push([
-        "onReaction",
-        new ReactionEventArg(this.state, reactionInfo),
-      ]);
+      const reactionEvent = new ReactionEventArg(this.state, reactionInfo);
+      this.mutate({
+        type: "pushPhaseReactionLog",
+        reactionEvent,
+      });
+      events.push(["onReaction", reactionEvent]);
       const reactionDescriptionEventArg: ReactionDescriptionEventArg = {
         where: opt.targetWho === opt.callerWho ? "my" : "opp",
         here: opt.targetWho === opt.callerWho ? "opp" : "my",
@@ -667,10 +669,12 @@ export class StateMutator {
         ],
       });
     }
-    events.push([
-      "onDamageOrHeal",
-      new DamageOrHealEventArg(this.state, damageInfo, opt),
-    ]);
+    const damageEvent = new DamageOrHealEventArg(this.state, damageInfo, opt);
+    this.mutate({
+      type: "pushPhaseDamageLog",
+      damageEvent,
+    });
+    events.push(["onDamageOrHeal", damageEvent]);
     if (
       damageInfo.type !== DamageType.Physical &&
       damageInfo.type !== DamageType.Piercing

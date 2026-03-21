@@ -1,4 +1,5 @@
 // Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -236,11 +237,12 @@ export function exposeMutation(
     case "stepRandom":
     case "stepId":
     case "mutateExtensionState":
-    case "pushRoundSkillLog":
-    case "clearRoundSkillLog":
     case "clearRemovedEntities":
-    case "pushDelayingEvent":
-    case "clearDelayingEvent":
+    case "pushRoundSkillLog":
+    case "clearRoundLogs":
+    case "pushPhaseDamageLog":
+    case "pushPhaseReactionLog":
+    case "clearPhaseLogs":
     case "resetVariables":
     case "switchActive": // We will manually handle this
       return null;
