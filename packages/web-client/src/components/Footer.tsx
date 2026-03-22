@@ -28,7 +28,7 @@ export function Footer() {
   const { versionInfo } = useVersionContext();
   const { t, locale } = useI18n();
   onMount(() => {
-    dayjs.locale(locale());
+    dayjs.locale(locale().toLocaleLowerCase());
   });
   return (
     <footer class="flex flex-col md:flex-row gap-4 p-4 text-sm text-gray-500">

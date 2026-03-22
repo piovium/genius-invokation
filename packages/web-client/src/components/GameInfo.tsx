@@ -32,7 +32,7 @@ export function GameInfo(props: GameInfoProps) {
   const { status } = useAuth();
   const { t, locale } = useI18n();
   onMount(() => {
-    dayjs.locale(locale());
+    dayjs.locale(locale().toLocaleLowerCase());
   });
 
   const downloadLog = async () => {
