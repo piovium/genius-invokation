@@ -15,7 +15,7 @@
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Show } from "solid-js";
+import { onMount, Show } from "solid-js";
 import axios from "axios";
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
@@ -30,8 +30,10 @@ export interface GameInfoProps {
 
 export function GameInfo(props: GameInfoProps) {
   const { status } = useAuth();
-  const { t, dayjsLocale } = useI18n();
-  dayjs.locale(dayjsLocale());
+  const { t, locale } = useI18n();
+  onMount(() => {
+    dayjs.locale(locale());
+  });
 
   const downloadLog = async () => {
     try {
@@ -53,8 +55,10 @@ export function GameInfo(props: GameInfoProps) {
     }
   };
   return (
-    <div class="flex flex-row gap-2 items-center flex-wrap">
-      <div class="w-24" title={props.createdAt}>{dayjs(props.createdAt).fromNow()}</div>
+    <div class="flex flex-row gap-2 items-center">
+      <div class="w-24" title={props.createdAt}>
+        {dayjs(props.createdAt).fromNow()}
+      </div>
       <div class="text-lg">
         <Show
           when={status()?.id === props.winnerId}
@@ -63,10 +67,7 @@ export function GameInfo(props: GameInfoProps) {
           <div class="text-green-400">{t("victory")}</div>
         </Show>
       </div>
-      <button
-        class="btn btn-outline whitespace-normal text-center leading-tight min-h-10 px-4 py-2"
-        onClick={downloadLog}
-      >
+      <button class="btn btn-outline" onClick={downloadLog}>
         {t("downloadLog")}
       </button>
     </div>

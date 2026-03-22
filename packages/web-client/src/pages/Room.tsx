@@ -226,7 +226,7 @@ export default function Room() {
     };
     if (payload && !playerIo()) {
       const [io, Ui] = createClient(payload.who, {
-        assetsManager: assetsManager(),
+        assetsManager,
         locale,
         onGiveUp,
         disableAction: !action,
@@ -520,22 +520,22 @@ export default function Room() {
                     id="showOpp"
                     type="checkbox"
                     class="checkbox-primary"
-                      checked={showOpp()}
-                      onChange={(e) => setShowOpp(e.currentTarget.checked)}
-                    />
-                    <label for="showOpp">{t("showOpponentBoard")}</label>
-                    <Show when={showOpp()}>
-                      <input
+                    checked={showOpp()}
+                    onChange={(e) => setShowOpp(e.currentTarget.checked)}
+                  />
+                  <label for="showOpp">{t("showOpponentBoard")}</label>
+                  <Show when={showOpp()}>
+                    <input
                       id="liveMode"
                       type="checkbox"
                       class="checkbox-primary"
-                        checked={liveMode()}
-                        onChange={(e) => setLiveMode(e.currentTarget.checked)}
-                      />
-                      <label for="liveMode">{t("liveMode")}</label>
-                    </Show>
+                      checked={liveMode()}
+                      onChange={(e) => setLiveMode(e.currentTarget.checked)}
+                    />
+                    <label for="liveMode">{t("liveMode")}</label>
                   </Show>
                 </Show>
+              </Show>
             </div>
             <div>
               <Show when={initialized()}>
@@ -551,7 +551,9 @@ export default function Room() {
                     </div>
                     <span class="group-data-[mobile]:hidden">，</span>
                     <span>
-                      {payload().who === 0 ? t("youAreFirst") : t("youAreSecond")}
+                      {payload().who === 0
+                        ? t("youAreFirst")
+                        : t("youAreSecond")}
                     </span>
                   </div>
                 )}
@@ -615,10 +617,10 @@ export default function Room() {
                 myPlayerInfo={getClientPlayerInfo(payload().myPlayerInfo)}
                 oppPlayerInfo={getClientPlayerInfo(payload().oppPlayerInfo)}
                 gameEndExtra={
-                  <div class="flex justify-center gap-10 mt-10 flex-wrap px-4">
-                    <div class="flex flex-col justify-start w-42 min-h-30">
+                  <div class="flex justify-center gap-20 mt-10">
+                    <div class="flex flex-col justify-start w-36 h-30">
                       <button
-                        class="px-5 py-2 w-42 min-h-12 mt-20 font-bold font-size-4 text-center leading-tight text-yellow-800 bg-yellow-50 rounded-full border-yellow-800 b-2 active:bg-yellow-800 active:text-yellow-200 hover:shadow-[inset_0_0_16px_white] hover:border-white whitespace-normal"
+                        class="px-4 py-1 w-36 h-10 mt-20 font-bold font-size-4.5 text-yellow-800 bg-yellow-50 rounded-full border-yellow-800 b-2 active:bg-yellow-800 active:text-yellow-200 hover:shadow-[inset_0_0_16px_white] hover:border-white"
                         onClick={downloadGameLog}
                       >
                         {t("downloadLog")}
@@ -627,9 +629,9 @@ export default function Room() {
                         <span class="text-white/60 text-3">{logtimer}后到期</span>
                       </Show> */}
                     </div>
-                    <div class="flex flex-col justify-start w-42 min-h-30">
+                    <div class="flex flex-col justify-start w-36 h-30">
                       <button
-                        class="px-5 py-2 w-42 min-h-12 mt-20 font-bold font-size-4 text-center leading-tight text-yellow-800 bg-yellow-50 rounded-full border-yellow-800 b-2 active:bg-yellow-800 active:text-yellow-200 hover:shadow-[inset_0_0_16px_white] hover:border-white whitespace-normal"
+                        class="px-4 py-1 w-36 h-10 mt-20 font-bold font-size-4.5 text-yellow-800 bg-yellow-50 rounded-full border-yellow-800 b-2 active:bg-yellow-800 active:text-yellow-200 hover:shadow-[inset_0_0_16px_white] hover:border-white"
                         onClick={() => {
                           navigate("/");
                         }}

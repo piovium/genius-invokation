@@ -28,9 +28,10 @@ export interface DeckInfoProps extends DeckInfo {
   onDelete?: () => void;
 }
 
-function CharacterAvatar(props: { id: number; assetsManager: AssetsManager }) {
+function CharacterAvatar(props: { id: number }) {
+  const { assetsManager } = useI18n();
   const [url] = createResource(
-    () => [props.id, props.assetsManager] as const,
+    () => [props.id, assetsManager()] as const,
     ([id, assetsManager]) =>
       assetsManager.getImageUrl(id, {
         type: "icon",
@@ -44,7 +45,7 @@ function CharacterAvatar(props: { id: number; assetsManager: AssetsManager }) {
     <img
       class="h-14 w-14 b-2 b-yellow-100 rounded-full"
       src={url()}
-      alt={props.assetsManager.getNameSync(props.id)}
+      alt={assetsManager().getNameSync(props.id)}
     />
   );
 }
@@ -96,7 +97,11 @@ export function DeckBriefInfo(props: DeckInfoProps) {
           {props.name}
         </h5>
         <div class="flex-shrink-0">
-          <button class="btn btn-ghost" title={t("copyShareCode")} onClick={copyCode}>
+          <button
+            class="btn btn-ghost"
+            title={t("copyShareCode")}
+            onClick={copyCode}
+          >
             <i class="i-mdi-clipboard-outline" />
           </button>
           <Show when={props.editable}>
@@ -111,9 +116,7 @@ export function DeckBriefInfo(props: DeckInfoProps) {
         </div>
       </div>
       <div class="p-2 flex flex-row items-center justify-around">
-        <For each={props.characters}>
-          {(id) => <CharacterAvatar id={id} assetsManager={assetsManager()} />}
-        </For>
+        <For each={props.characters}>{(id) => <CharacterAvatar id={id} />}</For>
       </div>
     </div>
   );

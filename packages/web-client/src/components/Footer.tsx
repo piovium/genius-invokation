@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { IS_BETA } from "@gi-tcg/config";
-import { Show } from "solid-js";
+import { onMount, Show } from "solid-js";
 import dayjs from "dayjs";
 import localize from "dayjs/plugin/localizedFormat";
 import "dayjs/locale/zh-cn";
@@ -26,8 +26,10 @@ dayjs.extend(localize);
 
 export function Footer() {
   const { versionInfo } = useVersionContext();
-  const { t, dayjsLocale } = useI18n();
-  dayjs.locale(dayjsLocale());
+  const { t, locale } = useI18n();
+  onMount(() => {
+    dayjs.locale(locale());
+  });
   return (
     <footer class="flex flex-col md:flex-row gap-4 p-4 text-sm text-gray-500">
       <div class="flex flex-row gap-4">

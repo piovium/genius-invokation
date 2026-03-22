@@ -27,7 +27,6 @@ import {
 } from "solid-js";
 import axios from "axios";
 import { useAuth } from "./auth";
-import { useI18n } from "./i18n";
 
 const Home = lazy(() => import("./pages/Home"));
 const User = lazy(() => import("./pages/User"));
@@ -48,25 +47,12 @@ export const useVersionContext = () => useContext(VersionContext)!;
 const MobileContext = createContext<Accessor<boolean>>();
 export const useMobile = () => useContext(MobileContext)!;
 
-export interface I18nContextValue {
-  locale: Accessor<"zh-CN" | "en-US">;
-  setLocale: (locale: "zh-CN" | "en-US") => void;
-}
-
-const AppI18nContext = createContext<I18nContextValue>();
-export const useAppI18n = () => useContext(AppI18nContext)!;
-
 function App() {
-  const { locale, setLocale } = useI18n();
   const [versionInfo] = createResource(() =>
     axios.get("version").then((res) => res.data),
   );
   const versionContextValue: VersionContextValue = {
     versionInfo,
-  };
-  const i18nContextValue: I18nContextValue = {
-    locale,
-    setLocale,
   };
 
   const mobileMediaQuery = window.matchMedia("(max-width: 768px)");
@@ -94,20 +80,18 @@ function App() {
   });
 
   return (
-    <AppI18nContext.Provider value={i18nContextValue}>
-      <VersionContext.Provider value={versionContextValue}>
-        <MobileContext.Provider value={mobile}>
-          <Router base={import.meta.env.BASE_URL.replace(/(.+)\/$/, "$1")}>
-            <Route path="/" component={Home} />
-            <Route path="/user/:id" component={User} />
-            <Route path="/decks/:id" component={EditDeck} />
-            <Route path="/decks" component={Decks} />
-            <Route path="/rooms/:code" component={Room} />
-            <Route path="*" component={NotFound} />
-          </Router>
-        </MobileContext.Provider>
-      </VersionContext.Provider>
-    </AppI18nContext.Provider>
+    <VersionContext.Provider value={versionContextValue}>
+      <MobileContext.Provider value={mobile}>
+        <Router base={import.meta.env.BASE_URL.replace(/(.+)\/$/, "$1")}>
+          <Route path="/" component={Home} />
+          <Route path="/user/:id" component={User} />
+          <Route path="/decks/:id" component={EditDeck} />
+          <Route path="/decks" component={Decks} />
+          <Route path="/rooms/:code" component={Room} />
+          <Route path="*" component={NotFound} />
+        </Router>
+      </MobileContext.Provider>
+    </VersionContext.Provider>
   );
 }
 
