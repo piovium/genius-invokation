@@ -74,7 +74,9 @@ export function Image(props: ImageProps) {
       ...rest,
       class: `${rest.class ?? ""} ${classNames}`,
       src: url.state === "ready" ? url() : void 0,
-      alt: isUnknown() ? "" : assetsManager().getNameSync(local.imageId),
+      alt: isUnknown()
+        ? ""
+        : (assetsManager().getNameSync(local.imageId) ?? `${local.imageId}`),
       draggable: "false",
       style: {
         height: local.height ? `${local.height}px` : void 0,
