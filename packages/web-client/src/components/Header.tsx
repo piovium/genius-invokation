@@ -20,16 +20,14 @@ import { getAvatarUrl } from "../utils";
 import Logo from "./Logo.svg";
 import Title from "./Title.svg";
 import { useAuth } from "../auth";
-import { useI18n } from "../i18n";
-import { useAppI18n } from "../App";
+import { Locale, useI18n } from "../i18n";
 
 const USE_LOGO = true;
 
 export function Header() {
   const navigate = useNavigate();
   const { status, logout } = useAuth();
-  const { t } = useI18n();
-  const { locale, setLocale } = useAppI18n();
+  const { t, locale, setLocale } = useI18n();
   return (
     <header class="fixed top-0 left-0 w-100dvw flex flex-row h-[calc(3rem+var(--root-padding-top))] md:h-[calc(4rem+var(--root-padding-top))] pt-[var(--root-padding-top)] bg-white z-200 px-4 shadow-md items-center gap-2">
       <img src={Logo} class="h-10 md:h-12" />
@@ -46,12 +44,12 @@ export function Header() {
             class="text-xs border rounded px-2 py-1 bg-white"
             value={locale()}
             onChange={(e) =>
-              setLocale(e.currentTarget.value as "zh-CN" | "en-US")
+              setLocale(e.currentTarget.value as Locale)
             }
             aria-label={t("languageLabel")}
           >
             <option value="zh-CN">{t("languageChinese")}</option>
-            <option value="en-US">{t("languageEnglish")}</option>
+            <option value="en">{t("languageEnglish")}</option>
           </select>
           <Show when={IS_BETA}>
             <span class="text-8px md:text-10px badge badge-soft-error">

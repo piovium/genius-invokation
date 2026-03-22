@@ -13,13 +13,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { defaultClientConditions, defineConfig } from "vite";
+import { defineConfig } from "vite";
 import unoCss from "unocss/vite";
 import solid from "vite-plugin-solid";
 import babel from "@rollup/plugin-babel";
 import { WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
 import { readdirSync } from "node:fs";
-import svgWithFallback from "./svg-with-fallback";
 
 const AVATARS_BASE_PATH = "public/avatars";
 const AVATARS = [...readdirSync(AVATARS_BASE_PATH)];
@@ -28,14 +27,10 @@ export default defineConfig({
   esbuild: {
     target: "ES2020",
   },
-  resolve: {
-    conditions: ["bun", ...defaultClientConditions],
-  },
   base: WEB_CLIENT_BASE_PATH,
   plugins: [
     unoCss(),
     solid(),
-    svgWithFallback(),
     babel({
       babelHelpers: "bundled",
     }),

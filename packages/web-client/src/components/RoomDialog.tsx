@@ -34,15 +34,13 @@ import { useI18n } from "../i18n";
 
 function SelectableDeckInfo(
   props: DeckInfoProps &
-    Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "id"> & {
-      assetsManager: AssetsManager;
-    },
+    Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "id"> 
 ) {
+  const { assetsManager } = useI18n();
   const [deckInfo, inputProps] = splitProps(props, [
     "characters",
     "name",
     "id",
-    "assetsManager",
   ]);
   return (
     <label class="relative group cursor-pointer min-w-15">
@@ -59,7 +57,7 @@ function SelectableDeckInfo(
             {(id) => (
               <img
                 class="h-12 w-12 b-2 b-yellow-100 rounded-full"
-                src={deckInfo.assetsManager.getImageUrlSync(id, {
+                src={assetsManager().getImageUrlSync(id, {
                   type: "icon",
                 })}
               />
@@ -268,16 +266,16 @@ export function RoomDialog(props: RoomDialogProps) {
   return (
     <dialog
       ref={(el) => (dialogEl = el) && (props.ref as any)?.(el)}
-      class="max-h-unset max-w-unset h-100dvh w-100dvw overflow-auto pt-[calc(0.75rem+var(--root-padding-top))] md:pt-3 md:m-x-auto md:my-2rem md:h-auto md:w-min md:max-h-[calc(100vh-4rem)] md:rounded-xl md:shadow-xl p-6 scrollbar-hidden"
+      class="max-h-unset max-w-unset h-100dvh w-100dvw overflow-auto pt-[calc(0.75rem+var(--root-padding-top))] md:pt-3 md:m-x-auto md:my-3rem md:h-[calc(100vh-6rem)] md:w-min md:max-h-180 md:rounded-xl md:shadow-xl p-6 scrollbar-hidden"
     >
-      <div class="flex flex-col md:h-auto w-full gap-5 md:gap-6">
+      <div class="flex flex-col md:min-h-full md:h-min w-full gap-5">
         <h3 class="flex-shrink-0 text-xl font-bold">{t("roomConfig")}</h3>
         <div
           class="flex-grow min-h-0 flex flex-col md:flex-row gap-4 data-[disabled=true]:cursor-not-allowed mb-[calc(4.5rem+var(--root-padding-bottom))] md:mb-0"
           data-disabled={!editable()}
         >
           <div
-            class="flex flex-col w-80 md:data-[editable=true]:w-140"
+            class="flex flex-col w-80 md:data-[editable=true]:w-130"
             data-editable={editable()}
           >
             <Show when={versionInfo()}>
@@ -296,11 +294,7 @@ export function RoomDialog(props: RoomDialogProps) {
               </div>
               <h4 class="text-lg mb-3">{t("thinkingTime")}</h4>
               <div
-                class="grid gap-2 mb-3 data-[disabled=true]:pointer-events-none"
-                classList={{
-                  "grid-cols-3": !props.joiningRoomInfo,
-                  "grid-cols-1": !!props.joiningRoomInfo,
-                }}
+                class="grid grid-cols-3 gap-2 mb-3 data-[disabled=true]:pointer-events-none"
                 data-disabled={!editable()}
               >
                 <For
@@ -312,24 +306,22 @@ export function RoomDialog(props: RoomDialogProps) {
                 >
                   {(config) => (
                     <div
-                      class="b-1 b-gray-400 rounded-lg p-3 md:p-4 group data-[active=true]:b-slate-500 data-[active=true]:b-2 md:data-[active=true]:p-[calc(1rem-1px)] cursor-pointer data-[active=true]:cursor-default select-none transition-colors"
+                      class="b-1 b-gray-400 rounded-lg p-2 md:p-12px group data-[active=true]:b-slate-500 data-[active=true]:b-2 md:data-[active=true]:p-11px cursor-pointer data-[active=true]:cursor-default select-none transition-colors"
                       data-active={
                         !!props.joiningRoomInfo || config === timeConfig()
                       }
                       onClick={() => setTimeConfig(config)}
                     >
-                      <h5 class="font-bold text-gray-400 group-data-[active=true]:text-black transition-colors leading-tight min-h-10 flex items-start">
+                      <h5 class="font-bold text-gray-400 group-data-[active=true]:text-black transition-colors">
                         {t(config.nameKey) ??
                           `${config.roundTotalActionTime} + ${config.actionTime}`}
                       </h5>
-                      <Show when={config.estimationTime}>
-                        <h5 class="text-gray-400 group-data-[active=true]:text-gray-600 transition-colors md:mb-2 font-size-80% leading-tight">
+                        <h5 class="text-gray-400 group-data-[active=true]:text-gray-600 transition-colors md:mb-1 font-size-80%">
                           {t("estimatedEachRound", {
                             minutes: config.estimationTime,
                           })}
                         </h5>
-                      </Show>
-                      <ul class="hidden md:block pl-4 list-disc text-gray-400 font-size-80% text-sm group-data-[active=true]:text-slate-500 transition-colors leading-relaxed">
+                      <ul class="hidden md:block pl-3 list-disc text-gray-400 font-size-80% text-sm group-data-[active=true]:text-slate-500 transition-colors">
                         <li>{t("initTotalActionTime", { seconds: config.initTotalActionTime })}</li>
                         <li>{t("rerollTime", { seconds: config.rerollTime })}</li>
                         <li>{t("roundTotalActionTime", { seconds: config.roundTotalActionTime })}</li>
@@ -385,9 +377,9 @@ export function RoomDialog(props: RoomDialogProps) {
             </Show>
           </div>
           <div class="b-r-gray-200 b-1" />
-          <div class="flex flex-col min-w-56 relative">
+          <div class="flex flex-col min-w-52 relative">
             <h4 class="text-lg mb-3">{t("chooseDeck")}</h4>
-            <ul class="flex-grow-1 flex flex-row md:flex-col flex-wrap md:flex-nowrap min-h-0 max-h-75dvh md:max-h-150 overflow-auto deck-ul-scrollbar pr-1">
+            <ul class="flex-grow-1 flex flex-row md:flex-col flex-wrap md:flex-nowrap min-h-0 max-h-75dvh md:max-h-135 overflow-auto deck-ul-scrollbar">
               <For
                 each={availableDecks()}
                 fallback={<li class="text-gray-500">{t("noDeckForVersion")}</li>}
@@ -395,7 +387,6 @@ export function RoomDialog(props: RoomDialogProps) {
                 {(deck) => (
                   <li>
                     <SelectableDeckInfo
-                      assetsManager={assetsManager()}
                       {...deck}
                       checked={selectedDeck() === deck.id}
                       onChange={(e) =>
