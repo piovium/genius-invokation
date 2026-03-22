@@ -89,7 +89,7 @@ function CardDataViewer(props: CardDataViewerProps) {
           <div class="card-panel">
             <p>{t("loadFailed")}</p>
             <pre class="whitespace-pre-wrap">
-              {"message" in err ? err.message : `${err}`}
+              {"message" in err ? (console.error(err), err.message) : `${err}`}
             </pre>
           </div>
         )}

@@ -91,7 +91,7 @@ export class AssetsManager {
 
   private readonly limitedFetch: (
     url: string | URL,
-    requestInit?: RequestInit
+    requestInit?: RequestInit,
   ) => Promise<Response>;
 
   constructor(options: Partial<AssetsManagerOption> = {}) {
@@ -345,35 +345,35 @@ export class AssetsManager {
 
   async getCategory(
     category: "characters",
-    options?: GetDataOptions
+    options?: GetDataOptions,
   ): Promise<CharacterRawData[]>;
   async getCategory(
     category: "action_cards",
-    options?: GetDataOptions
+    options?: GetDataOptions,
   ): Promise<ActionCardRawData[]>;
   async getCategory(
     category: "entities",
-    options?: GetDataOptions
+    options?: GetDataOptions,
   ): Promise<EntityRawData[]>;
   async getCategory(
     category: "keywords",
-    options?: GetDataOptions
+    options?: GetDataOptions,
   ): Promise<KeywordRawData[]>;
   async getCategory(
     category: Category,
-    options?: GetDataOptions
+    options?: GetDataOptions,
   ): Promise<
     (ActionCardRawData | CharacterRawData | EntityRawData | KeywordRawData)[]
   >;
   async getCategory(
     category: Category,
-    options: GetDataOptions = {}
+    options: GetDataOptions = {},
   ): Promise<
     (ActionCardRawData | CharacterRawData | EntityRawData | KeywordRawData)[]
   > {
     const dataUrl = `${this.options.apiEndpoint}/data/${this.options.version}/${this.options.language}/${category}`;
     const { data } = await this.limitedFetch(dataUrl, FETCH_OPTION).then((r) =>
-      r.json()
+      r.json(),
     );
     return data;
   }
@@ -434,7 +434,7 @@ export class AssetsManager {
 
   async getImageUrl(
     id: number,
-    options: GetImageOptions = {}
+    options: GetImageOptions = {},
   ): Promise<string> {
     if (this.customDataImageUrls.has(id)) {
       return this.customDataImageUrls.get(id)!;
@@ -449,7 +449,11 @@ export class AssetsManager {
   }
 
   getNameSync(id: number) {
-    return this.customDataNames.get(id) ?? getNameSync(id);
+    return (
+      this.customDataNames.get(id) ??
+      this.dataCacheSync.get(id)?.name ??
+      getNameSync(id)
+    );
   }
 
   async prepareForSync(options: PrepareForSyncOptions = {}): Promise<void> {
@@ -464,7 +468,7 @@ export class AssetsManager {
     return (this.preparedSyncData ??= (async () => {
       const dataUrl = `${this.options.apiEndpoint}/data/${this.options.version}/${this.options.language}/all`;
       const { data } = await this.limitedFetch(dataUrl, FETCH_OPTION).then(
-        (r) => r.json()
+        (r) => r.json(),
       );
       // Data
       for (const d of data) {

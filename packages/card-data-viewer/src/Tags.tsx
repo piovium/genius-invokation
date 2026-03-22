@@ -15,7 +15,7 @@
 
 import { For } from "solid-js";
 import { useAssetsManager } from "./context";
-import { TEXT_MAP_KEYS } from "./text_map";
+import { typeTagText } from "./text_map";
 
 export interface TagProps {
   tags: string[];
@@ -28,7 +28,7 @@ export function Tags(props: TagProps) {
       <For each={props.tags}>
         {(tag) => (
           <li class="bg-yellow-8 py-0.5 px-1 text-yellow-1 text-xs rounded-sm">
-            {t(TEXT_MAP_KEYS[tag])}
+            {typeTagText(tag, t)}
           </li>
         )}
       </For>
