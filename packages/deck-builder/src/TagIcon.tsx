@@ -15,7 +15,7 @@
 
 import { createResource, Switch, Match } from "solid-js";
 import { useDeckBuilderContext } from "./DeckBuilder";
-import { getCardTypeText } from "./i18n";
+import { cardTypeText } from "./i18n";
 
 export interface DiceIconProps {
   tagName: string;
@@ -85,7 +85,7 @@ const ALL_TAG_IMG_NAME_MAP: Record<string, string> = {
 };
 
 export function TagIcon(props: DiceIconProps) {
-  const { assetsManager, locale } = useDeckBuilderContext();
+  const { assetsManager, t } = useDeckBuilderContext();
   return (
     <Switch
       fallback={
@@ -108,7 +108,7 @@ export function TagIcon(props: DiceIconProps) {
       </Match>
       <Match when={props.tagName.startsWith("GCG_CARD_")}>
         <span class="text-gray-700 text-center text-nowrap">
-          {getCardTypeText(locale(), props.tagName)}
+          {cardTypeText(props.tagName, t)}
         </span>
       </Match>
     </Switch>
