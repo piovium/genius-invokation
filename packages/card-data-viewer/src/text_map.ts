@@ -15,7 +15,7 @@
 
 import type { I18nKey } from "./locales";
 
-export const TEXT_MAP_KEYS: Record<string, I18nKey> = {
+const TEXT_MAP_KEYS: Record<string, I18nKey> = {
   GCG_SKILL_TAG_A: "skillNormal",
   GCG_SKILL_TAG_E: "skillElemental",
   GCG_SKILL_TAG_Q: "skillBurst",
@@ -76,4 +76,12 @@ export const TEXT_MAP_KEYS: Record<string, I18nKey> = {
   GCG_TAG_DENDRO_PRODUCE: "dendroProduce",
   GCG_TAG_ARKHE_PNEUMA: "pneuma",
   GCG_TAG_ARKHE_OUSIA: "ousia",
+};
+
+export const typeTagText = (
+  type: string,
+  t: (key: I18nKey) => string,
+): string | undefined => {
+  const key = TEXT_MAP_KEYS[type];
+  return key ? t(key) : void 0;
 };

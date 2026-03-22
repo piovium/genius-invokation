@@ -16,11 +16,15 @@
 import { onMount } from "solid-js";
 import { createCardDataViewer } from ".";
 import { render } from "solid-js/web";
+import { AssetsManager } from "@gi-tcg/assets-manager";
 
 function App() {
+  const enAssetsManager = new AssetsManager({ language: "EN" });
   const { CardDataViewer, showCharacter, showState, showCard, showSkill } =
     createCardDataViewer({
       includesImage: true,
+      assetsManager: () => enAssetsManager,
+      locale: () => "en"
     });
   onMount(() => {
     showState(
@@ -68,26 +72,26 @@ function App() {
         },
       ],
     );
-    showState("card", {
-      id: -5000001,
-      definitionId: 330005,
-      definitionCost: [],
-      descriptionDictionary: {
-        "[T]": "2",
-      },
-      tags: 0,
-      hasUsagePerRound: false,
-      type: 3,
-      attachment: [
-        {
-          id: -5000002,
-          definitionId: 204,
-          descriptionDictionary: {},
-          variableName: "usage",
-          variableValue: 1,
-        },
-      ],
-    });
+    // showState("card", {
+    //   id: -5000001,
+    //   definitionId: 330005,
+    //   definitionCost: [],
+    //   descriptionDictionary: {
+    //     "[T]": "2",
+    //   },
+    //   tags: 0,
+    //   hasUsagePerRound: false,
+    //   type: 3,
+    //   attachment: [
+    //     {
+    //       id: -5000002,
+    //       definitionId: 204,
+    //       descriptionDictionary: {},
+    //       variableName: "usage",
+    //       variableValue: 1,
+    //     },
+    //   ],
+    // });
     // showState("summon", {
     //   id: -5000001,
     //   definitionId: 113041,
