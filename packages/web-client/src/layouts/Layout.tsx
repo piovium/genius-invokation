@@ -30,7 +30,7 @@ export function Layout(props: LayoutProps) {
       >
         <ErrorBoundary
           fallback={(err) => (
-            <div class="text-red-500">{err?.message ?? String(err)}</div>
+            <div class="text-red-500">{err?.stack ?? String(err)}</div>
           )}
         >
           {props.children}

@@ -41,7 +41,7 @@ export function Header() {
         </h1>
         <div class="flex flex-row gap-2">
           <select
-            class="text-xs border rounded px-2 py-1 bg-white"
+            class="select text-xs border rounded px-2 py-1 bg-white"
             value={locale()}
             onChange={(e) =>
               setLocale(e.currentTarget.value as Locale)

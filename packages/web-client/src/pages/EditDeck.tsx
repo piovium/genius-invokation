@@ -35,9 +35,10 @@ import { unwrap } from "solid-js/store";
 import { useMobile } from "../App";
 import { copyToClipboard } from "../utils";
 import { useI18n } from "../i18n";
+import { locale } from "core-js";
 
 export default function EditDeck() {
-  const { t, assetsManager } = useI18n();
+  const { t, locale, assetsManager } = useI18n();
   const params = useParams();
   const mobile = useMobile();
   const { status } = useAuth();
@@ -314,6 +315,7 @@ export default function EditDeck() {
             <DeckBuilder
               class={`h-[calc(100dvh-9rem)] @3xl:h-auto w-full flex-grow min-h-0`}
               assetsManager={assetsManager()}
+              locale={locale()}
               deck={deckValue()}
               onChangeDeck={(v) => (setDeckValue(v), setDirty(true))}
             />
