@@ -475,8 +475,8 @@ function diceReqText(
     const shifted = ((type + 8) % 9) + 1;
     const name =
       (ctx.assetsManager.getNameSync(-300 - shifted) ?? "")
-        .replace("无色", ctx.t("any"))
-        .replace("相同", count === 1 ? "" : ctx.t("same")) +
+        .replace(/无色|Unaligned/, ctx.t("any"))
+        .replace(/相同|Matching/, count === 1 ? "" : ctx.t("same")) +
       ctx.t("diceSuffix");
     const style =
       type >= 1 && type <= 7 ? `color: var(--c-${DICE_COLOR[type]});` : "";
