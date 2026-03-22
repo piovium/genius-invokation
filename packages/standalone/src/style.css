@@ -15,18 +15,6 @@ html {
   /* overflow: hidden; */
 }
 
-.app-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0.5rem 0.5rem 0;
-}
-
-.language-picker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 .gi-tcg-chessboard-new {
   height: 36rem;
 }

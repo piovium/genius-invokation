@@ -16,7 +16,6 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
 import { inject } from "@vercel/analytics";
-import { I18nProvider } from "./i18n";
 
 import "./style.css";
 
@@ -27,14 +26,7 @@ import "./style.css";
   const { App } = await import("./App");
   const root = document.getElementById("root")!;
   root.innerHTML = "";
-  render(
-    () => (
-      <I18nProvider>
-        <App />
-      </I18nProvider>
-    ),
-    root,
-  );
+  render(() => <App />, root);
 })();
 
 inject();

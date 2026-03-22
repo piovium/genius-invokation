@@ -29,7 +29,6 @@ import { IS_BETA, SERVER_HOST, WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
 import { DeckBuilder } from "@gi-tcg/deck-builder";
 import "@gi-tcg/deck-builder/style.css";
 import { DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
-import { useI18n } from "./i18n";
 
 enum GameMode {
   NotStarted = 0,
@@ -46,7 +45,6 @@ if (import.meta.env.DEV) {
 }
 
 export function App() {
-  const { locale, setLocale, assetsManager, t } = useI18n();
   if (window.opener !== null) {
     // eslint-disable-next-line solid/components-return-once
     return <StandaloneChild />;
@@ -65,7 +63,7 @@ export function App() {
       input.onchange = (e) => {
         const file = (e.target as HTMLInputElement)?.files?.[0];
         if (!file) {
-          reject(t("readUploadedFileFailed"));
+          reject(`Failed to read uploaded file`);
           return;
         }
         const reader = new FileReader();
@@ -82,7 +80,7 @@ export function App() {
         reader.readAsText(file);
       };
       input.oncancel = () => {
-        reject(t("fileUploadCanceled"));
+        reject(`File upload canceled`);
       };
       input.click();
     });
@@ -102,7 +100,7 @@ export function App() {
     deckBuilderDialog.close();
   };
   const loadDeckBuilderValue = async () => {
-    const code = prompt(t("inputShareCode"));
+    const code = prompt(`Input share code:`);
     if (code === null) {
       return;
     }
@@ -121,7 +119,7 @@ export function App() {
     try {
       const code = DEFAULT_ASSETS_MANAGER.encode(deck);
       await navigator.clipboard.writeText(code);
-      alert(t("deckCodeCopied", { code }));
+      alert(`Deck code copied to clipboard: ${code}`);
     } catch (e) {
       if (e instanceof Error) {
         alert(e.message);
@@ -132,18 +130,6 @@ export function App() {
 
   return (
     <div>
-      <div class="app-toolbar">
-        <label class="language-picker">
-          <span>{t("languageLabel")}</span>
-          <select
-            value={locale()}
-            onChange={(e) => setLocale(e.currentTarget.value as "zh-CN" | "en-US")}
-          >
-            <option value="zh-CN">{t("languageChinese")}</option>
-            <option value="en-US">{t("languageEnglish")}</option>
-          </select>
-        </label>
-      </div>
       <Switch>
         <Match when={mode() === GameMode.NotStarted}>
           <div class="tabs">
@@ -155,12 +141,12 @@ export function App() {
               checked
             />
             <label class="tab__header" for="standaloneInput">
-              {t("localSimulation")}
+              本地模拟
             </label>
             <div class="tab__content config-panel">
-              <div class="config-panel__title">{t("deckConfig")}</div>
+              <div class="config-panel__title">牌组配置</div>
               <div class="config-panel__deck">
-                <label>{t("firstPlayerDeck")}</label>
+                <label>先手牌组</label>
                 <input
                   type="text"
                   value={deck0()}
@@ -168,7 +154,7 @@ export function App() {
                 />
               </div>
               <div class="config-panel__deck">
-                <label>{t("secondPlayerDeck")}</label>
+                <label>后手牌组</label>
                 <input
                   type="text"
                   value={deck1()}
@@ -176,7 +162,7 @@ export function App() {
                 />
               </div>
               <div class="config-panel__deck">
-                <label>{t("gameVersion")}</label>
+                <label>游戏版本</label>
                 <select
                   value={version()}
                   onChange={(e) => setVersion(e.target.value as Version)}
@@ -187,16 +173,18 @@ export function App() {
                 </select>
               </div>
               <div class="config-panel__description">
-                {t("standaloneDescription")}
+                点击下方按钮开始对局；先手方棋盘会在弹出窗口显示，后手方棋盘在本页面显示。
                 <br />
-                {t("standalonePopupHint")}
+                （若弹窗不显示为浏览器阻止，请允许本页面使用弹出式窗口。）
                 <Show when={IS_BETA}>
                   <br />
-                  <strong>{t("betaDeckWarning")}</strong>
+                  <strong>
+                    请注意：本页面包含未发布的测试版卡牌；包含这些卡牌的分享码仅限在本页面内使用，它们可能是无效的正式版分享码。
+                  </strong>
                 </Show>
               </div>
               <div class="config-panel__button-group">
-                <button onClick={() => setMode(1)}>{t("startGame")}</button>
+                <button onClick={() => setMode(1)}>开始对局</button>
                 <button
                   onClick={async () => {
                     const logs = await importLog().catch(alert);
@@ -206,7 +194,7 @@ export function App() {
                     }
                   }}
                 >
-                  {t("importLog")}
+                  导入日志
                 </button>
               </div>
             </div>
@@ -219,16 +207,16 @@ export function App() {
             />
             <label class="tab__header" for="multiplayerInput">
               <a href={`${SERVER_HOST}${WEB_CLIENT_BASE_PATH}`} target="_blank">
-                {t("multiplayerBattle")}
+                多人对战
               </a>
             </label>
             <div class="tab__content config-panel" />
             <div class="tab__spacer" />
           </div>
-          <h3>{t("usefulLinks")}</h3>
+          <h3>友情链接</h3>
           <ul>
             <li>
-              {t("getDeckCode")}
+              获取牌组码：
               <a
                 href="https://webstatic.mihoyo.com/ys/event/bbs-lineup-qskp/index.html"
                 target="_blank"
@@ -237,17 +225,16 @@ export function App() {
               </a>
             </li>
             <li>
-              {t("getDeckCode")}
+              获取牌组码：
               <a href="https://www.summoners.top/teams" target="_blank">
                 召唤之巅：原神赛事数据统计平台
               </a>
             </li>
             <li>
-              {t("getDeckCode")}
-              <button onClick={openDeckBuilder}>{t("launchDeckBuilder")}</button>
+              获取牌组码：<button onClick={openDeckBuilder}>启动组牌器</button>
             </li>
             <li>
-              {t("projectGithub")}{" "}
+              此项目{" "}
               <a
                 href="https://github.com/Guyutongxue/genius-invokation"
                 target="_blank"
@@ -312,15 +299,14 @@ export function App() {
         <Show when={loadDeckBuilder()}>
           <DeckBuilder
             class="deck-builder"
-            assetsManager={assetsManager()}
             deck={deckBuilderValue()}
             onChangeDeck={setDeckBuilderValue}
           />
         </Show>
         <div class="deck-builder-actions">
-          <button onClick={closeDeckBuilder}>{t("close")}</button>
-          <button onClick={saveDeckBuilderValue}>{t("save")}</button>
-          <button onClick={loadDeckBuilderValue}>{t("loadFromCode")}</button>
+          <button onClick={closeDeckBuilder}>Close</button>
+          <button onClick={saveDeckBuilderValue}>Save</button>
+          <button onClick={loadDeckBuilderValue}>Load from code</button>
         </div>
       </dialog>
     </div>
