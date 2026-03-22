@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -13,24 +13,5 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { AssetsManager } from "@gi-tcg/assets-manager";
-import { createContext, useContext } from "solid-js";
-import type { I18nKey } from "./locales";
-import zhCN from "./locales/zh-CN";
-import en from "./locales/en";
-
-export const translations = {
-  "zh-CN": zhCN,
-  "en": en,
-} as const;
-
-export type Locale = "zh-CN" | "en";
-
-export interface AssetsContextValue {
-  assetsManager: () => AssetsManager;
-  locale: () => Locale;
-  t: (key: I18nKey) => string;
-}
-
-export const AssetsContext = createContext<AssetsContextValue>();
-export const useAssetsManager = () => useContext(AssetsContext)!;
+export type I18nDictionary = typeof import("./zh-CN").default;
+export type I18nKey = keyof I18nDictionary;

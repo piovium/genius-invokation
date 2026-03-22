@@ -108,12 +108,11 @@ function DamageDescription(props: DamageDescriptionProps) {
       void 0,
     ].indexOf(props.dType);
   const keywordId = () => -(100 + id());
-  const [keyword] = createResource(
-    () => [keywordId(), assetsManager()] as const,
-    ([id, manager]) => manager.getData(id),
+  const text = () => assetsManager().getNameSync(keywordId());
+  const [url] = createResource(
+    () => [id(), assetsManager()] as const,
+    ([id, manager]) => manager.getImageUrl(id),
   );
-  const text = () => keyword()?.name;
-  const [url] = createResource(id, (id) => assetsManager().getImageUrl(id));
   return (
     <>
       <Show when={id() <= 7 && url()}>
@@ -196,7 +195,7 @@ export function Description(props: DescriptionProps) {
                     when={item.rType === "K"}
                     fallback={
                       <span class="text-black mx-1">
-                        <ReferenceName definitionId={item.id} />
+                        {assetsManager().getNameSync(item.id) ?? item.id}
                       </span>
                     }
                   >
@@ -204,7 +203,7 @@ export function Description(props: DescriptionProps) {
                       class="text-black underline underline-1 underline-offset-3 cursor-pointer mx-1"
                       onClick={() => props.onRequestExplain?.(item.id)}
                     >
-                      <ReferenceName definitionId={item.id} />
+                      {assetsManager().getNameSync(item.id)}
                     </span>
                   </Show>
                 )}
@@ -228,13 +227,4 @@ export function Description(props: DescriptionProps) {
       </ul>
     </>
   );
-}
-
-function ReferenceName(props: { definitionId: number }) {
-  const { assetsManager } = useAssetsManager();
-  const [data] = createResource(
-    () => [props.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId),
-  );
-  return <>{data()?.name ?? props.definitionId}</>;
 }
