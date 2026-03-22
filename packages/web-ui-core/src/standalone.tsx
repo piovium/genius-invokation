@@ -16,17 +16,20 @@
 import type { PbExposedMutation, PbGameState } from "@gi-tcg/typings";
 import { createMemo, splitProps, untrack, type ComponentProps } from "solid-js";
 import { Chessboard, type ChessboardData } from "./components/Chessboard";
-import { UiContext } from "./hooks/context";
+import { translations, UiContext, type Locale } from "./hooks/context";
 import { parseMutations } from "./mutations";
-import { type AssetsManager, DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
+import {
+  type AssetsManager,
+  DEFAULT_ASSETS_MANAGER,
+} from "@gi-tcg/assets-manager";
 import { updateHistory, type HistoryData } from "./history/parser";
 import type { HistoryBlock } from "./history/typings";
-import { detectLocale, t as translate } from "./i18n";
+import { resolveTemplate, translator } from "@solid-primitives/i18n";
 
 export interface StandaloneChessboardProps extends ComponentProps<"div"> {
   who: 0 | 1;
-  assetsManager?: AssetsManager | (() => AssetsManager);
-  locale?: "zh-CN" | "en-US" | (() => "zh-CN" | "en-US");
+  assetsManager?: AssetsManager;
+  locale?: Locale;
   state: PbGameState;
   mutations: PbExposedMutation[];
 }
@@ -40,28 +43,13 @@ export function StandaloneChessboard(props: StandaloneChessboardProps) {
     "mutations",
   ]);
 
+  const getLocale = () => localProps.locale ?? "zh-CN";
+  const dict = createMemo(() => translations[getLocale()]);
+  const t = translator(dict, resolveTemplate);
+
   const history = createMemo<HistoryBlock[]>(() => {
     return [];
   });
-  const getAssetsManager = () =>
-    (typeof localProps.assetsManager === "function"
-      ? localProps.assetsManager()
-      : localProps.assetsManager) ?? DEFAULT_ASSETS_MANAGER;
-  const getLocale = () =>
-    typeof localProps.locale === "function"
-      ? localProps.locale()
-      : localProps.locale ?? detectLocale();
-  const getName = (definitionId?: number) => {
-    if (!definitionId) {
-      return "???";
-    }
-    const assetsManager = getAssetsManager();
-    try {
-      return assetsManager.getDataSync(definitionId).name;
-    } catch {
-      return assetsManager.getNameSync(definitionId) ?? `${definitionId}`;
-    }
-  };
 
   const data = createMemo<ChessboardData>(() => {
     const parsed = parseMutations(props.mutations);
@@ -74,10 +62,9 @@ export function StandaloneChessboard(props: StandaloneChessboardProps) {
   return (
     <UiContext.Provider
       value={{
-        assetsManager: getAssetsManager,
+        assetsManager: () => localProps.assetsManager ?? DEFAULT_ASSETS_MANAGER,
         locale: getLocale,
-        t: (key, params) => translate(key, params, getLocale()),
-        getName,
+        t,
       }}
     >
       <Chessboard

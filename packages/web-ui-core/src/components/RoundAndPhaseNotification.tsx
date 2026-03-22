@@ -61,7 +61,7 @@ export function RoundAndPhaseNotification(
       <Switch>
         <Match when={typeof props.info.value === "number"}>
           <div
-            class="max-w-250 min-h-6 px-3 py-0.5 flex flex-row justify-center items-center text-center leading-tight whitespace-normal break-words action-hint text-#f5ebd2 font-bold text-3.2 animate-[phase-notification_500ms_both] data-[delay]:animate-[phase-notification_500ms_800ms_both]"
+            class="w-210 h-6 flex flex-row justify-center items-center action-hint text-#f5ebd2 font-bold text-3.5 animate-[phase-notification_500ms_both] data-[delay]:animate-[phase-notification_500ms_800ms_both]"
             bool:data-delay={props.info.showRound}
           >
             {phaseText()[props.info.value as PbPhaseType]}
@@ -73,7 +73,7 @@ export function RoundAndPhaseNotification(
           }
         >
           <div
-            class="max-w-250 min-h-6 px-3 py-0.5 flex flex-row justify-center items-center text-center leading-tight whitespace-normal break-words font-bold text-3.2 action-hint-who animate-[phase-notification_500ms_both]"
+            class="w-210 h-6 flex flex-row justify-center items-center font-bold text-3.5 action-hint-who animate-[phase-notification_500ms_both]"
             bool:data-opp={opp()}
           >
             {props.info.value === "action"
@@ -91,13 +91,16 @@ export function RoundAndPhaseNotification(
       </Switch>
       <Show when={props.info.showRound}>
         <div
-          class="max-w-250 min-h-6 pb-6 px-3 flex flex-col justify-center items-center text-center leading-tight font-bold text-3.1 action-hint-who animate-[phase-notification_800ms_both]"
+          class="w-210 h-6 pb-6 flex flex-col justify-center items-center font-bold text-3.5 action-hint-who animate-[phase-notification_800ms_both]"
           bool:data-opp={props.currentTurn !== props.who}
         >
-          <h5 class="font-bold text-3">{t("round", { round: props.roundNumber })}</h5>
+          <h5 class="font-bold text-3">
+            {t("round", { round: props.roundNumber })}
+          </h5>
           <span>
             {t("sideFirst", {
-              side: props.currentTurn === props.who ? t("mySide") : t("oppSide"),
+              side:
+                props.currentTurn === props.who ? t("mySide") : t("oppSide"),
             })}
           </span>
         </div>
