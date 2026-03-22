@@ -14,26 +14,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { defaultClientConditions, defineConfig } from "vite";
-import unoCss from "unocss/vite";
 import solid from "vite-plugin-solid";
 import babel from "@rollup/plugin-babel";
 import { viteStaticCopy } from "vite-plugin-static-copy";
-import svgWithFallback from "./svg-with-fallback";
 
 export default defineConfig({
   esbuild: {
     target: "ES2020",
   },
-  resolve: {
-    conditions: ["bun", ...defaultClientConditions],
-  },
   plugins: [
-    unoCss(),
     solid(),
-    svgWithFallback(),
     babel({
       babelHelpers: "bundled",
-    }) as unknown as any,
+    }),
     viteStaticCopy({
       watch: null,
       silent: true,
@@ -41,9 +34,9 @@ export default defineConfig({
         {
           src: "../data-code-analyzer/src/result.json",
           rename: "data-code-analyze-result.json",
-          dest: ".",
-        },
-      ],
-    }),
+          dest: "."
+        }
+      ]
+    })
   ],
 });
