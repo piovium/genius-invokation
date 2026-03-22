@@ -55,10 +55,17 @@ function App() {
   const assetsManager = new AssetsManager({
     version: "beta",
   });
-  const [io0, Chessboard0] = createClient(0, { assetsManager });
+  const enAssetsManager = new AssetsManager({
+    language: "EN",
+    version: "beta",
+  });
+  const [io0, Chessboard0] = createClient(0, {
+    assetsManager: () => assetsManager,
+  });
   const [io1, Chessboard1] = createClient(1, {
-    assetsManager,
+    assetsManager: () => enAssetsManager,
     disableDelicateUi: true,
+    locale: () => "en",
   });
 
   const [logs, setLogs] = createSignal<DetailLogEntry[]>([]);
@@ -75,7 +82,7 @@ function App() {
     // const io0Opp = io0.oppController.open();
 
     game.players[0].io = io0;
-    game.players[1].io = io1 // mergeIo(io1, io0Opp);
+    game.players[1].io = io1; // mergeIo(io1, io0Opp);
     game.players[0].config.alwaysOmni = true;
     game.players[0].config.allowTuningAnyDice = true;
     game.onIoError = console.error;
