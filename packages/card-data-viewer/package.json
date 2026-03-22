@@ -21,8 +21,9 @@
     "solid-js": "catalog:"
   },
   "dependencies": {
+    "@gi-tcg/assets-manager": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
-    "@gi-tcg/assets-manager": "workspace:*"
+    "@solid-primitives/i18n": "^2.2.1"
   },
   "devDependencies": {
     "@gi-tcg/core": "workspace:*",

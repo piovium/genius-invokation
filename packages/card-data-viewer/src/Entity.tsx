@@ -34,7 +34,7 @@ import type {
 import { PlayCostList } from "./PlayCost";
 import { Description } from "./Description";
 import { Tags } from "./Tags";
-import { getCardDataViewerText } from "./i18n";
+import { TEXT_MAP_KEYS } from "./text_map";
 import { useAssetsManager } from "./context";
 
 export interface CardDataProps {
@@ -48,11 +48,11 @@ export function Character(props: CardDataProps) {
   const { assetsManager, t } = useAssetsManager();
   const [data] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<CharacterRawData>
+    ([defId, manager]) => manager.getData(defId) as Promise<CharacterRawData>,
   );
   const [image] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId, { type: "icon" })
+    ([defId, manager]) => manager.getImageUrl(defId, { type: "icon" }),
   );
   return (
     <div class={props.class}>
@@ -118,11 +118,11 @@ export function ActionCard(props: CardDataProps) {
   const { assetsManager, locale, t } = useAssetsManager();
   const [data] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<ActionCardRawData>
+    ([defId, manager]) => manager.getData(defId) as Promise<ActionCardRawData>,
   );
   const [image] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId)
+    ([defId, manager]) => manager.getImageUrl(defId),
   );
   return (
     <div class={props.class}>
@@ -142,7 +142,7 @@ export function ActionCard(props: CardDataProps) {
               <div class="flex flex-col mb-2">
                 <h3 class="font-bold">{data().name}</h3>
                 <div class="h-6 flex flex-row items-center gap-1">
-                  <span class="text-xs">{getCardDataViewerText(locale(), data().type)}</span>
+                  <span class="text-xs">{t(TEXT_MAP_KEYS[data().type])}</span>
                   <PlayCostList playCost={data().playCost} />
                 </div>
               </div>
@@ -184,12 +184,12 @@ export function Skill(props: ExpandableCardDataProps) {
   const { assetsManager, locale, t } = useAssetsManager();
   const [data] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<SkillRawData>
+    ([defId, manager]) => manager.getData(defId) as Promise<SkillRawData>,
   );
 
   const [icon] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId)
+    ([defId, manager]) => manager.getImageUrl(defId),
   );
   const [skillTypeText, setSkillTypeText] = createSignal("");
   const [playCost, setPlayCost] = createSignal<PlayCost[]>([]);
@@ -197,7 +197,7 @@ export function Skill(props: ExpandableCardDataProps) {
   createEffect(() => {
     if (data.state === "ready") {
       setPlayCost(data().playCost);
-      setSkillTypeText(getCardDataViewerText(locale(), data().type));
+      setSkillTypeText(t(TEXT_MAP_KEYS[data().type]));
     }
   });
   return (
@@ -212,7 +212,10 @@ export function Skill(props: ExpandableCardDataProps) {
           </Show>
         </div>
         <div class="flex flex-col">
-          <h3>{data()?.name ?? props.input.definitionId}</h3>
+          <h3>
+            {assetsManager().getNameSync(props.input.definitionId) ??
+              props.input.definitionId}
+          </h3>
           <div class="h-5 flex flex-row items-center gap-1">
             <span class="text-xs">{skillTypeText()}</span>
             <PlayCostList playCost={playCost()} />
@@ -252,17 +255,17 @@ export function Entity(props: ExpandableCardDataProps) {
   const { assetsManager, locale, t } = useAssetsManager();
   const [data] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<EntityRawData>
+    ([defId, manager]) => manager.getData(defId) as Promise<EntityRawData>,
   );
   const [icon] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId)
+    ([defId, manager]) => manager.getImageUrl(defId),
   );
   const [entityTypeText, setEntityTypeText] = createSignal("");
 
   createEffect(() => {
     if (data.state === "ready") {
-      setEntityTypeText(getCardDataViewerText(locale(), data().type));
+      setEntityTypeText(t(TEXT_MAP_KEYS[data().type]));
     }
   });
   return (
@@ -291,7 +294,10 @@ export function Entity(props: ExpandableCardDataProps) {
           </Show>
         </div>
         <div class="flex flex-col">
-          <h3>{data()?.name ?? props.input.definitionId}</h3>
+          <h3>
+            {assetsManager().getNameSync(props.input.definitionId) ??
+              props.input.definitionId}
+          </h3>
           <div class="h-5 flex flex-row items-center gap-1">
             <span class="text-xs">{entityTypeText()}</span>
           </div>
@@ -345,13 +351,16 @@ export function Keyword(props: CardDefinitionProps) {
   const { assetsManager, t } = useAssetsManager();
   const [data] = createResource(
     () => [props.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<KeywordRawData>
+    ([defId, manager]) => manager.getData(defId) as Promise<KeywordRawData>,
   );
   return (
     <div class={props.class}>
       <h3>
         <span class="text-yellow-7">{t("rulesExplanation")}</span>
-        <span class="font-bold">{data()?.name ?? props.definitionId}</span>
+        <span class="font-bold">
+          {assetsManager().getNameSync(props.definitionId) ??
+            props.definitionId}
+        </span>
       </h3>
       <Switch>
         <Match when={data.error}>{t("loadFailed")}</Match>
@@ -383,11 +392,11 @@ export function Reference(props: ReferenceProps) {
   const { assetsManager, locale, t } = useAssetsManager();
   const [data] = createResource(
     () => [props.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<SkillRawData>
+    ([defId, manager]) => manager.getData(defId) as Promise<SkillRawData>,
   );
   const [image] = createResource(
     () => [props.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId)
+    ([defId, manager]) => manager.getImageUrl(defId),
   );
   return (
     <div>
@@ -409,11 +418,14 @@ export function Reference(props: ReferenceProps) {
         </div>
       </Show>
       <h4 class="flex flex-row items-center justify-between">
-        <span class="font-bold">{data()?.name ?? props.definitionId}</span>
+        <span class="font-bold">
+          {assetsManager().getNameSync(props.definitionId) ??
+            props.definitionId}
+        </span>
         <Show when={data.state === "ready" && data()}>
           {(data) => (
             <span class="text-xs text-yellow-7">
-              {getCardDataViewerText(locale(), data().type)}
+              {t(TEXT_MAP_KEYS[data().type])}
             </span>
           )}
         </Show>
