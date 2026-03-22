@@ -112,7 +112,7 @@ export interface MiniSpecialViewGroupProps {
 }
 
 export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
-  const { getName } = useUiContext();
+  const { assetsManager } = useUiContext();
   return (
     <>
       <Show when={props.viewType === "switchHands"}>
@@ -127,7 +127,7 @@ export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
         <MiniView
           viewType="selecting"
           ids={props.selectCardCandidates}
-          nameGetter={getName}
+          nameGetter={(name) => assetsManager().getNameSync(name)}
           opp={props.opp}
         />
       </Show>

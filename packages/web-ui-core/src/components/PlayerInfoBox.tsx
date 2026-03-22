@@ -15,7 +15,7 @@
 
 import { DiceType, PbPlayerStatus } from "@gi-tcg/typings";
 import { Dice } from "./Dice";
-import { Show } from "solid-js";
+import { createMemo, Show } from "solid-js";
 import { WithDelicateUi } from "../primitives/delicate_ui";
 import { StrokedText } from "./StrokedText";
 import { useUiContext } from "../hooks/context";
@@ -33,14 +33,14 @@ export interface PlayerInfoProps {
 
 export function PlayerInfoBox(props: PlayerInfoProps) {
   const { t } = useUiContext();
-  const statusTextMap: Record<PbPlayerStatus, string> = {
+  const statusTextMap = createMemo<Record<PbPlayerStatus, string>>(() => ({
     [PbPlayerStatus.UNSPECIFIED]: t("waiting"),
     [PbPlayerStatus.ACTING]: t("acting"),
     [PbPlayerStatus.CHOOSING_ACTIVE]: t("choosingActive"),
     [PbPlayerStatus.REROLLING]: t("rerolling"),
     [PbPlayerStatus.SWITCHING_HANDS]: t("switchingHands"),
     [PbPlayerStatus.SELECTING_CARDS]: t("selectingCards"),
-  };
+  }));
   return (
     <div
       class={`pointer-events-none select-none m-2 gap-1 flex items-start data-[opp=true]:flex-col-reverse data-[opp=false]:flex-col ${
@@ -84,7 +84,7 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
       >
         {t("declaredEndStatus")}
       </div>
-      <div class="relative inline-block h-11 w-52">
+      <div class="relative inline-block h-10 w-44">
         <div
           class="absolute inset-0 rounded-l-full rounded-r-0 border-1.5 playerinfo-box h-full w-full"
           data-opp={props.opp}
@@ -102,15 +102,12 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
               />
             </div>
           </Show>
-          <div class="flex flex-col ml-2 flex-1 min-w-0 gap-0.4 text-stroke-0.3 pr-1">
-            <span class="text-3 leading-tight text-white max-w-30 overflow-hidden text-nowrap text-ellipsis">
+          <div class="flex flex-col ml-2 flex-1 gap-0.2 text-stroke-0.3">
+            <span class="text-3 leading-tight text-white w-24 overflow-hidden text-nowrap text-ellipsis">
               {props.name || <>&nbsp;</>}
             </span>
-            <div
-              class="text-2.2 min-h-5 max-w-30 text-white/55 leading-tight whitespace-normal break-words"
-              data-opp={props.opp}
-            >
-              {statusTextMap[props.status]}
+            <div class="text-2.5 h-3 w-24 text-white/40" data-opp={props.opp}>
+              {statusTextMap()[props.status]}
             </div>
           </div>
           <WithDelicateUi

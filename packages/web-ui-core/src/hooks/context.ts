@@ -15,13 +15,26 @@
 
 import type { AssetsManager } from "@gi-tcg/assets-manager";
 import { createContext, useContext } from "solid-js";
-import type { Locale, WebUiTranslationKey } from "../i18n";
+import type { I18nKey } from "../locales";
+import zhCN from "../locales/zh-CN";
+import en from "../locales/en";
+
+export type Locale = "zh-CN" | "en";
+
+export const translations = {
+  "zh-CN": zhCN,
+  en: en,
+};
+
+export type Translator = (
+  key: I18nKey,
+  params?: Record<string, string | number>,
+) => string;
 
 export interface UiContextValue {
   assetsManager: () => AssetsManager;
   locale: () => Locale;
-  t: (key: WebUiTranslationKey, params?: Record<string, string | number>) => string;
-  getName: (definitionId?: number) => string;
+  t: Translator;
   disableDelicateUi?: boolean;
 }
 

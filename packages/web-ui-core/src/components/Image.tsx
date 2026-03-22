@@ -48,7 +48,7 @@ export function Image(props: ImageProps) {
     "fallback",
     "type",
   ]);
-  const { assetsManager, getName } = useUiContext();
+  const { assetsManager } = useUiContext();
   const [url] = createResource(
     () => [local.imageId, local.type, assetsManager()] as const,
     ([imageId, type, manager]) =>
@@ -74,7 +74,7 @@ export function Image(props: ImageProps) {
       ...rest,
       class: `${rest.class ?? ""} ${classNames}`,
       src: url.state === "ready" ? url() : void 0,
-      alt: isUnknown() ? "" : getName(local.imageId),
+      alt: isUnknown() ? "" : assetsManager().getNameSync(local.imageId),
       draggable: "false",
       style: {
         height: local.height ? `${local.height}px` : void 0,

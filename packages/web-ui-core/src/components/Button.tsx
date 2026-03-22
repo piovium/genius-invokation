@@ -42,7 +42,7 @@ export function Button(props: ButtonProps) {
       <ButtonNormal
         class="grid-area-[1/1] w-45 h-10.8 block group-[:is(:hover,:active)]/confirm_btn:hidden" 
       />
-      <div class="grid-area-[1/1] h-full w-full px-3 flex items-center justify-center text-center leading-tight text-base font-bold text-black/70 transition-colors">
+      <div class="grid-area-[1/1] h-full w-full flex items-center justify-center text-lg font-bold text-black/70 transition-colors line-height-none">
        {ch()}        
       </div>
     </button>

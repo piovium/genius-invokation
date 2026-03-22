@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -13,20 +13,5 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-export interface ActionHintTextProps {
-  class?: string;
-  text?: string;
-}
-
-export function ActionHintText(props: ActionHintTextProps) {
-  return (
-    <div
-      class={`w-210 h-0 data-[shown]:h-6 pointer-events-none flex flex-row justify-center items-center action-hint text-#f5ebd2 font-bold text-3.5 transition-height ${
-        props.class ?? ""
-      }`}
-      bool:data-shown={props.text}
-    >
-      {props.text}
-    </div>
-  );
-}
+export type I18nDictionary = typeof import("./zh-CN").default;
+export type I18nKey = keyof I18nDictionary;

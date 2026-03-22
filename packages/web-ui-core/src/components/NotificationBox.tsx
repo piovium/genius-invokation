@@ -25,12 +25,15 @@ export interface NotificationBoxProps {
 }
 
 export function NotificationBox(props: NotificationBoxProps) {
-  const { t, getName } = useUiContext();
+  const { assetsManager, t } = useUiContext();
+
   const skillName = () =>
     typeof props.data.skillDefinitionId === "number"
-      ? getName(Math.floor(props.data.skillDefinitionId))
-      : undefined;
-  const characterName = () => getName(props.data.characterDefinitionId);
+      ? assetsManager().getNameSync(Math.floor(props.data.skillDefinitionId))
+      : void 0;
+  const characterName = () =>
+    assetsManager().getNameSync(props.data.characterDefinitionId);
+
   const typeText = (
     type: NotificationBoxInfo["skillType"],
   ): string | undefined => {
@@ -54,7 +57,7 @@ export function NotificationBox(props: NotificationBoxProps) {
         "--enter-offset": props.opp ? "2rem" : "-2rem",
       }}
     >
-      <div class="w-full h-full rounded-1.5 b-[var(--inner-border-color)] border-1 flex flex-row gap-2 items-center p-3 pr-6 min-w-0">
+      <div class="w-full h-full rounded-1.5 b-[var(--inner-border-color)] border-1 flex flex-row gap-2 items-center p-3">
         <div>
           <Image
             imageId={props.data.characterDefinitionId}
@@ -63,25 +66,19 @@ export function NotificationBox(props: NotificationBoxProps) {
             fallback="general"
           />
         </div>
-        <div class="flex flex-col min-w-0 flex-1 pr-2">
+        <div class="flex-col">
           <Show
             when={props.data.type === "switchActive"}
             fallback={
               <>
-                <h5 class="font-bold color-#ede4d8 leading-tight whitespace-normal break-words pr-2">
-                  {skillName()}
-                </h5>
-                <p
-                  class="text-[var(--text-color)] font-size-80% font-bold leading-tight whitespace-normal break-words"
-                >
+                <h5 class="font-bold color-#ede4d8">{skillName()}</h5>
+                <p class="text-[var(--text-color)] font-size-80% font-bold">
                   {typeText(props.data.skillType)}
                 </p>
                 <Show when={props.data.skillDefinitionId}>
                   {(skillDefinitionId) => (
                     <>
-                      <div
-                        class="absolute h-8 w-8 rounded-full bg-[var(--inner-background-color)] b-[var(--inner-border-color)] border-1 translate-x-50% translate-y--50% right-0 top-50% justify-center items-center p-0.3"
-                      >
+                      <div class="absolute h-8 w-8 rounded-full bg-[var(--inner-background-color)] b-[var(--inner-border-color)] border-1 translate-x-50% translate-y--50% right-0 top-50% justify-center items-center p-0.3">
                         <Image
                           imageId={Math.floor(skillDefinitionId())}
                           type="icon"
@@ -96,23 +93,20 @@ export function NotificationBox(props: NotificationBoxProps) {
               </>
             }
           >
-            <h5 class="font-bold color-#ede4d8 leading-tight whitespace-normal break-words pr-2">
+            <h5 class="font-bold color-#ede4d8">
               {props.opp ? t("oppSide") : t("mySide")}
-              {t("switchRole")}:
-              {characterName()}
+              {t("switchRole")}:{characterName()}
             </h5>
             <Show when={props.data.skillDefinitionId}>
               {(skillDefinitionId) => (
                 <>
                   <p
-                    class="text-[var(--text-color)] font-size-80% font-bold leading-tight whitespace-normal break-words"
+                    class="text-[var(--text-color)] font-size-80% font-bold"
                     data-opp={props.opp}
                   >
                     {characterName()}
                   </p>
-                  <div
-                    class="absolute h-8 w-8 rounded-full bg-[var(--inner-background-color)] b-[var(--inner-border-color)] border-1 translate-x-50% translate-y--50% right-0 top-50% justify-center items-center p-0.3"
-                  >
+                  <div class="absolute h-8 w-8 rounded-full bg-[var(--inner-background-color)] b-[var(--inner-border-color)] border-1 translate-x-50% translate-y--50% right-0 top-50% justify-center items-center p-0.3">
                     <Image
                       imageId={skillDefinitionId()}
                       type="icon"
@@ -124,9 +118,7 @@ export function NotificationBox(props: NotificationBoxProps) {
               )}
             </Show>
             <Show when={props.data.skillType === "overloaded"}>
-              <p
-                class="text-[var(--text-color)] font-size-80% font-bold leading-tight whitespace-normal break-words"
-              >
+              <p class="text-[var(--text-color)] font-size-80% font-bold">
                 {t("overloaded")}
               </p>
             </Show>

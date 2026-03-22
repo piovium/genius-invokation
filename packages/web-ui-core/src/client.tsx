@@ -26,7 +26,14 @@ import {
   PbPhaseType,
   PbPlayerStatus,
 } from "@gi-tcg/typings";
-import { createSignal, type Component, type ComponentProps, type JSX } from "solid-js";
+import {
+  createMemo,
+  createSignal,
+  type Accessor,
+  type Component,
+  type ComponentProps,
+  type JSX,
+} from "solid-js";
 import {
   Chessboard,
   type ChessboardViewType,
@@ -44,7 +51,7 @@ import type {
 } from "@gi-tcg/core";
 import { AsyncQueue } from "./async_queue";
 import { parseMutations } from "./mutations";
-import { UiContext } from "./hooks/context";
+import { translations, UiContext, type Locale } from "./hooks/context";
 import {
   createActionState,
   createChooseActiveState,
@@ -59,47 +66,13 @@ import {
 import { createStore, produce } from "solid-js/store";
 import type { Rotation } from "./components/TransformWrapper";
 import type { CancellablePlayerIO } from "@gi-tcg/core";
-import { OppChessboardController, type IOppChessboardController, type OppInfo } from "./opp";
+import {
+  OppChessboardController,
+  type IOppChessboardController,
+  type OppInfo,
+} from "./opp";
 import { flip } from "@gi-tcg/utils";
-import { detectLocale, t as translate } from "./i18n";
-import type { Locale } from "./i18n";
-
-const localizedNameCache = new Map<string, string>();
-
-function createLocalizedNameGetter(
-  getAssetsManager: () => AssetsManager,
-  getLocale: () => Locale,
-) {
-  return (definitionId?: number) => {
-    if (!definitionId) {
-      return "???";
-    }
-    const locale = getLocale();
-    const assetsManager = getAssetsManager();
-    const key = `${locale}:${definitionId}`;
-    const cached = localizedNameCache.get(key);
-    if (cached) {
-      return cached;
-    }
-    try {
-      const syncData = assetsManager.getDataSync(definitionId);
-      if (syncData?.name) {
-        localizedNameCache.set(key, syncData.name);
-        return syncData.name;
-      }
-    } catch {}
-    const fallback = assetsManager.getNameSync(definitionId) ?? `${definitionId}`;
-    void assetsManager
-      .getData(definitionId)
-      .then((data) => {
-        if (data?.name) {
-          localizedNameCache.set(key, data.name);
-        }
-      })
-      .catch(() => void 0);
-    return fallback;
-  };
-}
+import { resolveTemplate, translator } from "@solid-primitives/i18n";
 
 const EMPTY_PLAYER_DATA: PbPlayerState = {
   activeCharacterId: 0,
@@ -126,8 +99,8 @@ export const EMPTY_GAME_STATE: PbGameState = {
 export interface ClientOption {
   onGiveUp?: () => void;
   rpc?: Partial<RpcDispatcher>;
-  assetsManager?: AssetsManager | (() => AssetsManager);
-  locale?: Locale | (() => Locale);
+  assetsManager?: Accessor<AssetsManager>;
+  locale?: Accessor<Locale>;
   disableDelicateUi?: boolean;
   disableAction?: boolean;
 }
@@ -159,23 +132,11 @@ export interface ClientChessboardProps extends ComponentProps<"div"> {
 }
 
 export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
-  const getAssetsManager: () => AssetsManager = (() => {
-    if (typeof option.assetsManager === "function") {
-      const getter = option.assetsManager;
-      return () => getter();
-    }
-    const fixedAssetsManager = option.assetsManager ?? DEFAULT_ASSETS_MANAGER;
-    return () => fixedAssetsManager;
-  })();
-  const getLocale: () => Locale = (() => {
-    if (typeof option.locale === "function") {
-      const getter = option.locale;
-      return () => getter();
-    }
-    const fixedLocale = option.locale ?? detectLocale();
-    return () => fixedLocale;
-  })();
-  const getName = createLocalizedNameGetter(getAssetsManager, getLocale);
+  const getAssetsManager = () =>
+    option.assetsManager?.() ?? DEFAULT_ASSETS_MANAGER;
+  const getLocale = () => option.locale?.() ?? "zh-CN";
+  const dict = createMemo(() => translations[getLocale()]);
+  const t = translator(dict, resolveTemplate);
 
   const [data, setData] = createSignal<ChessboardData>({
     raw: [],
@@ -219,7 +180,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     chooseActive: async ({ candidateIds }) => {
       const resolver = Promise.withResolvers<ChooseActiveResponse>();
       actionResolvers.chooseActive = resolver;
-      const acState = createChooseActiveState(candidateIds, getLocale());
+      const acState = createChooseActiveState(candidateIds, t);
       setActionState(acState);
       try {
         return await resolver.promise;
@@ -230,7 +191,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     action: async ({ action }) => {
       const resolver = Promise.withResolvers<ActionResponse>();
       actionResolvers.action = resolver;
-      const acState = createActionState(getAssetsManager(), action, getLocale(), getName);
+      const acState = createActionState(getAssetsManager(), action, t);
       setActionState(acState);
       try {
         return await resolver.promise;
@@ -322,8 +283,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
 
   const oppController = new OppChessboardController({
     assetsManager: getAssetsManager,
-    locale: getLocale,
-    getName,
+    t,
     who: flip(who),
     onUpdate: async (info) => {
       await uiQueue.push(async () => {});
@@ -426,8 +386,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         ...option,
         assetsManager: getAssetsManager,
         locale: getLocale,
-        t: (key, params) => translate(key, params, getLocale()),
-        getName,
+        t,
       }}
     >
       <Chessboard

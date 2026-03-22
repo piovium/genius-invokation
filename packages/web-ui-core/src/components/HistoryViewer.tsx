@@ -99,9 +99,10 @@ export function useWho() {
   return useContext(WhoContext);
 }
 
-const renderName = (definitionId?: number) => {
-  const { getName } = useUiContext();
-  return getName(definitionId);
+const createRenderName = () => {
+  const { assetsManager } = useUiContext();
+  return (definitionId?: number) =>
+    definitionId ? assetsManager().getNameSync(definitionId) : "???";
 };
 
 const renderHistoryChild = (
@@ -139,6 +140,8 @@ const renderHistoryChild = (
     new: t("transformNew"),
   };
 
+  const renderName = createRenderName();
+
   const renderReaction = (reaction: Reaction, apply: DamageType) => {
     const { elements: element, nameKey } = REACTION_TEXT_MAP[reaction];
     const base = element.find((e) => e !== apply) as DamageType;
@@ -147,7 +150,7 @@ const renderHistoryChild = (
         <span>(</span>
         <Image imageId={base} class="h-3.5 w-3.5" fallback="aura" />
         <Image imageId={apply} class="h-3.5 w-3.5" fallback="aura" />
-        <span>{useUiContext().t(nameKey)}</span>
+        <span>{t(nameKey)}</span>
         <span>)</span>
       </>
     );
@@ -163,7 +166,9 @@ const renderHistoryChild = (
         content: (
           <>
             <span>角色出战</span>
-            <span>({child.isOverloaded ? t("overloaded") : t("cardEffect")})</span>
+            <span>
+              ({child.isOverloaded ? t("overloaded") : t("cardEffect")})
+            </span>
           </>
         ),
       };
@@ -447,7 +452,10 @@ const renderHistoryChild = (
           <>
             <span>{t("gainMaxHealth", { count: increaseValue })}</span>
             <span>
-              {t("maxHealthTo", { old: child.oldMaxHealth, next: child.newMaxHealth })}
+              {t("maxHealthTo", {
+                old: child.oldMaxHealth,
+                next: child.newMaxHealth,
+              })}
             </span>
           </>
         ),
@@ -543,9 +551,9 @@ const renderHistoryChild = (
       result = {
         opp: opp(child.who),
         imageId: child.isTuning ? "tuning" : parentCallerDefinitionId,
-          title: child.isTuning
-            ? t("elementalTuning")
-            : renderName(parentCallerDefinitionId),
+        title: child.isTuning
+          ? t("elementalTuning")
+          : renderName(parentCallerDefinitionId),
         content: (
           <>
             <span>{subject(opp(child.who))}</span>
@@ -983,7 +991,9 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
     return ["damage", "heal", "apply", "switch", "status"].includes(e.KEY);
   };
   const isCardSummary = (e: ShotGroupEntry): e is CardSummaryEntry => {
-    return ["discard", "getcard", "create", "remove", "attachment"].includes(e.KEY);
+    return ["discard", "getcard", "create", "remove", "attachment"].includes(
+      e.KEY,
+    );
   };
 
   for (const c of characterSummary) {
@@ -1105,7 +1115,7 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
       return;
     }
     return l.length === 1
-      ? (l[0].cardDefinitionId) || (all.length === 1)
+      ? l[0].cardDefinitionId || all.length === 1
         ? all
         : "more"
       : "more";
@@ -1209,7 +1219,9 @@ interface blockEnergyProps {
 
 const renderHistoryBlock = (block: HistoryDetailBlock) => {
   const who = useWho();
-  const { assetsManager, t } = useUiContext();
+  const { t } = useUiContext();
+  const renderName = createRenderName();
+
   let result: HistoryBlockData;
   const opp = (historyOwner: 0 | 1) => historyOwner !== who();
   const subject = (opp: boolean) => (opp ? t("oppSide") : t("mySide"));
@@ -1445,7 +1457,9 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           content: (
             <>
               <span class="text-3 text-#d4bc8e">{subject(opp(block.who))}</span>
-              <span class="text-3 text-#d4bc8e">{t("triggeredSelectEffect")}</span>
+              <span class="text-3 text-#d4bc8e">
+                {t("triggeredSelectEffect")}
+              </span>
             </>
           ),
         },
@@ -1679,7 +1693,7 @@ function HistorySummaryShot(props: { data: SummaryShot }) {
                 <Show when={props.data.innerValueSpecial}>
                   <div class="relative overflow-visible h-3 w-4 flex-shrink-0">
                     <div class="absolute w-5 h-5 top-50% left-50% -translate-x-50% -translate-y-50%">
-                      <DefeatedPreviewIcon />                    
+                      <DefeatedPreviewIcon />
                     </div>
                   </div>
                 </Show>

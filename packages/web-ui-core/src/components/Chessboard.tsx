@@ -1033,13 +1033,11 @@ export function Chessboard(props: ChessboardProps) {
   const [transformScale, setTransformScale] = createSignal(1);
 
   const { assetsManager, locale, t } = useUiContext();
-  const { CardDataViewer, ...dataViewerController } = createCardDataViewer(
-    {
-      includesImage: true,
-      assetsManager,
-      locale,
-    } as any,
-  );
+  const { CardDataViewer, ...dataViewerController } = createCardDataViewer({
+    includesImage: true,
+    assetsManager,
+    locale,
+  });
   const [selectingItem, setSelectingItem] = createSignal<SelectingItem | null>(
     null,
   );
@@ -1356,11 +1354,10 @@ export function Chessboard(props: ChessboardProps) {
       })) ?? []
     );
   });
-  const switchActiveStep = createMemo(
-    () =>
-      localProps.actionState?.availableSteps.find(
-        (s) => s.type === "clickSwitchActiveButton",
-      ),
+  const switchActiveStep = createMemo(() =>
+    localProps.actionState?.availableSteps.find(
+      (s) => s.type === "clickSwitchActiveButton",
+    ),
   );
   const showSkillButtons = createMemo(() => {
     const shown = !getFocusingHands() && getDraggingHand()?.status !== "moving";
@@ -1393,7 +1390,7 @@ export function Chessboard(props: ChessboardProps) {
     }
   });
 
-  const timer = () => (localProps.doingRpc ? localProps.timer ?? null : null);
+  const timer = () => (localProps.doingRpc ? (localProps.timer ?? null) : null);
 
   const [selectedDice, setSelectedDice] = createSignal<boolean[]>([]);
   const [dicePanelState, setDicePanelState] =
