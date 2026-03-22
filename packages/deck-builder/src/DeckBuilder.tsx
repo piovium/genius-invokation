@@ -38,22 +38,22 @@ import {
   type AssetsManager,
   type DeckData,
 } from "@gi-tcg/assets-manager";
-import {
-  type Locale,
-  translateDeckBuilder,
-} from "./i18n";
+import { translations, type Locale } from "./i18n";
+import type { I18nKey } from "./locales";
+import { translator } from "@solid-primitives/i18n";
 
 export interface DeckBuilderProps extends JSX.HTMLAttributes<HTMLDivElement> {
   assetsManager?: AssetsManager;
   deck?: Deck;
   version?: string;
   onChangeDeck?: (deck: Deck) => void;
+  locale?: Locale;
 }
 
 interface DeckBuilderContextValue {
   assetsManager: () => AssetsManager;
   locale: () => Locale;
-  t: (key: Parameters<typeof translateDeckBuilder>[1], params?: Record<string, string | number>) => string;
+  t: (key: I18nKey, params?: Record<string, string | number>) => string;
   showCard: (e: Event, type: "actionCard" | "character", id: number) => void;
 }
 
@@ -67,39 +67,24 @@ const EMPTY_DECK: Deck = {
 };
 
 export function DeckBuilder(props: DeckBuilderProps) {
-  const [local, rest] = splitProps(props, ["assetsManager", "class"]);
+  const [local, rest] = splitProps(props, ["assetsManager", "locale", "class"]);
   let container!: HTMLDivElement;
-  const detectLocale = (): Locale =>
-    document.documentElement.lang.toLowerCase().startsWith("en")
-      ? "en-US"
-      : "zh-CN";
-  const [locale, setLocale] = createSignal<Locale>(detectLocale());
-  createEffect(() => {
-    const observer = new MutationObserver(() => {
-      setLocale(detectLocale());
-    });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["lang"],
-    });
-    onCleanup(() => observer.disconnect());
-  });
-  const t = (key: Parameters<typeof translateDeckBuilder>[1], params?: Record<string, string | number>) =>
-    translateDeckBuilder(locale(), key, params);
   const assetsManager = createMemo(
     () => local.assetsManager ?? DEFAULT_ASSETS_MANAGER,
   );
+  const locale = createMemo(() => local.locale ?? "zh-CN");
+  const dict = createMemo(() => translations[locale()]);
+  const t = translator(dict);
 
   const [deckData] = createResource(assetsManager, (manager) =>
     manager.getDeckData(),
   );
-  const dataViewerLocale = createMemo(() => locale());
 
   const { CardDataViewer, showCard, showCharacter, hide } =
     createCardDataViewer({
       assetsManager,
-      locale: dataViewerLocale,
-    } as any);
+      locale,
+    });
 
   const [cardDataViewerOffsetX, setCardDataViewerOffsetX] = createSignal(0);
   const [cardDataViewerOffsetY, setCardDataViewerOffsetY] = createSignal(0);
@@ -123,11 +108,11 @@ export function DeckBuilder(props: DeckBuilderProps) {
 
   return (
     <DeckBuilderContext.Provider
-        value={{
-          assetsManager,
-          locale,
-          t,
-          showCard: (e, type, id) => {
+      value={{
+        assetsManager,
+        locale,
+        t,
+        showCard: (e, type, id) => {
           const rect = (e.target as HTMLElement).getBoundingClientRect();
           const containerRect = container.getBoundingClientRect();
           // 当点击事件发生在靠近左侧位置时，在鼠标右下角显示；否则在左上角显示

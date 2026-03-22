@@ -13,26 +13,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { I18nKey } from "./locales";
-import zhCN from "./locales/zh-CN";
-import en from "./locales/en";
-
-export type Locale = "zh-CN" | "en";
-
-export const translations = {
-  "zh-CN": zhCN,
-  "en": en,
-}
-
-export function cardTypeText(tagName: string, t: (key: I18nKey) => string) {
-  switch (tagName) {
-    case "GCG_CARD_MODIFY":
-      return t("typeModify");
-    case "GCG_CARD_EVENT":
-      return t("typeEvent");
-    case "GCG_CARD_ASSIST":
-      return t("typeAssist");
-    default:
-      return tagName;
-  }
-}
+export default {
+  characters: "角色牌",
+  actionCards: "行动牌",
+  versionBelow: "当前仅显示 {version} 及更低版本",
+  filter: "筛选",
+  clear: "清除",
+  collapse: "收起",
+  invalid: "失效",
+  selected: "已选",
+  selectedCount: "已选{count}张",
+  loadingCards: "加载卡牌中...",
+  loadCardsFailed: "加载卡牌失败！",
+  elementType: "元素类型",
+  weaponType: "武器类型",
+  faction: "所属阵营",
+  cardType: "卡牌类型",
+  cardTag: "卡牌标签",
+  typeModify: "装备牌",
+  typeEvent: "事件牌",
+  typeAssist: "支援牌",
+};
