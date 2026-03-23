@@ -152,11 +152,11 @@ const doQueryDict: QueryLangActionDict<AnyState[]> = {
     );
     if (orderByExprs.length > 0) {
       raw = toSortedBy(
-          raw.map(
-            (st) => [st, orderByExprs.map((expr) => expr.evalExpr(st))] as const,
-          ),
-          ([, values]) => values,
-        ).map(([st]) => st);
+        raw.map(
+          (st) => [st, orderByExprs.map((expr) => expr.evalExpr(st))] as const,
+        ),
+        ([, values]) => values,
+      ).map(([st]) => st);
     }
     const limitCount =
       limit.numChildren > 0
