@@ -45,10 +45,11 @@ const emptyRoomMetricsSnapshot = (): RoomMetricsSnapshot => ({
 export class MetricsService {
   private readonly registry = new Registry();
   private roomMetricsProvider: RoomMetricsProvider = emptyRoomMetricsSnapshot;
+  private roomMetricsSnapshotPromise: Promise<RoomMetricsSnapshot> | null = null;
   private readonly createdRoomsCounter: Counter<string>;
   private readonly startedRoomsCounter: Counter<string>;
   private readonly finishedRoomsCounter: Counter<string>;
-  private readonly persistedGamesCounter: Counter<string>;
+  private readonly storedGamesCounter: Counter<string>;
 
   constructor() {
     const service = this;
@@ -63,7 +64,7 @@ export class MetricsService {
       help: "Number of non-finished rooms in the current server process",
       registers: [this.registry],
       collect: async function () {
-        const snapshot = await service.roomMetricsProvider();
+        const snapshot = await service.collectRoomMetricsSnapshot();
         this.set(snapshot.activeRooms);
       },
     });
@@ -73,7 +74,7 @@ export class MetricsService {
       help: "Number of players currently in non-finished rooms",
       registers: [this.registry],
       collect: async function () {
-        const snapshot = await service.roomMetricsProvider();
+        const snapshot = await service.collectRoomMetricsSnapshot();
         this.set(snapshot.roomPlayers);
       },
     });
@@ -84,7 +85,7 @@ export class MetricsService {
       labelNames: ["status"],
       registers: [this.registry],
       collect: async function () {
-        const snapshot = await service.roomMetricsProvider();
+        const snapshot = await service.collectRoomMetricsSnapshot();
         this.set({ status: "waiting" }, snapshot.roomsByStatus.waiting);
         this.set({ status: "playing" }, snapshot.roomsByStatus.playing);
         this.set({ status: "finished" }, snapshot.roomsByStatus.finished);
@@ -109,11 +110,16 @@ export class MetricsService {
       registers: [this.registry],
     });
 
-    this.persistedGamesCounter = new Counter({
-      name: "gi_games_persisted_total",
-      help: "Number of games persisted by this server process",
+    this.storedGamesCounter = new Counter({
+      name: "gi_games_stored_total",
+      help: "Number of games stored in the database by this server process",
       registers: [this.registry],
     });
+  }
+
+  private collectRoomMetricsSnapshot() {
+    this.roomMetricsSnapshotPromise ??= Promise.resolve(this.roomMetricsProvider());
+    return this.roomMetricsSnapshotPromise;
   }
 
   setRoomMetricsProvider(provider: RoomMetricsProvider) {
@@ -132,12 +138,17 @@ export class MetricsService {
     this.finishedRoomsCounter.inc(count);
   }
 
-  incrementPersistedGames(count = 1) {
-    this.persistedGamesCounter.inc(count);
+  incrementStoredGames(count = 1) {
+    this.storedGamesCounter.inc(count);
   }
 
   async getMetrics() {
-    return await this.registry.metrics();
+    this.roomMetricsSnapshotPromise = null;
+    try {
+      return await this.registry.metrics();
+    } finally {
+      this.roomMetricsSnapshotPromise = null;
+    }
   }
 
   get contentType() {

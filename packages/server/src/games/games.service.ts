@@ -49,7 +49,7 @@ export class GamesService {
         },
       },
     });
-    this.metrics.incrementPersistedGames();
+    this.metrics.incrementStoredGames();
     return game;
   }
 

@@ -650,15 +650,14 @@ export class RoomsService {
     for (const room of this.rooms.values()) {
       switch (room.status) {
         case RoomStatus.Waiting:
-          snapshot.roomsByStatus.waiting++;
+        case RoomStatus.Playing: {
+          const statusKey =
+            room.status === RoomStatus.Waiting ? "waiting" : "playing";
+          snapshot.roomsByStatus[statusKey]++;
           snapshot.activeRooms++;
           snapshot.roomPlayers += room.getPlayers().length;
           break;
-        case RoomStatus.Playing:
-          snapshot.roomsByStatus.playing++;
-          snapshot.activeRooms++;
-          snapshot.roomPlayers += room.getPlayers().length;
-          break;
+        }
         case RoomStatus.Finished:
           snapshot.roomsByStatus.finished++;
           break;
