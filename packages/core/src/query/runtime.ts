@@ -16,8 +16,9 @@
 import type { AnyState, GameState } from "../base/state";
 import { toExpression, type Expression, type IQuery } from "./utils";
 import { getAllEntitiesWithArea, type EntityWithArea } from "../utils";
+import type { SExprSchema } from "./expr_schema";
 
-export function queryToExpression(query: IQuery): Expression {
+export function queryToExpression(query: IQuery): SExprSchema.Query {
   return query[toExpression]();
 }
 
@@ -33,6 +34,25 @@ class QueryRuntime {
     this.state = state;
     this.who = who;
   }
+
+  execute(expr: SExprSchema.Query): number[] {
+    switch (expr[0]) {
+      case "orderBy": {
+        const [_, unorderedQuery, orderBy, limit] = expr;
+        const unorderedResult = this.executeUnordered(unorderedQuery);
+        // TODO
+        break;
+      }
+      default: {
+        return [...this.executeUnordered(expr)];
+      }
+    }
+  }
+  executeUnordered(expr: SExprSchema.UnorderedQuery): Set<number> {
+    // TODO
+    switch (expr[0]) {
+      case "area":
+    }
+  }
 }
 
-interface UnorderedQueryResult {}
