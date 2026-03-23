@@ -72,10 +72,6 @@ function CardDataViewer(props: CardDataViewerProps) {
     const g = grouped();
     return g.equipment || g.status || g.combatStatus || g.attachment;
   };
-  const equipmentAndStatuses = () => [
-    ...(grouped().equipment ?? []),
-    ...(grouped().status ?? []),
-  ];
 
   const [explainKeyword, setExplainKeyword] = createSignal<number | null>(null);
   const onRequestExplain = (definitionId: number) => {
@@ -146,10 +142,24 @@ function CardDataViewer(props: CardDataViewerProps) {
           </For>
           <Show when={hasStatuses()}>
             <div class="card-panel">
-              <Show when={equipmentAndStatuses().length}>
-                <h3 class="text-yellow-7 mb-2">{t("equipmentAndStatus")}</h3>
+              <Show when={grouped().equipment?.length}>
+                <h3 class="text-yellow-7 mb-2">{t("equipment")}</h3>
               </Show>
-              <For each={equipmentAndStatuses()}>
+              <For each={grouped().equipment}>
+                {(input) => (
+                  <Entity
+                    class="b-yellow-3 b-1 rounded-md mb-2"
+                    {...props}
+                    input={input}
+                    asChild
+                    onRequestExplain={onRequestExplain}
+                  />
+                )}
+              </For>
+              <Show when={grouped().status?.length}>
+                <h3 class="text-yellow-7 mb-2">{t("status")}</h3>
+              </Show>
+              <For each={grouped().status}>
                 {(input) => (
                   <Entity
                     class="b-yellow-3 b-1 rounded-md mb-2"
