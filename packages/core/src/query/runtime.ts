@@ -22,14 +22,21 @@ export function queryToExpression(query: IQuery): SExprSchema.Query {
   return query[toExpression]();
 }
 
+interface EntityEntry extends EntityWithArea {
+  index: number;
+}
+
 class QueryRuntime {
-  readonly entities: ReadonlyMap<number, EntityWithArea>;
+  readonly entities: ReadonlyMap<number, EntityEntry>;
   readonly state: GameState;
   readonly who: 0 | 1;
 
   constructor(state: GameState, who: 0 | 1) {
     this.entities = new Map(
-      getAllEntitiesWithArea(state).map((e) => [e.state.id, e]),
+      getAllEntitiesWithArea(state).map((e, index) => [
+        e.state.id,
+        { ...e, index },
+      ]),
     );
     this.state = state;
     this.who = who;
@@ -55,4 +62,3 @@ class QueryRuntime {
     }
   }
 }
-
