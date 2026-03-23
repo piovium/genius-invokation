@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { resolveOfficialVersion, type WithVersionInfo } from "../base/version";
-import "../utils";
+import { toSortedBy } from "../utils";
 
 test("find version", () => {
   const versions: (WithVersionInfo & { id: number })[] = [
@@ -43,10 +43,10 @@ test("find version", () => {
 });
 
 test("sortedBy", () => {
-  expect([3, 2, 1].toSortedBy((x) => x)).toEqual([1, 2, 3]);
-  expect([3, 2, 1].toSortedBy((x) => -x)).toEqual([3, 2, 1]);
+  expect(toSortedBy([3, 2, 1], (x) => x)).toEqual([1, 2, 3]);
+  expect(toSortedBy([3, 2, 1], (x) => -x)).toEqual([3, 2, 1]);
   expect(
-    ["the", "quick", "brown", "fox"].toSortedBy((x) => [
+    toSortedBy(["the", "quick", "brown", "fox"], (x) => [
       x.length,
       x.charCodeAt(0),
     ]),

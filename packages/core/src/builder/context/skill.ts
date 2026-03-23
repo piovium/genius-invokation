@@ -103,7 +103,7 @@ import {
   type RxEntityState,
 } from "./reactive";
 import { ReactiveStateSymbol } from "./reactive_base";
-import type { CreateEntityOptions } from "../../utils";
+import { type CreateEntityOptions, toSortedBy } from "../../utils";
 import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "../skill";
 import type { LunarReaction } from "@gi-tcg/typings";
 
@@ -526,9 +526,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
           ] as const,
       ),
     );
-    return player.hands
-      .filter(filter)
-      .toSortedBy((card) => [
+    return toSortedBy(player.hands.filter(filter), (card) => [
         sortData.get(card.id)!.cost,
         sortData.get(card.id)!.tb,
       ]);
@@ -1290,7 +1288,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       countMap.set(dice, (countMap.get(dice) ?? 0) + 1);
     }
     // 万能骰排最后。其余按照数量排序，相等时按照骰子类型排序
-    const sorted = this.player.dice.toSortedBy((dice) => [
+    const sorted = toSortedBy(this.player.dice, (dice) => [
       +(dice === DiceType.Omni),
       -countMap.get(dice)!,
       dice,

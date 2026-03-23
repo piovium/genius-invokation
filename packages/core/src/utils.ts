@@ -166,7 +166,7 @@ function getAllEntitiesImpl(
     try {
       activeIdx = getActiveCharacterIndex(player);
     } catch {}
-    const [active, ...standby] = player.characters.shiftLeft(activeIdx);
+    const [active, ...standby] = shiftLeft(player.characters, activeIdx);
 
     // 游戏实际的响应顺序并非规则书所述，而是
     // 出战角色、出战角色装备和状态、出战状态、后台角色、后台角色装备和状态
@@ -970,11 +970,11 @@ export function nationOfCharacter(ch: CharacterDefinition): NationTag[] {
   return ch.tags.filter((tag): tag is NationTag => nationTags.includes(tag));
 }
 
-function toSortedBy<T, K extends number[] | number>(
-  this: readonly T[],
+export function toSortedBy<T, K extends number[] | number>(
+  arr: readonly T[],
   projection: (element: T) => K,
 ): T[] {
-  return this.toSorted((a, b) => {
+  return arr.toSorted((a, b) => {
     let projectionA: number[] | number = projection(a);
     let projectionB: number[] | number = projection(b);
     if (!Array.isArray(projectionA)) {
@@ -1010,14 +1010,13 @@ export function sortDice(
   player: PlayerState,
   dice: readonly DiceType[],
 ): DiceType[] {
-  const characterElements = player.characters
-    .shiftLeft(getActiveCharacterIndex(player))
+  const characterElements = shiftLeft(player.characters, getActiveCharacterIndex(player))
     .map((ch) => elementOfCharacter(ch.definition));
   const countMap = new Map<DiceType, number>();
   for (const d of dice) {
     countMap.set(d, (countMap.get(d) ?? 0) + 1);
   }
-  return dice.toSortedBy((dice) => [
+  return toSortedBy(dice, (dice) => [
     dice === DiceType.Omni ? -1 : 0,
     characterElements.includes(dice) ? -1 : 0,
     -countMap.get(dice)!,
@@ -1026,17 +1025,7 @@ export function sortDice(
 }
 
 declare global {
-  interface ReadonlyArray<T> {
-    shiftLeft: typeof shiftLeft;
-    last: typeof arrayLast;
-    toSortedBy: typeof toSortedBy;
-  }
   interface Array<T> {
-    /** Won't mutate original array. */
-    shiftLeft: typeof shiftLeft;
-    last: typeof arrayLast;
-    toSortedBy: typeof toSortedBy;
-
     map<This extends [unknown, unknown], U>(
       this: This,
       fn: (v: T) => U,
@@ -1044,15 +1033,9 @@ declare global {
   }
 }
 
-function shiftLeft<T>(this: readonly T[], idx: number): T[] {
-  return [...this.slice(idx), ...this.slice(0, idx)];
+export function shiftLeft<T>(arr: readonly T[], idx: number): T[] {
+  return [...arr.slice(idx), ...arr.slice(0, idx)];
 }
-function arrayLast<T>(this: readonly T[]): T {
-  return this[this.length - 1];
-}
-Array.prototype.shiftLeft = shiftLeft;
-Array.prototype.last = arrayLast;
-Array.prototype.toSortedBy = toSortedBy;
 
 /** Shuffle an array. No use of state random generator */
 export function shuffle<T>(arr: readonly T[]): readonly T[] {
