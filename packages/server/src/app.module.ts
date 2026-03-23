@@ -20,9 +20,17 @@ import { UsersModule } from "./users/users.module";
 import { GamesModule } from './games/games.module';
 import { DecksModule } from './decks/decks.module';
 import { RoomsModule } from './rooms/rooms.module';
+import { MetricsModule } from "./metrics/metrics.module";
 
 @Module({
   controllers: [AppController],
-  imports: [AuthModule, UsersModule, GamesModule, DecksModule, RoomsModule],
+  imports: [
+    AuthModule,
+    UsersModule,
+    GamesModule,
+    DecksModule,
+    RoomsModule,
+    MetricsModule,
+  ],
 })
 export class AppModule {}

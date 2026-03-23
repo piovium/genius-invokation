@@ -17,6 +17,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../db/prisma.service";
 import type { Game as GameModel, PlayerOnGames } from "#prisma/client";
 import type { PaginationDto, PaginationResult } from "../utils";
+import { MetricsService } from "../metrics/metrics.service";
 
 export interface AddGameOption {
   playerIds: number[];
@@ -30,7 +31,10 @@ interface GameNoData extends Omit<GameModel, "data"> {}
 
 @Injectable()
 export class GamesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private metrics: MetricsService,
+  ) {}
 
   async addGame({ playerIds, ...data }: AddGameOption): Promise<GameModel> {
     const playerOnGames = playerIds.map((id, who) => ({
@@ -45,6 +49,7 @@ export class GamesService {
         },
       },
     });
+    this.metrics.incrementStoredGames();
     return game;
   }
 
