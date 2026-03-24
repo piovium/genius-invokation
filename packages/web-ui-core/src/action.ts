@@ -75,13 +75,13 @@ export function getHintTextOfCardOrSkill(
       | SkillRawData
       | ActionCardRawData;
     if (data.type === "GCG_CARD_ASSIST") {
-      return Array.from({ length: 2 }, () => t("chooseSupportToDispose"));
+      return Array.from({ length: 2 }, () => t("hint_chooseSupportToDispose"));
     }
     const result = data.targetList.map((x) => x.hintText);
     result.push(result.at(-1)!);
     return result;
   } catch (e) {
-    return Array.from({ length: targetLength }, () => t("applyToTarget"));
+    return Array.from({ length: targetLength }, () => t("hint_applyToTarget"));
   }
 }
 
@@ -391,15 +391,15 @@ const validityText = (
 ): string | undefined => {
   switch (validity) {
     case ActionValidity.CONDITION_NOT_MET:
-      return t("conditionNotMet");
+      return t("hint_conditionNotMet");
     case ActionValidity.NO_TARGET:
-      return t("noTarget");
+      return t("hint_noTarget");
     case ActionValidity.DISABLED:
-      return t("disabled");
+      return t("hint_disabled");
     case ActionValidity.NO_DICE:
-      return t("noDice");
+      return t("hint_noDice");
     case ActionValidity.NO_ENERGY:
-      return t("noEnergy");
+      return t("hint_noEnergy");
   }
 };
 
@@ -485,7 +485,7 @@ function diceReqText(
       die: `<span style="${style}">${name}</span>`,
     });
   });
-  return ctx.t("payCost", { cost: diceText.join(ctx.t("andSeparator")) });
+  return ctx.t("hint_payCost", { cost: diceText.join(ctx.t("andSeparator")) });
 }
 
 function createPlayCardActionState(
@@ -558,7 +558,7 @@ function createPlayCardActionState(
     realCosts: root.realCosts,
     showHands: false,
     showSkillButtons: false,
-    hintText: ctx.t("playCardHint", {
+    hintText: ctx.t("hint_playCardHint", {
       name:
         ctx.assetsManager.getNameSync(ctx.action.value.cardDefinitionId) ??
         "???",
@@ -653,7 +653,7 @@ function createMultiStepState<T>(
     if (node.type === "leaf") {
       const CLICK_CONFIRM_STEP: ClickConfirmButtonActionStep = {
         type: "clickConfirmButton",
-        confirmText: isSkill ? ctx.t("confirm") : ctx.t("playCard"),
+        confirmText: isSkill ? ctx.t("confirm") : ctx.t("hint_playCard"),
         isEffectless: ctx.isEffectless,
       };
       const CLICK_ENTITY_STEP: ClickEntityActionStep = {
@@ -713,7 +713,7 @@ function createMultiStepState<T>(
               type: "newState",
               newState: {
                 ...resultState,
-                alertText: ctx.t("chooseTarget"),
+                alertText: ctx.t("hint_chooseTarget"),
               },
             };
           } else {
@@ -751,7 +751,7 @@ function createMultiStepState<T>(
               type: "newState",
               newState: {
                 ...resultState,
-                alertText: ctx.t("chooseTarget"),
+                alertText: ctx.t("hint_chooseTarget"),
               },
             };
           } else {
@@ -929,7 +929,7 @@ function createElementalTuningActionState(
     realCosts: root.realCosts,
     showHands: false,
     showSkillButtons: false,
-    hintText: ctx.t("tuneToDice", {
+    hintText: ctx.t("hint_tuneToDice", {
       element: getElementName(targetDice, ctx.t),
     }),
     dicePanel: "visible",
@@ -954,7 +954,7 @@ function createElementalTuningActionState(
             type: "newState",
             newState: {
               ...resultState,
-              alertText: ctx.t("chooseOneDiceToTune"),
+              alertText: ctx.t("hint_chooseOneDiceToTune"),
             },
           };
         }
@@ -1019,7 +1019,7 @@ function createSwitchActiveActionState(
     realCosts: root.realCosts,
     showHands: false,
     showSkillButtons: true,
-    hintText: ctx.t("switchRoleHint", {
+    hintText: ctx.t("hint_switchRoleHint", {
       name:
         ctx.assetsManager.getNameSync(ctx.action.value.characterDefinitionId) ??
         "???",
@@ -1312,7 +1312,7 @@ export function createChooseActiveState(
     showBackdrop: false,
     showHands: true,
     showSkillButtons: true,
-    hintText: t("chooseActiveCharacter"),
+    hintText: t("hint_chooseActiveCharacter"),
     isFast: false,
     step: (step) => {
       if (step === CANCEL_ACTION_STEP) {
@@ -1322,7 +1322,7 @@ export function createChooseActiveState(
           type: "newState",
           newState: {
             ...root,
-            alertText: t("chooseActiveCharacter"),
+            alertText: t("hint_chooseActiveCharacter"),
           },
         };
       } else if (step.type === "clickEntity") {
@@ -1361,7 +1361,7 @@ export function createChooseActiveState(
       showBackdrop: false,
       showHands: true,
       showSkillButtons: true,
-      hintText: t("chooseActiveCharacter"),
+      hintText: t("hint_chooseActiveCharacter"),
       isFast: false,
       step: (step, dice) => {
         if (step === CANCEL_ACTION_STEP) {

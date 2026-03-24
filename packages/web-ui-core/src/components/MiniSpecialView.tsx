@@ -31,7 +31,6 @@ export interface MiniSpecialViewProps {
 
 function MiniView(props: MiniSpecialViewProps) {
   const { t } = useUiContext();
-  const whoText = () => (props.opp ? t("oppSide") : t("mySide"));
   return (
     <div class="absolute aspect-ratio-[16/9] w-full max-h-full top-50% translate-y--50% pointer-events-none">
       <div
@@ -40,7 +39,7 @@ function MiniView(props: MiniSpecialViewProps) {
       >
         <Switch>
           <Match when={props.viewType === "switching"}>
-            <h3 class="font-bold text-4">{`${whoText()}${t("switchingHands")}`}</h3>
+            <h3 class="font-bold text-4">{props.opp ? t("playerinfo_oppSwitchingHands") : t("playerinfo_mySwitchingHands")}</h3>
             <ul class="flex flex-row w-80 justify-evenly">
               <For each={props.ids}>
                 {(cardId) => (
@@ -61,7 +60,7 @@ function MiniView(props: MiniSpecialViewProps) {
             </ul>
           </Match>
           <Match when={props.viewType === "selecting"}>
-            <h3 class="font-bold text-4">{`${whoText()}${t("selectingCards")}`}</h3>
+            <h3 class="font-bold text-4">{props.opp ? t("playerinfo_oppSelectingCards") : t("playerinfo_mySelectingCards")}</h3>
             <ul class="flex flex-row w-80 justify-evenly">
               <For each={props.ids}>
                 {(cardId) => (
@@ -85,7 +84,7 @@ function MiniView(props: MiniSpecialViewProps) {
             </ul>
           </Match>
           <Match when={props.viewType === "rerolling"}>
-            <h3 class="font-bold text-4">{`${whoText()}${t("rerolling")}`}</h3>
+            <h3 class="font-bold text-4">{props.opp ? t("playerinfo_oppRerolling") : t("playerinfo_myRerolling")}</h3>
             <ul class="grid grid-rows-2 grid-flow-col gap-2">
               <For each={props.ids}>
                 {(dice) => (

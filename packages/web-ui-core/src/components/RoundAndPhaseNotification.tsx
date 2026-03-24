@@ -77,12 +77,8 @@ export function RoundAndPhaseNotification(
             bool:data-opp={opp()}
           >
             {props.info.value === "action"
-              ? t("actionTurn", {
-                  side: opp() ? t("oppSide") : t("mySide"),
-                })
-              : t("declareEndTurn", {
-                  side: opp() ? t("oppSide") : t("mySide"),
-                })}
+              ? (opp() ? t("playerinfo_oppActionTurn") : t("playerinfo_myActionTurn"))
+              : (opp() ? t("playerinfo_oppDeclareEndTurn") : t("playerinfo_myDeclareEndTurn"))}
             <Show when={props.info.value === "declareEnd" && !isFirst()}>
               {t("gainFirst")}
             </Show>
@@ -98,10 +94,7 @@ export function RoundAndPhaseNotification(
             {t("round", { round: props.roundNumber })}
           </h5>
           <span>
-            {t("sideFirst", {
-              side:
-                props.currentTurn === props.who ? t("mySide") : t("oppSide"),
-            })}
+            {props.currentTurn === props.who ? t("playerinfo_mySideFirst") : t("playerinfo_oppSideFirst")}
           </span>
         </div>
       </Show>
