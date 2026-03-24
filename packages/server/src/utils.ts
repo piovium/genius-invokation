@@ -168,7 +168,7 @@ function maxVersion(versions: Iterable<string | undefined>): Version {
   const ver = [...versions]
     .filter((v): v is string => !!v)
     .toSorted(semver.order)
-    .last();
+    .at(-1);
   if (!VERSIONS.includes(ver as Version)) {
     return CURRENT_VERSION;
   } else {

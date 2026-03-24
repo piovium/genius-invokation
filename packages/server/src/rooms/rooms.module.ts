@@ -21,9 +21,10 @@ import { UsersModule } from "../users/users.module";
 import { GamesModule } from "../games/games.module";
 import { AuthModule } from "../auth/auth.module";
 import { ParsePlayerIdPipe } from "./rooms.pipe";
+import { MetricsModule } from "../metrics/metrics.module";
 
 @Module({
-  imports: [DecksModule, UsersModule, GamesModule, AuthModule],
+  imports: [DecksModule, UsersModule, GamesModule, AuthModule, MetricsModule],
   providers: [RoomsService, ParsePlayerIdPipe],
   controllers: [RoomsController],
 })

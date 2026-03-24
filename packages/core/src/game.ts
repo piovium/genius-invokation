@@ -61,6 +61,7 @@ import {
   findReplaceAction,
   shuffle,
   sortDice,
+  toSortedBy,
   isSkillDisabled,
   initiativeSkillsOfPlayer,
   getEntityArea,
@@ -151,7 +152,7 @@ function initPlayerState(
       return 1;
     }
   };
-  initialPile = initialPile.toSortedBy(compFn);
+  initialPile = toSortedBy(initialPile, compFn);
   const characters: CharacterState[] = [];
   const pile: EntityState[] = [];
   for (const definition of characterDefs) {

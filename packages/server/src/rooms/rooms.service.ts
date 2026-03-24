@@ -57,6 +57,10 @@ import {
   takeUntil,
 } from "rxjs";
 import { createGuestId, DeckVerificationError, verifyDeck } from "../utils";
+import {
+  MetricsService,
+  type RoomMetricsSnapshot,
+} from "../metrics/metrics.service";
 import type {
   CreateRoomDto,
   GuestCreateRoomDto,
@@ -602,7 +606,9 @@ export class RoomsService {
     private users: UsersService,
     private decks: DecksService,
     private games: GamesService,
+    private metrics: MetricsService,
   ) {
+    this.metrics.setRoomMetricsProvider(() => this.getRoomMetricsSnapshot());
     const onShutdown = async () => {
       console.log(`Waiting for ${this.rooms.size} rooms to stop...`);
       if (!this.shutdownResolvers && this.rooms.size !== 0) {
@@ -628,6 +634,37 @@ export class RoomsService {
       }
     }
     return null;
+  }
+
+  private getRoomMetricsSnapshot(): RoomMetricsSnapshot {
+    const snapshot: RoomMetricsSnapshot = {
+      activeRooms: 0,
+      roomPlayers: 0,
+      roomsByStatus: {
+        waiting: 0,
+        playing: 0,
+        finished: 0,
+      },
+    };
+
+    for (const room of this.rooms.values()) {
+      switch (room.status) {
+        case RoomStatus.Waiting:
+        case RoomStatus.Playing: {
+          const statusKey =
+            room.status === RoomStatus.Waiting ? "waiting" : "playing";
+          snapshot.roomsByStatus[statusKey]++;
+          snapshot.activeRooms++;
+          snapshot.roomPlayers += room.getPlayers().length;
+          break;
+        }
+        case RoomStatus.Finished:
+          snapshot.roomsByStatus.finished++;
+          break;
+      }
+    }
+
+    return snapshot;
   }
 
   async createRoomFromUser(userId: number, params: UserCreateRoomDto) {
@@ -735,9 +772,13 @@ export class RoomsService {
     }
     this.rooms.set(roomId, room);
     this.roomIdPool.shift();
+    this.metrics.incrementCreatedRooms();
     this.logger.log(`Room ${room.id} created, host is ${playerInfo.name}`);
 
     room.onStop(async (room, game) => {
+      if (game) {
+        this.metrics.incrementFinishedRooms();
+      }
       let deploying = null;
       if (process.env.REDIS_URL) {
         deploying = await redis.get("meta:deploying");
@@ -880,6 +921,7 @@ export class RoomsService {
       });
     });
     room.start();
+    this.metrics.incrementStartedRooms();
   }
 
   getRoom(roomId: number): RoomInfo {

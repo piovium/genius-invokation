@@ -50,6 +50,7 @@ import {
   isChargedPlunging,
   isSkillDisabled,
   playSkillOfCard,
+  shiftLeft,
 } from "./utils";
 import { flip } from "@gi-tcg/utils";
 import { DetailLogType } from "./log";
@@ -381,7 +382,8 @@ export class SkillExecutor {
     ] = [null, null];
     for (const who of [0, 1] as const) {
       const player = this.state.players[who];
-      const [activeCh] = player.characters.shiftLeft(
+      const [activeCh] = shiftLeft(
+        player.characters,
         getActiveCharacterIndex(player),
       );
       if (activeCh.variables.alive) {

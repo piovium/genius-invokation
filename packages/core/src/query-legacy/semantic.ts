@@ -24,7 +24,7 @@ import type {
 } from "../base/state";
 import type { ContextMetaBase, SkillContext } from "../builder/context/skill";
 import { CharacterBase } from "../builder/context/character";
-import { getEntityArea } from "../utils";
+import { getEntityArea, toSortedBy } from "../utils";
 import type { EntityArea, EntityType } from "../base/entity";
 import { GiTcgQueryError } from "../error";
 
@@ -151,12 +151,12 @@ const doQueryDict: QueryLangActionDict<AnyState[]> = {
       (node) => node.children[1].asIteration().children,
     );
     if (orderByExprs.length > 0) {
-      raw = raw
-        .map(
+      raw = toSortedBy(
+        raw.map(
           (st) => [st, orderByExprs.map((expr) => expr.evalExpr(st))] as const,
-        )
-        .toSortedBy(([, values]) => values)
-        .map(([st]) => st);
+        ),
+        ([, values]) => values,
+      ).map(([st]) => st);
     }
     const limitCount =
       limit.numChildren > 0
@@ -248,7 +248,7 @@ const doQueryDict: QueryLangActionDict<AnyState[]> = {
         }
         return Math.abs(i - baseIdx);
       };
-      result.push(targetChs.toSortedBy((e) => orderFn(e))[0][0]);
+      result.push(toSortedBy(targetChs, (e) => orderFn(e))[0][0]);
     }
     return result;
   },
