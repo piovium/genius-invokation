@@ -1,7 +1,7 @@
 import type { I18nDictionary } from ".";
 
 export default {
-  notYourTurn: "Not your turn",
+  notYourTurn: "It is not your turn",
   actionPhase: "Action Phase",
   endPhase: "End Phase",
   rollPhase: "Roll Phase",
