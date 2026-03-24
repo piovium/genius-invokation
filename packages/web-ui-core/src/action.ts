@@ -41,26 +41,26 @@ import type { AssetsManager } from "@gi-tcg/assets-manager";
 import type { ReactionInfo } from "./components/Chessboard";
 import type { Translator } from "./hooks/context";
 
-function getElementName(type: DiceType, t: Translator) {
+function getTuneToDiceText(type: DiceType, t: Translator) {
   switch (type) {
     case DiceType.Cryo:
-      return t("cryoElement");
+      return t("actionTuneToCryoDice");
     case DiceType.Hydro:
-      return t("hydroElement");
+      return t("actionTuneToHydroDice");
     case DiceType.Pyro:
-      return t("pyroElement");
+      return t("actionTuneToPyroDice");
     case DiceType.Electro:
-      return t("electroElement");
+      return t("actionTuneToElectroDice");
     case DiceType.Anemo:
-      return t("anemoElement");
+      return t("actionTuneToAnemoDice");
     case DiceType.Geo:
-      return t("geoElement");
+      return t("actionTuneToGeoDice");
     case DiceType.Dendro:
-      return t("dendroElement");
+      return t("actionTuneToDendroDice");
     case DiceType.Omni:
-      return t("omniElement");
+      return t("actionTuneToOmniDice");
     default:
-      return t("unknownDie");
+      return t("actionTuneToUnknownDice");
   }
 }
 
@@ -929,9 +929,7 @@ function createElementalTuningActionState(
     realCosts: root.realCosts,
     showHands: false,
     showSkillButtons: false,
-    hintText: ctx.t("tuneToDice", {
-      element: getElementName(targetDice, ctx.t),
-    }),
+    hintText: getTuneToDiceText(targetDice, ctx.t),
     dicePanel: "visible",
     autoSelectedDice: ctx.action.autoSelectedDice as DiceType[],
     maxSelectedDiceCount: 1,

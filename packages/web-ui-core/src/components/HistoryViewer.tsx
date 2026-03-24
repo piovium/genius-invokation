@@ -113,15 +113,11 @@ const renderHistoryChild = (
   const { assetsManager, t } = useUiContext();
   let result: HistoryChildData;
   const opp = (historyOwner: 0 | 1) => historyOwner !== who();
-  const subject = (opp: boolean) => (opp ? t("oppSide") : t("mySide"));
 
   const createEntityTextMap: Record<string, string> = {
-    combatStatus: t("createCombatStatus"),
     status: t("attachStatus"),
     equipment: t("attachEquipment"),
     attachment: t("attachStatus"),
-    summon: t("createSummon"),
-    support: t("createSupport"),
   };
   const removeEntityTextMap: Record<string, string> = {
     combatStatus: t("removeCombatStatus"),
@@ -130,10 +126,6 @@ const renderHistoryChild = (
     attachment: t("removeStatus"),
     summon: t("removeSummon"),
     support: t("removeSupport"),
-  };
-  const createCardTextMap: Record<string, string> = {
-    pile: t("createCardToPile"),
-    hands: t("gainHandCard"),
   };
   const TransformTextMap: Record<string, string> = {
     old: t("transformOld"),
@@ -188,38 +180,43 @@ const renderHistoryChild = (
       break;
     }
     case "drawCard": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
         content: (
           <>
-            <span>{subject(opp(child.who))}</span>
-            <span>{t("drawCards", { count: child.drawCardsCount })}</span>
+            <span>
+              {t(isOpp ? "historyOppDrawCards" : "historyMyDrawCards", {
+                count: child.drawCardsCount,
+              })}
+            </span>
           </>
         ),
       };
       break;
     }
     case "stealHand": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: child.cardDefinitionId,
         imageType: "cardFace",
         title: renderName(child.cardDefinitionId),
         content: (
           <>
-            <span>{subject(opp(child.who))}</span>
-            <span>{t("stealHand", { target: subject(!opp(child.who)) })}</span>
+            <span>{t(isOpp ? "historyOppStealMyHand" : "historyMyStealOppHand")}</span>
           </>
         ),
       };
       break;
     }
     case "createEntity": {
+      const isOpp = opp(child.who);
       if (["status", "equipment", "attachment"].includes(child.entityType)) {
         result = {
-          opp: opp(child.who),
+          opp: isOpp,
           imageId: child.masterDefinitionId,
           imageType: "cardFace",
           title: renderName(child.masterDefinitionId),
@@ -239,13 +236,26 @@ const renderHistoryChild = (
       } else {
         // child.entityType === "combatStatus" | "summon" | "support"
         result = {
-          opp: opp(child.who),
+          opp: isOpp,
           imageId: child.entityDefinitionId,
           title: renderName(child.entityDefinitionId),
           content: (
             <>
-              <span>{subject(opp(child.who))}</span>
-              <span>{createEntityTextMap[child.entityType]}</span>
+              <span>
+                {t(
+                  child.entityType === "combatStatus"
+                    ? isOpp
+                      ? "historyOppCreateCombatStatus"
+                      : "historyMyCreateCombatStatus"
+                    : child.entityType === "summon"
+                      ? isOpp
+                        ? "historyOppCreateSummon"
+                        : "historyMyCreateSummon"
+                      : isOpp
+                        ? "historyOppCreateSupport"
+                        : "historyMyCreateSupport",
+                )}
+              </span>
             </>
           ),
         };
@@ -253,14 +263,18 @@ const renderHistoryChild = (
       break;
     }
     case "generateDice": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
         content: (
           <>
-            <span>{subject(opp(child.who))}</span>
-            <span>{t("generateDice", { count: child.count })}</span>
+            <span>
+              {t(isOpp ? "historyOppGenerateDice" : "historyMyGenerateDice", {
+                count: child.count,
+              })}
+            </span>
             <Show when={child.diceType > 0}>
               <DiceIcon size={14} type={child.diceType} selected={false} />
             </Show>
@@ -271,71 +285,95 @@ const renderHistoryChild = (
       break;
     }
     case "absorbDice": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
         content: (
           <>
-            <span>{subject(opp(child.who))}</span>
-            <span>{t("absorbDice", { count: child.count })}</span>
+            <span>
+              {t(isOpp ? "historyOppAbsorbDice" : "historyMyAbsorbDice", {
+                count: child.count,
+              })}
+            </span>
           </>
         ),
       };
       break;
     }
     case "createCard": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: child.cardDefinitionId,
         imageType: "cardFace",
         title: renderName(child.cardDefinitionId),
         content: (
           <>
-            <span>{subject(opp(child.who))}</span>
-            <span>{createCardTextMap[child.target]}</span>
+            <span>
+              {t(
+                child.target === "pile"
+                  ? isOpp
+                    ? "historyOppCreateCardToPile"
+                    : "historyMyCreateCardToPile"
+                  : isOpp
+                    ? "historyOppGainHandCard"
+                    : "historyMyGainHandCard",
+              )}
+            </span>
           </>
         ),
       };
       break;
     }
     case "switchCard": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
         content: (
           <>
-            <span>{subject(opp(child.who))}</span>
-            <span>{t("switchHandOnce")}</span>
+            <span>{t(isOpp ? "historyOppSwitchHandOnce" : "historyMySwitchHandOnce")}</span>
           </>
         ),
       };
       break;
     }
     case "undrawCard": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
         content: (
           <>
-            <span>{subject(opp(child.who))}</span>
-            <span>{t("putHandToPile", { count: child.count })}</span>
+            <span>
+              {t(
+                isOpp ? "historyOppPutHandToPile" : "historyMyPutHandToPile",
+                { count: child.count },
+              )}
+            </span>
           </>
         ),
       };
       break;
     }
     case "rerollDice": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
         content: (
           <>
-            <span>{subject(opp(child.who))}</span>
-            <span>{t("rerolledTimes", { count: child.count })}</span>
+            <span>
+              {t(
+                isOpp ? "historyOppRerolledTimes" : "historyMyRerolledTimes",
+                { count: child.count },
+              )}
+            </span>
           </>
         ),
       };
@@ -482,15 +520,15 @@ const renderHistoryChild = (
       break;
     }
     case "removeCard": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: child.cardDefinitionId,
         imageType: "cardFace",
         title: renderName(child.cardDefinitionId),
         content: (
           <>
-            <span>{subject(opp(child.who))}</span>
-            <span>{t("discardHand")}</span>
+            <span>{t(isOpp ? "historyOppDiscardHand" : "historyMyDiscardHand")}</span>
           </>
         ),
       };
@@ -548,19 +586,28 @@ const renderHistoryChild = (
       break;
     }
     case "convertDice": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: child.isTuning ? "tuning" : parentCallerDefinitionId,
         title: child.isTuning
           ? t("elementalTuning")
           : renderName(parentCallerDefinitionId),
         content: (
           <>
-            <span>{subject(opp(child.who))}</span>
             <span>
-              {t("convertToDice", {
-                count: child.count || t("some"),
-              })}
+              {child.count
+                ? t(
+                    isOpp
+                      ? "historyOppConvertToDice"
+                      : "historyMyConvertToDice",
+                    { count: child.count },
+                  )
+                : t(
+                    isOpp
+                      ? "historyOppConvertSomeDice"
+                      : "historyMyConvertSomeDice",
+                  )}
             </span>
             <Show when={child.diceType > 0}>
               <DiceIcon size={14} type={child.diceType} selected={false} />
@@ -652,7 +699,6 @@ const renderHistoryHint = (block: HistoryHintBlock) => {
   const { t } = useUiContext();
   let result: HistoryHintData;
   const opp = (historyOwner: 0 | 1) => historyOwner !== who();
-  const subject = (opp: boolean) => (opp ? t("oppSide") : t("mySide"));
 
   switch (block.type) {
     case "changePhase": {
@@ -696,14 +742,20 @@ const renderHistoryHint = (block: HistoryHintBlock) => {
           result = {
             type: block.type,
             opp: opp(block.who),
-            content: t("actionTurn", { side: subject(opp(block.who)) }),
+            content: t(
+              opp(block.who) ? "historyOppActionTurn" : "historyMyActionTurn",
+            ),
           };
           break;
         case "declareEnd":
           result = {
             type: block.type,
             opp: opp(block.who),
-            content: t("declareEndTurn", { side: subject(opp(block.who)) }),
+            content: t(
+              opp(block.who)
+                ? "historyOppDeclareEndTurn"
+                : "historyMyDeclareEndTurn",
+            ),
           };
           break;
       }
@@ -1224,12 +1276,6 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
 
   let result: HistoryBlockData;
   const opp = (historyOwner: 0 | 1) => historyOwner !== who();
-  const subject = (opp: boolean) => (opp ? t("oppSide") : t("mySide"));
-  const switchActiveTextMap: Record<string, string> = {
-    init: t("initialActive"),
-    switch: t("switchActive"),
-    choose: t("chooseActive"),
-  };
 
   function extractBlockEnergyProps(
     block: {
@@ -1258,10 +1304,23 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
 
   switch (block.type) {
     case "switchOrChooseActive": {
+      const isOpp = opp(block.who);
+      const titleKey =
+        block.how === "init"
+          ? isOpp
+            ? "historyOppInitialActiveTitle"
+            : "historyMyInitialActiveTitle"
+          : block.how === "switch"
+            ? isOpp
+              ? "historyOppSwitchActiveTitle"
+              : "historyMySwitchActiveTitle"
+            : isOpp
+              ? "historyOppChooseActiveTitle"
+              : "historyMyChooseActiveTitle";
       result = {
         type: block.type,
-        opp: opp(block.who),
-        title: `${subject(opp(block.who))}${switchActiveTextMap[block.how]}`,
+        opp: isOpp,
+        title: t(titleKey),
         indent: block.indent,
         imageId: block.characterDefinitionId,
         imageSize: "normal",
@@ -1282,12 +1341,19 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
       break;
     }
     case "useSkill": {
+      const isOpp = opp(block.who);
       result = {
         type: block.type,
-        opp: opp(block.who),
-        title: `${subject(opp(block.who))}${
-          block.skillType === "technique" ? t("useTechnique") : t("useSkill")
-        }`,
+        opp: isOpp,
+        title: t(
+          block.skillType === "technique"
+            ? isOpp
+              ? "historyOppUseTechniqueTitle"
+              : "historyMyUseTechniqueTitle"
+            : isOpp
+              ? "historyOppUseSkillTitle"
+              : "historyMyUseSkillTitle",
+        ),
         indent: block.indent,
         imageId: block.callerDefinitionId,
         imageSize: "normal",
@@ -1410,10 +1476,11 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
       break;
     }
     case "playCard": {
+      const isOpp = opp(block.who);
       result = {
         type: block.type,
-        opp: opp(block.who),
-        title: t("playCardTitle", { side: subject(opp(block.who)) }),
+        opp: isOpp,
+        title: t(isOpp ? "historyOppPlayCardTitle" : "historyMyPlayCardTitle"),
         indent: block.indent,
         imageId: block.cardDefinitionId,
         imageSize: "normal",
@@ -1442,10 +1509,13 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
       break;
     }
     case "selectCard": {
+      const isOpp = opp(block.who);
       result = {
         type: block.type,
-        opp: opp(block.who),
-        title: t("selectCardTitle", { side: subject(opp(block.who)) }),
+        opp: isOpp,
+        title: t(
+          isOpp ? "historyOppSelectCardTitle" : "historyMySelectCardTitle",
+        ),
         indent: block.indent,
         imageId: block.cardDefinitionId,
         imageSize: "normal",
@@ -1456,9 +1526,12 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           name: renderName(block.cardDefinitionId),
           content: (
             <>
-              <span class="text-3 text-#d4bc8e">{subject(opp(block.who))}</span>
               <span class="text-3 text-#d4bc8e">
-                {t("triggeredSelectEffect")}
+                {t(
+                  isOpp
+                    ? "historyOppTriggeredSelectEffect"
+                    : "historyMyTriggeredSelectEffect",
+                )}
               </span>
             </>
           ),
@@ -1468,10 +1541,15 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
       break;
     }
     case "elementalTuning": {
+      const isOpp = opp(block.who);
       result = {
         type: block.type,
-        opp: opp(block.who),
-        title: t("elementalTuningTitle", { side: subject(opp(block.who)) }),
+        opp: isOpp,
+        title: t(
+          isOpp
+            ? "historyOppElementalTuningTitle"
+            : "historyMyElementalTuningTitle",
+        ),
         indent: block.indent,
         imageId: block.cardDefinitionId,
         imageSize: "normal",

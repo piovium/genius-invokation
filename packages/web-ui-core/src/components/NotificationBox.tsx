@@ -94,8 +94,12 @@ export function NotificationBox(props: NotificationBoxProps) {
             }
           >
             <h5 class="font-bold color-#ede4d8">
-              {props.opp ? t("oppSide") : t("mySide")}
-              {t("switchRole")}:{characterName()}
+              {t(
+                props.opp
+                  ? "notificationOppSwitchRole"
+                  : "notificationMySwitchRole",
+              )}
+              {characterName()}
             </h5>
             <Show when={props.data.skillDefinitionId}>
               {(skillDefinitionId) => (
