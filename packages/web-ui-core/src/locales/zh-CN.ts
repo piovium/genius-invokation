@@ -1,8 +1,8 @@
 export default {
-  notYourTurn: "不是你的行动轮",
+  notYourTurn: "现在不是你的行动轮",
   actionPhase: "行动阶段",
   endPhase: "结束阶段",
-  rollPhase: "掷骰阶段",
+  rollPhase: "投掷阶段",
   action: "行动",
   declareEnd: "宣布回合结束",
   gainFirst: "，获得先手",
