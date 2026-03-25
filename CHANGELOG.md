@@ -2,6 +2,10 @@
 
 **仅记录破坏性改动。**
 
+## 0.19.0
+- 移除了不再使用的 `GITCG_ENTITY_TYPE_EVENT_CARD`。
+- `core` 不再 pollute `Array.prototype`。
+
 ## 0.18.0
 - 支持 Attachments
 - 完成手牌的 Entity 化，导致 ExposedMutation 重构：
