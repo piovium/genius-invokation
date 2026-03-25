@@ -42,8 +42,8 @@ function MiniView(props: MiniSpecialViewProps) {
             <h3 class="font-bold text-4">
               {t(
                 props.opp
-                  ? "mini_oppSwitchingHands"
-                  : "mini_mySwitchingHands",
+                  ? "mini.oppSwitchingHands"
+                  : "mini.mySwitchingHands",
               )}
             </h3>
             <ul class="flex flex-row w-80 justify-evenly">
@@ -69,8 +69,8 @@ function MiniView(props: MiniSpecialViewProps) {
             <h3 class="font-bold text-4">
               {t(
                 props.opp
-                  ? "mini_oppSelectingCards"
-                  : "mini_mySelectingCards",
+                  ? "mini.oppSelectingCards"
+                  : "mini.mySelectingCards",
               )}
             </h3>
             <ul class="flex flex-row w-80 justify-evenly">
@@ -99,8 +99,8 @@ function MiniView(props: MiniSpecialViewProps) {
             <h3 class="font-bold text-4">
               {t(
                 props.opp
-                  ? "mini_oppRerolling"
-                  : "mini_myRerolling",
+                  ? "mini.oppRerolling"
+                  : "mini.myRerolling",
               )}
             </h3>
             <ul class="grid grid-rows-2 grid-flow-col gap-2">

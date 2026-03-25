@@ -68,13 +68,13 @@ function MessageBox(props: MessageBoxProps) {
           class="px-3 py-1 w-36 font-bold font-size-5 color-black bg-#e9e2d3 rounded-full border-#735a3f b-2 hover:bg-#e9e2d3 hover:shadow-[inset_0_0_16px_rgba(255,255,255,1)] hover:border-white"
           onClick={props.onCancel}
         >
-          {t("ui_buttonCancel")}
+          {t("ui.buttonCancel")}
         </button>
         <button
           class="px-3 py-1 w-36 font-bold font-size-5 color-black bg-#e9e2d3 rounded-full border-#735a3f b-2 hover:bg-#e9e2d3 hover:shadow-[inset_0_0_16px_rgba(255,255,255,1)] hover:border-white"
           onClick={props.onConfirm}
         >
-          {t("ui_buttonConfirm")}
+          {t("ui.buttonConfirm")}
         </button>
       </div>
     </dialog>

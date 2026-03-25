@@ -15,7 +15,7 @@
 
 import type { AssetsManager } from "@gi-tcg/assets-manager";
 import { createContext, useContext } from "solid-js";
-import type { I18nKey } from "../locales";
+import type { Translator } from "../locales";
 import zhCN from "../locales/zh-CN";
 import en from "../locales/en";
 
@@ -25,11 +25,6 @@ export const translations = {
   "zh-CN": zhCN,
   en: en,
 };
-
-export type Translator = (
-  key: I18nKey,
-  params?: Record<string, string | number>,
-) => string;
 
 export interface UiContextValue {
   assetsManager: () => AssetsManager;

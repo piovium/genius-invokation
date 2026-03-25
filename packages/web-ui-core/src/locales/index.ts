@@ -13,5 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-export type I18nDictionary = typeof import("./zh-CN").default;
+import type { Flatten, Translator as TranslatorT } from "@solid-primitives/i18n";
+
+export type I18nRawDictionary = typeof import("./zh-CN").default;
+export type I18nDictionary = Flatten<I18nRawDictionary>;
 export type I18nKey = keyof I18nDictionary;
+export type Translator = TranslatorT<I18nDictionary>;

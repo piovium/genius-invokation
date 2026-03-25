@@ -22,20 +22,20 @@ import { useUiContext } from "../hooks/context";
 interface ReactionRenderingData {
   elements: D[];
   nameKey:
-    | "reaction_Melt"
-    | "reaction_Vaporize"
-    | "reaction_Overloaded"
-    | "reaction_Superconduct"
-    | "reaction_ElectroCharged"
-    | "reaction_Frozen"
-    | "reaction_Swirl"
-    | "reaction_Crystallize"
-    | "reaction_Burning"
-    | "reaction_Bloom"
-    | "reaction_Quicken"
-    | "reaction_LunarElectroCharged"
-    | "reaction_LunarBloom"
-    | "reaction_LunarCrystallizeHydro";
+    | "reaction.Melt"
+    | "reaction.Vaporize"
+    | "reaction.Overloaded"
+    | "reaction.Superconduct"
+    | "reaction.ElectroCharged"
+    | "reaction.Frozen"
+    | "reaction.Swirl"
+    | "reaction.Crystallize"
+    | "reaction.Burning"
+    | "reaction.Bloom"
+    | "reaction.Quicken"
+    | "reaction.LunarElectroCharged"
+    | "reaction.LunarBloom"
+    | "reaction.LunarCrystallizeHydro";
   fgColor: string;
   bgColor: string;
 }
@@ -43,121 +43,121 @@ interface ReactionRenderingData {
 export const REACTION_TEXT_MAP: Record<number, ReactionRenderingData> = {
   [R.Melt]: {
     elements: [D.Cryo, D.Pyro],
-    nameKey: "reaction_Melt",
+    nameKey: "reaction.Melt",
     fgColor: "#ffcc66",
     bgColor: "#994b22",
   },
   [R.Vaporize]: {
     elements: [D.Hydro, D.Pyro],
-    nameKey: "reaction_Vaporize",
+    nameKey: "reaction.Vaporize",
     fgColor: "#ffcc66",
     bgColor: "#994b22",
   },
   [R.Overloaded]: {
     elements: [D.Electro, D.Pyro],
-    nameKey: "reaction_Overloaded",
+    nameKey: "reaction.Overloaded",
     fgColor: "#ff809b",
     bgColor: "#802d55",
   },
   [R.Superconduct]: {
     elements: [D.Cryo, D.Electro],
-    nameKey: "reaction_Superconduct",
+    nameKey: "reaction.Superconduct",
     fgColor: "#b4b4ff",
     bgColor: "#5511ee",
   },
   [R.ElectroCharged]: {
     elements: [D.Electro, D.Hydro],
-    nameKey: "reaction_ElectroCharged",
+    nameKey: "reaction.ElectroCharged",
     fgColor: "#e19bff",
     bgColor: "#7f2dee",
   },
   [R.Frozen]: {
     elements: [D.Cryo, D.Hydro],
-    nameKey: "reaction_Frozen",
+    nameKey: "reaction.Frozen",
     fgColor: "#99ffff",
     bgColor: "#1199ee",
   },
   [R.SwirlCryo]: {
     elements: [D.Cryo, D.Anemo],
-    nameKey: "reaction_Swirl",
+    nameKey: "reaction.Swirl",
     fgColor: "#66ffcc",
     bgColor: "#406d6d",
   },
   [R.SwirlHydro]: {
     elements: [D.Hydro, D.Anemo],
-    nameKey: "reaction_Swirl",
+    nameKey: "reaction.Swirl",
     fgColor: "#66ffcc",
     bgColor: "#406d6d",
   },
   [R.SwirlPyro]: {
     elements: [D.Pyro, D.Anemo],
-    nameKey: "reaction_Swirl",
+    nameKey: "reaction.Swirl",
     fgColor: "#66ffcc",
     bgColor: "#406d6d",
   },
   [R.SwirlElectro]: {
     elements: [D.Electro, D.Anemo],
-    nameKey: "reaction_Swirl",
+    nameKey: "reaction.Swirl",
     fgColor: "#66ffcc",
     bgColor: "#406d6d",
   },
   [R.CrystallizeCryo]: {
     elements: [D.Cryo, D.Geo],
-    nameKey: "reaction_Crystallize",
+    nameKey: "reaction.Crystallize",
     fgColor: "#ffd766",
     bgColor: "#664408",
   },
   [R.CrystallizeHydro]: {
     elements: [D.Hydro, D.Geo],
-    nameKey: "reaction_Crystallize",
+    nameKey: "reaction.Crystallize",
     fgColor: "#ffd766",
     bgColor: "#664408",
   },
   [R.CrystallizePyro]: {
     elements: [D.Pyro, D.Geo],
-    nameKey: "reaction_Crystallize",
+    nameKey: "reaction.Crystallize",
     fgColor: "#ffd766",
     bgColor: "#664408",
   },
   [R.CrystallizeElectro]: {
     elements: [D.Electro, D.Geo],
-    nameKey: "reaction_Crystallize",
+    nameKey: "reaction.Crystallize",
     fgColor: "#ffd766",
     bgColor: "#664408",
   },
   [R.Burning]: {
     elements: [D.Dendro, D.Pyro],
-    nameKey: "reaction_Burning",
+    nameKey: "reaction.Burning",
     fgColor: "#ff9c00",
     bgColor: "#843e11",
   },
   [R.Bloom]: {
     elements: [D.Dendro, D.Hydro],
-    nameKey: "reaction_Bloom",
+    nameKey: "reaction.Bloom",
     fgColor: "#00ea55",
     bgColor: "#3b6208",
   },
   [R.Quicken]: {
     elements: [D.Dendro, D.Electro],
-    nameKey: "reaction_Quicken",
+    nameKey: "reaction.Quicken",
     fgColor: "#00ea55",
     bgColor: "#3b6208",
   },
   [R.LunarElectroCharged]: {
     elements: [D.Electro, D.Hydro],
-    nameKey: "reaction_LunarElectroCharged",
+    nameKey: "reaction.LunarElectroCharged",
     fgColor: "#e19bff",
     bgColor: "#7f2dee",
   },
   [R.LunarBloom]: {
     elements: [D.Dendro, D.Hydro],
-    nameKey: "reaction_LunarBloom",
+    nameKey: "reaction.LunarBloom",
     fgColor: "#00ea55",
     bgColor: "#3b6208",
   },
   [R.LunarCrystallizeHydro]: {
     elements: [D.Hydro, D.Geo],
-    nameKey: "reaction_LunarCrystallizeHydro",
+    nameKey: "reaction.LunarCrystallizeHydro",
     fgColor: "#ffd766",
     bgColor: "#664408",
   },

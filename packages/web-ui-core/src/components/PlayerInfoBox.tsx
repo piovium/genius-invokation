@@ -34,12 +34,12 @@ export interface PlayerInfoProps {
 export function PlayerInfoBox(props: PlayerInfoProps) {
   const { t } = useUiContext();
   const statusTextMap = createMemo<Record<PbPlayerStatus, string>>(() => ({
-    [PbPlayerStatus.UNSPECIFIED]: t("player_waiting"),
-    [PbPlayerStatus.ACTING]: t("player_acting"),
-    [PbPlayerStatus.CHOOSING_ACTIVE]: t("player_choosingActive"),
-    [PbPlayerStatus.REROLLING]: t("player_rerolling"),
-    [PbPlayerStatus.SWITCHING_HANDS]: t("player_switchingHands"),
-    [PbPlayerStatus.SELECTING_CARDS]: t("player_selectingCards"),
+    [PbPlayerStatus.UNSPECIFIED]: t("player.waiting"),
+    [PbPlayerStatus.ACTING]: t("player.acting"),
+    [PbPlayerStatus.CHOOSING_ACTIVE]: t("player.choosingActive"),
+    [PbPlayerStatus.REROLLING]: t("player.rerolling"),
+    [PbPlayerStatus.SWITCHING_HANDS]: t("player.switchingHands"),
+    [PbPlayerStatus.SELECTING_CARDS]: t("player.selectingCards"),
   }));
   return (
     <div
@@ -82,7 +82,7 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
         bool:data-shown={props.declaredEnd}
         data-opp={props.opp}
       >
-        {t("player_declaredEndStatus")}
+        {t("player.declaredEndStatus")}
       </div>
       <div class="relative inline-block h-10 w-44">
         <div

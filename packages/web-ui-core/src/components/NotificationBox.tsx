@@ -39,13 +39,13 @@ export function NotificationBox(props: NotificationBoxProps) {
   ): string | undefined => {
     switch (type) {
       case PbSkillType.NORMAL:
-        return t("notification_normalAttack");
+        return t("notification.normalAttack");
       case PbSkillType.ELEMENTAL:
-        return t("notification_elementalSkill");
+        return t("notification.elementalSkill");
       case PbSkillType.BURST:
-        return t("notification_elementalBurst");
+        return t("notification.elementalBurst");
       case PbSkillType.CHARACTER_PASSIVE:
-        return t("notification_passiveSkill");
+        return t("notification.passiveSkill");
     }
   };
 
@@ -96,8 +96,8 @@ export function NotificationBox(props: NotificationBoxProps) {
             <h5 class="font-bold color-#ede4d8">
               {t(
                 props.opp
-                  ? "notification_oppSwitchRole"
-                  : "notification_mySwitchRole",
+                  ? "notification.oppSwitchRole"
+                  : "notification.mySwitchRole",
               )}
               {characterName()}
             </h5>
@@ -123,7 +123,7 @@ export function NotificationBox(props: NotificationBoxProps) {
             </Show>
             <Show when={props.data.skillType === "overloaded"}>
               <p class="text-[var(--text-color)] font-size-80% font-bold">
-                {t("notification_overloaded")}
+                {t("notification.overloaded")}
               </p>
             </Show>
           </Show>

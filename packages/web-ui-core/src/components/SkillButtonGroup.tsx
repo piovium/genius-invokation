@@ -103,7 +103,7 @@ function SkillButton(props: SkillButtonProps) {
             bool:data-focused={props.step?.isFocused}
             bool:data-mini={props.isTechnique}
             onClick={(e) => props.onClick?.(e)}
-            title={props.step ? props.step.tooltipText : t("skill_notYourTurn")}
+            title={props.step ? props.step.tooltipText : t("skill.notYourTurn")}
           >
             {children()}
           </button>
@@ -121,7 +121,7 @@ function SkillButton(props: SkillButtonProps) {
         ) => (
           <div
             class="relative w-12 h-12 skill-button-img flex items-center justify-center data-[mini]:w-9.6 data-[mini]:h-9.6 data-[mini]:mt-1.7 data-[mini]:mb-0.7 data-[disabled]:saturate-80 data-[disabled]:brightness-80"
-            title={props.step ? props.step.tooltipText : t("skill_notYourTurn")}
+            title={props.step ? props.step.tooltipText : t("skill.notYourTurn")}
             bool:data-mini={props.isTechnique}
             bool:data-focused={props.step?.isFocused}
             bool:data-disabled={!props.step || props.step.isDisabled}

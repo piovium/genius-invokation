@@ -86,7 +86,7 @@ export function ExitButton(props: ExitButtonProps) {
   return (
     <button
       class="h-8 w-8 pr-1 flex items-center justify-center rounded-full b-red-800 b-2 bg-red-500 hover:bg-red-600 active:bg-red-600 text-white transition-colors line-height-none cursor-pointer"
-      title={t("ui_giveUpGame")}
+      title={t("ui.giveUpGame")}
       onClick={() => {
         props.onClick?.();
       }}

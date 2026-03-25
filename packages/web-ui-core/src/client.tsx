@@ -72,7 +72,7 @@ import {
   type OppInfo,
 } from "./opp";
 import { flip } from "@gi-tcg/utils";
-import { resolveTemplate, translator } from "@solid-primitives/i18n";
+import { flatten, resolveTemplate, translator } from "@solid-primitives/i18n";
 
 const EMPTY_PLAYER_DATA: PbPlayerState = {
   activeCharacterId: 0,
@@ -135,7 +135,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   const getAssetsManager = () =>
     option.assetsManager?.() ?? DEFAULT_ASSETS_MANAGER;
   const getLocale = () => option.locale?.() ?? "zh-CN";
-  const dict = createMemo(() => translations[getLocale()]);
+  const dict = createMemo(() => flatten(translations[getLocale()]));
   const t = translator(dict, resolveTemplate);
 
   const [data, setData] = createSignal<ChessboardData>({

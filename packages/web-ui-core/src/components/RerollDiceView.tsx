@@ -50,7 +50,7 @@ export function RerollDiceView(props: RerollViewProps) {
       class="absolute inset-0  flex flex-col items-center justify-center gap-10 select-none"
       onPointerUp={() => setSelectingOn(null)}
     >
-      <h3 class="max-w-70 px-4 text-center leading-tight font-bold text-2xl">{t("view_rerollDiceTitle")}</h3>
+      <h3 class="max-w-70 px-4 text-center leading-tight font-bold text-2xl">{t("view.rerollDiceTitle")}</h3>
       <ul class="grid grid-rows-2 grid-flow-col gap-6">
         <Index each={props.dice}>
           {(dice, index) => (
@@ -90,7 +90,7 @@ export function RerollDiceView(props: RerollViewProps) {
         class="visible data-[hidden]:invisible"
         bool:data-hidden={props.noConfirmButton}
       >
-        <Button onClick={() => props.onConfirm()}>{t("view_confirmButton")}</Button>
+        <Button onClick={() => props.onConfirm()}>{t("view.confirmButton")}</Button>
       </div>
     </div>
   );

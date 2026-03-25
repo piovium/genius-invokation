@@ -57,7 +57,7 @@ import { REACTION_TEXT_MAP } from "./Reaction";
 const getDiceTypeText = (type: DiceType) => {
   const { assetsManager, t } = useUiContext();
   if (type === DiceType.Void) {
-    return t("history_unknownDice");
+    return t("history.unknownDice");
   }
   if (type === DiceType.Omni) {
     return assetsManager().getNameSync(-411);
@@ -139,12 +139,12 @@ const renderHistoryChild = (
         title: renderName(child.characterDefinitionId),
         content: (
           <>
-            <span>{t("history_switchActive")}</span>
+            <span>{t("history.switchActive")}</span>
             <span>
               (
               {child.isOverloaded
-                ? t("history_overloaded")
-                : t("history_cardEffect")}
+                ? t("history.overloaded")
+                : t("history.cardEffect")}
               )
             </span>
           </>
@@ -159,7 +159,7 @@ const renderHistoryChild = (
         title: renderName(child.callerDefinitionId),
         content: (
           <>
-            <span>{t("history_willTriggered")}</span>
+            <span>{t("history.willTriggered")}</span>
           </>
         ),
       };
@@ -174,7 +174,7 @@ const renderHistoryChild = (
         content: (
           <>
             <span>
-              {t(isOpp ? "history_oppDrawCards" : "history_myDrawCards", {
+              {t(isOpp ? "history.oppDrawCards" : "history.myDrawCards", {
                 count: child.drawCardsCount,
               })}
             </span>
@@ -193,7 +193,7 @@ const renderHistoryChild = (
         content: (
           <>
             <span>
-              {t(isOpp ? "history_oppStealMyHand" : "history_myStealOppHand")}
+              {t(isOpp ? "history.oppStealMyHand" : "history.myStealOppHand")}
             </span>
           </>
         ),
@@ -213,8 +213,8 @@ const renderHistoryChild = (
               <span>
                 {t(
                   child.entityType === "equipment"
-                    ? "history_createEquipment"
-                    : "history_createStatus",
+                    ? "history.createEquipment"
+                    : "history.createStatus",
                 )}
               </span>
               <Image
@@ -239,15 +239,15 @@ const renderHistoryChild = (
                 {t(
                   child.entityType === "combatStatus"
                     ? isOpp
-                      ? "history_oppCreateCombatStatus"
-                      : "history_myCreateCombatStatus"
+                      ? "history.oppCreateCombatStatus"
+                      : "history.myCreateCombatStatus"
                     : child.entityType === "summon"
                       ? isOpp
-                        ? "history_oppCreateSummon"
-                        : "history_myCreateSummon"
+                        ? "history.oppCreateSummon"
+                        : "history.myCreateSummon"
                       : isOpp
-                        ? "history_oppCreateSupport"
-                        : "history_myCreateSupport",
+                        ? "history.oppCreateSupport"
+                        : "history.myCreateSupport",
                 )}
               </span>
             </>
@@ -265,7 +265,7 @@ const renderHistoryChild = (
         content: (
           <>
             <span>
-              {t(isOpp ? "history_oppGenerateDice" : "history_myGenerateDice", {
+              {t(isOpp ? "history.oppGenerateDice" : "history.myGenerateDice", {
                 count: child.count,
               })}
             </span>
@@ -273,9 +273,9 @@ const renderHistoryChild = (
               <DiceIcon size={14} type={child.diceType} selected={false} />
             </Show>
             <span>
-              {t("history_diceTypeLabel", {
+              {t("history.diceTypeLabel", {
                 dicetype:
-                  getDiceTypeText(child.diceType) ?? t("history_unknownDice"),
+                  getDiceTypeText(child.diceType) ?? t("history.unknownDice"),
               })}
             </span>
           </>
@@ -292,7 +292,7 @@ const renderHistoryChild = (
         content: (
           <>
             <span>
-              {t(isOpp ? "history_oppAbsorbDice" : "history_myAbsorbDice", {
+              {t(isOpp ? "history.oppAbsorbDice" : "history.myAbsorbDice", {
                 count: child.count,
               })}
             </span>
@@ -314,11 +314,11 @@ const renderHistoryChild = (
               {t(
                 child.target === "pile"
                   ? isOpp
-                    ? "history_oppCreateCardToPile"
-                    : "history_myCreateCardToPile"
+                    ? "history.oppCreateCardToPile"
+                    : "history.myCreateCardToPile"
                   : isOpp
-                    ? "history_oppGainHandCard"
-                    : "history_myGainHandCard",
+                    ? "history.oppGainHandCard"
+                    : "history.myGainHandCard",
               )}
             </span>
           </>
@@ -337,8 +337,8 @@ const renderHistoryChild = (
             <span>
               {t(
                 isOpp
-                  ? "history_oppSwitchHandOnce"
-                  : "history_mySwitchHandOnce",
+                  ? "history.oppSwitchHandOnce"
+                  : "history.mySwitchHandOnce",
               )}
             </span>
           </>
@@ -356,7 +356,7 @@ const renderHistoryChild = (
           <>
             <span>
               {t(
-                isOpp ? "history_oppPutHandToPile" : "history_myPutHandToPile",
+                isOpp ? "history.oppPutHandToPile" : "history.myPutHandToPile",
                 { count: child.count },
               )}
             </span>
@@ -375,7 +375,7 @@ const renderHistoryChild = (
           <>
             <span>
               {t(
-                isOpp ? "history_oppRerolledTimes" : "history_myRerolledTimes",
+                isOpp ? "history.oppRerolledTimes" : "history.myRerolledTimes",
                 { count: child.count },
               )}
             </span>
@@ -397,7 +397,7 @@ const renderHistoryChild = (
         },
         content: (
           <>
-            <span>{t("history_takeDamage", { count: child.damageValue })}</span>
+            <span>{t("history.takeDamage", { count: child.damageValue })}</span>
             <Show when={child.damageType <= 7}>
               <Image
                 imageId={child.damageType}
@@ -419,13 +419,13 @@ const renderHistoryChild = (
               {(reaction) => renderReaction(reaction(), child.damageType)}
             </Show>
             <span>
-              {t("history_healthTo", {
+              {t("history.healthTo", {
                 old: child.oldHealth,
                 next: child.newHealth,
               })}
             </span>
             <Show when={child.causeDefeated}>
-              <span>{t("history_defeated")}</span>
+              <span>{t("history.defeated")}</span>
             </Show>
           </>
         ),
@@ -447,17 +447,17 @@ const renderHistoryChild = (
           <>
             <Switch>
               <Match when={child.healType === "revive"}>
-                <span>{t("history_reviveAnd")}</span>
+                <span>{t("history.reviveAnd")}</span>
               </Match>
               <Match when={child.healType === "immuneDefeated"}>
-                <span>{t("history_immuneDefeatedAnd")}</span>
+                <span>{t("history.immuneDefeatedAnd")}</span>
               </Match>
               <Match when={child.healType === "normal"}>
-                <span>{t("history_healed", { count: child.healValue })}</span>
+                <span>{t("history.healed", { count: child.healValue })}</span>
               </Match>
             </Switch>
             <span>
-              {t("history_healthTo", {
+              {t("history.healthTo", {
                 old: child.oldHealth,
                 next: child.newHealth,
               })}
@@ -475,7 +475,7 @@ const renderHistoryChild = (
         title: renderName(child.characterDefinitionId),
         content: (
           <>
-            <span>{t("history_applyElement")}</span>
+            <span>{t("history.applyElement")}</span>
             <Image
               imageId={child.elementType}
               class="h-3.5 w-3.5"
@@ -503,9 +503,9 @@ const renderHistoryChild = (
         title: renderName(child.characterDefinitionId),
         content: (
           <>
-            <span>{t("history_gainMaxHealth", { count: increaseValue })}</span>
+            <span>{t("history.gainMaxHealth", { count: increaseValue })}</span>
             <span>
-              {t("history_maxHealthTo", {
+              {t("history.maxHealthTo", {
                 old: child.oldMaxHealth,
                 next: child.newMaxHealth,
               })}
@@ -526,11 +526,11 @@ const renderHistoryChild = (
           <>
             <span>
               {energyValue > 0
-                ? t("history_gainEnergy", { count: Math.abs(energyValue) })
-                : t("history_loseEnergy", { count: Math.abs(energyValue) })}
+                ? t("history.gainEnergy", { count: Math.abs(energyValue) })
+                : t("history.loseEnergy", { count: Math.abs(energyValue) })}
             </span>
             <span>
-              {t("history_energyTo", {
+              {t("history.energyTo", {
                 old: child.oldEnergy,
                 next: child.newEnergy,
               })}
@@ -550,7 +550,7 @@ const renderHistoryChild = (
         content: (
           <>
             <span>
-              {t(isOpp ? "history_oppDiscardHand" : "history_myDiscardHand")}
+              {t(isOpp ? "history.oppDiscardHand" : "history.myDiscardHand")}
             </span>
           </>
         ),
@@ -585,8 +585,8 @@ const renderHistoryChild = (
               <span>
                 {t(
                   child.entityType === "equipment"
-                    ? "history_removeEquipment"
-                    : "history_removeStatus",
+                    ? "history.removeEquipment"
+                    : "history.removeStatus",
                 )}
               </span>
               <Image
@@ -610,10 +610,10 @@ const renderHistoryChild = (
               <span>
                 {t(
                   child.entityType === "combatStatus"
-                    ? "history_removeCombatStatus"
+                    ? "history.removeCombatStatus"
                     : child.entityType === "summon"
-                      ? "history_removeSummon"
-                      : "history_removeSupport",
+                      ? "history.removeSummon"
+                      : "history.removeSupport",
                 )}
               </span>
             </>
@@ -628,7 +628,7 @@ const renderHistoryChild = (
         opp: isOpp,
         imageId: child.isTuning ? "tuning" : parentCallerDefinitionId,
         title: child.isTuning
-          ? t("history_elementalTuning")
+          ? t("history.elementalTuning")
           : renderName(parentCallerDefinitionId),
         content: (
           <>
@@ -636,23 +636,23 @@ const renderHistoryChild = (
               {child.count
                 ? t(
                     isOpp
-                      ? "history_oppConvertToDice"
-                      : "history_myConvertToDice",
+                      ? "history.oppConvertToDice"
+                      : "history.myConvertToDice",
                     { count: child.count },
                   )
                 : t(
                     isOpp
-                      ? "history_oppConvertSomeDice"
-                      : "history_myConvertSomeDice",
+                      ? "history.oppConvertSomeDice"
+                      : "history.myConvertSomeDice",
                   )}
             </span>
             <Show when={child.diceType > 0}>
               <DiceIcon size={14} type={child.diceType} selected={false} />
             </Show>
             <span>
-              {t("history_diceTypeLabel", {
+              {t("history.diceTypeLabel", {
                 dicetype:
-                  getDiceTypeText(child.diceType) ?? t("history_unknownDice"),
+                  getDiceTypeText(child.diceType) ?? t("history.unknownDice"),
               })}
             </span>
           </>
@@ -668,7 +668,7 @@ const renderHistoryChild = (
         title: renderName(child.cardDefinitionId),
         content: (
           <>
-            <span>{t("history_blockedNoEffect")}</span>
+            <span>{t("history.blockedNoEffect")}</span>
           </>
         ),
       };
@@ -684,8 +684,8 @@ const renderHistoryChild = (
             <span>
               {t(
                 child.stage === "old"
-                  ? "history_transformOld"
-                  : "history_transformNew",
+                  ? "history.transformOld"
+                  : "history.transformNew",
               )}
             </span>
           </>
@@ -701,7 +701,7 @@ const renderHistoryChild = (
         content: (
           <>
             <span>
-              {t("history_swapPosition", {
+              {t("history.swapPosition", {
                 name: renderName(child.character1DefinitionId) ?? "???",
               })}
             </span>
@@ -718,7 +718,7 @@ const renderHistoryChild = (
         title: renderName(child.cardDefinitionId),
         content: (
           <>
-            <span>{t("history_overflowCard")}</span>
+            <span>{t("history.overflowCard")}</span>
           </>
         ),
       };
@@ -754,25 +754,25 @@ const renderHistoryHint = (block: HistoryHintBlock) => {
         case "initHands":
           result = {
             type: block.type,
-            content: t("history_replaceInitialHand"),
+            content: t("history.replaceInitialHand"),
           };
           break;
         case "initActives":
           result = {
             type: block.type,
-            content: t("history_chooseInitialActiveCharacter"),
+            content: t("history.chooseInitialActiveCharacter"),
           };
           break;
         case "action":
           result = {
             type: block.type,
-            content: t("history_roundStart", { round: block.roundNumber }),
+            content: t("history.roundStart", { round: block.roundNumber }),
           };
           break;
         case "end":
           result = {
             type: block.type,
-            content: t("history_endPhase"),
+            content: t("history.endPhase"),
           };
           break;
         default:
@@ -791,7 +791,7 @@ const renderHistoryHint = (block: HistoryHintBlock) => {
             type: block.type,
             opp: opp(block.who),
             content: t(
-              opp(block.who) ? "history_oppActionTurn" : "history_myActionTurn",
+              opp(block.who) ? "history.oppActionTurn" : "history.myActionTurn",
             ),
           };
           break;
@@ -801,8 +801,8 @@ const renderHistoryHint = (block: HistoryHintBlock) => {
             opp: opp(block.who),
             content: t(
               opp(block.who)
-                ? "history_oppDeclareEndTurn"
-                : "history_myDeclareEndTurn",
+                ? "history.oppDeclareEndTurn"
+                : "history.myDeclareEndTurn",
             ),
           };
           break;
@@ -1267,8 +1267,8 @@ const CardDescriptionPart = (props: { cardDefinitionId: number }) => {
   );
   return (
     <Switch>
-      <Match when={data.loading}>{t("history_loading")}</Match>
-      <Match when={data.error}>{t("history_loadFailed")}</Match>
+      <Match when={data.loading}>{t("history.loading")}</Match>
+      <Match when={data.error}>{t("history.loadFailed")}</Match>
       <Match when={data()}>
         {(data) => (
           <p class="whitespace-pre-wrap">
@@ -1356,15 +1356,15 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
       const titleKey =
         block.how === "init"
           ? isOpp
-            ? "history_oppInitialActiveTitle"
-            : "history_myInitialActiveTitle"
+            ? "history.oppInitialActiveTitle"
+            : "history.myInitialActiveTitle"
           : block.how === "switch"
             ? isOpp
-              ? "history_oppSwitchActiveTitle"
-              : "history_mySwitchActiveTitle"
+              ? "history.oppSwitchActiveTitle"
+              : "history.mySwitchActiveTitle"
             : isOpp
-              ? "history_oppChooseActiveTitle"
-              : "history_myChooseActiveTitle";
+              ? "history.oppChooseActiveTitle"
+              : "history.myChooseActiveTitle";
       result = {
         type: block.type,
         opp: isOpp,
@@ -1381,7 +1381,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           content: (
             <>
               <span class="text-3 text-#d4bc8e">
-                {t("history_switchActive")}
+                {t("history.switchActive")}
               </span>
             </>
           ),
@@ -1398,11 +1398,11 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
         title: t(
           block.skillType === "technique"
             ? isOpp
-              ? "history_oppUseTechniqueTitle"
-              : "history_myUseTechniqueTitle"
+              ? "history.oppUseTechniqueTitle"
+              : "history.myUseTechniqueTitle"
             : isOpp
-              ? "history_oppUseSkillTitle"
-              : "history_myUseSkillTitle",
+              ? "history.oppUseSkillTitle"
+              : "history.myUseSkillTitle",
         ),
         indent: block.indent,
         imageId: block.callerDefinitionId,
@@ -1428,8 +1428,8 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
                 <div class="text-3 text-#d4bc8e">
                   {`${
                     block.skillType === "technique"
-                      ? t("history_useTechnique")
-                      : t("history_useSkill")
+                      ? t("history.useTechnique")
+                      : t("history.useSkill")
                   }`}
                 </div>
                 <div class="flex flex-row items-center gap-1">
@@ -1457,7 +1457,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
       result = {
         type: block.type,
         opp: opp(block.who),
-        title: t("history_triggered"),
+        title: t("history.triggered"),
         indent: block.indent,
         imageId:
           block.entityType === "equipment"
@@ -1489,7 +1489,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           name: renderName(block.masterOrCallerDefinitionId),
           content: !block.callerOrSkillDefinitionId ? (
             <>
-              <div class="text-3 text-#d4bc8e">{t("history_willTriggered")}</div>
+              <div class="text-3 text-#d4bc8e">{t("history.willTriggered")}</div>
             </>
           ) : block.callerOrSkillDefinitionId ===
             block.masterOrCallerDefinitionId ? (
@@ -1503,7 +1503,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           ) : (
             <>
               <div class="flex flex-col gap-1">
-                <div class="text-3 text-#d4bc8e">{t("history_willTriggered")}</div>
+                <div class="text-3 text-#d4bc8e">{t("history.willTriggered")}</div>
                 <div class="flex flex-row items-center gap-1">
                   <div class="h-7 w-7 rounded-full b-1 b-white/30 flex items-center justify-center">
                     <Image
@@ -1531,7 +1531,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
         type: block.type,
         opp: isOpp,
         title: t(
-          isOpp ? "history_oppPlayCardTitle" : "history_myPlayCardTitle",
+          isOpp ? "history.oppPlayCardTitle" : "history.myPlayCardTitle",
         ),
         indent: block.indent,
         imageId: block.cardDefinitionId,
@@ -1566,7 +1566,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
         type: block.type,
         opp: isOpp,
         title: t(
-          isOpp ? "history_oppSelectCardTitle" : "history_mySelectCardTitle",
+          isOpp ? "history.oppSelectCardTitle" : "history.mySelectCardTitle",
         ),
         indent: block.indent,
         imageId: block.cardDefinitionId,
@@ -1581,8 +1581,8 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
               <span class="text-3 text-#d4bc8e">
                 {t(
                   isOpp
-                    ? "history_oppTriggeredSelectEffect"
-                    : "history_myTriggeredSelectEffect",
+                    ? "history.oppTriggeredSelectEffect"
+                    : "history.myTriggeredSelectEffect",
                 )}
               </span>
             </>
@@ -1599,8 +1599,8 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
         opp: isOpp,
         title: t(
           isOpp
-            ? "history_oppElementalTuningTitle"
-            : "history_myElementalTuningTitle",
+            ? "history.oppElementalTuningTitle"
+            : "history.myElementalTuningTitle",
         ),
         indent: block.indent,
         imageId: block.cardDefinitionId,
@@ -1633,7 +1633,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
       result = {
         type: "pocket",
         opp: false,
-        title: t("history_judgeAction"),
+        title: t("history.judgeAction"),
         indent: block.indent,
         imageSize: "normal",
         content: {
@@ -2205,7 +2205,7 @@ export function HistoryPanel(props: HistoryPanelProps) {
             class="absolute w-66 h-6 bottom-3 right-2 bg-#e9e2d3 opacity-80 text-#3b4255 text-3 font-bold rounded-full hover:bg-#e9e2d3 hover:shadow-[inset_0_0_16px_rgba(216,212,204,1),0_0_8px_rgba(255,255,255,0.2)] hover:b-white hover:b-2 hover:opacity-100"
             onClick={() => scrollToBottom("instant")}
           >
-            {useUiContext().t("history_jumpLatest")}
+            {useUiContext().t("history.jumpLatest")}
           </button>
         </Show>
         <Show when={selectedBlock()}>
