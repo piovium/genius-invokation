@@ -44,7 +44,7 @@ export default {
     Aligned: "Same Elemental",
     Void: "Any Elemental",
     Elemental: "Elemental",
-    tuneToDice: "Tune to {{dicetype}} Die",
+    tuneToDice: "Tune to {{diceType}} Die",
     chooseSupportToDispose:
       "Your Support Zone is full, you must choose a Support Card to discard",
     // chooseEquipmentToReplace: "You already have equipment of the same type. Playing this card will override pre-existing equipment",
@@ -58,7 +58,7 @@ export default {
     disabled: "This action is not available",
     payCostNoDice: "No need to pay more Elemental Dice",
     payCost: "Pay {{cost}}",
-    payCostSingle: "{{count}} × {{dicetype}} Dice",
+    payCostSingle: "{{count}} × {{diceType}} Dice",
     payCostAndSeparator: "and",
     playCardHint: "Play Card 「{{name}}」",
     switchRoleHint: "Switch Active Character to 「{{name}}」",
