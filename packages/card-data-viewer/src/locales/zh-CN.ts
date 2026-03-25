@@ -84,7 +84,7 @@ export default {
   pneuma: "始基力：荒性",
   ousia: "始基力：芒性",
   blessing: "元素幻变",
-  nyxState: "夜魂加持",
+  nyxState: "夜魂态",
   simulanka: "希穆兰卡",
   adventurePlace: "冒险地点",
   prepareSkill: "准备技能",
