@@ -1169,7 +1169,9 @@ export class StateMutator {
           characterDefinitionId: switchInfo.to.definition.id,
           viaSkillDefinitionId: switchInfo.fromReaction
             ? Reaction.Overloaded
-            : switchInfo.via?.definition.id,
+            : switchInfo.via
+              ? Math.floor(switchInfo.via.definition.id)
+              : void 0,
           fromAction:
             switchInfo.fast === null
               ? PbSwitchActiveFromAction.NONE
