@@ -1,6 +1,6 @@
 [project]
 name = "gitcg"
-version = "0.19.0"
+version = "0.19.1"
 description = "Genius Invokation TCG (Python binding)"
 readme = "README.md"
 authors = [{ name = "guyutongxue", email = "guyutongxue@163.com" }]
