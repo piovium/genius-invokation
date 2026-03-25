@@ -1041,13 +1041,13 @@ declare global {
     map<This extends readonly [unknown, unknown], U>(
       this: This,
       fn: (v: T) => U,
-    ): { [K in keyof This]: U };
+    ): { -readonly [K in keyof This]: U };
   }
   interface Array<T> {
     map<This extends [unknown, unknown], U>(
       this: This,
       fn: (v: T) => U,
-    ): { [K in keyof This]: U };
+    ): { -readonly [K in keyof This]: U };
   }
 }
 
