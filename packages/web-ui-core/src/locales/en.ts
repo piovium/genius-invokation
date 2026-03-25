@@ -1,3 +1,18 @@
+// Copyright (C) 2026 Piovium Labs
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import type { I18nRawDictionary } from ".";
 
 export default {
@@ -43,8 +58,7 @@ export default {
     disabled: "This action is not available",
     payCostNoDice: "No need to pay more Elemental Dice",
     payCost: "Pay {{cost}}",
-    payCostDiceCountLabel: "{{count}} × ",
-    payCostDiceTypeLabel: "{{dicetype}} Dice",
+    payCostSingle: "{{count}} × {{dicetype}} Dice",
     payCostAndSeparator: "and",
     playCardHint: "Play Card 「{{name}}」",
     switchRoleHint: "Switch Active Character to 「{{name}}」",
@@ -77,8 +91,8 @@ export default {
     createStatus: "Gained Status: ",
     createEquipment: "Equipped Equipment: ",
     removeCombatStatus: "Combat Status disappeared",
-    removeStatus: "Status Removed: ",
-    removeEquipment: "Equipment Removed: ",
+    removeStatus: "Status Removed: {{entity}}",
+    removeEquipment: "Equipment Removed: {{entity}}",
     removeSummon: "Summon Card(s) Discarded",
     removeSupport: "Support Card(s) Discarded",
     transformOld: "Changing state...",
@@ -98,8 +112,8 @@ export default {
     oppCreateSummon: "Your opponent created a Summon",
     myCreateSupport: "You placed a Card in the Support Zone",
     oppCreateSupport: "Your opponent placed a Card in the Support Zone",
-    myGenerateDice: "You created {{count}} × ",
-    oppGenerateDice: "Your opponent created {{count}} × ",
+    myGenerateDice: "You created {{count}} × {{diceType}} Dice",
+    oppGenerateDice: "Your opponent created {{count}} × {{diceType}} Dice",
     myAbsorbDice: "You discarded {{count}} Elemental Dice",
     oppAbsorbDice: "Your opponent discarded {{count}} Elemental Dice",
     myCreateCardToPile: "You generated a card and added it to your deck",
@@ -115,27 +129,24 @@ export default {
       "Your opponent placed {{count}} cards from their Hand back into the deck",
     myRerolledTimes: "You rerolled {{count}} time(s)",
     oppRerolledTimes: "Your opponent rerolled {{count}} time(s)",
-    takeDamage: "Received {{count}} ",
+    takeDamage: "Received {{count}} {{damageType}}",
     healthTo: ", HP {{old}}→{{next}}",
     defeated: ", and was defeated",
     reviveAnd: "Revived and healed for {{count}} HP",
     immuneDefeatedAnd:
       "Character is immune to being defeated and is healed for {{count}} HP",
     healed: "Healed for {{count}} HP",
-    applyElement: "Apply ",
-    gainMaxHealth: "Gain {{count}} Max HP",
-    maxHealthTo: ", Max HP {{old}}→{{next}}",
-    gainEnergy: "Gained {{count}} Energy",
-    loseEnergy: "Used {{count}} Energy",
-    energyTo: ", Energy {{old}}→{{next}}",
+    applyElement: "Apply {{elementType}}",
+    gainMaxHealth: "Gain {{count}} Max HP, Max HP {{old}}→{{next}}",
+    gainEnergy: "Gained {{count}} Energy, Energy {{old}}→{{next}}",
+    loseEnergy: "Used {{count}} Energy, Energy {{old}}→{{next}}",
     myDiscardHand: "You discarded a card from your Hand",
     oppDiscardHand: "Your opponent discarded a card from their Hand",
     elementalTuning: "Elemental Tuning",
-    diceTypeLabel: "{{dicetype}} Dice",
-    myConvertToDice: "You converted {{count}} Elemental Dice to ",
-    oppConvertToDice: "Your opponent converted {{count}} Elemental Dice to ",
-    myConvertSomeDice: "You converted some Elemental Dice to ",
-    oppConvertSomeDice: "Your opponent converted some Elemental Dice to ",
+    myConvertToDice: "You converted {{count}} Elemental Dice to {{diceType}} Dice",
+    oppConvertToDice: "Your opponent converted {{count}} Elemental Dice to {{diceType}} Dice",
+    myConvertSomeDice: "You converted some Elemental Dice to {{diceType}} Dice",
+    oppConvertSomeDice: "Your opponent converted some Elemental Dice to {{diceType}} Dice",
     blockedNoEffect: "Effect Countered, Cannot Trigger",
     swapPosition: "Switch position with {{name}}",
     overflowCard: "Discarded due to exceeding the hand limit",

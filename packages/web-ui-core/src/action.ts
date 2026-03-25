@@ -33,6 +33,7 @@ import {
   type PreviewData,
   type SwitchActiveAction,
 } from "@gi-tcg/typings";
+import type { JSX } from "solid-js";
 import type { DicePanelState } from "./components/DicePanel";
 import { DICE_COLOR } from "./components/Dice";
 import { checkDice } from "@gi-tcg/utils";
@@ -483,16 +484,16 @@ function diceReqText(
     return ctx.t("action.payCostNoDice");
   }
   const diceText = Array.from(diceReq.entries()).map(([type, count]) => {
-    const typeText = ctx.t("action.payCostDiceTypeLabel", {
-      dicetype:
-        type === DiceType.Aligned && count === 1
-          ? ctx.t("action.Elemental")
-          : getDiceText(type, ctx.t),
+    const typeText =
+      type === DiceType.Aligned && count === 1
+        ? ctx.t("action.Elemental")
+        : getDiceText(type, ctx.t);
+    const color =
+      type >= 1 && type <= 7 ? `color="var(--c-${DICE_COLOR[type]})"` : "";
+    return ctx.t("action.payCostSingle", {
+      count,
+      diceType: `<font ${color}>${typeText}</font>`,
     });
-    const style =
-      type >= 1 && type <= 7 ? `color: var(--c-${DICE_COLOR[type]});` : "";
-    const countText = ctx.t("action.payCostDiceCountLabel", { count });
-    return `${countText}<span style="${style}">${typeText}</span>`;
   });
   return ctx.t("action.payCost", {
     cost: diceText.join(ctx.t("action.payCostAndSeparator")),

@@ -41,7 +41,11 @@ import type {
 } from "../history/typings";
 import { Image } from "./Image";
 import { DiceIcon } from "./Dice";
-import type { ActionCardRawData, EntityRawData } from "@gi-tcg/assets-manager";
+import type {
+  ActionCardRawData,
+  AssetsManager,
+  EntityRawData,
+} from "@gi-tcg/assets-manager";
 import TuningIcon from "../svg/TuningIcon.svg?fb";
 import DefeatedPreviewIcon from "../svg/DefeatedPreviewIcon.svg?fb";
 import RevivePreviewIcon from "../svg/RevivePreviewIcon.svg?fb";
@@ -53,31 +57,8 @@ import { CardFace } from "./Card";
 import { StrokedText } from "./StrokedText";
 import { DAMAGE_COLOR } from "./Damage";
 import { REACTION_TEXT_MAP } from "./Reaction";
-
-const getDiceTypeText = (type: DiceType) => {
-  const { assetsManager, t } = useUiContext();
-  if (type === DiceType.Void) {
-    return t("history.unknownDice");
-  }
-  if (type === DiceType.Omni) {
-    return assetsManager().getNameSync(-411);
-  }
-  return assetsManager().getNameSync(-300 - type);
-};
-
-const getDamageTypeText = (type: DamageType) => {
-  const { assetsManager } = useUiContext();
-  if (type === DamageType.Piercing) {
-    return assetsManager().getNameSync(-5);
-  } else {
-    return assetsManager().getNameSync(-100 - type);
-  }
-};
-
-const getApplyTypeText = (type: DamageType) => {
-  const { assetsManager } = useUiContext();
-  return assetsManager().getNameSync(-300 - type);
-};
+import { RichText } from "./RichText";
+import type { Translator } from "../locales";
 
 interface ChildHealthChange {
   type: "damage" | "heal";
@@ -91,7 +72,7 @@ interface HistoryChildData {
   imageType?: "cardFace" | "icon" | "unspecified";
   title?: string;
   healthChange?: ChildHealthChange;
-  content: JSX.Element;
+  content: string;
 }
 
 export const WhoContext = createContext<() => 0 | 1>(() => 0 as 0 | 1);
@@ -116,18 +97,42 @@ const renderHistoryChild = (
 
   const renderName = createRenderName();
 
-  const renderReaction = (reaction: Reaction, apply: DamageType) => {
+  const diceIconAndText = (type: DiceType) => {
+    const manager = assetsManager();
+    if (type === DiceType.Void) {
+      return t("history.unknownDice");
+    }
+    if (type === DiceType.Omni) {
+      return `<image type="dice" id="${type}" />` + manager.getNameSync(-411);
+    }
+    return (
+      `<image type="dice" id="${type}" />` + manager.getNameSync(-300 - type)
+    );
+  };
+
+  const damageIconAndText = (type: DamageType) => {
+    const manager = assetsManager();
+    const icon = type <= 7 ? `<image type="element" id="${type}" />` : "";
+    const color =
+      type >= 1 && type <= 7 ? `color="var(--c-${DAMAGE_COLOR[type]})"` : "";
+    if (type === DamageType.Piercing) {
+      return `${icon}<font ${color}>${manager.getNameSync(-5)}</font>`;
+    } else {
+      return `${icon}<font ${color}>${manager.getNameSync(-100 - type)}</font>`;
+    }
+  };
+
+  const applyIconAndText = (type: DamageType) => {
+    const icon = `<image type="element" id="${type}" />`;
+    const color = `color="var(--c-${DAMAGE_COLOR[type]})"`;
+    const manager = assetsManager();
+    return `${icon}<font ${color}>${manager.getNameSync(-300 - type)}</font>`;
+  };
+
+  const reactionIconAndText = (reaction: Reaction, apply: DamageType) => {
     const { elements: element, nameKey } = REACTION_TEXT_MAP[reaction];
     const base = element.find((e) => e !== apply) as DamageType;
-    return (
-      <>
-        <span>(</span>
-        <Image imageId={base} class="h-3.5 w-3.5" fallback="aura" />
-        <Image imageId={apply} class="h-3.5 w-3.5" fallback="aura" />
-        <span>{t(nameKey)}</span>
-        <span>)</span>
-      </>
-    );
+    return `(<image type="element" id="${base}" /><image type="element" id="${apply}" />${t(nameKey)})`;
   };
 
   switch (child.type) {
@@ -137,18 +142,9 @@ const renderHistoryChild = (
         imageId: child.characterDefinitionId,
         imageType: "cardFace",
         title: renderName(child.characterDefinitionId),
-        content: (
-          <>
-            <span>{t("history.switchActive")}</span>
-            <span>
-              (
-              {child.isOverloaded
-                ? t("history.overloaded")
-                : t("history.cardEffect")}
-              )
-            </span>
-          </>
-        ),
+        content: `${t("history.switchActive")}(${
+          child.isOverloaded ? t("history.overloaded") : t("history.cardEffect")
+        })`,
       };
       break;
     }
@@ -157,11 +153,7 @@ const renderHistoryChild = (
         opp: opp(child.who),
         imageId: child.callerDefinitionId,
         title: renderName(child.callerDefinitionId),
-        content: (
-          <>
-            <span>{t("history.willTriggered")}</span>
-          </>
-        ),
+        content: t("history.willTriggered"),
       };
       break;
     }
@@ -171,15 +163,9 @@ const renderHistoryChild = (
         opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>
-              {t(isOpp ? "history.oppDrawCards" : "history.myDrawCards", {
-                count: child.drawCardsCount,
-              })}
-            </span>
-          </>
-        ),
+        content: t(isOpp ? "history.oppDrawCards" : "history.myDrawCards", {
+          count: child.drawCardsCount,
+        }),
       };
       break;
     }
@@ -190,13 +176,7 @@ const renderHistoryChild = (
         imageId: child.cardDefinitionId,
         imageType: "cardFace",
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>
-              {t(isOpp ? "history.oppStealMyHand" : "history.myStealOppHand")}
-            </span>
-          </>
-        ),
+        content: t(isOpp ? "history.oppStealMyHand" : "history.myStealOppHand"),
       };
       break;
     }
@@ -208,50 +188,24 @@ const renderHistoryChild = (
           imageId: child.masterDefinitionId,
           imageType: "cardFace",
           title: renderName(child.masterDefinitionId),
-          content: (
-            <>
-              <span>
-                {t(
-                  child.entityType === "equipment"
-                    ? "history.createEquipment"
-                    : "history.createStatus",
-                )}
-              </span>
-              <Image
-                imageId={child.entityDefinitionId}
-                type="icon"
-                class="h-3.5 w-3.5"
-                fallback="state"
-              />
-              <span>{renderName(child.entityDefinitionId)}</span>
-            </>
-          ),
+          content:
+            t(
+              child.entityType === "equipment"
+                ? "history.createEquipment"
+                : "history.createStatus",
+            ) +
+            `<image id="${child.entityDefinitionId}" />` +
+            renderName(child.entityDefinitionId),
         };
       } else {
         // child.entityType === "combatStatus" | "summon" | "support"
+        const key =
+          `history.${isOpp ? "opp" : "my"}Create${child.entityType === "combatStatus" ? "CombatStatus" : child.entityType === "summon" ? "Summon" : "Support"}` as const;
         result = {
           opp: isOpp,
           imageId: child.entityDefinitionId,
           title: renderName(child.entityDefinitionId),
-          content: (
-            <>
-              <span>
-                {t(
-                  child.entityType === "combatStatus"
-                    ? isOpp
-                      ? "history.oppCreateCombatStatus"
-                      : "history.myCreateCombatStatus"
-                    : child.entityType === "summon"
-                      ? isOpp
-                        ? "history.oppCreateSummon"
-                        : "history.myCreateSummon"
-                      : isOpp
-                        ? "history.oppCreateSupport"
-                        : "history.myCreateSupport",
-                )}
-              </span>
-            </>
-          ),
+          content: t(key),
         };
       }
       break;
@@ -262,24 +216,11 @@ const renderHistoryChild = (
         opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>
-              {t(isOpp ? "history.oppGenerateDice" : "history.myGenerateDice", {
-                count: child.count,
-              })}
-            </span>
-            <Show when={child.diceType > 0}>
-              <DiceIcon size={14} type={child.diceType} selected={false} />
-            </Show>
-            <span>
-              {t("history.diceTypeLabel", {
-                dicetype:
-                  getDiceTypeText(child.diceType) ?? t("history.unknownDice"),
-              })}
-            </span>
-          </>
-        ),
+        content:
+          t(isOpp ? "history.oppGenerateDice" : "history.myGenerateDice", {
+            count: child.count,
+            diceType: diceIconAndText(child.diceType),
+          }),
       };
       break;
     }
@@ -289,15 +230,9 @@ const renderHistoryChild = (
         opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>
-              {t(isOpp ? "history.oppAbsorbDice" : "history.myAbsorbDice", {
-                count: child.count,
-              })}
-            </span>
-          </>
-        ),
+        content: t(isOpp ? "history.oppAbsorbDice" : "history.myAbsorbDice", {
+          count: child.count,
+        }),
       };
       break;
     }
@@ -308,20 +243,14 @@ const renderHistoryChild = (
         imageId: child.cardDefinitionId,
         imageType: "cardFace",
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>
-              {t(
-                child.target === "pile"
-                  ? isOpp
-                    ? "history.oppCreateCardToPile"
-                    : "history.myCreateCardToPile"
-                  : isOpp
-                    ? "history.oppGainHandCard"
-                    : "history.myGainHandCard",
-              )}
-            </span>
-          </>
+        content: t(
+          child.target === "pile"
+            ? isOpp
+              ? "history.oppCreateCardToPile"
+              : "history.myCreateCardToPile"
+            : isOpp
+              ? "history.oppGainHandCard"
+              : "history.myGainHandCard",
         ),
       };
       break;
@@ -332,16 +261,8 @@ const renderHistoryChild = (
         opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>
-              {t(
-                isOpp
-                  ? "history.oppSwitchHandOnce"
-                  : "history.mySwitchHandOnce",
-              )}
-            </span>
-          </>
+        content: t(
+          isOpp ? "history.oppSwitchHandOnce" : "history.mySwitchHandOnce",
         ),
       };
       break;
@@ -352,15 +273,9 @@ const renderHistoryChild = (
         opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>
-              {t(
-                isOpp ? "history.oppPutHandToPile" : "history.myPutHandToPile",
-                { count: child.count },
-              )}
-            </span>
-          </>
+        content: t(
+          isOpp ? "history.oppPutHandToPile" : "history.myPutHandToPile",
+          { count: child.count },
         ),
       };
       break;
@@ -371,20 +286,17 @@ const renderHistoryChild = (
         opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>
-              {t(
-                isOpp ? "history.oppRerolledTimes" : "history.myRerolledTimes",
-                { count: child.count },
-              )}
-            </span>
-          </>
+        content: t(
+          isOpp ? "history.oppRerolledTimes" : "history.myRerolledTimes",
+          { count: child.count },
         ),
       };
       break;
     }
     case "damage": {
+      const reactionText = child.reaction
+        ? reactionIconAndText(child.reaction, child.damageType)
+        : "";
       result = {
         opp: opp(child.who),
         imageId: child.characterDefinitionId,
@@ -395,44 +307,28 @@ const renderHistoryChild = (
           value: child.damageValue,
           special: child.causeDefeated,
         },
-        content: (
-          <>
-            <span>{t("history.takeDamage", { count: child.damageValue })}</span>
-            <Show when={child.damageType <= 7}>
-              <Image
-                imageId={child.damageType}
-                zero="physic"
-                class="h-3.5 w-3.5"
-                fallback="aura"
-              />
-            </Show>
-            <span
-              style={
-                child.damageType >= 1 && child.damageType <= 7
-                  ? { color: `var(--c-${DAMAGE_COLOR[child.damageType]})` }
-                  : void 0
-              }
-            >
-              {getDamageTypeText(child.damageType)}
-            </span>
-            <Show when={child.reaction}>
-              {(reaction) => renderReaction(reaction(), child.damageType)}
-            </Show>
-            <span>
-              {t("history.healthTo", {
-                old: child.oldHealth,
-                next: child.newHealth,
-              })}
-            </span>
-            <Show when={child.causeDefeated}>
-              <span>{t("history.defeated")}</span>
-            </Show>
-          </>
-        ),
+        content:
+          t("history.takeDamage", {
+            count: child.damageValue,
+            damageType: damageIconAndText(child.damageType),
+          }) +
+          reactionText +
+          t("history.healthTo", {
+            old: child.oldHealth,
+            next: child.newHealth,
+          }) +
+          (child.causeDefeated ? t("history.defeated") : ""),
       };
       break;
     }
     case "heal": {
+      const prefixTextKey =
+        child.healType === "revive"
+          ? "history.reviveAnd"
+          : child.healType === "immuneDefeated"
+            ? "history.immuneDefeatedAnd"
+            : ("history.healed" as const);
+
       result = {
         opp: opp(child.who),
         imageId: child.characterDefinitionId,
@@ -443,54 +339,28 @@ const renderHistoryChild = (
           value: child.healValue,
           special: child.healType !== "normal",
         },
-        content: (
-          <>
-            <Switch>
-              <Match when={child.healType === "revive"}>
-                <span>{t("history.reviveAnd")}</span>
-              </Match>
-              <Match when={child.healType === "immuneDefeated"}>
-                <span>{t("history.immuneDefeatedAnd")}</span>
-              </Match>
-              <Match when={child.healType === "normal"}>
-                <span>{t("history.healed", { count: child.healValue })}</span>
-              </Match>
-            </Switch>
-            <span>
-              {t("history.healthTo", {
-                old: child.oldHealth,
-                next: child.newHealth,
-              })}
-            </span>
-          </>
-        ),
+        content:
+          t(prefixTextKey, { count: child.healValue }) +
+          t("history.healthTo", {
+            old: child.oldHealth,
+            next: child.newHealth,
+          }),
       };
       break;
     }
     case "apply": {
+      const reactionText = child.reaction
+        ? reactionIconAndText(child.reaction, child.elementType)
+        : "";
       result = {
         opp: opp(child.who),
         imageId: child.characterDefinitionId,
         imageType: "cardFace",
         title: renderName(child.characterDefinitionId),
-        content: (
-          <>
-            <span>{t("history.applyElement")}</span>
-            <Image
-              imageId={child.elementType}
-              class="h-3.5 w-3.5"
-              fallback="aura"
-            />
-            <span
-              style={{ color: `var(--c-${DAMAGE_COLOR[child.elementType]})` }}
-            >
-              {getApplyTypeText(child.elementType)}
-            </span>
-            <Show when={child.reaction}>
-              {(reaction) => renderReaction(reaction(), child.elementType)}
-            </Show>
-          </>
-        ),
+        content:
+          t("history.applyElement", {
+            elementType: applyIconAndText(child.elementType),
+          }) + reactionText,
       };
       break;
     }
@@ -501,41 +371,29 @@ const renderHistoryChild = (
         imageId: child.characterDefinitionId,
         imageType: "cardFace",
         title: renderName(child.characterDefinitionId),
-        content: (
-          <>
-            <span>{t("history.gainMaxHealth", { count: increaseValue })}</span>
-            <span>
-              {t("history.maxHealthTo", {
-                old: child.oldMaxHealth,
-                next: child.newMaxHealth,
-              })}
-            </span>
-          </>
-        ),
+        content: t("history.gainMaxHealth", {
+          count: increaseValue,
+          old: child.oldMaxHealth,
+          next: child.newMaxHealth,
+        }),
       };
       break;
     }
     case "energy": {
       const energyValue = child.newEnergy - child.oldEnergy;
+      const payload = {
+        count: Math.abs(energyValue),
+        old: child.oldEnergy,
+        next: child.newEnergy,
+      };
       result = {
         opp: opp(child.who),
         imageId: child.characterDefinitionId,
         imageType: "cardFace",
         title: renderName(child.characterDefinitionId),
-        content: (
-          <>
-            <span>
-              {energyValue > 0
-                ? t("history.gainEnergy", { count: Math.abs(energyValue) })
-                : t("history.loseEnergy", { count: Math.abs(energyValue) })}
-            </span>
-            <span>
-              {t("history.energyTo", {
-                old: child.oldEnergy,
-                next: child.newEnergy,
-              })}
-            </span>
-          </>
+        content: t(
+          energyValue > 0 ? "history.gainEnergy" : "history.loseEnergy",
+          payload,
         ),
       };
       break;
@@ -547,13 +405,7 @@ const renderHistoryChild = (
         imageId: child.cardDefinitionId,
         imageType: "cardFace",
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>
-              {t(isOpp ? "history.oppDiscardHand" : "history.myDiscardHand")}
-            </span>
-          </>
-        ),
+        content: t(isOpp ? "history.oppDiscardHand" : "history.myDiscardHand"),
       };
       break;
     }
@@ -562,14 +414,7 @@ const renderHistoryChild = (
         opp: opp(child.who),
         imageId: child.cardDefinitionId,
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>{child.variableName}：</span>
-            <span>
-              {child.oldValue}→{child.newValue}
-            </span>
-          </>
-        ),
+        content: `${child.variableName}: ${child.oldValue}→${child.newValue}`,
       };
       break;
     }
@@ -580,23 +425,15 @@ const renderHistoryChild = (
           imageId: child.masterDefinitionId,
           imageType: "cardFace",
           title: renderName(child.masterDefinitionId),
-          content: (
-            <>
-              <span>
-                {t(
-                  child.entityType === "equipment"
-                    ? "history.removeEquipment"
-                    : "history.removeStatus",
-                )}
-              </span>
-              <Image
-                imageId={child.entityDefinitionId}
-                type="icon"
-                class="h-3.5 w-3.5"
-                fallback="state"
-              />
-              <span>{renderName(child.entityDefinitionId)}</span>
-            </>
+          content: t(
+            child.entityType === "equipment"
+              ? "history.removeEquipment"
+              : "history.removeStatus",
+            {
+              entity:
+                `<image id="${child.entityDefinitionId}" />` +
+                renderName(child.entityDefinitionId),
+            },
           ),
         };
       } else {
@@ -605,18 +442,12 @@ const renderHistoryChild = (
           opp: opp(child.who),
           imageId: child.entityDefinitionId,
           title: renderName(child.entityDefinitionId),
-          content: (
-            <>
-              <span>
-                {t(
-                  child.entityType === "combatStatus"
-                    ? "history.removeCombatStatus"
-                    : child.entityType === "summon"
-                      ? "history.removeSummon"
-                      : "history.removeSupport",
-                )}
-              </span>
-            </>
+          content: t(
+            child.entityType === "combatStatus"
+              ? "history.removeCombatStatus"
+              : child.entityType === "summon"
+                ? "history.removeSummon"
+                : "history.removeSupport",
           ),
         };
       }
@@ -624,39 +455,17 @@ const renderHistoryChild = (
     }
     case "convertDice": {
       const isOpp = opp(child.who);
+      const key =
+        `history.${isOpp ? "opp" : "my"}Convert${child.count ? "To" : "Some"}Dice` as const;
       result = {
         opp: isOpp,
         imageId: child.isTuning ? "tuning" : parentCallerDefinitionId,
         title: child.isTuning
           ? t("history.elementalTuning")
           : renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>
-              {child.count
-                ? t(
-                    isOpp
-                      ? "history.oppConvertToDice"
-                      : "history.myConvertToDice",
-                    { count: child.count },
-                  )
-                : t(
-                    isOpp
-                      ? "history.oppConvertSomeDice"
-                      : "history.myConvertSomeDice",
-                  )}
-            </span>
-            <Show when={child.diceType > 0}>
-              <DiceIcon size={14} type={child.diceType} selected={false} />
-            </Show>
-            <span>
-              {t("history.diceTypeLabel", {
-                dicetype:
-                  getDiceTypeText(child.diceType) ?? t("history.unknownDice"),
-              })}
-            </span>
-          </>
-        ),
+        content: t(key, {
+          diceType: diceIconAndText(child.diceType),
+        }),
       };
       break;
     }
@@ -666,11 +475,7 @@ const renderHistoryChild = (
         imageId: child.cardDefinitionId,
         imageType: "cardFace",
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>{t("history.blockedNoEffect")}</span>
-          </>
-        ),
+        content: t("history.blockedNoEffect"),
       };
       break;
     }
@@ -679,16 +484,10 @@ const renderHistoryChild = (
         opp: opp(child.who),
         imageId: child.cardDefinitionId,
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>
-              {t(
-                child.stage === "old"
-                  ? "history.transformOld"
-                  : "history.transformNew",
-              )}
-            </span>
-          </>
+        content: t(
+          child.stage === "old"
+            ? "history.transformOld"
+            : "history.transformNew",
         ),
       };
       break;
@@ -698,15 +497,9 @@ const renderHistoryChild = (
         opp: opp(child.who),
         imageId: child.character0DefinitionId,
         title: renderName(child.character0DefinitionId),
-        content: (
-          <>
-            <span>
-              {t("history.swapPosition", {
-                name: renderName(child.character1DefinitionId) ?? "???",
-              })}
-            </span>
-          </>
-        ),
+        content: t("history.swapPosition", {
+          name: renderName(child.character1DefinitionId) ?? "???",
+        }),
       };
       break;
     }
@@ -716,11 +509,7 @@ const renderHistoryChild = (
         imageId: child.cardDefinitionId,
         imageType: "cardFace",
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>{t("history.overflowCard")}</span>
-          </>
-        ),
+        content: t("history.overflowCard"),
       };
       break;
     }
@@ -728,7 +517,7 @@ const renderHistoryChild = (
       result = {
         opp: false,
         title: "",
-        content: <></>,
+        content: "",
       };
       break;
     }
@@ -1298,11 +1087,11 @@ interface HistoryBlockData {
   energyChange?: blockEnergyProps;
   status?: number;
   combatStatus?: number;
-  content: blockDetailProps;
+  content: BlockDetailProps;
   summary: SummaryShot[];
 }
 
-interface blockDetailProps {
+interface BlockDetailProps {
   opp: boolean;
   imageId?: number;
   name?: string;
@@ -1489,7 +1278,9 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           name: renderName(block.masterOrCallerDefinitionId),
           content: !block.callerOrSkillDefinitionId ? (
             <>
-              <div class="text-3 text-#d4bc8e">{t("history.willTriggered")}</div>
+              <div class="text-3 text-#d4bc8e">
+                {t("history.willTriggered")}
+              </div>
             </>
           ) : block.callerOrSkillDefinitionId ===
             block.masterOrCallerDefinitionId ? (
@@ -1503,7 +1294,9 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           ) : (
             <>
               <div class="flex flex-col gap-1">
-                <div class="text-3 text-#d4bc8e">{t("history.willTriggered")}</div>
+                <div class="text-3 text-#d4bc8e">
+                  {t("history.willTriggered")}
+                </div>
                 <div class="flex flex-row items-center gap-1">
                   <div class="h-7 w-7 rounded-full b-1 b-white/30 flex items-center justify-center">
                     <Image
@@ -1724,8 +1517,8 @@ function HistoryChildBox(props: { data: HistoryChildData }) {
             )}
           </Show>
         </div>
-        <div class="flex flex-row text-2.5 text-#b2afa8 font-bold">
-          {props.data.content}
+        <div class="flex flex-row text-2.5 text-#b2afa8 font-bold history-children">
+          <RichText content={props.data.content} />
         </div>
       </div>
     </div>

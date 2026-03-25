@@ -1,3 +1,18 @@
+// Copyright (C) 2026 Piovium Labs
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 export default {
   reaction: {
     Melt: "融化",
@@ -28,7 +43,7 @@ export default {
     Void: "任意元素",
     Elemental: "元素",
 
-    tuneToDice: "调和为{{dicetype}}骰",
+    tuneToDice: "调和为{{diceType}}骰",
 
     chooseSupportToDispose: "支援区已满，需先选择一张支援牌弃置",
     // chooseEquipmentToReplace: "已有同类装备，打出后将覆盖原有装备",
@@ -45,8 +60,7 @@ export default {
 
     payCostNoDice: "无需支付更多元素骰",
     payCost: "请支付{{cost}}",
-    payCostDiceCountLabel: "{{count}}个",
-    payCostDiceTypeLabel: "{{dicetype}}骰",
+    payCostSingle: "{{count}}个{{diceType}}骰",
     payCostAndSeparator: "和",
 
     playCardHint: "打出手牌「{{name}}」",
@@ -84,8 +98,8 @@ export default {
     createEquipment: "附属装备：",
 
     removeCombatStatus: "出战状态消失",
-    removeStatus: "失去状态：",
-    removeEquipment: "失去装备：",
+    removeStatus: "失去状态：{{entity}}",
+    removeEquipment: "失去装备：{{entity}}",
     removeSummon: "召唤物弃置",
     removeSupport: "支援区卡牌弃置",
 
@@ -112,8 +126,8 @@ export default {
     myCreateSupport: "我方生成支援区卡牌",
     oppCreateSupport: "对方生成支援区卡牌",
 
-    myGenerateDice: "我方生成{{count}}个",
-    oppGenerateDice: "对方生成{{count}}个",
+    myGenerateDice: "我方生成{{count}}个{{diceType}}骰",
+    oppGenerateDice: "对方生成{{count}}个{{diceType}}骰",
 
     myAbsorbDice: "我方弃置了{{count}}个元素骰",
     oppAbsorbDice: "对方弃置了{{count}}个元素骰",
@@ -132,7 +146,7 @@ export default {
     myRerolledTimes: "我方进行了{{count}}次重投",
     oppRerolledTimes: "对方进行了{{count}}次重投",
 
-    takeDamage: "受到{{count}}点",
+    takeDamage: "受到{{count}}点{{damageType}}",
     healthTo: "，生命值{{old}}→{{next}}",
     defeated: "，被击倒",
 
@@ -140,25 +154,22 @@ export default {
     immuneDefeatedAnd: "角色免于被击倒，并受到{{count}}点治疗",
     healed: "受到{{count}}点治疗",
 
-    applyElement: "附着",
+    applyElement: "附着{{elementType}}",
 
-    gainMaxHealth: "获得{{count}}点最大生命值",
-    maxHealthTo: "，最大生命值{{old}}→{{next}}",
+    gainMaxHealth: "获得{{count}}点最大生命值，最大生命值{{old}}→{{next}}",
 
-    gainEnergy: "获得{{count}}点充能",
-    loseEnergy: "消耗{{count}}点充能",
-    energyTo: "，充能值{{old}}→{{next}}",
+    gainEnergy: "获得{{count}}点充能，充能值{{old}}→{{next}}",
+    loseEnergy: "消耗{{count}}点充能，充能值{{old}}→{{next}}",
 
     myDiscardHand: "我方舍弃手牌",
     oppDiscardHand: "对方舍弃手牌",
 
     elementalTuning: "元素调和",
 
-    diceTypeLabel: "{{dicetype}}骰",
-    myConvertToDice: "我方将{{count}}个元素骰转换为",
-    oppConvertToDice: "对方将{{count}}个元素骰转换为",
-    myConvertSomeDice: "我方将若干元素骰转换为",
-    oppConvertSomeDice: "对方将若干元素骰转换为",
+    myConvertToDice: "我方将{{count}}个元素骰转换为{{diceType}}骰",
+    oppConvertToDice: "对方将{{count}}个元素骰转换为{{diceType}}骰",
+    myConvertSomeDice: "我方将若干元素骰转换为{{diceType}}骰",
+    oppConvertSomeDice: "对方将若干元素骰转换为{{diceType}}骰",
 
     blockedNoEffect: "遭到反制，未能生效",
 

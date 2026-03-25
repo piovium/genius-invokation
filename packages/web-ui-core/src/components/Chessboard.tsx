@@ -145,6 +145,7 @@ import { FastActionMarker } from "./FastActionMarker";
 import { TransformWrapper, type Rotation } from "./TransformWrapper";
 import { MiniSpecialViewGroup } from "./MiniSpecialView";
 import type { OppInfo } from "../opp";
+import { RichText } from "./RichText";
 
 export type CardArea = "myPile" | "oppPile" | "myHand" | "oppHand";
 
@@ -1215,7 +1216,7 @@ export function Chessboard(props: ChessboardProps) {
             setSelectedDice(selectingDice);
           }
           if (actionState.alertText) {
-            showAlert(actionState.alertText);
+            showAlert(<RichText content={actionState.alertText} />);
           }
           setDicePanelState(actionState.dicePanel);
         } else if (prevActionState) {

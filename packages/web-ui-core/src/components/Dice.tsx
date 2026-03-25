@@ -91,7 +91,8 @@ function LegendIcon(props: { size: number }) {
 }
 
 export function DiceIcon(props: {
-  size: number;
+  class?: string;
+  size?: number;
   type: DiceType;
   selected: boolean;
 }) {
@@ -101,10 +102,10 @@ export function DiceIcon(props: {
       height="14"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 15 15"
-      class="fill-current w-10 h-10"
+      class={`dice-icon fill-current w-10 h-10 ${props.class ?? ""}`}
       style={{
-        height: `${props.size}px`,
-        width: `${props.size}px`,
+        height: props.size ? `${props.size}px` : void 0,
+        width: props.size ? `${props.size}px` : void 0,
         color: `var(--c-${DICE_COLOR[props.type]})`,
       }}
     >
