@@ -29,7 +29,7 @@ export function NotificationBox(props: NotificationBoxProps) {
 
   const skillName = () =>
     typeof props.data.skillDefinitionId === "number"
-      ? assetsManager().getNameSync(Math.floor(props.data.skillDefinitionId))
+      ? assetsManager().getNameSync(props.data.skillDefinitionId)
       : void 0;
   const characterName = () =>
     assetsManager().getNameSync(props.data.characterDefinitionId);
@@ -80,7 +80,7 @@ export function NotificationBox(props: NotificationBoxProps) {
                     <>
                       <div class="absolute h-8 w-8 rounded-full bg-[var(--inner-background-color)] b-[var(--inner-border-color)] border-1 translate-x-50% translate-y--50% right-0 top-50% justify-center items-center p-0.3">
                         <Image
-                          imageId={Math.floor(skillDefinitionId())}
+                          imageId={skillDefinitionId()}
                           type="icon"
                           class="h-full w-full"
                           data-opp={props.opp}

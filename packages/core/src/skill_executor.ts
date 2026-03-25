@@ -171,7 +171,7 @@ export class SkillExecutor {
           who: callerArea.who,
           callerId,
           callerDefinitionId,
-          skillDefinitionId: skillDef.id,
+          skillDefinitionId: Math.floor(skillDef.id),
           skillType,
           triggeredOn: skillDef.triggerOn,
         });
