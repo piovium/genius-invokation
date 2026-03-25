@@ -20,7 +20,7 @@ export function ConfirmButton(props: ConfirmButtonProps) {
     >
       <Show when={props.step?.isEffectless}>
         <div class="text-#ffdada bg-#ca2527/80 rounded-full px-2 py-0 text-3.5 font-bold shadow-[0_0_16px_#ca2527aa,0_0_12px_#ca2527bb,0_0_8px_#ca2527cc]">
-          {t("invalidatedCardEffect")}
+          {t("bottom_invalidatedCardEffectHint")}
         </div>
       </Show>
       <Button onClick={() => props.step && props.onClick?.(props.step)}>

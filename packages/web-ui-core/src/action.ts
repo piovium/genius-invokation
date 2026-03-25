@@ -41,26 +41,30 @@ import type { AssetsManager } from "@gi-tcg/assets-manager";
 import type { ReactionInfo } from "./components/Chessboard";
 import type { Translator } from "./hooks/context";
 
-function getTuneToDiceText(type: DiceType, t: Translator) {
+function getDiceText(type: DiceType, t: Translator) {
   switch (type) {
     case DiceType.Cryo:
-      return t("actionTuneToCryoDice");
+      return t("action_Cryo");
     case DiceType.Hydro:
-      return t("actionTuneToHydroDice");
+      return t("action_Hydro");
     case DiceType.Pyro:
-      return t("actionTuneToPyroDice");
+      return t("action_Pyro");
     case DiceType.Electro:
-      return t("actionTuneToElectroDice");
+      return t("action_Electro");
     case DiceType.Anemo:
-      return t("actionTuneToAnemoDice");
+      return t("action_Anemo");
     case DiceType.Geo:
-      return t("actionTuneToGeoDice");
+      return t("action_Geo");
     case DiceType.Dendro:
-      return t("actionTuneToDendroDice");
+      return t("action_Dendro");
     case DiceType.Omni:
-      return t("actionTuneToOmniDice");
+      return t("action_Omni");
+    case DiceType.Aligned:
+      return t("action_Aligned");
+    case DiceType.Void:
+      return t("action_Void");
     default:
-      return t("actionTuneToUnknownDice");
+      return t("action_Elemental");
   }
 }
 
@@ -75,13 +79,17 @@ export function getHintTextOfCardOrSkill(
       | SkillRawData
       | ActionCardRawData;
     if (data.type === "GCG_CARD_ASSIST") {
-      return Array.from({ length: 2 }, () => t("chooseSupportToDispose"));
+      return Array.from({ length: 2 }, () =>
+        t("action_chooseSupportToDispose"),
+      );
     }
     const result = data.targetList.map((x) => x.hintText);
     result.push(result.at(-1)!);
     return result;
   } catch (e) {
-    return Array.from({ length: targetLength }, () => t("applyToTarget"));
+    return Array.from({ length: targetLength }, () =>
+      t("action_applyToTarget"),
+    );
   }
 }
 
@@ -391,15 +399,15 @@ const validityText = (
 ): string | undefined => {
   switch (validity) {
     case ActionValidity.CONDITION_NOT_MET:
-      return t("conditionNotMet");
+      return t("action_conditionNotMet");
     case ActionValidity.NO_TARGET:
-      return t("noTarget");
+      return t("action_noTarget");
     case ActionValidity.DISABLED:
-      return t("disabled");
+      return t("action_disabled");
     case ActionValidity.NO_DICE:
-      return t("noDice");
+      return t("action_noDice");
     case ActionValidity.NO_ENERGY:
-      return t("noEnergy");
+      return t("action_noEnergy");
   }
 };
 
@@ -471,21 +479,24 @@ function diceReqText(
   diceReq: Map<DiceType, number>,
   ctx: { assetsManager: AssetsManager; t: Translator },
 ) {
+  if ([...diceReq].reduce((acc, [k, v]) => acc + v, 0) === 0) {
+    return ctx.t("action_payCostNoDice");
+  }
   const diceText = Array.from(diceReq.entries()).map(([type, count]) => {
-    const shifted = ((type + 8) % 9) + 1;
-    const name =
-      (ctx.assetsManager.getNameSync(-300 - shifted) ?? "")
-        .replace(/无色|Unaligned/, ctx.t("any"))
-        .replace(/相同|Matching/, count === 1 ? "" : ctx.t("same")) +
-      ctx.t("diceSuffix");
+    const typeText = ctx.t("action_payCostDiceTypeLabel", {
+      dicetype:
+        type === DiceType.Aligned && count === 1
+          ? ctx.t("action_Elemental")
+          : getDiceText(type, ctx.t),
+    });
     const style =
       type >= 1 && type <= 7 ? `color: var(--c-${DICE_COLOR[type]});` : "";
-    return ctx.t("diceCountLabel", {
-      count,
-      die: `<span style="${style}">${name}</span>`,
-    });
+    const countText = ctx.t("action_payCostDiceCountLabel", { count });
+    return `${countText}<span style="${style}">${typeText}</span>`;
   });
-  return ctx.t("payCost", { cost: diceText.join(ctx.t("andSeparator")) });
+  return ctx.t("action_payCost", {
+    cost: diceText.join(ctx.t("action_payCostAndSeparator")),
+  });
 }
 
 function createPlayCardActionState(
@@ -546,7 +557,7 @@ function createPlayCardActionState(
   }
   const CONFIRM_BUTTON_STEP: ClickConfirmButtonActionStep = {
     type: "clickConfirmButton",
-    confirmText: ctx.t("confirm"),
+    confirmText: ctx.t("action_confirmButtonDefault"),
     isEffectless: ctx.action.value.willBeEffectless,
   };
   const resultState: ActionState = {
@@ -558,7 +569,7 @@ function createPlayCardActionState(
     realCosts: root.realCosts,
     showHands: false,
     showSkillButtons: false,
-    hintText: ctx.t("playCardHint", {
+    hintText: ctx.t("action_playCardHint", {
       name:
         ctx.assetsManager.getNameSync(ctx.action.value.cardDefinitionId) ??
         "???",
@@ -653,7 +664,9 @@ function createMultiStepState<T>(
     if (node.type === "leaf") {
       const CLICK_CONFIRM_STEP: ClickConfirmButtonActionStep = {
         type: "clickConfirmButton",
-        confirmText: isSkill ? ctx.t("confirm") : ctx.t("playCard"),
+        confirmText: isSkill
+          ? ctx.t("action_confirmButtonDefault")
+          : ctx.t("action_confirmButtonPlayCard"),
         isEffectless: ctx.isEffectless,
       };
       const CLICK_ENTITY_STEP: ClickEntityActionStep = {
@@ -713,7 +726,7 @@ function createMultiStepState<T>(
               type: "newState",
               newState: {
                 ...resultState,
-                alertText: ctx.t("chooseTarget"),
+                alertText: ctx.t("action_chooseTarget"),
               },
             };
           } else {
@@ -751,7 +764,7 @@ function createMultiStepState<T>(
               type: "newState",
               newState: {
                 ...resultState,
-                alertText: ctx.t("chooseTarget"),
+                alertText: ctx.t("action_chooseTarget"),
               },
             };
           } else {
@@ -920,7 +933,7 @@ function createElementalTuningActionState(
 ): ActionState {
   const CONFIRM_BUTTON_ACTION: ClickConfirmButtonActionStep = {
     type: "clickConfirmButton",
-    confirmText: ctx.t("elementalTuning"),
+    confirmText: ctx.t("action_confirmButtonElementalTuning"),
   };
   const targetDice = ctx.action.value.targetDice as DiceType;
   const disabledDiceTypes = [DiceType.Omni, targetDice];
@@ -929,7 +942,9 @@ function createElementalTuningActionState(
     realCosts: root.realCosts,
     showHands: false,
     showSkillButtons: false,
-    hintText: getTuneToDiceText(targetDice, ctx.t),
+    hintText: ctx.t("action_tuneToDice", {
+      dicetype: getDiceText(targetDice, ctx.t),
+    }),
     dicePanel: "visible",
     autoSelectedDice: ctx.action.autoSelectedDice as DiceType[],
     maxSelectedDiceCount: 1,
@@ -952,7 +967,7 @@ function createElementalTuningActionState(
             type: "newState",
             newState: {
               ...resultState,
-              alertText: ctx.t("chooseOneDiceToTune"),
+              alertText: ctx.t("action_chooseOneDiceToTune"),
             },
           };
         }
@@ -1017,7 +1032,7 @@ function createSwitchActiveActionState(
     realCosts: root.realCosts,
     showHands: false,
     showSkillButtons: true,
-    hintText: ctx.t("switchRoleHint", {
+    hintText: ctx.t("action_switchRoleHint", {
       name:
         ctx.assetsManager.getNameSync(ctx.action.value.characterDefinitionId) ??
         "???",
@@ -1310,7 +1325,7 @@ export function createChooseActiveState(
     showBackdrop: false,
     showHands: true,
     showSkillButtons: true,
-    hintText: t("chooseActiveCharacter"),
+    hintText: t("action_chooseActiveCharacter"),
     isFast: false,
     step: (step) => {
       if (step === CANCEL_ACTION_STEP) {
@@ -1320,7 +1335,7 @@ export function createChooseActiveState(
           type: "newState",
           newState: {
             ...root,
-            alertText: t("chooseActiveCharacter"),
+            alertText: t("action_chooseActiveCharacter"),
           },
         };
       } else if (step.type === "clickEntity") {
@@ -1359,7 +1374,7 @@ export function createChooseActiveState(
       showBackdrop: false,
       showHands: true,
       showSkillButtons: true,
-      hintText: t("chooseActiveCharacter"),
+      hintText: t("action_chooseActiveCharacter"),
       isFast: false,
       step: (step, dice) => {
         if (step === CANCEL_ACTION_STEP) {

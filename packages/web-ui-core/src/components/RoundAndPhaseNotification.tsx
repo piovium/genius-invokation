@@ -38,9 +38,9 @@ export function RoundAndPhaseNotification(
 ) {
   const { t } = useUiContext();
   const phaseText = createMemo<Record<PbPhaseType, string>>(() => ({
-    [PbPhaseType.ROLL]: t("rollPhase"),
-    [PbPhaseType.ACTION]: t("actionPhase"),
-    [PbPhaseType.END]: t("endPhase"),
+    [PbPhaseType.ROLL]: t("phase_rollPhase"),
+    [PbPhaseType.ACTION]: t("phase_actionPhase"),
+    [PbPhaseType.END]: t("phase_endPhase"),
     [PbPhaseType.INIT_ACTIVES]: "",
     [PbPhaseType.INIT_HANDS]: "",
     [PbPhaseType.GAME_END]: "",
@@ -77,14 +77,14 @@ export function RoundAndPhaseNotification(
             bool:data-opp={opp()}
           >
             {props.info.value === "action"
-              ? t(opp() ? "hintOppActionTurn" : "hintMyActionTurn")
+              ? t(opp() ? "phase_oppActionTurn" : "phase_myActionTurn")
               : t(
                   opp()
-                    ? "hintOppDeclareEndTurn"
-                    : "hintMyDeclareEndTurn",
+                    ? "phase_oppDeclareEndTurn"
+                    : "phase_myDeclareEndTurn",
                 )}
             <Show when={props.info.value === "declareEnd" && !isFirst()}>
-              {t("gainFirst")}
+              {t("phase_gainFirst")}
             </Show>
           </div>
         </Match>
@@ -95,13 +95,13 @@ export function RoundAndPhaseNotification(
           bool:data-opp={props.currentTurn !== props.who}
         >
           <h5 class="font-bold text-3">
-            {t("round", { round: props.roundNumber })}
+            {t("phase_round", { round: props.roundNumber })}
           </h5>
           <span>
             {t(
               props.currentTurn === props.who
-                ? "hintMySideFirst"
-                : "hintOppSideFirst",
+                ? "phase_mySideFirst"
+                : "phase_oppSideFirst",
             )}
           </span>
         </div>

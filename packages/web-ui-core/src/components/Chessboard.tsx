@@ -1957,7 +1957,7 @@ export function Chessboard(props: ChessboardProps) {
               <Show when={localProps.data.state.phase !== PbPhaseType.GAME_END}>
                 <ExitButton
                   onClick={async () => {
-                    if (await confirm(t("confirmGiveUpGame"))) {
+                    if (await confirm(t("ui_confirmGiveUpGame"))) {
                       localProps.onGiveUp?.();
                     }
                   }}
@@ -1984,7 +1984,7 @@ export function Chessboard(props: ChessboardProps) {
         <Show when={localProps.opp && localProps.liveStreamingMode}>
           <div class="absolute top-2.5 right-[calc(var(--chessboard-right-offset)+0.625rem)] flex flex-row-reverse gap-2">
             <div class="h-8 w-24 flex items-center justify-center rounded-full b-2 line-height-none font-bold bg-#e9e2d3 text-black/70 b-black/70">
-              {t("liveStreamingMode")}
+              {t("ui_liveStreamingMode")}
             </div>
           </div>
         </Show>
@@ -1996,8 +1996,8 @@ export function Chessboard(props: ChessboardProps) {
           <div class="absolute inset-0 bg-black/85 flex items-center justify-center flex-col z-50">
             <div class="font-bold text-4xl text-white my-10">
               {localProps.data.state.winner === localProps.who
-                ? t("gameVictory")
-                : t("gameDefeat")}
+                ? t("ui_gameVictory")
+                : t("ui_gameDefeat")}
             </div>
             {localProps.gameEndExtra}
           </div>

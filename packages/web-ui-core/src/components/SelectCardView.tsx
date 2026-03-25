@@ -42,7 +42,7 @@ export function SelectCardView(props: SelectCardViewProps) {
 
   return (
     <div class="absolute inset-0 flex flex-col items-center justify-center gap-10 select-none">
-      <h3 class="font-bold text-3xl">{t("chooseCard")}</h3>
+      <h3 class="font-bold text-3xl">{t("view_chooseCard")}</h3>
       <ul class="flex flex-row gap-1">
         <For each={props.candidateIds}>
           {(cardId) => (
@@ -85,7 +85,7 @@ export function SelectCardView(props: SelectCardViewProps) {
             }
           }}
         >
-          {t("confirm")}
+          {t("view_confirmButton")}
         </Button>
       </div>
     </div>
