@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { EntityDefinition, CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, pair, status, summon, originalDiceCostOfCard } from "@gi-tcg/core/builder";
+import { EntityDefinition, CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, status, summon, originalDiceCostOfCard } from "@gi-tcg/core/builder";
 import { BurningFlame, CatalyzingField, DendroCore, EfficientSwitch, Empowerment, ResistantForm, Shield } from "../../commons";
 import { BountifulCore } from "../../characters/hydro/nilou";
 
@@ -917,9 +917,9 @@ export const [Pankration] = card(332023)
   .done();
 
 const LyresongIsFirstExtension = extension(332024, { first: "pair<boolean>" })
-  .initialState({ first: pair(true) })
+  .initialState({ first: [true, true] })
   .description("打出琴音之诗前该方该轮次未打出过其他行动牌")
-  .mutateWhen("onRoundEnd", (c) => c.first = pair(true))
+  .mutateWhen("onRoundEnd", (c) => c.first = [true, true])
   .mutateWhen("onPlayCard", (c, e) => c.first[e.who] = false)
   .done();
 
@@ -2028,8 +2028,8 @@ export const DisposedSupportAndSummonsCountExtension = extension(332051, {
   disposedSummonsCount: "pair<number>",
 })
   .initialState({
-    disposedSupportCount: pair(0),
-    disposedSummonsCount: pair(0),
+    disposedSupportCount: [0, 0],
+    disposedSummonsCount: [0, 0],
   })
   .description("记录本场对局中双方支援区和召唤区弃置卡牌的数量")
   .mutateWhen("onDispose", (st, e) => {

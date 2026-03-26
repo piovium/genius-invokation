@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DamageType, DiceType, card, combatStatus, extension, pair } from "@gi-tcg/core/builder";
+import { DamageType, DiceType, card, combatStatus, extension } from "@gi-tcg/core/builder";
 
 /**
  * @id 323001
@@ -124,7 +124,7 @@ export const SeedDispensary = card(323005)
   .done();
 
 const CardPlayedExtension = extension(323006, { played: "pair<number[]>" })
-  .initialState({ played: pair([]) })
+  .initialState({ played: [[], []] })
   .description("记录本场对局中双方曾经打出过的行动牌")
   .mutateWhen("onAction", (st, e) => {
     if (e.isPlayCard()) {

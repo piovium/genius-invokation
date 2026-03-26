@@ -94,7 +94,6 @@ export class ExtensionBuilder<ExtStateType> {
 
 import {
   type,
-  type Type,
   type TypeInfer,
   type TypeValidate,
 } from "@gi-tcg/utils";

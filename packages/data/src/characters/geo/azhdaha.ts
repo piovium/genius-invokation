@@ -13,13 +13,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, DiceType, CharacterHandle, Aura, extension, pair, type, Pair } from "@gi-tcg/core/builder";
+import { character, skill, status, card, DamageType, DiceType, CharacterHandle, Aura, extension, type, Pair } from "@gi-tcg/core/builder";
 
 const AbsorbedCountExtension = extension(2602, {
     absorbed: type.declare<Pair<DiceType[]>>().type("pair<number[]>")
   })
   .initialState({
-    absorbed: pair([])
+    absorbed: [[], []],
   })
   .description("记录某方若陀龙王已汲取过的元素类型")
   .done();

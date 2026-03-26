@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { EntityDefinition } from "@gi-tcg/core";
-import { card, combatStatus, DamageType, extension, pair, status, StatusHandle } from "@gi-tcg/core/builder";
+import { card, combatStatus, DamageType, extension, status, StatusHandle } from "@gi-tcg/core/builder";
 
 /**
  * @id 313001
@@ -292,7 +292,7 @@ export const Tatankasaurus = card(313008)
   .done();
 
 export const TechniquesPlayedCountExtension = extension(301306, { techniquesPlayedCount: "pair<number>" })
-  .initialState({ techniquesPlayedCount: pair(0) })
+  .initialState({ techniquesPlayedCount: [0, 0] })
   .description("记录本场对局中双方打出特技牌的数量")
   .mutateWhen("onPlayCard", (c, e) => {
     if (e.card.definition.tags.includes("technique")) {

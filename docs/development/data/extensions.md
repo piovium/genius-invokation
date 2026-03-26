@@ -7,7 +7,8 @@
 ```ts
 import { extension, pair } from "@gi-tcg/core/builder";
 
-const DisposedSupportCountExtension = extension(322022, { disposedSupportCount: pair(0) })
+const DisposedSupportCountExtension = extension(322022, { disposedSupportCount: "pair<number>" })
+  .initialState({ disposedSupportCount: [0, 0] })
   .mutateWhen("onDispose", (st, e) => {
     if (e.entity.definition.type === "support") {
       st.disposedSupportCount[e.who]++;

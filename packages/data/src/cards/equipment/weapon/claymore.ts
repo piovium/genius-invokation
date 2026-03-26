@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, combatStatus, extension, pair, status } from "@gi-tcg/core/builder";
+import { card, combatStatus, extension, status } from "@gi-tcg/core/builder";
 
 /**
  * @id 311301
@@ -198,7 +198,7 @@ export const ForestRegalia = card(311307)
   .done();
 
 export const NonInitialPlayedCardExtension = extension(311308, { defIds: "pair<number[]>" })
-  .initialState({ defIds: pair([]) })
+  .initialState({ defIds: [[], []] })
   .description("记录双方打出过的名称不存在于本局最初牌组中的不同名的行动牌")
   .mutateWhen("onPlayCard", (c, e) => {
     if (e.onTimeState.players[e.who].initialPile.every((card) => card.id !== e.card.definition.id)) {
