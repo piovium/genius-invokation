@@ -68,7 +68,8 @@ export const TrailOfTheQilin = skill(11012)
   .combatStatus(IceLotus)
   .done();
 
-const FrostflakeArrowUsedExtension = extension(11013, { used: pair(false) })
+const FrostflakeArrowUsedExtension = extension(11013, { used: "pair<boolean>" })
+  .initialState({ used: pair(false) })
   .description("本场对局中某方曾经使用过霜华矢")
   .done();
 

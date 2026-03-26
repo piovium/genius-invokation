@@ -22,6 +22,8 @@ export interface ExtensionDefinition {
   readonly id: number;
   readonly version: VersionInfo;
   readonly description: string;
+  /** JSON Schema for the state */
+  readonly schema: unknown;
   readonly initialState: unknown;
   readonly skills: readonly SkillDefinition[];
 }

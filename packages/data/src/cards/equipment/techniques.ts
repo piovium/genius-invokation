@@ -291,7 +291,8 @@ export const Tatankasaurus = card(313008)
   .characterStatus(TatankasaurusStatus01, "@master")
   .done();
 
-export const TechniquesPlayedCountExtension = extension(301306, { techniquesPlayedCount: pair(0) })
+export const TechniquesPlayedCountExtension = extension(301306, { techniquesPlayedCount: "pair<number>" })
+  .initialState({ techniquesPlayedCount: pair(0) })
   .description("记录本场对局中双方打出特技牌的数量")
   .mutateWhen("onPlayCard", (c, e) => {
     if (e.card.definition.tags.includes("technique")) {

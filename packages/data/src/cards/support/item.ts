@@ -123,7 +123,8 @@ export const SeedDispensary = card(323005)
   .deductOmniCost(1)
   .done();
 
-const CardPlayedExtension = extension(323006, { played: pair<number[]>([]) })
+const CardPlayedExtension = extension(323006, { played: "pair<number[]>" })
+  .initialState({ played: pair([]) })
   .description("记录本场对局中双方曾经打出过的行动牌")
   .mutateWhen("onAction", (st, e) => {
     if (e.isPlayCard()) {

@@ -235,9 +235,13 @@ export const EdictOfAbsolution = card(330009)
   .done();
 
 export const FlamesOfWarExtension = extension(300006, {
-    spirit: pair(0),
-    win: pair(false),
+    spirit: "pair<number>",
+    win: "pair<boolean>",
   })
+    .initialState({
+      spirit: pair(0),
+      win: pair(false),
+    })
     .description("记录双方斗争之火的「斗志」，并在行动阶段开始时设置斗争之火的胜者")
     .mutateWhen("onDamageOrHeal", (st, e) => {
       if (e.sourceWho !== e.targetWho) {

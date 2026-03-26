@@ -197,7 +197,8 @@ export const ForestRegalia = card(311307)
   .characterStatus(ForestRegaliaInEffect, "@master")
   .done();
 
-export const NonInitialPlayedCardExtension = extension(311308, { defIds: pair<number[]>([]) })
+export const NonInitialPlayedCardExtension = extension(311308, { defIds: "pair<number[]>" })
+  .initialState({ defIds: pair([]) })
   .description("记录双方打出过的名称不存在于本局最初牌组中的不同名的行动牌")
   .mutateWhen("onPlayCard", (c, e) => {
     if (e.onTimeState.players[e.who].initialPile.every((card) => card.id !== e.card.definition.id)) {

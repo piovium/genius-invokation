@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { CardHandle, CharacterHandle, DamageType, DiceType, SkillHandle, SupportHandle, card, extension, flip, pair, status, summon } from "@gi-tcg/core/builder";
+import { CardHandle, CharacterHandle, DamageType, DiceType, Pair, SkillHandle, SupportHandle, card, extension, flip, pair, status, summon, type } from "@gi-tcg/core/builder";
 import { CalledInForCleanup, CanotilasSupport, CosanzeanasSupport, LaumesSupport, LutinesSupport, MelusineSupport, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SerenesSupport, SIMULANKA_SUMMONS, SluasisSupport, TaroumarusSavings, ThironasSupport, TopyassSupport, ToyGuard, VirdasSupport } from "../event/other";
 
 /**
@@ -454,8 +454,11 @@ export const SandsAndDream = status(302205)
   .done();
 
 export const DisposedSupportCountExtension = extension(322022, {
-  disposedSupportCount: pair(0),
+  disposedSupportCount: "pair<number>",
 })
+  .initialState({
+    disposedSupportCount: pair(0),
+  })
   .description("记录本场对局中双方支援区弃置卡牌的数量")
   .mutateWhen("onDispose", (st, e) => {
     if (e.isDiscardOrTuning()) {
@@ -501,8 +504,11 @@ export const Jeht = card(322022)
   .done();
 
 const DamageTypeCountExtension = extension(322023, {
-  damages: pair<DamageType[]>([]),
-})
+    damages: type.declare<Pair<DamageType[]>>().type("pair<number[]>")
+  })
+  .initialState({
+    damages: pair([])
+  })
   .description("记录本场对局中双方角色受到过的元素伤害种类")
   .mutateWhen("onDamageOrHeal", (st, e) => {
     if (e.isDamageTypeDamage() &&  e.type !== DamageType.Physical && e.type !== DamageType.Piercing) {
