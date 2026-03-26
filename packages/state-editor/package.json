@@ -1,0 +1,23 @@
+{
+  "name": "@gi-tcg/state-editor",
+  "exports": {
+    ".": {
+      "bun": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "dependencies": {
+    "@gi-tcg/core": "workspace:*",
+    "@gi-tcg/assets-manager": "workspace:*",
+    "solid-js": "catalog:"
+  },
+  "devDependencies": {
+    "rollup-plugin-node-externals": "catalog:",
+    "unocss": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:",
+    "vite-plugin-solid": "catalog:"
+  }
+}

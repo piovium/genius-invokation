@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,6 @@ import unoCss from "unocss/vite";
 import solid from "vite-plugin-solid";
 import nodeExternals from "rollup-plugin-node-externals";
 import dts from "vite-plugin-dts";
-import svgWithFallback from "./scripts/plugins/svg-with-fallback";
 
 export default defineConfig({
   esbuild: {
@@ -34,7 +33,6 @@ export default defineConfig({
     },
     unoCss(),
     solid(),
-    svgWithFallback(),
     !process.env.NO_TYPING && dts({ rollupTypes: true }),
   ],
   build: {

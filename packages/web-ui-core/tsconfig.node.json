@@ -8,7 +8,7 @@
     "allowSyntheticDefaultImports": true,
   },
   "include": [
-    "vite.config.ts",
+    "../state-editor/vite.config.ts",
     "scripts"
   ]
 }
