@@ -30,7 +30,7 @@ import {
 } from "@gi-tcg/typings";
 import { createActionState, type ActionState } from "./action";
 import type { ChessboardViewType } from "./components/Chessboard";
-import type { Translator } from "./hooks/context";
+import type { Translator } from "./locales";
 
 export interface OppChessboardControllerOption {
   assetsManager: () => AssetsManager;

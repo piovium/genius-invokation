@@ -33,7 +33,7 @@ export function Footer() {
   return (
     <footer class="flex flex-col md:flex-row gap-4 p-4 text-sm text-gray-500">
       <div class="flex flex-row gap-4">
-        <span>© 2025 Guyutongxue</span>
+        <span>© 2026 Piovium Labs</span>
         <a
           class="text-blue-400"
           href="https://github.com/piovium/genius-invokation"
@@ -71,7 +71,7 @@ export function Footer() {
             }`}
             target="_blank"
           >
-            {dayjs(versionInfo().revision.date).format("ll HH:mm:ss")}
+            {dayjs(versionInfo().revision.date).format("YYYY-MM-DD HH:mm:ss")}
           </a>
           )
         </div>
@@ -79,10 +79,10 @@ export function Footer() {
       <div>
         <a
           class="text-blue-400"
-          href="https://qm.qq.com/q/svHK8eJulW"
+          href={t("playerGroupLink")}
           target="_blank"
         >
-          {t("joinQQGroup")}
+          {t("joinPlayerGroup")}
         </a>
       </div>
     </footer>

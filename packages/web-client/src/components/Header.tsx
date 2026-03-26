@@ -19,6 +19,7 @@ import { IS_BETA } from "@gi-tcg/config";
 import { getAvatarUrl } from "../utils";
 import Logo from "./Logo.svg";
 import Title from "./Title.svg";
+import LanguageIcon from "./Language.svg";
 import { useAuth } from "../auth";
 import { Locale, useI18n } from "../i18n";
 
@@ -40,17 +41,6 @@ export function Header() {
           </A>
         </h1>
         <div class="flex flex-row gap-2">
-          <select
-            class="select text-xs border rounded px-2 py-1 bg-white"
-            value={locale()}
-            onChange={(e) =>
-              setLocale(e.currentTarget.value as Locale)
-            }
-            aria-label={t("languageLabel")}
-          >
-            <option value="zh-CN">{t("languageChinese")}</option>
-            <option value="en">{t("languageEnglish")}</option>
-          </select>
           <Show when={IS_BETA}>
             <span class="text-8px md:text-10px badge badge-soft-error">
               {t("includeUnreleasedData")}
@@ -59,6 +49,16 @@ export function Header() {
         </div>
       </div>
       <Show when={status().type !== "notLogin"}>
+        <img src={LanguageIcon} class="h-6 translate-x-9" alt={t("languageLabel")} />
+        <select
+          class="select h-8 text-xs border rounded-full pl-7 py-1 bg-white"
+          value={locale()}
+          onChange={(e) => setLocale(e.currentTarget.value as Locale)}
+          aria-label={t("languageLabel")}
+        >
+          <option value="zh-CN">{t("languageChinese")}</option>
+          <option value="en">{t("languageEnglish")}</option>
+        </select>
         <Show when={status().type === "user"}>
           <A href={`/user/${status().id}`}>
             <div class="rounded-full w-10 h-10 md:w-12 md:h-12 b-solid b-1 b-gray-200 flex items-center justify-center">
