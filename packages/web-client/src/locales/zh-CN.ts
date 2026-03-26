@@ -29,7 +29,7 @@ export default {
   loadingNow: "加载中，请稍候...",
   loading: "正在加载中...",
   loadingShort: "加载中...",
-  loadingEllipsis: "加载中…",
+  loadingEllipsis: "加载中...",
   loadFailed: "加载失败：{{message}}",
   createDeckFirst: "请先创建一组牌组",
   profile: "个人信息",
