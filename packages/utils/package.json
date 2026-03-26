@@ -17,5 +17,9 @@
   },
   "devDependencies": {
     "@gi-tcg/typings": "workspace:*"
+  },
+  "dependencies": {
+    "@ark/schema": "^0.56.0",
+    "arktype": "^2.2.0"
   }
 }

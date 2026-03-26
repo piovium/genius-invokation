@@ -12,10 +12,7 @@ import { wrapSkillInfoWithExt, type WritableMetaOf } from "./skill";
 import type { ExtensionHandle } from "./type";
 import { DEFAULT_VERSION_INFO } from "../base/version";
 
-type ExtensionBuilderMeta<
-  ExtStateType extends object,
-  Event extends EventNames,
-> = {
+type ExtensionBuilderMeta<ExtStateType, Event extends EventNames> = {
   callerType: "character";
   callerVars: never;
   eventArgType: EventArgOf<Event>;
@@ -24,7 +21,7 @@ type ExtensionBuilderMeta<
 
 export const EXTENSION_ID_OFFSET = 50_000_000;
 
-export class ExtensionBuilder<ExtStateType extends object> {
+export class ExtensionBuilder<ExtStateType> {
   private _skillNo = 0;
   private _skillList: TriggeredSkillDefinition[] = [];
   public readonly id: number;
@@ -32,6 +29,7 @@ export class ExtensionBuilder<ExtStateType extends object> {
 
   constructor(
     idHint: number,
+    private readonly schema: unknown,
     private readonly initialState: ExtStateType,
   ) {
     this.id = idHint + EXTENSION_ID_OFFSET;
@@ -86,6 +84,7 @@ export class ExtensionBuilder<ExtStateType extends object> {
       id: this.id,
       description: this._description,
       version: DEFAULT_VERSION_INFO,
+      schema: this.schema,
       initialState: this.initialState,
       skills: this._skillList,
     });
@@ -93,9 +92,23 @@ export class ExtensionBuilder<ExtStateType extends object> {
   }
 }
 
-export function extension<ExtStateType extends object>(
+import {
+  type,
+  type TypeInfer,
+  type TypeValidate,
+} from "@gi-tcg/utils";
+
+type ExtensionFactory2<T> = {
+  initialState: (initialState: T) => ExtensionBuilder<T>;
+};
+
+export function extension<const Def, R = TypeInfer<Def>>(
   idHint: number,
-  initialState: ExtStateType,
-) {
-  return new ExtensionBuilder(idHint, initialState);
+  def: TypeValidate<Def>,
+): ExtensionFactory2<R> {
+  const schema = type(def as any).toJsonSchema();
+  return {
+    initialState: (initialState) =>
+      new ExtensionBuilder(idHint, schema, initialState),
+  };
 }

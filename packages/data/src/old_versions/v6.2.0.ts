@@ -177,14 +177,14 @@ const UltimateOverlordsMegaMagicSword = card(311308)
   .weapon("claymore")
   .variable("supp", 0)
   .associateExtension(NonInitialPlayedCardExtension)
-  .replaceDescription("[GCG_TOKEN_COUNTER]", (_, { area }, ext) => ext.defIds[area.who].size)
+  .replaceDescription("[GCG_TOKEN_COUNTER]", (_, { area }, ext) => ext.defIds[area.who].length)
   .on("enter")
   .do((c) => {
-    c.setVariable("supp", c.getExtensionState().defIds[c.self.who].size);
+    c.setVariable("supp", c.getExtensionState().defIds[c.self.who].length);
   })
   .on("playCard")
   .do((c) => {
-    c.setVariable("supp", c.getExtensionState().defIds[c.self.who].size);
+    c.setVariable("supp", c.getExtensionState().defIds[c.self.who].length);
   })
   .on("increaseSkillDamage")
   .do((c, e) => {

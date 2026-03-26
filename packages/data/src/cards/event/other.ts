@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { EntityDefinition, CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, pair, status, summon, originalDiceCostOfCard } from "@gi-tcg/core/builder";
+import { EntityDefinition, CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, status, summon, originalDiceCostOfCard } from "@gi-tcg/core/builder";
 import { BurningFlame, CatalyzingField, DendroCore, EfficientSwitch, Empowerment, ResistantForm, Shield } from "../../commons";
 import { BountifulCore } from "../../characters/hydro/nilou";
 
@@ -916,9 +916,10 @@ export const [Pankration] = card(332023)
   })
   .done();
 
-const LyresongIsFirstExtension = extension(332024, { first: pair(true) })
+const LyresongIsFirstExtension = extension(332024, { first: "pair<boolean>" })
+  .initialState({ first: [true, true] })
   .description("打出琴音之诗前该方该轮次未打出过其他行动牌")
-  .mutateWhen("onRoundEnd", (c) => c.first = pair(true))
+  .mutateWhen("onRoundEnd", (c) => c.first = [true, true])
   .mutateWhen("onPlayCard", (c, e) => c.first[e.who] = false)
   .done();
 
@@ -2022,19 +2023,23 @@ export const AwesomeBro = card(332050)
   .generateDice(DiceType.Omni, 1)
   .done();
 
-export const DisposedSupportAndSummonsCountExtension = extension(332051, pair({
-  disposedSupportCount: 0,
-  disposedSummonsCount: 0,
-}))
+export const DisposedSupportAndSummonsCountExtension = extension(332051, {
+  disposedSupportCount: "pair<number>",
+  disposedSummonsCount: "pair<number>",
+})
+  .initialState({
+    disposedSupportCount: [0, 0],
+    disposedSummonsCount: [0, 0],
+  })
   .description("记录本场对局中双方支援区和召唤区弃置卡牌的数量")
   .mutateWhen("onDispose", (st, e) => {
     if (e.isDiscardOrTuning()) {
       return;
     }
     if (e.entity.definition.type === "support") {
-      st[e.who].disposedSupportCount++;
+      st.disposedSupportCount[e.who]++;
     } else if (e.entity.definition.type === "summon") {
-      st[e.who].disposedSummonsCount++;
+      st.disposedSummonsCount[e.who]++;
     }
   })
   .done();
@@ -2057,9 +2062,9 @@ export const FellDragon = summon(303245)
   })
   .on("enter")
   .do((c, e) => {
-    const ext = c.getExtensionState()[c.self.who];
-    const addUsage = Math.min(ext.disposedSupportCount, 4);
-    const addDmg = Math.min(ext.disposedSummonsCount, 4);
+    const ext = c.getExtensionState();
+    const addUsage = Math.min(ext.disposedSupportCount[c.self.who], 4);
+    const addDmg = Math.min(ext.disposedSummonsCount[c.self.who], 4);
     c.addVariable("usage", addUsage);
     c.addVariable("effect", addDmg);
   })
@@ -2079,8 +2084,8 @@ export const FellDragonsAwakening = card(332051)
   .since("v6.0.0")
   .costSame(2)
   .associateExtension(DisposedSupportAndSummonsCountExtension)
-  .replaceDescription("[GCG_TOKEN_COUNTER]", (c, { area }, ext) => ext[area.who].disposedSupportCount)
-  .replaceDescription("[GCG_TOKEN_COUNTER_2]", (c, { area }, ext) => ext[area.who].disposedSummonsCount)
+  .replaceDescription("[GCG_TOKEN_COUNTER]", (c, { area }, ext) => ext.disposedSupportCount[area.who])
+  .replaceDescription("[GCG_TOKEN_COUNTER_2]", (c, { area }, ext) => ext.disposedSummonsCount[area.who])
   .summon(FellDragon)
   .done();
 

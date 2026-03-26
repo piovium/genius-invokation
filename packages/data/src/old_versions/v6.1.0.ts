@@ -158,9 +158,9 @@ const FellDragon = summon(303245)
   })
   .on("enter")
   .do((c, e) => {
-    const ext = c.getExtensionState()[c.self.who];
-    const addUsage = Math.min(ext.disposedSupportCount, 5);
-    const addDmg = Math.min(ext.disposedSummonsCount, 5);
+    const ext = c.getExtensionState();
+    const addUsage = Math.min(ext.disposedSupportCount[c.self.who], 5);
+    const addDmg = Math.min(ext.disposedSummonsCount[c.self.who], 5);
     c.addVariable("usage", addUsage);
     c.addVariable("effect", addDmg);
   })

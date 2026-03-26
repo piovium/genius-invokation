@@ -13,9 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, DiceType, CharacterHandle, Aura, extension, pair } from "@gi-tcg/core/builder";
+import { character, skill, status, card, DamageType, DiceType, CharacterHandle, Aura, extension, type, Pair } from "@gi-tcg/core/builder";
 
-const AbsorbedCountExtension = extension(2602, { absorbed: pair(new Set<DiceType>() )})
+const AbsorbedCountExtension = extension(2602, {
+    absorbed: type.declare<Pair<DiceType[]>>().type("pair<number[]>")
+  })
+  .initialState({
+    absorbed: [[], []],
+  })
   .description("记录某方若陀龙王已汲取过的元素类型")
   .done();
 
@@ -37,7 +42,11 @@ export const StoneFacetsElementalAbsorption = status(126021)
       case AzhdahaPyro: diceType = DiceType.Pyro; break;
       case AzhdahaElectro: diceType = DiceType.Electro; break;
     };
-    c.setExtensionState((st) => st.absorbed[c.self.who].add(diceType));
+    c.setExtensionState((st) => {
+      if (!st.absorbed[c.self.who].includes(diceType)) {
+        st.absorbed[c.self.who].push(diceType);
+      }
+    });
     c.generateDice(diceType, 1);
   })
   .done();
@@ -136,7 +145,7 @@ export const DecimatingRockfall = skill(26024)
   .costEnergy(2)
   .associateExtension(AbsorbedCountExtension)
   .do((c) => {
-    const bonus = c.getExtensionState().absorbed[c.self.who].size;
+    const bonus = c.getExtensionState().absorbed[c.self.who].length;
     c.damage(DamageType.Geo, 4 + bonus);
   })
   .done();
