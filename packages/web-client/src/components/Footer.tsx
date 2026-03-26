@@ -31,7 +31,7 @@ export function Footer() {
     dayjs.locale(locale().toLocaleLowerCase());
   });
   return (
-    <footer class="flex flex-col md:flex-row gap-4 p-4 text-sm text-gray-500">
+    <footer class="flex flex-col md:flex-row gap-4 p-4 text-sm text-gray-500 flex-wrap">
       <div class="flex flex-row gap-4">
         <span>© 2026 Piovium Labs</span>
         <a

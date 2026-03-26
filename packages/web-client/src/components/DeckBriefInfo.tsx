@@ -20,7 +20,6 @@ import { DeckInfo } from "../pages/Decks";
 import { useGuestDecks } from "../guest";
 import { useAuth } from "../auth";
 import { copyToClipboard } from "../utils";
-import type { AssetsManager } from "@gi-tcg/assets-manager";
 import { useI18n } from "../i18n";
 
 export interface DeckInfoProps extends DeckInfo {
@@ -43,7 +42,7 @@ function CharacterAvatar(props: { id: number }) {
   );
   return (
     <img
-      class="h-14 w-14 b-2 b-yellow-100 rounded-full"
+      class="h-10 w-10 b-2 md:h-14 md:w-14 md:b-3 b-gray-500 rounded-full"
       src={url()}
       alt={assetsManager().getNameSync(props.id)}
     />
@@ -89,33 +88,33 @@ export function DeckBriefInfo(props: DeckInfoProps) {
 
   return (
     <div
-      class="w-60 bg-yellow-800 hover:bg-yellow-700 transition-all flex flex-col p-2 rounded-xl select-none cursor-default"
+      class="w-full deck-info-card transition-all flex flex-col p-1 md:p-2 rounded-xl select-none cursor-default"
       onClick={viewDeck}
     >
-      <div class="pl-2 flex flex-row justify-between">
-        <h5 class="font-bold text-yellow-100 overflow-hidden whitespace-nowrap text-ellipsis">
+      <div class="px-2 py-1 flex flex-row justify-between items-center">
+        <h5 class="font-bold text-blue-900 overflow-hidden whitespace-nowrap text-ellipsis">
           {props.name}
         </h5>
-        <div class="flex-shrink-0">
+        <div class="flex-shrink-0 flex flex-row gap-2">
           <button
-            class="btn btn-ghost"
+            class="btn color-blue-900 h-6 w-6 p-0 hover:color-blue-500"
             title={t("copyShareCode")}
             onClick={copyCode}
           >
-            <i class="i-mdi-clipboard-outline" />
+            <i class="i-mdi-file-export h-5.5 w-5.5" />
           </button>
           <Show when={props.editable}>
             <button
-              class="btn btn-ghost-red"
+              class="btn color-red-800 h-6 w-6 p-0 hover:color-red-500"
               title={t("deleteDeck")}
               onClick={deleteDeck}
             >
-              <i class="i-mdi-delete" />
+              <i class="i-mdi-delete h-6 w-6" />
             </button>
           </Show>
         </div>
       </div>
-      <div class="p-2 flex flex-row items-center justify-around">
+      <div class="p-1 md:p-2 flex flex-row items-center justify-around">
         <For each={props.characters}>{(id) => <CharacterAvatar id={id} />}</For>
       </div>
     </div>

@@ -92,7 +92,7 @@ export default function Decks() {
             {t("loadFailed", { message: error()?.message ?? String(error()) })}
           </Match>
           <Match when={true}>
-            <ul class="flex flex-row flex-wrap gap-3">
+            <ul class="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] md:gap-3">
               <For
                 each={decks().data}
                 fallback={

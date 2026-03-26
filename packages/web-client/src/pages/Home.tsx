@@ -139,7 +139,7 @@ export default function Home() {
                 </h2>
               </div>
               <div class="flex flex-grow flex-col-reverse md:flex-row gap-8 min-h-0">
-                <div class="h-full w-full md:w-60 flex flex-col items-start md:bottom-opacity-gradient">
+                <div class="h-full w-full md:w-120 flex flex-col items-start md:bottom-opacity-gradient">
                   <A
                     href="/decks"
                     class="text-xl font-bold text-blue-500 hover:underline mb-4"
@@ -158,7 +158,7 @@ export default function Home() {
                       </div>
                     </Match>
                     <Match when={true}>
-                      <div class="flex flex-row flex-wrap md:flex-col gap-2">
+                      <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2 md:grid-cols-2 gap-2">
                         <For
                           each={decks().data}
                           fallback={
