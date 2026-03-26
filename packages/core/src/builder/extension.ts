@@ -113,7 +113,7 @@ export function extension<const Def, R = TypeInfer<Def>>(
   idHint: number,
   def: TypeValidate<Def>,
 ): ExtensionFactory2<R> {
-  const schema = (def as Type<any>).toJsonSchema();
+  const schema = type(def as any).toJsonSchema();
   return {
     initialState: (initialState) =>
       new ExtensionBuilder(idHint, schema, initialState),
