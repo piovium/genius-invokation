@@ -92,12 +92,6 @@ export class ExtensionBuilder<ExtStateType> {
   }
 }
 
-// export function extension<ExtStateType extends object>(
-//   idHint: number,
-//   initialState: ExtStateType,
-// ) {
-//   return new ExtensionBuilder(idHint, initialState);
-// }
 import {
   type,
   type Type,
