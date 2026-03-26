@@ -79,7 +79,7 @@ export default function Decks() {
   const { decks, loading, error, refetch } = useDecks();
   return (
     <Layout>
-      <div class="container mx-auto">
+      <div class="container mx-auto px-2">
         <div class="flex flex-row gap-4 items-center mb-5">
           <h2 class="text-2xl font-bold">{t("myDecks")}</h2>
           <A class="btn btn-outline-green" href="/decks/new">

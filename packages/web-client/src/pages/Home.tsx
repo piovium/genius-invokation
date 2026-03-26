@@ -107,7 +107,7 @@ export default function Home() {
 
   return (
     <Layout>
-      <div class="container mx-auto h-full">
+      <div class="container mx-auto h-full px-2">
         <Switch>
           <Match when={userLoading()}>
             <div class="text-gray-500">{t("loadingNow")}</div>
@@ -201,7 +201,7 @@ export default function Home() {
                       >
                         <input
                           type="text"
-                          class="input input-solid rounded-r-0 b-r-0 flex-grow md:flex-grow-0 text-1rem line-height-none h-2.3rem"
+                          class="input input-solid rounded-r-0 b-r-0 flex-grow md:flex-grow-0 text-1rem line-height-none h-9 text-4"
                           name="roomCode"
                           placeholder={t("enterRoomCode")}
                           inputmode="numeric"
@@ -214,7 +214,7 @@ export default function Home() {
                         />
                         <button
                           type="submit"
-                          class="flex-shrink-0 w-20 sm:w-35 btn btn-solid rounded-l-0 h-2.3rem"
+                          class="flex-shrink-0 btn btn-solid rounded-l-0 h-9 text-4"
                           disabled={!roomCodeValid()}
                         >
                           {t("joinRoom")}

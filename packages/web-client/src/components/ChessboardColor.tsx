@@ -39,7 +39,7 @@ export function ChessboardColor(props: ChessboardColorProps) {
   );
   const [loading, setLoading] = createSignal<boolean>(false);
   return (
-    <div class="flex items-center gap-2 flex-wrap h-10">
+    <div class="flex items-center gap-2 flex-wrap">
       <For each={CHESSBOARD_COLORS}>
         {(presetColor) => (
           <button

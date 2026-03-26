@@ -48,8 +48,7 @@ export function Header() {
           </Show>
         </div>
       </div>
-      <Show when={status().type !== "notLogin"}>
-        <img src={LanguageIcon} class="h-6 translate-x-9" alt={t("languageLabel")} />
+      <div class="flex flex-row items-center relative">
         <select
           class="select h-8 text-xs border rounded-full pl-7 py-1 bg-white"
           value={locale()}
@@ -59,6 +58,9 @@ export function Header() {
           <option value="zh-CN">{t("languageChinese")}</option>
           <option value="en">{t("languageEnglish")}</option>
         </select>
+        <img src={LanguageIcon} class="absolute h-6 -translate-x-50% left-4" alt={t("languageLabel")} />
+      </div>
+      <Show when={status().type !== "notLogin"}>
         <Show when={status().type === "user"}>
           <A href={`/user/${status().id}`}>
             <div class="rounded-full w-10 h-10 md:w-12 md:h-12 b-solid b-1 b-gray-200 flex items-center justify-center">

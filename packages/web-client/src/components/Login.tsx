@@ -71,7 +71,7 @@ export function Login() {
         <form class="flex flex-row items-stretch" onSubmit={guestLogin}>
           <input
             type="text"
-            class="input input-solid rounded-r-0 b-r-0 h-2.2rem text-1rem"
+            class="input input-solid rounded-r-0 b-r-0 h-9 text-4"
             name="guestName"
             maxLength={64}
             placeholder={t("guestNamePlaceholder")}
@@ -82,7 +82,7 @@ export function Login() {
           />
           <button
             type="submit"
-            class="flex-shrink-0 btn btn-solid rounded-l-0 h-2.2rem text-1rem"
+            class="flex-shrink-0 btn btn-solid rounded-l-0 h-9 text-4"
             disabled={!guestNameValid()}
           >
             <span>{t("confirm")}</span>
