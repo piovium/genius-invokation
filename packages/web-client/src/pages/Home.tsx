@@ -158,7 +158,7 @@ export default function Home() {
                       </div>
                     </Match>
                     <Match when={true}>
-                      <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2 md:grid-cols-2 gap-2">
+                      <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] md:gap-3">
                         <For
                           each={decks().data}
                           fallback={
@@ -177,7 +177,7 @@ export default function Home() {
                   </Switch>
                 </div>
                 <div class="b-r-gray-200 b-1 hidden md:block" />
-                <div class="flex-grow flex flex-col">
+                <div class="flex-grow flex flex-col md:min-w-125">
                   <h4 class="text-xl font-bold mb-5">{t("startGame")}</h4>
                   <Show
                     when={!currentRoom()}
