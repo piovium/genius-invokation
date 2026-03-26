@@ -501,12 +501,14 @@ export const Jeht = card(322022)
   .done();
 
 const DamageTypeCountExtension = extension(322023, {
-  damages: pair(new Set<DamageType>()),
+  damages: pair<DamageType[]>([]),
 })
   .description("记录本场对局中双方角色受到过的元素伤害种类")
   .mutateWhen("onDamageOrHeal", (st, e) => {
     if (e.isDamageTypeDamage() &&  e.type !== DamageType.Physical && e.type !== DamageType.Piercing) {
-      st.damages[e.targetWho].add(e.type);
+      if (!st.damages[e.targetWho].includes(e.type)) {
+        st.damages[e.targetWho].push(e.type);
+      }
     }
   })
   .done();
@@ -523,19 +525,19 @@ export const SilverAndMelus = card(322023)
   .since("v4.4.0")
   .costSame(1)
   .associateExtension(DamageTypeCountExtension)
-  .replaceDescription("[GCG_TOKEN_COUNTER]", (_, { area }, ext) => ext.damages[flip(area.who)].size)
+  .replaceDescription("[GCG_TOKEN_COUNTER]", (_, { area }, ext) => ext.damages[flip(area.who)].length)
   .support("ally")
   .associateExtension(DamageTypeCountExtension)
   .variable("count", 0)
   .on("enter")
   .do((c) => {
-    const count = c.getExtensionState().damages[flip(c.self.who)].size;
+    const count = c.getExtensionState().damages[flip(c.self.who)].length;
     c.setVariable("count", Math.min(count, 4));
   })
   .on("damaged", (c, e) => !e.target.isMine())
   .listenToAll()
   .do((c) => {
-    const count = c.getExtensionState().damages[flip(c.self.who)].size;
+    const count = c.getExtensionState().damages[flip(c.self.who)].length;
     c.setVariable("count", Math.min(count, 4));
   })
   .on("endPhase")

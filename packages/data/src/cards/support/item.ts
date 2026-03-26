@@ -123,11 +123,14 @@ export const SeedDispensary = card(323005)
   .deductOmniCost(1)
   .done();
 
-const CardPlayedExtension = extension(323006, { played: pair(new Set<number>()) })
+const CardPlayedExtension = extension(323006, { played: pair<number[]>([]) })
   .description("记录本场对局中双方曾经打出过的行动牌")
   .mutateWhen("onAction", (st, e) => {
     if (e.isPlayCard()) {
-      st.played[e.who].add(e.action.skill.caller.definition.id);
+      const defId = e.action.skill.caller.definition.id;
+      if (!st.played[e.who].includes(defId)) {
+        st.played[e.who].push(defId);
+      }
     }
   })
   .done();
@@ -149,7 +152,7 @@ export const MementoLens = card(323006)
     if (!e.hasOneOfCardTag("weapon", "artifact", "place", "ally")) {
       return false;
     }
-    return c.getExtensionState().played[c.self.who].has(e.action.skill.caller.definition.id);
+    return c.getExtensionState().played[c.self.who].includes(e.action.skill.caller.definition.id);
   })
   .usagePerRound(1)
   .do((c, e) => {
