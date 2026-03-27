@@ -209,8 +209,15 @@ The editing consists following parts:
 - The variable list of that entity. The list entries are fixed by `definition.varConfig` (cannot remove or append) and initialized ("initial state") from that. The variable value must be a safe integer. 
 - If the popup is opened from `hands` / `pile`, an list for editing attachments and inner popup (similar to editing `EntityState`) can be opened for each attachment.
 
+## Exports
+
+Finally add an export button to the corner of app. The export button serialize the built `state` by `JSON.stringify(serializeGameStateLog({ state, canResume: true }))` and download to user's computer. 
+
+The `state` can be also persisted inside user browser's `localStorage` (use `@solid-primitives/storage` please).
+
 ## Notes
 
+- Take a view on `test` package or `core` package on how to create GameState programmatically; this may disambiguate some typos on above docs.
 - Do not forget to add `[StateSymbol]` for each level's state. Check the source code for detail.
 - Make sure TypeScript do not complain errors. Be careful to use `as any` -- make explicit comment on each.
 
