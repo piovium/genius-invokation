@@ -278,9 +278,11 @@
     "packages/test": {
       "name": "@gi-tcg/test",
       "dependencies": {
+        "@gi-tcg/assets-manager": "workspace:*",
         "@gi-tcg/core": "workspace:*",
         "@gi-tcg/data": "workspace:*",
         "@gi-tcg/typings": "workspace:*",
+        "@gi-tcg/utils": "workspace:*",
       },
       "devDependencies": {
         "immer": "^11.0.0",
