@@ -18,6 +18,7 @@
     "@gi-tcg/core": "workspace:*",
     "@gi-tcg/assets-manager": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
+    "@gi-tcg/typings": "workspace:*",
     "solid-js": "catalog:"
   },
   "devDependencies": {

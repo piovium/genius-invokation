@@ -2,7 +2,6 @@ import { DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
 import {
   Aura,
   CURRENT_VERSION,
-  DiceType,
   StateSymbol,
   getVersionBehavior,
   type AttachmentState,
@@ -17,6 +16,7 @@ import {
   type PhaseType,
   type PlayerState,
 } from "@gi-tcg/core";
+import { DiceType } from "@gi-tcg/typings";
 import getData from "@gi-tcg/data";
 
 type AttachmentDefinition = AttachmentState["definition"];
@@ -69,7 +69,7 @@ export type EditorSection =
   | { kind: "summons"; who: 0 | 1 }
   | { kind: "combatStatuses"; who: 0 | 1 }
   | { kind: "dice"; who: 0 | 1 }
-  | { kind: "playerInfo"; who: 0 | 1 }  // 合并玩家标记和技能记录
+  | { kind: "playerInfo"; who: 0 | 1 } // 合并玩家标记和技能记录
   | { kind: "deckImport"; who: 0 | 1 }
   | { kind: "extension"; index: number };
 
