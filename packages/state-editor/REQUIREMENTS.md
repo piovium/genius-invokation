@@ -2,14 +2,14 @@
 
 ## Core requirement
 
-Implement a `state-editor` i.e. a `GameState` editor, based on Solid.js, UnoCSS.
+Implement a `state-editor` i.e. an editor for producing **resumable** `GameState`, based on Solid.js, UnoCSS.
 
 The package should export a `GameStateEditor` Solid.js component accept following props:
 
 ```ts
-interface GameStateEditorProps extends HTMLDivElementProps {
-  value: GameState;
-  onChange: (newState: GameState) => void;
+interface GameStateEditorProps extends ComponentProps<"div"> {
+  initialValue?: GameState;
+  onSubmit: (state: GameState) => void;
 }
 ```
 
@@ -66,17 +66,17 @@ interface GameState {
 
 In UI's `Game State Editing` section:
 
-- The `data` might be locked to the latest version for now (via imports to `@gi-tcg/data` with default settings).
+- The `data` might be locked to the latest version for now (via imports to `@gi-tcg/data` with `CURRENT_VERSION`).
 - The `config` must be the default setting (via `mergeGameConfigWithDefault`), except `randomSeed`.
-- The `versionBehavior` must be the default settings (via `getVersionBehavior`).
+- The `versionBehavior` must be the default settings (via `getVersionBehavior` with `CURRENT_VERSION`).
 - The `iterators.random` should be the user chosen `randomSeed`.
 - The `phase`, `roundNumber`, `currentTurn`, can be edit by user.
 - The `winner` must be `null`.
 - For `extensions` and `players`, see below.
 
-We should grab all `character`'s `initiativeSkill` definition and group `entities` by its type, indexed by their name (run `AssetsManager#getNameSync` on it), for future use.
+We should grab all `character`'s `initiativeSkill` definition and group `entities`, `characters`, `attachments` by its type, which could be searched by name (run `AssetsManager#getNameSync` on it), for future use.
 
-Set the initial `iterators.id` to -5,000,000. Each insertion of new entities (characters, attachments, cards, extensions) use this `id` and bump the `iterators.id` to the next one (e.g. -5,000,001).
+Set the initial `iterators.id` to -500,000. Each insertion of new entities (characters, attachments, cards, extensions) use this `id` and bump the `iterators.id` to the next one (e.g. -500,001).
 
 ### The editing of `ExtensionState`
 
@@ -86,7 +86,7 @@ The `extensions` array itself cannot be modified to remove or add new extension.
 
 For each `ExtensionState`, list their id & description inside UI, with a click-to-pop-up for editing its state.
 
-The editing is based on the `ExtensionDefinition`'s `schema`, which is a JSON Schema. Only very limit patterned was used:
+The editing is based on the `ExtensionDefinition`'s `schema`, which is a JSON Schema (draft 2020-12). Only very limit patterned was used:
 - `type: object`: Its properties should be fixed with `required`, no optional, pattern, or additional properties.
 - `type: number` or `type: boolean`: Rendered as number input and radio button.
 - `type: array`: If the array has a `prefixItems`, consider it as a tuple, something like:
@@ -95,6 +95,7 @@ The editing is based on the `ExtensionDefinition`'s `schema`, which is a JSON Sc
   [1]: <Editing fields for the second element>
   ```
   and no additional elements or removing existing element. Otherwise, the `item` must be homogeneous while editing array with appending/removing elements should be provided. 
+- Recursively handle inner object `properties` and array `items`.
 - Any other `type` can be considered uneditable.
 
 ### The editing of `PlayerState`
@@ -125,7 +126,7 @@ interface PlayerState {
 }
 ```
 
-All fields comment with `fixed` should be hidden and not editable.
+All fields comment with `fixed` should be hidden and not editable (since they must be empty in a resumable stat).
 
 All flags (`boolean` field) can be editable via a radio button.
 
@@ -136,13 +137,14 @@ All flags (`boolean` field) can be editable via a radio button.
 The `initialPile`, `pile` and `characters` should be able to imported from deck share code (See `AssetsManager#decode`):
 - The `characters` is the initial state (see below) of the corresponding character ID
 - The `initialPile` is the definition of corresponding entity ID
+- The `pile` is the initial state of the corresponding entity of cards ID, no shuffle needed, but bring `legend` cards on the pile top.
 - While importing, there should have options controlling each three above components will be overriden or omitted.
 
 The `characters` should be fixed to length of 3. The default characters are 1301 (Diluc), 1103 (Kaeya), 1501 (Sucrose). Characters can swap their position by drag'n'drop or buttons. A character can be set to `active` by setting `activeCharacterId` to the corresponding character's `id`. The default active character is the first one.
 
 The `combatStatuses` area shows icon lists and can be sorted, removed or appended by a Select input filtered to entities with type of `combatStatus`. Each one can be clicked to open a detail editing popup.
 
-The `support`/`summon` area shows card faces of entities, which also can be sorted, removed or appended by Select inputs. Each one can be clicked to open a detail editing popup.
+The `support`/`summon` area shows card faces of entities, which also can be sorted, removed or appended  (max = 4) by Select inputs. Each one can be clicked to open a detail editing popup.
 
 ### The editing of pile
 
@@ -184,12 +186,12 @@ interface CharacterState {
 }
 ```
 
-For player's character, the UI should show their card face, `health`, `energy`, `maxHealth`, `maxEnergy`, `aura`, and all entities' icons (equipments and statuses).
+For player's character, the UI should show their card face, `health`, `energy`, `maxHealth`, `maxEnergy`, `aura`, and all entities' icons (equipments and statuses). If the character have a `specialEnergy` config in their definition, replace `energy` to the special energy variable name, and `maxEnergy` to its `slotSize`.
 
 The popup for editing characters can:
-- set their `health`, `energy`, `maxHealth`, `aura`. The default value ("initial state" of character) can be read from `definition.varConfigs`. The aura must be the one of `Aura` enumeration (see `typings` package).
+- set their `health`, `energy` (or special energy name), `maxHealth`, `aura`. The default value ("initial state" of character) can be read from `definition.varConfigs`. The aura must be the one of `Aura` enumeration (see `typings` package).
 - set other variable values that defined inside `definition.varConfig`. The variable value must be a safe integer. 
-- a button to make the character "defeated". It set `health`, `energy`, `aura` to zero, remove all entities and mark `alive` to `0`. User should be prompt to confirm. A defeated character makes variables readonly, but can be reset to alive which set `health` and `alive` to 1.
+- a button to make the character "defeated". It set `health`, `energy`, `aura` to zero, remove all entities and mark `alive` to `0` (not an invariant, just for better editing experience). User should be prompt to confirm. A defeated character makes variables readonly, but can be reset to alive which set `health` and `alive` to 1.
 - an editable array of entities on this character area. The entity must be type of `status` or `equipment`. Clicking entry inside this array opens popup to edit `EntityState`. The entries should also be able to adjust order by drag'n'drop or buttons.
 
 ### The editing of `EntityState`
@@ -207,13 +209,19 @@ A popup for editing Entities can be opened at character's `entities` editing, or
 
 The editing consists following parts:
 - The variable list of that entity. The list entries are fixed by `definition.varConfig` (cannot remove or append) and initialized ("initial state") from that. The variable value must be a safe integer. 
-- If the popup is opened from `hands` / `pile`, an list for editing attachments and inner popup (similar to editing `EntityState`) can be opened for each attachment.
+- If the popup is opened from `hands` / `pile`, an list for editing, appending (by a Select input to attachments) and removing attachments and inner popup (see below) can be opened for each attachment. Could be sorted.
 
-## Exports
+### The editing of `AttachmentState`
 
-Add a "Done" button to the corner of app, which triggers `onChange` callback to the host App (disabled when state is invalid). 
+Similar to `EntityState`, but just showing a variable list (from `definition.varConfig`) of that attachment.
 
-In `src/dev.tsx`, import the Editor component, and on Done do serialize the built `state` by `JSON.stringify(serializeGameStateLog({ state, canResume: true }))` and download to user's computer. The `state` can be also persisted inside user browser's `localStorage` (use `@solid-primitives/storage` please).
+## Component API
+
+The `initialState`'s default value should be the default value specified above. It's not reactive and only be read at component's initialization.
+
+Add a "Done" button to the corner of app, which triggers `onSubmit` callback to the host App (disabled when state is invalid, e.g. invalid numeric input, non-existed definition id etc.). 
+
+In `src/dev.tsx`, import the Editor component, and on Done do serialize the built `state` by `JSON.stringify(serializeGameStateLog([{ state, canResume: true }]))` and download to user's computer. The `state` can be also persisted inside user browser's `localStorage` (use `@solid-primitives/storage` please) as next load's `initialState`.
 
 ## Notes
 

@@ -268,6 +268,7 @@
         "solid-js": "catalog:",
       },
       "devDependencies": {
+        "@solid-primitives/storage": "^4.2.1",
         "rollup-plugin-node-externals": "catalog:",
         "unocss": "catalog:",
         "vite": "catalog:",
