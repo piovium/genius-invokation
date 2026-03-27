@@ -13,4 +13,70 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// TODO
+/* @refresh reload */
+
+import "./index";
+
+import { makePersisted } from "@solid-primitives/storage";
+import { createMemo, createSignal } from "solid-js";
+import { render } from "solid-js/web";
+
+import getData from "@gi-tcg/data";
+import {
+  CURRENT_VERSION,
+  deserializeGameStateLog,
+  serializeGameStateLog,
+  type GameState,
+} from "@gi-tcg/core";
+
+import { GameStateEditor } from "./components/GameStateEditor";
+
+const STORAGE_KEY = "gi-tcg-state-editor-latest";
+
+function downloadState(serialized: string) {
+  const blob = new Blob([serialized], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = "resumable-game-state.json";
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+function App() {
+  const [persistedState, setPersistedState] = makePersisted(createSignal<string | null>(null), {
+    storage: localStorage,
+    name: STORAGE_KEY,
+  });
+
+  const initialState = createMemo(() => {
+    const source = persistedState();
+    if (!source) {
+      return undefined;
+    }
+    try {
+      const logs = deserializeGameStateLog(
+        getData(CURRENT_VERSION) as unknown as Parameters<typeof deserializeGameStateLog>[0],
+        JSON.parse(source) as Parameters<typeof deserializeGameStateLog>[1],
+      );
+      return logs[0]?.state;
+    } catch (error) {
+      console.error(error);
+      return undefined;
+    }
+  });
+
+  const handleSubmit = (state: GameState) => {
+    const serialized = JSON.stringify(
+      serializeGameStateLog([{ state, canResume: true }]),
+      null,
+      2,
+    );
+    setPersistedState(serialized);
+    downloadState(serialized);
+  };
+
+  return <GameStateEditor initialValue={initialState()} onSubmit={handleSubmit} />;
+}
+
+render(() => <App />, document.getElementById("root")!);

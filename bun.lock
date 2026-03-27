@@ -265,6 +265,8 @@
       "dependencies": {
         "@gi-tcg/assets-manager": "workspace:*",
         "@gi-tcg/core": "workspace:*",
+        "@gi-tcg/data": "workspace:*",
+        "@gi-tcg/utils": "workspace:*",
         "solid-js": "catalog:",
       },
       "devDependencies": {

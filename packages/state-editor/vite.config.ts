@@ -21,6 +21,11 @@ import nodeExternals from "rollup-plugin-node-externals";
 import dts from "vite-plugin-dts";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@gi-tcg/data": resolve(__dirname, "../data/src/index.ts"),
+    },
+  },
   esbuild: {
     supported: {
       using: false,

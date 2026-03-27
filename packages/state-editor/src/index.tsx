@@ -15,6 +15,6 @@
 
 import "@gi-tcg/utils/reset.css";
 import "virtual:uno.css";
+import "./style.css";
 
-// TODO
-
+export { GameStateEditor, type GameStateEditorProps } from "./components/GameStateEditor";

@@ -225,6 +225,7 @@ In `src/dev.tsx`, import the Editor component, and on Done do serialize the buil
 
 ## Notes
 
+- Split components into different files under `src/components` subfolder.
 - Take a view on `test` package or `core` package on how to create GameState programmatically; this may disambiguate some typos on above docs.
 - Do not forget to add `[StateSymbol]` for each level's state. Check the source code for detail.
 - Make sure TypeScript do not complain errors. Be careful to use `as any` -- make explicit comment on each.
