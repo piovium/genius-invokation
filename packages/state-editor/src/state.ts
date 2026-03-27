@@ -69,8 +69,7 @@ export type EditorSection =
   | { kind: "summons"; who: 0 | 1 }
   | { kind: "combatStatuses"; who: 0 | 1 }
   | { kind: "dice"; who: 0 | 1 }
-  | { kind: "playerFlags"; who: 0 | 1 }
-  | { kind: "roundSkillLog"; who: 0 | 1 }
+  | { kind: "playerInfo"; who: 0 | 1 }  // 合并玩家标记和技能记录
   | { kind: "deckImport"; who: 0 | 1 }
   | { kind: "extension"; index: number };
 

@@ -8,10 +8,11 @@ import {
   onMount,
   splitProps,
   type ComponentProps,
+  type JSX,
 } from "solid-js";
 import { createStore, produce } from "solid-js/store";
 
-import type { GameState } from "@gi-tcg/core";
+import type { GameState, CharacterState } from "@gi-tcg/core";
 
 import {
   NumberField,
@@ -39,6 +40,9 @@ import {
   materializeGameState,
   PHASE_LABELS,
   validateGameState,
+  getPlayer,
+  getDefinitionName,
+  DICE_LABELS,
   type EditorModal,
   type EditorSection,
   type Mutable,
@@ -48,6 +52,161 @@ import {
 export interface GameStateEditorProps extends Omit<ComponentProps<"div">, "onSubmit"> {
   initialValue?: GameState;
   onSubmit: (state: GameState) => void;
+}
+
+// Grid 布局常量
+const GRID_ROWS = 12;  // 总行数
+const GRID_COLS = 16;   // 总列数
+
+// 入口配置接口 - 使用行列坐标指定位置和尺寸
+interface SectionConfig {
+  section: EditorSection;
+  label: string;
+  // 位置和尺寸（基于0的索引）
+  row: number;          // 起始行
+  col: number;          // 起始列
+  rowSpan: number;      // 占据行数
+  colSpan: number;      // 占据列数
+  // 预览内容
+  preview?: (state: GameState) => JSX.Element;
+  // 样式变体
+  variant?: "default" | "character" | "collection" | "status";
+}
+
+// 入口卡片组件
+function SectionCard(props: {
+  config: SectionConfig;
+  isActive: boolean;
+  onClick: () => void;
+  state: GameState;
+}) {
+  const variantStyles = {
+    default: "border-white/30 bg-slate-800/80",
+    character: "border-amber-500/50 bg-amber-900/40",
+    collection: "border-cyan-500/50 bg-cyan-900/40",
+    status: "border-emerald-500/50 bg-emerald-900/40",
+  };
+
+  const activeStyles = props.isActive
+    ? "ring-2 ring-cyan-500/50 border-cyan-500/50 bg-cyan-950/30"
+    : "";
+
+  // 计算 grid 位置样式（CSS Grid 使用1-based索引）
+  const gridStyle = () => ({
+    "grid-column": `${props.config.col + 1} / span ${props.config.colSpan}`,
+    "grid-row": `${props.config.row + 1} / span ${props.config.rowSpan}`,
+  });
+
+  return (
+    <button
+      type="button"
+      onClick={props.onClick}
+      class={`
+        relative rounded-2xl border p-3 text-left transition-all duration-200
+        hover:scale-[1.02] hover:shadow-lg overflow-hidden
+        ${variantStyles[props.config.variant || "default"]}
+        ${activeStyles}
+      `}
+      style={gridStyle()}
+    >
+      {/* 标题 */}
+      <div class="flex items-center justify-between mb-2">
+        <span class="font-semibold text-amber-50 text-sm">{props.config.label}</span>
+        {props.isActive && (
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+        )}
+      </div>
+      
+      {/* 预览内容 */}
+      <div class="text-xs text-slate-400 mt-2">
+        {props.config.preview?.(props.state)}
+      </div>
+    </button>
+  );
+}
+
+// 角色预览组件
+function CharacterPreview(props: { character: CharacterState; isActive: boolean }) {
+  return (
+    <div class="space-y-1">
+      <div class="flex items-center gap-2">
+        <span class="text-amber-200">{getDefinitionName(props.character.definition)}</span>
+        {props.isActive && <span class="text-xs text-cyan-400">出战</span>}
+      </div>
+      <div class="flex gap-3 text-xs">
+        <span class="text-rose-300">生命 {props.character.variables.health}/{props.character.variables.maxHealth}</span>
+        <span class="text-cyan-300">能量 {props.character.variables.energy}/{props.character.variables.maxEnergy}</span>
+      </div>
+      <div class="text-slate-500">
+        装备 {props.character.entities.length} 个
+      </div>
+    </div>
+  );
+}
+
+// 牌库/手牌预览
+function CollectionPreview(props: { count: number; max: number; label: string }) {
+  return (
+    <div class="space-y-1">
+      <div class="flex items-center justify-between">
+        <span class="text-cyan-200">{props.count} 张卡牌</span>
+        <span class="text-slate-500">上限 {props.max}</span>
+      </div>
+      <div class="w-full bg-slate-800 rounded-full h-1.5 mt-2">
+        <div 
+          class="bg-cyan-500 h-1.5 rounded-full transition-all"
+          style={{ width: `${Math.min((props.count / props.max) * 100, 100)}%` }}
+        ></div>
+      </div>
+    </div>
+  );
+}
+
+// 骰子预览
+function DicePreview(props: { dice: number[] }) {
+  const diceCounts = () => {
+    const counts: Record<number, number> = {};
+    props.dice.forEach(d => { counts[d] = (counts[d] || 0) + 1; });
+    return counts;
+  };
+
+  return (
+    <div class="space-y-1">
+      <div class="text-emerald-200">共 {props.dice.length} 个骰子</div>
+      <div class="flex flex-wrap gap-1 mt-1">
+        {Object.entries(diceCounts()).slice(0, 4).map(([type, count]) => (
+          <span class="px-1.5 py-0.5 bg-slate-800 rounded text-[10px] text-slate-300">
+            {DICE_LABELS[Number(type)]}×{count}
+          </span>
+        ))}
+        {Object.keys(diceCounts()).length > 4 && (
+          <span class="text-[10px] text-slate-500">+{Object.keys(diceCounts()).length - 4}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 支援/召唤区预览
+function EntityAreaPreview(props: { items: readonly { definition: { id: number } }[]; max: number; label: string }) {
+  return (
+    <div class="space-y-1">
+      <div class="flex items-center justify-between">
+        <span class="text-purple-200">{props.items.length} 个{props.label}</span>
+        <span class="text-slate-500">上限 {props.max}</span>
+      </div>
+      <div class="flex flex-wrap gap-1 mt-1">
+        {props.items.slice(0, 3).map((item, i) => (
+          <span class="text-[10px] text-slate-400 truncate max-w-[60px]">
+            {getDefinitionName(item.definition)}
+          </span>
+        ))}
+        {props.items.length > 3 && (
+          <span class="text-[10px] text-slate-500">+{props.items.length - 3}</span>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export function GameStateEditor(props: GameStateEditorProps) {
@@ -94,37 +253,252 @@ export function GameStateEditor(props: GameStateEditorProps) {
     local.onSubmit(nextState);
   };
 
-  const sections = createMemo(() => {
-    const result: { section: EditorSection; label: string; icon?: string }[] = [
-      { section: { kind: "global" }, label: "游戏全局" },
-    ];
+  // 配置化的入口定义 - 使用行列坐标指定位置 (0-based索引)
+  // Grid: 12行 x 16列，撑满容器
+  const sectionConfigs = createMemo((): SectionConfig[] => {
+    const configs: SectionConfig[] = [];
     
-    for (const who of [0, 1] as const) {
-      result.push({ section: { kind: "pile", who }, label: `玩家 ${who} 牌库` });
-      result.push({ section: { kind: "hands", who }, label: `玩家 ${who} 手牌` });
-      
-      const player = state.players[who];
-      player.characters.forEach((char, index) => {
-        result.push({
-          section: { kind: "character", who, characterIndex: index },
-          label: `玩家 ${who} 角色 ${index + 1}`,
-        });
-      });
-      
-      result.push({ section: { kind: "supports", who }, label: `玩家 ${who} 支援区` });
-      result.push({ section: { kind: "summons", who }, label: `玩家 ${who} 召唤区` });
-      result.push({ section: { kind: "combatStatuses", who }, label: `玩家 ${who} 出战状态` });
-      result.push({ section: { kind: "dice", who }, label: `玩家 ${who} 骰子` });
-      result.push({ section: { kind: "playerFlags", who }, label: `玩家 ${who} 标记` });
-      result.push({ section: { kind: "roundSkillLog", who }, label: `玩家 ${who} 技能记录` });
-      result.push({ section: { kind: "deckImport", who }, label: `玩家 ${who} 牌组导入` });
-    }
-    
-    state.extensions.forEach((_, index) => {
-      result.push({ section: { kind: "extension", index }, label: `扩展 #${index + 1}` });
+    configs.push({
+      section: { kind: "global" },
+      label: "游戏全局",
+      row: 5, col: 0, rowSpan: 2, colSpan: 3,
+      variant: "default",
+      preview: (s) => (
+        <div class="flex gap-4 text-sm">
+          <span>回合 {s.roundNumber}</span>
+          <span>玩家 {s.currentTurn} 行动</span>
+          <span>阶段: {PHASE_LABELS[s.phase]}</span>
+        </div>
+      ),
     });
     
-    return result;
+    const player0 = state.players[0];
+    
+    configs.push({
+      section: { kind: "pile", who: 0 },
+      label: "牌库",
+      row: 8, col: 0, rowSpan: 3, colSpan: 3,
+      variant: "collection",
+      preview: () => (
+        <CollectionPreview count={player0.pile.length} max={state.config.maxPileCount} label="卡牌" />
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "hands", who: 0 },
+      label: "手牌",
+      row: 10, col: 3, rowSpan: 2, colSpan: 12,
+      variant: "collection",
+      preview: () => (
+        <CollectionPreview count={player0.hands.length} max={state.config.maxHandsCount} label="卡牌" />
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "character", who: 0, characterIndex: 0 },
+      label: "角色1",
+      row: 6, col: 6, rowSpan: 3, colSpan: 2,
+      variant: "character",
+      preview: () => (
+        <CharacterPreview character={player0.characters[0]} isActive={player0.activeCharacterId === player0.characters[0].id} />
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "character", who: 0, characterIndex: 1 },
+      label: "角色2",
+      row: 6, col: 8, rowSpan: 3, colSpan: 2,
+      variant: "character",
+      preview: () => (
+        <CharacterPreview character={player0.characters[1]} isActive={player0.activeCharacterId === player0.characters[1].id} />
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "character", who: 0, characterIndex: 2 },
+      label: "角色3",
+      row: 6, col: 10, rowSpan: 3, colSpan: 2,
+      variant: "character",
+      preview: () => (
+        <CharacterPreview character={player0.characters[2]} isActive={player0.activeCharacterId === player0.characters[2].id} />
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "supports", who: 0 },
+      label: "支援区",
+      row: 6, col: 3, rowSpan: 4, colSpan: 3,
+      variant: "status",
+      preview: () => (
+        <EntityAreaPreview items={player0.supports} max={state.config.maxSupportsCount} label="支援" />
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "summons", who: 0 },
+      label: "召唤区",
+      row: 6, col: 12, rowSpan: 4, colSpan: 3,
+      variant: "status",
+      preview: () => (
+        <EntityAreaPreview items={player0.summons} max={state.config.maxSummonsCount} label="召唤" />
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "combatStatuses", who: 0 },
+      label: "出战状态",
+      row: 9, col: 6, rowSpan: 1, colSpan: 6,
+      variant: "status",
+      preview: () => <div class="text-emerald-200">{player0.combatStatuses.length} 个状态</div>,
+    });
+    
+    configs.push({
+      section: { kind: "dice", who: 0 },
+      label: "骰子",
+      row: 6, col: 15, rowSpan: 6, colSpan: 1,
+      variant: "default",
+      preview: () => <DicePreview dice={[...player0.dice]} />,
+    });
+
+    configs.push({
+      section: { kind: "playerInfo", who: 0 },
+      label: "玩家0 信息",
+      row: 11, col: 0, rowSpan: 1, colSpan: 3,
+      variant: "default",
+      preview: () => (
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400">
+            {player0.declaredEnd && <span class="text-amber-400 mr-2">已结束</span>}
+            {player0.hasDefeated && <span class="text-rose-400 mr-2">已击败</span>}
+            {player0.legendUsed && <span class="text-purple-400">已秘传</span>}
+          </div>
+          <div class="text-xs text-slate-500">技能记录: {player0.roundSkillLog.size} 条</div>
+        </div>
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "deckImport", who: 0 },
+      label: "玩家0 牌组导入",
+      row: 7, col: 0, rowSpan: 1, colSpan: 3,
+      variant: "default",
+      preview: () => <span class="text-slate-500">点击导入</span>,
+    });
+
+    const player1 = state.players[1];
+    
+    configs.push({
+      section: { kind: "pile", who: 1 },
+      label: "牌库",
+      row: 1, col: 0, rowSpan: 3, colSpan: 3,
+      variant: "collection",
+      preview: () => (
+        <CollectionPreview count={player1.pile.length} max={state.config.maxPileCount} label="卡牌" />
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "hands", who: 1 },
+      label: "手牌",
+      row: 0, col: 3, rowSpan: 2, colSpan: 12,
+      variant: "collection",
+      preview: () => (
+        <CollectionPreview count={player1.hands.length} max={state.config.maxHandsCount} label="卡牌" />
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "character", who: 1, characterIndex: 0 },
+      label: "角色1",
+      row: 2, col: 6, rowSpan: 3, colSpan: 2,
+      variant: "character",
+      preview: () => (
+        <CharacterPreview character={player1.characters[0]} isActive={player1.activeCharacterId === player1.characters[0].id} />
+      ),
+    });
+
+    configs.push({
+      section: { kind: "character", who: 1, characterIndex: 1 },
+      label: "角色2",
+      row: 2, col: 8, rowSpan: 3, colSpan: 2,
+      variant: "character",
+      preview: () => (
+        <CharacterPreview character={player1.characters[1]} isActive={player1.activeCharacterId === player1.characters[1].id} />
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "character", who: 1, characterIndex: 2 },
+      label: "角色3",
+      row: 2, col: 10, rowSpan: 3, colSpan: 2,
+      variant: "character",
+      preview: () => (
+        <CharacterPreview character={player1.characters[2]} isActive={player1.activeCharacterId === player1.characters[2].id} />
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "supports", who: 1 },
+      label: "支援区",
+      row: 2, col: 3, rowSpan: 4, colSpan: 3,
+      variant: "status",
+      preview: () => (
+        <EntityAreaPreview items={player1.supports} max={state.config.maxSupportsCount} label="支援" />
+      ),
+    });
+
+    configs.push({
+      section: { kind: "summons", who: 1 },
+      label: "召唤区",
+      row: 2, col: 12, rowSpan: 4, colSpan: 3,
+      variant: "status",
+      preview: () => (
+        <EntityAreaPreview items={player1.summons} max={state.config.maxSummonsCount} label="召唤" />
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "combatStatuses", who: 1 },
+      label: "出战状态",
+      row: 5, col: 6, rowSpan: 1, colSpan: 6,
+      variant: "status",
+      preview: () => <div class="text-emerald-200">{player1.combatStatuses.length} 个状态</div>,
+    });
+    
+    configs.push({
+      section: { kind: "dice", who: 1 },
+      label: "骰子",
+      row: 0, col: 15, rowSpan: 6, colSpan: 1,
+      variant: "default",
+      preview: () => <DicePreview dice={[...player1.dice]} />,
+    });
+    
+    configs.push({
+      section: { kind: "playerInfo", who: 1 },
+      label: "玩家1 信息",
+      row: 0, col: 0, rowSpan: 1, colSpan: 3,
+      variant: "default",
+      preview: () => (
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400">
+            {player1.declaredEnd && <span class="text-amber-400 mr-2">已结束</span>}
+            {player1.hasDefeated && <span class="text-rose-400 mr-2">已击败</span>}
+            {player1.legendUsed && <span class="text-purple-400">已秘传</span>}
+          </div>
+          <div class="text-xs text-slate-500">技能记录: {player1.roundSkillLog.size} 条</div>
+        </div>
+      ),
+    });
+    
+    configs.push({
+      section: { kind: "deckImport", who: 1 },
+      label: "玩家1 牌组导入",
+      row: 4, col: 0, rowSpan: 1, colSpan: 3,
+      variant: "default",
+      preview: () => <span class="text-slate-500">点击导入</span>,
+    });
+    
+    return configs;
   });
 
   const isSectionActive = (section: EditorSection) => {
@@ -170,29 +544,32 @@ export function GameStateEditor(props: GameStateEditorProps) {
 
         {/* Main Content */}
         <div class="flex-1 flex overflow-hidden">
-          {/* Left Sidebar */}
-          <div class="w-64 flex-none border-r border-[var(--gi-editor-border)] bg-slate-950/50 overflow-y-auto">
-            <nav class="p-4 space-y-1">
-              <For each={sections()}>
-                {({ section, label }) => (
-                  <button
-                    type="button"
-                    onClick={() => setSelectedSection(section)}
-                    class={`w-full text-left px-3 py-2 rounded-xl text-sm transition ${
-                      isSectionActive(section)
-                        ? "bg-cyan-500/20 text-cyan-50 border border-cyan-500/30"
-                        : "text-slate-300 hover:bg-white/5 hover:text-slate-100"
-                    }`}
-                  >
-                    {label}
-                  </button>
+          {/* Left Sidebar - Grid Layout */}
+          <div 
+            class="w-3/5 flex-none border-r border-[var(--gi-editor-border)] bg-slate-900 overflow-y-auto"
+          >
+            <div 
+              class="p-4 grid gap-2 h-full box-border"
+              style={{
+                "grid-template-columns": `repeat(${GRID_COLS}, 1fr)`,
+                "grid-template-rows": `repeat(${GRID_ROWS}, 1fr)`,
+              }}
+            >
+              <For each={sectionConfigs()}>
+                {(config) => (
+                  <SectionCard
+                    config={config}
+                    isActive={isSectionActive(config.section)}
+                    onClick={() => setSelectedSection(config.section)}
+                    state={state as unknown as GameState}
+                  />
                 )}
               </For>
-            </nav>
+            </div>
           </div>
 
           {/* Right Content Area */}
-          <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div class="w-2/5 shrink-0 overflow-y-auto p-4 sm:p-6 lg:p-8 box-border">
             <div class="max-w-5xl mx-auto">
               <Switch>
                 {/* Global Section */}
@@ -315,7 +692,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
                 </Match>
 
                 {/* Player Sections */}
-                <Match when={selectedSection().kind === "supports" || selectedSection().kind === "summons" || selectedSection().kind === "combatStatuses" || selectedSection().kind === "dice" || selectedSection().kind === "playerFlags" || selectedSection().kind === "roundSkillLog" || selectedSection().kind === "deckImport"}>
+                <Match when={selectedSection().kind === "supports" || selectedSection().kind === "summons" || selectedSection().kind === "combatStatuses" || selectedSection().kind === "dice" || selectedSection().kind === "playerInfo" || selectedSection().kind === "deckImport"}>
                   <PlayerSectionContent
                     state={state as unknown as GameState}
                     section={selectedSection()}

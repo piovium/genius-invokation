@@ -123,66 +123,74 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
     </Surface>
   );
 
-  // Player flags section
-  const PlayerFlagsSection = () => (
-    <Surface title={`玩家 ${who()} 标记`}>
-      <div class="space-y-4">
-        <SectionTitle title="玩家标记" />
-        <div class="grid gap-3 sm:grid-cols-2">
-          <BooleanField
-            label="已宣告结束"
-            value={player().declaredEnd}
-            onChange={(value) => {
-              props.updateState((draft) => {
-                draft.players[who()].declaredEnd = value;
-              });
-            }}
-          />
-          <BooleanField
-            label="本回合已击倒对手"
-            value={player().hasDefeated}
-            onChange={(value) => {
-              props.updateState((draft) => {
-                draft.players[who()].hasDefeated = value;
-              });
-            }}
-          />
-          <BooleanField
-            label="可视为重击"
-            value={player().canCharged}
-            onChange={(value) => {
-              props.updateState((draft) => {
-                draft.players[who()].canCharged = value;
-              });
-            }}
-          />
-          <BooleanField
-            label="可视为下落攻击"
-            value={player().canPlunging}
-            onChange={(value) => {
-              props.updateState((draft) => {
-                draft.players[who()].canPlunging = value;
-              });
-            }}
-          />
-          <BooleanField
-            label="已使用秘传"
-            value={player().legendUsed}
-            onChange={(value) => {
-              props.updateState((draft) => {
-                draft.players[who()].legendUsed = value;
-              });
-            }}
-          />
-          <BooleanField
-            label="跳过下个行动轮次"
-            value={player().skipNextTurn}
-            onChange={(value) => {
-              props.updateState((draft) => {
-                draft.players[who()].skipNextTurn = value;
-              });
-            }}
-          />
+  // Player info section (合并玩家标记和技能记录)
+  const PlayerInfoSection = () => (
+    <Surface title={`玩家 ${who()} 信息`}>
+      <div class="space-y-6">
+        {/* 玩家标记 */}
+        <div class="space-y-4">
+          <SectionTitle title="玩家标记" />
+          <div class="grid gap-3 sm:grid-cols-2">
+            <BooleanField
+              label="已宣告结束"
+              value={player().declaredEnd}
+              onChange={(value) => {
+                props.updateState((draft) => {
+                  draft.players[who()].declaredEnd = value;
+                });
+              }}
+            />
+            <BooleanField
+              label="本回合已击倒对手"
+              value={player().hasDefeated}
+              onChange={(value) => {
+                props.updateState((draft) => {
+                  draft.players[who()].hasDefeated = value;
+                });
+              }}
+            />
+            <BooleanField
+              label="可视为重击"
+              value={player().canCharged}
+              onChange={(value) => {
+                props.updateState((draft) => {
+                  draft.players[who()].canCharged = value;
+                });
+              }}
+            />
+            <BooleanField
+              label="可视为下落攻击"
+              value={player().canPlunging}
+              onChange={(value) => {
+                props.updateState((draft) => {
+                  draft.players[who()].canPlunging = value;
+                });
+              }}
+            />
+            <BooleanField
+              label="已使用秘传"
+              value={player().legendUsed}
+              onChange={(value) => {
+                props.updateState((draft) => {
+                  draft.players[who()].legendUsed = value;
+                });
+              }}
+            />
+            <BooleanField
+              label="跳过下个行动轮次"
+              value={player().skipNextTurn}
+              onChange={(value) => {
+                props.updateState((draft) => {
+                  draft.players[who()].skipNextTurn = value;
+                });
+              }}
+            />
+          </div>
+        </div>
+
+        {/* 回合技能记录 */}
+        <div class="space-y-4 pt-4 border-t border-white/10">
+          <RoundSkillLogSection />
         </div>
       </div>
     </Surface>
@@ -323,86 +331,84 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
     };
 
     return (
-      <Surface title={`玩家 ${who()} 回合技能记录`}>
-        <div class="space-y-4">
-          <SectionTitle title="回合技能记录" description="键为角色定义 ID，值为本回合用过的主动技能。" />
-          <ActionButton label="新增记录" onClick={addRoundSkillRow} />
-          <div class="space-y-3">
-            <For each={roundSkillRows()}>
-              {([definitionId, skillIds], index) => {
-                const used = new Set(roundSkillRows().map(([key]) => key));
-                used.delete(definitionId);
-                const characterOptions = props.catalog.roundSkillCharacters.filter(
-                  (character) => !used.has(character.id),
+      <div class="space-y-4">
+        <SectionTitle title="回合技能记录" description="键为角色定义 ID，值为本回合用过的主动技能。" />
+        <ActionButton label="新增记录" onClick={addRoundSkillRow} />
+        <div class="space-y-3">
+          <For each={roundSkillRows()}>
+            {([definitionId, skillIds], index) => {
+              const used = new Set(roundSkillRows().map(([key]) => key));
+              used.delete(definitionId);
+              const characterOptions = props.catalog.roundSkillCharacters.filter(
+                (character) => !used.has(character.id),
+              );
+              const prioritizedSkills = (() => {
+                const priority = props.catalog.initiativeSkillsByCharacterId.get(definitionId) ?? [];
+                const rest = props.catalog.allInitiativeSkills.filter(
+                  (skill) => !priority.some((current) => current.id === skill.id),
                 );
-                const prioritizedSkills = (() => {
-                  const priority = props.catalog.initiativeSkillsByCharacterId.get(definitionId) ?? [];
-                  const rest = props.catalog.allInitiativeSkills.filter(
-                    (skill) => !priority.some((current) => current.id === skill.id),
-                  );
-                  return [...priority, ...rest];
-                })();
-                const toggleSkill = (skill: InitiativeSkillOption) => {
-                  const nextRows = [...roundSkillRows()];
-                  const current = nextRows[index()]!;
-                  const nextValue = current[1].includes(skill.id)
-                    ? current[1].filter((item) => item !== skill.id)
-                    : [...current[1], skill.id];
-                  nextRows[index()] = [current[0], nextValue];
-                  setRoundSkillRows(nextRows);
-                };
-                return (
-                  <div class="space-y-3 rounded-2xl border border-white/10 bg-slate-950/20 p-3">
-                    <div class="flex items-end gap-3">
-                      <div class="flex-1">
-                        <SelectField
-                          label="角色定义"
-                          value={definitionId}
-                          options={characterOptions.map((character) => ({
-                            value: character.id,
-                            label: `${character.name} #${character.id}`,
-                          }))}
-                          onChange={(value) => {
-                            const nextRows = [...roundSkillRows()];
-                            nextRows[index()] = [Number(value), skillIds];
-                            setRoundSkillRows(nextRows);
-                          }}
-                        />
-                      </div>
-                      <ActionButton
-                        label="移除记录"
-                        tone="danger"
-                        onClick={() =>
-                          setRoundSkillRows(
-                            roundSkillRows().filter((_, rowIndex) => rowIndex !== index()),
-                          )
-                        }
+                return [...priority, ...rest];
+              })();
+              const toggleSkill = (skill: InitiativeSkillOption) => {
+                const nextRows = [...roundSkillRows()];
+                const current = nextRows[index()]!;
+                const nextValue = current[1].includes(skill.id)
+                  ? current[1].filter((item) => item !== skill.id)
+                  : [...current[1], skill.id];
+                nextRows[index()] = [current[0], nextValue];
+                setRoundSkillRows(nextRows);
+              };
+              return (
+                <div class="space-y-3 rounded-2xl border border-white/10 bg-slate-950/20 p-3">
+                  <div class="flex items-end gap-3">
+                    <div class="flex-1">
+                      <SelectField
+                        label="角色定义"
+                        value={definitionId}
+                        options={characterOptions.map((character) => ({
+                          value: character.id,
+                          label: `${character.name} #${character.id}`,
+                        }))}
+                        onChange={(value) => {
+                          const nextRows = [...roundSkillRows()];
+                          nextRows[index()] = [Number(value), skillIds];
+                          setRoundSkillRows(nextRows);
+                        }}
                       />
                     </div>
-                    <div class="flex flex-wrap gap-2">
-                      <For each={prioritizedSkills}>
-                        {(skill) => (
-                          <button
-                            type="button"
-                            class={`gi-editor-button rounded-full border px-3 py-1.5 text-xs ${
-                              skillIds.includes(skill.id)
-                                ? "border-cyan-200/35 bg-cyan-300/12 text-cyan-50"
-                                : "border-white/10 bg-white/5 text-slate-100"
-                            }`}
-                            onClick={() => toggleSkill(skill)}
-                          >
-                            {skill.name} #{skill.id}
-                          </button>
-                        )}
-                      </For>
-                    </div>
+                    <ActionButton
+                      label="移除记录"
+                      tone="danger"
+                      onClick={() =>
+                        setRoundSkillRows(
+                          roundSkillRows().filter((_, rowIndex) => rowIndex !== index()),
+                        )
+                      }
+                    />
                   </div>
-                );
-              }}
-            </For>
-          </div>
+                  <div class="flex flex-wrap gap-2">
+                    <For each={prioritizedSkills}>
+                      {(skill) => (
+                        <button
+                          type="button"
+                          class={`gi-editor-button rounded-full border px-3 py-1.5 text-xs ${
+                            skillIds.includes(skill.id)
+                              ? "border-cyan-200/35 bg-cyan-300/12 text-cyan-50"
+                              : "border-white/10 bg-white/5 text-slate-100"
+                          }`}
+                          onClick={() => toggleSkill(skill)}
+                        >
+                          {skill.name} #{skill.id}
+                        </button>
+                      )}
+                    </For>
+                  </div>
+                </div>
+              );
+            }}
+          </For>
         </div>
-      </Surface>
+      </div>
     );
   };
 
@@ -507,11 +513,8 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
       <Match when={section().kind === "dice"}>
         <DiceSection />
       </Match>
-      <Match when={section().kind === "playerFlags"}>
-        <PlayerFlagsSection />
-      </Match>
-      <Match when={section().kind === "roundSkillLog"}>
-        <RoundSkillLogSection />
+      <Match when={section().kind === "playerInfo"}>
+        <PlayerInfoSection />
       </Match>
       <Match when={section().kind === "deckImport"}>
         <DeckImportSection />
