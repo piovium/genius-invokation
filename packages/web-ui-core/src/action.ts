@@ -944,7 +944,7 @@ function createElementalTuningActionState(
     showHands: false,
     showSkillButtons: false,
     hintText: ctx.t("action.tuneToDice", {
-      dicetype: getDiceText(targetDice, ctx.t),
+      diceType: getDiceText(targetDice, ctx.t),
     }),
     dicePanel: "visible",
     autoSelectedDice: ctx.action.autoSelectedDice as DiceType[],
