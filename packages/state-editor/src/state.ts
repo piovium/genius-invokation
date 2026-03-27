@@ -1,6 +1,5 @@
 import { DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
 import {
-  Aura,
   CURRENT_VERSION,
   StateSymbol,
   getVersionBehavior,
@@ -16,7 +15,7 @@ import {
   type PhaseType,
   type PlayerState,
 } from "@gi-tcg/core";
-import { DiceType } from "@gi-tcg/typings";
+import { Aura, DiceType } from "@gi-tcg/typings";
 import getData from "@gi-tcg/data";
 
 type AttachmentDefinition = AttachmentState["definition"];
