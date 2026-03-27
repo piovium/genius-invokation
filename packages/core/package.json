@@ -28,7 +28,7 @@
   "dependencies": {
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
-    "immer": "^10.0.3",
+    "immer": "^11.1.4",
     "ohm-js": "^17.1.0"
   },
   "devDependencies": {
