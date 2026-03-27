@@ -238,6 +238,7 @@
         "@gi-tcg/data-code-analyzer": "workspace:*",
         "@gi-tcg/deck-builder": "workspace:*",
         "@gi-tcg/detail-log-viewer": "workspace:*",
+        "@gi-tcg/state-editor": "workspace:*",
         "@gi-tcg/utils": "workspace:*",
         "@gi-tcg/web-ui-core": "workspace:*",
         "@vercel/analytics": "^1.2.0",

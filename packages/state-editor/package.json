@@ -1,5 +1,6 @@
 {
   "name": "@gi-tcg/state-editor",
+  "type": "module",
   "exports": {
     ".": {
       "bun": "./src/index.tsx",

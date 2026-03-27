@@ -145,7 +145,7 @@ export function StandaloneParent(props: StandaloneParentProps) {
   };
   const enableLog = () => {
     setViewingWho(1);
-    setViewingLogIndex(stateLog().length - 2);
+    setViewingLogIndex(stateLog().length - 1);
   };
   const maxLogIndex = () => {
     return stateLog().length - (fromImport() ? 1 : 2);
@@ -263,7 +263,7 @@ export function StandaloneParent(props: StandaloneParentProps) {
     window.addEventListener("message", childGiveUpHandler);
     if (Array.isArray(props.logs)) {
       setStateLog(props.logs);
-      setViewingLogIndex(props.logs.length - 2);
+      setViewingLogIndex(props.logs.length - 1);
       setFromImport(true);
     } else {
       startGame();

@@ -11,12 +11,17 @@ html {
 
 #root {
   margin: 0 auto;
-  width: min(100vw, 1280px);
+  width: min(100vw, 1600px);
   /* overflow: hidden; */
 }
 
 .gi-tcg-chessboard-new {
   height: 36rem;
+}
+
+.gi-state-editor {
+  height: 100vh;
+  width: 100vw;
 }
 
 .title {

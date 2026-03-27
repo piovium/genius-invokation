@@ -19,7 +19,7 @@ export default defineConfig({
   presets: [presetWind3()],
   transformers: [transformerDirectives()],
   postprocess: (obj) => {
-    const scope = `.gi-tcg-chessboard-new`;
+    const scope = `.gi-state-editor`;
     obj.selector += `:where(${scope},${scope} *)`;
   },
 });

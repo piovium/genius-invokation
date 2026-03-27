@@ -10,7 +10,7 @@ import {
   type ComponentProps,
   type JSX,
 } from "solid-js";
-import { createStore, produce } from "solid-js/store";
+import { createStore, produce, unwrap } from "solid-js/store";
 
 import type { GameState, CharacterState } from "@gi-tcg/core";
 
@@ -35,9 +35,7 @@ import {
 import { PlayerSectionContent } from "./PlayerSectionContent";
 import {
   buildEditorCatalog,
-  cloneGameState,
   createDefaultGameState,
-  materializeGameState,
   PHASE_LABELS,
   validateGameState,
   getPlayer,
@@ -211,16 +209,15 @@ function EntityAreaPreview(props: { items: readonly { definition: { id: number }
 
 export function GameStateEditor(props: GameStateEditorProps) {
   const [local, rest] = splitProps(props, ["initialValue", "onSubmit", "class"]);
-  const initialState = cloneGameState(local.initialValue ?? createDefaultGameState());
+  const initialState = (local.initialValue ?? createDefaultGameState());
   const [state, setState] = createStore(initialState);
   const catalog = createMemo(() =>
-    buildEditorCatalog(state.data as unknown as Parameters<typeof buildEditorCatalog>[0]),
+    buildEditorCatalog(state.data),
   );
   const [selectedSection, setSelectedSection] = createSignal<EditorSection>({ kind: "global" });
   const [modalStack, setModalStack] = createSignal<EditorModal[]>([]);
   const currentModal = createMemo(() => modalStack()[modalStack().length - 1] ?? null);
-  const materializedState = createMemo(() => materializeGameState(state as unknown as GameState));
-  const errors = createMemo(() => validateGameState(materializedState(), catalog()));
+  const errors = createMemo(() => validateGameState(state, catalog()));
   const [formValid, setFormValid] = createSignal(true);
   let formRef: HTMLFormElement | undefined;
 
@@ -246,10 +243,11 @@ export function GameStateEditor(props: GameStateEditorProps) {
   };
 
   const submit = () => {
-    const nextState = materializedState();
     if (!formValid() || errors().length > 0) {
       return;
     }
+    const nextState = unwrap(state);
+    console.log(`Submitted:`, nextState);
     local.onSubmit(nextState);
   };
 
@@ -510,7 +508,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
   return (
     <div
       {...rest}
-      class={`gi-state-editor gi-tcg-chessboard-new ${local.class ?? ""}`}
+      class={`gi-state-editor ${local.class ?? ""}`}
     >
       <form
         ref={formRef}
@@ -682,7 +680,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
                 {/* Character Section */}
                 <Match when={selectedSection().kind === "character"}>
                   <CharacterModalContent
-                    state={state as unknown as GameState}
+                    state={state}
                     who={(selectedSection() as Extract<EditorSection, { kind: "character" }>).who}
                     characterIndex={(selectedSection() as Extract<EditorSection, { kind: "character" }>).characterIndex}
                     catalog={catalog()}
@@ -694,7 +692,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
                 {/* Player Sections */}
                 <Match when={selectedSection().kind === "supports" || selectedSection().kind === "summons" || selectedSection().kind === "combatStatuses" || selectedSection().kind === "dice" || selectedSection().kind === "playerInfo" || selectedSection().kind === "deckImport"}>
                   <PlayerSectionContent
-                    state={state as unknown as GameState}
+                    state={state}
                     section={selectedSection()}
                     catalog={catalog()}
                     updateState={updateState}
@@ -705,7 +703,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
                 {/* Extension Section */}
                 <Match when={selectedSection().kind === "extension"}>
                   <ExtensionModalContent
-                    state={state as unknown as GameState}
+                    state={state}
                     index={(selectedSection() as Extract<EditorSection, { kind: "extension" }>).index}
                     updateState={updateState}
                   />
@@ -729,7 +727,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
         <Match when={currentModal()?.kind === "entity"}>
           <EntityModal
             open
-            state={state as unknown as GameState}
+            state={state}
             who={(currentModal() as Extract<EditorModal, { kind: "entity" }>).who}
             area={(currentModal() as Extract<EditorModal, { kind: "entity" }>).area}
             entityId={(currentModal() as Extract<EditorModal, { kind: "entity" }>).entityId}
@@ -743,7 +741,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
         <Match when={currentModal()?.kind === "attachment"}>
           <AttachmentModal
             open
-            state={state as unknown as GameState}
+            state={state}
             who={(currentModal() as Extract<EditorModal, { kind: "attachment" }>).who}
             area={(currentModal() as Extract<EditorModal, { kind: "attachment" }>).area}
             entityId={(currentModal() as Extract<EditorModal, { kind: "attachment" }>).entityId}
