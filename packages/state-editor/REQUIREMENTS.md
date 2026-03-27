@@ -211,9 +211,9 @@ The editing consists following parts:
 
 ## Exports
 
-Finally add an export button to the corner of app. The export button serialize the built `state` by `JSON.stringify(serializeGameStateLog({ state, canResume: true }))` and download to user's computer. 
+Add a "Done" button to the corner of app, which triggers `onChange` callback to the host App (disabled when state is invalid). 
 
-The `state` can be also persisted inside user browser's `localStorage` (use `@solid-primitives/storage` please).
+In `src/dev.tsx`, import the Editor component, and on Done do serialize the built `state` by `JSON.stringify(serializeGameStateLog({ state, canResume: true }))` and download to user's computer. The `state` can be also persisted inside user browser's `localStorage` (use `@solid-primitives/storage` please).
 
 ## Notes
 
