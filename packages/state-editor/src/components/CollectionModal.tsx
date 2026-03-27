@@ -2,7 +2,7 @@ import { For, Show } from "solid-js";
 
 import type { GameState } from "@gi-tcg/core";
 
-import { ActionButton, SearchableSelect } from "./Fields";
+import { ActionButton, SearchableSelect, Surface, SectionTitle } from "./Fields";
 import { Modal } from "./Modal";
 import { PreviewTile } from "./Previews";
 import {
@@ -27,6 +27,14 @@ interface CollectionModalProps {
   onClose: () => void;
 }
 
+interface CollectionContentProps {
+  state: GameState;
+  who: 0 | 1;
+  catalog: EditorCatalog;
+  updateState: UpdateGameState;
+  openModal: (modal: EditorModal) => void;
+}
+
 function detailBadges(card: { attachments: readonly unknown[]; variables: Record<string, number> }) {
   return [
     `变量 ${Object.keys(card.variables).length}`,
@@ -34,11 +42,12 @@ function detailBadges(card: { attachments: readonly unknown[]; variables: Record
   ];
 }
 
-export function PileModal(props: CollectionModalProps) {
+// Content component for Pile (non-modal version)
+export function PileModalContent(props: CollectionContentProps) {
   const player = () => getPlayer(props.state, props.who);
 
   return (
-    <Modal open={props.open} title={`玩家 ${props.who} 牌库编辑`} onClose={props.onClose}>
+    <Surface title={`玩家 ${props.who} 牌库编辑`}>
       <div class="space-y-4">
         <div class="flex flex-wrap gap-2">
           <ActionButton
@@ -156,15 +165,16 @@ export function PileModal(props: CollectionModalProps) {
           </For>
         </div>
       </div>
-    </Modal>
+    </Surface>
   );
 }
 
-export function HandsModal(props: CollectionModalProps) {
+// Content component for Hands (non-modal version)
+export function HandsModalContent(props: CollectionContentProps) {
   const player = () => getPlayer(props.state, props.who);
 
   return (
-    <Modal open={props.open} title={`玩家 ${props.who} 手牌编辑`} onClose={props.onClose}>
+    <Surface title={`玩家 ${props.who} 手牌编辑`}>
       <div class="space-y-4">
         <SearchableSelect
           label="追加卡牌"
@@ -294,6 +304,35 @@ export function HandsModal(props: CollectionModalProps) {
           </For>
         </div>
       </div>
+    </Surface>
+  );
+}
+
+// Modal versions (keeping for backwards compatibility if needed)
+export function PileModal(props: CollectionModalProps) {
+  return (
+    <Modal open={props.open} title={`玩家 ${props.who} 牌库编辑`} onClose={props.onClose}>
+      <PileModalContent
+        state={props.state}
+        who={props.who}
+        catalog={props.catalog}
+        updateState={props.updateState}
+        openModal={props.openModal}
+      />
+    </Modal>
+  );
+}
+
+export function HandsModal(props: CollectionModalProps) {
+  return (
+    <Modal open={props.open} title={`玩家 ${props.who} 手牌编辑`} onClose={props.onClose}>
+      <HandsModalContent
+        state={props.state}
+        who={props.who}
+        catalog={props.catalog}
+        updateState={props.updateState}
+        openModal={props.openModal}
+      />
     </Modal>
   );
 }

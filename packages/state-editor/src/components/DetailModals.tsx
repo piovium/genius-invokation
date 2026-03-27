@@ -8,6 +8,7 @@ import {
   SearchableSelect,
   SelectField,
   SectionTitle,
+  Surface,
 } from "./Fields";
 import { JsonSchemaEditor } from "./JsonSchemaEditor";
 import { Modal } from "./Modal";
@@ -57,26 +58,26 @@ function VariableGrid(props: {
   );
 }
 
-interface CharacterModalProps {
-  open: boolean;
+// Content version (non-modal) for Character
+interface CharacterContentProps {
   state: GameState;
   who: 0 | 1;
-  characterId: number;
+  characterIndex: number;
   catalog: EditorCatalog;
   updateState: UpdateGameState;
   openModal: (modal: EditorModal) => void;
-  onClose: () => void;
 }
 
-export function CharacterModal(props: CharacterModalProps) {
+export function CharacterModalContent(props: CharacterContentProps) {
   const player = () => getPlayer(props.state, props.who);
-  const character = () => getCharacter(player(), props.characterId);
+  const characterId = () => player().characters[props.characterIndex]?.id ?? 0;
+  const character = () => getCharacter(player(), characterId());
   const defeated = () => (character()?.variables.alive ?? 1) === 0;
 
   const updateCharacter = (updater: (target: Mutable<CharacterState>) => void) => {
     props.updateState((draft) => {
       const target = draft.players[props.who].characters.find(
-        (item) => item.id === props.characterId,
+        (item) => item.id === characterId(),
       );
       if (target) {
         updater(target as unknown as Mutable<CharacterState>);
@@ -98,11 +99,7 @@ export function CharacterModal(props: CharacterModalProps) {
           );
 
         return (
-          <Modal
-            open={props.open}
-            title={`角色编辑 - ${getDefinitionName(currentCharacter().definition)}`}
-            onClose={props.onClose}
-          >
+          <Surface title={`角色编辑 - ${getDefinitionName(currentCharacter().definition)}`}>
             <div class="space-y-5">
               <div class="grid gap-4 lg:grid-cols-[280px,1fr]">
                 <PreviewTile
@@ -121,7 +118,7 @@ export function CharacterModal(props: CharacterModalProps) {
                       tone="accent"
                       onClick={() => {
                         props.updateState((draft) => {
-                          draft.players[props.who].activeCharacterId = props.characterId;
+                          draft.players[props.who].activeCharacterId = characterId();
                         });
                       }}
                     />
@@ -192,7 +189,7 @@ export function CharacterModal(props: CharacterModalProps) {
                         }
                         props.updateState((draft) => {
                           const target = draft.players[props.who].characters.find(
-                            (item) => item.id === props.characterId,
+                            (item) => item.id === characterId(),
                           );
                           if (!target) {
                             return;
@@ -211,7 +208,7 @@ export function CharacterModal(props: CharacterModalProps) {
                       onClick={() => {
                         props.updateState((draft) => {
                           const target = draft.players[props.who].characters.find(
-                            (item) => item.id === props.characterId,
+                            (item) => item.id === characterId(),
                           );
                           if (!target) {
                             return;
@@ -250,7 +247,7 @@ export function CharacterModal(props: CharacterModalProps) {
                   onSelect={(option) => {
                     props.updateState((draft) => {
                       const target = draft.players[props.who].characters.find(
-                        (item) => item.id === props.characterId,
+                        (item) => item.id === characterId(),
                       );
                       if (!target) {
                         return;
@@ -275,7 +272,7 @@ export function CharacterModal(props: CharacterModalProps) {
                             who: props.who,
                             area: "characterEntities",
                             entityId: entity.id,
-                            characterId: props.characterId,
+                            characterId: characterId(),
                           })
                         }
                         actions={
@@ -288,7 +285,7 @@ export function CharacterModal(props: CharacterModalProps) {
                                   who: props.who,
                                   area: "characterEntities",
                                   entityId: entity.id,
-                                  characterId: props.characterId,
+                                  characterId: characterId(),
                                 })
                               }
                             />
@@ -298,7 +295,7 @@ export function CharacterModal(props: CharacterModalProps) {
                               onClick={() => {
                                 props.updateState((draft) => {
                                   const target = draft.players[props.who].characters.find(
-                                    (item) => item.id === props.characterId,
+                                    (item) => item.id === characterId(),
                                   );
                                   if (!target) {
                                     return;
@@ -313,7 +310,7 @@ export function CharacterModal(props: CharacterModalProps) {
                               onClick={() => {
                                 props.updateState((draft) => {
                                   const target = draft.players[props.who].characters.find(
-                                    (item) => item.id === props.characterId,
+                                    (item) => item.id === characterId(),
                                   );
                                   if (!target) {
                                     return;
@@ -328,7 +325,7 @@ export function CharacterModal(props: CharacterModalProps) {
                               onClick={() => {
                                 props.updateState((draft) => {
                                   const target = draft.players[props.who].characters.find(
-                                    (item) => item.id === props.characterId,
+                                    (item) => item.id === characterId(),
                                   );
                                   if (!target) {
                                     return;
@@ -345,15 +342,52 @@ export function CharacterModal(props: CharacterModalProps) {
                 </div>
               </div>
             </div>
-          </Modal>
+          </Surface>
         );
       }}
     </Show>
   );
 }
 
-interface EntityModalProps {
+// Modal version (keeping for backwards compatibility)
+interface CharacterModalProps {
   open: boolean;
+  state: GameState;
+  who: 0 | 1;
+  characterId: number;
+  catalog: EditorCatalog;
+  updateState: UpdateGameState;
+  openModal: (modal: EditorModal) => void;
+  onClose: () => void;
+}
+
+export function CharacterModal(props: CharacterModalProps) {
+  // Find character index from characterId
+  const characterIndex = () => {
+    const player = getPlayer(props.state, props.who);
+    return player.characters.findIndex(c => c.id === props.characterId);
+  };
+
+  return (
+    <Modal
+      open={props.open}
+      title={`角色编辑`}
+      onClose={props.onClose}
+    >
+      <CharacterModalContent
+        state={props.state}
+        who={props.who}
+        characterIndex={characterIndex()}
+        catalog={props.catalog}
+        updateState={props.updateState}
+        openModal={props.openModal}
+      />
+    </Modal>
+  );
+}
+
+// Content component for Entity (non-modal version)
+interface EntityContentProps {
   state: GameState;
   who: 0 | 1;
   area: EditorEntityArea;
@@ -362,11 +396,10 @@ interface EntityModalProps {
   catalog: EditorCatalog;
   updateState: UpdateGameState;
   openModal: (modal: EditorModal) => void;
-  onClose: () => void;
 }
 
-function updateEntityByArea(
-  props: EntityModalProps,
+function updateEntityByAreaContent(
+  props: EntityContentProps,
   updater: (entity: Mutable<EntityState>) => void,
 ) {
   props.updateState((draft) => {
@@ -386,7 +419,7 @@ function updateEntityByArea(
   });
 }
 
-export function EntityModal(props: EntityModalProps) {
+export function EntityModalContent(props: EntityContentProps) {
   const player = () => getPlayer(props.state, props.who);
   const entity = () => getEntity(player(), props.area, props.entityId, props.characterId);
   const allowAttachments = () => props.area === "hands" || props.area === "pile";
@@ -396,11 +429,7 @@ export function EntityModal(props: EntityModalProps) {
       {(resolvedEntity) => {
         const currentEntity = () => resolvedEntity();
         return (
-          <Modal
-            open={props.open}
-            title={`实体编辑 - ${getDefinitionName(currentEntity().definition)}`}
-            onClose={props.onClose}
-          >
+          <Surface title={`实体编辑 - ${getDefinitionName(currentEntity().definition)}`}>
             <div class="space-y-5">
               <div class="grid gap-4 lg:grid-cols-[260px,1fr]">
                 <PreviewTile
@@ -414,7 +443,7 @@ export function EntityModal(props: EntityModalProps) {
                   <VariableGrid
                     entries={Object.entries(currentEntity().variables)}
                     onChange={(key, value) =>
-                      updateEntityByArea(props, (target) => {
+                      updateEntityByAreaContent(props, (target) => {
                         target.variables[key] = value;
                       })
                     }
@@ -540,25 +569,59 @@ export function EntityModal(props: EntityModalProps) {
                 </div>
               </Show>
             </div>
-          </Modal>
+          </Surface>
         );
       }}
     </Show>
   );
 }
 
-interface AttachmentModalProps {
+// Modal version (keeping for backwards compatibility)
+interface EntityModalProps {
   open: boolean;
+  state: GameState;
+  who: 0 | 1;
+  area: EditorEntityArea;
+  entityId: number;
+  characterId?: number;
+  catalog: EditorCatalog;
+  updateState: UpdateGameState;
+  openModal: (modal: EditorModal) => void;
+  onClose: () => void;
+}
+
+export function EntityModal(props: EntityModalProps) {
+  return (
+    <Modal
+      open={props.open}
+      title={`实体编辑`}
+      onClose={props.onClose}
+    >
+      <EntityModalContent
+        state={props.state}
+        who={props.who}
+        area={props.area}
+        entityId={props.entityId}
+        characterId={props.characterId}
+        catalog={props.catalog}
+        updateState={props.updateState}
+        openModal={props.openModal}
+      />
+    </Modal>
+  );
+}
+
+// Content component for Attachment (non-modal version)
+interface AttachmentContentProps {
   state: GameState;
   who: 0 | 1;
   area: "hands" | "pile";
   entityId: number;
   attachmentId: number;
   updateState: UpdateGameState;
-  onClose: () => void;
 }
 
-export function AttachmentModal(props: AttachmentModalProps) {
+export function AttachmentModalContent(props: AttachmentContentProps) {
   const player = () => getPlayer(props.state, props.who);
   const attachment = () => getAttachment(player(), props.area, props.entityId, props.attachmentId);
   return (
@@ -566,11 +629,7 @@ export function AttachmentModal(props: AttachmentModalProps) {
       {(resolvedAttachment) => {
         const currentAttachment = () => resolvedAttachment();
         return (
-          <Modal
-            open={props.open}
-            title={`附着编辑 - ${getDefinitionName(currentAttachment().definition)}`}
-            onClose={props.onClose}
-          >
+          <Surface title={`附着编辑 - ${getDefinitionName(currentAttachment().definition)}`}>
             <div class="space-y-4">
               <PreviewTile
                 definition={currentAttachment().definition}
@@ -597,35 +656,61 @@ export function AttachmentModal(props: AttachmentModalProps) {
                 }}
               />
             </div>
-          </Modal>
+          </Surface>
         );
       }}
     </Show>
   );
 }
 
-interface ExtensionModalProps {
+// Modal version (keeping for backwards compatibility)
+interface AttachmentModalProps {
   open: boolean;
   state: GameState;
-  index: number;
+  who: 0 | 1;
+  area: "hands" | "pile";
+  entityId: number;
+  attachmentId: number;
   updateState: UpdateGameState;
   onClose: () => void;
 }
 
-export function ExtensionModal(props: ExtensionModalProps) {
+export function AttachmentModal(props: AttachmentModalProps) {
+  return (
+    <Modal
+      open={props.open}
+      title={`附着编辑`}
+      onClose={props.onClose}
+    >
+      <AttachmentModalContent
+        state={props.state}
+        who={props.who}
+        area={props.area}
+        entityId={props.entityId}
+        attachmentId={props.attachmentId}
+        updateState={props.updateState}
+      />
+    </Modal>
+  );
+}
+
+// Content component for Extension (non-modal version)
+interface ExtensionContentProps {
+  state: GameState;
+  index: number;
+  updateState: UpdateGameState;
+}
+
+export function ExtensionModalContent(props: ExtensionContentProps) {
   const extension = () => props.state.extensions[props.index];
   return (
     <Show when={extension()}>
       {(resolvedExtension) => {
         const currentExtension = () => resolvedExtension();
         return (
-          <Modal
-            open={props.open}
-            title={`扩展编辑 - #${currentExtension().definition.id}`}
-            description={currentExtension().definition.description}
-            onClose={props.onClose}
-          >
+          <Surface title={`扩展编辑 - #${currentExtension().definition.id}`}>
             <div class="space-y-4">
+              <p class="text-sm text-slate-300/80">{currentExtension().definition.description}</p>
               <div class="grid gap-3 sm:grid-cols-2">
                 <SummaryLine label="扩展编号" value={String(currentExtension().definition.id)} />
                 <SummaryLine label="说明" value={currentExtension().definition.description || "无"} />
@@ -640,9 +725,34 @@ export function ExtensionModal(props: ExtensionModalProps) {
                 }}
               />
             </div>
-          </Modal>
+          </Surface>
         );
       }}
     </Show>
+  );
+}
+
+// Modal version (keeping for backwards compatibility)
+interface ExtensionModalProps {
+  open: boolean;
+  state: GameState;
+  index: number;
+  updateState: UpdateGameState;
+  onClose: () => void;
+}
+
+export function ExtensionModal(props: ExtensionModalProps) {
+  return (
+    <Modal
+      open={props.open}
+      title={`扩展编辑`}
+      onClose={props.onClose}
+    >
+      <ExtensionModalContent
+        state={props.state}
+        index={props.index}
+        updateState={props.updateState}
+      />
+    </Modal>
   );
 }

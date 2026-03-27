@@ -60,6 +60,20 @@ export type EditorModal =
     }
   | { kind: "extension"; index: number };
 
+export type EditorSection =
+  | { kind: "global" }
+  | { kind: "pile"; who: 0 | 1 }
+  | { kind: "hands"; who: 0 | 1 }
+  | { kind: "character"; who: 0 | 1; characterIndex: number }
+  | { kind: "supports"; who: 0 | 1 }
+  | { kind: "summons"; who: 0 | 1 }
+  | { kind: "combatStatuses"; who: 0 | 1 }
+  | { kind: "dice"; who: 0 | 1 }
+  | { kind: "playerFlags"; who: 0 | 1 }
+  | { kind: "roundSkillLog"; who: 0 | 1 }
+  | { kind: "deckImport"; who: 0 | 1 }
+  | { kind: "extension"; index: number };
+
 export type UpdateGameState = (
   updater: (draft: Mutable<GameState>) => void,
 ) => void;
