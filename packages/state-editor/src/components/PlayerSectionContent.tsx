@@ -1,6 +1,12 @@
 import { For, Match, Show, Switch, createMemo, createSignal } from "solid-js";
 
-import type { EntityState, GameState } from "@gi-tcg/core";
+import type {
+  EntityState,
+  EntityDefinition,
+  EntityType,
+  GameState,
+  EntityTag,
+} from "@gi-tcg/core";
 
 import {
   ActionButton,
@@ -13,6 +19,7 @@ import {
 import { PreviewTile } from "./Previews";
 import { RoundSkillModal } from "./RoundSkillModal";
 import { ListItem, type ListItemButton } from "./ListItem";
+import { AddCardModal } from "./AddCardModal";
 import {
   allocateId,
   buildImportedCharacterStates,
@@ -21,6 +28,7 @@ import {
   decodeDeckShareCode,
   DICE_LABELS,
   DICE_OPTIONS,
+  getDefinitionName,
   getImageUrl,
   getPlayer,
   moveInArray,
@@ -210,127 +218,175 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
   // Entity area section (supports, summons, combatStatuses)
   const EntityAreaSection = (props2: {
     title: string;
-    description: string;
+    description?: string;
     area: "supports" | "summons" | "combatStatuses";
     mode: "card" | "icon";
     limit?: number;
+    availableTags?: EntityTag[]; // 可选的标签列表，用于添加时的筛选
   }) => {
     const items = () => player()[props2.area];
-    const options = () => {
+    const [addModalOpen, setAddModalOpen] = createSignal(false);
+
+    // 获取可用的类型
+    const availableTypes = () => {
       switch (props2.area) {
         case "supports":
-          return props.catalog.entitiesByType.support;
+          return ["support"];
         case "summons":
-          return props.catalog.entitiesByType.summon;
+          return ["summon"];
         case "combatStatuses":
-          return props.catalog.entitiesByType.combatStatus;
+          return ["combatStatus"];
         default:
           return [];
       }
     };
 
+    // 处理添加
+    const handleAdd = (definition: EntityDefinition) => {
+      props.updateState((draft) => {
+        const target = draft.players[who()][props2.area];
+        if (typeof props2.limit === "number" && target.length >= props2.limit) {
+          return;
+        }
+        target.push(
+          createEntityState(
+            definition,
+            allocateId(draft),
+          ) as unknown as (typeof target)[number],
+        );
+      });
+    };
+
+    // 判断是否可以放回手牌
+    const canReturnToHands = () => {
+      return props2.area === "supports";
+    };
+
     return (
       <Surface title={props2.title}>
+        <Show when={props2.description}>
+          <p class="mt-1 text-xs text-slate-300/80">{`※ ${props2.description}`}</p>
+        </Show>
         <div class="space-y-4">
-          <SectionTitle title={props2.title} description={props2.description} />
-          <SearchableSelect
-            label={`追加${props2.title}`}
-            options={options()}
-            buttonText={`加入${props2.title}`}
+          <div class="space-y-2">
+            <For each={items()}>
+              {(entity, index) => {
+                const buttons: ListItemButton[] = [
+                  // 第一列
+                  {
+                    content: "上移",
+                    col: 0,
+                    onClick: () => {
+                      props.updateState((draft) => {
+                        draft.players[who()][props2.area] = moveInArray(
+                          draft.players[who()][props2.area],
+                          index(),
+                          -1,
+                        );
+                      });
+                    },
+                  },
+                  {
+                    content: "下移",
+                    col: 0,
+                    onClick: () => {
+                      props.updateState((draft) => {
+                        draft.players[who()][props2.area] = moveInArray(
+                          draft.players[who()][props2.area],
+                          index(),
+                          1,
+                        );
+                      });
+                    },
+                  },
+                  // 第二列
+                  {
+                    content: "详情",
+                    col: 1,
+                    variant: "primary",
+                    onClick: () =>
+                      props.openModal({
+                        kind: "entity",
+                        who: who(),
+                        area: props2.area,
+                        entityId: entity.id,
+                      }),
+                  },
+                  {
+                    content: "移除",
+                    col: 1,
+                    variant: "danger",
+                    onClick: () => {
+                      props.updateState((draft) => {
+                        draft.players[who()][props2.area].splice(index(), 1);
+                      });
+                    },
+                  },
+                ];
+
+                // 支援牌可以放回手牌
+                if (canReturnToHands() && props2.area === "supports") {
+                  buttons.splice(1, 0, {
+                    content: "放回手牌",
+                    col: 0,
+                    onClick: () => {
+                      props.updateState((draft) => {
+                        const target = draft.players[who()];
+                        if (target.hands.length >= draft.config.maxHandsCount) {
+                          return;
+                        }
+                        const [item] = target.supports.splice(index(), 1);
+                        if (item) {
+                          target.hands.push(item);
+                        }
+                      });
+                    },
+                  });
+                }
+
+                return (
+                  <ListItem
+                    imageSrc={getImageUrl(
+                      entity.definition,
+                      props2.mode === "card" ? "card" : "icon",
+                    )}
+                    imageMode={props2.mode}
+                    title={getDefinitionName(entity.definition)}
+                    description={`ID: ${entity.id}`}
+                    tags={entityBadges(entity)}
+                    buttonColumns={2}
+                    buttons={buttons}
+                  />
+                );
+              }}
+            </For>
+          </div>
+          {/* 新增按钮 */}
+          <button
+            type="button"
+            onClick={() => setAddModalOpen(true)}
             disabled={
               typeof props2.limit === "number" && items().length >= props2.limit
             }
-            onSelect={(option) => {
-              props.updateState((draft) => {
-                const target = draft.players[who()][props2.area];
-                if (
-                  typeof props2.limit === "number" &&
-                  target.length >= props2.limit
-                ) {
-                  return;
-                }
-                target.push(
-                  createEntityState(
-                    option.definition,
-                    allocateId(draft),
-                  ) as unknown as (typeof target)[number],
-                );
-              });
-            }}
+            class="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 bg-transparent px-3 py-3 text-sm text-slate-400 hover:border-white/40 hover:text-slate-300 hover:bg-white/5 transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <span class="text-lg">+</span>
+            <span>追加{props2.title}</span>
+          </button>
+
+          {/* AddCardModal */}
+          <AddCardModal
+            open={addModalOpen()}
+            state={props.state}
+            catalog={props.catalog}
+            onSelect={handleAdd}
+            onClose={() => setAddModalOpen(false)}
+            availableTypes={availableTypes() as EntityType[]}
+            showTypeFilter={false}
+            availableTags={props2.availableTags}
+            showTagFilter={!!props2.availableTags}
+            maxResults={200}
           />
-          <div class="gi-editor-preview-grid">
-            <For each={items()}>
-              {(entity, index) => (
-                <PreviewTile
-                  definition={entity.definition}
-                  mode={props2.mode}
-                  subtitle={`状态 ID #${entity.id}`}
-                  badges={entityBadges(entity)}
-                  onClick={() =>
-                    props.openModal({
-                      kind: "entity",
-                      who: who(),
-                      area: props2.area,
-                      entityId: entity.id,
-                    })
-                  }
-                  actions={
-                    <>
-                      <ActionButton
-                        label="详情"
-                        onClick={() =>
-                          props.openModal({
-                            kind: "entity",
-                            who: who(),
-                            area: props2.area,
-                            entityId: entity.id,
-                          })
-                        }
-                      />
-                      <ActionButton
-                        label="上移"
-                        disabled={index() === 0}
-                        onClick={() => {
-                          props.updateState((draft) => {
-                            draft.players[who()][props2.area] = moveInArray(
-                              draft.players[who()][props2.area],
-                              index(),
-                              -1,
-                            );
-                          });
-                        }}
-                      />
-                      <ActionButton
-                        label="下移"
-                        disabled={index() === items().length - 1}
-                        onClick={() => {
-                          props.updateState((draft) => {
-                            draft.players[who()][props2.area] = moveInArray(
-                              draft.players[who()][props2.area],
-                              index(),
-                              1,
-                            );
-                          });
-                        }}
-                      />
-                      <ActionButton
-                        label="移除"
-                        tone="danger"
-                        onClick={() => {
-                          props.updateState((draft) => {
-                            draft.players[who()][props2.area].splice(
-                              index(),
-                              1,
-                            );
-                          });
-                        }}
-                      />
-                    </>
-                  }
-                />
-              )}
-            </For>
-          </div>
         </div>
       </Surface>
     );
@@ -443,7 +499,9 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
 
               return (
                 <ListItem
-                  imageSrc={character ? getImageUrl(character, "icon") : undefined}
+                  imageSrc={
+                    character ? getImageUrl(character, "icon") : undefined
+                  }
                   title={character?.name ?? `角色 #${characterId}`}
                   tags={skills.map((s) => s.name)}
                   buttonColumns={2}
@@ -665,27 +723,27 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
       <Match when={section().kind === "supports"}>
         <EntityAreaSection
           title="支援区"
-          description="展示支援牌，可排序、移除、追加。"
           area="supports"
           mode="card"
           limit={props.state.config.maxSupportsCount}
+          availableTags={["ally", "place", "item", "blessing", "adventureSpot"]}
         />
       </Match>
       <Match when={section().kind === "summons"}>
         <EntityAreaSection
           title="召唤区"
-          description="展示召唤物，可排序、移除、追加。"
           area="summons"
           mode="card"
           limit={props.state.config.maxSummonsCount}
+          availableTags={["barrier"]}
         />
       </Match>
       <Match when={section().kind === "combatStatuses"}>
         <EntityAreaSection
           title="出战状态"
-          description="以图标列表展示，可排序、移除、追加。"
           area="combatStatuses"
           mode="icon"
+          availableTags={["shield", "barrier"]}
         />
       </Match>
       <Match when={section().kind === "dice"}>

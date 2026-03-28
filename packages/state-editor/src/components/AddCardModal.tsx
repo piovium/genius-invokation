@@ -1,10 +1,12 @@
 import { For, Show, createMemo, createSignal } from "solid-js";
-import type { GameState, EntityDefinition, EntityType, EntityTag } from "@gi-tcg/core";
+import type {
+  GameState,
+  EntityDefinition,
+  EntityType,
+  EntityTag,
+} from "@gi-tcg/core";
 import { Modal } from "./Modal";
-import {
-  getImageUrl,
-  type EditorCatalog,
-} from "../state";
+import { getImageUrl, type EditorCatalog } from "../state";
 
 interface AddCardModalProps {
   open: boolean;
@@ -14,15 +16,19 @@ interface AddCardModalProps {
   onClose: () => void;
   // 可选：控制是否展示类型筛选行
   showTypeFilter?: boolean;
+  // 可选：控制是否展示标签筛选行
+  showTagFilter?: boolean;
   // 可选：控制哪些类型显示在筛选项中
   availableTypes?: EntityType[];
   // 可选：控制哪些标签显示在筛选项中（默认为所有 EntityTag）
   availableTags?: EntityTag[];
   // 是否显示"其他"选项（筛选不包含任何 availableTags 的实体）
   showOtherTag?: boolean;
+  // 可选：控制截断长度（默认为60）
+  maxResults?: number;
 }
 
-const MAX_RESULTS = 60;
+const DEFAULT_MAX_RESULTS = 60;
 
 const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   combatStatus: "出战状态",
@@ -129,9 +135,23 @@ export function AddCardModal(props: AddCardModalProps) {
     return selectedTags().length > 0 || selectedOther();
   });
 
-  // 所有可选的卡牌，按ID排序
+  // 获取实际的截断长度
+  const maxResults = createMemo(() => props.maxResults ?? DEFAULT_MAX_RESULTS);
+
+  // 所有可选的卡牌，根据availableTypes预筛选，按ID排序
   const allCards = createMemo(() => {
-    return [...props.catalog.cardEntities].sort((a, b) => a.id - b.id);
+    const types = availableTypes();
+    let results: typeof props.catalog.cardEntities = [];
+
+    // 从entitiesByType中获取指定类型的实体
+    for (const type of types) {
+      const entitiesOfType = props.catalog.entitiesByType[type];
+      if (entitiesOfType) {
+        results = [...results, ...entitiesOfType];
+      }
+    }
+
+    return results.sort((a, b) => a.id - b.id);
   });
 
   // 筛选后的结果
@@ -146,9 +166,9 @@ export function AddCardModal(props: AddCardModalProps) {
 
     // 1. 按搜索词筛选（名称或ID）
     if (q) {
-      results = results.filter((card) =>
-        card.name.toLowerCase().includes(q) ||
-        String(card.id).includes(q)
+      results = results.filter(
+        (card) =>
+          card.name.toLowerCase().includes(q) || String(card.id).includes(q),
       );
     }
 
@@ -160,13 +180,16 @@ export function AddCardModal(props: AddCardModalProps) {
     // 3. 按标签筛选
     if (otherSelected) {
       // 选择了"其他"：筛选不包含任何 availableTags 的实体
-      results = results.filter((card) =>
-        !currentAvailableTags.some((tag) => card.definition.tags.includes(tag))
+      results = results.filter(
+        (card) =>
+          !currentAvailableTags.some((tag) =>
+            card.definition.tags.includes(tag),
+          ),
       );
     } else if (tags.length > 0) {
       // 普通标签筛选（多选，并集）
       results = results.filter((card) =>
-        tags.some((tag) => card.definition.tags.includes(tag))
+        tags.some((tag) => card.definition.tags.includes(tag)),
       );
     }
 
@@ -179,7 +202,7 @@ export function AddCardModal(props: AddCardModalProps) {
     if (isTagFiltering()) {
       return results; // 选择了标签，显示全部
     }
-    return results.slice(0, MAX_RESULTS); // 未选择标签，应用截断
+    return results.slice(0, maxResults()); // 未选择标签，应用截断
   });
 
   // 是否还有更多结果：只在未筛选任何标签时计算
@@ -187,7 +210,7 @@ export function AddCardModal(props: AddCardModalProps) {
     if (isTagFiltering()) {
       return false; // 选择了标签，不显示截断提示
     }
-    return filteredCards().length > MAX_RESULTS;
+    return filteredCards().length > maxResults();
   });
 
   // 切换标签选择
@@ -198,11 +221,6 @@ export function AddCardModal(props: AddCardModalProps) {
       }
       return [...prev, tag];
     });
-  };
-
-  // 获取卡牌图片
-  const getCardImage = (definition: EntityDefinition) => {
-    return getImageUrl(definition, "card");
   };
 
   return (
@@ -226,7 +244,9 @@ export function AddCardModal(props: AddCardModalProps) {
         </div>
 
         {/* 类型筛选（单选） */}
-        <Show when={props.showTypeFilter !== false && availableTypes().length > 0}>
+        <Show
+          when={props.showTypeFilter !== false && availableTypes().length > 0}
+        >
           <div class="space-y-2">
             <label class="text-sm text-slate-300">类型（单选）</label>
             <div class="flex flex-wrap gap-2">
@@ -261,7 +281,9 @@ export function AddCardModal(props: AddCardModalProps) {
         </Show>
 
         {/* 标签筛选（多选） */}
-        <Show when={availableTags().length > 0}>
+        <Show
+          when={props.showTagFilter !== false && availableTags().length > 0}
+        >
           <div class="space-y-2">
             <label class="text-sm text-slate-300">标签（多选）</label>
             <div class="flex flex-wrap gap-2">
@@ -276,7 +298,7 @@ export function AddCardModal(props: AddCardModalProps) {
                         toggleTag(tag);
                       }}
                       class={`px-3 py-1.5 rounded-full text-xs border transition ${
-                         selectedTags().includes(tag)
+                        selectedTags().includes(tag)
                           ? "bg-amber-500/20 border-amber-500/50 text-amber-50"
                           : "bg-slate-800 border-white/20 text-slate-300 hover:bg-slate-700"
                       }`}
@@ -311,13 +333,13 @@ export function AddCardModal(props: AddCardModalProps) {
           找到 {filteredCards().length} 个结果
           <Show when={hasMoreResults()}>
             <span class="text-amber-400 ml-2">
-              （仅显示前 {MAX_RESULTS} 个，请完善筛选条件）
+              （仅显示前 {maxResults()} 个，请完善筛选条件）
             </span>
           </Show>
         </div>
 
         {/* 结果网格 - 固定高度可滚动（细体滚动条） */}
-        <div 
+        <div
           class="h-40vh overflow-y-auto pr-2 scrollbar-thin"
           style={{
             "scrollbar-width": "thin",
@@ -349,34 +371,41 @@ export function AddCardModal(props: AddCardModalProps) {
           `}</style>
           <div
             class="grid gap-3"
-            style={{ "grid-template-columns": "repeat(auto-fill, minmax(100px, 1fr))" }}
+            style={{
+              "grid-template-columns": "repeat(auto-fill, minmax(100px, 1fr))",
+            }}
           >
             <For each={displayedCards()}>
-              {(card) => (
-                <button
-                  type="button"
-                  onClick={() => {
-                    props.onSelect(card.definition);
-                    props.onClose();
-                  }}
-                  class="group flex flex-col items-center gap-2 p-3 rounded-xl border border-white/10 bg-slate-800/50 hover:bg-slate-700/50 hover:border-white/30 transition"
-                >
-                  {/* 卡牌图片 */}
-                  <div class="w-full aspect-[3/4] rounded-lg overflow-hidden bg-slate-900">
-                    <img
-                      src={getCardImage(card.definition)}
-                      alt={card.name}
-                      class="w-full h-full object-cover group-hover:scale-105 transition"
-                      loading="lazy"
-                    />
-                  </div>
-                  {/* 名称和ID */}
-                  <div class="text-center w-full">
-                    <div class="text-xs text-slate-200 truncate">{card.name}</div>
-                    <div class="text-[10px] text-slate-500">#{card.id}</div>
-                  </div>
-                </button>
-              )}
+              {(card) => {
+                const cardMode = ["status", "combatStatus"].includes(card.definition.type) ? "icon" : "card";
+                return (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      props.onSelect(card.definition);
+                      props.onClose();
+                    }}
+                    class="group flex flex-col items-center gap-2 p-3 rounded-xl border border-white/10 bg-slate-800/50 hover:bg-slate-700/50 hover:border-white/30 transition"
+                  >
+                    {/* 卡牌图片 */}
+                    <div class={`w-full rounded-lg overflow-hidden ${cardMode === "icon" ? "" : "aspect-[3/4]"}`}>
+                      <img
+                        src={getImageUrl(card.definition, cardMode)}
+                        alt={card.name}
+                        class="w-full h-full object-cover group-hover:scale-105 transition"
+                        loading="lazy"
+                      />
+                    </div>
+                    {/* 名称和ID */}
+                    <div class="text-center w-full">
+                      <div class="text-xs text-slate-200 truncate">
+                        {card.name}
+                      </div>
+                      <div class="text-[10px] text-slate-500">#{card.id}</div>
+                    </div>
+                  </button>
+                );
+              }}
             </For>
           </div>
 
