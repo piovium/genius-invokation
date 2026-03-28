@@ -111,16 +111,6 @@ function getExistingEquipmentOfType(
   }) || null;
 }
 
-interface CollectionModalProps {
-  open: boolean;
-  state: GameState;
-  who: 0 | 1;
-  catalog: EditorCatalog;
-  updateState: UpdateGameState;
-  openModal: (modal: EditorModal) => void;
-  onClose: () => void;
-}
-
 interface CollectionContentProps {
   state: GameState;
   who: 0 | 1;
@@ -634,39 +624,4 @@ export function HandsModalContent(props: CollectionContentProps) {
   );
 }
 
-// Modal versions (keeping for backwards compatibility if needed)
-export function PileModal(props: CollectionModalProps) {
-  return (
-    <Modal
-      open={props.open}
-      title={`玩家 ${props.who} 牌库编辑`}
-      onClose={props.onClose}
-    >
-      <PileModalContent
-        state={props.state}
-        who={props.who}
-        catalog={props.catalog}
-        updateState={props.updateState}
-        openModal={props.openModal}
-      />
-    </Modal>
-  );
-}
 
-export function HandsModal(props: CollectionModalProps) {
-  return (
-    <Modal
-      open={props.open}
-      title={`玩家 ${props.who} 手牌编辑`}
-      onClose={props.onClose}
-    >
-      <HandsModalContent
-        state={props.state}
-        who={props.who}
-        catalog={props.catalog}
-        updateState={props.updateState}
-        openModal={props.openModal}
-      />
-    </Modal>
-  );
-}
