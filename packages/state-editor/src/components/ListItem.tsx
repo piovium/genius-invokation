@@ -5,7 +5,7 @@ export interface ListItemButton {
   content: JSX.Element;
   col: number; // 列号，从0开始
   onClick: () => void;
-  variant?: "default" | "primary" | "danger" | "accent";
+  variant?: "default" | "primary" | "danger" | "accent" | "use";
 }
 
 export interface ListItemProps {
@@ -31,6 +31,7 @@ export function ListItem(props: ListItemProps) {
     primary: "border-cyan-200/30 bg-cyan-300/10 text-cyan-50 hover:bg-cyan-300/20",
     danger: "border-rose-300/30 bg-rose-400/10 text-rose-100 hover:bg-rose-400/20",
     accent: "border-amber-200/30 bg-amber-300/10 text-amber-50 hover:bg-amber-300/20",
+    use: "border-green-300/30 bg-green-400/10 text-green-100 hover:bg-green-400/20 w-24",
   };
 
   const buttonCols = () => props.buttonColumns ?? 2;
@@ -114,11 +115,11 @@ export function ListItem(props: ListItemProps) {
                           e.stopPropagation();
                           button.onClick();
                         }}
-                        class={`inline-flex min-w-16 flex-1 items-center justify-center text-xs font-bold transition ${
+                        class={`inline-flex min-w-16 flex-1 items-center justify-center text-xs font-bold transition px-1 whitespace-nowrap text-ellipsis overflow-hidden ${
                           variantClasses[button.variant ?? "default"]
                         }`}
                       >
-                        {button.content}
+                        <span class="truncate">{button.content}</span>
                       </button>
                     )}
                   </For>
