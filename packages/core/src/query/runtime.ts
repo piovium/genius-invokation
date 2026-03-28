@@ -127,7 +127,7 @@ class QueryRuntime {
     expr: SExprSchema.NumericalExpression | SExprSchema.BooleanExpression,
   ): ExpressionKeyAndDepth {
     if (typeof expr !== "object") {
-      return [`${expr}`, 0];
+      return [String(expr), 0];
     }
     let entry = this.#expressionKeyCache.get(expr);
     if (!entry) {
