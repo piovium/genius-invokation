@@ -5,10 +5,13 @@ import type { GameState } from "@gi-tcg/core";
 import { ActionButton, SearchableSelect, Surface, SectionTitle } from "./Fields";
 import { Modal } from "./Modal";
 import { PreviewTile } from "./Previews";
+import { ListItem, type ListItemButton } from "./ListItem";
 import {
   allocateId,
   createEntityState,
   getCharacter,
+  getDefinitionName,
+  getImageUrl,
   getPlayer,
   moveInArray,
   shuffleList,
@@ -78,90 +81,90 @@ export function PileModalContent(props: CollectionContentProps) {
             });
           }}
         />
-        <div class="gi-editor-preview-grid">
+        <div class="space-y-2">
           <For each={player().pile}>
-            {(card, index) => (
-              <PreviewTile
-                definition={card.definition}
-                mode="card"
-                badges={detailBadges(card)}
-                subtitle={`状态 ID #${card.id}`}
-                onClick={() =>
-                  props.openModal({
-                    kind: "entity",
-                    who: props.who,
-                    area: "pile",
-                    entityId: card.id,
-                  })
-                }
-                actions={
-                  <>
-                    <ActionButton
-                      label="详情"
-                      onClick={() =>
-                        props.openModal({
-                          kind: "entity",
-                          who: props.who,
-                          area: "pile",
-                          entityId: card.id,
-                        })
+            {(card, index) => {
+              const buttons: ListItemButton[] = [
+                // 第一列
+                {
+                  content: "上移",
+                  col: 0,
+                  onClick: () => {
+                    props.updateState((draft) => {
+                      draft.players[props.who].pile = moveInArray(
+                        draft.players[props.who].pile,
+                        index(),
+                        -1,
+                      );
+                    });
+                  },
+                },
+                {
+                  content: "加入手牌",
+                  col: 0,
+                  onClick: () => {
+                    props.updateState((draft) => {
+                      const target = draft.players[props.who];
+                      if (target.hands.length >= draft.config.maxHandsCount) {
+                        return;
                       }
-                    />
-                    <ActionButton
-                      label="上移"
-                      disabled={index() === 0}
-                      onClick={() => {
-                        props.updateState((draft) => {
-                          draft.players[props.who].pile = moveInArray(
-                            draft.players[props.who].pile,
-                            index(),
-                            -1,
-                          );
-                        });
-                      }}
-                    />
-                    <ActionButton
-                      label="下移"
-                      disabled={index() === player().pile.length - 1}
-                      onClick={() => {
-                        props.updateState((draft) => {
-                          draft.players[props.who].pile = moveInArray(
-                            draft.players[props.who].pile,
-                            index(),
-                            1,
-                          );
-                        });
-                      }}
-                    />
-                    <ActionButton
-                      label="抽到手牌"
-                      disabled={player().hands.length >= props.state.config.maxHandsCount}
-                      onClick={() => {
-                        props.updateState((draft) => {
-                          const target = draft.players[props.who];
-                          if (target.hands.length >= draft.config.maxHandsCount) {
-                            return;
-                          }
-                          const [item] = target.pile.splice(index(), 1);
-                          if (item) {
-                            target.hands.push(item);
-                          }
-                        });
-                      }}
-                    />
-                    <ActionButton
-                      label="移除"
-                      tone="danger"
-                      onClick={() => {
-                        props.updateState((draft) => {
-                          draft.players[props.who].pile.splice(index(), 1);
-                        });
-                      }}
-                    />
-                  </>
-                }
-              />
-            )}
+                      const [item] = target.pile.splice(index(), 1);
+                      if (item) {
+                        target.hands.push(item);
+                      }
+                    });
+                  },
+                },
+                {
+                  content: "下移",
+                  col: 0,
+                  onClick: () => {
+                    props.updateState((draft) => {
+                      draft.players[props.who].pile = moveInArray(
+                        draft.players[props.who].pile,
+                        index(),
+                        1,
+                      );
+                    });
+                  },
+                },
+                // 第二列
+                {
+                  content: "详情",
+                  col: 1,
+                  variant: "primary",
+                  onClick: () =>
+                    props.openModal({
+                      kind: "entity",
+                      who: props.who,
+                      area: "pile",
+                      entityId: card.id,
+                    }),
+                },
+                {
+                  content: "移除",
+                  col: 1,
+                  variant: "danger",
+                  onClick: () => {
+                    props.updateState((draft) => {
+                      draft.players[props.who].pile.splice(index(), 1);
+                    });
+                  },
+                },
+              ];
+
+              return (
+                <ListItem
+                  imageSrc={getImageUrl(card.definition, "card")}
+                  imageMode="card"
+                  title={getDefinitionName(card.definition)}
+                  description={`ID: ${card.id}`}
+                  tags={detailBadges(card)}
+                  buttonColumns={2}
+                  buttons={buttons}
+                />
+              );
+            }}
           </For>
         </div>
       </div>

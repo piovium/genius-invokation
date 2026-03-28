@@ -430,11 +430,13 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
                 {
                   content: "编辑",
                   variant: "primary",
+                  col: 0,
                   onClick: () => openEditModal(index()),
                 },
                 {
                   content: "删除",
                   variant: "danger",
+                  col: 1,
                   onClick: () => handleDelete(index()),
                 },
               ];

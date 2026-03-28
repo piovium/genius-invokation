@@ -33,6 +33,7 @@ import {
   HandsModalContent,
 } from "./CollectionModal";
 import { PlayerSectionContent } from "./PlayerSectionContent";
+import { ListItem, type ListItemButton } from "./ListItem";
 import {
   buildEditorCatalog,
   createDefaultGameState,
@@ -633,23 +634,24 @@ export function GameStateEditor(props: GameStateEditorProps) {
                         <SectionTitle title="扩展" description="扩展数量固定，只能编辑其内部状态。" />
                         <div class="mt-3 space-y-2">
                           <For each={state.extensions}>
-                            {(extension, index) => (
-                              <button
-                                type="button"
-                                class="gi-editor-button flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 text-left p-0 overflow-hidden"
-                                onClick={() => openModal({ kind: "extension", index: index() })}
-                              >
-                                <div class="flex flex-col gap-2 p-3">
-                                  <p class="text-sm font-semibold text-amber-50 my-0">{extension.definition.description || `扩展 #${extension.definition.id}`}</p>
-                                  <p class="text-xs text-slate-300/80 my-0">{extension.definition.description ? `扩展 #${extension.definition.id}` : "无说明"}</p>
-                                </div>
-                                <div class="flex items-center self-stretch shrink-0">
-                                  <span class="inline-flex min-w-16 h-auto min-h-full bg-cyan-300/10 text-xs font-bold text-cyan-50 items-center justify-center">
-                                    编辑
-                                  </span>
-                                </div>
-                              </button>
-                            )}
+                            {(extension, index) => {
+                              const buttons: ListItemButton[] = [
+                                {
+                                  content: "编辑",
+                                  variant: "primary",
+                                  col: 0,
+                                  onClick: () => openModal({ kind: "extension", index: index() }),
+                                },
+                              ];
+                              return (
+                                <ListItem
+                                  title={extension.definition.description || `扩展 #${extension.definition.id}`}
+                                  description={extension.definition.description ? `扩展 #${extension.definition.id}` : "无说明"}
+                                  buttonColumns={1}
+                                  buttons={buttons}
+                                />
+                              );
+                            }}
                           </For>
                         </div>
                       </div>

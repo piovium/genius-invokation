@@ -1,12 +1,9 @@
-import { For, Show } from "solid-js";
+import { For, Show, createMemo } from "solid-js";
 import type { JSX } from "solid-js";
 
 export interface ListItemButton {
   content: JSX.Element;
-  colSpan?: number;
-  rowSpan?: number;
-  colStart?: number;
-  rowStart?: number;
+  col: number; // 列号，从0开始
   onClick: () => void;
   variant?: "default" | "primary" | "danger" | "accent";
 }
@@ -36,7 +33,24 @@ export function ListItem(props: ListItemProps) {
     accent: "border-amber-200/30 bg-amber-300/10 text-amber-50 hover:bg-amber-300/20",
   };
 
-  const buttonCols = props.buttonColumns ?? 2;
+  const buttonCols = () => props.buttonColumns ?? 2;
+
+  // 按列分组按钮
+  const buttonsByCol = createMemo(() => {
+    const cols: ListItemButton[][] = [];
+    const colCount = buttonCols();
+    
+    for (let i = 0; i < colCount; i++) {
+      cols.push([]);
+    }
+    
+    props.buttons?.forEach((btn) => {
+      const col = Math.min(Math.max(0, btn.col), colCount - 1);
+      cols[col].push(btn);
+    });
+    
+    return cols;
+  });
 
   return (
     <div
@@ -57,7 +71,7 @@ export function ListItem(props: ListItemProps) {
         </Show>
 
         {/* 文字信息 */}
-        <div class="flex-1 min-w-0 py-3">
+        <div class={`flex-1 min-w-0 py-3 pr-2 ${props.imageSrc ? "" : "pl-4"}`}>
           {/* 标题 */}
           <div class="text-sm font-semibold text-amber-50 truncate">
             {props.title}
@@ -85,40 +99,31 @@ export function ListItem(props: ListItemProps) {
         </div>
       </div>
 
-      {/* 右侧按钮区域 */}
+      {/* 右侧按钮区域 - Flex布局 */}
       <Show when={props.buttons && props.buttons.length > 0}>
-        <div
-          class="grid self-stretch shrink-0"
-          style={{
-            "grid-template-columns": `repeat(${buttonCols}, auto)`,
-          }}
-        >
-          <For each={props.buttons}>
-            {(button) => (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  button.onClick();
-                }}
-                class={`inline-flex min-w-16 h-auto min-h-full items-center justify-center text-xs font-bold transition ${
-                  variantClasses[button.variant ?? "default"]
-                }`}
-                style={{
-                  "grid-column": button.colSpan
-                    ? `span ${button.colSpan}`
-                    : button.colStart
-                      ? `${button.colStart} / span 1`
-                      : "auto",
-                  "grid-row": button.rowSpan
-                    ? `span ${button.rowSpan}`
-                    : button.rowStart
-                      ? `${button.rowStart} / span 1`
-                      : "auto",
-                }}
-              >
-                {button.content}
-              </button>
+        <div class="flex self-stretch shrink-0">
+          <For each={buttonsByCol()}>
+            {(colButtons, colIndex) => (
+              <Show when={colButtons.length > 0}>
+                <div class="flex flex-col self-stretch">
+                  <For each={colButtons}>
+                    {(button) => (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          button.onClick();
+                        }}
+                        class={`inline-flex min-w-16 flex-1 items-center justify-center text-xs font-bold transition ${
+                          variantClasses[button.variant ?? "default"]
+                        }`}
+                      >
+                        {button.content}
+                      </button>
+                    )}
+                  </For>
+                </div>
+              </Show>
             )}
           </For>
         </div>
