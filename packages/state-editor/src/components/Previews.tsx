@@ -32,9 +32,7 @@ export function PreviewTile(props: PreviewTileProps) {
         <img
           src={getImageUrl(props.definition, mode())}
           alt={props.title ?? getDefinitionName(props.definition)}
-          class={`w-full rounded-2xl border border-white/10 bg-slate-950/50 ${
-            mode() === "card" ? "gi-editor-card-image" : "gi-editor-icon-image"
-          }`}
+          class={`w-full rounded-2xl ${mode() === "card" ? "gi-editor-card-image" : "gi-editor-icon-image"}`}
         />
         <div class="space-y-1">
           <p class="text-sm font-semibold text-amber-50">
