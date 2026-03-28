@@ -19,6 +19,7 @@ import { JsonSchemaEditor } from "./JsonSchemaEditor";
 import { Modal } from "./Modal";
 import { Badge, PreviewTile, SummaryLine } from "./Previews";
 import { ListItem, type ListItemButton } from "./ListItem";
+import { ConfirmModal } from "./ConfirmModal";
 import {
   allocateId,
   AURA_LABELS,
@@ -479,6 +480,9 @@ function updateEntityByAreaContent(
 
 export function EntityModalContent(props: EntityContentProps) {
   const [query, setQuery] = createSignal("");
+  const [confirmModalOpen, setConfirmModalOpen] = createSignal(false);
+  const [pendingAttachment, setPendingAttachment] = createSignal<any | null>(null);
+  const [existingAttachmentIndex, setExistingAttachmentIndex] = createSignal(-1);
 
   const player = () => getPlayer(props.state, props.who);
   const entity = () =>
@@ -502,12 +506,98 @@ export function EntityModalContent(props: EntityContentProps) {
     return results;
   });
 
+  // 检查是否存在相同 definition.id 的附着
+  const checkDuplicateAttachment = (attachmentDef: typeof props.catalog.attachments[0]['definition']) => {
+    const currentEntity = entity();
+    if (!currentEntity) return -1;
+    const index = currentEntity.attachments.findIndex(
+      att => att.definition.id === attachmentDef.id
+    );
+    return index;
+  };
+
+  // 处理添加附着前的检查
+  const handleAddAttachmentCheck = (option: typeof props.catalog.attachments[0]) => {
+    const duplicateIndex = checkDuplicateAttachment(option.definition);
+    
+    if (duplicateIndex !== -1) {
+      // 存在重复，显示确认弹窗
+      setPendingAttachment(option);
+      setExistingAttachmentIndex(duplicateIndex);
+      setConfirmModalOpen(true);
+    } else {
+      // 没有重复，直接添加
+      doAddAttachment(option);
+    }
+  };
+
+  // 执行添加附着
+  const doAddAttachment = (option: typeof props.catalog.attachments[0]) => {
+    props.updateState((draft) => {
+      const targetPlayer = draft.players[props.who];
+      const targetEntity = targetPlayer[
+        props.area as "hands" | "pile"
+      ].find(
+        (item) => item.id === props.entityId,
+      );
+      if (!targetEntity) {
+        return;
+      }
+      targetEntity.attachments.push(
+        createAttachmentState(
+          option.definition,
+          allocateId(draft),
+        ) as unknown as (typeof targetEntity.attachments)[number],
+      );
+    });
+  };
+
+  // 执行覆盖（替换）附着
+  const doReplaceAttachment = (option: typeof props.catalog.attachments[0], index: number) => {
+    props.updateState((draft) => {
+      const targetPlayer = draft.players[props.who];
+      const targetEntity = targetPlayer[
+        props.area as "hands" | "pile"
+      ].find(
+        (item) => item.id === props.entityId,
+      );
+      if (!targetEntity) {
+        return;
+      }
+      // 替换指定位置的附着
+      targetEntity.attachments[index] = createAttachmentState(
+        option.definition,
+        allocateId(draft),
+      ) as unknown as (typeof targetEntity.attachments)[number];
+    });
+  };
+
+  // 确认覆盖附着
+  const handleConfirmReplaceAttachment = () => {
+    const attachment = pendingAttachment();
+    const index = existingAttachmentIndex();
+    if (attachment && index !== -1) {
+      doReplaceAttachment(attachment, index);
+    }
+    setConfirmModalOpen(false);
+    setPendingAttachment(null);
+    setExistingAttachmentIndex(-1);
+  };
+
+  // 取消覆盖附着，改为添加新的
+  const handleCancelReplaceAttachment = () => {
+    setConfirmModalOpen(false);
+    setPendingAttachment(null);
+    setExistingAttachmentIndex(-1);
+  };
+
   return (
-    <Show when={entity()}>
-      {(resolvedEntity) => {
-        const currentEntity = () => resolvedEntity();
-        return (
-          <div class="space-y-2">
+    <>
+      <Show when={entity()}>
+        {(resolvedEntity) => {
+          const currentEntity = () => resolvedEntity();
+          return (
+            <div class="space-y-2">
             <div class="flex gap-4">
               <div class="shrink-0 w-1/5">
                 <PreviewTile
@@ -561,26 +651,7 @@ export function EntityModalContent(props: EntityContentProps) {
                               <button
                                 type="button"
                                 class="flex flex-col items-center p-2 rounded-lg border border-white/10 bg-slate-800/30 hover:bg-slate-700/50 transition text-center"
-                                onClick={() => {
-                                  props.updateState((draft) => {
-                                    const targetPlayer =
-                                      draft.players[props.who];
-                                    const targetEntity = targetPlayer[
-                                      props.area as "hands" | "pile"
-                                    ].find(
-                                      (item) => item.id === props.entityId,
-                                    );
-                                    if (!targetEntity) {
-                                      return;
-                                    }
-                                    targetEntity.attachments.push(
-                                      createAttachmentState(
-                                        option.definition,
-                                        allocateId(draft),
-                                      ) as unknown as (typeof targetEntity.attachments)[number],
-                                    );
-                                  });
-                                }}
+                                onClick={() => handleAddAttachmentCheck(option)}
                               >
                                 {/* 卡牌图片 */}
                                 <div
@@ -720,6 +791,21 @@ export function EntityModalContent(props: EntityContentProps) {
         );
       }}
     </Show>
+
+    {/* Confirm Modal for duplicate attachments */}
+    <ConfirmModal
+      open={confirmModalOpen()}
+      title="检测到重复附着"
+      message={(() => {
+        const att = pendingAttachment();
+        return att ? `已存在相同类型的附着「${att.name}」，是否覆盖？` : "";
+      })()}
+      confirmText="确认覆盖"
+      cancelText="取消"
+      onConfirm={handleConfirmReplaceAttachment}
+      onCancel={handleCancelReplaceAttachment}
+    />
+    </>
   );
 }
 

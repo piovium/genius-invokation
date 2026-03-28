@@ -3,7 +3,6 @@ import { For, Show, createSignal, createMemo } from "solid-js";
 import type { GameState, EntityDefinition, EntityState, CharacterState } from "@gi-tcg/core";
 
 import { ActionButton, Surface, SectionTitle } from "./Fields";
-import { Modal } from "./Modal";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { AddCardModal } from "./AddCardModal";
 import {
@@ -19,6 +18,7 @@ import {
   type EditorModal,
   type UpdateGameState,
 } from "../state";
+import { ConfirmModal } from "./ConfirmModal";
 
 // 装备类型定义
 type EquipmentType = "artifact" | "technique" | "weapon" | "talent" | "other";
@@ -594,31 +594,15 @@ export function HandsModalContent(props: CollectionContentProps) {
         />
         
         {/* 确认对话框 */}
-        <Modal
+        <ConfirmModal
           open={confirmDialog().open}
           title={confirmDialog().title}
-          onClose={confirmDialog().onCancel}
-        >
-          <div class="space-y-4">
-            <p class="text-sm text-slate-300">{confirmDialog().message}</p>
-            <div class="flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={confirmDialog().onCancel}
-                class="px-4 py-2 rounded-xl border border-white/20 bg-slate-800 text-sm text-slate-300 hover:bg-slate-700 transition"
-              >
-                取消
-              </button>
-              <button
-                type="button"
-                onClick={confirmDialog().onConfirm}
-                class="px-4 py-2 rounded-xl border border-rose-500/50 bg-rose-500/20 text-sm text-rose-100 hover:bg-rose-500/30 transition"
-              >
-                确认覆盖
-              </button>
-            </div>
-          </div>
-        </Modal>
+          message={confirmDialog().message}
+          confirmText="确认覆盖"
+          cancelText="取消"
+          onConfirm={confirmDialog().onConfirm}
+          onCancel={confirmDialog().onCancel}
+        />
       </div>
     </Surface>
   );

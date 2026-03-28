@@ -19,6 +19,7 @@ import { DiceIcon, getDiceTypeName } from "./DiceIcon";
 import { RoundSkillModal } from "./RoundSkillModal";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { AddCardModal } from "./AddCardModal";
+import { ConfirmModal } from "./ConfirmModal";
 import {
   allocateId,
   buildImportedCharacterStates,
@@ -275,6 +276,9 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
   }) => {
     const items = () => player()[props2.area];
     const [addModalOpen, setAddModalOpen] = createSignal(false);
+    const [confirmModalOpen, setConfirmModalOpen] = createSignal(false);
+    const [pendingDefinition, setPendingDefinition] = createSignal<EntityDefinition | null>(null);
+    const [existingEntityIndex, setExistingEntityIndex] = createSignal<number>(-1);
 
     // 获取可用的类型
     const availableTypes = () => {
@@ -290,8 +294,30 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
       }
     };
 
-    // 处理添加
-    const handleAdd = (definition: EntityDefinition) => {
+    // 检查是否存在相同 definition.id 的实体
+    const checkDuplicate = (definition: EntityDefinition) => {
+      const currentItems = items();
+      const index = currentItems.findIndex(item => item.definition.id === definition.id);
+      return index;
+    };
+
+    // 处理添加前的检查
+    const handleAddCheck = (definition: EntityDefinition) => {
+      const duplicateIndex = checkDuplicate(definition);
+      
+      if (duplicateIndex !== -1) {
+        // 存在重复，显示确认弹窗
+        setPendingDefinition(definition);
+        setExistingEntityIndex(duplicateIndex);
+        setConfirmModalOpen(true);
+      } else {
+        // 没有重复，直接添加
+        doAdd(definition);
+      }
+    };
+
+    // 执行添加
+    const doAdd = (definition: EntityDefinition) => {
       props.updateState((draft) => {
         const target = draft.players[who()][props2.area];
         if (typeof props2.limit === "number" && target.length >= props2.limit) {
@@ -304,6 +330,37 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
           ) as unknown as (typeof target)[number],
         );
       });
+    };
+
+    // 执行覆盖（替换）
+    const doReplace = (definition: EntityDefinition, index: number) => {
+      props.updateState((draft) => {
+        const target = draft.players[who()][props2.area];
+        // 替换指定位置的实体
+        target[index] = createEntityState(
+          definition,
+          allocateId(draft),
+        ) as unknown as (typeof target)[number];
+      });
+    };
+
+    // 确认覆盖
+    const handleConfirmReplace = () => {
+      const definition = pendingDefinition();
+      const index = existingEntityIndex();
+      if (definition && index !== -1) {
+        doReplace(definition, index);
+      }
+      setConfirmModalOpen(false);
+      setPendingDefinition(null);
+      setExistingEntityIndex(-1);
+    };
+
+    // 取消覆盖，改为添加新的
+    const handleCancelReplace = () => {
+      setConfirmModalOpen(false);
+      setPendingDefinition(null);
+      setExistingEntityIndex(-1);
     };
 
     // 判断是否可以放回手牌
@@ -428,13 +485,28 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
             open={addModalOpen()}
             state={props.state}
             catalog={props.catalog}
-            onSelect={handleAdd}
+            onSelect={handleAddCheck}
             onClose={() => setAddModalOpen(false)}
             availableTypes={availableTypes() as EntityType[]}
             showTypeFilter={false}
             availableTags={props2.availableTags}
             showTagFilter={!!props2.availableTags}
             maxResults={200}
+          />
+
+          {/* Confirm Modal for duplicate entities */}
+          <ConfirmModal
+            open={confirmModalOpen()}
+            title="检测到重复实体"
+            message={
+              pendingDefinition()
+                ? `区域中已存在相同类型的实体「${getDefinitionName(pendingDefinition()!)}」，是否覆盖？`
+                : ""
+            }
+            confirmText="确认覆盖"
+            cancelText="取消"
+            onConfirm={handleConfirmReplace}
+            onCancel={handleCancelReplace}
           />
         </div>
       </Surface>
