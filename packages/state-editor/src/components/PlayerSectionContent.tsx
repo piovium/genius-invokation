@@ -15,6 +15,7 @@ import {
   SectionTitle,
   Surface,
 } from "./Fields";
+import { DiceIcon, getDiceTypeName } from "./DiceIcon";
 import { RoundSkillModal } from "./RoundSkillModal";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { AddCardModal } from "./AddCardModal";
@@ -62,83 +63,133 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
   const player = () => getPlayer(props.state, who());
 
   // Dice section
-  const DiceSection = () => (
-    <Surface title={`玩家 ${who()} 骰子`}>
-      <div class="space-y-4">
-        <SectionTitle
-          title="骰子"
-          description={`最多 ${props.state.config.maxDiceCount} 个。`}
-        />
-        <div class="flex flex-wrap gap-2">
-          <For each={DICE_OPTIONS}>
-            {(dice) => (
-              <ActionButton
-                label={`+${DICE_LABELS[dice]}`}
-                disabled={
-                  player().dice.length >= props.state.config.maxDiceCount
-                }
-                onClick={() => {
-                  props.updateState((draft) => {
-                    const target = draft.players[who()];
-                    if (target.dice.length >= draft.config.maxDiceCount) {
-                      return;
-                    }
-                    target.dice.push(dice);
-                  });
+  const DiceSection = () => {
+    // 计算每种骰子的数量
+    const diceCounts = createMemo(() => {
+      const counts: Record<number, number> = {};
+      for (const dice of player().dice) {
+        counts[dice] = (counts[dice] || 0) + 1;
+      }
+      return counts;
+    });
+
+    // 按ID排序的骰子列表（用于显示图标）
+    const sortedDice = createMemo(() => {
+      return [...player().dice].sort((a, b) => a - b);
+    });
+
+    // 更新特定类型骰子的数量
+    const updateDiceCount = (diceType: number, newCount: number) => {
+      console.log(diceType, newCount);
+      props.updateState((draft) => {
+        const target = draft.players[who()];
+        const currentCount = target.dice.filter((d) => d === diceType).length;
+
+        if (newCount > currentCount) {
+          // 添加骰子
+          const toAdd = newCount - currentCount;
+          const availableSpace = draft.config.maxDiceCount - target.dice.length;
+          const actualAdd = Math.min(toAdd, availableSpace);
+          for (let i = 0; i < actualAdd; i++) {
+            target.dice.push(diceType);
+          }
+        } else if (newCount < currentCount) {
+          // 移除骰子
+          const toRemove = currentCount - newCount;
+          let removed = 0;
+          target.dice = target.dice.filter((d) => {
+            if (d === diceType && removed < toRemove) {
+              removed++;
+              return false;
+            }
+            return true;
+          });
+        }
+      });
+    };
+
+    // 加满特定类型的骰子
+    const fillDice = (diceType: number) => {
+      props.updateState((draft) => {
+        const target = draft.players[who()];
+        const currentCount = target.dice.filter((d) => d === diceType).length;
+        const availableSpace = draft.config.maxDiceCount - target.dice.length;
+        // 计算可以添加多少个（最多补到某种上限，或者填满剩余空间）
+        const maxPerType = 16; // 每种骰子最多16个（两行的数量）
+        const canAdd = Math.min(maxPerType - currentCount, availableSpace);
+        for (
+          let i = 0;
+          i < canAdd && target.dice.length < draft.config.maxDiceCount;
+          i++
+        ) {
+          target.dice.push(diceType);
+        }
+      });
+    };
+
+    return (
+      <Surface title={`玩家 ${who()} 骰子`}>
+        <p class="mt-1 text-xs text-slate-300/80">{`※ 最多 ${props.state.config.maxDiceCount} 个，当前 ${player().dice.length} 个`}</p>
+        <div class="space-y-6">
+          {/* 上方：已有骰子图标，每行8个 */}
+          <div>
+            <div class="text-sm text-slate-400 mb-2">已有骰子</div>
+            <div class="grid grid-cols-8">
+              <For each={sortedDice()}>
+                {(dice) => (
+                  <div class="flex justify-center">
+                    <DiceIcon type={dice} />
+                  </div>
+                )}
+              </For>
+            </div>
+            {sortedDice().length === 0 && (
+              <div class="text-center text-slate-500 py-4">暂无骰子</div>
+            )}
+          </div>
+
+          {/* 下方：骰子数量编辑器，每行2个 */}
+          <div>
+            <div class="text-sm text-slate-400 mb-2">数量编辑</div>
+            <div class="grid grid-cols-2 gap-3">
+              <For each={DICE_OPTIONS}>
+                {(diceType) => {
+                  const count = () => diceCounts()[diceType] || 0;
+                  const buttons: ListItemButton[] = [
+                    {
+                      content: "+",
+                      col: 0,
+                      onClick: () => updateDiceCount(diceType, count() + 1),
+                    },
+                    {
+                      content: "-",
+                      col: 0,
+                      onClick: () => updateDiceCount(diceType, count() - 1),
+                    },
+                    {
+                      content: "加满",
+                      col: 1,
+                      variant: "primary",
+                      onClick: () => fillDice(diceType),
+                    },
+                  ];
+
+                  return (
+                    <ListItem
+                      title={DICE_LABELS[diceType]}
+                      description={`数量: ${count()}`}
+                      buttonColumns={2}
+                      buttons={buttons}
+                    />
+                  );
                 }}
-              />
-            )}
-          </For>
+              </For>
+            </div>
+          </div>
         </div>
-        <div class="space-y-2">
-          <For each={player().dice}>
-            {(dice, index) => (
-              <div class="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-slate-950/20 px-3 py-2">
-                <span class="text-sm text-slate-50">{DICE_LABELS[dice]}</span>
-                <div class="flex gap-2">
-                  <ActionButton
-                    label="左移"
-                    disabled={index() === 0}
-                    onClick={() => {
-                      props.updateState((draft) => {
-                        draft.players[who()].dice = moveInArray(
-                          draft.players[who()].dice,
-                          index(),
-                          -1,
-                        );
-                      });
-                    }}
-                  />
-                  <ActionButton
-                    label="右移"
-                    disabled={index() === player().dice.length - 1}
-                    onClick={() => {
-                      props.updateState((draft) => {
-                        draft.players[who()].dice = moveInArray(
-                          draft.players[who()].dice,
-                          index(),
-                          1,
-                        );
-                      });
-                    }}
-                  />
-                  <ActionButton
-                    label="移除"
-                    tone="danger"
-                    onClick={() => {
-                      props.updateState((draft) => {
-                        draft.players[who()].dice.splice(index(), 1);
-                      });
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </For>
-        </div>
-      </div>
-    </Surface>
-  );
+      </Surface>
+    );
+  };
 
   // Player info section (合并玩家标记和技能记录)
   const PlayerInfoSection = () => (
