@@ -12,6 +12,7 @@ import {
 } from "./Fields";
 import { PreviewTile } from "./Previews";
 import { RoundSkillModal } from "./RoundSkillModal";
+import { ListItem, type ListItemButton } from "./ListItem";
 import {
   allocateId,
   buildImportedCharacterStates,
@@ -425,35 +426,27 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
                 )
                 .filter((s): s is NonNullable<typeof s> => s !== undefined);
 
+              const buttons: ListItemButton[] = [
+                {
+                  content: "编辑",
+                  variant: "primary",
+                  onClick: () => openEditModal(index()),
+                },
+                {
+                  content: "删除",
+                  variant: "danger",
+                  onClick: () => handleDelete(index()),
+                },
+              ];
+
               return (
-                <div class="flex w-full items-start justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 text-left hover:bg-white/10 transition box-border overflow-hidden">
-                  <div class="flex flex-col flex-1 min-w-0 gap-2 px-3 py-3">
-                    <p class="text-sm font-semibold text-amber-50 my-0">
-                      {character?.name ?? `角色 #${characterId}`}
-                    </p>
-                    <p class="text-xs text-slate-300/80 my-0">
-                      {skills.length > 0
-                        ? skills.map((s) => s.name).join(", ")
-                        : "无技能记录"}
-                    </p>
-                  </div>
-                  <div class="grid grid-cols-2 self-stretch shrink-0">
-                    <button
-                      type="button"
-                      class="inline-flex min-w-16 h-auto min-h-full bg-cyan-300/10 text-xs font-bold text-cyan-50 hover:bg-cyan-300/20 transition items-center justify-center"
-                      onClick={() => openEditModal(index())}
-                    >
-                      编辑
-                    </button>
-                    <button
-                      type="button"
-                      class="inline-flex min-w-16 h-auto min-h-full bg-rose-400/10 text-xs font-bold text-rose-100 hover:bg-rose-400/20 transition items-center justify-center"
-                      onClick={() => handleDelete(index())}
-                    >
-                      删除
-                    </button>
-                  </div>
-                </div>
+                <ListItem
+                  imageSrc={character ? getImageUrl(character, "icon") : undefined}
+                  title={character?.name ?? `角色 #${characterId}`}
+                  tags={skills.map((s) => s.name)}
+                  buttonColumns={2}
+                  buttons={buttons}
+                />
               );
             }}
           </For>
