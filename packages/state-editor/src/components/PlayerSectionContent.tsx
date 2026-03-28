@@ -11,6 +11,7 @@ import {
   Surface,
 } from "./Fields";
 import { PreviewTile } from "./Previews";
+import { RoundSkillModal } from "./RoundSkillModal";
 import {
   allocateId,
   buildImportedCharacterStates,
@@ -350,105 +351,142 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
       });
     };
 
-    const addRoundSkillRow = () => {
-      const used = new Set(roundSkillRows().map(([key]) => key));
-      const nextCharacter = props.catalog.roundSkillCharacters.find(
-        (character) => !used.has(character.id),
-      );
-      if (!nextCharacter) {
-        return;
-      }
-      setRoundSkillRows([...roundSkillRows(), [nextCharacter.id, []]]);
+    // Modal状态
+    const [modalOpen, setModalOpen] = createSignal(false);
+    const [editingIndex, setEditingIndex] = createSignal<number | null>(null);
+
+    // 获取已使用的角色ID（用于新增时排除）
+    const usedCharacterIds = createMemo(() =>
+      roundSkillRows().map(([charId]) => charId),
+    );
+
+    // 打开新增modal
+    const openAddModal = () => {
+      setEditingIndex(null);
+      setModalOpen(true);
     };
+
+    // 打开编辑modal
+    const openEditModal = (index: number) => {
+      setEditingIndex(index);
+      setModalOpen(true);
+    };
+
+    // 提交处理
+    const handleSubmit = (characterId: number, skillIds: number[]) => {
+      const rows = [...roundSkillRows()];
+      const editIdx = editingIndex();
+
+      if (editIdx !== null) {
+        // 编辑模式：替换该条目
+        rows[editIdx] = [characterId, skillIds];
+      } else {
+        // 新增模式：追加条目
+        rows.push([characterId, skillIds]);
+      }
+
+      setRoundSkillRows(rows);
+    };
+
+    // 删除条目
+    const handleDelete = (index: number) => {
+      setRoundSkillRows(roundSkillRows().filter((_, i) => i !== index));
+    };
+
+    // 获取当前编辑的数据
+    const editingData = createMemo(() => {
+      const idx = editingIndex();
+      if (idx === null) return undefined;
+      const row = roundSkillRows()[idx];
+      if (!row) return undefined;
+      return {
+        characterId: row[0],
+        skillIds: row[1],
+      };
+    });
 
     return (
       <div class="space-y-4">
         <SectionTitle
           title="回合技能记录"
-          description="键为角色定义 ID，值为本回合用过的主动技能。"
+          description="记录本回合各角色使用过的主动技能"
         />
-        <ActionButton label="新增记录" onClick={addRoundSkillRow} />
-        <div class="space-y-3">
+
+        {/* 技能记录列表 */}
+        <div class="space-y-2">
           <For each={roundSkillRows()}>
-            {([definitionId, skillIds], index) => {
-              const used = new Set(roundSkillRows().map(([key]) => key));
-              used.delete(definitionId);
-              const characterOptions =
-                props.catalog.roundSkillCharacters.filter(
-                  (character) => !used.has(character.id),
-                );
-              const prioritizedSkills = (() => {
-                const priority =
-                  props.catalog.initiativeSkillsByCharacterId.get(
-                    definitionId,
-                  ) ?? [];
-                const rest = props.catalog.allInitiativeSkills.filter(
-                  (skill) =>
-                    !priority.some((current) => current.id === skill.id),
-                );
-                return [...priority, ...rest];
-              })();
-              const toggleSkill = (skill: InitiativeSkillOption) => {
-                const nextRows = [...roundSkillRows()];
-                const current = nextRows[index()]!;
-                const nextValue = current[1].includes(skill.id)
-                  ? current[1].filter((item) => item !== skill.id)
-                  : [...current[1], skill.id];
-                nextRows[index()] = [current[0], nextValue];
-                setRoundSkillRows(nextRows);
-              };
+            {([characterId, skillIds], index) => {
+              const character = props.catalog.roundSkillCharacters.find(
+                (c) => c.id === characterId,
+              );
+              const skills = skillIds
+                .map((id) =>
+                  props.catalog.allInitiativeSkills.find((s) => s.id === id),
+                )
+                .filter((s): s is NonNullable<typeof s> => s !== undefined);
+
               return (
-                <div class="space-y-3 rounded-2xl border border-white/10 bg-slate-950/20 p-3">
-                  <div class="flex items-end gap-3">
-                    <div class="flex-1">
-                      <SelectField
-                        label="角色定义"
-                        value={definitionId}
-                        options={characterOptions.map((character) => ({
-                          value: character.id,
-                          label: `${character.name} #${character.id}`,
-                        }))}
-                        onChange={(value) => {
-                          const nextRows = [...roundSkillRows()];
-                          nextRows[index()] = [Number(value), skillIds];
-                          setRoundSkillRows(nextRows);
-                        }}
-                      />
-                    </div>
-                    <ActionButton
-                      label="移除记录"
-                      tone="danger"
-                      onClick={() =>
-                        setRoundSkillRows(
-                          roundSkillRows().filter(
-                            (_, rowIndex) => rowIndex !== index(),
-                          ),
-                        )
-                      }
-                    />
+                <div class="flex w-full items-start justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 text-left hover:bg-white/10 transition box-border overflow-hidden">
+                  <div class="flex flex-col flex-1 min-w-0 gap-2 px-3 py-3">
+                    <p class="text-sm font-semibold text-amber-50 my-0">
+                      {character?.name ?? `角色 #${characterId}`}
+                    </p>
+                    <p class="text-xs text-slate-300/80 my-0">
+                      {skills.length > 0
+                        ? skills.map((s) => s.name).join(", ")
+                        : "无技能记录"}
+                    </p>
                   </div>
-                  <div class="flex flex-wrap gap-2">
-                    <For each={prioritizedSkills}>
-                      {(skill) => (
-                        <button
-                          type="button"
-                          class={`gi-editor-button rounded-full border px-3 py-1.5 text-xs ${
-                            skillIds.includes(skill.id)
-                              ? "border-cyan-200/35 bg-cyan-300/12 text-cyan-50"
-                              : "border-white/10 bg-white/5 text-slate-100"
-                          }`}
-                          onClick={() => toggleSkill(skill)}
-                        >
-                          {skill.name} #{skill.id}
-                        </button>
-                      )}
-                    </For>
+                  <div class="grid grid-cols-2 self-stretch shrink-0">
+                    <button
+                      type="button"
+                      class="inline-flex min-w-16 h-auto min-h-full bg-cyan-300/10 text-xs font-bold text-cyan-50 hover:bg-cyan-300/20 transition items-center justify-center"
+                      onClick={() => openEditModal(index())}
+                    >
+                      编辑
+                    </button>
+                    <button
+                      type="button"
+                      class="inline-flex min-w-16 h-auto min-h-full bg-rose-400/10 text-xs font-bold text-rose-100 hover:bg-rose-400/20 transition items-center justify-center"
+                      onClick={() => handleDelete(index())}
+                    >
+                      删除
+                    </button>
                   </div>
                 </div>
               );
             }}
           </For>
+
+          {/* 新增按钮 - 虚线框样式 */}
+          <button
+            type="button"
+            onClick={openAddModal}
+            class="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 bg-transparent px-3 py-3 text-sm text-slate-400 hover:border-white/40 hover:text-slate-300 hover:bg-white/5 transition"
+          >
+            <span class="text-lg">+</span>
+            <span>新增技能记录</span>
+          </button>
         </div>
+
+        {/* Modal */}
+        <RoundSkillModal
+          open={modalOpen()}
+          state={props.state}
+          catalog={props.catalog}
+          who={who()}
+          editingCharacterId={editingData()?.characterId}
+          editingSkillIds={editingData()?.skillIds}
+          usedCharacterIds={
+            editingIndex() !== null
+              ? usedCharacterIds().filter(
+                  (id) => id !== editingData()?.characterId,
+                )
+              : usedCharacterIds()
+          }
+          onSubmit={handleSubmit}
+          onClose={() => setModalOpen(false)}
+        />
       </div>
     );
   };
