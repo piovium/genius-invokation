@@ -19,6 +19,7 @@ import {
   decodeDeckShareCode,
   DICE_LABELS,
   DICE_OPTIONS,
+  getImageUrl,
   getPlayer,
   moveInArray,
   type EditorCatalog,
@@ -37,7 +38,10 @@ interface PlayerSectionContentProps {
 }
 
 function entityBadges(entity: EntityState) {
-  return [`变量 ${Object.keys(entity.variables).length}`, `附着 ${entity.attachments.length}`];
+  return [
+    `变量 ${Object.keys(entity.variables).length}`,
+    `附着 ${entity.attachments.length}`,
+  ];
 }
 
 export function PlayerSectionContent(props: PlayerSectionContentProps) {
@@ -53,13 +57,18 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
   const DiceSection = () => (
     <Surface title={`玩家 ${who()} 骰子`}>
       <div class="space-y-4">
-        <SectionTitle title="骰子" description={`最多 ${props.state.config.maxDiceCount} 个。`} />
+        <SectionTitle
+          title="骰子"
+          description={`最多 ${props.state.config.maxDiceCount} 个。`}
+        />
         <div class="flex flex-wrap gap-2">
           <For each={DICE_OPTIONS}>
             {(dice) => (
               <ActionButton
                 label={`+${DICE_LABELS[dice]}`}
-                disabled={player().dice.length >= props.state.config.maxDiceCount}
+                disabled={
+                  player().dice.length >= props.state.config.maxDiceCount
+                }
                 onClick={() => {
                   props.updateState((draft) => {
                     const target = draft.players[who()];
@@ -197,9 +206,9 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
   );
 
   // Entity area section (supports, summons, combatStatuses)
-  const EntityAreaSection = (props2: { 
-    title: string; 
-    description: string; 
+  const EntityAreaSection = (props2: {
+    title: string;
+    description: string;
     area: "supports" | "summons" | "combatStatuses";
     mode: "card" | "icon";
     limit?: number;
@@ -207,10 +216,14 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
     const items = () => player()[props2.area];
     const options = () => {
       switch (props2.area) {
-        case "supports": return props.catalog.entitiesByType.support;
-        case "summons": return props.catalog.entitiesByType.summon;
-        case "combatStatuses": return props.catalog.entitiesByType.combatStatus;
-        default: return [];
+        case "supports":
+          return props.catalog.entitiesByType.support;
+        case "summons":
+          return props.catalog.entitiesByType.summon;
+        case "combatStatuses":
+          return props.catalog.entitiesByType.combatStatus;
+        default:
+          return [];
       }
     };
 
@@ -222,15 +235,23 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
             label={`追加${props2.title}`}
             options={options()}
             buttonText={`加入${props2.title}`}
-            disabled={typeof props2.limit === "number" && items().length >= props2.limit}
+            disabled={
+              typeof props2.limit === "number" && items().length >= props2.limit
+            }
             onSelect={(option) => {
               props.updateState((draft) => {
                 const target = draft.players[who()][props2.area];
-                if (typeof props2.limit === "number" && target.length >= props2.limit) {
+                if (
+                  typeof props2.limit === "number" &&
+                  target.length >= props2.limit
+                ) {
                   return;
                 }
                 target.push(
-                  createEntityState(option.definition, allocateId(draft)) as unknown as typeof target[number],
+                  createEntityState(
+                    option.definition,
+                    allocateId(draft),
+                  ) as unknown as (typeof target)[number],
                 );
               });
             }}
@@ -295,7 +316,10 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
                         tone="danger"
                         onClick={() => {
                           props.updateState((draft) => {
-                            draft.players[who()][props2.area].splice(index(), 1);
+                            draft.players[who()][props2.area].splice(
+                              index(),
+                              1,
+                            );
                           });
                         }}
                       />
@@ -312,18 +336,25 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
 
   // Round skill log section
   const RoundSkillLogSection = () => {
-    const roundSkillRows = createMemo(() => Array.from(player().roundSkillLog.entries()));
+    const roundSkillRows = createMemo(() =>
+      Array.from(player().roundSkillLog.entries()),
+    );
 
-    const setRoundSkillRows = (rows: readonly (readonly [number, number[]])[]) => {
+    const setRoundSkillRows = (
+      rows: readonly (readonly [number, number[]])[],
+    ) => {
       props.updateState((draft) => {
         const nextLog = new Map(rows.map(([key, value]) => [key, [...value]]));
-        draft.players[who()].roundSkillLog = nextLog as unknown as typeof draft.players[0]["roundSkillLog"];
+        draft.players[who()].roundSkillLog =
+          nextLog as unknown as (typeof draft.players)[0]["roundSkillLog"];
       });
     };
 
     const addRoundSkillRow = () => {
       const used = new Set(roundSkillRows().map(([key]) => key));
-      const nextCharacter = props.catalog.roundSkillCharacters.find((character) => !used.has(character.id));
+      const nextCharacter = props.catalog.roundSkillCharacters.find(
+        (character) => !used.has(character.id),
+      );
       if (!nextCharacter) {
         return;
       }
@@ -332,20 +363,28 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
 
     return (
       <div class="space-y-4">
-        <SectionTitle title="回合技能记录" description="键为角色定义 ID，值为本回合用过的主动技能。" />
+        <SectionTitle
+          title="回合技能记录"
+          description="键为角色定义 ID，值为本回合用过的主动技能。"
+        />
         <ActionButton label="新增记录" onClick={addRoundSkillRow} />
         <div class="space-y-3">
           <For each={roundSkillRows()}>
             {([definitionId, skillIds], index) => {
               const used = new Set(roundSkillRows().map(([key]) => key));
               used.delete(definitionId);
-              const characterOptions = props.catalog.roundSkillCharacters.filter(
-                (character) => !used.has(character.id),
-              );
+              const characterOptions =
+                props.catalog.roundSkillCharacters.filter(
+                  (character) => !used.has(character.id),
+                );
               const prioritizedSkills = (() => {
-                const priority = props.catalog.initiativeSkillsByCharacterId.get(definitionId) ?? [];
+                const priority =
+                  props.catalog.initiativeSkillsByCharacterId.get(
+                    definitionId,
+                  ) ?? [];
                 const rest = props.catalog.allInitiativeSkills.filter(
-                  (skill) => !priority.some((current) => current.id === skill.id),
+                  (skill) =>
+                    !priority.some((current) => current.id === skill.id),
                 );
                 return [...priority, ...rest];
               })();
@@ -381,7 +420,9 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
                       tone="danger"
                       onClick={() =>
                         setRoundSkillRows(
-                          roundSkillRows().filter((_, rowIndex) => rowIndex !== index()),
+                          roundSkillRows().filter(
+                            (_, rowIndex) => rowIndex !== index(),
+                          ),
                         )
                       }
                     />
@@ -420,6 +461,36 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
     const [importPile, setImportPile] = createSignal(true);
     const [importError, setImportError] = createSignal<string | null>(null);
 
+    // 解析分享码中的卡牌和角色
+    const parsedDeck = createMemo(() => {
+      try {
+        const code = shareCode().trim();
+        if (!code) return null;
+        const deck = decodeDeckShareCode(code);
+        return deck;
+      } catch {
+        return null;
+      }
+    });
+
+    // 获取角色定义
+    const characterDefinitions = createMemo(() => {
+      const deck = parsedDeck();
+      if (!deck) return [];
+      return deck.characters
+        .map((id) => props.state.data.characters.get(id))
+        .filter((def): def is NonNullable<typeof def> => def !== undefined);
+    });
+
+    // 获取卡牌定义
+    const cardDefinitions = createMemo(() => {
+      const deck = parsedDeck();
+      if (!deck) return [];
+      return deck.cards
+        .map((id) => props.state.data.entities.get(id))
+        .filter((def): def is NonNullable<typeof def> => def !== undefined);
+    });
+
     const handleImport = () => {
       try {
         const deck = decodeDeckShareCode(shareCode());
@@ -435,19 +506,30 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
                 }
                 return definition;
               })
-              .sort((left, right) => Number(!left.tags.includes("legend")) - Number(!right.tags.includes("legend")))
+              .sort(
+                (left, right) =>
+                  Number(!left.tags.includes("legend")) -
+                  Number(!right.tags.includes("legend")),
+              )
           : null;
         props.updateState((draft) => {
           const target = draft.players[who()];
           if (importCharacters()) {
-            target.characters = buildImportedCharacterStates(draft, deck.characters) as unknown as typeof target.characters;
+            target.characters = buildImportedCharacterStates(
+              draft,
+              deck.characters,
+            ) as unknown as typeof target.characters;
             target.activeCharacterId = target.characters[0]?.id ?? 0;
           }
           if (importedInitialPile) {
-            target.initialPile = importedInitialPile as unknown as typeof target.initialPile;
+            target.initialPile =
+              importedInitialPile as unknown as typeof target.initialPile;
           }
           if (importPile()) {
-            target.pile = buildImportedPileStates(draft, deck.cards) as unknown as typeof target.pile;
+            target.pile = buildImportedPileStates(
+              draft,
+              deck.cards,
+            ) as unknown as typeof target.pile;
           }
         });
         setImportError(null);
@@ -459,20 +541,83 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
     return (
       <Surface title={`玩家 ${who()} 牌组导入`}>
         <div class="space-y-4">
-          <SectionTitle title="牌组分享码导入" description="可分别覆盖角色、初始牌堆、当前牌堆。" />
+          <SectionTitle
+            title="牌组分享码导入"
+            description="可分别覆盖角色、初始牌堆、当前牌堆。"
+          />
           <textarea
-            class="min-h-28 w-full rounded-3xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-amber-200/50"
+            class="min-h-18 h-18 w-full min-w-full max-w-full box-border rounded-3xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-amber-200/50"
             value={shareCode()}
             placeholder="输入牌组分享码"
             onInput={(event) => setShareCode(event.currentTarget.value)}
           />
-          <div class="grid gap-3 sm:grid-cols-3">
-            <BooleanField label="覆盖角色" value={importCharacters()} onChange={setImportCharacters} />
-            <BooleanField label="覆盖初始牌堆" value={importInitialPile()} onChange={setImportInitialPile} />
-            <BooleanField label="覆盖当前牌堆" value={importPile()} onChange={setImportPile} />
+
+          {/* 卡牌图片预览 */}
+          <Show when={parsedDeck()}>
+            <h4 class="text-4 text-amber-50 my-0">预览</h4>
+            <div class="space-y-4">
+              {/* 角色预览 */}
+              <Show when={characterDefinitions().length > 0}>
+                <div class="flex gap-2 justify-center">
+                  <For each={characterDefinitions()}>
+                    {(character) => (
+                      <div class="w-16 h-16 rounded-full overflow-hidden border border-white/20 bg-slate-800">
+                        <img
+                          src={getImageUrl(character, "icon")}
+                          alt={`Character ${character.id}`}
+                          class="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+                  </For>
+                </div>
+              </Show>
+
+              {/* 卡牌预览 */}
+              <Show when={cardDefinitions().length > 0}>
+                <div class="grid grid-cols-15 gap-1">
+                  <For each={cardDefinitions()}>
+                    {(card) => (
+                      <div class="w-full h-auto rounded-sm overflow-hidden bg-slate-800">
+                        <img
+                          src={getImageUrl(card, "card")}
+                          alt={`Card ${card.id}`}
+                          class="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+                  </For>
+                </div>
+              </Show>
+            </div>
+          </Show>
+
+          <div class="grid gap-3 sm:grid-cols-3 pt-4">
+            <BooleanField
+              label="覆盖角色"
+              value={importCharacters()}
+              onChange={setImportCharacters}
+            />
+            <BooleanField
+              label="覆盖初始牌堆"
+              value={importInitialPile()}
+              onChange={setImportInitialPile}
+            />
+            <BooleanField
+              label="覆盖当前牌堆"
+              value={importPile()}
+              onChange={setImportPile}
+            />
           </div>
           <div class="flex flex-wrap gap-2">
-            <ActionButton label="导入分享码" tone="accent" onClick={handleImport} />
+            <ActionButton
+              label="导入分享码"
+              tone="accent"
+              onClick={handleImport}
+              class="w-full"
+            />
           </div>
           <Show when={importError()}>
             <p class="text-sm text-rose-200">{importError()}</p>

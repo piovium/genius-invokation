@@ -270,6 +270,7 @@ export function ActionButton(props: {
   onClick: () => void;
   disabled?: boolean;
   tone?: "default" | "danger" | "accent";
+  class?: string;
 }) {
   const toneClass = createMemo(() => {
     switch (props.tone) {
@@ -284,7 +285,7 @@ export function ActionButton(props: {
   return (
     <button
       type="button"
-      class={`gi-editor-button rounded-full border px-3 py-1.5 text-xs font-medium ${toneClass()}`}
+      class={`gi-editor-button rounded-full border px-3 py-1.5 text-xs font-medium ${toneClass()} ${props.class || ""}`}
       disabled={props.disabled}
       onClick={props.onClick}
     >
