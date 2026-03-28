@@ -24,7 +24,7 @@ import {
   CharacterModalContent,
   EntityModalContent,
   AttachmentModalContent,
-  ExtensionModalContent,
+  ExtensionModal,
   EntityModal,
   AttachmentModal,
 } from "./DetailModals";
@@ -636,16 +636,18 @@ export function GameStateEditor(props: GameStateEditorProps) {
                             {(extension, index) => (
                               <button
                                 type="button"
-                                class="gi-editor-button flex w-full items-start justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-left"
-                                onClick={() => setSelectedSection({ kind: "extension", index: index() })}
+                                class="gi-editor-button flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 text-left p-0 overflow-hidden"
+                                onClick={() => openModal({ kind: "extension", index: index() })}
                               >
-                                <div>
-                                  <p class="text-sm font-semibold text-amber-50">扩展 #{extension.definition.id}</p>
-                                  <p class="text-xs text-slate-300/80">{extension.definition.description || "无说明"}</p>
+                                <div class="flex flex-col gap-2 p-3">
+                                  <p class="text-sm font-semibold text-amber-50 my-0">{extension.definition.description || `扩展 #${extension.definition.id}`}</p>
+                                  <p class="text-xs text-slate-300/80 my-0">{extension.definition.description ? `扩展 #${extension.definition.id}` : "无说明"}</p>
                                 </div>
-                                <span class="rounded-full border border-cyan-200/30 bg-cyan-300/10 px-3 py-1.5 text-xs font-medium text-cyan-50">
-                                  编辑
-                                </span>
+                                <div class="flex items-center self-stretch shrink-0">
+                                  <span class="inline-flex min-w-16 h-auto min-h-full bg-cyan-300/10 text-xs font-bold text-cyan-50 items-center justify-center">
+                                    编辑
+                                  </span>
+                                </div>
                               </button>
                             )}
                           </For>
@@ -700,14 +702,6 @@ export function GameStateEditor(props: GameStateEditorProps) {
                   />
                 </Match>
 
-                {/* Extension Section */}
-                <Match when={selectedSection().kind === "extension"}>
-                  <ExtensionModalContent
-                    state={state}
-                    index={(selectedSection() as Extract<EditorSection, { kind: "extension" }>).index}
-                    updateState={updateState}
-                  />
-                </Match>
               </Switch>
 
               <Show when={errors().length > 0}>
@@ -746,6 +740,15 @@ export function GameStateEditor(props: GameStateEditorProps) {
             area={(currentModal() as Extract<EditorModal, { kind: "attachment" }>).area}
             entityId={(currentModal() as Extract<EditorModal, { kind: "attachment" }>).entityId}
             attachmentId={(currentModal() as Extract<EditorModal, { kind: "attachment" }>).attachmentId}
+            updateState={updateState}
+            onClose={closeTopModal}
+          />
+        </Match>
+        <Match when={currentModal()?.kind === "extension"}>
+          <ExtensionModal
+            open
+            state={state}
+            index={(currentModal() as Extract<EditorModal, { kind: "extension" }>).index}
             updateState={updateState}
             onClose={closeTopModal}
           />
