@@ -14,13 +14,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DiceType } from "@gi-tcg/typings";
-import { createResource, Show } from "solid-js";
+import { createResource } from "solid-js";
 
 export interface DiceIconProps {
   type: number;
 }
 
 const UI_ASSET_URL_BASE = "https://ui.assets.gi-tcg.guyutongxue.site/";
+
+const urlCache = new Map<string, string>();
 
 // 骰子类型到颜色名称的映射
 const DICE_TYPE_TO_COLOR: Record<number, string> = {
@@ -35,25 +37,32 @@ const DICE_TYPE_TO_COLOR: Record<number, string> = {
 };
 
 export function DiceIcon(props: DiceIconProps) {
-  // 构建图片 URL
-  const imageUrl = () => {
-    const colorName = DICE_TYPE_TO_COLOR[props.type];
-    if (!colorName) return null;
-    return `${UI_ASSET_URL_BASE}UI_Gcg_DiceL_${colorName}_Glow_02.webp`;
-  };
-
   // 使用 createResource 加载图片
-  const [imageSrc] = createResource(imageUrl, async (url) => {
-    if (!url) return null;
-    try {
-      const response = await fetch(url);
-      if (!response.ok) return null;
-      const blob = await response.blob();
-      return URL.createObjectURL(blob);
-    } catch {
-      return null;
-    }
-  });
+  const [imageSrc] = createResource(
+    () => props.type,
+    async (diceType) => {
+      const colorName = DICE_TYPE_TO_COLOR[diceType];
+      if (!colorName) {
+        return null;
+      }
+      const url = urlCache.get(colorName);
+      if (url) {
+        return url;
+      }
+      try {
+        const response = await fetch(
+          `${UI_ASSET_URL_BASE}UI_Gcg_DiceL_${colorName}_Glow_02.webp`,
+        );
+        if (!response.ok) return null;
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        urlCache.set(DICE_TYPE_TO_COLOR[props.type], objectUrl);
+        return objectUrl;
+      } catch {
+        return null;
+      }
+    },
+  );
 
   return (
     <img

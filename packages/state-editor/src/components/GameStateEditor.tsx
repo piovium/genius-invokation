@@ -368,11 +368,13 @@ function DicePreview(props: { dice: number[] }) {
         {props.dice.length}个
       </div>
       <div class="flex flex-col">
-        {props.dice.map((diceType, index) => (
-          <div class="w-full h-auto rounded-full overflow-hidden bg-slate-800/30 mb--3">
-            <DiceIcon type={diceType} />
-          </div>
-        ))}
+        <For each={props.dice}>
+          {(diceType) => (
+            <div class="w-full h-auto rounded-full overflow-hidden bg-slate-800/30 mb--3">
+              <DiceIcon type={diceType} />
+            </div>
+          )}
+        </For>
       </div>
     </div>
   );
