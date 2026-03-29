@@ -303,6 +303,12 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
 
     // 处理添加前的检查
     const handleAddCheck = (definition: EntityDefinition) => {
+      // 支援区不限制同 definition.id
+      if (props2.area === "supports") {
+        doAdd(definition);
+        return;
+      }
+
       const duplicateIndex = checkDuplicate(definition);
       
       if (duplicateIndex !== -1) {

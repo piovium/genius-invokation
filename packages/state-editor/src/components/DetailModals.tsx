@@ -325,8 +325,14 @@ export function CharacterModalContent(props: CharacterContentProps) {
       // 保留合法的实体
       (newCharacter as any).entities = validEntities;
 
-      // 替换角色
-      player.characters[props.characterIndex] = newCharacter as any;
+      // 替换或添加角色
+      if (props.characterIndex < player.characters.length) {
+        // 替换现有角色
+        player.characters[props.characterIndex] = newCharacter as any;
+      } else {
+        // 在末尾添加新角色（避免创建空槽位）
+        player.characters.push(newCharacter as any);
+      }
 
       // 如果这是第一个角色，设为出战
       if (player.characters.length === 1) {
@@ -1595,7 +1601,6 @@ export function EntityModalContent(props: EntityContentProps) {
                                 imageMode="icon"
                                 title={getDefinitionName(attachment.definition)}
                                 description={`ID: ${attachment.id} · 变量: ${Object.keys(attachment.variables).length}`}
-                                definition={attachment.definition}
                                 buttonColumns={2}
                                 buttons={buttons}
                               />

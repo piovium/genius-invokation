@@ -35,7 +35,6 @@ const DICE_TYPE_TO_COLOR: Record<number, string> = {
 };
 
 export function DiceIcon(props: DiceIconProps) {
-
   // 构建图片 URL
   const imageUrl = () => {
     const colorName = DICE_TYPE_TO_COLOR[props.type];
@@ -57,18 +56,14 @@ export function DiceIcon(props: DiceIconProps) {
   });
 
   return (
-    <Show
-      when={imageSrc.state === "ready" && imageSrc()}
-      fallback={<span>{getDiceTypeName(props.type)}</span>}
-    >
-      <img
-        src={imageSrc()!}
-        alt={getDiceTypeName(props.type)}
-        class="w-full h-auto object-contain"
-        title={getDiceTypeName(props.type)}
-        draggable={false}
-      />
-    </Show>
+    <img
+      src={imageSrc()!}
+      alt={getDiceTypeName(props.type)}
+      class="w-full h-auto object-contain"
+      title={getDiceTypeName(props.type)}
+      draggable={false}
+      loading="lazy"
+    />
   );
 }
 

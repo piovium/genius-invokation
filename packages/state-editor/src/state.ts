@@ -744,6 +744,7 @@ export function validateGameState(state: GameState, catalog: EditorCatalog) {
       }
     }
     for (const character of player.characters) {
+      if (!character) continue;
       allIds.push(character.id);
       for (const [key, value] of Object.entries(character.variables)) {
         validateSafeInteger(value, `角色变量 ${key}`, errors);
