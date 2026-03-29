@@ -1,16 +1,17 @@
 import { For, Match, Show, Switch } from "solid-js";
+import type { ExpressiveJSONSchema } from "ya-json-schema-types";
 
 import { ActionButton, BooleanField, NumberField } from "./Fields";
 import { createSchemaDefault } from "../state";
 
 interface JsonSchemaEditorProps {
-  schema: any;
+  schema: ExpressiveJSONSchema;
   value: unknown;
   label?: string;
   onChange: (value: unknown) => void;
 }
 
-function replaceArrayItem(source: readonly unknown[], index: number, value: unknown) {
+function replaceArrayItem<T>(source: readonly T[], index: number, value: T) {
   const next = [...source];
   next[index] = value;
   return next;
@@ -18,14 +19,20 @@ function replaceArrayItem(source: readonly unknown[], index: number, value: unkn
 
 export function JsonSchemaEditor(props: JsonSchemaEditorProps) {
   return (
-    <Switch fallback={<p class="text-sm text-slate-400">该扩展状态无法编辑。</p>}>
+    <Switch
+      fallback={<p class="text-sm text-slate-400">该扩展状态无法编辑。</p>}
+    >
       <Match when={props.schema?.type === "object"}>
         <div class="space-y-4">
-          <For each={Object.entries((props.schema?.properties as Record<string, unknown>) ?? {})}>
+          <For
+            each={Object.entries(
+              (props.schema?.properties as Record<string, unknown>) ?? {},
+            )}
+          >
             {([key, schema]) => (
               <div class="rounded-2xl border border-white/10 bg-slate-950/25 p-3">
                 <JsonSchemaEditor
-                  schema={schema}
+                  schema={schema as ExpressiveJSONSchema}
                   value={(props.value as Record<string, unknown> | null)?.[key]}
                   label={key}
                   onChange={(nextValue) =>
@@ -40,21 +47,30 @@ export function JsonSchemaEditor(props: JsonSchemaEditorProps) {
           </For>
         </div>
       </Match>
-      <Match when={props.schema?.type === "array" && Array.isArray(props.schema?.prefixItems)}>
+      <Match
+        when={
+          props.schema?.type === "array" &&
+          Array.isArray(props.schema?.prefixItems)
+        }
+      >
         <div class="space-y-3">
           <Show when={props.label}>
             <p class="text-sm font-medium text-amber-50">{props.label}</p>
           </Show>
-          <For each={props.schema.prefixItems as unknown[]}>
+          <For each={props.schema.prefixItems as ExpressiveJSONSchema[]}>
             {(schema, index) => (
               <div class="rounded-2xl border border-white/10 bg-slate-950/25 p-3">
                 <JsonSchemaEditor
-                  schema={schema}
-                  value={(props.value as unknown[] | undefined)?.[index()]}
+                  schema={schema as ExpressiveJSONSchema}
+                  value={(props.value as ExpressiveJSONSchema[])?.[index()]}
                   label={`[${index()}]`}
                   onChange={(nextValue) =>
                     props.onChange(
-                      replaceArrayItem((props.value as unknown[] | undefined) ?? [], index(), nextValue),
+                      replaceArrayItem(
+                        (props.value as ExpressiveJSONSchema[]) ?? [],
+                        index(),
+                        nextValue,
+                      ),
                     )
                   }
                 />
@@ -73,7 +89,12 @@ export function JsonSchemaEditor(props: JsonSchemaEditorProps) {
               label="追加一项"
               onClick={() => {
                 const current = Array.isArray(props.value) ? props.value : [];
-                props.onChange([...current, createSchemaDefault(props.schema.items)]);
+                props.onChange([
+                  ...current,
+                  createSchemaDefault(
+                    props.schema.items as ExpressiveJSONSchema,
+                  ),
+                ]);
               }}
               disabled={!props.schema?.items}
             />
@@ -96,11 +117,15 @@ export function JsonSchemaEditor(props: JsonSchemaEditorProps) {
                   />
                 </div>
                 <JsonSchemaEditor
-                  schema={props.schema.items}
+                  schema={props.schema.items as ExpressiveJSONSchema}
                   value={item}
                   onChange={(nextValue) =>
                     props.onChange(
-                      replaceArrayItem((props.value as unknown[] | undefined) ?? [], index(), nextValue),
+                      replaceArrayItem(
+                        (props.value as ExpressiveJSONSchema[]) ?? [],
+                        index(),
+                        nextValue,
+                      ),
                     )
                   }
                 />

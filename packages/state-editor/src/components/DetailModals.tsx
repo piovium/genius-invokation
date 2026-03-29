@@ -1,29 +1,28 @@
 import { createMemo, createSignal, For, Show } from "solid-js";
 
 import type {
-  AttachmentState,
   CharacterState,
   EntityDefinition,
   EntityState,
   GameState,
+  CharacterDefinition,
+  CharacterTag,
+  AttachmentDefinition,
 } from "@gi-tcg/core";
 
 import {
   ActionButton,
   NumberField,
-  SearchableSelect,
   SelectField,
   SectionTitle,
   Surface,
 } from "./Fields";
 import { JsonSchemaEditor } from "./JsonSchemaEditor";
 import { Modal } from "./Modal";
-import { Badge, PreviewTile, SummaryLine } from "./Previews";
+import { PreviewTile, SummaryLine } from "./Previews";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { ConfirmModal } from "./ConfirmModal";
 import { AddCardModal } from "./AddCardModal";
-import type { CharacterDefinition } from "@gi-tcg/core";
-import type { CharacterTag } from "@gi-tcg/core";
 import {
   allocateId,
   AURA_LABELS,
@@ -32,21 +31,21 @@ import {
   createCharacterState,
   createEntityState,
   getAttachment,
-  getCharacter,
   getCharacterEnergyLabel,
-  getCharacterMaxEnergyLabel,
   getDefinitionName,
   getEntity,
   getPlayer,
   moveInArray,
-  type Mutable,
   type EditorCatalog,
   type EditorEntityArea,
   type EditorModal,
   type EditorSection,
   type UpdateGameState,
   getImageUrl,
+  type AssetOption,
 } from "../state";
+import type { ExpressiveJSONSchema } from "ya-json-schema-types";
+import type { Draft } from "immer";
 
 // 角色标签分类
 const CHARACTER_TAG_CATEGORIES = {
@@ -84,20 +83,13 @@ const CHARACTER_TAG_CATEGORIES = {
   ] as const,
 };
 
-// 所有角色标签
-const ALL_CHARACTER_TAGS = [
-  ...CHARACTER_TAG_CATEGORIES.element,
-  ...CHARACTER_TAG_CATEGORIES.weapon,
-  ...CHARACTER_TAG_CATEGORIES.nation,
-] as const;
-
 function VariableGrid(props: {
   entries: readonly [string, number][];
   disabled?: boolean;
   readOnlyKeys?: readonly string[];
   onChange: (key: string, value: number) => void;
 }) {
-  const readOnly = new Set(props.readOnlyKeys ?? []);
+  const readOnly = () => new Set(props.readOnlyKeys ?? []);
   return (
     <div class="grid gap-3 sm:grid-cols-2">
       <For each={props.entries}>
@@ -106,7 +98,7 @@ function VariableGrid(props: {
             label={key}
             value={value}
             disabled={props.disabled}
-            readOnly={readOnly.has(key)}
+            readOnly={readOnly().has(key)}
             onChange={(nextValue) => props.onChange(key, nextValue)}
           />
         )}
@@ -179,14 +171,16 @@ export function CharacterModalContent(props: CharacterContentProps) {
   });
 
   const updateCharacter = (
-    updater: (target: Mutable<CharacterState>) => void,
+    updater: (target: Draft<CharacterState>) => void,
   ) => {
+    const who = props.who;
+    const chId = characterId();
     props.updateState((draft) => {
-      const target = draft.players[props.who].characters.find(
-        (item) => item.id === characterId(),
+      const target = draft.players[who].characters.find(
+        (item) => item.id === chId,
       );
       if (target) {
-        updater(target as unknown as Mutable<CharacterState>);
+        updater(target);
       }
     });
   };
@@ -194,26 +188,20 @@ export function CharacterModalContent(props: CharacterContentProps) {
   // 击倒确认弹窗状态
   const [defeatConfirmOpen, setDefeatConfirmOpen] = createSignal(false);
 
-  // 武器/天赋不合法警告弹窗状态
-  const [invalidEntityWarning, setInvalidEntityWarning] = createSignal<{
-    open: boolean;
-    type: "weapon" | "talent" | "other";
-    entityName: string;
-  }>({ open: false, type: "other", entityName: "" });
-
   // 移动角色位置
   const moveCharacter = (delta: number) => {
-    const chars = props.state.players[props.who].characters;
+    const who = props.who;
+    const chars = props.state.players[who].characters;
     const currentIndex = props.characterIndex;
     const newIndex = currentIndex + delta;
     if (newIndex < 0 || newIndex >= chars.length) return;
 
     props.updateState((draft) => {
-      const draftChars = draft.players[props.who].characters;
+      const draftChars = draft.players[who].characters;
       // 交换位置
       const temp = draftChars[currentIndex];
-      draftChars[currentIndex] = draftChars[newIndex]!;
-      draftChars[newIndex] = temp!;
+      draftChars[currentIndex] = draftChars[newIndex];
+      draftChars[newIndex] = temp;
     });
 
     // 自动切换右侧面板跟随对应角色
@@ -231,9 +219,11 @@ export function CharacterModalContent(props: CharacterContentProps) {
 
   // 确认击倒
   const handleConfirmDefeat = () => {
+    const who = props.who;
+    const chId = characterId();
     props.updateState((draft) => {
-      const target = draft.players[props.who].characters.find(
-        (item) => item.id === characterId(),
+      const target = draft.players[who].characters.find(
+        (item) => item.id === chId,
       );
       if (!target) return;
       target.variables.health = 0;
@@ -252,9 +242,11 @@ export function CharacterModalContent(props: CharacterContentProps) {
 
   // 恢复存活
   const reviveCharacter = () => {
+    const who = props.who;
+    const chId = characterId();
     props.updateState((draft) => {
-      const target = draft.players[props.who].characters.find(
-        (item) => item.id === characterId(),
+      const target = draft.players[who].characters.find(
+        (item) => item.id === chId,
       );
       if (!target) return;
       target.variables.health = 1;
@@ -264,16 +256,18 @@ export function CharacterModalContent(props: CharacterContentProps) {
 
   // 设为出战
   const setAsActive = () => {
+    const who = props.who;
+    const chId = characterId();
     props.updateState((draft) => {
-      draft.players[props.who].activeCharacterId = characterId();
+      draft.players[who].activeCharacterId = chId;
     });
   };
 
   // 校验实体合法性（武器标签和天赋关联角色）
   const validateAndCleanEntities = (
-    entities: EntityState[],
+    entities: Draft<EntityState>[],
     newCharDef: CharacterDefinition,
-  ): EntityState[] => {
+  ): Draft<EntityState>[] => {
     return entities.filter((entity) => {
       const def = entity.definition;
       const tags = def.tags;
@@ -307,31 +301,29 @@ export function CharacterModalContent(props: CharacterContentProps) {
 
   // 处理角色选择
   const handleSelectCharacter = (charDef: CharacterDefinition) => {
+    const who = props.who;
+    const chIdx = props.characterIndex;
     props.updateState((draft) => {
-      const player = draft.players[props.who];
-      const existingChar = player.characters[props.characterIndex];
+      const player = draft.players[who];
+      const existingChar = player.characters[chIdx];
 
       // 保留现有实体，但需要进行合法性校验
-      const existingEntities = (existingChar?.entities ||
-        []) as unknown as EntityState[];
+      const existingEntities = existingChar?.entities ?? [];
       const validEntities = validateAndCleanEntities(existingEntities, charDef);
 
       // 创建新角色
-      const newCharacter = createCharacterState(
-        charDef as any,
-        allocateId(draft),
-      );
+      const newCharacter = createCharacterState(charDef, allocateId(draft));
 
       // 保留合法的实体
-      (newCharacter as any).entities = validEntities;
+      newCharacter.entities = validEntities;
 
       // 替换或添加角色
-      if (props.characterIndex < player.characters.length) {
+      if (chIdx < player.characters.length) {
         // 替换现有角色
-        player.characters[props.characterIndex] = newCharacter as any;
+        player.characters[chIdx] = newCharacter;
       } else {
         // 在末尾添加新角色（避免创建空槽位）
-        player.characters.push(newCharacter as any);
+        player.characters.push(newCharacter);
       }
 
       // 如果这是第一个角色，设为出战
@@ -424,13 +416,16 @@ export function CharacterModalContent(props: CharacterContentProps) {
                             {specialEnergyLabel()}:{" "}
                           </span>
                           <span class="text-cyan-300">
+                            {
+                              currentCharacter().variables[
+                                currentCharacter().definition.specialEnergy
+                                  ?.variableName ?? "energy"
+                              ]
+                            }
+                            /
                             {currentCharacter().definition.specialEnergy
-                              ?.variableName
-                              ? currentCharacter().variables[
-                                  currentCharacter().definition.specialEnergy
-                                    ?.variableName!
-                                ]
-                              : `${currentCharacter().variables.energy}/${currentCharacter().variables.maxEnergy}`}
+                              ?.slotSize ??
+                              currentCharacter().variables.maxEnergy}
                           </span>
                         </div>
                         <div class="rounded-xl border border-white/10 bg-slate-900/50 px-3 py-2">
@@ -534,20 +529,17 @@ export function CharacterModalContent(props: CharacterContentProps) {
                     <NumberField
                       label={specialEnergyLabel()}
                       value={
-                        currentCharacter().definition.specialEnergy
-                          ?.variableName
-                          ? currentCharacter().variables[
-                              currentCharacter().definition.specialEnergy
-                                ?.variableName!
-                            ]
-                          : currentCharacter().variables.energy
+                        currentCharacter().variables[
+                          currentCharacter().definition.specialEnergy
+                            ?.variableName ?? "energy"
+                        ]
                       }
                       disabled={defeated()}
                       onChange={(value) =>
                         updateCharacter((target) => {
                           if (target.definition.specialEnergy?.variableName) {
                             target.variables[
-                              target.definition.specialEnergy?.variableName!
+                              target.definition.specialEnergy?.variableName
                             ] = value;
                           } else {
                             target.variables.energy = value;
@@ -797,8 +789,9 @@ interface CharacterEntitySectionProps {
 function CharacterEntitySection(props: CharacterEntitySectionProps) {
   const [addModalOpen, setAddModalOpen] = createSignal(false);
   const [confirmModalOpen, setConfirmModalOpen] = createSignal(false);
-  const [pendingDefinition, setPendingDefinition] =
-    createSignal<EntityDefinition | null>(null);
+  const [pendingDefinition, setPendingDefinition] = createSignal<
+    EntityDefinition | undefined
+  >(void 0);
   const [existingEntityIndex, setExistingEntityIndex] =
     createSignal<number>(-1);
   // 同类实体替换确认弹窗状态
@@ -954,33 +947,29 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
 
   // 执行添加
   const doAdd = (definition: EntityDefinition) => {
+    const who = props.who;
+    const chId = props.characterId;
     props.updateState((draft) => {
-      const target = draft.players[props.who].characters.find(
-        (item) => item.id === props.characterId,
+      const target = draft.players[who].characters.find(
+        (item) => item.id === chId,
       );
       if (!target) return;
 
-      target.entities.push(
-        createEntityState(
-          definition,
-          allocateId(draft),
-        ) as unknown as (typeof target.entities)[number],
-      );
+      target.entities.push(createEntityState(definition, allocateId(draft)));
     });
   };
 
   // 执行覆盖
   const doReplace = (definition: EntityDefinition, index: number) => {
+    const who = props.who;
+    const chId = props.characterId;
     props.updateState((draft) => {
-      const target = draft.players[props.who].characters.find(
-        (item) => item.id === props.characterId,
+      const target = draft.players[who].characters.find(
+        (item) => item.id === chId,
       );
       if (!target) return;
 
-      target.entities[index] = createEntityState(
-        definition,
-        allocateId(draft),
-      ) as unknown as (typeof target.entities)[number];
+      target.entities[index] = createEntityState(definition, allocateId(draft));
     });
   };
 
@@ -992,14 +981,14 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
       doReplace(definition, index);
     }
     setConfirmModalOpen(false);
-    setPendingDefinition(null);
+    setPendingDefinition(void 0);
     setExistingEntityIndex(-1);
   };
 
   // 取消覆盖
   const handleCancelReplace = () => {
     setConfirmModalOpen(false);
-    setPendingDefinition(null);
+    setPendingDefinition(void 0);
     setExistingEntityIndex(-1);
   };
 
@@ -1034,16 +1023,15 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
                   content: "上移",
                   col: 0,
                   onClick: () => {
+                    const who = props.who;
+                    const chId = props.characterId;
+                    const i = index();
                     props.updateState((draft) => {
-                      const target = draft.players[props.who].characters.find(
-                        (item) => item.id === props.characterId,
+                      const target = draft.players[who].characters.find(
+                        (item) => item.id === chId,
                       );
                       if (!target) return;
-                      target.entities = moveInArray(
-                        target.entities,
-                        index(),
-                        -1,
-                      );
+                      target.entities = moveInArray(target.entities, i, -1);
                     });
                   },
                 },
@@ -1051,16 +1039,15 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
                   content: "下移",
                   col: 0,
                   onClick: () => {
+                    const who = props.who;
+                    const chId = props.characterId;
+                    const i = index();
                     props.updateState((draft) => {
-                      const target = draft.players[props.who].characters.find(
-                        (item) => item.id === props.characterId,
+                      const target = draft.players[who].characters.find(
+                        (item) => item.id === chId,
                       );
                       if (!target) return;
-                      target.entities = moveInArray(
-                        target.entities,
-                        index(),
-                        1,
-                      );
+                      target.entities = moveInArray(target.entities, i, 1);
                     });
                   },
                 },
@@ -1082,18 +1069,21 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
                   col: 1,
                   variant: "danger",
                   onClick: () => {
+                    const who = props.who;
+                    const chId = props.characterId;
+                    const i = index();
                     props.updateState((draft) => {
-                      const target = draft.players[props.who].characters.find(
-                        (item) => item.id === props.characterId,
+                      const target = draft.players[who].characters.find(
+                        (item) => item.id === chId,
                       );
                       if (!target) return;
-                      target.entities.splice(index(), 1);
+                      target.entities.splice(i, 1);
                     });
                   },
                 },
               ];
               const imageMode = () =>
-                entity.definition.type == "status" ? "icon" : "card";
+                entity.definition.type === "status" ? "icon" : "card";
 
               return (
                 <ListItem
@@ -1162,7 +1152,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
         title="检测到重复实体"
         message={
           pendingDefinition()
-            ? `角色区域中已存在相同类型的实体「${getDefinitionName(pendingDefinition()!)}」，是否覆盖？`
+            ? `角色区域中已存在相同类型的实体「${getDefinitionName(pendingDefinition())}」，是否覆盖？`
             : ""
         }
         confirmText="确认覆盖"
@@ -1209,7 +1199,6 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
           }
         })()}
         confirmText="知道了"
-        cancelText={null as unknown as string}
         onConfirm={closeInvalidEntityWarning}
         onCancel={closeInvalidEntityWarning}
       />
@@ -1265,7 +1254,7 @@ interface EntityContentProps {
 
 function updateEntityByAreaContent(
   props: EntityContentProps,
-  updater: (entity: Mutable<EntityState>) => void,
+  updater: (entity: Draft<EntityState>) => void,
 ) {
   props.updateState((draft) => {
     const player = draft.players[props.who];
@@ -1277,7 +1266,7 @@ function updateEntityByAreaContent(
         (item) => item.id === props.entityId,
       );
       if (entity) {
-        updater(entity as unknown as Mutable<EntityState>);
+        updater(entity);
       }
       return;
     }
@@ -1285,7 +1274,7 @@ function updateEntityByAreaContent(
       (item) => item.id === props.entityId,
     );
     if (entity) {
-      updater(entity as unknown as Mutable<EntityState>);
+      updater(entity);
     }
   });
 }
@@ -1293,9 +1282,8 @@ function updateEntityByAreaContent(
 export function EntityModalContent(props: EntityContentProps) {
   const [query, setQuery] = createSignal("");
   const [confirmModalOpen, setConfirmModalOpen] = createSignal(false);
-  const [pendingAttachment, setPendingAttachment] = createSignal<any | null>(
-    null,
-  );
+  const [pendingAttachment, setPendingAttachment] =
+    createSignal<AssetOption<AttachmentDefinition> | null>(null);
   const [existingAttachmentIndex, setExistingAttachmentIndex] =
     createSignal(-1);
 
@@ -1335,7 +1323,7 @@ export function EntityModalContent(props: EntityContentProps) {
 
   // 处理添加附着前的检查
   const handleAddAttachmentCheck = (
-    option: (typeof props.catalog.attachments)[0],
+    option: AssetOption<AttachmentDefinition>,
   ) => {
     const duplicateIndex = checkDuplicateAttachment(option.definition);
 
@@ -1351,20 +1339,18 @@ export function EntityModalContent(props: EntityContentProps) {
   };
 
   // 执行添加附着
-  const doAddAttachment = (option: (typeof props.catalog.attachments)[0]) => {
+  const doAddAttachment = (option: AssetOption<AttachmentDefinition>) => {
+    const who = props.who;
+    const area = props.area as "hands" | "pile";
+    const etId = props.entityId;
     props.updateState((draft) => {
-      const targetPlayer = draft.players[props.who];
-      const targetEntity = targetPlayer[props.area as "hands" | "pile"].find(
-        (item) => item.id === props.entityId,
-      );
+      const targetPlayer = draft.players[who];
+      const targetEntity = targetPlayer[area].find((item) => item.id === etId);
       if (!targetEntity) {
         return;
       }
       targetEntity.attachments.push(
-        createAttachmentState(
-          option.definition,
-          allocateId(draft),
-        ) as unknown as (typeof targetEntity.attachments)[number],
+        createAttachmentState(option.definition, allocateId(draft)),
       );
     });
   };
@@ -1374,11 +1360,12 @@ export function EntityModalContent(props: EntityContentProps) {
     option: (typeof props.catalog.attachments)[0],
     index: number,
   ) => {
+    const who = props.who;
+    const area = props.area as "hands" | "pile";
+    const etId = props.entityId;
     props.updateState((draft) => {
-      const targetPlayer = draft.players[props.who];
-      const targetEntity = targetPlayer[props.area as "hands" | "pile"].find(
-        (item) => item.id === props.entityId,
-      );
+      const targetPlayer = draft.players[who];
+      const targetEntity = targetPlayer[area].find((item) => item.id === etId);
       if (!targetEntity) {
         return;
       }
@@ -1386,7 +1373,7 @@ export function EntityModalContent(props: EntityContentProps) {
       targetEntity.attachments[index] = createAttachmentState(
         option.definition,
         allocateId(draft),
-      ) as unknown as (typeof targetEntity.attachments)[number];
+      );
     });
   };
 
@@ -1508,8 +1495,8 @@ export function EntityModalContent(props: EntityContentProps) {
                       <div class="flex-1 overflow-y-auto space-y-2">
                         <For each={currentEntity().attachments}>
                           {(attachment, index) => {
-                            const isFirst = index() === 0;
-                            const isLast =
+                            const isFirst = () => index() === 0;
+                            const isLast = () =>
                               index() ===
                               currentEntity().attachments.length - 1;
 
@@ -1532,19 +1519,20 @@ export function EntityModalContent(props: EntityContentProps) {
                                 content: "上移",
                                 col: 0,
                                 onClick: () => {
-                                  if (isFirst) return;
+                                  if (isFirst()) return;
+                                  const who = props.who;
+                                  const area = props.area as "hands" | "pile";
+                                  const etId = props.entityId;
+                                  const i = index();
                                   props.updateState((draft) => {
-                                    const targetPlayer =
-                                      draft.players[props.who];
+                                    const targetPlayer = draft.players[who];
                                     const targetEntity = targetPlayer[
-                                      props.area as "hands" | "pile"
-                                    ].find(
-                                      (item) => item.id === props.entityId,
-                                    );
+                                      area
+                                    ].find((item) => item.id === etId);
                                     if (!targetEntity) return;
                                     targetEntity.attachments = moveInArray(
                                       targetEntity.attachments,
-                                      index(),
+                                      i,
                                       -1,
                                     );
                                   });
@@ -1554,19 +1542,20 @@ export function EntityModalContent(props: EntityContentProps) {
                                 content: "下移",
                                 col: 0,
                                 onClick: () => {
-                                  if (isLast) return;
+                                  if (isLast()) return;
+                                  const who = props.who;
+                                  const area = props.area as "hands" | "pile";
+                                  const etId = props.entityId;
+                                  const i = index();
                                   props.updateState((draft) => {
-                                    const targetPlayer =
-                                      draft.players[props.who];
+                                    const targetPlayer = draft.players[who];
                                     const targetEntity = targetPlayer[
-                                      props.area as "hands" | "pile"
-                                    ].find(
-                                      (item) => item.id === props.entityId,
-                                    );
+                                      area
+                                    ].find((item) => item.id === etId);
                                     if (!targetEntity) return;
                                     targetEntity.attachments = moveInArray(
                                       targetEntity.attachments,
-                                      index(),
+                                      i,
                                       1,
                                     );
                                   });
@@ -1577,16 +1566,17 @@ export function EntityModalContent(props: EntityContentProps) {
                                 col: 1,
                                 variant: "danger",
                                 onClick: () => {
+                                  const who = props.who;
+                                  const area = props.area as "hands" | "pile";
+                                  const etId = props.entityId;
+                                  const i = index();
                                   props.updateState((draft) => {
-                                    const targetPlayer =
-                                      draft.players[props.who];
+                                    const targetPlayer = draft.players[who];
                                     const targetEntity = targetPlayer[
-                                      props.area as "hands" | "pile"
-                                    ].find(
-                                      (item) => item.id === props.entityId,
-                                    );
+                                      area
+                                    ].find((item) => item.id === etId);
                                     if (!targetEntity) return;
-                                    targetEntity.attachments.splice(index(), 1);
+                                    targetEntity.attachments.splice(i, 1);
                                   });
                                 },
                               },
@@ -1659,7 +1649,7 @@ export function EntityModal(props: EntityModalProps) {
     getEntity(player(), props.area, props.entityId, props.characterId);
   const title = () =>
     entity()
-      ? `实体编辑 - ${getDefinitionName(entity()!.definition)}`
+      ? `实体编辑 - ${getDefinitionName(entity()?.definition)}`
       : "实体编辑";
 
   return (
@@ -1714,20 +1704,22 @@ export function AttachmentModalContent(props: AttachmentContentProps) {
                 <VariableGrid
                   entries={Object.entries(currentAttachment().variables)}
                   onChange={(key, value) => {
+                    const who = props.who;
+                    const area = props.area;
+                    const etId = props.entityId;
+                    const attId = props.attachmentId;
                     props.updateState((draft) => {
-                      const targetPlayer = draft.players[props.who];
-                      const targetEntity = targetPlayer[props.area].find(
-                        (item) => item.id === props.entityId,
+                      const targetPlayer = draft.players[who];
+                      const targetEntity = targetPlayer[area].find(
+                        (item) => item.id === etId,
                       );
                       const targetAttachment = targetEntity?.attachments.find(
-                        (item) => item.id === props.attachmentId,
+                        (item) => item.id === attId,
                       );
                       if (!targetAttachment) {
                         return;
                       }
-                      (
-                        targetAttachment as unknown as Mutable<AttachmentState>
-                      ).variables[key] = value;
+                      targetAttachment.variables[key] = value;
                     });
                   }}
                 />
@@ -1758,7 +1750,7 @@ export function AttachmentModal(props: AttachmentModalProps) {
     getAttachment(player(), props.area, props.entityId, props.attachmentId);
   const title = () =>
     attachment()
-      ? `附着编辑 - ${getDefinitionName(attachment()!.definition)}`
+      ? `附着编辑 - ${getDefinitionName(attachment()?.definition)}`
       : "附着编辑";
   return (
     <Modal open={props.open} title={title()} onClose={props.onClose}>
@@ -1800,11 +1792,14 @@ export function ExtensionModalContent(props: ExtensionContentProps) {
               />
             </div>
             <JsonSchemaEditor
-              schema={currentExtension().definition.schema}
+              schema={
+                currentExtension().definition.schema as ExpressiveJSONSchema
+              }
               value={currentExtension().state}
               onChange={(value) => {
+                const idx = props.index;
                 props.updateState((draft) => {
-                  draft.extensions[props.index].state = value;
+                  draft.extensions[idx].state = value;
                 });
               }}
             />

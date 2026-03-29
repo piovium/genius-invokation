@@ -33,12 +33,7 @@
     "@iconify-json/mdi": "^1.1.66",
     "@rollup/plugin-babel": "^6.0.4",
     "@types/core-js": "^2.5.8",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
     "@unocss/preset-icons": "catalog:",
-    "eslint": "^8.56.0",
-    "eslint-plugin-only-warn": "^1.1.0",
-    "eslint-plugin-solid": "^0.13.1",
     "unocss": "catalog:",
     "vite": "catalog:",
     "vite-plugin-solid": "catalog:"

@@ -1,8 +1,6 @@
 import {
   For,
-  Match,
   Show,
-  Switch,
   createEffect,
   createMemo,
   createSignal,
@@ -12,7 +10,6 @@ import type { GameState } from "@gi-tcg/core";
 
 import {
   ActionButton,
-  BooleanField,
   SelectField,
   SectionTitle,
 } from "./Fields";
@@ -20,8 +17,6 @@ import { Modal } from "./Modal";
 import {
   getDefinitionName,
   type EditorCatalog,
-  type InitiativeSkillOption,
-  type UpdateGameState,
 } from "../state";
 
 interface RoundSkillModalProps {

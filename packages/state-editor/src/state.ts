@@ -17,19 +17,11 @@ import {
 } from "@gi-tcg/core";
 import { Aura, DiceType } from "@gi-tcg/typings";
 import getData from "@gi-tcg/data";
+import type { Draft } from "immer";
+import type { ExpressiveJSONSchema } from "ya-json-schema-types";
 
 type AttachmentDefinition = AttachmentState["definition"];
 type EditorGameData = ReturnType<typeof getData>;
-
-export type Mutable<T> = {
-  -readonly [K in keyof T]: T[K] extends ReadonlyArray<infer Item>
-    ? Mutable<Item>[]
-    : T[K] extends ReadonlyMap<infer Key, infer Value>
-      ? Map<Key, Mutable<Value>>
-      : T[K] extends object
-        ? Mutable<T[K]>
-        : T[K];
-};
 
 export type EditorEntityArea =
   | "combatStatuses"
@@ -72,7 +64,7 @@ export type EditorSection =
   | { kind: "deckImport"; who: 0 | 1 };
 
 export type UpdateGameState = (
-  updater: (draft: Mutable<GameState>) => void,
+  updater: (draft: Draft<GameState>) => void,
 ) => void;
 
 export interface AssetOption<TDefinition> {
@@ -104,10 +96,7 @@ const DEFAULT_CHARACTER_DEFINITION_IDS: readonly number[] = [];
 const DEFAULT_CHARACTER_INSTANCE_IDS: readonly [
   readonly number[],
   readonly number[],
-] = [
-  [],
-  [],
-];
+] = [[], []];
 
 export const PHASE_LABELS: Record<PhaseType, string> = {
   initActives: "选择出战",
@@ -189,8 +178,8 @@ function buildSearch(name: string, id: number) {
   return `${name} ${id}`.toLowerCase();
 }
 
-export function getDefinitionName(definition: { id: number }) {
-  return getSafeName(definition.id);
+export function getDefinitionName(definition: { id: number } | undefined) {
+  return definition ? getSafeName(definition.id) : "未知";
 }
 
 export function getDefinitionTypeLabel(definition: { type: string }) {
@@ -236,11 +225,11 @@ function buildEntityVariables(
 export function createCharacterState(
   definition: CharacterDefinition,
   id: number,
-): CharacterState {
+): Draft<CharacterState> {
   return {
     [StateSymbol]: "character",
     id,
-    definition,
+    definition: definition as Draft<CharacterDefinition>,
     entities: [],
     variables: buildCharacterVariables(definition),
   };
@@ -249,11 +238,11 @@ export function createCharacterState(
 export function createEntityState(
   definition: EntityDefinition,
   id: number,
-): EntityState {
+): Draft<EntityState> {
   return {
     [StateSymbol]: "entity",
     id,
-    definition,
+    definition: definition as Draft<EntityDefinition>,
     variables: buildEntityVariables(definition),
     attachments: [],
   };
@@ -262,11 +251,11 @@ export function createEntityState(
 export function createAttachmentState(
   definition: AttachmentDefinition,
   id: number,
-): AttachmentState {
+): Draft<AttachmentState> {
   return {
     [StateSymbol]: "attachment",
     id,
-    definition,
+    definition: definition as Draft<AttachmentDefinition>,
     variables: buildEntityVariables(definition),
   };
 }
@@ -294,7 +283,7 @@ function buildDefaultPlayerState(
     who,
     initialPile: [],
     pile: [],
-    activeCharacterId: characters.length > 0 ? characters[0]!.id : -1,
+    activeCharacterId: characters[0]?.id ?? -1,
     hands: [],
     characters,
     combatStatuses: [],
@@ -470,7 +459,7 @@ export function matchesSearch(option: { search: string }, query: string) {
   return option.search.includes(query.trim().toLowerCase());
 }
 
-export function allocateId(draft: Mutable<GameState>) {
+export function allocateId(draft: Draft<GameState>) {
   const id = draft.iterators.id;
   draft.iterators.id -= 1;
   return id;
@@ -487,7 +476,7 @@ export function moveInArray<T>(
   }
   const next = [...items];
   const [value] = next.splice(index, 1);
-  next.splice(nextIndex, 0, value!);
+  next.splice(nextIndex, 0, value);
   return next;
 }
 
@@ -496,8 +485,8 @@ export function shuffleList<T>(items: readonly T[]) {
   for (let index = result.length - 1; index > 0; index -= 1) {
     const swapIndex = Math.floor(Math.random() * (index + 1));
     const current = result[index];
-    result[index] = result[swapIndex]!;
-    result[swapIndex] = current!;
+    result[index] = result[swapIndex];
+    result[swapIndex] = current;
   }
   return result;
 }
@@ -515,13 +504,11 @@ export function decodeDeckShareCode(code: string) {
 }
 
 export function buildImportedCharacterStates(
-  draft: Mutable<GameState>,
+  draft: Draft<GameState>,
   characterIds: readonly number[],
 ) {
   return characterIds.map((id) => {
-    const definition = (draft.data as unknown as EditorGameData).characters.get(
-      id,
-    );
+    const definition = draft.data.characters.get(id);
     if (!definition) {
       throw new Error(`角色 ${id} 不存在`);
     }
@@ -544,13 +531,12 @@ export function buildImportedPileDefinitions(
 }
 
 export function buildImportedPileStates(
-  draft: Mutable<GameState>,
+  draft: Draft<GameState>,
   cardIds: readonly number[],
 ) {
-  return buildImportedPileDefinitions(
-    draft.data as unknown as EditorGameData,
-    cardIds,
-  ).map((definition) => createEntityState(definition, allocateId(draft)));
+  return buildImportedPileDefinitions(draft.data, cardIds).map((definition) =>
+    createEntityState(definition, allocateId(draft)),
+  );
 }
 
 export function getPlayer(state: GameState, who: 0 | 1) {
@@ -593,7 +579,11 @@ export function getAttachment(
 }
 
 export function getCharacterEnergyLabel(character: CharacterState) {
-  return SPECIAL_ENERGY_LABELS[character.definition.specialEnergy?.variableName ?? ""] ?? "能量";
+  return (
+    SPECIAL_ENERGY_LABELS[
+      character.definition.specialEnergy?.variableName ?? ""
+    ] ?? "能量"
+  );
 }
 
 export function getCharacterMaxEnergyLabel(character: CharacterState) {
@@ -614,7 +604,7 @@ function validateSafeInteger(value: number, label: string, errors: string[]) {
 }
 
 function validateExtensionValue(
-  schema: any,
+  schema: ExpressiveJSONSchema,
   value: unknown,
   label: string,
   errors: string[],
@@ -633,7 +623,7 @@ function validateExtensionValue(
     }
     for (const [key, childSchema] of Object.entries(properties)) {
       validateExtensionValue(
-        childSchema,
+        childSchema as ExpressiveJSONSchema,
         (value as Record<string, unknown>)[key],
         `${label}.${key}`,
         errors,
@@ -660,7 +650,7 @@ function validateExtensionValue(
       }
       return;
     }
-    const items = schema.items;
+    const items = schema.items as ExpressiveJSONSchema;
     if (!items) {
       return;
     }
@@ -780,7 +770,7 @@ export function validateGameState(state: GameState, catalog: EditorCatalog) {
   }
   state.extensions.forEach((extension) => {
     validateExtensionValue(
-      extension.definition.schema,
+      extension.definition.schema as ExpressiveJSONSchema,
       extension.state,
       `扩展 ${extension.definition.id}`,
       errors,
@@ -789,7 +779,7 @@ export function validateGameState(state: GameState, catalog: EditorCatalog) {
   return errors;
 }
 
-export function createSchemaDefault(schema: any): unknown {
+export function createSchemaDefault(schema: ExpressiveJSONSchema): unknown {
   if (!schema || typeof schema !== "object") {
     return null;
   }
@@ -800,13 +790,13 @@ export function createSchemaDefault(schema: any): unknown {
       return result;
     }
     for (const [key, childSchema] of Object.entries(properties)) {
-      result[key] = createSchemaDefault(childSchema);
+      result[key] = createSchemaDefault(childSchema as ExpressiveJSONSchema);
     }
     return result;
   }
   if (schema.type === "array") {
     if (Array.isArray(schema.prefixItems)) {
-      return schema.prefixItems.map((item: unknown) =>
+      return schema.prefixItems.map((item: ExpressiveJSONSchema) =>
         createSchemaDefault(item),
       );
     }

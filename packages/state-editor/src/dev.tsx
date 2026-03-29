@@ -44,10 +44,14 @@ function downloadState(serialized: string) {
 }
 
 function App() {
-  const [persistedState, setPersistedState] = makePersisted(createSignal<string | null>(null), {
-    storage: localStorage,
-    name: STORAGE_KEY,
-  });
+  const [persistedState, setPersistedState] = makePersisted(
+    // eslint-disable-next-line solid/reactivity
+    createSignal<string | null>(null),
+    {
+      storage: localStorage,
+      name: STORAGE_KEY,
+    },
+  );
 
   const initialState = createMemo(() => {
     const source = persistedState();
@@ -56,8 +60,8 @@ function App() {
     }
     try {
       const logs = deserializeGameStateLog(
-        getData(CURRENT_VERSION) as unknown as Parameters<typeof deserializeGameStateLog>[0],
-        JSON.parse(source) as Parameters<typeof deserializeGameStateLog>[1],
+        getData(CURRENT_VERSION),
+        JSON.parse(source),
       );
       return logs[0]?.state;
     } catch (error) {
@@ -76,7 +80,9 @@ function App() {
     downloadState(serialized);
   };
 
-  return <GameStateEditor initialValue={initialState()} onSubmit={handleSubmit} />;
+  return (
+    <GameStateEditor initialValue={initialState()} onSubmit={handleSubmit} />
+  );
 }
 
-render(() => <App />, document.getElementById("root")!);
+render(() => <App />, document.getElementById("root") as HTMLElement);

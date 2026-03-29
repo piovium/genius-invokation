@@ -23,10 +23,12 @@
   },
   "devDependencies": {
     "@solid-primitives/storage": "^4.2.1",
+    "immer": "^11.1.4",
     "rollup-plugin-node-externals": "catalog:",
     "unocss": "catalog:",
     "vite": "catalog:",
     "vite-plugin-dts": "catalog:",
-    "vite-plugin-solid": "catalog:"
+    "vite-plugin-solid": "catalog:",
+    "ya-json-schema-types": "^2.0.0"
   }
 }

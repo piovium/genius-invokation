@@ -43,7 +43,7 @@ export function DiceIcon(props: DiceIconProps) {
     async (diceType) => {
       const colorName = DICE_TYPE_TO_COLOR[diceType];
       if (!colorName) {
-        return null;
+        return;
       }
       const url = urlCache.get(colorName);
       if (url) {
@@ -53,20 +53,20 @@ export function DiceIcon(props: DiceIconProps) {
         const response = await fetch(
           `${UI_ASSET_URL_BASE}UI_Gcg_DiceL_${colorName}_Glow_02.webp`,
         );
-        if (!response.ok) return null;
+        if (!response.ok) return;
         const blob = await response.blob();
         const objectUrl = URL.createObjectURL(blob);
-        urlCache.set(DICE_TYPE_TO_COLOR[props.type], objectUrl);
+        urlCache.set(colorName, objectUrl);
         return objectUrl;
       } catch {
-        return null;
+        return;
       }
     },
   );
 
   return (
     <img
-      src={imageSrc()!}
+      src={imageSrc()}
       alt={getDiceTypeName(props.type)}
       class="w-full h-auto object-contain"
       title={getDiceTypeName(props.type)}

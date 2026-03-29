@@ -18,13 +18,10 @@ import { Aura } from "@gi-tcg/typings";
 import { NumberField, SectionTitle, SelectField, Surface } from "./Fields";
 import {
   CharacterModalContent,
-  EntityModalContent,
-  AttachmentModalContent,
   ExtensionModal,
   EntityModal,
   AttachmentModal,
 } from "./DetailModals";
-import { Modal } from "./Modal";
 import { PileModalContent, HandsModalContent } from "./CollectionModal";
 import { PlayerSectionContent } from "./PlayerSectionContent";
 import { ListItem, type ListItemButton } from "./ListItem";
@@ -33,19 +30,14 @@ import {
   createDefaultGameState,
   PHASE_LABELS,
   validateGameState,
-  getPlayer,
   getDefinitionName,
-  DICE_LABELS,
-  createCharacterState,
-  allocateId,
   getImageUrl,
-  type EditorCatalog,
   type EditorModal,
   type EditorSection,
-  type Mutable,
   type UpdateGameState,
 } from "../state";
 import { DiceIcon } from "./DiceIcon";
+import type { Draft } from "immer";
 
 export interface GameStateEditorProps extends Omit<
   ComponentProps<"div">,
@@ -102,7 +94,7 @@ function SectionCard(props: {
   return (
     <button
       type="button"
-      onClick={props.onClick}
+      onClick={() => props.onClick()}
       class={`
         relative rounded-2xl border p-3 text-left transition-all duration-200
         hover:scale-[1.02] hover:shadow-lg overflow-hidden flex flex-col justify-start
@@ -116,9 +108,9 @@ function SectionCard(props: {
         <span class="font-semibold text-amber-50 text-sm whitespace-nowrap">
           {props.config.label}
         </span>
-        {props.isActive && (
-          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-        )}
+        <Show when={props.isActive}>
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+        </Show>
       </div>
 
       {/* 预览内容 */}
@@ -178,7 +170,7 @@ function CharacterPreview(props: {
       {(char) => (
         <>
           <Show when={!props.isActive}>
-            <div class="h-4"/>            
+            <div class="h-4" />
           </Show>
           {/* 角色图片和基本信息 */}
           <div class="flex flex-col items-center">
@@ -224,41 +216,47 @@ function CharacterPreview(props: {
             </div>
           </div>
           <Show when={props.isActive}>
-            <div class="h-4 text-[10px] text-cyan-400/80 text-center">出战角色</div>            
+            <div class="h-4 text-[10px] text-cyan-400/80 text-center">
+              出战角色
+            </div>
           </Show>
           {/* 装备组 */}
           <Show when={equipments().length > 0}>
             <div class="grid grid-cols-4 items-center gap-0.5">
-              {equipments().map((entity) => (
-                <div class="w-full h-auto aspect-square rounded overflow-hidden">
-                  <img
-                    src={getImageUrl(entity.definition, "icon")}
-                    alt=""
-                    class="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              ))}
+              <For each={equipments()}>
+                {(entity) => (
+                  <div class="w-full h-auto aspect-square rounded overflow-hidden">
+                    <img
+                      src={getImageUrl(entity.definition, "icon")}
+                      alt=""
+                      class="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+              </For>
             </div>
           </Show>
           {/* 状态组 */}
           <Show when={statuses().length > 0}>
             <div class="grid grid-cols-4 items-start gap-0.5">
-              {statusDisplay().items.map((entity) => (
-                <div class="w-full h-auto aspect-square rounded overflow-hidden">
-                  <img
-                    src={getImageUrl(entity.definition, "icon")}
-                    alt=""
-                    class="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              ))}
-              {statusDisplay().showMore && (
+              <For each={equipments()}>
+                {(entity) => (
+                  <div class="w-full h-auto aspect-square rounded overflow-hidden">
+                    <img
+                      src={getImageUrl(entity.definition, "icon")}
+                      alt=""
+                      class="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+              </For>
+              <Show when={statusDisplay().showMore}>
                 <div class="w-full h-auto aspect-square rounded-full bg-slate-400/20 flex items-center justify-center text-[8px] text-slate-400">
                   +{statusDisplay().count}
                 </div>
-              )}
+              </Show>
             </div>
           </Show>
         </>
@@ -294,16 +292,18 @@ function PilePreview(props: {
         />
       </div>
       <div class="grid grid-cols-5 items-start gap-1 pt-4">
-        {displayItems().items.map((item) => (
-          <div class="w-full h-auto rounded overflow-hidden bg-slate-800/50">
-            <img
-              src={getImageUrl(item.definition, "card")}
-              alt=""
-              class="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-        ))}
+        <For each={displayItems().items}>
+          {(item) => (
+            <div class="w-full h-auto rounded overflow-hidden bg-slate-800/50">
+              <img
+                src={getImageUrl(item.definition, "card")}
+                alt=""
+                class="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          )}
+        </For>
         {displayItems().showMore && (
           <div class="w-full h-auto aspect-[7/12] rounded-0.5 b-solid box-border b-slate-400 b-2 bg-slate-800/50 flex items-center justify-center text-[10px] text-slate-400">
             +{props.items.length - 9}
@@ -334,16 +334,18 @@ function HandsPreview(props: {
         />
       </div>
       <div class="flex items-center gap-1 pt-2 overflow-hidden">
-        {props.items.map((item) => (
-          <div class="w-7 h-12 rounded overflow-hidden bg-slate-800/50 flex-shrink-0">
-            <img
-              src={getImageUrl(item.definition, "card")}
-              alt=""
-              class="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-        ))}
+        <For each={props.items}>
+          {(item) => (
+            <div class="w-7 h-12 rounded overflow-hidden bg-slate-800/50 flex-shrink-0">
+              <img
+                src={getImageUrl(item.definition, "card")}
+                alt=""
+                class="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          )}
+        </For>
       </div>
     </div>
   );
@@ -395,16 +397,18 @@ function EntityAreaPreview(props: {
         <span class="text-slate-500">上限 {props.max}</span>
       </div>
       <div class="grid grid-cols-2 gap-3 p-1 pt-2">
-        {props.items.map((item) => (
-          <div class="w-full h-auto aspect-[3/4] rounded-lg overflow-hidden bg-slate-800/50 b-solid b-2 b-slate-400">
-            <img
-              src={getImageUrl(item.definition, "card")}
-              alt=""
-              class="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-        ))}
+        <For each={props.items}>
+          {(item) => (
+            <div class="w-full h-auto aspect-[3/4] rounded-lg overflow-hidden bg-slate-800/50 b-solid b-2 b-slate-400">
+              <img
+                src={getImageUrl(item.definition, "card")}
+                alt=""
+                class="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          )}
+        </For>
       </div>
     </div>
   );
@@ -425,21 +429,23 @@ function CombatStatusPreview(props: {
     <div class="space-y-1 flex flex-row items-center justify-between">
       <div class="text-emerald-200">{props.items.length} 个状态</div>
       <div class="flex items-center gap-1 mt-1">
-        {displayItems().items.map((item) => (
-          <div class="w-6 h-6 rounded overflow-hidden bg-slate-800/50">
-            <img
-              src={getImageUrl(item.definition, "icon")}
-              alt=""
-              class="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-        ))}
-        {displayItems().showMore && (
+        <For each={displayItems().items}>
+          {(item) => (
+            <div class="w-6 h-6 rounded overflow-hidden bg-slate-800/50">
+              <img
+                src={getImageUrl(item.definition, "icon")}
+                alt=""
+                class="w-full h-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          )}
+        </For>
+        <Show when={displayItems().showMore}>
           <div class="w-6 h-6 rounded-full bg-slate-400/20 flex items-center justify-center text-[10px] text-slate-400">
             +{props.items.length - 4}
           </div>
-        )}
+        </Show>
       </div>
     </div>
   );
@@ -463,18 +469,17 @@ export function GameStateEditor(props: GameStateEditorProps) {
   );
   const errors = createMemo(() => validateGameState(state, catalog()));
   const [formValid, setFormValid] = createSignal(true);
-  let formRef: HTMLFormElement | undefined;
+  // eslint-disable-next-line no-unassigned-vars
+  let formRef!: HTMLFormElement;
 
   const refreshFormValidity = () => {
-    setFormValid(formRef?.checkValidity() ?? true);
+    setFormValid(formRef.checkValidity());
   };
 
   onMount(() => queueMicrotask(refreshFormValidity));
 
   const updateState: UpdateGameState = (updater) => {
-    setState(
-      produce((draft) => updater(draft as unknown as Mutable<GameState>)),
-    );
+    setState(produce((draft) => updater(draft as Draft<GameState>)));
     queueMicrotask(refreshFormValidity);
   };
 
@@ -865,7 +870,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
                     config={config}
                     isActive={isSectionActive(config.section)}
                     onClick={() => setSelectedSection(config.section)}
-                    state={state as unknown as GameState}
+                    state={state}
                   />
                 )}
               </For>
@@ -1010,7 +1015,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
                 {/* Pile Section */}
                 <Match when={selectedSection().kind === "pile"}>
                   <PileModalContent
-                    state={state as unknown as GameState}
+                    state={state}
                     who={
                       (
                         selectedSection() as Extract<
@@ -1028,7 +1033,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
                 {/* Hands Section */}
                 <Match when={selectedSection().kind === "hands"}>
                   <HandsModalContent
-                    state={state as unknown as GameState}
+                    state={state}
                     who={
                       (
                         selectedSection() as Extract<

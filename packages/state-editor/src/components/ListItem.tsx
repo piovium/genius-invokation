@@ -1,6 +1,6 @@
 import { For, Show, createMemo } from "solid-js";
 import type { JSX } from "solid-js";
-import type { EntityDefinition, EntityTag, EntityType } from "@gi-tcg/core";
+import type { EntityTag, EntityType } from "@gi-tcg/core";
 import { ENTITY_TYPE_LABELS, TAG_LABELS } from "./AddCardModal";
 
 // 扩展的实体定义类型，兼容 EntityDefinition 和 AttachmentDefinition
@@ -23,14 +23,14 @@ export interface ListItemProps {
   title: JSX.Element;
   description?: JSX.Element;
   tags?: string[];
-  
+
   // 实体定义 - 如果传入则自动显示 type 和 tags
   definition?: ExtendedEntityDefinition;
-  
+
   // 右侧按钮区域
   buttonColumns?: number;
   buttons?: ListItemButton[];
-  
+
   // 整体样式
   class?: string;
   onClick?: () => void;
@@ -39,9 +39,12 @@ export interface ListItemProps {
 export function ListItem(props: ListItemProps) {
   const variantClasses = {
     default: "border-white/10 bg-white/5 text-slate-100 hover:bg-white/10",
-    primary: "border-cyan-200/30 bg-cyan-300/10 text-cyan-50 hover:bg-cyan-300/20",
-    danger: "border-rose-300/30 bg-rose-400/10 text-rose-100 hover:bg-rose-400/20",
-    accent: "border-amber-200/30 bg-amber-300/10 text-amber-50 hover:bg-amber-300/20",
+    primary:
+      "border-cyan-200/30 bg-cyan-300/10 text-cyan-50 hover:bg-cyan-300/20",
+    danger:
+      "border-rose-300/30 bg-rose-400/10 text-rose-100 hover:bg-rose-400/20",
+    accent:
+      "border-amber-200/30 bg-amber-300/10 text-amber-50 hover:bg-amber-300/20",
     use: "border-green-300/30 bg-green-400/10 text-green-100 hover:bg-green-400/20 w-24",
   };
 
@@ -51,16 +54,16 @@ export function ListItem(props: ListItemProps) {
   const buttonsByCol = createMemo(() => {
     const cols: ListItemButton[][] = [];
     const colCount = buttonCols();
-    
+
     for (let i = 0; i < colCount; i++) {
       cols.push([]);
     }
-    
+
     props.buttons?.forEach((btn) => {
       const col = Math.min(Math.max(0, btn.col), colCount - 1);
       cols[col].push(btn);
     });
-    
+
     return cols;
   });
 
@@ -68,19 +71,19 @@ export function ListItem(props: ListItemProps) {
   const allTags = createMemo(() => {
     const userTags = props.tags ?? [];
     const def = props.definition;
-    
+
     if (!def) {
       return userTags;
     }
 
     const autoTags: string[] = [];
-    
+
     // 添加 type 标签
     const typeLabel = ENTITY_TYPE_LABELS[def.type];
     if (typeLabel) {
       autoTags.push(typeLabel);
     }
-    
+
     // 添加 tags 标签
     def.tags.forEach((tag) => {
       const tagLabel = TAG_LABELS[tag as keyof typeof TAG_LABELS];
@@ -95,15 +98,17 @@ export function ListItem(props: ListItemProps) {
   return (
     <div
       class={`flex w-full items-start justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 text-left transition hover:bg-white/10 box-border overflow-hidden ${props.class ?? ""}`}
-      onClick={props.onClick}
+      onClick={() => props.onClick?.()}
     >
       {/* 左侧信息区域 */}
       <div class="flex flex-1 items-center gap-2 min-w-0">
         {/* 图片 */}
         <Show when={props.imageSrc}>
-          <div class={`flex shrink-0 overflow-hidden items-center ${props.imageMode === "card" ? "w-14 h-24" : "w-12 h-12 ml-2"}`}>
+          <div
+            class={`flex shrink-0 overflow-hidden items-center ${props.imageMode === "card" ? "w-14 h-24" : "w-12 h-12 ml-2"}`}
+          >
             <img
-              src={props.imageSrc!}
+              src={props.imageSrc}
               class="w-full h-auto object-center"
               loading="lazy"
             />
@@ -143,7 +148,7 @@ export function ListItem(props: ListItemProps) {
       <Show when={props.buttons && props.buttons.length > 0}>
         <div class="flex self-stretch shrink-0">
           <For each={buttonsByCol()}>
-            {(colButtons, colIndex) => (
+            {(colButtons) => (
               <Show when={colButtons.length > 0}>
                 <div class="flex flex-col self-stretch">
                   <For each={colButtons}>

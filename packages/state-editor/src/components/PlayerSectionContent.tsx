@@ -8,14 +8,8 @@ import type {
   EntityTag,
 } from "@gi-tcg/core";
 
-import {
-  ActionButton,
-  BooleanField,
-  SelectField,
-  SectionTitle,
-  Surface,
-} from "./Fields";
-import { DiceIcon, getDiceTypeName } from "./DiceIcon";
+import { ActionButton, BooleanField, SectionTitle, Surface } from "./Fields";
+import { DiceIcon } from "./DiceIcon";
 import { RoundSkillModal } from "./RoundSkillModal";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { AddCardModal } from "./AddCardModal";
@@ -35,9 +29,9 @@ import {
   type EditorCatalog,
   type EditorModal,
   type EditorSection,
-  type InitiativeSkillOption,
   type UpdateGameState,
 } from "../state";
+import type { Draft } from "immer";
 
 interface PlayerSectionContentProps {
   state: GameState;
@@ -82,8 +76,9 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
     // 更新特定类型骰子的数量
     const updateDiceCount = (diceType: number, newCount: number) => {
       console.log(diceType, newCount);
+      const whoV = who();
       props.updateState((draft) => {
-        const target = draft.players[who()];
+        const target = draft.players[whoV];
         const currentCount = target.dice.filter((d) => d === diceType).length;
 
         if (newCount > currentCount) {
@@ -111,8 +106,9 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
 
     // 加满特定类型的骰子
     const fillDice = (diceType: number) => {
+      const whoV = who();
       props.updateState((draft) => {
-        const target = draft.players[who()];
+        const target = draft.players[whoV];
         const currentCount = target.dice.filter((d) => d === diceType).length;
         const availableSpace = draft.config.maxDiceCount - target.dice.length;
         // 计算可以添加多少个（最多补到某种上限，或者填满剩余空间）
@@ -204,8 +200,9 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
               label="已宣告结束"
               value={player().declaredEnd}
               onChange={(value) => {
+                const whoV = who();
                 props.updateState((draft) => {
-                  draft.players[who()].declaredEnd = value;
+                  draft.players[whoV].declaredEnd = value;
                 });
               }}
             />
@@ -213,8 +210,9 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
               label="本回合已击倒对手"
               value={player().hasDefeated}
               onChange={(value) => {
+                const whoV = who();
                 props.updateState((draft) => {
-                  draft.players[who()].hasDefeated = value;
+                  draft.players[whoV].hasDefeated = value;
                 });
               }}
             />
@@ -222,8 +220,9 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
               label="可视为重击"
               value={player().canCharged}
               onChange={(value) => {
+                const whoV = who();
                 props.updateState((draft) => {
-                  draft.players[who()].canCharged = value;
+                  draft.players[whoV].canCharged = value;
                 });
               }}
             />
@@ -231,8 +230,9 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
               label="可视为下落攻击"
               value={player().canPlunging}
               onChange={(value) => {
+                const whoV = who();
                 props.updateState((draft) => {
-                  draft.players[who()].canPlunging = value;
+                  draft.players[whoV].canPlunging = value;
                 });
               }}
             />
@@ -240,8 +240,9 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
               label="已使用秘传"
               value={player().legendUsed}
               onChange={(value) => {
+                const whoV = who();
                 props.updateState((draft) => {
-                  draft.players[who()].legendUsed = value;
+                  draft.players[whoV].legendUsed = value;
                 });
               }}
             />
@@ -249,8 +250,9 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
               label="跳过下个行动轮次"
               value={player().skipNextTurn}
               onChange={(value) => {
+                const whoV = who();
                 props.updateState((draft) => {
-                  draft.players[who()].skipNextTurn = value;
+                  draft.players[whoV].skipNextTurn = value;
                 });
               }}
             />
@@ -277,8 +279,10 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
     const items = () => player()[props2.area];
     const [addModalOpen, setAddModalOpen] = createSignal(false);
     const [confirmModalOpen, setConfirmModalOpen] = createSignal(false);
-    const [pendingDefinition, setPendingDefinition] = createSignal<EntityDefinition | null>(null);
-    const [existingEntityIndex, setExistingEntityIndex] = createSignal<number>(-1);
+    const [pendingDefinition, setPendingDefinition] =
+      createSignal<EntityDefinition | undefined>(void 0);
+    const [existingEntityIndex, setExistingEntityIndex] =
+      createSignal<number>(-1);
 
     // 获取可用的类型
     const availableTypes = () => {
@@ -297,7 +301,9 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
     // 检查是否存在相同 definition.id 的实体
     const checkDuplicate = (definition: EntityDefinition) => {
       const currentItems = items();
-      const index = currentItems.findIndex(item => item.definition.id === definition.id);
+      const index = currentItems.findIndex(
+        (item) => item.definition.id === definition.id,
+      );
       return index;
     };
 
@@ -310,7 +316,7 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
       }
 
       const duplicateIndex = checkDuplicate(definition);
-      
+
       if (duplicateIndex !== -1) {
         // 存在重复，显示确认弹窗
         setPendingDefinition(definition);
@@ -324,29 +330,26 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
 
     // 执行添加
     const doAdd = (definition: EntityDefinition) => {
+      const whoV = who();
+      const area = props2.area;
+      const limit = props2.limit;
       props.updateState((draft) => {
-        const target = draft.players[who()][props2.area];
-        if (typeof props2.limit === "number" && target.length >= props2.limit) {
+        const target = draft.players[whoV][area];
+        if (typeof limit === "number" && target.length >= limit) {
           return;
         }
-        target.push(
-          createEntityState(
-            definition,
-            allocateId(draft),
-          ) as unknown as (typeof target)[number],
-        );
+        target.push(createEntityState(definition, allocateId(draft)));
       });
     };
 
     // 执行覆盖（替换）
     const doReplace = (definition: EntityDefinition, index: number) => {
+      const whoV = who();
+      const area = props2.area;
       props.updateState((draft) => {
-        const target = draft.players[who()][props2.area];
+        const target = draft.players[whoV][area];
         // 替换指定位置的实体
-        target[index] = createEntityState(
-          definition,
-          allocateId(draft),
-        ) as unknown as (typeof target)[number];
+        target[index] = createEntityState(definition, allocateId(draft));
       });
     };
 
@@ -358,14 +361,14 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
         doReplace(definition, index);
       }
       setConfirmModalOpen(false);
-      setPendingDefinition(null);
+      setPendingDefinition(void 0);
       setExistingEntityIndex(-1);
     };
 
     // 取消覆盖，改为添加新的
     const handleCancelReplace = () => {
       setConfirmModalOpen(false);
-      setPendingDefinition(null);
+      setPendingDefinition(void 0);
       setExistingEntityIndex(-1);
     };
 
@@ -389,10 +392,13 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
                     content: "上移",
                     col: 0,
                     onClick: () => {
+                      const whoV = who();
+                      const area = props2.area;
+                      const i = index();
                       props.updateState((draft) => {
-                        draft.players[who()][props2.area] = moveInArray(
-                          draft.players[who()][props2.area],
-                          index(),
+                        draft.players[whoV][area] = moveInArray(
+                          draft.players[whoV][area],
+                          i,
                           -1,
                         );
                       });
@@ -402,10 +408,13 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
                     content: "下移",
                     col: 0,
                     onClick: () => {
+                      const whoV = who();
+                      const area = props2.area;
+                      const i = index();
                       props.updateState((draft) => {
-                        draft.players[who()][props2.area] = moveInArray(
-                          draft.players[who()][props2.area],
-                          index(),
+                        draft.players[whoV][area] = moveInArray(
+                          draft.players[whoV][area],
+                          i,
                           1,
                         );
                       });
@@ -429,8 +438,11 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
                     col: 1,
                     variant: "danger",
                     onClick: () => {
+                      const whoV = who();
+                      const area = props2.area;
+                      const i = index();
                       props.updateState((draft) => {
-                        draft.players[who()][props2.area].splice(index(), 1);
+                        draft.players[whoV][area].splice(i, 1);
                       });
                     },
                   },
@@ -442,12 +454,14 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
                     content: "放回手牌",
                     col: 0,
                     onClick: () => {
+                      const whoV = who();
+                      const i = index();
                       props.updateState((draft) => {
-                        const target = draft.players[who()];
+                        const target = draft.players[whoV];
                         if (target.hands.length >= draft.config.maxHandsCount) {
                           return;
                         }
-                        const [item] = target.supports.splice(index(), 1);
+                        const [item] = target.supports.splice(i, 1);
                         if (item) {
                           target.hands.push(item);
                         }
@@ -507,7 +521,7 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
             title="检测到重复实体"
             message={
               pendingDefinition()
-                ? `区域中已存在相同类型的实体「${getDefinitionName(pendingDefinition()!)}」，是否覆盖？`
+                ? `区域中已存在相同类型的实体「${getDefinitionName(pendingDefinition())}」，是否覆盖？`
                 : ""
             }
             confirmText="确认覆盖"
@@ -529,10 +543,10 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
     const setRoundSkillRows = (
       rows: readonly (readonly [number, number[]])[],
     ) => {
+      const whoV = who();
       props.updateState((draft) => {
         const nextLog = new Map(rows.map(([key, value]) => [key, [...value]]));
-        draft.players[who()].roundSkillLog =
-          nextLog as unknown as (typeof draft.players)[0]["roundSkillLog"];
+        draft.players[whoV].roundSkillLog = nextLog;
       });
     };
 
@@ -731,24 +745,24 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
                   Number(!right.tags.includes("legend")),
               )
           : null;
+        const whoV = who();
+        const importingChs = importCharacters();
+        const importingPile = importPile();
         props.updateState((draft) => {
-          const target = draft.players[who()];
-          if (importCharacters()) {
+          const target = draft.players[whoV];
+          if (importingChs) {
             target.characters = buildImportedCharacterStates(
               draft,
               deck.characters,
-            ) as unknown as typeof target.characters;
+            );
             target.activeCharacterId = target.characters[0]?.id ?? 0;
           }
           if (importedInitialPile) {
             target.initialPile =
-              importedInitialPile as unknown as typeof target.initialPile;
+              importedInitialPile as Draft<EntityDefinition>[];
           }
-          if (importPile()) {
-            target.pile = buildImportedPileStates(
-              draft,
-              deck.cards,
-            ) as unknown as typeof target.pile;
+          if (importingPile) {
+            target.pile = buildImportedPileStates(draft, deck.cards);
           }
         });
         setImportError(null);

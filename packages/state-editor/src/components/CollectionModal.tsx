@@ -1,14 +1,19 @@
-import { For, Show, createSignal, createMemo } from "solid-js";
+import { For, createSignal } from "solid-js";
 
-import type { GameState, EntityDefinition, EntityState, CharacterState } from "@gi-tcg/core";
+import type {
+  GameState,
+  EntityDefinition,
+  EntityState,
+  CharacterState,
+  EntityTag,
+} from "@gi-tcg/core";
 
-import { ActionButton, Surface, SectionTitle } from "./Fields";
+import { ActionButton, Surface } from "./Fields";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { AddCardModal } from "./AddCardModal";
 import {
   allocateId,
   createEntityState,
-  getCharacter,
   getDefinitionName,
   getImageUrl,
   getPlayer,
@@ -19,6 +24,7 @@ import {
   type UpdateGameState,
 } from "../state";
 import { ConfirmModal } from "./ConfirmModal";
+import type { Draft } from "immer";
 
 // 装备类型定义
 type EquipmentType = "artifact" | "technique" | "weapon" | "talent" | "other";
@@ -39,19 +45,21 @@ function isCharacterAlive(character: CharacterState): boolean {
 
 // 获取角色的武器类型标签
 function getCharacterWeaponTag(character: CharacterState): string | null {
-  return character.definition.tags.find(tag => 
-    ["sword", "claymore", "pole", "catalyst", "bow"].includes(tag)
-  ) || null;
+  return (
+    character.definition.tags.find((tag) =>
+      ["sword", "claymore", "pole", "catalyst", "bow"].includes(tag),
+    ) || null
+  );
 }
 
 // 检查装备是否可以装备到角色
 function canEquipToCharacter(
   equipment: EntityState,
   character: CharacterState,
-  allCharacters: CharacterState[]
+  allCharacters: CharacterState[],
 ): { canEquip: boolean; reason?: string } {
   const eqType = getEquipmentType(equipment.definition);
-  
+
   // 1. 检查角色是否存活
   if (!isCharacterAlive(character)) {
     return { canEquip: false, reason: "角色已倒下" };
@@ -63,28 +71,30 @@ function canEquipToCharacter(
     case "technique":
       // 圣遗物和特技可以装备给所有存活角色
       return { canEquip: true };
-      
+
     case "weapon": {
       // 武器只能装备给对应武器类型的角色
       const characterWeapon = getCharacterWeaponTag(character);
       if (!characterWeapon) {
         return { canEquip: false, reason: "角色没有武器类型" };
       }
-      if (!equipment.definition.tags.includes(characterWeapon as any)) {
+      if (!equipment.definition.tags.includes(characterWeapon as EntityTag)) {
         return { canEquip: false, reason: `需要${characterWeapon}类型武器` };
       }
       return { canEquip: true };
     }
-      
+
     case "talent": {
       // 天赋只能装备给对应的角色
       // 注意：这里假设装备卡的ID与角色ID有关联
       // 实际游戏中天赋卡的relatedCharacterId应该与角色definition.id匹配
-      const relatedCharId = Number(equipment.definition.id.toString().slice(1, -1));
+      const relatedCharId = Number(
+        equipment.definition.id.toString().slice(1, -1),
+      );
       if (character.definition.id !== relatedCharId) {
         // 检查这个角色是否在当前存活角色列表中
         const targetExists = allCharacters.some(
-          c => c.definition.id === relatedCharId && isCharacterAlive(c)
+          (c) => c.definition.id === relatedCharId && isCharacterAlive(c),
         );
         if (targetExists) {
           return { canEquip: false, reason: "天赋只能装备给指定角色" };
@@ -94,7 +104,7 @@ function canEquipToCharacter(
       }
       return { canEquip: true };
     }
-      
+
     default:
       return { canEquip: true };
   }
@@ -103,12 +113,14 @@ function canEquipToCharacter(
 // 获取角色已装备的同类型装备
 function getExistingEquipmentOfType(
   character: CharacterState,
-  equipmentType: EquipmentType
+  equipmentType: EquipmentType,
 ): EntityState | null {
-  return character.entities.find(entity => {
-    if (entity.definition.type !== "equipment") return false;
-    return getEquipmentType(entity.definition) === equipmentType;
-  }) || null;
+  return (
+    character.entities.find((entity) => {
+      if (entity.definition.type !== "equipment") return false;
+      return getEquipmentType(entity.definition) === equipmentType;
+    }) || null
+  );
 }
 
 interface CollectionContentProps {
@@ -143,16 +155,18 @@ export function PileModalContent(props: CollectionContentProps) {
   };
 
   const handleAddCard = (definition: EntityDefinition) => {
+    const who = props.who;
+    const insertPos = insertPosition();
     props.updateState((draft) => {
-      const target = draft.players[props.who];
+      const target = draft.players[who];
       if (target.pile.length >= draft.config.maxPileCount) {
         return;
       }
       const newCard = createEntityState(
         definition,
         allocateId(draft),
-      ) as unknown as (typeof target.pile)[number];
-      if (insertPosition() === "start") {
+      ) as Draft<EntityState>;
+      if (insertPos === "start") {
         target.pile.unshift(newCard);
       } else {
         target.pile.push(newCard);
@@ -169,10 +183,9 @@ export function PileModalContent(props: CollectionContentProps) {
             tone="accent"
             disabled={player().pile.length < 2}
             onClick={() => {
+              const who = props.who;
               props.updateState((draft) => {
-                draft.players[props.who].pile = shuffleList(
-                  draft.players[props.who].pile,
-                );
+                draft.players[who].pile = shuffleList(draft.players[who].pile);
               });
             }}
           />
@@ -197,10 +210,12 @@ export function PileModalContent(props: CollectionContentProps) {
                   content: "上移",
                   col: 0,
                   onClick: () => {
+                    const who = props.who;
+                    const i = index();
                     props.updateState((draft) => {
-                      draft.players[props.who].pile = moveInArray(
-                        draft.players[props.who].pile,
-                        index(),
+                      draft.players[who].pile = moveInArray(
+                        draft.players[who].pile,
+                        i,
                         -1,
                       );
                     });
@@ -210,12 +225,14 @@ export function PileModalContent(props: CollectionContentProps) {
                   content: "加入手牌",
                   col: 0,
                   onClick: () => {
+                    const who = props.who;
+                    const i = index();
                     props.updateState((draft) => {
-                      const target = draft.players[props.who];
+                      const target = draft.players[who];
                       if (target.hands.length >= draft.config.maxHandsCount) {
                         return;
                       }
-                      const [item] = target.pile.splice(index(), 1);
+                      const [item] = target.pile.splice(i, 1);
                       if (item) {
                         target.hands.push(item);
                       }
@@ -226,10 +243,12 @@ export function PileModalContent(props: CollectionContentProps) {
                   content: "下移",
                   col: 0,
                   onClick: () => {
+                    const who = props.who;
+                    const i = index();
                     props.updateState((draft) => {
-                      draft.players[props.who].pile = moveInArray(
-                        draft.players[props.who].pile,
-                        index(),
+                      draft.players[who].pile = moveInArray(
+                        draft.players[who].pile,
+                        i,
                         1,
                       );
                     });
@@ -253,8 +272,10 @@ export function PileModalContent(props: CollectionContentProps) {
                   col: 1,
                   variant: "danger",
                   onClick: () => {
+                    const who = props.who;
+                    const i = index();
                     props.updateState((draft) => {
-                      draft.players[props.who].pile.splice(index(), 1);
+                      draft.players[who].pile.splice(i, 1);
                     });
                   },
                 },
@@ -324,7 +345,7 @@ export function PileModalContent(props: CollectionContentProps) {
 export function HandsModalContent(props: CollectionContentProps) {
   const player = () => getPlayer(props.state, props.who);
   const [addCardModalOpen, setAddCardModalOpen] = createSignal(false);
-  
+
   // 确认对话框状态
   const [confirmDialog, setConfirmDialog] = createSignal<{
     open: boolean;
@@ -341,30 +362,29 @@ export function HandsModalContent(props: CollectionContentProps) {
   });
 
   const handleAddCard = (definition: EntityDefinition) => {
+    const who = props.who;
     props.updateState((draft) => {
-      const target = draft.players[props.who];
+      const target = draft.players[who];
       if (target.hands.length >= draft.config.maxHandsCount) {
         return;
       }
       target.hands.push(
-        createEntityState(
-          definition,
-          allocateId(draft),
-        ) as unknown as (typeof target.hands)[number],
+        createEntityState(definition, allocateId(draft)) as Draft<EntityState>,
       );
     });
   };
-  
+
   // 处理装备操作
   const handleEquip = (
     cardIndex: number,
     characterId: number,
     equipment: EntityState,
-    character: CharacterState
+    character: CharacterState,
   ) => {
     const eqType = getEquipmentType(equipment.definition);
     const existingEquipment = getExistingEquipmentOfType(character, eqType);
-    
+    const who = props.who;
+
     if (existingEquipment) {
       // 已有同类型装备，显示确认对话框
       setConfirmDialog({
@@ -374,24 +394,25 @@ export function HandsModalContent(props: CollectionContentProps) {
         onConfirm: () => {
           // 执行装备操作
           props.updateState((draft) => {
-            const target = draft.players[props.who];
+            const target = draft.players[who];
             const [item] = target.hands.splice(cardIndex, 1);
             if (!item) return;
-            
+
             const destination = target.characters.find(
-              (c) => c.id === characterId
+              (c) => c.id === characterId,
             );
             if (!destination) return;
-            
+
             // 移除已有的同类型装备
             const existingIndex = destination.entities.findIndex(
-              (e) => e.definition.type === "equipment" && 
-                     getEquipmentType(e.definition as any) === eqType
+              (e) =>
+                e.definition.type === "equipment" &&
+                getEquipmentType(e.definition) === eqType,
             );
             if (existingIndex !== -1) {
               destination.entities.splice(existingIndex, 1);
             }
-            
+
             // 添加新装备
             destination.entities.push(item);
           });
@@ -404,13 +425,11 @@ export function HandsModalContent(props: CollectionContentProps) {
     } else {
       // 直接装备
       props.updateState((draft) => {
-        const target = draft.players[props.who];
+        const target = draft.players[who];
         const [item] = target.hands.splice(cardIndex, 1);
         if (!item) return;
-        
-        const destination = target.characters.find(
-          (c) => c.id === characterId
-        );
+
+        const destination = target.characters.find((c) => c.id === characterId);
         destination?.entities.push(item);
       });
     }
@@ -419,7 +438,9 @@ export function HandsModalContent(props: CollectionContentProps) {
   return (
     <Surface title={`玩家 ${props.who} 手牌编辑`}>
       <p class="mt-1 text-xs text-slate-300/80">※ 排列顺序为加入手牌顺序</p>
-      <p class="mt-1 text-xs text-slate-300/80">※ 移动、装备等操作仅为移动实体位置，无法触发任何入场效果</p>
+      <p class="mt-1 text-xs text-slate-300/80">
+        ※ 移动、装备等操作仅为移动实体位置，无法触发任何入场效果
+      </p>
       <div class="space-y-4">
         <div class="space-y-2">
           <For each={player().hands}>
@@ -430,10 +451,12 @@ export function HandsModalContent(props: CollectionContentProps) {
                   content: "上移",
                   col: 1,
                   onClick: () => {
+                    const who = props.who;
+                    const i = index();
                     props.updateState((draft) => {
-                      draft.players[props.who].hands = moveInArray(
-                        draft.players[props.who].hands,
-                        index(),
+                      draft.players[who].hands = moveInArray(
+                        draft.players[who].hands,
+                        i,
                         -1,
                       );
                     });
@@ -443,12 +466,14 @@ export function HandsModalContent(props: CollectionContentProps) {
                   content: "放回牌库",
                   col: 1,
                   onClick: () => {
+                    const who = props.who;
+                    const i = index();
                     props.updateState((draft) => {
-                      const target = draft.players[props.who];
+                      const target = draft.players[who];
                       if (target.pile.length >= draft.config.maxPileCount) {
                         return;
                       }
-                      const [item] = target.hands.splice(index(), 1);
+                      const [item] = target.hands.splice(i, 1);
                       if (item) {
                         target.pile.push(item);
                       }
@@ -459,10 +484,12 @@ export function HandsModalContent(props: CollectionContentProps) {
                   content: "下移",
                   col: 1,
                   onClick: () => {
+                    const who = props.who;
+                    const i = index();
                     props.updateState((draft) => {
-                      draft.players[props.who].hands = moveInArray(
-                        draft.players[props.who].hands,
-                        index(),
+                      draft.players[who].hands = moveInArray(
+                        draft.players[who].hands,
+                        i,
                         1,
                       );
                     });
@@ -486,8 +513,10 @@ export function HandsModalContent(props: CollectionContentProps) {
                   col: 2,
                   variant: "danger",
                   onClick: () => {
+                    const who = props.who;
+                    const i = index();
                     props.updateState((draft) => {
-                      draft.players[props.who].hands.splice(index(), 1);
+                      draft.players[who].hands.splice(i, 1);
                     });
                   },
                 },
@@ -500,14 +529,16 @@ export function HandsModalContent(props: CollectionContentProps) {
                   col: 0,
                   variant: "use",
                   onClick: () => {
+                    const who = props.who;
+                    const i = index();
                     props.updateState((draft) => {
-                      const target = draft.players[props.who];
+                      const target = draft.players[who];
                       if (
                         target.supports.length >= draft.config.maxSupportsCount
                       ) {
                         return;
                       }
-                      const [item] = target.hands.splice(index(), 1);
+                      const [item] = target.hands.splice(i, 1);
                       if (item) {
                         target.supports.push(item);
                       }
@@ -523,9 +554,9 @@ export function HandsModalContent(props: CollectionContentProps) {
                   const checkResult = canEquipToCharacter(
                     card,
                     character,
-                    allChars
+                    allChars,
                   );
-                  
+
                   if (checkResult.canEquip) {
                     const buttonLabel = `装备给${getDefinitionName({ id: character.definition.id })}`;
                     buttons.push({
@@ -594,7 +625,7 @@ export function HandsModalContent(props: CollectionContentProps) {
             "blessing",
           ]}
         />
-        
+
         {/* 确认对话框 */}
         <ConfirmModal
           open={confirmDialog().open}
@@ -609,5 +640,3 @@ export function HandsModalContent(props: CollectionContentProps) {
     </Surface>
   );
 }
-
-

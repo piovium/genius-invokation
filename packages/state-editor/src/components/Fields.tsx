@@ -5,6 +5,7 @@ import {
   createMemo,
   createSignal,
   createUniqueId,
+  type JSX,
 } from "solid-js";
 
 import { matchesSearch, type AssetOption } from "../state";
@@ -24,7 +25,7 @@ export function SectionTitle(props: { title: string; description?: string }) {
   );
 }
 
-export function Surface(props: { title?: string; children: any; class?: string }) {
+export function Surface(props: { title?: string; children: JSX.Element; class?: string }) {
   return (
     <section
       class={`rounded-3xl border border-[var(--gi-editor-border)] bg-[var(--gi-editor-panel)] p-4 shadow-[var(--gi-editor-shadow)] ${props.class ?? ""}`}
@@ -61,8 +62,10 @@ export interface NumberFieldProps {
 }
 
 export function NumberField(props: NumberFieldProps) {
+  // eslint-disable-next-line solid/reactivity
   const [text, setText] = createSignal(String(props.value));
-  let inputRef: HTMLInputElement | undefined;
+  // eslint-disable-next-line no-unassigned-vars
+  let inputRef!: HTMLInputElement;
 
   createEffect(() => {
     const nextValue = String(props.value);
@@ -217,7 +220,7 @@ export function SearchableSelect<TDefinition>(props: SearchableSelectProps<TDefi
       return;
     }
     if (!options.some((option) => String(option.id) === selected())) {
-      setSelected(String(options[0]!.id));
+      setSelected(String(options[0]?.id));
     }
   });
 
@@ -287,7 +290,7 @@ export function ActionButton(props: {
       type="button"
       class={`gi-editor-button rounded-full border px-3 py-1.5 text-xs font-medium ${toneClass()} ${props.class || ""}`}
       disabled={props.disabled}
-      onClick={props.onClick}
+      onClick={() => props.onClick()}
     >
       {props.label}
     </button>

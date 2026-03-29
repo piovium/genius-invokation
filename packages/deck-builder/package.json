@@ -34,11 +34,6 @@
   },
   "devDependencies": {
     "@gi-tcg/config": "workspace:*",
-    "@typescript-eslint/eslint-plugin": "^6.18.0",
-    "@typescript-eslint/parser": "^6.18.0",
-    "eslint": "^8.56.0",
-    "eslint-plugin-only-warn": "^1.1.0",
-    "eslint-plugin-solid": "^0.13.1",
     "rollup-plugin-node-externals": "catalog:",
     "solid-devtools": "^0.29.2",
     "unocss": "catalog:",
