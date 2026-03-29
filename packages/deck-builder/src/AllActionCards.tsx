@@ -21,10 +21,7 @@ import type { DeckDataActionCardInfo } from "@gi-tcg/assets-manager";
 import { CARD_TAG_IMG_NAME_MAP, CARD_TYPE_TEXT_MAP, TagIcon } from "./TagIcon";
 import { FilterBar } from "./FilterBar";
 
-const SINGLETON_REQUIRED_TAGS = [
-  "GCG_TAG_LEGEND",
-  "GCG_TAG_CARD_BLESSING",
-];
+const SINGLETON_REQUIRED_TAGS = ["GCG_TAG_LEGEND", "GCG_TAG_CARD_BLESSING"];
 
 export function AllActionCards(props: AllCardsProps) {
   const [acType, setAcType] = createSignal<string | null>(null);
@@ -49,9 +46,11 @@ export function AllActionCards(props: AllCardsProps) {
     }
   });
   const maxCount = (id: number) => {
-    return props.actionCards.get(id)?.tags.some(
-      (tag) => SINGLETON_REQUIRED_TAGS.includes(tag)
-    ) ? 1 : 2;
+    return props.actionCards
+      .get(id)
+      ?.tags.some((tag) => SINGLETON_REQUIRED_TAGS.includes(tag))
+      ? 1
+      : 2;
   };
 
   const toggleCard = (id: number) => {
@@ -77,7 +76,7 @@ export function AllActionCards(props: AllCardsProps) {
   const valid = (actionCard: DeckDataActionCardInfo) => {
     const currentCharacters = props.deck.characters;
     const currentChTags = currentCharacters.flatMap(
-      (c) => props.characters.get(c)?.tags ?? []
+      (c) => props.characters.get(c)?.tags ?? [],
     );
     if (actionCard.relatedCharacterId !== null) {
       return currentCharacters.includes(actionCard.relatedCharacterId);
@@ -122,13 +121,20 @@ export function AllActionCards(props: AllCardsProps) {
   };
 
   const sortedActionCards = createMemo(() => {
-    return props.actionCards.values().toArray().toSorted((a, b) => {
-      const aValid = valid(a);
-      const bValid = valid(b);
-      if (aValid && !bValid) return -1;
-      if (!aValid && bValid) return 1;
-      return 0;
-    });
+    return props.actionCards
+      .values()
+      .toArray()
+      .toSorted(
+        // The sort callback is guaranteed to be synchronous, so it's safe to use signals inside
+        // eslint-disable-next-line solid/reactivity
+        (a, b) => {
+          const aValid = valid(a);
+          const bValid = valid(b);
+          if (aValid && !bValid) return -1;
+          if (!aValid && bValid) return 1;
+          return 0;
+        },
+      );
   });
 
   const selected = (id: number) => maxCount(id) === count(id);
@@ -162,7 +168,7 @@ export function AllActionCards(props: AllCardsProps) {
               bool:data-disabled={fullCards() && !count(ac().id)}
               onClick={() => {
                 if (valid(ac())) {
-                  toggleCard(ac().id)
+                  toggleCard(ac().id);
                 }
               }}
             >

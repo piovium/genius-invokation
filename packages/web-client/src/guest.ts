@@ -44,12 +44,14 @@ export type GuestDeck = readonly [
 ];
 
 const [guestInfo, setGuestInfo] = makePersisted(
+  // eslint-disable-next-line solid/reactivity
   createSignal<GuestInfo | null>(null),
   { storage: localStorage },
 );
 
 export const useGuestInfo = () => [guestInfo, setGuestInfo] as const;
 
+// eslint-disable-next-line solid/reactivity
 const [guestDeck, setGuestDeck] = makePersisted(createStore<DeckInfo[]>([]), {
   storage: localStorage,
 });

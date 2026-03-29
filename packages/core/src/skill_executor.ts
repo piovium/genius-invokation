@@ -194,9 +194,10 @@ export class SkillExecutor {
     let emittedEvents = [...this.executeSkill(skillInfo, arg)];
     await this.mutator.notifyAndPause();
 
-    const nonDamageEvents: EventAndRequest[] = [];
-    const safeDamageEvents: DamageOrHealEventArg<DamageInfo>[] = [];
-    const criticalDamageEvents: DamageOrHealEventArg<DamageInfo>[] = [];
+    const otherEvents: EventAndRequest[] = [];
+    const hciEvents: EventAndRequest[] = [];
+    const safeDamageEvents: EventAndRequest[] = [];
+    const criticalDamageEvents: EventAndRequest[] = [];
 
     do {
       const damageEventArgs: DamageOrHealEventArg<DamageInfo>[] = [];
@@ -269,8 +270,10 @@ export class SkillExecutor {
           } else {
             damageEventArgs.push(arg);
           }
+        } else if (name === "onHandCardInserted") {
+          hciEvents.push(event);
         } else {
-          nonDamageEvents.push(event);
+          otherEvents.push(event);
         }
       }
 
@@ -305,9 +308,9 @@ export class SkillExecutor {
 
       for (const event of damageEventArgs) {
         if (event.damageInfo.causeDefeated) {
-          criticalDamageEvents.push(event);
+          criticalDamageEvents.push(["onDamageOrHeal", event]);
         } else {
-          safeDamageEvents.push(event);
+          safeDamageEvents.push(["onDamageOrHeal", event]);
         }
       }
 
@@ -361,13 +364,11 @@ export class SkillExecutor {
       }
     }
 
-    await this.handleEvent(...nonDamageEvents);
-    for (const arg of safeDamageEvents) {
-      await this.handleEvent(["onDamageOrHeal", arg]);
-    }
-    for (const arg of criticalDamageEvents) {
-      await this.handleEvent(["onDamageOrHeal", arg]);
-    }
+    await this.handleEvent(...otherEvents);
+    await this.handleEvent(...hciEvents);
+    await this.handleEvent(...safeDamageEvents);
+    await this.handleEvent(...criticalDamageEvents);
+
     // 接下来处理出战角色倒下后的切人
     // 仅当本次技能的使用造成倒下时才会处理
     if (criticalDamageEvents.length === 0) {

@@ -458,8 +458,8 @@ export const ThunderAndEternity = card(331803)
 export const NatureAndWisdom = card(331804)
   .since("v3.7.0")
   .costSame(1)
+  .drawCards(1)
   .switchCards()
-  .drawCards(1) // 先触发换牌请求，再触发抓牌效果
   .done();
 
 /**
