@@ -36,7 +36,9 @@ self.addEventListener("message", async (event) => {
       const payload = event.data.payload;
       backendBaseUrl = payload.backendBaseUrl;
       await setupVersion();
-      await deleteOldCaches();
+      if (version) {
+        await deleteOldCaches();
+      }
     } catch (error) {
       console.error("Error handling config message:", error);
     }
@@ -65,7 +67,7 @@ self.addEventListener("fetch", (/** @type {FetchEvent} */ event) => {
   }
 });
 
-const deleteCache = async (key) => {
+const deleteCache = async (/** @type {string} */ key) => {
   await caches.delete(key);
 };
 
@@ -107,14 +109,17 @@ const putInCache = async (key, request, response) => {
  */
 const cacheFirst = async (request, preloadResponsePromise, event) => {
   // First try to get the resource from the cache
-  const responseFromCache = await caches.match(request);
-  if (responseFromCache) {
-    console.log(`Cache hit for ${request}`);
-    return responseFromCache;
+  if (version) {
+    const cache = await caches.open(version);
+    const responseFromCache = await cache.match(request);
+    if (responseFromCache) {
+      console.log(`Cache hit for ${request}`);
+      return responseFromCache;
+    }
   }
 
   // Next try to use (and cache) the preloaded response, if it's there
-  const preloadResponse = await preloadResponsePromise;
+  const preloadResponse = await preloadResponsePromise.catch(() => {});
   if (version && preloadResponse) {
     console.info("using preload response", preloadResponse);
     event.waitUntil(putInCache(version, request, preloadResponse.clone()));
