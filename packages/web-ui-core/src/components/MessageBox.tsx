@@ -64,13 +64,13 @@ function MessageBox(props: MessageBoxProps) {
       <div class="flex justify-center gap-2">
         <button
           class="px-3 py-1 w-36 font-bold font-size-5 color-black bg-#e9e2d3 rounded-full border-#735a3f b-2 hover:bg-#e9e2d3 hover:shadow-[inset_0_0_16px_rgba(255,255,255,1)] hover:border-white"
-          onClick={props.onCancel}
+          onClick={() => props.onCancel()}
         >
           取消
         </button>
         <button
           class="px-3 py-1 w-36 font-bold font-size-5 color-black bg-#e9e2d3 rounded-full border-#735a3f b-2 hover:bg-#e9e2d3 hover:shadow-[inset_0_0_16px_rgba(255,255,255,1)] hover:border-white"
-          onClick={props.onConfirm}
+          onClick={() => props.onConfirm()}
         >
           确定
         </button>

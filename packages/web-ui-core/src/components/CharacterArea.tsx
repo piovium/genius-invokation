@@ -417,14 +417,13 @@ export function CharacterArea(props: CharacterAreaProps) {
     const aura = props.preview?.newAura ?? preReactionAura() ?? data().aura;
     return [aura & 0xf, (aura >> 4) & 0xf];
   });
-  const previewReaction = createMemo(
-    () =>
-      props.preview?.reactions.map((r) => {
-        const reactionElement = REACTION_TEXT_MAP[r.reactionType].elements;
-        const applyElement = r.incoming;
-        const baseElement = reactionElement.find((e) => e !== applyElement);
-        return [baseElement, applyElement];
-      }),
+  const previewReaction = createMemo(() =>
+    props.preview?.reactions.map((r) => {
+      const reactionElement = REACTION_TEXT_MAP[r.reactionType].elements;
+      const applyElement = r.incoming;
+      const baseElement = reactionElement.find((e) => e !== applyElement);
+      return [baseElement, applyElement];
+    }),
   );
   const energy = createMemo(() => data().energy);
   const defeated = createMemo(() => data().defeated);
@@ -678,19 +677,20 @@ interface EnergyBarProps {
 
 function EnergyBar(props: EnergyBarProps) {
   type EnergyState = 0 | 1 | 2;
-  let ENERGY_MAP: Partial<Record<EnergyState, Component>>;
-  if (props.specialEnergyName === "fightingSpirit") {
-    ENERGY_MAP = {
-      0: EnergyIconEmptyMavuika,
-      1: EnergyIconActiveMavuika,
-      2: EnergyIconExtraMavuika,
-    };
-  } else {
-    ENERGY_MAP = {
-      0: EnergyIconEmpty,
-      1: EnergyIconActive,
-    };
-  }
+  let energyMap = createMemo<Partial<Record<EnergyState, Component>>>(() => {
+    if (props.specialEnergyName === "fightingSpirit") {
+      return {
+        0: EnergyIconEmptyMavuika,
+        1: EnergyIconActiveMavuika,
+        2: EnergyIconExtraMavuika,
+      };
+    } else {
+      return {
+        0: EnergyIconEmpty,
+        1: EnergyIconActive,
+      };
+    }
+  });
   const energyStates = (current: number): EnergyState[] => {
     const total = props.total;
     const state = Array.from(
@@ -700,14 +700,16 @@ function EnergyBar(props: EnergyBarProps) {
     return state;
   };
   const currentStates = createMemo(() => energyStates(props.current));
-  const previewStates = createMemo(() => energyStates(props.preview ?? props.current));
+  const previewStates = createMemo(() =>
+    energyStates(props.preview ?? props.current),
+  );
   return (
     <div class="grid grid-cols-1 grid-rows-1">
       <div class="grid-area-[1/1]">
         <For each={currentStates()}>
           {(comp) => (
             <Dynamic<Component<ComponentProps<"div">>>
-              component={ENERGY_MAP[comp]}
+              component={energyMap()[comp]}
               class="w-5.8 h-4"
             />
           )}
@@ -718,7 +720,7 @@ function EnergyBar(props: EnergyBarProps) {
           <For each={previewStates()}>
             {(comp) => (
               <Dynamic<Component<ComponentProps<"div">>>
-                component={ENERGY_MAP[comp]}
+                component={energyMap()[comp]}
                 class="w-5.8 h-4"
               />
             )}
@@ -737,15 +739,15 @@ function SkirkEnergyBar(props: EnergyBarProps) {
       <div class="grid-area-[1/1]">
         <EnergyIconEmptySkirk class="w-4.2 h-16.2" />
       </div>
-      <div 
-        class="grid-area-[1/1] skirk-foreground" 
+      <div
+        class="grid-area-[1/1] skirk-foreground"
         style={{ "--ratio": `${currentRatio() * 100}%` }}
       >
         <EnergyIconActiveSkirk class="w-4.2 h-16.2" />
       </div>
       <Show when={props.preview !== null && props.preview > props.current}>
-        <div 
-          class="grid-area-[1/1] skirk-foreground energy-preview-animation" 
+        <div
+          class="grid-area-[1/1] skirk-foreground energy-preview-animation"
           style={{ "--ratio": `${previewRatio() * 100}%` }}
         >
           <EnergyIconActiveSkirk class="w-4.2 h-16.2" />

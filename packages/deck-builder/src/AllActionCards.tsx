@@ -122,7 +122,10 @@ export function AllActionCards(props: AllCardsProps) {
   };
 
   const sortedActionCards = createMemo(() => {
-    return props.actionCards.values().toArray().toSorted((a, b) => {
+    return props.actionCards.values().toArray().toSorted(
+    // The sort callback is guaranteed to be synchronous, so it's safe to use signals inside
+    // eslint-disable-next-line solid/reactivity  
+    (a, b) => {
       const aValid = valid(a);
       const bValid = valid(b);
       if (aValid && !bValid) return -1;

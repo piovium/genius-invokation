@@ -1353,11 +1353,10 @@ export function Chessboard(props: ChessboardProps) {
       })) ?? []
     );
   });
-  const switchActiveStep = createMemo(
-    () =>
-      localProps.actionState?.availableSteps.find(
-        (s) => s.type === "clickSwitchActiveButton",
-      ),
+  const switchActiveStep = createMemo(() =>
+    localProps.actionState?.availableSteps.find(
+      (s) => s.type === "clickSwitchActiveButton",
+    ),
   );
   const showSkillButtons = createMemo(() => {
     const shown = !getFocusingHands() && getDraggingHand()?.status !== "moving";
@@ -1390,7 +1389,7 @@ export function Chessboard(props: ChessboardProps) {
     }
   });
 
-  const timer = () => (localProps.doingRpc ? localProps.timer ?? null : null);
+  const timer = () => (localProps.doingRpc ? (localProps.timer ?? null) : null);
 
   const [selectedDice, setSelectedDice] = createSignal<boolean[]>([]);
   const [dicePanelState, setDicePanelState] =
@@ -1956,10 +1955,15 @@ export function Chessboard(props: ChessboardProps) {
             <div class="absolute top-2 right-2 flex flex-row-reverse gap-1.5">
               <Show when={localProps.data.state.phase !== PbPhaseType.GAME_END}>
                 <ExitButton
-                  onClick={async () => {
-                    if (await confirm("确定放弃对局吗？")) {
-                      localProps.onGiveUp?.();
-                    }
+                  onClick={() => {
+                    const giveUp = localProps.onGiveUp;
+                    confirm("确定放弃对局吗？")
+                      .then((confirmed) => {
+                        if (confirmed) {
+                          giveUp?.();
+                        }
+                      })
+                      .catch(() => {});
                   }}
                 />
               </Show>
