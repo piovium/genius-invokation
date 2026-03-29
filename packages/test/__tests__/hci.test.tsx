@@ -64,7 +64,7 @@ import { YaeMiko } from "@gi-tcg/data/internal/characters/electro/yae_miko";
 import { TowerOfIpsissimus } from "@gi-tcg/data/internal/cards/support/adventure";
 
 describe("HCI stuff", () => {
-  test("HCI event should be handled after rest events", async () => {
+  test("HCI event should be handled after other events", async () => {
     const myNext = ref();
     const c = setup(
       <State>
