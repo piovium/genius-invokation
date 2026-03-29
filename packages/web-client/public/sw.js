@@ -31,22 +31,22 @@ sw.addEventListener("activate", (event) => {
   event.waitUntil(enableNavigationPreload());
 });
 
-sw.addEventListener("message", async (event) => {
+sw.addEventListener("message", (event) => {
   if (event.data && event.data.type === "config") {
-    try {
-      const payload = event.data.payload;
-      backendBaseUrl = payload.backendBaseUrl;
-      event.waitUntil(
-        (async () => {
+    const payload = event.data.payload;
+    backendBaseUrl = payload.backendBaseUrl;
+    event.waitUntil(
+      (async () => {
+        try {
           await setupVersion();
           if (version) {
             await deleteOldCaches();
           }
-        })(),
-      );
-    } catch (error) {
-      console.error("Error handling config message:", error);
-    }
+        } catch (error) {
+          console.error("Error handling config message:", error);
+        }
+      })(),
+    );
   }
 });
 
