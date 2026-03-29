@@ -1655,6 +1655,13 @@ export function Chessboard(props: ChessboardProps) {
     }
   };
 
+  const onExit = async () => {
+    const confirmed = await confirm("确定放弃对局吗？");
+    if (confirmed) {
+      localProps.onGiveUp?.();
+    }
+  };
+
   onMount(() => {
     setSpecialViewVisible(!localProps.liveStreamingMode);
     onResize();
@@ -1954,18 +1961,7 @@ export function Chessboard(props: ChessboardProps) {
           <Show when={!localProps.liveStreamingMode}>
             <div class="absolute top-2 right-2 flex flex-row-reverse gap-1.5">
               <Show when={localProps.data.state.phase !== PbPhaseType.GAME_END}>
-                <ExitButton
-                  onClick={() => {
-                    const giveUp = localProps.onGiveUp;
-                    confirm("确定放弃对局吗？")
-                      .then((confirmed) => {
-                        if (confirmed) {
-                          giveUp?.();
-                        }
-                      })
-                      .catch(() => {});
-                  }}
-                />
+                <ExitButton onClick={onExit} />
               </Show>
               <FullScreenToggleButton
                 isFullScreen={isFullscreen()}
