@@ -1,6 +1,7 @@
 /* eslint-disable */
 // @ts-check
-/// <reference lib="webworker" />
+
+const sw = /** @type {ServiceWorkerGlobalScope & typeof globalThis} */ (self);
 
 const FEATURE_NO_THUMB = true;
 
@@ -26,26 +27,30 @@ const setupVersion = async () => {
   }
 };
 
-self.addEventListener("activate", (event) => {
+sw.addEventListener("activate", (event) => {
   event.waitUntil(enableNavigationPreload());
 });
 
-self.addEventListener("message", async (event) => {
+sw.addEventListener("message", async (event) => {
   if (event.data && event.data.type === "config") {
     try {
       const payload = event.data.payload;
       backendBaseUrl = payload.backendBaseUrl;
-      await setupVersion();
-      if (version) {
-        await deleteOldCaches();
-      }
+      event.waitUntil(
+        (async () => {
+          await setupVersion();
+          if (version) {
+            await deleteOldCaches();
+          }
+        })(),
+      );
     } catch (error) {
       console.error("Error handling config message:", error);
     }
   }
 });
 
-self.addEventListener("fetch", (/** @type {FetchEvent} */ event) => {
+sw.addEventListener("fetch", (event) => {
   if (
     event.request.method === "GET" &&
     event.request.headers.get("X-Gi-Tcg-Assets-Manager")
@@ -109,13 +114,13 @@ const putInCache = async (key, request, response) => {
  */
 const cacheFirst = async (request, preloadResponsePromise, event) => {
   // First try to get the resource from the cache
-  if (version) {
-    const cache = await caches.open(version);
-    const responseFromCache = await cache.match(request);
-    if (responseFromCache) {
-      console.log(`Cache hit for ${request}`);
-      return responseFromCache;
-    }
+  const responseFromCache = await caches.match(request, {
+    // Backend by Elysia has a hardcoded Vary: *, ignore that to make cache work
+    ignoreVary: true,
+  });
+  if (responseFromCache) {
+    console.log(`Cache hit for ${request}`);
+    return responseFromCache;
   }
 
   // Next try to use (and cache) the preloaded response, if it's there
@@ -151,7 +156,7 @@ const cacheFirst = async (request, preloadResponsePromise, event) => {
 
 // Enable navigation preload
 const enableNavigationPreload = async () => {
-  if (self.registration.navigationPreload) {
-    await self.registration.navigationPreload.enable();
+  if (sw.registration.navigationPreload) {
+    await sw.registration.navigationPreload.enable();
   }
 };
