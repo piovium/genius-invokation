@@ -12,20 +12,27 @@ export interface ModalProps {
 export function Modal(props: ModalProps) {
   return (
     <Show when={props.open}>
-      <div class="gi-editor-modal-backdrop" onClick={props.onClose}>
-        <div class="gi-editor-modal-panel gi-editor-scroll" onClick={(event) => event.stopPropagation()}>
+      <div class="gi-editor-modal-backdrop" onClick={() => props.onClose()}>
+        <div
+          class="gi-editor-modal-panel gi-editor-scroll"
+          onClick={(event) => event.stopPropagation()}
+        >
           <div class="sticky top-0 z-1 border-b border-white/10 bg-slate-950/70 px-5 py-4 backdrop-blur">
             <div class="flex items-start justify-between gap-4">
               <div>
-                <h2 class="text-xl font-semibold text-amber-50">{props.title}</h2>
+                <h2 class="text-xl font-semibold text-amber-50">
+                  {props.title}
+                </h2>
                 <Show when={props.description}>
-                  <p class="mt-1 text-sm text-slate-300/80">{props.description}</p>
+                  <p class="mt-1 text-sm text-slate-300/80">
+                    {props.description}
+                  </p>
                 </Show>
               </div>
               <button
                 type="button"
                 class="gi-editor-button rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-100"
-                onClick={props.onClose}
+                onClick={() => props.onClose()}
               >
                 关闭
               </button>
