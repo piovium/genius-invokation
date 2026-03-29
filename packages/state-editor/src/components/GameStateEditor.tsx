@@ -28,6 +28,7 @@ import {
   EntityModal,
   AttachmentModal,
 } from "./DetailModals";
+import { Modal } from "./Modal";
 import {
   PileModalContent,
   HandsModalContent,
@@ -42,6 +43,10 @@ import {
   getPlayer,
   getDefinitionName,
   DICE_LABELS,
+  createCharacterState,
+  allocateId,
+  getImageUrl,
+  type EditorCatalog,
   type EditorModal,
   type EditorSection,
   type Mutable,
@@ -125,20 +130,35 @@ function SectionCard(props: {
 }
 
 // 角色预览组件
-function CharacterPreview(props: { character: CharacterState; isActive: boolean }) {
+function CharacterPreview(props: { character?: CharacterState; isActive: boolean; onSelectClick?: () => void }) {
   return (
     <div class="space-y-1">
-      <div class="flex items-center gap-2">
-        <span class="text-amber-200">{getDefinitionName(props.character.definition)}</span>
-        {props.isActive && <span class="text-xs text-cyan-400">出战</span>}
-      </div>
-      <div class="flex gap-3 text-xs">
-        <span class="text-rose-300">生命 {props.character.variables.health}/{props.character.variables.maxHealth}</span>
-        <span class="text-cyan-300">能量 {props.character.variables.energy}/{props.character.variables.maxEnergy}</span>
-      </div>
-      <div class="text-slate-500">
-        装备 {props.character.entities.length} 个
-      </div>
+      <Show when={props.character} fallback={
+        <button
+          type="button"
+          onClick={props.onSelectClick}
+          class="w-full flex items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/30 bg-transparent px-3 py-4 text-sm text-slate-400 hover:border-amber-400/50 hover:text-amber-300 transition"
+        >
+          <span class="text-lg">+</span>
+          <span>选择角色</span>
+        </button>
+      }>
+        {(char) => (
+          <>
+            <div class="flex items-center gap-2">
+              <span class="text-amber-200">{getDefinitionName(char().definition)}</span>
+              {props.isActive && <span class="text-xs text-cyan-400">出战</span>}
+            </div>
+            <div class="flex gap-3 text-xs">
+              <span class="text-rose-300">生命 {char().variables.health}/{char().variables.maxHealth}</span>
+              <span class="text-cyan-300">能量 {char().variables.energy}/{char().variables.maxEnergy}</span>
+            </div>
+            <div class="text-slate-500">
+              装备 {char().entities.length} 个
+            </div>
+          </>
+        )}
+      </Show>
     </div>
   );
 }
@@ -220,6 +240,9 @@ export function GameStateEditor(props: GameStateEditorProps) {
   const currentModal = createMemo(() => modalStack()[modalStack().length - 1] ?? null);
   const errors = createMemo(() => validateGameState(state, catalog()));
   const [formValid, setFormValid] = createSignal(true);
+  // 角色选择弹窗状态
+  const [selectCharacterModalOpen, setSelectCharacterModalOpen] = createSignal(false);
+  const [selectCharacterTarget, setSelectCharacterTarget] = createSignal<{ who: 0 | 1; index: number } | null>(null);
   let formRef: HTMLFormElement | undefined;
 
   const refreshFormValidity = () => {
@@ -241,6 +264,46 @@ export function GameStateEditor(props: GameStateEditorProps) {
   const closeTopModal = () => {
     setModalStack((stack) => stack.slice(0, -1));
     queueMicrotask(refreshFormValidity);
+  };
+
+  // 打开角色选择弹窗
+  const openSelectCharacterModal = (who: 0 | 1, index: number) => {
+    setSelectCharacterTarget({ who, index });
+    setSelectCharacterModalOpen(true);
+  };
+
+  // 关闭角色选择弹窗
+  const closeSelectCharacterModal = () => {
+    setSelectCharacterModalOpen(false);
+    setSelectCharacterTarget(null);
+  };
+
+  // 选择角色
+  const handleSelectCharacter = (characterDef: NonNullable<EditorCatalog["characters"][number]>["definition"]) => {
+    const target = selectCharacterTarget();
+    if (!target) return;
+    
+    updateState((draft) => {
+      const player = draft.players[target.who];
+      const newCharacter = createCharacterState(
+        characterDef as any,
+        allocateId(draft)
+      );
+      
+      // 如果该位置已有角色，替换它；否则添加
+      if (target.index < player.characters.length) {
+        player.characters[target.index] = newCharacter as any;
+      } else {
+        player.characters.push(newCharacter as any);
+      }
+      
+      // 如果是第一个角色，设为出战
+      if (player.characters.length === 1) {
+        player.activeCharacterId = newCharacter.id;
+      }
+    });
+    
+    closeSelectCharacterModal();
   };
 
   const submit = () => {
@@ -293,35 +356,23 @@ export function GameStateEditor(props: GameStateEditorProps) {
       ),
     });
     
-    configs.push({
-      section: { kind: "character", who: 0, characterIndex: 0 },
-      label: "角色1",
-      row: 6, col: 6, rowSpan: 3, colSpan: 2,
-      variant: "character",
-      preview: () => (
-        <CharacterPreview character={player0.characters[0]} isActive={player0.activeCharacterId === player0.characters[0].id} />
-      ),
-    });
-    
-    configs.push({
-      section: { kind: "character", who: 0, characterIndex: 1 },
-      label: "角色2",
-      row: 6, col: 8, rowSpan: 3, colSpan: 2,
-      variant: "character",
-      preview: () => (
-        <CharacterPreview character={player0.characters[1]} isActive={player0.activeCharacterId === player0.characters[1].id} />
-      ),
-    });
-    
-    configs.push({
-      section: { kind: "character", who: 0, characterIndex: 2 },
-      label: "角色3",
-      row: 6, col: 10, rowSpan: 3, colSpan: 2,
-      variant: "character",
-      preview: () => (
-        <CharacterPreview character={player0.characters[2]} isActive={player0.activeCharacterId === player0.characters[2].id} />
-      ),
-    });
+    // 玩家0角色区域（支持0-3个角色）
+    for (let i = 0; i < 3; i++) {
+      const character = player0.characters[i];
+      configs.push({
+        section: { kind: "character", who: 0, characterIndex: i },
+        label: `角色${i + 1}`,
+        row: 6, col: 6 + i * 2, rowSpan: 3, colSpan: 2,
+        variant: "character",
+        preview: () => (
+          <CharacterPreview 
+            character={character} 
+            isActive={character ? player0.activeCharacterId === character.id : false}
+            onSelectClick={!character ? () => openSelectCharacterModal(0, i) : undefined}
+          />
+        ),
+      });
+    }
     
     configs.push({
       section: { kind: "supports", who: 0 },
@@ -406,35 +457,23 @@ export function GameStateEditor(props: GameStateEditorProps) {
       ),
     });
     
-    configs.push({
-      section: { kind: "character", who: 1, characterIndex: 0 },
-      label: "角色1",
-      row: 2, col: 6, rowSpan: 3, colSpan: 2,
-      variant: "character",
-      preview: () => (
-        <CharacterPreview character={player1.characters[0]} isActive={player1.activeCharacterId === player1.characters[0].id} />
-      ),
-    });
-
-    configs.push({
-      section: { kind: "character", who: 1, characterIndex: 1 },
-      label: "角色2",
-      row: 2, col: 8, rowSpan: 3, colSpan: 2,
-      variant: "character",
-      preview: () => (
-        <CharacterPreview character={player1.characters[1]} isActive={player1.activeCharacterId === player1.characters[1].id} />
-      ),
-    });
-    
-    configs.push({
-      section: { kind: "character", who: 1, characterIndex: 2 },
-      label: "角色3",
-      row: 2, col: 10, rowSpan: 3, colSpan: 2,
-      variant: "character",
-      preview: () => (
-        <CharacterPreview character={player1.characters[2]} isActive={player1.activeCharacterId === player1.characters[2].id} />
-      ),
-    });
+    // 玩家1角色区域（支持0-3个角色）
+    for (let i = 0; i < 3; i++) {
+      const character = player1.characters[i];
+      configs.push({
+        section: { kind: "character", who: 1, characterIndex: i },
+        label: `角色${i + 1}`,
+        row: 2, col: 6 + i * 2, rowSpan: 3, colSpan: 2,
+        variant: "character",
+        preview: () => (
+          <CharacterPreview 
+            character={character} 
+            isActive={character ? player1.activeCharacterId === character.id : false}
+            onSelectClick={!character ? () => openSelectCharacterModal(1, i) : undefined}
+          />
+        ),
+      });
+    }
     
     configs.push({
       section: { kind: "supports", who: 1 },
@@ -756,6 +795,76 @@ export function GameStateEditor(props: GameStateEditorProps) {
           />
         </Match>
       </Switch>
+
+      {/* 角色选择弹窗 */}
+      <Modal
+        open={selectCharacterModalOpen()}
+        title="选择角色"
+        description="从列表中选择一个角色"
+        onClose={closeSelectCharacterModal}
+      >
+        <div class="space-y-4">
+          {/* 角色网格 */}
+          <div
+            class="h-50vh overflow-y-auto pr-2 scrollbar-thin"
+            style={{
+              "scrollbar-width": "thin",
+              "scrollbar-color": "rgba(255, 255, 255, 0.3) transparent",
+            }}
+          >
+            <style>{`
+              .scrollbar-thin::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+              }
+              .scrollbar-thin::-webkit-scrollbar-track {
+                background: transparent;
+              }
+              .scrollbar-thin::-webkit-scrollbar-thumb {
+                background-color: rgba(255, 255, 255, 0.3);
+                border-radius: 3px;
+              }
+              .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+                background-color: rgba(255, 255, 255, 0.5);
+              }
+              @supports (scrollbar-width: thin) {
+                .scrollbar-thin {
+                  scrollbar-width: thin;
+                  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+                }
+              }
+            `}</style>
+            <div class="grid grid-cols-4 gap-3">
+              <For each={catalog().characters}>
+                {(char) => (
+                  <button
+                    type="button"
+                    onClick={() => handleSelectCharacter(char.definition)}
+                    class="group flex flex-col items-center gap-2 p-3 rounded-xl border border-white/10 bg-slate-800/50 hover:bg-slate-700/50 hover:border-amber-500/50 transition"
+                  >
+                    {/* 角色头像 */}
+                    <div class="w-full aspect-square rounded-full overflow-hidden border-2 border-white/20 group-hover:border-amber-500/50">
+                      <img
+                        src={getImageUrl(char, "icon")}
+                        alt={char.name}
+                        class="w-full h-full object-cover group-hover:scale-105 transition"
+                        loading="lazy"
+                      />
+                    </div>
+                    {/* 名称和ID */}
+                    <div class="text-center w-full">
+                      <div class="text-xs text-slate-200 truncate">
+                        {char.name}
+                      </div>
+                      <div class="text-[10px] text-slate-500">#{char.id}</div>
+                    </div>
+                  </button>
+                )}
+              </For>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -99,13 +99,14 @@ export interface EditorCatalog {
   allInitiativeSkills: InitiativeSkillOption[];
 }
 
-const DEFAULT_CHARACTER_DEFINITION_IDS = [1301, 1103, 1501] as const;
+// 角色区域初始为空，需要通过选择角色来填充
+const DEFAULT_CHARACTER_DEFINITION_IDS: readonly number[] = [];
 const DEFAULT_CHARACTER_INSTANCE_IDS: readonly [
   readonly number[],
   readonly number[],
 ] = [
-  [1, 2, 3],
-  [101, 102, 103],
+  [],
+  [],
 ];
 
 export const PHASE_LABELS: Record<PhaseType, string> = {
@@ -166,6 +167,11 @@ const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   support: "支援",
   summon: "召唤物",
   eventCard: "事件牌",
+};
+
+const SPECIAL_ENERGY_LABELS: Record<string, string> = {
+  fightingSpirit: "战意",
+  serpentsSubtlety: "蛇之狡谋",
 };
 
 function sortOptions<T>(options: AssetOption<T>[]) {
@@ -288,7 +294,7 @@ function buildDefaultPlayerState(
     who,
     initialPile: [],
     pile: [],
-    activeCharacterId: characters[0]!.id,
+    activeCharacterId: characters.length > 0 ? characters[0]!.id : -1,
     hands: [],
     characters,
     combatStatuses: [],
@@ -587,11 +593,11 @@ export function getAttachment(
 }
 
 export function getCharacterEnergyLabel(character: CharacterState) {
-  return character.definition.specialEnergy?.variableName ?? "能量";
+  return SPECIAL_ENERGY_LABELS[character.definition.specialEnergy?.variableName ?? ""] ?? "能量";
 }
 
 export function getCharacterMaxEnergyLabel(character: CharacterState) {
-  return character.definition.specialEnergy ? "最大槽位" : "最大能量";
+  return `最大${getCharacterEnergyLabel(character)}`;
 }
 
 function collectEntityIds(entity: EntityState, ids: number[]) {
@@ -698,10 +704,9 @@ export function validateGameState(state: GameState, catalog: EditorCatalog) {
     if (player.who !== playerIndex) {
       errors.push(`玩家 ${playerIndex} 的 who 不匹配`);
     }
-    if (player.characters.length !== 3) {
-      errors.push(`玩家 ${playerIndex} 的角色数量必须是 3`);
-    }
+    // 角色数量不再强制为3，可以为空
     if (
+      player.characters.length > 0 &&
       !player.characters.some(
         (character) => character.id === player.activeCharacterId,
       )
