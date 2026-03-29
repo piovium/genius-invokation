@@ -30,7 +30,7 @@ interface AddCardModalProps {
 
 const DEFAULT_MAX_RESULTS = 60;
 
-const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
+export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   combatStatus: "出战状态",
   status: "状态",
   equipment: "装备牌",
@@ -71,7 +71,7 @@ const ALL_ENTITY_TAGS: EntityTag[] = [
   "adventureSpot",
 ];
 
-const TAG_LABELS: Record<EntityTag, string> = {
+export const TAG_LABELS: Record<EntityTag, string> = {
   // CardTag
   legend: "秘传",
   action: "战斗行动",

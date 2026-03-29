@@ -459,6 +459,7 @@ export function PlayerSectionContent(props: PlayerSectionContentProps) {
                     imageMode={props2.mode}
                     title={getDefinitionName(entity.definition)}
                     description={`ID: ${entity.id}`}
+                    definition={entity.definition}
                     tags={entityBadges(entity)}
                     buttonColumns={2}
                     buttons={buttons}

@@ -266,6 +266,7 @@ export function PileModalContent(props: CollectionContentProps) {
                   imageMode="card"
                   title={getDefinitionName(card.definition)}
                   description={`ID: ${card.id}`}
+                  definition={card.definition}
                   tags={detailBadges(card)}
                   buttonColumns={2}
                   buttons={buttons}
@@ -545,6 +546,7 @@ export function HandsModalContent(props: CollectionContentProps) {
                   imageMode="card"
                   title={getDefinitionName(card.definition)}
                   description={`ID: ${card.id}`}
+                  definition={card.definition}
                   tags={detailBadges(card)}
                   buttonColumns={3}
                   buttons={buttons}

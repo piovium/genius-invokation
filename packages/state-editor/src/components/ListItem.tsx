@@ -1,5 +1,13 @@
 import { For, Show, createMemo } from "solid-js";
 import type { JSX } from "solid-js";
+import type { EntityDefinition, EntityTag, EntityType } from "@gi-tcg/core";
+import { ENTITY_TYPE_LABELS, TAG_LABELS } from "./AddCardModal";
+
+// 扩展的实体定义类型，兼容 EntityDefinition 和 AttachmentDefinition
+type ExtendedEntityDefinition = {
+  type: EntityType;
+  tags: readonly EntityTag[];
+};
 
 export interface ListItemButton {
   content: JSX.Element;
@@ -15,6 +23,9 @@ export interface ListItemProps {
   title: JSX.Element;
   description?: JSX.Element;
   tags?: string[];
+  
+  // 实体定义 - 如果传入则自动显示 type 和 tags
+  definition?: ExtendedEntityDefinition;
   
   // 右侧按钮区域
   buttonColumns?: number;
@@ -53,6 +64,34 @@ export function ListItem(props: ListItemProps) {
     return cols;
   });
 
+  // 合并标签：用户传入的标签 + 实体定义自动生成的标签
+  const allTags = createMemo(() => {
+    const userTags = props.tags ?? [];
+    const def = props.definition;
+    
+    if (!def) {
+      return userTags;
+    }
+
+    const autoTags: string[] = [];
+    
+    // 添加 type 标签
+    const typeLabel = ENTITY_TYPE_LABELS[def.type];
+    if (typeLabel) {
+      autoTags.push(typeLabel);
+    }
+    
+    // 添加 tags 标签
+    def.tags.forEach((tag) => {
+      const tagLabel = TAG_LABELS[tag as keyof typeof TAG_LABELS];
+      if (tagLabel && tagLabel.trim() !== "") {
+        autoTags.push(tagLabel);
+      }
+    });
+
+    return [...autoTags, ...userTags];
+  });
+
   return (
     <div
       class={`flex w-full items-start justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 text-left transition hover:bg-white/10 box-border overflow-hidden ${props.class ?? ""}`}
@@ -86,9 +125,9 @@ export function ListItem(props: ListItemProps) {
           </Show>
 
           {/* 标签 */}
-          <Show when={props.tags && props.tags.length > 0}>
+          <Show when={allTags().length > 0}>
             <div class="flex flex-wrap gap-1 mt-2">
-              <For each={props.tags}>
+              <For each={allTags()}>
                 {(tag) => (
                   <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-slate-700/50 text-slate-300 border border-white/10">
                     {tag}

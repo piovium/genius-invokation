@@ -1095,6 +1095,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
                   imageMode={imageMode()}
                   title={getDefinitionName(entity.definition)}
                   description={`ID: ${entity.id}`}
+                  definition={entity.definition}
                   tags={[
                     `变量 ${Object.keys(entity.variables).length}`,
                     `附着 ${entity.attachments.length}`,
@@ -1594,6 +1595,7 @@ export function EntityModalContent(props: EntityContentProps) {
                                 imageMode="icon"
                                 title={getDefinitionName(attachment.definition)}
                                 description={`ID: ${attachment.id} · 变量: ${Object.keys(attachment.variables).length}`}
+                                definition={attachment.definition}
                                 buttonColumns={2}
                                 buttons={buttons}
                               />
