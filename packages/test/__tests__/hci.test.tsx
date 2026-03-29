@@ -28,7 +28,7 @@ import {
 import { describe, test, expect } from "bun:test";
 import { VeteransVisage } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { PortablePowerSaw } from "@gi-tcg/data/internal/cards/equipment/weapon/claymore";
-import { Strategize, TheNarzissenkreuzAdventure, UnderseaTreasure } from "@gi-tcg/data/internal/cards/event/other";
+import { CountdownToTheShow2, NatureAndWisdom, Strategize, TheNarzissenkreuzAdventure, UnderseaTreasure } from "@gi-tcg/data/internal/cards/event/other";
 import {
   Chasca,
   ShadowhuntShell,
@@ -44,10 +44,6 @@ import {
 } from "@gi-tcg/data/internal/characters/pyro/xinyan";
 import { Aura } from "@gi-tcg/typings";
 import { PuffPopsInEffect } from "@gi-tcg/data/internal/cards/event/food";
-import {
-  CountdownToTheShow2,
-  NatureAndWisdom,
-} from "@gi-tcg/data/internal/cards/event/other";
 import { Keqing } from "@gi-tcg/data/internal/characters/electro/keqing";
 import { Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida";
 import {
