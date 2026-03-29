@@ -12,7 +12,9 @@
   "dependencies": {
     "@gi-tcg/core": "workspace:*",
     "@gi-tcg/data": "workspace:*",
-    "@gi-tcg/typings": "workspace:*"
+    "@gi-tcg/utils": "workspace:*",
+    "@gi-tcg/typings": "workspace:*",
+    "@gi-tcg/assets-manager": "workspace:*"
   },
   "devDependencies": {
     "immer": "^11.1.4"

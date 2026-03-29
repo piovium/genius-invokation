@@ -28,7 +28,7 @@ import {
 import { describe, test, expect } from "bun:test";
 import { VeteransVisage } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { PortablePowerSaw } from "@gi-tcg/data/internal/cards/equipment/weapon/claymore";
-import { Strategize } from "@gi-tcg/data/internal/cards/event/other";
+import { CountdownToTheShow2, NatureAndWisdom, Strategize, TheNarzissenkreuzAdventure, UnderseaTreasure } from "@gi-tcg/data/internal/cards/event/other";
 import {
   Chasca,
   ShadowhuntShell,
@@ -44,10 +44,6 @@ import {
 } from "@gi-tcg/data/internal/characters/pyro/xinyan";
 import { Aura } from "@gi-tcg/typings";
 import { PuffPopsInEffect } from "@gi-tcg/data/internal/cards/event/food";
-import {
-  CountdownToTheShow2,
-  NatureAndWisdom,
-} from "@gi-tcg/data/internal/cards/event/other";
 import { Keqing } from "@gi-tcg/data/internal/characters/electro/keqing";
 import { Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida";
 import {
@@ -58,8 +54,33 @@ import { TheMausoleumOfKingDeshret, TheMausoleumOfKingDeshretInEffect } from "@g
 import { CrystalShrapnel, Navia } from "@gi-tcg/data/internal/characters/geo/navia";
 import { CostIncrease } from "@gi-tcg/data/internal/commons";
 import { Baizhu, SeamlessShield } from "@gi-tcg/data/internal/characters/dendro/baizhu";
+import { Jean } from "@gi-tcg/data/internal/characters/anemo/jean";
+import { Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";
+import { YaeMiko } from "@gi-tcg/data/internal/characters/electro/yae_miko";
+import { TowerOfIpsissimus } from "@gi-tcg/data/internal/cards/support/adventure";
 
 describe("HCI stuff", () => {
+  test("HCI event should be handled after other events", async () => {
+    const myNext = ref();
+    const c = setup(
+      <State>
+        <Character my active def={Jean} health={1}>
+          <Status def={PuffPopsInEffect} usage={1} />
+        </Character>
+        <Character my def={Kaeya} ref={myNext} />
+        <Character my def={YaeMiko} />
+        <Card my pile notInitial def={UnderseaTreasure} />
+        <Card my def={TheNarzissenkreuzAdventure} />
+      </State>
+    );
+    await c.me.card(TheNarzissenkreuzAdventure);
+    // 事件列表 [HCI, 请求冒险]，重排后 HCI 在请求冒险之后
+    await c.me.selectCard(TowerOfIpsissimus);
+    c.expect("my active").toNotExist();
+    // 请求冒险选塔把琴打死，此时 HCI 不会再生效
+    await c.me.chooseActive(myNext);
+  });
+
   test("sigewinne and yumkasaur interaction", async () => {
     const yumkasaur = ref();
     const oppActive = ref();
