@@ -3,10 +3,13 @@ import {
   Match,
   Show,
   Switch,
+  createContext,
   createMemo,
   createSignal,
   onMount,
   splitProps,
+  useContext,
+  type Accessor,
   type ComponentProps,
   type JSX,
 } from "solid-js";
@@ -16,12 +19,8 @@ import type { GameState, CharacterState } from "@gi-tcg/core";
 import { Aura } from "@gi-tcg/typings";
 
 import { NumberField, SectionTitle, SelectField, Surface } from "./Fields";
-import {
-  AttachmentModal,
-} from "./AttachmentModal";
 import { CharacterEditor } from "./CharacterEditor";
 import { ExtensionModal } from "./ExtensionModal";
-import { EntityModal } from "./EntityModal";
 import { PileEditor, HandsEditor } from "./HandsPileEditor";
 import { PlayerSectionEditor } from "./PlayerSectionEditor";
 import { ListItem, type ListItemButton } from "./ListItem";
@@ -32,12 +31,13 @@ import {
   validateGameState,
   getDefinitionName,
   getImageUrl,
-  type EditorModal,
   type EditorSection,
   type UpdateGameState,
 } from "../state";
 import { DiceIcon } from "./DiceIcon";
 import type { Draft } from "immer";
+import { Portal } from "solid-js/web";
+import { ModalContextProvider } from "./Modal";
 
 export interface GameStateEditorProps extends Omit<
   ComponentProps<"div">,
@@ -451,6 +451,18 @@ function CombatStatusPreview(props: {
   );
 }
 
+export interface StateEditorContextValue {
+  gameState: Accessor<GameState>;
+  updateState: UpdateGameState;
+  openModal: (modalCode: () => JSX.Element) => void;
+}
+
+const StateEditorContext = createContext<StateEditorContextValue>();
+
+export const useStateEditorContext = () => {
+  return useContext(StateEditorContext)!;
+};
+
 export function GameStateEditor(props: GameStateEditorProps) {
   const [local, rest] = splitProps(props, [
     "initialValue",
@@ -463,10 +475,8 @@ export function GameStateEditor(props: GameStateEditorProps) {
   const [selectedSection, setSelectedSection] = createSignal<EditorSection>({
     kind: "global",
   });
-  const [modalStack, setModalStack] = createSignal<EditorModal[]>([]);
-  const currentModal = createMemo(
-    () => modalStack()[modalStack().length - 1] ?? null,
-  );
+  const [modalStack, setModalStack] = createSignal<(() => JSX.Element)[]>([]);
+
   const errors = createMemo(() => validateGameState(state, catalog()));
   const [formValid, setFormValid] = createSignal(true);
   // eslint-disable-next-line no-unassigned-vars
@@ -483,14 +493,20 @@ export function GameStateEditor(props: GameStateEditorProps) {
     queueMicrotask(refreshFormValidity);
   };
 
-  const openModal = (modal: EditorModal) => {
-    setModalStack((stack) => [...stack, modal]);
-    queueMicrotask(refreshFormValidity);
-  };
-
-  const closeTopModal = () => {
-    setModalStack((stack) => stack.slice(0, -1));
-    queueMicrotask(refreshFormValidity);
+  const openModal = (modalCode: () => JSX.Element) => {
+    const Wrapper = () => (
+      <ModalContextProvider
+        value={{
+          removeSelf: () => {
+            setModalStack((stack) => stack.filter((m) => m !== Wrapper));
+            queueMicrotask(refreshFormValidity);
+          },
+        }}
+      >
+        {modalCode()}
+      </ModalContextProvider>
+    );
+    setModalStack((stack) => [...stack, Wrapper]);
   };
 
   const submit = () => {
@@ -821,334 +837,275 @@ export function GameStateEditor(props: GameStateEditorProps) {
 
   return (
     <div {...rest} class={`gi-state-editor ${local.class ?? ""}`}>
-      <form
-        ref={formRef}
-        class="gi-editor-frame h-screen flex flex-col"
-        onInput={refreshFormValidity}
-        onChange={refreshFormValidity}
+      <StateEditorContext.Provider
+        value={{
+          gameState: () => state,
+          updateState,
+          openModal,
+        }}
       >
-        {/* Header */}
-        <div class="flex-none px-4 py-4 sm:px-6 lg:px-8 border-b border-[var(--gi-editor-border-strong)] bg-slate-950/70">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h1 class="text-2xl font-semibold text-amber-50">游戏状态编辑</h1>
-            </div>
-            <div class="flex flex-wrap items-center gap-3">
-              <Show when={errors().length > 0 || !formValid()}>
-                <span class="rounded-full border border-rose-300/30 bg-rose-400/10 px-3 py-1.5 text-xs text-rose-100">
-                  {errors().length > 0
-                    ? `存在 ${errors().length} 个状态问题`
-                    : "表单输入未完成"}
-                </span>
-              </Show>
-              <button
-                type="button"
-                class="gi-editor-button rounded-full border border-cyan-200/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-semibold text-cyan-50 disabled:cursor-not-allowed disabled:opacity-40"
-                disabled={!formValid() || errors().length > 0}
-                onClick={submit}
-              >
-                完成
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div class="flex-1 flex overflow-hidden">
-          {/* Left Sidebar - Grid Layout */}
-          <div class="w-3/5 flex-none border-r border-[var(--gi-editor-border)] bg-slate-900 overflow-y-auto">
-            <div
-              class="p-4 grid gap-2 h-full box-border"
-              style={{
-                "grid-template-columns": `repeat(${GRID_COLS}, 1fr)`,
-                "grid-template-rows": `repeat(${GRID_ROWS}, 1fr)`,
-              }}
-            >
-              <For each={sectionConfigs()}>
-                {(config) => (
-                  <SectionCard
-                    config={config}
-                    isActive={isSectionActive(config.section)}
-                    onClick={() => setSelectedSection(config.section)}
-                    state={state}
-                  />
-                )}
-              </For>
-            </div>
-          </div>
-
-          {/* Right Content Area */}
-          <div class="w-2/5 shrink-0 overflow-y-auto p-4 sm:p-6 lg:p-8 box-border scrollbar-thin">
-            <div class="max-w-5xl mx-auto">
-              <Switch>
-                {/* Global Section */}
-                <Match when={selectedSection().kind === "global"}>
-                  <Surface title="游戏全局设置">
-                    <div class="space-y-6">
-                      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <NumberField
-                          label="随机种子"
-                          value={state.config.randomSeed}
-                          onChange={(value) =>
-                            updateState((draft) => {
-                              draft.config.randomSeed = value;
-                              draft.iterators.random = value;
-                            })
-                          }
-                        />
-                        <SelectField
-                          label="阶段"
-                          value={state.phase}
-                          options={Object.entries(PHASE_LABELS).map(
-                            ([value, label]) => ({ value, label }),
-                          )}
-                          onChange={(value) =>
-                            updateState((draft) => {
-                              draft.phase = value as GameState["phase"];
-                            })
-                          }
-                        />
-                        <NumberField
-                          label="回合数"
-                          value={state.roundNumber}
-                          min={1}
-                          max={state.config.maxRoundsCount - 1}
-                          onChange={(value) =>
-                            updateState((draft) => {
-                              draft.roundNumber = value;
-                            })
-                          }
-                        />
-                        <SelectField
-                          label="当前行动方"
-                          value={state.currentTurn}
-                          options={[
-                            { value: 0, label: "玩家 0" },
-                            { value: 1, label: "玩家 1" },
-                          ]}
-                          onChange={(value) =>
-                            updateState((draft) => {
-                              draft.currentTurn = Number(value) as 0 | 1;
-                            })
-                          }
-                        />
-                      </div>
-
-                      <div class="rounded-3xl border border-white/10 bg-slate-950/20 p-4">
-                        <SectionTitle title="固定信息" />
-                        <div class="mt-3 space-y-2 text-sm text-slate-200">
-                          <p>
-                            数据版本：
-                            {state.data === initialState.data
-                              ? "最新官方数据"
-                              : "传入初始值"}
-                          </p>
-                          <p>下一个状态 ID：{state.iterators.id}</p>
-                        </div>
-                      </div>
-
-                      <div class="rounded-3xl border border-white/10 bg-slate-950/20 p-4">
-                        <SectionTitle
-                          title="扩展"
-                          description="扩展数量固定，只能编辑其内部状态。"
-                        />
-                        <div class="mt-3 space-y-2">
-                          <For each={state.extensions}>
-                            {(extension, index) => {
-                              const buttons: ListItemButton[] = [
-                                {
-                                  content: "编辑",
-                                  variant: "primary",
-                                  col: 0,
-                                  onClick: () =>
-                                    openModal({
-                                      kind: "extension",
-                                      index: index(),
-                                    }),
-                                },
-                              ];
-                              return (
-                                <ListItem
-                                  title={
-                                    extension.definition.description ||
-                                    `扩展 #${extension.definition.id}`
-                                  }
-                                  description={
-                                    extension.definition.description
-                                      ? `扩展 #${extension.definition.id}`
-                                      : "无说明"
-                                  }
-                                  buttonColumns={1}
-                                  buttons={buttons}
-                                />
-                              );
-                            }}
-                          </For>
-                        </div>
-                      </div>
-                    </div>
-                  </Surface>
-                </Match>
-
-                {/* Pile Section */}
-                <Match when={selectedSection().kind === "pile"}>
-                  <PileEditor
-                    state={state}
-                    who={
-                      (
-                        selectedSection() as Extract<
-                          EditorSection,
-                          { kind: "pile" }
-                        >
-                      ).who
-                    }
-                    catalog={catalog()}
-                    updateState={updateState}
-                    openModal={openModal}
-                  />
-                </Match>
-
-                {/* Hands Section */}
-                <Match when={selectedSection().kind === "hands"}>
-                  <HandsEditor
-                    state={state}
-                    who={
-                      (
-                        selectedSection() as Extract<
-                          EditorSection,
-                          { kind: "hands" }
-                        >
-                      ).who
-                    }
-                    catalog={catalog()}
-                    updateState={updateState}
-                    openModal={openModal}
-                  />
-                </Match>
-
-                {/* Character Section */}
-                <Match when={selectedSection().kind === "character"}>
-                  <CharacterEditor
-                    state={state}
-                    who={
-                      (
-                        selectedSection() as Extract<
-                          EditorSection,
-                          { kind: "character" }
-                        >
-                      ).who
-                    }
-                    characterIndex={
-                      (
-                        selectedSection() as Extract<
-                          EditorSection,
-                          { kind: "character" }
-                        >
-                      ).characterIndex
-                    }
-                    catalog={catalog()}
-                    updateState={updateState}
-                    openModal={openModal}
-                    onSelectSection={setSelectedSection}
-                  />
-                </Match>
-
-                {/* Player Sections */}
-                <Match
-                  when={
-                    selectedSection().kind === "supports" ||
-                    selectedSection().kind === "summons" ||
-                    selectedSection().kind === "combatStatuses" ||
-                    selectedSection().kind === "dice" ||
-                    selectedSection().kind === "playerInfo" ||
-                    selectedSection().kind === "deckImport"
-                  }
+        <form
+          ref={formRef}
+          class="gi-editor-frame h-screen flex flex-col"
+          onInput={refreshFormValidity}
+          onChange={refreshFormValidity}
+        >
+          {/* Header */}
+          <div class="flex-none px-4 py-4 sm:px-6 lg:px-8 border-b border-[var(--gi-editor-border-strong)] bg-slate-950/70">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h1 class="text-2xl font-semibold text-amber-50">
+                  游戏状态编辑
+                </h1>
+              </div>
+              <div class="flex flex-wrap items-center gap-3">
+                <Show when={errors().length > 0 || !formValid()}>
+                  <span class="rounded-full border border-rose-300/30 bg-rose-400/10 px-3 py-1.5 text-xs text-rose-100">
+                    {errors().length > 0
+                      ? `存在 ${errors().length} 个状态问题`
+                      : "表单输入未完成"}
+                  </span>
+                </Show>
+                <button
+                  type="button"
+                  class="gi-editor-button rounded-full border border-cyan-200/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-semibold text-cyan-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  disabled={!formValid() || errors().length > 0}
+                  onClick={submit}
                 >
-                  <PlayerSectionEditor
-                    state={state}
-                    section={selectedSection()}
-                    catalog={catalog()}
-                    updateState={updateState}
-                    openModal={openModal}
-                  />
-                </Match>
-              </Switch>
-
-              <Show when={errors().length > 0}>
-                <Surface title="状态校验" class="mt-6">
-                  <ul class="list-disc space-y-2 pl-5 text-sm text-rose-100">
-                    <For each={errors()}>{(error) => <li>{error}</li>}</For>
-                  </ul>
-                </Surface>
-              </Show>
+                  完成
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </form>
 
-      {/* Modals for entity editing (still needed for nested entities) */}
-      <Switch>
-        <Match when={currentModal()?.kind === "entity"}>
-          <EntityModal
-            open
-            state={state}
-            who={
-              (currentModal() as Extract<EditorModal, { kind: "entity" }>).who
-            }
-            area={
-              (currentModal() as Extract<EditorModal, { kind: "entity" }>).area
-            }
-            entityId={
-              (currentModal() as Extract<EditorModal, { kind: "entity" }>)
-                .entityId
-            }
-            characterId={
-              (currentModal() as Extract<EditorModal, { kind: "entity" }>)
-                .characterId
-            }
-            catalog={catalog()}
-            updateState={updateState}
-            openModal={openModal}
-            onClose={closeTopModal}
-          />
-        </Match>
-        <Match when={currentModal()?.kind === "attachment"}>
-          <AttachmentModal
-            open
-            state={state}
-            who={
-              (currentModal() as Extract<EditorModal, { kind: "attachment" }>)
-                .who
-            }
-            area={
-              (currentModal() as Extract<EditorModal, { kind: "attachment" }>)
-                .area
-            }
-            entityId={
-              (currentModal() as Extract<EditorModal, { kind: "attachment" }>)
-                .entityId
-            }
-            attachmentId={
-              (currentModal() as Extract<EditorModal, { kind: "attachment" }>)
-                .attachmentId
-            }
-            updateState={updateState}
-            onClose={closeTopModal}
-          />
-        </Match>
-        <Match when={currentModal()?.kind === "extension"}>
-          <ExtensionModal
-            open
-            state={state}
-            index={
-              (currentModal() as Extract<EditorModal, { kind: "extension" }>)
-                .index
-            }
-            updateState={updateState}
-            onClose={closeTopModal}
-          />
-        </Match>
-      </Switch>
+          {/* Main Content */}
+          <div class="flex-1 flex overflow-hidden">
+            {/* Left Sidebar - Grid Layout */}
+            <div class="w-3/5 flex-none border-r border-[var(--gi-editor-border)] bg-slate-900 overflow-y-auto">
+              <div
+                class="p-4 grid gap-2 h-full box-border"
+                style={{
+                  "grid-template-columns": `repeat(${GRID_COLS}, 1fr)`,
+                  "grid-template-rows": `repeat(${GRID_ROWS}, 1fr)`,
+                }}
+              >
+                <For each={sectionConfigs()}>
+                  {(config) => (
+                    <SectionCard
+                      config={config}
+                      isActive={isSectionActive(config.section)}
+                      onClick={() => setSelectedSection(config.section)}
+                      state={state}
+                    />
+                  )}
+                </For>
+              </div>
+            </div>
+
+            {/* Right Content Area */}
+            <div class="w-2/5 shrink-0 overflow-y-auto p-4 sm:p-6 lg:p-8 box-border gi-editor-scroll">
+              <div class="max-w-5xl mx-auto">
+                <Switch>
+                  {/* Global Section */}
+                  <Match when={selectedSection().kind === "global"}>
+                    <Surface title="游戏全局设置">
+                      <div class="space-y-6">
+                        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                          <NumberField
+                            label="随机种子"
+                            value={state.config.randomSeed}
+                            onChange={(value) =>
+                              updateState((draft) => {
+                                draft.config.randomSeed = value;
+                                draft.iterators.random = value;
+                              })
+                            }
+                          />
+                          <SelectField
+                            label="阶段"
+                            value={state.phase}
+                            options={Object.entries(PHASE_LABELS).map(
+                              ([value, label]) => ({ value, label }),
+                            )}
+                            onChange={(value) =>
+                              updateState((draft) => {
+                                draft.phase = value as GameState["phase"];
+                              })
+                            }
+                          />
+                          <NumberField
+                            label="回合数"
+                            value={state.roundNumber}
+                            min={1}
+                            max={state.config.maxRoundsCount - 1}
+                            onChange={(value) =>
+                              updateState((draft) => {
+                                draft.roundNumber = value;
+                              })
+                            }
+                          />
+                          <SelectField
+                            label="当前行动方"
+                            value={state.currentTurn}
+                            options={[
+                              { value: 0, label: "玩家 0" },
+                              { value: 1, label: "玩家 1" },
+                            ]}
+                            onChange={(value) =>
+                              updateState((draft) => {
+                                draft.currentTurn = Number(value) as 0 | 1;
+                              })
+                            }
+                          />
+                        </div>
+
+                        <div class="rounded-3xl border border-white/10 bg-slate-950/20 p-4">
+                          <SectionTitle title="固定信息" />
+                          <div class="mt-3 space-y-2 text-sm text-slate-200">
+                            <p>
+                              数据版本：
+                              {state.data === initialState.data
+                                ? "最新官方数据"
+                                : "传入初始值"}
+                            </p>
+                            <p>下一个状态 ID：{state.iterators.id}</p>
+                          </div>
+                        </div>
+
+                        <div class="rounded-3xl border border-white/10 bg-slate-950/20 p-4">
+                          <SectionTitle
+                            title="扩展"
+                            description="扩展数量固定，只能编辑其内部状态。"
+                          />
+                          <div class="mt-3 space-y-2">
+                            <For each={state.extensions}>
+                              {(extension, index) => {
+                                const buttons: ListItemButton[] = [
+                                  {
+                                    content: "编辑",
+                                    variant: "primary",
+                                    col: 0,
+                                    onClick: () =>
+                                      openModal(() => (
+                                        <ExtensionModal
+                                          state={state}
+                                          index={index()}
+                                        />
+                                      )),
+                                  },
+                                ];
+                                return (
+                                  <ListItem
+                                    title={
+                                      extension.definition.description ||
+                                      `扩展 #${extension.definition.id}`
+                                    }
+                                    description={
+                                      extension.definition.description
+                                        ? `扩展 #${extension.definition.id}`
+                                        : "无说明"
+                                    }
+                                    buttonColumns={1}
+                                    buttons={buttons}
+                                  />
+                                );
+                              }}
+                            </For>
+                          </div>
+                        </div>
+                      </div>
+                    </Surface>
+                  </Match>
+
+                  {/* Pile Section */}
+                  <Match when={selectedSection().kind === "pile"}>
+                    <PileEditor
+                      state={state}
+                      who={
+                        (
+                          selectedSection() as Extract<
+                            EditorSection,
+                            { kind: "pile" }
+                          >
+                        ).who
+                      }
+                      catalog={catalog()}
+                    />
+                  </Match>
+
+                  {/* Hands Section */}
+                  <Match when={selectedSection().kind === "hands"}>
+                    <HandsEditor
+                      state={state}
+                      who={
+                        (
+                          selectedSection() as Extract<
+                            EditorSection,
+                            { kind: "hands" }
+                          >
+                        ).who
+                      }
+                      catalog={catalog()}
+                    />
+                  </Match>
+
+                  {/* Character Section */}
+                  <Match when={selectedSection().kind === "character"}>
+                    <CharacterEditor
+                      state={state}
+                      who={
+                        (
+                          selectedSection() as Extract<
+                            EditorSection,
+                            { kind: "character" }
+                          >
+                        ).who
+                      }
+                      characterIndex={
+                        (
+                          selectedSection() as Extract<
+                            EditorSection,
+                            { kind: "character" }
+                          >
+                        ).characterIndex
+                      }
+                      catalog={catalog()}
+                      onSelectSection={setSelectedSection}
+                    />
+                  </Match>
+
+                  {/* Player Sections */}
+                  <Match
+                    when={
+                      selectedSection().kind === "supports" ||
+                      selectedSection().kind === "summons" ||
+                      selectedSection().kind === "combatStatuses" ||
+                      selectedSection().kind === "dice" ||
+                      selectedSection().kind === "playerInfo" ||
+                      selectedSection().kind === "deckImport"
+                    }
+                  >
+                    <PlayerSectionEditor
+                      state={state}
+                      section={selectedSection()}
+                      catalog={catalog()}
+                    />
+                  </Match>
+                </Switch>
+
+                <Show when={errors().length > 0}>
+                  <Surface title="状态校验" class="mt-6">
+                    <ul class="list-disc space-y-2 pl-5 text-sm text-rose-100">
+                      <For each={errors()}>{(error) => <li>{error}</li>}</For>
+                    </ul>
+                  </Surface>
+                </Show>
+              </div>
+            </div>
+          </div>
+        </form>
+        <For each={modalStack()}>{(modal) => modal()}</For>
+      </StateEditorContext.Provider>
     </div>
   );
 }

@@ -25,6 +25,8 @@ import {
 } from "../state";
 import { ConfirmModal } from "./ConfirmModal";
 import type { Draft } from "immer";
+import { useStateEditorContext } from "./GameStateEditor";
+import { EntityModal } from "./EntityModal";
 
 // 装备类型定义
 type EquipmentType = "artifact" | "technique" | "weapon" | "talent" | "other";
@@ -127,8 +129,6 @@ interface CollectionContentProps {
   state: GameState;
   who: 0 | 1;
   catalog: EditorCatalog;
-  updateState: UpdateGameState;
-  openModal: (modal: EditorModal) => void;
 }
 
 function detailBadges(card: {
@@ -142,21 +142,47 @@ function detailBadges(card: {
 }
 
 export function PileEditor(props: CollectionContentProps) {
+  const { updateState, openModal } = useStateEditorContext();
+
   const player = () => getPlayer(props.state, props.who);
-  const [addCardModalOpen, setAddCardModalOpen] = createSignal(false);
   const [insertPosition, setInsertPosition] = createSignal<"start" | "end">(
     "end",
   );
 
   const openAddCardModal = (position: "start" | "end") => {
     setInsertPosition(position);
-    setAddCardModalOpen(true);
+    openModal(() => (
+      <AddCardModal
+        catalog={props.catalog}
+        onSelect={handleAddCard}
+        availableTypes={["eventCard", "equipment", "support"]} // 牌库只能添加这些类型的实体
+        availableTags={[
+          "legend",
+          "action",
+          "food",
+          "resonance",
+          "talent",
+          "artifact",
+          "technique",
+          "weapon",
+          "sword",
+          "claymore",
+          "pole",
+          "catalyst",
+          "bow",
+          "ally",
+          "place",
+          "item",
+          "blessing",
+        ]}
+      />
+    ));
   };
 
   const handleAddCard = (definition: EntityDefinition) => {
     const who = props.who;
     const insertPos = insertPosition();
-    props.updateState((draft) => {
+    updateState((draft) => {
       const target = draft.players[who];
       if (target.pile.length >= draft.config.maxPileCount) {
         return;
@@ -183,7 +209,7 @@ export function PileEditor(props: CollectionContentProps) {
             disabled={player().pile.length < 2}
             onClick={() => {
               const who = props.who;
-              props.updateState((draft) => {
+              updateState((draft) => {
                 draft.players[who].pile = shuffleList(draft.players[who].pile);
               });
             }}
@@ -211,7 +237,7 @@ export function PileEditor(props: CollectionContentProps) {
                   onClick: () => {
                     const who = props.who;
                     const i = index();
-                    props.updateState((draft) => {
+                    updateState((draft) => {
                       draft.players[who].pile = moveInArray(
                         draft.players[who].pile,
                         i,
@@ -226,7 +252,7 @@ export function PileEditor(props: CollectionContentProps) {
                   onClick: () => {
                     const who = props.who;
                     const i = index();
-                    props.updateState((draft) => {
+                    updateState((draft) => {
                       const target = draft.players[who];
                       if (target.hands.length >= draft.config.maxHandsCount) {
                         return;
@@ -244,7 +270,7 @@ export function PileEditor(props: CollectionContentProps) {
                   onClick: () => {
                     const who = props.who;
                     const i = index();
-                    props.updateState((draft) => {
+                    updateState((draft) => {
                       draft.players[who].pile = moveInArray(
                         draft.players[who].pile,
                         i,
@@ -258,13 +284,16 @@ export function PileEditor(props: CollectionContentProps) {
                   content: "详情",
                   col: 1,
                   variant: "primary",
-                  onClick: () =>
-                    props.openModal({
-                      kind: "entity",
-                      who: props.who,
-                      area: "pile",
-                      entityId: card.id,
-                    }),
+                  onClick: () => {
+                    openModal(() => (
+                      <EntityModal
+                        who={props.who}
+                        area="pile"
+                        entityId={card.id}
+                        catalog={props.catalog}
+                      />
+                    ));
+                  },
                 },
                 {
                   content: "移除",
@@ -273,7 +302,7 @@ export function PileEditor(props: CollectionContentProps) {
                   onClick: () => {
                     const who = props.who;
                     const i = index();
-                    props.updateState((draft) => {
+                    updateState((draft) => {
                       draft.players[who].pile.splice(i, 1);
                     });
                   },
@@ -306,62 +335,48 @@ export function PileEditor(props: CollectionContentProps) {
           <span class="text-lg">+</span>
           <span>在牌堆底部追加卡牌</span>
         </button>
-
-        {/* AddCardModal */}
-        <AddCardModal
-          open={addCardModalOpen()}
-          state={props.state}
-          catalog={props.catalog}
-          onSelect={handleAddCard}
-          onClose={() => setAddCardModalOpen(false)}
-          availableTypes={["eventCard", "equipment", "support"]} // 牌库只能添加这些类型的实体
-          availableTags={[
-            "legend",
-            "action",
-            "food",
-            "resonance",
-            "talent",
-            "artifact",
-            "technique",
-            "weapon",
-            "sword",
-            "claymore",
-            "pole",
-            "catalyst",
-            "bow",
-            "ally",
-            "place",
-            "item",
-            "blessing",
-          ]}
-        />
       </div>
     </Surface>
   );
 }
 
 export function HandsEditor(props: CollectionContentProps) {
-  const player = () => getPlayer(props.state, props.who);
-  const [addCardModalOpen, setAddCardModalOpen] = createSignal(false);
+  const { updateState, openModal } = useStateEditorContext();
 
-  // 确认对话框状态
-  const [confirmDialog, setConfirmDialog] = createSignal<{
-    open: boolean;
-    title: string;
-    message: string;
-    onConfirm: () => void;
-    onCancel: () => void;
-  }>({
-    open: false,
-    title: "",
-    message: "",
-    onConfirm: () => {},
-    onCancel: () => {},
-  });
+  const player = () => getPlayer(props.state, props.who);
+
+  const openAddCardModal = () => {
+    openModal(() => (
+      <AddCardModal
+        catalog={props.catalog}
+        onSelect={handleAddCard}
+        availableTypes={["eventCard", "equipment", "support"]} // 牌库只能添加这些类型的实体
+        availableTags={[
+          "legend",
+          "action",
+          "food",
+          "resonance",
+          "talent",
+          "artifact",
+          "technique",
+          "weapon",
+          "sword",
+          "claymore",
+          "pole",
+          "catalyst",
+          "bow",
+          "ally",
+          "place",
+          "item",
+          "blessing",
+        ]}
+      />
+    ));
+  };
 
   const handleAddCard = (definition: EntityDefinition) => {
     const who = props.who;
-    props.updateState((draft) => {
+    updateState((draft) => {
       const target = draft.players[who];
       if (target.hands.length >= draft.config.maxHandsCount) {
         return;
@@ -385,44 +400,43 @@ export function HandsEditor(props: CollectionContentProps) {
 
     if (existingEquipment) {
       // 已有同类型装备，显示确认对话框
-      setConfirmDialog({
-        open: true,
-        title: "覆盖装备",
-        message: `角色已装备${getDefinitionName(existingEquipment.definition as EntityDefinition)}，是否覆盖？`,
-        onConfirm: () => {
-          // 执行装备操作
-          props.updateState((draft) => {
-            const target = draft.players[who];
-            const [item] = target.hands.splice(cardIndex, 1);
-            if (!item) return;
+      openModal(() => (
+        <ConfirmModal
+          title="覆盖装备"
+          message={`角色已装备${getDefinitionName(existingEquipment.definition as EntityDefinition)}，是否覆盖？`}
+          confirmText="确认覆盖"
+          cancelText="取消"
+          onConfirm={() => {
+            // 执行装备操作
+            updateState((draft) => {
+              const target = draft.players[who];
+              const [item] = target.hands.splice(cardIndex, 1);
+              if (!item) return;
 
-            const destination = target.characters.find(
-              (c) => c.id === characterId,
-            );
-            if (!destination) return;
+              const destination = target.characters.find(
+                (c) => c.id === characterId,
+              );
+              if (!destination) return;
 
-            // 移除已有的同类型装备
-            const existingIndex = destination.entities.findIndex(
-              (e) =>
-                e.definition.type === "equipment" &&
-                getEquipmentType(e.definition) === eqType,
-            );
-            if (existingIndex !== -1) {
-              destination.entities.splice(existingIndex, 1);
-            }
+              // 移除已有的同类型装备
+              const existingIndex = destination.entities.findIndex(
+                (e) =>
+                  e.definition.type === "equipment" &&
+                  getEquipmentType(e.definition) === eqType,
+              );
+              if (existingIndex !== -1) {
+                destination.entities.splice(existingIndex, 1);
+              }
 
-            // 添加新装备
-            destination.entities.push(item);
-          });
-          setConfirmDialog((prev) => ({ ...prev, open: false }));
-        },
-        onCancel: () => {
-          setConfirmDialog((prev) => ({ ...prev, open: false }));
-        },
-      });
+              // 添加新装备
+              destination.entities.push(item);
+            });
+          }}
+        />
+      ));
     } else {
       // 直接装备
-      props.updateState((draft) => {
+      updateState((draft) => {
         const target = draft.players[who];
         const [item] = target.hands.splice(cardIndex, 1);
         if (!item) return;
@@ -451,7 +465,7 @@ export function HandsEditor(props: CollectionContentProps) {
                   onClick: () => {
                     const who = props.who;
                     const i = index();
-                    props.updateState((draft) => {
+                    updateState((draft) => {
                       draft.players[who].hands = moveInArray(
                         draft.players[who].hands,
                         i,
@@ -466,7 +480,7 @@ export function HandsEditor(props: CollectionContentProps) {
                   onClick: () => {
                     const who = props.who;
                     const i = index();
-                    props.updateState((draft) => {
+                    updateState((draft) => {
                       const target = draft.players[who];
                       if (target.pile.length >= draft.config.maxPileCount) {
                         return;
@@ -484,7 +498,7 @@ export function HandsEditor(props: CollectionContentProps) {
                   onClick: () => {
                     const who = props.who;
                     const i = index();
-                    props.updateState((draft) => {
+                    updateState((draft) => {
                       draft.players[who].hands = moveInArray(
                         draft.players[who].hands,
                         i,
@@ -498,13 +512,16 @@ export function HandsEditor(props: CollectionContentProps) {
                   content: "详情",
                   col: 2,
                   variant: "primary",
-                  onClick: () =>
-                    props.openModal({
-                      kind: "entity",
-                      who: props.who,
-                      area: "hands",
-                      entityId: card.id,
-                    }),
+                  onClick: () => {
+                    openModal(() => (
+                      <EntityModal
+                        who={props.who}
+                        area="hands"
+                        entityId={card.id}
+                        catalog={props.catalog}
+                      />
+                    ));
+                  },
                 },
                 {
                   content: "移除",
@@ -513,7 +530,7 @@ export function HandsEditor(props: CollectionContentProps) {
                   onClick: () => {
                     const who = props.who;
                     const i = index();
-                    props.updateState((draft) => {
+                    updateState((draft) => {
                       draft.players[who].hands.splice(i, 1);
                     });
                   },
@@ -529,7 +546,7 @@ export function HandsEditor(props: CollectionContentProps) {
                   onClick: () => {
                     const who = props.who;
                     const i = index();
-                    props.updateState((draft) => {
+                    updateState((draft) => {
                       const target = draft.players[who];
                       if (
                         target.supports.length >= draft.config.maxSupportsCount
@@ -587,53 +604,13 @@ export function HandsEditor(props: CollectionContentProps) {
         {/* 新增按钮 */}
         <button
           type="button"
-          onClick={() => setAddCardModalOpen(true)}
+          onClick={() => openAddCardModal()}
           disabled={player().hands.length >= props.state.config.maxHandsCount}
           class="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 bg-transparent px-3 py-3 text-sm text-slate-400 hover:border-white/40 hover:text-slate-300 hover:bg-white/5 transition disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <span class="text-lg">+</span>
           <span>追加手牌</span>
         </button>
-
-        {/* AddCardModal */}
-        <AddCardModal
-          open={addCardModalOpen()}
-          state={props.state}
-          catalog={props.catalog}
-          onSelect={handleAddCard}
-          onClose={() => setAddCardModalOpen(false)}
-          availableTypes={["eventCard", "equipment", "support"]} // 牌库只能添加这些类型的实体
-          availableTags={[
-            "legend",
-            "action",
-            "food",
-            "resonance",
-            "talent",
-            "artifact",
-            "technique",
-            "weapon",
-            "sword",
-            "claymore",
-            "pole",
-            "catalyst",
-            "bow",
-            "ally",
-            "place",
-            "item",
-            "blessing",
-          ]}
-        />
-
-        {/* 确认对话框 */}
-        <ConfirmModal
-          open={confirmDialog().open}
-          title={confirmDialog().title}
-          message={confirmDialog().message}
-          confirmText="确认覆盖"
-          cancelText="取消"
-          onConfirm={confirmDialog().onConfirm}
-          onCancel={confirmDialog().onCancel}
-        />
       </div>
     </Surface>
   );

@@ -27,18 +27,16 @@ import {
   getPlayer,
   moveInArray,
   type EditorCatalog,
-  type EditorModal,
   type EditorSection,
-  type UpdateGameState,
 } from "../state";
 import type { Draft } from "immer";
+import { useStateEditorContext } from "./GameStateEditor";
+import { EntityModal } from "./EntityModal";
 
 interface PlayerSectionEditorProps {
   state: GameState;
   section: EditorSection;
   catalog: EditorCatalog;
-  updateState: UpdateGameState;
-  openModal: (modal: EditorModal) => void;
 }
 
 function entityBadges(entity: EntityState) {
@@ -49,6 +47,8 @@ function entityBadges(entity: EntityState) {
 }
 
 export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
+  const { updateState, openModal } = useStateEditorContext();
+
   const section = () => props.section;
   const who = () => {
     const s = section();
@@ -75,9 +75,8 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
 
     // 更新特定类型骰子的数量
     const updateDiceCount = (diceType: number, newCount: number) => {
-      console.log(diceType, newCount);
       const whoV = who();
-      props.updateState((draft) => {
+      updateState((draft) => {
         const target = draft.players[whoV];
         const currentCount = target.dice.filter((d) => d === diceType).length;
 
@@ -107,7 +106,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
     // 加满特定类型的骰子
     const fillDice = (diceType: number) => {
       const whoV = who();
-      props.updateState((draft) => {
+      updateState((draft) => {
         const target = draft.players[whoV];
         const currentCount = target.dice.filter((d) => d === diceType).length;
         const availableSpace = draft.config.maxDiceCount - target.dice.length;
@@ -201,7 +200,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
               value={player().declaredEnd}
               onChange={(value) => {
                 const whoV = who();
-                props.updateState((draft) => {
+                updateState((draft) => {
                   draft.players[whoV].declaredEnd = value;
                 });
               }}
@@ -211,7 +210,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
               value={player().hasDefeated}
               onChange={(value) => {
                 const whoV = who();
-                props.updateState((draft) => {
+                updateState((draft) => {
                   draft.players[whoV].hasDefeated = value;
                 });
               }}
@@ -221,7 +220,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
               value={player().canCharged}
               onChange={(value) => {
                 const whoV = who();
-                props.updateState((draft) => {
+                updateState((draft) => {
                   draft.players[whoV].canCharged = value;
                 });
               }}
@@ -231,7 +230,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
               value={player().canPlunging}
               onChange={(value) => {
                 const whoV = who();
-                props.updateState((draft) => {
+                updateState((draft) => {
                   draft.players[whoV].canPlunging = value;
                 });
               }}
@@ -241,7 +240,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
               value={player().legendUsed}
               onChange={(value) => {
                 const whoV = who();
-                props.updateState((draft) => {
+                updateState((draft) => {
                   draft.players[whoV].legendUsed = value;
                 });
               }}
@@ -251,7 +250,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
               value={player().skipNextTurn}
               onChange={(value) => {
                 const whoV = who();
-                props.updateState((draft) => {
+                updateState((draft) => {
                   draft.players[whoV].skipNextTurn = value;
                 });
               }}
@@ -277,10 +276,10 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
     availableTags?: EntityTag[]; // 可选的标签列表，用于添加时的筛选
   }) => {
     const items = () => player()[props2.area];
-    const [addModalOpen, setAddModalOpen] = createSignal(false);
-    const [confirmModalOpen, setConfirmModalOpen] = createSignal(false);
-    const [pendingDefinition, setPendingDefinition] =
-      createSignal<EntityDefinition | undefined>(void 0);
+
+    const [pendingDefinition, setPendingDefinition] = createSignal<
+      EntityDefinition | undefined
+    >(void 0);
     const [existingEntityIndex, setExistingEntityIndex] =
       createSignal<number>(-1);
 
@@ -321,7 +320,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
         // 存在重复，显示确认弹窗
         setPendingDefinition(definition);
         setExistingEntityIndex(duplicateIndex);
-        setConfirmModalOpen(true);
+        confirmOverride();
       } else {
         // 没有重复，直接添加
         doAdd(definition);
@@ -333,7 +332,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
       const whoV = who();
       const area = props2.area;
       const limit = props2.limit;
-      props.updateState((draft) => {
+      updateState((draft) => {
         const target = draft.players[whoV][area];
         if (typeof limit === "number" && target.length >= limit) {
           return;
@@ -346,11 +345,45 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
     const doReplace = (definition: EntityDefinition, index: number) => {
       const whoV = who();
       const area = props2.area;
-      props.updateState((draft) => {
+      updateState((draft) => {
         const target = draft.players[whoV][area];
         // 替换指定位置的实体
         target[index] = createEntityState(definition, allocateId(draft));
       });
+    };
+
+    const appendEntity = () => {
+      openModal(() => (
+        <AddCardModal
+          catalog={props.catalog}
+          onSelect={handleAddCheck}
+          availableTypes={availableTypes() as EntityType[]}
+          showTypeFilter={false}
+          availableTags={props2.availableTags}
+          showTagFilter={!!props2.availableTags}
+          maxResults={200}
+        />
+      ));
+    };
+
+    {
+      /* Confirm Modal for duplicate entities */
+    }
+    const confirmOverride = () => {
+      openModal(() => (
+        <ConfirmModal
+          title="检测到重复实体"
+          message={
+            pendingDefinition()
+              ? `区域中已存在相同类型的实体「${getDefinitionName(pendingDefinition())}」，是否覆盖？`
+              : ""
+          }
+          confirmText="确认覆盖"
+          cancelText="取消"
+          onConfirm={handleConfirmReplace}
+          onCancel={handleCancelReplace}
+        />
+      ));
     };
 
     // 确认覆盖
@@ -360,14 +393,12 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
       if (definition && index !== -1) {
         doReplace(definition, index);
       }
-      setConfirmModalOpen(false);
       setPendingDefinition(void 0);
       setExistingEntityIndex(-1);
     };
 
     // 取消覆盖，改为添加新的
     const handleCancelReplace = () => {
-      setConfirmModalOpen(false);
       setPendingDefinition(void 0);
       setExistingEntityIndex(-1);
     };
@@ -395,7 +426,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
                       const whoV = who();
                       const area = props2.area;
                       const i = index();
-                      props.updateState((draft) => {
+                      updateState((draft) => {
                         draft.players[whoV][area] = moveInArray(
                           draft.players[whoV][area],
                           i,
@@ -411,7 +442,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
                       const whoV = who();
                       const area = props2.area;
                       const i = index();
-                      props.updateState((draft) => {
+                      updateState((draft) => {
                         draft.players[whoV][area] = moveInArray(
                           draft.players[whoV][area],
                           i,
@@ -426,12 +457,14 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
                     col: 1,
                     variant: "primary",
                     onClick: () =>
-                      props.openModal({
-                        kind: "entity",
-                        who: who(),
-                        area: props2.area,
-                        entityId: entity.id,
-                      }),
+                      openModal(() => (
+                        <EntityModal
+                          who={who()}
+                          area={props2.area}
+                          catalog={props.catalog}
+                          entityId={entity.id}
+                        />
+                      )),
                   },
                   {
                     content: "移除",
@@ -441,7 +474,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
                       const whoV = who();
                       const area = props2.area;
                       const i = index();
-                      props.updateState((draft) => {
+                      updateState((draft) => {
                         draft.players[whoV][area].splice(i, 1);
                       });
                     },
@@ -456,7 +489,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
                     onClick: () => {
                       const whoV = who();
                       const i = index();
-                      props.updateState((draft) => {
+                      updateState((draft) => {
                         const target = draft.players[whoV];
                         if (target.hands.length >= draft.config.maxHandsCount) {
                           return;
@@ -491,7 +524,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
           {/* 新增按钮 */}
           <button
             type="button"
-            onClick={() => setAddModalOpen(true)}
+            onClick={() => appendEntity()}
             disabled={
               typeof props2.limit === "number" && items().length >= props2.limit
             }
@@ -500,35 +533,6 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
             <span class="text-lg">+</span>
             <span>追加{props2.title}</span>
           </button>
-
-          {/* AddCardModal */}
-          <AddCardModal
-            open={addModalOpen()}
-            state={props.state}
-            catalog={props.catalog}
-            onSelect={handleAddCheck}
-            onClose={() => setAddModalOpen(false)}
-            availableTypes={availableTypes() as EntityType[]}
-            showTypeFilter={false}
-            availableTags={props2.availableTags}
-            showTagFilter={!!props2.availableTags}
-            maxResults={200}
-          />
-
-          {/* Confirm Modal for duplicate entities */}
-          <ConfirmModal
-            open={confirmModalOpen()}
-            title="检测到重复实体"
-            message={
-              pendingDefinition()
-                ? `区域中已存在相同类型的实体「${getDefinitionName(pendingDefinition())}」，是否覆盖？`
-                : ""
-            }
-            confirmText="确认覆盖"
-            cancelText="取消"
-            onConfirm={handleConfirmReplace}
-            onCancel={handleCancelReplace}
-          />
         </div>
       </Surface>
     );
@@ -544,14 +548,12 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
       rows: readonly (readonly [number, number[]])[],
     ) => {
       const whoV = who();
-      props.updateState((draft) => {
+      updateState((draft) => {
         const nextLog = new Map(rows.map(([key, value]) => [key, [...value]]));
         draft.players[whoV].roundSkillLog = nextLog;
       });
     };
 
-    // Modal状态
-    const [modalOpen, setModalOpen] = createSignal(false);
     const [editingIndex, setEditingIndex] = createSignal<number | null>(null);
 
     // 获取已使用的角色ID（用于新增时排除）
@@ -562,13 +564,41 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
     // 打开新增modal
     const openAddModal = () => {
       setEditingIndex(null);
-      setModalOpen(true);
+      openModal(() => (
+        <RoundSkillModal
+          catalog={props.catalog}
+          who={who()}
+          usedCharacterIds={
+            editingIndex() !== null
+              ? usedCharacterIds().filter(
+                  (id) => id !== editingData()?.characterId,
+                )
+              : usedCharacterIds()
+          }
+          onSubmit={handleSubmit}
+        />
+      ));
     };
 
     // 打开编辑modal
     const openEditModal = (index: number) => {
       setEditingIndex(index);
-      setModalOpen(true);
+      openModal(() => (
+        <RoundSkillModal
+          catalog={props.catalog}
+          who={who()}
+          editingCharacterId={editingData()?.characterId}
+          editingSkillIds={editingData()?.skillIds}
+          usedCharacterIds={
+            editingIndex() !== null
+              ? usedCharacterIds().filter(
+                  (id) => id !== editingData()?.characterId,
+                )
+              : usedCharacterIds()
+          }
+          onSubmit={handleSubmit}
+        />
+      ));
     };
 
     // 提交处理
@@ -663,25 +693,6 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
             <span>新增技能记录</span>
           </button>
         </div>
-
-        {/* Modal */}
-        <RoundSkillModal
-          open={modalOpen()}
-          state={props.state}
-          catalog={props.catalog}
-          who={who()}
-          editingCharacterId={editingData()?.characterId}
-          editingSkillIds={editingData()?.skillIds}
-          usedCharacterIds={
-            editingIndex() !== null
-              ? usedCharacterIds().filter(
-                  (id) => id !== editingData()?.characterId,
-                )
-              : usedCharacterIds()
-          }
-          onSubmit={handleSubmit}
-          onClose={() => setModalOpen(false)}
-        />
       </div>
     );
   };
@@ -748,7 +759,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
         const whoV = who();
         const importingChs = importCharacters();
         const importingPile = importPile();
-        props.updateState((draft) => {
+        updateState((draft) => {
           const target = draft.players[whoV];
           if (importingChs) {
             target.characters = buildImportedCharacterStates(

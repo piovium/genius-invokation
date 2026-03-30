@@ -7,13 +7,11 @@ import type {
 } from "@gi-tcg/core";
 import { Modal } from "./Modal";
 import { getImageUrl, type EditorCatalog } from "../state";
+import { useStateEditorContext } from "./GameStateEditor";
 
 interface AddCardModalProps {
-  open: boolean;
-  state: GameState;
   catalog: EditorCatalog;
   onSelect: (cardDefinition: EntityDefinition) => void;
-  onClose: () => void;
   // 可选：控制是否展示类型筛选行
   showTypeFilter?: boolean;
   // 可选：控制是否展示标签筛选行
@@ -108,6 +106,7 @@ export const TAG_LABELS: Record<EntityTag, string> = {
 };
 
 export function AddCardModal(props: AddCardModalProps) {
+
   const [query, setQuery] = createSignal("");
   const [selectedType, setSelectedType] = createSignal<EntityType | null>(null);
   const [selectedTags, setSelectedTags] = createSignal<EntityTag[]>([]);
@@ -223,12 +222,7 @@ export function AddCardModal(props: AddCardModalProps) {
   };
 
   return (
-    <Modal
-      open={props.open}
-      title="追加卡牌"
-      description="搜索并选择要追加的卡牌"
-      onClose={props.onClose}
-    >
+    <Modal title="追加卡牌" description="搜索并选择要追加的卡牌">
       <div class="space-y-4">
         {/* 搜索框 */}
         <div class="space-y-2">
@@ -338,7 +332,7 @@ export function AddCardModal(props: AddCardModalProps) {
         </div>
 
         {/* 结果网格 - 固定高度可滚动（细体滚动条） */}
-        <div class="h-40vh overflow-y-auto pr-2 scrollbar-thin">
+        <div class="h-40vh overflow-y-auto pr-2 gi-editor-scroll">
           <div
             class="grid gap-3"
             style={{
@@ -355,9 +349,9 @@ export function AddCardModal(props: AddCardModalProps) {
                 return (
                   <button
                     type="button"
+                    data-close-dialog
                     onClick={() => {
                       props.onSelect(card.definition);
-                      props.onClose();
                     }}
                     class="group flex flex-col items-center gap-2 p-3 rounded-xl border border-white/10 bg-slate-800/50 hover:bg-slate-700/50 hover:border-white/30 transition"
                   >

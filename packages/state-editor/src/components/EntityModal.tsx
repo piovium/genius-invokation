@@ -17,8 +17,6 @@ import {
   getPlayer,
   moveInArray,
   type EditorCatalog,
-  type EditorModal,
-  type UpdateGameState,
   getImageUrl,
   type EditorEntityArea,
   type AssetOption,
@@ -28,54 +26,27 @@ import {
 import type { Draft } from "immer";
 import { VariableGrid } from "./VariableGrid";
 import { PreviewTile } from "./Previews";
+import { useStateEditorContext } from "./GameStateEditor";
+import { AttachmentModal } from "./AttachmentModal";
 
 interface EntityContentProps {
-  state: GameState;
   who: 0 | 1;
   area: EditorEntityArea;
   entityId: number;
   characterId?: number;
   catalog: EditorCatalog;
-  updateState: UpdateGameState;
-  openModal: (modal: EditorModal) => void;
-}
-
-function updateEntityByAreaContent(
-  props: EntityContentProps,
-  updater: (entity: Draft<EntityState>) => void,
-) {
-  props.updateState((draft) => {
-    const player = draft.players[props.who];
-    if (props.area === "characterEntities") {
-      const character = player.characters.find(
-        (item) => item.id === props.characterId,
-      );
-      const entity = character?.entities.find(
-        (item) => item.id === props.entityId,
-      );
-      if (entity) {
-        updater(entity);
-      }
-      return;
-    }
-    const entity = player[props.area].find(
-      (item) => item.id === props.entityId,
-    );
-    if (entity) {
-      updater(entity);
-    }
-  });
 }
 
 function EntityModalContent(props: EntityContentProps) {
+  const { gameState, updateState, openModal } = useStateEditorContext();
+
   const [query, setQuery] = createSignal("");
-  const [confirmModalOpen, setConfirmModalOpen] = createSignal(false);
   const [pendingAttachment, setPendingAttachment] =
     createSignal<AssetOption<AttachmentDefinition> | null>(null);
   const [existingAttachmentIndex, setExistingAttachmentIndex] =
     createSignal(-1);
 
-  const player = () => getPlayer(props.state, props.who);
+  const player = () => getPlayer(gameState(), props.who);
   const entity = () =>
     getEntity(player(), props.area, props.entityId, props.characterId);
   const allowAttachments = () =>
@@ -109,6 +80,22 @@ function EntityModalContent(props: EntityContentProps) {
     return index;
   };
 
+  const confirmDuplicateAttachment = () => {
+    openModal(() => (
+      <ConfirmModal
+        title="检测到重复附着"
+        message={(() => {
+          const att = pendingAttachment();
+          return att ? `已存在相同类型的附着「${att.name}」，是否覆盖？` : "";
+        })()}
+        confirmText="确认覆盖"
+        cancelText="取消"
+        onConfirm={handleConfirmReplaceAttachment}
+        onCancel={handleCancelReplaceAttachment}
+      />
+    ));
+  };
+
   // 处理添加附着前的检查
   const handleAddAttachmentCheck = (
     option: AssetOption<AttachmentDefinition>,
@@ -119,7 +106,7 @@ function EntityModalContent(props: EntityContentProps) {
       // 存在重复，显示确认弹窗
       setPendingAttachment(option);
       setExistingAttachmentIndex(duplicateIndex);
-      setConfirmModalOpen(true);
+      confirmDuplicateAttachment();
     } else {
       // 没有重复，直接添加
       doAddAttachment(option);
@@ -131,7 +118,7 @@ function EntityModalContent(props: EntityContentProps) {
     const who = props.who;
     const area = props.area as "hands" | "pile";
     const etId = props.entityId;
-    props.updateState((draft) => {
+    updateState((draft) => {
       const targetPlayer = draft.players[who];
       const targetEntity = targetPlayer[area].find((item) => item.id === etId);
       if (!targetEntity) {
@@ -151,7 +138,7 @@ function EntityModalContent(props: EntityContentProps) {
     const who = props.who;
     const area = props.area as "hands" | "pile";
     const etId = props.entityId;
-    props.updateState((draft) => {
+    updateState((draft) => {
       const targetPlayer = draft.players[who];
       const targetEntity = targetPlayer[area].find((item) => item.id === etId);
       if (!targetEntity) {
@@ -172,16 +159,41 @@ function EntityModalContent(props: EntityContentProps) {
     if (attachment && index !== -1) {
       doReplaceAttachment(attachment, index);
     }
-    setConfirmModalOpen(false);
     setPendingAttachment(null);
     setExistingAttachmentIndex(-1);
   };
 
   // 取消覆盖附着，改为添加新的
   const handleCancelReplaceAttachment = () => {
-    setConfirmModalOpen(false);
     setPendingAttachment(null);
     setExistingAttachmentIndex(-1);
+  };
+
+  const updateEntityByAreaContent = (
+    updater: (entity: Draft<EntityState>) => void,
+  ) => {
+    // TODO reactivity issue
+    updateState((draft) => {
+      const player = draft.players[props.who];
+      if (props.area === "characterEntities") {
+        const character = player.characters.find(
+          (item) => item.id === props.characterId,
+        );
+        const entity = character?.entities.find(
+          (item) => item.id === props.entityId,
+        );
+        if (entity) {
+          updater(entity);
+        }
+        return;
+      }
+      const entity = player[props.area].find(
+        (item) => item.id === props.entityId,
+      );
+      if (entity) {
+        updater(entity);
+      }
+    });
   };
 
   return (
@@ -207,7 +219,7 @@ function EntityModalContent(props: EntityContentProps) {
                   <VariableGrid
                     entries={Object.entries(currentEntity().variables)}
                     onChange={(key, value) =>
-                      updateEntityByAreaContent(props, (target) => {
+                      updateEntityByAreaContent((target) => {
                         target.variables[key] = value;
                       })
                     }
@@ -289,8 +301,6 @@ function EntityModalContent(props: EntityContentProps) {
                               entity={currentEntity()}
                               attachment={attachment}
                               index={index()}
-                              updateState={props.updateState}
-                              openModal={props.openModal}
                             />
                           )}
                         </For>
@@ -308,20 +318,6 @@ function EntityModalContent(props: EntityContentProps) {
           );
         }}
       </Show>
-
-      {/* Confirm Modal for duplicate attachments */}
-      <ConfirmModal
-        open={confirmModalOpen()}
-        title="检测到重复附着"
-        message={(() => {
-          const att = pendingAttachment();
-          return att ? `已存在相同类型的附着「${att.name}」，是否覆盖？` : "";
-        })()}
-        confirmText="确认覆盖"
-        cancelText="取消"
-        onConfirm={handleConfirmReplaceAttachment}
-        onCancel={handleCancelReplaceAttachment}
-      />
     </>
   );
 }
@@ -332,11 +328,11 @@ interface AttachmentListItemProps {
   area: "hands" | "pile";
   entity: EntityState;
   attachment: AttachmentState;
-  updateState: UpdateGameState;
-  openModal: (modal: EditorModal) => void;
 }
 
 function AttachmentListItem(props: AttachmentListItemProps) {
+  const { updateState, openModal } = useStateEditorContext();
+
   const isFirst = () => props.index === 0;
   const isLast = () => props.index === props.entity.attachments.length - 1;
 
@@ -381,13 +377,14 @@ function AttachmentListItem(props: AttachmentListItemProps) {
       col: 1,
       variant: "primary",
       onClick: () => {
-        props.openModal({
-          kind: "attachment",
-          who: props.who,
-          area: props.area,
-          entityId: props.entity.id,
-          attachmentId: props.attachment.id,
-        });
+        openModal(() => (
+          <AttachmentModal
+            who={props.who}
+            area={props.area}
+            entityId={props.entity.id}
+            attachmentId={props.attachment.id}
+          />
+        ));
       },
     },
     {
@@ -395,7 +392,7 @@ function AttachmentListItem(props: AttachmentListItemProps) {
       col: 0,
       onClick: () => {
         if (isFirst()) return;
-        props.updateState(moveUp);
+        updateState(moveUp);
       },
     },
     {
@@ -403,7 +400,7 @@ function AttachmentListItem(props: AttachmentListItemProps) {
       col: 0,
       onClick: () => {
         if (isLast()) return;
-        props.updateState(moveDown);
+        updateState(moveDown);
       },
     },
     {
@@ -411,7 +408,7 @@ function AttachmentListItem(props: AttachmentListItemProps) {
       col: 1,
       variant: "danger",
       onClick: () => {
-        props.updateState(remove);
+        updateState(remove);
       },
     },
   ];
@@ -428,13 +425,11 @@ function AttachmentListItem(props: AttachmentListItemProps) {
   );
 }
 
-interface EntityModalProps extends EntityContentProps {
-  open: boolean;
-  onClose: () => void;
-}
+interface EntityModalProps extends EntityContentProps {}
 
 export function EntityModal(props: EntityModalProps) {
-  const player = () => getPlayer(props.state, props.who);
+  const { gameState } = useStateEditorContext();
+  const player = () => getPlayer(gameState(), props.who);
   const entity = () =>
     getEntity(player(), props.area, props.entityId, props.characterId);
   const title = () =>
@@ -443,16 +438,13 @@ export function EntityModal(props: EntityModalProps) {
       : "实体编辑";
 
   return (
-    <Modal open={props.open} title={title()} onClose={props.onClose}>
+    <Modal title={title()}>
       <EntityModalContent
-        state={props.state}
         who={props.who}
         area={props.area}
         entityId={props.entityId}
         characterId={props.characterId}
         catalog={props.catalog}
-        updateState={props.updateState}
-        openModal={props.openModal}
       />
     </Modal>
   );

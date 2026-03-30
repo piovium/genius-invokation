@@ -36,6 +36,8 @@ import {
 } from "../state";
 import type { Draft } from "immer";
 import { VariableGrid } from "./VariableGrid";
+import { useStateEditorContext } from "./GameStateEditor";
+import { EntityModal } from "./EntityModal";
 
 // 角色标签分类
 const CHARACTER_TAG_CATEGORIES = {
@@ -78,8 +80,6 @@ interface CharacterEditorProps {
   who: 0 | 1;
   characterIndex: number;
   catalog: EditorCatalog;
-  updateState: UpdateGameState;
-  openModal: (modal: EditorModal) => void;
   onSelectSection: (section: EditorSection) => void;
 }
 
@@ -90,9 +90,8 @@ export function CharacterEditor(props: CharacterEditorProps) {
   const defeated = () => (character()?.variables.alive ?? 1) === 0;
   const isActive = () => player().activeCharacterId === characterId();
 
-  // 角色选择弹窗状态
-  const [selectCharacterModalOpen, setSelectCharacterModalOpen] =
-    createSignal(false);
+  const { openModal, updateState } = useStateEditorContext();
+
   // 角色标签筛选状态
   const [selectedCharacterTags, setSelectedCharacterTags] = createSignal<
     CharacterTag[]
@@ -140,7 +139,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
   ) => {
     const who = props.who;
     const chId = characterId();
-    props.updateState((draft) => {
+    updateState((draft) => {
       const target = draft.players[who].characters.find(
         (item) => item.id === chId,
       );
@@ -150,9 +149,6 @@ export function CharacterEditor(props: CharacterEditorProps) {
     });
   };
 
-  // 击倒确认弹窗状态
-  const [defeatConfirmOpen, setDefeatConfirmOpen] = createSignal(false);
-
   // 移动角色位置
   const moveCharacter = (delta: number) => {
     const who = props.who;
@@ -161,7 +157,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
     const newIndex = currentIndex + delta;
     if (newIndex < 0 || newIndex >= chars.length) return;
 
-    props.updateState((draft) => {
+    updateState((draft) => {
       const draftChars = draft.players[who].characters;
       // 交换位置
       const temp = draftChars[currentIndex];
@@ -179,14 +175,22 @@ export function CharacterEditor(props: CharacterEditorProps) {
 
   // 标记为击倒
   const defeatCharacter = () => {
-    setDefeatConfirmOpen(true);
+    openModal(() => (
+      <ConfirmModal
+        title="确认击倒角色"
+        message="确定要将该角色设为已击倒吗？击倒后角色将失去所有装备和状态。"
+        confirmText="确认击倒"
+        cancelText="取消"
+        onConfirm={handleConfirmDefeat}
+      />
+    ));
   };
 
   // 确认击倒
   const handleConfirmDefeat = () => {
     const who = props.who;
     const chId = characterId();
-    props.updateState((draft) => {
+    updateState((draft) => {
       const target = draft.players[who].characters.find(
         (item) => item.id === chId,
       );
@@ -197,19 +201,13 @@ export function CharacterEditor(props: CharacterEditorProps) {
       target.variables.alive = 0;
       target.entities = [];
     });
-    setDefeatConfirmOpen(false);
-  };
-
-  // 取消击倒
-  const handleCancelDefeat = () => {
-    setDefeatConfirmOpen(false);
   };
 
   // 恢复存活
   const reviveCharacter = () => {
     const who = props.who;
     const chId = characterId();
-    props.updateState((draft) => {
+    updateState((draft) => {
       const target = draft.players[who].characters.find(
         (item) => item.id === chId,
       );
@@ -223,7 +221,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
   const setAsActive = () => {
     const who = props.who;
     const chId = characterId();
-    props.updateState((draft) => {
+    updateState((draft) => {
       draft.players[who].activeCharacterId = chId;
     });
   };
@@ -261,14 +259,147 @@ export function CharacterEditor(props: CharacterEditorProps) {
 
   // 重新选择角色（覆盖当前角色）
   const reselectCharacter = () => {
-    setSelectCharacterModalOpen(true);
+    openModal(() => (
+      <Modal title="选择角色" description="从列表中选择一个角色">
+        <div class="space-y-4">
+          {/* 标签筛选区域 */}
+          <div class="space-y-3 border-b border-white/10 pb-4">
+            {/* 元素标签 */}
+            <div class="space-y-2">
+              <div class="text-xs text-slate-400">元素</div>
+              <div class="flex flex-wrap gap-2">
+                <For each={CHARACTER_TAG_CATEGORIES.element}>
+                  {({ tag, label }) => (
+                    <button
+                      type="button"
+                      onClick={() => toggleCharacterTag(tag)}
+                      class={`px-2 py-1 rounded-full text-xs border transition ${
+                        selectedCharacterTags().includes(tag)
+                          ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-50"
+                          : "bg-slate-800 border-white/10 text-slate-300 hover:bg-slate-700"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  )}
+                </For>
+              </div>
+            </div>
+
+            {/* 武器标签 */}
+            <div class="space-y-2">
+              <div class="text-xs text-slate-400">武器</div>
+              <div class="flex flex-wrap gap-2">
+                <For each={CHARACTER_TAG_CATEGORIES.weapon}>
+                  {({ tag, label }) => (
+                    <button
+                      type="button"
+                      onClick={() => toggleCharacterTag(tag)}
+                      class={`px-2 py-1 rounded-full text-xs border transition ${
+                        selectedCharacterTags().includes(tag)
+                          ? "bg-amber-500/20 border-amber-500/50 text-amber-50"
+                          : "bg-slate-800 border-white/10 text-slate-300 hover:bg-slate-700"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  )}
+                </For>
+              </div>
+            </div>
+
+            {/* 地区标签 */}
+            <div class="space-y-2">
+              <div class="text-xs text-slate-400">阵营</div>
+              <div class="flex flex-wrap gap-2">
+                <For each={CHARACTER_TAG_CATEGORIES.nation}>
+                  {({ tag, label }) => (
+                    <button
+                      type="button"
+                      onClick={() => toggleCharacterTag(tag)}
+                      class={`px-2 py-1 rounded-full text-xs border transition ${
+                        selectedCharacterTags().includes(tag)
+                          ? "bg-purple-500/20 border-purple-500/50 text-purple-50"
+                          : "bg-slate-800 border-white/10 text-slate-300 hover:bg-slate-700"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  )}
+                </For>
+              </div>
+            </div>
+            {/* 已选标签和清除按钮 */}
+            <Show when={selectedCharacterTags().length > 0}>
+              <div class="flex items-center justify-between pt-2 border-t border-white/10">
+                <div class="text-xs text-slate-400">
+                  已选择 {selectedCharacterTags().length} 个标签
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCharacterTags([])}
+                  class="text-xs text-slate-400 hover:text-slate-200 transition"
+                >
+                  清除筛选
+                </button>
+              </div>
+            </Show>
+          </div>
+
+          {/* 角色列表 */}
+          <div class="h-40vh overflow-y-auto pr-2 gi-editor-scroll">
+            {/* 结果统计 */}
+            <div class="text-xs text-slate-400 mb-2">
+              找到 {filteredCharacters().length} 个角色
+            </div>
+
+            <div class="grid grid-cols-8 gap-3">
+              <For each={filteredCharacters()}>
+                {(char) => (
+                  <button
+                    type="button"
+                    data-close-dialog
+                    onClick={() => handleSelectCharacter(char.definition)}
+                    class="group flex flex-col items-center gap-2 p-3 rounded-xl border border-white/10 bg-slate-800/50 hover:bg-slate-700/50 hover:border-amber-500/50 transition"
+                  >
+                    {/* 角色头像 */}
+                    <div class="w-full aspect-square rounded-full overflow-hidden border-2 border-white/20 group-hover:border-amber-500/50">
+                      <img
+                        src={getImageUrl(char, "icon")}
+                        alt={char.name}
+                        class="w-full h-full object-cover group-hover:scale-105 transition"
+                        loading="lazy"
+                      />
+                    </div>
+                    {/* 名称和ID */}
+                    <div class="text-center w-full">
+                      <div class="text-xs text-slate-200 truncate">
+                        {char.name}
+                      </div>
+                      <div class="text-[10px] text-slate-500">#{char.id}</div>
+                    </div>
+                  </button>
+                )}
+              </For>
+            </div>
+
+            {/* 空状态 */}
+            <Show when={filteredCharacters().length === 0}>
+              <div class="text-center py-8 text-slate-500">
+                没有找到匹配的角色
+              </div>
+            </Show>
+          </div>
+        </div>
+      </Modal>
+    ));
   };
 
   // 处理角色选择
   const handleSelectCharacter = (charDef: CharacterDefinition) => {
     const who = props.who;
     const chIdx = props.characterIndex;
-    props.updateState((draft) => {
+    updateState((draft) => {
       const player = draft.players[who];
       const existingChar = player.characters[chIdx];
 
@@ -299,8 +430,6 @@ export function CharacterEditor(props: CharacterEditorProps) {
         player.activeCharacterId = newCharacter.id;
       }
     });
-
-    setSelectCharacterModalOpen(false);
   };
 
   return (
@@ -312,7 +441,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
             <div class="space-y-6">
               <button
                 type="button"
-                onClick={() => setSelectCharacterModalOpen(true)}
+                onClick={() => reselectCharacter()}
                 class="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-amber-400/40 bg-transparent px-3 py-4 text-sm text-amber-300 hover:border-amber-400/70 hover:bg-amber-400/10 transition"
               >
                 <span class="text-lg">+</span>
@@ -554,8 +683,6 @@ export function CharacterEditor(props: CharacterEditorProps) {
                   characterId={characterId()}
                   state={props.state}
                   catalog={props.catalog}
-                  updateState={props.updateState}
-                  openModal={props.openModal}
                   defeated={defeated()}
                 />
               </div>
@@ -563,155 +690,6 @@ export function CharacterEditor(props: CharacterEditorProps) {
           );
         }}
       </Show>
-
-      {/* 角色选择弹窗 */}
-      <Modal
-        open={selectCharacterModalOpen()}
-        title="选择角色"
-        description="从列表中选择一个角色"
-        onClose={() => setSelectCharacterModalOpen(false)}
-      >
-        <div class="space-y-4">
-          {/* 标签筛选区域 */}
-          <div class="space-y-3 border-b border-white/10 pb-4">
-            {/* 元素标签 */}
-            <div class="space-y-2">
-              <div class="text-xs text-slate-400">元素</div>
-              <div class="flex flex-wrap gap-2">
-                <For each={CHARACTER_TAG_CATEGORIES.element}>
-                  {({ tag, label }) => (
-                    <button
-                      type="button"
-                      onClick={() => toggleCharacterTag(tag)}
-                      class={`px-2 py-1 rounded-full text-xs border transition ${
-                        selectedCharacterTags().includes(tag)
-                          ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-50"
-                          : "bg-slate-800 border-white/10 text-slate-300 hover:bg-slate-700"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  )}
-                </For>
-              </div>
-            </div>
-
-            {/* 武器标签 */}
-            <div class="space-y-2">
-              <div class="text-xs text-slate-400">武器</div>
-              <div class="flex flex-wrap gap-2">
-                <For each={CHARACTER_TAG_CATEGORIES.weapon}>
-                  {({ tag, label }) => (
-                    <button
-                      type="button"
-                      onClick={() => toggleCharacterTag(tag)}
-                      class={`px-2 py-1 rounded-full text-xs border transition ${
-                        selectedCharacterTags().includes(tag)
-                          ? "bg-amber-500/20 border-amber-500/50 text-amber-50"
-                          : "bg-slate-800 border-white/10 text-slate-300 hover:bg-slate-700"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  )}
-                </For>
-              </div>
-            </div>
-
-            {/* 地区标签 */}
-            <div class="space-y-2">
-              <div class="text-xs text-slate-400">阵营</div>
-              <div class="flex flex-wrap gap-2">
-                <For each={CHARACTER_TAG_CATEGORIES.nation}>
-                  {({ tag, label }) => (
-                    <button
-                      type="button"
-                      onClick={() => toggleCharacterTag(tag)}
-                      class={`px-2 py-1 rounded-full text-xs border transition ${
-                        selectedCharacterTags().includes(tag)
-                          ? "bg-purple-500/20 border-purple-500/50 text-purple-50"
-                          : "bg-slate-800 border-white/10 text-slate-300 hover:bg-slate-700"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  )}
-                </For>
-              </div>
-            </div>
-            {/* 已选标签和清除按钮 */}
-            <Show when={selectedCharacterTags().length > 0}>
-              <div class="flex items-center justify-between pt-2 border-t border-white/10">
-                <div class="text-xs text-slate-400">
-                  已选择 {selectedCharacterTags().length} 个标签
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedCharacterTags([])}
-                  class="text-xs text-slate-400 hover:text-slate-200 transition"
-                >
-                  清除筛选
-                </button>
-              </div>
-            </Show>
-          </div>
-
-          {/* 角色列表 */}
-          <div class="h-40vh overflow-y-auto pr-2 scrollbar-thin">
-            {/* 结果统计 */}
-            <div class="text-xs text-slate-400 mb-2">
-              找到 {filteredCharacters().length} 个角色
-            </div>
-
-            <div class="grid grid-cols-8 gap-3">
-              <For each={filteredCharacters()}>
-                {(char) => (
-                  <button
-                    type="button"
-                    onClick={() => handleSelectCharacter(char.definition)}
-                    class="group flex flex-col items-center gap-2 p-3 rounded-xl border border-white/10 bg-slate-800/50 hover:bg-slate-700/50 hover:border-amber-500/50 transition"
-                  >
-                    {/* 角色头像 */}
-                    <div class="w-full aspect-square rounded-full overflow-hidden border-2 border-white/20 group-hover:border-amber-500/50">
-                      <img
-                        src={getImageUrl(char, "icon")}
-                        alt={char.name}
-                        class="w-full h-full object-cover group-hover:scale-105 transition"
-                        loading="lazy"
-                      />
-                    </div>
-                    {/* 名称和ID */}
-                    <div class="text-center w-full">
-                      <div class="text-xs text-slate-200 truncate">
-                        {char.name}
-                      </div>
-                      <div class="text-[10px] text-slate-500">#{char.id}</div>
-                    </div>
-                  </button>
-                )}
-              </For>
-            </div>
-
-            {/* 空状态 */}
-            <Show when={filteredCharacters().length === 0}>
-              <div class="text-center py-8 text-slate-500">
-                没有找到匹配的角色
-              </div>
-            </Show>
-          </div>
-        </div>
-      </Modal>
-
-      {/* 击倒确认弹窗 */}
-      <ConfirmModal
-        open={defeatConfirmOpen()}
-        title="确认击倒角色"
-        message="确定要将该角色设为已击倒吗？击倒后角色将失去所有装备和状态。"
-        confirmText="确认击倒"
-        cancelText="取消"
-        onConfirm={handleConfirmDefeat}
-        onCancel={handleCancelDefeat}
-      />
     </>
   );
 }
@@ -723,22 +701,18 @@ interface CharacterEntitySectionProps {
   characterId: number;
   state: GameState;
   catalog: EditorCatalog;
-  updateState: UpdateGameState;
-  openModal: (modal: EditorModal) => void;
   defeated: boolean;
 }
 
 function CharacterEntitySection(props: CharacterEntitySectionProps) {
-  const [addModalOpen, setAddModalOpen] = createSignal(false);
-  const [confirmModalOpen, setConfirmModalOpen] = createSignal(false);
+  const { openModal, updateState } = useStateEditorContext();
+
   const [pendingDefinition, setPendingDefinition] = createSignal<
     EntityDefinition | undefined
   >(void 0);
   const [existingEntityIndex, setExistingEntityIndex] =
     createSignal<number>(-1);
-  // 同类实体替换确认弹窗状态
-  const [categoryReplaceModalOpen, setCategoryReplaceModalOpen] =
-    createSignal(false);
+
   const [pendingCategoryReplace, setPendingCategoryReplace] = createSignal<{
     definition: EntityDefinition;
     existingIndex: number;
@@ -747,15 +721,9 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
 
   // 武器/天赋不合法警告弹窗状态
   const [invalidEntityWarning, setInvalidEntityWarning] = createSignal<{
-    open: boolean;
     type: "weapon" | "talent" | "other";
     entityName: string;
-  }>({ open: false, type: "other", entityName: "" });
-
-  // 关闭不合法警告弹窗
-  const closeInvalidEntityWarning = () => {
-    setInvalidEntityWarning({ open: false, type: "other", entityName: "" });
-  };
+  } | null>(null);
 
   // 检查实体类别（武器、圣遗物、天赋、特技）
   const getEntityCategory = (definition: EntityDefinition): string | null => {
@@ -832,6 +800,100 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
     return true;
   };
 
+  const appendEntity = () => {
+    openModal(() => (
+      <AddCardModal
+        catalog={props.catalog}
+        onSelect={(definition) => {
+          handleAddCheck(definition);
+        }}
+        showTypeFilter={true}
+        showTagFilter={true}
+        availableTypes={["equipment", "status"]}
+        availableTags={[
+          "shield",
+          "barrier",
+          "preparingSkill",
+          "nightsoulsBlessing",
+          "talent",
+          "artifact",
+          "technique",
+          "weapon",
+          "sword",
+          "claymore",
+          "pole",
+          "catalyst",
+          "bow",
+        ]}
+        maxResults={60}
+      />
+    ));
+  };
+
+  /* 确认覆盖弹窗 - 相同 definition.id */
+  const confirmOverride = () => {
+    openModal(() => (
+      <ConfirmModal
+        title="检测到重复实体"
+        message={
+          pendingDefinition()
+            ? `角色区域中已存在相同类型的实体「${getDefinitionName(pendingDefinition())}」，是否覆盖？`
+            : ""
+        }
+        confirmText="确认覆盖"
+        cancelText="取消"
+        onConfirm={handleConfirmReplace}
+        onCancel={handleCancelReplace}
+      />
+    ));
+  };
+
+  /* 确认替换弹窗 - 同类别实体（武器、圣遗物、天赋、特技） */
+  const confirmReplace = () => {
+    openModal(() => (
+      <ConfirmModal
+        title={`${(() => {
+          const pending = pendingCategoryReplace();
+          return pending
+            ? `已存在${getCategoryLabel(pending.category)}`
+            : "替换确认";
+        })()}`}
+        message={(() => {
+          const pending = pendingCategoryReplace();
+          if (!pending) return "";
+          const existingEntity =
+            props.character.entities[pending.existingIndex];
+          return `角色区域中已存在${getCategoryLabel(pending.category)}「${existingEntity ? getDefinitionName(existingEntity.definition) : ""}」，是否替换为新${getCategoryLabel(pending.category)}「${getDefinitionName(pending.definition)}」？`;
+        })()}
+        confirmText="确认替换"
+        cancelText="取消"
+        onConfirm={handleConfirmCategoryReplace}
+        onCancel={handleCancelCategoryReplace}
+      />
+    ));
+  };
+
+  /* 不合法实体警告弹窗 - 武器/天赋不合法 */
+  const confirmInvalidEntity = () => {
+    openModal(() => (
+      <ConfirmModal
+        title="实体不合法"
+        message={(() => {
+          const warning = invalidEntityWarning();
+          if (!warning) return "";
+          if (warning.type === "weapon") {
+            return `「${warning.entityName}」的武器类型与当前角色不匹配，无法装备。`;
+          } else if (warning.type === "talent") {
+            return `「${warning.entityName}」不属于当前角色，无法装备。`;
+          } else {
+            return `「${warning.entityName}」不适合当前角色。`;
+          }
+        })()}
+        confirmText="知道了"
+      />
+    ));
+  };
+
   // 处理添加前的检查
   const handleAddCheck = (definition: EntityDefinition) => {
     // 1. 首先检查合法性
@@ -840,25 +902,15 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
       const weaponTags = ["sword", "claymore", "pole", "catalyst", "bow"];
       const entityWeaponTag = tags.find((tag) => weaponTags.includes(tag));
 
-      if (entityWeaponTag) {
-        setInvalidEntityWarning({
-          open: true,
-          type: "weapon",
-          entityName: getDefinitionName(definition),
-        });
-      } else if (tags.includes("talent")) {
-        setInvalidEntityWarning({
-          open: true,
-          type: "talent",
-          entityName: getDefinitionName(definition),
-        });
-      } else {
-        setInvalidEntityWarning({
-          open: true,
-          type: "other",
-          entityName: getDefinitionName(definition),
-        });
-      }
+      setInvalidEntityWarning({
+        type: entityWeaponTag
+          ? "weapon"
+          : tags.includes("talent")
+            ? "talent"
+            : "other",
+        entityName: getDefinitionName(definition),
+      });
+      confirmInvalidEntity();
       return;
     }
 
@@ -867,7 +919,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
     if (duplicateIndex !== -1) {
       setPendingDefinition(definition);
       setExistingEntityIndex(duplicateIndex);
-      setConfirmModalOpen(true);
+      confirmOverride();
       return;
     }
 
@@ -879,7 +931,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
         existingIndex: sameCategory.index,
         category: sameCategory.category,
       });
-      setCategoryReplaceModalOpen(true);
+      confirmReplace();
       return;
     }
 
@@ -891,7 +943,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
   const doAdd = (definition: EntityDefinition) => {
     const who = props.who;
     const chId = props.characterId;
-    props.updateState((draft) => {
+    updateState((draft) => {
       const target = draft.players[who].characters.find(
         (item) => item.id === chId,
       );
@@ -905,7 +957,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
   const doReplace = (definition: EntityDefinition, index: number) => {
     const who = props.who;
     const chId = props.characterId;
-    props.updateState((draft) => {
+    updateState((draft) => {
       const target = draft.players[who].characters.find(
         (item) => item.id === chId,
       );
@@ -922,14 +974,12 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
     if (definition && index !== -1) {
       doReplace(definition, index);
     }
-    setConfirmModalOpen(false);
     setPendingDefinition(void 0);
     setExistingEntityIndex(-1);
   };
 
   // 取消覆盖
   const handleCancelReplace = () => {
-    setConfirmModalOpen(false);
     setPendingDefinition(void 0);
     setExistingEntityIndex(-1);
   };
@@ -940,13 +990,11 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
     if (pending) {
       doReplace(pending.definition, pending.existingIndex);
     }
-    setCategoryReplaceModalOpen(false);
     setPendingCategoryReplace(null);
   };
 
   // 取消同类替换
   const handleCancelCategoryReplace = () => {
-    setCategoryReplaceModalOpen(false);
     setPendingCategoryReplace(null);
   };
 
@@ -968,7 +1016,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
                     const who = props.who;
                     const chId = props.characterId;
                     const i = index();
-                    props.updateState((draft) => {
+                    updateState((draft) => {
                       const target = draft.players[who].characters.find(
                         (item) => item.id === chId,
                       );
@@ -984,7 +1032,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
                     const who = props.who;
                     const chId = props.characterId;
                     const i = index();
-                    props.updateState((draft) => {
+                    updateState((draft) => {
                       const target = draft.players[who].characters.find(
                         (item) => item.id === chId,
                       );
@@ -997,14 +1045,16 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
                   content: "详情",
                   col: 1,
                   variant: "primary",
-                  onClick: () =>
-                    props.openModal({
-                      kind: "entity",
-                      who: props.who,
-                      area: "characterEntities",
-                      entityId: entity.id,
-                      characterId: props.characterId,
-                    }),
+                  onClick: () => {
+                    openModal(() => (
+                      <EntityModal
+                        who={props.who}
+                        area="characterEntities"
+                        entityId={entity.id}
+                        catalog={props.catalog}
+                      />
+                    ));
+                  },
                 },
                 {
                   content: "移除",
@@ -1014,7 +1064,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
                     const who = props.who;
                     const chId = props.characterId;
                     const i = index();
-                    props.updateState((draft) => {
+                    updateState((draft) => {
                       const target = draft.players[who].characters.find(
                         (item) => item.id === chId,
                       );
@@ -1047,7 +1097,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
           {/* 新增按钮 */}
           <button
             type="button"
-            onClick={() => setAddModalOpen(true)}
+            onClick={() => appendEntity()}
             disabled={props.defeated}
             class="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 bg-transparent px-3 py-3 text-sm text-slate-400 hover:border-white/40 hover:text-slate-300 hover:bg-white/5 transition disabled:opacity-40 disabled:cursor-not-allowed"
           >
@@ -1056,94 +1106,6 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
           </button>
         </div>
       </div>
-
-      {/* 添加实体弹窗 - 使用 AddCardModal */}
-      <AddCardModal
-        open={addModalOpen()}
-        state={props.state}
-        catalog={props.catalog}
-        onSelect={(definition) => {
-          handleAddCheck(definition);
-          setAddModalOpen(false);
-        }}
-        onClose={() => setAddModalOpen(false)}
-        showTypeFilter={true}
-        showTagFilter={true}
-        availableTypes={["equipment", "status"]}
-        availableTags={[
-          "shield",
-          "barrier",
-          "preparingSkill",
-          "nightsoulsBlessing",
-          "talent",
-          "artifact",
-          "technique",
-          "weapon",
-          "sword",
-          "claymore",
-          "pole",
-          "catalyst",
-          "bow",
-        ]}
-        maxResults={60}
-      />
-
-      {/* 确认覆盖弹窗 - 相同 definition.id */}
-      <ConfirmModal
-        open={confirmModalOpen()}
-        title="检测到重复实体"
-        message={
-          pendingDefinition()
-            ? `角色区域中已存在相同类型的实体「${getDefinitionName(pendingDefinition())}」，是否覆盖？`
-            : ""
-        }
-        confirmText="确认覆盖"
-        cancelText="取消"
-        onConfirm={handleConfirmReplace}
-        onCancel={handleCancelReplace}
-      />
-
-      {/* 确认替换弹窗 - 同类别实体（武器、圣遗物、天赋、特技） */}
-      <ConfirmModal
-        open={categoryReplaceModalOpen()}
-        title={`${(() => {
-          const pending = pendingCategoryReplace();
-          return pending
-            ? `已存在${getCategoryLabel(pending.category)}`
-            : "替换确认";
-        })()}`}
-        message={(() => {
-          const pending = pendingCategoryReplace();
-          if (!pending) return "";
-          const existingEntity =
-            props.character.entities[pending.existingIndex];
-          return `角色区域中已存在${getCategoryLabel(pending.category)}「${existingEntity ? getDefinitionName(existingEntity.definition) : ""}」，是否替换为新${getCategoryLabel(pending.category)}「${getDefinitionName(pending.definition)}」？`;
-        })()}
-        confirmText="确认替换"
-        cancelText="取消"
-        onConfirm={handleConfirmCategoryReplace}
-        onCancel={handleCancelCategoryReplace}
-      />
-
-      {/* 不合法实体警告弹窗 - 武器/天赋不合法 */}
-      <ConfirmModal
-        open={invalidEntityWarning().open}
-        title="实体不合法"
-        message={(() => {
-          const warning = invalidEntityWarning();
-          if (!warning.open) return "";
-          if (warning.type === "weapon") {
-            return `「${warning.entityName}」的武器类型与当前角色不匹配，无法装备。`;
-          } else if (warning.type === "talent") {
-            return `「${warning.entityName}」不属于当前角色，无法装备。`;
-          } else {
-            return `「${warning.entityName}」不适合当前角色。`;
-          }
-        })()}
-        confirmText="知道了"
-        onConfirm={closeInvalidEntityWarning}
-        onCancel={closeInvalidEntityWarning}
-      />
     </>
   );
 }

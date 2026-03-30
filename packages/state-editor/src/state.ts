@@ -562,6 +562,9 @@ export function getEntity(
     const character = getCharacter(player, characterId);
     return character?.entities.find((entity) => entity.id === entityId) ?? null;
   }
+  if (!player) {
+    debugger;
+  }
   return player[area].find((entity) => entity.id === entityId) ?? null;
 }
 

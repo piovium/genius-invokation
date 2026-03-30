@@ -5,6 +5,7 @@ import {
   createMemo,
   createSignal,
   createUniqueId,
+  type ComponentProps,
   type JSX,
 } from "solid-js";
 
@@ -25,7 +26,11 @@ export function SectionTitle(props: { title: string; description?: string }) {
   );
 }
 
-export function Surface(props: { title?: string; children: JSX.Element; class?: string }) {
+export function Surface(props: {
+  title?: string;
+  children: JSX.Element;
+  class?: string;
+}) {
   return (
     <section
       class={`rounded-3xl border border-[var(--gi-editor-border)] bg-[var(--gi-editor-panel)] p-4 shadow-[var(--gi-editor-shadow)] ${props.class ?? ""}`}
@@ -191,7 +196,9 @@ export function SelectField(props: SelectFieldProps) {
         onChange={(event) => props.onChange(event.currentTarget.value)}
       >
         <For each={props.options}>
-          {(option) => <option value={String(option.value)}>{option.label}</option>}
+          {(option) => (
+            <option value={String(option.value)}>{option.label}</option>
+          )}
         </For>
       </select>
     </div>
@@ -208,9 +215,13 @@ export interface SearchableSelectProps<TDefinition> {
   onSelect: (option: AssetOption<TDefinition>) => void;
 }
 
-export function SearchableSelect<TDefinition>(props: SearchableSelectProps<TDefinition>) {
+export function SearchableSelect<TDefinition>(
+  props: SearchableSelectProps<TDefinition>,
+) {
   const [query, setQuery] = createSignal("");
-  const filtered = createMemo(() => props.options.filter((option) => matchesSearch(option, query())));
+  const filtered = createMemo(() =>
+    props.options.filter((option) => matchesSearch(option, query())),
+  );
   const [selected, setSelected] = createSignal<string>("");
 
   createEffect(() => {
@@ -225,7 +236,9 @@ export function SearchableSelect<TDefinition>(props: SearchableSelectProps<TDefi
   });
 
   const selectCurrent = () => {
-    const current = filtered().find((option) => String(option.id) === selected());
+    const current = filtered().find(
+      (option) => String(option.id) === selected(),
+    );
     if (!current) {
       return;
     }
@@ -250,7 +263,11 @@ export function SearchableSelect<TDefinition>(props: SearchableSelectProps<TDefi
         onChange={(event) => setSelected(event.currentTarget.value)}
       >
         <For each={filtered()}>
-          {(option) => <option value={String(option.id)}>{option.name} #{option.id}</option>}
+          {(option) => (
+            <option value={String(option.id)}>
+              {option.name} #{option.id}
+            </option>
+          )}
         </For>
       </select>
       <Show when={filtered().length === 0}>
@@ -268,13 +285,13 @@ export function SearchableSelect<TDefinition>(props: SearchableSelectProps<TDefi
   );
 }
 
-export function ActionButton(props: {
+export interface ActionButtonProps extends ComponentProps<"button"> {
   label: string;
-  onClick: () => void;
   disabled?: boolean;
   tone?: "default" | "danger" | "accent";
-  class?: string;
-}) {
+}
+
+export function ActionButton(props: ActionButtonProps) {
   const toneClass = createMemo(() => {
     switch (props.tone) {
       case "danger":
@@ -290,7 +307,6 @@ export function ActionButton(props: {
       type="button"
       class={`gi-editor-button rounded-full border px-3 py-1.5 text-xs font-medium ${toneClass()} ${props.class || ""}`}
       disabled={props.disabled}
-      onClick={() => props.onClick()}
     >
       {props.label}
     </button>

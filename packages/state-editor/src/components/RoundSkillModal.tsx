@@ -1,27 +1,13 @@
-import {
-  For,
-  Show,
-  createEffect,
-  createMemo,
-  createSignal,
-} from "solid-js";
+import { For, Show, createEffect, createMemo, createSignal } from "solid-js";
 
 import type { GameState } from "@gi-tcg/core";
 
-import {
-  ActionButton,
-  SelectField,
-  SectionTitle,
-} from "./Fields";
+import { ActionButton, SelectField, SectionTitle } from "./Fields";
 import { Modal } from "./Modal";
-import {
-  getDefinitionName,
-  type EditorCatalog,
-} from "../state";
+import { getDefinitionName, type EditorCatalog } from "../state";
+import { useStateEditorContext } from "./GameStateEditor";
 
 interface RoundSkillModalProps {
-  open: boolean;
-  state: GameState;
   catalog: EditorCatalog;
   who: 0 | 1;
   // 编辑模式时传入的现有数据
@@ -30,16 +16,20 @@ interface RoundSkillModalProps {
   // 已使用的角色ID列表（用于排除）
   usedCharacterIds: number[];
   onSubmit: (characterId: number, skillIds: number[]) => void;
-  onClose: () => void;
 }
 
 export function RoundSkillModal(props: RoundSkillModalProps) {
+  const { gameState } = useStateEditorContext();
+
   // 是否是编辑模式
   const isEditing = () => props.editingCharacterId !== undefined;
 
   // 角色选择状态
-  const [selectedCharacterId, setSelectedCharacterId] = createSignal<number | null>(null);
-  const [showOtherCharacterSelect, setShowOtherCharacterSelect] = createSignal(false);
+  const [selectedCharacterId, setSelectedCharacterId] = createSignal<
+    number | null
+  >(null);
+  const [showOtherCharacterSelect, setShowOtherCharacterSelect] =
+    createSignal(false);
 
   // 技能选择状态
   const [selectedSkillIds, setSelectedSkillIds] = createSignal<number[]>([]);
@@ -47,7 +37,7 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
   const [otherSkillQuery, setOtherSkillQuery] = createSignal("");
 
   // 当前玩家
-  const player = () => props.state.players[props.who];
+  const player = () => gameState().players[props.who];
 
   // 牌组中的三个角色
   const deckCharacters = createMemo(() => {
@@ -62,7 +52,8 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
   const otherCharacterOptions = createMemo(() => {
     const deckIds = new Set(deckCharacters().map((c) => c.id));
     return props.catalog.roundSkillCharacters.filter(
-      (char) => !deckIds.has(char.id) && !props.usedCharacterIds.includes(char.id),
+      (char) =>
+        !deckIds.has(char.id) && !props.usedCharacterIds.includes(char.id),
     );
   });
 
@@ -110,18 +101,16 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
 
   // 重置状态当modal打开/关闭时
   createEffect(() => {
-    if (props.open) {
-      if (isEditing() && props.editingCharacterId) {
-        setSelectedCharacterId(props.editingCharacterId);
-        setSelectedSkillIds(props.editingSkillIds ?? []);
-      } else {
-        setSelectedCharacterId(null);
-        setSelectedSkillIds([]);
-      }
-      setShowOtherCharacterSelect(false);
-      setShowOtherSkillSelect(false);
-      setOtherSkillQuery("");
+    if (isEditing() && props.editingCharacterId) {
+      setSelectedCharacterId(props.editingCharacterId);
+      setSelectedSkillIds(props.editingSkillIds ?? []);
+    } else {
+      setSelectedCharacterId(null);
+      setSelectedSkillIds([]);
     }
+    setShowOtherCharacterSelect(false);
+    setShowOtherSkillSelect(false);
+    setOtherSkillQuery("");
   });
 
   // 切换技能选择
@@ -140,19 +129,16 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
     const skillIds = selectedSkillIds();
     if (charId && skillIds.length > 0) {
       props.onSubmit(charId, skillIds);
-      props.onClose();
     }
   };
 
   return (
     <Modal
-      open={props.open}
       title={isEditing() ? "编辑技能记录" : "新增技能记录"}
       description="选择角色和本回合使用过的技能"
-      onClose={props.onClose}
       footer={
         <div class="flex justify-end gap-3">
-          <ActionButton label="取消" onClick={props.onClose} />
+          <ActionButton label="取消" data-close-dialog />
           <ActionButton
             label={isEditing() ? "保存" : "提交"}
             tone="accent"
@@ -259,7 +245,8 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
             <div class="flex flex-wrap gap-2">
               <For each={characterSkills()}>
                 {(skill) => {
-                  const isSelected = () => selectedSkillIds().includes(skill.id);
+                  const isSelected = () =>
+                    selectedSkillIds().includes(skill.id);
 
                   return (
                     <button
@@ -324,7 +311,9 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
             {/* 已选择的技能显示 */}
             <Show when={selectedSkillIds().length > 0}>
               <div class="text-sm text-slate-400">
-                已选择 <span class="text-amber-200">{selectedSkillIds().length}</span> 个技能
+                已选择{" "}
+                <span class="text-amber-200">{selectedSkillIds().length}</span>{" "}
+                个技能
               </div>
             </Show>
           </div>

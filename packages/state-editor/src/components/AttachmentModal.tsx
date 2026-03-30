@@ -1,5 +1,4 @@
 import { Show } from "solid-js";
-import type { GameState } from "@gi-tcg/core";
 import { SectionTitle } from "./Fields";
 import { Modal } from "./Modal";
 import { PreviewTile } from "./Previews";
@@ -7,21 +6,21 @@ import {
   getAttachment,
   getDefinitionName,
   getPlayer,
-  type UpdateGameState,
 } from "../state";
 import { VariableGrid } from "./VariableGrid";
+import { useStateEditorContext } from "./GameStateEditor";
 
 interface AttachmentContentProps {
-  state: GameState;
   who: 0 | 1;
   area: "hands" | "pile";
   entityId: number;
   attachmentId: number;
-  updateState: UpdateGameState;
 }
 
 function AttachmentModalContent(props: AttachmentContentProps) {
-  const player = () => getPlayer(props.state, props.who);
+  const { gameState, updateState } = useStateEditorContext();
+
+  const player = () => getPlayer(gameState(), props.who);
   const attachment = () =>
     getAttachment(player(), props.area, props.entityId, props.attachmentId);
   return (
@@ -50,7 +49,7 @@ function AttachmentModalContent(props: AttachmentContentProps) {
                     const area = props.area;
                     const etId = props.entityId;
                     const attId = props.attachmentId;
-                    props.updateState((draft) => {
+                    updateState((draft) => {
                       const targetPlayer = draft.players[who];
                       const targetEntity = targetPlayer[area].find(
                         (item) => item.id === etId,
@@ -74,13 +73,11 @@ function AttachmentModalContent(props: AttachmentContentProps) {
   );
 }
 
-interface AttachmentModalProps extends AttachmentContentProps {
-  open: boolean;
-  onClose: () => void;
-}
+interface AttachmentModalProps extends AttachmentContentProps {}
 
 export function AttachmentModal(props: AttachmentModalProps) {
-  const player = () => getPlayer(props.state, props.who);
+  const { gameState } = useStateEditorContext();
+  const player = () => getPlayer(gameState(), props.who);
   const attachment = () =>
     getAttachment(player(), props.area, props.entityId, props.attachmentId);
   const title = () =>
@@ -88,14 +85,12 @@ export function AttachmentModal(props: AttachmentModalProps) {
       ? `附着编辑 - ${getDefinitionName(attachment()?.definition)}`
       : "附着编辑";
   return (
-    <Modal open={props.open} title={title()} onClose={props.onClose}>
+    <Modal title={title()}>
       <AttachmentModalContent
-        state={props.state}
         who={props.who}
         area={props.area}
         entityId={props.entityId}
         attachmentId={props.attachmentId}
-        updateState={props.updateState}
       />
     </Modal>
   );

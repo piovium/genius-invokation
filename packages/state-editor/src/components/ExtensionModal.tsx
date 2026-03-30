@@ -1,18 +1,18 @@
 import type { GameState } from "@gi-tcg/core";
-import type { UpdateGameState } from "../state";
 import { SummaryLine } from "./Previews";
 import { JsonSchemaEditor } from "./JsonSchemaEditor";
 import type { ExpressiveJSONSchema } from "ya-json-schema-types";
 import { Show } from "solid-js";
 import { Modal } from "./Modal";
+import { useStateEditorContext } from "./GameStateEditor";
 
 interface ExtensionContentProps {
   state: GameState;
   index: number;
-  updateState: UpdateGameState;
 }
 
 function ExtensionModalContent(props: ExtensionContentProps) {
+  const { updateState } = useStateEditorContext();
   const extension = () => props.state.extensions[props.index];
   return (
     <Show when={extension()}>
@@ -37,7 +37,7 @@ function ExtensionModalContent(props: ExtensionContentProps) {
               value={currentExtension().state}
               onChange={(value) => {
                 const idx = props.index;
-                props.updateState((draft) => {
+                updateState((draft) => {
                   draft.extensions[idx].state = value;
                 });
               }}
@@ -50,19 +50,12 @@ function ExtensionModalContent(props: ExtensionContentProps) {
 }
 
 // Modal version (keeping for backwards compatibility)
-interface ExtensionModalProps extends ExtensionContentProps {
-  open: boolean;
-  onClose: () => void;
-}
+interface ExtensionModalProps extends ExtensionContentProps {}
 
 export function ExtensionModal(props: ExtensionModalProps) {
   return (
-    <Modal open={props.open} title={`扩展编辑`} onClose={props.onClose}>
-      <ExtensionModalContent
-        state={props.state}
-        index={props.index}
-        updateState={props.updateState}
-      />
+    <Modal title={`扩展编辑`}>
+      <ExtensionModalContent state={props.state} index={props.index} />
     </Modal>
   );
 }
