@@ -1,5 +1,6 @@
 .gi-state-editor {
   color: #f6efe3;
+  overflow: hidden;
 
   --gi-editor-border: rgba(255, 236, 207, 0.16);
   --gi-editor-border-strong: rgba(255, 236, 207, 0.34);
@@ -28,6 +29,7 @@
     linear-gradient(180deg, #1a2435, #0f1522 58%, #131a28);
 
   .gi-editor-frame {
+    height: 100%;
     max-width: 1600px;
     margin: 0 auto;
   }

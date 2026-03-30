@@ -98,7 +98,7 @@ function SectionCard(props: {
       type="button"
       onClick={() => props.onClick()}
       class={`
-        relative rounded-2xl border p-3 text-left transition-all duration-200
+        relative rounded-md @2xl:rounded-2xl border p-1 @2xl:p-3 text-left transition-all duration-200
         hover:scale-[1.02] hover:shadow-lg overflow-hidden flex flex-col justify-start
         ${variantStyles[props.config.variant || "default"]}
         ${activeStyles()}
@@ -116,7 +116,7 @@ function SectionCard(props: {
       </div>
 
       {/* 预览内容 */}
-      <div class="text-xs text-slate-400 mt-2">
+      <div class="text-xs text-slate-400">
         {props.config.preview?.(props.state)}
       </div>
     </button>
@@ -242,7 +242,7 @@ function CharacterPreview(props: {
           {/* 状态组 */}
           <Show when={statuses().length > 0}>
             <div class="grid grid-cols-4 items-start gap-0.5">
-              <For each={equipments()}>
+              <For each={statusDisplay().items}>
                 {(entity) => (
                   <div class="w-full h-auto aspect-square rounded overflow-hidden">
                     <img
@@ -839,133 +839,136 @@ export function GameStateEditor(props: GameStateEditorProps) {
   };
 
   return (
-    <div {...rest} class={`gi-state-editor ${local.class ?? ""}`}>
-      <StateEditorContext.Provider
-        value={{
-          gameState: () => state,
-          updateState,
-          openModal,
-          catalog,
-        }}
-      >
-        <form
-          ref={formRef}
-          class="gi-editor-frame h-screen flex flex-col"
-          onInput={refreshFormValidity}
-          onChange={refreshFormValidity}
+      <div {...rest} class={`gi-state-editor ${local.class ?? ""}`}>
+        <StateEditorContext.Provider
+          value={{
+            gameState: () => state,
+            updateState,
+            openModal,
+            catalog,
+          }}
         >
-          {/* Header */}
-          <div class="flex-none px-4 py-4 sm:px-6 lg:px-8 border-b border-[var(--gi-editor-border-strong)] bg-slate-950/70">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h1 class="text-2xl font-semibold text-amber-50">
-                  游戏状态编辑
-                </h1>
+          <form
+            ref={formRef}
+            class="gi-editor-frame flex flex-col"
+            onInput={refreshFormValidity}
+            onChange={refreshFormValidity}
+          >
+            {/* Header */}
+            <div class="flex-none px-4 py-4 sm:px-6 lg:px-8 border-b border-[var(--gi-editor-border-strong)] bg-slate-950/70">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h1 class="text-2xl font-semibold text-amber-50">
+                    游戏状态编辑
+                  </h1>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                  <Show when={errors().length > 0 || !formValid()}>
+                    <span class="rounded-full border border-rose-300/30 bg-rose-400/10 px-3 py-1.5 text-xs text-rose-100">
+                      {errors().length > 0
+                        ? `存在 ${errors().length} 个状态问题`
+                        : "表单输入未完成"}
+                    </span>
+                  </Show>
+                  <button
+                    type="button"
+                    class="gi-editor-button rounded-full border border-cyan-200/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-semibold text-cyan-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    disabled={!formValid() || errors().length > 0}
+                    onClick={submit}
+                  >
+                    完成
+                  </button>
+                </div>
               </div>
-              <div class="flex flex-wrap items-center gap-3">
-                <Show when={errors().length > 0 || !formValid()}>
-                  <span class="rounded-full border border-rose-300/30 bg-rose-400/10 px-3 py-1.5 text-xs text-rose-100">
-                    {errors().length > 0
-                      ? `存在 ${errors().length} 个状态问题`
-                      : "表单输入未完成"}
-                  </span>
-                </Show>
-                <button
-                  type="button"
-                  class="gi-editor-button rounded-full border border-cyan-200/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-semibold text-cyan-50 disabled:cursor-not-allowed disabled:opacity-40"
-                  disabled={!formValid() || errors().length > 0}
-                  onClick={submit}
+            </div>
+
+            {/* Main Content */}
+            <div class="flex-1 flex min-h-0 overflow-hidden">
+              {/* Left Sidebar - Grid Layout */}
+              <div class="w-3/5 flex-none border-r border-[var(--gi-editor-border)] bg-slate-900 overflow-y-auto">
+                <div
+                  class="p-4 grid gap-2 box-border h-full min-h-180 @container"
+                  style={{
+                    "grid-template-columns": `repeat(${GRID_COLS}, 1fr)`,
+                    "grid-template-rows": `repeat(${GRID_ROWS}, 1fr)`,
+                  }}
                 >
-                  完成
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <div class="flex-1 flex overflow-hidden">
-            {/* Left Sidebar - Grid Layout */}
-            <div class="w-3/5 flex-none border-r border-[var(--gi-editor-border)] bg-slate-900 overflow-y-auto">
-              <div
-                class="p-4 grid gap-2 h-full box-border"
-                style={{
-                  "grid-template-columns": `repeat(${GRID_COLS}, 1fr)`,
-                  "grid-template-rows": `repeat(${GRID_ROWS}, 1fr)`,
-                }}
-              >
-                <For each={sectionConfigs()}>
-                  {(config) => (
-                    <SectionCard
-                      config={config}
-                      isActive={isSectionActive(config.section)}
-                      onClick={() => setSelectedSection(config.section)}
-                      state={state}
-                    />
-                  )}
-                </For>
-              </div>
-            </div>
-
-            {/* Right Content Area */}
-            <div class="w-2/5 shrink-0 overflow-y-auto p-4 sm:p-6 lg:p-8 box-border gi-editor-scroll">
-              <div class="max-w-5xl mx-auto">
-                <Switch>
-                  {/* Global Section */}
-                  <Match when={selectedSection().kind === "global"}>
-                    <GlobalSection initialState={initialState} />
-                  </Match>
-
-                  {/* Pile Section */}
-                  <Match
-                    when={guard(selectedSection, (s) => s.kind === "pile")}
-                  >
-                    {(sect) => <PileEditor state={state} who={sect().who} />}
-                  </Match>
-                  {/* Hands Section */}
-                  <Match
-                    when={guard(selectedSection, (s) => s.kind === "hands")}
-                  >
-                    {(sect) => <HandsEditor state={state} who={sect().who} />}
-                  </Match>
-
-                  {/* Character Section */}
-                  <Match
-                    when={guard(selectedSection, (s) => s.kind === "character")}
-                  >
-                    {(sect) => (
-                      <CharacterEditor
-                        who={sect().who}
-                        characterIndex={sect().characterIndex}
-                        onSelectSection={setSelectedSection}
-                      />
-                    )}
-                  </Match>
-
-                  {/* Player Sections */}
-                  <Match when={guard(selectedSection, (s) => "who" in s)}>
-                    {(sect) => (
-                      <PlayerSectionEditor
+                  <For each={sectionConfigs()}>
+                    {(config) => (
+                      <SectionCard
+                        config={config}
+                        isActive={isSectionActive(config.section)}
+                        onClick={() => setSelectedSection(config.section)}
                         state={state}
-                        who={sect().who}
-                        kind={sect().kind}
                       />
                     )}
-                  </Match>
-                </Switch>
+                  </For>
+                </div>
+              </div>
 
-                <Show when={errors().length > 0}>
-                  <Surface title="状态校验" class="mt-6">
-                    <ul class="list-disc space-y-2 pl-5 text-sm text-rose-100">
-                      <For each={errors()}>{(error) => <li>{error}</li>}</For>
-                    </ul>
-                  </Surface>
-                </Show>
+              {/* Right Content Area */}
+              <div class="w-2/5 shrink-0 overflow-y-auto p-4 sm:p-6 lg:p-8 box-border gi-editor-scroll">
+                <div class="max-w-5xl mx-auto">
+                  <Switch>
+                    {/* Global Section */}
+                    <Match when={selectedSection().kind === "global"}>
+                      <GlobalSection initialState={initialState} />
+                    </Match>
+
+                    {/* Pile Section */}
+                    <Match
+                      when={guard(selectedSection, (s) => s.kind === "pile")}
+                    >
+                      {(sect) => <PileEditor state={state} who={sect().who} />}
+                    </Match>
+                    {/* Hands Section */}
+                    <Match
+                      when={guard(selectedSection, (s) => s.kind === "hands")}
+                    >
+                      {(sect) => <HandsEditor state={state} who={sect().who} />}
+                    </Match>
+
+                    {/* Character Section */}
+                    <Match
+                      when={guard(
+                        selectedSection,
+                        (s) => s.kind === "character",
+                      )}
+                    >
+                      {(sect) => (
+                        <CharacterEditor
+                          who={sect().who}
+                          characterIndex={sect().characterIndex}
+                          onSelectSection={setSelectedSection}
+                        />
+                      )}
+                    </Match>
+
+                    {/* Player Sections */}
+                    <Match when={guard(selectedSection, (s) => "who" in s)}>
+                      {(sect) => (
+                        <PlayerSectionEditor
+                          state={state}
+                          who={sect().who}
+                          kind={sect().kind}
+                        />
+                      )}
+                    </Match>
+                  </Switch>
+
+                  <Show when={errors().length > 0}>
+                    <Surface title="状态校验" class="mt-6">
+                      <ul class="list-disc space-y-2 pl-5 text-sm text-rose-100">
+                        <For each={errors()}>{(error) => <li>{error}</li>}</For>
+                      </ul>
+                    </Surface>
+                  </Show>
+                </div>
               </div>
             </div>
-          </div>
-        </form>
-        <For each={modalStack()}>{(modal) => modal()}</For>
-      </StateEditorContext.Provider>
-    </div>
+          </form>
+          <For each={modalStack()}>{(modal) => modal()}</For>
+        </StateEditorContext.Provider>
+      </div>
   );
 }
