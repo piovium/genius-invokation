@@ -34,11 +34,11 @@ interface EntityContentProps {
   area: EditorEntityArea;
   entityId: number;
   characterId?: number;
-  catalog: EditorCatalog;
 }
 
 function EntityModalContent(props: EntityContentProps) {
-  const { gameState, updateState, openModal } = useStateEditorContext();
+  const { gameState, updateState, catalog, openModal } =
+    useStateEditorContext();
 
   const [query, setQuery] = createSignal("");
   const [pendingAttachment, setPendingAttachment] =
@@ -58,7 +58,7 @@ function EntityModalContent(props: EntityContentProps) {
 
   const filteredAttachments = createMemo(() => {
     const q = query().trim().toLowerCase();
-    let results = props.catalog.attachments;
+    let results = catalog().attachments;
     if (q) {
       results = results.filter(
         (card) =>
@@ -69,9 +69,7 @@ function EntityModalContent(props: EntityContentProps) {
   });
 
   // 检查是否存在相同 definition.id 的附着
-  const checkDuplicateAttachment = (
-    attachmentDef: (typeof props.catalog.attachments)[0]["definition"],
-  ) => {
+  const checkDuplicateAttachment = (attachmentDef: AttachmentDefinition) => {
     const currentEntity = entity();
     if (!currentEntity) return -1;
     const index = currentEntity.attachments.findIndex(
@@ -132,7 +130,7 @@ function EntityModalContent(props: EntityContentProps) {
 
   // 执行覆盖（替换）附着
   const doReplaceAttachment = (
-    option: (typeof props.catalog.attachments)[0],
+    option: AssetOption<AttachmentDefinition>,
     index: number,
   ) => {
     const who = props.who;
@@ -444,7 +442,6 @@ export function EntityModal(props: EntityModalProps) {
         area={props.area}
         entityId={props.entityId}
         characterId={props.characterId}
-        catalog={props.catalog}
       />
     </Modal>
   );

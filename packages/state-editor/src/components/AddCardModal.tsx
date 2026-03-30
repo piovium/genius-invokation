@@ -1,16 +1,14 @@
 import { For, Show, createMemo, createSignal } from "solid-js";
 import type {
-  GameState,
   EntityDefinition,
   EntityType,
   EntityTag,
 } from "@gi-tcg/core";
 import { Modal } from "./Modal";
-import { getImageUrl, type EditorCatalog } from "../state";
+import { getImageUrl, type AssetOption } from "../state";
 import { useStateEditorContext } from "./GameStateEditor";
 
 interface AddCardModalProps {
-  catalog: EditorCatalog;
   onSelect: (cardDefinition: EntityDefinition) => void;
   // 可选：控制是否展示类型筛选行
   showTypeFilter?: boolean;
@@ -106,7 +104,7 @@ export const TAG_LABELS: Record<EntityTag, string> = {
 };
 
 export function AddCardModal(props: AddCardModalProps) {
-
+  const { catalog } = useStateEditorContext();
   const [query, setQuery] = createSignal("");
   const [selectedType, setSelectedType] = createSignal<EntityType | null>(null);
   const [selectedTags, setSelectedTags] = createSignal<EntityTag[]>([]);
@@ -139,11 +137,11 @@ export function AddCardModal(props: AddCardModalProps) {
   // 所有可选的卡牌，根据availableTypes预筛选，按ID排序
   const allCards = createMemo(() => {
     const types = availableTypes();
-    let results: typeof props.catalog.cardEntities = [];
+    let results: AssetOption<EntityDefinition>[] = [];
 
     // 从entitiesByType中获取指定类型的实体
     for (const type of types) {
-      const entitiesOfType = props.catalog.entitiesByType[type];
+      const entitiesOfType = catalog().entitiesByType[type];
       if (entitiesOfType) {
         results = [...results, ...entitiesOfType];
       }

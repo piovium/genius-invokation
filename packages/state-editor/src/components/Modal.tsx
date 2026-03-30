@@ -41,21 +41,19 @@ export function Modal(props: ModalProps) {
   };
 
   onMount(() => {
-    ref.showModal();
     ref.addEventListener("click", onClickClose);
-    ref.addEventListener("close", closeHandler);
+    ref.showModal();
   });
 
   onCleanup(() => {
-    ref.removeEventListener("close", closeHandler);
-    ref.removeEventListener("click", onClickClose);
     ref.close();
+    ref.removeEventListener("click", onClickClose);
   });
   return (
     <dialog
       ref={ref}
       class="gi-editor-modal-panel gi-editor-scroll"
-      onClick={(event) => event.stopPropagation()}
+      onClose={closeHandler}
     >
       <div class="sticky top-0 z-1 border-b border-white/10 bg-slate-950/70 px-5 py-4 backdrop-blur">
         <div class="flex items-start justify-between gap-4">

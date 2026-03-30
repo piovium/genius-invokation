@@ -5,6 +5,7 @@ import {
   createMemo,
   createSignal,
   createUniqueId,
+  splitProps,
   type ComponentProps,
   type JSX,
 } from "solid-js";
@@ -292,6 +293,12 @@ export interface ActionButtonProps extends ComponentProps<"button"> {
 }
 
 export function ActionButton(props: ActionButtonProps) {
+  const [localProps, restProps] = splitProps(props, [
+    "label",
+    "disabled",
+    "tone",
+    "class",
+  ]);
   const toneClass = createMemo(() => {
     switch (props.tone) {
       case "danger":
@@ -305,10 +312,11 @@ export function ActionButton(props: ActionButtonProps) {
   return (
     <button
       type="button"
-      class={`gi-editor-button rounded-full border px-3 py-1.5 text-xs font-medium ${toneClass()} ${props.class || ""}`}
-      disabled={props.disabled}
+      class={`gi-editor-button rounded-full border px-3 py-1.5 text-xs font-medium ${toneClass()} ${localProps.class || ""}`}
+      disabled={localProps.disabled}
+      {...restProps}
     >
-      {props.label}
+      {localProps.label}
     </button>
   );
 }

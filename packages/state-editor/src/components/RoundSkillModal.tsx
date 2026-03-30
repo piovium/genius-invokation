@@ -1,25 +1,21 @@
 import { For, Show, createEffect, createMemo, createSignal } from "solid-js";
-
-import type { GameState } from "@gi-tcg/core";
-
 import { ActionButton, SelectField, SectionTitle } from "./Fields";
 import { Modal } from "./Modal";
-import { getDefinitionName, type EditorCatalog } from "../state";
+import { getDefinitionName } from "../state";
 import { useStateEditorContext } from "./GameStateEditor";
 
 interface RoundSkillModalProps {
-  catalog: EditorCatalog;
   who: 0 | 1;
   // 编辑模式时传入的现有数据
   editingCharacterId?: number;
   editingSkillIds?: number[];
   // 已使用的角色ID列表（用于排除）
-  usedCharacterIds: number[];
+  disabledCharacterIds: number[];
   onSubmit: (characterId: number, skillIds: number[]) => void;
 }
 
 export function RoundSkillModal(props: RoundSkillModalProps) {
-  const { gameState } = useStateEditorContext();
+  const { gameState, catalog } = useStateEditorContext();
 
   // 是否是编辑模式
   const isEditing = () => props.editingCharacterId !== undefined;
@@ -51,9 +47,9 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
   // 可选的其他角色（排除牌组中的和已使用的）
   const otherCharacterOptions = createMemo(() => {
     const deckIds = new Set(deckCharacters().map((c) => c.id));
-    return props.catalog.roundSkillCharacters.filter(
+    return catalog().roundSkillCharacters.filter(
       (char) =>
-        !deckIds.has(char.id) && !props.usedCharacterIds.includes(char.id),
+        !deckIds.has(char.id) && !props.disabledCharacterIds.includes(char.id),
     );
   });
 
@@ -63,7 +59,7 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
     if (!id) return null;
     return (
       deckCharacters().find((c) => c.id === id) ||
-      props.catalog.roundSkillCharacters.find((c) => c.id === id)
+      catalog().roundSkillCharacters.find((c) => c.id === id)
     );
   });
 
@@ -71,14 +67,14 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
   const characterSkills = createMemo(() => {
     const charId = selectedCharacterId();
     if (!charId) return [];
-    return props.catalog.initiativeSkillsByCharacterId.get(charId) ?? [];
+    return catalog().initiativeSkillsByCharacterId.get(charId) ?? [];
   });
 
   // 其他技能选项（排除当前角色的技能和已选择的）
   const otherSkillOptions = createMemo(() => {
     const currentSkills = new Set(characterSkills().map((s) => s.id));
     const selected = new Set(selectedSkillIds());
-    return props.catalog.allInitiativeSkills.filter(
+    return catalog().allInitiativeSkills.filter(
       (skill) => !currentSkills.has(skill.id) && !selected.has(skill.id),
     );
   });
@@ -141,6 +137,7 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
           <ActionButton label="取消" data-close-dialog />
           <ActionButton
             label={isEditing() ? "保存" : "提交"}
+            data-close-dialog
             tone="accent"
             disabled={!canSubmit()}
             onClick={handleSubmit}
@@ -160,7 +157,7 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
                 const isSelected = () => selectedCharacterId() === character.id;
                 const isDisabled = () =>
                   !isEditing() &&
-                  props.usedCharacterIds.includes(character.id) &&
+                  props.disabledCharacterIds.includes(character.id) &&
                   selectedCharacterId() !== character.id;
 
                 return (

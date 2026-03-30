@@ -1,4 +1,3 @@
-import type { GameState } from "@gi-tcg/core";
 import { SummaryLine } from "./Previews";
 import { JsonSchemaEditor } from "./JsonSchemaEditor";
 import type { ExpressiveJSONSchema } from "ya-json-schema-types";
@@ -7,13 +6,12 @@ import { Modal } from "./Modal";
 import { useStateEditorContext } from "./GameStateEditor";
 
 interface ExtensionContentProps {
-  state: GameState;
   index: number;
 }
 
 function ExtensionModalContent(props: ExtensionContentProps) {
-  const { updateState } = useStateEditorContext();
-  const extension = () => props.state.extensions[props.index];
+  const { gameState, updateState } = useStateEditorContext();
+  const extension = () => gameState().extensions[props.index];
   return (
     <Show when={extension()}>
       {(resolvedExtension) => {
@@ -55,7 +53,7 @@ interface ExtensionModalProps extends ExtensionContentProps {}
 export function ExtensionModal(props: ExtensionModalProps) {
   return (
     <Modal title={`扩展编辑`}>
-      <ExtensionModalContent state={props.state} index={props.index} />
+      <ExtensionModalContent index={props.index} />
     </Modal>
   );
 }

@@ -28,10 +28,7 @@ import {
   getDefinitionName,
   getPlayer,
   moveInArray,
-  type EditorCatalog,
-  type EditorModal,
   type EditorSection,
-  type UpdateGameState,
   getImageUrl,
 } from "../state";
 import type { Draft } from "immer";
@@ -76,21 +73,19 @@ const CHARACTER_TAG_CATEGORIES = {
 };
 
 interface CharacterEditorProps {
-  state: GameState;
   who: 0 | 1;
   characterIndex: number;
-  catalog: EditorCatalog;
   onSelectSection: (section: EditorSection) => void;
 }
 
 export function CharacterEditor(props: CharacterEditorProps) {
-  const player = () => getPlayer(props.state, props.who);
+  const { openModal, catalog, gameState, updateState } =
+    useStateEditorContext();
+  const player = () => getPlayer(gameState(), props.who);
   const character = () => player().characters[props.characterIndex];
   const characterId = () => character()?.id ?? 0;
   const defeated = () => (character()?.variables.alive ?? 1) === 0;
   const isActive = () => player().activeCharacterId === characterId();
-
-  const { openModal, updateState } = useStateEditorContext();
 
   // 角色标签筛选状态
   const [selectedCharacterTags, setSelectedCharacterTags] = createSignal<
@@ -114,7 +109,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
 
   // 根据标签筛选角色，并排除已选择的角色
   const filteredCharacters = createMemo(() => {
-    const allCharacters = props.catalog.characters.sort((a, b) => a.id - b.id);
+    const allCharacters = catalog().characters.sort((a, b) => a.id - b.id);
     const tags = selectedCharacterTags();
     const existingIds = existingCharacterIds();
 
@@ -152,7 +147,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
   // 移动角色位置
   const moveCharacter = (delta: number) => {
     const who = props.who;
-    const chars = props.state.players[who].characters;
+    const chars = gameState().players[who].characters;
     const currentIndex = props.characterIndex;
     const newIndex = currentIndex + delta;
     if (newIndex < 0 || newIndex >= chars.length) return;
@@ -681,8 +676,6 @@ export function CharacterEditor(props: CharacterEditorProps) {
                   character={currentCharacter()}
                   who={props.who}
                   characterId={characterId()}
-                  state={props.state}
-                  catalog={props.catalog}
                   defeated={defeated()}
                 />
               </div>
@@ -699,8 +692,6 @@ interface CharacterEntitySectionProps {
   character: CharacterState;
   who: 0 | 1;
   characterId: number;
-  state: GameState;
-  catalog: EditorCatalog;
   defeated: boolean;
 }
 
@@ -803,7 +794,6 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
   const appendEntity = () => {
     openModal(() => (
       <AddCardModal
-        catalog={props.catalog}
         onSelect={(definition) => {
           handleAddCheck(definition);
         }}
@@ -1051,7 +1041,6 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
                         who={props.who}
                         area="characterEntities"
                         entityId={entity.id}
-                        catalog={props.catalog}
                       />
                     ));
                   },

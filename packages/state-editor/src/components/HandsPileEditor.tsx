@@ -128,7 +128,6 @@ function getExistingEquipmentOfType(
 interface CollectionContentProps {
   state: GameState;
   who: 0 | 1;
-  catalog: EditorCatalog;
 }
 
 function detailBadges(card: {
@@ -153,7 +152,6 @@ export function PileEditor(props: CollectionContentProps) {
     setInsertPosition(position);
     openModal(() => (
       <AddCardModal
-        catalog={props.catalog}
         onSelect={handleAddCard}
         availableTypes={["eventCard", "equipment", "support"]} // 牌库只能添加这些类型的实体
         availableTags={[
@@ -290,7 +288,6 @@ export function PileEditor(props: CollectionContentProps) {
                         who={props.who}
                         area="pile"
                         entityId={card.id}
-                        catalog={props.catalog}
                       />
                     ));
                   },
@@ -348,7 +345,6 @@ export function HandsEditor(props: CollectionContentProps) {
   const openAddCardModal = () => {
     openModal(() => (
       <AddCardModal
-        catalog={props.catalog}
         onSelect={handleAddCard}
         availableTypes={["eventCard", "equipment", "support"]} // 牌库只能添加这些类型的实体
         availableTags={[
@@ -518,7 +514,6 @@ export function HandsEditor(props: CollectionContentProps) {
                         who={props.who}
                         area="hands"
                         entityId={card.id}
-                        catalog={props.catalog}
                       />
                     ));
                   },
