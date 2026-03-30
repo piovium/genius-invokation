@@ -448,6 +448,7 @@ function EntityAreaSection(props2: {
 
   const appendEntity = () => {
     openModal(() => {
+      // eslint-disable-next-line no-unassigned-vars
       let ref!: HTMLDialogElement;
       return (
         <AddCardModal
