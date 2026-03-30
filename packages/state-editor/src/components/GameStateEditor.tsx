@@ -15,8 +15,7 @@ import {
 } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
 
-import type { GameState, CharacterState } from "@gi-tcg/core";
-import { Aura } from "@gi-tcg/typings";
+import type { GameState } from "@gi-tcg/core";
 
 import { NumberField, SectionTitle, SelectField, Surface } from "./Fields";
 import { CharacterEditor } from "./CharacterEditor";
@@ -29,17 +28,22 @@ import {
   createDefaultGameState,
   PHASE_LABELS,
   validateGameState,
-  getDefinitionName,
-  getImageUrl,
   type EditorSection,
   type UpdateGameState,
   type EditorCatalog,
 } from "../state";
-import { DiceIcon } from "./DiceIcon";
 import type { Draft } from "immer";
 import { ModalContextProvider } from "./Modal";
 import { guard } from "../utils";
 import { GlobalSection } from "./GlobalSection";
+import {
+  CharacterPreview,
+  CombatStatusPreview,
+  DicePreview,
+  EntityAreaPreview,
+  HandsPreview,
+  PilePreview,
+} from "./Previews";
 
 export interface GameStateEditorProps extends Omit<
   ComponentProps<"div">,
@@ -123,336 +127,6 @@ function SectionCard(props: {
   );
 }
 
-// 角色预览组件
-function CharacterPreview(props: {
-  character?: CharacterState;
-  isActive: boolean;
-}) {
-  // 分离装备和状态
-  const equipments = () => {
-    if (!props.character) return [];
-    return props.character.entities.filter(
-      (e) => e.definition.type === "equipment",
-    );
-  };
-
-  const statuses = () => {
-    if (!props.character) return [];
-    return props.character.entities.filter(
-      (e) => e.definition.type === "status",
-    );
-  };
-
-  // 状态显示逻辑：最多4个，超过则显示3+more
-  const statusDisplay = () => {
-    const items = statuses();
-    if (items.length <= 4) {
-      return { items, showMore: false };
-    }
-    return {
-      items: items.slice(0, 3),
-      showMore: true,
-      count: items.length - 3,
-    };
-  };
-
-  // 获取元素附着图片
-  const auraImage = () => {
-    if (!props.character) return [];
-    return AURA_IMAGE_IDS[props.character.variables.aura];
-  };
-
-  return (
-    <Show
-      when={props.character}
-      fallback={
-        <div class="text-center py-4 text-slate-500 text-sm">未选择角色</div>
-      }
-    >
-      {(char) => (
-        <>
-          <Show when={!props.isActive}>
-            <div class="h-4" />
-          </Show>
-          {/* 角色图片和基本信息 */}
-          <div class="flex flex-col items-center">
-            {/* 元素附着 */}
-            <div class="flex h-5 mt--2">
-              <For each={auraImage()}>
-                {(id) => (
-                  <div class="w-5 h-5 rounded-full overflow-hidden bg-slate-800/50 flex-shrink-0">
-                    <img
-                      src={getImageUrl({ id }, "icon")}
-                      alt=""
-                      class="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                )}
-              </For>
-            </div>
-            <div class="w-80% h-auto aspect-[7/12] rounded-lg overflow-hidden bg-slate-800/50 flex-shrink-0 b-solid b-2 b-slate-400 box-border relative">
-              <img
-                src={getImageUrl(char().definition, "card")}
-                alt=""
-                class="w-full h-full object-cover"
-                loading="lazy"
-              />
-              <div class="absolute flex bottom-0 flex-col bg-slate-800/80 p-1 w-full box-border">
-                <div class="flex items-center gap-1 w-full justify-center">
-                  <span class="text-amber-200 text-xs truncate">
-                    {getDefinitionName(char().definition)}
-                  </span>
-                </div>
-                <div class="grid grid-cols-2 text-[10px] text-center">
-                  <span class="text-rose-300">生命</span>
-                  <span class="text-cyan-300">能量</span>
-                  <span class="text-rose-300">
-                    {char().variables.health}/{char().variables.maxHealth}
-                  </span>
-                  <span class="text-cyan-300">
-                    {char().variables.energy}/{char().variables.maxEnergy}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <Show when={props.isActive}>
-            <div class="h-4 text-[10px] text-cyan-400/80 text-center">
-              出战角色
-            </div>
-          </Show>
-          {/* 装备组 */}
-          <Show when={equipments().length > 0}>
-            <div class="grid grid-cols-4 items-center gap-0.5">
-              <For each={equipments()}>
-                {(entity) => (
-                  <div class="w-full h-auto aspect-square rounded overflow-hidden">
-                    <img
-                      src={getImageUrl(entity.definition, "icon")}
-                      alt=""
-                      class="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                )}
-              </For>
-            </div>
-          </Show>
-          {/* 状态组 */}
-          <Show when={statuses().length > 0}>
-            <div class="grid grid-cols-4 items-start gap-0.5">
-              <For each={statusDisplay().items}>
-                {(entity) => (
-                  <div class="w-full h-auto aspect-square rounded overflow-hidden">
-                    <img
-                      src={getImageUrl(entity.definition, "icon")}
-                      alt=""
-                      class="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                )}
-              </For>
-              <Show when={statusDisplay().showMore}>
-                <div class="w-full h-auto aspect-square rounded-full bg-slate-400/20 flex items-center justify-center text-[8px] text-slate-400">
-                  +{statusDisplay().count}
-                </div>
-              </Show>
-            </div>
-          </Show>
-        </>
-      )}
-    </Show>
-  );
-}
-
-// 牌库预览 - 显示顶部15张卡牌图片
-function PilePreview(props: {
-  items: readonly { definition: { id: number; type: string } }[];
-  max: number;
-}) {
-  const displayItems = () => {
-    if (props.items.length <= 10) {
-      return { items: props.items, showMore: false };
-    }
-    return { items: props.items.slice(0, 9), showMore: true };
-  };
-
-  return (
-    <div class="space-y-1">
-      <div class="flex items-center justify-between">
-        <span class="text-cyan-200">{props.items.length} 张卡牌</span>
-        <span class="text-slate-500">上限 {props.max}</span>
-      </div>
-      <div class="w-full bg-slate-800 rounded-full h-1.5 mt-2">
-        <div
-          class="bg-cyan-500 h-1.5 rounded-full transition-all"
-          style={{
-            width: `${Math.min((props.items.length / props.max) * 100, 100)}%`,
-          }}
-        />
-      </div>
-      <div class="grid grid-cols-5 items-start gap-1 pt-4">
-        <For each={displayItems().items}>
-          {(item) => (
-            <div class="w-full h-auto rounded overflow-hidden bg-slate-800/50">
-              <img
-                src={getImageUrl(item.definition, "card")}
-                alt=""
-                class="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          )}
-        </For>
-        {displayItems().showMore && (
-          <div class="w-full h-auto aspect-[7/12] rounded-0.5 b-solid box-border b-slate-400 b-2 bg-slate-800/50 flex items-center justify-center text-[10px] text-slate-400">
-            +{props.items.length - 9}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// 手牌预览 - 显示全部手牌图片
-function HandsPreview(props: {
-  items: readonly { definition: { id: number; type: string } }[];
-  max: number;
-}) {
-  return (
-    <div class="space-y-1">
-      <div class="flex items-center justify-between">
-        <span class="text-cyan-200">{props.items.length} 张卡牌</span>
-        <span class="text-slate-500">上限 {props.max}</span>
-      </div>
-      <div class="w-full bg-slate-800 rounded-full h-1.5 mt-2">
-        <div
-          class="bg-cyan-500 h-1.5 rounded-full transition-all"
-          style={{
-            width: `${Math.min((props.items.length / props.max) * 100, 100)}%`,
-          }}
-        />
-      </div>
-      <div class="flex items-center gap-1 pt-2 overflow-hidden">
-        <For each={props.items}>
-          {(item) => (
-            <div class="w-7 h-12 rounded overflow-hidden bg-slate-800/50 flex-shrink-0">
-              <img
-                src={getImageUrl(item.definition, "card")}
-                alt=""
-                class="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          )}
-        </For>
-      </div>
-    </div>
-  );
-}
-
-// 元素附着类型到图片ID的映射
-const AURA_IMAGE_IDS: Record<number, number[]> = {
-  [Aura.None]: [],
-  [Aura.Cryo]: [1],
-  [Aura.Hydro]: [2],
-  [Aura.Pyro]: [3],
-  [Aura.Electro]: [4],
-  [Aura.Dendro]: [7],
-  [Aura.CryoDendro]: [1, 7],
-};
-
-// 骰子预览 - 显示全部骰子图片
-function DicePreview(props: { dice: number[] }) {
-  return (
-    <div class="space-y-1">
-      <div class="text-emerald-200 text-xs text-nowrap">
-        {props.dice.length}个
-      </div>
-      <div class="flex flex-col">
-        <For each={props.dice}>
-          {(diceType) => (
-            <div class="w-full h-auto rounded-full overflow-hidden bg-slate-800/30 mb--3">
-              <DiceIcon type={diceType} />
-            </div>
-          )}
-        </For>
-      </div>
-    </div>
-  );
-}
-
-// 支援/召唤区预览 - 显示全部实体图片
-function EntityAreaPreview(props: {
-  items: readonly { definition: { id: number; type: string } }[];
-  max: number;
-  label: string;
-}) {
-  return (
-    <div class="space-y-1">
-      <div class="flex items-center justify-between">
-        <span class="text-purple-200">
-          {props.items.length} 个{props.label}
-        </span>
-        <span class="text-slate-500">上限 {props.max}</span>
-      </div>
-      <div class="grid grid-cols-2 gap-3 p-1 pt-2">
-        <For each={props.items}>
-          {(item) => (
-            <div class="w-full h-auto aspect-[3/4] rounded-lg overflow-hidden bg-slate-800/50 b-solid b-2 b-slate-400">
-              <img
-                src={getImageUrl(item.definition, "card")}
-                alt=""
-                class="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          )}
-        </For>
-      </div>
-    </div>
-  );
-}
-
-// 出战状态预览 - 显示至多5个状态
-function CombatStatusPreview(props: {
-  items: readonly { definition: { id: number; type: string } }[];
-}) {
-  const displayItems = () => {
-    if (props.items.length <= 5) {
-      return { items: props.items, showMore: false };
-    }
-    return { items: props.items.slice(0, 4), showMore: true };
-  };
-
-  return (
-    <div class="space-y-1 flex flex-row items-center justify-between">
-      <div class="text-emerald-200">{props.items.length} 个状态</div>
-      <div class="flex items-center gap-1 mt-1">
-        <For each={displayItems().items}>
-          {(item) => (
-            <div class="w-6 h-6 rounded overflow-hidden bg-slate-800/50">
-              <img
-                src={getImageUrl(item.definition, "icon")}
-                alt=""
-                class="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          )}
-        </For>
-        <Show when={displayItems().showMore}>
-          <div class="w-6 h-6 rounded-full bg-slate-400/20 flex items-center justify-center text-[10px] text-slate-400">
-            +{props.items.length - 4}
-          </div>
-        </Show>
-      </div>
-    </div>
-  );
-}
-
 export interface StateEditorContextValue {
   gameState: Accessor<GameState>;
   updateState: UpdateGameState;
@@ -497,18 +171,20 @@ export function GameStateEditor(props: GameStateEditorProps) {
   };
 
   const openModal = (modalCode: () => JSX.Element) => {
-    const Wrapper = () => (
-      <ModalContextProvider
-        value={{
-          removeSelf: () => {
-            setModalStack((stack) => stack.filter((m) => m !== Wrapper));
-            queueMicrotask(refreshFormValidity);
-          },
-        }}
-      >
-        {modalCode()}
-      </ModalContextProvider>
-    );
+    function Wrapper() {
+      return (
+        <ModalContextProvider
+          value={{
+            removeSelf: () => {
+              setModalStack((stack) => stack.filter((m) => m !== Wrapper));
+              queueMicrotask(refreshFormValidity);
+            },
+          }}
+        >
+          {modalCode()}
+        </ModalContextProvider>
+      );
+    }
     setModalStack((stack) => [...stack, Wrapper]);
   };
 

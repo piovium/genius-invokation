@@ -506,7 +506,7 @@ export function decodeDeckShareCode(code: string) {
 export function buildImportedCharacterStates(
   draft: Draft<GameState>,
   characterIds: readonly number[],
-) {
+): Draft<CharacterState>[] {
   return characterIds.map((id) => {
     const definition = draft.data.characters.get(id);
     if (!definition) {
@@ -519,7 +519,7 @@ export function buildImportedCharacterStates(
 export function buildImportedPileDefinitions(
   data: EditorGameData,
   cardIds: readonly number[],
-) {
+): EntityDefinition[] {
   const definitions = cardIds.map((id) => {
     const definition = data.entities.get(id);
     if (!definition) {
@@ -533,7 +533,7 @@ export function buildImportedPileDefinitions(
 export function buildImportedPileStates(
   draft: Draft<GameState>,
   cardIds: readonly number[],
-) {
+): Draft<EntityState>[] {
   return buildImportedPileDefinitions(draft.data, cardIds).map((definition) =>
     createEntityState(definition, allocateId(draft)),
   );

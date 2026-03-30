@@ -122,7 +122,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
 }
 
 // Dice section
-const DiceSection = () => {
+function DiceSection() {
   const { gameState, updateState } = useStateEditorContext();
   const { who, player } = usePlayer();
 
@@ -252,10 +252,10 @@ const DiceSection = () => {
       </div>
     </Surface>
   );
-};
+}
 
 // Player info section (合并玩家标记和技能记录)
-const PlayerInfoSection = () => {
+function PlayerInfoSection() {
   const { updateState } = useStateEditorContext();
   const { who, player } = usePlayer();
   return (
@@ -335,17 +335,17 @@ const PlayerInfoSection = () => {
       </div>
     </Surface>
   );
-};
+}
 
 // Entity area section (supports, summons, combatStatuses)
-const EntityAreaSection = (props2: {
+function EntityAreaSection(props2: {
   title: string;
   description?: string;
   area: "supports" | "summons" | "combatStatuses";
   mode: "card" | "icon";
   limit?: number;
   availableTags?: EntityTag[]; // 可选的标签列表，用于添加时的筛选
-}) => {
+}) {
   const { openModal, updateState } = useStateEditorContext();
   const { who, player } = usePlayer();
   const items = () => player()[props2.area];
@@ -616,10 +616,10 @@ const EntityAreaSection = (props2: {
       </div>
     </Surface>
   );
-};
+}
 
 // Round skill log section
-const RoundSkillLogSection = () => {
+function RoundSkillLogSection() {
   const { openModal, updateState, catalog } = useStateEditorContext();
   const { who, player } = usePlayer();
   const roundSkillRows = createMemo(() =>
@@ -767,10 +767,10 @@ const RoundSkillLogSection = () => {
       </div>
     </div>
   );
-};
+}
 
 // Deck import section
-const DeckImportSection = () => {
+function DeckImportSection() {
   const { gameState, updateState } = useStateEditorContext();
   const { who, player } = usePlayer();
   const [shareCode, setShareCode] = createSignal("");
@@ -942,4 +942,4 @@ const DeckImportSection = () => {
       </div>
     </Surface>
   );
-};
+}
