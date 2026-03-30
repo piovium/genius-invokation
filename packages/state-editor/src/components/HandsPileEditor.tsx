@@ -127,14 +127,14 @@ interface CollectionContentProps {
   who: 0 | 1;
 }
 
-function detailBadges(card: {
-  attachments: readonly unknown[];
-  variables: Record<string, number>;
-}) {
-  return [
-    `变量 ${Object.keys(card.variables).length}`,
-    `附着 ${card.attachments.length}`,
-  ];
+function detailBadges(card: EntityState) {
+  const badges = card.definition.visibleVarName
+    ? [
+        `${card.definition.visibleVarName} = ${card.variables[card.definition.visibleVarName]}`,
+      ]
+    : [];
+  badges.push(`附着 ${card.attachments.length}`);
+  return badges;
 }
 
 export function PileEditor(props: CollectionContentProps) {

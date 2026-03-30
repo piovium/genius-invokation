@@ -50,10 +50,11 @@ interface PlayerSectionEditorProps {
 }
 
 function entityBadges(entity: EntityState) {
-  return [
-    `变量 ${Object.keys(entity.variables).length}`,
-    `附着 ${entity.attachments.length}`,
-  ];
+  return entity.definition.visibleVarName
+    ? [
+        `${entity.definition.visibleVarName} = ${entity.variables[entity.definition.visibleVarName]}`,
+      ]
+    : [];
 }
 
 interface PlayerContextValue {

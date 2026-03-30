@@ -1109,10 +1109,13 @@ function CharacterEntityListItem(props: CharacterEntityListItemProps) {
       title={getDefinitionName(props.entity.definition)}
       description={`ID: ${props.entity.id}`}
       definition={props.entity.definition}
-      tags={[
-        `变量 ${Object.keys(props.entity.variables).length}`,
-        `附着 ${props.entity.attachments.length}`,
-      ]}
+      tags={
+        props.entity.definition.visibleVarName
+          ? [
+              `${props.entity.definition.visibleVarName} = ${props.entity.variables[props.entity.definition.visibleVarName]}`,
+            ]
+          : []
+      }
       buttonColumns={2}
       buttons={buttons}
     />

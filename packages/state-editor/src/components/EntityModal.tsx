@@ -196,24 +196,28 @@ function EntityModalContent(props: EntityContentProps) {
     <>
       <Show when={entity()}>
         {(resolvedEntity) => {
-          const currentEntity = () => resolvedEntity();
+          const et = resolvedEntity();
           return (
             <div class="space-y-2">
               <div class="flex gap-4">
                 <div class="shrink-0 w-1/5">
                   <PreviewTile
-                    definition={currentEntity().definition}
+                    definition={et.definition}
                     mode={imageMode()}
-                    subtitle={`状态 ID #${currentEntity().id}`}
-                    badges={[
-                      `变量 ${Object.keys(currentEntity().variables).length}`,
-                    ]}
+                    subtitle={`状态 ID #${et.id}`}
+                    badges={
+                      et.definition.visibleVarName
+                        ? [
+                            `${et.definition.visibleVarName} = ${et.variables[et.definition.visibleVarName]}`,
+                          ]
+                        : []
+                    }
                   />
                 </div>
                 <div class="flex-1 space-y-4 min-w-0">
                   <SectionTitle title="变量编辑" />
                   <VariableGrid
-                    entries={Object.entries(currentEntity().variables)}
+                    entries={Object.entries(et.variables)}
                     onChange={(key, value) =>
                       updateEntityByAreaContent((target) => {
                         target.variables[key] = value;
@@ -285,22 +289,22 @@ function EntityModalContent(props: EntityContentProps) {
                     <div class="flex-1 flex flex-col border border-white/10 rounded-xl overflow-hidden gap-3">
                       <div class="p-3 bg-slate-800/50 border-b border-white/10">
                         <div class="text-sm font-medium text-amber-50">
-                          已有附着 ({currentEntity().attachments.length})
+                          已有附着 ({et.attachments.length})
                         </div>
                       </div>
                       <div class="flex-1 overflow-y-auto space-y-2">
-                        <For each={currentEntity().attachments}>
+                        <For each={et.attachments}>
                           {(attachment, index) => (
                             <AttachmentListItem
                               who={props.who}
                               area={props.area as "hands" | "pile"}
-                              entity={currentEntity()}
+                              entity={et}
                               attachment={attachment}
                               index={index()}
                             />
                           )}
                         </For>
-                        {currentEntity().attachments.length === 0 && (
+                        {et.attachments.length === 0 && (
                           <div class="text-center text-slate-500 py-8 text-sm">
                             暂无附着
                           </div>
