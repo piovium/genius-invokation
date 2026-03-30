@@ -2,6 +2,7 @@ import { createMemo, createSignal, For, Show } from "solid-js";
 
 import type {
   AttachmentDefinition,
+  AttachmentState,
   EntityState,
   GameState,
 } from "@gi-tcg/core";
@@ -281,108 +282,17 @@ function EntityModalContent(props: EntityContentProps) {
                       </div>
                       <div class="flex-1 overflow-y-auto space-y-2">
                         <For each={currentEntity().attachments}>
-                          {(attachment, index) => {
-                            const isFirst = () => index() === 0;
-                            const isLast = () =>
-                              index() ===
-                              currentEntity().attachments.length - 1;
-
-                            const buttons: ListItemButton[] = [
-                              {
-                                content: "编辑",
-                                col: 1,
-                                variant: "primary",
-                                onClick: () => {
-                                  props.openModal({
-                                    kind: "attachment",
-                                    who: props.who,
-                                    area: props.area as "hands" | "pile",
-                                    entityId: props.entityId,
-                                    attachmentId: attachment.id,
-                                  });
-                                },
-                              },
-                              {
-                                content: "上移",
-                                col: 0,
-                                onClick: () => {
-                                  if (isFirst()) return;
-                                  const who = props.who;
-                                  const area = props.area as "hands" | "pile";
-                                  const etId = props.entityId;
-                                  const i = index();
-                                  props.updateState((draft) => {
-                                    const targetPlayer = draft.players[who];
-                                    const targetEntity = targetPlayer[
-                                      area
-                                    ].find((item) => item.id === etId);
-                                    if (!targetEntity) return;
-                                    targetEntity.attachments = moveInArray(
-                                      targetEntity.attachments,
-                                      i,
-                                      -1,
-                                    );
-                                  });
-                                },
-                              },
-                              {
-                                content: "下移",
-                                col: 0,
-                                onClick: () => {
-                                  if (isLast()) return;
-                                  const who = props.who;
-                                  const area = props.area as "hands" | "pile";
-                                  const etId = props.entityId;
-                                  const i = index();
-                                  props.updateState((draft) => {
-                                    const targetPlayer = draft.players[who];
-                                    const targetEntity = targetPlayer[
-                                      area
-                                    ].find((item) => item.id === etId);
-                                    if (!targetEntity) return;
-                                    targetEntity.attachments = moveInArray(
-                                      targetEntity.attachments,
-                                      i,
-                                      1,
-                                    );
-                                  });
-                                },
-                              },
-                              {
-                                content: "移除",
-                                col: 1,
-                                variant: "danger",
-                                onClick: () => {
-                                  const who = props.who;
-                                  const area = props.area as "hands" | "pile";
-                                  const etId = props.entityId;
-                                  const i = index();
-                                  props.updateState((draft) => {
-                                    const targetPlayer = draft.players[who];
-                                    const targetEntity = targetPlayer[
-                                      area
-                                    ].find((item) => item.id === etId);
-                                    if (!targetEntity) return;
-                                    targetEntity.attachments.splice(i, 1);
-                                  });
-                                },
-                              },
-                            ];
-
-                            return (
-                              <ListItem
-                                imageSrc={getImageUrl(
-                                  attachment.definition,
-                                  "icon",
-                                )}
-                                imageMode="icon"
-                                title={getDefinitionName(attachment.definition)}
-                                description={`ID: ${attachment.id} · 变量: ${Object.keys(attachment.variables).length}`}
-                                buttonColumns={2}
-                                buttons={buttons}
-                              />
-                            );
-                          }}
+                          {(attachment, index) => (
+                            <AttachmentListItem
+                              who={props.who}
+                              area={props.area as "hands" | "pile"}
+                              entity={currentEntity()}
+                              attachment={attachment}
+                              index={index()}
+                              updateState={props.updateState}
+                              openModal={props.openModal}
+                            />
+                          )}
                         </For>
                         {currentEntity().attachments.length === 0 && (
                           <div class="text-center text-slate-500 py-8 text-sm">
@@ -416,7 +326,108 @@ function EntityModalContent(props: EntityContentProps) {
   );
 }
 
-// Modal version
+interface AttachmentListItemProps {
+  index: number;
+  who: 0 | 1;
+  area: "hands" | "pile";
+  entity: EntityState;
+  attachment: AttachmentState;
+  updateState: UpdateGameState;
+  openModal: (modal: EditorModal) => void;
+}
+
+function AttachmentListItem(props: AttachmentListItemProps) {
+  const isFirst = () => props.index === 0;
+  const isLast = () => props.index === props.entity.attachments.length - 1;
+
+  const moveUp = (draft: Draft<GameState>) => {
+    const targetPlayer = draft.players[props.who];
+    const targetEntity = targetPlayer[props.area].find(
+      (item) => item.id === props.entity.id,
+    );
+    if (!targetEntity) return;
+    targetEntity.attachments = moveInArray(
+      targetEntity.attachments,
+      props.index,
+      -1,
+    );
+  };
+
+  const moveDown = (draft: Draft<GameState>) => {
+    const targetPlayer = draft.players[props.who];
+    const targetEntity = targetPlayer[props.area].find(
+      (item) => item.id === props.entity.id,
+    );
+    if (!targetEntity) return;
+    targetEntity.attachments = moveInArray(
+      targetEntity.attachments,
+      props.index,
+      1,
+    );
+  };
+
+  const remove = (draft: Draft<GameState>) => {
+    const targetPlayer = draft.players[props.who];
+    const targetEntity = targetPlayer[props.area].find(
+      (item) => item.id === props.entity.id,
+    );
+    if (!targetEntity) return;
+    targetEntity.attachments.splice(props.index, 1);
+  };
+
+  const buttons: ListItemButton[] = [
+    {
+      content: "编辑",
+      col: 1,
+      variant: "primary",
+      onClick: () => {
+        props.openModal({
+          kind: "attachment",
+          who: props.who,
+          area: props.area,
+          entityId: props.entity.id,
+          attachmentId: props.attachment.id,
+        });
+      },
+    },
+    {
+      content: "上移",
+      col: 0,
+      onClick: () => {
+        if (isFirst()) return;
+        props.updateState(moveUp);
+      },
+    },
+    {
+      content: "下移",
+      col: 0,
+      onClick: () => {
+        if (isLast()) return;
+        props.updateState(moveDown);
+      },
+    },
+    {
+      content: "移除",
+      col: 1,
+      variant: "danger",
+      onClick: () => {
+        props.updateState(remove);
+      },
+    },
+  ];
+
+  return (
+    <ListItem
+      imageSrc={getImageUrl(props.attachment.definition, "icon")}
+      imageMode="icon"
+      title={getDefinitionName(props.attachment.definition)}
+      description={`ID: ${props.attachment.id} · 变量: ${Object.keys(props.attachment.variables).length}`}
+      buttonColumns={2}
+      buttons={buttons}
+    />
+  );
+}
+
 interface EntityModalProps extends EntityContentProps {
   open: boolean;
   onClose: () => void;

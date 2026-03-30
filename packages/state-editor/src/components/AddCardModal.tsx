@@ -39,7 +39,6 @@ export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   eventCard: "事件牌",
 };
 
-// 所有 EntityTag 值（从 @gi-tcg/core 的 EntityTag 类型提取）
 const ALL_ENTITY_TAGS: EntityTag[] = [
   // CardTag
   "legend",

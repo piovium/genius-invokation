@@ -11,7 +11,6 @@ import {
 } from "../state";
 import { VariableGrid } from "./VariableGrid";
 
-// Content component for Attachment (non-modal version)
 interface AttachmentContentProps {
   state: GameState;
   who: 0 | 1;
