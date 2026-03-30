@@ -17,12 +17,10 @@ import { createStore, produce, unwrap } from "solid-js/store";
 
 import type { GameState } from "@gi-tcg/core";
 
-import { NumberField, SectionTitle, SelectField, Surface } from "./Fields";
+import { Surface } from "./Fields";
 import { CharacterEditor } from "./CharacterEditor";
-import { ExtensionModal } from "./ExtensionModal";
 import { PileEditor, HandsEditor } from "./HandsPileEditor";
 import { PlayerSectionEditor } from "./PlayerSectionEditor";
-import { ListItem, type ListItemButton } from "./ListItem";
 import {
   buildEditorCatalog,
   createDefaultGameState,
@@ -137,6 +135,7 @@ export interface StateEditorContextValue {
 const StateEditorContext = createContext<StateEditorContextValue>();
 
 export const useStateEditorContext = () => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return useContext(StateEditorContext)!;
 };
 

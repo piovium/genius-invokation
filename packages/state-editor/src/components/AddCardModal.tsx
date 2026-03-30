@@ -5,7 +5,7 @@ import { getImageUrl, type AssetOption } from "../state";
 import { useStateEditorContext } from "./GameStateEditor";
 
 interface AddCardModalProps {
-  ref?: HTMLDialogElement;
+  ref?: HTMLDialogElement | ((el: HTMLDialogElement) => void);
   autoClose?: boolean;
   onSelect: (cardDefinition: EntityDefinition) => void;
   // 可选：控制是否展示类型筛选行

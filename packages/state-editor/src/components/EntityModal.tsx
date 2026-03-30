@@ -421,7 +421,7 @@ function AttachmentListItem(props: AttachmentListItemProps) {
   );
 }
 
-interface EntityModalProps extends EntityContentProps {}
+type EntityModalProps = EntityContentProps;
 
 export function EntityModal(props: EntityModalProps) {
   const { gameState } = useStateEditorContext();

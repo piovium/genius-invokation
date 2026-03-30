@@ -16,7 +16,6 @@ import type {
   EntityType,
   GameState,
   EntityTag,
-  PlayerState,
 } from "@gi-tcg/core";
 
 import { ActionButton, BooleanField, SectionTitle, Surface } from "./Fields";
@@ -63,6 +62,7 @@ interface PlayerContextValue {
 }
 
 const PlayerContext = createContext<PlayerContextValue>();
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const usePlayer = () => useContext(PlayerContext)!;
 
 export function PlayerSectionEditor(props: PlayerSectionEditorProps) {

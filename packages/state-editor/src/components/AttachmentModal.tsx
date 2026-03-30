@@ -73,9 +73,7 @@ function AttachmentModalContent(props: AttachmentContentProps) {
   );
 }
 
-interface AttachmentModalProps extends AttachmentContentProps {}
-
-export function AttachmentModal(props: AttachmentModalProps) {
+export function AttachmentModal(props: AttachmentContentProps) {
   const { gameState } = useStateEditorContext();
   const player = () => getPlayer(gameState(), props.who);
   const attachment = () =>

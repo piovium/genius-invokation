@@ -47,10 +47,8 @@ function ExtensionModalContent(props: ExtensionContentProps) {
   );
 }
 
-// Modal version (keeping for backwards compatibility)
-interface ExtensionModalProps extends ExtensionContentProps {}
 
-export function ExtensionModal(props: ExtensionModalProps) {
+export function ExtensionModal(props: ExtensionContentProps) {
   return (
     <Modal title={`扩展编辑`}>
       <ExtensionModalContent index={props.index} />
