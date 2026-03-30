@@ -1,4 +1,4 @@
-import { For, createMemo, createSignal, type Accessor } from "solid-js";
+import { For, createMemo, createSignal } from "solid-js";
 
 import type {
   GameState,
@@ -424,9 +424,10 @@ function HandsCardListItem(props: HandsCardListItemProps) {
       return [] as CharacterState[];
     }
 
-    const allChars = [...player().characters];
-    return player().characters.filter(
+    const allChars = player().characters.filter((character) => !!character);
+    return allChars.filter(
       (character) =>
+        character &&
         canEquipToCharacter(props.card, character, allChars).canEquip,
     );
   });
@@ -485,7 +486,7 @@ function HandsCardListItem(props: HandsCardListItemProps) {
     if (!item) return;
 
     const destination = target.characters.find(
-      (character) => character.id === characterId,
+      (character) => character && character.id === characterId,
     );
     if (!destination) return;
 
@@ -508,7 +509,7 @@ function HandsCardListItem(props: HandsCardListItemProps) {
     const targetWho = props.who;
     const cardIndex = props.index;
     const destination = player().characters.find(
-      (character) => character.id === characterId,
+      (character) => character && character.id === characterId,
     );
     if (!destination) {
       return;
@@ -588,12 +589,14 @@ function HandsCardListItem(props: HandsCardListItemProps) {
     }
 
     for (const character of equipTargets()) {
-      next.push({
-        content: `装备给${getDefinitionName({ id: character.definition.id })}`,
-        col: 0,
-        variant: "use",
-        onClick: () => handleEquip(character.id),
-      });
+      if (character) {
+        next.push({
+          content: `装备给${getDefinitionName(character.definition)}`,
+          col: 0,
+          variant: "use",
+          onClick: () => handleEquip(character.id),
+        });
+      }
     }
 
     return next;

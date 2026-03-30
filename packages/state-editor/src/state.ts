@@ -91,12 +91,9 @@ export interface EditorCatalog {
   allInitiativeSkills: InitiativeSkillOption[];
 }
 
-// 角色区域初始为空，需要通过选择角色来填充
-const DEFAULT_CHARACTER_DEFINITION_IDS: readonly number[] = [];
-const DEFAULT_CHARACTER_INSTANCE_IDS: readonly [
-  readonly number[],
-  readonly number[],
-] = [[], []];
+const DEFAULT_CHARACTER_DEFINITION_IDS: readonly number[] = [1301, 1103, 1501];
+
+const ID_START = -500000;
 
 export const PHASE_LABELS: Partial<Record<PhaseType, string>> = {
   // initActives: "选择出战",
@@ -271,19 +268,15 @@ function buildDefaultPlayerState(
     }
     return definition;
   });
-  const instanceIds = DEFAULT_CHARACTER_INSTANCE_IDS[who];
   const characters = definitions.map((definition, index) =>
-    createCharacterState(
-      definition,
-      instanceIds[index] ?? who * 100 + index + 1,
-    ),
+    createCharacterState(definition, ID_START + 1 + who * 3 + index),
   );
   return {
     [StateSymbol]: "player",
     who,
     initialPile: [],
     pile: [],
-    activeCharacterId: characters[0]?.id ?? -1,
+    activeCharacterId: characters[0].id,
     hands: [],
     characters,
     combatStatuses: [],
@@ -333,7 +326,7 @@ export function createDefaultGameState(): GameState {
     versionBehavior: getVersionBehavior(CURRENT_VERSION),
     iterators: {
       random: randomSeed,
-      id: -500000,
+      id: ID_START,
     },
     phase: "action",
     roundNumber: 1,
@@ -539,18 +532,22 @@ export function buildImportedPileStates(
   );
 }
 
-export function getPlayer(state: GameState, who: 0 | 1) {
+export interface LoosePlayerState extends Omit<PlayerState, "characters"> {
+  readonly characters: readonly (CharacterState | null)[];
+}
+
+export function getPlayer(state: GameState, who: 0 | 1): LoosePlayerState {
   return state.players[who];
 }
 
-export function getCharacter(player: PlayerState, characterId: number) {
+export function getCharacter(player: LoosePlayerState, characterId: number) {
   return (
-    player.characters.find((character) => character.id === characterId) ?? null
+    player.characters.find((character) => character?.id === characterId) ?? null
   );
 }
 
 export function getEntity(
-  player: PlayerState,
+  player: LoosePlayerState,
   area: EditorEntityArea,
   entityId: number,
   characterId?: number,
@@ -562,14 +559,11 @@ export function getEntity(
     const character = getCharacter(player, characterId);
     return character?.entities.find((entity) => entity.id === entityId) ?? null;
   }
-  if (!player) {
-    debugger;
-  }
   return player[area].find((entity) => entity.id === entityId) ?? null;
 }
 
 export function getAttachment(
-  player: PlayerState,
+  player: LoosePlayerState,
   area: "hands" | "pile",
   entityId: number,
   attachmentId: number,
@@ -707,15 +701,15 @@ export function validateGameState(state: GameState, catalog: EditorCatalog) {
     catalog.roundSkillCharacters.map((character) => character.id),
   );
   for (const [playerIndex, player] of state.players.entries()) {
+    const characters = player.characters.filter(Boolean);
     if (player.who !== playerIndex) {
       errors.push(`玩家 ${playerIndex} 的 who 不匹配`);
     }
-    // 角色数量不再强制为3，可以为空
+    if (characters.length !== 3) {
+      errors.push(`玩家 ${playerIndex} 角色数量不为3`);
+    }
     if (
-      player.characters.length > 0 &&
-      !player.characters.some(
-        (character) => character.id === player.activeCharacterId,
-      )
+      !characters.some((character) => character.id === player.activeCharacterId)
     ) {
       errors.push(`玩家 ${playerIndex} 的出战角色不存在`);
     }
@@ -748,9 +742,6 @@ export function validateGameState(state: GameState, catalog: EditorCatalog) {
           errors.push(`玩家 ${playerIndex} 的回合技能记录技能不存在`);
         }
       }
-    }
-    if (player.characters.length !== 3) {
-      errors.push(`玩家 ${playerIndex} 角色数量不为3`);
     }
     for (const character of player.characters) {
       allIds.push(character.id);

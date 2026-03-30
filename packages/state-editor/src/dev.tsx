@@ -56,7 +56,7 @@ function App() {
   const initialState = createMemo(() => {
     const source = persistedState();
     if (!source) {
-      return undefined;
+      return;
     }
     try {
       const logs = deserializeGameStateLog(
@@ -66,7 +66,7 @@ function App() {
       return logs[0]?.state;
     } catch (error) {
       console.error(error);
-      return undefined;
+      return;
     }
   });
 

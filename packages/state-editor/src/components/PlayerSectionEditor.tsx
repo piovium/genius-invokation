@@ -38,6 +38,7 @@ import {
   getPlayer,
   moveInArray,
   type EditorSection,
+  type LoosePlayerState,
 } from "../state";
 import type { Draft } from "immer";
 import { useStateEditorContext } from "./GameStateEditor";
@@ -58,7 +59,7 @@ function entityBadges(entity: EntityState) {
 
 interface PlayerContextValue {
   who: Accessor<0 | 1>;
-  player: Accessor<PlayerState>;
+  player: Accessor<LoosePlayerState>;
 }
 
 const PlayerContext = createContext<PlayerContextValue>();
@@ -722,9 +723,13 @@ function RoundSkillLogSection() {
   // 获取当前编辑的数据
   const editingData = createMemo(() => {
     const idx = editingIndex();
-    if (idx === null) return undefined;
+    if (idx === null) {
+      return void 0;
+    }
     const row = roundSkillRows()[idx];
-    if (!row) return undefined;
+    if (!row) {
+      return void 0;
+    }
     return {
       characterId: row[0],
       skillIds: row[1],
@@ -787,13 +792,11 @@ function RoundSkillLogListItem(props: RoundSkillLogListItemProps) {
       .map((id) =>
         catalog().allInitiativeSkills.find((skill) => skill.id === id),
       )
-      .filter(
-        (skill): skill is NonNullable<typeof skill> => skill !== undefined,
-      ),
+      .filter((skill) => !!skill),
   );
   const imageSrc = createMemo(() => {
     const item = character();
-    return item ? getImageUrl(item, "icon") : undefined;
+    return item ? getImageUrl(item, "icon") : void 0;
   });
 
   const buttons: ListItemButton[] = [
@@ -850,7 +853,7 @@ function DeckImportSection() {
     if (!deck) return [];
     return deck.characters
       .map((id) => gameState().data.characters.get(id))
-      .filter((def): def is NonNullable<typeof def> => def !== undefined);
+      .filter((def) => !!def);
   });
 
   // 获取卡牌定义
@@ -859,7 +862,7 @@ function DeckImportSection() {
     if (!deck) return [];
     return deck.cards
       .map((id) => gameState().data.entities.get(id))
-      .filter((def): def is NonNullable<typeof def> => def !== undefined);
+      .filter((def) => !!def);
   });
 
   const handleImport = () => {
@@ -893,7 +896,7 @@ function DeckImportSection() {
             draft,
             deck.characters,
           );
-          target.activeCharacterId = target.characters[0]?.id ?? 0;
+          target.activeCharacterId = target.characters[0].id;
         }
         if (importedInitialPile) {
           target.initialPile = importedInitialPile as Draft<EntityDefinition>[];

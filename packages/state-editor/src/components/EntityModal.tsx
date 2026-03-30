@@ -16,7 +16,6 @@ import {
   getDefinitionName,
   getPlayer,
   moveInArray,
-  type EditorCatalog,
   getImageUrl,
   type EditorEntityArea,
   type AssetOption,
@@ -178,7 +177,7 @@ function EntityModalContent(props: EntityContentProps) {
       const player = draft.players[who];
       if (area === "characterEntities") {
         const character = player.characters.find(
-          (item) => item.id === characterId,
+          (item) => item && item.id === characterId,
         );
         const entity = character?.entities.find((item) => item.id === entityId);
         if (entity) {

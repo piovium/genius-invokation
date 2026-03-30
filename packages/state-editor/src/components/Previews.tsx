@@ -28,7 +28,7 @@ export interface PreviewTileProps {
 }
 
 export interface CharacterPreviewProps {
-  character?: CharacterState;
+  character: CharacterState | null;
   isActive: boolean;
 }
 

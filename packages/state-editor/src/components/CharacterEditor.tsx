@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show, type Accessor } from "solid-js";
+import { createMemo, createSignal, For, Show } from "solid-js";
 import type {
   CharacterState,
   EntityDefinition,
@@ -104,7 +104,11 @@ export function CharacterEditor(props: CharacterEditorProps) {
 
   // 获取当前玩家已选择的角色ID列表
   const existingCharacterIds = createMemo(() => {
-    return new Set(player().characters.map((c) => c.definition.id));
+    return new Set(
+      player()
+        .characters.map((c) => c?.definition.id)
+        .filter((id) => typeof id === "number"),
+    );
   });
 
   // 根据标签筛选角色，并排除已选择的角色
@@ -136,7 +140,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
     const chId = characterId();
     updateState((draft) => {
       const target = draft.players[who].characters.find(
-        (item) => item.id === chId,
+        (item) => item?.id === chId,
       );
       if (target) {
         updater(target);
@@ -187,7 +191,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
     const chId = characterId();
     updateState((draft) => {
       const target = draft.players[who].characters.find(
-        (item) => item.id === chId,
+        (item) => item?.id === chId,
       );
       if (!target) return;
       target.variables.health = 0;
@@ -204,7 +208,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
     const chId = characterId();
     updateState((draft) => {
       const target = draft.players[who].characters.find(
-        (item) => item.id === chId,
+        (item) => item?.id === chId,
       );
       if (!target) return;
       target.variables.health = 1;
@@ -397,6 +401,9 @@ export function CharacterEditor(props: CharacterEditorProps) {
     updateState((draft) => {
       const player = draft.players[who];
       const existingChar = player.characters[chIdx];
+      const hadActiveCharacter = player.characters.some(
+        (character) => character?.id === player.activeCharacterId,
+      );
 
       // 保留现有实体，但需要进行合法性校验
       const existingEntities = existingChar?.entities ?? [];
@@ -408,20 +415,12 @@ export function CharacterEditor(props: CharacterEditorProps) {
       // 保留合法的实体
       newCharacter.entities = validEntities;
 
-      // 替换或添加角色
-      if (chIdx < player.characters.length) {
-        // 替换现有角色
-        player.characters[chIdx] = newCharacter;
-      } else {
-        // 在末尾添加新角色（避免创建空槽位）
-        player.characters.push(newCharacter);
-      }
+      player.characters[chIdx] = newCharacter;
 
-      // 如果这是第一个角色，设为出战
-      if (player.characters.length === 1) {
-        player.activeCharacterId = newCharacter.id;
-      } else if (existingChar?.id === player.activeCharacterId) {
-        // 如果替换的是出战角色，更新activeCharacterId
+      if (
+        !hadActiveCharacter ||
+        existingChar?.id === player.activeCharacterId
+      ) {
         player.activeCharacterId = newCharacter.id;
       }
     });
@@ -561,9 +560,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
                     />
                     <ActionButton
                       label="右移"
-                      disabled={
-                        props.characterIndex >= player().characters.length - 1
-                      }
+                      disabled={props.characterIndex >= 2}
                       onClick={() => moveCharacter(1)}
                     />
                   </div>
@@ -794,31 +791,33 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
   const appendEntity = () => {
     openModal(() => {
       let ref!: HTMLDialogElement;
-      return <AddCardModal
-        ref={ref}
-        onSelect={(definition) => {
-          handleAddCheck(definition, () => ref.close());
-        }}
-        showTypeFilter={true}
-        showTagFilter={true}
-        availableTypes={["equipment", "status"]}
-        availableTags={[
-          "shield",
-          "barrier",
-          "preparingSkill",
-          "nightsoulsBlessing",
-          "talent",
-          "artifact",
-          "technique",
-          "weapon",
-          "sword",
-          "claymore",
-          "pole",
-          "catalyst",
-          "bow",
-        ]}
-        maxResults={60}
-      />
+      return (
+        <AddCardModal
+          ref={ref}
+          onSelect={(definition) => {
+            handleAddCheck(definition, () => ref.close());
+          }}
+          showTypeFilter={true}
+          showTagFilter={true}
+          availableTypes={["equipment", "status"]}
+          availableTags={[
+            "shield",
+            "barrier",
+            "preparingSkill",
+            "nightsoulsBlessing",
+            "talent",
+            "artifact",
+            "technique",
+            "weapon",
+            "sword",
+            "claymore",
+            "pole",
+            "catalyst",
+            "bow",
+          ]}
+          maxResults={60}
+        />
+      );
     });
   };
 
@@ -944,7 +943,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
     const chId = props.characterId;
     updateState((draft) => {
       const target = draft.players[who].characters.find(
-        (item) => item.id === chId,
+        (item) => item?.id === chId,
       );
       if (!target) return;
 
@@ -958,7 +957,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
     const chId = props.characterId;
     updateState((draft) => {
       const target = draft.players[who].characters.find(
-        (item) => item.id === chId,
+        (item) => item?.id === chId,
       );
       if (!target) return;
 
@@ -1043,7 +1042,7 @@ function CharacterEntityListItem(props: CharacterEntityListItemProps) {
 
   const moveUp = (draft: Draft<GameState>) => {
     const target = draft.players[props.who].characters.find(
-      (item) => item.id === props.characterId,
+      (item) => item?.id === props.characterId,
     );
     if (!target) return;
     target.entities = moveInArray(target.entities, props.index, -1);
@@ -1051,7 +1050,7 @@ function CharacterEntityListItem(props: CharacterEntityListItemProps) {
 
   const moveDown = (draft: Draft<GameState>) => {
     const target = draft.players[props.who].characters.find(
-      (item) => item.id === props.characterId,
+      (item) => item?.id === props.characterId,
     );
     if (!target) return;
     target.entities = moveInArray(target.entities, props.index, 1);
@@ -1059,7 +1058,7 @@ function CharacterEntityListItem(props: CharacterEntityListItemProps) {
 
   const remove = (draft: Draft<GameState>) => {
     const target = draft.players[props.who].characters.find(
-      (item) => item.id === props.characterId,
+      (item) => item?.id === props.characterId,
     );
     if (!target) return;
     target.entities.splice(props.index, 1);

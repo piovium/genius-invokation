@@ -18,7 +18,7 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
   const { gameState, catalog } = useStateEditorContext();
 
   // 是否是编辑模式
-  const isEditing = () => props.editingCharacterId !== undefined;
+  const isEditing = () => typeof props.editingCharacterId === "number";
 
   // 角色选择状态
   const [selectedCharacterId, setSelectedCharacterId] = createSignal<
@@ -37,11 +37,17 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
 
   // 牌组中的三个角色
   const deckCharacters = createMemo(() => {
-    return player().characters.map((char) => ({
-      id: char.definition.id,
-      name: getDefinitionName(char.definition),
-      definition: char.definition,
-    }));
+    return player()
+      .characters.map((char) =>
+        char
+          ? {
+              id: char.definition.id,
+              name: getDefinitionName(char.definition),
+              definition: char.definition,
+            }
+          : null,
+      )
+      .filter((c) => !!c);
   });
 
   // 可选的其他角色（排除牌组中的和已使用的）
