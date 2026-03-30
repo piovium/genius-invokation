@@ -792,10 +792,12 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
   };
 
   const appendEntity = () => {
-    openModal(() => (
-      <AddCardModal
+    openModal(() => {
+      let ref!: HTMLDialogElement;
+      return <AddCardModal
+        ref={ref}
         onSelect={(definition) => {
-          handleAddCheck(definition);
+          handleAddCheck(definition, () => ref.close());
         }}
         showTypeFilter={true}
         showTagFilter={true}
@@ -817,11 +819,11 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
         ]}
         maxResults={60}
       />
-    ));
+    });
   };
 
   /* 确认覆盖弹窗 - 相同 definition.id */
-  const confirmOverride = () => {
+  const confirmOverride = (done: () => void) => {
     openModal(() => (
       <ConfirmModal
         title="检测到重复实体"
@@ -832,14 +834,17 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
         }
         confirmText="确认覆盖"
         cancelText="取消"
-        onConfirm={handleConfirmReplace}
+        onConfirm={() => {
+          handleConfirmReplace();
+          done();
+        }}
         onCancel={handleCancelReplace}
       />
     ));
   };
 
   /* 确认替换弹窗 - 同类别实体（武器、圣遗物、天赋、特技） */
-  const confirmReplace = () => {
+  const confirmReplace = (done: () => void) => {
     openModal(() => (
       <ConfirmModal
         title={`${(() => {
@@ -857,7 +862,10 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
         })()}
         confirmText="确认替换"
         cancelText="取消"
-        onConfirm={handleConfirmCategoryReplace}
+        onConfirm={() => {
+          handleConfirmCategoryReplace();
+          done();
+        }}
         onCancel={handleCancelCategoryReplace}
       />
     ));
@@ -885,7 +893,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
   };
 
   // 处理添加前的检查
-  const handleAddCheck = (definition: EntityDefinition) => {
+  const handleAddCheck = (definition: EntityDefinition, done: () => void) => {
     // 1. 首先检查合法性
     if (!isEntityValidForCharacter(definition)) {
       const tags = definition.tags;
@@ -909,7 +917,7 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
     if (duplicateIndex !== -1) {
       setPendingDefinition(definition);
       setExistingEntityIndex(duplicateIndex);
-      confirmOverride();
+      confirmOverride(done);
       return;
     }
 
@@ -921,12 +929,13 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
         existingIndex: sameCategory.index,
         category: sameCategory.category,
       });
-      confirmReplace();
+      confirmReplace(done);
       return;
     }
 
     // 4. 直接添加
     doAdd(definition);
+    done();
   };
 
   // 执行添加

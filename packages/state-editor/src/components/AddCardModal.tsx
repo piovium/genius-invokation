@@ -1,14 +1,12 @@
 import { For, Show, createMemo, createSignal } from "solid-js";
-import type {
-  EntityDefinition,
-  EntityType,
-  EntityTag,
-} from "@gi-tcg/core";
+import type { EntityDefinition, EntityType, EntityTag } from "@gi-tcg/core";
 import { Modal } from "./Modal";
 import { getImageUrl, type AssetOption } from "../state";
 import { useStateEditorContext } from "./GameStateEditor";
 
 interface AddCardModalProps {
+  ref?: HTMLDialogElement;
+  autoClose?: boolean;
   onSelect: (cardDefinition: EntityDefinition) => void;
   // 可选：控制是否展示类型筛选行
   showTypeFilter?: boolean;
@@ -220,7 +218,11 @@ export function AddCardModal(props: AddCardModalProps) {
   };
 
   return (
-    <Modal title="追加卡牌" description="搜索并选择要追加的卡牌">
+    <Modal
+      ref={(el) => (props.ref as any)?.(el)}
+      title="追加卡牌"
+      description="搜索并选择要追加的卡牌"
+    >
       <div class="space-y-4">
         {/* 搜索框 */}
         <div class="space-y-2">
@@ -347,7 +349,7 @@ export function AddCardModal(props: AddCardModalProps) {
                 return (
                   <button
                     type="button"
-                    data-close-dialog
+                    bool:data-close-dialog={props.autoClose}
                     onClick={() => {
                       props.onSelect(card.definition);
                     }}

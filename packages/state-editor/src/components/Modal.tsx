@@ -6,9 +6,9 @@ import {
   useContext,
   type JSX,
 } from "solid-js";
-import { useStateEditorContext } from "./GameStateEditor";
 
 export interface ModalProps {
+  ref?: HTMLDialogElement | ((el: HTMLDialogElement) => void);
   title: string;
   description?: string;
   footer?: JSX.Element;
@@ -28,7 +28,6 @@ export const ModalContextProvider = ModalContext.Provider;
 export function Modal(props: ModalProps) {
   const { removeSelf } = useContext(ModalContext);
 
-  // eslint-disable-next-line no-unassigned-vars
   let ref!: HTMLDialogElement;
   const closeHandler = () => {
     props.onClose?.();
@@ -51,7 +50,7 @@ export function Modal(props: ModalProps) {
   });
   return (
     <dialog
-      ref={ref}
+      ref={(el) => (ref = el) && (props.ref as any)?.(el)}
       class="gi-editor-modal-panel gi-editor-scroll"
       onClose={closeHandler}
     >

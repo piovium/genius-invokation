@@ -380,10 +380,11 @@ const EntityAreaSection = (props2: {
   };
 
   // 处理添加前的检查
-  const handleAddCheck = (definition: EntityDefinition) => {
+  const handleAddCheck = (definition: EntityDefinition, done: () => void) => {
     // 支援区不限制同 definition.id
     if (props2.area === "supports") {
       doAdd(definition);
+      done();
       return;
     }
 
@@ -393,11 +394,12 @@ const EntityAreaSection = (props2: {
       // 存在重复，显示确认弹窗
       setPendingDefinition(definition);
       setExistingEntityIndex(duplicateIndex);
-      confirmOverride();
-    } else {
+      confirmOverride(done);
+      return;
+    } 
       // 没有重复，直接添加
       doAdd(definition);
-    }
+      done();
   };
 
   // 执行添加
@@ -426,22 +428,26 @@ const EntityAreaSection = (props2: {
   };
 
   const appendEntity = () => {
-    openModal(() => (
-      <AddCardModal
-        onSelect={handleAddCheck}
+    openModal(() => {
+      let ref!: HTMLDialogElement;
+      return <AddCardModal
+        ref={ref}
+        onSelect={(def) => {
+          handleAddCheck(def, () => ref.close())
+        }}
         availableTypes={availableTypes() as EntityType[]}
         showTypeFilter={false}
         availableTags={props2.availableTags}
         showTagFilter={!!props2.availableTags}
         maxResults={200}
       />
-    ));
+  });
   };
 
   {
     /* Confirm Modal for duplicate entities */
   }
-  const confirmOverride = () => {
+  const confirmOverride = (done: () => void) => {
     openModal(() => (
       <ConfirmModal
         title="检测到重复实体"
@@ -452,7 +458,10 @@ const EntityAreaSection = (props2: {
         }
         confirmText="确认覆盖"
         cancelText="取消"
-        onConfirm={handleConfirmReplace}
+        onConfirm={() => {
+          done();
+          handleConfirmReplace();
+        }}
         onCancel={handleCancelReplace}
       />
     ));
