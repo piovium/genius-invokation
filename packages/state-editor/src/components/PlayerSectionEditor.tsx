@@ -33,7 +33,7 @@ import {
 } from "../state";
 import type { Draft } from "immer";
 
-interface PlayerSectionContentProps {
+interface PlayerSectionEditorProps {
   state: GameState;
   section: EditorSection;
   catalog: EditorCatalog;
@@ -48,7 +48,7 @@ function entityBadges(entity: EntityState) {
   ];
 }
 
-export function PlayerSectionContent(props: PlayerSectionContentProps) {
+export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
   const section = () => props.section;
   const who = () => {
     const s = section();

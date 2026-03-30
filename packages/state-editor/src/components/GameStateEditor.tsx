@@ -17,13 +17,13 @@ import { Aura } from "@gi-tcg/typings";
 
 import { NumberField, SectionTitle, SelectField, Surface } from "./Fields";
 import {
-  CharacterModalContent,
-  ExtensionModal,
-  EntityModal,
   AttachmentModal,
-} from "./DetailModals";
-import { PileModalContent, HandsModalContent } from "./CollectionModal";
-import { PlayerSectionContent } from "./PlayerSectionContent";
+} from "./AttachmentModal";
+import { CharacterEditor } from "./CharacterEditor";
+import { ExtensionModal } from "./ExtensionModal";
+import { EntityModal } from "./EntityModal";
+import { PileEditor, HandsEditor } from "./HandsPileEditor";
+import { PlayerSectionEditor } from "./PlayerSectionEditor";
 import { ListItem, type ListItemButton } from "./ListItem";
 import {
   buildEditorCatalog,
@@ -878,29 +878,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
           </div>
 
           {/* Right Content Area */}
-          <div
-            class="w-2/5 shrink-0 overflow-y-auto p-4 sm:p-6 lg:p-8 box-border"
-            style={{
-              "scrollbar-width": "thin",
-              "scrollbar-color": "rgba(255, 255, 255, 0.3) transparent",
-            }}
-          >
-            <style>{`
-              .scrollbar-thin::-webkit-scrollbar {
-                width: 6px;
-                height: 6px;
-              }
-              .scrollbar-thin::-webkit-scrollbar-track {
-                background: transparent;
-              }
-              .scrollbar-thin::-webkit-scrollbar-thumb {
-                background-color: rgba(255, 255, 255, 0.3);
-                border-radius: 3px;
-              }
-              .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-                background-color: rgba(255, 255, 255, 0.5);
-              }
-            `}</style>
+          <div class="w-2/5 shrink-0 overflow-y-auto p-4 sm:p-6 lg:p-8 box-border scrollbar-thin">
             <div class="max-w-5xl mx-auto">
               <Switch>
                 {/* Global Section */}
@@ -933,7 +911,8 @@ export function GameStateEditor(props: GameStateEditorProps) {
                         <NumberField
                           label="回合数"
                           value={state.roundNumber}
-                          min={0}
+                          min={1}
+                          max={state.config.maxRoundsCount - 1}
                           onChange={(value) =>
                             updateState((draft) => {
                               draft.roundNumber = value;
@@ -964,7 +943,6 @@ export function GameStateEditor(props: GameStateEditorProps) {
                               ? "最新官方数据"
                               : "传入初始值"}
                           </p>
-                          <p>胜者：固定为 null</p>
                           <p>下一个状态 ID：{state.iterators.id}</p>
                         </div>
                       </div>
@@ -1014,7 +992,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
 
                 {/* Pile Section */}
                 <Match when={selectedSection().kind === "pile"}>
-                  <PileModalContent
+                  <PileEditor
                     state={state}
                     who={
                       (
@@ -1032,7 +1010,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
 
                 {/* Hands Section */}
                 <Match when={selectedSection().kind === "hands"}>
-                  <HandsModalContent
+                  <HandsEditor
                     state={state}
                     who={
                       (
@@ -1050,7 +1028,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
 
                 {/* Character Section */}
                 <Match when={selectedSection().kind === "character"}>
-                  <CharacterModalContent
+                  <CharacterEditor
                     state={state}
                     who={
                       (
@@ -1086,7 +1064,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
                     selectedSection().kind === "deckImport"
                   }
                 >
-                  <PlayerSectionContent
+                  <PlayerSectionEditor
                     state={state}
                     section={selectedSection()}
                     catalog={catalog()}

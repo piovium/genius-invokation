@@ -339,36 +339,7 @@ export function AddCardModal(props: AddCardModalProps) {
         </div>
 
         {/* 结果网格 - 固定高度可滚动（细体滚动条） */}
-        <div
-          class="h-40vh overflow-y-auto pr-2 scrollbar-thin"
-          style={{
-            "scrollbar-width": "thin",
-            "scrollbar-color": "rgba(255, 255, 255, 0.3) transparent",
-          }}
-        >
-          <style>{`
-            .scrollbar-thin::-webkit-scrollbar {
-              width: 6px;
-              height: 6px;
-            }
-            .scrollbar-thin::-webkit-scrollbar-track {
-              background: transparent;
-            }
-            .scrollbar-thin::-webkit-scrollbar-thumb {
-              background-color: rgba(255, 255, 255, 0.3);
-              border-radius: 3px;
-            }
-            .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-              background-color: rgba(255, 255, 255, 0.5);
-            }
-            /* Firefox */
-            @supports (scrollbar-width: thin) {
-              .scrollbar-thin {
-                scrollbar-width: thin;
-                scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
-              }
-            }
-          `}</style>
+        <div class="h-40vh overflow-y-auto pr-2 scrollbar-thin">
           <div
             class="grid gap-3"
             style={{
@@ -377,7 +348,11 @@ export function AddCardModal(props: AddCardModalProps) {
           >
             <For each={displayedCards()}>
               {(card) => {
-                const cardMode = ["status", "combatStatus"].includes(card.definition.type) ? "icon" : "card";
+                const cardMode = ["status", "combatStatus"].includes(
+                  card.definition.type,
+                )
+                  ? "icon"
+                  : "card";
                 return (
                   <button
                     type="button"
@@ -388,7 +363,9 @@ export function AddCardModal(props: AddCardModalProps) {
                     class="group flex flex-col items-center gap-2 p-3 rounded-xl border border-white/10 bg-slate-800/50 hover:bg-slate-700/50 hover:border-white/30 transition"
                   >
                     {/* 卡牌图片 */}
-                    <div class={`w-full rounded-lg overflow-hidden ${cardMode === "icon" ? "" : "aspect-[3/4]"}`}>
+                    <div
+                      class={`w-full rounded-lg overflow-hidden ${cardMode === "icon" ? "" : "aspect-[3/4]"}`}
+                    >
                       <img
                         src={getImageUrl(card.definition, cardMode)}
                         alt={card.name}

@@ -98,13 +98,13 @@ const DEFAULT_CHARACTER_INSTANCE_IDS: readonly [
   readonly number[],
 ] = [[], []];
 
-export const PHASE_LABELS: Record<PhaseType, string> = {
-  initActives: "选择出战",
-  initHands: "初始手牌",
+export const PHASE_LABELS: Partial<Record<PhaseType, string>> = {
+  // initActives: "选择出战",
+  // initHands: "初始手牌",
   roll: "掷骰阶段",
   action: "行动阶段",
   end: "结束阶段",
-  gameEnd: "对局结束",
+  // gameEnd: "对局结束",
 };
 
 export const DICE_OPTIONS = [
@@ -677,6 +677,19 @@ export function validateGameState(state: GameState, catalog: EditorCatalog) {
   validateSafeInteger(state.iterators.random, "随机迭代器", errors);
   validateSafeInteger(state.iterators.id, "下一个状态 ID", errors);
   validateSafeInteger(state.roundNumber, "回合数", errors);
+  if (
+    state.roundNumber <= 0 ||
+    state.roundNumber >= state.config.maxRoundsCount
+  ) {
+    errors.push("回合数超出范围");
+  }
+  if (
+    state.phase === "initActives" ||
+    state.phase === "initHands" ||
+    state.phase === "gameEnd"
+  ) {
+    errors.push(`不支持阶段 ${state.phase}`);
+  }
   if (state.currentTurn !== 0 && state.currentTurn !== 1) {
     errors.push("当前行动方无效");
   }
@@ -733,8 +746,10 @@ export function validateGameState(state: GameState, catalog: EditorCatalog) {
         }
       }
     }
+    if (player.characters.length !== 3) {
+      errors.push(`玩家 ${playerIndex} 角色数量不为3`);
+    }
     for (const character of player.characters) {
-      if (!character) continue;
       allIds.push(character.id);
       for (const [key, value] of Object.entries(character.variables)) {
         validateSafeInteger(value, `角色变量 ${key}`, errors);

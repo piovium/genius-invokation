@@ -141,8 +141,7 @@ function detailBadges(card: {
   ];
 }
 
-// Content component for Pile (non-modal version)
-export function PileModalContent(props: CollectionContentProps) {
+export function PileEditor(props: CollectionContentProps) {
   const player = () => getPlayer(props.state, props.who);
   const [addCardModalOpen, setAddCardModalOpen] = createSignal(false);
   const [insertPosition, setInsertPosition] = createSignal<"start" | "end">(
@@ -341,8 +340,7 @@ export function PileModalContent(props: CollectionContentProps) {
   );
 }
 
-// Content component for Hands (non-modal version)
-export function HandsModalContent(props: CollectionContentProps) {
+export function HandsEditor(props: CollectionContentProps) {
   const player = () => getPlayer(props.state, props.who);
   const [addCardModalOpen, setAddCardModalOpen] = createSignal(false);
 
