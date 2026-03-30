@@ -1,4 +1,4 @@
-import { For, createSignal } from "solid-js";
+import { For, createMemo, createSignal, type Accessor } from "solid-js";
 
 import type {
   GameState,
@@ -19,9 +19,6 @@ import {
   getPlayer,
   moveInArray,
   shuffleList,
-  type EditorCatalog,
-  type EditorModal,
-  type UpdateGameState,
 } from "../state";
 import { ConfirmModal } from "./ConfirmModal";
 import type { Draft } from "immer";
@@ -227,99 +224,9 @@ export function PileEditor(props: CollectionContentProps) {
 
         <div class="space-y-2">
           <For each={player().pile}>
-            {(card, index) => {
-              const buttons: ListItemButton[] = [
-                // 第一列
-                {
-                  content: "上移",
-                  col: 0,
-                  onClick: () => {
-                    const who = props.who;
-                    const i = index();
-                    updateState((draft) => {
-                      draft.players[who].pile = moveInArray(
-                        draft.players[who].pile,
-                        i,
-                        -1,
-                      );
-                    });
-                  },
-                },
-                {
-                  content: "加入手牌",
-                  col: 0,
-                  onClick: () => {
-                    const who = props.who;
-                    const i = index();
-                    updateState((draft) => {
-                      const target = draft.players[who];
-                      if (target.hands.length >= draft.config.maxHandsCount) {
-                        return;
-                      }
-                      const [item] = target.pile.splice(i, 1);
-                      if (item) {
-                        target.hands.push(item);
-                      }
-                    });
-                  },
-                },
-                {
-                  content: "下移",
-                  col: 0,
-                  onClick: () => {
-                    const who = props.who;
-                    const i = index();
-                    updateState((draft) => {
-                      draft.players[who].pile = moveInArray(
-                        draft.players[who].pile,
-                        i,
-                        1,
-                      );
-                    });
-                  },
-                },
-                // 第二列
-                {
-                  content: "详情",
-                  col: 1,
-                  variant: "primary",
-                  onClick: () => {
-                    openModal(() => (
-                      <EntityModal
-                        who={props.who}
-                        area="pile"
-                        entityId={card.id}
-                      />
-                    ));
-                  },
-                },
-                {
-                  content: "移除",
-                  col: 1,
-                  variant: "danger",
-                  onClick: () => {
-                    const who = props.who;
-                    const i = index();
-                    updateState((draft) => {
-                      draft.players[who].pile.splice(i, 1);
-                    });
-                  },
-                },
-              ];
-
-              return (
-                <ListItem
-                  imageSrc={getImageUrl(card.definition, "card")}
-                  imageMode="card"
-                  title={getDefinitionName(card.definition)}
-                  description={`ID: ${card.id}`}
-                  definition={card.definition}
-                  tags={detailBadges(card)}
-                  buttonColumns={2}
-                  buttons={buttons}
-                />
-              );
-            }}
+            {(card, index) => (
+              <PileCardListItem who={props.who} card={card} index={index()} />
+            )}
           </For>
         </div>
 
@@ -335,6 +242,94 @@ export function PileEditor(props: CollectionContentProps) {
         </button>
       </div>
     </Surface>
+  );
+}
+
+interface PileCardListItemProps {
+  who: 0 | 1;
+  card: EntityState;
+  index: number;
+}
+
+function PileCardListItem(props: PileCardListItemProps) {
+  const { updateState, openModal } = useStateEditorContext();
+
+  const moveUp = (draft: Draft<GameState>) => {
+    draft.players[props.who].pile = moveInArray(
+      draft.players[props.who].pile,
+      props.index,
+      -1,
+    );
+  };
+
+  const moveDown = (draft: Draft<GameState>) => {
+    draft.players[props.who].pile = moveInArray(
+      draft.players[props.who].pile,
+      props.index,
+      1,
+    );
+  };
+
+  const moveToHands = (draft: Draft<GameState>) => {
+    const target = draft.players[props.who];
+    if (target.hands.length >= draft.config.maxHandsCount) {
+      return;
+    }
+    const [item] = target.pile.splice(props.index, 1);
+    if (item) {
+      target.hands.push(item);
+    }
+  };
+
+  const remove = (draft: Draft<GameState>) => {
+    draft.players[props.who].pile.splice(props.index, 1);
+  };
+
+  const buttons: ListItemButton[] = [
+    {
+      content: "上移",
+      col: 0,
+      onClick: () => updateState(moveUp),
+    },
+    {
+      content: "加入手牌",
+      col: 0,
+      onClick: () => updateState(moveToHands),
+    },
+    {
+      content: "下移",
+      col: 0,
+      onClick: () => updateState(moveDown),
+    },
+    {
+      content: "详情",
+      col: 1,
+      variant: "primary",
+      onClick: () => {
+        openModal(() => (
+          <EntityModal who={props.who} area="pile" entityId={props.card.id} />
+        ));
+      },
+    },
+    {
+      content: "移除",
+      col: 1,
+      variant: "danger",
+      onClick: () => updateState(remove),
+    },
+  ];
+
+  return (
+    <ListItem
+      imageSrc={getImageUrl(props.card.definition, "card")}
+      imageMode="card"
+      title={getDefinitionName(props.card.definition)}
+      description={`ID: ${props.card.id}`}
+      definition={props.card.definition}
+      tags={detailBadges(props.card)}
+      buttonColumns={2}
+      buttons={buttons}
+    />
   );
 }
 
@@ -385,66 +380,6 @@ export function HandsEditor(props: CollectionContentProps) {
     });
   };
 
-  // 处理装备操作
-  const handleEquip = (
-    cardIndex: number,
-    characterId: number,
-    equipment: EntityState,
-    character: CharacterState,
-  ) => {
-    const eqType = getEquipmentType(equipment.definition);
-    const existingEquipment = getExistingEquipmentOfType(character, eqType);
-    const who = props.who;
-
-    if (existingEquipment) {
-      // 已有同类型装备，显示确认对话框
-      openModal(() => (
-        <ConfirmModal
-          title="覆盖装备"
-          message={`角色已装备${getDefinitionName(existingEquipment.definition as EntityDefinition)}，是否覆盖？`}
-          confirmText="确认覆盖"
-          cancelText="取消"
-          onConfirm={() => {
-            // 执行装备操作
-            updateState((draft) => {
-              const target = draft.players[who];
-              const [item] = target.hands.splice(cardIndex, 1);
-              if (!item) return;
-
-              const destination = target.characters.find(
-                (c) => c.id === characterId,
-              );
-              if (!destination) return;
-
-              // 移除已有的同类型装备
-              const existingIndex = destination.entities.findIndex(
-                (e) =>
-                  e.definition.type === "equipment" &&
-                  getEquipmentType(e.definition) === eqType,
-              );
-              if (existingIndex !== -1) {
-                destination.entities.splice(existingIndex, 1);
-              }
-
-              // 添加新装备
-              destination.entities.push(item);
-            });
-          }}
-        />
-      ));
-    } else {
-      // 直接装备
-      updateState((draft) => {
-        const target = draft.players[who];
-        const [item] = target.hands.splice(cardIndex, 1);
-        if (!item) return;
-
-        const destination = target.characters.find((c) => c.id === characterId);
-        destination?.entities.push(item);
-      });
-    }
-  };
-
   return (
     <Surface title={`玩家 ${props.who} 手牌编辑`}>
       <p class="mt-1 text-xs text-slate-300/80">※ 排列顺序为加入手牌顺序</p>
@@ -454,148 +389,9 @@ export function HandsEditor(props: CollectionContentProps) {
       <div class="space-y-4">
         <div class="space-y-2">
           <For each={player().hands}>
-            {(card, index) => {
-              const buttons: ListItemButton[] = [
-                // 第一列
-                {
-                  content: "上移",
-                  col: 1,
-                  onClick: () => {
-                    const who = props.who;
-                    const i = index();
-                    updateState((draft) => {
-                      draft.players[who].hands = moveInArray(
-                        draft.players[who].hands,
-                        i,
-                        -1,
-                      );
-                    });
-                  },
-                },
-                {
-                  content: "放回牌库",
-                  col: 1,
-                  onClick: () => {
-                    const who = props.who;
-                    const i = index();
-                    updateState((draft) => {
-                      const target = draft.players[who];
-                      if (target.pile.length >= draft.config.maxPileCount) {
-                        return;
-                      }
-                      const [item] = target.hands.splice(i, 1);
-                      if (item) {
-                        target.pile.push(item);
-                      }
-                    });
-                  },
-                },
-                {
-                  content: "下移",
-                  col: 1,
-                  onClick: () => {
-                    const who = props.who;
-                    const i = index();
-                    updateState((draft) => {
-                      draft.players[who].hands = moveInArray(
-                        draft.players[who].hands,
-                        i,
-                        1,
-                      );
-                    });
-                  },
-                },
-                // 第二列
-                {
-                  content: "详情",
-                  col: 2,
-                  variant: "primary",
-                  onClick: () => {
-                    openModal(() => (
-                      <EntityModal
-                        who={props.who}
-                        area="hands"
-                        entityId={card.id}
-                      />
-                    ));
-                  },
-                },
-                {
-                  content: "移除",
-                  col: 2,
-                  variant: "danger",
-                  onClick: () => {
-                    const who = props.who;
-                    const i = index();
-                    updateState((draft) => {
-                      draft.players[who].hands.splice(i, 1);
-                    });
-                  },
-                },
-              ];
-
-              // 支援牌可以移到支援区
-              if (card.definition.type === "support") {
-                buttons.push({
-                  content: "移到支援区",
-                  col: 0,
-                  variant: "use",
-                  onClick: () => {
-                    const who = props.who;
-                    const i = index();
-                    updateState((draft) => {
-                      const target = draft.players[who];
-                      if (
-                        target.supports.length >= draft.config.maxSupportsCount
-                      ) {
-                        return;
-                      }
-                      const [item] = target.hands.splice(i, 1);
-                      if (item) {
-                        target.supports.push(item);
-                      }
-                    });
-                  },
-                });
-              }
-
-              // 装备牌可以装备到角色（带详细规则）
-              if (card.definition.type === "equipment") {
-                const allChars = [...player().characters];
-                player().characters.forEach((character) => {
-                  const checkResult = canEquipToCharacter(
-                    card,
-                    character,
-                    allChars,
-                  );
-
-                  if (checkResult.canEquip) {
-                    const buttonLabel = `装备给${getDefinitionName({ id: character.definition.id })}`;
-                    buttons.push({
-                      content: buttonLabel,
-                      col: 0,
-                      variant: "use",
-                      onClick: () => {
-                        handleEquip(index(), character.id, card, character);
-                      },
-                    });
-                  }
-                });
-              }
-
-              return (
-                <ListItem
-                  imageSrc={getImageUrl(card.definition, "card")}
-                  imageMode="card"
-                  title={getDefinitionName(card.definition)}
-                  description={`ID: ${card.id}`}
-                  definition={card.definition}
-                  tags={detailBadges(card)}
-                  buttonColumns={3}
-                  buttons={buttons}
-                />
-              );
-            }}
+            {(card, index) => (
+              <HandsCardListItem who={props.who} card={card} index={index()} />
+            )}
           </For>
         </div>
         {/* 新增按钮 */}
@@ -610,5 +406,209 @@ export function HandsEditor(props: CollectionContentProps) {
         </button>
       </div>
     </Surface>
+  );
+}
+
+interface HandsCardListItemProps {
+  who: 0 | 1;
+  card: EntityState;
+  index: number;
+}
+
+function HandsCardListItem(props: HandsCardListItemProps) {
+  const { gameState, updateState, openModal } = useStateEditorContext();
+  const player = () => getPlayer(gameState(), props.who);
+
+  const equipTargets = createMemo(() => {
+    if (props.card.definition.type !== "equipment") {
+      return [] as CharacterState[];
+    }
+
+    const allChars = [...player().characters];
+    return player().characters.filter(
+      (character) =>
+        canEquipToCharacter(props.card, character, allChars).canEquip,
+    );
+  });
+
+  const moveUp = (draft: Draft<GameState>) => {
+    draft.players[props.who].hands = moveInArray(
+      draft.players[props.who].hands,
+      props.index,
+      -1,
+    );
+  };
+
+  const moveDown = (draft: Draft<GameState>) => {
+    draft.players[props.who].hands = moveInArray(
+      draft.players[props.who].hands,
+      props.index,
+      1,
+    );
+  };
+
+  const returnToPile = (draft: Draft<GameState>) => {
+    const target = draft.players[props.who];
+    if (target.pile.length >= draft.config.maxPileCount) {
+      return;
+    }
+    const [item] = target.hands.splice(props.index, 1);
+    if (item) {
+      target.pile.push(item);
+    }
+  };
+
+  const moveToSupports = (draft: Draft<GameState>) => {
+    const target = draft.players[props.who];
+    if (target.supports.length >= draft.config.maxSupportsCount) {
+      return;
+    }
+    const [item] = target.hands.splice(props.index, 1);
+    if (item) {
+      target.supports.push(item);
+    }
+  };
+
+  const remove = (draft: Draft<GameState>) => {
+    draft.players[props.who].hands.splice(props.index, 1);
+  };
+
+  const equipToCharacter = (
+    draft: Draft<GameState>,
+    who: 0 | 1,
+    cardIndex: number,
+    characterId: number,
+    replaceExisting: boolean,
+  ) => {
+    const target = draft.players[who];
+    const [item] = target.hands.splice(cardIndex, 1);
+    if (!item) return;
+
+    const destination = target.characters.find(
+      (character) => character.id === characterId,
+    );
+    if (!destination) return;
+
+    if (replaceExisting) {
+      const eqType = getEquipmentType(item.definition);
+      const existingIndex = destination.entities.findIndex(
+        (entity) =>
+          entity.definition.type === "equipment" &&
+          getEquipmentType(entity.definition) === eqType,
+      );
+      if (existingIndex !== -1) {
+        destination.entities.splice(existingIndex, 1);
+      }
+    }
+
+    destination.entities.push(item);
+  };
+
+  const handleEquip = (characterId: number) => {
+    const targetWho = props.who;
+    const cardIndex = props.index;
+    const destination = player().characters.find(
+      (character) => character.id === characterId,
+    );
+    if (!destination) {
+      return;
+    }
+
+    const eqType = getEquipmentType(props.card.definition);
+    const existingEquipment = getExistingEquipmentOfType(destination, eqType);
+
+    if (existingEquipment) {
+      openModal(() => (
+        <ConfirmModal
+          title="覆盖装备"
+          message={`角色已装备${getDefinitionName(existingEquipment.definition as EntityDefinition)}，是否覆盖？`}
+          confirmText="确认覆盖"
+          cancelText="取消"
+          onConfirm={() => {
+            updateState((draft) =>
+              equipToCharacter(draft, targetWho, cardIndex, characterId, true),
+            );
+          }}
+        />
+      ));
+      return;
+    }
+
+    updateState((draft) =>
+      equipToCharacter(draft, targetWho, cardIndex, characterId, false),
+    );
+  };
+
+  const buttons = createMemo<ListItemButton[]>(() => {
+    const next: ListItemButton[] = [
+      {
+        content: "上移",
+        col: 1,
+        onClick: () => updateState(moveUp),
+      },
+      {
+        content: "放回牌库",
+        col: 1,
+        onClick: () => updateState(returnToPile),
+      },
+      {
+        content: "下移",
+        col: 1,
+        onClick: () => updateState(moveDown),
+      },
+      {
+        content: "详情",
+        col: 2,
+        variant: "primary",
+        onClick: () => {
+          openModal(() => (
+            <EntityModal
+              who={props.who}
+              area="hands"
+              entityId={props.card.id}
+            />
+          ));
+        },
+      },
+      {
+        content: "移除",
+        col: 2,
+        variant: "danger",
+        onClick: () => updateState(remove),
+      },
+    ];
+
+    if (props.card.definition.type === "support") {
+      next.push({
+        content: "移到支援区",
+        col: 0,
+        variant: "use",
+        onClick: () => updateState(moveToSupports),
+      });
+    }
+
+    for (const character of equipTargets()) {
+      next.push({
+        content: `装备给${getDefinitionName({ id: character.definition.id })}`,
+        col: 0,
+        variant: "use",
+        onClick: () => handleEquip(character.id),
+      });
+    }
+
+    return next;
+  });
+
+  return (
+    <ListItem
+      imageSrc={getImageUrl(props.card.definition, "card")}
+      imageMode="card"
+      title={getDefinitionName(props.card.definition)}
+      description={`ID: ${props.card.id}`}
+      definition={props.card.definition}
+      tags={detailBadges(props.card)}
+      buttonColumns={3}
+      buttons={buttons()}
+    />
   );
 }

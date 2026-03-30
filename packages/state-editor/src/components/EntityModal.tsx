@@ -170,24 +170,23 @@ function EntityModalContent(props: EntityContentProps) {
   const updateEntityByAreaContent = (
     updater: (entity: Draft<EntityState>) => void,
   ) => {
-    // TODO reactivity issue
+    const who = props.who;
+    const area = props.area;
+    const characterId = props.characterId;
+    const entityId = props.entityId;
     updateState((draft) => {
-      const player = draft.players[props.who];
-      if (props.area === "characterEntities") {
+      const player = draft.players[who];
+      if (area === "characterEntities") {
         const character = player.characters.find(
-          (item) => item.id === props.characterId,
+          (item) => item.id === characterId,
         );
-        const entity = character?.entities.find(
-          (item) => item.id === props.entityId,
-        );
+        const entity = character?.entities.find((item) => item.id === entityId);
         if (entity) {
           updater(entity);
         }
         return;
       }
-      const entity = player[props.area].find(
-        (item) => item.id === props.entityId,
-      );
+      const entity = player[area].find((item) => item.id === entityId);
       if (entity) {
         updater(entity);
       }

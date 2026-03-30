@@ -123,7 +123,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
 
 // Dice section
 function DiceSection() {
-  const { gameState, updateState } = useStateEditorContext();
+  const { gameState } = useStateEditorContext();
   const { who, player } = usePlayer();
 
   // 计算每种骰子的数量
@@ -139,56 +139,6 @@ function DiceSection() {
   const sortedDice = createMemo(() => {
     return [...player().dice].sort((a, b) => a - b);
   });
-
-  // 更新特定类型骰子的数量
-  const updateDiceCount = (diceType: number, newCount: number) => {
-    const whoV = who();
-    updateState((draft) => {
-      const target = draft.players[whoV];
-      const currentCount = target.dice.filter((d) => d === diceType).length;
-
-      if (newCount > currentCount) {
-        // 添加骰子
-        const toAdd = newCount - currentCount;
-        const availableSpace = draft.config.maxDiceCount - target.dice.length;
-        const actualAdd = Math.min(toAdd, availableSpace);
-        for (let i = 0; i < actualAdd; i++) {
-          target.dice.push(diceType);
-        }
-      } else if (newCount < currentCount) {
-        // 移除骰子
-        const toRemove = currentCount - newCount;
-        let removed = 0;
-        target.dice = target.dice.filter((d) => {
-          if (d === diceType && removed < toRemove) {
-            removed++;
-            return false;
-          }
-          return true;
-        });
-      }
-    });
-  };
-
-  // 加满特定类型的骰子
-  const fillDice = (diceType: number) => {
-    const whoV = who();
-    updateState((draft) => {
-      const target = draft.players[whoV];
-      const currentCount = target.dice.filter((d) => d === diceType).length;
-      const availableSpace = draft.config.maxDiceCount - target.dice.length;
-      // 计算可以添加多少个（最多补到某种上限，或者填满剩余空间）
-      const maxPerType = 16; // 每种骰子最多16个（两行的数量）
-      const canAdd = Math.min(maxPerType - currentCount, availableSpace);
-      for (
-        let i = 0;
-        i < canAdd && target.dice.length < draft.config.maxDiceCount;
-        i++
-      ) {
-        target.dice.push(diceType);
-      }
-    });
-  };
 
   return (
     <Surface title={`玩家 ${who()} 骰子`}>
@@ -216,41 +166,109 @@ function DiceSection() {
           <div class="text-sm text-slate-400 mb-2">数量编辑</div>
           <div class="grid grid-cols-2 gap-3">
             <For each={DICE_OPTIONS}>
-              {(diceType) => {
-                const count = () => diceCounts()[diceType] || 0;
-                const buttons: ListItemButton[] = [
-                  {
-                    content: "+",
-                    col: 0,
-                    onClick: () => updateDiceCount(diceType, count() + 1),
-                  },
-                  {
-                    content: "-",
-                    col: 0,
-                    onClick: () => updateDiceCount(diceType, count() - 1),
-                  },
-                  {
-                    content: "加满",
-                    col: 1,
-                    variant: "primary",
-                    onClick: () => fillDice(diceType),
-                  },
-                ];
-
-                return (
-                  <ListItem
-                    title={DICE_LABELS[diceType]}
-                    description={`数量: ${count()}`}
-                    buttonColumns={2}
-                    buttons={buttons}
-                  />
-                );
-              }}
+              {(diceType) => (
+                <DiceTypeListItem
+                  diceType={diceType}
+                  count={() => diceCounts()[diceType] || 0}
+                />
+              )}
             </For>
           </div>
         </div>
       </div>
     </Surface>
+  );
+}
+
+interface DiceTypeListItemProps {
+  diceType: number;
+  count: Accessor<number>;
+}
+
+function DiceTypeListItem(props: DiceTypeListItemProps) {
+  const { updateState } = useStateEditorContext();
+  const { who } = usePlayer();
+
+  const applyDiceCount = (draft: Draft<GameState>, nextCount: number) => {
+    const target = draft.players[who()];
+    const currentCount = target.dice.filter(
+      (dice) => dice === props.diceType,
+    ).length;
+
+    if (nextCount > currentCount) {
+      const toAdd = nextCount - currentCount;
+      const availableSpace = draft.config.maxDiceCount - target.dice.length;
+      const actualAdd = Math.min(toAdd, availableSpace);
+      for (let i = 0; i < actualAdd; i++) {
+        target.dice.push(props.diceType);
+      }
+      return;
+    }
+
+    if (nextCount < currentCount) {
+      const toRemove = currentCount - nextCount;
+      let removed = 0;
+      target.dice = target.dice.filter((dice) => {
+        if (dice === props.diceType && removed < toRemove) {
+          removed++;
+          return false;
+        }
+        return true;
+      });
+    }
+  };
+
+  const increment = (draft: Draft<GameState>) => {
+    applyDiceCount(draft, props.count() + 1);
+  };
+
+  const decrement = (draft: Draft<GameState>) => {
+    applyDiceCount(draft, props.count() - 1);
+  };
+
+  const fill = (draft: Draft<GameState>) => {
+    const target = draft.players[who()];
+    const currentCount = target.dice.filter(
+      (dice) => dice === props.diceType,
+    ).length;
+    const availableSpace = draft.config.maxDiceCount - target.dice.length;
+    const maxPerType = 16;
+    const canAdd = Math.min(maxPerType - currentCount, availableSpace);
+    for (
+      let i = 0;
+      i < canAdd && target.dice.length < draft.config.maxDiceCount;
+      i++
+    ) {
+      target.dice.push(props.diceType);
+    }
+  };
+
+  const buttons: ListItemButton[] = [
+    {
+      content: "+",
+      col: 0,
+      onClick: () => updateState(increment),
+    },
+    {
+      content: "-",
+      col: 0,
+      onClick: () => updateState(decrement),
+    },
+    {
+      content: "加满",
+      col: 1,
+      variant: "primary",
+      onClick: () => updateState(fill),
+    },
+  ];
+
+  return (
+    <ListItem
+      title={DICE_LABELS[props.diceType]}
+      description={`数量: ${props.count()}`}
+      buttonColumns={2}
+      buttons={buttons}
+    />
   );
 }
 
@@ -396,10 +414,10 @@ function EntityAreaSection(props2: {
       setExistingEntityIndex(duplicateIndex);
       confirmOverride(done);
       return;
-    } 
-      // 没有重复，直接添加
-      doAdd(definition);
-      done();
+    }
+    // 没有重复，直接添加
+    doAdd(definition);
+    done();
   };
 
   // 执行添加
@@ -430,18 +448,20 @@ function EntityAreaSection(props2: {
   const appendEntity = () => {
     openModal(() => {
       let ref!: HTMLDialogElement;
-      return <AddCardModal
-        ref={ref}
-        onSelect={(def) => {
-          handleAddCheck(def, () => ref.close())
-        }}
-        availableTypes={availableTypes() as EntityType[]}
-        showTypeFilter={false}
-        availableTags={props2.availableTags}
-        showTagFilter={!!props2.availableTags}
-        maxResults={200}
-      />
-  });
+      return (
+        <AddCardModal
+          ref={ref}
+          onSelect={(def) => {
+            handleAddCheck(def, () => ref.close());
+          }}
+          availableTypes={availableTypes() as EntityType[]}
+          showTypeFilter={false}
+          availableTags={props2.availableTags}
+          showTagFilter={!!props2.availableTags}
+          maxResults={200}
+        />
+      );
+    });
   };
 
   {
@@ -484,11 +504,6 @@ function EntityAreaSection(props2: {
     setExistingEntityIndex(-1);
   };
 
-  // 判断是否可以放回手牌
-  const canReturnToHands = () => {
-    return props2.area === "supports";
-  };
-
   return (
     <Surface title={props2.title}>
       <Show when={props2.description}>
@@ -497,108 +512,14 @@ function EntityAreaSection(props2: {
       <div class="space-y-4">
         <div class="space-y-2">
           <For each={items()}>
-            {(entity, index) => {
-              const buttons: ListItemButton[] = [
-                // 第一列
-                {
-                  content: "上移",
-                  col: 0,
-                  onClick: () => {
-                    const whoV = who();
-                    const area = props2.area;
-                    const i = index();
-                    updateState((draft) => {
-                      draft.players[whoV][area] = moveInArray(
-                        draft.players[whoV][area],
-                        i,
-                        -1,
-                      );
-                    });
-                  },
-                },
-                {
-                  content: "下移",
-                  col: 0,
-                  onClick: () => {
-                    const whoV = who();
-                    const area = props2.area;
-                    const i = index();
-                    updateState((draft) => {
-                      draft.players[whoV][area] = moveInArray(
-                        draft.players[whoV][area],
-                        i,
-                        1,
-                      );
-                    });
-                  },
-                },
-                // 第二列
-                {
-                  content: "详情",
-                  col: 1,
-                  variant: "primary",
-                  onClick: () =>
-                    openModal(() => (
-                      <EntityModal
-                        who={who()}
-                        area={props2.area}
-                        entityId={entity.id}
-                      />
-                    )),
-                },
-                {
-                  content: "移除",
-                  col: 1,
-                  variant: "danger",
-                  onClick: () => {
-                    const whoV = who();
-                    const area = props2.area;
-                    const i = index();
-                    updateState((draft) => {
-                      draft.players[whoV][area].splice(i, 1);
-                    });
-                  },
-                },
-              ];
-
-              // 支援牌可以放回手牌
-              if (canReturnToHands() && props2.area === "supports") {
-                buttons.splice(1, 0, {
-                  content: "放回手牌",
-                  col: 0,
-                  onClick: () => {
-                    const whoV = who();
-                    const i = index();
-                    updateState((draft) => {
-                      const target = draft.players[whoV];
-                      if (target.hands.length >= draft.config.maxHandsCount) {
-                        return;
-                      }
-                      const [item] = target.supports.splice(i, 1);
-                      if (item) {
-                        target.hands.push(item);
-                      }
-                    });
-                  },
-                });
-              }
-
-              return (
-                <ListItem
-                  imageSrc={getImageUrl(
-                    entity.definition,
-                    props2.mode === "card" ? "card" : "icon",
-                  )}
-                  imageMode={props2.mode}
-                  title={getDefinitionName(entity.definition)}
-                  description={`ID: ${entity.id}`}
-                  definition={entity.definition}
-                  tags={entityBadges(entity)}
-                  buttonColumns={2}
-                  buttons={buttons}
-                />
-              );
-            }}
+            {(entity, index) => (
+              <EntityAreaListItem
+                area={props2.area}
+                mode={props2.mode}
+                entity={entity}
+                index={index}
+              />
+            )}
           </For>
         </div>
         {/* 新增按钮 */}
@@ -618,9 +539,113 @@ function EntityAreaSection(props2: {
   );
 }
 
+interface EntityAreaListItemProps {
+  area: "supports" | "summons" | "combatStatuses";
+  mode: "card" | "icon";
+  entity: EntityState;
+  index: Accessor<number>;
+}
+
+function EntityAreaListItem(props: EntityAreaListItemProps) {
+  const { updateState, openModal } = useStateEditorContext();
+  const { who } = usePlayer();
+
+  const moveUp = (draft: Draft<GameState>) => {
+    draft.players[who()][props.area] = moveInArray(
+      draft.players[who()][props.area],
+      props.index(),
+      -1,
+    );
+  };
+
+  const moveDown = (draft: Draft<GameState>) => {
+    draft.players[who()][props.area] = moveInArray(
+      draft.players[who()][props.area],
+      props.index(),
+      1,
+    );
+  };
+
+  const remove = (draft: Draft<GameState>) => {
+    draft.players[who()][props.area].splice(props.index(), 1);
+  };
+
+  const returnToHands = (draft: Draft<GameState>) => {
+    const target = draft.players[who()];
+    if (target.hands.length >= draft.config.maxHandsCount) {
+      return;
+    }
+    const [item] = target.supports.splice(props.index(), 1);
+    if (item) {
+      target.hands.push(item);
+    }
+  };
+
+  const buttons = createMemo<ListItemButton[]>(() => {
+    const next: ListItemButton[] = [
+      {
+        content: "上移",
+        col: 0,
+        onClick: () => updateState(moveUp),
+      },
+      {
+        content: "下移",
+        col: 0,
+        onClick: () => updateState(moveDown),
+      },
+      {
+        content: "详情",
+        col: 1,
+        variant: "primary",
+        onClick: () => {
+          openModal(() => (
+            <EntityModal
+              who={who()}
+              area={props.area}
+              entityId={props.entity.id}
+            />
+          ));
+        },
+      },
+      {
+        content: "移除",
+        col: 1,
+        variant: "danger",
+        onClick: () => updateState(remove),
+      },
+    ];
+
+    if (props.area === "supports") {
+      next.splice(1, 0, {
+        content: "放回手牌",
+        col: 0,
+        onClick: () => updateState(returnToHands),
+      });
+    }
+
+    return next;
+  });
+
+  return (
+    <ListItem
+      imageSrc={getImageUrl(
+        props.entity.definition,
+        props.mode === "card" ? "card" : "icon",
+      )}
+      imageMode={props.mode}
+      title={getDefinitionName(props.entity.definition)}
+      description={`ID: ${props.entity.id}`}
+      definition={props.entity.definition}
+      tags={entityBadges(props.entity)}
+      buttonColumns={2}
+      buttons={buttons()}
+    />
+  );
+}
+
 // Round skill log section
 function RoundSkillLogSection() {
-  const { openModal, updateState, catalog } = useStateEditorContext();
+  const { openModal, updateState } = useStateEditorContext();
   const { who, player } = usePlayer();
   const roundSkillRows = createMemo(() =>
     Array.from(player().roundSkillLog.entries()),
@@ -716,43 +741,15 @@ function RoundSkillLogSection() {
       {/* 技能记录列表 */}
       <div class="space-y-2">
         <For each={roundSkillRows()}>
-          {([characterId, skillIds], index) => {
-            const character = catalog().roundSkillCharacters.find(
-              (c) => c.id === characterId,
-            );
-            const skills = skillIds
-              .map((id) =>
-                catalog().allInitiativeSkills.find((s) => s.id === id),
-              )
-              .filter((s): s is NonNullable<typeof s> => s !== undefined);
-
-            const buttons: ListItemButton[] = [
-              {
-                content: "编辑",
-                variant: "primary",
-                col: 0,
-                onClick: () => openEditModal(index()),
-              },
-              {
-                content: "删除",
-                variant: "danger",
-                col: 1,
-                onClick: () => handleDelete(index()),
-              },
-            ];
-
-            return (
-              <ListItem
-                imageSrc={
-                  character ? getImageUrl(character, "icon") : undefined
-                }
-                title={character?.name ?? `角色 #${characterId}`}
-                tags={skills.map((s) => s.name)}
-                buttonColumns={2}
-                buttons={buttons}
-              />
-            );
-          }}
+          {([characterId, skillIds], index) => (
+            <RoundSkillLogListItem
+              characterId={characterId}
+              skillIds={skillIds}
+              index={index()}
+              onEdit={() => openEditModal(index())}
+              onDelete={() => handleDelete(index())}
+            />
+          )}
         </For>
 
         {/* 新增按钮 - 虚线框样式 */}
@@ -769,10 +766,66 @@ function RoundSkillLogSection() {
   );
 }
 
+interface RoundSkillLogListItemProps {
+  characterId: number;
+  skillIds: number[];
+  index: number;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+function RoundSkillLogListItem(props: RoundSkillLogListItemProps) {
+  const { catalog } = useStateEditorContext();
+
+  const character = createMemo(() =>
+    catalog().roundSkillCharacters.find(
+      (item) => item.id === props.characterId,
+    ),
+  );
+  const skills = createMemo(() =>
+    props.skillIds
+      .map((id) =>
+        catalog().allInitiativeSkills.find((skill) => skill.id === id),
+      )
+      .filter(
+        (skill): skill is NonNullable<typeof skill> => skill !== undefined,
+      ),
+  );
+  const imageSrc = createMemo(() => {
+    const item = character();
+    return item ? getImageUrl(item, "icon") : undefined;
+  });
+
+  const buttons: ListItemButton[] = [
+    {
+      content: "编辑",
+      variant: "primary",
+      col: 0,
+      onClick: () => props.onEdit(),
+    },
+    {
+      content: "删除",
+      variant: "danger",
+      col: 1,
+      onClick: () => props.onDelete(),
+    },
+  ];
+
+  return (
+    <ListItem
+      imageSrc={imageSrc()}
+      title={character()?.name ?? `角色 #${props.characterId}`}
+      tags={skills().map((skill) => skill.name)}
+      buttonColumns={2}
+      buttons={buttons}
+    />
+  );
+}
+
 // Deck import section
 function DeckImportSection() {
   const { gameState, updateState } = useStateEditorContext();
-  const { who, player } = usePlayer();
+  const { who } = usePlayer();
   const [shareCode, setShareCode] = createSignal("");
   const [importCharacters, setImportCharacters] = createSignal(true);
   const [importInitialPile, setImportInitialPile] = createSignal(true);

@@ -91,8 +91,9 @@ export function GlobalSection(props: GlobalSectionProps) {
                     content: "编辑",
                     variant: "primary",
                     col: 0,
-                    onClick: () =>
-                      openModal(() => <ExtensionModal index={index()} />),
+                    onClick: () => {
+                      openModal(() => <ExtensionModal index={index()} />);
+                    },
                   },
                 ];
                 return (

@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, Show } from "solid-js";
+import { createMemo, createSignal, For, Show, type Accessor } from "solid-js";
 import type {
   CharacterState,
   EntityDefinition,
@@ -1006,91 +1006,14 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
         />
         <div class="mt-4 space-y-3">
           <For each={props.character.entities}>
-            {(entity, index) => {
-              const buttons: ListItemButton[] = [
-                {
-                  content: "上移",
-                  col: 0,
-                  onClick: () => {
-                    const who = props.who;
-                    const chId = props.characterId;
-                    const i = index();
-                    updateState((draft) => {
-                      const target = draft.players[who].characters.find(
-                        (item) => item.id === chId,
-                      );
-                      if (!target) return;
-                      target.entities = moveInArray(target.entities, i, -1);
-                    });
-                  },
-                },
-                {
-                  content: "下移",
-                  col: 0,
-                  onClick: () => {
-                    const who = props.who;
-                    const chId = props.characterId;
-                    const i = index();
-                    updateState((draft) => {
-                      const target = draft.players[who].characters.find(
-                        (item) => item.id === chId,
-                      );
-                      if (!target) return;
-                      target.entities = moveInArray(target.entities, i, 1);
-                    });
-                  },
-                },
-                {
-                  content: "详情",
-                  col: 1,
-                  variant: "primary",
-                  onClick: () => {
-                    openModal(() => (
-                      <EntityModal
-                        who={props.who}
-                        area="characterEntities"
-                        entityId={entity.id}
-                      />
-                    ));
-                  },
-                },
-                {
-                  content: "移除",
-                  col: 1,
-                  variant: "danger",
-                  onClick: () => {
-                    const who = props.who;
-                    const chId = props.characterId;
-                    const i = index();
-                    updateState((draft) => {
-                      const target = draft.players[who].characters.find(
-                        (item) => item.id === chId,
-                      );
-                      if (!target) return;
-                      target.entities.splice(i, 1);
-                    });
-                  },
-                },
-              ];
-              const imageMode = () =>
-                entity.definition.type === "status" ? "icon" : "card";
-
-              return (
-                <ListItem
-                  imageSrc={getImageUrl(entity.definition, imageMode())}
-                  imageMode={imageMode()}
-                  title={getDefinitionName(entity.definition)}
-                  description={`ID: ${entity.id}`}
-                  definition={entity.definition}
-                  tags={[
-                    `变量 ${Object.keys(entity.variables).length}`,
-                    `附着 ${entity.attachments.length}`,
-                  ]}
-                  buttonColumns={2}
-                  buttons={buttons}
-                />
-              );
-            }}
+            {(entity, index) => (
+              <CharacterEntityListItem
+                who={props.who}
+                characterId={props.characterId}
+                entity={entity}
+                index={index()}
+              />
+            )}
           </For>
           {/* 新增按钮 */}
           <button
@@ -1105,5 +1028,93 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
         </div>
       </div>
     </>
+  );
+}
+
+interface CharacterEntityListItemProps {
+  who: 0 | 1;
+  characterId: number;
+  entity: EntityState;
+  index: number;
+}
+
+function CharacterEntityListItem(props: CharacterEntityListItemProps) {
+  const { updateState, openModal } = useStateEditorContext();
+
+  const moveUp = (draft: Draft<GameState>) => {
+    const target = draft.players[props.who].characters.find(
+      (item) => item.id === props.characterId,
+    );
+    if (!target) return;
+    target.entities = moveInArray(target.entities, props.index, -1);
+  };
+
+  const moveDown = (draft: Draft<GameState>) => {
+    const target = draft.players[props.who].characters.find(
+      (item) => item.id === props.characterId,
+    );
+    if (!target) return;
+    target.entities = moveInArray(target.entities, props.index, 1);
+  };
+
+  const remove = (draft: Draft<GameState>) => {
+    const target = draft.players[props.who].characters.find(
+      (item) => item.id === props.characterId,
+    );
+    if (!target) return;
+    target.entities.splice(props.index, 1);
+  };
+
+  const imageMode = () =>
+    props.entity.definition.type === "status" ? "icon" : "card";
+
+  const buttons: ListItemButton[] = [
+    {
+      content: "上移",
+      col: 0,
+      onClick: () => updateState(moveUp),
+    },
+    {
+      content: "下移",
+      col: 0,
+      onClick: () => updateState(moveDown),
+    },
+    {
+      content: "详情",
+      col: 1,
+      variant: "primary",
+      onClick: () => {
+        openModal(() => (
+          <EntityModal
+            who={props.who}
+            area="characterEntities"
+            entityId={props.entity.id}
+            characterId={props.characterId}
+          />
+        ));
+      },
+    },
+    {
+      content: "移除",
+      col: 1,
+      variant: "danger",
+      onClick: () => updateState(remove),
+    },
+  ];
+
+  return (
+    <ListItem
+      imageSrc={getImageUrl(props.entity.definition, imageMode())}
+      imageMode={imageMode()}
+      title={getDefinitionName(props.entity.definition)}
+      description={`ID: ${props.entity.id}`}
+      definition={props.entity.definition}
+      tags={[
+        `变量 ${Object.keys(props.entity.variables).length}`,
+        `附着 ${props.entity.attachments.length}`,
+      ]}
+      buttonColumns={2}
+      buttons={buttons}
+    />
   );
 }
