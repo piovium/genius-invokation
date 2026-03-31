@@ -18,7 +18,7 @@ import {
   getEntityItemDescription,
   getEntityVisibleVarBadges,
 } from "../state/catalog";
-import { getEquipmentInvalidity, moveInArray } from "../utils";
+import { getEquipmentInvalidity, getEquipmentType, moveInArray } from "../utils";
 import { allocateId, createEntityState } from "../state/factory";
 import { getImageUrl } from "../state/assets";
 import { getCharacter } from "../state/common";
@@ -42,15 +42,6 @@ const ENTITY_CATEGORY_LABELS: Record<string, string> = {
   technique: "特技",
 };
 
-function getEntityCategory(definition: EntityDefinition): string | null {
-  const tags = definition.tags;
-  if (tags.includes("weapon")) return "weapon";
-  if (tags.includes("artifact")) return "artifact";
-  if (tags.includes("talent")) return "talent";
-  if (tags.includes("technique")) return "technique";
-  return null;
-}
-
 export function CharacterEntitySection(props: CharacterEntitySectionProps) {
   const { openModal, updateState } = useStateEditorContext();
 
@@ -68,11 +59,11 @@ export function CharacterEntitySection(props: CharacterEntitySectionProps) {
   const checkSameCategoryEntity = (
     definition: EntityDefinition,
   ): { index: number; category: string } | null => {
-    const category = getEntityCategory(definition);
-    if (!category) return null;
+    const category = getEquipmentType(definition);
+    if (category === "other") return null;
 
     const index = props.character.entities.findIndex(
-      (item) => getEntityCategory(item.definition) === category,
+      (item) => getEquipmentType(item.definition) === category,
     );
 
     return index !== -1 ? { index, category } : null;
@@ -97,7 +88,6 @@ export function CharacterEntitySection(props: CharacterEntitySectionProps) {
   };
 
   const { checkDuplicate, confirmOverride } = createDuplicateEntityCheck({
-    openModal,
     items: () => props.character.entities,
     onReplace: doReplace,
   });

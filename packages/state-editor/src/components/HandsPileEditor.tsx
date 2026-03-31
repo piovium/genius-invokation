@@ -16,7 +16,7 @@ import { AddButton } from "./AddButton";
 import type { Draft } from "immer";
 import { useStateEditorContext } from "./GameStateEditor";
 import { EntityModal } from "./EntityModal";
-import { getEquipmentInvalidity, moveInArray, shuffleList } from "../utils";
+import { getEquipmentInvalidity, getEquipmentType, moveInArray, shuffleList, type EquipmentType } from "../utils";
 import {
   getDefinitionName,
   getEntityItemDescription,
@@ -25,18 +25,6 @@ import {
 import { allocateId, createEntityState } from "../state/factory";
 import { getImageUrl } from "../state/assets";
 import { getPlayer, getCharacter } from "../state/common";
-
-// 装备类型定义
-type EquipmentType = "artifact" | "technique" | "weapon" | "talent" | "other";
-
-// 获取装备的分类类型
-function getEquipmentType(definition: EntityDefinition): EquipmentType {
-  if (definition.tags.includes("artifact")) return "artifact";
-  if (definition.tags.includes("technique")) return "technique";
-  if (definition.tags.includes("weapon")) return "weapon";
-  if (definition.tags.includes("talent")) return "talent";
-  return "other";
-}
 
 // 检查角色是否存活
 function isCharacterAlive(character: CharacterState): boolean {

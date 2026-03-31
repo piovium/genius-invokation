@@ -1,4 +1,5 @@
 import type {
+  AttachmentDefinition,
   AttachmentState,
   CharacterDefinition,
   CharacterState,
@@ -60,15 +61,14 @@ export interface AssetOption<TDefinition> {
   definition: TDefinition;
 }
 
-export interface InitiativeSkillOption {
+export interface InitiativeSkillOption extends AssetOption<{ id: number }> {
   id: number;
   name: string;
-  definitionId: number;
 }
 
 export interface EditorCatalog {
   characters: AssetOption<CharacterDefinition>[];
-  attachments: AssetOption<AttachmentState["definition"]>[];
+  attachments: AssetOption<AttachmentDefinition>[];
   entitiesByType: Record<
     EntityType | "characterEntities" | "cardEntities",
     AssetOption<EntityDefinition>[]

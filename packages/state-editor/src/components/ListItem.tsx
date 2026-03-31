@@ -1,8 +1,7 @@
 import { For, Show, createMemo } from "solid-js";
 import type { JSX } from "solid-js";
 import type { EntityTag, EntityType } from "@gi-tcg/core";
-import { TAG_LABELS } from "./AddCardModal";
-import { ENTITY_TYPE_LABELS } from "../constants";
+import { ENTITY_TYPE_LABELS, TAG_LABELS } from "../constants";
 
 // 扩展的实体定义类型，兼容 EntityDefinition 和 AttachmentDefinition
 type ExtendedEntityDefinition = {
@@ -87,7 +86,7 @@ export function ListItem(props: ListItemProps) {
 
     // 添加 tags 标签
     def.tags.forEach((tag) => {
-      const tagLabel = TAG_LABELS[tag as keyof typeof TAG_LABELS];
+      const tagLabel = TAG_LABELS[tag];
       if (tagLabel && tagLabel.trim() !== "") {
         autoTags.push(tagLabel);
       }

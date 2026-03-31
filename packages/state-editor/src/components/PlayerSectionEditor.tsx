@@ -46,7 +46,7 @@ export function PlayerSectionEditor(props: PlayerSectionEditorProps) {
             area="summons"
             mode="card"
             limit={props.state.config.maxSummonsCount}
-            availableTags={["barrier"] as EntityTag[]}
+            availableTags={["barrier"] satisfies EntityTag[]}
           />
         </Match>
         <Match when={props.kind === "combatStatuses"}>

@@ -3,6 +3,7 @@ import { ActionButton, SelectField, SectionTitle } from "./Fields";
 import { Modal } from "./Modal";
 import { getDefinitionName } from "../state/catalog";
 import { useStateEditorContext } from "./GameStateEditor";
+import { matchesSearch } from "../state/assets";
 
 interface RoundSkillModalProps {
   who: 0 | 1;
@@ -87,12 +88,10 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
 
   // 过滤后的其他技能
   const filteredOtherSkills = createMemo(() => {
-    const query = otherSkillQuery().trim().toLowerCase();
+    const query = otherSkillQuery().trim();
     if (!query) return otherSkillOptions();
     return otherSkillOptions().filter(
-      (skill) =>
-        skill.name.toLowerCase().includes(query) ||
-        String(skill.id).includes(query),
+      (skill) => matchesSearch(skill, query)
     );
   });
 

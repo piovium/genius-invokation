@@ -1,4 +1,5 @@
 import {
+  type AttachmentDefinition,
   type AttachmentState,
   type CharacterDefinition,
   type CharacterState,
@@ -8,7 +9,11 @@ import {
   type GameState,
   type InitiativeSkillDefinition,
 } from "@gi-tcg/core";
-import type { AssetOption, EditorCatalog, EditorEntityArea, InitiativeSkillOption, LoosePlayerState } from "../types";
+import type {
+  AssetOption,
+  EditorCatalog,
+  InitiativeSkillOption,
+} from "../types";
 import { ENTITY_TYPE_LABELS, SPECIAL_ENERGY_LABELS } from "../constants";
 import { getSafeName, buildSearch } from "./assets";
 
@@ -77,7 +82,9 @@ export function getDefinitionTypeLabel(definition: { type: string }) {
   return ENTITY_TYPE_LABELS[definition.type as EntityType] ?? definition.type;
 }
 
-export function getEntityVisibleVarBadges(entity: EntityState | AttachmentState) {
+export function getEntityVisibleVarBadges(
+  entity: EntityState | AttachmentState,
+) {
   return entity.definition.visibleVarName
     ? [
         `${entity.definition.visibleVarName} = ${entity.variables[entity.definition.visibleVarName]}`,
@@ -85,7 +92,9 @@ export function getEntityVisibleVarBadges(entity: EntityState | AttachmentState)
     : [];
 }
 
-export function getEntityItemDescription(entity: EntityState | AttachmentState) {
+export function getEntityItemDescription(
+  entity: EntityState | AttachmentState,
+) {
   return `ID: ${entity.id} / DefID: ${entity.definition.id}`;
 }
 
@@ -111,7 +120,7 @@ export function buildEditorCatalog(state: GameState): EditorCatalog {
     ),
   );
   const characterOptions: AssetOption<CharacterDefinition>[] = [];
-  const attachmentOptions: AssetOption<AttachmentState["definition"]>[] = [];
+  const attachmentOptions: AssetOption<AttachmentDefinition>[] = [];
   const entityOptionsByType: Record<
     EntityType,
     AssetOption<EntityDefinition>[]
@@ -148,9 +157,7 @@ export function buildEditorCatalog(state: GameState): EditorCatalog {
       definition,
     });
   }
-  for (const definition of Array.from(
-    data.attachments.values(),
-  ) as AttachmentState["definition"][]) {
+  for (const definition of Array.from(data.attachments.values())) {
     const name = getSafeName(definition.id);
     attachmentOptions.push({
       id: definition.id,
@@ -169,16 +176,18 @@ export function buildEditorCatalog(state: GameState): EditorCatalog {
   ) as CharacterDefinition[]) {
     const skills = definition.skills
       .filter(
-        (
-          skill: CharacterDefinition["skills"][number],
-        ): skill is InitiativeSkillDefinition =>
+        (skill): skill is InitiativeSkillDefinition =>
           "triggerOn" in skill && skill.triggerOn === "initiative",
       )
-      .map((skill) => ({
-        id: skill.id,
-        name: getSafeName(skill.id),
-        definitionId: definition.id,
-      }));
+      .map((skill) => {
+        const name = getSafeName(skill.id);
+        return {
+          id: skill.id,
+          name,
+          search: buildSearch(name, skill.id),
+          definition,
+        };
+      });
     initiativeSkillsByCharacterId.set(
       definition.id,
       [...skills].sort((left, right) =>

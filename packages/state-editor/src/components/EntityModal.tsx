@@ -15,16 +15,16 @@ import { VariableGrid } from "./VariableGrid";
 import { PreviewTile } from "./Previews";
 import { useStateEditorContext } from "./GameStateEditor";
 import { AttachmentModal } from "./AttachmentModal";
-import type { AssetOption, EditorEntityArea } from "../types";
+import type { EditorEntityArea } from "../types";
 import {
   getDefinitionName,
   getEntityItemDescription,
   getEntityVisibleVarBadges,
 } from "../state/catalog";
 import { allocateId, createAttachmentState } from "../state/factory";
-import { getImageUrl } from "../state/assets";
+import { getImageUrl, matchesSearch } from "../state/assets";
 import { moveInArray } from "../utils";
-import { getEntity, getCharacter } from "../state/common";
+import { getEntity } from "../state/common";
 import { createDuplicateEntityCheck } from "../hooks/createDuplicateEntityCheck";
 
 interface EntityContentProps {
@@ -47,13 +47,10 @@ function EntityModalContent(props: EntityContentProps) {
       : "card";
 
   const filteredAttachments = createMemo(() => {
-    const q = query().trim().toLowerCase();
+    const q = query().trim();
     let results = catalog().attachments;
     if (q) {
-      results = results.filter(
-        (card) =>
-          card.name.toLowerCase().includes(q) || String(card.id).includes(q),
-      );
+      results = results.filter((card) => matchesSearch(card, q));
     }
     return results;
   });
@@ -90,7 +87,6 @@ function EntityModalContent(props: EntityContentProps) {
 
   const { checkDuplicate, confirmOverride } =
     createDuplicateEntityCheck<AttachmentState>({
-      openModal,
       items: () => props.entity.attachments,
       subject: "附着",
       onReplace: doReplaceAttachment,

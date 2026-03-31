@@ -3,9 +3,9 @@ import type { Accessor, JSX } from "solid-js";
 import { ConfirmModal } from "../components/ConfirmModal";
 import type { AttachmentState, EntityState } from "@gi-tcg/core";
 import { getDefinitionName } from "../state/catalog";
+import { useStateEditorContext } from "../components/GameStateEditor";
 
 interface DuplicateCheckOptions<T extends EntityState | AttachmentState> {
-  openModal: (render: () => JSX.Element) => void;
   items: Accessor<readonly T[]>;
   onReplace: (item: T["definition"], index: number) => void;
   subject?: string;
@@ -21,6 +21,7 @@ interface DuplicateCheckResult<T extends EntityState | AttachmentState> {
 export function createDuplicateEntityCheck<
   T extends EntityState | AttachmentState,
 >(options: DuplicateCheckOptions<T>): DuplicateCheckResult<T> {
+  const { openModal } = useStateEditorContext();
   const [pendingDefinition, setPendingDefinition] = createSignal<
     T["definition"] | null
   >(null);
@@ -40,7 +41,7 @@ export function createDuplicateEntityCheck<
   const confirmOverride = (done?: () => void) => {
     const pending = pendingDefinition();
     if (!pending) return;
-    options.openModal(() => (
+    openModal(() => (
       <ConfirmModal
         title={`检测到重复${options.subject || "实体"}`}
         message={

@@ -1,11 +1,10 @@
-import { Show } from "solid-js";
 import { SectionTitle } from "./Fields";
 import { Modal } from "./Modal";
 import { PreviewTile } from "./Previews";
 import { VariableGrid } from "./VariableGrid";
 import { useStateEditorContext } from "./GameStateEditor";
 import { getDefinitionName, getEntityVisibleVarBadges } from "../state/catalog";
-import { getAttachment, getPlayer } from "../state/common";
+import { getAttachment } from "../state/common";
 import type { AttachmentState } from "@gi-tcg/core";
 
 interface AttachmentContentProps {
@@ -16,7 +15,7 @@ interface AttachmentContentProps {
 }
 
 function AttachmentModalContent(props: AttachmentContentProps) {
-  const { gameState, updateState } = useStateEditorContext();
+  const { updateState } = useStateEditorContext();
 
   return (
     <div class="space-y-2">

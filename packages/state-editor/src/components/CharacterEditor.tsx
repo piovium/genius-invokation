@@ -3,6 +3,8 @@ import type {
   CharacterState,
   CharacterDefinition,
   CharacterTag,
+  Aura,
+  EntityState,
 } from "@gi-tcg/core";
 import {
   ActionButton,
@@ -20,7 +22,7 @@ import { CharacterEntitySection } from "./CharacterEntitySection";
 import type { EditorSection } from "../types";
 import { getCharacterEnergyLabel, getDefinitionName } from "../state/catalog";
 import { getImageUrl } from "../state/assets";
-import { filterValidCharacterEntities } from "../utils";
+import { filterValidCharacterEntities, moveInArray } from "../utils";
 import { allocateId, createCharacterState } from "../state/factory";
 import { AURA_LABELS, AURA_OPTIONS } from "../constants";
 import { getCharacter, getPlayer } from "../state/common";
@@ -165,16 +167,17 @@ export function CharacterEditor(props: CharacterEditorProps) {
 
   const moveCharacter = (delta: number) => {
     const who = props.who;
-    const chars = gameState().players[who].characters;
     const currentIndex = props.characterIndex;
     const newIndex = currentIndex + delta;
-    if (newIndex < 0 || newIndex >= chars.length) return;
+    if (newIndex < 0 || newIndex >= 3) return;
 
     updateState((draft) => {
-      const draftChars = draft.players[who].characters;
-      const temp = draftChars[currentIndex];
-      draftChars[currentIndex] = draftChars[newIndex];
-      draftChars[newIndex] = temp;
+      const player = draft.players[who];
+      player.characters = moveInArray(
+        player.characters,
+        currentIndex,
+        delta,
+      );
     });
 
     props.onSelectSection({
@@ -203,7 +206,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
       if (!target) return;
       target.variables.health = 0;
       target.variables.energy = 0;
-      target.variables.aura = 0 as CharacterState["variables"]["aura"];
+      target.variables.aura = 0 as Aura;
       target.variables.alive = 0;
       target.entities = [];
     });
@@ -330,9 +333,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
       );
 
       const newCharacter = createCharacterState(charDef, allocateId(draft));
-      newCharacter.entities = validEntities as Draft<
-        CharacterState["entities"]
-      >;
+      newCharacter.entities = validEntities as Draft<EntityState>[];
       player.characters[chIdx] = newCharacter;
 
       if (
@@ -553,9 +554,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
                       }))}
                       onChange={(value) =>
                         updateCharacter((target) => {
-                          target.variables.aura = Number(
-                            value,
-                          ) as CharacterState["variables"]["aura"];
+                          target.variables.aura = Number(value) as Aura;
                         })
                       }
                     />

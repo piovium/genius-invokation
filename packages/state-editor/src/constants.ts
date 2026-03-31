@@ -1,5 +1,5 @@
 import { Aura, DiceType } from "@gi-tcg/typings";
-import type { PhaseType, EntityType } from "@gi-tcg/core";
+import type { PhaseType, EntityType, EntityTag } from "@gi-tcg/core";
 
 export const PHASE_LABELS: Partial<Record<PhaseType, string>> = {
   roll: "掷骰阶段",
@@ -69,4 +69,41 @@ export const WEAPON_TAGS = [
 export const SPECIAL_ENERGY_LABELS: Record<string, string> = {
   fightingSpirit: "战意",
   serpentsSubtlety: "蛇之狡谋",
+};
+
+export const TAG_LABELS: Record<EntityTag, string> = {
+  // CardTag
+  legend: "秘传",
+  action: "战斗行动",
+  food: "料理",
+  resonance: "元素共鸣",
+  abyss: "",
+  // CommonEntityTag
+  shield: "护盾",
+  barrier: "伤害降低",
+  normalAsPlunging: "下落攻击",
+  // StatusTag
+  bondOfLife: "生命之契",
+  disableSkill: "",
+  immuneControl: "免疫控制",
+  preparingSkill: "准备技能",
+  // CombatStatusTag
+  eventEffectless: "",
+  nightsoulsBlessing: "夜魂加持",
+  // EquipmentTag
+  talent: "天赋",
+  artifact: "圣遗物",
+  technique: "特技",
+  weapon: "武器",
+  sword: "单手剑",
+  claymore: "双手剑",
+  pole: "长柄武器",
+  catalyst: "法器",
+  bow: "弓",
+  // SupportTag
+  ally: "伙伴",
+  place: "场地",
+  item: "道具",
+  blessing: "元素幻变",
+  adventureSpot: "冒险地点",
 };

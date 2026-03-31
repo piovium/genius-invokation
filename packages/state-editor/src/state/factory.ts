@@ -2,11 +2,14 @@ import {
   CURRENT_VERSION,
   StateSymbol,
   getVersionBehavior,
+  type AttachmentDefinition,
   type AttachmentState,
   type CharacterDefinition,
   type CharacterState,
+  type CharacterVariables,
   type EntityDefinition,
   type EntityState,
+  type EntityVariables,
   type ExtensionState,
   type GameData,
   type GameState,
@@ -22,24 +25,24 @@ const ID_START = -500000;
 
 function buildCharacterVariables(
   definition: CharacterDefinition,
-): CharacterState["variables"] {
+): CharacterVariables {
   return Object.fromEntries(
     Object.entries(definition.varConfigs).map(([key, value]) => [
       key,
       value.initialValue,
     ]),
-  ) as CharacterState["variables"];
+  ) as CharacterVariables;
 }
 
 function buildEntityVariables(
-  definition: EntityDefinition | AttachmentState["definition"],
-): EntityState["variables"] {
+  definition: EntityDefinition | AttachmentDefinition,
+): EntityVariables {
   return Object.fromEntries(
     Object.entries(definition.varConfigs).map(([key, value]) => [
       key,
       value.initialValue,
     ]),
-  ) as EntityState["variables"];
+  ) as EntityVariables;
 }
 
 export function createCharacterState(
@@ -69,13 +72,13 @@ export function createEntityState(
 }
 
 export function createAttachmentState(
-  definition: AttachmentState["definition"],
+  definition: AttachmentDefinition,
   id: number,
 ): Draft<AttachmentState> {
   return {
     [StateSymbol]: "attachment",
     id,
-    definition: definition as Draft<AttachmentState["definition"]>,
+    definition: definition as Draft<AttachmentDefinition>,
     variables: buildEntityVariables(definition),
   };
 }
@@ -130,13 +133,13 @@ export function createDefaultGameState(): GameState {
     maxSupportsCount: 4,
     randomSeed,
   } as const;
-  const extensions: ExtensionState[] = (
-    Array.from(data.extensions.values()) as ExtensionState["definition"][]
-  ).map((definition) => ({
-    [StateSymbol]: "extension",
-    definition,
-    state: definition.initialState,
-  }));
+  const extensions: ExtensionState[] = Array.from(data.extensions.values()).map(
+    (definition) => ({
+      [StateSymbol]: "extension",
+      definition,
+      state: definition.initialState,
+    }),
+  );
   return {
     [StateSymbol]: "game",
     data,

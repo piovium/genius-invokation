@@ -72,7 +72,6 @@ export function EntityAreaSection(props: EntityAreaSectionProps) {
   };
 
   const { checkDuplicate, confirmOverride } = createDuplicateEntityCheck({
-    openModal,
     items,
     onReplace: doReplace,
   });

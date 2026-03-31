@@ -2,9 +2,9 @@ import { For, Show, createMemo, createSignal } from "solid-js";
 import type { EntityDefinition, EntityType, EntityTag } from "@gi-tcg/core";
 import { Modal } from "./Modal";
 import { useStateEditorContext } from "./GameStateEditor";
-import { ENTITY_TYPE_LABELS } from "../constants";
+import { ENTITY_TYPE_LABELS, TAG_LABELS } from "../constants";
 import type { AssetOption } from "../types";
-import { getImageUrl } from "../state/assets";
+import { getImageUrl, matchesSearch } from "../state/assets";
 
 interface AddCardModalProps {
   ref?: HTMLDialogElement | ((el: HTMLDialogElement) => void);
@@ -57,43 +57,6 @@ const ALL_ENTITY_TAGS: EntityTag[] = [
   "adventureSpot",
 ];
 
-export const TAG_LABELS: Record<EntityTag, string> = {
-  // CardTag
-  legend: "秘传",
-  action: "战斗行动",
-  food: "料理",
-  resonance: "元素共鸣",
-  abyss: "",
-  // CommonEntityTag
-  shield: "护盾",
-  barrier: "伤害降低",
-  normalAsPlunging: "下落攻击",
-  // StatusTag
-  bondOfLife: "生命之契",
-  disableSkill: "",
-  immuneControl: "免疫控制",
-  preparingSkill: "准备技能",
-  // CombatStatusTag
-  eventEffectless: "",
-  nightsoulsBlessing: "夜魂加持",
-  // EquipmentTag
-  talent: "天赋",
-  artifact: "圣遗物",
-  technique: "特技",
-  weapon: "武器",
-  sword: "单手剑",
-  claymore: "双手剑",
-  pole: "长柄武器",
-  catalyst: "法器",
-  bow: "弓",
-  // SupportTag
-  ally: "伙伴",
-  place: "场地",
-  item: "道具",
-  blessing: "元素幻变",
-  adventureSpot: "冒险地点",
-};
-
 export function AddCardModal(props: AddCardModalProps) {
   const { catalog } = useStateEditorContext();
   const [query, setQuery] = createSignal("");
@@ -144,7 +107,7 @@ export function AddCardModal(props: AddCardModalProps) {
 
   // 筛选后的结果
   const filteredCards = createMemo(() => {
-    const q = query().trim().toLowerCase();
+    const q = query().trim();
     const type = selectedType();
     const tags = selectedTags();
     const otherSelected = selectedOther();
@@ -154,10 +117,7 @@ export function AddCardModal(props: AddCardModalProps) {
 
     // 1. 按搜索词筛选（名称或ID）
     if (q) {
-      results = results.filter(
-        (card) =>
-          card.name.toLowerCase().includes(q) || String(card.id).includes(q),
-      );
+      results = results.filter((card) => matchesSearch(card, q));
     }
 
     // 2. 按类型筛选（单选）

@@ -4,13 +4,12 @@ import {
   createEffect,
   createMemo,
   createSignal,
-  createUniqueId,
   splitProps,
   type ComponentProps,
   type JSX,
 } from "solid-js";
 import type { AssetOption } from "../types";
-import { matchesSearch } from "../utils";
+import { matchesSearch } from "../state/assets";
 
 export function SectionTitle(props: { title: string; description?: string }) {
   return (
