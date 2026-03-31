@@ -10,7 +10,6 @@ import type {
 import { SectionTitle } from "./Fields";
 import { Modal } from "./Modal";
 import { ListItem, type ListItemButton } from "./ListItem";
-import { ConfirmModal } from "./ConfirmModal";
 import type { Draft } from "immer";
 import { VariableGrid } from "./VariableGrid";
 import { PreviewTile } from "./Previews";
@@ -26,6 +25,7 @@ import { allocateId, createAttachmentState } from "../state/factory";
 import { getImageUrl } from "../state/assets";
 import { moveInArray } from "../utils";
 import { getEntity, getCharacter } from "../state/common";
+import { createDuplicateEntityCheck } from "../hooks/createDuplicateEntityCheck";
 
 interface EntityContentProps {
   who: 0 | 1;
@@ -38,10 +38,6 @@ function EntityModalContent(props: EntityContentProps) {
   const { updateState, catalog, openModal } = useStateEditorContext();
 
   const [query, setQuery] = createSignal("");
-  const [pendingAttachment, setPendingAttachment] =
-    createSignal<AssetOption<AttachmentDefinition> | null>(null);
-  const [existingAttachmentIndex, setExistingAttachmentIndex] =
-    createSignal(-1);
 
   const allowAttachments = () =>
     props.area === "hands" || props.area === "pile";
@@ -62,49 +58,7 @@ function EntityModalContent(props: EntityContentProps) {
     return results;
   });
 
-  // 检查是否存在相同 definition.id 的附着
-  const checkDuplicateAttachment = (attachmentDef: AttachmentDefinition) => {
-    const index = props.entity.attachments.findIndex(
-      (att) => att.definition.id === attachmentDef.id,
-    );
-    return index;
-  };
-
-  const confirmDuplicateAttachment = () => {
-    openModal(() => (
-      <ConfirmModal
-        title="检测到重复附着"
-        message={(() => {
-          const att = pendingAttachment();
-          return att ? `已存在相同类型的附着「${att.name}」，是否覆盖？` : "";
-        })()}
-        confirmText="确认覆盖"
-        cancelText="取消"
-        onConfirm={handleConfirmReplaceAttachment}
-        onCancel={handleCancelReplaceAttachment}
-      />
-    ));
-  };
-
-  // 处理添加附着前的检查
-  const handleAddAttachmentCheck = (
-    option: AssetOption<AttachmentDefinition>,
-  ) => {
-    const duplicateIndex = checkDuplicateAttachment(option.definition);
-
-    if (duplicateIndex !== -1) {
-      // 存在重复，显示确认弹窗
-      setPendingAttachment(option);
-      setExistingAttachmentIndex(duplicateIndex);
-      confirmDuplicateAttachment();
-    } else {
-      // 没有重复，直接添加
-      doAddAttachment(option);
-    }
-  };
-
-  // 执行添加附着
-  const doAddAttachment = (option: AssetOption<AttachmentDefinition>) => {
+  const doAddAttachment = (definition: AttachmentDefinition) => {
     const etId = props.entity.id;
     updateState((draft) => {
       const targetEntity = getEntity(draft, etId);
@@ -112,14 +66,13 @@ function EntityModalContent(props: EntityContentProps) {
         return;
       }
       targetEntity.attachments.push(
-        createAttachmentState(option.definition, allocateId(draft)),
+        createAttachmentState(definition, allocateId(draft)),
       );
     });
   };
 
-  // 执行覆盖（替换）附着
   const doReplaceAttachment = (
-    option: AssetOption<AttachmentDefinition>,
+    definition: AttachmentDefinition,
     index: number,
   ) => {
     const etId = props.entity.id;
@@ -128,29 +81,28 @@ function EntityModalContent(props: EntityContentProps) {
       if (!targetEntity) {
         return;
       }
-      // 替换指定位置的附着
       targetEntity.attachments[index] = createAttachmentState(
-        option.definition,
+        definition,
         allocateId(draft),
       );
     });
   };
 
-  // 确认覆盖附着
-  const handleConfirmReplaceAttachment = () => {
-    const attachment = pendingAttachment();
-    const index = existingAttachmentIndex();
-    if (attachment && index !== -1) {
-      doReplaceAttachment(attachment, index);
-    }
-    setPendingAttachment(null);
-    setExistingAttachmentIndex(-1);
-  };
+  const { checkDuplicate, confirmOverride } =
+    createDuplicateEntityCheck<AttachmentState>({
+      openModal,
+      items: () => props.entity.attachments,
+      subject: "附着",
+      onReplace: doReplaceAttachment,
+    });
 
-  // 取消覆盖附着，改为添加新的
-  const handleCancelReplaceAttachment = () => {
-    setPendingAttachment(null);
-    setExistingAttachmentIndex(-1);
+  const handleAddAttachmentCheck = (definition: AttachmentDefinition) => {
+    const duplicateIndex = checkDuplicate(definition);
+    if (duplicateIndex !== -1) {
+      confirmOverride();
+    } else {
+      doAddAttachment(definition);
+    }
   };
 
   const updateEntity = (updater: (entity: Draft<EntityState>) => void) => {
@@ -214,7 +166,9 @@ function EntityModalContent(props: EntityContentProps) {
                         <button
                           type="button"
                           class="flex flex-col items-center p-2 rounded-lg border border-white/10 bg-slate-800/30 hover:bg-slate-700/50 transition text-center"
-                          onClick={() => handleAddAttachmentCheck(option)}
+                          onClick={() =>
+                            handleAddAttachmentCheck(option.definition)
+                          }
                         >
                           {/* 卡牌图片 */}
                           <div class={`w-full rounded-lg overflow-hidden`}>

@@ -1,5 +1,10 @@
 import { createSignal, For } from "solid-js";
-import type { EntityDefinition, EntityState, EntityTag, GameState } from "@gi-tcg/core";
+import type {
+  EntityDefinition,
+  EntityState,
+  EntityTag,
+  GameState,
+} from "@gi-tcg/core";
 import { SectionTitle } from "./Fields";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { ConfirmModal } from "./ConfirmModal";
@@ -7,11 +12,16 @@ import { AddCardModal } from "./AddCardModal";
 import type { Draft } from "immer";
 import { useStateEditorContext } from "./GameStateEditor";
 import { EntityModal } from "./EntityModal";
-import { getDefinitionName, getEntityItemDescription, getEntityVisibleVarBadges } from "../state/catalog";
+import {
+  getDefinitionName,
+  getEntityItemDescription,
+  getEntityVisibleVarBadges,
+} from "../state/catalog";
 import { getEquipmentInvalidity, moveInArray } from "../utils";
 import { allocateId, createEntityState } from "../state/factory";
 import { getImageUrl } from "../state/assets";
 import { getCharacter } from "../state/common";
+import { createDuplicateEntityCheck } from "../hooks/createDuplicateEntityCheck";
 
 interface CharacterEntitySectionProps {
   character: {
@@ -43,12 +53,6 @@ function getEntityCategory(definition: EntityDefinition): string | null {
 export function CharacterEntitySection(props: CharacterEntitySectionProps) {
   const { openModal, updateState } = useStateEditorContext();
 
-  const [pendingDefinition, setPendingDefinition] = createSignal<
-    EntityDefinition | undefined
-  >(void 0);
-  const [existingEntityIndex, setExistingEntityIndex] =
-    createSignal<number>(-1);
-
   const [pendingCategoryReplace, setPendingCategoryReplace] = createSignal<{
     definition: EntityDefinition;
     existingIndex: number;
@@ -59,12 +63,6 @@ export function CharacterEntitySection(props: CharacterEntitySectionProps) {
     type: "weapon" | "talent" | "other";
     entityName: string;
   } | null>(null);
-
-  const checkDuplicate = (definition: EntityDefinition) => {
-    return props.character.entities.findIndex(
-      (item) => item.definition.id === definition.id,
-    );
-  };
 
   const checkSameCategoryEntity = (
     definition: EntityDefinition,
@@ -79,61 +77,29 @@ export function CharacterEntitySection(props: CharacterEntitySectionProps) {
     return index !== -1 ? { index, category } : null;
   };
 
-  const appendEntity = () => {
-    openModal(() => {
-      // eslint-disable-next-line no-unassigned-vars
-      let ref!: HTMLDialogElement;
-      return (
-        <AddCardModal
-          ref={ref}
-          onSelect={(definition) => {
-            handleAddCheck(definition, () => ref.close());
-          }}
-          showTypeFilter={true}
-          showTagFilter={true}
-          type="characterEntities"
-          availableTags={
-            [
-              "shield",
-              "barrier",
-              "preparingSkill",
-              "nightsoulsBlessing",
-              "talent",
-              "artifact",
-              "technique",
-              "weapon",
-              "sword",
-              "claymore",
-              "pole",
-              "catalyst",
-              "bow",
-            ] satisfies EntityTag<"status" | "equipment">[]
-          }
-          maxResults={60}
-        />
-      );
+  const doAdd = (definition: EntityDefinition) => {
+    const chId = props.characterId;
+    updateState((draft) => {
+      const target = getCharacter(draft, chId);
+      if (!target) return;
+      target.entities.push(createEntityState(definition, allocateId(draft)));
     });
   };
 
-  const confirmOverride = (done: () => void) => {
-    openModal(() => (
-      <ConfirmModal
-        title="检测到重复实体"
-        message={
-          pendingDefinition()
-            ? `角色区域中已存在相同类型的实体「${getDefinitionName(pendingDefinition())}」，是否覆盖？`
-            : ""
-        }
-        confirmText="确认覆盖"
-        cancelText="取消"
-        onConfirm={() => {
-          handleConfirmReplace();
-          done();
-        }}
-        onCancel={handleCancelReplace}
-      />
-    ));
+  const doReplace = (definition: EntityDefinition, index: number) => {
+    const chId = props.characterId;
+    updateState((draft) => {
+      const target = getCharacter(draft, chId);
+      if (!target) return;
+      target.entities[index] = createEntityState(definition, allocateId(draft));
+    });
   };
+
+  const { checkDuplicate, confirmOverride } = createDuplicateEntityCheck({
+    openModal,
+    items: () => props.character.entities,
+    onReplace: doReplace,
+  });
 
   const confirmReplace = (done: () => void) => {
     openModal(() => (
@@ -200,8 +166,6 @@ export function CharacterEntitySection(props: CharacterEntitySectionProps) {
 
     const duplicateIndex = checkDuplicate(definition);
     if (duplicateIndex !== -1) {
-      setPendingDefinition(definition);
-      setExistingEntityIndex(duplicateIndex);
       confirmOverride(done);
       return;
     }
@@ -221,37 +185,40 @@ export function CharacterEntitySection(props: CharacterEntitySectionProps) {
     done();
   };
 
-  const doAdd = (definition: EntityDefinition) => {
-    const chId = props.characterId;
-    updateState((draft) => {
-      const target = getCharacter(draft, chId);
-      if (!target) return;
-      target.entities.push(createEntityState(definition, allocateId(draft)));
+  const appendEntity = () => {
+    openModal(() => {
+      // eslint-disable-next-line no-unassigned-vars
+      let ref!: HTMLDialogElement;
+      return (
+        <AddCardModal
+          ref={ref}
+          onSelect={(definition) => {
+            handleAddCheck(definition, () => ref.close());
+          }}
+          showTypeFilter={true}
+          showTagFilter={true}
+          type="characterEntities"
+          availableTags={
+            [
+              "shield",
+              "barrier",
+              "preparingSkill",
+              "nightsoulsBlessing",
+              "talent",
+              "artifact",
+              "technique",
+              "weapon",
+              "sword",
+              "claymore",
+              "pole",
+              "catalyst",
+              "bow",
+            ] satisfies EntityTag<"status" | "equipment">[]
+          }
+          maxResults={60}
+        />
+      );
     });
-  };
-
-  const doReplace = (definition: EntityDefinition, index: number) => {
-    const chId = props.characterId;
-    updateState((draft) => {
-      const target = getCharacter(draft, chId);
-      if (!target) return;
-      target.entities[index] = createEntityState(definition, allocateId(draft));
-    });
-  };
-
-  const handleConfirmReplace = () => {
-    const definition = pendingDefinition();
-    const index = existingEntityIndex();
-    if (definition && index !== -1) {
-      doReplace(definition, index);
-    }
-    setPendingDefinition(void 0);
-    setExistingEntityIndex(-1);
-  };
-
-  const handleCancelReplace = () => {
-    setPendingDefinition(void 0);
-    setExistingEntityIndex(-1);
   };
 
   const handleConfirmCategoryReplace = () => {

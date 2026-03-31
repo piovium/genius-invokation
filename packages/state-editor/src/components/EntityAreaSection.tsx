@@ -1,17 +1,27 @@
 import { For, Show, createMemo, createSignal, type Accessor } from "solid-js";
 import type { Draft } from "immer";
-import type { GameState, EntityState, EntityDefinition, EntityType, EntityTag } from "@gi-tcg/core";
+import type {
+  GameState,
+  EntityState,
+  EntityDefinition,
+  EntityType,
+  EntityTag,
+} from "@gi-tcg/core";
 import { Surface } from "./Fields";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { AddCardModal } from "./AddCardModal";
-import { ConfirmModal } from "./ConfirmModal";
 import { useStateEditorContext } from "./GameStateEditor";
 import { EntityModal } from "./EntityModal";
 import { usePlayer } from "./PlayerInfoSection";
 import { allocateId, createEntityState } from "../state/factory";
-import { getDefinitionName, getEntityItemDescription, getEntityVisibleVarBadges } from "../state/catalog";
+import {
+  getDefinitionName,
+  getEntityItemDescription,
+  getEntityVisibleVarBadges,
+} from "../state/catalog";
 import { moveInArray } from "../utils";
 import { getImageUrl } from "../state/assets";
+import { createDuplicateEntityCheck } from "../hooks/createDuplicateEntityCheck";
 
 interface EntityAreaSectionProps {
   title: string;
@@ -27,12 +37,6 @@ export function EntityAreaSection(props: EntityAreaSectionProps) {
   const { who, player } = usePlayer();
   const items = () => player()[props.area];
 
-  const [pendingDefinition, setPendingDefinition] = createSignal<
-    EntityDefinition | undefined
-  >(void 0);
-  const [existingEntityIndex, setExistingEntityIndex] =
-    createSignal<number>(-1);
-
   const entityType = (): EntityType => {
     switch (props.area) {
       case "supports":
@@ -42,31 +46,6 @@ export function EntityAreaSection(props: EntityAreaSectionProps) {
       case "combatStatuses":
         return "combatStatus";
     }
-  };
-
-  const checkDuplicate = (definition: EntityDefinition) => {
-    return items().findIndex(
-      (item) => item.definition.id === definition.id,
-    );
-  };
-
-  const handleAddCheck = (definition: EntityDefinition, done: () => void) => {
-    // supports 允许重复
-    if (props.area === "supports") {
-      doAdd(definition);
-      done();
-      return;
-    }
-
-    const duplicateIndex = checkDuplicate(definition);
-    if (duplicateIndex !== -1) {
-      setPendingDefinition(definition);
-      setExistingEntityIndex(duplicateIndex);
-      confirmOverride(done);
-      return;
-    }
-    doAdd(definition);
-    done();
   };
 
   const doAdd = (definition: EntityDefinition) => {
@@ -91,6 +70,29 @@ export function EntityAreaSection(props: EntityAreaSectionProps) {
     });
   };
 
+  const { checkDuplicate, confirmOverride } = createDuplicateEntityCheck({
+    openModal,
+    items,
+    onReplace: doReplace,
+  });
+
+  const handleAddCheck = (definition: EntityDefinition, done: () => void) => {
+    // supports 允许重复
+    if (props.area === "supports") {
+      doAdd(definition);
+      done();
+      return;
+    }
+
+    const duplicateIndex = checkDuplicate(definition);
+    if (duplicateIndex !== -1) {
+      confirmOverride(done);
+      return;
+    }
+    doAdd(definition);
+    done();
+  };
+
   const appendEntity = () => {
     openModal(() => {
       // eslint-disable-next-line no-unassigned-vars
@@ -109,41 +111,6 @@ export function EntityAreaSection(props: EntityAreaSectionProps) {
         />
       );
     });
-  };
-
-  const confirmOverride = (done: () => void) => {
-    openModal(() => (
-      <ConfirmModal
-        title="检测到重复实体"
-        message={
-          pendingDefinition()
-            ? `区域中已存在相同类型的实体「${getDefinitionName(pendingDefinition())}」，是否覆盖？`
-            : ""
-        }
-        confirmText="确认覆盖"
-        cancelText="取消"
-        onConfirm={() => {
-          done();
-          handleConfirmReplace();
-        }}
-        onCancel={handleCancelReplace}
-      />
-    ));
-  };
-
-  const handleConfirmReplace = () => {
-    const definition = pendingDefinition();
-    const index = existingEntityIndex();
-    if (definition && index !== -1) {
-      doReplace(definition, index);
-    }
-    setPendingDefinition(void 0);
-    setExistingEntityIndex(-1);
-  };
-
-  const handleCancelReplace = () => {
-    setPendingDefinition(void 0);
-    setExistingEntityIndex(-1);
   };
 
   return (
@@ -232,11 +199,7 @@ function EntityAreaListItem(props: EntityAreaListItemProps) {
         variant: "primary",
         onClick: () => {
           openModal(() => (
-            <EntityModal
-              who={who()}
-              area={props.area}
-              entity={props.entity}
-            />
+            <EntityModal who={who()} area={props.area} entity={props.entity} />
           ));
         },
       },

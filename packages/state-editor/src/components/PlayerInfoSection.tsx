@@ -20,6 +20,17 @@ export const usePlayer = () => useContext(PlayerContext)!;
 export function PlayerInfoSection() {
   const { updateState } = useStateEditorContext();
   const { who, player } = usePlayer();
+
+  const updatePlayerField = <K extends keyof LoosePlayerState>(
+    field: K,
+    value: LoosePlayerState[K],
+  ) => {
+    const whoV = who();
+    updateState((draft) => {
+      (draft.players[whoV] as LoosePlayerState)[field] = value;
+    });
+  };
+
   return (
     <Surface title={`玩家 ${who()} 信息`}>
       <div class="space-y-6">
@@ -29,62 +40,32 @@ export function PlayerInfoSection() {
             <BooleanField
               label="已宣告结束"
               value={player().declaredEnd}
-              onChange={(value) => {
-                const whoV = who();
-                updateState((draft) => {
-                  draft.players[whoV].declaredEnd = value;
-                });
-              }}
+              onChange={(value) => updatePlayerField("declaredEnd", value)}
             />
             <BooleanField
               label="本回合存在被击倒角色"
               value={player().hasDefeated}
-              onChange={(value) => {
-                const whoV = who();
-                updateState((draft) => {
-                  draft.players[whoV].hasDefeated = value;
-                });
-              }}
+              onChange={(value) => updatePlayerField("hasDefeated", value)}
             />
             <BooleanField
               label="可视为重击"
               value={player().canCharged}
-              onChange={(value) => {
-                const whoV = who();
-                updateState((draft) => {
-                  draft.players[whoV].canCharged = value;
-                });
-              }}
+              onChange={(value) => updatePlayerField("canCharged", value)}
             />
             <BooleanField
               label="可视为下落攻击"
               value={player().canPlunging}
-              onChange={(value) => {
-                const whoV = who();
-                updateState((draft) => {
-                  draft.players[whoV].canPlunging = value;
-                });
-              }}
+              onChange={(value) => updatePlayerField("canPlunging", value)}
             />
             <BooleanField
               label="已使用秘传"
               value={player().legendUsed}
-              onChange={(value) => {
-                const whoV = who();
-                updateState((draft) => {
-                  draft.players[whoV].legendUsed = value;
-                });
-              }}
+              onChange={(value) => updatePlayerField("legendUsed", value)}
             />
             <BooleanField
               label="跳过下个行动轮次"
               value={player().skipNextTurn}
-              onChange={(value) => {
-                const whoV = who();
-                updateState((draft) => {
-                  draft.players[whoV].skipNextTurn = value;
-                });
-              }}
+              onChange={(value) => updatePlayerField("skipNextTurn", value)}
             />
           </div>
         </div>
@@ -225,9 +206,7 @@ function RoundSkillLogListItem(props: RoundSkillLogListItemProps) {
   const { catalog } = useStateEditorContext();
 
   const character = createMemo(() =>
-    catalog().characters.find(
-      (item) => item.id === props.characterId,
-    ),
+    catalog().characters.find((item) => item.id === props.characterId),
   );
   const skills = createMemo(() =>
     props.skillIds

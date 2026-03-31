@@ -60,6 +60,39 @@ const CHARACTER_TAG_CATEGORIES = {
   ] as const,
 };
 
+interface TagFilterGroupProps<T extends string> {
+  title: string;
+  tags: readonly { tag: T; label: string }[];
+  selectedTags: T[];
+  onToggle: (tag: T) => void;
+  activeClass: string;
+}
+
+export function TagFilterGroup<T extends string>(props: TagFilterGroupProps<T>) {
+  return (
+    <div class="space-y-2">
+      <div class="text-xs text-slate-400">{props.title}</div>
+      <div class="flex flex-wrap gap-2">
+        <For each={props.tags}>
+          {({ tag, label }) => (
+            <button
+              type="button"
+              onClick={() => props.onToggle(tag)}
+              class={`px-2 py-1 rounded-full text-xs border transition ${
+                props.selectedTags.includes(tag)
+                  ? props.activeClass
+                  : "bg-slate-800 border-white/10 text-slate-300 hover:bg-slate-700"
+              }`}
+            >
+              {label}
+            </button>
+          )}
+        </For>
+      </div>
+    </div>
+  );
+}
+
 interface CharacterEditorProps {
   who: 0 | 1;
   characterIndex: number;
@@ -196,68 +229,27 @@ export function CharacterEditor(props: CharacterEditorProps) {
       <Modal title="选择角色" description="从列表中选择一个角色">
         <div class="space-y-4">
           <div class="space-y-3 border-b border-white/10 pb-4">
-            <div class="space-y-2">
-              <div class="text-xs text-slate-400">元素</div>
-              <div class="flex flex-wrap gap-2">
-                <For each={CHARACTER_TAG_CATEGORIES.element}>
-                  {({ tag, label }) => (
-                    <button
-                      type="button"
-                      onClick={() => toggleCharacterTag(tag)}
-                      class={`px-2 py-1 rounded-full text-xs border transition ${
-                        selectedCharacterTags().includes(tag)
-                          ? "bg-cyan-500/20 border-cyan-500/50 text-cyan-50"
-                          : "bg-slate-800 border-white/10 text-slate-300 hover:bg-slate-700"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  )}
-                </For>
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              <div class="text-xs text-slate-400">武器</div>
-              <div class="flex flex-wrap gap-2">
-                <For each={CHARACTER_TAG_CATEGORIES.weapon}>
-                  {({ tag, label }) => (
-                    <button
-                      type="button"
-                      onClick={() => toggleCharacterTag(tag)}
-                      class={`px-2 py-1 rounded-full text-xs border transition ${
-                        selectedCharacterTags().includes(tag)
-                          ? "bg-amber-500/20 border-amber-500/50 text-amber-50"
-                          : "bg-slate-800 border-white/10 text-slate-300 hover:bg-slate-700"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  )}
-                </For>
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              <div class="text-xs text-slate-400">阵营</div>
-              <div class="flex flex-wrap gap-2">
-                <For each={CHARACTER_TAG_CATEGORIES.nation}>
-                  {({ tag, label }) => (
-                    <button
-                      type="button"
-                      onClick={() => toggleCharacterTag(tag)}
-                      class={`px-2 py-1 rounded-full text-xs border transition ${
-                        selectedCharacterTags().includes(tag)
-                          ? "bg-purple-500/20 border-purple-500/50 text-purple-50"
-                          : "bg-slate-800 border-white/10 text-slate-300 hover:bg-slate-700"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  )}
-                </For>
-              </div>
-            </div>
+            <TagFilterGroup
+              title="元素"
+              tags={CHARACTER_TAG_CATEGORIES.element}
+              selectedTags={selectedCharacterTags()}
+              onToggle={toggleCharacterTag}
+              activeClass="bg-cyan-500/20 border-cyan-500/50 text-cyan-50"
+            />
+            <TagFilterGroup
+              title="武器"
+              tags={CHARACTER_TAG_CATEGORIES.weapon}
+              selectedTags={selectedCharacterTags()}
+              onToggle={toggleCharacterTag}
+              activeClass="bg-amber-500/20 border-amber-500/50 text-amber-50"
+            />
+            <TagFilterGroup
+              title="阵营"
+              tags={CHARACTER_TAG_CATEGORIES.nation}
+              selectedTags={selectedCharacterTags()}
+              onToggle={toggleCharacterTag}
+              activeClass="bg-purple-500/20 border-purple-500/50 text-purple-50"
+            />
             <Show when={selectedCharacterTags().length > 0}>
               <div class="flex items-center justify-between pt-2 border-t border-white/10">
                 <div class="text-xs text-slate-400">

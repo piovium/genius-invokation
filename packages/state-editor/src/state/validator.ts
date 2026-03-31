@@ -162,7 +162,11 @@ export function validateGameState(state: GameState, catalog: EditorCatalog) {
     for (const character of player.characters) {
       allIds.push(character.id);
       for (const [key, value] of Object.entries(character.variables)) {
-        validateSafeInteger(value, `角色变量 ${key}`, errors);
+        validateSafeInteger(
+          value,
+          `玩家 ${playerIndex} 角色 ${character.definition.id}(#${character.id}) 变量 ${key}`,
+          errors,
+        );
       }
       if (!AURA_OPTIONS.includes(character.variables.aura)) {
         errors.push(
@@ -172,7 +176,11 @@ export function validateGameState(state: GameState, catalog: EditorCatalog) {
       for (const entity of character.entities) {
         collectEntityIds(entity, allIds);
         for (const [key, value] of Object.entries(entity.variables)) {
-          validateSafeInteger(value, `实体变量 ${key}`, errors);
+          validateSafeInteger(
+            value,
+            `玩家 ${playerIndex} 角色 ${character.definition.id}(#${character.id}) 实体 ${entity.definition.id}(#${entity.id}) 变量 ${key}`,
+            errors,
+          );
         }
       }
     }
@@ -185,7 +193,11 @@ export function validateGameState(state: GameState, catalog: EditorCatalog) {
     ]) {
       collectEntityIds(entity, allIds);
       for (const [key, value] of Object.entries(entity.variables)) {
-        validateSafeInteger(value, `实体变量 ${key}`, errors);
+        validateSafeInteger(
+          value,
+          `玩家 ${playerIndex} 实体 ${entity.definition.id}(#${entity.id}) 变量 ${key}`,
+          errors,
+        );
       }
     }
   }
