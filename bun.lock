@@ -268,6 +268,7 @@
         "@gi-tcg/data": "workspace:*",
         "@gi-tcg/typings": "workspace:*",
         "@gi-tcg/utils": "workspace:*",
+        "remeda": "^2.33.6",
         "solid-js": "catalog:",
       },
       "devDependencies": {
@@ -2289,7 +2290,7 @@
 
     "regjsparser": ["regjsparser@0.9.1", "", { "dependencies": { "jsesc": "~0.5.0" }, "bin": { "regjsparser": "bin/parser" } }, "sha512-dQUtn90WanSNl+7mQKcXAgZxvUe7Z0SqXlgzv0za4LwiUhyzBC58yQO3liFoUgu8GiJVInAhJjkj1N0EtQ5nkQ=="],
 
-    "remeda": ["remeda@2.26.1", "", { "dependencies": { "type-fest": "^4.41.0" } }, "sha512-hpiLfhUwkJhiMS3Z7dRrygcRdkMRZASw5qUdNdi33x1/Y9y/J5q5TyLyf8btDoVLIcsg/4fzPdaGXDTbnl+ixw=="],
+    "remeda": ["remeda@2.33.6", "", {}, "sha512-tazDGH7s75kUPGBKLvhgBEHMgW+TdDFhjUAMdQj57IoWz6HsGa5D2RX5yDUz6IIqiRRvZiaEHzCzWdTeixc/Kg=="],
 
     "require-directory": ["require-directory@2.1.1", "", {}, "sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q=="],
 
@@ -3222,8 +3223,6 @@
     "readdirp/picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
 
     "regjsparser/jsesc": ["jsesc@0.5.0", "", { "bin": { "jsesc": "bin/jsesc" } }, "sha512-uZz5UnB7u4T9LvwmFqXii7pZSouaRPorGs5who1Ip7VO0wxanFvBL7GkM6dTHlgX+jhBApRetaWpnDabOeTcnA=="],
-
-    "remeda/type-fest": ["type-fest@4.41.0", "", {}, "sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA=="],
 
     "simple-git/debug": ["debug@4.3.5", "", { "dependencies": { "ms": "2.1.2" } }, "sha512-pt0bNEmneDIvdL1Xsd9oDQ/wrQRkXDT4AUWlNZNPKvW5x/jyO9VFXkJUP07vQ2upmw5PlaITaPKc31jK13V+jg=="],
 

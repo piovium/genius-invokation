@@ -14,11 +14,12 @@
     "build": "bunx --bun vite build"
   },
   "dependencies": {
-    "@gi-tcg/data": "workspace:*",
-    "@gi-tcg/core": "workspace:*",
     "@gi-tcg/assets-manager": "workspace:*",
-    "@gi-tcg/utils": "workspace:*",
+    "@gi-tcg/core": "workspace:*",
+    "@gi-tcg/data": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
+    "@gi-tcg/utils": "workspace:*",
+    "remeda": "^2.33.6",
     "solid-js": "catalog:"
   },
   "devDependencies": {

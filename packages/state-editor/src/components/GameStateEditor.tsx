@@ -36,6 +36,7 @@ import { createDefaultGameState } from "../state/factory";
 import { buildEditorCatalog } from "../state/catalog";
 import { validateGameState } from "../state/validator";
 import { PHASE_LABELS } from "../constants";
+import { isShallowEqual } from "remeda";
 
 export interface GameStateEditorProps extends Omit<
   ComponentProps<"div">,
@@ -439,7 +440,10 @@ export function GameStateEditor(props: GameStateEditorProps) {
                   {(config) => (
                     <SectionCard
                       config={config}
-                      isActive={config.section === selectedSection()}
+                      isActive={isShallowEqual(
+                        selectedSection(),
+                        config.section,
+                      )}
                       onClick={() => setSelectedSection(config.section)}
                       state={state}
                     />

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { For, Match, Show, Switch, createMemo, createSignal } from "solid-js";
+import { For, Match, Show, Switch, createSignal } from "solid-js";
 import getData from "@gi-tcg/data";
 import {
   CURRENT_VERSION,
@@ -24,7 +24,6 @@ import {
   Deck,
   Game,
   GameState,
-  serializeGameStateLog,
 } from "@gi-tcg/core";
 import { StandaloneChild } from "./StandaloneChild";
 import { StandaloneParent } from "./StandaloneParent";
