@@ -21,11 +21,13 @@ import {
   untrack,
   createSignal,
   createEffect,
+  createMemo,
   Show,
   createResource,
   Switch,
   Match,
   createUniqueId,
+  onCleanup,
 } from "solid-js";
 import { AllCards } from "./AllCards";
 import { CurrentDeck } from "./CurrentDeck";
@@ -36,16 +38,22 @@ import {
   type AssetsManager,
   type DeckData,
 } from "@gi-tcg/assets-manager";
+import { translations, type Locale } from "./i18n";
+import type { I18nKey } from "./locales";
+import { resolveTemplate, translator } from "@solid-primitives/i18n";
 
 export interface DeckBuilderProps extends JSX.HTMLAttributes<HTMLDivElement> {
   assetsManager?: AssetsManager;
   deck?: Deck;
   version?: string;
   onChangeDeck?: (deck: Deck) => void;
+  locale?: Locale;
 }
 
 interface DeckBuilderContextValue {
-  assetsManager: AssetsManager;
+  assetsManager: () => AssetsManager;
+  locale: () => Locale;
+  t: (key: I18nKey, params?: Record<string, string | number>) => string;
   showCard: (e: Event, type: "actionCard" | "character", id: number) => void;
 }
 
@@ -59,16 +67,23 @@ const EMPTY_DECK: Deck = {
 };
 
 export function DeckBuilder(props: DeckBuilderProps) {
-  const [local, rest] = splitProps(props, ["assetsManager", "class"]);
+  const [local, rest] = splitProps(props, ["assetsManager", "locale", "class"]);
   let container!: HTMLDivElement;
+  const assetsManager = createMemo(
+    () => local.assetsManager ?? DEFAULT_ASSETS_MANAGER,
+  );
+  const locale = createMemo(() => local.locale ?? "zh-CN");
+  const dict = createMemo(() => translations[locale()]);
+  const t = translator(dict, resolveTemplate);
 
-  const [deckData] = createResource(() => {
-    return (local.assetsManager ?? DEFAULT_ASSETS_MANAGER).getDeckData();
-  });
+  const [deckData] = createResource(assetsManager, (manager) =>
+    manager.getDeckData(),
+  );
 
   const { CardDataViewer, showCard, showCharacter, hide } =
     createCardDataViewer({
-      assetsManager: untrack(() => local.assetsManager),
+      assetsManager,
+      locale,
     });
 
   const [cardDataViewerOffsetX, setCardDataViewerOffsetX] = createSignal(0);
@@ -94,8 +109,9 @@ export function DeckBuilder(props: DeckBuilderProps) {
   return (
     <DeckBuilderContext.Provider
       value={{
-        assetsManager:
-          untrack(() => local.assetsManager) ?? DEFAULT_ASSETS_MANAGER,
+        assetsManager,
+        locale,
+        t,
         showCard: (e, type, id) => {
           const rect = (e.target as HTMLElement).getBoundingClientRect();
           const containerRect = container.getBoundingClientRect();
@@ -143,10 +159,10 @@ export function DeckBuilder(props: DeckBuilderProps) {
         >
           <Switch>
             <Match when={deckData.loading}>
-              <div class="flex-grow">Loading cards...</div>
+              <div class="flex-grow">{t("loadingCards")}</div>
             </Match>
             <Match when={deckData.error}>
-              <div class="flex-grow">Load data errored!</div>
+              <div class="flex-grow">{t("loadCardsFailed")}</div>
             </Match>
             <Match when={deckData()}>
               {(deckData) => (

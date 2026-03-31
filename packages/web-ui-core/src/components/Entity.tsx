@@ -47,8 +47,8 @@ export interface EntityProps extends EntityInfo {
 const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
   const { assetsManager } = useUiContext();
   const [data] = createResource(
-    () => props.cardDefinitionId,
-    (id) => assetsManager.getData(id),
+    () => [props.cardDefinitionId, assetsManager()] as const,
+    ([id, manager]) => manager.getData(id),
   );
   const ICON_MAP: Record<string, Component> = {
     GCG_TOKEN_ICON_CLOCK: ClockIcon,

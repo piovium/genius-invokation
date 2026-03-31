@@ -14,18 +14,22 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { For } from "solid-js";
-import { TEXT_MAP } from "./text_map";
+import { useAssetsManager } from "./context";
+import { typeTagText } from "./text_map";
 
 export interface TagProps {
   tags: string[];
 }
 
 export function Tags(props: TagProps) {
+  const { t } = useAssetsManager();
   return (
     <ul class="flex flex-row gap-2 flex-wrap mb-3">
       <For each={props.tags}>
         {(tag) => (
-          <li class="bg-yellow-8 py-0.5 px-1 text-yellow-1 text-xs rounded-sm">{TEXT_MAP[tag]}</li>
+          <li class="bg-yellow-8 py-0.5 px-1 text-yellow-1 text-xs rounded-sm">
+            {typeTagText(tag, t)}
+          </li>
         )}
       </For>
     </ul>

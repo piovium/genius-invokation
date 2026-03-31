@@ -30,9 +30,11 @@ import {
 } from "@gi-tcg/typings";
 import { createActionState, type ActionState } from "./action";
 import type { ChessboardViewType } from "./components/Chessboard";
+import type { Translator } from "./locales";
 
 export interface OppChessboardControllerOption {
-  assetsManager: AssetsManager;
+  assetsManager: () => AssetsManager;
+  t: Translator;
   who: 0 | 1;
   onUpdate: (info: OppInfo | null) => void;
 }
@@ -79,15 +81,17 @@ export class OppChessboardController implements IOppChessboardController {
       actionState: this.#actionState,
       viewType: this.#viewType,
       selectCardCandidates: this.#selectCardCandidates,
-    }
+    };
   }
 
-  constructor(
-    private readonly opt: OppChessboardControllerOption
-  ) {
+  constructor(private readonly opt: OppChessboardControllerOption) {
     const rpcDispatcher: RpcDispatcher = {
       action: ({ action }) => {
-        this.#actionState = createActionState(this.opt.assetsManager, action);
+        this.#actionState = createActionState(
+          this.opt.assetsManager(),
+          action,
+          this.opt.t,
+        );
         this.onUpdate();
         return Promise.reject("opp chessboard");
       },

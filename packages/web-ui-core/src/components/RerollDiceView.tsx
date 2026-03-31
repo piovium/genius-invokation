@@ -20,6 +20,7 @@ import { checkPointerEvent } from "../utils";
 import { Button } from "./Button";
 import type { ChessboardViewType } from "./Chessboard";
 import { SpecialViewBackdrop } from "./ViewPanelBackdrop";
+import { useUiContext } from "../hooks/context";
 
 export interface RerollViewProps {
   noConfirmButton?: boolean;
@@ -30,6 +31,7 @@ export interface RerollViewProps {
 }
 
 export function RerollDiceView(props: RerollViewProps) {
+  const { t } = useUiContext();
   const [selectingOn, setSelectingOn] = createSignal<boolean | null>(null);
   const toggleDice = (index: number) => {
     const rawSelectedDice = props.selectedDice;
@@ -48,7 +50,7 @@ export function RerollDiceView(props: RerollViewProps) {
       class="absolute inset-0  flex flex-col items-center justify-center gap-10 select-none"
       onPointerUp={() => setSelectingOn(null)}
     >
-      <h3 class="font-bold text-3xl">重投骰子</h3>
+      <h3 class="max-w-70 px-4 text-center leading-tight font-bold text-2xl">{t("view.rerollDiceTitle")}</h3>
       <ul class="grid grid-rows-2 grid-flow-col gap-6">
         <Index each={props.dice}>
           {(dice, index) => (
@@ -88,7 +90,7 @@ export function RerollDiceView(props: RerollViewProps) {
         class="visible data-[hidden]:invisible"
         bool:data-hidden={props.noConfirmButton}
       >
-        <Button onClick={() => props.onConfirm()}>确定</Button>
+        <Button onClick={() => props.onConfirm()}>{t("view.confirmButton")}</Button>
       </div>
     </div>
   );

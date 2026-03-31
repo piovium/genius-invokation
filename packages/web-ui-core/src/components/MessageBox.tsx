@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { createSignal } from "solid-js";
+import { useUiContext } from "../hooks/context";
 
 export interface MessageBoxController {
   confirm: (question: string) => Promise<boolean>;
@@ -53,6 +54,7 @@ interface MessageBoxProps {
 }
 
 function MessageBox(props: MessageBoxProps) {
+  const { t } = useUiContext();
   return (
     <dialog
       ref={props.ref}
@@ -66,13 +68,13 @@ function MessageBox(props: MessageBoxProps) {
           class="px-3 py-1 w-36 font-bold font-size-5 color-black bg-#e9e2d3 rounded-full border-#735a3f b-2 hover:bg-#e9e2d3 hover:shadow-[inset_0_0_16px_rgba(255,255,255,1)] hover:border-white"
           onClick={() => props.onCancel()}
         >
-          取消
+          {t("ui.buttonCancel")}
         </button>
         <button
           class="px-3 py-1 w-36 font-bold font-size-5 color-black bg-#e9e2d3 rounded-full border-#735a3f b-2 hover:bg-#e9e2d3 hover:shadow-[inset_0_0_16px_rgba(255,255,255,1)] hover:border-white"
           onClick={() => props.onConfirm()}
         >
-          确定
+          {t("ui.buttonConfirm")}
         </button>
       </div>
     </dialog>

@@ -34,8 +34,10 @@ import { useAuth } from "../auth";
 import { unwrap } from "solid-js/store";
 import { useMobile } from "../App";
 import { copyToClipboard } from "../utils";
+import { useI18n } from "../i18n";
 
 export default function EditDeck() {
+  const { t, locale, assetsManager } = useI18n();
   const params = useParams();
   const mobile = useMobile();
   const { status } = useAuth();
@@ -44,7 +46,7 @@ export default function EditDeck() {
   const isNew = params.id === "new";
   const deckId = Number(params.id);
   const [deckName, setDeckName] = createSignal<string>(
-    searchParams.name ?? "新建牌组",
+    searchParams.name ?? t("newDeck"),
   );
   const [nameInputEl, setNameInputEl] = createSignal<HTMLInputElement>();
   const [editingName, setEditingName] = createSignal(false);
@@ -67,7 +69,7 @@ export default function EditDeck() {
     if (type === "guest") {
       const found = guestDecks().find((d) => d.id === deckId);
       if (!found) {
-        throw new Error("未找到该牌组");
+        throw new Error(t("deckNotFound"));
       }
       deckInfo = found;
     }
@@ -91,7 +93,7 @@ export default function EditDeck() {
   // });
   const navigateBack = async () => {
     if (dirty()) {
-      if (window.confirm("您有未保存的更改，是否保存？")) {
+      if (window.confirm(t("unsavedChangesConfirm"))) {
         await saveDeck();
       }
     }
@@ -104,7 +106,7 @@ export default function EditDeck() {
   };
 
   const importCode = () => {
-    const input = window.prompt("请输入分享码");
+    const input = window.prompt(t("inputShareCode"));
     if (input === null) {
       return;
     }
@@ -125,7 +127,7 @@ export default function EditDeck() {
       const deck = deckValue();
       const code = DEFAULT_ASSETS_MANAGER.encode(deck);
       await copyToClipboard(code);
-      alert(`分享码已复制到剪贴板：${code}`);
+      alert(t("shareCodeCopied", { code }));
     } catch (e) {
       if (e instanceof Error) {
         window.alert(e.message);
@@ -243,7 +245,7 @@ export default function EditDeck() {
                 class="btn btn-soft-green h-8 w-12"
                 disabled={uploading()}
               >
-                <Show when={uploading()} fallback="保存">
+                <Show when={uploading()} fallback={t("save")}>
                   <i class="i-mdi-loading animate-spin" />
                 </Show>
               </button>
@@ -251,7 +253,7 @@ export default function EditDeck() {
                 class="btn btn-soft-red h-8 w-12"
                 onClick={() => setEditingName(false)}
               >
-                取消
+                {t("cancel")}
               </button>
             </form>
           </Show>
@@ -260,13 +262,13 @@ export default function EditDeck() {
               class="btn btn-outline-blue"
               onClick={importCode}
             >
-              导入分享码
+              {t("importShareCode")}
             </button>
             <button
               class="btn btn-outline"
               onClick={exportCode}
             >
-              生成分享码
+              {t("generateShareCode")}
             </button>
             <button
               class="flex-shrink-0 btn btn-solid-green min-w-18 md:min-w-22"
@@ -286,7 +288,7 @@ export default function EditDeck() {
                 <Match when={uploadDone()}>
                   <i class="i-mdi-check" />
                 </Match>
-                <Match when={true}>保存牌组</Match>
+                <Match when={true}>{t("saveDeck")}</Match>
               </Switch>
             </button>
             <span class="flex-grow" />
@@ -294,21 +296,25 @@ export default function EditDeck() {
               class="flex-shrink-0 btn btn-outline-red"
               onClick={() => navigateBack()}
             >
-              返回
+              {t("back")}
             </button>
           </div>
         </div>
         <Switch>
-          <Match when={userDeckData.loading}>正在加载中...</Match>
+          <Match when={userDeckData.loading}>{t("loading")}</Match>
           <Match when={status().type !== "guest" && userDeckData.error}>
-            加载失败：{" "}
-            {userDeckData.error instanceof AxiosError
-              ? userDeckData.error.response?.data.message
-              : userDeckData.error}
+            {t("loadFailed", {
+              message:
+                userDeckData.error instanceof AxiosError
+                  ? userDeckData.error.response?.data.message
+                  : userDeckData.error,
+            })}
           </Match>
           <Match when={status().type !== "notLogin"}>
             <DeckBuilder
               class={`h-[calc(100dvh-9rem)] @3xl:h-auto w-full flex-grow min-h-0`}
+              assetsManager={assetsManager()}
+              locale={locale()}
               deck={deckValue()}
               onChangeDeck={(v) => (setDeckValue(v), setDirty(true))}
             />

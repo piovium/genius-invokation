@@ -16,15 +16,20 @@
 import type { PbExposedMutation, PbGameState } from "@gi-tcg/typings";
 import { createMemo, splitProps, untrack, type ComponentProps } from "solid-js";
 import { Chessboard, type ChessboardData } from "./components/Chessboard";
-import { UiContext } from "./hooks/context";
+import { translations, UiContext, type Locale } from "./hooks/context";
 import { parseMutations } from "./mutations";
-import { AssetsManager, DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
+import {
+  type AssetsManager,
+  DEFAULT_ASSETS_MANAGER,
+} from "@gi-tcg/assets-manager";
 import { updateHistory, type HistoryData } from "./history/parser";
 import type { HistoryBlock } from "./history/typings";
+import { resolveTemplate, translator } from "@solid-primitives/i18n";
 
 export interface StandaloneChessboardProps extends ComponentProps<"div"> {
   who: 0 | 1;
   assetsManager?: AssetsManager;
+  locale?: Locale;
   state: PbGameState;
   mutations: PbExposedMutation[];
 }
@@ -33,9 +38,14 @@ export function StandaloneChessboard(props: StandaloneChessboardProps) {
   const [localProps, elProps] = splitProps(props, [
     "who",
     "assetsManager",
+    "locale",
     "state",
     "mutations",
   ]);
+
+  const getLocale = () => localProps.locale ?? "zh-CN";
+  const dict = createMemo(() => translations[getLocale()]);
+  const t = translator(dict, resolveTemplate);
 
   const history = createMemo<HistoryBlock[]>(() => {
     return [];
@@ -52,8 +62,9 @@ export function StandaloneChessboard(props: StandaloneChessboardProps) {
   return (
     <UiContext.Provider
       value={{
-        assetsManager:
-          untrack(() => localProps.assetsManager) ?? DEFAULT_ASSETS_MANAGER,
+        assetsManager: () => localProps.assetsManager ?? DEFAULT_ASSETS_MANAGER,
+        locale: getLocale,
+        t,
       }}
     >
       <Chessboard

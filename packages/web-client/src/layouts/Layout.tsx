@@ -16,25 +16,29 @@
 import { ErrorBoundary, JSX } from "solid-js";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
+import { Dynamic } from "solid-js/web";
 
 export interface LayoutProps {
   children?: JSX.Element;
+}
+
+function Passthrough(props: { children?: JSX.Element }) {
+  return <>{props.children}</>;
 }
 
 export function Layout(props: LayoutProps) {
   return (
     <div class="w-full h-full flex flex-col">
       <Header />
-      <main
-        class="flex-grow flex-shrink-0 min-h-0 w-full p-4 md:p-8 mt-12 md:mt-16"
-      >
-        <ErrorBoundary
-          fallback={(err) => (
+      <main class="flex-grow flex-shrink-0 min-h-0 w-full p-4 md:p-8 mt-12 md:mt-16">
+        <Dynamic
+          component={import.meta.env.DEV ? Passthrough : ErrorBoundary}
+          fallback={(err: Error) => (
             <div class="text-red-500">{err?.message ?? String(err)}</div>
           )}
         >
           {props.children}
-        </ErrorBoundary>
+        </Dynamic>
       </main>
 
       <Footer />

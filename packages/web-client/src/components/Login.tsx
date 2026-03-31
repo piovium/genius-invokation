@@ -16,18 +16,16 @@
 import { createSignal } from "solid-js";
 import { GITHUB_AUTH_REDIRECT_URL } from "../config";
 import { useAuth } from "../auth";
+import { useI18n } from "../i18n";
 
 export function Login() {
   const CLIENT_ID = "Iv23liMGX6EkkrfUax8B";
   const REDIRECT_URL = encodeURIComponent(GITHUB_AUTH_REDIRECT_URL);
   const { loginGuest } = useAuth();
+  const { t } = useI18n();
 
   const showGuestHint = () => {
-    window.alert(`在游客模式下：
-- 您的牌组将保存在本地，不会在云端同步；
-- 您的对局记录将不会在任何地方保存。
-
-如果您希望将对局中的 bug 反馈给开发者，那么强烈建议您使用 GitHub 登录以便我们在数据库中查询对局记录。`);
+    window.alert(t("guestModeHint"));
   };
 
   const [guestNameValid, setGuestNameValid] = createSignal(false);
@@ -39,7 +37,7 @@ export function Login() {
       'popup,width=600,height=700'
     );
     if (!popup) {
-      window.alert("Please allow popup window to login with GitHub.");
+      window.alert(t("allowPopup"));
       return;
     }
     window.githubOAuthPopup = popup;
@@ -59,24 +57,24 @@ export function Login() {
         onClick={githubLogin}
       >
         <i class="block i-mdi-github" />
-        <span>推荐使用 GitHub 登录</span>
+        <span>{t("recommendGithubLogin")}</span>
       </button>
       <hr />
       <div class="flex flex-col gap-1">
         <p class="text-gray-500 text-sm">
-          或者以{" "}
+          {t("continueAsGuest")}{" "}
           <span class="text-blue-400 cursor-pointer" onClick={showGuestHint}>
-            游客身份
+            {t("guestIdentity")}
           </span>{" "}
-          继续……
+          {t("continueSuffix")}
         </p>
         <form class="flex flex-row items-stretch" onSubmit={guestLogin}>
           <input
             type="text"
-            class="input input-solid rounded-r-0 b-r-0 h-2.2rem text-1rem"
+            class="input input-solid rounded-r-0 b-r-0 h-9 text-4"
             name="guestName"
             maxLength={64}
-            placeholder="起一个响亮的名字吧！"
+            placeholder={t("guestNamePlaceholder")}
             pattern=".*[^\s].*"
             onInput={(e) => setGuestNameValid(e.target.checkValidity())}
             autofocus
@@ -84,10 +82,10 @@ export function Login() {
           />
           <button
             type="submit"
-            class="flex-shrink-0 btn btn-solid rounded-l-0 h-2.2rem text-1rem"
+            class="flex-shrink-0 btn btn-solid rounded-l-0 h-9 text-4"
             disabled={!guestNameValid()}
           >
-            <span>确认</span>
+            <span>{t("confirm")}</span>
           </button>
         </form>
       </div>

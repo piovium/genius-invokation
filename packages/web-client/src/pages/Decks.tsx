@@ -21,6 +21,7 @@ import { DeckBriefInfo } from "../components/DeckBriefInfo";
 import type { Deck } from "@gi-tcg/typings";
 import { useGuestDecks } from "../guest";
 import { useAuth } from "../auth";
+import { useI18n } from "../i18n";
 
 export interface DeckInfo extends Deck {
   id: number;
@@ -74,25 +75,28 @@ export function useDecks(): UseDecksResult {
 }
 
 export default function Decks() {
+  const { t } = useI18n();
   const { decks, loading, error, refetch } = useDecks();
   return (
     <Layout>
-      <div class="container mx-auto">
+      <div class="container mx-auto px-2">
         <div class="flex flex-row gap-4 items-center mb-5">
-          <h2 class="text-2xl font-bold">我的牌组</h2>
+          <h2 class="text-2xl font-bold">{t("myDecks")}</h2>
           <A class="btn btn-outline-green" href="/decks/new">
-            <i class="i-mdi-plus" /> 添加
+            <i class="i-mdi-plus" /> {t("add")}
           </A>
         </div>
         <Switch>
-          <Match when={loading()}>正在加载中...</Match>
-          <Match when={error()}>加载失败：{error()?.message ?? String(error())}</Match>
+          <Match when={loading()}>{t("loading")}</Match>
+          <Match when={error()}>
+            {t("loadFailed", { message: error()?.message ?? String(error()) })}
+          </Match>
           <Match when={true}>
-            <ul class="flex flex-row flex-wrap gap-3">
+            <ul class="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] md:gap-3">
               <For
                 each={decks().data}
                 fallback={
-                  <li class="p-4 text-gray-5">暂无牌组，可点击 + 添加</li>
+                  <li class="p-4 text-gray-5">{t("noDecksAddHint")}</li>
                 }
               >
                 {(deckData) => (

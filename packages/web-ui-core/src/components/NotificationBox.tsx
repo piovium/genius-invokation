@@ -13,11 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { getNameSync } from "@gi-tcg/assets-manager";
 import type { NotificationBoxInfo } from "./Chessboard";
 import { Image } from "./Image";
-import { createEffect, Show } from "solid-js";
+import { Show } from "solid-js";
 import { PbSkillType } from "@gi-tcg/typings";
+import { useUiContext } from "../hooks/context";
 
 export interface NotificationBoxProps {
   opp: boolean;
@@ -25,18 +25,27 @@ export interface NotificationBoxProps {
 }
 
 export function NotificationBox(props: NotificationBoxProps) {
+  const { assetsManager, t } = useUiContext();
+
+  const skillName = () =>
+    typeof props.data.skillDefinitionId === "number"
+      ? assetsManager().getNameSync(props.data.skillDefinitionId)
+      : void 0;
+  const characterName = () =>
+    assetsManager().getNameSync(props.data.characterDefinitionId);
+
   const typeText = (
     type: NotificationBoxInfo["skillType"],
   ): string | undefined => {
     switch (type) {
       case PbSkillType.NORMAL:
-        return "普通攻击";
+        return t("notification.normalAttack");
       case PbSkillType.ELEMENTAL:
-        return "元素战技";
+        return t("notification.elementalSkill");
       case PbSkillType.BURST:
-        return "元素爆发";
+        return t("notification.elementalBurst");
       case PbSkillType.CHARACTER_PASSIVE:
-        return "被动技能";
+        return t("notification.passiveSkill");
     }
   };
 
@@ -62,9 +71,7 @@ export function NotificationBox(props: NotificationBoxProps) {
             when={props.data.type === "switchActive"}
             fallback={
               <>
-                <h5 class="font-bold color-#ede4d8">
-                  {getNameSync(props.data.skillDefinitionId as number)}
-                </h5>
+                <h5 class="font-bold color-#ede4d8">{skillName()}</h5>
                 <p class="text-[var(--text-color)] font-size-80% font-bold">
                   {typeText(props.data.skillType)}
                 </p>
@@ -87,8 +94,12 @@ export function NotificationBox(props: NotificationBoxProps) {
             }
           >
             <h5 class="font-bold color-#ede4d8">
-              {props.opp ? "对方" : "我方"}切换角色：
-              {getNameSync(props.data.characterDefinitionId)}
+              {t(
+                props.opp
+                  ? "notification.oppSwitchRole"
+                  : "notification.mySwitchRole",
+              )}
+              {characterName()}
             </h5>
             <Show when={props.data.skillDefinitionId}>
               {(skillDefinitionId) => (
@@ -97,7 +108,7 @@ export function NotificationBox(props: NotificationBoxProps) {
                     class="text-[var(--text-color)] font-size-80% font-bold"
                     data-opp={props.opp}
                   >
-                    {getNameSync(props.data.characterDefinitionId)}
+                    {characterName()}
                   </p>
                   <div class="absolute h-8 w-8 rounded-full bg-[var(--inner-background-color)] b-[var(--inner-border-color)] border-1 translate-x-50% translate-y--50% right-0 top-50% justify-center items-center p-0.3">
                     <Image
@@ -112,7 +123,7 @@ export function NotificationBox(props: NotificationBoxProps) {
             </Show>
             <Show when={props.data.skillType === "overloaded"}>
               <p class="text-[var(--text-color)] font-size-80% font-bold">
-                超载
+                {t("notification.overloaded")}
               </p>
             </Show>
           </Show>

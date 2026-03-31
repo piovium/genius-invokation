@@ -33,30 +33,64 @@ import {
   type PreviewData,
   type SwitchActiveAction,
 } from "@gi-tcg/typings";
+import type { JSX } from "solid-js";
 import type { DicePanelState } from "./components/DicePanel";
 import { DICE_COLOR } from "./components/Dice";
 import { checkDice } from "@gi-tcg/utils";
 import type { SkillRawData, ActionCardRawData } from "@gi-tcg/assets-manager";
 import type { AssetsManager } from "@gi-tcg/assets-manager";
 import type { ReactionInfo } from "./components/Chessboard";
+import type { Translator } from "./locales";
+
+function getDiceText(type: DiceType, t: Translator) {
+  switch (type) {
+    case DiceType.Cryo:
+      return t("action.Cryo");
+    case DiceType.Hydro:
+      return t("action.Hydro");
+    case DiceType.Pyro:
+      return t("action.Pyro");
+    case DiceType.Electro:
+      return t("action.Electro");
+    case DiceType.Anemo:
+      return t("action.Anemo");
+    case DiceType.Geo:
+      return t("action.Geo");
+    case DiceType.Dendro:
+      return t("action.Dendro");
+    case DiceType.Omni:
+      return t("action.Omni");
+    case DiceType.Aligned:
+      return t("action.Aligned");
+    case DiceType.Void:
+      return t("action.Void");
+    default:
+      return t("action.Elemental");
+  }
+}
 
 export function getHintTextOfCardOrSkill(
   assetsManager: AssetsManager,
   definitionId: number,
   targetLength: number,
+  t: Translator,
 ): string[] {
   try {
     const data = assetsManager.getDataSync(definitionId) as
       | SkillRawData
       | ActionCardRawData;
     if (data.type === "GCG_CARD_ASSIST") {
-      return Array.from({ length: 2 }, () => "需先选择一张支援牌弃置");
+      return Array.from({ length: 2 }, () =>
+        t("action.chooseSupportToDispose"),
+      );
     }
     const result = data.targetList.map((x) => x.hintText);
     result.push(result.at(-1)!);
     return result;
   } catch (e) {
-    return Array.from({ length: targetLength }, () => `对所选目标生效`);
+    return Array.from({ length: targetLength }, () =>
+      t("action.applyToTarget"),
+    );
   }
 }
 
@@ -360,18 +394,21 @@ export interface ActionState {
   step: StepActionFunction;
 }
 
-const validityText = (validity: ActionValidity): string | undefined => {
+const validityText = (
+  validity: ActionValidity,
+  t: Translator,
+): string | undefined => {
   switch (validity) {
     case ActionValidity.CONDITION_NOT_MET:
-      return "未满足使用条件";
+      return t("action.conditionNotMet");
     case ActionValidity.NO_TARGET:
-      return "无可用目标";
+      return t("action.noTarget");
     case ActionValidity.DISABLED:
-      return "不可进行此操作";
+      return t("action.disabled");
     case ActionValidity.NO_DICE:
-      return "骰子不足";
+      return t("action.noDice");
     case ActionValidity.NO_ENERGY:
-      return "充能不足";
+      return t("action.noEnergy");
   }
 };
 
@@ -415,6 +452,7 @@ function appendMultiStepNode<T>(
 /** 创建多步状态树时需使用到的上下文 */
 interface MultiStepRootNodeContext<T> {
   assetsManager: AssetsManager;
+  t: Translator;
   /** 是否是使用技能（否则为打出卡牌） */
   isSkill: boolean;
   /** 行动树根节点 */
@@ -429,6 +467,7 @@ interface MultiStepRootNodeContext<T> {
 
 interface CreatePlayCardActionStateContext {
   assetsManager: AssetsManager;
+  t: Translator;
   // 单步打出（直接打出或者直接选骰）对应的 step 行为加入此 map
   cardSingleSteps: Map<PlayCardActionStep, () => StepActionResult>;
   // 多步打出对应的 context 加入此 map，后续构建成状态树
@@ -439,19 +478,26 @@ interface CreatePlayCardActionStateContext {
 
 function diceReqText(
   diceReq: Map<DiceType, number>,
-  ctx: { assetsManager: AssetsManager },
+  ctx: { assetsManager: AssetsManager; t: Translator },
 ) {
+  if ([...diceReq].reduce((acc, [k, v]) => acc + v, 0) === 0) {
+    return ctx.t("action.payCostNoDice");
+  }
   const diceText = Array.from(diceReq.entries()).map(([type, count]) => {
-    const shifted = ((type + 8) % 9) + 1;
-    const name =
-      (ctx.assetsManager.getNameSync(-300 - shifted) ?? "")
-        .replace("无色", "任意")
-        .replace("相同", count === 1 ? "" : "相同") + "骰";
-    const style =
-      type >= 1 && type <= 7 ? `color: var(--c-${DICE_COLOR[type]});` : "";
-    return `${count}个<span style="${style}">${name}</span>`;
+    const typeText =
+      type === DiceType.Aligned && count === 1
+        ? ctx.t("action.Elemental")
+        : getDiceText(type, ctx.t);
+    const color =
+      type >= 1 && type <= 7 ? `color="var(--c-${DICE_COLOR[type]})"` : "";
+    return ctx.t("action.payCostSingle", {
+      count,
+      diceType: `<font ${color}>${typeText}</font>`,
+    });
   });
-  return `请支付${diceText.join("和")}`;
+  return ctx.t("action.payCost", {
+    cost: diceText.join(ctx.t("action.payCostAndSeparator")),
+  });
 }
 
 function createPlayCardActionState(
@@ -471,7 +517,7 @@ function createPlayCardActionState(
       type: "newState",
       newState: {
         ...root,
-        alertText: validityText(ctx.action.validity),
+        alertText: validityText(ctx.action.validity, ctx.t),
       },
     }));
     return;
@@ -481,6 +527,7 @@ function createPlayCardActionState(
     if (!ctx.cardMultiSteps.has(id)) {
       ctx.cardMultiSteps.set(id, {
         assetsManager: ctx.assetsManager,
+        t: ctx.t,
         isSkill: false,
         node: { type: "branch", children: new Map() },
         autoSelectedDice: ctx.action.autoSelectedDice as DiceType[],
@@ -511,7 +558,7 @@ function createPlayCardActionState(
   }
   const CONFIRM_BUTTON_STEP: ClickConfirmButtonActionStep = {
     type: "clickConfirmButton",
-    confirmText: "确定",
+    confirmText: ctx.t("action.confirmButtonDefault"),
     isEffectless: ctx.action.value.willBeEffectless,
   };
   const resultState: ActionState = {
@@ -523,9 +570,11 @@ function createPlayCardActionState(
     realCosts: root.realCosts,
     showHands: false,
     showSkillButtons: false,
-    hintText: `打出手牌「${ctx.assetsManager.getNameSync(
-      ctx.action.value.cardDefinitionId,
-    )}」`,
+    hintText: ctx.t("action.playCardHint", {
+      name:
+        ctx.assetsManager.getNameSync(ctx.action.value.cardDefinitionId) ??
+        "???",
+    }),
     isFast: ctx.action.isFast,
     dicePanel: ctx.action.autoSelectedDice.length > 0 ? "visible" : "hidden",
     autoSelectedDice: ctx.action.autoSelectedDice as DiceType[],
@@ -616,7 +665,9 @@ function createMultiStepState<T>(
     if (node.type === "leaf") {
       const CLICK_CONFIRM_STEP: ClickConfirmButtonActionStep = {
         type: "clickConfirmButton",
-        confirmText: isSkill ? "确定" : "打出手牌",
+        confirmText: isSkill
+          ? ctx.t("action.confirmButtonDefault")
+          : ctx.t("action.confirmButtonPlayCard"),
         isEffectless: ctx.isEffectless,
       };
       const CLICK_ENTITY_STEP: ClickEntityActionStep = {
@@ -676,7 +727,7 @@ function createMultiStepState<T>(
               type: "newState",
               newState: {
                 ...resultState,
-                alertText: "请选择目标",
+                alertText: ctx.t("action.chooseTarget"),
               },
             };
           } else {
@@ -714,7 +765,7 @@ function createMultiStepState<T>(
               type: "newState",
               newState: {
                 ...resultState,
-                alertText: "请选择目标",
+                alertText: ctx.t("action.chooseTarget"),
               },
             };
           } else {
@@ -761,6 +812,7 @@ function createMultiStepState<T>(
     ctx.assetsManager,
     ctx.cardOrSkillDefinitionId,
     3,
+    ctx.t,
   );
   const state = createState(id, ctx.node, hintTexts);
   allStates.push(state);
@@ -769,6 +821,7 @@ function createMultiStepState<T>(
 
 interface CreateUseSkillActionStateContext {
   assetsManager: AssetsManager;
+  t: Translator;
   skillSingleStepStates: Map<ClickSkillButtonActionStep, ActionState>;
   skillMultiSteps: Map<number, MultiStepRootNodeContext<UseSkillAction>>;
   action: Action & { value: UseSkillAction };
@@ -785,6 +838,7 @@ function createUseSkillActionState(
     if (!ctx.skillMultiSteps.has(id)) {
       ctx.skillMultiSteps.set(id, {
         assetsManager: ctx.assetsManager,
+        t: ctx.t,
         isSkill: true,
         node: { type: "branch", children: new Map() },
         autoSelectedDice: ctx.action.autoSelectedDice as DiceType[],
@@ -802,7 +856,7 @@ function createUseSkillActionState(
   const ENTER_STEP: ClickSkillButtonActionStep = {
     type: "clickSkillButton",
     skillId: id,
-    tooltipText: validityText(ctx.action.validity),
+    tooltipText: validityText(ctx.action.validity, ctx.t),
     isDisabled: !ok,
     isFocused: false,
   };
@@ -854,7 +908,8 @@ function createUseSkillActionState(
               ...resultState,
               autoSelectedDice: null,
               alertText:
-                validityText(ctx.action.validity) ?? diceReqText(diceReq, ctx),
+                validityText(ctx.action.validity, ctx.t) ??
+                diceReqText(diceReq, ctx),
             },
           };
         }
@@ -867,6 +922,8 @@ function createUseSkillActionState(
 }
 
 interface CreateElementalTuningActionStateContext {
+  assetsManager: AssetsManager;
+  t: Translator;
   action: Action & { value: ElementalTuningAction };
   index: number;
 }
@@ -877,7 +934,7 @@ function createElementalTuningActionState(
 ): ActionState {
   const CONFIRM_BUTTON_ACTION: ClickConfirmButtonActionStep = {
     type: "clickConfirmButton",
-    confirmText: "元素调和",
+    confirmText: ctx.t("action.confirmButtonElementalTuning"),
   };
   const targetDice = ctx.action.value.targetDice as DiceType;
   const disabledDiceTypes = [DiceType.Omni, targetDice];
@@ -886,7 +943,9 @@ function createElementalTuningActionState(
     realCosts: root.realCosts,
     showHands: false,
     showSkillButtons: false,
-    hintText: `调和为${targetDice === DiceType.Omni ? "万能" : "_冰水火雷风岩草"[targetDice]}元素骰子`,
+    hintText: ctx.t("action.tuneToDice", {
+      diceType: getDiceText(targetDice, ctx.t),
+    }),
     dicePanel: "visible",
     autoSelectedDice: ctx.action.autoSelectedDice as DiceType[],
     maxSelectedDiceCount: 1,
@@ -909,7 +968,7 @@ function createElementalTuningActionState(
             type: "newState",
             newState: {
               ...resultState,
-              alertText: "请选择1个元素骰调和",
+              alertText: ctx.t("action.chooseOneDiceToTune"),
             },
           };
         }
@@ -924,6 +983,7 @@ function createElementalTuningActionState(
 
 interface CreateSwitchActiveActionStateContext {
   assetsManager: AssetsManager;
+  t: Translator;
   // 在根状态下，点击角色进入“显示切换出战按钮”的状态
   outerLevelStates: Map<ClickEntityActionStep, ActionState>;
   // 在“显示切换出战按钮”状态下，点击按钮/选中角色可提交行动；或点击其他角色切换目标
@@ -973,9 +1033,11 @@ function createSwitchActiveActionState(
     realCosts: root.realCosts,
     showHands: false,
     showSkillButtons: true,
-    hintText: `切换出战角色为「${ctx.assetsManager.getNameSync(
-      ctx.action.value.characterDefinitionId,
-    )}」`,
+    hintText: ctx.t("action.switchRoleHint", {
+      name:
+        ctx.assetsManager.getNameSync(ctx.action.value.characterDefinitionId) ??
+        "???",
+    }),
     dicePanel: ctx.action.autoSelectedDice.length > 0 ? "visible" : "wrapped",
     autoSelectedDice: ctx.action.autoSelectedDice as DiceType[],
     maxSelectedDiceCount: ctx.action.autoSelectedDice.length,
@@ -1008,7 +1070,8 @@ function createSwitchActiveActionState(
               ...innerState,
               autoSelectedDice: null,
               alertText:
-                validityText(ctx.action.validity) ?? diceReqText(diceReq, ctx),
+                validityText(ctx.action.validity, ctx.t) ??
+                diceReqText(diceReq, ctx),
             },
           };
         }
@@ -1062,6 +1125,7 @@ function createSwitchActiveActionState(
 export function createActionState(
   assetsManager: AssetsManager,
   actions: Action[],
+  t: Translator,
 ): ActionState {
   assetsManager.prepareForSync();
   const realCosts: RealCosts = {
@@ -1118,6 +1182,7 @@ export function createActionState(
         realCosts.skills.set(action.value.skillDefinitionId, requiredCost);
         createUseSkillActionState(root, {
           assetsManager,
+          t,
           skillSingleStepStates: useSkillSingleStepStates,
           skillMultiSteps: useSkillMultiSteps,
           action: { value: action.value, ...actions[i] },
@@ -1129,6 +1194,7 @@ export function createActionState(
         realCosts.cards.set(action.value.cardId, requiredCost);
         createPlayCardActionState(root, {
           assetsManager,
+          t,
           cardSingleSteps: playCardSingleSteps,
           cardMultiSteps: playCardMultiSteps,
           action: { value: action.value, ...actions[i] },
@@ -1140,6 +1206,7 @@ export function createActionState(
         realCosts.switchActive.set(action.value.characterId, requiredCost);
         createSwitchActiveActionState(root, {
           assetsManager,
+          t,
           outerLevelStates: switchActiveOuterStates,
           innerLevelStates: switchActiveInnerStates,
           action: { value: action.value, ...actions[i] },
@@ -1156,6 +1223,8 @@ export function createActionState(
           cardId: action.value.removedCardId,
         };
         const state = createElementalTuningActionState(root, {
+          assetsManager,
+          t,
           action: { value: action.value, ...actions[i] },
           index: i,
         });
@@ -1231,7 +1300,10 @@ export function createActionState(
   return root;
 }
 
-export function createChooseActiveState(candidateIds: number[]): ActionState {
+export function createChooseActiveState(
+  candidateIds: number[],
+  t: Translator,
+): ActionState {
   const NO_COST: RealCosts = {
     cards: new Map(),
     skills: new Map(),
@@ -1254,7 +1326,7 @@ export function createChooseActiveState(candidateIds: number[]): ActionState {
     showBackdrop: false,
     showHands: true,
     showSkillButtons: true,
-    hintText: "请选择出战角色",
+    hintText: t("action.chooseActiveCharacter"),
     isFast: false,
     step: (step) => {
       if (step === CANCEL_ACTION_STEP) {
@@ -1264,7 +1336,7 @@ export function createChooseActiveState(candidateIds: number[]): ActionState {
           type: "newState",
           newState: {
             ...root,
-            alertText: "请选择出战角色",
+            alertText: t("action.chooseActiveCharacter"),
           },
         };
       } else if (step.type === "clickEntity") {
@@ -1303,7 +1375,7 @@ export function createChooseActiveState(candidateIds: number[]): ActionState {
       showBackdrop: false,
       showHands: true,
       showSkillButtons: true,
-      hintText: "请选择出战角色",
+      hintText: t("action.chooseActiveCharacter"),
       isFast: false,
       step: (step, dice) => {
         if (step === CANCEL_ACTION_STEP) {

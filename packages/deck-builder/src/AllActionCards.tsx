@@ -20,10 +20,12 @@ import { Key } from "@solid-primitives/keyed";
 import type { DeckDataActionCardInfo } from "@gi-tcg/assets-manager";
 import { CARD_TAG_IMG_NAME_MAP, CARD_TYPE_TEXT_MAP, TagIcon } from "./TagIcon";
 import { FilterBar } from "./FilterBar";
+import { useDeckBuilderContext } from "./DeckBuilder";
 
 const SINGLETON_REQUIRED_TAGS = ["GCG_TAG_LEGEND", "GCG_TAG_CARD_BLESSING"];
 
 export function AllActionCards(props: AllCardsProps) {
+  const { t } = useDeckBuilderContext();
   const [acType, setAcType] = createSignal<string | null>(null);
   const [acTag, setAcTag] = createSignal<string | null>(null);
 
@@ -146,13 +148,13 @@ export function AllActionCards(props: AllCardsProps) {
       <FilterBar
         filterSelections={[
           {
-            name: "卡牌类型",
+            name: t("cardType"),
             selected: acType,
             onSelect: (value) => toggleType(value),
             option: CARD_TYPE_TEXT_MAP,
           },
           {
-            name: "卡牌标签",
+            name: t("cardTag"),
             selected: acTag,
             onSelect: (value) => toggleTag(value),
             option: CARD_TAG_IMG_NAME_MAP,

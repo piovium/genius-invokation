@@ -30,7 +30,7 @@ export interface MiniSpecialViewProps {
 }
 
 function MiniView(props: MiniSpecialViewProps) {
-  const whoText = () => (props.opp ? "对方" : "我方");
+  const { t } = useUiContext();
   return (
     <div class="absolute aspect-ratio-[16/9] w-full max-h-full top-50% translate-y--50% pointer-events-none">
       <div
@@ -39,7 +39,13 @@ function MiniView(props: MiniSpecialViewProps) {
       >
         <Switch>
           <Match when={props.viewType === "switching"}>
-            <h3 class="font-bold text-4">{`${whoText()}正在替换手牌`}</h3>
+            <h3 class="font-bold text-4">
+              {t(
+                props.opp
+                  ? "mini.oppSwitchingHands"
+                  : "mini.mySwitchingHands",
+              )}
+            </h3>
             <ul class="flex flex-row w-80 justify-evenly">
               <For each={props.ids}>
                 {(cardId) => (
@@ -60,7 +66,13 @@ function MiniView(props: MiniSpecialViewProps) {
             </ul>
           </Match>
           <Match when={props.viewType === "selecting"}>
-            <h3 class="font-bold text-4">{`${whoText()}正在挑选卡牌`}</h3>
+            <h3 class="font-bold text-4">
+              {t(
+                props.opp
+                  ? "mini.oppSelectingCards"
+                  : "mini.mySelectingCards",
+              )}
+            </h3>
             <ul class="flex flex-row w-80 justify-evenly">
               <For each={props.ids}>
                 {(cardId) => (
@@ -84,7 +96,13 @@ function MiniView(props: MiniSpecialViewProps) {
             </ul>
           </Match>
           <Match when={props.viewType === "rerolling"}>
-            <h3 class="font-bold text-4">{`${whoText()}正在重投骰子`}</h3>
+            <h3 class="font-bold text-4">
+              {t(
+                props.opp
+                  ? "mini.oppRerolling"
+                  : "mini.myRerolling",
+              )}
+            </h3>
             <ul class="grid grid-rows-2 grid-flow-col gap-2">
               <For each={props.ids}>
                 {(dice) => (
@@ -126,7 +144,7 @@ export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
         <MiniView
           viewType="selecting"
           ids={props.selectCardCandidates}
-          nameGetter={(name) => assetsManager.getNameSync(name)}
+          nameGetter={(name) => assetsManager().getNameSync(name)}
           opp={props.opp}
         />
       </Show>

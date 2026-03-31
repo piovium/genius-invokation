@@ -37,11 +37,12 @@ export interface SelectCardViewProps {
 }
 
 export function SelectCardView(props: SelectCardViewProps) {
+  const { t } = useUiContext();
   const [selectedId, setSelectedId] = createSignal<number | null>(null);
 
   return (
     <div class="absolute inset-0 flex flex-col items-center justify-center gap-10 select-none">
-      <h3 class="font-bold text-3xl">挑选卡牌</h3>
+      <h3 class="font-bold text-3xl">{t("view.chooseCard")}</h3>
       <ul class="flex flex-row gap-1">
         <For each={props.candidateIds}>
           {(cardId) => (
@@ -84,7 +85,7 @@ export function SelectCardView(props: SelectCardViewProps) {
             }
           }}
         >
-          确定
+          {t("view.confirmButton")}
         </Button>
       </div>
     </div>
@@ -100,8 +101,8 @@ export interface DiceCostAsyncProps {
 export const DiceCostAsync = (props: DiceCostAsyncProps) => {
   const { assetsManager } = useUiContext();
   const [data] = createResource(
-    () => props.cardDefinitionId,
-    (id) => assetsManager.getData(id),
+    () => [props.cardDefinitionId, assetsManager()] as const,
+    ([id, manager]) => manager.getData(id),
   );
   const COST_MAP: Record<string, number> = {
     GCG_COST_DICE_VOID: DiceType.Void,

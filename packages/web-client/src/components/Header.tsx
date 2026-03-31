@@ -19,31 +19,46 @@ import { IS_BETA } from "@gi-tcg/config";
 import { getAvatarUrl } from "../utils";
 import Logo from "./Logo.svg";
 import Title from "./Title.svg";
+import LanguageIcon from "./Language.svg";
 import { useAuth } from "../auth";
+import { Locale, useI18n } from "../i18n";
 
 const USE_LOGO = true;
 
 export function Header() {
   const navigate = useNavigate();
   const { status, logout } = useAuth();
+  const { t, locale, setLocale } = useI18n();
   return (
     <header class="fixed top-0 left-0 w-100dvw flex flex-row h-[calc(3rem+var(--root-padding-top))] md:h-[calc(4rem+var(--root-padding-top))] pt-[var(--root-padding-top)] bg-white z-200 px-4 shadow-md items-center gap-2">
       <img src={Logo} class="h-10 md:h-12" />
       <div class="flex-grow flex flex-col md:flex-row items-start md:items-end gap-1 md:gap-2">
         <h1 class="text-xl line-height-none font-bold">
           <A href="/">
-            <Show when={USE_LOGO} fallback="七圣召唤模拟对战平台">
-              <img src={Title} class="h-5 md:h-6" alt="雨酱牌！" />
+            <Show when={USE_LOGO} fallback={t("platformTitle")}>
+              <img src={Title} class="h-5 md:h-6" alt={t("platformLogoAlt")} />
             </Show>
           </A>
         </h1>
         <div class="flex flex-row gap-2">
           <Show when={IS_BETA}>
             <span class="text-8px md:text-10px badge badge-soft-error">
-              Incl. unreleased data
+              {t("includeUnreleasedData")}
             </span>
           </Show>
         </div>
+      </div>
+      <div class="flex flex-row items-center relative">
+        <select
+          class="select h-8 text-xs border rounded-full pl-7 py-1 bg-white"
+          value={locale()}
+          onChange={(e) => setLocale(e.currentTarget.value as Locale)}
+          aria-label={t("languageLabel")}
+        >
+          <option value="zh-CN">{t("languageChinese")}</option>
+          <option value="en">{t("languageEnglish")}</option>
+        </select>
+        <img src={LanguageIcon} class="absolute h-6 -translate-x-50% left-4" alt={t("languageLabel")} />
       </div>
       <Show when={status().type !== "notLogin"}>
         <Show when={status().type === "user"}>
@@ -64,7 +79,7 @@ export function Header() {
           }}
         >
           <i class="i-mdi-logout" />
-          <span class="hidden sm:inline">退出登录</span>
+          <span class="hidden sm:inline">{t("logout")}</span>
         </button>
       </Show>
     </header>

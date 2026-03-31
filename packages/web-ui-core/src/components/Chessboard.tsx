@@ -145,6 +145,7 @@ import { FastActionMarker } from "./FastActionMarker";
 import { TransformWrapper, type Rotation } from "./TransformWrapper";
 import { MiniSpecialViewGroup } from "./MiniSpecialView";
 import type { OppInfo } from "../opp";
+import { RichText } from "./RichText";
 
 export type CardArea = "myPile" | "oppPile" | "myHand" | "oppHand";
 
@@ -1032,10 +1033,11 @@ export function Chessboard(props: ChessboardProps) {
   let chessboardElement!: HTMLDivElement;
   const [transformScale, setTransformScale] = createSignal(1);
 
-  const { assetsManager } = useUiContext();
+  const { assetsManager, locale, t } = useUiContext();
   const { CardDataViewer, ...dataViewerController } = createCardDataViewer({
     includesImage: true,
     assetsManager,
+    locale,
   });
   const [selectingItem, setSelectingItem] = createSignal<SelectingItem | null>(
     null,
@@ -1214,7 +1216,7 @@ export function Chessboard(props: ChessboardProps) {
             setSelectedDice(selectingDice);
           }
           if (actionState.alertText) {
-            showAlert(actionState.alertText);
+            showAlert(<RichText content={actionState.alertText} />);
           }
           setDicePanelState(actionState.dicePanel);
         } else if (prevActionState) {
@@ -1656,7 +1658,7 @@ export function Chessboard(props: ChessboardProps) {
   };
 
   const onExit = async () => {
-    const confirmed = await confirm("确定放弃对局吗？");
+    const confirmed = await confirm(t("ui.confirmGiveUpGame"));
     if (confirmed) {
       localProps.onGiveUp?.();
     }
@@ -1899,7 +1901,7 @@ export function Chessboard(props: ChessboardProps) {
               localProps.onSelectCard?.(id);
               dataViewerController.hide();
             }}
-            nameGetter={(name) => assetsManager.getNameSync(name)}
+            nameGetter={(id) => assetsManager().getNameSync(id)}
           />
         </Show>
         <Show when={props.viewType === "switchHands" && specialViewVisible()}>
@@ -1961,7 +1963,9 @@ export function Chessboard(props: ChessboardProps) {
           <Show when={!localProps.liveStreamingMode}>
             <div class="absolute top-2 right-2 flex flex-row-reverse gap-1.5">
               <Show when={localProps.data.state.phase !== PbPhaseType.GAME_END}>
-                <ExitButton onClick={onExit} />
+                <ExitButton
+                  onClick={onExit}
+                />
               </Show>
               <FullScreenToggleButton
                 isFullScreen={isFullscreen()}
@@ -1984,7 +1988,7 @@ export function Chessboard(props: ChessboardProps) {
         <Show when={localProps.opp && localProps.liveStreamingMode}>
           <div class="absolute top-2.5 right-[calc(var(--chessboard-right-offset)+0.625rem)] flex flex-row-reverse gap-2">
             <div class="h-8 w-24 flex items-center justify-center rounded-full b-2 line-height-none font-bold bg-#e9e2d3 text-black/70 b-black/70">
-              直播模式
+              {t("ui.liveStreamingMode")}
             </div>
           </div>
         </Show>
@@ -1996,8 +2000,8 @@ export function Chessboard(props: ChessboardProps) {
           <div class="absolute inset-0 bg-black/85 flex items-center justify-center flex-col z-50">
             <div class="font-bold text-4xl text-white my-10">
               {localProps.data.state.winner === localProps.who
-                ? "对局胜利"
-                : "对局失败"}
+                ? t("ui.gameVictory")
+                : t("ui.gameDefeat")}
             </div>
             {localProps.gameEndExtra}
           </div>

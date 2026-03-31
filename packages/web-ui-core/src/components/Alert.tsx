@@ -13,10 +13,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { createEffect, createSignal, Show, type Component } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  Show,
+  type Component,
+  type JSX,
+} from "solid-js";
+import { RichText } from "./RichText";
 
 export interface AlertController {
-  show: (dangrouslyInnerHtml: string) => void;
+  show: (content: JSX.Element) => void;
   hide: () => void;
 }
 
@@ -25,14 +32,14 @@ export const createAlert = (): [
   component: Component,
 ] => {
   const [showAlert, setShowAlert] = createSignal(false);
-  const [innerHtml, setInnerHtml] = createSignal<string>();
+  const [content, setContent] = createSignal<JSX.Element>();
 
   let autoHideTimeout: number | null = null;
 
-  const show = (dangerouslyInnerHtml: string) => {
+  const show = (content: JSX.Element) => {
     setShowAlert(false); // retrigger animation
     window.setTimeout(() => {
-      setInnerHtml(dangerouslyInnerHtml);
+      setContent(content);
       setShowAlert(true);
       if (autoHideTimeout) {
         window.clearTimeout(autoHideTimeout);
@@ -54,11 +61,9 @@ export const createAlert = (): [
       hide,
     },
     () => (
-      <Alert
-        shown={showAlert()}
-        dangerouslyInnerHtml={innerHtml()}
-        onBackdropClick={hide}
-      />
+      <Alert shown={showAlert()} onBackdropClick={hide}>
+        {content()}
+      </Alert>
     ),
   ];
 };
@@ -66,7 +71,7 @@ export const createAlert = (): [
 interface AlertProps {
   shown: boolean;
   class?: string;
-  dangerouslyInnerHtml?: string;
+  children?: JSX.Element;
   onBackdropClick?: () => void;
 }
 
@@ -82,9 +87,9 @@ function Alert(props: AlertProps) {
           class={`w-84 h-16 pointer-events-none flex flex-row justify-center font-bold items-center bg-#786049 border-#bea678 b-3 text-white rounded-1.5 text-4.5 color-#ede4d8 opacity-100 animate-[alert-auto-hide_4000ms_forwards] pointer-events-none select-none ${
             props.class ?? ""
           }`}
-          // eslint-disable-next-line solid/no-innerhtml
-          innerHTML={props.dangerouslyInnerHtml}
-        />
+        >
+          {props.children}
+        </div>
       </Show>
     </div>
   );

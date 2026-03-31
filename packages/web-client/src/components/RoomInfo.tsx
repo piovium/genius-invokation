@@ -18,6 +18,7 @@ import { A } from "@solidjs/router";
 import { useAuth } from "../auth";
 import { getPlayerAvatarUrl, roomIdToCode } from "../utils";
 import type { PlayerInfo } from "../utils";
+import { useI18n } from "../i18n";
 
 export interface RoomInfoProps {
   id: number;
@@ -27,6 +28,7 @@ export interface RoomInfoProps {
 }
 
 export function RoomInfo(props: RoomInfoProps) {
+  const { t } = useI18n();
   const { status } = useAuth();
   const insideRoom = () => props.players.some((p) => p.id === status()?.id);
   const code = () => roomIdToCode(props.id);
@@ -52,9 +54,9 @@ export function RoomInfo(props: RoomInfoProps) {
   return (
     <div class="w-75 md:w-90 bg-yellow-100 rounded-xl p-4 flex flex-col">
       <div class="flex flex-row items-center gap-2 mb-3">
-        <h4 class="font-semibold">房间 {code()}</h4>
+        <h4 class="font-semibold">{t("room", { code: code() })}</h4>
         <Show when={!props.watchable}>
-          <span title="不可观战">&#8856;</span>
+          <span title={t("spectateUnavailable")}>&#8856;</span>
         </Show>
       </div>
       <div
@@ -79,7 +81,7 @@ export function RoomInfo(props: RoomInfoProps) {
             when={props.players.length > 1}
             fallback={
               <div class="flex flex-row items-center gap-2">
-                <span class="text-yellow-600 italic">虚位以待</span>
+                <span class="text-yellow-600 italic">{t("slotAvailable")}</span>
                 <Show when={!insideRoom()}>
                   <button
                     class="h-30px w-30px rounded-full bg-yellow-800 flex items-center justify-center text-lg text-yellow-100 font-bold select-none hover:bg-yellow-700 transition-colors"

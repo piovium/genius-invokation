@@ -23,6 +23,7 @@ import {
   Show,
   Switch,
 } from "solid-js";
+import { useUiContext } from "../hooks/context";
 
 export interface RoundAndPhaseNotificationProps {
   class?: string;
@@ -32,18 +33,18 @@ export interface RoundAndPhaseNotificationProps {
   info: RoundAndPhaseNotificationInfo;
 }
 
-const PHASE_TYPE_TEXT_MAP: Record<PbPhaseType, string> = {
-  [PbPhaseType.ROLL]: "掷骰阶段",
-  [PbPhaseType.ACTION]: "行动阶段",
-  [PbPhaseType.END]: "结束阶段",
-  [PbPhaseType.INIT_ACTIVES]: "",
-  [PbPhaseType.INIT_HANDS]: "",
-  [PbPhaseType.GAME_END]: "",
-};
-
 export function RoundAndPhaseNotification(
   props: RoundAndPhaseNotificationProps,
 ) {
+  const { t } = useUiContext();
+  const phaseText = createMemo<Record<PbPhaseType, string>>(() => ({
+    [PbPhaseType.ROLL]: t("phase.rollPhase"),
+    [PbPhaseType.ACTION]: t("phase.actionPhase"),
+    [PbPhaseType.END]: t("phase.endPhase"),
+    [PbPhaseType.INIT_ACTIVES]: "",
+    [PbPhaseType.INIT_HANDS]: "",
+    [PbPhaseType.GAME_END]: "",
+  }));
   const opp = createMemo(() => props.who !== props.info.who);
   const [isFirst, setIsFirst] = createSignal(true);
   createEffect(() => {
@@ -63,7 +64,7 @@ export function RoundAndPhaseNotification(
             class="w-210 h-6 flex flex-row justify-center items-center action-hint text-#f5ebd2 font-bold text-3.5 animate-[phase-notification_500ms_both] data-[delay]:animate-[phase-notification_500ms_800ms_both]"
             bool:data-delay={props.info.showRound}
           >
-            {PHASE_TYPE_TEXT_MAP[props.info.value as PbPhaseType]}
+            {phaseText()[props.info.value as PbPhaseType]}
           </div>
         </Match>
         <Match
@@ -75,10 +76,15 @@ export function RoundAndPhaseNotification(
             class="w-210 h-6 flex flex-row justify-center items-center font-bold text-3.5 action-hint-who animate-[phase-notification_500ms_both]"
             bool:data-opp={opp()}
           >
-            {opp() ? "对方" : "我方"}
-            {props.info.value === "action" ? "行动" : "宣布回合结束"}
+            {props.info.value === "action"
+              ? t(opp() ? "phase.oppActionTurn" : "phase.myActionTurn")
+              : t(
+                  opp()
+                    ? "phase.oppDeclareEndTurn"
+                    : "phase.myDeclareEndTurn",
+                )}
             <Show when={props.info.value === "declareEnd" && !isFirst()}>
-              {"，获得先手"}
+              {t("phase.gainFirst")}
             </Show>
           </div>
         </Match>
@@ -88,8 +94,16 @@ export function RoundAndPhaseNotification(
           class="w-210 h-6 pb-6 flex flex-col justify-center items-center font-bold text-3.5 action-hint-who animate-[phase-notification_800ms_both]"
           bool:data-opp={props.currentTurn !== props.who}
         >
-          <h5 class="font-bold text-3">第 {props.roundNumber} 回合</h5>
-          <span>{props.currentTurn === props.who ? "我方" : "对方"}先手</span>
+          <h5 class="font-bold text-3">
+            {t("phase.round", { round: props.roundNumber })}
+          </h5>
+          <span>
+            {t(
+              props.currentTurn === props.who
+                ? "phase.mySideFirst"
+                : "phase.oppSideFirst",
+            )}
+          </span>
         </div>
       </Show>
     </div>

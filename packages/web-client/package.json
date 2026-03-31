@@ -13,9 +13,10 @@
   "dependencies": {
     "@gi-tcg/assets-manager": "workspace:*",
     "@gi-tcg/deck-builder": "workspace:*",
-    "@gi-tcg/web-ui-core": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
+    "@gi-tcg/web-ui-core": "workspace:*",
     "@server-sent-stream/web": "^1.0.3",
+    "@solid-primitives/i18n": "^2.2.1",
     "@solid-primitives/storage": "^4.2.1",
     "@solidjs/router": "^0.13.5",
     "@una-ui/preset": "^0.34.0-beta.1",

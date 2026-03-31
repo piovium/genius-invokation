@@ -41,7 +41,11 @@ import type {
 } from "../history/typings";
 import { Image } from "./Image";
 import { DiceIcon } from "./Dice";
-import type { ActionCardRawData, EntityRawData } from "@gi-tcg/assets-manager";
+import type {
+  ActionCardRawData,
+  AssetsManager,
+  EntityRawData,
+} from "@gi-tcg/assets-manager";
 import TuningIcon from "../svg/TuningIcon.svg?fb";
 import DefeatedPreviewIcon from "../svg/DefeatedPreviewIcon.svg?fb";
 import RevivePreviewIcon from "../svg/RevivePreviewIcon.svg?fb";
@@ -53,31 +57,8 @@ import { CardFace } from "./Card";
 import { StrokedText } from "./StrokedText";
 import { DAMAGE_COLOR } from "./Damage";
 import { REACTION_TEXT_MAP } from "./Reaction";
-
-const getDiceTypeText = (type: DiceType) => {
-  const { assetsManager } = useUiContext();
-  if (type === DiceType.Void) {
-    return "未知元素骰";
-  }
-  if (type === DiceType.Omni) {
-    return assetsManager.getNameSync(-411);
-  }
-  return assetsManager.getNameSync(-300 - type);
-};
-
-const getDamageTypeText = (type: DamageType) => {
-  const { assetsManager } = useUiContext();
-  if (type === DamageType.Piercing) {
-    return assetsManager.getNameSync(-5);
-  } else {
-    return assetsManager.getNameSync(-100 - type);
-  }
-};
-
-const getApplyTypeText = (type: DamageType) => {
-  const { assetsManager } = useUiContext();
-  return assetsManager.getNameSync(-300 - type);
-};
+import { RichText } from "./RichText";
+import type { Translator } from "../locales";
 
 interface ChildHealthChange {
   type: "damage" | "heal";
@@ -91,7 +72,7 @@ interface HistoryChildData {
   imageType?: "cardFace" | "icon" | "unspecified";
   title?: string;
   healthChange?: ChildHealthChange;
-  content: JSX.Element;
+  content: string;
 }
 
 export const WhoContext = createContext<() => 0 | 1>(() => 0 as 0 | 1);
@@ -99,9 +80,10 @@ export function useWho() {
   return useContext(WhoContext);
 }
 
-const renderName = (definitionId?: number) => {
+const createRenderName = () => {
   const { assetsManager } = useUiContext();
-  return definitionId ? assetsManager.getNameSync(definitionId) : "???";
+  return (definitionId?: number) =>
+    definitionId ? assetsManager().getNameSync(definitionId) : "???";
 };
 
 const renderHistoryChild = (
@@ -109,48 +91,48 @@ const renderHistoryChild = (
   parentCallerDefinitionId?: number,
 ) => {
   const who = useWho();
-  const { assetsManager } = useUiContext();
+  const { assetsManager, t } = useUiContext();
   let result: HistoryChildData;
   const opp = (historyOwner: 0 | 1) => historyOwner !== who();
-  const subject = (opp: boolean) => (opp ? "对方" : "我方");
 
-  const createEntityTextMap: Record<string, string> = {
-    combatStatus: "生成出战状态",
-    status: "附属状态：",
-    equipment: "附属装备：",
-    attachment: "附属状态：",
-    summon: "生成召唤物",
-    support: "生成支援区卡牌",
-  };
-  const removeEntityTextMap: Record<string, string> = {
-    combatStatus: "出战状态消失",
-    status: "失去状态：",
-    equipment: "失去装备：",
-    attachment: "失去状态：",
-    summon: "召唤物弃置",
-    support: "支援区卡牌弃置",
-  };
-  const createCardTextMap: Record<string, string> = {
-    pile: "生成卡牌, 并将其置入牌库",
-    hands: "获得手牌",
-  };
-  const TransformTextMap: Record<string, string> = {
-    old: "转换形态···",
-    new: "转换形态完成",
-  };
+  const renderName = createRenderName();
 
-  const renderReaction = (reaction: Reaction, apply: DamageType) => {
-    const { elements: element, name } = REACTION_TEXT_MAP[reaction];
-    const base = element.find((e) => e !== apply) as DamageType;
+  const diceIconAndText = (type: DiceType) => {
+    const manager = assetsManager();
+    if (type === DiceType.Void) {
+      return t("history.unknownDice");
+    }
+    if (type === DiceType.Omni) {
+      return `<image type="dice" id="${type}" />` + manager.getNameSync(-411);
+    }
     return (
-      <>
-        <span>（</span>
-        <Image imageId={base} class="h-3.5 w-3.5" fallback="aura" />
-        <Image imageId={apply} class="h-3.5 w-3.5" fallback="aura" />
-        <span>{name}</span>
-        <span>）</span>
-      </>
+      `<image type="dice" id="${type}" />` + manager.getNameSync(-300 - type)
     );
+  };
+
+  const damageIconAndText = (type: DamageType) => {
+    const manager = assetsManager();
+    const icon = type <= 7 ? `<image type="element" id="${type}" />` : "";
+    const color =
+      type >= 1 && type <= 7 ? `color="var(--c-${DAMAGE_COLOR[type]})"` : "";
+    if (type === DamageType.Piercing) {
+      return `${icon}<font ${color}>${manager.getNameSync(-5)}</font>`;
+    } else {
+      return `${icon}<font ${color}>${manager.getNameSync(-100 - type)}</font>`;
+    }
+  };
+
+  const applyIconAndText = (type: DamageType) => {
+    const icon = `<image type="element" id="${type}" />`;
+    const color = `color="var(--c-${DAMAGE_COLOR[type]})"`;
+    const manager = assetsManager();
+    return `${icon}<font ${color}>${manager.getNameSync(-300 - type)}</font>`;
+  };
+
+  const reactionIconAndText = (reaction: Reaction, apply: DamageType) => {
+    const { elements: element, nameKey } = REACTION_TEXT_MAP[reaction];
+    const base = element.find((e) => e !== apply) as DamageType;
+    return `(<image type="element" id="${base}" /><image type="element" id="${apply}" />${t(nameKey)})`;
   };
 
   switch (child.type) {
@@ -160,12 +142,9 @@ const renderHistoryChild = (
         imageId: child.characterDefinitionId,
         imageType: "cardFace",
         title: renderName(child.characterDefinitionId),
-        content: (
-          <>
-            <span>角色出战</span>
-            <span>（{child.isOverloaded ? "超载" : "卡牌效果"}）</span>
-          </>
-        ),
+        content: `${t("history.switchActive")}(${
+          child.isOverloaded ? t("history.overloaded") : t("history.cardEffect")
+        })`,
       };
       break;
     }
@@ -174,169 +153,150 @@ const renderHistoryChild = (
         opp: opp(child.who),
         imageId: child.callerDefinitionId,
         title: renderName(child.callerDefinitionId),
-        content: (
-          <>
-            <span>触发效果</span>
-          </>
-        ),
+        content: t("history.willTriggered"),
       };
       break;
     }
     case "drawCard": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>{subject(opp(child.who))}</span>
-            <span>抓{child.drawCardsCount}张牌</span>
-          </>
-        ),
+        content: t(isOpp ? "history.oppDrawCards" : "history.myDrawCards", {
+          count: child.drawCardsCount,
+        }),
       };
       break;
     }
     case "stealHand": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: child.cardDefinitionId,
         imageType: "cardFace",
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>{subject(opp(child.who))}</span>
-            <span>夺取{subject(!opp(child.who))}手牌</span>
-          </>
-        ),
+        content: t(isOpp ? "history.oppStealMyHand" : "history.myStealOppHand"),
       };
       break;
     }
     case "createEntity": {
+      const isOpp = opp(child.who);
       if (["status", "equipment", "attachment"].includes(child.entityType)) {
         result = {
-          opp: opp(child.who),
+          opp: isOpp,
           imageId: child.masterDefinitionId,
           imageType: "cardFace",
           title: renderName(child.masterDefinitionId),
-          content: (
-            <>
-              <span>{createEntityTextMap[child.entityType]}</span>
-              <Image
-                imageId={child.entityDefinitionId}
-                type="icon"
-                class="h-3.5 w-3.5"
-                fallback="state"
-              />
-              <span>{renderName(child.entityDefinitionId)}</span>
-            </>
-          ),
+          content:
+            t(
+              child.entityType === "equipment"
+                ? "history.createEquipment"
+                : "history.createStatus",
+            ) +
+            `<image id="${child.entityDefinitionId}" />` +
+            renderName(child.entityDefinitionId),
         };
       } else {
         // child.entityType === "combatStatus" | "summon" | "support"
+        const key =
+          `history.${isOpp ? "opp" : "my"}Create${child.entityType === "combatStatus" ? "CombatStatus" : child.entityType === "summon" ? "Summon" : "Support"}` as const;
         result = {
-          opp: opp(child.who),
+          opp: isOpp,
           imageId: child.entityDefinitionId,
           title: renderName(child.entityDefinitionId),
-          content: (
-            <>
-              <span>{subject(opp(child.who))}</span>
-              <span>{createEntityTextMap[child.entityType]}</span>
-            </>
-          ),
+          content: t(key),
         };
       }
       break;
     }
     case "generateDice": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>{subject(opp(child.who))}</span>
-            <span>生成{child.count}个</span>
-            <Show when={child.diceType > 0}>
-              <DiceIcon size={14} type={child.diceType} selected={false} />
-            </Show>
-            <span>{getDiceTypeText(child.diceType)}</span>
-          </>
-        ),
+        content:
+          t(isOpp ? "history.oppGenerateDice" : "history.myGenerateDice", {
+            count: child.count,
+            diceType: diceIconAndText(child.diceType),
+          }),
       };
       break;
     }
     case "absorbDice": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>{subject(opp(child.who))}</span>
-            <span>弃置了{child.count}个元素骰</span>
-          </>
-        ),
+        content: t(isOpp ? "history.oppAbsorbDice" : "history.myAbsorbDice", {
+          count: child.count,
+        }),
       };
       break;
     }
     case "createCard": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: child.cardDefinitionId,
         imageType: "cardFace",
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>{subject(opp(child.who))}</span>
-            <span>{createCardTextMap[child.target]}</span>
-          </>
+        content: t(
+          child.target === "pile"
+            ? isOpp
+              ? "history.oppCreateCardToPile"
+              : "history.myCreateCardToPile"
+            : isOpp
+              ? "history.oppGainHandCard"
+              : "history.myGainHandCard",
         ),
       };
       break;
     }
     case "switchCard": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>{subject(opp(child.who))}</span>
-            <span>替换了1次手牌</span>
-          </>
+        content: t(
+          isOpp ? "history.oppSwitchHandOnce" : "history.mySwitchHandOnce",
         ),
       };
       break;
     }
     case "undrawCard": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>{subject(opp(child.who))}</span>
-            <span>将{child.count}张手牌置入牌库</span>
-          </>
+        content: t(
+          isOpp ? "history.oppPutHandToPile" : "history.myPutHandToPile",
+          { count: child.count },
         ),
       };
       break;
     }
     case "rerollDice": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>{subject(opp(child.who))}</span>
-            <span>进行了{child.count}次重投</span>
-          </>
+        content: t(
+          isOpp ? "history.oppRerolledTimes" : "history.myRerolledTimes",
+          { count: child.count },
         ),
       };
       break;
     }
     case "damage": {
+      const reactionText = child.reaction
+        ? reactionIconAndText(child.reaction, child.damageType)
+        : "";
       result = {
         opp: opp(child.who),
         imageId: child.characterDefinitionId,
@@ -347,39 +307,28 @@ const renderHistoryChild = (
           value: child.damageValue,
           special: child.causeDefeated,
         },
-        content: (
-          <>
-            <span>受到{child.damageValue}点</span>
-            <Show when={child.damageType <= 7}>
-              <Image
-                imageId={child.damageType}
-                zero="physic"
-                class="h-3.5 w-3.5"
-                fallback="aura"
-              />
-            </Show>
-            <span
-              style={
-                child.damageType >= 1 && child.damageType <= 7
-                  ? { color: `var(--c-${DAMAGE_COLOR[child.damageType]})` }
-                  : void 0
-              }
-            >
-              {getDamageTypeText(child.damageType)}
-            </span>
-            <Show when={child.reaction}>
-              {(reaction) => renderReaction(reaction(), child.damageType)}
-            </Show>
-            <span>
-              ，生命值{child.oldHealth}→{child.newHealth}
-            </span>
-            <span>{child.causeDefeated ? "，被击倒" : ""}</span>
-          </>
-        ),
+        content:
+          t("history.takeDamage", {
+            count: child.damageValue,
+            damageType: damageIconAndText(child.damageType),
+          }) +
+          reactionText +
+          t("history.healthTo", {
+            old: child.oldHealth,
+            next: child.newHealth,
+          }) +
+          (child.causeDefeated ? t("history.defeated") : ""),
       };
       break;
     }
     case "heal": {
+      const prefixTextKey =
+        child.healType === "revive"
+          ? "history.reviveAnd"
+          : child.healType === "immuneDefeated"
+            ? "history.immuneDefeatedAnd"
+            : ("history.healed" as const);
+
       result = {
         opp: opp(child.who),
         imageId: child.characterDefinitionId,
@@ -390,49 +339,28 @@ const renderHistoryChild = (
           value: child.healValue,
           special: child.healType !== "normal",
         },
-        content: (
-          <>
-            <Switch>
-              <Match when={child.healType === "revive"}>
-                <span>复苏，并</span>
-              </Match>
-              <Match when={child.healType === "immuneDefeated"}>
-                <span>角色免于被击倒，并</span>
-              </Match>
-            </Switch>
-            <span>受到{child.healValue}点治疗</span>
-            <span>
-              ，生命值{child.oldHealth}→{child.newHealth}
-            </span>
-          </>
-        ),
+        content:
+          t(prefixTextKey, { count: child.healValue }) +
+          t("history.healthTo", {
+            old: child.oldHealth,
+            next: child.newHealth,
+          }),
       };
       break;
     }
     case "apply": {
+      const reactionText = child.reaction
+        ? reactionIconAndText(child.reaction, child.elementType)
+        : "";
       result = {
         opp: opp(child.who),
         imageId: child.characterDefinitionId,
         imageType: "cardFace",
         title: renderName(child.characterDefinitionId),
-        content: (
-          <>
-            <span>附着</span>
-            <Image
-              imageId={child.elementType}
-              class="h-3.5 w-3.5"
-              fallback="aura"
-            />
-            <span
-              style={{ color: `var(--c-${DAMAGE_COLOR[child.elementType]})` }}
-            >
-              {getApplyTypeText(child.elementType)}
-            </span>
-            <Show when={child.reaction}>
-              {(reaction) => renderReaction(reaction(), child.elementType)}
-            </Show>
-          </>
-        ),
+        content:
+          t("history.applyElement", {
+            elementType: applyIconAndText(child.elementType),
+          }) + reactionText,
       };
       break;
     }
@@ -443,48 +371,41 @@ const renderHistoryChild = (
         imageId: child.characterDefinitionId,
         imageType: "cardFace",
         title: renderName(child.characterDefinitionId),
-        content: (
-          <>
-            <span>获得{increaseValue}点最大生命值</span>
-            <span>
-              ，最大生命值{child.oldMaxHealth}→{child.newMaxHealth}
-            </span>
-          </>
-        ),
+        content: t("history.gainMaxHealth", {
+          count: increaseValue,
+          old: child.oldMaxHealth,
+          next: child.newMaxHealth,
+        }),
       };
       break;
     }
     case "energy": {
       const energyValue = child.newEnergy - child.oldEnergy;
+      const payload = {
+        count: Math.abs(energyValue),
+        old: child.oldEnergy,
+        next: child.newEnergy,
+      };
       result = {
         opp: opp(child.who),
         imageId: child.characterDefinitionId,
         imageType: "cardFace",
         title: renderName(child.characterDefinitionId),
-        content: (
-          <>
-            <span>{energyValue > 0 ? "获得" : "消耗"}</span>
-            <span>{Math.abs(energyValue)}点充能</span>
-            <span>
-              ，充能值{child.oldEnergy}→{child.newEnergy}
-            </span>
-          </>
+        content: t(
+          energyValue > 0 ? "history.gainEnergy" : "history.loseEnergy",
+          payload,
         ),
       };
       break;
     }
     case "removeCard": {
+      const isOpp = opp(child.who);
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: child.cardDefinitionId,
         imageType: "cardFace",
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>{subject(opp(child.who))}</span>
-            <span>舍弃手牌</span>
-          </>
-        ),
+        content: t(isOpp ? "history.oppDiscardHand" : "history.myDiscardHand"),
       };
       break;
     }
@@ -493,35 +414,26 @@ const renderHistoryChild = (
         opp: opp(child.who),
         imageId: child.cardDefinitionId,
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>{child.variableName}：</span>
-            <span>
-              {child.oldValue}→{child.newValue}
-            </span>
-          </>
-        ),
+        content: `${child.variableName}: ${child.oldValue}→${child.newValue}`,
       };
       break;
     }
     case "removeEntity": {
-      if (child.entityType === "status" || child.entityType === "equipment") {
+      if (["status", "equipment", "attachment"].includes(child.entityType)) {
         result = {
           opp: opp(child.who),
           imageId: child.masterDefinitionId,
           imageType: "cardFace",
           title: renderName(child.masterDefinitionId),
-          content: (
-            <>
-              <span>{removeEntityTextMap[child.entityType]}</span>
-              <Image
-                imageId={child.entityDefinitionId}
-                type="icon"
-                class="h-3.5 w-3.5"
-                fallback="state"
-              />
-              <span>{assetsManager.getNameSync(child.entityDefinitionId)}</span>
-            </>
+          content: t(
+            child.entityType === "equipment"
+              ? "history.removeEquipment"
+              : "history.removeStatus",
+            {
+              entity:
+                `<image id="${child.entityDefinitionId}" />` +
+                renderName(child.entityDefinitionId),
+            },
           ),
         };
       } else {
@@ -530,32 +442,30 @@ const renderHistoryChild = (
           opp: opp(child.who),
           imageId: child.entityDefinitionId,
           title: renderName(child.entityDefinitionId),
-          content: (
-            <>
-              <span>{removeEntityTextMap[child.entityType]}</span>
-            </>
+          content: t(
+            child.entityType === "combatStatus"
+              ? "history.removeCombatStatus"
+              : child.entityType === "summon"
+                ? "history.removeSummon"
+                : "history.removeSupport",
           ),
         };
       }
       break;
     }
     case "convertDice": {
+      const isOpp = opp(child.who);
+      const key =
+        `history.${isOpp ? "opp" : "my"}Convert${child.count ? "To" : "Some"}Dice` as const;
       result = {
-        opp: opp(child.who),
+        opp: isOpp,
         imageId: child.isTuning ? "tuning" : parentCallerDefinitionId,
         title: child.isTuning
-          ? "元素调和"
+          ? t("history.elementalTuning")
           : renderName(parentCallerDefinitionId),
-        content: (
-          <>
-            <span>{subject(opp(child.who))}</span>
-            <span>将{!!child.count ? `${child.count}个` : `若干`}元素骰转换为</span>
-            <Show when={child.diceType > 0}>
-              <DiceIcon size={14} type={child.diceType} selected={false} />
-            </Show>
-            <span>{getDiceTypeText(child.diceType)}</span>
-          </>
-        ),
+        content: t(key, {
+          diceType: diceIconAndText(child.diceType),
+        }),
       };
       break;
     }
@@ -565,11 +475,7 @@ const renderHistoryChild = (
         imageId: child.cardDefinitionId,
         imageType: "cardFace",
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>遭到反制，未能生效</span>
-          </>
-        ),
+        content: t("history.blockedNoEffect"),
       };
       break;
     }
@@ -578,10 +484,10 @@ const renderHistoryChild = (
         opp: opp(child.who),
         imageId: child.cardDefinitionId,
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>{TransformTextMap[child.stage]}</span>
-          </>
+        content: t(
+          child.stage === "old"
+            ? "history.transformOld"
+            : "history.transformNew",
         ),
       };
       break;
@@ -591,11 +497,9 @@ const renderHistoryChild = (
         opp: opp(child.who),
         imageId: child.character0DefinitionId,
         title: renderName(child.character0DefinitionId),
-        content: (
-          <>
-            <span>与{renderName(child.character1DefinitionId)}交换位置</span>
-          </>
-        ),
+        content: t("history.swapPosition", {
+          name: renderName(child.character1DefinitionId) ?? "???",
+        }),
       };
       break;
     }
@@ -605,11 +509,7 @@ const renderHistoryChild = (
         imageId: child.cardDefinitionId,
         imageType: "cardFace",
         title: renderName(child.cardDefinitionId),
-        content: (
-          <>
-            <span>因刻意的游戏设计而回归地脉</span>
-          </>
-        ),
+        content: t("history.overflowCard"),
       };
       break;
     }
@@ -617,7 +517,7 @@ const renderHistoryChild = (
       result = {
         opp: false,
         title: "",
-        content: <></>,
+        content: "",
       };
       break;
     }
@@ -633,9 +533,9 @@ interface HistoryHintData {
 
 const renderHistoryHint = (block: HistoryHintBlock) => {
   const who = useWho();
+  const { t } = useUiContext();
   let result: HistoryHintData;
   const opp = (historyOwner: 0 | 1) => historyOwner !== who();
-  const subject = (opp: boolean) => (opp ? "对方" : "我方");
 
   switch (block.type) {
     case "changePhase": {
@@ -643,25 +543,25 @@ const renderHistoryHint = (block: HistoryHintBlock) => {
         case "initHands":
           result = {
             type: block.type,
-            content: `替换起始手牌`,
+            content: t("history.replaceInitialHand"),
           };
           break;
         case "initActives":
           result = {
             type: block.type,
-            content: `选择初始出战角色`,
+            content: t("history.chooseInitialActiveCharacter"),
           };
           break;
         case "action":
           result = {
             type: block.type,
-            content: `回合${block.roundNumber} 开始`,
+            content: t("history.roundStart", { round: block.roundNumber }),
           };
           break;
         case "end":
           result = {
             type: block.type,
-            content: `结束阶段`,
+            content: t("history.endPhase"),
           };
           break;
         default:
@@ -679,14 +579,20 @@ const renderHistoryHint = (block: HistoryHintBlock) => {
           result = {
             type: block.type,
             opp: opp(block.who),
-            content: `${subject(opp(block.who))}行动`,
+            content: t(
+              opp(block.who) ? "history.oppActionTurn" : "history.myActionTurn",
+            ),
           };
           break;
         case "declareEnd":
           result = {
             type: block.type,
             opp: opp(block.who),
-            content: `${subject(opp(block.who))}宣布回合结束`,
+            content: t(
+              opp(block.who)
+                ? "history.oppDeclareEndTurn"
+                : "history.myDeclareEndTurn",
+            ),
           };
           break;
       }
@@ -974,7 +880,9 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
     return ["damage", "heal", "apply", "switch", "status"].includes(e.KEY);
   };
   const isCardSummary = (e: ShotGroupEntry): e is CardSummaryEntry => {
-    return ["discard", "getcard", "create", "remove", "attachment"].includes(e.KEY);
+    return ["discard", "getcard", "create", "remove", "attachment"].includes(
+      e.KEY,
+    );
   };
 
   for (const c of characterSummary) {
@@ -1096,7 +1004,7 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
       return;
     }
     return l.length === 1
-      ? (l[0].cardDefinitionId) || (all.length === 1)
+      ? l[0].cardDefinitionId || all.length === 1
         ? all
         : "more"
       : "more";
@@ -1141,15 +1049,15 @@ function renderSummary(children: HistoryChildren[]): SummaryShot[] {
 }
 
 const CardDescriptionPart = (props: { cardDefinitionId: number }) => {
-  const { assetsManager } = useUiContext();
+  const { assetsManager, t } = useUiContext();
   const [data] = createResource(
-    () => props.cardDefinitionId,
-    (id) => assetsManager.getData(id),
+    () => [props.cardDefinitionId, assetsManager()] as const,
+    ([id, manager]) => manager.getData(id),
   );
   return (
     <Switch>
-      <Match when={data.loading}>加载中···</Match>
-      <Match when={data.error}>加载失败</Match>
+      <Match when={data.loading}>{t("history.loading")}</Match>
+      <Match when={data.error}>{t("history.loadFailed")}</Match>
       <Match when={data()}>
         {(data) => (
           <p class="whitespace-pre-wrap">
@@ -1179,11 +1087,11 @@ interface HistoryBlockData {
   energyChange?: blockEnergyProps;
   status?: number;
   combatStatus?: number;
-  content: blockDetailProps;
+  content: BlockDetailProps;
   summary: SummaryShot[];
 }
 
-interface blockDetailProps {
+interface BlockDetailProps {
   opp: boolean;
   imageId?: number;
   name?: string;
@@ -1200,15 +1108,11 @@ interface blockEnergyProps {
 
 const renderHistoryBlock = (block: HistoryDetailBlock) => {
   const who = useWho();
-  const { assetsManager } = useUiContext();
+  const { t } = useUiContext();
+  const renderName = createRenderName();
+
   let result: HistoryBlockData;
   const opp = (historyOwner: 0 | 1) => historyOwner !== who();
-  const subject = (opp: boolean) => (opp ? "对方" : "我方");
-  const switchActiveTextMap: Record<string, string> = {
-    init: "初始出战角色",
-    switch: "切换角色",
-    choose: "选择出战角色",
-  };
 
   function extractBlockEnergyProps(
     block: {
@@ -1237,10 +1141,23 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
 
   switch (block.type) {
     case "switchOrChooseActive": {
+      const isOpp = opp(block.who);
+      const titleKey =
+        block.how === "init"
+          ? isOpp
+            ? "history.oppInitialActiveTitle"
+            : "history.myInitialActiveTitle"
+          : block.how === "switch"
+            ? isOpp
+              ? "history.oppSwitchActiveTitle"
+              : "history.mySwitchActiveTitle"
+            : isOpp
+              ? "history.oppChooseActiveTitle"
+              : "history.myChooseActiveTitle";
       result = {
         type: block.type,
-        opp: opp(block.who),
-        title: `${subject(opp(block.who))}${switchActiveTextMap[block.how]}`,
+        opp: isOpp,
+        title: t(titleKey),
         indent: block.indent,
         imageId: block.characterDefinitionId,
         imageSize: "normal",
@@ -1252,7 +1169,9 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           name: renderName(block.characterDefinitionId),
           content: (
             <>
-              <span class="text-3 text-#d4bc8e">角色出战</span>
+              <span class="text-3 text-#d4bc8e">
+                {t("history.switchActive")}
+              </span>
             </>
           ),
         },
@@ -1261,12 +1180,19 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
       break;
     }
     case "useSkill": {
+      const isOpp = opp(block.who);
       result = {
         type: block.type,
-        opp: opp(block.who),
-        title: `${subject(opp(block.who))}${
-          block.skillType === "technique" ? "使用特技" : "使用技能"
-        }`,
+        opp: isOpp,
+        title: t(
+          block.skillType === "technique"
+            ? isOpp
+              ? "history.oppUseTechniqueTitle"
+              : "history.myUseTechniqueTitle"
+            : isOpp
+              ? "history.oppUseSkillTitle"
+              : "history.myUseSkillTitle",
+        ),
         indent: block.indent,
         imageId: block.callerDefinitionId,
         imageSize: "normal",
@@ -1290,7 +1216,9 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
               <div class="flex flex-col gap-1">
                 <div class="text-3 text-#d4bc8e">
                   {`${
-                    block.skillType === "technique" ? "使用特技" : "使用技能"
+                    block.skillType === "technique"
+                      ? t("history.useTechnique")
+                      : t("history.useSkill")
                   }`}
                 </div>
                 <div class="flex flex-row items-center gap-1">
@@ -1303,7 +1231,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
                     />
                   </div>
                   <span class="text-#fff3e0/98 text-3">
-                    {assetsManager.getNameSync(block.skillDefinitionId)}
+                    {renderName(block.skillDefinitionId)}
                   </span>
                 </div>
               </div>
@@ -1318,7 +1246,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
       result = {
         type: block.type,
         opp: opp(block.who),
-        title: "触发效果",
+        title: t("history.triggered"),
         indent: block.indent,
         imageId:
           block.entityType === "equipment"
@@ -1350,7 +1278,9 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           name: renderName(block.masterOrCallerDefinitionId),
           content: !block.callerOrSkillDefinitionId ? (
             <>
-              <div class="text-3 text-#d4bc8e">触发效果</div>
+              <div class="text-3 text-#d4bc8e">
+                {t("history.willTriggered")}
+              </div>
             </>
           ) : block.callerOrSkillDefinitionId ===
             block.masterOrCallerDefinitionId ? (
@@ -1364,7 +1294,9 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           ) : (
             <>
               <div class="flex flex-col gap-1">
-                <div class="text-3 text-#d4bc8e">触发效果</div>
+                <div class="text-3 text-#d4bc8e">
+                  {t("history.willTriggered")}
+                </div>
                 <div class="flex flex-row items-center gap-1">
                   <div class="h-7 w-7 rounded-full b-1 b-white/30 flex items-center justify-center">
                     <Image
@@ -1387,10 +1319,13 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
       break;
     }
     case "playCard": {
+      const isOpp = opp(block.who);
       result = {
         type: block.type,
-        opp: opp(block.who),
-        title: `${subject(opp(block.who))}打出手牌`,
+        opp: isOpp,
+        title: t(
+          isOpp ? "history.oppPlayCardTitle" : "history.myPlayCardTitle",
+        ),
         indent: block.indent,
         imageId: block.cardDefinitionId,
         imageSize: "normal",
@@ -1419,10 +1354,13 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
       break;
     }
     case "selectCard": {
+      const isOpp = opp(block.who);
       result = {
         type: block.type,
-        opp: opp(block.who),
-        title: `${subject(opp(block.who))}执行挑选`,
+        opp: isOpp,
+        title: t(
+          isOpp ? "history.oppSelectCardTitle" : "history.mySelectCardTitle",
+        ),
         indent: block.indent,
         imageId: block.cardDefinitionId,
         imageSize: "normal",
@@ -1433,8 +1371,13 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           name: renderName(block.cardDefinitionId),
           content: (
             <>
-              <span class="text-3 text-#d4bc8e">{subject(opp(block.who))}</span>
-              <span class="text-3 text-#d4bc8e">触发挑选效果</span>
+              <span class="text-3 text-#d4bc8e">
+                {t(
+                  isOpp
+                    ? "history.oppTriggeredSelectEffect"
+                    : "history.myTriggeredSelectEffect",
+                )}
+              </span>
             </>
           ),
         },
@@ -1443,10 +1386,15 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
       break;
     }
     case "elementalTuning": {
+      const isOpp = opp(block.who);
       result = {
         type: block.type,
-        opp: opp(block.who),
-        title: `${subject(opp(block.who))}进行「元素调和」`,
+        opp: isOpp,
+        title: t(
+          isOpp
+            ? "history.oppElementalTuningTitle"
+            : "history.myElementalTuningTitle",
+        ),
         indent: block.indent,
         imageId: block.cardDefinitionId,
         imageSize: "normal",
@@ -1478,7 +1426,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
       result = {
         type: "pocket",
         opp: false,
-        title: "裁判行动",
+        title: t("history.judgeAction"),
         indent: block.indent,
         imageSize: "normal",
         content: {
@@ -1569,8 +1517,8 @@ function HistoryChildBox(props: { data: HistoryChildData }) {
             )}
           </Show>
         </div>
-        <div class="flex flex-row text-2.5 text-#b2afa8 font-bold">
-          {props.data.content}
+        <div class="flex flex-row text-2.5 text-#b2afa8 font-bold history-children">
+          <RichText content={props.data.content} />
         </div>
       </div>
     </div>
@@ -1668,7 +1616,7 @@ function HistorySummaryShot(props: { data: SummaryShot }) {
                 <Show when={props.data.innerValueSpecial}>
                   <div class="relative overflow-visible h-3 w-4 flex-shrink-0">
                     <div class="absolute w-5 h-5 top-50% left-50% -translate-x-50% -translate-y-50%">
-                      <DefeatedPreviewIcon />                    
+                      <DefeatedPreviewIcon />
                     </div>
                   </div>
                 </Show>
@@ -2050,7 +1998,7 @@ export function HistoryPanel(props: HistoryPanelProps) {
             class="absolute w-66 h-6 bottom-3 right-2 bg-#e9e2d3 opacity-80 text-#3b4255 text-3 font-bold rounded-full hover:bg-#e9e2d3 hover:shadow-[inset_0_0_16px_rgba(216,212,204,1),0_0_8px_rgba(255,255,255,0.2)] hover:b-white hover:b-2 hover:opacity-100"
             onClick={() => scrollToBottom("instant")}
           >
-            跳转至最新
+            {useUiContext().t("history.jumpLatest")}
           </button>
         </Show>
         <Show when={selectedBlock()}>
