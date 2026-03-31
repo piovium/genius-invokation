@@ -19,7 +19,7 @@ import { getEquipmentInvalidity, moveInArray, shuffleList } from "../utils";
 import { getDefinitionName, getEntityVisibleVarBadges } from "../state/catalog";
 import { allocateId, createEntityState } from "../state/factory";
 import { getImageUrl } from "../state/assets";
-import { getPlayer } from "../state/common";
+import { getPlayer, getCharacter } from "../state/common";
 
 // 装备类型定义
 type EquipmentType = "artifact" | "technique" | "weapon" | "talent" | "other";
@@ -432,9 +432,7 @@ function HandsCardListItem(props: HandsCardListItemProps) {
     const [item] = target.hands.splice(cardIndex, 1);
     if (!item) return;
 
-    const destination = target.characters.find(
-      (character) => character && character.id === characterId,
-    );
+    const destination = getCharacter(draft, characterId);
     if (!destination) return;
 
     if (replaceExisting) {
@@ -455,9 +453,7 @@ function HandsCardListItem(props: HandsCardListItemProps) {
   const handleEquip = (characterId: number) => {
     const targetWho = props.who;
     const cardIndex = props.index;
-    const destination = player().characters.find(
-      (character) => character && character.id === characterId,
-    );
+    const destination = getCharacter(gameState(), characterId);
     if (!destination) {
       return;
     }

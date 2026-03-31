@@ -174,12 +174,9 @@ export function CharacterEditor(props: CharacterEditorProps) {
   };
 
   const reviveCharacter = () => {
-    const who = props.who;
     const chId = characterId();
     updateState((draft) => {
-      const target = draft.players[who].characters.find(
-        (item) => item?.id === chId,
-      );
+      const target = getCharacter(draft, chId);
       if (!target) return;
       target.variables.health = 1;
       target.variables.alive = 1;

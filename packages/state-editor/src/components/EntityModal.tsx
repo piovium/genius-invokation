@@ -21,6 +21,7 @@ import { getDefinitionName, getEntityVisibleVarBadges } from "../state/catalog";
 import { allocateId, createAttachmentState } from "../state/factory";
 import { getImageUrl } from "../state/assets";
 import { moveInArray } from "../utils";
+import { getEntity, getCharacter } from "../state/common";
 
 interface EntityContentProps {
   who: 0 | 1;
@@ -59,8 +60,7 @@ function EntityModalContent(props: EntityContentProps) {
 
   // 检查是否存在相同 definition.id 的附着
   const checkDuplicateAttachment = (attachmentDef: AttachmentDefinition) => {
-    const currentEntity = props.entity;
-    const index = currentEntity.attachments.findIndex(
+    const index = props.entity.attachments.findIndex(
       (att) => att.definition.id === attachmentDef.id,
     );
     return index;
@@ -101,12 +101,9 @@ function EntityModalContent(props: EntityContentProps) {
 
   // 执行添加附着
   const doAddAttachment = (option: AssetOption<AttachmentDefinition>) => {
-    const who = props.who;
-    const area = props.area as "hands" | "pile";
     const etId = props.entity.id;
     updateState((draft) => {
-      const targetPlayer = draft.players[who];
-      const targetEntity = targetPlayer[area].find((item) => item.id === etId);
+      const targetEntity = getEntity(draft, etId);
       if (!targetEntity) {
         return;
       }
@@ -121,12 +118,9 @@ function EntityModalContent(props: EntityContentProps) {
     option: AssetOption<AttachmentDefinition>,
     index: number,
   ) => {
-    const who = props.who;
-    const area = props.area as "hands" | "pile";
     const etId = props.entity.id;
     updateState((draft) => {
-      const targetPlayer = draft.players[who];
-      const targetEntity = targetPlayer[area].find((item) => item.id === etId);
+      const targetEntity = getEntity(draft, etId);
       if (!targetEntity) {
         return;
       }
@@ -158,23 +152,9 @@ function EntityModalContent(props: EntityContentProps) {
   const updateEntityByAreaContent = (
     updater: (entity: Draft<EntityState>) => void,
   ) => {
-    const who = props.who;
-    const area = props.area;
-    const characterId = props.characterId;
     const entityId = props.entity.id;
     updateState((draft) => {
-      const player = draft.players[who];
-      if (area === "characterEntities") {
-        const character = player.characters.find(
-          (item) => item && item.id === characterId,
-        );
-        const entity = character?.entities.find((item) => item.id === entityId);
-        if (entity) {
-          updater(entity);
-        }
-        return;
-      }
-      const entity = player[area].find((item) => item.id === entityId);
+      const entity = getEntity(draft, entityId);
       if (entity) {
         updater(entity);
       }
@@ -305,10 +285,7 @@ function AttachmentListItem(props: AttachmentListItemProps) {
   const isLast = () => props.index === props.entity.attachments.length - 1;
 
   const moveUp = (draft: Draft<GameState>) => {
-    const targetPlayer = draft.players[props.who];
-    const targetEntity = targetPlayer[props.area].find(
-      (item) => item.id === props.entity.id,
-    );
+    const targetEntity = getEntity(draft, props.entity.id);
     if (!targetEntity) return;
     targetEntity.attachments = moveInArray(
       targetEntity.attachments,
@@ -318,10 +295,7 @@ function AttachmentListItem(props: AttachmentListItemProps) {
   };
 
   const moveDown = (draft: Draft<GameState>) => {
-    const targetPlayer = draft.players[props.who];
-    const targetEntity = targetPlayer[props.area].find(
-      (item) => item.id === props.entity.id,
-    );
+    const targetEntity = getEntity(draft, props.entity.id);
     if (!targetEntity) return;
     targetEntity.attachments = moveInArray(
       targetEntity.attachments,
@@ -331,10 +305,7 @@ function AttachmentListItem(props: AttachmentListItemProps) {
   };
 
   const remove = (draft: Draft<GameState>) => {
-    const targetPlayer = draft.players[props.who];
-    const targetEntity = targetPlayer[props.area].find(
-      (item) => item.id === props.entity.id,
-    );
+    const targetEntity = getEntity(draft, props.entity.id);
     if (!targetEntity) return;
     targetEntity.attachments.splice(props.index, 1);
   };

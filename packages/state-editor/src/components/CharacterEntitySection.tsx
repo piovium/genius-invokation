@@ -11,6 +11,7 @@ import { getDefinitionName, getEntityVisibleVarBadges } from "../state/catalog";
 import { getEquipmentInvalidity, moveInArray } from "../utils";
 import { allocateId, createEntityState } from "../state/factory";
 import { getImageUrl } from "../state/assets";
+import { getCharacter } from "../state/common";
 
 interface CharacterEntitySectionProps {
   character: {
@@ -221,24 +222,18 @@ export function CharacterEntitySection(props: CharacterEntitySectionProps) {
   };
 
   const doAdd = (definition: EntityDefinition) => {
-    const who = props.who;
     const chId = props.characterId;
     updateState((draft) => {
-      const target = draft.players[who].characters.find(
-        (item) => item?.id === chId,
-      );
+      const target = getCharacter(draft, chId);
       if (!target) return;
       target.entities.push(createEntityState(definition, allocateId(draft)));
     });
   };
 
   const doReplace = (definition: EntityDefinition, index: number) => {
-    const who = props.who;
     const chId = props.characterId;
     updateState((draft) => {
-      const target = draft.players[who].characters.find(
-        (item) => item?.id === chId,
-      );
+      const target = getCharacter(draft, chId);
       if (!target) return;
       target.entities[index] = createEntityState(definition, allocateId(draft));
     });
@@ -313,25 +308,19 @@ export function CharacterEntityListItem(props: CharacterEntityListItemProps) {
   const { updateState, openModal } = useStateEditorContext();
 
   const moveUp = (draft: Draft<GameState>) => {
-    const target = draft.players[props.who].characters.find(
-      (item) => item?.id === props.characterId,
-    );
+    const target = getCharacter(draft, props.characterId);
     if (!target) return;
     target.entities = moveInArray(target.entities, props.index, -1);
   };
 
   const moveDown = (draft: Draft<GameState>) => {
-    const target = draft.players[props.who].characters.find(
-      (item) => item?.id === props.characterId,
-    );
+    const target = getCharacter(draft, props.characterId);
     if (!target) return;
     target.entities = moveInArray(target.entities, props.index, 1);
   };
 
   const remove = (draft: Draft<GameState>) => {
-    const target = draft.players[props.who].characters.find(
-      (item) => item?.id === props.characterId,
-    );
+    const target = getCharacter(draft, props.characterId);
     if (!target) return;
     target.entities.splice(props.index, 1);
   };
