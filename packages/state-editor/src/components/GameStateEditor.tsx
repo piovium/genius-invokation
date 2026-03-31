@@ -147,7 +147,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
   ]);
   const initialState = local.initialValue ?? createDefaultGameState();
   const [state, setState] = createStore(initialState);
-  const catalog = createMemo(() => buildEditorCatalog(state.data));
+  const catalog = createMemo(() => buildEditorCatalog(state));
   const [selectedSection, setSelectedSection] = createSignal<EditorSection>({
     kind: "global",
   });

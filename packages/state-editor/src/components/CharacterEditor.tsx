@@ -6,6 +6,7 @@ import type {
   GameState,
   CharacterDefinition,
   CharacterTag,
+  EntityTag,
 } from "@gi-tcg/core";
 import {
   ActionButton,
@@ -113,7 +114,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
 
   // 根据标签筛选角色，并排除已选择的角色
   const filteredCharacters = createMemo(() => {
-    const allCharacters = catalog().characters.sort((a, b) => a.id - b.id);
+    const allCharacters = catalog().characters;
     const tags = selectedCharacterTags();
     const existingIds = existingCharacterIds();
 
@@ -800,22 +801,24 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
           }}
           showTypeFilter={true}
           showTagFilter={true}
-          availableTypes={["equipment", "status"]}
-          availableTags={[
-            "shield",
-            "barrier",
-            "preparingSkill",
-            "nightsoulsBlessing",
-            "talent",
-            "artifact",
-            "technique",
-            "weapon",
-            "sword",
-            "claymore",
-            "pole",
-            "catalyst",
-            "bow",
-          ]}
+          type="characterEntities"
+          availableTags={
+            [
+              "shield",
+              "barrier",
+              "preparingSkill",
+              "nightsoulsBlessing",
+              "talent",
+              "artifact",
+              "technique",
+              "weapon",
+              "sword",
+              "claymore",
+              "pole",
+              "catalyst",
+              "bow",
+            ] satisfies EntityTag<"status" | "equipment">[]
+          }
           maxResults={60}
         />
       );

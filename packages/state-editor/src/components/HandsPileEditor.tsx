@@ -151,26 +151,28 @@ export function PileEditor(props: CollectionContentProps) {
       <AddCardModal
         autoClose
         onSelect={handleAddCard}
-        availableTypes={["eventCard", "equipment", "support"]} // 牌库只能添加这些类型的实体
-        availableTags={[
-          "legend",
-          "action",
-          "food",
-          "resonance",
-          "talent",
-          "artifact",
-          "technique",
-          "weapon",
-          "sword",
-          "claymore",
-          "pole",
-          "catalyst",
-          "bow",
-          "ally",
-          "place",
-          "item",
-          "blessing",
-        ]}
+        type="cardEntities"
+        availableTags={
+          [
+            "legend",
+            "action",
+            "food",
+            "resonance",
+            "talent",
+            "artifact",
+            "technique",
+            "weapon",
+            "sword",
+            "claymore",
+            "pole",
+            "catalyst",
+            "bow",
+            "ally",
+            "place",
+            "item",
+            "blessing",
+          ] satisfies EntityTag<"equipment" | "support" | "eventCard">[]
+        }
       />
     ));
   };
@@ -343,26 +345,28 @@ export function HandsEditor(props: CollectionContentProps) {
       <AddCardModal
         autoClose
         onSelect={handleAddCard}
-        availableTypes={["eventCard", "equipment", "support"]} // 牌库只能添加这些类型的实体
-        availableTags={[
-          "legend",
-          "action",
-          "food",
-          "resonance",
-          "talent",
-          "artifact",
-          "technique",
-          "weapon",
-          "sword",
-          "claymore",
-          "pole",
-          "catalyst",
-          "bow",
-          "ally",
-          "place",
-          "item",
-          "blessing",
-        ]}
+        type="cardEntities" // 牌库只能添加这些类型的实体
+        availableTags={
+          [
+            "legend",
+            "action",
+            "food",
+            "resonance",
+            "talent",
+            "artifact",
+            "technique",
+            "weapon",
+            "sword",
+            "claymore",
+            "pole",
+            "catalyst",
+            "bow",
+            "ally",
+            "place",
+            "item",
+            "blessing",
+          ] satisfies EntityTag<"equipment" | "support" | "eventCard">[]
+        }
       />
     ));
   };

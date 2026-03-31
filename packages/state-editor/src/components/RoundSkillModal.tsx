@@ -53,7 +53,7 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
   // 可选的其他角色（排除牌组中的和已使用的）
   const otherCharacterOptions = createMemo(() => {
     const deckIds = new Set(deckCharacters().map((c) => c.id));
-    return catalog().roundSkillCharacters.filter(
+    return catalog().characters.filter(
       (char) =>
         !deckIds.has(char.id) && !props.disabledCharacterIds.includes(char.id),
     );
@@ -65,7 +65,7 @@ export function RoundSkillModal(props: RoundSkillModalProps) {
     if (!id) return null;
     return (
       deckCharacters().find((c) => c.id === id) ||
-      catalog().roundSkillCharacters.find((c) => c.id === id)
+      catalog().characters.find((c) => c.id === id)
     );
   });
 

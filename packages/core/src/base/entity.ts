@@ -41,6 +41,7 @@ export type CardTag =
   | "food"
   | "resonance" // 元素共鸣
   | "abyss"; // 显示深渊特效
+
 export type CommonEntityTag =
   | "shield" // 护盾 & 显示黄盾特效
   | "barrier" // 紫盾 & 显示蓝盾特效
@@ -50,11 +51,10 @@ export type StatusTag =
   | "bondOfLife" // 显示生命之契特效
   | "disableSkill" // 禁用技能（仅角色状态）
   | "immuneControl" // 免疫冻结石化眩晕，禁用效果切人（仅角色状态）
-  | "preparingSkill"; // 角色将准备技能（仅角色状态）
-
-export type CombatStatusTag =
-  | "eventEffectless" // 禁用事件牌效果（6.3 及之前）
+  | "preparingSkill" // 角色将准备技能（仅角色状态）
   | "nightsoulsBlessing"; // 夜魂加持（仅角色状态）
+
+export type CombatStatusTag = "eventEffectless"; // 禁用事件牌效果（6.3 及之前）
 
 export type EntityTagMap = {
   eventCard: CardTag;

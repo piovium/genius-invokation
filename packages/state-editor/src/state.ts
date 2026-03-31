@@ -10,6 +10,7 @@ import {
   type EntityState,
   type EntityType,
   type ExtensionState,
+  type GameData,
   type GameState,
   type InitiativeSkillDefinition,
   type PhaseType,
@@ -21,7 +22,6 @@ import type { Draft } from "immer";
 import type { ExpressiveJSONSchema } from "ya-json-schema-types";
 
 type AttachmentDefinition = AttachmentState["definition"];
-type EditorGameData = ReturnType<typeof getData>;
 
 export type EditorEntityArea =
   | "combatStatuses"
@@ -83,10 +83,10 @@ export interface InitiativeSkillOption {
 export interface EditorCatalog {
   characters: AssetOption<CharacterDefinition>[];
   attachments: AssetOption<AttachmentDefinition>[];
-  entitiesByType: Record<EntityType, AssetOption<EntityDefinition>[]>;
-  cardEntities: AssetOption<EntityDefinition>[];
-  characterEntities: AssetOption<EntityDefinition>[];
-  roundSkillCharacters: AssetOption<CharacterDefinition>[];
+  entitiesByType: Record<
+    EntityType | "characterEntities" | "cardEntities",
+    AssetOption<EntityDefinition>[]
+  >;
   initiativeSkillsByCharacterId: Map<number, InitiativeSkillOption[]>;
   allInitiativeSkills: InitiativeSkillOption[];
 }
@@ -162,6 +162,50 @@ const SPECIAL_ENERGY_LABELS: Record<string, string> = {
 
 function sortOptions<T>(options: AssetOption<T>[]) {
   return [...options].sort((left, right) => {
+    const nameCompare = left.name.localeCompare(right.name, "zh-Hans-CN");
+    return nameCompare === 0 ? left.id - right.id : nameCompare;
+  });
+}
+
+function isSixDigitId(id: number) {
+  return id >= 100000 && id <= 999999;
+}
+
+function getEntitySortPriority(
+  id: number,
+  characterDefinitionIds: Set<number>,
+) {
+  if ((id >= 100 && id <= 999) || id === 303300) {
+    return 0;
+  }
+  if (isSixDigitId(id)) {
+    const idText = String(id);
+    const prefix = idText[0];
+    if (prefix === "1" || prefix === "2") {
+      const relatedCharacterId = Number(idText.slice(1, 5));
+      if (characterDefinitionIds.has(relatedCharacterId)) {
+        return prefix === "1" ? 1 : 2;
+      }
+      return 4;
+    }
+    if (prefix === "3") {
+      return 3;
+    }
+  }
+  return 4;
+}
+
+function sortEntityOptions(
+  options: AssetOption<EntityDefinition>[],
+  characterDefinitionIds: Set<number>,
+) {
+  return [...options].sort((left, right) => {
+    const priorityCompare =
+      getEntitySortPriority(left.id, characterDefinitionIds) -
+      getEntitySortPriority(right.id, characterDefinitionIds);
+    if (priorityCompare !== 0) {
+      return priorityCompare;
+    }
     const nameCompare = left.name.localeCompare(right.name, "zh-Hans-CN");
     return nameCompare === 0 ? left.id - right.id : nameCompare;
   });
@@ -257,10 +301,7 @@ export function createAttachmentState(
   };
 }
 
-function buildDefaultPlayerState(
-  who: 0 | 1,
-  data: EditorGameData,
-): PlayerState {
+function buildDefaultPlayerState(who: 0 | 1, data: GameData): PlayerState {
   const definitions = DEFAULT_CHARACTER_DEFINITION_IDS.map((id) => {
     const definition = data.characters.get(id);
     if (!definition) {
@@ -340,7 +381,19 @@ export function createDefaultGameState(): GameState {
   };
 }
 
-export function buildEditorCatalog(data: EditorGameData): EditorCatalog {
+export function buildEditorCatalog(state: GameState): EditorCatalog {
+  const data = state.data;
+  const characterDefinitionIds = new Set(
+    state.players.flatMap((player) =>
+      player.characters
+        .filter(Boolean)
+        .map((character) => character.definition.id),
+    ),
+  );
+  console.log(
+    "Character definition ids in current state:",
+    characterDefinitionIds,
+  );
   const characterOptions: AssetOption<CharacterDefinition>[] = [];
   const attachmentOptions: AssetOption<AttachmentDefinition>[] = [];
   const entityOptionsByType: Record<
@@ -422,27 +475,57 @@ export function buildEditorCatalog(data: EditorGameData): EditorCatalog {
     const nameCompare = left.name.localeCompare(right.name, "zh-Hans-CN");
     return nameCompare === 0 ? left.id - right.id : nameCompare;
   });
+  console.log(
+    entityOptionsByType.summon.map((option) => [
+      option.id,
+      option.name,
+      getEntitySortPriority(option.id, characterDefinitionIds),
+    ]),
+  );
+  console.log(
+    sortEntityOptions(entityOptionsByType.summon, characterDefinitionIds),
+  );
   return {
     characters: sortOptions(characterOptions),
     attachments: sortOptions(attachmentOptions),
     entitiesByType: {
-      combatStatus: sortOptions(entityOptionsByType.combatStatus),
-      status: sortOptions(entityOptionsByType.status),
-      equipment: sortOptions(entityOptionsByType.equipment),
-      support: sortOptions(entityOptionsByType.support),
-      summon: sortOptions(entityOptionsByType.summon),
-      eventCard: sortOptions(entityOptionsByType.eventCard),
+      combatStatus: sortEntityOptions(
+        entityOptionsByType.combatStatus,
+        characterDefinitionIds,
+      ),
+      status: sortEntityOptions(
+        entityOptionsByType.status,
+        characterDefinitionIds,
+      ),
+      equipment: sortEntityOptions(
+        entityOptionsByType.equipment,
+        characterDefinitionIds,
+      ),
+      support: sortEntityOptions(
+        entityOptionsByType.support,
+        characterDefinitionIds,
+      ),
+      summon: sortEntityOptions(
+        entityOptionsByType.summon,
+        characterDefinitionIds,
+      ),
+      eventCard: sortEntityOptions(
+        entityOptionsByType.eventCard,
+        characterDefinitionIds,
+      ),
+      cardEntities: sortEntityOptions(
+        [
+          ...entityOptionsByType.support,
+          ...entityOptionsByType.equipment,
+          ...entityOptionsByType.eventCard,
+        ],
+        characterDefinitionIds,
+      ),
+      characterEntities: sortEntityOptions(
+        [...entityOptionsByType.status, ...entityOptionsByType.equipment],
+        characterDefinitionIds,
+      ),
     },
-    cardEntities: sortOptions([
-      ...entityOptionsByType.support,
-      ...entityOptionsByType.equipment,
-      ...entityOptionsByType.eventCard,
-    ]),
-    characterEntities: sortOptions([
-      ...entityOptionsByType.status,
-      ...entityOptionsByType.equipment,
-    ]),
-    roundSkillCharacters: sortOptions(characterOptions),
     initiativeSkillsByCharacterId,
     allInitiativeSkills,
   };
@@ -510,7 +593,7 @@ export function buildImportedCharacterStates(
 }
 
 export function buildImportedPileDefinitions(
-  data: EditorGameData,
+  data: GameData,
   cardIds: readonly number[],
 ): EntityDefinition[] {
   const definitions = cardIds.map((id) => {
@@ -698,7 +781,7 @@ export function validateGameState(state: GameState, catalog: EditorCatalog) {
     catalog.allInitiativeSkills.map((skill) => skill.id),
   );
   const validCharacterDefinitionIds = new Set(
-    catalog.roundSkillCharacters.map((character) => character.id),
+    catalog.characters.map((character) => character.id),
   );
   for (const [playerIndex, player] of state.players.entries()) {
     const characters = player.characters.filter(Boolean);

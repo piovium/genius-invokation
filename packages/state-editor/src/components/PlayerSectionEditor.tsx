@@ -377,16 +377,14 @@ function EntityAreaSection(props2: {
     createSignal<number>(-1);
 
   // 获取可用的类型
-  const availableTypes = () => {
+  const entityType = (): EntityType => {
     switch (props2.area) {
       case "supports":
-        return ["support"];
+        return "support";
       case "summons":
-        return ["summon"];
+        return "summon";
       case "combatStatuses":
-        return ["combatStatus"];
-      default:
-        return [];
+        return "combatStatus";
     }
   };
 
@@ -457,7 +455,7 @@ function EntityAreaSection(props2: {
           onSelect={(def) => {
             handleAddCheck(def, () => ref.close());
           }}
-          availableTypes={availableTypes() as EntityType[]}
+          type={entityType()}
           showTypeFilter={false}
           availableTags={props2.availableTags}
           showTagFilter={!!props2.availableTags}
@@ -785,7 +783,7 @@ function RoundSkillLogListItem(props: RoundSkillLogListItemProps) {
   const { catalog } = useStateEditorContext();
 
   const character = createMemo(() =>
-    catalog().roundSkillCharacters.find(
+    catalog().characters.find(
       (item) => item.id === props.characterId,
     ),
   );

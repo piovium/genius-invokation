@@ -13,7 +13,7 @@ interface AddCardModalProps {
   // 可选：控制是否展示标签筛选行
   showTagFilter?: boolean;
   // 可选：控制哪些类型显示在筛选项中
-  availableTypes?: EntityType[];
+  type: EntityType | "cardEntities" | "characterEntities";
   // 可选：控制哪些标签显示在筛选项中（默认为所有 EntityTag）
   availableTags?: EntityTag[];
   // 是否显示"其他"选项（筛选不包含任何 availableTags 的实体）
@@ -109,9 +109,13 @@ export function AddCardModal(props: AddCardModalProps) {
   const [selectedOther, setSelectedOther] = createSignal(false);
 
   // 获取可用的类型列表
-  const availableTypes = createMemo(() => {
-    if (props.availableTypes && props.availableTypes.length > 0) {
-      return props.availableTypes;
+  const availableTypes = createMemo<EntityType[]>(() => {
+    if (props.type === "cardEntities") {
+      return ["eventCard", "equipment", "support"];
+    } else if (props.type === "characterEntities") {
+      return ["combatStatus", "status"];
+    } else if (props.type) {
+      return [props.type];
     }
     return Object.keys(ENTITY_TYPE_LABELS) as EntityType[];
   });
@@ -134,18 +138,15 @@ export function AddCardModal(props: AddCardModalProps) {
 
   // 所有可选的卡牌，根据availableTypes预筛选，按ID排序
   const allCards = createMemo(() => {
-    const types = availableTypes();
     let results: AssetOption<EntityDefinition>[] = [];
 
     // 从entitiesByType中获取指定类型的实体
-    for (const type of types) {
-      const entitiesOfType = catalog().entitiesByType[type];
-      if (entitiesOfType) {
-        results = [...results, ...entitiesOfType];
-      }
+    const entitiesOfType = catalog().entitiesByType[props.type];
+    if (entitiesOfType) {
+      results = [...results, ...entitiesOfType];
     }
 
-    return results.sort((a, b) => a.id - b.id);
+    return results;
   });
 
   // 筛选后的结果
