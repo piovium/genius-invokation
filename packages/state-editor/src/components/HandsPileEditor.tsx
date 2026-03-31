@@ -16,7 +16,7 @@ import type { Draft } from "immer";
 import { useStateEditorContext } from "./GameStateEditor";
 import { EntityModal } from "./EntityModal";
 import { getEquipmentInvalidity, moveInArray, shuffleList } from "../utils";
-import { getDefinitionName, getEntityVisibleVarBadges } from "../state/catalog";
+import { getDefinitionName, getEntityItemDescription, getEntityVisibleVarBadges } from "../state/catalog";
 import { allocateId, createEntityState } from "../state/factory";
 import { getImageUrl } from "../state/assets";
 import { getPlayer, getCharacter } from "../state/common";
@@ -270,7 +270,7 @@ function PileCardListItem(props: PileCardListItemProps) {
       imageSrc={getImageUrl(props.card.definition, "card")}
       imageMode="card"
       title={getDefinitionName(props.card.definition)}
-      description={`ID: ${props.card.id}`}
+      description={getEntityItemDescription(props.card)}
       definition={props.card.definition}
       tags={detailBadges(props.card)}
       buttonColumns={2}
@@ -506,11 +506,7 @@ function HandsCardListItem(props: HandsCardListItemProps) {
         variant: "primary",
         onClick: () => {
           openModal(() => (
-            <EntityModal
-              who={props.who}
-              area="hands"
-              entity={props.card}
-            />
+            <EntityModal who={props.who} area="hands" entity={props.card} />
           ));
         },
       },
@@ -550,7 +546,7 @@ function HandsCardListItem(props: HandsCardListItemProps) {
       imageSrc={getImageUrl(props.card.definition, "card")}
       imageMode="card"
       title={getDefinitionName(props.card.definition)}
-      description={`ID: ${props.card.id}`}
+      description={getEntityItemDescription(props.card)}
       definition={props.card.definition}
       tags={detailBadges(props.card)}
       buttonColumns={3}

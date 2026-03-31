@@ -77,15 +77,16 @@ export function getDefinitionTypeLabel(definition: { type: string }) {
   return ENTITY_TYPE_LABELS[definition.type as EntityType] ?? definition.type;
 }
 
-export function getEntityVisibleVarBadges(entity: {
-  definition: { visibleVarName?: string | null };
-  variables: Record<string, number>;
-}) {
+export function getEntityVisibleVarBadges(entity: EntityState | AttachmentState) {
   return entity.definition.visibleVarName
     ? [
         `${entity.definition.visibleVarName} = ${entity.variables[entity.definition.visibleVarName]}`,
       ]
     : [];
+}
+
+export function getEntityItemDescription(entity: EntityState | AttachmentState) {
+  return `ID: ${entity.id} / DefID: ${entity.definition.id}`;
 }
 
 export function getCharacterEnergyLabel(character: CharacterState) {

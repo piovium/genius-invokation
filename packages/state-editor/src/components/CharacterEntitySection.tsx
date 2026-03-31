@@ -7,7 +7,7 @@ import { AddCardModal } from "./AddCardModal";
 import type { Draft } from "immer";
 import { useStateEditorContext } from "./GameStateEditor";
 import { EntityModal } from "./EntityModal";
-import { getDefinitionName, getEntityVisibleVarBadges } from "../state/catalog";
+import { getDefinitionName, getEntityItemDescription, getEntityVisibleVarBadges } from "../state/catalog";
 import { getEquipmentInvalidity, moveInArray } from "../utils";
 import { allocateId, createEntityState } from "../state/factory";
 import { getImageUrl } from "../state/assets";
@@ -367,7 +367,7 @@ export function CharacterEntityListItem(props: CharacterEntityListItemProps) {
       imageSrc={getImageUrl(props.entity.definition, imageMode())}
       imageMode={imageMode()}
       title={getDefinitionName(props.entity.definition)}
-      description={`ID: ${props.entity.id}`}
+      description={getEntityItemDescription(props.entity)}
       definition={props.entity.definition}
       tags={getEntityVisibleVarBadges(props.entity)}
       buttonColumns={2}

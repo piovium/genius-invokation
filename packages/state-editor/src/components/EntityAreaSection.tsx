@@ -11,7 +11,7 @@ import { EntityModal } from "./EntityModal";
 import { usePlayer } from "./PlayerInfoSection";
 import { DICE_LABELS, DICE_OPTIONS } from "../constants";
 import { allocateId, createEntityState } from "../state/factory";
-import { getDefinitionName, getEntityVisibleVarBadges } from "../state/catalog";
+import { getDefinitionName, getEntityItemDescription, getEntityVisibleVarBadges } from "../state/catalog";
 import { moveInArray } from "../utils";
 import { getImageUrl } from "../state/assets";
 
@@ -406,7 +406,7 @@ function EntityAreaListItem(props: EntityAreaListItemProps) {
       )}
       imageMode={props.mode}
       title={getDefinitionName(props.entity.definition)}
-      description={`ID: ${props.entity.id}`}
+      description={getEntityItemDescription(props.entity)}
       definition={props.entity.definition}
       tags={getEntityVisibleVarBadges(props.entity)}
       buttonColumns={2}

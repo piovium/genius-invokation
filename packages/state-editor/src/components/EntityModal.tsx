@@ -17,7 +17,7 @@ import { PreviewTile } from "./Previews";
 import { useStateEditorContext } from "./GameStateEditor";
 import { AttachmentModal } from "./AttachmentModal";
 import type { AssetOption, EditorEntityArea } from "../types";
-import { getDefinitionName, getEntityVisibleVarBadges } from "../state/catalog";
+import { getDefinitionName, getEntityItemDescription, getEntityVisibleVarBadges } from "../state/catalog";
 import { allocateId, createAttachmentState } from "../state/factory";
 import { getImageUrl } from "../state/assets";
 import { moveInArray } from "../utils";
@@ -357,7 +357,8 @@ function AttachmentListItem(props: AttachmentListItemProps) {
       imageSrc={getImageUrl(props.attachment.definition, "icon")}
       imageMode="icon"
       title={getDefinitionName(props.attachment.definition)}
-      description={`ID: ${props.attachment.id} · 变量: ${Object.keys(props.attachment.variables).length}`}
+      description={getEntityItemDescription(props.attachment)}
+      tags={getEntityVisibleVarBadges(props.attachment)}
       buttonColumns={2}
       buttons={buttons}
     />
