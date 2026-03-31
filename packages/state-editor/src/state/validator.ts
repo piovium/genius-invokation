@@ -159,7 +159,7 @@ export function validateGameState(state: GameState, catalog: EditorCatalog) {
         }
       }
     }
-    for (const character of player.characters) {
+    for (const character of characters) {
       allIds.push(character.id);
       for (const [key, value] of Object.entries(character.variables)) {
         validateSafeInteger(
