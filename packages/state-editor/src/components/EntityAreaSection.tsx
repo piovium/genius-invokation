@@ -1,4 +1,4 @@
-import { For, Show, createMemo, createSignal, type Accessor } from "solid-js";
+import { For, Show, createMemo, type Accessor } from "solid-js";
 import type { Draft } from "immer";
 import type {
   GameState,
@@ -10,6 +10,7 @@ import type {
 import { Surface } from "./Fields";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { AddCardModal } from "./AddCardModal";
+import { AddButton } from "./AddButton";
 import { useStateEditorContext } from "./GameStateEditor";
 import { EntityModal } from "./EntityModal";
 import { usePlayer } from "./PlayerInfoSection";
@@ -131,17 +132,13 @@ export function EntityAreaSection(props: EntityAreaSectionProps) {
             )}
           </For>
         </div>
-        <button
-          type="button"
-          onClick={() => appendEntity()}
+        <AddButton
+          label={`追加${props.title}`}
           disabled={
             typeof props.limit === "number" && items().length >= props.limit
           }
-          class="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 bg-transparent px-3 py-3 text-sm text-slate-400 hover:border-white/40 hover:text-slate-300 hover:bg-white/5 transition disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span class="text-lg">+</span>
-          <span>追加{props.title}</span>
-        </button>
+          onClick={() => appendEntity()}
+        />
       </div>
     </Surface>
   );

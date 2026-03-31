@@ -2,6 +2,7 @@ import { For, createMemo, createSignal } from "solid-js";
 import { BooleanField, SectionTitle, Surface } from "./Fields";
 import { RoundSkillModal } from "./RoundSkillModal";
 import { ListItem, type ListItemButton } from "./ListItem";
+import { AddButton } from "./AddButton";
 import { getImageUrl } from "../state/assets";
 import { useStateEditorContext } from "./GameStateEditor";
 import { createContext, useContext, type Accessor } from "solid-js";
@@ -181,14 +182,7 @@ function RoundSkillLogSection() {
           )}
         </For>
 
-        <button
-          type="button"
-          onClick={openAddModal}
-          class="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 bg-transparent px-3 py-3 text-sm text-slate-400 hover:border-white/40 hover:text-slate-300 hover:bg-white/5 transition"
-        >
-          <span class="text-lg">+</span>
-          <span>新增技能记录</span>
-        </button>
+        <AddButton label="新增技能记录" onClick={openAddModal} />
       </div>
     </div>
   );

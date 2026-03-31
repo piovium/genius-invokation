@@ -12,11 +12,16 @@ import { ActionButton, Surface } from "./Fields";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { AddCardModal } from "./AddCardModal";
 import { ConfirmModal } from "./ConfirmModal";
+import { AddButton } from "./AddButton";
 import type { Draft } from "immer";
 import { useStateEditorContext } from "./GameStateEditor";
 import { EntityModal } from "./EntityModal";
 import { getEquipmentInvalidity, moveInArray, shuffleList } from "../utils";
-import { getDefinitionName, getEntityItemDescription, getEntityVisibleVarBadges } from "../state/catalog";
+import {
+  getDefinitionName,
+  getEntityItemDescription,
+  getEntityVisibleVarBadges,
+} from "../state/catalog";
 import { allocateId, createEntityState } from "../state/factory";
 import { getImageUrl } from "../state/assets";
 import { getPlayer, getCharacter } from "../state/common";
@@ -158,15 +163,11 @@ export function PileEditor(props: CollectionContentProps) {
           />
         </div>
         {/* 列表开头的新增按钮 */}
-        <button
-          type="button"
-          onClick={() => openAddCardModal("start")}
+        <AddButton
+          label="在牌堆顶部追加卡牌"
           disabled={player().pile.length >= props.state.config.maxPileCount}
-          class="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 bg-transparent px-3 py-3 text-sm text-slate-400 hover:border-white/40 hover:text-slate-300 hover:bg-white/5 transition disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span class="text-lg">+</span>
-          <span>在牌堆顶部追加卡牌</span>
-        </button>
+          onClick={() => openAddCardModal("start")}
+        />
 
         <div class="space-y-2">
           <For each={player().pile}>
@@ -177,15 +178,11 @@ export function PileEditor(props: CollectionContentProps) {
         </div>
 
         {/* 列表末尾的新增按钮 */}
-        <button
-          type="button"
-          onClick={() => openAddCardModal("end")}
+        <AddButton
+          label="在牌堆底部追加卡牌"
           disabled={player().pile.length >= props.state.config.maxPileCount}
-          class="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 bg-transparent px-3 py-3 text-sm text-slate-400 hover:border-white/40 hover:text-slate-300 hover:bg-white/5 transition disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span class="text-lg">+</span>
-          <span>在牌堆底部追加卡牌</span>
-        </button>
+          onClick={() => openAddCardModal("end")}
+        />
       </div>
     </Surface>
   );
@@ -343,15 +340,11 @@ export function HandsEditor(props: CollectionContentProps) {
           </For>
         </div>
         {/* 新增按钮 */}
-        <button
-          type="button"
-          onClick={() => openAddCardModal()}
+        <AddButton
+          label="追加手牌"
           disabled={player().hands.length >= props.state.config.maxHandsCount}
-          class="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 bg-transparent px-3 py-3 text-sm text-slate-400 hover:border-white/40 hover:text-slate-300 hover:bg-white/5 transition disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span class="text-lg">+</span>
-          <span>追加手牌</span>
-        </button>
+          onClick={() => openAddCardModal()}
+        />
       </div>
     </Surface>
   );

@@ -9,6 +9,7 @@ import { SectionTitle } from "./Fields";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { ConfirmModal } from "./ConfirmModal";
 import { AddCardModal } from "./AddCardModal";
+import { AddButton } from "./AddButton";
 import type { Draft } from "immer";
 import { useStateEditorContext } from "./GameStateEditor";
 import { EntityModal } from "./EntityModal";
@@ -250,15 +251,11 @@ export function CharacterEntitySection(props: CharacterEntitySectionProps) {
             />
           )}
         </For>
-        <button
-          type="button"
-          onClick={() => appendEntity()}
+        <AddButton
+          label="追加实体"
           disabled={props.defeated}
-          class="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 bg-transparent px-3 py-3 text-sm text-slate-400 hover:border-white/40 hover:text-slate-300 hover:bg-white/5 transition disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <span class="text-lg">+</span>
-          <span>追加实体</span>
-        </button>
+          onClick={() => appendEntity()}
+        />
       </div>
     </div>
   );

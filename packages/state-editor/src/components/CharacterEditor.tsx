@@ -24,6 +24,7 @@ import { filterValidCharacterEntities } from "../utils";
 import { allocateId, createCharacterState } from "../state/factory";
 import { AURA_LABELS, AURA_OPTIONS } from "../constants";
 import { getCharacter, getPlayer } from "../state/common";
+import { AddButton } from "./AddButton";
 
 const CHARACTER_TAG_CATEGORIES = {
   element: [
@@ -68,7 +69,9 @@ interface TagFilterGroupProps<T extends string> {
   activeClass: string;
 }
 
-export function TagFilterGroup<T extends string>(props: TagFilterGroupProps<T>) {
+export function TagFilterGroup<T extends string>(
+  props: TagFilterGroupProps<T>,
+) {
   return (
     <div class="space-y-2">
       <div class="text-xs text-slate-400">{props.title}</div>
@@ -348,14 +351,7 @@ export function CharacterEditor(props: CharacterEditorProps) {
         fallback={
           <Surface title={`角色${props.characterIndex + 1} - 未选择`}>
             <div class="space-y-6">
-              <button
-                type="button"
-                onClick={() => reselectCharacter()}
-                class="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-amber-400/40 bg-transparent px-3 py-4 text-sm text-amber-300 hover:border-amber-400/70 hover:bg-amber-400/10 transition"
-              >
-                <span class="text-lg">+</span>
-                <span>选择角色</span>
-              </button>
+              <AddButton label="选择角色" onClick={reselectCharacter} />
             </div>
           </Surface>
         }
