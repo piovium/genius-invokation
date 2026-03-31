@@ -47,10 +47,9 @@ function ExtensionModalContent(props: ExtensionContentProps) {
   );
 }
 
-
 export function ExtensionModal(props: ExtensionContentProps) {
   return (
-    <Modal title={`扩展编辑`}>
+    <Modal title="扩展编辑">
       <ExtensionModalContent index={props.index} />
     </Modal>
   );

@@ -146,7 +146,7 @@ export const AURA_LABELS: Record<number, string> = {
   [Aura.CryoDendro]: "冰草共存",
 };
 
-const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
+export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   combatStatus: "出战状态",
   status: "状态",
   equipment: "装备",
@@ -154,6 +154,14 @@ const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
   summon: "召唤物",
   eventCard: "事件牌",
 };
+
+export const WEAPON_TAGS = [
+  "sword",
+  "claymore",
+  "pole",
+  "catalyst",
+  "bow",
+] as const;
 
 const SPECIAL_ENERGY_LABELS: Record<string, string> = {
   fightingSpirit: "战意",
@@ -175,6 +183,7 @@ function getEntitySortPriority(
   id: number,
   characterDefinitionIds: Set<number>,
 ) {
+  // 系统全局定义优先（生命之契、激化领域、饱腹等）
   if ((id >= 100 && id <= 999) || id === 303300) {
     return 0;
   }
@@ -231,6 +240,48 @@ export function getDefinitionTypeLabel(definition: { type: string }) {
     return "附着";
   }
   return ENTITY_TYPE_LABELS[definition.type as EntityType] ?? definition.type;
+}
+
+export function getEntityVisibleVarBadges(entity: {
+  definition: { visibleVarName?: string | null };
+  variables: Record<string, number>;
+}) {
+  return entity.definition.visibleVarName
+    ? [
+        `${entity.definition.visibleVarName} = ${entity.variables[entity.definition.visibleVarName]}`,
+      ]
+    : [];
+}
+
+function getWeaponTag(tags: readonly string[]) {
+  return WEAPON_TAGS.find((tag) => tags.includes(tag));
+}
+
+export function getEquipmentInvalidity(
+  definition: EntityDefinition,
+  characterDefinition: CharacterDefinition,
+): "weapon" | "talent" | null {
+  const entityWeaponTag = getWeaponTag(definition.tags);
+  const characterWeaponTag = getWeaponTag(characterDefinition.tags);
+  if (entityWeaponTag && entityWeaponTag !== characterWeaponTag) {
+    return "weapon";
+  }
+  if (definition.tags.includes("talent")) {
+    const relatedCharacterId = Number(definition.id.toString().slice(1, -1));
+    if (characterDefinition.id !== relatedCharacterId) {
+      return "talent";
+    }
+  }
+  return null;
+}
+
+export function filterValidCharacterEntities(
+  entities: readonly EntityState[],
+  characterDefinition: CharacterDefinition,
+): EntityState[] {
+  return entities.filter(
+    (entity) => !getEquipmentInvalidity(entity.definition, characterDefinition),
+  );
 }
 
 export function getImageUrl(
@@ -390,10 +441,6 @@ export function buildEditorCatalog(state: GameState): EditorCatalog {
         .map((character) => character.definition.id),
     ),
   );
-  console.log(
-    "Character definition ids in current state:",
-    characterDefinitionIds,
-  );
   const characterOptions: AssetOption<CharacterDefinition>[] = [];
   const attachmentOptions: AssetOption<AttachmentDefinition>[] = [];
   const entityOptionsByType: Record<
@@ -475,16 +522,6 @@ export function buildEditorCatalog(state: GameState): EditorCatalog {
     const nameCompare = left.name.localeCompare(right.name, "zh-Hans-CN");
     return nameCompare === 0 ? left.id - right.id : nameCompare;
   });
-  console.log(
-    entityOptionsByType.summon.map((option) => [
-      option.id,
-      option.name,
-      getEntitySortPriority(option.id, characterDefinitionIds),
-    ]),
-  );
-  console.log(
-    sortEntityOptions(entityOptionsByType.summon, characterDefinitionIds),
-  );
   return {
     characters: sortOptions(characterOptions),
     attachments: sortOptions(attachmentOptions),

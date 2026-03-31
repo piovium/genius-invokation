@@ -2,7 +2,12 @@ import { Show } from "solid-js";
 import { SectionTitle } from "./Fields";
 import { Modal } from "./Modal";
 import { PreviewTile } from "./Previews";
-import { getAttachment, getDefinitionName, getPlayer } from "../state";
+import {
+  getAttachment,
+  getDefinitionName,
+  getEntityVisibleVarBadges,
+  getPlayer,
+} from "../state";
 import { VariableGrid } from "./VariableGrid";
 import { useStateEditorContext } from "./GameStateEditor";
 
@@ -28,17 +33,11 @@ function AttachmentModalContent(props: AttachmentContentProps) {
             <div class="flex gap-4">
               <div class="shrink-0 w-1/5">
                 <PreviewTile
-                  definition={att.definition}
-                  mode="icon"
-                  subtitle={`状态 ID #${att.id}`}
-                  badges={
-                    att.definition.visibleVarName
-                      ? [
-                          `${att.definition.visibleVarName} = ${att.variables[att.definition.visibleVarName]}`,
-                        ]
-                      : []
-                  }
-                />
+                    definition={att.definition}
+                    mode="icon"
+                    subtitle={`状态 ID #${att.id}`}
+                    badges={getEntityVisibleVarBadges(att)}
+                  />
               </div>
               <div class="flex-1 space-y-4 min-w-0">
                 <SectionTitle title="变量编辑" />

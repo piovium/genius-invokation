@@ -14,6 +14,7 @@ import { ConfirmModal } from "./ConfirmModal";
 import {
   allocateId,
   getDefinitionName,
+  getEntityVisibleVarBadges,
   getPlayer,
   moveInArray,
   getImageUrl,
@@ -205,13 +206,7 @@ function EntityModalContent(props: EntityContentProps) {
                     definition={et.definition}
                     mode={imageMode()}
                     subtitle={`状态 ID #${et.id}`}
-                    badges={
-                      et.definition.visibleVarName
-                        ? [
-                            `${et.definition.visibleVarName} = ${et.variables[et.definition.visibleVarName]}`,
-                          ]
-                        : []
-                    }
+                    badges={getEntityVisibleVarBadges(et)}
                   />
                 </div>
                 <div class="flex-1 space-y-4 min-w-0">

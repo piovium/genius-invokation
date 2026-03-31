@@ -1,7 +1,7 @@
 import { For, Show, createMemo, createSignal } from "solid-js";
 import type { EntityDefinition, EntityType, EntityTag } from "@gi-tcg/core";
 import { Modal } from "./Modal";
-import { getImageUrl, type AssetOption } from "../state";
+import { ENTITY_TYPE_LABELS, getImageUrl, type AssetOption } from "../state";
 import { useStateEditorContext } from "./GameStateEditor";
 
 interface AddCardModalProps {
@@ -23,15 +23,6 @@ interface AddCardModalProps {
 }
 
 const DEFAULT_MAX_RESULTS = 60;
-
-export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
-  combatStatus: "出战状态",
-  status: "状态",
-  equipment: "装备牌",
-  support: "支援牌",
-  summon: "召唤物",
-  eventCard: "事件牌",
-};
 
 const ALL_ENTITY_TAGS: EntityTag[] = [
   // CardTag

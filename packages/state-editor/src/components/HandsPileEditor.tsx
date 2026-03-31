@@ -15,8 +15,10 @@ import {
   allocateId,
   createEntityState,
   getDefinitionName,
+  getEntityVisibleVarBadges,
   getImageUrl,
   getPlayer,
+  getEquipmentInvalidity,
   moveInArray,
   shuffleList,
 } from "../state";
@@ -42,71 +44,23 @@ function isCharacterAlive(character: CharacterState): boolean {
   return character.variables.alive !== 0;
 }
 
-// 获取角色的武器类型标签
-function getCharacterWeaponTag(character: CharacterState): string | null {
-  return (
-    character.definition.tags.find((tag) =>
-      ["sword", "claymore", "pole", "catalyst", "bow"].includes(tag),
-    ) || null
-  );
-}
-
 // 检查装备是否可以装备到角色
 function canEquipToCharacter(
   equipment: EntityState,
   character: CharacterState,
-  allCharacters: CharacterState[],
 ): { canEquip: boolean; reason?: string } {
-  const eqType = getEquipmentType(equipment.definition);
-
-  // 1. 检查角色是否存活
+  const invalidity = getEquipmentInvalidity(
+    equipment.definition,
+    character.definition,
+  );
   if (!isCharacterAlive(character)) {
     return { canEquip: false, reason: "角色已倒下" };
   }
-
-  // 2. 根据装备类型判断
-  switch (eqType) {
-    case "artifact":
-    case "technique":
-      // 圣遗物和特技可以装备给所有存活角色
-      return { canEquip: true };
-
-    case "weapon": {
-      // 武器只能装备给对应武器类型的角色
-      const characterWeapon = getCharacterWeaponTag(character);
-      if (!characterWeapon) {
-        return { canEquip: false, reason: "角色没有武器类型" };
-      }
-      if (!equipment.definition.tags.includes(characterWeapon as EntityTag)) {
-        return { canEquip: false, reason: `需要${characterWeapon}类型武器` };
-      }
-      return { canEquip: true };
-    }
-
-    case "talent": {
-      // 天赋只能装备给对应的角色
-      // 注意：这里假设装备卡的ID与角色ID有关联
-      // 实际游戏中天赋卡的relatedCharacterId应该与角色definition.id匹配
-      const relatedCharId = Number(
-        equipment.definition.id.toString().slice(1, -1),
-      );
-      if (character.definition.id !== relatedCharId) {
-        // 检查这个角色是否在当前存活角色列表中
-        const targetExists = allCharacters.some(
-          (c) => c.definition.id === relatedCharId && isCharacterAlive(c),
-        );
-        if (targetExists) {
-          return { canEquip: false, reason: "天赋只能装备给指定角色" };
-        } else {
-          return { canEquip: false, reason: "对应角色不在场上或已倒下" };
-        }
-      }
-      return { canEquip: true };
-    }
-
-    default:
-      return { canEquip: true };
-  }
+  return {
+    canEquip: !invalidity,
+    reason:
+      invalidity === "talent" ? "天赋只能装备给指定角色" : "武器类型不匹配",
+  };
 }
 
 // 获取角色已装备的同类型装备
@@ -128,11 +82,7 @@ interface CollectionContentProps {
 }
 
 function detailBadges(card: EntityState) {
-  const badges = card.definition.visibleVarName
-    ? [
-        `${card.definition.visibleVarName} = ${card.variables[card.definition.visibleVarName]}`,
-      ]
-    : [];
+  const badges = getEntityVisibleVarBadges(card);
   badges.push(`附着 ${card.attachments.length}`);
   return badges;
 }
@@ -431,8 +381,7 @@ function HandsCardListItem(props: HandsCardListItemProps) {
     const allChars = player().characters.filter((character) => !!character);
     return allChars.filter(
       (character) =>
-        character &&
-        canEquipToCharacter(props.card, character, allChars).canEquip,
+        character && canEquipToCharacter(props.card, character).canEquip,
     );
   });
 

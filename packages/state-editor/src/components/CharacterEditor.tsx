@@ -25,8 +25,11 @@ import {
   AURA_OPTIONS,
   createCharacterState,
   createEntityState,
+  filterValidCharacterEntities,
   getCharacterEnergyLabel,
   getDefinitionName,
+  getEntityVisibleVarBadges,
+  getEquipmentInvalidity,
   getPlayer,
   moveInArray,
   type EditorSection,
@@ -226,37 +229,6 @@ export function CharacterEditor(props: CharacterEditorProps) {
     });
   };
 
-  // 校验实体合法性（武器标签和天赋关联角色）
-  const validateAndCleanEntities = (
-    entities: Draft<EntityState>[],
-    newCharDef: CharacterDefinition,
-  ): Draft<EntityState>[] => {
-    return entities.filter((entity) => {
-      const def = entity.definition;
-      const tags = def.tags;
-      // 检查武器标签
-      const weaponTags = ["sword", "claymore", "pole", "catalyst", "bow"];
-      const entityWeaponTag = tags.find((tag) => weaponTags.includes(tag));
-      const charWeaponTag = newCharDef.tags.find((tag) =>
-        weaponTags.includes(tag),
-      );
-      // 如果实体有武器标签但角色没有对应的武器标签，不合法
-      if (entityWeaponTag && entityWeaponTag !== charWeaponTag) {
-        return false;
-      }
-
-      // 检查天赋关联角色（talent标签的实体需要关联特定角色）
-      if (tags.includes("talent")) {
-        // 天赋只能装备给对应的角色
-        const relatedCharId = Number(def.id.toString().slice(1, -1));
-        if (newCharDef.id !== relatedCharId) {
-          return false;
-        }
-      }
-      return true;
-    });
-  };
-
   // 重新选择角色（覆盖当前角色）
   const reselectCharacter = () => {
     openModal(() => (
@@ -408,13 +380,16 @@ export function CharacterEditor(props: CharacterEditorProps) {
 
       // 保留现有实体，但需要进行合法性校验
       const existingEntities = existingChar?.entities ?? [];
-      const validEntities = validateAndCleanEntities(existingEntities, charDef);
+      const validEntities = filterValidCharacterEntities(
+        existingEntities,
+        charDef,
+      );
 
       // 创建新角色
       const newCharacter = createCharacterState(charDef, allocateId(draft));
 
       // 保留合法的实体
-      newCharacter.entities = validEntities;
+      newCharacter.entities = validEntities as Draft<EntityState>[];
 
       player.characters[chIdx] = newCharacter;
 
@@ -763,32 +738,6 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
     return null;
   };
 
-  // 校验实体是否适合当前角色
-  const isEntityValidForCharacter = (definition: EntityDefinition): boolean => {
-    const tags = definition.tags;
-    const charTags = props.character.definition.tags;
-
-    // 检查武器标签
-    const weaponTags = ["sword", "claymore", "pole", "catalyst", "bow"];
-    const entityWeaponTag = tags.find((tag) => weaponTags.includes(tag));
-    const charWeaponTag = charTags.find((tag) => weaponTags.includes(tag));
-
-    // 如果实体有武器标签但角色没有对应的武器标签，不合法
-    if (entityWeaponTag && entityWeaponTag !== charWeaponTag) {
-      return false;
-    }
-
-    // 检查天赋关联角色
-    if (tags.includes("talent")) {
-      const relatedCharId = Number(definition.id.toString().slice(1, -1));
-      if (props.character.definition.id !== relatedCharId) {
-        return false;
-      }
-    }
-
-    return true;
-  };
-
   const appendEntity = () => {
     openModal(() => {
       // eslint-disable-next-line no-unassigned-vars
@@ -898,17 +847,13 @@ function CharacterEntitySection(props: CharacterEntitySectionProps) {
   // 处理添加前的检查
   const handleAddCheck = (definition: EntityDefinition, done: () => void) => {
     // 1. 首先检查合法性
-    if (!isEntityValidForCharacter(definition)) {
-      const tags = definition.tags;
-      const weaponTags = ["sword", "claymore", "pole", "catalyst", "bow"];
-      const entityWeaponTag = tags.find((tag) => weaponTags.includes(tag));
-
+    const invalidity = getEquipmentInvalidity(
+      definition,
+      props.character.definition,
+    );
+    if (invalidity) {
       setInvalidEntityWarning({
-        type: entityWeaponTag
-          ? "weapon"
-          : tags.includes("talent")
-            ? "talent"
-            : "other",
+        type: invalidity,
         entityName: getDefinitionName(definition),
       });
       confirmInvalidEntity();
@@ -1112,13 +1057,7 @@ function CharacterEntityListItem(props: CharacterEntityListItemProps) {
       title={getDefinitionName(props.entity.definition)}
       description={`ID: ${props.entity.id}`}
       definition={props.entity.definition}
-      tags={
-        props.entity.definition.visibleVarName
-          ? [
-              `${props.entity.definition.visibleVarName} = ${props.entity.variables[props.entity.definition.visibleVarName]}`,
-            ]
-          : []
-      }
+      tags={getEntityVisibleVarBadges(props.entity)}
       buttonColumns={2}
       buttons={buttons}
     />

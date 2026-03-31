@@ -14,15 +14,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DiceType } from "@gi-tcg/typings";
-import { createResource } from "solid-js";
+import { createMemo } from "solid-js";
+import { DICE_LABELS } from "../state";
 
 export interface DiceIconProps {
   type: number;
 }
 
 const UI_ASSET_URL_BASE = "https://ui.assets.gi-tcg.guyutongxue.site/";
-
-const urlCache = new Map<string, string>();
 
 // 骰子类型到颜色名称的映射
 const DICE_TYPE_TO_COLOR: Record<number, string> = {
@@ -37,38 +36,19 @@ const DICE_TYPE_TO_COLOR: Record<number, string> = {
 };
 
 export function DiceIcon(props: DiceIconProps) {
-  // 使用 createResource 加载图片
-  const [imageSrc] = createResource(
-    () => props.type,
-    async (diceType) => {
-      const colorName = DICE_TYPE_TO_COLOR[diceType];
-      if (!colorName) {
-        return;
-      }
-      const url = urlCache.get(colorName);
-      if (url) {
-        return url;
-      }
-      try {
-        const response = await fetch(
-          `${UI_ASSET_URL_BASE}UI_Gcg_DiceL_${colorName}_Glow_02.webp`,
-        );
-        if (!response.ok) return;
-        const blob = await response.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        urlCache.set(colorName, objectUrl);
-        return objectUrl;
-      } catch {
-        return;
-      }
-    },
-  );
+  const imageSrc = createMemo(() => {
+    const colorName = DICE_TYPE_TO_COLOR[props.type];
+    if (!colorName) {
+      return void 0;
+    }
+    return `${UI_ASSET_URL_BASE}UI_Gcg_DiceL_${colorName}_Glow_02.webp`;
+  });
 
   return (
     <img
       src={imageSrc()}
       alt={getDiceTypeName(props.type)}
-      class="w-full h-auto object-contain"
+      class="w-full aspect-ratio-square h-auto object-contain"
       title={getDiceTypeName(props.type)}
       draggable={false}
       loading="lazy"
@@ -77,15 +57,5 @@ export function DiceIcon(props: DiceIconProps) {
 }
 
 export function getDiceTypeName(type: number): string {
-  const names: Record<number, string> = {
-    [DiceType.Cryo]: "冰",
-    [DiceType.Hydro]: "水",
-    [DiceType.Pyro]: "火",
-    [DiceType.Electro]: "雷",
-    [DiceType.Anemo]: "风",
-    [DiceType.Geo]: "岩",
-    [DiceType.Dendro]: "草",
-    [DiceType.Omni]: "万能",
-  };
-  return names[type];
+  return DICE_LABELS[type] ?? "未知";
 }

@@ -192,12 +192,34 @@ export function GameStateEditor(props: GameStateEditorProps) {
       return;
     }
     const nextState = unwrap(state);
-    console.log(`Submitted:`, nextState);
     local.onSubmit(nextState);
   };
 
-  // 配置化的入口定义 - 使用行列坐标指定位置 (0-based索引)
-  // Grid: 12行 x 16列，撑满容器
+  const playerLayouts = {
+    0: {
+      pileRow: 8,
+      handsRow: 10,
+      characterRow: 6,
+      supportsRow: 6,
+      summonsRow: 6,
+      combatRow: 9,
+      diceRow: 6,
+      infoRow: 11,
+      deckImportRow: 7,
+    },
+    1: {
+      pileRow: 1,
+      handsRow: 0,
+      characterRow: 2,
+      supportsRow: 2,
+      summonsRow: 2,
+      combatRow: 5,
+      diceRow: 0,
+      infoRow: 0,
+      deckImportRow: 4,
+    },
+  } as const;
+
   const sectionConfigs = createMemo((): SectionConfig[] => {
     const configs: SectionConfig[] = [];
 
@@ -218,303 +240,144 @@ export function GameStateEditor(props: GameStateEditorProps) {
       ),
     });
 
-    const player0 = state.players[0];
+    const buildPlayerInfoPreview = (who: 0 | 1) => {
+      const player = state.players[who];
+      return (
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400">
+            {player.declaredEnd && <span class="text-amber-400 mr-2">已结束</span>}
+            {player.hasDefeated && <span class="text-rose-400 mr-2">已击败</span>}
+            {player.legendUsed && <span class="text-purple-400">已秘传</span>}
+          </div>
+          <div class="text-xs text-slate-500">技能记录: {player.roundSkillLog.size} 条</div>
+        </div>
+      );
+    };
 
-    configs.push({
-      section: { kind: "pile", who: 0 },
-      label: "牌库",
-      row: 8,
-      col: 0,
-      rowSpan: 3,
-      colSpan: 3,
-      variant: "collection",
-      preview: () => (
-        <PilePreview items={player0.pile} max={state.config.maxPileCount} />
-      ),
-    });
+    const buildPlayerConfigs = (who: 0 | 1) => {
+      const player = state.players[who];
+      const layout = playerLayouts[who];
 
-    configs.push({
-      section: { kind: "hands", who: 0 },
-      label: "手牌",
-      row: 10,
-      col: 3,
-      rowSpan: 2,
-      colSpan: 12,
-      variant: "collection",
-      preview: () => (
-        <HandsPreview items={player0.hands} max={state.config.maxHandsCount} />
-      ),
-    });
-
-    // 玩家0角色区域（支持0-3个角色）
-    for (let i = 0; i < 3; i++) {
-      const character = player0.characters[i];
       configs.push({
-        section: { kind: "character", who: 0, characterIndex: i },
-        label: `角色${i + 1}`,
-        row: 6,
-        col: 6 + i * 2,
+        section: { kind: "pile", who },
+        label: "牌库",
+        row: layout.pileRow,
+        col: 0,
         rowSpan: 3,
-        colSpan: 2,
-        variant: "character",
+        colSpan: 3,
+        variant: "collection",
+        preview: () => <PilePreview items={player.pile} max={state.config.maxPileCount} />,
+      });
+      configs.push({
+        section: { kind: "hands", who },
+        label: "手牌",
+        row: layout.handsRow,
+        col: 3,
+        rowSpan: 2,
+        colSpan: 12,
+        variant: "collection",
+        preview: () => <HandsPreview items={player.hands} max={state.config.maxHandsCount} />,
+      });
+      for (let i = 0; i < 3; i += 1) {
+        const character = player.characters[i];
+        configs.push({
+          section: { kind: "character", who, characterIndex: i },
+          label: `角色${i + 1}`,
+          row: layout.characterRow,
+          col: 6 + i * 2,
+          rowSpan: 3,
+          colSpan: 2,
+          variant: "character",
+          preview: () => (
+            <CharacterPreview
+              character={character}
+              isActive={character ? player.activeCharacterId === character.id : false}
+            />
+          ),
+        });
+      }
+      configs.push({
+        section: { kind: "supports", who },
+        label: "支援区",
+        row: layout.supportsRow,
+        col: 3,
+        rowSpan: 4,
+        colSpan: 3,
+        variant: "status",
         preview: () => (
-          <CharacterPreview
-            character={character}
-            isActive={
-              character ? player0.activeCharacterId === character.id : false
-            }
+          <EntityAreaPreview
+            items={player.supports}
+            max={state.config.maxSupportsCount}
+            label="支援"
           />
         ),
       });
-    }
-
-    configs.push({
-      section: { kind: "supports", who: 0 },
-      label: "支援区",
-      row: 6,
-      col: 3,
-      rowSpan: 4,
-      colSpan: 3,
-      variant: "status",
-      preview: () => (
-        <EntityAreaPreview
-          items={player0.supports}
-          max={state.config.maxSupportsCount}
-          label="支援"
-        />
-      ),
-    });
-
-    configs.push({
-      section: { kind: "summons", who: 0 },
-      label: "召唤区",
-      row: 6,
-      col: 12,
-      rowSpan: 4,
-      colSpan: 3,
-      variant: "status",
-      preview: () => (
-        <EntityAreaPreview
-          items={player0.summons}
-          max={state.config.maxSummonsCount}
-          label="召唤"
-        />
-      ),
-    });
-
-    configs.push({
-      section: { kind: "combatStatuses", who: 0 },
-      label: "出战状态",
-      row: 9,
-      col: 6,
-      rowSpan: 1,
-      colSpan: 6,
-      variant: "status",
-      preview: () => <CombatStatusPreview items={player0.combatStatuses} />,
-    });
-
-    configs.push({
-      section: { kind: "dice", who: 0 },
-      label: "骰子",
-      row: 6,
-      col: 15,
-      rowSpan: 6,
-      colSpan: 1,
-      variant: "default",
-      preview: () => <DicePreview dice={[...player0.dice]} />,
-    });
-
-    configs.push({
-      section: { kind: "playerInfo", who: 0 },
-      label: "玩家0 信息",
-      row: 11,
-      col: 0,
-      rowSpan: 1,
-      colSpan: 3,
-      variant: "default",
-      preview: () => (
-        <div class="space-y-1">
-          <div class="text-xs text-slate-400">
-            {player0.declaredEnd && (
-              <span class="text-amber-400 mr-2">已结束</span>
-            )}
-            {player0.hasDefeated && (
-              <span class="text-rose-400 mr-2">已击败</span>
-            )}
-            {player0.legendUsed && <span class="text-purple-400">已秘传</span>}
-          </div>
-          <div class="text-xs text-slate-500">
-            技能记录: {player0.roundSkillLog.size} 条
-          </div>
-        </div>
-      ),
-    });
-
-    configs.push({
-      section: { kind: "deckImport", who: 0 },
-      label: "玩家0 牌组导入",
-      row: 7,
-      col: 0,
-      rowSpan: 1,
-      colSpan: 3,
-      variant: "default",
-      preview: () => <span class="text-slate-500">点击导入</span>,
-    });
-
-    const player1 = state.players[1];
-
-    configs.push({
-      section: { kind: "pile", who: 1 },
-      label: "牌库",
-      row: 1,
-      col: 0,
-      rowSpan: 3,
-      colSpan: 3,
-      variant: "collection",
-      preview: () => (
-        <PilePreview items={player1.pile} max={state.config.maxPileCount} />
-      ),
-    });
-
-    configs.push({
-      section: { kind: "hands", who: 1 },
-      label: "手牌",
-      row: 0,
-      col: 3,
-      rowSpan: 2,
-      colSpan: 12,
-      variant: "collection",
-      preview: () => (
-        <HandsPreview items={player1.hands} max={state.config.maxHandsCount} />
-      ),
-    });
-
-    // 玩家1角色区域（支持0-3个角色）
-    for (let i = 0; i < 3; i++) {
-      const character = player1.characters[i];
       configs.push({
-        section: { kind: "character", who: 1, characterIndex: i },
-        label: `角色${i + 1}`,
-        row: 2,
-        col: 6 + i * 2,
-        rowSpan: 3,
-        colSpan: 2,
-        variant: "character",
+        section: { kind: "summons", who },
+        label: "召唤区",
+        row: layout.summonsRow,
+        col: 12,
+        rowSpan: 4,
+        colSpan: 3,
+        variant: "status",
         preview: () => (
-          <CharacterPreview
-            character={character}
-            isActive={
-              character ? player1.activeCharacterId === character.id : false
-            }
+          <EntityAreaPreview
+            items={player.summons}
+            max={state.config.maxSummonsCount}
+            label="召唤"
           />
         ),
       });
-    }
+      configs.push({
+        section: { kind: "combatStatuses", who },
+        label: "出战状态",
+        row: layout.combatRow,
+        col: 6,
+        rowSpan: 1,
+        colSpan: 6,
+        variant: "status",
+        preview: () => <CombatStatusPreview items={player.combatStatuses} />,
+      });
+      configs.push({
+        section: { kind: "dice", who },
+        label: "骰子",
+        row: layout.diceRow,
+        col: 15,
+        rowSpan: 6,
+        colSpan: 1,
+        variant: "default",
+        preview: () => <DicePreview dice={[...player.dice]} />,
+      });
+      configs.push({
+        section: { kind: "playerInfo", who },
+        label: `玩家${who} 信息`,
+        row: layout.infoRow,
+        col: 0,
+        rowSpan: 1,
+        colSpan: 3,
+        variant: "default",
+        preview: () => buildPlayerInfoPreview(who),
+      });
+      configs.push({
+        section: { kind: "deckImport", who },
+        label: `玩家${who} 牌组导入`,
+        row: layout.deckImportRow,
+        col: 0,
+        rowSpan: 1,
+        colSpan: 3,
+        variant: "default",
+        preview: () => <span class="text-slate-500">点击导入</span>,
+      });
+    };
 
-    configs.push({
-      section: { kind: "supports", who: 1 },
-      label: "支援区",
-      row: 2,
-      col: 3,
-      rowSpan: 4,
-      colSpan: 3,
-      variant: "status",
-      preview: () => (
-        <EntityAreaPreview
-          items={player1.supports}
-          max={state.config.maxSupportsCount}
-          label="支援"
-        />
-      ),
-    });
-
-    configs.push({
-      section: { kind: "summons", who: 1 },
-      label: "召唤区",
-      row: 2,
-      col: 12,
-      rowSpan: 4,
-      colSpan: 3,
-      variant: "status",
-      preview: () => (
-        <EntityAreaPreview
-          items={player1.summons}
-          max={state.config.maxSummonsCount}
-          label="召唤"
-        />
-      ),
-    });
-
-    configs.push({
-      section: { kind: "combatStatuses", who: 1 },
-      label: "出战状态",
-      row: 5,
-      col: 6,
-      rowSpan: 1,
-      colSpan: 6,
-      variant: "status",
-      preview: () => <CombatStatusPreview items={player1.combatStatuses} />,
-    });
-
-    configs.push({
-      section: { kind: "dice", who: 1 },
-      label: "骰子",
-      row: 0,
-      col: 15,
-      rowSpan: 6,
-      colSpan: 1,
-      variant: "default",
-      preview: () => <DicePreview dice={[...player1.dice]} />,
-    });
-
-    configs.push({
-      section: { kind: "playerInfo", who: 1 },
-      label: "玩家1 信息",
-      row: 0,
-      col: 0,
-      rowSpan: 1,
-      colSpan: 3,
-      variant: "default",
-      preview: () => (
-        <div class="space-y-1">
-          <div class="text-xs text-slate-400">
-            {player1.declaredEnd && (
-              <span class="text-amber-400 mr-2">已结束</span>
-            )}
-            {player1.hasDefeated && (
-              <span class="text-rose-400 mr-2">已击败</span>
-            )}
-            {player1.legendUsed && <span class="text-purple-400">已秘传</span>}
-          </div>
-          <div class="text-xs text-slate-500">
-            技能记录: {player1.roundSkillLog.size} 条
-          </div>
-        </div>
-      ),
-    });
-
-    configs.push({
-      section: { kind: "deckImport", who: 1 },
-      label: "玩家1 牌组导入",
-      row: 4,
-      col: 0,
-      rowSpan: 1,
-      colSpan: 3,
-      variant: "default",
-      preview: () => <span class="text-slate-500">点击导入</span>,
-    });
+    buildPlayerConfigs(0);
+    buildPlayerConfigs(1);
 
     return configs;
   });
 
-  const isSectionActive = (section: EditorSection) => {
-    const current = selectedSection();
-    if (current.kind !== section.kind) return false;
-    return JSON.stringify(current) === JSON.stringify(section);
-  };
-
   return (
-      <div {...rest} class={`gi-state-editor ${local.class ?? ""}`}>
+    <div {...rest} class={`gi-state-editor ${local.class ?? ""}`}>
         <StateEditorContext.Provider
           value={{
             gameState: () => state,
@@ -572,7 +435,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
                     {(config) => (
                       <SectionCard
                         config={config}
-                        isActive={isSectionActive(config.section)}
+                        isActive={config.section === selectedSection()}
                         onClick={() => setSelectedSection(config.section)}
                         state={state}
                       />
@@ -644,6 +507,6 @@ export function GameStateEditor(props: GameStateEditorProps) {
           </form>
           <For each={modalStack()}>{(modal) => modal()}</For>
         </StateEditorContext.Provider>
-      </div>
+    </div>
   );
 }

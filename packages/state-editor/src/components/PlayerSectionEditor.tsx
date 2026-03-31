@@ -33,6 +33,7 @@ import {
   DICE_LABELS,
   DICE_OPTIONS,
   getDefinitionName,
+  getEntityVisibleVarBadges,
   getImageUrl,
   getPlayer,
   moveInArray,
@@ -47,14 +48,6 @@ interface PlayerSectionEditorProps {
   state: GameState;
   who: 0 | 1;
   kind: Extract<EditorSection, { who: 0 | 1 }>["kind"];
-}
-
-function entityBadges(entity: EntityState) {
-  return entity.definition.visibleVarName
-    ? [
-        `${entity.definition.visibleVarName} = ${entity.variables[entity.definition.visibleVarName]}`,
-      ]
-    : [];
 }
 
 interface PlayerContextValue {
@@ -358,7 +351,7 @@ function PlayerInfoSection() {
 }
 
 // Entity area section (supports, summons, combatStatuses)
-function EntityAreaSection(props2: {
+function EntityAreaSection(props: {
   title: string;
   description?: string;
   area: "supports" | "summons" | "combatStatuses";
@@ -368,7 +361,7 @@ function EntityAreaSection(props2: {
 }) {
   const { openModal, updateState } = useStateEditorContext();
   const { who, player } = usePlayer();
-  const items = () => player()[props2.area];
+  const items = () => player()[props.area];
 
   const [pendingDefinition, setPendingDefinition] = createSignal<
     EntityDefinition | undefined
@@ -378,7 +371,7 @@ function EntityAreaSection(props2: {
 
   // 获取可用的类型
   const entityType = (): EntityType => {
-    switch (props2.area) {
+    switch (props.area) {
       case "supports":
         return "support";
       case "summons":
@@ -400,7 +393,7 @@ function EntityAreaSection(props2: {
   // 处理添加前的检查
   const handleAddCheck = (definition: EntityDefinition, done: () => void) => {
     // 支援区不限制同 definition.id
-    if (props2.area === "supports") {
+    if (props.area === "supports") {
       doAdd(definition);
       done();
       return;
@@ -423,8 +416,8 @@ function EntityAreaSection(props2: {
   // 执行添加
   const doAdd = (definition: EntityDefinition) => {
     const whoV = who();
-    const area = props2.area;
-    const limit = props2.limit;
+    const area = props.area;
+    const limit = props.limit;
     updateState((draft) => {
       const target = draft.players[whoV][area];
       if (typeof limit === "number" && target.length >= limit) {
@@ -437,7 +430,7 @@ function EntityAreaSection(props2: {
   // 执行覆盖（替换）
   const doReplace = (definition: EntityDefinition, index: number) => {
     const whoV = who();
-    const area = props2.area;
+    const area = props.area;
     updateState((draft) => {
       const target = draft.players[whoV][area];
       // 替换指定位置的实体
@@ -457,8 +450,8 @@ function EntityAreaSection(props2: {
           }}
           type={entityType()}
           showTypeFilter={false}
-          availableTags={props2.availableTags}
-          showTagFilter={!!props2.availableTags}
+          availableTags={props.availableTags}
+          showTagFilter={!!props.availableTags}
           maxResults={200}
         />
       );
@@ -506,17 +499,17 @@ function EntityAreaSection(props2: {
   };
 
   return (
-    <Surface title={props2.title}>
-      <Show when={props2.description}>
-        <p class="mt-1 text-xs text-slate-300/80">{`※ ${props2.description}`}</p>
+    <Surface title={props.title}>
+      <Show when={props.description}>
+        <p class="mt-1 text-xs text-slate-300/80">{`※ ${props.description}`}</p>
       </Show>
       <div class="space-y-4">
         <div class="space-y-2">
           <For each={items()}>
             {(entity, index) => (
               <EntityAreaListItem
-                area={props2.area}
-                mode={props2.mode}
+                area={props.area}
+                mode={props.mode}
                 entity={entity}
                 index={index}
               />
@@ -528,12 +521,12 @@ function EntityAreaSection(props2: {
           type="button"
           onClick={() => appendEntity()}
           disabled={
-            typeof props2.limit === "number" && items().length >= props2.limit
-          }
+              typeof props.limit === "number" && items().length >= props.limit
+            }
           class="w-full flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/20 bg-transparent px-3 py-3 text-sm text-slate-400 hover:border-white/40 hover:text-slate-300 hover:bg-white/5 transition disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <span class="text-lg">+</span>
-          <span>追加{props2.title}</span>
+          <span>追加{props.title}</span>
         </button>
       </div>
     </Surface>
@@ -637,7 +630,7 @@ function EntityAreaListItem(props: EntityAreaListItemProps) {
       title={getDefinitionName(props.entity.definition)}
       description={`ID: ${props.entity.id}`}
       definition={props.entity.definition}
-      tags={entityBadges(props.entity)}
+      tags={getEntityVisibleVarBadges(props.entity)}
       buttonColumns={2}
       buttons={buttons()}
     />
@@ -927,7 +920,7 @@ function DeckImportSection() {
 
         {/* 卡牌图片预览 */}
         <Show when={parsedDeck()}>
-          <h4 class="text-4 text-amber-50 my-0">预览</h4>
+          <h4 class="text-sm text-amber-50 my-0">预览</h4>
           <div class="space-y-4">
             {/* 角色预览 */}
             <Show when={characterDefinitions().length > 0}>
