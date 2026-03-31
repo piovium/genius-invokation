@@ -35,6 +35,7 @@ import { unwrap } from "solid-js/store";
 import { useMobile } from "../App";
 import { copyToClipboard } from "../utils";
 import { useI18n } from "../i18n";
+import { AutoResizeText } from "@gi-tcg/web-ui-core";
 
 export default function EditDeck() {
   const { t, locale, assetsManager } = useI18n();
@@ -225,13 +226,19 @@ export default function EditDeck() {
                 <h2 class="text-xl md:text-2xl font-bold min-w-0 overflow-hidden whitespace-nowrap text-ellipsis flex-shrink-0">
                   {deckName()}
                 </h2>
-                <button class="btn btn-ghost h-8 w-8 p-1" onClick={startEditingName}>
+                <button
+                  class="btn btn-ghost h-8 w-8 p-1"
+                  onClick={startEditingName}
+                >
                   <i class="i-mdi-pencil-outline" />
                 </button>
               </div>
             }
           >
-            <form onSubmit={saveName} class="flex flex-row gap-1 md:gap-3 text-3.2 md:text-3.5">
+            <form
+              onSubmit={saveName}
+              class="flex flex-row gap-1 md:gap-3 text-3.2 md:text-3.5"
+            >
               <input
                 type="text"
                 required
@@ -257,21 +264,19 @@ export default function EditDeck() {
               </button>
             </form>
           </Show>
-          <div class="flex flex-row flex-1 gap-1 md:gap-3 text-3.2 md:text-3.5">
-            <button
-              class="btn btn-outline-blue"
-              onClick={importCode}
-            >
-              {t("importShareCode")}
+          <div class="flex flex-row flex-1 gap-1 md:gap-3 text-3.2 md:text-3.5 max-w-full">
+            <button class="btn btn-outline-blue min-w-20 max-w-30% py-0 px-1" onClick={importCode}>
+              <AutoResizeText minFontSize={10}>
+                {t("importShareCode")}
+              </AutoResizeText>
+            </button>
+            <button class="btn btn-outline min-w-20 max-w-30% py-0 px-1" onClick={exportCode}>
+              <AutoResizeText minFontSize={10}>
+                {t("generateShareCode")}
+              </AutoResizeText>
             </button>
             <button
-              class="btn btn-outline"
-              onClick={exportCode}
-            >
-              {t("generateShareCode")}
-            </button>
-            <button
-              class="flex-shrink-0 btn btn-solid-green min-w-18 md:min-w-22"
+              class="flex-shrink-0 btn btn-solid-green min-w-15 md:min-w-22 max-w-20% py-0 px-1"
               disabled={!valid() || uploading()}
               onClick={async () => {
                 if (await saveDeck()) {
@@ -288,15 +293,19 @@ export default function EditDeck() {
                 <Match when={uploadDone()}>
                   <i class="i-mdi-check" />
                 </Match>
-                <Match when={true}>{t("saveDeck")}</Match>
+                <Match when={true}>
+                  <AutoResizeText minFontSize={10}>
+                    {t("saveDeck")}
+                  </AutoResizeText>
+                </Match>
               </Switch>
             </button>
             <span class="flex-grow" />
             <button
-              class="flex-shrink-0 btn btn-outline-red"
+              class="flex-shrink-0 btn btn-outline-red min-w-15 max-w-20% py-0 px-1"
               onClick={() => navigateBack()}
             >
-              {t("back")}
+              <AutoResizeText minFontSize={10}>{t("back")}</AutoResizeText>
             </button>
           </div>
         </div>

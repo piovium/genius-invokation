@@ -60,6 +60,7 @@ export default {
   artifact: "Artifact",
   talent: "Talent",
   shield: "Shield",
+  barrier: "Damage Reduction",
   vehicle: "Technique",
   place: "Location",
   ally: "Companion",

@@ -77,6 +77,7 @@ export default {
     liveStreamingMode: "Live Streaming",
     gameVictory: "Victory",
     gameDefeat: "Defeat",
+    buttonDeclareEnd: "End Round",
   },
   bottom: {
     invalidatedCardEffectHint: "This card will be rendered ineffective",
