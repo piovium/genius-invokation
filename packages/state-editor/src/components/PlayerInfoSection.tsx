@@ -25,7 +25,7 @@ export function PlayerInfoSection() {
       <div class="space-y-6">
         <div class="space-y-4">
           <SectionTitle title="玩家标记" />
-          <div class="grid gap-3 sm:grid-cols-2">
+          <div class="grid gap-x-6 gap-y-3 sm:grid-cols-2">
             <BooleanField
               label="已宣告结束"
               value={player().declaredEnd}
@@ -37,7 +37,7 @@ export function PlayerInfoSection() {
               }}
             />
             <BooleanField
-              label="本回合已击倒对手"
+              label="本回合存在被击倒角色"
               value={player().hasDefeated}
               onChange={(value) => {
                 const whoV = who();

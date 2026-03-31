@@ -240,8 +240,8 @@ export function GameStateEditor(props: GameStateEditorProps) {
         <div class="space-y-1">
           <div class="text-xs text-slate-400">
             {player.declaredEnd && <span class="text-amber-400 mr-2">已结束</span>}
-            {player.hasDefeated && <span class="text-rose-400 mr-2">已击败</span>}
-            {player.legendUsed && <span class="text-purple-400">已秘传</span>}
+            {player.hasDefeated && <span class="text-rose-400 mr-2">有击倒</span>}
+            {!player.legendUsed && <span class="text-purple-400">秘传揭令</span>}
           </div>
           <div class="text-xs text-slate-500">技能记录: {player.roundSkillLog.size} 条</div>
         </div>

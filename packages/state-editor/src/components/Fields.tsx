@@ -148,32 +148,25 @@ export interface BooleanFieldProps {
 }
 
 export function BooleanField(props: BooleanFieldProps) {
-  const name = createUniqueId();
   return (
-    <div class="flex flex-col gap-2">
+    <div class="flex items-center justify-between gap-2">
       <FieldLabel label={props.label} />
-      <div class="flex flex-wrap gap-2">
-        <label class="flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/30 px-3 py-2 text-sm text-slate-100">
-          <input
-            type="radio"
-            name={name}
-            checked={props.value}
-            disabled={props.disabled}
-            onChange={() => props.onChange(true)}
-          />
-          是
-        </label>
-        <label class="flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/30 px-3 py-2 text-sm text-slate-100">
-          <input
-            type="radio"
-            name={name}
-            checked={!props.value}
-            disabled={props.disabled}
-            onChange={() => props.onChange(false)}
-          />
-          否
-        </label>
-      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={props.value}
+        disabled={props.disabled}
+        onClick={() => props.onChange(!props.value)}
+        class={`relative inline-flex h-6 w-11 p-0.5 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/50 disabled:cursor-not-allowed disabled:opacity-60 ${
+          props.value ? "bg-amber-400/80" : "bg-slate-600/60"
+        }`}
+      >
+        <span
+          class={`pointer-events-none inline-block h-5 w-5 translate-x-0 rounded-full bg-white shadow-lg ring-0 transition-transform duration-200 ease-in-out ${
+            props.value ? "translate-x-5" : "translate-x-0"
+          }`}
+        />
+      </button>
     </div>
   );
 }
