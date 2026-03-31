@@ -69,7 +69,7 @@ export function AddCardModal(props: AddCardModalProps) {
     if (props.type === "cardEntities") {
       return ["eventCard", "equipment", "support"];
     } else if (props.type === "characterEntities") {
-      return ["combatStatus", "status"];
+      return ["status", "equipment"];
     } else if (props.type) {
       return [props.type];
     }
