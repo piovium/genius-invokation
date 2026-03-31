@@ -1,7 +1,6 @@
-import type { AnyState, EntityDefinition, EntityState } from "@gi-tcg/core";
+import type { EntityDefinition, EntityState } from "@gi-tcg/core";
 import { WEAPON_TAGS } from "./constants";
 import type { Accessor } from "solid-js";
-import type { AssetOption } from "./types";
 
 function getWeaponTag(tags: readonly string[]) {
   return WEAPON_TAGS.find((tag) => tags.includes(tag));

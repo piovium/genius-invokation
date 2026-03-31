@@ -35,7 +35,7 @@ interface EntityContentProps {
 }
 
 function EntityModalContent(props: EntityContentProps) {
-  const { updateState, catalog, openModal } = useStateEditorContext();
+  const { updateState, catalog } = useStateEditorContext();
 
   const [query, setQuery] = createSignal("");
 

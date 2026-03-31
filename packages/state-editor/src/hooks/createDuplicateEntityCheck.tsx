@@ -1,5 +1,5 @@
 import { batch, createSignal } from "solid-js";
-import type { Accessor, JSX } from "solid-js";
+import type { Accessor } from "solid-js";
 import { ConfirmModal } from "../components/ConfirmModal";
 import type { AttachmentState, EntityState } from "@gi-tcg/core";
 import { getDefinitionName } from "../state/catalog";

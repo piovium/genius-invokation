@@ -1,6 +1,5 @@
 import type {
   AttachmentDefinition,
-  AttachmentState,
   CharacterDefinition,
   CharacterState,
   EntityDefinition,
