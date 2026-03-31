@@ -31,7 +31,12 @@ export async function frontend(app: FastifyInstance) {
       const type = mime.getType(name) ?? "application/octet-stream";
       app.get(`${WEB_CLIENT_BASE_PATH}${name}`, (_req, reply) => {
         reply
-          .header("Cache-Control", "public, max-age=31536000, immutable")
+          .header(
+            "Cache-Control",
+            name === "sw.js"
+              ? "public, no-cache, must-revalidate"
+              : "public, max-age=31536000, immutable",
+          )
           .type(type)
           .send(buffer);
       });
