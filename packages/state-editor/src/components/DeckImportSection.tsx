@@ -5,7 +5,11 @@ import { ActionButton, BooleanField, SectionTitle, Surface } from "./Fields";
 import { useStateEditorContext } from "./GameStateEditor";
 import { usePlayer } from "./PlayerInfoSection";
 import { decodeDeckShareCode, getImageUrl } from "../state/assets";
-import { buildImportedCharacterStates, buildImportedPileStates } from "../state/factory";
+import {
+  buildImportedCharacterStates,
+  buildImportedPileStates,
+} from "../state/factory";
+import { sortImportedCards } from "../utils";
 
 export function DeckImportSection() {
   const { gameState, updateState } = useStateEditorContext();
@@ -49,19 +53,15 @@ export function DeckImportSection() {
         throw new Error("分享码中的角色数量不是 3。");
       }
       const importedInitialPile = importInitialPile()
-        ? [...deck.cards]
-            .map((id) => {
+        ? sortImportedCards(
+            deck.cards.map((id) => {
               const definition = gameState().data.entities.get(id);
               if (!definition) {
                 throw new Error(`卡牌 ${id} 不存在。`);
               }
-              return definition;
-            })
-            .sort(
-              (left, right) =>
-                Number(!left.tags.includes("legend")) -
-                Number(!right.tags.includes("legend")),
-            )
+              return definition as Draft<EntityDefinition>;
+            }),
+          )
         : null;
       const whoV = who();
       const importingChs = importCharacters();
@@ -76,7 +76,7 @@ export function DeckImportSection() {
           target.activeCharacterId = target.characters[0].id;
         }
         if (importedInitialPile) {
-          target.initialPile = importedInitialPile as Draft<EntityDefinition>[];
+          target.initialPile = importedInitialPile;
         }
         if (importingPile) {
           target.pile = buildImportedPileStates(draft, deck.cards);

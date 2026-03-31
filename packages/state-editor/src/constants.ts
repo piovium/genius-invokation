@@ -66,9 +66,7 @@ export const WEAPON_TAGS = [
   "bow",
 ] as const;
 
-const SPECIAL_ENERGY_LABELS: Record<string, string> = {
+export const SPECIAL_ENERGY_LABELS: Record<string, string> = {
   fightingSpirit: "战意",
   serpentsSubtlety: "蛇之狡谋",
 };
-
-export { SPECIAL_ENERGY_LABELS };

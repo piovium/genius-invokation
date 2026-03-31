@@ -1,4 +1,4 @@
-import type { EntityState } from "@gi-tcg/core";
+import type { EntityDefinition, EntityState } from "@gi-tcg/core";
 import { WEAPON_TAGS } from "./constants";
 import type { Accessor } from "solid-js";
 
@@ -58,7 +58,7 @@ export function shuffleList<T>(items: readonly T[]) {
   return result;
 }
 
-export function sortImportedCards(definitions: readonly { tags: readonly string[] }[]) {
+export function sortImportedCards<T extends EntityDefinition>(definitions: readonly T[]): T[] {
   return [...definitions].sort((left, right) => {
     const leftScore = left.tags.includes("legend") ? 0 : 1;
     const rightScore = right.tags.includes("legend") ? 0 : 1;

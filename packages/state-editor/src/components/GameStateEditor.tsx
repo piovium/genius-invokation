@@ -214,45 +214,50 @@ export function GameStateEditor(props: GameStateEditorProps) {
     },
   } as const;
 
-  const sectionConfigs = createMemo((): SectionConfig[] => {
+  const buildPlayerInfoPreview = (who: 0 | 1) => {
+    const player = state.players[who];
+    return (
+      <div class="space-y-1">
+        <div class="text-xs text-slate-400">
+          {player.declaredEnd && (
+            <span class="text-amber-400 mr-2">已结束</span>
+          )}
+          {player.hasDefeated && <span class="text-rose-400 mr-2">有击倒</span>}
+          {!player.legendUsed && <span class="text-purple-400">秘传揭令</span>}
+        </div>
+        <div class="text-xs text-slate-500">
+          技能记录: {player.roundSkillLog.size} 条
+        </div>
+      </div>
+    );
+  };
+
+  const playerConfigs = (who: 0 | 1) => {
+    const player = state.players[who];
+    const layout = playerLayouts[who];
     const configs: SectionConfig[] = [];
-
-    configs.push({
-      section: { kind: "global" },
-      label: "游戏全局",
-      row: 5,
-      col: 0,
-      rowSpan: 2,
-      colSpan: 3,
-      variant: "default",
-      preview: (s) => (
-        <div class="flex flex-col text-sm">
-          <span>第 {s.roundNumber} 回合</span>
-          <span>{PHASE_LABELS[s.phase]}</span>
-          <span>轮到 玩家{s.currentTurn} 行动</span>
-        </div>
-      ),
-    });
-
-    const buildPlayerInfoPreview = (who: 0 | 1) => {
-      const player = state.players[who];
-      return (
-        <div class="space-y-1">
-          <div class="text-xs text-slate-400">
-            {player.declaredEnd && <span class="text-amber-400 mr-2">已结束</span>}
-            {player.hasDefeated && <span class="text-rose-400 mr-2">有击倒</span>}
-            {!player.legendUsed && <span class="text-purple-400">秘传揭令</span>}
-          </div>
-          <div class="text-xs text-slate-500">技能记录: {player.roundSkillLog.size} 条</div>
-        </div>
-      );
-    };
-
-    const buildPlayerConfigs = (who: 0 | 1) => {
-      const player = state.players[who];
-      const layout = playerLayouts[who];
-
+    for (let i = 0; i < 3; i += 1) {
+      const character = player.characters[i];
       configs.push({
+        section: { kind: "character", who, characterIndex: i },
+        label: `角色${i + 1}`,
+        row: layout.characterRow,
+        col: 6 + i * 2,
+        rowSpan: 3,
+        colSpan: 2,
+        variant: "character",
+        preview: () => (
+          <CharacterPreview
+            character={character}
+            isActive={
+              character ? player.activeCharacterId === character.id : false
+            }
+          />
+        ),
+      });
+    }
+    configs.push(
+      {
         section: { kind: "pile", who },
         label: "牌库",
         row: layout.pileRow,
@@ -260,9 +265,11 @@ export function GameStateEditor(props: GameStateEditorProps) {
         rowSpan: 3,
         colSpan: 3,
         variant: "collection",
-        preview: () => <PilePreview items={player.pile} max={state.config.maxPileCount} />,
-      });
-      configs.push({
+        preview: () => (
+          <PilePreview items={player.pile} max={state.config.maxPileCount} />
+        ),
+      },
+      {
         section: { kind: "hands", who },
         label: "手牌",
         row: layout.handsRow,
@@ -270,27 +277,11 @@ export function GameStateEditor(props: GameStateEditorProps) {
         rowSpan: 2,
         colSpan: 12,
         variant: "collection",
-        preview: () => <HandsPreview items={player.hands} max={state.config.maxHandsCount} />,
-      });
-      for (let i = 0; i < 3; i += 1) {
-        const character = player.characters[i];
-        configs.push({
-          section: { kind: "character", who, characterIndex: i },
-          label: `角色${i + 1}`,
-          row: layout.characterRow,
-          col: 6 + i * 2,
-          rowSpan: 3,
-          colSpan: 2,
-          variant: "character",
-          preview: () => (
-            <CharacterPreview
-              character={character}
-              isActive={character ? player.activeCharacterId === character.id : false}
-            />
-          ),
-        });
-      }
-      configs.push({
+        preview: () => (
+          <HandsPreview items={player.hands} max={state.config.maxHandsCount} />
+        ),
+      },
+      {
         section: { kind: "supports", who },
         label: "支援区",
         row: layout.supportsRow,
@@ -305,8 +296,8 @@ export function GameStateEditor(props: GameStateEditorProps) {
             label="支援"
           />
         ),
-      });
-      configs.push({
+      },
+      {
         section: { kind: "summons", who },
         label: "召唤区",
         row: layout.summonsRow,
@@ -321,8 +312,8 @@ export function GameStateEditor(props: GameStateEditorProps) {
             label="召唤"
           />
         ),
-      });
-      configs.push({
+      },
+      {
         section: { kind: "combatStatuses", who },
         label: "出战状态",
         row: layout.combatRow,
@@ -331,8 +322,8 @@ export function GameStateEditor(props: GameStateEditorProps) {
         colSpan: 6,
         variant: "status",
         preview: () => <CombatStatusPreview items={player.combatStatuses} />,
-      });
-      configs.push({
+      },
+      {
         section: { kind: "dice", who },
         label: "骰子",
         row: layout.diceRow,
@@ -341,8 +332,8 @@ export function GameStateEditor(props: GameStateEditorProps) {
         colSpan: 1,
         variant: "default",
         preview: () => <DicePreview dice={[...player.dice]} />,
-      });
-      configs.push({
+      },
+      {
         section: { kind: "playerInfo", who },
         label: `玩家${who} 信息`,
         row: layout.infoRow,
@@ -351,8 +342,8 @@ export function GameStateEditor(props: GameStateEditorProps) {
         colSpan: 3,
         variant: "default",
         preview: () => buildPlayerInfoPreview(who),
-      });
-      configs.push({
+      },
+      {
         section: { kind: "deckImport", who },
         label: `玩家${who} 牌组导入`,
         row: layout.deckImportRow,
@@ -361,146 +352,162 @@ export function GameStateEditor(props: GameStateEditorProps) {
         colSpan: 3,
         variant: "default",
         preview: () => <span class="text-slate-500">点击导入</span>,
-      });
-    };
-
-    buildPlayerConfigs(0);
-    buildPlayerConfigs(1);
-
+      },
+    );
     return configs;
+  };
+
+  const sectionConfigs = createMemo<SectionConfig[]>(() => {
+    return [
+      {
+        section: { kind: "global" },
+        label: "游戏全局",
+        row: 5,
+        col: 0,
+        rowSpan: 2,
+        colSpan: 3,
+        variant: "default",
+        preview: (s) => (
+          <div class="flex flex-col text-sm">
+            <span>第 {s.roundNumber} 回合</span>
+            <span>{PHASE_LABELS[s.phase]}</span>
+            <span>轮到 玩家{s.currentTurn} 行动</span>
+          </div>
+        ),
+      },
+      ...playerConfigs(0),
+      ...playerConfigs(1),
+    ];
   });
 
   return (
     <div {...rest} class={`gi-state-editor ${local.class ?? ""}`}>
-        <StateEditorContext.Provider
-          value={{
-            gameState: () => state,
-            updateState,
-            openModal,
-            catalog,
-          }}
+      <StateEditorContext.Provider
+        value={{
+          gameState: () => state,
+          updateState,
+          openModal,
+          catalog,
+        }}
+      >
+        <form
+          ref={formRef}
+          class="gi-editor-frame flex flex-col"
+          onInput={refreshFormValidity}
+          onChange={refreshFormValidity}
         >
-          <form
-            ref={formRef}
-            class="gi-editor-frame flex flex-col"
-            onInput={refreshFormValidity}
-            onChange={refreshFormValidity}
-          >
-            {/* Header */}
-            <div class="flex-none px-4 py-4 sm:px-6 lg:px-8 border-b border-[var(--gi-editor-border-strong)] bg-slate-950/70">
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h1 class="text-2xl font-semibold text-amber-50">
-                    游戏状态编辑
-                  </h1>
-                </div>
-                <div class="flex flex-wrap items-center gap-3">
-                  <Show when={errors().length > 0 || !formValid()}>
-                    <span class="rounded-full border border-rose-300/30 bg-rose-400/10 px-3 py-1.5 text-xs text-rose-100">
-                      {errors().length > 0
-                        ? `存在 ${errors().length} 个状态问题`
-                        : "表单输入未完成"}
-                    </span>
-                  </Show>
-                  <button
-                    type="button"
-                    class="gi-editor-button rounded-full border border-cyan-200/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-semibold text-cyan-50 disabled:cursor-not-allowed disabled:opacity-40"
-                    disabled={!formValid() || errors().length > 0}
-                    onClick={submit}
-                  >
-                    完成
-                  </button>
-                </div>
+          {/* Header */}
+          <div class="flex-none px-4 py-4 sm:px-6 lg:px-8 border-b border-[var(--gi-editor-border-strong)] bg-slate-950/70">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h1 class="text-2xl font-semibold text-amber-50">
+                  游戏状态编辑
+                </h1>
+              </div>
+              <div class="flex flex-wrap items-center gap-3">
+                <Show when={errors().length > 0 || !formValid()}>
+                  <span class="rounded-full border border-rose-300/30 bg-rose-400/10 px-3 py-1.5 text-xs text-rose-100">
+                    {errors().length > 0
+                      ? `存在 ${errors().length} 个状态问题`
+                      : "表单输入未完成"}
+                  </span>
+                </Show>
+                <button
+                  type="button"
+                  class="gi-editor-button rounded-full border border-cyan-200/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-semibold text-cyan-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  disabled={!formValid() || errors().length > 0}
+                  onClick={submit}
+                >
+                  完成
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div class="flex-1 flex min-h-0 overflow-hidden">
+            {/* Left Sidebar - Grid Layout */}
+            <div class="w-3/5 flex-none border-r border-[var(--gi-editor-border)] bg-slate-900 overflow-y-auto">
+              <div
+                class="p-4 grid gap-2 box-border h-full min-h-180 @container"
+                style={{
+                  "grid-template-columns": `repeat(${GRID_COLS}, 1fr)`,
+                  "grid-template-rows": `repeat(${GRID_ROWS}, 1fr)`,
+                }}
+              >
+                <For each={sectionConfigs()}>
+                  {(config) => (
+                    <SectionCard
+                      config={config}
+                      isActive={config.section === selectedSection()}
+                      onClick={() => setSelectedSection(config.section)}
+                      state={state}
+                    />
+                  )}
+                </For>
               </div>
             </div>
 
-            {/* Main Content */}
-            <div class="flex-1 flex min-h-0 overflow-hidden">
-              {/* Left Sidebar - Grid Layout */}
-              <div class="w-3/5 flex-none border-r border-[var(--gi-editor-border)] bg-slate-900 overflow-y-auto">
-                <div
-                  class="p-4 grid gap-2 box-border h-full min-h-180 @container"
-                  style={{
-                    "grid-template-columns": `repeat(${GRID_COLS}, 1fr)`,
-                    "grid-template-rows": `repeat(${GRID_ROWS}, 1fr)`,
-                  }}
-                >
-                  <For each={sectionConfigs()}>
-                    {(config) => (
-                      <SectionCard
-                        config={config}
-                        isActive={config.section === selectedSection()}
-                        onClick={() => setSelectedSection(config.section)}
-                        state={state}
+            {/* Right Content Area */}
+            <div class="w-2/5 shrink-0 overflow-y-auto p-4 sm:p-6 lg:p-8 box-border gi-editor-scroll">
+              <div class="max-w-5xl mx-auto">
+                <Switch>
+                  {/* Global Section */}
+                  <Match when={selectedSection().kind === "global"}>
+                    <GlobalSection initialState={initialState} />
+                  </Match>
+
+                  {/* Pile Section */}
+                  <Match
+                    when={guard(selectedSection, (s) => s.kind === "pile")}
+                  >
+                    {(sect) => <PileEditor state={state} who={sect().who} />}
+                  </Match>
+                  {/* Hands Section */}
+                  <Match
+                    when={guard(selectedSection, (s) => s.kind === "hands")}
+                  >
+                    {(sect) => <HandsEditor state={state} who={sect().who} />}
+                  </Match>
+
+                  {/* Character Section */}
+                  <Match
+                    when={guard(selectedSection, (s) => s.kind === "character")}
+                  >
+                    {(sect) => (
+                      <CharacterEditor
+                        who={sect().who}
+                        characterIndex={sect().characterIndex}
+                        onSelectSection={setSelectedSection}
                       />
                     )}
-                  </For>
-                </div>
-              </div>
+                  </Match>
 
-              {/* Right Content Area */}
-              <div class="w-2/5 shrink-0 overflow-y-auto p-4 sm:p-6 lg:p-8 box-border gi-editor-scroll">
-                <div class="max-w-5xl mx-auto">
-                  <Switch>
-                    {/* Global Section */}
-                    <Match when={selectedSection().kind === "global"}>
-                      <GlobalSection initialState={initialState} />
-                    </Match>
+                  {/* Player Sections */}
+                  <Match when={guard(selectedSection, (s) => "who" in s)}>
+                    {(sect) => (
+                      <PlayerSectionEditor
+                        state={state}
+                        who={sect().who}
+                        kind={sect().kind}
+                      />
+                    )}
+                  </Match>
+                </Switch>
 
-                    {/* Pile Section */}
-                    <Match
-                      when={guard(selectedSection, (s) => s.kind === "pile")}
-                    >
-                      {(sect) => <PileEditor state={state} who={sect().who} />}
-                    </Match>
-                    {/* Hands Section */}
-                    <Match
-                      when={guard(selectedSection, (s) => s.kind === "hands")}
-                    >
-                      {(sect) => <HandsEditor state={state} who={sect().who} />}
-                    </Match>
-
-                    {/* Character Section */}
-                    <Match
-                      when={guard(
-                        selectedSection,
-                        (s) => s.kind === "character",
-                      )}
-                    >
-                      {(sect) => (
-                        <CharacterEditor
-                          who={sect().who}
-                          characterIndex={sect().characterIndex}
-                          onSelectSection={setSelectedSection}
-                        />
-                      )}
-                    </Match>
-
-                    {/* Player Sections */}
-                    <Match when={guard(selectedSection, (s) => "who" in s)}>
-                      {(sect) => (
-                        <PlayerSectionEditor
-                          state={state}
-                          who={sect().who}
-                          kind={sect().kind}
-                        />
-                      )}
-                    </Match>
-                  </Switch>
-
-                  <Show when={errors().length > 0}>
-                    <Surface title="状态校验" class="mt-6">
-                      <ul class="list-disc space-y-2 pl-5 text-sm text-rose-100">
-                        <For each={errors()}>{(error) => <li>{error}</li>}</For>
-                      </ul>
-                    </Surface>
-                  </Show>
-                </div>
+                <Show when={errors().length > 0}>
+                  <Surface title="状态校验" class="mt-6">
+                    <ul class="list-disc space-y-2 pl-5 text-sm text-rose-100">
+                      <For each={errors()}>{(error) => <li>{error}</li>}</For>
+                    </ul>
+                  </Surface>
+                </Show>
               </div>
             </div>
-          </form>
-          <For each={modalStack()}>{(modal) => modal()}</For>
-        </StateEditorContext.Provider>
+          </div>
+        </form>
+        <For each={modalStack()}>{(modal) => modal()}</For>
+      </StateEditorContext.Provider>
     </div>
   );
 }

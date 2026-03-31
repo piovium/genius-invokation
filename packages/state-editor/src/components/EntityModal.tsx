@@ -17,7 +17,11 @@ import { PreviewTile } from "./Previews";
 import { useStateEditorContext } from "./GameStateEditor";
 import { AttachmentModal } from "./AttachmentModal";
 import type { AssetOption, EditorEntityArea } from "../types";
-import { getDefinitionName, getEntityItemDescription, getEntityVisibleVarBadges } from "../state/catalog";
+import {
+  getDefinitionName,
+  getEntityItemDescription,
+  getEntityVisibleVarBadges,
+} from "../state/catalog";
 import { allocateId, createAttachmentState } from "../state/factory";
 import { getImageUrl } from "../state/assets";
 import { moveInArray } from "../utils";
@@ -149,9 +153,7 @@ function EntityModalContent(props: EntityContentProps) {
     setExistingAttachmentIndex(-1);
   };
 
-  const updateEntityByAreaContent = (
-    updater: (entity: Draft<EntityState>) => void,
-  ) => {
+  const updateEntity = (updater: (entity: Draft<EntityState>) => void) => {
     const entityId = props.entity.id;
     updateState((draft) => {
       const entity = getEntity(draft, entityId);
@@ -177,7 +179,7 @@ function EntityModalContent(props: EntityContentProps) {
           <VariableGrid
             entries={Object.entries(props.entity.variables)}
             onChange={(key, value) =>
-              updateEntityByAreaContent((target) => {
+              updateEntity((target) => {
                 target.variables[key] = value;
               })
             }
