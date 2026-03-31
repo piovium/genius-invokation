@@ -11,34 +11,26 @@ import { SectionTitle } from "./Fields";
 import { Modal } from "./Modal";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { ConfirmModal } from "./ConfirmModal";
-import {
-  allocateId,
-  getDefinitionName,
-  getEntityVisibleVarBadges,
-  getPlayer,
-  moveInArray,
-  getImageUrl,
-  type EditorEntityArea,
-  type AssetOption,
-  getEntity,
-  createAttachmentState,
-} from "../state";
 import type { Draft } from "immer";
 import { VariableGrid } from "./VariableGrid";
 import { PreviewTile } from "./Previews";
 import { useStateEditorContext } from "./GameStateEditor";
 import { AttachmentModal } from "./AttachmentModal";
+import type { AssetOption, EditorEntityArea } from "../types";
+import { getDefinitionName, getEntityVisibleVarBadges } from "../state/catalog";
+import { allocateId, createAttachmentState } from "../state/factory";
+import { getImageUrl } from "../state/assets";
+import { moveInArray } from "../utils";
 
 interface EntityContentProps {
   who: 0 | 1;
   area: EditorEntityArea;
-  entityId: number;
+  entity: EntityState;
   characterId?: number;
 }
 
 function EntityModalContent(props: EntityContentProps) {
-  const { gameState, updateState, catalog, openModal } =
-    useStateEditorContext();
+  const { updateState, catalog, openModal } = useStateEditorContext();
 
   const [query, setQuery] = createSignal("");
   const [pendingAttachment, setPendingAttachment] =
@@ -46,13 +38,10 @@ function EntityModalContent(props: EntityContentProps) {
   const [existingAttachmentIndex, setExistingAttachmentIndex] =
     createSignal(-1);
 
-  const player = () => getPlayer(gameState(), props.who);
-  const entity = () =>
-    getEntity(player(), props.area, props.entityId, props.characterId);
   const allowAttachments = () =>
     props.area === "hands" || props.area === "pile";
   const imageMode = () =>
-    ["status", "combatStatus"].includes(entity()?.definition.type ?? "")
+    ["status", "combatStatus"].includes(props.entity.definition.type ?? "")
       ? "icon"
       : "card";
 
@@ -70,8 +59,7 @@ function EntityModalContent(props: EntityContentProps) {
 
   // 检查是否存在相同 definition.id 的附着
   const checkDuplicateAttachment = (attachmentDef: AttachmentDefinition) => {
-    const currentEntity = entity();
-    if (!currentEntity) return -1;
+    const currentEntity = props.entity;
     const index = currentEntity.attachments.findIndex(
       (att) => att.definition.id === attachmentDef.id,
     );
@@ -115,7 +103,7 @@ function EntityModalContent(props: EntityContentProps) {
   const doAddAttachment = (option: AssetOption<AttachmentDefinition>) => {
     const who = props.who;
     const area = props.area as "hands" | "pile";
-    const etId = props.entityId;
+    const etId = props.entity.id;
     updateState((draft) => {
       const targetPlayer = draft.players[who];
       const targetEntity = targetPlayer[area].find((item) => item.id === etId);
@@ -135,7 +123,7 @@ function EntityModalContent(props: EntityContentProps) {
   ) => {
     const who = props.who;
     const area = props.area as "hands" | "pile";
-    const etId = props.entityId;
+    const etId = props.entity.id;
     updateState((draft) => {
       const targetPlayer = draft.players[who];
       const targetEntity = targetPlayer[area].find((item) => item.id === etId);
@@ -173,7 +161,7 @@ function EntityModalContent(props: EntityContentProps) {
     const who = props.who;
     const area = props.area;
     const characterId = props.characterId;
-    const entityId = props.entityId;
+    const entityId = props.entity.id;
     updateState((draft) => {
       const player = draft.players[who];
       if (area === "characterEntities") {
@@ -194,126 +182,111 @@ function EntityModalContent(props: EntityContentProps) {
   };
 
   return (
-    <>
-      <Show when={entity()}>
-        {(resolvedEntity) => {
-          const et = resolvedEntity();
-          return (
-            <div class="space-y-2">
-              <div class="flex gap-4">
-                <div class="shrink-0 w-1/5">
-                  <PreviewTile
-                    definition={et.definition}
-                    mode={imageMode()}
-                    subtitle={`状态 ID #${et.id}`}
-                    badges={getEntityVisibleVarBadges(et)}
-                  />
-                </div>
-                <div class="flex-1 space-y-4 min-w-0">
-                  <SectionTitle title="变量编辑" />
-                  <VariableGrid
-                    entries={Object.entries(et.variables)}
-                    onChange={(key, value) =>
-                      updateEntityByAreaContent((target) => {
-                        target.variables[key] = value;
-                      })
-                    }
-                  />
-                </div>
+    <div class="space-y-2">
+      <div class="flex gap-4">
+        <div class="shrink-0 w-1/5">
+          <PreviewTile
+            definition={props.entity.definition}
+            mode={imageMode()}
+            subtitle={`状态 ID #${props.entity.id}`}
+            badges={getEntityVisibleVarBadges(props.entity)}
+          />
+        </div>
+        <div class="flex-1 space-y-4 min-w-0">
+          <SectionTitle title="变量编辑" />
+          <VariableGrid
+            entries={Object.entries(props.entity.variables)}
+            onChange={(key, value) =>
+              updateEntityByAreaContent((target) => {
+                target.variables[key] = value;
+              })
+            }
+          />
+        </div>
+      </div>
+
+      <Show when={allowAttachments()}>
+        <div class="pt-4 border-t border-white/10">
+          <SectionTitle title="附着" />
+
+          {/* 左右两列布局 */}
+          <div class="mt-3 flex gap-4 h-40vh">
+            {/* 左侧：追加附着面板 */}
+            <div class="flex-1 flex flex-col border border-white/10 rounded-xl overflow-hidden gap-3">
+              <div class="p-3 bg-slate-800/50 border-b border-white/10">
+                <div class="text-sm font-medium text-amber-50">追加附着</div>
               </div>
-
-              <Show when={allowAttachments()}>
-                <div class="pt-4 border-t border-white/10">
-                  <SectionTitle title="附着" />
-
-                  {/* 左右两列布局 */}
-                  <div class="mt-3 flex gap-4 h-40vh">
-                    {/* 左侧：追加附着面板 */}
-                    <div class="flex-1 flex flex-col border border-white/10 rounded-xl overflow-hidden gap-3">
-                      <div class="p-3 bg-slate-800/50 border-b border-white/10">
-                        <div class="text-sm font-medium text-amber-50">
-                          追加附着
-                        </div>
-                      </div>
-                      <div class="flex-1 flex flex-col overflow-hidden">
-                        {/* 搜索框 */}
-                        <input
-                          type="text"
-                          value={query()}
-                          onInput={(e) => setQuery(e.currentTarget.value)}
-                          placeholder="输入名称或ID搜索"
-                          class="w-full px-3 py-2 rounded-xl bg-slate-800 border border-white/20 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/50 box-border"
-                        />
-                        <div class="flex-1 overflow-y-auto mt-3 pr-1">
-                          <div class="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-2">
-                            <For each={filteredAttachments()}>
-                              {(option) => (
-                                <button
-                                  type="button"
-                                  class="flex flex-col items-center p-2 rounded-lg border border-white/10 bg-slate-800/30 hover:bg-slate-700/50 transition text-center"
-                                  onClick={() =>
-                                    handleAddAttachmentCheck(option)
-                                  }
-                                >
-                                  {/* 卡牌图片 */}
-                                  <div
-                                    class={`w-full rounded-lg overflow-hidden`}
-                                  >
-                                    <img
-                                      src={getImageUrl(option, "icon")}
-                                      alt={option.name}
-                                      class="w-full h-full object-cover group-hover:scale-105 transition"
-                                      loading="lazy"
-                                    />
-                                  </div>
-                                  <div class="text-xs text-slate-200 truncate w-full">
-                                    {option.name}
-                                  </div>
-                                  <div class="text-[10px] text-slate-500">
-                                    #{option.id}
-                                  </div>
-                                </button>
-                              )}
-                            </For>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 右侧：已有附着列表 */}
-                    <div class="flex-1 flex flex-col border border-white/10 rounded-xl overflow-hidden gap-3">
-                      <div class="p-3 bg-slate-800/50 border-b border-white/10">
-                        <div class="text-sm font-medium text-amber-50">
-                          已有附着 ({et.attachments.length})
-                        </div>
-                      </div>
-                      <div class="flex-1 overflow-y-auto space-y-2">
-                        <For each={et.attachments}>
-                          {(attachment, index) => (
-                            <AttachmentListItem
-                              who={props.who}
-                              area={props.area as "hands" | "pile"}
-                              entity={et}
-                              attachment={attachment}
-                              index={index()}
+              <div class="flex-1 flex flex-col overflow-hidden">
+                {/* 搜索框 */}
+                <input
+                  type="text"
+                  value={query()}
+                  onInput={(e) => setQuery(e.currentTarget.value)}
+                  placeholder="输入名称或ID搜索"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-800 border border-white/20 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/50 box-border"
+                />
+                <div class="flex-1 overflow-y-auto mt-3 pr-1">
+                  <div class="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-2">
+                    <For each={filteredAttachments()}>
+                      {(option) => (
+                        <button
+                          type="button"
+                          class="flex flex-col items-center p-2 rounded-lg border border-white/10 bg-slate-800/30 hover:bg-slate-700/50 transition text-center"
+                          onClick={() => handleAddAttachmentCheck(option)}
+                        >
+                          {/* 卡牌图片 */}
+                          <div class={`w-full rounded-lg overflow-hidden`}>
+                            <img
+                              src={getImageUrl(option, "icon")}
+                              alt={option.name}
+                              class="w-full h-full object-cover group-hover:scale-105 transition"
+                              loading="lazy"
                             />
-                          )}
-                        </For>
-                        {et.attachments.length === 0 && (
-                          <div class="text-center text-slate-500 py-8 text-sm">
-                            暂无附着
                           </div>
-                        )}
-                      </div>
-                    </div>
+                          <div class="text-xs text-slate-200 truncate w-full">
+                            {option.name}
+                          </div>
+                          <div class="text-[10px] text-slate-500">
+                            #{option.id}
+                          </div>
+                        </button>
+                      )}
+                    </For>
                   </div>
                 </div>
-              </Show>
+              </div>
             </div>
-          );
-        }}
+
+            {/* 右侧：已有附着列表 */}
+            <div class="flex-1 flex flex-col border border-white/10 rounded-xl overflow-hidden gap-3">
+              <div class="p-3 bg-slate-800/50 border-b border-white/10">
+                <div class="text-sm font-medium text-amber-50">
+                  已有附着 ({props.entity.attachments.length})
+                </div>
+              </div>
+              <div class="flex-1 overflow-y-auto space-y-2">
+                <For each={props.entity.attachments}>
+                  {(attachment, index) => (
+                    <AttachmentListItem
+                      who={props.who}
+                      area={props.area as "hands" | "pile"}
+                      entity={props.entity}
+                      attachment={attachment}
+                      index={index()}
+                    />
+                  )}
+                </For>
+                {props.entity.attachments.length === 0 && (
+                  <div class="text-center text-slate-500 py-8 text-sm">
+                    暂无附着
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </Show>
-    </>
+    </div>
   );
 }
 
@@ -377,7 +350,7 @@ function AttachmentListItem(props: AttachmentListItemProps) {
             who={props.who}
             area={props.area}
             entityId={props.entity.id}
-            attachmentId={props.attachment.id}
+            attachment={props.attachment}
           />
         ));
       },
@@ -423,21 +396,12 @@ function AttachmentListItem(props: AttachmentListItemProps) {
 type EntityModalProps = EntityContentProps;
 
 export function EntityModal(props: EntityModalProps) {
-  const { gameState } = useStateEditorContext();
-  const player = () => getPlayer(gameState(), props.who);
-  const entity = () =>
-    getEntity(player(), props.area, props.entityId, props.characterId);
-  const title = () =>
-    entity()
-      ? `实体编辑 - ${getDefinitionName(entity()?.definition)}`
-      : "实体编辑";
-
   return (
-    <Modal title={title()}>
+    <Modal title={`实体编辑 - ${getDefinitionName(props.entity.definition)}`}>
       <EntityModalContent
         who={props.who}
         area={props.area}
-        entityId={props.entityId}
+        entity={props.entity}
         characterId={props.characterId}
       />
     </Modal>

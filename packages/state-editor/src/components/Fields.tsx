@@ -9,8 +9,8 @@ import {
   type ComponentProps,
   type JSX,
 } from "solid-js";
-
-import { matchesSearch, type AssetOption } from "../state";
+import type { AssetOption } from "../types";
+import { matchesSearch } from "../utils";
 
 export function SectionTitle(props: { title: string; description?: string }) {
   return (

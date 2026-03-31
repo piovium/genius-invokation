@@ -2,7 +2,7 @@ import { For, Show, createMemo } from "solid-js";
 import type { JSX } from "solid-js";
 import type { EntityTag, EntityType } from "@gi-tcg/core";
 import { TAG_LABELS } from "./AddCardModal";
-import { ENTITY_TYPE_LABELS } from "../state";
+import { ENTITY_TYPE_LABELS } from "../constants";
 
 // 扩展的实体定义类型，兼容 EntityDefinition 和 AttachmentDefinition
 type ExtendedEntityDefinition = {

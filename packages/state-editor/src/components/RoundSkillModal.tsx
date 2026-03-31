@@ -1,7 +1,7 @@
 import { For, Show, createEffect, createMemo, createSignal } from "solid-js";
 import { ActionButton, SelectField, SectionTitle } from "./Fields";
 import { Modal } from "./Modal";
-import { getDefinitionName } from "../state";
+import { getDefinitionName } from "../state/catalog";
 import { useStateEditorContext } from "./GameStateEditor";
 
 interface RoundSkillModalProps {

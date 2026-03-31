@@ -1,7 +1,7 @@
 import { For } from "solid-js";
 import { NumberField, SectionTitle, SelectField, Surface } from "./Fields";
 import { useStateEditorContext } from "./GameStateEditor";
-import { PHASE_LABELS } from "../state";
+import { PHASE_LABELS } from "../constants";
 import type { GameState } from "@gi-tcg/core";
 import { ExtensionModal } from "./ExtensionModal";
 import { ListItem, type ListItemButton } from "./ListItem";

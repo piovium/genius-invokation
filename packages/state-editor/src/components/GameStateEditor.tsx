@@ -14,22 +14,11 @@ import {
   type JSX,
 } from "solid-js";
 import { createStore, produce, unwrap } from "solid-js/store";
-
 import type { GameState } from "@gi-tcg/core";
-
 import { Surface } from "./Fields";
 import { CharacterEditor } from "./CharacterEditor";
 import { PileEditor, HandsEditor } from "./HandsPileEditor";
 import { PlayerSectionEditor } from "./PlayerSectionEditor";
-import {
-  buildEditorCatalog,
-  createDefaultGameState,
-  PHASE_LABELS,
-  validateGameState,
-  type EditorSection,
-  type UpdateGameState,
-  type EditorCatalog,
-} from "../state";
 import type { Draft } from "immer";
 import { ModalContextProvider } from "./Modal";
 import { guard } from "../utils";
@@ -42,6 +31,11 @@ import {
   HandsPreview,
   PilePreview,
 } from "./Previews";
+import type { EditorCatalog, EditorSection, UpdateGameState } from "../types";
+import { createDefaultGameState } from "../state/factory";
+import { buildEditorCatalog } from "../state/catalog";
+import { validateGameState } from "../state/validator";
+import { PHASE_LABELS } from "../constants";
 
 export interface GameStateEditorProps extends Omit<
   ComponentProps<"div">,

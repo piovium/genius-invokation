@@ -1,8 +1,10 @@
 import { For, Show, createMemo, createSignal } from "solid-js";
 import type { EntityDefinition, EntityType, EntityTag } from "@gi-tcg/core";
 import { Modal } from "./Modal";
-import { ENTITY_TYPE_LABELS, getImageUrl, type AssetOption } from "../state";
 import { useStateEditorContext } from "./GameStateEditor";
+import { ENTITY_TYPE_LABELS } from "../constants";
+import type { AssetOption } from "../types";
+import { getImageUrl } from "../state/assets";
 
 interface AddCardModalProps {
   ref?: HTMLDialogElement | ((el: HTMLDialogElement) => void);

@@ -3,8 +3,9 @@ import { For, Show, type JSX } from "solid-js";
 import type { CharacterState } from "@gi-tcg/core";
 import { Aura } from "@gi-tcg/typings";
 
-import { getDefinitionName, getImageUrl } from "../state";
+import { getImageUrl } from "../state/assets";
 import { DiceIcon } from "./DiceIcon";
+import { getDefinitionName } from "../state/catalog";
 
 const AURA_IMAGE_IDS: Record<number, number[]> = {
   [Aura.None]: [],

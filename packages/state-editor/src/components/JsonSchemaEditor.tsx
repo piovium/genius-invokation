@@ -2,7 +2,7 @@ import { For, Match, Show, Switch } from "solid-js";
 import type { ExpressiveJSONSchema } from "ya-json-schema-types";
 
 import { ActionButton, BooleanField, NumberField } from "./Fields";
-import { createSchemaDefault } from "../state";
+import { createSchemaDefault } from "../state/factory";
 
 interface JsonSchemaEditorProps {
   schema: ExpressiveJSONSchema;

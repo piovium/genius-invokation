@@ -11,21 +11,15 @@ import type {
 import { ActionButton, Surface } from "./Fields";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { AddCardModal } from "./AddCardModal";
-import {
-  allocateId,
-  createEntityState,
-  getDefinitionName,
-  getEntityVisibleVarBadges,
-  getImageUrl,
-  getPlayer,
-  getEquipmentInvalidity,
-  moveInArray,
-  shuffleList,
-} from "../state";
 import { ConfirmModal } from "./ConfirmModal";
 import type { Draft } from "immer";
 import { useStateEditorContext } from "./GameStateEditor";
 import { EntityModal } from "./EntityModal";
+import { getEquipmentInvalidity, moveInArray, shuffleList } from "../utils";
+import { getDefinitionName, getEntityVisibleVarBadges } from "../state/catalog";
+import { allocateId, createEntityState } from "../state/factory";
+import { getImageUrl } from "../state/assets";
+import { getPlayer } from "../state/common";
 
 // 装备类型定义
 type EquipmentType = "artifact" | "technique" | "weapon" | "talent" | "other";
@@ -259,7 +253,7 @@ function PileCardListItem(props: PileCardListItemProps) {
       variant: "primary",
       onClick: () => {
         openModal(() => (
-          <EntityModal who={props.who} area="pile" entityId={props.card.id} />
+          <EntityModal who={props.who} area="pile" entity={props.card} />
         ));
       },
     },
@@ -519,7 +513,7 @@ function HandsCardListItem(props: HandsCardListItemProps) {
             <EntityModal
               who={props.who}
               area="hands"
-              entityId={props.card.id}
+              entity={props.card}
             />
           ));
         },

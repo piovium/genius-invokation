@@ -15,7 +15,7 @@
 
 import { DiceType } from "@gi-tcg/typings";
 import { createMemo } from "solid-js";
-import { DICE_LABELS } from "../state";
+import { DICE_LABELS } from "../constants";
 
 export interface DiceIconProps {
   type: number;
