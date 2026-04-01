@@ -28,15 +28,18 @@ export const GoldflameState = status(123061)
   .usageCanAppend(1, Infinity)
   .do((c) => {
     let damageValue = 1;
+    let chosen = null;
     if (c.$(`my equipment with definition id ${FlamelordsBlessing}`)) {
-      const chosen = c.random(c.player.hands);
+      chosen = c.random(c.player.hands);
       if (chosen) {
-          c.disposeCard(chosen);
-          damageValue += chosen.diceCost();
+        damageValue += chosen.diceCost();
       }
     }
     c.damage(DamageType.Piercing, 1, "opp standby");
     c.damage(DamageType.Pyro, damageValue);
+    if (chosen) {
+      c.disposeCard(chosen);
+    }
   })
   .done();
 
