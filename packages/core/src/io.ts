@@ -292,14 +292,11 @@ export function exposeMutation(
       };
     }
     case "createEntity": {
-      // 对手塞入牌库/手牌的信息不可见
-      const hidden =
-        m.target.who !== who && ["hands", "pile"].includes(m.target.type);
       return {
         $case: "createEntity",
         who: m.target.who,
         where: exposeEntityWhere(m.target.type),
-        entity: exposeEntity(null, m.value, hidden),
+        entity: exposeEntity(null, m.value, false),
         masterCharacterId:
           m.target.type === "characters" ? m.target.characterId : void 0,
       };
