@@ -29,6 +29,30 @@ html {
   margin-left: calc(50% - 50vw);
 }
 
+.editor-back-button {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 20;
+  border: 1px solid rgb(148 163 184 / 0.4);
+  border-radius: 9999px;
+  background: rgb(15 23 42 / 0.9);
+  color: #f8fafc;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.editor-back-button:hover {
+  background: rgb(30 41 59 / 0.95);
+}
+
+.editor-back-button:focus-visible {
+  outline: 2px solid #e5e7eb;
+  outline-offset: 3px;
+  background: rgb(30 41 59 / 0.95);
+}
+
 .title {
   flex-grow: 1;
   flex-shrink: 1;

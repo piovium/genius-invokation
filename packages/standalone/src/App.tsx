@@ -324,6 +324,13 @@ export function App() {
         </Match>
         <Match when={mode() === GameMode.Editor}>
           <div class="standalone-editor-page">
+            <button
+              class="editor-back-button"
+              type="button"
+              onClick={() => setMode(GameMode.NotStarted)}
+            >
+              返回首页
+            </button>
             <GameStateEditor
               initialValue={editorInitialState()}
               onSubmit={onEditorSubmit}
