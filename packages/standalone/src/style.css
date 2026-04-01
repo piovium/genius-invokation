@@ -10,9 +10,7 @@ html {
 }
 
 #root {
-  margin: 0 auto;
-  width: min(100vw, 1600px);
-  /* overflow: hidden; */
+  width: 100%;
 }
 
 .gi-tcg-chessboard-new {
@@ -24,16 +22,12 @@ html {
   width: 100%;
 }
 
-.standalone-editor-page {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
+.standalone-board-shell {
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
 .editor-back-button {
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-  z-index: 20;
   border: 1px solid rgb(148 163 184 / 0.4);
   border-radius: 9999px;
   background: rgb(15 23 42 / 0.9);

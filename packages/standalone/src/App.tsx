@@ -323,7 +323,10 @@ export function App() {
           />
         </Match>
         <Match when={mode() === GameMode.Editor}>
-          <div class="standalone-editor-page">
+          <GameStateEditor
+            initialValue={editorInitialState()}
+            onSubmit={onEditorSubmit}
+          >
             <button
               class="editor-back-button"
               type="button"
@@ -331,11 +334,7 @@ export function App() {
             >
               返回首页
             </button>
-            <GameStateEditor
-              initialValue={editorInitialState()}
-              onSubmit={onEditorSubmit}
-            />
-          </div>
+          </GameStateEditor>
         </Match>
       </Switch>
       <dialog ref={deckBuilderDialog!} class="deck-builder-dialog">

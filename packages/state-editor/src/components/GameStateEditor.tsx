@@ -138,6 +138,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
   const [local, rest] = splitProps(props, [
     "initialValue",
     "onSubmit",
+    "children",
     "class",
   ]);
   const initialState = local.initialValue ?? createDefaultGameState();
@@ -400,7 +401,8 @@ export function GameStateEditor(props: GameStateEditorProps) {
           {/* Header */}
           <div class="flex-none px-4 py-4 sm:px-6 lg:px-8 border-b border-[var(--gi-editor-border-strong)] bg-slate-950/70">
             <div class="flex flex-wrap items-center justify-between gap-3">
-              <div>
+              <div class="flex min-w-0 items-center gap-3">
+                {local.children}
                 <h1 class="text-2xl font-semibold text-amber-50">
                   游戏状态编辑
                 </h1>
