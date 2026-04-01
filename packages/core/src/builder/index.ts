@@ -52,4 +52,4 @@ export {
 } from "../base/custom_event";
 
 export { originalDiceCostSizeOfCard as originalDiceCostOfCard } from "../utils";
-export { flip, pair } from "@gi-tcg/utils";
+export { flip, pair, type, type Pair } from "@gi-tcg/utils";

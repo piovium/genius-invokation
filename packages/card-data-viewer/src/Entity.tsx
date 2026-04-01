@@ -34,7 +34,7 @@ import type {
 import { PlayCostList } from "./PlayCost";
 import { Description } from "./Description";
 import { Tags } from "./Tags";
-import { TEXT_MAP } from "./text_map";
+import { typeTagText } from "./text_map";
 import { useAssetsManager } from "./context";
 
 export interface CardDataProps {
@@ -45,20 +45,20 @@ export interface CardDataProps {
 }
 
 export function Character(props: CardDataProps) {
-  const assetsManager = useAssetsManager();
+  const { assetsManager, t } = useAssetsManager();
   const [data] = createResource(
-    () => props.input.definitionId,
-    (defId) => assetsManager.getData(defId) as Promise<CharacterRawData>
+    () => [props.input.definitionId, assetsManager()] as const,
+    ([defId, manager]) => manager.getData(defId) as Promise<CharacterRawData>,
   );
   const [image] = createResource(
-    () => props.input.definitionId,
-    (defId) => assetsManager.getImageUrl(defId, { type: "icon" })
+    () => [props.input.definitionId, assetsManager()] as const,
+    ([defId, manager]) => manager.getImageUrl(defId, { type: "icon" }),
   );
   return (
     <div class={props.class}>
       <Switch>
-        <Match when={data.error}>加载失败</Match>
-        <Match when={data.state === "pending"}>加载中...</Match>
+        <Match when={data.error}>{t("loadFailed")}</Match>
+        <Match when={data.state === "pending"}>{t("loading")}</Match>
         <Match when={data()}>
           {(data) => (
             <>
@@ -115,20 +115,20 @@ export function Character(props: CardDataProps) {
 }
 
 export function ActionCard(props: CardDataProps) {
-  const assetsManager = useAssetsManager();
+  const { assetsManager, t } = useAssetsManager();
   const [data] = createResource(
-    () => props.input.definitionId,
-    (defId) => assetsManager.getData(defId) as Promise<ActionCardRawData>
+    () => [props.input.definitionId, assetsManager()] as const,
+    ([defId, manager]) => manager.getData(defId) as Promise<ActionCardRawData>,
   );
   const [image] = createResource(
-    () => props.input.definitionId,
-    (defId) => assetsManager.getImageUrl(defId)
+    () => [props.input.definitionId, assetsManager()] as const,
+    ([defId, manager]) => manager.getImageUrl(defId),
   );
   return (
     <div class={props.class}>
       <Switch>
-        <Match when={data.error}>加载失败</Match>
-        <Match when={data.state === "pending"}>加载中...</Match>
+        <Match when={data.error}>{t("loadFailed")}</Match>
+        <Match when={data.state === "pending"}>{t("loading")}</Match>
         <Match when={data()}>
           {(data) => (
             <>
@@ -142,7 +142,7 @@ export function ActionCard(props: CardDataProps) {
               <div class="flex flex-col mb-2">
                 <h3 class="font-bold">{data().name}</h3>
                 <div class="h-6 flex flex-row items-center gap-1">
-                  <span class="text-xs">{TEXT_MAP[data().type]}</span>
+                  <span class="text-xs">{typeTagText(data().type, t)}</span>
                   <PlayCostList playCost={data().playCost} />
                 </div>
               </div>
@@ -181,15 +181,15 @@ interface ExpandableCardDataProps extends CardDataProps {
 }
 
 export function Skill(props: ExpandableCardDataProps) {
-  const assetsManager = useAssetsManager();
+  const { assetsManager, t } = useAssetsManager();
   const [data] = createResource(
-    () => props.input.definitionId,
-    (defId) => assetsManager.getData(defId) as Promise<SkillRawData>
+    () => [props.input.definitionId, assetsManager()] as const,
+    ([defId, manager]) => manager.getData(defId) as Promise<SkillRawData>,
   );
 
   const [icon] = createResource(
-    () => props.input.definitionId,
-    (defId) => assetsManager.getImageUrl(defId)
+    () => [props.input.definitionId, assetsManager()] as const,
+    ([defId, manager]) => manager.getImageUrl(defId),
   );
   const [skillTypeText, setSkillTypeText] = createSignal("");
   const [playCost, setPlayCost] = createSignal<PlayCost[]>([]);
@@ -197,7 +197,7 @@ export function Skill(props: ExpandableCardDataProps) {
   createEffect(() => {
     if (data.state === "ready") {
       setPlayCost(data().playCost);
-      setSkillTypeText(TEXT_MAP[data().type]);
+      setSkillTypeText(typeTagText(data().type, t) ?? "");
     }
   });
   return (
@@ -213,7 +213,8 @@ export function Skill(props: ExpandableCardDataProps) {
         </div>
         <div class="flex flex-col">
           <h3>
-            {assetsManager.getNameSync(props.input.definitionId) ??
+            {data()?.name ??
+              assetsManager().getNameSync(props.input.definitionId) ??
               props.input.definitionId}
           </h3>
           <div class="h-5 flex flex-row items-center gap-1">
@@ -223,8 +224,8 @@ export function Skill(props: ExpandableCardDataProps) {
         </div>
       </summary>
       <Switch>
-        <Match when={data.error}>加载失败</Match>
-        <Match when={data.state === "pending"}>加载中...</Match>
+        <Match when={data.error}>{t("loadFailed")}</Match>
+        <Match when={data.state === "pending"}>{t("loading")}</Match>
         <Match when={data()}>
           {(data) => (
             <div class="p-2">
@@ -252,20 +253,20 @@ export function Skill(props: ExpandableCardDataProps) {
 }
 
 export function Entity(props: ExpandableCardDataProps) {
-  const assetsManager = useAssetsManager();
+  const { assetsManager, t } = useAssetsManager();
   const [data] = createResource(
-    () => props.input.definitionId,
-    (defId) => assetsManager.getData(defId) as Promise<EntityRawData>
+    () => [props.input.definitionId, assetsManager()] as const,
+    ([defId, manager]) => manager.getData(defId) as Promise<EntityRawData>,
   );
   const [icon] = createResource(
-    () => props.input.definitionId,
-    (defId) => assetsManager.getImageUrl(defId)
+    () => [props.input.definitionId, assetsManager()] as const,
+    ([defId, manager]) => manager.getImageUrl(defId),
   );
   const [entityTypeText, setEntityTypeText] = createSignal("");
 
   createEffect(() => {
     if (data.state === "ready") {
-      setEntityTypeText(TEXT_MAP[data().type]);
+      setEntityTypeText(typeTagText(data().type, t) ?? "");
     }
   });
   return (
@@ -295,7 +296,8 @@ export function Entity(props: ExpandableCardDataProps) {
         </div>
         <div class="flex flex-col">
           <h3>
-            {assetsManager.getNameSync(props.input.definitionId) ??
+            {data()?.name ??
+              assetsManager().getNameSync(props.input.definitionId) ??
               props.input.definitionId}
           </h3>
           <div class="h-5 flex flex-row items-center gap-1">
@@ -304,8 +306,8 @@ export function Entity(props: ExpandableCardDataProps) {
         </div>
       </summary>
       <Switch>
-        <Match when={data.error}>加载失败</Match>
-        <Match when={data.state === "pending"}>加载中...</Match>
+        <Match when={data.error}>{t("loadFailed")}</Match>
+        <Match when={data.state === "pending"}>{t("loading")}</Match>
         <Match when={data()}>
           {(data) => (
             <div class="p-2">
@@ -348,22 +350,24 @@ export interface CardDefinitionProps {
 }
 
 export function Keyword(props: CardDefinitionProps) {
-  const assetsManager = useAssetsManager();
+  const { assetsManager, t } = useAssetsManager();
   const [data] = createResource(
-    () => props.definitionId,
-    (defId) => assetsManager.getData(defId) as Promise<KeywordRawData>
+    () => [props.definitionId, assetsManager()] as const,
+    ([defId, manager]) => manager.getData(defId) as Promise<KeywordRawData>,
   );
   return (
     <div class={props.class}>
       <h3>
-        <span class="text-yellow-7">规则解释：</span>
+        <span class="text-yellow-7">{t("rulesExplanation")}</span>
         <span class="font-bold">
-          {assetsManager.getNameSync(props.definitionId) ?? props.definitionId}
+          {data()?.name ??
+            assetsManager().getNameSync(props.definitionId) ??
+            props.definitionId}
         </span>
       </h3>
       <Switch>
-        <Match when={data.error}>加载失败</Match>
-        <Match when={data.state === "pending"}>加载中...</Match>
+        <Match when={data.error}>{t("loadFailed")}</Match>
+        <Match when={data.state === "pending"}>{t("loading")}</Match>
         <Match when={data()}>
           {(data) => (
             <div class="p-2">
@@ -388,14 +392,14 @@ export interface ReferenceProps extends CardDefinitionProps {
 }
 
 export function Reference(props: ReferenceProps) {
-  const assetsManager = useAssetsManager();
+  const { assetsManager, t } = useAssetsManager();
   const [data] = createResource(
-    () => props.definitionId,
-    (defId) => assetsManager.getData(defId) as Promise<SkillRawData>
+    () => [props.definitionId, assetsManager()] as const,
+    ([defId, manager]) => manager.getData(defId) as Promise<SkillRawData>,
   );
   const [image] = createResource(
-    () => props.definitionId,
-    (defId) => assetsManager.getImageUrl(defId)
+    () => [props.definitionId, assetsManager()] as const,
+    ([defId, manager]) => manager.getImageUrl(defId),
   );
   return (
     <div>
@@ -418,18 +422,22 @@ export function Reference(props: ReferenceProps) {
       </Show>
       <h4 class="flex flex-row items-center justify-between">
         <span class="font-bold">
-          {assetsManager.getNameSync(props.definitionId) ?? props.definitionId}
+          {data()?.name ??
+            assetsManager().getNameSync(props.definitionId) ??
+            props.definitionId}
         </span>
         <Show when={data.state === "ready" && data()}>
           {(data) => (
-            <span class="text-xs text-yellow-7">{TEXT_MAP[data().type]}</span>
+            <span class="text-xs text-yellow-7">
+              {typeTagText(data().type, t)}
+            </span>
           )}
         </Show>
       </h4>
       <div class="text-sm">
         <Switch>
-          <Match when={data.error}>加载失败</Match>
-          <Match when={data.state === "pending"}>加载中...</Match>
+          <Match when={data.error}>{t("loadFailed")}</Match>
+          <Match when={data.state === "pending"}>{t("loading")}</Match>
           <Match when={data()}>
             {(data) => (
               <Description

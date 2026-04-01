@@ -15,6 +15,7 @@
 
 import { createResource, Switch, Match } from "solid-js";
 import { useDeckBuilderContext } from "./DeckBuilder";
+import { cardTypeText } from "./i18n";
 
 export interface DiceIconProps {
   tagName: string;
@@ -71,9 +72,9 @@ export const CARD_TAG_IMG_NAME_MAP: Record<string, string> = {
 };
 
 export const CARD_TYPE_TEXT_MAP: Record<string, string> = {
-  GCG_CARD_MODIFY: "装备牌",
-  GCG_CARD_EVENT: "事件牌",
-  GCG_CARD_ASSIST: "支援牌",
+  GCG_CARD_MODIFY: "GCG_CARD_MODIFY",
+  GCG_CARD_EVENT: "GCG_CARD_EVENT",
+  GCG_CARD_ASSIST: "GCG_CARD_ASSIST",
 };
 
 const ALL_TAG_IMG_NAME_MAP: Record<string, string> = {
@@ -84,7 +85,7 @@ const ALL_TAG_IMG_NAME_MAP: Record<string, string> = {
 };
 
 export function TagIcon(props: DiceIconProps) {
-  const { assetsManager } = useDeckBuilderContext();
+  const { assetsManager, t } = useDeckBuilderContext();
   return (
     <Switch
       fallback={
@@ -98,7 +99,7 @@ export function TagIcon(props: DiceIconProps) {
     >
       <Match when={props.tagName.startsWith("GCG_TAG_ELEMENT_")}>
         <img
-          src={assetsManager.getRawImageUrlSync(
+          src={assetsManager().getRawImageUrlSync(
             "UI_Gcg_Buff_Common_" + ALL_TAG_IMG_NAME_MAP[props.tagName]
           )}
           draggable="false"
@@ -106,7 +107,9 @@ export function TagIcon(props: DiceIconProps) {
         />
       </Match>
       <Match when={props.tagName.startsWith("GCG_CARD_")}>
-        <span class="text-gray-700 text-center text-nowrap">{CARD_TYPE_TEXT_MAP[props.tagName]}</span>
+        <span class="text-gray-700 text-center text-nowrap">
+          {cardTypeText(props.tagName, t)}
+        </span>
       </Match>
     </Switch>
   );

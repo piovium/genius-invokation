@@ -37,7 +37,7 @@ export function Card(props: CardProps) {
   const { assetsManager, showCard } = useDeckBuilderContext();
 
   const [url] = createResource(() =>
-    assetsManager.getImageUrl(props.id, { thumbnail: true }),
+    assetsManager().getImageUrl(props.id, { thumbnail: true }),
   );
 
   return (
@@ -87,6 +87,7 @@ export interface PoolCardProps extends CardProps {
 }
 
 export function PoolCard(props: PoolCardProps) {
+  const { t } = useDeckBuilderContext();
   return (
     <div
       class="pool-card w-full rounded-lg overflow-clip b-[var(--border-color)] b-2 relative"
@@ -101,7 +102,7 @@ export function PoolCard(props: PoolCardProps) {
             class="absolute left-0 bottom-0 bg-[var(--border-color)] h-25% w-full items-center justify-center text-red font-bold text-sm flex"
             bool:data-invalid={props.valid === false}
           >
-            失效
+            {t("invalid")}
           </div>
         </Match>
         <Match when={props.type === "character" && props.selected}>
@@ -109,7 +110,7 @@ export function PoolCard(props: PoolCardProps) {
             class="absolute left-0 bottom-0 bg-[var(--border-color)] h-25% w-full items-center justify-center text-white font-bold text-sm flex"
             bool:data-selected={props.selected}
           >
-            已选
+            {t("selected")}
           </div>
         </Match>
         <Match
@@ -123,7 +124,7 @@ export function PoolCard(props: PoolCardProps) {
             bool:data-selected={props.selected}
             bool:data-partial-selected={props.partialSelected}
           >
-            已选{props.selectedCount}张
+            {t("selectedCount", { count: props.selectedCount ?? 0 })}
           </div>
         </Match>
       </Switch>
@@ -171,7 +172,7 @@ export function TinyCharacterCard(props: TinyCardProps) {
   const { assetsManager } = useDeckBuilderContext();
 
   const [url] = createResource(() =>
-    assetsManager.getImageUrl(props.id, { type: "icon", thumbnail: true }),
+    assetsManager().getImageUrl(props.id, { type: "icon", thumbnail: true }),
   );
 
   return (
@@ -197,7 +198,7 @@ export function TinyActionCard(props: TinyCardProps) {
   const { assetsManager } = useDeckBuilderContext();
 
   const [url] = createResource(() =>
-    assetsManager.getImageUrl(props.id, { thumbnail: true }),
+    assetsManager().getImageUrl(props.id, { thumbnail: true }),
   );
 
   return (

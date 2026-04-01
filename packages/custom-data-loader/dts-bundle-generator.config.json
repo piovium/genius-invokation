@@ -6,10 +6,10 @@
     {
       "filePath": "./src/runtime.ts",
       "outFile": "./dist/runtime.d.ts",
+      "noCheck": true,
       "libraries": {
         "inlinedLibraries": [
           "@gi-tcg/core",
-          "@gi-tcg/utils",
           "@gi-tcg/typings",
           "immer",
           "@bufbuild/protobuf"

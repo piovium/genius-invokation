@@ -18,6 +18,7 @@ import HistoryIcon from "../svg/HistoryIcon.svg?fb";
 import FullScreen from "../svg/FullScreen.svg?fb";
 import NormalScreen from "../svg/NormalScreen.svg?fb";
 import ExitIcon from "../svg/Exit.svg?fb";
+import { useUiContext } from "../hooks/context";
 
 export interface SpecialViewToggleButtonProps {
   onClick?: () => void;
@@ -81,10 +82,11 @@ export interface ExitButtonProps {
 }
 
 export function ExitButton(props: ExitButtonProps) {
+  const { t } = useUiContext();
   return (
     <button
       class="h-8 w-8 pr-1 flex items-center justify-center rounded-full b-red-800 b-2 bg-red-500 hover:bg-red-600 active:bg-red-600 text-white transition-colors line-height-none cursor-pointer"
-      title="放弃对局"
+      title={t("ui.giveUpGame")}
       onClick={() => {
         props.onClick?.();
       }}

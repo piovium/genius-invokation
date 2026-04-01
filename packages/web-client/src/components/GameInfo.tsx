@@ -15,9 +15,10 @@
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Show } from "solid-js";
+import { onMount, Show } from "solid-js";
 import axios from "axios";
 import { useAuth } from "../auth";
+import { useI18n } from "../i18n";
 
 dayjs.extend(relativeTime);
 
@@ -29,6 +30,10 @@ export interface GameInfoProps {
 
 export function GameInfo(props: GameInfoProps) {
   const { status } = useAuth();
+  const { t, locale } = useI18n();
+  onMount(() => {
+    dayjs.locale(locale().toLocaleLowerCase());
+  });
 
   const downloadLog = async () => {
     try {
@@ -42,22 +47,28 @@ export function GameInfo(props: GameInfoProps) {
       URL.revokeObjectURL(url);
     } catch (e) {
       console.error(e);
-      alert(`下载失败: ${e instanceof Error ? e.message : e}`);
+      alert(
+        t("downloadFailed", {
+          message: e instanceof Error ? e.message : String(e),
+        }),
+      );
     }
   };
   return (
     <div class="flex flex-row gap-2 items-center">
-      <div class="w-24" title={props.createdAt}>{dayjs(props.createdAt).fromNow()}</div>
+      <div class="w-24" title={props.createdAt}>
+        {dayjs(props.createdAt).fromNow()}
+      </div>
       <div class="text-lg">
         <Show
           when={status()?.id === props.winnerId}
-          fallback={<div class="text-red-400">失败</div>}
+          fallback={<div class="text-red-400">{t("defeat")}</div>}
         >
-          <div class="text-green-400">胜利</div>
+          <div class="text-green-400">{t("victory")}</div>
         </Show>
       </div>
       <button class="btn btn-outline" onClick={downloadLog}>
-        下载日志
+        {t("downloadLog")}
       </button>
     </div>
   );

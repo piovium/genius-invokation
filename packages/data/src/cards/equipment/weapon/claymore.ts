@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, combatStatus, extension, pair, status } from "@gi-tcg/core/builder";
+import { card, combatStatus, extension, status } from "@gi-tcg/core/builder";
 
 /**
  * @id 311301
@@ -197,11 +197,14 @@ export const ForestRegalia = card(311307)
   .characterStatus(ForestRegaliaInEffect, "@master")
   .done();
 
-export const NonInitialPlayedCardExtension = extension(311308, { defIds: pair(new Set<number>()) })
+export const NonInitialPlayedCardExtension = extension(311308, { defIds: "pair<number[]>" })
+  .initialState({ defIds: [[], []] })
   .description("记录双方打出过的名称不存在于本局最初牌组中的不同名的行动牌")
   .mutateWhen("onPlayCard", (c, e) => {
     if (e.onTimeState.players[e.who].initialPile.every((card) => card.id !== e.card.definition.id)) {
-      c.defIds[e.who].add(e.card.definition.id);
+      if (!c.defIds[e.who].includes(e.card.definition.id)) {
+        c.defIds[e.who].push(e.card.definition.id);
+      }
     }
   })
   .done();
@@ -221,14 +224,14 @@ export const UltimateOverlordsMegaMagicSword = card(311308)
   .weapon("claymore")
   .variable("supp", 0)
   .associateExtension(NonInitialPlayedCardExtension)
-  .replaceDescription("[GCG_TOKEN_COUNTER]", (_, { area }, ext) => ext.defIds[area.who].size)
+  .replaceDescription("[GCG_TOKEN_COUNTER]", (_, { area }, ext) => ext.defIds[area.who].length)
   .on("enter")
   .do((c) => {
-    c.setVariable("supp", c.getExtensionState().defIds[c.self.who].size);
+    c.setVariable("supp", c.getExtensionState().defIds[c.self.who].length);
   })
   .on("playCard")
   .do((c) => {
-    c.setVariable("supp", c.getExtensionState().defIds[c.self.who].size);
+    c.setVariable("supp", c.getExtensionState().defIds[c.self.who].length);
   })
   .on("increaseSkillDamage")
   .do((c, e) => {

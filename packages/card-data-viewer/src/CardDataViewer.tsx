@@ -23,6 +23,7 @@ import {
   Show,
 } from "solid-js";
 import { ActionCard, Character, Entity, Keyword, Skill } from "./Entity";
+import { useAssetsManager } from "./context";
 
 export type StateType =
   | AnyState["definition"]["type"]
@@ -65,15 +66,12 @@ export function CardDataViewerContainer(props: CardDataViewerContainerProps) {
 }
 
 function CardDataViewer(props: CardDataViewerProps) {
+  const { t } = useAssetsManager();
   const grouped = createMemo(() => Object.groupBy(props.inputs, (i) => i.type));
   const hasStatuses = () => {
     const g = grouped();
     return g.equipment || g.status || g.combatStatus || g.attachment;
   };
-  const equipmentAndStatuses = () => [
-    ...(grouped().equipment ?? []),
-    ...(grouped().status ?? []),
-  ];
 
   const [explainKeyword, setExplainKeyword] = createSignal<number | null>(null);
   const onRequestExplain = (definitionId: number) => {
@@ -85,9 +83,9 @@ function CardDataViewer(props: CardDataViewerProps) {
       <ErrorBoundary
         fallback={(err) => (
           <div class="card-panel">
-            <p>加载失败</p>
+            <p>{t("loadFailed")}</p>
             <pre class="whitespace-pre-wrap">
-              {"message" in err ? err.message : `${err}`}
+              {"message" in err ? (console.error(err), err.message) : `${err}`}
             </pre>
           </div>
         )}
@@ -144,10 +142,24 @@ function CardDataViewer(props: CardDataViewerProps) {
           </For>
           <Show when={hasStatuses()}>
             <div class="card-panel">
-              <Show when={equipmentAndStatuses().length}>
-                <h3 class="text-yellow-7 mb-2">装备与状态</h3>
+              <Show when={grouped().equipment?.length}>
+                <h3 class="text-yellow-7 mb-2">{t("equipment")}</h3>
               </Show>
-              <For each={equipmentAndStatuses()}>
+              <For each={grouped().equipment}>
+                {(input) => (
+                  <Entity
+                    class="b-yellow-3 b-1 rounded-md mb-2"
+                    {...props}
+                    input={input}
+                    asChild
+                    onRequestExplain={onRequestExplain}
+                  />
+                )}
+              </For>
+              <Show when={grouped().status?.length}>
+                <h3 class="text-yellow-7 mb-2">{t("status")}</h3>
+              </Show>
+              <For each={grouped().status}>
                 {(input) => (
                   <Entity
                     class="b-yellow-3 b-1 rounded-md mb-2"
@@ -159,7 +171,7 @@ function CardDataViewer(props: CardDataViewerProps) {
                 )}
               </For>
               <Show when={grouped().combatStatus?.length}>
-                <h3 class="text-yellow-7 mb-2">出战状态</h3>
+                <h3 class="text-yellow-7 mb-2">{t("combatStatus")}</h3>
               </Show>
               <For each={grouped().combatStatus}>
                 {(input) => (
@@ -173,7 +185,7 @@ function CardDataViewer(props: CardDataViewerProps) {
                 )}
               </For>
               <Show when={grouped().attachment?.length}>
-                <h3 class="text-yellow-7 mb-2">附着效果状态</h3>
+                <h3 class="text-yellow-7 mb-2">{t("attachmentStatus")}</h3>
               </Show>
               <For each={grouped().attachment}>
                 {(input) => (

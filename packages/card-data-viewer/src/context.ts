@@ -15,6 +15,22 @@
 
 import type { AssetsManager } from "@gi-tcg/assets-manager";
 import { createContext, useContext } from "solid-js";
+import type { I18nKey } from "./locales";
+import zhCN from "./locales/zh-CN";
+import en from "./locales/en";
 
-export const AssetsContext = createContext<AssetsManager>();
+export const translations = {
+  "zh-CN": zhCN,
+  "en": en,
+} as const;
+
+export type Locale = "zh-CN" | "en";
+
+export interface AssetsContextValue {
+  assetsManager: () => AssetsManager;
+  locale: () => Locale;
+  t: (key: I18nKey) => string;
+}
+
+export const AssetsContext = createContext<AssetsContextValue>();
 export const useAssetsManager = () => useContext(AssetsContext)!;

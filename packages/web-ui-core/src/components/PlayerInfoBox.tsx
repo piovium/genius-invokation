@@ -15,9 +15,10 @@
 
 import { DiceType, PbPlayerStatus } from "@gi-tcg/typings";
 import { Dice } from "./Dice";
-import { Show } from "solid-js";
+import { createMemo, Show } from "solid-js";
 import { WithDelicateUi } from "../primitives/delicate_ui";
 import { StrokedText } from "./StrokedText";
+import { useUiContext } from "../hooks/context";
 
 export interface PlayerInfoProps {
   class?: string;
@@ -30,16 +31,16 @@ export interface PlayerInfoProps {
   avatarUrl?: string;
 }
 
-const STATUS_TEXT_MAP: Record<PbPlayerStatus, string> = {
-  [PbPlayerStatus.UNSPECIFIED]: "正在等待…",
-  [PbPlayerStatus.ACTING]: "正在行动…",
-  [PbPlayerStatus.CHOOSING_ACTIVE]: "正在选择出战角色…",
-  [PbPlayerStatus.REROLLING]: "正在重投骰子…",
-  [PbPlayerStatus.SWITCHING_HANDS]: "正在替换手牌…",
-  [PbPlayerStatus.SELECTING_CARDS]: "正在挑选…",
-};
-
 export function PlayerInfoBox(props: PlayerInfoProps) {
+  const { t } = useUiContext();
+  const statusTextMap = createMemo<Record<PbPlayerStatus, string>>(() => ({
+    [PbPlayerStatus.UNSPECIFIED]: t("player.waiting"),
+    [PbPlayerStatus.ACTING]: t("player.acting"),
+    [PbPlayerStatus.CHOOSING_ACTIVE]: t("player.choosingActive"),
+    [PbPlayerStatus.REROLLING]: t("player.rerolling"),
+    [PbPlayerStatus.SWITCHING_HANDS]: t("player.switchingHands"),
+    [PbPlayerStatus.SELECTING_CARDS]: t("player.selectingCards"),
+  }));
   return (
     <div
       class={`pointer-events-none select-none m-2 gap-1 flex items-start data-[opp=true]:flex-col-reverse data-[opp=false]:flex-col ${
@@ -81,7 +82,7 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
         bool:data-shown={props.declaredEnd}
         data-opp={props.opp}
       >
-        已宣布结束
+        {t("player.declaredEndStatus")}
       </div>
       <div class="relative inline-block h-10 w-44">
         <div
@@ -106,7 +107,7 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
               {props.name || <>&nbsp;</>}
             </span>
             <div class="text-2.5 h-3 w-24 text-white/40" data-opp={props.opp}>
-              {STATUS_TEXT_MAP[props.status]}
+              {statusTextMap()[props.status]}
             </div>
           </div>
           <WithDelicateUi

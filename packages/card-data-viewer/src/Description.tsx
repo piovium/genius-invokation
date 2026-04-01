@@ -94,6 +94,7 @@ const DAMAGE_COLORS = [
 ];
 
 function DamageDescription(props: DamageDescriptionProps) {
+  const { assetsManager } = useAssetsManager();
   const id = () =>
     [
       "GCG_ELEMENT_PHYSIC",
@@ -107,9 +108,10 @@ function DamageDescription(props: DamageDescriptionProps) {
       void 0,
     ].indexOf(props.dType);
   const keywordId = () => -(100 + id());
-  const text = () => assetsManager.getNameSync(keywordId());
-  const assetsManager = useAssetsManager();
-  const [url] = createResource(id, (id) => assetsManager.getImageUrl(id));
+  const [url] = createResource(
+    () => [id(), assetsManager()] as const,
+    ([id, manager]) => manager.getImageUrl(id),
+  );
   return (
     <>
       <Show when={id() <= 7 && url()}>
@@ -120,7 +122,7 @@ function DamageDescription(props: DamageDescriptionProps) {
         style={{ color: DAMAGE_COLORS[id()] }}
         onClick={() => props.onRequestExplain?.(keywordId())}
       >
-        {text()}
+        <ReferenceName definitionId={keywordId()} />
       </span>
     </>
   );
@@ -137,7 +139,7 @@ export interface DescriptionProps {
 }
 
 export function Description(props: DescriptionProps) {
-  const assetsManager = useAssetsManager();
+  const { assetsManager } = useAssetsManager();
   const items = createMemo(() =>
     descriptionToItems(props.description, props.keyMap),
   );
@@ -192,7 +194,7 @@ export function Description(props: DescriptionProps) {
                     when={item.rType === "K"}
                     fallback={
                       <span class="text-black mx-1">
-                        {assetsManager.getNameSync(item.id) ?? item.id}
+                        <ReferenceName definitionId={item.id} />
                       </span>
                     }
                   >
@@ -200,7 +202,7 @@ export function Description(props: DescriptionProps) {
                       class="text-black underline underline-1 underline-offset-3 cursor-pointer mx-1"
                       onClick={() => props.onRequestExplain?.(item.id)}
                     >
-                      {assetsManager.getNameSync(item.id)}
+                      <ReferenceName definitionId={item.id} />
                     </span>
                   </Show>
                 )}
@@ -222,6 +224,21 @@ export function Description(props: DescriptionProps) {
           )}
         </For>
       </ul>
+    </>
+  );
+}
+
+function ReferenceName(props: { definitionId: number }) {
+  const { assetsManager } = useAssetsManager();
+  const [data] = createResource(
+    () => [props.definitionId, assetsManager()] as const,
+    ([defId, manager]) => manager.getData(defId),
+  );
+  return (
+    <>
+      {data()?.name ??
+        assetsManager().getNameSync(props.definitionId) ??
+        props.definitionId}
     </>
   );
 }

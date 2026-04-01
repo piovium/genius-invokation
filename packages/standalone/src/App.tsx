@@ -22,17 +22,22 @@ import {
   deserializeGameStateLog,
   VERSIONS,
   Deck,
+  Game,
+  GameState,
 } from "@gi-tcg/core";
 import { StandaloneChild } from "./StandaloneChild";
 import { StandaloneParent } from "./StandaloneParent";
 import { IS_BETA, SERVER_HOST, WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
 import { DeckBuilder } from "@gi-tcg/deck-builder";
 import "@gi-tcg/deck-builder/style.css";
+import "@gi-tcg/state-editor/style.css";
 import { DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
+import { GameStateEditor } from "@gi-tcg/state-editor";
 
 enum GameMode {
   NotStarted = 0,
   Standalone = 1,
+  Editor = 2,
 }
 
 const INIT_DECK0 =
@@ -128,6 +133,29 @@ export function App() {
     }
   };
 
+  const editorInitialState = () => {
+    const d0 = deck0();
+    const d1 = deck1();
+    try {
+      const deck0 = DEFAULT_ASSETS_MANAGER.decode(d0);
+      const deck1 = DEFAULT_ASSETS_MANAGER.decode(d1);
+      return Game.createInitialState({
+        decks: [deck0, deck1],
+        data: getData(version()),
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        alert(e.message);
+      }
+      console.error(e);
+    }
+  };
+  const onEditorSubmit = (state: GameState) => {
+    console.log(state);
+    setLogs([{ state, canResume: true }]);
+    setMode(GameMode.Standalone);
+  };
+
   return (
     <div>
       <Switch>
@@ -196,6 +224,7 @@ export function App() {
                 >
                   导入日志
                 </button>
+                <button onClick={() => setMode(GameMode.Editor)}>摆盘器</button>
               </div>
             </div>
             <input
@@ -203,7 +232,6 @@ export function App() {
               type="radio"
               name="gameModeTab"
               id="multiplayerInput"
-              disabled
             />
             <label class="tab__header" for="multiplayerInput">
               <a href={`${SERVER_HOST}${WEB_CLIENT_BASE_PATH}`} target="_blank">
@@ -292,6 +320,12 @@ export function App() {
             deck0={deck0()}
             deck1={deck1()}
             version={version()}
+          />
+        </Match>
+        <Match when={mode() === GameMode.Editor}>
+          <GameStateEditor
+            initialValue={editorInitialState()}
+            onSubmit={onEditorSubmit}
           />
         </Match>
       </Switch>

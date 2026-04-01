@@ -15,7 +15,12 @@
 
 import { version } from "../package.json" /*  with { type: "json" } */;
 export { version as CORE_VERSION };
-export { Game, type DeckConfig, type CreateInitialStateConfig } from "./game";
+export {
+  Game,
+  type DeckConfig,
+  type CreateInitialStateConfig,
+  mergeGameConfigWithDefault,
+} from "./game";
 export { type Player, type PlayerConfig } from "./player";
 export {
   type GameStateLogEntry,
@@ -41,6 +46,9 @@ export {
   type PlayerIO,
   type CancellablePlayerIO,
   exposeState,
+  exposeCharacter,
+  exposeEntity,
+  exposeAttachment,
   mergeIo,
 } from "./io";
 export * from "./error";

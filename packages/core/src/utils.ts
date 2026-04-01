@@ -160,21 +160,24 @@ function getAllEntitiesImpl(
       result.push(entity);
     };
   }
-  for (const who of [state.currentTurn, flip(state.currentTurn)]) {
+
+  // 游戏实际的响应顺序并非规则书所述，而是
+  // 出战角色、出战角色装备和状态、出战状态、后台角色、后台角色装备和状态
+  // 召唤物、支援牌
+  // （即出战状态区夹在出战角色区和后台角色区之间）
+
+  const characters = ([0, 1] as const).map((who) => {
     const player = state.players[who];
     let activeIdx = 0;
     try {
       activeIdx = getActiveCharacterIndex(player);
     } catch {}
-    const [active, ...standby] = shiftLeft(player.characters, activeIdx);
+    return shiftLeft(player.characters, activeIdx);
+  });
 
-    // 游戏实际的响应顺序并非规则书所述，而是
-    // 出战角色、出战角色装备和状态、出战状态、后台角色、后台角色装备和状态
-    // 召唤物、支援牌
-    // （即出战状态区夹在出战角色区和后台角色区之间）
-
-    // 先列出倒下角色区上实体
-    for (const ch of standby) {
+  // 先列出倒下角色区上实体
+  for (const who of [state.currentTurn, flip(state.currentTurn)]) {
+    for (const ch of characters[who]) {
       if (ch.variables.alive === 0) {
         const area: EntityArea = {
           type: "characters",
@@ -187,15 +190,22 @@ function getAllEntitiesImpl(
         }
       }
     }
+  }
 
-    const activeArea: EntityArea = {
-      type: "characters",
-      who,
-      characterId: active.id,
-    };
-    append(active, activeArea);
-    for (const entity of active.entities) {
-      append(entity, activeArea);
+  for (const who of [state.currentTurn, flip(state.currentTurn)]) {
+    const player = state.players[who];
+    const [active, ...standby] = characters[who];
+
+    if (active.variables.alive === 1) {
+      const activeArea: EntityArea = {
+        type: "characters",
+        who,
+        characterId: active.id,
+      };
+      append(active, activeArea);
+      for (const entity of active.entities) {
+        append(entity, activeArea);
+      }
     }
     const combatStatusArea: EntityArea = {
       type: "combatStatuses",
@@ -1010,8 +1020,10 @@ export function sortDice(
   player: PlayerState,
   dice: readonly DiceType[],
 ): DiceType[] {
-  const characterElements = shiftLeft(player.characters, getActiveCharacterIndex(player))
-    .map((ch) => elementOfCharacter(ch.definition));
+  const characterElements = shiftLeft(
+    player.characters,
+    getActiveCharacterIndex(player),
+  ).map((ch) => elementOfCharacter(ch.definition));
   const countMap = new Map<DiceType, number>();
   for (const d of dice) {
     countMap.set(d, (countMap.get(d) ?? 0) + 1);
@@ -1025,11 +1037,17 @@ export function sortDice(
 }
 
 declare global {
+  interface ReadonlyArray<T> {
+    map<This extends readonly [unknown, unknown], U>(
+      this: This,
+      fn: (v: T) => U,
+    ): { -readonly [K in keyof This]: U };
+  }
   interface Array<T> {
     map<This extends [unknown, unknown], U>(
       this: This,
       fn: (v: T) => U,
-    ): { [K in keyof This]: U };
+    ): { -readonly [K in keyof This]: U };
   }
 }
 

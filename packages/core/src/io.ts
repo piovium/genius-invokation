@@ -539,7 +539,7 @@ export function exposeEntity(
   };
 }
 
-function exposeAttachment(
+export function exposeAttachment(
   state: GameState | null,
   att: Omit<AttachmentState, StateSymbol>,
 ): PbAttachmentState {
@@ -572,7 +572,7 @@ function exposeDiceRequirement(
     .toArray();
 }
 
-function exposeCharacter(
+export function exposeCharacter(
   state: GameState | null,
   player: PlayerState | null,
   ch: Omit<CharacterState, StateSymbol>,

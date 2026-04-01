@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { CardHandle, CharacterHandle, DamageType, DiceType, SkillHandle, SupportHandle, card, extension, flip, pair, status, summon } from "@gi-tcg/core/builder";
-import { CalledInForCleanup, CanotilasSupport, CosanzeanasSupport, LaumesSupport, LutinesSupport, MelusineSupport, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SerenesSupport, SIMULANKA_SUMMONS, SluasisSupport, TaroumarusSavings, ThironasSupport, TopyassSupport, ToyGuard, VirdasSupport } from "../event/other";
+import { CardHandle, CharacterHandle, DamageType, DiceType, Pair, SkillHandle, SupportHandle, card, extension, flip, status, summon, type } from "@gi-tcg/core/builder";
+import { CalledInForCleanup, CanotilasSupport, CosanzeanasSupport, LaumesSupport, LutinesSupport, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SerenesSupport, SIMULANKA_SUMMONS, SluasisSupport, TaroumarusSavings, ThironasSupport, TopyassSupport, ToyGuard, VirdasSupport } from "../event/other";
 
 /**
  * @id 322001
@@ -454,8 +454,11 @@ export const SandsAndDream = status(302205)
   .done();
 
 export const DisposedSupportCountExtension = extension(322022, {
-  disposedSupportCount: pair(0),
+  disposedSupportCount: "pair<number>",
 })
+  .initialState({
+    disposedSupportCount: [0, 0],
+  })
   .description("记录本场对局中双方支援区弃置卡牌的数量")
   .mutateWhen("onDispose", (st, e) => {
     if (e.isDiscardOrTuning()) {
@@ -501,12 +504,17 @@ export const Jeht = card(322022)
   .done();
 
 const DamageTypeCountExtension = extension(322023, {
-  damages: pair(new Set<DamageType>()),
-})
+    damages: type.declare<Pair<DamageType[]>>().type("pair<number[]>")
+  })
+  .initialState({
+    damages: [[], []],
+  })
   .description("记录本场对局中双方角色受到过的元素伤害种类")
   .mutateWhen("onDamageOrHeal", (st, e) => {
     if (e.isDamageTypeDamage() &&  e.type !== DamageType.Physical && e.type !== DamageType.Piercing) {
-      st.damages[e.targetWho].add(e.type);
+      if (!st.damages[e.targetWho].includes(e.type)) {
+        st.damages[e.targetWho].push(e.type);
+      }
     }
   })
   .done();
@@ -523,19 +531,19 @@ export const SilverAndMelus = card(322023)
   .since("v4.4.0")
   .costSame(1)
   .associateExtension(DamageTypeCountExtension)
-  .replaceDescription("[GCG_TOKEN_COUNTER]", (_, { area }, ext) => ext.damages[flip(area.who)].size)
+  .replaceDescription("[GCG_TOKEN_COUNTER]", (_, { area }, ext) => ext.damages[flip(area.who)].length)
   .support("ally")
   .associateExtension(DamageTypeCountExtension)
   .variable("count", 0)
   .on("enter")
   .do((c) => {
-    const count = c.getExtensionState().damages[flip(c.self.who)].size;
+    const count = c.getExtensionState().damages[flip(c.self.who)].length;
     c.setVariable("count", Math.min(count, 4));
   })
   .on("damaged", (c, e) => !e.target.isMine())
   .listenToAll()
   .do((c) => {
-    const count = c.getExtensionState().damages[flip(c.self.who)].size;
+    const count = c.getExtensionState().damages[flip(c.self.who)].length;
     c.setVariable("count", Math.min(count, 4));
   })
   .on("endPhase")

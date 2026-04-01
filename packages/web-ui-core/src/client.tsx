@@ -27,7 +27,9 @@ import {
   PbPlayerStatus,
 } from "@gi-tcg/typings";
 import {
+  createMemo,
   createSignal,
+  type Accessor,
   type Component,
   type ComponentProps,
   type JSX,
@@ -49,7 +51,7 @@ import type {
 } from "@gi-tcg/core";
 import { AsyncQueue } from "./async_queue";
 import { parseMutations } from "./mutations";
-import { UiContext } from "./hooks/context";
+import { translations, UiContext, type Locale } from "./hooks/context";
 import {
   createActionState,
   createChooseActiveState,
@@ -64,8 +66,13 @@ import {
 import { createStore, produce } from "solid-js/store";
 import type { Rotation } from "./components/TransformWrapper";
 import type { CancellablePlayerIO } from "@gi-tcg/core";
-import { OppChessboardController, type IOppChessboardController, type OppInfo } from "./opp";
+import {
+  OppChessboardController,
+  type IOppChessboardController,
+  type OppInfo,
+} from "./opp";
 import { flip } from "@gi-tcg/utils";
+import { flatten, resolveTemplate, translator } from "@solid-primitives/i18n";
 
 const EMPTY_PLAYER_DATA: PbPlayerState = {
   activeCharacterId: 0,
@@ -92,7 +99,8 @@ export const EMPTY_GAME_STATE: PbGameState = {
 export interface ClientOption {
   onGiveUp?: () => void;
   rpc?: Partial<RpcDispatcher>;
-  assetsManager?: AssetsManager;
+  assetsManager?: Accessor<AssetsManager>;
+  locale?: Accessor<Locale>;
   disableDelicateUi?: boolean;
   disableAction?: boolean;
 }
@@ -124,7 +132,12 @@ export interface ClientChessboardProps extends ComponentProps<"div"> {
 }
 
 export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
-  const assetsManager = option.assetsManager ?? DEFAULT_ASSETS_MANAGER;
+  const getAssetsManager = () =>
+    option.assetsManager?.() ?? DEFAULT_ASSETS_MANAGER;
+  const getLocale = () => option.locale?.() ?? "zh-CN";
+  const dict = createMemo(() => flatten(translations[getLocale()]));
+  const t = translator(dict, resolveTemplate);
+
   const [data, setData] = createSignal<ChessboardData>({
     raw: [],
     roundAndPhase: {
@@ -167,7 +180,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     chooseActive: async ({ candidateIds }) => {
       const resolver = Promise.withResolvers<ChooseActiveResponse>();
       actionResolvers.chooseActive = resolver;
-      const acState = createChooseActiveState(candidateIds);
+      const acState = createChooseActiveState(candidateIds, t);
       setActionState(acState);
       try {
         return await resolver.promise;
@@ -178,7 +191,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     action: async ({ action }) => {
       const resolver = Promise.withResolvers<ActionResponse>();
       actionResolvers.action = resolver;
-      const acState = createActionState(assetsManager, action);
+      const acState = createActionState(getAssetsManager(), action, t);
       setActionState(acState);
       try {
         return await resolver.promise;
@@ -269,7 +282,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   });
 
   const oppController = new OppChessboardController({
-    assetsManager,
+    assetsManager: getAssetsManager,
+    t,
     who: flip(who),
     onUpdate: async (info) => {
       await uiQueue.push(async () => {});
@@ -370,7 +384,9 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     <UiContext.Provider
       value={{
         ...option,
-        assetsManager,
+        assetsManager: getAssetsManager,
+        locale: getLocale,
+        t,
       }}
     >
       <Chessboard

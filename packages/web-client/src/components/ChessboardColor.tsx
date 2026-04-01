@@ -16,7 +16,7 @@
 import { createSignal, For, Show } from "solid-js";
 import { useAuth } from "../auth";
 import { AxiosError } from "axios";
-import { set } from "core-js/core/dict";
+import { useI18n } from "../i18n";
 
 export const CHESSBOARD_COLORS = [
   "#c0cac3",
@@ -31,6 +31,7 @@ export const CHESSBOARD_COLORS = [
 export interface ChessboardColorProps {}
 
 export function ChessboardColor(props: ChessboardColorProps) {
+  const { t } = useI18n();
   const { status, updateInfo } = useAuth();
   const [dirty, setDirty] = createSignal<boolean>(false);
   const [color, setColor] = createSignal<string | null>(
@@ -38,7 +39,7 @@ export function ChessboardColor(props: ChessboardColorProps) {
   );
   const [loading, setLoading] = createSignal<boolean>(false);
   return (
-    <div class="flex items-center gap-2 flex-wrap h-10">
+    <div class="flex items-center gap-2 flex-wrap">
       <For each={CHESSBOARD_COLORS}>
         {(presetColor) => (
           <button
@@ -105,7 +106,7 @@ export function ChessboardColor(props: ChessboardColorProps) {
             }
           }}
         >
-          保存
+          {t("save")}
         </button>
         <button
           class="btn btn-soft-red"
@@ -115,7 +116,7 @@ export function ChessboardColor(props: ChessboardColorProps) {
             setDirty(false);
           }}
         >
-          取消
+          {t("cancel")}
         </button>
       </Show>
     </div>

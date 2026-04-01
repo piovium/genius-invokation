@@ -17,11 +17,25 @@ import { DamageType as D, Reaction as R } from "@gi-tcg/typings";
 import type { ReactionInfo } from "./Chessboard";
 import { StrokedText } from "./StrokedText";
 import { Image } from "./Image";
-import { createEffect } from "solid-js";
+import { useUiContext } from "../hooks/context";
 
 interface ReactionRenderingData {
   elements: D[];
-  name: string;
+  nameKey:
+    | "reaction.Melt"
+    | "reaction.Vaporize"
+    | "reaction.Overloaded"
+    | "reaction.Superconduct"
+    | "reaction.ElectroCharged"
+    | "reaction.Frozen"
+    | "reaction.Swirl"
+    | "reaction.Crystallize"
+    | "reaction.Burning"
+    | "reaction.Bloom"
+    | "reaction.Quicken"
+    | "reaction.LunarElectroCharged"
+    | "reaction.LunarBloom"
+    | "reaction.LunarCrystallizeHydro";
   fgColor: string;
   bgColor: string;
 }
@@ -29,121 +43,121 @@ interface ReactionRenderingData {
 export const REACTION_TEXT_MAP: Record<number, ReactionRenderingData> = {
   [R.Melt]: {
     elements: [D.Cryo, D.Pyro],
-    name: "融化",
+    nameKey: "reaction.Melt",
     fgColor: "#ffcc66",
     bgColor: "#994b22",
   },
   [R.Vaporize]: {
     elements: [D.Hydro, D.Pyro],
-    name: "蒸发",
+    nameKey: "reaction.Vaporize",
     fgColor: "#ffcc66",
     bgColor: "#994b22",
   },
   [R.Overloaded]: {
     elements: [D.Electro, D.Pyro],
-    name: "超载",
+    nameKey: "reaction.Overloaded",
     fgColor: "#ff809b",
     bgColor: "#802d55",
   },
   [R.Superconduct]: {
     elements: [D.Cryo, D.Electro],
-    name: "超导",
+    nameKey: "reaction.Superconduct",
     fgColor: "#b4b4ff",
     bgColor: "#5511ee",
   },
   [R.ElectroCharged]: {
     elements: [D.Electro, D.Hydro],
-    name: "感电",
+    nameKey: "reaction.ElectroCharged",
     fgColor: "#e19bff",
     bgColor: "#7f2dee",
   },
   [R.Frozen]: {
     elements: [D.Cryo, D.Hydro],
-    name: "冻结",
+    nameKey: "reaction.Frozen",
     fgColor: "#99ffff",
     bgColor: "#1199ee",
   },
   [R.SwirlCryo]: {
     elements: [D.Cryo, D.Anemo],
-    name: "扩散",
+    nameKey: "reaction.Swirl",
     fgColor: "#66ffcc",
     bgColor: "#406d6d",
   },
   [R.SwirlHydro]: {
     elements: [D.Hydro, D.Anemo],
-    name: "扩散",
+    nameKey: "reaction.Swirl",
     fgColor: "#66ffcc",
     bgColor: "#406d6d",
   },
   [R.SwirlPyro]: {
     elements: [D.Pyro, D.Anemo],
-    name: "扩散",
+    nameKey: "reaction.Swirl",
     fgColor: "#66ffcc",
     bgColor: "#406d6d",
   },
   [R.SwirlElectro]: {
     elements: [D.Electro, D.Anemo],
-    name: "扩散",
+    nameKey: "reaction.Swirl",
     fgColor: "#66ffcc",
     bgColor: "#406d6d",
   },
   [R.CrystallizeCryo]: {
     elements: [D.Cryo, D.Geo],
-    name: "结晶",
+    nameKey: "reaction.Crystallize",
     fgColor: "#ffd766",
     bgColor: "#664408",
   },
   [R.CrystallizeHydro]: {
     elements: [D.Hydro, D.Geo],
-    name: "结晶",
+    nameKey: "reaction.Crystallize",
     fgColor: "#ffd766",
     bgColor: "#664408",
   },
   [R.CrystallizePyro]: {
     elements: [D.Pyro, D.Geo],
-    name: "结晶",
+    nameKey: "reaction.Crystallize",
     fgColor: "#ffd766",
     bgColor: "#664408",
   },
   [R.CrystallizeElectro]: {
     elements: [D.Electro, D.Geo],
-    name: "结晶",
+    nameKey: "reaction.Crystallize",
     fgColor: "#ffd766",
     bgColor: "#664408",
   },
   [R.Burning]: {
     elements: [D.Dendro, D.Pyro],
-    name: "燃烧",
+    nameKey: "reaction.Burning",
     fgColor: "#ff9c00",
     bgColor: "#843e11",
   },
   [R.Bloom]: {
     elements: [D.Dendro, D.Hydro],
-    name: "绽放",
+    nameKey: "reaction.Bloom",
     fgColor: "#00ea55",
     bgColor: "#3b6208",
   },
   [R.Quicken]: {
     elements: [D.Dendro, D.Electro],
-    name: "原激化",
+    nameKey: "reaction.Quicken",
     fgColor: "#00ea55",
     bgColor: "#3b6208",
   },
   [R.LunarElectroCharged]: {
     elements: [D.Electro, D.Hydro],
-    name: "月感电",
+    nameKey: "reaction.LunarElectroCharged",
     fgColor: "#e19bff",
     bgColor: "#7f2dee",
   },
   [R.LunarBloom]: {
     elements: [D.Dendro, D.Hydro],
-    name: "月绽放",
+    nameKey: "reaction.LunarBloom",
     fgColor: "#00ea55",
     bgColor: "#3b6208",
   },
   [R.LunarCrystallizeHydro]: {
     elements: [D.Hydro, D.Geo],
-    name: "月结晶",
+    nameKey: "reaction.LunarCrystallizeHydro",
     fgColor: "#ffd766",
     bgColor: "#664408",
   },
@@ -154,6 +168,7 @@ export interface ReactionProps {
 }
 
 export function Reaction(props: ReactionProps) {
+  const { t } = useUiContext();
   const data = () => REACTION_TEXT_MAP[props.info.reactionType];
   const applyElement = () => props.info.incoming;
   const baseElement = () => data().elements.find((e)=> e !== applyElement())!;
@@ -172,13 +187,13 @@ export function Reaction(props: ReactionProps) {
           "--bg-color": data().bgColor,
         }}
       >
-        <div class="grid-area-[1/1] h-5 w-full reaction-text-shadow"/>
-        <StrokedText
-          class="text-3.5 font-bold text-[var(--fg-color)] grid-area-[1/1] mx-2"
-          text={data().name}
-          strokeColor="var(--bg-color)"
-          strokeWidth={2.5}
-        />          
+          <div class="grid-area-[1/1] h-5 w-full reaction-text-shadow"/>
+          <StrokedText
+            class="text-3.5 font-bold text-[var(--fg-color)] grid-area-[1/1] mx-2"
+            text={t(data().nameKey)}
+            strokeColor="var(--bg-color)"
+            strokeWidth={2.5}
+          />          
       </div>
     </div>
   );

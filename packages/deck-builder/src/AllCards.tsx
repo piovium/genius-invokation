@@ -18,6 +18,7 @@ import { AllCharacterCards } from "./AllCharacterCards";
 import { AllActionCards } from "./AllActionCards";
 import type { Deck } from "@gi-tcg/typings";
 import type { DeckData } from "@gi-tcg/assets-manager";
+import { useDeckBuilderContext } from "./DeckBuilder";
 
 export interface AllCardsProps extends DeckData {
   deck: Deck;
@@ -29,6 +30,7 @@ export interface AllCardsProps extends DeckData {
 }
 
 export function AllCards(props: AllCardsProps) {
+  const { t } = useDeckBuilderContext();
   const [tab, setTab] = createSignal(0);
 
   return (
@@ -45,20 +47,20 @@ export function AllCards(props: AllCardsProps) {
           onClick={() => setTab(0)}
           bool:data-active={tab() === 0}
         >
-          角色牌
+          {t("characters")}
         </button>
         <button
           class="data-[active]:font-bold rounded-r-full w-22 h-8 b-1 b-l-0 data-[active]:b-0 data-[active]:bg-blue-100"
           onClick={() => setTab(1)}
           bool:data-active={tab() === 1}
         >
-          行动牌
+          {t("actionCards")}
         </button>
         <Show
           when={!props.versionSpecified}
           fallback={
             <span class="text-gray-500 ml-2">
-              当前仅显示 {props.allVersions[props.version]} 及更低版本
+              {t("versionBelow", { version: props.allVersions[props.version] })}
             </span>
           }
         >

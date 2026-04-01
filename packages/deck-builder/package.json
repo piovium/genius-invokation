@@ -1,6 +1,6 @@
 {
   "name": "@gi-tcg/deck-builder",
-  "version": "0.18.4",
+  "version": "0.19.1",
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -29,16 +29,12 @@
     "@gi-tcg/card-data-viewer": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
+    "@solid-primitives/i18n": "^2.2.1",
     "@solid-primitives/keyed": "^1.4.0",
     "long-press-event": "^2.5.0"
   },
   "devDependencies": {
     "@gi-tcg/config": "workspace:*",
-    "@typescript-eslint/eslint-plugin": "^6.18.0",
-    "@typescript-eslint/parser": "^6.18.0",
-    "eslint": "^8.56.0",
-    "eslint-plugin-only-warn": "^1.1.0",
-    "eslint-plugin-solid": "^0.13.1",
     "rollup-plugin-node-externals": "catalog:",
     "solid-devtools": "^0.29.2",
     "unocss": "catalog:",

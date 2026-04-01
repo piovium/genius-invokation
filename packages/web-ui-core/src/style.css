@@ -447,6 +447,9 @@
   .history-indent-hint {
     clip-path: polygon(0 0, 71% 0, 100% 50%, 71% 100%, 0 100%);
   }
+  .history-children .rich-text .inline-image {
+    @apply h-3.5 w-3.5;
+  }
 
   .chessboard-bg {
     position: absolute;

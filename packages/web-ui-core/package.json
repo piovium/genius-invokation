@@ -1,6 +1,6 @@
 {
   "name": "@gi-tcg/web-ui-core",
-  "version": "0.18.4",
+  "version": "0.19.1",
   "description": "Core component of @gi-tcg/web-ui",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -22,8 +22,9 @@
   },
   "dependencies": {
     "@gi-tcg/assets-manager": "workspace:*",
-    "@gi-tcg/utils": "workspace:*",
     "@gi-tcg/card-data-viewer": "workspace:*",
+    "@gi-tcg/utils": "workspace:*",
+    "@solid-primitives/i18n": "^2.2.1",
     "@solid-primitives/keyed": "^1.4.0",
     "remeda": "^2.26.1"
   },
@@ -36,11 +37,6 @@
     "@gi-tcg/data": "workspace:*",
     "@gi-tcg/detail-log-viewer": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
-    "@typescript-eslint/eslint-plugin": "^6.18.0",
-    "@typescript-eslint/parser": "^6.18.0",
-    "eslint": "^8.56.0",
-    "eslint-plugin-only-warn": "^1.1.0",
-    "eslint-plugin-solid": "^0.13.1",
     "puppeteer-core": "^24.14.0",
     "puppeteer-screen-recorder": "^3.0.6",
     "rollup-plugin-node-externals": "catalog:",

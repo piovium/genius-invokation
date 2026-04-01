@@ -14,20 +14,26 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { IS_BETA } from "@gi-tcg/config";
-import { Show } from "solid-js";
+import { onMount, Show } from "solid-js";
 import dayjs from "dayjs";
 import localize from "dayjs/plugin/localizedFormat";
 import "dayjs/locale/zh-cn";
+import "dayjs/locale/en";
 import { useVersionContext } from "../App";
+import { useI18n } from "../i18n";
 
-dayjs.extend(localize).locale("zh-cn");
+dayjs.extend(localize);
 
 export function Footer() {
   const { versionInfo } = useVersionContext();
+  const { t, locale } = useI18n();
+  onMount(() => {
+    dayjs.locale(locale().toLocaleLowerCase());
+  });
   return (
-    <footer class="flex flex-col md:flex-row gap-4 p-4 text-sm text-gray-500">
+    <footer class="flex flex-col md:flex-row gap-4 p-4 text-sm text-gray-500 flex-wrap">
       <div class="flex flex-row gap-4">
-        <span>© 2025 Guyutongxue</span>
+        <span>© 2026 Piovium Labs</span>
         <a
           class="text-blue-400"
           href="https://github.com/piovium/genius-invokation"
@@ -37,7 +43,7 @@ export function Footer() {
         </a>
       </div>
       <div>
-        许可{" "}
+        {t("license")}{" "}
         <a
           class="text-blue-400"
           href="https://www.gnu.org/licenses/agpl-3.0.html"
@@ -48,15 +54,15 @@ export function Footer() {
       </div>
       <Show when={versionInfo()}>
         <div>
-          游戏版本{" "}
+          {t("gameVersion")}{" "}
           {IS_BETA ? (
-            <span class="text-red-300">最新测试版</span>
+            <span class="text-red-300">{t("latestBeta")}</span>
           ) : (
             versionInfo().currentGameVersion
           )}
         </div>
         <div>
-          模拟器版本 {versionInfo().coreVersion} (
+          {t("simulatorVersion")} {versionInfo().coreVersion} (
           <a
             title={versionInfo().revision.message}
             class="text-blue-400"
@@ -65,7 +71,7 @@ export function Footer() {
             }`}
             target="_blank"
           >
-            {dayjs(versionInfo().revision.date).format("ll HH:mm:ss")}
+            {dayjs(versionInfo().revision.date).format("YYYY-MM-DD HH:mm:ss")}
           </a>
           )
         </div>
@@ -73,10 +79,10 @@ export function Footer() {
       <div>
         <a
           class="text-blue-400"
-          href="https://qm.qq.com/q/svHK8eJulW"
+          href={t("playerGroupLink")}
           target="_blank"
         >
-          点击加入用户QQ群
+          {t("joinPlayerGroup")}
         </a>
       </div>
     </footer>

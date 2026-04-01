@@ -17,6 +17,7 @@ import { For, Show, createMemo, createSignal, createUniqueId, type Accessor } fr
 import FilterIcon from "./Filter.svg";
 import DeleteIcon from "./Delete.svg";
 import { TagIcon } from "./TagIcon";
+import { useDeckBuilderContext } from "./DeckBuilder";
 
 export interface FilterSelection {
   name: string;
@@ -30,6 +31,7 @@ export interface FilterBarProps {
 }
 
 export function FilterBar(props: FilterBarProps) {
+  const { t } = useDeckBuilderContext();
   const selected = createMemo(() => {
     return props.filterSelections.some((fs) => fs.selected() !== null);
   });
@@ -51,7 +53,7 @@ export function FilterBar(props: FilterBarProps) {
             for={filterMenuControlId}
             class="@3xl:hidden mr--2 pl-1.5 h-8 w-22 rounded-full bg-purple-300 text-white flex items-center justify-center flex-shrink-0 z-1 "
           >
-            <span class="text-4 font-bold">筛选</span>
+            <span class="text-4 font-bold">{t("filter")}</span>
             <img src={FilterIcon} class="w-5 h-5" />
           </label>
         }
@@ -62,7 +64,7 @@ export function FilterBar(props: FilterBarProps) {
             props.filterSelections.forEach((fs) => fs.onSelect(null));
           }}
         >
-          <span class="text-4 font-bold">清除</span>
+          <span class="text-4 font-bold">{t("clear")}</span>
           <img src={DeleteIcon} class="w-5 h-5" />
         </div>
       </Show>
@@ -124,7 +126,7 @@ export function FilterBar(props: FilterBarProps) {
           for={filterMenuControlId}
           class="hidden FM:block @3xl:FM:hidden h-6 w-full rounded-full bg-blue-100 text-blue-500 text-sm line-height-6 text-center"
         >
-          收起
+          {t("collapse")}
         </label>
       </div>
       {/* 当前选择 */}

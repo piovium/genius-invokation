@@ -19,8 +19,10 @@ import { Layout } from "../layouts/Layout";
 import axios, { AxiosError } from "axios";
 import { UserInfo } from "../components/UserInfo";
 import { useAuth } from "../auth";
+import { useI18n } from "../i18n";
 
 export default function User() {
+  const { t } = useI18n();
   const params = useParams();
   const { status: mine } = useAuth();
   const userId = Number(params.id);
@@ -30,12 +32,14 @@ export default function User() {
   return (
     <Layout>
       <Switch>
-        <Match when={userInfo.loading}>正在加载中...</Match>
+        <Match when={userInfo.loading}>{t("loading")}</Match>
         <Match when={userInfo.error}>
-          加载失败：{" "}
-          {userInfo.error instanceof AxiosError
-            ? userInfo.error.response?.data.message
-            : userInfo.error}
+          {t("loadFailed", {
+            message:
+              userInfo.error instanceof AxiosError
+                ? userInfo.error.response?.data.message
+                : userInfo.error,
+          })}
         </Match>
         <Match when={userInfo()}>
           <div class="w-full flex flex-row justify-center">

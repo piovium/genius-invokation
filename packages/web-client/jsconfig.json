@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ES2024",
+    "lib": ["ES2024", "WebWorker"],
+    "strict": true
+  },
+  "files": ["public/sw.js"]
+}
