@@ -323,10 +323,12 @@ export function App() {
           />
         </Match>
         <Match when={mode() === GameMode.Editor}>
-          <GameStateEditor
-            initialValue={editorInitialState()}
-            onSubmit={onEditorSubmit}
-          />
+          <div class="standalone-editor-page">
+            <GameStateEditor
+              initialValue={editorInitialState()}
+              onSubmit={onEditorSubmit}
+            />
+          </div>
         </Match>
       </Switch>
       <dialog ref={deckBuilderDialog!} class="deck-builder-dialog">
