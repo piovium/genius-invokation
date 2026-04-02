@@ -21,6 +21,7 @@ import {
   JSX,
   splitProps,
 } from "solid-js";
+import { makePersisted } from "@solid-primitives/storage";
 import axios, { AxiosError } from "axios";
 import { ToggleSwitch } from "./ToggleSwitch";
 import { DeckInfoProps } from "./DeckBriefInfo";
@@ -152,6 +153,12 @@ export function RoomDialog(props: RoomDialogProps) {
     dialogEl.close();
   };
   const { versionInfo } = useVersionContext();
+  const [savedVersion, setSavedVersion] = makePersisted(
+    createSignal<number | null>(null),
+    {
+      name: "room-game-version",
+    },
+  );
   const [version, setVersion] = createSignal(-1);
   const [timeConfig, setTimeConfig] = createSignal(TIME_CONFIGS[1]);
   const [isPublic, setIsPublic] = createSignal(true);
@@ -164,11 +171,33 @@ export function RoomDialog(props: RoomDialogProps) {
 
   createEffect(() => {
     const versions = versionInfo()?.supportedGameVersions ?? [];
+    if (versions.length === 0) {
+      setVersion(-1);
+      return;
+    }
     if (props.joiningRoomInfo?.config.gameVersion) {
       const ver = versions.indexOf(props.joiningRoomInfo.config.gameVersion);
       setVersion(ver);
+    } else if (
+      savedVersion() !== null &&
+      savedVersion()! >= 0 &&
+      savedVersion()! < versions.length
+    ) {
+      setVersion(savedVersion()!);
     } else {
-      setVersion(versions.length - 1);
+      const latestVersion = versions.length - 1;
+      setVersion(latestVersion);
+      setSavedVersion(latestVersion);
+    }
+  });
+
+  createEffect(() => {
+    if (!editable()) {
+      return;
+    }
+    const ver = version();
+    if (ver >= 0 && savedVersion() !== ver) {
+      setSavedVersion(ver);
     }
   });
 
