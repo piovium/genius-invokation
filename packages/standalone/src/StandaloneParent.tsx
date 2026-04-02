@@ -274,67 +274,63 @@ export function StandaloneParent(props: StandaloneParentProps) {
   });
 
   return (
-    <div>
+    <div class="standalone-board-shell">
       <Show
         when={viewingState()}
         fallback={
           <>
-            <div class="standalone-board-shell">
-              <div class="title-row">
-                <span class="title">后手方棋盘</span>
-                <button disabled={stateLog().length <= 1} onClick={enableLog}>
-                  查看历史
-                </button>
-              </div>
-              <Chessboard />
+            <div class="title-row">
+              <span class="title">后手方棋盘</span>
+              <button disabled={stateLog().length <= 1} onClick={enableLog}>
+                查看历史
+              </button>
             </div>
+            <Chessboard />
           </>
         }
       >
         {(state) => (
           <>
-            <div class="standalone-board-shell">
-              <div class="title-row">
-                <span class="title">
-                  {viewingWho() ? "后" : "先"}手方棋盘（查看历史中）
-                </span>
-                <Show
-                  when={viewingLogIndex() <= maxLogIndex() && state().canResume}
-                >
-                  <button onClick={resumeGame}>从此处继续</button>
-                </Show>
-                <button onClick={() => setViewingWho((i) => (1 - i) as 0 | 1)}>
-                  切换玩家
-                </button>
-                <button
-                  disabled={viewingLogIndex() <= 0}
-                  onClick={() => setViewingLogIndex((i) => i - 1)}
-                >
-                  后退一步
-                </button>
-                <span>
-                  {viewingLogIndex() + 1} / {stateLog().length}
-                </span>
-                <button
-                  disabled={viewingLogIndex() >= maxLogIndex()}
-                  onClick={() => setViewingLogIndex((i) => i + 1)}
-                >
-                  前进一步
-                </button>
-                <button
-                  disabled={fromImport()}
-                  onClick={() => setViewingLogIndex(-1)}
-                >
-                  返回游戏
-                </button>
-              </div>
-              <StandaloneChessboard
-                class="grayscale"
-                who={viewingWho()}
-                state={exposeState(viewingWho(), state().state)}
-                mutations={[]}
-              />
+            <div class="title-row">
+              <span class="title">
+                {viewingWho() ? "后" : "先"}手方棋盘（查看历史中）
+              </span>
+              <Show
+                when={viewingLogIndex() <= maxLogIndex() && state().canResume}
+              >
+                <button onClick={resumeGame}>从此处继续</button>
+              </Show>
+              <button onClick={() => setViewingWho((i) => (1 - i) as 0 | 1)}>
+                切换玩家
+              </button>
+              <button
+                disabled={viewingLogIndex() <= 0}
+                onClick={() => setViewingLogIndex((i) => i - 1)}
+              >
+                后退一步
+              </button>
+              <span>
+                {viewingLogIndex() + 1} / {stateLog().length}
+              </span>
+              <button
+                disabled={viewingLogIndex() >= maxLogIndex()}
+                onClick={() => setViewingLogIndex((i) => i + 1)}
+              >
+                前进一步
+              </button>
+              <button
+                disabled={fromImport()}
+                onClick={() => setViewingLogIndex(-1)}
+              >
+                返回游戏
+              </button>
             </div>
+            <StandaloneChessboard
+              class="grayscale"
+              who={viewingWho()}
+              state={exposeState(viewingWho(), state().state)}
+              mutations={[]}
+            />
           </>
         )}
       </Show>
