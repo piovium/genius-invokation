@@ -138,6 +138,7 @@ export function GameStateEditor(props: GameStateEditorProps) {
   const [local, rest] = splitProps(props, [
     "initialValue",
     "onSubmit",
+    "children",
     "class",
   ]);
   const initialState = local.initialValue ?? createDefaultGameState();
@@ -400,14 +401,14 @@ export function GameStateEditor(props: GameStateEditorProps) {
           {/* Header */}
           <div class="flex-none px-4 py-4 sm:px-6 lg:px-8 border-b border-[var(--gi-editor-border-strong)] bg-slate-950/70">
             <div class="flex flex-wrap items-center justify-between gap-3">
-              <div>
+              <div class="flex min-w-0 items-center gap-3">
                 <h1 class="text-2xl font-semibold text-amber-50">
                   游戏状态编辑
                 </h1>
               </div>
               <div class="flex flex-wrap items-center gap-3">
                 <Show when={errors().length > 0 || !formValid()}>
-                  <span class="rounded-full border border-rose-300/30 bg-rose-400/10 px-3 py-1.5 text-xs text-rose-100">
+                  <span class="rounded-full border b-solid border-rose-300/30 bg-rose-400/10 px-3 py-1.5 text-xs text-rose-100">
                     {errors().length > 0
                       ? `存在 ${errors().length} 个状态问题`
                       : "表单输入未完成"}
@@ -415,12 +416,13 @@ export function GameStateEditor(props: GameStateEditorProps) {
                 </Show>
                 <button
                   type="button"
-                  class="gi-editor-button rounded-full border border-cyan-200/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-semibold text-cyan-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  class="gi-editor-button rounded-full border b-solid border-cyan-200/30 bg-cyan-300/10 px-5 py-2.5 text-sm font-semibold text-cyan-50 disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={!formValid() || errors().length > 0}
                   onClick={submit}
                 >
                   完成
                 </button>
+                {local.children}                
               </div>
             </div>
           </div>

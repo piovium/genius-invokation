@@ -82,7 +82,7 @@ export function StandaloneChild() {
   });
 
   return (
-    <div>
+    <div class="standalone-board-shell">
       <div class="title-row">
         <span class="title">先手方棋盘</span>
       </div>

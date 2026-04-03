@@ -274,7 +274,7 @@ export function StandaloneParent(props: StandaloneParentProps) {
   });
 
   return (
-    <div>
+    <div class="standalone-board-shell">
       <Show
         when={viewingState()}
         fallback={

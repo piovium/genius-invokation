@@ -326,7 +326,15 @@ export function App() {
           <GameStateEditor
             initialValue={editorInitialState()}
             onSubmit={onEditorSubmit}
-          />
+          >
+            <button
+              class="editor-back-button"
+              type="button"
+              onClick={() => setMode(GameMode.NotStarted)}
+            >
+              返回首页
+            </button>
+          </GameStateEditor>
         </Match>
       </Switch>
       <dialog ref={deckBuilderDialog!} class="deck-builder-dialog">

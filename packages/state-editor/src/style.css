@@ -30,7 +30,7 @@
 
   .gi-editor-frame {
     height: 100%;
-    max-width: 1600px;
+    max-width: 150vh;
     margin: 0 auto;
   }
 
