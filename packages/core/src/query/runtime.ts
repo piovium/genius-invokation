@@ -30,8 +30,19 @@ interface EntityEntry extends EntityWithArea {
   index: number;
 }
 
+const assertsArgCount = (op: string, args: unknown[], expected = 2) => {
+  if (args.length !== expected) {
+    throw new Error(
+      `Invalid number of arguments for '${op}': expected ${expected}, got ${args.length}`,
+    );
+  }
+};
+
+type NumericalLikeExpression =
+  | SExprSchema.NumericalExpression
+  | SExprSchema.BooleanExpression;
 type ExpressionKeyAndDepth = [key: string, depth: number];
-type ParsedExpression<Ret = any> = (id: number) => Ret;
+type ParsedExpression = (variables: Record<string, number>) => number;
 type ParsedExpressionAndIsCompiled = [
   exprFn: ParsedExpression,
   compiled: boolean,
@@ -64,7 +75,12 @@ class QueryRuntime {
     switch (orderBySpec[0]) {
       case "expr": {
         const [_, expr] = orderBySpec;
-        return this.#buildExpression(expr, runCountHint);
+        const built = QueryRuntime.#buildExpression(
+          expr,
+          runCountHint ?? this.entities.size,
+        );
+        return (id: number) =>
+          built(this.entities.get(id)?.state.variables ?? {});
       }
       case "fn": {
         const [_, code] = orderBySpec;
@@ -92,16 +108,16 @@ class QueryRuntime {
    * - For `depth` = 1, use Compile only when `runCountHint` > 15.
    * - For 2 <= `depth` <= 3, use Compile only when `runCountHint` > 5.
    * - For `depth` > 3, always use Compile.
-   * 
+   *
    * @ref Benchmark Gist: https://gist.github.com/guyutongxue/d55be95c3a171c1f3fcd2b4093cf5820
-   * 
+   *
    * @param expr
    * @param runCountHint
    */
-  #buildExpression(
-    expr: SExprSchema.NumericalExpression | SExprSchema.BooleanExpression,
-    runCountHint = this.entities.size,
-  ): (id: number) => any {
+  static #buildExpression(
+    expr: NumericalLikeExpression,
+    runCountHint: number,
+  ): ParsedExpression {
     const [cacheKey, depth] = this.#getExpressionKeyAndEstimatedDepth(expr);
     const cachedEntry = this.#expressionCache.get(cacheKey);
     const shouldCompile =
@@ -110,21 +126,215 @@ class QueryRuntime {
       return cachedEntry[0];
     }
     if (shouldCompile) {
-      // TODO
-      const compiledFn = () => 0;
+      const compiledFn = this.#compileExpression(expr);
       this.#expressionCache.set(cacheKey, [compiledFn, true]);
       return compiledFn;
     } else {
-      // TODO
-      const interpretFn = () => 0;
+      const interpretFn = this.#interpretExpression(expr);
       this.#expressionCache.set(cacheKey, [interpretFn, false]);
       return interpretFn;
     }
   }
 
-  #expressionKeyCache = new WeakMap<object, ExpressionKeyAndDepth>();
-  #getExpressionKeyAndEstimatedDepth(
-    expr: SExprSchema.NumericalExpression | SExprSchema.BooleanExpression,
+  static #interpretExpression(expr: NumericalLikeExpression): ParsedExpression {
+    return (variables: Record<string, number>) => {
+      const visitor = (expr: Expression | NumericalLikeExpression): number => {
+        if (typeof expr === "number") {
+          return expr;
+        }
+        if (typeof expr === "string") {
+          return variables[expr] ?? Number.NaN;
+        }
+        const [op, ...args] = expr as Exclude<
+          NumericalLikeExpression,
+          number | string
+        >;
+        switch (op) {
+          case "+": {
+            return args.reduce<number>((sum, arg) => sum + visitor(arg), 0);
+          }
+          case "-": {
+            if (args.length === 1) {
+              return -visitor(args[0]);
+            } else if (args.length === 2) {
+              return visitor(args[0]) - visitor(args[1]);
+            } else {
+              throw new Error(
+                `Invalid number of arguments for '-': ${args.length}`,
+              );
+            }
+          }
+          case "*": {
+            return args.reduce<number>(
+              (product, arg) => product * visitor(arg),
+              1,
+            );
+          }
+          case "/": {
+            if (args.length === 1) {
+              return 1 / visitor(args[0]);
+            } else if (args.length === 2) {
+              return visitor(args[0]) / visitor(args[1]);
+            } else {
+              throw new Error(
+                `Invalid number of arguments for '/': ${args.length}`,
+              );
+            }
+          }
+          case "%": {
+            assertsArgCount("%", args);
+            return visitor(args[0]) % visitor(args[1]);
+          }
+          case "min": {
+            return Math.min(...args.map(visitor));
+          }
+          case "max": {
+            return Math.max(...args.map(visitor));
+          }
+          case "=": {
+            assertsArgCount("=", args);
+            return +(visitor(args[0]) === visitor(args[1]));
+          }
+          case "!=": {
+            assertsArgCount("!=", args);
+            return +(visitor(args[0]) !== visitor(args[1]));
+          }
+          case ">": {
+            assertsArgCount(">", args);
+            return +(visitor(args[0]) > visitor(args[1]));
+          }
+          case ">=": {
+            assertsArgCount(">=", args);
+            return +(visitor(args[0]) >= visitor(args[1]));
+          }
+          case "<": {
+            assertsArgCount("<", args);
+            return +(visitor(args[0]) < visitor(args[1]));
+          }
+          case "<=": {
+            assertsArgCount("<=", args);
+            return +(visitor(args[0]) <= visitor(args[1]));
+          }
+          case "and": {
+            return args.every(visitor) ? 1 : 0;
+          }
+          case "or": {
+            return args.some(visitor) ? 1 : 0;
+          }
+          case "not": {
+            assertsArgCount("not", args, 1);
+            return visitor(args[0]) ? 0 : 1;
+          }
+          default: {
+            const _check: never = op;
+            throw new Error(`Unknown expression type: ${expr[0]}`);
+          }
+        }
+      };
+      return visitor(expr);
+    };
+  }
+
+  static #compileExpression(expr: NumericalLikeExpression): ParsedExpression {
+    const VARIABLES_PARAM = "variables";
+    const visitor = (expr: Expression | NumericalLikeExpression): string => {
+      if (typeof expr === "number") {
+        return String(expr);
+      }
+      if (typeof expr === "string") {
+        return `(${VARIABLES_PARAM}[${JSON.stringify(expr)}] ?? Number.NaN)`;
+      }
+      const [op, ...args] = expr as Exclude<
+        NumericalLikeExpression,
+        number | string
+      >;
+      switch (op) {
+        case "+": {
+          return `(${args.map(visitor).join(" + ")})`;
+        }
+        case "-": {
+          if (args.length === 1) {
+            return `(-${visitor(args[0])})`;
+          } else if (args.length === 2) {
+            return `(${visitor(args[0])} - ${visitor(args[1])})`;
+          } else {
+            throw new Error(
+              `Invalid number of arguments for '-': ${args.length}`,
+            );
+          }
+        }
+        case "*": {
+          return `(${args.map(visitor).join(" * ")})`;
+        }
+        case "/": {
+          if (args.length === 1) {
+            return `(1 / ${visitor(args[0])})`;
+          } else if (args.length === 2) {
+            return `(${visitor(args[0])} / ${visitor(args[1])})`;
+          } else {
+            throw new Error(
+              `Invalid number of arguments for '/': ${args.length}`,
+            );
+          }
+        }
+        case "%": {
+          assertsArgCount("%", args);
+          return `(${visitor(args[0])} % ${visitor(args[1])})`;
+        }
+        case "min": {
+          return `Math.min(${args.map(visitor).join(", ")})`;
+        }
+        case "max": {
+          return `Math.max(${args.map(visitor).join(", ")})`;
+        }
+        case "=": {
+          assertsArgCount("=", args);
+          return `(+(${visitor(args[0])} === ${visitor(args[1])}))`;
+        }
+        case "!=": {
+          assertsArgCount("!=", args);
+          return `(+(${visitor(args[0])} !== ${visitor(args[1])}))`;
+        }
+        case ">": {
+          assertsArgCount(">", args);
+          return `(+(${visitor(args[0])} > ${visitor(args[1])}))`;
+        }
+        case ">=": {
+          assertsArgCount(">=", args);
+          return `(+(${visitor(args[0])} >= ${visitor(args[1])}))`;
+        }
+        case "<": {
+          assertsArgCount("<", args);
+          return `(+(${visitor(args[0])} < ${visitor(args[1])}))`;
+        }
+        case "<=": {
+          assertsArgCount("<=", args);
+          return `(+(${visitor(args[0])} <= ${visitor(args[1])}))`;
+        }
+        case "and": {
+          return `(${args.map(visitor).join(" && ")})`;
+        }
+        case "or": {
+          return `(${args.map(visitor).join(" || ")})`;
+        }
+        case "not": {
+          assertsArgCount("not", args, 1);
+          return `(!${visitor(args[0])})`;
+        }
+        default: {
+          const _check: never = op;
+          throw new Error(`Unknown expression type: ${expr[0]}`);
+        }
+      }
+    };
+    const functionBody = `return ${visitor(expr)};`;
+    // console.log("Compiled expression function body:", functionBody);
+    return new Function(VARIABLES_PARAM, functionBody) as ParsedExpression;
+  }
+
+  static #expressionKeyCache = new WeakMap<object, ExpressionKeyAndDepth>();
+  static #getExpressionKeyAndEstimatedDepth(
+    expr: NumericalLikeExpression,
   ): ExpressionKeyAndDepth {
     if (typeof expr !== "object") {
       return [String(expr), 0];
@@ -139,13 +349,13 @@ class QueryRuntime {
     return entry;
   }
 
-  #expressionCache = new Map<string, ParsedExpressionAndIsCompiled>();
+  static #expressionCache = new Map<string, ParsedExpressionAndIsCompiled>();
   /**
    * Estimate the maximum depth of an expression tree.
    * We do not consider literal `[` inside string because it is rare.
    * (Just an estimation for optimization purpose, not for correctness.)
    */
-  #estimateExpressionDepth(jsonKey: string) {
+  static #estimateExpressionDepth(jsonKey: string) {
     let depth = 0;
     let maxDepth = 0;
     for (const char of jsonKey) {
