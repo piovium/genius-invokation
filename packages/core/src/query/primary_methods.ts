@@ -46,6 +46,7 @@ import {
   type TypingInfoFromMeta,
   type AnyTuple,
   toExpressionUnordered,
+  stringifyFunction,
 } from "./utils";
 
 type EventCardHandle = number & { readonly _eventCard: unique symbol };
@@ -319,9 +320,9 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
           ["expr", [opOrValue, name, valueOrUndefined]],
         ]);
       } else if (typeof opOrValue === "function") {
-        const fnSource = opOrValue.toString();
+        const fnCode = stringifyFunction(opOrValue);
         const prop = escapeUnsafeChars(JSON.stringify(name));
-        const wrappedSource = `(v) => (${fnSource})(v[${prop}])`;
+        const wrappedSource = `(v) => (${fnCode})(v[${prop}])`;
         this._internal.addConstraint(["variables", ["fn", wrappedSource]]);
       } else {
         const _exhaustiveCheck: never = opOrValue!;
@@ -329,8 +330,8 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
       }
     } else {
       const [pred] = args;
-      const fnSource = pred.toString();
-      this._internal.addConstraint(["variables", ["fn", fnSource]]);
+      const fnCode = stringifyFunction(pred);
+      this._internal.addConstraint(["variables", ["fn", fnCode]]);
     }
     return this._self;
   }

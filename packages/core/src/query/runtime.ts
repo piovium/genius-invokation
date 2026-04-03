@@ -14,7 +14,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { AnyState, GameState } from "../base/state";
-import { toExpression, type Expression, type IQuery } from "./utils";
+import {
+  reviveFunction,
+  toExpression,
+  type Expression,
+  type IQuery,
+} from "./utils";
 import {
   getAllEntitiesWithArea,
   toSortedBy,
@@ -68,13 +73,13 @@ class QueryRuntime {
     this.#globalUniverse = new Set(this.entities.keys());
   }
 
-  #parseOrderBy(
-    orderBySpec: SExprSchema.OrderBySpec,
+  #parseOrderByOrVariable(
+    spec: SExprSchema.OrderBySpec | SExprSchema.VariableSpec,
     runCountHint?: number,
   ): (id: number) => number {
-    switch (orderBySpec[0]) {
+    switch (spec[0]) {
       case "expr": {
-        const [_, expr] = orderBySpec;
+        const [_, expr] = spec;
         const built = QueryRuntime.#buildExpression(
           expr,
           runCountHint ?? this.entities.size,
@@ -83,14 +88,26 @@ class QueryRuntime {
           built(this.entities.get(id)?.state.variables ?? {});
       }
       case "fn": {
-        const [_, code] = orderBySpec;
-        // TODO
-        return () => 0;
+        const [_, code] = spec;
+        const revived = QueryRuntime.#reviveFunction(code);
+        return (id: number) =>
+          revived(this.entities.get(id)?.state.variables ?? {}) as number;
       }
       default: {
-        throw new Error(`Unknown orderBy spec: ${orderBySpec[0]}`);
+        throw new Error(`Unknown orderBy/variable spec: ${spec[0]}`);
       }
     }
+  }
+
+  static #revivedFunctions = new Map<string, ParsedExpression>();
+  static #reviveFunction(code: string): ParsedExpression {
+    const cached = this.#revivedFunctions.get(code);
+    if (cached) {
+      return cached;
+    }
+    const fn = reviveFunction(code) as ParsedExpression;
+    this.#revivedFunctions.set(code, fn);
+    return fn;
   }
 
   /**
@@ -376,7 +393,7 @@ class QueryRuntime {
         const unorderedResult = this.executeUnordered(unorderedQuery);
         const orderByFns = [
           ...orderBy.map((spec) =>
-            this.#parseOrderBy(spec, unorderedResult.size),
+            this.#parseOrderByOrVariable(spec, unorderedResult.size),
           ),
           this.#defaultOrder,
         ];
@@ -404,8 +421,23 @@ class QueryRuntime {
       case "position":
       case "tag":
       case "type":
-      case "variables":
-      case "who":
+      // TODO
+      case "variables": {
+        const spec = expr[1] as SExprSchema.VariableSpec;
+        const filter = this.#parseOrderByOrVariable(spec);
+        return new Set(universe.values().filter(filter));
+      }
+      case "who": {
+        const [_, whoDesc] = expr;
+        const who = (
+          {
+            my: [0, 1],
+            opp: [1, 0],
+          } as const
+        )[whoDesc][this.who];
+        const filter = (id: number) => this.entities.get(id)?.area.who === who;
+        return new Set(universe.values().filter(filter));
+      }
 
       // complex
       case "recentFrom":

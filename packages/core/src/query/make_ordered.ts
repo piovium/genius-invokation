@@ -12,10 +12,11 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 import type { CharacterVariableConfigs } from "../base/character";
 import type { SExprSchema } from "./expr_schema";
 import {
+  stringifyFunction,
   toExpression,
   toExpressionUnordered,
   typingInfo,
@@ -38,7 +39,9 @@ type VarName<Ty extends TypingInfoBase> =
       : never);
 // | (string & {});
 
-export class MakeOrderedMethods<Ty extends TypingInfoBase> implements IQuery<Ty> {
+export class MakeOrderedMethods<Ty extends TypingInfoBase>
+  implements IQuery<Ty>
+{
   declare [typingInfo]: Ty;
 
   private _unorderedQuery: SExprSchema.UnorderedQuery;
@@ -63,7 +66,8 @@ export class MakeOrderedMethods<Ty extends TypingInfoBase> implements IQuery<Ty>
     fn: (variables: Record<VarName<Ty>, number>) => number,
   ): MakeOrderedMethods<Ty> {
     const self = this._makeThisOrdered();
-    self._orderBySpecs.push(["fn", fn.toString()]);
+    const fnCode = stringifyFunction(fn);
+    self._orderBySpecs.push(["fn", fnCode]);
     return self;
   }
   orderBy<V extends VarName<Ty>>(variable: V): MakeOrderedMethods<Ty>;

@@ -12,7 +12,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 import type { EntityArea, EntityType } from "../base/entity";
 import type { ExEntityType } from "../builder/type";
 import type { SExprSchema } from "./expr_schema";
@@ -296,3 +296,37 @@ export type RelatedToReq<
   Input extends TypingInfoBase,
   Req extends ReqBase,
 > = PropsRelated<Input, Req, "type" | "areaType">;
+
+// https://github.com/puppeteer/puppeteer/blob/bf1e9722eef723c80250119d81fd9d9e0596c074/packages/puppeteer-core/src/util/Function.ts
+
+type UnknownFunction = (...args: unknown[]) => unknown;
+export function reviveFunction(code: string): UnknownFunction {
+  return new Function(`return ${code}`)() as UnknownFunction;
+}
+
+export function stringifyFunction(fn: (...args: never) => unknown): string {
+  let value = fn.toString();
+  if (
+    value.match(/^(async )*function(\(|\s)/) ||
+    value.match(/^(async )*function\s*\*\s*/)
+  ) {
+    return value;
+  }
+  const isArrow =
+    value.startsWith("(") ||
+    value.match(/^async\s*\(/) ||
+    value.match(
+      /^(async)*\s*(?:[$_\p{ID_Start}])(?:[$\u200C\u200D\p{ID_Continue}])*\s*=>/u,
+    );
+  if (isArrow) {
+    return value;
+  }
+  // This means we might have a function shorthand (e.g. `test(){}`). Let's
+  // try prefixing.
+  let prefix = "function ";
+  if (value.startsWith("async ")) {
+    prefix = `async ${prefix}`;
+    value = value.substring("async ".length);
+  }
+  return `${prefix}${value}`;
+}
