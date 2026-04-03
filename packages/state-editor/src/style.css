@@ -1,0 +1,133 @@
+.gi-state-editor {
+  color: #f6efe3;
+  overflow: hidden;
+
+  --gi-editor-border: rgba(255, 236, 207, 0.16);
+  --gi-editor-border-strong: rgba(255, 236, 207, 0.34);
+  --gi-editor-panel: linear-gradient(
+    180deg,
+    rgba(37, 47, 66, 0.95),
+    rgba(17, 24, 39, 0.95)
+  );
+  --gi-editor-panel-soft: linear-gradient(
+    180deg,
+    rgba(54, 68, 90, 0.82),
+    rgba(25, 34, 51, 0.9)
+  );
+  --gi-editor-highlight: #e2b96c;
+  --gi-editor-accent: #6bc6c3;
+  --gi-editor-danger: #ef7f73;
+  --gi-editor-shadow: 0 24px 60px rgba(4, 10, 18, 0.35);
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(107, 198, 195, 0.18), transparent 36%),
+    radial-gradient(
+      circle at bottom right,
+      rgba(226, 185, 108, 0.2),
+      transparent 28%
+    ),
+    linear-gradient(180deg, #1a2435, #0f1522 58%, #131a28);
+
+  .gi-editor-frame {
+    height: 100%;
+    max-width: 150vh;
+    margin: 0 auto;
+  }
+
+  .gi-editor-scroll {
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+  }
+
+  .gi-editor-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .gi-editor-modal-panel {
+
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    overflow: auto;
+
+    width: min(980px, 100%);
+    max-height: calc(100vh - 2rem);
+    border: 1px solid var(--gi-editor-border-strong);
+    border-radius: 24px;
+    background: linear-gradient(
+      180deg,
+      rgba(32, 41, 59, 0.98),
+      rgba(12, 18, 30, 0.98)
+    );
+    box-shadow: var(--gi-editor-shadow);
+    
+    &::backdrop {
+      background: rgba(6, 10, 18, 0.7);
+      backdrop-filter: blur(10px);
+    }
+  }
+
+  .gi-editor-card-image {
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+  }
+
+  .gi-editor-icon-image {
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  .gi-editor-preview-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .gi-editor-button {
+    transition:
+      transform 120ms ease,
+      border-color 120ms ease,
+      background-color 120ms ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+}
+
+@layer reset {
+  button:where(.gi-state-editor *) {
+    appearance: none;
+    background: unset;
+    border: unset;
+  }
+}
+@media (max-width: 900px) {
+  .gi-state-editor .gi-editor-mobile-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .gi-state-editor .gi-editor-modal-panel {
+    border-radius: 18px;
+  }
+}

@@ -242,6 +242,7 @@
         "@gi-tcg/data-code-analyzer": "workspace:*",
         "@gi-tcg/deck-builder": "workspace:*",
         "@gi-tcg/detail-log-viewer": "workspace:*",
+        "@gi-tcg/state-editor": "workspace:*",
         "@gi-tcg/utils": "workspace:*",
         "@gi-tcg/web-ui-core": "workspace:*",
         "@vercel/analytics": "^1.2.0",
@@ -257,6 +258,28 @@
         "vite": "^6.0.11",
         "vite-plugin-solid": "^2.11.1",
         "vite-plugin-static-copy": "^3.1.1",
+      },
+    },
+    "packages/state-editor": {
+      "name": "@gi-tcg/state-editor",
+      "dependencies": {
+        "@gi-tcg/assets-manager": "workspace:*",
+        "@gi-tcg/core": "workspace:*",
+        "@gi-tcg/data": "workspace:*",
+        "@gi-tcg/typings": "workspace:*",
+        "@gi-tcg/utils": "workspace:*",
+        "remeda": "^2.33.6",
+        "solid-js": "catalog:",
+      },
+      "devDependencies": {
+        "@solid-primitives/storage": "^4.2.1",
+        "immer": "^11.1.4",
+        "rollup-plugin-node-externals": "catalog:",
+        "unocss": "catalog:",
+        "vite": "catalog:",
+        "vite-plugin-dts": "catalog:",
+        "vite-plugin-solid": "catalog:",
+        "ya-json-schema-types": "^2.0.0",
       },
     },
     "packages/test": {
@@ -818,6 +841,8 @@
     "@gi-tcg/server": ["@gi-tcg/server@workspace:packages/server"],
 
     "@gi-tcg/standalone": ["@gi-tcg/standalone@workspace:packages/standalone"],
+
+    "@gi-tcg/state-editor": ["@gi-tcg/state-editor@workspace:packages/state-editor"],
 
     "@gi-tcg/test": ["@gi-tcg/test@workspace:packages/test"],
 
@@ -2265,7 +2290,7 @@
 
     "regjsparser": ["regjsparser@0.9.1", "", { "dependencies": { "jsesc": "~0.5.0" }, "bin": { "regjsparser": "bin/parser" } }, "sha512-dQUtn90WanSNl+7mQKcXAgZxvUe7Z0SqXlgzv0za4LwiUhyzBC58yQO3liFoUgu8GiJVInAhJjkj1N0EtQ5nkQ=="],
 
-    "remeda": ["remeda@2.26.1", "", { "dependencies": { "type-fest": "^4.41.0" } }, "sha512-hpiLfhUwkJhiMS3Z7dRrygcRdkMRZASw5qUdNdi33x1/Y9y/J5q5TyLyf8btDoVLIcsg/4fzPdaGXDTbnl+ixw=="],
+    "remeda": ["remeda@2.33.6", "", {}, "sha512-tazDGH7s75kUPGBKLvhgBEHMgW+TdDFhjUAMdQj57IoWz6HsGa5D2RX5yDUz6IIqiRRvZiaEHzCzWdTeixc/Kg=="],
 
     "require-directory": ["require-directory@2.1.1", "", {}, "sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q=="],
 
@@ -2592,6 +2617,8 @@
     "xtend": ["xtend@4.0.2", "", {}, "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="],
 
     "y18n": ["y18n@5.0.8", "", {}, "sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA=="],
+
+    "ya-json-schema-types": ["ya-json-schema-types@2.0.0", "", { "dependencies": { "type-fest": "^5.5.0" } }, "sha512-DWIXJzprR7bwvpiOuIJHAuTwZMfHG9i5VOR3+jArHz8Ew1ZNqZtsJmvjafb4siw7hIcRUzYqYHFJlb1uo/T8RQ=="],
 
     "yallist": ["yallist@4.0.0", "", {}, "sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A=="],
 
@@ -3196,8 +3223,6 @@
     "readdirp/picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
 
     "regjsparser/jsesc": ["jsesc@0.5.0", "", { "bin": { "jsesc": "bin/jsesc" } }, "sha512-uZz5UnB7u4T9LvwmFqXii7pZSouaRPorGs5who1Ip7VO0wxanFvBL7GkM6dTHlgX+jhBApRetaWpnDabOeTcnA=="],
-
-    "remeda/type-fest": ["type-fest@4.41.0", "", {}, "sha512-TeTSQ6H5YHvpqVwBRcnLDCBnDOHWYu7IvGbHT6N8AOymcr9PJGjc1GTtiWZTYg0NCgYwvnYWEkVChQAr9bjfwA=="],
 
     "simple-git/debug": ["debug@4.3.5", "", { "dependencies": { "ms": "2.1.2" } }, "sha512-pt0bNEmneDIvdL1Xsd9oDQ/wrQRkXDT4AUWlNZNPKvW5x/jyO9VFXkJUP07vQ2upmw5PlaITaPKc31jK13V+jg=="],
 

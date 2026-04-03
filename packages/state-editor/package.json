@@ -1,0 +1,35 @@
+{
+  "name": "@gi-tcg/state-editor",
+  "type": "module",
+  "exports": {
+    ".": {
+      "bun": "./src/index.tsx",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "scripts": {
+    "dev": "bunx --bun vite",
+    "build": "bunx --bun vite build"
+  },
+  "dependencies": {
+    "@gi-tcg/assets-manager": "workspace:*",
+    "@gi-tcg/core": "workspace:*",
+    "@gi-tcg/data": "workspace:*",
+    "@gi-tcg/typings": "workspace:*",
+    "@gi-tcg/utils": "workspace:*",
+    "remeda": "^2.33.6",
+    "solid-js": "catalog:"
+  },
+  "devDependencies": {
+    "@solid-primitives/storage": "^4.2.1",
+    "immer": "^11.1.4",
+    "rollup-plugin-node-externals": "catalog:",
+    "unocss": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:",
+    "vite-plugin-solid": "catalog:",
+    "ya-json-schema-types": "^2.0.0"
+  }
+}

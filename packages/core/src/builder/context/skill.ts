@@ -527,9 +527,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
       ),
     );
     return toSortedBy(player.hands.filter(filter), (card) => [
-        sortData.get(card.id)!.cost,
-        sortData.get(card.id)!.tb,
-      ]);
+      sortData.get(card.id)!.cost,
+      sortData.get(card.id)!.tb,
+    ]);
   }
 
   /** 我方或对方当前元素骰费用最多的 `count` 张手牌 */
@@ -1424,10 +1424,19 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return this.enableShortcut();
   }
 
-  createHandCard(cardId: CardHandle) {
+  createHandCard(
+    cardId: CardHandle,
+  ): ShortcutReturn<Meta, RxEntityState<Meta, EntityType> | void> {
     const cardDef = this.state.data.entities.get(cardId);
     if (typeof cardDef === "undefined") {
       throw new GiTcgDataError(`Unknown card definition id ${cardId}`);
+    }
+    if (this.player.hands.length >= this.state.config.maxHandsCount) {
+      this.mutator.log(
+        DetailLogType.Other,
+        `Cannot create hand card [${cardDef.type}:${cardId}] because player's hand is full`,
+      );
+      return this.enableShortcut();
     }
     const { state } = this.callAndEmit(
       "createHandCard",

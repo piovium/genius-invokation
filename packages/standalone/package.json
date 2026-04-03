@@ -16,6 +16,7 @@
     "@gi-tcg/data": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
     "@gi-tcg/web-ui-core": "workspace:*",
+    "@gi-tcg/state-editor": "workspace:*",
     "@gi-tcg/deck-builder": "workspace:*",
     "@gi-tcg/detail-log-viewer": "workspace:*",
     "@gi-tcg/data-code-analyzer": "workspace:*",

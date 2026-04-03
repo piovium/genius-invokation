@@ -235,4 +235,5 @@ export type {
   SkillDefinition,
   InitiativeSkillDefinition,
   TriggeredSkillDefinition,
+  AttachmentDefinition,
 };

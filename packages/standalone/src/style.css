@@ -10,13 +10,43 @@ html {
 }
 
 #root {
-  margin: 0 auto;
-  width: min(100vw, 1280px);
-  /* overflow: hidden; */
+  width: 100%;
 }
 
 .gi-tcg-chessboard-new {
   height: 36rem;
+}
+
+.gi-state-editor {
+  height: 100vh;
+  width: 100%;
+}
+
+.standalone-board-shell {
+  max-width: calc((100vh - 80px) * 160 / 81);
+  margin: 0 auto;
+}
+
+.editor-back-button {
+  border: 1px solid rgb(165 243 252 / 0.3);;
+  border-radius: 9999px;
+  background: rgb(103 232 249 / 0.1);
+  color: #ecfeff;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.editor-back-button:hover {
+  background: rgb(30 41 59 / 0.95);
+}
+
+.editor-back-button:focus-visible {
+  outline: 2px solid #e5e7eb;
+  outline-offset: 3px;
+  background: rgb(30 41 59 / 0.95);
 }
 
 .title {
