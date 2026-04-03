@@ -37,6 +37,35 @@ test("'Fluent API' building tests", () => {
   `);
 });
 
+test("stringify of functions", () => {
+  expect(
+    prettyStringifySExpr(
+      queryToExpression($.my.summon.var(({ usage }) => usage >= 2)),
+    ),
+  ).toBe(dedent`
+    (intersection (defeated ignore)
+                  (who my)
+                  (area summons true)
+                  (variables (fn "({ usage }) => usage >= 2")))
+  `);
+
+  const obj = {
+    seemsAlive({ health }: Record<string, number>) {
+      return health > 0;
+    },
+  };
+  expect(
+    prettyStringifySExpr(
+      queryToExpression($.opp.character.var(obj.seemsAlive)),
+    ),
+  ).toBe(dedent`
+    (intersection (defeated ignore)
+                  (who opp)
+                  (area characters true)
+                  (variables (fn "function seemsAlive({ health }) {\\n      return health > 0;\\n    }")))
+  `);
+});
+
 function dedent(strings: TemplateStringsArray, ...values: unknown[]): string {
   const content = strings.reduce((acc, str, i) => {
     const value = i < values.length ? String(values[i]) : "";
