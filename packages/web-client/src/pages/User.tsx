@@ -42,12 +42,10 @@ export default function User() {
           })}
         </Match>
         <Match when={userInfo()}>
-          <div class="w-full flex flex-row justify-center">
-            <UserInfo
-              {...userInfo()}
-              editable={userInfo()?.id === mine()?.id}
-            />
-          </div>
+          <UserInfo
+            {...userInfo()}
+            editable={userInfo()?.id === mine()?.id}
+          />
         </Match>
       </Switch>
     </Layout>
