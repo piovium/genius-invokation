@@ -25,6 +25,7 @@ import { useI18n } from "../i18n";
 export interface DeckInfoProps extends DeckInfo {
   editable?: boolean;
   onDelete?: () => void;
+  onPin?: () => void;
 }
 
 function CharacterAvatar(props: { id: number }) {
@@ -113,6 +114,16 @@ export function DeckBriefInfo(props: DeckInfoProps) {
             <i class="i-mdi-file-export h-5.5 w-5.5" />
           </button>
           <Show when={props.editable}>
+            <button
+              class="btn color-blue-900 h-6 w-6 p-0 hover:color-blue-500"
+              title={t("pinDeck")}
+              onClick={(e: MouseEvent) => {
+                e.stopPropagation();
+                props.onPin?.();
+              }}
+            >
+              <i class="i-mdi-chevron-up-circle h-5.5 w-5.5" />
+            </button>
             <button
               class="btn color-red-800 h-6 w-6 p-0 hover:color-red-500"
               title={t("deleteDeck")}

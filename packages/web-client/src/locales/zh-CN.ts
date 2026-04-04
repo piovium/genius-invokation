@@ -109,6 +109,8 @@ export default {
   spectateUnavailable: "不可观战",
   slotAvailable: "虚位以待",
   copyShareCode: "复制分享码",
+  pinDeck: "置顶牌组",
+  pinFailed: "置顶失败",
   deleteDeck: "删除牌组",
   deleteDeckConfirm: "确定要删除牌组 {{name}} 吗？",
   pageNotFound: "页面未找到",

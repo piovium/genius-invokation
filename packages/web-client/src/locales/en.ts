@@ -111,6 +111,8 @@ export default {
   spectateUnavailable: "Spectating disabled",
   slotAvailable: "Empty slot",
   copyShareCode: "Copy share code",
+  pinDeck: "Pin deck",
+  pinFailed: "Failed to pin deck",
   deleteDeck: "Delete deck",
   deleteDeckConfirm: "Confirm to delete deck {{name}}?",
   pageNotFound: "Page not found",

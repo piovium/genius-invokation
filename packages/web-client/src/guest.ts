@@ -40,6 +40,7 @@ export type GuestDeck = readonly [
       deck: Partial<DeckWithName>,
     ) => Promise<DeckInfo>;
     removeGuestDeck: (id: number) => Promise<void>;
+    pinGuestDeck: (id: number) => Promise<void>;
   },
 ];
 
@@ -59,7 +60,7 @@ const [guestDeck, setGuestDeck] = makePersisted(createStore<DeckInfo[]>([]), {
 type VersionResponse = Omit<DeckInfo, "id">;
 
 export const useGuestDecks = (): GuestDeck => [
-  () => guestDeck,
+  () => [...guestDeck].reverse(),
   {
     addGuestDeck: async (deck) => {
       const id = Date.now();
@@ -81,7 +82,8 @@ export const useGuestDecks = (): GuestDeck => [
       const result = { ...data, ...newDeck, id };
       setGuestDeck(
         produce((decks) => {
-          decks[index] = result;
+          decks.splice(index, 1);
+          decks.push(result);
         }),
       );
       return result;
@@ -94,6 +96,19 @@ export const useGuestDecks = (): GuestDeck => [
       setGuestDeck(
         produce((decks) => {
           decks.splice(idx, 1);
+        }),
+      );
+    },
+    pinGuestDeck: async (id) => {
+      const idx = guestDeck.findIndex((deck) => deck.id === id);
+      if (idx === -1) {
+        throw new Error("Deck not found");
+      }
+      const deck = guestDeck[idx];
+      setGuestDeck(
+        produce((decks) => {
+          decks.splice(idx, 1);
+          decks.push(deck);
         }),
       );
     },

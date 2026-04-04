@@ -155,7 +155,7 @@ export default function Home() {
                       </div>
                     </Match>
                     <Match when={true}>
-                      <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] md:gap-3 md:pr-6 md:overflow-y-auto scrollbar-thin-hover">
+                      <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] md:gap-3 md:pr-6 md:overflow-y-auto scrollbar-thin-hover">
                         <For
                           each={decks().data}
                           fallback={

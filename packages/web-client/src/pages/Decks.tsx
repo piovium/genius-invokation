@@ -15,7 +15,7 @@
 
 import { For, Match, Switch, createResource, Accessor } from "solid-js";
 import { Layout } from "../layouts/Layout";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { A } from "@solidjs/router";
 import { DeckBriefInfo } from "../components/DeckBriefInfo";
 import type { Deck } from "@gi-tcg/typings";
@@ -69,18 +69,38 @@ export function useDecks(): UseDecksResult {
       }
     },
     loading: () => status().type === "user" && userDecks.loading,
-    error: () => status().type === "user" ? userDecks.error : void 0,
+    error: () => (status().type === "user" ? userDecks.error : void 0),
     refetch,
   };
 }
 
 export default function Decks() {
   const { t } = useI18n();
+  const { status } = useAuth();
   const { decks, loading, error, refetch } = useDecks();
+  const [, { pinGuestDeck }] = useGuestDecks();
+
+  const pinDeck = async (deckId: number) => {
+    const { type } = status();
+    try {
+      if (type === "guest") {
+        await pinGuestDeck(deckId);
+      } else if (type === "user") {
+        await axios.patch(`decks/${deckId}`, {});
+      }
+      refetch();
+    } catch (e) {
+      if (e instanceof AxiosError) {
+        alert(e.response?.data?.message || t("pinFailed"));
+      }
+      console.error(e);
+    }
+  };
+
   return (
     <Layout>
       <div class="container mx-auto h-full px-2 flex flex-col">
-        <div class="flex flex-row gap-4 items-center mb-5">
+        <div class="flex flex-row gap-4 justify-between items-center mb-5">
           <h2 class="text-2xl font-bold">{t("myDecks")}</h2>
           <A class="btn btn-outline-green" href="/decks/new">
             <i class="i-mdi-plus" /> {t("add")}
@@ -92,7 +112,7 @@ export default function Decks() {
             {t("loadFailed", { message: error()?.message ?? String(error()) })}
           </Match>
           <Match when={true}>
-            <ul class="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] md:gap-3 md:overflow-y-auto scrollbar-thin-hover">
+            <ul class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(240px,1fr))] md:gap-3 md:overflow-y-auto scrollbar-thin-hover">
               <For
                 each={decks().data}
                 fallback={
@@ -103,6 +123,7 @@ export default function Decks() {
                   <DeckBriefInfo
                     editable
                     onDelete={() => refetch()}
+                    onPin={() => pinDeck(deckData.id)}
                     {...deckData}
                   />
                 )}
