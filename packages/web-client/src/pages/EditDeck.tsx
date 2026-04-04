@@ -126,8 +126,12 @@ export default function EditDeck() {
     try {
       const deck = deckValue();
       const code = DEFAULT_ASSETS_MANAGER.encode(deck);
-      await copyToClipboard(code);
-      alert(t("shareCodeCopied", { code }));
+      try {
+        await copyToClipboard(code);
+        alert(t("shareCodeCopied", { code }));
+      } catch (e) {
+        alert(t("shareCodeFallback", { code, error: (e as Error).message }));
+      }
     } catch (e) {
       if (e instanceof Error) {
         window.alert(e.message);
@@ -225,13 +229,19 @@ export default function EditDeck() {
                 <h2 class="text-xl md:text-2xl font-bold min-w-0 overflow-hidden whitespace-nowrap text-ellipsis flex-shrink-0">
                   {deckName()}
                 </h2>
-                <button class="btn btn-ghost h-8 w-8 p-1" onClick={startEditingName}>
+                <button
+                  class="btn btn-ghost h-8 w-8 p-1"
+                  onClick={startEditingName}
+                >
                   <i class="i-mdi-pencil-outline" />
                 </button>
               </div>
             }
           >
-            <form onSubmit={saveName} class="flex flex-row gap-1 md:gap-3 text-3.2 md:text-3.5">
+            <form
+              onSubmit={saveName}
+              class="flex flex-row gap-1 md:gap-3 text-3.2 md:text-3.5"
+            >
               <input
                 type="text"
                 required
@@ -258,16 +268,10 @@ export default function EditDeck() {
             </form>
           </Show>
           <div class="flex flex-row flex-1 gap-1 md:gap-3 text-3.2 md:text-3.5">
-            <button
-              class="btn btn-outline-blue"
-              onClick={importCode}
-            >
+            <button class="btn btn-outline-blue" onClick={importCode}>
               {t("importShareCode")}
             </button>
-            <button
-              class="btn btn-outline"
-              onClick={exportCode}
-            >
+            <button class="btn btn-outline" onClick={exportCode}>
               {t("generateShareCode")}
             </button>
             <button
