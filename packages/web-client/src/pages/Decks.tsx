@@ -79,7 +79,7 @@ export default function Decks() {
   const { decks, loading, error, refetch } = useDecks();
   return (
     <Layout>
-      <div class="container mx-auto px-2">
+      <div class="container mx-auto h-full px-2 flex flex-col">
         <div class="flex flex-row gap-4 items-center mb-5">
           <h2 class="text-2xl font-bold">{t("myDecks")}</h2>
           <A class="btn btn-outline-green" href="/decks/new">
@@ -92,7 +92,7 @@ export default function Decks() {
             {t("loadFailed", { message: error()?.message ?? String(error()) })}
           </Match>
           <Match when={true}>
-            <ul class="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] md:gap-3">
+            <ul class="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] md:gap-3 md:overflow-y-auto scrollbar-thin-hover">
               <For
                 each={decks().data}
                 fallback={
