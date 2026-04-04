@@ -13,7 +13,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { AnyState, GameState } from "../base/state";
+import type {
+  AnyState,
+  CharacterState,
+  CharacterTag,
+  GameState,
+} from "../base/state";
 import {
   reviveFunction,
   toExpression,
@@ -26,6 +31,8 @@ import {
   type EntityWithArea,
 } from "../utils";
 import type { SExprSchema } from "./expr_schema";
+import { CharacterBase } from "../builder/context/character";
+import { flip } from "@gi-tcg/utils";
 
 export function queryToExpression(query: IQuery): SExprSchema.Query {
   return query[toExpression]();
@@ -60,13 +67,41 @@ class QueryRuntime {
   readonly who: 0 | 1;
   readonly #defaultOrder: (id: number) => number;
 
+  #characters: ReadonlySet<number>;
+  #entitiesOnCharacters: ReadonlySet<number>;
+  #attachables: ReadonlySet<number>;
+  #attachments: ReadonlySet<number>;
+
   constructor(state: GameState, who: 0 | 1) {
-    this.entities = new Map(
-      getAllEntitiesWithArea(state).map((e, index) => [
-        e.state.id,
-        { ...e, index },
-      ]),
-    );
+    const entities = new Map<number, EntityEntry>();
+    // TODO!! 这个改成 AnyState 没必要在 id 查表
+    const characters = new Set<number>();
+    const entitiesOnCharacters = new Set<number>();
+    const attachables = new Set<number>();
+    const attachments = new Set<number>();
+
+    const entitiesWithArea = getAllEntitiesWithArea(state);
+    for (let i = 0; i < entitiesWithArea.length; i++) {
+      const entry = entitiesWithArea[i];
+      entities.set(entry.state.id, { ...entry, index: i });
+      if (entry.state.definition.type === "character") {
+        characters.add(entry.state.id);
+      } else if (entry.area.type === "characters") {
+        entitiesOnCharacters.add(entry.state.id);
+      }
+      if (entry.area.type === "hands" || entry.area.type === "pile") {
+        attachables.add(entry.state.id);
+      }
+      if (entry.state.definition.type === "attachment") {
+        attachments.add(entry.state.id);
+      }
+    }
+    this.entities = entities;
+    this.#characters = characters;
+    this.#entitiesOnCharacters = entitiesOnCharacters;
+    this.#attachables = attachables;
+    this.#attachments = attachments;
+
     this.state = state;
     this.who = who;
     this.#defaultOrder = (id: number) => this.entities.get(id)?.index ?? -1;
@@ -440,8 +475,86 @@ class QueryRuntime {
       }
 
       // complex
-      case "recentFrom":
-      case "tagOf":
+      case "recentFrom": {
+        const [_, base] = expr;
+        const baseIds = this.executeUnordered(
+          base as SExprSchema.UnorderedQuery,
+          this.#characters,
+        );
+        const recentIds = new Set<number>();
+        for (const baseId of baseIds) {
+          const baseState = this.entities.get(baseId)?.state;
+          if (baseState?.definition.type !== "character") {
+            continue;
+          }
+          const baseChCtx = new CharacterBase(this.state, baseId);
+          const baseIdx = baseChCtx.positionIndex();
+          const targetWho = flip(baseChCtx.who);
+          const targetChs = this.state.players[targetWho].characters.map(
+            (ch, i) => [ch, i] as const,
+          );
+          if (targetChs.length === 0) {
+            continue;
+          }
+          // 由于“循环”判定距离，第一个也可以以“尾后”位置的方式参与距离计算
+          targetChs.unshift([targetChs[0][0], targetChs.length]);
+          const orderFn = ([ch, i]: readonly [CharacterState, number]) => {
+            if (!ch.variables.alive) {
+              return Infinity;
+            }
+            return Math.abs(i - baseIdx);
+          };
+          recentIds.add(toSortedBy(targetChs, orderFn)[0][0].id);
+        }
+        return recentIds;
+      }
+      case "tagOf": {
+        const [_, tagCategory, base] = expr;
+        const baseIds = this.executeUnordered(
+          base as SExprSchema.UnorderedQuery,
+          this.#characters,
+        );
+        if (baseIds.size !== 1) {
+          console?.warn(
+            `Expected exactly one candidate for tagOf query, got ${baseIds.size}`,
+          );
+          console?.trace();
+        }
+        const baseTags = [...baseIds].flatMap(
+          (id) =>
+            (this.entities.get(id)?.state.definition.tags as CharacterTag[]) ??
+            [],
+        );
+        const categorizedTags: CharacterTag[] = (
+          {
+            weapon: ["sword", "claymore", "pole", "catalyst", "bow"],
+            element: [
+              "cryo",
+              "hydro",
+              "pyro",
+              "electro",
+              "anemo",
+              "geo",
+              "dendro",
+            ],
+          } satisfies Record<string, CharacterTag[]>
+        )[tagCategory];
+        const filteredTags: string[] = baseTags.filter((tag) =>
+          categorizedTags.includes(tag),
+        );
+        return new Set(
+          universe
+            .values()
+            .filter(
+              (id) =>
+                this.entities
+                  .get(id)
+                  ?.state.definition.tags?.some((tag) =>
+                    filteredTags.includes(tag),
+                  ),
+            ),
+        );
+      }
 
       // relationals
       case "has":
