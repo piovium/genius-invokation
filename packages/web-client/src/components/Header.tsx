@@ -16,7 +16,7 @@
 import { A, useNavigate } from "@solidjs/router";
 import { Match, Show, Switch } from "solid-js";
 import { IS_BETA } from "@gi-tcg/config";
-import { getAvatarUrl } from "../utils";
+import { getPlayerAvatarUrl } from "../utils";
 import Logo from "./Logo.svg";
 import Title from "./Title.svg";
 import LanguageIcon from "./Language.svg";
@@ -65,23 +65,14 @@ export function Header() {
         />
       </div>
       <Show when={status().type !== "notLogin"}>
-        <Switch>
-          <Match when={status().type === "user"}>
-            <A href={`/user/${status().id}`}>
-              <div class="rounded-full w-10 h-10 md:w-12 md:h-12 b-solid b-1 b-gray-200 flex items-center justify-center">
-                <img
-                  src={getAvatarUrl(status().id as number)}
-                  class="w-85% h-85% [clip-path:circle()]"
-                />
-              </div>
-            </A>
-          </Match>
-          <Match when={status().type === "guest"}>
-            <A href="/user/guest">
-              <div class="rounded-full w-10 h-10 md:w-12 md:h-12 b-solid b-1 b-gray-200 flex items-center justify-center bg-gray-100" />
-            </A>
-          </Match>
-        </Switch>
+        <A href={status().type === "guest" ? `/user/guest` : `/user/${status().id}`}>
+          <div class="rounded-full w-10 h-10 md:w-12 md:h-12 b-solid b-1 b-gray-200 flex items-center justify-center">
+            <img
+              src={getPlayerAvatarUrl({...status(), isGuest: status().type === "guest"})}
+              class="w-85% h-85% [clip-path:circle()]"
+            />
+          </div>
+        </A>
         <button
           class="btn btn-outline-red"
           onClick={() => {

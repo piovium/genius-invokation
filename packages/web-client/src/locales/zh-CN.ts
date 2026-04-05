@@ -81,6 +81,8 @@ export default {
   continueSuffix: "继续……",
   guestNamePlaceholder: "起一个响亮的名字吧！",
   confirm: "确认",
+  selectAvatar: "选择头像",
+  useDefaultAvatar: "默认",
   allowPopup: "请允许弹出窗口以使用 GitHub 登录。",
   guestModeHint:
     "在游客模式下：\n- 您的牌组将保存在本地，不会在云端同步；\n- 您的对局记录将不会在任何地方保存。\n\n如果您希望将对局中的 bug 反馈给开发者，那么强烈建议您使用 GitHub 登录以便我们在数据库中查询对局记录。",

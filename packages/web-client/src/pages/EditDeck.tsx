@@ -233,7 +233,7 @@ export default function EditDeck() {
                   class="btn btn-ghost h-8 w-8 p-1"
                   onClick={startEditingName}
                 >
-                  <i class="i-mdi-pencil-outline" />
+                  <i class="i-mdi-square-edit-outline h-6 w-6" />
                 </button>
               </div>
             }

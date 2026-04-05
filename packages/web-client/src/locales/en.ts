@@ -83,6 +83,8 @@ export default {
   continueSuffix: "...",
   guestNamePlaceholder: "Give it a name!",
   confirm: "Confirm",
+  selectAvatar: "Select Avatar",
+  useDefaultAvatar: "Default",
   allowPopup: "Please allow pop-ups to sign in with GitHub.",
   guestModeHint:
     "In guest mode:\n- Your decks are stored locally and never sync to the cloud.\n- Your match history will not be saved anywhere.\n\nIf you want to report bugs from a match, we strongly recommend you to sign in with GitHub so we can inspect the stored match record.",

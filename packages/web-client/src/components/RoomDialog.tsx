@@ -225,6 +225,7 @@ export function RoomDialog(props: RoomDialogProps) {
           payload.deck = guestDecks().find(
             (deck) => deck.id === selectedDeck(),
           );
+          payload.avatar = guestInfo()?.avatar;
         } else if (type === "user") {
           payload.hostDeckId = selectedDeck();
         }
@@ -237,6 +238,7 @@ export function RoomDialog(props: RoomDialogProps) {
           payload = {
             deck: guestDecks().find((deck) => deck.id === selectedDeck()),
             name,
+            avatar: guestInfo()?.avatar,
           };
         } else if (type === "user") {
           payload = {

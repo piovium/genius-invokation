@@ -18,8 +18,10 @@ import { createResource, Switch, Match, Show } from "solid-js";
 import { Layout } from "../layouts/Layout";
 import axios, { AxiosError } from "axios";
 import { UserInfo } from "../components/UserInfo";
+import { AvatarSelector } from "../components/AvatarSelector";
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
+import { Portal } from "solid-js/web";
 
 export default function User() {
   const { t } = useI18n();
@@ -27,6 +29,7 @@ export default function User() {
   const { status: mine, updateInfo } = useAuth();
   const isGuestMode = params.id === "guest";
   const userId = isGuestMode ? null : Number(params.id);
+  let avatarSelectorEl!: HTMLDialogElement;
   
   const [userInfo, { refetch: refetchUserInfo }] = createResource(
     () => !isGuestMode,
@@ -39,6 +42,7 @@ export default function User() {
       return {
         id: null,
         name: s.name,
+        avatar: s.avatar,
         login: "",
         chessboardColor: s.chessboardColor,
         type: "guest" as const,
@@ -56,6 +60,17 @@ export default function User() {
       await refetchUserInfo();
     }
   };
+  
+  const handleAvatarChange = async (newAvatar: string | null) => {
+    const s = mine();
+    if (s.type === "guest") {
+      await updateInfo({ avatar: newAvatar });
+    }
+  };
+
+  const openAvatarSelector = () => {
+    avatarSelectorEl.showModal();
+  };
 
   return (
     <Layout>
@@ -66,8 +81,9 @@ export default function User() {
               <UserInfo
                 {...info()}
                 editable={true}
-                isGuest={true}
                 onNameChange={handleNameChange}
+                onAvatarChange={handleAvatarChange}
+                onOpenAvatarSelector={openAvatarSelector}
               />
             )}
           </Show>
@@ -89,6 +105,14 @@ export default function User() {
           />
         </Match>
       </Switch>
+      <Portal>
+        <AvatarSelector
+          ref={avatarSelectorEl!}
+          currentAvatar={guestInfo()?.avatar}
+          onSelect={handleAvatarChange}
+          onCancel={() => {}}
+        />
+      </Portal>
     </Layout>
   );
 }

@@ -111,6 +111,9 @@ export class GuestCreateRoomDto extends CreateRoomDto {
 
   @ValidateNested()
   deck!: DeckDto;
+
+  @IsOptional()
+  avatar?: string;
 }
 
 export class UserJoinRoomDto {
@@ -124,6 +127,9 @@ export class GuestJoinRoomDto {
 
   @ValidateNested()
   deck!: DeckDto;
+
+  @IsOptional()
+  avatar?: string;
 }
 
 export class PlayerActionResponseDto {

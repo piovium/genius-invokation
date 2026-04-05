@@ -19,10 +19,18 @@ export interface PlayerInfo {
   isGuest: boolean;
   id: number | string;
   name: string;
+  avatar?: string | null;
   deck: Deck;
 }
 
-export function getAvatarUrl(userId: number) {
+export interface AvatarProps {
+  isGuest: boolean;
+  id: number | string | null;
+  name: string;
+  avatar?: string | null;
+}
+
+export function getGithubAvatarUrl(userId: number) {
   return `https://avatars.githubusercontent.com/u/${userId}?v=4`;
 }
 
@@ -33,13 +41,24 @@ function hashCode(s: string) {
   return h;
 }
 
-export function getPlayerAvatarUrl(player: PlayerInfo) {
-  if (player.isGuest) {
-    const hash = Math.abs(hashCode(player.name));
-    return `/avatars/${AVATARS[hash % AVATARS.length]}`;
-  } else {
-    return getAvatarUrl(player.id as number);
+function getRandomAvatar(name: string): string {
+  const hash = Math.abs(hashCode(name));
+  return `/avatars/${AVATARS[hash % AVATARS.length]}`;
+}
+
+function isValidAvatar(avatar: string | null | undefined): avatar is string {
+  if (!avatar) return false;
+  return AVATARS.includes(avatar);
+}
+
+export function getPlayerAvatarUrl(player: AvatarProps): string {
+  if (!player.isGuest && typeof player.id === 'number') {
+    return getGithubAvatarUrl(player.id);
   }
+  if (isValidAvatar(player.avatar)) {
+    return `/avatars/${player.avatar}`;
+  }
+  return getRandomAvatar(player.name);
 }
 
 export async function copyToClipboard(content: string) {

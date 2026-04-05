@@ -111,7 +111,7 @@ export function DeckBriefInfo(props: DeckInfoProps) {
             title={t("copyShareCode")}
             onClick={copyCode}
           >
-            <i class="i-mdi-file-export h-5.5 w-5.5" />
+            <i class="i-mdi-file-export-outline h-5.5 w-5.5" />
           </button>
           <Show when={props.editable}>
             <button
@@ -122,14 +122,14 @@ export function DeckBriefInfo(props: DeckInfoProps) {
                 props.onPin?.();
               }}
             >
-              <i class="i-mdi-chevron-up-circle h-5.5 w-5.5" />
+              <i class="i-mdi-sort-descending h-6 w-6" />
             </button>
             <button
               class="btn color-red-800 h-6 w-6 p-0 hover:color-red-500"
               title={t("deleteDeck")}
               onClick={deleteDeck}
             >
-              <i class="i-mdi-delete h-6 w-6" />
+              <i class="i-mdi-delete-outline h-6 w-6" />
             </button>
           </Show>
         </div>
