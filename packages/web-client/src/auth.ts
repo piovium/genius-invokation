@@ -21,7 +21,8 @@ export interface UserInfo {
   type: "user";
   id: number;
   login: string;
-  name?: string;
+  name: string;
+  avatar: string | null;
   chessboardColor: string | null;
 }
 
@@ -29,6 +30,7 @@ const NOT_LOGIN = {
   type: "notLogin",
   name: "",
   id: null,
+  avatar: null,
   chessboardColor: null,
 } as const;
 
@@ -38,6 +40,7 @@ type AuthStatus = UserInfo | GuestInfo | NotLogin;
 
 export interface UpdateInfoPatch {
   name?: string;
+  avatar?: string | null;
   chessboardColor?: string | null;
 }
 
@@ -90,6 +93,7 @@ export const useAuth = (): Auth => {
         type: "guest",
         name,
         id: null,
+        avatar: null,
         chessboardColor: null,
       });
     },

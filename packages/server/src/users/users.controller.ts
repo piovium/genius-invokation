@@ -35,6 +35,9 @@ export class UpdateUserInfoDto {
   @Length(1, 64)
   @IsOptional()
   name?: string;
+
+  @IsOptional()
+  avatar?: string | null;
 }
 
 @Controller("users")

@@ -21,26 +21,28 @@ import {
   Switch,
   createSignal,
 } from "solid-js";
-import { getAvatarUrl } from "../utils";
+import { getPlayerAvatarUrl } from "../utils";
 import { A } from "@solidjs/router";
 import axios, { AxiosError } from "axios";
 import { GameInfo } from "./GameInfo";
 import { ChessboardColor } from "./ChessboardColor";
+import { AvatarSelector } from "./AvatarSelector";
 import { useI18n } from "../i18n";
 
 export interface UserInfoProps {
   type: "user" | "guest";
   id: number | null;
   name?: string;
+  avatar: string | null;
   chessboardColor: string | null;
   editable?: boolean;
   isGuest?: boolean;
   onNameChange?: (newName: string) => Promise<void>;
+  onAvatarChange?: (newAvatar: string | null) => Promise<void>;
 }
 
 export function UserInfo(props: UserInfoProps) {
   const { t } = useI18n();
-  const avatarUrl = () => props.id ? getAvatarUrl(props.id) : void 0;
   const [games] = createResource(() =>
     axios.get<{ data: any[] }>(`games/mine`).then((res) => res.data)
   );
@@ -49,6 +51,9 @@ export function UserInfo(props: UserInfoProps) {
   const [editingName, setEditingName] = createSignal(false);
   const [nameInputEl, setNameInputEl] = createSignal<HTMLInputElement>();
   const [uploading, setUploading] = createSignal(false);
+  
+  // Avatar editing state
+  const [showAvatarSelector, setShowAvatarSelector] = createSignal(false);
   
   const startEditingName = () => {
     setEditingName(true);
@@ -77,12 +82,37 @@ export function UserInfo(props: UserInfoProps) {
     }
   };
   
+  const saveAvatar = async (newAvatar: string | null) => {
+    if (props.onAvatarChange) {
+      await props.onAvatarChange(newAvatar);
+    }
+    setShowAvatarSelector(false);
+  };
+  
+  const avatarUrl = () => {
+    return getPlayerAvatarUrl({
+      isGuest: props.type === "guest",
+      id: props.id ?? null,
+      name: props.name || "",
+      avatar: props.avatar,
+    });
+  };
+  
   return (
     <div class="flex flex-row container gap-4 px-2 h-full md:overflow-y-auto">
       <div class="hidden md:flex flex-col w-45">
-        <div class="rounded-full w-40 h-40 b-solid b-1 b-gray-200 flex items-center justify-center mb-3">
-          <Show when={avatarUrl()} fallback={<span class="text-6xl">👤</span>}>
-            <img src={avatarUrl()} class="w-36 h-36 [clip-path:circle()]" />
+        <div class="relative">
+          <div class="rounded-full w-40 h-40 b-solid b-1 b-gray-200 flex items-center justify-center mb-3 overflow-hidden">
+            <img src={avatarUrl()} class="w-full h-full object-cover" />
+          </div>
+          <Show when={props.editable}>
+            <button
+              class="absolute bottom-3 right-0 btn btn-ghost bg-white/80 h-10 w-10 p-1 rounded-full shadow-md"
+              onClick={() => setShowAvatarSelector(true)}
+              title={t("selectAvatar")}
+            >
+              <i class="i-mdi-camera text-xl" />
+            </button>
           </Show>
         </div>
       </div>
@@ -113,7 +143,7 @@ export function UserInfo(props: UserInfoProps) {
               }
             >
               <form
-                onSubmit={saveName}
+                onSubmit={(e) => saveName(e)}
                 class="flex flex-row gap-1 md:gap-3 text-3.2 md:text-3.5"
               >
                 <input
@@ -191,6 +221,14 @@ export function UserInfo(props: UserInfoProps) {
           </A>
         </div>
       </div>
+      
+      <Show when={showAvatarSelector()}>
+        <AvatarSelector
+          currentAvatar={props.avatar}
+          onSelect={(avatar) => saveAvatar(avatar)}
+          onCancel={() => setShowAvatarSelector(false)}
+        />
+      </Show>
     </div>
   );
 }
