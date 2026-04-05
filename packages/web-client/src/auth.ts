@@ -37,6 +37,7 @@ type NotLogin = typeof NOT_LOGIN;
 type AuthStatus = UserInfo | GuestInfo | NotLogin;
 
 export interface UpdateInfoPatch {
+  name?: string;
   chessboardColor?: string | null;
 }
 

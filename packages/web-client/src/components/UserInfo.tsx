@@ -20,7 +20,6 @@ import {
   Show,
   Switch,
 } from "solid-js";
-import { UserInfo as UserInfoT } from "../auth";
 import { getAvatarUrl } from "../utils";
 import { A } from "@solidjs/router";
 import axios, { AxiosError } from "axios";
@@ -28,13 +27,18 @@ import { GameInfo } from "./GameInfo";
 import { ChessboardColor } from "./ChessboardColor";
 import { useI18n } from "../i18n";
 
-export interface UserInfoProps extends UserInfoT {
+export interface UserInfoProps {
+  type: "user" | "guest";
+  id: number | null;
+  name?: string;
+  chessboardColor: string | null;
   editable?: boolean;
+  isGuest?: boolean;
 }
 
 export function UserInfo(props: UserInfoProps) {
   const { t } = useI18n();
-  const avatarUrl = () => getAvatarUrl(props.id);
+  const avatarUrl = () => props.id ? getAvatarUrl(props.id) : void 0;
   const [games] = createResource(() =>
     axios.get<{ data: any[] }>(`games/mine`).then((res) => res.data)
   );
@@ -50,7 +54,7 @@ export function UserInfo(props: UserInfoProps) {
       <div class="flex-grow flex flex-col items-start">
         <h2 class="text-2xl font-bold">{t("profile")}</h2>
         <div class="flex items-end gap-2 mb-5">
-          <span class="text-gray-4 text-sm font-300">ID: {props.id}</span>
+          <span class="text-gray-4 text-sm font-300">{props.type === "guest" ? t("guestIdentity") : `ID: ${props.id}`}</span>
         </div>
         <dl class="flex flex-row gap-4 items-center">
           <dt class="font-bold">{t("nickname")}</dt>
@@ -68,6 +72,7 @@ export function UserInfo(props: UserInfoProps) {
           <dt class="font-bold">{t("gameRecords")}</dt>
           <dd class="flex flex-col gap-1">
             <Switch>
+              <Match when={props.type === "guest"}>{t("guestNoGameRecords")}</Match>
               <Match when={games.loading}>{t("loading")}</Match>
               <Match when={games.error}>
                 {t("loadFailed", {

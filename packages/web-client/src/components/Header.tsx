@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { A, useNavigate } from "@solidjs/router";
-import { Show } from "solid-js";
+import { Match, Show, Switch } from "solid-js";
 import { IS_BETA } from "@gi-tcg/config";
 import { getAvatarUrl } from "../utils";
 import Logo from "./Logo.svg";
@@ -58,19 +58,30 @@ export function Header() {
           <option value="zh-CN">{t("languageChinese")}</option>
           <option value="en">{t("languageEnglish")}</option>
         </select>
-        <img src={LanguageIcon} class="absolute h-6 -translate-x-50% left-4" alt={t("languageLabel")} />
+        <img
+          src={LanguageIcon}
+          class="absolute h-6 -translate-x-50% left-4"
+          alt={t("languageLabel")}
+        />
       </div>
       <Show when={status().type !== "notLogin"}>
-        <Show when={status().type === "user"}>
-          <A href={`/user/${status().id}`}>
-            <div class="rounded-full w-10 h-10 md:w-12 md:h-12 b-solid b-1 b-gray-200 flex items-center justify-center">
-              <img
-                src={getAvatarUrl(status().id as number)}
-                class="w-85% h-85% [clip-path:circle()]"
-              />
-            </div>
-          </A>
-        </Show>
+        <Switch>
+          <Match when={status().type === "user"}>
+            <A href={`/user/${status().id}`}>
+              <div class="rounded-full w-10 h-10 md:w-12 md:h-12 b-solid b-1 b-gray-200 flex items-center justify-center">
+                <img
+                  src={getAvatarUrl(status().id as number)}
+                  class="w-85% h-85% [clip-path:circle()]"
+                />
+              </div>
+            </A>
+          </Match>
+          <Match when={status().type === "guest"}>
+            <A href="/user/guest">
+              <div class="rounded-full w-10 h-10 md:w-12 md:h-12 b-solid b-1 b-gray-200 flex items-center justify-center bg-gray-100" />
+            </A>
+          </Match>
+        </Switch>
         <button
           class="btn btn-outline-red"
           onClick={() => {

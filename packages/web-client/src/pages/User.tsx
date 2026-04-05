@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { useParams } from "@solidjs/router";
-import { createResource, Switch, Match } from "solid-js";
+import { createResource, Switch, Match, Show } from "solid-js";
 import { Layout } from "../layouts/Layout";
 import axios, { AxiosError } from "axios";
 import { UserInfo } from "../components/UserInfo";
@@ -25,13 +25,42 @@ export default function User() {
   const { t } = useI18n();
   const params = useParams();
   const { status: mine } = useAuth();
-  const userId = Number(params.id);
-  const [userInfo] = createResource(() =>
-    axios.get(`users/${userId}`).then((res) => res.data),
+  const isGuestMode = params.id === "guest";
+  const userId = isGuestMode ? null : Number(params.id);
+  
+  const [userInfo] = createResource(
+    () => !isGuestMode,
+    () => axios.get(`users/${userId}`).then((res) => res.data),
   );
+  
+  const guestInfo = () => {
+    const s = mine();
+    if (s.type === "guest") {
+      return {
+        id: null,
+        name: s.name,
+        login: "",
+        chessboardColor: s.chessboardColor,
+        type: "guest" as const,
+      };
+    }
+    return null;
+  };
+
   return (
     <Layout>
       <Switch>
+        <Match when={isGuestMode}>
+          <Show when={guestInfo()}>
+            {(info) => (
+              <UserInfo
+                {...info()}
+                editable={true}
+                isGuest={true}
+              />
+            )}
+          </Show>
+        </Match>
         <Match when={userInfo.loading}>{t("loading")}</Match>
         <Match when={userInfo.error}>
           {t("loadFailed", {
