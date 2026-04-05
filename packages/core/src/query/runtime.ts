@@ -33,6 +33,7 @@ import {
 import type { SExprSchema } from "./expr_schema";
 import { CharacterBase } from "../builder/context/character";
 import { flip } from "@gi-tcg/utils";
+import type { EntityArea } from "../base/entity";
 
 export function queryToExpression(query: IQuery): SExprSchema.Query {
   return query[toExpression]();
@@ -60,43 +61,49 @@ type ParsedExpressionAndIsCompiled = [
   compiled: boolean,
 ];
 
+const OFF_STAGE_AREAS = ["hands", "pile"] as EntityArea["type"][];
+interface ProperIterable<T> {
+  [Symbol.iterator](): IteratorObject<T>;
+}
+
 class QueryRuntime {
-  readonly entities: ReadonlyMap<number, EntityEntry>;
-  readonly #globalUniverse: ReadonlySet<number>;
+  readonly entities: ReadonlySet<EntityEntry>;
+  readonly entityMap: ReadonlyMap<number, EntityEntry>;
+
   readonly state: GameState;
   readonly who: 0 | 1;
-  readonly #defaultOrder: (id: number) => number;
+  readonly #defaultOrder: (entry: EntityEntry) => number;
 
-  #characters: ReadonlySet<number>;
-  #entitiesOnCharacters: ReadonlySet<number>;
-  #attachables: ReadonlySet<number>;
-  #attachments: ReadonlySet<number>;
+  readonly #characters: ReadonlySet<EntityEntry>;
+  readonly #entitiesOnCharacters: ReadonlySet<EntityEntry>;
+  readonly #attachables: ReadonlySet<EntityEntry>;
+  readonly #attachments: ReadonlySet<EntityEntry>;
 
   constructor(state: GameState, who: 0 | 1) {
-    const entities = new Map<number, EntityEntry>();
-    // TODO!! 这个改成 AnyState 没必要在 id 查表
-    const characters = new Set<number>();
-    const entitiesOnCharacters = new Set<number>();
-    const attachables = new Set<number>();
-    const attachments = new Set<number>();
+    const entityMap = new Map<number, EntityEntry>();
+    const characters = new Set<EntityEntry>();
+    const entitiesOnCharacters = new Set<EntityEntry>();
+    const attachables = new Set<EntityEntry>();
+    const attachments = new Set<EntityEntry>();
 
     const entitiesWithArea = getAllEntitiesWithArea(state);
     for (let i = 0; i < entitiesWithArea.length; i++) {
-      const entry = entitiesWithArea[i];
-      entities.set(entry.state.id, { ...entry, index: i });
+      const entry = { ...entitiesWithArea[i], index: i };
+      entityMap.set(entry.state.id, entry);
       if (entry.state.definition.type === "character") {
-        characters.add(entry.state.id);
+        characters.add(entry);
       } else if (entry.area.type === "characters") {
-        entitiesOnCharacters.add(entry.state.id);
+        entitiesOnCharacters.add(entry);
       }
       if (entry.area.type === "hands" || entry.area.type === "pile") {
-        attachables.add(entry.state.id);
+        attachables.add(entry);
       }
       if (entry.state.definition.type === "attachment") {
-        attachments.add(entry.state.id);
+        attachments.add(entry);
       }
     }
-    this.entities = entities;
+    this.entities = new Set(entityMap.values());
+    this.entityMap = entityMap;
     this.#characters = characters;
     this.#entitiesOnCharacters = entitiesOnCharacters;
     this.#attachables = attachables;
@@ -104,14 +111,13 @@ class QueryRuntime {
 
     this.state = state;
     this.who = who;
-    this.#defaultOrder = (id: number) => this.entities.get(id)?.index ?? -1;
-    this.#globalUniverse = new Set(this.entities.keys());
+    this.#defaultOrder = (entry: EntityEntry) => entry.index;
   }
 
   #parseOrderByOrVariable(
     spec: SExprSchema.OrderBySpec | SExprSchema.VariableSpec,
     runCountHint?: number,
-  ): (id: number) => number {
+  ): (entry: EntityEntry) => number {
     switch (spec[0]) {
       case "expr": {
         const [_, expr] = spec;
@@ -119,14 +125,12 @@ class QueryRuntime {
           expr,
           runCountHint ?? this.entities.size,
         );
-        return (id: number) =>
-          built(this.entities.get(id)?.state.variables ?? {});
+        return (entry) => built(entry.state.variables ?? {});
       }
       case "fn": {
         const [_, code] = spec;
         const revived = QueryRuntime.#reviveFunction(code);
-        return (id: number) =>
-          revived(this.entities.get(id)?.state.variables ?? {}) as number;
+        return (entry) => revived(entry.state.variables ?? {}) as number;
       }
       default: {
         throw new Error(`Unknown orderBy/variable spec: ${spec[0]}`);
@@ -364,14 +368,14 @@ class QueryRuntime {
           return `(+(${visitor(args[0])} <= ${visitor(args[1])}))`;
         }
         case "and": {
-          return `(${args.map(visitor).join(" && ")})`;
+          return `（+(${args.map(visitor).join(" && ")}))`;
         }
         case "or": {
-          return `(${args.map(visitor).join(" || ")})`;
+          return `(+(${args.map(visitor).join(" || ")}))`;
         }
         case "not": {
           assertsArgCount("not", args, 1);
-          return `(!${visitor(args[0])})`;
+          return `(+!${visitor(args[0])})`;
         }
         default: {
           const _check: never = op;
@@ -421,18 +425,18 @@ class QueryRuntime {
     return maxDepth;
   }
 
-  execute(expr: SExprSchema.Query): number[] {
+  execute(expr: SExprSchema.Query): EntityEntry[] {
     switch (expr[0]) {
       case "orderBy": {
         const [_, unorderedQuery, orderBy, limit] = expr;
-        const unorderedResult = this.executeUnordered(unorderedQuery);
+        const unorderedResult = new Set(this.executeUnordered(unorderedQuery));
         const orderByFns = [
           ...orderBy.map((spec) =>
             this.#parseOrderByOrVariable(spec, unorderedResult.size),
           ),
           this.#defaultOrder,
         ];
-        const order = (id: number) => orderByFns.map((f) => f(id));
+        const order = (entry: EntityEntry) => orderByFns.map((f) => f(entry));
         return toSortedBy([...unorderedResult], order).slice(0, limit);
       }
       default: {
@@ -442,25 +446,83 @@ class QueryRuntime {
   }
   executeUnordered(
     expr: SExprSchema.UnorderedQuery,
-    universe = this.#globalUniverse,
-  ): Set<number> {
-    // TODO
+    universe: ProperIterable<EntityEntry> = this.entities,
+  ): ProperIterable<EntityEntry> {
+    const universeIt = universe[Symbol.iterator]();
+    type EntityFilter = (entry: EntityEntry) => boolean;
     switch (expr[0]) {
       // basic
-      case "area":
-      case "defeated":
-      case "definition":
-      case "id":
-      case "offStage":
-      case "onStage":
-      case "position":
-      case "tag":
-      case "type":
-      // TODO
+      case "area": {
+        const [_, areaType, byPath] = expr;
+        const byPathTypeFilter: Partial<
+          Record<EntityArea["type"], EntityFilter>
+        > = {
+          characters: (entry) => entry.state.definition.type === "character",
+          hands: (entry) => entry.state.definition.type !== "attachment",
+          pile: (entry) => entry.state.definition.type !== "attachment",
+        };
+        const typeFilter =
+          (byPath && byPathTypeFilter[areaType]) ?? (() => true);
+        const filter: EntityFilter = (entry) =>
+          entry.area.type === areaType && typeFilter(entry);
+        return universeIt.filter(filter);
+      }
+      case "defeated": {
+        const [_, defeatedSpec] = expr;
+        const filter: EntityFilter =
+          defeatedSpec === "only"
+            ? (entry) => entry.state.variables.alive === 0
+            : (entry) => entry.state.variables.alive !== 0;
+        return universeIt.filter(filter);
+      }
+      case "definition": {
+        const [_, defId] = expr;
+        const filter: EntityFilter = (entry) =>
+          entry.state.definition.id === defId;
+        return universeIt.filter(filter);
+      }
+      case "id": {
+        const [_, id] = expr;
+        const entry = this.entityMap.get(id);
+        return entry ? [entry] : [];
+      }
+      case "offStage": {
+        const filter: EntityFilter = (entry) =>
+          OFF_STAGE_AREAS.includes(entry.area.type);
+        return universeIt.filter(filter);
+      }
+      case "onStage": {
+        const filter: EntityFilter = (entry) =>
+          !OFF_STAGE_AREAS.includes(entry.area.type);
+        return universeIt.filter(filter);
+      }
+      case "position": {
+        const [_, posSpec] = expr;
+        const filter: EntityFilter = (entry) => {
+          if (entry.area.type !== "characters") {
+            return false;
+          }
+          const chCtx = new CharacterBase(this.state, entry.state.id);
+          return chCtx.satisfyPosition(posSpec);
+        };
+        return universeIt.filter(filter);
+      }
+      case "tag": {
+        const [_, tag] = expr;
+        const filter: EntityFilter = (entry) =>
+          (entry.state.definition.tags as string[]).includes(tag);
+        return universeIt.filter(filter);
+      }
+      case "type": {
+        const [_, type] = expr;
+        const filter: EntityFilter = (entry) =>
+          entry.state.definition.type === type;
+        return universeIt.filter(filter);
+      }
       case "variables": {
-        const spec = expr[1] as SExprSchema.VariableSpec;
-        const filter = this.#parseOrderByOrVariable(spec);
-        return new Set(universe.values().filter(filter));
+        const [_, variableSpec] = expr;
+        const filter = this.#parseOrderByOrVariable(variableSpec);
+        return universeIt.filter(filter);
       }
       case "who": {
         const [_, whoDesc] = expr;
@@ -470,60 +532,56 @@ class QueryRuntime {
             opp: [1, 0],
           } as const
         )[whoDesc][this.who];
-        const filter = (id: number) => this.entities.get(id)?.area.who === who;
-        return new Set(universe.values().filter(filter));
+        const filter: EntityFilter = (entry) => entry.area.who === who;
+        return universeIt.filter(filter);
       }
 
       // complex
       case "recentFrom": {
         const [_, base] = expr;
-        const baseIds = this.executeUnordered(
+        const baseEntries = this.executeUnordered(
           base as SExprSchema.UnorderedQuery,
           this.#characters,
         );
-        const recentIds = new Set<number>();
-        for (const baseId of baseIds) {
-          const baseState = this.entities.get(baseId)?.state;
-          if (baseState?.definition.type !== "character") {
-            continue;
-          }
-          const baseChCtx = new CharacterBase(this.state, baseId);
+        const results = new Set<EntityEntry>();
+        for (const baseEntry of baseEntries) {
+          const baseChCtx = new CharacterBase(this.state, baseEntry.state.id);
           const baseIdx = baseChCtx.positionIndex();
           const targetWho = flip(baseChCtx.who);
           const targetChs = this.state.players[targetWho].characters.map(
-            (ch, i) => [ch, i] as const,
+            (ch, i) => [this.entityMap.get(ch.id)!, i] as const,
           );
           if (targetChs.length === 0) {
             continue;
           }
           // 由于“循环”判定距离，第一个也可以以“尾后”位置的方式参与距离计算
           targetChs.unshift([targetChs[0][0], targetChs.length]);
-          const orderFn = ([ch, i]: readonly [CharacterState, number]) => {
-            if (!ch.variables.alive) {
+          const orderFn = ([ch, i]: readonly [EntityEntry, number]) => {
+            if (!ch.state.variables.alive) {
               return Infinity;
             }
             return Math.abs(i - baseIdx);
           };
-          recentIds.add(toSortedBy(targetChs, orderFn)[0][0].id);
+          results.add(toSortedBy(targetChs, orderFn)[0][0]);
         }
-        return recentIds;
+        return results;
       }
       case "tagOf": {
         const [_, tagCategory, base] = expr;
-        const baseIds = this.executeUnordered(
-          base as SExprSchema.UnorderedQuery,
-          this.#characters,
-        );
-        if (baseIds.size !== 1) {
+        const baseEntries = [
+          ...this.executeUnordered(
+            base as SExprSchema.UnorderedQuery,
+            this.#characters,
+          ),
+        ];
+        if (baseEntries.length !== 1) {
           console?.warn(
-            `Expected exactly one candidate for tagOf query, got ${baseIds.size}`,
+            `Expected exactly one candidate for tagOf query, got ${baseEntries.length}`,
           );
           console?.trace();
         }
-        const baseTags = [...baseIds].flatMap(
-          (id) =>
-            (this.entities.get(id)?.state.definition.tags as CharacterTag[]) ??
-            [],
+        const baseTags = baseEntries.flatMap(
+          (entry) => (entry.state.definition.tags as CharacterTag[]) ?? [],
         );
         const categorizedTags: CharacterTag[] = (
           {
@@ -539,39 +597,138 @@ class QueryRuntime {
             ],
           } satisfies Record<string, CharacterTag[]>
         )[tagCategory];
-        const filteredTags: string[] = baseTags.filter((tag) =>
-          categorizedTags.includes(tag),
+        const filteredTags: string[] = baseTags.filter(
+          (tag) => categorizedTags?.includes(tag),
         );
-        return new Set(
-          universe
-            .values()
-            .filter(
-              (id) =>
-                this.entities
-                  .get(id)
-                  ?.state.definition.tags?.some((tag) =>
-                    filteredTags.includes(tag),
-                  ),
-            ),
+        return universeIt.filter((entry) =>
+          entry.state.definition.tags.some((tag) => filteredTags.includes(tag)),
         );
       }
 
       // relationals
-      case "has":
-      case "at":
-      case "on":
-      case "with":
+      case "has": {
+        const [_, operand] = expr;
+        const operandEntries = new Set(
+          this.executeUnordered(
+            operand as SExprSchema.UnorderedQuery,
+            this.#entitiesOnCharacters,
+          )
+            [Symbol.iterator]()
+            .map((entry) => entry.state.id),
+        );
+        const filter: EntityFilter = (entry) =>
+          "entities" in entry.state &&
+          entry.state.entities.some((e) => operandEntries.has(e.id));
+        return universeIt.filter(filter);
+      }
+      case "at": {
+        const [_, operand] = expr;
+        const operandEntries = new Set(
+          this.executeUnordered(
+            operand as SExprSchema.UnorderedQuery,
+            this.#characters,
+          )
+            [Symbol.iterator]()
+            .map((entry) => entry.state.id),
+        );
+        const filter: EntityFilter = (entry) =>
+          entry.area.type === "characters" &&
+          operandEntries.has(entry.area.characterId);
+        return universeIt.filter(filter);
+      }
+      case "on": {
+        const [_, operand] = expr;
+        const operandEntries = new Set(
+          this.executeUnordered(
+            operand as SExprSchema.UnorderedQuery,
+            this.#attachables,
+          )
+            [Symbol.iterator]()
+            .map((entry) => entry.state.id),
+        );
+        const filter: EntityFilter = (entry) =>
+          (entry.area.type === "hands" || entry.area.type === "pile") &&
+          operandEntries.has(entry.area.cardId);
+        return universeIt.filter(filter);
+      }
+      case "with": {
+        const [_, operand] = expr;
+        const operandEntries = new Set(
+          this.executeUnordered(
+            operand as SExprSchema.UnorderedQuery,
+            this.#attachments,
+          )
+            [Symbol.iterator]()
+            .map((entry) => entry.state.id),
+        );
+        const filter: EntityFilter = (entry) =>
+          "attachments" in entry.state &&
+          entry.state.attachments.some((e) => operandEntries.has(e.id));
+        return universeIt.filter(filter);
+      }
 
       // unary
-      case "not":
+      case "not": {
+        const [_, operand] = expr;
+        const operandEntries = new Set(
+          this.executeUnordered(operand as SExprSchema.UnorderedQuery),
+        );
+        return new Set(universe).difference(operandEntries);
+      }
 
       // binaries
-      case "exclude":
-      case "intersection":
-      case "orElse":
-      case "union":
+      case "exclude": {
+        const [_, left, right] = expr;
+        const leftEntries = new Set(
+          this.executeUnordered(left as SExprSchema.UnorderedQuery),
+        );
+        const rightEntries = new Set(
+          this.executeUnordered(
+            right as SExprSchema.UnorderedQuery,
+            leftEntries,
+          ),
+        );
+        return new Set(leftEntries).difference(rightEntries);
+      }
+      case "intersection": {
+        let currUniverse = new Set(universe);
+        for (const operand of expr.slice(1)) {
+          const operandEntries = new Set(
+            this.executeUnordered(
+              operand as SExprSchema.UnorderedQuery,
+              currUniverse,
+            ),
+          );
+          currUniverse = new Set(currUniverse).intersection(operandEntries);
+        }
+        return currUniverse;
+      }
+      case "orElse": {
+        const [_, left, right] = expr;
+        const leftEntries = new Set(
+          this.executeUnordered(left as SExprSchema.UnorderedQuery),
+        );
+        if (leftEntries.size > 0) {
+          return leftEntries;
+        }
+        return this.executeUnordered(right as SExprSchema.UnorderedQuery);
+      }
+      case "union": {
+        let result = new Set<EntityEntry>();
+        for (const operand of expr.slice(1)) {
+          const operandEntries = new Set(
+            this.executeUnordered(
+              operand as SExprSchema.UnorderedQuery,
+              universe,
+            ),
+          );
+          result = result.union(operandEntries);
+        }
+        return result;
+      }
 
       default: {
+        const _check: never = expr[0];
         throw new Error(`Unknown query operator: ${expr[0]}`);
       }
     }
