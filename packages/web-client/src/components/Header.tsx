@@ -14,9 +14,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { A, useNavigate } from "@solidjs/router";
-import { Match, Show, Switch } from "solid-js";
+import { Show } from "solid-js";
 import { IS_BETA } from "@gi-tcg/config";
-import { getPlayerAvatarUrl } from "../utils";
 import Logo from "./Logo.svg";
 import Title from "./Title.svg";
 import LanguageIcon from "./Language.svg";
@@ -27,7 +26,7 @@ const USE_LOGO = true;
 
 export function Header() {
   const navigate = useNavigate();
-  const { status, logout } = useAuth();
+  const { status, logout, avatarUrl } = useAuth();
   const { t, locale, setLocale } = useI18n();
   return (
     <header class="fixed top-0 left-0 w-100dvw flex flex-row h-[calc(3rem+var(--root-padding-top))] md:h-[calc(4rem+var(--root-padding-top))] pt-[var(--root-padding-top)] bg-white z-200 px-4 shadow-md items-center gap-2">
@@ -65,12 +64,13 @@ export function Header() {
         />
       </div>
       <Show when={status().type !== "notLogin"}>
-        <A href={status().type === "guest" ? `/user/guest` : `/user/${status().id}`}>
+        <A
+          href={
+            status().type === "guest" ? `/user/guest` : `/user/${status().id}`
+          }
+        >
           <div class="rounded-full w-10 h-10 md:w-12 md:h-12 b-solid b-1 b-gray-200 flex items-center justify-center">
-            <img
-              src={getPlayerAvatarUrl({...status(), isGuest: status().type === "guest"})}
-              class="w-85% h-85% [clip-path:circle()]"
-            />
+            <img src={avatarUrl()} class="w-85% h-85% [clip-path:circle()]" />
           </div>
         </A>
         <button

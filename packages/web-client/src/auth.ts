@@ -16,6 +16,7 @@
 import { Accessor, createResource } from "solid-js";
 import { GuestInfo, useGuestInfo } from "./guest";
 import axios from "axios";
+import { EMPTY_IMAGE, getGithubAvatarUrl, getRandomAvatar } from "./utils";
 
 export interface UserInfo {
   type: "user";
@@ -38,7 +39,7 @@ type AuthStatus = UserInfo | GuestInfo | NotLogin;
 
 export interface UpdateInfoPatch {
   name?: string;
-  avatar?: string | null;
+  avatarUrl?: string | null;
   chessboardColor?: string | null;
 }
 
@@ -49,6 +50,7 @@ export interface Auth {
   readonly refresh: () => Promise<void>;
   readonly loginGuest: (name: string) => void;
   readonly setGuestId: (id: string) => void;
+  readonly avatarUrl: () => string;
   readonly updateInfo: (patch: UpdateInfoPatch) => Promise<void>;
   readonly logout: () => Promise<void>;
 }
@@ -62,8 +64,11 @@ const [user, { refetch: refetchUser }] = createResource<UserInfo | NotLogin>(
             type: "user",
             name: data.name ?? data.login,
           }
-        : NOT_LOGIN
-    )
+        : NOT_LOGIN,
+    ),
+  {
+    initialValue: NOT_LOGIN,
+  },
 );
 
 const updateUserInfo = async (newInfo: Partial<UserInfo>) => {
@@ -91,9 +96,21 @@ export const useAuth = (): Auth => {
         type: "guest",
         name,
         id: null,
-        avatar: null,
+        avatarUrl: null,
         chessboardColor: null,
       });
+    },
+    avatarUrl: () => {
+      const guest = guestInfo();
+      if (guest) {
+        return guest.avatarUrl ?? getRandomAvatar(guest.name);
+      } else {
+        const u = user();
+        if (u.id) {
+          return getGithubAvatarUrl(u.id);
+        }
+      }
+      return EMPTY_IMAGE;
     },
     setGuestId: (id: string) => {
       setGuestInfo(
@@ -101,7 +118,7 @@ export const useAuth = (): Auth => {
           oldInfo && {
             ...oldInfo,
             id,
-          }
+          },
       );
     },
     updateInfo: async (patch) => {

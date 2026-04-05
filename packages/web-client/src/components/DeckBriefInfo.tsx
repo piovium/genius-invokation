@@ -63,17 +63,7 @@ export function DeckBriefInfo(props: DeckInfoProps) {
 
   const copyCode = async (e: MouseEvent) => {
     e.stopPropagation();
-    try {
-      await copyToClipboard(props.code);
-      alert(t("shareCodeCopied", { code: props.code }));
-    } catch (e) {
-      alert(
-        t("shareCodeFallback", {
-          code: props.code,
-          error: (e as Error).message,
-        }),
-      );
-    }
+    await copyToClipboard(props.code, t);
   };
 
   const deleteDeck = async (e: MouseEvent) => {

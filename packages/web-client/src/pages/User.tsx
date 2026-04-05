@@ -14,79 +14,44 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { useParams } from "@solidjs/router";
-import { createResource, Switch, Match, Show } from "solid-js";
+import { createResource, Switch, Match } from "solid-js";
 import { Layout } from "../layouts/Layout";
 import axios, { AxiosError } from "axios";
-import { UserInfo } from "../components/UserInfo";
-import { AvatarSelector } from "../components/AvatarSelector";
-import { useAuth } from "../auth";
+import { useAuth, UserInfo as UserInfoT } from "../auth";
 import { useI18n } from "../i18n";
-import { Portal } from "solid-js/web";
+import { UserInfo } from "../components/UserInfo";
 
 export default function User() {
   const { t } = useI18n();
   const params = useParams();
-  const { status: mine, updateInfo } = useAuth();
-  const isGuestMode = params.id === "guest";
-  const userId = isGuestMode ? null : Number(params.id);
-  let avatarSelectorEl!: HTMLDialogElement;
-  
-  const [userInfo, { refetch: refetchUserInfo }] = createResource(
-    () => !isGuestMode,
-    () => axios.get(`users/${userId}`).then((res) => res.data),
-  );
-  
-  const guestInfo = () => {
-    const s = mine();
-    if (s.type === "guest") {
-      return {
-        id: null,
-        name: s.name,
-        avatar: s.avatar,
-        login: "",
-        chessboardColor: s.chessboardColor,
-        type: "guest" as const,
-      };
-    }
-    return null;
-  };
-  
-  const handleNameChange = async (newName: string) => {
-    const s = mine();
-    if (s.type === "guest") {
-      await updateInfo({ name: newName });
-    } else if (s.type === "user" && userId) {
-      await axios.patch("users/me", { name: newName });
-      await refetchUserInfo();
-    }
-  };
-  
-  const handleAvatarChange = async (newAvatar: string | null) => {
-    const s = mine();
-    if (s.type === "guest") {
-      await updateInfo({ avatar: newAvatar });
-    }
-  };
+  const { status: mine, avatarUrl: myAvatarUrl } = useAuth();
 
-  const openAvatarSelector = () => {
-    avatarSelectorEl.showModal();
-  };
+  const [userInfo] = createResource(
+    () => params.id,
+    async (id) => {
+      if (id.trim() === "" || !Number.isFinite(+id)) {
+        throw new Error(`User ID is incorrect: ${id}`);
+      } else {
+        return await axios
+          .get(`users/${params.id}`)
+          .then((res) => res.data as UserInfoT);
+      }
+    },
+  );
+
+  const guestMode = () => params.id === "guest";
 
   return (
     <Layout>
       <Switch>
-        <Match when={isGuestMode}>
-          <Show when={guestInfo()} fallback={t("notLoggedIn")}>
-            {(info) => (
-              <UserInfo
-                {...info()}
-                editable={true}
-                onNameChange={handleNameChange}
-                onAvatarChange={handleAvatarChange}
-                onOpenAvatarSelector={openAvatarSelector}
-              />
-            )}
-          </Show>
+        <Match when={guestMode()}>
+          <UserInfo
+            type="guest"
+            idText={t("guestIdentity")}
+            name={mine()?.name || ""}
+            avatarUrl={myAvatarUrl()}
+            editable={true}
+          />
         </Match>
         <Match when={userInfo.loading}>{t("loading")}</Match>
         <Match when={userInfo.error}>
@@ -98,21 +63,16 @@ export default function User() {
           })}
         </Match>
         <Match when={userInfo()}>
-          <UserInfo
-            {...userInfo()}
-            editable={userInfo()?.id === mine()?.id}
-            onNameChange={handleNameChange}
-          />
+          {(user) => (
+            <UserInfo
+              type="user"
+              idText={`ID: ${user().id}`}
+              name={user().name}
+              editable={user().id === mine()?.id}
+            />
+          )}
         </Match>
       </Switch>
-      <Portal>
-        <AvatarSelector
-          ref={avatarSelectorEl!}
-          currentAvatar={guestInfo()?.avatar}
-          onSelect={handleAvatarChange}
-          onCancel={() => {}}
-        />
-      </Portal>
     </Layout>
   );
 }

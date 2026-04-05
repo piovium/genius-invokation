@@ -51,7 +51,7 @@ export function TransformWrapper(props: TransformWrapperProps) {
   const onContainerResize = () => {
     const containerEl = transformWrapperEl.parentElement!;
     const hasOppChessboard = untrack(() => props.hasOppChessboard) ?? false;
-    let containerWidth = containerEl.clientWidth;
+    const containerWidth = containerEl.clientWidth;
     let containerHeight = containerEl.clientHeight;
     const autoHeight = untrack(() => props.autoHeight) ?? true;
     const rotate = untrack(() => props.rotation) ?? 0;
@@ -74,27 +74,8 @@ export function TransformWrapper(props: TransformWrapperProps) {
         height /= oppScale;
       }
     };
-
-    if (isFullscreen) {
-      if (rotate % 180 === 0) {
-        scale = Math.min(
-          containerHeight / (UNIT * MINIMUM_HEIGHT),
-          containerWidth / (UNIT * MINIMUM_WIDTH),
-        );
-        height = containerHeight;
-        width = containerWidth;
-        adjustScale();
-      } else {
-        scale = Math.min(
-          containerHeight / (UNIT * MINIMUM_WIDTH),
-          containerWidth / (UNIT * MINIMUM_HEIGHT),
-        );
-        height = containerWidth;
-        width = containerHeight;
-        adjustScale();
-      }
-    } else if (rotate % 180 === 0) {
-      if (autoHeight) {
+    if (rotate % 180 === 0) {
+      if (autoHeight && !isFullscreen) {
         containerHeight = 0.9 * DEFAULT_HEIGHT_WIDTH_RATIO * containerWidth;
         containerEl.style.height = `${containerHeight}px`;
       }
@@ -106,7 +87,7 @@ export function TransformWrapper(props: TransformWrapperProps) {
       width = containerWidth;
       adjustScale();
     } else {
-      if (autoHeight) {
+      if (autoHeight && !isFullscreen) {
         containerHeight = containerWidth / DEFAULT_HEIGHT_WIDTH_RATIO;
         containerEl.style.height = `${containerHeight}px`;
       }

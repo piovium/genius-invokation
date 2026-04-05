@@ -126,12 +126,7 @@ export default function EditDeck() {
     try {
       const deck = deckValue();
       const code = DEFAULT_ASSETS_MANAGER.encode(deck);
-      try {
-        await copyToClipboard(code);
-        alert(t("shareCodeCopied", { code }));
-      } catch (e) {
-        alert(t("shareCodeFallback", { code, error: (e as Error).message }));
-      }
+      await copyToClipboard(code, t);
     } catch (e) {
       if (e instanceof Error) {
         window.alert(e.message);

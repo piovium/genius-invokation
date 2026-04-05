@@ -79,7 +79,7 @@ export default {
   noGames: "No matches",
   recommendGithubLogin: "Sign in with GitHub",
   continueAsGuest: "Or continue as a",
-  guestIdentity: "guest",
+  guestIdentity: "Guest",
   continueSuffix: "...",
   guestNamePlaceholder: "Give it a name!",
   confirm: "Confirm",

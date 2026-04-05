@@ -86,6 +86,7 @@ export default function Decks() {
       if (type === "guest") {
         await pinGuestDeck(deckId);
       } else if (type === "user") {
+        // trigger updatedAt
         await axios.patch(`decks/${deckId}`, {});
       }
       refetch();

@@ -21,23 +21,21 @@ import {
   Switch,
   createSignal,
 } from "solid-js";
-import { getPlayerAvatarUrl, getGithubAvatarUrl } from "../utils";
 import { A } from "@solidjs/router";
 import axios, { AxiosError } from "axios";
 import { GameInfo } from "./GameInfo";
 import { ChessboardColor } from "./ChessboardColor";
 import { useI18n } from "../i18n";
+import { Portal } from "solid-js/web";
+import { AvatarSelector } from "./AvatarSelector";
+import { useAuth } from "../auth";
 
 export interface UserInfoProps {
   type: "user" | "guest";
-  id: number | null;
-  name?: string;
-  avatar?: string | null;
-  chessboardColor: string | null;
+  idText: string;
+  name: string;
+  avatarUrl?: string;
   editable?: boolean;
-  onNameChange?: (newName: string) => Promise<void>;
-  onAvatarChange?: (newAvatar: string | null) => Promise<void>;
-  onOpenAvatarSelector?: () => void;
 }
 
 export function UserInfo(props: UserInfoProps) {
@@ -46,7 +44,10 @@ export function UserInfo(props: UserInfoProps) {
     axios.get<{ data: any[] }>(`games/mine`).then((res) => res.data),
   );
 
+  let avatarSelectorEl: HTMLDialogElement | undefined;
+
   // Nickname editing state
+  const { updateInfo } = useAuth();
   const [editingName, setEditingName] = createSignal(false);
   const [nameInputEl, setNameInputEl] = createSignal<HTMLInputElement>();
   const [uploading, setUploading] = createSignal(false);
@@ -65,10 +66,10 @@ export function UserInfo(props: UserInfoProps) {
     const formData = new FormData(e.target as HTMLFormElement);
     const newName = formData.get("name") as string;
 
-    if (newName.trim() && props.onNameChange) {
+    if (newName.trim()) {
       try {
         setUploading(true);
-        await props.onNameChange(newName.trim());
+        await updateInfo({ name: newName });
         setEditingName(false);
       } catch (err) {
         console.error(err);
@@ -78,41 +79,46 @@ export function UserInfo(props: UserInfoProps) {
     }
   };
 
-  const avatarUrl = () => {
-    console.log(props.id, props.type);
-    if (props.type !== "guest" && props.id) {
-      return getGithubAvatarUrl(props.id);
-    }
-    return getPlayerAvatarUrl({
-      isGuest: true,
-      id: props.id ?? null,
-      name: props.name || "",
-      avatar: props.avatar,
-    });
+  const setAvatarUrl = async (newUrl: string) => {
+    await updateInfo({ avatarUrl: newUrl });
   };
 
   return (
     <div class="flex flex-col md:flex-row container gap-4 px-2 h-full md:overflow-y-auto">
       <div class="flex flex-col w-full md:w-45 justify-start items-center">
         <div class="relative rounded-full w-40 h-40 b-solid b-1 b-gray-200 flex items-center justify-center">
-          <img src={avatarUrl()} class="w-36 h-36 object-cover rounded-full" />
-          <Show when={props.editable && props.type === "guest"}>
-            <button
-              class="absolute top-28 right-2 btn btn-ghost bg-white h-10 w-10 p-1 rounded-full shadow-md"
-              onClick={() => props.onOpenAvatarSelector?.()}
-              title={t("selectAvatar")}
-            >
-              <i class="i-mdi-camera h-6 w-6" />
-            </button>
+          <img
+            src={props.avatarUrl}
+            class="w-36 h-36 object-cover rounded-full"
+          />
+          <Show
+            when={props.editable && props.type === "guest" && props.avatarUrl}
+          >
+            {(avatarUrl) => (
+              <>
+                <button
+                  class="absolute top-28 right-2 btn btn-ghost bg-white h-10 w-10 p-1 rounded-full shadow-md"
+                  onClick={() => avatarSelectorEl?.showModal()}
+                  title={t("selectAvatar")}
+                >
+                  <i class="i-mdi-camera h-6 w-6" />
+                </button>
+                <Portal>
+                  <AvatarSelector
+                    ref={avatarSelectorEl!}
+                    value={avatarUrl()}
+                    onChange={setAvatarUrl}
+                  />
+                </Portal>
+              </>
+            )}
           </Show>
         </div>
       </div>
       <div class="flex-grow flex flex-col items-start">
         <h2 class="text-2xl font-bold">{t("profile")}</h2>
         <div class="flex items-end gap-2 mb-5">
-          <span class="text-gray-4 text-sm font-300">
-            {props.type === "guest" ? t("guestIdentity") : `ID: ${props.id}`}
-          </span>
+          <span class="text-gray-4 text-sm font-300">{props.idText}</span>
         </div>
         <dl class="flex flex-row gap-4 items-center">
           <dt class="font-bold text-nowrap">{t("nickname")}</dt>
@@ -192,7 +198,7 @@ export function UserInfo(props: UserInfoProps) {
                       : String(games.error),
                 })}
               </Match>
-              <Match when={!!!games()?.data.length}>{t("noGameRecords")}</Match>
+              <Match when={!games()?.data.length}>{t("noGameRecords")}</Match>
               <Match when={games()}>
                 {(games) => (
                   <For each={games().data}>

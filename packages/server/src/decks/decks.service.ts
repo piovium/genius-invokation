@@ -157,7 +157,6 @@ export class DecksService {
         name: deck.name,
         code,
         requiredVersion,
-        updatedAt: new Date(),
       },
     });
     return model;
