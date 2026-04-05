@@ -23,7 +23,7 @@ export interface UserInfo {
   id: number;
   login: string;
   name?: string;
-  avatar: string | null;
+  avatarUrl: string;
   chessboardColor?: string | null;
 }
 
@@ -59,8 +59,8 @@ export class UsersService implements OnModuleInit {
     return {
       id: user.id,
       login: userResponse.data.login,
-      name: user.name || userResponse.data.name || userResponse.data.login,
-      avatar: user.avatar ?? null,
+      name: user.name || userResponse.data.name,
+      avatarUrl: userResponse.data.avatar_url,
       chessboardColor: user.chessboardColor ?? null,
     };
   }

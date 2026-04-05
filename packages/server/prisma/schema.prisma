@@ -30,7 +30,6 @@ datasource db {
 model User {
   id              Int             @id
   name            String?
-  avatar          String?
   chessboardColor String?
   ghToken         String?
   games           PlayerOnGames[]

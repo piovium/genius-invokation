@@ -39,7 +39,6 @@ export default function User() {
       return {
         id: null,
         name: s.name,
-        avatar: s.avatar,
         login: "",
         chessboardColor: s.chessboardColor,
         type: "guest" as const,
@@ -57,16 +56,6 @@ export default function User() {
       await refetchUserInfo();
     }
   };
-  
-  const handleAvatarChange = async (newAvatar: string | null) => {
-    const s = mine();
-    if (s.type === "guest") {
-      await updateInfo({ avatar: newAvatar });
-    } else if (s.type === "user" && userId) {
-      await axios.patch("users/me", { avatar: newAvatar });
-      await refetchUserInfo();
-    }
-  };
 
   return (
     <Layout>
@@ -79,7 +68,6 @@ export default function User() {
                 editable={true}
                 isGuest={true}
                 onNameChange={handleNameChange}
-                onAvatarChange={handleAvatarChange}
               />
             )}
           </Show>
@@ -98,7 +86,6 @@ export default function User() {
             {...userInfo()}
             editable={userInfo()?.id === mine()?.id}
             onNameChange={handleNameChange}
-            onAvatarChange={handleAvatarChange}
           />
         </Match>
       </Switch>

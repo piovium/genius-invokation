@@ -42,13 +42,13 @@ export function RoomInfo(props: RoomInfoProps) {
   const [avatarUrl0] = createResource(
     () => props.players,
     (players) => {
-      return players[0] && getPlayerAvatarUrl({...players[0]});
+      return players[0] && getPlayerAvatarUrl(players[0]);
     },
   );
   const [avatarUrl1] = createResource(
     () => props.players,
     (players) => {
-      return players[1] && getPlayerAvatarUrl({...players[1]});
+      return players[1] && getPlayerAvatarUrl(players[1]);
     },
   );
   return (
