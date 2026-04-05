@@ -20,6 +20,7 @@ import axios, { AxiosError } from "axios";
 import { useAuth, UserInfo as UserInfoT } from "../auth";
 import { useI18n } from "../i18n";
 import { UserInfo } from "../components/UserInfo";
+import { getGithubAvatarUrl } from "../utils";
 
 export default function User() {
   const { t } = useI18n();
@@ -68,6 +69,7 @@ export default function User() {
               type="user"
               idText={`ID: ${user().id}`}
               name={user().name}
+              avatarUrl={getGithubAvatarUrl(user().id)}
               editable={user().id === mine()?.id}
             />
           )}

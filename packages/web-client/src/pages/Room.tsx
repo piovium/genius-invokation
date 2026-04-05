@@ -458,7 +458,7 @@ export default function Room() {
 
   const getClientPlayerInfo = (playerInfo: PlayerInfo) => ({
     name: playerInfo.name,
-    avatarUrl: getPlayerAvatarUrl({...playerInfo}),
+    avatarUrl: getPlayerAvatarUrl(playerInfo),
   });
 
   let chessboardContainer: HTMLDivElement | undefined;
