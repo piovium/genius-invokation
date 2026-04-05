@@ -19,6 +19,7 @@ import {
   Match,
   Show,
   Switch,
+  createSignal,
 } from "solid-js";
 import { getAvatarUrl } from "../utils";
 import { A } from "@solidjs/router";
@@ -34,6 +35,7 @@ export interface UserInfoProps {
   chessboardColor: string | null;
   editable?: boolean;
   isGuest?: boolean;
+  onNameChange?: (newName: string) => Promise<void>;
 }
 
 export function UserInfo(props: UserInfoProps) {
@@ -42,11 +44,44 @@ export function UserInfo(props: UserInfoProps) {
   const [games] = createResource(() =>
     axios.get<{ data: any[] }>(`games/mine`).then((res) => res.data)
   );
+  
+  // Nickname editing state
+  const [editingName, setEditingName] = createSignal(false);
+  const [nameInputEl, setNameInputEl] = createSignal<HTMLInputElement>();
+  const [uploading, setUploading] = createSignal(false);
+  
+  const startEditingName = () => {
+    setEditingName(true);
+    const input = nameInputEl();
+    if (input) {
+      input.value = props.name || "";
+      input.focus();
+    }
+  };
+  
+  const saveName = async (e: SubmitEvent) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    const newName = formData.get("name") as string;
+    
+    if (newName.trim() && props.onNameChange) {
+      try {
+        setUploading(true);
+        await props.onNameChange(newName.trim());
+        setEditingName(false);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
+  
   return (
     <div class="flex flex-row container gap-4 px-2 h-full md:overflow-y-auto">
       <div class="hidden md:flex flex-col w-45">
         <div class="rounded-full w-40 h-40 b-solid b-1 b-gray-200 flex items-center justify-center mb-3">
-          <Show when={avatarUrl()}>
+          <Show when={avatarUrl()} fallback={<span class="text-6xl">👤</span>}>
             <img src={avatarUrl()} class="w-36 h-36 [clip-path:circle()]" />
           </Show>
         </div>
@@ -57,8 +92,58 @@ export function UserInfo(props: UserInfoProps) {
           <span class="text-gray-4 text-sm font-300">{props.type === "guest" ? t("guestIdentity") : `ID: ${props.id}`}</span>
         </div>
         <dl class="flex flex-row gap-4 items-center">
-          <dt class="font-bold">{t("nickname")}</dt>
-          <dd class="flex flex-row gap-4 items-center h-8">{props.name}</dd>
+          <dt class="font-bold text-nowrap">{t("nickname")}</dt>
+          <dd class="flex flex-row gap-4 items-center h-8">
+            <Show
+              when={props.editable && editingName()}
+              fallback={
+                <div class="flex flex-row items-center gap-2">
+                  <span class="min-w-0 overflow-hidden whitespace-nowrap text-ellipsis">
+                    {props.name}
+                  </span>
+                  <Show when={props.editable}>
+                    <button
+                      class="btn btn-ghost h-8 w-8 p-1"
+                      onClick={startEditingName}
+                    >
+                      <i class="i-mdi-pencil-outline" />
+                    </button>
+                  </Show>
+                </div>
+              }
+            >
+              <form
+                onSubmit={saveName}
+                class="flex flex-row gap-1 md:gap-3 text-3.2 md:text-3.5"
+              >
+                <input
+                  type="text"
+                  required
+                  ref={setNameInputEl}
+                  onFocus={(e) => e.target.select()}
+                  name="name"
+                  class="input input-outline min-w-40 md:w-50 h-8 text-1rem"
+                  placeholder={t("guestNamePlaceholder")}
+                />
+                <button
+                  type="submit"
+                  class="btn btn-soft-green h-8 w-12"
+                  disabled={uploading()}
+                >
+                  <Show when={uploading()} fallback={t("save")}>
+                    <i class="i-mdi-loading animate-spin" />
+                  </Show>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-soft-red h-8 w-12"
+                  onClick={() => setEditingName(false)}
+                >
+                  {t("cancel")}
+                </button>
+              </form>
+            </Show>
+          </dd>
         </dl>
         <hr class="h-1 w-full text-gray-4 my-4" />
         <dl class="flex flex-row gap-4 items-center">

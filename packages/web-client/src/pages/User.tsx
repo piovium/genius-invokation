@@ -24,11 +24,11 @@ import { useI18n } from "../i18n";
 export default function User() {
   const { t } = useI18n();
   const params = useParams();
-  const { status: mine } = useAuth();
+  const { status: mine, updateInfo } = useAuth();
   const isGuestMode = params.id === "guest";
   const userId = isGuestMode ? null : Number(params.id);
   
-  const [userInfo] = createResource(
+  const [userInfo, { refetch: refetchUserInfo }] = createResource(
     () => !isGuestMode,
     () => axios.get(`users/${userId}`).then((res) => res.data),
   );
@@ -46,17 +46,28 @@ export default function User() {
     }
     return null;
   };
+  
+  const handleNameChange = async (newName: string) => {
+    const s = mine();
+    if (s.type === "guest") {
+      await updateInfo({ name: newName });
+    } else if (s.type === "user" && userId) {
+      await axios.patch("users/me", { name: newName });
+      await refetchUserInfo();
+    }
+  };
 
   return (
     <Layout>
       <Switch>
         <Match when={isGuestMode}>
-          <Show when={guestInfo()}>
+          <Show when={guestInfo()} fallback={t("notLoggedIn")}>
             {(info) => (
               <UserInfo
                 {...info()}
                 editable={true}
                 isGuest={true}
+                onNameChange={handleNameChange}
               />
             )}
           </Show>
@@ -74,6 +85,7 @@ export default function User() {
           <UserInfo
             {...userInfo()}
             editable={userInfo()?.id === mine()?.id}
+            onNameChange={handleNameChange}
           />
         </Match>
       </Switch>

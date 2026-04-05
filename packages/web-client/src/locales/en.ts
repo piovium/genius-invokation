@@ -41,6 +41,7 @@ export default {
   gameRecords: "Match history",
   guestNoGameRecords: "Guest mode will not retain match records. Please log in with GitHub to save your match records.",
   noGameRecords: "No match history yet",
+  notLoggedIn: "Not logged in",
   myDecks: "My Deck(s)",
   myDecksMore: "My Deck(s)...",
   add: "Add",

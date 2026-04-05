@@ -39,6 +39,7 @@ export default {
   gameRecords: "对局记录",
   guestNoGameRecords: "游客模式不会保留对局记录，如需保留对局记录，请使用 GitHub 登录。",
   noGameRecords: "暂无对局记录",
+  notLoggedIn: "未登录",
   myDecks: "我的牌组",
   myDecksMore: "我的牌组…",
   add: "添加",
