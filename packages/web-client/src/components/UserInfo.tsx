@@ -29,6 +29,7 @@ import { useI18n } from "../i18n";
 import { Portal } from "solid-js/web";
 import { AvatarSelector } from "./AvatarSelector";
 import { useAuth } from "../auth";
+import { TextFieldEdit } from "./TextFieldEdit";
 
 export interface UserInfoProps {
   type: "user" | "guest";
@@ -48,35 +49,17 @@ export function UserInfo(props: UserInfoProps) {
 
   // Nickname editing state
   const { updateInfo } = useAuth();
-  const [editingName, setEditingName] = createSignal(false);
-  const [nameInputEl, setNameInputEl] = createSignal<HTMLInputElement>();
-  const [uploading, setUploading] = createSignal(false);
 
-  const startEditingName = () => {
-    setEditingName(true);
-    const input = nameInputEl();
-    if (input) {
-      input.value = props.name || "";
-      input.focus();
-    }
-  };
-
-  const saveName = async (e: SubmitEvent) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const newName = formData.get("name") as string;
-
+  const saveName = async (newName: string) => {
     if (newName.trim()) {
       try {
-        setUploading(true);
         await updateInfo({ name: newName });
-        setEditingName(false);
+        return true;
       } catch (err) {
         console.error(err);
-      } finally {
-        setUploading(false);
       }
     }
+    return false;
   };
 
   const setAvatarUrl = async (newUrl: string) => {
@@ -123,55 +106,14 @@ export function UserInfo(props: UserInfoProps) {
         <dl class="flex flex-row gap-4 items-center">
           <dt class="font-bold text-nowrap">{t("nickname")}</dt>
           <dd class="flex flex-row gap-4 items-center h-8">
-            <Show
-              when={props.editable && editingName()}
-              fallback={
-                <div class="flex flex-row items-center gap-2">
-                  <span class="min-w-0 overflow-hidden whitespace-nowrap text-ellipsis">
-                    {props.name}
-                  </span>
-                  <Show when={props.editable && props.type === "guest"}>
-                    <button
-                      class="btn btn-ghost h-8 w-8 p-1"
-                      onClick={startEditingName}
-                    >
-                      <i class="i-mdi-square-edit-outline h-6 w-6" />
-                    </button>
-                  </Show>
-                </div>
-              }
-            >
-              <form
-                onSubmit={(e) => saveName(e)}
-                class="flex flex-row gap-1 md:gap-3 text-3.2 md:text-3.5"
-              >
-                <input
-                  type="text"
-                  required
-                  ref={setNameInputEl}
-                  onFocus={(e) => e.target.select()}
-                  name="name"
-                  class="input input-outline min-w-40 md:w-50 h-8 text-1rem"
-                  placeholder={t("guestNamePlaceholder")}
-                />
-                <button
-                  type="submit"
-                  class="btn btn-soft-green h-8 w-12"
-                  disabled={uploading()}
-                >
-                  <Show when={uploading()} fallback={t("save")}>
-                    <i class="i-mdi-loading animate-spin" />
-                  </Show>
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-soft-red h-8 w-12"
-                  onClick={() => setEditingName(false)}
-                >
-                  {t("cancel")}
-                </button>
-              </form>
-            </Show>
+            <TextFieldEdit
+              disable={!props.editable}
+              value={props.name || ""}
+              saveText={t("save")}
+              cancelText={t("cancel")}
+              placeholder={t("guestNamePlaceholder")}
+              onSave={saveName}
+            />
           </dd>
         </dl>
         <hr class="h-1 w-full text-gray-4 my-4" />
