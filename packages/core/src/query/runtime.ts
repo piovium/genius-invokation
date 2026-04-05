@@ -13,16 +13,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type {
-  AnyState,
-  CharacterState,
-  CharacterTag,
-  GameState,
-} from "../base/state";
+import type { AnyState, CharacterTag, GameState } from "../base/state";
 import {
   reviveFunction,
   toExpression,
   type Expression,
+  type InferResult,
   type IQuery,
 } from "./utils";
 import {
@@ -34,6 +30,7 @@ import type { SExprSchema } from "./expr_schema";
 import { CharacterBase } from "../builder/context/character";
 import { flip } from "@gi-tcg/utils";
 import type { EntityArea } from "../base/entity";
+import type { ExEntityState } from "../builder/type";
 
 export function queryToExpression(query: IQuery): SExprSchema.Query {
   return query[toExpression]();
@@ -66,12 +63,12 @@ interface ProperIterable<T> {
   [Symbol.iterator](): IteratorObject<T>;
 }
 
-class QueryRuntime {
+class QueryRunner {
   readonly entities: ReadonlySet<EntityEntry>;
   readonly entityMap: ReadonlyMap<number, EntityEntry>;
 
   readonly state: GameState;
-  readonly who: 0 | 1;
+  who: 0 | 1 = 0;
   readonly #defaultOrder: (entry: EntityEntry) => number;
 
   readonly #characters: ReadonlySet<EntityEntry>;
@@ -79,12 +76,15 @@ class QueryRuntime {
   readonly #attachables: ReadonlySet<EntityEntry>;
   readonly #attachments: ReadonlySet<EntityEntry>;
 
-  constructor(state: GameState, who: 0 | 1) {
+  readonly #characterHelpers: ReadonlyMap<number, CharacterBase>;
+
+  constructor(state: GameState) {
     const entityMap = new Map<number, EntityEntry>();
     const characters = new Set<EntityEntry>();
     const entitiesOnCharacters = new Set<EntityEntry>();
     const attachables = new Set<EntityEntry>();
     const attachments = new Set<EntityEntry>();
+    const characterHelpers = new Map<number, CharacterBase>();
 
     const entitiesWithArea = getAllEntitiesWithArea(state);
     for (let i = 0; i < entitiesWithArea.length; i++) {
@@ -92,6 +92,10 @@ class QueryRuntime {
       entityMap.set(entry.state.id, entry);
       if (entry.state.definition.type === "character") {
         characters.add(entry);
+        characterHelpers.set(
+          entry.state.id,
+          new CharacterBase(state, entry.state.id),
+        );
       } else if (entry.area.type === "characters") {
         entitiesOnCharacters.add(entry);
       }
@@ -108,9 +112,9 @@ class QueryRuntime {
     this.#entitiesOnCharacters = entitiesOnCharacters;
     this.#attachables = attachables;
     this.#attachments = attachments;
+    this.#characterHelpers = characterHelpers;
 
     this.state = state;
-    this.who = who;
     this.#defaultOrder = (entry: EntityEntry) => entry.index;
   }
 
@@ -121,7 +125,7 @@ class QueryRuntime {
     switch (spec[0]) {
       case "expr": {
         const [_, expr] = spec;
-        const built = QueryRuntime.#buildExpression(
+        const built = QueryRunner.#buildExpression(
           expr,
           runCountHint ?? this.entities.size,
         );
@@ -129,7 +133,7 @@ class QueryRuntime {
       }
       case "fn": {
         const [_, code] = spec;
-        const revived = QueryRuntime.#reviveFunction(code);
+        const revived = QueryRunner.#reviveFunction(code);
         return (entry) => revived(entry.state.variables ?? {}) as number;
       }
       default: {
@@ -499,11 +503,12 @@ class QueryRuntime {
       case "position": {
         const [_, posSpec] = expr;
         const filter: EntityFilter = (entry) => {
-          if (entry.area.type !== "characters") {
+          if (entry.state.definition.type !== "character") {
             return false;
           }
-          const chCtx = new CharacterBase(this.state, entry.state.id);
-          return chCtx.satisfyPosition(posSpec);
+          return this.#characterHelpers
+            .get(entry.state.id)!
+            .satisfyPosition(posSpec);
         };
         return universeIt.filter(filter);
       }
@@ -545,21 +550,31 @@ class QueryRuntime {
         );
         const results = new Set<EntityEntry>();
         for (const baseEntry of baseEntries) {
-          const baseChCtx = new CharacterBase(this.state, baseEntry.state.id);
-          const baseIdx = baseChCtx.positionIndex();
-          const targetWho = flip(baseChCtx.who);
-          const targetChs = this.state.players[targetWho].characters.map(
-            (ch, i) => [this.entityMap.get(ch.id)!, i] as const,
-          );
+          const baseIdx = this.#characterHelpers
+            .get(baseEntry.state.id)!
+            .positionIndex();
+          const targetWho = flip(baseEntry.area.who);
+          const targetChs = this.#characters
+            .values()
+            .filter(
+              (entry) =>
+                entry.area.who === targetWho &&
+                entry.state.variables.alive !== 0,
+            )
+            .map(
+              (entry) =>
+                [
+                  entry,
+                  this.#characterHelpers.get(entry.state.id)!.positionIndex(),
+                ] as const,
+            )
+            .toArray();
           if (targetChs.length === 0) {
             continue;
           }
           // 由于“循环”判定距离，第一个也可以以“尾后”位置的方式参与距离计算
           targetChs.unshift([targetChs[0][0], targetChs.length]);
-          const orderFn = ([ch, i]: readonly [EntityEntry, number]) => {
-            if (!ch.state.variables.alive) {
-              return Infinity;
-            }
+          const orderFn = ([_, i]: readonly [EntityEntry, number]) => {
             return Math.abs(i - baseIdx);
           };
           results.add(toSortedBy(targetChs, orderFn)[0][0]);
@@ -608,7 +623,7 @@ class QueryRuntime {
       // relationals
       case "has": {
         const [_, operand] = expr;
-        const operandEntries = new Set(
+        const operandIds = new Set(
           this.executeUnordered(
             operand as SExprSchema.UnorderedQuery,
             this.#entitiesOnCharacters,
@@ -618,7 +633,7 @@ class QueryRuntime {
         );
         const filter: EntityFilter = (entry) =>
           "entities" in entry.state &&
-          entry.state.entities.some((e) => operandEntries.has(e.id));
+          entry.state.entities.some((e) => operandIds.has(e.id));
         return universeIt.filter(filter);
       }
       case "at": {
@@ -633,6 +648,8 @@ class QueryRuntime {
         );
         const filter: EntityFilter = (entry) =>
           entry.area.type === "characters" &&
+          // this.#entitiesOnCharacters.has(entry) can also work, but it is more efficient to directly check type
+          entry.state.definition.type !== "character" &&
           operandEntries.has(entry.area.characterId);
         return universeIt.filter(filter);
       }
@@ -648,12 +665,14 @@ class QueryRuntime {
         );
         const filter: EntityFilter = (entry) =>
           (entry.area.type === "hands" || entry.area.type === "pile") &&
+          // this.#attachables.has(entry) can also work, but it is more efficient to directly check type
+          entry.state.definition.type === "attachment" &&
           operandEntries.has(entry.area.cardId);
         return universeIt.filter(filter);
       }
       case "with": {
         const [_, operand] = expr;
-        const operandEntries = new Set(
+        const operandIds = new Set(
           this.executeUnordered(
             operand as SExprSchema.UnorderedQuery,
             this.#attachments,
@@ -663,7 +682,7 @@ class QueryRuntime {
         );
         const filter: EntityFilter = (entry) =>
           "attachments" in entry.state &&
-          entry.state.attachments.some((e) => operandEntries.has(e.id));
+          entry.state.attachments.some((e) => operandIds.has(e.id));
         return universeIt.filter(filter);
       }
 
@@ -733,4 +752,21 @@ class QueryRuntime {
       }
     }
   }
+}
+
+const runners = new WeakMap<GameState, QueryRunner>();
+export function runQuery<T extends IQuery>(
+  state: GameState,
+  who: 0 | 1,
+  query: T,
+): ExEntityState<InferResult<T>["type"]>[] {
+  let runner = runners.get(state);
+  if (!runner) {
+    runner = new QueryRunner(state);
+    runners.set(state, runner);
+  }
+  runner.who = who;
+  return runner
+    .execute(query[toExpression]())
+    .map((entry) => entry.state) as ExEntityState<InferResult<T>["type"]>[];
 }
