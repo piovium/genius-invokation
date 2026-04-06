@@ -13,13 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {
-  createResource,
-  For,
-  Match,
-  Show,
-  Switch,
-} from "solid-js";
+import { createResource, For, Match, Show, Switch } from "solid-js";
 import { A } from "@solidjs/router";
 import axios, { AxiosError } from "axios";
 import { GameInfo } from "./GameInfo";
@@ -115,53 +109,53 @@ export function UserInfo(props: UserInfoProps) {
             />
           </dd>
         </dl>
-        <hr class="h-1 w-full text-gray-4 my-4" />
-        <dl class="flex flex-row gap-4 items-center">
-          <dt class="font-bold text-nowrap">{t("chessboardColor")}</dt>
-          <Show when={props.editable}>
+        <Show when={props.editable}>
+          <hr class="h-1 w-full text-gray-4 my-4" />
+          <dl class="flex flex-row gap-4 items-center">
+            <dt class="font-bold text-nowrap">{t("chessboardColor")}</dt>
             <ChessboardColor />
-          </Show>
-        </dl>
-        <hr class="h-1 w-full text-gray-4 my-4" />
-        <div class="flex flex-col gap-4">
-          <dt class="font-bold">{t("gameRecords")}</dt>
-          <dd class="flex flex-col gap-1">
-            <Switch>
-              <Match when={props.type === "guest"}>
-                {t("guestNoGameRecords")}
-              </Match>
-              <Match when={games.loading}>{t("loading")}</Match>
-              <Match when={games.error}>
-                {t("loadFailed", {
-                  message:
-                    games.error instanceof AxiosError
-                      ? games.error.response?.data.message
-                      : String(games.error),
-                })}
-              </Match>
-              <Match when={!games()?.data.length}>{t("noGameRecords")}</Match>
-              <Match when={games()}>
-                {(games) => (
-                  <For each={games().data}>
-                    {(data) => (
-                      <GameInfo
-                        gameId={data.game.id}
-                        createdAt={data.game.createdAt}
-                        winnerId={data.game.winnerId}
-                      />
-                    )}
-                  </For>
-                )}
-              </Match>
-            </Switch>
-          </dd>
-        </div>
-        <hr class="h-1 w-full text-gray-4 my-4" />
-        <div class="flex items-center gap-3">
-          <A class="btn btn-ghost font-bold" href="/decks">
-            {t("myDecksMore")}
-          </A>
-        </div>
+          </dl>
+          <hr class="h-1 w-full text-gray-4 my-4" />
+          <div class="flex flex-col gap-4">
+            <dt class="font-bold">{t("gameRecords")}</dt>
+            <dd class="flex flex-col gap-1">
+              <Switch>
+                <Match when={props.type === "guest"}>
+                  {t("guestNoGameRecords")}
+                </Match>
+                <Match when={games.loading}>{t("loading")}</Match>
+                <Match when={games.error}>
+                  {t("loadFailed", {
+                    message:
+                      games.error instanceof AxiosError
+                        ? games.error.response?.data.message
+                        : String(games.error),
+                  })}
+                </Match>
+                <Match when={!games()?.data.length}>{t("noGameRecords")}</Match>
+                <Match when={games()}>
+                  {(games) => (
+                    <For each={games().data}>
+                      {(data) => (
+                        <GameInfo
+                          gameId={data.game.id}
+                          createdAt={data.game.createdAt}
+                          winnerId={data.game.winnerId}
+                        />
+                      )}
+                    </For>
+                  )}
+                </Match>
+              </Switch>
+            </dd>
+          </div>
+          <hr class="h-1 w-full text-gray-4 my-4" />
+          <div class="flex items-center gap-3">
+            <A class="btn btn-ghost font-bold" href="/decks">
+              {t("myDecksMore")}
+            </A>
+          </div>
+        </Show>
       </div>
     </div>
   );
