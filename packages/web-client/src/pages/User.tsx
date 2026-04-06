@@ -68,7 +68,7 @@ export default function User() {
             <UserInfo
               type="user"
               idText={`ID: ${user().id}`}
-              name={user().name}
+              name={user().id === mine()?.id ? mine().name : user().name}
               avatarUrl={getGithubAvatarUrl(user().id)}
               editable={user().id === mine()?.id}
             />
