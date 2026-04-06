@@ -92,7 +92,7 @@ export class DecksService {
         }
       },
       orderBy: {
-        updatedAt: 'desc',
+        updatedAt: "desc",
       },
     });
     const data = models.map((model) => {
