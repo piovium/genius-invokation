@@ -197,6 +197,7 @@ export function StandaloneParent(props: StandaloneParentProps) {
       });
     }
     const game = new Game(state);
+    (window as any).theGame = game;
     game.onPause = pause;
     game.players[0].io = childIo;
     game.players[1].io = uiIo;
