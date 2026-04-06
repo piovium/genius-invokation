@@ -13,8 +13,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-export { $ } from "./dollar";
+import type { IDollar } from "./dollar";
+import type { IQuery } from "./utils";
+
+export { $, type IDollar } from "./dollar";
 export { queryToExpression } from "./runtime";
 export { stringifySExpr, prettyStringifySExpr } from "./s_expr";
-export type { IQuery, InferResult } from "./utils";
+export { type IQuery, type InferResult, toExpression } from "./utils";
 export { runQuery } from "./runtime";
+
+export type QueryFn = ($: IDollar) => IQuery;

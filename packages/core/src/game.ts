@@ -104,6 +104,7 @@ import {
 import { type ActionInfoWithModification, ActionPreviewer } from "./preview";
 import { Player } from "./player";
 import type { CharacterDefinition } from "./base/character";
+import { $, runQuery, toExpression, type IQuery, type QueryFn } from "./query";
 
 export interface DeckConfig extends Deck {
   noShuffle?: boolean;
@@ -308,8 +309,17 @@ export class Game {
     }
   }
 
-  query(who: 0 | 1, query: string): AnyState[] {
-    return executeQueryOnState(this.state, who, query);
+  query(who: 0 | 1, query: string | QueryFn | IQuery): AnyState[] {
+    if (typeof query === "string") {
+      return executeQueryOnState(this.state, who, query);
+    }
+    if (typeof query === "function") {
+      return runQuery(this.state, who, query($));
+    }
+    if (toExpression in query) {
+      return runQuery(this.state, who, query);
+    }
+    throw new GiTcgCoreInternalError(`Invalid query: ${String(query)}`);
   }
 
   // private lastNotifiedState: [string, string] = ["", ""];

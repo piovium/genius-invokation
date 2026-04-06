@@ -26,6 +26,8 @@ import {
 } from "./primary_methods";
 import { createPrimaryQuery, type PrimaryQuery } from "./primary_query";
 import {
+  diceCostKey,
+  inInitialPileKey,
   toExpressionUnordered,
   UNARY_OPERATORS,
   type Computed,
@@ -123,6 +125,12 @@ class Dollar {
   ): CompositeQuery<UnionTy<T>> {
     return createCompositeQuery("union", args);
   }
+
+  readonly keys = {
+    diceCost: diceCostKey,
+    inInitialPile: inInitialPileKey,
+  }
+  readonly macros = {}
 }
 
 type InitialPrimaryMeta = Computed<
@@ -139,7 +147,7 @@ type AnyMeta = Computed<
   HeterogeneousMetaBase
 >;
 
-type IDollar = Dollar &
+export type IDollar = Dollar &
   PrimaryMethods<InitialPrimaryMeta> &
   DollarUnaryOperatorMethods;
 
