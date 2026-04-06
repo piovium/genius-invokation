@@ -159,12 +159,11 @@ export default function EditDeck() {
   };
 
   const saveDeck = async () => {
-    const deck = deckValue();
+    const deckInfo = { ...deckValue(), name: deckName() };
     const { type } = status();
     try {
       setUploading(true);
       if (isNew) {
-        const deckInfo = { ...deck, name: deckName() };
         if (type === "guest") {
           await addGuestDeck(deckInfo);
         } else if (type === "user") {
@@ -173,12 +172,9 @@ export default function EditDeck() {
         setDirty(false);
       } else {
         if (type === "guest") {
-          await updateGuestDeck(deckId, {
-            cards: deck.cards,
-            characters: deck.characters,
-          });
+          await updateGuestDeck(deckId, deckInfo);
         } else if (type === "user") {
-          await axios.patch(`decks/${deckId}`, { ...deck });
+          await axios.patch(`decks/${deckId}`, deckInfo);
         }
         setDirty(false);
         setUploadDone(true);
