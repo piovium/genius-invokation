@@ -111,7 +111,7 @@ export const useGuestDecks = (): GuestDeck => {
       updateGuestDeck,
       removeGuestDeck,
       pinGuestDeck: async (id) => {
-        updateGuestDeck(id, {});
+        await updateGuestDeck(id, {});
       },
     },
   ];
