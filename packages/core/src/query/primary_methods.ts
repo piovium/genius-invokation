@@ -251,6 +251,19 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     this._internal.addConstraint(["type", "eventCard"]);
     return this._self;
   }
+  // alternative type methods, but not recommended (disambiguate from path)
+  /** @deprecated Use `typeEquipment` instead. */
+  get equipment() {
+    return this.typeEquipment;
+  }
+  /** @deprecated Use `typeStatus` instead. */
+  get status() {
+    return this.typeStatus;
+  }
+  /** @deprecated Use `typeEventCard` instead. */
+  get eventCard() {
+    return this.typeEventCard;
+  }
   // position
   get active(): Assign<Meta, PositionPatch<"active">> {
     this._internal.addConstraint(["position", "active"]);
@@ -367,11 +380,14 @@ type PrimaryMethodRestrictionConfig = {
   opp: { who: "opp" };
   character: { type: "character"; areaType: "characters" };
   equipment: { type: "equipment"; areaType: "characters" | "hands" | "pile" };
+  typeEquipment: { type: "equipment"; areaType: "characters" | "hands" | "pile" };
   status: { type: "status"; areaType: "characters" };
+  typeStatus: { type: "status"; areaType: "characters" };
   combatStatus: { type: "combatStatus"; areaType: "combatStatuses" };
   summon: { type: "summon"; areaType: "summons" };
   support: { type: "support"; areaType: "supports" | "hands" | "pile" };
   eventCard: { type: "eventCard"; areaType: "hands" | "pile" };
+  typeEventCard: { type: "eventCard"; areaType: "hands" | "pile" };
   active: { type: "character"; position: "active" };
   prev: { type: "character"; position: "prev" };
   next: { type: "character"; position: "next" };
