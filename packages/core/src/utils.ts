@@ -116,8 +116,8 @@ export function getAllEntities(
 }
 
 export interface EntityWithArea {
-  state: AnyState;
-  area: EntityArea;
+  readonly state: AnyState;
+  readonly area: EntityArea;
 }
 
 /**
@@ -1088,7 +1088,7 @@ type MixinResult<
  * Construct a mixin class from `derivedCtor`, then attach all methods from `constructors` to it.
  * @param derivedCtor The base class to extend from.
  * @param constructors Other class methods to attached from. These class's constructor **WON'T** be executed, including `[[define]]` of the class field's initializer.
- * @returns 
+ * @returns
  */
 export function mixins<
   T extends Constructor,

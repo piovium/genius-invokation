@@ -153,11 +153,30 @@ type Explode<T> = ExplodeImpl<T> extends infer O
 
 export type Expression = string | number | Expression[];
 
-export const toExpressionUnordered: unique symbol = Symbol(
-  "toExpressionUnordered",
+export const toExpressionUnordered: unique symbol = Symbol.for(
+  "GiTcgCore/query/toExpressionUnordered",
 );
-export const toExpression: unique symbol = Symbol("toExpression");
-export const typingInfo: unique symbol = Symbol("meta");
+export const toExpression: unique symbol = Symbol.for(
+  "GiTcgCore/query/toExpression",
+);
+export const typingInfo: unique symbol = Symbol.for(
+  "GiTcgCore/query/typingInfo",
+);
+
+export const diceCostKey: unique symbol = Symbol.for(
+  "GiTcgCore/query/varKey/diceCost",
+);
+export const inInitialPileKey: unique symbol = Symbol.for(
+  "GiTcgCore/query/varKey/inInitialPile",
+);
+
+export interface StateVariables {
+  [key: string]: number;
+  [diceCostKey]?: number;
+  [inInitialPileKey]?: number;
+}
+
+export type StateVariablesKey = keyof StateVariables;
 
 type TypingInfoSymbol = typeof typingInfo;
 
@@ -296,6 +315,25 @@ export type RelatedToReq<
   Input extends TypingInfoBase,
   Req extends ReqBase,
 > = PropsRelated<Input, Req, "type" | "areaType">;
+
+export function variableKeyToExpr(
+  key: StateVariablesKey,
+): SExprSchema.NumericalExpression {
+  if (key === diceCostKey) {
+    return ["special:diceCost"];
+  } else if (key === inInitialPileKey) {
+    return ["special:inInitialPile"];
+  } else {
+    return key;
+  }
+}
+export function variableKeyToPropertyCode(key: StateVariablesKey): string {
+  if (typeof key === "symbol") {
+    return `Symbol.for(${JSON.stringify(Symbol.keyFor(key))})`;
+  } else {
+    return JSON.stringify(key);
+  }
+}
 
 // https://github.com/puppeteer/puppeteer/blob/bf1e9722eef723c80250119d81fd9d9e0596c074/packages/puppeteer-core/src/util/Function.ts
 

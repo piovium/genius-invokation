@@ -13,15 +13,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { AnyState, CharacterTag, GameState } from "../base/state";
+import type {
+  EntityState,
+  CharacterTag,
+  GameState,
+} from "../base/state";
 import {
+  diceCostKey,
+  inInitialPileKey,
   reviveFunction,
   toExpression,
   type Expression,
   type InferResult,
   type IQuery,
+  type StateVariables,
 } from "./utils";
 import {
+  diceCostSizeOfCard,
   getAllEntitiesWithArea,
   toSortedBy,
   type EntityWithArea,
@@ -52,7 +60,7 @@ type NumericalLikeExpression =
   | SExprSchema.NumericalExpression
   | SExprSchema.BooleanExpression;
 type ExpressionKeyAndDepth = [key: string, depth: number];
-type ParsedExpression = (variables: Record<string, number>) => number;
+type ParsedExpression = (variables: StateVariables) => number;
 type ParsedExpressionAndIsCompiled = [
   exprFn: ParsedExpression,
   compiled: boolean,
@@ -118,6 +126,49 @@ class QueryRunner {
     this.#defaultOrder = (entry: EntityEntry) => entry.index;
   }
 
+  readonly variableParamCache = new WeakMap<EntityEntry, StateVariables>();
+  /**
+   * 对行动牌（equipment, support, eventCard）开启两个特殊变量访问
+   * 1. `special:diceCost`: 牌的骰子费用，考虑 attachments
+   * 2. `special:inInitialPile`: 牌是否在对应玩家的初始牌堆中（0 或 1）
+   * @param entry
+   * @returns
+   */
+  #createVariableParam(entry: EntityEntry): StateVariables {
+    if (
+      entry.state.definition.type === "equipment" ||
+      entry.state.definition.type === "support" ||
+      entry.state.definition.type === "eventCard"
+    ) {
+      return entry.state.variables;
+    }
+    const cached = this.variableParamCache.get(entry);
+    if (cached) {
+      return cached;
+    }
+    let diceCost: number | undefined;
+    let inInitialPile: number | undefined;
+    const gameState = this.state;
+    const initialPile = gameState.players[entry.area.who].initialPile;
+    const result = new Proxy(entry.state.variables, {
+      get(target, prop, receiver) {
+        if (prop === diceCostKey) {
+          return (diceCost ??= diceCostSizeOfCard(
+            gameState,
+            entry.state as EntityState,
+          ));
+        } else if (prop === inInitialPileKey) {
+          return (inInitialPile ??= +initialPile.some(
+            (c) => c.id === entry.state.id,
+          ));
+        }
+        return Reflect.get(target, prop, receiver);
+      },
+    }) as StateVariables;
+    this.variableParamCache.set(entry, result);
+    return result;
+  }
+
   #parseOrderByOrVariable(
     spec: SExprSchema.OrderBySpec | SExprSchema.VariableSpec,
     runCountHint?: number,
@@ -129,12 +180,12 @@ class QueryRunner {
           expr,
           runCountHint ?? this.entities.size,
         );
-        return (entry) => built(entry.state.variables ?? {});
+        return (entry) => built(this.#createVariableParam(entry));
       }
       case "fn": {
         const [_, code] = spec;
         const revived = QueryRunner.#reviveFunction(code);
-        return (entry) => revived(entry.state.variables ?? {}) as number;
+        return (entry) => revived(this.#createVariableParam(entry));
       }
       default: {
         throw new Error(`Unknown orderBy/variable spec: ${spec[0]}`);
@@ -197,7 +248,7 @@ class QueryRunner {
   }
 
   static #interpretExpression(expr: NumericalLikeExpression): ParsedExpression {
-    return (variables: Record<string, number>) => {
+    return (variables: StateVariables) => {
       const visitor = (expr: Expression | NumericalLikeExpression): number => {
         if (typeof expr === "number") {
           return expr;
@@ -284,6 +335,12 @@ class QueryRunner {
           case "not": {
             assertsArgCount("not", args, 1);
             return visitor(args[0]) ? 0 : 1;
+          }
+          case "special:diceCost": {
+            return variables[diceCostKey] ?? Number.NaN;
+          }
+          case "special:inInitialPile": {
+            return variables[inInitialPileKey] ?? Number.NaN;
           }
           default: {
             const _check: never = op;
@@ -380,6 +437,14 @@ class QueryRunner {
         case "not": {
           assertsArgCount("not", args, 1);
           return `(+!${visitor(args[0])})`;
+        }
+        case "special:diceCost": {
+          const keyStr = JSON.stringify(Symbol.keyFor(diceCostKey));
+          return `(${VARIABLES_PARAM}[Symbol.for(${keyStr})] ?? Number.NaN)`;
+        }
+        case "special:inInitialPile": {
+          const keyStr = JSON.stringify(Symbol.keyFor(inInitialPileKey));
+          return `(${VARIABLES_PARAM}[Symbol.for(${keyStr})] ?? Number.NaN)`;
         }
         default: {
           const _check: never = op;

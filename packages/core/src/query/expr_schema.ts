@@ -312,6 +312,16 @@ class NonTerminalsConfig {
         description: `Arbitrary constant number`,
       },
       {
+        leading: "special:diceCost",
+        args: [],
+        description: `Returns the dice cost of this card.`
+      },
+      {
+        leading: "special:inInitialPile",
+        args: [],
+        description: `Returns 1 if the card is in player's initial pile, otherwise 0.`
+      },
+      {
         leading: "+",
         restArgs: { name: "operands", use: "NumericalExpression" },
       },

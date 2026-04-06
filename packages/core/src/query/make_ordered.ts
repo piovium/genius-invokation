@@ -16,13 +16,17 @@
 import type { CharacterVariableConfigs } from "../base/character";
 import type { SExprSchema } from "./expr_schema";
 import {
+  diceCostKey,
+  inInitialPileKey,
   stringifyFunction,
   toExpression,
   toExpressionUnordered,
   typingInfo,
+  variableKeyToExpr,
   type IQuery,
   type IUnorderedQuery,
   type NonIndexKeyOf,
+  type StateVariablesKey,
   type TypingInfoBase,
 } from "./utils";
 
@@ -33,11 +37,14 @@ const isUnorderedQuery = (query: unknown): query is IUnorderedQuery => {
 type A = NonIndexKeyOf<CharacterVariableConfigs>;
 
 type VarName<Ty extends TypingInfoBase> =
-  | Ty["variables"]
-  | (Ty["type"] extends "character"
-      ? NonIndexKeyOf<CharacterVariableConfigs>
-      : never);
-// | (string & {});
+  | (
+      | Ty["variables"]
+      | (Ty["type"] extends "character"
+          ? NonIndexKeyOf<CharacterVariableConfigs>
+          : never)
+    )
+  | typeof diceCostKey
+  | typeof inInitialPileKey;
 
 export class MakeOrderedMethods<Ty extends TypingInfoBase>
   implements IQuery<Ty>
@@ -77,15 +84,17 @@ export class MakeOrderedMethods<Ty extends TypingInfoBase>
     rhs: V2 | number,
   ): MakeOrderedMethods<Ty>;
   orderBy(
-    lhs: string | number,
+    lhs: StateVariablesKey | number,
     op?: "+" | "-" | "*" | "/" | "%",
-    rhs?: string | number,
+    rhs?: StateVariablesKey | number,
   ): MakeOrderedMethods<Ty> {
     const self = this._makeThisOrdered();
+    const lhsExpr = typeof lhs === "number" ? lhs : variableKeyToExpr(lhs);
     if (!op) {
-      self._orderBySpecs.push(["expr", lhs]);
+      self._orderBySpecs.push(["expr", lhsExpr]);
     } else {
-      self._orderBySpecs.push(["expr", [op, lhs, rhs!]]);
+      const rhsExpr = typeof rhs === "number" ? rhs : variableKeyToExpr(rhs!);
+      self._orderBySpecs.push(["expr", [op, lhsExpr, rhsExpr]]);
     }
     return self;
   }

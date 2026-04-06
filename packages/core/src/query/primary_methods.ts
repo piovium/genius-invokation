@@ -12,7 +12,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 import type { CharacterTag, EntityTag, EntityType } from "..";
 import type { AttachmentTag } from "../base/attachment";
 import type {
@@ -47,6 +47,10 @@ import {
   type AnyTuple,
   toExpressionUnordered,
   stringifyFunction,
+  type StateVariables,
+  type StateVariablesKey,
+  variableKeyToExpr,
+  variableKeyToPropertyCode,
 } from "./utils";
 
 type EventCardHandle = number & { readonly _eventCard: unique symbol };
@@ -117,10 +121,10 @@ type Assign<
 
 export { type Assign as AssignedPrimaryQuery };
 
-type AssignVar<T extends HeterogeneousMetaBase, Name extends string> = Assign<
-  T,
-  { variables: { [K in Name]: 0 } }
->;
+type AssignVar<
+  T extends HeterogeneousMetaBase,
+  Name extends StateVariablesKey,
+> = Assign<T, { variables: { [K in Name]: 0 } }>;
 
 type RelationOp = "<" | "<=" | "=" | ">=" | ">" | "!=";
 
@@ -297,44 +301,45 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     return this._self;
   }
   // with
-  var<const Name extends string>(
+  var<const Name extends StateVariablesKey>(
     name: Name,
     value: number,
   ): AssignVar<Meta, Name>;
-  var<const Name extends string>(
+  var<const Name extends StateVariablesKey>(
     name: Name,
     op: RelationOp,
     value: number,
   ): AssignVar<Meta, Name>;
-  var<const Name extends string>(
+  var<const Name extends StateVariablesKey>(
     name: Name,
     pred: (value: number) => unknown,
   ): AssignVar<Meta, Name>;
-  var<const Name extends string>(
-    pred: (values: Record<string, number>) => unknown,
+  var<const Name extends StateVariablesKey>(
+    pred: (values: StateVariables) => unknown,
   ): AssignVar<Meta, Name>;
   var(
     ...args:
-      | [string, number]
-      | [string, RelationOp, number]
-      | [string, (value: number) => unknown]
-      | [(values: Record<string, number>) => unknown]
+      | [StateVariablesKey, number]
+      | [StateVariablesKey, RelationOp, number]
+      | [StateVariablesKey, (value: number) => unknown]
+      | [(values: StateVariables) => unknown]
   ): any {
-    if (typeof args[0] === "string") {
+    if (typeof args[0] !== "function") {
       const [name, opOrValue, valueOrUndefined] = args;
+      const lhs = variableKeyToExpr(name);
       if (typeof opOrValue === "number") {
         this._internal.addConstraint([
           "variables",
-          ["expr", ["=", name, opOrValue]],
+          ["expr", ["=", lhs, opOrValue]],
         ]);
       } else if (typeof opOrValue === "string") {
         this._internal.addConstraint([
           "variables",
-          ["expr", [opOrValue, name, valueOrUndefined]],
+          ["expr", [opOrValue, lhs, valueOrUndefined]],
         ]);
       } else if (typeof opOrValue === "function") {
         const fnCode = stringifyFunction(opOrValue);
-        const prop = escapeUnsafeChars(JSON.stringify(name));
+        const prop = escapeUnsafeChars(variableKeyToPropertyCode(name));
         const wrappedSource = `(v) => (${fnCode})(v[${prop}])`;
         this._internal.addConstraint(["variables", ["fn", wrappedSource]]);
       } else {
@@ -370,7 +375,11 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     type: "weapon" | "element",
     query: RelatedToReq<InferResult<T>, CharacterReq> extends true ? T : never,
   ): Assign<Meta> {
-    this._internal.addConstraint(["tagOf", type, query[toExpressionUnordered]()]);
+    this._internal.addConstraint([
+      "tagOf",
+      type,
+      query[toExpressionUnordered](),
+    ]);
     return this._self;
   }
 }
@@ -380,7 +389,10 @@ type PrimaryMethodRestrictionConfig = {
   opp: { who: "opp" };
   character: { type: "character"; areaType: "characters" };
   equipment: { type: "equipment"; areaType: "characters" | "hands" | "pile" };
-  typeEquipment: { type: "equipment"; areaType: "characters" | "hands" | "pile" };
+  typeEquipment: {
+    type: "equipment";
+    areaType: "characters" | "hands" | "pile";
+  };
   status: { type: "status"; areaType: "characters" };
   typeStatus: { type: "status"; areaType: "characters" };
   combatStatus: { type: "combatStatus"; areaType: "combatStatuses" };
