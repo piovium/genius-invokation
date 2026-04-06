@@ -36,7 +36,7 @@ expectEntityType<"eventCard" | "equipment" | "support">()($.hand);
 expectEntityType<"eventCard" | "equipment" | "support">()($.pile);
 
 expectEntityType<"eventCard" | "equipment" | "support">()($.my.pile.cost(">", 0));
-expectEntityType<"eventCard" | "equipment" | "support">()($.hand.initialPile(false));
+expectEntityType<"eventCard" | "equipment" | "support">()($.hand.notInitial);
 
 expectEntityType<"character">()($.character);
 expectEntityType<"character">()($.active);

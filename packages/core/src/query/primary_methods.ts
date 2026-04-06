@@ -380,11 +380,8 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     // @ts-expect-error - overloads are not properly inferred here
     return this.var(diceCostKey, ...args);
   }
-
-  initialPile(
-    value = true,
-  ): AssignVarAndActionCard<Meta, typeof inInitialPileKey> {
-    return this.var(inInitialPileKey, value ? 1 : 0);
+  get notInitial(): AssignVarAndActionCard<Meta, typeof inInitialPileKey> {
+    return this.var(inInitialPileKey, 0);
   }
 
   id<const Id extends number>(
@@ -441,10 +438,6 @@ type PrimaryMethodRestrictionConfig = {
   onlyDefeated: { type: "character"; defeated: "only" };
   includesDefeated: { type: "character"; defeated: "includes" };
   // cost: {
-  //   type: "eventCard" | "support" | "equipment";
-  //   areaType: "characters" | "hands" | "pile" | "supports";
-  // };
-  // initialPile: {
   //   type: "eventCard" | "support" | "equipment";
   //   areaType: "characters" | "hands" | "pile" | "supports";
   // };
