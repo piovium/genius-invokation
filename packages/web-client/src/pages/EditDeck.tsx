@@ -204,6 +204,7 @@ export default function EditDeck() {
             value={deckName()}
             saveText={t("save")}
             cancelText={t("cancel")}
+            class="text-xl md:text-2xl font-bold "
             onSave={saveName}
           />
           <div class="flex flex-row flex-1 gap-1 md:gap-3 text-3.2 md:text-3.5">

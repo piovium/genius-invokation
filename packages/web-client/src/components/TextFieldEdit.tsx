@@ -19,6 +19,7 @@ export interface TextFieldEditProps {
   value: string;
   saveText: string;
   cancelText: string;
+  class?: string;
   placeholder?: string;
   disable?: boolean;
   onSave: (value: string) => boolean | Promise<boolean>;
@@ -61,7 +62,7 @@ export function TextFieldEdit(props: TextFieldEditProps) {
       when={editing() && !props.disable}
       fallback={
         <div class="flex flex-row items-center gap-2">
-          <h2 class="text-xl md:text-2xl font-bold min-w-0 overflow-hidden whitespace-nowrap text-ellipsis flex-shrink-0">
+          <h2 class={`min-w-0 overflow-hidden whitespace-nowrap text-ellipsis flex-shrink-0 ${props.class}`}>
             {props.value}
           </h2>
           <button

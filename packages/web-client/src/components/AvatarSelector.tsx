@@ -63,7 +63,7 @@ export function AvatarSelector(props: AvatarSelectorProps) {
       </div>
       <button
         autofocus
-        class="hidden md:block absolute right-4 top-4 h-5 w-5 text-black bg-transparent"
+        class="block absolute right-4 top-4 h-5 w-5 text-black bg-transparent"
         onClick={() => dialogEl.close()}
       >
         <i class="inline-block h-full w-full i-mdi-window-close" />
