@@ -51,6 +51,8 @@ import {
   type StateVariablesKey,
   variableKeyToExpr,
   variableKeyToPropertyCode,
+  diceCostKey,
+  inInitialPileKey,
 } from "./utils";
 
 type EventCardHandle = number & { readonly _eventCard: unique symbol };
@@ -125,6 +127,18 @@ type AssignVar<
   T extends HeterogeneousMetaBase,
   Name extends StateVariablesKey,
 > = Assign<T, { variables: { [K in Name]: 0 } }>;
+
+type AssignVarAndActionCard<
+  T extends HeterogeneousMetaBase,
+  Name extends StateVariablesKey,
+> = Assign<
+  T,
+  {
+    variables: { [K in Name]: 0 };
+    type: "eventCard" | "equipment" | "support";
+    areaType: "characters" | "hands" | "pile" | "supports";
+  }
+>;
 
 type RelationOp = "<" | "<=" | "=" | ">=" | ">" | "!=";
 
@@ -353,6 +367,26 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     }
     return this._self;
   }
+
+  cost(value: number): AssignVarAndActionCard<Meta, typeof diceCostKey>;
+  cost(
+    op: RelationOp,
+    value: number,
+  ): AssignVarAndActionCard<Meta, typeof diceCostKey>;
+  cost(
+    pred: (value: number) => unknown,
+  ): AssignVarAndActionCard<Meta, typeof diceCostKey>;
+  cost(...args: any[]) {
+    // @ts-expect-error - overloads are not properly inferred here
+    return this.var(diceCostKey, ...args);
+  }
+
+  initialPile(
+    value = true,
+  ): AssignVarAndActionCard<Meta, typeof inInitialPileKey> {
+    return this.var(inInitialPileKey, value ? 1 : 0);
+  }
+
   id<const Id extends number>(
     id: Id,
   ): Assign<Meta, { id: Id & { readonly _idSpecified: unique symbol } }> {
@@ -406,6 +440,14 @@ type PrimaryMethodRestrictionConfig = {
   standby: { type: "character"; position: "standby" };
   onlyDefeated: { type: "character"; defeated: "only" };
   includesDefeated: { type: "character"; defeated: "includes" };
+  // cost: {
+  //   type: "eventCard" | "support" | "equipment";
+  //   areaType: "characters" | "hands" | "pile" | "supports";
+  // };
+  // initialPile: {
+  //   type: "eventCard" | "support" | "equipment";
+  //   areaType: "characters" | "hands" | "pile" | "supports";
+  // };
 };
 
 type _Check = StaticAssert<

@@ -35,6 +35,20 @@ test("'Fluent API' building tests", () => {
              [(expr (- health maxHealth))]
              1)
   `);
+
+  expect(
+    prettyStringifySExpr(
+      queryToExpression(
+        $.my.pile.cost(">", 0)
+      )
+    )
+  ).toBe(dedent`
+    (intersection (defeated ignore)
+                  (who my)
+                  (area pile true)
+                  (variables (expr (> (special:diceCost)
+                                      0))))
+  `);
 });
 
 test("stringify of functions", () => {
