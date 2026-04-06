@@ -19,7 +19,6 @@ import {
   Match,
   Show,
   Switch,
-  createSignal,
 } from "solid-js";
 import { A } from "@solidjs/router";
 import axios, { AxiosError } from "axios";
