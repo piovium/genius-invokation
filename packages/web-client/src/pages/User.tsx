@@ -27,7 +27,7 @@ export default function User() {
   const params = useParams();
   const { status: mine, avatarUrl: myAvatarUrl } = useAuth();
 
-  const [userInfo] = createResource(
+  const [userInfo, { refetch }] = createResource(
     () => params.id,
     async (id) => {
       if (id.trim() === "" || !Number.isFinite(+id)) {
@@ -68,9 +68,10 @@ export default function User() {
             <UserInfo
               type="user"
               idText={`ID: ${user().id}`}
-              name={user().id === mine()?.id ? mine().name : user().name}
+              name={user().name}
               avatarUrl={getGithubAvatarUrl(user().id)}
               editable={user().id === mine()?.id}
+              onSubmit={refetch}
             />
           )}
         </Match>

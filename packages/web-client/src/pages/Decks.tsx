@@ -70,7 +70,7 @@ export function useDecks(): UseDecksResult {
     },
     loading: () => status().type === "user" && userDecks.loading,
     error: () => (status().type === "user" ? userDecks.error : void 0),
-    refetch,
+    refetch: () => (status().type === "user" ? refetch() : void 0),
   };
 }
 

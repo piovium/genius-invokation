@@ -30,6 +30,7 @@ export interface UserInfoProps {
   name: string;
   avatarUrl?: string;
   editable?: boolean;
+  onSubmit?: () => void;
 }
 
 export function UserInfo(props: UserInfoProps) {
@@ -47,6 +48,7 @@ export function UserInfo(props: UserInfoProps) {
     if (newName.trim()) {
       try {
         await updateInfo({ name: newName });
+        props.onSubmit?.();
         return true;
       } catch (err) {
         console.error(err);
