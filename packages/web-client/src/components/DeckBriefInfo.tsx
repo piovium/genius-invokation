@@ -19,12 +19,13 @@ import { createResource, For, Show } from "solid-js";
 import { DeckInfo } from "../pages/Decks";
 import { useGuestDecks } from "../guest";
 import { useAuth } from "../auth";
-import { copyToClipboard } from "../utils";
+import { copyShareCode } from "../utils";
 import { useI18n } from "../i18n";
 
 export interface DeckInfoProps extends DeckInfo {
   editable?: boolean;
   onDelete?: () => void;
+  onPin?: () => void;
 }
 
 function CharacterAvatar(props: { id: number }) {
@@ -50,7 +51,7 @@ function CharacterAvatar(props: { id: number }) {
 }
 
 export function DeckBriefInfo(props: DeckInfoProps) {
-  const { t, assetsManager } = useI18n();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { status } = useAuth();
   const [, { removeGuestDeck }] = useGuestDecks();
@@ -62,8 +63,7 @@ export function DeckBriefInfo(props: DeckInfoProps) {
 
   const copyCode = async (e: MouseEvent) => {
     e.stopPropagation();
-    await copyToClipboard(props.code);
-    alert(t("shareCodeCopied", { code: props.code }));
+    await copyShareCode(props.code, t);
   };
 
   const deleteDeck = async (e: MouseEvent) => {
@@ -101,15 +101,25 @@ export function DeckBriefInfo(props: DeckInfoProps) {
             title={t("copyShareCode")}
             onClick={copyCode}
           >
-            <i class="i-mdi-file-export h-5.5 w-5.5" />
+            <i class="i-mdi-file-export-outline h-5.5 w-5.5" />
           </button>
           <Show when={props.editable}>
+            <button
+              class="btn color-blue-900 h-6 w-6 p-0 hover:color-blue-500"
+              title={t("pinDeck")}
+              onClick={(e: MouseEvent) => {
+                e.stopPropagation();
+                props.onPin?.();
+              }}
+            >
+              <i class="i-mdi-sort-descending h-6 w-6" />
+            </button>
             <button
               class="btn color-red-800 h-6 w-6 p-0 hover:color-red-500"
               title={t("deleteDeck")}
               onClick={deleteDeck}
             >
-              <i class="i-mdi-delete h-6 w-6" />
+              <i class="i-mdi-delete-outline h-6 w-6" />
             </button>
           </Show>
         </div>

@@ -16,7 +16,6 @@
 import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { Layout } from "../layouts/Layout";
 import {
-  copyToClipboard,
   PlayerInfo,
   roomCodeToId,
   getPlayerAvatarUrl,
@@ -33,7 +32,7 @@ import {
   Component,
   createUniqueId,
 } from "solid-js";
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios, { AxiosError } from "axios";
 import "@gi-tcg/web-ui-core/style.css";
 import EventSourceStream from "@server-sent-stream/web";
 import {
@@ -74,7 +73,7 @@ const createReconnectSse = <T,>(
   onPayload: (payload: T) => void,
   onError?: (e: Error) => void,
 ): [fetch: () => void, abort: () => void] => {
-  let reconnectTimeout: Timer | null = null;
+  let reconnectTimeout: number | null = null;
   let abortController: AbortController | null = null;
   let cancelled = false;
   let activating = false;
@@ -170,7 +169,7 @@ const createReconnectSse = <T,>(
 export default function Room() {
   const { t, assetsManager, locale } = useI18n();
   const params = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const checkboxId = createUniqueId();
   const navigate = useNavigate();
   const code = params.code;
@@ -279,13 +278,6 @@ export default function Room() {
       }
       console.error(e);
     }
-  };
-
-  const copyWatchLink = async () => {
-    const url = new URL(location.href);
-    url.searchParams.delete("action");
-    await copyToClipboard(url.href);
-    alert(t("watchLinkCopied"));
   };
 
   const [currentMyTimer, setCurrentMyTimer] = createSignal<RpcTimer | null>(
@@ -481,7 +473,7 @@ export default function Room() {
       component={mobile() && !!chessboard() ? MobileChessboardLayout : Layout}
     >
       <div
-        class="data-[mobile]:p-0 data-[mobile]:h-100dvh data-[mobile]:overflow-clip container mx-auto flex flex-col group"
+        class="p-0 data-[mobile]:h-100dvh data-[mobile]:overflow-clip container mx-auto flex flex-col group max-w-[calc((100dvh-13.5rem)*160/81)]"
         bool:data-mobile={mobile() && chessboard()}
       >
         <div class="group-data-[mobile]:fixed top-0 right-0 z-100 group-data-[mobile]:translate-x-100% group-data-[mobile]-rotate-90 transform-origin-top-left flex group-data-[mobile]:flex-col flex-row group-data-[mobile]:items-start items-center has-[.visibility-control:checked]:bg-white group-data-[mobile]:pl-[calc(var(--root-padding-top)+1rem)] group-data-[mobile]:p-4 rounded-br-2xl">
@@ -508,13 +500,6 @@ export default function Room() {
                 </button>
               </Show>
               <Show when={initialized()?.config?.watchable}>
-                <button
-                  class="btn btn-outline-primary"
-                  title={t("copyWatchLink")}
-                  onClick={copyWatchLink}
-                >
-                  <i class="i-mdi-link-variant" />
-                </button>
                 <Show when={allowWatchOpp()}>
                   <input
                     id="showOpp"

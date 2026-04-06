@@ -7,11 +7,11 @@ import {
   useContext,
 } from "solid-js";
 import { AssetsManager } from "@gi-tcg/assets-manager";
-import { I18nKey } from "./locales";
+import { I18nDictionary, I18nKey } from "./locales";
 import { makePersisted } from "@solid-primitives/storage";
 import zhCN from "./locales/zh-CN";
 import en from "./locales/en";
-import { resolveTemplate, translator } from "@solid-primitives/i18n";
+import { resolveTemplate, translator, Translator as SolidTranslator } from "@solid-primitives/i18n";
 
 export type Locale = "zh-CN" | "en";
 
@@ -20,11 +20,13 @@ const translations = {
   en: en,
 };
 
+export type Translator = SolidTranslator<I18nDictionary>;
+
 interface I18nContextValue {
   locale: () => Locale;
   setLocale: (locale: Locale) => void;
   assetsManager: () => AssetsManager;
-  t: (key: I18nKey, params?: Record<string, string | number>) => string;
+  t: Translator;
 }
 
 const I18nContext = createContext<I18nContextValue>();

@@ -32,14 +32,13 @@ import { useGuestDecks } from "../guest";
 import { DeckInfo } from "./Decks";
 import { useAuth } from "../auth";
 import { unwrap } from "solid-js/store";
-import { useMobile } from "../App";
-import { copyToClipboard } from "../utils";
+import { copyShareCode } from "../utils";
 import { useI18n } from "../i18n";
+import { TextFieldEdit } from "../components/TextFieldEdit";
 
 export default function EditDeck() {
   const { t, locale, assetsManager } = useI18n();
   const params = useParams();
-  const mobile = useMobile();
   const { status } = useAuth();
   const [guestDecks, { addGuestDeck, updateGuestDeck }] = useGuestDecks();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,8 +47,6 @@ export default function EditDeck() {
   const [deckName, setDeckName] = createSignal<string>(
     searchParams.name ?? t("newDeck"),
   );
-  const [nameInputEl, setNameInputEl] = createSignal<HTMLInputElement>();
-  const [editingName, setEditingName] = createSignal(false);
   const [uploading, setUploading] = createSignal(false);
   const [uploadDone, setUploadDone] = createSignal(false);
   const [deckValue, setDeckValue] = createSignal<Deck>({
@@ -126,8 +123,7 @@ export default function EditDeck() {
     try {
       const deck = deckValue();
       const code = DEFAULT_ASSETS_MANAGER.encode(deck);
-      await copyToClipboard(code);
-      alert(t("shareCodeCopied", { code }));
+      await copyShareCode(code, t);
     } catch (e) {
       if (e instanceof Error) {
         window.alert(e.message);
@@ -136,53 +132,38 @@ export default function EditDeck() {
     }
   };
 
-  const startEditingName = () => {
-    setEditingName(true);
-    const nameInput = nameInputEl();
-    if (nameInput) {
-      nameInput.value = deckName();
-      nameInput?.focus();
-    }
-  };
-
-  const saveName = async (e: SubmitEvent) => {
-    e.preventDefault();
-    const data = new FormData(e.target as HTMLFormElement);
-    const newName = data.get("name") as string;
+  const saveName = async (newName: string) => {
     const oldName = deckName();
     const { type } = status();
     if (!isNew) {
       try {
-        setUploading(true);
         if (type === "guest") {
           await updateGuestDeck(deckId, { name: newName });
         } else if (type === "user") {
           await axios.patch(`decks/${deckId}`, { name: newName });
         }
         setDeckName(newName);
-        setEditingName(false);
+        return true;
       } catch (e) {
         if (e instanceof AxiosError) {
           alert(e.response?.data.message);
           setDeckName(oldName);
         }
         console.error(e);
-      } finally {
-        setUploading(false);
       }
+      return false;
     } else {
       setDeckName(newName);
-      setEditingName(false);
+      return true;
     }
   };
 
   const saveDeck = async () => {
-    const deck = deckValue();
+    const deckInfo = { ...deckValue(), name: deckName() };
     const { type } = status();
     try {
       setUploading(true);
       if (isNew) {
-        const deckInfo = { ...deck, name: deckName() };
         if (type === "guest") {
           await addGuestDeck(deckInfo);
         } else if (type === "user") {
@@ -191,12 +172,9 @@ export default function EditDeck() {
         setDirty(false);
       } else {
         if (type === "guest") {
-          await updateGuestDeck(deckId, {
-            cards: deck.cards,
-            characters: deck.characters,
-          });
+          await updateGuestDeck(deckId, deckInfo);
         } else if (type === "user") {
-          await axios.patch(`decks/${deckId}`, { ...deck });
+          await axios.patch(`decks/${deckId}`, deckInfo);
         }
         setDirty(false);
         setUploadDone(true);
@@ -218,56 +196,18 @@ export default function EditDeck() {
     <Layout>
       <div class="container mx-auto h-full flex flex-col px-2 @container">
         <div class="flex flex-row flex-wrap items-center gap-1 md:gap-3 mb-3 md:mb-5 min-h-0">
-          <Show
-            when={editingName()}
-            fallback={
-              <div class="flex flex-row items-center gap-2">
-                <h2 class="text-xl md:text-2xl font-bold min-w-0 overflow-hidden whitespace-nowrap text-ellipsis flex-shrink-0">
-                  {deckName()}
-                </h2>
-                <button class="btn btn-ghost h-8 w-8 p-1" onClick={startEditingName}>
-                  <i class="i-mdi-pencil-outline" />
-                </button>
-              </div>
-            }
-          >
-            <form onSubmit={saveName} class="flex flex-row gap-1 md:gap-3 text-3.2 md:text-3.5">
-              <input
-                type="text"
-                required
-                ref={setNameInputEl}
-                onFocus={(e) => e.target.select()}
-                name="name"
-                class="input input-outline min-w-40 md:w-50 h-8 text-1rem"
-              />
-              <button
-                type="submit"
-                class="btn btn-soft-green h-8 w-12"
-                disabled={uploading()}
-              >
-                <Show when={uploading()} fallback={t("save")}>
-                  <i class="i-mdi-loading animate-spin" />
-                </Show>
-              </button>
-              <button
-                class="btn btn-soft-red h-8 w-12"
-                onClick={() => setEditingName(false)}
-              >
-                {t("cancel")}
-              </button>
-            </form>
-          </Show>
+          <TextFieldEdit
+            value={deckName()}
+            saveText={t("save")}
+            cancelText={t("cancel")}
+            class="text-xl md:text-2xl font-bold "
+            onSave={saveName}
+          />
           <div class="flex flex-row flex-1 gap-1 md:gap-3 text-3.2 md:text-3.5">
-            <button
-              class="btn btn-outline-blue"
-              onClick={importCode}
-            >
+            <button class="btn btn-outline-blue" onClick={importCode}>
               {t("importShareCode")}
             </button>
-            <button
-              class="btn btn-outline"
-              onClick={exportCode}
-            >
+            <button class="btn btn-outline" onClick={exportCode}>
               {t("generateShareCode")}
             </button>
             <button

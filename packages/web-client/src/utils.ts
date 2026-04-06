@@ -14,47 +14,81 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import type { Deck } from "@gi-tcg/typings";
+import { Translator } from "./i18n";
 
 export interface PlayerInfo {
   isGuest: boolean;
   id: number | string;
   name: string;
+  avatarUrl?: string | null;
   deck: Deck;
 }
 
-export function getAvatarUrl(userId: number) {
+export function getGithubAvatarUrl(userId: number) {
   return `https://avatars.githubusercontent.com/u/${userId}?v=4`;
 }
 
 function hashCode(s: string) {
   let h = 0;
-  for(let i = 0; i < s.length; i++)
-      h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+  for (let i = 0; i < s.length; i++)
+    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
   return h;
 }
 
-export function getPlayerAvatarUrl(player: PlayerInfo) {
-  if (player.isGuest) {
-    const hash = Math.abs(hashCode(player.name));
-    return `/avatars/${AVATARS[hash % AVATARS.length]}`;
-  } else {
-    return getAvatarUrl(player.id as number);
+export const EMPTY_IMAGE = `data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7`;
+
+export function avatarToUrl(avatar: string): string {
+  if (AVATARS.includes(avatar)) {
+    return `/avatars/${avatar}`;
   }
+  return EMPTY_IMAGE;
 }
 
-export async function copyToClipboard(content: string) {
-  if (navigator.clipboard) {
-    await navigator.clipboard.writeText(content);
-  } else {
-    const textarea = document.createElement("textarea");
-    textarea.value = content;
-    textarea.style.position = "fixed";
-    document.body.appendChild(textarea);
-    textarea.focus();
-    textarea.select();
-    try {
+export function getRandomAvatar(name: string): string {
+  const hash = Math.abs(hashCode(name));
+  return avatarToUrl(`${AVATARS[hash % AVATARS.length]}`);
+}
+
+const AVATAR_REGEX = new RegExp(`^/avatars/(${AVATARS.join("|")})$`);
+function isValidAvatar(avatar: string | null | undefined): avatar is string {
+  if (!avatar) return false;
+  return AVATAR_REGEX.test(avatar);
+}
+
+export function getPlayerAvatarUrl(player: PlayerInfo): string {
+  if (!player.isGuest && typeof player.id === "number") {
+    return getGithubAvatarUrl(player.id);
+  }
+  if (isValidAvatar(player.avatarUrl)) {
+    return player.avatarUrl;
+  }
+  return getRandomAvatar(player.name);
+}
+
+export async function copyShareCode(content: string, t: Translator) {
+  let textarea: HTMLTextAreaElement | null = null;
+  try {
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(content);
+    } else {
+      textarea = document.createElement("textarea");
+      textarea.value = content;
+      textarea.style.position = "fixed";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
       document.execCommand("copy");
-    } finally {
+    }
+    alert(t("shareCodeCopied", { code: content }));
+  } catch (e) {
+    alert(
+      t("shareCodeFallback", {
+        code: content,
+        error: (e as Error).message,
+      }),
+    );
+  } finally {
+    if (textarea) {
       document.body.removeChild(textarea);
     }
   }

@@ -1689,6 +1689,7 @@ export function Chessboard(props: ChessboardProps) {
         autoHeight={localProps.autoHeight}
         rotation={localProps.rotation}
         hasOppChessboard={!!localProps.opp}
+        isFullscreen={isFullscreen()}
         setTransformScale={setTransformScale}
       >
         <ChessboardBackground color={localProps.chessboardColor} />

@@ -134,8 +134,8 @@ export default function Home() {
                   })}
                 </h2>
               </div>
-              <div class="flex flex-grow flex-col-reverse md:flex-row gap-8 min-h-0">
-                <div class="h-full w-full md:w-120 flex flex-col items-start md:bottom-opacity-gradient">
+              <div class="flex flex-grow flex-col-reverse md:flex-row gap-8 md:gap-0 min-h-0">
+                <div class="h-full w-full md:w-128 flex flex-col items-start md:bottom-opacity-gradient">
                   <A
                     href="/decks"
                     class="text-xl font-bold text-blue-500 hover:underline mb-4"
@@ -155,7 +155,7 @@ export default function Home() {
                       </div>
                     </Match>
                     <Match when={true}>
-                      <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] md:gap-3">
+                      <div class="grid w-full grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] md:gap-3 md:pr-6 md:overflow-y-auto scrollbar-thin-hover">
                         <For
                           each={decks().data}
                           fallback={
@@ -173,13 +173,13 @@ export default function Home() {
                     </Match>
                   </Switch>
                 </div>
-                <div class="b-r-gray-200 b-1 hidden md:block" />
-                <div class="flex-grow flex flex-col md:min-w-125">
+                <div class="b-r-gray-200 b-1 hidden md:block mr-8" />
+                <div class="flex-grow flex flex-col md:min-w-128">
                   <h4 class="text-xl font-bold mb-5">{t("startGame")}</h4>
                   <Show
                     when={!currentRoom()}
                     fallback={
-                      <div class="mb-8">
+                      <div class="mb-8 grid gap-3 grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(360px,1fr))]">
                         <RoomInfo {...currentRoom()} />
                       </div>
                     }
@@ -228,7 +228,7 @@ export default function Home() {
                       <i class="i-mdi-refresh" />
                     </button>
                   </h4>
-                  <ul class="flex gap-2 flex-row flex-wrap">
+                  <ul class="grid scrollbar-thin-hover grid w-full grid-cols-1 gap-2 md:grid-cols-[repeat(auto-fill,minmax(360px,1fr))] md:gap-3 md:overflow-y-auto">
                     <Switch>
                       <Match when={allRooms.loading}>
                         <div class="text-gray-500">{t("roomInfoLoading")}</div>

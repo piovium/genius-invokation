@@ -42,7 +42,7 @@ function SelectableDeckInfo(
     "id",
   ]);
   return (
-    <label class="relative group cursor-pointer min-w-15">
+    <label class="relative group cursor-pointer min-w-15 w-full">
       <input
         type="radio"
         hidden
@@ -225,6 +225,7 @@ export function RoomDialog(props: RoomDialogProps) {
           payload.deck = guestDecks().find(
             (deck) => deck.id === selectedDeck(),
           );
+          payload.avatarUrl = guestInfo()?.avatarUrl;
         } else if (type === "user") {
           payload.hostDeckId = selectedDeck();
         }
@@ -237,6 +238,7 @@ export function RoomDialog(props: RoomDialogProps) {
           payload = {
             deck: guestDecks().find((deck) => deck.id === selectedDeck()),
             name,
+            avatarUrl: guestInfo()?.avatarUrl,
           };
         } else if (type === "user") {
           payload = {
@@ -270,7 +272,7 @@ export function RoomDialog(props: RoomDialogProps) {
   return (
     <dialog
       ref={(el) => (dialogEl = el) && (props.ref as any)?.(el)}
-      class="max-h-unset max-w-unset h-100dvh w-100dvw overflow-auto pt-[calc(0.75rem+var(--root-padding-top))] md:pt-3 md:m-x-auto md:my-3rem md:h-[calc(100vh-6rem)] md:w-min md:max-h-180 md:rounded-xl md:shadow-xl p-6 scrollbar-hidden"
+      class="max-h-unset max-w-unset h-100dvh w-100dvw overflow-auto pt-[calc(0.75rem+var(--root-padding-top))] md:pt-3 md:m-x-auto md:my-3rem md:h-[calc(100vh-6rem)] md:w-min md:max-h-200 md:rounded-xl md:shadow-xl p-6 scrollbar-hidden"
     >
       <div class="flex flex-col md:min-h-full md:h-min w-full gap-5">
         <h3 class="flex-shrink-0 text-xl font-bold">{t("roomConfig")}</h3>
@@ -278,10 +280,7 @@ export function RoomDialog(props: RoomDialogProps) {
           class="flex-grow min-h-0 flex flex-col md:flex-row gap-4 data-[disabled=true]:cursor-not-allowed mb-[calc(4.5rem+var(--root-padding-bottom))] md:mb-0"
           data-disabled={!editable()}
         >
-          <div
-            class="flex flex-col w-80 md:data-[editable=true]:w-130"
-            data-editable={editable()}
-          >
+          <div class="flex flex-col w-full md:w-130" data-editable={editable()}>
             <Show when={versionInfo()}>
               <div class="mb-3 flex flex-row gap-4 items-center">
                 <h4 class="text-lg">{t("gameVersion")}</h4>
@@ -297,10 +296,7 @@ export function RoomDialog(props: RoomDialogProps) {
                 </select>
               </div>
               <h4 class="text-lg mb-3">{t("thinkingTime")}</h4>
-              <div
-                class="grid grid-cols-3 gap-2 mb-3 data-[disabled=true]:pointer-events-none"
-                data-disabled={!editable()}
-              >
+              <div class="w-full grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] md:grid-cols-3 gap-2 mb-3 data-[disabled=true]:pointer-events-none">
                 <For
                   each={
                     props.joiningRoomInfo
@@ -397,7 +393,7 @@ export function RoomDialog(props: RoomDialogProps) {
           <div class="b-r-gray-200 b-1" />
           <div class="flex flex-col min-w-52 relative">
             <h4 class="text-lg mb-3">{t("chooseDeck")}</h4>
-            <ul class="flex-grow-1 flex flex-row md:flex-col flex-wrap md:flex-nowrap min-h-0 max-h-75dvh md:max-h-135 overflow-auto deck-ul-scrollbar">
+            <ul class="grid w-full grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2 md:grid-cols-1 min-h-0 max-h-75dvh md:max-h-155 overflow-auto scrollbar-thin-hover">
               <For
                 each={availableDecks()}
                 fallback={

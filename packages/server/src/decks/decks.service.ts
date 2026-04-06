@@ -91,6 +91,9 @@ export class DecksService {
           lte: requiredVersion,
         }
       },
+      orderBy: {
+        updatedAt: "desc",
+      },
     });
     const data = models.map((model) => {
       const { characters, cards } = this.codeToDeck(model.code);

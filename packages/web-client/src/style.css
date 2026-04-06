@@ -64,31 +64,6 @@ dialog[open] {
   scrollbar-width: none;
 }
 
-.deck-ul-scrollbar {
-  --scrollbar-width: 8px;
-  --scrollbar-track: transparent;
-  --scrollbar-thumb: #f0f0f0;
-  --scrollbar-thumb-hover: #808080;
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-}
-
-.deck-ul-scrollbar::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-}
-
-.deck-ul-scrollbar::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
-}
-
-.deck-ul-scrollbar::-webkit-scrollbar-thumb {
-  background-color: var(--scrollbar-thumb);
-}
-
-.deck-ul-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: var(--scrollbar-thumb-hover);
-}
-
 .deck-info-card {
   background: linear-gradient(
     0deg,
@@ -111,4 +86,38 @@ dialog[open] {
     #9db2ff60 70%,
     #9db2ff60 100%
   );
+}
+
+.scrollbar-thin-hover {
+  --scrollbar-width: 4px;
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: transparent;
+  --scrollbar-thumb-hover: #c0c0c0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+.scrollbar-thin-hover:hover {
+  --scrollbar-thumb: #d0d0d0;
+}
+
+.scrollbar-thin-hover::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.scrollbar-thin-hover::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.scrollbar-thin-hover::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 2px;
+}
+
+.scrollbar-thin-hover:hover::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+.scrollbar-thin-hover::-webkit-scrollbar-thumb:hover {
+  background-color: #a0a0a0;
 }
