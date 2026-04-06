@@ -65,7 +65,7 @@ export function getPlayerAvatarUrl(player: PlayerInfo): string {
   return getRandomAvatar(player.name);
 }
 
-export async function copyToClipboard(content: string, t: Translator) {
+export async function copyShareCode(content: string, t: Translator) {
   let textarea: HTMLTextAreaElement | null = null;
   try {
     if (navigator.clipboard) {

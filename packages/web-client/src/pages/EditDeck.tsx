@@ -32,7 +32,7 @@ import { useGuestDecks } from "../guest";
 import { DeckInfo } from "./Decks";
 import { useAuth } from "../auth";
 import { unwrap } from "solid-js/store";
-import { copyToClipboard } from "../utils";
+import { copyShareCode } from "../utils";
 import { useI18n } from "../i18n";
 import { TextFieldEdit } from "../components/TextFieldEdit";
 
@@ -123,7 +123,7 @@ export default function EditDeck() {
     try {
       const deck = deckValue();
       const code = DEFAULT_ASSETS_MANAGER.encode(deck);
-      await copyToClipboard(code, t);
+      await copyShareCode(code, t);
     } catch (e) {
       if (e instanceof Error) {
         window.alert(e.message);

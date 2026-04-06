@@ -80,14 +80,14 @@ export default function Decks() {
   const { decks, loading, error, refetch } = useDecks();
   const [, { pinGuestDeck }] = useGuestDecks();
 
-  const pinDeck = async (deckId: number) => {
+  const pinDeck = async (deck: DeckInfo) => {
     const { type } = status();
     try {
       if (type === "guest") {
-        await pinGuestDeck(deckId);
+        await pinGuestDeck(deck.id);
       } else if (type === "user") {
         // trigger updatedAt
-        await axios.patch(`decks/${deckId}`, {});
+        await axios.patch(`decks/${deck.id}`, { name: deck.name });
       }
       refetch();
     } catch (e) {
@@ -124,7 +124,7 @@ export default function Decks() {
                   <DeckBriefInfo
                     editable
                     onDelete={() => refetch()}
-                    onPin={() => pinDeck(deckData.id)}
+                    onPin={() => pinDeck(deckData)}
                     {...deckData}
                   />
                 )}

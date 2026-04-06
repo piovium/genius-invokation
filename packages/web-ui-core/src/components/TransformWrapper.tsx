@@ -123,7 +123,12 @@ export function TransformWrapper(props: TransformWrapperProps) {
   });
   createEffect(
     on(
-      () => props.hasOppChessboard,
+      () => [
+        props.hasOppChessboard,
+        props.autoHeight,
+        props.rotation,
+        props.isFullscreen,
+      ],
       () => {
         onContainerResizeDebouncer.call();
       },

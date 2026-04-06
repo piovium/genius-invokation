@@ -19,7 +19,7 @@ import { createResource, For, Show } from "solid-js";
 import { DeckInfo } from "../pages/Decks";
 import { useGuestDecks } from "../guest";
 import { useAuth } from "../auth";
-import { copyToClipboard } from "../utils";
+import { copyShareCode } from "../utils";
 import { useI18n } from "../i18n";
 
 export interface DeckInfoProps extends DeckInfo {
@@ -51,7 +51,7 @@ function CharacterAvatar(props: { id: number }) {
 }
 
 export function DeckBriefInfo(props: DeckInfoProps) {
-  const { t, assetsManager } = useI18n();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { status } = useAuth();
   const [, { removeGuestDeck }] = useGuestDecks();
@@ -63,7 +63,7 @@ export function DeckBriefInfo(props: DeckInfoProps) {
 
   const copyCode = async (e: MouseEvent) => {
     e.stopPropagation();
-    await copyToClipboard(props.code, t);
+    await copyShareCode(props.code, t);
   };
 
   const deleteDeck = async (e: MouseEvent) => {

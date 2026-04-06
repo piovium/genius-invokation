@@ -114,7 +114,6 @@ export class GuestCreateRoomDto extends CreateRoomDto {
   deck!: DeckDto;
 
   @IsOptional()
-  @IsUrl()
   @Length(1, 256)
   avatarUrl?: string;
 }
@@ -132,7 +131,6 @@ export class GuestJoinRoomDto {
   deck!: DeckDto;
 
   @IsOptional()
-  @IsUrl()
   @Length(1, 256)
   avatarUrl?: string;
 }
