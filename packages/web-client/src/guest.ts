@@ -19,6 +19,7 @@ import type { DeckInfo } from "./pages/Decks";
 import type { Deck } from "@gi-tcg/typings";
 import axios from "axios";
 import { createStore, produce } from "solid-js/store";
+import pLimit from "p-limit";
 
 export interface GuestInfo {
   type: "guest";
@@ -104,14 +105,16 @@ export const useGuestDecks = (): GuestDeck => {
     );
   };
 
+  const limit = pLimit(1);
+
   return [
     () => guestDeck.toReversed(),
     {
-      addGuestDeck,
-      updateGuestDeck,
-      removeGuestDeck,
+      addGuestDeck: (deck) => limit(addGuestDeck, deck),
+      updateGuestDeck: (id, newDeck) => limit(updateGuestDeck, id, newDeck),
+      removeGuestDeck: (id) => limit(removeGuestDeck, id),
       pinGuestDeck: async (id) => {
-        await updateGuestDeck(id, {});
+        await limit(updateGuestDeck, id, {});
       },
     },
   ];
