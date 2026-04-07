@@ -104,7 +104,8 @@ import {
 import { type ActionInfoWithModification, ActionPreviewer } from "./preview";
 import { Player } from "./player";
 import type { CharacterDefinition } from "./base/character";
-import { $, runQuery, toExpression, type IQuery, type QueryFn } from "./query";
+import { $, runQuery, toExpression, type QueryFn } from "./query";
+import type { IQuery } from "./query/utils";
 
 export interface DeckConfig extends Deck {
   noShuffle?: boolean;

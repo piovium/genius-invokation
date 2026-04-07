@@ -61,7 +61,7 @@ type DollarUnaryOperatorMethods = {
     NotFunctionPrototype;
 };
 
-class Dollar {
+export class Dollar {
   static {
     // creating primary methods
     for (const [method, descriptor] of Object.entries<PropertyDescriptor>(
@@ -131,7 +131,6 @@ class Dollar {
     diceCost: diceCostKey,
     inInitialPile: inInitialPileKey,
   } as const;
-  declare readonly macros: Macros;
 }
 
 type InitialPrimaryMeta = Computed<
@@ -175,11 +174,3 @@ const MACROS = {
   myHandsOrderByCost: $.my.hand.orderBy(0, "-", $.keys.diceCost),
   oppHandsOrderByCost: $.opp.hand.orderBy(0, "-", $.keys.diceCost),
 } as const satisfies Record<string, IQuery>;
-type Macros = typeof MACROS;
-
-Object.defineProperty(Dollar.prototype, "macros", {
-  get() {
-    return MACROS;
-  },
-  enumerable: true,
-});

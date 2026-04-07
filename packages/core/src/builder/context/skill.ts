@@ -109,13 +109,22 @@ import type { LunarReaction } from "@gi-tcg/typings";
 import {
   $,
   runQuery,
+  toExpression,
   type IDollar,
   type InferResult,
   type IQuery,
+  type QueryFn,
 } from "../../query";
 
-type CharacterTargetArg = PlainCharacterState | PlainCharacterState[] | string;
-type EntityTargetArg = PlainEntityState | PlainEntityState[] | string;
+type GeneralQueryTargetArg = string | IQuery | QueryFn;
+type CharacterTargetArg =
+  | PlainCharacterState
+  | PlainCharacterState[]
+  | GeneralQueryTargetArg;
+type EntityTargetArg =
+  | PlainEntityState
+  | PlainEntityState[]
+  | GeneralQueryTargetArg;
 
 type EntityDefinitionFilterFn = (card: EntityDefinition) => boolean;
 
@@ -453,12 +462,17 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   private queryOrGet<TypeT extends ExEntityType>(
-    q: ExPlainEntityState<TypeT> | ExPlainEntityState<TypeT>[] | string,
+    q:
+      | ExPlainEntityState<TypeT>
+      | ExPlainEntityState<TypeT>[]
+      | GeneralQueryTargetArg,
   ): RxEntityState<Meta, TypeT>[] {
     if (Array.isArray(q)) {
       return q.map((s) => this.get(s));
     } else if (typeof q === "string") {
       return this.$$(q) as RxEntityState<Meta, TypeT>[];
+    } else if (typeof q === "function" || toExpression in q) {
+      return this.queryAll(q) as RxEntityState<Meta, TypeT>[];
     } else {
       return [this.get(q)];
     }

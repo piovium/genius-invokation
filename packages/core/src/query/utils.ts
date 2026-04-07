@@ -156,19 +156,25 @@ export type Expression = string | number | Expression[];
 export const toExpressionUnordered: unique symbol = Symbol.for(
   "GiTcgCore/query/toExpressionUnordered",
 );
+export type ToExpressionUnorderedSymbol = typeof toExpressionUnordered;
 export const toExpression: unique symbol = Symbol.for(
   "GiTcgCore/query/toExpression",
 );
+export type ToExpressionSymbol = typeof toExpression;
+
 export const typingInfo: unique symbol = Symbol.for(
   "GiTcgCore/query/typingInfo",
 );
+export type TypingInfoSymbol = typeof typingInfo;
 
 export const diceCostKey: unique symbol = Symbol.for(
   "GiTcgCore/query/varKey/diceCost",
 );
+export type DiceCostKey = typeof diceCostKey;
 export const inInitialPileKey: unique symbol = Symbol.for(
   "GiTcgCore/query/varKey/inInitialPile",
 );
+export type InInitialPileKey = typeof inInitialPileKey;
 
 export interface StateVariables {
   [key: string]: number;
@@ -177,8 +183,6 @@ export interface StateVariables {
 }
 
 export type StateVariablesKey = Exclude<keyof StateVariables, number>;
-
-type TypingInfoSymbol = typeof typingInfo;
 
 export type EntityAreaType = EntityArea["type"];
 
