@@ -15,8 +15,6 @@
 
 import type { IDollar } from "./dollar";
 import type { IQuery } from "./utils";
-import { runLegacyQuery } from "../query-legacy";
-import type { AnyState, GameState } from "../base/state";
 
 export { $, type IDollar } from "./dollar";
 export { queryToExpression } from "./runtime";
@@ -25,12 +23,3 @@ export { type IQuery, type InferResult, toExpression } from "./utils";
 export { runQuery } from "./runtime";
 
 export type QueryFn = ($: IDollar) => IQuery;
-
-/** @deprecated Use `runLegacyQuery` for string queries. */
-export function executeQueryOnState(
-  state: GameState,
-  who: 0 | 1,
-  q: string,
-): AnyState[] {
-  return runLegacyQuery(state, who, q);
-}

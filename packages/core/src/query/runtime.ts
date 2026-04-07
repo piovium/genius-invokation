@@ -434,13 +434,13 @@ class QueryRunner {
           if (args.length === 0) {
             return "1";
           }
-          return `(+Boolean(${args.map(visitor).join(" && ")}))`;
+          return `(+!!(${args.map(visitor).join(" && ")}))`;
         }
         case "or": {
           if (args.length === 0) {
             return "0";
           }
-          return `(+Boolean(${args.map(visitor).join(" || ")}))`;
+          return `(+!!(${args.map(visitor).join(" || ")}))`;
         }
         case "not": {
           assertsArgCount("not", args, 1);
