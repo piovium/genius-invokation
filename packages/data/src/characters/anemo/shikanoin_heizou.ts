@@ -29,7 +29,9 @@ export const Declension: StatusHandle = status(115132)
     c.self.getVariable("henkaku") >= 2)
   .do((c) => {
     // 使用 勠心拳 后，我方继续行动一个回合
-    c.continueNextTurn();
+    if(!c.oppPlayer.declaredEnd) {
+      c.continueNextTurn();      
+    }
     // 为 角色 添加 增伤数值
     if (c.self.master.hasEquipment(CuriousCasefiles)) {
       c.self.master.setVariable("increaseDmg", 2);
