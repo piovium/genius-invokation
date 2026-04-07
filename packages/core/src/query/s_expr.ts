@@ -124,9 +124,20 @@ export function parseSExpr(input: string): Expression {
     const start = i;
     i++; // Skip opening quote
     while (i < input.length) {
-      if (input[i] === '"' && input[i - 1] !== "\\") {
-        i++; // Include closing quote
-        break;
+      if (input[i] === '"') {
+        // Count consecutive backslashes immediately before this quote.
+        // An even count (including 0) means the quote is NOT escaped;
+        // an odd count means the preceding backslash IS escaping this quote.
+        let backslashCount = 0;
+        let j = i - 1;
+        while (j > start && input[j] === "\\") {
+          backslashCount++;
+          j--;
+        }
+        if (backslashCount % 2 === 0) {
+          i++; // Include closing quote
+          break;
+        }
       }
       i++;
     }

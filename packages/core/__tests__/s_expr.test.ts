@@ -73,6 +73,17 @@ describe("S-expression Parser", () => {
               (second-arg tail))`);
   });
 
+  test("parseString handles backslashes correctly", () => {
+    // A trailing escaped backslash: "foo\\" — the \\ is an escaped backslash,
+    // so the quote after it is the real closing quote (not escaped).
+    expect(parseSExpr('"foo\\\\"')).toEqual("foo\\");
+    // A quote escaped by an odd number of backslashes: "foo\\\"bar"
+    // The \\\ before the inner " means one escaped backslash + escaped quote.
+    expect(parseSExpr('"foo\\\\\\"bar"')).toEqual('foo\\"bar');
+    // Normal escaped quote still works: "hello \"world\""
+    expect(parseSExpr('"hello \\"world\\""')).toEqual('hello "world"');
+  });
+
   test("pretty stringify only quotes strings when needed", () => {
     expect(
       prettyStringifySExpr([
