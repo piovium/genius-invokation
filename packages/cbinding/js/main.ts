@@ -30,9 +30,9 @@ import {
 import {
   CURRENT_VERSION,
   deserializeGameStateLog,
-  executeQueryOnState,
   GiTcgIoError,
   Game as InternalGame,
+  runLegacyQuery,
   serializeGameStateLog,
   VERSIONS,
   type AnyState,
@@ -234,9 +234,7 @@ class State {
     );
   }
   query(who: 0 | 1, query: string): Entity[] {
-    return executeQueryOnState(this.state, who, query).map(
-      (st) => new Entity(st),
-    );
+    return runLegacyQuery(this.state, who, query).map((st) => new Entity(st));
   }
   getAttribute(attribute: number): number {
     switch (attribute) {
