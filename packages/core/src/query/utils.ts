@@ -358,7 +358,9 @@ export function stringifyFunction(fn: (...args: never) => unknown): string {
     value.startsWith("(") ||
     value.match(/^async\s*\(/) ||
     value.match(
-      /^(async)*\s*(?:[$_\p{ID_Start}])(?:[$\u200C\u200D\p{ID_Continue}])*\s*=>/u,
+      /^(async)?\s*[$_a-zA-Z][$\w\u200C\u200D]*\s*=>/,
+      // The below one is more accurate but requires ICU support, which is not always available (e.g. cbindings)
+      // /^(async)*\s*(?:[$_\p{ID_Start}])(?:[$\u200C\u200D\p{ID_Continue}])*\s*=>/u,
     );
   if (isArrow) {
     return value;
