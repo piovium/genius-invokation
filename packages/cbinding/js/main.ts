@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import "./stub.js";
 // Encoding API is a WHATWG Living Standard.
 // Not included in ECMA-262, so V8 doesn't support it. Add a polyfill for that.
 import "fast-text-encoding";
