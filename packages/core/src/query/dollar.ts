@@ -12,7 +12,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 import {
   createCompositeQuery,
   type CompositeQuery,
@@ -33,6 +33,7 @@ import {
   type Computed,
   type HeterogeneousMetaBase,
   type InferResult,
+  type IQuery,
   type IUnorderedQuery,
   type MetaBase,
   type NotFunctionPrototype,
@@ -129,8 +130,8 @@ class Dollar {
   readonly keys = {
     diceCost: diceCostKey,
     inInitialPile: inInitialPileKey,
-  }
-  readonly macros = {}
+  } as const;
+  declare readonly macros: Macros;
 }
 
 type InitialPrimaryMeta = Computed<
@@ -152,3 +153,33 @@ export type IDollar = Dollar &
   DollarUnaryOperatorMethods;
 
 export const $ = new Dollar() as IDollar;
+
+const MACROS = {
+  myActive: $.my.active,
+  oppActive: $.opp.active,
+
+  myEnergyNotFull: $.my.character.var("energy", "<", "maxEnergy"),
+
+  oppActivePrioritized: $.opp.character.var("health", ">", 0).limit(1),
+
+  myMinHealth: $.my.character.orderBy("health").limit(1),
+  oppMinHealth: $.opp.character.orderBy("health").limit(1),
+  myMaxHealth: $.my.character.orderBy(0, "-", "health").limit(1),
+  oppMaxHealth: $.opp.character.orderBy(0, "-", "health").limit(1),
+
+  myMostInjured: $.my.character.orderBy("health", "-", "maxHealth").limit(1),
+  oppMostInjured: $.opp.character.orderBy("health", "-", "maxHealth").limit(1),
+  myLeastInjured: $.my.character.orderBy("maxHealth", "-", "health").limit(1),
+  oppLeastInjured: $.opp.character.orderBy("maxHealth", "-", "health").limit(1),
+
+  myHandsOrderByCost: $.my.hand.orderBy(0, "-", $.keys.diceCost),
+  oppHandsOrderByCost: $.opp.hand.orderBy(0, "-", $.keys.diceCost),
+} as const satisfies Record<string, IQuery>;
+type Macros = typeof MACROS;
+
+Object.defineProperty(Dollar.prototype, "macros", {
+  get() {
+    return MACROS;
+  },
+  enumerable: true,
+});

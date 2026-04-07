@@ -64,7 +64,7 @@ import {
   type ExPlainEntityState,
   type PlainAttachmentState,
 } from "./utils";
-import { executeQuery } from "../../query-legacy";
+import { runLegacyQueryWithContext } from "../../query-legacy";
 import type {
   AppliableDamageType,
   CardHandle,
@@ -106,6 +106,13 @@ import { ReactiveStateSymbol } from "./reactive_base";
 import { type CreateEntityOptions, toSortedBy } from "../../utils";
 import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "../skill";
 import type { LunarReaction } from "@gi-tcg/typings";
+import {
+  $,
+  runQuery,
+  type IDollar,
+  type InferResult,
+  type IQuery,
+} from "../../query";
 
 type CharacterTargetArg = PlainCharacterState | PlainCharacterState[] | string;
 type EntityTargetArg = PlainEntityState | PlainEntityState[] | string;
@@ -383,15 +390,46 @@ export class SkillContext<Meta extends ContextMetaBase> {
 
   $<const Q extends string>(
     arg: Q,
-  ): RxEntityState<Meta, GuessedTypeOfQuery<Q>> | undefined {
+  ): RxEntityState<Meta, GuessedTypeOfQuery<Q>> | undefined;
+  /** @deprecated use `query` */
+  $<const Q extends IQuery>(
+    arg: (($: IDollar) => Q) | Q,
+  ): RxEntityState<Meta, InferResult<Q>["type"]> | undefined;
+  $(arg: any): any {
     const result = this.$$(arg);
     return result[0];
   }
 
   $$<const Q extends string>(
     arg: Q,
-  ): RxEntityState<Meta, GuessedTypeOfQuery<Q>>[] {
-    return executeQuery(this, arg);
+  ): RxEntityState<Meta, GuessedTypeOfQuery<Q>>[];
+  /** @deprecated use `queryAll` */
+  $$<const Q extends IQuery>(
+    arg: (($: IDollar) => Q) | Q,
+  ): RxEntityState<Meta, InferResult<Q>["type"]>[];
+  $$(arg: string | IQuery | ((dollar: IDollar) => IQuery)): any[] {
+    if (typeof arg === "string") {
+      return runLegacyQueryWithContext(this, arg);
+    }
+    return this.queryAll(arg);
+  }
+
+  query<const Q extends IQuery>(
+    arg: (($: IDollar) => Q) | Q,
+  ): RxEntityState<Meta, InferResult<Q>["type"]> | undefined {
+    const results = this.queryAll(arg);
+    return results[0];
+  }
+
+  queryAll<const Q extends IQuery>(
+    arg: (($: IDollar) => Q) | Q,
+  ): RxEntityState<Meta, InferResult<Q>["type"]>[] {
+    if (typeof arg === "function") {
+      arg = arg($);
+    }
+    return runQuery(this.rawState, this.callerArea.who, arg).map((state) =>
+      this.get(state),
+    );
   }
 
   get<T extends ExEntityType>(id: number): RxEntityState<Meta, T>;

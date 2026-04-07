@@ -176,7 +176,7 @@ export interface StateVariables {
   [inInitialPileKey]?: number;
 }
 
-export type StateVariablesKey = keyof StateVariables;
+export type StateVariablesKey = Exclude<keyof StateVariables, number>;
 
 type TypingInfoSymbol = typeof typingInfo;
 

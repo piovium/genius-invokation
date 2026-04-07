@@ -28,7 +28,7 @@ import type {
 import { GiTcgDataError } from "../error";
 import { getRaw, type RxEntityState } from "../builder/context/reactive";
 
-export function executeQuery<
+export function runLegacyQueryWithContext<
   Meta extends ContextMetaBase,
   const Q extends string,
 >(ctx: SkillContext<Meta>, q: Q): RxEntityState<Meta, GuessedTypeOfQuery<Q>>[] {
@@ -66,11 +66,14 @@ export function executeQuery<
       ),
     },
   };
-  const result = doSemanticQueryAction(q, arg)
-  return result.map((st) => ctx.get<any>(st)) as RxEntityState<Meta, GuessedTypeOfQuery<Q>>[];
+  const result = doSemanticQueryAction(q, arg);
+  return result.map((st) => ctx.get<any>(st)) as RxEntityState<
+    Meta,
+    GuessedTypeOfQuery<Q>
+  >[];
 }
 
-export function executeQueryOnState(
+export function runLegacyQuery(
   state: GameState,
   who: 0 | 1,
   q: string,

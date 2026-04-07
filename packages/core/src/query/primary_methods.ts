@@ -324,6 +324,10 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     op: RelationOp,
     value: number,
   ): AssignVar<Meta, Name>;
+  var<
+    const Name extends StateVariablesKey,
+    const Name2 extends StateVariablesKey,
+  >(name: Name, op: RelationOp, ref: Name2): AssignVar<Meta, Name | Name2>;
   var<const Name extends StateVariablesKey>(
     name: Name,
     pred: (value: number) => unknown,
@@ -334,12 +338,12 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
   var(
     ...args:
       | [StateVariablesKey, number]
-      | [StateVariablesKey, RelationOp, number]
+      | [StateVariablesKey, RelationOp, number | StateVariablesKey]
       | [StateVariablesKey, (value: number) => unknown]
       | [(values: StateVariables) => unknown]
   ): any {
     if (typeof args[0] !== "function") {
-      const [name, opOrValue, valueOrUndefined] = args;
+      const [name, opOrValue, valueOrRefOrUndefined] = args;
       const lhs = variableKeyToExpr(name);
       if (typeof opOrValue === "number") {
         this._internal.addConstraint([
@@ -347,9 +351,13 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
           ["expr", ["=", lhs, opOrValue]],
         ]);
       } else if (typeof opOrValue === "string") {
+        const rhs =
+          typeof valueOrRefOrUndefined === "number"
+            ? valueOrRefOrUndefined
+            : variableKeyToExpr(valueOrRefOrUndefined);
         this._internal.addConstraint([
           "variables",
-          ["expr", [opOrValue, lhs, valueOrUndefined]],
+          ["expr", [opOrValue, lhs, rhs]],
         ]);
       } else if (typeof opOrValue === "function") {
         const fnCode = stringifyFunction(opOrValue);
