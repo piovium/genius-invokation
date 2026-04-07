@@ -13,7 +13,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType } from "@gi-tcg/core/builder";
+import { character, skill, status, card, DamageType, $ } from "@gi-tcg/core/builder";
+import { BonecrunchersEnergyBlock, BonecrunchersEnergyBlockCombatStatus } from "../../cards/event/other";
+
+/**
+ * @id 27055
+ * @name 催萌腐草
+ * @description
+ * 造成2点草元素伤害。
+ */
+export const SproutsOfTheBlightedRot = skill(27055)
+  .type("burst")
+  .prepared()
+  .damage(DamageType.Dendro, 2)
+  .done();
 
 /**
  * @id 127051
@@ -23,7 +36,7 @@ import { character, skill, status, card, DamageType } from "@gi-tcg/core/builder
  */
 export const SproutsOfTheBlightedRotStatus = status(127051)
   .since("v6.5.0")
-  // TODO
+  .prepare(SproutsOfTheBlightedRot)
   .done();
 
 /**
@@ -36,7 +49,7 @@ export const ClawSlash = skill(27051)
   .type("normal")
   .costDendro(1)
   .costVoid(2)
-  // TODO
+  .damage(DamageType.Physical, 2)
   .done();
 
 /**
@@ -48,7 +61,8 @@ export const ClawSlash = skill(27051)
 export const SiphonWave = skill(27052)
   .type("elemental")
   .costDendro(3)
-  // TODO
+  .damage(DamageType.Dendro, 2)
+  .drawCards(1, { withDefinition: BonecrunchersEnergyBlock })
   .done();
 
 /**
@@ -61,7 +75,14 @@ export const SprawlingBlightedVines = skill(27053)
   .type("burst")
   .costDendro(3)
   .costEnergy(2)
-  // TODO
+  .do((c) => {
+    c.damage(DamageType.Dendro, 4);
+    const block = c.query($.my.hand.def(BonecrunchersEnergyBlock));
+    if (block) {
+      c.disposeCard(block);
+      c.characterStatus(SproutsOfTheBlightedRotStatus, "@self");
+    }
+  })
   .done();
 
 /**
@@ -72,18 +93,14 @@ export const SprawlingBlightedVines = skill(27053)
  */
 export const HungerFromTheRemains = skill(27054)
   .type("passive")
-  // TODO
-  .done();
-
-/**
- * @id 27055
- * @name 催萌腐草
- * @description
- * 造成2点草元素伤害。
- */
-export const SproutsOfTheBlightedRot = skill(27055)
-  .type("burst")
-  // TODO
+  .on("battleBegin")
+  .createPileCards(BonecrunchersEnergyBlock, 2, "bottom")
+  .on("enterRelative", (c, e) => e.entity.definition.id === BonecrunchersEnergyBlockCombatStatus)
+  .listenToPlayer()
+  .usagePerRound(1, { name: "usagePerRound1" })
+  .do((c, e) => {
+    c.dispose(e.entity.cast<"combatStatus">());
+  })
   .done();
 
 /**
@@ -107,7 +124,7 @@ export const ConsecratedFangedBeast = character(2705)
   .tags("dendro", "monster", "sacread")
   .health(10)
   .energy(2)
-  .skills(ClawSlash, SiphonWave, SprawlingBlightedVines, HungerFromTheRemains, SproutsOfTheBlightedRot, HungerFromTheRemains)
+  .skills(ClawSlash, SiphonWave, SprawlingBlightedVines, HungerFromTheRemains, SproutsOfTheBlightedRot)
   .done();
 
 /**
@@ -121,6 +138,14 @@ export const ConsecratedFangedBeast = character(2705)
 export const WitheredReedsEclipseTheSun = card(227051)
   .since("v6.5.0")
   .costDendro(1)
-  .talent(ConsecratedFangedBeast)
-  // TODO
+  .talent(ConsecratedFangedBeast, "none")
+  .variable("usagePerRound", 1)
+  .on("playCard", (c, e) => c.getVariable("usagePerRound") && e.card.definition.id === BonecrunchersEnergyBlock)
+  .drawCards(1)
+  .setVariable("usagePerRound", 0)
+  .on("disposeCard", (c, e) => c.getVariable("usagePerRound") && e.entity.definition.id === BonecrunchersEnergyBlock)
+  .drawCards(1)
+  .setVariable("usagePerRound", 0)
+  .on("roundEnd")
+  .setVariable("usagePerRound", 1)
   .done();

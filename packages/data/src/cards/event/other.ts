@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { EntityDefinition, CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, status, summon, originalDiceCostOfCard } from "@gi-tcg/core/builder";
-import { BurningFlame, CatalyzingField, DendroCore, EfficientSwitch, Empowerment, ResistantForm, Shield } from "../../commons";
+import { EntityDefinition, CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, status, summon, originalDiceCostOfCard, $, CombatStatusHandle } from "@gi-tcg/core/builder";
+import { BurningFlame, CatalyzingField, CostReduction, DendroCore, EfficientSwitch, Empowerment, ResistantForm, Shield } from "../../commons";
 import { BountifulCore } from "../../characters/hydro/nilou";
 
 /**
@@ -305,6 +305,29 @@ export const ElementalResonanceSprawlingGreenery = card(331702)
   .done();
 
 /**
+ * @id 331721
+ * @name 月兆·满辉
+ * @description
+ * 赋予我方随机1张手牌以及牌组顶的卡牌费用降低。
+ * （牌组包含至少2个「挪德卡莱」角色，才能加入牌组）
+ */
+export const MoonsignAscendantGleam = card(331721)
+  .since("v6.5.0")
+  .tags("resonance")
+  .do((c) => {
+    const handCandidates = c.queryAll($.my.hand.cost(">", 0));
+    if (handCandidates.length > 0) {
+      const handCard = c.random(handCandidates);
+      c.attach(CostReduction, handCard);
+    }
+    const pileCard = c.query($.my.pile.cost(">", 0));
+    if (pileCard) {
+      c.attach(CostReduction, pileCard);
+    }
+  })
+  .done();
+
+/**
  * @id 331101
  * @name 元素共鸣：交织之冰
  * @description
@@ -521,6 +544,54 @@ export const FireAndWar = card(331806)
   .costSame(1)
   .addTarget("my characters")
   .characterStatus(OdeOfResurrection, "@targets.0")
+  .done();
+
+
+/**
+ * @id 303184
+ * @name 月与故乡（生效中）
+ * @description
+ * 行动阶段开始时：创建所记录的卡牌加入手牌。
+ */
+export const MoonAndHomelandInEffect02 = combatStatus(303184)
+  .variable("cardDefId", 0, { visible: false })
+  .once("actionPhase")
+  .do((c) => {
+    const cardDefId = c.getVariable("cardDefId") as CardHandle;
+    if (cardDefId) {
+      c.createHandCard(cardDefId);
+    }
+  })
+  .done();
+
+/**
+ * @id 303183
+ * @name 月与故乡（生效中）
+ * @description
+ * 本回合内我方打出下张卡牌后：在下个回合开始时，创建1张所打出的卡牌加入手牌。
+ */
+export const MoonAndHomelandInEffect01: CombatStatusHandle = combatStatus(303183)
+  .oneDuration()
+  .once("playCard", (c, e) => e.card.definition.id !== MoonAndHomeland)
+  .do((c, e) => {
+    c.combatStatus(MoonAndHomelandInEffect02, "my", {
+      overrideVariables: {
+        cardDefId: e.card.definition.id,
+      }
+    })
+  })
+  .done();
+
+/**
+ * @id 331807
+ * @name 月与故乡
+ * @description
+ * 本回合内我方打出下张卡牌后：在下个回合开始时，创建1张所打出的卡牌加入手牌。
+ * （牌组包含至少2个「挪德卡莱」角色，才能加入牌组）
+ */
+export const MoonAndHomeland = card(331807)
+  .since("v6.5.0")
+  .combatStatus(MoonAndHomelandInEffect01)
   .done();
 
 /**
@@ -1332,7 +1403,8 @@ const MELUSINE_EVENT_CARDS = [
   NatureAndWisdom,
   WaterAndJustice,
   FireAndWar,
-  // 331807, 
+  MoonAndHomeland,
+  // 331808 
 ];
 
 // 筛出当前版本存在的卡
@@ -2394,11 +2466,7 @@ export const ClinkClankLegion = card(332061)
  * @description
  * 对我方出战角色造成1点穿透伤害，执行1个「治疗」效果相关的计划。
  */
-export const LepinepaulinesInvestmentInMedicalEquipment = card(302229)
-  .since("v6.5.0")
-  .tags("ally")
-  // TODO
-  .done();
+const LepinepaulinesInvestmentInMedicalEquipment = void 0;
 
 /**
  * @id 302230
@@ -2406,11 +2474,7 @@ export const LepinepaulinesInvestmentInMedicalEquipment = card(302229)
  * @description
  * 舍弃1张随机手牌，执行1个「抓牌」效果相关的计划。
  */
-export const LepinepaulinesInvestmentInGraphAdversarialTechnology = card(302230)
-  .since("v6.5.0")
-  .tags("ally")
-  // TODO
-  .done();
+const LepinepaulinesInvestmentInGraphAdversarialTechnology = void 0;
 
 /**
  * @id 302231
@@ -2418,36 +2482,7 @@ export const LepinepaulinesInvestmentInGraphAdversarialTechnology = card(302230)
  * @description
  * 移除我方1个元素骰，执行1个「元素骰」效果相关的计划。
  */
-export const LepinepaulinesInvestmentInEnergyMechanism = card(302231)
-  .since("v6.5.0")
-  .tags("ally")
-  // TODO
-  .done();
-
-/**
- * @id 331721
- * @name 月兆·满辉
- * @description
- * 赋予我方随机1张手牌以及牌组顶的卡牌费用降低。
- * （牌组包含至少2个「挪德卡莱」角色，才能加入牌组）
- */
-export const MoonsignAscendantGleam = card(331721)
-  .since("v6.5.0")
-  .tags("resonance")
-  // TODO
-  .done();
-
-/**
- * @id 331807
- * @name 月与故乡
- * @description
- * 本回合内我方打出下张卡牌后：在下个回合开始时，创建1张所打出的卡牌加入手牌。
- * （牌组包含至少2个「挪德卡莱」角色，才能加入牌组）
- */
-export const MoonAndHomeland = card(331807)
-  .since("v6.5.0")
-  // TODO
-  .done();
+const LepinepaulinesInvestmentInEnergyMechanism = void 0;
 
 /**
  * @id 332062
@@ -2457,5 +2492,11 @@ export const MoonAndHomeland = card(331807)
  */
 export const CleaningTime = card(332062)
   .since("v6.5.0")
-  // TODO
+  .do((c) => {
+    const attachmentsCount = new Set(
+      c.queryAll($.my.attachment).map((att) => att.definition.id)
+    ).size;
+    const diceCount = Math.min(attachmentsCount, 2);
+    c.generateDice("randomElement", diceCount);
+  })
   .done();

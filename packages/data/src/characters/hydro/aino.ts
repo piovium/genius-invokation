@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, card, DamageType } from "@gi-tcg/core/builder";
+import { character, skill, summon, card, DamageType, $, Reaction } from "@gi-tcg/core/builder";
+import { AgileSwitch, Empowerment } from "../../commons";
 
 /**
  * @id 112161
@@ -24,7 +25,8 @@ import { character, skill, summon, card, DamageType } from "@gi-tcg/core/builder
  */
 export const CoolYourJetsDucky = summon(112161)
   .since("v6.5.0")
-  // TODO
+  .endPhaseDamage(DamageType.Hydro, 2)
+  .usage(2)
   .done();
 
 /**
@@ -37,7 +39,7 @@ export const BishbashboshRepair = skill(12161)
   .type("normal")
   .costHydro(1)
   .costVoid(2)
-  // TODO
+  .damage(DamageType.Physical, 2)
   .done();
 
 /**
@@ -49,7 +51,11 @@ export const BishbashboshRepair = skill(12161)
 export const Musecatcher = skill(12162)
   .type("elemental")
   .costHydro(3)
-  // TODO
+  .if((c) => c.query($.my.hand.with($.def(Empowerment))))
+  .damage(DamageType.Hydro, 3)
+  .else()
+  .damage(DamageType.Hydro, 2)
+  .combatStatus(AgileSwitch)
   .done();
 
 /**
@@ -62,7 +68,8 @@ export const PrecisionHydronicCooler = skill(12163)
   .type("burst")
   .costHydro(3)
   .costEnergy(2)
-  // TODO
+  .damage(DamageType.Hydro, 2)
+  .summon(CoolYourJetsDucky)
   .done();
 
 /**
@@ -73,7 +80,17 @@ export const PrecisionHydronicCooler = skill(12163)
  */
 export const ModularEfficiencyProtocol = skill(12164)
   .type("passive")
-  // TODO
+  .on("enterRelative", (c, e) => e.entity.definition.id === Empowerment)
+  .listenToPlayer()
+  .usagePerRound(1, { name: "usagePerRound1" })
+  .do((c) => {
+    const ducky = c.query($.my.summon.def(CoolYourJetsDucky));
+    if (ducky) {
+      ducky.addVariable("usage", 1);
+    } else {
+      c.gainEnergy(1, c.self);
+    }
+  })
   .done();
 
 /**
@@ -104,5 +121,21 @@ export const TheBurdenOfCreativeGenius = card(212161)
   .costHydro(3)
   .costEnergy(2)
   .talent(Aino)
-  // TODO
+  .on("enter")
+  .useSkill(PrecisionHydronicCooler)
+  .on("increaseDamage", (c, e) =>
+    ([
+      Reaction.ElectroCharged,
+      Reaction.LunarElectroCharged,
+      Reaction.Bloom
+    ] as (Reaction | null)[]).includes(e.getReaction()))
+  .listenToPlayer()
+  .usagePerRound(1)
+  .do((c, e) => {
+    e.increaseDamage(2);
+    const [hand] = c.maxCostHands(1);
+    if (hand) {
+      c.attach(Empowerment, hand);
+    }
+  })
   .done();

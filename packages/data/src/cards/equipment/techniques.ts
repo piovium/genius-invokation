@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { EntityDefinition } from "@gi-tcg/core";
-import { card, combatStatus, DamageType, extension, status, StatusHandle } from "@gi-tcg/core/builder";
+import type { EntityDefinition } from "@gi-tcg/core";
+import { card, combatStatus, DamageType, extension, status, StatusHandle, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 313001
@@ -386,5 +386,24 @@ export const Blubberbeast = card(313010)
   .since("v6.5.0")
   .costSame(1)
   .technique()
-  // TODO
+  .provideSkill(3130101)
+  .usage(2)
+  .costSame(1)
+  .abortPreview()
+  .do((c) => {
+    c.switchActive($.my.next);
+    const takeMax = c.random([true, false]);
+    const pile = Object.groupBy(c.player.pile, (c) => c.diceCost());
+    // ES6 保证从小到大排序，无需再 sort
+    const costs = Object.keys(pile).map(Number);
+    if (costs.length === 0) {
+      return;
+    }
+    const targetCost = takeMax ? costs[costs.length - 1] : costs[0];
+    const candidates = pile[targetCost]!;
+    const targetCard = c.random(candidates);
+    if (targetCard) {
+      c.drawCards(targetCard);
+    }
+  })
   .done();

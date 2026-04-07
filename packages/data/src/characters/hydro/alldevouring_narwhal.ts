@@ -211,6 +211,15 @@ export const InsatiableAppetite = skill(22044)
   .done();
 
 /**
+ * @id 22045
+ * @name 无尽食欲
+ * @description
+ * 【被动】战斗开始时，生成深噬之域。
+ */
+export const InsatiableAppetite01 = skill(22045)
+  .reserve();
+
+/**
  * @id 2204
  * @name 吞星之鲸
  * @description
@@ -247,13 +256,3 @@ export const LightlessFeeding = card(222041)
   })
   .done();
 
-/**
- * @id 22045
- * @name 无尽食欲
- * @description
- * 【被动】战斗开始时，生成深噬之域。
- */
-export const InsatiableAppetite = skill(22045)
-  .type("passive")
-  // TODO
-  .done();

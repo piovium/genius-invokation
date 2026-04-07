@@ -83,7 +83,7 @@ export function getCardCode(card: ActionCardRawData, extra = ""): string {
 }
 
 export async function generateCards() {
-  const INIT_CARD_CODE = `import { card } from "@gi-tcg/core/builder";\n`;
+  const INIT_CARD_CODE = `import { card, $ } from "@gi-tcg/core/builder";\n`;
   const equipsCode: Record<string, SourceInfo[]> = {
     bow: [],
     sword: [],

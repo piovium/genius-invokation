@@ -236,5 +236,16 @@ export const SnareHook = card(311209)
   .since("v6.5.0")
   .costVoid(2)
   .weapon("bow")
-  // TODO
+  .variable("agile", 0)
+  .on("increaseSkillDamage", (c, e) => e.viaSkillType("burst"))
+  .increaseDamage(2)
+  .on("dealReaction")
+  .listenToPlayer()
+  .do((c) => {
+    c.addVariable("agile", 1);
+    if (c.getVariable("agile") >= 2 && c.self.master.energy < c.self.master.maxEnergy) {
+      c.addVariable("agile", -2);
+      c.gainEnergy(1, c.self.master);
+    }
+  })
   .done();

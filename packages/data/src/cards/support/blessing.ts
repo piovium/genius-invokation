@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, DamageType, DiceType, Reaction, status } from "@gi-tcg/core/builder";
-import { CostIncrease, NoTuningAllowed } from "../../commons";
+import { $, card, DamageType, DiceType, Reaction, status } from "@gi-tcg/core/builder";
+import { CostIncrease, NoTuningAllowed, Shield } from "../../commons";
 
 /**
  * @id 303041
@@ -168,6 +168,54 @@ export const ElementalTransfigurationVaporizeBlessing = card(331005)
   .done();
 
 /**
+ * @id 303061
+ * @name 绽放祝佑·甘露
+ * @description
+ * 投掷阶段：总是投出2个水元素骰和2个草元素骰。
+ * 每回合第2次打出卡牌后：我方受伤最多的角色获得2点额外最大生命值。
+ */
+export const BloomBlessingAmrita = card(303061)
+  .costHydro(2)
+  .undiscoverable()
+  .support()
+  .variable("playCount", 0)
+  .on("roll")
+  .fixDice(DiceType.Hydro, 2)
+  .fixDice(DiceType.Dendro, 2)
+  .on("playCard")
+  .do((c) => {
+    c.addVariable("playCount", 1);
+    if (c.getVariable("playCount") === 2) {
+      const target = c.query($.macros.myMostInjured);
+      if (target) {
+        c.increaseMaxHealth(2, target);
+      }
+    }
+  })
+  .on("roundEnd")
+  .setVariable("playCount", 0)
+  .done();
+
+/**
+ * @id 303062
+ * @name 绽放祝佑·蔓生
+ * @description
+ * 投掷阶段：总是投出2个水元素骰和2个草元素骰。
+ * 我方触发元素反应后：造成1点水元素伤害。（每回合1次）
+ */
+export const BloomBlessingOvergrow = card(303062)
+  .costDendro(2)
+  .undiscoverable()
+  .support()
+  .on("roll")
+  .fixDice(DiceType.Hydro, 2)
+  .fixDice(DiceType.Dendro, 2)
+  .on("dealReaction")
+  .usagePerRound(1)
+  .damage(DamageType.Hydro, 1, $.macros.oppActivePrioritized)
+  .done();
+
+/**
  * @id 331006
  * @name 元素幻变：绽放祝佑
  * @description
@@ -178,8 +226,63 @@ export const ElementalTransfigurationVaporizeBlessing = card(331005)
 export const ElementalTransfigurationBloomBlessing = card(331006)
   .since("v6.5.0")
   .costSame(2)
-  .support("blessing")
-  // TODO
+  .elementalBlessing(DiceType.Hydro, DiceType.Dendro)
+  .on("roll")
+  .fixDice(DiceType.Hydro, 2)
+  .fixDice(DiceType.Dendro, 2)
+  .on("dealReaction", (c, e) => e.type === Reaction.Bloom)
+  .selectAndCreateHandCard([
+    BloomBlessingAmrita,
+    BloomBlessingOvergrow,
+  ])
+  .dispose()
+  .done();
+
+/**
+ * @id 303071
+ * @name 火岩祝佑·回火
+ * @description
+ * 投掷阶段：总是投出2个火元素骰和2个岩元素骰。
+ * 我方场上存在护盾角色状态或护盾出战状态时，造成的火元素伤害和岩元素伤害+1。（每回合3次）
+ */
+export const LavaBlessingTurnfire = card(303071)
+  .costPyro(2)
+  .undiscoverable()
+  .support()
+  .on("roll")
+  .fixDice(DiceType.Pyro, 2)
+  .fixDice(DiceType.Geo, 2)
+  .on("increaseDamage", (c, e) => {
+    if (!([DamageType.Pyro, DamageType.Geo] as DamageType[]).includes(e.type)) {
+      return false;
+    }
+    return !!c.query($.union($.my.typeStatus.tag("shield"), $.my.combatStatus.tag("shield")));
+  })
+  .usagePerRound(3)
+  .increaseDamage(1)
+  .done();
+
+/**
+ * @id 303072
+ * @name 火岩祝佑·重熔
+ * @description
+ * 投掷阶段：总是投出2个火元素骰和2个岩元素骰。
+ * 我方造成后火元素伤害或岩元素伤害后：生成2层护盾。（每回合1次）
+ */
+export const LavaBlessingRemelting = card(303072)
+  .costGeo(3)
+  .undiscoverable()
+  .support()
+  .on("roll")
+  .fixDice(DiceType.Pyro, 2)
+  .fixDice(DiceType.Geo, 2)
+  .on("dealDamage", (c, e) => ([DamageType.Pyro, DamageType.Geo] as DamageType[]).includes(e.type))
+  .usagePerRound(1)
+  .combatStatus(Shield, "my", {
+    overrideVariables: {
+      shield: 2
+    }
+  })
   .done();
 
 /**
@@ -193,6 +296,14 @@ export const ElementalTransfigurationBloomBlessing = card(331006)
 export const ElementalTransfigurationLavaBlessing = card(331007)
   .since("v6.5.0")
   .costSame(2)
-  .support("blessing")
-  // TODO
+  .elementalBlessing(DiceType.Pyro, DiceType.Geo)
+  .on("roll")
+  .fixDice(DiceType.Pyro, 2)
+  .fixDice(DiceType.Geo, 2)
+  .on("dealReaction", (c, e) => e.type === Reaction.CrystallizePyro)
+  .selectAndCreateHandCard([
+    LavaBlessingTurnfire,
+    LavaBlessingRemelting,
+  ])
+  .dispose()
   .done();

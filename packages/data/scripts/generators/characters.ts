@@ -145,7 +145,7 @@ export async function generateCharacters() {
     if (hasCombatStatuses) importDecls.push("combatStatus");
     const initCode = `import { ${importDecls.join(
       ", ",
-    )}, card, DamageType } from "@gi-tcg/core/builder";\n`;
+    )}, card, DamageType, $ } from "@gi-tcg/core/builder";\n`;
     const skills = ch.skills;
 
     items.push(

@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, combatStatus, card, DamageType } from "@gi-tcg/core/builder";
+import { character, skill, combatStatus, card, DamageType, $ } from "@gi-tcg/core/builder";
+import { Shield } from "../../commons";
 
 /**
  * @id 112151
@@ -24,7 +25,9 @@ import { character, skill, combatStatus, card, DamageType } from "@gi-tcg/core/b
  */
 export const FavonianFavor = combatStatus(112151)
   .since("v6.5.0")
-  // TODO
+  .on("damaged")
+  .usage(2)
+  .combatStatus(Shield)
   .done();
 
 /**
@@ -37,7 +40,16 @@ export const FavonianFavor = combatStatus(112151)
  */
 export const SacramentalShower = combatStatus(112152)
   .since("v6.5.0")
-  // TODO
+  .on("switchActive")
+  .usage(1)
+  .listenToAll()
+  .do((c, e) => {
+    if (e.switchInfo.to.isMine()) {
+      c.generateDice("randomElement", 1);
+    } else {
+      c.damage(DamageType.Hydro, 1);
+    }
+  })
   .done();
 
 /**
@@ -50,7 +62,7 @@ export const FavoniusBladeworkRitual = skill(12151)
   .type("normal")
   .costHydro(1)
   .costVoid(2)
-  // TODO
+  .damage(DamageType.Physical, 2)
   .done();
 
 /**
@@ -62,7 +74,8 @@ export const FavoniusBladeworkRitual = skill(12151)
 export const ImmersiveOrdinance = skill(12152)
   .type("elemental")
   .costHydro(3)
-  // TODO
+  .damage(DamageType.Hydro, 2)
+  .combatStatus(SacramentalShower)
   .done();
 
 /**
@@ -75,7 +88,13 @@ export const RadiantPsalter = skill(12153)
   .type("burst")
   .costHydro(3)
   .costEnergy(2)
-  // TODO
+  .damage(DamageType.Hydro, 2)
+  .combatStatus(Shield, "my", {
+    overrideVariables: {
+      shield: 2
+    }
+  })
+  .combatStatus(FavonianFavor)
   .done();
 
 /**
@@ -106,5 +125,15 @@ export const YouShallGoOutWithJoy = card(212151)
   .costHydro(3)
   .costEnergy(2)
   .talent(Dahlia)
-  // TODO
+  .on("enter")
+  .useSkill(RadiantPsalter)
+  .on("beforeDefeated", (c) => c.query($.my.combatStatus.def(FavonianFavor)))
+  .listenToPlayer()
+  .do((c, e) => {
+    const favor = c.query($.my.combatStatus.def(FavonianFavor));
+    if (favor) {
+      c.dispose(favor);
+    }
+  })
+  .immune(2)
   .done();
