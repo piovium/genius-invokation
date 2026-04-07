@@ -13,9 +13,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { EntityArea, EntityType } from "../base/entity";
+import type { EntityArea } from "../base/entity";
 import type { ExEntityType } from "../builder/type";
 import type { SExprSchema } from "./expr_schema";
+import type { CharacterVariableConfigs } from "../base/character";
 
 export type IsExtends<T, U> = [T] extends [U] ? true : false;
 export type Related<T, U> = IsExtends<T, U> extends true
@@ -28,6 +29,12 @@ export type Computed<T, R = any> = {
 } extends infer O extends R
   ? O
   : never;
+
+export type IsEqual<T, U> = (<G>() => G extends T ? 1 : 2) extends <
+  G,
+>() => G extends U ? 1 : 2
+  ? true
+  : false;
 
 export type StrictlySuperTypeOf<T, U> = IsExtends<U, T> extends true
   ? IsExtends<T, U> extends true
@@ -224,7 +231,11 @@ export interface MetaBase {
 export type TypingInfoFromMeta<M extends MetaBase> = {
   type: M["type"];
   areaType: M["areaType"];
-  variables: Extract<keyof M["variables"], string>;
+  variables:
+    | Extract<keyof M["variables"], string>
+    | IsEqual<M["type"], "character"> extends true
+    ? NonIndexKeyOf<CharacterVariableConfigs>
+    : never;
 };
 
 export type ReturnOfMeta<M extends MetaBase> = Computed<

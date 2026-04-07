@@ -34,15 +34,9 @@ const isUnorderedQuery = (query: unknown): query is IUnorderedQuery => {
   return !!query && typeof query === "object" && toExpressionUnordered in query;
 };
 
-type A = NonIndexKeyOf<CharacterVariableConfigs>;
-
 type VarName<Ty extends TypingInfoBase> =
-  | (
-      | Ty["variables"]
-      | (Ty["type"] extends "character"
-          ? NonIndexKeyOf<CharacterVariableConfigs>
-          : never)
-    )
+  | Ty["variables"]
+  | (string & {})
   | typeof diceCostKey
   | typeof inInitialPileKey;
 

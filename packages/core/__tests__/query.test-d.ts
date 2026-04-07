@@ -5,17 +5,11 @@ import {
   expectError,
 } from "tsd";
 import { $ } from "../src/query/dollar";
-import { typingInfo, type IQuery, type InferResult } from "../src/query/utils";
+import { type IsEqual, typingInfo, type IQuery, type InferResult } from "../src/query/utils";
 import { CharacterHandle, SummonHandle } from "../src/builder";
 import { AttachmentHandle, ExEntityType } from "../src/builder/type";
 
 declare const infer: <Q extends IQuery>(q: Q) => InferResult<Q>;
-
-type IsEqual<T, U> = (<G>() => G extends T ? 1 : 2) extends <G>() => G extends U
-  ? 1
-  : 2
-  ? true
-  : false;
 
 const expectEntityType =
   <T extends ExEntityType>() =>
