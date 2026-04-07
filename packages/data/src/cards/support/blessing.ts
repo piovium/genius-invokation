@@ -166,3 +166,33 @@ export const ElementalTransfigurationVaporizeBlessing = card(331005)
   ])
   .dispose()
   .done();
+
+/**
+ * @id 331006
+ * @name 元素幻变：绽放祝佑
+ * @description
+ * 元素幻变：水元素草元素
+ * 投掷阶段：总是投出2个水元素骰和2个草元素骰。
+ * 我方触发绽放反应后：弃置此牌并从绽放祝佑·甘露和绽放祝佑·蔓生中挑选一项加入手牌。
+ */
+export const ElementalTransfigurationBloomBlessing = card(331006)
+  .since("v6.5.0")
+  .costSame(2)
+  .support("blessing")
+  // TODO
+  .done();
+
+/**
+ * @id 331007
+ * @name 元素幻变：火岩祝佑
+ * @description
+ * 元素幻变：火元素岩元素
+ * 投掷阶段：总是投出2个火元素骰和2个岩元素骰。
+ * 我方触发火结晶反应后：弃置此牌并从火岩祝佑·回火和火岩祝佑·重熔中挑选一项加入手牌。
+ */
+export const ElementalTransfigurationLavaBlessing = card(331007)
+  .since("v6.5.0")
+  .costSame(2)
+  .support("blessing")
+  // TODO
+  .done();

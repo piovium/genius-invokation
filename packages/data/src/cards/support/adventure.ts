@@ -106,7 +106,7 @@ export const TideTurningSacredLord = summon(301041)
  * @name 天蛇船
  * @description
  * 冒险经历增加时：将1个元素骰转换为万能元素。
- * 冒险经历达到2时：抓1张牌。
+ * 冒险经历达到2时：抓2张牌。
  * 冒险经历达到4时：我方出战角色附属2层战斗计划。
  * 冒险经历达到6时：弃置敌方场上1个随机召唤物，召唤回天的圣主，然后弃置此牌。
  */
@@ -117,7 +117,7 @@ export const Tonatiuh = card(321034)
   .convertDice(DiceType.Omni, 1)
   .on("adventure", (c) => c.getVariable("exp") >= 2)
   .usage(1, { name: "stage1", visible: false })
-  .drawCards(1)
+  .drawCards(2)
   .on("adventure", (c) => c.getVariable("exp") >= 4)
   .usage(1, { name: "stage2", visible: false })
   .characterStatus(BattlePlan, "my active", {
@@ -134,4 +134,19 @@ export const Tonatiuh = card(321034)
     c.summon(TideTurningSacredLord);
     c.finishAdventure();
   })
+  .done();
+
+/**
+ * @id 321040
+ * @name 层岩巨渊
+ * @description
+ * 入场时：在我方牌组中随机生成5张事件牌。
+ * 冒险经历达到偶数次时：生成1个随机基础元素骰并抓1张牌。
+ * 冒险经历达到10次，我方单回合内打出2张名称不存在于本局最初牌组的牌时：生成3个万能元素骰，然后弃置此卡牌。
+ */
+export const TheChasm = card(321040)
+  .since("v6.5.0")
+  .tags("adventureSpot")
+  .adventureSpot()
+  // TODO
   .done();

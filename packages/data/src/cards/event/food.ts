@@ -412,19 +412,30 @@ export const [MystiqueSoupProvidence] = card(333022)
   .done();
 
 /**
+ * @id 303318
+ * @name 奇瑰之汤·激愤（生效中）
+ * @description
+ * 本回合中，该角色下一次造成的伤害+1。
+ * 可用次数：2
+ */
+export const MystiqueSoupFuryInEffect = status(303318)
+  .oneDuration()
+  .on("increaseSkillDamage")
+  .usage(2)
+  .increaseDamage(1)
+  .done();
+
+/**
  * @id 333023
  * @name 奇瑰之汤·激愤
  * @description
- * 本回合中，目标角色下一次造成的伤害+2。
+ * 本回合中，目标角色下次造成的伤害+1。（最多生效2次）
  */
-export const [MystiqueSoupFury] = card(333023)
+export const MystiqueSoupFury = card(333023)
   .since("v5.5.0")
   .food()
   .undiscoverable()
-  .toStatus(303318, "@targets.0")
-  .oneDuration()
-  .once("increaseSkillDamage")
-  .increaseDamage(2)
+  .characterStatus(MystiqueSoupFuryInEffect, "@targets.0")
   .done();
 
 /**

@@ -246,3 +246,14 @@ export const LightlessFeeding = card(222041)
     c.heal(c.get(e.arg).diceCost(), "@master")
   })
   .done();
+
+/**
+ * @id 22045
+ * @name 无尽食欲
+ * @description
+ * 【被动】战斗开始时，生成深噬之域。
+ */
+export const InsatiableAppetite = skill(22045)
+  .type("passive")
+  // TODO
+  .done();

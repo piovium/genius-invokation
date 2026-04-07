@@ -20,7 +20,7 @@ import { character, skill, status, card, DamageType } from "@gi-tcg/core/builder
  * @name 佩伊刻计
  * @description
  * 我方每抓1张牌后：此牌累积1层「压力阶级」。
- * 所附属角色使用浮冰增压时：如果「压力阶级」至少有2层，则移除此效果，使技能少花费1元素骰，且如果此技能结算后「压力阶级」至少有4层，则再额外造成2点物理伤害。
+ * 所附属角色使用浮冰增压时：如果「压力阶级」至少有2层，则移除此效果，使技能少花费1元素骰，且如果此技能结算后「压力阶级」至少有4层，则再额外造成3点物理伤害。
  */
 export const PersTimer = status(111121)
   .since("v5.0.0")
@@ -31,7 +31,7 @@ export const PersTimer = status(111121)
   .deductOmniCost(1)
   .on("useSkill", (c, e) => c.getVariable("level") >= 2)
   .if((c) => c.getVariable("level") >= 4)
-  .damage(DamageType.Physical, 2)
+  .damage(DamageType.Physical, 3)
   .dispose()
   .done();
 

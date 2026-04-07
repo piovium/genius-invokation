@@ -848,7 +848,7 @@ export const TidesealStone = card(321036)
  * @name 霜月之坊
  * @description
  * 入场时：抓2张牌，治疗我方受伤最多的角色2点。
- * 结束阶段：赋予我方随机2张当前元素骰费用不为0的手牌费用降低。
+ * 结束阶段：赋予我方随机2张手牌费用降低。
  * 可用次数：2
  */
 export const FrostmoonEnclave = card(321037)
@@ -861,8 +861,7 @@ export const FrostmoonEnclave = card(321037)
   .on("endPhase")
   .usage(2)
   .do((c) => {
-    const candidates = c.player.hands.filter((card) => card.diceCost() > 0);
-    const chosen = c.randomSubset(candidates, 2);
+    const chosen = c.randomSubset(c.player.hands, 2);
     for (const card of chosen) {
       c.attach(CostReduction, card);
     }

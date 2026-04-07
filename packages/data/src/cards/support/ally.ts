@@ -823,3 +823,123 @@ export const BonaAndCocouik = card(322032)
   .usagePerRound(1)
   .adventure()
   .done();
+
+/**
+ * @id 302220
+ * @name 医疗器材投资·大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到1时，治疗我方受伤最多的角色2点，然后弃置此卡牌。
+ */
+export const MedicalEquipmentInvestmentGrandPlan = card(302220)
+  .since("v6.5.0")
+  .support("ally")
+  // TODO
+  .done();
+
+/**
+ * @id 302221
+ * @name 医疗器材投资·特大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到2时，治疗我方受伤最多的角色4点，然后弃置此卡牌。
+ */
+export const MedicalEquipmentInvestmentMegaPlan = card(302221)
+  .since("v6.5.0")
+  .support("ally")
+  // TODO
+  .done();
+
+/**
+ * @id 302222
+ * @name 医疗器材投资·超级大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到3时，治疗我方受伤最多的角色6点，然后弃置此卡牌。
+ */
+export const MedicalEquipmentInvestmentSupermegaPlan = card(302222)
+  .since("v6.5.0")
+  .support("ally")
+  // TODO
+  .done();
+
+/**
+ * @id 302223
+ * @name 图形对抗投资·大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到1时，抓2张牌，然后弃置此卡牌。
+ */
+export const GraphAdversarialTechnologyInvestmentGrandPlan = card(302223)
+  .since("v6.5.0")
+  .support("ally")
+  // TODO
+  .done();
+
+/**
+ * @id 302224
+ * @name 图形对抗投资·特大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到2时，抓4张牌，然后弃置此卡牌。
+ */
+export const GraphAdversarialTechnologyInvestmentMegaPlan = card(302224)
+  .since("v6.5.0")
+  .support("ally")
+  // TODO
+  .done();
+
+/**
+ * @id 302225
+ * @name 图形对抗投资·超级大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到3时，抓6张牌，然后弃置此卡牌。
+ */
+export const GraphAdversarialTechnologyInvestmentSupermegaPlan = card(302225)
+  .since("v6.5.0")
+  .support("ally")
+  // TODO
+  .done();
+
+/**
+ * @id 302226
+ * @name 能量机关投资·大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到1时，获得1个随机基础元素骰，然后弃置此卡牌。
+ */
+export const EnergyMechanismInvestmentGrandPlan = card(302226)
+  .since("v6.5.0")
+  .support("ally")
+  // TODO
+  .done();
+
+/**
+ * @id 302227
+ * @name 能量机关投资·特大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到2时，获得2个随机基础元素骰，然后弃置此卡牌。
+ */
+export const EnergyMechanismInvestmentMegaPlan = card(302227)
+  .since("v6.5.0")
+  .support("ally")
+  // TODO
+  .done();
+
+/**
+ * @id 302228
+ * @name 能量机关投资·超级大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到3时，获得3个随机基础元素骰，然后弃置此卡牌。
+ */
+export const EnergyMechanismInvestmentSupermegaPlan = card(302228)
+  .since("v6.5.0")
+  .support("ally")
+  // TODO
+  .done();
+
+/**
+ * @id 322033
+ * @name 乐平波琳
+ * @description
+ * 入场时：挑选1个投资计划。
+ */
+export const LepinePauline = card(322033)
+  .since("v6.5.0")
+  .support("ally")
+  // TODO
+  .done();

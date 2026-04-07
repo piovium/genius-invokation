@@ -2387,3 +2387,75 @@ export const ClinkClankLegion = card(332061)
     }
   })
   .done();
+
+/**
+ * @id 302229
+ * @name 乐平波琳的医疗器材投资
+ * @description
+ * 对我方出战角色造成1点穿透伤害，执行1个「治疗」效果相关的计划。
+ */
+export const LepinepaulinesInvestmentInMedicalEquipment = card(302229)
+  .since("v6.5.0")
+  .tags("ally")
+  // TODO
+  .done();
+
+/**
+ * @id 302230
+ * @name 乐平波琳的图形对抗投资
+ * @description
+ * 舍弃1张随机手牌，执行1个「抓牌」效果相关的计划。
+ */
+export const LepinepaulinesInvestmentInGraphAdversarialTechnology = card(302230)
+  .since("v6.5.0")
+  .tags("ally")
+  // TODO
+  .done();
+
+/**
+ * @id 302231
+ * @name 乐平波琳的能量机关投资
+ * @description
+ * 移除我方1个元素骰，执行1个「元素骰」效果相关的计划。
+ */
+export const LepinepaulinesInvestmentInEnergyMechanism = card(302231)
+  .since("v6.5.0")
+  .tags("ally")
+  // TODO
+  .done();
+
+/**
+ * @id 331721
+ * @name 月兆·满辉
+ * @description
+ * 赋予我方随机1张手牌以及牌组顶的卡牌费用降低。
+ * （牌组包含至少2个「挪德卡莱」角色，才能加入牌组）
+ */
+export const MoonsignAscendantGleam = card(331721)
+  .since("v6.5.0")
+  .tags("resonance")
+  // TODO
+  .done();
+
+/**
+ * @id 331807
+ * @name 月与故乡
+ * @description
+ * 本回合内我方打出下张卡牌后：在下个回合开始时，创建1张所打出的卡牌加入手牌。
+ * （牌组包含至少2个「挪德卡莱」角色，才能加入牌组）
+ */
+export const MoonAndHomeland = card(331807)
+  .since("v6.5.0")
+  // TODO
+  .done();
+
+/**
+ * @id 332062
+ * @name 清扫时间
+ * @description
+ * 我方手牌中每存在1种附着状态，则生成1个随机基础元素骰。（至多生成2个）
+ */
+export const CleaningTime = card(332062)
+  .since("v6.5.0")
+  // TODO
+  .done();

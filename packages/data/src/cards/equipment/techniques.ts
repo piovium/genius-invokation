@@ -372,3 +372,19 @@ export const RawrRawr = card(313009)
   .drawCards(1, { withTag: "technique" })
   .combatStatus(SaurianMoralSupport)
   .done();
+
+/**
+ * @id 313010
+ * @name 膨膨兽
+ * @description
+ * 特技：膨膨音波
+ * 可用次数：2
+ * （角色最多装备1个「特技」）
+ * [3130101: 膨膨音波] (1*Same) 切换到下一个角色，从牌组里随机抓1张当前元素骰费用最高或最低的牌。
+ */
+export const Blubberbeast = card(313010)
+  .since("v6.5.0")
+  .costSame(1)
+  .technique()
+  // TODO
+  .done();
