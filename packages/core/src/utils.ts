@@ -1085,9 +1085,9 @@ type MixinResult<
 ) => InstanceType<T> & InstanceOfConstructors<Us>;
 
 /**
- * Construct a mixin class from `derivedCtor`, then attach all methods from `constructors` to it.
+ * Construct a mixin class from `derivedCtor`, then copy prototype methods from `constructors` onto it.
  * @param derivedCtor The base class to extend from.
- * @param constructors Other class methods to attached from. These class's constructor **WON'T** be executed, including `[[define]]` of the class field's initializer.
+ * @param constructors Classes whose prototype methods will be copied. Their constructors and class field initializers are not executed.
  * @returns
  */
 export function mixins<

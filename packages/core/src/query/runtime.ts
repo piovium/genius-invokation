@@ -363,6 +363,9 @@ class QueryRunner {
       >;
       switch (op) {
         case "+": {
+          if (args.length === 0) {
+            return "0";
+          }
           return `(${args.map(visitor).join(" + ")})`;
         }
         case "-": {
@@ -377,6 +380,9 @@ class QueryRunner {
           }
         }
         case "*": {
+          if (args.length === 0) {
+            return "1";
+          }
           return `(${args.map(visitor).join(" * ")})`;
         }
         case "/": {
@@ -425,10 +431,16 @@ class QueryRunner {
           return `(+(${visitor(args[0])} <= ${visitor(args[1])}))`;
         }
         case "and": {
-          return `（+(${args.map(visitor).join(" && ")}))`;
+          if (args.length === 0) {
+            return "1";
+          }
+          return `(+Boolean(${args.map(visitor).join(" && ")}))`;
         }
         case "or": {
-          return `(+(${args.map(visitor).join(" || ")}))`;
+          if (args.length === 0) {
+            return "0";
+          }
+          return `(+Boolean(${args.map(visitor).join(" || ")}))`;
         }
         case "not": {
           assertsArgCount("not", args, 1);
@@ -527,7 +539,7 @@ class QueryRunner {
           pile: (entry) => entry.state.definition.type !== "attachment",
         };
         const typeFilter =
-          (byPath && byPathTypeFilter[areaType]) ?? (() => true);
+          byPath === "true" ? (byPathTypeFilter[areaType] ?? (() => true)) : () => true;
         const filter: EntityFilter = (entry) =>
           entry.area.type === areaType && typeFilter(entry);
         return universeIt.filter(filter);
