@@ -279,7 +279,7 @@ export const UNARY_OPERATORS = [
   "with",
   "on",
   "not",
-  "recentFrom",
+  "recentOppFrom",
 ] as const;
 export type UnaryOperator = (typeof UNARY_OPERATORS)[number];
 
@@ -314,7 +314,7 @@ export type UnaryOperatorMetas = {
     operand: CardReq;
     result: AttachmentReq;
   };
-  recentFrom: {
+  recentOppFrom: {
     operand: CharacterReq;
     result: CharacterReq;
   };

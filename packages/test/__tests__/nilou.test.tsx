@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Character, CombatStatus, setup, State } from "#test"
+import { test } from "bun:test";
+import { $, Character, CombatStatus, setup, State } from "#test"
 import { AllSchemesToKnow, Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida"
 import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona"
 import { BountifulCore, GoldenChalicesBounty, Nilou } from "@gi-tcg/data/internal/characters/hydro/nilou"
@@ -31,7 +32,7 @@ test("nilou basic logic", async () => {
     </State>
   );
   await c.me.skill(AllSchemesToKnow);
-  c.expect(`opp active`).toHaveVariable({ aura: Aura.None });
-  c.expect(`my combat status with definition id ${DendroCore}`).toNotExist();
-  c.expect(`my summon with definition id ${BountifulCore}`).toBeExist();
+  c.expect($.opp.active).toHaveVariable({ aura: Aura.None });
+  c.expect($.my.combatStatus.def(DendroCore)).toNotExist();
+  c.expect($.my.summon.def(BountifulCore)).toBeExist();
 })

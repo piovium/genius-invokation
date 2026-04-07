@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Card, Character, ref, setup, State } from "#test";
+import { $, Card, Character, ref, setup, State } from "#test";
 import { TenacityOfTheMillelith } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { MementoLens } from "@gi-tcg/data/internal/cards/support/item";
 import { test } from "bun:test";
@@ -33,7 +33,7 @@ test("memento lens: repeated same-name support/equipment card can deduct cost", 
   await c.me.card(MementoLens);
   await c.me.card(TenacityOfTheMillelith, target);
 
-  c.expect(`my support with definition id ${MementoLens}`).toHaveVariable({
+  c.expect($.my.support.def(MementoLens)).toHaveVariable({
     totalUsage: 1,
   });
 });

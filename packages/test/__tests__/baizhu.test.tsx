@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Character, CombatStatus, ref, setup, State } from "#test";
+import { $, Character, CombatStatus, ref, setup, State } from "#test";
 import {
   Baizhu,
   HolisticRevivification,
@@ -79,14 +79,14 @@ test("baizhu shield: hit the death", async () => {
   c.expect(oppActive).toHaveVariable({ alive: 0 });
 
   // 白术盾反，1点草伤；但被我方白术盾挡住
-  c.expect(`my active`).toHaveVariable({
+  c.expect($.my.active).toHaveVariable({
     health: 10,
     aura: Aura.Dendro,
   });
 
   // 我方白术盾打尸体，但不挂草
   c.expect(oppActive).toHaveVariable({ aura: Aura.None });
-  c.expect(`my status with definition id ${SeamlessShield}`).toNotExist();
+  c.expect($.my.combatStatus.def(SeamlessShield)).toNotExist();
 
   // 对方选人后没受伤
   await c.opp.chooseActive(oppNext);

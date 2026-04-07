@@ -13,7 +13,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Status, Equipment, Card } from "#test";
+import {
+  ref,
+  setup,
+  Character,
+  State,
+  Status,
+  Equipment,
+  Card,
+  $,
+} from "#test";
 import {
   Klee,
   Kaboom,
@@ -44,17 +53,17 @@ test("klee: dice deduction", async () => {
 
   await c.me.skill(JumpyDumpty);
   await c.opp.end();
-  c.expect("opp active").toHaveVariable({ health: 6 });
+  c.expect($.opp.active).toHaveVariable({ health: 6 });
   expect(c.state.players[0].dice).toBeArrayOfSize(4);
 
   await c.me.skill(Kaboom);
   expect(c.state.players[0].dice).toBeArrayOfSize(4);
 
-  c.expect(`my equipment with definition id ${ExplosiveSpark}`).toNotExist();
-  c.expect(
-    `my equipment with definition id ${TulaytullahsRemembrance}`,
-  ).toHaveVariable({ usagePerRound: 1 });
-  c.expect(
-    `my equipment with definition id ${VermillionHereafter}`,
-  ).toHaveVariable({ usagePerRound: 1 });
+  c.expect($.my.typeStatus.def(ExplosiveSpark)).toNotExist();
+  c.expect($.my.typeEquipment.def(TulaytullahsRemembrance)).toHaveVariable({
+    usagePerRound: 1,
+  });
+  c.expect($.my.typeEquipment.def(VermillionHereafter)).toHaveVariable({
+    usagePerRound: 1,
+  });
 });

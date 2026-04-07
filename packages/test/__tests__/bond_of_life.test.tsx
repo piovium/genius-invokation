@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Status, Card } from "#test";
+import { ref, setup, Character, State, Status, Card, $ } from "#test";
 import { BondOfLife } from "@gi-tcg/data/internal/commons";
 import { MondstadtHashBrown } from "@gi-tcg/data/internal/cards/event/food";
 import { test } from "bun:test";
@@ -29,5 +29,5 @@ test("bond of life decrease the heal", async () => {
     </State>,
   );
   await c.me.card(MondstadtHashBrown, active);
-  c.expect("my active").toHaveVariable({ health: 5 });
+  c.expect($.my.active).toHaveVariable({ health: 5 });
 });

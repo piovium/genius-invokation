@@ -21,6 +21,7 @@ import {
   Equipment,
   CombatStatus,
   DeclaredEnd,
+  $,
 } from "#test";
 import {
   Bennett,
@@ -53,5 +54,5 @@ test("bennett talent don't heal on prepared skill", async () => {
   c.expect(opp2).toHaveVariable({ health: 4 });
   c.expect(opp3).toHaveVariable({ health: 3 });
   // 只有首次
-  c.expect("my active").toHaveVariable({ health: 3 });
+  c.expect($.my.active).toHaveVariable({ health: 3 });
 });

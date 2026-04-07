@@ -8,18 +8,25 @@ import {
   Status,
   Summon,
   Support,
+  $,
 } from "#test";
 import { EntityState } from "@gi-tcg/core";
 import { ToyGuardSummon } from "@gi-tcg/data/internal/cards/event/other";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
 import { SuperconductBlessingDeepFreeze } from "@gi-tcg/data/internal/cards/support/blessing";
-import { ShikanoinHeizou, WindmusterIrisCryo } from "@gi-tcg/data/internal/characters/anemo/shikanoin_heizou";
+import {
+  ShikanoinHeizou,
+  WindmusterIrisCryo,
+} from "@gi-tcg/data/internal/characters/anemo/shikanoin_heizou";
 import {
   Charlotte,
   CoolcolorCapture,
 } from "@gi-tcg/data/internal/characters/cryo/charlotte";
 import { Fischl, Oz } from "@gi-tcg/data/internal/characters/electro/fischl";
-import { SpiritfoxSineater, YaeMiko } from "@gi-tcg/data/internal/characters/electro/yae_miko";
+import {
+  SpiritfoxSineater,
+  YaeMiko,
+} from "@gi-tcg/data/internal/characters/electro/yae_miko";
 import {
   RiffRevolution,
   Xinyan,
@@ -68,10 +75,9 @@ describe("superconduct blessing: deep freeze", () => {
     );
     await c.me.end();
     expect(
-      (
-        c.query(`opp hand with definition id ${Paimon}`)[0] as EntityState
-      )?.attachments.find((a) => a.definition.id === CostIncrease)?.variables
-        .layer,
+      (c.query($.opp.hand.def(Paimon))[0] as EntityState)?.attachments.find(
+        (a) => a.definition.id === CostIncrease,
+      )?.variables.layer,
     ).toBe(2);
   });
 
@@ -85,7 +91,7 @@ describe("superconduct blessing: deep freeze", () => {
         <Character my active def={YaeMiko} ref={myActive} health={10}>
           <Status def={WindmusterIrisCryo} />
         </Character>
-      </State>
+      </State>,
     );
     await c.me.skill(SpiritfoxSineater);
     c.expect(myActive).toHaveVariable({ health: 9, aura: Aura.Cryo });

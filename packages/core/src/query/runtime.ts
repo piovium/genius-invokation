@@ -615,7 +615,7 @@ class QueryRunner {
       }
 
       // complex
-      case "recentFrom": {
+      case "recentOppFrom": {
         const [_, base] = expr;
         const baseEntries = this.executeUnordered(
           base as SExprSchema.UnorderedQuery,

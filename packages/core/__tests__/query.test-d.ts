@@ -73,7 +73,7 @@ expectAssignable<{ variables: "foo" }>(infer($.var("foo", ">=", 1)));
 expectAssignable<{ variables: "foo" }>(infer($.var("foo", (x) => x >= 1)));
 
 // unary operators
-expectEntityType<"character">()($.recentFrom($.opp.active));
+expectEntityType<"character">()($.recentOppFrom($.opp.active));
 expectEntityType<"character">()($.has($.typeStatus));
 expectEntityType<"character">()($.has.typeStatus);
 expectEntityType<"character">()($.has.typeEquipment);
@@ -85,7 +85,7 @@ expectError(infer($.has($.support)));
 // @ts-expect-error
 expectError(infer($.at($.summon)));
 // @ts-expect-error
-expectError(infer($.recentFrom($.support)));
+expectError(infer($.recentOppFrom($.support)));
 // using Function.prototype
 expectDeprecated($.has.call);
 expectDeprecated($.at.name);

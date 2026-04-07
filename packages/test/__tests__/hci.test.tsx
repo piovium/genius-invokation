@@ -24,6 +24,7 @@ import {
   Support,
   Attachment,
   CombatStatus,
+  $,
 } from "#test";
 import { describe, test, expect } from "bun:test";
 import { VeteransVisage } from "@gi-tcg/data/internal/cards/equipment/artifacts";
@@ -76,7 +77,7 @@ describe("HCI stuff", () => {
     await c.me.card(TheNarzissenkreuzAdventure);
     // 事件列表 [HCI, 请求冒险]，重排后 HCI 在请求冒险之后
     await c.me.selectCard(TowerOfIpsissimus);
-    c.expect("my active").toNotExist();
+    c.expect($.my.active).toNotExist();
     // 请求冒险选塔把琴打死，此时 HCI 不会再生效
     await c.me.chooseActive(myNext);
   });
@@ -168,7 +169,7 @@ describe("HCI stuff", () => {
     );
     await c.me.skill(SweepingFervor);
     // E 2 火伤，动力锯+1；洽斯卡弹头 1 风伤扩散消元素
-    c.expect("opp active").toHaveVariable({ health: 6, aura: Aura.None });
+    c.expect($.opp.active).toHaveVariable({ health: 6, aura: Aura.None });
     // 后台 1 扩散火伤
     c.expect(oppStandby).toHaveVariable({ health: 9, aura: Aura.Pyro });
   });
@@ -203,11 +204,11 @@ describe("HCI stuff", () => {
     // --- --- --- 中水泡：对我方出战打1水伤 3->2
     // --- --- --- > 其中内联地舍弃弹头
     // --- 大水泡：治疗我方出战 2->5
-    c.expect(`my equipment with definition id ${PortablePowerSaw}`).toHaveVariable({ stoic: 1 });
+    c.expect($.my.typeEquipment.def(PortablePowerSaw)).toHaveVariable({ stoic: 1 });
     c.expect(oppActive).toHaveVariable({ health: 9 });
     c.expect(myActive).toHaveVariable({ health: 5 });
-    c.expect(`my hands`).toBeCount(0);
-    c.expect(`my pile limit 1`).toBeDefinition(ShadowhuntShell);
+    c.expect($.my.hand).toBeCount(0);
+    c.expect($.my.pile.limit(1)).toBeDefinition(ShadowhuntShell);
     // console.dir(c.game.detailLog, { depth: null });
   });
 
@@ -245,10 +246,10 @@ describe("HCI stuff", () => {
     // --- --- --- 中水泡：对我方出战打1水伤 3->2
     // --- --- --- > 其中内联地舍弃大水泡
     // --- 大水泡：治疗我方出战 2->5
-    c.expect(`my equipment with definition id ${PortablePowerSaw}`).toHaveVariable({ stoic: 1 });
+    c.expect($.my.typeEquipment.def(PortablePowerSaw)).toHaveVariable({ stoic: 1 });
     c.expect(oppActive).toHaveVariable({ health: 10 });
     c.expect(myActive).toHaveVariable({ health: 5 });
-    c.expect(`my hands limit 1`).toBeDefinition(ShadowhuntShell);
+    c.expect($.my.hand.limit(1)).toBeDefinition(ShadowhuntShell);
   });
 
   test("Bubblebalm/PuffPops behavior with discard between HCI events emission and handling", async () => {
@@ -274,9 +275,9 @@ describe("HCI stuff", () => {
     // --- > 舍弃后：
     // > 抓牌后
     // --- 大水泡不触发、ddpp 触发、赤王陵不触发
-    c.expect(`my hands or my pile`).toBeCount(0);
-    c.expect(`my active`).toHaveVariable({ health: 6, aura: Aura.Dendro });
-    c.expect(`my status with definition id ${PuffPopsInEffect}`).toHaveVariable({ usage: 2 });
+    c.expect($.union($.my.hand, $.my.pile)).toBeCount(0);
+    c.expect($.my.active).toHaveVariable({ health: 6, aura: Aura.Dendro });
+    c.expect($.my.typeStatus.def(PuffPopsInEffect)).toHaveVariable({ usage: 2 });
   })
 
 });

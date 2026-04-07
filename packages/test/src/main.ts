@@ -15,4 +15,6 @@
 
 import "@gi-tcg/data";
 import "./matcher";
+
+export { $ } from "@gi-tcg/core";
 export * from "./setup";

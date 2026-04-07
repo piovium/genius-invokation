@@ -72,7 +72,7 @@ class CompositeQueryImpl<Ty extends TypingInfoBase>
       this.type === "at" ||
       this.type === "with" ||
       this.type === "on" ||
-      this.type === "recentFrom"
+      this.type === "recentOppFrom"
     ) {
       if (this.operands.length !== 1) {
         throw new Error(`${this.type} operator requires exactly 1 operands`);

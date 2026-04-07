@@ -20,6 +20,7 @@ import {
   State,
   Equipment,
   Summon,
+  $,
 } from "#test";
 import { test } from "bun:test";
 import { GaleBlade, Jean } from "@gi-tcg/data/internal/characters/anemo/jean";
@@ -39,5 +40,5 @@ test("Effect-caused switchActive should mark canPlunging", async () => {
   await c.opp.skill(GaleBlade);
   await c.me.skill(FavoniusBladeworkWeiss);
   // 阿贝多天赋：下落攻击+1伤
-  c.expect("opp active").toHaveVariable({ health: 7 });
+  c.expect($.opp.active).toHaveVariable({ health: 7 });
 });

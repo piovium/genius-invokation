@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Equipment, Card, Summon, CombatStatus, DeclaredEnd, Support } from "#test";
+import { ref, setup, Character, State, Equipment, Card, Summon, CombatStatus, DeclaredEnd, Support, $ } from "#test";
 import { GamblersEarrings } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { FreshWindOfFreedom, FreshWindOfFreedomInEffect } from "@gi-tcg/data/internal/cards/event/legend";
 import { CountdownToTheShow2, IdRatherLoseMoneyMyself } from "@gi-tcg/data/internal/cards/event/other";
@@ -132,11 +132,11 @@ test("FreshWindOfFreedom: triggered when opp is choosing character at end phase,
   // 节末伤害打到 oppActive，对方选人
   await c.opp.chooseActive(oppNext).manual();
   // 此时“自由的新风（生效中）”还未触发
-  c.expect(`my combat status with definition id ${FreshWindOfFreedomInEffect}`).toBeExist();
+  c.expect($.my.combatStatus.def(FreshWindOfFreedomInEffect)).toBeExist();
   // 选人后二重毁伤弹打到 oppNext，对方再选人
   await c.opp.chooseActive(oppLast);
   // 此时“自由的新风（生效中）”已触发并弃置
-  c.expect(`my combat status with definition id ${FreshWindOfFreedomInEffect}`).toNotExist();
+  c.expect($.my.combatStatus.def(FreshWindOfFreedomInEffect)).toNotExist();
 
   // 下一回合对方轮次跳过，我方可再行动一次
   expect(c.state.players[1].skipNextTurn).toBe(true);
@@ -199,6 +199,6 @@ test("IdRatherLoseMoneyMyself: on endPhase, trigger generateDice", async () => {
   await c.opp.chooseActive(oppNext);
 
   // 对方赚钱没有触发生成护盾
-  c.expect(`opp combat status with definition id ${Shield}`).toNotExist();
+  c.expect($.opp.combatStatus.def(Shield)).toNotExist();
   expect(c.state.players[1].dice).toBeArrayOfSize(10);
 })

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, State, Card, Support, Character, Equipment, Summon, DeclaredEnd, Status } from "#test";
+import { ref, setup, State, Card, Support, Character, Equipment, Summon, DeclaredEnd, Status, $ } from "#test";
 import { SkillHandle } from "@gi-tcg/core/builder";
 import { PlungingStrike } from "@gi-tcg/data/internal/cards/event/other";
 import { WhirlwindThrust, Xiao, YakshasMask } from "@gi-tcg/data/internal/characters/anemo/xiao";
@@ -62,7 +62,7 @@ test("plunging triggered by a in-skill-switch to Albedo", async () => {
     </State>,
   );
   await c.me.skill(1121422 as SkillHandle);
-  c.expect("my active").toBe(albedo);
+  c.expect($.my.active).toBe(albedo);
   await c.me.skill(FavoniusBladeworkWeiss);
   // 阿贝多天赋：阳华在场时下落攻击伤害+1
   c.expect(target).toHaveVariable({ health: 7 });

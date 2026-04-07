@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Equipment } from "#test";
+import { ref, setup, Character, State, Equipment, $ } from "#test";
 import { VeteransVisage } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { Sucrose, WindSpiritCreation } from "@gi-tcg/data/internal/characters/anemo/sucrose";
 import { Aura } from "@gi-tcg/typings";
@@ -39,5 +39,5 @@ test("damage combination", async () => {
   c.expect(target).toHaveVariable({ health: 7 });
   // 伤害合并后，只触发一次老兵，不抽牌
   c.expect(veteran).toHaveVariable({ count: 1 });
-  c.expect("my hands").toBeCount(0);
+  c.expect($.my.hand).toBeCount(0);
 });

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Equipment, Card } from "#test";
+import { ref, setup, Character, State, Equipment, Card, $ } from "#test";
 import { Chevreuse, OverchargedBall, ShortrangeRapidInterdictionFire } from "@gi-tcg/data/internal/characters/pyro/chevreuse";
 
 import { test } from "bun:test";
@@ -32,5 +32,5 @@ test("chevreuse overcharged ball", async () => {
   // e -2, 弹头 -1
   c.expect(target).toHaveVariable({ health: 7 });
   c.expect(chevreuse).toHaveVariable({ health: 9 });
-  c.expect("my hands").toNotExist();
+  c.expect($.my.hand).toNotExist();
 })

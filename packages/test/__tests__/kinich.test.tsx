@@ -21,7 +21,7 @@ import {
   Equipment,
   CombatStatus,
   Card,
-  Status,
+  Status,$
 } from "#test";
 import { SkillHandle } from "@gi-tcg/core/builder";
 import { AbundantPhlogistonInEffect } from "@gi-tcg/data/internal/cards/event/other";
@@ -53,11 +53,11 @@ test("kinich's link handle event earlier then kachina's", async () => {
   // 转转冲击
   await c.me.skill(1161021 as SkillHandle);
   // 燃素充盈消耗
-  c.expect(`combat status with definition id ${AbundantPhlogistonInEffect}`).toNotExist();
+  c.expect($.combatStatus.def(AbundantPhlogistonInEffect)).toNotExist();
   // 钩锁准备
-  c.expect(`status with definition id ${GrapplePrepare}`).toBeExist();
+  c.expect($.typeStatus.def(GrapplePrepare)).toBeExist();
   // 1 -> 2 -> 0 -> 1
-  c.expect(`status with tag (nightsoulsBlessing) at character with id ${kinich.id}`).toHaveVariable({ nightsoul: 1 });
+  c.expect($.typeStatus.tag("nightsoulsBlessing").at($.id(kinich.id))).toHaveVariable({ nightsoul: 1 });
   // 2 -> 1
-  c.expect(`status with tag (nightsoulsBlessing) at character with id ${kachina.id}`).toHaveVariable({ nightsoul: 1 });
+  c.expect($.typeStatus.tag("nightsoulsBlessing").at($.id(kachina.id))).toHaveVariable({ nightsoul: 1 });
 });

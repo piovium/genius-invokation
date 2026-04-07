@@ -23,11 +23,20 @@ import {
   DeclaredEnd,
   Card,
   Status,
+  $,
 } from "#test";
 import { Aura, SkillHandle } from "@gi-tcg/core/builder";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
-import { Chasca, NightsoulsBlessing, ShiningShadowhuntShellPyro, SoulsniperRitualStaff } from "@gi-tcg/data/internal/characters/anemo/chasca";
-import { AlldevouringNarwhal, DarkShadow } from "@gi-tcg/data/internal/characters/hydro/alldevouring_narwhal";
+import {
+  Chasca,
+  NightsoulsBlessing,
+  ShiningShadowhuntShellPyro,
+  SoulsniperRitualStaff,
+} from "@gi-tcg/data/internal/characters/anemo/chasca";
+import {
+  AlldevouringNarwhal,
+  DarkShadow,
+} from "@gi-tcg/data/internal/characters/hydro/alldevouring_narwhal";
 import { test } from "bun:test";
 
 test("dark shadow: do not barrier on nested damage", async () => {
@@ -37,16 +46,16 @@ test("dark shadow: do not barrier on nested damage", async () => {
       <Card opp def={ShiningShadowhuntShellPyro} />
       <Card opp def={Paimon} />
       <Card opp def={Paimon} />
-      <Character opp active def={Chasca} >
+      <Character opp active def={Chasca}>
         <Equipment def={SoulsniperRitualStaff} usage={2} />
         <Status def={NightsoulsBlessing} v={{ nightsoul: 2 }} />
       </Character>
       <Character my active health={10} />
       <Character my def={AlldevouringNarwhal} />
-      <Summon my def={DarkShadow} ref={darkShadow} v={{ atk: 3, usage: 12 }}  />
+      <Summon my def={DarkShadow} ref={darkShadow} v={{ atk: 3, usage: 12 }} />
     </State>,
   );
   await c.opp.skill(1151121 as SkillHandle);
-  c.expect("my active").toHaveVariable({ aura: Aura.Pyro, health: 9 });
+  c.expect($.my.active).toHaveVariable({ aura: Aura.Pyro, health: 9 });
   c.expect(darkShadow).toHaveVariable({ usage: 10 });
 });

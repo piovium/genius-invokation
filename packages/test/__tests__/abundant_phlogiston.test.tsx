@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Card } from "#test";
+import { ref, setup, Character, State, Card, $ } from "#test";
 import { test } from "bun:test";
 import {
   CoolingTreatment,
@@ -36,16 +36,16 @@ test("abundant phlogiston: mualani", async () => {
   );
   await c.me.skill(SurfsharkWavebreaker);
   await c.opp.switch(secondOpp);
-  c.expect(`my status with tag (nightsoulsBlessing)`).toHaveVariable({
+  c.expect($.my.typeStatus.tag("nightsoulsBlessing")).toHaveVariable({
     nightsoul: 1,
   });
   await c.me.card(AbundantPhlogiston);
   await c.me.skill(CoolingTreatment);
   await c.opp.switch(firstOpp);
-  c.expect(`my status with tag (nightsoulsBlessing)`).toHaveVariable({
+  c.expect($.my.typeStatus.tag("nightsoulsBlessing")).toHaveVariable({
     nightsoul: 1,
   });
   await c.me.end();
   await c.opp.switch(secondOpp);
-  c.expect(`my status with tag (nightsoulsBlessing)`).toNotExist();
+  c.expect($.my.typeStatus.tag("nightsoulsBlessing")).toNotExist();
 });

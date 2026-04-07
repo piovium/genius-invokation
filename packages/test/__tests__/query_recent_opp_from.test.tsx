@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, State, Character } from "#test";
+import { ref, setup, State, Character, $ } from "#test";
 import { test } from "bun:test";
 
 test("query: recent opp from", async () => {
@@ -28,5 +28,5 @@ test("query: recent opp from", async () => {
       <Character my active />
     </State>,
   );
-  c.expect("recent opp from my active").toHaveVariable({ expected: 1 });
+  c.expect($.recentOppFrom($.my.active)).toHaveVariable({ expected: 1 });
 });

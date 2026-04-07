@@ -200,7 +200,7 @@ class NonTerminalsConfig {
         args: [{ name: "operand", use: "UnorderedQuery" }],
       },
       {
-        leading: "recentFrom",
+        leading: "recentOppFrom",
         args: [{ name: "operand", use: "UnorderedQuery" }],
       },
     ],

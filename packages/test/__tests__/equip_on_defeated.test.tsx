@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Equipment, Card } from "#test";
+import { ref, setup, Character, State, Equipment, Card, $ } from "#test";
 import { HeartOfKhvarenasBrilliance } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
 import { Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";
@@ -32,8 +32,8 @@ test("HeartOfKhvarenasBrilliance should not trigger on defeated damage", async (
       <Card my pile def={Paimon} />
     </State>,
   );
-  await c.expect("my hand cards").toBeCount(0);
+  await c.expect($.my.hand).toBeCount(0);
   await c.opp.skill(YunlaiSwordsmanship);
   await c.me.chooseActive(myNext);
-  await c.expect("my hand cards").toBeCount(0);
+  await c.expect($.my.hand).toBeCount(0);
 });
