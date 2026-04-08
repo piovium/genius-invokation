@@ -39,4 +39,4 @@ test("cost decrease applied on increase will neutralize each other", async () =>
   c.expect($.my.attachment.def(CostIncrease)).toNotExist();
   // 但不可调和还在
   c.expect($.my.attachment.on($.id(theHandCard.id))).toBeDefinition(NoTuningAllowed);
-})
+});
