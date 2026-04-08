@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DamageType, DiceType, Reaction } from "@gi-tcg/typings";
+import { Aura, DamageType, DiceType, Reaction } from "@gi-tcg/typings";
 
 import {
   type EntityArea,
@@ -865,6 +865,25 @@ export class SkillContext<Meta extends ContextMetaBase> {
         targetWho: ch.who,
         targetIsActive: ch.isActive(),
         enabledLunarReactions: this.getEnabledLunarReactions(ch.who),
+      });
+    }
+    return this.enableShortcut();
+  }
+
+  /** 清除角色身上的元素附着 */
+  cleanAura(target: CharacterTargetArg) {
+    const characters = this.queryCoerceToCharacters(target);
+    for (const ch of characters) {
+      using l = this.mutator.subLog(
+        DetailLogType.Primitive,
+        `Clean aura of ${stringifyState(ch)}`,
+      );
+      this.mutate({
+        type: "modifyEntityVar",
+        direction: "decrease",
+        state: ch.latest(),
+        varName: "aura",
+        value: Aura.None,
       });
     }
     return this.enableShortcut();
@@ -2099,6 +2118,7 @@ type SkillContextMutativeProps =
   | "increaseMaxHealth"
   | "damage"
   | "apply"
+  | "cleanAura"
   | "createEntity"
   | "moveEntity"
   | "summon"
@@ -2106,6 +2126,8 @@ type SkillContextMutativeProps =
   | "characterStatus"
   | "equip"
   | "attach"
+  | "attachCostIncrease"
+  | "attachCostReduction"
   | "dispose"
   | "transferEntity"
   | "setVariable"
