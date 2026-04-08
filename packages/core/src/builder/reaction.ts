@@ -165,8 +165,7 @@ function initialize() {
       const myHands = c.player.hands;
       if (myHands.length > 0) {
         const target = c.random(myHands);
-        // TODO: use c.attachCostReduction
-        c.attach(CostReduction, target);
+        c.attachCostReduction(target);
       }
     })
 }
