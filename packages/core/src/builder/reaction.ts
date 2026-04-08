@@ -17,7 +17,7 @@ import { Reaction, DamageType } from "@gi-tcg/typings";
 import type { SkillDescription } from "../base/skill";
 import { SkillBuilder, withShortcut } from "./skill";
 import type { TypedSkillContext } from "./context/skill";
-import type { CombatStatusHandle, StatusHandle, SummonHandle } from "./type";
+import type { AttachmentHandle, CombatStatusHandle, StatusHandle, SummonHandle } from "./type";
 import type { SwirlableElement } from "../base/reaction";
 import { builderWeakRefs } from "./registry";
 
@@ -28,6 +28,7 @@ const Crystallize = 111 as CombatStatusHandle;
 const BurningFlame = 115 as SummonHandle;
 const DendroCore = 116 as CombatStatusHandle;
 const CatalyzingField = 117 as CombatStatusHandle;
+const CostReduction = 202 as AttachmentHandle;
 const Thundercloud = 205 as SummonHandle;
 
 export interface ReactionDescriptionEventArg {
@@ -158,6 +159,16 @@ function initialize() {
       c.summon(Thundercloud, e.here);
     })
     .done();
+
+  reaction(Reaction.LunarBloom)
+    .do((c, e) => {
+      const myHands = c.player.hands;
+      if (myHands.length > 0) {
+        const target = c.random(myHands);
+        // TODO: use c.attachCostReduction
+        c.attach(CostReduction, target);
+      }
+    })
 }
 
 let initialized = false;
