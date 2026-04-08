@@ -172,7 +172,7 @@ export interface SkillInfo {
   /**
    * 结算环境：可能为
    * - `normal`：常规结算
-   * - `precalculation`：预计算（骰子消耗和快速行动与否）
+   * - `precalculate`：预计算（骰子消耗和快速行动与否）
    * - `preview`：渲染预览数据
    */
   readonly environment: SkillEnvironment;

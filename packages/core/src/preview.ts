@@ -30,7 +30,6 @@ import {
   type EventAndRequest,
   type InitiativeSkillEventArg,
   type InitiativeSkillInfo,
-  type SkillEnvironment,
   type SwitchActiveInfo,
   type WithActionDetail,
 } from "./base/skill";
