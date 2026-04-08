@@ -19,6 +19,11 @@
       "development": ["./src/builder/index.ts", "./dist/builder.js"],
       "import": "./dist/builder.js"
     },
+    "./gts/*": {
+      "types": "./dist/gts/*.d.ts",
+      "development": "./src/gts/*.ts",
+      "import": "./dist/gts/*.js"
+    },
     "./builder/internal": "./src/builder/internal_exports.ts"
   },
   "files": [
@@ -32,6 +37,7 @@
     "gen:s_expr_schema": "gnx scripts/gen_s_expr_schema.ts"
   },
   "dependencies": {
+    "@gi-tcg/gts-runtime": "^0.3.1",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
     "immer": "^11.1.4",

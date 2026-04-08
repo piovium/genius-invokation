@@ -24,6 +24,10 @@
     "check": "tsc --noEmit",
     "build": "tsdown"
   },
+  "gamingTs": {
+    "runtimeImportSource": "@gi-tcg/core/gts/runtime",
+    "providerImportSource": "@gi-tcg/core/gts"
+  },
   "peerDependencies": {
     "@gi-tcg/core": "workspace:*"
   },
