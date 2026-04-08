@@ -25,6 +25,7 @@ import {
   RequestArg,
   SelectCardEventArg,
   type SelectCardInfo,
+  type SkillEnvironment,
   type SkillInfo,
   type SwitchActiveInfo,
   type TriggeredSkillDefinition,
@@ -60,7 +61,7 @@ import type { Mutation } from "./base/mutation";
 export type GeneralSkillArg = EventArg | InitiativeSkillEventArg;
 
 interface SkillExecutorConfig {
-  readonly preview: boolean;
+  readonly environment: SkillEnvironment;
 }
 
 export class SkillExecutor {
@@ -121,7 +122,7 @@ export class SkillExecutor {
       this.state,
       {
         ...skillInfo,
-        isPreview: this.config.preview,
+        environment: this.config.environment,
         logger: this.mutator.logger,
       },
       arg as any,
@@ -737,7 +738,7 @@ export class SkillExecutor {
     skill: SkillInfo,
     arg: GeneralSkillArg,
   ) {
-    const executor = new SkillExecutor(mutator, { preview: false });
+    const executor = new SkillExecutor(mutator, { environment: "normal" });
     await executor.finalizeSkill(skill, arg);
     return executor.state;
   }
@@ -745,7 +746,7 @@ export class SkillExecutor {
     return SkillExecutor.handleEvents(mutator, [event]);
   }
   static async handleEvents(mutator: StateMutator, events: EventAndRequest[]) {
-    const executor = new SkillExecutor(mutator, { preview: false });
+    const executor = new SkillExecutor(mutator, { environment: "normal" });
     await executor.handleEvent(...events);
     return executor.state;
   }

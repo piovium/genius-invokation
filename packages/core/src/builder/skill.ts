@@ -42,6 +42,7 @@ import {
   EMPTY_SKILL_RESULT,
   UseSkillEventArg,
   DamageOrHealEventArg,
+  ModifyAction4EventArg,
 } from "../base/skill";
 import type {
   AnyState,
@@ -335,10 +336,7 @@ export const detailedEventDictionary = {
       e.canDeductCost()
     );
   }),
-  modifyAction: defineDescriptor("modifyAction2", (e, r) => {
-    return checkRelative(e.onTimeState, { who: e.who }, r);
-  }),
-  beforeFastSwitch: defineDescriptor("modifyAction2", (e, r) => {
+  beforeFastSwitch: defineDescriptor("modifyAction4", (e, r) => {
     return (
       checkRelative(e.onTimeState, { who: e.who }, r) &&
       e.isSwitchActive() &&
@@ -630,12 +628,12 @@ type OverrideEventArgType = {
   dealDamage: DamageOrHealEventArg<DamageInfo>;
   deductOmniDiceSwitch: ModifyAction2EventArg<SwitchActiveInfo>;
   deductOmniDiceCard: ModifyAction2EventArg<PlayCardInfo>;
-  beforeFastSwitch: ModifyAction2EventArg<SwitchActiveInfo>;
   deductAllDiceCard: ModifyAction3EventArg<PlayCardInfo>;
   deductVoidDiceSkill: ModifyAction0EventArg<UseSkillInfo>;
   deductElementDiceSkill: ModifyAction1EventArg<UseSkillInfo>;
   deductOmniDiceSkill: ModifyAction2EventArg<UseSkillInfo>;
   deductOmniDiceTechnique: ModifyAction2EventArg<UseSkillInfo>;
+  beforeFastSwitch: ModifyAction4EventArg<SwitchActiveInfo>;
   cancelHealed: Omit<ModifyHeal0EventArg, "damageInfo" | "value">;
   decreaseHealed: Omit<ModifyHeal1EventArg, "damageInfo" | "value">;
 };

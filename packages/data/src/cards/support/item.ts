@@ -65,10 +65,14 @@ export const Nre = card(323002)
  */
 export const RedFeatherFanStatus = combatStatus(302303)
   .oneDuration()
-  .usage(1, { visible: false })
-  .on("modifyAction", (c, e) => e.action.type === "switchActive" && (!e.isFast() || e.canDeductCost()))
-  .setFastAction()
+  .variable("deductDiceTriggered", 0, { visible: false })
+  .on("deductOmniDiceSwitch")
+  .setVariable("deductDiceTriggered", 1)
   .deductOmniCost(1)
+  .on("beforeFastSwitch", (c) => c.getVariable("deductDiceTriggered"))
+  .setFastAction()
+  .on("switchActive")
+  .dispose()
   .done();
 
 /**

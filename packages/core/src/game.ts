@@ -714,6 +714,7 @@ export class Game {
         await this.handleEvent("modifyAction1", actionInfo.eventArg);
         await this.handleEvent("modifyAction2", actionInfo.eventArg);
         await this.handleEvent("modifyAction3", actionInfo.eventArg);
+        await this.handleEvent("modifyAction4", actionInfo.eventArg);
 
         // 检查骰子
         if (!checkDice(actionInfo.cost, usedDice as DiceType[])) {

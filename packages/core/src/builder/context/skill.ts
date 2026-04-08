@@ -361,7 +361,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   get isPreview(): boolean {
-    return !!this.skillInfo.isPreview;
+    return this.skillInfo.environment === "preview";
   }
 
   get state(): ApplyReactive<Meta, GameState> {
