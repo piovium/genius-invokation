@@ -1039,12 +1039,77 @@ export class SkillContext<Meta extends ContextMetaBase> {
     }
     return this.enableShortcut();
   }
-  attach(def: AttachmentHandle, target: PlainEntityState) {
+  attach(
+    def: AttachmentHandle,
+    target: PlainEntityState,
+    opt: CreateEntityOptions = {},
+  ) {
     const definition = this.state.data.attachments.get(def);
     if (typeof definition === "undefined") {
       throw new GiTcgDataError(`Unknown attachment definition id ${def}`);
     }
-    this.callAndEmit("createAttachment", this.get(target).latest(), definition);
+    this.callAndEmit(
+      "createAttachment",
+      this.get(target).latest(),
+      definition,
+      opt,
+    );
+    return this.enableShortcut();
+  }
+
+  private attachCostChange(
+    target: EntityStateO,
+    value: number,
+    isIncrease: boolean,
+  ) {
+    const CostIncrease = 201 as AttachmentHandle;
+    const CostReduction = 202 as AttachmentHandle;
+    const [consumeDef, incomingDef] = isIncrease
+      ? [CostReduction, CostIncrease]
+      : [CostIncrease, CostReduction];
+    const existed = this.query($.def(consumeDef).on($.id(target.id)));
+    if (existed) {
+      const existedLayer = existed.variables.layer;
+      if (existedLayer > value) {
+        this.setVariable("layer", existedLayer - value, existed);
+      } else {
+        this.mutate({
+          type: "removeEntity",
+          from: existed.area,
+          oldState: existed.latest(),
+          reason: "other",
+        });
+        value -= existedLayer;
+      }
+    }
+    if (value > 0) {
+      this.attach(incomingDef, target, {
+        overrideVariables: { layer: value },
+      });
+    }
+  }
+
+  /**
+   * 给 `target` 附着费用增加。
+   * 若 `target` 上附着有费用减少，会选择去除其层数而非新附着。
+   */
+  attachCostIncrease(target: EntityTargetArg, value = 1) {
+    const targets = this.queryOrGet<EntityType>(target);
+    for (const target of targets) {
+      this.attachCostChange(target.latest(), value, true);
+    }
+    return this.enableShortcut();
+  }
+
+  /**
+   * 给 `target` 附着费用减少。
+   * 若 `target` 上附着有费用增加，会选择去除其层数而非新附着。
+   */
+  attachCostReduction(target: EntityTargetArg, value = 1) {
+    const targets = this.queryOrGet<EntityType>(target);
+    for (const target of targets) {
+      this.attachCostChange(target.latest(), value, false);
+    }
     return this.enableShortcut();
   }
 

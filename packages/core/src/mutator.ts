@@ -40,6 +40,7 @@ import {
   getInsertedStateVariables,
   shouldEnterOverride,
   sortDice,
+  type CreateEntityOptions,
   type InsertEntityOptions,
 } from "./utils";
 import { GiTcgCoreInternalError, GiTcgDataError, GiTcgIoError } from "./error";
@@ -81,7 +82,6 @@ import {
 import { exposeHealKind } from "./io";
 import type { AttachmentDefinition } from "./base/attachment";
 import type { LunarReaction } from "@gi-tcg/typings";
-import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "./builder/skill";
 
 export class GiTcgPreviewAbortedError extends GiTcgCoreInternalError {
   constructor(message?: string) {
@@ -995,6 +995,14 @@ export class StateMutator {
 
       if (moveFrom) {
         const state = stateOrDef as EntityState;
+        for (const attachment of state.attachments) {
+          this.mutate({
+            type: "removeEntity",
+            from: moveFrom,
+            oldState: attachment,
+            reason: "other", // TODO maybe better reason?
+          })
+        }
         this.mutate({
           type: "moveEntity",
           from: moveFrom,
@@ -1031,7 +1039,7 @@ export class StateMutator {
     }
     return { oldState, newState, events };
   }
-  createAttachment(host: EntityState, definition: AttachmentDefinition) {
+  createAttachment(host: EntityState, definition: AttachmentDefinition, opt: CreateEntityOptions) {
     using l = this.subLog(
       DetailLogType.Primitive,
       `Create attachment [attachment:${definition.id}] on ${stringifyState(
@@ -1049,7 +1057,7 @@ export class StateMutator {
       state: this.state,
       oldState,
       newStateTemplate: { definition },
-      opt: {},
+      opt,
     });
     let newStateId: number;
     const events: EventAndRequest[] = [];

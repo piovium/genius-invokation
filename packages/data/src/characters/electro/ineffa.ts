@@ -142,7 +142,7 @@ export const RectifyingProcessor = card(214171)
   .do((c) => {
     const target = c.random(c.oppPlayer.hands);
     if (target) {
-      c.attach(CostIncrease, target);
+      c.attachCostIncrease(target);
     }
   })
   .done();

@@ -318,11 +318,11 @@ export const MoonsignAscendantGleam = card(331721)
     const handCandidates = c.queryAll($.my.hand.cost(">", 0));
     if (handCandidates.length > 0) {
       const handCard = c.random(handCandidates);
-      c.attach(CostReduction, handCard);
+      c.attachCostReduction(handCard);
     }
     const pileCard = c.query($.my.pile.cost(">", 0));
     if (pileCard) {
-      c.attach(CostReduction, pileCard);
+      c.attachCostReduction(pileCard);
     }
   })
   .done();

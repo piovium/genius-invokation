@@ -838,7 +838,7 @@ export const TidesealStone = card(321036)
   .usage(2)
   .do((c) => {
     const target = c.random(c.oppPlayer.hands);
-    c.attach(CostIncrease, target);
+    c.attachCostIncrease(target);
     c.attach(NoTuningAllowed, target);
   })
   .done();
@@ -863,7 +863,7 @@ export const FrostmoonEnclave = card(321037)
   .do((c) => {
     const chosen = c.randomSubset(c.player.hands, 2);
     for (const card of chosen) {
-      c.attach(CostReduction, card);
+      c.attachCostReduction(card);
     }
   })
   .done();

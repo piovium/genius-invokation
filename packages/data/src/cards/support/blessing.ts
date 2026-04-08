@@ -38,7 +38,7 @@ export const SuperconductBlessingDeepFreeze = card(303041)
     const target = c.random(c.oppPlayer.hands);
     if (target) {
       c.attach(NoTuningAllowed, target);
-      c.attach(CostIncrease, target);
+      c.attachCostIncrease(target);
     }
   })
   .done();
