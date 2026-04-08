@@ -117,7 +117,15 @@ class PreviewContext {
   }
   async precalculateEvent(...event: EventAndRequest) {
     const executor = new SkillExecutor(this.mutator, { environment: "precalculate" });
-    await executor.handleEvent(event);
+    try {
+      await executor.handleEvent(event);
+    } catch (e) {
+      if (e instanceof GiTcgError && this.skipError) {
+        // skip.
+      } else {
+        throw e;
+      }
+    }
   }
 
   getMainDamageTargetId(): number | undefined {
