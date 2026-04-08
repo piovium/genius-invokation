@@ -1079,8 +1079,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
           oldState: existed.latest(),
           reason: "other",
         });
-        value -= existedLayer;
       }
+      value -= existedLayer;
     }
     if (value > 0) {
       this.attach(incomingDef, target, {
