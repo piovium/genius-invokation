@@ -118,7 +118,7 @@
     },
     "packages/data": {
       "name": "@gi-tcg/data",
-      "version": "0.19.1-6-4-0",
+      "version": "0.19.1-6-5-0",
       "devDependencies": {
         "@gi-tcg/assets-manager": "workspace:*",
         "@gi-tcg/config": "workspace:*",

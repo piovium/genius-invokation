@@ -85,7 +85,7 @@ class PreviewContext {
     if (this.stopped) {
       return;
     }
-    const executor = new SkillExecutor(this.mutator, { preview: true });
+    const executor = new SkillExecutor(this.mutator, { environment: "preview" });
     try {
       await executor.finalizeSkill(skillInfo, arg);
     } catch (e) {
@@ -98,17 +98,29 @@ class PreviewContext {
       }
     }
   }
-  async previewEvent(...event: EventAndRequest) {
+  async previewEvent( ...event: EventAndRequest) {
     if (this.stopped) {
       return;
     }
-    const executor = new SkillExecutor(this.mutator, { preview: true });
+    const executor = new SkillExecutor(this.mutator, { environment: "preview" });
     try {
       await executor.handleEvent(event);
     } catch (e) {
       if (e instanceof GiTcgPreviewAbortedError) {
         this.stopped = true;
       } else if (e instanceof GiTcgError && this.skipError) {
+        // skip.
+      } else {
+        throw e;
+      }
+    }
+  }
+  async precalculateEvent(...event: EventAndRequest) {
+    const executor = new SkillExecutor(this.mutator, { environment: "precalculate" });
+    try {
+      await executor.handleEvent(event);
+    } catch (e) {
+      if (e instanceof GiTcgError && this.skipError) {
         // skip.
       } else {
         throw e;
@@ -238,10 +250,11 @@ export class ActionPreviewer {
       };
     }
     const ctx = new PreviewContext(this.originalState, this.skipError);
-    await ctx.previewEvent("modifyAction0", eventArgPreCalc);
-    await ctx.previewEvent("modifyAction1", eventArgPreCalc);
-    await ctx.previewEvent("modifyAction2", eventArgPreCalc);
-    await ctx.previewEvent("modifyAction3", eventArgPreCalc);
+    await ctx.precalculateEvent("modifyAction0", eventArgPreCalc);
+    await ctx.precalculateEvent("modifyAction1", eventArgPreCalc);
+    await ctx.precalculateEvent("modifyAction2", eventArgPreCalc);
+    await ctx.precalculateEvent("modifyAction3", eventArgPreCalc);
+    await ctx.precalculateEvent("modifyAction4", eventArgPreCalc);
     const newActionInfo: Writable<WithActionDetail<ActionInfoBase>> =
       eventArgPreCalc.action;
 

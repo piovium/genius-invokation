@@ -180,7 +180,7 @@ const FrostmoonEnclave = card(321037)
     const candidates = c.player.hands.filter((card) => card.diceCost() > 0);
     const chosen = c.randomSubset(candidates, 2);
     for (const card of chosen) {
-      c.attach(CostReduction, card);
+      c.attachCostReduction(card);
     }
   })
   .done();

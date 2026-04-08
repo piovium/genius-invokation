@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { $, card, DamageType, DiceType, Reaction, status } from "@gi-tcg/core/builder";
-import { CostIncrease, NoTuningAllowed, Shield } from "../../commons";
+import { NoTuningAllowed, Shield } from "../../commons";
 
 /**
  * @id 303041
@@ -38,7 +38,7 @@ export const SuperconductBlessingDeepFreeze = card(303041)
     const target = c.random(c.oppPlayer.hands);
     if (target) {
       c.attach(NoTuningAllowed, target);
-      c.attach(CostIncrease, target);
+      c.attachCostIncrease(target);
     }
   })
   .done();

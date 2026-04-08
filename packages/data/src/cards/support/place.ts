@@ -14,8 +14,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DamageType, DiceType, EntityState, card, combatStatus, originalDiceCostOfCard, status } from "@gi-tcg/core/builder";
-import { ForbiddenKnowledge, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SIMULANKA_QUERY, SIMULANKA_SUMMONS, ToyGuard, ToyGuardSummon } from "../event/other";
-import { BattlePlan, CostIncrease, CostReduction, Empowerment, IneffectiveWhenPlayed, NoTuningAllowed } from "../../commons";
+import { ForbiddenKnowledge, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SIMULANKA_QUERY, ToyGuard, ToyGuardSummon } from "../event/other";
+import { BattlePlan, CostReduction, Empowerment, IneffectiveWhenPlayed, NoTuningAllowed } from "../../commons";
 
 /**
  * @id 321001
@@ -838,7 +838,7 @@ export const TidesealStone = card(321036)
   .usage(2)
   .do((c) => {
     const target = c.random(c.oppPlayer.hands);
-    c.attach(CostIncrease, target);
+    c.attachCostIncrease(target);
     c.attach(NoTuningAllowed, target);
   })
   .done();
@@ -863,7 +863,7 @@ export const FrostmoonEnclave = card(321037)
   .do((c) => {
     const chosen = c.randomSubset(c.player.hands, 2);
     for (const card of chosen) {
-      c.attach(CostReduction, card);
+      c.attachCostReduction(card);
     }
   })
   .done();
