@@ -152,6 +152,8 @@ export interface InitiativeSkillDefinition
   readonly initiativeSkillConfig: InitiativeSkillConfig;
 }
 
+export type SkillEnvironment = "normal" | "precalculate" | "preview";
+
 /** 使用 `defineSkillInfo` 创建 */
 export interface SkillInfo {
   readonly caller: AnyState;
@@ -168,9 +170,12 @@ export interface SkillInfo {
   /** 准备技能 */
   readonly prepared: boolean;
   /**
-   * 是否是预览中。部分技能会因是否为预览而采取不同的效果。
+   * 结算环境：可能为
+   * - `normal`：常规结算
+   * - `precalculate`：预计算（骰子消耗和快速行动与否）
+   * - `preview`：渲染预览数据
    */
-  readonly isPreview: boolean;
+  readonly environment: SkillEnvironment;
   /** @internal */
   readonly logger?: IDetailLogger;
 }
@@ -184,7 +189,7 @@ export interface PlayCardSkillInfo extends InitiativeSkillInfo {
 type RequiredWith<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
 type InitSkillInfo = RequiredWith<
-  Partial<Omit<SkillInfo, "isPreview" | "mutatorConfig">>, // these properties will be added by SkillExecutor
+  Partial<Omit<SkillInfo, "environment" | "mutatorConfig">>, // these properties will be added by SkillExecutor
   "caller" | "definition" // This is required for every skill info
 >;
 
@@ -201,7 +206,7 @@ export function defineSkillInfo(init: InitSkillInfo): SkillInfo {
     charged: false,
     plunging: false,
     prepared: false,
-    isPreview: false,
+    environment: "normal",
     ...init,
   };
 }
@@ -619,14 +624,6 @@ export class ModifyAction2EventArg<
       count,
     );
   }
-  setFastAction(): void {
-    if (this._fast) {
-      console?.warn("Potential error: fast action already set");
-      console?.trace();
-    }
-    this._log += `${stringifyState(this.caller)} set fast action.\n`;
-    this._fast = true;
-  }
 }
 
 export class ModifyAction3EventArg<
@@ -638,11 +635,25 @@ export class ModifyAction3EventArg<
   }
 }
 
+export class ModifyAction4EventArg<
+  InfoT extends ActionInfoBase,
+> extends ModifyActionEventArgBase<InfoT> {
+  setFastAction(): void {
+    if (this._fast) {
+      console?.warn("Potential error: fast action already set");
+      console?.trace();
+    }
+    this._log += `${stringifyState(this.caller)} set fast action.\n`;
+    this._fast = true;
+  }
+}
+
 export const GenericModifyActionEventArg = mixins(ModifyActionEventArgBase, [
   ModifyAction0EventArg,
   ModifyAction1EventArg,
   ModifyAction2EventArg,
   ModifyAction3EventArg,
+  ModifyAction4EventArg,
 ]);
 
 export class SwitchActiveEventArg extends EventArg {
@@ -1331,8 +1342,9 @@ export const EVENT_MAP = {
   onBeforeAction: PlayerEventArg,
   modifyAction0: ModifyAction0EventArg, // 增骰、减无色
   modifyAction1: ModifyAction1EventArg, // 减有色
-  modifyAction2: ModifyAction2EventArg, // 减任意、快速行动
+  modifyAction2: ModifyAction2EventArg, // 减任意
   modifyAction3: ModifyAction3EventArg, // 蒂玛乌斯 & 瓦格纳
+  modifyAction4: ModifyAction4EventArg, // 快速行动
   onAction: ActionEventArg,
 
   onBeforeUseSkill: UseSkillEventArg,

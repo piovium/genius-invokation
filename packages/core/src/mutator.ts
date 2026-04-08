@@ -372,7 +372,7 @@ export class StateMutator {
         charged: false,
         plunging: false,
         prepared: false,
-        isPreview: parentSkill.isPreview,
+        environment: parentSkill.environment,
       }),
     );
     for (const info of infos) {

@@ -189,20 +189,27 @@ export const Qucusaurus = card(313006)
   .since("v5.3.0")
   .costSame(1)
   .technique()
+  .variable("deductDiceTriggered", 0, { visible: false })
   .on("enter")
-  .characterStatus(Target, "opp active")
-  .on("deductOmniDiceSwitch", (c, e) =>                           // 绒翼龙只在可以减费时生效
-    c.$(`opp active has status with definition id ${Target}`) &&  // 敌方出战角色附属目标
-    e.action.to.id === c.self.master.id &&                      // 附属角色切换为出战角色
-    c.player.hands.length > 0)                                    // 有手牌（“如可能，舍弃”）
-  .deductOmniCost(1)
-  .setFastAction()
-  .do((c) => {
-    c.disposeMaxCostHands(1);
-    for (const st of c.$$(`opp status with definition id ${Target}`)) {
+  .characterStatus(Target, $.opp.active)
+  .on("deductOmniDiceSwitch", (c, e) =>          // 绒翼龙只在可以减费时生效
+    c.query($.opp.active.has($.def(Target))) &&  // 敌方出战角色附属目标
+    e.action.to.id === c.self.master.id &&       // 附属角色切换为出战角色
+    c.player.hands.length > 0)                   // 有手牌（“如可能，舍弃”）
+  .do((c, e) => {
+    c.setVariable("deductDiceTriggered", 1);
+    // 预计算时不触发弃牌
+    if (c.skillInfo.environment !== "precalculate") {
+      c.disposeMaxCostHands(1);
+    }
+    for (const st of c.queryAll($.opp.typeStatus.def(Target))) {
       st.dispose();
     }
+    e.deductOmniCost(1);
   })
+  .on("beforeFastSwitch", (c) => c.getVariable("deductDiceTriggered"))  // 将此次切换视为「快速行动」
+  .setVariable("deductDiceTriggered", 0)
+  .setFastAction()
   .endOn()
   .provideSkill(3130063)
   .usage(2)
