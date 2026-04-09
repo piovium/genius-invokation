@@ -159,28 +159,3 @@ const Tonatiuh = card(321034)
   })
   .done();
 
-/**
- * @id 321037
- * @name 霜月之坊
- * @description
- * 入场时：抓2张牌，治疗我方受伤最多的角色2点。
- * 结束阶段：赋予我方随机2张当前元素骰费用不为0的手牌费用降低。
- * 可用次数：2
- */
-const FrostmoonEnclave = card(321037)
-  .until("v6.4.0")
-  .costSame(4)
-  .support("place")
-  .on("enter")
-  .drawCards(2)
-  .heal(2, "my characters order by health - maxHealth limit 1")
-  .on("endPhase")
-  .usage(2)
-  .do((c) => {
-    const candidates = c.player.hands.filter((card) => card.diceCost() > 0);
-    const chosen = c.randomSubset(candidates, 2);
-    for (const card of chosen) {
-      c.attachCostReduction(card);
-    }
-  })
-  .done();

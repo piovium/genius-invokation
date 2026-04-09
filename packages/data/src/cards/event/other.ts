@@ -315,12 +315,13 @@ export const MoonsignAscendantGleam = card(331721)
   .since("v6.5.0")
   .tags("resonance")
   .do((c) => {
-    const handCandidates = c.queryAll($.my.hand.cost(">", 0));
+    const handCandidates = c.queryAll($.macros.myHandsNotFree);
     if (handCandidates.length > 0) {
       const handCard = c.random(handCandidates);
       c.attachCostReduction(handCard);
     }
-    const pileCard = c.query($.my.pile.cost(">", 0));
+    // queryAll 返回顺序是底到顶，牌顶是最后一张
+    const pileCard = c.queryAll($.macros.myPileNotFree).at(-1);
     if (pileCard) {
       c.attachCostReduction(pileCard);
     }

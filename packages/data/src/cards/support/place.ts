@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DamageType, DiceType, EntityState, card, combatStatus, originalDiceCostOfCard, status } from "@gi-tcg/core/builder";
+import { $, DamageType, DiceType, EntityState, card, combatStatus, originalDiceCostOfCard, status } from "@gi-tcg/core/builder";
 import { ForbiddenKnowledge, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SIMULANKA_QUERY, ToyGuard, ToyGuardSummon } from "../event/other";
 import { BattlePlan, CostReduction, Empowerment, IneffectiveWhenPlayed, NoTuningAllowed } from "../../commons";
 
@@ -861,7 +861,7 @@ export const FrostmoonEnclave = card(321037)
   .on("endPhase")
   .usage(2)
   .do((c) => {
-    const chosen = c.randomSubset(c.player.hands, 2);
+    const chosen = c.randomSubset(c.queryAll($.macros.myHandsNotFree), 2);
     for (const card of chosen) {
       c.attachCostReduction(card);
     }

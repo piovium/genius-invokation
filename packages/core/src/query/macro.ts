@@ -3,7 +3,7 @@ import type { InferResult, IQuery } from "./utils";
 
 export function createMacros($: IDollar) {
   type CharacterQuery = IQuery<InferResult<typeof $.character>>;
-  type ActionCardQuery = IQuery<InferResult<typeof $.hand>>;
+  type ActionCardQuery = IQuery<InferResult<typeof $.hand | typeof $.pile>>;
   // Helper for TypeScript bundling
   const ch = (query: CharacterQuery) => query;
   const ac = (query: ActionCardQuery) => query;
@@ -35,6 +35,11 @@ export function createMacros($: IDollar) {
 
     myHandsOrderByCost: ac($.my.hand.orderBy(0, "-", $.keys.diceCost)),
     oppHandsOrderByCost: ac($.opp.hand.orderBy(0, "-", $.keys.diceCost)),
+
+    myHandsNotFree: ac($.my.hand.cost(">", 0)),
+    oppHandsNotFree: ac($.opp.hand.cost(">", 0)),
+    myPileNotFree: ac($.my.pile.cost(">", 0)),
+    oppPileNotFree: ac($.opp.pile.cost(">", 0)),
   };
   Object.freeze(MACROS);
 

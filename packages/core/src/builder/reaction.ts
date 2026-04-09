@@ -20,6 +20,7 @@ import type { TypedSkillContext } from "./context/skill";
 import type { CombatStatusHandle, StatusHandle, SummonHandle } from "./type";
 import type { SwirlableElement } from "../base/reaction";
 import { builderWeakRefs } from "./registry";
+import { $ } from "../query";
 
 export const CALLED_FROM_REACTION: unique symbol = Symbol();
 
@@ -161,7 +162,9 @@ function initialize() {
 
   reaction(Reaction.LunarBloom)
     .do((c, e) => {
-      const hands = (e.here === "my" ? c.player : c.oppPlayer).hands;
+      const query =
+        e.here === "my" ? $.macros.myHandsNotFree : $.macros.oppHandsNotFree;
+      const hands = c.queryAll(query);
       if (hands.length > 0) {
         const target = c.random(hands);
         c.attachCostReduction(target);
