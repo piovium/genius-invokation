@@ -13,12 +13,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, State, Character, Support, $, Card } from "#test";
+import { ref, setup, State, Character, Card } from "#test";
 import { Collei, FloralSidewinder } from "@gi-tcg/data/internal/characters/dendro/collei";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "bun:test";
 
-test("collei: talent status won't applied to defeated characters", async () => {
+test("collei: talent status won't target on defeated characters", async () => {
   const chosenNext = ref();
   const collei = ref();
   const c = setup(
