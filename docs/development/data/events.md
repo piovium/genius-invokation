@@ -115,7 +115,6 @@
 | `damagedOrHealed`        | `onDamageOrHeal`         | 我方/所附着角色受到伤害或治疗后             |
 | `defeated`               | `onDamageOrHeal`         | 我方/所附着角色倒下时                       |
 | `reaction`               | `onReaction`             | 我方/所附着**角色上发生**元素反应后         |
-| `skillReaction`          | `onReaction`             | 我方/所附着**角色引发**元素反应后           |
 | `enter`                  | `onEnter`                | 实体**自身**入场时                          |
 | `enterRelative`          | `onEnter`                | **我方**实体入场时                          |
 | `dispose`                | `onDispose`              | **我方**实体弃置时                          |

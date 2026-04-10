@@ -546,11 +546,6 @@ export const detailedEventDictionary = {
   dealReaction: defineDescriptor("onReaction", (e, r) => {
     return checkRelative(e.onTimeState, e.caller.id, r);
   }),
-  skillReaction: defineDescriptor("onReaction", (e, r) => {
-    return (
-      checkRelative(e.onTimeState, e.caller.id, r) && e.viaCharacterSkill()
-    );
-  }),
   enter: defineDescriptor("onEnter", (e, r) => {
     return e.entity.id === r.callerId;
   }),
