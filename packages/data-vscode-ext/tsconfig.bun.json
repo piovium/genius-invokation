@@ -11,6 +11,6 @@
   },
   "include": [
     "scripts/**/*.ts", 
-    "tsdown.config.ts",
+    "tsdown.config.mts",
   ]
 }
