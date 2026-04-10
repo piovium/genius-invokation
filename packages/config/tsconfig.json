@@ -6,7 +6,8 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
 
-    "noEmit": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
     
     "useDefineForClassFields": true,
     "esModuleInterop": true,
@@ -14,5 +15,7 @@
     "skipLibCheck": true,
     "strict": true,
     "noUncheckedIndexedAccess": true
-  }
+  },
+  "include": ["src/**/*.ts"],
+  "references": [{ "path": "./tsconfig.bun.json" }]
 }

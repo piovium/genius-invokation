@@ -5,6 +5,8 @@
     "lib": [
       "ESNext"
     ],
+    "types": ["bun"],
+    
     "sourceMap": true,
     "strict": true, /* enable all strict type-checking options */
     "skipLibCheck": true,

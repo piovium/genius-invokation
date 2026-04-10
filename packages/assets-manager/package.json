@@ -28,7 +28,7 @@
   },
   "scripts": {
     "build:data": "bun --preload=./scripts/fetch_preload.ts ./scripts/fetch.ts",
-    "build:ts": "tsup",
+    "build:ts": "tsdown",
     "build": "bun run build:data && bun run build:ts"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+
+    "target": "ES2022",
+    "module": "Preserve",
+    "lib": ["ESNext"],
+    
+    "types": ["bun"]
+  },
+  "include": [
+    "scripts/**/*.ts", 
+    "tsdown.config.ts",
+  ]
+}

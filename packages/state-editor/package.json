@@ -28,7 +28,7 @@
     "rollup-plugin-node-externals": "catalog:",
     "unocss": "catalog:",
     "vite": "catalog:",
-    "vite-plugin-dts": "catalog:",
+    "unplugin-dts": "catalog:",
     "vite-plugin-solid": "catalog:",
     "ya-json-schema-types": "^2.0.0"
   }

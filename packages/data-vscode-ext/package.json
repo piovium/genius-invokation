@@ -22,7 +22,7 @@
   "scripts": {
     "vscode:prepublish": "bun run build",
     "build:method_names": "bun scripts/get_method_names.ts",
-    "build:ts": "tsup",
+    "build:ts": "tsdown",
     "build": "bun run build:method_names && bun run build:ts",
     "watch": "bun run build:ts --watch",
     "package": "bun run build && bun scripts/publish.ts",

@@ -23,7 +23,7 @@
     "check": "tsc --noEmit",
     "test": "bun test",
     "build:ohm": "ohm generateBundles -et src/query-legacy/query.ohm",
-    "build": "bun build:ohm && tsup"
+    "build": "bun build:ohm && tsdown"
   },
   "dependencies": {
     "@gi-tcg/typings": "workspace:*",

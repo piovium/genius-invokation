@@ -13,15 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineConfig } from "tsup";
+import { defineConfig } from "tsdown";
 
 export default defineConfig({
+  platform: "neutral",
   entry: {
-    extension: "./src/extension.ts",
+    index: "./src/index.ts"
   },
-  external: ["vscode"],
-  format: "cjs",
-  clean: true,
   sourcemap: true,
+  dts: !process.env.NO_TYPING,
   minify: true,
+  target: false,
 });

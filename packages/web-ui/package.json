@@ -18,7 +18,7 @@
     "@gi-tcg/web-ui-core": "workspace:*",
     "@gi-tcg/detail-log-viewer": "workspace:*",
     "vite": "catalog:",
-    "vite-plugin-dts": "catalog:",
+    "unplugin-dts": "catalog:",
     "vite-plugin-solid": "catalog:"
   }
 }

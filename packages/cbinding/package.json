@@ -5,6 +5,7 @@
   "browserslist": "chrome >= 116",
   "devDependencies": {
     "@babel/preset-typescript": "^7.26.0",
+    "@babel/preset-env": "^7.29.2",
     "@gi-tcg/core": "workspace:*",
     "@gi-tcg/data": "workspace:*",
     "@gi-tcg/typings": "workspace:*",

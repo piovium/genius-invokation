@@ -13,29 +13,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineConfig } from "tsup";
-
-// We must ensure the built JS file doesn't contains `import.meta.env.*`
-// tsup only replace them when `env` config explicitly provided their value.
-
-const requiredEnvVars = ["WEB_CLIENT_BASE_PATH", "SERVER_HOST"];
-
-const env: Record<string, string> = {};
-for (const [key, value] of Object.entries(process.env)) {
-  if (/^[A-Z_]+$/.test(key) && value) {
-    env[key] = value;
-  }
-}
-for (const key of requiredEnvVars) {
-  env[key] ??= "";
-}
+import { defineConfig } from "tsdown";
 
 export default defineConfig({
+  platform: "neutral",
   entry: ["./src/index.ts"],
-  format: "esm",
-  clean: true,
   sourcemap: true,
-  dts: !process.env.NO_TYPING,
+  dts: process.env.NO_TYPING ? false : { build: true },
   minify: true,
-  env,
+  env: {
+    DEFAULT_ASSETS_API_ENDPOINT: process.env.DEFAULT_ASSETS_API_ENDPOINT || "",
+  },
+  copy: "src/data",
+  target: false,
 });

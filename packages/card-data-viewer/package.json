@@ -30,7 +30,7 @@
     "@gi-tcg/typings": "workspace:*",
     "unocss": "catalog:",
     "vite": "catalog:",
-    "vite-plugin-dts": "catalog:",
+    "unplugin-dts": "catalog:",
     "vite-plugin-solid": "catalog:",
     "rollup-plugin-node-externals": "catalog:"
   }

@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build:buf": "bun scripts/buf.ts",
-    "build": "bun build:buf && tsup"
+    "build": "bun build:buf && tsdown"
   },
   "devDependencies": {
   },
