@@ -18,15 +18,15 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "@gi-tcg/data": "workspace:*",
-    "rolldown": "^1.0.0-rc.15",
-    "rolldown-plugin-dts": "^0.23.2"
+    "@gi-tcg/data": "workspace:*"
   },
   "peerDependencies": {
     "@gi-tcg/core": "workspace:*"
   },
   "devDependencies": {
     "@gi-tcg/assets-manager": "workspace:*",
+    "rolldown": "^1.0.0-rc.15",
+    "rolldown-plugin-dts": "^0.23.2",
     "@gi-tcg/deck-builder": "workspace:*",
     "@gi-tcg/web-ui-core": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
