@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, Reaction, StatusHandle, Aura } from "@gi-tcg/core/builder";
+import { character, skill, status, card, DamageType, Reaction, StatusHandle, Aura, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 115151
@@ -99,8 +99,8 @@ export const Cacucu = card(115152)
   .provideSkill(1151521)
   .costVoid(2)
   .consumeNightsoul("@master", 1)
-  .damage(DamageType.Anemo, 1, "opp prev")
-  .heal(2, `my characters order by health - maxHealth limit 1`)
+  .damage(DamageType.Anemo, 1, $.opp.prev.orElse($.opp.active))
+  .heal(2, $.macros.myMostInjured)
   .done();
 
 /**
