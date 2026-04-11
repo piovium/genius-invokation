@@ -144,7 +144,6 @@ export class EntityBuilder<
   private _skillNo = 0;
   readonly _skillList: SkillDefinition[] = [];
   private _defaultDispose = true;
-  readonly _skillListBeforeDefaultDispose: SkillDefinition[] = [];
   _usagePerRoundIndex = 0;
   private readonly _tags: (EntityTag | AttachmentTag)[] = [];
   _varConfigs: Writable<EntityVariableConfigs> = {};
@@ -609,13 +608,6 @@ export class EntityBuilder<
     return this.hintIcon(icon);
   }
 
-  onMasterDefeated() {
-    if (this._type === "status" || this._type === "equipment") {
-      return this.on("defeated").beforeDefaultDispose();
-    } else {
-      throw new GiTcgDataError("Type error when onMasterDefeated");
-    }
-  }
   /**
    * Same as
    * ```
@@ -798,10 +790,10 @@ export class EntityBuilder<
       (this._type === "status" || this._type === "equipment") &&
       this._defaultDispose
     ) {
-      this.onMasterDefeated().dispose().endOn();
+      this.on("defeated").dispose().endOn();
     }
 
-    const skills = [...this._skillListBeforeDefaultDispose, ...this._skillList];
+    const skills = [...this._skillList];
     if (this._type === "character") {
       registerPassiveSkill({
         __definition: "passiveSkills",

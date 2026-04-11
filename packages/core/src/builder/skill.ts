@@ -873,7 +873,6 @@ export class TriggeredSkillBuilder<
   CreateSkillBuilderMeta<EventArgType, CallerType, CallerVars, AssociatedExt>
 > {
   private _asSkillType: CommonSkillType | null = null;
-  private _beforeDefaultDispose = false;
   private _enableHandTriggering = false;
   private _enablePileTriggering = false;
   private _usageOpt: { name: string; autoDecrease: boolean } | null = null;
@@ -915,11 +914,6 @@ export class TriggeredSkillBuilder<
       );
     }
     this._asSkillType = skillType;
-    return this;
-  }
-
-  beforeDefaultDispose() {
-    this._beforeDefaultDispose = true;
     return this;
   }
 
@@ -994,16 +988,10 @@ export class TriggeredSkillBuilder<
     return this;
   }
   listenToPlayer(): this {
-    if (this._beforeDefaultDispose) {
-      throw new GiTcgDataError("Only not self defeated can be listened");
-    }
     this._listenTo = ListenTo.SamePlayer;
     return this;
   }
   listenToAll(): this {
-    if (this._beforeDefaultDispose) {
-      throw new GiTcgDataError("Only not self defeated can be listened");
-    }
     this._listenTo = ListenTo.All;
     return this;
   }
@@ -1056,6 +1044,14 @@ export class TriggeredSkillBuilder<
     ) {
       this.filters.push((c) => c.self.variables.alive);
     }
+    if (
+      (this.parent._type === "status" || this.parent._type === "equipment") &&
+      this.detailedEventName !== "selfDispose"
+    ) {
+      this.filters.push(
+        (c) => c.self.cast<"status" | "equipment">().master.variables.alive,
+      );
+    }
     // 1. 对于并非响应自身弃置的技能，当实体已经被弃置时，不再响应
     if (this.detailedEventName !== "selfDispose") {
       this.filters.push((c, e) => {
@@ -1105,9 +1101,7 @@ export class TriggeredSkillBuilder<
     // 5. 定义技能时显式传入的 filter
     this.filters.push(this.triggerFilter);
 
-    const parentSkillList = this._beforeDefaultDispose
-      ? this.parent._skillListBeforeDefaultDispose
-      : this.parent._skillList;
+    const parentSkillList = this.parent._skillList;
 
     // 【构造技能定义并向父级实体添加】
     const filter = this.buildFilter();
