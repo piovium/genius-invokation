@@ -28,7 +28,6 @@ import {
   type VariableValueChangeInfo,
   type DamageInfo,
   DamageOrHealEventArg,
-  type DisposeOrTuneMethod,
   type EventAndRequest,
   type EventAndRequestConstructorArgs,
   type EventAndRequestNames,
@@ -41,6 +40,8 @@ import {
   BeforeVariableEventArg,
   ZeroHealthEventArg,
   ReactionEventArg,
+  EMPTY_SKILL_RESULT,
+  type CoreSkillResult,
 } from "../../base/skill";
 import {
   type CharacterState as CharacterStateO,
@@ -50,7 +51,6 @@ import {
   type GameState,
   type PhaseType,
   type PlayerState,
-  StateSymbol,
   stringifyState,
 } from "../../base/state";
 import {
@@ -77,7 +77,6 @@ import type {
   StatusHandle,
   SummonHandle,
   EquipmentHandle,
-  SupportHandle,
   AttachmentHandle,
 } from "../type";
 import type { GuessedTypeOfQuery } from "../../query-legacy/types";
@@ -86,11 +85,13 @@ import { flip } from "@gi-tcg/utils";
 import { GiTcgDataError } from "../../error";
 import { DetailLogType } from "../../log";
 import {
+  EventList,
   GiTcgPreviewAbortedError,
   type InsertPileStrategy,
   type InternalHealOption,
   type InternalNotifyOption,
   type MutatorConfig,
+  type ReadonlyEventList,
   StateMutator,
 } from "../../mutator";
 import { type Draft, produce } from "immer";
@@ -185,8 +186,8 @@ type ShortcutReturn<
   : T;
 
 type MutatorResultCanEmit =
-  | readonly EventAndRequest[]
-  | { readonly events: readonly EventAndRequest[] };
+  | ReadonlyEventList
+  | { readonly events: ReadonlyEventList };
 
 type MutatorMethodCanEmitImpl<K extends keyof StateMutator> =
   StateMutator[K] extends (...args: any[]) => MutatorResultCanEmit ? K : never;
@@ -197,9 +198,9 @@ type MutatorMethodCanEmit = {
 
 type CallAndEmitResult<K extends MutatorMethodCanEmit> = ReturnType<
   StateMutator[K]
-> extends { readonly events: readonly EventAndRequest[] }
+> extends { readonly events: ReadonlyEventList }
   ? Omit<ReturnType<StateMutator[K]>, "events">
-  : ReturnType<StateMutator[K]> extends readonly EventAndRequest[]
+  : ReturnType<StateMutator[K]> extends ReadonlyEventList
     ? void
     : never;
 
@@ -220,7 +221,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     ReturnType<typeof Proxy.revocable>
   >();
 
-  private readonly eventAndRequests: EventAndRequest[] = [];
+  private readonly eventAndRequests = new EventList();
   private mainDamage: DamageInfo | null = null;
 
   private enableShortcut(): ShortcutReturn<Meta>;
@@ -267,56 +268,142 @@ export class SkillContext<Meta extends ContextMetaBase> {
 
   /**
    * 对技能返回的事件列表预处理。
-   * - 将重复目标的“伤害事件”合并。
-   * - 对未导致爆牌的 HCI 事件，若目标牌已弃置，则删除之
    */
-  private preprocessEventList() {
-    const result: EventAndRequest[] = [];
-    const damageEventIndexInResultBasedOnTarget = new Map<number, number>();
+  private preprocessEventList(): CoreSkillResult {
+    const otherEvents: EventAndRequest[] = [];
+    const hciEvents: EventAndRequest[] = [];
+    const safeDamageEvents: EventAndRequest[] = [];
+    const criticalDamageEvents: EventAndRequest[] = [];
+
+    const failedPlayers = new Set<0 | 1>();
+
+    // 将 originalEvents 分类
+    // - 对于 damage，先判断：
+    //   - 若可能击倒但应用 modifyZeroHealth 后免于被击倒，则内联执行后
+    //     将事件继续添加到 originalEvents 中（通常仅有治疗事件）
+    //   - 若确实击倒切无法被免于被击倒，则归类为 criticalDamageEvents，
+    //     否则归类为 safeDamageEvents
+    // - 对于 HCI，删去目标已被舍弃的事件，其余归入 hciEvents
+    // - 其余类型归类为 otherEvents
     for (const event of this.eventAndRequests) {
       const [name, arg] = event;
       if (name === "onDamageOrHeal" && arg.isDamageTypeDamage()) {
-        const previousIndex = damageEventIndexInResultBasedOnTarget.get(
-          arg.target.id,
-        );
-        if (typeof previousIndex !== "undefined") {
-          // combine current event with previous event
-          const previousArg = result[
-            previousIndex
-          ][1] as DamageOrHealEventArg<DamageInfo>;
-          const combinedDamageInfo: DamageInfo = {
-            ...previousArg.damageInfo,
-            value: previousArg.damageInfo.value + arg.damageInfo.value,
-            causeDefeated:
-              previousArg.damageInfo.causeDefeated ||
-              arg.damageInfo.causeDefeated,
-            fromReaction:
-              previousArg.damageInfo.fromReaction ||
-              arg.damageInfo.fromReaction,
-          };
-          result[previousIndex][1] = new DamageOrHealEventArg(
-            previousArg.onTimeState,
-            combinedDamageInfo,
-            previousArg.option,
+        let critical = false;
+        if (arg.damageInfo.causeDefeated) {
+          // Wrap original EventArg to ZeroHealthEventArg
+          const zeroHealthEventArg = new ZeroHealthEventArg(
+            arg.onTimeState,
+            arg.damageInfo,
+            arg.option,
           );
+          this.callAndEmit(
+            "handleInlineEvent",
+            this.skillInfo,
+            "modifyZeroHealth",
+            zeroHealthEventArg,
+          );
+          if (!zeroHealthEventArg._immuneInfo) {
+            const defeatedCh = this.get(arg.target);
+            if (defeatedCh.variables.alive) {
+              this.mutator.log(
+                DetailLogType.Primitive,
+                `${stringifyState(
+                  defeatedCh,
+                )} is defeated (and no immune available)`,
+              );
+              this.mutate({
+                type: "modifyEntityVar",
+                state: defeatedCh.latest(),
+                varName: "alive",
+                value: 0,
+                direction: "decrease",
+              });
+              const energyVarName =
+                defeatedCh.definition.specialEnergy?.variableName ?? "energy";
+              this.mutate({
+                type: "modifyEntityVar",
+                state: defeatedCh.latest(),
+                varName: energyVarName,
+                value: 0,
+                direction: "decrease",
+              });
+              this.mutate({
+                type: "modifyEntityVar",
+                state: defeatedCh.latest(),
+                varName: "aura",
+                value: Aura.None,
+                direction: null,
+              });
+              this.mutate({
+                type: "setPlayerFlag",
+                who: defeatedCh.who,
+                flagName: "hasDefeated",
+                value: true,
+              });
+              const player = this.state.players[defeatedCh.who];
+              const aliveCharacters = player.characters.filter(
+                (ch) => ch.variables.alive,
+              );
+              if (aliveCharacters.length === 0) {
+                failedPlayers.add(defeatedCh.who);
+              }
+            }
+            critical = true;
+          }
+        }
+        if (critical) {
+          criticalDamageEvents.push(event);
         } else {
-          damageEventIndexInResultBasedOnTarget.set(
-            arg.target.id,
-            result.length,
-          );
-          result.push(event);
+          safeDamageEvents.push(event);
         }
       } else if (name === "onHandCardInserted") {
         const shouldDrop =
           !arg.overflowed && this.get(arg.card).area.type === "removedEntities";
         if (!shouldDrop) {
-          result.push(event);
+          hciEvents.push(event);
         }
       } else {
-        result.push(event);
+        otherEvents.push(event);
       }
     }
-    return result;
+
+    if (failedPlayers.size === 2) {
+      this.mutator.log(
+        DetailLogType.Other,
+        `Both player has no alive characters, set winner to null`,
+      );
+      this.mutate({
+        type: "changePhase",
+        newPhase: "gameEnd",
+      });
+      this.mutator.notify();
+      return EMPTY_SKILL_RESULT;
+    } else if (failedPlayers.size === 1) {
+      const who = [...failedPlayers.values()][0];
+      this.mutator.log(
+        DetailLogType.Other,
+        `player ${who} has no alive characters, set winner to ${flip(who)}`,
+      );
+      this.mutate({
+        type: "changePhase",
+        newPhase: "gameEnd",
+      });
+      this.mutate({
+        type: "setWinner",
+        winner: flip(who),
+      });
+      this.mutator.notify();
+      return EMPTY_SKILL_RESULT;
+    }
+
+    const emittedEvents = [
+      ...otherEvents,
+      ...hciEvents,
+      ...safeDamageEvents,
+      ...criticalDamageEvents,
+    ];
+    const causeDefeated = criticalDamageEvents.length > 0;
+    return { emittedEvents, causeDefeated };
   }
 
   /**
@@ -325,8 +412,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
    */
   _terminate(): SkillDescriptionReturn {
     this.mutator.notify();
+    const { emittedEvents, causeDefeated } = this.preprocessEventList();
+    Object.freeze(emittedEvents);
     Object.freeze(this);
-    const emittedEvents = this.preprocessEventList();
     const resultState = this.rawState;
     for (const [, { revoke }] of this._reactiveProxies) {
       revoke();
@@ -337,6 +425,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         emittedEvents,
         innerNotify: this._savedNotify,
         mainDamage: this.mainDamage,
+        causeDefeated,
       },
     ];
   }
@@ -646,6 +735,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     );
     this.eventAndRequests.push([event, arg] as EventAndRequest);
   }
+
   // 等效调用 this.mutator.<method>, 并将返回的 events 添加
   callAndEmit<K extends MutatorMethodCanEmit>(
     method: K,
@@ -1935,7 +2025,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
           },
         );
         if (!nightsoulStatus) {
-          console?.warn(
+          console?.warn?.(
             `Failed to create nightsouls blessing for ${stringifyState(
               target,
             )}`,

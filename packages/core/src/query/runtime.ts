@@ -663,10 +663,10 @@ class QueryRunner {
           ),
         ];
         if (baseEntries.length !== 1) {
-          console?.warn(
+          console?.warn?.(
             `Expected exactly one candidate for tagOf query, got ${baseEntries.length}`,
           );
-          console?.trace();
+          console?.trace?.();
         }
         const baseTags = baseEntries.flatMap(
           (entry) => (entry.state.definition.tags as CharacterTag[]) ?? [],

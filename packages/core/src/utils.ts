@@ -425,33 +425,6 @@ export function allEntitiesAtArea(
 }
 
 /**
- * 将 `e` 的一份拷贝传入所有响应 `modifyZeroHealth` 的技能，
- * 检查是否存在可使该 `e` 免于被击倒的可能。
- * @param state
- * @param e
- * @returns
- */
-export function checkImmune(state: GameState, e: ZeroHealthEventArg) {
-  const clonedE = new ZeroHealthEventArg(state, e.damageInfo, e.option);
-  for (const { caller, skill } of allSkills(state, "modifyZeroHealth")) {
-    const skillInfo = defineSkillInfo({
-      caller,
-      definition: skill,
-    });
-    clonedE._currentSkillInfo = skillInfo;
-    const filterResult = (0, skill.filter)(state, skillInfo, clonedE);
-    if (!filterResult) {
-      continue;
-    }
-    (0, skill.action)(state, skillInfo, clonedE);
-    if (clonedE._immuneInfo) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
  * Remove an entity by its id from the given game state.
  * @param state The mutable game state draft.
  * @param id The id of the entity to remove.
@@ -1036,17 +1009,24 @@ export function sortDice(
   ]);
 }
 
+type TupleIndices<T extends readonly unknown[]> = Extract<
+  keyof T,
+  `${number}`
+> extends `${infer N extends number}`
+  ? N
+  : never;
+
 declare global {
   interface ReadonlyArray<T> {
     map<This extends readonly [unknown, unknown], U>(
       this: This,
-      fn: (v: T) => U,
+      fn: (value: T, index: TupleIndices<This>, array: This) => U,
     ): { -readonly [K in keyof This]: U };
   }
   interface Array<T> {
     map<This extends [unknown, unknown], U>(
       this: This,
-      fn: (v: T) => U,
+      fn: (value: T, index: TupleIndices<This>, array: This) => U,
     ): { -readonly [K in keyof This]: U };
   }
 }

@@ -99,6 +99,7 @@ import {
   type InternalNotifyOption,
   type InternalPauseOption,
   type MutatorConfig,
+  type ReadonlyEventList,
   StateMutator,
 } from "./mutator";
 import { type ActionInfoWithModification, ActionPreviewer } from "./preview";
@@ -1057,7 +1058,7 @@ export class Game {
           }
         }
       } else {
-        console?.warn(`Card ${card.definition.id} has no play skill defined.`);
+        console?.warn?.(`Card ${card.definition.id} has no play skill defined.`);
       }
 
       result.push({
@@ -1182,7 +1183,7 @@ export class Game {
   private async handleEvent(...args: EventAndRequest) {
     await SkillExecutor.handleEvent(this.mutator, ...args);
   }
-  private async handleEvents(events: EventAndRequest[]) {
+  private async handleEvents(events: ReadonlyEventList) {
     await SkillExecutor.handleEvents(this.mutator, events);
   }
 }

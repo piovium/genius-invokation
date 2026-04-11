@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+/// <reference types="./env.d.ts" />
+
 /** Toggle this when editing beta version. */
 export const IS_BETA = false;
 

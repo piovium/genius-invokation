@@ -144,7 +144,7 @@ export interface InsertEntityResult {
   /** 若成功入场，给出新建的实体状态 */
   readonly newState: EntityState | null;
   /** 若成功入场，则引发的 onEnter 事件 */
-  readonly events: readonly EventAndRequest[];
+  readonly events: ReadonlyEventList;
 }
 
 export interface SwitchActiveOption {
@@ -172,7 +172,7 @@ export interface InternalHealOption {
 
 export interface DamageResult {
   readonly damageInfo: DamageInfo;
-  readonly events: readonly EventAndRequest[];
+  readonly events: ReadonlyEventList;
 }
 
 export type InsertHandPayload =
@@ -194,7 +194,7 @@ export interface InsertHandCardOption {
 
 export interface CreateHandCardResult {
   readonly state: EntityState;
-  readonly events: EventAndRequest[];
+  readonly events: ReadonlyEventList;
 }
 
 export type InsertPileStrategy =
@@ -204,6 +204,65 @@ export type InsertPileStrategy =
   | "spaceAround"
   | `topRange${number}`
   | `topIndex${number}`;
+
+export class EventList extends Array<EventAndRequest> {
+  private damageEventIndexInResultBasedOnTarget = new Map<number, number>();
+
+  /**
+   * 将引发的事件 `[event, arg]` 添加到事件列表中。
+   * Note: 如果是伤害事件，则会基于伤害目标和先前的伤害事件合并。
+   * @returns
+   */
+  override push(...items: EventAndRequest[]) {
+    for (const item of items) {
+      const [event, arg] = item;
+      if (event === "onDamageOrHeal" && arg.isDamageTypeDamage()) {
+        const previousIndex = this.damageEventIndexInResultBasedOnTarget.get(
+          arg.target.id,
+        );
+        if (typeof previousIndex !== "undefined") {
+          // combine current event with previous event
+          const previousArg = this[
+            previousIndex
+          ][1] as DamageOrHealEventArg<DamageInfo>;
+          const combinedDamageInfo: DamageInfo = {
+            ...previousArg.damageInfo,
+            value: previousArg.damageInfo.value + arg.damageInfo.value,
+            causeDefeated:
+              previousArg.damageInfo.causeDefeated ||
+              arg.damageInfo.causeDefeated,
+            fromReaction:
+              previousArg.damageInfo.fromReaction ||
+              arg.damageInfo.fromReaction,
+          };
+          this[previousIndex][1] = new DamageOrHealEventArg(
+            previousArg.onTimeState,
+            combinedDamageInfo,
+            previousArg.option,
+          );
+          continue;
+        } else {
+          this.damageEventIndexInResultBasedOnTarget.set(
+            arg.target.id,
+            this.length,
+          );
+        }
+      }
+      super.push(item);
+    }
+    return this.length;
+  }
+}
+
+export interface ReadonlyEventList extends ReadonlyArray<EventAndRequest> {}
+
+declare global {
+  interface Console {
+    warn?(...data: any[]): void;
+    trace?(): void;
+  }
+  var console: Console | undefined;
+}
 
 /**
  * 管理一个状态和状态的修改；同时也进行日志管理。
@@ -242,9 +301,9 @@ export class StateMutator {
     notifyOpt?: Omit<NotifyOption, "mutations">,
   ) {
     if (this._mutationsToBeNotified.length > 0) {
-      console?.warn("Resetting state with pending mutations not notified");
-      console?.warn(this._mutationsToBeNotified);
-      console?.trace();
+      console?.warn?.("Resetting state with pending mutations not notified");
+      console?.warn?.(this._mutationsToBeNotified);
+      console?.trace?.();
       // debugger;
     }
     this._state = newState;
@@ -344,7 +403,7 @@ export class StateMutator {
     skillDescription: SkillDescription<Arg>,
     skill: SkillInfo,
     arg: Arg,
-  ): readonly EventAndRequest[] {
+  ): ReadonlyEventList {
     this.notify();
     const [newState, { innerNotify, emittedEvents }] = skillDescription(
       this.state,
@@ -358,12 +417,12 @@ export class StateMutator {
     parentSkill: SkillInfo,
     event: E,
     arg: EventArgOf<E>,
-  ): EventAndRequest[] {
+  ): ReadonlyEventList {
     using l = this.subLog(
       DetailLogType.Event,
       `Handling inline event ${event} (${arg.toString()}):`,
     );
-    const events: EventAndRequest[] = [];
+    const events = new EventList();
     const infos = allSkills(this.state, event).map<SkillInfo>(
       ({ caller, skill }) => ({
         caller,
@@ -397,11 +456,11 @@ export class StateMutator {
     target: CharacterState,
     type: NontrivialDamageType,
     opt: ApplyOption,
-  ): EventAndRequest[] {
+  ): ReadonlyEventList {
     if (!target.variables.alive) {
       return [];
     }
-    const events: EventAndRequest[] = [];
+    const events = new EventList();
     const aura = target.variables.aura;
     const { newAura, reaction } = getReaction({
       type,
@@ -496,9 +555,9 @@ export class StateMutator {
     value: number,
     targetState: CharacterState,
     opt: InternalHealOption,
-  ): EventAndRequest[] {
+  ): ReadonlyEventList {
     const damageType = DamageType.Heal;
-    const events: EventAndRequest[] = [];
+    const events = new EventList();
     if (!targetState.variables.alive) {
       if (opt.kind === "revive") {
         this.log(
@@ -608,7 +667,7 @@ export class StateMutator {
         damageInfo.type
       }] damage to ${stringifyState(target)}`,
     );
-    const events: EventAndRequest[] = [];
+    const events = new EventList();
     if (damageInfo.type !== DamageType.Piercing) {
       const modifier = new GenericModifyDamageEventArg(
         this.state,
@@ -692,7 +751,7 @@ export class StateMutator {
   insertHandCard(
     payload: InsertHandPayload,
     opt: InsertHandCardOption = {},
-  ): EventAndRequest[] {
+  ): ReadonlyEventList {
     const who = payload.target.who;
     const reason =
       payload.type === "createEntity" ? ("create" as const) : payload.reason;
@@ -728,8 +787,8 @@ export class StateMutator {
     ];
   }
 
-  drawCardsPlain(who: 0 | 1, count: number): EventAndRequest[] {
-    const events: EventAndRequest[] = [];
+  drawCardsPlain(who: 0 | 1, count: number): ReadonlyEventList {
+    const events = new EventList();
     for (let i = 0; i < count; i++) {
       const card = this.state.players[who].pile[0];
       if (!card) {
@@ -795,7 +854,7 @@ export class StateMutator {
     payloads: InsertPilePayload[],
     strategy: InsertPileStrategy,
     who: 0 | 1,
-  ): EventAndRequest[] {
+  ): ReadonlyEventList {
     const target: EntityArea = { who, type: "pile", cardId: 0 };
     const player = this.state.players[who];
     const pileCount = player.pile.length;
@@ -903,7 +962,7 @@ export class StateMutator {
       );
     }
     const { definition } = stateOrDef;
-    const events: EventAndRequest[] = [];
+    const events = new EventList();
 
     using l = this.subLog(
       DetailLogType.Primitive,
@@ -1001,7 +1060,7 @@ export class StateMutator {
             from: moveFrom,
             oldState: attachment,
             reason: "other", // TODO maybe better reason?
-          })
+          });
         }
         this.mutate({
           type: "moveEntity",
@@ -1039,7 +1098,11 @@ export class StateMutator {
     }
     return { oldState, newState, events };
   }
-  createAttachment(host: EntityState, definition: AttachmentDefinition, opt: CreateEntityOptions) {
+  createAttachment(
+    host: EntityState,
+    definition: AttachmentDefinition,
+    opt: CreateEntityOptions,
+  ) {
     using l = this.subLog(
       DetailLogType.Primitive,
       `Create attachment [attachment:${definition.id}] on ${stringifyState(
@@ -1060,7 +1123,7 @@ export class StateMutator {
       opt,
     });
     let newStateId: number;
-    const events: EventAndRequest[] = [];
+    const events = new EventList();
     if (oldState) {
       this.log(
         DetailLogType.Other,
@@ -1107,7 +1170,7 @@ export class StateMutator {
     who: 0 | 1,
     target: CharacterState,
     opt: SwitchActiveOption = {},
-  ): EventAndRequest[] {
+  ): ReadonlyEventList {
     let from: CharacterState | null;
     if (this.state.players[who].activeCharacterId === 0) {
       from = null;
@@ -1233,7 +1296,7 @@ export class StateMutator {
     }
   }
 
-  async switchHands(who: 0 | 1): Promise<EventAndRequest[]> {
+  async switchHands(who: 0 | 1): Promise<ReadonlyEventList> {
     if (!this.config.howToSwitchHands) {
       throw new GiTcgIoNotProvideError();
     }
@@ -1251,7 +1314,7 @@ export class StateMutator {
     });
     const swapInCardIds = swapInCards.map((c) => c.definition.id);
 
-    const events: EventAndRequest[] = [];
+    const events = new EventList();
 
     for (const card of swapInCards) {
       const randomValue = this.stepRandom();
@@ -1307,7 +1370,7 @@ export class StateMutator {
     who: 0 | 1,
     via: SkillInfo,
     info: SelectCardInfo,
-  ): Promise<EventAndRequest[]> {
+  ): Promise<ReadonlyEventList> {
     if (!this.config.howToSelectCard) {
       throw new GiTcgIoNotProvideError();
     }

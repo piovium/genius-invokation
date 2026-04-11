@@ -69,7 +69,7 @@ import type { PlainCharacterState } from "../builder/context/utils";
 import type { AppliableDamageType } from "../builder/type";
 import type { MoveEntityM, RemoveEntityM } from "./mutation";
 import type { LunarReaction } from "@gi-tcg/typings";
-import type { DamageOption } from "../mutator";
+import type { DamageOption, ReadonlyEventList } from "../mutator";
 
 export interface SkillDefinitionBase<Arg> {
   readonly type: "skill";
@@ -86,8 +86,12 @@ export type StateMutationAndExposedMutation = {
   stateMutations: Mutation[];
 };
 
-export type SkillResult = {
-  readonly emittedEvents: readonly EventAndRequest[];
+export interface CoreSkillResult {
+  readonly emittedEvents: ReadonlyEventList;
+  readonly causeDefeated: boolean;
+}
+
+export interface SkillResult extends CoreSkillResult {
   readonly innerNotify: StateMutationAndExposedMutation;
   readonly mainDamage: DamageInfo | null;
 };
@@ -99,6 +103,7 @@ export const EMPTY_SKILL_RESULT: SkillResult = {
     stateMutations: [],
   },
   mainDamage: null,
+  causeDefeated: false,
 };
 
 export type SkillDescriptionReturn = readonly [GameState, SkillResult];
@@ -640,8 +645,8 @@ export class ModifyAction4EventArg<
 > extends ModifyActionEventArgBase<InfoT> {
   setFastAction(): void {
     if (this._fast) {
-      console?.warn("Potential error: fast action already set");
-      console?.trace();
+      console?.warn?.("Potential error: fast action already set");
+      console?.trace?.();
     }
     this._log += `${stringifyState(this.caller)} set fast action.\n`;
     this._fast = true;
@@ -949,8 +954,8 @@ export class ModifyDamage0EventArg extends ModifyDamageEventArgBase {
       super.damageInfo.type
     }] to [damage:${type}].\n`;
     if (this._newDamageType !== null) {
-      console?.warn("Potential error: damage type already changed");
-      console?.trace();
+      console?.warn?.("Potential error: damage type already changed");
+      console?.trace?.();
     }
     this._newDamageType = type;
   }
@@ -1393,7 +1398,8 @@ export type InlineEventNames =
   | "modifyHeal0"
   | "modifyHeal1"
   | "modifyChangeVariable"
-  | "modifyReaction";
+  | "modifyReaction"
+  | "modifyZeroHealth";
 
 export type EventArgOf<E extends EventNames> = InstanceType<EventMap[E]>;
 

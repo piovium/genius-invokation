@@ -490,10 +490,10 @@ export class EntityBuilder<
       name !== "usage" &&
       typeof opt?.autoDispose === "boolean"
     ) {
-      console?.warn(
+      console?.warn?.(
         `No need to specify \`autoDispose\` of a non-per-round non-defaulted-name usage, since it cannot be auto-disposed by \`.consumeUsage\` primitive.`,
       );
-      console?.trace();
+      console?.trace?.();
     }
     const autoDispose = name === "usage" && opt?.autoDispose !== false;
     this.variable(name, count, opt);
