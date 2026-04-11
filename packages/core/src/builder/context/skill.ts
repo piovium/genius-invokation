@@ -288,7 +288,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
     for (const event of this.eventAndRequests) {
       const [name, arg] = event;
       if (name === "onDamageOrHeal" && arg.isDamageTypeDamage()) {
-        let critical = false;
         if (arg.damageInfo.causeDefeated) {
           // Wrap original EventArg to ZeroHealthEventArg
           const zeroHealthEventArg = new ZeroHealthEventArg(
@@ -348,11 +347,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
                 failedPlayers.add(defeatedCh.who);
               }
             }
-            critical = true;
+            criticalDamageEvents.push(event);
+          } else {
+            safeDamageEvents.push(["onDamageOrHeal", zeroHealthEventArg]);
           }
-        }
-        if (critical) {
-          criticalDamageEvents.push(event);
         } else {
           safeDamageEvents.push(event);
         }
