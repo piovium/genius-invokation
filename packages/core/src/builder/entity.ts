@@ -143,12 +143,12 @@ export class EntityBuilder<
 > {
   private _skillNo = 0;
   readonly _skillList: SkillDefinition[] = [];
-  private _defaultDispose = true;
   _usagePerRoundIndex = 0;
   private readonly _tags: (EntityTag | AttachmentTag)[] = [];
   _varConfigs: Writable<EntityVariableConfigs> = {};
   _obtainable = false;
   private _disposeWhenUsageIsZero = false;
+  private _disposeOnMasterDefeated: boolean;
   private _visibleVarName: string | null = null;
   _associatedExtensionId: number | null = null;
   private _hintText: string | null = null;
@@ -166,6 +166,15 @@ export class EntityBuilder<
     private readonly chainFromId: number | null = null,
   ) {
     builderWeakRefs.add(new WeakRef(this));
+    this._disposeOnMasterDefeated = _type === "status" || _type === "equipment";
+    this.on(
+      "defeated",
+      (c, e) =>
+        c.self.area.type === "characters" &&
+        c.self.cast<EntityType>().definition.disposeOnMasterDefeated,
+    )
+      .dispose()
+      .endOn();
   }
 
   noDefaultDispose() {
@@ -174,7 +183,7 @@ export class EntityBuilder<
         `Only status and equipment can specify .noDefaultDispose()`,
       );
     }
-    this._defaultDispose = false;
+    this._disposeOnMasterDefeated = false;
     return this;
   }
 
@@ -786,13 +795,6 @@ export class EntityBuilder<
         .endOn();
     }
 
-    if (
-      (this._type === "status" || this._type === "equipment") &&
-      this._defaultDispose
-    ) {
-      this.on("defeated").dispose().endOn();
-    }
-
     const skills = [...this._skillList];
     if (this._type === "character") {
       registerPassiveSkill({
@@ -825,6 +827,7 @@ export class EntityBuilder<
         visibleVarName: this._visibleVarName,
         varConfigs: this._varConfigs,
         disposeWhenUsageIsZero: this._disposeWhenUsageIsZero,
+        disposeOnMasterDefeated: this._disposeOnMasterDefeated,
         hintText: this._hintText,
         disableTuning: false,
         skills,
@@ -841,7 +844,9 @@ export class EntityBuilder<
   }
 
   protected getAttachmentModifications(): ModificationGetter {
-    throw new GiTcgCoreInternalError(`Unreachable; AttachmentBuilder should override this`);
+    throw new GiTcgCoreInternalError(
+      `Unreachable; AttachmentBuilder should override this`,
+    );
   }
 
   /** 此定义未被使用。 */

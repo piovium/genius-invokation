@@ -1044,14 +1044,6 @@ export class TriggeredSkillBuilder<
     ) {
       this.filters.push((c) => c.self.variables.alive);
     }
-    if (
-      (this.parent._type === "status" || this.parent._type === "equipment") &&
-      this.detailedEventName !== "selfDispose"
-    ) {
-      this.filters.push(
-        (c) => c.self.cast<"status" | "equipment">().master.variables.alive,
-      );
-    }
     // 1. 对于并非响应自身弃置的技能，当实体已经被弃置时，不再响应
     if (this.detailedEventName !== "selfDispose") {
       this.filters.push((c, e) => {
@@ -1069,7 +1061,20 @@ export class TriggeredSkillBuilder<
         return c.self.area.type !== "pile";
       });
     }
-    // 3. 基于 listenTo 的 filter
+    // 3. 状态和装备的技能默认要求角色存活，击倒默认弃置和响应自身弃置除外
+    if (
+      (this.parent._type === "status" || this.parent._type === "equipment") &&
+      this.detailedEventName !== "selfDispose" &&
+      this.detailedEventName !== "defeated"
+    ) {
+      this.filters.push((c) => {
+        if (c.self.area.type === "characters") {
+          return c.self.cast<"status" | "equipment">().master.variables.alive;
+        }
+        return true;
+      });
+    }
+    // 4. 基于 listenTo 的 filter
     const [triggerOn, filterDescriptor] =
       detailedEventDictionary[
         isCustomEvent(this.detailedEventName)
@@ -1089,7 +1094,7 @@ export class TriggeredSkillBuilder<
         c.rawState,
       );
     });
-    // 4. 自定义事件：确保事件名一致
+    // 5. 自定义事件：确保事件名一致
     if (isCustomEvent(this.detailedEventName)) {
       const customEvent = this.detailedEventName;
       this.filters.push(function (c, e) {
@@ -1098,7 +1103,7 @@ export class TriggeredSkillBuilder<
         );
       });
     }
-    // 5. 定义技能时显式传入的 filter
+    // 6. 定义技能时显式传入的 filter
     this.filters.push(this.triggerFilter);
 
     const parentSkillList = this.parent._skillList;

@@ -192,6 +192,12 @@ export const AbyssHeraldWickedTorrents = character(2203)
   .skills(RipplingSlash, VortexEdge, TorrentialShock, WateryRebirth, RipplingBlades, WateryRebirth01)
   .done();
 
+export const SurgingUndercurrentCombatStatus = combatStatus(122034)
+  .on("defeated", (c, e) => e.target.definition.id === AbyssHeraldWickedTorrents)
+  .combatStatus(CurseOfTheUndercurrent, "opp")
+  .dispose()
+  .done();
+
 /**
  * @id 222031
  * @name 暗流涌动
@@ -205,8 +211,6 @@ export const SurgingUndercurrent = card(222031)
   .costHydro(1)
   .talent(AbyssHeraldWickedTorrents, "none")
   .on("enter", (c) => c.self.master.getVariable("wateryRebirthTriggered"))
-  .combatStatus(CurseOfTheUndercurrent, "opp")
-  .endOn()
-  .onMasterDefeated()
+  .combatStatus(SurgingUndercurrentCombatStatus)
   .combatStatus(CurseOfTheUndercurrent, "opp")
   .done();

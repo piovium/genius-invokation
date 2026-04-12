@@ -63,7 +63,11 @@ export const SeedOfSkandha: StatusHandle = status(117031)
     if (c.get(fromChId).variables.alive) {
       return;
     }
-    return c.hasPhaseDamage("all", (e) => e.getReaction() !== null && e.damageInfo.target.id === fromChId);
+    return c.hasPhaseDamage("all", (e) =>
+      e.getReaction() !== null && 
+      e.damageInfo.causeDefeated && 
+      e.damageInfo.target.id === fromChId
+    );
   })
   .emitCustomEvent(TriggerOtherSeed)
   .done();
