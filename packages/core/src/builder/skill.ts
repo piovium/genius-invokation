@@ -882,7 +882,7 @@ export class TriggeredSkillBuilder<
   } | null = null;
   private _listenTo: ListenTo = ListenTo.SameArea;
 
-  /** @internal 这个技能是默认的角色击倒时弃置，不添加 filter */
+  /** @internal 这个技能是默认的角色击倒时弃置，不应用检测 master 存活的 filter */
   "~isDefaultDefeatedDispose" = false;
 
   constructor(
