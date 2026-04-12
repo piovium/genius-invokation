@@ -155,7 +155,7 @@ export const AbyssLectorVioletLightning = character(2406)
   .skills(DenOfThunder, ShockOfTheEnigmaticAbyss, WildThunderburst, ElectricRebirthPassive)
   .done();
 
-// 侵雷重闪入场时创建此出战状态，检测咏者击倒后失去1点充能
+// 侵雷重闪入场时创建此出战状态，检测咏者击倒后夺取1点充能
 export const ChainLightningCascadeCombatStatus = combatStatus(124065)
   .on("defeated", (c, e) => e.target.definition.id === AbyssLectorVioletLightning)
   .do((c) => {

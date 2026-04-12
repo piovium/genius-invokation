@@ -1064,11 +1064,10 @@ export class TriggeredSkillBuilder<
     ) {
       this.filters.push((c) => c.self.variables.alive);
     }
-    // 3. 状态和装备的技能默认要求角色存活，击倒默认弃置和响应自身弃置除外
+    // 3. 状态和装备的技能默认要求角色存活，默认击倒弃置除外
     if (
       !this["~isDefaultDefeatedDispose"] &&
-      (this.parent._type === "status" || this.parent._type === "equipment") &&
-      this.detailedEventName !== "selfDispose"
+      (this.parent._type === "status" || this.parent._type === "equipment")
     ) {
       this.filters.push((c) => {
         if (c.self.area.type === "characters") {
