@@ -367,7 +367,7 @@ export class ModifyRollEventArg extends PlayerEventArg {
   fixDice(type: DiceType, count: number): void {
     count = Math.min(
       count,
-      this.onTimeState.config.maxDiceCount - this._fixedDice.length,
+      Math.max(0, this.onTimeState.config.initialDiceCount - this._fixedDice.length),
     );
     this._log += `${stringifyState(
       this.caller,
