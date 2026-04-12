@@ -32,10 +32,5 @@ test("riptide should propagate", async () => {
   );
   await c.me.skill(YunlaiSwordsmanship);
   await c.opp.chooseActive(oppNext);
-
-
-  console.dir(c.game.detailLog, { depth: null });
-
-
   c.expect($.typeStatus.def(Riptide).at($.id(oppNext.id))).toBeExist();
 });
