@@ -167,14 +167,21 @@ export class EntityBuilder<
   ) {
     builderWeakRefs.add(new WeakRef(this));
     this._disposeOnMasterDefeated = _type === "status" || _type === "equipment";
-    this.on(
+    this.createDefaultDisposeSkill();
+  }
+
+  private createDefaultDisposeSkill() {
+    if (!(this._type === "status" || this._type === "equipment")) {
+      return;
+    }
+    const builder = this.on(
       "defeated",
       (c, e) =>
         c.self.area.type === "characters" &&
         c.self.cast<EntityType>().definition.disposeOnMasterDefeated,
-    )
-      .dispose()
-      .endOn();
+    );
+    builder["~isDefaultDefeatedDispose"] = true;
+    builder.dispose().endOn();
   }
 
   noDefaultDispose() {

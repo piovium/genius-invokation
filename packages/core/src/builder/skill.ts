@@ -882,6 +882,9 @@ export class TriggeredSkillBuilder<
   } | null = null;
   private _listenTo: ListenTo = ListenTo.SameArea;
 
+  /** @internal 这个技能是默认的角色击倒时弃置，不添加 filter */
+  "~isDefaultDefeatedDispose" = false;
+
   constructor(
     id: number,
     private readonly detailedEventName: DetailedEventNames | CustomEvent,
@@ -1037,20 +1040,13 @@ export class TriggeredSkillBuilder<
 
     // 【添加各种 filter】
 
-    // 0. 被动技能要求角色存活
-    if (
-      this.parent._type === "character" &&
-      this.detailedEventName !== "defeated"
-    ) {
-      this.filters.push((c) => c.self.variables.alive);
-    }
-    // 1. 对于并非响应自身弃置的技能，当实体已经被弃置时，不再响应
+    // 0. 对于并非响应自身弃置的技能，当实体已经被弃置时，不再响应
     if (this.detailedEventName !== "selfDispose") {
       this.filters.push((c, e) => {
         return c.self.area.type !== "removedEntities";
       });
     }
-    // 2. 默认禁止手牌区实体响应事件，除非显式启用
+    // 1. 默认禁止手牌 & 牌库区实体响应事件，除非显式启用
     if (!this._enableHandTriggering) {
       this.filters.push((c) => {
         return c.self.area.type !== "hands";
@@ -1061,11 +1057,18 @@ export class TriggeredSkillBuilder<
         return c.self.area.type !== "pile";
       });
     }
+    // 2. 被动技能要求角色存活
+    if (
+      this.parent._type === "character" &&
+      this.detailedEventName !== "defeated"
+    ) {
+      this.filters.push((c) => c.self.variables.alive);
+    }
     // 3. 状态和装备的技能默认要求角色存活，击倒默认弃置和响应自身弃置除外
     if (
+      !this["~isDefaultDefeatedDispose"] &&
       (this.parent._type === "status" || this.parent._type === "equipment") &&
-      this.detailedEventName !== "selfDispose" &&
-      this.detailedEventName !== "defeated"
+      this.detailedEventName !== "selfDispose"
     ) {
       this.filters.push((c) => {
         if (c.self.area.type === "characters") {
