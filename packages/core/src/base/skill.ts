@@ -94,7 +94,7 @@ export interface CoreSkillResult {
 export interface SkillResult extends CoreSkillResult {
   readonly innerNotify: StateMutationAndExposedMutation;
   readonly mainDamage: DamageInfo | null;
-};
+}
 
 export const EMPTY_SKILL_RESULT: SkillResult = {
   emittedEvents: [],
@@ -365,6 +365,10 @@ export class ModifyRollEventArg extends PlayerEventArg {
   _extraRerollCount = 0;
   _log = "";
   fixDice(type: DiceType, count: number): void {
+    count = Math.min(
+      count,
+      this.onTimeState.config.maxDiceCount - this._fixedDice.length,
+    );
     this._log += `${stringifyState(
       this.caller,
     )} fix ${count} [dice:${type}].\n`;
@@ -472,10 +476,7 @@ export class ActionEventArg<
 
   isSkillType(skillType: CommonSkillType): boolean {
     if (this.isUseSkill()) {
-      return (
-        this.action.skill.definition.skillType ===
-        skillType
-      );
+      return this.action.skill.definition.skillType === skillType;
     } else {
       return false;
     }
@@ -694,9 +695,7 @@ export class UseSkillEventArg extends PlayerEventArg {
     return this._skillInfo.caller as CharacterState | EntityState;
   }
   get techniqueCaller() {
-    if (
-      this._skillInfo.definition.skillType !== "technique"
-    ) {
+    if (this._skillInfo.definition.skillType !== "technique") {
       throw new GiTcgDataError(`techniqueCaller only available on technique`);
     }
     if (this.callerArea.type !== "characters") {
