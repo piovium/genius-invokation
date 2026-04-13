@@ -71,7 +71,7 @@ import type {
 import { DecksService } from "../decks/decks.service";
 import { UsersService, type UserInfo } from "../users/users.service";
 import { GamesService } from "../games/games.service";
-import { redis, semver } from "bun";
+import { redis, s3, semver } from "bun";
 
 interface RoomConfig extends Partial<GameConfig> {
   initTotalActionTime: number; // defaults 45
@@ -915,13 +915,27 @@ export class RoomsService {
       ) as number[];
       const winnerWho = game.state.winner;
       const winnerId = winnerWho === null ? null : playerIds[winnerWho]!;
+      const gameData = JSON.stringify(room.getStateLog());
       this.games.addGame({
         coreVersion: Room.CORE_VERSION,
         gameVersion: room.config.gameVersion,
-        data: JSON.stringify(room.getStateLog()),
+        data: gameData,
         winnerId,
         playerIds,
       });
+      if (process.env.S3_BUCKET) {
+        const now = new Date().toISOString();
+        const date = now.slice(0, 10);
+        const time = now.slice(11, 19).replaceAll(":", "");
+        s3
+          .file(`logs/${date}/${time}-${room.id}.json`)
+          .write(gameData, { type: "application/json" })
+          .catch((error) => {
+            this.logger.warn(
+              `Failed to upload room ${room.id} game log: ${error}`,
+            );
+          });
+      }
     });
     room.start();
     this.metrics.incrementStartedRooms();
