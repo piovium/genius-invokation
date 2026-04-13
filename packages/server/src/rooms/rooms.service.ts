@@ -907,6 +907,22 @@ export class RoomsService {
         return;
       }
       const players = room.getPlayers();
+      const gameData = JSON.stringify(room.getStateLog());
+      if (process.env.S3_BUCKET) {
+        const now = new Date().toISOString();
+        const date = now.slice(0, 10);
+        const time = now.slice(11, 19).replaceAll(":", "");
+        const s3Prefix = process.env.S3_PREFIX;
+        const keyPrefix = s3Prefix ? `${s3Prefix}/` : "";
+        s3
+          .file(`${keyPrefix}logs/${date}/${time}-${room.id}.json`)
+          .write(gameData, { type: "application/json" })
+          .catch((error) => {
+            this.logger.warn(
+              `Failed to upload room ${room.id} game log: ${error}`,
+            );
+          });
+      }
       if (players.some((p) => p.playerInfo.isGuest)) {
         return;
       }
@@ -915,7 +931,6 @@ export class RoomsService {
       ) as number[];
       const winnerWho = game.state.winner;
       const winnerId = winnerWho === null ? null : playerIds[winnerWho]!;
-      const gameData = JSON.stringify(room.getStateLog());
       this.games.addGame({
         coreVersion: Room.CORE_VERSION,
         gameVersion: room.config.gameVersion,
@@ -923,19 +938,6 @@ export class RoomsService {
         winnerId,
         playerIds,
       });
-      if (process.env.S3_BUCKET) {
-        const now = new Date().toISOString();
-        const date = now.slice(0, 10);
-        const time = now.slice(11, 19).replaceAll(":", "");
-        s3
-          .file(`logs/${date}/${time}-${room.id}.json`)
-          .write(gameData, { type: "application/json" })
-          .catch((error) => {
-            this.logger.warn(
-              `Failed to upload room ${room.id} game log: ${error}`,
-            );
-          });
-      }
     });
     room.start();
     this.metrics.incrementStartedRooms();
