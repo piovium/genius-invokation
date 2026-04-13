@@ -429,8 +429,8 @@ class Room {
   private stateLog: GameStateLogEntry[] = [];
   private terminated = false;
   private onStopHandlers: GameStopHandler[] = [];
-  private startedAt: string | null = null;
-  private endedAt: string | null = null;
+  private startedAt: Date | null = null;
+  private endedAt: Date | null = null;
 
   constructor(
     public readonly id: number,
@@ -504,7 +504,7 @@ class Room {
         `Failed to create initial game state: ${e}; propably due to invalid decks`,
       );
     }
-    this.startedAt = new Date().toISOString();
+    this.startedAt = new Date();
     const game = new InternalGame(state);
     game.onPause = async (state, mutations, canResume) => {
       this.stateLog.push({ state, canResume });
@@ -560,7 +560,7 @@ class Room {
 
   stop() {
     this.terminated = true;
-    this.endedAt = new Date().toISOString();
+    this.endedAt = new Date();
     this.players[0]?.complete();
     this.players[1]?.complete();
     for (const cb of this.onStopHandlers) {
@@ -584,8 +584,8 @@ class Room {
       gv: this.config.gameVersion,
       m: {
         roomId: this.id,
-        startedAt: this.startedAt,
-        endedAt: this.endedAt,
+        startedAt: this.startedAt?.toISOString() ?? null,
+        endedAt: this.endedAt?.toISOString() ?? null,
         players,
       },
     };
