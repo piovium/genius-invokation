@@ -185,15 +185,10 @@ export class SkillExecutor {
     skillInfo: SkillInfo,
     arg: GeneralSkillArg,
   ): Promise<void> {
+    const { emittedEvents, causeDefeated } = this.executeSkill(skillInfo, arg);
     if (this.state.phase === "gameEnd") {
       return;
     }
-    const { emittedEvents, causeDefeated } = this.executeSkill(skillInfo, arg);
-
-    if ((this.state as GameState).phase === "gameEnd") {
-      return;
-    }
-
     if (
       skillInfo.caller.definition.type === "character" &&
       skillInfo.definition.triggerOn === "initiative"

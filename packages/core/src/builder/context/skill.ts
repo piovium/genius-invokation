@@ -40,7 +40,6 @@ import {
   BeforeVariableEventArg,
   ZeroHealthEventArg,
   ReactionEventArg,
-  EMPTY_SKILL_RESULT,
   type CoreSkillResult,
 } from "../../base/skill";
 import {
@@ -375,7 +374,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
         newPhase: "gameEnd",
       });
       this.mutator.notify();
-      return EMPTY_SKILL_RESULT;
     } else if (failedPlayers.size === 1) {
       const who = [...failedPlayers.values()][0];
       this.mutator.log(
@@ -391,7 +389,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
         winner: flip(who),
       });
       this.mutator.notify();
-      return EMPTY_SKILL_RESULT;
     }
 
     const emittedEvents = [

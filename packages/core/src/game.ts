@@ -44,6 +44,7 @@ import {
   type GameState,
   type PlayerState,
   type VersionBehavior,
+  type PhaseType,
 } from "./base/state";
 import { CURRENT_VERSION, type Version } from "./base/version";
 import type { Mutation } from "./base/mutation";
@@ -364,21 +365,6 @@ export class Game {
     }
     const { state, canResume, stateMutations } = opt;
     await this.onPause?.(state, [...stateMutations], canResume);
-    if (state.phase === "gameEnd") {
-      this.gotWinner(state.winner);
-    }
-  }
-
-  private async tryPhase(fn: (this: Game) => Promise<void>) {
-    try {
-      await fn.call(this);
-    } catch (e) {
-      if (e instanceof GiTcgError && this.config.errorLevel === "skipPhase") {
-        // skip.
-      } else {
-        throw e;
-      }
-    }
   }
 
   async start(): Promise<0 | 1 | null> {
@@ -389,29 +375,45 @@ export class Game {
     }
     this.finishResolvers = Promise.withResolvers();
     this.logger.clearLogs();
+    const phaseFns: Record<
+      Exclude<PhaseType, "gameEnd">,
+      (this: Game, prev: PhaseType | null) => Promise<PhaseType>
+    > = {
+      initHands: this.initHands,
+      initActives: this.initActives,
+      roll: this.rollPhase,
+      action: this.actionPhase,
+      end: this.endPhase,
+    };
     (async () => {
       try {
         await this.mutator.notifyAndPause({ force: true, canResume: true });
+        let prevPhase: PhaseType | null = null;
         while (!this._terminated) {
-          switch (this.state.phase) {
-            case "initHands":
-              await this.tryPhase(this.initHands);
-              break;
-            case "initActives":
-              await this.tryPhase(this.initActives);
-              break;
-            case "roll":
-              await this.tryPhase(this.rollPhase);
-              break;
-            case "action":
-              await this.tryPhase(this.actionPhase);
-              break;
-            case "end":
-              await this.tryPhase(this.endPhase);
-              break;
-            default:
-              break;
+          const currentPhase = this.state.phase;
+          if (currentPhase === "gameEnd") {
+            return await this.gotWinner(this.state.winner);
           }
+          const phaseFn = phaseFns[currentPhase];
+          const newPhase: PhaseType = await phaseFn
+            .call(this, prevPhase)
+            .catch((e) => {
+              if (
+                e instanceof GiTcgError &&
+                this.config.errorLevel === "skipPhase"
+              ) {
+                return this.state.phase;
+              } else {
+                throw e;
+              }
+            });
+          if (newPhase !== currentPhase) {
+            this.mutate({
+              type: "changePhase",
+              newPhase,
+            });
+          }
+          prevPhase = currentPhase;
           this.mutate({ type: "clearRemovedEntities" });
           this.mutate({ type: "clearPhaseLogs" });
           await this.mutator.notifyAndPause({ canResume: true });
@@ -450,7 +452,7 @@ export class Game {
         type: "changePhase",
         newPhase: "gameEnd",
       });
-      if (winner !== null) {
+      if (winner && winner !== this.state.winner) {
         this.mutate({
           type: "setWinner",
           winner,
@@ -536,48 +538,6 @@ export class Game {
     }
   }
 
-  private async initHands() {
-    using l = this.mutator.subLog(DetailLogType.Phase, `In initHands phase:`);
-    for (const who of [0, 1] as const) {
-      const events = this.mutator.drawCardsPlain(
-        who,
-        this.config.initialHandsCount,
-      );
-      await this.handleEvents(events);
-    }
-    await this.mutator.notifyAndPause();
-    const events = (
-      await Promise.all([
-        this.mutator.switchHands(0),
-        this.mutator.switchHands(1),
-      ])
-    ).flat(1);
-    await this.handleEvents(events);
-    this.mutate({
-      type: "changePhase",
-      newPhase: "initActives",
-    });
-  }
-
-  private async initActives() {
-    using l = this.mutator.subLog(DetailLogType.Phase, `In initActive phase:`);
-    const [a0, a1] = await Promise.all([
-      this.mutator.chooseActive(0),
-      this.mutator.chooseActive(1),
-    ]);
-    this.mutator.postChooseActive(a0, a1);
-    await this.switchActive(0, a0, null);
-    await this.switchActive(1, a1, null);
-    await this.handleEvent("onBattleBegin", new EventArg(this.state));
-    this.mutate({
-      type: "changePhase",
-      newPhase: "roll",
-    });
-    this.mutate({
-      type: "stepRound",
-    });
-  }
-
   private async rpcChooseActive(
     who: 0 | 1,
     candidateIds: number[],
@@ -595,7 +555,41 @@ export class Game {
     return activeCharacterId;
   }
 
-  private async rollPhase() {
+  private async initHands(_: PhaseType | null): Promise<PhaseType> {
+    using l = this.mutator.subLog(DetailLogType.Phase, `In initHands phase:`);
+    for (const who of [0, 1] as const) {
+      const events = this.mutator.drawCardsPlain(
+        who,
+        this.config.initialHandsCount,
+      );
+      await this.handleEvents(events);
+    }
+    await this.mutator.notifyAndPause();
+    const events = (
+      await Promise.all([
+        this.mutator.switchHands(0),
+        this.mutator.switchHands(1),
+      ])
+    ).flat(1);
+    await this.handleEvents(events);
+    return "initActives";
+  }
+  private async initActives(_: PhaseType | null): Promise<PhaseType> {
+    using l = this.mutator.subLog(DetailLogType.Phase, `In initActive phase:`);
+    const [a0, a1] = await Promise.all([
+      this.mutator.chooseActive(0),
+      this.mutator.chooseActive(1),
+    ]);
+    this.mutator.postChooseActive(a0, a1);
+    await this.switchActive(0, a0, null);
+    await this.switchActive(1, a1, null);
+    await this.handleEvent("onBattleBegin", new EventArg(this.state));
+    this.mutate({
+      type: "stepRound",
+    });
+    return "roll";
+  }
+  private async rollPhase(_: PhaseType | null): Promise<PhaseType> {
     using l = this.mutator.subLog(
       DetailLogType.Phase,
       `In roll phase (round ${this.state.roundNumber}):`,
@@ -636,13 +630,12 @@ export class Game {
         await this.mutator.reroll(who, count);
       }),
     );
-    this.mutate({
-      type: "changePhase",
-      newPhase: "action",
-    });
-    await this.handleEvent("onActionPhase", new EventArg(this.state));
+    return "action";
   }
-  private async actionPhase() {
+  private async actionPhase(prevPhase: PhaseType | null): Promise<PhaseType> {
+    if (prevPhase === "roll") {
+      await this.handleEvent("onActionPhase", new EventArg(this.state));
+    }
     const who = this.state.currentTurn;
     // 使用 getter 防止状态变化后原有 player 过时的问题
     const player = () => this.state.players[who];
@@ -876,10 +869,6 @@ export class Game {
       this.state.players[0].declaredEnd &&
       this.state.players[1].declaredEnd
     ) {
-      this.mutate({
-        type: "changePhase",
-        newPhase: "end",
-      });
       // 进入结束阶段时，清空双方的宣布结束 flag。
       // 这会完全模拟“看到那小子挣钱”在结束阶段仍然触发生骰的行为
       // 也会保证“自由的新风”在结束阶段可以生效使下回合连续行动一次
@@ -892,9 +881,12 @@ export class Game {
           value: false,
         });
       }
+      return "end";
+    } else {
+      return "action";
     }
   }
-  private async endPhase() {
+  private async endPhase(_: PhaseType | null): Promise<PhaseType> {
     using l = this.mutator.subLog(
       DetailLogType.Phase,
       `In end phase (round ${this.state.roundNumber}, turn ${this.state.currentTurn}):`,
@@ -922,12 +914,9 @@ export class Game {
       type: "stepRound",
     });
     if (this.state.roundNumber >= this.config.maxRoundsCount) {
-      this.gotWinner(null);
+      return "gameEnd";
     } else {
-      this.mutate({
-        type: "changePhase",
-        newPhase: "roll",
-      });
+      return "roll";
     }
   }
 
@@ -1058,7 +1047,9 @@ export class Game {
           }
         }
       } else {
-        console?.warn?.(`Card ${card.definition.id} has no play skill defined.`);
+        console?.warn?.(
+          `Card ${card.definition.id} has no play skill defined.`,
+        );
       }
 
       result.push({
