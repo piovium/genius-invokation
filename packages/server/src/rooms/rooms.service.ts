@@ -577,8 +577,7 @@ class Room {
       .map((who) => {
         const player = this.getPlayer(who)?.playerInfo;
         return player && { who, id: player.id, name: player.name };
-      })
-      .filter((player): player is NonNullable<typeof player> => !!player);
+      });
     return {
       ...serializeGameStateLog(this.stateLog),
       gv: this.config.gameVersion,
