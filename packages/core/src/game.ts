@@ -551,7 +551,7 @@ export class Game {
         `Invalid active character id ${activeCharacterId}`,
       );
     }
-    this.notifyOne;
+    this.notifyOne(who);
     return activeCharacterId;
   }
 
