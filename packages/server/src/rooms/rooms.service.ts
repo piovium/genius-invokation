@@ -429,6 +429,8 @@ class Room {
   private stateLog: GameStateLogEntry[] = [];
   private terminated = false;
   private onStopHandlers: GameStopHandler[] = [];
+  private startedAt: string | null = null;
+  private endedAt: string | null = null;
 
   constructor(
     public readonly id: number,
@@ -502,6 +504,7 @@ class Room {
         `Failed to create initial game state: ${e}; propably due to invalid decks`,
       );
     }
+    this.startedAt = new Date().toISOString();
     const game = new InternalGame(state);
     game.onPause = async (state, mutations, canResume) => {
       this.stateLog.push({ state, canResume });
@@ -557,6 +560,7 @@ class Room {
 
   stop() {
     this.terminated = true;
+    this.endedAt = new Date().toISOString();
     this.players[0]?.complete();
     this.players[1]?.complete();
     for (const cb of this.onStopHandlers) {
@@ -569,9 +573,21 @@ class Room {
   }
 
   getStateLog() {
+    const players = ([0, 1] as const)
+      .map((who) => {
+        const player = this.getPlayer(who)?.playerInfo;
+        return player && { who, id: player.id, name: player.name };
+      })
+      .filter((player): player is NonNullable<typeof player> => !!player);
     return {
       ...serializeGameStateLog(this.stateLog),
       gv: this.config.gameVersion,
+      m: {
+        roomId: this.id,
+        startedAt: this.startedAt,
+        endedAt: this.endedAt,
+        players,
+      },
     };
   }
 
