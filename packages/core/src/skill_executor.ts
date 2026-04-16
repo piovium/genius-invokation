@@ -83,7 +83,7 @@ export class SkillExecutor {
     skillInfo: SkillInfo,
     arg: GeneralSkillArg,
   ): CoreSkillResult {
-    if (this.state.phase === "gameEnd") {
+    if (this.ended()) {
       return { emittedEvents: [], causeDefeated: false };
     }
     using l = this.mutator.subLog(
@@ -186,7 +186,7 @@ export class SkillExecutor {
     arg: GeneralSkillArg,
   ): Promise<void> {
     const { emittedEvents, causeDefeated } = this.executeSkill(skillInfo, arg);
-    if (this.state.phase === "gameEnd") {
+    if (this.ended()) {
       return;
     }
     if (
@@ -230,7 +230,7 @@ export class SkillExecutor {
 
     // 接下来处理出战角色倒下后的切人
     // 仅当**本次**技能的使用造成倒下时才会处理
-    if (!causeDefeated) {
+    if (this.ended() || !causeDefeated) {
       return;
     }
 
@@ -348,6 +348,9 @@ export class SkillExecutor {
    */
   async handleEvent(...events: ReadonlyEventList) {
     for (const event of events) {
+      if (this.ended()) {
+        return;
+      }
       const [name, arg] = event;
       using guard = this.createHandleEventNotifies(name);
       if (name === "requestReroll") {
@@ -550,8 +553,8 @@ export class SkillExecutor {
     }
   }
 
-  getState() {
-    return this.state;
+  private ended() {
+    return this.state.phase === "gameEnd";
   }
 
   static async executeSkill(
