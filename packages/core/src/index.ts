@@ -19,6 +19,8 @@ export {
   Game,
   type DeckConfig,
   type CreateInitialStateConfig,
+  type GameOption,
+  type ErrorLevel,
   mergeGameConfigWithDefault,
 } from "./game";
 export { type Player, type PlayerConfig } from "./player";

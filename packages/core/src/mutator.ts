@@ -43,7 +43,7 @@ import {
   type CreateEntityOptions,
   type InsertEntityOptions,
 } from "./utils";
-import { GiTcgCoreInternalError, GiTcgDataError, GiTcgIoError } from "./error";
+import { GiTcgCoreInternalError, GiTcgDataError, GiTcgIoError, GiTcgIoNotProvideError } from "./error";
 import {
   CharacterEventArg,
   type DamageInfo,
@@ -82,18 +82,6 @@ import {
 import { exposeHealKind } from "./io";
 import type { AttachmentDefinition } from "./base/attachment";
 import type { LunarReaction } from "@gi-tcg/typings";
-
-export class GiTcgPreviewAbortedError extends GiTcgCoreInternalError {
-  constructor(message?: string) {
-    super(`${message ?? "Preview aborted."} This error should be caught.`);
-  }
-}
-
-export class GiTcgIoNotProvideError extends GiTcgPreviewAbortedError {
-  constructor() {
-    super("IO is not provided.");
-  }
-}
 
 export interface NotifyOption {
   /** 即便没有积攒的 mutations，也执行 `onNotify`。适用于首次通知。 */

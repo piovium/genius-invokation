@@ -13,46 +13,44 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type {
-  ModifyEntityVarM,
-  Mutation,
-  SwitchActiveM,
-} from "./base/mutation";
+import type { ModifyEntityVarM, Mutation } from "./base/mutation";
 import {
   ActionEventArg,
   DisposeEventArg,
   GenericModifyActionEventArg,
   PlayCardEventArg,
-  SwitchActiveEventArg,
   UseSkillEventArg,
   type ActionInfo,
   type ActionInfoBase,
   type EventAndRequest,
   type InitiativeSkillEventArg,
   type InitiativeSkillInfo,
-  type SwitchActiveInfo,
   type WithActionDetail,
 } from "./base/skill";
 import type { GameState } from "./base/state";
 import { SkillExecutor } from "./skill_executor";
 import { getActiveCharacterIndex, getEntityArea, type Writable } from "./utils";
-import { GiTcgPreviewAbortedError, StateMutator } from "./mutator";
+import { GiTcgPreviewAbortedError } from "./error";
 import {
   ActionValidity,
   type ExposedMutation,
   type FlattenOneof,
   type PreviewData,
-  SwitchActiveEM,
   unFlattenOneof,
 } from "@gi-tcg/typings";
 import { exposeMutation } from "./io";
-import { GiTcgError } from "./error";
+import { DetailLogger } from "./log";
+import { getAsyncContextValue } from "./async_context";
+import { StateMutator } from "./mutator";
 
 export type ActionInfoWithModification = ActionInfo & {
   eventArg: InstanceType<typeof GenericModifyActionEventArg>;
 };
 
-class PreviewContext {
+class PreviewContext implements Disposable {
+  private readonly logger = new DetailLogger();
+  private readonly _lastCtxPreviewLogger: DetailLogger | undefined;
+
   public readonly mutator: StateMutator;
   private stateMutations: Mutation[] = [];
   private exposedMutations: ExposedMutation[] = [];
@@ -67,7 +65,20 @@ class PreviewContext {
         this.exposedMutations.push(...exposedMutations);
       },
       onPause: async () => {},
+      logger: this.logger,
     });
+    const ctx = getAsyncContextValue();
+    if (ctx) {
+      this._lastCtxPreviewLogger = ctx.previewLogger;
+      ctx.previewLogger = this.logger;
+    }
+  }
+
+  [Symbol.dispose]() {
+    const ctx = getAsyncContextValue();
+    if (ctx && ctx.previewLogger === this.logger) {
+      ctx.previewLogger = this._lastCtxPreviewLogger;
+    }
   }
 
   get state() {
@@ -85,30 +96,34 @@ class PreviewContext {
     if (this.stopped) {
       return;
     }
-    const executor = new SkillExecutor(this.mutator, { environment: "preview" });
+    const environment = "preview";
+    this.logger.environment = environment;
+    const executor = new SkillExecutor(this.mutator, { environment });
     try {
       await executor.finalizeSkill(skillInfo, arg);
     } catch (e) {
       if (e instanceof GiTcgPreviewAbortedError) {
         this.stopped = true;
-      } else if (e instanceof GiTcgError && this.skipError) {
+      } else if (this.skipError) {
         // skip.
       } else {
         throw e;
       }
     }
   }
-  async previewEvent( ...event: EventAndRequest) {
+  async previewEvent(...event: EventAndRequest) {
     if (this.stopped) {
       return;
     }
-    const executor = new SkillExecutor(this.mutator, { environment: "preview" });
+    const environment = "preview";
+    this.logger.environment = environment;
+    const executor = new SkillExecutor(this.mutator, { environment });
     try {
       await executor.handleEvent(event);
     } catch (e) {
       if (e instanceof GiTcgPreviewAbortedError) {
         this.stopped = true;
-      } else if (e instanceof GiTcgError && this.skipError) {
+      } else if (this.skipError) {
         // skip.
       } else {
         throw e;
@@ -116,11 +131,13 @@ class PreviewContext {
     }
   }
   async precalculateEvent(...event: EventAndRequest) {
-    const executor = new SkillExecutor(this.mutator, { environment: "precalculate" });
+    const environment = "precalculate";
+    this.logger.environment = environment;
+    const executor = new SkillExecutor(this.mutator, { environment });
     try {
       await executor.handleEvent(event);
     } catch (e) {
-      if (e instanceof GiTcgError && this.skipError) {
+      if (this.skipError) {
         // skip.
       } else {
         throw e;
@@ -249,7 +266,7 @@ export class ActionPreviewer {
         eventArg: eventArgReal,
       };
     }
-    const ctx = new PreviewContext(this.originalState, this.skipError);
+    using ctx = new PreviewContext(this.originalState, this.skipError);
     await ctx.precalculateEvent("modifyAction0", eventArgPreCalc);
     await ctx.precalculateEvent("modifyAction1", eventArgPreCalc);
     await ctx.precalculateEvent("modifyAction2", eventArgPreCalc);

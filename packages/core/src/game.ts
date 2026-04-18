@@ -38,7 +38,6 @@ import {
   type AnyState,
   type CharacterState,
   type EntityDefinition,
-  type ErrorLevel,
   type ExtensionState,
   type GameConfig,
   type GameState,
@@ -108,6 +107,11 @@ import { Player } from "./player";
 import type { CharacterDefinition } from "./base/character";
 import { $, runQuery, toExpression, type QueryFn } from "./query";
 import type { IQuery } from "./query/utils";
+import {
+  runWithAsyncContext,
+  setAsyncContext,
+  type GiTcgAsyncContext,
+} from "./async_context";
 
 export interface DeckConfig extends Deck {
   noShuffle?: boolean;
@@ -218,11 +222,19 @@ export interface CreateInitialStateConfig
   data: GameData;
 }
 
+export type ErrorLevel = "strict" | "toleratePreview" | "skipPhase";
+
+export interface GameOption {
+  errorLevel: ErrorLevel;
+  asyncContext: boolean | GiTcgAsyncContext;
+}
+
 const VOID_1_DICE_REQUIREMENT: DiceRequirement = new Map([[DiceType.Void, 1]]);
 const EMPTY_DICE_REQUIREMENT: DiceRequirement = new Map();
 
 export class Game {
   private readonly logger: DetailLogger;
+  private readonly option: GameOption;
 
   private _terminated = false;
   private finishResolvers: PromiseWithResolvers<0 | 1 | null> | null = null;
@@ -234,8 +246,13 @@ export class Game {
   public onPause: PauseHandler | null = null;
   public onIoError: IoErrorHandler | null = null;
 
-  constructor(initialState: GameState) {
+  constructor(initialState: GameState, option: Partial<GameOption> = {}) {
     this.logger = new DetailLogger();
+    this.option = {
+      errorLevel: "strict",
+      asyncContext: false,
+      ...option,
+    };
     this.mutatorConfig = {
       logger: this.logger,
       onNotify: (opt) => this.mutatorNotifyHandler(opt),
@@ -385,59 +402,60 @@ export class Game {
       action: this.actionPhase,
       end: this.endPhase,
     };
-    (async () => {
-      try {
-        await this.mutator.notifyAndPause({ force: true, canResume: true });
-        let prevPhase: PhaseType | null = null;
-        while (!this._terminated) {
-          const currentPhase = this.state.phase;
-          if (currentPhase === "gameEnd") {
-            return await this.gotWinner(this.state.winner);
-          }
-          const phaseFn = phaseFns[currentPhase];
-          const newPhase: PhaseType = await phaseFn
-            .call(this, prevPhase)
-            .catch((e) => {
-              if (
-                e instanceof GiTcgError &&
-                this.config.errorLevel === "skipPhase"
-              ) {
-                return this.state.phase;
-              } else {
-                throw e;
-              }
-            });
-          if (newPhase !== currentPhase) {
-            this.mutate({
-              type: "changePhase",
-              newPhase,
-            });
-          }
-          prevPhase = currentPhase;
-          this.mutate({ type: "clearRemovedEntities" });
-          this.mutate({ type: "clearPhaseLogs" });
-          await this.mutator.notifyAndPause({ canResume: true });
-        }
-      } catch (e) {
-        if (e instanceof GiTcgIoError) {
-          this.onIoError?.(e);
-          await this.gotWinner(flip(e.who));
-        } else if (e instanceof GiTcgError) {
-          this.finishResolvers?.reject(e);
-        } else {
-          let message = String(e);
-          if (e instanceof Error) {
-            message = e.message;
-            if (e.stack) {
-              message += "\n" + e.stack;
+    await setAsyncContext(this.option.asyncContext);
+    await runWithAsyncContext(
+      {
+        gameLogger: this.logger,
+      },
+      async () => {
+        try {
+          await this.mutator.notifyAndPause({ force: true, canResume: true });
+          let prevPhase: PhaseType | null = null;
+          while (!this._terminated) {
+            const currentPhase = this.state.phase;
+            if (currentPhase === "gameEnd") {
+              return await this.gotWinner(this.state.winner);
             }
+            const phaseFn = phaseFns[currentPhase];
+            const newPhase: PhaseType = await phaseFn
+              .call(this, prevPhase)
+              .catch((e) => {
+                if (
+                  e instanceof GiTcgError &&
+                  this.option.errorLevel === "skipPhase"
+                ) {
+                  return this.state.phase;
+                } else {
+                  throw e;
+                }
+              });
+            if (newPhase !== currentPhase) {
+              this.mutate({
+                type: "changePhase",
+                newPhase,
+              });
+            }
+            prevPhase = currentPhase;
+            this.mutate({ type: "clearRemovedEntities" });
+            this.mutate({ type: "clearPhaseLogs" });
+            await this.mutator.notifyAndPause({ canResume: true });
           }
-          this.finishResolvers?.reject(
-            new GiTcgCoreInternalError(`Unexpected error: ` + message),
-          );
+        } catch (e) {
+          if (e instanceof GiTcgIoError) {
+            this.onIoError?.(e);
+            await this.gotWinner(flip(e.who));
+          } else if (e instanceof GiTcgError) {
+            this.finishResolvers?.reject(e);
+          } else if (e instanceof Error) {
+            this.finishResolvers?.reject(
+              new GiTcgCoreInternalError(e.message, { cause: e }),
+            );
+          } else {
+            this.finishResolvers?.reject(new GiTcgCoreInternalError(String(e)));
+          }
         }
-      }
-    })();
+      },
+    );
     return this.finishResolvers.promise;
   }
 
@@ -529,7 +547,7 @@ export class Game {
       return value;
     } catch (e) {
       if (e instanceof Error) {
-        throw new GiTcgIoError(who, e.message, { cause: e?.cause });
+        throw new GiTcgIoError(who, e.message, { cause: e });
       } else {
         throw new GiTcgIoError(who, String(e));
       }
@@ -1096,7 +1114,7 @@ export class Game {
     // Add preview and apply modifyAction
     const skipError = (
       ["toleratePreview", "skipPhase"] as ErrorLevel[]
-    ).includes(this.config.errorLevel);
+    ).includes(this.option.errorLevel);
     const previewer = new ActionPreviewer(this.state, who, skipError);
     return await Promise.all(
       result.map((a) =>

@@ -17,6 +17,7 @@ import type { Draft } from "immer";
 import type { GameState } from "./base/state";
 import type { GameData } from "./builder";
 import { CORE_VERSION, StateSymbol } from "./index";
+import type { SkillEnvironment } from "./base/skill";
 
 export interface GameStateLogEntry {
   readonly state: GameState;
@@ -267,6 +268,7 @@ export enum DetailLogType {
 
 export interface DetailLogEntry {
   type: DetailLogType;
+  env: SkillEnvironment;
   value: string;
   children?: DetailLogEntry[];
 }
@@ -281,16 +283,17 @@ export interface IDetailLogger {
 }
 
 export class DetailLogger implements IDetailLogger {
+  public environment: SkillEnvironment = "normal";
   private logs: DetailLogEntry[] = [];
   _currentLogs: DetailLogEntry[] = this.logs;
   _parentLogs: DetailLogEntry[][] = [];
 
   public log(type: DetailLogType, value: string): void {
-    this._currentLogs.push({ type, value });
+    this._currentLogs.push({ type, env: this.environment, value });
   }
 
   public subLog(type: DetailLogType, value: string): DetailSubLogger {
-    const entry = { type, value, children: [] };
+    const entry = { type, env: this.environment, value, children: [] };
     this._currentLogs.push(entry);
     this._parentLogs.push(this._currentLogs);
     this._currentLogs = entry.children;

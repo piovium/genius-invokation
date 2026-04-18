@@ -81,11 +81,10 @@ import type {
 import type { GuessedTypeOfQuery } from "../../query-legacy/types";
 import { CALLED_FROM_REACTION } from "../reaction";
 import { flip } from "@gi-tcg/utils";
-import { GiTcgDataError } from "../../error";
+import { GiTcgDataError, GiTcgPreviewAbortedError } from "../../error";
 import { DetailLogType } from "../../log";
 import {
   EventList,
-  GiTcgPreviewAbortedError,
   type InsertPileStrategy,
   type InternalHealOption,
   type InternalNotifyOption,

@@ -370,7 +370,7 @@ export class TestController {
   public readonly game: Game;
 
   constructor(initState: GameState) {
-    this.game = new Game(initState);
+    this.game = new Game(initState, { asyncContext: true });
     // TODO: enable reroll
     const playerConfig: PlayerConfig = {
       allowTuningAnyDice: true,

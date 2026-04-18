@@ -30,6 +30,7 @@ import "@gi-tcg/web-ui-core/style.css";
 import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
 import { DetailLogViewer } from "@gi-tcg/detail-log-viewer";
 import { DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
+import mergeErrorCause from "merge-error-cause";
 
 export interface StandaloneParentProps {
   logs?: GameStateLogEntry[];
@@ -177,11 +178,10 @@ export function StandaloneParent(props: StandaloneParentProps) {
 
   const onGameError = (e: unknown, from?: Game) => {
     if (!from || from === game) {
-      console.error(e);
+      const merged = mergeErrorCause(e);
+      console.error(merged);
       alert(
-        `游戏出现了内部错误！请点击主窗口下方“导出日志”按钮生成日志文件，并反馈至 GitHub Issue，thanks~\n${
-          e instanceof Error ? e.message : String(e)
-        }`,
+        `游戏出现了内部错误！请点击主窗口下方“导出日志”按钮生成日志文件，并反馈至 GitHub Issue，thanks~\n${merged.message}\n${merged.stack}`,
       );
     }
   };
@@ -196,7 +196,7 @@ export function StandaloneParent(props: StandaloneParentProps) {
         versionBehavior: props.version,
       });
     }
-    const game = new Game(state);
+    const game = new Game(state, { asyncContext: true });
     (window as any).theGame = game;
     game.onPause = pause;
     game.players[0].io = childIo;
