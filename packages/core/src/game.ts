@@ -226,7 +226,6 @@ export type ErrorLevel = "strict" | "toleratePreview" | "skipPhase";
 
 export interface GameOption {
   errorLevel: ErrorLevel;
-  asyncContext: boolean | GiTcgAsyncContext;
 }
 
 const VOID_1_DICE_REQUIREMENT: DiceRequirement = new Map([[DiceType.Void, 1]]);
@@ -250,7 +249,6 @@ export class Game {
     this.logger = new DetailLogger();
     this.option = {
       errorLevel: "strict",
-      asyncContext: false,
       ...option,
     };
     this.mutatorConfig = {
@@ -402,7 +400,6 @@ export class Game {
       action: this.actionPhase,
       end: this.endPhase,
     };
-    await setAsyncContext(this.option.asyncContext);
     await runWithAsyncContext(
       {
         gameLogger: this.logger,

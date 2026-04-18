@@ -31,6 +31,7 @@ import {
   getVersionBehavior,
   CURRENT_VERSION,
   EntityDefinition,
+  setAsyncContext,
 } from "@gi-tcg/core";
 import {
   Aura,
@@ -45,6 +46,8 @@ import {
   SupportHandle,
 } from "@gi-tcg/core/builder";
 import { TestController } from "./controller";
+
+await setAsyncContext(true);
 
 let _nextId = -5000000;
 function nextId() {
@@ -503,7 +506,6 @@ export function setup(state: JSX.Element): TestController {
     [StateSymbol]: "game",
     data,
     config: {
-      errorLevel: "strict",
       initialDiceCount: 8,
       initialHandsCount: 5,
       maxDiceCount: 16,

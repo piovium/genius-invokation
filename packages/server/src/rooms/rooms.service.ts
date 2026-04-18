@@ -37,6 +37,7 @@ import {
   CURRENT_VERSION,
   type Version,
   type GameState,
+  setAsyncContext,
 } from "@gi-tcg/core";
 import { dispatchRpc, type Deck } from "@gi-tcg/typings";
 import getData from "@gi-tcg/data";
@@ -423,6 +424,8 @@ function sendDebugLog(name: string, message: any) {
   }
 }
 
+await setAsyncContext(true);
+
 class Room {
   public static readonly CORE_VERSION = CORE_VERSION;
   private game: InternalGame | null = null;
@@ -509,7 +512,7 @@ class Room {
       );
     }
     this.startedAt = new Date();
-    const game = new InternalGame(state, { asyncContext: true });
+    const game = new InternalGame(state);
     game.onPause = async (state, mutations, canResume) => {
       this.stateLog.push({ state, canResume });
       for (const mut of mutations) {

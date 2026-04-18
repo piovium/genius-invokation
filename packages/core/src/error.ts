@@ -40,11 +40,15 @@ function detailLogToString(logs: readonly DetailLogEntry[]) {
   return lines.toReversed().join("\n");
 }
 
+export interface GiTcgErrorOptions extends ErrorOptions {
+  omitLogs?: boolean;
+}
+
 export abstract class GiTcgError extends Error {
-  constructor(message?: string, options?: ErrorOptions) {
+  constructor(message?: string, options?: GiTcgErrorOptions) {
     let errorMessage = message || "(no message)";
     const logs: DetailLogEntry[] = [];
-    const ctx = getAsyncContextValue();
+    const ctx = options?.omitLogs ? void 0 : getAsyncContextValue();
     if (ctx?.gameLogger) {
       logs.push(...(ctx.gameLogger.getLogs?.() ?? []));
     }
@@ -102,7 +106,9 @@ export class GiTcgIoError extends GiTcgError {
 
 export class GiTcgPreviewAbortedError extends GiTcgCoreInternalError {
   constructor(message?: string) {
-    super(`${message ?? "Preview aborted."} This error should be caught.`);
+    super(`${message ?? "Preview aborted."} This error should be caught.`, {
+      omitLogs: true,
+    });
   }
 }
 

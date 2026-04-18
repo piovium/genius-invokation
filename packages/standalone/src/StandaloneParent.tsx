@@ -23,6 +23,7 @@ import {
   Version,
   exposeState,
   serializeGameStateLog,
+  setAsyncContext,
 } from "@gi-tcg/core";
 
 import { createClient, StandaloneChessboard } from "@gi-tcg/web-ui-core";
@@ -186,7 +187,7 @@ export function StandaloneParent(props: StandaloneParentProps) {
     }
   };
 
-  const createGame = (state?: GameState) => {
+  const createGame = async (state?: GameState) => {
     if (!state) {
       const deck0 = DEFAULT_ASSETS_MANAGER.decode(props.deck0);
       const deck1 = DEFAULT_ASSETS_MANAGER.decode(props.deck1);
@@ -196,7 +197,8 @@ export function StandaloneParent(props: StandaloneParentProps) {
         versionBehavior: props.version,
       });
     }
-    const game = new Game(state, { asyncContext: true });
+    await setAsyncContext(true);
+    const game = new Game(state);
     (window as any).theGame = game;
     game.onPause = pause;
     game.players[0].io = childIo;
@@ -207,7 +209,7 @@ export function StandaloneParent(props: StandaloneParentProps) {
   const startGame = async () => {
     try {
       await showPopup();
-      const initialGame = createGame();
+      const initialGame = await createGame();
       game = initialGame;
       initialGame.start().catch((e) => onGameError(e, initialGame));
     } catch (e) {
@@ -222,7 +224,7 @@ export function StandaloneParent(props: StandaloneParentProps) {
     uiIo.cancelRpc?.();
     game?.terminate();
     const latestState = logs[logs.length - 1];
-    const newGame = createGame(latestState.state);
+    const newGame = await createGame(latestState.state);
     game = newGame;
     newGame.start().catch((e) => onGameError(e, newGame));
     setStateLog(logs);

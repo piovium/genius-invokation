@@ -103,6 +103,7 @@ export async function setAsyncContext(value?: boolean | GiTcgAsyncContext) {
         "Failed to enable async context, falling back to noop context",
         e,
       );
+      disableAsyncContext();
     });
   } else {
     activeContext = value;
