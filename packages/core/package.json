@@ -23,7 +23,8 @@
     "check": "tsc --noEmit",
     "test": "bun test",
     "build:ohm": "ohm generateBundles -et src/query-legacy/query.ohm",
-    "build": "bun build:ohm && tsdown"
+    "build": "bun build:ohm && tsdown",
+    "gen:s_expr_schema": "bun run scripts/gen_s_expr_schema.ts"
   },
   "dependencies": {
     "@gi-tcg/typings": "workspace:*",
