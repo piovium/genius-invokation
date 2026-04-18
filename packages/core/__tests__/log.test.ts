@@ -27,12 +27,19 @@ test("detail logger", () => {
 
   const logs = logger.getLogs();
   expect(logs).toEqual([
-    { type: DetailLogType.Other, value: "top level" },
+    { type: DetailLogType.Other, env: "normal", value: "top level" },
     {
       type: DetailLogType.Skill,
+      env: "normal",
       value: "skill",
-      children: [{ type: DetailLogType.Other, value: "in skill" }],
+      children: [
+        {
+          type: DetailLogType.Other,
+          env: "normal",
+          value: "in skill",
+        },
+      ],
     },
-    { type: DetailLogType.Other, value: "top level again" },
+    { type: DetailLogType.Other, env: "normal", value: "top level again" },
   ]);
 });
