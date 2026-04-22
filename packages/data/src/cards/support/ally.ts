@@ -296,7 +296,7 @@ export const KidKujirai = card(322014)
   .do((c) => {
     c.generateDice(DiceType.Omni, 1);
     if (c.remainingSupportCount("opp") > 0) {
-      c.transferEntity(c.self, {
+      c.moveEntity(c.self, {
         type: "supports",
         who: flip(c.self.who),
       });
