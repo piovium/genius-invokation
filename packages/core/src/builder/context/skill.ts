@@ -337,6 +337,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
                 flagName: "hasDefeated",
                 value: true,
               });
+              this.mutate({
+                type: "removeRoundSkillLog",
+                caller: defeatedCh.latest(),
+              });
               const player = this.state.players[defeatedCh.who];
               const aliveCharacters = player.characters.filter(
                 (ch) => ch.variables.alive,

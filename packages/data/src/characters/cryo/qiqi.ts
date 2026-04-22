@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, combatStatus, card, DamageType, SkillHandle } from "@gi-tcg/core/builder";
+import { character, skill, summon, combatStatus, card, DamageType, SkillHandle, extension, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 111081
@@ -76,6 +76,17 @@ export const AdeptusArtHeraldOfFrost: SkillHandle = skill(11082)
   .summon(HeraldOfFrost)
   .done();
 
+const RiteOfResurrectionUsedExtension = extension(211081, { count: "pair<number>" })
+  .initialState({ count: [0, 0] })
+  .description("本场对局中某方触发起死回骸的次数")
+  .mutateWhen("onDamageOrHeal", (st, e) => {
+    // 七七倒下时重置
+    if (e.target.definition.id === Qiqi && e.damageInfo.causeDefeated) {
+      st.count[e.targetWho] = 0;
+    }
+  })
+  .done();
+
 /**
  * @id 11083
  * @name 仙法·救苦度厄
@@ -86,8 +97,19 @@ export const AdeptusArtPreserverOfFortune: SkillHandle = skill(11083)
   .type("burst")
   .costCryo(3)
   .costEnergy(3)
-  .damage(DamageType.Cryo, 3)
-  .combatStatus(FortunepreservingTalisman)
+  .associateExtension(RiteOfResurrectionUsedExtension)
+  .do((c) => {
+    c.damage(DamageType.Cryo, 3);
+    c.combatStatus(FortunepreservingTalisman);
+    if (c.self.hasEquipment(RiteOfResurrection) && 
+      c.getExtensionState().count[c.self.who] < 2) {
+      c.setExtensionState((st) => st.count[c.self.who]++);
+      const defeated = c.queryAll($.my.character.onlyDefeated);
+      for (const ch of defeated) {
+        ch.heal(2, { kind: "revive" });
+      }
+    }
+  })
   .done();
 
 /**
@@ -120,11 +142,4 @@ export const RiteOfResurrection = card(211081)
   .talent(Qiqi)
   .on("enter")
   .useSkill(AdeptusArtPreserverOfFortune)
-  .on("useSkill", (c, e) => e.skill.definition.id === AdeptusArtPreserverOfFortune)
-  .usage(2, { autoDispose: false })
-  .do((c) => {
-    for (const ch of c.$$(`all my defeated characters`)) {
-      ch.heal(2, { kind: "revive" });
-    }
-  })
   .done();

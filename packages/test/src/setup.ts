@@ -171,6 +171,17 @@ export function DeclaredEnd(props: DeclaredEnd.Prop): JSX.Element {
   return { comp: DeclaredEnd, prop: props };
 }
 
+export namespace DiceCount {
+  export interface Prop {
+    my?: boolean;
+    opp?: boolean;
+    count: number;
+  }
+}
+export function DiceCount(props: DiceCount.Prop): JSX.Element {
+  return { comp: DiceCount, prop: props };
+}
+
 export namespace State {
   export interface Prop {
     dataVersion?: Version;
@@ -207,7 +218,7 @@ function emptyPlayerState(who: 0 | 1): Draft<PlayerState> {
     who,
     initialPile: [],
     pile: [],
-    dice: [],
+    dice: Array.from({ length: 8 }, () => DiceType.Omni),
     activeCharacterId: 0,
     characters: [],
     combatStatuses: [],
@@ -255,6 +266,15 @@ export function setup(state: JSX.Element): TestController {
       }
       if (prop.opp) {
         players[1].declaredEnd = true;
+      }
+      continue;
+    } else if (comp === DiceCount) {
+      const diceArr = Array.from({ length: prop.count }, () => DiceType.Omni);
+      if (prop.my) {
+        players[0].dice = diceArr;
+      }
+      if (prop.opp) {
+        players[1].dice = diceArr;
       }
       continue;
     }
@@ -489,7 +509,6 @@ export function setup(state: JSX.Element): TestController {
     if (player.activeCharacterId === 0) {
       player.activeCharacterId = player.characters[0].id;
     }
-    player.dice = Array.from({ length: 8 }, () => DiceType.Omni);
   }
 
   const extensions = data.extensions

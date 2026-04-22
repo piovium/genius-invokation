@@ -71,6 +71,12 @@ export const TrailOfTheQilin = skill(11012)
 const FrostflakeArrowUsedExtension = extension(11013, { used: "pair<boolean>" })
   .initialState({ used: [false, false] })
   .description("本场对局中某方曾经使用过霜华矢")
+  .mutateWhen("onDamageOrHeal", (st, e) => {
+    // 甘雨倒下时重置
+    if (e.target.definition.id === Ganyu && e.damageInfo.causeDefeated) {
+      st.used[e.targetWho] = false;
+    }
+  })
   .done();
 
 /**

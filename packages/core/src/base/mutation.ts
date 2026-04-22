@@ -210,6 +210,10 @@ export interface PushRoundSkillLogM {
   readonly caller: CharacterState;
   readonly skillId: number;
 }
+export interface RemoveRoundSkillLogM {
+  readonly type: "removeRoundSkillLog";
+  readonly caller: CharacterState;
+}
 export interface ClearRoundLogsM {
   readonly type: "clearRoundLogs";
 }
@@ -249,6 +253,7 @@ export type Mutation =
   | SetPlayerFlagM
   | MutateExtensionStateM
   | PushRoundSkillLogM
+  | RemoveRoundSkillLogM
   | ClearRoundLogsM
   | ClearRemovedEntitiesM
   | PushPhaseDamageLogM
@@ -517,6 +522,14 @@ function doMutation(state: GameState, m: Mutation): GameState {
         player.roundSkillLog.get(key)!.push(m.skillId);
       });
     }
+    case "removeRoundSkillLog": {
+      const key = m.caller.definition.id;
+      const { who } = getEntityArea(state, m.caller.id);
+      return produce(state, (draft) => {
+        const player = draft.players[who];
+        player.roundSkillLog.delete(key);
+      });
+    }
     case "clearRoundLogs": {
       return produce(state, (draft) => {
         draft.players[0].roundSkillLog.clear();
@@ -621,6 +634,11 @@ export function stringifyMutation(m: Mutation): string | null {
     }
     case "pushRoundSkillLog": {
       return `Push round skill log ${m.skillId} into ${stringifyState(
+        m.caller,
+      )}`;
+    }
+    case "removeRoundSkillLog": {
+      return `Remove round skill log of [character:${m.caller.definition.id}] from ${stringifyState(
         m.caller,
       )}`;
     }
