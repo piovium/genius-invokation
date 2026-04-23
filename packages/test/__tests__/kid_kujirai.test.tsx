@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { DeclaredEnd, State, Support, ref, setup } from "#test";
+import { $, DeclaredEnd, State, Support, ref, setup } from "#test";
 import { Jeht, KidKujirai } from "@gi-tcg/data/internal/cards/support/ally";
 import { expect, test } from "bun:test";
 
@@ -28,7 +28,7 @@ test("Kid Kujirai: move to opponent support area without counting as dispose", a
     </State>,
   );
   await c.me.end();
-  expect(c.state.players[0].supports.some((s) => s.id === kid.id)).toBe(false);
-  expect(c.state.players[1].supports.some((s) => s.id === kid.id)).toBe(true);
+  c.expect($.my.id(kid.id)).toNotExist();
+  c.expect($.opp.id(kid.id)).toBeExist();
   c.expect(jeht).toHaveVariable({ experience: 0 });
 });
