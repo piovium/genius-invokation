@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Character, ref, setup, State, Equipment, Card, Status } from "#test";
+import { Character, ref, setup, State, Equipment, Card, Status, $ } from "#test";
 import { Wanderer, Windfavored, YuubanMeigen } from "@gi-tcg/data/internal/characters/anemo/wanderer";
 import { test } from "bun:test";
 
@@ -32,5 +32,5 @@ test("wanderer: normal attack to opp next", async () => {
   );
   await c.me.skill(YuubanMeigen);
   c.expect(target).toHaveVariable({ health: 7 });
-  c.expect("opp active").toHaveVariable({ health: 10 });
+  c.expect($.opp.active).toHaveVariable({ health: 10 });
 });

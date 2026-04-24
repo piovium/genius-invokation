@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, Aura } from "@gi-tcg/core/builder";
+import { character, skill, status, card, DamageType, Aura, combatStatus, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 124063
@@ -155,6 +155,15 @@ export const AbyssLectorVioletLightning = character(2406)
   .skills(DenOfThunder, ShockOfTheEnigmaticAbyss, WildThunderburst, ElectricRebirthPassive)
   .done();
 
+// 侵雷重闪入场时创建此出战状态，检测咏者击倒后夺取1点充能
+export const ChainLightningCascadeCombatStatus = combatStatus(124065)
+  .on("defeated", (c, e) => e.target.definition.id === AbyssLectorVioletLightning)
+  .do((c) => {
+    c.query($.opp.active)?.loseEnergy(1);
+    c.dispose();
+  })
+  .done();
+
 /**
  * @id 224061
  * @name 侵雷重闪
@@ -169,13 +178,9 @@ export const ChainLightningCascade = card(224061)
   .talent(AbyssLectorVioletLightning, "none")
   .on("enter")
   .do((c) => {
+    c.combatStatus(ChainLightningCascadeCombatStatus);
     if (!c.self.master.hasStatus(ElectricRebirth)) {
-      c.$("opp active")?.loseEnergy(1);
+      c.query($.opp.active)?.loseEnergy(1);
     }
-  })
-  .endOn()
-  .onMasterDefeated()
-  .do((c) => {
-    c.$("opp active")?.loseEnergy(1);
   })
   .done();

@@ -13,9 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, DamageType, DiceType, summon } from "@gi-tcg/core/builder";
+import { $, card, CardHandle, combatStatus, DamageType, DiceType, summon } from "@gi-tcg/core/builder";
 import { ChenyuBrew } from "../event/food";
-import { AgileSwitch, BattlePlan, EfficientSwitch } from "../../commons";
+import { AdventureCompleted, AgileSwitch, BattlePlan, EfficientSwitch } from "../../commons";
 import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other";
 
 /**
@@ -106,7 +106,7 @@ export const TideTurningSacredLord = summon(301041)
  * @name 天蛇船
  * @description
  * 冒险经历增加时：将1个元素骰转换为万能元素。
- * 冒险经历达到2时：抓1张牌。
+ * 冒险经历达到2时：抓2张牌。
  * 冒险经历达到4时：我方出战角色附属2层战斗计划。
  * 冒险经历达到6时：弃置敌方场上1个随机召唤物，召唤回天的圣主，然后弃置此牌。
  */
@@ -117,7 +117,7 @@ export const Tonatiuh = card(321034)
   .convertDice(DiceType.Omni, 1)
   .on("adventure", (c) => c.getVariable("exp") >= 2)
   .usage(1, { name: "stage1", visible: false })
-  .drawCards(1)
+  .drawCards(2)
   .on("adventure", (c) => c.getVariable("exp") >= 4)
   .usage(1, { name: "stage2", visible: false })
   .characterStatus(BattlePlan, "my active", {
@@ -134,4 +134,62 @@ export const Tonatiuh = card(321034)
     c.summon(TideTurningSacredLord);
     c.finishAdventure();
   })
+  .done();
+
+/**
+ * @id 301042
+ * @name 层岩巨渊（生效中）
+ * @description
+ * 我方本回合内打出2张名称不存在于本局最初牌组的牌时：生成3个万能元素骰，然后弃置层岩巨渊。
+ */
+export const TheChasmInEffect = combatStatus(301042)
+  .variable("cardsPlayed", 0)
+  .on("roundEnd")
+  .setVariable("cardsPlayed", 0)
+  .on("playCard", (c, e) => !c.isInInitialPile(e.card))
+  .do((c) => {
+    c.addVariable("cardsPlayed", 1);
+    if (c.getVariable("cardsPlayed") >= 2) {
+      c.generateDice(DiceType.Omni, 3);
+      const chasm = c.query($.my.support.def(TheChasm));
+      if (chasm) {
+        c.dispose(chasm);
+        if (c.data.entities.get(AdventureCompleted)) {
+          c.combatStatus(AdventureCompleted);
+        }
+      }
+      c.dispose();
+    }
+  })
+  .done();
+
+/**
+ * @id 321040
+ * @name 层岩巨渊
+ * @description
+ * 入场时：在我方牌组中随机生成5张事件牌。
+ * 冒险经历达到偶数次时：生成1个随机基础元素骰并抓1张牌。
+ * 冒险经历达到10次，我方单回合内打出2张名称不存在于本局最初牌组的牌时：生成3个万能元素骰，然后弃置此卡牌。
+ */
+export const TheChasm = card(321040)
+  .since("v6.5.0")
+  .tags("adventureSpot")
+  .adventureSpot()
+  .on("enter", (c, e) => !e.overridden)
+  .do((c) => {
+    const excludeTags = ["food", "legend"] as const;
+    const candidates = c.allCardDefinitions(
+      (c) => c.type === "eventCard" && !excludeTags.some((tag) => c.tags.includes(tag))
+    );
+    const cards = c.randomSubset(candidates, 5);
+    for (const card of cards) {
+      c.createPileCards(card.id as CardHandle, 1, "random");
+    }
+  })
+  .on("adventure", (c) => c.getVariable("exp") % 2 === 0)
+  .generateDice("randomElement", 1)
+  .drawCards(1)
+  .on("adventure", (c) => c.getVariable("exp") >= 10)
+  .usage(1, { name: "stage3", visible: false })
+  .combatStatus(TheChasmInEffect)
   .done();

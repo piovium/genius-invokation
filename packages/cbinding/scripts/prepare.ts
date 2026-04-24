@@ -23,7 +23,19 @@ async function writeGeneratedJsCodeCpp() {
       }),
       babel({
         extensions: [".mjs", ".js", ".ts"],
-        presets: ["@babel/preset-typescript"],
+        // We use v8 11.6
+        targets: "node 20.0",
+        presets: [
+          "@babel/preset-typescript",
+          [
+            "@babel/preset-env",
+            {
+              bugfixes: true,
+              useBuiltIns: "entry",
+              corejs: "3.38.1",
+            },
+          ],
+        ],
         babelHelpers: "bundled",
       }),
       commonjs(),
@@ -92,14 +104,11 @@ async function replaceHeaderMacros() {
   for (
     let result: RegExpExecArray | null = null;
     (result = regexp.exec(macros));
-
   ) {
     const [_, name, value] = result;
     output_source += `#define ${name} ${value}\n`;
   }
-  const header = await Bun.file(
-    `${INLCUDE_DIR}/gitcg.h`,
-  ).text();
+  const header = await Bun.file(`${INLCUDE_DIR}/gitcg.h`).text();
   const updatedHeader = header.replace(
     /\/\/ >>> generated macros[\s\S]*?\/\/ <<< generated macros/,
     `// >>> generated macros\n${output_source}// <<< generated macros`,

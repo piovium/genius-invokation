@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import { character, skill, summon, status, card, DamageType, DiceType, SummonHandle } from "@gi-tcg/core/builder";
 
 /**
  * @id 116054
@@ -39,18 +39,19 @@ export const SuperlativeSuperstrength = status(116054)
  * 我方出战角色受到伤害时：抵消1点伤害。
  * 可用次数：1，耗尽时不弃置此牌。
  * 此召唤物在场期间可触发1次：我方角色受到伤害后，为荒泷一斗附属乱神之怪力。
- * 结束阶段：弃置此牌，造成1点岩元素伤害。
+ * 结束阶段：弃置此牌，造成1点岩元素伤害，并为荒泷一斗附属乱神之怪力。
  */
-export const Ushi = summon(116051)
+export const Ushi: SummonHandle = summon(116051)
   .tags("barrier")
   .endPhaseDamage(DamageType.Geo, 1)
   .dispose()
+  .characterStatus(SuperlativeSuperstrength, $ => $.my.character.def(AratakiItto))
   .on("decreaseDamaged", (c, e) => e.target.isActive())
   .usage(1, { autoDispose: false })
   .decreaseDamage(1)
   .on("damaged")
   .usage(1, { name: "addStatusUsage" })
-  .characterStatus(SuperlativeSuperstrength, `my characters with definition id 1605`)
+  .characterStatus(SuperlativeSuperstrength, $ => $.my.character.def(AratakiItto))
   .done();
 
 /**

@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { EntityDefinition } from "@gi-tcg/core";
-import { card, combatStatus, DamageType, extension, status, StatusHandle } from "@gi-tcg/core/builder";
+import type { EntityDefinition } from "@gi-tcg/core";
+import { card, combatStatus, DamageType, extension, status, StatusHandle, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 313001
@@ -189,20 +189,27 @@ export const Qucusaurus = card(313006)
   .since("v5.3.0")
   .costSame(1)
   .technique()
+  .variable("deductDiceTriggered", 0, { visible: false })
   .on("enter")
-  .characterStatus(Target, "opp active")
-  .on("deductOmniDiceSwitch", (c, e) =>                           // 绒翼龙只在可以减费时生效
-    c.$(`opp active has status with definition id ${Target}`) &&  // 敌方出战角色附属目标
-    e.action.to.id === c.self.master.id &&                      // 附属角色切换为出战角色
-    c.player.hands.length > 0)                                    // 有手牌（“如可能，舍弃”）
-  .deductOmniCost(1)
-  .setFastAction()
-  .do((c) => {
-    c.disposeMaxCostHands(1);
-    for (const st of c.$$(`opp status with definition id ${Target}`)) {
+  .characterStatus(Target, $.opp.active)
+  .on("deductOmniDiceSwitch", (c, e) =>          // 绒翼龙只在可以减费时生效
+    c.query($.opp.active.has($.def(Target))) &&  // 敌方出战角色附属目标
+    e.action.to.id === c.self.master.id &&       // 附属角色切换为出战角色
+    c.player.hands.length > 0)                   // 有手牌（“如可能，舍弃”）
+  .do((c, e) => {
+    c.setVariable("deductDiceTriggered", 1);
+    // 预计算时不触发弃牌
+    if (c.skillInfo.environment !== "precalculate") {
+      c.disposeMaxCostHands(1);
+    }
+    for (const st of c.queryAll($.opp.typeStatus.def(Target))) {
       st.dispose();
     }
+    e.deductOmniCost(1);
   })
+  .on("beforeFastSwitch", (c) => c.getVariable("deductDiceTriggered"))  // 将此次切换视为「快速行动」
+  .setVariable("deductDiceTriggered", 0)
+  .setFastAction()
   .endOn()
   .provideSkill(3130063)
   .usage(2)
@@ -371,4 +378,39 @@ export const RawrRawr = card(313009)
   .costVoid(2)
   .drawCards(1, { withTag: "technique" })
   .combatStatus(SaurianMoralSupport)
+  .done();
+
+/**
+ * @id 313010
+ * @name 膨膨兽
+ * @description
+ * 特技：膨膨音波
+ * 可用次数：2
+ * （角色最多装备1个「特技」）
+ * [3130101: 膨膨音波] (1*Same) 切换到下一个角色，从牌组里随机抓1张当前元素骰费用最高或最低的牌。
+ */
+export const Blubberbeast = card(313010)
+  .since("v6.5.0")
+  .costSame(1)
+  .technique()
+  .provideSkill(3130101)
+  .usage(2)
+  .costSame(1)
+  .abortPreview()
+  .do((c) => {
+    c.switchActive($.my.next);
+    const takeMax = c.random([true, false]);
+    const pile = Object.groupBy(c.player.pile, (c) => c.diceCost());
+    // ES6 保证从小到大排序，无需再 sort
+    const costs = Object.keys(pile).map(Number);
+    if (costs.length === 0) {
+      return;
+    }
+    const targetCost = takeMax ? costs[costs.length - 1] : costs[0];
+    const candidates = pile[targetCost]!;
+    const targetCard = c.random(candidates);
+    if (targetCard) {
+      c.drawCards(targetCard);
+    }
+  })
   .done();

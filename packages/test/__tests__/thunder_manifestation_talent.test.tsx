@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Status, Card, Equipment } from "#test";
+import { ref, setup, Character, State, Status, Card, Equipment, $ } from "#test";
 import { MondstadtHashBrown } from "@gi-tcg/data/internal/cards/event/food";
 import { test } from "bun:test";
 import {
@@ -38,13 +38,13 @@ test("thunder manifestation: talent works on 'disposed' status", async () => {
       <Card my pile def={MondstadtHashBrown} />
     </State>,
   );
-  c.expect("my hand cards").toBeCount(0);
+  c.expect($.my.hand).toBeCount(0);
   await c.me.skill(StrifefulLightning);
   // 雷鸣探知弃置，伤害 +1
-  c.expect(`status with definition id ${LightningRod}`).toNotExist();
+  c.expect($.typeStatus.def(LightningRod)).toNotExist();
   c.expect(target).toHaveVariable({ health: 6 });
   // 我方抽牌
-  c.expect("my hand cards").toBeCount(1);
+  c.expect($.my.hand).toBeCount(1);
   // 我方天赋每回合使用次数归零
   c.expect(talent).toHaveVariable({ usagePerRound: 0 });
 });

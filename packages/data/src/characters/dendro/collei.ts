@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, combatStatus, card, DamageType, SkillHandle } from "@gi-tcg/core/builder";
+import { character, skill, summon, combatStatus, card, DamageType, SkillHandle, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 117011
@@ -36,9 +36,19 @@ export const CuileinAnbar = summon(117011)
  */
 export const Sprout = combatStatus(117012)
   .duration(1)
-  .on("skillReaction", (c, e) => e.relatedTo(DamageType.Dendro))
+  .on("useSkill", (c) => c.hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Dendro)))
   .usagePerRound(1)
   .damage(DamageType.Dendro, 1)
+  .done();
+
+/**
+ * @id 117013
+ * @name 新叶(已创建)
+ * @description
+ * 本回合中无法再生成新的新叶。
+ */
+export const SproutCreated = combatStatus(117013)
+  .oneDuration()
   .done();
 
 /**
@@ -64,8 +74,12 @@ export const FloralBrush: SkillHandle = skill(17012)
   .type("elemental")
   .costDendro(3)
   .damage(DamageType.Dendro, 3)
-  .if((c) => c.self.hasEquipment(FloralSidewinder))
-  .combatStatus(Sprout)
+  .do((c) => {
+    if (c.self.hasEquipment(FloralSidewinder) && !c.query($.my.combatStatus.def(SproutCreated))) {
+      c.combatStatus(Sprout);
+      c.combatStatus(SproutCreated);
+    }
+  })
   .done();
 
 /**

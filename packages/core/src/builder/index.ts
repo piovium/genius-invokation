@@ -50,6 +50,12 @@ export {
   type CustomEvent,
   createCustomEvent as customEvent,
 } from "../base/custom_event";
+export {
+  $,
+  type IQuery,
+  type IDollar,
+  type InferResult as InferQueryResult,
+} from "../query";
 
 export { originalDiceCostSizeOfCard as originalDiceCostOfCard } from "../utils";
 export { flip, pair, type, type Pair } from "@gi-tcg/utils";

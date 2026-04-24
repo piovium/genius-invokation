@@ -118,7 +118,7 @@ export const SuannisGildedDance = skill(13163)
  * @id 13165
  * @name 踏云献瑞
  * @description
- * 造成D__KEY__DAMAGE点D__KEY__ELEMENT。
+ * 造成D__KEY__DAMAGE点物理伤害。
  */
 export const BestialAscentPassive = skill(13165)
   .reserve();

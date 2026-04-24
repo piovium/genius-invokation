@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, StatusHandle, combatStatus } from "@gi-tcg/core/builder";
+import { character, skill, status, card, DamageType, StatusHandle, combatStatus, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 112042
@@ -56,10 +56,13 @@ export const RangedStance = status(112041)
  * （处于「近战状态」的达达利亚攻击所附属角色时，会造成额外伤害。）
  */
 export const Riptide: StatusHandle = status(112043)
-  .onMasterDefeated()
+  // 当带有断流的角色被击倒时（也即断流弃置时）：
+  // - 若出战角色被击倒（稍后玩家需选择出战）： 则在下次切换角色后，为新的出战角色附属断流。
+  // - 否则直接为当前出战角色附属断流。
+  .on("selfDispose")
   .do((c) => {
-    const active = c.$("my active includes defeated")!;
-    if (active.variables.alive) {
+    const active = c.query($.my.active.includesDefeated);
+    if (active?.variables.alive) {
       active.addStatus(Riptide);
     } else {
       c.combatStatus(Riptide2);
@@ -67,18 +70,10 @@ export const Riptide: StatusHandle = status(112043)
   })
   .done();
 
-
-// 当对方带有断流的角色被击倒时：
-// 若出战角色被击倒（稍后玩家需选择出战角色）：
-// - 则在下次切换角色后，为新的出战角色附属断流。
-// 否则：
-// - 直接为当前出战角色附属断流。
-
 const Riptide2 = combatStatus(112044)
   .once("switchActive")
   .characterStatus(Riptide, "my active")
   .done();
-
 
 /**
  * @id 12041

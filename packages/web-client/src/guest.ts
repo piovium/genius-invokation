@@ -19,12 +19,14 @@ import type { DeckInfo } from "./pages/Decks";
 import type { Deck } from "@gi-tcg/typings";
 import axios from "axios";
 import { createStore, produce } from "solid-js/store";
+import pLimit from "p-limit";
 
 export interface GuestInfo {
   type: "guest";
   name: string;
   id: string | null;
   chessboardColor: string | null;
+  avatarUrl: string | null;
 }
 
 export interface DeckWithName extends Deck {
@@ -40,6 +42,7 @@ export type GuestDeck = readonly [
       deck: Partial<DeckWithName>,
     ) => Promise<DeckInfo>;
     removeGuestDeck: (id: number) => Promise<void>;
+    pinGuestDeck: (id: number) => Promise<void>;
   },
 ];
 
@@ -58,44 +61,61 @@ const [guestDeck, setGuestDeck] = makePersisted(createStore<DeckInfo[]>([]), {
 
 type VersionResponse = Omit<DeckInfo, "id">;
 
-export const useGuestDecks = (): GuestDeck => [
-  () => guestDeck,
-  {
-    addGuestDeck: async (deck) => {
-      const id = Date.now();
-      const { data } = await axios.post<VersionResponse>("decks/version", deck);
-      const deckInfo: DeckInfo = { ...data, ...deck, id };
-      setGuestDeck((decks) => [...decks, deckInfo]);
-      return deckInfo;
+export const useGuestDecks = (): GuestDeck => {
+  const addGuestDeck = async (deck: DeckWithName) => {
+    const id = Date.now();
+    const { data } = await axios.post<VersionResponse>("decks/version", deck);
+    const deckInfo: DeckInfo = { ...data, ...deck, id };
+    setGuestDeck((decks) => [...decks, deckInfo]);
+    return deckInfo;
+  };
+
+  const updateGuestDeck = async (
+    id: number,
+    newDeck: Partial<DeckWithName>,
+  ) => {
+    const index = guestDeck.findIndex((deck) => deck.id === id);
+    if (index === -1) {
+      throw new Error("Deck not found");
+    }
+    const oldDeck = guestDeck[index];
+    const { data } = await axios.post<VersionResponse>("decks/version", {
+      ...oldDeck,
+      ...newDeck,
+    });
+    const result = { ...data, ...newDeck, id };
+    setGuestDeck(
+      produce((decks) => {
+        decks.splice(index, 1);
+        decks.push(result);
+      }),
+    );
+    return result;
+  };
+
+  const removeGuestDeck = async (id: number) => {
+    const idx = guestDeck.findIndex((deck) => deck.id === id);
+    if (idx === -1) {
+      throw new Error("Deck not found");
+    }
+    setGuestDeck(
+      produce((decks) => {
+        decks.splice(idx, 1);
+      }),
+    );
+  };
+
+  const limit = pLimit(1);
+
+  return [
+    () => guestDeck.toReversed(),
+    {
+      addGuestDeck: (deck) => limit(addGuestDeck, deck),
+      updateGuestDeck: (id, newDeck) => limit(updateGuestDeck, id, newDeck),
+      removeGuestDeck: (id) => limit(removeGuestDeck, id),
+      pinGuestDeck: async (id) => {
+        await limit(updateGuestDeck, id, {});
+      },
     },
-    updateGuestDeck: async (id, newDeck) => {
-      const index = guestDeck.findIndex((deck) => deck.id === id);
-      if (index === -1) {
-        throw new Error("Deck not found");
-      }
-      const oldDeck = guestDeck[index];
-      const { data } = await axios.post<VersionResponse>("decks/version", {
-        ...oldDeck,
-        ...newDeck,
-      });
-      const result = { ...data, ...newDeck, id };
-      setGuestDeck(
-        produce((decks) => {
-          decks[index] = result;
-        }),
-      );
-      return result;
-    },
-    removeGuestDeck: async (id) => {
-      const idx = guestDeck.findIndex((deck) => deck.id === id);
-      if (idx === -1) {
-        throw new Error("Deck not found");
-      }
-      setGuestDeck(
-        produce((decks) => {
-          decks.splice(idx, 1);
-        }),
-      );
-    },
-  },
-];
+  ];
+};

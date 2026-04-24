@@ -64,7 +64,7 @@ import {
   type EntityBuilderPublic,
   type EntityDescriptionDictionaryGetter,
 } from "./entity";
-import type { GuessedTypeOfQuery } from "../query/types";
+import type { GuessedTypeOfQuery } from "../query-legacy/types";
 import { GiTcgDataError } from "../error";
 import {
   costSize,

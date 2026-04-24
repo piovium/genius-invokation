@@ -14,34 +14,30 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
-  type DamageInfo,
-  DamageOrHealEventArg,
+  type CoreSkillResult,
   defineSkillInfo,
   DisposeEventArg,
   type Event,
   type EventAndRequest,
   EventArg,
   type InitiativeSkillEventArg,
-  RequestArg,
   SelectCardEventArg,
   type SelectCardInfo,
+  type SkillEnvironment,
   type SkillInfo,
-  type SwitchActiveInfo,
   type TriggeredSkillDefinition,
   UseSkillEventArg,
-  ZeroHealthEventArg,
 } from "./base/skill";
 import {
   type AnyState,
   type CharacterState,
-  StateSymbol,
+  type GameState,
   stringifyState,
 } from "./base/state";
-import { Aura, PbSkillType, type ExposedMutation } from "@gi-tcg/typings";
+import { PbSkillType, type ExposedMutation } from "@gi-tcg/typings";
 import {
   allSkills,
   type CallerAndTriggeredSkill,
-  checkImmune,
   getActiveCharacterIndex,
   getEntityArea,
   getEntityById,
@@ -54,13 +50,13 @@ import {
 } from "./utils";
 import { flip } from "@gi-tcg/utils";
 import { DetailLogType } from "./log";
-import { StateMutator } from "./mutator";
+import { EventList, StateMutator, type ReadonlyEventList } from "./mutator";
 import type { Mutation } from "./base/mutation";
 
 export type GeneralSkillArg = EventArg | InitiativeSkillEventArg;
 
 interface SkillExecutorConfig {
-  readonly preview: boolean;
+  readonly environment: SkillEnvironment;
 }
 
 export class SkillExecutor {
@@ -86,9 +82,9 @@ export class SkillExecutor {
   private executeSkill(
     skillInfo: SkillInfo,
     arg: GeneralSkillArg,
-  ): readonly EventAndRequest[] {
-    if (this.state.phase === "gameEnd") {
-      return [];
+  ): CoreSkillResult {
+    if (this.ended()) {
+      return { emittedEvents: [], causeDefeated: false };
     }
     using l = this.mutator.subLog(
       DetailLogType.Skill,
@@ -117,11 +113,12 @@ export class SkillExecutor {
 
     const oldState = this.state;
     this.mutator.notify();
-    const [newState, { innerNotify, emittedEvents }] = (0, skillDef.action)(
+    const [newState, { innerNotify, emittedEvents, causeDefeated }] = (0,
+    skillDef.action)(
       this.state,
       {
         ...skillInfo,
-        isPreview: this.config.preview,
+        environment: this.config.environment,
         logger: this.mutator.logger,
       },
       arg as any,
@@ -181,152 +178,17 @@ export class SkillExecutor {
     innerNotify.exposedMutations.unshift(...prependMutations);
     this.mutator.resetState(newState, innerNotify);
 
-    return emittedEvents;
+    return { emittedEvents, causeDefeated };
   }
 
   async finalizeSkill(
     skillInfo: SkillInfo,
     arg: GeneralSkillArg,
   ): Promise<void> {
-    if (this.state.phase === "gameEnd") {
+    const { emittedEvents, causeDefeated } = this.executeSkill(skillInfo, arg);
+    if (this.ended()) {
       return;
     }
-    let emittedEvents = [...this.executeSkill(skillInfo, arg)];
-    await this.mutator.notifyAndPause();
-
-    const otherEvents: EventAndRequest[] = [];
-    const hciEvents: EventAndRequest[] = [];
-    const safeDamageEvents: EventAndRequest[] = [];
-    const criticalDamageEvents: EventAndRequest[] = [];
-
-    do {
-      const damageEventArgs: DamageOrHealEventArg<DamageInfo>[] = [];
-      const zeroHealthEventArgs: ZeroHealthEventArg[] = [];
-
-      const failedPlayers = new Set<0 | 1>();
-
-      // 将 emittedEvents 分成 nonDamage 和 damage 两类，
-      // 同时收集 zeroHealth 以处理击倒和免于被击倒
-      for (const event of emittedEvents) {
-        const [name, arg] = event;
-        if (name === "onDamageOrHeal" && arg.isDamageTypeDamage()) {
-          if (arg.damageInfo.causeDefeated) {
-            // Wrap original EventArg to ZeroHealthEventArg
-            const zeroHealthEventArg = new ZeroHealthEventArg(
-              arg.onTimeState,
-              arg.damageInfo,
-              arg.option,
-            );
-            if (checkImmune(this.state, zeroHealthEventArg)) {
-              zeroHealthEventArgs.push(zeroHealthEventArg);
-            } else {
-              const { id } = arg.target;
-              const ch = getEntityById(this.state, id) as CharacterState;
-              const { who } = getEntityArea(this.state, id);
-              if (ch.variables.alive) {
-                this.mutator.log(
-                  DetailLogType.Primitive,
-                  `${stringifyState(ch)} is defeated (and no immune available)`,
-                );
-                this.mutate({
-                  type: "modifyEntityVar",
-                  state: ch,
-                  varName: "alive",
-                  value: 0,
-                  direction: "decrease",
-                });
-                const energyVarName =
-                  ch.definition.specialEnergy?.variableName ?? "energy";
-                this.mutate({
-                  type: "modifyEntityVar",
-                  state: ch,
-                  varName: energyVarName,
-                  value: 0,
-                  direction: "decrease",
-                });
-                this.mutate({
-                  type: "modifyEntityVar",
-                  state: ch,
-                  varName: "aura",
-                  value: Aura.None,
-                  direction: null,
-                });
-                this.mutate({
-                  type: "setPlayerFlag",
-                  who,
-                  flagName: "hasDefeated",
-                  value: true,
-                });
-                const player = this.state.players[who];
-                const aliveCharacters = player.characters.filter(
-                  (ch) => ch.variables.alive,
-                );
-                if (aliveCharacters.length === 0) {
-                  failedPlayers.add(who);
-                }
-              }
-            }
-            damageEventArgs.push(zeroHealthEventArg);
-          } else {
-            damageEventArgs.push(arg);
-          }
-        } else if (name === "onHandCardInserted") {
-          hciEvents.push(event);
-        } else {
-          otherEvents.push(event);
-        }
-      }
-
-      if (failedPlayers.size === 2) {
-        this.mutator.log(
-          DetailLogType.Other,
-          `Both player has no alive characters, set winner to null`,
-        );
-        this.mutate({
-          type: "changePhase",
-          newPhase: "gameEnd",
-        });
-        await this.mutator.notifyAndPause();
-        return;
-      } else if (failedPlayers.size === 1) {
-        const who = [...failedPlayers.values()][0];
-        this.mutator.log(
-          DetailLogType.Other,
-          `player ${who} has no alive characters, set winner to ${flip(who)}`,
-        );
-        this.mutate({
-          type: "changePhase",
-          newPhase: "gameEnd",
-        });
-        this.mutate({
-          type: "setWinner",
-          winner: flip(who),
-        });
-        await this.mutator.notifyAndPause();
-        return;
-      }
-
-      for (const event of damageEventArgs) {
-        if (event.damageInfo.causeDefeated) {
-          criticalDamageEvents.push(["onDamageOrHeal", event]);
-        } else {
-          safeDamageEvents.push(["onDamageOrHeal", event]);
-        }
-      }
-
-      if (criticalDamageEvents.length > 0) {
-        await this.mutator.notifyAndPause();
-      }
-
-      // 继续收集在执行免于被击倒的 onDamageOrHeal 响应时产生的事件
-      emittedEvents = [];
-      for (const arg of zeroHealthEventArgs) {
-        emittedEvents.push(
-          ...this.handleEventShallow(["modifyZeroHealth", arg]),
-        );
-      }
-    } while (emittedEvents.length > 0);
-
     if (
       skillInfo.caller.definition.type === "character" &&
       skillInfo.definition.triggerOn === "initiative"
@@ -364,31 +226,24 @@ export class SkillExecutor {
       }
     }
 
-    await this.handleEvent(...otherEvents);
-    await this.handleEvent(...hciEvents);
-    await this.handleEvent(...safeDamageEvents);
-    await this.handleEvent(...criticalDamageEvents);
+    await this.handleEvent(...emittedEvents);
 
     // 接下来处理出战角色倒下后的切人
-    // 仅当本次技能的使用造成倒下时才会处理
-    if (criticalDamageEvents.length === 0) {
+    // 仅当**本次**技能的使用造成倒下时才会处理
+    if (this.ended() || !causeDefeated) {
       return;
     }
+
     const savedSwitchingFlags = this.state.players.map(
       (p) => p.defeatedSwitching,
     );
-    const switchPromises: [
-      null | Promise<SwitchActiveInfo>,
-      null | Promise<SwitchActiveInfo>,
-    ] = [null, null];
-    for (const who of [0, 1] as const) {
-      const player = this.state.players[who];
+    const switchPromises = this.state.players.map(async (player, who) => {
       const [activeCh] = shiftLeft(
         player.characters,
         getActiveCharacterIndex(player),
       );
       if (activeCh.variables.alive) {
-        continue;
+        return null;
       }
       this.mutator.log(
         DetailLogType.Other,
@@ -400,36 +255,34 @@ export class SkillExecutor {
         flagName: "defeatedSwitching",
         value: true,
       });
-      switchPromises[who] = this.mutator.chooseActive(who).then((to) => ({
+      const to = await this.mutator.chooseActive(who);
+      const switchInfo = {
         type: "switchActive",
         who,
         from: activeCh,
         to,
         fromReaction: false,
         fast: null,
-      }));
-    }
+      };
+      return switchInfo;
+    });
     const switchInfos = await Promise.all(switchPromises);
     this.mutator.postChooseActive(
       ...switchInfos.map((info) => info?.to ?? null),
     );
     const currentTurn = this.state.currentTurn;
-    const switchEvents: EventAndRequest[][] = [[], []];
-    for (const info of switchInfos) {
-      if (info) {
-        using l = this.mutator.subLog(
-          DetailLogType.Primitive,
-          `Player ${info.who} switch active from ${
-            info.from ? stringifyState(info.from) : "(null)"
-          } to ${stringifyState(info.to)}`,
-        );
-        switchEvents[info.who].push(
-          ...this.mutator.switchActive(info.who, info.to),
-        );
-      }
-    }
     for (const who of [currentTurn, flip(currentTurn)]) {
-      await this.handleEvent(...switchEvents[who]);
+      const info = switchInfos[who];
+      if (!info) {
+        continue;
+      }
+      using l = this.mutator.subLog(
+        DetailLogType.Primitive,
+        `Player ${info.who} switch active from ${
+          info.from ? stringifyState(info.from) : "(null)"
+        } to ${stringifyState(info.to)}`,
+      );
+      await this.handleEvent(...this.mutator.switchActive(info.who, info.to));
     }
     for (const who of [0, 1] as const) {
       this.mutator.mutate({
@@ -464,37 +317,6 @@ export class SkillExecutor {
     return callerAndSkills;
   }
 
-  /**
-   * 执行监听 `event` 事件的技能。此过程并不结算这些技能：技能中引发的级联事件将作为结果返回。
-   * @param event
-   * @returns
-   */
-  private handleEventShallow(...events: EventAndRequest[]): EventAndRequest[] {
-    const result: EventAndRequest[] = [];
-    for (const event of events) {
-      const [name, arg] = event;
-      if (arg instanceof RequestArg) {
-        result.push(event);
-        continue;
-      }
-      using guard = this.createHandleEventNotifies(name);
-      const callerAndSkills = this.broadcastEvent(event as Event);
-      for (const { caller, skill } of callerAndSkills) {
-        const skillInfo = defineSkillInfo({
-          caller,
-          definition: skill,
-        });
-        arg._currentSkillInfo = skillInfo;
-        if (!(0, skill.filter)(this.state, skillInfo, arg)) {
-          continue;
-        }
-        const emittedEvents = this.executeSkill(skillInfo, arg);
-        result.push(...emittedEvents);
-      }
-    }
-    return result;
-  }
-
   private createHandleEventNotifies(name: string) {
     this.mutator.notify({
       mutations: [
@@ -524,8 +346,11 @@ export class SkillExecutor {
    * 处理事件 `events`。监听它们的技能将会被递归结算。
    * @param events
    */
-  async handleEvent(...events: EventAndRequest[]) {
+  async handleEvent(...events: ReadonlyEventList) {
     for (const event of events) {
+      if (this.ended()) {
+        return;
+      }
       const [name, arg] = event;
       using guard = this.createHandleEventNotifies(name);
       if (name === "requestReroll") {
@@ -728,8 +553,8 @@ export class SkillExecutor {
     }
   }
 
-  getState() {
-    return this.state;
+  private ended() {
+    return this.state.phase === "gameEnd";
   }
 
   static async executeSkill(
@@ -737,15 +562,15 @@ export class SkillExecutor {
     skill: SkillInfo,
     arg: GeneralSkillArg,
   ) {
-    const executor = new SkillExecutor(mutator, { preview: false });
+    const executor = new SkillExecutor(mutator, { environment: "normal" });
     await executor.finalizeSkill(skill, arg);
     return executor.state;
   }
   static async handleEvent(mutator: StateMutator, ...event: EventAndRequest) {
     return SkillExecutor.handleEvents(mutator, [event]);
   }
-  static async handleEvents(mutator: StateMutator, events: EventAndRequest[]) {
-    const executor = new SkillExecutor(mutator, { preview: false });
+  static async handleEvents(mutator: StateMutator, events: ReadonlyEventList) {
+    const executor = new SkillExecutor(mutator, { environment: "normal" });
     await executor.handleEvent(...events);
     return executor.state;
   }

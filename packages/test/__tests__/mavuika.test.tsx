@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Equipment, Card } from "#test";
+import { ref, setup, Character, State, Equipment, Card, $ } from "#test";
 import { LumenstoneAdjuvant } from "@gi-tcg/data/internal/cards/support/item";
 import { ScionsOfTheCanopy } from "@gi-tcg/data/internal/cards/support/place";
 import { FlamestriderBlazingTrail, Mavuika, TheNamedMoment } from "@gi-tcg/data/internal/characters/pyro/mavuika";
@@ -33,7 +33,7 @@ test("mavuika: play 'E' card trigger ScionsOfTheCanopy", async () => {
   await c.me.card(ScionsOfTheCanopy);
   await c.me.card(FlamestriderBlazingTrail, mavuika);
   // 初始1，打出后变2
-  c.expect(`my support with definition id ${ScionsOfTheCanopy}`).toHaveVariable({
+  c.expect($.my.support.def(ScionsOfTheCanopy)).toHaveVariable({
     point: 2,
   });
   // 8 - 2(火神E) - 2(涉渡) + 1(悬木人生成) = 5

@@ -59,7 +59,7 @@ export class UsersService implements OnModuleInit {
     return {
       id: user.id,
       login: userResponse.data.login,
-      name: userResponse.data.name,
+      name: user.name || userResponse.data.name,
       avatarUrl: userResponse.data.avatar_url,
       chessboardColor: user.chessboardColor ?? null,
     };

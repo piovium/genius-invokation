@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Equipment, CombatStatus, Card } from "#test";
+import { ref, setup, Character, State, Equipment, CombatStatus, Card, $ } from "#test";
 import { BurstScan, Kaveh } from "@gi-tcg/data/internal/characters/dendro/kaveh";
 import { FlamestriderSoaringAscent } from "@gi-tcg/data/internal/characters/pyro/mavuika";
 import { DendroCore } from "@gi-tcg/data/internal/commons";
@@ -34,10 +34,10 @@ test("kaveh deal damage after dispose card", async () => {
     </State>,
   );
   await c.stepToNextAction();
-  c.expect(`my combat status with definition id ${DendroCore}`).toNotExist();
-  c.expect(`opp defeated active`).toBeExist();
+  c.expect($.my.combatStatus.def(DendroCore)).toNotExist();
+  c.expect($.opp.active.onlyDefeated).toBeExist();
   await c.opp.chooseActive(target);
   // 3草伤+1绽放
   c.expect(target).toHaveVariable({ health: 6 });
-  c.expect(`my combat status with definition id ${DendroCore}`).toBeExist();
+  c.expect($.my.combatStatus.def(DendroCore)).toBeExist();
 });

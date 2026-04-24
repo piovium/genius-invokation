@@ -44,7 +44,7 @@
     "svgo": "^4.0.0",
     "unocss": "catalog:",
     "vite": "catalog:",
-    "vite-plugin-dts": "catalog:",
+    "unplugin-dts": "catalog:",
     "vite-plugin-solid": "catalog:"
   }
 }

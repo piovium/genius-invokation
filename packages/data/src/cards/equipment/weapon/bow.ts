@@ -223,3 +223,29 @@ export const AquaSimulacra = card(311208)
   .on("enter")
   .increaseMaxHealth(1, "@master")
   .done();
+
+/**
+ * @id 311209
+ * @name 罗网勾针
+ * @description
+ * 角色使用「元素爆发」造成的伤害+2。
+ * 我方引发元素反应时：累计1层矫捷无影，当矫捷无影不低于2层时，消耗2层矫捷无影使所附属角色获得1点充能。
+ * （「弓」角色才能装备。角色最多装备1件「武器」）
+ */
+export const SnareHook = card(311209)
+  .since("v6.5.0")
+  .costVoid(2)
+  .weapon("bow")
+  .variable("agile", 0)
+  .on("increaseSkillDamage", (c, e) => e.viaSkillType("burst"))
+  .increaseDamage(2)
+  .on("dealReaction")
+  .listenToPlayer()
+  .do((c) => {
+    c.addVariable("agile", 1);
+    if (c.getVariable("agile") >= 2 && c.self.master.energy < c.self.master.maxEnergy) {
+      c.addVariable("agile", -2);
+      c.gainEnergy(1, c.self.master);
+    }
+  })
+  .done();

@@ -28,7 +28,7 @@
     "solid-devtools": "^0.29.2",
     "unocss": "catalog:",
     "vite": "catalog:",
-    "vite-plugin-dts": "catalog:",
+    "unplugin-dts": "catalog:",
     "vite-plugin-solid": "catalog:"
   }
 }

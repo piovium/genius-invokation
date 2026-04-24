@@ -1,0 +1,15 @@
+{
+  "include": ["scripts/**/*.ts", "tsdown.config.ts"],
+  "compilerOptions": {
+    "composite": true,
+
+    "target": "ESNext",
+    "module": "Preserve",
+    
+    "lib": ["ESNext"],
+    "types": ["bun"],
+
+    "strict": true,
+    "skipLibCheck": true,
+  }
+}

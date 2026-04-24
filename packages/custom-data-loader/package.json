@@ -15,9 +15,7 @@
   "scripts": {
     "dev": "vite",
     "check": "tsc --noEmit",
-    "build:runtime_types": "dts-bundle-generator --config=dts-bundle-generator.config.json",
-    "build:ts": "tsup",
-    "build": "bun run build:ts && bun run build:runtime_types"
+    "build": "tsdown"
   },
   "dependencies": {
     "@gi-tcg/data": "workspace:*"
@@ -27,10 +25,11 @@
   },
   "devDependencies": {
     "@gi-tcg/assets-manager": "workspace:*",
+    "rolldown": "^1.0.0-rc.15",
+    "rolldown-plugin-dts": "^0.23.2",
     "@gi-tcg/deck-builder": "workspace:*",
     "@gi-tcg/web-ui-core": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
-    "dts-bundle-generator": "^9.5.1",
     "monaco-editor": "^0.52.2",
     "solid-js": "catalog:",
     "vite": "catalog:",

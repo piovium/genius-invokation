@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Status, Card, Equipment, Support, DeclaredEnd } from "#test";
+import { ref, setup, Character, State, Status, Card, Equipment, Support, DeclaredEnd, $ } from "#test";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
 import { TheMausoleumOfKingDeshret } from "@gi-tcg/data/internal/cards/support/place";
 import { test } from "bun:test";
@@ -38,8 +38,8 @@ test("the mausoleum of king deshret: trigger on overflowed HCI", async () => {
       <Card my def={Paimon} />
     </State>,
   );
-  c.expect("my hands").toBeCount(10);
+  c.expect($.my.hand).toBeCount(10);
   await c.me.end();
   c.expect(mausoleum).toHaveVariable({ drawnCardCount: 2 });
-  c.expect("my hands").toBeCount(10);
+  c.expect($.my.hand).toBeCount(10);
 });

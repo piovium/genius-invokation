@@ -69,7 +69,7 @@ import type { PlainCharacterState } from "../builder/context/utils";
 import type { AppliableDamageType } from "../builder/type";
 import type { MoveEntityM, RemoveEntityM } from "./mutation";
 import type { LunarReaction } from "@gi-tcg/typings";
-import type { DamageOption } from "../mutator";
+import type { DamageOption, ReadonlyEventList } from "../mutator";
 
 export interface SkillDefinitionBase<Arg> {
   readonly type: "skill";
@@ -86,11 +86,15 @@ export type StateMutationAndExposedMutation = {
   stateMutations: Mutation[];
 };
 
-export type SkillResult = {
-  readonly emittedEvents: readonly EventAndRequest[];
+export interface CoreSkillResult {
+  readonly emittedEvents: ReadonlyEventList;
+  readonly causeDefeated: boolean;
+}
+
+export interface SkillResult extends CoreSkillResult {
   readonly innerNotify: StateMutationAndExposedMutation;
   readonly mainDamage: DamageInfo | null;
-};
+}
 
 export const EMPTY_SKILL_RESULT: SkillResult = {
   emittedEvents: [],
@@ -99,6 +103,7 @@ export const EMPTY_SKILL_RESULT: SkillResult = {
     stateMutations: [],
   },
   mainDamage: null,
+  causeDefeated: false,
 };
 
 export type SkillDescriptionReturn = readonly [GameState, SkillResult];
@@ -152,6 +157,8 @@ export interface InitiativeSkillDefinition
   readonly initiativeSkillConfig: InitiativeSkillConfig;
 }
 
+export type SkillEnvironment = "normal" | "precalculate" | "preview";
+
 /** 使用 `defineSkillInfo` 创建 */
 export interface SkillInfo {
   readonly caller: AnyState;
@@ -168,9 +175,12 @@ export interface SkillInfo {
   /** 准备技能 */
   readonly prepared: boolean;
   /**
-   * 是否是预览中。部分技能会因是否为预览而采取不同的效果。
+   * 结算环境：可能为
+   * - `normal`：常规结算
+   * - `precalculate`：预计算（骰子消耗和快速行动与否）
+   * - `preview`：渲染预览数据
    */
-  readonly isPreview: boolean;
+  readonly environment: SkillEnvironment;
   /** @internal */
   readonly logger?: IDetailLogger;
 }
@@ -184,7 +194,7 @@ export interface PlayCardSkillInfo extends InitiativeSkillInfo {
 type RequiredWith<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
 type InitSkillInfo = RequiredWith<
-  Partial<Omit<SkillInfo, "isPreview" | "mutatorConfig">>, // these properties will be added by SkillExecutor
+  Partial<Omit<SkillInfo, "environment" | "mutatorConfig">>, // these properties will be added by SkillExecutor
   "caller" | "definition" // This is required for every skill info
 >;
 
@@ -201,7 +211,7 @@ export function defineSkillInfo(init: InitSkillInfo): SkillInfo {
     charged: false,
     plunging: false,
     prepared: false,
-    isPreview: false,
+    environment: "normal",
     ...init,
   };
 }
@@ -355,6 +365,10 @@ export class ModifyRollEventArg extends PlayerEventArg {
   _extraRerollCount = 0;
   _log = "";
   fixDice(type: DiceType, count: number): void {
+    count = Math.min(
+      count,
+      Math.max(0, this.onTimeState.config.initialDiceCount - this._fixedDice.length),
+    );
     this._log += `${stringifyState(
       this.caller,
     )} fix ${count} [dice:${type}].\n`;
@@ -462,10 +476,7 @@ export class ActionEventArg<
 
   isSkillType(skillType: CommonSkillType): boolean {
     if (this.isUseSkill()) {
-      return (
-        this.action.skill.definition.skillType ===
-        skillType
-      );
+      return this.action.skill.definition.skillType === skillType;
     } else {
       return false;
     }
@@ -619,14 +630,6 @@ export class ModifyAction2EventArg<
       count,
     );
   }
-  setFastAction(): void {
-    if (this._fast) {
-      console?.warn("Potential error: fast action already set");
-      console?.trace();
-    }
-    this._log += `${stringifyState(this.caller)} set fast action.\n`;
-    this._fast = true;
-  }
 }
 
 export class ModifyAction3EventArg<
@@ -638,11 +641,25 @@ export class ModifyAction3EventArg<
   }
 }
 
+export class ModifyAction4EventArg<
+  InfoT extends ActionInfoBase,
+> extends ModifyActionEventArgBase<InfoT> {
+  setFastAction(): void {
+    if (this._fast) {
+      console?.warn?.("Potential error: fast action already set");
+      console?.trace?.();
+    }
+    this._log += `${stringifyState(this.caller)} set fast action.\n`;
+    this._fast = true;
+  }
+}
+
 export const GenericModifyActionEventArg = mixins(ModifyActionEventArgBase, [
   ModifyAction0EventArg,
   ModifyAction1EventArg,
   ModifyAction2EventArg,
   ModifyAction3EventArg,
+  ModifyAction4EventArg,
 ]);
 
 export class SwitchActiveEventArg extends EventArg {
@@ -678,9 +695,7 @@ export class UseSkillEventArg extends PlayerEventArg {
     return this._skillInfo.caller as CharacterState | EntityState;
   }
   get techniqueCaller() {
-    if (
-      this._skillInfo.definition.skillType !== "technique"
-    ) {
+    if (this._skillInfo.definition.skillType !== "technique") {
       throw new GiTcgDataError(`techniqueCaller only available on technique`);
     }
     if (this.callerArea.type !== "characters") {
@@ -938,8 +953,8 @@ export class ModifyDamage0EventArg extends ModifyDamageEventArgBase {
       super.damageInfo.type
     }] to [damage:${type}].\n`;
     if (this._newDamageType !== null) {
-      console?.warn("Potential error: damage type already changed");
-      console?.trace();
+      console?.warn?.("Potential error: damage type already changed");
+      console?.trace?.();
     }
     this._newDamageType = type;
   }
@@ -971,6 +986,7 @@ export class ModifyDamageByReactionEventArg extends ModifyDamageEventArgBase {
       case Reaction.Burning:
       case Reaction.Bloom:
       case Reaction.Quicken:
+      case Reaction.LunarBloom:
         this._increased += 1;
         this._log += `${damageInfo.log}\nReaction (${reaction}) increase damage by 1`;
         break;
@@ -1331,8 +1347,9 @@ export const EVENT_MAP = {
   onBeforeAction: PlayerEventArg,
   modifyAction0: ModifyAction0EventArg, // 增骰、减无色
   modifyAction1: ModifyAction1EventArg, // 减有色
-  modifyAction2: ModifyAction2EventArg, // 减任意、快速行动
+  modifyAction2: ModifyAction2EventArg, // 减任意
   modifyAction3: ModifyAction3EventArg, // 蒂玛乌斯 & 瓦格纳
+  modifyAction4: ModifyAction4EventArg, // 快速行动
   onAction: ActionEventArg,
 
   onBeforeUseSkill: UseSkillEventArg,
@@ -1380,7 +1397,8 @@ export type InlineEventNames =
   | "modifyHeal0"
   | "modifyHeal1"
   | "modifyChangeVariable"
-  | "modifyReaction";
+  | "modifyReaction"
+  | "modifyZeroHealth";
 
 export type EventArgOf<E extends EventNames> = InstanceType<EventMap[E]>;
 

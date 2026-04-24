@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Status, Card } from "#test";
+import { ref, setup, Character, State, Status, Card, $ } from "#test";
 import { AnAncientSacrificeOfSacredBrocade } from "@gi-tcg/data/internal/cards/event/other";
 import { ChenyuVale } from "@gi-tcg/data/internal/cards/support/adventure";
 import {
@@ -31,5 +31,5 @@ test("adventure: basic", async () => {
   );
   await c.me.card(AnAncientSacrificeOfSacredBrocade);
   await c.me.selectCard(ChenyuVale);
-  c.expect(`my support with definition id ${ChenyuVale}`).toHaveVariable({ exp: 1 });
+  c.expect($.my.support.def(ChenyuVale)).toHaveVariable({ exp: 1 });
 });

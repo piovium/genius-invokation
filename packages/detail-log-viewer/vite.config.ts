@@ -17,7 +17,7 @@ import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import nodeExternals from "rollup-plugin-node-externals";
 import solid from "vite-plugin-solid";
-import dts from "vite-plugin-dts";
+import dts from "unplugin-dts/vite";
 
 export default defineConfig({
   plugins: [
@@ -26,7 +26,7 @@ export default defineConfig({
       enforce: "pre",
     },
     solid(),
-    !process.env.NO_TYPING && dts({ rollupTypes: true }),
+    !process.env.NO_TYPING && dts({ bundleTypes: true }),
   ],
   build: {
     sourcemap: true,

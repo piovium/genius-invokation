@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Card, Character, Equipment, ref, setup, State } from "#test";
+import { $, Card, Character, Equipment, ref, setup, State } from "#test";
 import {
   ShadowOfTheSandKing,
   VourukashasGlow,
@@ -39,6 +39,6 @@ test("blessing of divine: trigger onDispose of overridden", async () => {
   await c.me.card(TheBoarPrincess);
   await c.me.card(BlessingOfTheDivineRelicsInstallation, from, to);
   expect(c.state.players[0].dice).toBeArrayOfSize(9);
-  c.expect("my hands").toBeCount(0);
-  c.expect(`equipment at character with id ${to.id}`).toBeUnique();
+  c.expect($.my.hand).toBeCount(0);
+  c.expect($.typeEquipment.at($.id(to.id))).toBeUnique();
 });

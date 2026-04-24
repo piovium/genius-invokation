@@ -55,7 +55,7 @@ import {
   type ApplyReactive,
   type RxEntityState,
 } from "./reactive";
-import type { GuessedTypeOfQuery } from "../../query/types";
+import type { GuessedTypeOfQuery } from "../../query-legacy/types";
 
 export type CharacterPosition = "active" | "next" | "prev" | "standby";
 

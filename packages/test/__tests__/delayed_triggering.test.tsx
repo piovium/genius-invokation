@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, State, Character, Support, CombatStatus, Equipment, Status } from "#test";
+import { ref, setup, State, Character, Support, CombatStatus, Equipment, Status, $ } from "#test";
 import { InstructorsCap } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { ChangTheNinth } from "@gi-tcg/data/internal/cards/support/ally";
 import { ParametricTransformer } from "@gi-tcg/data/internal/cards/support/item";
@@ -97,7 +97,7 @@ test("sethos and xianyun", async () => {
   // 赛索斯：附着雷+附着增伤状态+技能内切人
   // 切到闲云：触发冲击波
   // 冲击波扩散雷
-  c.expect("opp prev").toHaveVariable({ health: 9 });
+  c.expect($.opp.prev).toHaveVariable({ health: 9 });
   // 赛索斯充能+1（使用技能+1、效果+1）
   c.expect(sethos).toHaveVariable({ energy: 2 });
 });
@@ -117,7 +117,7 @@ test("sethos and opp useSkill", async () => {
   await c.me.skill(GaleBlade);
   // 风压剑：对方切人
   // 触发越祓草轮，对琴1点雷伤，超导到2
-  c.expect("my active").toHaveVariable({ health: 8 });
+  c.expect($.my.active).toHaveVariable({ health: 8 });
   // 对方实体造成的元素反应 **不触发** 赛索斯
   c.expect(sethos).toHaveVariable({ energy: 0 });
 });

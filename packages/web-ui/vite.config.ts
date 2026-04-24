@@ -15,7 +15,7 @@
 
 import { defineConfig } from "vite";
 import { resolve } from "node:path";
-import dts from "vite-plugin-dts";
+import dts from "unplugin-dts/vite";
 import solid from "vite-plugin-solid";
 
 export default defineConfig({
@@ -23,8 +23,9 @@ export default defineConfig({
     solid(),
     !process.env.NO_TYPING &&
       dts({
-        rollupTypes: true,
-        bundledPackages: ["@gi-tcg/web-ui-core"],
+        bundleTypes: {
+          bundledPackages: ["@gi-tcg/web-ui-core"],
+        },
       }),
   ],
   build: {

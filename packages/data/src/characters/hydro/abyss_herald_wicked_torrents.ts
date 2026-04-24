@@ -192,6 +192,13 @@ export const AbyssHeraldWickedTorrents = character(2203)
   .skills(RipplingSlash, VortexEdge, TorrentialShock, WateryRebirth, RipplingBlades, WateryRebirth01)
   .done();
 
+// 暗流涌动入场时创建此出战状态，检测使徒击倒后生成暗流的诅咒
+export const SurgingUndercurrentCombatStatus = combatStatus(122034)
+  .on("defeated", (c, e) => e.target.definition.id === AbyssHeraldWickedTorrents)
+  .combatStatus(CurseOfTheUndercurrent, "opp")
+  .dispose()
+  .done();
+
 /**
  * @id 222031
  * @name 暗流涌动
@@ -204,9 +211,11 @@ export const SurgingUndercurrent = card(222031)
   .since("v4.6.0")
   .costHydro(1)
   .talent(AbyssHeraldWickedTorrents, "none")
-  .on("enter", (c) => c.self.master.getVariable("wateryRebirthTriggered"))
-  .combatStatus(CurseOfTheUndercurrent, "opp")
-  .endOn()
-  .onMasterDefeated()
-  .combatStatus(CurseOfTheUndercurrent, "opp")
+  .on("enter")
+  .do((c) => {
+    c.combatStatus(SurgingUndercurrentCombatStatus);
+    if (c.self.master.getVariable("wateryRebirthTriggered")) {
+      c.combatStatus(CurseOfTheUndercurrent, "opp");
+    }
+  })
   .done();

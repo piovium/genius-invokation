@@ -197,7 +197,7 @@ function sameDescription(a: string, b: string) {
 const OLD_VERSION_PATH = path.resolve(BASE_PATH, `old_versions/${OLD_VERSION}.ts`);
 
 if (SAVE_OLD_CODES && !existsSync(OLD_VERSION_PATH)) {
-  await writeFile(OLD_VERSION_PATH, `import { card, skill } from "@gi-tcg/core/builder";\n`);
+  await writeFile(OLD_VERSION_PATH, `import { card, skill, $ } from "@gi-tcg/core/builder";\n`);
 }
 
 let untitledId = 1;

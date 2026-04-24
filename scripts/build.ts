@@ -133,11 +133,18 @@ for (const pkg of packagesToBuilt) {
     if (pkg.buildNoTypingCommand) {
       await $`${{ raw: pkg.buildNoTypingCommand }}`
         .env({ ...process.env, NO_TYPING: "1" })
-        .cwd(pkg.cwd);
+        .cwd(pkg.cwd)
+        .catch((e) => {
+          console.error(`Failed to build ${pkg.name}: ${e.message}`);
+          process.exit(1);
+        });
     }
   } else {
     if (pkg.buildCommand) {
-      await $`${{ raw: pkg.buildCommand }}`.cwd(pkg.cwd);
+      await $`${{ raw: pkg.buildCommand }}`.cwd(pkg.cwd).catch((e) => {
+        console.error(`Failed to build ${pkg.name}: ${e.message}`);
+        process.exit(1);
+      });
     }
   }
 }

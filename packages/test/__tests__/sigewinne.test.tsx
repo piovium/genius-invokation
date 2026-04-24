@@ -14,6 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import {
+  $,
   Card,
   Character,
   CombatStatus,
@@ -66,11 +67,10 @@ test("sigwinne: passive triggered after defeated", async () => {
   // 生命之契弃置，触发希格雯被动，最大生命值+1
   // 生命值 10，最大生命值 11
   c.expect(oppNext).toHaveVariable({ health: 10, maxHealth: 11 });
-  c.expect(
-    `opp status with definition id ${DetailedDiagnosisThoroughTreatmentStatus}`,
+  c.expect($.opp.typeStatus.def(DetailedDiagnosisThoroughTreatmentStatus),
   ).toNotExist();
   await c.opp.chooseActive(oppNext);
-  c.expect("opp active").toBe(oppNext);
+  c.expect($.opp.active).toBe(oppNext);
 });
 
 test("sigwinne: bubble", async () => {
@@ -90,7 +90,7 @@ test("sigwinne: bubble", async () => {
   await c.me.switch(target);
   await c.me.card(SingYourHeartOut);
   // 抓三张，水泡自动弃置
-  c.expect("my hand cards").toBeCount(2);
+  c.expect($.my.hand).toBeCount(2);
   c.expect(target).toHaveVariable({ health: 4 });
 });
 
@@ -107,8 +107,8 @@ test("sigwinne bubble: disposed before HCI event", async () => {
   );
   await c.me.skill(SweepingFervor);
   // 希格雯水泡抽上来且舍弃掉
-  c.expect(`my pile or my hands`).toBeCount(0);
+  c.expect($.my.pile).toBeCount(0);
   // 但是不会触发效果
-  c.expect(`opp pile`).toBeCount(0);
+  c.expect($.opp.pile).toBeCount(0);
   c.expect(myActive).toHaveVariable({ health: 1 });
 });

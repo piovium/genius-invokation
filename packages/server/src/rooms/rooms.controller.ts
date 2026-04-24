@@ -35,6 +35,7 @@ import {
   Max,
   Min,
   ValidateNested,
+  IsUrl,
 } from "class-validator";
 import { RoomsService, type PlayerId } from "./rooms.service";
 import { Guest, User, UserOrGuest } from "../auth/user.decorator";
@@ -111,6 +112,10 @@ export class GuestCreateRoomDto extends CreateRoomDto {
 
   @ValidateNested()
   deck!: DeckDto;
+
+  @IsOptional()
+  @Length(1, 256)
+  avatarUrl?: string;
 }
 
 export class UserJoinRoomDto {
@@ -124,6 +129,10 @@ export class GuestJoinRoomDto {
 
   @ValidateNested()
   deck!: DeckDto;
+
+  @IsOptional()
+  @Length(1, 256)
+  avatarUrl?: string;
 }
 
 export class PlayerActionResponseDto {

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { CardHandle, CharacterHandle, DamageType, DiceType, Pair, SkillHandle, SupportHandle, card, extension, flip, status, summon, type } from "@gi-tcg/core/builder";
+import { $, CardHandle, CharacterHandle, DamageType, DiceType, Pair, SkillHandle, SupportHandle, card, extension, flip, status, summon, type } from "@gi-tcg/core/builder";
 import { CalledInForCleanup, CanotilasSupport, CosanzeanasSupport, LaumesSupport, LutinesSupport, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SerenesSupport, SIMULANKA_SUMMONS, SluasisSupport, TaroumarusSavings, ThironasSupport, TopyassSupport, ToyGuard, VirdasSupport } from "../event/other";
 
 /**
@@ -296,7 +296,7 @@ export const KidKujirai = card(322014)
   .do((c) => {
     c.generateDice(DiceType.Omni, 1);
     if (c.remainingSupportCount("opp") > 0) {
-      c.transferEntity(c.self, {
+      c.moveEntity(c.self, {
         type: "supports",
         who: flip(c.self.who),
       });
@@ -822,4 +822,282 @@ export const BonaAndCocouik = card(322032)
   .on("useTechnique")
   .usagePerRound(1)
   .adventure()
+  .done();
+
+/**
+ * @id 302220
+ * @name 医疗器材投资·大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到1时，治疗我方受伤最多的角色2点，然后弃置此卡牌。
+ */
+export const MedicalEquipmentInvestmentGrandPlan = card(302220)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 1) {
+      c.heal(2, $.macros.myMostInjured);
+      c.dispose();
+    }
+  })
+  .done();
+
+/**
+ * @id 302221
+ * @name 医疗器材投资·特大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到2时，治疗我方受伤最多的角色4点，然后弃置此卡牌。
+ */
+export const MedicalEquipmentInvestmentMegaPlan = card(302221)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 2) {
+      c.heal(4, $.macros.myMostInjured);
+      c.dispose();
+    }
+  })
+  .done();
+
+/**
+ * @id 302222
+ * @name 医疗器材投资·超级大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到3时，治疗我方受伤最多的角色6点，然后弃置此卡牌。
+ */
+export const MedicalEquipmentInvestmentSuperMegaPlan = card(302222)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 3) {
+      c.heal(6, $.macros.myMostInjured);
+      c.dispose();
+    }
+  })
+  .done();
+
+/**
+ * @id 302229
+ * @name 乐平波琳的医疗器材投资
+ * @description
+ * 对我方出战角色造成1点穿透伤害，执行1个「治疗」效果相关的计划。
+ */
+export const LepinepaulinesInvestmentInMedicalEquipment = card(302229)
+  .since("v6.5.0")
+  .undiscoverable()
+  .do((c) => {
+    const lepine = c.query($.my.support.def(LepinePauline));
+    if (!lepine) {
+      return;
+    }
+    c.damage(DamageType.Piercing, 1, $.my.active);
+    const targetPlan = c.random([
+      MedicalEquipmentInvestmentGrandPlan, 
+      MedicalEquipmentInvestmentMegaPlan, 
+      MedicalEquipmentInvestmentSuperMegaPlan
+    ]);
+    c.transformDefinition(lepine, targetPlan);
+  })
+  .done();
+
+/**
+ * @id 302223
+ * @name 图形对抗投资·大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到1时，抓2张牌，然后弃置此卡牌。
+ */
+export const GraphAdversarialTechnologyInvestmentGrandPlan = card(302223)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 1) {
+      c.drawCards(2);
+      c.dispose();
+    }
+  })
+  .done();
+
+/**
+ * @id 302224
+ * @name 图形对抗投资·特大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到2时，抓4张牌，然后弃置此卡牌。
+ */
+export const GraphAdversarialTechnologyInvestmentMegaPlan = card(302224)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 2) {
+      c.drawCards(4);
+      c.dispose();
+    }
+  })
+  .done();
+
+/**
+ * @id 302225
+ * @name 图形对抗投资·超级大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到3时，抓6张牌，然后弃置此卡牌。
+ */
+export const GraphAdversarialTechnologyInvestmentSuperMegaPlan = card(302225)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 3) {
+      c.drawCards(6);
+      c.dispose();
+    }
+  })
+  .done();
+
+/**
+ * @id 302230
+ * @name 乐平波琳的图形对抗投资
+ * @description
+ * 舍弃1张随机手牌，执行1个「抓牌」效果相关的计划。
+ */
+export const LepinepaulinesInvestmentInGraphAdversarialTechnology = card(302230)
+  .since("v6.5.0")
+  .undiscoverable()
+  .do((c) => {
+    const lepine = c.query($.my.support.def(LepinePauline));
+    if (!lepine) {
+      return;
+    }
+    const randomCard = c.random(c.player.hands);
+    if (randomCard) {
+      c.disposeCard(randomCard);
+      const targetPlan = c.random([
+        GraphAdversarialTechnologyInvestmentGrandPlan, GraphAdversarialTechnologyInvestmentMegaPlan, GraphAdversarialTechnologyInvestmentSuperMegaPlan
+      ]);
+      c.transformDefinition(lepine, targetPlan);
+    } else {
+      c.dispose(lepine);
+    }
+  })
+  .done();
+
+/**
+ * @id 302226
+ * @name 能量机关投资·大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到1时，获得1个随机基础元素骰，然后弃置此卡牌。
+ */
+export const EnergyMechanismInvestmentGrandPlan = card(302226)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 1) {
+      c.generateDice("randomElement", 1);
+      c.dispose();
+    }
+  })
+  .done();
+
+/**
+ * @id 302227
+ * @name 能量机关投资·特大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到2时，获得2个随机基础元素骰，然后弃置此卡牌。
+ */
+export const EnergyMechanismInvestmentMegaPlan = card(302227)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 2) {
+      c.generateDice("randomElement", 2);
+      c.dispose();
+    }
+  })
+  .done();
+
+/**
+ * @id 302228
+ * @name 能量机关投资·超级大计划
+ * @description
+ * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到3时，获得3个随机基础元素骰，然后弃置此卡牌。
+ */
+export const EnergyMechanismInvestmentSuperMegaPlan = card(302228)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 3) {
+      c.generateDice("randomElement", 3);
+      c.dispose();
+    }
+  })
+  .done();
+
+/**
+ * @id 302231
+ * @name 乐平波琳的能量机关投资
+ * @description
+ * 移除我方1个元素骰，执行1个「元素骰」效果相关的计划。
+ */
+export const LepinepaulinesInvestmentInEnergyMechanism = card(302231)
+  .since("v6.5.0")
+  .undiscoverable()
+  .do((c) => {
+    const lepine = c.query($.my.support.def(LepinePauline));
+    if (!lepine) {
+      return;
+    }
+    const absorbed = c.absorbDice("seq", 1);
+    if (absorbed.length > 0) {
+      const targetPlan = c.random([
+        EnergyMechanismInvestmentGrandPlan, 
+        EnergyMechanismInvestmentMegaPlan, 
+        EnergyMechanismInvestmentSuperMegaPlan
+      ]);
+      c.transformDefinition(lepine, targetPlan);
+    } else {
+      c.dispose(lepine);
+    }
+  })
+  .done();
+
+
+/**
+ * @id 322033
+ * @name 乐平波琳
+ * @description
+ * 入场时：挑选1个投资计划。
+ */
+export const LepinePauline = card(322033)
+  .since("v6.5.0")
+  .support("ally")
+  .variable("progress", 0) // for transformed plans to use
+  .on("enter")
+  .selectAndPlay([
+    LepinepaulinesInvestmentInMedicalEquipment,
+    LepinepaulinesInvestmentInGraphAdversarialTechnology,
+    LepinepaulinesInvestmentInEnergyMechanism,
+  ])
   .done();

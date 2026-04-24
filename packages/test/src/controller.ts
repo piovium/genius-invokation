@@ -25,7 +25,14 @@ import {
   RpcResponsePayloadOf,
   SelectCardResponse,
 } from "@gi-tcg/typings";
-import { AnyState, Game, GameState, PlayerConfig } from "@gi-tcg/core";
+import {
+  AnyState,
+  Game,
+  GameState,
+  IQuery,
+  PlayerConfig,
+  QueryFn,
+} from "@gi-tcg/core";
 import {
   CardHandle,
   CharacterHandle,
@@ -413,13 +420,14 @@ export class TestController {
     return this.game.state;
   }
 
-  query(query: string): AnyState[] {
+  query(query: IQuery | QueryFn): AnyState[] {
     return this.game.query(0, query);
   }
 
-  expect(what: string | Ref): StatesMatcher {
+  expect(what: IQuery | QueryFn | Ref): StatesMatcher {
     if (what instanceof Ref) {
-      what = `with id ${what.id}`;
+      const id = what.id;
+      what = ($) => $.includesDefeated.id(id);
     }
     return new StatesMatcher(this.query(what));
   }

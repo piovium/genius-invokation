@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+
+    "target": "ES2022",
+    "module": "Preserve",
+    "lib": ["ESNext"],
+    
+    "types": ["bun"]
+  },
+  "include": [
+    "scripts/**/*.ts", 
+    // This packages have a special construction that the build scripts needs
+    // run the 'src' part as a preload to refresh initial data.
+    // This is also the reason we need to specify `-b` when running `rolldown-dts-plugin`.
+    "src/**/*.ts",
+    "tsdown.config.ts"
+  ]
+}

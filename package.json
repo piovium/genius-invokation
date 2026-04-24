@@ -11,23 +11,24 @@
     "build:prod": "bun scripts/build.ts -n"
   },
   "devDependencies": {
-    "@gi-tcg/config": "workspace:*",
     "@arethetypeswrong/cli": "^0.16.4",
     "@bufbuild/buf": "^1.47.2",
-    "@microsoft/api-extractor": "^7.53.1",
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
+    "@gi-tcg/config": "workspace:*",
+    "@microsoft/api-extractor": "^7.58.2",
     "@types/bun": "^1.3.0",
-    "bun": "^1.3.0",
-    "typescript": "^5.6.2",
-    "dependency-graph": "^1.0.0",
-    "tsup": "^8.3.0",
-    "type-fest": "^4.26.1",
     "@typescript-eslint/eslint-plugin": "^8.57.2",
     "@typescript-eslint/parser": "^8.57.2",
+    "bun": "^1.3.0",
+    "dependency-graph": "^1.0.0",
     "eslint": "^10.1.0",
-    "@eslint/js": "^10.0.1",
-    "@eslint/eslintrc": "^3.3.5",
     "eslint-plugin-only-warn": "^1.1.0",
-    "eslint-plugin-solid": "^0.14.5"
+    "eslint-plugin-solid": "^0.14.5",
+    "tsdown": "^0.21.7",
+    "tsup": "^8.3.0",
+    "type-fest": "^4.26.1",
+    "typescript": "^6.0.2"
   },
   "overrides": {
     "esbuild": "0.19.11",
@@ -35,8 +36,8 @@
     "babel-plugin-jsx-dom-expressions": "0.39.6"
   },
   "catalog": {
-    "vite": "^7.1.1",
-    "vite-plugin-dts": "^4.5.4",
+    "vite": "^8.0.8",
+    "unplugin-dts": "^1.0.0-beta.6",
     "vite-plugin-solid": "^2.11.8",
     "rollup-plugin-node-externals": "^8.0.1",
     "unocss": "^66.3.3",
@@ -48,6 +49,7 @@
     "ohm-js@17.1.0": "patches/ohm-js@17.1.0.patch",
     "importx@0.5.1": "patches/importx@0.5.1.patch",
     "puppeteer-screen-recorder@3.0.6": "patches/puppeteer-screen-recorder@3.0.6.patch",
-    "@prisma/client@5.20.0": "patches/@prisma%2Fclient@5.20.0.patch"
+    "@prisma/client@5.20.0": "patches/@prisma%2Fclient@5.20.0.patch",
+    "unplugin-dts@1.0.0-beta.6": "patches/unplugin-dts@1.0.0-beta.6.patch"
   }
 }

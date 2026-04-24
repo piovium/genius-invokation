@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Status, Equipment, Summon, CombatStatus } from "#test";
+import { ref, setup, Character, State, Status, Equipment, Summon, CombatStatus, $ } from "#test";
 import { WindAndFreedomInEffect } from "@gi-tcg/data/internal/cards/event/other";
 import { Fischl, Oz } from "@gi-tcg/data/internal/characters/electro/fischl";
 import { Mualani, NightRealmsGiftCrestsAndTroughs } from "@gi-tcg/data/internal/characters/hydro/mualani";
@@ -47,5 +47,5 @@ test("Amber talent triggered after WindAndFreedom", async () => {
   await c.me.skill(Sharpshooter);
   c.expect(opp1).toHaveVariable({ aura: Aura.None, health: 5 });
   c.expect(opp2).toHaveVariable({ aura: Aura.Pyro, health: 6 });
-  c.expect("my summons").toNotExist();
+  c.expect($.my.summon).toNotExist();
 });

@@ -19,12 +19,12 @@ import { character, skill, summon, status, card, DamageType, SkillHandle } from 
  * @id 111062
  * @name 光降之剑
  * @description
- * 优菈使用「普通攻击」或「元素战技」时：此牌累积2点「能量层数」，但是优菈不会获得充能。
- * 结束阶段：弃置此牌，造成3点物理伤害；每有1点「能量层数」，都使此伤害+1。
+ * 优菈使用「普通攻击」或「元素战技」时：此卡牌累积2点「能量层数」，但是优菈不会获得充能。
+ * 结束阶段：弃置此牌，造成4点物理伤害；每有1点「能量层数」，都使此伤害+1。
  * （影响此牌「可用次数」的效果会作用于「能量层数」。）
  */
 export const LightfallSword = summon(111062)
-  .hint(DamageType.Physical, "3+")
+  .hint(DamageType.Physical, "4+")
   .usage(0, { autoDispose: false })
   .on("useSkill", (c, e) =>
     e.skill.definition.id === FavoniusBladeworkEdel ||
@@ -39,7 +39,7 @@ export const LightfallSword = summon(111062)
   })
   .on("endPhase")
   .do((c) => {
-    c.damage(DamageType.Physical, 3 + c.getVariable("usage"));
+    c.damage(DamageType.Physical, 4 + c.getVariable("usage"));
     c.dispose();
   })
   .done();

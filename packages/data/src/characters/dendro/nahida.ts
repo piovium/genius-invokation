@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, StatusHandle, customEvent } from "@gi-tcg/core/builder";
+import { character, skill, status, combatStatus, card, DamageType, StatusHandle, customEvent, $ } from "@gi-tcg/core/builder";
 
 // 蕴种印描述修正：
 // 入场时，此牌携带3点可用次数。可用次数耗尽时，弃置此牌。
@@ -33,13 +33,15 @@ export const TriggerOtherSeed = customEvent("nahida/triggerOtherSeed");
 export const SeedOfSkandha: StatusHandle = status(117031)
   .usage(2)
   .on("damaged", (c, e) => e.getReaction() !== null)
-  .beforeDefaultDispose()
   .do((c) => {
     if (
       // 由于蕴种印在对方场上，故查找我方信息时使用 opp
-      c.$("opp characters has equipment with definition id 217031") && // 装备有心识蕴藏之种
-      c.$("opp combat status with definition id 117032") && // 摩耶之殿在场时
-      c.$("opp characters include defeated with tag (pyro)") // 我方队伍中存在火元素
+      c.query($.opp.typeEquipment.def(TheSeedOfStoredKnowledge)) && // 装备有心识蕴藏之种
+      (
+        c.query($.opp.combatStatus.def(ShrineOfMaya)) ||
+        c.query($.opp.combatStatus.def(ShrineOfMaya01))
+      ) &&                                                          // 摩耶之殿在场时
+      c.query($.opp.character.includesDefeated.tag("pyro"))         // 我方队伍中存在火元素
     ) {
       c.damage(DamageType.Dendro, 1, "@master")
     } else {
@@ -52,6 +54,22 @@ export const SeedOfSkandha: StatusHandle = status(117031)
   .listenToPlayer()
   .damage(DamageType.Piercing, 1, "@master")
   .consumeUsage()
+  // 自身因元素反应伤害击倒而弃置时
+  .on("selfDispose", (c, e) => {
+    if (e.from.type !== "characters") {
+      return;
+    }
+    const fromChId = e.from.characterId;
+    if (c.get(fromChId).variables.alive) {
+      return;
+    }
+    return c.hasPhaseDamage("all", (e) =>
+      e.getReaction() !== null && 
+      e.damageInfo.causeDefeated && 
+      e.damageInfo.target.id === fromChId
+    );
+  })
+  .emitCustomEvent(TriggerOtherSeed)
   .done();
 
 /**

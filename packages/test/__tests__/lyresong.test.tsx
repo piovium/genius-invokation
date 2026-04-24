@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Character, ref, setup, State, Equipment, Card } from "#test";
+import { Character, ref, setup, State, Equipment, Card, $ } from "#test";
 import { GildedDreams, TenacityOfTheMillelith } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { LeaveItToMe, Lyresong, TheBoarPrincess, TheBoarPrincessInEffect } from "@gi-tcg/data/internal/cards/event/other";
 import { Ganyu } from "@gi-tcg/data/internal/characters/cryo/ganyu";
@@ -70,7 +70,7 @@ test("lyresong: don't trigger boar princess", async () => {
   await c.me.card(TheBoarPrincess);
   await c.me.card(Lyresong, target);
   expect(c.state.players[0].dice).toBeArrayOfSize(8);
-  c.expect(`my combat status with definition id ${TheBoarPrincessInEffect}`).toBeExist();
+  c.expect($.my.combatStatus.def(TheBoarPrincessInEffect)).toBeExist();
   await c.me.card(GildedDreams, target);
   // 8 - (3 - 1) + 1 = 7
   expect(c.state.players[0].dice).toBeArrayOfSize(7);

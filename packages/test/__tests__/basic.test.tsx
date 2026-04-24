@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Status } from "#test";
+import { ref, setup, Character, State, Status, $ } from "#test";
 import {
   SkywardSonnet,
   Venti,
@@ -32,5 +32,5 @@ test("basic", async () => {
     </State>,
   );
   await c.me.skill(SkywardSonnet);
-  c.expect("opp active").toHaveVariable({ health: 8 });
+  c.expect($.opp.active).toHaveVariable({ health: 8 });
 });

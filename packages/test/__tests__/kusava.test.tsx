@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, State, Card, Support } from "#test";
+import { ref, setup, State, Card, Support, $ } from "#test";
 import { TheBestestTravelCompanion } from "@gi-tcg/data/internal/cards/event/other";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
 import { Kusava } from "@gi-tcg/data/internal/cards/support/item";
@@ -29,6 +29,6 @@ test("kusava", async () => {
     </State>,
   );
   await c.stepToNextAction();
-  c.expect("my hand cards").toBeCount(0);
+  c.expect($.my.hand).toBeCount(0);
   c.expect(kusava).toHaveVariable({ memory: 2 });
 });

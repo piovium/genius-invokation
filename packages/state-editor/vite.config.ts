@@ -18,7 +18,7 @@ import { defineConfig } from "vite";
 import unoCss from "unocss/vite";
 import solid from "vite-plugin-solid";
 import nodeExternals from "rollup-plugin-node-externals";
-import dts from "vite-plugin-dts";
+import dts from "unplugin-dts/vite";
 
 export default defineConfig({
   resolve: {
@@ -38,7 +38,7 @@ export default defineConfig({
     },
     unoCss(),
     solid(),
-    !process.env.NO_TYPING && dts({ rollupTypes: true }),
+    !process.env.NO_TYPING && dts({ bundleTypes: true }),
   ],
   build: {
     sourcemap: true,

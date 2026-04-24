@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Card, Character, DeclaredEnd, Equipment, ref, setup, State, Status } from "#test";
+import { Card, Character, DeclaredEnd, Equipment, ref, setup, State, Status, $ } from "#test";
+import { test } from "bun:test";
 import { Aura, SkillHandle } from "@gi-tcg/core/builder";
 import { Keqing, StellarRestoration } from "@gi-tcg/data/internal/characters/electro/keqing";
 import { HydroHilichurlRogue, MistBubbleSlime, SlashOfSurgingTides } from "@gi-tcg/data/internal/characters/hydro/hydro_hilichurl_rogue";
@@ -33,7 +34,7 @@ test("MistBubbleLockdown: normal", async () => {
   );
   await c.me.skill(1220511 as SkillHandle);
   c.expect(target).toHaveVariable({ health: 9 });
-  c.expect(`my equipment with definition id ${MistBubbleSlime}`).toNotExist();
+  c.expect($.my.typeEquipment.def(MistBubbleSlime)).toNotExist();
 });
 
 test("MistBubbleLockdown: switched during preparing", async () => {
@@ -50,9 +51,9 @@ test("MistBubbleLockdown: switched during preparing", async () => {
   );
   await c.me.skill(1220511 as SkillHandle);
   await c.opp.skill(StellarRestoration);
-  await c.expect("my prev").toBe(active);
-  await c.expect(target).toHaveVariable({ health: 10 });
-  await c.expect(`my equipment with definition id ${MistBubbleSlime}`).toNotExist();
+  c.expect($.my.prev).toBe(active);
+  c.expect(target).toHaveVariable({ health: 10 });
+  c.expect($.my.typeEquipment.def(MistBubbleSlime)).toNotExist();
 });
 
 test("SlashOfSurgingTides gain energy on critical damage", async () => {
@@ -64,6 +65,6 @@ test("SlashOfSurgingTides gain energy on critical damage", async () => {
     </State>
   );
   await c.me.skill(SlashOfSurgingTides);
-  c.expect("opp active").toNotExist(); // 被击倒
+  c.expect($.opp.active).toNotExist(); // 被击倒
   c.expect(active).toHaveVariable({ energy: 2 });
 });

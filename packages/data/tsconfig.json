@@ -13,5 +13,5 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
   },
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [{ "path": "./tsconfig.bun.json" }]
 }

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Card, Character, DeclaredEnd, ref, setup, State, Status } from "#test";
+import { $, Card, Character, DeclaredEnd, ref, setup, State, Status } from "#test";
 import { TeyvatFriedEgg } from "@gi-tcg/data/internal/cards/event/food";
 import {
   IcesealedCrimsonWitchOfEmbers,
@@ -56,18 +56,14 @@ test("la signora: death in cryo state", async () => {
   // 死了
   c.expect(laSignora).toHaveVariable({ alive: 0 });
   // 复活甲没了
-  c.expect(
-    `opp status with definition id ${IcesealedCrimsonWitchOfEmbers}`,
-  ).toNotExist();
+  c.expect($.opp.typeStatus.def(IcesealedCrimsonWitchOfEmbers)).toNotExist();
   // 仍然是冰形态
-  c.expect(`with id ${laSignora.id}`).toBeDefinition(LaSignora);
+  c.expect($.opp.onlyDefeated.id(laSignora.id)).toBeDefinition(LaSignora);
 
   await c.opp.chooseActive(otherOpp);
   await c.opp.card(TeyvatFriedEgg, laSignora);
 
   c.expect(laSignora).toHaveVariable({ alive: 1, health: 1 });
   // 复活后带着复活甲
-  c.expect(
-    `opp status with definition id ${IcesealedCrimsonWitchOfEmbers}`,
-  ).toBeExist();
+  c.expect($.opp.typeStatus.def(IcesealedCrimsonWitchOfEmbers)).toBeExist();
 });

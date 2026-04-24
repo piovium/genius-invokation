@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Support, DeclaredEnd, Status } from "#test";
+import { ref, setup, Character, State, Support, DeclaredEnd, Status, $ } from "#test";
 import { Keqing, YunlaiSwordsmanship } from "@gi-tcg/data/internal/characters/electro/keqing";
 import { Riptide, Tartaglia } from "@gi-tcg/data/internal/characters/hydro/tartaglia";
 import { test } from "bun:test";
@@ -32,5 +32,5 @@ test("riptide should propagate", async () => {
   );
   await c.me.skill(YunlaiSwordsmanship);
   await c.opp.chooseActive(oppNext);
-  c.expect(`status with definition id ${Riptide} at character with id ${oppNext.id}`).toBeExist();
+  c.expect($.typeStatus.def(Riptide).at($.id(oppNext.id))).toBeExist();
 });

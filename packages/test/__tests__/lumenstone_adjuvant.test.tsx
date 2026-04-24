@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Equipment, Card } from "#test";
+import { ref, setup, Character, State, Equipment, Card, $ } from "#test";
 import { LumenstoneAdjuvant } from "@gi-tcg/data/internal/cards/support/item";
 import { test } from "bun:test";
 
@@ -24,7 +24,7 @@ test("lumenstone adjuvant: no trigger on self entering play card", async () => {
     </State>,
   );
   await c.me.card(LumenstoneAdjuvant);
-  c.expect(`my support with definition id ${LumenstoneAdjuvant}`).toHaveVariable({
+  c.expect($.my.support.def(LumenstoneAdjuvant)).toHaveVariable({
     playedCard: 0
   });
 });

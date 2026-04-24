@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, card, DamageType, SkillHandle } from "@gi-tcg/core/builder";
+import { character, skill, summon, status, card, DamageType, SkillHandle, $, DiceType } from "@gi-tcg/core/builder";
 
 /**
  * @id 114063
@@ -26,7 +26,7 @@ export const CrowfeatherCover = status(114063)
   .on("increaseSkillDamage", (c, e) => e.viaSkillType("elemental") || e.viaSkillType("burst"))
   .usage(2)
   .increaseDamage(1)
-  .if((c) => c.$(`my equipment with definition id ${SinOfPride}`))
+  .if((c) => c.self.master.element() === DiceType.Electro && c.query($.my.typeEquipment.def(SinOfPride)))
   .increaseDamage(1)
   .done();
 

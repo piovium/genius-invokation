@@ -13,9 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DamageType, DiceType, EntityState, card, combatStatus, originalDiceCostOfCard, status } from "@gi-tcg/core/builder";
-import { ForbiddenKnowledge, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SIMULANKA_QUERY, SIMULANKA_SUMMONS, ToyGuard, ToyGuardSummon } from "../event/other";
-import { BattlePlan, CostIncrease, CostReduction, Empowerment, IneffectiveWhenPlayed, NoTuningAllowed } from "../../commons";
+import { $, DamageType, DiceType, EntityState, card, combatStatus, originalDiceCostOfCard, status } from "@gi-tcg/core/builder";
+import { ForbiddenKnowledge, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SIMULANKA_QUERY, ToyGuard, ToyGuardSummon } from "../event/other";
+import { BattlePlan, CostReduction, Empowerment, IneffectiveWhenPlayed, NoTuningAllowed } from "../../commons";
 
 /**
  * @id 321001
@@ -838,7 +838,7 @@ export const TidesealStone = card(321036)
   .usage(2)
   .do((c) => {
     const target = c.random(c.oppPlayer.hands);
-    c.attach(CostIncrease, target);
+    c.attachCostIncrease(target);
     c.attach(NoTuningAllowed, target);
   })
   .done();
@@ -848,7 +848,7 @@ export const TidesealStone = card(321036)
  * @name 霜月之坊
  * @description
  * 入场时：抓2张牌，治疗我方受伤最多的角色2点。
- * 结束阶段：赋予我方随机2张当前元素骰费用不为0的手牌费用降低。
+ * 结束阶段：赋予我方随机2张手牌费用降低。
  * 可用次数：2
  */
 export const FrostmoonEnclave = card(321037)
@@ -861,10 +861,9 @@ export const FrostmoonEnclave = card(321037)
   .on("endPhase")
   .usage(2)
   .do((c) => {
-    const candidates = c.player.hands.filter((card) => card.diceCost() > 0);
-    const chosen = c.randomSubset(candidates, 2);
+    const chosen = c.randomSubset(c.queryAll($.macros.myHandsNotFree), 2);
     for (const card of chosen) {
-      c.attach(CostReduction, card);
+      c.attachCostReduction(card);
     }
   })
   .done();

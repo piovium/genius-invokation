@@ -195,10 +195,10 @@ const MyCharacter = character("银狼")
     const gameInstance = new Game(initState);
 
     const [io0, Chessboard0] = createClient(0, {
-      assetsManager: assetsManager(),
+      assetsManager: () => assetsManager()!,
     });
     const [io1, Chessboard1] = createClient(1, {
-      assetsManager: assetsManager(),
+      assetsManager: () => assetsManager()!,
     });
     setChessboard0(() => Chessboard0);
     setChessboard1(() => Chessboard1);

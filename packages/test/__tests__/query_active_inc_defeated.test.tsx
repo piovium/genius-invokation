@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Status } from "#test";
+import { ref, setup, Character, State, Status, $ } from "#test";
 import { test } from "bun:test";
 
 test("query: active includes defeated", async () => {
@@ -22,6 +22,6 @@ test("query: active includes defeated", async () => {
       <Character my active alive={0} />
     </State>,
   );
-  c.expect("my active").toBeCount(0);
-  c.expect("my active includes defeated").toBeExist();
+  c.expect($.my.active).toBeCount(0);
+  c.expect($.my.active.includesDefeated).toBeExist();
 });

@@ -4,6 +4,7 @@
     "module": "ES2022",
     "moduleResolution": "Bundler",
     "lib": ["ES2024"],
+    "types": ["bun"],
     "allowJs": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,

@@ -262,7 +262,7 @@ const MasterOfWeaponry = card(332010)
       who: target.who,
       characterId: target.id,
     };
-    c.transferEntity(weapon, area);
+    c.moveEntity(weapon, area);
   })
   .done();
 
@@ -284,7 +284,7 @@ const BlessingOfTheDivineRelicsInstallation = card(332011)
       who: target.who,
       characterId: target.id,
     };
-    c.transferEntity(artifact, area);
+    c.moveEntity(artifact, area);
   })
   .done();
 

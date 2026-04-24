@@ -145,6 +145,7 @@ export const FlamestriderBlazingTrail = card(113155)
   .usage(2)
   .switchActive("my next")
   .convertDice(DiceType.Omni, 2)
+  .if((c) => !c.oppPlayer.declaredEnd)
   .continueNextTurn()
   .done();
 

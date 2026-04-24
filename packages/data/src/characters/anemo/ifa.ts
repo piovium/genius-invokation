@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, Reaction, StatusHandle, Aura } from "@gi-tcg/core/builder";
+import { character, skill, status, card, DamageType, Reaction, StatusHandle, Aura, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 115151
@@ -99,8 +99,8 @@ export const Cacucu = card(115152)
   .provideSkill(1151521)
   .costVoid(2)
   .consumeNightsoul("@master", 1)
-  .damage(DamageType.Anemo, 1, "opp prev")
-  .heal(2, `my characters order by health - maxHealth limit 1`)
+  .damage(DamageType.Anemo, 1, $.opp.prev.orElse($.opp.active))
+  .heal(2, $.macros.myMostInjured)
   .done();
 
 /**
@@ -187,7 +187,7 @@ export const Ifa = character(1515)
  * @name 温敷战术包扎
  * @description
  * 快速行动：装备给我方的伊法，治疗我方受伤最多的角色1点。
- * 装备有此牌的伊法在场时，我方触发风元素相关反应、感电或月感电反应后，治疗我方受伤最多的角色1点。（每回合2次）（每回合2次）
+ * 装备有此牌的伊法在场时，我方触发风元素相关反应、感电或月感电反应后，治疗我方受伤最多的角色1点。（每回合2次）
  * （牌组中包含伊法，才能加入牌组）
  */
 export const TacticalWarmCompressBandaging = card(215151)

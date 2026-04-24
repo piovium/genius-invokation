@@ -89,6 +89,7 @@ export interface EntityDefinition {
   readonly disableTuning: boolean;
   readonly varConfigs: EntityVariableConfigs;
   readonly disposeWhenUsageIsZero: boolean;
+  readonly disposeOnMasterDefeated: boolean;
   readonly skills: readonly SkillDefinition[];
   readonly descriptionDictionary: DescriptionDictionary;
 }

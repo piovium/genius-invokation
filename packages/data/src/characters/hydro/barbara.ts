@@ -76,7 +76,7 @@ export const ShiningMiracle = skill(12013)
 export const Barbara = character(1201)
   .since("v3.3.0")
   .tags("hydro", "catalyst", "mondstadt")
-  .health(10)
+  .health(12)
   .energy(3)
   .skills(WhisperOfWater, LetTheShowBegin, ShiningMiracle)
   .done();

@@ -52,10 +52,7 @@ export type StateKind =
 export const StateSymbol: unique symbol = Symbol("GiTcgCoreState");
 export type StateSymbol = typeof StateSymbol;
 
-export type ErrorLevel = "strict" | "toleratePreview" | "skipPhase";
-
 export interface GameConfig {
-  readonly errorLevel: ErrorLevel;
   readonly randomSeed: number;
   readonly initialHandsCount: number;
   readonly maxHandsCount: number;
@@ -68,7 +65,6 @@ export interface GameConfig {
 }
 
 export const getDefaultGameConfig = (): GameConfig => ({
-  errorLevel: "strict",
   initialDiceCount: 8,
   initialHandsCount: 5,
   maxDiceCount: 16,

@@ -13,7 +13,7 @@
     "./reset.css": "./src/reset.css"
   },
   "scripts": {
-    "build": "tsup"
+    "build": "tsdown"
   },
   "devDependencies": {
     "@gi-tcg/typings": "workspace:*"

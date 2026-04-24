@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import "./stub.js";
 // Encoding API is a WHATWG Living Standard.
 // Not included in ECMA-262, so V8 doesn't support it. Add a polyfill for that.
 import "fast-text-encoding";
@@ -30,9 +31,9 @@ import {
 import {
   CURRENT_VERSION,
   deserializeGameStateLog,
-  executeQueryOnState,
   GiTcgIoError,
   Game as InternalGame,
+  runLegacyQuery,
   serializeGameStateLog,
   VERSIONS,
   type AnyState,
@@ -234,9 +235,7 @@ class State {
     );
   }
   query(who: 0 | 1, query: string): Entity[] {
-    return executeQueryOnState(this.state, who, query).map(
-      (st) => new Entity(st),
-    );
+    return runLegacyQuery(this.state, who, query).map((st) => new Entity(st));
   }
   getAttribute(attribute: number): number {
     switch (attribute) {

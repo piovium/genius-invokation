@@ -4,6 +4,8 @@
     "lib": ["ESNext"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
+
+    "types": ["bun"],
     
     "useDefineForClassFields": true,
 

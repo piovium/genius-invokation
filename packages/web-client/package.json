@@ -24,6 +24,7 @@
     "axios": "^1.7.2",
     "core-js": "3.38.1",
     "dayjs": "^1.11.13",
+    "p-limit": "^7.3.0",
     "solid-js": "catalog:"
   },
   "devDependencies": {

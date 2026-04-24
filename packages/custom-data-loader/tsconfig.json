@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "tsdown.config.ts"],
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",
@@ -17,7 +17,7 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
 
-    "types": []
+    "types": ["bun"]
   },
   "references": [{ "path": "./tsconfig.web.json" }]
 }

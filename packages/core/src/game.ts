@@ -38,12 +38,12 @@ import {
   type AnyState,
   type CharacterState,
   type EntityDefinition,
-  type ErrorLevel,
   type ExtensionState,
   type GameConfig,
   type GameState,
   type PlayerState,
   type VersionBehavior,
+  type PhaseType,
 } from "./base/state";
 import { CURRENT_VERSION, type Version } from "./base/version";
 import type { Mutation } from "./base/mutation";
@@ -86,7 +86,7 @@ import {
   type InitiativeSkillEventArg,
   defineSkillInfo,
 } from "./base/skill";
-import { executeQueryOnState } from "./query";
+import { runLegacyQuery } from "./query-legacy";
 import {
   GiTcgCoreInternalError,
   GiTcgDataError,
@@ -99,11 +99,17 @@ import {
   type InternalNotifyOption,
   type InternalPauseOption,
   type MutatorConfig,
+  type ReadonlyEventList,
   StateMutator,
 } from "./mutator";
 import { type ActionInfoWithModification, ActionPreviewer } from "./preview";
 import { Player } from "./player";
 import type { CharacterDefinition } from "./base/character";
+import { $, runQuery, toExpression, type QueryFn } from "./query";
+import type { IQuery } from "./query/utils";
+import {
+  runWithAsyncContext,
+} from "./async_context";
 
 export interface DeckConfig extends Deck {
   noShuffle?: boolean;
@@ -214,11 +220,18 @@ export interface CreateInitialStateConfig
   data: GameData;
 }
 
+export type ErrorLevel = "strict" | "toleratePreview" | "skipPhase";
+
+export interface GameOption {
+  errorLevel: ErrorLevel;
+}
+
 const VOID_1_DICE_REQUIREMENT: DiceRequirement = new Map([[DiceType.Void, 1]]);
 const EMPTY_DICE_REQUIREMENT: DiceRequirement = new Map();
 
 export class Game {
   private readonly logger: DetailLogger;
+  private readonly option: GameOption;
 
   private _terminated = false;
   private finishResolvers: PromiseWithResolvers<0 | 1 | null> | null = null;
@@ -230,8 +243,12 @@ export class Game {
   public onPause: PauseHandler | null = null;
   public onIoError: IoErrorHandler | null = null;
 
-  constructor(initialState: GameState) {
+  constructor(initialState: GameState, option: Partial<GameOption> = {}) {
     this.logger = new DetailLogger();
+    this.option = {
+      errorLevel: "strict",
+      ...option,
+    };
     this.mutatorConfig = {
       logger: this.logger,
       onNotify: (opt) => this.mutatorNotifyHandler(opt),
@@ -308,8 +325,17 @@ export class Game {
     }
   }
 
-  query(who: 0 | 1, query: string): AnyState[] {
-    return executeQueryOnState(this.state, who, query);
+  query(who: 0 | 1, query: string | QueryFn | IQuery): AnyState[] {
+    if (typeof query === "string") {
+      return runLegacyQuery(this.state, who, query);
+    }
+    if (typeof query === "function") {
+      return runQuery(this.state, who, query($));
+    }
+    if (toExpression in query) {
+      return runQuery(this.state, who, query);
+    }
+    throw new GiTcgCoreInternalError(`Invalid query: ${String(query)}`);
   }
 
   // private lastNotifiedState: [string, string] = ["", ""];
@@ -352,21 +378,6 @@ export class Game {
     }
     const { state, canResume, stateMutations } = opt;
     await this.onPause?.(state, [...stateMutations], canResume);
-    if (state.phase === "gameEnd") {
-      this.gotWinner(state.winner);
-    }
-  }
-
-  private async tryPhase(fn: (this: Game) => Promise<void>) {
-    try {
-      await fn.call(this);
-    } catch (e) {
-      if (e instanceof GiTcgError && this.config.errorLevel === "skipPhase") {
-        // skip.
-      } else {
-        throw e;
-      }
-    }
   }
 
   async start(): Promise<0 | 1 | null> {
@@ -377,53 +388,69 @@ export class Game {
     }
     this.finishResolvers = Promise.withResolvers();
     this.logger.clearLogs();
-    (async () => {
-      try {
-        await this.mutator.notifyAndPause({ force: true, canResume: true });
-        while (!this._terminated) {
-          switch (this.state.phase) {
-            case "initHands":
-              await this.tryPhase(this.initHands);
-              break;
-            case "initActives":
-              await this.tryPhase(this.initActives);
-              break;
-            case "roll":
-              await this.tryPhase(this.rollPhase);
-              break;
-            case "action":
-              await this.tryPhase(this.actionPhase);
-              break;
-            case "end":
-              await this.tryPhase(this.endPhase);
-              break;
-            default:
-              break;
-          }
-          this.mutate({ type: "clearRemovedEntities" });
-          this.mutate({ type: "clearPhaseLogs" });
-          await this.mutator.notifyAndPause({ canResume: true });
-        }
-      } catch (e) {
-        if (e instanceof GiTcgIoError) {
-          this.onIoError?.(e);
-          await this.gotWinner(flip(e.who));
-        } else if (e instanceof GiTcgError) {
-          this.finishResolvers?.reject(e);
-        } else {
-          let message = String(e);
-          if (e instanceof Error) {
-            message = e.message;
-            if (e.stack) {
-              message += "\n" + e.stack;
+    const phaseFns: Record<
+      Exclude<PhaseType, "gameEnd">,
+      (this: Game, prev: PhaseType | null) => Promise<PhaseType>
+    > = {
+      initHands: this.initHands,
+      initActives: this.initActives,
+      roll: this.rollPhase,
+      action: this.actionPhase,
+      end: this.endPhase,
+    };
+    runWithAsyncContext(
+      {
+        gameLogger: this.logger,
+      },
+      async () => {
+        try {
+          await this.mutator.notifyAndPause({ force: true, canResume: true });
+          let prevPhase: PhaseType | null = null;
+          while (!this._terminated) {
+            const currentPhase = this.state.phase;
+            if (currentPhase === "gameEnd") {
+              return await this.gotWinner(this.state.winner);
             }
+            const phaseFn = phaseFns[currentPhase];
+            const newPhase: PhaseType = await phaseFn
+              .call(this, prevPhase)
+              .catch((e) => {
+                if (
+                  e instanceof GiTcgError &&
+                  this.option.errorLevel === "skipPhase"
+                ) {
+                  return this.state.phase;
+                } else {
+                  throw e;
+                }
+              });
+            if (newPhase !== currentPhase) {
+              this.mutate({
+                type: "changePhase",
+                newPhase,
+              });
+            }
+            prevPhase = currentPhase;
+            this.mutate({ type: "clearRemovedEntities" });
+            this.mutate({ type: "clearPhaseLogs" });
+            await this.mutator.notifyAndPause({ canResume: true });
           }
-          this.finishResolvers?.reject(
-            new GiTcgCoreInternalError(`Unexpected error: ` + message),
-          );
+        } catch (e) {
+          if (e instanceof GiTcgIoError) {
+            this.onIoError?.(e);
+            await this.gotWinner(flip(e.who));
+          } else if (e instanceof GiTcgError) {
+            this.finishResolvers?.reject(e);
+          } else if (e instanceof Error) {
+            this.finishResolvers?.reject(
+              new GiTcgCoreInternalError(e.message, { cause: e }),
+            );
+          } else {
+            this.finishResolvers?.reject(new GiTcgCoreInternalError(String(e)));
+          }
         }
-      }
-    })();
+      },
+    );
     return this.finishResolvers.promise;
   }
 
@@ -438,7 +465,7 @@ export class Game {
         type: "changePhase",
         newPhase: "gameEnd",
       });
-      if (winner !== null) {
+      if (winner && winner !== this.state.winner) {
         this.mutate({
           type: "setWinner",
           winner,
@@ -515,7 +542,7 @@ export class Game {
       return value;
     } catch (e) {
       if (e instanceof Error) {
-        throw new GiTcgIoError(who, e.message, { cause: e?.cause });
+        throw new GiTcgIoError(who, e.message, { cause: e });
       } else {
         throw new GiTcgIoError(who, String(e));
       }
@@ -524,7 +551,24 @@ export class Game {
     }
   }
 
-  private async initHands() {
+  private async rpcChooseActive(
+    who: 0 | 1,
+    candidateIds: number[],
+  ): Promise<number> {
+    const { activeCharacterId } = await this.rpc(who, "chooseActive", {
+      candidateIds,
+    });
+    if (!candidateIds.includes(activeCharacterId)) {
+      throw new GiTcgIoError(
+        who,
+        `Invalid active character id ${activeCharacterId}`,
+      );
+    }
+    this.notifyOne(who);
+    return activeCharacterId;
+  }
+
+  private async initHands(_: PhaseType | null): Promise<PhaseType> {
     using l = this.mutator.subLog(DetailLogType.Phase, `In initHands phase:`);
     for (const who of [0, 1] as const) {
       const events = this.mutator.drawCardsPlain(
@@ -541,13 +585,9 @@ export class Game {
       ])
     ).flat(1);
     await this.handleEvents(events);
-    this.mutate({
-      type: "changePhase",
-      newPhase: "initActives",
-    });
+    return "initActives";
   }
-
-  private async initActives() {
+  private async initActives(_: PhaseType | null): Promise<PhaseType> {
     using l = this.mutator.subLog(DetailLogType.Phase, `In initActive phase:`);
     const [a0, a1] = await Promise.all([
       this.mutator.chooseActive(0),
@@ -558,32 +598,11 @@ export class Game {
     await this.switchActive(1, a1, null);
     await this.handleEvent("onBattleBegin", new EventArg(this.state));
     this.mutate({
-      type: "changePhase",
-      newPhase: "roll",
-    });
-    this.mutate({
       type: "stepRound",
     });
+    return "roll";
   }
-
-  private async rpcChooseActive(
-    who: 0 | 1,
-    candidateIds: number[],
-  ): Promise<number> {
-    const { activeCharacterId } = await this.rpc(who, "chooseActive", {
-      candidateIds,
-    });
-    if (!candidateIds.includes(activeCharacterId)) {
-      throw new GiTcgIoError(
-        who,
-        `Invalid active character id ${activeCharacterId}`,
-      );
-    }
-    this.notifyOne;
-    return activeCharacterId;
-  }
-
-  private async rollPhase() {
+  private async rollPhase(_: PhaseType | null): Promise<PhaseType> {
     using l = this.mutator.subLog(
       DetailLogType.Phase,
       `In roll phase (round ${this.state.roundNumber}):`,
@@ -624,13 +643,12 @@ export class Game {
         await this.mutator.reroll(who, count);
       }),
     );
-    this.mutate({
-      type: "changePhase",
-      newPhase: "action",
-    });
-    await this.handleEvent("onActionPhase", new EventArg(this.state));
+    return "action";
   }
-  private async actionPhase() {
+  private async actionPhase(prevPhase: PhaseType | null): Promise<PhaseType> {
+    if (prevPhase === "roll") {
+      await this.handleEvent("onActionPhase", new EventArg(this.state));
+    }
     const who = this.state.currentTurn;
     // 使用 getter 防止状态变化后原有 player 过时的问题
     const player = () => this.state.players[who];
@@ -703,6 +721,7 @@ export class Game {
         await this.handleEvent("modifyAction1", actionInfo.eventArg);
         await this.handleEvent("modifyAction2", actionInfo.eventArg);
         await this.handleEvent("modifyAction3", actionInfo.eventArg);
+        await this.handleEvent("modifyAction4", actionInfo.eventArg);
 
         // 检查骰子
         if (!checkDice(actionInfo.cost, usedDice as DiceType[])) {
@@ -863,10 +882,6 @@ export class Game {
       this.state.players[0].declaredEnd &&
       this.state.players[1].declaredEnd
     ) {
-      this.mutate({
-        type: "changePhase",
-        newPhase: "end",
-      });
       // 进入结束阶段时，清空双方的宣布结束 flag。
       // 这会完全模拟“看到那小子挣钱”在结束阶段仍然触发生骰的行为
       // 也会保证“自由的新风”在结束阶段可以生效使下回合连续行动一次
@@ -879,9 +894,12 @@ export class Game {
           value: false,
         });
       }
+      return "end";
+    } else {
+      return "action";
     }
   }
-  private async endPhase() {
+  private async endPhase(_: PhaseType | null): Promise<PhaseType> {
     using l = this.mutator.subLog(
       DetailLogType.Phase,
       `In end phase (round ${this.state.roundNumber}, turn ${this.state.currentTurn}):`,
@@ -909,12 +927,9 @@ export class Game {
       type: "stepRound",
     });
     if (this.state.roundNumber >= this.config.maxRoundsCount) {
-      this.gotWinner(null);
+      return "gameEnd";
     } else {
-      this.mutate({
-        type: "changePhase",
-        newPhase: "roll",
-      });
+      return "roll";
     }
   }
 
@@ -1045,7 +1060,9 @@ export class Game {
           }
         }
       } else {
-        console?.warn(`Card ${card.definition.id} has no play skill defined.`);
+        console?.warn?.(
+          `Card ${card.definition.id} has no play skill defined.`,
+        );
       }
 
       result.push({
@@ -1092,7 +1109,7 @@ export class Game {
     // Add preview and apply modifyAction
     const skipError = (
       ["toleratePreview", "skipPhase"] as ErrorLevel[]
-    ).includes(this.config.errorLevel);
+    ).includes(this.option.errorLevel);
     const previewer = new ActionPreviewer(this.state, who, skipError);
     return await Promise.all(
       result.map((a) =>
@@ -1170,7 +1187,7 @@ export class Game {
   private async handleEvent(...args: EventAndRequest) {
     await SkillExecutor.handleEvent(this.mutator, ...args);
   }
-  private async handleEvents(events: EventAndRequest[]) {
+  private async handleEvents(events: ReadonlyEventList) {
     await SkillExecutor.handleEvents(this.mutator, events);
   }
 }

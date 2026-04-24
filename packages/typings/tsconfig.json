@@ -1,7 +1,4 @@
 {
-  "files": [
-    "src/index.ts"
-  ],
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",
@@ -13,4 +10,8 @@
     "strict": true,
     "skipLibCheck": true
   },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "references": [{ "path": "./tsconfig.bun.json" }]
 }

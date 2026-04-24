@@ -52,7 +52,7 @@ export function RoomInfo(props: RoomInfoProps) {
     },
   );
   return (
-    <div class="w-75 md:w-90 bg-yellow-100 rounded-xl p-4 flex flex-col">
+    <div class="w-full bg-yellow-100 rounded-xl p-4 flex flex-col">
       <div class="flex flex-row items-center gap-2 mb-3">
         <h4 class="font-semibold">{t("room", { code: code() })}</h4>
         <Show when={!props.watchable}>
@@ -60,27 +60,29 @@ export function RoomInfo(props: RoomInfoProps) {
         </Show>
       </div>
       <div
-        class="flex flex-row justify-between items-center group"
+        class="grid items-center group grid-cols-[calc(50%-1rem)_2rem_calc(50%-1rem)]"
         data-disabled={!insideRoom() && !props.watchable}
       >
         <Show when={props.players.length > 0}>
           <A
             href={url(props.players[0].id)}
-            class="flex flex-row items-center h-6 rounded-r-xl pr-2 bg-yellow-800 text-yellow-100 ml-2 hover:bg-yellow-700 transition-colors group-data-[disabled=true]:pointer-events-none max-w-30 whitespace-nowrap"
+            class="flex flex-row items-center h-6 rounded-r-xl pr-2 bg-yellow-800 text-yellow-100 ml-2 hover:bg-yellow-700 transition-colors group-data-[disabled=true]:pointer-events-none max-w-[calc(100%-0.5rem)] mr-auto whitespace-nowrap"
           >
             <img
               src={avatarUrl0()}
               width="30"
               height="30"
-              class="rounded-full b-yellow-800 b-1 translate-x--2"
+              class="rounded-full bg-yellow-100 b-yellow-800 b-1 translate-x--2"
             />
-            <span class="overflow-hidden text-ellipsis">{props.players[0].name}</span>
+            <span class="overflow-hidden text-ellipsis">
+              {props.players[0].name}
+            </span>
           </A>
-          <span class="text-xl font-bold">VS</span>
+          <span class="text-xl font-bold w-8 text-center">VS</span>
           <Show
             when={props.players.length > 1}
             fallback={
-              <div class="flex flex-row items-center gap-2">
+              <div class="flex flex-row items-center justify-end gap-2 ml-auto">
                 <span class="text-yellow-600 italic">{t("slotAvailable")}</span>
                 <Show when={!insideRoom()}>
                   <button
@@ -95,14 +97,16 @@ export function RoomInfo(props: RoomInfoProps) {
           >
             <A
               href={url(props.players[1].id)}
-              class="flex flex-row items-center h-6 rounded-l-xl pl-2 bg-yellow-800 text-yellow-100 mr-2 hover:bg-yellow-700 transition-colors group-data-[disabled=true]:pointer-events-none max-w-30 whitespace-nowrap"
+              class="flex flex-row items-center justify-end h-6 rounded-l-xl pl-2 bg-yellow-800 text-yellow-100 mr-2 hover:bg-yellow-700 transition-colors group-data-[disabled=true]:pointer-events-none max-w-[calc(100%-0.5rem)] ml-auto whitespace-nowrap"
             >
-            <span class="overflow-hidden text-ellipsis">{props.players[1].name}</span>
+              <span class="overflow-hidden text-ellipsis">
+                {props.players[1].name}
+              </span>
               <img
                 src={avatarUrl1()}
                 width="30"
                 height="30"
-                class="rounded-full b-yellow-800 b-1 translate-x-2"
+                class="rounded-full bg-yellow-100 b-yellow-800 b-1 translate-x-2"
               />
             </A>
           </Show>

@@ -239,6 +239,7 @@ export function exposeMutation(
     case "mutateExtensionState":
     case "clearRemovedEntities":
     case "pushRoundSkillLog":
+    case "removeRoundSkillLog":
     case "clearRoundLogs":
     case "pushPhaseDamageLog":
     case "pushPhaseReactionLog":
@@ -292,11 +293,12 @@ export function exposeMutation(
       };
     }
     case "createEntity": {
+      const hidden = m.target.who !== who && m.target.type === "hands";
       return {
         $case: "createEntity",
         who: m.target.who,
         where: exposeEntityWhere(m.target.type),
-        entity: exposeEntity(null, m.value, false),
+        entity: exposeEntity(null, m.value, hidden),
         masterCharacterId:
           m.target.type === "characters" ? m.target.characterId : void 0,
       };
