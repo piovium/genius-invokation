@@ -52,6 +52,12 @@
       transparent 100%
     );
   }
+
+  /* Alert */
+  .alert-auto-hide {
+    animation: fade-out 0.5s ease-in both;
+    animation-delay: 3.5s;
+  }
   /* end */
 
   &[data-has-opp-chessboard] {
@@ -855,6 +861,19 @@
     box-shadow: 0 0 0 rgba(0, 0, 0, 0);
   }
 }
+
+/* keyframes start */
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* keyframes end */
 
 @keyframes attack-effect-top-flash {
   0% {
@@ -1667,20 +1686,6 @@
 
   100% {
     transform: scale(1.375);
-    opacity: 0;
-  }
-}
-
-@keyframes alert-auto-hide {
-  0% {
-    opacity: 1;
-  }
-
-  90% {
-    opacity: 1;
-  }
-
-  100% {
     opacity: 0;
   }
 }

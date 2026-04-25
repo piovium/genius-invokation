@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue & CherryC9H13N
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,13 +14,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
-  createEffect,
   createSignal,
-  Show,
   type Component,
   type JSX,
 } from "solid-js";
-import { RichText } from "./RichText";
 
 export interface AlertController {
   show: (content: JSX.Element) => void;
@@ -78,19 +75,18 @@ interface AlertProps {
 function Alert(props: AlertProps) {
   return (
     <div
-      class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 data-[shown]:opacity-100 pointer-events-none data-[shown]:pointer-events-auto transition-opacity"
+      class="hidden data-[shown]:flex absolute inset-0 bg-black/50 items-center justify-center"
       bool:data-shown={props.shown}
       onClick={() => props.onBackdropClick?.()}
     >
-      <Show when={props.shown}>
-        <div
-          class={`w-84 h-16 pointer-events-none flex flex-row justify-center font-bold items-center bg-#786049 border-#bea678 b-3 text-white rounded-1.5 text-4.5 color-#ede4d8 opacity-100 animate-[alert-auto-hide_4000ms_forwards] pointer-events-none select-none ${
-            props.class ?? ""
-          }`}
-        >
-          {props.children}
-        </div>
-      </Show>
+      <div
+        class={`w-90 p-4 pointer-events-none select-none
+          font-bold text-#ede4d8 text-4.5 text-center
+          bg-#786049 border-#bea678 b-3 rounded-1.5
+          alert-auto-hide ${ props.class ?? "" }`}
+      >
+        {props.children}
+      </div>
     </div>
   );
 }
