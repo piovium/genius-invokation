@@ -32,7 +32,7 @@ export function CurrentTurnHint(props: CurrentTurnHintProps) {
         class="h-8 w-24 flex items-center justify-center rounded-full b-2 line-height-none font-bold current-turn-hint text-color-[var(--fg-color)] border-[var(--fg-color)] bg-[var(--bg-color)] px-1 box-border"
         data-opp={props.opp}
       >
-        <AutoResizeText minFontSize={10}>
+        <AutoResizeText minFontSize={10} class="text-center">
           {t(
             props.opp ? "capsule.hintOppSideFirst" : "capsule.hintMySideFirst",
           )}

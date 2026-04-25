@@ -19,6 +19,7 @@ import { createMemo, Show } from "solid-js";
 import { WithDelicateUi } from "../primitives/delicate_ui";
 import { StrokedText } from "./StrokedText";
 import { useUiContext } from "../hooks/context";
+import { AutoResizeText } from "./AutoResizeText";
 
 export interface PlayerInfoProps {
   class?: string;
@@ -89,7 +90,7 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
           class="absolute inset-0 rounded-l-full rounded-r-0 border-1.5 playerinfo-box h-full w-full"
           data-opp={props.opp}
         />
-        <div class="relative flex items-center p-1">
+        <div class="relative flex items-center px-1">
           <Show when={props.avatarUrl} fallback={<div class="w-2" />}>
             <div
               class="absolute h-8 w-8 rounded-full border-3 border-#9f6939 data-[opp]:border-#415671"
@@ -102,13 +103,13 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
               />
             </div>
           </Show>
-          <div class="flex flex-col ml-2 flex-1 gap-0.2 text-stroke-0.3">
-            <span class="text-3 leading-tight text-white w-24 overflow-hidden text-nowrap text-ellipsis">
+          <div class="flex flex-col ml-2 flex-1 pt-1">
+            <span class="text-3 leading-tight text-white h-3 w-24 overflow-hidden text-nowrap text-ellipsis">
               {props.name || <>&nbsp;</>}
             </span>
-            <div class="text-2.5 h-3 w-24 text-white/40" data-opp={props.opp}>
+            <AutoResizeText minFontSize={8} class="text-2.5 h-6 w-24 text-white/40 text-start items-center">
               {statusTextMap()[props.status]}
-            </div>
+            </AutoResizeText>
           </div>
           <WithDelicateUi
             assetId={

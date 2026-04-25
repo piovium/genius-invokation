@@ -110,17 +110,16 @@ export function AutoResizeText(props: AutoResizeTextProps) {
   return (
     <p
       ref={container}
-      class={`block overflow-hidden text-center ${props.class ?? ""}`}
+      class={`grid overflow-hidden ${props.class ?? ""}`}
       {...restProps}
     >
       <span
         ref={textSpan}
         style={{
-          display: "inline-block",
           "font-size": fontSize() !== null ? `${fontSize()}px` : void 0,
           "white-space": shouldWrap() ? "normal" : "nowrap",
           "word-break": shouldWrap() ? "break-word" : void 0,
-          "line-height": shouldWrap() ? "1.2" : void 0,
+          "line-height": shouldWrap() ? "1.0" : void 0,
         }}
       >
         {children()}
