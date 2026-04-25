@@ -126,18 +126,18 @@ const opacityKeyframes = (uiState: CardAnimatingUiState): Keyframe[] => {
 
 export interface CardFaceProps {
   definitionId: number;
+  class?: string;
 }
 
 export function CardFace(props: CardFaceProps) {
   return (
-    <div class="absolute h-full w-full backface-hidden">
-      <div class="absolute inset-0.5 bg-#bdaa8a rounded-2" />
+    <div class={`backface-hidden grid ${props.class ?? ""}`}>
       <Image
-        class="absolute inset-0 h-full w-full p-1px"
+        class="grid-area-[1/1] h-full w-full"
         imageId={props.definitionId}
         fallback="card"
       />
-      <CardFrameNormal class="absolute inset-0 h-full w-full pointer-events-none" />
+      <CardFrameNormal class="grid-area-[1/1] h-full w-full pointer-events-none" />
     </div>
   );
 }
@@ -283,7 +283,7 @@ export function Card(props: CardProps) {
         }
       />
 
-      <CardFace definitionId={data().definitionId} />
+      <CardFace definitionId={data().definitionId} class="absolute h-full w-full"/>
       <Switch>
         <Match when={props.toBeSwitched}>
           <WithDelicateUi

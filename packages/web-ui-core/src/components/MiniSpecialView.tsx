@@ -52,7 +52,7 @@ function MiniView(props: MiniSpecialViewProps) {
                   <div class="relative h-24 w-4.5">
                     <li class="flex flex-col items-center absolute top-0 left--3">
                       <div class="h-18 w-10.5 relative">
-                        <CardFace definitionId={cardId} />
+                        <CardFace definitionId={cardId} class="absolute inset-0 w-10.5 h-18" />
                         <DiceCostAsync
                           cardDefinitionId={cardId}
                           size={18}
@@ -79,7 +79,7 @@ function MiniView(props: MiniSpecialViewProps) {
                   <div class="relative h-24 w-4.5">
                     <li class="flex flex-col items-center absolute top-0 left--3">
                       <div class="h-18 w-10.5 relative">
-                        <CardFace definitionId={cardId} />
+                        <CardFace definitionId={cardId} class="absolute inset-0 w-10.5 h-18" />
                         <DiceCostAsync
                           cardDefinitionId={cardId}
                           size={18}

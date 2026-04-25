@@ -54,7 +54,7 @@ export function SelectCardView(props: SelectCardViewProps) {
                   props.onClickCard(cardId);
                 }}
               >
-                <CardFace definitionId={cardId} />
+                <CardFace definitionId={cardId} class="absolute inset-0 h-36 w-21" />
                 <Show when={selectedId() === cardId}>
                   <div class="absolute h-full w-full backface-hidden flex items-center justify-center">
                     <SelectingIcon class="w-21 h-21" />

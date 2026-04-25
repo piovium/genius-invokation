@@ -1568,7 +1568,7 @@ function HistorySummaryShot(props: { data: SummaryShot }) {
                         <CardbackNormal class="absolute inset-0 w-10.5 h-18" />
                       }
                     >
-                      <CardFace definitionId={imageId} />
+                      <CardFace definitionId={imageId} class="absolute inset-0 w-10.5 h-18" />
                     </Show>
                   </div>
                 </div>
@@ -1743,7 +1743,7 @@ function HistoryBlockBox(props: {
                   fallback={<CardbackNormal class="w-10.5 h-18" />}
                 >
                   <div class="relative w-10.5 h-18">
-                    <CardFace definitionId={props.data.imageId as number} />
+                    <CardFace definitionId={props.data.imageId as number} class="absolute inset-0 w-10.5 h-18" />
                   </div>
                 </Show>
               </Match>
@@ -2046,6 +2046,7 @@ function HistoryBlockDetailPanel(props: {
                 <div class="relative w-10.5 h-18">
                   <CardFace
                     definitionId={renderBlock().content.imageId as number}
+                    class="absolute inset-0 w-10.5 h-18"
                   />
                 </div>
               </Show>
