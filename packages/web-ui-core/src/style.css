@@ -38,6 +38,22 @@
     );
   }
 
+  /* start */
+  /* ActionHintText */
+  .action-hint {
+    border-top:#9d7f64 3px double;
+    border-bottom:#9d7f64 3px double;
+    background-color: #70553c;
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 45%,
+      black 55%,
+      transparent 100%
+    );
+  }
+  /* end */
+
   &[data-has-opp-chessboard] {
     --skill-button-offset-x: 1.5rem;
     --chessboard-bg-y-border-width: calc(
@@ -318,27 +334,6 @@
     box-shadow:
       0 0 8px #44332280,
       0 0 16px #443322;
-  }
-
-  .action-hint {
-    background: linear-gradient(
-      to bottom,
-      #70553c 1px,
-      #9d7f64 1px,
-      #9d7f64 2px,
-      #70553c 2px,
-      #70553c 22px,
-      #9d7f64 22px,
-      #9d7f64 23px,
-      #70553c 23px
-    );
-    mask-image: linear-gradient(
-      to right,
-      transparent 0%,
-      #000000ff 45%,
-      #000000ff 55%,
-      transparent 100%
-    );
   }
 
   .action-hint-who {
