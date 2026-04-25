@@ -575,6 +575,9 @@ function doMutation(state: GameState, m: Mutation): GameState {
 
 export function stringifyMutation(m: Mutation): string | null {
   switch (m.type) {
+    case "changePhase": {
+      return `Change phase to ${m.newPhase}`;
+    }
     case "stepRound": {
       return `Step round number`;
     }
@@ -640,6 +643,11 @@ export function stringifyMutation(m: Mutation): string | null {
     case "removeRoundSkillLog": {
       return `Remove round skill log of [character:${m.caller.definition.id}] from ${stringifyState(
         m.caller,
+      )}`;
+    }
+    case "mutateExtensionState": {
+      return `Mutate state of extension ${m.extensionId} to ${JSON.stringify(
+        m.newState,
       )}`;
     }
     default: {
