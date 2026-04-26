@@ -1867,7 +1867,7 @@ export function Chessboard(props: ChessboardProps) {
             }
           />
           <ConfirmButton
-            class="absolute top-80% left-50% translate-x--50%"
+            class="absolute top-[calc(50%+9rem)] left-50% translate-x--50%"
             step={showConfirmButton()}
             onClick={(step) => {
               localProps.onStepActionState?.(step, selectedDiceValue());
