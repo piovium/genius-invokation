@@ -1,17 +1,19 @@
-import { children, type ComponentProps } from "solid-js";
+import { children, splitProps, type ComponentProps } from "solid-js";
 
 export function AspectRatioContainer(props: ComponentProps<"div">) {
-  const child = children(() => props.children);
+  const [local, restProps] = splitProps(props, [
+    "class",
+    "children",
+  ]);
+  const child = children(() => local.children);
   return (
-    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-      <div
-        class={`absolute aspect-ratio-[16/9] h-full max-w-full flex-grow-0 flex-shrink-0 children-pointer-events-auto ${
-          props.class ?? ""
-        }`}
-        {...props}
-      >
-        {child()}
-      </div>
+    <div
+      class={`grid-area-[1/1] aspect-ratio-[16/9] h-full max-w-full relative mx-auto pointer-events-none children-pointer-events-auto ${
+        local.class ?? ""
+      }`}
+      {...restProps}
+    >
+      {child()}
     </div>
   );
 }

@@ -151,6 +151,9 @@
   .chessboard-bg-container {
     top: var(--chessboard-y-offset);
     bottom: var(--chessboard-y-offset);
+    img {
+      scale: 1.08;
+    }
   }
 
   .skill-button-group {

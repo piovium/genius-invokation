@@ -1685,7 +1685,7 @@ export function Chessboard(props: ChessboardProps) {
       {...elProps}
     >
       <TransformWrapper
-        class="absolute left-0"
+        class="absolute left-0 grid grid-cols-1 grid-rows-1"
         autoHeight={localProps.autoHeight}
         rotation={localProps.rotation}
         hasOppChessboard={!!localProps.opp}
@@ -1695,7 +1695,7 @@ export function Chessboard(props: ChessboardProps) {
         <ChessboardBackground color={localProps.chessboardColor} />
         {/* 3d space */}
         <div
-          class="relative h-full w-full preserve-3d select-none"
+          class="relative h-full w-full preserve-3d select-none grid-area-[1/1]"
           ref={chessboardElement}
           onClick={onChessboardClick}
           style={{
