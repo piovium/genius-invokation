@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -29,15 +29,15 @@ export function CardCountHint(props: CardCountHintProps) {
   };
   return (
     <div
-      class="pointer-events-none absolute left-0 top-0 h-6 w-6 grid grid-cols-1 grid-rows-1 opacity-0 data-[shown]:opacity-100 transition-opacity current-turn-hint"
+      class="pointer-events-none absolute left-0 top-0 h-6 w-6 hidden data-[shown]:grid current-turn-hint"
       style={cssPropertyOfTransform(props.transform)}
       bool:data-shown={props.shown}
       data-opp={hintStyle().opp}
     >
       <div 
-        class={`grid-area-[1/1] z-0 h-6 w-6 rounded-lt-full rounded-r-full bg-[var(--bg-color)] b-1 b-[var(--fg-color)] ${hintStyle().hint}`}
+        class={`grid-area-[1/1] rounded-lt-full rounded-r-full bg-[var(--bg-color)] b-3 b-[var(--fg-color)] ${hintStyle().hint}`}
       />
-      <div class={`grid-area-[1/1] z-1 w-6 text-[var(--fg-color)] text-4 text-center`}>{props.value}</div>
+      <div class={`grid-area-[1/1] z-1 text-white font-bold text-3 text-center self-center`}>{props.value}</div>
     </div>
   );
 }

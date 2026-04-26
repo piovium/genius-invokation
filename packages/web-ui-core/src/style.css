@@ -111,6 +111,17 @@
     box-shadow:#581c87 0 0 15px;
   }
 
+  /* CardCountHint */
+  .current-turn-hint[data-opp="false"] {
+    --fg-color: #d9b48d;
+    --bg-color: #644d39;
+  }
+
+  .current-turn-hint[data-opp="true"] {
+    --fg-color: #7e98cb;
+    --bg-color: #3f4957;
+  }
+
   /* end */
 
   &[data-has-opp-chessboard] {
@@ -417,16 +428,6 @@
     --inner-background-color: #485569;
     --inner-border-color: #899dc6;
     --text-color: #7e98cb;
-  }
-
-  .current-turn-hint[data-opp="false"] {
-    --fg-color: #644d39;
-    --bg-color: #d9b48d;
-  }
-
-  .current-turn-hint[data-opp="true"] {
-    --fg-color: #3f4957;
-    --bg-color: #7e98cb;
   }
 
   .block-opp-selected {
