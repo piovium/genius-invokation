@@ -35,7 +35,7 @@ export function CardCountHint(props: CardCountHintProps) {
       data-opp={hintStyle().opp}
     >
       <div 
-        class={`grid-area-[1/1] rounded-lt-full rounded-r-full bg-[var(--bg-color)] b-3 b-[var(--fg-color)] ${hintStyle().hint}`}
+        class={`grid-area-[1/1] rounded-lt-full rounded-r-full bg-[var(--fg-color)] b-3 b-[var(--bg-color)] ${hintStyle().hint}`}
       />
       <div class={`grid-area-[1/1] z-1 text-white font-bold text-3 text-center self-center`}>{props.value}</div>
     </div>
