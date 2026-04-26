@@ -886,6 +886,28 @@
   }
 }
 
+@keyframes brightness-blink {
+  0% {
+  }
+  20% {
+    filter: brightness(1.5);
+  }
+  100% {
+  }
+}
+
+@property --effect-shadow {
+  syntax: '<box-shadow>';
+  initial-value: 0 0 transparent;
+  inherits: false;
+}
+
+@property --inset-shadow {
+  syntax: '<box-shadow>';
+  initial-value: 0 0 transparent;
+  inherits: false;
+}
+
 @keyframes shadow-blink {
   0% {
   }
@@ -894,16 +916,6 @@
   }
   100% {
     --effect-shadow: 0 0 transparent;
-  }
-}
-
-@keyframes brightness-blink {
-  0% {
-  }
-  20% {
-    filter: brightness(1.5);
-  }
-  100% {
   }
 }
 

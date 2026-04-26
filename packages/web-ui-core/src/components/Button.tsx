@@ -29,14 +29,14 @@ export function Button(props: ButtonProps) {
   const ch = children(() => props.children);
   return (
     <button
-      class={`grid group/confirm_btn bg-transparent ${
+      class={`w-45 h-10 grid group/confirm_btn bg-transparent ${
         props.class ?? ""
       }`}
       onClick={(e) => props.onClick(e)}
     >
-      <ButtonNormal class="grid-area-[1/1] w-45 h-10.8 block group-[:is(:hover,:active)]/confirm_btn:hidden" />  
-      <ButtonHover class="grid-area-[1/1] w-45 h-10.8 hidden group-[:hover:not(:active)]/confirm_btn:block" />          
-      <ButtonActive class="grid-area-[1/1] w-45 h-10.8 hidden group-active/confirm_btn:block" />
+      <ButtonNormal class="grid-area-[1/1] w-full" />  
+      <ButtonHover class="grid-area-[1/1] w-full hidden group-[:hover:not(:active)]/confirm_btn:block" />          
+      <ButtonActive class="grid-area-[1/1] w-full hidden group-active/confirm_btn:block" />
       <AutoResizeText class="grid-area-[1/1] w-30 text-center font-bold text-black/70 self-center mx-auto">{ch()}</AutoResizeText>
     </button>
   );
