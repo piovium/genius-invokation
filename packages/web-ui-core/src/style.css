@@ -92,13 +92,14 @@
   }
 
   .card-animation:where([data-dragging-end] > *) {
-    --shadow-color: rgba(255, 230, 89, 0.8);
-    animation: shadow-blink 1s ease-in-out forwards;
+    --effect-shadow: 0px 0px 25px 10px rgba(255, 230, 89, 0.8);
+    animation: blink-25 1s ease-in-out forwards;
   }
 
   .card-animation:where([data-triggered] > *) {
-    --shadow-color: rgb(252 240 168 / 0.4);
-    animation: shadow-blink 0.5s ease-in-out, inset-shadow-blink 0.5s ease-in-out;
+    --effect-shadow: 0px 0px 25px 10px rgb(252 240 168 / 0.4);
+    --inset-shadow: inset 0px 0px 25px 10px rgb(252 240 168 / 0.4);
+    animation: blink-25 0.5s ease-in-out;
   }
 
   /* end */
@@ -889,44 +890,22 @@
 @keyframes brightness-blink {
   0% {
   }
-  20% {
+  25% {
     filter: brightness(1.5);
   }
   100% {
   }
 }
 
-@property --effect-shadow {
-  syntax: '<box-shadow>';
-  initial-value: 0 0 transparent;
-  inherits: false;
-}
-
-@property --inset-shadow {
-  syntax: '<box-shadow>';
-  initial-value: 0 0 transparent;
-  inherits: false;
-}
-
-@keyframes shadow-blink {
+@keyframes blink-25 {
   0% {
+    opacity: 0;
   }
-  20% {
-    --effect-shadow: 0px 0px 25px 10px var(--shadow-color);
+  25% {
+    opacity: 1;
   }
   100% {
-    --effect-shadow: 0 0 transparent;
-  }
-}
-
-@keyframes inset-shadow-blink {
-  0% {
-  }
-  20% {
-    --inset-shadow: inset 0px 0px 25px 10px var(--shadow-color);
-  }
-  100% {
-    --inset-shadow: 0 0 transparent;
+    opacity: 0;
   }
 }
 
