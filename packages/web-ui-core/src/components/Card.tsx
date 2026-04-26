@@ -27,7 +27,6 @@ import {
   CARD_TAG_ABYSS,
   CARD_TAG_CONDUCTIVE,
 } from "@gi-tcg/typings";
-import { WithDelicateUi } from "../primitives/delicate_ui";
 import SelectingIcon from "../svg/SelectingIcon.svg?fb";
 import CardFrameNormal from "../svg/CardFrameNormal.svg?fb";
 import CardbackNormal from "../svg/CardbackNormal.svg?fb";
@@ -292,19 +291,19 @@ export function Card(props: CardProps) {
         </Match>
       </Switch>
       <StatusGroup
-        class="absolute top-0.5 attachments w-full justify-center"
+        class="grid-area-[1/1] mt-1 mx-auto z-1 attachments"
         statuses={attachmentInfo()}
         maxCount={2}
       />
       <DiceCost
-        class="absolute left-1.8 top--1 translate-x--50% backface-hidden flex flex-col gap-1 [&:where([data-opp-hand]>*)]:rotate-180"
+        class="absolute left-2 top--1 translate-x--50% backface-hidden flex flex-col gap-1 [&:where([data-opp-hand]>*)]:rotate-180"
         cost={data().definitionCost}
         size={36}
         realCost={realCost()}
       />
-      <CardbackNormal class="absolute h-full w-full backface-hidden rotate-y-180 translate-z--0.1px pointer-events-none" />
+      <CardbackNormal class="grid-area-[1/1] backface-hidden rotate-y-180 translate-z--0.1px pointer-events-none" />
       <Show when={abyssDebuff()}>
-        <div class="absolute h-full w-full backface-hidden rotate-y-180 translate-z--0.2px rounded-1.2 abyss-debuff" />
+        <div class="grid-area-[1/1] backface-hidden rotate-y-180 translate-z--0.2px rounded-1.2 abyss-debuff" />
       </Show>
       <Show when={conductiveDebuff()}>
         <ElectricShocks

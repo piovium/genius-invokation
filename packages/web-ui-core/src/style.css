@@ -106,6 +106,11 @@
     animation: rotate-60 reverse 0.15s ease-out both;
   }
 
+  .abyss-debuff {
+    background-color: #581c87aa;
+    box-shadow:#581c87 0 0 15px;
+  }
+
   /* end */
 
   &[data-has-opp-chessboard] {
@@ -723,17 +728,6 @@
     );
     animation: blink 4s ease-in-out infinite;
     --blink-opacity: 0.5;
-  }
-
-  .abyss-debuff {
-    background-color: #6b21a828;
-    filter: brightness(0.8);
-    box-shadow:
-      #581c8780 0 0 2px 2px,
-      inset #581c8780 0 0 18px 18px,
-      inset #581c8780 0 0 6px 6px;
-    animation: blink 8s ease-in-out infinite;
-    --blink-opacity: 0.6;
   }
 
   .electric-shocks-debuff {
