@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -31,6 +31,7 @@ import { WithDelicateUi } from "../primitives/delicate_ui";
 import SelectingIcon from "../svg/SelectingIcon.svg?fb";
 import CardFrameNormal from "../svg/CardFrameNormal.svg?fb";
 import CardbackNormal from "../svg/CardbackNormal.svg?fb";
+import ExchangeCard from "../svg/ExchangeCard.svg?fb";
 import { StatusGroup } from "./StatusGroup";
 import { ElectricShocks } from "./ElectricShocks";
 
@@ -238,7 +239,7 @@ export function Card(props: CardProps) {
   return (
     <div
       ref={el}
-      class={`absolute top-0 left-0 h-36 w-21 rounded-1.5
+      class={`absolute top-0 left-0 h-36 w-21 grid rounded-1.5
         preserve-3d transform-origin-tl card pointer-events-auto`}
       style={style()}
       bool:data-opp-hand={props.kind === "oppHand"}
@@ -280,29 +281,14 @@ export function Card(props: CardProps) {
         props.onPointerDown?.(e, e.currentTarget);
       }}
     >
-      <CardFace definitionId={data().definitionId} class="absolute h-full w-full"/>      
-      <div class="absolute inset-0 pointer-events-none h-full w-full rounded-1.2 card-animation"/>
+      <CardFace definitionId={data().definitionId} class="grid-area-[1/1]"/>      
+      <div class="grid-area-[1/1] pointer-events-none rounded-1.2 card-animation"/>
       <Switch>
         <Match when={props.toBeSwitched}>
-          <WithDelicateUi
-            assetId="UI_TeyvatCard_Select_ExchangeCard"
-            fallback={
-              <div class="absolute h-full w-full backface-hidden flex items-center justify-center text-8xl text-red-500 line-height-none">
-                &#8856;
-              </div>
-            }
-          >
-            {(image) => (
-              <div class="absolute h-full w-full backface-hidden flex items-center justify-center children-w-18">
-                {image}
-              </div>
-            )}
-          </WithDelicateUi>
+          <ExchangeCard class="grid-area-[1/1] w-18 h-18 self-center mx-auto z-1 exchange-card-entering" />
         </Match>
         <Match when={props.selected}>
-          <div class="absolute h-full w-full backface-hidden flex items-center justify-center">
-            <SelectingIcon class="w-21 h-21" />
-          </div>
+          <SelectingIcon class="grid-area-[1/1] w-21 h-21 self-center mx-auto z-1" />
         </Match>
       </Switch>
       <StatusGroup

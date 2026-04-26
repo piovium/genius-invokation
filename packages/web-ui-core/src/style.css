@@ -102,6 +102,10 @@
     animation: blink-25 0.5s ease-in-out;
   }
 
+  .exchange-card-entering {
+    animation: rotate-60 reverse 0.15s ease-out both;
+  }
+
   /* end */
 
   &[data-has-opp-chessboard] {
@@ -906,6 +910,14 @@
   }
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes rotate-60 {
+  0% {
+  }
+  100% {
+    rotate: 60deg;
   }
 }
 
