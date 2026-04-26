@@ -108,6 +108,7 @@ function App() {
         rotation={0}
         style={{ width: "80vw", height: "80vh" }}
         autoHeight={false}
+        chessboardColor="#537a76"
         // liveStreamingMode
         myPlayerInfo={{
           avatarUrl: "https://http.cat/404",

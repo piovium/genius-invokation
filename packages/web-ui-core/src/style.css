@@ -58,6 +58,49 @@
     animation: fade-out 0.5s ease-in both;
     animation-delay: 3.5s;
   }
+
+  /* Card */
+  .card[data-transition-transform] {
+    transition: transform 150ms ease;
+  }
+
+  .card[data-hidden] {
+    visibility: hidden;
+    pointer-events: none;
+  } 
+
+  .card[data-dragging-end] {
+    pointer-events: none;
+    animation: fade-out 1s ease-in-out forwards, brightness-blink 1s ease-in-out forwards;
+  }
+
+  .card-animation {
+    --common-shadow: 0 0 transparent;
+    --effect-shadow: 0 0 transparent;
+    --inset-shadow: 0 0 transparent;
+    --shadow-color: transparent;
+    box-shadow: var(--common-shadow), var(--effect-shadow), var(--inset-shadow);
+    transition: box-shadow 150ms ease;
+  }
+
+  .card-animation:where([data-shadow] > *) {
+    --common-shadow: 0 20px 25px 5px rgb(0 0 0 / 0.2);
+  }
+
+  .card-animation:where([data-playable] > *) {
+    --effect-shadow: 0 0 3px 2px rgb(252 240 168 / 0.8);
+  }
+
+  .card-animation:where([data-dragging-end] > *) {
+    --shadow-color: rgba(255, 230, 89, 0.8);
+    animation: shadow-blink 1s ease-in-out forwards;
+  }
+
+  .card-animation:where([data-triggered] > *) {
+    --shadow-color: rgb(252 240 168 / 0.4);
+    animation: shadow-blink 0.5s ease-in-out, inset-shadow-blink 0.5s ease-in-out;
+  }
+
   /* end */
 
   &[data-has-opp-chessboard] {
@@ -234,36 +277,6 @@
   .energy-preview-animation {
     --blink-opacity: 0.1;
     animation: blink 3s ease-in-out both infinite;
-  }
-
-  .card {
-    --playable-shadow: 0 0 transparent;
-    box-shadow: var(--common-shadow), var(--playable-shadow);
-    transition-property: box-shadow;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 150ms;
-  }
-
-  .card[data-hidden] {
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  .card[data-shadow] {
-    --common-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
-      0 8px 10px -6px rgb(0 0 0 / 0.1);
-  }
-
-  .card[data-playable] {
-    --playable-shadow: 0 0 2px 2px rgb(252 240 168 / 0.8);
-  }
-
-  .card[data-transition-transform] {
-    transition-property: box-shadow, transform;
-  }
-
-  .card[data-dragging-end] {
-    animation: card-dragging-end 0.2s both;
   }
 
   .declare-end-marker-img,
@@ -870,6 +883,38 @@
   }
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes shadow-blink {
+  0% {
+  }
+  20% {
+    --effect-shadow: 0px 0px 25px 10px var(--shadow-color);
+  }
+  100% {
+    --effect-shadow: 0 0 transparent;
+  }
+}
+
+@keyframes brightness-blink {
+  0% {
+  }
+  20% {
+    filter: brightness(1.5);
+  }
+  100% {
+  }
+}
+
+@keyframes inset-shadow-blink {
+  0% {
+  }
+  20% {
+    --inset-shadow: inset 0px 0px 25px 10px var(--shadow-color);
+  }
+  100% {
+    --inset-shadow: 0 0 transparent;
   }
 }
 
@@ -1560,22 +1605,6 @@
     opacity: 1;
     filter: none;
     box-shadow: none;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes card-dragging-end {
-  0% {
-    filter: none;
-  }
-
-  20% {
-    filter: brightness(1.5);
-    box-shadow: 0px 0px 15px 10px yellow;
-    opacity: 1;
   }
 
   100% {

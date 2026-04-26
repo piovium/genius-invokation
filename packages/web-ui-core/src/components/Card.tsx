@@ -133,7 +133,7 @@ export function CardFace(props: CardFaceProps) {
   return (
     <div class={`backface-hidden grid ${props.class ?? ""}`}>
       <Image
-        class="grid-area-[1/1] h-full w-full"
+        class="grid-area-[1/1] h-full w-full p-2%"
         imageId={props.definitionId}
         fallback="card"
       />
@@ -238,12 +238,16 @@ export function Card(props: CardProps) {
   return (
     <div
       ref={el}
-      class="absolute top-0 left-0 h-36 w-21 rounded-1.5 preserve-3d transform-origin-tl card pointer-events-auto data-[dragging-end]:pointer-events-none"
+      class={`absolute top-0 left-0 h-36 w-21 rounded-1.5
+        preserve-3d transform-origin-tl card pointer-events-auto`}
       style={style()}
       bool:data-opp-hand={props.kind === "oppHand"}
       bool:data-hidden={props.hidden}
       bool:data-transition-transform={props.enableTransition}
       bool:data-shadow={props.enableShadow}
+      bool:data-triggered={
+        props.uiState.type === "cardStatic" && props.uiState.triggered
+      }
       bool:data-playable={
         props.kind !== "switching" && props.playStep?.playable
       }
@@ -276,14 +280,8 @@ export function Card(props: CardProps) {
         props.onPointerDown?.(e, e.currentTarget);
       }}
     >
-      <div
-        class="absolute inset-0 pointer-events-none h-full w-full rounded-1.2 entity-animation-1"
-        bool:data-triggered={
-          props.uiState.type === "cardStatic" && props.uiState.triggered
-        }
-      />
-
-      <CardFace definitionId={data().definitionId} class="absolute h-full w-full"/>
+      <CardFace definitionId={data().definitionId} class="absolute h-full w-full"/>      
+      <div class="absolute inset-0 pointer-events-none h-full w-full rounded-1.2 card-animation"/>
       <Switch>
         <Match when={props.toBeSwitched}>
           <WithDelicateUi
