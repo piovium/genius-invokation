@@ -1545,16 +1545,18 @@ export function Chessboard(props: ChessboardProps) {
     shouldMoveWhenHandBlurring?.resolve(false);
     const dragging = getDraggingHand();
     const focusingHands = getFocusingHands();
+    const size = [height(), width()] as Size;
     if (dragging?.id !== cardInfo.id) {
       return;
     }
-    const [tuningAreaX] = getTuningAreaPos([height(), width()], dragging);
+    const [tuningAreaX] = getTuningAreaPos(size, dragging);
+    const shouldFocusingHand = shouldFocusHandWhenDragging(size, dragging.y);
     if (cardInfo.tuneStep && dragging.x + CARD_WIDTH > tuningAreaX) {
       localProps.onStepActionState?.(cardInfo.tuneStep, selectedDiceValue());
       setDraggingHand({ ...dragging, status: "end" });
       return;
     }
-    if (!focusingHands && cardInfo.playStep) {
+    if (!shouldFocusingHand && cardInfo.playStep) {
       localProps.onStepActionState?.(cardInfo.playStep, selectedDiceValue());
       if (cardInfo.playStep.playable) {
         setDraggingHand({ ...dragging, status: "end" });
