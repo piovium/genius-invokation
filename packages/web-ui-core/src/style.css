@@ -122,6 +122,10 @@
     --bg-color: #7e98cb;
   }
 
+  .damage {
+    animation: scale-200-120 200ms ease both;
+  }
+
   /* end */
 
   &[data-has-opp-chessboard] {
@@ -919,6 +923,17 @@
   }
 }
 
+@keyframes scale-200-120 {
+  0% {
+  }
+  50% {
+    scale: 200%;
+  }
+  100% {
+    scale: 120%;
+  }
+}
+
 /* keyframes end */
 
 @keyframes attack-effect-top-flash {
@@ -1542,12 +1557,6 @@
   100% {
     opacity: 0;
     scale: 300%;
-  }
-}
-
-@keyframes damage-text-enter {
-  50% {
-    scale: 200%;
   }
 }
 

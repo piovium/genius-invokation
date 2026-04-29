@@ -42,8 +42,9 @@ export const DICE_COLOR: Record<number, string> = {
   [DiceType.Geo]: "geo",
   [DiceType.Dendro]: "dendro",
   [DiceType.Omni]: "omni",
-  [DiceType.Energy]: "heal",
-  10: "heal",
+  // [DiceType.Aligned]: "",
+  // [DiceType.Energy]: "",
+  // [DiceType.Legend]: "",
 };
 
 function EnergyIcon(props: { size: number }) {

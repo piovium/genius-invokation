@@ -16,50 +16,49 @@
 import { DamageType } from "@gi-tcg/typings";
 import { DICE_COLOR } from "./Dice";
 import type { DamageInfo } from "./Chessboard";
-import { createEffect, createMemo } from "solid-js";
+import { createMemo } from "solid-js";
 import { StrokedText } from "./StrokedText";
 import DamageIcon from "../svg/DamageIcon.svg?fb";
 import HealIcon from "../svg/HealIcon.svg?fb";
 
 export interface DamageProps {
-  info: DamageInfo;
+  info: DamageInfo | null;
   shown: boolean;
 }
 
 export const DAMAGE_COLOR: Record<number, string> = {
   ...DICE_COLOR, 
-  [DamageType.Piercing]: "void"
+  [DamageType.Piercing]: "void",
+  [DamageType.Heal]: "heal",
 };
 
 export function Damage(props: DamageProps) {
-  const damageType = createMemo(() => props.info.damageType);
-  const damageValue = createMemo(() => props.info.value);
+  const damageType = createMemo(() => props.info?.damageType);
+  const damageValue = createMemo(() => props.info?.value);
   return (
-    <div class="absolute z-5 top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] preserve-3d">
-      <div
-        class="relative w-28 h-28 transition-all-100 transition-discrete hidden data-[shown]:flex scale-80 data-[shown]:scale-100 starting:data-[shown]:scale-80"
-        bool:data-shown={props.shown}
-        style={{
-          color: `var(--c-${DAMAGE_COLOR[damageType()]})`,
-        }}
-      >
-        <div class="absolute h-full w-full">
-          {damageType() === DamageType.Heal ? <HealIcon noRender /> : <DamageIcon noRender />}
-        </div>
-        <div
-          class="relative h-full w-full data-[heal=false]:animate-[damage-text-enter_200ms_both] text-5xl font-bold text-center"
-          data-heal={damageType() === DamageType.Heal}
-        >
-          <StrokedText
-            class="absolute translate-x-[calc(-50%-0.1rem)] top-50% left-50% translate-y-[calc(-50%+0.05rem)] "
-            text={`${
-              damageType() === DamageType.Heal ? "+" : "-"
-            }${damageValue()}`}
-            strokeColor="#fffae3"
-            strokeWidth={7}
-          />
-        </div>
-      </div>
+    <div
+      class={`grid-area-[1/1] self-center z-5 w-21 h-21 hidden data-[shown]:grid damage preserve-3d`}
+      bool:data-shown={props.shown}
+      style={{
+        color: `var(--c-${DAMAGE_COLOR[damageType() ?? 0]})`,
+      }}    
+    >
+      <HealIcon
+        class="h-full w-full grid-area-[1/1] data-[hidden]:hidden"
+        bool:data-hidden={damageType() !== DamageType.Heal}
+      />
+      <DamageIcon
+        class="h-full w-full grid-area-[1/1] data-[hidden]:hidden"
+        bool:data-hidden={damageType() === DamageType.Heal}
+      />
+      <StrokedText
+        class="grid-area-[1/1] font-bold text-center text-9 self-center text-nowrap"
+        text={`${
+          damageType() === DamageType.Heal ? "+" : "-"
+        }${damageValue()}`}
+        strokeColor="#fffae3"
+        strokeWidth={7}
+      />
     </div>
   );
 }

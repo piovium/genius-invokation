@@ -498,7 +498,7 @@ export function CharacterArea(props: CharacterAreaProps) {
           </Switch>
         </div>
       </div>
-      <div class="h-36 w-21 relative z-9 preserve-3d">
+      <div class="h-36 w-21 relative z-9 preserve-3d grid grid-cols-1 grid-rows-1">
         <Show when={!defeated()}>
           <Health
             value={data().health}
@@ -590,7 +590,7 @@ export function CharacterArea(props: CharacterAreaProps) {
           </div>
         </Show>
         <div
-          class="h-full w-full rounded-1.2 clickable-outline transition-shadow data-[defeated]:brightness-50 preserve-3d"
+          class="grid-area-[1/1] h-full w-full rounded-1.2 clickable-outline transition-shadow data-[defeated]:brightness-50 preserve-3d"
           bool:data-clickable={
             props.clickStep && props.clickStep.ui >= ActionStepEntityUi.Outlined
           }
@@ -645,9 +645,7 @@ export function CharacterArea(props: CharacterAreaProps) {
             </div>
           </Match>
         </Switch>
-        <Show when={getDamage()}>
-          {(dmg) => <Damage info={dmg()} shown={showDamage()} />}
-        </Show>
+        <Damage info={getDamage()} shown={showDamage()} />
         <CharacterTagMasks tags={data().tags} />
         <Show when={triggered()}>
           <div class="absolute h-21 w-21 top-7.5">
