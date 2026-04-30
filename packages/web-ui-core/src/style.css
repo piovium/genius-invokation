@@ -93,12 +93,14 @@
 
   .card-animation:where([data-dragging-end] > *) {
     --effect-shadow: 0px 0px 25px 10px rgba(255, 230, 89, 0.8);
+    --blink-opacity: 0;
     animation: blink-25 1s ease-in-out forwards;
   }
 
   .card-animation:where([data-triggered] > *) {
     --effect-shadow: 0px 0px 25px 10px rgb(252 240 168 / 0.4);
     --inset-shadow: inset 0px 0px 25px 10px rgb(252 240 168 / 0.4);
+    --blink-opacity: 0;
     animation: blink-25 0.5s ease-in-out;
   }
 
@@ -122,9 +124,17 @@
     --bg-color: #7e98cb;
   }
 
+  /* CharacterArea */
+  .aura[data-preview] {
+    --blink-opacity: 0.5;    
+    animation: blink-50 2s linear infinite;
+  }
+
   .damage {
     animation: scale-200-120 200ms ease both;
   }
+
+
 
   /* end */
 
@@ -704,11 +714,6 @@
     animation: skill-triggered-6 0.5s linear both;
   }
 
-  .preview-blink[data-preview] {
-    animation: blink 4s ease-in-out infinite;
-    --blink-opacity: 0.5;
-  }
-
   .attack-effect {
     animation: attack-effect-outline 600ms ease-out forwards;
     box-shadow: 0 0 0 rgba(0, 0, 0, 0);
@@ -904,14 +909,22 @@
 }
 
 @keyframes blink-25 {
-  0% {
-    opacity: 0;
+  0%,
+  100% {
+    opacity: var(--blink-opacity, 1);
   }
   25% {
     opacity: 1;
   }
+}
+
+@keyframes blink-50 {
+  0%,
   100% {
-    opacity: 0;
+    opacity: var(--blink-opacity, 1);
+  }
+  50% {
+    opacity: 1;
   }
 }
 
@@ -1619,17 +1632,6 @@
 
   100% {
     opacity: 0;
-  }
-}
-
-@keyframes blink {
-  0%,
-  100% {
-    opacity: var(--blink-opacity, 1);
-  }
-
-  50% {
-    opacity: 1;
   }
 }
 

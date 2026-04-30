@@ -452,7 +452,7 @@ export function CharacterArea(props: CharacterAreaProps) {
   );
   return (
     <div
-      class="absolute flex flex-col items-center transition-transform preserve-3d [&_*]:backface-hidden"
+      class="absolute w-21 h-48 grid grid-cols-1 grid-rows-[1fr_6fr_1fr] transition-transform preserve-3d [&_*]:backface-hidden"
       style={cssPropertyOfTransform(props.uiState.transform)}
       ref={el}
       onClick={(e) => {
@@ -461,42 +461,44 @@ export function CharacterArea(props: CharacterAreaProps) {
       }}
     >
       <div
-        class="h-6 w-21 flex relative justify-center overflow-visible preview-blink z-10"
-        bool:data-preview={props.preview?.newAura || props.preview?.reactions}
+        class="grid-area-[1/1] flex flex-row justify-center items-center gap-0.2 z-10 aura"
+        bool:data-preview={props.preview?.newAura || !!props.preview?.reactions?.length}
       >
-        <div class="flex flex-row items-center gap-0.2 max-w-full">
-          <Switch>
-            <Match when={getReaction()}>{(r) => <Reaction info={r()} />}</Match>
-            <Match when={true}>
-              <For each={previewReaction()}>
-                {(reaction) => (
-                  <div class="h-5.1 flex flex-row items-center bg-black/60 rounded-full shrink-0">
-                    <For each={reaction}>
-                      {(e) => (
-                        <Show when={e}>
-                          {(e) => (
-                            <Image
-                              imageId={e()}
-                              class="h-5 w-5"
-                              fallback="aura"
-                            />
-                          )}
-                        </Show>
-                      )}
-                    </For>
-                  </div>
-                )}
-              </For>
-              <For each={aura()}>
-                {(aura) => (
-                  <Show when={aura}>
-                    <Image imageId={aura} class="h-5 w-5" fallback="aura" />
-                  </Show>
-                )}
-              </For>
-            </Match>
-          </Switch>
-        </div>
+        <Switch>
+          <Match when={getReaction()}>
+            {(r) =>
+              <Reaction info={r()} />
+            }
+          </Match>
+          <Match when={true}>
+            <For each={previewReaction()}>
+              {(reaction) => (
+                <div class="h-5.1 flex flex-row items-center bg-black/60 rounded-full shrink-0">
+                  <For each={reaction}>
+                    {(e) => (
+                      <Show when={e}>
+                        {(e) => (
+                          <Image
+                            imageId={e()}
+                            class="h-5 w-5"
+                            fallback="aura"
+                          />
+                        )}
+                      </Show>
+                    )}
+                  </For>
+                </div>
+              )}
+            </For>
+            <For each={aura()}>
+              {(aura) => (
+                <Show when={aura}>
+                  <Image imageId={aura} class="h-5 w-5" fallback="aura" />
+                </Show>
+              )}
+            </For>
+          </Match>
+        </Switch>
       </div>
       <div class="h-36 w-21 relative z-9 preserve-3d grid grid-cols-1 grid-rows-1">
         <Show when={!defeated()}>
@@ -619,7 +621,7 @@ export function CharacterArea(props: CharacterAreaProps) {
             fallback="card"
           />
           <CardFrameNormal class="absolute inset-0 h-full w-full pointer-events-none" />
-          <CardbackNormal class="absolute inset-0 h-full w-full backface-hidden rotate-y-180 translate-z--0.1px" />
+          <CardbackNormal class="absolute inset-0 h-full w-full rotate-y-180 translate-z--0.1px" />
         </div>
         <StatusGroup
           class="absolute z-3 left-0.5 bottom-0 h-5.5 w-20"
@@ -630,17 +632,17 @@ export function CharacterArea(props: CharacterAreaProps) {
         </Show>
         <Switch>
           <Match when={props.clickStep?.ui === ActionStepEntityUi.Selected}>
-            <div class="z-6 absolute inset-0 backface-hidden flex items-center justify-center">
+            <div class="z-6 absolute inset-0 flex items-center justify-center">
               <SelectingConfirmIcon class="cursor-pointer h-20 w-20" />
             </div>
           </Match>
           <Match when={props.selecting}>
-            <div class="z-6 absolute inset-0 backface-hidden flex items-center justify-center">
+            <div class="z-6 absolute inset-0 flex items-center justify-center">
               <SelectingIcon class="w-21 h-21" />
             </div>
           </Match>
           <Match when={props.preview?.active}>
-            <div class="z-6 absolute inset-0 backface-hidden flex items-center justify-center">
+            <div class="z-6 absolute inset-0 flex items-center justify-center">
               <SwitchActiveHistoryIcon class="h-18 w-18" />
             </div>
           </Match>
