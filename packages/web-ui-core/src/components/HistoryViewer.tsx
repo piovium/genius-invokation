@@ -1227,7 +1227,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
                       imageId={block.skillDefinitionId}
                       type="icon"
                       class="h-6.5 w-6.5 relative"
-                      fallback="general"
+                      fallback="skill"
                     />
                   </div>
                   <span class="text-#fff3e0/98 text-3">
@@ -1303,7 +1303,7 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
                       imageId={block.callerOrSkillDefinitionId}
                       type="icon"
                       class="h-6.5 w-6.5 relative"
-                      fallback="general"
+                      fallback="skill"
                     />
                   </div>
                   <span class="text-#fff3e0/98 text-3">
@@ -1475,8 +1475,8 @@ function HistoryChildBox(props: { data: HistoryChildData }) {
             <Image
               imageId={props.data.imageId as number}
               type={props.data.imageType}
-              class="w-5 h-auto rounded-0.75"
-              fallback="board"
+              class="w-5 aspect-ratio-[7/12] h-auto text-0"
+              fallback="card"
             />
           </Match>
         </Switch>
@@ -1546,7 +1546,7 @@ function HistorySummaryShot(props: { data: SummaryShot }) {
           <Match when={!!props.data.aura}>
             <For each={props.data.aura as DamageType[]}>
               {(damageType) => (
-                <Image imageId={damageType} class="h-3 w-3" fallback="aura" />
+                <Image imageId={damageType} class="h-3 w-3" fallback="state" />
               )}
             </For>
           </Match>
@@ -1588,8 +1588,8 @@ function HistorySummaryShot(props: { data: SummaryShot }) {
                     >
                       <Image
                         imageId={imageId}
-                        class="absolute inset-0 w-full h-full  p-1px rounded-lg"
-                        fallback="summon"
+                        class="absolute inset-0 w-full h-full  p-1px rounded-lg text-0"
+                        fallback="card"
                       />
                     </Show>
                     <CardFrameSummon class="absolute inset-0 w-10.5 h-12.375 pointer-events-none" />
@@ -1757,8 +1757,8 @@ function HistoryBlockBox(props: {
                   >
                     <Image
                       imageId={props.data.imageId as number}
-                      class="absolute inset-0 w-full h-full  p-1px rounded-lg"
-                      fallback="summon"
+                      class="absolute inset-0 w-full h-full  p-1px rounded-lg text-0"
+                      fallback="card"
                     />
                   </Show>
                   <CardFrameSummon class="absolute inset-0 h-full w-full pointer-events-none" />

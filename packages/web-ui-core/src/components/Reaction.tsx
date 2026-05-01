@@ -175,10 +175,10 @@ export function Reaction(props: ReactionProps) {
   return (
     <div class="h-5 w-21 flex flex-row items-center justify-center relative">
       <div class="absolute top-0 left-8 w-5 h-5 reaction-base-animation" >
-        <Image imageId={baseElement()} class="h-5 w-5" fallback="aura" />
+        <Image imageId={baseElement()} class="h-5 w-5" fallback="state" />
       </div>
       <div class="absolute top-0 left-8 w-5 h-5 reaction-apply-animation">
-        <Image imageId={applyElement()} class="h-5 w-5" fallback="aura" />
+        <Image imageId={applyElement()} class="h-5 w-5" fallback="state" />
       </div>
       <div
         class="reaction-text-animation grid grid-cols-[max-content] grid-rows-[max-content] place-items-center"

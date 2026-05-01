@@ -133,7 +133,7 @@ export function CardFace(props: CardFaceProps) {
   return (
     <div class={`backface-hidden grid ${props.class ?? ""}`}>
       <Image
-        class="grid-area-[1/1] h-full w-full p-2%"
+        class="grid-area-[1/1] h-full w-full p-2% text-3"
         imageId={props.definitionId}
         fallback="card"
       />

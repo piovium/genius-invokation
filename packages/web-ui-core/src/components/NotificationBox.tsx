@@ -63,7 +63,7 @@ export function NotificationBox(props: NotificationBoxProps) {
             imageId={props.data.characterDefinitionId}
             type="icon"
             class="h-10 w-10 rounded-full b-[var(--inner-border-color)] border-2 relative"
-            fallback="general"
+            fallback="skill"
           />
         </div>
         <div class="flex-col">
@@ -84,7 +84,7 @@ export function NotificationBox(props: NotificationBoxProps) {
                           type="icon"
                           class="h-full w-full"
                           data-opp={props.opp}
-                          fallback="general"
+                          fallback="skill"
                         />
                       </div>
                     </>
@@ -115,7 +115,7 @@ export function NotificationBox(props: NotificationBoxProps) {
                       imageId={skillDefinitionId()}
                       type="icon"
                       class="h-full w-full"
-                      fallback="general"
+                      fallback="skill"
                     />
                   </div>
                 </>

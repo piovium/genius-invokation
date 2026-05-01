@@ -134,8 +134,6 @@
     animation: scale-200-120 200ms ease both;
   }
 
-
-
   /* end */
 
   &[data-has-opp-chessboard] {
@@ -817,30 +815,6 @@
       #ffffff66 50%,
       #ffffff33 75%,
       transparent 100%
-    );
-  }
-
-  .custom-status {
-    background: radial-gradient(
-      circle at center,
-      var(--bg-inner-color) 0%,
-      var(--bg-outer-color) 70%
-    );
-    mask-image: radial-gradient(
-      circle at center,
-      #ffffffff 0%,
-      #ffffff80 60%,
-      transparent 70%
-    );
-  }
-
-  .simply-elemental {
-    background-color: var(--bg-color);
-    mask-image: radial-gradient(
-      circle at center,
-      #ffffffff 20%,
-      #ffffffcc 60%,
-      transparent 70%
     );
   }
 

@@ -54,7 +54,7 @@ function SkillButton(props: SkillButtonProps) {
         <Image
           imageId={skillId() as number}
           class="w-full group-data-[disabled]:opacity-50"
-          fallback="general"
+          fallback="skill"
         />
       </Match>
       <Match when={skillId() === "switchActive"}>

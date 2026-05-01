@@ -481,7 +481,7 @@ export function CharacterArea(props: CharacterAreaProps) {
                           <Image
                             imageId={e()}
                             class="h-5 w-5"
-                            fallback="aura"
+                            fallback="state"
                           />
                         )}
                       </Show>
@@ -493,7 +493,7 @@ export function CharacterArea(props: CharacterAreaProps) {
             <For each={aura()}>
               {(aura) => (
                 <Show when={aura}>
-                  <Image imageId={aura} class="h-5 w-5" fallback="aura" />
+                  <Image imageId={aura} class="h-5 w-5" fallback="state" />
                 </Show>
               )}
             </For>
@@ -614,10 +614,9 @@ export function CharacterArea(props: CharacterAreaProps) {
               element={Number(data().definitionId.toString()[1]) as DiceType}
             />
           </Show>
-          <div class="absolute inset-0.5 bg-#bdaa8a rounded-1.2" />
           <Image
             imageId={data().definitionId}
-            class="absolute inset-0 h-full w-full p-1px"
+            class="absolute inset-0 h-full w-full p-1px text-3"
             fallback="card"
           />
           <CardFrameNormal class="absolute inset-0 h-full w-full pointer-events-none" />
