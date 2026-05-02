@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
-  Aura,
+  Aura as A,
   CHARACTER_TAG_BARRIER,
   CHARACTER_TAG_BOND_OF_LIFE,
   CHARACTER_TAG_DISABLE_SKILL,
@@ -309,7 +309,7 @@ export function CharacterArea(props: CharacterAreaProps) {
 
   const [getDamage, setDamage] = createSignal<DamageInfo | null>(null);
   // 播放带元素反应的伤害动画时，目标携带旧 aura
-  const [preReactionAura, setPreReactionAura] = createSignal<Aura | null>();
+  const [preReactionAura, setPreReactionAura] = createSignal<A | null>();
   const [getReaction, setReaction] = createSignal<ReactionInfo | null>(null);
   const [showDamage, setShowDamage] = createSignal(false);
 
@@ -317,7 +317,7 @@ export function CharacterArea(props: CharacterAreaProps) {
     delayMs: number,
     damages: (DamageInfo | ReactionInfo)[],
   ) => {
-    let preReactionAuraValue: Aura | null = null;
+    let preReactionAuraValue: A | null = null;
     if (damages[0]?.type === "damage" && damages[0]?.reaction?.base) {
       preReactionAuraValue = damages[0].reaction.base;
     } else if (damages[0]?.type === "reaction" && damages[0].base) {
@@ -417,11 +417,16 @@ export function CharacterArea(props: CharacterAreaProps) {
     const aura = props.preview?.newAura ?? preReactionAura() ?? data().aura;
     return [aura & 0xf, (aura >> 4) & 0xf];
   });
+  const previewAura = createMemo(
+    () => !!props.preview?.newAura || !!props.preview?.reactions?.length,
+  );
   const previewReaction = createMemo(() =>
     props.preview?.reactions.map((r) => {
       const reactionElement = REACTION_TEXT_MAP[r.reactionType].elements;
       const applyElement = r.incoming;
-      const baseElement = reactionElement.find((e) => e !== applyElement);
+      const baseElement = reactionElement.find(
+        (e) => e !== applyElement,
+      ) as DamageType;
       return [baseElement, applyElement];
     }),
   );
@@ -460,46 +465,18 @@ export function CharacterArea(props: CharacterAreaProps) {
         props.onClick?.(e, e.currentTarget);
       }}
     >
-      <div
-        class="grid-area-[1/1] flex flex-row justify-center items-center gap-0.2 z-10 aura"
-        bool:data-preview={props.preview?.newAura || !!props.preview?.reactions?.length}
+      <Show
+        when={getReaction()}
+        fallback={
+          <Aura
+            preview={previewAura()}
+            previewReaction={previewReaction()}
+            aura={aura()}
+          />
+        }
       >
-        <Switch>
-          <Match when={getReaction()}>
-            {(r) =>
-              <Reaction info={r()} />
-            }
-          </Match>
-          <Match when={true}>
-            <For each={previewReaction()}>
-              {(reaction) => (
-                <div class="h-5.1 flex flex-row items-center bg-black/60 rounded-full shrink-0">
-                  <For each={reaction}>
-                    {(e) => (
-                      <Show when={e}>
-                        {(e) => (
-                          <Image
-                            imageId={e()}
-                            class="h-5 w-5"
-                            fallback="state"
-                          />
-                        )}
-                      </Show>
-                    )}
-                  </For>
-                </div>
-              )}
-            </For>
-            <For each={aura()}>
-              {(aura) => (
-                <Show when={aura}>
-                  <Image imageId={aura} class="h-5 w-5" fallback="state" />
-                </Show>
-              )}
-            </For>
-          </Match>
-        </Switch>
-      </div>
+        {(r) => <Reaction class="grid-area-[1/1] z-10" info={r()} />}
+      </Show>
       <div class="h-36 w-21 relative z-9 preserve-3d grid grid-cols-1 grid-rows-1">
         <Show when={!defeated()}>
           <Health
@@ -663,6 +640,39 @@ export function CharacterArea(props: CharacterAreaProps) {
       <Show when={props.active}>
         <StatusGroup class="h-6 w-20 z-10" statuses={props.combatStatus} />
       </Show>
+    </div>
+  );
+}
+
+interface AuraProps {
+  preview: boolean;
+  previewReaction?: DamageType[][];
+  aura: [number, number];
+}
+
+function Aura(props: AuraProps) {
+  return (
+    <div
+      class="grid-area-[1/1] flex flex-nowrap justify-center items-center z-10 aura"
+      bool:data-preview={props.preview}
+    >
+      <For each={props.previewReaction}>
+        {(reaction) => (
+          <div class="flex flex-nowrap items-center bg-black/60 rounded-full shrink-0">
+            <For each={reaction}>
+              {(e) => <Image imageId={e} class="h-5 w-5" fallback="state" />}
+            </For>
+          </div>
+        )}
+      </For>
+      <For each={props.aura}>
+        {(aura) => (
+          // aura is 0 when no element, should not render
+          <Show when={aura}>
+            <Image imageId={aura} class="h-5 w-5" fallback="state" />
+          </Show>
+        )}
+      </For>
     </div>
   );
 }

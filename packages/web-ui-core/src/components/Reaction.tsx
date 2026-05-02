@@ -20,7 +20,7 @@ import { Image } from "./Image";
 import { useUiContext } from "../hooks/context";
 
 interface ReactionRenderingData {
-  elements: D[];
+  elements: [D, D];
   nameKey:
     | "reaction.Melt"
     | "reaction.Vaporize"
@@ -164,6 +164,7 @@ export const REACTION_TEXT_MAP: Record<number, ReactionRenderingData> = {
 };
 
 export interface ReactionProps {
+  class?: string;
   info: ReactionInfo;
 }
 
@@ -171,30 +172,31 @@ export function Reaction(props: ReactionProps) {
   const { t } = useUiContext();
   const data = () => REACTION_TEXT_MAP[props.info.reactionType];
   const applyElement = () => props.info.incoming;
-  const baseElement = () => data().elements.find((e)=> e !== applyElement())!;
+  const baseElement = () => data().elements.find((e) => e !== applyElement()) as D;
   return (
-    <div class="h-5 w-21 flex flex-row items-center justify-center relative">
-      <div class="absolute top-0 left-8 w-5 h-5 reaction-base-animation" >
-        <Image imageId={baseElement()} class="h-5 w-5" fallback="state" />
-      </div>
-      <div class="absolute top-0 left-8 w-5 h-5 reaction-apply-animation">
-        <Image imageId={applyElement()} class="h-5 w-5" fallback="state" />
-      </div>
-      <div
-        class="reaction-text-animation grid grid-cols-[max-content] grid-rows-[max-content] place-items-center"
-        style={{
-          "--fg-color": data().fgColor,
-          "--bg-color": data().bgColor,
-        }}
-      >
-          <div class="grid-area-[1/1] h-5 w-full reaction-text-shadow"/>
-          <StrokedText
-            class="text-3.5 font-bold text-[var(--fg-color)] grid-area-[1/1] mx-2"
-            text={t(data().nameKey)}
-            strokeColor="var(--bg-color)"
-            strokeWidth={2.5}
-          />          
-      </div>
+    <div
+      class={`grid justify-items-center items-center ${props.class ?? ""}`}
+      style={{
+        "--fg-color": data().fgColor,
+        "--bg-color": data().bgColor,
+      }}
+    >
+      <Image
+        imageId={baseElement()}
+        class="h-5 w-5 grid-area-[1/1] reaction-base"
+        fallback="state"
+      />
+      <Image
+        imageId={applyElement()}
+        class="h-5 w-5 grid-area-[1/1] reaction-apply"
+        fallback="state"
+      />
+      <StrokedText
+        class="text-3.5 font-bold text-[var(--fg-color)] grid-area-[1/1] reaction-text"
+        text={t(data().nameKey)}
+        strokeColor="var(--bg-color)"
+        strokeWidth={2.5}
+      />
     </div>
   );
 }

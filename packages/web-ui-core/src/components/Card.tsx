@@ -238,7 +238,7 @@ export function Card(props: CardProps) {
   return (
     <div
       ref={el}
-      class={`absolute top-0 left-0 h-36 w-21 grid rounded-1.5
+      class={`absolute top-0 left-0 h-36 w-21 grid rounded-1.5 justify-items-center
         preserve-3d transform-origin-tl card pointer-events-auto`}
       style={style()}
       bool:data-opp-hand={props.kind === "oppHand"}
@@ -284,14 +284,14 @@ export function Card(props: CardProps) {
       <div class="grid-area-[1/1] pointer-events-none rounded-1.2 card-animation"/>
       <Switch>
         <Match when={props.toBeSwitched}>
-          <ExchangeCard class="grid-area-[1/1] w-18 h-18 self-center mx-auto z-1 exchange-card-entering" />
+          <ExchangeCard class="grid-area-[1/1] w-18 h-18 self-center z-1 exchange-card-entering" />
         </Match>
         <Match when={props.selected}>
-          <SelectingIcon class="grid-area-[1/1] w-21 h-21 self-center mx-auto z-1" />
+          <SelectingIcon class="grid-area-[1/1] w-21 h-21 self-center z-1" />
         </Match>
       </Switch>
       <StatusGroup
-        class="grid-area-[1/1] mt-1 mx-auto z-1 attachments"
+        class="grid-area-[1/1] mt-1 z-1 attachments"
         statuses={attachmentInfo()}
         maxCount={2}
       />

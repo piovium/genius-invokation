@@ -10,9 +10,10 @@
   --c-omni: #dcd4c2;
   /* --c-energy: #eab308; */
   --c-heal: #3ed490;
-  --font-emoji: Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji,
-    Android Emoji, EmojiSymbols, EmojiOne Mozilla, Twemoji Mozilla,
-    Segoe UI Symbol, Noto Color Emoji Compat, emoji;
+  --font-emoji:
+    Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, Android Emoji,
+    EmojiSymbols, EmojiOne Mozilla, Twemoji Mozilla, Segoe UI Symbol,
+    Noto Color Emoji Compat, emoji;
 
   overflow: clip;
 
@@ -41,8 +42,8 @@
   /* start */
   /* ActionHintText */
   .action-hint {
-    border-top:#9d7f64 3px double;
-    border-bottom:#9d7f64 3px double;
+    border-top: #9d7f64 3px double;
+    border-bottom: #9d7f64 3px double;
     background-color: #70553c;
     mask-image: linear-gradient(
       to right,
@@ -55,7 +56,7 @@
 
   /* Alert */
   .alert-auto-hide {
-    animation: fade-out 0.5s ease-in both;
+    animation: 0.5s ease-in both fade-out;
     animation-delay: 3.5s;
   }
 
@@ -67,11 +68,13 @@
   .card[data-hidden] {
     visibility: hidden;
     pointer-events: none;
-  } 
+  }
 
   .card[data-dragging-end] {
     pointer-events: none;
-    animation: fade-out 1s ease-in-out forwards, brightness-blink 1s ease-in-out forwards;
+    animation:
+      1s ease-in-out forwards fade-out,
+      1s ease-in-out forwards brightness-blink;
   }
 
   .card-animation {
@@ -94,23 +97,23 @@
   .card-animation:where([data-dragging-end] > *) {
     --effect-shadow: 0px 0px 25px 10px rgba(255, 230, 89, 0.8);
     --blink-opacity: 0;
-    animation: blink-25 1s ease-in-out forwards;
+    animation: 1s ease-in-out forwards blink-25;
   }
 
   .card-animation:where([data-triggered] > *) {
     --effect-shadow: 0px 0px 25px 10px rgb(252 240 168 / 0.4);
     --inset-shadow: inset 0px 0px 25px 10px rgb(252 240 168 / 0.4);
     --blink-opacity: 0;
-    animation: blink-25 0.5s ease-in-out;
+    animation: 0.5s ease-in-out blink-25;
   }
 
   .exchange-card-entering {
-    animation: rotate-60 reverse 0.15s ease-out both;
+    animation: 0.15s ease-out reverse both rotate-60;
   }
 
   .abyss-debuff {
     background-color: #581c87aa;
-    box-shadow:#581c87 0 0 15px;
+    box-shadow: #581c87 0 0 15px;
   }
 
   /* CardCountHint */
@@ -126,12 +129,37 @@
 
   /* CharacterArea */
   .aura[data-preview] {
-    --blink-opacity: 0.5;    
-    animation: blink-50 2s linear infinite;
+    --blink-opacity: 0.5;
+    animation: 2s linear infinite blink-50;
+  }
+
+  .reaction-base {
+    animation:
+      300ms ease 100ms both left-in-50,
+      300ms ease 100ms both fade-out;
+  }
+
+  .reaction-apply {
+    animation:
+      300ms ease 100ms both right-in-50,
+      300ms ease 100ms both fade-out;
+  }
+
+  .reaction-text {
+    --scale-start: 10%;
+    --scale-middle: 120%;
+    --scale-end: 100%;
+    transform-origin: center;
+    animation:
+      300ms ease 100ms both transform-scale,
+      300ms ease 100ms both fade-in;
   }
 
   .damage {
-    animation: scale-200-120 200ms ease both;
+    --scale-start: 100%;
+    --scale-middle: 200%;
+    --scale-end: 120%;
+    animation: 200ms ease both transform-scale;
   }
 
   /* end */
@@ -742,23 +770,32 @@
   }
 
   .electric-shocks-debuff {
-      position: absolute;
-      border-radius: 8px;
-      pointer-events: none;
-      --mask-angle: 0deg;
-      mask-image: conic-gradient(from var(--mask-angle), transparent 0% 25%, #000 30% 45%, transparent 50% 75%, #000 80% 95%, transparent 100%);
-      animation: electric-shocks-rotate 5s linear infinite, electric-shocks-ping 2.5s ease-in-out infinite;
+    position: absolute;
+    border-radius: 8px;
+    pointer-events: none;
+    --mask-angle: 0deg;
+    mask-image: conic-gradient(
+      from var(--mask-angle),
+      transparent 0% 25%,
+      #000 30% 45%,
+      transparent 50% 75%,
+      #000 80% 95%,
+      transparent 100%
+    );
+    animation:
+      electric-shocks-rotate 5s linear infinite,
+      electric-shocks-ping 2.5s ease-in-out infinite;
   }
 
   .electric-shocks-debuff-inner {
-      position: absolute;
-      inset: 15%;
-      box-shadow: #7d50e8 0 0 1px 1px;
-      border: 1px solid #cbbaf4;
-      border-radius: inherit;
-      filter: var(--filter-electric-shocks);
-      margin-top: -4px;
-      margin-left: -4px;
+    position: absolute;
+    inset: 15%;
+    box-shadow: #7d50e8 0 0 1px 1px;
+    border: 1px solid #cbbaf4;
+    border-radius: inherit;
+    filter: var(--filter-electric-shocks);
+    margin-top: -4px;
+    margin-left: -4px;
   }
 
   .bond-of-life-health {
@@ -786,35 +823,6 @@
       to top,
       black var(--ratio, 0%),
       transparent var(--ratio, 0%)
-    );
-  }
-
-  .reaction-base-animation {
-    animation: reaction-base ease-in 500ms;
-  }
-
-  .reaction-apply-animation {
-    animation: reaction-apply ease-in 500ms;
-  }
-
-  .reaction-text-animation {
-    transform-origin: center;
-    animation: reaction-text ease-in 500ms;
-  }
-
-  .reaction-text-shadow {
-    background: radial-gradient(
-      circle at center,
-      var(--bg-color) 0%,
-      transparent 70%
-    );
-    mask-image: linear-gradient(
-      to bottom,
-      transparent 0%,
-      #ffffff33 25%,
-      #ffffff66 50%,
-      #ffffff33 75%,
-      transparent 100%
     );
   }
 
@@ -872,6 +880,15 @@
   }
 }
 
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 @keyframes brightness-blink {
   0% {
   }
@@ -910,14 +927,31 @@
   }
 }
 
-@keyframes scale-200-120 {
+@keyframes transform-scale {
   0% {
+    transform: scale(var(--scale-start, 1));
   }
   50% {
-    scale: 200%;
+    transform: scale(var(--scale-middle, 1));
   }
   100% {
-    scale: 120%;
+    transform: scale(var(--scale-end, 1));
+  }
+}
+
+@keyframes left-in-50 {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+  }
+}
+
+@keyframes right-in-50 {
+  0% {
+    transform: translateX(50%);
+  }
+  100% {
   }
 }
 
@@ -946,75 +980,6 @@
   }
 }
 
-@keyframes reaction-base {
-  0% {
-    opacity: 1;
-    transform: translateX(-50%);
-  }
-
-  25% {
-    opacity: 1;
-    transform: translateX(-50%);
-  }
-
-  75% {
-    opacity: 0;
-    transform: translateX(0);
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes reaction-apply {
-  0% {
-    opacity: 1;
-    transform: translateX(50%);
-  }
-
-  25% {
-    opacity: 1;
-    transform: translateX(50%);
-  }
-
-  75% {
-    opacity: 0;
-    transform: translateX(0);
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes reaction-text {
-  0% {
-    opacity: 0;
-    transform: scale(0.1);
-  }
-
-  25% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-
-  50% {
-    opacity: 0.6;
-    transform: scale(0.7);
-  }
-
-  75% {
-    opacity: 0.8;
-    transform: scale(1.2);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 @keyframes status-entering {
   0%,
   100% {
@@ -1027,7 +992,8 @@
       #fad59510 60%,
       #fad59500 70%
     );
-    mask-image: conic-gradient(
+    mask-image:
+      conic-gradient(
         #000000ff 0deg 20deg,
         #00000066 30deg 50deg,
         #000000ff 60deg 80deg,
@@ -1706,26 +1672,26 @@
 }
 
 @property --mask-angle {
-  syntax: '<angle>';
+  syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
 }
 
 @keyframes electric-shocks-rotate {
-    0% {
-        --mask-angle: 0deg;
-    }
-    100% {
-        --mask-angle: 180deg;
-    }
+  0% {
+    --mask-angle: 0deg;
+  }
+  100% {
+    --mask-angle: 180deg;
+  }
 }
 
 @keyframes electric-shocks-ping {
-    0%,
-    100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.1;
-    }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.1;
+  }
 }
