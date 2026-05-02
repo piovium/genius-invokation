@@ -477,7 +477,7 @@ export function CharacterArea(props: CharacterAreaProps) {
       >
         {(r) => <Reaction class="grid-area-[1/1] z-10" info={r()} />}
       </Show>
-      <div class="h-36 w-21 relative z-9 preserve-3d grid grid-cols-1 grid-rows-1">
+      <div class="grid-area-[2/1] relative z-9 preserve-3d grid grid-cols-1 grid-rows-1">
         <Show when={!defeated()}>
           <Health
             value={data().health}
@@ -774,25 +774,25 @@ interface HealthProps {
 
 function Health(props: HealthProps) {
   return (
-    <div class="absolute z-1 left-1.8 top-3 h-9.8 w-9.8 -translate-x-50% -translate-y-50% children-h-full">
-      <HealthIcon class="w-full h-full" />
-      <Show when={props.bondOfLife}>
-        <div class="bond-of-life-health">
-          <BondOfLifeIcon class="w-full h-full" />
-          <div class="bond-of-life-health-background" />
-        </div>
+    <div class="absolute z-1 left-2 top--2 h-10 w-10 -translate-x-50% grid">
+      <Show
+        when={props.bondOfLife}
+        fallback={<HealthIcon class="grid-area-[1/1] w-full h-full" />}
+      >
+        <BondOfLifeIcon class="grid-area-[1/1] w-full h-full" />
       </Show>
-      <Show when={props.isMax}>
-        <div class="absolute inset-0 w-full h-full max-health" />
-      </Show>
-      <div class="absolute inset-0 h-full w-full pt-1.4 flex items-center justify-center scale-y-96">
-        <StrokedText
-          text={String(props.value)}
-          class="line-height-none text-white font-bold text-4.5"
-          strokeWidth={2}
-          strokeColor="#000000B0"
+      <Show when={props.isMax || props.bondOfLife}>
+        <div
+          class="grid-area-[1/1] health"
+          style={{ "--bg-color": `${props.isMax ? "#fef9c3dd" : "#ff000060"}` }}
         />
-      </div>
+      </Show>
+      <StrokedText
+        text={String(props.value)}
+        class="grid-area-[1/1] mt-2.25 text-white font-bold text-4.5 text-center"
+        strokeWidth={2}
+        strokeColor="#000000B0"
+      />
     </div>
   );
 }
