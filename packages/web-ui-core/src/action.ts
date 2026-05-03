@@ -21,8 +21,10 @@ import {
   ElementalTuningAction,
   PbEntityArea,
   PbEntityState,
+  PbEquipmentType,
   PbHealKind,
   PbModifyDirection,
+  PbMoveEntityReason,
   PbReactionType,
   PlayCardAction,
   Reaction,
@@ -116,6 +118,7 @@ export interface ClickEntityActionStep {
   readonly type: "clickEntity";
   readonly entityId: number | "myActiveCharacter";
   readonly ui: ActionStepEntityUi;
+  readonly equip?: PbEquipmentType;
 }
 export interface ClickSkillButtonActionStep {
   readonly type: "clickSkillButton";
@@ -359,6 +362,29 @@ function parsePreviewData(previewData: PreviewData[]): ParsedPreviewData {
         break;
       }
     }
+  }
+  return result;
+}
+
+function extractEquipInfoFromPreview(
+  previewData: PreviewData[],
+): Map<number, PbEquipmentType> {
+  const result = new Map<number, PbEquipmentType>();
+  for (const data of previewData) {
+    const { $case, value } = data.mutation!;
+    let characterId: number | undefined;
+    let equipType: PbEquipmentType | undefined;
+
+    if ($case === "moveEntity") {
+      if (value.toWhere !== PbEntityArea.CHARACTER) continue;
+      if (value.reason !== PbMoveEntityReason.EQUIP) continue;
+      characterId = value.toMasterCharacterId;
+      equipType = value.entity?.equipment;
+    }
+    if (characterId === undefined) continue;
+    if (equipType === undefined) continue;
+
+    result.set(characterId, equipType);
   }
   return result;
 }
@@ -635,6 +661,22 @@ function createMultiStepState<T>(
   { isSkill, ...ctx }: MultiStepRootNodeContext<T>,
 ): readonly [ActionStep, ActionState, ActionState[]] {
   const allStates: ActionState[] = [];
+  // 收集所有 leaf 节点的 preview equip 信息
+  const previewEquip = new Map<number, PbEquipmentType>();
+  function collectLeafPreview(node: ActionTreeNode<T>) {
+    if (node.type === "leaf") {
+      const leafEquip = extractEquipInfoFromPreview(node.value.action.preview);
+      for (const [charId, equip] of leafEquip) {
+        const existing = previewEquip.get(charId);
+        previewEquip.set(charId, existing || equip);
+      }
+    } else {
+      for (const child of node.children.values()) {
+        collectLeafPreview(child);
+      }
+    }
+  }
+  collectLeafPreview(ctx.node);
   // 起点操作
   const enterStep: ActionStep = isSkill
     ? {
@@ -674,6 +716,7 @@ function createMultiStepState<T>(
         type: "clickEntity",
         entityId: id,
         ui: ActionStepEntityUi.Selected,
+        equip: previewEquip.get(id),
       };
       const resultState: ActionState = {
         availableSteps: [
@@ -783,6 +826,7 @@ function createMultiStepState<T>(
           type: "clickEntity",
           entityId: key,
           ui: ActionStepEntityUi.Outlined,
+          equip: previewEquip.get(key),
         };
         childrenStates.set(
           step,
