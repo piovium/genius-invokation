@@ -108,7 +108,9 @@
   }
 
   .exchange-card-entering {
-    animation: 0.15s ease-out reverse both rotate-60;
+    --rotation-start: 30deg;
+    --rotation-end: 0deg;
+    animation: 150ms ease-out both transform-rotate;
   }
 
   .abyss-debuff {
@@ -166,6 +168,56 @@
       black var(--ratio, 0%),
       transparent var(--ratio, 0%)
     );
+  }
+
+  .technique-icon[data-entering] {
+    animation: 500ms linear forwards brightness-blink;
+  }
+
+  .technique-icon[data-disposing] {
+    animation: 250ms linear 250ms forwards fade-out;
+  }
+
+  .technique-effect[data-usable] {
+    scale: 80%;
+    mix-blend-mode: screen;
+    background-color: #ff6a00;
+    box-shadow: 0 0 2px 2px #faaa33;
+    opacity: 0.6;
+  }
+
+  .technique-effect[data-entering] {
+    box-shadow:
+      0 0 4px 2px #fcfed5,
+      inset 0 0 4px 2px #fcfed5;
+    --scale-start: 40%;
+    --scale-middle: 120%;
+    --scale-end: 200%;
+    --blink-opacity: 0;
+    animation:
+      500ms linear forwards transform-scale,
+      500ms linear forwards blink-25;
+  }
+
+  .technique-effect[data-disposing] {
+    box-shadow:
+      0 0 4px 2px #fcfed5,
+      inset 0 0 4px 2px #fcfed5;
+    --blink-opacity: 0;
+    animation: 500ms linear forwards blink-50;
+  }
+
+  .technique-effect[data-triggered] {
+    scale: 80%;
+    box-shadow:
+      0 -4px 4px 0 #fcfed5,
+      inset 0 4px 4px 0 #fcfed5;
+    --rotation-start: -225deg;
+    --rotation-end: 225deg;
+    --blink-opacity: 0;
+    animation:
+      500ms linear forwards transform-rotate,
+      500ms linear forwards blink-50;
   }
 
   .damage {
@@ -312,27 +364,27 @@
   }
 
   .equipment-animation-1[data-entering] {
-    animation: equipment-entering-1 0.5s linear both;
+    animation: equipment-entering-1 5s linear both infinite;
   }
 
   .equipment-animation-2[data-entering] {
-    animation: equipment-entering-2 0.5s linear both;
+    animation: equipment-entering-2 5s linear both infinite;
   }
 
   .equipment-animation-1[data-triggered] {
-    animation: equipment-triggered-1 0.5s ease-in-out both;
+    animation: equipment-triggered-1 5s linear both infinite;
   }
 
   .equipment-animation-2[data-triggered] {
-    animation: equipment-triggered-2 0.5s ease-in-out both;
+    animation: equipment-triggered-2 5s linear both infinite;
   }
 
   .equipment-animation-1[data-disposing] {
-    animation: equipment-disposing 0.5s linear both;
+    animation: equipment-disposing 5s linear both infinite;
   }
 
   .equipment[data-disposing] {
-    animation: disposing 0.2s linear both;
+    animation: disposing 2s linear both infinite;
   }
 
   .entity-animation-1[data-entering] {
@@ -597,18 +649,6 @@
   .status-usage[data-disposing],
   .status-usage[data-usable][data-disposing] {
     opacity: 0;
-  }
-
-  .technique-usage[data-usable] {
-    scale: 120%;
-    mix-blend-mode: screen;
-    background-image: radial-gradient(
-      circle at center,
-      #ff6a00 0%,
-      #ff6a0080 40%,
-      #faaa33 45%,
-      #ff6a0000 65%
-    );
   }
 
   .entity-usage-1 {
@@ -897,11 +937,12 @@
   }
 }
 
-@keyframes rotate-60 {
+@keyframes transform-rotate {
   0% {
+    transform: rotate(var(--rotation-start, 0deg));
   }
   100% {
-    rotate: 60deg;
+    transform: rotate(var(--rotation-end, 0deg));
   }
 }
 

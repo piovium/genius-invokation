@@ -490,7 +490,7 @@ export function CharacterArea(props: CharacterAreaProps) {
             isMax={data().health === data().maxHealth}
             bondOfLife={!!(data().tags & CHARACTER_TAG_BOND_OF_LIFE)}
           />
-          <div class="absolute z-1 right-0.5 top-3 translate-x-50% flex flex-col gap-0 items-center">
+          <div class="absolute z-1 right-0.5 top-3 translate-x-50% flex flex-col items-center">
             <Dynamic
               component={energyBarComponent()}
               current={energy()}
@@ -499,27 +499,21 @@ export function CharacterArea(props: CharacterAreaProps) {
             />
             <Show when={technique()}>
               {(et) => (
-                <div class="relative w-6 h-6 rounded-full mt-0.75">
+                <div class="w-6 h-6 mt-0.5 grid">
                   <Image
-                    class="w-6 h-6 equipment"
+                    class="grid-area-[1/1] technique-icon"
                     imageId={et().data.definitionId}
                     type={"icon"}
                     fallback="technique"
-                    bool:data-disposing={et().animation === "disposing"}
-                  />
-                  <div
-                    class="absolute top-0 w-6 h-6 rounded-full technique-usage"
-                    bool:data-usable={et().data.hasUsagePerRound}
-                    bool:data-disposing={et().animation === "disposing"}
-                  />
-                  <div
-                    class="absolute top-0 w-6 h-6 rounded-full equipment-animation-1"
                     bool:data-entering={et().animation === "entering"}
                     bool:data-disposing={et().animation === "disposing"}
-                    bool:data-triggered={et().triggered}
                   />
+                  <Show when={props.clickStep?.equip === PbEquipmentType.TECHNIQUE}>
+                    <div class="grid-area-[1/1] rounded-full bg-red" />
+                  </Show>
                   <div
-                    class="absolute top-0 w-6 h-6 rounded-full equipment-animation-2"
+                    class="grid-area-[1/1] rounded-full technique-effect"
+                    bool:data-usable={et().data.hasUsagePerRound}
                     bool:data-entering={et().animation === "entering"}
                     bool:data-disposing={et().animation === "disposing"}
                     bool:data-triggered={et().triggered}

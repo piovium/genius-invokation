@@ -281,7 +281,7 @@ export function Card(props: CardProps) {
       }}
     >
       <CardFace definitionId={data().definitionId} class="grid-area-[1/1]"/>      
-      <div class="grid-area-[1/1] pointer-events-none rounded-1.2 card-animation"/>
+      <div class="grid-area-[1/1] w-full pointer-events-none rounded-1.2 card-animation"/>
       <Switch>
         <Match when={props.toBeSwitched}>
           <ExchangeCard class="grid-area-[1/1] w-18 h-18 self-center z-1 exchange-card-entering" />
