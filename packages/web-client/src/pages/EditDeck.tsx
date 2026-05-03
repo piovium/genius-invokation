@@ -35,6 +35,7 @@ import { unwrap } from "solid-js/store";
 import { copyShareCode } from "../utils";
 import { useI18n } from "../i18n";
 import { TextFieldEdit } from "../components/TextFieldEdit";
+import { AutoResizeText } from "@gi-tcg/web-ui-core";
 
 export default function EditDeck() {
   const { t, locale, assetsManager } = useI18n();
@@ -211,7 +212,7 @@ export default function EditDeck() {
               {t("generateShareCode")}
             </button>
             <button
-              class="flex-shrink-0 btn btn-solid-green min-w-18 md:min-w-22"
+              class="flex-shrink-0 btn btn-solid-green min-w-15 md:min-w-22 max-w-20% py-0 px-1"
               disabled={!valid() || uploading()}
               onClick={async () => {
                 if (await saveDeck()) {
@@ -228,15 +229,19 @@ export default function EditDeck() {
                 <Match when={uploadDone()}>
                   <i class="i-mdi-check" />
                 </Match>
-                <Match when={true}>{t("saveDeck")}</Match>
+                <Match when={true}>
+                  <AutoResizeText minFontSize={10}>
+                    {t("saveDeck")}
+                  </AutoResizeText>
+                </Match>
               </Switch>
             </button>
             <span class="flex-grow" />
             <button
-              class="flex-shrink-0 btn btn-outline-red"
+              class="flex-shrink-0 btn btn-outline-red min-w-15 max-w-20% py-0 px-1"
               onClick={() => navigateBack()}
             >
-              {t("back")}
+              <AutoResizeText minFontSize={10}>{t("back")}</AutoResizeText>
             </button>
           </div>
         </div>

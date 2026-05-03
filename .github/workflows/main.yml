@@ -50,26 +50,6 @@ jobs:
           name: csbinding-source
           path: packages/csbinding
 
-  Deploy-Frontend:
-    name: 🌐 Deploy Standalone Frontend
-    needs: Build-Core
-    runs-on: ubuntu-latest
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STANDALONE }}
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: standalone-frontend
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-      - name: Deploy to Vercel
-        run: >
-          bunx vercel deploy
-          ${{ github.ref == 'refs/heads/main' && '--prod' || '' }}
-          --token=${{ secrets.VERCEL_TOKEN }}
-
   Publish-Core:
     name: 🚀 Publish to npm (Tag Push)
     needs: Build-Core

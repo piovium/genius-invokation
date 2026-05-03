@@ -37,3 +37,7 @@ export {
   type ClientChessboardProps,
   type WebUiPlayerIO,
 } from "./client.tsx";
+export {
+  AutoResizeText,
+  type AutoResizeTextProps,
+} from "./components/AutoResizeText.tsx"

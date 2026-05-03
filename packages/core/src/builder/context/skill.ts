@@ -337,6 +337,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
                 flagName: "hasDefeated",
                 value: true,
               });
+              this.mutate({
+                type: "removeRoundSkillLog",
+                caller: defeatedCh.latest(),
+              });
               const player = this.state.players[defeatedCh.who];
               const aliveCharacters = player.characters.filter(
                 (ch) => ch.variables.alive,
@@ -1239,34 +1243,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
     const targets = this.queryOrGet<EntityType>(target);
     for (const target of targets) {
       this.attachCostChange(target.latest(), value, false);
-    }
-    return this.enableShortcut();
-  }
-
-  /** @deprecated */
-  transferEntity(target: EntityTargetArg, area: EntityArea) {
-    const targets = this.queryOrGet(target);
-    for (const target of targets) {
-      const state = target.latest();
-      if (state.definition.type === "character") {
-        throw new GiTcgDataError(`Cannot transfer a character`);
-      }
-      using l = this.mutator.subLog(
-        DetailLogType.Primitive,
-        `Transfer ${stringifyState(target)} to ${stringifyEntityArea(area)}`,
-      );
-      this.mutate({
-        type: "removeEntity",
-        from: target.area,
-        oldState: state,
-        reason: "other",
-      });
-      const newState = { ...state } as EntityStateO;
-      this.mutate({
-        type: "createEntity",
-        value: newState,
-        target: area,
-      });
     }
     return this.enableShortcut();
   }
@@ -2240,7 +2216,6 @@ type SkillContextMutativeProps =
   | "attachCostIncrease"
   | "attachCostReduction"
   | "dispose"
-  | "transferEntity"
   | "setVariable"
   | "addVariable"
   | "addVariableWithMax"

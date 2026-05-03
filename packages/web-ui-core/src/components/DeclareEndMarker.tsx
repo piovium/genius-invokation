@@ -15,6 +15,7 @@
 
 import type { PbPhaseType } from "@gi-tcg/typings";
 import { Button } from "./Button";
+import { useUiContext } from "../hooks/context";
 import { WithDelicateUi } from "../primitives/delicate_ui";
 import { createEffect, createMemo, createSignal, on } from "solid-js";
 
@@ -124,6 +125,7 @@ export function TimerBar(props: TimerBarProps) {
 }
 
 export function DeclareEndMarker(props: DeclareEndMarkerProps) {
+  const { t } = useUiContext();
   const onClick = (e: MouseEvent) => {
     e.stopPropagation();
     props.onClick(e);
@@ -194,7 +196,7 @@ export function DeclareEndMarker(props: DeclareEndMarkerProps) {
         class="opacity-0 data-[shown]:pointer-events-auto data-[shown]:opacity-100 transition-opacity"
         bool:data-shown={props.showButton}
       >
-        <Button onClick={onClick}>宣布结束</Button>
+        <Button onClick={onClick}>{t("ui.buttonDeclareEnd")}</Button>
       </div>
     </div>
   );

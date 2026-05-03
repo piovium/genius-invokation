@@ -462,12 +462,14 @@ export class CardBuilder<
     this.do((c) => {
       c.characterStatus(id as StatusHandle, target);
     }).done();
-    const builder = new EntityBuilder<"status", never, never, true, never>(
+    const builder = new EntityBuilder<
       "status",
-      id,
-      this.id,
-    );
-    builder._versionInfo = this._versionInfo;
+      never,
+      never,
+      true,
+      never
+    >("status", id, this.id);
+    builder._versionInfo = DEFAULT_VERSION_INFO;
     return builder;
   }
 

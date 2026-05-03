@@ -37,8 +37,8 @@ export function Button(props: ButtonProps) {
       <ButtonActive class="grid-area-[1/1] w-45 h-10.8 hidden group-active/confirm_btn:block" />
       <ButtonHover class="grid-area-[1/1] w-45 h-10.8 hidden group-[:hover:not(:active)]/confirm_btn:block" />
       <ButtonNormal class="grid-area-[1/1] w-45 h-10.8 block group-[:is(:hover,:active)]/confirm_btn:hidden" />
-      <div class="grid-area-[1/1] h-full w-full flex items-center justify-center text-lg font-bold text-black/70 transition-colors line-height-none">
-        <AutoResizeText>{ch()}</AutoResizeText>
+      <div class="grid-area-[1/1] h-10.8 w-45 flex items-center justify-center text-lg font-bold text-black/70 transition-colors line-height-none px-6 box-border">
+        <AutoResizeText class="text-center">{ch()}</AutoResizeText>
       </div>
     </button>
   );

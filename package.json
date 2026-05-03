@@ -37,7 +37,7 @@
   },
   "catalog": {
     "vite": "^8.0.8",
-    "unplugin-dts": "^1.0.0-beta.6",
+    "unplugin-dts": "^1.0.0",
     "vite-plugin-solid": "^2.11.8",
     "rollup-plugin-node-externals": "^8.0.1",
     "unocss": "^66.3.3",
@@ -49,7 +49,6 @@
     "ohm-js@17.1.0": "patches/ohm-js@17.1.0.patch",
     "importx@0.5.1": "patches/importx@0.5.1.patch",
     "puppeteer-screen-recorder@3.0.6": "patches/puppeteer-screen-recorder@3.0.6.patch",
-    "@prisma/client@5.20.0": "patches/@prisma%2Fclient@5.20.0.patch",
-    "unplugin-dts@1.0.0-beta.6": "patches/unplugin-dts@1.0.0-beta.6.patch"
+    "@prisma/client@5.20.0": "patches/@prisma%2Fclient@5.20.0.patch"
   }
 }

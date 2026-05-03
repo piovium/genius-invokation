@@ -68,6 +68,7 @@ const TEXT_MAP_KEYS: Record<string, I18nKey> = {
   GCG_TAG_ARTIFACT: "artifact",
   GCG_TAG_TALENT: "talent",
   GCG_TAG_SHEILD: "shield",
+  GCG_TAG_SUB_HURT: "barrier",
   GCG_TAG_VEHICLE: "vehicle",
   GCG_TAG_PLACE: "place",
   GCG_TAG_ALLY: "ally",

@@ -73,6 +73,7 @@ export default {
   artifact: "圣遗物",
   talent: "天赋",
   shield: "护盾",
+  barrier: "减伤",
   vehicle: "特技",
   place: "场地",
   ally: "伙伴",

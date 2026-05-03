@@ -107,9 +107,7 @@ import { Player } from "./player";
 import type { CharacterDefinition } from "./base/character";
 import { $, runQuery, toExpression, type QueryFn } from "./query";
 import type { IQuery } from "./query/utils";
-import {
-  runWithAsyncContext,
-} from "./async_context";
+import { runWithAsyncContext } from "./async_context";
 
 export interface DeckConfig extends Deck {
   noShuffle?: boolean;
@@ -389,7 +387,7 @@ export class Game {
     this.finishResolvers = Promise.withResolvers();
     this.logger.clearLogs();
     const phaseFns: Record<
-      Exclude<PhaseType, "gameEnd">,
+      PhaseType,
       (this: Game, prev: PhaseType | null) => Promise<PhaseType>
     > = {
       initHands: this.initHands,
@@ -397,6 +395,7 @@ export class Game {
       roll: this.rollPhase,
       action: this.actionPhase,
       end: this.endPhase,
+      gameEnd: async () => "gameEnd",
     };
     runWithAsyncContext(
       {
@@ -408,9 +407,6 @@ export class Game {
           let prevPhase: PhaseType | null = null;
           while (!this._terminated) {
             const currentPhase = this.state.phase;
-            if (currentPhase === "gameEnd") {
-              return await this.gotWinner(this.state.winner);
-            }
             const phaseFn = phaseFns[currentPhase];
             const newPhase: PhaseType = await phaseFn
               .call(this, prevPhase)
@@ -424,6 +420,9 @@ export class Game {
                   throw e;
                 }
               });
+            if (this.state.phase === "gameEnd") {
+              return await this.gotWinner(this.state.winner);
+            }
             if (newPhase !== currentPhase) {
               this.mutate({
                 type: "changePhase",

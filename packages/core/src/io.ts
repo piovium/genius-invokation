@@ -239,6 +239,7 @@ export function exposeMutation(
     case "mutateExtensionState":
     case "clearRemovedEntities":
     case "pushRoundSkillLog":
+    case "removeRoundSkillLog":
     case "clearRoundLogs":
     case "pushPhaseDamageLog":
     case "pushPhaseReactionLog":

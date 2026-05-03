@@ -5,7 +5,6 @@ import {
   onMount,
   splitProps,
   type ComponentProps,
-  untrack,
 } from "solid-js";
 
 export interface AutoResizeTextProps extends ComponentProps<"p"> {
@@ -111,16 +110,16 @@ export function AutoResizeText(props: AutoResizeTextProps) {
   return (
     <p
       ref={container}
-      class={`block overflow-hidden ${props.class}`}
+      class={`grid overflow-hidden ${props.class ?? ""}`}
       {...restProps}
     >
       <span
         ref={textSpan}
         style={{
-          display: "inline",
           "font-size": fontSize() !== null ? `${fontSize()}px` : void 0,
           "white-space": shouldWrap() ? "normal" : "nowrap",
           "word-break": shouldWrap() ? "break-word" : void 0,
+          "line-height": shouldWrap() ? "1.0" : void 0,
         }}
       >
         {children()}
