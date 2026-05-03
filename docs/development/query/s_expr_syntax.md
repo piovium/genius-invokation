@@ -63,12 +63,12 @@
 有序查询使用 `orderBy` 关键字，格式为：
 
 ```lisp
-(orderBy <targetQuery> <orderBySpecList> <limit>)
+(orderBy <targetQuery> <orderBySpecList> [limit])
 ```
 
 - `targetQuery`：被排序的无序查询；
 - `orderBySpecList`：排序规则列表（`OrderBySpec` 的列表），每项是 `(expr ...)` 或 `(fn "...")` 形式；
-- `limit`：最多返回的实体数，`Infinity` 或正无穷表示不限制。
+- `limit`：最多返回的实体数，不提供则不限制数量。
 
 示例：
 

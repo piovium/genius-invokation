@@ -15,8 +15,6 @@
 
 /**
  * 此脚本从 NonTerminalsConfig 生成 s_expr_schema.md 文档。
- * 运行方式：
- *   bun run packages/core/scripts/gen_s_expr_schema.ts [output_path]
  *
  * 若未指定 output_path，则输出到 docs/development/query/s_expr_schema.md。
  */
@@ -26,14 +24,11 @@ import {
   type Rule,
   type Argument,
   type NonTerminalConfig,
-} from "../src/query/expr_schema.ts";
-import { writeFileSync, mkdirSync } from "fs";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
+  // @ts-ignore
+} from "../src/query/expr_schema";
+import path from "node:path";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-function ruleToString(rule: Rule, inline = false): string {
+function ruleToString(rule: Rule): string {
   if (rule.use) {
     return `[_${rule.use}_](#${rule.use.toLowerCase()})`;
   }
@@ -95,9 +90,11 @@ function generateNonTerminalSection(
         }
       }
       if (rule.restArgs) {
-        parts.push(`<...${rule.restArgs.name}: ${ruleToString(rule.restArgs)}>`);
+        parts.push(
+          `<...${rule.restArgs.name}: ${ruleToString(rule.restArgs)}>`,
+        );
       }
-      lines.push(`- \`(${parts.join(" ")})\``);
+      lines.push(`- \`(\` ${parts.join(" ")} \`)\``);
       // rule description
       if (rule.description) {
         lines.push(`  > ${rule.description}`);
@@ -113,7 +110,8 @@ function generateNonTerminalSection(
         }
       }
     } else if (rule.arbitrary) {
-      const typeLabel = rule.arbitrary === "number" ? "数字字面量" : "字符串字面量";
+      const typeLabel =
+        rule.arbitrary === "number" ? "数字字面量" : "字符串字面量";
       lines.push(`- ${typeLabel}`);
       if (rule.description) {
         lines.push(`  > ${rule.description}`);
@@ -159,11 +157,10 @@ function generate(): string {
   return sections.join("\n");
 }
 
-const outputPath =
-  process.argv[2] ??
-  resolve(__dirname, "../../../docs/development/query/s_expr_schema.md");
-
-mkdirSync(dirname(outputPath), { recursive: true });
+const outputPath = path.resolve(
+  import.meta.dirname,
+  "../../../docs/development/query/s_expr_schema.md",
+);
 const content = generate();
-writeFileSync(outputPath, content, "utf-8");
+await Bun.write(outputPath, content);
 console.log(`Generated: ${outputPath}`);

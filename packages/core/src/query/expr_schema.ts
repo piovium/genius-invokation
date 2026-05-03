@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
-import type { Expression, IsExtends, StaticAssert } from "./utils";
+import type { Expression } from "./utils";
 
 export interface Rule {
   use?: NonTerminalName;
