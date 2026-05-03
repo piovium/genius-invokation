@@ -434,9 +434,15 @@ export function CharacterArea(props: CharacterAreaProps) {
   const defeated = createMemo(() => data().defeated);
   const triggered = createMemo(() => props.triggered);
 
-  // MARK: debug SKK with returning true
-  const isSkirkEnergyBar = () =>
-    data().specialEnergyName === "serpentsSubtlety";
+  const energyBarComponent = createMemo(() => {
+    const SPECIAL_ENERGY_MAP: Record<string, Component<EnergyBarProps>> = {
+      serpentsSubtlety: SkirkEnergyBar,
+      fightingSpirit: MavuikaEnergyBar,
+    };
+    return (
+      SPECIAL_ENERGY_MAP[data().specialEnergyName ?? ""] ?? NormalEnergyBar
+    );
+  });
 
   const statuses = createMemo(() =>
     props.entities.filter((et) => typeof et.data.equipment === "undefined"),
@@ -484,13 +490,12 @@ export function CharacterArea(props: CharacterAreaProps) {
             isMax={data().health === data().maxHealth}
             bondOfLife={!!(data().tags & CHARACTER_TAG_BOND_OF_LIFE)}
           />
-          <div class="absolute z-1 right-0.4 top-3 translate-x-50% flex flex-col gap-0 items-center">
+          <div class="absolute z-1 right-0.5 top-3 translate-x-50% flex flex-col gap-0 items-center">
             <Dynamic
-              component={isSkirkEnergyBar() ? SkirkEnergyBar : EnergyBar}
+              component={energyBarComponent()}
               current={energy()}
               preview={props.preview?.newEnergy ?? null}
               total={data().maxEnergy}
-              specialEnergyName={data().specialEnergyName}
             />
             <Show when={technique()}>
               {(et) => (
@@ -681,30 +686,19 @@ interface EnergyBarProps {
   current: number;
   preview: number | null;
   total: number;
-  specialEnergyName?: string | undefined;
 }
 
-function EnergyBar(props: EnergyBarProps) {
-  type EnergyState = 0 | 1 | 2;
-  let energyMap = createMemo<Partial<Record<EnergyState, Component>>>(() => {
-    if (props.specialEnergyName === "fightingSpirit") {
-      return {
-        0: EnergyIconEmptyMavuika,
-        1: EnergyIconActiveMavuika,
-        2: EnergyIconExtraMavuika,
-      };
-    } else {
-      return {
-        0: EnergyIconEmpty,
-        1: EnergyIconActive,
-      };
-    }
-  });
-  const energyStates = (current: number): EnergyState[] => {
+interface EnergyCellBarProps extends EnergyBarProps {
+  cellComponentMap: Record<number, Component>;
+}
+
+function EnergyCellBar(props: EnergyCellBarProps) {
+  const energyStates = (current: number): number[] => {
     const total = props.total;
     const state = Array.from(
       { length: total },
-      (_, i) => (+(current > i) + +(current - total > i)) as EnergyState,
+      (_, i) =>
+        (Math.floor(current / total) + +(current % total > i)) as number,
     );
     return state;
   };
@@ -713,30 +707,62 @@ function EnergyBar(props: EnergyBarProps) {
     energyStates(props.preview ?? props.current),
   );
   return (
-    <div class="grid grid-cols-1 grid-rows-1">
-      <div class="grid-area-[1/1]">
-        <For each={currentStates()}>
-          {(comp) => (
+    <div
+      class="grid grid-cols-1 grid-rows-[repeat(var(--total),minmax(0,1fr))]"
+      style={{ "--total": props.total }}
+    >
+      <For each={currentStates()}>
+        {(comp, idx) => (
+          <Dynamic<Component<ComponentProps<"div">>>
+            component={props.cellComponentMap[comp]}
+            class="w-6 h-4 grid-area-[var(--row-idx)/1]"
+            style={{ "--row-idx": idx() + 1 }}
+          />
+        )}
+      </For>
+      <Show when={props.preview !== null && props.preview > props.current}>
+        <For each={previewStates()}>
+          {(comp, idx) => (
             <Dynamic<Component<ComponentProps<"div">>>
-              component={energyMap()[comp]}
-              class="w-5.8 h-4"
+              component={props.cellComponentMap[comp]}
+              class="w-6 h-4 grid-area-[var(--row-idx)/1] energy-preview"
+              style={{ "--row-idx": idx() + 1 }}
             />
           )}
         </For>
-      </div>
-      <Show when={props.preview !== null && props.preview > props.current}>
-        <div class="grid-area-[1/1] energy-preview-animation">
-          <For each={previewStates()}>
-            {(comp) => (
-              <Dynamic<Component<ComponentProps<"div">>>
-                component={energyMap()[comp]}
-                class="w-5.8 h-4"
-              />
-            )}
-          </For>
-        </div>
       </Show>
     </div>
+  );
+}
+
+function NormalEnergyBar(props: EnergyBarProps) {
+  const energyMap: Record<number, Component> = {
+    0: EnergyIconEmpty,
+    1: EnergyIconActive,
+  };
+  return (
+    <EnergyCellBar
+      current={props.current}
+      preview={props.preview}
+      total={props.total}
+      cellComponentMap={energyMap}
+    />
+  );
+}
+
+function MavuikaEnergyBar(props: EnergyBarProps) {
+  const energyMap: Record<number, Component> = {
+    0: EnergyIconEmptyMavuika,
+    1: EnergyIconActiveMavuika,
+    2: EnergyIconExtraMavuika,
+  };
+  return (
+    <EnergyCellBar
+      current={props.current}
+      preview={props.preview}
+      total={props.total}
+      cellComponentMap={energyMap}
+    />
   );
 }
 
@@ -745,22 +771,16 @@ function SkirkEnergyBar(props: EnergyBarProps) {
   const previewRatio = () => ((props.preview ?? props.current) * 14 + 5) / 108;
   return (
     <div class="grid grid-cols-1 grid-rows-1">
-      <div class="grid-area-[1/1]">
-        <EnergyIconEmptySkirk class="w-4.2 h-16.2" />
-      </div>
-      <div
-        class="grid-area-[1/1] skirk-foreground"
+      <EnergyIconEmptySkirk class="grid-area-[1/1] w-4.2 h-16.2" />
+      <EnergyIconActiveSkirk
+        class="grid-area-[1/1] w-4.2 h-16.2 skirk-foreground"
         style={{ "--ratio": `${currentRatio() * 100}%` }}
-      >
-        <EnergyIconActiveSkirk class="w-4.2 h-16.2" />
-      </div>
+      />
       <Show when={props.preview !== null && props.preview > props.current}>
-        <div
-          class="grid-area-[1/1] skirk-foreground energy-preview-animation"
+        <EnergyIconActiveSkirk
+          class="grid-area-[1/1] w-4.2 h-16.2 skirk-foreground energy-preview"
           style={{ "--ratio": `${previewRatio() * 100}%` }}
-        >
-          <EnergyIconActiveSkirk class="w-4.2 h-16.2" />
-        </div>
+        />
       </Show>
     </div>
   );

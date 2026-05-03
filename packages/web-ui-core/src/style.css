@@ -155,6 +155,19 @@
       300ms ease 100ms both fade-in;
   }
 
+  .energy-preview {
+    --blink-opacity: 0.1;
+    animation: 3s ease-in-out infinite both blink-50;
+  }
+
+  .skirk-foreground {
+    mask-image: linear-gradient(
+      to top,
+      black var(--ratio, 0%),
+      transparent var(--ratio, 0%)
+    );
+  }
+
   .damage {
     --scale-start: 100%;
     --scale-middle: 200%;
@@ -336,11 +349,6 @@
 
   .entity[data-disposing] {
     animation: entity-disposing 0.5s linear both;
-  }
-
-  .energy-preview-animation {
-    --blink-opacity: 0.1;
-    animation: blink 3s ease-in-out both infinite;
   }
 
   .declare-end-marker-img,
@@ -794,14 +802,6 @@
     filter: var(--filter-electric-shocks);
     margin-top: -4px;
     margin-left: -4px;
-  }
-
-  .skirk-foreground {
-    mask-image: linear-gradient(
-      to top,
-      black var(--ratio, 0%),
-      transparent var(--ratio, 0%)
-    );
   }
 
   .function-button {
