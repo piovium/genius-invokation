@@ -141,7 +141,7 @@ import { createAlert } from "./Alert";
 import { createMessageBox } from "./MessageBox";
 import { TimerCapsule, TimerAlert } from "./Timer";
 import type { HistoryBlock } from "../history/typings";
-import { FastActionMarker } from "./FastActionMarker";
+import { BottomHint } from "./BottomHint";
 import { TransformWrapper, type Rotation } from "./TransformWrapper";
 import { MiniSpecialViewGroup } from "./MiniSpecialView";
 import type { OppInfo } from "../opp";
@@ -1861,13 +1861,9 @@ export function Chessboard(props: ChessboardProps) {
               />
             </Show>
           </Show>
-          <FastActionMarker
-            shown={
-              localProps.actionState?.showBackdrop &&
-              localProps.actionState?.isFast &&
-              !showConfirmButton()
-            }
-          />
+          <Show when={localProps.actionState?.showBackdrop}>
+            <BottomHint {...localProps.actionState!} />
+          </Show>
           <ConfirmButton
             class="absolute top-[calc(50%+9rem)] left-50% translate-x--50%"
             step={showConfirmButton()}
@@ -1966,9 +1962,7 @@ export function Chessboard(props: ChessboardProps) {
           <Show when={!localProps.liveStreamingMode}>
             <div class="absolute top-2 right-2 flex flex-row-reverse gap-1.5">
               <Show when={localProps.data.state.phase !== PbPhaseType.GAME_END}>
-                <ExitButton
-                  onClick={onExit}
-                />
+                <ExitButton onClick={onExit} />
               </Show>
               <FullScreenToggleButton
                 isFullScreen={isFullscreen()}

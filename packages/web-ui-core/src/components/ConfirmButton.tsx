@@ -17,11 +17,6 @@ export function ConfirmButton(props: ConfirmButtonProps) {
          pointer-events-none data-[shown]:pointer-events-auto ${ props.class ?? "" }`}
       bool:data-shown={props.step}
     >
-      <Show when={props.step?.isEffectless}>
-        <div class="text-#ffdada bg-#ca2527/80 rounded-full px-2 py-0 text-3.5 font-bold shadow-[0_0_4px_4px_#ca2527cd]">
-          {t("bottom.invalidatedCardEffectHint")}
-        </div>
-      </Show>
       <Button onClick={() => props.step && props.onClick?.(props.step)}>
         {props.step?.confirmText}
       </Button>
