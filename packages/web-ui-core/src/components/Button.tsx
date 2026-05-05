@@ -29,7 +29,7 @@ export function Button(props: ButtonProps) {
   const ch = children(() => props.children);
   return (
     <button
-      class={`w-41 h-9 grid group/confirm_btn bg-transparent justify-items-center items-center ${
+      class={`w-41 h-9 grid group/confirm_btn bg-transparent place-items-center ${
         props.class ?? ""
       }`}
       onClick={(e) => props.onClick(e)}

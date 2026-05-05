@@ -175,7 +175,7 @@ export function Reaction(props: ReactionProps) {
   const baseElement = () => data().elements.find((e) => e !== applyElement()) as D;
   return (
     <div
-      class={`grid justify-items-center items-center ${props.class ?? ""}`}
+      class={`grid place-items-center ${props.class ?? ""}`}
       style={{
         "--fg-color": data().fgColor,
         "--bg-color": data().bgColor,

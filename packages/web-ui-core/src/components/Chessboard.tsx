@@ -1687,7 +1687,7 @@ export function Chessboard(props: ChessboardProps) {
       {...elProps}
     >
       <TransformWrapper
-        class="absolute left-0 grid grid-cols-1 grid-rows-1 justify-items-center items-center"
+        class="absolute left-0 grid grid-cols-1 grid-rows-1 place-items-center"
         autoHeight={localProps.autoHeight}
         rotation={localProps.rotation}
         hasOppChessboard={!!localProps.opp}

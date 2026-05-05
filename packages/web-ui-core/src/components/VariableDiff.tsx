@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { PbModifyDirection } from "@gi-tcg/typings";
-import { createMemo, Match, Show, Switch } from "solid-js";
+import { createMemo, Match, Switch } from "solid-js";
 import { StrokedText } from "./StrokedText";
 import DefeatedPreviewIcon from "../svg/DefeatedPreviewIcon.svg?fb";
 import RevivePreviewIcon from "../svg/RevivePreviewIcon.svg?fb";
@@ -25,7 +25,7 @@ export interface VariableDiffProps {
   revived?: boolean;
   oldValue: number;
   newValue: number;
-  direction: PbModifyDirection;
+  direction?: PbModifyDirection;
 }
 
 export function VariableDiff(props: VariableDiffProps) {
@@ -40,38 +40,30 @@ export function VariableDiff(props: VariableDiffProps) {
   );
   return (
     <div
-      class={`scale-75 origin-top-left text-white h-8 inline-grid grid-cols-[max-content] grid-rows-[max-content] place-items-center ${
-        props.class ?? ""
-      }`}
+      class={`h-6 grid place-items-stretch ${props.class ?? ""}`}
       style={{
         "--bg-color": backgroundColor(),
       }}
     >
-      <div class="grid-area-[1/1] bg-black rounded-full h-full w-full"/>
-      <div class="grid-area-[1/1] bg-black rounded-1 h-full w-[calc(100%-8px)] mx-1"/>
-      <div class="grid-area-[1/1] bg-[var(--bg-color)] rounded-full h-[calc(100%-4px)] w-[calc(100%-4px)] m-0.5"/>
-      <div class="grid-area-[1/1] bg-[var(--bg-color)] rounded-0.5 h-[calc(100%-4px)] w-[calc(100%-12px)] my-0.5 mx-1.5"/>
-      <div class="grid-area-[1/1] inline-flex items-center px-2.5 w-max h-8">
+      <div class="grid-area-[1/1] bg-[var(--bg-color)] rounded-full b-black b-2 z-0" />
+      <div class="grid-area-[1/1] bg-[var(--bg-color)] rounded-0.5 mx-1 b-black b-2 mix-blend-lighten z-0" />
+      <div class="grid-area-[1/1] flex items-center px-2 w-max h-6 z-1">
         <Switch>
           <Match when={props.defeated}>
-            <div class="relative h-8 w-8 overflow-visible shrink-0">
-              <DefeatedPreviewIcon noRender class="absolute top-50% left-50% h-10 w-10 -translate-x-50% -translate-y-55%" />
-            </div>
+            <DefeatedPreviewIcon class="h-7.5 w-7.5 m--1" />
           </Match>
           <Match when={props.revived}>
-            <div class="relative h-8 w-8 overflow-visible shrink-0">
-              <RevivePreviewIcon noRender class="absolute top-50% left-50% h-10 w-10 -translate-x-50% -translate-y-55%" />
-            </div>
-          </Match>          
+            <RevivePreviewIcon class="h-7.5 w-7.5 m--1" />
+          </Match>
         </Switch>
         <StrokedText
-          class="shrink-0 font-bold font-size-5 line-height-none mx-0.5"
+          class="shrink-0 font-bold font-size-4 line-height-none mx-0.5 text-white"
           text={`${increase() ? "+" : "-"}${Math.abs(
             props.newValue - props.oldValue,
           )}`}
           strokeWidth={2}
           strokeColor="black"
-        />        
+        />
       </div>
     </div>
   );

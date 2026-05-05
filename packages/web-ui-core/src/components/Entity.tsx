@@ -121,7 +121,7 @@ export function Entity(props: EntityProps) {
       />
       <Show when={props.preview && props.preview.newVariableValue !== null && !props.previewingNew}>
         <VariableDiff
-          class="absolute z-5 top--1.6 right-1"
+          class="absolute z-1 top--1.75 right-3"
           oldValue={data().variableValue!}
           newValue={props.preview!.newVariableValue!}
           direction={props.preview!.newVariableDirection}
