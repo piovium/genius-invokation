@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="a" xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 64 64">
+    <g>
+        <circle cx="31" cy="31" r="30" fill="#7e633c" stroke="#906f3e" stroke-miterlimit="10"
+            stroke-width="2" />
+        <foreignObject width="58" height="58" x="2" y="2">
+            <div xmlns="http://www.w3.org/1999/xhtml">
+                <style>
+                #conic {
+                    width: 58px;
+                    height: 58px;
+                    border-radius: 50%;
+                    background-image: conic-gradient(
+                        #f6c308 0%,
+                        #f3d40a 15%,
+                        #f3d40a 25%,
+                        #7e633c 25%,
+                        #7e633c 35%,
+                        #f6c308 75%
+                    );
+                }
+            </style>
+                <div id="conic"></div>
+            </div>
+        </foreignObject>
+        <circle cx="31" cy="31" r="24.5" fill="#c37e1d" stroke="#b66f1d" stroke-miterlimit="10" />
+        <path
+            d="M29,13v10l-1.4-1.4c-3.85,1.38-6.6,5.07-6.6,9.4,0,4.83,3.44,8.87,8,9.8v8.09c-9-1-16-8.63-16-17.89,0-6.51,3.45-12.21,8.63-15.37l-2.63-2.63h10Z"
+            fill="#fff" />
+        <path
+            d="M40.37,46.37l2.63,2.63h-10v-10l1.4,1.4c3.85-1.38,6.6-5.07,6.6-9.4,0-4.83-3.44-8.87-8-9.8v-8.09c9,1,16,8.63,16,17.89,0,6.51-3.45,12.21-8.63,15.37Z"
+            fill="#fff" />
+        <animateTransform
+            attributeName="transform"
+            dur="4s"
+            repeatCount="indefinite"
+            type="rotate"
+            values="0 31 31;360 31 31"
+        />
+    </g>
+</svg>

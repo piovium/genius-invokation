@@ -67,6 +67,7 @@ import EnergyIconExtraMavuika from "../svg/EnergyIconExtraMavuika.svg?fb";
 import SelectingConfirmIcon from "../svg/SelectingConfirmIcon.svg?fb";
 import SelectingIcon from "../svg/SelectingIcon.svg?fb";
 import SwitchActiveHistoryIcon from "../svg/SwitchActiveHistoryIcon.svg?fb";
+import ReplaceEquipment from "../svg/ReplaceEquipment.svg?fb";
 import ArtifactIcon from "../svg/ArtifactIcon.svg?fb";
 import WeaponIcon from "../svg/WeaponIcon.svg?fb";
 import TalentIcon from "../svg/TalentIcon.svg?fb";
@@ -483,7 +484,7 @@ export function CharacterArea(props: CharacterAreaProps) {
       >
         {(r) => <Reaction class="grid-area-[1/1] z-10" info={r()} />}
       </Show>
-      <div class="grid-area-[2/1] relative z-9 preserve-3d grid grid-cols-1 grid-rows-1">
+      <div class="grid-area-[2/1] relative preserve-3d grid grid-cols-1 grid-rows-1">
         <Show when={!defeated()}>
           <Health
             value={data().health}
@@ -499,26 +500,10 @@ export function CharacterArea(props: CharacterAreaProps) {
             />
             <Show when={technique()}>
               {(et) => (
-                <div class="w-6 h-6 mt-0.5 grid">
-                  <Image
-                    class="grid-area-[1/1] technique-icon"
-                    imageId={et().data.definitionId}
-                    type={"icon"}
-                    fallback="technique"
-                    bool:data-entering={et().animation === "entering"}
-                    bool:data-disposing={et().animation === "disposing"}
-                  />
-                  <Show when={props.clickStep?.equip === PbEquipmentType.TECHNIQUE}>
-                    <div class="grid-area-[1/1] rounded-full bg-red" />
-                  </Show>
-                  <div
-                    class="grid-area-[1/1] rounded-full technique-effect"
-                    bool:data-usable={et().data.hasUsagePerRound}
-                    bool:data-entering={et().animation === "entering"}
-                    bool:data-disposing={et().animation === "disposing"}
-                    bool:data-triggered={et().triggered}
-                  />
-                </div>
+                <Technique
+                  data={et()}
+                  replace={props.clickStep?.equip === PbEquipmentType.TECHNIQUE}
+                />
               )}
             </Show>
           </div>
@@ -534,35 +519,32 @@ export function CharacterArea(props: CharacterAreaProps) {
               revived={props.preview?.revived}
             />
           </Show>
-          <div class="absolute z-3 hover:z-10 left-0 -translate-x-2.5 top-8 flex flex-col items-center justify-center">
+          <div class="absolute z-1 left-1 -translate-x-50% top-8 flex flex-col">
             <Show when={weapon()}>
               {(et) => (
-                <Equipment data={et()}>
-                  <WeaponIcon
-                    class="absolute w-7 h-7 equipment"
-                    bool:data-disposing={et().animation === "disposing"}
-                  />
-                </Equipment>
+                <Equipment
+                  data={et()}
+                  icon={WeaponIcon}
+                  replace={props.clickStep?.equip === PbEquipmentType.WEAPON}
+                />
               )}
             </Show>
             <Show when={artifact()}>
               {(et) => (
-                <Equipment data={et()}>
-                  <ArtifactIcon
-                    class="absolute w-7 h-7 equipment"
-                    bool:data-disposing={et().animation === "disposing"}
-                  />
-                </Equipment>
+                <Equipment
+                  data={et()}
+                  icon={ArtifactIcon}
+                  replace={props.clickStep?.equip === PbEquipmentType.ARTIFACT}
+                />
               )}
             </Show>
             <Key each={otherEquipments()} by="id">
               {(et) => (
-                <Equipment data={et()}>
-                  <TalentIcon
-                    class="absolute w-7 h-7 equipment"
-                    bool:data-disposing={et().animation === "disposing"}
-                  />
-                </Equipment>
+                <Equipment
+                  data={et()}
+                  icon={TalentIcon}
+                  replace={props.clickStep?.equip === PbEquipmentType.OTHER}
+                />
               )}
             </Key>
           </div>
@@ -838,30 +820,59 @@ function CharacterTagMasks(props: CharacterTagMasksProps) {
   );
 }
 
-interface EquipmentProps {
+interface TechniqueProps {
   data: StatusInfo;
-  children: JSX.Element;
+  replace: boolean;
 }
 
-function Equipment(props: EquipmentProps) {
-  const ch = children(() => props.children);
+function Technique(props: TechniqueProps) {
   const data = createMemo(() => props.data);
   return (
-    <div class="relative w-7 h-6.5 rounded-full">
-      {ch()}
-      <div
-        class="absolute top-0 w-7 h-7 rounded-full equipment-usage"
-        bool:data-usable={data().data.hasUsagePerRound}
+    <div class="w-6 h-6 mt-0.5 grid">
+      <Image
+        class="grid-area-[1/1] technique-icon"
+        imageId={data().data.definitionId}
+        type={"icon"}
+        fallback="technique"
+        bool:data-entering={data().animation === "entering"}
         bool:data-disposing={data().animation === "disposing"}
       />
+      <Show when={props.replace}>
+        <ReplaceEquipment class="grid-area-[1/1] w-full h-full" />
+      </Show>
       <div
-        class="absolute top-0 w-7 h-7 rounded-full equipment-animation-1"
+        class="grid-area-[1/1] rounded-full technique-effect"
+        bool:data-usable={data().data.hasUsagePerRound}
         bool:data-entering={data().animation === "entering"}
         bool:data-disposing={data().animation === "disposing"}
         bool:data-triggered={data().triggered}
       />
+    </div>
+  );
+}
+
+interface EquipmentProps {
+  data: StatusInfo;
+  icon: Component;
+  replace: boolean;
+}
+
+function Equipment(props: EquipmentProps) {
+  const data = createMemo(() => props.data);
+  return (
+    <div class="w-7 h-7 mb--0.5 grid">
+      <Dynamic<Component<ComponentProps<"div">>>
+        component={props.icon}
+        class="grid-area-[1/1] equipment-icon"
+        bool:data-entering={data().animation === "entering"}
+        bool:data-disposing={data().animation === "disposing"}
+      />
+      <Show when={props.replace}>
+        <ReplaceEquipment class="grid-area-[1/1] w-6.5 h-6.5 justify-self-center self-center" />
+      </Show>
       <div
-        class="absolute top-0 w-7 h-7 rounded-full equipment-animation-2"
+        class="grid-area-[1/1] rounded-full equipment-effect"
+        bool:data-usable={data().data.hasUsagePerRound}
         bool:data-entering={data().animation === "entering"}
         bool:data-disposing={data().animation === "disposing"}
         bool:data-triggered={data().triggered}

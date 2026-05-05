@@ -170,10 +170,12 @@
     );
   }
 
+  .equipment-icon[data-entering],
   .technique-icon[data-entering] {
     animation: 500ms linear forwards brightness-blink;
   }
 
+  .equipment-icon[data-disposing],
   .technique-icon[data-disposing] {
     animation: 250ms linear 250ms forwards fade-out;
   }
@@ -186,6 +188,7 @@
     opacity: 0.6;
   }
 
+  .equipment-effect[data-entering],
   .technique-effect[data-entering] {
     box-shadow:
       0 0 4px 2px #fcfed5,
@@ -199,6 +202,7 @@
       500ms linear forwards blink-25;
   }
 
+  .equipment-effect[data-disposing],
   .technique-effect[data-disposing] {
     box-shadow:
       0 0 4px 2px #fcfed5,
@@ -207,6 +211,7 @@
     animation: 500ms linear forwards blink-50;
   }
 
+  .equipment-effect[data-triggered],
   .technique-effect[data-triggered] {
     scale: 80%;
     box-shadow:
@@ -218,6 +223,13 @@
     animation:
       500ms linear forwards transform-rotate,
       500ms linear forwards blink-50;
+  }
+
+  .equipment-effect[data-usable] {
+    scale: 80%;
+    box-shadow:
+      0 0 2px 2px #fcfed5,
+      inset 0 0 4px 4px #fcfed5;
   }
 
   .damage {
@@ -361,30 +373,6 @@
 
   .status[data-triggered][data-disposing] {
     animation: disposing 0.2s linear 0.3s both;
-  }
-
-  .equipment-animation-1[data-entering] {
-    animation: equipment-entering-1 5s linear both infinite;
-  }
-
-  .equipment-animation-2[data-entering] {
-    animation: equipment-entering-2 5s linear both infinite;
-  }
-
-  .equipment-animation-1[data-triggered] {
-    animation: equipment-triggered-1 5s linear both infinite;
-  }
-
-  .equipment-animation-2[data-triggered] {
-    animation: equipment-triggered-2 5s linear both infinite;
-  }
-
-  .equipment-animation-1[data-disposing] {
-    animation: equipment-disposing 5s linear both infinite;
-  }
-
-  .equipment[data-disposing] {
-    animation: disposing 2s linear both infinite;
   }
 
   .entity-animation-1[data-entering] {
@@ -608,25 +596,6 @@
       #ffffffff var(--progress-value),
       transparent var(--progress-value)
     );
-  }
-
-  .equipment-usage[data-usable] {
-    background-image: radial-gradient(
-      circle at center,
-      transparent 0%,
-      #fcfed580 40%,
-      #fcfed5 50%,
-      #fcfed5 60%,
-      #fad59500 70%
-    );
-    --blink-opacity: 0.8;
-    animation: blink 3s infinite ease-in-out;
-  }
-
-  .equipment-usage[data-disposing],
-  .equipment-usage[data-usable][data-disposing] {
-    opacity: 0;
-    animation: none;
   }
 
   .status-usage[data-usable] {
@@ -1132,84 +1101,6 @@
   99% {
     opacity: 0;
     scale: 450%;
-  }
-}
-
-@keyframes equipment-entering-1 {
-  0%,
-  100% {
-    background: radial-gradient(
-      circle at center,
-      #fad595ff 0%,
-      #ffff9eff 45%,
-      #fcfed5ff 50%,
-      #fcfed5ff 55%,
-      #ffff9eff 60%,
-      #fad59500 70%
-    );
-    opacity: 0;
-  }
-
-  1% {
-    opacity: 0;
-    scale: 100%;
-  }
-
-  10% {
-    opacity: 1;
-    scale: 100%;
-    filter: brightness(1);
-  }
-
-  20% {
-    opacity: 1;
-    scale: 120%;
-    filter: brightness(1.2);
-  }
-
-  40% {
-    opacity: 1;
-    scale: 100%;
-    filter: brightness(1);
-  }
-
-  99% {
-    opacity: 0;
-    scale: 100%;
-  }
-}
-
-@keyframes equipment-entering-2 {
-  0%,
-  100% {
-    background: radial-gradient(
-      circle at center,
-      #fad59500 40%,
-      #fcfed5ff 53%,
-      #fcfed5ff 57%,
-      #fad59500 70%
-    );
-    opacity: 0;
-  }
-
-  1% {
-    opacity: 0;
-    scale: 100%;
-  }
-
-  20% {
-    opacity: 1;
-    scale: 120%;
-  }
-
-  90% {
-    opacity: 0.6;
-    scale: 200%;
-  }
-
-  99% {
-    opacity: 0;
-    scale: 200%;
   }
 }
 
