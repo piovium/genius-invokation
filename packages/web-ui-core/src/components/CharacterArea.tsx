@@ -472,6 +472,7 @@ export function CharacterArea(props: CharacterAreaProps) {
         props.onClick?.(e, e.currentTarget);
       }}
     >
+      {/* Elemente */}
       <Show
         when={getReaction()}
         fallback={
@@ -484,7 +485,14 @@ export function CharacterArea(props: CharacterAreaProps) {
       >
         {(r) => <Reaction class="grid-area-[1/1] z-10" info={r()} />}
       </Show>
-      <div class="grid-area-[2/1] relative preserve-3d grid grid-cols-1 grid-rows-1">
+      {/* Card Area */}
+      <div
+        class="grid-area-[2/1] relative preserve-3d grid grid-cols-1 grid-rows-1 rounded-1.2 clickable-outline transition-shadow preserve-3d"
+        bool:data-clickable={
+          props.clickStep && props.clickStep.ui >= ActionStepEntityUi.Outlined
+        }
+      >
+        {/* Marker */}
         <Show when={!defeated()}>
           <Health
             value={data().health}
@@ -550,59 +558,49 @@ export function CharacterArea(props: CharacterAreaProps) {
             </Key>
           </div>
         </Show>
-        <div
-          class="grid-area-[1/1] h-full w-full rounded-1.2 clickable-outline transition-shadow data-[defeated]:brightness-50 preserve-3d"
-          bool:data-clickable={
-            props.clickStep && props.clickStep.ui >= ActionStepEntityUi.Outlined
-          }
-          bool:data-defeated={defeated()}
-        >
-          <Show when={damageSourceColor()}>
-            <div
-              class="absolute inset-0 h-full w-full rounded-1 attack-effect"
-              style={{ "--glow-color": damageSourceColor() }}
-            />
-            <div
-              class="absolute inset-0 h-full w-full rounded-1 attack-effect rotate-y-180"
-              style={{ "--glow-color": damageSourceColor() }}
-            />
-          </Show>
-          <Show when={data().tags & CHARACTER_TAG_NIGHTSOULS_BLESSING}>
-            <NightsoulsBlessing
-              class="absolute z--1 inset--1.25 top--6"
-              element={Number(data().definitionId.toString()[1]) as DiceType}
-            />
-          </Show>
-          <Image
-            imageId={data().definitionId}
-            class="absolute inset-0 h-full w-full p-1px text-3"
-            fallback="card"
+        <Show when={damageSourceColor()}>
+          <div
+            class="grid-area-[1/1] rounded-1 attack-effect"
+            style={{ "--glow-color": damageSourceColor() }}
           />
-          <CardFrameNormal class="absolute inset-0 h-full w-full pointer-events-none" />
-          <CardbackNormal class="absolute inset-0 h-full w-full rotate-y-180 translate-z--0.1px" />
-        </div>
+          <div
+            class="grid-area-[1/1] rounded-1 attack-effect rotate-y-180"
+            style={{ "--glow-color": damageSourceColor() }}
+          />
+        </Show>
+        <Show when={data().tags & CHARACTER_TAG_NIGHTSOULS_BLESSING}>
+          <NightsoulsBlessing
+            class="grid-area-[1/1] z--1 m--1.25 mt--8 self-end"
+            element={Number(data().definitionId.toString()[1]) as DiceType}
+          />
+        </Show>
+        <Image
+          imageId={data().definitionId}
+          class="grid-area-[1/1] h-full w-full p-1% text-3 data-[defeated]:brightness-50"
+          fallback="card"
+          bool:data-defeated={defeated()}
+        />
+        <CardFrameNormal
+          class="grid-area-[1/1] pointer-events-none data-[defeated]:brightness-50"
+          bool:data-defeated={defeated()}
+        />
+        <CardbackNormal class="grid-area-[1/1] rotate-y-180 translate-z--0.1px" />
         <StatusGroup
-          class="absolute z-3 left-0.5 bottom-0 h-5.5 w-20"
+          class="grid-area-[1/1] z-1 self-end h-5 px-0.5 mb-1"
           statuses={statuses()}
         />
         <Show when={defeated()}>
-          <DefeatedIcon class="absolute z-5 top-[50%] left-0 w-21 text-center text-5xl font-bold translate-y--10.5 font-[var(--font-emoji)]" />
+          <DefeatedIcon class="grid-area-[1/1] w-21 h-21 z-1 place-self-center" />
         </Show>
         <Switch>
           <Match when={props.clickStep?.ui === ActionStepEntityUi.Selected}>
-            <div class="z-6 absolute inset-0 flex items-center justify-center">
-              <SelectingConfirmIcon class="cursor-pointer h-20 w-20" />
-            </div>
+            <SelectingConfirmIcon class="grid-area-[1/1] w-18 h-18 z-2 place-self-center" />
           </Match>
           <Match when={props.selecting}>
-            <div class="z-6 absolute inset-0 flex items-center justify-center">
-              <SelectingIcon class="w-21 h-21" />
-            </div>
+            <SelectingIcon class="grid-area-[1/1] w-21 h-21 z-2 place-self-center" />
           </Match>
           <Match when={props.preview?.active}>
-            <div class="z-6 absolute inset-0 flex items-center justify-center">
-              <SwitchActiveHistoryIcon class="h-18 w-18" />
-            </div>
+            <SwitchActiveHistoryIcon class="grid-area-[1/1] w-18 h-18 z-2 place-self-center" />
           </Match>
         </Switch>
         <Damage info={getDamage()} shown={showDamage()} />
@@ -620,7 +618,7 @@ export function CharacterArea(props: CharacterAreaProps) {
         </Show>
       </div>
       <Show when={props.active}>
-        <StatusGroup class="h-6 w-20 z-10" statuses={props.combatStatus} />
+        <StatusGroup class="grid-area-[3/1] z-10 px-0.5 mt-0.25" statuses={props.combatStatus} />
       </Show>
     </div>
   );

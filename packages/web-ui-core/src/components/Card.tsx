@@ -31,7 +31,7 @@ import SelectingIcon from "../svg/SelectingIcon.svg?fb";
 import CardFrameNormal from "../svg/CardFrameNormal.svg?fb";
 import CardbackNormal from "../svg/CardbackNormal.svg?fb";
 import ExchangeCard from "../svg/ExchangeCard.svg?fb";
-import { StatusGroup } from "./StatusGroup";
+import { AttachmentGroup } from "./StatusGroup";
 import { ElectricShocks } from "./ElectricShocks";
 
 export interface CardProps extends CardInfo {
@@ -133,7 +133,7 @@ export function CardFace(props: CardFaceProps) {
   return (
     <div class={`backface-hidden grid ${props.class ?? ""}`}>
       <Image
-        class="grid-area-[1/1] h-full w-full p-2% text-3"
+        class="grid-area-[1/1] h-full w-full p-1% text-3"
         imageId={props.definitionId}
         fallback="card"
       />
@@ -169,28 +169,11 @@ export function Card(props: CardProps) {
       !!(props.data.tags & CARD_TAG_CONDUCTIVE),
   );
 
-  const EFFECTLESS_PLACEHOLDER: StatusViewInfo = {
-    id: 0,
-    data: {
-      id: 0,
-      definitionId: 208,
-      tags: 0,
-      descriptionDictionary: {},
-    },
-    animation: "none",
-    triggered: false,
-  };
-
-  const attachmentInfo = createMemo<StatusViewInfo[]>(() => {
-    const result = props.data.attachment.map<StatusViewInfo>((data) => ({
-      id: data.id,
-      data,
-      animation: "none",
-      triggered: false,
-    }));
+  const attachments = createMemo<number[]>(() => {
+    const result = props.data.attachment.map((data) => data.definitionId);
     // attachment 引入之前的 effectless 效果需要手动添加
     if (result.length === 0 && props.playStep?.isEffectless) {
-      result.push(EFFECTLESS_PLACEHOLDER);
+      result.push(208);
     }
     return result;
   });
@@ -290,10 +273,9 @@ export function Card(props: CardProps) {
           <SelectingIcon class="grid-area-[1/1] w-21 h-21 self-center z-1" />
         </Match>
       </Switch>
-      <StatusGroup
-        class="grid-area-[1/1] mt-1 z-1 attachments"
-        statuses={attachmentInfo()}
-        maxCount={2}
+      <AttachmentGroup
+        class="grid-area-[1/1] mt-1 z-1"
+        attachments={attachments()}
       />
       <DiceCost
         class="absolute left-2 top--1 translate-x--50% backface-hidden flex flex-col gap-1 [&:where([data-opp-hand]>*)]:rotate-180"

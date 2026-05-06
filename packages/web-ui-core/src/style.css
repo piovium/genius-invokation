@@ -188,6 +188,27 @@
     opacity: 0.6;
   }
 
+  .equipment-effect[data-usable] {
+    scale: 80%;
+    box-shadow:
+      0 0 2px 2px #fcfed5,
+      inset 0 0 4px 4px #fcfed5;
+  }
+
+  .equipment-effect[data-triggered],
+  .technique-effect[data-triggered] {
+    scale: 80%;
+    box-shadow:
+      0 -4px 4px 0 #fcfed5,
+      inset 0 4px 4px 0 #fcfed5;
+    --rotation-start: -225deg;
+    --rotation-end: 225deg;
+    --blink-opacity: 0;
+    animation:
+      500ms linear forwards transform-rotate,
+      500ms linear forwards blink-50;
+  }
+
   .equipment-effect[data-entering],
   .technique-effect[data-entering] {
     box-shadow:
@@ -211,9 +232,26 @@
     animation: 500ms linear forwards blink-50;
   }
 
-  .equipment-effect[data-triggered],
-  .technique-effect[data-triggered] {
-    scale: 80%;
+  .damage {
+    --scale-start: 100%;
+    --scale-middle: 200%;
+    --scale-end: 120%;
+    animation: 200ms ease both transform-scale;
+  }
+
+  /* Status */
+  .status-effect[data-usable] {
+    box-shadow: inset 0 0 4px 2px #fcfed5;
+    mask-image: linear-gradient(
+      to right,
+      black 10%,
+      transparent 40%,
+      transparent 60%,
+      black 90%
+    );
+  }
+
+  .status-effect[data-triggered] {
     box-shadow:
       0 -4px 4px 0 #fcfed5,
       inset 0 4px 4px 0 #fcfed5;
@@ -225,18 +263,32 @@
       500ms linear forwards blink-50;
   }
 
-  .equipment-effect[data-usable] {
-    scale: 80%;
+  .status-effect[data-entering] {
+    background-color: #fcfed5;
+    box-shadow: 0 0 16px 16px #fcfed5;
+    --scale-start: 100%;
+    --scale-middle: 70%;
+    --scale-end: 40%;
+    animation:
+      500ms linear both transform-scale,
+      500ms linear both fade-out;
+  }  
+
+  .status-effect[data-disposing] {
     box-shadow:
-      0 0 2px 2px #fcfed5,
-      inset 0 0 4px 4px #fcfed5;
+      0 0 4px 2px #fcfed5,
+      inset 0 0 4px 2px #fcfed5;
+    --scale-start: 80%;
+    --scale-middle: 140%;
+    --scale-end: 200%;
+    --blink-opacity: 0;
+    animation:
+      500ms linear forwards transform-scale,
+      500ms linear forwards blink-25
   }
 
-  .damage {
-    --scale-start: 100%;
-    --scale-middle: 200%;
-    --scale-end: 120%;
-    animation: 200ms ease both transform-scale;
+  .status-icon[data-disposing] {
+    animation: 150ms linear 350ms forwards fade-out;
   }
 
   /* end */
@@ -344,35 +396,6 @@
   }
   [data-display-none] {
     display: none;
-  }
-
-  .status-animation[data-entering],
-  .status-animation[data-entering][data-triggered] {
-    animation:
-      status-entering 0.2s ease-in-out 0s backwards,
-      status-triggered 0.3s linear 0.2s forwards;
-  }
-
-  .status-animation[data-triggered] {
-    animation: status-triggered 0.3s linear both;
-  }
-
-  .status-animation[data-disposing] {
-    animation: status-disposing 0.3s linear both;
-  }
-
-  .status-animation[data-triggered][data-disposing] {
-    animation:
-      status-triggered 0.3s linear 0s backwards,
-      status-disposing 0.2s linear 0.3s forwards;
-  }
-
-  .status[data-disposing] {
-    animation: disposing 0.3s linear both;
-  }
-
-  .status[data-triggered][data-disposing] {
-    animation: disposing 0.2s linear 0.3s both;
   }
 
   .entity-animation-1[data-entering] {
@@ -596,28 +619,6 @@
       #ffffffff var(--progress-value),
       transparent var(--progress-value)
     );
-  }
-
-  .status-usage[data-usable] {
-    background: radial-gradient(
-      circle at center,
-      transparent 48%,
-      #fcfed5 52%,
-      #fcfed5 54%,
-      transparent 64%
-    );
-    mask-image: linear-gradient(
-      to right,
-      black 10%,
-      transparent 40%,
-      transparent 60%,
-      black 90%
-    );
-  }
-
-  .status-usage[data-disposing],
-  .status-usage[data-usable][data-disposing] {
-    opacity: 0;
   }
 
   .entity-usage-1 {
@@ -965,142 +966,6 @@
   100% {
     opacity: 0;
     transform: scaleY(1);
-  }
-}
-
-@keyframes status-entering {
-  0%,
-  100% {
-    background: radial-gradient(
-      circle at center,
-      #fcfed5ff 0%,
-      #ffff9eff 16%,
-      #ffff9edd 24%,
-      #fad59580 35%,
-      #fad59510 60%,
-      #fad59500 70%
-    );
-    mask-image:
-      conic-gradient(
-        #000000ff 0deg 20deg,
-        #00000066 30deg 50deg,
-        #000000ff 60deg 80deg,
-        #00000066 90deg 100deg,
-        #000000ff 110deg 120deg,
-        #00000066 130deg 150deg,
-        #000000ff 160deg 170deg,
-        #00000066 180deg 200deg,
-        #000000ff 210deg 230deg,
-        #00000066 240deg 250deg,
-        #000000ff 260deg 280deg,
-        #00000066 290deg 300deg,
-        #000000ff 310deg 330deg,
-        #00000066 340deg 350deg,
-        #000000ff 360deg 0deg
-      ),
-      radial-gradient(circle at center, black 25%, transparent 35%);
-    opacity: 0;
-  }
-
-  1% {
-    opacity: 0;
-    scale: 600%;
-  }
-
-  10% {
-    opacity: 1;
-    scale: 600%;
-  }
-
-  70% {
-    opacity: 1;
-  }
-
-  99% {
-    opacity: 0;
-    scale: 150%;
-  }
-}
-
-@keyframes status-triggered {
-  0%,
-  100% {
-    background: radial-gradient(
-      circle at center,
-      #fad59500 25%,
-      #fad59580 30%,
-      #ffff9eaa 33%,
-      #fcfed5ff 35%,
-      #ffff9eaa 37%,
-      #fad59580 40%,
-      #fad59510 60%,
-      #fad59500 70%
-    );
-    mask-image: conic-gradient(
-      transparent 0deg 100deg,
-      #000000ff 140deg 220deg,
-      transparent 260deg 360deg
-    );
-    opacity: 0;
-    scale: 200%;
-  }
-
-  1% {
-    opacity: 0;
-    transform: rotate(0deg);
-  }
-
-  25% {
-    opacity: 0.8;
-    transform: rotate(90deg);
-  }
-
-  50% {
-    opacity: 1;
-    transform: rotate(180deg);
-  }
-
-  75% {
-    opacity: 0.8;
-    transform: rotate(270deg);
-  }
-
-  99% {
-    opacity: 0;
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes status-disposing {
-  0%,
-  100% {
-    background: radial-gradient(
-      circle at center,
-      #fad59500 0%,
-      #fcfed5ff 35%,
-      #fad59500 70%
-    );
-    opacity: 0;
-  }
-
-  1% {
-    opacity: 0;
-    scale: 10%;
-  }
-
-  10% {
-    opacity: 0.5;
-    scale: 20%;
-  }
-
-  90% {
-    opacity: 0.3;
-    scale: 400%;
-  }
-
-  99% {
-    opacity: 0;
-    scale: 450%;
   }
 }
 
