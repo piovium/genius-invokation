@@ -438,7 +438,7 @@ const bottomHintOfAction = (
   if ("willBeEffectless" in action.value && action.value.willBeEffectless) {
     result.bottomHintType = "danger";
     result.bottomHintText = t("bottom.invalidatedCardEffectHint");
-  } else if (!("cardId" in action) && action.isFast) {
+  } else if (action.action?.$case !== "playCard" && action.isFast) {
     // 打出手牌不显示“快速行动”
     result.bottomHintType = "normal";
     result.bottomHintText = t("bottom.fastAction");

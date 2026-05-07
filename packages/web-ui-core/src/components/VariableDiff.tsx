@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { PbModifyDirection } from "@gi-tcg/typings";
-import { createMemo, Match, Switch } from "solid-js";
+import { createMemo, Match, Switch, Show } from "solid-js";
 import { StrokedText } from "./StrokedText";
 import DefeatedPreviewIcon from "../svg/DefeatedPreviewIcon.svg?fb";
 import RevivePreviewIcon from "../svg/RevivePreviewIcon.svg?fb";
@@ -23,18 +23,28 @@ export interface VariableDiffProps {
   class?: string;
   defeated?: boolean;
   revived?: boolean;
-  oldValue: number;
-  newValue: number;
+  oldValue?: number;
+  newValue?: number;
   direction?: PbModifyDirection;
 }
 
 export function VariableDiff(props: VariableDiffProps) {
-  const increase = createMemo(
-    () =>
-      props.newValue > props.oldValue ||
-      (props.newValue === props.oldValue &&
-        props.direction !== PbModifyDirection.DECREASE),
-  );
+  const showValue = createMemo(() => {
+    if (props.oldValue === undefined || props.newValue === undefined) {
+      return void 0;
+    } else {
+      return props.newValue - props.oldValue;
+    }
+  });
+  const increase = createMemo<boolean>(() => {
+    if (showValue()) {
+      return (showValue() as number) > 0;
+    } else if (props.direction) {
+      return props.direction !== PbModifyDirection.DECREASE;
+    } else {
+      return props.defeated ? !props.defeated : !!props.revived;
+    }
+  });
   const backgroundColor = createMemo(() =>
     increase() ? "#6e9b3a" : props.defeated ? "#a25053" : "#d14f51",
   );
@@ -47,23 +57,23 @@ export function VariableDiff(props: VariableDiffProps) {
     >
       <div class="grid-area-[1/1] bg-[var(--bg-color)] rounded-full b-black b-2 z-0" />
       <div class="grid-area-[1/1] bg-[var(--bg-color)] rounded-0.5 mx-1 b-black b-2 mix-blend-lighten z-0" />
-      <div class="grid-area-[1/1] flex items-center px-2 w-max h-6 z-1">
+      <div class="grid-area-[1/1] flex items-center px-1.5 w-max h-6 z-1">
         <Switch>
           <Match when={props.defeated}>
-            <DefeatedPreviewIcon class="h-7.5 w-7.5 m--1" />
+            <DefeatedPreviewIcon class="h-6.5 w-6.5 mx--0.75 mt--1.25 max-w-6.5" />
           </Match>
           <Match when={props.revived}>
-            <RevivePreviewIcon class="h-7.5 w-7.5 m--1" />
+            <RevivePreviewIcon class="h-6.5 w-6.5 mx--0.75 mt--1.25 max-w-6.5" />
           </Match>
         </Switch>
-        <StrokedText
-          class="shrink-0 font-bold font-size-4 line-height-none mx-0.5 text-white"
-          text={`${increase() ? "+" : "-"}${Math.abs(
-            props.newValue - props.oldValue,
-          )}`}
-          strokeWidth={2}
-          strokeColor="black"
-        />
+        <Show when={showValue() !== undefined}>
+          <StrokedText
+            class="shrink-0 font-bold font-size-4 line-height-none mx-0.5 text-white"
+            text={`${increase() ? "+" : "-"}${Math.abs(showValue() as number)}`}
+            strokeWidth={2}
+            strokeColor="black"
+          />
+        </Show>
       </div>
     </div>
   );

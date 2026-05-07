@@ -86,6 +86,12 @@ const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
 
 export function Entity(props: EntityProps) {
   const data = createMemo(() => props.data);
+  const showVariableDiff = createMemo(
+    () =>
+      props.preview &&
+      (props.preview.newVariableValue !== null || props.preview.disposed) &&
+      !props.previewingNew,
+  );
   return (
     <div
       class="absolute left-0 top-0 h-17.7 w-15 transition-all rounded-1.2 clickable-outline entity"
@@ -119,16 +125,18 @@ export function Entity(props: EntityProps) {
         class="absolute h-full w-full rounded-1.2 entity-animation-2"
         bool:data-entering={props.animation === "entering"}
       />
-      <Show when={props.preview && props.preview.newVariableValue !== null && !props.previewingNew}>
+      <Show when={showVariableDiff()}>
         <VariableDiff
-          class="absolute z-1 top--1.75 right-3"
-          oldValue={data().variableValue!}
-          newValue={props.preview!.newVariableValue!}
-          direction={props.preview!.newVariableDirection}
-          defeated={props.preview!.disposed}
+          class="absolute z-1 top--1.75 left--1"
+          oldValue={data().variableValue}
+          newValue={props.preview?.newVariableValue ?? void 0}
+          direction={props.preview?.newVariableDirection}
+          defeated={props.preview?.disposed}
         />
       </Show>
-      <Show when={typeof data().variableValue === "number" && !props.previewingNew}>
+      <Show
+        when={typeof data().variableValue === "number" && !props.previewingNew}
+      >
         <EntityTopHint
           cardDefinitionId={data().definitionId}
           value={data().variableValue as number}
@@ -163,7 +171,7 @@ export function Entity(props: EntityProps) {
           </div>
         </Match>
         <Match when={props.selecting}>
-          <div class="absolute h-full w-full backface-hidden flex items-center justify-center overflow-visible scale-120%">
+          <div class="absolute h-full w-full backface-hidden flex items-center justify-center overflow-visible scale-140%">
             <SelectingIcon class="w-15 h-15" />
           </div>
         </Match>

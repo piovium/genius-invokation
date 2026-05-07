@@ -23,7 +23,7 @@ export function BottomHint(props: BottomHintProps) {
     <Show when={props.bottomHintType !== "none"}>
       <div
         class={`grid-area-[1/1] place-self-center mt-118
-        text-center text-3.5 font-bold line-height-none
+        text-center text-3.5 font-bold line-height-none px-1
         rounded-full pointer-events-none bottom-hint`}
         data-bottom-hint-type={props.bottomHintType}
       >

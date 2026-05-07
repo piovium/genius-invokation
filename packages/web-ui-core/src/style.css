@@ -293,15 +293,15 @@
 
   /* BottomHint */
   .bottom-hint[data-bottom-hint-type="normal"] {
-    background-color: #e7892ccc;
+    background-color: #faaa33cc;
     color: #fef9c3;
-    box-shadow: 0 0 4px 4px #e7892ccc;
+    box-shadow: 0 0 8px 8px #faaa33cc;
   }
 
   .bottom-hint[data-bottom-hint-type="danger"] {
     background-color: #ca2527cc;
     color: #ffdada;
-    box-shadow: 0 0 4px 4px #ca2527cc;
+    box-shadow: 0 0 8px 8px #ca2527cc;
   }
 
   /* end */
