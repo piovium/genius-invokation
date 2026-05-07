@@ -1865,7 +1865,7 @@ export function Chessboard(props: ChessboardProps) {
             <BottomHint {...localProps.actionState!} />
           </Show>
           <ConfirmButton
-            class="grid-area-[1/1] place-self-center mt-100"
+            class="grid-area-[1/1] place-self-center mt-95"
             step={showConfirmButton()}
             onClick={(step) => {
               localProps.onStepActionState?.(step, selectedDiceValue());
