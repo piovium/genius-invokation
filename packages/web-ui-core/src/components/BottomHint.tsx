@@ -1,24 +1,34 @@
+// Copyright (C) 2026 Piovium Labs
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import { Show } from "solid-js";
-import { useUiContext } from "../hooks/context";
 import type { BottomHintConfig } from "../action";
 
-export interface BottomHintProps extends BottomHintConfig {
-}
+export interface BottomHintProps extends BottomHintConfig {}
 
 export function BottomHint(props: BottomHintProps) {
-  const { t } = useUiContext();
   return (
     <Show when={props.bottomHintType !== "none"}>
-      <div class="absolute bottom-10% left-50% translate-x--50% text-center text-yellow-100 bg-#e7892c/80 rounded-full px-2 py-0 text-3.5 font-bold shadow-[0_0_16px_#e7892caa,0_0_12px_#e7892cbb,0_0_8px_#e7892ccc]">
+      <div
+        class={`grid-area-[1/1] place-self-center mt-118
+        text-center text-3.5 font-bold line-height-none
+        rounded-full pointer-events-none bottom-hint`}
+        data-bottom-hint-type={props.bottomHintType}
+      >
         {props.bottomHintText}
       </div>
-      {/*
-        <Show when={props.step?.isEffectless}>
-          <div class="text-#ffdada bg-#ca2527/80 rounded-full px-2 py-0 text-3.5 font-bold shadow-[0_0_4px_4px_#ca2527cd]">
-            {t("bottom.invalidatedCardEffectHint")}
-          </div>
-        </Show>
-      */}
     </Show>
   );
 }

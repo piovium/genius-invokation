@@ -1,7 +1,20 @@
-import { Show } from "solid-js";
+// Copyright (C) 2026 Piovium Labs
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import type { ClickConfirmButtonActionStep } from "../action";
 import { Button } from "./Button";
-import { useUiContext } from "../hooks/context";
 
 export interface ConfirmButtonProps {
   class?: string;
@@ -10,16 +23,13 @@ export interface ConfirmButtonProps {
 }
 
 export function ConfirmButton(props: ConfirmButtonProps) {
-  const { t } = useUiContext();
   return (
-    <div
-      class={`hidden data-[shown]:flex flex-col items-center justify-end gap-2 h-16
-         pointer-events-none data-[shown]:pointer-events-auto ${ props.class ?? "" }`}
+    <Button
+      class={`hidden data-[shown]:grid ${props.class ?? ""}`}
+      onClick={() => props.step && props.onClick?.(props.step)}
       bool:data-shown={props.step}
     >
-      <Button onClick={() => props.step && props.onClick?.(props.step)}>
-        {props.step?.confirmText}
-      </Button>
-    </div>
+      {props.step?.confirmText}
+    </Button>
   );
 }

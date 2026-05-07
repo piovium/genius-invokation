@@ -13,29 +13,31 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { children, type JSX } from "solid-js";
+import { children, splitProps, type ComponentProps, type JSX } from "solid-js";
 import ButtonNormal from "../svg/ButtonNormal.svg?fb";
 import ButtonHover from "../svg/ButtonHover.svg?fb";
 import ButtonActive from "../svg/ButtonActive.svg?fb";
 import { AutoResizeText } from "./AutoResizeText";
 
-export interface ButtonProps {
+export interface ButtonProps extends ComponentProps<"button"> {
   class?: string;
   children: JSX.Element;
   onClick: (e: MouseEvent) => void;
 }
 
 export function Button(props: ButtonProps) {
-  const ch = children(() => props.children);
+  const [local, rest] = splitProps(props, ["class", "children", "onClick"]);
+  const ch = children(() => local.children);
   return (
     <button
       class={`w-41 h-9 grid group/confirm_btn bg-transparent place-items-center ${
-        props.class ?? ""
+        local.class ?? ""
       }`}
-      onClick={(e) => props.onClick(e)}
+      onClick={(e) => local.onClick(e)}
+      {...rest}
     >
-      <ButtonNormal class="grid-area-[1/1] w-full" />  
-      <ButtonHover class="grid-area-[1/1] w-full hidden group-[:hover:not(:active)]/confirm_btn:block" />          
+      <ButtonNormal class="grid-area-[1/1] w-full" />
+      <ButtonHover class="grid-area-[1/1] w-full hidden group-[:hover:not(:active)]/confirm_btn:block" />
       <ButtonActive class="grid-area-[1/1] w-full hidden group-active/confirm_btn:block" />
       <AutoResizeText class="grid-area-[1/1] w-30 text-center font-bold text-black/70">
         {ch()}

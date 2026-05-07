@@ -1785,9 +1785,9 @@ export function Chessboard(props: ChessboardProps) {
           </Show>
         </div>
         {/* 下层 UI 组件 */}
-        <AspectRatioContainer>
+        <AspectRatioContainer class="grid">
           <ActionHintText
-            class="absolute left-50% top-50% translate-x--50% translate-y--50%"
+            class="grid-area-[1/1] place-self-center"
             text={localProps.actionState?.hintText}
           />
           <Show when={displayUiComponents()}>
@@ -1865,7 +1865,7 @@ export function Chessboard(props: ChessboardProps) {
             <BottomHint {...localProps.actionState!} />
           </Show>
           <ConfirmButton
-            class="absolute top-[calc(50%+9rem)] left-50% translate-x--50%"
+            class="grid-area-[1/1] place-self-center mt-100"
             step={showConfirmButton()}
             onClick={(step) => {
               localProps.onStepActionState?.(step, selectedDiceValue());
