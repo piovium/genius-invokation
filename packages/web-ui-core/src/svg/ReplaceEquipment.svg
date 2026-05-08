@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="a" xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 64 64">
     <g>
         <circle cx="31" cy="31" r="30" fill="#7e633c" stroke="#906f3e" stroke-miterlimit="10"
             stroke-width="2" />

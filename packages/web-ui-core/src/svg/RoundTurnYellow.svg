@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    viewBox="0 0 160 84">
+    <defs>
+        <filter id="b" x="0" y="0" width="160" height="84" filterUnits="userSpaceOnUse">
+            <feOffset dx="0" dy="0" />
+            <feGaussianBlur result="c" stdDeviation="5" />
+            <feFlood flood-color="#f7a15b" flood-opacity="1" />
+            <feComposite in2="c" operator="in" />
+            <feComposite in="SourceGraphic" />
+        </filter>
+        <filter id="d" x="56" y="19" width="48" height="47" filterUnits="userSpaceOnUse">
+            <feOffset dx="0" dy="0" />
+            <feGaussianBlur result="e" stdDeviation="5" />
+            <feFlood flood-color="#f7a15b" flood-opacity="1" />
+            <feComposite in2="e" operator="in" />
+            <feComposite in="SourceGraphic" />
+        </filter>
+    </defs>
+    <path
+        d="M15.79,15.59c25.82,31.61,58.54,20.26,64.07,39.97,5.36-19.65,38.39-8.21,64.35-39.97-21.18,44.69-56.49,29.3-64.35,53.24-7.64-23.74-43.16-8.93-64.07-53.24Z"
+        fill="#ffffae" fill-rule="evenodd" filter="url(#b)" />
+    <path
+        d="M80,50.75c.56-5,3.33-7.78,8.33-8.33-5-.56-7.78-3.33-8.33-8.33-.56,5-3.33,7.78-8.33,8.33,5,.56,7.78,3.33,8.33,8.33Z"
+        fill="#ffffae" filter="url(#d)" />
+</svg>

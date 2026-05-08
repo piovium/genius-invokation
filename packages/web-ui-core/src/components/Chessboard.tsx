@@ -1260,7 +1260,6 @@ export function Chessboard(props: ChessboardProps) {
       (s) => s.type === "declareEnd",
     );
     return {
-      opp: localProps.data.state.currentTurn !== localProps.who,
       roundNumber: localProps.data.state.roundNumber,
       phase: localProps.data.state.phase,
       markerClickable: !!canDeclareEnd,
@@ -1268,6 +1267,7 @@ export function Chessboard(props: ChessboardProps) {
       timingMine: localProps.doingRpc,
       currentTime: localProps.timer?.current ?? 0,
       totalTime: localProps.timer?.total ?? Infinity,
+      willGetFirst: !localProps.data.state.player[flip(localProps.who)].declaredEnd,
       onClick: () => {
         if (canDeclareEnd) {
           if (!showDeclareEndButton()) {
@@ -1792,7 +1792,7 @@ export function Chessboard(props: ChessboardProps) {
           />
           <Show when={displayUiComponents()}>
             <DeclareEndMarker
-              class={"absolute top-50% translate-y--50% left-1"}
+              class={"grid-area-[1/1] self-center"}
               {...declareEndMarkerProps()}
             />
             <PlayerInfoBox

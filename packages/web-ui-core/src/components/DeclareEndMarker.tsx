@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -13,22 +13,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { PbPhaseType } from "@gi-tcg/typings";
+import { PbPhaseType } from "@gi-tcg/typings";
 import { Button } from "./Button";
 import { useUiContext } from "../hooks/context";
-import { WithDelicateUi } from "../primitives/delicate_ui";
 import { createEffect, createMemo, createSignal, on } from "solid-js";
+import RoundButton from "../svg/RoundButton.svg?fb";
+import RoundTurnYellow from "../svg/RoundTurnYellow.svg?fb";
+import RoundTurnBlue from "../svg/RoundTurnBlue.svg?fb";
 
 export interface DeclareEndMarkerProps {
   class?: string;
   markerClickable: boolean;
   showButton: boolean;
-  opp: boolean;
   roundNumber: number;
   phase: PbPhaseType;
   currentTime: number;
   totalTime: number;
   timingMine: boolean;
+  willGetFirst: boolean;
   onClick: (e: MouseEvent) => void;
 }
 
@@ -46,14 +48,14 @@ export function TimerBar(props: TimerBarProps) {
   const colorBg = () => (props.timingMine ? "#ebd29a" : "#c2d8f3");
   const colorFg = () => (props.timingMine ? "#ec8831" : "#5a9bef");
   const offsetFg = () =>
-    circumference *
-    (props.currentTime > 45 ? 0.55 : 1 - props.currentTime / 100);
+    circumference * Math.max(1 - props.currentTime / 100, 0.55);
   const offsetBg = createMemo(() => {
-    if (props.totalTime > 45) {
-      return props.currentTime > 45
-        ? circumference *
-            ((1 - (props.currentTime - 45) / (props.totalTime - 45)) * 0.55)
-        : offsetFg();
+    if (props.totalTime > 45 && props.currentTime > 45) {
+      return (
+        circumference *
+        0.55 *
+        Math.max(1 - (props.currentTime - 45) / (props.totalTime - 45), 0)
+      );
     } else {
       return offsetFg();
     }
@@ -69,15 +71,10 @@ export function TimerBar(props: TimerBarProps) {
     }),
   );
   return (
-    <svg viewBox="0 0 100 100" class="w-full h-full rotate-90">
-      <circle
-        cx={CENTER}
-        cy={CENTER}
-        r={RADIUS}
-        fill="none"
-        stroke="#ffffff00"
-        stroke-width={BORDER_WIDTH}
-      />
+    <svg
+      viewBox="0 0 100 100"
+      class="grid-area-[1/1] w-14 h-14 self-center rotate-90"
+    >
       <circle
         cx={CENTER}
         cy={CENTER}
@@ -89,10 +86,7 @@ export function TimerBar(props: TimerBarProps) {
         stroke-dashoffset={offsetBg()}
         stroke-linecap="butt"
         transform="scale(-1,1) translate(-100,0)"
-        style={{
-          filter: "drop-shadow(0 0 6px #ffffff)",
-          transition: transition(),
-        }}
+        style={{ transition: transition() }}
       />
       <circle
         cx={CENTER}
@@ -131,72 +125,56 @@ export function DeclareEndMarker(props: DeclareEndMarkerProps) {
     props.onClick(e);
   };
   const currentTime = () => Math.min(props.currentTime, props.totalTime);
+  createEffect(() => {
+    console.log(`DeclareEndMarker: `, props.timingMine, props.markerClickable);
+  });
   return (
     <div
-      class={`flex flex-row items-center pointer-events-none select-none ${
+      class={`grid grid-cols-[4.5rem_10rem] grid-rows-1 w-58 h-22 pointer-events-none select-none justify-items-center ${
         props.class ?? ""
       }`}
     >
-      <WithDelicateUi
-        assetId={[
-          "UI_Gcg_Round_Button_01",
-          "UI_Gcg_Round_Button_02",
-          "UI_Gcg_Round_Button_03",
-          "UI_Gcg_Round_Button_04",
-        ]}
-        dataUri
-        fallback={
-          <div
-            class="pointer-events-auto ml-3 h-14 w-14 rounded-full data-[opp=true]:bg-blue-300 data-[opp=false]:bg-yellow-300 b-white b-3 flex flex-col items-center justify-center cursor-not-allowed data-[clickable]:cursor-pointer data-[clickable]:hover:bg-yellow-400 transition-colors"
-            data-opp={props.opp}
-            onClick={onClick}
-            bool:data-clickable={props.markerClickable}
-          >
-            T{props.roundNumber}
-            <div class="w-19 h-19 absolute pointer-events-none">
-              <TimerBar
-                currentTime={currentTime()}
-                totalTime={props.totalTime}
-                timingMine={props.timingMine}
-              />
-            </div>
-          </div>
-        }
+      <RoundButton class="grid-area-[1/1] w-18 h-18 self-center" />
+      <RoundTurnBlue
+        class="grid-area-[1/1] w-16 h-8.4 self-start hidden data-[shown]:block"
+        bool:data-shown={!props.timingMine && props.phase !== PbPhaseType.END}
+      />
+      <RoundTurnYellow
+        class="grid-area-[1/1] w-16 h-8.4 self-end hidden data-[shown]:block"
+        bool:data-shown={props.timingMine && props.phase !== PbPhaseType.END}
+      />
+      <TimerBar
+        currentTime={currentTime()}
+        totalTime={props.totalTime}
+        timingMine={props.timingMine}
+      />
+      <button
+        class={`grid-area-[1/1] self-center
+          hidden data-[clickable]:block
+          h-9 w-9 rounded-full b-2.5 pointer-events-auto
+          b-#f3ca58 bg-#ebb145
+          hover:b-#fffd79 hover:bg-#ffd954
+          active:b-#ef9b32 active:bg-#ba6c10
+          text-3 text-black/60 font-bold`}
+        onClick={onClick}
+        bool:data-clickable={props.markerClickable}
       >
-        {(opp, normal, hover, active) => (
-          <div
-            class="relative h-24 w-20 flex items-center justify-center declare-end-marker-img"
-            style={{
-              "--img-url": `url("${
-                props.opp ? opp : props.showButton ? hover : normal
-              }")`,
-              "--img-hover-url": `url("${props.opp ? opp : hover}")`,
-              "--img-active-url": `url("${props.opp ? opp : active}")`,
-            }}
-          >
-            <div class="w-13.8 h-13.8 absolute">
-              <TimerBar
-                currentTime={currentTime()}
-                totalTime={props.totalTime}
-                timingMine={props.timingMine}
-              />
-            </div>
-            <button
-              class="block pointer-events-auto h-12 w-12 rounded-full declare-end-marker-img-button data-[opp=true]:color-white"
-              data-opp={props.opp}
-              onClick={onClick}
-              bool:data-clickable={props.markerClickable}
-            >
-              T{props.roundNumber}
-            </button>
-          </div>
-        )}
-      </WithDelicateUi>
-      <div
-        class="opacity-0 data-[shown]:pointer-events-auto data-[shown]:opacity-100 transition-opacity"
+        T{props.roundNumber}
+      </button>
+      <Button
+        class="hidden data-[shown]:grid pointer-events-auto grid-area-[1/2] self-center"
         bool:data-shown={props.showButton}
+        onClick={onClick}
       >
-        <Button onClick={onClick}>{t("ui.buttonDeclareEnd")}</Button>
+        {t("ui.buttonDeclareEnd")}
+      </Button>
+      <div
+        class={`grid-area-[1/2] self-start hidden data-[shown]:block
+          bg-#71553f rounded-2 px-3 py-0.5 b-#816246 b-2
+          text-white text-2.5 font-bold`}
+        bool:data-shown={props.showButton && props.willGetFirst}
+      >
+        {t("ui.willGetFirst")}
       </div>
     </div>
   );

@@ -55,7 +55,7 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
             props.opp ? "UI_Gcg_DiceL_Count_02" : "UI_Gcg_DiceL_Count_01"
           }
           fallback={
-            <div class="relative flex items-center justify-center ml-2.8">
+            <div class="relative flex items-center justify-center ml-1">
               <Dice
                 type={DiceType.Omni}
                 size={40}
@@ -65,7 +65,7 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
           }
         >
           {(image) => (
-            <div class="relative flex items-center justify-center ml-2.5">
+            <div class="relative flex items-center justify-center ml-0.5">
               <div class="h-9 w-9">{image}</div>
               <StrokedText
                 text={String(props.diceCount)}

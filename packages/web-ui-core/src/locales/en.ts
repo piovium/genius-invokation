@@ -78,6 +78,7 @@ export default {
     gameVictory: "Victory",
     gameDefeat: "Defeat",
     buttonDeclareEnd: "End Round",
+    willGetFirst: "Go First in Next Round",
   },
   bottom: {
     invalidatedCardEffectHint: "This card will be rendered ineffective",

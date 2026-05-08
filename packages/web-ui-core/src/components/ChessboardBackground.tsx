@@ -38,7 +38,7 @@ export function ChessboardBackground(props: ChessboardBackgroundProps) {
       {(image) => (
         <div
           class="grid-area-[1/1] aspect-ratio-[16/9] max-h-full max-w-full chessboard-bg-container"
-          style={{ "background-color": props.color ?? "#c0cac3" }}
+          style={{ "background-color": props.color ?? "#537a76" }}
         >
           {image}
         </div>

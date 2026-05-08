@@ -83,6 +83,7 @@ export default {
     gameVictory: "对局胜利",
     gameDefeat: "对局失败",
     buttonDeclareEnd: "宣布结束",
+    willGetFirst: "获得先手",
   },
   bottom: {
     invalidatedCardEffectHint: "此牌效果将被无效",
