@@ -1797,12 +1797,12 @@ export function Chessboard(props: ChessboardProps) {
             />
             <PlayerInfoBox
               opp
-              class="absolute top-0.5 bottom-[calc(50%+2rem)] left-2"
+              class="grid-area-[1/1] self-start"
               {...playerInfoPropsOf(flip(localProps.who))}
               {...localProps.oppPlayerInfo}
             />
             <PlayerInfoBox
-              class="absolute top-[calc(50%+2rem)] bottom-0.5 left-2"
+              class="grid-area-[1/1] self-end"
               {...playerInfoPropsOf(localProps.who)}
               {...localProps.myPlayerInfo}
             />

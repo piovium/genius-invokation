@@ -313,6 +313,19 @@
     box-shadow: 0 0 8px 8px #ca2527cc;
   }
 
+  /* PlayerInfoBox */
+  .playerinfo-box {
+    background-image: linear-gradient(to right, #deab65 25%, #845f39 100%);
+    border-color: #ffd89f;
+    mask-image: linear-gradient(to right, #000000ee 55%, transparent 95%);
+  }
+
+  .playerinfo-box[data-opp] {
+    background-image: linear-gradient(to right, #4c6890 25%, #293954 100%);
+    border-color: #697a8c;
+    mask-image: linear-gradient(to right, #000000ee 55%, transparent 95%);
+  }
+
   /* end */
 
   &[data-has-opp-chessboard] {
@@ -510,18 +523,6 @@
       #a6cdff00 100%
     );
     color: #46648b;
-  }
-
-  .playerinfo-box {
-    background-image: linear-gradient(to right, #deab65 25%, #845f39 100%);
-    border-color: #ffd89f;
-    mask-image: linear-gradient(to right, #000000ee 55%, transparent 95%);
-  }
-
-  .playerinfo-box[data-opp] {
-    background-image: linear-gradient(to right, #4c6890 25%, #293954 100%);
-    border-color: #697a8c;
-    mask-image: linear-gradient(to right, #000000ee 55%, transparent 95%);
   }
 
   .notification-box[data-opp="false"] {

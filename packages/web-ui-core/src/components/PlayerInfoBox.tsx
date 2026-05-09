@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -13,13 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, PbPlayerStatus } from "@gi-tcg/typings";
-import { Dice } from "./Dice";
+import {  PbPlayerStatus } from "@gi-tcg/typings";
 import { createMemo, Show } from "solid-js";
-import { WithDelicateUi } from "../primitives/delicate_ui";
 import { StrokedText } from "./StrokedText";
 import { useUiContext } from "../hooks/context";
 import { AutoResizeText } from "./AutoResizeText";
+import DiceCountYellow from "../svg/DiceCountYellow.svg?fb";
+import DiceCountBlue from "../svg/DiceCountBlue.svg?fb";
+import DiceLegend from "../svg/DiceLegend.svg?fb";
+import DiceLegendBg from "../svg/DiceLegendBg.svg?fb";
 
 export interface PlayerInfoProps {
   class?: string;
@@ -44,87 +46,68 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
   }));
   return (
     <div
-      class={`pointer-events-none select-none m-2 gap-1 flex items-start data-[opp=true]:flex-col-reverse data-[opp=false]:flex-col ${
-        props.class ?? ""
-      }`}
-      data-opp={!!props.opp}
+      class={`pointer-events-none select-none h-50% py-2 gap-1
+        flex flex-col data-[opp]:flex-col-reverse items-start ${
+          props.class ?? ""
+        }`}
+      bool:data-opp={!!props.opp}
     >
-      <div>
-        <WithDelicateUi
-          assetId={
-            props.opp ? "UI_Gcg_DiceL_Count_02" : "UI_Gcg_DiceL_Count_01"
-          }
-          fallback={
-            <div class="relative flex items-center justify-center ml-1">
-              <Dice
-                type={DiceType.Omni}
-                size={40}
-                text={String(props.diceCount)}
-              />
-            </div>
-          }
+      <div class="grid place-items-center w-18 h-9 my-9">
+        <Show
+          when={props.opp}
+          fallback={<DiceCountYellow class="grid-area-[1/1] h-9 w-9" />}
         >
-          {(image) => (
-            <div class="relative flex items-center justify-center ml-0.5">
-              <div class="h-9 w-9">{image}</div>
-              <StrokedText
-                text={String(props.diceCount)}
-                strokeWidth={2}
-                strokeColor="#000000B0"
-                class="absolute inset-0 text-center text-white font-bold text-4.5 line-height-9"
-              />
-            </div>
-          )}
-        </WithDelicateUi>
+          <DiceCountBlue class="grid-area-[1/1] h-9 w-9" />
+        </Show>
+        <StrokedText
+          text={String(props.diceCount)}
+          strokeWidth={2}
+          strokeColor="#000000B0"
+          class="grid-area-[1/1] text-center text-white font-bold text-4.5"
+        />
       </div>
-      <div class="flex-grow-1" />
+      <div class="grow-1" />
       <div
-        class="opacity-0 data-[shown]:opacity-100 bg-#e9e1d3 text-#403f44 text-3 font-bold b-1 b-#403f44 py-0.5 pr-3 pl-3.5 ml-7 rounded-r-3 transition-opacity rounded-lb-0 rounded-lt-4 data-[opp]:rounded-lb-4 data-[opp]:rounded-lt-0"
+        class={`hidden data-[shown]block py-0.5 pr-3 pl-3.5 ml-7
+          bg-#e9e1d3 b-1 b-#403f44 text-#403f44 text-3 font-bold
+           rounded-r-3 rounded-lb-0 rounded-lt-4 data-[opp]:rounded-lb-4 data-[opp]:rounded-lt-0`}
         bool:data-shown={props.declaredEnd}
-        data-opp={props.opp}
+        bool:data-opp={props.opp}
       >
         {t("player.declaredEndStatus")}
       </div>
-      <div class="relative inline-block h-10 w-44">
+      <div class="h-10 w-44 grid grid-cols-[2.5rem_6rem_2rem] grid-rows-1 isolate ml-2">
         <div
-          class="absolute inset-0 rounded-l-full rounded-r-0 border-1.5 playerinfo-box h-full w-full"
+          class="grid-area-[1/1/2/4] rounded-l-full rounded-r-0 border-1.5 playerinfo-box z--1"
           data-opp={props.opp}
         />
-        <div class="relative flex items-center px-1">
-          <Show when={props.avatarUrl} fallback={<div class="w-2" />}>
-            <div
-              class="absolute h-8 w-8 rounded-full border-3 border-#9f6939 data-[opp]:border-#415671"
-              data-opp={props.opp}
+        <Show when={props.avatarUrl} fallback={<div class="w-2" />}>
+          <div
+            class="grid-area-[1/1] place-self-center h-8 w-8 rounded-full b-3 b-#9f6939 data-[opp]:b-#415671 bg-white/70"
+            data-opp={props.opp}
+          />
+          <img
+              src={props.avatarUrl}
+              class="grid-area-[1/1] place-self-center w-6.5 h-6.5 rounded-full object-cover"
             />
-            <div class="relative h-8 w-8 shrink-0 p-0.5">
-              <img
-                src={props.avatarUrl}
-                class="w-7 h-7 rounded-full border-1.5 border-white/70 object-cover"
-              />
-            </div>
-          </Show>
-          <div class="flex flex-col ml-2 flex-1 pt-1">
-            <span class="text-3 leading-tight text-white h-3 w-24 overflow-hidden text-nowrap text-ellipsis">
-              {props.name || <>&nbsp;</>}
-            </span>
-            <AutoResizeText minFontSize={8} class="text-2.5 h-6 w-24 text-white/40 text-start items-center">
-              {statusTextMap()[props.status]}
-            </AutoResizeText>
-          </div>
-          <WithDelicateUi
-            assetId={
-              props.legendUsed ? "UI_Gcg_Esoteric_Bg" : "UI_Gcg_DiceL_Legend"
-            }
-            fallback={
-              <div
-                class="h-6 w-6 b-gray-400 b-2 rounded-md rotate-45 bg-gradient-to-r from-purple-500 to-blue-500 data-[used]:bg-gray-300 data-[used]:bg-none"
-                bool:data-used={props.legendUsed}
-              />
-            }
+        </Show>
+        <div class="grid-area-[1/2] flex flex-col">
+          <span class="text-3 leading-tight text-white w-24 overflow-hidden text-nowrap text-ellipsis mt-1">
+            {props.name || <>&nbsp;</>}
+          </span>
+          <AutoResizeText
+            minFontSize={8}
+            class="text-2.5 h-5 w-24 text-white/40 text-start items-center"
           >
-            {(image) => <div class="h-8 w-8">{image}</div>}
-          </WithDelicateUi>
+            {statusTextMap()[props.status]}
+          </AutoResizeText>
         </div>
+        <Show
+          when={props.legendUsed}
+          fallback={<DiceLegend class="grid-area-[1/3] h-8 w-8 self-center" />}
+        >
+          <DiceLegendBg class="grid-area-[1/3] h-8 w-8 self-center" />
+        </Show>
       </div>
     </div>
   );
