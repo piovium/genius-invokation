@@ -25,11 +25,11 @@ import {
   type KeywordRawData,
   // @ts-ignore Cross-project import, but it should be fine
 } from "#src/index";
-import { rmdir } from "node:fs/promises";
+import { rm } from "node:fs/promises";
 
 const DESTINATION_DIR = path.resolve(import.meta.dirname, "../src/data");
 
-await rmdir(DESTINATION_DIR, { recursive: true });
+await rm(DESTINATION_DIR, { recursive: true, force: true });
 
 const mapReplacer = (key: string, value: unknown) => {
   if (value instanceof Map) {
