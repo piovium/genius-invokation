@@ -134,7 +134,6 @@ export function AllCharacterCards(props: AllCardsProps) {
               <PoolCard
                 id={ch().id}
                 type="character"
-                name={ch().name}
                 selected={selected(ch().id)}
               />
             </li>

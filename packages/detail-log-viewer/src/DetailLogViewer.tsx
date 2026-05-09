@@ -77,7 +77,7 @@ export function DetailLogEntry(props: DetailLogEntryProps) {
           );
         default: {
           const rid = Math.floor(id);
-          let result = getNameSync?.(rid);
+          let result = getNameSync?.("CHS", rid);
           if (result) {
             if (rid !== id) {
               result += "的响应技能";

@@ -177,7 +177,6 @@ export function AllActionCards(props: AllCardsProps) {
               <PoolCard
                 id={ac().id}
                 type="actionCard"
-                name={ac().name}
                 valid={valid(ac())}
                 selected={selected(ac().id)}
                 partialSelected={partialSelected(ac().id)}

@@ -1,4 +1,5 @@
 // Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -17,36 +18,18 @@ import path from "node:path";
 import {
   ALL_CATEGORIES,
   getDeckData,
-  DEFAULT_ASSETS_MANAGER,
+  AssetsManager,
   type ActionCardRawData,
   type CharacterRawData,
   type EntityRawData,
   type KeywordRawData,
+  // @ts-ignore Cross-project import, but it should be fine
 } from "#src/index";
+import { rm } from "node:fs/promises";
 
-const [actionCards, characters, entities, keywords] = (await Promise.all(
-  ALL_CATEGORIES.map((category) =>
-    DEFAULT_ASSETS_MANAGER.getCategory(category),
-  ),
-)) as [
-  ActionCardRawData[],
-  CharacterRawData[],
-  EntityRawData[],
-  KeywordRawData[],
-];
+const DESTINATION_DIR = path.resolve(import.meta.dirname, "../src/data");
 
-const names = Object.fromEntries([
-  ...[...characters, ...actionCards, ...entities, ...keywords].flatMap((e) => [
-    [e.id, e.name],
-    ...("skills" in e ? e.skills.map((s) => [s.id, s.name]) : []),
-  ]),
-]);
-
-const deckData = getDeckData(characters, actionCards);
-
-const shareMap = Object.fromEntries(
-  [...characters, ...actionCards].map((card) => [card.shareId, card.id]),
-);
+await rm(DESTINATION_DIR, { recursive: true, force: true });
 
 const mapReplacer = (key: string, value: unknown) => {
   if (value instanceof Map) {
@@ -55,17 +38,45 @@ const mapReplacer = (key: string, value: unknown) => {
   return value;
 };
 
-const DESTINATION_DIR = path.resolve(import.meta.dirname, "../src/data");
 const write = async (data: unknown, ...paths: string[]) => {
   const finalPath = path.resolve(DESTINATION_DIR, ...paths);
   await Bun.write(finalPath, JSON.stringify(data, mapReplacer, 2) + "\n");
   console.log(`Wrote ${finalPath}`);
 };
 
-await write(deckData, "deck.json");
-await write(names, "names.json");
-await write(actionCards, "action_cards.json");
-await write(characters, "characters.json");
-await write(entities, "entities.json");
-await write(keywords, "keywords.json");
-await write(shareMap, "share_id.json");
+for (const language of ["EN", "CHS"] as const) {
+  const manager = new AssetsManager({ language });
+  const [actionCards, characters, entities, keywords] = (await Promise.all(
+    ALL_CATEGORIES.map((category) => manager.getCategory(category)),
+  )) as [
+    ActionCardRawData[],
+    CharacterRawData[],
+    EntityRawData[],
+    KeywordRawData[],
+  ];
+
+  const names = Object.fromEntries([
+    ...[...characters, ...actionCards, ...entities, ...keywords].flatMap(
+      (e) => [
+        [e.id, e.name],
+        ...("skills" in e ? e.skills.map((s) => [s.id, s.name]) : []),
+      ],
+    ),
+  ]);
+
+  await write(names, language, "names.json");
+  await write(actionCards, language, "action_cards.json");
+  await write(characters, language, "characters.json");
+  await write(entities, language, "entities.json");
+  await write(keywords, language, "keywords.json");
+
+  // language agnostic
+  if (language === "CHS") {
+    const deckData = getDeckData(characters, actionCards);
+    const shareMap = Object.fromEntries(
+      [...characters, ...actionCards].map((card) => [card.shareId, card.id]),
+    );
+    await write(deckData, "deck.json");
+    await write(shareMap, "share_id.json");
+  }
+}

@@ -13,9 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
-import type { Expression, IsExtends, StaticAssert } from "./utils";
+import type { Expression } from "./utils";
 
-interface Rule {
+export interface Rule {
   use?: NonTerminalName;
 
   enum?: [string, ...string[]];
@@ -34,11 +34,11 @@ interface Rule {
   description?: string;
 }
 
-interface Argument extends Rule {
+export interface Argument extends Rule {
   name: string;
 }
 
-interface NonTerminalConfig {
+export interface NonTerminalConfig {
   rules: [Rule, ...Rule[]];
   description?: string;
 }
@@ -46,7 +46,7 @@ interface NonTerminalConfig {
 const defineNonTerminal = <const T extends NonTerminalConfig>(config: T): T =>
   config;
 
-class NonTerminalsConfig {
+export class NonTerminalsConfig {
   Query = defineNonTerminal({
     rules: [{ use: "UnorderedQuery" }, { use: "OrderedQuery" }],
   });

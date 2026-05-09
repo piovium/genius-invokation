@@ -1,4 +1,5 @@
 // Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -62,16 +63,18 @@ export interface Progress {
 
 export interface PrepareForSyncOptions {}
 
+export type Language = "EN" | "CHS";
+
 export interface AssetsManagerOption {
   apiEndpoint: string;
   version: "beta" | "latest" | (string & {});
-  language: "EN" | "CHS";
+  language: Language;
   customData: CustomData[];
   concurrency: number;
 }
 
 export const DEFAULT_ASSETS_API_ENDPOINT =
-  import.meta.env.DEFAULT_ASSETS_API_ENDPOINT ||
+  import.meta.env?.DEFAULT_ASSETS_API_ENDPOINT ||
   "https://gi-tcg-assets-api-hf.guyutongxue.site/api/v4";
 
 const FETCH_OPTION: RequestInit = {
@@ -81,6 +84,7 @@ const FETCH_OPTION: RequestInit = {
 };
 
 export class AssetsManager {
+  public readonly language: Language;
   private readonly dataCacheSync = new Map<number, AnyData>();
   private readonly dataCache = new Map<number, Promise<AnyData>>();
   private readonly imageCacheSync = new Map<string, Blob>();
@@ -103,6 +107,7 @@ export class AssetsManager {
       concurrency: 32,
       ...options,
     };
+    this.language = this.options.language;
     for (const data of this.options.customData) {
       this.setupCustomData(data);
     }
@@ -452,7 +457,7 @@ export class AssetsManager {
     return (
       this.customDataNames.get(id) ??
       this.dataCacheSync.get(id)?.name ??
-      getNameSync(id)
+      getNameSync(this.language, id)
     );
   }
 

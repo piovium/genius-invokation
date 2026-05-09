@@ -17,7 +17,6 @@ import type { ActionCardRawData, CharacterRawData } from "./data_types";
 
 export interface DeckDataCharacterInfo {
   id: number;
-  name: string;
   tags: string[];
   version: number;
 }
@@ -27,7 +26,6 @@ export interface DeckDataActionCardInfo {
   type: string;
   tags: string[];
   version: number;
-  name: string;
   relatedCharacterId: number | null;
   relatedCharacterTag: string | null;
 }
@@ -63,7 +61,6 @@ export function getDeckData(
         ch.id,
         {
           id: ch.id,
-          name: ch.name,
           tags: ch.tags,
           version: allVersions.indexOf(ch.sinceVersion!),
         },
@@ -77,7 +74,6 @@ export function getDeckData(
           type: ac.type,
           tags: ac.tags,
           version: allVersions.indexOf(ac.sinceVersion!),
-          name: ac.name,
           relatedCharacterId: ac.relatedCharacterId,
           relatedCharacterTag: (() => {
             const t = ac.relatedCharacterTags;

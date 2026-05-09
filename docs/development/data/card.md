@@ -8,7 +8,7 @@
 - `.costXxx` 可指定卡牌所消耗的骰子。
 - `.legend()` 秘传牌。
 - `.tags` 指定标签，如 `action` 为战斗行动。
-- `.addTarget` 增加一个卡牌使用目标，可行目标由[实体查询语法](../query.md)给出。
+- `.addTarget` 增加一个卡牌使用目标，可行目标由[实体查询语法](../query-legacy.md)给出。
 - `.filter` 设置打出条件；只有条件满足时才能打出。
 - `.associateExtension`：参见[扩展点](./extensions.md)。
 
@@ -29,7 +29,7 @@ const PlungingStrike = card(332017)
 
 ### `.toStatus` 生成角色状态
 
-在 builder chain 中指定 `.toStatus` 后，即表明该牌打出后将产生角色状态。该链方法的参数为角色状态的附属目标的[实体查询](../query.md)字符串，随后的描述均为该[角色状态](./entity.md)的定义。例：
+在 builder chain 中指定 `.toStatus` 后，即表明该牌打出后将产生角色状态。该链方法的参数为角色状态的附属目标的[实体查询](../query-legacy.md)字符串，随后的描述均为该[角色状态](./entity.md)的定义。例：
 
 ```ts
 /** 元素共鸣：粉碎之冰 */
