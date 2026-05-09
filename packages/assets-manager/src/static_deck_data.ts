@@ -1,4 +1,5 @@
 // Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -18,9 +19,12 @@ import type {
   DeckDataActionCardInfo,
   DeckDataCharacterInfo,
 } from "./deck_data";
-import staticDeckData from "./data/deck.json";
+import staticEnDeckData from "./data/EN/deck.json";
+import staticChsDeckData from "./data/CHS/deck.json";
+import type { Language } from "./manager";
 
-export function getStaticDeckData(): DeckData {
+export function getStaticDeckData(language: Language): DeckData {
+  const staticDeckData = language === "CHS" ? staticChsDeckData : staticEnDeckData;
   return {
     allTags: staticDeckData.allTags,
     allTypes: staticDeckData.allTypes,

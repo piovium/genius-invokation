@@ -23,7 +23,7 @@
     },
     "./data/*": {
       "bun": "./src/data/*.json",
-      "import": "./dist/*.json"
+      "import": "./dist/data/*.json"
     }
   },
   "scripts": {

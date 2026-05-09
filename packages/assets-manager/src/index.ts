@@ -1,4 +1,5 @@
 // Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -26,7 +27,15 @@ export {
   type AssetsManagerOption,
 } from "./manager";
 
-export const DEFAULT_ASSETS_MANAGER = new AssetsManager();
+const preferredLanguage =
+  globalThis?.navigator?.languages?.[0] ??
+  globalThis?.navigator?.language ??
+  globalThis?.Intl?.DateTimeFormat()?.resolvedOptions()?.locale ??
+  "en-US";
+
+export const DEFAULT_ASSETS_MANAGER = new AssetsManager({
+  language: preferredLanguage === "zh-CN" ? "CHS" : "EN",
+});
 
 export { getNameSync } from "./names";
 export type {

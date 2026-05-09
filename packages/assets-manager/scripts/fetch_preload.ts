@@ -17,7 +17,7 @@
 
 import path from "node:path";
 import { existsSync } from "node:fs";
-const neededModules = ["deck", "names", "share_id"];
+const neededModules = ["CHS/deck", "CHS/names", "EN/deck", "EN/names", "share_id"];
 
 for (const mod of neededModules) {
   const filepath = path.resolve(
