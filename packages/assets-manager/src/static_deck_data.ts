@@ -19,12 +19,9 @@ import type {
   DeckDataActionCardInfo,
   DeckDataCharacterInfo,
 } from "./deck_data";
-import staticEnDeckData from "./data/EN/deck.json";
-import staticChsDeckData from "./data/CHS/deck.json";
-import type { Language } from "./manager";
+import staticDeckData from "./data/deck.json";
 
-export function getStaticDeckData(language: Language): DeckData {
-  const staticDeckData = language === "CHS" ? staticChsDeckData : staticEnDeckData;
+export function getStaticDeckData(): DeckData {
   return {
     allTags: staticDeckData.allTags,
     allTypes: staticDeckData.allTypes,

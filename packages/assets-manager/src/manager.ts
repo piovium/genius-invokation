@@ -494,7 +494,7 @@ export class AssetsManager {
 
   async getDeckData(): Promise<DeckData> {
     if (this === DEFAULT_ASSETS_MANAGER) {
-      return getStaticDeckData(this.language);
+      return getStaticDeckData();
     }
     await this.prepareForSync();
     const characters = this.dataCacheSync

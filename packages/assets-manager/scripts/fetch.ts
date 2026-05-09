@@ -64,19 +64,19 @@ for (const language of ["EN", "CHS"] as const) {
     ),
   ]);
 
-  const deckData = getDeckData(characters, actionCards);
-
-  const shareMap = Object.fromEntries(
-    [...characters, ...actionCards].map((card) => [card.shareId, card.id]),
-  );
-  await write(deckData, language, "deck.json");
   await write(names, language, "names.json");
   await write(actionCards, language, "action_cards.json");
   await write(characters, language, "characters.json");
   await write(entities, language, "entities.json");
   await write(keywords, language, "keywords.json");
+
   // language agnostic
-  if (language === "EN") {
+  if (language === "CHS") {
+    const deckData = getDeckData(characters, actionCards);
+    const shareMap = Object.fromEntries(
+      [...characters, ...actionCards].map((card) => [card.shareId, card.id]),
+    );
+    await write(deckData, "deck.json");
     await write(shareMap, "share_id.json");
   }
 }

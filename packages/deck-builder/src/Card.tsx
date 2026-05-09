@@ -30,7 +30,6 @@ import "long-press-event";
 export interface CardProps {
   id: number;
   type: "character" | "actionCard";
-  name: string;
 }
 
 export function Card(props: CardProps) {
@@ -39,20 +38,21 @@ export function Card(props: CardProps) {
   const [url] = createResource(() =>
     assetsManager().getImageUrl(props.id, { thumbnail: true }),
   );
+  const name = () => assetsManager().getNameSync(props.id);
 
   return (
-    <div title={props.name} class="w-full relative group">
+    <div title={name()} class="w-full relative group">
       <Show
         when={url.state === "ready"}
         fallback={
           <div class="w-full aspect-ratio-[7/12] bg-gray-200 text-black whitespace-pre overflow-clip">
-            {props.name}
+            {name()}
           </div>
         }
       >
         <img
           src={url()}
-          alt={props.name}
+          alt={name()}
           draggable="false"
           class="w-full object-cover brightness-[var(--card-brightness,1)] opacity-[var(--card-opacity,1)]"
         />
@@ -95,7 +95,7 @@ export function PoolCard(props: PoolCardProps) {
       bool:data-partial-selected={props.partialSelected}
       bool:data-invalid={props.valid === false}
     >
-      <Card id={props.id} type={props.type} name={props.name} />
+      <Card id={props.id} type={props.type} />
       <Switch>
         <Match when={props.valid === false}>
           <div
@@ -144,7 +144,7 @@ export function DeckCard(props: DeckCardProps) {
         props.class ?? ""
       }`}
     >
-      <Card id={props.id} type={props.type} name={props.name} />
+      <Card id={props.id} type={props.type} />
       <div
         class={`absolute inset-0 data-[warn]:flex hidden group-hover:hidden pointer-events-none
            bg-red-500/50 items-center justify-center`}

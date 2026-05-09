@@ -125,7 +125,6 @@ export function CurrentDeck(props: AllCardsProps) {
                         class="rounded-xl hidden @3xl:block DP:block"
                         id={ch().id}
                         type="character"
-                        name={ch().name}
                         warn={ch().version > props.version}
                       />
                       <TinyCharacterCard
@@ -168,7 +167,6 @@ export function CurrentDeck(props: AllCardsProps) {
                         class="rounded-lg hidden @3xl:block DP:block"
                         id={ac().id}
                         type="actionCard"
-                        name={ac().name}
                         warn={ac().version > props.version}
                       />
                       <TinyActionCard
