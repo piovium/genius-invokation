@@ -1,4 +1,4 @@
-// Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,23 +14,41 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DiceType } from "@gi-tcg/typings";
-
-import { Image } from "./Image";
-import { Match, Show, Switch, createMemo, mergeProps } from "solid-js";
-import { WithDelicateUi } from "../primitives/delicate_ui";
+import {
+  Show,
+  splitProps,
+  type Component,
+  type ComponentProps,
+} from "solid-js";
 import { StrokedText } from "./StrokedText";
-import SimpleEnergyDice from "../svg/SimpleEnergyDice.svg?fb";
-import SimpleLegendDice from "../svg/SimpleLegendDice.svg?fb";
+import { Dynamic } from "solid-js/web";
 
-export interface DiceProps {
-  type: number;
-  selected?: boolean;
-  size?: number;
-  text?: string;
-  color?: DiceColor;
-}
+import DiceCryoS from "../svg/DiceCryoS.svg?fb";
+import DiceHydroS from "../svg/DiceHydroS.svg?fb";
+import DicePyroS from "../svg/DicePyroS.svg?fb";
+import DiceElectroS from "../svg/DiceElectroS.svg?fb";
+import DiceAnemoS from "../svg/DiceAnemoS.svg?fb";
+import DiceGeoS from "../svg/DiceGeoS.svg?fb";
+import DiceDendroS from "../svg/DiceDendroS.svg?fb";
+import DiceOmniS from "../svg/DiceOmniS.svg?fb";
 
-export type DiceColor = "normal" | "increased" | "decreased";
+import DiceVoid from "../svg/DiceVoid.svg?fb";
+import DiceCryo from "../svg/DiceCryo.svg?fb";
+import DiceHydro from "../svg/DiceHydro.svg?fb";
+import DicePyro from "../svg/DicePyro.svg?fb";
+import DiceElectro from "../svg/DiceElectro.svg?fb";
+import DiceAnemo from "../svg/DiceAnemo.svg?fb";
+import DiceGeo from "../svg/DiceGeo.svg?fb";
+import DiceDendro from "../svg/DiceDendro.svg?fb";
+import DiceSame from "../svg/DiceSame.svg?fb";
+import DiceEnergyNormal from "../svg/DiceEnergyNormal.svg?fb";
+import DiceLegend from "../svg/DiceLegend.svg?fb";
+import DiceEnergyMavuika from "../svg/DiceEnergyMavuika.svg?fb";
+import DiceEnergySkirk from "../svg/DiceEnergySkirk.svg?fb";
+
+import SelectingDice from "../svg/SelectingDice.svg?fb";
+
+export type CostTextColor = "normal" | "increased" | "decreased";
 
 export const DICE_COLOR: Record<number, string> = {
   [DiceType.Void]: "void",
@@ -47,197 +65,128 @@ export const DICE_COLOR: Record<number, string> = {
   // [DiceType.Legend]: "",
 };
 
-function EnergyIcon(props: { size: number }) {
-  return (
-    <WithDelicateUi
-      assetId="UI_Gcg_DiceL_Energy"
-      fallback={
-        <SimpleEnergyDice
-          style={{ height: `${props.size}px`, width: `${props.size}px` }}
-        />
-      }
-    >
-      {(image) => (
-        <div
-          class="children-h-full children-w-full children-scale-95%"
-          style={{ height: `${props.size}px`, width: `${props.size}px` }}
-        >
-          {image}
-        </div>
-      )}
-    </WithDelicateUi>
-  );
-}
+export const DICE_COMPONENT_MAP: Record<number, Component> = {
+  // [DiceType.Void]: ,
+  [DiceType.Cryo]: DiceCryoS,
+  [DiceType.Hydro]: DiceHydroS,
+  [DiceType.Pyro]: DicePyroS,
+  [DiceType.Electro]: DiceElectroS,
+  [DiceType.Anemo]: DiceAnemoS,
+  [DiceType.Geo]: DiceGeoS,
+  [DiceType.Dendro]: DiceDendroS,
+  [DiceType.Omni]: DiceOmniS,
+  // [DiceType.Aligned]: ,
+  // [DiceType.Energy]: ,
+  // [DiceType.Legend]: ,
+};
 
-function LegendIcon(props: { size: number }) {
-  return (
-    <WithDelicateUi
-      assetId="UI_Gcg_DiceL_Legend"
-      fallback={
-        <SimpleLegendDice
-          style={{ height: `${props.size}px`, width: `${props.size}px` }}
-        />
-      }
-    >
-      {(image) => (
-        <div
-          class="children-h-full children-w-full"
-          style={{ height: `${props.size}px`, width: `${props.size}px` }}
-        >
-          {image}
-        </div>
-      )}
-    </WithDelicateUi>
-  );
-}
+export const COST_COMPONENT_MAP: Record<number, Component> = {
+  [DiceType.Void]: DiceVoid,
+  [DiceType.Cryo]: DiceCryo,
+  [DiceType.Hydro]: DiceHydro,
+  [DiceType.Pyro]: DicePyro,
+  [DiceType.Electro]: DiceElectro,
+  [DiceType.Anemo]: DiceAnemo,
+  [DiceType.Geo]: DiceGeo,
+  [DiceType.Dendro]: DiceDendro,
+  [DiceType.Omni]: DiceSame,
+  // [DiceType.Aligned]: ,
+  [DiceType.Energy]: DiceEnergyNormal,
+  [DiceType.Legend]: DiceLegend,
 
-export function DiceIcon(props: {
+  12: DiceEnergyMavuika,
+  13: DiceEnergySkirk,
+};
+
+export interface DiceProps extends ComponentProps<"div"> {
   class?: string;
-  size?: number;
-  type: DiceType;
-  selected: boolean;
-}) {
-  return (
-    <svg // 骰子图标
-      width="14"
-      height="14"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 15 15"
-      class={`dice-icon fill-current w-10 h-10 ${props.class ?? ""}`}
-      style={{
-        height: props.size ? `${props.size}px` : void 0,
-        width: props.size ? `${props.size}px` : void 0,
-        color: `var(--c-${DICE_COLOR[props.type]})`,
-      }}
-    >
-      <defs>
-        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="0.3" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-          <feFlood flood-color="#F7A15B" flood-opacity="1" result="color" />
-          <feComposite in="color" in2="blur" operator="in" result="glowColor" />
-          <feMerge>
-            <feMergeNode in="glowColor" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-      <path
-        d="M7.5 2.065L2.97 4.784v5.432l4.53 2.719 4.53-2.719V4.784z"
-        stroke-width=".214"
-        stroke-linejoin="round"
-        fill="#FFF"
-        stroke="gray"
-      />
-      <path
-        d="M7.5 2.065L2.97 4.784v5.432l4.53 2.719 4.53-2.719V4.784z"
-        opacity=".2"
-      />
-      <path
-        d="M7.5 1.071L2.143 4.286v6.428L7.5 13.93l5.357-3.215V4.286L7.5 1.07zm0 .994l4.53 2.719v5.432L7.5 12.935l-4.53-2.719V4.784L7.5 2.065z"
-        fill="#D4C0A5"
-        stroke="#F7A15B"
-        stroke-width={props.selected ? 2 : 0}
-        stroke-linejoin="round"
-        filter={props.selected ? "url(#glow)" : undefined}
-      />
-      <path
-        d="M7.5 7.5V2.065L2.97 4.784zM7.5 12.935V7.5l4.53 2.716z"
-        opacity=".6"
-      />
-      <path d="M2.97 4.784L7.5 7.5l-4.53 2.716z" opacity=".9" />
-      <path d="M7.5 12.935V7.5l-4.53 2.716zm0-10.87V7.5l4.53-2.716z" />
-      <path d="M7.5 7.5l4.53-2.716v5.432z" opacity=".9" />
-    </svg>
-  );
+  type: number;
+  selected?: boolean;
 }
 
 export function Dice(props: DiceProps) {
-  const merged = mergeProps(
-    {
-      selected: false,
-      size: 25,
-      color: "normal" as DiceColor,
-    },
-    props,
-  );
-  const normalDelicateDiceAssetId = createMemo(
-    () => `UI_Gcg_DiceL_${DICE_COLOR[merged.type]}_Glow`,
-  );
-  const signedDelicateDiceAssetId = createMemo(
-    () =>
-      `UI_Gcg_DiceL_${DICE_COLOR[merged.type]}_Glow_0${
-        merged.size > 25 ? "2" : "1"
-      }`,
-  );
-
+  const [local, rest] = splitProps(props, ["class", "type", "selected"]);
   return (
-    <div class="relative flex items-center justify-center m--1">
-      <Switch>
-        <Match when={merged.type === 9}>
-          <EnergyIcon size={merged.size} />
-        </Match>
-        <Match when={merged.type === 10}>
-          <LegendIcon size={merged.size} />
-        </Match>
-        <Match when={true}>
-          <DiceIcon {...merged} />
-        </Match>
-      </Switch>
-      <Switch>
-        <Match when={merged.text}>
-          <Show when={merged.type !== 9}>
-            <WithDelicateUi
-              assetId={normalDelicateDiceAssetId()}
-              fallback={<></>}
-            >
-              {(image) => (
-                <div class="absolute inset-0 children-h-full children-w-full">
-                  {image}
-                </div>
-              )}
-            </WithDelicateUi>
-          </Show>
-          <StrokedText
-            class="absolute inset-0 text-center font-bold text-white data-[color=increased]:text-red-500 data-[color=decreased]:text-green-500"
-            style={{
-              "line-height": `${merged.size}px`,
-              "font-size": `${0.5 * merged.size}px`,
-            }}
-            strokeWidth={2}
-            strokeColor="#000000B0"
-            text={merged.text ?? ""}
-            data-color={merged.color}
-          />
-        </Match>
-        <Match when={merged.type >= 1 && merged.type <= 8}>
-          <WithDelicateUi
-            assetId={signedDelicateDiceAssetId()}
-            fallback={
-              <Show when={merged.type !== 8}>
-                <Image
-                  class="absolute"
-                  imageId={merged.type}
-                  height={0.6 * merged.size}
-                  width={0.6 * merged.size}
-                />
-              </Show>
-            }
-          >
-            {(image) => (
-              <div
-                class="absolute inset-0 children-h-full children-w-full delicate-dice"
-                bool:data-selected={merged.selected}
-              >
-                {image}
-              </div>
-            )}
-          </WithDelicateUi>
-        </Match>
-      </Switch>
+    <div class={`grid ${local.class ?? "w-6 h-6"}`} {...rest}>
+      <Dynamic<Component<ComponentProps<"div">>>
+        component={DICE_COMPONENT_MAP[local.type]}
+        class="grid-area-[1/1] w-full h-full"
+      />
+      <Show when={local.selected}>
+        <SelectingDice class="grid-area-[1/1] w-full h-full" />
+      </Show>
     </div>
+  );
+}
+
+export interface DiceUnpackProps {
+  class?: string;
+  type: number;
+  selected?: boolean;
+  col: number;
+  row: number;
+}
+
+export function DiceUnpack(props: DiceUnpackProps) {
+  return (
+    <>
+      <Dynamic<Component<ComponentProps<"div">>>
+        component={DICE_COMPONENT_MAP[props.type]}
+        class={props.class ?? "w-6 h-6"}
+        style={{ "grid-column": props.col, "grid-row": props.row }}
+      />
+      <Show when={props.selected}>
+        <SelectingDice
+          class={props.class ?? "w-6 h-6"}
+          style={{ "grid-column": props.col, "grid-row": props.row }}
+        />
+      </Show>
+    </>
+  );
+}
+
+export interface CostProps {
+  class: string;
+  type: number;
+  count: number;
+  color: CostTextColor;
+}
+
+export function Cost(props: CostProps) {
+  return (
+    <div
+      class={`grid ${props.class}`}
+    >
+      <Dynamic<Component<ComponentProps<"div">>>
+        component={COST_COMPONENT_MAP[props.type]}
+        class="grid-area-[1/1] w-full h-full"
+      />
+      <Show when={props.type !== DiceType.Legend}>
+        <StrokedText
+          class={`grid-area-[1/1] w-full h-full
+          text-center font-bold text-white place-items-center
+          data-[color=increased]:text-red-500
+          data-[color=decreased]:text-green-500`}
+          strokeWidth={2}
+          strokeColor="#000000B0"
+          text={props.count.toString()}
+          data-color={props.color}
+        />
+      </Show>
+    </div>
+  );
+}
+
+export interface InlineDiceProps {
+  class: string;
+  type: number;
+}
+
+export function InlineDice(props: InlineDiceProps) {
+  return (
+    <Dynamic<Component<ComponentProps<"div">>>
+      component={COST_COMPONENT_MAP[props.type]}
+      class={props.class}
+    />
   );
 }

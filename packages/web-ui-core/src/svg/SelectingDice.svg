@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    viewBox="0 0 96 96">
+    <defs>
+        <filter id="b" x="3" y="-3" width="90" height="104" filterUnits="userSpaceOnUse">
+            <feOffset dx="0" dy="0" />
+            <feGaussianBlur result="c" stdDeviation="2" />
+            <feFlood flood-color="#fcfed5" flood-opacity="1" />
+            <feComposite in2="c" operator="in" />
+            <feComposite in="SourceGraphic" />
+        </filter>
+    </defs>
+    <polygon points="48 91.3 10.5 69.65 10.5 26.35 48 4.7 85.5 26.35 85.5 69.65 48 91.3"
+        fill="none" filter="url(#b)" stroke="#fcfed5" stroke-miterlimit="10" stroke-width="3" />
+</svg>

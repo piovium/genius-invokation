@@ -125,9 +125,6 @@ export function DeclareEndMarker(props: DeclareEndMarkerProps) {
     props.onClick(e);
   };
   const currentTime = () => Math.min(props.currentTime, props.totalTime);
-  createEffect(() => {
-    console.log(`DeclareEndMarker: `, props.timingMine, props.markerClickable);
-  });
   return (
     <div
       class={`grid grid-cols-[4.5rem_10rem] grid-rows-1 w-58 h-22 pointer-events-none select-none justify-items-center ${

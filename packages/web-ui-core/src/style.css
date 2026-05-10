@@ -100,7 +100,7 @@
   }
 
   .card-animation:where([data-playable] > *) {
-    --effect-shadow: 0 0 3px 2px rgb(252 240 168 / 0.8);
+    --effect-shadow: 0 0 4px 4px #fcfed5;
   }
 
   .card-animation:where([data-dragging-end] > *) {
@@ -480,15 +480,6 @@
       rgba(0, 0, 0, 0.9) 82%,
       rgba(0, 0, 0, 0) 92%
     );
-
-    .delicate-dice {
-      --blink-opacity: 1;
-      animation: blink 4s ease-in-out infinite;
-    }
-
-    .delicate-dice[data-selected] {
-      --blink-opacity: 0.5;
-    }
   }
 
   .dice-shadow {

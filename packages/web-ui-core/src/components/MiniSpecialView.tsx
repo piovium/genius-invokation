@@ -16,8 +16,8 @@
 import { For, Match, Show, Switch } from "solid-js";
 import { CardFace } from "./Card";
 import { DiceType } from "@gi-tcg/typings";
-import { DiceCostAsync } from "./SelectCardView";
-import { Dice } from "./Dice";
+import { DiceCostAsync } from "./DiceCost";
+import { InlineDice } from "./Dice";
 import type { PbPlayerState } from "@gi-tcg/core";
 import type { ChessboardViewType } from "./Chessboard";
 import { useUiContext } from "../hooks/context";
@@ -55,8 +55,8 @@ function MiniView(props: MiniSpecialViewProps) {
                         <CardFace definitionId={cardId} class="absolute inset-0 w-10.5 h-18" />
                         <DiceCostAsync
                           cardDefinitionId={cardId}
-                          size={18}
-                          class="top-0 left-0.8"
+                          class="absolute translate-x--50% backface-hidden flex flex-col gap-1 top-0 left-0.8"
+                          diceClass="w-4.5 h-4.5 text-2.25 m--0.5"
                         />
                       </div>
                     </li>
@@ -82,8 +82,8 @@ function MiniView(props: MiniSpecialViewProps) {
                         <CardFace definitionId={cardId} class="absolute inset-0 w-10.5 h-18" />
                         <DiceCostAsync
                           cardDefinitionId={cardId}
-                          size={18}
-                          class="top-0 left-0.8"
+                          class="absolute translate-x--50% backface-hidden flex flex-col gap-1 top-0 left-0.8"
+                          diceClass="w-4.5 h-4.5 text-2.25 m--0.5"
                         />
                       </div>
                       <div class="mt-1 w-10.5 text-2 text-center color-black/60 font-bold whitespace-nowrap">
@@ -103,17 +103,13 @@ function MiniView(props: MiniSpecialViewProps) {
                   : "mini.myRerolling",
               )}
             </h3>
-            <ul class="grid grid-rows-2 grid-flow-col gap-2">
+            <div class="grid grid-rows-2 grid-flow-col">
               <For each={props.ids}>
                 {(dice) => (
-                  <li>
-                    <div class="relative">
-                      <Dice type={dice} size={42} />
-                    </div>
-                  </li>
+                  <InlineDice type={dice} class="w-10 h-10" />
                 )}
               </For>
-            </ul>
+            </div>
           </Match>
         </Switch>
       </div>

@@ -40,7 +40,6 @@ import type {
   HistoryHintBlock,
 } from "../history/typings";
 import { Image } from "./Image";
-import { DiceIcon } from "./Dice";
 import type {
   ActionCardRawData,
   AssetsManager,

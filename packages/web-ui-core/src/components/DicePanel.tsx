@@ -15,7 +15,7 @@
 
 import type { DiceType } from "@gi-tcg/typings";
 import { createMemo, Index, Match, Show, Switch } from "solid-js";
-import { Dice } from "./Dice";
+import { Dice, DiceUnpack, InlineDice } from "./Dice";
 import { WithDelicateUi } from "../primitives/delicate_ui";
 
 export type DicePanelState = "hidden" | "wrapped" | "visible";
@@ -60,7 +60,9 @@ export function DicePanel(props: DicePanelProps) {
       props.onStateChange("visible");
     }
   };
-  const compactView = createMemo(() => props.state === "hidden" && props.compactView);
+  const compactView = createMemo(
+    () => props.state === "hidden" && props.compactView,
+  );
   return (
     <Switch>
       <Match when={compactView()}>
@@ -71,19 +73,11 @@ export function DicePanel(props: DicePanelProps) {
             data-opp={props.opp}
             bool:data-has-mini-view={props.hasMiniView}
           >
-            <ul class="absolute grid grid-rows-6 grid-flow-col items-center gap-1.5">
+            <div class="absolute grid grid-rows-6 grid-flow-col items-center gap-1.5">
               <Index each={props.dice}>
-                {(dice, index) => (
-                  <Dice
-                    type={dice()}
-                    size={25}
-                    selected={
-                      props.state === "wrapped" && props.selectedDice[index]
-                    }
-                  />
-                )}
+                {(dice) => <InlineDice type={dice()} class="w-6 h-6 m--1" />}
               </Index>
-            </ul>
+            </div>
           </div>
         </div>
       </Match>
@@ -101,30 +95,26 @@ export function DicePanel(props: DicePanelProps) {
           </div>
           <div class="flex-grow h-full flex items-center justify-center">
             <Show when={props.state === "visible"}>
-              <ul class="grid grid-cols-2 gap-x-1 gap-y-2 -translate-y-5">
+              <div class="grid grid-cols-2 gap-x-1 gap-y-2 -translate-y-5">
                 <Index each={props.dice}>
                   {(dice, index) => (
-                    <li
-                      class="data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                    <Dice
+                      type={dice()}
+                      class="w-12 h-12 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed m--1"
+                      selected={props.selectedDice[index]}
                       bool:data-disabled={props.disabledDiceTypes.includes(
                         dice(),
                       )}
                       onClick={() => toggleDice(dice(), index)}
-                    >
-                      <Dice
-                        type={dice()}
-                        size={48}
-                        selected={props.selectedDice[index]}
-                      />
-                    </li>
+                    />
                   )}
                 </Index>
-              </ul>
+              </div>
             </Show>
           </div>
         </div>
         <div
-          class="absolute right-2 top-0 bottom-0 opacity-0 pointer-events-none data-[shown]:opacity-100 transition-opacity"
+          class="absolute right-2 top-0 bottom-0 hidden pointer-events-none data-[shown]:block"
           bool:data-shown={props.state !== "visible"}
         >
           <div class="m-2 flex flex-col select-none gap-1.5 items-center">
@@ -145,24 +135,21 @@ export function DicePanel(props: DicePanelProps) {
                 </div>
               )}
             </WithDelicateUi>
-            <ul class="flex flex-col gap-1.5 items-center dice-shadow">
+            <div class="grid grid-cols-1 gap-1.5 items-center dice-shadow pointer-events-auto">
               <Index each={props.dice}>
                 {(dice, index) => (
-                  <li
-                    onClick={() =>
-                      props.state === "wrapped" && toggleDice(dice(), index)
+                  <DiceUnpack
+                    type={dice()}
+                    selected={
+                      props.state === "wrapped" && props.selectedDice[index]
                     }
-                  >
-                    <Dice
-                      type={dice()}
-                      selected={
-                        props.state === "wrapped" && props.selectedDice[index]
-                      }
-                    />
-                  </li>
+                    class="w-6 h-6 m--1"
+                    col={1}
+                    row={index + 1}
+                  />
                 )}
               </Index>
-            </ul>
+            </div>
           </div>
         </div>
       </Match>

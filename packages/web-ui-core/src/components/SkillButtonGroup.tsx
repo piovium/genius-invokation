@@ -178,7 +178,7 @@ function SkillButton(props: SkillButtonProps) {
         <DiceCost
           class="flex flex-row gap-4px"
           cost={props.cost}
-          size={26}
+          diceClass="w-6.5 h-6.5 text-3.25 m--1"
           realCost={props.realCost}
         />
       </div>
