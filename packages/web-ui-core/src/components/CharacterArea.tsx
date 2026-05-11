@@ -528,7 +528,7 @@ export function CharacterArea(props: CharacterAreaProps) {
               revived={props.preview?.revived}
             />
           </Show>
-          <div class="absolute z-1 left-1 -translate-x-50% top-8 flex flex-col">
+          <div class="absolute z-1 left-0.5 -translate-x-50% top-8 flex flex-col">
             <Show when={weapon()}>
               {(et) => (
                 <Equipment
@@ -618,7 +618,7 @@ export function CharacterArea(props: CharacterAreaProps) {
         </Show>
       </div>
       <Show when={props.active}>
-        <StatusGroup class="grid-area-[3/1] z-10 px-0.5 mt-0.25" statuses={props.combatStatus} />
+        <StatusGroup class="grid-area-[3/1] z-10 px-0.5" statuses={props.combatStatus} />
       </Show>
     </div>
   );
@@ -769,7 +769,7 @@ interface HealthProps {
 
 function Health(props: HealthProps) {
   return (
-    <div class="absolute z-1 left-2 top--2 h-10 w-10 -translate-x-50% grid">
+    <div class="absolute z-1 left-1.5 top--2 h-10 w-10 -translate-x-50% grid">
       <Show
         when={props.bondOfLife}
         fallback={<HealthIcon class="grid-area-[1/1] w-full h-full" />}
@@ -827,7 +827,7 @@ interface TechniqueProps {
 function Technique(props: TechniqueProps) {
   const data = createMemo(() => props.data);
   return (
-    <div class="w-6 h-6 mt-0.5 grid">
+    <div class="w-7 h-7 mt-0.5 grid">
       <Image
         class="grid-area-[1/1] technique-icon"
         imageId={data().data.definitionId}
@@ -837,7 +837,7 @@ function Technique(props: TechniqueProps) {
         bool:data-disposing={data().animation === "disposing"}
       />
       <Show when={props.replace}>
-        <ReplaceEquipment class="grid-area-[1/1] w-full h-full" />
+        <ReplaceEquipment class="grid-area-[1/1] w-6.5 h-6.5 place-self-center" />
       </Show>
       <div
         class="grid-area-[1/1] rounded-full technique-effect"
@@ -867,7 +867,7 @@ function Equipment(props: EquipmentProps) {
         bool:data-disposing={data().animation === "disposing"}
       />
       <Show when={props.replace}>
-        <ReplaceEquipment class="grid-area-[1/1] w-6.5 h-6.5 justify-self-center self-center" />
+        <ReplaceEquipment class="grid-area-[1/1] w-6.5 h-6.5 place-self-center" />
       </Show>
       <div
         class="grid-area-[1/1] rounded-full equipment-effect"

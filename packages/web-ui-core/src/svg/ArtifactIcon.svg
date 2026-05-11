@@ -1,18 +1,13 @@
-<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"
-    xmlns:xlink="http://www.w3.org/1999/xlink">
-    <g>
-        <circle cx="32" cy="32" r="27" fill="#8C6B44" />
-        <path d="M63.9 32L58 26L58 38L63.9 32Z" fill="#8C6B44" />
-        <circle cx="32" cy="32" r="26" fill="#CCB893" />
-        <path d="M62.5 32L57.5 27L57.5 37L62.5 32Z" fill="#CCB893" />
-        <circle cx="32" cy="32" r="23" fill="#EDE4D2" />
-        <rect x="9" y="9" width="46" height="46" fill="url(#pattern0_artifact)" />
-    </g>
-    <defs>
-        <pattern id="pattern0_artifact" patternContentUnits="objectBoundingBox" width="1" height="1">
-            <use xlink:href="#image0_artifact" transform="scale(0.015625)" />
-        </pattern>
-        <image id="image0_artifact" width="64" height="64" preserveAspectRatio="none"
-            xlink:href="data:image/png;base64,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" />
-    </defs>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+    <path
+        d="M94.03,49.3c-.79,2.29-2.97,3.99-4.31,6.01-3.17,4.5-4.1,10.05-7.26,14.52-10.09,16.52-32.84,23.54-50.59,15.94C-9.47,68.28,2.43,7.78,47.59,7.18c16.08-.1,31.02,9.51,37.55,23.89,1.46,3.22,2.42,6.73,4.56,9.61,1.71,2.63,5.4,5.12,4.32,8.62Z"
+        fill="#ccb893" stroke="#8c6b44" stroke-miterlimit="0" stroke-width="3" />
+    <circle cx="47.57" cy="48" r="35.25" fill="#ede4d2" />
+    <path
+        d="M51.46,26.07c11.1.65,15.6,11.04,17.89,16.95.74,1.53,2.87,2.68,3.67,3.94.41.63.1,1.32-.5,1.71-1.21.8-4.42.96-4.43,2.37-.04,5.95-9.52,17-15.43,13.67-.81-.99-1.47-3.45-2.43-4.66-1.36-1.9-3.44-1.34-4.42.57-.83,1.22-.98,2.8-1.92,3.95-5.45,3.74-15.54-7.24-15.38-13.65.04-1.52-4.72-1.25-5.56-2.72-.99-1.74,2.94-2.74,3.4-4.38,1.87-6.74,7.03-16.69,18.14-17.63,1.26-2.68-7.91-2.55-3.15-6.02,1.41-1.2,3.14-2.23,4.2-4.08.9-1.57,2.64-3.02,4.15-1.38.63.69,1.43,2.25,2.17,3.04,1.05,1.11,3.71,2.23,4.11,3.68.06,1.81-4.68,3.05-4.52,4.63ZM48.2,33.61c-1.3,1.02-1.33,3.49-2.24,4.9-2.73,7.35-14.34,6.21-6.93,9.12,3.07,1.4,5.53,3.52,7.12,6.5.52.82,1.2,2.99,2.13,3.21,1.08-.6,1.44-2.65,2.06-3.76,1.48-3.84,5.12-5.19,8.67-6.77,3.73-1.43-7.44-1.21-9.72-11.04-.27-.65-.51-1.85-1.09-2.17Z"
+        fill="#615d66" />
+    <path
+        d="M47.78,61.26c2.9-1,3.22,5.62,3.87,6.19.39.22.79.06,1.38-.05,1.21-.22,3.85-1.25,3.97.72-.55,1.11-2.13,2.27-3.09,3.27-2.46,1.87-3.63,8.42-4.67,10.1-1.98,2.47-2.96-4.87-3.44-5.29-.55-1.22-1.22-2.6-1.99-3.68-.54-.73-2.66-2.64-3.7-3.68-.47-.46-.55-.57-.46-1.1.5-1.66,3.88,0,5.06-.19,1.11-.34,1.03-5.56,3.06-6.29Z"
+        fill="#615d66" />
 </svg>

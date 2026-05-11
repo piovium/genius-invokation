@@ -278,7 +278,7 @@ export function Card(props: CardProps) {
         attachments={attachments()}
       />
       <DiceCost
-        class="absolute left-2 top--1 translate-x--50% backface-hidden flex flex-col gap-1 [&:where([data-opp-hand]>*)]:rotate-180"
+        class="absolute left-2 top--0.5 translate-x--50% backface-hidden flex flex-col gap-1 [&:where([data-opp-hand]>*)]:rotate-180"
         cost={data().definitionCost}
         diceClass="w-9 h-9 text-4.5 m--1"
         realCost={realCost()}
