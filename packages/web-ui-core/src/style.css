@@ -281,7 +281,7 @@
     animation:
       500ms linear both transform-scale,
       500ms linear both fade-out;
-  }  
+  }
 
   .status-effect[data-disposing] {
     box-shadow:
@@ -293,7 +293,7 @@
     --blink-opacity: 0;
     animation:
       500ms linear forwards transform-scale,
-      500ms linear forwards blink-25
+      500ms linear forwards blink-25;
   }
 
   .status-icon[data-disposing] {
@@ -324,6 +324,123 @@
     background-image: linear-gradient(to right, #4c6890 25%, #293954 100%);
     border-color: #697a8c;
     mask-image: linear-gradient(to right, #000000ee 55%, transparent 95%);
+  }
+
+  /* SkillButton */
+  .skill-button {
+    transition: transform 150ms ease;
+    transform: scale(calc(var(--base-scale, 1) * 1))
+      translateY(var(--offset-y, 0));
+    --circle-border: #cc8a53;
+    --circle-background: #704c2d;
+    --button-border: #b47f50;
+    --button-background: #a26c41;
+  }
+
+  .skill-button[data-disabled] {
+    cursor: not-allowed;
+  }
+
+  .skill-button[data-mini] {
+    --base-scale: 0.8;
+    --offset-y: 5px;
+  }
+
+  .skill-button:hover {
+    transform: scale(calc(var(--base-scale, 1) * 1.05))
+      translateY(var(--offset-y, 0));
+    --circle-border: #cf8c53;
+    --circle-background: #704c2d;
+    --button-border: #e49752;
+    --button-background: #c97c40;
+  }
+
+  .skill-button:active {
+    transform: scale(calc(var(--base-scale, 1) * 0.95))
+      translateY(var(--offset-y, 0));
+    --circle-border: #cf8c53;
+    --circle-background: #ab6c38;
+    --button-border: #ffd26a;
+    --button-background: #cd8444;
+  }
+
+  .skill-button[data-selected] {
+    --circle-border: #d79154;
+    --circle-background: #835833;
+    --button-border: #e49752;
+    --button-background: #dc8b46;
+  }
+
+  .skill-button[data-selected]:hover {
+    --circle-border: #d79154;
+    --circle-background: #956133;
+    --button-border: #ffb45d;
+    --button-background: #f69b4c;
+  }
+
+  .skill-button[data-selected]:active {
+    --circle-border: #d79154;
+    --circle-background: #cd8d42;
+    --button-border: #fff26d;
+    --button-background: #fda04e;
+  }
+
+  .skill-button-bg:where([data-disabled] > *) {
+    filter: brightness(0.8) saturate(0.7);
+  }
+
+  .skill-button-icon:where([data-disabled] > *) {
+    opacity: 0.5;
+  }
+
+  .skill-button-icon:where(:not([data-disabled]) > *) {
+    background-image: radial-gradient(
+      circle at center,
+      #ff953c var(--skill-button-light-start, 0%),
+      transparent 60%
+    );
+  }
+
+  .skill-button-icon:where(:not([data-disabled]):hover > *) {
+    filter: brightness(1.1);
+  }
+
+  .skill-button-icon:where(:not([data-disabled]):active > *) {
+    filter: brightness(1.1);
+    opacity: 0.5;
+  }
+
+  .skill-button-switch {
+    --skill-button-light-start: 25%;
+  }
+
+  .skill-button-marker {
+    display: none;
+  }
+
+  .skill-button-marker:where([data-selected] > *) {
+    display: block;
+  }
+
+  .skill-button-burst-progress {
+    mask-image: linear-gradient(
+      to top,
+      #ffffffff var(--progress-value),
+      transparent var(--progress-value)
+    );
+  }
+
+  .skill-button-burst-animation {
+    box-shadow:
+      inset 0 0 8px 4px var(--element-color),
+      0 0 8px 4px var(--element-color);
+    --scale-start: 100%;
+    --scale-middle: 130%;
+    --scale-end: 160%;
+    --blink-opacity: 0;
+    animation:
+      5000ms linear infinite transform-scale,
+      5000ms linear infinite blink-50;
   }
 
   /* end */
@@ -439,29 +556,6 @@
 
   .entity[data-disposing] {
     animation: entity-disposing 0.5s linear both;
-  }
-
-  .skill-button-img {
-    background-image: var(--img-url);
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-  }
-
-  .skill-button-img-button {
-    background-color: transparent;
-  }
-
-  .skill-button-img-button[data-disabled] {
-    cursor: not-allowed;
-  }
-
-  .skill-button-img:has(.skill-button-img-button:hover) {
-    background-image: var(--img-hover-url);
-  }
-
-  .skill-button-img:has(.skill-button-img-button:active) {
-    background-image: var(--img-active-url);
   }
 
   .dice-panel {
@@ -592,21 +686,6 @@
     box-shadow:
       inset 0 0 18px #000000,
       0 0 40px #63524a;
-  }
-
-  .burst-animator {
-    box-shadow:
-      inset 0 0 20px var(--color),
-      0 0 20px var(--color);
-    animation: var(--animation-name) 3s linear infinite;
-  }
-
-  .burst-progress {
-    mask-image: linear-gradient(
-      to top,
-      #ffffffff var(--progress-value),
-      transparent var(--progress-value)
-    );
   }
 
   .entity-usage-1 {
@@ -1207,102 +1286,6 @@
   }
 
   100% {
-    opacity: 0;
-  }
-}
-
-@keyframes elemental-burst-1 {
-  0% {
-    transform: scale(1);
-    opacity: 0;
-  }
-
-  20% {
-    transform: scale(1.15);
-    opacity: 0.7;
-  }
-
-  40% {
-    transform: scale(1.275);
-    opacity: 0.45;
-  }
-
-  60% {
-    transform: scale(1.375);
-    opacity: 0.25;
-  }
-
-  80% {
-    transform: scale(1.45);
-    opacity: 0.1;
-  }
-
-  100% {
-    transform: scale(1.5);
-    opacity: 0;
-  }
-}
-
-@keyframes elemental-burst-2 {
-  0% {
-    transform: scale(1);
-    opacity: 0;
-  }
-
-  20% {
-    transform: scale(1);
-    opacity: 0;
-  }
-
-  40% {
-    transform: scale(1);
-    opacity: 0;
-  }
-
-  60% {
-    transform: scale(1);
-    opacity: 0.35;
-  }
-
-  80% {
-    transform: scale(1.15);
-    opacity: 0.7;
-  }
-
-  100% {
-    transform: scale(1.275);
-    opacity: 0;
-  }
-}
-
-@keyframes elemental-burst-3 {
-  0% {
-    transform: scale(1.375);
-    opacity: 0;
-  }
-
-  20% {
-    transform: scale(1.45);
-    opacity: 0.25;
-  }
-
-  40% {
-    transform: scale(1.5);
-    opacity: 0;
-  }
-
-  60% {
-    transform: scale(1);
-    opacity: 0;
-  }
-
-  80% {
-    transform: scale(1);
-    opacity: 0;
-  }
-
-  100% {
-    transform: scale(1.375);
     opacity: 0;
   }
 }

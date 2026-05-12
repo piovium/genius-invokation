@@ -1,22 +1,14 @@
-<svg
-  viewBox="0 0 48 48"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <circle
-    cx="24"
-    cy="24"
-    r="20"
-    stroke="#897660"
-    stroke-width="6"
-    fill="none"
-  />
-  <line
-    x1="38"
-    y1="10"
-    x2="10"
-    y2="38"
-    stroke="#897660"
-    stroke-width="6"
-  />
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    viewBox="0 0 64 64">
+    <defs>
+        <radialGradient id="b" cx="32" cy="32" fx="32" fy="32" r="30.5"
+            gradientUnits="userSpaceOnUse">
+            <stop offset=".2" stop-color="#38200d" />
+            <stop offset="1" stop-color="#624522" />
+        </radialGradient>
+    </defs>
+    <circle cx="32" cy="32" r="30.5" fill="url(#b)" stroke="#38200d" stroke-width="3.05" />
+    <circle cx="32" cy="32" r="19" fill="none" stroke="#897660" stroke-width="6" />
+    <line x1="45.3" y1="18.7" x2="18.7" y2="45.3" fill="none" stroke="#897660" stroke-width="6" />
 </svg>

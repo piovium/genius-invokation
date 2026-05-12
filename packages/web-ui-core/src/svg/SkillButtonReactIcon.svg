@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    viewBox="0 0 192 192">
+    <circle cx="96" cy="96" r="90" fill="var(--circle-border,#cc8a53)" stroke="#6c3e1f"
+        stroke-width="2" />
+    <circle cx="96" cy="96" r="81" fill="var(--circle-background,#704c2d)" stroke="#ad7e53"
+        stroke-width="3" />
+    <path
+        d="M136.61,136.39c6.8,36.14-87.96,36.17-81.18,0-35.9,6.88-35.93-87.64,0-80.77-6.8-36.14,87.96-36.17,81.18,0,35.76-7.14,35.95,87.96,0,80.77Z"
+        fill="var(--button-background,#a26c41)"
+        stroke="var(--button-border,#b47f50)"
+        stroke-width="10" />
+</svg>
