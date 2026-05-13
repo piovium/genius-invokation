@@ -20,6 +20,8 @@ const args = [
   // https://github.com/privatenumber/tsx/issues/791
   "--disable-warning=DEP0205",
   // `--conditions=${process.env.NODE_ENV ?? "development"}`,
+  // To prevent unnecessary transpilation, only enable cross-package TypeScript transpiling 
+  // (via `development` conditions) when `NODE_ENV` is explicit set to `development`.
   ...(process.env.NODE_ENV ? [`--conditions=${process.env.NODE_ENV}`] : []),
   "--import",
   import.meta.resolve("@gi-tcg/config/preload"),

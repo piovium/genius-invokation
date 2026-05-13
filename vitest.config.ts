@@ -18,5 +18,14 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     watch: false,
+    env: {
+      NODE_OPTIONS: "--expose-gc",
+    },
+  },
+  ssr: {
+    // https://vitest.dev/guide/common-errors.html#custom-package-conditions-are-not-resolved
+    resolve: {
+      conditions: ["development", "import", "default"],
+    },
   },
 });
