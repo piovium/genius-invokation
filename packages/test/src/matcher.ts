@@ -17,6 +17,31 @@ import { Ref } from "#test";
 import { AnyState, CharacterVariables, EntityVariables } from "@gi-tcg/core";
 import { expect } from "vitest";
 
+expect.extend({
+  toBeArrayOfSize(received: unknown, expected: number) {
+    const isArray = Array.isArray(received);
+    const pass = isArray && received.length === expected;
+    return {
+      pass,
+      message: () =>
+        pass
+          ? `expected array not to have size ${expected}`
+          : isArray
+            ? `expected array of size ${expected}, but got ${received.length}`
+            : `expected an array, but got ${typeof received}`,
+    };
+  },
+});
+
+declare module "vitest" {
+  interface Assertion<T> {
+    toBeArrayOfSize(size: number): void;
+  }
+  interface AsymmetricMatchersContaining {
+    toBeArrayOfSize(size: number): void;
+  }
+}
+
 export class StatesMatcher {
   constructor(public readonly states: readonly AnyState[]) {}
 

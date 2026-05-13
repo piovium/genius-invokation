@@ -5,6 +5,6 @@ export default defineConfig({
     watch: false,
     env: {
       NODE_OPTIONS: "--expose-gc",
-    }
+    },
   },
 });
