@@ -16,6 +16,7 @@
 import { glob, readFile } from "node:fs/promises";
 import path from "node:path";
 import { build, type Plugin } from "rolldown";
+import { replacePlugin } from "rolldown/plugins";
 
 const frontendDir = path.join(import.meta.dirname, "../../web-client/dist");
 
@@ -32,7 +33,10 @@ const inlineFrontendPlugin: Plugin = {
   async load(id) {
     if (id !== virtualFrontendId) return null;
     const contents: Record<string, string> = {};
-    for await (const dirent of glob(`${frontendDir}/**/*`, { cwd: frontendDir, withFileTypes: true })) {
+    for await (const dirent of glob(`${frontendDir}/**/*`, {
+      cwd: frontendDir,
+      withFileTypes: true,
+    })) {
       if (dirent.isFile()) {
         const filepath = path.resolve(dirent.parentPath, dirent.name);
         const relativePath = path.relative(frontendDir, filepath);
@@ -63,6 +67,9 @@ await build({
   ],
   plugins: [
     inlineFrontendPlugin,
+    replacePlugin({
+      "process.env.NODE_ENV": '"production"',
+    }),
   ],
   platform: "node",
   resolve: {

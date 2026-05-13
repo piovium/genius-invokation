@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nod ./src/dev.ts",
     "prisma:generate": "prisma generate",
-    "build": "pnpm prisma:generate && NODE_ENV=production nod scripts/build.ts",
+    "build": "pnpm prisma:generate && nod scripts/build.ts",
     "start": "nod src/main.ts",
     "start:prod": "nod dist/main.js",
     "check": "tsc --noEmit",
