@@ -1,4 +1,4 @@
-import { resolve } from "node:path";
+import path, { resolve } from "node:path";
 import { rollup } from "rollup";
 import babel from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
@@ -6,7 +6,7 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 import terser from "@rollup/plugin-terser";
 import { CORE_VERSION } from "@gi-tcg/core";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 
 async function writeGeneratedJsCodeCpp() {
   const build = await rollup({
@@ -75,6 +75,7 @@ async function writeGeneratedJsCodeCpp() {
     );
   }
 
+  await mkdir(path.dirname(OUTPUT_FILEPATH), { recursive: true });
   await writeFile(
     OUTPUT_FILEPATH,
     `namespace gitcg {
