@@ -20,13 +20,13 @@ jobs:
       SERVER_HOST: gi.xqm32.org
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
           node-version: 26
           cache: pnpm
       - name: Run Build
         run: |
-          corepack enable
           pnpm install --frozen-lockfile
           pnpm -r -F "@gi-tcg/cbinding..." -F "@gi-tcg/standalone..." build
       - name: Run Tests
@@ -59,6 +59,7 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
           node-version: 26
@@ -181,7 +182,6 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 26
-          cache: pnpm
       - name: Get pybinding docs artifact
         uses: actions/download-artifact@v4
         with:
@@ -189,7 +189,7 @@ jobs:
           path: ${{ github.workspace }}
       - name: Vercel deploy
         run: >
-          pnpm vercel deploy
+          npx vercel deploy
           ${{ github.ref == 'refs/heads/main' && '--prod' || '' }}
           --token=${{ secrets.VERCEL_TOKEN }}
 
