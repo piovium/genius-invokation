@@ -18,7 +18,7 @@ import { GildedDreams, TenacityOfTheMillelith } from "@gi-tcg/data/internal/card
 import { LeaveItToMe, Lyresong, TheBoarPrincess, TheBoarPrincessInEffect } from "@gi-tcg/data/internal/cards/event/other";
 import { Ganyu } from "@gi-tcg/data/internal/characters/cryo/ganyu";
 import { KamisatoAyaka } from "@gi-tcg/data/internal/characters/cryo/kamisato_ayaka";
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 
 test("lyresong: first play deduct 2 omni", async () => {
   const target = ref();

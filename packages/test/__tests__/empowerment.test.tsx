@@ -19,7 +19,7 @@ import {
   GrandExpectation,
 } from "@gi-tcg/data/internal/characters/pyro/bennett";
 import { Empowerment } from "@gi-tcg/data/internal/commons";
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 
 test("empowerment should not change energy cost", async () => {
   const bennett = ref();

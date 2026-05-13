@@ -31,7 +31,7 @@ import {
   ElectroHypostasis,
   RockpaperscissorsCombo,
 } from "@gi-tcg/data/internal/characters/electro/electro_hypostasis";
-import { test } from "bun:test";
+import { test } from "vitest";
 import { Aura } from "@gi-tcg/typings";
 
 test("bennett talent don't heal on prepared skill", async () => {

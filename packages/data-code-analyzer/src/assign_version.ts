@@ -1,6 +1,8 @@
 import { CURRENT_VERSION, Version } from "@gi-tcg/core";
 import analyzeResult from "./result.json" with { type: "json" };
 import { MOYU_S7_VERSIONS } from "./moyu_s7_version";
+import { writeFile } from "node:fs/promises";
+
 const entityDependency = new Map<number, number[]>(
   analyzeResult.map(({ id, dependencies }) => [id, dependencies] as const),
 );
@@ -58,7 +60,7 @@ const assignResult = assignVersion(CURRENT_VERSION, MOYU_S7_VERSIONS);
 // @ts-expect-error
 assignResult["$base"] = CURRENT_VERSION;
 
-await Bun.write(
+await writeFile(
   `${import.meta.dirname}/../dist/moyu_s7_versions.json`,
   JSON.stringify(assignResult, null, 2),
 );

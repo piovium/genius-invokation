@@ -15,7 +15,7 @@
 
 
 import { ref, setup, Character, State, Status, Card, Equipment } from "#test";
-import { test } from "bun:test";
+import { test } from "vitest";
 import { Aura } from "@gi-tcg/typings";
 import { Nahida, SeedOfSkandha } from "@gi-tcg/data/internal/characters/dendro/nahida";
 import { Kaboom, Klee } from "@gi-tcg/data/internal/characters/pyro/klee";

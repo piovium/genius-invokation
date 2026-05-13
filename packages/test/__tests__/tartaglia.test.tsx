@@ -16,7 +16,7 @@
 import { ref, setup, Character, State, Support, DeclaredEnd, Status, $ } from "#test";
 import { Keqing, YunlaiSwordsmanship } from "@gi-tcg/data/internal/characters/electro/keqing";
 import { Riptide, Tartaglia } from "@gi-tcg/data/internal/characters/hydro/tartaglia";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("riptide should propagate", async () => {
   const oppNext = ref();

@@ -17,7 +17,7 @@ import { $, Character, CombatStatus, ref, setup, State, Status } from "#test";
 import { Declension, HeartstopperStrike, ShikanoinHeizou } from "@gi-tcg/data/internal/characters/anemo/shikanoin_heizou";
 import { AurousBlaze, Yoimiya } from "@gi-tcg/data/internal/characters/pyro/yoimiya";
 import { Aura } from "@gi-tcg/typings";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("heizou: continue next turn", async () => {
   const declension = ref();

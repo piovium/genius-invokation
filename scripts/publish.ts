@@ -18,7 +18,7 @@
  * This file tries to publish all publish-able packages.
  */
 
-import { $ } from "bun";
+import { $ } from "execa";
 import { existsSync } from "node:fs";
 import { PackageJson } from "type-fest";
 import { IS_BETA } from "@gi-tcg/config";
@@ -100,7 +100,7 @@ for (const pkg of packages) {
     `${directory}/package.json`,
   ).json();
   if ("build" in (packageJson.scripts ?? {})) {
-    await $`pnpm build`.cwd(directory).quiet();
+    await $({ cwd: directory })`pnpm build`;
   }
   if (!packageJson.dependencies) {
     packageJson.dependencies = {};
@@ -135,21 +135,21 @@ for (const { packageJson, directory } of packageInfos) {
   if (!version?.startsWith(VERSION)) {
     throw new Error(`Version not starts with ${VERSION}: ${name}`);
   }
-  await $`rm -rf ${publishDir}`.quiet();
-  await $`mkdir -p ${publishDir}`.quiet();
-  await $`cp -r ${directory}/dist ${publishDir}/`.quiet();
-  // await $`cp -r ${directory}/src ${publishDir}/`.quiet();
-  // await $`cp ${directory}/tsconfig.json ${publishDir}/`.quiet();
+  await $`rm -rf ${publishDir}`;
+  await $`mkdir -p ${publishDir}`;
+  await $`cp -r ${directory}/dist ${publishDir}/`;
+  // await $`cp -r ${directory}/src ${publishDir}/`;
+  // await $`cp ${directory}/tsconfig.json ${publishDir}/`;
   await $`echo ${JSON.stringify(
     packageJson,
     void 0,
     2,
-  )} > ${publishDir}/package.json`.quiet();
-  await $`cp ${directory}/README.md ${publishDir}/`.quiet();
-  await $`cp ${licensePath} ${publishDir}/`.quiet();
+  )} > ${publishDir}/package.json`;
+  await $`cp ${directory}/README.md ${publishDir}/`;
+  await $`cp ${licensePath} ${publishDir}/`;
   // Bro attw is so strict
-  await $`pnpm attw --pack ${publishDir}`.nothrow();
+  await $({ reject: false })`pnpm attw --pack ${publishDir}`;
   if (doPublish) {
-    await $`pnpm publish --provenance --access public`.cwd(publishDir);
+    await $({ cwd: publishDir })`pnpm publish --provenance --access public`;
   }
 }

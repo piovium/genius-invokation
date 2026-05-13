@@ -1,5 +1,5 @@
 import { unstable_startServer } from "@prisma/dev";
-import { $ } from "bun";
+import { $ } from "execa";
 import getPort from "get-port";
 import path from "path";
 
@@ -20,27 +20,29 @@ async function startLocalPrisma(name: string) {
 async function localDev() {
   const server = await startLocalPrisma("gi-tcg-server-dev");
   try {
-    await $`pnpm prisma migrate dev`.env({ DATABASE_URL: server.ppg.url });
+    await $({ env: { DATABASE_URL: server.ppg.url } })`pnpm prisma migrate dev`;
     await $`pnpm prisma generate`;
-    await $`pnpm nod --watch ${path.resolve(import.meta.dirname, "main.ts")}`
-      .env({
+    await $({
+      env: {
         DATABASE_URL: server.database.connectionString,
         DATABASE_CONNECTION_LIMIT: "1",
-      })
-      .nothrow();
+      },
+      reject: false,
+    })`pnpm nod --watch ${path.resolve(import.meta.dirname, "main.ts")}`;
   } finally {
     await server.close!();
   }
 }
 
 async function remoteDev() {
-  await $`pnpm prisma migrate dev`.env({
-    DATABASE_URL: process.env.DATABASE_URL!,
-  });
+  await $({
+    env: { DATABASE_URL: process.env.DATABASE_URL! },
+  })`pnpm prisma migrate dev`;
   await $`pnpm prisma generate`;
-  await $`pnpm nod --watch ${path.resolve(import.meta.dirname, "main.ts")}`
-    .env({ DATABASE_URL: process.env.DATABASE_URL! })
-    .nothrow();
+  await $({
+    env: { DATABASE_URL: process.env.DATABASE_URL! },
+    reject: false,
+  })`pnpm nod --watch ${path.resolve(import.meta.dirname, "main.ts")}`;
 }
 
 if (process.env.DATABASE_URL) {

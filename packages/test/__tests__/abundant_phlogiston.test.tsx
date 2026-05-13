@@ -14,14 +14,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Card, $ } from "#test";
-import { test } from "bun:test";
+import { test } from "vitest";
 import {
   CoolingTreatment,
   Mualani,
   SurfsharkWavebreaker,
 } from "@gi-tcg/data/internal/characters/hydro/mualani";
 import { AbundantPhlogiston } from "@gi-tcg/data/internal/cards/event/other";
-import { expect } from "bun:test";
+import { expect } from "vitest";
 
 test("abundant phlogiston: mualani", async () => {
   const firstOpp = ref();

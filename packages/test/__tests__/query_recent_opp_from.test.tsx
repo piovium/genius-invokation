@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, State, Character, $ } from "#test";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("query: recent opp from", async () => {
   const c = setup(

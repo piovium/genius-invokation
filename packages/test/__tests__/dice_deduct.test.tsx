@@ -32,8 +32,8 @@ import {
 import { TulaytullahsRemembrance } from "@gi-tcg/data/internal/cards/equipment/weapon/catalyst";
 import { VermillionHereafter } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { MintyMeatRolls } from "@gi-tcg/data/internal/cards/event/food";
-import { test } from "bun:test";
-import { expect } from "bun:test";
+import { test } from "vitest";
+import { expect } from "vitest";
 
 test("klee: dice deduction", async () => {
   const klee = ref();

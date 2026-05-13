@@ -16,7 +16,7 @@
 import path from "node:path";
 import { mkdir, copyFile, rm, writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
-import { $ } from "zx";
+import { $ } from "execa";
 
 const BASE_DIR = path.resolve(`${import.meta.dirname}/..`);
 
@@ -47,13 +47,11 @@ async function prepare() {
 
 async function createPackage() {
   await prepare();
-  $.cwd = PUBLISH_DIR;
-  await $`pnpx '@vscode/vsce' package --no-dependencies`;
+  await $({ cwd: PUBLISH_DIR })`pnpx '@vscode/vsce' package --no-dependencies`;
 }
 async function publish() {
   await prepare();
-  $.cwd = PUBLISH_DIR;
-  await $`pnpx '@vscode/vsce' publish --no-dependencies`;
+  await $({ cwd: PUBLISH_DIR })`pnpx '@vscode/vsce' publish --no-dependencies`;
 }
 
 const { values } = parseArgs({

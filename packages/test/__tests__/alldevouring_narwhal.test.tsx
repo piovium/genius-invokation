@@ -37,7 +37,7 @@ import {
   AlldevouringNarwhal,
   DarkShadow,
 } from "@gi-tcg/data/internal/characters/hydro/alldevouring_narwhal";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("dark shadow: do not barrier on nested damage", async () => {
   const darkShadow = ref();

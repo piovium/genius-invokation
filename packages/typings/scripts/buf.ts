@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { $ } from "zx";
+import { $ } from "execa";
 
-$.cwd = `${import.meta.dirname}/../../..`;
-await $`buf generate`;
+await $({ cwd: `${import.meta.dirname}/../../..` })`buf generate`;

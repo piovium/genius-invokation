@@ -18,7 +18,7 @@ import { TeyvatFriedEgg } from "@gi-tcg/data/internal/cards/event/food";
 import { FrostflakeArrow, Ganyu, UndividedHeart } from "@gi-tcg/data/internal/characters/cryo/ganyu";
 import { CeremonialBladework, Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";
 import { AgileSwitch, EfficientSwitch } from "@gi-tcg/data/internal/commons";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("ganyu: FrostflakeArrow usage clear after defeated", async () => {
   const ganyu = ref();

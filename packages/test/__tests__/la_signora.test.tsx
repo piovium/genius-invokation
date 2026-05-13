@@ -24,8 +24,8 @@ import {
   RingOfBurstingGrenades,
 } from "@gi-tcg/data/internal/characters/pyro/chevreuse";
 import { Aura } from "@gi-tcg/typings";
-import { expect } from "bun:test";
-import { test } from "bun:test";
+import { expect } from "vitest";
+import { test } from "vitest";
 
 test("la signora: death in cryo state", async () => {
   const laSignora = ref();

@@ -15,7 +15,7 @@
 
 import { ref, setup, Character, State, Equipment, Card, $ } from "#test";
 import { LumenstoneAdjuvant } from "@gi-tcg/data/internal/cards/support/item";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("lumenstone adjuvant: no trigger on self entering play card", async () => {
   const c = setup(

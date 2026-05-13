@@ -19,7 +19,7 @@ import { BurstScan, Kaveh } from "@gi-tcg/data/internal/characters/dendro/kaveh"
 import { FlamestriderSoaringAscent } from "@gi-tcg/data/internal/characters/pyro/mavuika";
 import { DendroCore } from "@gi-tcg/data/internal/commons";
 import { Aura } from "@gi-tcg/typings";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("kaveh deal damage after dispose card", async () => {
   const target = ref();

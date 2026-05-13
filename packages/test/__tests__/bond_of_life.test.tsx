@@ -16,7 +16,7 @@
 import { ref, setup, Character, State, Status, Card, $ } from "#test";
 import { BondOfLife } from "@gi-tcg/data/internal/commons";
 import { MondstadtHashBrown } from "@gi-tcg/data/internal/cards/event/food";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("bond of life decrease the heal", async () => {
   const active = ref();

@@ -13,12 +13,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { nextRandom, randomSeed } from "../src/random";
 
 test("random seed", () => {
   const x = randomSeed();
-  expect(x).toBeInteger();
+  expect(Number.isInteger(x)).toBe(true);
   expect(x).toBeGreaterThanOrEqual(0);
   expect(x).toBeLessThan(2147483647);
 })

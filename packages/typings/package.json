@@ -17,6 +17,6 @@
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.2.2",
-    "zx": "catalog:"
+    "execa": "catalog:"
   }
 }

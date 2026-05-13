@@ -19,7 +19,7 @@ import { SuperconductBlessingDeepFreeze } from "@gi-tcg/data/internal/cards/supp
 import { FrostmoonEnclave } from "@gi-tcg/data/internal/cards/support/place";
 import { CeremonialBladework, Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";
 import { CostIncrease, NoTuningAllowed } from "@gi-tcg/data/internal/commons";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("cost decrease applied on increase will neutralize each other", async () => {
   const theHandCard = ref();

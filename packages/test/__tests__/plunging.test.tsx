@@ -21,7 +21,7 @@ import { Keqing, YunlaiSwordsmanship } from "@gi-tcg/data/internal/characters/el
 import { AbiogenesisSolarIsotoma, Albedo, DescentOfDivinity, FavoniusBladeworkWeiss, SolarIsotoma } from "@gi-tcg/data/internal/characters/geo/albedo";
 import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona";
 import { BiteyShark, Mualani } from "@gi-tcg/data/internal/characters/hydro/mualani";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("plunging : negative test", async () => {
   const target = ref();

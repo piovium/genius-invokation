@@ -17,7 +17,7 @@ import { ref, setup, Character, State, Status, Equipment, Card, Summon, Declared
 import { Collei, CuileinAnbar } from "@gi-tcg/data/internal/characters/dendro/collei";
 import { Emilie, LumidouceCaseLevel1 } from "@gi-tcg/data/internal/characters/dendro/emilie";
 import { Aura } from "@gi-tcg/typings";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("emillie: lumidouce upgrade at end phase", async () => {
   const target = ref();

@@ -16,7 +16,7 @@
 import { ref, setup, Character, State, Equipment, Card, $ } from "#test";
 import { Chevreuse, OverchargedBall, ShortrangeRapidInterdictionFire } from "@gi-tcg/data/internal/characters/pyro/chevreuse";
 
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("chevreuse overcharged ball", async () => {
   const target = ref();

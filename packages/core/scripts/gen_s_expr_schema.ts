@@ -19,6 +19,7 @@
  * 若未指定 output_path，则输出到 docs/development/query/s_expr_schema.md。
  */
 
+import { writeFile } from "node:fs/promises";
 import {
   NonTerminalsConfig,
   type Rule,
@@ -162,5 +163,5 @@ const outputPath = path.resolve(
   "../../../docs/development/query/s_expr_schema.md",
 );
 const content = generate();
-await Bun.write(outputPath, content);
-console.log(`Generated: ${outputPath}`);
+await writeFile(outputPath, content);
+console?.log(`Generated: ${outputPath}`);
