@@ -10,13 +10,16 @@
   },
   "packageManager": "pnpm@11.0.8",
   "scripts": {
-    "build": "pnpm -r build",
+    ".filter": "nod scripts/filter.ts",
+    ".filter-prod": "nod scripts/filter.ts -P",
+    "build": "pnpm .filter build",
     "test": "pnpm -r test",
-    "build:prod": "NO_TYPING=1 pnpm build"
+    "publish": "pnpm .filter-prod publish core...,data...,assets-manager...,web-ui-core...,web-ui...",
+    "build:no-typing": "NO_TYPING=1 pnpm build"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.16.4",
     "@bufbuild/buf": "^1.47.2",
+    "@commander-js/extra-typings": "^14.0.0",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
     "@gi-tcg/config": "workspace:*",
