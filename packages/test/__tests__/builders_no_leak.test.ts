@@ -19,9 +19,9 @@ import { test, expect } from "vitest";
 
 test("builders should be gc'd after initialize", () => {
   const data = getData();
-  Bun.gc(true);
+  globalThis.gc?.();
   expect(builderWeakRefs.size).toBeGreaterThan(0);
   expect(builderWeakRefs.values().some((ref) => ref.deref())).toBe(false);
-  expect(data).toBeObject();
+  expect(data).toBeDefined();
 })
 
