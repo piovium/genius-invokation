@@ -98,7 +98,7 @@ export async function verifyDeck({
         `character id ${chId} not found`,
       );
     }
-    if (!character.obtainable) {
+    if (typeof character.shareId !== "number") {
       throw new DeckVerificationError(
         DEC.NotFoundError,
         `character id ${chId} not obtainable`,
@@ -131,7 +131,7 @@ export async function verifyDeck({
       }
       cardCounts.set(cardId, count);
     } else {
-      if (!card.obtainable) {
+      if (typeof card.shareId !== "number") {
         throw new DeckVerificationError(
           DEC.RelationError,
           `card id ${cardId} not obtainable`,

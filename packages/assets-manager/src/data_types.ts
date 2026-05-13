@@ -28,6 +28,7 @@ export interface ChooseTarget {
 
 export interface CharacterRawData {
   id: number;
+  /** @deprecated use `shareId` instead */
   obtainable: boolean;
   shareId?: number;
   sinceVersion?: string;
@@ -82,6 +83,7 @@ export interface EntityRawData {
 export interface ActionCardRawData {
   id: number;
   type: string;
+  /** @deprecated use `shareId` instead */
   obtainable: boolean;
   shareId?: number;
   sinceVersion?: string;
