@@ -32,9 +32,12 @@ async function prepare() {
     await mkdir(path.dirname(target), { recursive: true });
     await copyFile(source, target);
   }
-  const packageJson = await import(path.resolve(BASE_DIR, "package.json"), {
-    with: { type: "json" },
-  });
+  const { default: packageJson } = await import(
+    path.resolve(BASE_DIR, "package.json"),
+    {
+      with: { type: "json" },
+    }
+  );
   delete packageJson.scripts;
   delete packageJson.dependencies;
   delete packageJson.devDependencies;
