@@ -120,6 +120,6 @@ pnpm dev # 查看效果
 
 ### 例：修改前后端通信数据格式
 
-修改 `@gi-tcg/typings` 中定义的数据结构后，请使用 `bun run build` 生成对应的 JSON Schema 文件。（否则核心可能会校验失败，切记！）
+修改 `@gi-tcg/typings` 中定义的数据结构后，请使用 `pnpm build` 生成对应的 JSON Schema 文件。（否则核心可能会校验失败，切记！）
 
 核心库中的 `src/io.ts` 中存在翻译 `GameState` 到对应数据格式的代码，你可能也要一并修改。
