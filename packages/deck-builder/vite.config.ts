@@ -14,16 +14,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { resolve } from "node:path";
-import { defaultClientConditions, defineConfig } from "vite";
+import { defineConfig } from "vite";
 import unoCss from "unocss/vite";
 import solid from "vite-plugin-solid";
 import nodeExternals from "rollup-plugin-node-externals";
 import dts from "unplugin-dts/vite";
 
 export default defineConfig({
-  resolve: {
-    conditions: ["bun", ...defaultClientConditions],
-  },
   plugins: [
     {
       ...nodeExternals(),

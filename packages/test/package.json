@@ -7,7 +7,7 @@
     "#jsx/jsx-dev-runtime": "./src/jsx/jsx-runtime.ts"
   },
   "scripts": {
-    "test": "bun test"
+    "test": "vitest"
   },
   "dependencies": {
     "@gi-tcg/core": "workspace:*",

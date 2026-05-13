@@ -6,16 +6,16 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "bun": "./src/index.tsx",
+      "development": "./src/index.tsx",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./style.css": "./dist/style.css"
   },
   "scripts": {
-    "dev": "bunx --bun vite",
+    "dev": "vite",
     "check": "tsc --noEmit",
-    "build": "bunx --bun vite build"
+    "build": "vite build"
   },
   "peerDependencies": {
     "solid-js": "catalog:"

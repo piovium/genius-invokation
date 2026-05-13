@@ -1,4 +1,4 @@
-// Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { $ } from "zx";
+import Redis from "ioredis";
 
-$.cwd = `${import.meta.dirname}/../../..`;
-await $`buf generate`;
+export const redis = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : null;

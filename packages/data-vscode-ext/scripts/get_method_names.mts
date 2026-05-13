@@ -24,8 +24,9 @@ import {
   TriggeredSkillBuilder,
   EVENT_MAP,
 } from "@gi-tcg/core/builder/internal";
+import { writeFile } from "node:fs/promises";
 
-const OUTPUT_FILE = `${__dirname}/../src/names.json`;
+const OUTPUT_FILE = `${import.meta.dirname}/../src/names.json`;
 
 const propFilter = (name: string) =>
   name !== "constructor" && !name.startsWith("_");
@@ -60,7 +61,7 @@ const event = new Set(
   .values()
   .toArray();
 
-await Bun.write(
+await writeFile(
   OUTPUT_FILE,
   JSON.stringify({ builder, context, event }, null, 2),
 );

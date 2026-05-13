@@ -82,7 +82,7 @@ function removeBunFromExport(
   }
   const cond: typeof exports = {};
   for (const key in exports) {
-    if (key === "bun" || key.includes("internal")) {
+    if (key.includes("internal")) {
       continue;
     }
     cond[key] = removeBunFromExport(exports[key])!;
@@ -100,7 +100,7 @@ for (const pkg of packages) {
     `${directory}/package.json`,
   ).json();
   if ("build" in (packageJson.scripts ?? {})) {
-    await $`bun run build`.cwd(directory).quiet();
+    await $`pnpm build`.cwd(directory).quiet();
   }
   if (!packageJson.dependencies) {
     packageJson.dependencies = {};
@@ -148,8 +148,8 @@ for (const { packageJson, directory } of packageInfos) {
   await $`cp ${directory}/README.md ${publishDir}/`.quiet();
   await $`cp ${licensePath} ${publishDir}/`.quiet();
   // Bro attw is so strict
-  await $`bunx --bun attw --pack ${publishDir}`.nothrow();
+  await $`pnpm attw --pack ${publishDir}`.nothrow();
   if (doPublish) {
-    await $`bunx npm@latest publish --provenance --access public`.cwd(publishDir);
+    await $`pnpm publish --provenance --access public`.cwd(publishDir);
   }
 }

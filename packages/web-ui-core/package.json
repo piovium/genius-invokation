@@ -6,8 +6,8 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "bun": "./src/index.ts",
       "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
       "import": "./dist/index.js"
     },
     "./style.css": "./dist/style.css"
@@ -16,9 +16,9 @@
     "**/*.css"
   ],
   "scripts": {
-    "dev": "bunx --bun vite",
+    "dev": "vite",
     "check": "tsc --noEmit",
-    "build": "bunx --bun vite build"
+    "build": "vite build"
   },
   "dependencies": {
     "@gi-tcg/assets-manager": "workspace:*",

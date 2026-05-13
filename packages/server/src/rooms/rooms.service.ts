@@ -70,9 +70,21 @@ import type {
   UserCreateRoomDto,
 } from "./rooms.controller";
 import { DecksService } from "../decks/decks.service";
-import { UsersService, type UserInfo } from "../users/users.service";
+import { UsersService } from "../users/users.service";
 import { GamesService } from "../games/games.service";
-import { inspect, redis, s3, semver } from "bun";
+import { inspect  } from "node:util";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import semver from "semver";
+import { redis } from "../redis";
+
+const s3 = process.env.S3_ENDPOINT ? new S3Client({
+  region: process.env.S3_REGION,
+  endpoint: process.env.S3_ENDPOINT,
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+  }
+}) : null;
 
 interface RoomConfig extends Partial<GameConfig> {
   initTotalActionTime: number; // defaults 45
@@ -406,8 +418,8 @@ interface RoomInfo {
 }
 
 function sendDebugLog(name: string, message: any) {
-  if (import.meta.env.DEBUG_LOG_RECEIVE_URL) {
-    fetch(import.meta.env.DEBUG_LOG_RECEIVE_URL, {
+  if (process.env.DEBUG_LOG_RECEIVE_URL) {
+    fetch(process.env.DEBUG_LOG_RECEIVE_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -417,7 +429,7 @@ function sendDebugLog(name: string, message: any) {
     })
       .then(() => {
         console.log(
-          `Debug log ${name} sent to ${import.meta.env.DEBUG_LOG_RECEIVE_URL}`,
+          `Debug log ${name} sent to ${process.env.DEBUG_LOG_RECEIVE_URL}`,
         );
       })
       .catch(() => ({}));
@@ -728,10 +740,7 @@ export class RoomsService {
   }
 
   private async createRoom(playerInfo: PlayerInfo, params: CreateRoomDto) {
-    let deploying = null;
-    if (process.env.REDIS_URL) {
-      deploying = await redis.get("meta:deploying");
-    }
+    let deploying = await redis?.get("meta:deploying") ?? null;
     if (this.shutdownResolvers || deploying !== null) {
       throw new ConflictException(
         "Creating room is disabled now; we are planning a maintenance",
@@ -765,7 +774,7 @@ export class RoomsService {
 
     try {
       const version = await verifyDeck(playerInfo.deck);
-      if (semver.order(version, roomConfig.gameVersion) > 0) {
+      if (semver.compare(version, roomConfig.gameVersion) > 0) {
         throw new BadRequestException(
           `Deck version required ${version}, it's higher game version ${roomConfig.gameVersion}`,
         );
@@ -783,16 +792,14 @@ export class RoomsService {
       throw new InternalServerErrorException("no room available");
     }
     const room = new Room(roomId, roomConfig);
-    if (process.env.REDIS_URL) {
-      await redis.hset("meta:active_rooms", roomId, JSON.stringify(roomConfig));
-      await redis.hexpire(
-        "meta:active_rooms",
-        1 * 60 * 60,
-        "FIELDS",
-        1,
-        roomId,
-      );
-    }
+    await redis?.hset("meta:active_rooms", roomId, JSON.stringify(roomConfig));
+    await redis?.hexpire(
+      "meta:active_rooms",
+      1 * 60 * 60,
+      "FIELDS",
+      1,
+      String(roomId),
+    );
     this.rooms.set(roomId, room);
     this.roomIdPool.shift();
     this.metrics.incrementCreatedRooms();
@@ -802,10 +809,8 @@ export class RoomsService {
       if (game) {
         this.metrics.incrementFinishedRooms();
       }
-      let deploying = null;
-      if (process.env.REDIS_URL) {
-        deploying = await redis.get("meta:deploying");
-      }
+      let deploying = await redis?.get("meta:deploying") ?? null;      
+
       const keepRoomDuration =
         (this.shutdownResolvers || deploying ? 1 : 5) * 60 * 1000;
       this.logger.log(
@@ -816,9 +821,8 @@ export class RoomsService {
         await new Promise((r) => setTimeout(r, keepRoomDuration));
       }
       this.logger.log(`Room ${room.id} removed`);
-      if (process.env.REDIS_URL) {
-        await redis.hdel("meta:active_rooms", room.id);
-      }
+      await redis?.hdel("meta:active_rooms", String(room.id));
+      
       this.rooms.delete(room.id);
       this.roomIdPool.push(room.id);
       if (this.rooms.size === 0) {
@@ -908,7 +912,7 @@ export class RoomsService {
 
     try {
       const version = await verifyDeck(playerInfo.deck);
-      if (semver.order(version, room.config.gameVersion) > 0) {
+      if (semver.compare(version, room.config.gameVersion) > 0) {
         throw new BadRequestException(
           `Deck version required ${version}, it's higher game version ${room.config.gameVersion}`,
         );
@@ -929,14 +933,19 @@ export class RoomsService {
       }
       const players = room.getPlayers();
       const gameData = JSON.stringify(room.getStateLog());
-      if (process.env.S3_BUCKET) {
+      if (s3) {
         const now = new Date().toISOString();
         const date = now.slice(0, 10);
         const time = now.slice(11, 19).replaceAll(":", "");
         const s3Prefix = process.env.S3_PREFIX;
         const keyPrefix = s3Prefix ? `${s3Prefix}/` : "";
-        s3.file(`${keyPrefix}logs/${date}/${time}-${room.id}.json`)
-          .write(gameData, { type: "application/json" })
+        const command = new PutObjectCommand({
+          Bucket: process.env.S3_BUCKET!,
+          Key: `${keyPrefix}logs/${date}/${time}-${room.id}.json`,
+          Body: gameData,
+          ContentType: "application/json",
+        });
+        s3.send(command)
           .catch((error) => {
             this.logger.warn(
               `Failed to upload room ${room.id} game log: ${error}`,

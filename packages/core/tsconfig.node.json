@@ -3,14 +3,14 @@
   "compilerOptions": {
     "composite": true,
 
-    "target": "ES2022",
+    "target": "ESNext",
     "module": "Preserve",
     "lib": ["ESNext"],
     
-    "types": ["bun"]
+    "types": ["node"]
   },
   "include": [
-    "scripts/**/*.ts", 
-    "tsdown.config.mts",
+    "scripts",
+    "tsdown.config.ts"
   ]
 }

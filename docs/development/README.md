@@ -81,11 +81,11 @@ interface PlayerIO {
 
 ## 参与开发
 
-配置开发环境。安装 [Bun](https://bun.sh)，随后在仓库根目录下执行下述命令既可：
+配置开发环境。安装 Node.js v26+，随后在仓库根目录下执行下述命令既可：
 
 ```sh
-bun install
-bun run build
+corepack enable
+pnpm build
 ```
 
 随后即可调试修改数据定义包、核心包或者其它代码。
@@ -94,7 +94,7 @@ bun run build
 
 ```
 cd packages/standalone
-bun dev
+pnpm dev
 ```
 
 ### 例：修改卡牌定义
@@ -106,7 +106,7 @@ bun dev
 ```sh
 cd packages/web-ui-core
 # 编辑 src/dev.tsx
-bun dev # 查看效果
+pnpm dev # 查看效果
 ```
 
 ### 例：参与游戏核心设计细节

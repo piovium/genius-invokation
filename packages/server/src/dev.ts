@@ -20,9 +20,9 @@ async function startLocalPrisma(name: string) {
 async function localDev() {
   const server = await startLocalPrisma("gi-tcg-server-dev");
   try {
-    await $`bunx prisma migrate dev`.env({ DATABASE_URL: server.ppg.url });
-    await $`bunx prisma generate`;
-    await $`bun --watch ${path.resolve(import.meta.dirname, "main.ts")}`
+    await $`pnpm prisma migrate dev`.env({ DATABASE_URL: server.ppg.url });
+    await $`pnpm prisma generate`;
+    await $`pnpm nod --watch ${path.resolve(import.meta.dirname, "main.ts")}`
       .env({
         DATABASE_URL: server.database.connectionString,
         DATABASE_CONNECTION_LIMIT: "1",
@@ -34,11 +34,11 @@ async function localDev() {
 }
 
 async function remoteDev() {
-  await $`bunx prisma migrate dev`.env({
+  await $`pnpm prisma migrate dev`.env({
     DATABASE_URL: process.env.DATABASE_URL!,
   });
-  await $`bunx prisma generate`;
-  await $`bun --watch ${path.resolve(import.meta.dirname, "main.ts")}`
+  await $`pnpm prisma generate`;
+  await $`pnpm nod --watch ${path.resolve(import.meta.dirname, "main.ts")}`
     .env({ DATABASE_URL: process.env.DATABASE_URL! })
     .nothrow();
 }

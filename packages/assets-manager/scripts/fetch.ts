@@ -25,7 +25,7 @@ import {
   type KeywordRawData,
   // @ts-ignore Cross-project import, but it should be fine
 } from "#src/index";
-import { rm } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 
 const DESTINATION_DIR = path.resolve(import.meta.dirname, "../src/data");
 
@@ -40,8 +40,9 @@ const mapReplacer = (key: string, value: unknown) => {
 
 const write = async (data: unknown, ...paths: string[]) => {
   const finalPath = path.resolve(DESTINATION_DIR, ...paths);
-  await Bun.write(finalPath, JSON.stringify(data, mapReplacer, 2) + "\n");
-  console.log(`Wrote ${finalPath}`);
+  await mkdir(path.dirname(finalPath), { recursive: true });
+  await writeFile(finalPath, JSON.stringify(data, mapReplacer, 2) + "\n");
+  console?.log(`Wrote ${finalPath}`);
 };
 
 for (const language of ["EN", "CHS"] as const) {

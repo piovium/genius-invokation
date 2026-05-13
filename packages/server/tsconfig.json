@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ESNext",
     "module": "ES2022",
     "moduleResolution": "Bundler",
-    "lib": ["ES2024"],
-    "types": ["bun"],
+    "lib": ["ESNext"],
+    "types": ["node"],
     "allowJs": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,

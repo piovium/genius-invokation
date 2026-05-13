@@ -29,7 +29,7 @@ import {
   ValidationError,
 } from "class-validator";
 import { CURRENT_VERSION, VERSIONS, type Version } from "@gi-tcg/core";
-import { semver } from "bun";
+import { compare as semverCompare } from "semver";
 import {
   plainToClass,
   Transform,
@@ -167,7 +167,7 @@ export async function verifyDeck({
 function maxVersion(versions: Iterable<string | undefined>): Version {
   const ver = [...versions]
     .filter((v): v is string => !!v)
-    .toSorted(semver.order)
+    .toSorted(semverCompare)
     .at(-1);
   if (!VERSIONS.includes(ver as Version)) {
     return CURRENT_VERSION;

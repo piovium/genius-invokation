@@ -18,5 +18,5 @@
     "noUncheckedIndexedAccess": true
   },
   "include": ["src/**/*.ts"],
-  "references": [{ "path": "./tsconfig.bun.json" }]
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

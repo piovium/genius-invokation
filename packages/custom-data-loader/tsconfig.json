@@ -17,7 +17,7 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
 
-    "types": ["bun"]
+    "types": ["node"]
   },
   "references": [{ "path": "./tsconfig.web.json" }]
 }

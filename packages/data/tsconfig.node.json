@@ -7,7 +7,7 @@
     "module": "Preserve",
     
     "lib": ["ESNext"],
-    "types": ["bun"],
+    "types": ["node"],
 
     "strict": true,
     "skipLibCheck": true,

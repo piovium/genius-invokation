@@ -6,7 +6,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "bun": "./src/index.ts",
+      "development": "./src/index.ts",
       "import": "./dist/index.js"
     },
     "./style.css": "./dist/style.css"
@@ -15,11 +15,11 @@
     "**/*.css"
   ],
   "scripts": {
-    "dev": "bunx --bun vite",
-    "preview": "bunx --bun vite preview",
+    "dev": "vite",
+    "preview": "vite preview",
     "check": "tsc --noEmit",
-    "build:vite": "bunx --bun vite build",
-    "build": "bun build:vite"
+    "build:vite": "vite build",
+    "build": "pnpm build:vite"
   },
   "peerDependencies": {
     "solid-js": "catalog:"

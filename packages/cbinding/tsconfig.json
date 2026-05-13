@@ -7,7 +7,8 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
 
-    "noEmit": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
     
     "useDefineForClassFields": true,
     "esModuleInterop": true,
@@ -16,5 +17,6 @@
     "strict": true,
     "noUncheckedIndexedAccess": true
   },
-  "include": ["js/**/*.ts", "js/**/*.js"]
+  "include": ["js/**/*.ts", "js/**/*.js"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

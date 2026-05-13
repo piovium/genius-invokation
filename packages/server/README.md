@@ -4,12 +4,12 @@
 
 ## 本地开发
 
-1. 安装依赖且构建所有依赖 packages（`core` `data` 等，可在根目录下执行 `bun run build server` 以自动构建依赖）
+1. 安装依赖且构建所有依赖 packages（`core` `data` 等，可在根目录下执行 `pnpm build server` 以自动构建依赖）
 2. 创建 `.env` 文件，存储 `JWT_SECRET=任意字符串`。
 
    - 也可创建 `GH_CLIENT_ID` 与 `GH_CLIENT_SECRET` 以启用 GitHub OAuth 登录。此功能需要[新建 GitHub Apps](https://docs.github.com/en/apps/creating-github-apps)。
 
-3. 执行 `bun dev` 命令：这将尝试启动本地的 PGLite 模拟数据库并使用 `--watch` 运行服务器以支持本地调试。本地数据库数据持久化存储，如需删除可执行 `bunx prisma dev rm gi-tcg-server-dev`。
+3. 执行 `pnpm dev` 命令：这将尝试启动本地的 PGLite 模拟数据库并使用 `--watch` 运行服务器以支持本地调试。本地数据库数据持久化存储，如需删除可执行 `pnpm prisma dev rm gi-tcg-server-dev`。
    - 如果修改了 `prisma/schema.prisma`，则会在启动数据库前进行 Schema 迁移，请按提示输入迁移名称。
 
 ## 部署对战平台

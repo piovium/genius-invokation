@@ -28,8 +28,8 @@ export const LiutianArchery = ...
 ## 更新操作备忘录
 
 - 更新 `static-data` 仓库后，重启远程 API 部署；
-- 本地运行 `bun regenerate_data`；
-- 导出游戏内图片资源至 `$TEXTURE2D_FOLDER`，前往 `assets` 运行 `bun build:image`；
-- 使用 `bun dev` 启动状态图标编辑器，维护最新状态图标映射；
+- 本地运行 `pnpm regenerate_data`；
+- 导出游戏内图片资源至 `$TEXTURE2D_FOLDER`，前往 `assets` 运行 `pnpm build:image`；
+- 使用 `pnpm dev` 启动状态图标编辑器，维护最新状态图标映射；
 - 导出映射文件后，回填至 `static-data` 的 `mappings/buff_icons.json`。
 
