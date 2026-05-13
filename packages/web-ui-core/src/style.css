@@ -29,6 +29,10 @@
   --chessboard-bg-y-border-width: var(--chessboard-bg-y-border-width-initial);
   --opp-chessboard-hands-prominent-height: 28px;
 
+  .dev {
+    outline: #3ed490 solid 1px;
+  }
+
   /* start */
   /* Chessboard Background */
   .chessboard-bg-container {
@@ -431,6 +435,52 @@
       5000ms linear infinite blink-50;
   }
 
+  /* DicePanel */
+  .dice-shadow:not([data-wrapped]) {
+    background-color: #443322aa;
+    border-radius: 9999px;
+    box-shadow: 0 0 4px 4px #443322aa;
+  }
+
+  .dice-bar-opp {
+    display: none;
+  }
+
+  :has(.dice-panel[data-state="hidden"]) .dice-bar-opp {
+    display: grid;
+  }
+
+  .dice-panel {
+    background-image: linear-gradient(
+      to right,
+      transparent 8px,
+      #9d907bff 8px,
+      #9d907bff 10px,
+      #86795eee 10px,
+      #5e4223ee 60px,
+      #5e4223ee 90%,
+      #5e422300 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 4%,
+      black 10%,
+      black 82%,
+      transparent 96%
+    );
+    transition: all 150ms ease;
+  }
+
+  .dice-panel[data-state="hidden"] {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(9rem);
+  }
+
+  .dice-panel[data-state="wrapped"] {
+    transform: translateX(5.5rem);
+  }
+
   /* end */
 
   &[data-has-opp-chessboard] {
@@ -440,33 +490,6 @@
     );
   }
 
-  :has(.dice-panel[data-state="visible"]) .dice-panel-compact {
-    display: none;
-  }
-  :has(.dice-panel[data-state="wrapped"]) .dice-panel-compact {
-    display: none;
-  }
-
-  .dice-panel-compact {
-    background-color: #443322;
-    mask-image: linear-gradient(to right, black 90%, transparent 100%);
-  }
-  .dice-panel-compact[data-opp="false"] {
-    box-shadow:
-      inset 8px 0px 8px 0px #e78a2b40,
-      inset 4px 0px 4px 0px #fcffab66;
-    top: 52%;
-  }
-  .dice-panel-compact[data-opp="true"] {
-    box-shadow:
-      inset 8px 0px 8px 0px #5e7ea740,
-      inset 4px 0px 4px 0px #bffffe66;
-    bottom: 52%;
-  }
-  .dice-panel-compact[data-has-mini-view] {
-    transform: translateX(-90%);
-    opacity: 0.6;
-  }
   .opp-chessboard-hands-container {
     position: absolute;
     width: 30rem;
@@ -528,32 +551,6 @@
 
   .entity[data-disposing] {
     animation: entity-disposing 0.5s linear both;
-  }
-
-  .dice-panel {
-    background: linear-gradient(
-      to right,
-      #9d907bff 2px,
-      #86795eff 2px,
-      #5e4223ff 50px,
-      #5e4223ff 90%,
-      #5e422300 100%
-    );
-    mask-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0) 6%,
-      rgba(0, 0, 0, 0.9) 12%,
-      rgba(0, 0, 0, 0.9) 82%,
-      rgba(0, 0, 0, 0) 92%
-    );
-  }
-
-  .dice-shadow {
-    background-color: #443322a0;
-    border-radius: 0.5rem;
-    box-shadow:
-      0 0 8px #44332280,
-      0 0 16px #443322;
   }
 
   .action-hint-who {

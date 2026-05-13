@@ -90,7 +90,7 @@ import { NotificationBox } from "./NotificationBox";
 import { Entity } from "./Entity";
 import { PlayerInfoBox, type PlayerInfoProps } from "./PlayerInfoBox";
 import { flip } from "@gi-tcg/utils";
-import { DicePanel, type DicePanelState } from "./DicePanel";
+import { DiceBar, DicePanel, type DicePanelState } from "./DicePanel";
 import { SkillButtonGroup } from "./SkillButtonGroup";
 import { createStore } from "solid-js/store";
 import { RoundAndPhaseNotification } from "./RoundAndPhaseNotification";
@@ -1267,7 +1267,8 @@ export function Chessboard(props: ChessboardProps) {
       timingMine: localProps.doingRpc,
       currentTime: localProps.timer?.current ?? 0,
       totalTime: localProps.timer?.total ?? Infinity,
-      willGetFirst: !localProps.data.state.player[flip(localProps.who)].declaredEnd,
+      willGetFirst:
+        !localProps.data.state.player[flip(localProps.who)].declaredEnd,
       onClick: () => {
         if (canDeclareEnd) {
           if (!showDeclareEndButton()) {
@@ -1818,13 +1819,7 @@ export function Chessboard(props: ChessboardProps) {
               onSelectDice={setSelectedDice}
               state={dicePanelState()}
               onStateChange={setDicePanelState}
-              compactView={!!localProps.opp}
-              opp={false}
-              hasMiniView={
-                !!localProps.opp &&
-                (props.viewType === "selectCard" ||
-                  props.viewType === "switchHands")
-              }
+              liveStreamingMode={localProps.liveStreamingMode}
             />
             <SkillButtonGroup
               class="grid-area-[1/1] place-self-end mb-2 mr-6"
@@ -1837,23 +1832,15 @@ export function Chessboard(props: ChessboardProps) {
               shown={showSkillButtons()}
             />
             <Show when={localProps.opp}>
-              <DicePanel
-                state="hidden"
-                dice={oppDice()}
-                disabledDiceTypes={[]}
-                maxSelectedCount={null}
-                onSelectDice={() => {}}
-                onStateChange={() => {}}
-                selectedDice={[]}
-                compactView
+              <DiceBar
+                class="grid-area-[1/1] justify-self-end self-start mt-13 translate-x-6.5 dice-bar-opp"
                 opp
-                hasMiniView={
-                  localProps.viewType === "selectCard" ||
-                  localProps.viewType === "switchHands"
-                }
+                dice={oppDice()}
+                selectedDice={[]}
+                state={"hidden"}
               />
               <SkillButtonGroup
-                class="grid-area-[1/1] self-start justify-self-end mt-10 mr-6"
+                class="grid-area-[1/1] self-start justify-self-end mt-10 mr-12"
                 skills={oppSkills()}
                 switchActiveButton={null}
                 switchActiveCost={null}
