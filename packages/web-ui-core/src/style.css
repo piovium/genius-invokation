@@ -29,21 +29,9 @@
   --chessboard-bg-y-border-width: var(--chessboard-bg-y-border-width-initial);
   --opp-chessboard-hands-prominent-height: 28px;
 
-  --chessboard-opp-scale: 1;
-  --chessboard-right-offset: 0;
-
-  * {
-    --chessboard-y-offset: calc(50% * (1 - var(--chessboard-opp-scale)));
-    --chessboard-right-offset: calc(
-      -100% * ((1 / var(--chessboard-opp-scale)) - 1)
-    );
-  }
-
   /* start */
   /* Chessboard Background */
   .chessboard-bg-container {
-    top: var(--chessboard-y-offset);
-    bottom: var(--chessboard-y-offset);
     img {
       scale: 1.072;
     }
@@ -446,22 +434,12 @@
   /* end */
 
   &[data-has-opp-chessboard] {
-    --skill-button-offset-x: 1.5rem;
     --chessboard-bg-y-border-width: calc(
       var(--chessboard-bg-y-border-width-initial) -
         var(--opp-chessboard-hands-prominent-height)
     );
   }
-  .opp {
-    --skill-button-offset-x: 12rem;
-  }
-  &[data-livestreaming] .opp {
-    --skill-button-offset-x: 1.5rem;
-  }
 
-  &[data-has-opp-chessboard] .has-opp-chessboard-hidden {
-    display: none;
-  }
   :has(.dice-panel[data-state="visible"]) .dice-panel-compact {
     display: none;
   }
@@ -469,12 +447,6 @@
     display: none;
   }
 
-  .skill-button-group {
-    right: var(--skill-button-offset-x, 1rem);
-  }
-  .history-panel {
-    right: var(--chessboard-right-offset, 0);
-  }
   .dice-panel-compact {
     background-color: #443322;
     mask-image: linear-gradient(to right, black 90%, transparent 100%);

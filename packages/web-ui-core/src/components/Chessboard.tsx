@@ -449,7 +449,7 @@ function calcCardsInfo(
           },
           draggingEndAnimation: false,
         },
-        enableShadow: true,
+        enableShadow: !isSwitching,
         enableTransition: true,
         playStep,
         tuneStep,
@@ -1827,7 +1827,7 @@ export function Chessboard(props: ChessboardProps) {
               }
             />
             <SkillButtonGroup
-              class="absolute bottom-2 transform-origin-br scale-120% skill-button-group"
+              class="grid-area-[1/1] place-self-end mb-2 mr-6"
               skills={mySkills()}
               switchActiveButton={switchActiveStep() ?? null}
               switchActiveCost={
@@ -1853,7 +1853,7 @@ export function Chessboard(props: ChessboardProps) {
                 }
               />
               <SkillButtonGroup
-                class="absolute top-1.2 transform-origin-tr scale-120% skill-button-group opp"
+                class="grid-area-[1/1] self-start justify-self-end mt-10 mr-6"
                 skills={oppSkills()}
                 switchActiveButton={null}
                 switchActiveCost={null}
@@ -1934,7 +1934,7 @@ export function Chessboard(props: ChessboardProps) {
           />
         </Show>
         {/* 上层 UI 组件 */}
-        <Show when={showHistory() || localProps.opp}>
+        <Show when={showHistory()}>
           <HistoryPanel
             who={localProps.who}
             history={localProps.history}
@@ -1983,7 +1983,7 @@ export function Chessboard(props: ChessboardProps) {
           </Show>
         </AspectRatioContainer>
         <Show when={localProps.opp && localProps.liveStreamingMode}>
-          <div class="absolute top-2.5 right-[calc(var(--chessboard-right-offset)+0.625rem)] flex flex-row-reverse gap-2">
+          <div class="absolute top-2.5 right-2.5 flex flex-row-reverse gap-2">
             <div class="h-8 w-24 flex items-center justify-center rounded-full b-2 line-height-none font-bold bg-#e9e2d3 text-black/70 b-black/70">
               {t("ui.liveStreamingMode")}
             </div>

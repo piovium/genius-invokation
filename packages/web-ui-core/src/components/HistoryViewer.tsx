@@ -1932,7 +1932,7 @@ export function HistoryPanel(props: HistoryPanelProps) {
   return (
     <WhoContext.Provider value={who}>
       <div
-        class="absolute inset-0 z-0 bg-black/50 has-opp-chessboard-hidden"
+        class="absolute inset-0 z-0 bg-black/50"
         onClick={() => {
           props.onBackdropClick();
         }}
@@ -1945,7 +1945,7 @@ export function HistoryPanel(props: HistoryPanelProps) {
           }}
         />
       </Show>
-      <div class="absolute right-0 top-0 bottom-0 w-70 touch-pan shadow-lg bg-[linear-gradient(to_bottom,_#2f333bff_30%,_#2f333bdd_100%)] history-panel">
+      <div class="absolute right-0 top-0 bottom-0 w-70 touch-pan shadow-lg bg-[linear-gradient(to_bottom,_#2f333bff_30%,_#2f333bdd_100%)]">
         <div class="w-full h-12" />
         <div
           class="h-[calc(100%-4.5rem)] overflow-y-auto py-2 pl-2 pr-1.2 space-y-1.5 relative flex flex-col history-scrollbar"

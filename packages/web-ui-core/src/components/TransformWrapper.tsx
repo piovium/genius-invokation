@@ -37,13 +37,14 @@ export interface TransformWrapperProps {
   setTransformScale: Setter<number>;
 }
 
-const PRE_ROTATION_TRANSFORM = `translate(-50%, -50%)`;
+const PRE_ROTATION_TRANSFORM = "translate(-50%, -50%)";
 const POST_ROTATION_TRANSFORM = {
   0: "translate(50%, 50%)",
   90: "translate(50%, -50%)",
   180: "translate(-50%, -50%)",
   270: "translate(-50%, 50%)",
 };
+const OPP_CHESSBOARD_TRANSFORM = "translate(5%, 5%) scale(90%)";
 
 export function TransformWrapper(props: TransformWrapperProps) {
   let transformWrapperEl!: HTMLDivElement;
@@ -56,24 +57,12 @@ export function TransformWrapper(props: TransformWrapperProps) {
     const autoHeight = untrack(() => props.autoHeight) ?? true;
     const rotate = untrack(() => props.rotation) ?? 0;
     const isFullscreen = untrack(() => props.isFullscreen) ?? false;
+    const oppScale = untrack(() => props.hasOppChessboard) ? 0.9 : 1;
     const UNIT = unitInPx();
     let height: number;
     let width: number;
     let scale: number;
-    let oppScale = 1;
     const DEFAULT_HEIGHT_WIDTH_RATIO = MINIMUM_HEIGHT / MINIMUM_WIDTH;
-    const adjustScale = () => {
-      height /= scale;
-      width /= scale;
-      if (hasOppChessboard) {
-        if (height / width > DEFAULT_HEIGHT_WIDTH_RATIO) {
-          oppScale = 0.75;
-        } else {
-          oppScale = 0.8;
-        }
-        height /= oppScale;
-      }
-    };
     if (rotate % 180 === 0) {
       if (autoHeight && !isFullscreen) {
         containerHeight = 0.9 * DEFAULT_HEIGHT_WIDTH_RATIO * containerWidth;
@@ -83,9 +72,8 @@ export function TransformWrapper(props: TransformWrapperProps) {
         containerHeight / (UNIT * MINIMUM_HEIGHT),
         containerWidth / (UNIT * MINIMUM_WIDTH),
       );
-      height = containerHeight;
-      width = containerWidth;
-      adjustScale();
+      height = containerHeight / scale;
+      width = containerWidth / scale;
     } else {
       if (autoHeight && !isFullscreen) {
         containerHeight = containerWidth / DEFAULT_HEIGHT_WIDTH_RATIO;
@@ -95,17 +83,12 @@ export function TransformWrapper(props: TransformWrapperProps) {
         containerHeight / (UNIT * MINIMUM_WIDTH),
         containerWidth / (UNIT * MINIMUM_HEIGHT),
       );
-      height = containerWidth;
-      width = containerHeight;
-      adjustScale();
+      height = containerWidth / scale;
+      width = containerHeight / scale;
     }
-    transformWrapperEl.style.setProperty(
-      "--chessboard-opp-scale",
-      `${oppScale}`,
-    );
-    transformWrapperEl.style.transform = `${PRE_ROTATION_TRANSFORM} scale(${
-      scale * oppScale
-    }) rotate(${rotate}deg) ${POST_ROTATION_TRANSFORM[rotate]}`;
+    transformWrapperEl.style.transform = `${PRE_ROTATION_TRANSFORM} 
+      scale(${scale}) ${hasOppChessboard ? OPP_CHESSBOARD_TRANSFORM : ""} rotate(${rotate}deg) 
+      ${POST_ROTATION_TRANSFORM[rotate]}`;
     transformWrapperEl.style.height = `${height}px`;
     transformWrapperEl.style.width = `${width}px`;
     untrack(() => props.setTransformScale)(scale * oppScale);

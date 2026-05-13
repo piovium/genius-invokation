@@ -48,11 +48,11 @@ function SkillButton(props: SkillButtonProps) {
   );
   return (
     <div
-      class="relative w-12 h-16.5 flex flex-col items-center gap-0.5 select-none"
+      class="relative w-14.5 h-20 flex flex-col items-center gap-0.5 select-none"
       style={{ "--element-color": color() }}
     >
       <div
-        class="grid grid-cols-1 grid-rows-1 w-12 h-12 place-items-center skill-button children:pointer-events-none isolate"
+        class="grid grid-cols-1 grid-rows-1 w-14.5 h-14.5 place-items-center skill-button children:pointer-events-none isolate"
         title={props.step ? props.step.tooltipText : t("skill.notYourTurn")}
         bool:data-mini={props.isTechnique}
         bool:data-selected={props.step?.isFocused}
@@ -61,43 +61,43 @@ function SkillButton(props: SkillButtonProps) {
       >
         <SkillButtonReactIcon
           noRender
-          class="grid-area-[1/1] w-12 h-12 skill-button-bg z-1"
+          class="grid-area-[1/1] w-14.5 h-14.5 skill-button-bg z-1"
         />
         <Show when={isBurst()}>
           <div
-            class="grid-area-[1/1] hidden data-[shown]:block w-10 h-10 rounded-full skill-button-burst-animation z-0"
+            class="grid-area-[1/1] hidden data-[shown]:block w-12 h-12 rounded-full skill-button-burst-animation z-0"
             bool:data-shown={props.energy === 1}
           />
-          <SkillButtonBurstRing class="grid-area-[1/1] w-12 h-12 z-3" />
+          <SkillButtonBurstRing class="grid-area-[1/1] w-14.5 h-14.5 z-3" />
           <div
-            class="grid-area-[1/1] w-11.25 h-11.25 rounded-full border-3 b-[var(--element-color)] skill-button-burst-progress z-4"
+            class="grid-area-[1/1] w-13.5 h-13.5 rounded-full border-3.5 b-[var(--element-color)] skill-button-burst-progress z-4"
             style={{
               "--progress-value": (100 * (props.energy ?? 0)).toFixed(0) + "%",
             }}
           />
         </Show>
-        <SkillSelecting class="grid-area-[1/1] w-10 h-5.25 translate-y--5 skill-button-marker z-5" />
+        <SkillSelecting class="grid-area-[1/1] w-12 h-6.3 translate-y--6 skill-button-marker z-5" />
         <Switch>
           <Match when={typeof skillId() === "number"}>
             <Image
               imageId={skillId() as number}
-              class="grid-area-[1/1] w-9 h-9 skill-button-icon z-6"
+              class="grid-area-[1/1] w-11 h-11 skill-button-icon z-6"
               fallback="skill"
             />
           </Match>
           <Match when={skillId() === "switchActive"}>
-            <SwitchActiveIcon class="grid-area-[1/1] w-9 h-9 skill-button-icon skill-button-switch z-6 " />
+            <SwitchActiveIcon class="grid-area-[1/1] w-11 h-11 skill-button-icon skill-button-switch z-6 " />
           </Match>
         </Switch>
         <SkillAbandonIcon
-          class="grid-area-[1/1] w-5 h-5 place-self-end data-[hidden]:hidden z-7"
+          class="grid-area-[1/1] w-6 h-6 place-self-end data-[hidden]:hidden z-7"
           bool:data-hidden={props.step}
         />
       </div>
       <DiceCost
         class="flex flex-row gap-1 data-[hidden]:hidden data-[disabled]:brightness-80 data-[disabled]:saturate-80"
         cost={props.cost}
-        diceClass="w-6.5 h-6.5 text-3.25 m--1"
+        diceClass="w-7 h-7 text-3.5 m--1"
         realCost={props.realCost}
         bool:data-hidden={props.hideDiceCost}
         bool:data-disabled={!props.step || props.step.isDisabled}

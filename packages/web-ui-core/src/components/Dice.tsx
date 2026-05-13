@@ -185,7 +185,7 @@ export interface InlineDiceProps {
 export function InlineDice(props: InlineDiceProps) {
   return (
     <Dynamic<Component<ComponentProps<"div">>>
-      component={COST_COMPONENT_MAP[props.type]}
+      component={DICE_COMPONENT_MAP[props.type]}
       class={props.class}
     />
   );
