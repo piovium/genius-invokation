@@ -28,7 +28,7 @@ jobs:
       - name: Run Build
         run: |
           pnpm install --frozen-lockfile
-          pnpm -r -F "@gi-tcg/cbinding..." -F "@gi-tcg/standalone..." build
+          pnpm build "cbinding...,standalone..."
       - name: Run Tests
         run: pnpm -r test
       - name: "Upload artifact: Standalone frontend"
