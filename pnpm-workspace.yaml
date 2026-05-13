@@ -26,6 +26,7 @@ allowBuilds:
   '@ffmpeg-installer/linux-x64': true
   '@nestjs/core': true
   '@prisma/engines': true
+  '@swc/core': true
   '@vscode/vsce-sign': true
   core-js: true
   esbuild: true

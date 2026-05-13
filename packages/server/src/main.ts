@@ -27,7 +27,7 @@ import { frontend } from "./frontend";
 const app = await NestFactory.create<NestFastifyApplication>(
   AppModule,
   new FastifyAdapter({
-    http2: true,
+    // http2: true,
     keepAliveTimeout: 65000, // 65 seconds (should be longer than ping interval)
     requestTimeout: 0, // Disable request timeout for SSE
   }),
