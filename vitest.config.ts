@@ -18,6 +18,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     watch: false,
+    setupFiles: [`${import.meta.dirname}/vitest.setup.ts`],
     env: {
       NODE_OPTIONS: "--expose-gc",
     },

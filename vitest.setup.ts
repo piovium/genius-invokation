@@ -1,4 +1,4 @@
-// Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -13,21 +13,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { test, expect } from "vitest";
-import { nextRandom, randomSeed } from "../src/random";
+import { expect } from "vitest";
+import * as matchers from "jest-extended";
+import type { } from "jest-extended";
 
-test("random seed", () => {
-  const x = randomSeed();
-  expect(x).toBeInteger();
-  expect(x).toBeGreaterThanOrEqual(0);
-  expect(x).toBeLessThan(2147483647);
-})
+declare module "vitest" {
+  interface Assertion<T = any> extends jest.Matchers<T> {}
+  interface AsymmetricMatchersContaining extends jest.Matchers<any> {}
+}
 
-test("random generator", () => {
-  const seed = 3553;
-  let x = seed;
-  for (let i = 0; i < 5; i ++) {
-    x = nextRandom(x);
-  }
-  expect(x).toBe(314840640);
-})
+expect.extend(matchers);

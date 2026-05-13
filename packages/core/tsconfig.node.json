@@ -2,15 +2,19 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
-
     "target": "ESNext",
     "module": "Preserve",
-    "lib": ["ESNext"],
-    
-    "types": ["node"]
+    "lib": [
+      "ESNext"
+    ],
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "scripts",
+    "__tests__/**/*.ts",
+    "../../vitest.setup.ts",
     "tsdown.config.ts"
   ]
 }

@@ -32,6 +32,7 @@
     "eslint-plugin-only-warn": "^1.1.0",
     "eslint-plugin-solid": "^0.14.5",
     "execa": "catalog:",
+    "jest-extended": "^7.0.0",
     "tsdown": "^0.21.7",
     "tsup": "^8.3.0",
     "type-fest": "^4.26.1",
