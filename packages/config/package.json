@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "bin": {
-    "nod": "./bin/nod.mjs",
+    "gnx": "./bin/gnx.mjs",
     "bun": "./bin/bun.mjs"
   },
   "main": "./dist/index.js",

@@ -22,7 +22,7 @@
     "test": "vitest",
     "build:ohm": "ohm generateBundles -et src/query-legacy/query.ohm",
     "build": "pnpm build:ohm && tsdown",
-    "gen:s_expr_schema": "nod scripts/gen_s_expr_schema.ts"
+    "gen:s_expr_schema": "gnx scripts/gen_s_expr_schema.ts"
   },
   "dependencies": {
     "@gi-tcg/typings": "workspace:*",

@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "build:buf": "nod scripts/buf.ts",
+    "build:buf": "gnx scripts/buf.ts",
     "build": "pnpm build:buf && tsdown"
   },
   "dependencies": {

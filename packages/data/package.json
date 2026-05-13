@@ -13,7 +13,7 @@
     "./internal/*": "./src/*.ts"
   },
   "scripts": {
-    "regenerate_data": "nod ./scripts/generators/index.ts",
+    "regenerate_data": "gnx ./scripts/generators/index.ts",
     "check": "tsc --noEmit",
     "build": "tsdown"
   },

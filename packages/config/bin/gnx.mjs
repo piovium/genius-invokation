@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
@@ -13,4 +14,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// Do nothing
+import { spawn } from "node:child_process";
+
+const args = [
+  // https://github.com/privatenumber/tsx/issues/791
+  "--disable-warning=DEP0205",
+  // `--conditions=${process.env.NODE_ENV ?? "development"}`,
+  ...(process.env.NODE_ENV ? [`--conditions=${process.env.NODE_ENV}`] : []),
+  "--import",
+  import.meta.resolve("@gi-tcg/config/preload"),
+  ...process.argv.slice(2),
+];
+
+const child = spawn(process.execPath, args, { stdio: "inherit" });
+child.on("exit", (code) => process.exit(code ?? 0));

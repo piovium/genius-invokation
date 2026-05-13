@@ -10,8 +10,8 @@
   },
   "packageManager": "pnpm@11.0.8",
   "scripts": {
-    ".filter": "nod scripts/filter.ts",
-    ".filter-prod": "nod scripts/filter.ts -P",
+    ".filter": "gnx scripts/filter.ts",
+    ".filter-prod": "gnx scripts/filter.ts -P",
     "build": "pnpm .filter build",
     "test": "pnpm -r test",
     "publish": "pnpm .filter-prod publish core...,data...,assets-manager...,web-ui-core...,web-ui...",

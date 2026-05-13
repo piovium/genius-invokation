@@ -4,11 +4,11 @@
   "version": "0.19.1",
   "type": "module",
   "scripts": {
-    "dev": "nod ./src/dev.ts",
+    "dev": "gnx ./src/dev.ts",
     "prisma:generate": "prisma generate",
-    "build": "pnpm prisma:generate && nod scripts/build.ts",
-    "start": "nod src/main.ts",
-    "start:prod": "nod dist/main.js",
+    "build": "pnpm prisma:generate && gnx scripts/build.ts",
+    "start": "gnx src/main.ts",
+    "start:prod": "gnx dist/main.js",
     "check": "tsc --noEmit",
     "debug": "nest start --debug --watch"
   },

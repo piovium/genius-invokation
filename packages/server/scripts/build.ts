@@ -39,7 +39,7 @@ const inlineFrontendPlugin: Plugin = {
     })) {
       if (dirent.isFile()) {
         const filepath = path.resolve(dirent.parentPath, dirent.name);
-        const relativePath = path.relative(frontendDir, filepath);
+        const relativePath = path.relative(frontendDir, filepath).replaceAll(path.sep, "/");
         contents[relativePath] = (await readFile(filepath)).toString("base64");
       }
     }

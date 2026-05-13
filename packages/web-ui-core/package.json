@@ -19,7 +19,7 @@
     "dev": "vite",
     "check": "tsc --noEmit",
     "build": "vite build",
-    "svg_render": "nod ./scripts/svg_render.ts"
+    "svg_render": "gnx ./scripts/svg_render.ts"
   },
   "dependencies": {
     "@gi-tcg/assets-manager": "workspace:*",

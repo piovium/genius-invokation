@@ -21,11 +21,11 @@
   "contributes": {},
   "scripts": {
     "vscode:prepublish": "pnpm build",
-    "build:method_names": "nod scripts/get_method_names.mts",
+    "build:method_names": "gnx scripts/get_method_names.mts",
     "build:ts": "tsdown",
     "build": "pnpm build:method_names && pnpm build:ts",
     "watch": "pnpm build:ts --watch",
-    "package": "pnpm && nod scripts/publish.mts",
+    "package": "pnpm && gnx scripts/publish.mts",
     "check": "tsc --noEmit"
   },
   "devDependencies": {

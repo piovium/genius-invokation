@@ -17,7 +17,7 @@ async function startLocalPrisma(name: string) {
   });
 }
 
-// We use ts-node not our 'nod' (tsx underlying) because of lack of support for `--emitDecoratorMetadata`
+// We use ts-node not our 'gnx' (tsx underlying) because of lack of support for `--emitDecoratorMetadata`
 // https://github.com/privatenumber/tsx/issues/347
 
 const importFlags = [
