@@ -12,7 +12,6 @@ program
       (f) =>
         `--${options.production ? "filter-prod" : "filter"}=${f.replace(/([\w-]+)/g, "{packages/$1}")}`,
     );
-    console.log(filterArgs);
     await $({
       stdio: "inherit",
     })`pnpm --recursive ${filterArgs} ${command} ${args}`;
