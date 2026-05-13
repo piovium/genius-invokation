@@ -81,12 +81,12 @@ function SkillButton(props: SkillButtonProps) {
           <Match when={typeof skillId() === "number"}>
             <Image
               imageId={skillId() as number}
-              class="grid-area-[1/1] w-75% h-75% skill-button-icon z-6"
+              class="grid-area-[1/1] w-9 h-9 skill-button-icon z-6"
               fallback="skill"
             />
           </Match>
           <Match when={skillId() === "switchActive"}>
-            <SwitchActiveIcon class="grid-area-[1/1] w-75% h-75% skill-button-icon skill-button-switch z-6 " />
+            <SwitchActiveIcon class="grid-area-[1/1] w-9 h-9 skill-button-icon skill-button-switch z-6 " />
           </Match>
         </Switch>
         <SkillAbandonIcon
