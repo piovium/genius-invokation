@@ -23,6 +23,7 @@ patchedDependencies:
 
 allowBuilds:
   '@bufbuild/buf': true
+  '@ffmpeg-installer/darwin-arm64': true
   '@ffmpeg-installer/linux-x64': true
   '@nestjs/core': true
   '@prisma/engines': true
