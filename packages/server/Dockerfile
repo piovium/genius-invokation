@@ -1,12 +1,11 @@
-FROM oven/bun:alpine AS base
+FROM ghcr.io/pnpm/pnpm:latest AS build
+RUN pnpm runtime set node 26 -g
 WORKDIR /app
 ARG DEFAULT_ASSETS_API_ENDPOINT
-
-FROM base AS build
 COPY . .
-RUN bun install --frozen-lockfile && bun run build -n server
+RUN pnpm install --frozen-lockfile && pnpm build:no-typing server...
 
-FROM base AS deploy
+FROM node:26 AS deploy
 COPY --from=build /app/packages/server/dist/* /app/packages/server/prisma /app/packages/server/prisma.config.ts ./
 
-CMD ["bun", "main.js"]
+CMD ["node", "main.js"]
