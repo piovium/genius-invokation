@@ -11,7 +11,7 @@ services:
       DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
     depends_on:
       - db
-    command: ["bunx", "prisma", "migrate", "deploy"]
+    command: ["npx", "prisma", "migrate", "deploy"]
     build:
       context: ../..
       dockerfile: packages/server/Dockerfile
