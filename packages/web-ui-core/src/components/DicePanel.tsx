@@ -1,5 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
-//
+// Copyright (C) 2026 Piovium Labs
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -14,49 +13,44 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { DiceType } from "@gi-tcg/typings";
-import { Index, Show, splitProps, type ComponentProps } from "solid-js";
+import { Index, Show } from "solid-js";
 import { Dice, DiceUnpack } from "./Dice";
 import NumberHintBlue from "../svg/NumberHintBlue.svg?fb";
 import NumberHintYellow from "../svg/NumberHintYellow.svg?fb";
 
 export type DicePanelState = "hidden" | "wrapped" | "visible";
 
-export interface DiceBarProps extends ComponentProps<"div"> {
+export interface DiceBarProps {
+  class?: string;
   dice: DiceType[];
   selectedDice: boolean[];
   state: DicePanelState;
   opp?: boolean;
+  liveStreamingMode?: boolean;
 }
 
 export function DiceBar(props: DiceBarProps) {
-  const [local, rest] = splitProps(props, [
-    "dice",
-    "selectedDice",
-    "state",
-    "opp",
-    "class",
-  ]);
   return (
     <div
-      class={`grid grid-cols-1 w-7 gap-1.5 place-items-center select-none
-        pb-2 pointer-events-none dice-shadow ${local.class ?? ""}`}
-      bool:data-wrapped={local.state === "wrapped"}
-      {...rest}
+      class={`hidden data-[shown]:grid grid-cols-1 w-7 gap-1.5 place-items-center select-none
+        pb-2 pointer-events-none dice-shadow ${props.class ?? ""}`}
+      bool:data-wrapped={props.state === "wrapped"}
+      bool:data-shown={props.state !== "visible" || props.liveStreamingMode}
     >
       <Show
-        when={local.opp}
+        when={props.opp}
         fallback={<NumberHintYellow class="grid-area-[1/1] w-9 h-9 m--1" />}
       >
         <NumberHintBlue class="grid-area-[1/1] w-9 h-9 m--1" />
       </Show>
       <div class="grid-area-[1/1] text-white font-bold">
-        {local.dice.length}
+        {props.dice.length}
       </div>
-      <Index each={local.dice}>
+      <Index each={props.dice}>
         {(dice, index) => (
           <DiceUnpack
             type={dice()}
-            selected={local.state === "wrapped" && local.selectedDice[index]}
+            selected={props.state === "wrapped" && props.selectedDice[index]}
             class="w-6 h-6 m--1"
             col={1}
             row={index + 2}
@@ -72,7 +66,6 @@ export interface DicePanelProps extends DiceBarProps {
   maxSelectedCount: number | null;
   onSelectDice: (selectedDice: boolean[]) => void;
   onStateChange: (state: DicePanelState) => void;
-  liveStreamingMode?: boolean;
 }
 
 export function DicePanel(props: DicePanelProps) {
@@ -142,7 +135,7 @@ export function DicePanel(props: DicePanelProps) {
         dice={props.dice}
         selectedDice={props.selectedDice}
         state={props.state}
-        bool:data-shown={props.state !== "visible"}
+        liveStreamingMode={props.liveStreamingMode}
       />
     </>
   );

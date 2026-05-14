@@ -1833,11 +1833,13 @@ export function Chessboard(props: ChessboardProps) {
             />
             <Show when={localProps.opp}>
               <DiceBar
-                class="grid-area-[1/1] justify-self-end self-start mt-13 translate-x-6.5 dice-bar-opp"
+                class="grid-area-[1/1] self-start justify-self-end mt-13 translate-x-6.5"
                 opp
                 dice={oppDice()}
                 selectedDice={[]}
-                state={"hidden"}
+                // 对方骰子面板的显示状态同样受我方状态控制
+                state={dicePanelState()}
+                liveStreamingMode={localProps.liveStreamingMode}
               />
               <SkillButtonGroup
                 class="grid-area-[1/1] self-start justify-self-end mt-10 mr-12"

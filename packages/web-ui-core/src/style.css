@@ -442,14 +442,6 @@
     box-shadow: 0 0 4px 4px #443322aa;
   }
 
-  .dice-bar-opp {
-    display: none;
-  }
-
-  :has(.dice-panel[data-state="hidden"]) .dice-bar-opp {
-    display: grid;
-  }
-
   .dice-panel {
     background-image: linear-gradient(
       to right,
