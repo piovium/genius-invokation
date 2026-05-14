@@ -14,30 +14,44 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { cssPropertyOfTransform } from "../ui_state";
-import type { CardCountHintInfo } from "./Chessboard";
+import type { CardArea, CardCountHintInfo } from "./Chessboard";
+import NumberHintBlue from "../svg/NumberHintBlue.svg?fb";
+import NumberHintYellow from "../svg/NumberHintYellow.svg?fb";
+import type { Component, ComponentProps } from "solid-js";
+import { Dynamic } from "solid-js/web";
 
 export interface CardCountHintProps extends CardCountHintInfo {
   shown: boolean;
 }
 
+export const HINT_STYLE_MAP: Record<
+  CardArea,
+  { component: Component; rotate: number }
+> = {
+  myHand: { component: NumberHintYellow, rotate: 0 },
+  oppHand: { component: NumberHintBlue, rotate: 180 },
+  myPile: { component: NumberHintYellow, rotate: 90 },
+  oppPile: { component: NumberHintBlue, rotate: 90 },
+};
+
 export function CardCountHint(props: CardCountHintProps) {
-  const hintStyle = () => {
-    if (props.area === "myPile") return {opp: false, hint: "rotate-45"};
-    if (props.area === "oppPile") return {opp: true, hint: "rotate-45"};
-    if (props.area === "oppHand") return {opp: true, hint: "rotate-135"};
-    return {opp: false, hint: "-rotate-45"};
-  };
+  const hintStyle = () => HINT_STYLE_MAP[props.area];
   return (
     <div
-      class="pointer-events-none absolute left-0 top-0 h-6 w-6 hidden data-[shown]:grid current-turn-hint"
+      class="pointer-events-none absolute left-0 top-0 h-9 w-9 hidden data-[shown]:grid isolate"
       style={cssPropertyOfTransform(props.transform)}
       bool:data-shown={props.shown}
-      data-opp={hintStyle().opp}
     >
-      <div 
-        class={`grid-area-[1/1] rounded-lt-full rounded-r-full bg-[var(--fg-color)] b-3 b-[var(--bg-color)] ${hintStyle().hint}`}
+      <Dynamic<Component<ComponentProps<"div">>>
+        component={hintStyle().component}
+        class={`grid-area-[1/1] w-9 h-9`}
+        style={{ transform: `rotate(${hintStyle().rotate}deg)` }}
       />
-      <div class={`grid-area-[1/1] z-1 text-white font-bold text-3 text-center self-center`}>{props.value}</div>
+      <div
+        class={`grid-area-[1/1] z-1 text-white font-bold text-3 line-height-none place-self-center`}
+      >
+        {props.value}
+      </div>
     </div>
   );
 }

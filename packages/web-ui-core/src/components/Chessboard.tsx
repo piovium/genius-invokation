@@ -1766,11 +1766,7 @@ export function Chessboard(props: ChessboardProps) {
             {(hint) => (
               <CardCountHint
                 {...hint()}
-                shown={
-                  isShowCardHint[hint().area] !== null ||
-                  (!!localProps.liveStreamingMode &&
-                    (hint().area === "myPile" || hint().area === "oppPile"))
-                }
+                shown={isShowCardHint[hint().area] !== null}
               />
             )}
           </Key>
