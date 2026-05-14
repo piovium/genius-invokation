@@ -7,6 +7,7 @@ overrides:
   babel-plugin-jsx-dom-expressions: 0.39.6
 
 catalog:
+  axios: ^1.16.1
   vite: ^8.0.8
   unplugin-dts: ^1.0.0
   vite-plugin-solid: ^2.11.8
@@ -14,7 +15,7 @@ catalog:
   unocss: ^66.3.3
   "@unocss/preset-icons": ^66.3.3
   "@unocss/reset": ^66.3.3
-  solid-js: ^1.9.9
+  solid-js: ^1.9.12
   execa: ^9.6.1
 
 patchedDependencies:

@@ -40,7 +40,7 @@
     "@gi-tcg/typings": "workspace:*",
     "@hono/node-server": "^2.0.2",
     "hono": "^4.12.18",
-    "puppeteer-core": "^24.14.0",
+    "puppeteer-core": "^24.43.1",
     "puppeteer-screen-recorder": "^3.0.6",
     "rollup-plugin-node-externals": "catalog:",
     "solid-devtools": "^0.29.2",
