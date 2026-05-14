@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "check": "tsc --noEmit",
-    "dev": "bunx --bun vite",
-    "build": "bunx --bun vite build",
+    "dev": "vite",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "browserslist": "defaults",

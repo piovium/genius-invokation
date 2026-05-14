@@ -45,7 +45,7 @@ import {
 import { SweepingFervor, Xinyan } from "@gi-tcg/data/internal/characters/pyro/xinyan";
 import { BondOfLife, Satiated } from "@gi-tcg/data/internal/commons";
 import { Aura } from "@gi-tcg/typings";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("sigwinne: passive triggered after defeated", async () => {
   const oppNext = ref();

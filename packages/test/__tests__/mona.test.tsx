@@ -16,7 +16,7 @@
 
 import { Character, ref, setup, State, Equipment, Card } from "#test";
 import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona";
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 
 test("mona: fast switch passive", async () => {
   const mona = ref();

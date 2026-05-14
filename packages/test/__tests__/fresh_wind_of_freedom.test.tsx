@@ -25,7 +25,7 @@ import { Chevreuse, SecondaryExplosiveShells } from "@gi-tcg/data/internal/chara
 import { Guoba, Xiangling } from "@gi-tcg/data/internal/characters/pyro/xiangling";
 import { Shield } from "@gi-tcg/data/internal/commons";
 import { Aura } from "@gi-tcg/typings";
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 
 test("FreshWindOfFreedom: not triggered at end phase", async () => {
   const myNext = ref();

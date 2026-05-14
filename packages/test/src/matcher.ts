@@ -15,7 +15,7 @@
 
 import { Ref } from "#test";
 import { AnyState, CharacterVariables, EntityVariables } from "@gi-tcg/core";
-import { expect } from "bun:test";
+import { expect } from "vitest";
 
 export class StatesMatcher {
   constructor(public readonly states: readonly AnyState[]) {}

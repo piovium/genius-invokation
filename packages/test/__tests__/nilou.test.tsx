@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { test } from "bun:test";
+import { test } from "vitest";
 import { $, Character, CombatStatus, setup, State } from "#test"
 import { AllSchemesToKnow, Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida"
 import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona"

@@ -1,24 +1,35 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ESNext",
     "module": "ES2022",
     "moduleResolution": "Bundler",
-    "lib": ["ES2024"],
-    "types": ["bun"],
+    "lib": [
+      "ESNext"
+    ],
+    "types": [
+      "node"
+    ],
     "allowJs": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
-
     "noEmit": true,
-    
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "useDefineForClassFields": true,
     "esModuleInterop": true,
-
     "skipLibCheck": true,
     "strict": true,
     "noUncheckedIndexedAccess": true
+  },
+  "include": [
+    "src",
+    "scripts",
+    "prisma.config.ts"
+  ],
+  "ts-node": {
+    "esm": true,
+    "swc": true,
+    "experimentalSpecifierResolution": "node",
   }
 }

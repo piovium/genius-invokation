@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "check": "tsc --noEmit",
-    "dev": "bunx --bun vite",
-    "build": "bunx --bun vite build",
+    "dev": "vite",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "browserslist": "defaults",
@@ -32,7 +32,7 @@
     "@babel/preset-env": "^7.24.4",
     "@gi-tcg/config": "workspace:*",
     "@gi-tcg/core": "workspace:*",
-    "@iconify-json/mdi": "^1.1.66",
+    "@iconify-json/mdi": "^1.2.3",
     "@rollup/plugin-babel": "^6.0.4",
     "@types/core-js": "^2.5.8",
     "@unocss/preset-icons": "catalog:",

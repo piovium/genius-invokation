@@ -21,7 +21,7 @@ import {
   Venti,
 } from "@gi-tcg/data/internal/characters/anemo/venti";
 import { Satiated } from "@gi-tcg/data/internal/commons";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("adventure: basic", async () => {
   const c = setup(

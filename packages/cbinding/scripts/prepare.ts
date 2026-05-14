@@ -1,6 +1,4 @@
-import { $ } from "bun";
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
+import path, { resolve } from "node:path";
 import { rollup } from "rollup";
 import babel from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
@@ -8,6 +6,7 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 import terser from "@rollup/plugin-terser";
 import { CORE_VERSION } from "@gi-tcg/core";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 
 async function writeGeneratedJsCodeCpp() {
   const build = await rollup({
@@ -76,7 +75,8 @@ async function writeGeneratedJsCodeCpp() {
     );
   }
 
-  await Bun.write(
+  await mkdir(path.dirname(OUTPUT_FILEPATH), { recursive: true });
+  await writeFile(
     OUTPUT_FILEPATH,
     `namespace gitcg {
   namespace v1_0 {
@@ -94,9 +94,10 @@ ${chunk.code
 const INLCUDE_DIR = resolve(import.meta.dirname, `../include/gitcg`);
 
 async function replaceHeaderMacros() {
-  const macros = await Bun.file(
+  const macros = await readFile(
     `${import.meta.dirname}/../js/constant.ts`,
-  ).text();
+    "utf-8",
+  );
   let output_source = `#define GITCG_CORE_VERSION ${JSON.stringify(
     CORE_VERSION,
   )}\n`;
@@ -108,13 +109,13 @@ async function replaceHeaderMacros() {
     const [_, name, value] = result;
     output_source += `#define ${name} ${value}\n`;
   }
-  const header = await Bun.file(`${INLCUDE_DIR}/gitcg.h`).text();
+  const header = await readFile(`${INLCUDE_DIR}/gitcg.h`, "utf-8");
   const updatedHeader = header.replace(
     /\/\/ >>> generated macros[\s\S]*?\/\/ <<< generated macros/,
     `// >>> generated macros\n${output_source}// <<< generated macros`,
   );
 
-  await Bun.write(`${INLCUDE_DIR}/gitcg.h`, updatedHeader);
+  await writeFile(`${INLCUDE_DIR}/gitcg.h`, updatedHeader);
 }
 
 await writeGeneratedJsCodeCpp();

@@ -19,7 +19,7 @@ import { Fischl, Oz } from "@gi-tcg/data/internal/characters/electro/fischl";
 import { Mualani, NightRealmsGiftCrestsAndTroughs } from "@gi-tcg/data/internal/characters/hydro/mualani";
 import { Amber, BaronBunny, BunnyTriggered, Sharpshooter } from "@gi-tcg/data/internal/characters/pyro/amber";
 import { Aura } from "@gi-tcg/typings";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("Amber talent triggered after WindAndFreedom", async () => {
   const opp1 = ref();

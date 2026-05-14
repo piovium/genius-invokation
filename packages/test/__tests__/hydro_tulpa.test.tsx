@@ -17,7 +17,7 @@
 import { ref, setup, Character, State, Card } from "#test";
 import { TandooriRoastChicken } from "@gi-tcg/data/internal/cards/event/food";
 import { HydroTulpa, StormSurge } from "@gi-tcg/data/internal/characters/hydro/hydro_tulpa";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("hydro tulpa: E can be increaseSkillDamage'd", async () => {
   const tulpa = ref();

@@ -1,4 +1,4 @@
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { resolveOfficialVersion, type WithVersionInfo } from "../src/base/version";
 import { toSortedBy } from "../src/utils";
 

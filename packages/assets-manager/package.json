@@ -17,18 +17,18 @@
   },
   "exports": {
     ".": {
-      "bun": "./src/index.ts",
       "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
       "import": "./dist/index.js"
     },
     "./data/*": {
-      "bun": "./src/data/*.json",
+      "development": "./src/data/*.json",
       "import": "./dist/data/*.json"
     }
   },
   "scripts": {
-    "build:data": "bun --preload=./scripts/fetch_preload.ts ./scripts/fetch.ts",
+    "build:data": "gnx --import=./scripts/fetch_preload.ts ./scripts/fetch.ts",
     "build:ts": "tsdown",
-    "build": "bun run build:data && bun run build:ts"
+    "build": "pnpm build:data && pnpm build:ts"
   }
 }

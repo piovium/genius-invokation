@@ -20,15 +20,17 @@ jobs:
       SERVER_HOST: gi.xqm32.org
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
         with:
-          bun-version: latest
+          node-version: 26
+          cache: pnpm
       - name: Run Build
         run: |
-          bun install
-          bun run build -n cbinding standalone
+          pnpm install --frozen-lockfile
+          pnpm build "cbinding...,standalone..."
       - name: Run Tests
-        run: bun run test
+        run: pnpm -r test
       - name: "Upload artifact: Standalone frontend"
         uses: actions/upload-artifact@v4
         with:
@@ -57,17 +59,19 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
         with:
-          bun-version: latest
+          node-version: 26
+          cache: pnpm
       - name: Install deps & Publish
         env:
           PUBLISH: 1
         run: |
-          bun install
-          bun run build
+          pnpm install --frozen-lockfile
+          pnpm build
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-          bun scripts/publish.ts
+          pnpm run publish --provenance --access public
 
   Build-C:
     name: 💽 Build C Binding
@@ -175,10 +179,9 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PYBINDING }}
     steps:
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v6
         with:
-          bun-version: latest
+          node-version: 26
       - name: Get pybinding docs artifact
         uses: actions/download-artifact@v4
         with:
@@ -186,7 +189,7 @@ jobs:
           path: ${{ github.workspace }}
       - name: Vercel deploy
         run: >
-          bunx vercel deploy
+          npx vercel deploy
           ${{ github.ref == 'refs/heads/main' && '--prod' || '' }}
           --token=${{ secrets.VERCEL_TOKEN }}
 

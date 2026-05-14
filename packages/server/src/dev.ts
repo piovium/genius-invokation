@@ -1,5 +1,5 @@
 import { unstable_startServer } from "@prisma/dev";
-import { $ } from "bun";
+import { $ } from "execa";
 import getPort from "get-port";
 import path from "path";
 
@@ -17,30 +17,49 @@ async function startLocalPrisma(name: string) {
   });
 }
 
+// We use ts-node not our 'gnx' (tsx underlying) because of lack of support for `--emitDecoratorMetadata`
+// https://github.com/privatenumber/tsx/issues/347
+
+const importFlags = [
+  `--import`,
+  path.resolve(import.meta.dirname, "../scripts/ts_preload.js"),
+];
+
 async function localDev() {
   const server = await startLocalPrisma("gi-tcg-server-dev");
   try {
-    await $`bunx prisma migrate dev`.env({ DATABASE_URL: server.ppg.url });
-    await $`bunx prisma generate`;
-    await $`bun --watch ${path.resolve(import.meta.dirname, "main.ts")}`
-      .env({
+    await $({
+      env: { DATABASE_URL: server.ppg.url },
+      stdio: "inherit",
+    })`pnpm prisma migrate dev`;
+    await $({
+      stdio: "inherit",
+    })`pnpm prisma generate`;
+    await $({
+      env: {
         DATABASE_URL: server.database.connectionString,
         DATABASE_CONNECTION_LIMIT: "1",
-      })
-      .nothrow();
+      },
+      reject: false,
+      stdio: "inherit",
+    })`node ${importFlags} --watch ${path.resolve(import.meta.dirname, "main.ts")}`;
   } finally {
     await server.close!();
   }
 }
 
 async function remoteDev() {
-  await $`bunx prisma migrate dev`.env({
-    DATABASE_URL: process.env.DATABASE_URL!,
-  });
-  await $`bunx prisma generate`;
-  await $`bun --watch ${path.resolve(import.meta.dirname, "main.ts")}`
-    .env({ DATABASE_URL: process.env.DATABASE_URL! })
-    .nothrow();
+  await $({
+    env: { DATABASE_URL: process.env.DATABASE_URL! },
+  })`pnpm prisma migrate dev`;
+  await $({
+    stdio: "inherit",
+  })`pnpm prisma generate`;
+  await $({
+    env: { DATABASE_URL: process.env.DATABASE_URL! },
+    reject: false,
+    stdio: "inherit",
+  })`node ${importFlags} --watch ${path.resolve(import.meta.dirname, "main.ts")}`;
 }
 
 if (process.env.DATABASE_URL) {

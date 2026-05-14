@@ -17,7 +17,7 @@ import { ref, setup, Character, State, Equipment, $ } from "#test";
 import { VeteransVisage } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { Sucrose, WindSpiritCreation } from "@gi-tcg/data/internal/characters/anemo/sucrose";
 import { Aura } from "@gi-tcg/typings";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("damage combination", async () => {
   const target = ref();

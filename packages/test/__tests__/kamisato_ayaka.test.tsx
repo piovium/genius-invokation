@@ -16,7 +16,7 @@
 
 import { ref, setup, Character, State, Equipment, CombatStatus, Card } from "#test";
 import { KamisatoAyaka, KantenSenmyouBlessing } from "@gi-tcg/data/internal/characters/cryo/kamisato_ayaka";
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 
 test("a talent dup-equip test", async () => {
   const ayaka = ref();

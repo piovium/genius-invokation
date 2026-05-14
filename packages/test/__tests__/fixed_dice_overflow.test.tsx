@@ -15,7 +15,7 @@
 
 import { setup, State, Support } from "#test";
 import { SuperconductBlessingDeepFreeze } from "@gi-tcg/data/internal/cards/support/blessing";
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 
 test("fixedDice may not overflow initialDiceCount", async () => {
   const c = setup(

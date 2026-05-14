@@ -24,7 +24,7 @@ import {
   YunlaiSwordsmanship,
 } from "@gi-tcg/data/internal/characters/electro/keqing";
 import { Aura } from "@gi-tcg/typings";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("baizhu shield: onDispose", async () => {
   const baizhu = ref();

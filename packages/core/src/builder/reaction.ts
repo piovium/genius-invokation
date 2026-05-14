@@ -86,7 +86,9 @@ const swirl = (srcElement: SwirlableElement): ReactionAction => {
 function initialize() {
   // 此处有循环依赖。若 ReactionBuilder 在顶级，
   // 且打包后比 SkillBuilder 出现的位置更早，则会发生错误
-  class ReactionBuilder extends SkillBuilder<ReactionContextMeta> {
+  // Vite 的模块执行器似乎有 bug，必须先赋值到局部才能正确 extends
+  const SkillBuilder2 = SkillBuilder;
+  class ReactionBuilder extends SkillBuilder2<ReactionContextMeta> {
     constructor(private reaction: Reaction) {
       super(reaction);
       builderWeakRefs.add(new WeakRef(this));

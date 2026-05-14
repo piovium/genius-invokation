@@ -26,7 +26,7 @@ import { AncientRiteTheThunderingSands, Sethos, ThunderConvergence } from "@gi-t
 import { Barbara, WhisperOfWater } from "@gi-tcg/data/internal/characters/hydro/barbara";
 import { AurousBlaze, Yoimiya } from "@gi-tcg/data/internal/characters/pyro/yoimiya";
 import { Aura } from "@gi-tcg/typings";
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 
 test("chang & transformer: triggered on useSkill status", async () => {
   const chang = ref();

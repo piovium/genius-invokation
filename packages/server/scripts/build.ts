@@ -13,25 +13,66 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import inlineFrontendPlugin from "./bun_plugin_frontend";
+import { glob, readFile } from "node:fs/promises";
+import path from "node:path";
+import { build, type Plugin } from "rolldown";
+import { replacePlugin } from "rolldown/plugins";
 
-await Bun.build({
-  entrypoints: [`${import.meta.dirname}/../src/main.ts`],
-  outdir: `${import.meta.dirname}/../dist`,
+const frontendDir = path.join(import.meta.dirname, "../../web-client/dist");
+
+const virtualFrontendId = "\0inline-frontend";
+
+const inlineFrontendPlugin: Plugin = {
+  name: "inline-frontend",
+  resolveId(source) {
+    if (source === "@gi-tcg/web-client") {
+      return virtualFrontendId;
+    }
+    return null;
+  },
+  async load(id) {
+    if (id !== virtualFrontendId) return null;
+    const contents: Record<string, string> = {};
+    for await (const dirent of glob(`${frontendDir}/**/*`, {
+      cwd: frontendDir,
+      withFileTypes: true,
+    })) {
+      if (dirent.isFile()) {
+        const filepath = path.resolve(dirent.parentPath, dirent.name);
+        const relativePath = path.relative(frontendDir, filepath).replaceAll(path.sep, "/");
+        contents[relativePath] = (await readFile(filepath)).toString("base64");
+      }
+    }
+    return {
+      code: JSON.stringify(contents),
+      moduleType: "json",
+    };
+  },
+};
+
+await build({
+  input: `${import.meta.dirname}/../src/main.ts`,
+  output: {
+    dir: `${import.meta.dirname}/../dist`,
+    format: "esm",
+    sourcemap: true,
+    assetFileNames: "[name].[ext]",
+  },
   external: [
     "@nestjs/platform-express",
-    "@nestjs/microservices",
-    "@nestjs/websockets",
+    /^@nestjs\/microservices/,
+    /^@nestjs\/websockets/,
     "@fastify/view",
     "@fastify/static",
   ],
-  plugins: [inlineFrontendPlugin],
-  target: "bun",
-  conditions: ["bun", "es2015", "module"],
-  env: "inline",
-  // minify: true,
-  sourcemap: "linked",
-  naming: {
-    asset: `[name].[ext]`,
+  plugins: [
+    inlineFrontendPlugin,
+    replacePlugin({
+      "process.env.NODE_ENV": '"production"',
+    }),
+  ],
+  platform: "node",
+  resolve: {
+    conditionNames: ["es2015", "module"],
   },
 });

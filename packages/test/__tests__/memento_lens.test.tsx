@@ -16,7 +16,7 @@
 import { $, Card, Character, ref, setup, State } from "#test";
 import { TenacityOfTheMillelith } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { MementoLens } from "@gi-tcg/data/internal/cards/support/item";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("memento lens: repeated same-name support/equipment card can deduct cost", async () => {
   const target = ref();

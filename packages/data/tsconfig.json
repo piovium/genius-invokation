@@ -5,7 +5,7 @@
     "module": "ES2022",
     "moduleResolution": "Bundler",
     "lib": ["ESNext"],
-    "customConditions": ["bun"],
+    "customConditions": ["development"],
 
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -13,5 +13,5 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
   },
-  "references": [{ "path": "./tsconfig.bun.json" }]
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

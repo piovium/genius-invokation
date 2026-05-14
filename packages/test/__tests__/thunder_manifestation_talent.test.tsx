@@ -15,7 +15,7 @@
 
 import { ref, setup, Character, State, Status, Card, Equipment, $ } from "#test";
 import { MondstadtHashBrown } from "@gi-tcg/data/internal/cards/event/food";
-import { test } from "bun:test";
+import { test } from "vitest";
 import {
   ThunderManifestation,
   GrievingEcho,

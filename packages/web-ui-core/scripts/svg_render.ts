@@ -13,14 +13,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, Glob } from "bun";
+import { $ } from "execa";
+import { Hono } from "hono";
+import { serve } from "@hono/node-server";
 import puppeteer from "puppeteer-core";
 import {
   PuppeteerScreenRecorder,
   PuppeteerScreenRecorderOptions,
 } from "puppeteer-screen-recorder";
 import path from "node:path";
-import { mkdir } from "node:fs/promises";
+import { glob, mkdir, readFile } from "node:fs/promises";
 
 const port = 3000;
 
@@ -29,13 +31,10 @@ const outFolder = path.join(import.meta.dirname, "../out");
 
 await mkdir(outFolder, { recursive: true });
 
-const server = Bun.serve({
-  routes: {
-    "/*": async (req) => {
-      const { pathname } = new URL(req.url);
-      const content = await Bun.file(path.join(svgFolder, pathname)).text();
-      return new Response(
-        `<!DOCTYPE html>
+const hono = new Hono().get("/:filename", async (c) => {
+  const content = await readFile(path.join(svgFolder, c.req.param("filename")));
+  return new Response(
+    `<!DOCTYPE html>
 <link rel="icon" href="data:,">
 <style>
   body { margin: 0; height: 100vh; width: 100vw; overflow: clip; background: transparent; }
@@ -43,26 +42,29 @@ const server = Bun.serve({
 </style>
 <body>${content}</body>
 </html>`,
-        {
-          headers: {
-            "Content-Type": "text/html",
-          },
-        },
-      );
+    {
+      headers: {
+        "Content-Type": "text/html",
+      },
     },
-  },
+  );
+});
+const server = serve({
+  fetch: hono.fetch,
   port,
 });
 
-const url = `http://${server.hostname}:${server.port}/`;
+const url = `http://localhost:${port}/`;
 
 console.log(`SVG server running at ${url}`);
 
 const browser = (await puppeteer.launch({
-  executablePath: '/usr/bin/microsoft-edge',
+  executablePath: "/usr/bin/microsoft-edge",
   headless: false,
-})) as unknown as import("puppeteer").Browser;
+})) as unknown as import("puppeteer-core").Browser;
 const page = await browser.newPage();
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const ANIMATED: Record<string, number> = {
   "NightsoulsBlessingMask.svg": 6000,
@@ -77,7 +79,7 @@ const SKIPS: Record<string, number> = {
   "SelectingIcon.svg": 10_000,
 };
 
-for await (const file of new Glob("*.svg").scan(svgFolder)) {
+for await (const file of glob("*.svg", { cwd: svgFolder })) {
   if (SKIPS[file]) {
     continue;
   }
@@ -100,17 +102,18 @@ for await (const file of new Glob("*.svg").scan(svgFolder)) {
   await page.setViewport(info);
   if (ANIMATED[file]) {
     console.log(`Render animated SVG for ${file}...`);
-    await Bun.sleep(500); // Wait for magic happens...
+    await sleep(500); // Wait for magic happens...
+    // @ts-expect-error puppeteer vs puppeteer-core types mismatch
     const recorder = new PuppeteerScreenRecorder(page, {
       format: "png",
       fps: 25,
-      
     } as PuppeteerScreenRecorderOptions);
     await recorder.start(`${outFolder}/${file}`);
     console.log(`Waiting for ${ANIMATED[file]}ms...`);
-    await Bun.sleep(ANIMATED[file]);
+    await sleep(ANIMATED[file]);
     await recorder.stop();
-    await $`ffmpeg -y -i ${`${outFolder}/${file}/frame-%d.png`} -loop 0 -an -vf "fps=25,scale=${info.width}:${info.height}" ${`${outFolder}/${file}.webp`}`;
+    const options = `fps=25,scale=${info.width}:${info.height}`;
+    await $`ffmpeg -y -i ${`${outFolder}/${file}/frame-%d.png`} -loop 0 -an -vf ${options} ${`${outFolder}/${file}.webp`}`;
   } else {
     console.log(`Render static SVG for ${file}...`);
     const outfile = `${outFolder}/${file}.webp` as const;
@@ -126,4 +129,4 @@ for await (const file of new Glob("*.svg").scan(svgFolder)) {
 }
 
 await browser.close();
-await server.stop();
+server.close();

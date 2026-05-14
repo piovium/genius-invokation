@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 import {
   queryToExpression,
   $,
@@ -76,7 +76,7 @@ test("stringify of functions", () => {
     (intersection (defeated ignore)
                   (who opp)
                   (area characters true)
-                  (variables (fn "function seemsAlive({ health }) {\\n      return health > 0;\\n    }")))
+                  (variables (fn ${JSON.stringify("function " + obj.seemsAlive.toString())})))
   `);
 });
 

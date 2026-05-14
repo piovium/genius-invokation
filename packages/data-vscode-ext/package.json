@@ -20,20 +20,23 @@
   "main": "./dist/extension.js",
   "contributes": {},
   "scripts": {
-    "vscode:prepublish": "bun run build",
-    "build:method_names": "bun scripts/get_method_names.ts",
+    "vscode:prepublish": "pnpm build",
+    "build:method_names": "gnx scripts/get_method_names.mts",
     "build:ts": "tsdown",
-    "build": "bun run build:method_names && bun run build:ts",
-    "watch": "bun run build:ts --watch",
-    "package": "bun run build && bun scripts/publish.ts",
+    "build": "pnpm build:method_names && pnpm build:ts",
+    "watch": "pnpm build:ts --watch",
+    "package": "pnpm && gnx scripts/publish.mts",
     "check": "tsc --noEmit"
   },
   "devDependencies": {
-    "rxjs": "^7.8.1",
     "@gi-tcg/core": "workspace:*",
-    "@types/vscode": "^1.96.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
-    "@vscode/vsce": "^3.2.1"
+    "@types/vscode": "^1.96.0",
+    "@vscode/vsce": "^3.2.1",
+    "rxjs": "^7.8.1"
+  },
+  "dependencies": {
+    "execa": "catalog:"
   }
 }

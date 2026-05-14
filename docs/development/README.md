@@ -81,20 +81,27 @@ interface PlayerIO {
 
 ## 参与开发
 
-配置开发环境。安装 [Bun](https://bun.sh)，随后在仓库根目录下执行下述命令既可：
+配置开发环境。安装 Node.js v26+，随后在仓库根目录下执行下述命令既可：
 
 ```sh
-bun install
-bun run build
+corepack enable
+pnpm build
 ```
 
 随后即可调试修改数据定义包、核心包或者其它代码。
+
+### 关于运行时
+
+由于项目使用 TypeScript 编写，由于包含历史代码、生成代码等原因，项目多数无法直接简单转译为 JavaScript（如 `enum`、构造函数自动参数、不带扩展名的 `import`、legacy 装饰器等），故项目使用预加载 `tsx` 的 `node` 来运行这些代码（从而不用在开发时进行额外转译构建步骤）。在 `@gi-tcg/config` 中定义了 `gnx` 脚本（auGmented Node eXecution）来包装 `node` 以支持 TypeScript 模块解析和转译，之后该入口也将为 DSL 转译做准备。
+
+- 在 `scripts` 中，使用 `gnx` 来替代 `node`，如: `gnx scripts/foo.ts`；
+- 在命令行中，使用 `pnpm gnx`。
 
 ### 例：启动 `@gi-tcg/standalone` 项目的开发服务器
 
 ```
 cd packages/standalone
-bun dev
+pnpm dev
 ```
 
 ### 例：修改卡牌定义
@@ -106,7 +113,7 @@ bun dev
 ```sh
 cd packages/web-ui-core
 # 编辑 src/dev.tsx
-bun dev # 查看效果
+pnpm dev # 查看效果
 ```
 
 ### 例：参与游戏核心设计细节
@@ -120,6 +127,6 @@ bun dev # 查看效果
 
 ### 例：修改前后端通信数据格式
 
-修改 `@gi-tcg/typings` 中定义的数据结构后，请使用 `bun run build` 生成对应的 JSON Schema 文件。（否则核心可能会校验失败，切记！）
+修改 `@gi-tcg/typings` 中定义的数据结构后，请使用 `pnpm build` 生成对应的 JSON Schema 文件。（否则核心可能会校验失败，切记！）
 
 核心库中的 `src/io.ts` 中存在翻译 `GameState` 到对应数据格式的代码，你可能也要一并修改。

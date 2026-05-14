@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { $ } from "bun";
-import { resolve } from "node:path";
+import { $ } from "execa";
 
-await $`bunx buf generate`.cwd(`${import.meta.dirname}/../../..`);
+await $({ cwd: `${import.meta.dirname}/../../..` })`buf generate`;

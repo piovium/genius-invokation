@@ -15,7 +15,7 @@
 
 import { $, DeclaredEnd, State, Support, ref, setup } from "#test";
 import { Jeht, KidKujirai } from "@gi-tcg/data/internal/cards/support/ally";
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 
 test("Kid Kujirai: move to opponent support area without counting as dispose", async () => {
   const kid = ref();

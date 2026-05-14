@@ -1,5 +1,0 @@
-[install]
-peer = true
-
-[install.security]
-provider = "@socketsecurity/bun-security-scanner"

@@ -18,7 +18,7 @@ import { Qucusaurus, Target } from "@gi-tcg/data/internal/cards/equipment/techni
 import { Katheryne } from "@gi-tcg/data/internal/cards/support/ally";
 import { Chasca, ShadowhuntShell } from "@gi-tcg/data/internal/characters/anemo/chasca";
 import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona";
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 
 test("qucusaurus delayed one fast action to next switch", async () => {
   const switch1Target = ref();

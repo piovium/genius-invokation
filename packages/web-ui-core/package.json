@@ -6,8 +6,8 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "bun": "./src/index.ts",
       "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
       "import": "./dist/index.js"
     },
     "./style.css": "./dist/style.css"
@@ -16,9 +16,10 @@
     "**/*.css"
   ],
   "scripts": {
-    "dev": "bunx --bun vite",
+    "dev": "vite",
     "check": "tsc --noEmit",
-    "build": "bunx --bun vite build"
+    "build": "vite build",
+    "svg_render": "gnx ./scripts/svg_render.ts"
   },
   "dependencies": {
     "@gi-tcg/assets-manager": "workspace:*",
@@ -37,14 +38,16 @@
     "@gi-tcg/data": "workspace:*",
     "@gi-tcg/detail-log-viewer": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
+    "@hono/node-server": "^2.0.2",
+    "hono": "^4.12.18",
     "puppeteer-core": "^24.14.0",
     "puppeteer-screen-recorder": "^3.0.6",
     "rollup-plugin-node-externals": "catalog:",
     "solid-devtools": "^0.29.2",
     "svgo": "^4.0.0",
     "unocss": "catalog:",
-    "vite": "catalog:",
     "unplugin-dts": "catalog:",
+    "vite": "catalog:",
     "vite-plugin-solid": "catalog:"
   }
 }

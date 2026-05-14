@@ -7,14 +7,13 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "bun": "./src/index.ts",
       "development": "./src/index.ts",
       "import": "./dist/index.js"
     },
     "./internal/*": "./src/*.ts"
   },
   "scripts": {
-    "regenerate_data": "bun ./scripts/generators/index.ts",
+    "regenerate_data": "gnx ./scripts/generators/index.ts",
     "check": "tsc --noEmit",
     "build": "tsdown"
   },

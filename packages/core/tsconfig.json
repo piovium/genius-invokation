@@ -6,7 +6,7 @@
     ],
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "customConditions": ["bun"],
+    "customConditions": ["development"],
     
     "useDefineForClassFields": true,
     "esModuleInterop": true,
@@ -21,5 +21,5 @@
   "include": [
     "src/**/*.ts"
   ],
-  "references": [{ "path": "./tsconfig.bun.json" }]
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

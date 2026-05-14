@@ -16,7 +16,7 @@
 
 import { Character, ref, setup, State, Equipment, Card, Status, $ } from "#test";
 import { Wanderer, Windfavored, YuubanMeigen } from "@gi-tcg/data/internal/characters/anemo/wanderer";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("wanderer: normal attack to opp next", async () => {
   const sb = ref();

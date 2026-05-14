@@ -14,9 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import path from "node:path";
-import { mkdir, copyFile, rm } from "node:fs/promises";
+import { mkdir, copyFile, rm, writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
-import { $ } from "bun";
+import { $ } from "execa";
 
 const BASE_DIR = path.resolve(`${import.meta.dirname}/..`);
 
@@ -32,14 +32,17 @@ async function prepare() {
     await mkdir(path.dirname(target), { recursive: true });
     await copyFile(source, target);
   }
-  const packageJson = await Bun.file(
+  const { default: packageJson } = await import(
     path.resolve(BASE_DIR, "package.json"),
-  ).json();
+    {
+      with: { type: "json" },
+    }
+  );
   delete packageJson.scripts;
   delete packageJson.dependencies;
   delete packageJson.devDependencies;
   packageJson.name = packageJson.name.replace("@", "").replace("/", "-");
-  await Bun.write(
+  await writeFile(
     path.resolve(PUBLISH_DIR, "package.json"),
     JSON.stringify(packageJson, null, 2),
   );
@@ -47,11 +50,11 @@ async function prepare() {
 
 async function createPackage() {
   await prepare();
-  await $`bun x '@vscode/vsce' package --no-dependencies`.cwd(PUBLISH_DIR);
+  await $({ cwd: PUBLISH_DIR })`pnpx '@vscode/vsce' package --no-dependencies`;
 }
 async function publish() {
   await prepare();
-  await $`bun x '@vscode/vsce' publish --no-dependencies`.cwd(PUBLISH_DIR);
+  await $({ cwd: PUBLISH_DIR })`pnpx '@vscode/vsce' publish --no-dependencies`;
 }
 
 const { values } = parseArgs({

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { shuffle, sortDice } from "../src/utils";
 import { DiceType } from "@gi-tcg/typings";
 import { StateSymbol, type PlayerState } from "../src/base/state";

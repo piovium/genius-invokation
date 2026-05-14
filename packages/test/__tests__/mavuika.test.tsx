@@ -17,7 +17,7 @@ import { ref, setup, Character, State, Equipment, Card, $ } from "#test";
 import { LumenstoneAdjuvant } from "@gi-tcg/data/internal/cards/support/item";
 import { ScionsOfTheCanopy } from "@gi-tcg/data/internal/cards/support/place";
 import { FlamestriderBlazingTrail, Mavuika, TheNamedMoment } from "@gi-tcg/data/internal/characters/pyro/mavuika";
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 
 test("mavuika: play 'E' card trigger ScionsOfTheCanopy", async () => {
   const mavuika = ref();

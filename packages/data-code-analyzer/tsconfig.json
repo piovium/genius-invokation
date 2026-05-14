@@ -5,7 +5,7 @@
     "lib": [
       "ESNext"
     ],
-    "types": ["bun"],
+    "types": ["node"],
     
     "sourceMap": true,
     "strict": true, /* enable all strict type-checking options */

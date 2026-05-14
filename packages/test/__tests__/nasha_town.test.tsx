@@ -17,7 +17,7 @@ import { ref, setup, Character, State, Support, Card } from "#test";
 import { BrokenSea } from "@gi-tcg/data/internal/cards/event/other";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
 import { NashaTown } from "@gi-tcg/data/internal/cards/support/place";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("nasha town: triggered when disposed by broken sea", async () => {
   const target = ref();

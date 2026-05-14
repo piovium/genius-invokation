@@ -26,7 +26,7 @@ import {
   CombatStatus,
   $,
 } from "#test";
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect } from "vitest";
 import { VeteransVisage } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { PortablePowerSaw } from "@gi-tcg/data/internal/cards/equipment/weapon/claymore";
 import { CountdownToTheShow2, NatureAndWisdom, Strategize, TheNarzissenkreuzAdventure, UnderseaTreasure } from "@gi-tcg/data/internal/cards/event/other";

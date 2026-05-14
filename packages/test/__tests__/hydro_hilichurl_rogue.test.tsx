@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Card, Character, DeclaredEnd, Equipment, ref, setup, State, Status, $ } from "#test";
-import { test } from "bun:test";
+import { test } from "vitest";
 import { Aura, SkillHandle } from "@gi-tcg/core/builder";
 import { Keqing, StellarRestoration } from "@gi-tcg/data/internal/characters/electro/keqing";
 import { HydroHilichurlRogue, MistBubbleSlime, SlashOfSurgingTides } from "@gi-tcg/data/internal/characters/hydro/hydro_hilichurl_rogue";

@@ -3,15 +3,15 @@
   "type": "module",
   "exports": {
     ".": {
-      "bun": "./src/index.tsx",
       "types": "./dist/index.d.ts",
+      "development": "./src/index.tsx",
       "import": "./dist/index.js"
     },
     "./style.css": "./dist/style.css"
   },
   "scripts": {
-    "dev": "bunx --bun vite",
-    "build": "bunx --bun vite build"
+    "dev": "vite",
+    "build": "vite build"
   },
   "dependencies": {
     "@gi-tcg/assets-manager": "workspace:*",

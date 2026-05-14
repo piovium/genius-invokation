@@ -13,12 +13,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Glob } from "bun";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Project } from "ts-morph";
 import { TcgDataProject } from "./project";
 import { Location } from "./declaration";
+import { glob, writeFile } from "node:fs/promises";
 
 export const base = fileURLToPath(new URL("../../data", import.meta.url).href);
 
@@ -27,11 +27,10 @@ const project = new Project({
 });
 
 const tcgProject = new TcgDataProject(project);
-for await (const file of new Glob("src/**/*.ts").scan(base)) {
-  if (file.includes("old_versions")) {
+for await (const filepath of glob(`${base}/src/**/*.ts`)) {
+  if (filepath.includes("old_versions")) {
     continue;
   }
-  const filepath = path.join(base, file);
   const source = project.getSourceFileOrThrow(filepath);
   tcgProject.addFile(source);
 }
@@ -65,4 +64,4 @@ for (const [, file] of tcgProject.files) {
   }
 }
 
-await Bun.write(`${import.meta.dirname}/../src/result.json`, JSON.stringify(result, null, 2));
+await writeFile(`${import.meta.dirname}/../src/result.json`, JSON.stringify(result, null, 2));

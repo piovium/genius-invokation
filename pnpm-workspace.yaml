@@ -1,0 +1,36 @@
+packages:
+  - 'packages/*'
+
+overrides:
+  esbuild: 0.19.11
+  caniuse-lite: 1.0.30001778
+  babel-plugin-jsx-dom-expressions: 0.39.6
+
+catalog:
+  vite: ^8.0.8
+  unplugin-dts: ^1.0.0
+  vite-plugin-solid: ^2.11.8
+  rollup-plugin-node-externals: ^8.0.1
+  unocss: ^66.3.3
+  "@unocss/preset-icons": ^66.3.3
+  "@unocss/reset": ^66.3.3
+  solid-js: ^1.9.9
+  execa: ^9.6.1
+
+patchedDependencies:
+  ohm-js@17.1.0: patches/ohm-js@17.1.0.patch
+  puppeteer-screen-recorder@3.0.6: patches/puppeteer-screen-recorder@3.0.6.patch
+
+allowBuilds:
+  '@bufbuild/buf': true
+  '@ffmpeg-installer/darwin-arm64': true
+  '@ffmpeg-installer/linux-x64': true
+  '@nestjs/core': true
+  '@prisma/engines': true
+  '@swc/core': true
+  '@vscode/vsce-sign': true
+  core-js: true
+  esbuild: true
+  keytar: true
+  prisma: true
+  puppeteer: true

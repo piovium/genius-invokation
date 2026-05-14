@@ -84,7 +84,7 @@ export default function svgWithFallback(): Plugin {
 
     configResolved(cfg) {
       config = cfg;
-      solidPlugin = config.plugins.find((p) => p.name === "solid");
+      solidPlugin = config.plugins.find((p) => p.name === "solid")!;
       if (!solidPlugin) {
         throw new Error("solid plugin not found");
       }
@@ -111,8 +111,8 @@ export default function svgWithFallback(): Plugin {
         const transformFn =
           typeof solidPlugin.transform === "function"
             ? solidPlugin.transform
-            : solidPlugin.transform.handler;
-        return transformFn.bind(this)(source, `${path}.tsx`, transformOptions);
+            : solidPlugin.transform?.handler;
+        return transformFn?.bind(this)(source, `${path}.tsx`, transformOptions);
       }
     },
   };

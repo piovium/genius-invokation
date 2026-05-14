@@ -22,7 +22,7 @@ import {
   Summon,
   $,
 } from "#test";
-import { test } from "bun:test";
+import { test } from "vitest";
 import { GaleBlade, Jean } from "@gi-tcg/data/internal/characters/anemo/jean";
 import { Albedo, DescentOfDivinity, FavoniusBladeworkWeiss, SolarIsotoma } from "@gi-tcg/data/internal/characters/geo/albedo";
 

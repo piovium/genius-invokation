@@ -1,24 +1,28 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ESNext"],
+    "lib": [
+      "ESNext"
+    ],
     "module": "ESNext",
     "moduleResolution": "Bundler",
-
-    "types": ["bun"],
-    
+    "types": [
+      "node"
+    ],
     "useDefineForClassFields": true,
-
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-
     "strict": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
-
     "jsx": "react-jsx",
     "jsxImportSource": "#jsx",
   },
-  "include": ["src/**/*.ts", "__tests__/**/*.ts", "__tests__/**/*.tsx"],
+  "include": [
+    "src/**/*.ts",
+    "__tests__/**/*.ts",
+    "__tests__/**/*.tsx",
+    "../../vitest.setup.ts"
+  ],
 }

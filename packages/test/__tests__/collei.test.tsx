@@ -16,7 +16,7 @@
 import { ref, setup, State, Character, Card } from "#test";
 import { Collei, FloralSidewinder } from "@gi-tcg/data/internal/characters/dendro/collei";
 import { Aura } from "@gi-tcg/typings";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("collei: talent status won't target on defeated characters", async () => {
   const chosenNext = ref();

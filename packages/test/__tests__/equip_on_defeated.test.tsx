@@ -18,7 +18,7 @@ import { HeartOfKhvarenasBrilliance } from "@gi-tcg/data/internal/cards/equipmen
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
 import { Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";
 import { Keqing, YunlaiSwordsmanship } from "@gi-tcg/data/internal/characters/electro/keqing";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("HeartOfKhvarenasBrilliance should not trigger on defeated damage", async () => {
   const myNext = ref();

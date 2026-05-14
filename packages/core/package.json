@@ -6,13 +6,11 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "bun": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "development": "./src/index.ts",
       "import": "./dist/index.js"
     },
     "./builder": {
-      "bun": "./src/builder/index.ts",
       "types": "./dist/builder.d.ts",
       "development": "./src/builder/index.ts",
       "import": "./dist/builder.js"
@@ -21,10 +19,10 @@
   },
   "scripts": {
     "check": "tsc --noEmit",
-    "test": "bun test",
+    "test": "vitest",
     "build:ohm": "ohm generateBundles -et src/query-legacy/query.ohm",
-    "build": "bun build:ohm && tsdown",
-    "gen:s_expr_schema": "bun run scripts/gen_s_expr_schema.ts"
+    "build": "pnpm build:ohm && tsdown",
+    "gen:s_expr_schema": "gnx scripts/gen_s_expr_schema.ts"
   },
   "dependencies": {
     "@gi-tcg/typings": "workspace:*",

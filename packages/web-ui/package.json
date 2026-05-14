@@ -5,12 +5,12 @@
   "type": "module",
   "exports": {
     "types": "./dist/index.d.ts",
-    "bun": "./src/index.tsx",
+    "development": "./src/index.tsx",
     "import": "./dist/index.js"
   },
   "scripts": {
-    "dev": "bunx --bun vite",
-    "build": "bunx --bun vite build"
+    "dev": "vite",
+    "build": "vite build"
   },
   "devDependencies": {
     "solid-element": "^1.8.0",

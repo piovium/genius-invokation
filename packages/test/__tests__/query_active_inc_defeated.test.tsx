@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Status, $ } from "#test";
-import { test } from "bun:test";
+import { test } from "vitest";
 
 test("query: active includes defeated", async () => {
   const c = setup(

@@ -7,10 +7,9 @@
     "module": "Preserve",
     "lib": ["ESNext"],
     
-    "types": ["bun"]
+    "types": ["node"]
   },
   "include": [
-    "scripts/**/*.ts", 
-    "tsdown.config.ts",
+    "tsdown.config.ts"
   ]
 }
