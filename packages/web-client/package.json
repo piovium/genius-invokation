@@ -21,7 +21,7 @@
     "@solidjs/router": "^0.13.5",
     "@una-ui/preset": "^0.34.0-beta.1",
     "@unocss/reset": "catalog:",
-    "axios": "^1.7.2",
+    "axios": "catalog:",
     "core-js": "3.38.1",
     "dayjs": "^1.11.13",
     "p-limit": "^7.3.0",
