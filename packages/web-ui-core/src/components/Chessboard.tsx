@@ -611,6 +611,11 @@ interface ChessboardChildren {
   tuningArea: TuningAreaInfo | null;
 }
 
+interface SelectCardInfo {
+  candidateIds: number[];
+  selectedId: number;
+}
+
 function rerenderChildren(opt: {
   who: 0 | 1;
   size: Size;
@@ -621,6 +626,7 @@ function rerenderChildren(opt: {
   previewData: ParsedPreviewData;
   availableSteps: ActionStep[];
   hasOppChessboard: boolean;
+  selectCardInfo: SelectCardInfo | null;
 }): ChessboardChildren {
   const {
     size,
@@ -726,11 +732,23 @@ function rerenderChildren(opt: {
         const index = currentShowingCards.indexOf(animatingCard);
         const hasMiddle = index !== -1;
         if (hasMiddle) {
-          const [x, y] = getShowingCardPos(
-            size,
-            currentShowingCards.length,
-            index,
-          );
+          let totalCount = currentShowingCards.length;
+          let cardIndex = index;
+          const selectCardCtx = opt.selectCardInfo;
+          if (
+            selectCardCtx &&
+            animatingCard.data.definitionId === selectCardCtx.selectedId &&
+            currentShowingCards.some(
+              (c) => c.data.definitionId === selectCardCtx.selectedId,
+            )
+          ) {
+            totalCount = selectCardCtx.candidateIds.length;
+            cardIndex = selectCardCtx.candidateIds.indexOf(
+              selectCardCtx.selectedId,
+            );
+          }
+          console.log("render", opt.selectCardInfo)
+          const [x, y] = getShowingCardPos(size, totalCount, cardIndex);
           middleTransform = {
             x,
             y,
@@ -1135,6 +1153,7 @@ export function Chessboard(props: ChessboardProps) {
           previewData: localProps.actionState?.previewData ?? NO_PREVIEW,
           availableSteps: localProps.actionState?.availableSteps ?? [],
           hasOppChessboard: !!localProps.opp,
+          selectCardInfo: selectCardInfo(),
         });
         setChildren(newChildren);
         triggerUpdateChildren({ force: true });
@@ -1169,6 +1188,7 @@ export function Chessboard(props: ChessboardProps) {
           previewData: actionState?.previewData ?? NO_PREVIEW,
           availableSteps: actionState?.availableSteps ?? [],
           hasOppChessboard: !!localProps.opp,
+          selectCardInfo: selectCardInfo(),
         });
         setChildren(newChildren);
         triggerUpdateChildren({ force: false });
@@ -1422,6 +1442,9 @@ export function Chessboard(props: ChessboardProps) {
       setSelectingItem({ type: "card", info: cardInfo });
     }
   };
+
+  const [selectCardInfo, setSelectCardInfo] =
+    createSignal<SelectCardInfo | null>(null);
 
   const onCardPointerEnter = (
     e: PointerEvent,
@@ -1882,6 +1905,11 @@ export function Chessboard(props: ChessboardProps) {
               dataViewerController.showCard(id);
             }}
             onConfirm={(id) => {
+              setSelectCardInfo({
+                candidateIds: localProps.selectCardCandidates,
+                selectedId: id,
+              });
+              console.log("select", selectCardInfo())
               localProps.onSelectCard?.(id);
               dataViewerController.hide();
             }}
