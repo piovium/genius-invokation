@@ -1247,7 +1247,7 @@ export function Chessboard(props: ChessboardProps) {
     }
     const timeout = window.setTimeout(() => {
       setShowCardHint(area, null);
-    }, 500);
+    }, 1500);
     setShowCardHint(area, timeout);
   };
 

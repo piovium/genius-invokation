@@ -252,7 +252,7 @@ export function getShowingCardPos(
 export function getPileHintPos(size: Size, opp: boolean) {
   const [x, y] = getPilePos(size, opp);
   return {
-    x: x + 0.5,
+    x: x,
     y: y - CARD_WIDTH / 2 - 4.5,
   };
 }
