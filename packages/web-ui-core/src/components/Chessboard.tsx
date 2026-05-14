@@ -19,10 +19,7 @@ import {
   PbAttachmentState,
   PbDiceRequirement,
   PbDiceType,
-  PbExposedMutation,
   PbPhaseType,
-  PbPlayerStatus,
-  PbSkillInfo,
   type DamageType,
   type PbCharacterState,
   type PbEntityState,
@@ -36,13 +33,11 @@ import {
   createEffect,
   createMemo,
   createSignal,
-  Match,
   on,
   onCleanup,
   onMount,
   Show,
   splitProps,
-  Switch,
   untrack,
   type ComponentProps,
   type JSX,
@@ -63,7 +58,6 @@ import {
   getPilePos,
   getShowingCardPos,
   getTuningAreaPos,
-  MINIMUM_HEIGHT,
   MINIMUM_WIDTH,
   PERSPECTIVE,
   shouldFocusHandWhenDragging,
@@ -611,9 +605,24 @@ interface ChessboardChildren {
   tuningArea: TuningAreaInfo | null;
 }
 
-interface SelectCardInfo {
-  candidateIds: number[];
-  selectedId: number;
+interface ShowingCardPositionOverride {
+  readonly totalCount: number;
+  readonly cardIndex: number;
+}
+
+class ShowingCardPositionOverrideToken {
+  #store: ShowingCardPositionOverride | null = null;
+  reset(totalCount: number, cardIndex: number) {
+    this.#store = { totalCount, cardIndex };
+  }
+  consume(): ShowingCardPositionOverride | null {
+    if (!this.#store) {
+      return null;
+    }
+    const result = { ...this.#store };
+    this.#store = null;
+    return result;
+  }
 }
 
 function rerenderChildren(opt: {
@@ -626,7 +635,7 @@ function rerenderChildren(opt: {
   previewData: ParsedPreviewData;
   availableSteps: ActionStep[];
   hasOppChessboard: boolean;
-  selectCardInfo: SelectCardInfo | null;
+  overrideShowingCardPosition: ShowingCardPositionOverrideToken;
 }): ChessboardChildren {
   const {
     size,
@@ -732,22 +741,11 @@ function rerenderChildren(opt: {
         const index = currentShowingCards.indexOf(animatingCard);
         const hasMiddle = index !== -1;
         if (hasMiddle) {
-          let totalCount = currentShowingCards.length;
-          let cardIndex = index;
-          const selectCardCtx = opt.selectCardInfo;
-          if (
-            selectCardCtx &&
-            animatingCard.data.definitionId === selectCardCtx.selectedId &&
-            currentShowingCards.some(
-              (c) => c.data.definitionId === selectCardCtx.selectedId,
-            )
-          ) {
-            totalCount = selectCardCtx.candidateIds.length;
-            cardIndex = selectCardCtx.candidateIds.indexOf(
-              selectCardCtx.selectedId,
-            );
-          }
-          console.log("render", opt.selectCardInfo)
+          const overridePosition =
+            opt.overrideShowingCardPosition.consume();
+          const totalCount =
+            overridePosition?.totalCount ?? currentShowingCards.length;
+          const cardIndex = overridePosition?.cardIndex ?? index;
           const [x, y] = getShowingCardPos(size, totalCount, cardIndex);
           middleTransform = {
             x,
@@ -1101,6 +1099,8 @@ export function Chessboard(props: ChessboardProps) {
   );
   const [getDraggingHand, setDraggingHand] =
     createSignal<DraggingCardInfo | null>(null);
+  const overrideShowingCardPosition = new ShowingCardPositionOverrideToken();
+
   const canToggleHandFocus = createMemo(
     () => localProps.data.animatingCards.length === 0,
   );
@@ -1153,7 +1153,7 @@ export function Chessboard(props: ChessboardProps) {
           previewData: localProps.actionState?.previewData ?? NO_PREVIEW,
           availableSteps: localProps.actionState?.availableSteps ?? [],
           hasOppChessboard: !!localProps.opp,
-          selectCardInfo: selectCardInfo(),
+          overrideShowingCardPosition,
         });
         setChildren(newChildren);
         triggerUpdateChildren({ force: true });
@@ -1188,7 +1188,7 @@ export function Chessboard(props: ChessboardProps) {
           previewData: actionState?.previewData ?? NO_PREVIEW,
           availableSteps: actionState?.availableSteps ?? [],
           hasOppChessboard: !!localProps.opp,
-          selectCardInfo: selectCardInfo(),
+          overrideShowingCardPosition,
         });
         setChildren(newChildren);
         triggerUpdateChildren({ force: false });
@@ -1442,9 +1442,6 @@ export function Chessboard(props: ChessboardProps) {
       setSelectingItem({ type: "card", info: cardInfo });
     }
   };
-
-  const [selectCardInfo, setSelectCardInfo] =
-    createSignal<SelectCardInfo | null>(null);
 
   const onCardPointerEnter = (
     e: PointerEvent,
@@ -1905,11 +1902,13 @@ export function Chessboard(props: ChessboardProps) {
               dataViewerController.showCard(id);
             }}
             onConfirm={(id) => {
-              setSelectCardInfo({
-                candidateIds: localProps.selectCardCandidates,
-                selectedId: id,
-              });
-              console.log("select", selectCardInfo())
+              const index = localProps.selectCardCandidates.indexOf(id);
+              if (index >= 0) {
+                overrideShowingCardPosition.reset(
+                  localProps.selectCardCandidates.length,
+                  index,
+                );
+              }
               localProps.onSelectCard?.(id);
               dataViewerController.hide();
             }}
