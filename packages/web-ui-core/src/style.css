@@ -1,3 +1,6 @@
+@import "@gi-tcg/utils/reset.css";
+@import "@gi-tcg/card-data-viewer/style.css";
+
 .gi-tcg-chessboard-new {
   --c-void: #766368;
   --c-electro: #b178eb;
