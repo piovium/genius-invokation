@@ -1,6 +1,7 @@
 {
   "name": "@gi-tcg/custom-data-loader",
-  "version": "0.19.1+gi-6-0-0",
+  "private": true,
+  "version": "0.20.0+gi-6-0-0",
   "description": "Provides an easy way to load your custom data for GI-TCG",
   "type": "module",
   "types": "./dist/index.d.ts",

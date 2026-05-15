@@ -1,5 +1,6 @@
 {
   "name": "@gi-tcg/data-vscode-ext",
+  "private": true,
   "displayName": "Genius Invokation TCG Data Code Extension",
   "description": "Just add magical text decorations to @gi-tcg/data package's source",
   "publisher": "Guyutongxue",

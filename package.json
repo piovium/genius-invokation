@@ -1,5 +1,6 @@
 {
   "name": "genius-invokation",
+  "version": "0.0.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -14,7 +15,7 @@
     ".filter-prod": "gnx scripts/filter.ts -P",
     "build": "pnpm .filter build",
     "test": "pnpm -r test",
-    "publish": "pnpm .filter-prod publish core...,data...,assets-manager...,web-ui-core...,web-ui...",
+    "publish": "pnpm -r publish",
     "build:no-typing": "NO_TYPING=1 pnpm build"
   },
   "devDependencies": {

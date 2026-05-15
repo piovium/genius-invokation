@@ -2,6 +2,9 @@
 
 **仅记录破坏性改动。**
 
+## 0.20.0
+- 迁移 Bun 至 Node.js。
+
 ## 0.19.0
 - 移除了不再使用的 `GITCG_ENTITY_TYPE_EVENT_CARD`。
 - `core` 不再 pollute `Array.prototype`。
