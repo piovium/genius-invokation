@@ -1,16 +1,18 @@
-<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <g>
-        <circle cx="32" cy="34" r="28" fill="#4C5F65" />
-        <rect x="17" y="3" width="30" height="7" rx="3.5" fill="#52A9B4" stroke="#4C5F65"
-            stroke-width="2" />
-        <circle cx="32" cy="34" r="26" fill="url(#paint0_linear_175_62)" />
-        <circle opacity="0.8" cx="32" cy="34" r="20.5" stroke="#52969D" stroke-width="3" />
-    </g>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    viewBox="0 0 96 96">
     <defs>
-        <linearGradient id="paint0_linear_175_62" x1="32" y1="9.85714" x2="32" y2="42.5"
-            gradientUnits="userSpaceOnUse">
-            <stop stop-color="#52A9B4" />
-            <stop offset="1" stop-color="#81CCD4" />
+        <linearGradient id="b" x1="48" y1="115.21" x2="48" y2="66.25"
+            gradientTransform="translate(0 130) scale(1 -1)" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#52a9b4" />
+            <stop offset="1" stop-color="#81ccd4" />
         </linearGradient>
     </defs>
+    <circle cx="48" cy="51" r="42" fill="#4c5f65" />
+    <path
+        d="M30.75,4.5h34.5c2.9,0,5.25,2.35,5.25,5.25h0c0,2.9-2.35,5.25-5.25,5.25H30.75c-2.9,0-5.25-2.35-5.25-5.25h0c0-2.9,2.35-5.25,5.25-5.25Z"
+        fill="#52a9b4" stroke="#4c5f65" stroke-width="3" />
+    <circle cx="48" cy="51" r="39" fill="url(#b)" />
+    <circle cx="48" cy="51" r="30.75" fill="none" isolation="isolate" opacity=".8" stroke="#52969d"
+        stroke-width="4.5" />
 </svg>

@@ -35,11 +35,6 @@ function Status(props: StatusProps) {
         fallback="state"
         bool:data-disposing={props.animation === "disposing"}
       />
-      <Show when={typeof data().variableValue === "number"}>
-        <div class="absolute bottom--0.5 right--0.5 w-2.5 h-2.5 rounded-full bg-black/60 text-2.5 text-white text-center line-height-none">
-          {data().variableValue}
-        </div>
-      </Show>
       <div
         class="grid-area-[1/1] rounded-full status-effect"
         bool:data-usable={hasUsagePerRound()}
@@ -47,6 +42,11 @@ function Status(props: StatusProps) {
         bool:data-disposing={props.animation === "disposing"}
         bool:data-triggered={props.triggered}
       />
+      <Show when={typeof data().variableValue === "number"}>
+        <div class="grid-area-[1/1] place-self-end m--0.5 w-2.5 h-2.5 rounded-full bg-black/60 text-2.5 text-white text-center line-height-none">
+          {data().variableValue}
+        </div>
+      </Show>
     </div>
   );
 }
@@ -61,11 +61,29 @@ export function StatusGroup(props: StatusGroupProps) {
   const statuses = createMemo(() =>
     showEllipsis() ? props.statuses.slice(0, 3) : props.statuses,
   );
+  const ellipsisStatuses = createMemo((): StatusViewInfo[] =>
+    showEllipsis() ? props.statuses.slice(3) : [],
+  );
   return (
     <div class={`flex flex-row ${props.class ?? ""}`}>
       <For each={statuses()}>{(status) => <Status {...status} />}</For>
       <Show when={showEllipsis()}>
-        <MoreStatus class="h-5.5 w-5.5 m--0.25" />
+        <div class="h-5 w-5 relative grid">
+          <MoreStatus class="grid-area-[1/1] h-5.5 w-5.5 m--0.25 place-self-center" />
+          <div class="grid-area-[1/1] place-self-end m--0.5 w-2.5 h-2.5 rounded-full bg-black/60 text-2.5 text-white text-center line-height-none">
+            {ellipsisStatuses().length}
+          </div>
+          <div
+            class="grid-area-[1/1] rounded-full status-effect"
+            bool:data-entering={ellipsisStatuses().some(
+              (es) => es.animation === "entering",
+            )}
+            bool:data-disposing={ellipsisStatuses().some(
+              (es) => es.animation === "disposing",
+            )}
+            bool:data-triggered={ellipsisStatuses().some((es) => es.triggered)}
+          />
+        </div>
       </Show>
     </div>
   );
@@ -103,7 +121,7 @@ export function MoreStatus(props: { class?: string }) {
   );
   return (
     <Show when={url.state === "ready"}>
-      <img class={props.class} src={url()} />
+      <img class={`object-cover ${props.class ?? ""}`} src={url()} />
     </Show>
   );
 }

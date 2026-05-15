@@ -690,7 +690,7 @@ function EnergyCellBar(props: EnergyCellBarProps) {
         {(comp, idx) => (
           <Dynamic<Component<ComponentProps<"div">>>
             component={props.cellComponentMap[comp]}
-            class="w-6 h-4 grid-area-[var(--row-idx)/1]"
+            class="w-9 h-6 grid-area-[var(--row-idx)/1] my--1"
             style={{ "--row-idx": idx() + 1 }}
           />
         )}
@@ -700,7 +700,7 @@ function EnergyCellBar(props: EnergyCellBarProps) {
           {(comp, idx) => (
             <Dynamic<Component<ComponentProps<"div">>>
               component={props.cellComponentMap[comp]}
-              class="w-6 h-4 grid-area-[var(--row-idx)/1] energy-preview"
+              class="w-9 h-6 grid-area-[var(--row-idx)/1] my--1 energy-preview"
               style={{ "--row-idx": idx() + 1 }}
             />
           )}

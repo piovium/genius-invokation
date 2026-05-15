@@ -93,6 +93,7 @@ export function Entity(props: EntityProps) {
       !props.previewingNew,
   );
   return (
+    // 7:8.25
     <div
       class="absolute left-0 top-0 h-17.7 w-15 transition-all rounded-1.2 clickable-outline entity"
       style={cssPropertyOfTransform(props.uiState.transform)}
@@ -106,7 +107,7 @@ export function Entity(props: EntityProps) {
       }}
     >
       <Image
-        class="absolute inset-0 h-full w-full p-2px rounded-lg text-2.5"
+        class="absolute inset-0 h-full w-full p-1% rounded-md text-2.5"
         imageId={data().definitionId}
         fallback="card"
       />
