@@ -1,6 +1,6 @@
 {
   "name": "@gi-tcg/deck-builder",
-  "version": "0.20.4",
+  "version": "0.20.5",
   "type": "module",
   "description": "SolidJS Deck Builder component for Genius Invokation TCG",
   "types": "./dist/index.d.ts",
