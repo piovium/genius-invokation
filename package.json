@@ -9,7 +9,7 @@
   "engines": {
     "node": "^26.1.0"
   },
-  "packageManager": "pnpm@11.0.8",
+  "packageManager": "pnpm@11.0.9",
   "scripts": {
     ".filter": "gnx scripts/filter.ts",
     ".filter-prod": "gnx scripts/filter.ts -P",
