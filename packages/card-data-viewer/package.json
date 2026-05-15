@@ -1,6 +1,6 @@
 {
   "name": "@gi-tcg/card-data-viewer",
-  "version": "0.20.3",
+  "version": "0.20.4",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -10,12 +10,15 @@
   },
   "exports": {
     ".": {
-      "development": "./src/index.tsx",
       "types": "./dist/index.d.ts",
+      "development": ["./src/index.tsx", "./dist/index.js"],
       "import": "./dist/index.js"
     },
     "./style.css": "./dist/style.css"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "check": "tsc --noEmit",
