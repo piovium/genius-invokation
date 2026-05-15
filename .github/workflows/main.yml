@@ -71,7 +71,7 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm build
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-          pnpm run publish --provenance --access public
+          pnpm run publish --provenance --access public --no-git-checks
 
   Build-C:
     name: 💽 Build C Binding

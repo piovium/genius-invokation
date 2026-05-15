@@ -1,16 +1,23 @@
 {
   "name": "@gi-tcg/typings",
-  "version": "0.19.1",
+  "version": "0.20.5",
   "description": "Typings for Genius Invokation TCG",
   "type": "module",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "url": "https://github.com/piovium/genius-invokation",
+    "directory": "packages/typings"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "development": "./src/index.ts",
+      "development": ["./src/index.ts", "./dist/index.js"],
       "import": "./dist/index.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build:buf": "gnx scripts/buf.ts",
     "build": "pnpm build:buf && tsdown"

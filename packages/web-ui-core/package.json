@@ -1,17 +1,24 @@
 {
   "name": "@gi-tcg/web-ui-core",
-  "version": "0.19.1",
+  "version": "0.20.5",
   "description": "Core component of @gi-tcg/web-ui",
   "type": "module",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "url": "https://github.com/piovium/genius-invokation",
+    "directory": "packages/web-ui-core"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "development": "./src/index.ts",
+      "development": ["./src/index.ts", "./dist/index.js"],
       "import": "./dist/index.js"
     },
     "./style.css": "./dist/style.css"
   },
+  "files": [
+    "dist"
+  ],
   "sideEffects": [
     "**/*.css"
   ],
