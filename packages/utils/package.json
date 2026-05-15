@@ -1,9 +1,13 @@
 {
   "name": "@gi-tcg/utils",
-  "version": "0.20.1",
+  "version": "0.20.2",
   "description": "Utility functions for Genius Invokation TCG",
   "type": "module",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "url": "https://github.com/piovium/genius-invokation",
+    "directory": "packages/utils"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

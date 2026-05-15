@@ -1,9 +1,13 @@
 {
   "name": "@gi-tcg/data",
-  "version": "0.20.1+gi-6-5-0",
+  "version": "0.20.2+gi-6-5-0",
   "description": "Standard card data for Genius Invokation TCG",
   "type": "module",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "url": "https://github.com/piovium/genius-invokation",
+    "directory": "packages/data"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
