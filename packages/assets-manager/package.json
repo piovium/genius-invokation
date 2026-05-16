@@ -1,8 +1,12 @@
 {
   "name": "@gi-tcg/assets-manager",
-  "version": "0.19.1",
+  "version": "0.20.5",
   "type": "module",
   "description": "Manage assets of GI-TCG for Web app",
+  "repository": {
+    "url": "https://github.com/piovium/genius-invokation",
+    "directory": "packages/assets-manager"
+  },
   "dependencies": {
     "@gi-tcg/typings": "workspace:*",
     "p-limit": "^7.1.1"
@@ -18,14 +22,17 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "development": "./src/index.ts",
+      "development": ["./src/index.ts", "./dist/index.js"],
       "import": "./dist/index.js"
     },
     "./data/*": {
-      "development": "./src/data/*.json",
+      "development": ["./src/data/*.json", "./dist/data/*.json"],
       "import": "./dist/data/*.json"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build:data": "gnx --import=./scripts/fetch_preload.ts ./scripts/fetch.ts",
     "build:ts": "tsdown",

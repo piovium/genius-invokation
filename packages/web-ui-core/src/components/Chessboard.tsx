@@ -95,7 +95,6 @@ import { SkillButtonGroup } from "./SkillButtonGroup";
 import { createStore } from "solid-js/store";
 import { RoundAndPhaseNotification } from "./RoundAndPhaseNotification";
 import { PlayingCard } from "./PlayingCard";
-import "@gi-tcg/card-data-viewer/style.css";
 import { createCardDataViewer } from "@gi-tcg/card-data-viewer";
 import { useUiContext } from "../hooks/context";
 import { CardCountHint } from "./CardCountHint";

@@ -1,22 +1,29 @@
 {
   "name": "@gi-tcg/core",
-  "version": "0.19.1",
+  "version": "0.20.5",
   "type": "module",
   "description": "Genius Invokation TCG Simulator core library",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "url": "https://github.com/piovium/genius-invokation",
+    "directory": "packages/core"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "development": "./src/index.ts",
+      "development": ["./src/index.ts", "./dist/index.js"],
       "import": "./dist/index.js"
     },
     "./builder": {
       "types": "./dist/builder.d.ts",
-      "development": "./src/builder/index.ts",
+      "development": ["./src/builder/index.ts", "./dist/builder.js"],
       "import": "./dist/builder.js"
     },
     "./builder/internal": "./src/builder/internal_exports.ts"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "check": "tsc --noEmit",
     "test": "vitest",
