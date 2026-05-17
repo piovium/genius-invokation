@@ -528,6 +528,39 @@
       500ms linear forwards blink-25;
   }
 
+  /* Function Button */
+  .function-button {
+    border-radius: 1rem;
+    border-width: 2px;
+    background-color: #e9e2d3;
+    border-color: #000000b0;
+    transition-property: background-color, border-color;
+    transition-duration: 150ms;
+  }
+
+  .function-button:hover {
+    border-color: #ffffff;
+  }
+
+  .function-button:active {
+    background-color: #cfa56a;
+    border-color: #91744a;
+  }
+
+  .function-button.danger {
+    background-color: #ef4444;
+    border-color: #991b1b;
+  }
+
+  .function-button.danger:hover {
+    border-color: #ffffff;
+  }
+  
+  .function-button.danger:active {
+    background-color: #dc2626;
+    border-color: #991b1b;
+  }
+
   /* end */
 
   &[data-has-opp-chessboard] {
@@ -821,27 +854,6 @@
     filter: var(--filter-electric-shocks);
     margin-top: -4px;
     margin-left: -4px;
-  }
-
-  .function-button {
-    border-radius: 1rem;
-    border-width: 2px;
-    background-color: #e9e2d3;
-    color: rgba(0, 0, 0, 0.7);
-    border-color: rgba(0, 0, 0, 0.7);
-    line-height: 1;
-    cursor: pointer;
-    transition-property: color, background-color, border-color;
-    transition-duration: 150ms;
-  }
-
-  .function-button:hover {
-    border-color: #ffffff;
-  }
-
-  .function-button:active {
-    background-color: #cfa56a;
-    border-color: #91744a;
   }
 }
 

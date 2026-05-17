@@ -1,19 +1,26 @@
-<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <g opacity="0.7">
-        <mask id="mask0_302_2" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0"
-            width="56" height="56">
-            <path d="M7.07132e-09 0H56V28H28V56H0L7.07132e-09 0Z" fill="black" />
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    viewBox="0 0 64 64">
+    <defs>
+        <filter id="c" x="12" y="12" width="35" height="35" color-interpolation-filters="sRGB"
+            filterUnits="userSpaceOnUse">
+            <feColorMatrix result="cm" values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0" />
+        </filter>
+        <mask id="b" x="12" y="12" width="35" height="35" maskUnits="userSpaceOnUse">
+            <g filter="url(#c)">
+                <path d="M12,12h35v17.5h-17.5v17.5H12V12Z" />
+            </g>
         </mask>
-        <g mask="url(#mask0_302_2)">
+    </defs>
+    <g opacity=".7">
+        <g mask="url(#b)">
             <path
-                d="M14 3H42C48.0751 3 53 7.92487 53 14V42C53 48.0751 48.0751 53 42 53H14C7.92492 52.9999 3 48.0751 3 42V14C3 7.92491 7.92492 3.00006 14 3Z"
-                stroke="black" stroke-width="6" />
+                d="M20.75,13.88h17.5c3.8,0,6.88,3.08,6.88,6.88v17.5c0,3.8-3.08,6.88-6.88,6.88h-17.5c-3.8,0-6.88-3.08-6.88-6.88v-17.5c0-3.8,3.08-6.87,6.88-6.88Z"
+                fill="none" stroke="#000" stroke-width="3.75" />
         </g>
         <path
-            d="M31.0001 43C31.0001 36.3726 36.3726 31 43.0001 31H52C58.6274 31 64 36.3726 64 43V52C64 58.6274 58.6274 64 52 64H43.0001C36.3727 64 31.0001 58.6274 31.0001 52V43Z"
-            fill="black" />
+            d="M31.38,38.88c0-4.14,3.36-7.5,7.5-7.5h5.62c4.14,0,7.5,3.36,7.5,7.5v5.62c0,4.14-3.36,7.5-7.5,7.5h-5.62c-4.14,0-7.5-3.36-7.5-7.5v-5.62Z" />
         <path
-            d="M15 12C13.3431 12 12 13.3431 12 15L12 30C12 31.6569 13.3431 33 15 33C16.6569 33 18 31.6569 18 30L18 18L30 18C31.6569 18 33 16.6569 33 15C33 13.3431 31.6569 12 30 12L15 12ZM31 31L33.1213 28.8787L17.1213 12.8787L15 15L12.8787 17.1213L28.8787 33.1213L31 31Z"
-            fill="black" />
+            d="M21.38,19.5c-1.04,0-1.88.84-1.88,1.88v9.38c0,1.04.84,1.88,1.88,1.88s1.88-.84,1.88-1.88v-7.5h7.5c1.04,0,1.88-.84,1.88-1.88s-.84-1.88-1.88-1.88h-9.38ZM31.38,31.38l1.33-1.33-10-10-1.33,1.33-1.33,1.33,10,10,1.33-1.33Z" />
     </g>
 </svg>

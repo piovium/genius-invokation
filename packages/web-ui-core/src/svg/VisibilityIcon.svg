@@ -1,18 +1,10 @@
-<svg
-  xmlns="http://www.w3.org/2000/svg"
-  viewBox="0 0 24 24"
->
-  <g
-    fill="none"
-    stroke="black"
-    stroke-linecap="round"
-    stroke-width="2.5"
-    opacity="0.7"
-  >
-    <path
-      stroke-linejoin="round"
-      d="M10.73 5.073A11 11 0 0 1 12 5c4.664 0 8.4 2.903 10 7a11.6 11.6 0 0 1-1.555 2.788M6.52 6.519C4.48 7.764 2.9 9.693 2 12c1.6 4.097 5.336 7 10 7a10.44 10.44 0 0 0 5.48-1.52m-7.6-7.6a3 3 0 1 0 4.243 4.243"
-    />
-    <path d="m4 4l16 16" />
-  </g>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <g opacity=".7">
+        <path
+            d="M29.62,19.01c.79-.09,1.59-.14,2.38-.14,8.74,0,15.75,5.44,18.75,13.12-.73,1.87-1.71,3.63-2.92,5.23M21.72,21.72c-3.82,2.33-6.79,5.95-8.47,10.28,3,7.68,10,13.12,18.75,13.12,3.62.02,7.18-.97,10.27-2.85M28.02,28.02c-2.2,2.2-2.2,5.76,0,7.96s5.76,2.2,7.96,0"
+            fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round"
+            stroke-width="4.69" />
+        <path d="M17,17l30,30" fill="none" stroke="#000" stroke-linecap="round" stroke-width="4.69" />
+    </g>
 </svg>

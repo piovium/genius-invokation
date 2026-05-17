@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import { For, Show } from "solid-js";
+import { Show } from "solid-js";
 import VisibilityIcon from "../svg/VisibilityIcon.svg?fb";
 import HistoryIcon from "../svg/HistoryIcon.svg?fb";
 import FullScreen from "../svg/FullScreen.svg?fb";
@@ -27,12 +27,12 @@ export interface SpecialViewToggleButtonProps {
 export function SpecialViewToggleButton(props: SpecialViewToggleButtonProps) {
   return (
     <button
-      class="h-8 w-8 flex items-center justify-center function-button"
+      class="h-8 w-8 function-button"
       onClick={() => {
         props.onClick?.();
       }}
     >
-      <VisibilityIcon class="h-5.6 w-5.6" />
+      <VisibilityIcon class="h-7 w-7" />
     </button>
   );
 }
@@ -44,12 +44,12 @@ export interface HistoryToggleButtonProps {
 export function HistoryToggleButton(props: HistoryToggleButtonProps) {
   return (
     <button
-      class="h-8 w-8 flex items-center justify-center rounded-full b-2 bg-#e9e2d3 text-black/70 b-black/70 hover:b-white active:bg-#cfa56a active:b-#91744a transition-colors line-height-none cursor-pointer"
+      class="h-8 w-8 function-button"
       onClick={() => {
         props.onClick?.();
       }}
     >
-      <HistoryIcon class="h-5.4 w-5.4" />
+      <HistoryIcon class="h-7 w-7" />
     </button>
   );
 }
@@ -62,16 +62,16 @@ export interface FullScreenToggleButtonProps {
 export function FullScreenToggleButton(props: FullScreenToggleButtonProps) {
   return (
     <button
-      class="h-8 w-8 flex items-center justify-center function-button"
+      class="h-8 w-8 function-button"
       onClick={() => {
         props.onClick?.();
       }}
     >
       <Show
         when={!props.isFullScreen}
-        fallback={<NormalScreen class="h-5 w-5" />}
+        fallback={<NormalScreen class="h-7 w-7" />}
       >
-        <FullScreen class="h-5 w-5" />
+        <FullScreen class="h-7 w-7" />
       </Show>
     </button>
   );
@@ -85,13 +85,13 @@ export function ExitButton(props: ExitButtonProps) {
   const { t } = useUiContext();
   return (
     <button
-      class="h-8 w-8 pr-1 flex items-center justify-center rounded-full b-red-800 b-2 bg-red-500 hover:bg-red-600 active:bg-red-600 text-white transition-colors line-height-none cursor-pointer"
+      class="h-8 w-8 function-button danger"
       title={t("ui.giveUpGame")}
       onClick={() => {
         props.onClick?.();
       }}
     >
-      <ExitIcon class="h-5 w-5" />
+      <ExitIcon class="h-7 w-7" />
     </button>
   );
 }

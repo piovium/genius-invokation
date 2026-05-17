@@ -1944,7 +1944,7 @@ export function Chessboard(props: ChessboardProps) {
           </div>
           {/* 右上角部件 */}
           <Show when={!localProps.liveStreamingMode}>
-            <div class="absolute top-2 right-2 flex flex-row-reverse gap-1.5">
+            <div class="grid-area-[1/1] justify-self-end m-2 flex flex-row-reverse gap-1.5">
               <Show when={localProps.data.state.phase !== PbPhaseType.GAME_END}>
                 <ExitButton onClick={onExit} />
               </Show>
