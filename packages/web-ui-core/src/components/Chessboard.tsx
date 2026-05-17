@@ -1697,7 +1697,7 @@ export function Chessboard(props: ChessboardProps) {
         <ChessboardBackground color={localProps.chessboardColor} />
         {/* 3d space */}
         <div
-          class="relative h-full w-full preserve-3d select-none grid-area-[1/1]"
+          class="relative h-full w-full preserve-3d select-none grid-area-[1/1] z-1"
           ref={chessboardElement}
           onClick={onChessboardClick}
           style={{
@@ -1781,7 +1781,7 @@ export function Chessboard(props: ChessboardProps) {
           </Show>
         </div>
         {/* 下层 UI 组件 */}
-        <AspectRatioContainer class="grid">
+        <AspectRatioContainer class="grid isolate z-2">
           <ActionHintText
             class="grid-area-[1/1] place-self-center"
             text={localProps.actionState?.hintText}
@@ -1925,7 +1925,7 @@ export function Chessboard(props: ChessboardProps) {
             onBackdropClick={() => setShowHistory(false)}
           />
         </Show>
-        <AspectRatioContainer>
+        <AspectRatioContainer class="z-6">
           <Show when={localProps.opp}>
             <MiniSpecialViewGroup
               opp
@@ -1943,36 +1943,32 @@ export function Chessboard(props: ChessboardProps) {
             <CardDataViewer />
           </div>
           {/* 右上角部件 */}
-          <Show when={!localProps.liveStreamingMode}>
-            <div class="grid-area-[1/1] justify-self-end m-2 flex flex-row-reverse gap-1.5">
-              <Show when={localProps.data.state.phase !== PbPhaseType.GAME_END}>
-                <ExitButton onClick={onExit} />
-              </Show>
-              <FullScreenToggleButton
-                isFullScreen={isFullscreen()}
-                onClick={toggleFullscreen}
+          <div class="grid-area-[1/1] justify-self-end m-2 flex flex-row-reverse gap-1.5">
+            <Show when={localProps.data.state.phase !== PbPhaseType.GAME_END}>
+              <ExitButton onClick={onExit} />
+            </Show>
+            <FullScreenToggleButton
+              isFullScreen={isFullscreen()}
+              onClick={toggleFullscreen}
+            />
+            <HistoryToggleButton onClick={() => setShowHistory((v) => !v)} />
+            <Show when={hasSpecialView()}>
+              <SpecialViewToggleButton
+                onClick={() => setSpecialViewVisible((v) => !v)}
               />
-              <HistoryToggleButton onClick={() => setShowHistory((v) => !v)} />
-              <Show when={hasSpecialView()}>
-                <SpecialViewToggleButton
-                  onClick={() => setSpecialViewVisible((v) => !v)}
-                />
-              </Show>
-              <CurrentTurnHint
-                phase={localProps.data.state.phase}
-                opp={localProps.data.state.currentTurn !== localProps.who}
-              />
-              <TimerCapsule timer={timer()} />
-            </div>
-          </Show>
-        </AspectRatioContainer>
-        <Show when={localProps.opp && localProps.liveStreamingMode}>
-          <div class="absolute top-2.5 right-2.5 flex flex-row-reverse gap-2">
-            <div class="h-8 w-24 flex items-center justify-center rounded-full b-2 line-height-none font-bold bg-#e9e2d3 text-black/70 b-black/70">
-              {t("ui.liveStreamingMode")}
-            </div>
+            </Show>
+            <CurrentTurnHint
+              phase={localProps.data.state.phase}
+              opp={localProps.data.state.currentTurn !== localProps.who}
+            />
+            <TimerCapsule timer={timer()} />
+            <Show when={localProps.liveStreamingMode}>
+              <div class="h-8 w-24 flex items-center justify-center rounded-full b-2 line-height-none font-bold bg-#e9e2d3 text-black/70 b-black/70">
+                {t("ui.liveStreamingMode")}
+              </div>
+            </Show>
           </div>
-        </Show>
+        </AspectRatioContainer>
         <TimerAlert timer={timer()} />
         <Alert />
         <MessageBox />

@@ -215,11 +215,13 @@ const renderHistoryChild = (
         opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content:
-          t(isOpp ? "history.oppGenerateDice" : "history.myGenerateDice", {
+        content: t(
+          isOpp ? "history.oppGenerateDice" : "history.myGenerateDice",
+          {
             count: child.count,
             diceType: diceIconAndText(child.diceType),
-          }),
+          },
+        ),
       };
       break;
     }
@@ -1567,7 +1569,10 @@ function HistorySummaryShot(props: { data: SummaryShot }) {
                         <CardbackNormal class="absolute inset-0 w-10.5 h-18" />
                       }
                     >
-                      <CardFace definitionId={imageId} class="absolute inset-0 w-10.5 h-18" />
+                      <CardFace
+                        definitionId={imageId}
+                        class="absolute inset-0 w-10.5 h-18"
+                      />
                     </Show>
                   </div>
                 </div>
@@ -1742,7 +1747,10 @@ function HistoryBlockBox(props: {
                   fallback={<CardbackNormal class="w-10.5 h-18" />}
                 >
                   <div class="relative w-10.5 h-18">
-                    <CardFace definitionId={props.data.imageId as number} class="absolute inset-0 w-10.5 h-18" />
+                    <CardFace
+                      definitionId={props.data.imageId as number}
+                      class="absolute inset-0 w-10.5 h-18"
+                    />
                   </div>
                 </Show>
               </Match>
@@ -1932,23 +1940,18 @@ export function HistoryPanel(props: HistoryPanelProps) {
   return (
     <WhoContext.Provider value={who}>
       <div
-        class="absolute inset-0 z-0 bg-black/50"
+        class="grid-area-[1/1] w-full h-full bg-black/50 z-4"
         onClick={() => {
-          props.onBackdropClick();
+          if (selectedBlock()) {
+            setSelectedBlock(null);
+          } else {
+            props.onBackdropClick();
+          }
         }}
       />
-      <Show when={selectedBlock()}>
+      <div class="grid-area-[1/1] justify-self-end z-5 w-70 h-full relative touch-pan history-panel-bg pt-12 pb-5 select-none">
         <div
-          class="absolute inset-0 z-0"
-          onClick={() => {
-            setSelectedBlock(null);
-          }}
-        />
-      </Show>
-      <div class="absolute right-0 top-0 bottom-0 w-70 touch-pan shadow-lg bg-[linear-gradient(to_bottom,_#2f333bff_30%,_#2f333bdd_100%)]">
-        <div class="w-full h-12" />
-        <div
-          class="h-[calc(100%-4.5rem)] overflow-y-auto py-2 pl-2 pr-1.2 space-y-1.5 relative flex flex-col history-scrollbar"
+          class="w-full h-full flex flex-col space-y-1.5 overflow-y-scroll pl-2 history-scrollbar "
           ref={scrollRef}
           onScroll={handleScroll}
         >
@@ -1994,26 +1997,23 @@ export function HistoryPanel(props: HistoryPanelProps) {
         </div>
         <Show when={showBackToBottom()}>
           <button
-            class="absolute w-66 h-6 bottom-3 right-2 bg-#e9e2d3 opacity-80 text-#3b4255 text-3 font-bold rounded-full hover:bg-#e9e2d3 hover:shadow-[inset_0_0_16px_rgba(216,212,204,1),0_0_8px_rgba(255,255,255,0.2)] hover:b-white hover:b-2 hover:opacity-100"
+            class={`absolute h-6 left-2 right-2 bottom-2 rounded-full
+              bg-#e9e2d3 opacity-80 text-#3b4255 text-3 font-bold
+              hover:b-white hover:b-2 hover:opacity-100`}
             onClick={() => scrollToBottom("instant")}
           >
             {useUiContext().t("history.jumpLatest")}
           </button>
         </Show>
-        <Show when={selectedBlock()}>
-          {(block) => (
-            <div
-              class="absolute right-70 inset-0 z--0.1"
-              onClick={() => setSelectedBlock(null)}
-            >
-              <HistoryBlockDetailPanel
-                block={block() as HistoryDetailBlock}
-                onClose={() => setSelectedBlock(null)}
-              />
-            </div>
-          )}
-        </Show>
       </div>
+      <Show when={selectedBlock()}>
+        {(block) => (
+          <HistoryBlockDetailPanel
+            block={block() as HistoryDetailBlock}
+            onClose={() => setSelectedBlock(null)}
+          />
+        )}
+      </Show>
     </WhoContext.Provider>
   );
 }
@@ -2022,53 +2022,44 @@ function HistoryBlockDetailPanel(props: {
   block: HistoryDetailBlock;
   onClose: () => void;
 }) {
-  let panelRef!: HTMLDivElement | undefined;
   const renderBlock = createMemo(() => renderHistoryBlock(props.block));
   return (
     <div
-      class={`absolute right-1 w-90 p-3 max-h-120 bg-#2f333b/98 b-#404a56 b-1 rounded-1 shadow-xl overflow-hidden
-      top-50% -translate-y-50%`}
+      class={`grid-area-[1/1] justify-self-end mr-71 z-5 w-90 select-none
+        p-3 pr-1 bg-#2f333b/98 b-#404a56 b-1 rounded`}
       onClick={(e) => e.stopPropagation()}
     >
-      <div ref={panelRef} class="overflow-y-auto max-h-114 history-scrollbar">
+      <div class="overflow-y-scroll max-h-80 flex flex-col gap-1 history-scrollbar">
         <Show when={renderBlock().type !== "pocket"}>
-          <div class="relative w-full min-h-22 bg-#2d333a rounded-t-1.5 flex flex-row b-2 b-white/4">
+          <div class="relative w-full bg-#2d333a rounded-t-md flex flex-row b-2 b-white/10 shrink-0">
             <div
-              class="absolute top-1px left-1px w-3.5 h-3.5 rounded-lt-1 bg-#806440 data-[opp]:bg-#48678b history-card-hint"
+              class="absolute top-1px left-1px w-3.5 h-3.5 rounded-lt bg-#806440 data-[opp]:bg-#48678b history-card-hint"
               bool:data-opp={renderBlock().content.opp}
             />
-            <div class="w-14.5 h-22 p-2 flex-shrink-0">
-              <Show
-                when={renderBlock().content.imageId}
-                fallback={<CardbackNormal class="w-10.5 h-18" />}
-              >
-                <div class="relative w-10.5 h-18">
-                  <CardFace
-                    definitionId={renderBlock().content.imageId as number}
-                    class="absolute inset-0 w-10.5 h-18"
-                  />
-                </div>
-              </Show>
-            </div>
-            <div class="w-full min-h-22 py-1.5 pr-2 flex flex-col">
-              <div class="text-3.5 text-#fff3e0/98 font-bold">
+            <Show
+              when={renderBlock().content.imageId}
+              fallback={<CardbackNormal class="w-10.5 h-18 m-2 shrink-0" />}
+            >
+              <CardFace
+                definitionId={renderBlock().content.imageId as number}
+                class="w-10.5 h-18 m-2 shrink-0"
+              />
+            </Show>
+            <div class="flex-1 py-1.5 pr-2 flex flex-col font-bold text-2.5 text-#b2afa8">
+              <div class="text-3.5 text-#fff3e0">
                 {renderBlock().content.name}
               </div>
-              <div class="flex text-2.5 text-#b2afa8 font-bold">
-                {renderBlock().content.content}
-              </div>
+              {renderBlock().content.content}
             </div>
           </div>
         </Show>
-        <div class="space-y-0.5">
-          <For each={props.block.children}>
-            {(child) => (
-              <HistoryChildBox
-                data={renderHistoryChild(child, renderBlock().callerId)}
-              />
-            )}
-          </For>
-        </div>
+        <For each={props.block.children}>
+          {(child) => (
+            <HistoryChildBox
+              data={renderHistoryChild(child, renderBlock().callerId)}
+            />
+          )}
+        </For>
       </div>
     </div>
   );

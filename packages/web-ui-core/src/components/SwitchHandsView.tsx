@@ -25,7 +25,7 @@ export interface SwitchHandsViewProps {
 export function SwitchHandsView(props: SwitchHandsViewProps) {
   const { t } = useUiContext();
   return (
-    <div class="absolute pointer-events-none inset-0 flex flex-col items-center">
+    <div class="absolute pointer-events-none inset-0 flex flex-col items-center z-3">
       <h3 class="absolute top-50% -translate-y-40 font-bold text-3xl text-black">
         {t("view.replaceHandsTitle")}
       </h3>

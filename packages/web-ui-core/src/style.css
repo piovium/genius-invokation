@@ -555,10 +555,24 @@
   .function-button.danger:hover {
     border-color: #ffffff;
   }
-  
+
   .function-button.danger:active {
     background-color: #dc2626;
     border-color: #991b1b;
+  }
+
+  /* HistoryPanel */
+  .history-panel-bg {
+    background-image: linear-gradient(to bottom, #2f333bff 30%, #2f333bdd 100%);
+  }
+
+  .history-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #5c6983 #2c2e36;
+  }
+
+  .history-card-hint {
+    clip-path: polygon(0 0, 0 100%, 100% 0);
   }
 
   /* end */
@@ -687,15 +701,6 @@
     --bd-color: #6c5639;
     --title-color: #544635;
     --text-color: #e5aa5f;
-  }
-
-  .history-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: #5c6983 #2c2e36;
-  }
-
-  .history-card-hint {
-    clip-path: polygon(0 0, 0 100%, 100% 0);
   }
 
   .history-indent-hint {

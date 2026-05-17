@@ -45,7 +45,7 @@ export function RerollDiceView(props: RerollViewProps) {
   };
   return (
     <div
-      class="absolute inset-0  flex flex-col items-center justify-center gap-10 select-none"
+      class="absolute inset-0 z-3 flex flex-col items-center justify-center gap-10 select-none"
       onPointerUp={() => setSelectingOn(null)}
     >
       <h3 class="max-w-70 px-4 text-center leading-tight font-bold text-2xl">
