@@ -487,7 +487,7 @@ export function CharacterArea(props: CharacterAreaProps) {
       </Show>
       {/* Card Area */}
       <div
-        class="grid-area-[2/1] relative preserve-3d grid grid-cols-1 grid-rows-1 rounded-1.2 clickable-outline transition-shadow preserve-3d"
+        class="grid-area-[2/1] relative preserve-3d grid rounded-md clickable-outline transition-shadow"
         bool:data-clickable={
           props.clickStep && props.clickStep.ui >= ActionStepEntityUi.Outlined
         }

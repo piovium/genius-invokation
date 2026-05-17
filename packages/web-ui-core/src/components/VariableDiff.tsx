@@ -50,13 +50,13 @@ export function VariableDiff(props: VariableDiffProps) {
   );
   return (
     <div
-      class={`h-6 grid place-items-stretch ${props.class ?? ""}`}
+      class={`h-6 grid isolate ${props.class ?? ""}`}
       style={{
         "--bg-color": backgroundColor(),
       }}
     >
-      <div class="grid-area-[1/1] bg-[var(--bg-color)] rounded-full b-black b-2 z-0" />
-      <div class="grid-area-[1/1] bg-[var(--bg-color)] rounded-0.5 mx-1 b-black b-2 mix-blend-lighten z-0" />
+      <div class="grid-area-[1/1] bg-[var(--bg-color)] rounded-full b-black/60 b-2 z-0" />
+      <div class="grid-area-[1/1] bg-[var(--bg-color)] rounded-0.5 mx-1 b-black/60 b-2 mix-blend-lighten z-0" />
       <div class="grid-area-[1/1] flex items-center px-1.5 w-max h-6 z-1">
         <Switch>
           <Match when={props.defeated}>

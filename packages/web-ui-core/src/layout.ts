@@ -42,9 +42,9 @@ const CHARACTER_AREA_GAP = 5.5;
 const TOTAL_CHARACTERS_MAX_WIDTH =
   4 * CHARACTER_AREA_WIDTH + 3 * CHARACTER_AREA_GAP;
 
-const ENTITY_HEIGHT = 18;
-const ENTITY_WIDTH = 15;
-const ENTITY_GAP = 4;
+const ENTITY_HEIGHT = 19;
+const ENTITY_WIDTH = 16;
+const ENTITY_GAP = 4.5;
 const ENTITY_AREA_HEIGHT = 2 * ENTITY_HEIGHT + ENTITY_GAP;
 const ENTITY_AREA_WIDTH = 2 * ENTITY_WIDTH + ENTITY_GAP;
 
@@ -120,8 +120,8 @@ export function getEntityPos(
     : halfHeight + gapAroundEntityArea;
   const entityAreaX =
     type === "summon"
-      ? halfWidth + TOTAL_CHARACTERS_MAX_WIDTH / 2 + 4
-      : halfWidth - TOTAL_CHARACTERS_MAX_WIDTH / 2 - 4 - ENTITY_AREA_WIDTH;
+      ? halfWidth + TOTAL_CHARACTERS_MAX_WIDTH / 2
+      : halfWidth - TOTAL_CHARACTERS_MAX_WIDTH / 2 - ENTITY_AREA_WIDTH;
   const x = entityAreaX + (index % 2) * (ENTITY_WIDTH + ENTITY_GAP);
   const y = entityAreaY + Math.floor(index / 2) * (ENTITY_HEIGHT + ENTITY_GAP);
   return [x, y];
