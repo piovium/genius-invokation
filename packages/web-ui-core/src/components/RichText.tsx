@@ -43,6 +43,7 @@ function InlineImage(props: { type?: RichTextImageType; id: number }) {
           data-image-type={props.type}
           imageId={props.id}
           type="icon"
+          zero={props.type === "element" ? "physic" : "unknown"}
           fallback={props.type === "element" ? "state" : "skill"}
         />
       )}

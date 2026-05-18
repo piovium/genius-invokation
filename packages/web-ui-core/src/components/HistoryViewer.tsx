@@ -1457,70 +1457,57 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
 
 function HistoryChildBox(props: { data: HistoryChildData }) {
   return (
-    <div class="w-full h-11 flex flex-row shrink-0 bg-white/4 gap-2 justify-center">
-      <div
-        class="w-1 h-full shrink-0 bg-#806440 data-[opp]:bg-#48678b"
-        bool:data-opp={props.data.opp}
-      />
-      <div class="w-5 h-full shrink-0 items-center justify-center flex">
-        <Switch>
-          <Match when={!props.data.imageId}>
-            <CardbackNormal class="w-5 h-8.6" />
-          </Match>
-          <Match when={props.data.imageId === "tuning"}>
-            <div class="w-5 h-5">
-              <TuningIcon />
-            </div>
-          </Match>
-          <Match when={true}>
-            <Image
-              imageId={props.data.imageId as number}
-              type={props.data.imageType}
-              class="w-5 aspect-ratio-[7/12] h-auto text-0"
-              fallback="card"
-            />
-          </Match>
-        </Switch>
-      </div>
-      <div class="w-full h-full flex flex-col justify-center gap-1">
-        <div class="flex flex-row gap-1">
-          <div class="text-2.8 text-white/95 text-stroke-0.2 text-stroke-op-70">
-            {props.data.title}
+    <div
+      class="w-full min-h-11.6 flex flex-row items-center shrink-0 bg-white/4 gap-2 p-1 b-l-4 b-#806440 data-[opp]:b-#48678b"
+      bool:data-opp={props.data.opp}
+    >
+      <Switch>
+        <Match when={!props.data.imageId}>
+          <CardbackNormal class="w-5.6 h-9.6 shrink-0" />
+        </Match>
+        <Match when={props.data.imageId === "tuning"}>
+          <div class="w-5.6 h-5.6 shrink-0">
+            <TuningIcon />
           </div>
+        </Match>
+        <Match when={true}>
+          <Image
+            imageId={props.data.imageId as number}
+            type={props.data.imageType}
+            class="w-5.6 shrink-0 min-h-5.6 max-h-9.6"
+            fallback={"skill"}
+          />
+        </Match>
+      </Switch>
+      <div class="flex-1">
+        <div class="flex gap-2 h-4 text-3 text-white">
+          <span>{props.data.title}</span>
           <Show when={props.data.healthChange}>
             {(healthChange) => (
               <div
-                class="h-4 px-3 min-w-12 flex flex-row gap-1 items-center justify-center text-white text-3 rounded-full b-1 b-black bg-#d14f51 data-[increase]:bg-#6e9b3a"
+                class="flex h-4 px-3 gap-1 rounded-full b-1 b-black bg-#d14f51 data-[increase]:bg-#6e9b3a"
                 bool:data-increase={healthChange().type === "heal"}
               >
                 <Show when={healthChange().special}>
-                  <div class="relative overflow-visible h-3 w-4 flex-shrink-0">
-                    <div class="absolute h-5 w-5 top-50% left-50% -translate-x-50% -translate-y-50%">
-                      <Switch>
-                        <Match when={healthChange().type === "heal"}>
-                          <RevivePreviewIcon />
-                        </Match>
-                        <Match when={healthChange().type === "damage"}>
-                          <DefeatedPreviewIcon />
-                        </Match>
-                      </Switch>
-                    </div>
-                  </div>
+                  <Switch>
+                    <Match when={healthChange().type === "heal"}>
+                      <RevivePreviewIcon class="h-5 w-5 mx--1 mt--1.5 shrink-0" />
+                    </Match>
+                    <Match when={healthChange().type === "damage"}>
+                      <DefeatedPreviewIcon class="h-5 w-5 mx--1 mt--1.5 shrink-0" />
+                    </Match>
+                  </Switch>
                 </Show>
-                <StrokedText
-                  text={`${healthChange().type === "heal" ? "+" : "-"}${
-                    healthChange().value
-                  }`}
-                  strokeWidth={1.5}
-                  strokeColor="black"
-                />
+                <span class="line-height-3.5">
+                  {`${healthChange().type === "heal" ? "+" : "-"}${healthChange().value}`}
+                </span>
               </div>
             )}
           </Show>
         </div>
-        <div class="flex flex-row text-2.5 text-#b2afa8 font-bold history-children">
+        <p class="text-2.5 text-#b2afa8 history-children">
           <RichText content={props.data.content} />
-        </div>
+        </p>
       </div>
     </div>
   );
@@ -2029,7 +2016,7 @@ function HistoryBlockDetailPanel(props: {
         p-3 pr-1 bg-#2f333b/98 b-#404a56 b-1 rounded`}
       onClick={(e) => e.stopPropagation()}
     >
-      <div class="overflow-y-scroll max-h-80 flex flex-col gap-1 history-scrollbar">
+      <div class="overflow-y-scroll max-h-120 flex flex-col gap-1 history-scrollbar">
         <Show when={renderBlock().type !== "pocket"}>
           <div class="relative w-full bg-#2d333a rounded-t-md flex flex-row b-2 b-white/10 shrink-0">
             <div

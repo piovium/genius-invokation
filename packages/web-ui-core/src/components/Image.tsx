@@ -104,8 +104,8 @@ export function ImageFallback(props: ImageFallbackProps) {
     <Switch>
       <Match when={local.type === "card"}>
         <div
-          class={`text-center bg-#bdaa8a rounded-md pbe-25% leading-none 
-            flex items-end justify-center ${local.class ?? ""}`}
+          class={`text-center bg-#bdaa8a rounded-md leading-none
+            contain-strict flex justify-center items-center ${local.class ?? ""}`}
           {...rest}
         >
           {local.alt}
