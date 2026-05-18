@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, $ } from "@gi-tcg/core/builder";
+import { character, skill, status, combatStatus, card, DamageType, $, SkillHandle } from "@gi-tcg/core/builder";
+import { EfficientSwitch } from "../../commons";
 
 /**
  * @id 126053
@@ -24,7 +25,7 @@ import { character, skill, status, combatStatus, card, DamageType, $ } from "@gi
  */
 export const Evasion = status(126053)
   .since("v6.6.0")
-  // TODO
+  .duration(1)
   .done();
 
 /**
@@ -35,7 +36,9 @@ export const Evasion = status(126053)
  */
 export const ForceFieldManipulation = status(126054)
   .since("v6.6.0")
-  // TODO
+  .oneDuration()
+  .once("deductVoidDiceSkill", (c, e) => e.isSkillType("normal"))
+  .deductVoidCost(1)
   .done();
 
 /**
@@ -47,7 +50,14 @@ export const ForceFieldManipulation = status(126054)
  */
 export const LowGravityBackground = combatStatus(126051)
   .since("v6.6.0")
-  // TODO
+  .duration(2)
+  .on("useSkill", (c, e) => e.skill.definition.id !== GravityApplicationFieldReduction)
+  .listenToAll()
+  .do((c, e) => {
+    c.characterStatus(Evasion, e.skill.caller.cast<"character">());
+    const target = e.who === c.self.who ? $.my.next : $.opp.next;
+    c.switchActive(target);
+  })
   .done();
 
 /**
@@ -59,7 +69,9 @@ export const LowGravityBackground = combatStatus(126051)
  */
 export const ShockBlast = combatStatus(126052)
   .since("v6.6.0")
-  // TODO
+  .duration(2)
+  .on("endPhase")
+  .damage(DamageType.Piercing, 1, $.character.exclude($.has.def(Evasion)))
   .done();
 
 /**
@@ -72,7 +84,7 @@ export const GravityApplicationCrush = skill(26051)
   .type("normal")
   .costGeo(1)
   .costVoid(2)
-  // TODO
+  .damage(DamageType.Physical, 2)
   .done();
 
 /**
@@ -84,7 +96,12 @@ export const GravityApplicationCrush = skill(26051)
 export const GravityApplicationPointNull = skill(26052)
   .type("elemental")
   .costGeo(3)
-  // TODO
+  .damage(DamageType.Geo, 2)
+  .combatStatus(EfficientSwitch, "my", {
+    overrideVariables: {
+      usage: 2
+    }
+  })
   .done();
 
 /**
@@ -93,11 +110,14 @@ export const GravityApplicationPointNull = skill(26052)
  * @description
  * 造成3点岩元素伤害，生成低重力背景和振荡冲击，本回合中我方所有后台角色下次「普通攻击」少花费1个无色元素。
  */
-export const GravityApplicationFieldReduction = skill(26053)
+export const GravityApplicationFieldReduction: SkillHandle = skill(26053)
   .type("burst")
   .costGeo(3)
   .costEnergy(2)
-  // TODO
+  .damage(DamageType.Geo, 3)
+  .combatStatus(LowGravityBackground)
+  .combatStatus(ShockBlast)
+  .characterStatus(ForceFieldManipulation, $.my.standby)
   .done();
 
 /**
@@ -126,6 +146,15 @@ export const ExperimentalFieldGenerator = character(2605)
 export const GravityField = card(226051)
   .since("v6.6.0")
   .costGeo(1)
-  .talent(ExperimentalFieldGenerator)
-  // TODO
+  .talent(ExperimentalFieldGenerator, "none")
+  .on("declareEnd")
+  .listenToAll()
+  .do((c, e) => {
+    const target = e.who === c.self.who ? $.my.next : $.opp.next;
+    c.switchActive(target);
+  })
+  .on("increaseSkillDamage", (c, e) => e.viaPlungingAttack())
+  .listenToPlayer()
+  .usagePerRound(2)
+  .increaseDamage(1)
   .done();

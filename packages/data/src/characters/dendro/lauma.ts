@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, combatStatus, card, DamageType, $ } from "@gi-tcg/core/builder";
+import { character, skill, combatStatus, card, DamageType, $, Reaction } from "@gi-tcg/core/builder";
+import { CostReduction } from "../../commons";
 
 /**
  * @id 117111
@@ -25,7 +26,13 @@ import { character, skill, combatStatus, card, DamageType, $ } from "@gi-tcg/cor
  */
 export const FrostgroveSanctuary = combatStatus(117111)
   .since("v6.6.0")
-  // TODO
+  .variable("damageValue", 1, { visible: false })
+  .replaceDescription("[GCG_TOKEN_COUNTER]", (_, self) => self.variables.damageValue)
+  .on("endPhase")
+  .usage(2)
+  .do((c) => {
+    c.damage(DamageType.Dendro, c.getVariable("damageValue"))
+  })
   .done();
 
 /**
@@ -37,7 +44,9 @@ export const FrostgroveSanctuary = combatStatus(117111)
  */
 export const PaleHymn = combatStatus(117112)
   .since("v6.6.0")
-  // TODO
+  .on("increaseDamage", (c, e) => e.getReaction() === Reaction.LunarBloom)
+  .usage(3)
+  .increaseDamage(1)
   .done();
 
 /**
@@ -50,7 +59,7 @@ export const PeregrinationOfLinnunrata = skill(17111)
   .type("normal")
   .costDendro(1)
   .costVoid(2)
-  // TODO
+  .damage(DamageType.Dendro, 1)
   .done();
 
 /**
@@ -62,7 +71,22 @@ export const PeregrinationOfLinnunrata = skill(17111)
 export const RunoDawnlessRestOfKarsikko = skill(17112)
   .type("elemental")
   .costDendro(3)
-  // TODO
+  .do((c) => {
+    c.damage(DamageType.Dendro, 1);
+    const reducedCards = c.queryAll($.my.hand.with($.def(CostReduction)));
+    const target = c.random(reducedCards);
+    if (target) {
+      c.combatStatus(FrostgroveSanctuary, "my", {
+        overrideVariables: {
+          damageValue: 2,
+        },
+      })
+      // 去除一层降低就是加一层提高
+      c.attachCostIncrease(target);
+    } else {
+      c.combatStatus(FrostgroveSanctuary);
+    }
+  })
   .done();
 
 /**
@@ -75,7 +99,14 @@ export const RunoAllHeartsBecomeTheBeatingMoon = skill(17113)
   .type("burst")
   .costDendro(3)
   .costEnergy(2)
-  // TODO
+  .do((c) => {
+    const candidates = c.queryAll($.macros.myHandsNotFree);
+    const targets = c.randomSubset(candidates, 3);
+    for (const target of targets) {
+      c.attachCostReduction(target);
+    }
+    c.combatStatus(PaleHymn);
+  })
   .done();
 
 /**
@@ -87,7 +118,14 @@ export const RunoAllHeartsBecomeTheBeatingMoon = skill(17113)
  */
 export const MoonsignBenedictionNaturesChorus = skill(17114)
   .type("passive")
-  // TODO
+  .on("reaction", (c, e) => e.type === Reaction.LunarBloom && !e.target.isMine())
+  .listenToAll()
+  .do((c) => {
+    const target = c.random(c.queryAll($.macros.myPileNotFree));
+    if (target) {
+      c.attachCostReduction(target);
+    }
+  })
   .done();
 
 /**
@@ -97,10 +135,9 @@ export const MoonsignBenedictionNaturesChorus = skill(17114)
  * 【被动】本局游戏中，敌方受到绽放反应时，改为月绽放反应。
  * 敌方受到月绽放反应时：使我方牌组中随机1张卡牌附着费用降低。
  */
-export const MoonsignBenedictionNaturesChorus = skill(17115)
+export const MoonsignBenedictionNaturesChorus01 = skill(17115)
   .type("passive")
-  // TODO
-  .done();
+  .reserve();
 
 /**
  * @id 1711
@@ -113,7 +150,8 @@ export const Lauma = character(1711)
   .tags("dendro", "catalyst", "nodkrai")
   .health(11)
   .energy(2)
-  .skills(PeregrinationOfLinnunrata, RunoDawnlessRestOfKarsikko, RunoAllHeartsBecomeTheBeatingMoon, MoonsignBenedictionNaturesChorus, MoonsignBenedictionNaturesChorus)
+  .skills(PeregrinationOfLinnunrata, RunoDawnlessRestOfKarsikko, RunoAllHeartsBecomeTheBeatingMoon, MoonsignBenedictionNaturesChorus)
+  .enableLunarReactions(Reaction.LunarBloom)
   .done();
 
 /**
@@ -129,5 +167,10 @@ export const OLipsWeaveMeSongsAndPsalms = card(217111)
   .since("v6.6.0")
   .costDendro(3)
   .talent(Lauma)
-  // TODO
+  .on("enter")
+  .useSkill(RunoDawnlessRestOfKarsikko)
+  .on("dealReaction", (c, e) => ([Reaction.Bloom, Reaction.LunarBloom] as Reaction[]).includes(e.type))
+  .listenToPlayer()
+  .usagePerRound(1)
+  .heal(2, $.macros.myMostInjured)
   .done();

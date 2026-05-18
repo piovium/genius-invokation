@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DamageType, DiceType, Reaction, card, combatStatus, status } from "@gi-tcg/core/builder";
+import { $, DamageType, DiceType, Reaction, card, combatStatus, status } from "@gi-tcg/core/builder";
 import { AdventureCompleted, BondOfLife, BurningFlame, EfficientSwitch } from "../../commons";
 
 /**
@@ -1256,5 +1256,13 @@ export const GladiatorsFinale = card(312045)
   .since("v6.6.0")
   .costVoid(2)
   .artifact()
-  // TODO
+  .on("increaseSkillDamage", (c, e) => e.type === DamageType.Physical)
+  .increaseDamage(1)
+  .on("deductVoidDiceSkill", (c, e) =>
+    c.queryAll($.my.character).length === 1 && e.isSkillType("normal"))
+  .deductVoidCost(1)
+  .on("increaseDamage", (c, e) => 
+    c.queryAll($.my.character).length === 1 && e.viaSkillType("normal"))
+  .increaseDamage(1)
+  .usagePerRound(2)
   .done();

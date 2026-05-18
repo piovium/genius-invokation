@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DiceType, StatusHandle, card, combatStatus, status } from "@gi-tcg/core/builder";
-import { Satiated } from "../../commons";
+import { BattlePlan, Satiated, SharpenTheBlade } from "../../commons";
 
 /**
  * @id 333001
@@ -576,6 +576,19 @@ export const [ChenyuBrew] = card(333029)
 export const RouletteSpecial = card(333030)
   .since("v6.6.0")
   .costSame(4)
-  .tags("food")
-  // TODO
+  .food()
+  .do((c, e) => {
+    c.abortPreview();
+    const target = e.targets[0];
+    const effects = [
+      () => c.heal(2, target),
+      () => c.increaseMaxHealth(1, target),
+      () => c.characterStatus(BattlePlan, target),
+      () => c.characterStatus(SharpenTheBlade, target),
+    ];
+    for (let i = 0; i < 4; i++) {
+      const effect = c.random(effects);
+      effect();
+    }
+  })
   .done();

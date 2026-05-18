@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, card, combatStatus, extension, flip, status } from "@gi-tcg/core/builder";
+import { $, DiceType, card, combatStatus, extension, flip, status } from "@gi-tcg/core/builder";
 import { DisperseTheCalamity, SanctifyTheDefiled } from "./other";
 import { IneffectiveWhenPlayed } from "../../commons";
 
@@ -389,6 +389,22 @@ export const LostLegaciesInTheSand = card(330012)
   .done();
 
 /**
+ * @id 300010
+ * @name 另一侧的霜月（生效中）
+ * @description
+ * 行动阶段开始时：赋予我方随机1张手牌费用降低。
+ */
+export const TheOtherSideOfTheFrostmoonInEffect = combatStatus(300010)
+  .on("actionPhase")
+  .do((c) => {
+    const target = c.random(c.queryAll($.macros.myHandsNotFree));
+    if (target) {
+      c.attachCostReduction(target);
+    }
+  })
+  .done();
+
+/**
  * @id 330013
  * @name 另一侧的霜月
  * @description
@@ -398,5 +414,11 @@ export const LostLegaciesInTheSand = card(330012)
 export const TheOtherSideOfTheFrostmoon = card(330013)
   .since("v6.6.0")
   .legend()
-  // TODO
+  .do((c) => {
+    const target = c.random(c.queryAll($.macros.myHandsNotFree));
+    if (target) {
+      c.attachCostReduction(target);
+    }
+    c.combatStatus(TheOtherSideOfTheFrostmoonInEffect);
+  })
   .done();
