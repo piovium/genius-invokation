@@ -77,7 +77,6 @@ export function StatusGroup(props: StatusGroupProps) {
       <Show when={showEllipsis()}>
         <img
           class="pointer-events-auto h-5 w-5 [.attachments_&]:h-6 [.attachments_&]:w-6"
-          // TODO: replace this with an API endpoint
           src={assetsManager().getRawImageUrlSync("UI_Gcg_Buff_Common_More")}
         />
       </Show>
