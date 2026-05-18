@@ -24,13 +24,6 @@
   .touch-pan * {
     touch-action: pan-x pan-y;
   }
-  --chessboard-min-width: 60rem;
-  --chessboard-min-height: 33.75rem;
-
-  --chessboard-bg-x-border-width: 0.3rem;
-  --chessboard-bg-y-border-width-initial: 2.53125rem;
-  --chessboard-bg-y-border-width: var(--chessboard-bg-y-border-width-initial);
-  --opp-chessboard-hands-prominent-height: 28px;
 
   .dev {
     outline: #3ed490 solid 1px;
@@ -575,42 +568,15 @@
     clip-path: polygon(0 0, 0 100%, 100% 0);
   }
 
+  /* Merge Chessboard */
+  &[data-has-opp-chessboard] {
+    .chessboard-bg-container {
+      transform: scale(var(--chessboard-merge-scale, 1));
+    }
+  }
+
   /* end */
 
-  &[data-has-opp-chessboard] {
-    --chessboard-bg-y-border-width: calc(
-      var(--chessboard-bg-y-border-width-initial) -
-        var(--opp-chessboard-hands-prominent-height)
-    );
-  }
-
-  .opp-chessboard-hands-container {
-    position: absolute;
-    width: 30rem;
-    --top-offset: calc(50% - var(--chessboard-min-height) / 2);
-    top: 0;
-    left: max(calc(42% - 15rem), 12rem);
-    height: calc(
-      var(--top-offset) + var(--chessboard-bg-y-border-width) +
-        var(--opp-chessboard-hands-prominent-height)
-    );
-    background-image: linear-gradient(to top, #63524a 6.5px, #443322 54px);
-  }
-  .opp-chessboard-hands-border {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: var(--opp-chessboard-hands-prominent-height);
-    background-image: linear-gradient(to top, #63524a80 0%, transparent 100%);
-    @apply b-#443322 b-x-6 b-b-6 rounded-lb-3 rounded-rb-3;
-  }
-  .opp-chessboard-hands-shadow {
-    position: absolute;
-    top: calc(0.145 * var(--chessboard-min-height) + var(--top-offset));
-    left: 42%;
-    height: calc(0.035 * var(--chessboard-min-height));
-    box-shadow: 0 0 12px #000000aa;
-  }
   .mini-view[data-opp="false"] {
     top: 52%;
   }
@@ -708,22 +674,6 @@
   }
   .history-children .rich-text .inline-image {
     @apply h-3.5 w-3.5;
-  }
-
-  .chessboard-bg {
-    position: absolute;
-    inset: var(--chessboard-bg-y-border-width)
-      var(--chessboard-bg-x-border-width);
-    @apply rounded-15% border-6 border-#443322;
-    background-image: linear-gradient(
-      to bottom,
-      #f0fdf4ff 49.5%,
-      #ddeeddff 50%,
-      #f0fdf4ff 50.5%
-    );
-    box-shadow:
-      inset 0 0 18px #000000,
-      0 0 40px #63524a;
   }
 
   .triggered-animation-1 {

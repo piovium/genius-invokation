@@ -44,20 +44,19 @@ const POST_ROTATION_TRANSFORM = {
   180: "translate(-50%, -50%)",
   270: "translate(-50%, 50%)",
 };
-const OPP_CHESSBOARD_TRANSFORM = "translate(5%, 5%) scale(90%)";
+export const MERGE_CHESSBOARD_SCALE = 0.9;
 
 export function TransformWrapper(props: TransformWrapperProps) {
   let transformWrapperEl!: HTMLDivElement;
 
   const onContainerResize = () => {
     const containerEl = transformWrapperEl.parentElement!;
-    const hasOppChessboard = untrack(() => props.hasOppChessboard) ?? false;
     const containerWidth = containerEl.clientWidth;
     let containerHeight = containerEl.clientHeight;
     const autoHeight = untrack(() => props.autoHeight) ?? true;
     const rotate = untrack(() => props.rotation) ?? 0;
     const isFullscreen = untrack(() => props.isFullscreen) ?? false;
-    const oppScale = untrack(() => props.hasOppChessboard) ? 0.9 : 1;
+    const mergeScale = untrack(() => props.hasOppChessboard) ? MERGE_CHESSBOARD_SCALE : 1;
     const UNIT = unitInPx();
     let height: number;
     let width: number;
@@ -72,8 +71,8 @@ export function TransformWrapper(props: TransformWrapperProps) {
         containerHeight / (UNIT * MINIMUM_HEIGHT),
         containerWidth / (UNIT * MINIMUM_WIDTH),
       );
-      height = containerHeight / scale;
-      width = containerWidth / scale;
+      height = containerHeight / (scale * mergeScale);
+      width = containerWidth / (scale * mergeScale);
     } else {
       if (autoHeight && !isFullscreen) {
         containerHeight = containerWidth / DEFAULT_HEIGHT_WIDTH_RATIO;
@@ -83,15 +82,19 @@ export function TransformWrapper(props: TransformWrapperProps) {
         containerHeight / (UNIT * MINIMUM_WIDTH),
         containerWidth / (UNIT * MINIMUM_HEIGHT),
       );
-      height = containerWidth / scale;
-      width = containerHeight / scale;
+      height = containerWidth / (scale * mergeScale);
+      width = containerHeight / (scale * mergeScale);
     }
+    transformWrapperEl.style.setProperty(
+      "--chessboard-merge-scale",
+      `${mergeScale}`,
+    );
     transformWrapperEl.style.transform = `${PRE_ROTATION_TRANSFORM} 
-      scale(${scale}) ${hasOppChessboard ? OPP_CHESSBOARD_TRANSFORM : ""} rotate(${rotate}deg) 
+      scale(${scale * mergeScale}) rotate(${rotate}deg) 
       ${POST_ROTATION_TRANSFORM[rotate]}`;
     transformWrapperEl.style.height = `${height}px`;
     transformWrapperEl.style.width = `${width}px`;
-    untrack(() => props.setTransformScale)(scale * oppScale);
+    untrack(() => props.setTransformScale)(scale * mergeScale);
   };
 
   const onContainerResizeDebouncer = funnel(onContainerResize, {
