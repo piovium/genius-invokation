@@ -1526,11 +1526,11 @@ function HistoryChildBox(props: { data: HistoryChildData }) {
 }
 
 function More() {
+  const { assetsManager } = useUiContext();
   return (
     <img
       class="h-3 w-3"
-      // TODO: replace this with an API endpoint
-      src="https://assets.gi-tcg.guyutongxue.site/assets/UI_Gcg_Buff_Common_More.webp"
+      src={assetsManager().getRawImageUrlSync("UI_Gcg_Buff_Common_More")}
     />
   );
 }

@@ -17,6 +17,7 @@ import { Key } from "@solid-primitives/keyed";
 import type { StatusViewInfo } from "./Chessboard";
 import { Image } from "./Image";
 import { createMemo, Show } from "solid-js";
+import { useUiContext } from "../hooks/context";
 
 interface StatusProps extends StatusViewInfo {}
 
@@ -61,6 +62,7 @@ export interface StatusGroupProps {
 }
 
 export function StatusGroup(props: StatusGroupProps) {
+  const { assetsManager } = useUiContext();
   const showEllipsis = () => props.statuses.length > (props.maxCount ?? 4);
   const statuses = createMemo(() =>
     showEllipsis()
@@ -76,7 +78,7 @@ export function StatusGroup(props: StatusGroupProps) {
         <img
           class="pointer-events-auto h-5 w-5 [.attachments_&]:h-6 [.attachments_&]:w-6"
           // TODO: replace this with an API endpoint
-          src="https://assets.gi-tcg.guyutongxue.site/assets/UI_Gcg_Buff_Common_More.webp"
+          src={assetsManager().getRawImageUrlSync("UI_Gcg_Buff_Common_More")}
         />
       </Show>
     </div>
