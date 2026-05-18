@@ -13,7 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { createEffect, createMemo, Match, Show, Switch } from "solid-js";
+import {
+  createEffect,
+  createMemo,
+  Match,
+  Show,
+  splitProps,
+  Switch,
+  type ComponentProps,
+} from "solid-js";
 import { Image } from "./Image";
 import { DiceCost } from "./DiceCost";
 import {
@@ -124,17 +132,17 @@ const opacityKeyframes = (uiState: CardAnimatingUiState): Keyframe[] => {
   return [startKeyframe, ...middleKeyframes, endKeyframe];
 };
 
-export interface CardFaceProps {
+export interface CardFaceProps extends ComponentProps<"div"> {
   definitionId: number;
-  class?: string;
 }
 
 export function CardFace(props: CardFaceProps) {
+  const [local, rest] = splitProps(props, ["definitionId", "class"]);
   return (
-    <div class={`backface-hidden grid ${props.class ?? ""}`}>
+    <div class={`backface-hidden grid ${local.class ?? ""}`} {...rest}>
       <Image
         class="grid-area-[1/1] h-full w-full p-1% text-3"
-        imageId={props.definitionId}
+        imageId={local.definitionId}
         fallback="card"
       />
       <CardFrameNormal class="grid-area-[1/1] h-full w-full pointer-events-none" />
@@ -263,8 +271,8 @@ export function Card(props: CardProps) {
         props.onPointerDown?.(e, e.currentTarget);
       }}
     >
-      <CardFace definitionId={data().definitionId} class="grid-area-[1/1]"/>      
-      <div class="grid-area-[1/1] pointer-events-none rounded-1.2 card-animation"/>
+      <CardFace definitionId={data().definitionId} class="grid-area-[1/1]" />
+      <div class="grid-area-[1/1] pointer-events-none rounded-1.2 card-animation" />
       <Switch>
         <Match when={props.toBeSwitched}>
           <ExchangeCard class="grid-area-[1/1] w-18 h-18 place-self-center z-1 exchange-card-entering" />

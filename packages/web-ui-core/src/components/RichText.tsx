@@ -36,10 +36,10 @@ function InlineImage(props: { type?: RichTextImageType; id: number }) {
   return (
     <span class="inline-flex items-center justify-center align-middle">
       {props.type === "dice" ? (
-        <InlineDice class="inline-image m--0.5" type={props.id} />
+        <InlineDice class="inline-image my--0.5" type={props.id} />
       ) : (
         <Image
-          class="inline-image"
+          class="inline-image my--0.5"
           data-image-type={props.type}
           imageId={props.id}
           type="icon"

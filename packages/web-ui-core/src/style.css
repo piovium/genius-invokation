@@ -568,6 +568,38 @@
     clip-path: polygon(0 0, 0 100%, 100% 0);
   }
 
+  .history-block {
+    --bg-color: #454039cc;
+    --bd-color: #6c5639;
+    --title-color: #544635;
+    --text-color: #e5aa5f;
+  }
+
+  .history-block[data-selected] {
+    --bg-color: #4f4536dd;
+    --bd-color: #c58438;
+    --title-color: #684f30;
+    --text-color: #e5aa5f;
+  }
+
+  .history-block[data-opp] {
+    --bg-color: #323d4ccc;
+    --bd-color: #425675;
+    --title-color: #32445f;
+    --text-color: #7eb5ff;
+  }
+
+  .history-block[data-opp][data-selected] {
+    --bg-color: #334355dd;
+    --bd-color: #6993d8;
+    --title-color: #334f76;
+    --text-color: #7eb5ff;
+  }
+
+  .history-children .rich-text .inline-image {
+    @apply h-3.5 w-3.5;
+  }
+
   /* Merge Chessboard */
   &[data-has-opp-chessboard] {
     .chessboard-bg-container {
@@ -637,43 +669,6 @@
     --inner-background-color: #485569;
     --inner-border-color: #899dc6;
     --text-color: #7e98cb;
-  }
-
-  .block-opp-selected {
-    --bg-color: #334355dd;
-    --bd-color: #6993d8;
-    --title-color: #334f76;
-    --text-color: #7eb5ff;
-    /* --text-color: #334355; */
-  }
-
-  .block-my-selected {
-    --bg-color: #4f4536dd;
-    --bd-color: #c58438;
-    --title-color: #684f30;
-    --text-color: #e5aa5f;
-    /* --text-color: #4f4536; */
-  }
-
-  .block-opp-normal {
-    --bg-color: #323d4ccc;
-    --bd-color: #425675;
-    --title-color: #32445f;
-    --text-color: #7eb5ff;
-  }
-
-  .block-my-normal {
-    --bg-color: #454039cc;
-    --bd-color: #6c5639;
-    --title-color: #544635;
-    --text-color: #e5aa5f;
-  }
-
-  .history-indent-hint {
-    clip-path: polygon(0 0, 71% 0, 100% 50%, 71% 100%, 0 100%);
-  }
-  .history-children .rich-text .inline-image {
-    @apply h-3.5 w-3.5;
   }
 
   .triggered-animation-1 {
