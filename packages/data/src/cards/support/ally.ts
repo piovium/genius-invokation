@@ -1101,3 +1101,16 @@ export const LepinePauline = card(322033)
     LepinepaulinesInvestmentInEnergyMechanism,
   ])
   .done();
+
+/**
+ * @id 322034
+ * @name 涅朵奇卡
+ * @description
+ * 我方触发月感电或月绽放反应时：我方出战角色附属战斗计划。（每回合1次）
+ */
+export const Netochka = card(322034)
+  .since("v6.6.0")
+  .costSame(1)
+  .support("ally")
+  // TODO
+  .done();

@@ -21,7 +21,7 @@ import { NoTuningAllowed, Shield } from "../../commons";
  * @name 超导祝佑·极寒
  * @description
  * 投掷阶段：总是投出2个冰元素骰和2个雷元素骰。
- * 我方造成物理伤害或冰元素伤害后：赋予敌方随机1张手牌不可调和和费用增加。（每回合2次）
+ * 敌方受到物理伤害或冰元素伤害后：赋予敌方随机1张手牌不可调和和费用增加。（每回合2次）
  */
 export const SuperconductBlessingDeepFreeze = card(303041)
   .costCryo(1)
@@ -30,9 +30,10 @@ export const SuperconductBlessingDeepFreeze = card(303041)
   .on("roll")
   .fixDice(DiceType.Cryo, 2)
   .fixDice(DiceType.Electro, 2)
-  .on("dealDamage", (c, e) => 
+  .on("damaged", (c, e) => 
+    !e.target.isMine() &&
     ([DamageType.Physical, DamageType.Cryo] as DamageType[]).includes(e.type))
-  .listenToPlayer()
+  .listenToAll()
   .usagePerRound(2)
   .do((c) => {
     const target = c.random(c.oppPlayer.hands);
@@ -220,7 +221,7 @@ export const BloomBlessingOvergrow = card(303062)
  * @description
  * 元素幻变：水元素草元素
  * 投掷阶段：总是投出2个水元素骰和2个草元素骰。
- * 我方触发绽放反应后：弃置此牌并从绽放祝佑·甘露和绽放祝佑·蔓生中挑选一项加入手牌。
+ * 我方触发绽放或月绽放反应后：弃置此牌并从绽放祝佑·甘露和绽放祝佑·蔓生中挑选一项加入手牌。
  */
 export const ElementalTransfigurationBloomBlessing = card(331006)
   .since("v6.5.0")
@@ -229,7 +230,7 @@ export const ElementalTransfigurationBloomBlessing = card(331006)
   .on("roll")
   .fixDice(DiceType.Hydro, 2)
   .fixDice(DiceType.Dendro, 2)
-  .on("dealReaction", (c, e) => e.type === Reaction.Bloom)
+  .on("dealReaction", (c, e) => e.type === Reaction.Bloom || e.type === Reaction.LunarBloom)
   .selectAndCreateHandCard([
     BloomBlessingAmrita,
     BloomBlessingOvergrow,
@@ -290,7 +291,7 @@ export const LavaBlessingRemelting = card(303072)
  * @description
  * 元素幻变：火元素岩元素
  * 投掷阶段：总是投出2个火元素骰和2个岩元素骰。
- * 我方触发火结晶反应后：弃置此牌并从火岩祝佑·回火和火岩祝佑·重熔中挑选一项加入手牌。
+ * 我方触发结晶（火）反应后：弃置此牌并从火岩祝佑·回火和火岩祝佑·重熔中挑选一项加入手牌。
  */
 export const ElementalTransfigurationLavaBlessing = card(331007)
   .since("v6.5.0")
@@ -305,4 +306,34 @@ export const ElementalTransfigurationLavaBlessing = card(331007)
     LavaBlessingRemelting,
   ])
   .dispose()
+  .done();
+
+/**
+ * @id 331008
+ * @name 元素幻变：冰草祝佑
+ * @description
+ * 元素幻变：冰元素草元素
+ * 投掷阶段：总是投出2个冰元素骰和2个草元素骰。
+ * 我方选择行动前，如果存在敌方角色同时附着冰元素与草元素：弃置此牌并从冰草祝佑·棘霜和冰草祝佑·寒蔓中挑选一项加入手牌。
+ */
+export const ElementalTransfigurationRimegrassBlessing = card(331008)
+  .since("v6.6.0")
+  .costSame(2)
+  .support("blessing")
+  // TODO
+  .done();
+
+/**
+ * @id 331009
+ * @name 元素幻变：雷风祝佑
+ * @description
+ * 元素幻变：雷元素风元素
+ * 投掷阶段：总是投出2个雷元素骰和2个风元素骰。
+ * 我方触发扩散（雷）反应后：弃置此牌并从雷风祝佑·疾霆和雷风祝佑·罡风中挑选一项加入手牌。
+ */
+export const ElementalTransfigurationStormgaleBlessing = card(331009)
+  .since("v6.6.0")
+  .costSame(2)
+  .support("blessing")
+  // TODO
   .done();

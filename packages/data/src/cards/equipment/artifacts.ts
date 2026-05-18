@@ -1243,3 +1243,18 @@ export const DyedTassel = card(312044)
   .usagePerRound(1)
   .combatStatus(EfficientSwitch)
   .done();
+
+/**
+ * @id 312045
+ * @name 角斗士的终幕礼
+ * @description
+ * 附属角色造成的物理伤害+1。
+ * 我方仅附属角色未被击倒时：附属角色的「普通攻击」少花费1个无色元素，并且造成的伤害+1。（每回合2次）
+ * （角色最多装备1件「圣遗物」）
+ */
+export const GladiatorsFinale = card(312045)
+  .since("v6.6.0")
+  .costVoid(2)
+  .artifact()
+  // TODO
+  .done();

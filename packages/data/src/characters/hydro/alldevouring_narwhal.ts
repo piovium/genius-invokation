@@ -255,4 +255,3 @@ export const LightlessFeeding = card(222041)
     c.heal(c.get(e.arg).diceCost(), "@master")
   })
   .done();
-

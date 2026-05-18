@@ -95,6 +95,7 @@ export const MoonsignBenedictionAssemblageHub = skill(14174)
  * @id 14175
  * @name 月兆祝赐·象拟中继
  * @description
+ * 【被动】本局游戏中，敌方受到感电反应时，改为月感电反应。
  * 自身在场，敌方行动牌被赋予电击时：额外赋予不可调和状态。
  */
 export const MoonsignBenedictionAssemblageHub01 = skill(14175)

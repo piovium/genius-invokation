@@ -190,7 +190,7 @@ export const PrimordialJadeWingedspear = card(311407)
  * @name 公义的酬报
  * @description
  * 角色使用「元素爆发」造成的伤害+2。
- * 我方出战角色受到伤害或治疗后：累积1点「公义之理」。如果此牌已累积3点「公义之理」，则消耗3点「公义之理」，使角色获得1点充能。
+ * 我方出战角色受到伤害或治疗后：累积1点「公义之理」。如果此牌已累积4点「公义之理」，则消耗4点「公义之理」，使角色获得1点充能。
  * （「长柄武器」角色才能装备。角色最多装备1件「武器」）
  */
 export const RightfulReward = card(311408)
@@ -204,8 +204,8 @@ export const RightfulReward = card(311408)
   .listenToPlayer()
   .do((c) => {
     c.addVariable("justice", 1);
-    if (c.getVariable("justice") >= 3) {
-      c.addVariable("justice", -3);
+    if (c.getVariable("justice") >= 4) {
+      c.addVariable("justice", -4);
       c.gainEnergy(1, "@master");
     }
   })

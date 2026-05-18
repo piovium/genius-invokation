@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DamageType, DiceType, card, combatStatus, extension } from "@gi-tcg/core/builder";
+import { AgileSwitch, EfficientSwitch } from "../../commons";
 
 /**
  * @id 323001
@@ -80,7 +81,7 @@ export const RedFeatherFanStatus = combatStatus(302303)
  * @id 323003
  * @name 红羽团扇
  * @description
- * 我方切换角色后：本回合中，我方执行的下次「切换角色」行动视为「快速行动」而非「战斗行动」，并且少花费1个元素骰。（每回合1次）
+ * 我方切换角色后：我方获得1层高效切换和敏捷切换。（每回合1次）
  */
 export const RedFeatherFan = card(323003)
   .since("v3.7.0")
@@ -88,7 +89,8 @@ export const RedFeatherFan = card(323003)
   .support("item")
   .on("switchActive")
   .usagePerRound(1)
-  .combatStatus(RedFeatherFanStatus)
+  .combatStatus(EfficientSwitch)
+  .combatStatus(AgileSwitch)
   .done();
 
 /**

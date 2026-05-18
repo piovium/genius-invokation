@@ -142,7 +142,7 @@ export const DarkgoldWolfbite01 = skill(11116)
 export const Wriothesley = character(1111)
   .since("v4.7.0")
   .tags("cryo", "catalyst", "fontaine", "pneuma")
-  .health(10)
+  .health(11)
   .energy(3)
   .skills(ForcefulFistsOfFrost, IcefangRush, DarkgoldWolfbite, DarkgoldWolfbite01)
   .done();

@@ -70,7 +70,6 @@ export const MutualWeaponsMentorship = card(111161)
   .undiscoverable() 
   .addTarget(`my character with definition id 1116`)
   .characterStatus(SevenphaseFlash, "@targets.0")
-  .characterStatus(DeathsCrossing, "@targets.0")
   .onArbitraryEvent("actionPhase", {
     operation: (c) => {
       c.disposeCard(c.self);

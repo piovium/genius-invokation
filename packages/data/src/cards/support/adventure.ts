@@ -24,7 +24,7 @@ import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other";
  * @description
  * 冒险经历达到2时：生成2张手牌沉玉茶露。
  * 冒险经历达到4时：我方获得3层高效切换和敏捷切换。
- * 冒险经历达到8时：我方全体角色附着水元素，治疗我方受伤最多的角色至最大生命值，并使其获得2点最大生命值，然后弃置此牌。
+ * 冒险经历达到8时：我方全体角色附着水元素，治疗我方受伤最多的角色10点，并使其获得2点最大生命值，然后弃置此牌。
  */
 export const ChenyuVale = card(321032)
   .since("v6.1.0")
@@ -49,12 +49,11 @@ export const ChenyuVale = card(321032)
   .usage(1, { name: "stage3", visible: false })
   .apply(DamageType.Hydro, "all my characters")
   .do((c) => {
-    const targetCh = c.$(`my characters order by health - maxHealth limit 1`);
+    const targetCh = c.query($.macros.myMostInjured);
     if (!targetCh) {
       return;
     }
-    const healValue = 999; // interesting.
-    c.heal(healValue, targetCh);
+    c.heal(10, targetCh);
     c.increaseMaxHealth(2, targetCh);
     c.finishAdventure();
   })
