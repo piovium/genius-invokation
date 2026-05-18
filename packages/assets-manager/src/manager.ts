@@ -75,7 +75,7 @@ export interface AssetsManagerOption {
 
 export const DEFAULT_ASSETS_API_ENDPOINT =
   import.meta.env?.DEFAULT_ASSETS_API_ENDPOINT ||
-  "https://gi-tcg-assets-api-hf.guyutongxue.site/api/v4";
+  "https://static-data.piovium.org/api/v4";
 
 const FETCH_OPTION: RequestInit = {
   headers: {
