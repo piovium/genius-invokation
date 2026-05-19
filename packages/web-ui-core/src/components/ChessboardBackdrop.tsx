@@ -23,7 +23,7 @@ export function ChessboardBackdrop(props: ChessboardBackdropProps) {
     <div
       class={`absolute inset-0 translate-z-0.1
         pointer-events-none data-[shown]:pointer-events-auto
-        data-[shown]:bg-black/50 bg-black/0 transition-colors
+        data-[shown]:bg-black/50 bg-black/0 transition-all
         invisible data-[shown]:visible`}
       bool:data-shown={props.shown}
       onClick={(e) => {

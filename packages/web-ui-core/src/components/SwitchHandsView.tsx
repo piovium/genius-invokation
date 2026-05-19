@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -25,15 +25,11 @@ export interface SwitchHandsViewProps {
 export function SwitchHandsView(props: SwitchHandsViewProps) {
   const { t } = useUiContext();
   return (
-    <div class="absolute pointer-events-none inset-0 flex flex-col items-center z-3">
-      <h3 class="absolute top-50% -translate-y-40 font-bold text-3xl text-black">
+    <div class="grid-area-[1/1] w-full h-full flex flex-col items-center justify-center select-none z-3 pointer-events-none">
+      <h3 class="h-10 font-bold text-3xl text-white/80 mb-66 pointer-events-none">
         {t("view.replaceHandsTitle")}
       </h3>
-      <div class="flex-grow" />
-      <Button
-        class="absolute top-50% translate-y-30 pointer-events-auto"
-        onClick={props.onConfirm}
-      >
+      <Button class="pointer-events-auto" onClick={props.onConfirm}>
         {t("view.confirmButton")}
       </Button>
     </div>

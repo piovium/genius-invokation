@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -45,19 +45,19 @@ export function RerollDiceView(props: RerollViewProps) {
   };
   return (
     <div
-      class="absolute inset-0 z-3 flex flex-col items-center justify-center gap-10 select-none"
+      class="grid-area-[1/1] w-full h-full flex flex-col items-center justify-center select-none z-3"
       onPointerUp={() => setSelectingOn(null)}
     >
-      <h3 class="max-w-70 px-4 text-center leading-tight font-bold text-2xl">
+      <h3 class="h-10 font-bold text-3xl text-white/80">
         {t("view.rerollDiceTitle")}
       </h3>
-      <div class="grid grid-rows-2 grid-flow-col gap-3">
+      <div class="h-42 my-12 grid grid-rows-2 grid-flow-col gap-2">
         <Index each={props.dice}>
           {(dice, index) => (
             <Dice
               type={dice()}
               selected={props.selectedDice[index]}
-              class="cursor-pointer w-18 h-18"
+              class="cursor-pointer w-20 h-20"
               onPointerDown={(e) => {
                 if (checkPointerEvent(e)) {
                   toggleDice(index);
@@ -77,14 +77,13 @@ export function RerollDiceView(props: RerollViewProps) {
           )}
         </Index>
       </div>
-      <div
-        class="visible data-[hidden]:invisible"
+      <Button
+        class="visible data-[hidden]:invisible data-[hidden]:pointer-events-none"
         bool:data-hidden={props.noConfirmButton}
+        onClick={() => props.onConfirm()}
       >
-        <Button onClick={() => props.onConfirm()}>
-          {t("view.confirmButton")}
-        </Button>
-      </div>
+        {t("view.confirmButton")}
+      </Button>
     </div>
   );
 }

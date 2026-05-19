@@ -1745,6 +1745,47 @@ function HistoryHintBox(props: { data: HistoryHintData }) {
   );
 }
 
+function HistoryBlockItem(props: {
+  block: HistoryBlock;
+  isSelected: boolean;
+  onSelect: (block: HistoryBlock) => void;
+}) {
+  const isHint = () =>
+    props.block.type === "changePhase" || props.block.type === "action";
+
+  const hintData = createMemo(() => {
+    if (!isHint()) return null;
+    return renderHistoryHint(props.block as HistoryHintBlock);
+  });
+
+  const detailData = createMemo(() => {
+    if (isHint()) return null;
+    return renderHistoryBlock(props.block as HistoryDetailBlock);
+  });
+
+  return (
+    <Switch>
+      <Match when={isHint()}>
+        <HistoryHintBox data={hintData() as HistoryHintData} />
+      </Match>
+      <Match when={props.block.type === "pocket"}>
+        <PocketHistoryBlockBox
+          data={detailData() as HistoryBlockData}
+          isSelected={props.isSelected}
+          onClick={() => props.onSelect(props.block)}
+        />
+      </Match>
+      <Match when={true}>
+        <HistoryBlockBox
+          data={detailData() as HistoryBlockData}
+          isSelected={props.isSelected}
+          onClick={() => props.onSelect(props.block)}
+        />
+      </Match>
+    </Switch>
+  );
+}
+
 export interface HistoryPanelProps {
   who: 0 | 1;
   history: HistoryBlock[];
@@ -1799,41 +1840,15 @@ export function HistoryPanel(props: HistoryPanelProps) {
         >
           <For each={props.history}>
             {(block) => (
-              <Switch>
-                <Match
-                  when={block.type === "changePhase" || block.type === "action"}
-                >
-                  <HistoryHintBox
-                    data={renderHistoryHint(block as HistoryHintBlock)}
-                  />
-                </Match>
-                <Match when={block.type === "pocket"}>
-                  <PocketHistoryBlockBox
-                    data={renderHistoryBlock(block as HistoryDetailBlock)}
-                    isSelected={selectedBlock() === block}
-                    onClick={() => {
-                      if (
-                        block.type !== "changePhase" &&
-                        block.type !== "action"
-                      )
-                        setSelectedBlock(block);
-                    }}
-                  />
-                </Match>
-                <Match when={true}>
-                  <HistoryBlockBox
-                    data={renderHistoryBlock(block as HistoryDetailBlock)}
-                    isSelected={selectedBlock() === block}
-                    onClick={() => {
-                      if (
-                        block.type !== "changePhase" &&
-                        block.type !== "action"
-                      )
-                        setSelectedBlock(block);
-                    }}
-                  />
-                </Match>
-              </Switch>
+              <HistoryBlockItem
+                block={block}
+                isSelected={selectedBlock() === block}
+                onSelect={(b) => {
+                  if (b.type !== "changePhase" && b.type !== "action") {
+                    setSelectedBlock(b);
+                  }
+                }}
+              />
             )}
           </For>
         </div>

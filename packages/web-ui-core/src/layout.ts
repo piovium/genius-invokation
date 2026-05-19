@@ -64,8 +64,7 @@ const HAND_CARD_HOVERING_X_OFFSET = 2;
 
 const HAND_CARD_FOCUSING_AREA_HEIGHT_WHEN_DRAGGING = CARD_HEIGHT + 10;
 
-export const SHOWING_CARD_GAP_MIN = 10;
-const SHOWING_CARD_X_MARGIN = 60;
+export const SHOWING_CARD_X_MARGIN = 60;
 
 export function getCharacterAreaPos(
   [height, width]: Size,
@@ -239,13 +238,11 @@ export function getShowingCardPos(
   index: number,
 ): Pos {
   const y = height / 2 - CARD_HEIGHT / 2;
-  const xOffset = Math.min(
-    (MINIMUM_WIDTH - SHOWING_CARD_X_MARGIN - CARD_WIDTH) / (totalCount - 1),
-    CARD_WIDTH + SHOWING_CARD_GAP_MIN,
-  );
-  const totalWidth = xOffset * (totalCount - 1) + CARD_WIDTH;
-  const xStart = (width - totalWidth) / 2;
-  const x = xStart + index * xOffset;
+  const gapX =
+    (MINIMUM_WIDTH - SHOWING_CARD_X_MARGIN - totalCount * CARD_WIDTH) /
+    (totalCount + 1);
+  const xStart = (width - MINIMUM_WIDTH + SHOWING_CARD_X_MARGIN) / 2 + gapX;
+  const x = xStart + index * (CARD_WIDTH + gapX);
   return [x, y];
 }
 

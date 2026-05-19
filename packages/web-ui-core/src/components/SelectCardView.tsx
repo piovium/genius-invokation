@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { createSignal, For, Show } from "solid-js";
-import { SHOWING_CARD_GAP_MIN } from "../layout";
 import { Button } from "./Button";
 import { Image } from "./Image";
 import CardFrameNormal from "../svg/CardFrameNormal.svg?fb";
@@ -34,9 +33,11 @@ export function SelectCardView(props: SelectCardViewProps) {
   const [selectedId, setSelectedId] = createSignal<number | null>(null);
 
   return (
-    <div class="grid-area-[1/1] w-full h-full flex flex-col items-center justify-center gap-15 select-none z-3">
-      <h3 class="h-10 font-bold text-3xl text-white/80">{t("view.chooseCard")}</h3>
-      <div class={`flex flex-row gap-${SHOWING_CARD_GAP_MIN}`}>
+    <div class="grid-area-[1/1] w-full h-full flex flex-col items-center justify-center select-none z-3">
+      <h3 class="h-10 font-bold text-3xl text-white/80">
+        {t("view.chooseCard")}
+      </h3>
+      <div class={`flex flex-row h-36 my-15 justify-evenly w-180`}>
         <For each={props.candidateIds}>
           {(cardId) => (
             <div
@@ -69,13 +70,13 @@ export function SelectCardView(props: SelectCardViewProps) {
       </div>
       <Button
         class="invisible pointer-events-none data-[shown]:visible data-[shown]:pointer-events-auto"
+        bool:data-shown={selectedId() !== null}
         onClick={() => {
           const id = selectedId();
           if (id !== null) {
             props.onConfirm(id);
           }
         }}
-        bool:data-shown={selectedId() !== null}
       >
         {t("view.confirmButton")}
       </Button>
