@@ -14,8 +14,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { createSignal, For, Show } from "solid-js";
+import { SHOWING_CARD_GAP_MIN } from "../layout";
 import { Button } from "./Button";
-import { CardFace } from "./Card";
+import { Image } from "./Image";
+import CardFrameNormal from "../svg/CardFrameNormal.svg?fb";
 import SelectingIcon from "../svg/SelectingIcon.svg?fb";
 import { useUiContext } from "../hooks/context";
 import { DiceCostAsync } from "./DiceCost";
@@ -32,56 +34,51 @@ export function SelectCardView(props: SelectCardViewProps) {
   const [selectedId, setSelectedId] = createSignal<number | null>(null);
 
   return (
-    <div class="absolute inset-0 flex flex-col items-center justify-center gap-10 select-none z-3">
-      <h3 class="font-bold text-3xl">{t("view.chooseCard")}</h3>
-      <ul class="flex flex-row gap-1">
+    <div class="grid-area-[1/1] w-full h-full flex flex-col items-center justify-center gap-15 select-none z-3">
+      <h3 class="h-10 font-bold text-3xl">{t("view.chooseCard")}</h3>
+      <div class={`flex flex-row gap-${SHOWING_CARD_GAP_MIN}`}>
         <For each={props.candidateIds}>
           {(cardId) => (
-            <li class="flex flex-col items-center">
-              <div
-                class="h-36 w-21 relative"
-                onClick={() => {
-                  setSelectedId(cardId);
-                  props.onClickCard(cardId);
-                }}
-              >
-                <CardFace
-                  definitionId={cardId}
-                  class="absolute inset-0 h-36 w-21"
-                />
-                <Show when={selectedId() === cardId}>
-                  <div class="absolute h-full w-full backface-hidden flex items-center justify-center">
-                    <SelectingIcon class="w-21 h-21" />
-                  </div>
-                </Show>
-                <DiceCostAsync
-                  cardDefinitionId={cardId}
-                  class="absolute translate-x--50% backface-hidden flex flex-col gap-1 left-1.8 top--1"
-                  diceClass="w-9 h-9 text-4.5 m--1"
-                />
-              </div>
-              <div class="mt-2 w-36 font-size-4 text-center color-black/60 font-bold">
+            <div
+              class="w-21 h-36 grid relative"
+              onClick={() => {
+                setSelectedId(cardId);
+                props.onClickCard(cardId);
+              }}
+            >
+              <Image
+                class="grid-area-[1/1] h-full w-full p-1% text-3"
+                imageId={cardId}
+                fallback="card"
+              />
+              <CardFrameNormal class="grid-area-[1/1] h-full w-full pointer-events-none" />
+              <Show when={selectedId() === cardId}>
+                <SelectingIcon class="grid-area-[1/1] w-21 h-21 place-self-center" />
+              </Show>
+              <DiceCostAsync
+                cardDefinitionId={cardId}
+                class="absolute left-2 top--0.5 translate-x--50% flex flex-col gap-1"
+                diceClass="w-9 h-9 text-4.5 m--1"
+              />
+              <div class="grid-area-[1/1] self-end py-1 text-3 text-center text-black/60 font-bold line-height-tight translate-y-100%">
                 {props.nameGetter(cardId)}
               </div>
-            </li>
+            </div>
           )}
         </For>
-      </ul>
-      <div
+      </div>
+      <Button
         class="invisible pointer-events-none data-[shown]:visible data-[shown]:pointer-events-auto"
+        onClick={() => {
+          const id = selectedId();
+          if (id !== null) {
+            props.onConfirm(id);
+          }
+        }}
         bool:data-shown={selectedId() !== null}
       >
-        <Button
-          onClick={() => {
-            const id = selectedId();
-            if (id !== null) {
-              props.onConfirm(id);
-            }
-          }}
-        >
-          {t("view.confirmButton")}
-        </Button>
-      </div>
+        {t("view.confirmButton")}
+      </Button>
     </div>
   );
 }

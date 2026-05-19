@@ -48,7 +48,7 @@ import SwitchActiveHistoryIcon from "../svg/SwitchActiveHistoryIcon.svg?fb";
 import TriggerIcon from "../svg/TriggerIcon.svg?fb";
 import CardFrameSummon from "../svg/CardFrameSummon.svg?fb";
 import CardbackNormal from "../svg/CardbackNormal.svg?fb";
-import { CardFace } from "./Card";
+import CardFrameNormal from "../svg/CardFrameNormal.svg?fb";
 import { DAMAGE_COLOR } from "./Damage";
 import { REACTION_TEXT_MAP } from "./Reaction";
 import { RichText } from "./RichText";
@@ -1417,6 +1417,49 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
   return result;
 };
 
+export interface HistoryCardProps {
+  definitionId?: number;
+  class?: string;
+}
+
+export function HistoryCard(props: HistoryCardProps) {
+  return (
+    <Show
+      when={!!props.definitionId}
+      fallback={<CardbackNormal class={props.class} />}
+    >
+      <>
+        <Image
+          class={`p-1px text-0 ${props.class ?? ""}`}
+          imageId={props.definitionId as number}
+          fallback="card"
+        />
+        <CardFrameNormal class={`pointer-events-none ${props.class ?? ""}`} />
+      </>
+    </Show>
+  );
+}
+
+export function HistorySummon(props: HistoryCardProps) {
+  return (
+    <Show
+      when={!!props.definitionId}
+      fallback={
+        <div class={`bg-gray-700 b-2 b-white/50 ${props.class ?? ""}`} />
+      }
+    >
+      <>
+        <Image
+          class={`p-1px text-0 rounded-md ${props.class ?? ""}`}
+          imageId={props.definitionId as number}
+          fallback="card"
+        />
+        <CardFrameSummon class={`pointer-events-none ${props.class ?? ""}`} />
+      </>
+    </Show>
+  );
+}
+
 function HistoryChildBox(props: { data: HistoryChildData }) {
   return (
     <div
@@ -1499,39 +1542,20 @@ function HistorySummaryShot(props: { data: SummaryShot }) {
         <Match when={props.data.size === "normal"}>
           <For each={props.data.cardFace.toReversed()}>
             {(imageId, index) => (
-              <Show
-                when={!!imageId}
-                fallback={
-                  <CardbackNormal
-                    class="grid-area-[2/1] justify-self-end w-10.5 h-18"
-                    style={{ "margin-right": `${index() * 0.25}rem` }}
-                  />
-                }
-              >
-                <CardFace
-                  definitionId={imageId}
-                  class="grid-area-[2/1] justify-self-end w-10.5 h-18"
-                  style={{ "margin-right": `${index() * 0.25}rem` }}
-                />
-              </Show>
+              <HistoryCard
+                definitionId={imageId}
+                class={`grid-area-[2/1] justify-self-end w-10.5 h-18 mr-${index()}`}
+              />
             )}
           </For>
         </Match>
         <Match when={props.data.size === "summon"}>
           <For each={props.data.cardFace.toReversed()}>
             {(imageId, index) => (
-              <>
-                <Image
-                  imageId={imageId}
-                  class="grid-area-[2/1] justify-self-end self-center w-10.5 h-12.5 rounded-md text-0"
-                  fallback="card"
-                  style={{ "margin-right": `${index() * 0.25}rem` }}
-                />
-                <CardFrameSummon
-                  class="grid-area-[2/1] justify-self-end self-center w-10.5 h-12.5 pointer-events-none"
-                  style={{ "margin-right": `${index() * 0.25}rem` }}
-                />
-              </>
+              <HistorySummon
+                definitionId={imageId}
+                class={`grid-area-[2/1] justify-self-end self-center w-10.5 h-12.5 mr-${index()}`}
+              />
             )}
           </For>
         </Match>
@@ -1629,25 +1653,16 @@ function HistoryBlockBox(props: {
         <div class="w-10.5 h-24 grid grid-cols-1 grid-rows-[1fr_6fr_1fr]">
           <Switch>
             <Match when={props.data.imageSize === "normal"}>
-              <Show
-                when={!!props.data.imageId}
-                fallback={
-                  <CardbackNormal class="grid-area-[2/1] w-10.5 h-18" />
-                }
-              >
-                <CardFace
-                  definitionId={props.data.imageId as number}
-                  class="grid-area-[2/1] w-10.5 h-18"
-                />
-              </Show>
+              <HistoryCard
+                definitionId={props.data.imageId}
+                class="grid-area-[2/1] w-10.5 h-18"
+              />
             </Match>
             <Match when={props.data.imageSize === "summon"}>
-              <Image
-                imageId={props.data.imageId ?? 0}
-                class="grid-area-[2/1] place-self-center w-10.5 h-12.5 rounded-md text-0"
-                fallback="card"
+              <HistorySummon
+                definitionId={props.data.imageId}
+                class="grid-area-[2/1] place-self-center w-10.5 h-12.5"
               />
-              <CardFrameSummon class="grid-area-[2/1] place-self-center w-10.5 h-12.5 pointer-events-none" />
             </Match>
           </Switch>
           <Switch>
@@ -1858,21 +1873,16 @@ function HistoryBlockDetailPanel(props: {
     >
       <div class="overflow-y-scroll max-h-120 flex flex-col gap-1 history-scrollbar">
         <Show when={renderBlock().type !== "pocket"}>
-          <div class="relative w-full bg-#2d333a rounded-t-md flex flex-row b-2 b-white/10 shrink-0">
+          <div class="relative w-full bg-#2d333a rounded-t-md grid grid-cols-[3.625rem_1fr] self-start b-2 b-white/10 shrink-0">
             <div
               class="absolute top-1px left-1px w-3.5 h-3.5 rounded-lt bg-#806440 data-[opp]:bg-#48678b history-card-hint"
               bool:data-opp={renderBlock().content.opp}
             />
-            <Show
-              when={renderBlock().content.imageId}
-              fallback={<CardbackNormal class="w-10.5 h-18 m-2 shrink-0" />}
-            >
-              <CardFace
-                definitionId={renderBlock().content.imageId as number}
-                class="w-10.5 h-18 m-2 shrink-0"
-              />
-            </Show>
-            <div class="flex-1 py-1.5 pr-2 flex flex-col text-2.5 text-#b2afa8">
+            <HistoryCard
+              definitionId={renderBlock().content.imageId}
+              class="grid-area-[1/1] w-10.5 h-18 m-2"
+            />
+            <div class="grid-area-[1/2] py-1.5 pr-2 flex flex-col text-2.5 text-#b2afa8">
               <div class="text-3.5 text-#fff3e0 font-bold">
                 {renderBlock().content.name}
               </div>

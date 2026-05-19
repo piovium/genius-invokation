@@ -14,7 +14,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { For, Match, Show, Switch } from "solid-js";
-import { CardFace } from "./Card";
 import { DiceType } from "@gi-tcg/typings";
 import { DiceCostAsync } from "./DiceCost";
 import { InlineDice } from "./Dice";
@@ -52,7 +51,7 @@ function MiniView(props: MiniSpecialViewProps) {
                   <div class="relative h-24 w-4.5">
                     <li class="flex flex-col items-center absolute top-0 left--3">
                       <div class="h-18 w-10.5 relative">
-                        <CardFace definitionId={cardId} class="absolute inset-0 w-10.5 h-18" />
+                        {/* <CardFace definitionId={cardId} class="absolute inset-0 w-10.5 h-18" /> */}
                         <DiceCostAsync
                           cardDefinitionId={cardId}
                           class="absolute translate-x--50% backface-hidden flex flex-col gap-1 top-0 left-0.8"
@@ -79,7 +78,7 @@ function MiniView(props: MiniSpecialViewProps) {
                   <div class="relative h-24 w-4.5">
                     <li class="flex flex-col items-center absolute top-0 left--3">
                       <div class="h-18 w-10.5 relative">
-                        <CardFace definitionId={cardId} class="absolute inset-0 w-10.5 h-18" />
+                        {/* <CardFace definitionId={cardId} class="absolute inset-0 w-10.5 h-18" /> */}
                         <DiceCostAsync
                           cardDefinitionId={cardId}
                           class="absolute translate-x--50% backface-hidden flex flex-col gap-1 top-0 left-0.8"

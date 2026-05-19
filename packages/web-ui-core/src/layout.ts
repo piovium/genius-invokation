@@ -64,7 +64,7 @@ const HAND_CARD_HOVERING_X_OFFSET = 2;
 
 const HAND_CARD_FOCUSING_AREA_HEIGHT_WHEN_DRAGGING = CARD_HEIGHT + 10;
 
-const SHOWING_CARD_GAP_MIN = 10;
+export const SHOWING_CARD_GAP_MIN = 10;
 const SHOWING_CARD_X_MARGIN = 60;
 
 export function getCharacterAreaPos(

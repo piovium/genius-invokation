@@ -18,9 +18,7 @@ import {
   createMemo,
   Match,
   Show,
-  splitProps,
   Switch,
-  type ComponentProps,
 } from "solid-js";
 import { Image } from "./Image";
 import { DiceCost } from "./DiceCost";
@@ -132,24 +130,6 @@ const opacityKeyframes = (uiState: CardAnimatingUiState): Keyframe[] => {
   return [startKeyframe, ...middleKeyframes, endKeyframe];
 };
 
-export interface CardFaceProps extends ComponentProps<"div"> {
-  definitionId: number;
-}
-
-export function CardFace(props: CardFaceProps) {
-  const [local, rest] = splitProps(props, ["definitionId", "class"]);
-  return (
-    <div class={`backface-hidden grid ${local.class ?? ""}`} {...rest}>
-      <Image
-        class="grid-area-[1/1] h-full w-full p-1% text-3"
-        imageId={local.definitionId}
-        fallback="card"
-      />
-      <CardFrameNormal class="grid-area-[1/1] h-full w-full pointer-events-none" />
-    </div>
-  );
-}
-
 export function Card(props: CardProps) {
   // const [data] = createResource(
   //   () => props.data.definitionId,
@@ -229,7 +209,7 @@ export function Card(props: CardProps) {
   return (
     <div
       ref={el}
-      class={`absolute top-0 left-0 h-36 w-21 grid rounded-1.5
+      class={`absolute top-0 left-0 h-36 w-21 grid rounded-1.5 [&_*]:backface-hidden
         preserve-3d transform-origin-tl card pointer-events-auto`}
       style={style()}
       bool:data-opp-hand={props.kind === "oppHand"}
@@ -271,7 +251,12 @@ export function Card(props: CardProps) {
         props.onPointerDown?.(e, e.currentTarget);
       }}
     >
-      <CardFace definitionId={data().definitionId} class="grid-area-[1/1]" />
+      <Image
+        class="grid-area-[1/1] w-21 h-36 p-1% text-3"
+        imageId={data().definitionId}
+        fallback="card"
+      />
+      <CardFrameNormal class="grid-area-[1/1] w-21 h-36 pointer-events-none" />
       <div class="grid-area-[1/1] pointer-events-none rounded-1.2 card-animation" />
       <Switch>
         <Match when={props.toBeSwitched}>
@@ -286,20 +271,20 @@ export function Card(props: CardProps) {
         attachments={attachments()}
       />
       <DiceCost
-        class="absolute left-2 top--0.5 translate-x--50% backface-hidden flex flex-col gap-1 [&:where([data-opp-hand]>*)]:rotate-180"
+        class="absolute left-2 top--0.5 translate-x--50% flex flex-col gap-1 [&:where([data-opp-hand]>*)]:rotate-180"
         cost={data().definitionCost}
         diceClass="w-9 h-9 text-4.5 m--1"
         realCost={realCost()}
       />
-      <CardbackNormal class="grid-area-[1/1] backface-hidden rotate-y-180 translate-z--0.1px pointer-events-none" />
+      <CardbackNormal class="grid-area-[1/1] rotate-y-180 translate-z--0.1px pointer-events-none" />
       <Show when={abyssDebuff()}>
-        <div class="grid-area-[1/1] backface-hidden rotate-y-180 translate-z--0.2px rounded-1.2 abyss-debuff" />
+        <div class="grid-area-[1/1] rotate-y-180 translate-z--0.2px rounded-1.2 abyss-debuff" />
       </Show>
       <Show when={conductiveDebuff()}>
         <ElectricShocks
           class={`${
             props.kind === "oppHand"
-              ? "translate-z--0.2px inset--18%"
+              ? "translate-z--0.2px inset--18% rotate-y-180"
               : "inset--20%"
           }`}
         />
