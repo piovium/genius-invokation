@@ -104,6 +104,7 @@ export type CharacterAnimation =
 
 export interface CharacterAreaProps extends CharacterInfo {
   selecting: boolean;
+  hidden?: boolean;
   onClick?: (e: MouseEvent, currentTarget: HTMLElement) => void;
 }
 
@@ -464,13 +465,14 @@ export function CharacterArea(props: CharacterAreaProps) {
   );
   return (
     <div
-      class="absolute w-21 h-48 grid grid-cols-1 grid-rows-[1fr_6fr_1fr] transition-transform preserve-3d [&_*]:backface-hidden"
+      class="absolute w-21 h-48 grid grid-cols-1 grid-rows-[1fr_6fr_1fr] transition-transform preserve-3d [&_*]:backface-hidden data-[hidden]:invisible"
       style={cssPropertyOfTransform(props.uiState.transform)}
       ref={el}
       onClick={(e) => {
         e.stopPropagation();
         props.onClick?.(e, e.currentTarget);
       }}
+      bool:data-hidden={props.hidden}
     >
       {/* Elemente */}
       <Show

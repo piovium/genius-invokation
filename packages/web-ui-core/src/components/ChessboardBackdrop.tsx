@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -21,7 +21,10 @@ export interface ChessboardBackdropProps {
 export function ChessboardBackdrop(props: ChessboardBackdropProps) {
   return (
     <div
-      class="absolute inset-0 translate-z-0.1 pointer-events-none data-[shown]:pointer-events-auto data-[shown]:bg-black/50 bg-black/0 transition-colors"
+      class={`absolute inset-0 translate-z-0.1
+        pointer-events-none data-[shown]:pointer-events-auto
+        data-[shown]:bg-black/50 bg-black/0 transition-colors
+        invisible data-[shown]:visible`}
       bool:data-shown={props.shown}
       onClick={(e) => {
         e.stopPropagation();

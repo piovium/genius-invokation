@@ -35,7 +35,7 @@ export function SelectCardView(props: SelectCardViewProps) {
 
   return (
     <div class="grid-area-[1/1] w-full h-full flex flex-col items-center justify-center gap-15 select-none z-3">
-      <h3 class="h-10 font-bold text-3xl">{t("view.chooseCard")}</h3>
+      <h3 class="h-10 font-bold text-3xl text-white/80">{t("view.chooseCard")}</h3>
       <div class={`flex flex-row gap-${SHOWING_CARD_GAP_MIN}`}>
         <For each={props.candidateIds}>
           {(cardId) => (
@@ -60,7 +60,7 @@ export function SelectCardView(props: SelectCardViewProps) {
                 class="absolute left-2 top--0.5 translate-x--50% flex flex-col gap-1"
                 diceClass="w-9 h-9 text-4.5 m--1"
               />
-              <div class="grid-area-[1/1] self-end py-1 text-3 text-center text-black/60 font-bold line-height-tight translate-y-100%">
+              <div class="grid-area-[1/1] self-end py-1 text-3 text-center text-white/80 line-height-tight translate-y-100%">
                 {props.nameGetter(cardId)}
               </div>
             </div>

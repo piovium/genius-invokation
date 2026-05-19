@@ -487,6 +487,12 @@
   }
 
   /* Entity */
+  .entity {
+    transition:
+      transform 150ms ease,
+      box-shadow 150ms ease;
+  }
+  
   .entity[data-entering] {
     animation: 500ms linear forwards brightness-blink;
   }

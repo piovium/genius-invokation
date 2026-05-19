@@ -40,6 +40,7 @@ import { Dynamic } from "solid-js/web";
 
 export interface EntityProps extends EntityInfo {
   selecting: boolean;
+  hidden?: boolean;
   onClick?: (e: MouseEvent, currentTarget: HTMLElement) => void;
 }
 
@@ -107,9 +108,10 @@ export function Entity(props: EntityProps) {
   );
   return (
     <div
-      class={`absolute left-0 top-0 w-16 aspect-ratio-[28/33] transition-all
-        grid preserve-3d rounded clickable-outline entity isolate`}
+      class={`absolute left-0 top-0 w-16 aspect-ratio-[28/33] data-[hidden]:invisible
+        grid preserve-3d rounded isolate clickable-outline entity`}
       style={cssPropertyOfTransform(props.uiState.transform)}
+      bool:data-hidden={props.hidden}
       bool:data-entering={props.animation === "entering"}
       bool:data-disposing={props.animation === "disposing"}
       bool:data-clickable={

@@ -126,7 +126,6 @@ import { ConfirmButton } from "./ConfirmButton";
 import { TuningArea } from "./TuningArea";
 import { RerollDiceView } from "./RerollDiceView";
 import { SelectCardView } from "./SelectCardView";
-import { SpecialViewBackdrop } from "./ViewPanelBackdrop";
 import { SwitchHandsView } from "./SwitchHandsView";
 import { HistoryPanel } from "./HistoryViewer";
 import { CurrentTurnHint } from "./CurrentTurnHint";
@@ -1712,6 +1711,7 @@ export function Chessboard(props: ChessboardProps) {
               <CharacterArea
                 {...character()}
                 selecting={character().id === selectingItem()?.info.id}
+                hidden={hasSpecialView() && specialViewVisible()}
                 onClick={(e, t) => onCharacterAreaClick(e, t, character())}
               />
             )}
@@ -1733,7 +1733,7 @@ export function Chessboard(props: ChessboardProps) {
                 }
                 hidden={
                   // 存在特殊视图时：视图可见时只显示正在切换的手牌，反之只显示其他行动牌
-                  hasSpecialView() && !localProps.liveStreamingMode
+                  hasSpecialView()
                     ? (card().kind === "switching") !== specialViewVisible()
                     : false
                 }
@@ -1757,6 +1757,7 @@ export function Chessboard(props: ChessboardProps) {
               <Entity
                 {...entity()}
                 selecting={entity().id === selectingItem()?.info.id}
+                hidden={hasSpecialView() && specialViewVisible()}
                 onClick={(e, t) => onEntityClick(e, t, entity())}
               />
             )}
@@ -1765,15 +1766,15 @@ export function Chessboard(props: ChessboardProps) {
             {(hint) => (
               <CardCountHint
                 {...hint()}
-                shown={isShowCardHint[hint().area] !== null}
+                shown={
+                  isShowCardHint[hint().area] !== null &&
+                  !(hasSpecialView() && specialViewVisible())
+                }
               />
             )}
           </Key>
-          <Show when={hasSpecialView() && specialViewVisible()}>
-            <SpecialViewBackdrop onClick={onChessboardClick} />
-          </Show>
           <ChessboardBackdrop
-            shown={localProps.actionState?.showBackdrop}
+            shown={localProps.actionState?.showBackdrop || (hasSpecialView() && specialViewVisible())}
             onClick={onChessboardClick}
           />
           <Show when={children().tuningArea}>
@@ -1952,7 +1953,7 @@ export function Chessboard(props: ChessboardProps) {
               onClick={toggleFullscreen}
             />
             <HistoryToggleButton onClick={() => setShowHistory((v) => !v)} />
-            <Show when={hasSpecialView()}>
+            <Show when={hasSpecialView() && !localProps.liveStreamingMode}>
               <SpecialViewToggleButton
                 onClick={() => setSpecialViewVisible((v) => !v)}
               />
