@@ -97,7 +97,7 @@ function SkillButton(props: SkillButtonProps) {
       <DiceCost
         class="flex flex-row gap-1 data-[hidden]:hidden data-[disabled]:brightness-80 data-[disabled]:saturate-80"
         cost={props.cost}
-        diceClass="w-7 h-7 text-3.5 m--1"
+        diceClass="w-7 h-7 text-3.5 m--1 max-w-7 max-h-7"
         realCost={props.realCost}
         bool:data-hidden={props.hideDiceCost}
         bool:data-disabled={!props.step || props.step.isDisabled}

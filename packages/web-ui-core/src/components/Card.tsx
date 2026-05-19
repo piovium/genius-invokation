@@ -273,7 +273,7 @@ export function Card(props: CardProps) {
       <DiceCost
         class="absolute left-2 top--0.5 translate-x--50% flex flex-col gap-1 [&:where([data-opp-hand]>*)]:rotate-180"
         cost={data().definitionCost}
-        diceClass="w-9 h-9 text-4.5 m--1"
+        diceClass="w-9 h-9 text-4.5 m--1 max-w-9 max-h-9"
         realCost={realCost()}
       />
       <CardbackNormal class="grid-area-[1/1] rotate-y-180 translate-z--0.1px pointer-events-none" />

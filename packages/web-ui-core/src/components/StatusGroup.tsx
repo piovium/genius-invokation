@@ -31,7 +31,7 @@ function Status(props: StatusProps) {
     <div class="h-5 w-5 relative grid">
       <Image
         imageId={defId()}
-        class="grid-area-[1/1] h-5.5 w-5.5 m--0.25 place-self-center status-icon"
+        class="grid-area-[1/1] h-5.5 w-5.5 m--0.25 max-h-5.5 max-w-5.5 place-self-center status-icon"
         fallback="state"
         bool:data-disposing={props.animation === "disposing"}
       />
@@ -69,7 +69,7 @@ export function StatusGroup(props: StatusGroupProps) {
       <For each={statuses()}>{(status) => <Status {...status} />}</For>
       <Show when={showEllipsis()}>
         <div class="h-5 w-5 relative grid">
-          <MoreStatus class="grid-area-[1/1] h-5.5 w-5.5 m--0.25 place-self-center" />
+          <MoreStatus class="grid-area-[1/1] h-5.5 w-5.5 m--0.25 max-h-5.5 max-w-5.5 place-self-center" />
           <div class="grid-area-[1/1] place-self-end m--0.5 w-2.5 h-2.5 rounded-full bg-black/60 text-2.5 text-white text-center line-height-none">
             {ellipsisStatuses().length}
           </div>

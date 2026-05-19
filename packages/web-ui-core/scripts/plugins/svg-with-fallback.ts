@@ -19,8 +19,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 async function compileSvg(filepath: string, source: string) {
-  const filename = path.basename(filepath);
-  const remoteRenderedUrl = `https://ui.assets.gi-tcg.guyutongxue.site/rendered-svg/${filename}.webp`;
+  const filename = path.basename(filepath, ".svg");
+  const remoteRenderedUrl = `https://ui.assets.gi-tcg.guyutongxue.site/${filename}.webp`;
   const svgSource = source
     .replace(/([{}])/g, "{'$1'}")
     .replace(/<!--\s*([\s\S]*?)\s*-->/g, "{/* $1 */}");

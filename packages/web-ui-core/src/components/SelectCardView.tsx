@@ -59,7 +59,7 @@ export function SelectCardView(props: SelectCardViewProps) {
               <DiceCostAsync
                 cardDefinitionId={cardId}
                 class="absolute left-2 top--0.5 translate-x--50% flex flex-col gap-1"
-                diceClass="w-9 h-9 text-4.5 m--1"
+                diceClass="w-9 h-9 text-4.5 m--1 max-w-9 max-h-9"
               />
               <div class="grid-area-[1/1] self-end py-1 text-3 text-center text-white/80 line-height-tight translate-y-100%">
                 {props.nameGetter(cardId)}

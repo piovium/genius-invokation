@@ -39,9 +39,9 @@ export function DiceBar(props: DiceBarProps) {
     >
       <Show
         when={props.opp}
-        fallback={<NumberHintYellow class="grid-area-[1/1] w-9 h-9 m--1" />}
+        fallback={<NumberHintYellow class="grid-area-[1/1] w-9 h-9 m--1 max-w-9 max-h-9" />}
       >
-        <NumberHintBlue class="grid-area-[1/1] w-9 h-9 m--1" />
+        <NumberHintBlue class="grid-area-[1/1] w-9 h-9 m--1 max-w-9 max-h-9" />
       </Show>
       <div class="grid-area-[1/1] text-white font-bold">
         {props.dice.length}
@@ -51,7 +51,7 @@ export function DiceBar(props: DiceBarProps) {
           <DiceUnpack
             type={dice()}
             selected={props.state === "wrapped" && props.selectedDice[index]}
-            class="w-6 h-6 m--1"
+            class="w-6 h-6 m--1 max-w-6 max-h-6"
             col={1}
             row={index + 2}
           />
@@ -117,7 +117,7 @@ export function DicePanel(props: DicePanelProps) {
                 {(dice, index) => (
                   <Dice
                     type={dice()}
-                    class="w-12 h-12 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed m--1"
+                    class="w-12 h-12 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed m--1 max-w-12 max-h-12"
                     selected={props.selectedDice[index]}
                     bool:data-disabled={props.disabledDiceTypes.includes(
                       dice(),

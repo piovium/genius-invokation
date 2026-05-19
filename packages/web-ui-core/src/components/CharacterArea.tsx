@@ -620,7 +620,10 @@ export function CharacterArea(props: CharacterAreaProps) {
         </Show>
       </div>
       <Show when={props.active}>
-        <StatusGroup class="grid-area-[3/1] z-10 px-0.5" statuses={props.combatStatus} />
+        <StatusGroup
+          class="grid-area-[3/1] z-10 px-0.5"
+          statuses={props.combatStatus}
+        />
       </Show>
     </div>
   );
@@ -799,25 +802,21 @@ interface CharacterTagMasksProps {
 }
 
 function CharacterTagMasks(props: CharacterTagMasksProps) {
-  const assets = {
-    [CHARACTER_TAG_SHIELD]: "UI_GCG_Shield_01",
-    [CHARACTER_TAG_BARRIER]: "UI_GCG_Shield_02",
-    [CHARACTER_TAG_DISABLE_SKILL]: "UI_GCG_Frozen",
+  const TAG_MASK_MAP: Record<number, string> = {
+    [CHARACTER_TAG_SHIELD]: "MaskShield",
+    [CHARACTER_TAG_BARRIER]:"MaskBarrier",
+    [CHARACTER_TAG_DISABLE_SKILL]: "MaskFrozen",
     // "UI_GCG_Rocken",
     // "UI_GCG_Dizzy",
   };
   return (
-    <WithDelicateUi assetId={Object.values(assets)} fallback={<></>}>
-      {(...imgs) => (
-        <div class="absolute inset-0 pointer-events-none children-absolute children-inset-1/2 children--translate-x-1/2 children--translate-y-1/2 children-h-92% children-w-full children-scale-125%">
-          <Index each={Object.keys(assets)}>
-            {(flag, i) => (
-              <Show when={props.tags & Number(flag())}>{imgs[i]}</Show>
-            )}
-          </Index>
-        </div>
+    <Index each={Object.keys(TAG_MASK_MAP)}>
+      {(flag) => (
+        <Show when={props.tags & Number(flag())}>
+          <img class="grid-area-[1/1] m--3 w-27 h-42 max-w-27 max-h-42" src={`https://ui.assets.gi-tcg.guyutongxue.site/${TAG_MASK_MAP[Number(flag())]}.webp`}/>
+        </Show>
       )}
-    </WithDelicateUi>
+    </Index>
   );
 }
 
