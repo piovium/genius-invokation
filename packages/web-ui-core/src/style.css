@@ -30,12 +30,6 @@
   }
 
   /* start */
-  /* Chessboard Background */
-  .chessboard-bg-container {
-    img {
-      scale: 1.072;
-    }
-  }
 
   /* ActionHintText */
   .action-hint {
@@ -610,11 +604,9 @@
   }
 
   /* Merge Chessboard */
-  &[data-has-opp-chessboard] {
-    .chessboard-bg-container {
-      transform: scale(var(--chessboard-merge-scale, 1));
-    }
-  }
+  /* &[data-has-opp-chessboard] {
+    
+  } */
 
   /* end */
 

@@ -26,7 +26,6 @@ import {
 } from "@gi-tcg/typings";
 import { Key } from "@solid-primitives/keyed";
 import {
-  children,
   createEffect,
   createMemo,
   createSignal,
@@ -35,10 +34,8 @@ import {
   Match,
   Show,
   Switch,
-  untrack,
   type Component,
   type ComponentProps,
-  type JSX,
 } from "solid-js";
 import { Image } from "./Image";
 import type {
@@ -52,7 +49,6 @@ import { cssPropertyOfTransform } from "../ui_state";
 import { StatusGroup } from "./StatusGroup";
 import { ActionStepEntityUi } from "../action";
 import { VariableDiff } from "./VariableDiff";
-import { WithDelicateUi } from "../primitives/delicate_ui";
 import { StrokedText } from "./StrokedText";
 import DefeatedIcon from "../svg/DefeatedIcon.svg?fb";
 import HealthIcon from "../svg/HealthIcon.svg?fb";

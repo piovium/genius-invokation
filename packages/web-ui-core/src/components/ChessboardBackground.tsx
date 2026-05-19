@@ -21,28 +21,14 @@ export interface ChessboardBackgroundProps {
 }
 export function ChessboardBackground(props: ChessboardBackgroundProps) {
   return (
-    <WithDelicateUi
-      assetId={"ChessboardBackground"}
-      fallback={
-        <AspectRatioContainer
-          class="self-center p-10 z-0 chessboard-bg-container"
-        >
-          <div
-            class="h-full w-full rounded-15% brightness-120 b-5 b-#221100 shadow-[inset_0_0_16px_#000000]"
-            style={{ "background-color": props.color ?? "#c0cac3" }}
-          />
-          <div class="absolute top-49.5% left-5% h-1% w-90% bg-black/5"/>
-        </AspectRatioContainer>
-      }
+    <div
+      class="grid-area-[1/1] aspect-ratio-[16/9] max-h-full max-w-full z-0 chessboard-bg-container"
+      style={{ "background-color": props.color ?? "#537a76" }}
     >
-      {(image) => (
-        <div
-          class="grid-area-[1/1] aspect-ratio-[16/9] max-h-full max-w-full z-0 chessboard-bg-container"
-          style={{ "background-color": props.color ?? "#537a76" }}
-        >
-          {image}
-        </div>
-      )}
-    </WithDelicateUi>
+      <img
+        class="w-240 h-135 scale-107.2"
+        src="https://ui.assets.gi-tcg.guyutongxue.site/ChessboardBackground.webp"
+      />
+    </div>
   );
 }
