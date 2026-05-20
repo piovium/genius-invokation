@@ -1944,7 +1944,7 @@ export function Chessboard(props: ChessboardProps) {
             <CardDataViewer />
           </div>
           {/* 右上角部件 */}
-          <div class="grid-area-[1/1] justify-self-end m-2 flex flex-row-reverse gap-1.5">
+          <div class="grid-area-[1/1] justify-self-end m-2 flex flex-row-reverse gap-1.5 items-center">
             <Show when={localProps.data.state.phase !== PbPhaseType.GAME_END}>
               <ExitButton onClick={onExit} />
             </Show>
@@ -1964,7 +1964,7 @@ export function Chessboard(props: ChessboardProps) {
             />
             <TimerCapsule timer={timer()} />
             <Show when={localProps.liveStreamingMode}>
-              <div class="h-8 w-24 flex items-center justify-center rounded-full b-2 line-height-none font-bold bg-#e9e2d3 text-black/70 b-black/70">
+              <div class="h-6 min-w-20 px-3 rounded-full text-3.5 text-center line-height-6 bg-#e9e2d3 text-black/70">
                 {t("ui.liveStreamingMode")}
               </div>
             </Show>

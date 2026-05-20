@@ -110,13 +110,13 @@
 
   /* CardCountHint */
   .current-turn-hint[data-opp="false"] {
-    --fg-color: #644d39;
-    --bg-color: #d9b48d;
+    color: #644d39;
+    background-color: #d9b48d;
   }
 
   .current-turn-hint[data-opp="true"] {
-    --fg-color: #3f4957;
-    --bg-color: #7e98cb;
+    color: #3f4957;
+    background-color: #7e98cb;
   }
 
   /* CharacterArea */
