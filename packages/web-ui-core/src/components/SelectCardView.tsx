@@ -54,7 +54,8 @@ export function SelectCardView(props: SelectCardViewProps) {
               />
               <CardFrameNormal class="grid-area-[1/1] h-full w-full pointer-events-none" />
               <Show when={selectedId() === cardId}>
-                <SelectingIcon class="grid-area-[1/1] w-21 h-21 place-self-center" />
+                {/* with animate no render */}
+                <SelectingIcon noRender class="grid-area-[1/1] w-21 h-21 place-self-center" />
               </Show>
               <DiceCostAsync
                 cardDefinitionId={cardId}

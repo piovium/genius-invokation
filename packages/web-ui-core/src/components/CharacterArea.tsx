@@ -595,7 +595,8 @@ export function CharacterArea(props: CharacterAreaProps) {
             <SelectingConfirmIcon class="grid-area-[1/1] w-18 h-18 z-2 place-self-center" />
           </Match>
           <Match when={props.selecting}>
-            <SelectingIcon class="grid-area-[1/1] w-21 h-21 z-2 place-self-center" />
+            {/* with animate no render */}
+            <SelectingIcon noRender class="grid-area-[1/1] w-21 h-21 z-2 place-self-center" />
           </Match>
           <Match when={props.preview?.active}>
             <SwitchActiveHistoryIcon class="grid-area-[1/1] w-18 h-18 z-2 place-self-center" />
@@ -834,7 +835,8 @@ function Technique(props: TechniqueProps) {
         bool:data-disposing={data().animation === "disposing"}
       />
       <Show when={props.replace}>
-        <ReplaceEquipment class="grid-area-[1/1] w-6.5 h-6.5 place-self-center" />
+        {/* with animate no render */}
+        <ReplaceEquipment noRender class="grid-area-[1/1] w-6.5 h-6.5 place-self-center" />
       </Show>
       <div
         class="grid-area-[1/1] rounded-full technique-effect"
@@ -864,7 +866,8 @@ function Equipment(props: EquipmentProps) {
         bool:data-disposing={data().animation === "disposing"}
       />
       <Show when={props.replace}>
-        <ReplaceEquipment class="grid-area-[1/1] w-6.5 h-6.5 place-self-center" />
+        {/* with animate no render */}
+        <ReplaceEquipment noRender class="grid-area-[1/1] w-6.5 h-6.5 place-self-center" />
       </Show>
       <div
         class="grid-area-[1/1] rounded-full equipment-effect"

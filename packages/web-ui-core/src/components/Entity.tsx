@@ -167,7 +167,8 @@ export function Entity(props: EntityProps) {
           <SelectingConfirmIcon class="grid-area-[1/1] place-self-center w-18 h-18 m--1 max-w-18 z-4" />
         </Match>
         <Match when={props.selecting}>
-          <SelectingIcon class="grid-area-[1/1] place-self-center w-21 h-21 m--2.5 max-w-21 z-4" />
+          {/* with animate no render */}
+          <SelectingIcon noRender class="grid-area-[1/1] place-self-center w-21 h-21 m--2.5 max-w-21 z-4" />
         </Match>
       </Switch>
     </div>

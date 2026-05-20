@@ -59,6 +59,7 @@ function SkillButton(props: SkillButtonProps) {
         bool:data-disabled={!props.step || props.step.isDisabled}
         onClick={(e) => props.onClick?.(e)}
       >
+        {/* with react no render */}
         <SkillButtonReactIcon
           noRender
           class="grid-area-[1/1] w-14.5 h-14.5 skill-button-bg z-1"

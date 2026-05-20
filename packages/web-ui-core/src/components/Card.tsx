@@ -263,7 +263,8 @@ export function Card(props: CardProps) {
           <ExchangeCard class="grid-area-[1/1] w-18 h-18 place-self-center z-1 exchange-card-entering" />
         </Match>
         <Match when={props.selected}>
-          <SelectingIcon class="grid-area-[1/1] w-21 h-21 place-self-center z-1" />
+          {/* with animate no render */}
+          <SelectingIcon noRender class="grid-area-[1/1] w-21 h-21 place-self-center z-1" />
         </Match>
       </Switch>
       <AttachmentGroup
