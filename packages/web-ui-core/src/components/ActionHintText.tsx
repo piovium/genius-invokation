@@ -21,9 +21,9 @@ export interface ActionHintTextProps {
 export function ActionHintText(props: ActionHintTextProps) {
   return (
     <div
-      class={`hidden data-[shown]:block w-210 h-6 
-        text-center line-height-4.5 text-#f5ebd2 font-bold text-3.5
-        pointer-events-none action-hint ${ props.class ?? "" }`}
+      class={`invisible data-[shown]:visible opacity-0 data-[shown]:opacity-100
+        w-210 h-6 text-center line-height-4.5 text-#f5ebd2 font-bold text-3.5
+        pointer-events-none transition-all action-hint ${props.class ?? ""}`}
       bool:data-shown={props.text}
     >
       {props.text}

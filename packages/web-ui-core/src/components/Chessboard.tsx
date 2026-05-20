@@ -1860,7 +1860,7 @@ export function Chessboard(props: ChessboardProps) {
             who={localProps.who}
             roundNumber={localProps.data.state.roundNumber}
             currentTurn={localProps.data.state.currentTurn as 0 | 1}
-            class="absolute left-0 w-full top-50% translate-y--50%"
+            class="grid-area-[1/1] place-self-center"
             info={localProps.data.roundAndPhase}
           />
           <Show when={localProps.data.notificationBox} keyed>

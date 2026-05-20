@@ -604,6 +604,67 @@
     @apply h-3.5 w-3.5;
   }
 
+  /* RoundAndPhaseNotifiaction */
+  .phase-notification {
+    animation: 500ms linear both display;
+  }
+
+  .phase-notification[data-delay] {
+    animation-delay: 800ms;
+  }
+
+  .action-notification {
+    animation: 500ms linear both display;
+  }
+
+  .round-notification {
+    animation: 800ms linear both display;
+  }
+
+  .action-hint-who {
+    background-image: linear-gradient(
+      to right,
+      #fce6b100 0%,
+      #fce6b180 30%,
+      #ffffccff 40%,
+      #ffffccff 60%,
+      #fce6b180 70%,
+      #fce6b100 100%
+    );
+    color: #a0703b;
+  }
+
+  .action-hint-who[data-opp] {
+    background-image: linear-gradient(
+      to right,
+      #a6cdff00 0%,
+      #a6cdff80 30%,
+      #e6ffffff 40%,
+      #e6ffffff 60%,
+      #a6cdff80 70%,
+      #a6cdff00 100%
+    );
+    color: #46648b;
+  }
+
+  .round-hint-who {
+    background-image: radial-gradient(
+      circle at bottom,
+      #ffffccff 0%,
+      #fce6b180 30%,
+      #fce6b100 70%
+    );
+  }
+
+  .round-hint-who:where([data-opp] > *) {
+    background-image: radial-gradient(
+      circle at bottom,
+      #e6ffffff 0%,
+      #a6cdff80 30%,
+      #a6cdff00 70%
+    );
+  }
+
   /* Merge Chessboard */
   /* &[data-has-opp-chessboard] {
     
@@ -629,32 +690,6 @@
   }
   [data-display-none] {
     display: none;
-  }
-
-  .action-hint-who {
-    background: linear-gradient(
-      to right,
-      #fce6b100 0%,
-      #fce6b180 30%,
-      #ffffccff 40%,
-      #ffffccff 60%,
-      #fce6b180 70%,
-      #fce6b100 100%
-    );
-    color: #a0703b;
-  }
-
-  .action-hint-who[data-opp] {
-    background: linear-gradient(
-      to right,
-      #a6cdff00 0%,
-      #a6cdff80 30%,
-      #e6ffffff 40%,
-      #e6ffffff 60%,
-      #a6cdff80 70%,
-      #a6cdff00 100%
-    );
-    color: #46648b;
   }
 
   .notification-box[data-opp="false"] {
@@ -925,6 +960,17 @@
   }
 }
 
+@keyframes display {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+}
+
 /* keyframes end */
 
 @keyframes attack-effect-top-flash {
@@ -1058,24 +1104,6 @@
   100% {
     opacity: 0;
     scale: 300%;
-  }
-}
-
-@keyframes phase-notification {
-  0% {
-    opacity: 0;
-  }
-
-  20% {
-    opacity: 1;
-  }
-
-  80% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
   }
 }
 
