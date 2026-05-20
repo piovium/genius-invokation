@@ -314,31 +314,3 @@ const RedFeatherFan = card(323003)
   .usagePerRound(1)
   .combatStatus(RedFeatherFanStatus)
   .done();
-
-/**
- * @id 303041
- * @name 超导祝佑·极寒
- * @description
- * 投掷阶段：总是投出2个冰元素骰和2个雷元素骰。
- * 我方造成物理伤害或冰元素伤害后：赋予敌方随机1张手牌不可调和和费用增加。（每回合2次）
- */
-const SuperconductBlessingDeepFreeze = card(303041)
-  .until("v6.5.0")
-  .costCryo(1)
-  .undiscoverable()
-  .support()
-  .on("roll")
-  .fixDice(DiceType.Cryo, 2)
-  .fixDice(DiceType.Electro, 2)
-  .on("dealDamage", (c, e) => 
-    ([DamageType.Physical, DamageType.Cryo] as DamageType[]).includes(e.type))
-  .listenToPlayer()
-  .usagePerRound(2)
-  .do((c) => {
-    const target = c.random(c.oppPlayer.hands);
-    if (target) {
-      c.attach(NoTuningAllowed, target);
-      c.attachCostIncrease(target);
-    }
-  })
-  .done();

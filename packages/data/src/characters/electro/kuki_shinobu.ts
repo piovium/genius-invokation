@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, combatStatus, card, DamageType } from "@gi-tcg/core/builder";
+import { character, skill, combatStatus, card, DamageType, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 114111
@@ -26,8 +26,8 @@ export const GrassRingOfSanctification = combatStatus(114111)
   .on("switchActive")
   .usage(3)
   .usagePerRound(1)
-  .damage(DamageType.Electro, 1)
-  .heal(1, "my characters order by health - maxHealth limit 1")
+  .damage(DamageType.Electro, 1, $.macros.oppActivePrioritized)
+  .heal(1, $.macros.myMostInjured)
   .done();
 
 /**
