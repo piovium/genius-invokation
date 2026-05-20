@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -34,14 +34,14 @@ export function TuningArea(props: TuningAreaProps) {
   };
   return (
     <div
-      class="absolute top-0 left-0 h-full opacity-0 data-[status=shown]:opacity-75%  data-[status=shown-hovering]:opacity-100% w-0 data-[status^=shown]:w-20 invisible data-[status^=shown]:visible pr-0 data-[status^=shown]:pr-8 transition-all flex items-center justify-center text-4xl text-#e7d090 dice-panel"
+      class={`absolute top-0 left-0 h-full w-42 flex items-center
+        opacity-0 data-[status=shown]:opacity-75 data-[status=shown-hovering]:opacity-100
+        invisible data-[status^=shown]:visible tuning-area`}
       data-status={status()}
       bool:data-card-hovering={props.cardHovering}
       style={cssPropertyOfTransform(props.transform)}
     >
-      <div class="w-8 h-8">
-        <TuningIcon />
-      </div>
+      <TuningIcon class="w-8 h-8 m-3" />
     </div>
   );
 }

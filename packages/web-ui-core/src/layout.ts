@@ -270,7 +270,7 @@ export function getHandHintPos(size: Size, opp: boolean, value: number) {
   }
 }
 
-export const TUNNING_AREA_WIDTH = 20;
+export const TUNNING_AREA_INSET = 25;
 
 export function getTuningAreaPos(
   [height, width]: Size,
@@ -279,7 +279,7 @@ export function getTuningAreaPos(
   const tangent = MINIMUM_WIDTH / 2 / PERSPECTIVE;
   let x = (width - MINIMUM_WIDTH) / 2 + MINIMUM_WIDTH - DRAGGING_Z * tangent;
   if (draggingHand?.status === "moving" && draggingHand.tuneStep) {
-    x -= TUNNING_AREA_WIDTH;
+    x -= TUNNING_AREA_INSET;
   }
   return [x, 0];
 }
