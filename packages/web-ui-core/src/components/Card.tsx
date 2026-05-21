@@ -272,7 +272,7 @@ export function Card(props: CardProps) {
         attachments={attachments()}
       />
       <DiceCost
-        class="absolute left-2 top--0.5 translate-x--50% flex flex-col gap-1 [&:where([data-opp-hand]>*)]:rotate-180"
+        class="absolute left-2 top--0.5 translate-x--50% flex flex-col gap-1"
         cost={data().definitionCost}
         diceClass="w-9 h-9 text-4.5 m--1 max-w-9 max-h-9"
         realCost={realCost()}
@@ -283,11 +283,7 @@ export function Card(props: CardProps) {
       </Show>
       <Show when={conductiveDebuff()}>
         <ElectricShocks
-          class={`${
-            props.kind === "oppHand"
-              ? "translate-z--0.2px inset--18% rotate-y-180"
-              : "inset--20%"
-          }`}
+          class={props.kind === "oppHand" ? "translate-z--0.2px" : "inset--20%"}
         />
       </Show>
     </div>

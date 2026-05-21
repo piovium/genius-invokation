@@ -59,6 +59,7 @@ import {
   getHandCardBlurredPos,
   getHandCardFocusedPos,
   getHandHintPos,
+  getOppHandCardFocusedPos,
   getPileHintPos,
   getPilePos,
   getShowingCardPos,
@@ -305,7 +306,7 @@ export interface ChessboardProps extends ComponentProps<"div"> {
   onGiveUp?: () => void;
 }
 
-type MyHandState =
+type HandState =
   | "focusing" // 聚焦手牌显示
   | "blurred" // 正常收起手牌
   | "hidden" // 不显示手牌（行动中）
@@ -314,7 +315,8 @@ type MyHandState =
 interface CardInfoCalcContext {
   who: 0 | 1;
   size: Size;
-  myHandState: MyHandState;
+  myHandState: HandState;
+  oppHandState: HandState;
   triggeringEntities: number[];
   hoveringHand: CardInfo | null;
   draggingHand: DraggingCardInfo | null;
@@ -330,6 +332,7 @@ function calcCardsInfo(
     who,
     size,
     myHandState,
+    oppHandState,
     triggeringEntities,
     hoveringHand,
     availableSteps,
@@ -376,7 +379,9 @@ function calcCardsInfo(
     const totalHandCardCount = handCard.length;
     const skillCount = player.initiativeSkill.length;
 
-    const isFocus = !opp && myHandState === "focusing";
+    const isFocus =
+      (!opp && myHandState === "focusing") ||
+      (opp && hasOppChessboard && oppHandState === "focusing");
     const isSwitching = !opp && myHandState === "switching";
     const z = isSwitching ? DRAGGING_Z : isFocus ? FOCUSING_HANDS_Z : 1;
     const ry = isFocus ? 1 : opp && !hasOppChessboard ? 181 : 1;
@@ -405,11 +410,17 @@ function calcCardsInfo(
         continue;
       }
       let x, y;
-      let rz = 0;
       if (!opp && myHandState === "switching") {
         [x, y] = getShowingCardPos(size, totalHandCardCount, i);
       } else if (!opp && myHandState === "focusing") {
         [x, y] = getHandCardFocusedPos(
+          size,
+          totalHandCardCount,
+          i,
+          hoveringHandIndex,
+        );
+      } else if (opp && hasOppChessboard && oppHandState === "focusing") {
+        [x, y] = getOppHandCardFocusedPos(
           size,
           totalHandCardCount,
           i,
@@ -424,11 +435,9 @@ function calcCardsInfo(
           i,
           skillCount,
         );
-      }
-      if (opp && hasOppChessboard) {
-        x -= MINIMUM_WIDTH / 4;
-        y += CARD_HEIGHT;
-        rz = 180;
+        if (opp && hasOppChessboard) {
+          x -= MINIMUM_WIDTH / 6;
+        }
       }
       cards.push({
         id: card.id,
@@ -443,7 +452,7 @@ function calcCardsInfo(
             y,
             z,
             ry,
-            rz,
+            rz: 0,
           },
           draggingEndAnimation: false,
         },
@@ -612,7 +621,8 @@ interface ChessboardChildren {
 function rerenderChildren(opt: {
   who: 0 | 1;
   size: Size;
-  myHandState: MyHandState;
+  myHandState: HandState;
+  oppHandState: HandState;
   hoveringHand: CardInfo | null;
   draggingHand: DraggingCardInfo | null;
   data: ChessboardData;
@@ -623,6 +633,7 @@ function rerenderChildren(opt: {
   const {
     size,
     myHandState,
+    oppHandState,
     hoveringHand,
     draggingHand,
     data,
@@ -643,6 +654,8 @@ function rerenderChildren(opt: {
   for (const who of [0, 1] as const) {
     const opp = who !== opt.who;
     const player = state.player[who];
+    const oppFocused =
+      opp && opt.hasOppChessboard && opt.oppHandState === "focusing";
     cardCountHints.push({
       area: opp ? "oppPile" : "myPile",
       value: player.pileCard.length,
@@ -656,7 +669,7 @@ function rerenderChildren(opt: {
       area: opp ? "oppHand" : "myHand",
       value: player.handCard.length,
       transform: {
-        ...getHandHintPos(size, opp, player.handCard.length),
+        ...getHandHintPos(size, opp, player.handCard.length, oppFocused),
         ...COUNT_HINT_TRANSFORM_BASE,
         z: opp ? 2 : FOCUSING_HANDS_Z,
       },
@@ -668,6 +681,7 @@ function rerenderChildren(opt: {
     who: opt.who,
     size,
     myHandState,
+    oppHandState,
     hoveringHand,
     draggingHand,
     availableSteps,
@@ -680,6 +694,7 @@ function rerenderChildren(opt: {
       who: opt.who,
       size,
       myHandState,
+      oppHandState,
       hoveringHand,
       draggingHand,
       availableSteps: [],
@@ -1076,6 +1091,7 @@ export function Chessboard(props: ChessboardProps) {
       force: true,
     });
   const [getFocusingHands, setFocusingHands] = createSignal(false);
+  const [getOppFocusingHands, setOppFocusingHands] = createSignal(false);
   const [getHoveringHand, setHoveringHand] = createSignal<CardInfo | null>(
     null,
   );
@@ -1102,7 +1118,7 @@ export function Chessboard(props: ChessboardProps) {
     focusing: boolean,
     viewType: ChessboardViewType,
     actionState: ActionState | null,
-  ): MyHandState => {
+  ): HandState => {
     if (
       !localProps.liveStreamingMode &&
       (viewType === "switchHands" || viewType === "switchHandsEnd")
@@ -1127,6 +1143,11 @@ export function Chessboard(props: ChessboardProps) {
             localProps.viewType,
             localProps.actionState,
           ),
+          oppHandState: getHandState(
+            getOppFocusingHands(),
+            "normal",
+            localProps.actionState,
+          ),
           hoveringHand: getHoveringHand(),
           draggingHand: getDraggingHand(),
           data,
@@ -1144,6 +1165,7 @@ export function Chessboard(props: ChessboardProps) {
       [
         () => [height(), width()] as Size,
         getFocusingHands,
+        getOppFocusingHands,
         getHoveringHand,
         getDraggingHand,
         () => localProps.actionState,
@@ -1152,6 +1174,7 @@ export function Chessboard(props: ChessboardProps) {
       ([
         size,
         focusingHands,
+        oppFocusingHands,
         hoveringHand,
         draggingHand,
         actionState,
@@ -1161,6 +1184,7 @@ export function Chessboard(props: ChessboardProps) {
           who: localProps.who,
           size,
           myHandState: getHandState(focusingHands, viewType, actionState),
+          oppHandState: getHandState(oppFocusingHands, "normal", actionState),
           hoveringHand,
           draggingHand,
           data: localProps.data,
@@ -1367,6 +1391,14 @@ export function Chessboard(props: ChessboardProps) {
       return shown;
     }
   });
+  const showOppSkillButtons = createMemo(() => {
+    const shown = !getOppFocusingHands();
+    if (localProps.actionState) {
+      return shown && localProps.actionState.showSkillButtons;
+    } else {
+      return shown;
+    }
+  });
 
   const [specialViewVisible, setSpecialViewVisible] = createSignal(true);
   const hasSpecialView = createMemo(() =>
@@ -1426,7 +1458,10 @@ export function Chessboard(props: ChessboardProps) {
     currentTarget: HTMLElement,
     cardInfo: CardInfo,
   ) => {
-    if (cardInfo.kind === "myHand") {
+    if (
+      cardInfo.kind === "myHand" ||
+      (cardInfo.kind === "oppHand" && localProps.opp)
+    ) {
       setHoveringHand(cardInfo);
     }
   };
@@ -1435,7 +1470,7 @@ export function Chessboard(props: ChessboardProps) {
     currentTarget: HTMLElement,
     cardInfo: CardInfo,
   ) => {
-    if (getFocusingHands()) {
+    if (getFocusingHands() || getOppFocusingHands()) {
       setHoveringHand((c) => {
         if (c?.id === cardInfo.id) {
           return null;
@@ -1463,7 +1498,9 @@ export function Chessboard(props: ChessboardProps) {
         const doMove = await shouldMoveWhenHandBlurring.promise;
         if (canToggleHandFocus()) {
           setFocusingHands(true);
+          setOppFocusingHands(false);
           showCardHint("myHand");
+          setShowCardHint("oppHand", null);
           setSelectingItem(null);
         }
         if (!doMove) {
@@ -1498,14 +1535,22 @@ export function Chessboard(props: ChessboardProps) {
           return [x, y];
         },
       });
+    } else if (untrack(() => localProps.opp) && cardInfo.kind === "oppHand") {
+      currentTarget.setPointerCapture(e.pointerId);
+      if (!getOppFocusingHands() && canToggleHandFocus()) {
+        setOppFocusingHands(true);
+        setFocusingHands(false);
+        showCardHint("oppHand");
+        setShowCardHint("myHand", null);
+        setSelectingItem(null);
+        return;
+      }
+      setSelectingItem({ type: "card", info: cardInfo });
     } else if (
       cardInfo.kind === "myPile" ||
       cardInfo.kind === "oppHand" ||
       cardInfo.kind === "oppPile"
     ) {
-      if (untrack(() => localProps.opp) && cardInfo.kind === "oppHand") {
-        setSelectingItem({ type: "card", info: cardInfo });
-      }
       showCardHint(cardInfo.kind);
     }
   };
@@ -1528,6 +1573,10 @@ export function Chessboard(props: ChessboardProps) {
       const shouldFocusingHand = shouldFocusHandWhenDragging(size, y);
       setFocusingHands(shouldFocusingHand);
       setShowCardHint("myHand", null);
+      if (shouldFocusingHand) {
+        setOppFocusingHands(false);
+        setShowCardHint("oppHand", null);
+      }
     }
     setDraggingHand({
       ...dragging,
@@ -1545,7 +1594,7 @@ export function Chessboard(props: ChessboardProps) {
     const dragging = getDraggingHand();
     const focusingHands = getFocusingHands();
     const size = [height(), width()] as Size;
-    if (dragging?.id !== cardInfo.id) {
+    if (dragging?.id !== cardInfo.id || cardInfo.kind === "oppHand") {
       return;
     }
     const [tuningAreaX] = getTuningAreaPos(size, dragging);
@@ -1576,6 +1625,8 @@ export function Chessboard(props: ChessboardProps) {
         setFocusingHands(false);
         setShowCardHint("myHand", null);
       }
+      setOppFocusingHands(false);
+      setShowCardHint("oppHand", null);
       setShowDeclareEndButton(false);
       setDraggingHand(null);
       setHoveringHand(null);
@@ -1595,6 +1646,8 @@ export function Chessboard(props: ChessboardProps) {
       setFocusingHands(false);
       setShowCardHint("myHand", null);
     }
+    setOppFocusingHands(false);
+    setShowCardHint("oppHand", null);
     setShowDeclareEndButton(false);
     if (!props.actionState?.showBackdrop) {
       setSelectingItem({ type: "character", info: characterInfo });
@@ -1616,6 +1669,8 @@ export function Chessboard(props: ChessboardProps) {
       setFocusingHands(false);
       setShowCardHint("myHand", null);
     }
+    setOppFocusingHands(false);
+    setShowCardHint("oppHand", null);
     setShowDeclareEndButton(false);
     if (!props.actionState?.showBackdrop) {
       setSelectingItem({ type: "entity", info: entityInfo });
@@ -1641,6 +1696,14 @@ export function Chessboard(props: ChessboardProps) {
         localProps.onStepActionState?.(step, selectedDiceValue());
       }
     }
+  };
+  const onOppSkillClick = (sk: SkillInfo) => {
+    setSelectingItem({
+      type: "skill",
+      info: { ...sk, id: sk.id as number },
+    });
+    setFocusingHands(false);
+    setShowCardHint("myHand", null);
   };
 
   let containerElement!: HTMLDivElement;
@@ -1845,13 +1908,8 @@ export function Chessboard(props: ChessboardProps) {
                 skills={oppSkills()}
                 switchActiveButton={null}
                 switchActiveCost={null}
-                shown={true}
-                onClick={(sk) =>
-                  setSelectingItem({
-                    type: "skill",
-                    info: { ...sk, id: sk.id as number },
-                  })
-                }
+                shown={showOppSkillButtons()}
+                onClick={onOppSkillClick}
               />
             </Show>
           </Show>

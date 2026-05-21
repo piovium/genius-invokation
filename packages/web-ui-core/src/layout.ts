@@ -179,6 +179,35 @@ export function getHandCardBlurredPos(
   }
 }
 
+export function getOppHandCardFocusedPos(
+  [height, width]: Size,
+  totalCount: number,
+  index: number,
+  hoveringIndex: number | null,
+): Pos {
+  const yBase = (height - MINIMUM_HEIGHT) / 2;
+  const y = yBase + (index === hoveringIndex ? HAND_CARD_HOVERING_Y_OFFSET : 0);
+  const halfWidth = width / 2;
+  const cardAreaCenter = halfWidth + HAND_CARD_FOCUSED_CENTER_X_OFFSET;
+  const cardAreaMaxWidth = 9 * HAND_CARD_FOCUSED_SHOW_WIDTH_MIN + CARD_WIDTH;
+  const realGap = Math.min(
+    (cardAreaMaxWidth - CARD_WIDTH) / (totalCount - 1),
+    CARD_WIDTH + HAND_CARD_FOCUSED_GAP,
+  );
+  const cardAreaWidth = realGap * (totalCount - 1) + CARD_WIDTH;
+  const cardAreaX = cardAreaCenter - cardAreaWidth / 2;
+  let x = cardAreaX + index * realGap;
+  if (hoveringIndex === null) {
+    return [x, y];
+  }
+  if (index < hoveringIndex) {
+    x -= HAND_CARD_HOVERING_X_OFFSET;
+  } else if (index > hoveringIndex) {
+    x += HAND_CARD_HOVERING_X_OFFSET;
+  }
+  return [x, y];
+}
+
 export function getPilePos([height, width]: Size, opp: boolean): Pos {
   const quarterHeight = MINIMUM_HEIGHT / 4;
   const y = opp
@@ -254,8 +283,20 @@ export function getPileHintPos(size: Size, opp: boolean) {
   };
 }
 
-export function getHandHintPos(size: Size, opp: boolean, value: number) {
+export function getHandHintPos(
+  size: Size,
+  opp: boolean,
+  value: number,
+  focused: boolean,
+) {
   if (opp) {
+    if (focused) {
+      const [x, y] = getOppHandCardFocusedPos(size, value, value - 1, null);
+      return {
+        x: x + CARD_WIDTH / 2 - 4.5,
+        y: y + CARD_HEIGHT + 1,
+      };
+    }
     const [x, y] = getHandCardBlurredPos(size, true, true, value, value - 1, 0);
     return {
       x: x - CARD_WIDTH / 2 - 4.5,
