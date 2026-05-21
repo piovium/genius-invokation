@@ -1,4 +1,3 @@
-// Copyright (C) 2025 Guyutongxue
 // Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
@@ -29,7 +28,7 @@ export function CurrentTurnHint(props: CurrentTurnHintProps) {
   return (
     <Show when={props.phase <= PbPhaseType.ROLL}>
       <div
-        class="h-6 min-w-20 px-3 rounded-full text-3.5 text-center line-height-6 font-bold current-turn-hint"
+        class="h-6 min-w-20 px-3 rounded-full text-3.5 text-center line-height-6 font-bold current-turn-hint pointer-events-none select-none"
         data-opp={props.opp}
       >
         {t(props.opp ? "capsule.hintOppSideFirst" : "capsule.hintMySideFirst")}

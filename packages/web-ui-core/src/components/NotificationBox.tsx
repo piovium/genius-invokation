@@ -69,7 +69,7 @@ export function NotificationBox(props: NotificationBoxProps) {
 
   return (
     <div
-      class="grid-area-[1/1] place-self-center mb-69 min-h-15 w-64 rounded-lg b-2 flex notification-box"
+      class="grid-area-[1/1] place-self-center mb-69 min-h-15 w-64 rounded-lg b-2 flex select-none notification-box"
       bool:data-opp={props.opp}
       style={{
         "--enter-offset": props.opp ? "2rem" : "-2rem",

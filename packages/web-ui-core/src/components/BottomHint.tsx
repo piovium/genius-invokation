@@ -24,7 +24,7 @@ export function BottomHint(props: BottomHintProps) {
       <div
         class={`grid-area-[1/1] place-self-center mt-112
         text-center text-3.5 font-bold line-height-none px-1
-        rounded-full pointer-events-none bottom-hint`}
+        rounded-full pointer-events-none select-none bottom-hint`}
         data-bottom-hint-type={props.bottomHintType}
       >
         {props.bottomHintText}

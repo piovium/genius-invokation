@@ -48,7 +48,7 @@ export function CardCountHint(props: CardCountHintProps) {
         style={{ transform: `rotate(${hintStyle().rotate}deg)` }}
       />
       <div
-        class={`grid-area-[1/1] z-1 text-white font-bold text-3 line-height-none place-self-center`}
+        class={`grid-area-[1/1] z-1 text-white font-bold text-3 line-height-none place-self-center select-none`}
       >
         {props.value}
       </div>

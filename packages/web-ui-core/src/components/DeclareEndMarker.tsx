@@ -146,7 +146,7 @@ export function DeclareEndMarker(props: DeclareEndMarkerProps) {
         timingMine={props.timingMine}
       />
       <button
-        class={`grid-area-[1/1] self-center
+        class={`grid-area-[1/1] self-center select-none
           hidden data-[clickable]:block
           h-9 w-9 rounded-full b-2.5 pointer-events-auto
           b-#f3ca58 bg-#ebb145
@@ -168,7 +168,7 @@ export function DeclareEndMarker(props: DeclareEndMarkerProps) {
       <div
         class={`grid-area-[1/2] self-start hidden data-[shown]:block
           bg-#71553f rounded-2 px-3 py-0.5 b-#816246 b-2
-          text-white text-2.5 font-bold`}
+          text-white text-2.5 font-bold select-none`}
         bool:data-shown={props.showButton && props.willGetFirst}
       >
         {t("ui.willGetFirst")}

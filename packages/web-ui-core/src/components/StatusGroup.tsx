@@ -28,7 +28,7 @@ function Status(props: StatusProps) {
     return "hasUsagePerRound" in d && d.hasUsagePerRound;
   });
   return (
-    <div class="h-5 w-5 relative grid">
+    <div class="h-5 w-5 relative grid select-none">
       <Image
         imageId={defId()}
         class="grid-area-[1/1] h-5.5 w-5.5 m--0.25 max-h-5.5 max-w-5.5 place-self-center status-icon"

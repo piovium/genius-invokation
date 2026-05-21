@@ -1964,7 +1964,7 @@ export function Chessboard(props: ChessboardProps) {
             />
             <TimerCapsule timer={timer()} />
             <Show when={localProps.liveStreamingMode}>
-              <div class="h-6 min-w-20 px-3 rounded-full text-3.5 text-center line-height-6 bg-#e9e2d3 text-black/70">
+              <div class="h-6 min-w-20 px-3 rounded-full text-3.5 text-center line-height-6 bg-#e9e2d3 text-black/70 pointer-events-none select-none">
                 {t("ui.liveStreamingMode")}
               </div>
             </Show>
@@ -1976,7 +1976,7 @@ export function Chessboard(props: ChessboardProps) {
         {/* game end */}
         <Show when={localProps.data.state.phase === PbPhaseType.GAME_END}>
           <div class="absolute inset-0 bg-black/85 flex items-center justify-center flex-col z-50">
-            <div class="font-bold text-4xl text-white my-10">
+            <div class="font-bold text-4xl text-white my-10 select-none">
               {localProps.data.state.winner === localProps.who
                 ? t("ui.gameVictory")
                 : t("ui.gameDefeat")}

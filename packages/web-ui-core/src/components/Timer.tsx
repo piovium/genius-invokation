@@ -31,7 +31,7 @@ function parseTime(time: number) {
 export function TimerCapsule(props: TimerProps) {
   return (
     <Show when={props.timer && props.timer.current > 20}>
-      <div class="h-6 min-w-20 px-3 rounded-full text-center line-height-normal font-bold bg-#e9e2d3/50 text-black/70">
+      <div class="h-6 min-w-20 px-3 rounded-full text-center line-height-normal font-bold bg-#e9e2d3/50 text-black/70 pointer-events-none select-none">
         {parseTime(props.timer!.current)}
       </div>
     </Show>
@@ -42,7 +42,7 @@ export function TimerAlert(props: TimerProps) {
   return (
     <Show when={props.timer && props.timer.current <= 20}>
       <div
-        class="grid-area-[1/1] self-start mt-6 bg-black/80 text-white py-2 px-4 rounded-lg z-7 font-bold data-[alert]:text-red pointer-events-none"
+        class="grid-area-[1/1] self-start mt-6 bg-black/80 text-white py-2 px-4 rounded-lg z-7 font-bold data-[alert]:text-red pointer-events-none select-none"
         bool:data-alert={props.timer!.current <= 10}
       >
         {parseTime(props.timer!.current)}

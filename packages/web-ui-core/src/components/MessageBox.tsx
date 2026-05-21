@@ -58,12 +58,12 @@ function MessageBox(props: MessageBoxProps) {
   return (
     <dialog
       ref={props.ref}
-      class="bg-#ebdab7 p-4 rounded-3 shadow-lg w-96 h-48 border-#735a3f border-2"
+      class="bg-#ebdab7 pt-8 rounded-xl w-96 h-48 border-#735a3f border-2 select-none"
     >
-      <p class="h-24 font-size-6 font-bold mt-4 text-center">
+      <p class="h-24 text-6 font-bold text-center">
         {props.question}
       </p>
-      <div class="flex justify-center gap-2">
+      <div class="flex justify-evenly">
         <button
           class="px-3 py-1 w-36 font-bold font-size-5 color-black bg-#e9e2d3 rounded-full border-#735a3f b-2 hover:bg-#e9e2d3 hover:shadow-[inset_0_0_16px_rgba(255,255,255,1)] hover:border-white"
           onClick={() => props.onCancel()}
