@@ -52,7 +52,7 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
         }`}
       bool:data-opp={!!props.opp}
     >
-      <div class="grid place-items-center w-18 h-9 my-9">
+      <div class="grid place-items-center w-18 h-9 my-9 info-dice-count">
         <Show
           when={props.opp}
           fallback={<DiceCountYellow class="grid-area-[1/1] h-9 w-9" />}

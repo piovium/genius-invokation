@@ -32,7 +32,8 @@ export interface DiceBarProps {
 export function DiceBar(props: DiceBarProps) {
   return (
     <div
-      class={`hidden data-[shown]:grid grid-cols-1 w-7 gap-1.5 place-items-center select-none
+      class={`invisible data-[shown]:visible opacity-0 data-[shown]:opacity-100
+        grid grid-cols-1 w-7 gap-1.5 place-items-center select-none transition-all
         pb-2 pointer-events-none dice-shadow ${props.class ?? ""}`}
       bool:data-wrapped={props.state === "wrapped"}
       bool:data-shown={props.state !== "visible" || props.liveStreamingMode}
@@ -131,7 +132,7 @@ export function DicePanel(props: DicePanelProps) {
         </div>
       </Show>
       <DiceBar
-        class="grid-area-[1/1] justify-self-end self-start mr-2.5 mt-13 hidden data-[shown]:grid z-1"
+        class="grid-area-[1/1] justify-self-end self-start mr-2.5 mt-13 z-1 dice-bar-my"
         dice={props.dice}
         selectedDice={props.selectedDice}
         state={props.state}

@@ -1774,7 +1774,10 @@ export function Chessboard(props: ChessboardProps) {
             )}
           </Key>
           <ChessboardBackdrop
-            shown={localProps.actionState?.showBackdrop || (hasSpecialView() && specialViewVisible())}
+            shown={
+              localProps.actionState?.showBackdrop ||
+              (hasSpecialView() && specialViewVisible())
+            }
             onClick={onChessboardClick}
           />
           <Show when={children().tuningArea}>
@@ -1789,7 +1792,7 @@ export function Chessboard(props: ChessboardProps) {
           />
           <Show when={displayUiComponents()}>
             <DeclareEndMarker
-              class={"grid-area-[1/1] self-center"}
+              class={"grid-area-[1/1] self-center declare-end-marker"}
               {...declareEndMarkerProps()}
             />
             <PlayerInfoBox
@@ -1818,7 +1821,7 @@ export function Chessboard(props: ChessboardProps) {
               liveStreamingMode={localProps.liveStreamingMode}
             />
             <SkillButtonGroup
-              class="grid-area-[1/1] place-self-end mb-2 mr-6"
+              class="grid-area-[1/1] place-self-end mb-2 mr-6 z-2"
               skills={mySkills()}
               switchActiveButton={switchActiveStep() ?? null}
               switchActiveCost={
@@ -1829,7 +1832,7 @@ export function Chessboard(props: ChessboardProps) {
             />
             <Show when={localProps.opp}>
               <DiceBar
-                class="grid-area-[1/1] self-start justify-self-end mt-13 translate-x-6.5"
+                class="grid-area-[1/1] self-start justify-self-end mt-34 mr-5 z-1"
                 opp
                 dice={oppDice()}
                 selectedDice={[]}
@@ -1838,11 +1841,17 @@ export function Chessboard(props: ChessboardProps) {
                 liveStreamingMode={localProps.liveStreamingMode}
               />
               <SkillButtonGroup
-                class="grid-area-[1/1] self-start justify-self-end mt-10 mr-12"
+                class="grid-area-[1/1] self-start justify-self-end mt-12 mr-6 z-2"
                 skills={oppSkills()}
                 switchActiveButton={null}
                 switchActiveCost={null}
                 shown={true}
+                onClick={(sk) =>
+                  setSelectingItem({
+                    type: "skill",
+                    info: { ...sk, id: sk.id as number },
+                  })
+                }
               />
             </Show>
           </Show>
@@ -1964,7 +1973,7 @@ export function Chessboard(props: ChessboardProps) {
             />
             <TimerCapsule timer={timer()} />
             <Show when={localProps.liveStreamingMode}>
-              <div class="h-6 min-w-20 px-3 rounded-full text-3.5 text-center line-height-6 bg-#e9e2d3 text-black/70 pointer-events-none select-none">
+              <div class="h-6 min-w-20 px-3 rounded-full text-3.5 text-center line-height-6 font-bold bg-#e9e2d3/50 text-black/70 pointer-events-none select-none">
                 {t("ui.liveStreamingMode")}
               </div>
             </Show>

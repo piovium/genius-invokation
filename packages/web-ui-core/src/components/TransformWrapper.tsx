@@ -44,7 +44,7 @@ const POST_ROTATION_TRANSFORM = {
   180: "translate(-50%, -50%)",
   270: "translate(-50%, 50%)",
 };
-export const MERGE_CHESSBOARD_SCALE = 0.9;
+export const MERGE_CHESSBOARD_SCALE = 0.875;
 
 export function TransformWrapper(props: TransformWrapperProps) {
   let transformWrapperEl!: HTMLDivElement;

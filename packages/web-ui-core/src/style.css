@@ -725,9 +725,22 @@
   }
 
   /* Merge Chessboard */
-  /* &[data-has-opp-chessboard] {
+  &[data-has-opp-chessboard] {
+    .dice-bar-my {
+      margin-right: 3.5rem;
+      margin-top: 8.5rem;
+    }
+
+    .dice-panel {
+      margin-right: 1.25rem;
+    }
     
-  } */
+    .info-dice-count,
+    .declare-end-marker {
+      margin-left: 4.3rem;
+    }
+
+  }
 
   /* end */
 
