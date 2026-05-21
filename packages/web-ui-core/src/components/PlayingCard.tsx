@@ -24,16 +24,16 @@ export interface PlayingCardProps extends PlayingCardInfo {
 export function PlayingCard(props: PlayingCardProps) {
   return (
     <div
-      class="absolute top-50% -translate-y-42.5 data-[opp=false]:left-30 data-[opp=true]:right-30 z-100 shadow-xl w-35 h-60 rounded-6 animate-[playing-card_700ms_both]"
-      data-opp={props.opp}
+      class="grid-area-[1/1] place-self-center w-35 h-60 mb-24 rounded-lg grid playing-card"
+      bool:data-opp={props.opp}
+      bool:data-no-effect={props.noEffect}
     >
-      <div class="absolute inset-0.5 bg-#bdaa8a rounded-3" />
       <Image
-        class="absolute inset-0 h-full w-full p-1px"
+        class="grid-area-[1/1] h-full w-full p-1%"
         imageId={props.data.definitionId}
         fallback="card"
       />
-      <CardFrameNormal class="absolute inset-0 h-full w-full pointer-events-none" />
+      <CardFrameNormal class="grid-area-[1/1] h-full w-full pointer-events-none" />
     </div>
   );
 }

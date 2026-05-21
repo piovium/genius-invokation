@@ -698,6 +698,32 @@
       150ms ease both right-in-50;
   }
 
+  /* Playing Card */
+  .playing-card {
+    margin-right: 37rem;
+    margin-left: 0;
+    box-shadow:
+      0 0 24px 8px #fdd569,
+      inset 0 0 4px 2px #fdd569;
+    animation:
+      700ms linear both display,
+      700ms linear both brightness-blink;
+  }
+
+  .playing-card[data-opp] {
+    margin-right: 0;
+    margin-left: 37rem;
+  }
+
+  .playing-card[data-no-effect] {
+    box-shadow:
+      0 0 24px 8px #ca2527,
+      inset 0 0 4px 2px #ca2527;
+    animation:
+      700ms linear both display,
+      150ms linear 550ms both brightness-decrease;
+  }
+
   /* Merge Chessboard */
   /* &[data-has-opp-chessboard] {
     
@@ -1121,30 +1147,6 @@
   100% {
     opacity: 0;
     scale: 300%;
-  }
-}
-
-@keyframes playing-card {
-  0% {
-    opacity: 0;
-    filter: none;
-    box-shadow: none;
-  }
-
-  15% {
-    opacity: 1;
-    filter: brightness(1.5);
-    box-shadow: 0px 0px 15px 10px yellow;
-  }
-
-  85% {
-    opacity: 1;
-    filter: none;
-    box-shadow: none;
-  }
-
-  100% {
-    opacity: 0;
   }
 }
 

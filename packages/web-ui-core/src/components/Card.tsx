@@ -209,7 +209,7 @@ export function Card(props: CardProps) {
   return (
     <div
       ref={el}
-      class={`absolute top-0 left-0 h-36 w-21 grid rounded-1.5 [&_*]:backface-hidden
+      class={`absolute top-0 left-0 h-36 w-21 grid rounded-md [&_*]:backface-hidden
         preserve-3d transform-origin-tl card pointer-events-auto`}
       style={style()}
       bool:data-opp-hand={props.kind === "oppHand"}
