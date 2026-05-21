@@ -165,6 +165,14 @@ export interface GenerateDiceOption {
   randomAllowDuplicate?: boolean;
 }
 
+export interface IncreaseMaxHealthOption {
+  /**
+   * 是否同时治疗
+   * @default true
+   */
+  heal?: boolean;
+}
+
 type Setter<T> = (draft: Draft<T>) => void;
 
 export type ContextMetaBase = {
@@ -853,13 +861,17 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   /** 增加最大生命值 */
-  increaseMaxHealth(value: number, target: CharacterTargetArg) {
+  increaseMaxHealth(
+    value: number,
+    target: CharacterTargetArg,
+    { heal = true }: IncreaseMaxHealthOption = {},
+  ) {
     const targets = this.queryCoerceToCharacters(target);
     for (const t of targets) {
       const target = t.latest();
       using l = this.mutator.subLog(
         DetailLogType.Primitive,
-        `Increase ${value} max health to ${stringifyState(target)}`,
+        `Increase ${value} max health to ${stringifyState(target)} ${heal ? "and heal" : ""}`,
       );
       this.mutate({
         type: "modifyEntityVar",
@@ -868,11 +880,13 @@ export class SkillContext<Meta extends ContextMetaBase> {
         value: target.variables.maxHealth + value,
         direction: "increase",
       });
-      // t.latest() here for grabbing the new maxHealth
-      this.callAndEmit("heal", value, t.latest(), {
-        via: this.skillInfo,
-        kind: "increaseMaxHealth",
-      });
+      if (heal) {
+        // t.latest() here for grabbing the new maxHealth
+        this.callAndEmit("heal", value, t.latest(), {
+          via: this.skillInfo,
+          kind: "increaseMaxHealth",
+        });
+      }
     }
     return this.enableShortcut();
   }

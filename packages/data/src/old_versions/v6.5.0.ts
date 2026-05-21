@@ -293,9 +293,9 @@ const ChenyuVale = card(321032)
     if (!targetCh) {
       return;
     }
+    c.increaseMaxHealth(2, targetCh, { heal: false });
     const healValue = 999; // interesting.
     c.heal(healValue, targetCh);
-    c.increaseMaxHealth(2, targetCh);
     c.finishAdventure();
   })
   .done();
