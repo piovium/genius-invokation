@@ -15,7 +15,7 @@
 
 import {  PbPlayerStatus } from "@gi-tcg/typings";
 import { createMemo, Show } from "solid-js";
-import { StrokedTextUnpack } from "./StrokedText";
+import { StrokedTextContent } from "./StrokedText";
 import { useUiContext } from "../hooks/context";
 import { AutoResizeText } from "./AutoResizeText";
 import DiceCountYellow from "../svg/DiceCountYellow.svg?fb";
@@ -59,7 +59,7 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
         >
           <DiceCountBlue class="grid-area-[1/1] h-9 w-9" />
         </Show>
-        <StrokedTextUnpack
+        <StrokedTextContent
           text={String(props.diceCount)}
           strokeWidth={2}
           strokeColor="#000000B0"

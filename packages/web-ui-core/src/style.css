@@ -667,7 +667,7 @@
 
   /* NotifiactionBox */
   .notification-box {
-    margin-right: 39.5rem;
+    margin-right: 38rem;
     margin-left: 0;
     background-image: linear-gradient(to right, #786049dd 50%, #786049aa 100%);
     border-color: #644d39aa;
@@ -684,7 +684,7 @@
 
   .notification-box[data-opp] {
     margin-right: 0;
-    margin-left: 35.5rem;
+    margin-left: 36rem;
     background-image: linear-gradient(to right, #485569dd 50%, #485569aa 100%);
     border-color: #3f4957aa;
     box-shadow:

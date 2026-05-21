@@ -29,25 +29,19 @@ export function StrokedText(props: StrokedTextProps) {
     "strokeColor",
   ]);
   return (
-    <div
-      class={`grid grid-cols-1 grid-rows-1 select-none ${local.class ?? ""}`}
-      {...rest}
-    >
-      <div
-        class="grid-area-[1/1] pointer-events-none"
-        style={{
-          "-webkit-text-stroke-color": local.strokeColor,
-          "-webkit-text-stroke-width": `${local.strokeWidth}px`,
-        }}
-      >
-        {local.text}
-      </div>
-      <div class="grid-area-[1/1]">{local.text}</div>
+    <div class={`grid grid-cols-1 grid-rows-1 ${local.class ?? ""}`} {...rest}>
+      <StrokedTextContent
+        class="grid-area-[1/1]"
+        text={local.text}
+        strokeWidth={local.strokeWidth}
+        strokeColor={local.strokeColor}
+      />
     </div>
   );
 }
 
-export function StrokedTextUnpack(props: StrokedTextProps) {
+/** You can only use this component within a **grid** container. Otherwise, please use ```<StrokedText/>``` instead. */
+export function StrokedTextContent(props: StrokedTextProps) {
   const [local, rest] = splitProps(props, [
     "text",
     "class",

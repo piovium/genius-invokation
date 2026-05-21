@@ -20,7 +20,7 @@ import {
   type Component,
   type ComponentProps,
 } from "solid-js";
-import { StrokedTextUnpack } from "./StrokedText";
+import { StrokedTextContent } from "./StrokedText";
 import { Dynamic } from "solid-js/web";
 
 import DiceCryoS from "../svg/DiceCryoS.svg?fb";
@@ -108,18 +108,18 @@ export function Dice(props: DiceProps) {
   const [local, rest] = splitProps(props, ["class", "type", "selected"]);
   return (
     <div class={`grid ${local.class ?? "w-6 h-6"}`} {...rest}>
-      <Dynamic<Component<ComponentProps<"div">>>
-        component={DICE_COMPONENT_MAP[local.type]}
-        class="grid-area-[1/1] w-full h-full"
+      <DiceContent
+        class="w-full h-full"
+        type={local.type}
+        selected={local.selected}
+        col={1}
+        row={1}
       />
-      <Show when={local.selected}>
-        <SelectingDice class="grid-area-[1/1] w-full h-full" />
-      </Show>
     </div>
   );
 }
 
-export interface DiceUnpackProps {
+export interface DiceContentProps {
   class?: string;
   type: number;
   selected?: boolean;
@@ -127,7 +127,8 @@ export interface DiceUnpackProps {
   row: number;
 }
 
-export function DiceUnpack(props: DiceUnpackProps) {
+/** You can only use this component within a **grid** container. Otherwise, please use ```<Dice/>``` instead. */
+export function DiceContent(props: DiceContentProps) {
   return (
     <>
       <Dynamic<Component<ComponentProps<"div">>>
@@ -154,17 +155,15 @@ export interface CostProps {
 
 export function Cost(props: CostProps) {
   return (
-    <div
-      class={`grid ${props.class}`}
-    >
+    <div class={`grid ${props.class}`}>
       <Dynamic<Component<ComponentProps<"div">>>
         component={COST_COMPONENT_MAP[props.type]}
         class="grid-area-[1/1] w-full h-full"
       />
       <Show when={props.type !== DiceType.Legend}>
-        <StrokedTextUnpack
-          class={`grid-area-[1/1] w-full h-full
-          text-center font-bold text-white place-items-center
+        <StrokedTextContent
+          class={`grid-area-[1/1] place-self-center
+          text-center font-bold text-white
           data-[color=increased]:text-red-500
           data-[color=decreased]:text-green-500`}
           strokeWidth={2}

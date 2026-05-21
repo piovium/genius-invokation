@@ -14,7 +14,7 @@
 
 import type { DiceType } from "@gi-tcg/typings";
 import { Index, Show } from "solid-js";
-import { Dice, DiceUnpack } from "./Dice";
+import { Dice, DiceContent } from "./Dice";
 import NumberHintBlue from "../svg/NumberHintBlue.svg?fb";
 import NumberHintYellow from "../svg/NumberHintYellow.svg?fb";
 
@@ -48,7 +48,7 @@ export function DiceBar(props: DiceBarProps) {
       </div>
       <Index each={props.dice}>
         {(dice, index) => (
-          <DiceUnpack
+          <DiceContent
             type={dice()}
             selected={props.state === "wrapped" && props.selectedDice[index]}
             class="w-6 h-6 m--1 max-w-6 max-h-6"
