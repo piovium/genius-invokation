@@ -49,86 +49,55 @@ export function NotificationBox(props: NotificationBoxProps) {
     }
   };
 
+  const title = () => {
+    if (props.data.type === "switchActive") {
+      return `${props.opp ? t("notification.oppSwitchRole") : t("notification.mySwitchRole")}${characterName()}`;
+    } else {
+      return skillName();
+    }
+  };
+
+  const description = () => {
+    if (props.data.type === "switchActive") {
+      return props.data.skillType === "overloaded"
+        ? t("notification.overloaded")
+        : characterName();
+    } else {
+      return typeText(props.data.skillType);
+    }
+  };
+
   return (
     <div
-      class="absolute top-[calc(50%-10.5rem)] z-100 h-15 min-w-60 data-[opp=false]:left-15 data-[opp=true]:right-15 text-white rounded-2 shadow-lg notification-box border-2 animate-[notification-box_700ms_both]"
-      data-opp={props.opp}
+      class="grid-area-[1/1] place-self-center mb-69 min-h-15 w-64 rounded-lg b-2 flex notification-box"
+      bool:data-opp={props.opp}
       style={{
         "--enter-offset": props.opp ? "2rem" : "-2rem",
       }}
     >
-      <div class="w-full h-full rounded-1.5 b-[var(--inner-border-color)] border-1 flex flex-row gap-2 items-center p-3">
-        <div>
+      <Image
+        imageId={props.data.characterDefinitionId}
+        type="icon"
+        class="h-10 w-10 rounded-full b-[var(--inner-border-color)] border-2 m-2"
+        fallback="skill"
+      />
+      <div class="w-45 line-height-none">
+        <h5 class="font-bold color-#ede4d8 my-2">{title()}</h5>
+        <p class="text-[var(--text-color)] font-size-80% font-bold my-2">
+          {description()}
+        </p>
+      </div>
+      <Show when={props.data.skillDefinitionId}>
+        {(skillDefinitionId) => (
           <Image
-            imageId={props.data.characterDefinitionId}
+            imageId={skillDefinitionId()}
             type="icon"
-            class="h-10 w-10 rounded-full b-[var(--inner-border-color)] border-2 relative"
+            class="h-8 w-8 mr--4 my-3 rounded-full bg-[var(--inner-background-color)] b-[var(--inner-border-color)] border-2"
+            data-opp={props.opp}
             fallback="skill"
           />
-        </div>
-        <div class="flex-col">
-          <Show
-            when={props.data.type === "switchActive"}
-            fallback={
-              <>
-                <h5 class="font-bold color-#ede4d8">{skillName()}</h5>
-                <p class="text-[var(--text-color)] font-size-80% font-bold">
-                  {typeText(props.data.skillType)}
-                </p>
-                <Show when={props.data.skillDefinitionId}>
-                  {(skillDefinitionId) => (
-                    <>
-                      <div class="absolute h-8 w-8 rounded-full bg-[var(--inner-background-color)] b-[var(--inner-border-color)] border-1 translate-x-50% translate-y--50% right-0 top-50% justify-center items-center p-0.3">
-                        <Image
-                          imageId={skillDefinitionId()}
-                          type="icon"
-                          class="h-full w-full"
-                          data-opp={props.opp}
-                          fallback="skill"
-                        />
-                      </div>
-                    </>
-                  )}
-                </Show>
-              </>
-            }
-          >
-            <h5 class="font-bold color-#ede4d8">
-              {t(
-                props.opp
-                  ? "notification.oppSwitchRole"
-                  : "notification.mySwitchRole",
-              )}
-              {characterName()}
-            </h5>
-            <Show when={props.data.skillDefinitionId}>
-              {(skillDefinitionId) => (
-                <>
-                  <p
-                    class="text-[var(--text-color)] font-size-80% font-bold"
-                    data-opp={props.opp}
-                  >
-                    {characterName()}
-                  </p>
-                  <div class="absolute h-8 w-8 rounded-full bg-[var(--inner-background-color)] b-[var(--inner-border-color)] border-1 translate-x-50% translate-y--50% right-0 top-50% justify-center items-center p-0.3">
-                    <Image
-                      imageId={skillDefinitionId()}
-                      type="icon"
-                      class="h-full w-full"
-                      fallback="skill"
-                    />
-                  </div>
-                </>
-              )}
-            </Show>
-            <Show when={props.data.skillType === "overloaded"}>
-              <p class="text-[var(--text-color)] font-size-80% font-bold">
-                {t("notification.overloaded")}
-              </p>
-            </Show>
-          </Show>
-        </div>
-      </div>
+        )}
+      </Show>
     </div>
   );
 }

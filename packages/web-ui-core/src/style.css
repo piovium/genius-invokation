@@ -665,6 +665,39 @@
     );
   }
 
+  /* NotifiactionBox */
+  .notification-box {
+    margin-right: 39.5rem;
+    margin-left: 0;
+    background-image: linear-gradient(to right, #786049dd 50%, #786049aa 100%);
+    border-color: #644d39aa;
+    box-shadow:
+      0 0 12px -4px #00000080,
+      inset 0 0 0 1px #bea678;
+    --inner-background-color: #786049;
+    --inner-border-color: #bea678;
+    --text-color: #d9b48d;
+    animation:
+      700ms linear both display,
+      150ms ease both left-in-50;
+  }
+
+  .notification-box[data-opp] {
+    margin-right: 0;
+    margin-left: 35.5rem;
+    background-image: linear-gradient(to right, #485569dd 50%, #485569aa 100%);
+    border-color: #3f4957aa;
+    box-shadow:
+      0 0 12px -4px #00000080,
+      inset 0 0 0 1px #899dc6;
+    --inner-background-color: #485569;
+    --inner-border-color: #899dc6;
+    --text-color: #7e98cb;
+    animation:
+      700ms linear both display,
+      150ms ease both right-in-50;
+  }
+
   /* Merge Chessboard */
   /* &[data-has-opp-chessboard] {
     
@@ -690,22 +723,6 @@
   }
   [data-display-none] {
     display: none;
-  }
-
-  .notification-box[data-opp="false"] {
-    background-image: linear-gradient(to right, #786049dd 50%, #786049aa 100%);
-    border-color: #644d39aa;
-    --inner-background-color: #786049;
-    --inner-border-color: #bea678;
-    --text-color: #d9b48d;
-  }
-
-  .notification-box[data-opp="true"] {
-    background-image: linear-gradient(to right, #485569dd 50%, #485569aa 100%);
-    border-color: #3f4957aa;
-    --inner-background-color: #485569;
-    --inner-border-color: #899dc6;
-    --text-color: #7e98cb;
   }
 
   .triggered-animation-1 {
@@ -1104,26 +1121,6 @@
   100% {
     opacity: 0;
     scale: 300%;
-  }
-}
-
-@keyframes notification-box {
-  0% {
-    opacity: 0;
-    transform: translateX(var(--enter-offset));
-  }
-
-  15% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  85% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
   }
 }
 
