@@ -27,7 +27,7 @@ import type { EntityInfo } from "./Chessboard";
 import { Image } from "./Image";
 import { VariableDiff } from "./VariableDiff";
 import { ActionStepEntityUi } from "../action";
-import { StrokedText } from "./StrokedText";
+import { StrokedTextUnpack } from "./StrokedText";
 import SelectingIcon from "../svg/SelectingIcon.svg?fb";
 import SelectingConfirmIcon from "../svg/SelectingConfirmIcon.svg?fb";
 import CardFrameSummon from "../svg/CardFrameSummon.svg?fb";
@@ -67,7 +67,7 @@ const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
           component={hintComponent()}
           class="grid-area-[1/1] w-full h-full"
         />
-        <StrokedText
+        <StrokedTextUnpack
           class="grid-area-[1/1] place-self-center text-white font-bold"
           strokeWidth={2}
           strokeColor="#000000aa"
@@ -88,7 +88,7 @@ const EntityBottomHint = (props: { imageId: number; value: string }) => {
         class="grid-area-[1/1] h-7.5 w-7.5"
         fallback="state"
       />
-      <StrokedText
+      <StrokedTextUnpack
         class="grid-area-[1/1] text-white font-bold text-4.5"
         strokeWidth={2}
         strokeColor="#000000aa"

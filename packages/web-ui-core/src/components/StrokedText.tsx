@@ -29,9 +29,12 @@ export function StrokedText(props: StrokedTextProps) {
     "strokeColor",
   ]);
   return (
-    <div class={`grid grid-cols-1 grid-rows-1 ${local.class ?? ""}`} {...rest}>
+    <div
+      class={`grid grid-cols-1 grid-rows-1 select-none ${local.class ?? ""}`}
+      {...rest}
+    >
       <div
-        class="grid-area-[1/1] pointer-events-none select-none"
+        class="grid-area-[1/1] pointer-events-none"
         style={{
           "-webkit-text-stroke-color": local.strokeColor,
           "-webkit-text-stroke-width": `${local.strokeWidth}px`,
@@ -41,5 +44,31 @@ export function StrokedText(props: StrokedTextProps) {
       </div>
       <div class="grid-area-[1/1]">{local.text}</div>
     </div>
+  );
+}
+
+export function StrokedTextUnpack(props: StrokedTextProps) {
+  const [local, rest] = splitProps(props, [
+    "text",
+    "class",
+    "strokeWidth",
+    "strokeColor",
+  ]);
+  return (
+    <>
+      <div
+        class={`pointer-events-none select-none ${local.class ?? ""}`}
+        style={{
+          "-webkit-text-stroke-color": local.strokeColor,
+          "-webkit-text-stroke-width": `${local.strokeWidth}px`,
+        }}
+        {...rest}
+      >
+        {local.text}
+      </div>
+      <div class={`select-none ${local.class ?? ""}`} {...rest}>
+        {local.text}
+      </div>
+    </>
   );
 }

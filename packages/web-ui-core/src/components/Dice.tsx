@@ -20,7 +20,7 @@ import {
   type Component,
   type ComponentProps,
 } from "solid-js";
-import { StrokedText } from "./StrokedText";
+import { StrokedTextUnpack } from "./StrokedText";
 import { Dynamic } from "solid-js/web";
 
 import DiceCryoS from "../svg/DiceCryoS.svg?fb";
@@ -162,7 +162,7 @@ export function Cost(props: CostProps) {
         class="grid-area-[1/1] w-full h-full"
       />
       <Show when={props.type !== DiceType.Legend}>
-        <StrokedText
+        <StrokedTextUnpack
           class={`grid-area-[1/1] w-full h-full
           text-center font-bold text-white place-items-center
           data-[color=increased]:text-red-500
