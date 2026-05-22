@@ -125,10 +125,17 @@ export const DiceCostAsync = (props: DiceCostAsyncProps) => {
   };
   const renderCost = (data: AnyData) => {
     if ("playCost" in data && data.playCost.length > 0) {
-      return data.playCost.map((cost) => ({
+      const staticCost = data.playCost.map((cost) => ({
         type: COST_MAP[cost.type],
         count: cost.count,
       }));
+      if (
+        data.playCost.length === 1 &&
+        data.playCost[0].type === "GCG_COST_LEGEND"
+      ) {
+        return [{ type: 8, count: 0 }, ...staticCost];
+      }
+      return staticCost;
     } else {
       return [{ type: 8, count: 0 }];
     }

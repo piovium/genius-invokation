@@ -671,7 +671,7 @@ function rerenderChildren(opt: {
       transform: {
         ...getHandHintPos(size, opp, player.handCard.length, oppFocused),
         ...COUNT_HINT_TRANSFORM_BASE,
-        z: opp ? 2 : FOCUSING_HANDS_Z,
+        z: opp && !oppFocused ? 2 : FOCUSING_HANDS_Z,
       },
     });
   }
@@ -1406,6 +1406,11 @@ export function Chessboard(props: ChessboardProps) {
       localProps.viewType,
     ),
   );
+  const hasOppSpecialView = createMemo(() =>
+    ["rerollDice", "rerollDiceEnd", "switchHands", "selectCard"].includes(
+      localProps.opp?.viewType ?? "normal",
+    ),
+  );
   const displayUiComponents = createMemo(
     () => !hasSpecialView() || !specialViewVisible(),
   );
@@ -1706,6 +1711,15 @@ export function Chessboard(props: ChessboardProps) {
     setShowCardHint("myHand", null);
   };
 
+  const onMiniViewCardClick = (card: number) => {
+    setSelectingItem(null);
+    dataViewerController.showCard(card);
+    setFocusingHands(false);
+    setShowCardHint("myHand", null);
+    setOppFocusingHands(false);
+    setShowCardHint("oppHand", null);
+  };
+
   let containerElement!: HTMLDivElement;
 
   const [isFullscreen, setIsFullscreen] = createSignal(false);
@@ -1993,25 +2007,30 @@ export function Chessboard(props: ChessboardProps) {
             onBackdropClick={() => setShowHistory(false)}
           />
         </Show>
-        <AspectRatioContainer class="z-6">
-          <Show when={localProps.opp}>
+        <AspectRatioContainer class="z-6 grid children:grid-area-[1/1] isolate">
+          <Show
+            when={localProps.opp && !(hasSpecialView() && specialViewVisible())}
+          >
             <MiniSpecialViewGroup
-              opp
-              player={localProps.data.state.player[flip(localProps.who)]}
-              selectCardCandidates={localProps.opp?.selectCardCandidates ?? []}
-              viewType={localProps.opp?.viewType ?? "normal"}
-            />
-            <MiniSpecialViewGroup
-              player={localProps.data.state.player[localProps.who]}
-              selectCardCandidates={localProps.selectCardCandidates}
-              viewType={localProps.viewType}
+              who={localProps.who}
+              myViewType={localProps.viewType}
+              oppViewType={localProps.opp?.viewType ?? "normal"}
+              players={localProps.data.state.player}
+              mySelectCardCandidates={localProps.selectCardCandidates}
+              oppSelectCardCandidates={
+                localProps.opp?.selectCardCandidates ?? []
+              }
+              onCardClick={onMiniViewCardClick}
+              onBackDropClick={onChessboardClick}
+              showMyView={hasSpecialView()}
+              showOppView={hasOppSpecialView()}
             />
           </Show>
-          <div class="absolute inset-3 pointer-events-none touch-pan scale-68% translate-x--16% translate-y--16%">
+          <div class="m-2 pointer-events-none contain-strict touch-pan card-data-viewer">
             <CardDataViewer />
           </div>
           {/* 右上角部件 */}
-          <div class="grid-area-[1/1] justify-self-end m-2 flex flex-row-reverse gap-1.5 items-center">
+          <div class="justify-self-end h-8 m-2 flex flex-row-reverse gap-1.5 items-center">
             <Show when={localProps.data.state.phase !== PbPhaseType.GAME_END}>
               <ExitButton onClick={onExit} />
             </Show>
@@ -2025,16 +2044,16 @@ export function Chessboard(props: ChessboardProps) {
                 onClick={() => setSpecialViewVisible((v) => !v)}
               />
             </Show>
+            <Show when={localProps.liveStreamingMode}>
+              <div class="h-6 min-w-20 px-3 rounded-full text-3.5 text-center line-height-6 font-bold bg-#e9e2d3/70 text-black/70 pointer-events-none select-none">
+                {t("ui.liveStreamingMode")}
+              </div>
+            </Show>
             <CurrentTurnHint
               phase={localProps.data.state.phase}
               opp={localProps.data.state.currentTurn !== localProps.who}
             />
             <TimerCapsule timer={timer()} />
-            <Show when={localProps.liveStreamingMode}>
-              <div class="h-6 min-w-20 px-3 rounded-full text-3.5 text-center line-height-6 font-bold bg-#e9e2d3/50 text-black/70 pointer-events-none select-none">
-                {t("ui.liveStreamingMode")}
-              </div>
-            </Show>
           </div>
         </AspectRatioContainer>
         <TimerAlert timer={timer()} />

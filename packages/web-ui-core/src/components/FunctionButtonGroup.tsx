@@ -21,13 +21,14 @@ import ExitIcon from "../svg/Exit.svg?fb";
 import { useUiContext } from "../hooks/context";
 
 export interface SpecialViewToggleButtonProps {
+  class?: string;
   onClick?: () => void;
 }
 
 export function SpecialViewToggleButton(props: SpecialViewToggleButtonProps) {
   return (
     <button
-      class="h-8 w-8 function-button"
+      class={`h-8 w-8 function-button ${props.class ?? ""}`}
       onClick={() => {
         props.onClick?.();
       }}

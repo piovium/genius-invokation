@@ -13,7 +13,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { createSignal, For, Show } from "solid-js";
+import {
+  createSignal,
+  For,
+  Show,
+  splitProps,
+  type ComponentProps,
+} from "solid-js";
 import { Button } from "./Button";
 import { Image } from "./Image";
 import CardFrameNormal from "../svg/CardFrameNormal.svg?fb";
@@ -40,32 +46,18 @@ export function SelectCardView(props: SelectCardViewProps) {
       <div class={`flex flex-row h-36 my-15 justify-evenly w-180`}>
         <For each={props.candidateIds}>
           {(cardId) => (
-            <div
-              class="w-21 h-36 grid relative"
+            <StaticCard
+              cardDefinitionId={cardId}
+              selected={selectedId() === cardId}
               onClick={() => {
                 setSelectedId(cardId);
                 props.onClickCard(cardId);
               }}
             >
-              <Image
-                class="grid-area-[1/1] h-full w-full p-1% text-3"
-                imageId={cardId}
-                fallback="card"
-              />
-              <CardFrameNormal class="grid-area-[1/1] h-full w-full pointer-events-none" />
-              <Show when={selectedId() === cardId}>
-                {/* with animate no render */}
-                <SelectingIcon noRender class="grid-area-[1/1] w-21 h-21 place-self-center" />
-              </Show>
-              <DiceCostAsync
-                cardDefinitionId={cardId}
-                class="absolute left-2 top--0.5 translate-x--50% flex flex-col gap-1"
-                diceClass="w-9 h-9 text-4.5 m--1 max-w-9 max-h-9"
-              />
-              <div class="grid-area-[1/1] self-end py-1 text-3 text-center text-white/80 line-height-tight translate-y-100%">
+              <div class="self-end w-35 mx--7 max-w-35 py-1 text-3 text-center text-white/80 line-height-tight translate-y-100%">
                 {props.nameGetter(cardId)}
               </div>
-            </div>
+            </StaticCard>
           )}
         </For>
       </div>
@@ -81,6 +73,43 @@ export function SelectCardView(props: SelectCardViewProps) {
       >
         {t("view.confirmButton")}
       </Button>
+    </div>
+  );
+}
+
+export interface StaticCardProps extends ComponentProps<"div"> {
+  cardDefinitionId: number;
+  selected?: boolean;
+}
+
+export function StaticCard(props: StaticCardProps) {
+  const [local, rest] = splitProps(props, [
+    "cardDefinitionId",
+    "selected",
+    "class",
+    "children",
+  ]);
+  return (
+    <div
+      class={`w-21 h-36 grid relative children:grid-area-[1/1] ${local.class ?? ""}`}
+      {...rest}
+    >
+      <Image
+        class="h-full w-full p-1% text-3"
+        imageId={local.cardDefinitionId}
+        fallback="card"
+      />
+      <CardFrameNormal class="h-full w-full pointer-events-none" />
+      <Show when={local.selected}>
+        {/* with animate no render */}
+        <SelectingIcon noRender class="w-21 h-21 place-self-center" />
+      </Show>
+      <DiceCostAsync
+        cardDefinitionId={local.cardDefinitionId}
+        class="absolute left-2 top--0.5 translate-x--50% flex flex-col gap-1"
+        diceClass="w-9 h-9 text-4.5 m--1 max-w-9 max-h-9"
+      />
+      {local.children}
     </div>
   );
 }

@@ -724,6 +724,13 @@
       150ms linear 550ms both brightness-decrease;
   }
 
+  /* CardDataViewer */
+  .card-data-viewer .gi-tcg-card-data-viewer {
+    height: 147%;
+    transform: scale(0.68);
+    transform-origin: top left;
+  }
+
   /* Merge Chessboard */
   &[data-has-opp-chessboard] {
     .dice-bar-my {
@@ -743,16 +750,6 @@
   }
 
   /* end */
-
-  .mini-view[data-opp="false"] {
-    top: 52%;
-  }
-  .mini-view[data-opp="true"] {
-    bottom: 52%;
-  }
-  .mini-view {
-    box-shadow: inset 0 0 12px #00000080;
-  }
 
   [data-contain-strict] {
     contain: style size;

@@ -13,146 +13,190 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { For, Match, Show, Switch } from "solid-js";
-import { DiceType } from "@gi-tcg/typings";
-import { DiceCostAsync } from "./DiceCost";
+import { createEffect, createSignal, For, Match, Show, Switch } from "solid-js";
 import { InlineDice } from "./Dice";
+import { StaticCard } from "./SelectCardView";
 import type { PbPlayerState } from "@gi-tcg/core";
 import type { ChessboardViewType } from "./Chessboard";
 import { useUiContext } from "../hooks/context";
+import { SpecialViewToggleButton } from "./FunctionButtonGroup";
+import { flip } from "@gi-tcg/utils";
 
-export interface MiniSpecialViewProps {
-  viewType: "switching" | "selecting" | "rerolling";
-  ids: number[] | DiceType[];
-  nameGetter: (id: number) => string | undefined;
-  opp?: boolean;
+interface SelectedCardInfo {
+  who: 0 | 1;
+  id: number;
 }
 
-function MiniView(props: MiniSpecialViewProps) {
-  const { t } = useUiContext();
+export interface MiniSpecialViewProps {
+  opp?: boolean;
+  viewType: ChessboardViewType;
+  player: PbPlayerState;
+  selectCardCandidates: number[];
+  visible: boolean;
+  selectedCard?: number;
+  onCardClick: (definitionId: number, id?: number) => void;
+  onBackDropClick: () => void;
+}
+
+export function MiniView(props: MiniSpecialViewProps) {
+  const { t, assetsManager } = useUiContext();
+  const title = () => {
+    switch (props.viewType) {
+      case "switchHands":
+        return props.opp
+          ? t("mini.oppSwitchingHands")
+          : t("mini.mySwitchingHands");
+      case "selectCard":
+        return props.opp
+          ? t("mini.oppSelectingCards")
+          : t("mini.mySelectingCards");
+      default:
+        return props.opp ? t("mini.oppRerolling") : t("mini.myRerolling");
+    }
+  };
   return (
-    <div class="absolute aspect-ratio-[16/9] w-full max-h-full top-50% translate-y--50% pointer-events-none">
-      <div
-        class="absolute w-91.5 h-43 right--66.5 flex flex-col items-center justify-center gap-4 select-none mini-view bg-green-50 b-5 b-#443322 rounded-4"
-        data-opp={!!props.opp}
-      >
-        <Switch>
-          <Match when={props.viewType === "switching"}>
-            <h3 class="font-bold text-4">
-              {t(
-                props.opp
-                  ? "mini.oppSwitchingHands"
-                  : "mini.mySwitchingHands",
+    <div
+      class={`place-self-center ml-155 w-80 h-48 data-[fold]:h-8 contain-strict
+          translate-y-50% data-[opp]:translate-y--50% transition-all-300
+          flex flex-col items-center justify-start py-4 data-[fold]:py-2
+          select-none bg-black/60 text-white/80`}
+      bool:data-opp={!!props.opp}
+      bool:data-fold={!props.visible}
+      onClick={() => {
+        props.onBackDropClick();
+      }}
+    >
+      <h3 class="font-bold text-4 line-height-none">{title()}</h3>
+      <Switch>
+        <Match when={props.viewType === "switchHands"}>
+          <div class="flex flex-row w-full justify-around px-5">
+            <For each={props.player.handCard}>
+              {(card) => (
+                <StaticCard
+                  class="scale-50 shrink-0 mx--7"
+                  cardDefinitionId={card.definitionId}
+                  selected={props.selectedCard === card.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    props.onCardClick(card.definitionId, card.id);
+                  }}
+                />
               )}
-            </h3>
-            <ul class="flex flex-row w-80 justify-evenly">
-              <For each={props.ids}>
-                {(cardId) => (
-                  <div class="relative h-24 w-4.5">
-                    <li class="flex flex-col items-center absolute top-0 left--3">
-                      <div class="h-18 w-10.5 relative">
-                        {/* <CardFace definitionId={cardId} class="absolute inset-0 w-10.5 h-18" /> */}
-                        <DiceCostAsync
-                          cardDefinitionId={cardId}
-                          class="absolute translate-x--50% backface-hidden flex flex-col gap-1 top-0 left-0.8"
-                          diceClass="w-4.5 h-4.5 text-2.25 m--0.5"
-                        />
-                      </div>
-                    </li>
+            </For>
+          </div>
+        </Match>
+        <Match when={props.viewType === "selectCard" && props.visible}>
+          <div class="flex flex-row w-full justify-around px-5">
+            <For each={props.selectCardCandidates}>
+              {(cardId) => (
+                <StaticCard
+                  class="scale-50 shrink-0 mx--7"
+                  cardDefinitionId={cardId}
+                  selected={props.selectedCard === cardId}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    props.onCardClick(cardId);
+                  }}
+                >
+                  <div class="self-end w-35 mx--7 max-w-35 py-1 text-3 text-center text-white/80 line-height-tight translate-y-100%">
+                    {assetsManager().getNameSync(cardId)}
                   </div>
-                )}
-              </For>
-            </ul>
-          </Match>
-          <Match when={props.viewType === "selecting"}>
-            <h3 class="font-bold text-4">
-              {t(
-                props.opp
-                  ? "mini.oppSelectingCards"
-                  : "mini.mySelectingCards",
+                </StaticCard>
               )}
-            </h3>
-            <ul class="flex flex-row w-80 justify-evenly">
-              <For each={props.ids}>
-                {(cardId) => (
-                  <div class="relative h-24 w-4.5">
-                    <li class="flex flex-col items-center absolute top-0 left--3">
-                      <div class="h-18 w-10.5 relative">
-                        {/* <CardFace definitionId={cardId} class="absolute inset-0 w-10.5 h-18" /> */}
-                        <DiceCostAsync
-                          cardDefinitionId={cardId}
-                          class="absolute translate-x--50% backface-hidden flex flex-col gap-1 top-0 left-0.8"
-                          diceClass="w-4.5 h-4.5 text-2.25 m--0.5"
-                        />
-                      </div>
-                      <div class="mt-1 w-10.5 text-2 text-center color-black/60 font-bold whitespace-nowrap">
-                        {props.nameGetter(cardId)}
-                      </div>
-                    </li>
-                  </div>
-                )}
-              </For>
-            </ul>
-          </Match>
-          <Match when={props.viewType === "rerolling"}>
-            <h3 class="font-bold text-4">
-              {t(
-                props.opp
-                  ? "mini.oppRerolling"
-                  : "mini.myRerolling",
-              )}
-            </h3>
-            <div class="grid grid-rows-2 grid-flow-col">
-              <For each={props.ids}>
-                {(dice) => (
-                  <InlineDice type={dice} class="w-10 h-10" />
-                )}
-              </For>
-            </div>
-          </Match>
-        </Switch>
-      </div>
+            </For>
+          </div>
+        </Match>
+        <Match
+          when={
+            (props.viewType === "rerollDice" ||
+              props.viewType === "rerollDiceEnd") &&
+            props.visible
+          }
+        >
+          <div class="grid grid-rows-2 grid-flow-col h-20 my-8">
+            <For each={props.player.dice}>
+              {(dice) => <InlineDice type={dice} class="w-10 h-10" />}
+            </For>
+          </div>
+        </Match>
+      </Switch>
     </div>
   );
 }
 
 export interface MiniSpecialViewGroupProps {
-  opp?: boolean;
-  viewType: ChessboardViewType;
-  player: PbPlayerState;
-  selectCardCandidates: number[];
+  who: 0 | 1;
+  myViewType: ChessboardViewType;
+  oppViewType: ChessboardViewType;
+  players: PbPlayerState[];
+  mySelectCardCandidates: number[];
+  oppSelectCardCandidates: number[];
+  showMyView: boolean;
+  showOppView: boolean;
+  onCardClick: (card: number) => void;
+  onBackDropClick: () => void;
 }
 
 export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
-  const { assetsManager } = useUiContext();
+  const [miniViewVisible, setMiniViewVisible] = createSignal(true);
+  const [selectedId, setSelectedId] = createSignal<SelectedCardInfo | null>(
+    null,
+  );
+  createEffect(() => {
+    if (
+      props.myViewType === "selectCard" ||
+      props.oppViewType === "selectCard"
+    ) {
+      setMiniViewVisible(true);
+    } else {
+      setMiniViewVisible(false);
+    }
+  });
   return (
     <>
-      <Show when={props.viewType === "switchHands"}>
-        <MiniView
-          viewType="switching"
-          ids={props.player.handCard.map((card) => card.definitionId)}
-          nameGetter={() => void 0}
-          opp={props.opp}
+      <Show when={props.showMyView || props.showOppView}>
+        <SpecialViewToggleButton
+          class="place-self-center ml-75 z-1"
+          onClick={() => setMiniViewVisible((v) => !v)}
         />
       </Show>
-      <Show when={props.viewType === "selectCard"}>
+      <Show when={props.showMyView}>
         <MiniView
-          viewType="selecting"
-          ids={props.selectCardCandidates}
-          nameGetter={(name) => assetsManager().getNameSync(name)}
-          opp={props.opp}
+          player={props.players[props.who]}
+          selectCardCandidates={props.mySelectCardCandidates}
+          viewType={props.myViewType}
+          visible={miniViewVisible()}
+          selectedCard={
+            props.who === selectedId()?.who ? selectedId()?.id : undefined
+          }
+          onCardClick={(defId, id) => {
+            setSelectedId({ who: props.who, id: id ?? defId });
+            props.onCardClick(defId);
+          }}
+          onBackDropClick={() => {
+            setSelectedId(null);
+            props.onBackDropClick();
+          }}
         />
       </Show>
-      <Show
-        when={
-          props.viewType === "rerollDice" || props.viewType === "rerollDiceEnd"
-        }
-      >
+      <Show when={props.showOppView}>
         <MiniView
-          viewType="rerolling"
-          ids={props.player.dice}
-          nameGetter={() => void 0}
-          opp={props.opp}
+          opp
+          player={props.players[flip(props.who)]}
+          selectCardCandidates={props.oppSelectCardCandidates}
+          viewType={props.oppViewType}
+          visible={miniViewVisible()}
+          selectedCard={
+            flip(props.who) === selectedId()?.who ? selectedId()?.id : undefined
+          }
+          onCardClick={(defId, id) => {
+            setSelectedId({ who: flip(props.who), id: id ?? defId });
+            props.onCardClick(defId);
+          }}
+          onBackDropClick={() => {
+            setSelectedId(null);
+            props.onBackDropClick();
+          }}
         />
       </Show>
     </>
