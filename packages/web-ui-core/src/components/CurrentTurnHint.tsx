@@ -1,3 +1,4 @@
+// Copyright (C) 2025 Guyutongxue
 // Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
@@ -16,7 +17,6 @@
 import { PbPhaseType } from "@gi-tcg/typings";
 import { Show } from "solid-js";
 import { useUiContext } from "../hooks/context";
-import { AutoResizeText } from "./AutoResizeText";
 
 export interface CurrentTurnHintProps {
   phase: PbPhaseType;

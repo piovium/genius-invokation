@@ -29,8 +29,6 @@
     outline: #3ed490 solid 1px;
   }
 
-  /* start */
-
   /* ActionHintText */
   .action-hint {
     border-top: #9d7f64 3px double;
@@ -758,8 +756,7 @@
     }
   }
 
-  /* end */
-
+  /* svg-with-fallback */
   [data-contain-strict] {
     contain: style size;
     > * {
@@ -771,7 +768,6 @@
   }
 }
 
-/* keyframes start */
 
 @keyframes fade-out {
   0% {
@@ -905,38 +901,5 @@
     box-shadow:
       0 0 8px 0 #fdd569,
       inset 0 0 8px 0 #fdd569;
-  }
-}
-
-/* keyframes end */
-
-@keyframes disposing {
-  0% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes rotate {
-  0% {
-    rotate: 0deg;
-  }
-
-  100% {
-    rotate: 360deg;
-  }
-}
-
-@keyframes beat {
-  0%,
-  100% {
-    scale: var(--up-scale, 100%);
-  }
-
-  50% {
-    scale: var(--down-scale, 100%);
   }
 }

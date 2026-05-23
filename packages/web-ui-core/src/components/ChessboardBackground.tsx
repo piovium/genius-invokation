@@ -1,3 +1,4 @@
+// Copyright (C) 2025 Guyutongxue & CherryC9H13N
 // Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
