@@ -40,7 +40,7 @@ export function SelectCardView(props: SelectCardViewProps) {
   const [selectedId, setSelectedId] = createSignal<number | null>(null);
 
   return (
-    <div class="w-full h-full flex flex-col items-center justify-center select-none z-3">
+    <div class="w-full h-full flex flex-col items-center justify-center select-none z-3 min-w-0 min-h-0">
       <h3 class="h-10 font-bold text-3xl text-white/80">
         {t("view.chooseCard")}
       </h3>

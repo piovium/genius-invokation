@@ -24,7 +24,7 @@ export function AspectRatioContainer(props: ComponentProps<"div">) {
   const child = children(() => local.children);
   return (
     <div
-      class={`aspect-ratio-[16/9] h-full max-w-full relative pointer-events-none children-pointer-events-auto ${
+      class={`aspect-ratio-[16/9] h-full max-w-full min-h-0 min-w-0 relative pointer-events-none children-pointer-events-auto ${
         local.class ?? ""
       }`}
       {...restProps}

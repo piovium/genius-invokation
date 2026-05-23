@@ -1431,7 +1431,7 @@ export function HistoryCard(props: HistoryCardProps) {
     >
       <>
         <Image
-          class={`p-1px text-0 ${props.class ?? ""}`}
+          class={`text-0 ${props.class ?? ""}`}
           imageId={props.definitionId as number}
           fallback="card"
         />
@@ -1451,7 +1451,7 @@ export function HistorySummon(props: HistoryCardProps) {
     >
       <>
         <Image
-          class={`p-1px text-0 rounded-md ${props.class ?? ""}`}
+          class={`text-0 rounded-sm ${props.class ?? ""}`}
           imageId={props.definitionId as number}
           fallback="card"
         />

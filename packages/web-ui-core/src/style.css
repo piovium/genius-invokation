@@ -20,6 +20,9 @@
 
   overflow: clip;
 
+  --light-white: #fcfed5;
+  --light-golden: #fdd569;
+
   .touch-pan:not(#notExists),
   .touch-pan * {
     touch-action: pan-x pan-y;
@@ -72,25 +75,26 @@
     --inset-shadow: 0 0 transparent;
     box-shadow: var(--common-shadow), var(--effect-shadow), var(--inset-shadow);
     transition: box-shadow 150ms ease;
+    backface-visibility: visible;
   }
 
   .card-animation:where([data-shadow] > *) {
-    --common-shadow: 0 20px 25px 5px rgb(0 0 0 / 0.2);
+    --common-shadow: 0 16px 24px 4px #0000002f;
   }
 
   .card-animation:where([data-playable] > *) {
-    --effect-shadow: 0 0 4px 4px #fcfed5;
+    --effect-shadow: 0 0 4px 4px var(--light-white);
   }
 
   .card-animation:where([data-dragging-end] > *) {
-    --effect-shadow: 0px 0px 25px 10px rgba(255, 230, 89, 0.8);
+    --effect-shadow: 0px 0px 24px 12px var(--light-golden);
     --blink-opacity: 0;
     animation: 1s ease-in-out forwards blink-25;
   }
 
   .card-animation:where([data-triggered] > *) {
-    --effect-shadow: 0px 0px 25px 10px rgb(252 240 168 / 0.4);
-    --inset-shadow: inset 0px 0px 25px 10px rgb(252 240 168 / 0.4);
+    --effect-shadow: 0px 0px 12px 8px var(--light-golden);
+    --inset-shadow: inset 0px 0px 12px 8px var(--light-golden);
     --blink-opacity: 0;
     animation: 0.5s ease-in-out blink-25;
   }
@@ -120,7 +124,7 @@
 
   .clickable-outline[data-clickable] {
     cursor: pointer;
-    box-shadow: 0 0 6px 6px #fcfed5;
+    box-shadow: 0 0 6px 6px var(--light-white);
   }
 
   .health {
@@ -193,16 +197,16 @@
   .equipment-effect[data-usable] {
     scale: 80%;
     box-shadow:
-      0 0 2px 2px #fcfed5,
-      inset 0 0 4px 4px #fcfed5;
+      0 0 2px 2px var(--light-white),
+      inset 0 0 4px 4px var(--light-white);
   }
 
   .equipment-effect[data-triggered],
   .technique-effect[data-triggered] {
     scale: 80%;
     box-shadow:
-      0 -4px 4px 0 #fcfed5,
-      inset 0 4px 4px 0 #fcfed5;
+      0 -4px 4px 0 var(--light-golden),
+      inset 0 4px 4px 0 var(--light-golden);
     --rotation-start: -225deg;
     --rotation-end: 225deg;
     --blink-opacity: 0;
@@ -214,8 +218,8 @@
   .equipment-effect[data-entering],
   .technique-effect[data-entering] {
     box-shadow:
-      0 0 4px 2px #fcfed5,
-      inset 0 0 4px 2px #fcfed5;
+      0 0 4px 2px var(--light-golden),
+      inset 0 0 4px 2px var(--light-golden);
     --scale-start: 40%;
     --scale-middle: 120%;
     --scale-end: 200%;
@@ -228,8 +232,8 @@
   .equipment-effect[data-disposing],
   .technique-effect[data-disposing] {
     box-shadow:
-      0 0 4px 2px #fcfed5,
-      inset 0 0 4px 2px #fcfed5;
+      0 0 4px 2px var(--light-golden),
+      inset 0 0 4px 2px var(--light-golden);
     --blink-opacity: 0;
     animation: 500ms linear forwards blink-50;
   }
@@ -253,7 +257,7 @@
 
   /* Status */
   .status-effect[data-usable] {
-    box-shadow: inset 0 0 4px 2px #fcfed5;
+    box-shadow: inset 0 0 4px 2px var(--light-white);
     mask-image: linear-gradient(
       to right,
       black 10%,
@@ -265,8 +269,8 @@
 
   .status-effect[data-triggered] {
     box-shadow:
-      0 -4px 4px 0 #fcfed5,
-      inset 0 4px 4px 0 #fcfed5;
+      0 -4px 4px 0 var(--light-golden),
+      inset 0 4px 4px 0 var(--light-golden);
     --rotation-start: -225deg;
     --rotation-end: 225deg;
     --blink-opacity: 0;
@@ -276,8 +280,8 @@
   }
 
   .status-effect[data-entering] {
-    background-color: #fcfed5;
-    box-shadow: 0 0 16px 16px #fcfed5;
+    background-color: var(--light-golden);
+    box-shadow: 0 0 16px 16px var(--light-golden);
     --scale-start: 100%;
     --scale-middle: 70%;
     --scale-end: 40%;
@@ -288,8 +292,8 @@
 
   .status-effect[data-disposing] {
     box-shadow:
-      0 0 4px 2px #fcfed5,
-      inset 0 0 4px 2px #fcfed5;
+      0 0 4px 2px var(--light-white),
+      inset 0 0 4px 2px var(--light-white);
     --scale-start: 80%;
     --scale-middle: 140%;
     --scale-end: 200%;
@@ -504,21 +508,21 @@
   }
 
   .entity-effect[data-usable] {
-    box-shadow: inset 0 0 12px 8px #fcfed5;
+    box-shadow: inset 0 0 12px 8px var(--light-white);
   }
 
   .entity-effect[data-triggered] {
     box-shadow:
-      0 0 12px 8px #fdd569,
-      inset 0 0 12px 8px #fdd569;
+      0 0 12px 8px var(--light-golden),
+      inset 0 0 12px 8px var(--light-golden);
     --blink-opacity: 0;
     animation: 500ms linear forwards blink-50;
   }
 
   .entity-effect[data-entering] {
     box-shadow:
-      0 0 8px 4px #fdd569,
-      inset 0 0 8px 4px #fdd569;
+      0 0 8px 4px var(--light-golden),
+      inset 0 0 8px 4px var(--light-golden);
     --scale-start: 90%;
     --scale-middle: 125%;
     --scale-end: 160%;
@@ -706,8 +710,8 @@
     margin-right: 37rem;
     margin-left: 0;
     box-shadow:
-      0 0 24px 8px #fdd569,
-      inset 0 0 4px 2px #fdd569;
+      0 0 24px 8px var(--light-golden),
+      inset 0 0 4px 2px var(--light-golden);
     animation:
       700ms linear both display,
       700ms linear both brightness-blink;
@@ -873,28 +877,28 @@
     opacity: 0;
     transform: scale(200%);
     box-shadow:
-      0 0 24px 0 #fdd569,
-      inset 0 0 24px 0 #fdd569;
+      0 0 24px 0 var(--light-golden),
+      inset 0 0 24px 0 var(--light-golden);
   }
   30% {
     opacity: 1;
     transform: scale(100%);
     box-shadow:
-      0 0 8px 8px #fcfed5,
-      inset 0 0 32px 32px #fcfed5;
+      0 0 8px 8px var(--light-white),
+      inset 0 0 32px 32px var(--light-white);
   }
   60% {
     opacity: 1;
     transform: scale(0%);
     box-shadow:
-      0 0 8px 4px #fcfed5,
-      inset 0 0 8px 4px #fcfed5;
+      0 0 8px 4px var(--light-white),
+      inset 0 0 8px 4px var(--light-white);
   }
   100% {
     opacity: 0;
     transform: scale(300%);
     box-shadow:
-      0 0 8px 0 #fdd569,
-      inset 0 0 8px 0 #fdd569;
+      0 0 8px 0 var(--light-golden),
+      inset 0 0 8px 0 var(--light-golden);
   }
 }
