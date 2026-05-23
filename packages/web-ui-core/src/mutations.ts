@@ -15,9 +15,7 @@
 
 import {
   Aura,
-  CreateEntityEM,
   DamageType,
-  MoveEntityEM,
   PbEntityArea,
   type PbExposedMutation,
   PbMoveEntityReason,
@@ -28,7 +26,6 @@ import {
   PbRemoveEntityReason,
   PbSkillType,
   Reaction,
-  RemoveEntityEM,
 } from "@gi-tcg/typings";
 import type {
   AnimatingCardInfo,
@@ -325,6 +322,14 @@ export function parseMutations(
       }
       case "moveEntity": {
         handleCardOps(mutation);
+        if (
+          [
+            PbMoveEntityReason.EQUIP,
+            PbMoveEntityReason.CREATE_SUPPORT,
+          ].includes(mutation.value.reason)
+        ) {
+          enteringEntities.push(mutation.value.entity!.id);
+        }
         break;
       }
       case "removeEntity": {
