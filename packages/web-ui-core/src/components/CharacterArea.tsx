@@ -407,7 +407,7 @@ export function CharacterArea(props: CharacterAreaProps) {
     }
     const damageType = props.uiState.animation.damageType;
     if (damageType > DamageType.Physical && damageType < DamageType.Piercing) {
-      return `var(--c-${DAMAGE_COLOR[damageType]})`;
+      return DAMAGE_COLOR[damageType];
     }
   });
 
@@ -485,7 +485,7 @@ export function CharacterArea(props: CharacterAreaProps) {
       </Show>
       {/* Card Area */}
       <div
-        class="grid-area-[2/1] relative preserve-3d grid rounded-md clickable-outline transition-shadow"
+        class="grid-area-[2/1] relative preserve-3d grid rounded-md transition-shadow clickable-outline"
         bool:data-clickable={
           props.clickStep && props.clickStep.ui >= ActionStepEntityUi.Outlined
         }
@@ -558,12 +558,8 @@ export function CharacterArea(props: CharacterAreaProps) {
         </Show>
         <Show when={damageSourceColor()}>
           <div
-            class="grid-area-[1/1] rounded-1 attack-effect"
-            style={{ "--glow-color": damageSourceColor() }}
-          />
-          <div
-            class="grid-area-[1/1] rounded-1 attack-effect rotate-y-180"
-            style={{ "--glow-color": damageSourceColor() }}
+            class="grid-area-[1/1] rounded-md rotate-y-180 translate-z--0.2px attacking-effect"
+            style={{ "--shadow-color": `var(--c-${damageSourceColor()})` }}
           />
         </Show>
         <Show when={data().tags & CHARACTER_TAG_NIGHTSOULS_BLESSING}>
