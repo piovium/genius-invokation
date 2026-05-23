@@ -680,6 +680,15 @@ export function updateHistory(
               children: [],
               indent: history.currentIndent,
             };
+            if (m.reason === PbMoveEntityReason.EQUIP) {
+              children.push({
+                type: "createEntity",
+                who: m.fromWho as 0 | 1,
+                masterDefinitionId: history.recorder.getMasterDefinitionId(m.entity!.id),
+                entityDefinitionId: m.entity!.definitionId,
+                entityType: "equipment",
+              })
+            }
           } else if (
             m.reason === PbMoveEntityReason.UNEQUIP ||
             m.reason === PbMoveEntityReason.UNSUPPORT
