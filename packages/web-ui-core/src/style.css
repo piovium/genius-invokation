@@ -254,6 +254,10 @@
       inset 0 8px 24px 12px var(--shadow-color);
   }
 
+  .skill-triggered {
+    animation: 500ms linear forwards skill-triggered-animation;
+  }
+
   /* Status */
   .status-effect[data-usable] {
     box-shadow: inset 0 0 4px 2px #fcfed5;
@@ -765,93 +769,6 @@
   [data-display-none] {
     display: none;
   }
-
-  .triggered-animation-1 {
-    background: radial-gradient(
-      circle at center,
-      #fad59500 55%,
-      #fad59580 57%,
-      #ffff9eaa 59%,
-      #fcfed5ff 60%,
-      #ffff9eaa 61%,
-      #fad59580 63%,
-      #fad59500 65%
-    );
-    mask-image: conic-gradient(
-      black 0deg 40deg,
-      transparent 80deg 280deg,
-      black 320deg 360deg
-    );
-    transform-origin: 50% 10%;
-    rotate: 12deg;
-  }
-
-  .triggered-animation-2 {
-    background: radial-gradient(
-      circle at center,
-      #fad59500 55%,
-      #fad59580 57%,
-      #ffff9eaa 59%,
-      #fcfed5ff 60%,
-      #ffff9eaa 61%,
-      #fad59580 63%,
-      #fad59500 65%
-    );
-    mask-image: conic-gradient(
-      transparent 0deg 40deg,
-      black 80deg 160deg,
-      transparent 200deg 360deg
-    );
-    transform-origin: 84.6% 70%;
-    rotate: 12deg;
-  }
-
-  .triggered-animation-3 {
-    background: radial-gradient(
-      circle at center,
-      #fad59500 55%,
-      #fad59580 57%,
-      #ffff9eaa 59%,
-      #fcfed5ff 60%,
-      #ffff9eaa 61%,
-      #fad59580 63%,
-      #fad59500 65%
-    );
-    mask-image: conic-gradient(
-      transparent 0deg 160deg,
-      black 200deg 280deg,
-      transparent 320deg 360deg
-    );
-    transform-origin: 15.4% 70%;
-    rotate: 12deg;
-  }
-
-  .triggered-animation-4 {
-    animation: skill-triggered-4 0.5s linear both;
-  }
-
-  .triggered-animation-5 {
-    background: radial-gradient(
-      circle at center,
-      #fad59566 0%,
-      #ffff9e80 45%,
-      #ffff9eaa 60%,
-      #fad59500 70%
-    );
-    animation: skill-triggered-5 0.5s linear both;
-  }
-
-  .triggered-animation-6 {
-    background: radial-gradient(
-      circle at center,
-      #fad59500 35%,
-      #ffff9e66 55%,
-      #ffff9eaa 60%,
-      #ffff9e80 62%,
-      #fad59500 70%
-    );
-    animation: skill-triggered-6 0.5s linear both;
-  }
 }
 
 /* keyframes start */
@@ -960,6 +877,37 @@
   }
 }
 
+@keyframes skill-triggered-animation {
+  0% {
+    opacity: 0;
+    transform: scale(200%);
+    box-shadow:
+      0 0 24px 0 #fdd569,
+      inset 0 0 24px 0 #fdd569;
+  }
+  30% {
+    opacity: 1;
+    transform: scale(100%);
+    box-shadow:
+      0 0 8px 8px #fcfed5,
+      inset 0 0 32px 32px #fcfed5;
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0%);
+    box-shadow:
+      0 0 8px 4px #fcfed5,
+      inset 0 0 8px 4px #fcfed5;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(300%);
+    box-shadow:
+      0 0 8px 0 #fdd569,
+      inset 0 0 8px 0 #fdd569;
+  }
+}
+
 /* keyframes end */
 
 @keyframes disposing {
@@ -990,85 +938,5 @@
 
   50% {
     scale: var(--down-scale, 100%);
-  }
-}
-
-@keyframes skill-triggered-4 {
-  0% {
-    opacity: 0;
-    transform: rotate(0deg) scale(200%);
-  }
-
-  25% {
-    opacity: 1;
-    transform: rotate(180deg) scale(150%);
-  }
-
-  50% {
-    opacity: 0;
-    transform: rotate(360deg) scale(100%);
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes skill-triggered-5 {
-  0% {
-    opacity: 0;
-    scale: 120%;
-  }
-
-  30% {
-    opacity: 0;
-    scale: 120%;
-  }
-
-  50% {
-    opacity: 1;
-    scale: 125%;
-  }
-
-  75% {
-    opacity: 1;
-    scale: 150%;
-  }
-
-  90% {
-    opacity: 1;
-    scale: 135%;
-  }
-
-  100% {
-    opacity: 0;
-    scale: 125%;
-  }
-}
-
-@keyframes skill-triggered-6 {
-  0% {
-    opacity: 0;
-    scale: 100%;
-  }
-
-  50% {
-    opacity: 0;
-    scale: 125%;
-  }
-
-  75% {
-    opacity: 0.8;
-    scale: 150%;
-  }
-
-  90% {
-    opacity: 0.8;
-    scale: 240%;
-  }
-
-  100% {
-    opacity: 0;
-    scale: 300%;
   }
 }

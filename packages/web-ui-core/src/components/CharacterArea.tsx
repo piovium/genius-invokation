@@ -601,15 +601,7 @@ export function CharacterArea(props: CharacterAreaProps) {
         <Damage info={getDamage()} shown={showDamage()} />
         <CharacterTagMasks tags={data().tags} />
         <Show when={triggered()}>
-          <div class="absolute h-21 w-21 top-7.5">
-            <div class="absolute h-full w-full triggered-animation-6" />
-            <div class="absolute h-full w-full triggered-animation-4">
-              <div class="absolute h-full w-full triggered-animation-1" />
-              <div class="absolute h-full w-full triggered-animation-2" />
-              <div class="absolute h-full w-full triggered-animation-3" />
-            </div>
-            <div class="absolute h-full w-full triggered-animation-5" />
-          </div>
+          <div class="grid-area-[1/1] place-self-center h-21 w-21 rounded-full skill-triggered"/>
         </Show>
       </div>
       <Show when={props.active}>
