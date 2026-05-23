@@ -38,23 +38,23 @@ export const CatGrassCardamom = combatStatus(117073)
  * @id 117072
  * @name 安全运输护盾
  * @description
- * 为我方出战角色提供2点护盾。
+ * 为我方出战角色提供1点护盾。（可叠加，没有上限）
  */
 export const ShieldOfSafeTransport = combatStatus(117072)
-  .shield(2)
+  .shield(1, Infinity)
   .done();
 
 /**
  * @id 117071
  * @name 猫箱急件
  * @description
- * 绮良良为出战角色时，我方切换角色后：造成1点草元素伤害，抓1张牌。
+ * 绮良良为出战角色时，我方切换角色后：造成2点草元素伤害，抓1张牌。
  * 可用次数：1（可叠加，最多叠加到2次）
  */
 export const UrgentNekoParcel = combatStatus(117071)
   .on("switchActive", (c, e) => e.switchInfo.from?.definition.id === Kirara)
   .usageCanAppend(1, 2)
-  .damage(DamageType.Dendro, 1)
+  .damage(DamageType.Dendro, 2)
   .drawCards(1)
   .done();
 
@@ -75,13 +75,15 @@ export const Boxcutter = skill(17071)
  * @id 17072
  * @name 呜喵町飞足
  * @description
- * 生成猫箱急件和安全运输护盾。
+ * 生成猫箱急件和2层安全运输护盾。
  */
 export const MeowteorKick: SkillHandle = skill(17072)
   .type("elemental")
   .costDendro(3)
   .combatStatus(UrgentNekoParcel)
-  .combatStatus(ShieldOfSafeTransport)
+  .combatStatus(ShieldOfSafeTransport, "my", {
+    overrideVariables: { shield: 2 }
+  })
   .done();
 
 /**

@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DiceType, StatusHandle, card, combatStatus, status } from "@gi-tcg/core/builder";
-import { Satiated } from "../../commons";
+import { BattlePlan, Satiated, SharpenTheBlade } from "../../commons";
 
 /**
  * @id 333001
@@ -560,4 +560,35 @@ export const [ChenyuBrew] = card(333029)
   .on("endPhase")
   .heal(1, "@master")
   .consumeUsage()
+  .done();
+
+/**
+ * @id 333030
+ * @name 转盘特调
+ * @description
+ * 目标角色获得4次随机增益效果，其中效果如下：
+ * 治疗目标角色2点。
+ * 目标角色获得1点额外最大生命值。
+ * 目标角色下次使用技能少花费1个元素骰。
+ * 目标角色下次造成的伤害+1。
+ * （每回合每个角色最多食用1次「料理」）
+ */
+export const RouletteSpecial = card(333030)
+  .since("v6.6.0")
+  .costSame(4)
+  .food()
+  .do((c, e) => {
+    c.abortPreview();
+    const target = e.targets[0];
+    const effects = [
+      () => c.heal(2, target),
+      () => c.increaseMaxHealth(1, target),
+      () => c.characterStatus(BattlePlan, target),
+      () => c.characterStatus(SharpenTheBlade, target),
+    ];
+    for (let i = 0; i < 4; i++) {
+      const effect = c.random(effects);
+      effect();
+    }
+  })
   .done();

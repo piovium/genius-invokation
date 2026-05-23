@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, card, DamageType, DiceType, Reaction, status } from "@gi-tcg/core/builder";
+import { $, Aura, card, DamageType, DiceType, Reaction, status } from "@gi-tcg/core/builder";
 import { NoTuningAllowed, Shield } from "../../commons";
 
 /**
@@ -21,7 +21,7 @@ import { NoTuningAllowed, Shield } from "../../commons";
  * @name 超导祝佑·极寒
  * @description
  * 投掷阶段：总是投出2个冰元素骰和2个雷元素骰。
- * 我方造成物理伤害或冰元素伤害后：赋予敌方随机1张手牌不可调和和费用增加。（每回合2次）
+ * 敌方受到物理伤害或冰元素伤害后：赋予敌方随机1张手牌不可调和和费用增加。（每回合2次）
  */
 export const SuperconductBlessingDeepFreeze = card(303041)
   .costCryo(1)
@@ -30,9 +30,10 @@ export const SuperconductBlessingDeepFreeze = card(303041)
   .on("roll")
   .fixDice(DiceType.Cryo, 2)
   .fixDice(DiceType.Electro, 2)
-  .on("dealDamage", (c, e) => 
+  .on("damaged", (c, e) => 
+    !e.target.isMine() &&
     ([DamageType.Physical, DamageType.Cryo] as DamageType[]).includes(e.type))
-  .listenToPlayer()
+  .listenToAll()
   .usagePerRound(2)
   .do((c) => {
     const target = c.random(c.oppPlayer.hands);
@@ -220,7 +221,7 @@ export const BloomBlessingOvergrow = card(303062)
  * @description
  * 元素幻变：水元素草元素
  * 投掷阶段：总是投出2个水元素骰和2个草元素骰。
- * 我方触发绽放反应后：弃置此牌并从绽放祝佑·甘露和绽放祝佑·蔓生中挑选一项加入手牌。
+ * 我方触发绽放或月绽放反应后：弃置此牌并从绽放祝佑·甘露和绽放祝佑·蔓生中挑选一项加入手牌。
  */
 export const ElementalTransfigurationBloomBlessing = card(331006)
   .since("v6.5.0")
@@ -229,7 +230,7 @@ export const ElementalTransfigurationBloomBlessing = card(331006)
   .on("roll")
   .fixDice(DiceType.Hydro, 2)
   .fixDice(DiceType.Dendro, 2)
-  .on("dealReaction", (c, e) => e.type === Reaction.Bloom)
+  .on("dealReaction", (c, e) => e.type === Reaction.Bloom || e.type === Reaction.LunarBloom)
   .selectAndCreateHandCard([
     BloomBlessingAmrita,
     BloomBlessingOvergrow,
@@ -290,7 +291,7 @@ export const LavaBlessingRemelting = card(303072)
  * @description
  * 元素幻变：火元素岩元素
  * 投掷阶段：总是投出2个火元素骰和2个岩元素骰。
- * 我方触发火结晶反应后：弃置此牌并从火岩祝佑·回火和火岩祝佑·重熔中挑选一项加入手牌。
+ * 我方触发结晶（火）反应后：弃置此牌并从火岩祝佑·回火和火岩祝佑·重熔中挑选一项加入手牌。
  */
 export const ElementalTransfigurationLavaBlessing = card(331007)
   .since("v6.5.0")
@@ -303,6 +304,140 @@ export const ElementalTransfigurationLavaBlessing = card(331007)
   .selectAndCreateHandCard([
     LavaBlessingTurnfire,
     LavaBlessingRemelting,
+  ])
+  .dispose()
+  .done();
+
+/**
+ * @id 303081
+ * @name 冰草祝佑·棘霜
+ * @description
+ * 投掷阶段：总是投出2个冰元素骰和2个草元素骰。
+ * 结束阶段：对敌方附着有冰元素的角色造成2点穿透伤害，然后移除其冰元素附着。
+ */
+export const RimegrassBlessingThornFrost = card(303081)
+  .undiscoverable()
+  .support()
+  .on("roll")
+  .fixDice(DiceType.Cryo, 2)
+  .fixDice(DiceType.Dendro, 2)
+  .on("endPhase")
+  .do((c) => {
+    const targets = c.oppPlayer.characters.filter((ch) => 
+      ([Aura.Cryo, Aura.CryoDendro] as Aura[]).includes(ch.aura)
+    );
+    for (const target of targets) {
+      c.damage(DamageType.Piercing, 2, target);
+      c.cleanAura(Aura.Cryo, target);
+    }
+  })
+  .done();
+
+/**
+ * @id 303082
+ * @name 冰草祝佑·寒蔓
+ * @description
+ * 投掷阶段：总是投出2个冰元素骰和2个草元素骰。
+ * 我方使用技能后，如果敌方出战角色附着草元素：抓1张牌，治疗我方受伤最多的角色1点，然后移除敌方出战角色草元素附着。（每回合2次）
+ */
+export const RimegrassBlessingColdVine = card(303082)
+  .costDendro(1)
+  .undiscoverable()
+  .support()
+  .on("roll")
+  .fixDice(DiceType.Cryo, 2)
+  .fixDice(DiceType.Dendro, 2)
+  .on("useSkill", (c) => ([Aura.Dendro, Aura.CryoDendro] as (Aura | undefined)[]).includes(c.query($.opp.active)?.aura))
+  .usagePerRound(2)
+  .drawCards(1)
+  .heal(1, $.macros.myMostInjured)
+  .cleanAura(Aura.Dendro, $.opp.active)
+  .done();
+
+/**
+ * @id 331008
+ * @name 元素幻变：冰草祝佑
+ * @description
+ * 元素幻变：冰元素草元素
+ * 投掷阶段：总是投出2个冰元素骰和2个草元素骰。
+ * 我方选择行动前，如果存在敌方角色同时附着冰元素与草元素：弃置此牌并从冰草祝佑·棘霜和冰草祝佑·寒蔓中挑选一项加入手牌。
+ */
+export const ElementalTransfigurationRimegrassBlessing = card(331008)
+  .since("v6.6.0")
+  .costSame(2)
+  .elementalBlessing(DiceType.Cryo, DiceType.Dendro)
+  .on("roll")
+  .fixDice(DiceType.Cryo, 2)
+  .fixDice(DiceType.Dendro, 2)
+  .on("beforeAction", (c) => c.query($.opp.character.var("aura", Aura.CryoDendro)))
+  .selectAndCreateHandCard([
+    RimegrassBlessingThornFrost,
+    RimegrassBlessingColdVine,
+  ])
+  .dispose()
+  .done();
+
+/**
+ * @id 303091
+ * @name 雷风祝佑·疾霆
+ * @description
+ * 投掷阶段：总是投出2个雷元素骰和2个风元素骰。
+ * 结束阶段：敌方每有一个角色附着雷元素，我方一名角色获得1点充能（出战角色优先）。
+ */
+export const StormgaleBlessingSwiftBolt = card(303091)
+  .costElectro(1)
+  .undiscoverable()
+  .support()
+  .on("roll")
+  .fixDice(DiceType.Electro, 2)
+  .fixDice(DiceType.Anemo, 2)
+  .on("endPhase")
+  .do((c) => {;
+    const count = c.queryAll($.opp.character.var("aura", Aura.Electro)).length;
+    for (let i = 0; i < count; i++) {
+      c.query($.macros.myEnergyNotFull)?.gainEnergy(1);
+    }
+  })
+  .done();
+
+/**
+ * @id 303092
+ * @name 雷风祝佑·罡风
+ * @description
+ * 投掷阶段：总是投出2个雷元素骰和2个风元素骰。
+ * 我方触发扩散反应后：对敌方出战角色造成2点风元素伤害。（每回合1次）
+ */
+export const StormgaleBlessingWindForce = card(303092)
+  .costAnemo(2)
+  .undiscoverable()
+  .support()
+  .on("roll")
+  .fixDice(DiceType.Electro, 2)
+  .fixDice(DiceType.Anemo, 2)
+  .on("dealReaction", (c, e) => e.relatedTo(DamageType.Anemo))
+  .usagePerRound(1)
+  .damage(DamageType.Anemo, 2, $.macros.oppActivePrioritized)
+  .done();
+
+/**
+ * @id 331009
+ * @name 元素幻变：雷风祝佑
+ * @description
+ * 元素幻变：雷元素风元素
+ * 投掷阶段：总是投出2个雷元素骰和2个风元素骰。
+ * 我方触发扩散（雷）反应后：弃置此牌并从雷风祝佑·疾霆和雷风祝佑·罡风中挑选一项加入手牌。
+ */
+export const ElementalTransfigurationStormgaleBlessing = card(331009)
+  .since("v6.6.0")
+  .costSame(2)
+  .elementalBlessing(DiceType.Electro, DiceType.Anemo)
+  .on("roll")
+  .fixDice(DiceType.Electro, 2)
+  .fixDice(DiceType.Anemo, 2)
+  .on("dealReaction", (c, e) => e.type === Reaction.SwirlElectro)
+  .selectAndCreateHandCard([
+    StormgaleBlessingSwiftBolt,
+    StormgaleBlessingWindForce,
   ])
   .dispose()
   .done();

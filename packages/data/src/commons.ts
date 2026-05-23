@@ -160,6 +160,19 @@ export const BattlePlan = status(172)
   .done();
 
 /**
+ * @id 209
+ * @name 打磨利刃
+ * @description
+ * 所附属角色下次造成的伤害+1。
+ * 可用次数：1（可叠加，没有上限）
+ */
+export const SharpenTheBlade = status(209)
+  .on("increaseSkillDamage")
+  .usageCanAppend(1, Infinity)
+  .increaseDamage(1)
+  .done();
+
+/**
  * @id 201
  * @name 费用增加
  * @description

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, card, combatStatus, extension, flip, status } from "@gi-tcg/core/builder";
+import { $, DiceType, card, combatStatus, extension, flip, status } from "@gi-tcg/core/builder";
 import { DisperseTheCalamity, SanctifyTheDefiled } from "./other";
 import { IneffectiveWhenPlayed } from "../../commons";
 
@@ -356,6 +356,7 @@ export const PilgrimageOfTheReturnOfTheSacredFlame = card(330010)
  * @description
  * 抓1张牌。
  * 我方场上每存在一个被击倒的角色：我方剩余全体角色+2最大生命上限。
+ * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  */
 export const FightForDeath = card(330011)
   .since("v5.7.0")
@@ -379,9 +380,45 @@ export const FightForDeath = card(330011)
  * 将敌方1张当前元素骰费用最高的手牌置于牌组底。
  * 或
  * 将我方所有手牌置于牌组底，然后抓相同数量+1张手牌。
+ * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  */
 export const LostLegaciesInTheSand = card(330012)
   .since("v6.2.0")
   .legend()
   .selectAndPlay([DisperseTheCalamity, SanctifyTheDefiled])
+  .done();
+
+/**
+ * @id 300010
+ * @name 另一侧的霜月（生效中）
+ * @description
+ * 行动阶段开始时：赋予我方随机1张手牌费用降低。
+ */
+export const TheOtherSideOfTheFrostmoonInEffect = combatStatus(300010)
+  .on("actionPhase")
+  .do((c) => {
+    const target = c.random(c.queryAll($.macros.myHandsNotFree));
+    if (target) {
+      c.attachCostReduction(target);
+    }
+  })
+  .done();
+
+/**
+ * @id 330013
+ * @name 另一侧的霜月
+ * @description
+ * 打出及每个行动阶段开始时：赋予我方随机1张手牌费用降低。
+ * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
+ */
+export const TheOtherSideOfTheFrostmoon = card(330013)
+  .since("v6.6.0")
+  .legend()
+  .do((c) => {
+    const target = c.random(c.queryAll($.macros.myHandsNotFree));
+    if (target) {
+      c.attachCostReduction(target);
+    }
+    c.combatStatus(TheOtherSideOfTheFrostmoonInEffect);
+  })
   .done();

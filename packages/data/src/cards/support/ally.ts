@@ -13,8 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, CardHandle, CharacterHandle, DamageType, DiceType, Pair, SkillHandle, SupportHandle, card, extension, flip, status, summon, type } from "@gi-tcg/core/builder";
+import { $, CardHandle, CharacterHandle, DamageType, DiceType, Pair, Reaction, SkillHandle, SupportHandle, card, extension, flip, status, summon, type } from "@gi-tcg/core/builder";
 import { CalledInForCleanup, CanotilasSupport, CosanzeanasSupport, LaumesSupport, LutinesSupport, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SerenesSupport, SIMULANKA_SUMMONS, SluasisSupport, TaroumarusSavings, ThironasSupport, TopyassSupport, ToyGuard, VirdasSupport } from "../event/other";
+import { BattlePlan } from "../../commons";
 
 /**
  * @id 322001
@@ -1100,4 +1101,19 @@ export const LepinePauline = card(322033)
     LepinepaulinesInvestmentInGraphAdversarialTechnology,
     LepinepaulinesInvestmentInEnergyMechanism,
   ])
+  .done();
+
+/**
+ * @id 322034
+ * @name 涅朵奇卡
+ * @description
+ * 我方触发月感电或月绽放反应时：我方出战角色附属战斗计划。（每回合1次）
+ */
+export const Netochka = card(322034)
+  .since("v6.6.0")
+  .costSame(1)
+  .support("ally")
+  .on("dealReaction", (c, e) => ([Reaction.LunarElectroCharged, Reaction.LunarBloom] as Reaction[]).includes(e.type))
+  .usagePerRound(1)
+  .characterStatus(BattlePlan, $.my.active)
   .done();

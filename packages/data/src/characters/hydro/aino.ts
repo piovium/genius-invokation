@@ -113,7 +113,7 @@ export const Aino = character(1216)
  * @description
  * 战斗行动：我方出战角色为爱诺时，装备此牌。
  * 爱诺装备此牌后，立刻使用一次精密水冷仪。
- * 装备有此卡牌的爱诺在场时，我方触发感电、月感电及绽放反应时：该次伤害+2，并且赋予我方当前元素骰费用最高的1张手牌赋能。（每回合1次）
+ * 装备有此卡牌的爱诺在场时，我方触发感电、月感电、绽放及月绽放反应时：该次伤害+2，并且赋予我方当前元素骰费用最高的1张手牌赋能。（每回合1次）
  * （牌组中包含爱诺，才能加入牌组）
  */
 export const TheBurdenOfCreativeGenius = card(212161)
@@ -127,7 +127,8 @@ export const TheBurdenOfCreativeGenius = card(212161)
     ([
       Reaction.ElectroCharged,
       Reaction.LunarElectroCharged,
-      Reaction.Bloom
+      Reaction.Bloom,
+      Reaction.LunarBloom
     ] as (Reaction | null)[]).includes(e.getReaction()))
   .listenToPlayer()
   .usagePerRound(1)

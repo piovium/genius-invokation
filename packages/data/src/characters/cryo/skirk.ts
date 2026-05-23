@@ -63,14 +63,13 @@ export const DeathsCrossing = status(111164)
  * @id 111161
  * @name 诸武相授
  * @description
- * 我方丝柯克附属七相一闪，并且下次造成的伤害+1。
+ * 我方丝柯克附属七相一闪。
  * 回合开始或我方执行切换后：舍弃此牌，获得1点蛇之狡谋。
  */
 export const MutualWeaponsMentorship = card(111161)
   .undiscoverable() 
   .addTarget(`my character with definition id 1116`)
   .characterStatus(SevenphaseFlash, "@targets.0")
-  .characterStatus(DeathsCrossing, "@targets.0")
   .onArbitraryEvent("actionPhase", {
     operation: (c) => {
       c.disposeCard(c.self);

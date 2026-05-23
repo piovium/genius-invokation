@@ -132,7 +132,7 @@ export const StarsGatherAtDusk = skill(15103)
 export const Xianyun = character(1510)
   .since("v5.0.0")
   .tags("anemo", "catalyst", "liyue")
-  .health(10)
+  .health(11)
   .energy(2)
   .skills(WordOfWindAndFlower, WhiteCloudsAtDawn, StarsGatherAtDusk)
   .done();

@@ -24,7 +24,7 @@ test("qucusaurus delayed one fast action to next switch", async () => {
   const switch1Target = ref();
   const mona = ref();
   const c = setup(
-    <State>
+    <State dataVersion="v6.5.0">
       <Character opp active health={10}>
         <Status def={Target} />
       </Character>

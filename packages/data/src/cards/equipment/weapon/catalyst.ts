@@ -119,7 +119,7 @@ export const FruitOfFulfillment = card(311105)
  */
 export const LostPrayerToTheSacredWinds = card(311106)
   .since("v4.3.0")
-  .costSame(3)
+  .costSame(2)
   .weapon("catalyst")
   .variable("extraDamage", 0)
   .on("increaseSkillDamage")

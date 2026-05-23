@@ -15,6 +15,7 @@
 
 import type { EntityDefinition } from "@gi-tcg/core";
 import { card, combatStatus, DamageType, extension, status, StatusHandle, $ } from "@gi-tcg/core/builder";
+import { AgileSwitch, EfficientSwitch } from "../../commons";
 
 /**
  * @id 313001
@@ -177,13 +178,13 @@ export const Target: StatusHandle = status(301302)
  * @name 绒翼龙
  * @description
  * 入场时：敌方出战角色附属目标。
- * 附属角色切换为出战角色，且敌方出战角色附属目标时：如可能，舍弃1张当前元素骰费用最高的手牌，将此次切换视为「快速行动」而非「战斗行动」，少花费1个元素骰，并移除对方所有角色的目标。
+ * 敌方附属有目标的角色切换为出战角色时：我方获得1层高效切换和敏捷切换，并移除对方所有角色的目标。
  * 特技：迅疾滑翔
  * 可用次数：2
  * （角色最多装备1个「特技」）
  * [3130061: ] ()
  * [3130062: ] ()
- * [3130063: 迅疾滑翔] (1*Same) 切换到下一名角色，敌方出战角色附属目标。
+ * [3130063: 迅疾滑翔] (1*Same) 舍弃1张当前元素骰费用最高的手牌，切换到下一名角色，敌方出战角色附属目标。
  */
 export const Qucusaurus = card(313006)
   .since("v5.3.0")
@@ -192,30 +193,20 @@ export const Qucusaurus = card(313006)
   .variable("deductDiceTriggered", 0, { visible: false })
   .on("enter")
   .characterStatus(Target, $.opp.active)
-  .on("deductOmniDiceSwitch", (c, e) =>          // 绒翼龙只在可以减费时生效
-    c.query($.opp.active.has($.def(Target))) &&  // 敌方出战角色附属目标
-    e.action.to.id === c.self.master.id &&       // 附属角色切换为出战角色
-    c.player.hands.length > 0)                   // 有手牌（“如可能，舍弃”）
-  .do((c, e) => {
-    c.setVariable("deductDiceTriggered", 1);
-    // 预计算时不触发弃牌
-    if (c.skillInfo.environment !== "precalculate") {
-      c.disposeMaxCostHands(1);
-    }
-    for (const st of c.queryAll($.opp.typeStatus.def(Target))) {
-      st.dispose();
-    }
-    e.deductOmniCost(1);
-  })
-  .on("beforeFastSwitch", (c) => c.getVariable("deductDiceTriggered"))  // 将此次切换视为「快速行动」
-  .setVariable("deductDiceTriggered", 0)
-  .setFastAction()
+  .on("switchActive", (c, e) =>
+    !e.switchInfo.to.isMine() &&
+    e.switchInfo.to.hasStatus(Target))
+  .listenToAll()
+  .combatStatus(EfficientSwitch)
+  .combatStatus(AgileSwitch)
+  .dispose($.opp.typeStatus.def(Target))
   .endOn()
   .provideSkill(3130063)
   .usage(2)
   .costSame(1)
-  .switchActive("my next")
-  .characterStatus(Target, "opp active")
+  .disposeMaxCostHands(1)
+  .switchActive($.my.next)
+  .characterStatus(Target, $.opp.active)
   .done();
 
 /**

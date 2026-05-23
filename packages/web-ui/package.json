@@ -10,7 +10,6 @@
   },
   "exports": {
     "types": "./dist/index.d.ts",
-    "development": ["./src/index.tsx", "./dist/index.js"],
     "import": "./dist/index.js"
   },
   "files": [

@@ -26,7 +26,7 @@ export const CrowfeatherCover = status(114063)
   .on("increaseSkillDamage", (c, e) => e.viaSkillType("elemental") || e.viaSkillType("burst"))
   .usage(2)
   .increaseDamage(1)
-  .if((c) => c.self.master.element() === DiceType.Electro && c.query($.my.typeEquipment.def(SinOfPride)))
+  .if((c) => c.query($.my.typeEquipment.def(SinOfPride)))
   .increaseDamage(1)
   .done();
 
@@ -86,13 +86,13 @@ export const TenguStormcall: SkillHandle = skill(14062)
  * @id 14063
  * @name 煌煌千道镇式
  * @description
- * 造成1点雷元素伤害，召唤天狗咒雷·雷砾。
+ * 造成2点雷元素伤害，召唤天狗咒雷·雷砾。
  */
 export const SubjugationKoukouSendou: SkillHandle = skill(14063)
   .type("burst")
   .costElectro(4)
   .costEnergy(2)
-  .damage(DamageType.Electro, 1)
+  .damage(DamageType.Electro, 2)
   .summon(TenguJuuraiStormcluster)
   .done();
 
@@ -116,7 +116,7 @@ export const KujouSara = character(1406)
  * @description
  * 战斗行动：我方出战角色为九条裟罗时，装备此牌。
  * 九条裟罗装备此牌后，立刻使用一次鸦羽天狗霆雷召咒。
- * 装备有此牌的九条裟罗在场时，我方附属有鸣煌护持的雷元素角色，元素战技和元素爆发造成的伤害额外+1。
+ * 装备有此牌的九条裟罗在场时，我方附属有鸣煌护持的角色，元素战技和元素爆发造成的伤害额外+1。
  * （牌组中包含九条裟罗，才能加入牌组）
  */
 export const SinOfPride = card(214061)
