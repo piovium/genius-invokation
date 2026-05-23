@@ -88,7 +88,7 @@ export function RoundAndPhaseNotification(
       <Show when={props.info.showRound}>
         <div
           class={`w-210 h-6 text-center line-height-6 font-bold text-3.5 pointer-events-none
-            select-none action-hint-who round-1notification ${props.class ?? ""}`}
+            select-none action-hint-who round-notification ${props.class ?? ""}`}
           bool:data-opp={props.currentTurn !== props.who}
         >
           <div class="h-18 w-36 rounded-t-full font-bold text-3 line-height-none pt-14 mt--18 mx-auto round-hint-who">
