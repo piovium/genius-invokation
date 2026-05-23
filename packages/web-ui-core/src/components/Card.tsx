@@ -13,13 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  createEffect,
-  createMemo,
-  Match,
-  Show,
-  Switch,
-} from "solid-js";
+import { createEffect, createMemo, Match, Show, Switch } from "solid-js";
 import { Image } from "./Image";
 import { DiceCost } from "./DiceCost";
 import {
@@ -38,7 +32,7 @@ import CardFrameNormal from "../svg/CardFrameNormal.svg?fb";
 import CardbackNormal from "../svg/CardbackNormal.svg?fb";
 import ExchangeCard from "../svg/ExchangeCard.svg?fb";
 import { AttachmentGroup } from "./StatusGroup";
-import { ElectricShocks } from "./ElectricShocks";
+import ConductiveEffect from "../svg/ConductiveEffect.svg?fb";
 
 export interface CardProps extends CardInfo {
   selected: boolean;
@@ -264,7 +258,10 @@ export function Card(props: CardProps) {
         </Match>
         <Match when={props.selected}>
           {/* with animate no render */}
-          <SelectingIcon noRender class="grid-area-[1/1] w-21 h-21 place-self-center z-1" />
+          <SelectingIcon
+            noRender
+            class="grid-area-[1/1] w-21 h-21 place-self-center z-1"
+          />
         </Match>
       </Switch>
       <AttachmentGroup
@@ -282,8 +279,11 @@ export function Card(props: CardProps) {
         <div class="grid-area-[1/1] rotate-y-180 translate-z--0.2px rounded-1.2 abyss-debuff" />
       </Show>
       <Show when={conductiveDebuff()}>
-        <ElectricShocks
-          class={props.kind === "oppHand" ? "translate-z--0.2px" : "inset--20%"}
+        {/* with animate no render */}
+        <ConductiveEffect
+          noRender
+          class={`grid-area-[1/1] m--3 w-27 h-42 max-w-27 max-h-42
+            ${props.kind === "oppHand" ? "rotate-y-180 translate-z--0.2px" : ""}`}
         />
       </Show>
     </div>
