@@ -1899,7 +1899,6 @@ export function Chessboard(props: ChessboardProps) {
               state={dicePanelState()}
               onStateChange={setDicePanelState}
               liveStreamingMode={localProps.liveStreamingMode}
-              active={localProps.doingRpc && localProps.data.state.phase === PbPhaseType.ACTION}
             />
             <SkillButtonGroup
               class="grid-area-[1/1] place-self-end mb-2 mr-6 z-2"
@@ -1920,7 +1919,6 @@ export function Chessboard(props: ChessboardProps) {
                 // 对方骰子面板的显示状态同样受我方状态控制
                 state={dicePanelState()}
                 liveStreamingMode={localProps.liveStreamingMode}
-                active={!localProps.doingRpc && localProps.data.state.phase === PbPhaseType.ACTION}
               />
               <SkillButtonGroup
                 class="grid-area-[1/1] self-start justify-self-end mt-12 mr-6 z-2"

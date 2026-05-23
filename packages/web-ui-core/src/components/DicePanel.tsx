@@ -19,8 +19,6 @@ import { Index, Show } from "solid-js";
 import { Dice, DiceContent } from "./Dice";
 import DiceCountHintBlue from "../svg/DiceCountHintBlue.svg?fb";
 import DiceCountHintYellow from "../svg/DiceCountHintYellow.svg?fb";
-import SkillSelectingYellow from "../svg/SkillSelectingYellow.svg?fb";
-import SkillSelectingBlue from "../svg/SkillSelectingBlue.svg?fb";
 import { Dynamic } from "solid-js/web";
 
 export type DicePanelState = "hidden" | "wrapped" | "visible";
@@ -32,7 +30,6 @@ export interface DiceBarProps {
   state: DicePanelState;
   opp?: boolean;
   liveStreamingMode?: boolean;
-  active: boolean;
 }
 
 export function DiceBar(props: DiceBarProps) {
@@ -48,12 +45,6 @@ export function DiceBar(props: DiceBarProps) {
         component={props.opp ? DiceCountHintBlue : DiceCountHintYellow}
         class="grid-area-[1/1] w-9 h-9 m--1 max-w-9 max-h-9"
       />
-      <Show when={props.active}>
-        <Dynamic
-          component={props.opp ? SkillSelectingBlue : SkillSelectingYellow}
-          class="grid-area-[1/1] w-6 h-3.15 translate-y-90% rotate-180 self-end"
-        />
-      </Show>
       <div class="grid-area-[1/1] text-white font-bold">
         {props.dice.length}
       </div>
@@ -147,7 +138,6 @@ export function DicePanel(props: DicePanelProps) {
         selectedDice={props.selectedDice}
         state={props.state}
         liveStreamingMode={props.liveStreamingMode}
-        active={props.active}
       />
     </>
   );
