@@ -255,14 +255,12 @@ export function Card(props: CardProps) {
       <div class="pointer-events-none rounded-1.2 card-animation" />
       <Switch>
         <Match when={props.toBeSwitched}>
-          <ExchangeCard class="w-18 h-18 place-self-center z-1 exchange-card-entering" />
+          {/* with animate no render */}
+          <ExchangeCard noRender class="w-18 h-18 place-self-center z-1" />
         </Match>
         <Match when={props.selected}>
           {/* with animate no render */}
-          <SelectingIcon
-            noRender
-            class="w-21 h-21 place-self-center z-1"
-          />
+          <SelectingIcon noRender class="w-21 h-21 place-self-center z-1" />
         </Match>
       </Switch>
       <AttachmentGroup

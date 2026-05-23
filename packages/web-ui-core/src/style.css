@@ -95,12 +95,6 @@
     animation: 0.5s ease-in-out blink-25;
   }
 
-  .exchange-card-entering {
-    --rotation-start: 30deg;
-    --rotation-end: 0deg;
-    animation: 150ms ease-out both transform-rotate;
-  }
-
   .abyss-debuff {
     background-color: #581c87aa;
     box-shadow: #581c87 0 0 15px;
@@ -165,6 +159,7 @@
   }
 
   .energy-preview {
+    /* The blink animation is less affected by the fallback replacement of async resources. */
     --blink-opacity: 0.1;
     animation: 3s ease-in-out infinite both blink-50;
   }
