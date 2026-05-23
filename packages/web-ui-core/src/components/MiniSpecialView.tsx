@@ -139,7 +139,7 @@ export interface MiniSpecialViewGroupProps {
 }
 
 export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
-  const [miniViewVisible, setMiniViewVisible] = createSignal(true);
+  const [miniViewVisible, setMiniViewVisible] = createSignal(false);
   const [selectedId, setSelectedId] = createSignal<SelectedCardInfo | null>(
     null,
   );
