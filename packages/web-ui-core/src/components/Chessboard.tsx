@@ -1339,14 +1339,14 @@ export function Chessboard(props: ChessboardProps) {
   };
   const isTechnique = (id: SkillInfo["id"]): boolean =>
     typeof id === "number" && id.toString().length > 5;
-  const myActiveEnergy = createMemo(() => {
-    const player = localProps.data.state.player[localProps.who];
+  const activeEnergy = (who: 0 | 1) => {
+    const player = localProps.data.state.player[who];
     const { energy = 0, maxEnergy = 1 } =
       player.character.find((ch) => ch.id === player.activeCharacterId) ?? {};
     return { energy, maxEnergy };
-  });
-  const energyPercentage = (): number => {
-    const { energy, maxEnergy } = myActiveEnergy();
+  };
+  const energyPercentage = (who: 0 | 1): number => {
+    const { energy, maxEnergy } = activeEnergy(who);
     return Math.min(energy / maxEnergy, 1);
   };
   const mySkills = createMemo<SkillInfo[]>(() => {
@@ -1360,7 +1360,7 @@ export function Chessboard(props: ChessboardProps) {
         realCost: realCosts?.get(sk.definitionId),
         step: findSkillStep(steps, sk.definitionId),
         isTechnique: isTechnique(sk.definitionId),
-        energy: energyPercentage(),
+        energy: energyPercentage(localProps.who),
       }),
     );
   });
@@ -1375,7 +1375,7 @@ export function Chessboard(props: ChessboardProps) {
         realCost: realCosts?.get(sk.definitionId),
         step: findSkillStep(steps, sk.definitionId),
         isTechnique: isTechnique(sk.definitionId),
-        energy: energyPercentage(),
+        energy: energyPercentage(flip(localProps.who)),
       })) ?? []
     );
   });
@@ -1766,7 +1766,7 @@ export function Chessboard(props: ChessboardProps) {
       {...elProps}
     >
       <TransformWrapper
-        class="absolute left-0 grid grid-cols-1 grid-rows-1 place-items-center"
+        class="absolute left-0 grid place-items-center children:grid-area-[1/1]"
         autoHeight={localProps.autoHeight}
         rotation={localProps.rotation}
         hasOppChessboard={!!localProps.opp}
@@ -1776,7 +1776,7 @@ export function Chessboard(props: ChessboardProps) {
         <ChessboardBackground color={localProps.chessboardColor} />
         {/* 3d space */}
         <div
-          class="relative h-full w-full preserve-3d select-none grid-area-[1/1] z-1"
+          class="relative h-full w-full preserve-3d select-none z-1"
           ref={chessboardElement}
           onClick={onChessboardClick}
           style={{
@@ -1865,24 +1865,24 @@ export function Chessboard(props: ChessboardProps) {
           </Show>
         </div>
         {/* 下层 UI 组件 */}
-        <AspectRatioContainer class="grid isolate z-2">
+        <AspectRatioContainer class="grid children:grid-area-[1/1] isolate z-2">
           <ActionHintText
-            class="grid-area-[1/1] place-self-center"
+            class="place-self-center"
             text={localProps.actionState?.hintText}
           />
           <Show when={displayUiComponents()}>
             <DeclareEndMarker
-              class={"grid-area-[1/1] self-center declare-end-marker"}
+              class={"self-center declare-end-marker"}
               {...declareEndMarkerProps()}
             />
             <PlayerInfoBox
               opp
-              class="grid-area-[1/1] self-start"
+              class="self-start"
               {...playerInfoPropsOf(flip(localProps.who))}
               {...localProps.oppPlayerInfo}
             />
             <PlayerInfoBox
-              class="grid-area-[1/1] self-end"
+              class="self-end"
               {...playerInfoPropsOf(localProps.who)}
               {...localProps.myPlayerInfo}
             />
@@ -1901,7 +1901,7 @@ export function Chessboard(props: ChessboardProps) {
               liveStreamingMode={localProps.liveStreamingMode}
             />
             <SkillButtonGroup
-              class="grid-area-[1/1] place-self-end mb-2 mr-6 z-2"
+              class="place-self-end mb-2 mr-6 z-2"
               skills={mySkills()}
               switchActiveButton={switchActiveStep() ?? null}
               switchActiveCost={
@@ -1912,7 +1912,7 @@ export function Chessboard(props: ChessboardProps) {
             />
             <Show when={localProps.opp}>
               <DiceBar
-                class="grid-area-[1/1] self-start justify-self-end mt-34 mr-5 z-1"
+                class="self-start justify-self-end mt-34 mr-5 z-1"
                 opp
                 dice={oppDice()}
                 selectedDice={[]}
@@ -1921,7 +1921,7 @@ export function Chessboard(props: ChessboardProps) {
                 liveStreamingMode={localProps.liveStreamingMode}
               />
               <SkillButtonGroup
-                class="grid-area-[1/1] self-start justify-self-end mt-12 mr-6 z-2"
+                class="self-start justify-self-end mt-12 mr-6 z-2"
                 skills={oppSkills()}
                 switchActiveButton={null}
                 switchActiveCost={null}
@@ -1934,7 +1934,7 @@ export function Chessboard(props: ChessboardProps) {
             <BottomHint {...localProps.actionState!} />
           </Show>
           <ConfirmButton
-            class="grid-area-[1/1] place-self-center mt-95"
+            class="place-self-center mt-95"
             step={showConfirmButton()}
             onClick={(step) => {
               localProps.onStepActionState?.(step, selectedDiceValue());
@@ -1944,7 +1944,7 @@ export function Chessboard(props: ChessboardProps) {
             who={localProps.who}
             roundNumber={localProps.data.state.roundNumber}
             currentTurn={localProps.data.state.currentTurn as 0 | 1}
-            class="grid-area-[1/1] place-self-center"
+            class="place-self-center"
             info={localProps.data.roundAndPhase}
           />
           <Show when={localProps.data.notificationBox} keyed>
@@ -2029,7 +2029,7 @@ export function Chessboard(props: ChessboardProps) {
               showOppView={hasOppSpecialView()}
             />
           </Show>
-          <div class="m-2 pointer-events-none contain-strict touch-pan card-data-viewer">
+          <div class="mx-2 my-13 pointer-events-none contain-strict touch-pan card-data-viewer">
             <CardDataViewer />
           </div>
           {/* 右上角部件 */}
@@ -2064,8 +2064,8 @@ export function Chessboard(props: ChessboardProps) {
         <MessageBox />
         {/* game end */}
         <Show when={localProps.data.state.phase === PbPhaseType.GAME_END}>
-          <div class="absolute inset-0 bg-black/85 flex items-center justify-center flex-col z-50">
-            <div class="font-bold text-4xl text-white my-10 select-none">
+          <div class="w-full h-full bg-black/85 flex items-center justify-center flex-col z-10">
+            <div class="font-bold text-4xl text-white/70 my-10 select-none">
               {localProps.data.state.winner === localProps.who
                 ? t("ui.gameVictory")
                 : t("ui.gameDefeat")}

@@ -63,13 +63,13 @@ const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
   });
   return (
     <Show when={hintComponent()}>
-      <div class="absolute w-7 h-7 top--2.5 right--3 grid z-3">
+      <div class="absolute w-7 h-7 top--2.5 right--3 grid children:grid-area-[1/1] z-3">
         <Dynamic<Component<ComponentProps<"div">>>
           component={hintComponent()}
-          class="grid-area-[1/1] w-full h-full"
+          class="w-full h-full"
         />
         <StrokedTextContent
-          class="grid-area-[1/1] place-self-center text-white font-bold"
+          class="place-self-center text-white font-bold"
           strokeWidth={2}
           strokeColor="#000000aa"
           text={String(props.value)}
@@ -81,16 +81,16 @@ const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
 
 const EntityBottomHint = (props: { imageId: number; value: string }) => {
   return (
-    <div class="absolute h-8 w-8 left-0 bottom-0 grid place-items-center z-3">
+    <div class="absolute h-8 w-8 left-0 bottom-0 grid children:grid-area-[1/1] place-items-center z-3">
       <Image
         imageId={props.imageId}
         zero="physic"
         type="icon"
-        class="grid-area-[1/1] h-7.5 w-7.5"
+        class="h-7.5 w-7.5"
         fallback="state"
       />
       <StrokedTextContent
-        class="grid-area-[1/1] text-white font-bold text-4.5"
+        class="text-white font-bold text-4.5"
         strokeWidth={2}
         strokeColor="#000000aa"
         text={props.value}
@@ -110,7 +110,7 @@ export function Entity(props: EntityProps) {
   return (
     <div
       class={`absolute left-0 top-0 w-16 aspect-ratio-[28/33] data-[hidden]:invisible
-        grid preserve-3d rounded isolate clickable-outline entity`}
+        grid preserve-3d rounded isolate children:grid-area-[1/1] clickable-outline entity`}
       style={cssPropertyOfTransform(props.uiState.transform)}
       bool:data-hidden={props.hidden}
       bool:data-entering={props.animation === "entering"}
@@ -124,13 +124,13 @@ export function Entity(props: EntityProps) {
       }}
     >
       <Image
-        class="grid-area-[1/1] w-full aspect-ratio-[28/33] p-1% rounded-md text-2.5 z-0"
+        class="w-full aspect-ratio-[28/33] p-1% rounded-md text-2.5 z-0"
         imageId={data().definitionId}
         fallback="card"
       />
-      <CardFrameSummon class="grid-area-[1/1] w-full h-full pointer-events-none z-1" />
+      <CardFrameSummon class="w-full h-full pointer-events-none z-1" />
       <div
-        class="grid-area-[1/1] w-full h-full rounded entity-effect z-2"
+        class="w-full h-full rounded entity-effect z-2"
         bool:data-usable={data().hasUsagePerRound || props.previewingNew}
         bool:data-entering={props.animation === "entering"}
         bool:data-triggered={props.triggered}        
@@ -165,11 +165,11 @@ export function Entity(props: EntityProps) {
       </Show>
       <Switch>
         <Match when={props.clickStep?.ui === ActionStepEntityUi.Selected}>
-          <SelectingConfirmIcon class="grid-area-[1/1] place-self-center w-18 h-18 m--1 max-w-18 z-4" />
+          <SelectingConfirmIcon class="place-self-center w-18 h-18 m--1 max-w-18 z-4" />
         </Match>
         <Match when={props.selecting}>
           {/* with animate no render */}
-          <SelectingIcon noRender class="grid-area-[1/1] place-self-center w-21 h-21 m--2.5 max-w-21 z-4" />
+          <SelectingIcon noRender class="place-self-center w-21 h-21 m--2.5 max-w-21 z-4" />
         </Match>
       </Switch>
     </div>

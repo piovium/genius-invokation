@@ -205,7 +205,7 @@ export function Card(props: CardProps) {
     <div
       ref={el}
       class={`absolute top-0 left-0 h-36 w-21 grid rounded-md [&_*]:backface-hidden
-        preserve-3d transform-origin-tl card pointer-events-auto`}
+        preserve-3d transform-origin-tl pointer-events-auto children:grid-area-[1/1] card`}
       style={style()}
       bool:data-opp-hand={props.kind === "oppHand"}
       bool:data-hidden={props.hidden}
@@ -247,26 +247,26 @@ export function Card(props: CardProps) {
       }}
     >
       <Image
-        class="grid-area-[1/1] w-21 h-36 p-1% text-3"
+        class="w-21 h-36 p-1% text-3"
         imageId={data().definitionId}
         fallback="card"
       />
-      <CardFrameNormal class="grid-area-[1/1] w-21 h-36 pointer-events-none" />
-      <div class="grid-area-[1/1] pointer-events-none rounded-1.2 card-animation" />
+      <CardFrameNormal class="w-21 h-36 pointer-events-none" />
+      <div class="pointer-events-none rounded-1.2 card-animation" />
       <Switch>
         <Match when={props.toBeSwitched}>
-          <ExchangeCard class="grid-area-[1/1] w-18 h-18 place-self-center z-1 exchange-card-entering" />
+          <ExchangeCard class="w-18 h-18 place-self-center z-1 exchange-card-entering" />
         </Match>
         <Match when={props.selected}>
           {/* with animate no render */}
           <SelectingIcon
             noRender
-            class="grid-area-[1/1] w-21 h-21 place-self-center z-1"
+            class="w-21 h-21 place-self-center z-1"
           />
         </Match>
       </Switch>
       <AttachmentGroup
-        class="grid-area-[1/1] mt-1 z-1 self-start justify-self-center"
+        class="mt-1 z-1 self-start justify-self-center"
         attachments={attachments()}
       />
       <DiceCost
@@ -275,15 +275,15 @@ export function Card(props: CardProps) {
         diceClass="w-9 h-9 text-4.5 m--1 max-w-9 max-h-9"
         realCost={realCost()}
       />
-      <CardbackNormal class="grid-area-[1/1] rotate-y-180 translate-z--0.1px pointer-events-none" />
+      <CardbackNormal class="rotate-y-180 translate-z--0.1px pointer-events-none" />
       <Show when={abyssDebuff()}>
-        <div class="grid-area-[1/1] rotate-y-180 translate-z--0.2px rounded-1.2 abyss-debuff" />
+        <div class="rotate-y-180 translate-z--0.2px rounded-1.2 abyss-debuff" />
       </Show>
       <Show when={conductiveDebuff()}>
         {/* with animate no render */}
         <ConductiveEffect
           noRender
-          class={`grid-area-[1/1] m--3 w-27 h-42 max-w-27 max-h-42
+          class={`m--3 w-27 h-42 max-w-27 max-h-42
             ${props.kind === "oppHand" ? "rotate-y-180 translate-z--0.2px" : ""}`}
         />
       </Show>

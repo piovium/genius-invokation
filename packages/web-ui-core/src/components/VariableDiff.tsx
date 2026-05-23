@@ -51,14 +51,14 @@ export function VariableDiff(props: VariableDiffProps) {
   );
   return (
     <div
-      class={`h-6 grid isolate ${props.class ?? ""}`}
+      class={`h-6 grid children:grid-area-[1/1] isolate ${props.class ?? ""}`}
       style={{
         "--bg-color": backgroundColor(),
       }}
     >
-      <div class="grid-area-[1/1] bg-[var(--bg-color)] rounded-full b-black/60 b-2 z-0" />
-      <div class="grid-area-[1/1] bg-[var(--bg-color)] rounded-0.5 mx-1 b-black/60 b-2 mix-blend-lighten z-0" />
-      <div class="grid-area-[1/1] flex items-center px-1.5 w-max h-6 z-1">
+      <div class="bg-[var(--bg-color)] rounded-full b-black/60 b-2 z-0" />
+      <div class="bg-[var(--bg-color)] rounded-0.5 mx-1 b-black/60 b-2 mix-blend-lighten z-0" />
+      <div class="flex items-center px-1.5 w-max h-6 z-1">
         <Switch>
           <Match when={props.defeated}>
             <DefeatedPreviewIcon class="h-6.5 w-6.5 mx--0.75 mt--1.25 max-w-6.5" />

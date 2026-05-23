@@ -14,16 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { AspectRatioContainer } from "./AspectRatioContainer";
-import { WithDelicateUi } from "../primitives/delicate_ui";
-
 export interface ChessboardBackgroundProps {
   color?: string;
 }
+
 export function ChessboardBackground(props: ChessboardBackgroundProps) {
   return (
     <div
-      class="grid-area-[1/1] aspect-ratio-[16/9] max-h-full max-w-full z-0 chessboard-bg-container"
+      class="aspect-ratio-[16/9] max-h-full max-w-full z-0 chessboard-bg-container"
       style={{ "background-color": props.color ?? "#537a76" }}
     >
       <img

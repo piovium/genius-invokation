@@ -431,11 +431,11 @@
   }
 
   .skill-button-burst-progress {
-    mask-image: linear-gradient(
-      to top,
-      #ffffffff var(--progress-value),
-      transparent var(--progress-value)
-    );
+    mask-image: linear-gradient(white, white);
+    mask-repeat: no-repeat;
+    mask-size: 100% var(--progress-value, 0%);
+    mask-position: bottom;
+    transition: mask-size ease 300ms;
   }
 
   .skill-button-burst-animation {

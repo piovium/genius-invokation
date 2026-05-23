@@ -101,7 +101,7 @@ export function DicePanel(props: DicePanelProps) {
     <>
       <Show when={!props.liveStreamingMode}>
         <div
-          class={`grid-area-[1/1] justify-self-end w-42 h-full mr--4 pr-6
+          class={`justify-self-end w-42 h-full mr--4 pr-6
             flex flex-row items-center select-none dice-panel`}
           data-state={props.state}
         >
@@ -133,7 +133,7 @@ export function DicePanel(props: DicePanelProps) {
         </div>
       </Show>
       <DiceBar
-        class="grid-area-[1/1] justify-self-end self-start mr-2.5 mt-13 z-1 dice-bar-my"
+        class="justify-self-end self-start mr-2.5 mt-13 z-1 dice-bar-my"
         dice={props.dice}
         selectedDice={props.selectedDice}
         state={props.state}

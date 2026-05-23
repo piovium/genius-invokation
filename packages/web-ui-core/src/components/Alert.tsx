@@ -76,7 +76,7 @@ interface AlertProps {
 function Alert(props: AlertProps) {
   return (
     <div
-      class="hidden data-[shown]:flex absolute inset-0 bg-black/50 items-center justify-center"
+      class="z-7 hidden data-[shown]:flex w-full h-full bg-black/50 items-center justify-center"
       bool:data-shown={props.shown}
       onClick={() => props.onBackdropClick?.()}
     >

@@ -156,14 +156,14 @@ export interface CostProps {
 
 export function Cost(props: CostProps) {
   return (
-    <div class={`grid ${props.class}`}>
+    <div class={`grid children:grid-area-[1/1] ${props.class}`}>
       <Dynamic<Component<ComponentProps<"div">>>
         component={COST_COMPONENT_MAP[props.type]}
-        class="grid-area-[1/1] w-full h-full"
+        class="w-full h-full"
       />
       <Show when={props.type !== DiceType.Legend}>
         <StrokedTextContent
-          class={`grid-area-[1/1] place-self-center
+          class={`place-self-center
           text-center font-bold text-white
           data-[color=increased]:text-red-500
           data-[color=decreased]:text-green-500`}

@@ -176,7 +176,7 @@ export function Reaction(props: ReactionProps) {
   const baseElement = () => data().elements.find((e) => e !== applyElement()) as D;
   return (
     <div
-      class={`grid place-items-center ${props.class ?? ""}`}
+      class={`grid place-items-center children:grid-area-[1/1] ${props.class ?? ""}`}
       style={{
         "--fg-color": data().fgColor,
         "--bg-color": data().bgColor,
@@ -184,16 +184,16 @@ export function Reaction(props: ReactionProps) {
     >
       <Image
         imageId={baseElement()}
-        class="h-5 w-5 grid-area-[1/1] reaction-base"
+        class="h-5 w-5 reaction-base"
         fallback="state"
       />
       <Image
         imageId={applyElement()}
-        class="h-5 w-5 grid-area-[1/1] reaction-apply"
+        class="h-5 w-5 reaction-apply"
         fallback="state"
       />
       <StrokedText
-        class="text-3.5 font-bold text-[var(--fg-color)] grid-area-[1/1] reaction-text"
+        class="text-3.5 font-bold text-[var(--fg-color)] reaction-text"
         text={t(data().nameKey)}
         strokeColor="var(--bg-color)"
         strokeWidth={2.5}

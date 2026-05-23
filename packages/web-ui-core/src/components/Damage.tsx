@@ -38,22 +38,22 @@ export function Damage(props: DamageProps) {
   const damageValue = createMemo(() => props.info?.value);
   return (
     <div
-      class={`grid-area-[1/1] self-center z-5 w-21 h-21 hidden data-[shown]:grid damage preserve-3d`}
+      class={`self-center z-5 w-21 h-21 hidden data-[shown]:grid preserve-3d children:grid-area-[1/1] damage`}
       bool:data-shown={props.shown}
       style={{
         color: `var(--c-${DAMAGE_COLOR[damageType() ?? 0]})`,
       }}    
     >
       <HealIcon
-        class="h-full w-full grid-area-[1/1] data-[hidden]:hidden"
+        class="h-full w-full data-[hidden]:hidden"
         bool:data-hidden={damageType() !== DamageType.Heal}
       />
       <DamageIcon
-        class="h-full w-full grid-area-[1/1] data-[hidden]:hidden"
+        class="h-full w-full data-[hidden]:hidden"
         bool:data-hidden={damageType() === DamageType.Heal}
       />
       <StrokedTextContent
-        class="grid-area-[1/1] font-bold text-center text-9 self-center text-nowrap"
+        class="font-bold text-center text-9 self-center text-nowrap"
         text={`${
           damageType() === DamageType.Heal ? "+" : "-"
         }${damageValue()}`}

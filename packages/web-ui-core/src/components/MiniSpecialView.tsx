@@ -57,7 +57,7 @@ export function MiniView(props: MiniSpecialViewProps) {
   };
   return (
     <div
-      class={`place-self-center ml-155 w-80 h-48 data-[fold]:h-8 contain-strict
+      class={`place-self-center ml-152 w-80 h-48 data-[fold]:h-8 contain-strict
           translate-y-50% data-[opp]:translate-y--50% transition-all-300
           flex flex-col items-center justify-start py-4 data-[fold]:py-2
           select-none bg-black/60 text-white/80`}
@@ -157,7 +157,7 @@ export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
     <>
       <Show when={props.showMyView || props.showOppView}>
         <SpecialViewToggleButton
-          class="place-self-center ml-75 z-1"
+          class="place-self-center ml-72 z-1"
           onClick={() => setMiniViewVisible((v) => !v)}
         />
       </Show>

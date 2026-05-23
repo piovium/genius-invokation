@@ -40,20 +40,20 @@ export function CardCountHint(props: CardCountHintProps) {
   const hintStyle = () => HINT_STYLE_MAP[props.area];
   return (
     <div
-      class="pointer-events-none absolute left-0 top-0 h-9 w-9 hidden data-[shown]:grid isolate"
+      class="pointer-events-none absolute left-0 top-0 h-9 w-9 hidden data-[shown]:grid isolate children:grid-area-[1/1]"
       style={cssPropertyOfTransform(props.transform)}
       bool:data-shown={props.shown}
     >
       <Dynamic<Component<ComponentProps<"div">>>
         component={hintStyle().component}
-        class={`grid-area-[1/1] w-9 h-9`}
+        class="w-9 h-9"
         style={{ transform: `rotate(${hintStyle().rotate}deg)` }}
       />
       <StrokedTextContent
         text={String(props.value)}
         strokeWidth={1}
         strokeColor="#000000B0"
-        class="grid-area-[1/1] z-1 text-white font-bold place-self-center select-none"
+        class="z-1 text-white font-bold place-self-center select-none"
       />
     </div>
   );

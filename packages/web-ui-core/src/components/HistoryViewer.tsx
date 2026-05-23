@@ -1634,7 +1634,7 @@ function HistoryBlockBox(props: {
 }) {
   return (
     <div
-      class={`w-full h-31 flex flex-col rounded-sm shrink-0 bg-[var(--bg-color)] border-[var(--bd-color)] b-2 relative history-block`}
+      class={`w-full h-31 flex flex-col rounded-sm shrink-0 bg-[var(--bg-color)] border-[var(--bd-color)] b-2 relative overflow-clip history-block`}
       bool:data-opp={props.data.opp}
       bool:data-selected={props.isSelected}
       onClick={() => props.onClick()}
@@ -1824,7 +1824,7 @@ export function HistoryPanel(props: HistoryPanelProps) {
   return (
     <WhoContext.Provider value={who}>
       <div
-        class="grid-area-[1/1] w-full h-full bg-black/50 z-4"
+        class="w-full h-full bg-black/50 z-4"
         onClick={() => {
           if (selectedBlock()) {
             setSelectedBlock(null);
@@ -1833,7 +1833,7 @@ export function HistoryPanel(props: HistoryPanelProps) {
           }
         }}
       />
-      <div class="grid-area-[1/1] justify-self-end z-5 w-70 h-full pt-12 pb-5 relative select-none touch-pan history-panel-bg">
+      <div class="justify-self-end z-5 w-70 h-full pt-12 pb-5 relative select-none min-h-0 touch-pan history-panel-bg">
         <div
           class="w-full h-full flex flex-col space-y-1.5 overflow-y-scroll pl-2 history-scrollbar"
           ref={scrollRef}
@@ -1883,7 +1883,7 @@ function HistoryBlockDetailPanel(props: {
   const renderBlock = createMemo(() => renderHistoryBlock(props.block));
   return (
     <div
-      class={`grid-area-[1/1] justify-self-end mr-71 z-5 w-90 select-none
+      class={`justify-self-end mr-71 z-5 w-90 select-none
         p-3 pr-1 bg-#2f333b/98 b-#404a56 b-1 rounded`}
       onClick={(e) => e.stopPropagation()}
     >

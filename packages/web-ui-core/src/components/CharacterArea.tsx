@@ -486,7 +486,7 @@ export function CharacterArea(props: CharacterAreaProps) {
       </Show>
       {/* Card Area */}
       <div
-        class="grid-area-[2/1] relative preserve-3d grid rounded-md transition-shadow clickable-outline"
+        class="grid-area-[2/1] relative preserve-3d grid rounded-md transition-shadow children:grid-area-[1/1] clickable-outline"
         bool:data-clickable={
           props.clickStep && props.clickStep.ui >= ActionStepEntityUi.Outlined
         }
@@ -559,50 +559,50 @@ export function CharacterArea(props: CharacterAreaProps) {
         </Show>
         <Show when={damageSourceColor()}>
           <div
-            class="grid-area-[1/1] rounded-md rotate-y-180 translate-z--0.2px attacking-effect"
+            class="rounded-md rotate-y-180 translate-z--0.2px attacking-effect"
             style={{ "--shadow-color": `var(--c-${damageSourceColor()})` }}
           />
         </Show>
         <Show when={data().tags & CHARACTER_TAG_NIGHTSOULS_BLESSING}>
           <NightsoulsBlessing
-            class="grid-area-[1/1] z--1 m--1.25 mt--8 self-end"
+            class="z--1 m--1.25 mt--8 self-end"
             element={Number(data().definitionId.toString()[1]) as DiceType}
           />
         </Show>
         <Image
           imageId={data().definitionId}
-          class="grid-area-[1/1] h-full w-full p-1% text-3 data-[defeated]:brightness-50"
+          class="h-full w-full p-1% text-3 data-[defeated]:brightness-50"
           fallback="card"
           bool:data-defeated={defeated()}
         />
         <CardFrameNormal
-          class="grid-area-[1/1] pointer-events-none data-[defeated]:brightness-50"
+          class="pointer-events-none data-[defeated]:brightness-50"
           bool:data-defeated={defeated()}
         />
-        <CardbackNormal class="grid-area-[1/1] rotate-y-180 translate-z--0.1px" />
+        <CardbackNormal class="rotate-y-180 translate-z--0.1px" />
         <StatusGroup
-          class="grid-area-[1/1] z-1 self-end h-5 px-0.5 mb-1"
+          class="z-1 self-end h-5 px-0.5 mb-1"
           statuses={statuses()}
         />
         <Show when={defeated()}>
-          <DefeatedIcon class="grid-area-[1/1] w-21 h-21 z-1 place-self-center" />
+          <DefeatedIcon class="w-21 h-21 z-1 place-self-center" />
         </Show>
         <Switch>
           <Match when={props.clickStep?.ui === ActionStepEntityUi.Selected}>
-            <SelectingConfirmIcon class="grid-area-[1/1] w-18 h-18 z-2 place-self-center" />
+            <SelectingConfirmIcon class="w-18 h-18 z-2 place-self-center" />
           </Match>
           <Match when={props.selecting}>
             {/* with animate no render */}
-            <SelectingIcon noRender class="grid-area-[1/1] w-21 h-21 z-2 place-self-center" />
+            <SelectingIcon noRender class="w-21 h-21 z-2 place-self-center" />
           </Match>
           <Match when={props.preview?.active}>
-            <SwitchActiveHistoryIcon class="grid-area-[1/1] w-18 h-18 z-2 place-self-center" />
+            <SwitchActiveHistoryIcon class="w-18 h-18 z-2 place-self-center" />
           </Match>
         </Switch>
         <Damage info={getDamage()} shown={showDamage()} />
         <CharacterTagMasks tags={data().tags} />
         <Show when={triggered()}>
-          <div class="grid-area-[1/1] place-self-center h-21 w-21 rounded-full skill-triggered"/>
+          <div class="place-self-center h-21 w-21 rounded-full skill-triggered"/>
         </Show>
       </div>
       <Show when={props.active}>
@@ -736,15 +736,15 @@ function SkirkEnergyBar(props: EnergyBarProps) {
   const currentRatio = () => (props.current * 14 + 5) / 108;
   const previewRatio = () => ((props.preview ?? props.current) * 14 + 5) / 108;
   return (
-    <div class="grid grid-cols-1 grid-rows-1">
-      <EnergyIconEmptySkirk class="grid-area-[1/1] w-4.2 h-16.2" />
+    <div class="grid children:grid-area-[1/1]">
+      <EnergyIconEmptySkirk class="w-4.2 h-16.2" />
       <EnergyIconActiveSkirk
-        class="grid-area-[1/1] w-4.2 h-16.2 skirk-foreground"
+        class="w-4.2 h-16.2 skirk-foreground"
         style={{ "--ratio": `${currentRatio() * 100}%` }}
       />
       <Show when={props.preview !== null && props.preview > props.current}>
         <EnergyIconActiveSkirk
-          class="grid-area-[1/1] w-4.2 h-16.2 skirk-foreground energy-preview"
+          class="w-4.2 h-16.2 skirk-foreground energy-preview"
           style={{ "--ratio": `${previewRatio() * 100}%` }}
         />
       </Show>
@@ -760,22 +760,22 @@ interface HealthProps {
 
 function Health(props: HealthProps) {
   return (
-    <div class="absolute z-1 left-1.5 top--2 h-10 w-10 -translate-x-50% grid">
+    <div class="absolute z-1 left-1.5 top--2 h-10 w-10 -translate-x-50% grid children:grid-area-[1/1]">
       <Show
         when={props.bondOfLife}
-        fallback={<HealthIcon class="grid-area-[1/1] w-full h-full" />}
+        fallback={<HealthIcon class="w-full h-full" />}
       >
-        <BondOfLifeIcon class="grid-area-[1/1] w-full h-full" />
+        <BondOfLifeIcon class="w-full h-full" />
       </Show>
       <Show when={props.isMax || props.bondOfLife}>
         <div
-          class="grid-area-[1/1] health"
+          class="health"
           style={{ "--bg-color": `${props.isMax ? "#fef9c3dd" : "#ff000060"}` }}
         />
       </Show>
       <StrokedTextContent
         text={String(props.value)}
-        class="grid-area-[1/1] mt-2.25 text-white font-bold text-4.5 text-center"
+        class="mt-2.25 text-white font-bold text-4.5 text-center"
         strokeWidth={2}
         strokeColor="#000000B0"
       />
@@ -799,7 +799,7 @@ function CharacterTagMasks(props: CharacterTagMasksProps) {
     <Index each={Object.keys(TAG_MASK_MAP)}>
       {(flag) => (
         <Show when={props.tags & Number(flag())}>
-          <img class="grid-area-[1/1] m--3 w-27 h-42 max-w-27 max-h-42" src={`https://ui.assets.gi-tcg.guyutongxue.site/${TAG_MASK_MAP[Number(flag())]}.webp`}/>
+          <img class="m--3 w-27 h-42 max-w-27 max-h-42" src={`https://ui.assets.gi-tcg.guyutongxue.site/${TAG_MASK_MAP[Number(flag())]}.webp`}/>
         </Show>
       )}
     </Index>
@@ -814,9 +814,9 @@ interface TechniqueProps {
 function Technique(props: TechniqueProps) {
   const data = createMemo(() => props.data);
   return (
-    <div class="w-7 h-7 mt-0.5 grid">
+    <div class="w-7 h-7 mt-0.5 grid children:grid-area-[1/1]">
       <Image
-        class="grid-area-[1/1] technique-icon"
+        class="technique-icon"
         imageId={data().data.definitionId}
         type={"icon"}
         fallback="technique"
@@ -825,10 +825,10 @@ function Technique(props: TechniqueProps) {
       />
       <Show when={props.replace}>
         {/* with animate no render */}
-        <ReplaceEquipment noRender class="grid-area-[1/1] w-6.5 h-6.5 place-self-center" />
+        <ReplaceEquipment noRender class="w-6.5 h-6.5 place-self-center" />
       </Show>
       <div
-        class="grid-area-[1/1] rounded-full technique-effect"
+        class="rounded-full technique-effect"
         bool:data-usable={data().data.hasUsagePerRound}
         bool:data-entering={data().animation === "entering"}
         bool:data-disposing={data().animation === "disposing"}
@@ -847,19 +847,19 @@ interface EquipmentProps {
 function Equipment(props: EquipmentProps) {
   const data = createMemo(() => props.data);
   return (
-    <div class="w-7 h-7 mb--0.5 grid">
+    <div class="w-7 h-7 mb--0.5 grid children:grid-area-[1/1]">
       <Dynamic<Component<ComponentProps<"div">>>
         component={props.icon}
-        class="grid-area-[1/1] equipment-icon"
+        class="equipment-icon"
         bool:data-entering={data().animation === "entering"}
         bool:data-disposing={data().animation === "disposing"}
       />
       <Show when={props.replace}>
         {/* with animate no render */}
-        <ReplaceEquipment noRender class="grid-area-[1/1] w-6.5 h-6.5 place-self-center" />
+        <ReplaceEquipment noRender class="w-6.5 h-6.5 place-self-center" />
       </Show>
       <div
-        class="grid-area-[1/1] rounded-full equipment-effect"
+        class="rounded-full equipment-effect"
         bool:data-usable={data().data.hasUsagePerRound}
         bool:data-entering={data().animation === "entering"}
         bool:data-disposing={data().animation === "disposing"}

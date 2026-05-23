@@ -53,7 +53,7 @@ function SkillButton(props: SkillButtonProps) {
       style={{ "--element-color": color() }}
     >
       <div
-        class="grid grid-cols-1 grid-rows-1 w-14.5 h-14.5 place-items-center skill-button children:pointer-events-none isolate"
+        class="grid w-14.5 h-14.5 place-items-center children:grid-area-[1/1] children:pointer-events-none isolate skill-button"
         title={props.step ? props.step.tooltipText : t("skill.notYourTurn")}
         bool:data-mini={props.isTechnique}
         bool:data-selected={props.step?.isFocused}
@@ -63,36 +63,36 @@ function SkillButton(props: SkillButtonProps) {
         {/* with react no render */}
         <SkillButtonReactIcon
           noRender
-          class="grid-area-[1/1] w-14.5 h-14.5 skill-button-bg z-1"
+          class="w-14.5 h-14.5 skill-button-bg z-1"
         />
         <Show when={isBurst()}>
           <div
-            class="grid-area-[1/1] hidden data-[shown]:block w-12 h-12 rounded-full skill-button-burst-animation z-0"
+            class="hidden data-[shown]:block w-12 h-12 rounded-full skill-button-burst-animation z-0"
             bool:data-shown={props.energy === 1}
           />
-          <SkillButtonBurstRing class="grid-area-[1/1] w-14.5 h-14.5 z-3" />
+          <SkillButtonBurstRing class="w-14.5 h-14.5 z-3" />
           <div
-            class="grid-area-[1/1] w-13.5 h-13.5 rounded-full border-3.5 b-[var(--element-color)] skill-button-burst-progress z-4"
+            class="w-13.5 h-13.5 rounded-full border-3.5 b-[var(--element-color)] z-4 skill-button-burst-progress"
             style={{
               "--progress-value": (100 * (props.energy ?? 0)).toFixed(0) + "%",
             }}
           />
         </Show>
-        <SkillSelectingYellow class="grid-area-[1/1] w-12 h-6.3 translate-y--6 skill-button-marker z-5" />
+        <SkillSelectingYellow class="w-12 h-6.3 translate-y--6 skill-button-marker z-5" />
         <Switch>
           <Match when={typeof skillId() === "number"}>
             <Image
               imageId={skillId() as number}
-              class="grid-area-[1/1] w-11 h-11 skill-button-icon z-6"
+              class="w-11 h-11 skill-button-icon z-6"
               fallback="skill"
             />
           </Match>
           <Match when={skillId() === "switchActive"}>
-            <SwitchActiveIcon class="grid-area-[1/1] w-11 h-11 skill-button-icon skill-button-switch z-6 " />
+            <SwitchActiveIcon class="w-11 h-11 skill-button-icon skill-button-switch z-6 " />
           </Match>
         </Switch>
         <SkillAbandonIcon
-          class="grid-area-[1/1] w-6 h-6 place-self-end data-[hidden]:hidden z-7"
+          class="w-6 h-6 place-self-end data-[hidden]:hidden z-7"
           bool:data-hidden={props.step}
         />
       </div>

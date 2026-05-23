@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {  PbPlayerStatus } from "@gi-tcg/typings";
+import { PbPlayerStatus } from "@gi-tcg/typings";
 import { createMemo, Show } from "solid-js";
 import { StrokedTextContent } from "./StrokedText";
 import { useUiContext } from "../hooks/context";
@@ -23,6 +23,7 @@ import DiceCountYellow from "../svg/DiceCountYellow.svg?fb";
 import DiceCountBlue from "../svg/DiceCountBlue.svg?fb";
 import DiceLegend from "../svg/DiceLegend.svg?fb";
 import DiceLegendBg from "../svg/DiceLegendBg.svg?fb";
+import { Dynamic } from "solid-js/web";
 
 export interface PlayerInfoProps {
   class?: string;
@@ -53,18 +54,16 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
         }`}
       bool:data-opp={!!props.opp}
     >
-      <div class="grid place-items-center w-18 h-9 my-9 info-dice-count">
-        <Show
-          when={props.opp}
-          fallback={<DiceCountYellow class="grid-area-[1/1] h-9 w-9" />}
-        >
-          <DiceCountBlue class="grid-area-[1/1] h-9 w-9" />
-        </Show>
+      <div class="grid place-items-center w-18 h-9 my-9 children:grid-area-[1/1] info-dice-count">
+        <Dynamic
+          component={props.opp ? DiceCountBlue : DiceCountYellow}
+          class="h-9 w-9"
+        />
         <StrokedTextContent
           text={String(props.diceCount)}
           strokeWidth={2}
           strokeColor="#000000B0"
-          class="grid-area-[1/1] text-center text-white font-bold text-4.5"
+          class="text-center text-white font-bold text-4.5"
         />
       </div>
       <div class="grow-1" />
@@ -88,9 +87,9 @@ export function PlayerInfoBox(props: PlayerInfoProps) {
             data-opp={props.opp}
           />
           <img
-              src={props.avatarUrl}
-              class="grid-area-[1/1] place-self-center w-6.5 h-6.5 rounded-full object-cover"
-            />
+            src={props.avatarUrl}
+            class="grid-area-[1/1] place-self-center w-6.5 h-6.5 rounded-full object-cover"
+          />
         </Show>
         <div class="grid-area-[1/2] flex flex-col">
           <span class="text-3 leading-tight text-white w-24 overflow-hidden text-nowrap text-ellipsis mt-1">
