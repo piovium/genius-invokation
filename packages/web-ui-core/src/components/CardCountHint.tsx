@@ -15,10 +15,11 @@
 
 import { cssPropertyOfTransform } from "../ui_state";
 import type { CardArea, CardCountHintInfo } from "./Chessboard";
-import NumberHintBlue from "../svg/NumberHintBlue.svg?fb";
-import NumberHintYellow from "../svg/NumberHintYellow.svg?fb";
+import CardCountHintBlue from "../svg/CardCountHintBlue.svg?fb";
+import CardCountHintYellow from "../svg/CardCountHintYellow.svg?fb";
 import type { Component, ComponentProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
+import { StrokedTextContent } from "./StrokedText";
 
 export interface CardCountHintProps extends CardCountHintInfo {
   shown: boolean;
@@ -28,30 +29,31 @@ export const HINT_STYLE_MAP: Record<
   CardArea,
   { component: Component; rotate: number }
 > = {
-  myHand: { component: NumberHintYellow, rotate: 0 },
-  oppHand: { component: NumberHintBlue, rotate: 180 },
-  myPile: { component: NumberHintYellow, rotate: 90 },
-  oppPile: { component: NumberHintBlue, rotate: 90 },
+  myHand: { component: CardCountHintYellow, rotate: 0 },
+  oppHand: { component: CardCountHintBlue, rotate: 180 },
+  myPile: { component: CardCountHintYellow, rotate: 90 },
+  oppPile: { component: CardCountHintBlue, rotate: 90 },
 };
 
 export function CardCountHint(props: CardCountHintProps) {
   const hintStyle = () => HINT_STYLE_MAP[props.area];
   return (
     <div
-      class="pointer-events-none absolute left-0 top-0 h-9 w-9 hidden data-[shown]:grid isolate"
+      class="pointer-events-none absolute left-0 top-0 h-10 w-10 hidden data-[shown]:grid isolate"
       style={cssPropertyOfTransform(props.transform)}
       bool:data-shown={props.shown}
     >
       <Dynamic<Component<ComponentProps<"div">>>
         component={hintStyle().component}
-        class={`grid-area-[1/1] w-9 h-9`}
+        class={`grid-area-[1/1] w-10 h-10`}
         style={{ transform: `rotate(${hintStyle().rotate}deg)` }}
       />
-      <div
-        class={`grid-area-[1/1] z-1 text-white font-bold text-3 line-height-none place-self-center select-none`}
-      >
-        {props.value}
-      </div>
+      <StrokedTextContent
+        text={String(props.value)}
+        strokeWidth={1}
+        strokeColor="#000000B0"
+        class="grid-area-[1/1] z-1 text-white font-bold place-self-center select-none"
+      />
     </div>
   );
 }

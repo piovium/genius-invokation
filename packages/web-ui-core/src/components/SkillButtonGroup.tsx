@@ -24,7 +24,7 @@ import { DICE_COLOR } from "./Dice";
 import SkillAbandonIcon from "../svg/SkillAbandonIcon.svg?fb";
 import SwitchActiveIcon from "../svg/SwitchActiveIcon.svg?fb";
 import SkillButtonReactIcon from "../svg/SkillButtonReactIcon.svg?fb";
-import SkillSelecting from "../svg/SkillSelecting.svg?fb";
+import SkillSelectingYellow from "../svg/SkillSelectingYellow.svg?fb";
 import SkillButtonBurstRing from "../svg/SkillButtonBurstRing.svg?fb";
 import { useUiContext } from "../hooks/context";
 
@@ -77,7 +77,7 @@ function SkillButton(props: SkillButtonProps) {
             }}
           />
         </Show>
-        <SkillSelecting class="grid-area-[1/1] w-12 h-6.3 translate-y--6 skill-button-marker z-5" />
+        <SkillSelectingYellow class="grid-area-[1/1] w-12 h-6.3 translate-y--6 skill-button-marker z-5" />
         <Switch>
           <Match when={typeof skillId() === "number"}>
             <Image

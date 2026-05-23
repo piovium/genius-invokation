@@ -278,8 +278,8 @@ export function getShowingCardPos(
 export function getPileHintPos(size: Size, opp: boolean) {
   const [x, y] = getPilePos(size, opp);
   return {
-    x: x,
-    y: y - CARD_WIDTH / 2 - 4.5,
+    x: x - 5,
+    y: y - CARD_WIDTH / 2 - 5,
   };
 }
 
@@ -293,19 +293,19 @@ export function getHandHintPos(
     if (focused) {
       const [x, y] = getOppHandCardFocusedPos(size, value, value - 1, null);
       return {
-        x: x + CARD_WIDTH / 2 - 4.5,
+        x: x + CARD_WIDTH - 10,
         y: y + CARD_HEIGHT + 1,
       };
     }
     const [x, y] = getHandCardBlurredPos(size, true, true, value, value - 1, 0);
     return {
-      x: x - CARD_WIDTH / 2 - 4.5,
+      x: x - 10,
       y: y + CARD_HEIGHT + 1,
     };
   } else {
     const [x, y] = getHandCardFocusedPos(size, value, value - 1, null);
     return {
-      x: x + CARD_WIDTH / 2 - 4.5,
+      x: x + CARD_WIDTH - 10,
       y: y - 10,
     };
   }

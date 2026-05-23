@@ -360,7 +360,7 @@ function calcCardsInfo(
           transform: {
             x,
             y,
-            z: (pileSize - 1 - i) * 0.15,
+            z: (pileSize - 1 - i) * 0.1,
             ry: 180,
             rz: 90,
           },
@@ -661,7 +661,7 @@ function rerenderChildren(opt: {
       value: player.pileCard.length,
       transform: {
         ...getPileHintPos(size, opp),
-        z: 0,
+        z: player.pileCard.length * 0.1,
         ...COUNT_HINT_TRANSFORM_BASE,
       },
     });
@@ -1702,7 +1702,9 @@ export function Chessboard(props: ChessboardProps) {
       }
     }
   };
+
   const onOppSkillClick = (sk: SkillInfo) => {
+    setShowDeclareEndButton(false);
     setSelectingItem({
       type: "skill",
       info: { ...sk, id: sk.id as number },
@@ -1896,6 +1898,7 @@ export function Chessboard(props: ChessboardProps) {
               state={dicePanelState()}
               onStateChange={setDicePanelState}
               liveStreamingMode={localProps.liveStreamingMode}
+              active={localProps.doingRpc && localProps.data.state.phase === PbPhaseType.ACTION}
             />
             <SkillButtonGroup
               class="grid-area-[1/1] place-self-end mb-2 mr-6 z-2"
@@ -1916,6 +1919,7 @@ export function Chessboard(props: ChessboardProps) {
                 // 对方骰子面板的显示状态同样受我方状态控制
                 state={dicePanelState()}
                 liveStreamingMode={localProps.liveStreamingMode}
+                active={!localProps.doingRpc && localProps.data.state.phase === PbPhaseType.ACTION}
               />
               <SkillButtonGroup
                 class="grid-area-[1/1] self-start justify-self-end mt-12 mr-6 z-2"
