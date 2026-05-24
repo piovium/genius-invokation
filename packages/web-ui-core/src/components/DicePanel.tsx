@@ -29,7 +29,7 @@ export interface DiceBarProps {
   selectedDice: boolean[];
   state: DicePanelState;
   opp?: boolean;
-  liveStreamingMode?: boolean;
+  watchingMode?: boolean;
 }
 
 export function DiceBar(props: DiceBarProps) {
@@ -39,7 +39,7 @@ export function DiceBar(props: DiceBarProps) {
         grid grid-cols-1 w-7 gap-1.5 place-items-center select-none transition-all
         pb-2 pointer-events-none dice-shadow ${props.class ?? ""}`}
       bool:data-wrapped={props.state === "wrapped"}
-      bool:data-shown={props.state !== "visible" || props.liveStreamingMode}
+      bool:data-shown={props.state !== "visible" || props.watchingMode}
     >
       <Dynamic
         component={props.opp ? DiceCountHintBlue : DiceCountHintYellow}
@@ -99,7 +99,7 @@ export function DicePanel(props: DicePanelProps) {
   };
   return (
     <>
-      <Show when={!props.liveStreamingMode}>
+      <Show when={!props.watchingMode}>
         <div
           class={`justify-self-end w-42 h-full mr--4 pr-6
             flex flex-row items-center select-none dice-panel`}
@@ -137,7 +137,7 @@ export function DicePanel(props: DicePanelProps) {
         dice={props.dice}
         selectedDice={props.selectedDice}
         state={props.state}
-        liveStreamingMode={props.liveStreamingMode}
+        watchingMode={props.watchingMode}
       />
     </>
   );

@@ -74,7 +74,7 @@ export default {
     buttonConfirm: "Confirm",
     buttonCancel: "Cancel",
     confirmGiveUpGame: "Are you sure you want to concede this match?",
-    liveStreamingMode: "Watching",
+    watchingMode: "Watching",
     gameVictory: "Victory",
     gameDefeat: "Defeat",
     buttonDeclareEnd: "End Round",

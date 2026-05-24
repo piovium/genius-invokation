@@ -83,7 +83,7 @@ const createReconnectSse = <T,>(
       clearTimeout(reconnectTimeout);
     }
     reconnectTimeout = setTimeout(() => {
-      console.warn("No data received, reconnecting...");
+      console.warn?.("No data received, reconnecting...");
       abortController?.abort();
     }, SSE_RECONNECT_TIMEOUT);
   };
@@ -184,7 +184,6 @@ export default function Room() {
   const [chessboard, setChessboard] = createSignal<Component>();
 
   const [showOpp, setShowOpp] = createSignal(false);
-  const [liveMode, setLiveMode] = createSignal(true);
   const [oppPlayerIo, setOppPlayerIo] = createSignal<CancellablePlayerIO>();
 
   const reportStreamError = async (e: Error) => {
@@ -323,6 +322,9 @@ export default function Room() {
       switch (payload.type) {
         case "initialized": {
           setInitialized(payload);
+          if (allowWatchOpp()) {
+            setShowOpp(true);
+          }
           break;
         }
         case "notification": {
@@ -509,16 +511,6 @@ export default function Room() {
                     onChange={(e) => setShowOpp(e.currentTarget.checked)}
                   />
                   <label for="showOpp">{t("showOpponentBoard")}</label>
-                  <Show when={showOpp()}>
-                    <input
-                      id="liveMode"
-                      type="checkbox"
-                      class="checkbox-primary"
-                      checked={liveMode()}
-                      onChange={(e) => setLiveMode(e.currentTarget.checked)}
-                    />
-                    <label for="liveMode">{t("liveMode")}</label>
-                  </Show>
                 </Show>
               </Show>
             </div>
@@ -626,7 +618,7 @@ export default function Room() {
                     </div>
                   </div>
                 }
-                liveStreamingMode={showOpp() && liveMode()}
+                watchingMode={showOpp()}
               />
             </div>
           )}

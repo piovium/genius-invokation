@@ -285,7 +285,7 @@ export interface ChessboardProps extends ComponentProps<"div"> {
   myPlayerInfo?: PlayerInfo;
   oppPlayerInfo?: PlayerInfo;
   gameEndExtra?: JSX.Element;
-  liveStreamingMode?: boolean;
+  watchingMode?: boolean;
   chessboardColor?: string;
   opp: OppInfo | null;
   /**
@@ -1028,7 +1028,7 @@ export function Chessboard(props: ChessboardProps) {
     "oppPlayerInfo",
     "gameEndExtra",
     "opp",
-    "liveStreamingMode",
+    "watchingMode",
     "chessboardColor",
     "data",
     "actionState",
@@ -1121,7 +1121,7 @@ export function Chessboard(props: ChessboardProps) {
     actionState: ActionState | null,
   ): HandState => {
     if (
-      !localProps.liveStreamingMode &&
+      !localProps.watchingMode &&
       (viewType === "switchHands" || viewType === "switchHandsEnd")
     ) {
       return "switching";
@@ -1424,7 +1424,7 @@ export function Chessboard(props: ChessboardProps) {
   /** 当存在特殊视图可用时，使其可见 */
   createEffect(() => {
     if (hasSpecialView()) {
-      setSpecialViewVisible(!localProps.liveStreamingMode);
+      setSpecialViewVisible(!localProps.watchingMode);
     }
   });
 
@@ -1746,7 +1746,7 @@ export function Chessboard(props: ChessboardProps) {
   };
 
   onMount(() => {
-    setSpecialViewVisible(!localProps.liveStreamingMode);
+    setSpecialViewVisible(!localProps.watchingMode);
     onResize();
     resizeObserver.observe(chessboardElement);
     document.addEventListener("fullscreenchange", fullscreenHandler);
@@ -1762,7 +1762,7 @@ export function Chessboard(props: ChessboardProps) {
       }`}
       ref={containerElement}
       bool:data-has-opp-chessboard={!!localProps.opp}
-      bool:data-livestreaming={localProps.liveStreamingMode}
+      bool:data-livestreaming={localProps.watchingMode}
       {...elProps}
     >
       <TransformWrapper
@@ -1898,7 +1898,7 @@ export function Chessboard(props: ChessboardProps) {
               onSelectDice={setSelectedDice}
               state={dicePanelState()}
               onStateChange={setDicePanelState}
-              liveStreamingMode={localProps.liveStreamingMode}
+              watchingMode={localProps.watchingMode}
             />
             <SkillButtonGroup
               class="place-self-end mb-2 mr-6 z-2"
@@ -1918,7 +1918,7 @@ export function Chessboard(props: ChessboardProps) {
                 selectedDice={[]}
                 // 对方骰子面板的显示状态同样受我方状态控制
                 state={dicePanelState()}
-                liveStreamingMode={localProps.liveStreamingMode}
+                watchingMode={localProps.watchingMode}
               />
               <SkillButtonGroup
                 class="self-start justify-self-end mt-12 mr-6 z-2"
@@ -2042,14 +2042,14 @@ export function Chessboard(props: ChessboardProps) {
               onClick={toggleFullscreen}
             />
             <HistoryToggleButton onClick={() => setShowHistory((v) => !v)} />
-            <Show when={hasSpecialView() && !localProps.liveStreamingMode}>
+            <Show when={hasSpecialView() && !localProps.watchingMode}>
               <SpecialViewToggleButton
                 onClick={() => setSpecialViewVisible((v) => !v)}
               />
             </Show>
-            <Show when={localProps.liveStreamingMode}>
+            <Show when={localProps.watchingMode}>
               <div class="h-6 min-w-20 px-3 rounded-full text-3.5 text-center line-height-6 font-bold bg-#e9e2d3/70 text-black/70 pointer-events-none select-none">
-                {t("ui.liveStreamingMode")}
+                {t("ui.watchingMode")}
               </div>
             </Show>
             <CurrentTurnHint
