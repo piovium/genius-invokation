@@ -350,7 +350,7 @@
 
   .skill-button[data-mini] {
     --base-scale: 0.8;
-    --offset-y: 5px;
+    --offset-y: 3px;
   }
 
   .skill-button:hover {
@@ -508,7 +508,7 @@
   }
 
   .entity-effect[data-usable] {
-    box-shadow: inset 0 0 12px 8px var(--light-white);
+    box-shadow: inset 0 0 8px 4px var(--light-white);
   }
 
   .entity-effect[data-triggered] {

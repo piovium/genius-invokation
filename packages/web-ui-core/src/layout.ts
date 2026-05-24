@@ -306,7 +306,7 @@ export function getHandHintPos(
     const [x, y] = getHandCardFocusedPos(size, value, value - 1, null);
     return {
       x: x + CARD_WIDTH - 9,
-      y: y - 9,
+      y: y - 10,
     };
   }
 }
