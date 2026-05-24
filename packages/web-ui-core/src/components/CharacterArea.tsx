@@ -799,7 +799,7 @@ function CharacterTagMasks(props: CharacterTagMasksProps) {
     <Index each={Object.keys(TAG_MASK_MAP)}>
       {(flag) => (
         <Show when={props.tags & Number(flag())}>
-          <img class="m--3 w-27 h-42 max-w-27 max-h-42" src={`https://ui.assets.gi-tcg.guyutongxue.site/${TAG_MASK_MAP[Number(flag())]}.webp`}/>
+          <img class="m--3 w-27 h-42 max-w-27 max-h-42" src={`https://ui-assets.piovium.org/${TAG_MASK_MAP[Number(flag())]}.webp`}/>
         </Show>
       )}
     </Index>

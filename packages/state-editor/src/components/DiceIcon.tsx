@@ -21,7 +21,7 @@ export interface DiceIconProps {
   type: number;
 }
 
-const UI_ASSET_URL_BASE = "https://ui.assets.gi-tcg.guyutongxue.site/";
+const UI_ASSET_URL_BASE = "https://ui-assets.piovium.org/";
 
 // 骰子类型到颜色名称的映射
 const DICE_TYPE_TO_COLOR: Record<number, string> = {
