@@ -252,7 +252,7 @@ export function Card(props: CardProps) {
         fallback="card"
       />
       <CardFrameNormal class="w-21 h-36 pointer-events-none" />
-      <div class="pointer-events-none rounded-1.2 card-animation" />
+      <div class="pointer-events-none rounded-md z-1 card-animation" />
       <Switch>
         <Match when={props.toBeSwitched}>
           {/* with animate no render */}
@@ -268,7 +268,7 @@ export function Card(props: CardProps) {
         attachments={attachments()}
       />
       <DiceCost
-        class="absolute left-2 top--0.5 translate-x--50% flex flex-col gap-1"
+        class="absolute left-2 top--0.5 translate-x--50% flex flex-col gap-1 z-2"
         cost={data().definitionCost}
         diceClass="w-9 h-9 text-4.5 m--1 max-w-9 max-h-9"
         realCost={realCost()}
