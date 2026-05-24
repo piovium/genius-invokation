@@ -2,12 +2,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
     <polygon points="48 88.99 12.5 68.5 12.5 27.5 48 7.01 83.5 27.5 83.5 68.5 48 88.99"
         fill="#dccaae" stroke="#5e4632" stroke-miterlimit="10" />
-    <polygon points="48 48 78 65.32 78 30.68 48 48" fill="#dff" />
-    <polygon points="48 48 18 65.32 18 30.68 48 48" fill="#fec" />
-    <polygon points="18 65.32 48 82.64 48 48 18 65.32" fill="#fdd" />
-    <polygon points="78 30.68 48 48 48 13.36 78 30.68" fill="#dfd" />
-    <polygon points="18 30.68 48 48 48 13.36 18 30.68" fill="#ffd" />
-    <polygon points="78 65.32 48 82.64 48 48 78 65.32" fill="#ddf" />
+    <polygon points="48 48 78 65.32 78 30.68 48 48" fill="#afd1d1" />
+    <polygon points="48 48 18 65.32 18 30.68 48 48" fill="#dca" />
+    <polygon points="18 65.32 48 82.64 48 48 18 65.32" fill="#e7c5c5" />
+    <polygon points="78 30.68 48 48 48 13.36 78 30.68" fill="#c5e7c5" />
+    <polygon points="18 30.68 48 48 48 13.36 18 30.68" fill="#eec" />
+    <polygon points="78 65.32 48 82.64 48 48 78 65.32" fill="#dde" />
     <polygon points="48 82.64 18 65.32 18 30.68 48 13.36 78 30.68 78 65.32 48 82.64" fill="none"
         opacity=".3" stroke="#5e4632" stroke-miterlimit="10" stroke-width="2" />
     <path
