@@ -15,9 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { register } from "node:module";
-import { pathToFileURL } from "node:url";
 
-register("ts-node/esm", pathToFileURL("./"));
+register("ts-node/esm", import.meta.url);
 
 process.on("uncaughtException", (err) => {
   console.error("Uncaught exception:", err);

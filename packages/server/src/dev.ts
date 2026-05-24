@@ -1,16 +1,21 @@
-import { unstable_startServer } from "@prisma/dev";
+import { startPrismaDevServer } from "@prisma/dev";
 import { $ } from "execa";
 import getPort from "get-port";
 import path from "path";
+import { pathToFileURL } from "node:url";
+import { config } from "dotenv";
 
 if (process.env.NODE_ENV === "production") {
   throw new Error("Dev server should not be started in production mode");
 }
 
+config({ path: path.resolve(import.meta.dirname, "../.env") });
+process.env.NODE_USE_ENV_PROXY = "1";
+
 async function startLocalPrisma(name: string) {
   const port = await getPort();
 
-  return await unstable_startServer({
+  return await startPrismaDevServer({
     name,
     port,
     persistenceMode: "stateful",
@@ -22,7 +27,8 @@ async function startLocalPrisma(name: string) {
 
 const importFlags = [
   `--import`,
-  path.resolve(import.meta.dirname, "../scripts/ts_preload.js"),
+  pathToFileURL(path.resolve(import.meta.dirname, "../scripts/ts_preload.js"))
+    .href,
 ];
 
 async function localDev() {
