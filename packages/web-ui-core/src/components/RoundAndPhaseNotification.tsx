@@ -76,9 +76,9 @@ export function RoundAndPhaseNotification(
               select-none action-hint-who action-notification ${props.class ?? ""}`}
             bool:data-opp={opp()}
           >
-            {props.info.value === "action"
-              ? t(opp() ? "phase.oppActionTurn" : "phase.myActionTurn")
-              : t(opp() ? "phase.oppDeclareEndTurn" : "phase.myDeclareEndTurn")}
+            {t(
+              `phase.${opp() ? "opp" : "my"}${props.info.value === "action" ? "ActionTurn" : "DeclareEndTurn"}`,
+            )}
             <Show when={props.info.value === "declareEnd" && !isFirst()}>
               {t("phase.gainFirst")}
             </Show>

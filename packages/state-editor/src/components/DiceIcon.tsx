@@ -50,7 +50,7 @@ export function DiceIcon(props: DiceIconProps) {
       alt={getDiceTypeName(props.type)}
       class="w-full aspect-ratio-square h-auto object-contain"
       title={getDiceTypeName(props.type)}
-      draggable={false}
+      draggable="false"
       loading="lazy"
     />
   );

@@ -125,6 +125,8 @@ const opacityKeyframes = (uiState: CardAnimatingUiState): Keyframe[] => {
   return [startKeyframe, ...middleKeyframes, endKeyframe];
 };
 
+const EFFECTLESS_DEFINITION_ID = 208;
+
 export function Card(props: CardProps) {
   // const [data] = createResource(
   //   () => props.data.definitionId,
@@ -156,7 +158,7 @@ export function Card(props: CardProps) {
     const result = props.data.attachment.map((data) => data.definitionId);
     // attachment 引入之前的 effectless 效果需要手动添加
     if (result.length === 0 && props.playStep?.isEffectless) {
-      result.push(208);
+      result.push(EFFECTLESS_DEFINITION_ID);
     }
     return result;
   });

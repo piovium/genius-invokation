@@ -31,19 +31,23 @@ export interface VariableDiffProps {
 
 export function VariableDiff(props: VariableDiffProps) {
   const showValue = createMemo(() => {
-    if (props.oldValue === undefined || props.newValue === undefined) {
+    if (
+      typeof props.oldValue === "undefined" ||
+      typeof props.newValue === "undefined"
+    ) {
       return void 0;
     } else {
       return props.newValue - props.oldValue;
     }
   });
   const increase = createMemo<boolean>(() => {
-    if (showValue()) {
-      return (showValue() as number) > 0;
+    const showingValue = showValue();
+    if (typeof showingValue === "number") {
+      return showingValue > 0;
     } else if (props.direction) {
       return props.direction !== PbModifyDirection.DECREASE;
     } else {
-      return props.defeated ? !props.defeated : !!props.revived;
+      return props.defeated ? false : !!props.revived;
     }
   });
   const backgroundColor = createMemo(() =>

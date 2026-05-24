@@ -42,17 +42,14 @@ export interface MiniSpecialViewProps {
 export function MiniView(props: MiniSpecialViewProps) {
   const { t, assetsManager } = useUiContext();
   const title = () => {
+    const prefix = props.opp ? `mini.opp` : `mini.my`;
     switch (props.viewType) {
       case "switchHands":
-        return props.opp
-          ? t("mini.oppSwitchingHands")
-          : t("mini.mySwitchingHands");
+        return t(`${prefix}SwitchingHands`);
       case "selectCard":
-        return props.opp
-          ? t("mini.oppSelectingCards")
-          : t("mini.mySelectingCards");
+        return t(`${prefix}SelectingCards`);
       default:
-        return props.opp ? t("mini.oppRerolling") : t("mini.myRerolling");
+        return t(`${prefix}Rerolling`);
     }
   };
   return (
@@ -144,14 +141,9 @@ export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
     null,
   );
   createEffect(() => {
-    if (
-      props.myViewType === "selectCard" ||
-      props.oppViewType === "selectCard"
-    ) {
-      setMiniViewVisible(true);
-    } else {
-      setMiniViewVisible(false);
-    }
+    setMiniViewVisible(
+      props.myViewType === "selectCard" || props.oppViewType === "selectCard",
+    );
   });
   return (
     <>

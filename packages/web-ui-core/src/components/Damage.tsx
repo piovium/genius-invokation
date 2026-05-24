@@ -35,7 +35,7 @@ export const DAMAGE_COLOR: Record<number, string> = {
 
 export function Damage(props: DamageProps) {
   const damageType = createMemo(() => props.info?.damageType);
-  const damageValue = createMemo(() => props.info?.value);
+  const damageValue = createMemo(() => props.info?.value ?? 0);
   return (
     <div
       class={`self-center z-5 w-21 h-21 hidden data-[shown]:grid preserve-3d children:grid-area-[1/1] damage`}

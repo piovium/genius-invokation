@@ -45,7 +45,7 @@ export default (props = {}) => {
           bool:data-display-none={!remoteLoaded()}
           {...elProps}
           src={remoteRenderedUrl}
-          draggable={false}
+          draggable="false"
           onError={() => {
             setRemoteError(true);
             window.GI_TCG_REMOTE_RENDERED_ERRORS.push(remoteRenderedUrl);

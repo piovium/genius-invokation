@@ -96,7 +96,6 @@ export interface ImageFallbackProps {
   imageId: number;
   alt?: string;
   class?: string;
-  dragable?: boolean;
 }
 
 export function ImageFallback(props: ImageFallbackProps) {

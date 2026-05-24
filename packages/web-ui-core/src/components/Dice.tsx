@@ -95,8 +95,9 @@ export const COST_COMPONENT_MAP: Record<number, Component> = {
   [DiceType.Energy]: DiceEnergyNormal,
   [DiceType.Legend]: DiceLegend,
 
-  12: DiceEnergyMavuika,
-  13: DiceEnergySkirk,
+  // https://github.com/piovium/genius-invokation/issues/715
+  // 12: DiceEnergyMavuika,
+  // 13: DiceEnergySkirk,
 };
 
 export interface DiceProps extends ComponentProps<"div"> {

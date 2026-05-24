@@ -375,13 +375,21 @@ function extractEquipInfoFromPreview(
     let equipType: PbEquipmentType | undefined;
 
     if ($case === "moveEntity") {
-      if (value.toWhere !== PbEntityArea.CHARACTER) continue;
-      if (value.reason !== PbMoveEntityReason.EQUIP) continue;
+      if (
+        value.toWhere !== PbEntityArea.CHARACTER ||
+        value.reason !== PbMoveEntityReason.EQUIP
+      ) {
+        continue;
+      }
       characterId = value.toMasterCharacterId;
       equipType = value.entity?.equipment;
     }
-    if (characterId === undefined) continue;
-    if (equipType === undefined) continue;
+    if (
+      typeof characterId === "undefined" ||
+      typeof equipType === "undefined"
+    ) {
+      continue;
+    }
 
     result.set(characterId, equipType);
   }

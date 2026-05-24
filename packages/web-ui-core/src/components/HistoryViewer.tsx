@@ -211,13 +211,10 @@ const renderHistoryChild = (
         opp: isOpp,
         imageId: parentCallerDefinitionId,
         title: renderName(parentCallerDefinitionId),
-        content: t(
-          isOpp ? "history.oppGenerateDice" : "history.myGenerateDice",
-          {
-            count: child.count,
-            diceType: diceIconAndText(child.diceType),
-          },
-        ),
+        content: t(`history.${isOpp ? "opp" : "my"}GenerateDice`, {
+          count: child.count,
+          diceType: diceIconAndText(child.diceType),
+        }),
       };
       break;
     }
@@ -1237,11 +1234,9 @@ const renderHistoryBlock = (block: HistoryDetailBlock) => {
           name: renderName(block.callerDefinitionId),
           content: (
             <SkillTriggeredPart
-              subtitle={
-                block.skillType === "technique"
-                  ? t("history.useTechnique")
-                  : t("history.useSkill")
-              }
+              subtitle={t(
+                `history.use${block.skillType === "technique" ? "Technique" : "Skill"}`,
+              )}
               imageId={block.skillDefinitionId}
               name={renderName(block.skillDefinitionId)}
             />
@@ -1481,7 +1476,7 @@ function HistoryChildBox(props: { data: HistoryChildData }) {
             imageId={props.data.imageId as number}
             type={props.data.imageType}
             class="w-5.6 shrink-0 min-h-5.6 max-h-9.6"
-            fallback={"skill"}
+            fallback="skill"
           />
         </Match>
       </Switch>
@@ -1751,17 +1746,17 @@ function HistoryBlockItem(props: {
   isSelected: boolean;
   onSelect: (block: HistoryBlock) => void;
 }) {
-  const isHint = () =>
-    props.block.type === "changePhase" || props.block.type === "action";
+  const isHint = (b: HistoryBlock = props.block): b is HistoryHintBlock =>
+    b.type === "changePhase" || b.type === "action";
 
   const hintData = createMemo(() => {
-    if (!isHint()) return null;
-    return renderHistoryHint(props.block as HistoryHintBlock);
+    if (!isHint(props.block)) return null;
+    return renderHistoryHint(props.block);
   });
 
   const detailData = createMemo(() => {
-    if (isHint()) return null;
-    return renderHistoryBlock(props.block as HistoryDetailBlock);
+    if (isHint(props.block)) return null;
+    return renderHistoryBlock(props.block);
   });
 
   return (

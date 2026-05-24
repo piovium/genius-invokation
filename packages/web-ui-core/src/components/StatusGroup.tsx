@@ -116,13 +116,8 @@ export function AttachmentGroup(props: AttachmentGroupProps) {
 
 export function MoreStatus(props: { class?: string }) {
   const { assetsManager } = useUiContext();
-  const [url] = createResource(
-    () => [assetsManager()] as const,
-    ([manager]) => manager.getRawImageUrl("UI_Gcg_Buff_Common_More"),
+  const url = createMemo(() =>
+    assetsManager().getRawImageUrlSync("UI_Gcg_Buff_Common_More"),
   );
-  return (
-    <Show when={url.state === "ready"}>
-      <img class={`object-cover ${props.class ?? ""}`} src={url()} />
-    </Show>
-  );
+  return <img class={`object-cover ${props.class ?? ""}`} src={url()} />;
 }

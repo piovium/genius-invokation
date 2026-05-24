@@ -41,7 +41,10 @@ export function StrokedText(props: StrokedTextProps) {
   );
 }
 
-/** You can only use this component within a **grid** container. Otherwise, please use ```<StrokedText/>``` instead. */
+/**
+ * You can only use this component within a **grid** container. Otherwise, please use ```<StrokedText/>``` instead.
+ * 
+ */
 export function StrokedTextContent(props: StrokedTextProps) {
   const [local, rest] = splitProps(props, [
     "text",

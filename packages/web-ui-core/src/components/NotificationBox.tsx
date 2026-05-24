@@ -52,7 +52,7 @@ export function NotificationBox(props: NotificationBoxProps) {
 
   const title = () => {
     if (props.data.type === "switchActive") {
-      return `${props.opp ? t("notification.oppSwitchRole") : t("notification.mySwitchRole")}${characterName()}`;
+      return `${t(`notification.${props.opp ? "opp" : "my"}SwitchRole`)}${characterName()}`;
     } else {
       return skillName();
     }
