@@ -897,7 +897,7 @@
   }
   100% {
     opacity: 0;
-    transform: scale(300%);
+    transform: scale(200%);
     box-shadow:
       0 0 8px 0 var(--light-golden),
       inset 0 0 8px 0 var(--light-golden);
