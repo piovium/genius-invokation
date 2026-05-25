@@ -18,7 +18,7 @@ import { Button } from "./Button";
 import { useUiContext } from "../hooks/context";
 
 export interface SwitchHandsViewProps {
-  visible: boolean;
+  shown: boolean;
   onConfirm: () => void;
 }
 
@@ -26,8 +26,8 @@ export function SwitchHandsView(props: SwitchHandsViewProps) {
   const { t } = useUiContext();
   return (
     <div
-      class="w-full h-full flex flex-col items-center justify-center select-none z-3 pointer-events-none min-w-0 min-h-0 invisible data-[visible]:visible"
-      bool:data-visible={props.visible}
+      class="w-full h-full hidden data-[shown]:flex flex-col items-center justify-center select-none z-3 pointer-events-none min-w-0 min-h-0 "
+      bool:data-shown={props.shown}
     >
       <h3 class="h-10 font-bold text-3xl text-white/80 mb-66 pointer-events-none">
         {t("view.replaceHandsTitle")}

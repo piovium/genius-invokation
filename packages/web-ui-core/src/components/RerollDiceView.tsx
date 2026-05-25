@@ -22,7 +22,7 @@ import { Button } from "./Button";
 import { useUiContext } from "../hooks/context";
 
 export interface RerollViewProps {
-  visible: boolean;
+  shown: boolean;
   noConfirmButton?: boolean;
   dice: DiceType[];
   selectedDice: boolean[];
@@ -47,8 +47,8 @@ export function RerollDiceView(props: RerollViewProps) {
   };
   return (
     <div
-      class="w-full h-full flex flex-col items-center justify-center select-none z-3 min-w-0 min-h-0 invisible data-[visible]:visible"
-      bool:data-visible={props.visible}
+      class="w-full h-full hidden data-[shown]:flex flex-col items-center justify-center select-none z-3 min-w-0 min-h-0"
+      bool:data-shown={props.shown}
       onPointerUp={() => setSelectingOn(null)}
     >
       <h3 class="h-10 font-bold text-3xl text-white/80">
@@ -82,7 +82,7 @@ export function RerollDiceView(props: RerollViewProps) {
       </div>
       <Button
         class="visible data-[hidden]:invisible"
-        bool:data-hidden={props.noConfirmButton || !props.visible}
+        bool:data-hidden={props.noConfirmButton}
         onClick={() => props.onConfirm()}
       >
         {t("view.confirmButton")}

@@ -29,23 +29,20 @@ import { useUiContext } from "../hooks/context";
 import { DiceCostAsync } from "./DiceCost";
 
 export interface SelectCardViewProps {
-  visible: boolean;
+  shown: boolean;
   candidateIds: number[];
   onClickCard: (id: number) => void;
   onConfirm: (id: number) => void;
 }
 
-/**
- * ```selectedCard``` 只向外传递，不受外部影响，一旦选择不会清除。
- */
 export function SelectCardView(props: SelectCardViewProps) {
   const { t, assetsManager } = useUiContext();
   const [selectedId, setSelectedId] = createSignal<number | null>(null);
 
   return (
     <div
-      class="w-full h-full flex flex-col items-center justify-center select-none z-3 min-w-0 min-h-0 invisible data-[visible]:visible"
-      bool:data-visible={props.visible}
+      class="w-full h-full hidden data-[shown]:flex flex-col items-center justify-center select-none z-3 min-w-0 min-h-0 "
+      bool:data-shown={props.shown}
     >
       <h3 class="h-10 font-bold text-3xl text-white/80">
         {t("view.chooseCard")}
@@ -70,7 +67,7 @@ export function SelectCardView(props: SelectCardViewProps) {
       </div>
       <Button
         class="visible data-[hidden]:invisible"
-        bool:data-hidden={selectedId() === null || !props.visible}
+        bool:data-hidden={selectedId() === null}
         onClick={() => {
           const id = selectedId();
           if (id !== null) {

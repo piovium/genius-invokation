@@ -1023,7 +1023,7 @@ type SelectingItem =
       info: SkillInfo & { id: number };
     }
   | {
-      type: "external";
+      type: "externalCard";
       info: number | PbEntityState;
     };
 
@@ -1065,18 +1065,29 @@ export function Chessboard(props: ChessboardProps) {
   const [selectingItem, setSelectingItem] = createSignal<SelectingItem | null>(
     null,
   );
-  const isSelectingItem = (id: number, type?: SelectingItem["type"]) => {
+  /** 是否是主棋盘上被选中的卡 */
+  const isSelectingItem = (id: number) => {
     const item = selectingItem();
-    if (item === null) {
+    if (item === null || item.type === "externalCard") {
       return false;
-    } else if (type && type !== item.type) {
-      return false;
-    } else if (typeof item.info === "number") {
-      return id === item.info;
     } else {
       return id === item.info.id;
     }
   };
+  const isExternalSelectingItem = (defIdOrState: number | PbEntityState) => {
+    const item = selectingItem();
+    if (item === null || item.type !== "externalCard") {
+      return false;
+    } else if (
+      typeof item.info === "number" ||
+      typeof defIdOrState === "number"
+    ) {
+      return defIdOrState === item.info;
+    } else {
+      return defIdOrState.id === item.info.id;
+    }
+  };
+
   createEffect(() => {
     const item = selectingItem();
     if (item === null) {
@@ -1093,7 +1104,7 @@ export function Chessboard(props: ChessboardProps) {
       dataViewerController.showState(item.info.type, item.info.data);
     } else if (item.type === "skill") {
       dataViewerController.showSkill(item.info.id);
-    } else if (item.type === "external") {
+    } else if (item.type === "externalCard") {
       if (typeof item.info === "number") {
         dataViewerController.showCard(item.info);
       } else {
@@ -1439,8 +1450,7 @@ export function Chessboard(props: ChessboardProps) {
     () => !hasSpecialView() || !specialViewVisible(),
   );
   /** 当特殊视图显示状态发生变化时，隐藏所有选中对象 */
-  createEffect(() => {
-    specialViewVisible();
+  on(specialViewVisible, () => {
     setSelectingItem(null);
   });
   /** 当存在特殊视图可用时，使其可见 */
@@ -1737,7 +1747,7 @@ export function Chessboard(props: ChessboardProps) {
   };
 
   const onMiniViewCardClick = (card: number | PbEntityState) => {
-    setSelectingItem({ type: "external", info: card });
+    setSelectingItem({ type: "externalCard", info: card });
     setFocusingHands(false);
     setShowCardHint("myHand", null);
     setOppFocusingHands(false);
@@ -1824,8 +1834,7 @@ export function Chessboard(props: ChessboardProps) {
               <Card
                 {...card()}
                 selected={
-                  isSelectingItem(card().id, "card") &&
-                  card().kind !== "dragging"
+                  isSelectingItem(card().id) && card().kind !== "dragging"
                 }
                 toBeSwitched={
                   card().kind === "switching" &&
@@ -1983,10 +1992,10 @@ export function Chessboard(props: ChessboardProps) {
           when={props.viewType === "selectCard" && !localProps.spectatorMode}
         >
           <SelectCardView
-            visible={specialViewVisible()}
+            shown={specialViewVisible()}
             candidateIds={localProps.selectCardCandidates}
             onClickCard={(id) => {
-              setSelectingItem({ type: "external", info: id });
+              setSelectingItem({ type: "externalCard", info: id });
             }}
             onConfirm={(id) => {
               localProps.onSelectCard?.(id);
@@ -1998,7 +2007,7 @@ export function Chessboard(props: ChessboardProps) {
           when={props.viewType === "switchHands" && !localProps.spectatorMode}
         >
           <SwitchHandsView
-            visible={specialViewVisible()}
+            shown={specialViewVisible()}
             onConfirm={() => {
               const cards = switchedCards();
               setSwitchedCards([]);
@@ -2015,7 +2024,7 @@ export function Chessboard(props: ChessboardProps) {
           }
         >
           <RerollDiceView
-            visible={specialViewVisible()}
+            shown={specialViewVisible()}
             noConfirmButton={props.viewType === "rerollDiceEnd"}
             dice={myDice()}
             selectedDice={selectedDice()}
@@ -2048,7 +2057,7 @@ export function Chessboard(props: ChessboardProps) {
               oppSelectCardCandidates={
                 localProps.opp?.selectCardCandidates ?? []
               }
-              isSelectingItem={(id) => isSelectingItem(id, "external")}
+              isSelectingItem={isExternalSelectingItem}
               onCardClick={onMiniViewCardClick}
               onBackDropClick={onChessboardClick}
               showMyView={hasSpecialView()}

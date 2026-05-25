@@ -29,7 +29,7 @@ export interface MiniSpecialViewProps {
   player: PbPlayerState;
   selectCardCandidates: number[];
   visible: boolean;
-  isSelectingItem: (id: number) => boolean;
+  isSelectingItem: (defIdOrState: number | PbEntityState) => boolean;
   onCardClick: (card: number | PbEntityState) => void;
   onBackDropClick: () => void;
 }
@@ -68,7 +68,7 @@ export function MiniView(props: MiniSpecialViewProps) {
                 <StaticCard
                   class="scale-50 shrink-0 mx--7"
                   cardDefinitionId={card.definitionId}
-                  selected={props.isSelectingItem(card.id)}
+                  selected={props.isSelectingItem(card)}
                   onClick={(e) => {
                     e.stopPropagation();
                     props.onCardClick(card);
@@ -126,7 +126,7 @@ export interface MiniSpecialViewGroupProps {
   oppSelectCardCandidates: number[];
   showMyView: boolean;
   showOppView: boolean;
-  isSelectingItem: (id: number) => boolean;
+  isSelectingItem: (defIdOrState: number | PbEntityState) => boolean;
   onCardClick: (card: number | PbEntityState) => void;
   onBackDropClick: () => void;
 }
