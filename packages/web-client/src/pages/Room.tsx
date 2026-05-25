@@ -318,7 +318,7 @@ export default function Room() {
       switch (payload.type) {
         case "initialized": {
           setInitialized(payload);
-          if (allowWatchOpp()) {
+          if (payload?.config?.watchable && allowWatchOpp()) {
             setShowOpp(true);
           }
           break;
