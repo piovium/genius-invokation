@@ -1980,8 +1980,11 @@ export function Chessboard(props: ChessboardProps) {
           </Show>
         </AspectRatioContainer>
         {/* SpecialViews */}
-        <Show when={props.viewType === "selectCard" && specialViewVisible()}>
+        <Show
+          when={props.viewType === "selectCard" && !localProps.spectatorMode}
+        >
           <SelectCardView
+            visible={specialViewVisible()}
             candidateIds={localProps.selectCardCandidates}
             onClickCard={(id) => {
               setSelectingItem({ type: "external", info: id });
@@ -1996,12 +1999,13 @@ export function Chessboard(props: ChessboardProps) {
                 }
               });
             }}
-            nameGetter={(id) => assetsManager().getNameSync(id)}
           />
         </Show>
-        <Show when={props.viewType === "switchHands" && specialViewVisible()}>
+        <Show
+          when={props.viewType === "switchHands" && !localProps.spectatorMode}
+        >
           <SwitchHandsView
-            viewType={localProps.viewType}
+            visible={specialViewVisible()}
             onConfirm={() => {
               const cards = switchedCards();
               setSwitchedCards([]);
@@ -2014,10 +2018,11 @@ export function Chessboard(props: ChessboardProps) {
           when={
             (props.viewType === "rerollDice" ||
               props.viewType === "rerollDiceEnd") &&
-            specialViewVisible()
+            !localProps.spectatorMode
           }
         >
           <RerollDiceView
+            visible={specialViewVisible()}
             noConfirmButton={props.viewType === "rerollDiceEnd"}
             dice={myDice()}
             selectedDice={selectedDice()}

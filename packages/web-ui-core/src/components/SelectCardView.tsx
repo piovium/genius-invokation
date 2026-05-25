@@ -29,21 +29,24 @@ import { useUiContext } from "../hooks/context";
 import { DiceCostAsync } from "./DiceCost";
 
 export interface SelectCardViewProps {
+  visible: boolean;
   candidateIds: number[];
-  nameGetter: (id: number) => string | undefined;
   onClickCard: (id: number) => void;
   onConfirm: (id: number) => void;
 }
 
 /**
- * ```selectedCard``` 只向外传递，不受外部影响，一旦选择不会清除。 
+ * ```selectedCard``` 只向外传递，不受外部影响，一旦选择不会清除。
  */
 export function SelectCardView(props: SelectCardViewProps) {
-  const { t } = useUiContext();
+  const { t, assetsManager } = useUiContext();
   const [selectedId, setSelectedId] = createSignal<number | null>(null);
 
   return (
-    <div class="w-full h-full flex flex-col items-center justify-center select-none z-3 min-w-0 min-h-0">
+    <div
+      class="w-full h-full flex flex-col items-center justify-center select-none z-3 min-w-0 min-h-0 invisible data-[visible]:visible"
+      bool:data-visible={props.visible}
+    >
       <h3 class="h-10 font-bold text-3xl text-white/80">
         {t("view.chooseCard")}
       </h3>
@@ -59,15 +62,15 @@ export function SelectCardView(props: SelectCardViewProps) {
               }}
             >
               <div class="self-end w-35 mx--7 max-w-35 py-1 text-3 text-center text-white/80 line-height-tight translate-y-100%">
-                {props.nameGetter(cardId)}
+                {assetsManager().getNameSync(cardId)}
               </div>
             </StaticCard>
           )}
         </For>
       </div>
       <Button
-        class="invisible pointer-events-none data-[shown]:visible data-[shown]:pointer-events-auto"
-        bool:data-shown={selectedId() !== null}
+        class="visible data-[hidden]:invisible"
+        bool:data-hidden={selectedId() === null || !props.visible}
         onClick={() => {
           const id = selectedId();
           if (id !== null) {
