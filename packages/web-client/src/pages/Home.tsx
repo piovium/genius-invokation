@@ -21,7 +21,7 @@ import {
   For,
   createSignal,
   onMount,
-  createEffect,
+  onCleanup,
 } from "solid-js";
 import { Layout } from "../layouts/Layout";
 import { A, useNavigate, useSearchParams } from "@solidjs/router";
@@ -55,6 +55,12 @@ export default function Home() {
       .get("rooms")
       .then((e) => e.data.filter((r: any) => r.id !== currentRoom()?.id)),
   );
+  onMount(() => {
+    const intervalId = setInterval(() => {
+      refreshAllRooms();
+    }, 10000);
+    onCleanup(() => clearInterval(intervalId));
+  });
 
   const isLogin = () => {
     const { type } = status();
