@@ -55,15 +55,21 @@ export default function Home() {
       .get("rooms")
       .then((e) => e.data.filter((r: any) => r.id !== currentRoom()?.id)),
   );
-  let roomRefreshInterval: ReturnType<typeof setInterval> | undefined;
+  const ROOM_REFRESH_INTERVAL_MS = 10000;
+  const [roomRefreshInterval, setRoomRefreshInterval] = createSignal<
+    ReturnType<typeof setInterval> | undefined
+  >();
   onMount(() => {
-    roomRefreshInterval = setInterval(() => {
-      refreshAllRooms();
-    }, 10000);
+    setRoomRefreshInterval(
+      setInterval(() => {
+        refreshAllRooms();
+      }, ROOM_REFRESH_INTERVAL_MS),
+    );
   });
   onCleanup(() => {
-    if (roomRefreshInterval) {
-      clearInterval(roomRefreshInterval);
+    const intervalId = roomRefreshInterval();
+    if (intervalId) {
+      clearInterval(intervalId);
     }
   });
 
