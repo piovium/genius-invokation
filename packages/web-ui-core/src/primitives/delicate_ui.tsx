@@ -37,7 +37,7 @@ export type WithDelicateUiProps =
       children: (...assets: string[]) => JSX.Element;
     };
 
-const UI_ASSET_URL_BASE = `https://ui.assets.gi-tcg.guyutongxue.site/`;
+const UI_ASSET_URL_BASE = `https://ui-assets.piovium.org/`;
 
 const assetsImageCache = new Map<string, HTMLImageElement>();
 const assetsUriCache = new Map<string, string>();

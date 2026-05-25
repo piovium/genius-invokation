@@ -44,7 +44,7 @@ export function Background(props: BackgroundProps) {
   const maskId = createUniqueId();
   const isMobileSafari = () => "GestureEvent" in window;
   const maskUrl = isMobileSafari()
-    ? "https://ui.assets.gi-tcg.guyutongxue.site/NightsoulsBlessingMask.svg.webp"
+    ? "https://ui-assets.piovium.org/NightsoulsBlessingMask.svg.webp"
     : NightsoulsBlessingMask;
   return (
     <svg
