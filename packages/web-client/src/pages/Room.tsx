@@ -179,7 +179,7 @@ export default function Room() {
   const [failed, setFailed] = createSignal<null | string>(null);
   const [chessboard, setChessboard] = createSignal<Component>();
 
-  const [showOpp, setShowOpp] = createSignal(false);
+  const [observerMode, setObserverMode] = createSignal(false);
   const [oppPlayerIo, setOppPlayerIo] = createSignal<CancellablePlayerIO>();
 
   const reportStreamError = async (e: Error) => {
@@ -319,7 +319,7 @@ export default function Room() {
         case "initialized": {
           setInitialized(payload);
           if (payload?.config?.watchable && allowWatchOpp()) {
-            setShowOpp(true);
+            setObserverMode(true);
           }
           break;
         }
@@ -417,7 +417,7 @@ export default function Room() {
   );
 
   createEffect(() => {
-    if (showOpp()) {
+    if (observerMode()) {
       fetchOppNotification();
     } else {
       abortOppNotification();
@@ -501,11 +501,11 @@ export default function Room() {
                 <Show when={allowWatchOpp()}>
                   <button
                     class="btn btn-outline-primary"
-                    onClick={() => setShowOpp((v) => !v)}
+                    onClick={() => setObserverMode((v) => !v)}
                   >
                     <i class="i-mdi-video-switch-outline" />
                     <span>
-                      {t(`enter${showOpp() ? "PlayerView" : "ObserverMode"}`)}
+                      {t(`enter${observerMode() ? "PlayerView" : "ObserverMode"}`)}
                     </span>
                   </button>
                 </Show>
@@ -615,7 +615,7 @@ export default function Room() {
                     </div>
                   </div>
                 }
-                spectatorMode={showOpp()}
+                spectatorMode={observerMode()}
               />
             </div>
           )}
