@@ -65,7 +65,7 @@ export const useGuestDecks = (): GuestDeck => {
   const addGuestDeck = async (deck: DeckWithName) => {
     const id = Date.now();
     const { data } = await axios.post<VersionResponse>("decks/version", deck);
-    const deckInfo: DeckInfo = { ...data, ...deck, id };
+    const deckInfo: DeckInfo = { ...data, id };
     setGuestDeck((decks) => [...decks, deckInfo]);
     return deckInfo;
   };
@@ -83,7 +83,7 @@ export const useGuestDecks = (): GuestDeck => {
       ...oldDeck,
       ...newDeck,
     });
-    const result = { ...data, ...newDeck, id };
+    const result: DeckInfo = { ...data, id };
     setGuestDeck(
       produce((decks) => {
         decks.splice(index, 1);
