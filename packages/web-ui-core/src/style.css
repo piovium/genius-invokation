@@ -64,9 +64,7 @@
 
   .card[data-dragging-end] {
     pointer-events: none;
-    animation:
-      1s ease-in-out forwards fade-out,
-      1s ease-in-out forwards brightness-blink;
+    animation: 500ms linear forwards fade-out;
   }
 
   .card-animation {
@@ -88,16 +86,15 @@
   }
 
   .card-animation:where([data-dragging-end] > *) {
-    --effect-shadow: 0px 0px 24px 12px var(--light-golden);
-    --blink-opacity: 0;
-    animation: 1s ease-in-out forwards blink-25;
+    --effect-shadow: 0px 0px 8px 4px var(--light-golden);
+    --inset-shadow: inset 0 0 24px 12px var(--light-golden);
   }
 
   .card-animation:where([data-triggered] > *) {
     --effect-shadow: 0px 0px 12px 8px var(--light-golden);
     --inset-shadow: inset 0px 0px 12px 8px var(--light-golden);
     --blink-opacity: 0;
-    animation: 0.5s ease-in-out blink-25;
+    animation: 500ms linear blink-25;
   }
 
   .abyss-debuff {
