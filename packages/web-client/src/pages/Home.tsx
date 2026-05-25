@@ -55,11 +55,16 @@ export default function Home() {
       .get("rooms")
       .then((e) => e.data.filter((r: any) => r.id !== currentRoom()?.id)),
   );
+  let roomRefreshInterval: number | undefined;
   onMount(() => {
-    const intervalId = setInterval(() => {
+    roomRefreshInterval = window.setInterval(() => {
       refreshAllRooms();
     }, 10000);
-    onCleanup(() => clearInterval(intervalId));
+  });
+  onCleanup(() => {
+    if (roomRefreshInterval) {
+      clearInterval(roomRefreshInterval);
+    }
   });
 
   const isLogin = () => {
