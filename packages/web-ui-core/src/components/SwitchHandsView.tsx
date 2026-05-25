@@ -15,18 +15,20 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { Button } from "./Button";
-import type { ChessboardViewType } from "./Chessboard";
 import { useUiContext } from "../hooks/context";
 
 export interface SwitchHandsViewProps {
-  viewType: ChessboardViewType;
+  shown: boolean;
   onConfirm: () => void;
 }
 
 export function SwitchHandsView(props: SwitchHandsViewProps) {
   const { t } = useUiContext();
   return (
-    <div class="w-full h-full flex flex-col items-center justify-center select-none z-3 pointer-events-none min-w-0 min-h-0">
+    <div
+      class="w-full h-full hidden data-[shown]:flex flex-col items-center justify-center select-none z-3 pointer-events-none min-w-0 min-h-0 "
+      bool:data-shown={props.shown}
+    >
       <h3 class="h-10 font-bold text-3xl text-white/80 mb-66 pointer-events-none">
         {t("view.replaceHandsTitle")}
       </h3>

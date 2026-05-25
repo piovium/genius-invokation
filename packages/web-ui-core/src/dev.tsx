@@ -16,7 +16,7 @@
 /* @refresh reload */
 
 import "./index";
-import { createSignal, onMount } from "solid-js";
+import { createSignal, onMount, Show } from "solid-js";
 import { render } from "solid-js/web";
 
 import getData from "@gi-tcg/data";
@@ -70,6 +70,9 @@ function App() {
 
   const [logs, setLogs] = createSignal<DetailLogEntry[]>([]);
 
+  // Toggle me to debug oppChessboard
+  const createOpp = true;
+
   onMount(() => {
     const state = Game.createInitialState({
       data: getData(),
@@ -79,10 +82,10 @@ function App() {
 
     const game = new Game(state);
 
-    // const io0Opp = io0.oppController.open();
-
     game.players[0].io = io0;
-    game.players[1].io = io1; // mergeIo(io1, io0Opp);
+    game.players[1].io = createOpp
+      ? mergeIo(io1, io0.oppController.open())
+      : io1;
     game.players[0].config.alwaysOmni = true;
     game.players[0].config.allowTuningAnyDice = true;
     game.onIoError = console.error;
@@ -94,22 +97,23 @@ function App() {
 
   return (
     <>
-      {/*<Chessboard0
-        rotation={0}
-        style={{ width: "80vw", height: "80vh" }}
-        autoHeight={false}
-        spectatorMode
-        myPlayerInfo={{
-          avatarUrl: "https://http.cat/404",
-          name: "啊啊啊宝宝你是一个松松软软香香甜甜的小蛋糕",
-        }}
-      />*/}
+      <Show when={createOpp}>
+        <Chessboard0
+          rotation={0}
+          style={{ width: "80vw", height: "80vh" }}
+          autoHeight={false}
+          myPlayerInfo={{
+            avatarUrl: "https://http.cat/404",
+            name: "啊啊啊宝宝你是一个松松软软香香甜甜的小蛋糕",
+          }}
+        />
+      </Show>
       <Chessboard0
         rotation={0}
         style={{ width: "80vw", height: "80vh" }}
         autoHeight={false}
         chessboardColor="#537a76"
-        // spectatorMode
+        spectatorMode={createOpp}
         myPlayerInfo={{
           avatarUrl: "https://http.cat/404",
           name: "啊啊啊宝宝你是一个松松软软香香甜甜的小蛋糕",

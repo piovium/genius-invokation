@@ -50,7 +50,7 @@ import { cssPropertyOfTransform } from "../ui_state";
 import { StatusGroup } from "./StatusGroup";
 import { ActionStepEntityUi } from "../action";
 import { VariableDiff } from "./VariableDiff";
-import { StrokedTextContent } from "./StrokedText";
+import { StrokedText } from "./StrokedText";
 import DefeatedIcon from "../svg/DefeatedIcon.svg?fb";
 import HealthIcon from "../svg/HealthIcon.svg?fb";
 import BondOfLifeIcon from "../svg/BondOfLifeIcon.svg?fb";
@@ -773,7 +773,7 @@ function Health(props: HealthProps) {
           style={{ "--bg-color": `${props.isMax ? "#fef9c3dd" : "#ff000060"}` }}
         />
       </Show>
-      <StrokedTextContent
+      <StrokedText
         text={String(props.value)}
         class="mt-2.25 text-white font-bold text-4.5 text-center"
         strokeWidth={2}
