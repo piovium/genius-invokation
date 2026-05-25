@@ -179,6 +179,7 @@ export default function Room() {
   const [failed, setFailed] = createSignal<null | string>(null);
   const [chessboard, setChessboard] = createSignal<Component>();
 
+  // Enable opp chessboard & spectator mode
   const [observerMode, setObserverMode] = createSignal(false);
   const [oppPlayerIo, setOppPlayerIo] = createSignal<CancellablePlayerIO>();
 
