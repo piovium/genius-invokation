@@ -285,8 +285,14 @@ export interface ChessboardProps extends ComponentProps<"div"> {
   myPlayerInfo?: PlayerInfo;
   oppPlayerInfo?: PlayerInfo;
   gameEndExtra?: JSX.Element;
+  /**
+   * 观战模式。开启后将阻止选骰面板和特殊视图的展开。
+   */
   spectatorMode?: boolean;
   chessboardColor?: string;
+  /**
+   * 对方棋盘的信息。当传入对方棋盘信息时，将在我方棋盘同时渲染对手的手牌、骰子、技能以及特殊视图。
+   */
   opp: OppInfo | null;
   /**
    * 从 notify 传入的 state & mutations 经过解析后得到的棋盘数据
@@ -322,6 +328,9 @@ interface CardInfoCalcContext {
   hoveringHand: CardInfo | null;
   draggingHand: DraggingCardInfo | null;
   availableSteps: ActionStep[];
+  /**
+   * 控制oppHands朝向以及是否可以交互。
+   */
   hasOppChessboard: boolean;
 }
 

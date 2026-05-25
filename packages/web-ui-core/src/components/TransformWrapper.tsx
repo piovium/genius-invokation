@@ -29,6 +29,9 @@ import { funnel } from "remeda";
 
 export type Rotation = 0 | 90 | 180 | 270;
 export interface TransformWrapperProps {
+  /**
+   * 控制棋盘缩放。当 ```hasOppChessboard=true``` 时，棋盘内容将缩小一定比例以容纳更多元素。
+   */
   hasOppChessboard: boolean;
   class?: string;
   autoHeight?: boolean;
