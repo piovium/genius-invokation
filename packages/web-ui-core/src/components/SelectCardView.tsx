@@ -35,6 +35,9 @@ export interface SelectCardViewProps {
   onConfirm: (id: number) => void;
 }
 
+/**
+ * ```selectedCard``` 只向外传递，不受外部影响，一旦选择不会清除。 
+ */
 export function SelectCardView(props: SelectCardViewProps) {
   const { t } = useUiContext();
   const [selectedId, setSelectedId] = createSignal<number | null>(null);

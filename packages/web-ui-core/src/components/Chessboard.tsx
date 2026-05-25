@@ -1024,7 +1024,7 @@ type SelectingItem =
     }
   | {
       type: "external";
-      info: PbEntityState;
+      info: number | PbEntityState;
     };
 
 export function Chessboard(props: ChessboardProps) {
@@ -1065,12 +1065,20 @@ export function Chessboard(props: ChessboardProps) {
   const [selectingItem, setSelectingItem] = createSignal<SelectingItem | null>(
     null,
   );
+  const isSelectingItem = (id: number, type?: SelectingItem["type"]) => {
+    const item = selectingItem();
+    if (item === null) {
+      return false;
+    } else if (type && type !== item.type) {
+      return false;
+    } else if (typeof item.info === "number") {
+      return id === item.info;
+    } else {
+      return id === item.info.id;
+    }
+  };
   createEffect(() => {
     const item = selectingItem();
-    if (item?.type === "external") {
-      dataViewerController.showState("card", item.info);
-      return;
-    }
     if (item === null) {
       dataViewerController.hide();
     } else if (item.type === "card") {
@@ -1085,6 +1093,12 @@ export function Chessboard(props: ChessboardProps) {
       dataViewerController.showState(item.info.type, item.info.data);
     } else if (item.type === "skill") {
       dataViewerController.showSkill(item.info.id);
+    } else if (item.type === "external") {
+      if (typeof item.info === "number") {
+        dataViewerController.showCard(item.info);
+      } else {
+        dataViewerController.showState("card", item.info);
+      }
     }
   });
 
@@ -1723,9 +1737,8 @@ export function Chessboard(props: ChessboardProps) {
     setShowCardHint("myHand", null);
   };
 
-  const onMiniViewCardClick = (card: number) => {
-    setSelectingItem(null);
-    dataViewerController.showCard(card);
+  const onMiniViewCardClick = (card: number | PbEntityState) => {
+    setSelectingItem({ type: "external", info: card });
     setFocusingHands(false);
     setShowCardHint("myHand", null);
     setOppFocusingHands(false);
@@ -1798,7 +1811,7 @@ export function Chessboard(props: ChessboardProps) {
             {(character) => (
               <CharacterArea
                 {...character()}
-                selecting={character().id === selectingItem()?.info.id}
+                selecting={isSelectingItem(character().id)}
                 hidden={hasSpecialView() && specialViewVisible()}
                 onClick={(e, t) => onCharacterAreaClick(e, t, character())}
               />
@@ -1812,7 +1825,7 @@ export function Chessboard(props: ChessboardProps) {
               <Card
                 {...card()}
                 selected={
-                  card().id === selectingItem()?.info.id &&
+                  isSelectingItem(card().id, "card") &&
                   card().kind !== "dragging"
                 }
                 toBeSwitched={
@@ -1844,7 +1857,7 @@ export function Chessboard(props: ChessboardProps) {
             {(entity) => (
               <Entity
                 {...entity()}
-                selecting={entity().id === selectingItem()?.info.id}
+                selecting={isSelectingItem(entity().id)}
                 hidden={hasSpecialView() && specialViewVisible()}
                 onClick={(e, t) => onEntityClick(e, t, entity())}
               />
@@ -1971,11 +1984,17 @@ export function Chessboard(props: ChessboardProps) {
           <SelectCardView
             candidateIds={localProps.selectCardCandidates}
             onClickCard={(id) => {
-              dataViewerController.showCard(id);
+              setSelectingItem({ type: "external", info: id });
             }}
             onConfirm={(id) => {
               localProps.onSelectCard?.(id);
-              dataViewerController.hide();
+              setSelectingItem((item) => {
+                if (item?.type === "external") {
+                  return null;
+                } else {
+                  return item;
+                }
+              });
             }}
             nameGetter={(id) => assetsManager().getNameSync(id)}
           />
@@ -2031,6 +2050,7 @@ export function Chessboard(props: ChessboardProps) {
               oppSelectCardCandidates={
                 localProps.opp?.selectCardCandidates ?? []
               }
+              isSelectingItem={(id) => isSelectingItem(id, "external")}
               onCardClick={onMiniViewCardClick}
               onBackDropClick={onChessboardClick}
               showMyView={hasSpecialView()}
