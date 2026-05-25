@@ -1450,9 +1450,11 @@ export function Chessboard(props: ChessboardProps) {
     () => !hasSpecialView() || !specialViewVisible(),
   );
   /** 当特殊视图显示状态发生变化时，隐藏所有选中对象 */
-  on(specialViewVisible, () => {
-    setSelectingItem(null);
-  });
+  createEffect(
+    on(specialViewVisible, () => {
+      setSelectingItem(null);
+    }),
+  );
   /** 当存在特殊视图可用时，使其可见 */
   createEffect(() => {
     if (hasSpecialView()) {
