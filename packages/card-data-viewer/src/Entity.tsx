@@ -170,6 +170,14 @@ export function ActionCard(props: CardDataProps) {
       </Switch>
       <p class="mt-2 text-xs font-mono text-yellow-6">
         DefID: <span class="select-text">{props.input.definitionId}</span>
+        <Show when={props.input.from === "state" && props.input} keyed>
+          {(input) => (
+            <>
+              <span class="inline-block w-1em" />
+              ID: <span class="select-text">{input.id}</span>
+            </>
+          )}
+        </Show>
       </p>
     </div>
   );
@@ -328,7 +336,7 @@ export function Entity(props: ExpandableCardDataProps) {
           )}
         </Match>
       </Switch>
-      <p class="mx-2 mb-2 text-xs font-mono text-yellow-6">
+      <p class="mt-2 text-xs font-mono text-yellow-6">
         DefID: <span class="select-text">{props.input.definitionId}</span>
         <Show when={props.input.from === "state" && props.input} keyed>
           {(input) => (

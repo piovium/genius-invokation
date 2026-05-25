@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, Aura, card, DamageType, DiceType, Reaction, status } from "@gi-tcg/core/builder";
+import { $, Aura, card, DamageType, DiceType, Reaction, status, SupportHandle } from "@gi-tcg/core/builder";
 import { NoTuningAllowed, Shield } from "../../commons";
 
 /**
@@ -174,7 +174,7 @@ export const ElementalTransfigurationVaporizeBlessing = card(331005)
  * 投掷阶段：总是投出2个水元素骰和2个草元素骰。
  * 每回合第2次打出卡牌后：我方受伤最多的角色获得2点额外最大生命值。
  */
-export const BloomBlessingAmrita = card(303061)
+export const BloomBlessingAmrita: SupportHandle = card(303061)
   .costHydro(2)
   .undiscoverable()
   .support()
@@ -182,7 +182,7 @@ export const BloomBlessingAmrita = card(303061)
   .on("roll")
   .fixDice(DiceType.Hydro, 2)
   .fixDice(DiceType.Dendro, 2)
-  .on("playCard", (c, e) => e.card.id !== c.self.id)
+  .on("playCard", (c, e) => e.card.definition.id !== BloomBlessingAmrita)
   .do((c) => {
     c.addVariable("playCount", 1);
     if (c.getVariable("playCount") === 2) {
