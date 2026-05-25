@@ -98,7 +98,7 @@ function App() {
         rotation={0}
         style={{ width: "80vw", height: "80vh" }}
         autoHeight={false}
-        watchingMode
+        spectatorMode
         myPlayerInfo={{
           avatarUrl: "https://http.cat/404",
           name: "啊啊啊宝宝你是一个松松软软香香甜甜的小蛋糕",
@@ -109,7 +109,7 @@ function App() {
         style={{ width: "80vw", height: "80vh" }}
         autoHeight={false}
         chessboardColor="#537a76"
-        // watchingMode
+        // spectatorMode
         myPlayerInfo={{
           avatarUrl: "https://http.cat/404",
           name: "啊啊啊宝宝你是一个松松软软香香甜甜的小蛋糕",

@@ -126,7 +126,7 @@ export interface ClientChessboardProps extends ComponentProps<"div"> {
   timer?: RpcTimer | null;
   myPlayerInfo?: PlayerInfo;
   oppPlayerInfo?: PlayerInfo;
-  watchingMode?: boolean;
+  spectatorMode?: boolean;
   chessboardColor?: string;
   gameEndExtra?: JSX.Element;
 }

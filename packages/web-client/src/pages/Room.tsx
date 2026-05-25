@@ -15,11 +15,7 @@
 
 import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { Layout } from "../layouts/Layout";
-import {
-  PlayerInfo,
-  roomCodeToId,
-  getPlayerAvatarUrl,
-} from "../utils";
+import { PlayerInfo, roomCodeToId, getPlayerAvatarUrl } from "../utils";
 import {
   Show,
   createSignal,
@@ -503,14 +499,15 @@ export default function Room() {
               </Show>
               <Show when={initialized()?.config?.watchable}>
                 <Show when={allowWatchOpp()}>
-                  <input
-                    id="showOpp"
-                    type="checkbox"
-                    class="checkbox-primary"
-                    checked={showOpp()}
-                    onChange={(e) => setShowOpp(e.currentTarget.checked)}
-                  />
-                  <label for="showOpp">{t("showOpponentBoard")}</label>
+                  <button
+                    class="btn btn-outline-primary"
+                    onClick={() => setShowOpp((v) => !v)}
+                  >
+                    <i class="i-mdi-video-switch-outline" />
+                    <span>
+                      {t(`enter${showOpp() ? "PlayerView" : "ObserverMode"}`)}
+                    </span>
+                  </button>
                 </Show>
               </Show>
             </div>
@@ -618,7 +615,7 @@ export default function Room() {
                     </div>
                   </div>
                 }
-                watchingMode={showOpp()}
+                spectatorMode={showOpp()}
               />
             </div>
           )}
