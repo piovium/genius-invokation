@@ -1762,7 +1762,6 @@ export function Chessboard(props: ChessboardProps) {
       }`}
       ref={containerElement}
       bool:data-has-opp-chessboard={!!localProps.opp}
-      bool:data-livestreaming={localProps.spectatorMode}
       {...elProps}
     >
       <TransformWrapper
