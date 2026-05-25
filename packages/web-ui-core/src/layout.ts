@@ -50,7 +50,7 @@ const ENTITY_AREA_WIDTH = 2 * ENTITY_WIDTH + ENTITY_GAP;
 
 const HAND_CARD_BLURRED_SHOW_HEIGHT = 15;
 const HAND_CARD_BLURRED_SHOW_WIDTH = 10;
-const OPP_HAND_CARD_RIGHT_OFFSET = 21;
+const OPP_HAND_CARD_RIGHT_OFFSET = 24;
 
 const SKILL_BUTTON_WIDTH = 15;
 
@@ -138,8 +138,7 @@ export function getHandCardBlurredPos(
     let y =
       (height - MINIMUM_HEIGHT) / 2 +
       HAND_CARD_BLURRED_SHOW_HEIGHT -
-      CARD_HEIGHT -
-      3;
+      CARD_HEIGHT;
     if (!showHands) {
       y = HAND_CARD_BLURRED_SHOW_HEIGHT - CARD_HEIGHT - 2 - CARD_HEIGHT / 2;
     }
@@ -154,8 +153,7 @@ export function getHandCardBlurredPos(
     let y =
       (height - MINIMUM_HEIGHT) / 2 +
       MINIMUM_HEIGHT -
-      HAND_CARD_BLURRED_SHOW_HEIGHT +
-      2;
+      HAND_CARD_BLURRED_SHOW_HEIGHT - 1;
     if (!showHands) {
       y = height - HAND_CARD_BLURRED_SHOW_HEIGHT + 3 + CARD_HEIGHT / 2;
     }

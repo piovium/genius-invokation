@@ -393,7 +393,7 @@ function calcCardsInfo(
       (!opp && myHandState === "focusing") ||
       (opp && hasOppChessboard && oppHandState === "focusing");
     const isSwitching = !opp && myHandState === "switching";
-    const z = isSwitching ? DRAGGING_Z : isFocus ? FOCUSING_HANDS_Z : 1;
+    const z = isSwitching ? DRAGGING_Z : isFocus ? FOCUSING_HANDS_Z : 8;
     const ry = isFocus ? 1 : opp && !hasOppChessboard ? 181 : 1;
 
     let hoveringHandIndex: number | null = handCard.findIndex(
@@ -681,7 +681,7 @@ function rerenderChildren(opt: {
       transform: {
         ...getHandHintPos(size, opp, player.handCard.length, oppFocused),
         ...COUNT_HINT_TRANSFORM_BASE,
-        z: opp && !oppFocused ? 2 : FOCUSING_HANDS_Z,
+        z: opp && !oppFocused ? 8 : FOCUSING_HANDS_Z,
       },
     });
   }
