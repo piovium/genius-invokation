@@ -20,7 +20,7 @@ import CardCountHintBlue from "../svg/CardCountHintBlue.svg?fb";
 import CardCountHintYellow from "../svg/CardCountHintYellow.svg?fb";
 import type { Component, ComponentProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
-import { StrokedTextContent } from "./StrokedText";
+import { StrokedText } from "./StrokedText";
 
 export interface CardCountHintProps extends CardCountHintInfo {
   shown: boolean;
@@ -49,11 +49,11 @@ export function CardCountHint(props: CardCountHintProps) {
         class="w-9 h-9"
         style={{ transform: `rotate(${hintStyle().rotate}deg)` }}
       />
-      <StrokedTextContent
+      <StrokedText
         text={String(props.value)}
         strokeWidth={1}
         strokeColor="#000000B0"
-        class="z-1 text-white font-bold place-self-center select-none"
+        class="z-1 text-white font-bold place-self-center"
       />
     </div>
   );
