@@ -55,9 +55,9 @@ export default function Home() {
       .get("rooms")
       .then((e) => e.data.filter((r: any) => r.id !== currentRoom()?.id)),
   );
-  let roomRefreshInterval: number | undefined;
+  let roomRefreshInterval: ReturnType<typeof setInterval> | undefined;
   onMount(() => {
-    roomRefreshInterval = window.setInterval(() => {
+    roomRefreshInterval = setInterval(() => {
       refreshAllRooms();
     }, 10000);
   });
