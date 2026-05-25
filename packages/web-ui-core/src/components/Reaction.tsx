@@ -184,12 +184,12 @@ export function Reaction(props: ReactionProps) {
     >
       <Image
         imageId={baseElement()}
-        class="h-5 w-5 reaction-base"
+        class="h-5.5 w-5.5 reaction-base"
         fallback="state"
       />
       <Image
         imageId={applyElement()}
-        class="h-5 w-5 reaction-apply"
+        class="h-5.5 w-5.5 reaction-apply"
         fallback="state"
       />
       <StrokedText

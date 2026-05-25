@@ -77,7 +77,7 @@
   }
 
   .card-animation:where([data-shadow] > *) {
-    --common-shadow: 0 16px 24px 4px #0000002f;
+    --common-shadow: 0 8px 24px 4px #0000002f;
   }
 
   .card-animation:where([data-playable] > *) {

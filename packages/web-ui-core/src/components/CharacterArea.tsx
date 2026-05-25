@@ -631,7 +631,7 @@ function Aura(props: AuraProps) {
         {(reaction) => (
           <div class="flex flex-nowrap items-center bg-black/60 rounded-full shrink-0">
             <For each={reaction}>
-              {(e) => <Image imageId={e} class="h-5 w-5" fallback="state" />}
+              {(e) => <Image imageId={e} class="h-5.5 w-5.5" fallback="state" />}
             </For>
           </div>
         )}
@@ -640,7 +640,7 @@ function Aura(props: AuraProps) {
         {(aura) => (
           // aura is 0 when no element, should not render
           <Show when={aura}>
-            <Image imageId={aura} class="h-5 w-5" fallback="state" />
+            <Image imageId={aura} class="h-5.5 w-5.5" fallback="state" />
           </Show>
         )}
       </For>
