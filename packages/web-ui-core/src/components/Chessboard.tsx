@@ -1438,11 +1438,10 @@ export function Chessboard(props: ChessboardProps) {
   const displayUiComponents = createMemo(
     () => !hasSpecialView() || !specialViewVisible(),
   );
-  /** 当显示特殊视图时，隐藏所有选中对象 */
+  /** 当特殊视图显示状态发生变化时，隐藏所有选中对象 */
   createEffect(() => {
-    if (hasSpecialView() && specialViewVisible()) {
-      setSelectingItem(null);
-    }
+    specialViewVisible();
+    setSelectingItem(null);
   });
   /** 当存在特殊视图可用时，使其可见 */
   createEffect(() => {
@@ -1991,13 +1990,7 @@ export function Chessboard(props: ChessboardProps) {
             }}
             onConfirm={(id) => {
               localProps.onSelectCard?.(id);
-              setSelectingItem((item) => {
-                if (item?.type === "external") {
-                  return null;
-                } else {
-                  return item;
-                }
-              });
+              setSelectingItem(null);
             }}
           />
         </Show>
