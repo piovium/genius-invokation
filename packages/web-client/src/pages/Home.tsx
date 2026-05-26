@@ -58,10 +58,11 @@ export default function Home() {
   const ROOM_REFRESH_INTERVAL_MS = 10000;
   let roomRefreshInterval: number | null = null;
   onMount(() => {
-    roomRefreshInterval = setInterval(
-      refreshAllRooms,
-      ROOM_REFRESH_INTERVAL_MS,
-    );
+    roomRefreshInterval = setInterval(() => {
+      if (status().type !== "notLogin") {
+        refreshAllRooms();
+      }
+    }, ROOM_REFRESH_INTERVAL_MS);
   });
   onCleanup(() => {
     if (typeof roomRefreshInterval === "number") {
