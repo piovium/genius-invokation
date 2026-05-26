@@ -18,7 +18,7 @@ import { DamageType } from "@gi-tcg/typings";
 import { DICE_COLOR } from "./Dice";
 import type { DamageInfo } from "./Chessboard";
 import { createMemo } from "solid-js";
-import { StrokedTextContent } from "./StrokedText";
+import { StrokedText } from "./StrokedText";
 import DamageIcon from "../svg/DamageIcon.svg?fb";
 import HealIcon from "../svg/HealIcon.svg?fb";
 
@@ -52,7 +52,7 @@ export function Damage(props: DamageProps) {
         class="h-full w-full data-[hidden]:hidden"
         bool:data-hidden={damageType() === DamageType.Heal}
       />
-      <StrokedTextContent
+      <StrokedText
         class="font-bold text-center text-9 self-center text-nowrap"
         text={`${
           damageType() === DamageType.Heal ? "+" : "-"

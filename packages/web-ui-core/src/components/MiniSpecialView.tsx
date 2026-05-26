@@ -17,16 +17,11 @@
 import { createEffect, createSignal, For, Match, Show, Switch } from "solid-js";
 import { InlineDice } from "./Dice";
 import { StaticCard } from "./SelectCardView";
-import type { PbPlayerState } from "@gi-tcg/core";
+import type { PbEntityState, PbPlayerState } from "@gi-tcg/core";
 import type { ChessboardViewType } from "./Chessboard";
 import { useUiContext } from "../hooks/context";
 import { SpecialViewToggleButton } from "./FunctionButtonGroup";
 import { flip } from "@gi-tcg/utils";
-
-interface SelectedCardInfo {
-  who: 0 | 1;
-  id: number;
-}
 
 export interface MiniSpecialViewProps {
   opp?: boolean;
@@ -34,8 +29,8 @@ export interface MiniSpecialViewProps {
   player: PbPlayerState;
   selectCardCandidates: number[];
   visible: boolean;
-  selectedCard?: number;
-  onCardClick: (definitionId: number, id?: number) => void;
+  isSelectingItem: (defIdOrState: number | PbEntityState) => boolean;
+  onCardClick: (card: number | PbEntityState) => void;
   onBackDropClick: () => void;
 }
 
@@ -73,10 +68,10 @@ export function MiniView(props: MiniSpecialViewProps) {
                 <StaticCard
                   class="scale-50 shrink-0 mx--7"
                   cardDefinitionId={card.definitionId}
-                  selected={props.selectedCard === card.id}
+                  selected={props.isSelectingItem(card)}
                   onClick={(e) => {
                     e.stopPropagation();
-                    props.onCardClick(card.definitionId, card.id);
+                    props.onCardClick(card);
                   }}
                 />
               )}
@@ -90,7 +85,7 @@ export function MiniView(props: MiniSpecialViewProps) {
                 <StaticCard
                   class="scale-50 shrink-0 mx--7"
                   cardDefinitionId={cardId}
-                  selected={props.selectedCard === cardId}
+                  selected={props.isSelectingItem(cardId)}
                   onClick={(e) => {
                     e.stopPropagation();
                     props.onCardClick(cardId);
@@ -131,15 +126,13 @@ export interface MiniSpecialViewGroupProps {
   oppSelectCardCandidates: number[];
   showMyView: boolean;
   showOppView: boolean;
-  onCardClick: (card: number) => void;
+  isSelectingItem: (defIdOrState: number | PbEntityState) => boolean;
+  onCardClick: (card: number | PbEntityState) => void;
   onBackDropClick: () => void;
 }
 
 export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
   const [miniViewVisible, setMiniViewVisible] = createSignal(false);
-  const [selectedId, setSelectedId] = createSignal<SelectedCardInfo | null>(
-    null,
-  );
   createEffect(() => {
     setMiniViewVisible(
       props.myViewType === "selectCard" || props.oppViewType === "selectCard",
@@ -159,17 +152,9 @@ export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
           selectCardCandidates={props.mySelectCardCandidates}
           viewType={props.myViewType}
           visible={miniViewVisible()}
-          selectedCard={
-            props.who === selectedId()?.who ? selectedId()?.id : undefined
-          }
-          onCardClick={(defId, id) => {
-            setSelectedId({ who: props.who, id: id ?? defId });
-            props.onCardClick(defId);
-          }}
-          onBackDropClick={() => {
-            setSelectedId(null);
-            props.onBackDropClick();
-          }}
+          isSelectingItem={props.isSelectingItem}
+          onCardClick={props.onCardClick}
+          onBackDropClick={props.onBackDropClick}
         />
       </Show>
       <Show when={props.showOppView}>
@@ -179,17 +164,9 @@ export function MiniSpecialViewGroup(props: MiniSpecialViewGroupProps) {
           selectCardCandidates={props.oppSelectCardCandidates}
           viewType={props.oppViewType}
           visible={miniViewVisible()}
-          selectedCard={
-            flip(props.who) === selectedId()?.who ? selectedId()?.id : undefined
-          }
-          onCardClick={(defId, id) => {
-            setSelectedId({ who: flip(props.who), id: id ?? defId });
-            props.onCardClick(defId);
-          }}
-          onBackDropClick={() => {
-            setSelectedId(null);
-            props.onBackDropClick();
-          }}
+          isSelectingItem={props.isSelectingItem}
+          onCardClick={props.onCardClick}
+          onBackDropClick={props.onBackDropClick}
         />
       </Show>
     </>

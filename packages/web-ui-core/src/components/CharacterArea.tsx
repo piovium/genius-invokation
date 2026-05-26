@@ -50,7 +50,7 @@ import { cssPropertyOfTransform } from "../ui_state";
 import { StatusGroup } from "./StatusGroup";
 import { ActionStepEntityUi } from "../action";
 import { VariableDiff } from "./VariableDiff";
-import { StrokedTextContent } from "./StrokedText";
+import { StrokedText } from "./StrokedText";
 import DefeatedIcon from "../svg/DefeatedIcon.svg?fb";
 import HealthIcon from "../svg/HealthIcon.svg?fb";
 import BondOfLifeIcon from "../svg/BondOfLifeIcon.svg?fb";
@@ -631,7 +631,7 @@ function Aura(props: AuraProps) {
         {(reaction) => (
           <div class="flex flex-nowrap items-center bg-black/60 rounded-full shrink-0">
             <For each={reaction}>
-              {(e) => <Image imageId={e} class="h-5 w-5" fallback="state" />}
+              {(e) => <Image imageId={e} class="h-5.5 w-5.5" fallback="state" />}
             </For>
           </div>
         )}
@@ -640,7 +640,7 @@ function Aura(props: AuraProps) {
         {(aura) => (
           // aura is 0 when no element, should not render
           <Show when={aura}>
-            <Image imageId={aura} class="h-5 w-5" fallback="state" />
+            <Image imageId={aura} class="h-5.5 w-5.5" fallback="state" />
           </Show>
         )}
       </For>
@@ -773,7 +773,7 @@ function Health(props: HealthProps) {
           style={{ "--bg-color": `${props.isMax ? "#fef9c3dd" : "#ff000060"}` }}
         />
       </Show>
-      <StrokedTextContent
+      <StrokedText
         text={String(props.value)}
         class="mt-2.25 text-white font-bold text-4.5 text-center"
         strokeWidth={2}
