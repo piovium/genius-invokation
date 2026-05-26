@@ -25,14 +25,14 @@ const UI_ASSET_URL_BASE = "https://ui-assets.piovium.org/";
 
 // 骰子类型到颜色名称的映射
 const DICE_TYPE_TO_COLOR: Record<number, string> = {
-  [DiceType.Cryo]: "cryo",
-  [DiceType.Hydro]: "hydro",
-  [DiceType.Pyro]: "pyro",
-  [DiceType.Electro]: "electro",
-  [DiceType.Anemo]: "anemo",
-  [DiceType.Geo]: "geo",
-  [DiceType.Dendro]: "dendro",
-  [DiceType.Omni]: "omni",
+  [DiceType.Cryo]: "Cryo",
+  [DiceType.Hydro]: "Hydro",
+  [DiceType.Pyro]: "Pyro",
+  [DiceType.Electro]: "Electro",
+  [DiceType.Anemo]: "Anemo",
+  [DiceType.Geo]: "Geo",
+  [DiceType.Dendro]: "Dendro",
+  [DiceType.Omni]: "Omni",
 };
 
 export function DiceIcon(props: DiceIconProps) {
@@ -41,7 +41,7 @@ export function DiceIcon(props: DiceIconProps) {
     if (!colorName) {
       return void 0;
     }
-    return `${UI_ASSET_URL_BASE}UI_Gcg_DiceL_${colorName}_Glow_02.webp`;
+    return `${UI_ASSET_URL_BASE}Dice${colorName}S.svg.webp`;
   });
 
   return (
