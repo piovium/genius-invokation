@@ -24,7 +24,7 @@ import {
   onCleanup,
 } from "solid-js";
 import { Layout } from "../layouts/Layout";
-import { A, useNavigate, useSearchParams } from "@solidjs/router";
+import { A, useNavigate } from "@solidjs/router";
 import axios, { AxiosError } from "axios";
 import { DeckBriefInfo } from "../components/DeckBriefInfo";
 import { RoomDialog } from "../components/RoomDialog";
@@ -45,15 +45,20 @@ export default function Home() {
   const [roomCodeValid, setRoomCodeValid] = createSignal(false);
   let createRoomDialogEl!: HTMLDialogElement;
   let joinRoomDialogEl!: HTMLDialogElement;
-  const [joiningRoomInfo, setJoiningRoomInfo] = createSignal<any>();
+  const [joiningRoomInfo, setJoiningRoomInfo] = createSignal<
+    RoomInfo | undefined
+  >();
 
   const [currentRoom] = createResource(() =>
     axios.get("rooms/current").then((r) => r.data),
   );
-  const [allRooms, { refetch: refreshAllRooms }] = createResource(() =>
-    axios
-      .get("rooms")
-      .then((e) => e.data.filter((r: any) => r.id !== currentRoom()?.id)),
+  const [allRooms, { refetch: refreshAllRooms }] = createResource<RoomInfo[]>(
+    () =>
+      axios
+        .get("rooms")
+        .then((e) =>
+          e.data.filter((r: RoomInfo) => r.id !== currentRoom()?.id),
+        ),
   );
   const ROOM_REFRESH_INTERVAL_MS = 10000;
   let roomRefreshInterval: number | null = null;
@@ -105,7 +110,7 @@ export default function Home() {
       setJoiningRoomInfo();
     }
   };
-  const joinRoomByInfo = (roomInfo: any) => {
+  const joinRoomByInfo = (roomInfo: RoomInfo) => {
     if (!decks().count) {
       alert(t("createDeckFirst"));
       navigate("/decks/new");
@@ -244,9 +249,6 @@ export default function Home() {
                   </h4>
                   <ul class="grid scrollbar-thin-hover grid w-full grid-cols-1 gap-2 md:grid-cols-[repeat(auto-fill,minmax(360px,1fr))] md:gap-3 md:overflow-y-auto">
                     <Switch>
-                      <Match when={allRooms.loading}>
-                        <div class="text-gray-500">{t("roomInfoLoading")}</div>
-                      </Match>
                       <Match when={allRooms.error}>
                         <div class="text-red-500">
                           {t("roomInfoLoadFailed", {
@@ -256,6 +258,10 @@ export default function Home() {
                                 : allRooms.error,
                           })}
                         </div>
+                      </Match>
+                      {/* show loading text when no rooms and loading/refetching */}
+                      <Match when={allRooms.loading && !allRooms()?.length}>
+                        <div class="text-gray-500">{t("roomInfoLoading")}</div>
                       </Match>
                       <Match when={true}>
                         <For

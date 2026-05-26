@@ -20,11 +20,15 @@ import { getPlayerAvatarUrl, roomIdToCode } from "../utils";
 import type { PlayerInfo } from "../utils";
 import { useI18n } from "../i18n";
 
-export interface RoomInfoProps {
+export interface RoomInfo {
   id: number;
   watchable: boolean;
+  config: any;
   players: PlayerInfo[];
-  onJoin?: (roomInfo: RoomInfoProps) => void;
+}
+
+export interface RoomInfoProps extends RoomInfo {
+  onJoin?: (roomInfo: RoomInfo) => void;
 }
 
 export function RoomInfo(props: RoomInfoProps) {
