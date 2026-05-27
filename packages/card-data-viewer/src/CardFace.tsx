@@ -31,7 +31,7 @@ export function CardFace(props: CardFaceProps) {
   const frameUrl = `${UI_ASSET_URL_BASE}CardFrameNormal.svg.webp`;
   return (
     <div class="grid children:grid-area-[1/1] card-face">
-      <Show when={image()} fallback={<div class="w-full h-full bg-black/50" />}>
+      <Show when={image()} fallback={<div class="w-full h-full bg-black/50 rounded-[1em]" />}>
         {(image) => <img src={image()} class="w-full h-full" />}
       </Show>
       <img src={frameUrl} class="w-full h-full" />

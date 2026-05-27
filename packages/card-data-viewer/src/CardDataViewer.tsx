@@ -13,7 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { AnyState } from "@gi-tcg/core";
 import type {
   PbAttachmentState,
   PbCharacterState,
@@ -25,7 +24,9 @@ import {
   createSignal,
   ErrorBoundary,
   For,
+  Match,
   Show,
+  Switch,
 } from "solid-js";
 import { ActionCard, Character, Entity, Keyword, Skill } from "./Entity";
 import { useAssetsManager } from "./context";
@@ -70,9 +71,21 @@ export function CardDataViewerContainer(props: CardDataViewerContainerProps) {
 function CardDataViewer(props: CardDataViewerProps) {
   const { t } = useAssetsManager();
   const grouped = createMemo(() => Object.groupBy(props.inputs, (i) => i.type));
-  const hasStatuses = () => {
+  const subEntities = () => {
+    const render: (ViewerInput | SubStateType)[] = [];
     const g = grouped();
-    return g.equipment || g.status || g.combatStatus || g.attachment;
+    for (const t of [
+      "attachment",
+      "status",
+      "combatStatus",
+      "equipment",
+    ] as SubStateType[]) {
+      if (g[t]?.length) {
+        render.push(t);
+        render.push(...g[t]);
+      }
+    }
+    return render;
   };
 
   const [explainKeyword, setExplainKeyword] = createSignal<number | null>(null);
@@ -98,11 +111,7 @@ function CardDataViewer(props: CardDataViewerProps) {
         <For each={grouped().character}>
           {(input) => (
             <div class="card-panel">
-              <Character
-                {...props}
-                input={input}
-                onRequestExplain={onRequestExplain}
-              />
+              <Character input={input} onRequestExplain={onRequestExplain} />
             </div>
           )}
         </For>
@@ -110,8 +119,6 @@ function CardDataViewer(props: CardDataViewerProps) {
           {(input) => (
             <div class="card-panel">
               <ActionCard
-                class="min-h-0"
-                {...props}
                 input={input}
                 onRequestExplain={onRequestExplain}
               />
@@ -122,70 +129,30 @@ function CardDataViewer(props: CardDataViewerProps) {
           {(input) => (
             <div class="card-panel">
               <Skill
-                class="min-h-0"
-                {...props}
                 input={input}
                 onRequestExplain={onRequestExplain}
               />
             </div>
           )}
         </For>
-        <Show when={hasStatuses()}>
+        <Show when={subEntities()?.length}>
           <div class="card-panel">
-            <Show when={grouped().equipment?.length}>
-              <h3 class="text-yellow-7 mb-2">{t("equipment")}</h3>
-            </Show>
-            <For each={grouped().equipment}>
-              {(input) => (
-                <Entity
-                  class="b-yellow-3 b-1 rounded-md mb-2"
-                  {...props}
-                  input={input}
-                  asChild
-                  onRequestExplain={onRequestExplain}
-                />
-              )}
-            </For>
-            <Show when={grouped().status?.length}>
-              <h3 class="text-yellow-7 mb-2">{t("status")}</h3>
-            </Show>
-            <For each={grouped().status}>
-              {(input) => (
-                <Entity
-                  class="b-yellow-3 b-1 rounded-md mb-2"
-                  {...props}
-                  input={input}
-                  asChild
-                  onRequestExplain={onRequestExplain}
-                />
-              )}
-            </For>
-            <Show when={grouped().combatStatus?.length}>
-              <h3 class="text-yellow-7 mb-2">{t("combatStatus")}</h3>
-            </Show>
-            <For each={grouped().combatStatus}>
-              {(input) => (
-                <Entity
-                  class="b-yellow-3 b-1 rounded-md mb-2"
-                  {...props}
-                  input={input}
-                  asChild
-                  onRequestExplain={onRequestExplain}
-                />
-              )}
-            </For>
-            <Show when={grouped().attachment?.length}>
-              <h3 class="text-yellow-7 mb-2">{t("attachmentStatus")}</h3>
-            </Show>
-            <For each={grouped().attachment}>
-              {(input) => (
-                <Entity
-                  class="b-yellow-3 b-1 rounded-md mb-2"
-                  {...props}
-                  input={input}
-                  asChild
-                  onRequestExplain={onRequestExplain}
-                />
+            <For each={subEntities()}>
+              {(entity) => (
+                <Switch>
+                  <Match when={typeof entity === "string"}>
+                    <h3 class="w-full text-center rounded-full entity-category">
+                      {t(entity as SubStateType)}
+                    </h3>
+                  </Match>
+                  <Match when={true}>
+                    <Entity
+                      input={entity as ViewerInput}
+                      asChild
+                      onRequestExplain={onRequestExplain}
+                    />
+                  </Match>
+                </Switch>
               )}
             </For>
           </div>

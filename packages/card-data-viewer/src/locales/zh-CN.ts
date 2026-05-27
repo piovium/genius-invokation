@@ -19,7 +19,7 @@ export default {
   equipment: "角色装备",
   status: "角色状态",
   combatStatus: "阵营出战状态",
-  attachmentStatus: "附着效果状态",
+  attachment: "附着效果状态",
   rulesExplanation: "规则解释：",
   skillNormal: "普通攻击",
   skillElemental: "元素战技",

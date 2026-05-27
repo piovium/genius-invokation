@@ -7,13 +7,12 @@
   gap: 0.5em;
   min-height: 0;
 
-
   height: 100%;
   width: 100%;
 
   font-size: 1rem;
 
-  --panel-width: 18em; 
+  --panel-width: 18em;
   --card-width: 10em;
   /*
   --panel-background-color: #fef9c3;
@@ -22,31 +21,19 @@
   --text-color-content: var(--text-color-header);
   */
 
-  --panel-background-color: #2E3740;
-  --panel-border-color: #404D5C;
-  --text-color-h1: #CAD8EA;
-  --text-color-h2: #EDE5DA;
-  --text-color-h3: #D3BC8E;
+  --panel-background-color: #2e3740;
+  --panel-border-color: #404d5c;
+  --text-color-h1: #cad8ea;
+  --text-color-h2: #ede5da;
+  --text-color-h3: #d3bc8e;
   --text-color-h4: #758498;
-  --text-color-content: #B2AFA8;
-  --text-color-strong: #FFFFFF;
-  --item-background-color: #22292F;
-  --item-border-color: #434E5A;
-  --catalog-background-color: #252D37;
-  --keyword-border-color: #62686F;
+  --text-color-content: #b2afa8;
+  --text-color-strong: #ffffff;
+  --item-background-color: #22292f;
+  --item-border-color: #434e5a;
+  --category-background-color: #252d37;
+  --keyword-border-color: #62686f;
   --id-color: #ca8a04;
-
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background-color: darkgoldenrod;
-    border: 3px solid transparent;
-    border-radius: 5px;
-    background-clip: padding-box;
-  }
 
   .card-face {
     width: var(--card-width);
@@ -56,14 +43,17 @@
   .card-panel {
     position: relative;
     width: var(--panel-width, 18em);
-    padding: 0.5em;
+    padding: 0.5em 0.25em 0.5em 0.5em;
     border-radius: 0.375em;
     border: 0.125em solid var(--panel-border-color);
     color: var(--text-color-content);
     background-color: var(--panel-background-color);
-    overflow: auto;
+    overflow-y: auto;
     max-height: 100%;
+    min-height: 0;
     pointer-events: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--panel-border-color) transparent;
   }
 
   .card-name {
@@ -169,9 +159,23 @@
     font-size: 0.75em;
   }
 
+  .entity-category {
+    background-color: var(--category-background-color);
+    color: var(--text-color-h4);
+    padding: 0.125em;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+  }
+  
+  .entity-category:not(:first-child) {
+    margin-top: 0.5em;
+  }
+
+
   .entity-variable {
     width: 1.25em;
     height: 1.25em;
+    font-size: 1em;
     text-align: center;
     line-height: 1.25em;
     background-color: var(--keyword-border-color);

@@ -6,7 +6,7 @@ export default {
   equipment: "Character Equipment",
   status: "Character Status",
   combatStatus: "Team Combat Status",
-  attachmentStatus: "Applied Effect Status",
+  attachment: "Applied Effect Status",
   rulesExplanation: "Detailed Rules:",
   skillNormal: "Normal Attack",
   skillElemental: "Elemental Skill",

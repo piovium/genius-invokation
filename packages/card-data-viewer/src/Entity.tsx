@@ -18,17 +18,12 @@ import {
   createMemo,
   createResource,
   createSignal,
-  createUniqueId,
   For,
   Match,
   Show,
   Switch,
 } from "solid-js";
-import type {
-  PbAttachmentState,
-  PbCharacterState,
-  PbEntityState,
-} from "@gi-tcg/typings";
+import type { PbCharacterState, PbEntityState } from "@gi-tcg/typings";
 import type { ViewerInput } from "./CardDataViewer";
 import type {
   ActionCardRawData,
@@ -213,7 +208,7 @@ export function Skill(props: ExpandableCardDataProps) {
   });
   return (
     <details
-      class={`flex flex-col skill-wrap group ${props.class ?? ""}`}
+      class={`flex flex-col min-h-0 skill-wrap group ${props.class ?? ""}`}
       open={!props.asChild}
     >
       <summary class="flex flex-row items-center p-[0.25em] gap-[0.25em] cursor-pointer skill-header">
@@ -233,7 +228,9 @@ export function Skill(props: ExpandableCardDataProps) {
           </h3>
           <div class="flex flex-row items-center">
             <span class="skill-type mr-[0.5em]">{skillTypeText()}</span>
-            <PlayCostList playCost={playCost()} />
+            <Show when={data()?.type !== "GCG_SKILL_TAG_PASSIVE"}>
+              <PlayCostList playCost={playCost()} />
+            </Show>
           </div>
         </div>
       </summary>
@@ -285,7 +282,7 @@ export function Entity(props: ExpandableCardDataProps) {
   });
   return (
     <details
-      class={`flex flex-col skill-wrap group ${props.class ?? ""}`}
+      class={`flex flex-col min-h-0 skill-wrap group ${props.class ?? ""}`}
       open={!props.asChild}
     >
       <summary class="flex flex-row items-center p-[0.25em] gap-[0.25em] cursor-pointer skill-header">
