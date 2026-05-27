@@ -10,30 +10,60 @@
   height: 100%;
   width: 100%;
 
-  font-size: 1rem;
-
   --panel-width: 18em;
   --card-width: 10em;
-  /*
+
   --panel-background-color: #fef9c3;
   --panel-border-color: #854d0e;
-  --text-color-header: #713f12;
-  --text-color-content: var(--text-color-header);
-  */
-
-  --panel-background-color: #2e3740;
-  --panel-border-color: #404d5c;
-  --text-color-h1: #cad8ea;
-  --text-color-h2: #ede5da;
-  --text-color-h3: #d3bc8e;
-  --text-color-h4: #758498;
-  --text-color-content: #b2afa8;
-  --text-color-strong: #ffffff;
-  --item-background-color: #22292f;
-  --item-border-color: #434e5a;
-  --category-background-color: #252d37;
-  --reference-border-color: #62686f;
+  --text-color-h1: #713f12;
+  --text-color-h2: #713f12;
+  --text-color-h3: #ca8a04;
+  --text-color-h4: #fef9c3;
+  --text-color-content: #854d0e;
+  --text-color-strong: #000000;
+  --item-background-color: #fef08a;
+  --item-border-color: #eab308;
+  --tag-background-color: #854d0e;
+  --category-background-color: #eab308;
+  --reference-border-color: #854d0e;
+  --skill-icon-color: #713f12;
   --id-color: #ca8a04;
+
+  &[data-light] {
+    --panel-background-color: #f7f7eb;
+    --panel-border-color: #b4967e;
+    --text-color-h1: #716864;
+    --text-color-h2: #716864;
+    --text-color-h3: #b4967e;
+    --text-color-h4: #fefef4;
+    --text-color-content: #716864;
+    --text-color-strong: #4b2300;
+    --item-background-color: #f0eadd;
+    --item-border-color: #b4967e;
+    --tag-background-color: #cab5a1;
+    --category-background-color: #cab5a1;
+    --reference-border-color: #b4967e;
+    --skill-icon-color: #716864;
+    --id-color: #ca8a04;
+  }
+
+  &[data-dark] {
+    --panel-background-color: #2e3740;
+    --panel-border-color: #404d5c;
+    --text-color-h1: #cad8ea;
+    --text-color-h2: #ede5da;
+    --text-color-h3: #d3bc8e;
+    --text-color-h4: #758498;
+    --text-color-content: #b2afa8;
+    --text-color-strong: #ffffff;
+    --item-background-color: #22292f;
+    --item-border-color: #434e5a;
+    --tag-background-color: #cad8ea;
+    --category-background-color: #252d37;
+    --reference-border-color: #62686f;
+    --skill-icon-color: #ffffff;
+    --id-color: #ca8a04;
+  }
 
   .card-face {
     width: var(--card-width);
@@ -68,7 +98,7 @@
   }
 
   .card-tag {
-    background-color: var(--text-color-h1);
+    background-color: var(--tag-background-color);
     color: var(--panel-background-color);
     font-size: 0.875em;
     font-weight: bold;
@@ -90,7 +120,7 @@
     width: 3em;
     height: 3em;
     mask-size: 3em 3em;
-    background-color: var(--text-color-strong);
+    background-color: var(--skill-icon-color);
   }
 
   .skill-name {
@@ -179,8 +209,8 @@
     font-size: 1em;
     text-align: center;
     line-height: 1.25em;
-    background-color: var(--reference-border-color);
-    color: var(--text-color-strong);
+    background-color: #333e;
+    color: white;
   }
 
   .keyword-name {
