@@ -14,64 +14,60 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { PlayCost } from "@gi-tcg/assets-manager";
-import { For } from "solid-js";
+import { For, Show } from "solid-js";
 
 export interface PlayCostProps {
   playCost: PlayCost[];
 }
 
-const COLOR_MAP: Record<string, string> = {
-  GCG_COST_DICE_VOID: "#4a4a4a",
-  GCG_COST_DICE_ELECTRO: "#b380ff",
-  GCG_COST_DICE_PYRO: "#ff9955",
-  GCG_COST_DICE_DENDRO: "#a5c83b",
-  GCG_COST_DICE_CRYO: "#55ddff",
-  GCG_COST_DICE_GEO: "#ffcc00",
-  GCG_COST_DICE_HYDRO: "#3e99ff",
-  GCG_COST_DICE_ANEMO: "#80ffe6",
-  GCG_COST_DICE_SAME: "#dcd4c2",
-  GCG_COST_ENERGY: "#d0cc51",
+const UI_ASSET_URL_BASE = "https://ui-assets.piovium.org/";
+
+export const COST_ICON_MAP: Record<string, string> = {
+  GCG_COST_DICE_VOID: "DiceVoid",
+  GCG_COST_DICE_CRYO: "DiceCryo",
+  GCG_COST_DICE_HYDRO: "DiceHydro",
+  GCG_COST_DICE_PYRO: "DicePyro",
+  GCG_COST_DICE_ELECTRO: "DiceElectro",
+  GCG_COST_DICE_ANEMO: "DiceAnemo",
+  GCG_COST_DICE_GEO: "DiceGeo",
+  GCG_COST_DICE_DENDRO: "DiceDendro",
+  GCG_COST_DICE_SAME: "DiceSame",
+  GCG_COST_ENERGY: "DiceEnergyNormal",
+  GCG_COST_LEGEND: "DiceLegend",
+  GCG_COST_SPECIAL_ENERGY: "DiceEnergyMavuika",
+  GCG_COST_SKIRK_SPECIAL_ENERGY: "DiceEnergySkirk",
 };
 
 export function PlayCostList(props: PlayCostProps) {
-  const glyph = (type: string) => {
-    if (type === "GCG_COST_LEGEND") {
-      return "";
-    } else if (type === "GCG_COST_ENERGY") {
-      return "\u2726";
+  const getIconUrl = (type: string) =>
+    `${UI_ASSET_URL_BASE}${COST_ICON_MAP[type]}.svg.webp`;
+
+  const renderCost = () => {
+    if (props.playCost.length > 0) {
+      if (
+        props.playCost.length === 1 &&
+        props.playCost[0].type === "GCG_COST_LEGEND"
+      ) {
+        return [{ type: "GCG_COST_DICE_SAME", count: 0 }, ...props.playCost];
+      }
+      return props.playCost;
     } else {
-      return "\u2b22";
-    }
-  };
-  const textColor = (type: string) => {
-    if (["GCG_COST_ENERGY", "GCG_COST_DICE_SAME"].includes(type)) {
-      return "black";
-    } else {
-      return "white";
+      return [{ type: "GCG_COST_DICE_SAME", count: 0 }];
     }
   };
 
   return (
-    <div class="flex flex-row">
-      <For each={props.playCost}>
+    <>
+      <For each={renderCost()}>
         {(item) => (
-          <div class="relative">
-            <div
-              class="line-height-none text-2xl data-[legend]:w-3 data-[legend]:h-3 data-[legend]:bg-gradient-to-r data-[legend]:rotate-45 from-purple-500 to-blue-500"
-              bool:data-legend={item.type === "GCG_COST_LEGEND"}
-              style={{ color: COLOR_MAP[item.type] }}
-            >
-              {glyph(item.type)}
-            </div>
-            <div
-              class="line-height-none absolute left-50% top-50% translate-x--50% translate-y--50% text-xs"
-              style={{ color: textColor(item.type) }}
-            >
-              {item.count}
-            </div>
+          <div class="grid place-items-center children:grid-area-[1/1]">
+            <img class="w-[1.5em] h-[1.5em]" src={getIconUrl(item.type)} />
+            <Show when={item.type !== "GCG_COST_LEGEND"}>
+              <div class="play-cost">{item.count}</div>
+            </Show>
           </div>
         )}
       </For>
-    </div>
+    </>
   );
 }

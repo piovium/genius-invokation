@@ -15,13 +15,20 @@
 
 import {
   createEffect,
+  createMemo,
   createResource,
   createSignal,
+  createUniqueId,
   For,
   Match,
   Show,
   Switch,
 } from "solid-js";
+import type {
+  PbAttachmentState,
+  PbCharacterState,
+  PbEntityState,
+} from "@gi-tcg/typings";
 import type { ViewerInput } from "./CardDataViewer";
 import type {
   ActionCardRawData,
@@ -36,6 +43,7 @@ import { Description } from "./Description";
 import { Tags } from "./Tags";
 import { typeTagText } from "./text_map";
 import { useAssetsManager } from "./context";
+import { IdBox } from "./IdBox";
 
 export interface CardDataProps {
   class?: string;
@@ -45,6 +53,13 @@ export interface CardDataProps {
 }
 
 export function Character(props: CardDataProps) {
+  const state = createMemo(() => {
+    if (props.input.from === "definitionId") {
+      return null;
+    } else {
+      return props.input.state as PbCharacterState;
+    }
+  });
   const { assetsManager, t } = useAssetsManager();
   const [data] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
@@ -54,6 +69,12 @@ export function Character(props: CardDataProps) {
     () => [props.input.definitionId, assetsManager()] as const,
     ([defId, manager]) => manager.getImageUrl(defId, { type: "icon" }),
   );
+  const hpText = () =>
+    state() ? `${state()!.health}/${state()!.maxHealth}` : `${data()!.hp}`;
+  const mpText = () =>
+    state()
+      ? `${state()!.energy}/${state()!.maxEnergy}`
+      : `${data()!.maxEnergy}`;
   return (
     <div class={props.class}>
       <Switch>
@@ -63,21 +84,21 @@ export function Character(props: CardDataProps) {
           {(data) => (
             <>
               <Show when={props.includesImage}>
-                <div class="w-15 float-start mr-3 mb-3">
+                <div class="w-[3.75em] h-[3.75em] float-start mr-[0.5em] mb-[0.5em]">
                   <Show when={image()}>
-                    {(image) => <img src={image()} class="w-full" />}
+                    {(image) => <img src={image()} class="w-full h-full" />}
                   </Show>
                 </div>
               </Show>
-              <h3 class="font-bold mb-1">{data().name}</h3>
-              <dl class="flex flex-row gap-1 mb-1 text-sm">
+              <h3 class="card-name">{data().name}</h3>
+              <dl class="flex flex-row gap-[0.25em] mb-[0.25em] card-info">
                 <dt>HP</dt>
-                <dd class="font-bold">{data().hp}</dd>
+                <dd class="font-bold">{hpText()}</dd>
                 <dt>&nbsp;&nbsp;&nbsp;MP</dt>
-                <dd class="font-bold">{data().maxEnergy}</dd>
+                <dd class="font-bold">{mpText()}</dd>
               </dl>
               <Tags tags={data().tags} />
-              <ul class="clear-both flex flex-col gap-2">
+              <ul class="clear-both flex flex-col gap-[0.5em]">
                 <For each={data().skills}>
                   {(skill) => (
                     <Show when={!skill.hidden}>
@@ -89,7 +110,6 @@ export function Character(props: CardDataProps) {
                           definitionId: skill.id,
                         }}
                         asChild
-                        class="b-yellow-3 b-1 rounded-md"
                       />
                     </Show>
                   )}
@@ -99,22 +119,22 @@ export function Character(props: CardDataProps) {
           )}
         </Match>
       </Switch>
-      <p class="mt-2 text-xs font-mono text-yellow-6">
-        DefID: <span class="select-text">{props.input.definitionId}</span>
-        <Show when={props.input.from === "state" && props.input} keyed>
-          {(input) => (
-            <>
-              <span class="inline-block w-1em" />
-              ID: <span class="select-text">{input.id}</span>
-            </>
-          )}
-        </Show>
-      </p>
+      <IdBox
+        defId={props.input.definitionId}
+        id={state() ? state()!.id : void 0}
+      />
     </div>
   );
 }
 
 export function ActionCard(props: CardDataProps) {
+  const state = createMemo(() => {
+    if (props.input.from === "definitionId") {
+      return null;
+    } else {
+      return props.input.state as PbEntityState;
+    }
+  });
   const { assetsManager, t } = useAssetsManager();
   const [data] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
@@ -133,16 +153,18 @@ export function ActionCard(props: CardDataProps) {
           {(data) => (
             <>
               <Show when={props.includesImage}>
-                <div class="w-19 float-start mr-2 mb-0">
+                <div class="w-[4em] float-start mr-2">
                   <Show when={image()}>
                     {(image) => <img src={image()} class="w-full" />}
                   </Show>
                 </div>
               </Show>
-              <div class="flex flex-col mb-2">
-                <h3 class="font-bold">{data().name}</h3>
-                <div class="h-6 flex flex-row items-center gap-1">
-                  <span class="text-xs">{typeTagText(data().type, t)}</span>
+              <div class="flex flex-col mb-[0.25em]">
+                <h3 class="card-name">{data().name}</h3>
+                <div class="flex flex-row items-center">
+                  <span class="skill-type mr-[0.5em]">
+                    {typeTagText(data().type, t)}
+                  </span>
                   <PlayCostList playCost={data().playCost} />
                 </div>
               </div>
@@ -150,11 +172,7 @@ export function ActionCard(props: CardDataProps) {
               <div>
                 <Description
                   {...props}
-                  keyMap={
-                    props.input.from === "state"
-                      ? props.input.descriptionDictionary
-                      : {}
-                  }
+                  keyMap={state() ? state()!.descriptionDictionary : {}}
                   definitionId={props.input.definitionId}
                   description={
                     (props.input.from === "state" &&
@@ -168,17 +186,10 @@ export function ActionCard(props: CardDataProps) {
           )}
         </Match>
       </Switch>
-      <p class="mt-2 text-xs font-mono text-yellow-6">
-        DefID: <span class="select-text">{props.input.definitionId}</span>
-        <Show when={props.input.from === "state" && props.input} keyed>
-          {(input) => (
-            <>
-              <span class="inline-block w-1em" />
-              ID: <span class="select-text">{input.id}</span>
-            </>
-          )}
-        </Show>
-      </p>
+      <IdBox
+        defId={props.input.definitionId}
+        id={state() ? state()!.id : void 0}
+      />
     </div>
   );
 }
@@ -210,33 +221,36 @@ export function Skill(props: ExpandableCardDataProps) {
   });
   return (
     <details
-      class={`flex flex-col group ${props.class ?? ""}`}
+      class={`flex flex-col skill-wrap group ${props.class ?? ""}`}
       open={!props.asChild}
     >
-      <summary class="flex flex-row items-center gap-2 cursor-pointer rounded-md group-not-open:bg-yellow-2 transition-colors">
-        <div class="w-12 h-12">
-          <Show when={icon()}>
-            {(icon) => <img src={icon()} class="w-full h-full skill-icon" />}
-          </Show>
-        </div>
+      <summary class="flex flex-row items-center p-[0.25em] gap-[0.25em] cursor-pointer skill-header">
+        <Show when={icon()} fallback={<div class="w-[3em] h-[3em]" />}>
+          {(icon) => (
+            <div
+              class="skill-icon"
+              style={{ "mask-image": `url(${icon()})` }}
+            />
+          )}
+        </Show>
         <div class="flex flex-col">
-          <h3>
+          <h3 class="skill-name">
             {data()?.name ??
               assetsManager().getNameSync(props.input.definitionId) ??
               props.input.definitionId}
           </h3>
-          <div class="h-5 flex flex-row items-center gap-1">
-            <span class="text-xs">{skillTypeText()}</span>
+          <div class="flex flex-row items-center">
+            <span class="skill-type mr-[0.5em]">{skillTypeText()}</span>
             <PlayCostList playCost={playCost()} />
           </div>
         </div>
       </summary>
-      <Switch>
-        <Match when={data.error}>{t("loadFailed")}</Match>
-        <Match when={data.state === "pending"}>{t("loading")}</Match>
-        <Match when={data()}>
-          {(data) => (
-            <div class="p-2">
+      <div class="p-[0.5em]">
+        <Switch>
+          <Match when={data.error}>{t("loadFailed")}</Match>
+          <Match when={data.state === "pending"}>{t("loading")}</Match>
+          <Match when={data()}>
+            {(data) => (
               <Description
                 {...props}
                 definitionId={props.input.definitionId}
@@ -244,23 +258,23 @@ export function Skill(props: ExpandableCardDataProps) {
                 keyMap={data().keyMap}
                 onRequestExplain={props.onRequestExplain}
               />
-            </div>
-          )}
-        </Match>
-      </Switch>
-      <p
-        class="text-xs font-mono text-yellow-6"
-        classList={{
-          "mx-2 mb-2": props.asChild,
-        }}
-      >
-        DefID: <span class="select-text">{props.input.definitionId}</span>
-      </p>
+            )}
+          </Match>
+        </Switch>
+        <IdBox defId={props.input.definitionId} />
+      </div>
     </details>
   );
 }
 
 export function Entity(props: ExpandableCardDataProps) {
+  const state = createMemo(() => {
+    if (props.input.from === "definitionId") {
+      return null;
+    } else {
+      return props.input.state as PbEntityState;
+    }
+  });
   const { assetsManager, t } = useAssetsManager();
   const [data] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
@@ -268,7 +282,7 @@ export function Entity(props: ExpandableCardDataProps) {
   );
   const [icon] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId),
+    ([defId, manager]) => manager.getImageUrl(defId, { type: "icon" }),
   );
   const [entityTypeText, setEntityTypeText] = createSignal("");
 
@@ -279,74 +293,56 @@ export function Entity(props: ExpandableCardDataProps) {
   });
   return (
     <details
-      class={`flex flex-col group ${props.class ?? ""}`}
+      class={`flex flex-col skill-wrap group ${props.class ?? ""}`}
       open={!props.asChild}
     >
-      <summary class="flex flex-row items-center gap-2 cursor-pointer rounded-md group-not-open:bg-yellow-2 transition-colors">
-        <div class="relative h-12">
-          <Show when={icon()} fallback={<div class="w-12 h-12" />}>
-            {(icon) => <img src={icon()} class="h-full" />}
+      <summary class="flex flex-row items-center p-[0.25em] gap-[0.25em] cursor-pointer skill-header">
+        <div class="w-[3em] h-[3em] grid children:grid-area-[1/1]">
+          <Show when={icon()}>
+            {(icon) => <img src={icon()} class="w-[3em] h-[3em]" />}
           </Show>
           <Show
             when={
-              props.input.from === "state" &&
-              typeof props.input.variableValue === "number" &&
-              props.input
+              state() !== null && typeof state()!.variableValue === "number"
             }
-            keyed
           >
-            {(input) => (
-              <div class="absolute right-0 bottom-0 b-yellow-1 b-2 bg-yellow-8 text-yellow-1 text-xs line-height-0 h-4 w-4 rounded-full flex items-center justify-center">
-                {input.variableValue}
-              </div>
-            )}
+            <div class="place-self-end rounded-full entity-variable">
+              {state()!.variableValue}
+            </div>
           </Show>
         </div>
         <div class="flex flex-col">
-          <h3>
+          <h3 class="skill-name">
             {data()?.name ??
               assetsManager().getNameSync(props.input.definitionId) ??
               props.input.definitionId}
           </h3>
-          <div class="h-5 flex flex-row items-center gap-1">
-            <span class="text-xs">{entityTypeText()}</span>
-          </div>
+          <span class="skill-type">{entityTypeText()}</span>
         </div>
       </summary>
-      <Switch>
-        <Match when={data.error}>{t("loadFailed")}</Match>
-        <Match when={data.state === "pending"}>{t("loading")}</Match>
-        <Match when={data()}>
-          {(data) => (
-            <div class="p-2">
+      <div class="p-2">
+        <Switch>
+          <Match when={data.error}>{t("loadFailed")}</Match>
+          <Match when={data.state === "pending"}>{t("loading")}</Match>
+          <Match when={data()}>
+            {(data) => (
               <Description
                 {...props}
-                keyMap={
-                  props.input.from === "state"
-                    ? props.input.descriptionDictionary
-                    : {}
-                }
+                keyMap={state() ? state()!.descriptionDictionary : {}}
                 definitionId={props.input.definitionId}
                 description={
                   data().rawPlayingDescription ?? data().rawDescription
                 }
                 onRequestExplain={props.onRequestExplain}
               />
-            </div>
-          )}
-        </Match>
-      </Switch>
-      <p class="mt-2 text-xs font-mono text-yellow-6">
-        DefID: <span class="select-text">{props.input.definitionId}</span>
-        <Show when={props.input.from === "state" && props.input} keyed>
-          {(input) => (
-            <>
-              <span class="inline-block w-1em" />
-              ID: <span class="select-text">{input.id}</span>
-            </>
-          )}
-        </Show>
-      </p>
+            )}
+          </Match>
+        </Switch>
+        <IdBox
+          defId={props.input.definitionId}
+          id={state() ? state()!.id : void 0}
+        />
+      </div>
     </details>
   );
 }
@@ -405,44 +401,21 @@ export function Reference(props: ReferenceProps) {
     () => [props.definitionId, assetsManager()] as const,
     ([defId, manager]) => manager.getData(defId) as Promise<SkillRawData>,
   );
-  const [image] = createResource(
-    () => [props.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId),
-  );
   return (
-    <div>
-      <Show when={props.includesImage}>
-        <div class="w-8 h-11 float-start mr-1 justify-center overflow-hidden relative rounded-1">
-          <Show when={image()}>
-            {(image) => (
-              <img
-                src={image()}
-                class="absolute w-full top-50% left-50% translate-x--50% translate-y--50%"
-                classList={{
-                  "skill-icon":
-                    data.state === "ready" &&
-                    data()?.type?.startsWith("GCG_SKILL_"),
-                }}
-              />
-            )}
-          </Show>
-        </div>
-      </Show>
-      <h4 class="flex flex-row items-center justify-between">
-        <span class="font-bold">
+    <>
+      <h4 class="flex flex-row items-center justify-between mb-[0.25em]">
+        <span class="keyword-name">
           {data()?.name ??
             assetsManager().getNameSync(props.definitionId) ??
             props.definitionId}
         </span>
         <Show when={data.state === "ready" && data()}>
           {(data) => (
-            <span class="text-xs text-yellow-7">
-              {typeTagText(data().type, t)}
-            </span>
+            <span class="keyword-type">{typeTagText(data().type, t)}</span>
           )}
         </Show>
       </h4>
-      <div class="text-sm">
+      <div class="keyword-description">
         <Switch>
           <Match when={data.error}>{t("loadFailed")}</Match>
           <Match when={data.state === "pending"}>{t("loading")}</Match>
@@ -458,10 +431,8 @@ export function Reference(props: ReferenceProps) {
             )}
           </Match>
         </Switch>
-        <p class="text-xs font-mono text-yellow-6">
-          DefID: <span class="select-text">{props.definitionId}</span>
-        </p>
       </div>
-    </div>
+      <IdBox defId={props.definitionId} />
+    </>
   );
 }

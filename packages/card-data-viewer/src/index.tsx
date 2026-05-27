@@ -88,9 +88,7 @@ export function createCardDataViewer(
     id: st.id,
     type,
     definitionId: st.definitionId,
-    descriptionDictionary:
-      "descriptionDictionary" in st ? st.descriptionDictionary : {},
-    variableValue: "variableValue" in st ? st.variableValue : void 0,
+    state: st,
   });
 
   return {

@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -13,25 +13,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { For, Show } from "solid-js";
-import { useAssetsManager } from "./context";
-import { typeTagText } from "./text_map";
+import { Show } from "solid-js";
 
-export interface TagProps {
-  tags: string[];
+export interface IdBoxProps {
+  defId: number;
+  id?: number;
 }
 
-export function Tags(props: TagProps) {
-  const { t } = useAssetsManager();
+export function IdBox(props: IdBoxProps) {
   return (
-    <ul class="flex flex-row gap-[0.5em] flex-wrap mb-[0.5em]">
-      <For each={props.tags}>
-        {(tag) => (
-          <Show when={typeTagText(tag, t)}>
-            {(tagText) => <li class="card-tag">{tagText()}</li>}
-          </Show>
-        )}
-      </For>
-    </ul>
+    <p class="mt-[0.5em] font-mono id-box">
+      DefID: <span class="select-text">{props.defId}</span>
+      <Show when={props.id}>
+        <span class="inline-block w-[1em]" />
+        ID: <span class="select-text">{props.id}</span>
+      </Show>
+    </p>
   );
 }

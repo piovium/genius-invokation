@@ -14,6 +14,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { AnyState } from "@gi-tcg/core";
+import type {
+  PbAttachmentState,
+  PbCharacterState,
+  PbEntityState,
+} from "@gi-tcg/typings";
 import {
   createEffect,
   createMemo,
@@ -42,10 +47,7 @@ export type ViewerInput =
       id: number;
       type: StateType;
       definitionId: number;
-      variableValue?: number;
-      descriptionDictionary: {
-        [key: string]: string;
-      };
+      state: PbCharacterState | PbEntityState | PbAttachmentState;
     };
 
 export interface CardDataViewerProps {
@@ -90,130 +92,126 @@ function CardDataViewer(props: CardDataViewerProps) {
           </div>
         )}
       >
-        <div class="h-full w-full flex flex-row justify-begin items-start select-none gap-2 min-h-0">
-          <For each={grouped().character}>
-            {(input) => (
-              <div class="card-panel">
-                <Character
-                  {...props}
-                  input={input}
-                  onRequestExplain={onRequestExplain}
-                />
-              </div>
-            )}
-          </For>
-          <For each={grouped().card}>
-            {(input) => (
-              <div class="card-panel">
-                <ActionCard
-                  class="min-h-0"
-                  {...props}
-                  input={input}
-                  onRequestExplain={onRequestExplain}
-                />
-              </div>
-            )}
-          </For>
-          <For each={grouped().skill}>
-            {(input) => (
-              <div class="card-panel">
-                <Skill
-                  class="min-h-0"
-                  {...props}
-                  input={input}
-                  onRequestExplain={onRequestExplain}
-                />
-              </div>
-            )}
-          </For>
-          <For
-            each={[...(grouped().summon ?? []), ...(grouped().support ?? [])]}
-          >
-            {(input) => (
-              <div class="card-panel">
-                <Entity
-                  class="min-h-0"
-                  {...props}
-                  input={input}
-                  onRequestExplain={onRequestExplain}
-                />
-              </div>
-            )}
-          </For>
-          <Show when={hasStatuses()}>
+        <For each={grouped().character}>
+          {(input) => (
             <div class="card-panel">
-              <Show when={grouped().equipment?.length}>
-                <h3 class="text-yellow-7 mb-2">{t("equipment")}</h3>
-              </Show>
-              <For each={grouped().equipment}>
-                {(input) => (
-                  <Entity
-                    class="b-yellow-3 b-1 rounded-md mb-2"
-                    {...props}
-                    input={input}
-                    asChild
-                    onRequestExplain={onRequestExplain}
-                  />
-                )}
-              </For>
-              <Show when={grouped().status?.length}>
-                <h3 class="text-yellow-7 mb-2">{t("status")}</h3>
-              </Show>
-              <For each={grouped().status}>
-                {(input) => (
-                  <Entity
-                    class="b-yellow-3 b-1 rounded-md mb-2"
-                    {...props}
-                    input={input}
-                    asChild
-                    onRequestExplain={onRequestExplain}
-                  />
-                )}
-              </For>
-              <Show when={grouped().combatStatus?.length}>
-                <h3 class="text-yellow-7 mb-2">{t("combatStatus")}</h3>
-              </Show>
-              <For each={grouped().combatStatus}>
-                {(input) => (
-                  <Entity
-                    class="b-yellow-3 b-1 rounded-md mb-2"
-                    {...props}
-                    input={input}
-                    asChild
-                    onRequestExplain={onRequestExplain}
-                  />
-                )}
-              </For>
-              <Show when={grouped().attachment?.length}>
-                <h3 class="text-yellow-7 mb-2">{t("attachmentStatus")}</h3>
-              </Show>
-              <For each={grouped().attachment}>
-                {(input) => (
-                  <Entity
-                    class="b-yellow-3 b-1 rounded-md mb-2"
-                    {...props}
-                    input={input}
-                    asChild
-                    onRequestExplain={onRequestExplain}
-                  />
-                )}
-              </For>
+              <Character
+                {...props}
+                input={input}
+                onRequestExplain={onRequestExplain}
+              />
             </div>
-          </Show>
-          <Show when={explainKeyword()}>
-            {(defId) => (
-              <div class="card-panel">
-                <Keyword {...props} definitionId={defId()} />
-                <div
-                  class="absolute right-1 top-1 text-xs"
-                  onClick={() => setExplainKeyword(null)}
-                >
-                  &#10060;
-                </div>
+          )}
+        </For>
+        <For each={grouped().card}>
+          {(input) => (
+            <div class="card-panel">
+              <ActionCard
+                class="min-h-0"
+                {...props}
+                input={input}
+                onRequestExplain={onRequestExplain}
+              />
+            </div>
+          )}
+        </For>
+        <For each={grouped().skill}>
+          {(input) => (
+            <div class="card-panel">
+              <Skill
+                class="min-h-0"
+                {...props}
+                input={input}
+                onRequestExplain={onRequestExplain}
+              />
+            </div>
+          )}
+        </For>
+        <For each={[...(grouped().summon ?? []), ...(grouped().support ?? [])]}>
+          {(input) => (
+            <div class="card-panel">
+              <Entity
+                class="min-h-0"
+                {...props}
+                input={input}
+                onRequestExplain={onRequestExplain}
+              />
+            </div>
+          )}
+        </For>
+        <Show when={hasStatuses()}>
+          <div class="card-panel">
+            <Show when={grouped().equipment?.length}>
+              <h3 class="text-yellow-7 mb-2">{t("equipment")}</h3>
+            </Show>
+            <For each={grouped().equipment}>
+              {(input) => (
+                <Entity
+                  class="b-yellow-3 b-1 rounded-md mb-2"
+                  {...props}
+                  input={input}
+                  asChild
+                  onRequestExplain={onRequestExplain}
+                />
+              )}
+            </For>
+            <Show when={grouped().status?.length}>
+              <h3 class="text-yellow-7 mb-2">{t("status")}</h3>
+            </Show>
+            <For each={grouped().status}>
+              {(input) => (
+                <Entity
+                  class="b-yellow-3 b-1 rounded-md mb-2"
+                  {...props}
+                  input={input}
+                  asChild
+                  onRequestExplain={onRequestExplain}
+                />
+              )}
+            </For>
+            <Show when={grouped().combatStatus?.length}>
+              <h3 class="text-yellow-7 mb-2">{t("combatStatus")}</h3>
+            </Show>
+            <For each={grouped().combatStatus}>
+              {(input) => (
+                <Entity
+                  class="b-yellow-3 b-1 rounded-md mb-2"
+                  {...props}
+                  input={input}
+                  asChild
+                  onRequestExplain={onRequestExplain}
+                />
+              )}
+            </For>
+            <Show when={grouped().attachment?.length}>
+              <h3 class="text-yellow-7 mb-2">{t("attachmentStatus")}</h3>
+            </Show>
+            <For each={grouped().attachment}>
+              {(input) => (
+                <Entity
+                  class="b-yellow-3 b-1 rounded-md mb-2"
+                  {...props}
+                  input={input}
+                  asChild
+                  onRequestExplain={onRequestExplain}
+                />
+              )}
+            </For>
+          </div>
+        </Show>
+        <Show when={explainKeyword()}>
+          {(defId) => (
+            <div class="card-panel">
+              <Keyword {...props} definitionId={defId()} />
+              <div
+                class="absolute right-1 top-1 text-xs"
+                onClick={() => setExplainKeyword(null)}
+              >
+                &#10060;
               </div>
-            )}
-          </Show>
-        </div>
+            </div>
+          )}
+        </Show>
       </ErrorBoundary>
     </div>
   );

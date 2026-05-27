@@ -83,14 +83,14 @@ interface DamageDescriptionProps {
 }
 
 const DAMAGE_COLORS = [
-  "#000000",
-  "#91d5ff",
-  "#1890ff",
-  "#f5222d",
-  "#722ed1",
-  "#36cfc9",
-  "#d4b106",
-  "#52c41a",
+  "",
+  "#63d4e2",
+  "#5791e0",
+  "#f07648",
+  "#b178eb",
+  "#52daab",
+  "#e2a60b",
+  "#9bca13",
 ];
 
 function DamageDescription(props: DamageDescriptionProps) {
@@ -115,10 +115,10 @@ function DamageDescription(props: DamageDescriptionProps) {
   return (
     <>
       <Show when={id() <= 7 && url()}>
-        {(url) => <img src={url()} class="inline-block h-1em mb-2px mx-1" />}
+        {(url) => <img src={url()} class="inline-block h-[1.25em]" />}
       </Show>
       <span
-        class="underline underline-1 underline-offset-3 cursor-pointer"
+        class="cursor-pointer description-underline"
         style={{ color: DAMAGE_COLORS[id()] }}
         onClick={() => props.onRequestExplain?.(keywordId())}
       >
@@ -139,7 +139,6 @@ export interface DescriptionProps {
 }
 
 export function Description(props: DescriptionProps) {
-  const { assetsManager } = useAssetsManager();
   const items = createMemo(() =>
     descriptionToItems(props.description, props.keyMap),
   );
@@ -170,7 +169,7 @@ export function Description(props: DescriptionProps) {
 
   return (
     <>
-      <p class="line-height-normal whitespace-pre-wrap mb-2">
+      <p class="line-height-normal whitespace-pre-wrap mb-2 description">
         <For each={items()}>
           {(item) => (
             <Switch>
@@ -193,13 +192,13 @@ export function Description(props: DescriptionProps) {
                   <Show
                     when={item.rType === "K"}
                     fallback={
-                      <span class="text-black mx-1">
+                      <span class="description-strong">
                         <ReferenceName definitionId={item.id} />
                       </span>
                     }
                   >
                     <span
-                      class="text-black underline underline-1 underline-offset-3 cursor-pointer mx-1"
+                      class="description-underline cursor-pointer"
                       onClick={() => props.onRequestExplain?.(item.id)}
                     >
                       <ReferenceName definitionId={item.id} />
@@ -214,7 +213,7 @@ export function Description(props: DescriptionProps) {
       <ul>
         <For each={references}>
           {(defId) => (
-            <li class="b-l-2 p-l-2 b-solid b-yellow-5 mb-2">
+            <li class="keyword">
               <Reference
                 {...props}
                 definitionId={defId}

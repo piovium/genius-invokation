@@ -1,7 +1,39 @@
 .gi-tcg-card-data-viewer {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  -webkit-user-select: none;
+  user-select: none;
+  gap: 0.5em;
+  min-height: 0;
+
 
   height: 100%;
   width: 100%;
+
+  font-size: 1rem;
+
+  --panel-width: 18em; 
+  /*
+  --panel-background-color: #fef9c3;
+  --panel-border-color: #854d0e;
+  --text-color-header: #713f12;
+  --text-color-content: var(--text-color-header);
+  */
+
+  --panel-background-color: #2E3740;
+  --panel-border-color: #404D5C;
+  --text-color-h1: #CAD8EA;
+  --text-color-h2: #EDE5DA;
+  --text-color-h3: #D3BC8E;
+  --text-color-h4: #758498;
+  --text-color-content: #B2AFA8;
+  --text-color-strong: #FFFFFF;
+  --item-background-color: #22292F;
+  --item-border-color: #434E5A;
+  --catalog-background-color: #252D37;
+  --keyword-border-color: #62686F;
+  --id-color: #ca8a04;
 
   ::-webkit-scrollbar {
     width: 10px;
@@ -15,11 +47,128 @@
     background-clip: padding-box;
   }
 
-  .skill-icon {
-    filter: invert(75%) sepia(100%) saturate(250%);
+  .card-panel {
+    position: relative;
+    width: var(--panel-width, 18em);
+    padding: 0.5em;
+    border-radius: 0.375em;
+    border: 0.125em solid var(--panel-border-color);
+    color: var(--text-color-content);
+    background-color: var(--panel-background-color);
+    overflow: auto;
+    max-height: 100%;
+    pointer-events: auto;
   }
-}
 
-.card-panel {
-  --at-apply: pointer-events-auto max-h-100% overflow-auto bg-yellow-1 b-yellow-8 text-yellow-9 b-solid b-1 rounded-md p-2 w-72 relative;
+  .card-name {
+    font-size: 1.25em;
+    font-weight: bold;
+    color: var(--text-color-h1);
+  }
+
+  .card-info {
+    font-size: 0.875em;
+    color: var(--text-color-content);
+  }
+
+  .card-tag {
+    background-color: var(--text-color-h1);
+    color: var(--panel-background-color);
+    font-size: 0.875em;
+    font-weight: bold;
+    padding: 0 0.5em;
+    border-radius: 0.125em;
+  }
+
+  .skill-wrap {
+    border: 0.125em solid var(--item-border-color);
+    border-radius: 0.375em;
+    overflow: clip;
+  }
+
+  .skill-header {
+    background-color: var(--item-background-color);
+  }
+
+  .skill-icon {
+    width: 3em;
+    height: 3em;
+    mask-size: 3em 3em;
+    background-color: var(--text-color-strong);
+  }
+
+  .skill-name {
+    font-size: 1em;
+    color: var(--text-color-h2);
+  }
+
+  .skill-type {
+    font-size: 0.875em;
+    color: var(--text-color-h3);
+  }
+
+  .play-cost {
+    color: white;
+    font-size: 0.875em;
+    font-weight: bold;
+    paint-order: stroke fill;
+    -webkit-text-stroke-color: black;
+    -webkit-text-stroke-width: 0.125em;
+  }
+
+  .description {
+    color: var(--text-color-content);
+    font-size: 1em;
+  }
+
+  .description-strong {
+    color: var(--text-color-strong);
+    margin-inline: 0.125em;
+  }
+
+  .description-underline {
+    color: var(--text-color-strong);
+    text-decoration-line: underline;
+    text-decoration-thickness: 0.0625em;
+    text-underline-offset: 0.1875em;
+    margin-inline: 0.125em;
+  }
+
+  .keyword {
+    border-left: 0.1875em solid var(--keyword-border-color);
+    padding-left: 0.5em;
+  }
+
+  .keyword:not(:last-child) {
+    margin-bottom: 0.5em;
+  }
+
+  .keyword-name {
+    font-size: 0.875em;
+    color: var(--text-color-strong);
+  }
+
+  .keyword-type {
+    font-size: 0.875em;
+    color: var(--text-color-h3);
+  }
+
+  .keyword-description {
+    color: var(--text-color-content);
+    font-size: 0.875em;
+  }
+
+  .id-box {
+    color: var(--id-color);
+    font-size: 0.75em;
+  }
+
+  .entity-variable {
+    width: 1.25em;
+    height: 1.25em;
+    text-align: center;
+    line-height: 1.25em;
+    background-color: var(--keyword-border-color);
+    color: var(--text-color-strong);
+  }
 }
