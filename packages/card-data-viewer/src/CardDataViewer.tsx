@@ -31,11 +31,10 @@ import { ActionCard, Character, Entity, Keyword, Skill } from "./Entity";
 import { useAssetsManager } from "./context";
 import { CardFace } from "./CardFace";
 
-export type StateType =
-  | AnyState["definition"]["type"]
-  | "card"
-  | "skill"
-  | "keyword";
+type MainStateType = "character" | "card" | "entity" | "skill" | "keyword";
+type SubStateType = "attachment" | "status" | "combatStatus" | "equipment";
+
+export type StateType = MainStateType | SubStateType;
 
 export type ViewerInput =
   | {
@@ -107,7 +106,7 @@ function CardDataViewer(props: CardDataViewerProps) {
             </div>
           )}
         </For>
-        <For each={grouped().card}>
+        <For each={[...(grouped().card ?? []), ...(grouped().entity ?? [])]}>
           {(input) => (
             <div class="card-panel">
               <ActionCard
@@ -123,18 +122,6 @@ function CardDataViewer(props: CardDataViewerProps) {
           {(input) => (
             <div class="card-panel">
               <Skill
-                class="min-h-0"
-                {...props}
-                input={input}
-                onRequestExplain={onRequestExplain}
-              />
-            </div>
-          )}
-        </For>
-        <For each={[...(grouped().summon ?? []), ...(grouped().support ?? [])]}>
-          {(input) => (
-            <div class="card-panel">
-              <Entity
                 class="min-h-0"
                 {...props}
                 input={input}

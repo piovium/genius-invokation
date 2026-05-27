@@ -126,8 +126,25 @@ export function ActionCard(props: CardDataProps) {
   const { assetsManager, t } = useAssetsManager();
   const [data] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getData(defId) as Promise<ActionCardRawData>,
+    ([defId, manager]) =>
+      manager.getData(defId) as Promise<ActionCardRawData | EntityRawData>,
   );
+  const rawDescription = () => {
+    if (state()) {
+      if (
+        props.input.type === "card" &&
+        (data() as ActionCardRawData).rawDynamicDescription
+      ) {
+        return (data() as ActionCardRawData).rawDynamicDescription;
+      } else if (
+        props.input.type === "entity" &&
+        data()!.rawPlayingDescription
+      ) {
+        return data()!.rawPlayingDescription;
+      }
+    }
+    return data()!.rawDescription;
+  };
   return (
     <div class={props.class}>
       <Switch>
@@ -141,7 +158,11 @@ export function ActionCard(props: CardDataProps) {
                 <span class="skill-type mr-[0.5em]">
                   {typeTagText(data().type, t)}
                 </span>
-                <PlayCostList playCost={data().playCost} />
+                <Show when={props.input.type === "card"}>
+                  <PlayCostList
+                    playCost={(data() as ActionCardRawData).playCost}
+                  />
+                </Show>
               </div>
               <Tags tags={data().tags} />
               <div>
@@ -149,11 +170,7 @@ export function ActionCard(props: CardDataProps) {
                   {...props}
                   keyMap={state() ? state()!.descriptionDictionary : {}}
                   definitionId={props.input.definitionId}
-                  description={
-                    (props.input.from === "state" &&
-                      data().rawDynamicDescription) ||
-                    data().rawDescription
-                  }
+                  description={rawDescription()!}
                   onRequestExplain={props.onRequestExplain}
                 />
               </div>

@@ -1100,7 +1100,7 @@ export function Chessboard(props: ChessboardProps) {
         item.info.combatStatus.map((x) => x.data),
       );
     } else if (item.type === "entity") {
-      dataViewerController.showState(item.info.type, item.info.data);
+      dataViewerController.showState("eneity", item.info.data);
     } else if (item.type === "skill") {
       dataViewerController.showSkill(item.info.id);
     } else if (item.type === "externalCard") {

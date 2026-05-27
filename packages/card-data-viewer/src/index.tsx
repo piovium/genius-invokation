@@ -47,7 +47,7 @@ export interface RegisterResult {
       character: PbCharacterState,
       combatStatuses: PbEntityState[],
     ): void;
-    (type: "summon" | "support", entity: PbEntityState): void;
+    (type: "entity", entity: PbEntityState): void;
     (type: "card", card: PbEntityState): void;
   };
   readonly hide: () => void;
