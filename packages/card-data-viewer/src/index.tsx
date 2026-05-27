@@ -38,18 +38,16 @@ import { translator } from "@solid-primitives/i18n";
 
 export interface RegisterResult {
   readonly CardDataViewer: () => JSX.Element;
-  readonly showCharacter: (id: number) => void;
-  readonly showSkill: (id: number) => void;
-  readonly showCard: (id: number) => void;
-  readonly showState: {
-    (
-      type: "character",
-      character: PbCharacterState,
-      combatStatuses: PbEntityState[],
-    ): void;
-    (type: "entity", entity: PbEntityState): void;
-    (type: "card", card: PbEntityState): void;
-  };
+  readonly showCharacter: (id: number, opt?: ShowCardDataViewerOption) => void;
+  readonly showSkill: (id: number, opt?: ShowCardDataViewerOption) => void;
+  readonly showCard: (id: number, opt?: ShowCardDataViewerOption) => void;
+  readonly showState: (
+    type: "character" | "entity" | "card",
+    state: PbCharacterState | PbEntityState,
+    extra: PbEntityState[],
+    opt?: ShowCardDataViewerOption,
+  ) => void;
+
   readonly hide: () => void;
 }
 
@@ -130,7 +128,7 @@ export function createCardDataViewer(
     showState: (
       type: StateType,
       state: PbCharacterState | PbEntityState,
-      combatStatuses?: PbEntityState[],
+      extra?: PbEntityState[],
       opt?: ShowCardDataViewerOption,
     ) => {
       setMainImageDefId(
@@ -150,9 +148,7 @@ export function createCardDataViewer(
           ? state.attachment.map((st) => mapStateToInput(st, "attachment"))
           : []),
         // combat statuses (2nd argument)
-        ...(combatStatuses ?? []).map((st) =>
-          mapStateToInput(st, "combatStatus"),
-        ),
+        ...(extra ?? []).map((st) => mapStateToInput(st, "combatStatus")),
       ]);
       setShown(true);
     },

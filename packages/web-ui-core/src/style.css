@@ -730,10 +730,8 @@
   }
 
   /* CardDataViewer */
-  .card-data-viewer .gi-tcg-card-data-viewer {
-    height: 147%;
-    transform: scale(0.68);
-    transform-origin: top left;
+  .gi-tcg-card-data-viewer {
+    font-size: 0.68rem;
   }
 
   /* Merge Chessboard */

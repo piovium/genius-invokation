@@ -160,13 +160,15 @@ export function ActionCard(props: CardDataProps) {
                 </Show>
               </div>
               <Tags tags={data().tags} />
-              <Description
-                {...props}
-                keyMap={state() ? state()!.descriptionDictionary : {}}
-                definitionId={props.input.definitionId}
-                description={rawDescription()!}
-                onRequestExplain={props.onRequestExplain}
-              />
+              <div class="px-[0.5em]">
+                <Description
+                  {...props}
+                  keyMap={state() ? state()!.descriptionDictionary : {}}
+                  definitionId={props.input.definitionId}
+                  description={rawDescription()!}
+                  onRequestExplain={props.onRequestExplain}
+                />
+              </div>
             </>
           )}
         </Match>
