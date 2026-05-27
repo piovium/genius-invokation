@@ -18,6 +18,7 @@ export default {
   loadFailed: "加载失败",
   equipment: "角色装备",
   status: "角色状态",
+  equipAndStatus: "角色装备与状态",
   combatStatus: "阵营出战状态",
   attachment: "附着效果状态",
   rulesExplanation: "规则解释",

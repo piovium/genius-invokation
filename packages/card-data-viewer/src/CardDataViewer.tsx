@@ -33,7 +33,12 @@ import { useAssetsManager } from "./context";
 import { CardFace } from "./CardFace";
 
 type MainStateType = "character" | "card" | "entity" | "skill" | "keyword";
-type SubStateType = "attachment" | "status" | "combatStatus" | "equipment";
+type SubStateType =
+  | "equipment"
+  | "status"
+  | "equipAndStatus"
+  | "combatStatus"
+  | "attachment";
 
 export type StateType = MainStateType | SubStateType;
 
@@ -70,13 +75,28 @@ export function CardDataViewerContainer(props: CardDataViewerContainerProps) {
 
 function CardDataViewer(props: CardDataViewerProps) {
   const { t } = useAssetsManager();
-  const grouped = createMemo(() => Object.groupBy(props.inputs, (i) => i.type));
+  const [combineCharEntities, setCombineCharEntities] =
+    createSignal<boolean>(false);
+
+  const grouped = createMemo(() =>
+    Object.groupBy(props.inputs, (i) => {
+      if (
+        combineCharEntities() &&
+        (i.type === "equipment" || i.type === "status")
+      ) {
+        return "equipAndStatus";
+      } else {
+        return i.type;
+      }
+    }),
+  );
   const subEntities = () => {
     const render: (ViewerInput | SubStateType)[] = [];
     const g = grouped();
     for (const t of [
-      "equipment",      
+      "equipment",
       "status",
+      "equipAndStatus",
       "combatStatus",
       "attachment",
     ] as SubStateType[]) {
@@ -87,6 +107,12 @@ function CardDataViewer(props: CardDataViewerProps) {
     }
     return render;
   };
+
+  const showCombineButton = (type: SubStateType) =>
+    !!(
+      (grouped().equipment?.length && grouped().status?.length) ||
+      grouped().equipAndStatus?.length
+    ) && ["equipment", "status", "equipAndStatus"].includes(type);
 
   const [explainKeyword, setExplainKeyword] = createSignal<number | null>(null);
   const onRequestExplain = (definitionId: number | null) => {
@@ -131,30 +157,42 @@ function CardDataViewer(props: CardDataViewerProps) {
         </For>
         <Show when={subEntities()?.length}>
           <div class="card-panel">
-            <For each={subEntities()}>
-              {(entity) => (
-                <Switch>
-                  <Match when={typeof entity === "string"}>
-                    <h3 class="w-full text-center rounded-full entity-category">
-                      {t(entity as SubStateType)}
-                    </h3>
-                  </Match>
-                  <Match when={true}>
-                    <Entity
-                      input={entity as ViewerInput}
-                      asChild
-                      onRequestExplain={onRequestExplain}
-                    />
-                  </Match>
-                </Switch>
-              )}
-            </For>
+            <div class="flex flex-col gap-[0.5em]">
+              <For each={subEntities()}>
+                {(entity) => (
+                  <Switch>
+                    <Match when={typeof entity === "string"}>
+                      <h3
+                        class="w-full text-center rounded-full entity-category"
+                        bool:data-show-combine-button={showCombineButton(
+                          entity as SubStateType,
+                        )}
+                        onClick={() => {
+                          if (showCombineButton(entity as SubStateType)) {
+                            setCombineCharEntities((v) => !v);
+                          }
+                        }}
+                      >
+                        {t(entity as SubStateType)}
+                      </h3>
+                    </Match>
+                    <Match when={true}>
+                      <Entity
+                        input={entity as ViewerInput}
+                        asChild
+                        onRequestExplain={onRequestExplain}
+                      />
+                    </Match>
+                  </Switch>
+                )}
+              </For>
+            </div>
           </div>
         </Show>
         <Show when={explainKeyword()}>
           {(defId) => (
             <div class="card-panel">
-              <h3 class="w-full text-center rounded-full entity-category">
+              <h3 class="w-full text-center rounded-full mb-[0.5em] entity-category">
                 {t("rulesExplanation")}
               </h3>
               <Keyword {...props} definitionId={defId()} />

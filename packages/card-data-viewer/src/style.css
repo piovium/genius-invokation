@@ -164,11 +164,13 @@
     color: var(--text-color-h4);
     padding: 0.125em;
     font-weight: bold;
-    margin-bottom: 0.5em;
   }
 
-  .entity-category:not(:first-child) {
-    margin-top: 0.5em;
+  .entity-category[data-show-combine-button]::after {
+    content: "⇌";
+    position: absolute;
+    font-weight: bold;
+    right: 1em;
   }
 
   .entity-variable {

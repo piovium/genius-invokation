@@ -206,14 +206,14 @@ export function Skill(props: ExpandableCardDataProps) {
   });
   return (
     <details
-      class={`flex flex-col min-h-0 skill-wrap group ${props.class ?? ""}`}
+      class={`flex flex-col min-h-0 skill-wrap ${props.class ?? ""}`}
       open={!props.asChild}
     >
       <summary class="flex flex-row items-center p-[0.25em] gap-[0.25em] cursor-pointer skill-header">
-        <Show when={icon()} fallback={<div class="w-[3em] h-[3em]" />}>
+        <Show when={icon()} fallback={<div class="w-[3em] h-[3em] shrink-0" />}>
           {(icon) => (
             <div
-              class="skill-icon"
+              class="skill-icon shrink-0"
               style={{ "mask-image": `url(${icon()})` }}
             />
           )}
@@ -280,11 +280,11 @@ export function Entity(props: ExpandableCardDataProps) {
   });
   return (
     <details
-      class={`flex flex-col min-h-0 skill-wrap group ${props.class ?? ""}`}
+      class={`flex flex-col min-h-0 skill-wrap ${props.class ?? ""}`}
       open={!props.asChild}
     >
       <summary class="flex flex-row items-center p-[0.25em] gap-[0.25em] cursor-pointer skill-header">
-        <div class="w-[3em] h-[3em] grid children:grid-area-[1/1]">
+        <div class="w-[3em] h-[3em] grid children:grid-area-[1/1] shrink-0">
           <Show when={icon()}>
             {(icon) => <img src={icon()} class="w-[3em] h-[3em]" />}
           </Show>

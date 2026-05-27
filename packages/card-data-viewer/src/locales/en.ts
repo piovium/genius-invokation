@@ -5,6 +5,7 @@ export default {
   loadFailed: "Load failed",
   equipment: "Character Equipment",
   status: "Character Status",
+  equipAndStatus: "Equipment & Status",
   combatStatus: "Team Combat Status",
   attachment: "Applied Effect Status",
   rulesExplanation: "Detailed Rules",
