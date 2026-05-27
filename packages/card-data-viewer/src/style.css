@@ -32,7 +32,7 @@
   --item-background-color: #22292f;
   --item-border-color: #434e5a;
   --category-background-color: #252d37;
-  --keyword-border-color: #62686f;
+  --reference-border-color: #62686f;
   --id-color: #ca8a04;
 
   .card-face {
@@ -130,26 +130,26 @@
     margin-inline: 0.125em;
   }
 
-  .keyword {
-    border-left: 0.1875em solid var(--keyword-border-color);
+  .reference {
+    border-left: 0.1875em solid var(--reference-border-color);
     padding-left: 0.5em;
   }
 
-  .keyword:not(:last-child) {
+  .reference:not(:last-child) {
     margin-bottom: 0.5em;
   }
 
-  .keyword-name {
+  .reference-name {
     font-size: 0.875em;
     color: var(--text-color-strong);
   }
 
-  .keyword-type {
+  .reference-type {
     font-size: 0.875em;
     color: var(--text-color-h3);
   }
 
-  .keyword-description {
+  .reference-description {
     color: var(--text-color-content);
     font-size: 0.875em;
   }
@@ -166,11 +166,10 @@
     font-weight: bold;
     margin-bottom: 0.5em;
   }
-  
+
   .entity-category:not(:first-child) {
     margin-top: 0.5em;
   }
-
 
   .entity-variable {
     width: 1.25em;
@@ -178,7 +177,13 @@
     font-size: 1em;
     text-align: center;
     line-height: 1.25em;
-    background-color: var(--keyword-border-color);
+    background-color: var(--reference-border-color);
     color: var(--text-color-strong);
+  }
+
+  .keyword-name {
+    color: var(--text-color-strong);
+    font-weight: bold;
+    font-size: 1.125em;
   }
 }

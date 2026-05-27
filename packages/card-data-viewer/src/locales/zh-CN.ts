@@ -20,7 +20,7 @@ export default {
   status: "角色状态",
   combatStatus: "阵营出战状态",
   attachment: "附着效果状态",
-  rulesExplanation: "规则解释：",
+  rulesExplanation: "规则解释",
   skillNormal: "普通攻击",
   skillElemental: "元素战技",
   skillBurst: "元素爆发",

@@ -7,7 +7,7 @@ export default {
   status: "Character Status",
   combatStatus: "Team Combat Status",
   attachment: "Applied Effect Status",
-  rulesExplanation: "Detailed Rules:",
+  rulesExplanation: "Detailed Rules",
   skillNormal: "Normal Attack",
   skillElemental: "Elemental Skill",
   skillBurst: "Elemental Burst",

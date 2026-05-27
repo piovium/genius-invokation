@@ -120,7 +120,10 @@ function DamageDescription(props: DamageDescriptionProps) {
       <span
         class="cursor-pointer description-underline"
         style={{ color: DAMAGE_COLORS[id()] }}
-        onClick={() => props.onRequestExplain?.(keywordId())}
+        onClick={(e) => {
+          e.stopPropagation();
+          props.onRequestExplain?.(keywordId());
+        }}
       >
         <ReferenceName definitionId={keywordId()} />
       </span>
@@ -133,7 +136,7 @@ export interface DescriptionProps {
   description: string;
   keyMap?: Record<string, string>;
   fromSkill?: boolean;
-  onRequestExplain?: (id: number) => void;
+  onRequestExplain?: (id: number | null) => void;
   onAddReference?: (defId: number) => void;
 }
 
@@ -168,7 +171,10 @@ export function Description(props: DescriptionProps) {
 
   return (
     <>
-      <p class="line-height-normal whitespace-pre-wrap mb-2 description">
+      <p
+        class="line-height-normal whitespace-pre-wrap mb-2 description"
+        onClick={() => props.onRequestExplain?.(null)}
+      >
         <For each={items()}>
           {(item) => (
             <Switch>
@@ -198,7 +204,10 @@ export function Description(props: DescriptionProps) {
                   >
                     <span
                       class="description-underline cursor-pointer"
-                      onClick={() => props.onRequestExplain?.(item.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        props.onRequestExplain?.(item.id);
+                      }}
                     >
                       <ReferenceName definitionId={item.id} />
                     </span>
@@ -212,7 +221,7 @@ export function Description(props: DescriptionProps) {
       <ul>
         <For each={references}>
           {(defId) => (
-            <li class="keyword">
+            <li class="reference">
               <Reference
                 {...props}
                 definitionId={defId}

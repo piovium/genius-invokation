@@ -75,10 +75,10 @@ function CardDataViewer(props: CardDataViewerProps) {
     const render: (ViewerInput | SubStateType)[] = [];
     const g = grouped();
     for (const t of [
-      "attachment",
+      "equipment",      
       "status",
       "combatStatus",
-      "equipment",
+      "attachment",
     ] as SubStateType[]) {
       if (g[t]?.length) {
         render.push(t);
@@ -89,7 +89,7 @@ function CardDataViewer(props: CardDataViewerProps) {
   };
 
   const [explainKeyword, setExplainKeyword] = createSignal<number | null>(null);
-  const onRequestExplain = (definitionId: number) => {
+  const onRequestExplain = (definitionId: number | null) => {
     setExplainKeyword((prev) => (prev === definitionId ? null : definitionId));
   };
 
@@ -118,20 +118,14 @@ function CardDataViewer(props: CardDataViewerProps) {
         <For each={[...(grouped().card ?? []), ...(grouped().entity ?? [])]}>
           {(input) => (
             <div class="card-panel">
-              <ActionCard
-                input={input}
-                onRequestExplain={onRequestExplain}
-              />
+              <ActionCard input={input} onRequestExplain={onRequestExplain} />
             </div>
           )}
         </For>
         <For each={grouped().skill}>
           {(input) => (
             <div class="card-panel">
-              <Skill
-                input={input}
-                onRequestExplain={onRequestExplain}
-              />
+              <Skill input={input} onRequestExplain={onRequestExplain} />
             </div>
           )}
         </For>
@@ -160,13 +154,10 @@ function CardDataViewer(props: CardDataViewerProps) {
         <Show when={explainKeyword()}>
           {(defId) => (
             <div class="card-panel">
+              <h3 class="w-full text-center rounded-full entity-category">
+                {t("rulesExplanation")}
+              </h3>
               <Keyword {...props} definitionId={defId()} />
-              <div
-                class="absolute right-1 top-1 text-xs"
-                onClick={() => setExplainKeyword(null)}
-              >
-                &#10060;
-              </div>
             </div>
           )}
         </Show>

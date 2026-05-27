@@ -43,7 +43,7 @@ import { IdBox } from "./IdBox";
 export interface CardDataProps {
   class?: string;
   input: ViewerInput;
-  onRequestExplain?: (id: number) => void;
+  onRequestExplain?: (id: number | null) => void;
 }
 
 export function Character(props: CardDataProps) {
@@ -160,15 +160,13 @@ export function ActionCard(props: CardDataProps) {
                 </Show>
               </div>
               <Tags tags={data().tags} />
-              <div>
-                <Description
-                  {...props}
-                  keyMap={state() ? state()!.descriptionDictionary : {}}
-                  definitionId={props.input.definitionId}
-                  description={rawDescription()!}
-                  onRequestExplain={props.onRequestExplain}
-                />
-              </div>
+              <Description
+                {...props}
+                keyMap={state() ? state()!.descriptionDictionary : {}}
+                definitionId={props.input.definitionId}
+                description={rawDescription()!}
+                onRequestExplain={props.onRequestExplain}
+              />
             </>
           )}
         </Match>
@@ -309,7 +307,7 @@ export function Entity(props: ExpandableCardDataProps) {
           <span class="skill-type">{entityTypeText()}</span>
         </div>
       </summary>
-      <div class="p-2">
+      <div class="p-[0.5em]">
         <Switch>
           <Match when={data.error}>{t("loadFailed")}</Match>
           <Match when={data.state === "pending"}>{t("loading")}</Match>
@@ -348,33 +346,26 @@ export function Keyword(props: CardDefinitionProps) {
     ([defId, manager]) => manager.getData(defId) as Promise<KeywordRawData>,
   );
   return (
-    <div class={props.class}>
-      <h3>
-        <span class="text-yellow-7">{t("rulesExplanation")}</span>
-        <span class="font-bold">
-          {data()?.name ??
-            assetsManager().getNameSync(props.definitionId) ??
-            props.definitionId}
-        </span>
+    <div class={`px-[0.5em] ${props.class ?? ""}`}>
+      <h3 class="keyword-name">
+        {data()?.name ??
+          assetsManager().getNameSync(props.definitionId) ??
+          props.definitionId}
       </h3>
       <Switch>
         <Match when={data.error}>{t("loadFailed")}</Match>
         <Match when={data.state === "pending"}>{t("loading")}</Match>
         <Match when={data()}>
           {(data) => (
-            <div class="p-2">
-              <Description
-                {...props}
-                definitionId={props.definitionId}
-                description={data().rawDescription}
-              />
-            </div>
+            <Description
+              {...props}
+              definitionId={props.definitionId}
+              description={data().rawDescription}
+            />
           )}
         </Match>
       </Switch>
-      <p class="mt-2 text-xs font-mono text-yellow-6">
-        DefID: <span class="select-text">{-props.definitionId}</span>
-      </p>
+      <IdBox defId={-props.definitionId} />
     </div>
   );
 }
@@ -392,18 +383,18 @@ export function Reference(props: ReferenceProps) {
   return (
     <>
       <h4 class="flex flex-row items-center justify-between mb-[0.25em]">
-        <span class="keyword-name">
+        <span class="reference-name">
           {data()?.name ??
             assetsManager().getNameSync(props.definitionId) ??
             props.definitionId}
         </span>
         <Show when={data.state === "ready" && data()}>
           {(data) => (
-            <span class="keyword-type">{typeTagText(data().type, t)}</span>
+            <span class="reference-type">{typeTagText(data().type, t)}</span>
           )}
         </Show>
       </h4>
-      <div class="keyword-description">
+      <div class="reference-description">
         <Switch>
           <Match when={data.error}>{t("loadFailed")}</Match>
           <Match when={data.state === "pending"}>{t("loading")}</Match>
