@@ -72,7 +72,7 @@ export function createCardDataViewer(
   const dict = createMemo(() => translations[localeGetter()]);
 
   const [shown, setShown] = createSignal(false);
-  const [includesImage, setIncludesImage] = createSignal(false);
+  const [mainImageDefId, setMainImageDefId] = createSignal<number | null>(null);
   const [inputs, setInputs] = createSignal<ViewerInput[]>([]);
 
   const showDef = (
@@ -80,7 +80,7 @@ export function createCardDataViewer(
     type: StateType,
     opt?: ShowCardDataViewerOption,
   ) => {
-    setIncludesImage(opt?.includesImage ?? false);
+    setMainImageDefId(opt?.includesImage ? definitionId : null);
     setInputs([
       {
         from: "definitionId",
@@ -114,7 +114,7 @@ export function createCardDataViewer(
         <CardDataViewerContainer
           shown={shown()}
           inputs={inputs()}
-          includesImage={includesImage()}
+          mainImageDefId={mainImageDefId()}
         />
       </AssetsContext.Provider>
     ),
@@ -133,7 +133,9 @@ export function createCardDataViewer(
       combatStatuses?: PbEntityState[],
       opt?: ShowCardDataViewerOption,
     ) => {
-      setIncludesImage(opt?.includesImage ?? true);
+      setMainImageDefId(
+        opt?.includesImage === false ? null : state.definitionId,
+      );
       setInputs([
         // main item
         mapStateToInput(state, type),
@@ -143,6 +145,7 @@ export function createCardDataViewer(
               mapStateToInput(st, st.equipment ? "equipment" : "status"),
             )
           : []),
+        // action card zone entities
         ...("attachment" in state
           ? state.attachment.map((st) => mapStateToInput(st, "attachment"))
           : []),

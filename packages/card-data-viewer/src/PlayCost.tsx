@@ -15,12 +15,11 @@
 
 import type { PlayCost } from "@gi-tcg/assets-manager";
 import { For, Show } from "solid-js";
+import { UI_ASSET_URL_BASE } from "./CardFace";
 
 export interface PlayCostProps {
   playCost: PlayCost[];
 }
-
-const UI_ASSET_URL_BASE = "https://ui-assets.piovium.org/";
 
 export const COST_ICON_MAP: Record<string, string> = {
   GCG_COST_DICE_VOID: "DiceVoid",

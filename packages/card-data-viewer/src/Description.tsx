@@ -132,7 +132,6 @@ export interface DescriptionProps {
   definitionId: number;
   description: string;
   keyMap?: Record<string, string>;
-  includesImage: boolean;
   fromSkill?: boolean;
   onRequestExplain?: (id: number) => void;
   onAddReference?: (defId: number) => void;

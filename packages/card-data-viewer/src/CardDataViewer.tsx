@@ -29,6 +29,7 @@ import {
 } from "solid-js";
 import { ActionCard, Character, Entity, Keyword, Skill } from "./Entity";
 import { useAssetsManager } from "./context";
+import { CardFace } from "./CardFace";
 
 export type StateType =
   | AnyState["definition"]["type"]
@@ -52,7 +53,7 @@ export type ViewerInput =
 
 export interface CardDataViewerProps {
   inputs: ViewerInput[];
-  includesImage: boolean;
+  mainImageDefId: number | null;
 }
 
 export interface CardDataViewerContainerProps extends CardDataViewerProps {
@@ -92,6 +93,9 @@ function CardDataViewer(props: CardDataViewerProps) {
           </div>
         )}
       >
+        <Show when={props.mainImageDefId}>
+          {(id) => <CardFace defId={id()} />}
+        </Show>
         <For each={grouped().character}>
           {(input) => (
             <div class="card-panel">

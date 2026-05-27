@@ -14,6 +14,7 @@
   font-size: 1rem;
 
   --panel-width: 18em; 
+  --card-width: 14em;
   /*
   --panel-background-color: #fef9c3;
   --panel-border-color: #854d0e;
@@ -45,6 +46,11 @@
     border: 3px solid transparent;
     border-radius: 5px;
     background-clip: padding-box;
+  }
+
+  .card-face {
+    width: var(--card-width);
+    aspect-ratio: 7 / 12;
   }
 
   .card-panel {

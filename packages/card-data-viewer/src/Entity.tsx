@@ -48,7 +48,6 @@ import { IdBox } from "./IdBox";
 export interface CardDataProps {
   class?: string;
   input: ViewerInput;
-  includesImage: boolean;
   onRequestExplain?: (id: number) => void;
 }
 
@@ -65,10 +64,6 @@ export function Character(props: CardDataProps) {
     () => [props.input.definitionId, assetsManager()] as const,
     ([defId, manager]) => manager.getData(defId) as Promise<CharacterRawData>,
   );
-  const [image] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId, { type: "icon" }),
-  );
   const hpText = () =>
     state() ? `${state()!.health}/${state()!.maxHealth}` : `${data()!.hp}`;
   const mpText = () =>
@@ -83,13 +78,6 @@ export function Character(props: CardDataProps) {
         <Match when={data()}>
           {(data) => (
             <>
-              <Show when={props.includesImage}>
-                <div class="w-[3.75em] h-[3.75em] float-start mr-[0.5em] mb-[0.5em]">
-                  <Show when={image()}>
-                    {(image) => <img src={image()} class="w-full h-full" />}
-                  </Show>
-                </div>
-              </Show>
               <h3 class="card-name">{data().name}</h3>
               <dl class="flex flex-row gap-[0.25em] mb-[0.25em] card-info">
                 <dt>HP</dt>
@@ -98,7 +86,7 @@ export function Character(props: CardDataProps) {
                 <dd class="font-bold">{mpText()}</dd>
               </dl>
               <Tags tags={data().tags} />
-              <ul class="clear-both flex flex-col gap-[0.5em]">
+              <ul class="flex flex-col gap-[0.5em]">
                 <For each={data().skills}>
                   {(skill) => (
                     <Show when={!skill.hidden}>
@@ -140,10 +128,6 @@ export function ActionCard(props: CardDataProps) {
     () => [props.input.definitionId, assetsManager()] as const,
     ([defId, manager]) => manager.getData(defId) as Promise<ActionCardRawData>,
   );
-  const [image] = createResource(
-    () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) => manager.getImageUrl(defId),
-  );
   return (
     <div class={props.class}>
       <Switch>
@@ -152,21 +136,12 @@ export function ActionCard(props: CardDataProps) {
         <Match when={data()}>
           {(data) => (
             <>
-              <Show when={props.includesImage}>
-                <div class="w-[4em] float-start mr-2">
-                  <Show when={image()}>
-                    {(image) => <img src={image()} class="w-full" />}
-                  </Show>
-                </div>
-              </Show>
-              <div class="flex flex-col mb-[0.25em]">
-                <h3 class="card-name">{data().name}</h3>
-                <div class="flex flex-row items-center">
-                  <span class="skill-type mr-[0.5em]">
-                    {typeTagText(data().type, t)}
-                  </span>
-                  <PlayCostList playCost={data().playCost} />
-                </div>
+              <h3 class="card-name">{data().name}</h3>
+              <div class="flex flex-row items-center mb-[0.25em]">
+                <span class="skill-type mr-[0.5em]">
+                  {typeTagText(data().type, t)}
+                </span>
+                <PlayCostList playCost={data().playCost} />
               </div>
               <Tags tags={data().tags} />
               <div>
@@ -350,7 +325,6 @@ export function Entity(props: ExpandableCardDataProps) {
 export interface CardDefinitionProps {
   class?: string;
   definitionId: number;
-  includesImage: boolean;
 }
 
 export function Keyword(props: CardDefinitionProps) {
