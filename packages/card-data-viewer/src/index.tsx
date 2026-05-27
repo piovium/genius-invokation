@@ -55,21 +55,32 @@ export interface RegisterResult {
 
 export interface CreateCardDataViewerOption {
   assetsManager?: Accessor<AssetsManager>;
-  includesImage?: boolean;
   locale?: Accessor<Locale>;
+}
+
+export interface ShowCardDataViewerOption {
+  includesImage?: boolean;
 }
 
 export function createCardDataViewer(
   option: CreateCardDataViewerOption = {},
 ): RegisterResult {
   const localeGetter = createMemo(() => option.locale?.() ?? "zh-CN");
-  const assetsManagerGetter = createMemo(() => option.assetsManager?.() ?? DEFAULT_ASSETS_MANAGER);
+  const assetsManagerGetter = createMemo(
+    () => option.assetsManager?.() ?? DEFAULT_ASSETS_MANAGER,
+  );
   const dict = createMemo(() => translations[localeGetter()]);
 
   const [shown, setShown] = createSignal(false);
+  const [includesImage, setIncludesImage] = createSignal(false);
   const [inputs, setInputs] = createSignal<ViewerInput[]>([]);
 
-  const showDef = (definitionId: number, type: StateType) => {
+  const showDef = (
+    definitionId: number,
+    type: StateType,
+    opt?: ShowCardDataViewerOption,
+  ) => {
+    setIncludesImage(opt?.includesImage ?? false);
     setInputs([
       {
         from: "definitionId",
@@ -103,24 +114,26 @@ export function createCardDataViewer(
         <CardDataViewerContainer
           shown={shown()}
           inputs={inputs()}
-          includesImage={option.includesImage ?? false}
+          includesImage={includesImage()}
         />
       </AssetsContext.Provider>
     ),
-    showCard: (id) => {
-      showDef(id, "card");
+    showCard: (id: number, opt?: ShowCardDataViewerOption) => {
+      showDef(id, "card", opt);
     },
-    showCharacter: (id) => {
-      showDef(id, "character");
+    showCharacter: (id: number, opt?: ShowCardDataViewerOption) => {
+      showDef(id, "character", opt);
     },
-    showSkill: (id) => {
-      showDef(id, "skill");
+    showSkill: (id: number, opt?: ShowCardDataViewerOption) => {
+      showDef(id, "skill", opt);
     },
     showState: (
       type: StateType,
       state: PbCharacterState | PbEntityState,
       combatStatuses?: PbEntityState[],
+      opt?: ShowCardDataViewerOption,
     ) => {
+      setIncludesImage(opt?.includesImage ?? true);
       setInputs([
         // main item
         mapStateToInput(state, type),

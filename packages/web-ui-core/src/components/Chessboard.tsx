@@ -1058,7 +1058,6 @@ export function Chessboard(props: ChessboardProps) {
 
   const { assetsManager, locale, t } = useUiContext();
   const { CardDataViewer, ...dataViewerController } = createCardDataViewer({
-    includesImage: true,
     assetsManager,
     locale,
   });

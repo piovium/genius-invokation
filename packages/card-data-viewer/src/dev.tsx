@@ -22,7 +22,6 @@ function App() {
   const enAssetsManager = new AssetsManager({ language: "CHS" });
   const { CardDataViewer, showCharacter, showState, showCard, showSkill } =
     createCardDataViewer({
-      includesImage: true,
       assetsManager: () => enAssetsManager,
       locale: () => "zh-CN"
     });
