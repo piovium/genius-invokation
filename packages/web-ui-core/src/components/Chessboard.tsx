@@ -1458,7 +1458,9 @@ export function Chessboard(props: ChessboardProps) {
   /** 当特殊视图显示状态发生变化时，隐藏所有选中对象 */
   createEffect(
     on(specialViewVisible, () => {
-      setSelectingItem(null);
+      if (!localProps.spectatorMode) {
+        setSelectingItem(null);
+      }
     }),
   );
   /** 当存在特殊视图可用时，使其可见 */

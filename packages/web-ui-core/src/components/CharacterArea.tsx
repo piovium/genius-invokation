@@ -602,7 +602,7 @@ export function CharacterArea(props: CharacterAreaProps) {
         <Damage info={getDamage()} shown={showDamage()} />
         <CharacterTagMasks tags={data().tags} />
         <Show when={triggered()}>
-          <div class="place-self-center h-21 w-21 rounded-full skill-triggered"/>
+          <div class="place-self-center h-21 w-21 rounded-full skill-triggered" />
         </Show>
       </div>
       <Show when={props.active}>
@@ -631,7 +631,9 @@ function Aura(props: AuraProps) {
         {(reaction) => (
           <div class="flex flex-nowrap items-center bg-black/60 rounded-full shrink-0">
             <For each={reaction}>
-              {(e) => <Image imageId={e} class="h-5.5 w-5.5" fallback="state" />}
+              {(e) => (
+                <Image imageId={e} class="h-5.5 w-5.5" fallback="state" />
+              )}
             </For>
           </div>
         )}
@@ -790,7 +792,7 @@ interface CharacterTagMasksProps {
 function CharacterTagMasks(props: CharacterTagMasksProps) {
   const TAG_MASK_MAP: Record<number, string> = {
     [CHARACTER_TAG_SHIELD]: "MaskShield",
-    [CHARACTER_TAG_BARRIER]:"MaskBarrier",
+    [CHARACTER_TAG_BARRIER]: "MaskBarrier",
     [CHARACTER_TAG_DISABLE_SKILL]: "MaskFrozen",
     // "UI_GCG_Rocken",
     // "UI_GCG_Dizzy",
@@ -799,7 +801,11 @@ function CharacterTagMasks(props: CharacterTagMasksProps) {
     <Index each={Object.keys(TAG_MASK_MAP)}>
       {(flag) => (
         <Show when={props.tags & Number(flag())}>
-          <img class="m--3 w-27 h-42 max-w-27 max-h-42" src={`https://ui-assets.piovium.org/${TAG_MASK_MAP[Number(flag())]}.webp`}/>
+          <img
+            class="m--3 w-27 h-42 max-w-27 max-h-42"
+            src={`https://ui-assets.piovium.org/${TAG_MASK_MAP[Number(flag())]}.webp`}
+            draggable="false"
+          />
         </Show>
       )}
     </Index>

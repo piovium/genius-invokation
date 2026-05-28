@@ -27,6 +27,7 @@ export function ChessboardBackground(props: ChessboardBackgroundProps) {
       <img
         class="w-240 h-135 scale-107.2"
         src="https://ui-assets.piovium.org/ChessboardBackground.webp"
+        draggable="false"
       />
     </div>
   );
