@@ -157,7 +157,10 @@ export function createCardDataViewer(
         // character zone entities
         ...("entity" in state
           ? state.entity.map((st) =>
-              mapStateToInput(st, st.equipment ? "equipment" : "status"),
+              mapStateToInput(
+                st,
+                typeof st.equipment === "number" ? "equipment" : "status",
+              ),
             )
           : []),
         // action card zone entities
