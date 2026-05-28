@@ -1455,7 +1455,7 @@ export function Chessboard(props: ChessboardProps) {
   const displayUiComponents = createMemo(
     () => !hasSpecialView() || !specialViewVisible(),
   );
-  /** 当特殊视图显示状态发生变化时，隐藏所有选中对象 */
+  /** 在非观战模式下，当特殊视图显示状态发生变化时，隐藏所有选中对象 */
   createEffect(
     on(specialViewVisible, () => {
       if (!localProps.spectatorMode) {
