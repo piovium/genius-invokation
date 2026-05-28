@@ -78,18 +78,19 @@ function CardDataViewer(props: CardDataViewerProps) {
   const [combineCharEntities, setCombineCharEntities] =
     createSignal<boolean>(false);
 
-  const grouped = createMemo(() =>
-    Object.groupBy(props.inputs, (i) => {
+  const grouped = createMemo(() => {
+    const combineEquipAndStatus = combineCharEntities();
+    return Object.groupBy(props.inputs, (i) => {
       if (
-        combineCharEntities() &&
+        combineEquipAndStatus &&
         (i.type === "equipment" || i.type === "status")
       ) {
         return "equipAndStatus";
       } else {
         return i.type;
       }
-    }),
-  );
+    });
+  });
   const subEntities = () => {
     const render: (ViewerInput | SubStateType)[] = [];
     const g = grouped();
@@ -161,20 +162,22 @@ function CardDataViewer(props: CardDataViewerProps) {
               <For each={subEntities()}>
                 {(entity) => (
                   <Switch>
-                    <Match when={typeof entity === "string"}>
-                      <h3
-                        class="w-full text-center rounded-full entity-category"
-                        bool:data-show-combine-button={showCombineButton(
-                          entity as SubStateType,
-                        )}
-                        onClick={() => {
-                          if (showCombineButton(entity as SubStateType)) {
-                            setCombineCharEntities((v) => !v);
-                          }
-                        }}
-                      >
-                        {t(entity as SubStateType)}
-                      </h3>
+                    <Match when={typeof entity === "string" && entity}>
+                      {(entityType) => (
+                        <h3
+                          class="w-full text-center rounded-full entity-category"
+                          bool:data-show-combine-button={showCombineButton(
+                            entityType(),
+                          )}
+                          onClick={() => {
+                            if (showCombineButton(entityType())) {
+                              setCombineCharEntities((v) => !v);
+                            }
+                          }}
+                        >
+                          {t(entityType())}
+                        </h3>
+                      )}
                     </Match>
                     <Match when={true}>
                       <Entity

@@ -42,17 +42,11 @@ export function PlayCostList(props: PlayCostProps) {
     `${UI_ASSET_URL_BASE}${COST_ICON_MAP[type]}.svg.webp`;
 
   const renderCost = () => {
-    if (props.playCost.length > 0) {
-      if (
-        props.playCost.length === 1 &&
-        props.playCost[0].type === "GCG_COST_LEGEND"
-      ) {
-        return [{ type: "GCG_COST_DICE_SAME", count: 0 }, ...props.playCost];
-      }
-      return props.playCost;
-    } else {
-      return [{ type: "GCG_COST_DICE_SAME", count: 0 }];
+    const result = [...props.playCost];
+    if (result.length === 0 || result[0].type === "GCG_COST_LEGEND") {
+      result.unshift({ type: "GCG_COST_DICE_SAME", count: 0 });
     }
+    return result;
   };
 
   return (

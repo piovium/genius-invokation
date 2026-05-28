@@ -29,7 +29,7 @@
   --skill-icon-color: #713f12;
   --id-color: #ca8a04;
 
-  &:where([data-light] > *) {
+  &:where([data-light], [data-light] *) {
     --panel-background-color: #f7f7eb;
     --panel-border-color: #b4967e;
     --text-color-h1: #716864;
@@ -47,7 +47,7 @@
     --id-color: #ca8a04;
   }
 
-  &:where([data-dark] > *) {
+  &:where([data-dark], [data-dark] *) {
     --panel-background-color: #2e3740;
     --panel-border-color: #404d5c;
     --text-color-h1: #cad8ea;
@@ -120,6 +120,7 @@
     width: 3em;
     height: 3em;
     mask-size: 3em 3em;
+    mask-image: var(--mask-image);
     background-color: var(--skill-icon-color);
   }
 

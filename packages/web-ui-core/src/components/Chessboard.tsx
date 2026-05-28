@@ -1005,7 +1005,7 @@ function rerenderChildren(opt: {
   };
 }
 
-type SelectingItem =
+type SelectingItem = (
   | {
       type: "card";
       info: CardInfo;
@@ -1025,7 +1025,8 @@ type SelectingItem =
   | {
       type: "externalCard";
       info: number | PbEntityState;
-    };
+    }
+) & { showImage?: boolean };
 
 export function Chessboard(props: ChessboardProps) {
   const [localProps, elProps] = splitProps(props, [
@@ -1061,7 +1062,7 @@ export function Chessboard(props: ChessboardProps) {
     assetsManager,
     locale,
   });
-  const [selectingItem, setSelectingItem] = createSignal<SelectingItem & {showImage?: boolean} | null>(
+  const [selectingItem, setSelectingItem] = createSignal<SelectingItem | null>(
     null,
   );
   /** 是否是主棋盘上被选中的卡 */
@@ -1092,7 +1093,9 @@ export function Chessboard(props: ChessboardProps) {
     if (item === null) {
       dataViewerController.hide();
     } else if (item.type === "card") {
-      dataViewerController.showState("card", item.info.data, [], {includesImage: item.showImage});
+      dataViewerController.showState("card", item.info.data, {
+        includesImage: item.showImage,
+      });
     } else if (item.type === "character") {
       dataViewerController.showState(
         "character",
@@ -1100,14 +1103,18 @@ export function Chessboard(props: ChessboardProps) {
         item.info.combatStatus.map((x) => x.data),
       );
     } else if (item.type === "entity") {
-      dataViewerController.showState("entity", item.info.data, []);
+      dataViewerController.showState("entity", item.info.data);
     } else if (item.type === "skill") {
       dataViewerController.showSkill(item.info.id);
     } else if (item.type === "externalCard") {
       if (typeof item.info === "number") {
-        dataViewerController.showCard(item.info, {includesImage: item.showImage});
+        dataViewerController.showCard(item.info, {
+          includesImage: item.showImage,
+        });
       } else {
-        dataViewerController.showState("card", item.info, [], {includesImage: item.showImage});
+        dataViewerController.showState("card", item.info, {
+          includesImage: item.showImage,
+        });
       }
     }
   });
@@ -1996,7 +2003,11 @@ export function Chessboard(props: ChessboardProps) {
             shown={specialViewVisible()}
             candidateIds={localProps.selectCardCandidates}
             onClickCard={(id) => {
-              setSelectingItem({ type: "externalCard", info: id, showImage: false });
+              setSelectingItem({
+                type: "externalCard",
+                info: id,
+                showImage: false,
+              });
             }}
             onConfirm={(id) => {
               localProps.onSelectCard?.(id);
@@ -2065,7 +2076,10 @@ export function Chessboard(props: ChessboardProps) {
               showOppView={hasOppSpecialView()}
             />
           </Show>
-          <div class="mx-2 my-13 pointer-events-none contain-strict touch-pan" data-dark>
+          <div
+            class="mx-2 my-13 pointer-events-none contain-strict touch-pan"
+            data-dark
+          >
             <CardDataViewer />
           </div>
           {/* 右上角部件 */}

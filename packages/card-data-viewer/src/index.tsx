@@ -41,12 +41,23 @@ export interface RegisterResult {
   readonly showCharacter: (id: number, opt?: ShowCardDataViewerOption) => void;
   readonly showSkill: (id: number, opt?: ShowCardDataViewerOption) => void;
   readonly showCard: (id: number, opt?: ShowCardDataViewerOption) => void;
-  readonly showState: (
-    type: "character" | "entity" | "card",
-    state: PbCharacterState | PbEntityState,
-    extra: PbEntityState[],
-    opt?: ShowCardDataViewerOption,
-  ) => void;
+  readonly showState: {
+    (
+      type: "character",
+      state: PbCharacterState,
+      combatStatuses: PbEntityState[],
+      opt?: ShowCardDataViewerOption,
+    ): void;
+    /**
+     * - Pass in type = "entity" for on-stage entities (which reads `rawPlayingDescription`)
+     * - Pass in type = "card" for off-stage entities (which reads `rawDynamicDescription`)
+     */
+    (
+      type: "entity" | "card",
+      state: PbEntityState,
+      opt?: ShowCardDataViewerOption,
+    ): void;
+  };
 
   readonly hide: () => void;
 }
@@ -128,11 +139,17 @@ export function createCardDataViewer(
     showState: (
       type: StateType,
       state: PbCharacterState | PbEntityState,
-      extra?: PbEntityState[],
+      combatStatusesOrOpt?: PbEntityState[] | ShowCardDataViewerOption,
       opt?: ShowCardDataViewerOption,
     ) => {
+      const extra =
+        type === "character" ? (combatStatusesOrOpt as PbEntityState[]) : [];
+      const options =
+        type === "character"
+          ? opt
+          : (combatStatusesOrOpt as ShowCardDataViewerOption | undefined);
       setMainImageDefId(
-        opt?.includesImage === false ? null : state.definitionId,
+        options?.includesImage === false ? null : state.definitionId,
       );
       setInputs([
         // main item

@@ -91,14 +91,18 @@ function App() {
     //     },
     //   ],
     // });
-    // showState("entity", {
-    //   id: -5000001,
-    //   definitionId: 113041,
-    //   descriptionDictionary: {},
-    //   hasUsagePerRound: false,
-    //   variableName: "usage",
-    //   variableValue: 2,
-    // });
+    showState("entity", {
+      id: -5000001,
+      definitionId: 113041,
+      definitionCost: [],
+      tags: 0,
+      descriptionDictionary: {},
+      hasUsagePerRound: false,
+      variableName: "usage",
+      variableValue: 2,
+      type: 4,
+      attachment: []
+    });
     // showCard(212111);
     // showCharacter(1610);
     // showSkill(12111);

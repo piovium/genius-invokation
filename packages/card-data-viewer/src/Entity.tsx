@@ -59,12 +59,22 @@ export function Character(props: CardDataProps) {
     () => [props.input.definitionId, assetsManager()] as const,
     ([defId, manager]) => manager.getData(defId) as Promise<CharacterRawData>,
   );
-  const hpText = () =>
-    state() ? `${state()!.health}/${state()!.maxHealth}` : `${data()!.hp}`;
-  const mpText = () =>
-    state()
-      ? `${state()!.energy}/${state()!.maxEnergy}`
-      : `${data()!.maxEnergy}`;
+  const hpText = createMemo(() => {
+    const st = state();
+    if (st) {
+      return `${st.health}/${st.maxHealth}`;
+    } else {
+      return data()?.hp ?? 0;
+    }
+  });
+  const mpText = createMemo(() => {
+    const st = state();
+    if (st) {
+      return `${st.energy}/${st.maxEnergy}`;
+    } else {
+      return data()?.maxEnergy ?? 0;
+    }
+  });
   return (
     <div class={props.class}>
       <Switch>
@@ -102,10 +112,7 @@ export function Character(props: CardDataProps) {
           )}
         </Match>
       </Switch>
-      <IdBox
-        defId={props.input.definitionId}
-        id={state() ? state()!.id : void 0}
-      />
+      <IdBox defId={props.input.definitionId} id={state()?.id} />
     </div>
   );
 }
@@ -124,22 +131,18 @@ export function ActionCard(props: CardDataProps) {
     ([defId, manager]) =>
       manager.getData(defId) as Promise<ActionCardRawData | EntityRawData>,
   );
-  const rawDescription = () => {
-    if (state()) {
-      if (
-        props.input.type === "card" &&
-        (data() as ActionCardRawData).rawDynamicDescription
-      ) {
-        return (data() as ActionCardRawData).rawDynamicDescription;
-      } else if (
-        props.input.type === "entity" &&
-        data()!.rawPlayingDescription
-      ) {
-        return data()!.rawPlayingDescription;
+  const rawDescription = createMemo(() => {
+    const st = state();
+    const d = data() as ActionCardRawData | undefined;
+    if (st) {
+      if (props.input.type === "card" && d?.rawDynamicDescription) {
+        return d.rawDynamicDescription;
+      } else if (props.input.type === "entity" && d?.rawPlayingDescription) {
+        return d.rawPlayingDescription;
       }
     }
-    return data()!.rawDescription;
-  };
+    return d?.rawDescription;
+  });
   return (
     <div class={props.class}>
       <Switch>
@@ -163,9 +166,9 @@ export function ActionCard(props: CardDataProps) {
               <div class="px-[0.5em]">
                 <Description
                   {...props}
-                  keyMap={state() ? state()!.descriptionDictionary : {}}
+                  keyMap={state()?.descriptionDictionary ?? {}}
                   definitionId={props.input.definitionId}
-                  description={rawDescription()!}
+                  description={rawDescription() ?? ""}
                   onRequestExplain={props.onRequestExplain}
                 />
               </div>
@@ -173,10 +176,7 @@ export function ActionCard(props: CardDataProps) {
           )}
         </Match>
       </Switch>
-      <IdBox
-        defId={props.input.definitionId}
-        id={state() ? state()!.id : void 0}
-      />
+      <IdBox defId={props.input.definitionId} id={state()?.id} />
     </div>
   );
 }
@@ -216,7 +216,7 @@ export function Skill(props: ExpandableCardDataProps) {
           {(icon) => (
             <div
               class="skill-icon shrink-0"
-              style={{ "mask-image": `url(${icon()})` }}
+              style={{ "--mask-image": `url(${icon()})` }}
             />
           )}
         </Show>
@@ -290,11 +290,7 @@ export function Entity(props: ExpandableCardDataProps) {
           <Show when={icon()}>
             {(icon) => <img src={icon()} class="w-[3em] h-[3em]" />}
           </Show>
-          <Show
-            when={
-              state() !== null && typeof state()!.variableValue === "number"
-            }
-          >
+          <Show when={typeof state()?.variableValue === "number"}>
             <div class="place-self-end rounded-full entity-variable">
               {state()!.variableValue}
             </div>
@@ -317,7 +313,7 @@ export function Entity(props: ExpandableCardDataProps) {
             {(data) => (
               <Description
                 {...props}
-                keyMap={state() ? state()!.descriptionDictionary : {}}
+                keyMap={state()?.descriptionDictionary ?? {}}
                 definitionId={props.input.definitionId}
                 description={
                   data().rawPlayingDescription ?? data().rawDescription
@@ -327,10 +323,7 @@ export function Entity(props: ExpandableCardDataProps) {
             )}
           </Match>
         </Switch>
-        <IdBox
-          defId={props.input.definitionId}
-          id={state() ? state()!.id : void 0}
-        />
+        <IdBox defId={props.input.definitionId} id={state()?.id} />
       </div>
     </details>
   );
