@@ -244,12 +244,13 @@ export class EventList extends Array<EventAndRequest> {
 
 export interface ReadonlyEventList extends ReadonlyArray<EventAndRequest> {}
 
+type MaybeConsole = {
+  warn?: (...data: any[]) => void;
+  trace?: () => void;
+};
+
 declare global {
-  interface Console {
-    warn?(...data: any[]): void;
-    trace?(): void;
-  }
-  var console: Console | undefined;
+  var console: MaybeConsole | undefined;
 }
 
 /**
