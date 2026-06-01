@@ -87,7 +87,7 @@ import {
   type VersionMetadata,
 } from "../base/version";
 import { registerInitiativeSkill, builderWeakRefs } from "./registry";
-import type { TargetKindOfQuery, TargetQuery } from "./card";
+import type { TargetKindOfQuery, TargetQuery, TargetType } from "./card";
 import { $, type IDollar, type InferResult, type IQuery } from "../query";
 import { isCustomEvent, type CustomEvent } from "../base/custom_event";
 import type { ApplyReactive } from "./context/reactive";
@@ -1480,10 +1480,12 @@ export class InitiativeSkillBuilder<
     >
   >;
   addTarget<const Q extends IQuery>(
-    targetQuery: Q | ((dollar: IDollar) => Q),
+    targetQuery: InferResult<Q>["type"] extends TargetType
+      ? Q | ((dollar: IDollar) => Q)
+      : never,
   ): BuilderWithShortcut<
     InitiativeSkillBuilder<
-      readonly [...KindTs, InferResult<Q>["type"] & InitiativeSkillTargetKind[number]],
+      readonly [...KindTs, Extract<InferResult<Q>["type"], TargetType>],
       AssociatedExt
     >
   >;
@@ -1579,11 +1581,13 @@ export class TechniqueBuilder<
     >
   >;
   addTarget<const Q extends IQuery>(
-    targetQuery: Q | ((dollar: IDollar) => Q),
+    targetQuery: InferResult<Q>["type"] extends TargetType
+      ? Q | ((dollar: IDollar) => Q)
+      : never,
   ): BuilderWithShortcut<
     TechniqueBuilder<
       Vars,
-      readonly [...KindTs, InferResult<Q>["type"] & InitiativeSkillTargetKind[number]],
+      readonly [...KindTs, Extract<InferResult<Q>["type"], TargetType>],
       AssociatedExt,
       ParentFromCard
     >

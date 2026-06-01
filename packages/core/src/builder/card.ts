@@ -110,6 +110,7 @@ export type TargetQuery =
   | `${string}summon${string}`
   | `${string}support${string}`;
 export type TargetKindOfQuery<Q extends TargetQuery> = GuessedTypeOfQuery<Q>;
+export type TargetType = "character" | "summon" | "support";
 
 const SATIATED_ID = 303300 as StatusHandle;
 
@@ -484,10 +485,12 @@ export class CardBuilder<
     >
   >;
   addTarget<const Q extends IQuery>(
-    targetQuery: Q | ((dollar: IDollar) => Q),
+    targetQuery: InferResult<Q>["type"] extends TargetType
+      ? Q | ((dollar: IDollar) => Q)
+      : never,
   ): BuilderWithShortcut<
     CardBuilder<
-      readonly [...KindTs, InferResult<Q>["type"] & InitiativeSkillTargetKind[number]],
+      readonly [...KindTs, Extract<InferResult<Q>["type"], TargetType>],
       CallerVars,
       AssociatedExt
     >
