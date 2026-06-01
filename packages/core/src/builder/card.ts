@@ -892,6 +892,7 @@ export class CardBuilder<
       hintText: null,
       disableTuning: this._disableTuning,
       disposeWhenUsageIsZero: false,
+      disposeOnMasterDefeated: true,
     };
     registerEntity(cardDef);
     return this.cardId as CardHandle;
