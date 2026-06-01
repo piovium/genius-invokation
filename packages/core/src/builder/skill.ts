@@ -88,6 +88,7 @@ import {
 } from "../base/version";
 import { registerInitiativeSkill, builderWeakRefs } from "./registry";
 import type { TargetKindOfQuery, TargetQuery } from "./card";
+import { $, type IDollar, type InferResult, type IQuery } from "../query";
 import { isCustomEvent, type CustomEvent } from "../base/custom_event";
 import type { ApplyReactive } from "./context/reactive";
 
@@ -1333,13 +1334,17 @@ export abstract class SkillBuilderWithCost<
     return this;
   }
 
-  protected addTargetImpl(targetGetter: TargetGetter | string) {
+  protected addTargetImpl(targetGetter: TargetGetter | string | IQuery) {
     if (typeof targetGetter === "string") {
       this._targetGetters.push(function (ctx) {
         return ctx.$$(targetGetter).map((st) => st.latest());
       });
-    } else {
+    } else if (typeof targetGetter === "function") {
       this._targetGetters.push(targetGetter);
+    } else {
+      this._targetGetters.push(function (ctx) {
+        return ctx.queryAll(targetGetter).map((st) => st.latest());
+      });
     }
     return this;
   }
@@ -1473,8 +1478,21 @@ export class InitiativeSkillBuilder<
       readonly [...KindTs, TargetKindOfQuery<Q>],
       AssociatedExt
     >
-  > {
-    this.addTargetImpl(targetQuery);
+  >;
+  addTarget<const Q extends IQuery>(
+    targetQuery: Q | ((dollar: IDollar) => Q),
+  ): BuilderWithShortcut<
+    InitiativeSkillBuilder<
+      readonly [...KindTs, InferResult<Q>["type"] & InitiativeSkillTargetKind[number]],
+      AssociatedExt
+    >
+  >;
+  addTarget(targetQuery: any): any {
+    if (typeof targetQuery === "function") {
+      this.addTargetImpl(targetQuery($));
+    } else {
+      this.addTargetImpl(targetQuery);
+    }
     return this as any;
   }
 
@@ -1559,8 +1577,23 @@ export class TechniqueBuilder<
       AssociatedExt,
       ParentFromCard
     >
-  > {
-    this.addTargetImpl(targetQuery);
+  >;
+  addTarget<const Q extends IQuery>(
+    targetQuery: Q | ((dollar: IDollar) => Q),
+  ): BuilderWithShortcut<
+    TechniqueBuilder<
+      Vars,
+      readonly [...KindTs, InferResult<Q>["type"] & InitiativeSkillTargetKind[number]],
+      AssociatedExt,
+      ParentFromCard
+    >
+  >;
+  addTarget(targetQuery: any): any {
+    if (typeof targetQuery === "function") {
+      this.addTargetImpl(targetQuery($));
+    } else {
+      this.addTargetImpl(targetQuery);
+    }
     return this as any;
   }
 

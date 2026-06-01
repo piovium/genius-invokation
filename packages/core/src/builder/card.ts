@@ -65,6 +65,7 @@ import {
   type EntityDescriptionDictionaryGetter,
 } from "./entity";
 import type { GuessedTypeOfQuery } from "../query-legacy/types";
+import { $, type IDollar, type InferResult, type IQuery } from "../query";
 import { GiTcgDataError } from "../error";
 import {
   costSize,
@@ -481,8 +482,22 @@ export class CardBuilder<
       CallerVars,
       AssociatedExt
     >
-  > {
-    this.addTargetImpl(targetQuery);
+  >;
+  addTarget<const Q extends IQuery>(
+    targetQuery: Q | ((dollar: IDollar) => Q),
+  ): BuilderWithShortcut<
+    CardBuilder<
+      readonly [...KindTs, InferResult<Q>["type"] & InitiativeSkillTargetKind[number]],
+      CallerVars,
+      AssociatedExt
+    >
+  >;
+  addTarget(targetQuery: any): any {
+    if (typeof targetQuery === "function") {
+      this.addTargetImpl(targetQuery($));
+    } else {
+      this.addTargetImpl(targetQuery);
+    }
     return this as any;
   }
 
