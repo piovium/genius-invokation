@@ -65,6 +65,7 @@ import {
   type EntityDescriptionDictionaryGetter,
 } from "./entity";
 import type { GuessedTypeOfQuery } from "../query-legacy/types";
+import { $, type IDollar, type InferResult, type IQuery } from "../query";
 import { GiTcgDataError } from "../error";
 import {
   costSize,
@@ -109,6 +110,7 @@ export type TargetQuery =
   | `${string}summon${string}`
   | `${string}support${string}`;
 export type TargetKindOfQuery<Q extends TargetQuery> = GuessedTypeOfQuery<Q>;
+export type TargetType = "character" | "summon" | "support";
 
 const SATIATED_ID = 303300 as StatusHandle;
 
@@ -481,8 +483,24 @@ export class CardBuilder<
       CallerVars,
       AssociatedExt
     >
-  > {
-    this.addTargetImpl(targetQuery);
+  >;
+  addTarget<const Q extends IQuery>(
+    targetQuery: InferResult<Q>["type"] extends TargetType
+      ? Q | ((dollar: IDollar) => Q)
+      : never,
+  ): BuilderWithShortcut<
+    CardBuilder<
+      readonly [...KindTs, Extract<InferResult<Q>["type"], TargetType>],
+      CallerVars,
+      AssociatedExt
+    >
+  >;
+  addTarget(targetQuery: any): any {
+    if (typeof targetQuery === "function") {
+      this.addTargetImpl(targetQuery($));
+    } else {
+      this.addTargetImpl(targetQuery);
+    }
     return this as any;
   }
 
@@ -874,6 +892,7 @@ export class CardBuilder<
       hintText: null,
       disableTuning: this._disableTuning,
       disposeWhenUsageIsZero: false,
+      disposeOnMasterDefeated: true,
     };
     registerEntity(cardDef);
     return this.cardId as CardHandle;
