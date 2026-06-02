@@ -147,18 +147,21 @@ export function DeclareEndMarker(props: DeclareEndMarkerProps) {
         timingMine={props.timingMine}
       />
       <button
-        class={`grid-area-[1/1] self-center select-none
-          hidden data-[clickable]:block
-          h-9 w-9 rounded-full b-2.5 pointer-events-auto
+        class={`grid-area-[1/1] self-center
+          hidden data-[clickable]:block pointer-events-auto
+          h-9 w-9 rounded-full b-2.5
           b-#f3ca58 bg-#ebb145
           hover:b-#fffd79 hover:bg-#ffd954
-          active:b-#ef9b32 active:bg-#ba6c10
-          text-3 text-black/60 font-bold`}
+          active:b-#ef9b32 active:bg-#ba6c10`}
         onClick={onClick}
         bool:data-clickable={props.markerClickable}
+      />
+      <div
+        class="grid-area-[1/1] self-center text-3 font-bold line-height-none text-white/60 data-[button]:text-black/60"
+        bool:data-button={props.markerClickable}
       >
         T{props.roundNumber}
-      </button>
+      </div>
       <Button
         class="hidden data-[shown]:grid pointer-events-auto grid-area-[1/2] self-center"
         bool:data-shown={props.showButton}
