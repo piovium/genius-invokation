@@ -3,6 +3,8 @@ html {
   margin: 0;
   min-height: 100vh;
   overflow-x: hidden;
+  /* 抵消部分浏览器的字号缩放 */
+  -webkit-text-size-adjust: none;
 }
 
 * {

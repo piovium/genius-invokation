@@ -7,6 +7,8 @@
   --root-padding-right: env(safe-area-inset-right, 0px);
   --root-padding: var(--root-padding-top) var(--root-padding-right)
     var(--root-padding-bottom) var(--root-padding-left);
+  /* 抵消部分浏览器的字号缩放 */
+  -webkit-text-size-adjust: none;
 }
 
 #app {
