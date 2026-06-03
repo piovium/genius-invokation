@@ -31,6 +31,7 @@ function ensureUnitRef(): HTMLElement {
   return unitRefEl;
 }
 
+/** Return the actual px of 1/4 rem in the CSS */
 export function unitInPx(): number {
   const px = ensureUnitRef().clientWidth;
   if (px > 0) return px;
