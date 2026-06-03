@@ -33,6 +33,7 @@ const User = lazy(() => import("./pages/User"));
 const Decks = lazy(() => import("./pages/Decks"));
 const EditDeck = lazy(() => import("./pages/EditDeck"));
 const Room = lazy(() => import("./pages/Room"));
+const FontDebug = lazy(() => import("./pages/FontDebug"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 export interface VersionContextValue {
@@ -88,6 +89,7 @@ function App() {
           <Route path="/decks/:id" component={EditDeck} />
           <Route path="/decks" component={Decks} />
           <Route path="/rooms/:code" component={Room} />
+          <Route path="/debug" component={FontDebug} />
           <Route path="*" component={NotFound} />
         </Router>
       </MobileContext.Provider>
