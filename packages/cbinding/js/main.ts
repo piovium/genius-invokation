@@ -17,9 +17,7 @@ import "./stub.js";
 // Encoding API is a WHATWG Living Standard.
 // Not included in ECMA-262, so V8 doesn't support it. Add a polyfill for that.
 import "fast-text-encoding";
-import "core-js/es/promise/with-resolvers";
-import "core-js/proposals/iterator-helpers";
-import "core-js/proposals/explicit-resource-management";
+import "core-js/actual";
 
 import getData from "@gi-tcg/data";
 import {
