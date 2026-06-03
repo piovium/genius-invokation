@@ -1,4 +1,5 @@
 // Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -18,7 +19,21 @@ import type { DraggingCardInfo } from "./components/Chessboard";
 export type Size = [height: number, width: number];
 export type Pos = [x: number, y: number];
 
-export function unitInPx() {
+let unitRefEl: HTMLElement | null = null;
+
+function ensureUnitRef(): HTMLElement {
+  if (!unitRefEl || !unitRefEl.isConnected) {
+    unitRefEl = document.createElement("div");
+    unitRefEl.style.cssText =
+      "position:fixed;visibility:hidden;width:0.25rem;pointer-events:none;z-index:-9999";
+    (document.body || document.documentElement).appendChild(unitRefEl);
+  }
+  return unitRefEl;
+}
+
+export function unitInPx(): number {
+  const px = ensureUnitRef().clientWidth;
+  if (px > 0) return px;
   return parseFloat(getComputedStyle(document.documentElement).fontSize) / 4;
 }
 
