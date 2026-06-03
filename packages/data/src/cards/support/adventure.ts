@@ -98,10 +98,10 @@ export const TideTurningSacredLord = summon(301041)
   .usage(3)
   .on("selfDispose")
   .do((c) => {
-    const myMaxHpCharacter = c.query($.macros.myMaxHealth);
-    const oppMaxHpCharacter = c.query($.macros.oppMaxHealth);
+    const myMaxHpCharacter = c.query($.macros.myMaxHealth)!;
+    const oppMaxHpCharacter = c.query($.macros.oppMaxHealth)!;
     const target =
-      myMaxHpCharacter!.health > oppMaxHpCharacter!.health
+      myMaxHpCharacter.health > oppMaxHpCharacter.health
         ? myMaxHpCharacter :
         oppMaxHpCharacter;
     c.damage(DamageType.Piercing, 5, target);
