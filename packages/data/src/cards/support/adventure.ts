@@ -97,7 +97,7 @@ export const TideTurningSacredLord = summon(301041)
   .damage(DamageType.Piercing, 2)
   .usage(3)
   .on("selfDispose")
-  .damage(DamageType.Piercing, 5, "all characters order by 0 - health limit 1")
+  .damage(DamageType.Piercing, 5, $.union($.opp.character, $.my.character).orderBy(0, "-", "health").limit(1))
   .done();
 
 /**
