@@ -1,6 +1,6 @@
 {
   "name": "@gi-tcg/assets-manager",
-  "version": "0.20.5",
+  "version": "0.20.6",
   "type": "module",
   "description": "Manage assets of GI-TCG for Web app",
   "repository": {
