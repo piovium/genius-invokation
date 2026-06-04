@@ -4,8 +4,8 @@
   "type": "module",
   "browserslist": "chrome >= 116",
   "devDependencies": {
-    "@babel/preset-typescript": "^7.26.0",
-    "@babel/preset-env": "^7.29.2",
+    "@babel/preset-typescript": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
     "@gi-tcg/core": "workspace:*",
     "@gi-tcg/data": "workspace:*",
     "@gi-tcg/typings": "workspace:*",

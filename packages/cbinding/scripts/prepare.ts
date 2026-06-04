@@ -31,7 +31,7 @@ async function writeGeneratedJsCodeCpp() {
             {
               bugfixes: true,
               useBuiltIns: "entry",
-              corejs: "3.38.1",
+              corejs: "3.49.0",
             },
           ],
         ],

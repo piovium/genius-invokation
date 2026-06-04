@@ -17,7 +17,7 @@ import "./stub.js";
 // Encoding API is a WHATWG Living Standard.
 // Not included in ECMA-262, so V8 doesn't support it. Add a polyfill for that.
 import "fast-text-encoding";
-import "core-js/actual";
+import "core-js/es";
 
 import getData from "@gi-tcg/data";
 import {
@@ -33,6 +33,7 @@ import {
   Game as InternalGame,
   runLegacyQuery,
   serializeGameStateLog,
+  setAsyncContext,
   VERSIONS,
   type AnyState,
   type CreateInitialStateConfig,
@@ -43,6 +44,8 @@ import {
 } from "@gi-tcg/core";
 import * as c from "./constant";
 import { io } from "@gi-tcg/cbinding-io";
+
+setAsyncContext(false);
 
 class GameCreateParameter {
   config: Omit<CreateInitialStateConfig, "decks" | "data" | "versionBehavior"> =
@@ -379,9 +382,9 @@ export class Game {
   }
 
   // step is awaiting on this promise
-  #stepResolvers = Promise.withResolvers();
+  #stepResolvers = Promise.withResolvers<void>();
   // pause is awaiting on this promise
-  #stepDoneResolvers = Promise.withResolvers();
+  #stepDoneResolvers = Promise.withResolvers<void>();
 
   #mutations: Mutation[] = [];
   async #onPause(
