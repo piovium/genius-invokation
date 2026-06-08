@@ -2,7 +2,8 @@ name: opencode-review
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, ready_for_review]
+    branches: [main]
 
 jobs:
   opencode-review:
