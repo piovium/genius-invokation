@@ -90,7 +90,7 @@ export const MutualWeaponsMentorship = card(111161)
  * @id 111163
  * @name 虚境裂隙
  * @description
- * 战斗行动：我方手牌中存在当前元素骰费用为3的手牌时，舍弃1张当前元素骰费用为3的手牌，丝柯克获得2点蛇之狡谋。
+ * 战斗行动：我方手牌中存在当前元素骰费用为3的手牌时，舍弃1张当前元素骰费用为3的手牌，我方丝柯克获得2点蛇之狡谋。
  */
 export const VoidRift = card(111163)
   .undiscoverable()
