@@ -37,7 +37,7 @@
     "gen:s_expr_schema": "gnx scripts/gen_s_expr_schema.ts"
   },
   "dependencies": {
-    "@gi-tcg/gts-runtime": "^0.3.1",
+    "@gi-tcg/gts-runtime": "catalog:",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
     "immer": "^11.1.4",

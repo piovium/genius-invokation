@@ -5,7 +5,6 @@
     "module": "ES2022",
     "moduleResolution": "Bundler",
     "lib": ["ESNext"],
-    "customConditions": ["development"],
 
     "rewriteRelativeImportExtensions": true,
     "erasableSyntaxOnly": true,

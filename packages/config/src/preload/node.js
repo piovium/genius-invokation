@@ -12,5 +12,17 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// @ts-check
 
 import "tsx";
+import { register } from "unloader";
+import gtsPlugin from "@gi-tcg/unplugin-gts/unloader";
+import { readFileSync } from "node:fs";
+
+register({
+  plugins: [
+    gtsPlugin({
+      readFileFn: readFileSync,
+    }),
+  ],
+});
