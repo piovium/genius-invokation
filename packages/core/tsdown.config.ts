@@ -19,7 +19,9 @@ export default defineConfig({
   platform: "neutral",
   entry: {
     index: "./src/index.ts",
-    builder: "./src/builder/index.ts"
+    builder: "./src/builder/index.ts",
+    "gts/runtime": "./src/gts/runtime.ts",
+    "gts/vm": "./src/gts/vm.ts",
   },
   sourcemap: true,
   dts: !process.env.NO_TYPING,

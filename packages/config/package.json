@@ -24,6 +24,8 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "tsx": "^4.21.0"
+    "tsx": "^4.21.0",
+    "unloader": "^0.9.0",
+    "@gi-tcg/unplugin-gts": "catalog:"
   }
 }
