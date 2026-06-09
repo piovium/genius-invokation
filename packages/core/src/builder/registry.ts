@@ -199,7 +199,7 @@ function combineObject<T extends {}, U extends {}>(a: T, b: U): T & U {
   return combined;
 }
 
-interface CharacterEntry
+export interface CharacterEntry
   extends Omit<CharacterDefinition, "skills" | "associatedNightsoulsBlessing"> {
   skillIds: readonly number[];
   associatedNightsoulsBlessingId: number | null;
@@ -209,7 +209,7 @@ interface CharacterEntry
 //   initiativeSkillIds: readonly number[];
 // }
 
-interface CharacterPassiveSkillEntry {
+export interface CharacterPassiveSkillEntry {
   __definition: "passiveSkills";
   id: number;
   type: "passiveSkill";
@@ -218,7 +218,7 @@ interface CharacterPassiveSkillEntry {
   skills: readonly SkillDefinition[];
 }
 
-interface CharacterInitiativeSkillEntry {
+export interface CharacterInitiativeSkillEntry {
   __definition: "initiativeSkills";
   id: number;
   type: "initiativeSkill";

@@ -13,4 +13,27 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-export * from "@gi-tcg/gts-runtime";
+import { defineViewModel } from "@gi-tcg/gts-runtime";
+import type { EntityDefinition } from "../../base/entity";
+
+class EntityModel {
+  getEntry(): EntityDefinition {
+    // TODO
+    throw new Error("Method not implemented.");
+  }
+}
+
+export const EntityViewModel = defineViewModel(EntityModel, (h) => ({
+  // TODO
+}));
+
+class CardModel {
+  getEntry(): EntityDefinition {
+    // TODO
+    throw new Error("Method not implemented.");
+  }
+}
+
+export const CardViewModel = defineViewModel(CardModel, (h) => ({
+  // TODO
+}));

@@ -13,4 +13,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-export * from "@gi-tcg/gts-runtime";
+import { defineViewModel } from "@gi-tcg/gts-runtime";
+import type { ExtensionDefinition } from "../../base/extension";
+
+class ExtensionModel {
+  getEntry(): ExtensionDefinition {
+    // TODO
+    throw new Error("Method not implemented.");
+  }
+}
+
+export const ExtensionViewModel = defineViewModel(ExtensionModel, (h) => ({
+  // TODO
+}));
