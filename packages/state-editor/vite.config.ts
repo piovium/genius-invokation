@@ -19,6 +19,7 @@ import unoCss from "unocss/vite";
 import solid from "vite-plugin-solid";
 import nodeExternals from "rollup-plugin-node-externals";
 import dts from "unplugin-dts/vite";
+import gts from "@gi-tcg/unplugin-gts/rolldown";
 
 export default defineConfig({
   resolve: {
@@ -38,6 +39,7 @@ export default defineConfig({
     },
     unoCss(),
     solid(),
+    gts(),
     !process.env.NO_TYPING && dts({ bundleTypes: true }),
   ],
   build: {
