@@ -1,4 +1,4 @@
-// Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -48,19 +48,19 @@ export default defineViewModel(class RootModel {}, (h) => ({
   status: h.attribute<{
     (): AR.With<typeof EntityViewModel>;
   }>((_, [], subView) => {
-    const entity = EntityViewModel.parse(subView).getEntry();
+    const entity = EntityViewModel.parse(subView, "status").getEntry();
     registerEntity(entity);
   }),
   combatStatus: h.attribute<{
     (): AR.With<typeof EntityViewModel>;
   }>((_, [], subView) => {
-    const entity = EntityViewModel.parse(subView).getEntry();
+    const entity = EntityViewModel.parse(subView, "combatStatus").getEntry();
     registerEntity(entity);
   }),
   summon: h.attribute<{
     (): AR.With<typeof EntityViewModel>;
   }>((_, [], subView) => {
-    const entity = EntityViewModel.parse(subView).getEntry();
+    const entity = EntityViewModel.parse(subView, "summon").getEntry();
     registerEntity(entity);
   }),
   card: h.attribute<{

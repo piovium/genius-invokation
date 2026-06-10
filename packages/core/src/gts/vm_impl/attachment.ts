@@ -1,4 +1,4 @@
-// Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,9 +14,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { defineViewModel } from "@gi-tcg/gts-runtime";
-import type { AttachmentDefinition } from "../../base/attachment";
+import type {
+  AttachmentDefinition,
+  AttachmentModification,
+} from "../../base/attachment";
+import type { GameState } from "../../base/state";
 
 class AttachmentModel {
+  id!: number;
+  modifications: (
+    | AttachmentModification
+    | ((state: GameState, id: number) => AttachmentModification)
+  )[] = [];
   getEntry(): AttachmentDefinition {
     // TODO
     throw new Error("Method not implemented.");

@@ -1,4 +1,4 @@
-// Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -15,8 +15,18 @@
 
 import { defineViewModel } from "@gi-tcg/gts-runtime";
 import type { ExtensionDefinition } from "../../base/extension";
+import type { TriggeredSkillDefinition } from "../../base/state";
 
 class ExtensionModel {
+  skillIndex = 0;
+  
+  id!: number;
+  description = "";
+  schema: unknown;
+  initialState: unknown;
+
+  skillList: TriggeredSkillDefinition[] = [];
+
   getEntry(): ExtensionDefinition {
     // TODO
     throw new Error("Method not implemented.");
