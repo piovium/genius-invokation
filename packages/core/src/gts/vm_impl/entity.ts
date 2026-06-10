@@ -1,4 +1,4 @@
-// Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,9 +14,36 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { defineViewModel } from "@gi-tcg/gts-runtime";
-import type { EntityDefinition } from "../../base/entity";
+import type { DescriptionDictionary, EntityDefinition, EntityTag, VariableConfig } from "../../base/entity";
+import type { SkillDefinition } from "../../base/skill";
+import type { Writable } from "../../utils";
+import type { SkillOperation } from "../../builder/skill";
+import type { EntityType, VersionInfo } from "../..";
+import { DEFAULT_VERSION_INFO } from "../../base/version";
 
 class EntityModel {
+  skillIndex = 0;
+  usagePerRoundIndex = 0;
+
+  id!: number;
+  type: EntityType;
+  tags: EntityTag[] = [];
+  versionInfo: VersionInfo = DEFAULT_VERSION_INFO;
+
+  varConfigs = new Map<string, VariableConfig>();
+  skillList: SkillDefinition[] = [];
+  disposeWhenUsageIsZero = false;
+  disposeOnMasterDefeated = false;
+  visibleVarName: string | null = null;
+  associatedExtensionId: number | null = null;
+  hintText: string | null = null;
+  descriptionDictionary: Writable<DescriptionDictionary> = {};
+  snippets = new Map<string, SkillOperation<any>>();
+
+  constructor(type: EntityType) {
+    this.type = type;
+  }
+
   getEntry(): EntityDefinition {
     // TODO
     throw new Error("Method not implemented.");
@@ -28,6 +55,18 @@ export const EntityViewModel = defineViewModel(EntityModel, (h) => ({
 }));
 
 class CardModel {
+
+  type: "support" | "equipment" | "eventCard" = "eventCard";
+  obtainable = true;
+  tags: EntityTag[] = [];
+  versionInfo: VersionInfo = DEFAULT_VERSION_INFO;
+
+  varConfigs = new Map<string, VariableConfig>();
+  skillList: SkillDefinition[] = [];
+  disableTuning = false;
+  // TODO satiatedTarget
+  
+
   getEntry(): EntityDefinition {
     // TODO
     throw new Error("Method not implemented.");

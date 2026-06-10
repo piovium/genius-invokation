@@ -1,2 +1,5 @@
 
-define character {}
+define character {
+  id 1101;
+  
+}
