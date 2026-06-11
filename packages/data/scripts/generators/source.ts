@@ -1,19 +1,20 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import ts from "typescript";
+// import { parse } from "@gi-tcg/gts-transpiler";
 import tsdoc, {
   TSDocConfiguration,
   TSDocTagDefinition,
@@ -84,11 +85,20 @@ interface CommentInfo {
   code: string;
 }
 
-async function getExistsComments(path: string): Promise<CommentInfo[]> {
-  const content = await readFile(path, "utf-8");
-  const file = ts.createSourceFile(path, content, ts.ScriptTarget.Latest);
-  const result: CommentInfo[] = [];
+interface CommentRange {
+  range: {
+    pos: number;
+    end: number;
+  };
+  text: string;
+  code: string;
+}
 
+function* getTsCommentRanges(
+  path: string,
+  content: string,
+): Generator<CommentRange> {
+  const file = ts.createSourceFile(path, content, ts.ScriptTarget.Latest);
   for (const node of file.statements) {
     if (node.kind !== ts.SyntaxKind.VariableStatement) {
       continue;
@@ -106,9 +116,40 @@ async function getExistsComments(path: string): Promise<CommentInfo[]> {
     const range = docComments[docComments.length - 1];
     const code = content.substring(range.end + 1, node.end);
     const text = content.substring(range.pos, range.end);
+    yield { range, code, text };
+  }
+}
+function* getGtsCommentRanges(
+  path: string,
+  content: string
+): Generator<CommentRange> {
+  throw new Error("GTS comment parsing is not implemented yet");
+}
+
+
+function buildLineOffsets(content: string): number[] {
+  const offsets = [0];
+  let pos = content.indexOf("\n");
+  while (pos !== -1) {
+    offsets.push(pos + 1);
+    pos = content.indexOf("\n", pos + 1);
+  }
+  return offsets;
+}
+
+async function getExistsComments(path: string): Promise<CommentInfo[]> {
+  const content = await readFile(path, "utf-8");
+  const lineOffsets = buildLineOffsets(content);
+  const result: CommentInfo[] = [];
+  let commentGen = path.endsWith(".gts")
+    ? getGtsCommentRanges
+    : getTsCommentRanges;
+  for (const { range, code, text } of commentGen(path, content)) {
     const parseCtx = parser.parseString(text);
     if (parseCtx.log.messages.length > 0) {
-      throw new Error(`Syntax error in file ${path}: ${parseCtx.log.messages[0].text}`);
+      throw new Error(
+        `Syntax error in file ${path}: ${parseCtx.log.messages[0].text}`,
+      );
     }
     const blocks = parseCtx.docComment.customBlocks;
     let id: number | null = null;
@@ -139,8 +180,11 @@ async function getExistsComments(path: string): Promise<CommentInfo[]> {
       }
     }
     if (id === null || name === null || description === null) {
-      const { line, character } = ts.getLineAndCharacterOfPosition(file, range.pos);
-      console.warn(`${path}:${line + 1}:${character + 1} has incomplete documentation`);
+      const line = lineOffsets.findIndex((offset) => offset > range.pos) - 1;
+      const character = range.pos - lineOffsets[line];
+      console.warn(
+        `${path}:${line + 1}:${character + 1} has incomplete documentation`,
+      );
       continue;
     }
     if (outdated !== null) {
@@ -170,7 +214,10 @@ function replaceBetween(
 }
 
 function descriptionToLines(description: string): string[] {
-  return description.split("\n").map((l) => l.replace(/\{|\}/g, "").trim()).filter((l) => !!l);
+  return description
+    .split("\n")
+    .map((l) => l.replace(/\{|\}/g, "").trim())
+    .filter((l) => !!l);
 }
 
 function writeDescriptionAsComment(description: string) {
@@ -193,11 +240,16 @@ function sameDescription(a: string, b: string) {
   return sameArray(descriptionToLines(a), descriptionToLines(b));
 }
 
-
-const OLD_VERSION_PATH = path.resolve(BASE_PATH, `old_versions/${OLD_VERSION}.ts`);
+const OLD_VERSION_PATH = path.resolve(
+  BASE_PATH,
+  `old_versions/${OLD_VERSION}.ts`,
+);
 
 if (SAVE_OLD_CODES && !existsSync(OLD_VERSION_PATH)) {
-  await writeFile(OLD_VERSION_PATH, `import { card, skill, $ } from "@gi-tcg/core/builder";\n`);
+  await writeFile(
+    OLD_VERSION_PATH,
+    `import { card, skill, $ } from "@gi-tcg/core/builder";\n`,
+  );
 }
 
 let untitledId = 1;
@@ -254,8 +306,9 @@ export async function writeSourceCode(
       offset += newComment.length - (item.range.end - item.range.pos);
       // console.log("=====\n",item.code);
       if (SAVE_OLD_CODES) {
-      await appendFile(
-        OLD_VERSION_PATH, `
+        await appendFile(
+          OLD_VERSION_PATH,
+          `
 /**
  * @id ${item.id}
  * @name ${item.name}
@@ -263,7 +316,7 @@ export async function writeSourceCode(
  * ${writeDescriptionAsComment(item.description)}
  */
 ${item.code.replace(/export /, "").replace(/\n(  \.since\(".*?"\)\n)?/, `\n  .until("${OLD_VERSION}")\n`)}
-`
+`,
         );
       }
     }

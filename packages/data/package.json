@@ -34,6 +34,7 @@
   "devDependencies": {
     "@gi-tcg/assets-manager": "workspace:*",
     "@gi-tcg/config": "workspace:*",
+    "@gi-tcg/gts-transpiler": "catalog:",
     "@microsoft/tsdoc": "^0.14.2",
     "case-anything": "^2.1.13",
     "glob": "^11.0.3"
