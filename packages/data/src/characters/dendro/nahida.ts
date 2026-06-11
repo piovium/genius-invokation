@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, StatusHandle, customEvent, $ } from "@gi-tcg/core/builder";
+import { character, skill, status, combatStatus, card, DamageType, type StatusHandle, customEvent, $ } from "@gi-tcg/core/builder";
 
 // 蕴种印描述修正：
 // 入场时，此牌携带3点可用次数。可用次数耗尽时，弃置此牌。

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, SkillHandle, CharacterHandle } from "@gi-tcg/core/builder";
+import { character, skill, status, combatStatus, card, DamageType, type SkillHandle, type CharacterHandle } from "@gi-tcg/core/builder";
 
 /**
  * @id 12104

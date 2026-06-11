@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { $, DiceType, card, combatStatus, extension, flip, status } from "@gi-tcg/core/builder";
-import { DisperseTheCalamity, SanctifyTheDefiled } from "./other";
+import { DisperseTheCalamity, SanctifyTheDefiled } from "./other.ts";
 import { IneffectiveWhenPlayed } from "../../commons";
 
 /**

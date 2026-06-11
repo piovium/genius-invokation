@@ -1,12 +1,12 @@
 import { card, character, combatStatus, skill } from "@gi-tcg/core/builder";
-import { StrictProhibited } from "../cards/support/place";
-import { ConstantOffthecuffCookery, KitchenSkills, LowtemperatureCooking, ScoringCuts } from "../characters/cryo/escoffier";
-import { Breakthrough, DepthclarionDice, LingeringLifeline, StealthyBowshot } from "../characters/hydro/yelan";
-import { InsatiableAppetite, RavagingDevourer, ShatteringWaves, StarfallShower } from "../characters/hydro/alldevouring_narwhal";
-import { BranchingFlow, SavageSwell, StormSurge, ThunderingTide } from "../characters/hydro/hydro_tulpa";
-import { BladeAblaze, Prowl, StealthMaster, Thrust } from "../characters/pyro/fatui_pyro_agent";
-import { InfusedStonehide, MovoLawa, PlamaLawa, UpaShato } from "../characters/geo/stonehide_lawachurl";
-import { FeatherSpreading, MajesticDance, RadicalVitality, VolatileSporeCloud } from "../characters/dendro/jadeplume_terrorshroom";
+import { StrictProhibited } from "../cards/support/place.ts";
+import { ConstantOffthecuffCookery, KitchenSkills, LowtemperatureCooking, ScoringCuts } from "../characters/cryo/escoffier.ts";
+import { Breakthrough, DepthclarionDice, LingeringLifeline, StealthyBowshot } from "../characters/hydro/yelan.ts";
+import { InsatiableAppetite, RavagingDevourer, ShatteringWaves, StarfallShower } from "../characters/hydro/alldevouring_narwhal.ts";
+import { BranchingFlow, SavageSwell, StormSurge, ThunderingTide } from "../characters/hydro/hydro_tulpa.ts";
+import { BladeAblaze, Prowl, StealthMaster, Thrust } from "../characters/pyro/fatui_pyro_agent.ts";
+import { InfusedStonehide, MovoLawa, PlamaLawa, UpaShato } from "../characters/geo/stonehide_lawachurl.ts";
+import { FeatherSpreading, MajesticDance, RadicalVitality, VolatileSporeCloud } from "../characters/dendro/jadeplume_terrorshroom.ts";
 
 /**
  * @id 1115

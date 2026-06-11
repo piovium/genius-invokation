@@ -13,10 +13,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, card, CardHandle, combatStatus, DamageType, DiceType, summon } from "@gi-tcg/core/builder";
-import { ChenyuBrew } from "../event/food";
+import { $, card, type CardHandle, combatStatus, DamageType, DiceType, summon } from "@gi-tcg/core/builder";
+import { ChenyuBrew } from "../event/food.ts";
 import { AdventureCompleted, AgileSwitch, BattlePlan, EfficientSwitch } from "../../commons";
-import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other";
+import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other.ts";
 
 /**
  * @id 321032

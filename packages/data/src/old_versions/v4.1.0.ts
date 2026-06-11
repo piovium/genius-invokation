@@ -1,22 +1,22 @@
-import { DamageType, DiceType, EquipmentHandle, SkillHandle, SummonHandle, card, character, combatStatus, skill, status, summon } from "@gi-tcg/core/builder";
-import { FatalRainscreen, Xingqiu } from "../characters/hydro/xingqiu";
-import { InfluxBlast, MirrorMaiden } from "../characters/hydro/mirror_maiden";
-import { Barbara, LetTheShowBegin } from "../characters/hydro/barbara";
-import { ElectroCrystalCore, ElectroHypostasis } from "../characters/electro/electro_hypostasis";
-import { ChonghuasLayeredFrost, Chongyun } from "../characters/cryo/chongyun";
-import { GuobaAttack, Xiangling } from "../characters/pyro/xiangling";
-import { NiwabiEnshou, Yoimiya } from "../characters/pyro/yoimiya";
-import { Candace, SacredRiteWagtailsTide } from "../characters/hydro/candace";
-import { ClawAndThunder, Razor } from "../characters/electro/razor";
-import { Beidou, SummonerOfLightning, Tidecaller, TidecallerSurfEmbrace, Wavestrider } from "../characters/electro/beidou";
-import { KujouSara, SubjugationKoukouSendou } from "../characters/electro/kujou_sara";
-import { Cyno, PactswornPathclearer, SecretRiteChasmicSoulfarer } from "../characters/electro/cyno";
-import { BakeKurage } from "../characters/hydro/sangonomiya_kokomi";
-import { Amber, BaronBunny, ExplosivePuppet } from "../characters/pyro/amber";
-import { FavoniusBladework, GaleBlade } from "../characters/anemo/jean";
-import { SealOfApproval, Yanfei } from "../characters/pyro/yanfei";
-import { StreamingSurge } from "../characters/hydro/rhodeia_of_loch";
-import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto";
+import { DamageType, DiceType, type EquipmentHandle, type SkillHandle, type SummonHandle, card, character, combatStatus, skill, status, summon } from "@gi-tcg/core/builder";
+import { FatalRainscreen, Xingqiu } from "../characters/hydro/xingqiu.ts";
+import { InfluxBlast, MirrorMaiden } from "../characters/hydro/mirror_maiden.ts";
+import { Barbara, LetTheShowBegin } from "../characters/hydro/barbara.ts";
+import { ElectroCrystalCore, ElectroHypostasis } from "../characters/electro/electro_hypostasis.ts";
+import { ChonghuasLayeredFrost, Chongyun } from "../characters/cryo/chongyun.ts";
+import { GuobaAttack, Xiangling } from "../characters/pyro/xiangling.ts";
+import { NiwabiEnshou, Yoimiya } from "../characters/pyro/yoimiya.ts";
+import { Candace, SacredRiteWagtailsTide } from "../characters/hydro/candace.ts";
+import { ClawAndThunder, Razor } from "../characters/electro/razor.ts";
+import { Beidou, SummonerOfLightning, Tidecaller, TidecallerSurfEmbrace, Wavestrider } from "../characters/electro/beidou.ts";
+import { KujouSara, SubjugationKoukouSendou } from "../characters/electro/kujou_sara.ts";
+import { Cyno, PactswornPathclearer, SecretRiteChasmicSoulfarer } from "../characters/electro/cyno.ts";
+import { BakeKurage } from "../characters/hydro/sangonomiya_kokomi.ts";
+import { Amber, BaronBunny, ExplosivePuppet } from "../characters/pyro/amber.ts";
+import { FavoniusBladework, GaleBlade } from "../characters/anemo/jean.ts";
+import { SealOfApproval, Yanfei } from "../characters/pyro/yanfei.ts";
+import { StreamingSurge } from "../characters/hydro/rhodeia_of_loch.ts";
+import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.ts";
 
 /**
  * @id 330003

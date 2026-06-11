@@ -1,7 +1,7 @@
-import { DamageType, DiceType, SkillHandle, StatusHandle, card, character, combatStatus, skill, status } from "@gi-tcg/core/builder";
-import { AurousBlaze, FireworkFlareup, NiwabiFiredance } from "../characters/pyro/yoimiya";
-import { ShadowswordGallopingFrost, ShadowswordLoneGale, TranscendentAutomaton } from "../characters/anemo/maguu_kenki";
-import { Collei, FloralBrush } from "../characters/dendro/collei";
+import { DamageType, type SkillHandle, card, character, combatStatus, skill, status } from "@gi-tcg/core/builder";
+import { AurousBlaze, FireworkFlareup, NiwabiFiredance } from "../characters/pyro/yoimiya.ts";
+import { ShadowswordGallopingFrost, ShadowswordLoneGale, TranscendentAutomaton } from "../characters/anemo/maguu_kenki.ts";
+import { Collei, FloralBrush } from "../characters/dendro/collei.ts";
 
 /**
  * @id 13053

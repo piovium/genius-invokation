@@ -1,14 +1,14 @@
 import { card, character, DamageType, skill } from "@gi-tcg/core/builder";
-import { DominusLapidisStrikingStone, Zhongli } from "../characters/geo/zhongli";
-import { TurboDrillField, TurboTwirlyLetItRip, TurboTwirlyTriggered } from "../characters/geo/kachina";
-import { Xilonen, YohualsScratch } from "../characters/geo/xilonen";
-import { MistBubbleSlime, SlashOfSurgingTides, SlashOfSurgingTidesPassive, WhirlingScythe } from "../characters/hydro/hydro_hilichurl_rogue";
-import { AsWaterSeeksEquilibrium, EquitableJudgment, OTearsIShallRepay, OTidesIHaveReturned, SourcewaterDropletSkill } from "../characters/hydro/neuvillette";
-import { Oceanborne, Stormbreaker, Tidecaller, Wavestrider } from "../characters/electro/beidou";
-import { GleamingSpearGuardianStance, HeronStrike, SacredRiteHeronsSanctum, SacredRiteWagtailsTide } from "../characters/hydro/candace";
-import { HolisticRevivification, TheClassicsOfAcupuncture, UniversalDiagnosis } from "../characters/dendro/baizhu";
-import { RaidenShogun } from "../characters/electro/raiden_shogun";
-import { AbiogenesisSolarIsotoma, FavoniusBladeworkWeiss, RiteOfProgenitureTectonicTide } from "../characters/geo/albedo";
+import { DominusLapidisStrikingStone, Zhongli } from "../characters/geo/zhongli.ts";
+import { TurboDrillField, TurboTwirlyLetItRip, TurboTwirlyTriggered } from "../characters/geo/kachina.ts";
+import { Xilonen, YohualsScratch } from "../characters/geo/xilonen.ts";
+import { MistBubbleSlime, SlashOfSurgingTides, SlashOfSurgingTidesPassive, WhirlingScythe } from "../characters/hydro/hydro_hilichurl_rogue.ts";
+import { AsWaterSeeksEquilibrium, EquitableJudgment, OTearsIShallRepay, OTidesIHaveReturned, SourcewaterDropletSkill } from "../characters/hydro/neuvillette.ts";
+import { Oceanborne, Stormbreaker, Tidecaller, Wavestrider } from "../characters/electro/beidou.ts";
+import { GleamingSpearGuardianStance, HeronStrike, SacredRiteHeronsSanctum, SacredRiteWagtailsTide } from "../characters/hydro/candace.ts";
+import { HolisticRevivification, TheClassicsOfAcupuncture, UniversalDiagnosis } from "../characters/dendro/baizhu.ts";
+import { RaidenShogun } from "../characters/electro/raiden_shogun.ts";
+import { AbiogenesisSolarIsotoma, FavoniusBladeworkWeiss, RiteOfProgenitureTectonicTide } from "../characters/geo/albedo.ts";
 
 /**
  * @id 116102
