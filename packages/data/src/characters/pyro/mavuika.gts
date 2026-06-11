@@ -282,6 +282,7 @@ export const FightingSpirit = skill(13154)
  */
 define character {
   id 1315 as Mavuika;
+  since "v5.7.0";
   tags pyro, claymore, natlan;
   health 10;
   energy 0;
