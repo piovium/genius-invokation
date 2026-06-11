@@ -373,6 +373,5 @@ ${item.code}
       )
       .join("\n");
   resultText = resultText.trim() + "\n";
-  // TODO: use gts
-  await writeFile(existsPath ?? pathNoExt + ".ts", resultText);
+  await writeFile(existsPath ?? gtsPath, resultText);
 }

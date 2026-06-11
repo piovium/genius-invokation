@@ -153,6 +153,7 @@ export async function generateCharacters() {
 
     const { hasSummon, hasStatuses, hasCombatStatuses, items } =
       getAuxiliaryOfCharacter(ch.id);
+    // TODO: after migrate to GTS, these imports can be elided
     const importDecls = ["character", "skill"];
     if (hasSummon) importDecls.push("summon");
     if (hasStatuses) importDecls.push("status");
@@ -185,20 +186,20 @@ export async function generateCharacters() {
     const tagCode = ch.tags
       .map((t) => t.split("_").pop()!.toLowerCase())
       .filter((s) => s !== "none")
-      .map((s) => `"${s}"`)
       .join(", ");
 
     items.push({
       id: ch.id,
       name: ch.name,
       description: ch.storyText ?? "",
-      code: `export const ${identifier(ch.englishName)} = character(${ch.id})
-  .since("${NEW_VERSION}")
-  .tags(${tagCode})
-  .health(${ch.hp})
-  .energy(${ch.maxEnergy})
-  .skills(${skills.map((sk) => identifier(sk.englishName)).join(", ")})
-  .done();`,
+      code: `define character {
+  id ${ch.id} as ${identifier(ch.englishName)};
+  since "${NEW_VERSION}";
+  tags ${tagCode};
+  health ${ch.hp};
+  energy ${ch.maxEnergy};
+  skills ${skills.map((sk) => identifier(sk.englishName)).join(", ")};
+}`,
     });
     items.push(...getTalentCard(ch.id, ch.englishName));
 
