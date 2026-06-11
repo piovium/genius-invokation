@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { EntityDefinition } from "@gi-tcg/core";
-import { card, combatStatus, DamageType, extension, status, StatusHandle, $ } from "@gi-tcg/core/builder";
+import { card, combatStatus, DamageType, extension, status, type StatusHandle, $ } from "@gi-tcg/core/builder";
 import { AgileSwitch, EfficientSwitch } from "../../commons";
 
 /**

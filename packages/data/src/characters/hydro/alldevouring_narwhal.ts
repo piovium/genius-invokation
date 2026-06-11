@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, combatStatus, card, DamageType, customEvent, EntityState } from "@gi-tcg/core/builder";
+import { character, skill, summon, status, combatStatus, card, DamageType, customEvent, type EntityState } from "@gi-tcg/core/builder";
 
 // 入场时：获得我方已吞噬卡牌中最高元素骰费用值的「攻击力」，获得该费用的已吞噬卡牌数量的可用次数。
 

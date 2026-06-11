@@ -7,8 +7,11 @@
     "lib": ["ESNext"],
     "customConditions": ["development"],
 
-    "esModuleInterop": true,
+    "rewriteRelativeImportExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
+
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,

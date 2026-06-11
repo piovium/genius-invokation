@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, SkillHandle, StatusHandle, customEvent } from "@gi-tcg/core/builder";
+import { character, skill, status, card, DamageType, type SkillHandle, type StatusHandle, customEvent } from "@gi-tcg/core/builder";
 import { Frozen } from "../../commons";
 
 /**

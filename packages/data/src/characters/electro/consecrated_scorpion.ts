@@ -129,4 +129,12 @@ export const FatalFulmination = card(224051)
  * @description
  * 本回合无法再打出噬骸能量块。
  */
-const _ = void 0; // moved to cards
+const _1 = void 0; // moved to cards
+
+/**
+ * @id 124051
+ * @name 噬骸能量块
+ * @description
+ * 随机舍弃1张当前元素骰费用最高的手牌，生成1个我方出战角色类型的元素骰。（每回合最多打出1张）
+ */
+const _2 = void 0; // moved to cards

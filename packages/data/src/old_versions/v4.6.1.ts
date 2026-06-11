@@ -1,8 +1,8 @@
-import { card, skill, DiceType, status, DamageType, StatusHandle, summon } from "@gi-tcg/core/builder";
-import { Diluc, SearingOnslaught } from "../characters/pyro/diluc";
-import { NiwabiFiredance, Yoimiya } from "../characters/pyro/yoimiya";
-import { KyoukaFuushi } from "../characters/hydro/kamisato_ayato";
-import { AdeptusArtPreserverOfFortune, Qiqi } from "../characters/cryo/qiqi";
+import { card, skill, DiceType, status, DamageType, type StatusHandle, summon } from "@gi-tcg/core/builder";
+import { Diluc, SearingOnslaught } from "../characters/pyro/diluc.ts";
+import { NiwabiFiredance, Yoimiya } from "../characters/pyro/yoimiya.ts";
+import { KyoukaFuushi } from "../characters/hydro/kamisato_ayato.ts";
+import { AdeptusArtPreserverOfFortune, Qiqi } from "../characters/cryo/qiqi.ts";
 
 /**
  * @id 330005

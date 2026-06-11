@@ -13,7 +13,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { EntityRawData, characters, actionCards, entities } from "./data";
+import {
+  EntityRawData,
+  characters,
+  actionCards,
+  entities,
+  ActionCardRawData,
+} from "./data";
 
 import { snakeCase } from "case-anything";
 import { writeSourceCode, SourceInfo, identifier } from "./source";
@@ -41,7 +47,8 @@ function getAuxiliaryOfCharacter(id: number): AuxiliaryFound {
   type EntityRawDataWithKind = EntityRawData & { kind: string };
   const mySummons: EntityRawDataWithKind[] = [];
   const myStatuses: EntityRawDataWithKind[] = [];
-  const myCards: EntityRawDataWithKind[] = [];
+  const myCards: ((EntityRawData | ActionCardRawData) & { kind: string })[] =
+    [];
   const myCombatStatuses: EntityRawDataWithKind[] = [];
   const myUnknownEntities: EntityRawDataWithKind[] = [];
   for (const obj of candidates) {
@@ -59,7 +66,6 @@ function getAuxiliaryOfCharacter(id: number): AuxiliaryFound {
         myCombatStatuses.push({ ...obj, kind: "combatStatus" });
         break;
       case "GCG_CARD_MODIFY":
-      case "GCG_CARD_EVENT":
       case "GCG_CARD_ASSIST":
         myCards.push({ ...obj, kind: "card" });
         break;
@@ -67,6 +73,15 @@ function getAuxiliaryOfCharacter(id: number): AuxiliaryFound {
         // beta data
         myUnknownEntities.push({ ...obj, kind: "unknown" });
         break;
+    }
+  }
+  for (const obj of actionCards) {
+    if (
+      obj.type === "GCG_CARD_EVENT" &&
+      Math.floor(obj.id / 10) === 10000 + id &&
+      !candidates.find((c) => c.id === obj.id)
+    ) {
+      myCards.push({ ...obj, kind: "card" });
     }
   }
   const items = [

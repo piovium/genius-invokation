@@ -1,8 +1,8 @@
 import { DamageType, DiceType, card, skill, status } from "@gi-tcg/core/builder";
-import { EmbersRekindled } from "../characters/pyro/abyss_lector_fathomless_flames";
-import { HeronStrike } from "../characters/hydro/candace";
-import { Wavestrider } from "../characters/electro/beidou";
-import { DisposedSupportCountExtension } from "../cards/support/ally";
+import { EmbersRekindled } from "../characters/pyro/abyss_lector_fathomless_flames.ts";
+import { HeronStrike } from "../characters/hydro/candace.ts";
+import { Wavestrider } from "../characters/electro/beidou.ts";
+import { DisposedSupportCountExtension } from "../cards/support/ally.ts";
 
 /**
  * @id 123022

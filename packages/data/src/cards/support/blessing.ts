@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, Aura, card, DamageType, DiceType, Reaction, status, SupportHandle } from "@gi-tcg/core/builder";
-import { NoTuningAllowed, Shield } from "../../commons";
+import { $, Aura, card, DamageType, DiceType, Reaction, status, type SupportHandle } from "@gi-tcg/core/builder";
+import { NoTuningAllowed, Shield } from "../../commons.ts";
 
 /**
  * @id 303041

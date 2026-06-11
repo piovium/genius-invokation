@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { EntityState, character, skill, status, combatStatus, card, DamageType, CardHandle, customEvent } from "@gi-tcg/core/builder";
-import { BountifulCore } from "../hydro/nilou";
+import { type EntityState, character, skill, status, combatStatus, card, DamageType, type CardHandle, customEvent } from "@gi-tcg/core/builder";
+import { BountifulCore } from "../hydro/nilou.ts";
 import { DendroCore } from "../../commons";
 
 export const ShouldTriggerTalent = customEvent<EntityState>("kaveh/shouldTriggerTalent");

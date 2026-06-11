@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, CharacterHandle } from "@gi-tcg/core/builder";
-import { BlazingHeat, CrimsonWitchOfEmbers } from "../pyro/crimson_witch_of_embers";
+import { character, skill, status, combatStatus, card, DamageType, type CharacterHandle } from "@gi-tcg/core/builder";
+import { BlazingHeat, CrimsonWitchOfEmbers } from "../pyro/crimson_witch_of_embers.ts";
 
 /**
  * @id 121023

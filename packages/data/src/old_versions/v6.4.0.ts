@@ -1,10 +1,10 @@
 import { card, character, DamageType, DiceType, skill, status, summon } from "@gi-tcg/core/builder";
-import { LetTheShowBegin, ShiningMiracle, WhisperOfWater } from "../characters/hydro/barbara";
-import { FavoniusBladeworkEdel, IcetideVortex, WellspringOfWarlust } from "../characters/cryo/eula";
-import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto";
-import { Skirk, Skirk01 } from "../characters/cryo/skirk";
-import { BattlePlan, CostReduction } from "../commons";
-import { TideTurningSacredLord } from "../cards/support/adventure";
+import { LetTheShowBegin, ShiningMiracle, WhisperOfWater } from "../characters/hydro/barbara.ts";
+import { FavoniusBladeworkEdel, IcetideVortex, WellspringOfWarlust } from "../characters/cryo/eula.ts";
+import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.ts";
+import { Skirk, Skirk01 } from "../characters/cryo/skirk.ts";
+import { BattlePlan, CostReduction } from "../commons.ts";
+import { TideTurningSacredLord } from "../cards/support/adventure.ts";
 
 /**
  * @id 1201

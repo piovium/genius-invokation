@@ -1,12 +1,12 @@
 import { card, character, DamageType, Reaction, skill, status } from "@gi-tcg/core/builder";
-import { Citlali, MamaloacosFrigidRainInEffect } from "../characters/cryo/citlali";
-import { BondOfLife } from "../commons";
-import { Arlecchino } from "../characters/pyro/arlecchino";
-import { FlamestriderBlazingTrail, FlamestriderFullThrottle, FlamestriderSoaringAscent } from "../characters/pyro/mavuika";
-import { Kachina, TurboTwirlyTriggered } from "../characters/geo/kachina";
-import { GrappleLink, NightRealmsGiftRepaidInFull, NightsoulsBlessing } from "../characters/dendro/kinich";
-import { Emilie, LumidouceCaseLevel1, LumidouceCaseLevel2, LumidouceCaseLevel3 } from "../characters/dendro/emilie";
-import { BloodbondedShadow, FrostyInterjection, OnslaughtStance, SwiftPoint } from "../characters/cryo/frost_operative";
+import { Citlali, MamaloacosFrigidRainInEffect } from "../characters/cryo/citlali.ts";
+import { BondOfLife } from "../commons.ts";
+import { Arlecchino } from "../characters/pyro/arlecchino.ts";
+import { FlamestriderBlazingTrail, FlamestriderFullThrottle, FlamestriderSoaringAscent } from "../characters/pyro/mavuika.ts";
+import { Kachina, TurboTwirlyTriggered } from "../characters/geo/kachina.ts";
+import { GrappleLink, NightRealmsGiftRepaidInFull, NightsoulsBlessing } from "../characters/dendro/kinich.ts";
+import { Emilie, LumidouceCaseLevel1, LumidouceCaseLevel2, LumidouceCaseLevel3 } from "../characters/dendro/emilie.ts";
+import { BloodbondedShadow, FrostyInterjection, OnslaughtStance, SwiftPoint } from "../characters/cryo/frost_operative.ts";
 
 /**
  * @id 211141

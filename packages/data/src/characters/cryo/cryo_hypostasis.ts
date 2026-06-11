@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, card, DamageType, StatusHandle } from "@gi-tcg/core/builder";
-import { SheerCold } from "./la_signora";
+import { character, skill, summon, status, card, DamageType, type StatusHandle } from "@gi-tcg/core/builder";
+import { SheerCold } from "./la_signora.ts";
 
 /**
  * @id 121033

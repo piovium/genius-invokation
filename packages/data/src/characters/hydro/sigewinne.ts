@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, status, combatStatus, card, DamageType } from "@gi-tcg/core/builder";
-import { SourcewaterDroplet } from "./neuvillette";
+import { SourcewaterDroplet } from "./neuvillette.ts";
 import { BondOfLife } from "../../commons";
 
 /**

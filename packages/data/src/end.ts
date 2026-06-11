@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { resolveOfficialVersion, type Version } from "@gi-tcg/core";
-import { registry, scope } from "./begin";
+import { registry, scope } from "./begin.ts";
 
 scope.end();
 registry.freeze();

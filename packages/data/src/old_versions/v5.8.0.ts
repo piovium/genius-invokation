@@ -1,14 +1,14 @@
-import { card, character, DamageType, DiceType, PassiveSkillHandle, skill, status, summon, SummonHandle } from "@gi-tcg/core/builder";
-import { CryoElementalInfusion, CryoElementalInfusion01, KamisatoArtHyouka, KamisatoArtKabuki, KamisatoArtSoumetsu, KantenSenmyouBlessing } from "../characters/cryo/kamisato_ayaka";
-import { NORMAL_MIMICS, PREVIEW_MIMICS, Surge, TideAndTorrent } from "../characters/hydro/rhodeia_of_loch";
-import { GoldenCorrosion, RifthoundSkull } from "../characters/geo/golden_wolflord";
-import { ExplosivePuppet, FieryRain, Sharpshooter } from "../characters/pyro/amber";
-import { ArtisticIngenuity, PaintedDome, SchematicSetup } from "../characters/dendro/kaveh";
-import { EhecatlsRoar, NightsoulsBlessing, OcelotlicuePoint, SourceSample, YohualsScratch } from "../characters/geo/xilonen";
-import { IcyPaws, KatzleinStyle, SignatureMix } from "../characters/cryo/diona";
-import { CrushingTailAttack, FlamegranateConflagration, FlyingFruit, GluttonousRex01, GluttonousRex02 } from "../characters/dendro/gluttonous_yumkasaur_mountain_king";
-import { JadeScreen, Ningguang } from "../characters/geo/ningguang";
-import { Frostgnaw, Kaeya } from "../characters/cryo/kaeya";
+import { card, character, DamageType, DiceType, type PassiveSkillHandle, skill, status, summon, type SummonHandle } from "@gi-tcg/core/builder";
+import { CryoElementalInfusion, CryoElementalInfusion01, KamisatoArtHyouka, KamisatoArtKabuki, KamisatoArtSoumetsu, KantenSenmyouBlessing } from "../characters/cryo/kamisato_ayaka.ts";
+import { NORMAL_MIMICS, PREVIEW_MIMICS, Surge, TideAndTorrent } from "../characters/hydro/rhodeia_of_loch.ts";
+import { GoldenCorrosion, RifthoundSkull } from "../characters/geo/golden_wolflord.ts";
+import { ExplosivePuppet, FieryRain, Sharpshooter } from "../characters/pyro/amber.ts";
+import { ArtisticIngenuity, PaintedDome, SchematicSetup } from "../characters/dendro/kaveh.ts";
+import { EhecatlsRoar, NightsoulsBlessing, OcelotlicuePoint, SourceSample, YohualsScratch } from "../characters/geo/xilonen.ts";
+import { IcyPaws, KatzleinStyle, SignatureMix } from "../characters/cryo/diona.ts";
+import { CrushingTailAttack, FlamegranateConflagration, FlyingFruit, GluttonousRex01, GluttonousRex02 } from "../characters/dendro/gluttonous_yumkasaur_mountain_king.ts";
+import { JadeScreen, Ningguang } from "../characters/geo/ningguang.ts";
+import { Frostgnaw, Kaeya } from "../characters/cryo/kaeya.ts";
 
 /**
  * @id 1304

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, StatusHandle, card, combatStatus, status } from "@gi-tcg/core/builder";
+import { type StatusHandle, card, combatStatus, status } from "@gi-tcg/core/builder";
 import { BattlePlan, Satiated, SharpenTheBlade } from "../../commons";
 
 /**

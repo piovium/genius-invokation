@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import { character, skill, status, combatStatus, card, DamageType, DiceType, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 115111
@@ -55,7 +55,7 @@ export const SoulsniperRitualStaff = card(115112)
  * @name 追影弹
  * @description
  * 加入手牌时：若我方出战角色为火/水/雷/冰，则将此牌转化为对应元素。
- * 打出或弃置此牌时：造成1点风元素伤害，然后将一张追影弹随机放进牌库。
+ * 打出或从手牌中舍弃此牌时：优先对敌方出战角色造成1点风元素伤害，然后将一张追影弹随机放进牌库。
  */
 export const ShadowhuntShell = card(115113)
   .since("v5.7.0")
@@ -77,7 +77,7 @@ export const ShadowhuntShell = card(115113)
     filter: (c, e) => e.from.type === "hands",
     prependOp: (c) => c.abortPreview(),
   })
-  .damage(DamageType.Anemo, 1, "opp characters with health > 0 limit 1")
+  .damage(DamageType.Anemo, 1, $.macros.oppActivePrioritized)
   .do((c) => {
     c.createPileCards(ShadowhuntShell, 1, "random");
   })
@@ -87,7 +87,7 @@ export const ShadowhuntShell = card(115113)
  * @id 115114
  * @name 焕光追影弹·火
  * @description
- * 打出或弃置此牌时：造成1点火元素伤害，然后将一张追影弹随机放进牌库。
+ * 打出或从手牌中舍弃此牌时：优先对敌方出战角色造成1点火元素伤害，然后将一张追影弹随机放进牌库。
  */
 export const ShiningShadowhuntShellPyro = card(115114)
   .since("v5.7.0")
@@ -97,7 +97,7 @@ export const ShiningShadowhuntShellPyro = card(115114)
     filter: (c, e) => e.from.type === "hands",
     prependOp: (c) => c.abortPreview(),
   })
-  .damage(DamageType.Pyro, 1, "opp characters with health > 0 limit 1")
+  .damage(DamageType.Pyro, 1, $.macros.oppActivePrioritized)
   .do((c) => {
     c.createPileCards(ShadowhuntShell, 1, "random");
   })
@@ -107,7 +107,7 @@ export const ShiningShadowhuntShellPyro = card(115114)
  * @id 115115
  * @name 焕光追影弹·水
  * @description
- * 打出或弃置此牌时：造成1点水元素伤害，然后将一张追影弹随机放进牌库。
+ * 打出或从手牌中舍弃此牌时：优先对敌方出战角色造成1点水元素伤害，然后将一张追影弹随机放进牌库。
  */
 export const ShiningShadowhuntShellHydro = card(115115)
   .since("v5.7.0")
@@ -117,7 +117,7 @@ export const ShiningShadowhuntShellHydro = card(115115)
     filter: (c, e) => e.from.type === "hands",
     prependOp: (c) => c.abortPreview(),
   })
-  .damage(DamageType.Hydro, 1, "opp characters with health > 0 limit 1")
+  .damage(DamageType.Hydro, 1, $.macros.oppActivePrioritized)
   .do((c) => {
     c.createPileCards(ShadowhuntShell, 1, "random");
   })
@@ -127,7 +127,7 @@ export const ShiningShadowhuntShellHydro = card(115115)
  * @id 115116
  * @name 焕光追影弹·雷
  * @description
- * 打出或弃置此牌时：造成1点雷元素伤害，然后将一张追影弹随机放进牌库。
+ * 打出或从手牌中舍弃此牌时：：优先对敌方出战角色造成1点雷元素伤害，然后将一张追影弹随机放进牌库。
  */
 export const ShiningShadowhuntShellElectro = card(115116)
   .since("v5.7.0")
@@ -137,7 +137,7 @@ export const ShiningShadowhuntShellElectro = card(115116)
     filter: (c, e) => e.from.type === "hands",
     prependOp: (c) => c.abortPreview(),
   })
-  .damage(DamageType.Electro, 1, "opp characters with health > 0 limit 1")
+  .damage(DamageType.Electro, 1, $.macros.oppActivePrioritized)
   .do((c) => {
     c.createPileCards(ShadowhuntShell, 1, "random");
   })
@@ -147,7 +147,7 @@ export const ShiningShadowhuntShellElectro = card(115116)
  * @id 115117
  * @name 焕光追影弹·冰
  * @description
- * 打出或弃置此牌时：造成1点冰元素伤害，然后将一张追影弹随机放进牌库。
+ * 打出或从手牌中舍弃此牌时：优先对敌方出战角色造成1点冰元素伤害，然后将一张追影弹随机放进牌库。
  */
 export const ShiningShadowhuntShellCryo = card(115117)
   .since("v5.7.0")
@@ -157,7 +157,7 @@ export const ShiningShadowhuntShellCryo = card(115117)
     filter: (c, e) => e.from.type === "hands",
     prependOp: (c) => c.abortPreview(),
   })
-  .damage(DamageType.Cryo, 1, "opp characters with health > 0 limit 1")
+  .damage(DamageType.Cryo, 1, $.macros.oppActivePrioritized)
   .do((c) => {
     c.createPileCards(ShadowhuntShell, 1, "random");
   })
