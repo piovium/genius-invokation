@@ -13,12 +13,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
+import { defineViewModel } from "@gi-tcg/gts-runtime";
 import type { CharacterEntry } from "../../builder/registry";
-import { DEFAULT_VERSION_INFO, type VersionInfo } from "../../base/version";
+import {
+  DEFAULT_VERSION_INFO,
+  type Version,
+  type VersionInfo,
+} from "../../base/version";
 import { Aura, type LunarReaction } from "@gi-tcg/typings";
 import type { CharacterTag, SpecialEnergyConfig } from "../../base/character";
-import type { CharacterHandle } from "../../builder";
+import type {
+  CharacterHandle,
+  PassiveSkillHandle,
+  SkillHandle,
+  StatusHandle,
+} from "../../builder";
 import { createVariable } from "../../builder/utils";
 
 class CharacterModel {
@@ -52,23 +61,64 @@ class CharacterModel {
       associatedNightsoulsBlessingId: this.associatedNightsoulsBlessingId,
       enabledLunarReactions: this.enabledLunarReactions,
       specialEnergy: this.specialEnergy,
-    }
+    };
   }
 }
 
 export const CharacterViewModel = defineViewModel(CharacterModel, (h) => ({
-  id: h.attribute<{
-    (id: number): AR.Done;
-    required(): true;
-    uniqueKey(): "id";
-    as(): CharacterHandle;
-  }>(
-    (model, [id]) => {
-      model.id = id;
+  id: h.simpleAttribute({
+    required: true,
+    uniqueKey: "id",
+  })(
+    function (id: number) {
+      this.id = id;
     },
-    (_, [id]) => {
-      return id as CharacterHandle;
-    },
+    (id: number) => id as CharacterHandle,
   ),
-  // TODO
+  since: h.simpleAttribute({
+    uniqueKey: "version",
+  })(function (version: Version) {
+    this.versionInfo = {
+      from: "official",
+      value: { predicate: "since", version },
+    };
+  }),
+  until: h.simpleAttribute({
+    uniqueKey: "version",
+  })(function (version: Version) {
+    this.versionInfo = {
+      from: "official",
+      value: { predicate: "until", version },
+    };
+  }),
+  tags: h.simpleAttribute()(function (tags: CharacterTag[]) {
+    this.tags = tags;
+  }),
+  health: h.simpleAttribute()(function (health: number) {
+    this.maxHealth = health;
+  }),
+  maxEnergy: h.simpleAttribute()(function (maxEnergy: number) {
+    this.maxEnergy = maxEnergy;
+  }),
+  skills: h.simpleAttribute()(function (
+    ...skillIds: (SkillHandle | PassiveSkillHandle)[]
+  ) {
+    this.skillIds = skillIds;
+  }),
+  associatedNightsoulsBlessing: h.simpleAttribute({
+    uniqueKey: "associatedNightsoulsBlessingId",
+  })(function (blessingId: StatusHandle) {
+    this.associatedNightsoulsBlessingId = blessingId;
+  }),
+  enabledLunarReactions: h.simpleAttribute()(function (
+    ...reactions: LunarReaction[]
+  ) {
+    this.enabledLunarReactions = reactions;
+  }),
+  specialEnergy: h.simpleAttribute()(function (
+    variableName: string,
+    slotSize: number,
+  ) {
+    this.specialEnergy = { variableName, slotSize };
+  }),
 }));
