@@ -73,7 +73,7 @@ export const FlamestriderFullThrottleInEffect = combatStatus(113158)
  * 行动阶段开始时：生成2个万能元素骰。
  */
 export const FlamestriderFullThrottlePreparedSkill = skill(13155)
-  ["type"]("elemental")
+  .type("elemental")
   .prepared()
   .combatStatus(FlamestriderFullThrottleInEffect)
   .done();
@@ -208,7 +208,7 @@ export const AllfireArmamentsRingOfSearingRadiance: CombatStatusHandle = combatS
  * 造成2点物理伤害。
  */
 export const FlamesWeaveLife = skill(13151)
-  ["type"]("normal")
+  .type("normal")
   .costPyro(1)
   .costVoid(2)
   .damage(DamageType.Physical, 2)
@@ -221,7 +221,7 @@ export const FlamesWeaveLife = skill(13151)
  * 自身进入夜魂加持，获得2点「夜魂值」，并从3张驰轮车中挑选1张加入手牌。
  */
 export const TheNamedMoment = skill(13152)
-  ["type"]("elemental")
+  .type("elemental")
   .costPyro(3)
   .selectAndCreateHandCard([
     FlamestriderBlazingTrail,
@@ -239,7 +239,7 @@ export const TheNamedMoment = skill(13152)
  * 若消耗了6点战意，则自身附属死生之炉。
  */
 export const HourOfBurningSkies = skill(13153)
-  ["type"]("burst")
+  .type("burst")
   .costPyro(4)
   .filter((c) => c.self.getVariable("fightingSpirit") >= 3)
   .gainNightsoul("@self", 1)
@@ -262,7 +262,7 @@ export const HourOfBurningSkies = skill(13153)
  * 本角色使用元素战技或元素爆发时，附属诸火武装·焚曜之环。
  */
 export const FightingSpirit = skill(13154)
-  ["type"]("passive")
+  .type("passive")
   .variable("fightingSpirit", 0)
   .on("consumeNightsoul")
   .listenToPlayer()
