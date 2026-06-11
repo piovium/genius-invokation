@@ -9,6 +9,9 @@ catalogs:
     '@gi-tcg/gts-runtime':
       specifier: ^0.3.8
       version: 0.3.8
+    '@gi-tcg/gts-transpiler':
+      specifier: ^0.3.8
+      version: 0.3.8
     '@gi-tcg/unplugin-gts':
       specifier: ^0.3.8
       version: 0.3.8
@@ -316,6 +319,9 @@ importers:
       '@gi-tcg/config':
         specifier: workspace:*
         version: link:../config
+      '@gi-tcg/gts-transpiler':
+        specifier: 'catalog:'
+        version: 0.3.8
       '@microsoft/tsdoc':
         specifier: ^0.14.2
         version: 0.14.2
