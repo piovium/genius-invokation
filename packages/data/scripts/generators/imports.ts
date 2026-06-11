@@ -19,7 +19,7 @@ import { writeFile } from "node:fs/promises";
 import { BASE_PATH, LICENSE } from "./config";
 
 const TARGET = path.join(BASE_PATH, "index.ts");
-const GLOB = path.join(BASE_PATH, "**/*.ts");
+const GLOB = path.join(BASE_PATH, "**/*.{ts,gts}");
 
 export async function generateImports() {
   const files = (
