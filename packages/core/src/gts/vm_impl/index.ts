@@ -34,7 +34,7 @@ export default defineViewModel(class RootModel {}, (h) => ({
   }>((_, [], subView) => {
     const character = CharacterViewModel.parse(subView).getEntry();
     registerCharacter(character);
-  }),
+  }, CharacterViewModel),
   skill: h.attribute<{
     (): AR.With<typeof CharacterSkillViewModel>;
   }>((_, [], subView) => {
@@ -44,41 +44,41 @@ export default defineViewModel(class RootModel {}, (h) => ({
     } else {
       registerPassiveSkill(skill);
     }
-  }),
+  }, CharacterSkillViewModel),
   status: h.attribute<{
     (): AR.With<typeof EntityViewModel>;
   }>((_, [], subView) => {
     const entity = EntityViewModel.parse(subView, "status").getEntry();
     registerEntity(entity);
-  }),
+  }, EntityViewModel.bind("status")),
   combatStatus: h.attribute<{
     (): AR.With<typeof EntityViewModel>;
   }>((_, [], subView) => {
     const entity = EntityViewModel.parse(subView, "combatStatus").getEntry();
     registerEntity(entity);
-  }),
+  }, EntityViewModel.bind("combatStatus")),
   summon: h.attribute<{
     (): AR.With<typeof EntityViewModel>;
   }>((_, [], subView) => {
     const entity = EntityViewModel.parse(subView, "summon").getEntry();
     registerEntity(entity);
-  }),
+  }, EntityViewModel.bind("summon")),
   card: h.attribute<{
     (): AR.With<typeof CardViewModel>;
   }>((_, [], subView) => {
     const entity = CardViewModel.parse(subView).getEntry();
     registerEntity(entity);
-  }),
+  }, CardViewModel),
   attachment: h.attribute<{
     (): AR.With<typeof AttachmentViewModel>;
   }>((_, [], subView) => {
     const attachment = AttachmentViewModel.parse(subView).getEntry();
     registerAttachment(attachment);
-  }),
+  }, AttachmentViewModel),
   extension: h.attribute<{
     (): AR.With<typeof ExtensionViewModel>;
   }>((_, [], subView) => {
     const extension = ExtensionViewModel.parse(subView).getEntry();
     registerExtension(extension);
-  }),
+  }, ExtensionViewModel),
 }));

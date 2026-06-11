@@ -2,7 +2,7 @@ import { card, character, DamageType, Reaction, skill, status } from "@gi-tcg/co
 import { Citlali, MamaloacosFrigidRainInEffect } from "../characters/cryo/citlali.ts";
 import { BondOfLife } from "../commons.ts";
 import { Arlecchino } from "../characters/pyro/arlecchino.ts";
-import { FlamestriderBlazingTrail, FlamestriderFullThrottle, FlamestriderSoaringAscent } from "../characters/pyro/mavuika.ts";
+import { FlamestriderBlazingTrail, FlamestriderFullThrottle, FlamestriderSoaringAscent } from "../characters/pyro/mavuika.gts";
 import { Kachina, TurboTwirlyTriggered } from "../characters/geo/kachina.ts";
 import { GrappleLink, NightRealmsGiftRepaidInFull, NightsoulsBlessing } from "../characters/dendro/kinich.ts";
 import { Emilie, LumidouceCaseLevel1, LumidouceCaseLevel2, LumidouceCaseLevel3 } from "../characters/dendro/emilie.ts";

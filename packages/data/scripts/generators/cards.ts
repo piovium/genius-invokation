@@ -166,57 +166,57 @@ export async function generateCards() {
     });
   }
   return Promise.all([
-    writeSourceCode("cards/event/food.ts", INIT_CARD_CODE, foods),
-    writeSourceCode("cards/event/legend.ts", INIT_CARD_CODE, legends),
-    writeSourceCode("cards/event/other.ts", INIT_CARD_CODE, others),
+    writeSourceCode("cards/event/food", INIT_CARD_CODE, foods),
+    writeSourceCode("cards/event/legend", INIT_CARD_CODE, legends),
+    writeSourceCode("cards/event/other", INIT_CARD_CODE, others),
     writeSourceCode(
-      "cards/equipment/weapon/bow.ts",
+      "cards/equipment/weapon/bow",
       INIT_CARD_CODE,
       equipsCode.bow
     ),
     writeSourceCode(
-      "cards/equipment/weapon/sword.ts",
+      "cards/equipment/weapon/sword",
       INIT_CARD_CODE,
       equipsCode.sword
     ),
     writeSourceCode(
-      "cards/equipment/weapon/catalyst.ts",
+      "cards/equipment/weapon/catalyst",
       INIT_CARD_CODE,
       equipsCode.catalyst
     ),
     writeSourceCode(
-      "cards/equipment/weapon/pole.ts",
+      "cards/equipment/weapon/pole",
       INIT_CARD_CODE,
       equipsCode.pole
     ),
     writeSourceCode(
-      "cards/equipment/weapon/claymore.ts",
+      "cards/equipment/weapon/claymore",
       INIT_CARD_CODE,
       equipsCode.claymore
     ),
     writeSourceCode(
-      "cards/equipment/artifacts.ts",
+      "cards/equipment/artifacts",
       INIT_CARD_CODE,
       equipsCode.artifact
     ),
     writeSourceCode(
-      "cards/equipment/techniques.ts",
+      "cards/equipment/techniques",
       INIT_CARD_CODE,
       equipsCode.technique
     ),
-    writeSourceCode("cards/support/ally.ts", INIT_CARD_CODE, supportCode.ally),
+    writeSourceCode("cards/support/ally", INIT_CARD_CODE, supportCode.ally),
     writeSourceCode(
-      "cards/support/place.ts",
+      "cards/support/place",
       INIT_CARD_CODE,
       supportCode.place
     ),
-    writeSourceCode("cards/support/item.ts", INIT_CARD_CODE, supportCode.item),
+    writeSourceCode("cards/support/item", INIT_CARD_CODE, supportCode.item),
     writeSourceCode(
-      "cards/support/adventure.ts",
+      "cards/support/adventure",
       INIT_CARD_CODE,
       supportCode.adventureSpot
     ),
-    writeSourceCode("cards/support/blessing.ts", INIT_CARD_CODE, supportCode.blessing),
-    // writeSourceCode("cards/support/other.ts", INIT_CARD_CODE, supportCode.other),
+    writeSourceCode("cards/support/blessing", INIT_CARD_CODE, supportCode.blessing),
+    // writeSourceCode("cards/support/other", INIT_CARD_CODE, supportCode.other),
   ]);
 }

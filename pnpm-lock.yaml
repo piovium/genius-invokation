@@ -7,14 +7,14 @@ settings:
 catalogs:
   default:
     '@gi-tcg/gts-runtime':
-      specifier: ^0.3.8
-      version: 0.3.8
+      specifier: ^0.3.11
+      version: 0.3.11
     '@gi-tcg/gts-transpiler':
-      specifier: ^0.3.8
-      version: 0.3.8
+      specifier: ^0.3.11
+      version: 0.3.11
     '@gi-tcg/unplugin-gts':
-      specifier: ^0.3.8
-      version: 0.3.8
+      specifier: ^0.3.11
+      version: 0.3.11
     '@unocss/preset-icons':
       specifier: ^66.3.3
       version: 66.3.3
@@ -76,7 +76,7 @@ importers:
         version: link:packages/config
       '@gi-tcg/unplugin-gts':
         specifier: 'catalog:'
-        version: 0.3.8(esbuild@0.19.11)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@25.9.2)(esbuild@0.19.11)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.19.11))
+        version: 0.3.11(esbuild@0.19.11)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@25.9.2)(esbuild@0.19.11)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.19.11))
       '@microsoft/api-extractor':
         specifier: ^7.58.2
         version: 7.58.2(@types/node@25.9.2)
@@ -237,7 +237,7 @@ importers:
     dependencies:
       '@gi-tcg/gts-runtime':
         specifier: 'catalog:'
-        version: 0.3.8
+        version: 0.3.11
       '@gi-tcg/typings':
         specifier: workspace:*
         version: link:../typings
@@ -321,7 +321,7 @@ importers:
         version: link:../config
       '@gi-tcg/gts-transpiler':
         specifier: 'catalog:'
-        version: 0.3.8
+        version: 0.3.11
       '@microsoft/tsdoc':
         specifier: ^0.14.2
         version: 0.14.2
@@ -2541,14 +2541,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@gi-tcg/gts-runtime@0.3.8':
-    resolution: {integrity: sha512-zLO/dtaz3eh+bV/zQ9+K2ku8JlFKfgZtTjr1AF5qVnGSnM2r/yhhMKX1cdd8nOOydeAvjqAmTli7P9ai8uSGog==}
+  '@gi-tcg/gts-runtime@0.3.11':
+    resolution: {integrity: sha512-MwOF1+6Ut5NxJGDMGYfszCe748KHqPfJKsok6ls4ezd6bLYdEuZyge/yKmwrzaucA3LUicOJ7QHI5Msek+qk8Q==}
 
-  '@gi-tcg/gts-transpiler@0.3.8':
-    resolution: {integrity: sha512-tLvJ+A7Nb86hsemThJNnyi35vO0JHrdXMrgeQH4DiNYKdKBBgHaCJlPcUw0ZH1O9m0cMXdFFemSrohOmMWW+DA==}
+  '@gi-tcg/gts-transpiler@0.3.11':
+    resolution: {integrity: sha512-7a9DdWkY/BiHiN5sLcd3IZJD6K8RBziTO8qxkfYE3ZExOdfFiJGTwVSSVza6qu/ywEcaZOgSBo1iIaUSfuNH2w==}
 
-  '@gi-tcg/unplugin-gts@0.3.8':
-    resolution: {integrity: sha512-I81m/uhHccuPElxzylcYhiU4IoXs1PLzQM/+qy6UUPvJZB3eDj8i7Fhq71qdWh27f8R7pobNyUd8AV3NClyjRw==}
+  '@gi-tcg/unplugin-gts@0.3.11':
+    resolution: {integrity: sha512-bl72uIN7zw38bl+QH+A65pveAFnTA/VVKWlC278t0r4IIBN3WHBgTvD3TFK5Z/ZhuYLlhDIAqdLOtDgyNv1ECg==}
     peerDependencies:
       '@rspack/core': ^1
       esbuild: 0.19.11
@@ -10476,9 +10476,9 @@ snapshots:
   '@ffmpeg-installer/win32-x64@4.1.0':
     optional: true
 
-  '@gi-tcg/gts-runtime@0.3.8': {}
+  '@gi-tcg/gts-runtime@0.3.11': {}
 
-  '@gi-tcg/gts-transpiler@0.3.8':
+  '@gi-tcg/gts-transpiler@0.3.11':
     dependencies:
       '@sveltejs/acorn-typescript': 1.0.10(acorn@8.16.0)
       acorn: 8.16.0
@@ -10492,9 +10492,9 @@ snapshots:
       - '@types/estree'
       - babel-plugin-macros
 
-  '@gi-tcg/unplugin-gts@0.3.8(esbuild@0.19.11)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@25.9.2)(esbuild@0.19.11)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.19.11))':
+  '@gi-tcg/unplugin-gts@0.3.11(esbuild@0.19.11)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@25.9.2)(esbuild@0.19.11)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.19.11))':
     dependencies:
-      '@gi-tcg/gts-transpiler': 0.3.8
+      '@gi-tcg/gts-transpiler': 0.3.11
       '@types/bun': 1.3.14
       rollup: 4.46.2
       unplugin: '@gytx/unplugin@3.1.0-patch.2'

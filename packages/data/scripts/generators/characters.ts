@@ -149,8 +149,7 @@ export async function generateCharacters() {
       "characters/" +
       ch.tags[0].split("_").pop()!.toLowerCase() +
       "/" +
-      snakeCase(ch.englishName) +
-      ".ts";
+      snakeCase(ch.englishName);
 
     const { hasSummon, hasStatuses, hasCombatStatuses, items } =
       getAuxiliaryOfCharacter(ch.id);
