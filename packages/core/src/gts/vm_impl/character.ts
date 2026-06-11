@@ -91,34 +91,33 @@ export const CharacterViewModel = defineViewModel(CharacterModel, (h) => ({
       value: { predicate: "until", version },
     };
   }),
-  tags: h.simpleAttribute()(function (tags: CharacterTag[]) {
-    this.tags = tags;
+  tags: h.simpleAttribute()(function (...tags: CharacterTag[]) {
+    this.tags.push(...tags);
   }),
-  health: h.simpleAttribute()(function (health: number) {
-    this.maxHealth = health;
+  health: h.simpleAttribute()(function (maxHealth: number) {
+    this.maxHealth = maxHealth;
   }),
-  maxEnergy: h.simpleAttribute()(function (maxEnergy: number) {
+  energy: h.simpleAttribute()(function (maxEnergy: number) {
     this.maxEnergy = maxEnergy;
   }),
   skills: h.simpleAttribute()(function (
     ...skillIds: (SkillHandle | PassiveSkillHandle)[]
   ) {
-    this.skillIds = skillIds;
+    this.skillIds.push(...skillIds);
   }),
-  associatedNightsoulsBlessing: h.simpleAttribute({
-    uniqueKey: "associatedNightsoulsBlessingId",
+  associateNightsoul: h.simpleAttribute({
+    uniqueKey: "associateNightsoul",
   })(function (blessingId: StatusHandle) {
     this.associatedNightsoulsBlessingId = blessingId;
   }),
   enabledLunarReactions: h.simpleAttribute()(function (
     ...reactions: LunarReaction[]
   ) {
-    this.enabledLunarReactions = reactions;
+    this.enabledLunarReactions.push(...reactions);
   }),
-  specialEnergy: h.simpleAttribute()(function (
-    variableName: string,
-    slotSize: number,
-  ) {
+  specialEnergy: h.simpleAttribute({
+    uniqueKey: "specialEnergy",
+  })(function (variableName: string, slotSize: number) {
     this.specialEnergy = { variableName, slotSize };
   }),
 }));

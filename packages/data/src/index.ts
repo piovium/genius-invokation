@@ -168,7 +168,7 @@ import "./characters/pyro/hu_tao.ts";
 import "./characters/pyro/klee.ts";
 import "./characters/pyro/lord_of_eroded_primal_fire.ts";
 import "./characters/pyro/lyney.ts";
-import "./characters/pyro/mavuika.ts";
+import "./characters/pyro/mavuika.gts";
 import "./characters/pyro/thoma.ts";
 import "./characters/pyro/xiangling.ts";
 import "./characters/pyro/xinyan.ts";

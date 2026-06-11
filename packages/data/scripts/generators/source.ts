@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import ts from "typescript";
-// import { parse } from "@gi-tcg/gts-transpiler";
+import { parse } from "@gi-tcg/gts-transpiler";
 import tsdoc, {
   TSDocConfiguration,
   TSDocTagDefinition,
@@ -86,6 +86,7 @@ interface CommentInfo {
 }
 
 interface CommentRange {
+  type: "ts" | "gts";
   range: {
     pos: number;
     end: number;
@@ -116,16 +117,42 @@ function* getTsCommentRanges(
     const range = docComments[docComments.length - 1];
     const code = content.substring(range.end + 1, node.end);
     const text = content.substring(range.pos, range.end);
-    yield { range, code, text };
+    yield { type: "ts", range, text, code };
   }
 }
 function* getGtsCommentRanges(
   path: string,
-  content: string
+  content: string,
 ): Generator<CommentRange> {
-  throw new Error("GTS comment parsing is not implemented yet");
+  const commentsByNextCharPos = new Map<number, CommentRange>();
+  const ast = parse(content, {
+    onComment(isBlock, text, start, end) {
+      if (isBlock) {
+        let nextCharPos = end;
+        while (/\s/.test(content[nextCharPos])) {
+          nextCharPos++;
+        }
+        commentsByNextCharPos.set(nextCharPos, {
+          type: "gts",
+          range: { pos: start, end },
+          text: content.slice(start, end),
+          // TODO
+          code: "",
+        });
+      }
+    },
+  });
+  for (const stmt of ast.body) {
+    const [start, end] = stmt.range!;
+    const comment = commentsByNextCharPos.get(start);
+    if (comment) {
+      yield {
+        ...comment,
+        code: content.substring(start, end),
+      };
+    }
+  }
 }
-
 
 function buildLineOffsets(content: string): number[] {
   const offsets = [0];
@@ -258,13 +285,13 @@ export function identifier(name: string) {
 }
 
 export async function writeSourceCode(
-  filepath: string,
+  basename: string,
   init: string,
   infos: SourceInfo[],
   noSort = false,
 ): Promise<void> {
-  filepath = path.resolve(BASE_PATH, filepath);
-  await mkdir(path.dirname(filepath), { recursive: true });
+  const pathNoExt = path.resolve(BASE_PATH, basename);
+  await mkdir(path.dirname(pathNoExt), { recursive: true });
 
   if (!noSort) {
     infos.sort((a, b) => a.id - b.id);
@@ -272,8 +299,16 @@ export async function writeSourceCode(
 
   let newInfos: SourceInfo[] = [];
   let resultText = LICENSE + init;
-  if (existsSync(filepath)) {
-    const existsComments = await getExistsComments(filepath);
+  let existsPath: string | null = null;
+  const gtsPath = pathNoExt + ".gts";
+  const tsPath = pathNoExt + ".ts";
+  if (existsSync(gtsPath)) {
+    existsPath = gtsPath;
+  } else if (existsSync(tsPath)) {
+    existsPath = tsPath;
+  }
+  if (existsPath) {
+    const existsComments = await getExistsComments(existsPath);
     const rewriteInfos: (CommentInfo & { newDescription: string })[] = [];
     for (const item of infos) {
       const cmt = existsComments.find((c) => c.id === item.id);
@@ -286,7 +321,7 @@ export async function writeSourceCode(
       }
     }
     rewriteInfos.sort((a, b) => a.range.pos - b.range.pos);
-    resultText = await readFile(filepath, "utf-8");
+    resultText = await readFile(existsPath, "utf-8");
     let offset = 0;
     for (const item of rewriteInfos) {
       const newComment = `/**
@@ -338,5 +373,6 @@ ${item.code}
       )
       .join("\n");
   resultText = resultText.trim() + "\n";
-  await writeFile(filepath, resultText);
+  // TODO: use gts
+  await writeFile(existsPath ?? pathNoExt + ".ts", resultText);
 }

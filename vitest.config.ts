@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { defineConfig } from "vitest/config";
+import gts from "@gi-tcg/unplugin-gts/vite";
 
 export default defineConfig({
   test: {
@@ -23,6 +24,9 @@ export default defineConfig({
       NODE_OPTIONS: "--expose-gc",
     },
   },
+  plugins: [
+    gts(),
+  ],
   ssr: {
     // https://vitest.dev/guide/common-errors.html#custom-package-conditions-are-not-resolved
     resolve: {
