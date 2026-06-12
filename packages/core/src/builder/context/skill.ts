@@ -80,7 +80,7 @@ import type {
 } from "../type";
 import type { GuessedTypeOfQuery } from "../../query-legacy/types";
 import { CALLED_FROM_REACTION } from "../reaction";
-import { flip } from "@gi-tcg/utils";
+import { flip, toSortedBy } from "@gi-tcg/utils";
 import { GiTcgDataError, GiTcgPreviewAbortedError } from "../../error";
 import { DetailLogType } from "../../log";
 import {
@@ -102,7 +102,7 @@ import {
   type RxEntityState,
 } from "./reactive";
 import { ReactiveStateSymbol } from "./reactive_base";
-import { type CreateEntityOptions, playerUsefullDice, toSortedBy } from "../../utils";
+import { type CreateEntityOptions, playerUsefullDice } from "../../utils";
 import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "../skill";
 import type { LunarReaction } from "@gi-tcg/typings";
 import {

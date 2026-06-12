@@ -50,3 +50,65 @@ export function pair<T>(value: T): Pair<T> {
   const ret: [T, T] = [value, value];
   return ret;
 }
+
+/**
+ * Returns a new array sorted by the values returned by the `projection` function.
+ *
+ * Supports single-key sorting (projection returns `number`) and multi-key / lexicographic
+ * sorting (projection returns `number[]`). When the projection returns a number it is
+ * automatically wrapped into a single-element array for comparison.
+ *
+ * The comparison is stable in the sense that it follows the natural ordering of numbers
+ * and falls back to comparing array lengths when all compared elements are equal.
+ *
+ * @template T - The type of the array elements.
+ * @template K - The type returned by the projection (`number` or `number[]`).
+ *
+ * @param arr - The source array to be sorted (read-only, a new sorted array is returned).
+ * @param projection - A function that maps each element to a sortable key.
+ *                     - Return a `number` for single-key sorting.
+ *                     - Return a `number[]` for multi-key sorting (earlier indices have higher priority).
+ *
+ * @returns A new array containing the elements of `arr` sorted according to the projection.
+ *
+ * @example
+ * // Single-key numeric sort
+ * const users = [{ id: 3 }, { id: 1 }, { id: 2 }];
+ * toSortedBy(users, u => u.id);
+ * // => [{ id: 1 }, { id: 2 }, { id: 3 }]
+ *
+ * @example
+ * // Multi-key sort (first by score desc, then by name asc)
+ * const items = [
+ *   { score: 10, name: "Bob" },
+ *   { score: 10, name: "Alice" },
+ *   { score: 5, name: "Charlie" }
+ * ];
+ * toSortedBy(items, item => [-item.score, item.name.charCodeAt(0)]);
+ * // => [{ score: 10, name: "Alice" }, { score: 10, name: "Bob" }, { score: 5, name: "Charlie" }]
+ */
+export function toSortedBy<T, K extends number[] | number>(
+  arr: readonly T[],
+  projection: (element: T) => K,
+): T[] {
+  return arr.toSorted((a, b) => {
+    let projectionA: number[] | number = projection(a);
+    let projectionB: number[] | number = projection(b);
+    if (!Array.isArray(projectionA)) {
+      projectionA = [projectionA];
+    }
+    if (!Array.isArray(projectionB)) {
+      projectionB = [projectionB];
+    }
+    const size = Math.min(projectionA.length, projectionB.length);
+    for (let i = 0; i < size; i++) {
+      if (projectionA[i] < projectionB[i]) {
+        return -1;
+      }
+      if (projectionA[i] > projectionB[i]) {
+        return 1;
+      }
+    }
+    return projectionA.length - projectionB.length;
+  });
+}

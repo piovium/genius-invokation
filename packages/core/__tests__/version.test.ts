@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { resolveOfficialVersion, type WithVersionInfo } from "../src/base/version";
-import { toSortedBy } from "../src/utils";
+import { toSortedBy } from "@gi-tcg/utils";
 
 test("find version", () => {
   const versions: (WithVersionInfo & { id: number })[] = [

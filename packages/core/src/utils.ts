@@ -20,7 +20,7 @@ import {
   type DiceRequirement,
   type ReadonlyDiceRequirement,
 } from "@gi-tcg/typings";
-import { checkDice, chooseDiceValue, flip } from "@gi-tcg/utils";
+import { checkDice, chooseDiceValue, flip, toSortedBy } from "@gi-tcg/utils";
 import type {
   AnyState,
   CharacterState,
@@ -676,11 +676,13 @@ export function applyAutoSelectedDiceToAction(
   if (actionInfo.validity !== ActionValidity.VALID) {
     return actionInfo;
   }
+  const disallowed = new Set<DiceType>;
   if (actionInfo.type === "elementalTuning") {
-    const disallowed = config.allowTuningAnyDice
-      ? []
-      : [actionInfo.result, DiceType.Omni];
-    const tuningDice = player.dice.findLast((d) => !disallowed.includes(d));
+    if (!config.allowTuningAnyDice) {
+      disallowed.add(actionInfo.result);
+      disallowed.add(DiceType.Omni);
+    }
+    const tuningDice = player.dice.findLast((d) => !disallowed.has(d));
     if (!tuningDice) {
       return {
         ...actionInfo,
@@ -693,7 +695,22 @@ export function applyAutoSelectedDiceToAction(
       };
     }
   }
-  const autoSelectedDice = chooseDiceValue(actionInfo.cost, player.dice);
+  const activeCharDice = new Set<DiceType>;
+  if (actionInfo.type === "switchActive") {
+    activeCharDice.add(elementOfCharacter(actionInfo.to.definition))
+  } else {
+    activeCharDice.add(elementOfCharacter(
+      player.characters[getActiveCharacterIndex(player)].definition
+    ))
+  }
+  const usefullDice = playerUsefullDice(player);
+  const autoSelectedDice = chooseDiceValue(
+    actionInfo.cost,
+    player.dice,
+    usefullDice,
+    activeCharDice,
+    disallowed,
+  );
   const ok = checkDice(actionInfo.cost, autoSelectedDice);
   if (!ok) {
     return {
@@ -951,32 +968,6 @@ export function weaponOfCharacter(ch: CharacterDefinition): WeaponTag {
 export function nationOfCharacter(ch: CharacterDefinition): NationTag[] {
   const nationTags: readonly CharacterTag[] = NATION_TAGS;
   return ch.tags.filter((tag): tag is NationTag => nationTags.includes(tag));
-}
-
-export function toSortedBy<T, K extends number[] | number>(
-  arr: readonly T[],
-  projection: (element: T) => K,
-): T[] {
-  return arr.toSorted((a, b) => {
-    let projectionA: number[] | number = projection(a);
-    let projectionB: number[] | number = projection(b);
-    if (!Array.isArray(projectionA)) {
-      projectionA = [projectionA];
-    }
-    if (!Array.isArray(projectionB)) {
-      projectionB = [projectionB];
-    }
-    const size = Math.min(projectionA.length, projectionB.length);
-    for (let i = 0; i < size; i++) {
-      if (projectionA[i] < projectionB[i]) {
-        return -1;
-      }
-      if (projectionA[i] > projectionB[i]) {
-        return 1;
-      }
-    }
-    return projectionA.length - projectionB.length;
-  });
 }
 
 /** 
