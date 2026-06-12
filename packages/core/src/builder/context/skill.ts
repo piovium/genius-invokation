@@ -102,7 +102,7 @@ import {
   type RxEntityState,
 } from "./reactive";
 import { ReactiveStateSymbol } from "./reactive_base";
-import { type CreateEntityOptions, toSortedBy } from "../../utils";
+import { type CreateEntityOptions, playerUsefullDice, toSortedBy } from "../../utils";
 import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "../skill";
 import type { LunarReaction } from "@gi-tcg/typings";
 import {
@@ -1524,7 +1524,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
     for (const dice of this.player.dice) {
       countMap.set(dice, (countMap.get(dice) ?? 0) + 1);
     }
-    // 万能骰排最后。其余按照数量排序，相等时按照骰子类型排序
+    // 元素骰吸收序算法，用于自动选择被吸收的骰子：
+    // 1. 万能骰优先
+    // 2. 数量多的骰子优先
+    // 3. 骰子类型编号
     const sorted = toSortedBy(this.player.dice, (dice) => [
       +(dice === DiceType.Omni),
       -countMap.get(dice)!,
@@ -1581,15 +1584,32 @@ export class SkillContext<Meta extends ContextMetaBase> {
     const player = this.getRawPlayer(where);
     const who =
       where === "my" ? this.callerArea.who : flip(this.callerArea.who);
-    if (count === "all") {
-      count = player.dice.length;
-    } else {
-      count = Math.min(count, player.dice.length);
+    // 元素骰转换序算法，用于自动选择被转换的骰子：
+    // 1. 保护万能元素骰和目标元素骰
+    // 2. 无效骰优先
+    // 3. 数量少的骰子优先
+    // 4. 骰子类型编号
+    const protectDice = player.dice.filter((d) => d === DiceType.Omni || d === target);
+    let remainingDice = player.dice.filter((d) => !protectDice.includes(d));
+    const usefullDice = playerUsefullDice(player);
+    const countMap = new Map<DiceType, number>();
+    for (const d of remainingDice) {
+      countMap.set(d, (countMap.get(d) ?? 0) + 1);
     }
-    const oldDiceCount = player.dice.length - count;
-    const oldDice = player.dice.slice(0, oldDiceCount);
+    remainingDice = toSortedBy(remainingDice, (dice) => [
+      +usefullDice.has(dice),
+      countMap.get(dice)!,
+      dice,
+    ]);
+    if (count === "all") {
+      count = remainingDice.length;
+    } else {
+      count = Math.min(count, remainingDice.length);
+    }    
+    const oldDiceCount = remainingDice.length - count;
+    const oldDice = remainingDice.slice(0, oldDiceCount);
     const newDice = new Array<DiceType>(count).fill(target);
-    const finalDice = sortDice(player, [...oldDice, ...newDice]);
+    const finalDice = sortDice(player, [...protectDice, ...oldDice, ...newDice]);
     using l = this.mutator.subLog(
       DetailLogType.Primitive,
       `Convert ${who}'s ${count} dice to [dice:${target}]`,

@@ -979,11 +979,23 @@ export function toSortedBy<T, K extends number[] | number>(
   });
 }
 
+/** 
+ * 获取玩家的有效骰类型集合
+ * 有效骰：存活角色的主元素和副元素
+ * TODO: 需要一个完善的有效骰算法，在角色定义中添加角色的元素类型，包括副元素，筛选存活的角色，将其元素类型取并集（取代现在的从tag获取）
+ * @param player 当前玩家的状态
+ * @returns 有效骰类型集合
+ */
+export function playerUsefullDice(player: PlayerState): Set<DiceType> {
+  const aliveCh = player.characters.filter((ch) => ch.variables.alive === 1);
+  return new Set(aliveCh.flatMap((ch) => elementOfCharacter(ch.definition)));
+}
+
 /**
- * 骰子排序算法。每次修改骰子后都需要重新排序；排序依据是：
- * 1. 万能骰靠前
- * 2. 有效骰靠前
- * 3. 骰子数量多的靠前
+ * 元素骰显示序算法，控制骰子在所有场景下的显示顺序。每次修改骰子后都需要重新排序；排序依据是：
+ * 1. 万能骰优先
+ * 2. 有效骰优先
+ * 3. 数量多的骰子优先
  * 4. 骰子类型编号
  * @param player 当前玩家的状态，用以获取有效骰信息
  * @param dice
@@ -993,17 +1005,14 @@ export function sortDice(
   player: PlayerState,
   dice: readonly DiceType[],
 ): DiceType[] {
-  const characterElements = shiftLeft(
-    player.characters,
-    getActiveCharacterIndex(player),
-  ).map((ch) => elementOfCharacter(ch.definition));
+  const usefullDice = playerUsefullDice(player);
   const countMap = new Map<DiceType, number>();
   for (const d of dice) {
     countMap.set(d, (countMap.get(d) ?? 0) + 1);
   }
   return toSortedBy(dice, (dice) => [
     dice === DiceType.Omni ? -1 : 0,
-    characterElements.includes(dice) ? -1 : 0,
+    usefullDice.has(dice) ? -1 : 0,
     -countMap.get(dice)!,
     dice,
   ]);
