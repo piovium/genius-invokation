@@ -274,6 +274,12 @@ export const FightingSpirit = skill(13154)
   .combatStatus(AllfireArmamentsRingOfSearingRadiance)
   .done();
 
+// define skill {
+//   id 13154 as FightingSpirit2;
+//   "type" (3);
+
+// }
+
 /**
  * @id 1315
  * @name 玛薇卡

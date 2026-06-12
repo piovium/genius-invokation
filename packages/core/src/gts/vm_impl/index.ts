@@ -23,10 +23,19 @@ import {
   registerInitiativeSkill,
   registerPassiveSkill,
 } from "../../builder/registry";
-import { CardViewModel, EntityViewModel } from "./entity";
+import {
+  CardViewModel,
+  DEFAULT_ENTITY_VM_META,
+  EntityViewModel,
+} from "./entity";
 import { AttachmentViewModel } from "./attachment";
 import { ExtensionViewModel } from "./extension";
 import { CharacterSkillViewModel } from "./skill";
+import type { ExEntityType } from "../../builder/type";
+
+type EntityVMMeta<T extends ExEntityType> = typeof DEFAULT_ENTITY_VM_META & {
+  type: T;
+};
 
 export default defineViewModel(class RootModel {}, (h) => ({
   character: h.attribute<{
@@ -46,23 +55,23 @@ export default defineViewModel(class RootModel {}, (h) => ({
     }
   }, CharacterSkillViewModel),
   status: h.attribute<{
-    (): AR.With<typeof EntityViewModel>;
+    (): AR.With<typeof EntityViewModel, EntityVMMeta<"status">>;
   }>((_, [], subView) => {
     const entity = EntityViewModel.parse(subView, "status").getEntry();
     registerEntity(entity);
-  }, EntityViewModel.bind("status")),
+  }, EntityViewModel.bind<EntityVMMeta<"status">>("status")),
   combatStatus: h.attribute<{
-    (): AR.With<typeof EntityViewModel>;
+    (): AR.With<typeof EntityViewModel, EntityVMMeta<"combatStatus">>;
   }>((_, [], subView) => {
     const entity = EntityViewModel.parse(subView, "combatStatus").getEntry();
     registerEntity(entity);
-  }, EntityViewModel.bind("combatStatus")),
+  }, EntityViewModel.bind<EntityVMMeta<"combatStatus">>("combatStatus")),
   summon: h.attribute<{
-    (): AR.With<typeof EntityViewModel>;
+    (): AR.With<typeof EntityViewModel, EntityVMMeta<"summon">>;
   }>((_, [], subView) => {
     const entity = EntityViewModel.parse(subView, "summon").getEntry();
     registerEntity(entity);
-  }, EntityViewModel.bind("summon")),
+  }, EntityViewModel.bind<EntityVMMeta<"summon">>("summon")),
   card: h.attribute<{
     (): AR.With<typeof CardViewModel>;
   }>((_, [], subView) => {
