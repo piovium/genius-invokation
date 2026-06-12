@@ -20,6 +20,7 @@ import type { Writable } from "../../utils";
 import type { SkillOperation } from "../../builder/skill";
 import type { EntityType, VersionInfo } from "../..";
 import { DEFAULT_VERSION_INFO } from "../../base/version";
+import type { ExEntityType, ExtensionHandle } from "../../builder/type";
 
 class EntityModel {
   skillIndex = 0;
@@ -50,9 +51,21 @@ class EntityModel {
   }
 }
 
+export interface EntityVMMeta {
+  readonly type: ExEntityType;
+  readonly variables: string;
+  readonly associatedExtension: ExtensionHandle
+}
+
+export const DEFAULT_ENTITY_VM_META = {
+  type: "" as ExEntityType,
+  variables: null as never,
+  associatedExtension: null as never,
+} as const satisfies EntityVMMeta;
+
 export const EntityViewModel = defineViewModel(EntityModel, (h) => ({
   // TODO
-}));
+}), DEFAULT_ENTITY_VM_META);
 
 class CardModel {
 
@@ -75,4 +88,7 @@ class CardModel {
 
 export const CardViewModel = defineViewModel(CardModel, (h) => ({
   // TODO
-}));
+}), {
+  ...DEFAULT_ENTITY_VM_META,
+  type: "eventCard" as "eventCard" | "equipment" | "support",
+});
