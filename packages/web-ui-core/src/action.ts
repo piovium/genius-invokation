@@ -1001,7 +1001,7 @@ function createElementalTuningActionState(
     confirmText: ctx.t("action.confirmButtonElementalTuning"),
   };
   const targetDice = ctx.action.value.targetDice as DiceType;
-  const disabledDiceTypes = ctx.action.allowTuningAnyDice
+  const disabledDiceTypes = ctx.action.value.allowTuningAnyDice
     ? []
     : [DiceType.Omni, targetDice];
   const resultState: ActionState = {
