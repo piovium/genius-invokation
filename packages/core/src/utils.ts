@@ -676,25 +676,6 @@ export function applyAutoSelectedDiceToAction(
   if (actionInfo.validity !== ActionValidity.VALID) {
     return actionInfo;
   }
-  const disallowed = new Set<DiceType>;
-  if (actionInfo.type === "elementalTuning") {
-    if (!config.allowTuningAnyDice) {
-      disallowed.add(actionInfo.result);
-      disallowed.add(DiceType.Omni);
-    }
-    const tuningDice = player.dice.findLast((d) => !disallowed.has(d));
-    if (!tuningDice) {
-      return {
-        ...actionInfo,
-        validity: ActionValidity.NO_DICE,
-      };
-    } else {
-      return {
-        ...actionInfo,
-        autoSelectedDice: [tuningDice],
-      };
-    }
-  }
   const activeCharDice = new Set<DiceType>;
   if (actionInfo.type === "switchActive") {
     activeCharDice.add(elementOfCharacter(actionInfo.to.definition))
@@ -704,6 +685,11 @@ export function applyAutoSelectedDiceToAction(
     ))
   }
   const usefullDice = playerUsefullDice(player);
+  const disallowed = new Set<DiceType>;
+  if (actionInfo.type === "elementalTuning" && !config.allowTuningAnyDice) {
+    disallowed.add(actionInfo.result);
+    disallowed.add(DiceType.Omni);
+  }  
   const autoSelectedDice = chooseDiceValue(
     actionInfo.cost,
     player.dice,
@@ -711,6 +697,21 @@ export function applyAutoSelectedDiceToAction(
     activeCharDice,
     disallowed,
   );
+
+  if (actionInfo.type === "elementalTuning") {
+    if (autoSelectedDice.length === 0) {
+      return {
+        ...actionInfo,
+        validity: ActionValidity.NO_DICE,
+      };
+    } else {
+      return {
+        ...actionInfo,
+        autoSelectedDice: autoSelectedDice,
+      };
+    }
+  }
+  
   const ok = checkDice(actionInfo.cost, autoSelectedDice);
   if (!ok) {
     return {
