@@ -20,7 +20,7 @@ https://standalone.piovium.org
   - Historical retrospective (replay) and mid-game continuation
   - Game import and export
   - View detailed settlement logs
-- [Battle Platform (Chinese Version only)](https://play.piovium.org) (In public beta, thanks to [@xqm32](https://github.com/xqm32) for server support)
+- [Battle Platform](https://play.piovium.org) (In public beta)
 - Cross Programming Language Support
   - [C/C++](./packages/cbinding/)
   - [Python](./packages/pybinding/)

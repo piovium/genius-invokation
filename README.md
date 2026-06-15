@@ -30,7 +30,7 @@
   - 历史回溯（复盘）和中途继续
   - 对局导入导出
   - 查看结算细节日志
-- [对战平台](https://play.piovium.org)（公开测试中，感谢 [@xqm32](https://github.com/xqm32) 提供服务器支持）
+- [对战平台](https://play.piovium.org)（公开测试中）
 - 跨编程语言支持
   - [C/C++](./packages/cbinding/)
   - [Python](./packages/pybinding/)

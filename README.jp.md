@@ -18,7 +18,7 @@ https://standalone.piovium.org でお試しください。
   - 履歴の追跡（リプレイ）と途中再開
   - ゲームのインポート/エクスポート
   - 決済詳細ログの確認
-- [対戦プラットフォーム(中国語版のみ)](https://play.piovium.org)（公開テスト中、[@xqm32](https://github.com/xqm32)様のサーバー提供に感謝）
+- [対戦プラットフォーム(中国語版のみ)](https://play.piovium.org)（公開テスト中）
 - 複数プログラミング言語のサポート
   - [C/C++](./packages/cbinding/)
   - [Python](./packages/pybinding/)
