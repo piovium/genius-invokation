@@ -678,42 +678,27 @@ export function applyAutoSelectedDiceToAction(
   }
   const activeCharDice = new Set<DiceType>();
   if (actionInfo.type === "switchActive") {
-    activeCharDice.add(elementOfCharacter(actionInfo.to.definition))
+    activeCharDice.add(elementOfCharacter(actionInfo.to.definition));
   } else {
-    activeCharDice.add(elementOfCharacter(
-      player.characters[getActiveCharacterIndex(player)].definition
-    ))
+    activeCharDice.add(
+      elementOfCharacter(
+        player.characters[getActiveCharacterIndex(player)].definition,
+      ),
+    );
   }
-  const usefullDice = playerUsefullDice(player);
+  const usefulDice = playerUsefulDice(player);
   const disallowed = new Set<DiceType>();
   if (actionInfo.type === "elementalTuning" && !config.allowTuningAnyDice) {
     disallowed.add(actionInfo.result);
     disallowed.add(DiceType.Omni);
-  }  
+  }
   const autoSelectedDice = chooseDiceValue(
     actionInfo.cost,
     player.dice,
-    usefullDice,
+    usefulDice,
     activeCharDice,
     disallowed,
   );
-
-  if (actionInfo.type === "elementalTuning") {
-    if (autoSelectedDice.length === 0) {
-      return {
-        ...actionInfo,
-        validity: ActionValidity.NO_DICE,
-        allowTuningAnyDice: config.allowTuningAnyDice,
-      };
-    } else {
-      return {
-        ...actionInfo,
-        autoSelectedDice: autoSelectedDice,
-        allowTuningAnyDice: config.allowTuningAnyDice,
-      };
-    }
-  }
-  
   const ok = checkDice(actionInfo.cost, autoSelectedDice);
   if (!ok) {
     return {
@@ -973,14 +958,14 @@ export function nationOfCharacter(ch: CharacterDefinition): NationTag[] {
   return ch.tags.filter((tag): tag is NationTag => nationTags.includes(tag));
 }
 
-/** 
+/**
  * 获取玩家的有效骰类型集合
  * 有效骰：存活角色的主元素和副元素
  * TODO: 需要一个完善的有效骰算法，在角色定义中添加角色的元素类型，包括副元素，筛选存活的角色，将其元素类型取并集（取代现在的从tag获取）
  * @param player 当前玩家的状态
  * @returns 有效骰类型集合
  */
-export function playerUsefullDice(player: PlayerState): Set<DiceType> {
+export function playerUsefulDice(player: PlayerState): Set<DiceType> {
   const aliveCh = player.characters.filter((ch) => ch.variables.alive === 1);
   return new Set(aliveCh.flatMap((ch) => elementOfCharacter(ch.definition)));
 }
@@ -999,7 +984,7 @@ export function sortDice(
   player: PlayerState,
   dice: readonly DiceType[],
 ): DiceType[] {
-  const usefullDice = playerUsefullDice(player);
+  const usefullDice = playerUsefulDice(player);
   const countMap = new Map<DiceType, number>();
   for (const d of dice) {
     countMap.set(d, (countMap.get(d) ?? 0) + 1);
@@ -1032,13 +1017,13 @@ export function computeConvertDice(
     (d) => d === DiceType.Omni || d === target,
   );
   let remainingDice = player.dice.filter((d) => !protectDice.includes(d));
-  const usefullDice = playerUsefullDice(player);
+  const usefulDice = playerUsefulDice(player);
   const countMap = new Map<DiceType, number>();
   for (const d of remainingDice) {
     countMap.set(d, (countMap.get(d) ?? 0) + 1);
   }
   remainingDice = toSortedBy(remainingDice, (dice) => [
-    +usefullDice.has(dice),
+    +usefulDice.has(dice),
     countMap.get(dice)!,
     dice,
   ]);

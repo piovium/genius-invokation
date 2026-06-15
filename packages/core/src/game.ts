@@ -1068,6 +1068,7 @@ export class Game {
         card,
         who,
         result: tunedToType,
+        allowTuningAnyDice: this.players[who].config.allowTuningAnyDice,
         fast: true,
         cost: VOID_1_DICE_REQUIREMENT,
         autoSelectedDice: [],

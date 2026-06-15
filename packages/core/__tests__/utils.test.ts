@@ -60,7 +60,7 @@ const makePlayerState = (
   hands: [],
   pile: [],
   initialPile: [],
-  dice: dice,
+  dice,
   summons: [],
   supports: [],
   combatStatuses: [],

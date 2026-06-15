@@ -653,7 +653,6 @@ export function exposeAction(action: ActionInfo): Action {
     validity: action.validity,
     preview: action.preview ?? [],
     isFast: action.fast,
-    allowTuningAnyDice: action.allowTuningAnyDice ?? false,
   };
   switch (action.type) {
     case "useSkill": {
@@ -702,6 +701,7 @@ export function exposeAction(action: ActionInfo): Action {
           value: {
             removedCardId: action.card.id,
             targetDice: action.result as PbDiceType,
+            allowTuningAnyDice: action.allowTuningAnyDice ?? false,
           },
         },
         ...BASE,

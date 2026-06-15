@@ -300,6 +300,7 @@ export interface ElementalTuningInfo {
   readonly who: 0 | 1;
   readonly card: EntityState;
   readonly result: DiceType;
+  readonly allowTuningAnyDice: boolean;
 }
 
 export interface DeclareEndInfo {
@@ -319,7 +320,6 @@ export type WithActionDetail<T extends ActionInfoBase> = T & {
   readonly fast: boolean;
   readonly validity: ActionValidity;
   readonly autoSelectedDice: DiceType[];
-  readonly allowTuningAnyDice?: boolean;
   readonly log?: string;
   readonly preview?: PreviewData[];
 };
