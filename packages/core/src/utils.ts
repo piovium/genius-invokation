@@ -703,11 +703,13 @@ export function applyAutoSelectedDiceToAction(
       return {
         ...actionInfo,
         validity: ActionValidity.NO_DICE,
+        allowTuningAnyDice: config.allowTuningAnyDice,
       };
     } else {
       return {
         ...actionInfo,
         autoSelectedDice: autoSelectedDice,
+        allowTuningAnyDice: config.allowTuningAnyDice,
       };
     }
   }

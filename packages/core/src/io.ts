@@ -653,6 +653,7 @@ export function exposeAction(action: ActionInfo): Action {
     validity: action.validity,
     preview: action.preview ?? [],
     isFast: action.fast,
+    allowTuningAnyDice: action.allowTuningAnyDice ?? false,
   };
   switch (action.type) {
     case "useSkill": {

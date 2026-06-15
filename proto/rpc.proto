@@ -50,6 +50,7 @@ message Action {
   repeated DiceType auto_selected_dice = 12;
   ActionValidity validity = 13;
   bool is_fast = 14;
+  bool allow_tuning_any_dice = 15;
 }
 
 message ActionRequest {

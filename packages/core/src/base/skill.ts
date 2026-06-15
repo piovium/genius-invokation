@@ -319,6 +319,7 @@ export type WithActionDetail<T extends ActionInfoBase> = T & {
   readonly fast: boolean;
   readonly validity: ActionValidity;
   readonly autoSelectedDice: DiceType[];
+  readonly allowTuningAnyDice?: boolean;
   readonly log?: string;
   readonly preview?: PreviewData[];
 };
