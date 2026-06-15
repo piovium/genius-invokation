@@ -1009,6 +1009,48 @@ export function sortDice(
   ]);
 }
 
+/**
+ * 元素骰转换序算法，用于自动选择被转换的骰子并返回转换后的骰子数组：
+ * 1. 保护万能骰和目标元素骰
+ * 2. 无效骰优先
+ * 3. 数量少的骰子优先
+ * 4. 骰子类型编号
+ * @param player 当前玩家的状态
+ * @param target 目标骰子类型
+ * @param count 转换数量或"all"
+ * @returns 转换后的骰子数组
+ */
+export function computeConvertDice(
+  player: PlayerState,
+  target: DiceType,
+  count: number | "all",
+): DiceType[] {
+  const protectDice = player.dice.filter(
+    (d) => d === DiceType.Omni || d === target,
+  );
+  let remainingDice = player.dice.filter((d) => !protectDice.includes(d));
+  const usefullDice = playerUsefullDice(player);
+  const countMap = new Map<DiceType, number>();
+  for (const d of remainingDice) {
+    countMap.set(d, (countMap.get(d) ?? 0) + 1);
+  }
+  remainingDice = toSortedBy(remainingDice, (dice) => [
+    +usefullDice.has(dice),
+    countMap.get(dice)!,
+    dice,
+  ]);
+  if (count === "all") {
+    count = remainingDice.length;
+  } else {
+    count = Math.min(count, remainingDice.length);
+  }
+  const oldDiceCount = remainingDice.length - count;
+  const oldDice = remainingDice.slice(0, oldDiceCount);
+  const newDice = new Array<DiceType>(count).fill(target);
+  const finalDice = sortDice(player, [...protectDice, ...oldDice, ...newDice]);
+  return finalDice;
+}
+
 type TupleIndices<T extends readonly unknown[]> = Extract<
   keyof T,
   `${number}`

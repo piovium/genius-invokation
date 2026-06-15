@@ -102,7 +102,7 @@ import {
   type RxEntityState,
 } from "./reactive";
 import { ReactiveStateSymbol } from "./reactive_base";
-import { type CreateEntityOptions, playerUsefullDice } from "../../utils";
+import { computeConvertDice, type CreateEntityOptions } from "../../utils";
 import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "../skill";
 import type { LunarReaction } from "@gi-tcg/typings";
 import {
@@ -1584,32 +1584,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     const player = this.getRawPlayer(where);
     const who =
       where === "my" ? this.callerArea.who : flip(this.callerArea.who);
-    // 元素骰转换序算法，用于自动选择被转换的骰子：
-    // 1. 保护万能元素骰和目标元素骰
-    // 2. 无效骰优先
-    // 3. 数量少的骰子优先
-    // 4. 骰子类型编号
-    const protectDice = player.dice.filter((d) => d === DiceType.Omni || d === target);
-    let remainingDice = player.dice.filter((d) => !protectDice.includes(d));
-    const usefullDice = playerUsefullDice(player);
-    const countMap = new Map<DiceType, number>();
-    for (const d of remainingDice) {
-      countMap.set(d, (countMap.get(d) ?? 0) + 1);
-    }
-    remainingDice = toSortedBy(remainingDice, (dice) => [
-      +usefullDice.has(dice),
-      countMap.get(dice)!,
-      dice,
-    ]);
-    if (count === "all") {
-      count = remainingDice.length;
-    } else {
-      count = Math.min(count, remainingDice.length);
-    }    
-    const oldDiceCount = remainingDice.length - count;
-    const oldDice = remainingDice.slice(0, oldDiceCount);
-    const newDice = new Array<DiceType>(count).fill(target);
-    const finalDice = sortDice(player, [...protectDice, ...oldDice, ...newDice]);
+    const finalDice = computeConvertDice(player, target, count);
     using l = this.mutator.subLog(
       DetailLogType.Primitive,
       `Convert ${who}'s ${count} dice to [dice:${target}]`,
