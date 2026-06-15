@@ -1044,8 +1044,7 @@ export function computeConvertDice(
   } else {
     count = Math.min(count, remainingDice.length);
   }
-  const oldDiceCount = remainingDice.length - count;
-  const oldDice = remainingDice.slice(0, oldDiceCount);
+  const oldDice = remainingDice.slice(count);
   const newDice = new Array<DiceType>(count).fill(target);
   const finalDice = sortDice(player, [...protectDice, ...oldDice, ...newDice]);
   return finalDice;
