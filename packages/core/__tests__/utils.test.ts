@@ -234,7 +234,7 @@ test("auto select dice unable to pay", () => {
   // 调和 不足
   expect(
     chooseDiceValue(
-      new Map(),
+      new Map([[DiceType.Void, 1]]),
       [8, 8, 4, 4],
       new Set([4, 7, 3]),
       new Set([4]),

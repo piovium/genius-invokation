@@ -676,7 +676,7 @@ export function applyAutoSelectedDiceToAction(
   if (actionInfo.validity !== ActionValidity.VALID) {
     return actionInfo;
   }
-  const activeCharDice = new Set<DiceType>;
+  const activeCharDice = new Set<DiceType>();
   if (actionInfo.type === "switchActive") {
     activeCharDice.add(elementOfCharacter(actionInfo.to.definition))
   } else {
@@ -685,7 +685,7 @@ export function applyAutoSelectedDiceToAction(
     ))
   }
   const usefullDice = playerUsefullDice(player);
-  const disallowed = new Set<DiceType>;
+  const disallowed = new Set<DiceType>();
   if (actionInfo.type === "elementalTuning" && !config.allowTuningAnyDice) {
     disallowed.add(actionInfo.result);
     disallowed.add(DiceType.Omni);

@@ -39,7 +39,7 @@ export function chooseDiceValue(
 ): DiceType[] {
   const result: DiceType[] = [];
   // 单独计算万能骰的数量
-  let omniDiceConut = dice.filter((d) => d === OMNI).length;
+  let omniDiceConut = protectedDiceC.has(OMNI) ? 0 : dice.filter((d) => d === OMNI).length;
 
   // 将持有的骰子按类型分组计算数量，移除保护C集合的骰子，移除万能骰
   const diceCountMap = dice.reduce((map, d) => {
