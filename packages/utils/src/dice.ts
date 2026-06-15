@@ -39,7 +39,7 @@ export function chooseDiceValue(
 ): DiceType[] {
   const result: DiceType[] = [];
   // 单独计算万能骰的数量
-  let ominDiceConut = dice.filter((d) => d === OMNI).length;
+  let omniDiceConut = dice.filter((d) => d === OMNI).length;
 
   // 将持有的骰子按类型分组计算数量，移除保护C集合的骰子，移除万能骰
   const diceCountMap = dice.reduce((map, d) => {
@@ -52,18 +52,18 @@ export function chooseDiceValue(
   const requiredBaseDice = required.entries().filter(([k]) => k > VOID && k < ALIGNED);
   for (const [requiredType, requiredCount] of requiredBaseDice) {
     const target = remainingDice.find((d) => d.type === requiredType);
-    if (target && target.count + ominDiceConut >= requiredCount) {
+    if (target && target.count + omniDiceConut >= requiredCount) {
       // 指定类型的骰子和万能骰组合后数量足够
       const targetCount = Math.min(target.count, requiredCount);
       const omniCount = requiredCount - targetCount;
       result.push(...Array(targetCount).fill(target.type));
       result.push(...Array(omniCount).fill(OMNI));
       remainingDice.find((d) => d.type === target.type)!.count -= targetCount;
-      ominDiceConut -= omniCount;
-    } else if (ominDiceConut >= requiredCount) {
+      omniDiceConut -= omniCount;
+    } else if (omniDiceConut >= requiredCount) {
       // 没有指定类型的骰子，万能骰数量足够，直接用万能骰支付需求
       result.push(...Array(requiredCount).fill(OMNI));
-      ominDiceConut -= requiredCount;
+      omniDiceConut -= requiredCount;
     } else {
       // 无法支付需求
       return [];
@@ -86,7 +86,7 @@ export function chooseDiceValue(
       dice.type,
     ]);
     // 最少同色数量
-    const minSameCount = Math.max(0, requiredCount - ominDiceConut);
+    const minSameCount = Math.max(0, requiredCount - omniDiceConut);
     const target = sortedDice.find((d) => d.count >= minSameCount);
     if (target) {
       // 依照排序取第一个数量足够的，和万能骰组合，支付需求
@@ -95,11 +95,11 @@ export function chooseDiceValue(
       result.push(...Array(targetCount).fill(target.type));
       result.push(...Array(omniCount).fill(OMNI));
       remainingDice.find((d) => d.type === target.type)!.count -= targetCount;
-      ominDiceConut -= omniCount;
-    } else if (ominDiceConut >= requiredCount) {
+      omniDiceConut -= omniCount;
+    } else if (omniDiceConut >= requiredCount) {
       // 没有任何元素骰数量足够，万能骰数量足够，直接用万能骰支付需求
       result.push(...Array(requiredCount).fill(OMNI));
-      ominDiceConut -= requiredCount;
+      omniDiceConut -= requiredCount;
     } else {
       // 无法支付需求
       return [];
@@ -121,7 +121,7 @@ export function chooseDiceValue(
     ]);
     const flatRemainingDice: DiceType[] = [
       ...sortedDice.flatMap((d) => Array(d.count).fill(d.type)),
-      ...Array(ominDiceConut).fill(OMNI),
+      ...Array(omniDiceConut).fill(OMNI),
     ];
     if (flatRemainingDice.length >= requiredCount) {
       result.push(...flatRemainingDice.slice(0, requiredCount));
