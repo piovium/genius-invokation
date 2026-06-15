@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { DiceType, ReadonlyDiceRequirement } from "@gi-tcg/typings";
-import { toSortedBy } from ".";
+import { toSortedBy } from "./index";
 
 const VOID = 0;
 const OMNI: typeof DiceType.Omni = 8;

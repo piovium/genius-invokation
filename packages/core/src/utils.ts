@@ -676,16 +676,13 @@ export function applyAutoSelectedDiceToAction(
   if (actionInfo.validity !== ActionValidity.VALID) {
     return actionInfo;
   }
-  const activeCharDice = new Set<DiceType>();
-  if (actionInfo.type === "switchActive") {
-    activeCharDice.add(elementOfCharacter(actionInfo.to.definition));
-  } else {
-    activeCharDice.add(
-      elementOfCharacter(
-        player.characters[getActiveCharacterIndex(player)].definition,
-      ),
-    );
-  }
+  const activeCharDice = new Set<DiceType>([
+    elementOfCharacter(
+      actionInfo.type === "switchActive"
+        ? actionInfo.to.definition
+        : player.characters[getActiveCharacterIndex(player)].definition,
+    ),
+  ]);
   const usefulDice = playerUsefulDice(player);
   const disallowed = new Set<DiceType>();
   if (actionInfo.type === "elementalTuning" && !config.allowTuningAnyDice) {
