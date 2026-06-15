@@ -25,28 +25,28 @@ const ENERGY = 9;
  * "智能"选骰算法（不检查能量）
  * @param required 卡牌或技能需要的骰子类型
  * @param dice 当前持有的骰子
- * @param protectedDiceA 保护的骰子类型集合A，在其他骰子类型数量不足时才会被选择（e.g. 有效骰）
- * @param protectedDiceB 保护的骰子类型集合B，通常为集合A的子集，在A中其他骰子类型数量不足时才会被选择（e.g. 出战角色的元素骰）
- * @param protectedDiceC 保护的骰子类型集合C，任何情况下都不会被选择（e.g. 元素调和时的出战元素骰和万能元素骰）
+ * @param usefulDice 有效骰，在无效骰数量不足时才会被选择
+ * @param targetDice 出战角色或将要出战的角色的元素骰，在其他有效骰数量不足时才会被选择
+ * @param disallowDice 不匹配的元素骰类型（e.g. 元素调和时的出战元素骰和万能元素骰）
  * @returns 被选中的骰子
  */
 export function chooseDiceValue(
   required: ReadonlyDiceRequirement,
   dice: readonly DiceType[],
-  protectedDiceA: Set<DiceType>,
-  protectedDiceB: Set<DiceType>,
-  protectedDiceC: Set<DiceType>,
+  usefulDice: Set<DiceType>,
+  targetDice: Set<DiceType>,
+  disallowDice: Set<DiceType>,
 ): DiceType[] {
   const result: DiceType[] = [];
   // 单独计算万能骰的数量
-  let omniDiceConut = protectedDiceC.has(OMNI) ? 0 : dice.filter((d) => d === OMNI).length;
+  let omniDiceConut = disallowDice.has(OMNI) ? 0 : dice.filter((d) => d === OMNI).length;
 
-  // 将持有的骰子按类型分组计算数量，移除保护C集合的骰子，移除万能骰
+  // 将持有的骰子按类型分组计算数量，移除disallowDice，移除万能骰
   const diceCountMap = dice.reduce((map, d) => {
     map.set(d, (map.get(d) ?? 0) + 1);
     return map;
   }, new Map<DiceType, number>());
-  const remainingDice = [...diceCountMap.entries()].map(([type, count]) => ({ type, count })).filter((d) => !(protectedDiceC.has(d.type) || d.type === OMNI));
+  const remainingDice = [...diceCountMap.entries()].map(([type, count]) => ({ type, count })).filter((d) => !(disallowDice.has(d.type) || d.type === OMNI));
 
   // 需要指定类型的骰子
   const requiredBaseDice = required.entries().filter(([k]) => k > VOID && k < ALIGNED);
@@ -79,9 +79,9 @@ export function chooseDiceValue(
     // 4. 与需求数量差值的绝对值小的优先
     // 5. 骰子类型编号
     const sortedDice = toSortedBy(remainingDice, (dice) => [
-      +protectedDiceA.has(dice.type),
+      +usefulDice.has(dice.type),
       dice.count >= requiredCount ? -1 : 0,
-      +protectedDiceB.has(dice.type),
+      +targetDice.has(dice.type),
       Math.abs(dice.count - requiredCount),
       dice.type,
     ]);
@@ -114,8 +114,8 @@ export function chooseDiceValue(
     // 3. 数量少的骰子优先
     // 4. 骰子类型编号
     const sortedDice = toSortedBy(remainingDice, (dice) => [
-      +protectedDiceA.has(dice.type),
-      +protectedDiceB.has(dice.type),
+      +usefulDice.has(dice.type),
+      +targetDice.has(dice.type),
       dice.count,
       dice.type,
     ]);
