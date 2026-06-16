@@ -130,6 +130,12 @@ const renderHistoryChild = (
     return `(<image type="element" id="${base}" /><image type="element" id="${apply}" />${t(nameKey)})`;
   };
 
+  const variableNameText = (id: number, name: string) => {
+    const manager = assetsManager();
+    const data = manager.getDataSync(id) as EntityRawData;
+    return `<span title="${name}">${data.shownTokenName}</span>`;
+  };
+
   switch (child.type) {
     case "switchActive": {
       result = {
@@ -408,7 +414,7 @@ const renderHistoryChild = (
         opp: opp(child.who),
         imageId: child.cardDefinitionId,
         title: renderName(child.cardDefinitionId),
-        content: `${child.variableName}: ${child.oldValue}→${child.newValue}`,
+        content: `${variableNameText(child.cardDefinitionId, child.variableName)}: ${child.oldValue}→${child.newValue}`,
       };
       break;
     }
