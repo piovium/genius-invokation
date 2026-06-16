@@ -132,8 +132,9 @@ const renderHistoryChild = (
 
   const variableNameText = (id: number, name: string) => {
     const manager = assetsManager();
-    const data = manager.getDataSync(id) as EntityRawData;
-    return `<span title="${name}">${data.shownTokenName}</span>`;
+    const data = manager.getDataSync(id);
+    const tokenName = ("shownTokenName" in data) ? data.shownTokenName : name;
+    return `<span title="${name}">${tokenName}</span>`;
   };
 
   switch (child.type) {
