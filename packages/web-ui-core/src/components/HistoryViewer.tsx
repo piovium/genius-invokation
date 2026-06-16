@@ -134,7 +134,7 @@ const renderHistoryChild = (
     const manager = assetsManager();
     const data = manager.getDataSync(id);
     const tokenName = ("shownTokenName" in data) ? data.shownTokenName : name;
-    return `<span title="${name}">${tokenName}</span>`;
+    return `<tooltip title="${name}">${tokenName}</tooltip>`;
   };
 
   switch (child.type) {
