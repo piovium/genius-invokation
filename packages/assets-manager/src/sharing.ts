@@ -23,18 +23,25 @@ import shareIdMap from "./data/share_id.json";
  */
 const BLOCK_WORDS: string[] = [
   "1s", // 国服
+  "2c8", // 亚服
   "2g1c",
-  "64", // 国服
+  "4jg", // 亚服
+  "4jk", // 亚服
+  "5l3", // 亚服
+  "64", // 国服，似乎存在正则
   "6four", // 国服
   "6iv", // 国服
   "6si", // 国服
   "89", // might be removed
   "8jiu",
   "92f", // 国服
+  "99bb", // 亚服
+  "a55", // 亚服
   "anal",
   "anus",
   "ass", // 国服
   "ash0le",
+  "b00b", // 亚服
   "ba9", // 国服
   "bitch",
   "boob",
@@ -43,11 +50,13 @@ const BLOCK_WORDS: string[] = [
   "b1tch",
   "b17ch",
   "bi7ch",
+  "bb1", // 亚服
   "bbw", // 国服
   "bdsm",
   "beaner",
   "bimbos",
   "c0cks",
+  "c0n", // 亚服
   "c4", // might be removed
   "cag", // might be removed
   "ccp",
@@ -59,6 +68,7 @@ const BLOCK_WORDS: string[] = [
   "coons",
   "cum", // 国服
   "cunt",
+  "cuum", // 亚服
   "cv0", // 国服
   "darkie",
   "dick",
@@ -69,6 +79,8 @@ const BLOCK_WORDS: string[] = [
   "dvda",
   "ecchi",
   "erotic",
+  "f4k", // 亚服
+  "fdp", // 亚服
   "fuck",
   "fag1t",
   "fagg1t",
@@ -79,8 +91,11 @@ const BLOCK_WORDS: string[] = [
   "feltch",
   "femdom",
   "flg", // 国服
+  "fm2", // 亚服
   "gay", // 国服
   "gcd", // 国服
+  "gdm", // 亚服
+  "ggc", // 亚服
   "gwg", // 国服
   "girlon",
   "goatcx",
@@ -101,15 +116,19 @@ const BLOCK_WORDS: string[] = [
   "jiz", // 亚服 国服jizz
   "jzm",
   "juggs",
+  "k7", // 亚服，似乎存在正则
   "kike",
   "kinky",
   "kmt",
+  "kock", // 亚服
   "liu4",
   "liusi",
   "lolita",
   "lsp", // 国服
+  "m0m", // 亚服
   "m2f", // 国服
   "milf",
+  "mh0", // 亚服
   "mof0",
   "ntr", // 国服
   "nambla",
@@ -118,14 +137,17 @@ const BLOCK_WORDS: string[] = [
   "nigga",
   "nigger",
   "nipple",
+  "njink", // 亚服
   "nmd", // 国服
   "ntd", // 国服
   "nympho",
   "orgasm",
   "orgy",
   "p2np",
+  "p3t", // 亚服
   "pcp", // might be removed
   "pig", // 疑似美服
+  "phuq", // 亚服
   "puki",
   "penis",
   "pussy",
@@ -137,6 +159,8 @@ const BLOCK_WORDS: string[] = [
   "panty",
   "poof",
   "poon",
+  "pqp", // 亚服
+  "prr", // 亚服
   "pthc",
   "pubes",
   "punany",
@@ -150,24 +174,34 @@ const BLOCK_WORDS: string[] = [
   "rapist",
   "rectum",
   "rimjob",
+  "s2x", // 亚服
+  "s3x", // 亚服
   "sadism",
   "scat",
   "semen",
   "sex",
+  "sh7t", // 亚服
   "shit",
   "shota",
   "six4",
   "skeet",
   "slut",
+  "slvt", // 亚服
   "smut",
   "sodomy",
   "spic",
   "spooge",
   "spunk",
   "suck",
+  "t3k", // 亚服
+  "t41", // 亚服
+  "t43", // 亚服
+  "t4e", // 亚服
+  "t4i", // 亚服
   "tits",
   "tiedup",
   "titty",
+  "tmd", // 亚服
   "tosser",
   "tranny",
   "tushy",
@@ -182,6 +216,7 @@ const BLOCK_WORDS: string[] = [
   "wank",
   "whore",
   "wh0re",
+  "wtf", // 亚服
   "x3r",
   "xdd", // 国服
   "xjp", // 国服
