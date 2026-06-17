@@ -15,22 +15,27 @@
 
 import type { Deck } from "@gi-tcg/typings";
 import shareIdMap from "./data/share_id.json";
-
+/**
+ * 标记为“国服”的为经过测试只在国服生效的屏蔽词
+ * 标记为“亚服”的为经过测试只在亚服生效的屏蔽词
+ * 标记为“might be removed”的为早期收集的屏蔽词，在国服和亚服均未被屏蔽，不排除为其他服务器的屏蔽词
+ * 未标记的有早期收集的（不确定生效的服务器），或者在多个服务器生效的
+ */
 const BLOCK_WORDS: string[] = [
-  "1s",
+  "1s", // 国服
   "2g1c",
-  "64",
-  "6four",
-  "6iv",
-  "6si",
+  "64", // 国服
+  "6four", // 国服
+  "6iv", // 国服
+  "6si", // 国服
   "89", // might be removed
   "8jiu",
-  "92f",
+  "92f", // 国服
   "anal",
   "anus",
-  "ass",
+  "ass", // 国服
   "ash0le",
-  "ba9",
+  "ba9", // 国服
   "bitch",
   "boob",
   "boner",
@@ -38,7 +43,7 @@ const BLOCK_WORDS: string[] = [
   "b1tch",
   "b17ch",
   "bi7ch",
-  "bbw",
+  "bbw", // 国服
   "bdsm",
   "beaner",
   "bimbos",
@@ -48,13 +53,13 @@ const BLOCK_WORDS: string[] = [
   "ccp",
   "chink",
   "clit",
-  "cnm",
-  "cnn",
+  "cnm", // 国服
+  "cnn", // 国服
   "cock",
   "coons",
-  "cum",
+  "cum", // 国服
   "cunt",
-  "cv0",
+  "cv0", // 国服
   "darkie",
   "dick",
   "dildo",
@@ -68,32 +73,32 @@ const BLOCK_WORDS: string[] = [
   "fag1t",
   "fagg1t",
   "faggot",
-  "fck",
+  "fck", // 国服
   "fecal",
   "felch",
   "feltch",
   "femdom",
-  "flg",
-  "gay",
-  "gcd",
-  "gwg",
+  "flg", // 国服
+  "gay", // 国服
+  "gcd", // 国服
+  "gwg", // 国服
   "girlon",
   "goatcx",
   "goatse",
   "gokkun",
   "grope",
   "guro",
-  "hjt",
+  "hjt", // 国服
   "hentai",
   "hitler",
   "honkey",
   "hooker",
   "incest",
   "j8",
-  "jba",
-  "ji8",
+  "jba", // 国服
+  "ji8", // 国服
   "jiba",
-  "jiz", // 国际服 国服jizz
+  "jiz", // 亚服 国服jizz
   "jzm",
   "juggs",
   "kike",
@@ -102,25 +107,25 @@ const BLOCK_WORDS: string[] = [
   "liu4",
   "liusi",
   "lolita",
-  "lsp",
-  "m2f",
+  "lsp", // 国服
+  "m2f", // 国服
   "milf",
   "mof0",
-  "ntr",
+  "ntr", // 国服
   "nambla",
   "negro",
   "nignog",
   "nigga",
   "nigger",
   "nipple",
-  "nmd",
-  "ntd",
+  "nmd", // 国服
+  "ntd", // 国服
   "nympho",
   "orgasm",
   "orgy",
   "p2np",
   "pcp", // might be removed
-  "pig", // 国际服
+  "pig", // 疑似美服
   "puki",
   "penis",
   "pussy",
@@ -139,7 +144,7 @@ const BLOCK_WORDS: string[] = [
   "queef",
   "queer",
   "quim",
-  "rbq",
+  "rbq", // 国服
   "rape",
   "raping",
   "rapist",
@@ -169,17 +174,17 @@ const BLOCK_WORDS: string[] = [
   "twat",
   "twink",
   "vagina",
-  "vi4",
+  "vi4", // 国服
   "viiv",
   "vpn",
   "vulva",
-  "waf",
+  "waf", // 国服
   "wank",
   "whore",
   "wh0re",
   "x3r",
-  "xdd",
-  "xjp",
+  "xdd", // 国服
+  "xjp", // 国服
   "yaoi",
   "yiffy",
 ];
