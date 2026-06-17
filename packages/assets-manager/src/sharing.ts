@@ -42,19 +42,18 @@ const BLOCK_WORDS: string[] = [
   "ass", // 国服
   "ash0le",
   "b00b", // 亚服
-  "ba9", // 国服
-  "bitch",
-  "boob",
-  "boner",
-  "b00bz",
   "b1tch",
   "b17ch",
-  "bi7ch",
+  "ba9", // 国服
   "bb1", // 亚服
   "bbw", // 国服
   "bdsm",
   "beaner",
+  "bi7ch",
   "bimbos",
+  "bitch",
+  "boob",
+  "boner",
   "c0cks",
   "c0n", // 亚服
   "c4", // might be removed
@@ -80,32 +79,32 @@ const BLOCK_WORDS: string[] = [
   "ecchi",
   "erotic",
   "f4k", // 亚服
-  "fdp", // 亚服
-  "fuck",
   "fag1t",
   "fagg1t",
   "faggot",
   "fck", // 国服
+  "fdp", // 亚服
   "fecal",
   "felch",
   "feltch",
   "femdom",
   "flg", // 国服
   "fm2", // 亚服
+  "fuck",
   "gay", // 国服
   "gcd", // 国服
   "gdm", // 亚服
   "ggc", // 亚服
-  "gwg", // 国服
   "girlon",
   "goatcx",
   "goatse",
   "gokkun",
   "grope",
   "guro",
-  "hjt", // 国服
+  "gwg", // 国服
   "hentai",
   "hitler",
+  "hjt", // 国服
   "honkey",
   "hooker",
   "incest",
@@ -114,8 +113,8 @@ const BLOCK_WORDS: string[] = [
   "ji8", // 国服
   "jiba",
   "jiz", // 亚服 国服jizz
-  "jzm",
   "juggs",
+  "jzm",
   "k7", // 亚服，似乎存在正则
   "kike",
   "kinky",
@@ -127,10 +126,9 @@ const BLOCK_WORDS: string[] = [
   "lsp", // 国服
   "m0m", // 亚服
   "m2f", // 国服
-  "milf",
   "mh0", // 亚服
+  "milf",
   "mof0",
-  "ntr", // 国服
   "nambla",
   "negro",
   "nignog",
@@ -140,38 +138,39 @@ const BLOCK_WORDS: string[] = [
   "njink", // 亚服
   "nmd", // 国服
   "ntd", // 国服
+  "ntr", // 国服
   "nympho",
   "orgasm",
   "orgy",
+  "p0rn",
   "p2np",
   "p3t", // 亚服
-  "pcp", // might be removed
-  "pig", // 疑似美服
-  "phuq", // 亚服
-  "puki",
-  "penis",
-  "pussy",
-  "pu55i",
-  "pu55y",
-  "porn",
-  "p0rn",
   "paki",
   "panty",
+  "pcp", // might be removed
+  "penis",
+  "phuq", // 亚服
+  "pig", // 疑似美服
   "poof",
   "poon",
+  "porn",
   "pqp", // 亚服
   "prr", // 亚服
   "pthc",
+  "pu55i",
+  "pu55y",
   "pubes",
+  "puki",
   "punany",
+  "pussy",
   "queaf",
   "queef",
   "queer",
   "quim",
-  "rbq", // 国服
   "rape",
   "raping",
   "rapist",
+  "rbq", // 国服
   "rectum",
   "rimjob",
   "s2x", // 亚服
