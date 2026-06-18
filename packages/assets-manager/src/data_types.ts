@@ -35,6 +35,7 @@ export interface CharacterRawData {
   name: string;
   englishName: string;
   tags: string[];
+  subElements: string[];
   storyTitle?: string;
   storyText?: string;
   skills: SkillRawData[];
@@ -72,6 +73,7 @@ export interface EntityRawData {
   buffType?: string;
   hintType?: string;
   shownToken?: string;
+  shownTokenName?: string;
   shownIcon?: string;
   /** summons only */
   cardFace?: string;
