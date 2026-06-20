@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { flip } from "@gi-tcg/utils";
+import { flip, toSortedBy } from "@gi-tcg/utils";
 import type { MatchResult, Node, NonterminalNode } from "ohm-js";
 
 import grammar, { type QueryLangActionDict } from "./query.ohm-bundle";
@@ -24,7 +24,7 @@ import type {
 } from "../base/state";
 import type { ContextMetaBase, SkillContext } from "../builder/context/skill";
 import { CharacterBase } from "../builder/context/character";
-import { getEntityArea, toSortedBy } from "../utils";
+import { getEntityArea } from "../utils";
 import type { EntityArea, EntityType } from "../base/entity";
 import { GiTcgQueryError } from "../error";
 

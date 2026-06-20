@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { checkDice, flip } from "@gi-tcg/utils";
+import { checkDice, flip, toSortedBy } from "@gi-tcg/utils";
 import {
   DiceType,
   type ExposedMutation,
@@ -61,7 +61,6 @@ import {
   findReplaceAction,
   shuffle,
   sortDice,
-  toSortedBy,
   isSkillDisabled,
   initiativeSkillsOfPlayer,
   getEntityArea,
@@ -1069,6 +1068,7 @@ export class Game {
         card,
         who,
         result: tunedToType,
+        allowTuningAnyDice: this.players[who].config.allowTuningAnyDice,
         fast: true,
         cost: VOID_1_DICE_REQUIREMENT,
         autoSelectedDice: [],

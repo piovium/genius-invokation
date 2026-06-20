@@ -24,6 +24,7 @@ export interface RichTextProps {
   /**
    * The content is XML formatted string, supporting following tags:
    * - `<font color="<css-color-value>">...</font>`: to specify the color of the text
+   * - `<tooltip title="<tooltip-title>">...</tooltip>`: to add a tooltip to the text
    * - `<image type="<image-type>" id="<image-id>"/>`: insert an image with line-height size.
    *    - `image-type` can be `dice`, `element` and `icon`.
    */
@@ -86,6 +87,14 @@ function renderElement(element: Element, _index: number): JSX.Element[] {
         return [];
       }
       return [<InlineImage type={type} id={id} />];
+    }
+    case "tooltip": {
+      const title = element.getAttribute("title") ?? "";
+      return [
+        <span title={title}>
+          {renderNodes(Array.from(element.childNodes))}
+        </span>,
+      ];
     }
     default:
       return renderNodes(Array.from(element.childNodes));

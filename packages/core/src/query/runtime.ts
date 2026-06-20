@@ -27,12 +27,11 @@ import {
 import {
   diceCostSizeOfCard,
   getAllEntitiesWithArea,
-  toSortedBy,
   type EntityWithArea,
 } from "../utils";
 import type { SExprSchema } from "./expr_schema";
 import { CharacterBase } from "../builder/context/character";
-import { flip } from "@gi-tcg/utils";
+import { flip, toSortedBy } from "@gi-tcg/utils";
 import type { EntityArea } from "../base/entity";
 import type { ExEntityState } from "../builder/type";
 

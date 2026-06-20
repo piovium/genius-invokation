@@ -300,6 +300,7 @@ export interface ElementalTuningInfo {
   readonly who: 0 | 1;
   readonly card: EntityState;
   readonly result: DiceType;
+  readonly allowTuningAnyDice: boolean;
 }
 
 export interface DeclareEndInfo {

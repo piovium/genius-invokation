@@ -50,6 +50,7 @@ message ElementalTuningAction {
   sint32 removed_card_id = 2;
   // 调和目标骰子类型
   DiceType target_dice = 3;
+  bool allow_tuning_any_dice = 4;
 }
 
 // 宣布结束

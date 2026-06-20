@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { DiceType, ReadonlyDiceRequirement } from "@gi-tcg/typings";
+import { toSortedBy } from "./index";
 
 const VOID = 0;
 const OMNI: typeof DiceType.Omni = 8;
@@ -24,100 +25,117 @@ const ENERGY = 9;
  * "智能"选骰算法（不检查能量）
  * @param required 卡牌或技能需要的骰子类型
  * @param dice 当前持有的骰子
- * @returns 布尔数组，被选择的骰子的下标对应元素设置为 `true`；如果无法选择则返回全 `false`。
- */
-export function chooseDice(
-  required: ReadonlyDiceRequirement,
-  dice: readonly DiceType[],
-): boolean[] {
-  const OMNI_COUNT = dice.filter((d) => d === OMNI).length;
-  const FAIL_RESULT = Array<boolean>(dice.length).fill(false);
-  const result = [...FAIL_RESULT];
-  // 需要同色骰子
-  if (required.has(ALIGNED)) {
-    const requiredCount = required.get(ALIGNED)!;
-    // 杂色骰子+万能骰子，凑够同色
-    for (let i = dice.length - 1; i >= 0; i--) {
-      if (dice[i] === OMNI) continue;
-      const thisCount = dice.filter((d) => d === dice[i]).length;
-      if (thisCount + OMNI_COUNT < requiredCount) continue;
-      for (
-        let j = dice.length - 1, count = 0;
-        count < requiredCount && j >= 0;
-        j--
-      ) {
-        if (dice[j] === OMNI || dice[j] === dice[i]) {
-          result[j] = true;
-          count++;
-        }
-      }
-      return result;
-    }
-    // ……或者只用万能骰子凑
-    if (OMNI_COUNT >= requiredCount) {
-      for (let i = dice.length - 1, count = 0; count < requiredCount; i--) {
-        if (dice[i] === OMNI) {
-          result[i] = true;
-          count++;
-        }
-      }
-      return result;
-    }
-    return FAIL_RESULT;
-  }
-  const requiredArray = required
-    .entries()
-    .toArray()
-    .flatMap(([k, v]) => Array.from({ length: v }, () => k));
-  // 无色或者杂色
-  next: for (const r of requiredArray) {
-    if (r === ENERGY) continue;
-    if (r === VOID) {
-      // 无色：任何骰子都可以
-      for (let j = dice.length - 1; j >= 0; j--) {
-        if (!result[j]) {
-          result[j] = true;
-          continue next;
-        }
-      }
-    } else {
-      // 对应颜色或者万能骰子
-      for (let j = 0; j < dice.length; j++) {
-        if (!result[j] && dice[j] === r) {
-          result[j] = true;
-          continue next;
-        }
-      }
-      for (let j = 0; j < dice.length; j++) {
-        if (!result[j] && dice[j] === OMNI) {
-          result[j] = true;
-          continue next;
-        }
-      }
-    }
-    return FAIL_RESULT;
-  }
-  return result;
-}
-
-/**
- * "智能"选骰算法（不检查能量）
- * @param required 卡牌或技能需要的骰子类型
- * @param dice 当前持有的骰子
+ * @param usefulDice 有效骰，在无效骰数量不足时才会被选择
+ * @param targetDice 出战角色或将要出战的角色的元素骰，在其他有效骰数量不足时才会被选择
+ * @param disallowDice 不匹配的元素骰类型（e.g. 元素调和时的出战元素骰和万能元素骰）
  * @returns 被选中的骰子
  */
 export function chooseDiceValue(
   required: ReadonlyDiceRequirement,
   dice: readonly DiceType[],
+  usefulDice: Set<DiceType>,
+  targetDice: Set<DiceType>,
+  disallowDice: Set<DiceType>,
 ): DiceType[] {
-  const result = chooseDice(required, dice);
-  return dice.filter((_, i) => result[i]);
+  const result: DiceType[] = [];
+  // 单独计算万能骰的数量
+  let omniDiceConut = disallowDice.has(OMNI) ? 0 : dice.filter((d) => d === OMNI).length;
+
+  // 将持有的骰子按类型分组计算数量，移除disallowDice，移除万能骰
+  const diceCountMap = dice.reduce((map, d) => {
+    map.set(d, (map.get(d) ?? 0) + 1);
+    return map;
+  }, new Map<DiceType, number>());
+  const remainingDice = [...diceCountMap.entries()].map(([type, count]) => ({ type, count })).filter((d) => !(disallowDice.has(d.type) || d.type === OMNI));
+
+  // 需要指定类型的骰子
+  const requiredBaseDice = required.entries().filter(([k]) => k > VOID && k < ALIGNED);
+  for (const [requiredType, requiredCount] of requiredBaseDice) {
+    const target = remainingDice.find((d) => d.type === requiredType);
+    if (target && target.count + omniDiceConut >= requiredCount) {
+      // 指定类型的骰子和万能骰组合后数量足够
+      const targetCount = Math.min(target.count, requiredCount);
+      const omniCount = requiredCount - targetCount;
+      result.push(...Array(targetCount).fill(target.type));
+      result.push(...Array(omniCount).fill(OMNI));
+      remainingDice.find((d) => d.type === target.type)!.count -= targetCount;
+      omniDiceConut -= omniCount;
+    } else if (omniDiceConut >= requiredCount) {
+      // 没有指定类型的骰子，万能骰数量足够，直接用万能骰支付需求
+      result.push(...Array(requiredCount).fill(OMNI));
+      omniDiceConut -= requiredCount;
+    } else {
+      // 无法支付需求
+      return [];
+    }
+  }
+
+  // 需要同色骰子
+  if (required.has(ALIGNED)) {
+    const requiredCount = required.get(ALIGNED)!;
+    // 1. 无效骰优先
+    // 2. 数量>=需求的元素骰优先
+    // 3. 后台角色的元素骰优先
+    // 4. 与需求数量差值的绝对值小的优先
+    // 5. 骰子类型编号
+    const sortedDice = toSortedBy(remainingDice, (dice) => [
+      +usefulDice.has(dice.type),
+      dice.count >= requiredCount ? -1 : 0,
+      +targetDice.has(dice.type),
+      Math.abs(dice.count - requiredCount),
+      dice.type,
+    ]);
+    // 最少同色数量
+    const minSameCount = Math.max(0, requiredCount - omniDiceConut);
+    const target = sortedDice.find((d) => d.count >= minSameCount);
+    if (target) {
+      // 依照排序取第一个数量足够的，和万能骰组合，支付需求
+      const targetCount = Math.min(target.count, requiredCount);
+      const omniCount = requiredCount - targetCount;
+      result.push(...Array(targetCount).fill(target.type));
+      result.push(...Array(omniCount).fill(OMNI));
+      remainingDice.find((d) => d.type === target.type)!.count -= targetCount;
+      omniDiceConut -= omniCount;
+    } else if (omniDiceConut >= requiredCount) {
+      // 没有任何元素骰数量足够，万能骰数量足够，直接用万能骰支付需求
+      result.push(...Array(requiredCount).fill(OMNI));
+      omniDiceConut -= requiredCount;
+    } else {
+      // 无法支付需求
+      return [];
+    }
+  }
+
+  // 需要杂色骰子
+  if (required.has(VOID)) {
+    const requiredCount = required.get(VOID)!;
+    // 1. 无效骰优先
+    // 2. 后台角色的元素骰优先
+    // 3. 数量少的骰子优先
+    // 4. 骰子类型编号
+    const sortedDice = toSortedBy(remainingDice, (dice) => [
+      +usefulDice.has(dice.type),
+      +targetDice.has(dice.type),
+      dice.count,
+      dice.type,
+    ]);
+    const flatRemainingDice: DiceType[] = [
+      ...sortedDice.flatMap((d) => Array(d.count).fill(d.type)),
+      ...Array(omniDiceConut).fill(OMNI),
+    ];
+    if (flatRemainingDice.length >= requiredCount) {
+      result.push(...flatRemainingDice.slice(0, requiredCount));
+      // 最后一个分支，不需要再计算剩余骰子数量
+    } else {
+      return [];
+    }
+  }
+  return result;
 }
 
 /**
  * 检查骰子是否符合要求（不检查能量）
  * @param required 卡牌或技能需要的骰子类型
- * @param dice 当前持有的骰子
  * @param chosen 已选择的骰子
  * @returns 是否符合要求
  */

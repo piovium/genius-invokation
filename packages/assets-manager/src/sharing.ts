@@ -15,142 +15,210 @@
 
 import type { Deck } from "@gi-tcg/typings";
 import shareIdMap from "./data/share_id.json";
-
+/**
+ * 标记为“国服”的为经过测试只在国服生效的屏蔽词
+ * 标记为“亚服”的为经过测试只在亚服生效的屏蔽词
+ * 标记为“might be removed”的为早期收集的屏蔽词，在国服和亚服均未被屏蔽，不排除为其他服务器的屏蔽词
+ * 未标记的有早期收集的（不确定生效的服务器），或者在多个服务器生效的
+ */
 const BLOCK_WORDS: string[] = [
+  "1s", // 国服
+  "2c8", // 亚服
   "2g1c",
-  "64",
-  "89",
-  "1s",
+  "4jg", // 亚服
+  "4jk", // 亚服
+  "5l3", // 亚服
+  "64", // 国服，似乎存在正则
+  "6four", // 国服
+  "6iv", // 国服
+  "6si", // 国服
+  "89", // might be removed
+  "8jiu",
+  "92f", // 国服
+  "99bb", // 亚服
+  "a55", // 亚服
   "anal",
   "anus",
-  "ass",
+  "ass", // 国服
   "ash0le",
-  "ba9",
+  "b00b", // 亚服
+  "b1tch",
+  "b17ch",
+  "ba9", // 国服
+  "bb1", // 亚服
+  "bbw", // 国服
+  "bdsm",
+  "beaner",
+  "bi7ch",
+  "bimbos",
   "bitch",
   "boob",
   "boner",
-  "b00bz",
-  "b1tch",
-  "b17ch",
-  "bi7ch",
-  "bbw",
-  "bdsm",
-  "beaner",
-  "bimbos",
-  "c4",
-  "cag",
-  "cunt",
-  "cock",
   "c0cks",
+  "c0n", // 亚服
+  "c4", // might be removed
+  "cag", // might be removed
+  "ccp",
   "chink",
   "clit",
+  "cnm", // 国服
+  "cnn", // 国服
+  "cock",
   "coons",
-  "cum",
+  "cum", // 国服
+  "cunt",
+  "cuum", // 亚服
+  "cv0", // 国服
   "darkie",
   "dick",
   "dildo",
   "dilld0",
   "dommes",
+  "dpp",
   "dvda",
   "ecchi",
   "erotic",
-  "fuck",
+  "f4k", // 亚服
   "fag1t",
   "fagg1t",
   "faggot",
-  "fck",
+  "fck", // 国服
+  "fdp", // 亚服
   "fecal",
   "felch",
   "feltch",
   "femdom",
-  "flg",
-  "gay",
-  "gwg",
+  "flg", // 国服
+  "fm2", // 亚服
+  "fuck",
+  "gay", // 国服
+  "gcd", // 国服
+  "gdm", // 亚服
+  "ggc", // 亚服
   "girlon",
   "goatcx",
   "goatse",
   "gokkun",
   "grope",
   "guro",
-  "hjt",
+  "gwg", // 国服
   "hentai",
   "hitler",
+  "hjt", // 国服
   "honkey",
   "hooker",
   "incest",
   "j8",
-  "jba",
-  "jiz",
-  "jzm",
+  "jba", // 国服
+  "ji8", // 国服
+  "jiba",
+  "jiz", // 亚服 国服jizz
   "juggs",
+  "jzm",
+  "k7", // 亚服，似乎存在正则
   "kike",
   "kinky",
+  "kmt",
+  "kock", // 亚服
+  "liu4",
+  "liusi",
   "lolita",
+  "lsp", // 国服
+  "m0m", // 亚服
+  "m2f", // 国服
+  "mh0", // 亚服
   "milf",
   "mof0",
-  "ntr",
   "nambla",
   "negro",
   "nignog",
   "nigga",
   "nigger",
   "nipple",
+  "njink", // 亚服
+  "nmd", // 国服
+  "ntd", // 国服
+  "ntr", // 国服
   "nympho",
   "orgasm",
   "orgy",
-  "pcp", // might be removed
-  "puki",
-  "penis",
-  "pussy",
-  "pu55i",
-  "pu55y",
-  "porn",
   "p0rn",
+  "p2np",
+  "p3t", // 亚服
   "paki",
   "panty",
+  "pcp", // might be removed
+  "penis",
+  "phuq", // 亚服
+  "pig", // 疑似美服
   "poof",
   "poon",
+  "porn",
+  "pqp", // 亚服
+  "prr", // 亚服
   "pthc",
+  "pu55i",
+  "pu55y",
   "pubes",
+  "puki",
   "punany",
+  "pussy",
   "queaf",
   "queef",
   "queer",
   "quim",
-  "rbq",
   "rape",
   "raping",
   "rapist",
+  "rbq", // 国服
   "rectum",
   "rimjob",
-  "sex",
-  "shit",
+  "s2x", // 亚服
+  "s3x", // 亚服
   "sadism",
   "scat",
   "semen",
+  "sex",
+  "sh7t", // 亚服
+  "shit",
   "shota",
+  "six4",
   "skeet",
   "slut",
+  "slvt", // 亚服
   "smut",
   "sodomy",
   "spic",
   "spooge",
   "spunk",
   "suck",
+  "t3k", // 亚服
+  "t41", // 亚服
+  "t43", // 亚服
+  "t4e", // 亚服
+  "t4i", // 亚服
   "tits",
   "tiedup",
   "titty",
+  "tmd", // 亚服
   "tosser",
   "tranny",
   "tushy",
   "twat",
   "twink",
   "vagina",
+  "vi4", // 国服
+  "viiv",
+  "vpn",
   "vulva",
+  "waf", // 国服
   "wank",
   "whore",
   "wh0re",
-  "xjp",
+  "wtf", // 亚服
+  "x3r",
+  "xdd", // 国服
+  "xjp", // 国服
   "yaoi",
   "yiffy",
 ];

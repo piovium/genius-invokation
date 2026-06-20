@@ -80,7 +80,7 @@ import type {
 } from "../type";
 import type { GuessedTypeOfQuery } from "../../query-legacy/types";
 import { CALLED_FROM_REACTION } from "../reaction";
-import { flip } from "@gi-tcg/utils";
+import { flip, toSortedBy } from "@gi-tcg/utils";
 import { GiTcgDataError, GiTcgPreviewAbortedError } from "../../error";
 import { DetailLogType } from "../../log";
 import {
@@ -102,7 +102,7 @@ import {
   type RxEntityState,
 } from "./reactive";
 import { ReactiveStateSymbol } from "./reactive_base";
-import { type CreateEntityOptions, toSortedBy } from "../../utils";
+import { computeConvertDice, type CreateEntityOptions } from "../../utils";
 import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "../skill";
 import type { LunarReaction } from "@gi-tcg/typings";
 import {
@@ -1524,7 +1524,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
     for (const dice of this.player.dice) {
       countMap.set(dice, (countMap.get(dice) ?? 0) + 1);
     }
-    // 万能骰排最后。其余按照数量排序，相等时按照骰子类型排序
+    // 元素骰吸收序算法，用于自动选择被吸收的骰子：
+    // 1. 万能骰优先
+    // 2. 数量多的骰子优先
+    // 3. 骰子类型编号
     const sorted = toSortedBy(this.player.dice, (dice) => [
       +(dice === DiceType.Omni),
       -countMap.get(dice)!,
@@ -1581,15 +1584,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     const player = this.getRawPlayer(where);
     const who =
       where === "my" ? this.callerArea.who : flip(this.callerArea.who);
-    if (count === "all") {
-      count = player.dice.length;
-    } else {
-      count = Math.min(count, player.dice.length);
-    }
-    const oldDiceCount = player.dice.length - count;
-    const oldDice = player.dice.slice(0, oldDiceCount);
-    const newDice = new Array<DiceType>(count).fill(target);
-    const finalDice = sortDice(player, [...oldDice, ...newDice]);
+    const finalDice = computeConvertDice(player, target, count);
     using l = this.mutator.subLog(
       DetailLogType.Primitive,
       `Convert ${who}'s ${count} dice to [dice:${target}]`,

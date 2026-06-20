@@ -701,6 +701,7 @@ export function exposeAction(action: ActionInfo): Action {
           value: {
             removedCardId: action.card.id,
             targetDice: action.result as PbDiceType,
+            allowTuningAnyDice: action.allowTuningAnyDice ?? false,
           },
         },
         ...BASE,

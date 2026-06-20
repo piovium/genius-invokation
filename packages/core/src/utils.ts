@@ -20,7 +20,7 @@ import {
   type DiceRequirement,
   type ReadonlyDiceRequirement,
 } from "@gi-tcg/typings";
-import { checkDice, chooseDiceValue, flip } from "@gi-tcg/utils";
+import { checkDice, chooseDiceValue, flip, toSortedBy } from "@gi-tcg/utils";
 import type {
   AnyState,
   CharacterState,
@@ -676,24 +676,26 @@ export function applyAutoSelectedDiceToAction(
   if (actionInfo.validity !== ActionValidity.VALID) {
     return actionInfo;
   }
-  if (actionInfo.type === "elementalTuning") {
-    const disallowed = config.allowTuningAnyDice
-      ? []
-      : [actionInfo.result, DiceType.Omni];
-    const tuningDice = player.dice.findLast((d) => !disallowed.includes(d));
-    if (!tuningDice) {
-      return {
-        ...actionInfo,
-        validity: ActionValidity.NO_DICE,
-      };
-    } else {
-      return {
-        ...actionInfo,
-        autoSelectedDice: [tuningDice],
-      };
-    }
+  const activeCharDice = new Set<DiceType>([
+    elementOfCharacter(
+      actionInfo.type === "switchActive"
+        ? actionInfo.to.definition
+        : player.characters[getActiveCharacterIndex(player)].definition,
+    ),
+  ]);
+  const usefulDice = playerUsefulDice(player);
+  const disallowed = new Set<DiceType>();
+  if (actionInfo.type === "elementalTuning" && !config.allowTuningAnyDice) {
+    disallowed.add(actionInfo.result);
+    disallowed.add(DiceType.Omni);
   }
-  const autoSelectedDice = chooseDiceValue(actionInfo.cost, player.dice);
+  const autoSelectedDice = chooseDiceValue(
+    actionInfo.cost,
+    player.dice,
+    usefulDice,
+    activeCharDice,
+    disallowed,
+  );
   const ok = checkDice(actionInfo.cost, autoSelectedDice);
   if (!ok) {
     return {
@@ -953,37 +955,23 @@ export function nationOfCharacter(ch: CharacterDefinition): NationTag[] {
   return ch.tags.filter((tag): tag is NationTag => nationTags.includes(tag));
 }
 
-export function toSortedBy<T, K extends number[] | number>(
-  arr: readonly T[],
-  projection: (element: T) => K,
-): T[] {
-  return arr.toSorted((a, b) => {
-    let projectionA: number[] | number = projection(a);
-    let projectionB: number[] | number = projection(b);
-    if (!Array.isArray(projectionA)) {
-      projectionA = [projectionA];
-    }
-    if (!Array.isArray(projectionB)) {
-      projectionB = [projectionB];
-    }
-    const size = Math.min(projectionA.length, projectionB.length);
-    for (let i = 0; i < size; i++) {
-      if (projectionA[i] < projectionB[i]) {
-        return -1;
-      }
-      if (projectionA[i] > projectionB[i]) {
-        return 1;
-      }
-    }
-    return projectionA.length - projectionB.length;
-  });
+/**
+ * 获取玩家的有效骰类型集合
+ * 有效骰：存活角色的主元素和副元素
+ * TODO: 需要一个完善的有效骰算法，在角色定义中添加角色的元素类型，包括副元素，筛选存活的角色，将其元素类型取并集（取代现在的从tag获取）
+ * @param player 当前玩家的状态
+ * @returns 有效骰类型集合
+ */
+export function playerUsefulDice(player: PlayerState): Set<DiceType> {
+  const aliveCh = player.characters.filter((ch) => ch.variables.alive === 1);
+  return new Set(aliveCh.flatMap((ch) => elementOfCharacter(ch.definition)));
 }
 
 /**
- * 骰子排序算法。每次修改骰子后都需要重新排序；排序依据是：
- * 1. 万能骰靠前
- * 2. 有效骰靠前
- * 3. 骰子数量多的靠前
+ * 元素骰显示序算法，控制骰子在所有场景下的显示顺序。每次修改骰子后都需要重新排序；排序依据是：
+ * 1. 万能骰优先
+ * 2. 有效骰优先
+ * 3. 数量多的骰子优先
  * 4. 骰子类型编号
  * @param player 当前玩家的状态，用以获取有效骰信息
  * @param dice
@@ -993,20 +981,58 @@ export function sortDice(
   player: PlayerState,
   dice: readonly DiceType[],
 ): DiceType[] {
-  const characterElements = shiftLeft(
-    player.characters,
-    getActiveCharacterIndex(player),
-  ).map((ch) => elementOfCharacter(ch.definition));
+  const usefullDice = playerUsefulDice(player);
   const countMap = new Map<DiceType, number>();
   for (const d of dice) {
     countMap.set(d, (countMap.get(d) ?? 0) + 1);
   }
   return toSortedBy(dice, (dice) => [
     dice === DiceType.Omni ? -1 : 0,
-    characterElements.includes(dice) ? -1 : 0,
+    usefullDice.has(dice) ? -1 : 0,
     -countMap.get(dice)!,
     dice,
   ]);
+}
+
+/**
+ * 元素骰转换序算法，用于自动选择被转换的骰子并返回转换后的骰子数组：
+ * 1. 保护万能骰和目标元素骰
+ * 2. 无效骰优先
+ * 3. 数量少的骰子优先
+ * 4. 骰子类型编号
+ * @param player 当前玩家的状态
+ * @param target 目标骰子类型
+ * @param count 转换数量或"all"
+ * @returns 转换后的骰子数组
+ */
+export function computeConvertDice(
+  player: PlayerState,
+  target: DiceType,
+  count: number | "all",
+): DiceType[] {
+  const protectDice = player.dice.filter(
+    (d) => d === DiceType.Omni || d === target,
+  );
+  let remainingDice = player.dice.filter((d) => !protectDice.includes(d));
+  const usefulDice = playerUsefulDice(player);
+  const countMap = new Map<DiceType, number>();
+  for (const d of remainingDice) {
+    countMap.set(d, (countMap.get(d) ?? 0) + 1);
+  }
+  remainingDice = toSortedBy(remainingDice, (dice) => [
+    +usefulDice.has(dice),
+    countMap.get(dice)!,
+    dice,
+  ]);
+  if (count === "all") {
+    count = remainingDice.length;
+  } else {
+    count = Math.min(count, remainingDice.length);
+  }
+  const oldDice = remainingDice.slice(count);
+  const newDice = new Array<DiceType>(count).fill(target);
+  const finalDice = sortDice(player, [...protectDice, ...oldDice, ...newDice]);
+  return finalDice;
 }
 
 type TupleIndices<T extends readonly unknown[]> = Extract<
