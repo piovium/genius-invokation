@@ -41,11 +41,7 @@ async function writeGeneratedJsCodeCpp() {
       nodeResolve({
         extensions: [".mjs", ".js", ".ts"],
       }),
-      terser({
-        format: {
-          max_line_len: 4096,
-        },
-      }),
+      terser(),
     ],
     onwarn: (warn, handler) => {
       if (warn.code === "THIS_IS_UNDEFINED") {
@@ -85,7 +81,12 @@ async function writeGeneratedJsCodeCpp() {
     `
 namespace gitcg {
   namespace v1_0 {
-    extern const char JS_CODE[] = R"${D_CHAR_SEQ}(${chunk.code})${D_CHAR_SEQ}";
+    extern const char JS_CODE[] =
+${chunk.code
+  .match(/.{1,4096}/g)!
+  .map((block) => `    R"${D_CHAR_SEQ}(${block})${D_CHAR_SEQ}"`)
+  .join("\n")}
+    ;
   }
 }`,
   );
