@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "references": {
+    "gts": {
+      "repository": "piovium/gts",
+      "branch": "main",
+      "description": "GamingTS -- A TypeScript extension for writing Genius Invokation TCG cards",
+    },
+  },
+}
