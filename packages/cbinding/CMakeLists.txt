@@ -35,6 +35,8 @@ set_target_properties(gitcg
 
 target_compile_definitions(gitcg PRIVATE -DGITCG_API_EXPORTS)
 
+target_compile_options(gitcg PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
 target_link_libraries(gitcg
   PRIVATE
   v8_base_without_compiler

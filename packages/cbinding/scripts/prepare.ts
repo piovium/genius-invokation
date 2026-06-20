@@ -78,7 +78,8 @@ async function writeGeneratedJsCodeCpp() {
   await mkdir(path.dirname(OUTPUT_FILEPATH), { recursive: true });
   await writeFile(
     OUTPUT_FILEPATH,
-    `namespace gitcg {
+    `
+namespace gitcg {
   namespace v1_0 {
     extern const char JS_CODE[] =
 ${chunk.code
