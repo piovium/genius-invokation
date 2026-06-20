@@ -114,6 +114,12 @@ jobs:
           cmake
           --build build
           --config ${{ matrix.build_type }}
+      - name: Test C Binding
+        run: >
+          ctest
+          --output-on-failure
+          -C ${{ matrix.build_type }}
+        working-directory: build
       - name: Install C Binding
         run: >
           cmake

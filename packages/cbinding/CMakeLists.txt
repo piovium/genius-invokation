@@ -62,3 +62,6 @@ target_link_libraries(gitcg-cbinding-test
   PRIVATE
   gitcg
 )
+
+enable_testing()
+add_test(NAME gitcg-cbinding-test COMMAND gitcg-cbinding-test)

@@ -24,6 +24,7 @@
     "build": "gnx scripts/prepare.ts",
     "cmake:configure": "cmake -B build -GNinja",
     "cmake:build": "cmake --build build --config Release",
-    "cmake:install": "cmake --install build --config Release --prefix install"
+    "cmake:install": "cmake --install build --config Release --prefix install",
+    "cmake:test": "cd build && ctest --output-on-failure -C Release"
   }
 }
