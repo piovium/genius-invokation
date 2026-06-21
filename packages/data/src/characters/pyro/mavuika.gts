@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, DiceType, type CombatStatusHandle } from "@gi-tcg/core/builder";
+import { character, skill, status, combatStatus, card, DamageType, DiceType, type CombatStatusHandle, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 113151
@@ -213,6 +213,25 @@ export const FlamesWeaveLife = skill(13151)
   .costVoid(2)
   .damage(DamageType.Physical, 2)
   .done();
+
+
+// TODO: cost
+define skill {
+  id 13151 as FlamesWeaveLife2;
+  skillType normal;
+  // .costPyro(1)
+  // .costVoid(2)
+  :damage(DamageType.Physical, 2)
+}
+
+// TEST addTarget
+define skill {
+  id 123456789;
+  skillType elemental;
+  addTarget ($.my.character);
+  void 0;
+  :eventArg.targets[0].definition.type; // "character"
+}
 
 /**
  * @id 13152

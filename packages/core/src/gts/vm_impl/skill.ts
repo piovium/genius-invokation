@@ -13,12 +13,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
+import { defineViewModel, type AR, type Meta } from "@gi-tcg/gts-runtime";
 import type {
   CharacterInitiativeSkillEntry,
   CharacterPassiveSkillEntry,
 } from "../../builder/registry";
-import type { AnyState, CommonSkillType, DiceRequirement } from "../..";
+import type {
+  AnyState,
+  CommonSkillType,
+  DiceRequirement,
+  InferResult,
+  IQuery,
+} from "../..";
 import type { UsagePerRoundVariableNames } from "../../base/entity";
 import type { CustomEvent, ListenTo } from "../../builder";
 import type {
@@ -45,6 +51,7 @@ class SkillModel {
   skillType: CommonSkillType | null = null;
   prepared = false;
   hidden = false;
+  gainEnergy = true;
   alwaysCharged = false;
   alwaysPlunging = false;
   targetGetters: ((c: SkillContext<any>) => AnyState[])[] = [];
@@ -83,6 +90,23 @@ export const DEFAULT_CHARACTER_SKILL_VM_META = {
   isInitiativeSkill: true,
 } as const satisfies CharacterSkillVMMeta;
 
+type OnlyInitiativeThis<Meta extends CharacterSkillVMMeta> = AR.This<
+  Meta & { isInitiativeSkill: true }
+>;
+type TargetQueryTypeInfo =
+  | {
+      type: "character";
+      areaType: "characters";
+    }
+  | {
+      type: "summon";
+      areaType: "summons";
+    }
+  | {
+      type: "support";
+      areaType: "supports";
+    };
+
 export const CharacterSkillViewModel = defineViewModel(
   CharacterSkillModel,
   (h) => ({
@@ -101,9 +125,9 @@ export const CharacterSkillViewModel = defineViewModel(
       },
       (_, [id]) => id as any,
     ),
-    type: h.attribute<{
+    skillType: h.attribute<{
       <Meta extends CharacterSkillVMMeta>(
-        this: AR.This<Meta & { isInitiativeSkill: true }>,
+        this: OnlyInitiativeThis<Meta>,
         type: "normal" | "elemental" | "burst",
       ): AR.Done;
       <Meta extends CharacterSkillVMMeta>(
@@ -120,9 +144,54 @@ export const CharacterSkillViewModel = defineViewModel(
       }
     }),
 
+    prepared: h.attribute<{
+      <Meta extends CharacterSkillVMMeta>(
+        this: OnlyInitiativeThis<Meta>,
+      ): AR.Done;
+      uniqueKey(): "prepared";
+    }>((model) => {
+      model.prepared = true;
+      model.gainEnergy = false;
+      model.hidden = true;
+    }),
+    hidden: h.attribute<{
+      <Meta extends CharacterSkillVMMeta>(
+        this: OnlyInitiativeThis<Meta>,
+      ): AR.Done;
+      uniqueKey(): "hidden";
+    }>((model) => {
+      model.hidden = true;
+    }),
+    noEnergy: h.attribute<{
+      <Meta extends CharacterSkillVMMeta>(
+        this: OnlyInitiativeThis<Meta>,
+      ): AR.Done;
+      uniqueKey(): "noEnergy";
+    }>((model) => {
+      model.gainEnergy = false;
+    }),
+
+    addTarget: h.attribute<{
+      <Meta extends CharacterSkillVMMeta, Q extends IQuery>(
+        this: OnlyInitiativeThis<Meta>,
+        query: InferResult<Q> extends TargetQueryTypeInfo ? Q : never,
+      ): AR.DoneRewriteMeta<
+        Omit<Meta, "targetTypes"> & {
+          targetTypes: [
+            ...Meta["targetTypes"],
+            InferResult<Q> extends { type: infer T; }
+              ? T
+              : never,
+          ];
+        }
+      >;
+    }>((model, query: any) => {
+      // TODO
+    }),
+
     "~action": h.attribute<{
       <Meta extends CharacterSkillVMMeta>(
-        this: Meta extends { isInitiativeSkill: true } ? never : AR.This<Meta>,
+        this: OnlyInitiativeThis<Meta>,
         operation: SkillOperation<{
           callerType: Meta["type"];
           associatedExtension: Meta["associatedExtension"];
