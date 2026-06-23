@@ -18,27 +18,23 @@ import type {
   CharacterInitiativeSkillEntry,
   CharacterPassiveSkillEntry,
 } from "../../builder/registry";
-import {
-  DiceType,
-  type AnyState,
-  type CommonSkillType,
-  type DiceRequirement,
-  type InferResult,
-  type IQuery,
-} from "../..";
+import { type AnyState, type GameState } from "../../base/state";
+import { toExpression, type InferResult, type IQuery } from "../../query";
 import type { UsagePerRoundVariableNames } from "../../base/entity";
 import type { CustomEvent, ListenTo } from "../../builder";
-import type {
-  DetailedEventNames,
-  InitiativeSkillTargetKind,
-  SkillOperation,
-  SkillOperationFilter,
-  StrictInitiativeSkillEventArg,
-  WritableMetaOf,
+import {
+  buildTargetGetter,
+  wrapSkillInfoWithExt,
+  type DetailedEventNames,
+  type InitiativeSkillTargetKind,
+  type SkillOperation,
+  type SkillOperationFilter,
+  type StrictInitiativeSkillEventArg,
+  type WritableMetaOf,
 } from "../../builder/skill";
-import type {
+import {
   SkillContext,
-  TypedSkillContext,
+  type TypedSkillContext,
 } from "../../builder/context/skill";
 import { DEFAULT_ENTITY_VM_META, type EntityVMMeta } from "./entity";
 import type {
@@ -46,15 +42,29 @@ import type {
   PassiveSkillHandle,
   SkillHandle,
 } from "../../builder/type";
+import {
+  DEFAULT_VERSION_INFO,
+  type Version,
+  type VersionInfo,
+} from "../../base/version";
+import { costSize, diceCostSize, normalizeCost } from "../../utils";
+import type {
+  CommonSkillType,
+  SkillActionFilter,
+  SkillDescription,
+  SkillInfo,
+} from "../../base/skill";
+import type { DiceRequirement, DiceType } from "@gi-tcg/typings";
 
 class SkillModel {
   id!: number;
 
   isInitiativeSkill = true;
+  versionInfo: VersionInfo = DEFAULT_VERSION_INFO;
 
   // initiative configs
   skillType: CommonSkillType | null = null;
-  prepared = false;
+  omitEvents = false;
   hidden = false;
   gainEnergy = true;
   alwaysCharged = false;
@@ -64,7 +74,6 @@ class SkillModel {
 
   // triggered configs
   detailedEventName: DetailedEventNames | CustomEvent | null = null;
-  filter: SkillOperationFilter<any> = () => true;
   enableHandTriggering = false;
   enablePileTriggering = false;
   usageOpt: { name: string; autoDecrease: boolean } | null = null;
@@ -75,10 +84,81 @@ class SkillModel {
   listenTo: ListenTo | null = null;
 
   associatedExtensionId: number | null = null;
+
+  action: SkillOperation<any> = () => {};
+  filters: SkillOperationFilter<any>[] = [];
+
+  protected buildAction(): SkillDescription<any> {
+    const extId = this.associatedExtensionId;
+    const action = this.action;
+    return function (state: GameState, skillInfo: SkillInfo, arg: any) {
+      const context = new SkillContext(
+        state,
+        wrapSkillInfoWithExt(skillInfo, extId),
+        arg,
+      );
+      action(context, context.eventArg);
+      return context._terminate();
+    };
+  }
+  protected buildFilter(): SkillActionFilter<any> {
+    const extId = this.associatedExtensionId;
+    const filters = this.filters;
+    return function (state: GameState, skillInfo: SkillInfo, arg: any) {
+      const context = new SkillContext(
+        state,
+        wrapSkillInfoWithExt(skillInfo, extId),
+        arg,
+      );
+      for (const filter of filters) {
+        if (!filter(context, context.eventArg)) {
+          return false;
+        }
+      }
+      return true;
+    };
+  }
 }
 
+type TargetGetter = (ctx: SkillContext<any>) => AnyState[];
+
 class CharacterSkillModel extends SkillModel {
+  targetGetters: TargetGetter[] = [];
+
   getEntry(): CharacterInitiativeSkillEntry | CharacterPassiveSkillEntry {
+    if (this.skillType !== null) {
+      return {
+        type: "initiativeSkill",
+        __definition: "initiativeSkills",
+        id: this.id,
+        version: this.versionInfo,
+        skill: {
+          type: "skill",
+          id: this.id,
+          ownerType: "character",
+          skillType: this.skillType,
+          initiativeSkillConfig: {
+            requiredCost: normalizeCost(this.cost),
+            computed$costSize: costSize(this.cost),
+            computed$diceCostSize: diceCostSize(this.cost),
+            gainEnergy: this.gainEnergy,
+            shouldFast: false,
+            alwaysCharged: this.alwaysCharged,
+            alwaysPlunging: this.alwaysPlunging,
+            hidden: this.hidden,
+            omitEvents: this.omitEvents,
+            getTarget: buildTargetGetter(
+              this.targetGetters,
+              this.associatedExtensionId,
+            ),
+          },
+          triggerOn: "initiative",
+          action: this.buildAction(),
+          filter: this.buildFilter(),
+          usagePerRoundVariableName: null,
+        },
+      };
+    }
     // TODO
     throw new Error("Method not implemented.");
   }
@@ -148,6 +228,22 @@ export const CharacterSkillViewModel = defineViewModel(
         model.skillType = type;
       }
     }),
+    since: h.simpleAttribute({
+      uniqueKey: "version",
+    })(function (version: Version) {
+      this.versionInfo = {
+        from: "official",
+        value: { predicate: "since", version },
+      };
+    }),
+    until: h.simpleAttribute({
+      uniqueKey: "version",
+    })(function (version: Version) {
+      this.versionInfo = {
+        from: "official",
+        value: { predicate: "until", version },
+      };
+    }),
 
     prepared: h.attribute<{
       <Meta extends CharacterSkillVMMeta>(
@@ -155,7 +251,7 @@ export const CharacterSkillViewModel = defineViewModel(
       ): AR.Done;
       uniqueKey(): "prepared";
     }>((model) => {
-      model.prepared = true;
+      model.omitEvents = true;
       model.gainEnergy = false;
       model.hidden = true;
     }),
@@ -197,28 +293,62 @@ export const CharacterSkillViewModel = defineViewModel(
           ];
         }
       >;
-      // <Meta extends CharacterSkillVMMeta, Q extends IQuery>(
-      //   this: OnlyInitiativeThis<Meta>,
-      //   queryFn: (
-      //     context: TypedSkillContext<
-      //       WritableMetaOf<{
-      //         callerType: Meta["type"];
-      //         associatedExtension: Meta["associatedExtension"];
-      //         callerVars: Meta["variables"];
-      //         eventArgType: StrictInitiativeSkillEventArg<Meta["targetTypes"]>;
-      //       }>
-      //     >,
-      //   ) => InferResult<Q> extends TargetQueryTypeInfo ? Q : never,
-      // ): AR.DoneRewriteMeta<
-      //   Omit<Meta, "targetTypes"> & {
-      //     targetTypes: [
-      //       ...Meta["targetTypes"],
-      //       InferResult<Q> extends { type: infer T } ? T : never,
-      //     ];
-      //   }
-      // >;
+      <Meta extends CharacterSkillVMMeta, Q extends IQuery>(
+        this: OnlyInitiativeThis<Meta>,
+        queryFn: (
+          context: TypedSkillContext<
+            WritableMetaOf<{
+              callerType: Meta["type"];
+              associatedExtension: Meta["associatedExtension"];
+              callerVars: Meta["variables"];
+              eventArgType: StrictInitiativeSkillEventArg<Meta["targetTypes"]>;
+            }>
+          >,
+        ) => InferResult<Q> extends TargetQueryTypeInfo ? Q : never,
+      ): AR.DoneRewriteMeta<
+        Omit<Meta, "targetTypes"> & {
+          targetTypes: [
+            ...Meta["targetTypes"],
+            InferResult<Q> extends { type: infer T } ? T : never,
+          ];
+        }
+      >;
+
+      <Meta extends CharacterSkillVMMeta, Ret extends AnyState[]>(
+        this: OnlyInitiativeThis<Meta>,
+        queryFn: (
+          context: TypedSkillContext<
+            WritableMetaOf<{
+              callerType: Meta["type"];
+              associatedExtension: Meta["associatedExtension"];
+              callerVars: Meta["variables"];
+              eventArgType: StrictInitiativeSkillEventArg<Meta["targetTypes"]>;
+            }>
+          >,
+        ) => Ret[number] extends { type: InitiativeSkillTargetKind }
+          ? Ret
+          : never,
+      ): AR.DoneRewriteMeta<
+        Omit<Meta, "targetTypes"> & {
+          targetTypes: [
+            ...Meta["targetTypes"],
+            Ret[number] extends { type: InitiativeSkillTargetKind }
+              ? Ret
+              : never,
+          ];
+        }
+      >;
     }>((model, query: any) => {
-      // TODO
+      if (toExpression in query) {
+        query = () => query;
+      }
+      model.targetGetters.push((ctx) => {
+        const result: AnyState[] | IQuery = query(ctx);
+        if (result && toExpression in result) {
+          return ctx.queryAll(result).map((s) => s.latest());
+        }
+        return result;
+      });
     }),
 
     "~action": h.attribute<{

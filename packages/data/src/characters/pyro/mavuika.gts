@@ -210,18 +210,18 @@ export const AllfireArmamentsRingOfSearingRadiance: CombatStatusHandle = combatS
 define skill {
   id 13151 as FlamesWeaveLife;
   skillType normal;
-  cost pyro, 1
+  cost DiceType.Pyro, 1
   cost DiceType.Void, 2
   :damage(DamageType.Physical, 2)
 }
 
 // TEST addTarget
-define skill {
-  id 123456789;
-  skillType elemental;
-  addTarget $.my.character;
-  :eventArg.targets[0].definition.type; // "character"
-}
+// define skill {
+//   id 123456789;
+//   skillType elemental;
+//   addTarget $.my.character;
+//   :eventArg.targets[0].definition.type; // "character"
+// }
 
 /**
  * @id 13152
@@ -229,16 +229,17 @@ define skill {
  * @description
  * 自身进入夜魂加持，获得2点「夜魂值」，并从3张驰轮车中挑选1张加入手牌。
  */
-export const TheNamedMoment = skill(13152)
-  .type("elemental")
-  .costPyro(3)
-  .selectAndCreateHandCard([
+define skill {
+  id 13152 as TheNamedMoment;
+  skillType elemental;
+  cost DiceType.Pyro, 3;
+  :selectAndCreateHandCard([
     FlamestriderBlazingTrail,
     FlamestriderFullThrottle,
     FlamestriderSoaringAscent
-  ])
-  .gainNightsoul("@self", 2)
-  .done();
+  ]);
+  :gainNightsoul("@self", 2);
+}
 
 /**
  * @id 13153
@@ -282,12 +283,6 @@ export const FightingSpirit = skill(13154)
   .on("useSkill", (c, e) => e.isSkillType("elemental") || e.isSkillType("burst"))
   .combatStatus(AllfireArmamentsRingOfSearingRadiance)
   .done();
-
-// define skill {
-//   id 13154 as FightingSpirit2;
-//   "type" (3);
-
-// }
 
 /**
  * @id 1315
