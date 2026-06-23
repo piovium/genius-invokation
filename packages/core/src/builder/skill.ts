@@ -972,9 +972,9 @@ export class TriggeredSkillBuilder<
     opt?: Omit<UsageOptions<VarName>, "perRound">,
   ) {
     return this.usage<VarName>(count, {
+      visible: false,
       ...opt,
       perRound: true,
-      visible: false,
     });
   }
   usageCanAppend<VarName extends string = "usage">(
