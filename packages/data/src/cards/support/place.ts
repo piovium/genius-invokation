@@ -153,7 +153,8 @@ export const GrandNarukamiShrine = card(321008)
   .costVoid(3)
   .support("place")
   .on("useSkill", (c) => c.player.dice.length % 2 === 1)
-  .usagePerRound(2)
+  .usagePerRound(2, { visible: true })
+  .abortPreview() // 官方也中断，因为预览的时候骰子数目不对
   .generateDice(DiceType.Omni, 1)
   .done();
 
