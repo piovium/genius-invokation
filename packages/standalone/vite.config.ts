@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defaultClientConditions, defineConfig } from "vite";
+import { defineConfig } from "vite";
+import gts from "@gi-tcg/unplugin-gts/rolldown";
 import solid from "vite-plugin-solid";
 import babel from "@rollup/plugin-babel";
 import { viteStaticCopy } from "vite-plugin-static-copy";
@@ -23,6 +24,7 @@ export default defineConfig({
     target: "ES2020",
   },
   plugins: [
+    gts(),
     solid(),
     babel({
       babelHelpers: "bundled",

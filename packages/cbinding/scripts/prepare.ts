@@ -5,6 +5,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 import terser from "@rollup/plugin-terser";
+import gts from "@gi-tcg/unplugin-gts/rollup";
 import { CORE_VERSION } from "@gi-tcg/core";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 
@@ -13,6 +14,7 @@ async function writeGeneratedJsCodeCpp() {
     input: `${import.meta.dirname}/../js/main.ts`,
     external: ["@gi-tcg/cbinding-io"],
     plugins: [
+      gts(),
       replace({
         preventAssignment: true,
         values: {

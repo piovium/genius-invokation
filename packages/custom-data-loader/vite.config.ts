@@ -14,11 +14,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { defineConfig } from "vite";
+import gts from "@gi-tcg/unplugin-gts/rolldown";
 import solid from "vite-plugin-solid";
 
 export default defineConfig({
   esbuild: {
     target: "es2022"
   },
-  plugins: [solid()],
+  plugins: [
+    gts(),
+    solid(),
+  ],
 });
