@@ -272,7 +272,7 @@ export function App() {
             </li>
             <li>
               <a
-                href="https://jarvis-yu.github.io/Dottore-Genius-Invokation-TCG-PWA/"
+                href="https://gi-tcg.taim.site"
                 target="_blank"
               >
                 Taimevraiment 七圣召唤模拟器
