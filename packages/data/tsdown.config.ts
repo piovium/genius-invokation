@@ -26,4 +26,5 @@ export default defineConfig({
   minify: true,
   target: false,
   plugins: [gts()],
+  unbundle: true,
 });
