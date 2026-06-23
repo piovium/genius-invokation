@@ -22,7 +22,7 @@ import { expect, test } from "vitest";
 test("mavuika: play 'E' card trigger ScionsOfTheCanopy", async () => {
   const mavuika = ref();
   const c = setup(
-    <State dataVersion="v5.7.0">
+    <State>
       <Character my active def={Mavuika} ref={mavuika} />
       <Card my def={ScionsOfTheCanopy} />
     </State>,
@@ -36,6 +36,6 @@ test("mavuika: play 'E' card trigger ScionsOfTheCanopy", async () => {
   c.expect($.my.support.def(ScionsOfTheCanopy)).toHaveVariable({
     point: 2,
   });
-  // 8 - 2(火神E) - 2(涉渡) + 1(悬木人生成) = 5
-  expect(c.state.players[0].dice).toBeArrayOfSize(5);
+  // 8 - 3(火神E) - 2(涉渡) + 1(悬木人生成) = 4
+  expect(c.state.players[0].dice).toBeArrayOfSize(4);
 });

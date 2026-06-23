@@ -20,7 +20,10 @@ import type {
 } from "../../builder/registry";
 import { type AnyState, type GameState } from "../../base/state";
 import { toExpression, type InferResult, type IQuery } from "../../query";
-import type { UsagePerRoundVariableNames } from "../../base/entity";
+import type {
+  UsagePerRoundVariableNames,
+  VariableConfig,
+} from "../../base/entity";
 import type { CustomEvent, ListenTo } from "../../builder";
 import {
   buildTargetGetter,
@@ -50,7 +53,9 @@ import {
 import { costSize, diceCostSize, normalizeCost } from "../../utils";
 import type {
   CommonSkillType,
+  InitiativeSkillDefinition,
   SkillActionFilter,
+  SkillDefinition,
   SkillDescription,
   SkillInfo,
 } from "../../base/skill";
@@ -61,16 +66,6 @@ class SkillModel {
 
   isInitiativeSkill = true;
   versionInfo: VersionInfo = DEFAULT_VERSION_INFO;
-
-  // initiative configs
-  skillType: CommonSkillType | null = null;
-  omitEvents = false;
-  hidden = false;
-  gainEnergy = true;
-  alwaysCharged = false;
-  alwaysPlunging = false;
-  targetGetters: ((c: SkillContext<any>) => AnyState[])[] = [];
-  cost: DiceRequirement = new Map();
 
   // triggered configs
   detailedEventName: DetailedEventNames | CustomEvent | null = null;
@@ -120,47 +115,83 @@ class SkillModel {
   }
 }
 
+class TriggeredSkillModel extends SkillModel {
+  detailedEventName: DetailedEventNames | CustomEvent;
+  constructor(detailedEventName: DetailedEventNames | CustomEvent) {
+    super();
+    this.detailedEventName = detailedEventName;
+  }
+  buildSkillDefinition(): SkillDefinition {
+    throw new Error("Not implemented");
+  }
+}
+
+const TriggeredSkillVM = defineViewModel(TriggeredSkillModel, (h) => ({}));
+
 type TargetGetter = (ctx: SkillContext<any>) => AnyState[];
 
-class CharacterSkillModel extends SkillModel {
+class InitiativeSkillModel extends SkillModel {
+  skillType: CommonSkillType | null = null;
+  omitEvents = false;
+  hidden = false;
+  gainEnergy = true;
+  alwaysCharged = false;
+  alwaysPlunging = false;
   targetGetters: TargetGetter[] = [];
+  cost: DiceRequirement = new Map();
+
+  buildSkillDefinition(): InitiativeSkillDefinition {
+    return {
+      type: "skill",
+      id: this.id,
+      ownerType: "character",
+      skillType: this.skillType,
+      initiativeSkillConfig: {
+        requiredCost: normalizeCost(this.cost),
+        computed$costSize: costSize(this.cost),
+        computed$diceCostSize: diceCostSize(this.cost),
+        gainEnergy: this.gainEnergy,
+        shouldFast: false,
+        alwaysCharged: this.alwaysCharged,
+        alwaysPlunging: this.alwaysPlunging,
+        hidden: this.hidden,
+        omitEvents: this.omitEvents,
+        getTarget: buildTargetGetter(
+          this.targetGetters,
+          this.associatedExtensionId,
+        ),
+      },
+      triggerOn: "initiative",
+      action: this.buildAction(),
+      filter: this.buildFilter(),
+      usagePerRoundVariableName: null,
+    };
+  }
+}
+
+class CharacterSkillModel extends InitiativeSkillModel {
+  varConfigs = new Map<string, VariableConfig>();
+  passiveSkillDefinitions: SkillDefinition[] = [];
 
   getEntry(): CharacterInitiativeSkillEntry | CharacterPassiveSkillEntry {
-    if (this.skillType !== null) {
+    if (this.isInitiativeSkill) {
       return {
         type: "initiativeSkill",
         __definition: "initiativeSkills",
         id: this.id,
         version: this.versionInfo,
-        skill: {
-          type: "skill",
-          id: this.id,
-          ownerType: "character",
-          skillType: this.skillType,
-          initiativeSkillConfig: {
-            requiredCost: normalizeCost(this.cost),
-            computed$costSize: costSize(this.cost),
-            computed$diceCostSize: diceCostSize(this.cost),
-            gainEnergy: this.gainEnergy,
-            shouldFast: false,
-            alwaysCharged: this.alwaysCharged,
-            alwaysPlunging: this.alwaysPlunging,
-            hidden: this.hidden,
-            omitEvents: this.omitEvents,
-            getTarget: buildTargetGetter(
-              this.targetGetters,
-              this.associatedExtensionId,
-            ),
-          },
-          triggerOn: "initiative",
-          action: this.buildAction(),
-          filter: this.buildFilter(),
-          usagePerRoundVariableName: null,
-        },
+        skill: this.buildSkillDefinition(),
+      };
+    } else {
+      return {
+        type: "passiveSkill",
+        __definition: "passiveSkills",
+        id: this.id,
+        version: this.versionInfo,
+        skills: this.passiveSkillDefinitions,
+        varConfigs: Object.fromEntries(this.varConfigs.entries()),
       };
     }
-    // TODO
-    throw new Error("Method not implemented.");
   }
 }
 
@@ -175,9 +206,16 @@ export const DEFAULT_CHARACTER_SKILL_VM_META = {
   isInitiativeSkill: true,
 } as const satisfies CharacterSkillVMMeta;
 
-type OnlyInitiativeThis<Meta extends CharacterSkillVMMeta> = AR.This<
-  Meta & { isInitiativeSkill: true }
->;
+type OnlyInitiativeThis<Meta extends CharacterSkillVMMeta> = Meta extends {
+  isInitiativeSkill: true;
+}
+  ? AR.This<Meta>
+  : never;
+type OnlyPassiveThis<Meta extends CharacterSkillVMMeta> = Meta extends {
+  isInitiativeSkill: true;
+}
+  ? never
+  : AR.This<Meta>;
 type TargetQueryTypeInfo =
   | {
       type: "character";
@@ -216,7 +254,7 @@ export const CharacterSkillViewModel = defineViewModel(
         type: "normal" | "elemental" | "burst",
       ): AR.Done;
       <Meta extends CharacterSkillVMMeta>(
-        this: Meta,
+        this: AR.This<Meta>,
         type: "passive",
       ): AR.DoneRewriteMeta<Omit<Meta, "isInitiativeSkill">>;
       required(): true;
@@ -244,6 +282,8 @@ export const CharacterSkillViewModel = defineViewModel(
         value: { predicate: "until", version },
       };
     }),
+
+    // --- initiative attributes ---
 
     prepared: h.attribute<{
       <Meta extends CharacterSkillVMMeta>(
@@ -351,6 +391,20 @@ export const CharacterSkillViewModel = defineViewModel(
       });
     }),
 
+    filter: h.attribute<{
+      <Meta extends CharacterSkillVMMeta>(
+        this: OnlyInitiativeThis<Meta>,
+        filter: SkillOperationFilter<{
+          callerType: Meta["type"];
+          associatedExtension: Meta["associatedExtension"];
+          callerVars: Meta["variables"];
+          eventArgType: StrictInitiativeSkillEventArg<Meta["targetTypes"]>;
+        }>,
+      ): AR.Done;
+    }>((model, [filter]) => {
+      model.filters.push(filter);
+    }),
+
     "~action": h.attribute<{
       <Meta extends CharacterSkillVMMeta>(
         this: OnlyInitiativeThis<Meta>,
@@ -362,7 +416,21 @@ export const CharacterSkillViewModel = defineViewModel(
         }>,
       ): AR.Done;
       uniqueKey(): "~action";
-    }>((model, [operation]) => {}),
+    }>((model, [operation]) => {
+      model.action = operation;
+    }),
+
+    // --- passive attributes ---
+    on: h.attribute<{
+      <Meta extends CharacterSkillVMMeta>(
+        this: OnlyPassiveThis<Meta>,
+        eventName: DetailedEventNames | CustomEvent,
+      ): AR.With<typeof TriggeredSkillVM>;
+    }>((model, [eventName], subView) => {
+      const skillModel = TriggeredSkillVM.parse(subView, eventName);
+      const skillDef = skillModel.buildSkillDefinition();
+      model.passiveSkillDefinitions.push(skillDef);
+    }),
   }),
   DEFAULT_CHARACTER_SKILL_VM_META,
 );

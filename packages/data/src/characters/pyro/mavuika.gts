@@ -215,14 +215,6 @@ define skill {
   :damage(DamageType.Physical, 2)
 }
 
-// TEST addTarget
-// define skill {
-//   id 123456789;
-//   skillType elemental;
-//   addTarget $.my.character;
-//   :eventArg.targets[0].definition.type; // "character"
-// }
-
 /**
  * @id 13152
  * @name 称名之刻
@@ -248,20 +240,19 @@ define skill {
  * 本角色进入夜魂加持，获得1点「夜魂值」，消耗自身全部战意，对敌方前台造成等同于消耗战意数量的火元素伤害。
  * 若消耗了6点战意，则自身附属死生之炉。
  */
-export const HourOfBurningSkies = skill(13153)
-  .type("burst")
-  .costPyro(4)
-  .filter((c) => c.self.getVariable("fightingSpirit") >= 3)
-  .gainNightsoul("@self", 1)
-  .do((c) => {
-    const spirit = c.self.getVariable("fightingSpirit");
-    c.damage(DamageType.Pyro, spirit);
-    if (spirit >= 6){
-    c.characterStatus(CrucibleOfDeathAndLife);
-    }
-    c.self.setVariable("fightingSpirit", 0);
-  })
-  .done();
+define skill {
+  id 13153 as HourOfBurningSkies;
+  skillType burst;
+  cost DiceType.Pyro, 4;
+  filter :( :self.getVariable("fightingSpirit") >= 3 );
+  :gainNightsoul(:self, 1);
+  const spirit = :self.getVariable("fightingSpirit");
+  :damage(DamageType.Pyro, spirit);
+  if (spirit >= 6){
+    :characterStatus(CrucibleOfDeathAndLife);
+  }
+  :self.setVariable("fightingSpirit", 0);
+}
 
 /**
  * @id 13154
@@ -283,6 +274,14 @@ export const FightingSpirit = skill(13154)
   .on("useSkill", (c, e) => e.isSkillType("elemental") || e.isSkillType("burst"))
   .combatStatus(AllfireArmamentsRingOfSearingRadiance)
   .done();
+
+// define skill {
+//   id 13154 as private FightingSpiritTemp;
+//   skillType passive;
+//   on consumeNightsoul {
+
+//   };
+// }
 
 /**
  * @id 1315
