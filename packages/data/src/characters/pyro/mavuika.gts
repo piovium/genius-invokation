@@ -207,20 +207,11 @@ export const AllfireArmamentsRingOfSearingRadiance: CombatStatusHandle = combatS
  * @description
  * 造成2点物理伤害。
  */
-export const FlamesWeaveLife = skill(13151)
-  .type("normal")
-  .costPyro(1)
-  .costVoid(2)
-  .damage(DamageType.Physical, 2)
-  .done();
-
-
-// TODO: cost
 define skill {
-  id 13151 as FlamesWeaveLife2;
+  id 13151 as FlamesWeaveLife;
   skillType normal;
-  // .costPyro(1)
-  // .costVoid(2)
+  cost pyro, 1
+  cost DiceType.Void, 2
   :damage(DamageType.Physical, 2)
 }
 
@@ -228,8 +219,7 @@ define skill {
 define skill {
   id 123456789;
   skillType elemental;
-  addTarget ($.my.character);
-  void 0;
+  addTarget $.my.character;
   :eventArg.targets[0].definition.type; // "character"
 }
 

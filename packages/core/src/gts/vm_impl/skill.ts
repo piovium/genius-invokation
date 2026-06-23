@@ -18,12 +18,13 @@ import type {
   CharacterInitiativeSkillEntry,
   CharacterPassiveSkillEntry,
 } from "../../builder/registry";
-import type {
-  AnyState,
-  CommonSkillType,
-  DiceRequirement,
-  InferResult,
-  IQuery,
+import {
+  DiceType,
+  type AnyState,
+  type CommonSkillType,
+  type DiceRequirement,
+  type InferResult,
+  type IQuery,
 } from "../..";
 import type { UsagePerRoundVariableNames } from "../../base/entity";
 import type { CustomEvent, ListenTo } from "../../builder";
@@ -33,8 +34,12 @@ import type {
   SkillOperation,
   SkillOperationFilter,
   StrictInitiativeSkillEventArg,
+  WritableMetaOf,
 } from "../../builder/skill";
-import type { SkillContext } from "../../builder/context/skill";
+import type {
+  SkillContext,
+  TypedSkillContext,
+} from "../../builder/context/skill";
 import { DEFAULT_ENTITY_VM_META, type EntityVMMeta } from "./entity";
 import type {
   ExEntityType,
@@ -170,6 +175,15 @@ export const CharacterSkillViewModel = defineViewModel(
     }>((model) => {
       model.gainEnergy = false;
     }),
+    cost: h.attribute<{
+      <Meta extends CharacterSkillVMMeta>(
+        this: OnlyInitiativeThis<Meta>,
+        type: DiceType,
+        amount: number,
+      ): AR.Done;
+    }>((model, [type, amount]) => {
+      model.cost.set(type, amount);
+    }),
 
     addTarget: h.attribute<{
       <Meta extends CharacterSkillVMMeta, Q extends IQuery>(
@@ -179,12 +193,30 @@ export const CharacterSkillViewModel = defineViewModel(
         Omit<Meta, "targetTypes"> & {
           targetTypes: [
             ...Meta["targetTypes"],
-            InferResult<Q> extends { type: infer T; }
-              ? T
-              : never,
+            InferResult<Q> extends { type: infer T } ? T : never,
           ];
         }
       >;
+      // <Meta extends CharacterSkillVMMeta, Q extends IQuery>(
+      //   this: OnlyInitiativeThis<Meta>,
+      //   queryFn: (
+      //     context: TypedSkillContext<
+      //       WritableMetaOf<{
+      //         callerType: Meta["type"];
+      //         associatedExtension: Meta["associatedExtension"];
+      //         callerVars: Meta["variables"];
+      //         eventArgType: StrictInitiativeSkillEventArg<Meta["targetTypes"]>;
+      //       }>
+      //     >,
+      //   ) => InferResult<Q> extends TargetQueryTypeInfo ? Q : never,
+      // ): AR.DoneRewriteMeta<
+      //   Omit<Meta, "targetTypes"> & {
+      //     targetTypes: [
+      //       ...Meta["targetTypes"],
+      //       InferResult<Q> extends { type: infer T } ? T : never,
+      //     ];
+      //   }
+      // >;
     }>((model, query: any) => {
       // TODO
     }),

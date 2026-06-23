@@ -246,6 +246,25 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return this._self.area;
   }
 
+  public readonly "~prelude" = {
+    void: 0 satisfies typeof DiceType.Void,
+    nil: 0 satisfies typeof DiceType.Void,
+    unaligned: 0 satisfies typeof DiceType.Void,
+    physical: 0 satisfies typeof DamageType.Physical,
+    none: 0 satisfies typeof Aura.None,
+    cryo: 1,
+    hydro: 2,
+    pyro: 3,
+    electro: 4,
+    anemo: 5,
+    geo: 6,
+    dendro: 7,
+    omni: 8 satisfies typeof DiceType.Omni,
+    aligned: 8 satisfies typeof DiceType.Aligned,
+    energy: 9 satisfies typeof DiceType.Energy,
+    $,
+  } as const;
+
   /**
    *
    * @param state 触发此技能之前的游戏状态
@@ -871,7 +890,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
       const target = t.latest();
       using l = this.mutator.subLog(
         DetailLogType.Primitive,
-        `Increase ${value} max health to ${stringifyState(target)} ${heal ? "and heal" : ""}`,
+        `Increase ${value} max health to ${stringifyState(target)} ${
+          heal ? "and heal" : ""
+        }`,
       );
       this.mutate({
         type: "modifyEntityVar",
