@@ -262,26 +262,24 @@ define skill {
  * 在我方消耗「夜魂值」或使用「普通攻击」后，获得1点战意。
  * 本角色使用元素战技或元素爆发时，附属诸火武装·焚曜之环。
  */
-export const FightingSpirit = skill(13154)
-  .type("passive")
-  .variable("fightingSpirit", 0)
-  .on("consumeNightsoul")
-  .listenToPlayer()
-  .addVariableWithMax("fightingSpirit", 1, 6)
-  .on("useSkill", (c, e) => e.isSkillType("normal"))
-  .listenToPlayer()
-  .addVariableWithMax("fightingSpirit", 1, 6)
-  .on("useSkill", (c, e) => e.isSkillType("elemental") || e.isSkillType("burst"))
-  .combatStatus(AllfireArmamentsRingOfSearingRadiance)
-  .done();
-
-// define skill {
-//   id 13154 as private FightingSpiritTemp;
-//   skillType passive;
-//   on consumeNightsoul {
-
-//   };
-// }
+define skill {
+  id 13154 as private FightingSpirit;
+  skillType passive;
+  variable fightingSpirit, 0;
+  on consumeNightsoul {
+    listenTo player;
+    :addVariableWithMax("fightingSpirit", 1, 6);
+  };
+  on useSkill {
+    listenTo player;
+    when :( :e.isSkillType("normal") );
+    :addVariableWithMax("fightingSpirit", 1, 6);
+  }
+  on useSkill {
+    when :( :e.isSkillType("elemental") || :e.isSkillType("burst") );
+    :combatStatus(AllfireArmamentsRingOfSearingRadiance);
+  }
+}
 
 /**
  * @id 1315

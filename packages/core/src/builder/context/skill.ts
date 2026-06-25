@@ -220,6 +220,11 @@ export class SkillContext<Meta extends ContextMetaBase> {
     Meta,
     Omit<Meta["eventArgType"], `_${string}`>
   >;
+  // GTS support
+  public readonly e: ApplyReactive<
+    Meta,
+    Omit<Meta["eventArgType"], `_${string}`>
+  >;
 
   /** @internal */
   public readonly _reactiveProxies = new Map<
@@ -284,6 +289,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         ),
     };
     this.eventArg = applyReactive(this, eventArg);
+    this.e = this.eventArg;
     this.mutator = new StateMutator(state, mutatorConfig);
     this._self = applyReactive(this, this.skillInfo.caller) as RxEntityState<
       Meta,
