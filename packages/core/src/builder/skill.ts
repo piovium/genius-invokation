@@ -181,12 +181,14 @@ export type StrictInitiativeSkillFilter<
   InitiativeSkillBuilderMeta<CallerType, KindTs, AssociatedExt>
 >;
 
-export enum ListenTo {
-  Myself,
-  SameArea,
-  SamePlayer,
-  All,
-}
+/** @deprecated use string literal instead */
+export const ListenTo = {
+  Myself: "myself",
+  SameArea: "sameArea",
+  SamePlayer: "samePlayer",
+  All: "all",
+} as const;
+export type ListenTo = (typeof ListenTo)[keyof typeof ListenTo];
 
 interface RelativeArg {
   callerId: number;

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineViewModel, type AR, type Meta } from "@gi-tcg/gts-runtime";
+import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
 import type {
   CharacterInitiativeSkillEntry,
   CharacterPassiveSkillEntry,
@@ -33,15 +33,20 @@ import {
   type DetailedEventNames,
   type InitiativeSkillTargetKind,
   type ReadonlyMetaOf,
-  type SkillOperation,
-  type SkillOperationFilter,
+  type SkillBuilderMetaBase,
   type StrictInitiativeSkillEventArg,
+  type WritableMetaOf,
 } from "../../builder/skill";
 import {
   SkillContext,
   type TypedSkillContext,
 } from "../../builder/context/skill";
-import { DEFAULT_ENTITY_VM_META, type EntityVMMeta } from "./entity";
+import {
+  createVariableConfig,
+  DEFAULT_ENTITY_VM_META,
+  type EntityVMMeta,
+  type ICaller,
+} from "./entity";
 import type {
   ExEntityType,
   PassiveSkillHandle,
@@ -63,9 +68,17 @@ import type {
   SkillInfo,
 } from "../../base/skill";
 import type { DiceRequirement, DiceType } from "@gi-tcg/typings";
-import { createVariable } from "../../builder/utils";
-import { VariablesVM } from "./variables";
+import { UsageVM, VariablesVM, type GtsUsageOption } from "./variables";
 import { isCustomEvent } from "../../base/custom_event";
+import { GiTcgDataError } from "../../error";
+
+type GtsSkillOperation<Meta extends SkillBuilderMetaBase> = (
+  c: TypedSkillContext<WritableMetaOf<Meta>>,
+) => void;
+
+type GtsSkillOperationFilter<Meta extends SkillBuilderMetaBase> = (
+  c: TypedSkillContext<ReadonlyMetaOf<Meta>>,
+) => unknown;
 
 class SkillModel {
   id!: number;
@@ -75,11 +88,11 @@ class SkillModel {
 
   associatedExtensionId: number | null = null;
 
-  protected preOperations: SkillOperation<any>[] = [];
-  action: SkillOperation<any> = () => {};
-  protected postOperations: SkillOperation<any>[] = [];
-  protected filters: SkillOperationFilter<any>[] = [];
-  userFilters: SkillOperationFilter<any>[] = [];
+  protected preOperations: GtsSkillOperation<any>[] = [];
+  action: GtsSkillOperation<any> = () => {};
+  protected postOperations: GtsSkillOperation<any>[] = [];
+  protected filters: GtsSkillOperationFilter<any>[] = [];
+  userFilters: GtsSkillOperationFilter<any>[] = [];
 
   protected buildAction(): SkillDescription<any> {
     const extId = this.associatedExtensionId;
@@ -95,7 +108,7 @@ class SkillModel {
         arg,
       );
       for (const action of operations) {
-        action(context, context.eventArg);
+        action(context);
       }
       return context._terminate();
     };
@@ -110,7 +123,7 @@ class SkillModel {
         arg,
       );
       for (const filter of filters) {
-        if (!filter(context, context.eventArg)) {
+        if (!filter(context)) {
           return false;
         }
       }
@@ -119,13 +132,13 @@ class SkillModel {
   }
 }
 
-class TriggeredSkillModel extends SkillModel {
+export class TriggeredSkillModel extends SkillModel {
   // triggered configs
   // TODO we should check this carefully later.
   defaultDefeatedDispose = false;
 
   asSkillType: CommonSkillType | null = null;
-  callerType: ExEntityType;
+  caller: ICaller;
   detailedEventName: DetailedEventNames | CustomEvent;
   enableHandTriggering = false;
   enablePileTriggering = false;
@@ -137,13 +150,39 @@ class TriggeredSkillModel extends SkillModel {
   listenTo: ListenTo = ListenTo.SameArea;
 
   constructor(
-    callerType: ExEntityType,
+    caller: ICaller,
     detailedEventName: DetailedEventNames | CustomEvent,
   ) {
     super();
-    this.callerType = callerType;
+    this.caller = caller;
     this.detailedEventName = detailedEventName;
   }
+
+  setUsage(count: number, option: GtsUsageOption): void {
+    const perRound = option.perRound ?? false;
+    const autoDecrease = option.autoDecrease ?? false;
+    const name = this.caller.setUsage(count, option);
+    if (perRound) {
+      if (this.usagePerRoundOpt) {
+        throw new GiTcgDataError(
+          "Cannot set usage per round multiple times for the same skill.",
+        );
+      }
+      this.usagePerRoundOpt = {
+        name: name as UsagePerRoundVariableNames,
+        autoDecrease,
+      };
+    } else {
+      if (this.usageOpt) {
+        throw new GiTcgDataError(
+          "Cannot set usage multiple times for the same skill.",
+        );
+      }
+      this.usageOpt = { name, autoDecrease };
+    }
+    this.userFilters.unshift((c) => c.self.getVariable(name) > 0);
+  }
+
   buildSkillDefinition(): SkillDefinition {
     // 【可用次数自动扣除】
     if (this.usagePerRoundOpt?.autoDecrease) {
@@ -172,7 +211,7 @@ class TriggeredSkillModel extends SkillModel {
 
     // 0. 对于并非响应自身弃置的技能，当实体已经被弃置时，不再响应
     if (this.detailedEventName !== "selfDispose") {
-      this.filters.push((c, e) => {
+      this.filters.push((c) => {
         return c.self.area.type !== "removedEntities";
       });
     }
@@ -189,7 +228,7 @@ class TriggeredSkillModel extends SkillModel {
     }
     // 2. 被动技能要求角色存活
     if (
-      this.callerType === "character" &&
+      this.caller.type === "character" &&
       this.detailedEventName !== "defeated"
     ) {
       this.filters.push((c) => c.self.variables.alive);
@@ -197,7 +236,7 @@ class TriggeredSkillModel extends SkillModel {
     // 3. 状态和装备的技能默认要求角色存活，默认击倒弃置除外
     if (
       !this["defaultDefeatedDispose"] &&
-      (this.callerType === "status" || this.callerType === "equipment")
+      (this.caller.type === "status" || this.caller.type === "equipment")
     ) {
       this.filters.push((c) => {
         if (c.self.area.type === "characters") {
@@ -214,10 +253,10 @@ class TriggeredSkillModel extends SkillModel {
           : (this.detailedEventName as DetailedEventNames)
       ];
     const listenTo = this.listenTo;
-    this.filters.push(function (c, e) {
+    this.filters.push(function (c) {
       const { area, id } = c.self;
       return filterDescriptor(
-        e as any,
+        c.eventArg as any,
         {
           callerArea: area,
           callerId: id,
@@ -229,10 +268,8 @@ class TriggeredSkillModel extends SkillModel {
     // 5. 自定义事件：确保事件名一致
     if (isCustomEvent(this.detailedEventName)) {
       const customEvent = this.detailedEventName;
-      this.filters.push(function (c, e) {
-        return (
-          (e as unknown as CustomEventEventArg).customEvent === customEvent
-        );
+      this.filters.push(function (c) {
+        return c.eventArg.customEvent === customEvent;
       });
     }
 
@@ -242,7 +279,7 @@ class TriggeredSkillModel extends SkillModel {
     return {
       type: "skill",
       id: this.id,
-      ownerType: this.callerType,
+      ownerType: this.caller.type,
       skillType: this.asSkillType,
       triggerOn,
       initiativeSkillConfig: null,
@@ -268,23 +305,17 @@ type TriggeredSkillVMToBuilderMeta<Meta extends TriggeredSkillVMMeta> = {
   eventArgType: Meta["eventArgType"];
 };
 type TriggeredSkillOperationOfVM<Meta extends TriggeredSkillVMMeta> =
-  SkillOperation<TriggeredSkillVMToBuilderMeta<Meta>>;
+  GtsSkillOperation<TriggeredSkillVMToBuilderMeta<Meta>>;
 type TriggeredSkillFilterOfVM<Meta extends TriggeredSkillVMMeta> =
-  SkillOperationFilter<TriggeredSkillVMToBuilderMeta<Meta>>;
+  GtsSkillOperationFilter<TriggeredSkillVMToBuilderMeta<Meta>>;
 
-const TriggeredSkillVM = defineViewModel(
+export const TriggeredSkillVM = defineViewModel(
   TriggeredSkillModel,
   (h) => ({
     listenTo: h.simpleAttribute({
       uniqueKey: "listenTo",
-    })(function (listenTo: "player" | "all") {
-      if (listenTo === "player") {
-        this.listenTo = ListenTo.SamePlayer;
-      } else if (listenTo === "all") {
-        this.listenTo = ListenTo.All;
-      } else {
-        throw new Error(`Invalid listenTo value: ${listenTo}`);
-      }
+    })(function (listenTo: ListenTo) {
+      this.listenTo = listenTo;
     }),
     when: h.attribute<{
       <Meta extends TriggeredSkillVMMeta>(
@@ -296,12 +327,18 @@ const TriggeredSkillVM = defineViewModel(
     }),
 
     usage: h.attribute<{
+      // TODO name
       <Meta extends TriggeredSkillVMMeta>(
         this: AR.This<Meta>,
         count: number,
-      ): AR.Done; // TODO usage config
-    }>((model) => {
-      // TODO
+      ): AR.WithRewriteMeta<
+        typeof UsageVM,
+        Omit<Meta, "variables"> & { variables: Meta["variables"] | "usage" }
+      >;
+      // TODO unique key (we now can test perRound now, ...right?)
+    }>((model, [count], subView) => {
+      const options = UsageVM.parse(subView);
+      model.setUsage(count, options);
     }),
 
     "~action": h.attribute<{
@@ -358,9 +395,40 @@ class InitiativeSkillModel extends SkillModel {
   }
 }
 
-class CharacterSkillModel extends InitiativeSkillModel {
+class CharacterSkillModel extends InitiativeSkillModel implements ICaller {
+  type = "character" as const;
   varConfigs = new Map<string, VariableConfig>();
   passiveSkillDefinitions: SkillDefinition[] = [];
+
+  setUsage(count: number, option: GtsUsageOption): string {
+    const perRound = option.perRound ?? false;
+    let name: string;
+    if (option.name) {
+      name = option.name;
+    } else {
+      throw new GiTcgDataError(
+        `You must explicitly set the name of usage when defining passive skill. Be careful that different passive skill should have distinct usage name.`,
+      );
+    }
+    if (
+      !perRound &&
+      name !== "usage" &&
+      typeof option.autoDispose === "boolean"
+    ) {
+      console?.warn?.(
+        `No need to specify \`autoDispose\` of a non-per-round non-defaulted-name usage, since it cannot be auto-disposed by \`.consumeUsage\` primitive.`,
+      );
+      console?.trace?.();
+    }
+    const autoDispose = name === "usage" && option.autoDispose !== false;
+    if (autoDispose) {
+      throw new GiTcgDataError(
+        `Character cannot be autoDisposed by usage reaching 0.`,
+      );
+    }
+    this.varConfigs.set(name, createVariableConfig(count, option));
+    return name;
+  }
 
   getEntry(): CharacterInitiativeSkillEntry | CharacterPassiveSkillEntry {
     if (this.isInitiativeSkill) {
@@ -427,9 +495,9 @@ type CharacterSkillVMToBuilderMeta<Meta extends CharacterSkillVMMeta> = {
 };
 
 type CharacterSkillOperationOfVM<Meta extends CharacterSkillVMMeta> =
-  SkillOperation<CharacterSkillVMToBuilderMeta<Meta>>;
+  GtsSkillOperation<CharacterSkillVMToBuilderMeta<Meta>>;
 type CharacterSkillFilterOfVM<Meta extends CharacterSkillVMMeta> =
-  SkillOperationFilter<CharacterSkillVMToBuilderMeta<Meta>>;
+  GtsSkillOperationFilter<CharacterSkillVMToBuilderMeta<Meta>>;
 
 export const CharacterSkillViewModel = defineViewModel(
   CharacterSkillModel,
@@ -615,8 +683,7 @@ export const CharacterSkillViewModel = defineViewModel(
       >;
     }>((model, [name, initValue], subView) => {
       const options = VariablesVM.parse(subView);
-      // TODO other configs
-      const varConfig = createVariable(initValue);
+      const varConfig = createVariableConfig(initValue, options);
       model.varConfigs.set(name, varConfig);
     }),
     on: h.attribute<{
@@ -642,11 +709,37 @@ export const CharacterSkillViewModel = defineViewModel(
         }
       >;
     }>((model, [eventName], subView) => {
-      const skillModel = TriggeredSkillVM.parse(
-        subView,
-        "character",
-        eventName,
-      );
+      const skillModel = TriggeredSkillVM.parse(subView, model, eventName);
+      const skillDef = skillModel.buildSkillDefinition();
+      model.passiveSkillDefinitions.push(skillDef);
+    }),
+    /** same as `on` but add `usage 1 { visible false };` */
+    once: h.attribute<{
+      <
+        Meta extends CharacterSkillVMMeta,
+        const Event extends DetailedEventNames,
+      >(
+        this: OnlyPassiveThis<Meta>,
+        eventName: Event,
+      ): AR.With<
+        typeof TriggeredSkillVM,
+        Omit<Meta, "targetTypes"> & {
+          eventArgType: DetailedEventArgOf<Event>;
+        }
+      >;
+      <Meta extends CharacterSkillVMMeta, T = void>(
+        this: OnlyPassiveThis<Meta>,
+        customEvent: CustomEvent<T>,
+      ): AR.With<
+        typeof TriggeredSkillVM,
+        Omit<Meta, "targetTypes"> & {
+          eventArgType: CustomEventEventArg<T>;
+        }
+      >;
+      uniqueKey(): "once";
+    }>((model, [eventName], subView) => {
+      const skillModel = TriggeredSkillVM.parse(subView, model, eventName);
+      skillModel.setUsage(1, { visible: false });
       const skillDef = skillModel.buildSkillDefinition();
       model.passiveSkillDefinitions.push(skillDef);
     }),

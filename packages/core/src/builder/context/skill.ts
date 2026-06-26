@@ -220,11 +220,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
     Meta,
     Omit<Meta["eventArgType"], `_${string}`>
   >;
-  // GTS support
-  public readonly e: ApplyReactive<
-    Meta,
-    Omit<Meta["eventArgType"], `_${string}`>
-  >;
 
   /** @internal */
   public readonly _reactiveProxies = new Map<
@@ -251,24 +246,26 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return this._self.area;
   }
 
+  // GTS support
+  public get e() {
+    return this.eventArg;
+  }
   public readonly "~prelude" = {
-    void: 0 satisfies typeof DiceType.Void,
-    nil: 0 satisfies typeof DiceType.Void,
-    unaligned: 0 satisfies typeof DiceType.Void,
-    physical: 0 satisfies typeof DamageType.Physical,
-    none: 0 satisfies typeof Aura.None,
-    cryo: 1,
-    hydro: 2,
-    pyro: 3,
-    electro: 4,
-    anemo: 5,
-    geo: 6,
-    dendro: 7,
-    omni: 8 satisfies typeof DiceType.Omni,
-    aligned: 8 satisfies typeof DiceType.Aligned,
-    energy: 9 satisfies typeof DiceType.Energy,
     $,
   } as const;
+  public "~query"<const Q extends IQuery>(
+    arg: ($: IDollar) => Q,
+  ): RxEntityState<Meta, InferResult<Q>["type"]> | undefined {
+    const results = this.queryAll(arg);
+    return results[0];
+  }
+  public "~queryAll"<const Q extends IQuery>(
+    arg: ($: IDollar) => Q,
+  ): RxEntityState<Meta, InferResult<Q>["type"]>[] {
+    return runQuery(this.rawState, this.callerArea.who, arg($)).map((state) =>
+      this.get(state),
+    );
+  }
 
   /**
    *
@@ -289,7 +286,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
         ),
     };
     this.eventArg = applyReactive(this, eventArg);
-    this.e = this.eventArg;
     this.mutator = new StateMutator(state, mutatorConfig);
     this._self = applyReactive(this, this.skillInfo.caller) as RxEntityState<
       Meta,

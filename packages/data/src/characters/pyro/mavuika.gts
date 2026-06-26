@@ -22,14 +22,15 @@ import { character, skill, status, combatStatus, card, DamageType, DiceType, typ
  * 所附属角色可累积「夜魂值」。（最多累积到2点）
  * 夜魂值为0时，退出夜魂加持。
  */
-export const NightsoulsBlessing = status(113151)
-  .since("v5.7.0")
-  .nightsoulsBlessing(2, { autoDispose: true })
-  .on("selfDispose")
-  .do((c) => {
-    c.$(`my combat status with definition id ${AllfireArmamentsRingOfSearingRadiance}`)?.dispose();
-  })
-  .done();
+define status {
+  id 113151 as NightsoulsBlessing;
+  since "v5.7.0";
+  // nightsoulsBlessing 2, ({ autoDispose: true });
+  on selfDispose {
+    // TODO (gts): error mapping
+    :query($.my.combatStatus.def(AllfireArmamentsRingOfSearingRadiance)).dispose();
+  }
+}
 
 /**
  * @id 113152
@@ -267,11 +268,11 @@ define skill {
   skillType passive;
   variable fightingSpirit, 0;
   on consumeNightsoul {
-    listenTo player;
+    listenTo samePlayer;
     :addVariableWithMax("fightingSpirit", 1, 6);
   };
   on useSkill {
-    listenTo player;
+    listenTo samePlayer;
     when :( :e.isSkillType("normal") );
     :addVariableWithMax("fightingSpirit", 1, 6);
   }

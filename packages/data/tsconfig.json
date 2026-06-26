@@ -6,7 +6,7 @@
     "moduleResolution": "Bundler",
     "lib": ["ESNext"],
 
-    "rewriteRelativeImportExtensions": true,
+    "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
     "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,

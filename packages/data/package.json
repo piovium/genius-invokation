@@ -22,7 +22,7 @@
   ],
   "scripts": {
     "regenerate_data": "gnx ./scripts/generators/index.ts",
-    "check": "tsc --noEmit",
+    "check": "gtsc --noEmit",
     "build": "tsdown"
   },
   "gamingTs": {
@@ -36,6 +36,7 @@
     "@gi-tcg/assets-manager": "workspace:*",
     "@gi-tcg/config": "workspace:*",
     "@gi-tcg/gts-transpiler": "catalog:",
+    "@gi-tcg/gtsc": "catalog:",
     "@microsoft/tsdoc": "^0.14.2",
     "case-anything": "^2.1.13",
     "glob": "^11.0.3"
