@@ -6,6 +6,8 @@
     "moduleResolution": "Bundler",
     "lib": ["ESNext"],
 
+    "declaration": true,
+    "emitDeclarationOnly": true,
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
     "verbatimModuleSyntax": true,

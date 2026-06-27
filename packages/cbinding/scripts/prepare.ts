@@ -1,5 +1,6 @@
 import path, { resolve } from "node:path";
 import { rollup } from "rollup";
+import json from "@rollup/plugin-json";
 import babel from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
 import nodeResolve from "@rollup/plugin-node-resolve";
@@ -13,6 +14,7 @@ async function writeGeneratedJsCodeCpp() {
     input: `${import.meta.dirname}/../js/main.ts`,
     external: ["@gi-tcg/cbinding-io"],
     plugins: [
+      json(),
       replace({
         preventAssignment: true,
         values: {

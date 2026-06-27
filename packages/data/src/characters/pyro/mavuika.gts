@@ -25,10 +25,9 @@ import { character, skill, status, combatStatus, card, DamageType, DiceType, typ
 define status {
   id 113151 as NightsoulsBlessing;
   since "v5.7.0";
-  // nightsoulsBlessing 2, ({ autoDispose: true });
+  nightsoulsBlessing 2 { autoDispose };
   on selfDispose {
-    // TODO (gts): error mapping
-    :query($.my.combatStatus.def(AllfireArmamentsRingOfSearingRadiance)).dispose();
+    :query($.my.combatStatus.def(AllfireArmamentsRingOfSearingRadiance))?.dispose();
   }
 }
 
@@ -40,20 +39,22 @@ define status {
  * 我方全体角色「普通攻击」造成的伤害+1。
  * 可用次数：2
  */
-export const CrucibleOfDeathAndLife = status(113152)
-  .since("v5.7.0")
-  .usage(2)
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("normal"))
-  .listenToPlayer()
-  .increaseDamage(1)
-  .consumeUsage()
-  .on("cancelConsumeNightsoul")
-  .listenToPlayer()
-  .do((c, e) => {
-    e.cancel();
-    c.consumeUsage(e.info.diffValue);
-  })
-  .done();
+define status {
+  id 113152 as CrucibleOfDeathAndLife;
+  since "v5.7.0";
+  usage 2;
+  on increaseSkillDamage {
+    when :( :e.viaSkillType("normal") );
+    listenTo samePlayer;
+    :e.increaseDamage(1);
+    :consumeUsage();
+  }
+  on cancelConsumeNightsoul {
+    listenTo samePlayer;
+    :e.cancel();
+    :consumeUsage(:e.info.diffValue);
+  }
+}
 
 /**
  * @id 113158
@@ -61,11 +62,13 @@ export const CrucibleOfDeathAndLife = status(113152)
  * @description
  * 行动阶段开始时：生成2个万能元素。
  */
-export const FlamestriderFullThrottleInEffect = combatStatus(113158)
-  .since("v5.7.0")
-  .once("actionPhase")
-  .generateDice(DiceType.Omni, 2)
-  .done();
+define combatStatus {
+  id 113158 as FlamestriderFullThrottleInEffect;
+  since "v5.7.0";
+  once actionPhase {
+    :generateDice(DiceType.Omni, 2);
+  }
+}
 
 /**
  * @id 13155
@@ -73,11 +76,12 @@ export const FlamestriderFullThrottleInEffect = combatStatus(113158)
  * @description
  * 行动阶段开始时：生成2个万能元素骰。
  */
-export const FlamestriderFullThrottlePreparedSkill = skill(13155)
-  .type("elemental")
-  .prepared()
-  .combatStatus(FlamestriderFullThrottleInEffect)
-  .done();
+define skill {
+  id 13155 as FlamestriderFullThrottlePreparedSkill;
+  skillType elemental;
+  prepared;
+  :combatStatus(FlamestriderFullThrottleInEffect);
+}
 
 /**
  * @id 113157
@@ -85,10 +89,11 @@ export const FlamestriderFullThrottlePreparedSkill = skill(13155)
  * @description
  * 本角色将在下次行动时，直接使用技能：驰轮车·疾驰。
  */
-export const FlamestriderFullThrottleInEffectPrepareStatus = status(113157)
-  .since("v5.7.0")
-  .prepare(FlamestriderFullThrottlePreparedSkill)
-  .done();
+define status {
+  id 113157 as FlamestriderFullThrottleInEffectPrepareStatus;
+  since "v5.7.0";
+  prepare FlamestriderFullThrottlePreparedSkill;
+}
 
 /**
  * @id 113154
@@ -185,22 +190,23 @@ export const FlamestriderFullThrottle = card(113156)
  * @description
  * 我方其他角色使用「普通攻击」或特技后：消耗玛薇卡1点「夜魂值」，造成1点火元素伤害。（玛薇卡退出夜魂加持后销毁）
  */
-export const AllfireArmamentsRingOfSearingRadiance: CombatStatusHandle = combatStatus(113153)
-  .since("v5.7.0")
-  .on("useSkillOrTechnique", (c, e) => {
-    if (e.isSkillType("normal")){
-      return e.skillCaller.definition.id !== Mavuika;
-    } else if (e.isSkillType("technique")){
-      return e.techniqueCaller.definition.id !== Mavuika;
-    } else {
-      return false;
-    }
-  })
-  .do((c) => {
-    c.consumeNightsoul(`my character with definition id ${Mavuika}`);
-  })
-  .damage(DamageType.Pyro, 1)
-  .done();
+define combatStatus {
+  id 113153 as AllfireArmamentsRingOfSearingRadiance;
+  since "v5.7.0";
+  on useSkillOrTechnique {
+    when :{
+      if (:e.isSkillType("normal")){
+        return :e.skillCaller.definition.id !== Mavuika;
+      } else if (:e.isSkillType("technique")){
+        return :e.techniqueCaller.definition.id !== Mavuika;
+      } else {
+        return false;
+      }
+    };
+    :consumeNightsoul($.my.character.def(Mavuika));
+    :damage(DamageType.Pyro, 1);
+  }
+}
 
 /**
  * @id 13151

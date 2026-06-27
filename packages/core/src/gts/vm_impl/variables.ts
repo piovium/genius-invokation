@@ -24,7 +24,7 @@ const GtsAppendOptions = type({
 });
 export type GtsAppendOptions = TypeInfer<typeof GtsAppendOptions>;
 
-const GtsVariableOptions = type({
+export const GtsVariableOptions = type({
   /** 该值在重复创建时是否允许叠加。 */
   "append?": GtsAppendOptions.or("boolean | number"),
   /**
@@ -34,7 +34,7 @@ const GtsVariableOptions = type({
   "forceOverwrite?": "boolean",
   "visible?": "boolean",
 });
-export type GtsOptions = TypeInfer<typeof GtsVariableOptions>;
+export type GtsVariableOptions = TypeInfer<typeof GtsVariableOptions>;
 
 export const VariablesVM = defineSimpleViewModel(GtsVariableOptions, {
   booleanSwitch: true,

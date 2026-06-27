@@ -23,10 +23,11 @@ import {
 } from "../../base/entity";
 import type { CustomEventEventArg, SkillDefinition } from "../../base/skill";
 import type { Writable } from "../../utils";
-import type {
-  DetailedEventArgOf,
-  DetailedEventNames,
-  SkillOperation,
+import {
+  ListenTo,
+  type DetailedEventArgOf,
+  type DetailedEventNames,
+  type SkillOperation,
 } from "../../builder/skill";
 import {
   GiTcgCoreInternalError,
@@ -39,16 +40,18 @@ import type {
   ExEntityType,
   ExtensionHandle,
   HandleT,
+  SkillHandle,
 } from "../../builder/type";
 import {
   VariablesVM,
   type GtsAppendOptions,
-  type GtsOptions,
+  type GtsVariableOptions,
   type GtsUsageOption,
 } from "./variables";
 import { createVariable, createVariableCanAppend } from "../../builder/utils";
 import { TriggeredSkillModel, TriggeredSkillVM } from "./skill";
 import type { CustomEvent } from "../../builder";
+import { GlobalUsageVM, PrepareVM, NightsoulVM } from "./entity_auxilary";
 
 class EntityModel implements ICaller {
   skillIndex = 0;
@@ -171,7 +174,7 @@ export interface ICaller {
 
 export const createVariableConfig = (
   initialValue: number,
-  options: GtsOptions,
+  options: GtsVariableOptions,
 ): VariableConfig => {
   let appendOpt: GtsAppendOptions | undefined;
   if (typeof options.append === "object") {
@@ -238,6 +241,46 @@ export const EntityViewModel = defineViewModel(
       this.tags.push(...tags);
     }),
     // TODO
+    prepare: h.attribute<{
+      (skill: SkillHandle | "normal"): AR.With<typeof PrepareVM>;
+    }>((model, [skill], subView) => {
+      const options = PrepareVM.parse(subView);
+      if (typeof options.hintCount === "number") {
+        model.varConfigs.set("hintCount", createVariable(options.hintCount));
+      }
+      model.tags.push("preparingSkill");
+      const replaceSkillModel = new TriggeredSkillModel(
+        model,
+        "replaceActionBySkill",
+      );
+      replaceSkillModel.action = function (c) {
+        c.useSkill(skill, { asPrepared: true });
+        if (options.nextStatus) {
+          c.characterStatus(
+            options.nextStatus,
+            c.self.cast<"status">().master,
+            options.nextStatusCreateOpt,
+          );
+        }
+        c.dispose();
+      };
+      const switchActiveSkillModel = new TriggeredSkillModel(
+        model,
+        "switchActive",
+      );
+      switchActiveSkillModel.userFilters.push(function (c) {
+        return (
+          c.eventArg.switchInfo.from?.id === c.self.cast<"status">().master.id
+        );
+      });
+      switchActiveSkillModel.action = function (c) {
+        c.dispose();
+      };
+      model.skillList.push(
+        replaceSkillModel.buildSkillDefinition(),
+        switchActiveSkillModel.buildSkillDefinition(),
+      );
+    }),
     variable: h.attribute<{
       <Meta extends EntityVMMeta, const Name extends string>(
         this: AR.This<Meta>,
@@ -253,6 +296,53 @@ export const EntityViewModel = defineViewModel(
       const options = VariablesVM.parse(subView);
       const varConfig = createVariableConfig(initValue, options);
       model.varConfigs.set(name, varConfig);
+    }),
+    usage: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+        count: number,
+      ): AR.WithRewriteMeta<
+        typeof GlobalUsageVM,
+        Omit<Meta, "variables"> & {
+          variables: Meta["variables"] | "usage";
+        }
+      >;
+    }>((model, [count], subView) => {
+      const options = GlobalUsageVM.parse(subView);
+      model.setUsage(count, options);
+      if (options.autoDispose !== false) {
+        model.disposeWhenUsageIsZero = true;
+      }
+    }),
+    nightsoulsBlessing: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+        count: number,
+      ): AR.WithRewriteMeta<
+        typeof NightsoulVM,
+        Omit<Meta, "variables"> & {
+          variables: Meta["variables"] | "nightsoul";
+        }
+      >;
+    }>((model, [count], subView) => {
+      const options = NightsoulVM.parse(subView);
+      model.tags.push("nightsoulsBlessing");
+      const varConfig = createVariableConfig(count, options);
+      model.varConfigs.set("nightsoul", varConfig);
+      if (options.autoDispose) {
+        const disposeSkillModel = new TriggeredSkillModel(
+          model,
+          "beforeAction",
+        );
+        disposeSkillModel.userFilters.push(function (c) {
+          return c.getVariable("nightsoul") <= 0;
+        });
+        disposeSkillModel.listenTo = ListenTo.All;
+        disposeSkillModel.action = function (c) {
+          c.self.dispose();
+        };
+        model.skillList.push(disposeSkillModel.buildSkillDefinition());
+      }
     }),
     on: h.attribute<{
       <Meta extends EntityVMMeta, const Event extends DetailedEventNames>(
