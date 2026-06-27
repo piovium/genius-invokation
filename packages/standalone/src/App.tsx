@@ -303,7 +303,7 @@ export function App() {
               ）
             </li>
             <li>
-              <a href="https://7shengzhaohuan.online/lpsim" target="_blank">
+              <a href="https://lpsim.zyr17.cn/" target="_blank">
                 七圣召唤水皇模拟器 "LPSim"
               </a>
               （
