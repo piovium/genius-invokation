@@ -123,6 +123,31 @@ export const FlamestriderSoaringAscent = card(113154)
   .damage(DamageType.Pyro, 4)
   .done();
 
+
+// TODO: REMOVE ME design test
+/*
+define card {
+  id 113154 as FlamestriderSoaringAscentTemp;
+  since "v5.7.0";
+  undiscoverable;
+  cost DiceType.Void, 3;
+  on selfDiscard {
+    :damage(DamageType.Pyro, 1);
+  }
+  technique {
+    target $.my.character.def(Mavuika);
+    skill {
+      id 1131541;
+      usage 2;
+      cost DiceType.Void, 1;
+      when :( :self.master.hasNightsoulsBlessing()?.variables.nightsoul );
+      :consumeNightsoul("@master");
+      :damage(DamageType.Pyro, 4);
+    }
+  }
+}
+// */
+
 /**
  * @id 113155
  * @name 驰轮车·涉渡
@@ -327,3 +352,26 @@ export const HumanitysNameUnfettered = card(213151)
   .usagePerRound(1)
   .gainNightsoul("@master", 1)
   .done();
+
+// TODO REMOVE ME design test
+/*
+define card {
+  id 213151 as HumanitysNameUnfetteredTemp;
+  since "v5.7.0";
+  cost DiceType.Pyro, 1;
+  talent Mavuika, none {
+    on enter {
+      :selectAndCreateHandCard([
+        FlamestriderBlazingTrail,
+        FlamestriderFullThrottle,
+        FlamestriderSoaringAscent
+      ]);
+    }
+    on playCard {
+      when :( :e.hasCardTag("technique") && :self.master.hasStatus(NightsoulsBlessing) );
+      usagePerRound 1;
+      :gainNightsoul("@master", 1);
+    }
+  }
+}
+// */
