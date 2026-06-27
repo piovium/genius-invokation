@@ -42,27 +42,3 @@
 ## [关于开发](./docs/development/README.md)
 
 上述链接可查看（可能是过时的）开发文档和注记。
-
-<table>
-<tbody>
-<tr>
-<td>
-
-如果有意图参与本项目开发，欢迎加 QQ 群 [1015846340](https://qm.qq.com/q/n6TIu51Ae4) 或 [Discord 社区](https://discord.gg/vGjh6XAKqk)讨论。
-
-</td>
-<td>
-
-
-</td>
-<tr>
-<td colspan="2">
-
-进群口令请在代码中自行查找～
-
-</td>
-</tr>
-</tbody>
-</table>
-
-
