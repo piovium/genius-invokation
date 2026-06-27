@@ -34,7 +34,7 @@ https://standalone.piovium.org
 The above link provides access to (possibly outdated) development documentation and notes.
 
 
-If you are interested in our project or want to have more infomation, welcome to join our [Discord server](https://discord.gg/vGjh6XAKqk).
+If you are interested in our project or want to have more information, welcome to join our [Discord server](https://discord.gg/vGjh6XAKqk).
 
 All English content should refer to the Chinese content.
 

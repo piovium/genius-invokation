@@ -133,7 +133,7 @@ const renderHistoryChild = (
   const variableNameText = (id: number, name: string) => {
     const manager = assetsManager();
     const data = manager.getDataSync(id);
-    const tokenName = ("shownTokenName" in data) ? data.shownTokenName : name;
+    const tokenName = "shownTokenName" in data ? data.shownTokenName : name;
     return `<tooltip title="${name}">${tokenName}</tooltip>`;
   };
 
@@ -456,8 +456,10 @@ const renderHistoryChild = (
     }
     case "convertDice": {
       const isOpp = opp(child.who);
+      // 对方转换元素骰的数目由不完整的数据计算得到，为避免误导始终显示 SomeDice
+      const uncertain = isOpp && !child.isTuning;
       const key =
-        `history.${isOpp ? "opp" : "my"}Convert${child.count ? "To" : "Some"}Dice` as const;
+        `history.${isOpp ? "opp" : "my"}Convert${uncertain ? "Some" : "To"}Dice` as const;
       result = {
         opp: isOpp,
         imageId: child.isTuning ? "tuning" : parentCallerDefinitionId,
