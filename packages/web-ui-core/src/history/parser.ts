@@ -703,7 +703,8 @@ export function updateHistory(
             if (!mainBlock && phase === PbPhaseType.END) {
               maybeEndPhaseDrawing = true;
             }
-            const lastChild = getLastChild();
+            // 抓牌/弃牌数只在mutations内部合并
+            const lastChild = children.at(-1);
             if (lastChild?.type === "drawCard" && lastChild.who === m.fromWho) {
               lastChild.drawCardsCount += 1;
             } else {
@@ -720,7 +721,7 @@ export function updateHistory(
               cardDefinitionId: m.entity!.definitionId,
             });
           } else if (m.reason === PbMoveEntityReason.UNDRAW) {
-            const lastChild = getLastChild();
+            const lastChild = children.at(-1);
             if (
               lastChild?.type === "undrawCard" &&
               lastChild.who === m.fromWho
