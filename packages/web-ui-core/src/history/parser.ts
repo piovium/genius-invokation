@@ -432,10 +432,10 @@ export function updateHistory(
     const children: HistoryChildren[] = [];
     history.recorder.onInitialize(previousState);
 
-    const getLastChild = () => {
+    const getLastChild = (includeLastMainBlock = false) => {
       return (
         children.at(-1) ??
-        (lastMainBlock && "children" in lastMainBlock
+        (includeLastMainBlock && lastMainBlock && "children" in lastMainBlock
           ? lastMainBlock.children.at(-1)
           : void 0)
       );
@@ -684,10 +684,12 @@ export function updateHistory(
               children.push({
                 type: "createEntity",
                 who: m.fromWho as 0 | 1,
-                masterDefinitionId: history.recorder.getMasterDefinitionId(m.entity!.id),
+                masterDefinitionId: history.recorder.getMasterDefinitionId(
+                  m.entity!.id,
+                ),
                 entityDefinitionId: m.entity!.definitionId,
                 entityType: "equipment",
-              })
+              });
             }
           } else if (
             m.reason === PbMoveEntityReason.UNEQUIP ||
@@ -703,6 +705,7 @@ export function updateHistory(
             if (!mainBlock && phase === PbPhaseType.END) {
               maybeEndPhaseDrawing = true;
             }
+            // 抓牌/弃牌数只在 mutations 内部合并
             const lastChild = getLastChild();
             if (lastChild?.type === "drawCard" && lastChild.who === m.fromWho) {
               lastChild.drawCardsCount += 1;
@@ -872,7 +875,7 @@ export function updateHistory(
           if (phase < PbPhaseType.ACTION) {
             break;
           }
-          const lastChild = getLastChild();
+          const lastChild = getLastChild(true);
           if (lastChild?.type === "rerollDice" && lastChild.who === m.who) {
             lastChild.count += 1;
           } else {
@@ -888,7 +891,7 @@ export function updateHistory(
           if (phase < PbPhaseType.ACTION) {
             break;
           }
-          const lastChild = getLastChild();
+          const lastChild = getLastChild(true);
           if (lastChild?.type === "switchCard" && lastChild.who === m.who) {
             lastChild.count += 1;
           } else {
