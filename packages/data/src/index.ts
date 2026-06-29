@@ -136,7 +136,7 @@ import "./characters/hydro/barbara.ts";
 import "./characters/hydro/candace.ts";
 import "./characters/hydro/consecrated_horned_crocodile.ts";
 import "./characters/hydro/dahlia.ts";
-import "./characters/hydro/furina.ts";
+import "./characters/hydro/furina.gts";
 import "./characters/hydro/hydro_hilichurl_rogue.ts";
 import "./characters/hydro/hydro_tulpa.ts";
 import "./characters/hydro/kamisato_ayato.ts";

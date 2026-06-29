@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, combatStatus, card, DamageType, type CharacterHandle, type CardHandle } from "@gi-tcg/core/builder";
+import { character, skill, summon, status, combatStatus, card, DamageType, type CharacterHandle, type CardHandle } from "@gi-tcg/core/builder";import { $ } from "@gi-tcg/core/builder";
+
 
 /**
  * @id 112113
@@ -22,32 +23,31 @@ import { character, skill, summon, status, combatStatus, card, DamageType, type 
  * 在「始基力：荒性」和「始基力：芒性」之中，切换芙宁娜的形态。
  * 如果我方场上存在沙龙成员或众水的歌者，也切换其形态。
  */
-export const SeatsSacredAndSecular: CardHandle = card(112113)
-  .since("v4.7.0")
-  .undiscoverable()
-  .filter((c) => c.$(`my character with definition id ${FurinaPneuma} or my character with definition id ${FurinaOusia}`))
-  .do((c) => {
-    const furina = c.$(`my character with definition id ${FurinaPneuma} or my character with definition id ${FurinaOusia}`);
-    if (!furina) {
-      return;
+define card {
+  id 112113 as SeatsSacredAndSecular;
+  since "v4.7.0";
+  undiscoverable;
+  filter :( :query($.union($.my.character.def(FurinaPneuma), $.my.character.def(FurinaOusia))) );
+  const furina = :query($.union($.my.character.def(FurinaPneuma), $.my.character.def(FurinaOusia)))
+  if (!furina) {
+    return;
+  }
+  if (furina.definition.id === FurinaPneuma) {
+    :transformDefinition(furina, FurinaOusia);
+    const summon = :query($.my.summon.def(SalonMembers));
+    if (summon) {
+      :transformDefinition(summon, SingerOfManyWaters);
+      summon.setVariable("hintIcon", DamageType.Heal);
     }
-    if (furina.definition.id === FurinaPneuma) {
-      c.transformDefinition(furina, FurinaOusia);
-      const summon = c.$(`my summon with definition id ${SalonMembers}`);
-      if (summon) {
-        c.transformDefinition(summon, SingerOfManyWaters);
-        summon.setVariable("hintIcon", DamageType.Heal);
-      }
-    } else {
-      c.transformDefinition(furina, FurinaPneuma);
-      const summon = c.$(`my summon with definition id ${SingerOfManyWaters}`);
-      if (summon) {
-        c.transformDefinition(summon, SalonMembers)
-        summon.setVariable("hintIcon", DamageType.Hydro);
-      }
+  } else {
+    :transformDefinition(furina, FurinaPneuma);
+    const summon = :query($.my.summon.def(SingerOfManyWaters));
+    if (summon) {
+      :transformDefinition(summon, SalonMembers)
+      summon.setVariable("hintIcon", DamageType.Hydro);
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 112111
@@ -206,13 +206,14 @@ export const ArkheSeatsSacredAndSecular = skill(12115)
  * @description
  * 永世领唱，无尽圆舞。
  */
-export const FurinaPneuma = character(1211)
-  .since("v4.7.0")
-  .tags("hydro", "sword", "fontaine", "pneuma")
-  .health(12)
-  .energy(2)
-  .skills(SoloistsSolicitation, SalonSolitairePneuma, LetThePeopleRejoice, Skill12114, ArkheSeatsSacredAndSecular)
-  .done();
+define character {
+  id 1211 as FurinaPneuma;
+  since "v4.7.0";
+  tags hydro, sword, fontaine, pneuma;
+  health 12;
+  energy 2;
+  skills SoloistsSolicitation, SalonSolitairePneuma, LetThePeopleRejoice, Skill12114, ArkheSeatsSacredAndSecular;
+}
 
 
 /**
@@ -248,13 +249,14 @@ export const SalonSolitaireOusia = skill(12122)
  * @description
  *
  */
-export const FurinaOusia = character(1212)
-  .since("v4.7.0")
-  .tags("hydro", "sword", "fontaine", "ousia")
-  .health(12)
-  .energy(2)
-  .skills(SoloistsSolicitationOusia, SalonSolitaireOusia, LetThePeopleRejoice, Skill12114, ArkheSeatsSacredAndSecular)
-  .done();
+define character {
+  id 1212 as FurinaOusia;
+  since "v4.7.0";
+  tags hydro, sword, fontaine, ousia;
+  health 12;
+  energy 2;
+  skills SoloistsSolicitationOusia, SalonSolitaireOusia, LetThePeopleRejoice, Skill12114, ArkheSeatsSacredAndSecular;
+}
 
 /**
  * @id 212111

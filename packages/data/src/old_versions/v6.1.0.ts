@@ -2,7 +2,7 @@ import { card, character, combatStatus, DamageType, skill, summon } from "@gi-tc
 import { DisposedSupportAndSummonsCountExtension } from "../cards/event/other.ts";
 import { Itzpapa, NightsoulsBlessing, OpalShield } from "../characters/cryo/citlali.ts";
 import { CaloricBalancingPlan01, KineticEnergyScale, TeachingsOfTheCollectiveOfPlenty, ThunderboltRush, WeightedSpike } from "../characters/electro/iansan.ts";
-import { ArkheSeatsSacredAndSecular, LetThePeopleRejoice, SalonSolitaireOusia, SalonSolitairePneuma, Skill12114, SoloistsSolicitation, SoloistsSolicitationOusia } from "../characters/hydro/furina.ts";
+import { ArkheSeatsSacredAndSecular, LetThePeopleRejoice, SalonSolitaireOusia, SalonSolitairePneuma, Skill12114, SoloistsSolicitation, SoloistsSolicitationOusia } from "../characters/hydro/furina.gts";
 import { AllIsAsh, Arlecchino, BalemoonRising, InvitationToABeheading, TheBalemoonAloneMayKnowPassive01, TheBalemoonAloneMayKnowPassive03 } from "../characters/pyro/arlecchino.ts";
 import { BondOfLife } from "../commons.ts";
 
