@@ -14,8 +14,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Status, Card, $ } from "#test";
-import { AnAncientSacrificeOfSacredBrocade } from "@gi-tcg/data/internal/cards/event/other";
-import { ChenyuVale } from "@gi-tcg/data/internal/cards/support/adventure";
+import { AnAncientSacrificeOfSacredBrocade } from "@gi-tcg/data/internal/cards/event/other.gts";
+import { ChenyuVale } from "@gi-tcg/data/internal/cards/support/adventure.gts";
 import {
   SkywardSonnet,
   Venti,

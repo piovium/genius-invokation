@@ -14,9 +14,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, State, Character, Support, $, Card } from "#test";
-import { CountdownToTheShow3 } from "@gi-tcg/data/internal/cards/event/other";
-import { SuperconductBlessingDeepFreeze } from "@gi-tcg/data/internal/cards/support/blessing";
-import { FrostmoonEnclave } from "@gi-tcg/data/internal/cards/support/place";
+import { CountdownToTheShow3 } from "@gi-tcg/data/internal/cards/event/other.gts";
+import { SuperconductBlessingDeepFreeze } from "@gi-tcg/data/internal/cards/support/blessing.gts";
+import { FrostmoonEnclave } from "@gi-tcg/data/internal/cards/support/place.gts";
 import { CeremonialBladework, Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";
 import { CostIncrease, NoTuningAllowed } from "@gi-tcg/data/internal/commons.gts";
 import { test } from "vitest";

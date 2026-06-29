@@ -14,8 +14,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Equipment, Card, $ } from "#test";
-import { LumenstoneAdjuvant } from "@gi-tcg/data/internal/cards/support/item";
-import { ScionsOfTheCanopy } from "@gi-tcg/data/internal/cards/support/place";
+import { LumenstoneAdjuvant } from "@gi-tcg/data/internal/cards/support/item.gts";
+import { ScionsOfTheCanopy } from "@gi-tcg/data/internal/cards/support/place.gts";
 import { FlamestriderBlazingTrail, Mavuika, TheNamedMoment } from "@gi-tcg/data/internal/characters/pyro/mavuika.gts";
 import { expect, test } from "vitest";
 
