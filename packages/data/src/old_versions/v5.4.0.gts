@@ -1,6 +1,6 @@
 import { card, character, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
 import { DandelionBreeze, FavoniusBladework, GaleBlade } from "../characters/anemo/jean.ts";
-import { DivineMarksmanship, SkywardSonnet, WindsGrandOde } from "../characters/anemo/venti.ts";
+import { DivineMarksmanship, SkywardSonnet, WindsGrandOde } from "../characters/anemo/venti.gts";
 import { CelestialShower, FrostflakeArrow, LiutianArchery, TrailOfTheQilin } from "../characters/cryo/ganyu.ts";
 import { Breastplate, FavoniusBladeworkMaid, SweepingTime } from "../characters/geo/noelle.ts";
 import { DominusLapidis, DominusLapidisStrikingStone, PlanetBefall, RainOfStone } from "../characters/geo/zhongli.gts";

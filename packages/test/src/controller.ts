@@ -26,6 +26,7 @@ import {
   SelectCardResponse,
 } from "@gi-tcg/typings";
 import {
+  $,
   AnyState,
   Game,
   GameState,
@@ -382,7 +383,7 @@ export class TestController {
       const response = await this.rpc(0, request);
       return response;
     };
-    this.game.onIoError = console.error;
+    this.game.onIoError = console?.error!;
     this.game.players[1].io.rpc = async (request) => {
       const response = await this.rpc(1, request);
       return response;
@@ -427,7 +428,7 @@ export class TestController {
   expect(what: IQuery | QueryFn | Ref): StatesMatcher {
     if (what instanceof Ref) {
       const id = what.id;
-      what = ($) => $.includesDefeated.id(id);
+      what = $.includesDefeated.id(id);
     }
     return new StatesMatcher(this.query(what));
   }

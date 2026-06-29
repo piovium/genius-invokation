@@ -19,7 +19,7 @@ import type {
   CharacterPassiveSkillEntry,
 } from "../../builder/registry";
 import { type AnyState, type GameState } from "../../base/state";
-import { toExpression, type InferResult, type IQuery } from "../../query";
+import { $, toExpression, type InferResult, type IQuery } from "../../query";
 import type {
   UsagePerRoundVariableNames,
   VariableConfig,
@@ -548,21 +548,6 @@ export const InitiativeSkillViewModel = defineViewModel(
           ];
         }
       >;
-      <Meta extends InitiativeSkillVMMeta, Q extends IQuery>(
-        this: NotCharacterPassiveThis<Meta>,
-        queryFn: (
-          context: TypedSkillContext<
-            ReadonlyMetaOf<InitiativeSkillVMToBuilderMeta<Meta>>
-          >,
-        ) => InferResult<Q> extends TargetQueryTypeInfo ? Q : never,
-      ): AR.DoneRewriteMeta<
-        Omit<Meta, "targetTypes"> & {
-          targetTypes: [
-            ...Meta["targetTypes"],
-            InferResult<Q> extends { type: infer T } ? T : never,
-          ];
-        }
-      >;
 
       <Meta extends InitiativeSkillVMMeta, Ret extends AnyState[]>(
         this: NotCharacterPassiveThis<Meta>,
@@ -586,14 +571,11 @@ export const InitiativeSkillViewModel = defineViewModel(
     }>((model, [query]: any) => {
       if (toExpression in query) {
         const queryObj = query;
-        query = () => queryObj;
+        query = (c: SkillContext<any>) =>
+          c.queryAll(queryObj as typeof $.any).map((s) => s.latest());
       }
       model.targetGetters.push((ctx) => {
-        const result: AnyState[] | IQuery = query(ctx);
-        if (result && toExpression in result) {
-          return ctx.queryAll(result).map((s) => s.latest());
-        }
-        return result;
+        return query(ctx);
       });
     }),
 

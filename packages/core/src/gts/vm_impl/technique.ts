@@ -30,7 +30,10 @@ import {
 } from "./skill";
 import { $, toExpression, type InferResult, type IQuery } from "../../query";
 import type { AnyState, InitiativeSkillDefinition } from "../../base/state";
-import type { TypedSkillContext } from "../../builder/context/skill";
+import type {
+  SkillContext,
+  TypedSkillContext,
+} from "../../builder/context/skill";
 import type { SkillHandle } from "../../builder";
 import { UsageVM, type UsageVMMeta } from "./variables";
 import type { UsagePerRoundVariableNames } from "../../base/entity";
@@ -62,14 +65,6 @@ export const TechniqueViewModel = EntityViewModel
       <Q extends IQuery>(
         query: InferResult<Q> extends CharacterQueryResult ? Q : never,
       ): AR.Done;
-      <Meta extends TechniqueVMMeta, Q extends IQuery>(
-        this: AR.This<Meta>,
-        queryFn: (
-          context: TypedSkillContext<
-            ReadonlyMetaOf<TechniqueVMToBuilderMeta<Meta>>
-          >,
-        ) => InferResult<Q> extends CharacterQueryResult ? Q : never,
-      ): AR.Done;
       <Meta extends TechniqueVMMeta, Ret extends AnyState[]>(
         this: AR.This<Meta>,
         queryFn: (
@@ -82,14 +77,11 @@ export const TechniqueViewModel = EntityViewModel
     }>((model, [query]: any) => {
       if (toExpression in query) {
         const queryObj = query;
-        query = () => queryObj;
+        query = (c: SkillContext<any>) =>
+          c.queryAll(queryObj as typeof $.any).map((s) => s.latest());
       }
       model.targetGetter = function (ctx) {
-        const result: AnyState[] | IQuery = query(ctx);
-        if (result && toExpression in result) {
-          return ctx.queryAll(result).map((s) => s.latest());
-        }
-        return result;
+        return query(ctx);
       };
     }),
     // TODO nightsoul

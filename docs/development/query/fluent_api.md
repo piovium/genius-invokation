@@ -2,12 +2,12 @@
 
 Fluent API 是实体查询系统的 TypeScript 接口，以 `$` 对象为入口，通过链式调用构建查询表达式。相比直接编写 S-Expr，Fluent API 提供了完整的 TypeScript 类型检查与 IDE 自动补全支持。
 
-`$` 对象从 `@gi-tcg/core` 导入，也可从 `packages/core/src/query/index.ts` 获取。在技能/卡牌定义的上下文中，通常以 `QueryFn` 的形式传入，即 `($: IDollar) => IQuery` 的函数。
+`$` 对象从 `@gi-tcg/core` 导入，也可从 `packages/core/src/query/index.ts` 获取。
 
 ```ts
 import { $ } from "@gi-tcg/core";
-// 或在技能定义中：
-skill.query(($) => $.my.active);
+// 在技能定义中：
+skill.query($.my.active);
 ```
 
 ---

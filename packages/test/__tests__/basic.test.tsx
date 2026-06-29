@@ -17,7 +17,7 @@ import { ref, setup, Character, State, Status, $ } from "#test";
 import {
   SkywardSonnet,
   Venti,
-} from "@gi-tcg/data/internal/characters/anemo/venti";
+} from "@gi-tcg/data/internal/characters/anemo/venti.gts";
 import { Satiated } from "@gi-tcg/data/internal/commons.gts";
 import { test } from "vitest";
 

@@ -245,7 +245,9 @@ export class EventList extends Array<EventAndRequest> {
 export interface ReadonlyEventList extends ReadonlyArray<EventAndRequest> {}
 
 type MaybeConsole = {
+  log?: (...data: unknown[]) => void;
   warn?: (...data: unknown[]) => void;
+  error?: (...data: unknown[]) => void;
   trace?: () => void;
 };
 

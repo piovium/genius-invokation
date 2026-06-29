@@ -47,7 +47,7 @@ import "./characters/anemo/maguu_kenki.ts";
 import "./characters/anemo/sayu.ts";
 import "./characters/anemo/shikanoin_heizou.ts";
 import "./characters/anemo/sucrose.ts";
-import "./characters/anemo/venti.ts";
+import "./characters/anemo/venti.gts";
 import "./characters/anemo/wanderer.ts";
 import "./characters/anemo/xianyun.ts";
 import "./characters/anemo/xiao.ts";

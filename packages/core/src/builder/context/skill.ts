@@ -533,7 +533,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   queryAll<const Q extends IQuery>(
     arg: (($: IDollar) => Q) | Q,
   ): RxEntityState<Meta, InferResult<Q>["type"]>[] {
-    if (typeof arg === "function") {
+    if (!(toExpression in arg)) {
       arg = arg($);
     }
     return runQuery(this.rawState, this.callerArea.who, arg).map((state) =>

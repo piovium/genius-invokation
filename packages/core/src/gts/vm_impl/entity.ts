@@ -27,6 +27,8 @@ import {
 import type { AttachmentDefinition, EntityState } from "../../base/state";
 import type {
   CustomEventEventArg,
+  DamageInfo,
+  DamageOrHealEventArg,
   EnterEventArg,
   ModifyDamage3EventArg,
   SkillDefinition,
@@ -58,7 +60,7 @@ import {
 } from "./variables";
 import { createVariable, createVariableCanAppend } from "../../builder/utils";
 import { TriggeredSkillModel, TriggeredSkillViewModel } from "./skill";
-import { $, type CustomEvent, type DamageType } from "../../builder";
+import { $, DamageType, type CustomEvent } from "../../builder";
 import { GlobalUsageVM, PrepareVM, NightsoulVM } from "./entity_auxilary";
 import type { CharacterPassiveSkillEntry } from "../../builder/registry";
 import type { EntityDescriptionDictionaryGetter } from "../../builder/entity";
@@ -513,6 +515,18 @@ export const EntityViewModel = defineViewModel(
       model.addDescriptionReplacement(key, getter);
     }),
     hint: h.attribute<{
+      /**
+       * The hint icon will defaults to Anemo, but changed to a swirled element 
+       * after my character/summon produced a swirling reaction.
+       */
+      <Meta extends EntityVMMeta>(
+        this: ThisWithType<Meta, "summon">,
+        icon: "swirled",
+        text?:
+          | number
+          | string
+          | EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
+      ): AR.DoneRewriteMeta<PushVar<Meta, "hintIcon" | "swirledUsage">>;
       <Meta extends EntityVMMeta>(
         this: ThisWithType<Meta, "summon">,
         icon: DamageType | CombatStatusHandle,
@@ -520,8 +534,28 @@ export const EntityViewModel = defineViewModel(
           | number
           | string
           | EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
-      ): AR.DoneRewriteMeta<PushVar<Meta, "hintCount">>;
+      ): AR.DoneRewriteMeta<PushVar<Meta, "hintIcon">>;
     }>((model, [icon, text]) => {
+      if (icon === "swirled") {
+        icon = DamageType.Anemo;
+        const onDmgSkill = new TriggeredSkillModel(model, "dealDamage");
+        onDmgSkill.id = model.getSubId();
+        onDmgSkill.userFilters.push(function (c) {
+          const e = c.eventArg as DamageOrHealEventArg<DamageInfo>;
+          return (
+            ["character", "summon"].includes(e.source.definition.type) &&
+            e.isSwirl()
+          );
+        });
+        onDmgSkill.setUsage(1, { name: "swirledUsage", perRound: false });
+        onDmgSkill.action = function (c) {
+          const swirledType = (
+            c.eventArg as DamageOrHealEventArg<DamageInfo>
+          ).isSwirl()!;
+          c.setVariable("hintIcon", swirledType);
+        };
+        model.skillList.push(onDmgSkill.buildSkillDefinition());
+      }
       model.varConfigs.set(
         "hintCount",
         createVariableConfig(icon, { visible: false }),
