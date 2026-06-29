@@ -46,7 +46,7 @@ import {
 import { Aura } from "@gi-tcg/typings";
 import { PuffPopsInEffect } from "@gi-tcg/data/internal/cards/event/food.gts";
 import { Keqing } from "@gi-tcg/data/internal/characters/electro/keqing";
-import { Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida";
+import { Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida.gts";
 import {
   GluttonousYumkasaurMountainKing,
   TheAlldevourer,

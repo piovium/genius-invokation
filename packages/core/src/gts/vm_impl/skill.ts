@@ -140,7 +140,7 @@ abstract class SkillModel {
 export class TriggeredSkillModel extends SkillModel {
   // triggered configs
   // TODO we should check this carefully later.
-  defaultDefeatedDispose = false;
+  isDefaultDefeatedDispose = false;
 
   asSkillType: CommonSkillType | null = null;
   caller: ICaller;
@@ -243,7 +243,7 @@ export class TriggeredSkillModel extends SkillModel {
     }
     // 3. 状态和装备的技能默认要求角色存活，默认击倒弃置除外
     if (
-      !this["defaultDefeatedDispose"] &&
+      !this.isDefaultDefeatedDispose &&
       (this.caller.type === "status" || this.caller.type === "equipment")
     ) {
       this.filters.push((c) => {
@@ -317,7 +317,7 @@ type TriggeredSkillOperationOfVM<Meta extends TriggeredSkillVMMeta> =
 type TriggeredSkillFilterOfVM<Meta extends TriggeredSkillVMMeta> =
   GtsSkillOperationFilter<TriggeredSkillVMToBuilderMeta<Meta>>;
 
-export const TriggeredSkillVM = defineViewModel(
+export const TriggeredSkillViewModel = defineViewModel(
   TriggeredSkillModel,
   (h) => ({
     listenTo: h.simpleAttribute({

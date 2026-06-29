@@ -64,7 +64,7 @@ define summon {
   // 将两段伤害拆成两个技能，从而中间可以插入第一段伤害引发的事件（如缤纷马卡龙）
   on endPhase {
     usage 2 { append 4 };
-    if (:query($.my.character.var("health", ">=", "6"))) {
+    if (:query($.my.character.var("health", ">=", 6))) {
       :damage(DamageType.Piercing, 1, $.macros.myLeastInjured);
       :damage(DamageType.Hydro, 1);
     }
@@ -84,7 +84,7 @@ define summon {
   on endPhase {
     usage 2 { append 4 };
     :heal(1, $.my.character);
-    if (:query($.my.character.var("health", "<=", "5"))) {
+    if (:query($.my.character.var("health", "<=", 5))) {
       :heal(1, $.macros.myMostInjured);
     }
   }

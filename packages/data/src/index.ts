@@ -86,7 +86,7 @@ import "./characters/dendro/kaveh.ts";
 import "./characters/dendro/kinich.ts";
 import "./characters/dendro/kirara.ts";
 import "./characters/dendro/lauma.ts";
-import "./characters/dendro/nahida.ts";
+import "./characters/dendro/nahida.gts";
 import "./characters/dendro/tighnari.ts";
 import "./characters/dendro/yaoyao.ts";
 import "./characters/electro/abyss_lector_violet_lightning.ts";

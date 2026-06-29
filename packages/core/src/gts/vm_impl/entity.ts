@@ -19,12 +19,17 @@ import {
   type DescriptionDictionary,
   type DescriptionDictionaryEntry,
   type DescriptionDictionaryKey,
+  type EntityArea,
   type EntityDefinition,
   type EntityTag,
   type VariableConfig,
 } from "../../base/entity";
 import type { AttachmentDefinition, EntityState } from "../../base/state";
-import type { CustomEventEventArg, SkillDefinition } from "../../base/skill";
+import type {
+  CustomEventEventArg,
+  EnterEventArg,
+  SkillDefinition,
+} from "../../base/skill";
 import { getEntityArea, getEntityById, type Writable } from "../../utils";
 import {
   ListenTo,
@@ -51,12 +56,13 @@ import {
   type GtsVariableOptions,
 } from "./variables";
 import { createVariable, createVariableCanAppend } from "../../builder/utils";
-import { TriggeredSkillModel, TriggeredSkillVM } from "./skill";
-import type { CustomEvent, DamageType } from "../../builder";
+import { TriggeredSkillModel, TriggeredSkillViewModel } from "./skill";
+import { $, type CustomEvent, type DamageType } from "../../builder";
 import { GlobalUsageVM, PrepareVM, NightsoulVM } from "./entity_auxilary";
 import type { CharacterPassiveSkillEntry } from "../../builder/registry";
 import type { EntityDescriptionDictionaryGetter } from "../../builder/entity";
 import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
+import type { Computed } from "../../query/utils";
 
 export interface GtsUsageOrUsagePerRoundOptions extends GtsUsageOptions {
   perRound: boolean;
@@ -83,6 +89,25 @@ export class EntityModel implements ICaller {
 
   constructor(type: ExEntityType) {
     this.type = type;
+    if (this.type === "status" || this.type === "equipment") {
+      // add default defeated dispose skill
+      const skillModel = new TriggeredSkillModel(this, "defeated");
+      skillModel.id = this.getSubId();
+      skillModel.action = function (c) {
+        c.dispose();
+      };
+      skillModel.isDefaultDefeatedDispose = true;
+      this.skillList.push(skillModel.buildSkillDefinition());
+    }
+  }
+
+  #subIdCounter = 0;
+  getSubId(): number {
+    const subId = ++this.#subIdCounter;
+    if (subId > 99) {
+      throw new Error("Sub ID exceeded the maximum limit of 99.");
+    }
+    return this.id + 0.01 * subId;
   }
 
   addDescriptionReplacement(
@@ -113,6 +138,7 @@ export class EntityModel implements ICaller {
     const skills = [...this.skillList];
     if (usagePerRoundNames.length > 0 || hasDuration) {
       const roundEndSkill = new TriggeredSkillModel(this, "roundEnd");
+      roundEndSkill.id = this.getSubId();
       roundEndSkill.action = function (c) {
         const self = c.self;
         // 恢复每回合使用次数
@@ -272,6 +298,12 @@ export type ThisWithType<
   T extends ExEntityType,
 > = Meta["type"] extends T ? AR.This<Meta> : never;
 
+type PushVar<Meta extends EntityVMMeta, Name extends string> = Computed<
+  Omit<Meta, "variables"> & {
+    variables: Meta["variables"] | Name;
+  }
+>;
+
 export const EntityViewModel = defineViewModel(
   EntityModel,
   (h) => ({
@@ -325,6 +357,7 @@ export const EntityViewModel = defineViewModel(
         model,
         "replaceActionBySkill",
       );
+      replaceSkillModel.id = model.getSubId();
       replaceSkillModel.action = function (c) {
         c.useSkill(skill, { asPrepared: true });
         if (options.nextStatus) {
@@ -340,6 +373,7 @@ export const EntityViewModel = defineViewModel(
         model,
         "switchActive",
       );
+      switchActiveSkillModel.id = model.getSubId();
       switchActiveSkillModel.userFilters.push(function (c) {
         return (
           c.eventArg.switchInfo.from?.id === c.self.cast<"status">().master.id
@@ -358,12 +392,7 @@ export const EntityViewModel = defineViewModel(
         this: AR.This<Meta>,
         name: Name,
         initialValue: number,
-      ): AR.WithRewriteMeta<
-        Omit<Meta, "variables"> & {
-          variables: Meta["variables"] | Name;
-        },
-        typeof VariablesVM
-      >;
+      ): AR.WithRewriteMeta<PushVar<Meta, Name>, typeof VariablesVM>;
     }>((model, [name, initValue], subView) => {
       const options = VariablesVM.parse(subView);
       const varConfig = createVariableConfig(initValue, options);
@@ -373,12 +402,7 @@ export const EntityViewModel = defineViewModel(
       <Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
         count: number,
-      ): AR.WithRewriteMeta<
-        Omit<Meta, "variables"> & {
-          variables: Meta["variables"] | "usage";
-        },
-        typeof GlobalUsageVM
-      >;
+      ): AR.WithRewriteMeta<PushVar<Meta, "usage">, typeof GlobalUsageVM>;
     }>((model, [count], subView) => {
       const options = GlobalUsageVM.parse(subView);
       model.setUsage(count, { ...options, perRound: false });
@@ -390,12 +414,7 @@ export const EntityViewModel = defineViewModel(
       <Meta extends EntityVMMeta>(
         this: ThisWithType<Meta, "status">,
         count: number,
-      ): AR.WithRewriteMeta<
-        Omit<Meta, "variables"> & {
-          variables: Meta["variables"] | "nightsoul";
-        },
-        typeof NightsoulVM
-      >;
+      ): AR.WithRewriteMeta<PushVar<Meta, "nightsoul">, typeof NightsoulVM>;
     }>((model, [count], subView) => {
       const options = NightsoulVM.parse(subView);
       model.tags.push("nightsoulsBlessing");
@@ -406,6 +425,7 @@ export const EntityViewModel = defineViewModel(
           model,
           "beforeAction",
         );
+        disposeSkillModel.id = model.getSubId();
         disposeSkillModel.userFilters.push(function (c) {
           return c.getVariable("nightsoul") <= 0;
         });
@@ -421,12 +441,7 @@ export const EntityViewModel = defineViewModel(
       <Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
         value: number,
-      ): AR.WithRewriteMeta<
-        Omit<Meta, "variables"> & {
-          variables: Meta["variables"] | "duration";
-        },
-        typeof VariablesVM
-      >;
+      ): AR.WithRewriteMeta<PushVar<Meta, "duration">, typeof VariablesVM>;
     }>((model, [value], subView) => {
       const options = VariablesVM.parse(subView);
       const varConfig = createVariableConfig(value, options);
@@ -468,11 +483,7 @@ export const EntityViewModel = defineViewModel(
           | number
           | string
           | EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
-      ): AR.DoneRewriteMeta<
-        Omit<Meta, "variables"> & {
-          variables: Meta["variables"] | "hintCount";
-        }
-      >;
+      ): AR.DoneRewriteMeta<PushVar<Meta, "hintCount">>;
     }>((model, [icon, text]) => {
       model.varConfigs.set(
         "hintCount",
@@ -489,13 +500,41 @@ export const EntityViewModel = defineViewModel(
       }
     }),
 
+    conflictWith: h.attribute<{
+      (id: number): AR.Done;
+    }>((model, [id]) => {
+      // 自身入场时，将位于相同实体区域的目标实体移除
+      const enterSkill = new TriggeredSkillModel(model, "enter");
+      enterSkill.id = model.getSubId();
+      enterSkill.userFilters.push(function (c) {
+        return c.query($.def(id as HandleT<ExEntityType>));
+      });
+      enterSkill.action = function (c) {
+        const selfArea = c.self.area;
+        for (const entity of c.queryAll($.def(id as HandleT<ExEntityType>))) {
+          const enteringArea: EntityArea = entity.area;
+          if (
+            enteringArea.type === "characters" &&
+            selfArea.type === "characters"
+          ) {
+            if (enteringArea.characterId === selfArea.characterId) {
+              entity.dispose();
+            }
+          } else if (enteringArea.type === selfArea.type) {
+            entity.dispose();
+          }
+        }
+      };
+      model.skillList.push(enterSkill.buildSkillDefinition());
+    }),
+
     on: h.attribute<{
       <Meta extends EntityVMMeta, const Event extends DetailedEventNames>(
         this: AR.This<Meta>,
         eventName: Event,
       ): AR.With<
-        typeof TriggeredSkillVM,
-        Omit<Meta, "targetTypes"> & {
+        typeof TriggeredSkillViewModel,
+        Meta & {
           eventArgType: DetailedEventArgOf<Event>;
         }
       >;
@@ -503,13 +542,20 @@ export const EntityViewModel = defineViewModel(
         this: AR.This<Meta>,
         customEvent: CustomEvent<T>,
       ): AR.With<
-        typeof TriggeredSkillVM,
-        Omit<Meta, "targetTypes"> & {
-          eventArgType: CustomEventEventArg<T>;
-        }
+        typeof TriggeredSkillViewModel,
+        Computed<
+          Meta & {
+            eventArgType: CustomEventEventArg<T>;
+          }
+        >
       >;
     }>((model, [eventName], subView) => {
-      const skillModel = TriggeredSkillVM.parse(subView, model, eventName);
+      const skillModel = TriggeredSkillViewModel.parse(
+        subView,
+        model,
+        eventName,
+      );
+      skillModel.id = model.getSubId();
       const skillDef = skillModel.buildSkillDefinition();
       model.skillList.push(skillDef);
     }),
@@ -519,23 +565,32 @@ export const EntityViewModel = defineViewModel(
         this: AR.This<Meta>,
         eventName: Event,
       ): AR.With<
-        typeof TriggeredSkillVM,
-        Omit<Meta, "targetTypes"> & {
-          eventArgType: DetailedEventArgOf<Event>;
-        }
+        typeof TriggeredSkillViewModel,
+        Computed<
+          Meta & {
+            eventArgType: DetailedEventArgOf<Event>;
+          }
+        >
       >;
       <Meta extends EntityVMMeta, T = void>(
         this: AR.This<Meta>,
         customEvent: CustomEvent<T>,
       ): AR.With<
-        typeof TriggeredSkillVM,
-        Omit<Meta, "targetTypes"> & {
-          eventArgType: CustomEventEventArg<T>;
-        }
+        typeof TriggeredSkillViewModel,
+        Computed<
+          Meta & {
+            eventArgType: CustomEventEventArg<T>;
+          }
+        >
       >;
       uniqueKey(): "once";
     }>((model, [eventName], subView) => {
-      const skillModel = TriggeredSkillVM.parse(subView, model, eventName);
+      const skillModel = TriggeredSkillViewModel.parse(
+        subView,
+        model,
+        eventName,
+      );
+      skillModel.id = model.getSubId();
       skillModel.setUsage(1, { visible: false, perRound: false });
       const skillDef = skillModel.buildSkillDefinition();
       model.skillList.push(skillDef);

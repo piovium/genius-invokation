@@ -19,7 +19,7 @@ import {
   AmethystCrown,
   OrnateKabuto,
 } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
-import { Akara, Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida";
+import { Akara, Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida.gts";
 import {
   Keqing,
   StarwardSword,

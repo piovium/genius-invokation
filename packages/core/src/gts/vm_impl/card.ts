@@ -53,7 +53,7 @@ import { $, toExpression, type InferResult, type IQuery } from "../../query";
 import {
   InitiativeSkillModel,
   InitiativeSkillViewModel,
-  TriggeredSkillVM,
+  TriggeredSkillViewModel,
   type TargetGetter,
   type TargetQueryTypeInfo,
 } from "./skill";
@@ -416,13 +416,13 @@ export const CardViewModel = InitiativeSkillViewModel
         this: AR.This<Meta>,
         eventName: Event,
       ): AR.With<
-        typeof TriggeredSkillVM,
+        typeof TriggeredSkillViewModel,
         Omit<Meta, "targetTypes"> & {
           eventArgType: DetailedEventArgOf<Event>;
         }
       >;
     }>((model, [eventName], subView) => {
-      const skillModel = TriggeredSkillVM.parse(subView, model, eventName);
+      const skillModel = TriggeredSkillViewModel.parse(subView, model, eventName);
       skillModel.id = model.getSubId();
       skillModel.enableHandTriggering = true;
       skillModel.enablePileTriggering = true;
