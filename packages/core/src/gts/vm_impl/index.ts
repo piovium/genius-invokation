@@ -31,8 +31,7 @@ import {
 import { AttachmentViewModel } from "./attachment";
 import { ExtensionViewModel } from "./extension";
 import { CharacterSkillViewModel } from "./skill";
-import type { ExEntityType } from "../../builder/type";
-import type { EntityDefinition } from "../..";
+import type { AttachmentDefinition, EntityDefinition } from "../..";
 import { CardViewModel } from "./card";
 
 export default defineViewModel(class RootModel {}, (h) => ({
@@ -80,7 +79,7 @@ export default defineViewModel(class RootModel {}, (h) => ({
     (): AR.With<typeof AttachmentViewModel>;
   }>((_, [], subView) => {
     const attachment = AttachmentViewModel.parse(subView).getEntry();
-    registerAttachment(attachment);
+    registerAttachment(attachment as AttachmentDefinition);
   }, AttachmentViewModel),
   extension: h.attribute<{
     (): AR.With<typeof ExtensionViewModel>;

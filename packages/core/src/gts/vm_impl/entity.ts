@@ -67,13 +67,13 @@ import type { EntityDescriptionDictionaryGetter } from "../../builder/entity";
 import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
 import type { Computed } from "../../query/utils";
 import type { AttachmentTag, ModificationGetter } from "../../base/attachment";
+import { getSubId } from "./sub_id";
 
 export interface GtsUsageOrUsagePerRoundOptions extends GtsUsageOptions {
   perRound: boolean;
 }
 
 export class EntityModel implements ICaller {
-  skillIndex = 0;
   usagePerRoundIndex = 0;
 
   id!: number;
@@ -105,13 +105,8 @@ export class EntityModel implements ICaller {
     }
   }
 
-  #subIdCounter = 0;
   getSubId(): number {
-    const subId = ++this.#subIdCounter;
-    if (subId > 99) {
-      throw new Error("Sub ID exceeded the maximum limit of 99.");
-    }
-    return this.id + 0.01 * subId;
+    return getSubId(this.id);
   }
 
   addDescriptionReplacement(
@@ -377,7 +372,7 @@ export const EntityViewModel = defineViewModel(
     tags: h.simpleAttribute()(function (...tags: EntityTag[]) {
       this.tags.push(...tags);
     }),
-    // TODO
+    
     prepare: h.attribute<{
       <Meta extends EntityVMMeta>(
         this: ThisWithType<Meta, "status">,

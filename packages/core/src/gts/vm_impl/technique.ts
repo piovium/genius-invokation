@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { AR } from "@gi-tcg/gts-runtime";
-import type { ReadonlyMetaOf } from "../../builder/skill";
+import { ListenTo, type ReadonlyMetaOf } from "../../builder/skill";
 import {
   EntityModel,
   EntityViewModel,
@@ -25,6 +25,7 @@ import {
   DEFAULT_INITIATIVE_SKILL_VM_META,
   InitiativeSkillModel,
   InitiativeSkillViewModel,
+  TriggeredSkillModel,
   type InitiativeSkillVMMeta,
   type TargetGetter,
 } from "./skill";
@@ -38,8 +39,11 @@ import type { SkillHandle } from "../../builder";
 import { UsageVM, type UsageVMMeta } from "./variables";
 import type { UsagePerRoundVariableNames } from "../../base/entity";
 import { GiTcgDataError } from "../..";
+import { TechniqueNightsoulVM } from "./entity_auxilary";
+import type { DisposeEventArg } from "../../base/skill";
 
 export class TechniqueModel extends EntityModel {
+  isNightsoul = false;
   targetGetter: TargetGetter = function (ctx) {
     return ctx.queryAll($.my.character).map((s) => s.latest());
   };
@@ -84,7 +88,54 @@ export const TechniqueViewModel = EntityViewModel
         return query(ctx);
       };
     }),
-    // TODO nightsoul
+    nightsoul: h.attribute<{
+      (): AR.With<typeof TechniqueNightsoulVM>;
+    }>((model, [], subView) => {
+      const { alsoDisposeNightsoulsBlessing = true } =
+        TechniqueNightsoulVM.parse(subView);
+      model.isNightsoul = true;
+      const disposeByNightsoulSkill = new TriggeredSkillModel(
+        model,
+        "beforeAction",
+      );
+      disposeByNightsoulSkill.id = model.getSubId();
+      disposeByNightsoulSkill.listenTo = ListenTo.All;
+      disposeByNightsoulSkill.action = function (c) {
+        const master = c.self.cast<"equipment">().master;
+        const nightsoulBlessing = c.query(
+          $.typeStatus.tag("nightsoulsBlessing").at($.id(master.id)),
+        );
+        if (
+          nightsoulBlessing &&
+          nightsoulBlessing.getVariable("nightsoul") <= 0
+        ) {
+          c.dispose();
+        }
+      };
+      model.skillList.push(disposeByNightsoulSkill.buildSkillDefinition());
+      if (alsoDisposeNightsoulsBlessing) {
+        const disposeNightsoulSkill = new TriggeredSkillModel(
+          model,
+          "selfDispose",
+        );
+        disposeNightsoulSkill.id = model.getSubId();
+        disposeNightsoulSkill.action = function (c) {
+          const disposingArea = (c.eventArg as DisposeEventArg).area;
+          if (disposingArea.type !== "characters") {
+            return;
+          }
+          c
+            .query(
+              $.typeStatus
+                .tag("nightsoulsBlessing")
+                .at($.id(disposingArea.characterId)),
+            )
+            ?.dispose();
+        };
+        model.skillList.push(disposeNightsoulSkill.buildSkillDefinition());
+      }
+    }),
+
     skill: h.attribute<{
       (): AR.With<typeof TechniqueSkillViewModel>;
       required(): true;

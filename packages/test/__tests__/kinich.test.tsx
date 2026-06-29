@@ -31,7 +31,7 @@ import {
   Kinich,
   NightsoulsBlessing as NightsoulsBlessingKinich,
 } from "@gi-tcg/data/internal/characters/dendro/kinich";
-import { Kachina, NightsoulsBlessing as NightsoulsBlessingKachina, TurboTwirly, TurboTwirlyLetItRip } from "@gi-tcg/data/internal/characters/geo/kachina";
+import { Kachina, NightsoulsBlessing as NightsoulsBlessingKachina, TurboTwirly, TurboTwirlyLetItRip } from "@gi-tcg/data/internal/characters/geo/kachina.gts";
 import { test } from "vitest";
 
 test("kinich's link handle event earlier then kachina's", async () => {

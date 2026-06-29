@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, combatStatus, card, DamageType, customEvent } from "@gi-tcg/core/builder";
+import { character, skill, summon, status, combatStatus, card, DamageType, customEvent, DiceType, $ } from "@gi-tcg/core/builder";
 
 export const TurboTwirlyTriggered = customEvent("kachina/turboTwirlyTriggered");
 
@@ -67,29 +67,33 @@ export const NightsoulsBlessing = status(116104)
  * [1161023: ] ()
  * [1161024: ] ()
  */
-export const TurboTwirly = card(116102)
-  .since("v5.5.0")
-  .nightsoulTechnique()
-  .on("switchActive", (c, e) => e.switchInfo.from?.id === c.self.master.id)
-  .consumeNightsoul("@master")
-  .summon(TurboTwirlyLetItRip)
-  .endOn()
-  .provideSkill(1161021)
-  .costGeo(1)
-  .consumeNightsoul("@master")
-  .do((c) => {
-    const field = c.$(`my combat status with definition id ${TurboDrillField}`);
-    if (field) {
-      c.damage(DamageType.Geo, 3);
-      c.damage(DamageType.Piercing, 2, "opp next");
-      c.consumeUsage(1, field);
-    } else {
-      c.damage(DamageType.Geo, 2);
-      c.damage(DamageType.Piercing, 1, "opp next");
+define card {
+  id 116102 as TurboTwirly;
+  since "v5.5.0";
+  technique {
+    nightsoul;
+    on  switchActive {
+      when :( :e.switchInfo.from?.id === :self.master.id );
+      :consumeNightsoul("@master");
+      :summon(TurboTwirlyLetItRip);
     }
-    c.emitCustomEvent(TurboTwirlyTriggered);
-  })
-  .done();
+    skill {
+      id 1161021;
+      cost DiceType.Geo, 1;
+      :consumeNightsoul("@master")
+      const field = :query($.my.combatStatus.def(TurboDrillField));
+      if (field) {
+        :damage(DamageType.Geo, 3);
+        :damage(DamageType.Piercing, 2, "opp next");
+        :consumeUsage(1, field);
+      } else {
+        :damage(DamageType.Geo, 2);
+        :damage(DamageType.Piercing, 1, "opp next");
+      }
+      :emitCustomEvent(TurboTwirlyTriggered);
+    }
+  }
+}
 
 /**
  * @id 116101

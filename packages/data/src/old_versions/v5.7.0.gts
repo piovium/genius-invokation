@@ -3,7 +3,7 @@ import { Citlali, MamaloacosFrigidRainInEffect } from "../characters/cryo/citlal
 import { BondOfLife } from "../commons.gts";
 import { Arlecchino } from "../characters/pyro/arlecchino.ts";
 import { FlamestriderBlazingTrail, FlamestriderFullThrottle, FlamestriderSoaringAscent } from "../characters/pyro/mavuika.gts";
-import { Kachina, TurboTwirlyTriggered } from "../characters/geo/kachina.ts";
+import { Kachina, TurboTwirlyTriggered } from "../characters/geo/kachina.gts";
 import { GrappleLink, NightRealmsGiftRepaidInFull, NightsoulsBlessing } from "../characters/dendro/kinich.ts";
 import { Emilie, LumidouceCaseLevel1, LumidouceCaseLevel2, LumidouceCaseLevel3 } from "../characters/dendro/emilie.ts";
 import { BloodbondedShadow, FrostyInterjection, OnslaughtStance, SwiftPoint } from "../characters/cryo/frost_operative.ts";

@@ -29,6 +29,7 @@ import type { Draft } from "immer";
 import { SkillContext } from "../../builder/internal_exports";
 import { wrapSkillInfoWithExt } from "../../builder/skill";
 import { DEFAULT_VERSION_INFO } from "../../base/version";
+import { getSubId } from "./sub_id";
 
 class ExtensionModel {
   skillIndex = 0;
@@ -40,13 +41,8 @@ class ExtensionModel {
 
   skillList: TriggeredSkillDefinition[] = [];
 
-  #subIdCounter = 0;
   getSubId(): number {
-    const subId = ++this.#subIdCounter;
-    if (subId > 99) {
-      throw new Error("Sub ID exceeded the maximum limit of 99.");
-    }
-    return this.id + 0.01 * subId;
+    return getSubId(this.id);
   }
 
   getEntry(): ExtensionDefinition {

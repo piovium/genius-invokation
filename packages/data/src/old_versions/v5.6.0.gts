@@ -1,6 +1,6 @@
 import { card, character, DamageType, skill } from "@gi-tcg/core/builder";
 import { DominusLapidisStrikingStone, Zhongli } from "../characters/geo/zhongli.gts";
-import { TurboDrillField, TurboTwirlyLetItRip, TurboTwirlyTriggered } from "../characters/geo/kachina.ts";
+import { TurboDrillField, TurboTwirlyLetItRip, TurboTwirlyTriggered } from "../characters/geo/kachina.gts";
 import { Xilonen, YohualsScratch } from "../characters/geo/xilonen.ts";
 import { MistBubbleSlime, SlashOfSurgingTides, SlashOfSurgingTidesPassive, WhirlingScythe } from "../characters/hydro/hydro_hilichurl_rogue.ts";
 import { AsWaterSeeksEquilibrium, EquitableJudgment, OTearsIShallRepay, OTidesIHaveReturned, SourcewaterDropletSkill } from "../characters/hydro/neuvillette.ts";

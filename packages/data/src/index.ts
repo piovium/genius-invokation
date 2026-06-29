@@ -121,7 +121,7 @@ import "./characters/geo/chiori.ts";
 import "./characters/geo/experimental_field_generator.ts";
 import "./characters/geo/golden_wolflord.ts";
 import "./characters/geo/gorou.ts";
-import "./characters/geo/kachina.ts";
+import "./characters/geo/kachina.gts";
 import "./characters/geo/navia.ts";
 import "./characters/geo/ningguang.ts";
 import "./characters/geo/noelle.ts";

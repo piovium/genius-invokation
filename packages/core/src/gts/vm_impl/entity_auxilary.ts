@@ -83,3 +83,22 @@ export const CombatFoodVM = defineSimpleViewModel(GtsCombatFoodOptions, {
   booleanSwitch: false,
   recursive: false,
 });
+
+const GtsTechniqueNightsoulOptions = type({
+  /**
+   * 弃置自身时同时弃置夜魂加持状态
+   * @default true
+   */
+  "alsoDisposeNightsoulsBlessing?": "boolean",
+});
+export type GtsTechniqueNightsoulOptions = TypeInfer<
+  typeof GtsTechniqueNightsoulOptions
+>;
+
+export const TechniqueNightsoulVM = defineSimpleViewModel(
+  GtsTechniqueNightsoulOptions,
+  {
+    booleanSwitch: false,
+    recursive: false,
+  },
+);

@@ -140,8 +140,6 @@ abstract class SkillModel {
 }
 
 export class TriggeredSkillModel extends SkillModel {
-  // triggered configs
-  // TODO we should check this carefully later.
   isDefaultDefeatedDispose = false;
 
   asSkillType: CommonSkillType | null = null;

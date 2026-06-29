@@ -65,6 +65,7 @@ import type { DiceRequirement, DiceType } from "@gi-tcg/typings";
 import { TechniqueViewModel, type TechniqueVMMeta } from "./technique";
 import type { CharacterState, EntityState } from "../../builder";
 import type { IUnorderedQuery } from "../../query/utils";
+import { getSubId } from "./sub_id";
 
 const SATIATED_ID = 303300 as StatusHandle;
 
@@ -83,13 +84,8 @@ class CardModel extends InitiativeSkillModel implements ICaller {
   tags: EntityTag[] = [];
   versionInfo: VersionInfo = DEFAULT_VERSION_INFO;
 
-  #subIdCounter = 0;
   getSubId(): number {
-    const subId = ++this.#subIdCounter;
-    if (subId > 99) {
-      throw new Error("Sub ID exceeded the maximum limit of 99.");
-    }
-    return this.cardId + 0.01 * subId;
+    return getSubId(this.id);
   }
 
   skillList: SkillDefinition[] = [];
@@ -174,7 +170,7 @@ class CardModel extends InitiativeSkillModel implements ICaller {
       __definition: "entities",
       type: this.type,
       id: this.cardId,
-      tags: [...this.tags, ...(this.innerModel?.tags ?? [])],
+      tags: [...this.tags, ...(this.innerModel?.tags ?? [])] as EntityTag[],
       obtainable: this.obtainable,
       disableTuning: this.disableTuning,
       hintText: this.innerModel?.hintText ?? null,
@@ -244,7 +240,8 @@ export const CardViewModel = InitiativeSkillViewModel
       this.obtainable = false;
     }),
 
-    // TODO
+    // TODO: blessing, adventureSpot
+
     event: h.attribute<{
       (): AR.Done;
       uniqueKey(): "type";
