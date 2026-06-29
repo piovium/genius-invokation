@@ -128,7 +128,7 @@ import "./characters/geo/noelle.ts";
 import "./characters/geo/stonehide_lawachurl.ts";
 import "./characters/geo/xilonen.ts";
 import "./characters/geo/yun_jin.ts";
-import "./characters/geo/zhongli.ts";
+import "./characters/geo/zhongli.gts";
 import "./characters/hydro/abyss_herald_wicked_torrents.ts";
 import "./characters/hydro/aino.ts";
 import "./characters/hydro/alldevouring_narwhal.ts";

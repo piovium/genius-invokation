@@ -28,6 +28,7 @@ import type { AttachmentDefinition, EntityState } from "../../base/state";
 import type {
   CustomEventEventArg,
   EnterEventArg,
+  ModifyDamage3EventArg,
   SkillDefinition,
 } from "../../base/skill";
 import { getEntityArea, getEntityById, type Writable } from "../../utils";
@@ -436,6 +437,43 @@ export const EntityViewModel = defineViewModel(
         model.skillList.push(disposeSkillModel.buildSkillDefinition());
       }
     }),
+    shield: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: ThisWithType<Meta, "status" | "combatStatus">,
+        count: number,
+        max?: number,
+      ): AR.DoneRewriteMeta<PushVar<Meta, "shield">>;
+    }>((model, [count, max = count]) => {
+      const varConfig = createVariableConfig(count, {
+        append: { limit: max },
+      });
+      model.varConfigs.set("shield", varConfig);
+      const decreaseDmgSkill = new TriggeredSkillModel(
+        model,
+        "decreaseDamaged",
+      );
+      decreaseDmgSkill.id = model.getSubId();
+      decreaseDmgSkill.userFilters.push(function (c) {
+        if (c.self.definition.type === "combatStatus") {
+          // 出战状态护盾只对出战角色生效
+          return c.eventArg.target.isActive();
+        } else {
+          return true;
+        }
+      });
+      decreaseDmgSkill.action = function (c) {
+        const shield = c.getVariable("shield");
+        const e = c.eventArg as ModifyDamage3EventArg;
+        const currentValue = e.value;
+        const decreased = Math.min(shield, currentValue);
+        e.decreaseDamage(decreased);
+        c.addVariable("shield", -decreased);
+        if (shield <= currentValue) {
+          c.dispose();
+        }
+      };
+      model.skillList.push(decreaseDmgSkill.buildSkillDefinition());
+    }),
 
     duration: h.attribute<{
       <Meta extends EntityVMMeta>(
@@ -450,16 +488,15 @@ export const EntityViewModel = defineViewModel(
     oneDuration: h.attribute<{
       <Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
-        value: number,
       ): AR.WithRewriteMeta<
         Omit<Meta, "variables"> & {
           variables: Meta["variables"] | "duration";
         },
         typeof VariablesVM
       >;
-    }>((model, [value], subView) => {
+    }>((model, [], subView) => {
       const options = VariablesVM.parse(subView);
-      const varConfig = createVariableConfig(value, {
+      const varConfig = createVariableConfig(1, {
         ...options,
         visible: false,
       });

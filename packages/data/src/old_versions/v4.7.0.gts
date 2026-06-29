@@ -2,7 +2,7 @@ import { Aura, type CardHandle, DamageType, DiceType, card, combatStatus, skill,
 import { BonecrunchersEnergyBlockCombatStatus } from "../cards/event/other.gts";
 import { Cyno } from "../characters/electro/cyno.ts";
 import { LightningRoseSummon } from "../characters/electro/lisa.ts";
-import { DominusLapidisStrikingStone, Zhongli } from "../characters/geo/zhongli.ts";
+import { DominusLapidisStrikingStone, Zhongli } from "../characters/geo/zhongli.gts";
 import { AutumnWhirlwind } from "../characters/anemo/kaedehara_kazuha.ts";
 import { AbiogenesisSolarIsotoma, Albedo } from "../characters/geo/albedo.ts";
 import { DecorousHarmony } from "../characters/geo/yun_jin.ts";

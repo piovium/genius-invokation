@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, combatStatus, card, DamageType } from "@gi-tcg/core/builder";
+import { $, DamageType, DiceType } from "@gi-tcg/core/builder";
 
 /**
  * @id 116031
@@ -22,10 +22,14 @@ import { character, skill, summon, status, combatStatus, card, DamageType } from
  * 结束阶段：造成1点岩元素伤害。
  * 可用次数：2
  */
-export const StoneStele = summon(116031)
-  .endPhaseDamage(DamageType.Geo, 1)
-  .usage(2)
-  .done();
+define summon {
+  id 116031 as StoneStele;
+  hint DamageType.Geo, 1;
+  on endPhase {
+    usage 2;
+    :damage(DamageType.Geo, 1);
+  }
+}
 
 /**
  * @id 116033
@@ -33,10 +37,11 @@ export const StoneStele = summon(116031)
  * @description
  * 角色无法使用技能。（持续到回合结束）
  */
-export const Petrification = status(116033)
-  .oneDuration()
-  .tags("disableSkill")
-  .done();
+define status {
+  id 116033 as Petrification;
+  oneDuration;
+  tags disableSkill;
+}
 
 /**
  * @id 116032
@@ -44,9 +49,10 @@ export const Petrification = status(116033)
  * @description
  * 为我方出战角色提供2点护盾。
  */
-export const JadeShield = combatStatus(116032)
-  .shield(2)
-  .done();
+define combatStatus {
+  id 116032 as JadeShield;
+  shield 2;
+}
 
 /**
  * @id 16031
@@ -54,12 +60,13 @@ export const JadeShield = combatStatus(116032)
  * @description
  * 造成2点物理伤害。
  */
-export const RainOfStone = skill(16031)
-  .type("normal")
-  .costGeo(1)
-  .costVoid(2)
-  .damage(DamageType.Physical, 2)
-  .done();
+define skill { 
+  id 16031 as RainOfStone;
+  skillType normal;
+  cost DiceType.Geo, 1;
+  cost DiceType.Void, 2;
+  :damage(DamageType.Physical, 2);
+}
 
 /**
  * @id 16032
@@ -67,12 +74,13 @@ export const RainOfStone = skill(16031)
  * @description
  * 造成1点岩元素伤害，召唤岩脊。
  */
-export const DominusLapidis = skill(16032)
-  .type("elemental")
-  .costGeo(3)
-  .damage(DamageType.Geo, 1)
-  .summon(StoneStele)
-  .done();
+define skill {
+  id 16032 as DominusLapidis;
+  skillType elemental;
+  cost DiceType.Geo, 3;
+  :damage(DamageType.Geo, 1);
+  :summon(StoneStele);
+}
 
 /**
  * @id 16033
@@ -80,13 +88,14 @@ export const DominusLapidis = skill(16032)
  * @description
  * 造成3点岩元素伤害，召唤岩脊，生成玉璋护盾。
  */
-export const DominusLapidisStrikingStone = skill(16033)
-  .type("elemental")
-  .costGeo(5)
-  .damage(DamageType.Geo, 3)
-  .summon(StoneStele)
-  .combatStatus(JadeShield)
-  .done();
+define skill {
+  id 16033 as DominusLapidisStrikingStone;
+  skillType elemental;
+  cost DiceType.Geo, 5;
+  :damage(DamageType.Geo, 3);
+  :summon(StoneStele);
+  :combatStatus(JadeShield);
+}
 
 /**
  * @id 16034
@@ -94,13 +103,14 @@ export const DominusLapidisStrikingStone = skill(16033)
  * @description
  * 造成4点岩元素伤害，目标角色附属石化。
  */
-export const PlanetBefall = skill(16034)
-  .type("burst")
-  .costGeo(3)
-  .costEnergy(3)
-  .damage(DamageType.Geo, 4)
-  .characterStatus(Petrification, "opp active")
-  .done();
+define skill {
+  id 16034 as PlanetBefall;
+  skillType burst;
+  cost DiceType.Geo, 3;
+  cost DiceType.Energy, 3;
+  :damage(DamageType.Geo, 4);
+  :characterStatus(Petrification, $.opp.active);
+}
 
 /**
  * @id 1603
@@ -108,13 +118,14 @@ export const PlanetBefall = skill(16034)
  * @description
  * 韬玉之石，可明八荒；灿若天星，纵横无双 。
  */
-export const Zhongli = character(1603)
-  .since("v3.7.0")
-  .tags("geo", "pole", "liyue")
-  .health(12)
-  .energy(3)
-  .skills(RainOfStone, DominusLapidis, DominusLapidisStrikingStone, PlanetBefall)
-  .done();
+define character {
+  id 1603 as Zhongli;
+  since "v3.7.0";
+  tags geo, pole, liyue;
+  health 12;
+  energy 3;
+  skills RainOfStone, DominusLapidis, DominusLapidisStrikingStone, PlanetBefall;
+}
 
 /**
  * @id 216031
@@ -125,19 +136,24 @@ export const Zhongli = character(1603)
  * 装备有此牌的钟离生命值至少为7时，钟离造成的伤害和我方召唤物造成的岩元素伤害+1。（每回合3次）
  * （牌组中包含钟离，才能加入牌组）
  */
-export const DominanceOfEarth = card(216031)
-  .since("v3.7.0")
-  .costGeo(5)
-  .talent(Zhongli)
-  .on("enter")
-  .useSkill(DominusLapidisStrikingStone)
-  .on("increaseDamage", (c, e) => {
-    return c.self.master.health >= 7 &&
-    (e.source.definition.id === Zhongli ||
-      e.type === DamageType.Geo &&
-      e.source.definition.type === "summon")
-  })
-  .listenToPlayer()
-  .usagePerRound(3)
-  .increaseDamage(1)
-  .done();
+define card {
+  id 216031 as DominanceOfEarth;
+  since "v3.7.0";
+  cost DiceType.Geo, 5;
+  talent Zhongli {
+    on enter {
+      :useSkill(DominusLapidisStrikingStone);
+    }
+    on increaseDamage {
+      when :{
+        return :self.master.health >= 7 &&
+        (:e.source.definition.id === Zhongli ||
+          :e.type === DamageType.Geo &&
+          :e.source.definition.type === "summon")
+      };
+      listenTo samePlayer;
+      usage perRound, 3;
+      :e.increaseDamage(1);
+    }
+  }
+}

@@ -3,7 +3,7 @@ import { DandelionBreeze, FavoniusBladework, GaleBlade } from "../characters/ane
 import { DivineMarksmanship, SkywardSonnet, WindsGrandOde } from "../characters/anemo/venti.ts";
 import { CelestialShower, FrostflakeArrow, LiutianArchery, TrailOfTheQilin } from "../characters/cryo/ganyu.ts";
 import { Breastplate, FavoniusBladeworkMaid, SweepingTime } from "../characters/geo/noelle.ts";
-import { DominusLapidis, DominusLapidisStrikingStone, PlanetBefall, RainOfStone } from "../characters/geo/zhongli.ts";
+import { DominusLapidis, DominusLapidisStrikingStone, PlanetBefall, RainOfStone } from "../characters/geo/zhongli.gts";
 import { KuragesOath, NereidsAscension, TheShapeOfWater } from "../characters/hydro/sangonomiya_kokomi.ts";
 import { DetailedDiagnosisThoroughTreatment01, DetailedDiagnosisThoroughTreatment02, DetailedDiagnosisThoroughTreatment03, MedicalInterventionOfPureIntention, ReboundHydrotherapy, SuperSaturatedSyringing, TargetedTreatment } from "../characters/hydro/sigewinne.ts";
 import { GuideToAfterlife, SecretSpearOfWangsheng, SpiritSoother } from "../characters/pyro/hu_tao.ts";
