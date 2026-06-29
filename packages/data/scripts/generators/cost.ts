@@ -17,7 +17,7 @@ import type { PlayCost } from "@gi-tcg/assets-manager";
 
 function costMap(s: string) {
   if (s === "GCG_COST_ENERGY") return "Energy";
-  if (s === "GCG_COST_SAME") return "Aligned";
+  if (s === "GCG_COST_DICE_SAME") return "Aligned";
   return s[14] + s.substring(15).toLowerCase();
 }
 

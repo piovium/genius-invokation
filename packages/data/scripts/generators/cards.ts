@@ -54,7 +54,7 @@ export function getCardCode(card: ActionCardRawData, extra = ""): string {
   const { type, tags } = getCardTypeAndTags(card);
   let mainCode = "";
   if (type === "event") {
-    mainCode = `  ${TODO_LINE}`;
+    mainCode = `\n  ${TODO_LINE}`;
   } else if (type === "equipment") {
     const tag = tags.shift();
     if (tag === "artifact") {
@@ -86,7 +86,7 @@ export function getCardCode(card: ActionCardRawData, extra = ""): string {
 }
 
 export async function generateCards() {
-  const INIT_CARD_CODE = `import { card, $ } from "@gi-tcg/core/builder";\n`;
+  const INIT_CARD_CODE = `import { DiceType, DamageType, $ } from "@gi-tcg/core/builder";\n`;
   const equipsCode: Record<string, SourceInfo[]> = {
     bow: [],
     sword: [],

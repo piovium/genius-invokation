@@ -28,9 +28,6 @@ import { getCardCode, getCardTypeAndTags, TODO_LINE } from "./cards";
 import { NEW_VERSION } from "./config";
 
 interface AuxiliaryFound {
-  hasSummon: boolean;
-  hasStatuses: boolean;
-  hasCombatStatuses: boolean;
   items: SourceInfo[];
 }
 
@@ -109,15 +106,12 @@ function getAuxiliaryOfCharacter(id: number): AuxiliaryFound {
       description: description,
       code: `define ${obj.kind} {
   id ${obj.id} as ${identifier(obj.englishName)};
-  since ${NEW_VERSION};
+  since "${NEW_VERSION}";
   // TODO
 }`,
     };
   });
   return {
-    hasSummon: mySummons.length > 0,
-    hasStatuses: myStatuses.length > 0,
-    hasCombatStatuses: myCombatStatuses.length > 0,
     items,
   };
 }
@@ -139,7 +133,7 @@ function getTalentCard(id: number, name: string): SourceInfo[] {
       description: card.description,
       code: getCardCode(
         card,
-        `\n   ${methodName} ${identifier(name)} {\n    ${TODO_LINE} }`,
+        `\n  ${methodName} ${identifier(name)} {\n    ${TODO_LINE}  }`,
       ),
     },
   ];
@@ -153,16 +147,9 @@ export async function generateCharacters() {
       "/" +
       snakeCase(ch.englishName);
 
-    const { hasSummon, hasStatuses, hasCombatStatuses, items } =
+    const { items } =
       getAuxiliaryOfCharacter(ch.id);
-    // TODO: after migrate to GTS, these imports can be elided
-    const importDecls = ["character", "skill"];
-    if (hasSummon) importDecls.push("summon");
-    if (hasStatuses) importDecls.push("status");
-    if (hasCombatStatuses) importDecls.push("combatStatus");
-    const initCode = `import { ${importDecls.join(
-      ", ",
-    )}, card, DamageType, $ } from "@gi-tcg/core/builder";\n`;
+    const initCode = `import { DiceType, DamageType, $ } from "@gi-tcg/core/builder";\n`;
     const skills = ch.skills;
 
     const todoLine = items.push(
@@ -181,9 +168,9 @@ export async function generateCharacters() {
   id ${sk.id} as ${identifier(sk.englishName)};
   skillType ${TYPE_MAP[sk.type]}${
     TYPE_MAP[sk.type] === "passive"
-      ? `{\n    ${TODO_LINE}}`
-      : `
-  ${getCostCode(sk.playCost)}  ${TODO_LINE}`
+      ? ` {\n    ${TODO_LINE}  }`
+      : `${getCostCode(sk.playCost)}
+  ${TODO_LINE}`
   }
 }`,
         };
