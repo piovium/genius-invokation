@@ -441,3 +441,37 @@ export const ElementalTransfigurationStormgaleBlessing = card(331009)
   ])
   .dispose()
   .done();
+
+/**
+ * @id 331010
+ * @name 元素幻变：水风祝佑
+ * @description
+ * 元素幻变：水元素风元素
+ * 投掷阶段：总是投出2个水元素骰和2个风元素骰。
+ * 我方触发扩散（水）反应后：弃置此牌并从水风祝佑·水爆和水风祝佑·漩风中挑选一项加入手牌。
+ */
+define card {
+  id 331010 as ElementalTransfigurationAquabreezeBlessing;
+  since "v6.7.0";
+  cost DiceType.Aligned, 2;
+  support blessing {
+    // TODO
+  }
+}
+
+/**
+ * @id 331011
+ * @name 元素幻变：雷草祝佑
+ * @description
+ * 元素幻变：雷元素草元素
+ * 投掷阶段：总是投出2个雷元素骰和2个草元素骰。
+ * 我方触发激化反应后：弃置此牌并从雷草祝佑·碎霆和雷草祝佑·锐核中挑选一项加入手牌。
+ */
+define card {
+  id 331011 as ElementalTransfigurationThunderbloomBlessing;
+  since "v6.7.0";
+  cost DiceType.Aligned, 2;
+  support blessing {
+    // TODO
+  }
+}

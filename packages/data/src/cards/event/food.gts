@@ -592,3 +592,19 @@ export const RouletteSpecial = card(333030)
     }
   })
   .done();
+
+/**
+ * @id 333031
+ * @name 白灵果派
+ * @description
+ * 本回合目标角色下2次使用技能少花费2个元素骰。
+ * （每回合每个角色最多食用1次「料理」）
+ */
+define card {
+  id 333031 as LakkaberryPie;
+  since "v6.7.0";
+  cost DiceType.Aligned, 4;
+  tags food;
+  // TODO
+
+}

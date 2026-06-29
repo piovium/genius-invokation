@@ -2501,3 +2501,34 @@ export const CleaningTime = card(332062)
     c.generateDice("randomElement", diceCount);
   })
   .done();
+
+/**
+ * @id 332063
+ * @name 小小灵蕈大幻戏
+ * @description
+ * 目标我方「魔物」角色造成的伤害+1。（不可叠加）
+ * 此牌在手中，我方「魔物」角色使用技能后：赋予此卡牌费用降低。
+ * 此牌被舍弃时：我方随机「魔物」角色获得1点额外最大生命值。
+ * （牌组包含至少2个「魔物」角色，才能加入牌组）
+ */
+define card {
+  id 332063 as LilFungisFuntasticFiesta;
+  since "v6.7.0";
+  cost DiceType.Aligned, 5;
+  // TODO
+
+}
+
+/**
+ * @id 332064
+ * @name 科研的动力
+ * @description
+ * 我方下3次打出当前元素骰费用大于等于3的卡牌后，生成1个随机基础元素骰。
+ */
+define card {
+  id 332064 as ThePowerOfResearch;
+  since "v6.7.0";
+  cost DiceType.Aligned, 1;
+  // TODO
+
+}
