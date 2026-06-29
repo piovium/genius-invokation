@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, summon, status, card, DamageType } from "@gi-tcg/core/builder";
-import { ResistantForm } from "../../commons";
+import { ResistantForm } from "../../commons.gts";
 /**
  * @id 115142
  * @name 梦见风名物点心

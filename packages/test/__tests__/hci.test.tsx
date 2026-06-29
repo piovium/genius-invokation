@@ -53,7 +53,7 @@ import {
 } from "@gi-tcg/data/internal/characters/dendro/gluttonous_yumkasaur_mountain_king";
 import { TheMausoleumOfKingDeshret, TheMausoleumOfKingDeshretInEffect } from "@gi-tcg/data/internal/cards/support/place";
 import { CrystalShrapnel, Navia } from "@gi-tcg/data/internal/characters/geo/navia";
-import { CostIncrease } from "@gi-tcg/data/internal/commons";
+import { CostIncrease } from "@gi-tcg/data/internal/commons.gts";
 import { Baizhu, SeamlessShield } from "@gi-tcg/data/internal/characters/dendro/baizhu";
 import { Jean } from "@gi-tcg/data/internal/characters/anemo/jean";
 import { Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";

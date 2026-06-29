@@ -6,9 +6,9 @@ import { BlazingBlessing, CrimsonOoyoroi, SwiftshatterSpear } from "../character
 import { FloralBrush, SupplicantsBowmanship, TrumpcardKitty } from "../characters/dendro/collei.ts";
 import { BranchingFlow, SavageSwell, StormSurge, ThunderingTide } from "../characters/hydro/hydro_tulpa.ts";
 import { ErodedFlamingFeathers, ResentmentPassive, SeveringPrimalFire, VoidClawStrike } from "../characters/pyro/lord_of_eroded_primal_fire.ts";
-import { NonInitialPlayedCardExtension } from "../cards/equipment/weapon/claymore.ts";
-import { ChenyuBrew } from "../cards/event/food.ts";
-import { AgileSwitch, EfficientSwitch } from "../commons.ts";
+import { NonInitialPlayedCardExtension } from "../cards/equipment/weapon/claymore.gts";
+import { ChenyuBrew } from "../cards/event/food.gts";
+import { AgileSwitch, EfficientSwitch } from "../commons.gts";
 
 /**
  * @id 1110

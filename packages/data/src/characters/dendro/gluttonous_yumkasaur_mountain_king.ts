@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, status, card, DamageType, customEvent } from "@gi-tcg/core/builder";
-import { Satiated } from "../../commons";
+import { Satiated } from "../../commons.gts";
 
 /**
  * @id 127041

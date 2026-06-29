@@ -43,7 +43,7 @@ import {
   Sigewinne,
 } from "@gi-tcg/data/internal/characters/hydro/sigewinne";
 import { SweepingFervor, Xinyan } from "@gi-tcg/data/internal/characters/pyro/xinyan";
-import { BondOfLife, Satiated } from "@gi-tcg/data/internal/commons";
+import { BondOfLife, Satiated } from "@gi-tcg/data/internal/commons.gts";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";
 

@@ -14,8 +14,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { $, type CardHandle, type CharacterHandle, DamageType, DiceType, type Pair, Reaction, type SkillHandle, type SupportHandle, card, extension, flip, status, summon, type } from "@gi-tcg/core/builder";
-import { CalledInForCleanup, CanotilasSupport, CosanzeanasSupport, LaumesSupport, LutinesSupport, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SerenesSupport, SIMULANKA_SUMMONS, SluasisSupport, TaroumarusSavings, ThironasSupport, TopyassSupport, ToyGuard, VirdasSupport } from "../event/other.ts";
-import { BattlePlan } from "../../commons";
+import { CalledInForCleanup, CanotilasSupport, CosanzeanasSupport, LaumesSupport, LutinesSupport, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SerenesSupport, SIMULANKA_SUMMONS, SluasisSupport, TaroumarusSavings, ThironasSupport, TopyassSupport, ToyGuard, VirdasSupport } from "../event/other.gts";
+import { BattlePlan } from "../../commons.gts";
 
 /**
  * @id 322001

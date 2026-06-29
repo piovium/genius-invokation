@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, summon, status, card, DamageType, Reaction, type SummonHandle } from "@gi-tcg/core/builder";
-import { BurningFlame } from "../../commons";
+import { BurningFlame } from "../../commons.gts";
 
 /**
  * @id 117102

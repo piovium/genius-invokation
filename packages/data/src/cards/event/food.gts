@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { type StatusHandle, card, combatStatus, status } from "@gi-tcg/core/builder";
-import { BattlePlan, Satiated, SharpenTheBlade } from "../../commons";
+import { BattlePlan, Satiated, SharpenTheBlade } from "../../commons.gts";
 
 /**
  * @id 333001

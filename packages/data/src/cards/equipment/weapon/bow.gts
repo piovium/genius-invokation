@@ -120,6 +120,7 @@ export const ElegyForTheEnd = card(311205)
   .combatStatus(MillennialMovementFarewellSong)
   .done();
 
+
 /**
  * @id 301103
  * @name 王下近侍（生效中）

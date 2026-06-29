@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { $, Aura, card, DamageType, DiceType, Reaction, status, type SupportHandle } from "@gi-tcg/core/builder";
-import { NoTuningAllowed, Shield } from "../../commons.ts";
+import { NoTuningAllowed, Shield } from "../../commons.gts";
 
 /**
  * @id 303041

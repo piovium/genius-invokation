@@ -4,8 +4,8 @@ import { GardenOfPurity, KamisatoArtKyouka, KamisatoArtMarobashi, KyoukaFuushi }
 import { FatuiCryoCicinMage } from "../characters/cryo/fatui_cryo_cicin_mage.ts";
 import { Diona, IcyPaws } from "../characters/cryo/diona.ts";
 import { RainbowBladework } from "../characters/hydro/xingqiu.ts";
-import { ReviveOnCooldown } from "../cards/event/food.ts";
-import { Satiated } from "../commons.ts";
+import { ReviveOnCooldown } from "../cards/event/food.gts";
+import { Satiated } from "../commons.gts";
 
 
 /**

@@ -23,7 +23,7 @@ import { CeremonialBladework, Icicle, Kaeya } from "@gi-tcg/data/internal/charac
 import { SesshouSakura, SpiritfoxSineater, YaeMiko } from "@gi-tcg/data/internal/characters/electro/yae_miko";
 import { Chevreuse, SecondaryExplosiveShells } from "@gi-tcg/data/internal/characters/pyro/chevreuse";
 import { Guoba, Xiangling } from "@gi-tcg/data/internal/characters/pyro/xiangling";
-import { Shield } from "@gi-tcg/data/internal/commons";
+import { Shield } from "@gi-tcg/data/internal/commons.gts";
 import { Aura } from "@gi-tcg/typings";
 import { expect, test } from "vitest";
 

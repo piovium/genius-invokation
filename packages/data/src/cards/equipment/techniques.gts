@@ -15,7 +15,7 @@
 
 import type { EntityDefinition } from "@gi-tcg/core";
 import { card, combatStatus, DamageType, extension, status, type StatusHandle, $ } from "@gi-tcg/core/builder";
-import { AgileSwitch, EfficientSwitch } from "../../commons";
+import { AgileSwitch, EfficientSwitch } from "../../commons.gts";
 
 /**
  * @id 313001

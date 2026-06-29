@@ -2,7 +2,7 @@ import { DamageType, type EquipmentHandle, type SkillHandle, card, character, sk
 import { LiutianArchery, SacredCryoPearl, TrailOfTheQilin } from "../characters/cryo/ganyu.ts";
 import { MirrorCage, Refraction, Refraction01 } from "../characters/hydro/mirror_maiden.ts";
 import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.ts";
-import { LithicGuard } from "../cards/equipment/weapon/pole.ts";
+import { LithicGuard } from "../cards/equipment/weapon/pole.gts";
 
 /**
  * @id 211011

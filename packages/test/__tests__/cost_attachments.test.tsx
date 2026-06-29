@@ -18,7 +18,7 @@ import { CountdownToTheShow3 } from "@gi-tcg/data/internal/cards/event/other";
 import { SuperconductBlessingDeepFreeze } from "@gi-tcg/data/internal/cards/support/blessing";
 import { FrostmoonEnclave } from "@gi-tcg/data/internal/cards/support/place";
 import { CeremonialBladework, Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";
-import { CostIncrease, NoTuningAllowed } from "@gi-tcg/data/internal/commons";
+import { CostIncrease, NoTuningAllowed } from "@gi-tcg/data/internal/commons.gts";
 import { test } from "vitest";
 
 test("cost decrease applied on increase will neutralize each other", async () => {

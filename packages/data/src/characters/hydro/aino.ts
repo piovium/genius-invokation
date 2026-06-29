@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, summon, card, DamageType, $, Reaction } from "@gi-tcg/core/builder";
-import { AgileSwitch, Empowerment } from "../../commons";
+import { AgileSwitch, Empowerment } from "../../commons.gts";
 
 /**
  * @id 112161

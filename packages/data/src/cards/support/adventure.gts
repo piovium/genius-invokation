@@ -14,9 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { $, card, type CardHandle, combatStatus, DamageType, DiceType, summon } from "@gi-tcg/core/builder";
-import { ChenyuBrew } from "../event/food.ts";
-import { AdventureCompleted, AgileSwitch, BattlePlan, EfficientSwitch } from "../../commons";
-import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other.ts";
+import { ChenyuBrew } from "../event/food.gts";
+import { AdventureCompleted, AgileSwitch, BattlePlan, EfficientSwitch } from "../../commons.gts";
+import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other.gts";
 
 /**
  * @id 321032

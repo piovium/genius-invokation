@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DamageType, DiceType, card, combatStatus, extension } from "@gi-tcg/core/builder";
-import { AgileSwitch, EfficientSwitch } from "../../commons";
+import { AgileSwitch, EfficientSwitch } from "../../commons.gts";
 
 /**
  * @id 323001

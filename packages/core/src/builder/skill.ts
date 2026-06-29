@@ -91,6 +91,7 @@ import type { TargetKindOfQuery, TargetQuery, TargetType } from "./card";
 import { $, type IDollar, type InferResult, type IQuery } from "../query";
 import { isCustomEvent, type CustomEvent } from "../base/custom_event";
 import type { ApplyReactive } from "./context/reactive";
+import type { StaticAssert } from "../query/utils";
 
 export type InitiativeSkillTargetKind = readonly (
   | "character"
@@ -783,7 +784,7 @@ type EnableShortcutPropsOf<Ctx extends object> = {
 }[keyof Ctx];
 
 /** 所有允许 shortcut 调用的方法名 */
-type EnabledShortcutProps = EnableShortcutPropsOf<
+type EnabledShortcutPropsRaw = EnableShortcutPropsOf<
   TypedSkillContext<{
     readonly: false;
     eventArgType: unknown;
@@ -793,6 +794,61 @@ type EnabledShortcutProps = EnableShortcutPropsOf<
     shortcutReceiver: {};
   }>
 >;
+// Temporary migration workaround of GTS:
+// TSServer inside GTS cannot correctly compue the type of `EnabledShortcutPropsRaw`.
+// So we manually list all the allowed shortcut methods here.
+type EnabledShortcutProps =
+  | "emitCustomEvent"
+  | "abortPreview"
+  | "switchActive"
+  | "gainEnergy"
+  | "heal"
+  | "immune"
+  | "increaseMaxHealth"
+  | "damage"
+  | "apply"
+  | "cleanAura"
+  | "moveEntity"
+  | "summon"
+  | "characterStatus"
+  | "equip"
+  | "combatStatus"
+  | "attach"
+  | "attachCostIncrease"
+  | "attachCostReduction"
+  | "dispose"
+  | "setVariable"
+  | "addVariable"
+  | "addVariableWithMax"
+  | "consumeUsage"
+  | "consumeUsagePerRound"
+  | "transformDefinition"
+  | "swapCharacterPosition"
+  | "convertDice"
+  | "generateDice"
+  | "createHandCard"
+  | "drawCards"
+  | "createPileCards"
+  | "undrawCards"
+  | "swapPlayerHandCards"
+  | "disposeMaxCostHands"
+  | "consumeNightsoul"
+  | "gainNightsoul"
+  | "continueNextTurn"
+  | "setExtensionState"
+  | "switchCards"
+  | "rerollDice"
+  | "triggerEndPhaseSkill"
+  | "useSkill"
+  | "selectAndSummon"
+  | "selectAndCreateHandCard"
+  | "selectAndPlay"
+  | "adventure"
+  | "finishAdventure";
+type EnabledShortcutPropsCheck = StaticAssert<
+  IsNever<Exclude<EnabledShortcutPropsRaw, EnabledShortcutProps>>
+>;
+type IsNever<T> = [T] extends [never] ? true : false;
 
 type ShortcutSkillContext<Meta extends ContextMetaBase> = Pick<
   TypedSkillContext<Meta>,

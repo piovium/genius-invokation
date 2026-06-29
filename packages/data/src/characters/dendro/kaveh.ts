@@ -15,7 +15,7 @@
 
 import { type EntityState, character, skill, status, combatStatus, card, DamageType, type CardHandle, customEvent } from "@gi-tcg/core/builder";
 import { BountifulCore } from "../hydro/nilou.ts";
-import { DendroCore } from "../../commons";
+import { DendroCore } from "../../commons.gts";
 
 export const ShouldTriggerTalent = customEvent<EntityState>("kaveh/shouldTriggerTalent");
 /**

@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { type EntityDefinition, type CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, status, summon, originalDiceCostOfCard, $, type CombatStatusHandle } from "@gi-tcg/core/builder";
-import { BurningFlame, CatalyzingField, CostReduction, DendroCore, EfficientSwitch, Empowerment, ResistantForm, Shield } from "../../commons";
+import { BurningFlame, CatalyzingField, CostReduction, DendroCore, EfficientSwitch, Empowerment, ResistantForm, Shield } from "../../commons.gts";
 import { BountifulCore } from "../../characters/hydro/nilou";
 
 /**

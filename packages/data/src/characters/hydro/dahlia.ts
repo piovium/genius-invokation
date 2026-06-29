@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, combatStatus, card, DamageType, $ } from "@gi-tcg/core/builder";
-import { Shield } from "../../commons";
+import { Shield } from "../../commons.gts";
 
 /**
  * @id 112151

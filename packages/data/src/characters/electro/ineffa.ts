@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, summon, card, DamageType, Reaction } from "@gi-tcg/core/builder";
-import { Conductive, NoTuningAllowed, Shield } from "../../commons";
+import { Conductive, NoTuningAllowed, Shield } from "../../commons.gts";
 import type { EntityType } from "@gi-tcg/core";
 
 /**

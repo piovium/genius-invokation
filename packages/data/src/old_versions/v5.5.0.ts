@@ -1,5 +1,5 @@
 import { card, DamageType, skill, status } from "@gi-tcg/core/builder";
-import { BurningFlame, CatalyzingField, DendroCore } from "../commons.ts";
+import { BurningFlame, CatalyzingField, DendroCore } from "../commons.gts";
 
 /**
  * @id 331702

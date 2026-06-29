@@ -1,5 +1,5 @@
 import { DamageType, DiceType, card, skill } from "@gi-tcg/core/builder";
-import { VermillionHereafterEffect } from "../cards/equipment/artifacts.ts";
+import { VermillionHereafterEffect } from "../cards/equipment/artifacts.gts";
 
 /**
  * @id 321003

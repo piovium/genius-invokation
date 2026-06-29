@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, status, card, DamageType, $, type SkillHandle, type CharacterHandle, Reaction } from "@gi-tcg/core/builder";
-import { Conductive, Thundercloud } from "../../commons";
+import { Conductive, Thundercloud } from "../../commons.gts";
 
 /**
  * @id 114181

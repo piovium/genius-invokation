@@ -1,6 +1,6 @@
 import { card, character, DamageType, Reaction, skill, status } from "@gi-tcg/core/builder";
 import { Citlali, MamaloacosFrigidRainInEffect } from "../characters/cryo/citlali.ts";
-import { BondOfLife } from "../commons.ts";
+import { BondOfLife } from "../commons.gts";
 import { Arlecchino } from "../characters/pyro/arlecchino.ts";
 import { FlamestriderBlazingTrail, FlamestriderFullThrottle, FlamestriderSoaringAscent } from "../characters/pyro/mavuika.gts";
 import { Kachina, TurboTwirlyTriggered } from "../characters/geo/kachina.ts";

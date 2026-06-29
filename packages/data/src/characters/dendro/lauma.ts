@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, combatStatus, card, DamageType, $, Reaction } from "@gi-tcg/core/builder";
-import { CostReduction } from "../../commons";
+import { CostReduction } from "../../commons.gts";
 
 /**
  * @id 117111

@@ -1,5 +1,5 @@
 import { skill, combatStatus, card, DamageType } from "@gi-tcg/core/builder";
-import { UnderseaTreasure } from "../cards/event/other.ts";
+import { UnderseaTreasure } from "../cards/event/other.gts";
 
 /**
  * @id 332031

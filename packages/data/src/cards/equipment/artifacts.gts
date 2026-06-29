@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { $, DamageType, DiceType, Reaction, card, combatStatus, status } from "@gi-tcg/core/builder";
-import { AdventureCompleted, BondOfLife, BurningFlame, EfficientSwitch } from "../../commons";
+import { AdventureCompleted, BondOfLife, BurningFlame, EfficientSwitch } from "../../commons.gts";
 
 /**
  * @id 312101

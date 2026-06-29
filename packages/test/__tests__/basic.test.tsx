@@ -18,7 +18,7 @@ import {
   SkywardSonnet,
   Venti,
 } from "@gi-tcg/data/internal/characters/anemo/venti";
-import { Satiated } from "@gi-tcg/data/internal/commons";
+import { Satiated } from "@gi-tcg/data/internal/commons.gts";
 import { test } from "vitest";
 
 test("basic", async () => {

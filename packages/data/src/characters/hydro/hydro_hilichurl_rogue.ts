@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, status, card, DamageType, type SkillHandle, type StatusHandle, customEvent } from "@gi-tcg/core/builder";
-import { Frozen } from "../../commons";
+import { Frozen } from "../../commons.gts";
 
 /**
  * @id 122052

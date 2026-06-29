@@ -5,10 +5,10 @@ import { SinOfPride, TenguJuuraiStormcluster } from "../characters/electro/kujou
 import { StarsGatherAtDusk, WhiteCloudsAtDawn, WordOfWindAndFlower } from "../characters/anemo/xianyun.ts";
 import { status } from "@gi-tcg/core/builder";
 import { Kirara } from "../characters/dendro/kirara.ts";
-import { Target } from "../cards/equipment/techniques.ts";
-import { AgileSwitch, EfficientSwitch, IneffectiveWhenPlayed, NoTuningAllowed } from "../commons.ts";
-import { ChenyuBrew } from "../cards/event/food.ts";
-import { RedFeatherFanStatus } from "../cards/support/item.ts";
+import { Target } from "../cards/equipment/techniques.gts";
+import { AgileSwitch, EfficientSwitch, IneffectiveWhenPlayed, NoTuningAllowed } from "../commons.gts";
+import { ChenyuBrew } from "../cards/event/food.gts";
+import { RedFeatherFanStatus } from "../cards/support/item.gts";
 
 /**
  * @id 1111

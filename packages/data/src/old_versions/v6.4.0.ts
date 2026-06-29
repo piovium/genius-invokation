@@ -3,8 +3,8 @@ import { LetTheShowBegin, ShiningMiracle, WhisperOfWater } from "../characters/h
 import { FavoniusBladeworkEdel, IcetideVortex, WellspringOfWarlust } from "../characters/cryo/eula.ts";
 import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.ts";
 import { Skirk, Skirk01 } from "../characters/cryo/skirk.ts";
-import { BattlePlan, CostReduction } from "../commons.ts";
-import { TideTurningSacredLord } from "../cards/support/adventure.ts";
+import { BattlePlan, CostReduction } from "../commons.gts";
+import { TideTurningSacredLord } from "../cards/support/adventure.gts";
 
 /**
  * @id 1201

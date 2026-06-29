@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, status, combatStatus, card, DamageType, $, type SkillHandle } from "@gi-tcg/core/builder";
-import { EfficientSwitch } from "../../commons";
+import { EfficientSwitch } from "../../commons.gts";
 
 /**
  * @id 126053

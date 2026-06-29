@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, status, card, DamageType, $ } from "@gi-tcg/core/builder";
-import { BonecrunchersEnergyBlock, BonecrunchersEnergyBlockCombatStatus } from "../../cards/event/other";
+import { BonecrunchersEnergyBlock, BonecrunchersEnergyBlockCombatStatus } from "../../cards/event/other.gts";
 
 /**
  * @id 27055

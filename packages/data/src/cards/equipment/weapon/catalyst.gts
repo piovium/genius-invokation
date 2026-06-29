@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DamageType, DiceType, card, status } from "@gi-tcg/core/builder";
-import { BondOfLife } from "../../../commons";
+import { BondOfLife } from "../../../commons.gts";
 
 /**
  * @id 311101

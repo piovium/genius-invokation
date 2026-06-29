@@ -14,8 +14,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { $, DamageType, DiceType, type EntityState, card, combatStatus, originalDiceCostOfCard, status } from "@gi-tcg/core/builder";
-import { ForbiddenKnowledge, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SIMULANKA_QUERY, ToyGuard, ToyGuardSummon } from "../event/other.ts";
-import { BattlePlan, CostReduction, Empowerment, IneffectiveWhenPlayed, NoTuningAllowed } from "../../commons";
+import { ForbiddenKnowledge, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SIMULANKA_QUERY, ToyGuard, ToyGuardSummon } from "../event/other.gts";
+import { BattlePlan, CostReduction, Empowerment, IneffectiveWhenPlayed, NoTuningAllowed } from "../../commons.gts";
 
 /**
  * @id 321001

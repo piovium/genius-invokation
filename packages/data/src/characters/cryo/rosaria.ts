@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { character, skill, summon, combatStatus, card, DamageType } from "@gi-tcg/core/builder";
-import { ChangingShifts } from "../../cards/event/other";
+import { ChangingShifts } from "../../cards/event/other.gts";
 
 /**
  * @id 111133

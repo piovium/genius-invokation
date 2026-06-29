@@ -15,7 +15,7 @@
 
 import { character, skill, status, combatStatus, card, DamageType } from "@gi-tcg/core/builder";
 import { SourcewaterDroplet } from "./neuvillette.ts";
-import { BondOfLife } from "../../commons";
+import { BondOfLife } from "../../commons.gts";
 
 /**
  * @id 12135

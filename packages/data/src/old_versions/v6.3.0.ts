@@ -1,5 +1,5 @@
 import { card, character, combatStatus, skill } from "@gi-tcg/core/builder";
-import { StrictProhibited } from "../cards/support/place.ts";
+import { StrictProhibited } from "../cards/support/place.gts";
 import { ConstantOffthecuffCookery, KitchenSkills, LowtemperatureCooking, ScoringCuts } from "../characters/cryo/escoffier.ts";
 import { Breakthrough, DepthclarionDice, LingeringLifeline, StealthyBowshot } from "../characters/hydro/yelan.ts";
 import { InsatiableAppetite, RavagingDevourer, ShatteringWaves, StarfallShower } from "../characters/hydro/alldevouring_narwhal.ts";
