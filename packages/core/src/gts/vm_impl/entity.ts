@@ -31,7 +31,8 @@ import {
 } from "../../builder/skill";
 import {
   GiTcgCoreInternalError,
-  type EntityType,
+  GiTcgDataError,
+  type AttachmentDefinition,
   type Version,
   type VersionInfo,
 } from "../..";
@@ -45,22 +46,26 @@ import type {
 import {
   VariablesVM,
   type GtsAppendOptions,
+  type GtsUsageOptions,
   type GtsVariableOptions,
-  type GtsUsageOption,
 } from "./variables";
 import { createVariable, createVariableCanAppend } from "../../builder/utils";
 import { TriggeredSkillModel, TriggeredSkillVM } from "./skill";
 import type { CustomEvent } from "../../builder";
 import { GlobalUsageVM, PrepareVM, NightsoulVM } from "./entity_auxilary";
+import type { CharacterPassiveSkillEntry } from "../../builder/registry";
 
-class EntityModel implements ICaller {
+export interface GtsUsageOrUsagePerRoundOptions extends GtsUsageOptions {
+  perRound: boolean;
+}
+
+export class EntityModel implements ICaller {
   skillIndex = 0;
   usagePerRoundIndex = 0;
 
   id!: number;
-  type: EntityType;
+  type: ExEntityType;
   tags: EntityTag[] = [];
-  obtainable = true;
   versionInfo: VersionInfo = DEFAULT_VERSION_INFO;
 
   varConfigs = new Map<string, VariableConfig>();
@@ -73,11 +78,12 @@ class EntityModel implements ICaller {
   descriptionDictionary: Writable<DescriptionDictionary> = {};
   snippets = new Map<string, SkillOperation<any>>();
 
-  constructor(type: EntityType) {
+  constructor(type: ExEntityType) {
     this.type = type;
   }
 
-  getEntry(): EntityDefinition {
+  /** Return all skills including implicit roundEnd */
+  getSkills(): SkillDefinition[] {
     // add clean-up roundEnd skill
     const usagePerRoundNames = USAGE_PER_ROUND_VARIABLE_NAMES.filter((name) =>
       this.varConfigs.has(name),
@@ -105,42 +111,65 @@ class EntityModel implements ICaller {
       };
       skills.push(roundEndSkill.buildSkillDefinition());
     }
-
-    return {
-      __definition: "entities",
-      id: this.id,
-      obtainable: this.obtainable,
-      version: this.versionInfo,
-      visibleVarName: this.visibleVarName,
-      varConfigs: Object.fromEntries(this.varConfigs.entries()),
-      disposeWhenUsageIsZero: this.disposeWhenUsageIsZero,
-      disposeOnMasterDefeated: this.disposeOnMasterDefeated,
-      hintText: this.hintText,
-      disableTuning: false,
-      skills,
-      tags: this.tags as EntityTag[],
-      type: this.type,
-      descriptionDictionary: this.descriptionDictionary,
-    };
+    return skills;
   }
 
-  setUsage(count: number, option: GtsUsageOption): string {
+  getEntry():
+    | EntityDefinition
+    | AttachmentDefinition
+    | CharacterPassiveSkillEntry {
+    if (this.type === "character") {
+      const skills = [...this.skillList];
+      return {
+        __definition: "passiveSkills",
+        type: "passiveSkill",
+        id: this.id,
+        version: this.versionInfo,
+        skills,
+        varConfigs: Object.fromEntries(this.varConfigs),
+      };
+    } else if (this.type === "attachment") {
+      throw new Error("Not implemented");
+    } else {
+      const skills = this.getSkills();
+      return {
+        __definition: "entities",
+        id: this.id,
+        obtainable: true,
+        disableTuning: false,
+        version: this.versionInfo,
+        visibleVarName: this.visibleVarName,
+        varConfigs: Object.fromEntries(this.varConfigs),
+        disposeWhenUsageIsZero: this.disposeWhenUsageIsZero,
+        disposeOnMasterDefeated: this.disposeOnMasterDefeated,
+        hintText: this.hintText,
+        skills,
+        tags: this.tags as EntityTag[],
+        type: this.type,
+        descriptionDictionary: this.descriptionDictionary,
+      };
+    }
+  }
+
+  setUsage(count: number, option: GtsUsageOrUsagePerRoundOptions): string {
     const perRound = option.perRound ?? false;
     let name: string;
     if (option.name) {
       name = option.name;
-    } else {
-      if (perRound) {
-        if (this.usagePerRoundIndex >= USAGE_PER_ROUND_VARIABLE_NAMES.length) {
-          throw new GiTcgCoreInternalError(
-            `Cannot specify more than ${USAGE_PER_ROUND_VARIABLE_NAMES.length} usagePerRound.`,
-          );
-        }
-        name = USAGE_PER_ROUND_VARIABLE_NAMES[this.usagePerRoundIndex];
-        this.usagePerRoundIndex++;
-      } else {
-        name = "usage";
+    } else if (this.type === "character") {
+      throw new GiTcgDataError(
+        `You must explicitly set the name of usage when defining passive skill. Be careful that different passive skill should have distinct usage name.`,
+      );
+    } else if (perRound) {
+      if (this.usagePerRoundIndex >= USAGE_PER_ROUND_VARIABLE_NAMES.length) {
+        throw new GiTcgCoreInternalError(
+          `Cannot specify more than ${USAGE_PER_ROUND_VARIABLE_NAMES.length} usagePerRound.`,
+        );
       }
+      name = USAGE_PER_ROUND_VARIABLE_NAMES[this.usagePerRoundIndex];
+      this.usagePerRoundIndex++;
+    } else {
+      name = "usage";
     }
     if (
       !perRound &&
@@ -155,6 +184,11 @@ class EntityModel implements ICaller {
     const autoDispose = name === "usage" && option.autoDispose !== false;
     this.varConfigs.set(name, createVariableConfig(count, option));
     if (autoDispose) {
+      if (this.type === "character" || this.type === "attachment") {
+        throw new GiTcgDataError(
+          `${this.type} cannot be autoDisposed by usage reaching 0.`,
+        );
+      }
       this.disposeWhenUsageIsZero = true;
     }
     return name;
@@ -169,7 +203,7 @@ export interface ICaller {
    * @param option
    * @returns the name of the variable that was added
    */
-  setUsage(count: number, option: GtsUsageOption): string;
+  setUsage(count: number, option: GtsUsageOptions): string;
 }
 
 export const createVariableConfig = (
@@ -207,13 +241,22 @@ export const DEFAULT_ENTITY_VM_META = {
   associatedExtension: null as never,
 } as const satisfies EntityVMMeta;
 
+export type DefaultEntityVMMeta<T extends ExEntityType> =
+  typeof DEFAULT_ENTITY_VM_META & {
+    type: T;
+  };
+
 export const EntityViewModel = defineViewModel(
   EntityModel,
   (h) => ({
     id: h.attribute<{
       (id: number): AR.Done;
       as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
-      required(): true;
+      required<Meta extends EntityVMMeta>(): Meta extends {
+        type: "summon" | "status" | "combatStatus";
+      }
+        ? true
+        : false;
       uniqueKey(): "id";
     }>(
       (model, [id]) => {
@@ -287,10 +330,10 @@ export const EntityViewModel = defineViewModel(
         name: Name,
         initialValue: number,
       ): AR.WithRewriteMeta<
-        typeof VariablesVM,
         Omit<Meta, "variables"> & {
           variables: Meta["variables"] | Name;
-        }
+        },
+        typeof VariablesVM
       >;
     }>((model, [name, initValue], subView) => {
       const options = VariablesVM.parse(subView);
@@ -302,14 +345,14 @@ export const EntityViewModel = defineViewModel(
         this: AR.This<Meta>,
         count: number,
       ): AR.WithRewriteMeta<
-        typeof GlobalUsageVM,
         Omit<Meta, "variables"> & {
           variables: Meta["variables"] | "usage";
-        }
+        },
+        typeof GlobalUsageVM
       >;
     }>((model, [count], subView) => {
       const options = GlobalUsageVM.parse(subView);
-      model.setUsage(count, options);
+      model.setUsage(count, { ...options, perRound: false });
       if (options.autoDispose !== false) {
         model.disposeWhenUsageIsZero = true;
       }
@@ -319,10 +362,10 @@ export const EntityViewModel = defineViewModel(
         this: AR.This<Meta>,
         count: number,
       ): AR.WithRewriteMeta<
-        typeof NightsoulVM,
         Omit<Meta, "variables"> & {
           variables: Meta["variables"] | "nightsoul";
-        }
+        },
+        typeof NightsoulVM
       >;
     }>((model, [count], subView) => {
       const options = NightsoulVM.parse(subView);
@@ -391,38 +434,10 @@ export const EntityViewModel = defineViewModel(
       uniqueKey(): "once";
     }>((model, [eventName], subView) => {
       const skillModel = TriggeredSkillVM.parse(subView, model, eventName);
-      skillModel.setUsage(1, { visible: false });
+      skillModel.setUsage(1, { visible: false, perRound: false });
       const skillDef = skillModel.buildSkillDefinition();
       model.skillList.push(skillDef);
     }),
   }),
   DEFAULT_ENTITY_VM_META,
-);
-
-class CardModel {
-  type: "support" | "equipment" | "eventCard" = "eventCard";
-  obtainable = true;
-  tags: EntityTag[] = [];
-  versionInfo: VersionInfo = DEFAULT_VERSION_INFO;
-
-  varConfigs = new Map<string, VariableConfig>();
-  skillList: SkillDefinition[] = [];
-  disableTuning = false;
-  // TODO satiatedTarget
-
-  getEntry(): EntityDefinition {
-    // TODO
-    throw new Error("Method not implemented.");
-  }
-}
-
-export const CardViewModel = defineViewModel(
-  CardModel,
-  (h) => ({
-    // TODO
-  }),
-  {
-    ...DEFAULT_ENTITY_VM_META,
-    type: "eventCard" as "eventCard" | "equipment" | "support",
-  },
 );

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineSimpleViewModel } from "@gi-tcg/gts-runtime";
+import { defineSimpleViewModel, type AR } from "@gi-tcg/gts-runtime";
 import { type, type TypeInfer } from "@gi-tcg/utils";
 
 const GtsAppendOptions = type({
@@ -41,19 +41,42 @@ export const VariablesVM = defineSimpleViewModel(GtsVariableOptions, {
   recursive: true,
 });
 
-const GtsUsageOptions = GtsVariableOptions.merge({
-  // TODO
-  // "name?": Name,
-  /** 是否为“每回合使用次数”。默认值为 `false`。 */
-  "perRound?": "boolean",
+const GtsUsageOptionsBase = GtsVariableOptions.merge({
   /** 是否在每次技能执行完毕后自动 -1。默认值为 `true`。 */
   "autoDecrease?": "boolean",
   /** 是否在扣除到 0 后自动弃置实体，默认值为 `true` */
   "autoDispose?": "boolean",
 });
-export type GtsUsageOption = TypeInfer<typeof GtsUsageOptions>;
 
-export const UsageVM = defineSimpleViewModel(GtsUsageOptions, {
+const UsageBaseVM = defineSimpleViewModel(GtsUsageOptionsBase, {
   booleanSwitch: true,
   recursive: true,
 });
+
+export interface GtsUsageOptions extends TypeInfer<typeof GtsUsageOptionsBase> {
+  name?: string;
+}
+class GtsUsageModel extends UsageBaseVM.Model implements GtsUsageOptions {
+  name?: string;
+}
+
+export interface UsageVMMeta {
+  name: string;
+}
+type DefaultUsageVMMeta = {
+  name: "usage";
+};
+
+export const UsageVM = UsageBaseVM.bind<DefaultUsageVMMeta>().extend(
+  GtsUsageModel,
+  (h) => ({
+    name: h.attribute<{
+      <const Meta extends UsageVMMeta, const Name extends string>(
+        this: AR.This<Meta>,
+        name: Name,
+      ): AR.DoneRewriteMeta<Omit<Meta, "name"> & { name: Name }>;
+    }>((model, [name]) => {
+      model.name = name;
+    }),
+  }),
+);

@@ -511,6 +511,13 @@ export const detailedEventDictionary = {
       checkRelative(e.onTimeState, { who: e.who }, r) && area.who === e.who
     );
   }),
+  // 自身加入手牌后
+  selfHandCardInserted: defineDescriptor(
+    "onHandCardInserted",
+    (e, r, curState) => {
+      return r.callerId === e.card.id && r.callerArea.type !== "pile";
+    },
+  ),
   disposeCard: defineDescriptor("onDispose", (e, r) => {
     return e.isDiscard() && checkRelative(e.onTimeState, { who: e.who }, r);
   }),
@@ -518,6 +525,10 @@ export const detailedEventDictionary = {
     return (
       e.isDiscardOrTuning() && checkRelative(e.onTimeState, { who: e.who }, r)
     );
+  }),
+  // 自身（在牌库或手牌中）舍弃时
+  selfDiscard: defineDescriptor("onDispose", (e, r) => {
+    return r.callerId === e.entity.id && e.isDiscard();
   }),
   dealDamage: defineDescriptor("onDamageOrHeal", (e, r) => {
     return (

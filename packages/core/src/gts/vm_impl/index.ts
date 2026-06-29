@@ -24,18 +24,16 @@ import {
   registerPassiveSkill,
 } from "../../builder/registry";
 import {
-  CardViewModel,
   DEFAULT_ENTITY_VM_META,
   EntityViewModel,
+  type DefaultEntityVMMeta,
 } from "./entity";
 import { AttachmentViewModel } from "./attachment";
 import { ExtensionViewModel } from "./extension";
 import { CharacterSkillViewModel } from "./skill";
 import type { ExEntityType } from "../../builder/type";
-
-type EntityVMMeta<T extends ExEntityType> = typeof DEFAULT_ENTITY_VM_META & {
-  type: T;
-};
+import type { EntityDefinition } from "../..";
+import { CardViewModel } from "./card";
 
 export default defineViewModel(class RootModel {}, (h) => ({
   character: h.attribute<{
@@ -55,23 +53,23 @@ export default defineViewModel(class RootModel {}, (h) => ({
     }
   }, CharacterSkillViewModel),
   status: h.attribute<{
-    (): AR.With<typeof EntityViewModel, EntityVMMeta<"status">>;
+    (): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"status">>;
   }>((_, [], subView) => {
-    const entity = EntityViewModel.parse(subView, "status").getEntry();
-    registerEntity(entity);
-  }, EntityViewModel.bind<EntityVMMeta<"status">>("status")),
+    const entityModel = EntityViewModel.parse(subView, "status");
+    registerEntity(entityModel.getEntry() as EntityDefinition);
+  }, EntityViewModel.bind<DefaultEntityVMMeta<"status">>("status")),
   combatStatus: h.attribute<{
-    (): AR.With<typeof EntityViewModel, EntityVMMeta<"combatStatus">>;
+    (): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"combatStatus">>;
   }>((_, [], subView) => {
-    const entity = EntityViewModel.parse(subView, "combatStatus").getEntry();
-    registerEntity(entity);
-  }, EntityViewModel.bind<EntityVMMeta<"combatStatus">>("combatStatus")),
+    const entityModel = EntityViewModel.parse(subView, "combatStatus");
+    registerEntity(entityModel.getEntry() as EntityDefinition);
+  }, EntityViewModel.bind<DefaultEntityVMMeta<"combatStatus">>("combatStatus")),
   summon: h.attribute<{
-    (): AR.With<typeof EntityViewModel, EntityVMMeta<"summon">>;
+    (): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"summon">>;
   }>((_, [], subView) => {
-    const entity = EntityViewModel.parse(subView, "summon").getEntry();
-    registerEntity(entity);
-  }, EntityViewModel.bind<EntityVMMeta<"summon">>("summon")),
+    const entityModel = EntityViewModel.parse(subView, "summon");
+    registerEntity(entityModel.getEntry() as EntityDefinition);
+  }, EntityViewModel.bind<DefaultEntityVMMeta<"summon">>("summon")),
   card: h.attribute<{
     (): AR.With<typeof CardViewModel>;
   }>((_, [], subView) => {

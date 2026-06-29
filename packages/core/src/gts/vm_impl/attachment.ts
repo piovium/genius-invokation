@@ -13,15 +13,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineViewModel } from "@gi-tcg/gts-runtime";
 import type {
   AttachmentDefinition,
   AttachmentModification,
 } from "../../base/attachment";
 import type { GameState } from "../../base/state";
+import {
+  EntityModel,
+  EntityViewModel,
+  type DefaultEntityVMMeta,
+} from "./entity";
 
-class AttachmentModel {
-  id!: number;
+class AttachmentModel extends EntityModel {
   modifications: (
     | AttachmentModification
     | ((state: GameState, id: number) => AttachmentModification)
@@ -32,6 +35,9 @@ class AttachmentModel {
   }
 }
 
-export const AttachmentViewModel = defineViewModel(AttachmentModel, (h) => ({
-  // TODO
-}));
+export const AttachmentViewModel = EntityViewModel
+  //
+  .extend(AttachmentModel, (h) => ({
+    // TODO
+  }))
+  .bind<DefaultEntityVMMeta<"attachment">>("attachment");

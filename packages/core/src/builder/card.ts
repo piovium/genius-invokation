@@ -114,7 +114,7 @@ export type TargetType = "character" | "summon" | "support";
 
 const SATIATED_ID = 303300 as StatusHandle;
 
-type TalentRequirement = "action" | "actionSkill" | "active" | "none";
+export type TalentRequirement = "action" | "actionSkill" | "active" | "none";
 
 export interface FoodOption {
   /** 只允许对受伤角色打出 */

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, DiceType, type CombatStatusHandle, $ } from "@gi-tcg/core/builder";
+import { DamageType, DiceType, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 113151
@@ -107,27 +107,8 @@ define status {
  * [1131541: 跃升] (1*Void) 消耗1点「夜魂值」，造成4点火元素伤害。
  * [1131542: ] ()
  */
-export const FlamestriderSoaringAscent = card(113154)
-  .since("v5.7.0")
-  .undiscoverable()
-  .costVoid(3)
-  .onDispose((c, e) => {
-    c.damage(DamageType.Pyro, 1);
-  })
-  .technique(`my character with definition id 1315`)
-  .provideSkill(1131541)
-  .usage(2)
-  .costVoid(1)
-  .filter((c) => c.self.master.hasNightsoulsBlessing()?.variables.nightsoul)
-  .consumeNightsoul("@master")
-  .damage(DamageType.Pyro, 4)
-  .done();
-
-
-// TODO: REMOVE ME design test
-/*
 define card {
-  id 113154 as FlamestriderSoaringAscentTemp;
+  id 113154 as FlamestriderSoaringAscent;
   since "v5.7.0";
   undiscoverable;
   cost DiceType.Void, 3;
@@ -137,16 +118,15 @@ define card {
   technique {
     target $.my.character.def(Mavuika);
     skill {
-      id 1131541;
+      id 1131541 as SoaringAscent;
       usage 2;
       cost DiceType.Void, 1;
-      when :( :self.master.hasNightsoulsBlessing()?.variables.nightsoul );
+      filter :( :self.master.hasNightsoulsBlessing()?.variables.nightsoul );
       :consumeNightsoul("@master");
       :damage(DamageType.Pyro, 4);
     }
   }
 }
-// */
 
 /**
  * @id 113155
@@ -160,25 +140,31 @@ define card {
  * [1131551: 涉渡] () 我方切换到下一个角色，将2个元素骰转换为万能元素。（使用此技能后，我方可继续行动）
  * [1131552: ] ()
  */
-export const FlamestriderBlazingTrail = card(113155)
-  .since("v5.7.0")
-  .undiscoverable()
-  .costVoid(2)
-  .do((c) => {
-    const summons = c.$$(`my summons`);
-    if (summons.length > 0) {
-      const summon = c.random(summons);
-      c.triggerEndPhaseSkill(summon);
+define card {
+  id 113155 as FlamestriderBlazingTrail;
+  since "v5.7.0";
+  undiscoverable;
+  cost DiceType.Void, 2;
+  technique {
+    target $.my.character.def(Mavuika);
+    on enter {
+      const summons = :queryAll($.my.summon);
+      if (summons.length > 0) {
+        const summon = :random(summons);
+        :triggerEndPhaseSkill(summon);
+      }
     }
-  })
-  .technique(`my character with definition id 1315`)
-  .provideSkill(1131551)
-  .usage(2)
-  .switchActive("my next")
-  .convertDice(DiceType.Omni, 2)
-  .if((c) => !c.oppPlayer.declaredEnd)
-  .continueNextTurn()
-  .done();
+    skill {
+      id 1131551 as BlazingTrail;
+      usage 2;
+      :switchActive("my next");
+      :convertDice(DiceType.Omni, 2);
+      if (:oppPlayer.declaredEnd) {
+        :continueNextTurn();
+      }
+    }
+  }
+}
 
 /**
  * @id 113156
@@ -191,23 +177,26 @@ export const FlamestriderBlazingTrail = card(113155)
  * （角色最多装备1个「特技」）
  * [1131561: 疾驰] (2*Void) 消耗1点「夜魂值」，然后准备技能：驰轮车·疾驰。
  */
-export const FlamestriderFullThrottle = card(113156)
-  .since("v5.7.0")
-  .undiscoverable()
-  .costSame(1)
-  .technique(`my character with definition id 1315`)
-  .provideSkill(1131561)
-  .usage(2)
-  .costVoid(2)
-  .filter((c) => c.self.master.hasNightsoulsBlessing()?.variables.nightsoul)
-  .consumeNightsoul("@master")
-  .characterStatus(FlamestriderFullThrottleInEffectPrepareStatus, "@master")
-  .do((c) => {
-    if (c.getVariable("usage") === 1) {
-      c.drawCards(4);
+define card {
+  id 113156 as FlamestriderFullThrottle;
+  since "v5.7.0";
+  undiscoverable;
+  cost DiceType.Aligned, 1;
+  technique {
+    target $.my.character.def(Mavuika);
+    skill {
+      id 1131561 as FullThrottle;
+      usage 2;
+      cost DiceType.Void, 2;
+      filter :( :self.master.hasNightsoulsBlessing()?.variables.nightsoul )
+      :consumeNightsoul("@master")
+      :characterStatus(FlamestriderFullThrottleInEffectPrepareStatus, "@master")
+      if (:getVariable("usage") === 1) {
+        :drawCards(4);
+      }
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 113153
@@ -296,20 +285,21 @@ define skill {
  */
 define skill {
   id 13154 as private FightingSpirit;
-  skillType passive;
-  variable fightingSpirit, 0;
-  on consumeNightsoul {
-    listenTo samePlayer;
-    :addVariableWithMax("fightingSpirit", 1, 6);
-  };
-  on useSkill {
-    listenTo samePlayer;
-    when :( :e.isSkillType("normal") );
-    :addVariableWithMax("fightingSpirit", 1, 6);
-  }
-  on useSkill {
-    when :( :e.isSkillType("elemental") || :e.isSkillType("burst") );
-    :combatStatus(AllfireArmamentsRingOfSearingRadiance);
+  skillType passive {
+    variable fightingSpirit, 0;
+    on consumeNightsoul {
+      listenTo samePlayer;
+      :addVariableWithMax("fightingSpirit", 1, 6);
+    };
+    on useSkill {
+      listenTo samePlayer;
+      when :( :e.isSkillType("normal") );
+      :addVariableWithMax("fightingSpirit", 1, 6);
+    }
+    on useSkill {
+      when :( :e.isSkillType("elemental") || :e.isSkillType("burst") );
+      :combatStatus(AllfireArmamentsRingOfSearingRadiance);
+    }
   }
 }
 
@@ -338,25 +328,8 @@ define character {
  * 我方打出特技牌后：若可能，玛薇卡恢复1点「夜魂值」。（每回合1次）
  * （牌组中包含玛薇卡，才能加入牌组）
  */
-export const HumanitysNameUnfettered = card(213151)
-  .since("v5.7.0")
-  .costPyro(1)
-  .talent(Mavuika, "none")
-  .on("enter")
-  .selectAndCreateHandCard([
-    FlamestriderBlazingTrail,
-    FlamestriderFullThrottle,
-    FlamestriderSoaringAscent
-  ])
-  .on("playCard", (c, e) => e.hasCardTag("technique") && c.self.master.hasStatus(NightsoulsBlessing))
-  .usagePerRound(1)
-  .gainNightsoul("@master", 1)
-  .done();
-
-// TODO REMOVE ME design test
-/*
 define card {
-  id 213151 as HumanitysNameUnfetteredTemp;
+  id 213151 as HumanitysNameUnfettered;
   since "v5.7.0";
   cost DiceType.Pyro, 1;
   talent Mavuika, none {
@@ -369,9 +342,8 @@ define card {
     }
     on playCard {
       when :( :e.hasCardTag("technique") && :self.master.hasStatus(NightsoulsBlessing) );
-      usagePerRound 1;
+      usage perRound, 1;
       :gainNightsoul("@master", 1);
     }
   }
 }
-// */

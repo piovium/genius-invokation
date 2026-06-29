@@ -12,7 +12,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 import { mixins } from "../utils";
 import { BinaryMethods } from "./binary_methods";
 import type { SExprSchema } from "./expr_schema";
@@ -32,12 +32,14 @@ type UnionTy2<T extends TypingInfoBase, U extends TypingInfoBase> = {
   [K in keyof T & keyof U]: T[K] | U[K];
 };
 export type UnionTy<Metas extends TypingInfoBase[]> = Computed<
-  Metas extends [
+  Metas extends readonly [
     infer First extends TypingInfoBase,
     ...infer Rest extends TypingInfoBase[],
   ]
     ? UnionTy2<First, UnionTy<Rest>>
-    : never,
+    : Metas extends readonly (infer Element)[]
+      ? Element
+      : never,
   TypingInfoBase
 >;
 
@@ -48,12 +50,16 @@ type IntersectionTy2<
   [K in keyof Meta1 & keyof Meta2]: Meta1[K] & Meta2[K];
 };
 export type IntersectionTy<Metas extends TypingInfoBase[]> = Computed<
-  Metas extends [
+  Metas extends readonly [
     infer First extends TypingInfoBase,
     ...infer Rest extends TypingInfoBase[],
   ]
     ? IntersectionTy2<First, IntersectionTy<Rest>>
-    : TypingInfoBase,
+    : Metas extends readonly []
+      ? TypingInfoBase
+      : Metas extends readonly (infer Element)[]
+        ? Element
+        : never,
   TypingInfoBase
 >;
 

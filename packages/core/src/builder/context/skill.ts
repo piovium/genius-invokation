@@ -250,22 +250,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
   public get e() {
     return this.eventArg;
   }
-  public readonly "~prelude" = {
-    $,
-  } as const;
-  public "~query"<const Q extends IQuery>(
-    arg: ($: IDollar) => Q,
-  ): RxEntityState<Meta, InferResult<Q>["type"]> | undefined {
-    const results = this.queryAll(arg);
-    return results[0];
-  }
-  public "~queryAll"<const Q extends IQuery>(
-    arg: ($: IDollar) => Q,
-  ): RxEntityState<Meta, InferResult<Q>["type"]>[] {
-    return runQuery(this.rawState, this.callerArea.who, arg($)).map((state) =>
-      this.get(state),
-    );
-  }
 
   /**
    *

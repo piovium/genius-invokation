@@ -25,7 +25,7 @@ const GtsNightsoulOptions = GtsVariableOptions.merge({
    * @default false
    */
   "autoDispose?": "boolean",
-})
+});
 export type GtsNightsoulOptions = TypeInfer<typeof GtsNightsoulOptions>;
 
 export const NightsoulVM = defineSimpleViewModel(GtsNightsoulOptions, {
@@ -39,7 +39,7 @@ const GtsGlobalUsageOptions = GtsVariableOptions.merge({
    * 默认为 true
    */
   "autoDispose?": "boolean",
-})
+});
 export type GtsGlobalUsageOptions = TypeInfer<typeof GtsGlobalUsageOptions>;
 
 export const GlobalUsageVM = defineSimpleViewModel(GtsGlobalUsageOptions, {
@@ -53,6 +53,33 @@ const GtsPrepareOption = type({
   "nextStatusCreateOpt?": type.unknown.as<CreateEntityOptions>(),
 });
 export const PrepareVM = defineSimpleViewModel(GtsPrepareOption, {
+  booleanSwitch: false,
+  recursive: false,
+});
+
+const GtsFoodOptions = type({
+  /** 只允许对受伤角色打出 */
+  "injuredOnly?": "boolean",
+  /** 指定后不附着饱腹状态 */
+  "noSatiated?": "boolean",
+});
+export type GtsFoodOptions = TypeInfer<typeof GtsFoodOptions>;
+
+export const FoodVM = defineSimpleViewModel(GtsFoodOptions, {
+  booleanSwitch: true,
+  recursive: false,
+});
+
+const GtsCombatFoodOptions = type({
+  /**
+   * - `existsNot`: 存在无饱腹角色时可打出（默认值）
+   * - `allNot`: 所有角色都没有饱腹状态时可打出
+   */
+  "satiatedFilter?": '"existsNot" | "allNot"',
+});
+export type GtsCombatFoodOptions = TypeInfer<typeof GtsCombatFoodOptions>;
+
+export const CombatFoodVM = defineSimpleViewModel(GtsCombatFoodOptions, {
   booleanSwitch: false,
   recursive: false,
 });
