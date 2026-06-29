@@ -48,38 +48,41 @@ export function getCardTypeAndTags(card: ActionCardRawData) {
   return { type, tags };
 }
 
+export const TODO_LINE = "// TODO\n";
+
 export function getCardCode(card: ActionCardRawData, extra = ""): string {
   const { type, tags } = getCardTypeAndTags(card);
-  let typeCode = "";
-  if (type === "equipment") {
+  let mainCode = "";
+  if (type === "event") {
+    mainCode = `  ${TODO_LINE}`;
+  } else if (type === "equipment") {
     const tag = tags.shift();
     if (tag === "artifact") {
-      typeCode = `\n  .artifact()`;
+      mainCode = `\n  artifact {\n    ${TODO_LINE}  }`;
     } else if (tag === "technique") {
-      typeCode = `\n  .technique()`;
+      mainCode = `\n  technique {\n    ${TODO_LINE}  }`;
     } else if (
       tag &&
       ["bow", "sword", "catalyst", "pole", "claymore"].includes(tag)
     ) {
-      typeCode = `\n  .weapon("${tag}")`;
+      mainCode = `\n  weapon ${tag} {\n    ${TODO_LINE}  }`;
     }
   } else if (type === "support") {
     const tag = tags.shift();
     if (tag === "place" && tags.includes("adventureSpot")) {
-      typeCode = `\n  .adventureSpot()`;
+      mainCode = `\n  adventureSpot {\n    ${TODO_LINE}  }`;
     } else if (tag) {
-      typeCode = `\n  .support("${tag}")`;
+      mainCode = `\n  support ${tag} {\n    ${TODO_LINE}  }`;
     } else {
-      typeCode = `\n  .support()`;
+      mainCode = `\n  support {\n    ${TODO_LINE}  }`;
     }
   }
-  const tagCode =
-    tags.length > 0 ? `\n  .tags(${tags.map((t) => `"${t}"`).join(", ")})` : "";
+  const tagCode = tags.length > 0 ? `\n  tags ${tags.join(", ")};` : "";
   const cost = getCostCode(card.playCost);
-  return `export const ${identifier(card.englishName)} = card(${card.id})
-  .since("${NEW_VERSION}")${cost}${tagCode}${extra}${typeCode}
-  // TODO
-  .done();`;
+  return `define card {
+  id ${card.id} as ${identifier(card.englishName)};
+  since "${NEW_VERSION}";${cost}${tagCode}${extra}${mainCode}
+}`;
 }
 
 export async function generateCards() {
@@ -154,7 +157,7 @@ export async function generateCards() {
       const et = entities.find((et) => et.id === card.id)!;
       for (const skill of et.skills) {
         description += `\n[${skill.id}: ${skill.name}] (${inlineCostDescription(
-          skill.playCost
+          skill.playCost,
         )}) ${skill.description}`;
       }
     }
@@ -172,51 +175,51 @@ export async function generateCards() {
     writeSourceCode(
       "cards/equipment/weapon/bow",
       INIT_CARD_CODE,
-      equipsCode.bow
+      equipsCode.bow,
     ),
     writeSourceCode(
       "cards/equipment/weapon/sword",
       INIT_CARD_CODE,
-      equipsCode.sword
+      equipsCode.sword,
     ),
     writeSourceCode(
       "cards/equipment/weapon/catalyst",
       INIT_CARD_CODE,
-      equipsCode.catalyst
+      equipsCode.catalyst,
     ),
     writeSourceCode(
       "cards/equipment/weapon/pole",
       INIT_CARD_CODE,
-      equipsCode.pole
+      equipsCode.pole,
     ),
     writeSourceCode(
       "cards/equipment/weapon/claymore",
       INIT_CARD_CODE,
-      equipsCode.claymore
+      equipsCode.claymore,
     ),
     writeSourceCode(
       "cards/equipment/artifacts",
       INIT_CARD_CODE,
-      equipsCode.artifact
+      equipsCode.artifact,
     ),
     writeSourceCode(
       "cards/equipment/techniques",
       INIT_CARD_CODE,
-      equipsCode.technique
+      equipsCode.technique,
     ),
     writeSourceCode("cards/support/ally", INIT_CARD_CODE, supportCode.ally),
-    writeSourceCode(
-      "cards/support/place",
-      INIT_CARD_CODE,
-      supportCode.place
-    ),
+    writeSourceCode("cards/support/place", INIT_CARD_CODE, supportCode.place),
     writeSourceCode("cards/support/item", INIT_CARD_CODE, supportCode.item),
     writeSourceCode(
       "cards/support/adventure",
       INIT_CARD_CODE,
-      supportCode.adventureSpot
+      supportCode.adventureSpot,
     ),
-    writeSourceCode("cards/support/blessing", INIT_CARD_CODE, supportCode.blessing),
+    writeSourceCode(
+      "cards/support/blessing",
+      INIT_CARD_CODE,
+      supportCode.blessing,
+    ),
     // writeSourceCode("cards/support/other", INIT_CARD_CODE, supportCode.other),
   ]);
 }

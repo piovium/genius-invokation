@@ -21,10 +21,10 @@ import { version } from "../../package.json" with { type: "json" };
 
 export const OLD_VERSION = VERSIONS.at(-2)!;
 export const NEW_VERSION: string = IS_BETA ? BETA_VERSION : VERSIONS.at(-1)!;
-export const SAVE_OLD_CODES = !IS_BETA;
+export const SAVE_OLD_CODES = process.env.SAVE_OLD_CODES !== "0" && !IS_BETA;
 
-if (SAVE_OLD_CODES && existsSync(path.resolve(import.meta.dirname, `../../src/old_versions/${OLD_VERSION}`))) {
-  throw new Error("Old version already exists; you may forgot to update (OLD|NEW)_VERSION at scripts/generators/config.ts .");
+if (SAVE_OLD_CODES && existsSync(path.resolve(import.meta.dirname, `../../src/old_versions/${OLD_VERSION}.gts`))) {
+  throw new Error("Old version already exists!");
 }
 
 const giIndex = version.indexOf("gi-");

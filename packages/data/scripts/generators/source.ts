@@ -136,7 +136,7 @@ function* getGtsCommentRanges(
           type: "gts",
           range: { pos: start, end },
           text: content.slice(start, end),
-          // TODO
+          // We will fill in it later
           code: "",
         });
       }
@@ -269,7 +269,7 @@ function sameDescription(a: string, b: string) {
 
 const OLD_VERSION_PATH = path.resolve(
   BASE_PATH,
-  `old_versions/${OLD_VERSION}.ts`,
+  `old_versions/${OLD_VERSION}.gts`,
 );
 
 if (SAVE_OLD_CODES && !existsSync(OLD_VERSION_PATH)) {
@@ -350,7 +350,12 @@ export async function writeSourceCode(
  * @description
  * ${writeDescriptionAsComment(item.description)}
  */
-${item.code.replace(/export /, "").replace(/\n(  \.since\(".*?"\)\n)?/, `\n  .until("${OLD_VERSION}")\n`)}
+${item.code
+  .replace(/export /, "")
+  .replace(/ as /, " as private ")
+  .replace(/\n(  \.?since(\(| )".*?"(\)|;)\n)?/, (str) =>
+    str.replace(/since/, "until").replace(/".*?"/, `"${OLD_VERSION}"`),
+  )}
 `,
         );
       }

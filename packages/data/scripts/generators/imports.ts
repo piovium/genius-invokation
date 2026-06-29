@@ -30,7 +30,7 @@ export async function generateImports() {
   ).toSorted();
 
   function pathToImport(path: string) {
-    return path.replace(new RegExp("^" + BASE_PATH, "g"), ".");
+    return path.replace(/\\/g, "/").replace(new RegExp("^" + BASE_PATH, "g"), ".");
   }
 
   const imports = files.map((f) => `import "${pathToImport(f)}";`).join("\n");
@@ -42,7 +42,7 @@ export async function generateImports() {
 
 import "./begin.ts";
 
-import "./commons.ts";
+import "./commons.gts";
 ${imports}
 
 export * from "./end.ts";

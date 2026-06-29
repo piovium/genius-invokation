@@ -24,7 +24,7 @@ import {
 import { snakeCase } from "case-anything";
 import { writeSourceCode, SourceInfo, identifier } from "./source";
 import { getCostCode, inlineCostDescription } from "./cost";
-import { getCardCode, getCardTypeAndTags } from "./cards";
+import { getCardCode, getCardTypeAndTags, TODO_LINE } from "./cards";
 import { NEW_VERSION } from "./config";
 
 interface AuxiliaryFound {
@@ -107,12 +107,11 @@ function getAuxiliaryOfCharacter(id: number): AuxiliaryFound {
       id: obj.id,
       name: obj.name,
       description: description,
-      code: `export const ${identifier(obj.englishName)} = ${obj.kind}(${
-        obj.id
-      })
-  .since("${NEW_VERSION}")
+      code: `define ${obj.kind} {
+  id ${obj.id} as ${identifier(obj.englishName)};
+  since ${NEW_VERSION};
   // TODO
-  .done();`,
+}`,
     };
   });
   return {
@@ -138,7 +137,10 @@ function getTalentCard(id: number, name: string): SourceInfo[] {
       id: card.id,
       name: card.name,
       description: card.description,
-      code: getCardCode(card, `\n  .${methodName}(${identifier(name)})`),
+      code: getCardCode(
+        card,
+        `\n   ${methodName} ${identifier(name)} {\n    ${TODO_LINE} }`,
+      ),
     },
   ];
 }
@@ -163,7 +165,7 @@ export async function generateCharacters() {
     )}, card, DamageType, $ } from "@gi-tcg/core/builder";\n`;
     const skills = ch.skills;
 
-    items.push(
+    const todoLine = items.push(
       ...skills.map<SourceInfo>((sk) => {
         const TYPE_MAP: Record<string, string> = {
           GCG_SKILL_TAG_A: "normal",
@@ -175,10 +177,15 @@ export async function generateCharacters() {
           id: sk.id,
           name: sk.name,
           description: sk.description,
-          code: `export const ${identifier(sk.englishName)} = skill(${sk.id})
-  .type("${TYPE_MAP[sk.type]}")${getCostCode(sk.playCost)}
-  // TODO
-  .done();`,
+          code: `define skill {
+  id ${sk.id} as ${identifier(sk.englishName)};
+  skillType ${TYPE_MAP[sk.type]}${
+    TYPE_MAP[sk.type] === "passive"
+      ? `{\n    ${TODO_LINE}}`
+      : `
+  ${getCostCode(sk.playCost)}  ${TODO_LINE}`
+  }
+}`,
         };
       }),
     );
