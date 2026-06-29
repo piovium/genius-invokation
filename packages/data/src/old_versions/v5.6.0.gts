@@ -7,7 +7,7 @@ import { AsWaterSeeksEquilibrium, EquitableJudgment, OTearsIShallRepay, OTidesIH
 import { Oceanborne, Stormbreaker, Tidecaller, Wavestrider } from "../characters/electro/beidou.ts";
 import { GleamingSpearGuardianStance, HeronStrike, SacredRiteHeronsSanctum, SacredRiteWagtailsTide } from "../characters/hydro/candace.ts";
 import { HolisticRevivification, TheClassicsOfAcupuncture, UniversalDiagnosis } from "../characters/dendro/baizhu.ts";
-import { RaidenShogun } from "../characters/electro/raiden_shogun.ts";
+import { RaidenShogun } from "../characters/electro/raiden_shogun.gts";
 import { AbiogenesisSolarIsotoma, FavoniusBladeworkWeiss, RiteOfProgenitureTectonicTide } from "../characters/geo/albedo.ts";
 
 /**

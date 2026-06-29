@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, card, DamageType } from "@gi-tcg/core/builder";
+import { character, skill, summon, status, card, DamageType, DiceType } from "@gi-tcg/core/builder";
 
 /**
  * @id 114071
@@ -23,12 +23,18 @@ import { character, skill, summon, status, card, DamageType } from "@gi-tcg/core
  * 可用次数：3
  * 此召唤物在场时：我方角色「元素爆发」造成的伤害+1。
  */
-export const EyeOfStormyJudgment = summon(114071)
-  .endPhaseDamage(DamageType.Electro, 1)
-  .usage(3)
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("burst"))
-  .increaseDamage(1)
-  .done();
+define summon {
+  id 114071 as EyeOfStormyJudgment;
+  hint DamageType.Electro, 1;
+  on endPhase {
+    usage 3;
+    :damage(DamageType.Electro, 1);
+  }
+  on increaseSkillDamage {
+    when :( :e.viaSkillType("burst") );
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 114072
@@ -37,22 +43,25 @@ export const EyeOfStormyJudgment = summon(114071)
  * 其他我方角色使用「元素爆发」后：累积1点「愿力」。（最多累积3点）
  * 所附属角色使用奥义·梦想真说时：消耗所有「愿力」，每点「愿力」使造成的伤害+1。
  */
-export const ChakraDesiderataStatus = status(114072)
-  .variable("chakra", 0)
-  .on("useSkill", (c, e) => e.isSkillType("burst") && e.skill.caller.id !== c.self.master.id)
-  .listenToPlayer()
-  .addVariableWithMax("chakra", 1, 3)
-  .on("increaseSkillDamage", (c, e) => e.via.definition.id === SecretArtMusouShinsetsu)
-  .do((c, e) => {
-    const currentVal = c.getVariable("chakra");
-    if (c.self.master.hasEquipment(WishesUnnumbered)) {
-      e.increaseDamage(currentVal * 2);
+define status {
+  id 114072 as ChakraDesiderataStatus;
+  variable chakra, 0;
+  on useSkill {
+    when :( :e.isSkillType("burst") && :e.skill.caller.id !== :self.master.id )
+    listenTo samePlayer;
+    :addVariableWithMax("chakra", 1, 3);
+  }
+  on increaseSkillDamage {
+    when :( :e.via.definition.id === SecretArtMusouShinsetsu );
+    const currentVal = :getVariable("chakra");
+    if (:self.master.hasEquipment(WishesUnnumbered)) {
+      :e.increaseDamage(currentVal * 2);
     } else {
-      e.increaseDamage(currentVal);
+      :e.increaseDamage(currentVal);
     }
-    c.setVariable("chakra", 0);
-  })
-  .done();
+    :setVariable("chakra", 0);
+  }
+}
 
 /**
  * @id 14071
@@ -60,12 +69,13 @@ export const ChakraDesiderataStatus = status(114072)
  * @description
  * 造成2点物理伤害。
  */
-export const Origin = skill(14071)
-  .type("normal")
-  .costElectro(1)
-  .costVoid(2)
-  .damage(DamageType.Physical, 2)
-  .done();
+define skill {
+  id 14071 as Origin;
+  skillType normal;
+  cost DiceType.Electro, 1;
+  cost DiceType.Void, 2;
+  :damage(DamageType.Physical, 2);
+}
 
 /**
  * @id 14072
@@ -73,11 +83,12 @@ export const Origin = skill(14071)
  * @description
  * 召唤雷罚恶曜之眼。
  */
-export const TranscendenceBalefulOmen = skill(14072)
-  .type("elemental")
-  .costElectro(3)
-  .summon(EyeOfStormyJudgment)
-  .done();
+define skill {
+  id 14072 as TranscendenceBalefulOmen;
+  skillType elemental;
+  cost DiceType.Electro, 3;
+  :summon(EyeOfStormyJudgment);
+}
 
 /**
  * @id 14073
@@ -85,13 +96,14 @@ export const TranscendenceBalefulOmen = skill(14072)
  * @description
  * 造成3点雷元素伤害，其他我方角色获得2点充能。
  */
-export const SecretArtMusouShinsetsu = skill(14073)
-  .type("burst")
-  .costElectro(3)
-  .costEnergy(2)
-  .damage(DamageType.Electro, 3)
-  .gainEnergy(2, "all my characters and not @self")
-  .done();
+define skill {
+  id 14073 as SecretArtMusouShinsetsu;
+  skillType burst;
+  cost DiceType.Electro, 3;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Electro, 3);
+  :gainEnergy(2, "all my characters and not @self");
+}
 
 /**
  * @id 14074
@@ -99,13 +111,17 @@ export const SecretArtMusouShinsetsu = skill(14073)
  * @description
  * 【被动】战斗开始时，初始附属诸愿百眼之轮。
  */
-export const ChakraDesiderata = skill(14074)
-  .type("passive")
-  .on("battleBegin")
-  .characterStatus(ChakraDesiderataStatus)
-  .on("revive")
-  .characterStatus(ChakraDesiderataStatus)
-  .done();
+define skill {
+  id 14074 as ChakraDesiderata;
+  skillType passive {
+    on battleBegin {
+      :characterStatus(ChakraDesiderataStatus)
+    }
+    on revive {
+      :characterStatus(ChakraDesiderataStatus)
+    }
+  }
+}
 
 /**
  * @id 1407
@@ -113,13 +129,14 @@ export const ChakraDesiderata = skill(14074)
  * @description
  * 鸣雷寂灭，浮世泡影。
  */
-export const RaidenShogun = character(1407)
-  .since("v3.7.0")
-  .tags("electro", "pole", "inazuma")
-  .health(10)
-  .energy(2)
-  .skills(Origin, TranscendenceBalefulOmen, SecretArtMusouShinsetsu, ChakraDesiderata)
-  .done();
+define character {
+  id 1407 as RaidenShogun;
+  since "v3.7.0";
+  tags electro, pole, inazuma;
+  health 10;
+  energy 2;
+  skills Origin, TranscendenceBalefulOmen, SecretArtMusouShinsetsu, ChakraDesiderata;
+}
 
 /**
  * @id 214071
@@ -130,11 +147,14 @@ export const RaidenShogun = character(1407)
  * 装备有此牌的雷电将军使用奥义·梦想真说时：每消耗1点「愿力」，都使造成的伤害额外+1。
  * （牌组中包含雷电将军，才能加入牌组）
  */
-export const WishesUnnumbered = card(214071)
-  .since("v3.7.0")
-  .costElectro(3)
-  .costEnergy(2)
-  .talent(RaidenShogun)
-  .on("enter")
-  .useSkill(SecretArtMusouShinsetsu)
-  .done();
+define card {
+  id 214071 as WishesUnnumbered;
+  since "v3.7.0";
+  cost DiceType.Electro, 3;
+  cost DiceType.Energy, 2;
+  talent RaidenShogun {
+    on enter {
+      :useSkill(SecretArtMusouShinsetsu);
+    }
+  }
+}

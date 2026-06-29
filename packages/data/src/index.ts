@@ -107,7 +107,7 @@ import "./characters/electro/kuki_shinobu.ts";
 import "./characters/electro/lisa.ts";
 import "./characters/electro/millennial_pearl_seahorse.ts";
 import "./characters/electro/ororon.ts";
-import "./characters/electro/raiden_shogun.ts";
+import "./characters/electro/raiden_shogun.gts";
 import "./characters/electro/razor.ts";
 import "./characters/electro/sethos.ts";
 import "./characters/electro/thunder_manifestation.ts";
