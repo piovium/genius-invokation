@@ -17,12 +17,15 @@ import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
 import {
   USAGE_PER_ROUND_VARIABLE_NAMES,
   type DescriptionDictionary,
+  type DescriptionDictionaryEntry,
+  type DescriptionDictionaryKey,
   type EntityDefinition,
   type EntityTag,
   type VariableConfig,
 } from "../../base/entity";
+import type { AttachmentDefinition, EntityState } from "../../base/state";
 import type { CustomEventEventArg, SkillDefinition } from "../../base/skill";
-import type { Writable } from "../../utils";
+import { getEntityArea, getEntityById, type Writable } from "../../utils";
 import {
   ListenTo,
   type DetailedEventArgOf,
@@ -30,14 +33,12 @@ import {
   type SkillOperation,
 } from "../../builder/skill";
 import {
-  GiTcgCoreInternalError,
-  GiTcgDataError,
-  type AttachmentDefinition,
+  DEFAULT_VERSION_INFO,
   type Version,
   type VersionInfo,
-} from "../..";
-import { DEFAULT_VERSION_INFO } from "../../base/version";
+} from "../../base/version";
 import type {
+  CombatStatusHandle,
   ExEntityType,
   ExtensionHandle,
   HandleT,
@@ -51,9 +52,11 @@ import {
 } from "./variables";
 import { createVariable, createVariableCanAppend } from "../../builder/utils";
 import { TriggeredSkillModel, TriggeredSkillVM } from "./skill";
-import type { CustomEvent } from "../../builder";
+import type { CustomEvent, DamageType } from "../../builder";
 import { GlobalUsageVM, PrepareVM, NightsoulVM } from "./entity_auxilary";
 import type { CharacterPassiveSkillEntry } from "../../builder/registry";
+import type { EntityDescriptionDictionaryGetter } from "../../builder/entity";
+import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
 
 export interface GtsUsageOrUsagePerRoundOptions extends GtsUsageOptions {
   perRound: boolean;
@@ -80,6 +83,24 @@ export class EntityModel implements ICaller {
 
   constructor(type: ExEntityType) {
     this.type = type;
+  }
+
+  addDescriptionReplacement(
+    key: DescriptionDictionaryKey,
+    getter: EntityDescriptionDictionaryGetter<any>,
+  ) {
+    if (Reflect.has(this.descriptionDictionary, key)) {
+      throw new GiTcgDataError(`Description key ${key} already exists`);
+    }
+    const extId = this.associatedExtensionId;
+    const entry: DescriptionDictionaryEntry = function (st, id) {
+      const ext = st.extensions.find((ext) => ext.definition.id === extId);
+      const self = getEntityById(st, id) as EntityState;
+      const area = getEntityArea(st, id);
+      return String(getter(st, { ...self, area }, ext?.state));
+    };
+    this.descriptionDictionary[key] = entry;
+    return this;
   }
 
   /** Return all skills including implicit roundEnd */
@@ -214,7 +235,7 @@ export const createVariableConfig = (
   if (typeof options.append === "object") {
     appendOpt = options.append;
   } else if (typeof options.append === "number") {
-    appendOpt = { value: options.append };
+    appendOpt = { limit: options.append };
   } else if (options.append === true) {
     appendOpt = {};
   }
@@ -245,6 +266,11 @@ export type DefaultEntityVMMeta<T extends ExEntityType> =
   typeof DEFAULT_ENTITY_VM_META & {
     type: T;
   };
+
+export type ThisWithType<
+  Meta extends EntityVMMeta,
+  T extends ExEntityType,
+> = Meta["type"] extends T ? AR.This<Meta> : never;
 
 export const EntityViewModel = defineViewModel(
   EntityModel,
@@ -285,7 +311,10 @@ export const EntityViewModel = defineViewModel(
     }),
     // TODO
     prepare: h.attribute<{
-      (skill: SkillHandle | "normal"): AR.With<typeof PrepareVM>;
+      <Meta extends EntityVMMeta>(
+        this: ThisWithType<Meta, "status">,
+        skill: SkillHandle | "normal",
+      ): AR.With<typeof PrepareVM>;
     }>((model, [skill], subView) => {
       const options = PrepareVM.parse(subView);
       if (typeof options.hintCount === "number") {
@@ -359,7 +388,7 @@ export const EntityViewModel = defineViewModel(
     }),
     nightsoulsBlessing: h.attribute<{
       <Meta extends EntityVMMeta>(
-        this: AR.This<Meta>,
+        this: ThisWithType<Meta, "status">,
         count: number,
       ): AR.WithRewriteMeta<
         Omit<Meta, "variables"> & {
@@ -387,6 +416,79 @@ export const EntityViewModel = defineViewModel(
         model.skillList.push(disposeSkillModel.buildSkillDefinition());
       }
     }),
+
+    duration: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+        value: number,
+      ): AR.WithRewriteMeta<
+        Omit<Meta, "variables"> & {
+          variables: Meta["variables"] | "duration";
+        },
+        typeof VariablesVM
+      >;
+    }>((model, [value], subView) => {
+      const options = VariablesVM.parse(subView);
+      const varConfig = createVariableConfig(value, options);
+      model.varConfigs.set("duration", varConfig);
+    }),
+    oneDuration: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+        value: number,
+      ): AR.WithRewriteMeta<
+        Omit<Meta, "variables"> & {
+          variables: Meta["variables"] | "duration";
+        },
+        typeof VariablesVM
+      >;
+    }>((model, [value], subView) => {
+      const options = VariablesVM.parse(subView);
+      const varConfig = createVariableConfig(value, {
+        ...options,
+        visible: false,
+      });
+      model.varConfigs.set("duration", varConfig);
+    }),
+
+    replaceDescription: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+        key: DescriptionDictionaryKey,
+        getter: EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
+      ): AR.Done;
+    }>((model, [key, getter]) => {
+      model.addDescriptionReplacement(key, getter);
+    }),
+    hint: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: ThisWithType<Meta, "summon">,
+        icon: DamageType | CombatStatusHandle,
+        text?:
+          | number
+          | string
+          | EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
+      ): AR.DoneRewriteMeta<
+        Omit<Meta, "variables"> & {
+          variables: Meta["variables"] | "hintCount";
+        }
+      >;
+    }>((model, [icon, text]) => {
+      model.varConfigs.set(
+        "hintCount",
+        createVariableConfig(icon, { visible: false }),
+      );
+      if (typeof text === "function") {
+        const hintReplacement = "[GCG_TOKEN_HINT_TEXT]";
+        model.hintText = `\${${hintReplacement}}`;
+        model.addDescriptionReplacement(hintReplacement, text);
+      } else if (typeof text === "number") {
+        model.hintText = String(text);
+      } else {
+        model.hintText = text ?? null;
+      }
+    }),
+
     on: h.attribute<{
       <Meta extends EntityVMMeta, const Event extends DetailedEventNames>(
         this: AR.This<Meta>,

@@ -13,8 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, combatStatus, card, DamageType, type CharacterHandle, type CardHandle } from "@gi-tcg/core/builder";import { $ } from "@gi-tcg/core/builder";
-
+import { $, DamageType, DiceType } from "@gi-tcg/core/builder";
 
 /**
  * @id 112113
@@ -56,17 +55,21 @@ define card {
  * 结束阶段：造成1点水元素伤害。如果我方存在生命值至少为6的角色，则对一位受伤最少的我方角色造成1点穿透伤害，然后再造成1点水元素伤害。
  * 可用次数：2（可叠加，最多叠加到4次）
  */
-export const SalonMembers = summon(112111)
-  .endPhaseDamage(DamageType.Hydro, 1)
-  .on("endPhase") // 将两段伤害拆成两个技能，从而中间可以插入第一段伤害引发的事件（如缤纷马卡龙）
-  .usageCanAppend(2, 4)
-  .do((c) => {
-    if (c.$(`my character with health >= 6`)) {
-      c.damage(DamageType.Piercing, 1, "my characters order by maxHealth - health limit 1");
-      c.damage(DamageType.Hydro, 1);
+define summon {
+  id 112111 as SalonMembers
+  hint DamageType.Hydro, 1;
+  on endPhase {
+    :damage(DamageType.Hydro, 1);
+  }
+  // 将两段伤害拆成两个技能，从而中间可以插入第一段伤害引发的事件（如缤纷马卡龙）
+  on endPhase {
+    usage 2 { append 4 };
+    if (:query($.my.character.var("health", ">=", "6"))) {
+      :damage(DamageType.Piercing, 1, $.macros.myLeastInjured);
+      :damage(DamageType.Hydro, 1);
     }
-  })
-  .done();
+  }
+};
 
 /**
  * @id 112112
@@ -75,15 +78,17 @@ export const SalonMembers = summon(112111)
  * 结束阶段：治疗所有我方角色1点。如果我方存在生命值不多于5的角色，则再治疗一位受伤最多的角色1点。
  * 可用次数：2（可叠加，最多叠加到4次）
  */
-export const SingerOfManyWaters = summon(112112)
-  .endPhaseDamage(DamageType.Heal, 1, "all my characters")
-  .usageCanAppend(2, 4)
-  .do((c) => {
-    if (c.$(`my character with health <= 5`)) {
-      c.heal(1, "my characters order by health - maxHealth limit 1");
+define summon {
+  id 112112 as SingerOfManyWaters;
+  hint DamageType.Heal, 1;
+  on endPhase {
+    usage 2 { append 4 };
+    :heal(1, $.my.character);
+    if (:query($.my.character.var("health", "<=", "5"))) {
+      :heal(1, $.macros.myMostInjured);
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 112116
@@ -92,20 +97,23 @@ export const SingerOfManyWaters = summon(112112)
  * 角色进行普通攻击时：使角色造成的物理伤害变为水元素伤害。如果角色处于「荒」形态，则治疗我方所有后台角色1点；如果角色处于「芒」形态，则此伤害+2，但是对一位受伤最少的我方角色造成1点穿透伤害。
  * 可用次数：1
  */
-export const CenterOfAttention = status(112116)
-  .on("modifySkillDamageType", (c, e) => e.viaSkillType("normal") && e.type === DamageType.Physical)
-  .changeDamageType(DamageType.Hydro)
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("normal"))
-  .usage(1)
-  .do((c, e) => {
-    if (c.self.master.definition.id === FurinaPneuma) {
-      c.heal(1, "my standby characters");
+define status {
+  id 112116 as CenterOfAttention;
+  on modifySkillDamageType {
+    when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Hydro);
+  }
+  on increaseSkillDamage {
+    when :( :e.viaSkillType("normal") );
+    usage 1;
+    if (:self.master.definition.id === FurinaPneuma) {
+      :heal(1, $.my.standby);
     } else {
-      e.increaseDamage(2);
-      c.damage(DamageType.Piercing, 1, "my characters order by maxHealth - health limit 1");
+      :e.increaseDamage(2);
+      :damage(DamageType.Piercing, 1, $.macros.myLeastInjured);
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 112115
@@ -114,11 +122,13 @@ export const CenterOfAttention = status(112116)
  * 我方造成的伤害+1。（包括角色引发的扩散伤害）
  * 可用次数：1（可叠加，没有上限）
  */
-export const Revelry = combatStatus(112115)
-  .on("increaseDamage")
-  .usageCanAppend(1, Infinity)
-  .increaseDamage(1)
-  .done();
+define combatStatus {
+  id 112115 as Revelry;
+  on increaseDamage {
+    usage 1 { append };
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 112114
@@ -127,11 +137,14 @@ export const Revelry = combatStatus(112115)
  * 我方出战角色受到伤害或治疗后：叠加1点狂欢值。
  * 持续回合：2
  */
-export const UniversalRevelry = combatStatus(112114)
-  .duration(2)
-  .on("damagedOrHealed", (c, e) => e.target.isActive())
-  .combatStatus(Revelry)
-  .done();
+define combatStatus {
+  id 112114 as UniversalRevelry;
+  duration 2;
+  on damagedOrHealed {
+    when :( :e.target.isActive() );
+    :combatStatus(Revelry);
+  }
+}
 
 /**
  * @id 12111
@@ -140,12 +153,13 @@ export const UniversalRevelry = combatStatus(112114)
  * 造成2点物理伤害。
  * 每回合1次：如果手牌中没有圣俗杂座，则生成手牌圣俗杂座。
  */
-export const SoloistsSolicitation = skill(12111)
-  .type("normal")
-  .costHydro(1)
-  .costVoid(2)
-  .damage(DamageType.Physical, 2)
-  .done();
+define skill {
+  id 12111 as SoloistsSolicitation;
+  skillType normal;
+  cost DiceType.Hydro, 1;
+  cost DiceType.Void, 2;
+  :damage(DamageType.Physical, 2);
+}
 
 /**
  * @id 12112
@@ -154,11 +168,12 @@ export const SoloistsSolicitation = skill(12111)
  * 芙宁娜当前处于「始基力：荒性」形态：召唤沙龙成员。
  * （芙宁娜处于「始基力：芒性」形态时，会改为召唤众水的歌者）
  */
-export const SalonSolitairePneuma = skill(12112)
-  .type("elemental")
-  .costHydro(3)
-  .summon(SalonMembers)
-  .done();
+define skill {
+  id 12112 as SalonSolitairePneuma;
+  skillType elemental;
+  cost DiceType.Hydro, 3;
+  :summon(SalonMembers);
+}
 
 /**
  * @id 12113
@@ -166,13 +181,14 @@ export const SalonSolitairePneuma = skill(12112)
  * @description
  * 造成2点水元素伤害，生成普世欢腾。
  */
-export const LetThePeopleRejoice = skill(12113)
-  .type("burst")
-  .costHydro(4)
-  .costEnergy(2)
-  .damage(DamageType.Hydro, 2)
-  .combatStatus(UniversalRevelry)
-  .done();
+define skill {
+  id 12113 as LetThePeopleRejoice;
+  skillType burst;
+  cost DiceType.Hydro, 4;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Hydro, 2)
+  :combatStatus(UniversalRevelry)
+}
 
 /**
  * @id 12114
@@ -180,13 +196,19 @@ export const LetThePeopleRejoice = skill(12113)
  * @description
  *
  */
-export const Skill12114 = skill(12114)
-  .type("passive")
-  .on("useSkill", (c, e) => e.isSkillType("normal") &&
-    !c.player.hands.find((card) => card.definition.id === SeatsSacredAndSecular))
-  .usagePerRound(1, { name: "usagePerRound1" })
-  .createHandCard(SeatsSacredAndSecular)
-  .done();
+define skill {
+  id 12114 as Skill12114;
+  skillType passive {
+    on useSkill {
+      when :( 
+        :e.isSkillType("normal") &&
+        !:player.hands.find((card) => card.definition.id === SeatsSacredAndSecular)
+      );
+      usage perRound, 1 { name usagePerRound1 };
+      :createHandCard(SeatsSacredAndSecular);
+    }
+  }
+}
 
 /**
  * @id 12115
@@ -194,11 +216,14 @@ export const Skill12114 = skill(12114)
  * @description
  * 【被动】战斗开始时，生成手牌圣俗杂座。
  */
-export const ArkheSeatsSacredAndSecular = skill(12115)
-  .type("passive")
-  .on("battleBegin")
-  .createHandCard(SeatsSacredAndSecular)
-  .done();
+define skill {
+  id 12115 as ArkheSeatsSacredAndSecular;
+  skillType passive {
+    on battleBegin {
+      :createHandCard(SeatsSacredAndSecular)
+    }
+  }
+}
 
 /**
  * @id 1211
@@ -223,13 +248,13 @@ define character {
  * 造成2点物理伤害。
  * 每回合1次：生成手牌圣俗杂座。
  */
-export const SoloistsSolicitationOusia = skill(12121)
-  .type("normal")
-  .costHydro(1)
-  .costVoid(2)
-  .damage(DamageType.Physical, 2)
-  .done();
-
+define skill {
+  id 12121 as SoloistsSolicitationOusia;
+  skillType normal;
+  cost DiceType.Hydro, 1;
+  cost DiceType.Void, 2;
+  :damage(DamageType.Physical, 2);
+}
 /**
  * @id 12122
  * @name 孤心沙龙
@@ -237,11 +262,12 @@ export const SoloistsSolicitationOusia = skill(12121)
  * 芙宁娜当前处于「始基力：芒性」形态：召唤众水的歌者。
  * （芙宁娜处于「始基力：荒性」形态时，会改为召唤沙龙成员）
  */
-export const SalonSolitaireOusia = skill(12122)
-  .type("elemental")
-  .costHydro(3)
-  .summon(SingerOfManyWaters)
-  .done();
+define skill {
+  id 12122 as SalonSolitaireOusia;
+  skillType elemental;
+  cost DiceType.Hydro, 3;
+  :summon(SingerOfManyWaters);
+}
 
 /**
  * @id 1212
@@ -267,18 +293,21 @@ define character {
  * 装备有此牌的芙宁娜使用孤心沙龙时，会对自身附属万众瞩目。（角色普通攻击时根据形态触发不同效果）
  * （牌组中包含芙宁娜，才能加入牌组）
  */
-export const HearMeLetUsRaiseTheChaliceOfLove = card(212111)
-  .since("v4.7.0")
-  .costHydro(3)
-  .talent([FurinaPneuma, FurinaOusia])
-  .on("enter")
-  .do((c) => {
-    if (c.self.master.definition.id === FurinaPneuma) {
-      c.useSkill(SalonSolitairePneuma);
-    } else {
-      c.useSkill(SalonSolitaireOusia);
+define card {
+  id 212111 as HearMeLetUsRaiseTheChaliceOfLove;
+  since "v4.7.0";
+  cost DiceType.Hydro, 3;
+  talent [FurinaPneuma, FurinaOusia] {
+    on enter {
+      if (:self.master.definition.id === FurinaPneuma) {
+        :useSkill(SalonSolitairePneuma);
+      } else {
+        :useSkill(SalonSolitaireOusia);
+      }
     }
-  })
-  .on("useSkill", (c, e) => e.isSkillType("elemental"))
-  .characterStatus(CenterOfAttention, "@master")
-  .done();
+    on useSkill {
+      when :( :e.isSkillType("elemental") )
+      :characterStatus(CenterOfAttention, "@master")
+    }
+  }
+}
