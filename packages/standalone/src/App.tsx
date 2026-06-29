@@ -272,6 +272,22 @@ export function App() {
             </li>
             <li>
               <a
+                href="https://gi-tcg.taim.site"
+                target="_blank"
+              >
+                Taimevraiment 七圣召唤模拟器
+              </a>
+              （
+              <a
+                href="https://github.com/Taimevraiment/genius-invokation"
+                target="_blank"
+              >
+                GitHub
+              </a>
+              ）
+            </li>
+            <li>
+              <a
                 href="https://jarvis-yu.github.io/Dottore-Genius-Invokation-TCG-PWA/"
                 target="_blank"
               >
@@ -287,7 +303,7 @@ export function App() {
               ）
             </li>
             <li>
-              <a href="https://7shengzhaohuan.online/lpsim" target="_blank">
+              <a href="https://lpsim.zyr17.cn/" target="_blank">
                 七圣召唤水皇模拟器 "LPSim"
               </a>
               （
