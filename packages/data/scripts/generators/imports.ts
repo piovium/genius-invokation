@@ -24,7 +24,7 @@ const GLOB = path.join(BASE_PATH, "**/*.{ts,gts}");
 export async function generateImports() {
   const files = (
     await glob(GLOB, {
-      ignore: `${BASE_PATH}/*.ts`,
+      ignore: `${BASE_PATH}/*.{ts,gts}`,
       windowsPathsNoEscape: true,
     })
   ).toSorted();
