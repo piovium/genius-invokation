@@ -15,7 +15,7 @@
 
 import { ref, setup, Character, State, Equipment, Card, Summon, CombatStatus, DeclaredEnd, Support, $, DiceCount } from "#test";
 import { TeyvatFriedEgg } from "@gi-tcg/data/internal/cards/event/food.gts";
-import { FrostflakeArrow, Ganyu, UndividedHeart } from "@gi-tcg/data/internal/characters/cryo/ganyu";
+import { FrostflakeArrow, Ganyu, UndividedHeart } from "@gi-tcg/data/internal/characters/cryo/ganyu.gts";
 import { CeremonialBladework, Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";
 import { AgileSwitch, EfficientSwitch } from "@gi-tcg/data/internal/commons.gts";
 import { test } from "vitest";

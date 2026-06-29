@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { status, combatStatus, summon, DamageType, attachment, DiceType } from "@gi-tcg/core/builder";
+import { status, combatStatus, summon, DamageType, attachment, DiceType, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 100
@@ -178,10 +178,11 @@ export const SharpenTheBlade = status(209)
  * @description
  * 此牌的元素骰费用增加1。（可叠加，没有上限）
  */
-export const CostIncrease = attachment(201)
-  .variableCanAppend("layer", 1, Infinity)
-  .addCost((st, self) => self.variables.layer)
-  .done();
+define attachment {
+  id 201 as CostIncrease;
+  variable layer, 1 { append };
+  addCost ((st, self) => self.variables.layer);
+}
 
 /**
  * @id 202
@@ -189,10 +190,11 @@ export const CostIncrease = attachment(201)
  * @description
  * 此牌的元素骰费用降低1。（可叠加，没有上限）
  */
-export const CostReduction = attachment(202)
-  .variableCanAppend("layer", 1, Infinity)
-  .deductCost((st, self) => self.variables.layer)
-  .done();
+define attachment {
+  id 202 as CostReduction;
+  variable layer, 1 { append };
+  deductCost ((st, self) => self.variables.layer);
+};
 
 /**
  * @id 203
@@ -210,17 +212,18 @@ export const Shield = combatStatus(203)
  * @description
  * 结束阶段：如果此牌在手牌中，则对我方生命值最高角色造成等同于自身层数的穿透伤害。(可叠加，没有上限）
  */
-export const Conductive = attachment(204)
-  .tags("conductive")
-  .variableCanAppend("layer", 1, Infinity)
-  .on("endPhase", (c, e) => c.self.area.type === "hands")
-  .do((c) => {
-    const target = c.$(`my characters order by 0 - health limit 1`);
+define attachment {
+  id 204 as Conductive;
+  tags conductive;
+  variable layer, 1 { append };
+  on endPhase {
+    when :( :self.area.type === "hands" );
+    const target = :query($.macros.myMaxHealth);
     if (target) {
-      c.damage(DamageType.Piercing, c.getVariable("layer"), target);
+      :damage(DamageType.Piercing, :getVariable("layer"), target);
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 205
@@ -264,9 +267,10 @@ export const Empowerment = attachment(206)
  * @description
  * 此牌无法进行调和。
  */
-export const NoTuningAllowed = attachment(207)
-  .disableTuning()
-  .done();
+define attachment {
+  id 207 as NoTuningAllowed;
+  disableTuning;
+}
 
 /**
  * @id 208
@@ -274,9 +278,10 @@ export const NoTuningAllowed = attachment(207)
  * @description
  * 此牌打出效果无效。
  */
-export const IneffectiveWhenPlayed = attachment(208)
-  .makeEffectless()
-  .done();
+define attachment {
+  id 208 as IneffectiveWhenPlayed;
+  makeEffectless;
+}
 
 /**
  * @id 303300
@@ -284,6 +289,7 @@ export const IneffectiveWhenPlayed = attachment(208)
  * @description
  * 本回合无法食用更多「料理」
  */
-export const Satiated = status(303300)
-  .oneDuration()
-  .done();
+define status {
+  id 303300 as Satiated;
+  oneDuration;
+}

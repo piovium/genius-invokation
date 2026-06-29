@@ -13,13 +13,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineViewModel } from "@gi-tcg/gts-runtime";
+import { defineViewModel, type AR, type Meta } from "@gi-tcg/gts-runtime";
+import type { TypeInfer, TypeValidate } from "@gi-tcg/utils";
 import type { ExtensionDefinition } from "../../base/extension";
-import type { TriggeredSkillDefinition } from "../../base/state";
+import type { GameState, TriggeredSkillDefinition } from "../../base/state";
+import { EXTENSION_ID_OFFSET } from "../../builder/extension";
+import type { ExtensionHandle } from "../../builder";
+import type { Computed } from "../../query/utils";
+import type {
+  EventArgOf,
+  EventNames,
+  SkillDescription,
+} from "../../base/skill";
+import type { Draft } from "immer";
+import { SkillContext } from "../../builder/internal_exports";
+import { wrapSkillInfoWithExt } from "../../builder/skill";
+import { DEFAULT_VERSION_INFO } from "../../base/version";
 
 class ExtensionModel {
   skillIndex = 0;
-  
+
   id!: number;
   description = "";
   schema: unknown;
@@ -27,12 +40,121 @@ class ExtensionModel {
 
   skillList: TriggeredSkillDefinition[] = [];
 
+  #subIdCounter = 0;
+  getSubId(): number {
+    const subId = ++this.#subIdCounter;
+    if (subId > 99) {
+      throw new Error("Sub ID exceeded the maximum limit of 99.");
+    }
+    return this.id + 0.01 * subId;
+  }
+
   getEntry(): ExtensionDefinition {
-    // TODO
-    throw new Error("Method not implemented.");
+    return {
+      __definition: "extensions",
+      type: "extension",
+      id: this.id,
+      description: this.description,
+      version: DEFAULT_VERSION_INFO,
+      schema: this.schema,
+      initialState: this.initialState,
+      skills: [...this.skillList],
+    };
   }
 }
 
-export const ExtensionViewModel = defineViewModel(ExtensionModel, (h) => ({
-  // TODO
-}));
+type ExtensionVMMeta = {
+  stateType: unknown;
+};
+const DEFAULT_EXTENSION_VM_META = {
+  stateType: null as unknown,
+} as const;
+
+export const ExtensionViewModel = defineViewModel(
+  ExtensionModel,
+  (h) => ({
+    idHint: h.attribute<{
+      (idHint: number): AR.Done;
+      as<Meta extends ExtensionVMMeta>(
+        this: AR.This<Meta>,
+      ): ExtensionHandle<Meta["stateType"]>;
+      required(): true;
+      uniqueKey(): "idHint";
+    }>(
+      (model, [id]) => {
+        model.id = EXTENSION_ID_OFFSET + id;
+      },
+      (_, [id]) => {
+        return (EXTENSION_ID_OFFSET + id) as ExtensionHandle;
+      },
+    ),
+    schema: h.attribute<{
+      <Meta extends ExtensionVMMeta, const Def, R = TypeInfer<Def>>(
+        this: AR.This<Meta>,
+        schema: TypeValidate<Def>,
+      ): AR.DoneRewriteMeta<
+        Computed<
+          Meta & {
+            stateType: R;
+          }
+        >
+      >;
+      required(): true;
+      uniqueKey(): "schema";
+    }>((model, schema: unknown) => {
+      model.schema = schema;
+    }),
+    initialState: h.attribute<{
+      <Meta extends ExtensionVMMeta>(
+        this: AR.This<Meta>,
+        initialState: Meta["stateType"],
+      ): AR.Done;
+      required(): true;
+      uniqueKey(): "initialState";
+    }>((model, [initialState]) => {
+      model.initialState = initialState;
+    }),
+
+    description: h.simpleAttribute({
+      uniqueKey: "description",
+    })(function (description: string) {
+      this.description = description;
+    }),
+
+    mutateWhen: h.attribute<{
+      <Meta extends ExtensionVMMeta, E extends EventNames>(
+        this: AR.This<Meta>,
+        event: E,
+        operation: (
+          extensionState: Draft<Meta["stateType"]>,
+          eventArg: EventArgOf<E>,
+          currentGameState: GameState,
+        ) => void,
+      ): AR.Done;
+    }>((model, [event, operation]) => {
+      const extId = model.id;
+      const action: SkillDescription<any> = (state, skillInfo, arg) => {
+        const ctx = new SkillContext<any>(
+          state,
+          wrapSkillInfoWithExt(skillInfo, extId),
+          arg,
+        );
+        ctx.setExtensionState((st) => operation(st, arg, state));
+        return ctx._terminate();
+      };
+      const def: TriggeredSkillDefinition = {
+        type: "skill",
+        initiativeSkillConfig: null,
+        id: model.getSubId(),
+        ownerType: "extension",
+        skillType: null,
+        triggerOn: event,
+        filter: () => true,
+        action,
+        usagePerRoundVariableName: null,
+      };
+      model.skillList.push(def);
+    }),
+  }),
+  DEFAULT_EXTENSION_VM_META,
+);

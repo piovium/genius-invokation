@@ -52,6 +52,7 @@ import {
 } from "./entity";
 import type {
   ExEntityType,
+  ExtensionHandle,
   PassiveSkillHandle,
   SkillHandle,
 } from "../../builder/type";
@@ -76,6 +77,7 @@ import type { DiceRequirement, DiceType } from "@gi-tcg/typings";
 import { UsageVM, type GtsUsageOptions, type UsageVMMeta } from "./variables";
 import { isCustomEvent } from "../../base/custom_event";
 import { GiTcgDataError } from "../../error";
+import type { Computed } from "../../query/utils";
 
 type GtsSkillOperation<Meta extends SkillBuilderMetaBase> = (
   c: TypedSkillContext<WritableMetaOf<Meta>>,
@@ -498,6 +500,21 @@ export const InitiativeSkillViewModel = defineViewModel(
         from: "official",
         value: { predicate: "until", version },
       };
+    }),
+    associateExtension: h.attribute<{
+      <Meta extends InitiativeSkillVMMeta, NewExtT>(
+        this: AR.This<Meta>,
+        ext: ExtensionHandle<NewExtT>,
+      ): AR.DoneRewriteMeta<
+        Computed<
+          Omit<Meta, "associatedExtension"> & {
+            associatedExtension: ExtensionHandle<NewExtT>;
+          }
+        >
+      >;
+      uniqueKey(): "associatedExtension";
+    }>((model, [extId]) => {
+      model.associatedExtensionId = extId;
     }),
 
     prepared: h.attribute<{

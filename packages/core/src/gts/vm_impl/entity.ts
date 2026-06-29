@@ -66,6 +66,7 @@ import type { CharacterPassiveSkillEntry } from "../../builder/registry";
 import type { EntityDescriptionDictionaryGetter } from "../../builder/entity";
 import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
 import type { Computed } from "../../query/utils";
+import type { AttachmentTag, ModificationGetter } from "../../base/attachment";
 
 export interface GtsUsageOrUsagePerRoundOptions extends GtsUsageOptions {
   perRound: boolean;
@@ -77,7 +78,7 @@ export class EntityModel implements ICaller {
 
   id!: number;
   type: ExEntityType;
-  tags: EntityTag[] = [];
+  tags: string[] = [];
   versionInfo: VersionInfo = DEFAULT_VERSION_INFO;
 
   varConfigs = new Map<string, VariableConfig>();
@@ -163,6 +164,11 @@ export class EntityModel implements ICaller {
     }
     return skills;
   }
+  protected getAttachmentModifications(): ModificationGetter {
+    throw new GiTcgCoreInternalError(
+      `Unreachable; AttachmentModel should override this`,
+    );
+  }
 
   getEntry():
     | EntityDefinition
@@ -179,7 +185,19 @@ export class EntityModel implements ICaller {
         varConfigs: Object.fromEntries(this.varConfigs),
       };
     } else if (this.type === "attachment") {
-      throw new Error("Not implemented");
+      const skills = this.getSkills();
+      return {
+        __definition: "attachments",
+        id: this.id,
+        visibleVarName: this.visibleVarName,
+        varConfigs: Object.fromEntries(this.varConfigs),
+        version: this.versionInfo,
+        skills,
+        modifications: this.getAttachmentModifications(),
+        tags: this.tags as AttachmentTag[],
+        type: this.type,
+        descriptionDictionary: this.descriptionDictionary,
+      };
     } else {
       const skills = this.getSkills();
       return {
@@ -325,6 +343,21 @@ export const EntityViewModel = defineViewModel(
       },
       (model, [id]) => id as any,
     ),
+    associateExtension: h.attribute<{
+      <Meta extends EntityVMMeta, NewExtT>(
+        this: AR.This<Meta>,
+        ext: ExtensionHandle<NewExtT>,
+      ): AR.DoneRewriteMeta<
+        Computed<
+          Omit<Meta, "associatedExtension"> & {
+            associatedExtension: ExtensionHandle<NewExtT>;
+          }
+        >
+      >;
+      uniqueKey(): "associatedExtension";
+    }>((model, [extId]) => {
+      model.associatedExtensionId = extId;
+    }),
     since: h.simpleAttribute({
       uniqueKey: "version",
     })(function (version: Version) {
@@ -516,7 +549,7 @@ export const EntityViewModel = defineViewModel(
     }),
     hint: h.attribute<{
       /**
-       * The hint icon will defaults to Anemo, but changed to a swirled element 
+       * The hint icon will defaults to Anemo, but changed to a swirled element
        * after my character/summon produced a swirling reaction.
        */
       <Meta extends EntityVMMeta>(

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, combatStatus, card, DamageType, extension } from "@gi-tcg/core/builder";
+import { character, skill, summon, combatStatus, card, DamageType, extension, DiceType } from "@gi-tcg/core/builder";
 
 /**
  * @id 111011
@@ -68,16 +68,17 @@ export const TrailOfTheQilin = skill(11012)
   .combatStatus(IceLotus)
   .done();
 
-const FrostflakeArrowUsedExtension = extension(11013, { used: "pair<boolean>" })
-  .initialState({ used: [false, false] })
-  .description("本场对局中某方曾经使用过霜华矢")
-  .mutateWhen("onDamageOrHeal", (st, e) => {
+define extension {
+  idHint 11013 as private FrostflakeArrowUsedExtension;
+  schema ({ used: "pair<boolean>" });
+  initialState ({ used: [false, false] });
+  mutateWhen onDamageOrHeal, ((st, e) => {
     // 甘雨倒下时重置
     if (e.target.definition.id === Ganyu && e.damageInfo.causeDefeated) {
       st.used[e.targetWho] = false;
     }
-  })
-  .done();
+  });
+}
 
 /**
  * @id 11013
@@ -85,20 +86,19 @@ const FrostflakeArrowUsedExtension = extension(11013, { used: "pair<boolean>" })
  * @description
  * 造成2点冰元素伤害，对所有敌方后台角色造成2点穿透伤害。
  */
-export const FrostflakeArrow = skill(11013)
-  .type("normal")
-  .costCryo(5)
-  .associateExtension(FrostflakeArrowUsedExtension)
-  .do((c) => {
-    if (c.self.hasEquipment(UndividedHeart) && c.getExtensionState().used[c.self.who]) {
-      c.damage(DamageType.Piercing, 3, "opp standby");
-    } else {
-      c.damage(DamageType.Piercing, 2, "opp standby");
-    }
-    c.damage(DamageType.Cryo, 2);
-    c.setExtensionState((st) => st.used[c.self.who] = true);
-  })
-  .done();
+define skill {
+  id 11013 as FrostflakeArrow;
+  skillType normal;
+  cost DiceType.Cryo, 5;
+  associateExtension FrostflakeArrowUsedExtension;
+  if (:self.hasEquipment(UndividedHeart) && :getExtensionState().used[:self.who]) {
+    :damage(DamageType.Piercing, 3, "opp standby");
+  } else {
+    :damage(DamageType.Piercing, 2, "opp standby");
+  }
+  :damage(DamageType.Cryo, 2);
+  :setExtensionState((st) => st.used[:self.who] = true);
+}
 
 /**
  * @id 11014

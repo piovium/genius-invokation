@@ -13,31 +13,110 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { getEntityById } from "../../utils";
 import type {
-  AttachmentDefinition,
   AttachmentModification,
+  AttachmentTag,
+  ModificationGetter,
 } from "../../base/attachment";
-import type { GameState } from "../../base/state";
+import type { AttachmentState, GameState } from "../../base/state";
 import {
   EntityModel,
   EntityViewModel,
   type DefaultEntityVMMeta,
 } from "./entity";
+import type { DiceType } from "@gi-tcg/typings";
+
+export type CostCountFn = (state: GameState, self: AttachmentState) => number;
 
 class AttachmentModel extends EntityModel {
   modifications: (
     | AttachmentModification
     | ((state: GameState, id: number) => AttachmentModification)
   )[] = [];
-  getEntry(): AttachmentDefinition {
-    // TODO
-    throw new Error("Method not implemented.");
+
+  protected override getAttachmentModifications(): ModificationGetter {
+    const modifications = this.modifications;
+    return function (state, id) {
+      return modifications.map((mod) =>
+        typeof mod === "function" ? mod(state, id) : mod,
+      );
+    };
   }
 }
 
 export const AttachmentViewModel = EntityViewModel
   //
   .extend(AttachmentModel, (h) => ({
-    // TODO
+    tags: h.simpleAttribute()(function (...tags: AttachmentTag[]) {
+      this.tags.push(...tags);
+    }),
+
+    addCost: h.simpleAttribute({
+      uniqueKey: "cost",
+    })(function (value: number | CostCountFn) {
+      this.modifications.push(
+        typeof value === "number"
+          ? {
+              type: "increaseCardCost",
+              value,
+            }
+          : (st, id) => {
+              const self = getEntityById(st, id) as AttachmentState;
+              return {
+                type: "increaseCardCost",
+                value: value(st, self),
+              };
+            },
+      );
+    }),
+    deductCost: h.simpleAttribute({
+      uniqueKey: "cost",
+    })(function (value: number | CostCountFn) {
+      this.modifications.push(
+        typeof value === "number"
+          ? {
+              type: "decreaseCardCost",
+              value,
+            }
+          : (st, id) => {
+              const self = getEntityById(st, id) as AttachmentState;
+              return {
+                type: "decreaseCardCost",
+                value: value(st, self),
+              };
+            },
+      );
+    }),
+    changeCostType: h.simpleAttribute({
+      uniqueKey: "costType",
+    })(function (toType: DiceType) {
+      this.modifications.push({
+        type: "changeCardCostType",
+        toType,
+      });
+    }),
+    changeTuningTarget: h.simpleAttribute({
+      uniqueKey: "tuningTarget",
+    })(function (tuningTarget: DiceType) {
+      this.modifications.push({
+        type: "changeCardTuningTarget",
+        tuningTarget,
+      });
+    }),
+    makeEffectless: h.simpleAttribute({
+      uniqueKey: "effectless",
+    })(function () {
+      this.modifications.push({
+        type: "makeEffectless",
+      });
+    }),
+    disableTuning: h.simpleAttribute({
+      uniqueKey: "disableTuning",
+    })(function () {
+      this.modifications.push({
+        type: "disableCardTuning",
+      });
+    }),
   }))
   .bind<DefaultEntityVMMeta<"attachment">>("attachment");

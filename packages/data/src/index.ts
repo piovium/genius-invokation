@@ -62,7 +62,7 @@ import "./characters/cryo/eula.ts";
 import "./characters/cryo/fatui_cryo_cicin_mage.ts";
 import "./characters/cryo/freminet.ts";
 import "./characters/cryo/frost_operative.ts";
-import "./characters/cryo/ganyu.ts";
+import "./characters/cryo/ganyu.gts";
 import "./characters/cryo/kaeya.ts";
 import "./characters/cryo/kamisato_ayaka.ts";
 import "./characters/cryo/la_signora.ts";
