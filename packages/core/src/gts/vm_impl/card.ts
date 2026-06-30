@@ -171,7 +171,7 @@ class CardModel extends InitiativeSkillModel implements ICaller {
       type: this.type,
       id: this.cardId,
       tags: [...this.tags, ...(this.innerModel?.tags ?? [])] as EntityTag[],
-      obtainable: this.obtainable,
+      obtainable: this.obtainable && (this.innerModel?.obtainable ?? true),
       disableTuning: this.disableTuning,
       hintText: this.innerModel?.hintText ?? null,
       descriptionDictionary: this.innerModel?.descriptionDictionary ?? {},

@@ -43,7 +43,6 @@ import { TechniqueNightsoulVM } from "./entity_auxilary";
 import type { DisposeEventArg } from "../../base/skill";
 
 export class TechniqueModel extends EntityModel {
-  isNightsoul = false;
   targetGetter: TargetGetter = function (ctx) {
     return ctx.queryAll($.my.character).map((s) => s.latest());
   };
@@ -93,7 +92,7 @@ export const TechniqueViewModel = EntityViewModel
     }>((model, [], subView) => {
       const { alsoDisposeNightsoulsBlessing = true } =
         TechniqueNightsoulVM.parse(subView);
-      model.isNightsoul = true;
+      model.obtainable = false;
       const disposeByNightsoulSkill = new TriggeredSkillModel(
         model,
         "beforeAction",

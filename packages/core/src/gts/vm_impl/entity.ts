@@ -51,6 +51,7 @@ import type {
   ExtensionHandle,
   HandleT,
   SkillHandle,
+  SupportHandle,
 } from "../../builder/type";
 import {
   VariablesVM,
@@ -60,7 +61,7 @@ import {
 } from "./variables";
 import { createVariable, createVariableCanAppend } from "../../builder/utils";
 import { TriggeredSkillModel, TriggeredSkillViewModel } from "./skill";
-import { $, DamageType, type CustomEvent } from "../../builder";
+import { $, DamageType, DiceType, type CustomEvent } from "../../builder";
 import { GlobalUsageVM, PrepareVM, NightsoulVM } from "./entity_auxilary";
 import type { CharacterPassiveSkillEntry } from "../../builder/registry";
 import type { EntityDescriptionDictionaryGetter } from "../../builder/entity";
@@ -78,8 +79,9 @@ export class EntityModel implements ICaller {
 
   id!: number;
   type: ExEntityType;
-  tags: string[] = [];
+  tags: ((string & {}) | EntityTag)[] = [];
   versionInfo: VersionInfo = DEFAULT_VERSION_INFO;
+  obtainable: boolean = true;
 
   varConfigs = new Map<string, VariableConfig>();
   skillList: SkillDefinition[] = [];
@@ -511,6 +513,58 @@ export const EntityViewModel = defineViewModel(
         }
       };
       model.skillList.push(decreaseDmgSkill.buildSkillDefinition());
+    }),
+    adventureSpot: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: ThisWithType<Meta, "support">,
+      ): AR.DoneRewriteMeta<PushVar<Meta, "exp">>;
+    }>((model, []) => {
+      model.obtainable = false;
+      model.tags.push("adventureSpot");
+      model.setVariable("exp", 1, { append: true });
+    }),
+    elementalBlessing: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: ThisWithType<Meta, "support">,
+        type1: DiceType,
+        type2: DiceType,
+      ): AR.Done;
+    }>((model, [type1, type2]) => {
+      model.obtainable = false;
+      model.tags.push("blessing");
+      const autoPlaySkill = new TriggeredSkillModel(model, "actionPhase");
+      autoPlaySkill.enableHandTriggering = true;
+      autoPlaySkill.enablePileTriggering = true;
+      autoPlaySkill.userFilters.push(function (c) {
+        if (c.self.area.type === "supports") {
+          return false;
+        }
+        const elements = new Set(
+          c.player.characters.flatMap((ch) => ch.element()),
+        );
+        return (
+          elements.size === 2 && elements.has(type1) && elements.has(type2)
+        );
+      });
+      autoPlaySkill.action = function (c) {
+        const self = c.self.cast<"support">();
+        // 若在牌库里，先抓到手上
+        if (c.self.area.type === "pile") {
+          c.drawCards(self);
+        }
+        // 若不在手上（爆牌），就啥也别干了
+        if (c.self.area.type !== "hands") {
+          return;
+        }
+        c.disposeCard(self);
+        c.createEntity("support", self.definition.id as SupportHandle, {
+          who: c.self.area.who,
+          type: "supports",
+        });
+        c.convertDice(type1, 2);
+        c.convertDice(type2, 2);
+      };
+      model.skillList.push(autoPlaySkill.buildSkillDefinition());
     }),
 
     duration: h.attribute<{
