@@ -70,7 +70,7 @@ export function getCardCode(card: ActionCardRawData, extra = ""): string {
   } else if (type === "support") {
     const tag = tags.shift();
     if (tag === "blessing") {
-      mainCode = `\n support {\n    blessing;    ${TODO_LINE}  }`;
+      mainCode = `\n support {\n    elementalBlessing;    ${TODO_LINE}  }`;
     } else if (tag) {
       mainCode = `\n  support ${tag} {\n    ${TODO_LINE}  }`;
     } else {

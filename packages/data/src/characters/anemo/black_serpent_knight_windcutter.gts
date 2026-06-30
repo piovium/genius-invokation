@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DiceType, DamageType, $ } from "@gi-tcg/core/builder";
+import { RES } from "../../commons.gts";
 
 /**
  * @id 125041
@@ -22,9 +23,9 @@ import { DiceType, DamageType, $ } from "@gi-tcg/core/builder";
  * 本角色将在下次行动时，直接使用技能：舍身架势。
  */
 define status {
-  id 125041 as RecklessStance;
+  id 125041 as RecklessStanceStatus;
   since "v6.7.0";
-  // TODO
+  prepare RecklessStance;
 }
 
 /**
@@ -34,9 +35,9 @@ define status {
  * 本角色将在下次行动时，直接使用技能：怒风循击。
  */
 define status {
-  id 125042 as GalePursuit;
+  id 125042 as GalePursuitStatus;
   since "v6.7.0";
-  // TODO
+  prepare GalePursuit;
 }
 
 /**
@@ -47,11 +48,10 @@ define status {
  */
 define skill {
   id 25041 as HalfswordTechnique;
-  skillType normal
+  skillType normal;
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
-  // TODO
-
+  :damage(DamageType.Physical, 2);
 }
 
 /**
@@ -62,10 +62,10 @@ define skill {
  */
 define skill {
   id 25042 as RisingSlash;
-  skillType elemental
+  skillType elemental;
   cost DiceType.Anemo, 3;
-  // TODO
-
+  :damage(DamageType.Anemo, 3);
+  :drawCards(1);
 }
 
 /**
@@ -76,11 +76,10 @@ define skill {
  */
 define skill {
   id 25043 as GuardStance;
-  skillType burst
+  skillType burst;
   cost DiceType.Anemo, 3;
   cost DiceType.Energy, 2;
-  // TODO
-
+  :characterStatus(RecklessStanceStatus);
 }
 
 /**
@@ -92,7 +91,26 @@ define skill {
 define skill {
   id 25044 as VanguardMomentum;
   skillType passive {
-    // TODO
+    variable drawCardsUsagePerRound, 2;
+    on dealReaction {
+      when :( :getVariable("drawCardsUsagePerRound") > 0 && :e.relatedTo(DamageType.Anemo) );
+      listenTo samePlayer;
+      :drawCards(1);
+      :addVariable("drawCardsUsagePerRound", -1);
+    }
+    on dispose {
+      when :( 0 &&
+        !:e.entity.isMine() &&
+        (:e.entity.definition.type === "status" || :e.entity.definition.type === "combatStatus") &&
+        (:e.entity.definition.tags.includes("shield") || :e.entity.definition.tags.includes("barrier"))
+      );
+      listenTo all;
+      :drawCards(1);
+      :addVariable("drawCardsUsagePerRound", -1);
+    }
+    on roundEnd {
+      :setVariable("drawCardsUsagePerRound", 2);
+    }
   }
 }
 
@@ -104,9 +122,11 @@ define skill {
  */
 define skill {
   id 25045 as RecklessStance;
-  skillType burst
-  // TODO
-
+  skillType burst;
+  prepared;
+  :damage(DamageType.Anemo, 3);
+  :disposeMaxCostHands(1);
+  :characterStatus(GalePursuitStatus);
 }
 
 /**
@@ -117,9 +137,10 @@ define skill {
  */
 define skill {
   id 25046 as GalePursuit;
-  skillType burst
-  // TODO
-
+  skillType burst;
+  prepared;
+  :damage(DamageType.Anemo, 3);
+  :disposeMaxCostHands(1);
 }
 
 /**
@@ -151,6 +172,20 @@ define card {
   since "v6.7.0";
   cost DiceType.Anemo, 3;
   talent BlackSerpentKnightWindcutter {
-    // TODO
+    on enter {
+      :useSkill(RisingSlash);
+    }
+    on actionPhase {
+      if (:oppPlayer.hands.length >= 7) {
+        :characterStatus(RES, $.opp.active)
+      }
+      if (:player.hands.length >= 7) {
+        :characterStatus(RES, $.my.active, {
+          overrideVariables: {
+            usage: 2
+          }
+        })
+      }
+    }
   }
 }

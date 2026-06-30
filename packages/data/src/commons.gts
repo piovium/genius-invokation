@@ -173,6 +173,21 @@ export const SharpenTheBlade = status(209)
   .done();
 
 /**
+ * @id 210
+ * @name 抗性
+ * @description
+ * 所附属角色受到伤害时：抵消1点伤害。（可叠加，没有上限）
+ */
+define status {
+  id 210 as RES;
+  tags barrier;
+  on decreaseDamaged {
+    usage 1 { append };
+    :e.decreaseDamage(1);
+  }
+}
+
+/**
  * @id 201
  * @name 费用增加
  * @description

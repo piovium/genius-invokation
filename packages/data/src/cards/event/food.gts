@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { type StatusHandle, card, combatStatus, status } from "@gi-tcg/core/builder";
+import { DiceType, type StatusHandle, card, combatStatus, status } from "@gi-tcg/core/builder";
 import { BattlePlan, Satiated, SharpenTheBlade } from "../../commons.gts";
 
 /**
@@ -594,6 +594,22 @@ export const RouletteSpecial = card(333030)
   .done();
 
 /**
+ * @id 303324
+ * @name 白灵果派（生效中）
+ * @description
+ * 本回合所附属角色使用技能少花费2个元素骰。
+ * 可用次数：2
+ */
+define status {
+  id 303324 as LakkaberryPieInEffect;
+  oneDuration;
+  on deductOmniDiceSkill {
+    usage 2;
+    :e.deductOmniCost(2);
+  }
+}
+
+/**
  * @id 333031
  * @name 白灵果派
  * @description
@@ -604,7 +620,6 @@ define card {
   id 333031 as LakkaberryPie;
   since "v6.7.0";
   cost DiceType.Aligned, 4;
-  tags food;
-  // TODO
-
+  food;
+  :characterStatus(LakkaberryPieInEffect, :e.targets[0]);
 }

@@ -107,7 +107,7 @@ export const Tighnari = character(1702)
  */
 export const KeenSight = card(217021)
   .since("v3.6.0")
-  .costDendro(4)
+  .costDendro(3)
   .talent(Tighnari)
   .on("enter")
   .useSkill(VijnanaphalaMine)

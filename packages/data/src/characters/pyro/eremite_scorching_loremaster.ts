@@ -41,13 +41,6 @@ export const ScorpionBlessing = combatStatus(123032)
  * （角色最多装备1个「特技」）
  * [1230311: 炙烧攻势] (2*Aligned) 造成2点火元素伤害。
  * [1230312: ] ()
- * @outdated
- * 所附属角色受到伤害时：如可能，失去1点充能，以抵消1点伤害，然后生成魔蝎祝福。（每回合至多2次）
- * 特技：炙烧攻势
- * 可用次数：1
- * （角色最多装备1个「特技」）
- * [1230311: 炙烧攻势] (2*Same) 造成2点火元素伤害。
- * [1230312: ] ()
  */
 export const SpiritOfOmenPyroScorpion = card(123031)
   .since("v5.1.0")

@@ -233,6 +233,9 @@ export const CardViewModel = InitiativeSkillViewModel
       },
       (_, [id]) => id as any,
     ),
+    tags: h.simpleAttribute()(function (...tags: EntityTag[]) {
+      this.tags.push(...tags);
+    }),
 
     undiscoverable: h.simpleAttribute({
       uniqueKey: "obtainable",
@@ -347,16 +350,16 @@ export const CardViewModel = InitiativeSkillViewModel
     support: h.attribute<{
       <Meta extends CardVMMeta>(
         this: NoTargetSpecifiedThis<Meta>,
-        supportType: SupportTag,
+        ...supportTags: SupportTag[]
       ): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"support">>;
       uniqueKey(): "type";
       mergeMeta<Meta extends CardVMMeta, InnerMeta extends EntityVMMeta>(
         meta: Meta,
         innerMeta: InnerMeta,
       ): InnerMeta & { readonly targetTypes: []; isInitiativeSkill: false };
-    }>((model, [supportType], subView) => {
+    }>((model, supportTags, subView) => {
       model.innerModel = EntityViewModel.parse(subView, "support");
-      model.tags.push(supportType);
+      model.tags.push(...supportTags);
       model.setSupportPlayAction();
     }),
     food: h.attribute<{
@@ -419,7 +422,11 @@ export const CardViewModel = InitiativeSkillViewModel
         }
       >;
     }>((model, [eventName], subView) => {
-      const skillModel = TriggeredSkillViewModel.parse(subView, model, eventName);
+      const skillModel = TriggeredSkillViewModel.parse(
+        subView,
+        model,
+        eventName,
+      );
       skillModel.id = model.getSubId();
       skillModel.enableHandTriggering = true;
       skillModel.enablePileTriggering = true;

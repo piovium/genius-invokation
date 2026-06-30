@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { $, Aura, card, DamageType, DiceType, Reaction, status, type SupportHandle } from "@gi-tcg/core/builder";
-import { NoTuningAllowed, Shield } from "../../commons.gts";
+import { CatalyzingField, NoTuningAllowed, Shield } from "../../commons.gts";
 
 /**
  * @id 303041
@@ -49,10 +49,10 @@ export const SuperconductBlessingDeepFreeze = card(303041)
  * @name 超导祝佑·电冲
  * @description
  * 投掷阶段：总是投出2个冰元素骰和2个雷元素骰。
- * 我方触发超导反应后：敌方生命值最高的一名角色受到2点穿透伤害。（每回合3次）
+ * 我方触发超导反应后：敌方生命值最高的一名角色受到1点穿透伤害。（每回合3次）
  */
 export const SuperconductBlessingElectricSurge = card(303042)
-  .costElectro(3)
+  .costElectro(1)
   .undiscoverable()
   .support()
   .on("roll")
@@ -60,7 +60,7 @@ export const SuperconductBlessingElectricSurge = card(303042)
   .fixDice(DiceType.Electro, 2)
   .on("dealReaction", (c, e) => e.type === Reaction.Superconduct)
   .usagePerRound(3)
-  .damage(DamageType.Piercing, 2, `opp characters order by 0 - health limit 1`)
+  .damage(DamageType.Piercing, 1, $.macros.oppMaxHealth)
   .done();
 
 /**
@@ -267,7 +267,7 @@ export const LavaBlessingTurnfire = card(303071)
  * @name 火岩祝佑·重熔
  * @description
  * 投掷阶段：总是投出2个火元素骰和2个岩元素骰。
- * 我方造成后火元素伤害或岩元素伤害后：生成2层护盾。（每回合1次）
+ * 敌方受到火元素伤害或岩元素伤害后：生成2层护盾。（每回合1次）
  */
 export const LavaBlessingRemelting = card(303072)
   .costGeo(3)
@@ -276,7 +276,10 @@ export const LavaBlessingRemelting = card(303072)
   .on("roll")
   .fixDice(DiceType.Pyro, 2)
   .fixDice(DiceType.Geo, 2)
-  .on("dealDamage", (c, e) => ([DamageType.Pyro, DamageType.Geo] as DamageType[]).includes(e.type))
+  .on("damaged", (c, e) => 
+    !e.target.isMine() && 
+    ([DamageType.Pyro, DamageType.Geo] as DamageType[]).includes(e.type))
+  .listenToAll()
   .usagePerRound(1)
   .combatStatus(Shield, "my", {
     overrideVariables: {
@@ -443,6 +446,46 @@ export const ElementalTransfigurationStormgaleBlessing = card(331009)
   .done();
 
 /**
+ * @id 303101
+ * @name 水风祝佑·水爆
+ * @description
+ * 投掷阶段：总是投出2个水元素骰和2个风元素骰。
+ * 我方获得治疗时：对敌方出战角色造成2点风元素伤害。（每回合1次）
+ */
+export const AquabreezeBlessingWaterburst = card(303101)
+  .costHydro(2)
+  .undiscoverable()
+  .support()
+  .on("roll")
+  .fixDice(DiceType.Hydro, 2)
+  .fixDice(DiceType.Anemo, 2)
+  .on("healed")
+  .usagePerRound(1)
+  .damage(DamageType.Anemo, 2, $.opp.active)
+  .done();
+
+/**
+ * @id 303102
+ * @name 水风祝佑·漩风
+ * @description
+ * 投掷阶段：总是投出2个水元素骰和2个风元素骰。
+ * 我方触发扩散反应时：目标角色造成的伤害+1，治疗我方受伤最多的角色1点。（每回合2次）
+ */
+export const AquabreezeBlessingVortex = card(303102)
+  .costAnemo(2)
+  .undiscoverable()
+  .support()
+  .on("roll")
+  .fixDice(DiceType.Hydro, 2)
+  .fixDice(DiceType.Anemo, 2)
+  .on("increaseDamage", (c, e) => e.isReactionRelatedTo(DamageType.Anemo))
+  .usagePerRound(2)
+  .increaseDamage(1)
+  .heal(1, $.macros.myMostInjured)
+  .done();
+
+
+/**
  * @id 331010
  * @name 元素幻变：水风祝佑
  * @description
@@ -454,10 +497,66 @@ define card {
   id 331010 as ElementalTransfigurationAquabreezeBlessing;
   since "v6.7.0";
   cost DiceType.Aligned, 2;
-  support blessing {
-    // TODO
+  support {
+    elementalBlessing DiceType.Hydro, DiceType.Anemo;
+    on roll {
+      :e.fixDice(DiceType.Hydro, 2);
+      :e.fixDice(DiceType.Anemo, 2);
+    }
+    on dealReaction {
+      when :( :e.type === Reaction.SwirlHydro);
+      :selectAndCreateHandCard([
+        AquabreezeBlessingWaterburst,
+        AquabreezeBlessingVortex,
+      ]);
+      :dispose();
+    }
   }
 }
+
+/**
+ * @id 303111
+ * @name 雷草祝佑·碎霆
+ * @description
+ * 投掷阶段：总是投出2个雷元素骰和2个草元素骰。
+ * 我方存在激化领域时：我方释放「元素爆发」少花费2个元素骰。（每回合1次）
+ */
+export const ThunderbloomBlessingShatterbolt = card(303111)
+  .costElectro(1)
+  .undiscoverable()
+  .support()
+  .on("roll")
+  .fixDice(DiceType.Electro, 2)
+  .fixDice(DiceType.Dendro, 2)
+  .on("deductOmniDiceSkill", (c, e) => 
+    e.isSkillType("burst") &&
+    c.query($.my.combatStatus.def(CatalyzingField)))
+  .usagePerRound(1)
+  .deductOmniCost(2)
+  .done();
+
+// 下面这个是七位数 id 因为 303112 已被占用
+
+/**
+ * @id 3003112
+ * @name 雷草祝佑·锐核
+ * @description
+ * 投掷阶段：总是投出2个雷元素骰和2个草元素骰。
+ * 我方存在激化领域时：我方释放「元素战技」少花费1个元素骰。（每回合2次）
+ */
+export const ThunderbloomBlessingShatteringThunder = card(3003112)
+  .costDendro(2)
+  .undiscoverable()
+  .support()
+  .on("roll")
+  .fixDice(DiceType.Electro, 2)
+  .fixDice(DiceType.Dendro, 2)
+  .on("deductOmniDiceSkill", (c, e) => 
+    e.isSkillType("elemental") &&
+    c.query($.my.combatStatus.def(CatalyzingField)))
+  .usagePerRound(2)
+  .deductOmniCost(1)
+  .done();
 
 /**
  * @id 331011
@@ -471,7 +570,19 @@ define card {
   id 331011 as ElementalTransfigurationThunderbloomBlessing;
   since "v6.7.0";
   cost DiceType.Aligned, 2;
-  support blessing {
-    // TODO
+  support {
+    elementalBlessing DiceType.Electro, DiceType.Dendro;
+    on roll {
+      :e.fixDice(DiceType.Electro, 2);
+      :e.fixDice(DiceType.Dendro, 2);
+    }
+    on dealReaction {
+      when :( :e.type === Reaction.Quicken);
+      :selectAndCreateHandCard([
+        ThunderbloomBlessingShatterbolt,
+        ThunderbloomBlessingShatteringThunder,
+      ]);
+      :dispose();
+    }
   }
 }

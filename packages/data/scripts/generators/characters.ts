@@ -169,7 +169,7 @@ export async function generateCharacters() {
   skillType ${TYPE_MAP[sk.type]}${
     TYPE_MAP[sk.type] === "passive"
       ? ` {\n    ${TODO_LINE}  }`
-      : `${getCostCode(sk.playCost)}
+      : `;${getCostCode(sk.playCost)}
   ${TODO_LINE}`
   }
 }`,

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { DiceType, DamageType, $ } from "@gi-tcg/core/builder";
+import { BattlePlan, Shield } from "../../commons.gts";
 
 /**
  * @id 121052
@@ -25,7 +26,12 @@ import { DiceType, DamageType, $ } from "@gi-tcg/core/builder";
 define summon {
   id 121052 as RadiantReflection;
   since "v6.7.0";
-  // TODO
+  variable damageValue, 1;
+  hint DamageType.Cryo, ((st, self) => self.variables.damageValue);
+  on endPhase {
+    usage 1;
+    :damage(DamageType.Cryo, :getVariable("damageValue"));
+  }
 }
 
 /**
@@ -37,7 +43,28 @@ define summon {
 define card {
   id 121051 as RadiantHues;
   since "v6.7.0";
-  // TODO
+  cost DiceType.Cryo, 2;
+  tags action;
+  :combatStatus(Shield, "my", {
+    overrideVariables: {
+      shield: 2,
+    }
+  });
+}
+
+/**
+ * @id 221052
+ * @name 浮彩·冰凌
+ * @description
+ * 打出浮彩时：额外造成1点冰元素伤害。（每层使造成的伤害+1）
+ */
+define combatStatus {
+  id 221052 as RadiantHuesIcicleInEffect;
+  variable damageValue, 1 { append; };
+  on playCard {
+    when :( :e.card.definition.id === RadiantHues )
+    :damage(DamageType.Cryo, :getVariable("damageValue"));
+  } 
 }
 
 /**
@@ -49,7 +76,26 @@ define card {
 define card {
   id 121054 as RadiantHuesIcicle;
   since "v6.7.0";
-  // TODO
+  :combatStatus(RadiantHuesIcicleInEffect);
+}
+
+/**
+ * @id 221053
+ * @name 浮彩·多重
+ * @description
+ * 打出浮彩时：召唤浮彩分身。（每层使召唤的浮彩分身造成的伤害+1）
+ */
+define combatStatus {
+  id 221053 as RadiantHuesEchoesInEffect;
+  variable damageValue, 1 { append; };
+  on playCard {
+    when :( :e.card.definition.id === RadiantHues )
+    :summon(RadiantReflection, "my", {
+      overrideVariables: {
+        damageValue: :getVariable("damageValue"),
+      }
+    });
+  }
 }
 
 /**
@@ -61,7 +107,22 @@ define card {
 define card {
   id 121055 as RadiantHuesEchoes;
   since "v6.7.0";
-  // TODO
+  :combatStatus(RadiantHuesEchoesInEffect);
+}
+
+/**
+ * @id 221054
+ * @name 浮彩·实像
+ * @description
+ * 打出浮彩时：抓1张牌。（每层额外抓1张牌）
+ */
+define combatStatus {
+  id 221054 as RadiantHuesManifestationInEffect;
+  variable drawValue, 1 { append; };
+  on playCard {
+    when :( :e.card.definition.id === RadiantHues )
+    :drawCards(:getVariable("drawValue"));
+  }
 }
 
 /**
@@ -73,7 +134,26 @@ define card {
 define card {
   id 121056 as RadiantHuesManifestation;
   since "v6.7.0";
-  // TODO
+  :combatStatus(RadiantHuesManifestationInEffect);
+}
+
+/**
+ * @id 221055
+ * @name 浮彩·支柱
+ * @description
+ * 打出浮彩时：生成1层护盾。（每层额外生成1层护盾）
+ */
+define combatStatus {
+  id 221055 as RadiantHuesPillarInEffect;
+  variable shieldValue, 1 { append; };
+  on playCard {
+    when :( :e.card.definition.id === RadiantHues )
+    :combatStatus(Shield, "my", {
+      overrideVariables: {
+        shield: :getVariable("shieldValue"),
+      }
+    });
+  }
 }
 
 /**
@@ -85,7 +165,26 @@ define card {
 define card {
   id 121057 as RadiantHuesPillar;
   since "v6.7.0";
-  // TODO
+  :combatStatus(RadiantHuesPillarInEffect);
+}
+
+/**
+ * @id 221056
+ * @name 浮彩·坚冰
+ * @description
+ * 打出浮彩时：使我方出战角色附属1层战斗计划。（每层额外附属1层战斗计划）
+ */
+define combatStatus {
+  id 221056 as RadiantHuesSolidIceInEffect;
+  variable layer, 1 { append; };
+  on playCard {
+    when :( :e.card.definition.id === RadiantHues )
+    :characterStatus(BattlePlan, $.my.active, {
+      overrideVariables: {
+        usage: :getVariable("layer"),
+      }
+    });
+  }
 }
 
 /**
@@ -97,7 +196,22 @@ define card {
 define card {
   id 121058 as RadiantHuesSolidIce;
   since "v6.7.0";
-  // TODO
+  :combatStatus(RadiantHuesSolidIceInEffect);
+}
+
+/**
+ * @id 221057
+ * @name 浮彩·迅影
+ * @description
+ * 打出浮彩少花费1个元素骰。（每层额外少花费1个元素骰）
+ */
+define combatStatus {
+  id 221057 as RadiantHuesSwiftShadowInEffect;
+  variable reductCount, 1 { append; };
+  on deductOmniDiceCard {
+    when :( :e.action.skill.caller.definition.id === RadiantHues );
+    :e.deductOmniCost(:getVariable("reductCount"));
+  }
 }
 
 /**
@@ -109,7 +223,7 @@ define card {
 define card {
   id 121059 as RadiantHuesSwiftShadow;
   since "v6.7.0";
-  // TODO
+  :combatStatus(RadiantHuesSwiftShadowInEffect);
 }
 
 /**
@@ -135,8 +249,7 @@ define skill {
   skillType normal
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
-  // TODO
-
+  :damage(DamageType.Cryo, 1);
 }
 
 /**
@@ -149,8 +262,17 @@ define skill {
   id 21052 as RadianceInFlux;
   skillType elemental
   cost DiceType.Cryo, 3;
-  // TODO
-
+  :damage(DamageType.Cryo, 1);
+  :createPileCards(RadiantHues, 1, "topIndex2");
+  const candidates = :randomSubset([
+    RadiantHuesIcicle,
+    RadiantHuesEchoes,
+    RadiantHuesManifestation,
+    RadiantHuesPillar,
+    RadiantHuesSolidIce,
+    RadiantHuesSwiftShadow,
+  ], 3)
+  :selectAndPlay(candidates);
 }
 
 /**
@@ -164,8 +286,8 @@ define skill {
   skillType burst
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
-  // TODO
-
+  :damage(DamageType.Cryo, 4)
+  :createHandCard(RadiantHues)
 }
 
 /**
@@ -177,7 +299,9 @@ define skill {
 define skill {
   id 21054 as IridescentSilhouette;
   skillType passive {
-    // TODO
+    on battleBegin {
+      :createPileCards(RadiantHues, 3, "spaceAround");
+    }
   }
 }
 
@@ -209,7 +333,18 @@ define card {
   id 221051 as FlowOfForms;
   since "v6.7.0";
   cost DiceType.Cryo, 1;
-  talent WaywardHermeticSpiritspeaker {
-    // TODO
+  talent WaywardHermeticSpiritspeaker, none {
+    on enter {
+      :createHandCard(RadiantHues);
+    }
+    on playCard {
+      when :( :e.card.definition.id === RadiantHues );
+      usage perRound, 1;
+      :combatStatus(Shield, "my", {
+        overrideVariables: {
+          shield: 2,
+        }
+      });
+    }
   }
 }

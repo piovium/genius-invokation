@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, DamageType, $ } from "@gi-tcg/core/builder";
+import { DiceType, DamageType, $, Reaction } from "@gi-tcg/core/builder";import { RES } from "../../commons.gts";
+
 
 /**
  * @id 117121
@@ -25,7 +26,9 @@ import { DiceType, DamageType, $ } from "@gi-tcg/core/builder";
 define card {
   id 117121 as SeedsOfDeceit;
   since "v6.7.0";
-  // TODO
+  tags action;
+  addTarget $.my.active.def(Nefer).exclude($.has.typeStatus.tag("disableSkill"));
+  :useSkill(PhantasmPerformance);
 }
 
 /**
@@ -37,7 +40,14 @@ define card {
 define combatStatus {
   id 117122 as SenetStrategyDanceOfAThousandNightsInEffect;
   since "v6.7.0";
-  // TODO
+  once beforeAction {
+    const candidates = :maxCostHands(3, {
+      filter: (card) => card.definition.id === SeedsOfDeceit
+    });
+    for (const card of candidates) {
+      :attachCostReduction(card);
+    }
+  }
 }
 
 /**
@@ -51,8 +61,7 @@ define skill {
   skillType normal
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
-  // TODO
-
+  :damage(DamageType.Dendro, 1);
 }
 
 /**
@@ -65,8 +74,9 @@ define skill {
   id 17122 as SenetStrategyDanceOfAThousandNights;
   skillType elemental
   cost DiceType.Dendro, 3;
-  // TODO
-
+  :damage(DamageType.Dendro, 1);
+  :characterStatus(RES, :self);
+  :combatStatus(SenetStrategyDanceOfAThousandNightsInEffect);
 }
 
 /**
@@ -80,8 +90,8 @@ define skill {
   skillType burst
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
-  // TODO
-
+  const deceitCount = :queryAll($.my.hand.def(SeedsOfDeceit)).length;
+  :damage(DamageType.Dendro, 4 + Math.min(deceitCount, 2));
 }
 
 /**
@@ -94,7 +104,16 @@ define skill {
 define skill {
   id 17124 as MoonsignBenedictionDusklitEaves;
   skillType passive {
-    // TODO
+    on reaction {
+      when :(
+        !:e.target.isMine() && 
+        :e.type === Reaction.LunarBloom &&
+        :queryAll($.my.hand.def(SeedsOfDeceit)).length < 3
+      );
+      usage perRound, 2 { name usagePerRound1 };
+      listenTo all;
+      :createHandCard(SeedsOfDeceit);
+    }
   }
 }
 
@@ -106,7 +125,7 @@ define skill {
  * 我方手牌中诳言之核少于3张，敌方受到月绽放反应时：生成手牌诳言之核。（每回合2次）
  */
 define skill {
-  id 17125 as MoonsignBenedictionDusklitEaves;
+  id 17125 as MoonsignBenedictionDusklitEaves01;
   skillType passive {
     // TODO
   }
@@ -121,8 +140,9 @@ define skill {
 define skill {
   id 17126 as PhantasmPerformance;
   skillType normal
-  // TODO
-
+  hidden;
+  noEnergy;
+  :damage(DamageType.Dendro, 4);
 }
 
 /**
@@ -137,7 +157,8 @@ define character {
   tags dendro, catalyst, sumeru, nodkrai;
   health 10;
   energy 2;
-  skills StrikingSerpent, SenetStrategyDanceOfAThousandNights, SacredVowTrueEyesPhantasm, MoonsignBenedictionDusklitEaves, MoonsignBenedictionDusklitEaves, PhantasmPerformance;
+  skills StrikingSerpent, SenetStrategyDanceOfAThousandNights, SacredVowTrueEyesPhantasm, MoonsignBenedictionDusklitEaves, PhantasmPerformance;
+  enabledLunarReactions Reaction.LunarBloom;
 }
 
 /**
@@ -153,7 +174,7 @@ define card {
   id 217121 as VictoryFlowsFromTheTurningOfTides;
   since "v6.7.0";
   cost DiceType.Dendro, 3;
-  talent Nefer {
+  talent Nefer, none {
     // TODO
   }
 }
