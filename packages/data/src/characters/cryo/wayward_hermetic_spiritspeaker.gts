@@ -246,7 +246,7 @@ define combatStatus {
  */
 define skill {
   id 21051 as SpiritspeakingFrostStar;
-  skillType normal
+  skillType normal;
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Cryo, 1);
@@ -260,7 +260,7 @@ define skill {
  */
 define skill {
   id 21052 as RadianceInFlux;
-  skillType elemental
+  skillType elemental;
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 1);
   :createPileCards(RadiantHues, 1, "topIndex2");
@@ -283,7 +283,7 @@ define skill {
  */
 define skill {
   id 21053 as ChillingIllustration;
-  skillType burst
+  skillType burst;
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 4)

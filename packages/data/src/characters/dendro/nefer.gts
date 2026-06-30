@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, DamageType, $, Reaction } from "@gi-tcg/core/builder";import { RES } from "../../commons.gts";
-
+import { DiceType, DamageType, $, Reaction } from "@gi-tcg/core/builder";
+import { RES } from "../../commons.gts";
 
 /**
  * @id 117121
@@ -58,7 +58,7 @@ define combatStatus {
  */
 define skill {
   id 17121 as StrikingSerpent;
-  skillType normal
+  skillType normal;
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Dendro, 1);
@@ -72,7 +72,7 @@ define skill {
  */
 define skill {
   id 17122 as SenetStrategyDanceOfAThousandNights;
-  skillType elemental
+  skillType elemental;
   cost DiceType.Dendro, 3;
   :damage(DamageType.Dendro, 1);
   :characterStatus(RES, :self);
@@ -87,7 +87,7 @@ define skill {
  */
 define skill {
   id 17123 as SacredVowTrueEyesPhantasm;
-  skillType burst
+  skillType burst;
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
   const deceitCount = :queryAll($.my.hand.def(SeedsOfDeceit)).length;
@@ -138,7 +138,7 @@ define skill {
  */
 define skill {
   id 17126 as PhantasmPerformance;
-  skillType normal
+  skillType normal;
   hidden;
   noEnergy;
   :damage(DamageType.Dendro, 4);
