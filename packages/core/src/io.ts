@@ -244,6 +244,7 @@ export function exposeMutation(
     case "pushPhaseDamageLog":
     case "pushPhaseReactionLog":
     case "clearPhaseLogs":
+    case "setPrevPhase":
     case "resetVariables":
     case "switchActive": // We will manually handle this
       return null;

@@ -134,6 +134,7 @@ export interface GameState {
   readonly versionBehavior: VersionBehavior;
   readonly iterators: IteratorState;
   readonly phase: PhaseType;
+  readonly prevPhase: PhaseType | null;
   readonly roundNumber: number;
   readonly currentTurn: 0 | 1;
   readonly winner: 0 | 1 | null;

@@ -296,6 +296,7 @@ export class Game {
         id: idIter.id,
       },
       phase: "initHands",
+      prevPhase: null,
       currentTurn: 0,
       roundNumber: 0,
       winner: null,
@@ -403,12 +404,11 @@ export class Game {
       async () => {
         try {
           await this.mutator.notifyAndPause({ force: true, canResume: true });
-          let prevPhase: PhaseType | null = null;
           while (!this._terminated) {
             const currentPhase = this.state.phase;
             const phaseFn = phaseFns[currentPhase];
             const newPhase: PhaseType = await phaseFn
-              .call(this, prevPhase)
+              .call(this, this.state.prevPhase)
               .catch((e) => {
                 if (
                   e instanceof GiTcgError &&
@@ -428,7 +428,7 @@ export class Game {
                 newPhase,
               });
             }
-            prevPhase = currentPhase;
+            this.mutate({ type: "setPrevPhase" });
             this.mutate({ type: "clearRemovedEntities" });
             this.mutate({ type: "clearPhaseLogs" });
             await this.mutator.notifyAndPause({ canResume: true });
@@ -643,8 +643,8 @@ export class Game {
     );
     return "action";
   }
-  private async actionPhase(prevPhase: PhaseType | null): Promise<PhaseType> {
-    if (prevPhase === "roll") {
+  private async actionPhase(_: PhaseType | null): Promise<PhaseType> {
+    if (this.state.prevPhase === "roll") {
       await this.handleEvent("onActionPhase", new EventArg(this.state));
     }
     const who = this.state.currentTurn;

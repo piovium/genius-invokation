@@ -543,6 +543,7 @@ export function setup(state: JSX.Element): TestController {
       id: nextId(),
     },
     phase: stateProp.phase ?? "action",
+    prevPhase: null,
     currentTurn: stateProp.currentTurn === "opp" ? 1 : 0,
     extensions,
     roundNumber: stateProp.roundNumber ?? 1,
