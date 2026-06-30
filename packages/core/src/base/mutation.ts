@@ -232,10 +232,6 @@ export interface ClearRemovedEntitiesM {
   readonly type: "clearRemovedEntities";
 }
 
-export interface SetPrevPhaseM {
-  readonly type: "setPrevPhase";
-}
-
 export type Mutation =
   | StepRandomM
   | StepIdM
@@ -260,7 +256,6 @@ export type Mutation =
   | RemoveRoundSkillLogM
   | ClearRoundLogsM
   | ClearRemovedEntitiesM
-  | SetPrevPhaseM
   | PushPhaseDamageLogM
   | PushPhaseReactionLogM
   | ClearPhaseLogsM;
@@ -292,6 +287,7 @@ function doMutation(state: GameState, m: Mutation): GameState {
     }
     case "changePhase": {
       return produce(state, (draft) => {
+        draft.prevPhase = state.phase;
         draft.phase = m.newPhase;
       });
     }
@@ -567,11 +563,6 @@ function doMutation(state: GameState, m: Mutation): GameState {
           draft.players[who].phaseDamageLog = [];
           draft.players[who].phaseReactionLog = [];
         }
-      });
-    }
-    case "setPrevPhase": {
-      return produce(state, (draft) => {
-        draft.prevPhase = state.phase;
       });
     }
     default: {
