@@ -248,21 +248,28 @@ define attachment {
  * 可用次数：1（可叠加，没有上限）
  * 自身入场或可用次数增加时：赋予敌方随机1张手牌电击。
  */
-export const Thundercloud = summon(205)
-  .defineSnippet("giveOppRandomCardConductive", (c) => {
-    if (c.oppPlayer.hands.length === 0) {
+define summon {
+  id 205 as Thundercloud;
+  hint DamageType.Electro, 2;
+  on endPhase {
+    usage 1 { append };
+    :damage(DamageType.Electro, 2);
+  }
+  defineSnippet giveOppRandomCardConductive, :{
+    if (:oppPlayer.hands.length === 0) {
       return;
     }
-    const targetHand = c.random(c.oppPlayer.hands);
-    c.attach(Conductive, targetHand);
-  })
-  .endPhaseDamage(DamageType.Electro, 2)
-  .usageCanAppend(1, Infinity)
-  .on("enter")
-  .callSnippet("giveOppRandomCardConductive")
-  .on("gainUsage", (c, e) => e.entity.id === c.self.id)
-  .callSnippet("giveOppRandomCardConductive")
-  .done();
+    const targetHand = :random(:oppPlayer.hands);
+    :attach(Conductive, targetHand);
+  }
+  on enter {
+    :callSnippet.giveOppRandomCardConductive();
+  }
+  on gainUsage {
+    when :( :e.entity.id === :self.id );
+    :callSnippet.giveOppRandomCardConductive();
+  }
+}
 
 /**
  * @id 206

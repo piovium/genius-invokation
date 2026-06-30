@@ -17,6 +17,7 @@ type ExtensionBuilderMeta<ExtStateType, Event extends EventNames> = {
   callerVars: never;
   eventArgType: EventArgOf<Event>;
   associatedExtension: ExtensionHandle<ExtStateType>;
+  gtsSnippets: {};
 };
 
 export const EXTENSION_ID_OFFSET = 50_000_000;

@@ -20,16 +20,11 @@ import type {
 } from "../../builder/registry";
 import { type AnyState, type GameState } from "../../base/state";
 import { $, toExpression, type InferResult, type IQuery } from "../../query";
-import type {
-  UsagePerRoundVariableNames,
-  VariableConfig,
-} from "../../base/entity";
+import type { UsagePerRoundVariableNames } from "../../base/entity";
 import { ListenTo, type CustomEvent } from "../../builder";
 import {
   buildTargetGetter,
   detailedEventDictionary,
-  wrapSkillInfoWithExt,
-  type DetailedEventArgOf,
   type DetailedEventNames,
   type InitiativeSkillTargetKind,
   type ReadonlyMetaOf,
@@ -63,20 +58,35 @@ import {
 import { costSize, diceCostSize, normalizeCost } from "../../utils";
 import type {
   CommonSkillType,
-  CustomEventEventArg,
   InitiativeSkillConfig,
   InitiativeSkillDefinition,
   SkillActionFilter,
   SkillDefinition,
   SkillDescription,
   SkillInfo,
+  SkillInfoOfContextConstruction,
   SkillType,
 } from "../../base/skill";
 import type { DiceRequirement, DiceType } from "@gi-tcg/typings";
-import { UsageVM, type GtsUsageOptions, type UsageVMMeta } from "./variables";
+import { UsageVM, type UsageVMMeta } from "./variables";
 import { isCustomEvent } from "../../base/custom_event";
 import { GiTcgDataError } from "../../error";
 import type { Computed } from "../../query/utils";
+import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
+
+export function wrapSkillInfoFromGts(
+  skillInfo: SkillInfo,
+  data: {
+    extId: number | null;
+    snippets: ReadonlyMap<string, (arg: any) => any>;
+  },
+): SkillInfoOfContextConstruction {
+  return {
+    ...skillInfo,
+    associatedExtensionId: data.extId,
+    gtsSnippets: data.snippets,
+  };
+}
 
 type GtsSkillOperation<Meta extends SkillBuilderMetaBase> = (
   c: TypedSkillContext<WritableMetaOf<Meta>>,
@@ -100,8 +110,16 @@ abstract class SkillModel {
   protected filters: GtsSkillOperationFilter<any>[] = [];
   userFilters: GtsSkillOperationFilter<any>[] = [];
 
+  readonly #emptySnippets: ReadonlyMap<string, (arg: any) => any> = new Map();
+  protected get snippets() {
+    return this.#emptySnippets;
+  }
+
   protected buildAction(): SkillDescription<any> {
-    const extId = this.associatedExtensionId;
+    const wrapData = {
+      extId: this.associatedExtensionId,
+      snippets: this.snippets,
+    };
     const operations = [
       ...this.preOperations,
       this.action,
@@ -110,26 +128,30 @@ abstract class SkillModel {
     return function (state: GameState, skillInfo: SkillInfo, arg: any) {
       const context = new SkillContext(
         state,
-        wrapSkillInfoWithExt(skillInfo, extId),
+        wrapSkillInfoFromGts(skillInfo, wrapData),
         arg,
       );
       for (const action of operations) {
-        action(context);
+        action(context as any);
       }
       return context._terminate();
     };
   }
   protected buildFilter(): SkillActionFilter<any> {
-    const extId = this.associatedExtensionId;
+    const wrapData = {
+      extId: this.associatedExtensionId,
+      // disable callSnippet in a filter
+      snippets: this.#emptySnippets,
+    };
     const filters = [...this.filters, ...this.userFilters];
     return function (state: GameState, skillInfo: SkillInfo, arg: any) {
       const context = new SkillContext(
         state,
-        wrapSkillInfoWithExt(skillInfo, extId),
+        wrapSkillInfoFromGts(skillInfo, wrapData),
         arg,
       );
       for (const filter of filters) {
-        if (!filter(context)) {
+        if (!filter(context as any)) {
           return false;
         }
       }
@@ -160,6 +182,10 @@ export class TriggeredSkillModel extends SkillModel {
     super();
     this.caller = caller;
     this.detailedEventName = detailedEventName;
+  }
+
+  override get snippets() {
+    return this.caller.snippets;
   }
 
   setUsage(count: number, option: GtsUsageOrUsagePerRoundOptions): void {
@@ -310,6 +336,7 @@ type TriggeredSkillVMToBuilderMeta<Meta extends TriggeredSkillVMMeta> = {
   associatedExtension: Meta["associatedExtension"];
   callerVars: Meta["variables"];
   eventArgType: Meta["eventArgType"];
+  gtsSnippets: Meta["snippets"];
 };
 type TriggeredSkillOperationOfVM<Meta extends TriggeredSkillVMMeta> =
   GtsSkillOperation<TriggeredSkillVMToBuilderMeta<Meta>>;
@@ -422,13 +449,19 @@ export class InitiativeSkillModel extends SkillModel {
 }
 
 class CharacterSkillModel extends InitiativeSkillModel {
+  reserved = false;
   passiveSkillEntry: CharacterPassiveSkillEntry | null = null;
   override get ownerType() {
     return "character" as const;
   }
 
-  getEntry(): CharacterInitiativeSkillEntry | CharacterPassiveSkillEntry {
-    if (this.passiveSkillEntry) {
+  getEntry():
+    | Reserved
+    | CharacterInitiativeSkillEntry
+    | CharacterPassiveSkillEntry {
+    if (this.reserved) {
+      return RESERVED;
+    } else if (this.passiveSkillEntry) {
       return this.passiveSkillEntry;
     } else {
       return {
@@ -471,6 +504,7 @@ type InitiativeSkillVMToBuilderMeta<Meta extends InitiativeSkillVMMeta> = {
   associatedExtension: Meta["associatedExtension"];
   callerVars: Meta["variables"];
   eventArgType: StrictInitiativeSkillEventArg<Meta["targetTypes"]>;
+  gtsSnippets: Meta["snippets"];
 };
 
 type InitiativeSkillOperationOfVM<Meta extends InitiativeSkillVMMeta> =
@@ -639,12 +673,18 @@ export const CharacterSkillViewModel = InitiativeSkillViewModel
       ): Meta extends { isInitiativeSkill: true }
         ? SkillHandle
         : PassiveSkillHandle;
+      as(this: AR.This<ReservedMeta>): undefined;
     }>(
       (model, [id]) => {
         model.id = id;
       },
       (_, [id]) => id as any,
     ),
+    reserved: h.attribute<{
+      (): AR.DoneRewriteMeta<ReservedMeta>;
+    }>((model, []) => {
+      model.reserved = true;
+    }),
     skillType: h.attribute<{
       <Meta extends CharacterSkillVMMeta>(
         this: AR.This<Meta>,

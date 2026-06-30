@@ -160,6 +160,7 @@ type InitiativeSkillBuilderMeta<
   callerVars: never;
   eventArgType: StrictInitiativeSkillEventArg<KindTs>;
   associatedExtension: AssociatedExt;
+  gtsSnippets: {};
 };
 
 export type CreateSkillBuilderMeta<
@@ -172,6 +173,7 @@ export type CreateSkillBuilderMeta<
   callerVars: Vars;
   eventArgType: EventArgType;
   associatedExtension: AssociatedExt;
+  gtsSnippets: {};
 };
 
 export type StrictInitiativeSkillFilter<
@@ -666,7 +668,11 @@ export function wrapSkillInfoWithExt(
   skillInfo: SkillInfo,
   associatedExtensionId: number | null,
 ): SkillInfoOfContextConstruction {
-  return { ...skillInfo, associatedExtensionId };
+  return {
+    ...skillInfo,
+    associatedExtensionId,
+    gtsSnippets: new Map()
+  };
 }
 
 const SHOULD_EXECUTE_ELSE: unique symbol = Symbol("shouldExecuteElse");
@@ -792,6 +798,7 @@ type EnabledShortcutPropsRaw = EnableShortcutPropsOf<
     callerType: "character";
     callerVars: never;
     shortcutReceiver: {};
+    gtsSnippets: {};
   }>
 >;
 // Temporary migration workaround of GTS:
@@ -1470,6 +1477,7 @@ export class InitiativeSkillBuilder<
   callerVars: never;
   eventArgType: StrictInitiativeSkillEventArg<KindTs>;
   associatedExtension: AssociatedExt;
+  gtsSnippets: {};
 }> {
   private _skillType: SkillType = "normal";
   private _gainEnergy = true;
@@ -1610,6 +1618,7 @@ export class TechniqueBuilder<
   callerVars: Vars;
   eventArgType: StrictInitiativeSkillEventArg<KindTs>;
   associatedExtension: AssociatedExt;
+  gtsSnippets: {};
 }> {
   private _usageOpt: { name: string; autoDecrease: boolean } | null = null;
   private _usagePerRoundOpt: {

@@ -233,9 +233,9 @@ define card {
  * （test）绿皮隐藏
  */
 define combatStatus {
-  id 121053 as Untitled13;
+  id 121053 as private Untitled13;
   since "v6.7.0";
-  // TODO
+  reserved;
 }
 
 /**

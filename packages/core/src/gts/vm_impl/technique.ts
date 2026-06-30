@@ -55,6 +55,7 @@ type TechniqueVMToBuilderMeta<Meta extends TechniqueVMMeta> = {
   callerVars: Meta["variables"];
   associatedExtension: Meta["associatedExtension"];
   eventArgType: never;
+  gtsSnippets: {};
 };
 
 type CharacterQueryResult = {

@@ -56,6 +56,7 @@ type ReactionContextMeta = {
   callerType: any;
   associatedExtension: never;
   shortcutReceiver: unknown;
+  gtsSnippets: {};
 };
 
 type ReactionAction = (

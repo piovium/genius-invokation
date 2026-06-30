@@ -70,6 +70,7 @@ import type { AppliableDamageType } from "../builder/type";
 import type { MoveEntityM, RemoveEntityM } from "./mutation";
 import type { LunarReaction } from "@gi-tcg/typings";
 import type { DamageOption, ReadonlyEventList } from "../mutator";
+import type { SkillContext } from "../builder/internal_exports";
 
 export interface SkillDefinitionBase<Arg> {
   readonly type: "skill";
@@ -219,9 +220,14 @@ export function defineSkillInfo(init: InitSkillInfo): SkillInfo {
 export interface SkillInfoOfContextConstruction extends SkillInfo {
   /**
    * 当访问 setExtensionState 时操作的扩展点 id。
-   * 在传入 SkillContext 时，由 SkillBuilder 指定好。
+   * 在传入 SkillContext 时，由 GTS/SkillBuilder 指定好。
    */
   readonly associatedExtensionId: number | null;
+  /**
+   * 当访问 callSnippet 时查找的 snippet 表。
+   * 
+   */
+  readonly gtsSnippets: ReadonlyMap<string, (arg: SkillContext<any>) => void>;
 }
 
 export interface DamageInfo {

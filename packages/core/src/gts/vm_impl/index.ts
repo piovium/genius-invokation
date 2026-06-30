@@ -23,15 +23,13 @@ import {
   registerInitiativeSkill,
   registerPassiveSkill,
 } from "../../builder/registry";
-import {
-  EntityViewModel,
-  type DefaultEntityVMMeta,
-} from "./entity";
+import { EntityViewModel, type DefaultEntityVMMeta } from "./entity";
 import { AttachmentViewModel } from "./attachment";
 import { ExtensionViewModel } from "./extension";
 import { CharacterSkillViewModel } from "./skill";
 import type { AttachmentDefinition, EntityDefinition } from "../..";
 import { CardViewModel } from "./card";
+import { RESERVED } from "./reserved";
 
 export default defineViewModel(class RootModel {}, (h) => ({
   character: h.attribute<{
@@ -44,7 +42,9 @@ export default defineViewModel(class RootModel {}, (h) => ({
     (): AR.With<typeof CharacterSkillViewModel>;
   }>((_, [], subView) => {
     const skill = CharacterSkillViewModel.parse(subView).getEntry();
-    if (skill.type === "initiativeSkill") {
+    if (skill === RESERVED) {
+      return;
+    } else if (skill.type === "initiativeSkill") {
       registerInitiativeSkill(skill);
     } else {
       registerPassiveSkill(skill);
@@ -54,31 +54,46 @@ export default defineViewModel(class RootModel {}, (h) => ({
     (): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"status">>;
   }>((_, [], subView) => {
     const entityModel = EntityViewModel.parse(subView, "status");
-    registerEntity(entityModel.getEntry() as EntityDefinition);
+    const entry = entityModel.getEntry();
+    if (entry !== RESERVED) {
+      registerEntity(entry as EntityDefinition);
+    }
   }, EntityViewModel.bind<DefaultEntityVMMeta<"status">>("status")),
   combatStatus: h.attribute<{
     (): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"combatStatus">>;
   }>((_, [], subView) => {
     const entityModel = EntityViewModel.parse(subView, "combatStatus");
-    registerEntity(entityModel.getEntry() as EntityDefinition);
+    const entry = entityModel.getEntry();
+    if (entry !== RESERVED) {
+      registerEntity(entry as EntityDefinition);
+    }
   }, EntityViewModel.bind<DefaultEntityVMMeta<"combatStatus">>("combatStatus")),
   summon: h.attribute<{
     (): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"summon">>;
   }>((_, [], subView) => {
     const entityModel = EntityViewModel.parse(subView, "summon");
-    registerEntity(entityModel.getEntry() as EntityDefinition);
+    const entry = entityModel.getEntry();
+    if (entry !== RESERVED) {
+      registerEntity(entry as EntityDefinition);
+    }
   }, EntityViewModel.bind<DefaultEntityVMMeta<"summon">>("summon")),
   card: h.attribute<{
     (): AR.With<typeof CardViewModel>;
   }>((_, [], subView) => {
-    const entity = CardViewModel.parse(subView).getEntry();
-    registerEntity(entity);
+    const cardModel = CardViewModel.parse(subView);
+    const entry = cardModel.getEntry();
+    if (entry !== RESERVED) {
+      registerEntity(entry as EntityDefinition);
+    }
   }, CardViewModel),
   attachment: h.attribute<{
     (): AR.With<typeof AttachmentViewModel>;
   }>((_, [], subView) => {
-    const attachment = AttachmentViewModel.parse(subView).getEntry();
-    registerAttachment(attachment as AttachmentDefinition);
+    const attachmentModel = AttachmentViewModel.parse(subView);
+    const entry = attachmentModel.getEntry();
+    if (entry !== RESERVED) {
+      registerAttachment(entry as AttachmentDefinition);
+    }
   }, AttachmentViewModel),
   extension: h.attribute<{
     (): AR.With<typeof ExtensionViewModel>;

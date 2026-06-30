@@ -114,6 +114,7 @@ import {
   type IQuery,
   type QueryFn,
 } from "../../query";
+import type { NotFunctionPrototype } from "../../query/utils";
 
 type GeneralQueryTargetArg = string | IQuery | QueryFn;
 type CharacterTargetArg =
@@ -182,6 +183,7 @@ export type ContextMetaBase = {
   callerType: ExEntityType;
   associatedExtension: ExtensionHandle;
   shortcutReceiver: unknown;
+  gtsSnippets: Record<string, unknown>;
 };
 
 type ShortcutReturn<
@@ -275,6 +277,19 @@ export class SkillContext<Meta extends ContextMetaBase> {
       Meta,
       Meta["callerType"]
     >;
+    this.callSnippet = new Proxy(
+      (arg: any) => this._callSnippetByName("default", arg),
+      {
+        get: (target, prop) => {
+          if (typeof prop !== "string") {
+            throw new GiTcgDataError(`Invalid snippet name ${String(prop)}`);
+          }
+          return (arg: any) => {
+            this._callSnippetByName(prop, arg);
+          };
+        },
+      },
+    ) as typeof this.callSnippet;
   }
 
   /**
@@ -783,6 +798,34 @@ export class SkillContext<Meta extends ContextMetaBase> {
       throw new GiTcgPreviewAbortedError();
     }
     return this.enableShortcut();
+  }
+
+  /** Call snippet passed in from GTS side */
+  declare callSnippet: {
+    (
+      arg: Meta["gtsSnippets"] extends { default: infer DefaultT }
+        ? DefaultT
+        : never,
+    ): void;
+  } & {
+    [T in keyof Meta["gtsSnippets"]]: (arg: Meta["gtsSnippets"][T]) => void;
+  } & NotFunctionPrototype;
+
+  private _callSnippetByName(name: string, arg: any) {
+    const snippet = this.skillInfo.gtsSnippets.get(name);
+    if (!snippet) {
+      throw new GiTcgDataError(`Snippet ${name} not found`);
+    }
+    const { proxy, revoke } = Proxy.revocable(this, {
+      get(target, prop, receiver) {
+        if (prop === "eventArg") {
+          return arg;
+        }
+        return Reflect.get(target, prop, receiver);
+      },
+    });
+    snippet(proxy);
+    revoke();
   }
 
   switchActive(target: CharacterTargetArg) {

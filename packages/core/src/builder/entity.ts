@@ -706,6 +706,7 @@ export class EntityBuilder<
         associatedExtension: AssociatedExt;
         eventArgType: NoInfer<CustomEventArgT>;
         shortcutReceiver: undefined;
+        gtsSnippets: {};
       }>,
       e: CustomEventArgT,
     ) => void,
@@ -729,6 +730,7 @@ export class EntityBuilder<
         associatedExtension: AssociatedExt;
         eventArgType: NoInfer<CustomEventArgT>;
         shortcutReceiver: undefined;
+        gtsSnippets: {};
       }>,
       e: CustomEventArgT,
     ) => void,

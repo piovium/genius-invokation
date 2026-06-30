@@ -35,3 +35,10 @@ export function createVariableCanAppend(initialValue: number, appendLimit = Infi
     }
   }
 }
+
+export interface TypeHint<T> {
+  _type: T;
+}
+export function typeHint<T>() {
+  return {} as TypeHint<T>;
+}

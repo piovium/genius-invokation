@@ -93,6 +93,7 @@ type DisposeCardBuilderMeta<
   callerVars: CallerVars;
   eventArgType: DisposeEventArg;
   associatedExtension: AssociatedExt;
+  gtsSnippets: {};
 };
 
 type HCICardBuilderMeta<
@@ -103,6 +104,7 @@ type HCICardBuilderMeta<
   callerVars: CallerVars;
   eventArgType: HandCardInsertedEventArg;
   associatedExtension: AssociatedExt;
+  gtsSnippets: {};
 };
 
 export type TargetQuery =
@@ -151,18 +153,21 @@ export interface DoSameWhenDisposedOption<
     callerVars: never;
     eventArgType: DisposeEventArg;
     associatedExtension: AssociatedExt;
+    gtsSnippets: {};
   }>;
   prependOp?: SkillOperation<{
     callerType: "eventCard";
     callerVars: never;
     eventArgType: DisposeEventArg;
     associatedExtension: AssociatedExt;
+    gtsSnippets: {};
   }>;
   appendOp?: SkillOperation<{
     callerType: "eventCard";
     callerVars: never;
     eventArgType: DisposeEventArg;
     associatedExtension: AssociatedExt;
+    gtsSnippets: {};
   }>;
 }
 
@@ -176,6 +181,7 @@ export interface CardOnArbitraryOption<
     callerVars: CallerVars;
     eventArgType: DetailedEventArgOf<E>;
     associatedExtension: AssociatedExt;
+    gtsSnippets: {};
   }>;
   listenTo?: ListenTo;
   enableTriggerInPile?: boolean;
@@ -184,6 +190,7 @@ export interface CardOnArbitraryOption<
     callerVars: CallerVars;
     eventArgType: DetailedEventArgOf<E>;
     associatedExtension: AssociatedExt;
+    gtsSnippets: {};
   }>;
 }
 
@@ -196,6 +203,7 @@ export class CardBuilder<
   callerVars: CallerVars;
   eventArgType: StrictInitiativeSkillEventArg<KindTs>;
   associatedExtension: AssociatedExt;
+  gtsSnippets: {};
 }> {
   private _type: "support" | "equipment" | "eventCard" = "eventCard";
   private _obtainable = true;

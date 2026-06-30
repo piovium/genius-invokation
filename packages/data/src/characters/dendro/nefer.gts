@@ -126,9 +126,8 @@ define skill {
  */
 define skill {
   id 17125 as MoonsignBenedictionDusklitEaves01;
-  skillType passive {
-    // TODO
-  }
+  skillType passive;
+  reserved;
 }
 
 /**
@@ -175,6 +174,21 @@ define card {
   since "v6.7.0";
   cost DiceType.Dendro, 3;
   talent Nefer, none {
-    // TODO
+    defineSnippet attachCostReductionToSeedsOfDeceit, :{
+      const deceitCards = :queryAll($.my.pile.def(SeedsOfDeceit));
+      for (const card of deceitCards) {
+        :attachCostReduction(card);
+      }
+    }
+    on enter {
+      :createPileCards(SeedsOfDeceit, 3, "spaceAround");
+      :callSnippet.attachCostReductionToSeedsOfDeceit();
+    }
+    on skillDamage {
+      when :( :e.via.definition.id === PhantasmPerformance );
+      usage perRound, 2;
+      :drawCards(1);
+      :callSnippet.attachCostReductionToSeedsOfDeceit();
+    }
   }
 }

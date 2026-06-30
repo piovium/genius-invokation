@@ -934,6 +934,21 @@ define card {
   id 321041 as NightmareOmen;
   since "v6.7.0";
   support place {
-    // TODO
+    defineSnippet :{
+      const [oppTarget] = :maxCostHands(1, { who: "opp" });
+      if (oppTarget) {
+        :attachCostIncrease(oppTarget);
+      }
+      const myPileTop = :player.pile[0];
+      if (myPileTop) {
+        :attachCostIncrease(myPileTop);
+      }
+    }
+    on enter {
+      :callSnippet();
+    }
+    on actionPhase {
+      :callSnippet();
+    }
   }
 }
