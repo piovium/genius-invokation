@@ -18,7 +18,12 @@ import {
   getEntityItemDescription,
   getEntityVisibleVarBadges,
 } from "../state/catalog";
-import { getEquipmentInvalidity, getEquipmentType, moveInArray } from "../utils";
+import {
+  getEquipmentInvalidity,
+  getEquipmentType,
+  moveInArray,
+  type EquipmentType,
+} from "../utils";
 import { allocateId, createEntityState } from "../state/factory";
 import { getImageUrl } from "../state/assets";
 import { getCharacter } from "../state/common";
@@ -35,12 +40,11 @@ interface CharacterEntitySectionProps {
   defeated: boolean;
 }
 
-const ENTITY_CATEGORY_LABELS: Record<string, string> = {
+const ENTITY_CATEGORY_LABELS = {
   weapon: "武器",
   artifact: "圣遗物",
-  talent: "天赋",
   technique: "特技",
-};
+} as const satisfies Partial<Record<EquipmentType, string>>;
 
 export function CharacterEntitySection(props: CharacterEntitySectionProps) {
   const { openModal, updateState } = useStateEditorContext();
@@ -48,7 +52,7 @@ export function CharacterEntitySection(props: CharacterEntitySectionProps) {
   const [pendingCategoryReplace, setPendingCategoryReplace] = createSignal<{
     definition: EntityDefinition;
     existingIndex: number;
-    category: string;
+    category: keyof typeof ENTITY_CATEGORY_LABELS;
   } | null>(null);
 
   const [invalidEntityWarning, setInvalidEntityWarning] = createSignal<{
@@ -58,9 +62,18 @@ export function CharacterEntitySection(props: CharacterEntitySectionProps) {
 
   const checkSameCategoryEntity = (
     definition: EntityDefinition,
-  ): { index: number; category: string } | null => {
+  ): {
+    index: number;
+    category: keyof typeof ENTITY_CATEGORY_LABELS;
+  } | null => {
     const category = getEquipmentType(definition);
-    if (category === "other") return null;
+    const isConflict =
+      category === "weapon" ||
+      category === "artifact" ||
+      category === "technique";
+    if (!isConflict) {
+      return null;
+    }
 
     const index = props.character.entities.findIndex(
       (item) => getEquipmentType(item.definition) === category,
