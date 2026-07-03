@@ -26,7 +26,7 @@ export function getEquipmentType(definition: EntityDefinition): EquipmentType {
 export function getEquipmentInvalidity(
   definition: { tags: readonly string[]; id: number },
   characterDefinition: { tags: readonly string[]; id: number },
-): "weapon" | "talent" | null {
+): "weapon" | "talent" | "other" | null {
   const entityWeaponTag = getWeaponTag(definition.tags);
   const characterWeaponTag = getWeaponTag(characterDefinition.tags);
   if (entityWeaponTag && entityWeaponTag !== characterWeaponTag) {
@@ -36,6 +36,13 @@ export function getEquipmentInvalidity(
     const relatedCharacterId = Number(definition.id.toString().slice(1, -1));
     if (characterDefinition.id !== relatedCharacterId) {
       return "talent";
+    }
+  }
+  const idStr = definition.id.toString();
+  if (idStr.length === 6 && idStr[0] === "1") {
+    const relatedCharacterId = Number(idStr.slice(1, -1));
+    if (characterDefinition.id !== relatedCharacterId) {
+      return "other";
     }
   }
   return null;

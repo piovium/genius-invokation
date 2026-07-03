@@ -46,7 +46,9 @@ function canEquipToCharacter(
   return {
     canEquip: !invalidity,
     reason:
-      invalidity === "talent" ? "天赋只能装备给指定角色" : "武器类型不匹配",
+      invalidity === "talent" ? "天赋只能装备给指定角色" :
+      invalidity === "other" ? "该实体不属于当前角色" :
+      "武器类型不匹配",
   };
 }
 
