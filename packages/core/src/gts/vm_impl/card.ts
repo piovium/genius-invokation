@@ -51,6 +51,7 @@ import { $ } from "../../query";
 import {
   InitiativeSkillModel,
   InitiativeSkillViewModel,
+  TriggeredSkillModel,
   TriggeredSkillViewModel,
   type TargetGetter,
 } from "./skill";
@@ -63,6 +64,21 @@ import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 import type { InitiativeSkillEventArg } from "../../base/skill";
 
 const SATIATED_ID = 303300 as StatusHandle;
+
+class OffStageTriggeredSkillModel extends TriggeredSkillModel {
+  enablePileTriggering = false;
+}
+
+const OffStageTriggeredSkillViewModel = TriggeredSkillViewModel.extend(
+  OffStageTriggeredSkillModel,
+  (h) => ({
+    enablePileTriggering: h.simpleAttribute({
+      uniqueKey: "disablePileTriggering",
+    })(function () {
+      this.enablePileTriggering = true;
+    }),
+  }),
+);
 
 class CardModel extends InitiativeSkillModel implements ICaller {
   reserved = false;
@@ -446,20 +462,20 @@ export const CardViewModel = InitiativeSkillViewModel
         this: AR.This<Meta>,
         eventName: Event,
       ): AR.With<
-        typeof TriggeredSkillViewModel,
+        typeof OffStageTriggeredSkillViewModel,
         Omit<Meta, "targetTypes"> & {
           eventArgType: DetailedEventArgOf<Event>;
         }
       >;
     }>((model, [eventName], subView) => {
-      const skillModel = TriggeredSkillViewModel.parse(
+      const skillModel = OffStageTriggeredSkillViewModel.parse(
         subView,
         model,
         eventName,
       );
       skillModel.id = model.getSubId();
       skillModel.enableHandTriggering = true;
-      skillModel.enablePileTriggering = true;
+      skillModel.enablePileTriggering = skillModel.enablePileTriggering;
       const skillDef = skillModel.buildSkillDefinition();
       model.skillList.push(skillDef);
     }),

@@ -91,7 +91,7 @@ define skill {
   id 15031 as DivineMarksmanship;
   skillType normal;
   cost DiceType.Anemo, 1;
-  cost DiceType.Void, 22;
+  cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
 }
 

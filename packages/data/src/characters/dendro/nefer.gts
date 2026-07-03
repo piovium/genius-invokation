@@ -26,7 +26,9 @@ import { RES } from "../../commons.gts";
 define card {
   id 117121 as SeedsOfDeceit;
   since "v6.7.0";
+  cost DiceType.Dendro, 5;
   tags action;
+  undiscoverable;
   addTarget $.my.active.def(Nefer).exclude($.has.typeStatus.tag("disableSkill"));
   :useSkill(PhantasmPerformance);
 }

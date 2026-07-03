@@ -56,7 +56,7 @@ define card {
  * @id 221052
  * @name 浮彩·冰凌
  * @description
- * 打出浮彩时：额外造成1点冰元素伤害。（每层使造成的伤害+1）
+ * 打出浮彩时：造成等于此状态层数点冰元素伤害。
  */
 define combatStatus {
   id 221052 as RadiantHuesIcicleInEffect;
@@ -76,6 +76,7 @@ define combatStatus {
 define card {
   id 121054 as RadiantHuesIcicle;
   since "v6.7.0";
+  undiscoverable;
   :combatStatus(RadiantHuesIcicleInEffect);
 }
 
@@ -83,7 +84,7 @@ define card {
  * @id 221053
  * @name 浮彩·多重
  * @description
- * 打出浮彩时：召唤浮彩分身。（每层使召唤的浮彩分身造成的伤害+1）
+ * 打出浮彩时：召唤浮彩分身。（浮彩分身造成的伤害等于此状态层数）
  */
 define combatStatus {
   id 221053 as RadiantHuesEchoesInEffect;
@@ -107,6 +108,7 @@ define combatStatus {
 define card {
   id 121055 as RadiantHuesEchoes;
   since "v6.7.0";
+  undiscoverable;
   :combatStatus(RadiantHuesEchoesInEffect);
 }
 
@@ -114,7 +116,7 @@ define card {
  * @id 221054
  * @name 浮彩·实像
  * @description
- * 打出浮彩时：抓1张牌。（每层额外抓1张牌）
+ * 打出浮彩时：抓等于此状态层数张牌。
  */
 define combatStatus {
   id 221054 as RadiantHuesManifestationInEffect;
@@ -134,6 +136,7 @@ define combatStatus {
 define card {
   id 121056 as RadiantHuesManifestation;
   since "v6.7.0";
+  undiscoverable;
   :combatStatus(RadiantHuesManifestationInEffect);
 }
 
@@ -141,7 +144,7 @@ define card {
  * @id 221055
  * @name 浮彩·支柱
  * @description
- * 打出浮彩时：生成1层护盾。（每层额外生成1层护盾）
+ * 打出浮彩时：生成等于此状态层数层护盾。
  */
 define combatStatus {
   id 221055 as RadiantHuesPillarInEffect;
@@ -165,6 +168,7 @@ define combatStatus {
 define card {
   id 121057 as RadiantHuesPillar;
   since "v6.7.0";
+  undiscoverable;
   :combatStatus(RadiantHuesPillarInEffect);
 }
 
@@ -172,7 +176,7 @@ define card {
  * @id 221056
  * @name 浮彩·坚冰
  * @description
- * 打出浮彩时：使我方出战角色附属1层战斗计划。（每层额外附属1层战斗计划）
+ * 打出浮彩时：使我方出战角色附属等于此状态层数层战斗计划。
  */
 define combatStatus {
   id 221056 as RadiantHuesSolidIceInEffect;
@@ -196,6 +200,7 @@ define combatStatus {
 define card {
   id 121058 as RadiantHuesSolidIce;
   since "v6.7.0";
+  undiscoverable;
   :combatStatus(RadiantHuesSolidIceInEffect);
 }
 
@@ -203,7 +208,7 @@ define card {
  * @id 221057
  * @name 浮彩·迅影
  * @description
- * 打出浮彩少花费1个元素骰。（每层额外少花费1个元素骰）
+ * 打出浮彩少花费等于此状态层数个元素骰。
  */
 define combatStatus {
   id 221057 as RadiantHuesSwiftShadowInEffect;
@@ -223,6 +228,7 @@ define combatStatus {
 define card {
   id 121059 as RadiantHuesSwiftShadow;
   since "v6.7.0";
+  undiscoverable;
   :combatStatus(RadiantHuesSwiftShadowInEffect);
 }
 

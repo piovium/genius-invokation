@@ -2535,6 +2535,7 @@ define card {
     :attachCostReduction(:self);
   }
   on selfDiscard {
+    enablePileTriggering;
     const target = :random(:queryAll($.my.character.tag("monster")));
     if (target) {
       :increaseMaxHealth(1, target);

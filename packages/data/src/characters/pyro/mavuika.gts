@@ -113,6 +113,7 @@ define card {
   undiscoverable;
   cost DiceType.Void, 3;
   on selfDiscard {
+    enablePileTriggering;
     :damage(DamageType.Pyro, 1);
   }
   technique {

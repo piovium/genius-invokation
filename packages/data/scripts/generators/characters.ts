@@ -117,17 +117,14 @@ function getAuxiliaryOfCharacter(id: number): AuxiliaryFound {
 }
 
 function getTalentCard(id: number, name: string): SourceInfo[] {
-  const card = actionCards.find(
+  const cards = actionCards.filter(
     (c) =>
       c.tags.includes("GCG_TAG_TALENT") && Math.floor(c.id / 10) === 20000 + id,
   );
-  if (!card) {
-    return [];
-  }
-  const { type } = getCardTypeAndTags(card);
-  const methodName = type === "equipment" ? "talent" : "eventTalent";
-  return [
-    {
+  return cards.map((card) => {
+    const { type } = getCardTypeAndTags(card);
+    const methodName = type === "equipment" ? "talent" : "eventTalent";
+    return {
       id: card.id,
       name: card.name,
       description: card.description,
@@ -135,8 +132,8 @@ function getTalentCard(id: number, name: string): SourceInfo[] {
         card,
         `\n  ${methodName} ${identifier(name)} {\n    ${TODO_LINE}  }`,
       ),
-    },
-  ];
+    };
+  });
 }
 
 export async function generateCharacters() {
@@ -147,8 +144,7 @@ export async function generateCharacters() {
       "/" +
       snakeCase(ch.englishName);
 
-    const { items } =
-      getAuxiliaryOfCharacter(ch.id);
+    const { items } = getAuxiliaryOfCharacter(ch.id);
     const initCode = `import { DiceType, DamageType, $ } from "@gi-tcg/core/builder";\n`;
     const skills = ch.skills;
 
