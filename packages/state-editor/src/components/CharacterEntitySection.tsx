@@ -60,7 +60,7 @@ export function CharacterEntitySection(props: CharacterEntitySectionProps) {
     definition: EntityDefinition,
   ): { index: number; category: string } | null => {
     const category = getEquipmentType(definition);
-    if (category === "other") return null;
+    if (category === "other" || category === "talent") return null;
 
     const index = props.character.entities.findIndex(
       (item) => getEquipmentType(item.definition) === category,
