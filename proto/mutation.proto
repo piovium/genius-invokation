@@ -55,6 +55,7 @@ message ExposedMutation {
 
 message ChangePhaseEM {
   PhaseType new_phase = 1;
+  bool has_change = 2;
 }
 
 message StepRoundEM { }

@@ -362,6 +362,7 @@ export function parseMutations(
       }
       case "changePhase": {
         if (
+          mutation.value.hasChange &&
           [PbPhaseType.ROLL, PbPhaseType.ACTION, PbPhaseType.END].includes(
             mutation.value.newPhase,
           )

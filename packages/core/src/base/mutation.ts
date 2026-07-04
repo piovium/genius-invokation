@@ -66,6 +66,7 @@ export interface StepIdM {
 
 export interface ChangePhaseM {
   readonly type: "changePhase";
+  hasChange: boolean;
   readonly newPhase: PhaseType;
 }
 
@@ -288,6 +289,7 @@ function doMutation(state: GameState, m: Mutation): GameState {
     case "changePhase": {
       return produce(state, (draft) => {
         draft.prevPhase = state.phase;
+        m.hasChange = draft.phase !== m.newPhase;
         draft.phase = m.newPhase;
       });
     }
@@ -642,9 +644,9 @@ export function stringifyMutation(m: Mutation): string | null {
       )}`;
     }
     case "removeRoundSkillLog": {
-      return `Remove round skill log of [character:${m.caller.definition.id}] from ${stringifyState(
-        m.caller,
-      )}`;
+      return `Remove round skill log of [character:${
+        m.caller.definition.id
+      }] from ${stringifyState(m.caller)}`;
     }
     case "mutateExtensionState": {
       return `Mutate state of extension ${m.extensionId} to ${JSON.stringify(

@@ -445,6 +445,9 @@ export function updateHistory(
       const m = flattenPbOneof(pbm.mutation!);
       switch (m.$case) {
         case "changePhase": {
+          if (!m.hasChange) {
+            continue;
+          }
           const newPhase = (
             {
               [PbPhaseType.INIT_HANDS]: "initHands",

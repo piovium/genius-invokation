@@ -419,6 +419,7 @@ export class Game {
             }
             this.mutate({
               type: "changePhase",
+              hasChange: this.state.phase !== newPhase,
               newPhase,
             });
             this.mutate({ type: "clearRemovedEntities" });
@@ -453,6 +454,7 @@ export class Game {
     if (this.state.phase !== "gameEnd") {
       this.mutate({
         type: "changePhase",
+        hasChange: true,
         newPhase: "gameEnd",
       });
       if (winner && winner !== this.state.winner) {

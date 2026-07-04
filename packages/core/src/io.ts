@@ -277,6 +277,7 @@ export function exposeMutation(
       const newPhase = exposePhaseType(m.newPhase);
       return {
         $case: "changePhase",
+        hasChange: m.hasChange,
         newPhase,
       };
     case "stepRound":

@@ -402,6 +402,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       );
       this.mutate({
         type: "changePhase",
+        hasChange: true,
         newPhase: "gameEnd",
       });
       this.mutator.notify();
@@ -413,6 +414,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       );
       this.mutate({
         type: "changePhase",
+        hasChange: true,
         newPhase: "gameEnd",
       });
       this.mutate({
