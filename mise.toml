@@ -1,0 +1,10 @@
+[tools]
+buf = "latest"
+cmake = "latest"
+dotnet = "latest"
+ninja = "latest"
+node = "26.1.0"
+pnpm = "11.3.0"
+python = "latest"
+rust = "latest"
+uv = "latest"
