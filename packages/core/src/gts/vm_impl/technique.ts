@@ -42,6 +42,128 @@ import { GiTcgDataError } from "../..";
 import { TechniqueNightsoulVM } from "./entity_auxilary";
 import type { DisposeEventArg } from "../../base/skill";
 
+class TechniqueSkillModel extends InitiativeSkillModel {
+  private caller: TechniqueModel;
+  override get ownerType() {
+    return "equipment" as const;
+  }
+
+  usageOpt: { name: string; autoDecrease: boolean } | null = null;
+  usagePerRoundOpt: {
+    name: UsagePerRoundVariableNames;
+    autoDecrease: boolean;
+  } | null = null;
+
+  constructor(caller: TechniqueModel) {
+    super();
+    this.caller = caller;
+    this.skillType = "technique";
+  }
+
+  setUsage(count: number, option: GtsUsageOrUsagePerRoundOptions) {
+    const perRound = option.perRound ?? false;
+    const autoDecrease = option.autoDecrease ?? true;
+    const name = this.caller.setUsage(count, option);
+    if (perRound) {
+      if (this.usagePerRoundOpt) {
+        throw new GiTcgDataError(
+          "Cannot set usage per round multiple times for the same skill.",
+        );
+      }
+      this.usagePerRoundOpt = {
+        name: name as UsagePerRoundVariableNames,
+        autoDecrease,
+      };
+    } else {
+      if (this.usageOpt) {
+        throw new GiTcgDataError(
+          "Cannot set usage multiple times for the same skill.",
+        );
+      }
+      this.usageOpt = { name, autoDecrease };
+    }
+    this.userFilters.unshift((c) => c.self.getVariable(name) > 0);
+  }
+
+  override buildSkillDefinition() {
+    // 【可用次数自动扣除】
+    if (this.usagePerRoundOpt?.autoDecrease) {
+      this.postOperations.push((c) => {
+        c.consumeUsagePerRound();
+      });
+    }
+    if (this.usageOpt?.autoDecrease) {
+      if (this.usageOpt.name === "usage") {
+        // 若变量名为 usage，则消耗可用次数时可能调用 c.dispose
+        // 使用 consumeUsage 方法实现相关操作
+        this.postOperations.push((c) => {
+          c.consumeUsage();
+        });
+      } else {
+        // 否则手动扣除使用次数
+        const name = this.usageOpt.name;
+        this.postOperations.push((c) => {
+          c.self.addVariable(name, -1);
+        });
+      }
+    }
+    return super.buildSkillDefinition();
+  }
+}
+
+interface TechniqueSkillVMMeta extends InitiativeSkillVMMeta {
+  variables: string;
+}
+const DEFAULT_TECHNIQUE_SKILL_VM_META = {
+  ...DEFAULT_INITIATIVE_SKILL_VM_META,
+  type: "equipment",
+  variables: null as never,
+} as const satisfies TechniqueSkillVMMeta;
+
+export const TechniqueSkillViewModel = InitiativeSkillViewModel
+  //
+  .extend(TechniqueSkillModel, (h) => ({
+    id: h.attribute<{
+      (id: number): AR.Done;
+      required(): true;
+      uniqueKey(): "id";
+      as(): SkillHandle;
+    }>(
+      (model, [id]) => {
+        model.id = id;
+      },
+      (_, [id]) => id as any,
+    ),
+    usage: h.attribute<{
+      <Meta extends TechniqueSkillVMMeta>(
+        this: AR.This<Meta>,
+        count: number,
+      ): AR.With<typeof UsageVM>;
+      <Meta extends TechniqueSkillVMMeta>(
+        this: AR.This<Meta>,
+        perRound: "perRound",
+        count: number,
+      ): AR.With<typeof UsageVM, { name: "usagePerRound" }>;
+      mergeMeta<
+        Meta extends TechniqueSkillVMMeta,
+        InnerMeta extends UsageVMMeta,
+      >(
+        meta: Meta,
+        innerMeta: InnerMeta,
+      ): Omit<Meta, "variables"> & {
+        variables: Meta["variables"] | InnerMeta["name"];
+      };
+    }>((model, positionals, subView) => {
+      const options = UsageVM.parse(subView);
+      if (positionals[0] === "perRound") {
+        model.setUsage(positionals[1], { ...options, perRound: true });
+      } else {
+        model.setUsage(positionals[0], { ...options, perRound: false });
+      }
+    }),
+  }))
+  .bind<typeof DEFAULT_TECHNIQUE_SKILL_VM_META>();
+
 export class TechniqueModel extends EntityModel {
   constructor(id?: number) {
     super("equipment", id);
@@ -146,103 +268,6 @@ export const TechniqueViewModel = EntityViewModel
       const skillModel = TechniqueSkillViewModel.parse(subView, model);
       const skillDef = skillModel.buildSkillDefinition();
       model.skillList.push(skillDef);
-    }),
+    }, TechniqueSkillViewModel.bind(null!)),
   }))
   .bind<TechniqueVMMeta>();
-
-class TechniqueSkillModel extends InitiativeSkillModel {
-  private caller: TechniqueModel;
-  override get ownerType() {
-    return "equipment" as const;
-  }
-
-  usageOpt: { name: string; autoDecrease: boolean } | null = null;
-  usagePerRoundOpt: {
-    name: UsagePerRoundVariableNames;
-    autoDecrease: boolean;
-  } | null = null;
-
-  constructor(caller: TechniqueModel) {
-    super();
-    this.caller = caller;
-    this.skillType = "technique";
-  }
-
-  setUsage(count: number, option: GtsUsageOrUsagePerRoundOptions) {
-    const perRound = option.perRound ?? false;
-    const autoDecrease = option.autoDecrease ?? true;
-    const name = this.caller.setUsage(count, option);
-    if (perRound) {
-      if (this.usagePerRoundOpt) {
-        throw new GiTcgDataError(
-          "Cannot set usage per round multiple times for the same skill.",
-        );
-      }
-      this.usagePerRoundOpt = {
-        name: name as UsagePerRoundVariableNames,
-        autoDecrease,
-      };
-    } else {
-      if (this.usageOpt) {
-        throw new GiTcgDataError(
-          "Cannot set usage multiple times for the same skill.",
-        );
-      }
-      this.usageOpt = { name, autoDecrease };
-    }
-    this.userFilters.unshift((c) => c.self.getVariable(name) > 0);
-  }
-}
-
-interface TechniqueSkillVMMeta extends InitiativeSkillVMMeta {
-  variables: string;
-}
-const DEFAULT_TECHNIQUE_SKILL_VM_META = {
-  ...DEFAULT_INITIATIVE_SKILL_VM_META,
-  type: "equipment",
-  variables: null as never,
-} as const satisfies TechniqueSkillVMMeta;
-
-export const TechniqueSkillViewModel = InitiativeSkillViewModel
-  //
-  .extend(TechniqueSkillModel, (h) => ({
-    id: h.attribute<{
-      (id: number): AR.Done;
-      required(): true;
-      uniqueKey(): "id";
-      as(): SkillHandle;
-    }>(
-      (model, [id]) => {
-        model.id = id;
-      },
-      (_, [id]) => id as any,
-    ),
-    usage: h.attribute<{
-      <Meta extends TechniqueSkillVMMeta>(
-        this: AR.This<Meta>,
-        count: number,
-      ): AR.With<typeof UsageVM>;
-      <Meta extends TechniqueSkillVMMeta>(
-        this: AR.This<Meta>,
-        perRound: "perRound",
-        count: number,
-      ): AR.With<typeof UsageVM, { name: "usagePerRound" }>;
-      mergeMeta<
-        Meta extends TechniqueSkillVMMeta,
-        InnerMeta extends UsageVMMeta,
-      >(
-        meta: Meta,
-        innerMeta: InnerMeta,
-      ): Omit<Meta, "variables"> & {
-        variables: Meta["variables"] | InnerMeta["name"];
-      };
-    }>((model, positionals, subView) => {
-      const options = UsageVM.parse(subView);
-      if (positionals[0] === "perRound") {
-        model.setUsage(positionals[1], { ...options, perRound: true });
-      } else {
-        model.setUsage(positionals[0], { ...options, perRound: false });
-      }
-    }),
-  }))
-  .bind<typeof DEFAULT_TECHNIQUE_SKILL_VM_META>();

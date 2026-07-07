@@ -13,10 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Equipment, Card, $ } from "#test";
-import { LumenstoneAdjuvant } from "@gi-tcg/data/internal/cards/support/item.gts";
+import { ref, setup, Character, State, Card, $ } from "#test";
 import { ScionsOfTheCanopy } from "@gi-tcg/data/internal/cards/support/place.gts";
-import { FlamestriderBlazingTrail, Mavuika, TheNamedMoment } from "@gi-tcg/data/internal/characters/pyro/mavuika.gts";
+import {
+  BlazingTrail,
+  FlamestriderBlazingTrail,
+  Mavuika,
+  TheNamedMoment,
+} from "@gi-tcg/data/internal/characters/pyro/mavuika.gts";
 import { expect, test } from "vitest";
 
 test("mavuika: play 'E' card trigger ScionsOfTheCanopy", async () => {
@@ -38,4 +42,10 @@ test("mavuika: play 'E' card trigger ScionsOfTheCanopy", async () => {
   });
   // 8 - 3(火神E) - 2(涉渡) + 1(悬木人生成) = 4
   expect(c.state.players[0].dice).toBeArrayOfSize(4);
+  // 点涉渡
+  await c.me.skill(BlazingTrail);
+  c.expect($.my.prev).toBeDefinition(Mavuika);
+  c.expect($.my.typeEquipment.def(FlamestriderBlazingTrail)).toHaveVariable({
+    usage: 1,
+  });
 });

@@ -355,7 +355,7 @@ export const CardViewModel = InitiativeSkillViewModel
       model.targetGetters = [techniqueModel.targetGetter];
       model.tags.push("technique");
       model.setEquipmentPlayAction();
-    }),
+    }, TechniqueViewModel),
     talent: h.attribute<{
       <Meta extends CardVMMeta>(
         this: NoTargetSpecifiedThis<Meta>,
