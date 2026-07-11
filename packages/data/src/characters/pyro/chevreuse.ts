@@ -171,7 +171,7 @@ export const Chevreuse = character(1313)
 export const VanguardsCoordinatedTactics = card(213131)
   .costPyro(2)
   .filter((c) => {
-    const elements = new Set(c.$$(`all my characters include defeated`).map((c) => c.element()));
+    const elements = new Set(c.$$(`all my characters include defeated`).map((ch) => ch.element()));
     return elements.size === 2 && elements.has(DiceType.Pyro) && elements.has(DiceType.Electro);
   })
   .talent(Chevreuse, "none")

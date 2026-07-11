@@ -88,7 +88,7 @@ export const DanceOfHaftkarsvar = skill(12082)
   .type("elemental")
   .costHydro(3)
   .do((c) => {
-    const elements = new Set(c.$$(`all my characters include defeated`).map((c) => c.element()));
+    const elements = new Set(c.$$(`all my characters include defeated`).map((ch) => ch.element()));
     if (elements.size === 2 && elements.has(DiceType.Hydro) && elements.has(DiceType.Dendro)) {
       c.combatStatus(GoldenChalicesBounty);
     }

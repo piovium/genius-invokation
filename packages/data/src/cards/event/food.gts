@@ -581,10 +581,10 @@ export const RouletteSpecial = card(333030)
     c.abortPreview();
     const target = e.targets[0];
     const effects = [
-      () => c.heal(2, target),
-      () => c.increaseMaxHealth(1, target),
-      () => c.characterStatus(BattlePlan, target),
-      () => c.characterStatus(SharpenTheBlade, target),
+      () => (c.heal(2, target)),
+      () => (c.increaseMaxHealth(1, target)),
+      () => (c.characterStatus(BattlePlan, target)),
+      () => (c.characterStatus(SharpenTheBlade, target)),
     ];
     for (let i = 0; i < 4; i++) {
       const effect = c.random(effects);
