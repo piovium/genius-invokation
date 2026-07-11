@@ -1,5 +1,5 @@
 import { DamageType, DiceType, card, combatStatus, skill } from "@gi-tcg/core/builder";
-import { BakeKurage, TamakushiCasket } from "../characters/hydro/sangonomiya_kokomi.ts";
+import { BakeKurage, TamakushiCasket } from "../characters/hydro/sangonomiya_kokomi.gts";
 
 /**
  * @id 322002

@@ -1,9 +1,9 @@
 import { DamageType, DiceType, type SkillHandle, card, character, skill, status, summon } from "@gi-tcg/core/builder";
-import { AurousBlaze } from "../characters/pyro/yoimiya.ts";
-import { ThunderbeastsTarge } from "../characters/electro/beidou.ts";
-import { PyronadoStatus } from "../characters/pyro/xiangling.ts";
-import { ClawAndThunder, SteelFang, TheWolfWithin } from "../characters/electro/razor.ts";
-import { FavoniusBladeworkEdel, IcetideVortex, WellspringOfWarlust } from "../characters/cryo/eula.ts";
+import { AurousBlaze } from "../characters/pyro/yoimiya.gts";
+import { ThunderbeastsTarge } from "../characters/electro/beidou.gts";
+import { PyronadoStatus } from "../characters/pyro/xiangling.gts";
+import { ClawAndThunder, SteelFang, TheWolfWithin } from "../characters/electro/razor.gts";
+import { FavoniusBladeworkEdel, IcetideVortex, WellspringOfWarlust } from "../characters/cryo/eula.gts";
 
 /**
  * @id 312004

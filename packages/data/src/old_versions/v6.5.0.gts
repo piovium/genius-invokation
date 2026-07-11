@@ -1,10 +1,10 @@
 import { card, skill, $, character, type SkillHandle, DamageType, DiceType, combatStatus } from "@gi-tcg/core/builder";
-import { DarkgoldWolfbite, DarkgoldWolfbite01, ForcefulFistsOfFrost, IcefangRush } from "../characters/cryo/wriothesley.ts";
-import { DeathsCrossing, SevenphaseFlash, Skirk, Skirk01 } from "../characters/cryo/skirk.ts";
-import { SinOfPride, TenguJuuraiStormcluster } from "../characters/electro/kujou_sara.ts";
-import { StarsGatherAtDusk, WhiteCloudsAtDawn, WordOfWindAndFlower } from "../characters/anemo/xianyun.ts";
+import { DarkgoldWolfbite, DarkgoldWolfbite01, ForcefulFistsOfFrost, IcefangRush } from "../characters/cryo/wriothesley.gts";
+import { DeathsCrossing, SevenphaseFlash, Skirk, Skirk01 } from "../characters/cryo/skirk.gts";
+import { SinOfPride, TenguJuuraiStormcluster } from "../characters/electro/kujou_sara.gts";
+import { StarsGatherAtDusk, WhiteCloudsAtDawn, WordOfWindAndFlower } from "../characters/anemo/xianyun.gts";
 import { status } from "@gi-tcg/core/builder";
-import { Kirara } from "../characters/dendro/kirara.ts";
+import { Kirara } from "../characters/dendro/kirara.gts";
 import { Target } from "../cards/equipment/techniques.gts";
 import { AgileSwitch, EfficientSwitch, IneffectiveWhenPlayed, NoTuningAllowed } from "../commons.gts";
 import { ChenyuBrew } from "../cards/event/food.gts";

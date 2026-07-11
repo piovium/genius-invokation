@@ -1,12 +1,12 @@
 import { card, DamageType, skill, type SkillHandle, summon, type SummonHandle } from "@gi-tcg/core/builder";
-import { ScopeOutSoftSpots } from "../characters/cryo/rosaria.ts";
-import { TamakushiCasket } from "../characters/hydro/sangonomiya_kokomi.ts";
-import { SesshouSakura } from "../characters/electro/yae_miko.ts";
-import { LandsOfDandelion } from "../characters/anemo/jean.ts";
-import { SoaringOnTheWind } from "../characters/anemo/xianyun.ts";
-import { MirrorCage, Refraction, Refraction01 } from "../characters/hydro/mirror_maiden.ts";
-import { RipplingBladesStatus } from "../characters/hydro/abyss_herald_wicked_torrents.ts";
-import { GyoeiNarukamiKariyamaRite, KukiShinobu } from "../characters/electro/kuki_shinobu.ts";
+import { ScopeOutSoftSpots } from "../characters/cryo/rosaria.gts";
+import { TamakushiCasket } from "../characters/hydro/sangonomiya_kokomi.gts";
+import { SesshouSakura } from "../characters/electro/yae_miko.gts";
+import { LandsOfDandelion } from "../characters/anemo/jean.gts";
+import { SoaringOnTheWind } from "../characters/anemo/xianyun.gts";
+import { MirrorCage, Refraction, Refraction01 } from "../characters/hydro/mirror_maiden.gts";
+import { RipplingBladesStatus } from "../characters/hydro/abyss_herald_wicked_torrents.gts";
+import { GyoeiNarukamiKariyamaRite, KukiShinobu } from "../characters/electro/kuki_shinobu.gts";
 
 /**
  * @id 22022
