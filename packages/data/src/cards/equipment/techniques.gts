@@ -117,19 +117,24 @@ define status {
  * （角色最多装备1个「特技」）
  * [3130041: 掘进突击] (2*Void) 抓2张牌。然后，如果手牌中存在名称不存在于本局最初牌组中的牌，则提供2点护盾保护所附属角色。
  */
-export const Tepetlisaurus = card(313004)
-  .since("v5.1.0")
-  .costSame(2)
-  .technique()
-  .provideSkill(3130041)
-  .usage(2)
-  .costVoid(2)
-  .drawCards(2)
-  .if((c) => {
-    return c.player.hands.some((card) => !c.isInInitialPile(card));
-  })
-  .characterStatus(DiggingDownToPaydirt, "@master")
-  .done();
+define card {
+  id 313004 as Tepetlisaurus;
+  since "v5.1.0";
+  cost DiceType.Aligned, 2;
+  technique {
+    skill {
+      id 3130041;
+      usage 2;
+      cost DiceType.Void, 2;
+      :drawCards(2);
+      if ((() => {
+        return :player.hands.some((card) => !:isInInitialPile(card));
+      })()) {
+        :characterStatus(DiggingDownToPaydirt, "@master");
+      }
+    }
+  }
+}
 
 /**
  * @id 313005

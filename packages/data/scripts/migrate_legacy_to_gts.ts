@@ -1505,17 +1505,6 @@ function convertFunction(fn: ts.Expression): {
   const contextParam = params[0] ?? null;
   const eventParam = params[1] ?? null;
 
-  if (hasNestedFunctionReference(unwrapped, contextParam, eventParam)) {
-    throw new ConversionError(
-      "nested function references context/event parameter",
-    );
-  }
-  if (hasReservedVariableCall(unwrapped)) {
-    throw new ConversionError(
-      "function contains variable operation with reserved variable name",
-    );
-  }
-
   if (ts.isBlock(unwrapped.body)) {
     const code = blockBodyText(unwrapped.body);
     return {
@@ -1537,33 +1526,6 @@ function convertFunction(fn: ts.Expression): {
   };
 }
 
-function hasReservedVariableCall(
-  fn: ts.ArrowFunction | ts.FunctionExpression,
-): boolean {
-  let result = false;
-  function visit(node: ts.Node) {
-    if (result) return;
-    if (ts.isCallExpression(node)) {
-      const callee = unwrapExpression(node.expression);
-      if (ts.isPropertyAccessExpression(callee)) {
-        const methodName = callee.name.text;
-        if (
-          (methodName === "addVariable" ||
-            methodName === "setVariable" ||
-            methodName === "getVariable") &&
-          node.arguments.length > 0 &&
-          isReservedVariableName(node.arguments[0]!)
-        ) {
-          result = true;
-          return;
-        }
-      }
-    }
-    ts.forEachChild(node, visit);
-  }
-  visit(fn);
-  return result;
-}
 
 function isFunctionExpression(expr: ts.Expression): boolean {
   const unwrapped = unwrapExpression(expr);

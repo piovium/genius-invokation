@@ -108,22 +108,29 @@ define card {
  * 角色使用「元素战技」后：如果我方存在提供「护盾」的出战状态，则为一个此类出战状态补充1点「护盾」。（每回合1次）
  * （「长柄武器」角色才能装备。角色最多装备1件「武器」）
  */
-export const VortexVanquisher = card(311404)
-  .since("v3.7.0")
-  .costSame(3)
-  .weapon("pole")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .on("increaseSkillDamage", (c, e) => {
-    return !!c.$("(my combat statuses with tag (shield)) or status with tag (shield) at @master");
-  })
-  .increaseDamage(1)
-  .on("useSkill", (c, e) => e.isSkillType("elemental") && c.$("my combat status with tag (shield)"))
-  .usagePerRound(1)
-  .do((c) => {
-    c.$("my combat status with tag (shield)")?.addVariable("shield", 1)
-  })
-  .done();
+define card {
+  id 311404 as VortexVanquisher;
+  since "v3.7.0";
+  cost DiceType.Aligned, 3;
+  weapon pole {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+    on increaseSkillDamage {
+      when :{
+        return !!:$("(my combat statuses with tag (shield)) or status with tag (shield) at @master");
+      };
+      :e.increaseDamage(1);
+    }
+    on useSkill {
+      when :(:e.isSkillType("elemental") && :$("my combat status with tag (shield)"));
+      usage perRound, 1 {
+        visible false;
+      };
+      :$("my combat status with tag (shield)")?.addVariable("shield", 1)
+    }
+  }
+}
 
 /**
  * @id 311405

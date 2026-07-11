@@ -113,19 +113,22 @@ define combatStatus {
  * 所附属角色受到治疗时：此效果每有1次可用次数，就消耗1次，以抵消1点所受到的治疗。（无法抵消复苏或分配生命值引发的治疗）
  * 可用次数：1（可叠加，没有上限）。
  */
-export const BondOfLife = status(122)
-  .tags("bondOfLife")
-  .on("decreaseHealed", (c, e) => e.healInfo.healKind !== "distribution")
-  .usage(1, {
-    append: { limit: Infinity },
-    autoDecrease: false,
-  })
-  .do((c, e) => {
-    const deducted = Math.min(c.getVariable("usage"), e.expectedValue);
-    e.decreaseHeal(deducted);
-    c.consumeUsage(deducted);
-  })
-  .done();
+define status {
+  id 122 as BondOfLife;
+  tags bondOfLife;
+  on decreaseHealed {
+    when :(:e.healInfo.healKind !== "distribution");
+    usage 1 {
+      append {
+      limit Infinity;
+    };
+      autoDecrease false;
+    };
+    const deducted = Math.min(:getVariable("usage"), :e.expectedValue);
+    :e.decreaseHeal(deducted);
+    :consumeUsage(deducted);
+  }
+}
 
 /**
  * @id 169

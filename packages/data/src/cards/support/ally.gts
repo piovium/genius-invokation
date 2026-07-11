@@ -692,15 +692,19 @@ define card {
  * 结束阶段：生成1张「清洁工作」，随机将其置入我方牌库顶部5张牌之中。如果此牌的可用次数仅剩余1，则抓1张牌。
  * 可用次数：2
  */
-export const TheWhiteGloveAndTheFisherman = card(322025)
-  .since("v4.6.0")
-  .support("ally")
-  .on("endPhase")
-  .usage(2)
-  .createPileCards(CalledInForCleanup, 1, `topRange5`)
-  .if((c) => c.getVariable("usage") === 1)
-  .drawCards(1)
-  .done();
+define card {
+  id 322025 as TheWhiteGloveAndTheFisherman;
+  since "v4.6.0";
+  support ally {
+    on endPhase {
+      usage 2;
+      :createPileCards(CalledInForCleanup, 1, "topRange5");
+      if (:getVariable("usage") === 1) {
+        :drawCards(1);
+      }
+    }
+  }
+}
 
 /**
  * @id 322026

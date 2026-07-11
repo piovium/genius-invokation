@@ -2428,13 +2428,14 @@ define card {
  * @description
  * 下个回合结束时，双方出战角色生命值变为5。
  */
-export const PlanToSaveTheWorldInEffect = combatStatus(303247)
-  .duration(2)
-  .on("endPhase", (c, e) => c.getVariable("duration") === 1)
-  .do((c) => {
-    const actives = c.$$(`all active characters`);
+define combatStatus {
+  id 303247 as PlanToSaveTheWorldInEffect;
+  duration 2;
+  on endPhase {
+    when :(:getVariable("duration") === 1);
+    const actives = :$$(`all active characters`);
     for (const ch of actives) {
-      c.mutate({
+      :mutate({
         type: "modifyEntityVar",
         state: ch.latest(),
         varName: "health",
@@ -2442,8 +2443,8 @@ export const PlanToSaveTheWorldInEffect = combatStatus(303247)
         direction: ch.health > 5 ? "decrease" : "increase",
       });
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 332058
@@ -2504,19 +2505,18 @@ export const AnAdventureThroughTheMorningMist = card(332059)
  * @description
  * 生成1张随机「道具」牌，赋予我方当前元素骰费用最高的2张手牌赋能。
  */
-export const GeniussUpgradeTechnique = card(332060)
-  .since("v6.4.0")
-  .do((c) => {
-    const itemCards = c.allCardDefinitions("item");
-    c.createHandCard(c.random(itemCards).id as CardHandle);
-    const hands = c.maxCostHands(2, {
-      filter: (card) => !c.get(card).empowered(),
-    });
-    for (const card of hands) {
-      c.attach(Empowerment, card);
-    }
-  })
-  .done();
+define card {
+  id 332060 as GeniussUpgradeTechnique;
+  since "v6.4.0";
+  const itemCards = :allCardDefinitions("item");
+  :createHandCard(:random(itemCards).id as CardHandle);
+  const hands = :maxCostHands(2, {
+    filter: (card) => !:get(card).empowered(),
+  });
+  for (const card of hands) {
+    :attach(Empowerment, card);
+  }
+}
 
 /**
  * @id 332061

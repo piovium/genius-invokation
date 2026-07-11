@@ -289,35 +289,33 @@ export const FlamesOfWarExtension = extension(300006, {
    * 此牌会记录本回合你对敌方角色造成的伤害，记为「斗志」。
    * 行动阶段开始时：若此牌是场上「斗志」最高的斗争之火，则清空此牌的「斗志」，使我方出战角色本回合造成的伤害+1。
    */
-  export const FlamesOfWar = card(300006)
-    .undiscoverable()
-    .support()
-    .variable("spirit", 0)
-    .associateExtension(FlamesOfWarExtension)
-    .on("enter")
-    .do((c) => {
-      c.setExtensionState((st) => {
-        st.spirit[c.self.who] = c.getVariable("spirit");
+  define card {
+  id 300006 as FlamesOfWar;
+  undiscoverable;
+  support {
+    variable spirit, 0;
+    associateExtension FlamesOfWarExtension;
+    on enter {
+      :setExtensionState((st) => {
+        st.spirit[:self.who] = :getVariable("spirit");
       });
-    })
-    .on("dealDamage")
-    .do((c) => {
-      c.setVariable("spirit", c.getExtensionState().spirit[c.self.who]);
-    })
-    .on("actionPhase")
-    .do((c) => {
-      c.setVariable("spirit", c.getExtensionState().spirit[c.self.who]);
-      if (c.getExtensionState().win[c.self.who]) {
-        c.characterStatus(FlamesOfWarInEffect, "my active");
+    }
+    on dealDamage {
+      :setVariable("spirit", :getExtensionState().spirit[:self.who]);
+    }
+    on actionPhase {
+      :setVariable("spirit", :getExtensionState().spirit[:self.who]);
+      if (:getExtensionState().win[:self.who]) {
+        :characterStatus(FlamesOfWarInEffect, "my active");
       }
-    })
-    .on("selfDispose")
-    .do((c) => {
-      c.setExtensionState((st) => {
-        st.spirit[c.self.who] = 0;
+    }
+    on selfDispose {
+      :setExtensionState((st) => {
+        st.spirit[:self.who] = 0;
       });
-    })
-    .done();
+    }
+  }
+}
 
 /**
  * @id 330010

@@ -26,38 +26,55 @@ import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other.gts";
  * 冒险经历达到4时：我方获得3层高效切换和敏捷切换。
  * 冒险经历达到8时：我方全体角色附着水元素，治疗我方受伤最多的角色10点，并使其获得2点最大生命值，然后弃置此牌。
  */
-export const ChenyuVale = card(321032)
-  .since("v6.1.0")
-  .adventureSpot()
-  .on("adventure", (c) => c.getVariable("exp") >= 2)
-  .usage(1, { name: "stage1", visible: false })
-  .createHandCard(ChenyuBrew)
-  .createHandCard(ChenyuBrew)
-  .on("adventure", (c) => c.getVariable("exp") >= 4)
-  .usage(1, { name: "stage2", visible: false })
-  .combatStatus(EfficientSwitch, "my", {
-    overrideVariables: {
-      usage: 3
+define card {
+  id 321032 as ChenyuVale;
+  since "v6.1.0";
+  undiscoverable;
+  support place {
+    adventureSpot;
+    on adventure {
+      when :(:getVariable("exp") >= 2);
+      usage 1 {
+        name "stage1";
+        visible false;
+      };
+      :createHandCard(ChenyuBrew);
+      :createHandCard(ChenyuBrew);
     }
-  })
-  .combatStatus(AgileSwitch, "my", {
-    overrideVariables: {
-      usage: 3
+    on adventure {
+      when :(:getVariable("exp") >= 4);
+      usage 1 {
+        name "stage2";
+        visible false;
+      };
+      :combatStatus(EfficientSwitch, "my", {
+          overrideVariables: {
+            usage: 3
+          }
+        });
+      :combatStatus(AgileSwitch, "my", {
+          overrideVariables: {
+            usage: 3
+          }
+        });
     }
-  })
-  .on("adventure", (c) => c.getVariable("exp") >= 8)
-  .usage(1, { name: "stage3", visible: false })
-  .apply(DamageType.Hydro, "all my characters")
-  .do((c) => {
-    const targetCh = c.query($.macros.myMostInjured);
-    if (!targetCh) {
-      return;
+    on adventure {
+      when :(:getVariable("exp") >= 8);
+      usage 1 {
+        name "stage3";
+        visible false;
+      };
+      :apply(DamageType.Hydro, "all my characters");
+      const targetCh = :query($.macros.myMostInjured);
+      if (!targetCh) {
+        return;
+      }
+      :increaseMaxHealth(2, targetCh);
+      :heal(10, targetCh);
+      :finishAdventure();
     }
-    c.increaseMaxHealth(2, targetCh);
-    c.heal(10, targetCh);
-    c.finishAdventure();
-  })
-  .done();
+  }
+}
 
 /**
  * @id 321033
@@ -68,21 +85,39 @@ export const ChenyuVale = card(321032)
  * 冒险经历达到5时：生成手牌木质玩具剑。
  * 冒险经历达到12时：生成手牌重铸圣剑，然后弃置此牌。
  */
-export const TowerOfIpsissimus = card(321033)
-  .since("v6.2.0")
-  .adventureSpot()
-  .on("enter", (c, e) => !e.overridden)
-  .damage(DamageType.Piercing, 1, "all my characters")
-  .on("adventure", (c) => c.getVariable("exp") % 2 === 0)
-  .generateDice("randomElement", 1)
-  .on("adventure", (c) => c.getVariable("exp") >= 5)
-  .usage(1, { name: "stage5", visible: false })
-  .createHandCard(WoodenToySword)
-  .on("adventure", (c) => c.getVariable("exp") >= 12)
-  .usage(1, { name: "stage12", visible: false })
-  .createHandCard(ReforgeTheHolyBlade)
-  .finishAdventure()
-  .done();
+define card {
+  id 321033 as TowerOfIpsissimus;
+  since "v6.2.0";
+  undiscoverable;
+  support place {
+    adventureSpot;
+    on enter {
+      when :(!:e.overridden);
+      :damage(DamageType.Piercing, 1, "all my characters");
+    }
+    on adventure {
+      when :(:getVariable("exp") % 2 === 0);
+      :generateDice("randomElement", 1);
+    }
+    on adventure {
+      when :(:getVariable("exp") >= 5);
+      usage 1 {
+        name "stage5";
+        visible false;
+      };
+      :createHandCard(WoodenToySword);
+    }
+    on adventure {
+      when :(:getVariable("exp") >= 12);
+      usage 1 {
+        name "stage12";
+        visible false;
+      };
+      :createHandCard(ReforgeTheHolyBlade);
+      :finishAdventure();
+    }
+  }
+}
 
 /**
  * @id 301041
@@ -118,31 +153,49 @@ define summon {
  * 冒险经历达到4时：我方出战角色附属2层战斗计划。
  * 冒险经历达到6时：弃置敌方场上1个随机召唤物，召唤回天的圣主，然后弃置此牌。
  */
-export const Tonatiuh = card(321034)
-  .since("v6.3.0")
-  .adventureSpot()
-  .on("adventure")
-  .convertDice(DiceType.Omni, 1)
-  .on("adventure", (c) => c.getVariable("exp") >= 2)
-  .usage(1, { name: "stage1", visible: false })
-  .drawCards(2)
-  .on("adventure", (c) => c.getVariable("exp") >= 4)
-  .usage(1, { name: "stage2", visible: false })
-  .characterStatus(BattlePlan, "my active", {
-    overrideVariables: { usage: 2 }
-  })
-  .on("adventure", (c) => c.getVariable("exp") >= 6)
-  .usage(1, { name: "stage3", visible: false })
-  .do((c) => {
-    const summons = c.$$("opp summons");
-    if (summons.length > 0) {
-      const summon = c.random(summons);
-      c.dispose(summon);
+define card {
+  id 321034 as Tonatiuh;
+  since "v6.3.0";
+  undiscoverable;
+  support place {
+    adventureSpot;
+    on adventure {
+      :convertDice(DiceType.Omni, 1);
     }
-    c.summon(TideTurningSacredLord);
-    c.finishAdventure();
-  })
-  .done();
+    on adventure {
+      when :(:getVariable("exp") >= 2);
+      usage 1 {
+        name "stage1";
+        visible false;
+      };
+      :drawCards(2);
+    }
+    on adventure {
+      when :(:getVariable("exp") >= 4);
+      usage 1 {
+        name "stage2";
+        visible false;
+      };
+      :characterStatus(BattlePlan, "my active", {
+          overrideVariables: { usage: 2 }
+        });
+    }
+    on adventure {
+      when :(:getVariable("exp") >= 6);
+      usage 1 {
+        name "stage3";
+        visible false;
+      };
+      const summons = :$$("opp summons");
+      if (summons.length > 0) {
+        const summon = :random(summons);
+        :dispose(summon);
+      }
+      :summon(TideTurningSacredLord);
+      :finishAdventure();
+    }
+  }
+}
 
 /**
  * @id 301042

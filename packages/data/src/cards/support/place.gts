@@ -635,34 +635,34 @@ define card {
  * 敌方打出名称不存在于本局最初牌组的牌时：此牌扣除1点「瞩目」。
  * 行动阶段开始时：如果此牌有至少3点「瞩目」，则生成1个随机基础元素骰；如果此牌有至少1点「瞩目」，将1个元素骰转换为万能元素。
  */
-export const StageTepetl = card(321023)
-  .since("v5.1.0")
-  .support("place")
-  .variable("attention", 0)
-  .on("playCard")
-  .listenToAll()
-  .do((c, e) => {
-    const isMine = e.who === c.self.who;
-    const player = isMine ? c.player : c.oppPlayer;
-    if (!player.initialPile.some((card) => card.id === e.card.definition.id)) {
-      if (isMine) {
-        c.addVariable("attention", 1);
-      } else if (c.getVariable("attention") > 0) {
-        c.addVariable("attention", -1);
+define card {
+  id 321023 as StageTepetl;
+  since "v5.1.0";
+  support place {
+    variable attention, 0;
+    on playCard {
+      listenTo all;
+      const isMine = :e.who === :self.who;
+      const player = isMine ? :player : :oppPlayer;
+      if (!player.initialPile.some((card) => card.id === :e.card.definition.id)) {
+        if (isMine) {
+          :addVariable("attention", 1);
+        } else if (:getVariable("attention") > 0) {
+          :addVariable("attention", -1);
+        }
       }
     }
-  })
-  .on("actionPhase")
-  .do((c) => {
-    const attention = c.getVariable("attention");
-    if (attention >= 3) {
-      c.generateDice("randomElement", 1);
+    on actionPhase {
+      const attention = :getVariable("attention");
+      if (attention >= 3) {
+        :generateDice("randomElement", 1);
+      }
+      if (attention >= 1) {
+        :convertDice(DiceType.Omni, 1);
+      }
     }
-    if (attention >= 1) {
-      c.convertDice(DiceType.Omni, 1);
-    }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 321024
@@ -690,17 +690,19 @@ define card {
  * 我方「召唤物」入场时：使其可用次数+1。
  * 可用次数：3
  */
-export const PeopleOfTheSprings = card(321025)
-  .since("v5.3.0")
-  .costSame(2)
-  .support("place")
-  .on("enterRelative", (c, e) => e.entity.definition.type === "summon")
-  .usage(3)
-  .do((c, e) => {
-    const target = c.$(`my summons with id ${e.entity.id}`);
-    target?.addVariable("usage", 1);
-  })
-  .done();
+define card {
+  id 321025 as PeopleOfTheSprings;
+  since "v5.3.0";
+  cost DiceType.Aligned, 2;
+  support place {
+    on enterRelative {
+      when :(:e.entity.definition.type === "summon");
+      usage 3;
+      const target = :$(`my summons with id ${e.entity.id}`);
+      target?.addVariable("usage", 1);
+    }
+  }
+}
 
 /**
  * @id 301024
@@ -907,16 +909,23 @@ define card {
  * 结束阶段：冒险1次。
  * 可用次数：3
  */
-export const AdventurersGuild = card(321031)
-  .since("v6.1.0")
-  .costSame(2)
-  .support("place")
-  .on("endPhase")
-  .usage(3, { autoDispose: false })
-  .adventure()
-  .on("adventure", (c) => c.getVariable("usage") === 0)
-  .dispose()
-  .done();
+define card {
+  id 321031 as AdventurersGuild;
+  since "v6.1.0";
+  cost DiceType.Aligned, 2;
+  support place {
+    on endPhase {
+      usage 3 {
+        autoDispose false;
+      };
+      :adventure();
+    }
+    on adventure {
+      when :(:getVariable("usage") === 0);
+      :dispose();
+    }
+  }
+}
 
 /**
  * @id 321035
@@ -998,24 +1007,27 @@ define card {
  * 可用次数：2
  * 此卡牌被弃置时：如果可用次数为0，造成2点物理伤害。
  */
-export const NashaTown = card(321038)
-  .since("v6.4.0")
-  .costSame(1)
-  .support("place")
-  .on("endPhase")
-  .usage(2)
-  .do((c) => {
-    const candidates = c.player.hands.filter(
-      (card) => card.diceCost() >= 2 && !card.empowered()
-    );
-    const chosen = c.randomSubset(candidates, 2);
-    for (const card of chosen) {
-      c.attach(Empowerment, card);
+define card {
+  id 321038 as NashaTown;
+  since "v6.4.0";
+  cost DiceType.Aligned, 1;
+  support place {
+    on endPhase {
+      usage 2;
+      const candidates = :player.hands.filter(
+        (card) => card.diceCost() >= 2 && !card.empowered()
+      );
+      const chosen = :randomSubset(candidates, 2);
+      for (const card of chosen) {
+        :attach(Empowerment, card);
+      }
     }
-  })
-  .on("selfDispose", (c, e) => c.getVariable("usage") === 0)
-  .damage(DamageType.Physical, 2)
-  .done();
+    on selfDispose {
+      when :(:getVariable("usage") === 0);
+      :damage(DamageType.Physical, 2);
+    }
+  }
+}
 
 /**
  * @id 321039

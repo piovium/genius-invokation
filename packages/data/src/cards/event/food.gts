@@ -590,25 +590,24 @@ export const [ChenyuBrew] = card(333029)
  * 目标角色下次造成的伤害+1。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const RouletteSpecial = card(333030)
-  .since("v6.6.0")
-  .costSame(4)
-  .food()
-  .do((c, e) => {
-    c.abortPreview();
-    const target = e.targets[0];
-    const effects = [
-      () => c.heal(2, target),
-      () => c.increaseMaxHealth(1, target),
-      () => c.characterStatus(BattlePlan, target),
-      () => c.characterStatus(SharpenTheBlade, target),
-    ];
-    for (let i = 0; i < 4; i++) {
-      const effect = c.random(effects);
-      effect();
-    }
-  })
-  .done();
+define card {
+  id 333030 as RouletteSpecial;
+  since "v6.6.0";
+  cost DiceType.Aligned, 4;
+  food;
+  :abortPreview();
+  const target = :e.targets[0];
+  const effects = [
+    () => :heal(2, target),
+    () => :increaseMaxHealth(1, target),
+    () => :characterStatus(BattlePlan, target),
+    () => :characterStatus(SharpenTheBlade, target),
+  ];
+  for (let i = 0; i < 4; i++) {
+    const effect = :random(effects);
+    effect();
+  }
+}
 
 /**
  * @id 303324
