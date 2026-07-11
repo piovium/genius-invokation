@@ -24,17 +24,14 @@ import { BattlePlan, CostReduction, Empowerment, IneffectiveWhenPlayed, NoTuning
  * 结束阶段：抓2张牌。
  * 可用次数：2
  */
-define card {
-  id 321001 as LiyueHarborWharf;
-  since "v3.3.0";
-  cost DiceType.Aligned, 2;
-  support place {
-    on endPhase {
-      usage 2;
-      :drawCards(2);
-    }
-  }
-}
+export const LiyueHarborWharf = card(321001)
+  .since("v3.3.0")
+  .costSame(2)
+  .support("place")
+  .on("endPhase")
+  .usage(2)
+  .drawCards(2)
+  .done();
 
 /**
  * @id 321002
@@ -43,18 +40,14 @@ define card {
  * 入场时：选择任意元素骰重投。
  * 投掷阶段：获得额外一次重投机会。
  */
-define card {
-  id 321002 as KnightsOfFavoniusLibrary;
-  since "v3.3.0";
-  support place {
-    on enter {
-      :rerollDice(1);
-    }
-    on roll {
-      :e.addRerollCount(1);
-    }
-  }
-}
+export const KnightsOfFavoniusLibrary = card(321002)
+  .since("v3.3.0")
+  .support("place")
+  .on("enter")
+  .rerollDice(1)
+  .on("roll")
+  .addRerollCount(1)
+  .done();
 
 /**
  * @id 321003
@@ -63,20 +56,17 @@ define card {
  * 投掷阶段：2个元素骰初始总是投出我方出战角色类型的元素。
  * 行动阶段开始时：如果我方手牌数量不多于3，则弃置此牌，生成1个万能元素。
  */
-define card {
-  id 321003 as JadeChamber;
-  since "v3.3.0";
-  support place {
-    on roll {
-      :e.fixDice(:$("my active")!.element(), 2);
-    }
-    on actionPhase {
-      when :(:player.hands.length <= 3);
-      :generateDice(DiceType.Omni, 1);
-      :dispose();
-    }
-  }
-}
+export const JadeChamber = card(321003)
+  .since("v3.3.0")
+  .support("place")
+  .on("roll")
+  .do((c, e) => {
+    e.fixDice(c.$("my active")!.element(), 2);
+  })
+  .on("actionPhase", (c) => c.player.hands.length <= 3)
+  .generateDice(DiceType.Omni, 1)
+  .dispose()
+  .done();
 
 /**
  * @id 321004
@@ -84,19 +74,14 @@ define card {
  * @description
  * 我方执行「切换角色」行动时：少花费1个元素骰。（每回合2次）
  */
-define card {
-  id 321004 as DawnWinery;
-  since "v3.3.0";
-  cost DiceType.Void, 3;
-  support place {
-    on deductOmniDiceSwitch {
-      usage perRound, 2 {
-        visible false;
-      };
-      :e.deductOmniCost(1);
-    }
-  }
-}
+export const DawnWinery = card(321004)
+  .since("v3.3.0")
+  .costVoid(3)
+  .support("place")
+  .on("deductOmniDiceSwitch")
+  .usagePerRound(2)
+  .deductOmniCost(1)
+  .done();
 
 /**
  * @id 321005
@@ -138,28 +123,24 @@ export const FavoniusCathedral = card(321006)
  * @description
  * 行动阶段开始时：如果我方的元素骰包含5种不同的元素，则生成1个万能元素。
  */
-define card {
-  id 321007 as Tenshukaku;
-  since "v3.7.0";
-  cost DiceType.Aligned, 2;
-  support place {
-    on actionPhase {
-      when :{
-        let omniCount = 0;
-        const nonOmniDice = new Set<DiceType>();
-        for (const d of :player.dice) {
-          if (d === DiceType.Omni) {
-            omniCount++;
-          } else {
-            nonOmniDice.add(d);
-          }
-        }
-        return omniCount + nonOmniDice.size >= 5;
-      };
-      :generateDice(DiceType.Omni, 1);
+export const Tenshukaku = card(321007)
+  .since("v3.7.0")
+  .costSame(2)
+  .support("place")
+  .on("actionPhase", (c) => {
+    let omniCount = 0;
+    const nonOmniDice = new Set<DiceType>();
+    for (const d of c.player.dice) {
+      if (d === DiceType.Omni) {
+        omniCount++;
+      } else {
+        nonOmniDice.add(d);
+      }
     }
-  }
-}
+    return omniCount + nonOmniDice.size >= 5;
+  })
+  .generateDice(DiceType.Omni, 1)
+  .done();
 
 /**
  * @id 321008
@@ -167,21 +148,15 @@ define card {
  * @description
  * 我方角色使用技能后：如果元素骰总数为奇数，则生成1个万能元素。（每回合2次）
  */
-define card {
-  id 321008 as GrandNarukamiShrine;
-  since "v3.6.0";
-  cost DiceType.Void, 3;
-  support place {
-    on useSkill {
-      when :(:player.dice.length % 2 === 1);
-      usage perRound, 2 {
-        visible;
-      };
-      :abortPreview();
-      :generateDice(DiceType.Omni, 1);
-    }
-  }
-}
+export const GrandNarukamiShrine = card(321008)
+  .since("v3.6.0")
+  .costVoid(3)
+  .support("place")
+  .on("useSkill", (c) => c.player.dice.length % 2 === 1)
+  .usagePerRound(2, { visible: true })
+  .abortPreview() // 官方也中断，因为预览的时候骰子数目不对
+  .generateDice(DiceType.Omni, 1)
+  .done();
 
 /**
  * @id 321009
@@ -206,21 +181,16 @@ export const SangonomiyaShrine = card(321009)
  * @description
  * 我方打出「天赋」牌或我方角色使用技能时：如果我方元素骰数量不多于手牌数量，则少花费1个元素骰。（每回合1次）
  */
-define card {
-  id 321010 as SumeruCity;
-  since "v3.7.0";
-  cost DiceType.Aligned, 2;
-  support place {
-    on deductOmniDice {
-      when :((:e.isUseSkill() || :e.hasCardTag("talent")) &&
-          (:player.dice.length <= :player.hands.length));
-      usage perRound, 1 {
-        visible false;
-      };
-      :e.deductOmniCost(1);
-    }
-  }
-}
+export const SumeruCity = card(321010)
+  .since("v3.7.0")
+  .costSame(2)
+  .support("place")
+  .on("deductOmniDice", (c, e) =>
+    (e.isUseSkill() || e.hasCardTag("talent")) &&
+    (c.player.dice.length <= c.player.hands.length))
+  .usagePerRound(1)
+  .deductOmniCost(1)
+  .done();
 
 /**
  * @id 321011
@@ -229,34 +199,30 @@ define card {
  * 结束阶段：收集最多2个未使用的元素骰。
  * 行动阶段开始时：拿回此牌所收集的元素骰。
  */
-define card {
-  id 321011 as Vanarana;
-  since "v3.7.0";
-  support place {
-    variable count, 0;
-    variable d1, 0 {
-      visible false;
-    };
-    variable d2, 0 {
-      visible false;
-    };
-    on endPhase {
-      const absorbed = :absorbDice("seq", 2);
-      :setVariable("count", absorbed.length);
-      :setVariable("d1", absorbed[0] ?? 0);
-      :setVariable("d2", absorbed[1] ?? 0);
+export const Vanarana = card(321011)
+  .since("v3.7.0")
+  .support("place")
+  .variable("count", 0)
+  .variable("d1", 0, { visible: false })
+  .variable("d2", 0, { visible: false })
+  .on("endPhase")
+  .do((c) => {
+    const absorbed = c.absorbDice("seq", 2);
+    c.setVariable("count", absorbed.length);
+    c.setVariable("d1", absorbed[0] ?? 0);
+    c.setVariable("d2", absorbed[1] ?? 0);
+  })
+  .on("actionPhase")
+  .do((c) => {
+    if (c.getVariable("count") === 2) {
+      c.generateDice(c.getVariable("d1"), 1);
+      c.generateDice(c.getVariable("d2"), 1);
+    } else if (c.getVariable("count") === 1) {
+      c.generateDice(c.getVariable("d1"), 1);
     }
-    on actionPhase {
-      if (:getVariable("count") === 2) {
-        :generateDice(:getVariable("d1"), 1);
-        :generateDice(:getVariable("d2"), 1);
-      } else if (:getVariable("count") === 1) {
-        :generateDice(:getVariable("d1"), 1);
-      }
-      :setVariable("count", 0);
-    }
-  }
-}
+  })
+  .setVariable("count", 0)
+  .done();
 
 /**
  * @id 321012
@@ -265,18 +231,14 @@ define card {
  * 我方选择行动前：如果当前元素骰总数为偶数，则我方角色「普通攻击」少花费1个无色元素。
  * 可用次数：4
  */
-define card {
-  id 321012 as ChinjuForest;
-  since "v3.7.0";
-  cost DiceType.Aligned, 2;
-  support place {
-    on deductVoidDiceSkill {
-      when :(:e.isChargedAttack());
-      usage 4;
-      :e.deductVoidCost(1);
-    }
-  }
-}
+export const ChinjuForest = card(321012)
+  .since("v3.7.0")
+  .costSame(2)
+  .support("place")
+  .on("deductVoidDiceSkill", (c, e) => e.isChargedAttack())
+  .usage(4)
+  .deductVoidCost(1)
+  .done();
 
 /**
  * @id 321013
@@ -285,21 +247,16 @@ define card {
  * 我方打出当前元素骰费用至少为3的「武器」或「圣遗物」手牌时：少花费1个元素骰。（每回合1次）
  * 可用次数：2
  */
-define card {
-  id 321013 as GoldenHouse;
-  since "v4.0.0";
-  support place {
-    on deductOmniDiceCard {
-      when :(:e.hasOneOfCardTag("weapon", "artifact") &&
-          :e.currentDiceCostSize() >= 3);
-      usage perRound, 1 {
-        visible false;
-      };
-      usage 2;
-      :e.deductOmniCost(1);
-    }
-  }
-}
+export const GoldenHouse = card(321013)
+  .since("v4.0.0")
+  .support("place")
+  .on("deductOmniDiceCard", (c, e) =>
+    e.hasOneOfCardTag("weapon", "artifact") &&
+    e.currentDiceCostSize() >= 3)
+  .usagePerRound(1)
+  .usage(2)
+  .deductOmniCost(1)
+  .done();
 
 /**
  * @id 321014
@@ -308,21 +265,15 @@ define card {
  * 我方选择行动前，元素骰数量为0时：生成1个万能元素。（每回合1次）
  * 可用次数：3
  */
-define card {
-  id 321014 as GandharvaVille;
-  since "v4.1.0";
-  cost DiceType.Aligned, 1;
-  support place {
-    on beforeAction {
-      when :(:player.dice.length === 0);
-      usage 3;
-      usage perRound, 1 {
-        visible false;
-      };
-      :generateDice(DiceType.Omni, 1);
-    }
-  }
-}
+export const GandharvaVille = card(321014)
+  .since("v4.1.0")
+  .costSame(1)
+  .support("place")
+  .on("beforeAction", (c) => c.player.dice.length === 0)
+  .usage(3)
+  .usagePerRound(1)
+  .generateDice(DiceType.Omni, 1)
+  .done();
 
 /**
  * @id 321015
@@ -332,27 +283,20 @@ define card {
  * 我方打出「天赋」牌，或我方角色使用原本元素骰消耗至少为4的技能时：少花费1个元素骰。（每回合1次）
  * 可用次数：3
  */
-define card {
-  id 321015 as StormterrorsLair;
-  since "v4.2.0";
-  cost DiceType.Aligned, 2;
-  support place {
-    on enter {
-      :drawCards(1, { withTag: "talent" });
-    }
-    on deductOmniDice {
-      when :{
-        return :e.hasCardTag("talent") ||
-          (:e.isUseSkill() && :e.currentDiceCostSize() >= 4);
-      };
-      usage 3;
-      usage perRound, 1 {
-        visible false;
-      };
-      :e.deductOmniCost(1);
-    }
-  }
-}
+export const StormterrorsLair = card(321015)
+  .since("v4.2.0")
+  .costSame(2)
+  .support("place")
+  .on("enter")
+  .drawCards(1, { withTag: "talent" })
+  .on("deductOmniDice", (c, e) => {
+    return e.hasCardTag("talent") ||
+      (e.isUseSkill() && e.currentDiceCostSize() >= 4);
+  })
+  .usage(3)
+  .usagePerRound(1)
+  .deductOmniCost(1)
+  .done();
 
 /**
  * @id 321016
@@ -361,18 +305,14 @@ define card {
  * 结束阶段：如果我方手牌数量不多于2，则抓2张牌。
  * 可用次数：2
  */
-define card {
-  id 321016 as WeepingWillowOfTheLake;
-  since "v4.3.0";
-  cost DiceType.Aligned, 1;
-  support place {
-    on endPhase {
-      when :(:player.hands.length <= 2);
-      usage 2;
-      :drawCards(2);
-    }
-  }
-}
+export const WeepingWillowOfTheLake = card(321016)
+  .since("v4.3.0")
+  .costSame(1)
+  .support("place")
+  .on("endPhase", (c) => c.player.hands.length <= 2)
+  .usage(2)
+  .drawCards(2)
+  .done();
 
 /**
  * @id 321017
@@ -381,29 +321,25 @@ define card {
  * 我方选择行动前：如果我方角色所装备卡牌的原本元素骰费用总和不比对方更低，则生成1个出战角色类型的元素骰。（每回合1次）
  * 可用次数：3
  */
-define card {
-  id 321017 as OperaEpiclese;
-  since "v4.3.0";
-  cost DiceType.Aligned, 1;
-  support place {
-    on beforeAction {
-      when :{
-        function costOfEquipment(equipment: EntityState) {
-          const cardDef = :data.entities.get(equipment.definition.id)!;
-          return originalDiceCostOfCard(cardDef);
-        }
-        const myCost = :$$(`my equipments`).map((entity) => costOfEquipment(entity)).reduce((a, b) => a + b, 0);
-        const oppCost = :$$(`opp equipments`).map((entity) => costOfEquipment(entity)).reduce((a, b) => a + b, 0);
-        return myCost >= oppCost;
-      };
-      usage 3;
-      usage perRound, 1 {
-        visible false;
-      };
-      :generateDice(:$("my active")!.element(), 1);
+export const OperaEpiclese = card(321017)
+  .since("v4.3.0")
+  .costSame(1)
+  .support("place")
+  .on("beforeAction", (c) => {
+    function costOfEquipment(equipment: EntityState) {
+      const cardDef = c.data.entities.get(equipment.definition.id)!;
+      return originalDiceCostOfCard(cardDef);
     }
-  }
-}
+    const myCost = c.$$(`my equipments`).map((entity) => costOfEquipment(entity)).reduce((a, b) => a + b, 0);
+    const oppCost = c.$$(`opp equipments`).map((entity) => costOfEquipment(entity)).reduce((a, b) => a + b, 0);
+    return myCost >= oppCost;
+  })
+  .usage(3)
+  .usagePerRound(1)
+  .do((c) => {
+    c.generateDice(c.$("my active")!.element(), 1);
+  })
+  .done();
 
 /**
  * @id 301018
@@ -412,15 +348,12 @@ define card {
  * 本回合中，所在阵营打出的事件牌无效。
  * 可用次数：1
  */
-define combatStatus {
-  id 301018 as StrictProhibited;
-  tags eventEffectless;
-  oneDuration;
-  on playCard {
-    when :(:e.card.definition.type === "eventCard");
-    usage 1;
-  }
-}
+export const StrictProhibited = combatStatus(301018)
+  .tags("eventEffectless")
+  .oneDuration()
+  .on("playCard", (c, e) => e.card.definition.type === "eventCard")
+  .usage(1)
+  .done();
 
 /**
  * @id 321018
@@ -428,28 +361,26 @@ define combatStatus {
  * @description
  * 我方出战角色受到伤害或治疗后：此牌累积1点「禁令」（可叠加，最多叠加到6）。如果此牌已有6点禁令，则消耗6点，赋予对方1张随机手牌无效化。
  */
-define card {
-  id 321018 as FortressOfMeropide;
-  since "v4.5.0";
-  cost DiceType.Aligned, 1;
-  support place {
-    variable forbidden, 0;
-    on damagedOrHealed {
-      when :(:e.target.isActive());
-      :addVariableWithMax("forbidden", 1, 6);
-      if (:getVariable("forbidden") >= 6 && :oppPlayer.hands.length > 0) {
-        :addVariable("forbidden", -6);
-        const candidates = :oppPlayer.hands.filter(
-          (card) => !card.withAttachment(IneffectiveWhenPlayed)
-        );
-        const target = :random(candidates);
-        if (target) {
-          :attach(IneffectiveWhenPlayed, target);
-        }
+export const FortressOfMeropide = card(321018)
+  .since("v4.5.0")
+  .costSame(1)
+  .support("place")
+  .variable("forbidden", 0)
+  .on("damagedOrHealed", (c, e) => e.target.isActive())
+  .do((c) => {
+    c.addVariableWithMax("forbidden", 1, 6);
+    if (c.getVariable("forbidden") >= 6 && c.oppPlayer.hands.length > 0) {
+      c.addVariable("forbidden", -6);
+      const candidates = c.oppPlayer.hands.filter(
+        (card) => !card.withAttachment(IneffectiveWhenPlayed)
+      );
+      const target = c.random(candidates);
+      if (target) {
+        c.attach(IneffectiveWhenPlayed, target);
       }
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 301019
@@ -458,13 +389,11 @@ define card {
  * 结束阶段：对所附属角色造成2点穿透伤害。
  * 可用次数：1
  */
-define status {
-  id 301019 as DistantStorm;
-  on endPhase {
-    usage 1;
-    :damage(DamageType.Piercing, 2, "@master");
-  }
-}
+export const DistantStorm = status(301019)
+  .on("endPhase")
+  .usage(1)
+  .damage(DamageType.Piercing, 2, "@master")
+  .done();
 
 /**
  * @id 321019
@@ -473,18 +402,17 @@ define status {
  * 任意阵营的角色受到治疗后：使该角色附属悠远雷暴。（结束阶段受到2点穿透伤害，可用1次）
  * 持续回合：2
  */
-define card {
-  id 321019 as SeiraiIsland;
-  since "v4.6.0";
-  cost DiceType.Aligned, 1;
-  support place {
-    duration 2;
-    on healed {
-      listenTo all;
-      :characterStatus(DistantStorm, :e.target);
-    }
-  }
-}
+export const SeiraiIsland = card(321019)
+  .since("v4.6.0")
+  .costSame(1)
+  .support("place")
+  .duration(2)
+  .on("healed")
+  .listenToAll()
+  .do((c, e) => {
+    c.characterStatus(DistantStorm, e.target);
+  })
+  .done();
 
 /**
  * @id 301022
@@ -492,16 +420,13 @@ define card {
  * @description
  * 直到本回合结束前，所在阵营每抓1张牌，就立刻生成1张禁忌知识，随机地置入牌库中。
  */
-define combatStatus {
-  id 301022 as TheMausoleumOfKingDeshretInEffect;
-  oneDuration;
-  on enter {
-    :createPileCards(ForbiddenKnowledge, 2, "top");
-  }
-  on drawCard {
-    :createPileCards(ForbiddenKnowledge, 1, "random");
-  }
-}
+export const TheMausoleumOfKingDeshretInEffect = combatStatus(301022)
+  .oneDuration()
+  .on("enter")
+  .createPileCards(ForbiddenKnowledge, 2, "top")
+  .on("drawCard")
+  .createPileCards(ForbiddenKnowledge, 1, "random")
+  .done();
 
 /**
  * @id 321020
@@ -509,23 +434,21 @@ define combatStatus {
  * @description
  * 对方累积抓4张牌后：弃置此牌，在对方牌库顶生成2张禁忌知识。然后直到本回合结束前，对方每抓1张牌，就立刻生成1张禁忌知识，随机地置入对方牌库中。
  */
-define card {
-  id 321020 as TheMausoleumOfKingDeshret;
-  since "v4.7.0";
-  cost DiceType.Aligned, 1;
-  support place {
-    variable drawnCardCount, 0;
-    on drawCard {
-      when :(:e.who !== :self.who);
-      listenTo all;
-      :addVariable("drawnCardCount", 1);
-      if (:getVariable("drawnCardCount") === 4) {
-        :combatStatus(TheMausoleumOfKingDeshretInEffect, "opp");
-        :dispose();
-      }
+export const TheMausoleumOfKingDeshret = card(321020)
+  .since("v4.7.0")
+  .costSame(1)
+  .support("place")
+  .variable("drawnCardCount", 0)
+  .on("drawCard", (c, e) => e.who !== c.self.who)
+  .listenToAll()
+  .do((c) => {
+    c.addVariable("drawnCardCount", 1);
+    if (c.getVariable("drawnCardCount") === 4) {
+      c.combatStatus(TheMausoleumOfKingDeshretInEffect, "opp");
+      c.dispose();
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 321021
@@ -533,24 +456,23 @@ define card {
  * @description
  * 我方舍弃或调和1张牌后：此牌累积1点「实验进展」。每当「实验进展」达到3点、6点、9点时，就获得1个万能元素。然后，如果「实验进展」至少为9点，则弃置此牌。
  */
-define card {
-  id 321021 as CentralLaboratoryRuins;
-  since "v4.7.0";
-  cost DiceType.Aligned, 1;
-  support place {
-    variable progress, 0;
-    on disposeOrTuneCard {
-      :addVariable("progress", 1);
-      const progress = :getVariable("progress");
-      if (progress % 3 === 0) {
-        :generateDice(DiceType.Omni, 1);
-      }
-      if (progress >= 9) {
-        :dispose();
-      }
+export const CentralLaboratoryRuins = card(321021)
+  .since("v4.7.0")
+  .costSame(1)
+  .support("place")
+  .variable("progress", 0)
+  .on("disposeOrTuneCard")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    const progress = c.getVariable("progress");
+    if (progress % 3 === 0) {
+      c.generateDice(DiceType.Omni, 1);
     }
-  }
-}
+    if (progress >= 9) {
+      c.dispose();
+    }
+  })
+  .done();
 
 /**
  * @id 301023
@@ -559,13 +481,11 @@ define card {
  * 角色造成的伤害+1。
  * 持续回合：2
  */
-define status {
-  id 301023 as StadiumOfTheSacredFlameInEffect;
-  duration 2;
-  on increaseSkillDamage {
-    :e.increaseDamage(1);
-  }
-}
+export const StadiumOfTheSacredFlameInEffect = status(301023)
+  .duration(2)
+  .on("increaseSkillDamage")
+  .increaseDamage(1)
+  .done();
 
 /**
  * @id 321022
@@ -576,33 +496,32 @@ define status {
  * 达到4时：治疗我方出战角色2点。
  * 达到6时：弃置此牌，使当前的我方出战角色在2回合内造成的伤害+1。
  */
-define card {
-  id 321022 as StadiumOfTheSacredFlame;
-  since "v5.0.0";
-  cost DiceType.Aligned, 2;
-  support place {
-    variable flame, 0;
-    on useSkillOrTechnique {
-      :addVariable("flame", 1);
-      const flame = :getVariable("flame");
-      switch (flame) {
-        case 2: {
-          :generateDice("randomElement", 1);
-          break;
-        }
-        case 4: {
-          :heal(2, "my active");
-          break;
-        }
-        case 6: {
-          :characterStatus(StadiumOfTheSacredFlameInEffect, "my active");
-          :dispose();
-          break;
-        }
+export const StadiumOfTheSacredFlame = card(321022)
+  .since("v5.0.0")
+  .costSame(2)
+  .support("place")
+  .variable("flame", 0)
+  .on("useSkillOrTechnique")
+  .addVariable("flame", 1)
+  .do((c) => {
+    const flame = c.getVariable("flame");
+    switch (flame) {
+      case 2: {
+        c.generateDice("randomElement", 1);
+        break;
+      }
+      case 4: {
+        c.heal(2, "my active");
+        break;
+      }
+      case 6: {
+        c.characterStatus(StadiumOfTheSacredFlameInEffect, "my active");
+        c.dispose();
+        break;
       }
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 133087
@@ -610,10 +529,8 @@ define card {
  * @description
  * 我方舍弃或调和1张牌后：此牌累积1点「实验进展」。每当「实验进展」达到3点、6点、9点时，就获得1个万能元素。然后，如果「实验进展」至少为9点，则弃置此牌。
  */
-define card {
-  id 133087 as FormerSiteOfTheCentralLaboratory;
-  reserved;
-}
+export const FormerSiteOfTheCentralLaboratory = card(133087) // 骗骗花
+  .reserve();
 
 /**
  * @id 133088
@@ -622,10 +539,8 @@ define card {
  * 结束阶段：治疗我方「出战角色」2点。
  * 可用次数：2
  */
-define card {
-  id 133088 as FakeFavoniusCathedral;
-  reserved;
-}
+export const FakeFavoniusCathedral = card(133088) // 骗骗花
+  .reserve();
 
 /**
  * @id 321023
@@ -635,34 +550,34 @@ define card {
  * 敌方打出名称不存在于本局最初牌组的牌时：此牌扣除1点「瞩目」。
  * 行动阶段开始时：如果此牌有至少3点「瞩目」，则生成1个随机基础元素骰；如果此牌有至少1点「瞩目」，将1个元素骰转换为万能元素。
  */
-define card {
-  id 321023 as StageTepetl;
-  since "v5.1.0";
-  support place {
-    variable attention, 0;
-    on playCard {
-      listenTo all;
-      const isMine = :e.who === :self.who;
-      const player = isMine ? :player : :oppPlayer;
-      if (!player.initialPile.some((card) => card.id === :e.card.definition.id)) {
-        if (isMine) {
-          :addVariable("attention", 1);
-        } else if (:getVariable("attention") > 0) {
-          :addVariable("attention", -1);
-        }
+export const StageTepetl = card(321023)
+  .since("v5.1.0")
+  .support("place")
+  .variable("attention", 0)
+  .on("playCard")
+  .listenToAll()
+  .do((c, e) => {
+    const isMine = e.who === c.self.who;
+    const player = isMine ? c.player : c.oppPlayer;
+    if (!player.initialPile.some((card) => card.id === e.card.definition.id)) {
+      if (isMine) {
+        c.addVariable("attention", 1);
+      } else if (c.getVariable("attention") > 0) {
+        c.addVariable("attention", -1);
       }
     }
-    on actionPhase {
-      const attention = :getVariable("attention");
-      if (attention >= 3) {
-        :generateDice("randomElement", 1);
-      }
-      if (attention >= 1) {
-        :convertDice(DiceType.Omni, 1);
-      }
+  })
+  .on("actionPhase")
+  .do((c) => {
+    const attention = c.getVariable("attention");
+    if (attention >= 3) {
+      c.generateDice("randomElement", 1);
     }
-  }
-}
+    if (attention >= 1) {
+      c.convertDice(DiceType.Omni, 1);
+    }
+  })
+  .done();
 
 /**
  * @id 321024
@@ -670,18 +585,14 @@ define card {
  * @description
  * 我方打出名称不存在于本局最初牌组的牌时：如果打出的牌当前元素骰费用不低于此牌的「极限运动点」，则生成1个随机基础元素骰，然后此牌累积1个「极限运动点」。
  */
-define card {
-  id 321024 as ScionsOfTheCanopy;
-  since "v5.2.0";
-  support place {
-    variable point, 1;
-    on playCard {
-      when :(!:isInInitialPile(:e.card) && :e.card.diceCost() >= :getVariable("point"));
-      :generateDice("randomElement", 1);
-      :addVariable("point", 1);
-    }
-  }
-}
+export const ScionsOfTheCanopy = card(321024)
+  .since("v5.2.0")
+  .support("place")
+  .variable("point", 1) // 神奇
+  .on("playCard", (c, e) => !c.isInInitialPile(e.card) && e.card.diceCost() >= c.getVariable("point"))
+  .generateDice("randomElement", 1)
+  .addVariable("point", 1)
+  .done();
 
 /**
  * @id 321025
@@ -690,19 +601,17 @@ define card {
  * 我方「召唤物」入场时：使其可用次数+1。
  * 可用次数：3
  */
-define card {
-  id 321025 as PeopleOfTheSprings;
-  since "v5.3.0";
-  cost DiceType.Aligned, 2;
-  support place {
-    on enterRelative {
-      when :(:e.entity.definition.type === "summon");
-      usage 3;
-      const target = :$(`my summons with id ${e.entity.id}`);
-      target?.addVariable("usage", 1);
-    }
-  }
-}
+export const PeopleOfTheSprings = card(321025)
+  .since("v5.3.0")
+  .costSame(2)
+  .support("place")
+  .on("enterRelative", (c, e) => e.entity.definition.type === "summon")
+  .usage(3)
+  .do((c, e) => {
+    const target = c.$(`my summons with id ${e.entity.id}`);
+    target?.addVariable("usage", 1);
+  })
+  .done();
 
 /**
  * @id 301024
@@ -725,21 +634,16 @@ export const FlowerfeatherClanInEffect = status(301024)
  * @description
  * 我方舍弃2张卡牌后：我方下一个后台角色获得1层“下次切换至前台时，回复1个对应元素的骰子”。（可叠加，每次触发1层）
  */
-define card {
-  id 321026 as FlowerfeatherClan;
-  since "v5.4.0";
-  support place {
-    variable disposedCardCount, 0;
-    on disposeCard {
-      :addVariable("disposedCardCount", 1);
-    }
-    on disposeCard {
-      when :(:getVariable("disposedCardCount") >= 2);
-      :setVariable("disposedCardCount", 0);
-      :characterStatus(FlowerfeatherClanInEffect, "my next");
-    }
-  }
-}
+export const FlowerfeatherClan = card(321026)
+  .since("v5.4.0")
+  .support("place")
+  .variable("disposedCardCount", 0)
+  .on("disposeCard")
+  .addVariable("disposedCardCount", 1)
+  .on("disposeCard", (c) => c.getVariable("disposedCardCount") >= 2)
+  .setVariable("disposedCardCount", 0)
+  .characterStatus(FlowerfeatherClanInEffect, "my next")
+  .done();
 
 /**
  * @id 321027
@@ -749,24 +653,23 @@ define card {
  * 我方挑选后：灵觉-1。
  * 行动阶段开始时：若灵觉为0，则移除自身，然后从3个随机元素骰费用为2的支援牌中挑选一个生成。
  */
-define card {
-  id 321027 as MastersOfTheNightwind;
-  since "v5.5.0";
-  support place {
-    variable intuition, 4;
-    on selectCard {
-      const newValue = Math.max(0, :getVariable("intuition") - 1);
-      :setVariable("intuition", newValue);
-    }
-    on actionPhase {
-      when :(:getVariable("intuition") === 0);
-      const cards = :allCardDefinitions("support").filter((card) => originalDiceCostOfCard(card) === 2);
-      const candidates = :randomSubset(cards, 3);
-      :selectAndPlay(candidates);
-      :dispose();
-    }
-  }
-}
+export const MastersOfTheNightwind = card(321027)
+  .since("v5.5.0")
+  .support("place")
+  .variable("intuition", 4)
+  .on("selectCard")
+  .do((c) => {
+    const newValue = Math.max(0, c.getVariable("intuition") - 1);
+    c.setVariable("intuition", newValue);
+  })
+  .on("actionPhase", (c) => c.getVariable("intuition") === 0)
+  .do((c) => {
+    const cards = c.allCardDefinitions("support").filter((card) => originalDiceCostOfCard(card) === 2);
+    const candidates = c.randomSubset(cards, 3);
+    c.selectAndPlay(candidates);
+    c.dispose();
+  })
+  .done();
 
 /**
  * @id 301025
@@ -774,20 +677,13 @@ define card {
  * @description
  * 自身层数到达3时，治疗所附属角色1点；若自身层数等于5，则所附属角色造成的伤害+1。（可叠加，最多叠加到5层）
  */
-define status {
-  id 301025 as Exercise;
-  variable layer, 2 {
-    append 5;
-  };
-  on enter {
-    when :((:e.overridden?.variables.layer ?? 0) < 3 && :getVariable("layer") >= 3);
-    :heal(1, "@master");
-  }
-  on increaseSkillDamage {
-    when :(:getVariable("layer") === 5);
-    :e.increaseDamage(1);
-  }
-}
+export const Exercise = status(301025)
+  .variableCanAppend("layer", 2, 5)
+  .on("enter", (c, e) => (e.overridden?.variables.layer ?? 0) < 3 && c.getVariable("layer") >= 3)
+  .heal(1, "@master")
+  .on("increaseSkillDamage", (c) => c.getVariable("layer") === 5)
+  .increaseDamage(1)
+  .done();
 
 /**
  * @id 321028
@@ -797,26 +693,24 @@ define status {
  * 我方角色切换为出战角色后：此角色获得2点锻炼。
  * （当锻炼层数到达3点时，治疗对应角色1点；当锻炼层数到达5点时，对应角色所造成的伤害+1）
  */
-define card {
-  id 321028 as CollectiveOfPlenty;
-  since "v5.6.0";
-  cost DiceType.Void, 3;
-  support place {
-    on enterRelative {
-      when :(:e.entity.definition.type === "status" &&
-          :e.entity.definition.tags.includes("preparingSkill"));
-      const ch = :e.entity.cast<"status">().master;
-      :characterStatus(Exercise, ch, {
-        overrideVariables: {
-          layer: 3
-        }
-      });
-    }
-    on switchActive {
-      :characterStatus(Exercise, "@event.switchTo");
-    }
-  }
-}
+export const CollectiveOfPlenty = card(321028)
+  .since("v5.6.0")
+  .costVoid(3)
+  .support("place")
+  .on("enterRelative", (c, e) =>
+    e.entity.definition.type === "status" &&
+    e.entity.definition.tags.includes("preparingSkill"))
+  .do((c, e) => {
+    const ch = e.entity.cast<"status">().master;
+    c.characterStatus(Exercise, ch, {
+      overrideVariables: {
+        layer: 3
+      }
+    });
+  })
+  .on("switchActive")
+  .characterStatus(Exercise, "@event.switchTo")
+  .done();
 
 /**
  * @id 321029
@@ -826,26 +720,25 @@ define card {
  * 我方宣布结束时：随机触发我方1个「希穆兰卡」召唤物的「结束阶段」效果。
  * 可用次数：3
  */
-define card {
-  id 321029 as CalligraphyTavern;
-  since "v5.8.0";
-  cost DiceType.Void, 2;
-  support place {
-    on enter {
-      const newCard = :random([OrigamiFlyingSquirrel, PopupPaperFrog, OrigamiHamster]);
-      :createHandCard(newCard);
+export const CalligraphyTavern = card(321029)
+  .since("v5.8.0")
+  .costVoid(2)
+  .support("place")
+  .on("enter")
+  .do((c, e) =>{
+    const newCard = c.random([OrigamiFlyingSquirrel, PopupPaperFrog, OrigamiHamster]);
+    c.createHandCard(newCard);
+  })
+  .on("declareEnd", (c, e) => c.$(SIMULANKA_QUERY))
+  .usage(3)
+  .do((c, e) =>{
+    const mySimulankaSummons = c.$$(SIMULANKA_QUERY);
+    const chosen = c.random(mySimulankaSummons);
+    if (chosen) {
+      c.triggerEndPhaseSkill(chosen);
     }
-    on declareEnd {
-      when :(:$(SIMULANKA_QUERY));
-      usage 3;
-      const mySimulankaSummons = :$$(SIMULANKA_QUERY);
-      const chosen = :random(mySimulankaSummons);
-      if (chosen) {
-        :triggerEndPhaseSkill(chosen);
-      }
-    }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 301032
@@ -853,13 +746,10 @@ define card {
  * @description
  * 下次打出积木小人少花费1个元素骰。
  */
-define combatStatus {
-  id 301032 as ConstellationMetropoleInEffect01;
-  once deductOmniDiceCard {
-    when :(:e.action.skill.caller.definition.id === ToyGuard);
-    :e.deductOmniCost(1);
-  }
-}
+export const ConstellationMetropoleInEffect01 = combatStatus(301032)
+  .once("deductOmniDiceCard", (c, e) => e.action.skill.caller.definition.id === ToyGuard)
+  .deductOmniCost(1)
+  .done();
 
 /**
  * @id 301037
@@ -867,13 +757,12 @@ define combatStatus {
  * @description
  * 下次打出的积木小人效果量+1。
  */
-define combatStatus {
-  id 301037 as ConstellationMetropoleInEffect02;
-  once enterRelative {
-    when :(:e.entity.definition.id === ToyGuardSummon);
-    :e.entity.cast<"summon">().addVariable("effect", 1);
-  }
-}
+export const ConstellationMetropoleInEffect02 = combatStatus(301037)
+  .once("enterRelative", (c, e) => e.entity.definition.id === ToyGuardSummon)
+  .do((c, e) => {
+    e.entity.cast<"summon">().addVariable("effect", 1);
+  })
+  .done();
 
 /**
  * @id 321030
@@ -883,24 +772,22 @@ define combatStatus {
  * 我方角色使用「元素战技」后：下次打出积木小人少花费1个元素骰。（不可叠加）
  * 我方角色使用「元素爆发」后：下次打出的积木小人效果量+1。（不可叠加）
  */
-define card {
-  id 321030 as ConstellationMetropole;
-  since "v5.8.0";
-  cost DiceType.Aligned, 2;
-  support place {
-    on enter {
-      :createHandCard(ToyGuard);
+export const ConstellationMetropole = card(321030)
+  .since("v5.8.0")
+  .costSame(2)
+  .support("place")
+  .on("enter")
+  .createHandCard(ToyGuard)
+  .on("useSkill")
+  .listenToPlayer()
+  .do((c, e) => {
+    if (e.isSkillType("elemental")){
+      c.combatStatus(ConstellationMetropoleInEffect01);
+    } else if (e.isSkillType("burst")){
+      c.combatStatus(ConstellationMetropoleInEffect02);
     }
-    on useSkill {
-      listenTo samePlayer;
-      if (:e.isSkillType("elemental")){
-        :combatStatus(ConstellationMetropoleInEffect01);
-      } else if (:e.isSkillType("burst")){
-        :combatStatus(ConstellationMetropoleInEffect02);
-      }
-    }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 321031
@@ -909,23 +796,16 @@ define card {
  * 结束阶段：冒险1次。
  * 可用次数：3
  */
-define card {
-  id 321031 as AdventurersGuild;
-  since "v6.1.0";
-  cost DiceType.Aligned, 2;
-  support place {
-    on endPhase {
-      usage 3 {
-        autoDispose false;
-      };
-      :adventure();
-    }
-    on adventure {
-      when :(:getVariable("usage") === 0);
-      :dispose();
-    }
-  }
-}
+export const AdventurersGuild = card(321031)
+  .since("v6.1.0")
+  .costSame(2)
+  .support("place")
+  .on("endPhase")
+  .usage(3, { autoDispose: false })
+  .adventure()
+  .on("adventure", (c) => c.getVariable("usage") === 0)
+  .dispose()
+  .done();
 
 /**
  * @id 321035
@@ -934,22 +814,16 @@ define card {
  * 我方卡牌被赋予费用降低或赋能时：累计1点计数。
  * 行动阶段开始，且此卡牌计数达到3时：移除3点计数，生成1个随机基础元素骰。
  */
-define card {
-  id 321035 as SilvermoonHall;
-  since "v6.4.0";
-  support place {
-    variable count, 0;
-    on enterRelative {
-      when :(([CostReduction, Empowerment] as number[]).includes(:e.entity.definition.id));
-      :addVariable("count", 1);
-    }
-    on actionPhase {
-      when :(:getVariable("count") >= 3);
-      :addVariable("count", -3);
-      :generateDice("randomElement", 1);
-    }
-  }
-}
+export const SilvermoonHall = card(321035)
+  .since("v6.4.0")
+  .support("place")
+  .variable("count", 0)
+  .on("enterRelative", (c, e) => ([CostReduction, Empowerment] as number[]).includes(e.entity.definition.id))
+  .addVariable("count", 1)
+  .on("actionPhase", (c) => c.getVariable("count") >= 3)
+  .addVariable("count", -3)
+  .generateDice("randomElement", 1)
+  .done();
 
 /**
  * @id 321036
@@ -958,19 +832,17 @@ define card {
  * 行动阶段开始时：赋予敌方随机1张手牌费用增加和不可调和。
  * 可用次数：2
  */
-define card {
-  id 321036 as TidesealStone;
-  since "v6.4.0";
-  support place {
-    on actionPhase {
-      when :(:oppPlayer.hands.length > 0);
-      usage 2;
-      const target = :random(:oppPlayer.hands);
-      :attachCostIncrease(target);
-      :attach(NoTuningAllowed, target);
-    }
-  }
-}
+export const TidesealStone = card(321036)
+  .since("v6.4.0")
+  .support("place")
+  .on("actionPhase", (c) => c.oppPlayer.hands.length > 0)
+  .usage(2)
+  .do((c) => {
+    const target = c.random(c.oppPlayer.hands);
+    c.attachCostIncrease(target);
+    c.attach(NoTuningAllowed, target);
+  })
+  .done();
 
 /**
  * @id 321037
@@ -980,24 +852,22 @@ define card {
  * 结束阶段：赋予我方随机2张手牌费用降低。
  * 可用次数：2
  */
-define card {
-  id 321037 as FrostmoonEnclave;
-  since "v6.4.0";
-  cost DiceType.Aligned, 4;
-  support place {
-    on enter {
-      :drawCards(2);
-      :heal(2, "my characters order by health - maxHealth limit 1");
+export const FrostmoonEnclave = card(321037)
+  .since("v6.4.0")
+  .costSame(4)
+  .support("place")
+  .on("enter")
+  .drawCards(2)
+  .heal(2, "my characters order by health - maxHealth limit 1")
+  .on("endPhase")
+  .usage(2)
+  .do((c) => {
+    const chosen = c.randomSubset(c.queryAll($.macros.myHandsNotFree), 2);
+    for (const card of chosen) {
+      c.attachCostReduction(card);
     }
-    on endPhase {
-      usage 2;
-      const chosen = :randomSubset(:queryAll($.macros.myHandsNotFree), 2);
-      for (const card of chosen) {
-        :attachCostReduction(card);
-      }
-    }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 321038
@@ -1007,27 +877,24 @@ define card {
  * 可用次数：2
  * 此卡牌被弃置时：如果可用次数为0，造成2点物理伤害。
  */
-define card {
-  id 321038 as NashaTown;
-  since "v6.4.0";
-  cost DiceType.Aligned, 1;
-  support place {
-    on endPhase {
-      usage 2;
-      const candidates = :player.hands.filter(
-        (card) => card.diceCost() >= 2 && !card.empowered()
-      );
-      const chosen = :randomSubset(candidates, 2);
-      for (const card of chosen) {
-        :attach(Empowerment, card);
-      }
+export const NashaTown = card(321038)
+  .since("v6.4.0")
+  .costSame(1)
+  .support("place")
+  .on("endPhase")
+  .usage(2)
+  .do((c) => {
+    const candidates = c.player.hands.filter(
+      (card) => card.diceCost() >= 2 && !card.empowered()
+    );
+    const chosen = c.randomSubset(candidates, 2);
+    for (const card of chosen) {
+      c.attach(Empowerment, card);
     }
-    on selfDispose {
-      when :(:getVariable("usage") === 0);
-      :damage(DamageType.Physical, 2);
-    }
-  }
-}
+  })
+  .on("selfDispose", (c, e) => c.getVariable("usage") === 0)
+  .damage(DamageType.Physical, 2)
+  .done();
 
 /**
  * @id 321039
@@ -1037,28 +904,25 @@ define card {
  * 可用次数：2
  * 此卡牌在场上被弃置时：抓2张赋予了赋能的卡牌，并使我方出战角色附属1层战斗计划。
  */
-define card {
-  id 321039 as KuuvahkiExperimentalDesignBureau;
-  since "v6.4.0";
-  cost DiceType.Aligned, 2;
-  support place {
-    on endPhase {
-      usage 2;
-      const chosen = :randomSubset(
-        :player.pile.filter((card) => !card.empowered()),
-        2
-      );
-      for (const card of chosen) {
-        :attach(Empowerment, card);
-      }
+export const KuuvahkiExperimentalDesignBureau = card(321039)
+  .since("v6.4.0")
+  .costSame(2)
+  .support("place")
+  .on("endPhase")
+  .usage(2)
+  .do((c) => {
+    const chosen = c.randomSubset(
+      c.player.pile.filter((card) => !card.empowered()),
+      2
+    );
+    for (const card of chosen) {
+      c.attach(Empowerment, card);
     }
-    on selfDispose {
-      when :(!:e.isDiscardOrTuning());
-      :drawCards(2, { withAttachment: Empowerment });
-      :characterStatus(BattlePlan, "my active");
-    }
-  }
-}
+  })
+  .on("selfDispose", (c, e) => !e.isDiscardOrTuning())
+  .drawCards(2, { withAttachment: Empowerment })
+  .characterStatus(BattlePlan, "my active")
+  .done();
 
 /**
  * @id 321041

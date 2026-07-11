@@ -137,27 +137,23 @@ export const InEveryHouseAStove = card(330005)
  * 本回合中，我方打出事件牌后：赋予我方手牌中所有事件牌无效化。
  * 本回合中，我方舍弃手牌后：将我方手牌中2张当前元素骰费用最高的卡牌置入牌组底。
  */
-define combatStatus {
-  id 300003 as PassingOfJudgmentInEffect;
-  oneDuration;
-  on playCard {
-    when :(:e.card.definition.type === "eventCard");
-    usage 1 {
-      autoDispose false;
-      visible false;
-    };
-    for (const hand of :player.hands) {
+export const PassingOfJudgmentInEffect = combatStatus(300003)
+  .oneDuration()
+  .on("playCard", (c, e) => e.card.definition.type === "eventCard")
+  .usage(1, { autoDispose: false, visible: false })
+  .do((c) => {
+    for (const hand of c.player.hands) {
       if (hand.definition.type === "eventCard") {
-        :attach(IneffectiveWhenPlayed, hand);
+        c.attach(IneffectiveWhenPlayed, hand);
       }
     }
-  }
-  on disposeCard {
-    when :(:e.from.type === "hands");
-    const maxCostHands = :maxCostHands(2);
-    :undrawCards(maxCostHands, "bottom");
-  }
-}
+  })
+  .on("disposeCard", (c, e) => e.from.type === "hands")
+  .do((c) => {
+    const maxCostHands = c.maxCostHands(2);
+    c.undrawCards(maxCostHands, "bottom");
+  })
+  .done();
 
 /**
  * @id 330006
@@ -214,12 +210,11 @@ export const ViciousAncientBattle = card(330008)
  * 所附属角色免疫冻结、眩晕、石化等无法使用技能的效果，并且该角色为「出战角色」时不会因效果而切换。
  * 持续回合：2
  */
-define status {
-  id 300005 as EdictOfAbsolutionInEffect;
-  since "v5.0.0";
-  tags immuneControl;
-  duration 2;
-}
+export const EdictOfAbsolutionInEffect = status(300005)
+  .since("v5.0.0")
+  .tags("immuneControl")
+  .duration(2)
+  .done();
 
 
 /**
@@ -273,14 +268,14 @@ export const FlamesOfWarExtension = extension(300006, {
    * @description
    * 附属角色本回合造成的伤害+1。（可叠加）
    */
-  define status {
-  id 300007 as FlamesOfWarInEffect;
-  oneDuration;
-  variable increasedDamage, 1;
-  on increaseSkillDamage {
-    :e.increaseDamage(:getVariable("increasedDamage"));
-  }
-}
+  export const FlamesOfWarInEffect = status(300007)
+    .oneDuration()
+    .variable("increasedDamage", 1)
+    .on("increaseSkillDamage")
+    .do((c, e) => {
+      e.increaseDamage(c.getVariable("increasedDamage"));
+    })
+    .done();
   
   /**
    * @id 300006
@@ -289,33 +284,35 @@ export const FlamesOfWarExtension = extension(300006, {
    * 此牌会记录本回合你对敌方角色造成的伤害，记为「斗志」。
    * 行动阶段开始时：若此牌是场上「斗志」最高的斗争之火，则清空此牌的「斗志」，使我方出战角色本回合造成的伤害+1。
    */
-  define card {
-  id 300006 as FlamesOfWar;
-  undiscoverable;
-  support {
-    variable spirit, 0;
-    associateExtension FlamesOfWarExtension;
-    on enter {
-      :setExtensionState((st) => {
-        st.spirit[:self.who] = :getVariable("spirit");
+  export const FlamesOfWar = card(300006)
+    .undiscoverable()
+    .support()
+    .variable("spirit", 0)
+    .associateExtension(FlamesOfWarExtension)
+    .on("enter")
+    .do((c) => {
+      c.setExtensionState((st) => {
+        st.spirit[c.self.who] = c.getVariable("spirit");
       });
-    }
-    on dealDamage {
-      :setVariable("spirit", :getExtensionState().spirit[:self.who]);
-    }
-    on actionPhase {
-      :setVariable("spirit", :getExtensionState().spirit[:self.who]);
-      if (:getExtensionState().win[:self.who]) {
-        :characterStatus(FlamesOfWarInEffect, "my active");
+    })
+    .on("dealDamage")
+    .do((c) => {
+      c.setVariable("spirit", c.getExtensionState().spirit[c.self.who]);
+    })
+    .on("actionPhase")
+    .do((c) => {
+      c.setVariable("spirit", c.getExtensionState().spirit[c.self.who]);
+      if (c.getExtensionState().win[c.self.who]) {
+        c.characterStatus(FlamesOfWarInEffect, "my active");
       }
-    }
-    on selfDispose {
-      :setExtensionState((st) => {
-        st.spirit[:self.who] = 0;
+    })
+    .on("selfDispose")
+    .do((c) => {
+      c.setExtensionState((st) => {
+        st.spirit[c.self.who] = 0;
       });
-    }
-  }
-}
+    })
+    .done();
 
 /**
  * @id 330010
@@ -397,15 +394,15 @@ export const LostLegaciesInTheSand = card(330012)
  * @description
  * 行动阶段开始时：赋予我方随机1张手牌费用降低。
  */
-define combatStatus {
-  id 300010 as TheOtherSideOfTheFrostmoonInEffect;
-  on actionPhase {
-    const target = :random(:queryAll($.macros.myHandsNotFree));
+export const TheOtherSideOfTheFrostmoonInEffect = combatStatus(300010)
+  .on("actionPhase")
+  .do((c) => {
+    const target = c.random(c.queryAll($.macros.myHandsNotFree));
     if (target) {
-      :attachCostReduction(target);
+      c.attachCostReduction(target);
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 330013

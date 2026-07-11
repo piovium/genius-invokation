@@ -1,5 +1,5 @@
 import { DiceType, DamageType, $, card, Reaction } from "@gi-tcg/core/builder";
-import { Tighnari, VijnanaphalaMine, VijnanaSuffusion } from "../characters/dendro/tighnari.gts";
+import { Tighnari, VijnanaphalaMine, VijnanaSuffusion } from "../characters/dendro/tighnari";
 import { Shield } from "../commons.gts";
 
 /**

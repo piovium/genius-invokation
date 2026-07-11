@@ -1,15 +1,15 @@
 import { Aura, type CardHandle, DamageType, DiceType, card, combatStatus, skill, status, summon } from "@gi-tcg/core/builder";
 import { BonecrunchersEnergyBlockCombatStatus } from "../cards/event/other.gts";
-import { Cyno } from "../characters/electro/cyno.gts";
-import { LightningRoseSummon } from "../characters/electro/lisa.gts";
+import { Cyno } from "../characters/electro/cyno.ts";
+import { LightningRoseSummon } from "../characters/electro/lisa.ts";
 import { DominusLapidisStrikingStone, Zhongli } from "../characters/geo/zhongli.gts";
-import { AutumnWhirlwind } from "../characters/anemo/kaedehara_kazuha.gts";
-import { AbiogenesisSolarIsotoma, Albedo } from "../characters/geo/albedo.gts";
-import { DecorousHarmony } from "../characters/geo/yun_jin.gts";
+import { AutumnWhirlwind } from "../characters/anemo/kaedehara_kazuha.ts";
+import { AbiogenesisSolarIsotoma, Albedo } from "../characters/geo/albedo.ts";
+import { DecorousHarmony } from "../characters/geo/yun_jin.ts";
 import { DendroCore } from "../commons.gts";
-import { BountifulCore } from "../characters/hydro/nilou.gts";
-import { TheArtOfBudgeting, TheArtOfBudgetingInEffect, ShouldTriggerTalent } from "../characters/dendro/kaveh.gts";
-import { AnomalousAnatomy, LightlessFeeding } from "../characters/hydro/alldevouring_narwhal.gts";
+import { BountifulCore } from "../characters/hydro/nilou.ts";
+import { TheArtOfBudgeting, TheArtOfBudgetingInEffect, ShouldTriggerTalent } from "../characters/dendro/kaveh.ts";
+import { AnomalousAnatomy, LightlessFeeding } from "../characters/hydro/alldevouring_narwhal.ts";
 
 /**
  * @id 124051

@@ -1,6 +1,6 @@
 import { card, character, DamageType, DiceType, skill, summon, type SummonHandle } from "@gi-tcg/core/builder";
-import { NORMAL_MIMICS, PREVIEW_MIMICS } from "../characters/hydro/rhodeia_of_loch.gts";
-import { BladeAblaze, Prowl, Stealth, StealthMaster, Thrust } from "../characters/pyro/fatui_pyro_agent.gts";
+import { NORMAL_MIMICS, PREVIEW_MIMICS } from "../characters/hydro/rhodeia_of_loch.ts";
+import { BladeAblaze, Prowl, Stealth, StealthMaster, Thrust } from "../characters/pyro/fatui_pyro_agent.ts";
 import { WindAndFreedomInEffect } from "../cards/event/other.gts";
 
 /**

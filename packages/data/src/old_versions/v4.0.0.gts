@@ -1,9 +1,9 @@
 import { DamageType, DiceType, type StatusHandle, type SummonHandle, card, character, combatStatus, flip, skill, status, summon } from "@gi-tcg/core/builder";
-import { MeleeStance, RangedStance, Tartaglia } from "../characters/hydro/tartaglia.gts";
-import { GardenOfPurity, KamisatoArtKyouka, KamisatoArtMarobashi, KyoukaFuushi } from "../characters/hydro/kamisato_ayato.gts";
-import { FatuiCryoCicinMage } from "../characters/cryo/fatui_cryo_cicin_mage.gts";
-import { Diona, IcyPaws } from "../characters/cryo/diona.gts";
-import { RainbowBladework } from "../characters/hydro/xingqiu.gts";
+import { MeleeStance, RangedStance, Tartaglia } from "../characters/hydro/tartaglia.ts";
+import { GardenOfPurity, KamisatoArtKyouka, KamisatoArtMarobashi, KyoukaFuushi } from "../characters/hydro/kamisato_ayato.ts";
+import { FatuiCryoCicinMage } from "../characters/cryo/fatui_cryo_cicin_mage.ts";
+import { Diona, IcyPaws } from "../characters/cryo/diona.ts";
+import { RainbowBladework } from "../characters/hydro/xingqiu.ts";
 import { ReviveOnCooldown } from "../cards/event/food.gts";
 import { Satiated } from "../commons.gts";
 

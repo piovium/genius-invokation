@@ -1,6 +1,6 @@
 import { card, combatStatus, DamageType, DiceType, skill, summon } from "@gi-tcg/core/builder";
-import { AlldevouringNarwhal, AnomalousAnatomy } from "../characters/hydro/alldevouring_narwhal.gts";
-import { FestiveFires } from "../characters/pyro/xinyan.gts";
+import { AlldevouringNarwhal, AnomalousAnatomy } from "../characters/hydro/alldevouring_narwhal.ts";
+import { FestiveFires } from "../characters/pyro/xinyan.ts";
 
 /**
  * @id 115113

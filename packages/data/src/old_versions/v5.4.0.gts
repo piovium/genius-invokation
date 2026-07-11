@@ -1,12 +1,12 @@
 import { card, character, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
-import { DandelionBreeze, FavoniusBladework, GaleBlade } from "../characters/anemo/jean.gts";
+import { DandelionBreeze, FavoniusBladework, GaleBlade } from "../characters/anemo/jean.ts";
 import { DivineMarksmanship, SkywardSonnet, WindsGrandOde } from "../characters/anemo/venti.gts";
 import { CelestialShower, FrostflakeArrow, LiutianArchery, TrailOfTheQilin } from "../characters/cryo/ganyu.gts";
-import { Breastplate, FavoniusBladeworkMaid, SweepingTime } from "../characters/geo/noelle.gts";
+import { Breastplate, FavoniusBladeworkMaid, SweepingTime } from "../characters/geo/noelle.ts";
 import { DominusLapidis, DominusLapidisStrikingStone, PlanetBefall, RainOfStone } from "../characters/geo/zhongli.gts";
-import { KuragesOath, NereidsAscension, TheShapeOfWater } from "../characters/hydro/sangonomiya_kokomi.gts";
-import { DetailedDiagnosisThoroughTreatment01, DetailedDiagnosisThoroughTreatment02, DetailedDiagnosisThoroughTreatment03, MedicalInterventionOfPureIntention, ReboundHydrotherapy, SuperSaturatedSyringing, TargetedTreatment } from "../characters/hydro/sigewinne.gts";
-import { GuideToAfterlife, SecretSpearOfWangsheng, SpiritSoother } from "../characters/pyro/hu_tao.gts";
+import { KuragesOath, NereidsAscension, TheShapeOfWater } from "../characters/hydro/sangonomiya_kokomi.ts";
+import { DetailedDiagnosisThoroughTreatment01, DetailedDiagnosisThoroughTreatment02, DetailedDiagnosisThoroughTreatment03, MedicalInterventionOfPureIntention, ReboundHydrotherapy, SuperSaturatedSyringing, TargetedTreatment } from "../characters/hydro/sigewinne.ts";
+import { GuideToAfterlife, SecretSpearOfWangsheng, SpiritSoother } from "../characters/pyro/hu_tao.ts";
 
 /**
  * @id 331402

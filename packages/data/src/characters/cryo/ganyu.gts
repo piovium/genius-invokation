@@ -35,15 +35,12 @@ export const SacredCryoPearl = summon(111011)
  * 我方出战角色受到伤害时：抵消1点伤害。
  * 可用次数：2
  */
-define combatStatus {
-  id 111012 as IceLotus;
-  tags barrier;
-  on decreaseDamaged {
-    when :(:e.target.isActive());
-    usage 2;
-    :e.decreaseDamage(1);
-  }
-}
+export const IceLotus = combatStatus(111012)
+  .tags("barrier")
+  .on("decreaseDamaged", (c, e) => e.target.isActive())
+  .usage(2)
+  .decreaseDamage(1)
+  .done();
 
 /**
  * @id 11011
@@ -51,13 +48,12 @@ define combatStatus {
  * @description
  * 造成2点物理伤害。
  */
-define skill {
-  id 11011 as LiutianArchery;
-  skillType normal;
-  cost DiceType.Cryo, 1;
-  cost DiceType.Void, 2;
-  :damage(DamageType.Physical, 2);
-}
+export const LiutianArchery = skill(11011)
+  .type("normal")
+  .costCryo(1)
+  .costVoid(2)
+  .damage(DamageType.Physical, 2)
+  .done();
 
 /**
  * @id 11012
@@ -65,13 +61,12 @@ define skill {
  * @description
  * 造成1点冰元素伤害，生成冰莲。
  */
-define skill {
-  id 11012 as TrailOfTheQilin;
-  skillType elemental;
-  cost DiceType.Cryo, 3;
-  :damage(DamageType.Cryo, 1);
-  :combatStatus(IceLotus);
-}
+export const TrailOfTheQilin = skill(11012)
+  .type("elemental")
+  .costCryo(3)
+  .damage(DamageType.Cryo, 1)
+  .combatStatus(IceLotus)
+  .done();
 
 define extension {
   idHint 11013 as private FrostflakeArrowUsedExtension;
@@ -111,15 +106,14 @@ define skill {
  * @description
  * 造成2点冰元素伤害，对所有敌方后台角色造成1点穿透伤害，召唤冰灵珠。
  */
-define skill {
-  id 11014 as CelestialShower;
-  skillType burst;
-  cost DiceType.Cryo, 3;
-  cost DiceType.Energy, 3;
-  :damage(DamageType.Piercing, 1, "opp standby");
-  :damage(DamageType.Cryo, 2);
-  :summon(SacredCryoPearl);
-}
+export const CelestialShower = skill(11014)
+  .type("burst")
+  .costCryo(3)
+  .costEnergy(3)
+  .damage(DamageType.Piercing, 1, "opp standby")
+  .damage(DamageType.Cryo, 2)
+  .summon(SacredCryoPearl)
+  .done();
 
 /**
  * @id 1101
@@ -127,14 +121,13 @@ define skill {
  * @description
  * 「既然是明早前要，那这份通稿，只要熬夜写完就好。」
  */
-define character {
-  id 1101 as Ganyu;
-  since "v3.3.0";
-  tags cryo, bow, liyue;
-  health 12;
-  energy 3;
-  skills LiutianArchery, TrailOfTheQilin, FrostflakeArrow, CelestialShower;
-}
+export const Ganyu = character(1101)
+  .since("v3.3.0")
+  .tags("cryo", "bow", "liyue")
+  .health(12)
+  .energy(3)
+  .skills(LiutianArchery, TrailOfTheQilin, FrostflakeArrow, CelestialShower)
+  .done();
 
 /**
  * @id 211011
@@ -145,13 +138,10 @@ define character {
  * 装备有此牌的甘雨使用霜华矢时：如果此技能在本场对局中曾经被使用过，则其对敌方后台角色造成的穿透伤害改为3点。
  * （牌组中包含甘雨，才能加入牌组）
  */
-define card {
-  id 211011 as UndividedHeart;
-  since "v3.3.0";
-  cost DiceType.Cryo, 5;
-  talent Ganyu {
-    on enter {
-      :useSkill(FrostflakeArrow);
-    }
-  }
-}
+export const UndividedHeart = card(211011)
+  .since("v3.3.0")
+  .costCryo(5)
+  .talent(Ganyu)
+  .on("enter")
+  .useSkill(FrostflakeArrow)
+  .done();
