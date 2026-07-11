@@ -15,7 +15,7 @@
 
 import ts from "typescript";
 import { constants as fsConstants } from "node:fs";
-import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, readdir, writeFile, unlink } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -120,7 +120,9 @@ class GtsBlock {
     }
     if (this.pendingElse) {
       if (!this.elseReady) {
-        throw new ConversionError("encountered .else() without a preceding .if()");
+        throw new ConversionError(
+          "encountered .else() without a preceding .if()",
+        );
       }
       this.actions.push("else {");
       this.actions.push(...indentRaw(normalized, 1));
@@ -491,7 +493,11 @@ function getBindingName(name: ts.BindingName): string | null {
   }
   if (ts.isArrayBindingPattern(name) && name.elements.length === 1) {
     const [element] = name.elements;
-    if (element && ts.isBindingElement(element) && ts.isIdentifier(element.name)) {
+    if (
+      element &&
+      ts.isBindingElement(element) &&
+      ts.isIdentifier(element.name)
+    ) {
       return element.name.text;
     }
   }
@@ -531,7 +537,9 @@ function current(frames: Frame[]): Frame {
 
 function popFrame(frames: Frame[], expected: FrameMode): void {
   if (current(frames).mode !== expected) {
-    throw new ConversionError(`.${expected} terminator found outside ${expected} block`);
+    throw new ConversionError(
+      `.${expected} terminator found outside ${expected} block`,
+    );
   }
   frames.pop();
 }
@@ -598,7 +606,9 @@ function applyStep(
   if (step.name === "do") {
     requireArgs(step, 1);
     if (!allowsTopLevelAction(frame)) {
-      throw new ConversionError(".do() direct actions are not mapped at this block level");
+      throw new ConversionError(
+        ".do() direct actions are not mapped at this block level",
+      );
     }
     frame.block.addAction(convertAction(step.args[0]));
     return;
@@ -609,21 +619,27 @@ function applyStep(
   }
   if (CONTEXT_SHORTCUTS.has(step.name)) {
     if (!allowsTopLevelAction(frame)) {
-      throw new ConversionError(`.${step.name}() is not mapped at this block level`);
+      throw new ConversionError(
+        `.${step.name}() is not mapped at this block level`,
+      );
     }
     if (
       (step.name === "addVariable" || step.name === "setVariable") &&
       step.args.length > 0 &&
       isReservedVariableName(step.args[0]!)
     ) {
-      throw new ConversionError(`.${step.name}() with reserved variable name is not mapped`);
+      throw new ConversionError(
+        `.${step.name}() with reserved variable name is not mapped`,
+      );
     }
     frame.block.addAction([`:${step.name}(${renderArgs(step.args)});`]);
     return;
   }
   if (EVENT_ARG_SHORTCUTS.has(step.name)) {
     if (!allowsTopLevelAction(frame)) {
-      throw new ConversionError(`.${step.name}() is not mapped at this block level`);
+      throw new ConversionError(
+        `.${step.name}() is not mapped at this block level`,
+      );
     }
     frame.block.addAction([`:e.${step.name}(${renderArgs(step.args)});`]);
     return;
@@ -722,7 +738,9 @@ function applyCharacterStep(step: ChainStep, frame: Frame): void {
       return;
     case "specialEnergy":
       if (step.args.length < 1 || step.args.length > 2) {
-        throw new ConversionError(".specialEnergy() expects one or two arguments");
+        throw new ConversionError(
+          ".specialEnergy() expects one or two arguments",
+        );
       }
       frame.block.addLine(`specialEnergy ${renderArgs(step.args)};`);
       return;
@@ -731,7 +749,9 @@ function applyCharacterStep(step: ChainStep, frame: Frame): void {
       frame.block.addLine(`associateNightsoul ${renderArg(step.args[0]!)};`);
       return;
     case "enableLunarReactions":
-      frame.block.addLine(`enabledLunarReactions ${renderBareArgs(step.args)};`);
+      frame.block.addLine(
+        `enabledLunarReactions ${renderBareArgs(step.args)};`,
+      );
       return;
     default:
       throw unsupported(step);
@@ -821,7 +841,9 @@ function applyCardStep(
       return;
     case "eventTalent": {
       if (step.args.length < 1 || step.args.length > 2) {
-        throw new ConversionError(".eventTalent() expects one or two arguments");
+        throw new ConversionError(
+          ".eventTalent() expects one or two arguments",
+        );
       }
       frame.block.addLine(`eventTalent ${renderTalentArgs(step.args)};`);
       return;
@@ -897,7 +919,9 @@ function applyEntityStep(
     case "provideSkill": {
       requireArgs(step, 1);
       if (frame.mode !== "technique") {
-        throw new ConversionError(".provideSkill() is only mapped inside .technique()");
+        throw new ConversionError(
+          ".provideSkill() is only mapped inside .technique()",
+        );
       }
       const block = new GtsBlock("skill");
       block.addLine(`id ${renderArg(step.args[0]!)};`);
@@ -913,7 +937,9 @@ function applyEntityStep(
       popFrame(frames, "event");
       return;
     case "endProvide":
-      throw new ConversionError(".endProvide() found outside technique skill block");
+      throw new ConversionError(
+        ".endProvide() found outside technique skill block",
+      );
     default:
       if (frame.mode === "technique" && step.name === "nightsoul") {
         frame.block.addLine(renderNoArgOrOptionAttr("nightsoul", step.args));
@@ -965,7 +991,9 @@ function applyEntityLikeStep(step: ChainStep, frame: Frame): boolean {
       frame.block.addLine(`shield ${renderArgs(step.args)};`);
       return true;
     case "nightsoulsBlessing":
-      frame.block.addLine(renderValueAndOptionsAttr("nightsoulsBlessing", step.args));
+      frame.block.addLine(
+        renderValueAndOptionsAttr("nightsoulsBlessing", step.args),
+      );
       return true;
     case "prepare":
       frame.block.addLine(renderValueAndOptionsAttr("prepare", step.args));
@@ -975,10 +1003,14 @@ function applyEntityLikeStep(step: ChainStep, frame: Frame): boolean {
         throw new ConversionError(".hint() expects one or two arguments");
       }
       if (isSupportBlock(frame)) {
-        throw new ConversionError(".hint() is not mapped inside support blocks");
+        throw new ConversionError(
+          ".hint() is not mapped inside support blocks",
+        );
       }
       if (step.args.some((arg) => isFunctionExpression(arg))) {
-        throw new ConversionError(".hint() with function argument is not mapped");
+        throw new ConversionError(
+          ".hint() with function argument is not mapped",
+        );
       }
       frame.block.addLine(`hint ${renderArgs(step.args)};`);
       return true;
@@ -1058,7 +1090,9 @@ function applyInitiativeStep(
   if (step.name in COST_METHODS) {
     requireArgs(step, 1);
     state.needsDiceType = true;
-    frame.block.addLine(`cost ${COST_METHODS[step.name]}, ${renderArg(step.args[0]!)};`);
+    frame.block.addLine(
+      `cost ${COST_METHODS[step.name]}, ${renderArg(step.args[0]!)};`,
+    );
     return true;
   }
   switch (step.name) {
@@ -1068,7 +1102,9 @@ function applyInitiativeStep(
       return true;
     case "addTarget":
       requireArgs(step, 1);
-      frame.block.addLine(`addTarget ${renderTargetArg(step.args[0]!, state)};`);
+      frame.block.addLine(
+        `addTarget ${renderTargetArg(step.args[0]!, state)};`,
+      );
       return true;
     case "filter":
       requireArgs(step, 1);
@@ -1106,7 +1142,10 @@ function pushCardInnerBlock(
       header = "artifact";
       break;
     case "support":
-      header = step.args.length === 0 ? "support" : `support ${renderBareArgs(step.args)}`;
+      header =
+        step.args.length === 0
+          ? "support"
+          : `support ${renderBareArgs(step.args)}`;
       break;
     case "talent":
       if (step.args.length < 1 || step.args.length > 2) {
@@ -1150,23 +1189,32 @@ function pushEventBlock(step: ChainStep, frames: Frame[]): void {
   frames.push({ mode: "event", block, eventParentMode: frame.mode });
 }
 
-function pushEndPhaseDamage(frame: Frame, args: readonly ts.Expression[]): void {
+function pushEndPhaseDamage(
+  frame: Frame,
+  args: readonly ts.Expression[],
+): void {
   if (args.length < 2 || args.length > 3) {
-    throw new ConversionError(".endPhaseDamage() expects two or three arguments");
+    throw new ConversionError(
+      ".endPhaseDamage() expects two or three arguments",
+    );
   }
   const icon = stringLiteralValue(args[0]!);
   if (icon === "swirledAnemo") {
     frame.block.addLine(`hint swirled, ${renderArg(args[1]!)};`);
     const block = new GtsBlock("on endPhase");
     const target = args[2] ? `, ${renderArg(args[2])}` : "";
-    block.addAction([`:damage(:self.variables.hintIcon, ${renderArg(args[1]!)}${target});`]);
+    block.addAction([
+      `:damage(:self.variables.hintIcon, ${renderArg(args[1]!)}${target});`,
+    ]);
     frame.block.addBlock(block);
     return;
   }
   frame.block.addLine(`hint ${renderArg(args[0]!)}, ${renderArg(args[1]!)};`);
   const block = new GtsBlock("on endPhase");
   const target = args[2] ? `, ${renderArg(args[2])}` : "";
-  block.addAction([`:damage(${renderArg(args[0]!)}, ${renderArg(args[1]!)}${target});`]);
+  block.addAction([
+    `:damage(${renderArg(args[0]!)}, ${renderArg(args[1]!)}${target});`,
+  ]);
   frame.block.addBlock(block);
 }
 
@@ -1218,7 +1266,9 @@ function renderTargetArg(
   }
   const value = stringLiteralValue(arg);
   if (value !== null) {
-    throw new ConversionError("legacy string target queries do not have an identical GTS VM mapping");
+    throw new ConversionError(
+      "legacy string target queries do not have an identical GTS VM mapping",
+    );
   }
   return renderArg(arg);
 }
@@ -1252,14 +1302,20 @@ function renderCallSnippet(args: readonly ts.Expression[]): string {
   return `:callSnippet.${name}(${projection});`;
 }
 
-function renderValueAndOptionsAttr(name: string, args: readonly ts.Expression[]): string {
+function renderValueAndOptionsAttr(
+  name: string,
+  args: readonly ts.Expression[],
+): string {
   if (args.length < 1 || args.length > 2) {
     throw new ConversionError(`.${name}() expects one or two arguments`);
   }
   return renderAttrWithOptions(`${name} ${renderArg(args[0]!)}`, args[1]);
 }
 
-function renderNoArgOrOptionAttr(name: string, args: readonly ts.Expression[]): string {
+function renderNoArgOrOptionAttr(
+  name: string,
+  args: readonly ts.Expression[],
+): string {
   if (args.length > 1) {
     throw new ConversionError(`.${name}() expects zero or one argument`);
   }
@@ -1268,7 +1324,9 @@ function renderNoArgOrOptionAttr(name: string, args: readonly ts.Expression[]): 
 
 function renderVariableCanAppend(args: readonly ts.Expression[]): string {
   if (args.length < 2 || args.length > 5) {
-    throw new ConversionError(".variableCanAppend() expects two to five arguments");
+    throw new ConversionError(
+      ".variableCanAppend() expects two to five arguments",
+    );
   }
   const [name, value, max, appendOrOpt, opt] = args;
   const optionLines: string[] = [];
@@ -1300,7 +1358,9 @@ function renderEntityUsage(args: readonly ts.Expression[]): string {
 
 function renderUsageCanAppend(args: readonly ts.Expression[]): string {
   if (args.length < 1 || args.length > 3) {
-    throw new ConversionError(".usageCanAppend() expects one to three arguments");
+    throw new ConversionError(
+      ".usageCanAppend() expects one to three arguments",
+    );
   }
   const optionLines =
     args.length >= 2 ? [renderAppendOption(args[1]!, args[2])] : ["append;"];
@@ -1313,7 +1373,9 @@ function renderUsage(
   perRoundSugar: boolean,
 ): string {
   if (args.length < 1 || args.length > 2) {
-    throw new ConversionError(`.${perRoundSugar ? "usagePerRound" : "usage"}() expects one or two arguments`);
+    throw new ConversionError(
+      `.${perRoundSugar ? "usagePerRound" : "usage"}() expects one or two arguments`,
+    );
   }
   const count = args[0]!;
   const optionsArg = args[1];
@@ -1326,7 +1388,10 @@ function renderUsage(
     }
     return true;
   });
-  if (perRoundSugar && !withoutPerRound.some((line) => /^visible(?:\s|;)/.test(line))) {
+  if (
+    perRoundSugar &&
+    !withoutPerRound.some((line) => /^visible(?:\s|;)/.test(line))
+  ) {
     withoutPerRound.push("visible false;");
   }
   const head = perRound
@@ -1335,7 +1400,10 @@ function renderUsage(
   return renderAttrWithOptionLines(head, withoutPerRound);
 }
 
-function renderAppendOption(limit: ts.Expression, value?: ts.Expression): string {
+function renderAppendOption(
+  limit: ts.Expression,
+  value?: ts.Expression,
+): string {
   if (value) {
     return `append {\n${indentMultiline(`limit ${renderArg(limit)};\nvalue ${renderArg(value)};`, 1).join("\n")}\n};`;
   }
@@ -1346,7 +1414,10 @@ function renderAppendOption(limit: ts.Expression, value?: ts.Expression): string
 }
 
 function renderListenTo(expr: ts.Expression): string {
-  if (ts.isPropertyAccessExpression(expr) && textOf(expr.expression) === "ListenTo") {
+  if (
+    ts.isPropertyAccessExpression(expr) &&
+    textOf(expr.expression) === "ListenTo"
+  ) {
     switch (expr.name.text) {
       case "All":
         return "all";
@@ -1395,14 +1466,19 @@ function convertAction(fn: ts.Expression | undefined): string[] {
   return splitLines(converted.code);
 }
 
-function convertFunction(fn: ts.Expression): { kind: "block" | "expr"; code: string } {
+function convertFunction(fn: ts.Expression): {
+  kind: "block" | "expr";
+  code: string;
+} {
   const unwrapped = unwrapExpression(fn);
   if (!ts.isArrowFunction(unwrapped) && !ts.isFunctionExpression(unwrapped)) {
     throw new ConversionError("expected an inline function");
   }
   const params = unwrapped.parameters.map((param) => {
     if (!ts.isIdentifier(param.name)) {
-      throw new ConversionError("only identifier function parameters are supported");
+      throw new ConversionError(
+        "only identifier function parameters are supported",
+      );
     }
     return param.name.text;
   });
@@ -1410,10 +1486,14 @@ function convertFunction(fn: ts.Expression): { kind: "block" | "expr"; code: str
   const eventParam = params[1] ?? null;
 
   if (hasNestedFunctionReference(unwrapped, contextParam, eventParam)) {
-    throw new ConversionError("nested function references context/event parameter");
+    throw new ConversionError(
+      "nested function references context/event parameter",
+    );
   }
   if (hasReservedVariableCall(unwrapped)) {
-    throw new ConversionError("function contains variable operation with reserved variable name");
+    throw new ConversionError(
+      "function contains variable operation with reserved variable name",
+    );
   }
 
   if (ts.isBlock(unwrapped.body)) {
@@ -1428,12 +1508,18 @@ function convertFunction(fn: ts.Expression): { kind: "block" | "expr"; code: str
   return {
     kind: "expr",
     code: collapseMultilineTemplateLiterals(
-      replaceContextReferences(textOf(unwrapped.body), contextParam, eventParam),
+      replaceContextReferences(
+        textOf(unwrapped.body),
+        contextParam,
+        eventParam,
+      ),
     ),
   };
 }
 
-function hasReservedVariableCall(fn: ts.ArrowFunction | ts.FunctionExpression): boolean {
+function hasReservedVariableCall(
+  fn: ts.ArrowFunction | ts.FunctionExpression,
+): boolean {
   let result = false;
   function visit(node: ts.Node) {
     if (result) return;
@@ -1469,10 +1555,14 @@ function hasNestedFunctionReference(
   contextParam: string | null,
   eventParam: string | null,
 ): boolean {
-  const targetNames = new Set<string>([contextParam, eventParam].filter(Boolean));
+  const targetNames = new Set<string>(
+    [contextParam, eventParam].filter((s) => s !== null),
+  );
   let result = false;
 
-  function getParamNames(func: ts.ArrowFunction | ts.FunctionExpression): Set<string> {
+  function getParamNames(
+    func: ts.ArrowFunction | ts.FunctionExpression,
+  ): Set<string> {
     return new Set(
       func.parameters
         .map((p) => (ts.isIdentifier(p.name) ? p.name.text : null))
@@ -1480,7 +1570,10 @@ function hasNestedFunctionReference(
     );
   }
 
-  function visit(node: ts.Node, currentFunction: ts.ArrowFunction | ts.FunctionExpression | null) {
+  function visit(
+    node: ts.Node,
+    currentFunction: ts.ArrowFunction | ts.FunctionExpression | null,
+  ) {
     if (result) return;
     if (node === fn) {
       ts.forEachChild(node, (child) => visit(child, fn));
@@ -1490,7 +1583,9 @@ function hasNestedFunctionReference(
     } else if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
       ts.forEachChild(node, (child) => visit(child, node));
     } else if (ts.isIdentifier(node) && targetNames.has(node.text)) {
-      const localNames = currentFunction ? getParamNames(currentFunction) : new Set<string>();
+      const localNames = currentFunction
+        ? getParamNames(currentFunction)
+        : new Set<string>();
       if (!localNames.has(node.text) && currentFunction !== fn) {
         result = true;
       }
@@ -1514,10 +1609,7 @@ function collapseMultilineTemplateLiterals(code: string): string {
       return match;
     }
     const content = match.slice(1, -1);
-    const collapsed = content
-      .replace(/\\`/g, "`")
-      .replace(/\s+/g, " ")
-      .trim();
+    const collapsed = content.replace(/\\`/g, "`").replace(/\s+/g, " ").trim();
     return `\`${collapsed}\``;
   });
 }
@@ -1565,7 +1657,9 @@ function replaceContextReferences(
           result += ":";
           i++;
         } else {
-          throw new ConversionError(`standalone context parameter '${contextParam}' cannot be mapped to GTS`);
+          throw new ConversionError(
+            `standalone context parameter '${contextParam}' cannot be mapped to GTS`,
+          );
         }
       } else if (eventParam && ident === eventParam && prev !== ".") {
         if (code[i] === ".") {
@@ -1629,7 +1723,10 @@ function renderAttrWithOptions(head: string, options?: ts.Expression): string {
   return renderAttrWithOptionLines(head, renderOptionsObject(options));
 }
 
-function renderAttrWithOptionLines(head: string, optionLines: string[]): string {
+function renderAttrWithOptionLines(
+  head: string,
+  optionLines: string[],
+): string {
   if (optionLines.length === 0) {
     return `${head};`;
   }
@@ -1644,12 +1741,16 @@ function renderOptionsObject(expr: ts.Expression): string[] {
   const result: string[] = [];
   for (const property of unwrapped.properties) {
     if (!ts.isPropertyAssignment(property)) {
-      throw new ConversionError("only simple option property assignments are supported");
+      throw new ConversionError(
+        "only simple option property assignments are supported",
+      );
     }
     const name = propertyName(property.name);
     const value = unwrapExpression(property.initializer);
     if (ts.isObjectLiteralExpression(value)) {
-      result.push(`${name} {\n${indentRaw(renderOptionsObject(value), 1).join("\n")}\n};`);
+      result.push(
+        `${name} {\n${indentRaw(renderOptionsObject(value), 1).join("\n")}\n};`,
+      );
     } else if (value.kind === ts.SyntaxKind.TrueKeyword) {
       result.push(`${name};`);
     } else if (value.kind === ts.SyntaxKind.FalseKeyword) {
@@ -1662,7 +1763,11 @@ function renderOptionsObject(expr: ts.Expression): string[] {
 }
 
 function propertyName(name: ts.PropertyName): string {
-  if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)) {
+  if (
+    ts.isIdentifier(name) ||
+    ts.isStringLiteral(name) ||
+    ts.isNumericLiteral(name)
+  ) {
     return name.text;
   }
   throw new ConversionError("computed option names are not supported");
@@ -1702,7 +1807,10 @@ function bareOrQuoted(value: string): string {
 
 function stringLiteralValue(expr: ts.Expression): string | null {
   const unwrapped = unwrapExpression(expr);
-  if (ts.isStringLiteral(unwrapped) || ts.isNoSubstitutionTemplateLiteral(unwrapped)) {
+  if (
+    ts.isStringLiteral(unwrapped) ||
+    ts.isNoSubstitutionTemplateLiteral(unwrapped)
+  ) {
     return unwrapped.text;
   }
   return null;
@@ -1812,9 +1920,7 @@ function maskGtsDefines(content: string): string {
     defineRegex.lastIndex = end;
   }
   for (const [start, end] of ranges.toReversed()) {
-    const replacement = content
-      .slice(start, end)
-      .replace(/[^\r\n]/g, " ");
+    const replacement = content.slice(start, end).replace(/[^\r\n]/g, " ");
     result = result.slice(0, start) + replacement + result.slice(end);
   }
   return result;
@@ -1854,9 +1960,14 @@ function lineOf(sourceFile: ts.SourceFile, position: number): number {
   return sourceFile.getLineAndCharacterOfPosition(position).line + 1;
 }
 
-function applyReplacements(content: string, replacements: Replacement[]): string {
+function applyReplacements(
+  content: string,
+  replacements: Replacement[],
+): string {
   let result = content;
-  for (const replacement of replacements.toSorted((a, b) => b.start - a.start)) {
+  for (const replacement of replacements.toSorted(
+    (a, b) => b.start - a.start,
+  )) {
     result =
       result.slice(0, replacement.start) +
       replacement.text +
@@ -1865,7 +1976,10 @@ function applyReplacements(content: string, replacements: Replacement[]): string
   return result;
 }
 
-function ensureBuilderImports(content: string, names: readonly string[]): string {
+function ensureBuilderImports(
+  content: string,
+  names: readonly string[],
+): string {
   const missing = names.filter((name) => !builderImportHas(content, name));
   if (missing.length === 0) {
     return content;
@@ -1902,9 +2016,14 @@ function builderImportHas(content: string, name: string): boolean {
     .includes(name);
 }
 
-async function processFile(inputPath: string, options: CliOptions): Promise<FileResult> {
+async function processFile(
+  inputPath: string,
+  options: CliOptions,
+): Promise<FileResult> {
   const original = await readFile(inputPath, "utf-8");
-  const masked = inputPath.endsWith(".gts") ? maskGtsDefines(original) : original;
+  const masked = inputPath.endsWith(".gts")
+    ? maskGtsDefines(original)
+    : original;
   const sourceFile = ts.createSourceFile(
     inputPath,
     masked,
@@ -1927,14 +2046,20 @@ async function processFile(inputPath: string, options: CliOptions): Promise<File
       continue;
     }
     const declaration = statement.declarationList.declarations[0]!;
-    const chain = declaration.initializer ? getChain(declaration.initializer) : null;
+    const chain = declaration.initializer
+      ? getChain(declaration.initializer)
+      : null;
     if (!chain) {
       continue;
     }
     const bindingName = getBindingName(declaration.name) ?? "<anonymous>";
     try {
       const state = { needsDiceType: false, needsDollar: false };
-      const replacement = convertDefinitionWithState(declaration, statement, state);
+      const replacement = convertDefinitionWithState(
+        declaration,
+        statement,
+        state,
+      );
       needsDiceType ||= state.needsDiceType;
       needsDollar ||= state.needsDollar;
       replacements.push({
@@ -1953,7 +2078,10 @@ async function processFile(inputPath: string, options: CliOptions): Promise<File
     }
   }
 
-  let content = replacements.length > 0 ? applyReplacements(original, replacements) : original;
+  let content =
+    replacements.length > 0
+      ? applyReplacements(original, replacements)
+      : original;
   const importNames: string[] = [];
   if (needsDiceType) {
     importNames.push("DiceType");
@@ -1987,21 +2115,31 @@ function convertDefinitionWithState(
   }
   const chain = getChain(declaration.initializer);
   if (!chain) {
-    throw new ConversionError("initializer is not a supported legacy builder chain");
+    throw new ConversionError(
+      "initializer is not a supported legacy builder chain",
+    );
   }
   if (chain.rootArgs.length !== 1) {
-    throw new ConversionError(`${chain.rootName}() must have exactly one id argument`);
+    throw new ConversionError(
+      `${chain.rootName}() must have exactly one id argument`,
+    );
   }
   const root = new GtsBlock(`define ${chain.rootName}`);
-  root.addLine(makeIdLine(chain.rootArgs[0]!, bindingName, isExported(statement)));
+  root.addLine(
+    makeIdLine(chain.rootArgs[0]!, bindingName, isExported(statement)),
+  );
   const frames: Frame[] = [{ mode: rootMode(chain.rootName), block: root }];
   for (const step of chain.steps) {
     applyStep(step, frames, state);
   }
-  if (frames.some((frame) => frame.block.pendingIf || frame.block.pendingElse)) {
+  if (
+    frames.some((frame) => frame.block.pendingIf || frame.block.pendingElse)
+  ) {
     throw new ConversionError("dangling .if() or .else()");
   }
-  if (!chain.steps.some((step) => step.name === "done" || step.name === "reserve")) {
+  if (
+    !chain.steps.some((step) => step.name === "done" || step.name === "reserve")
+  ) {
     throw new ConversionError("chain is missing .done() or .reserve()");
   }
   return root.render().join("\n") + "\n";
@@ -2009,8 +2147,11 @@ function convertDefinitionWithState(
 
 async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
-  const files = options.files.length > 0 ? options.files : await collectDefaultFiles();
-  const results = await Promise.all(files.map((file) => processFile(file, options)));
+  const files =
+    options.files.length > 0 ? options.files : await collectDefaultFiles();
+  const results = await Promise.all(
+    files.map((file) => processFile(file, options)),
+  );
 
   if (options.stdout) {
     process.stdout.write(results[0]!.content);
@@ -2035,6 +2176,9 @@ async function main(): Promise<void> {
       }
       await mkdir(path.dirname(result.outputPath), { recursive: true });
       await writeFile(result.outputPath, result.content);
+      if (result.outputPath !== result.path) {
+        await unlink(result.path);
+      }
       written++;
     }
   }

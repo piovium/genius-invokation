@@ -475,7 +475,6 @@ export const CardViewModel = InitiativeSkillViewModel
       );
       skillModel.id = model.getSubId();
       skillModel.enableHandTriggering = true;
-      skillModel.enablePileTriggering = skillModel.enablePileTriggering;
       const skillDef = skillModel.buildSkillDefinition();
       model.skillList.push(skillDef);
     }),
