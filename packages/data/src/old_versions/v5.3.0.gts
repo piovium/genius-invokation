@@ -1,7 +1,7 @@
 import { card, character, DamageType, skill } from "@gi-tcg/core/builder";
-import { DriftcloudWave, Skyladder } from "../characters/anemo/xianyun.gts";
-import { BattlelineDetonation, BusterBlaze, ImperialPanoply, SearingBlast, ShatterclampStrike } from "../characters/pyro/emperor_of_fire_and_iron.gts";
-import { Chiori, FlutteringHasode } from "../characters/geo/chiori.gts";
+import { DriftcloudWave, Skyladder } from "../characters/anemo/xianyun.ts";
+import { BattlelineDetonation, BusterBlaze, ImperialPanoply, SearingBlast, ShatterclampStrike } from "../characters/pyro/emperor_of_fire_and_iron.ts";
+import { Chiori, FlutteringHasode } from "../characters/geo/chiori.ts";
 
 /**
  * @id 2304

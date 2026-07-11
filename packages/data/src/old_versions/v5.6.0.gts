@@ -1,14 +1,14 @@
 import { card, character, DamageType, skill } from "@gi-tcg/core/builder";
 import { DominusLapidisStrikingStone, Zhongli } from "../characters/geo/zhongli.gts";
 import { TurboDrillField, TurboTwirlyLetItRip, TurboTwirlyTriggered } from "../characters/geo/kachina.gts";
-import { Xilonen, YohualsScratch } from "../characters/geo/xilonen.gts";
-import { MistBubbleSlime, SlashOfSurgingTides, SlashOfSurgingTidesPassive, WhirlingScythe } from "../characters/hydro/hydro_hilichurl_rogue.gts";
-import { AsWaterSeeksEquilibrium, EquitableJudgment, OTearsIShallRepay, OTidesIHaveReturned, SourcewaterDropletSkill } from "../characters/hydro/neuvillette.gts";
-import { Oceanborne, Stormbreaker, Tidecaller, Wavestrider } from "../characters/electro/beidou.gts";
-import { GleamingSpearGuardianStance, HeronStrike, SacredRiteHeronsSanctum, SacredRiteWagtailsTide } from "../characters/hydro/candace.gts";
-import { HolisticRevivification, TheClassicsOfAcupuncture, UniversalDiagnosis } from "../characters/dendro/baizhu.gts";
+import { Xilonen, YohualsScratch } from "../characters/geo/xilonen.ts";
+import { MistBubbleSlime, SlashOfSurgingTides, SlashOfSurgingTidesPassive, WhirlingScythe } from "../characters/hydro/hydro_hilichurl_rogue.ts";
+import { AsWaterSeeksEquilibrium, EquitableJudgment, OTearsIShallRepay, OTidesIHaveReturned, SourcewaterDropletSkill } from "../characters/hydro/neuvillette.ts";
+import { Oceanborne, Stormbreaker, Tidecaller, Wavestrider } from "../characters/electro/beidou.ts";
+import { GleamingSpearGuardianStance, HeronStrike, SacredRiteHeronsSanctum, SacredRiteWagtailsTide } from "../characters/hydro/candace.ts";
+import { HolisticRevivification, TheClassicsOfAcupuncture, UniversalDiagnosis } from "../characters/dendro/baizhu.ts";
 import { RaidenShogun } from "../characters/electro/raiden_shogun.gts";
-import { AbiogenesisSolarIsotoma, FavoniusBladeworkWeiss, RiteOfProgenitureTectonicTide } from "../characters/geo/albedo.gts";
+import { AbiogenesisSolarIsotoma, FavoniusBladeworkWeiss, RiteOfProgenitureTectonicTide } from "../characters/geo/albedo.ts";
 
 /**
  * @id 116102

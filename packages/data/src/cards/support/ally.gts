@@ -24,17 +24,14 @@ import { BattlePlan } from "../../commons.gts";
  * 行动阶段开始时：生成2点万能元素。
  * 可用次数：2
  */
-define card {
-  id 322001 as Paimon;
-  since "v3.3.0";
-  cost DiceType.Aligned, 3;
-  support ally {
-    on actionPhase {
-      usage 2;
-      :generateDice(DiceType.Omni, 2);
-    }
-  }
-}
+export const Paimon = card(322001)
+  .since("v3.3.0")
+  .costSame(3)
+  .support("ally")
+  .on("actionPhase")
+  .usage(2)
+  .generateDice(DiceType.Omni, 2)
+  .done();
 
 /**
  * @id 322002
@@ -42,19 +39,14 @@ define card {
  * @description
  * 我方执行「切换角色」行动时：将此次切换视为「快速行动」而非「战斗行动」。（每回合1次）
  */
-define card {
-  id 322002 as Katheryne;
-  since "v3.3.0";
-  cost DiceType.Aligned, 1;
-  support ally {
-    on beforeFastSwitch {
-      usage perRound, 1 {
-        visible false;
-      };
-      :e.setFastAction();
-    }
-  }
-}
+export const Katheryne = card(322002)
+  .since("v3.3.0")
+  .costSame(1)
+  .support("ally")
+  .on("beforeFastSwitch")
+  .usagePerRound(1)
+  .setFastAction()
+  .done();
 
 /**
  * @id 322003
@@ -121,28 +113,17 @@ export const Wagner = card(322004)
  * 打出「料理」事件牌后：生成1个随机基础元素骰。（每回合1次）
  * 打出「料理」事件牌后：从牌组中随机抽取1张「料理」事件牌。（整场牌局限制1次）
  */
-define card {
-  id 322005 as ChefMao;
-  since "v3.3.0";
-  cost DiceType.Aligned, 1;
-  support ally {
-    on playCard {
-      when :(:e.hasCardTag("food"));
-      usage perRound, 1 {
-        visible false;
-      };
-      :generateDice("randomElement", 1);
-    }
-    on playCard {
-      when :(:e.hasCardTag("food"));
-      usage 1 {
-        autoDispose false;
-        visible false;
-      };
-      :drawCards(1, { withTag: "food" });
-    }
-  }
-}
+export const ChefMao = card(322005)
+  .since("v3.3.0")
+  .costSame(1)
+  .support("ally")
+  .on("playCard", (c, e) => e.hasCardTag("food"))
+  .usagePerRound(1)
+  .generateDice("randomElement", 1)
+  .on("playCard", (c, e) => e.hasCardTag("food"))
+  .usage(1, { autoDispose: false, visible: false })
+  .drawCards(1, { withTag: "food" })
+  .done();
 
 /**
  * @id 322006
@@ -150,20 +131,14 @@ define card {
  * @description
  * 打出「场地」支援牌时：少花费2个元素骰。（每回合1次）
  */
-define card {
-  id 322006 as Tubby;
-  since "v3.3.0";
-  cost DiceType.Aligned, 2;
-  support ally {
-    on deductOmniDiceCard {
-      when :(:e.hasCardTag("place"));
-      usage perRound, 1 {
-        visible false;
-      };
-      :e.deductOmniCost(2);
-    }
-  }
-}
+export const Tubby = card(322006)
+  .since("v3.3.0")
+  .costSame(2)
+  .support("ally")
+  .on("deductOmniDiceCard", (c, e) => e.hasCardTag("place"))
+  .usagePerRound(1)
+  .deductOmniCost(2)
+  .done();
 
 /**
  * @id 322007
@@ -171,21 +146,20 @@ define card {
  * @description
  * 每回合自动触发1次：此牌累积1只「鸽子」。如果此牌已累积3只「鸽子」，则弃置此牌，抓1张牌，并生成1点万能元素。
  */
-define card {
-  id 322007 as Timmie;
-  since "v3.3.0";
-  support ally {
-    variable pigeon, 1;
-    on actionPhase {
-      :addVariable("pigeon", 1);
-      if (:getVariable("pigeon") === 3) {
-        :drawCards(1);
-        :generateDice(DiceType.Omni, 1);
-        :dispose();
-      }
+export const Timmie = card(322007)
+  .since("v3.3.0")
+  .support("ally")
+  .variable("pigeon", 1)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("pigeon", 1);
+    if (c.getVariable("pigeon") === 3) {
+      c.drawCards(1);
+      c.generateDice(DiceType.Omni, 1);
+      c.dispose();
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 322008
@@ -194,24 +168,24 @@ define card {
  * 结束阶段：收集我方未使用的元素骰（每种最多1个）。
  * 行动阶段开始时：如果此牌已收集3个元素骰，则抓2张牌，生成2点万能元素，然后弃置此牌。
  */
-define card {
-  id 322008 as Liben;
-  since "v3.3.0";
-  support ally {
-    variable collected, 0;
-    on endPhase {
-      const absorbed = :absorbDice("diff", 3 - :getVariable("collected"));
-      :addVariable("collected", absorbed.length);
+export const Liben = card(322008)
+  .since("v3.3.0")
+  .support("ally")
+  .variable("collected", 0)
+  .on("endPhase")
+  .do((c) => {
+    const absorbed = c.absorbDice("diff", 3 - c.getVariable("collected"));
+    c.addVariable("collected", absorbed.length);
+  })
+  .on("actionPhase")
+  .do((c) => {
+    if (c.getVariable("collected") >= 3) {
+      c.drawCards(2);
+      c.generateDice(DiceType.Omni, 2);
+      c.dispose();
     }
-    on actionPhase {
-      if (:getVariable("collected") >= 3) {
-        :drawCards(2);
-        :generateDice(DiceType.Omni, 2);
-        :dispose();
-      }
-    }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 322009
@@ -219,23 +193,22 @@ define card {
  * @description
  * 双方角色使用技能后：如果造成了物理伤害、穿透伤害或引发了元素反应，此牌累积1个「灵感」。如果此牌已累积3个「灵感」，则弃置此牌并抓2张牌。
  */
-define card {
-  id 322009 as ChangTheNinth;
-  since "v3.3.0";
-  support ally {
-    variable inspiration, 0;
-    on useSkill {
-      when :(:hasPhaseDamage("all", (e) => e.type === DamageType.Piercing || e.type === DamageType.Physical) || 
-          :hasPhaseReaction("all"));
-      listenTo all;
-      :addVariable("inspiration", 1);
-      if (:getVariable("inspiration") >= 3) {
-        :drawCards(2);
-        :dispose();
-      }
+export const ChangTheNinth = card(322009)
+  .since("v3.3.0")
+  .support("ally")
+  .variable("inspiration", 0)
+  .on("useSkill", (c) =>
+    c.hasPhaseDamage("all", (e) => e.type === DamageType.Piercing || e.type === DamageType.Physical) || 
+    c.hasPhaseReaction("all"))
+  .listenToAll()
+  .do((c) => {
+    c.addVariable("inspiration", 1);
+    if (c.getVariable("inspiration") >= 3) {
+      c.drawCards(2);
+      c.dispose();
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 322010
@@ -243,27 +216,21 @@ define card {
  * @description
  * 我方角色使用本回合使用过的技能时：少花费1个元素骰。（每回合1次）
  */
-define card {
-  id 322010 as Ellin;
-  since "v3.3.0";
-  cost DiceType.Aligned, 2;
-  support ally {
-    on deductOmniDiceSkill {
-      when :{
-        return (
-          :countOfSkill(
-            :e.action.skill.caller.definition.id as CharacterHandle,
-            :e.action.skill.definition.id as SkillHandle,
-          ) > 0
-        );
-      };
-      usage perRound, 1 {
-        visible false;
-      };
-      :e.deductOmniCost(1);
-    }
-  }
-}
+export const Ellin = card(322010)
+  .since("v3.3.0")
+  .costSame(2)
+  .support("ally")
+  .on("deductOmniDiceSkill", (c, e) => {
+    return (
+      c.countOfSkill(
+        e.action.skill.caller.definition.id as CharacterHandle,
+        e.action.skill.definition.id as SkillHandle,
+      ) > 0
+    );
+  })
+  .usagePerRound(1)
+  .deductOmniCost(1)
+  .done();
 
 /**
  * @id 322011
@@ -272,17 +239,14 @@ define card {
  * 结束阶段：我方一名充能未满的角色获得1点充能。（出战角色优先）
  * 可用次数：2
  */
-define card {
-  id 322011 as IronTongueTian;
-  since "v3.3.0";
-  cost DiceType.Void, 2;
-  support ally {
-    on endPhase {
-      usage 2;
-      :gainEnergy(1, "my characters with energy < maxEnergy limit 1");
-    }
-  }
-}
+export const IronTongueTian = card(322011)
+  .since("v3.3.0")
+  .costVoid(2)
+  .support("ally")
+  .on("endPhase")
+  .usage(2)
+  .gainEnergy(1, "my characters with energy < maxEnergy limit 1")
+  .done();
 
 /**
  * @id 322012
@@ -291,21 +255,15 @@ define card {
  * 我方切换到一个没有充能的角色后：使我方出战角色获得1点充能。（每回合1次）
  * 可用次数：2
  */
-define card {
-  id 322012 as LiuSu;
-  since "v3.3.0";
-  cost DiceType.Aligned, 1;
-  support ally {
-    on switchActive {
-      when :(:e.switchInfo.to.energy === 0);
-      usage 2;
-      usage perRound, 1 {
-        visible false;
-      };
-      :gainEnergy(1, "my active");
-    }
-  }
-}
+export const LiuSu = card(322012)
+  .since("v3.3.0")
+  .costSame(1)
+  .support("ally")
+  .on("switchActive", (c, e) => e.switchInfo.to.energy === 0)
+  .usage(2)
+  .usagePerRound(1)
+  .gainEnergy(1, "my active")
+  .done();
 
 /**
  * @id 322013
@@ -314,23 +272,17 @@ define card {
  * 召唤物消失时：此牌累积1点「大祓」进度。（最多累积3点）
  * 我方打出「武器」或「圣遗物」装备时：如果「大祓」进度已达到3，则弃置此牌，使打出的卡牌少花费2个元素骰。
  */
-define card {
-  id 322013 as Hanachirusato;
-  since "v3.7.0";
-  support ally {
-    variable progress, 0;
-    on dispose {
-      when :(:e.entity.definition.type === "summon");
-      listenTo all;
-      :addVariableWithMax("progress", 1, 3);
-    }
-    on deductOmniDiceCard {
-      when :(:e.hasOneOfCardTag("weapon", "artifact") && :getVariable("progress") >= 3);
-      :e.deductOmniCost(2);
-      :dispose();
-    }
-  }
-}
+export const Hanachirusato = card(322013)
+  .since("v3.7.0")
+  .support("ally")
+  .variable("progress", 0)
+  .on("dispose", (c, e) => e.entity.definition.type === "summon")
+  .listenToAll()
+  .addVariableWithMax("progress", 1, 3)
+  .on("deductOmniDiceCard", (c, e) => e.hasOneOfCardTag("weapon", "artifact") && c.getVariable("progress") >= 3)
+  .deductOmniCost(2)
+  .dispose()
+  .done();
 
 /**
  * @id 322014
@@ -338,21 +290,20 @@ define card {
  * @description
  * 行动阶段开始时：生成1点万能元素。然后，如果对方的支援区未满，则将此牌转移到对方的支援区。
  */
-define card {
-  id 322014 as KidKujirai;
-  since "v3.7.0";
-  support ally {
-    on actionPhase {
-      :generateDice(DiceType.Omni, 1);
-      if (:remainingSupportCount("opp") > 0) {
-        :moveEntity(:self, {
-          type: "supports",
-          who: flip(:self.who),
-        });
-      }
+export const KidKujirai = card(322014)
+  .since("v3.7.0")
+  .support("ally")
+  .on("actionPhase")
+  .do((c) => {
+    c.generateDice(DiceType.Omni, 1);
+    if (c.remainingSupportCount("opp") > 0) {
+      c.moveEntity(c.self, {
+        type: "supports",
+        who: flip(c.self.who),
+      });
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 322015
@@ -360,20 +311,14 @@ define card {
  * @description
  * 打出「料理」事件牌时：少花费2个元素骰。（每回合1次）
  */
-define card {
-  id 322015 as Xudong;
-  since "v3.7.0";
-  cost DiceType.Void, 2;
-  support ally {
-    on deductOmniDiceCard {
-      when :(:e.hasCardTag("food"));
-      usage perRound, 1 {
-        visible false;
-      };
-      :e.deductOmniCost(2);
-    }
-  }
-}
+export const Xudong = card(322015)
+  .since("v3.7.0")
+  .costVoid(2)
+  .support("ally")
+  .on("deductOmniDiceCard", (c, e) => e.hasCardTag("food"))
+  .usagePerRound(1)
+  .deductOmniCost(2)
+  .done();
 
 /**
  * @id 322016
@@ -382,28 +327,17 @@ define card {
  * 打出「伙伴」支援牌时：少花费1个元素骰。（每回合1次）
  * 打出「伙伴」支援牌后：从牌组中随机抽取1张「伙伴」支援牌。（整场牌局限制1次）
  */
-define card {
-  id 322016 as Dunyarzad;
-  since "v3.7.0";
-  cost DiceType.Aligned, 1;
-  support ally {
-    on deductOmniDiceCard {
-      when :(:e.hasCardTag("ally"));
-      usage perRound, 1 {
-        visible false;
-      };
-      :e.deductOmniCost(1);
-    }
-    on playCard {
-      when :(:e.card.id !== :self.id && :e.hasCardTag("ally"));
-      usage 1 {
-        autoDispose false;
-        visible false;
-      };
-      :drawCards(1, { withTag: "ally" });
-    }
-  }
-}
+export const Dunyarzad = card(322016)
+  .since("v3.7.0")
+  .costSame(1)
+  .support("ally")
+  .on("deductOmniDiceCard", (c, e) => e.hasCardTag("ally"))
+  .usagePerRound(1)
+  .deductOmniCost(1)
+  .on("playCard", (c, e) => e.card.id !== c.self.id && e.hasCardTag("ally"))
+  .usage(1, { autoDispose: false, visible: false })
+  .drawCards(1, { withTag: "ally" })
+  .done();
 
 /**
  * @id 322017
@@ -411,21 +345,17 @@ define card {
  * @description
  * 我方角色使用「元素战技」后：生成1个我方下一个后台角色类型的元素骰。（每回合1次）
  */
-define card {
-  id 322017 as Rana;
-  since "v3.7.0";
-  cost DiceType.Aligned, 2;
-  support ally {
-    on useSkill {
-      when :(:e.isSkillType("elemental") && :$("my next"));
-      usage perRound, 1 {
-        visible false;
-      };
-      const next = :$("my next")!;
-      :generateDice(next.element(), 1);
-    }
-  }
-}
+export const Rana = card(322017)
+  .since("v3.7.0")
+  .costSame(2)
+  .support("ally")
+  .on("useSkill", (c, e) => e.isSkillType("elemental") && c.$("my next"))
+  .usagePerRound(1)
+  .do((c) => {
+    const next = c.$("my next")!;
+    c.generateDice(next.element(), 1);
+  })
+  .done();
 
 /**
  * @id 322018
@@ -433,23 +363,19 @@ define card {
  * @description
  * 我方打出「武器」手牌时：少花费1个元素骰；我方场上每有1个已装备「武器」的角色，就额外少花费1个元素骰。（每回合1次）
  */
-define card {
-  id 322018 as MasterZhang;
-  since "v3.8.0";
-  cost DiceType.Aligned, 1;
-  support ally {
-    on deductOmniDiceCard {
-      when :(:e.hasCardTag("weapon"));
-      usage perRound, 1 {
-        visible false;
-      };
-      const weaponedCh = :$$(
-        "my characters has equipment with tag (weapon)",
-      ).length;
-      :e.deductOmniCost(1 + weaponedCh);
-    }
-  }
-}
+export const MasterZhang = card(322018)
+  .since("v3.8.0")
+  .costSame(1)
+  .support("ally")
+  .on("deductOmniDiceCard", (c, e) => e.hasCardTag("weapon"))
+  .usagePerRound(1)
+  .do((c, e) => {
+    const weaponedCh = c.$$(
+      "my characters has equipment with tag (weapon)",
+    ).length;
+    e.deductOmniCost(1 + weaponedCh);
+  })
+  .done();
 
 /**
  * @id 322019
@@ -458,19 +384,15 @@ define card {
  * 双方执行任意行动后，我方手牌数量为0时：抓1张牌。
  * 可用次数：3
  */
-define card {
-  id 322019 as Setaria;
-  since "v4.0.0";
-  cost DiceType.Aligned, 1;
-  support ally {
-    on action {
-      when :(:player.hands.length === 0);
-      listenTo all;
-      usage 3;
-      :drawCards(1);
-    }
-  }
-}
+export const Setaria = card(322019)
+  .since("v4.0.0")
+  .costSame(1)
+  .support("ally")
+  .on("action", (c) => c.player.hands.length === 0)
+  .listenToAll()
+  .usage(3)
+  .drawCards(1)
+  .done();
 
 /**
  * @id 322020
@@ -478,27 +400,23 @@ define card {
  * @description
  * 我方打出「圣遗物」手牌时：少花费1个元素骰；如果我方场上已有2个已装备「圣遗物」的角色，就额外少花费1个元素骰。（每回合1次）
  */
-define card {
-  id 322020 as YayoiNanatsuki;
-  since "v4.1.0";
-  cost DiceType.Aligned, 1;
-  support ally {
-    on deductOmniDiceCard {
-      when :(:e.hasCardTag("artifact"));
-      usage perRound, 1 {
-        visible false;
-      };
-      const artifactedCh = :$$(
-        "my characters has equipment with tag (artifact)",
-      );
-      if (artifactedCh.length >= 2) {
-        :e.deductOmniCost(2);
-      } else {
-        :e.deductOmniCost(1);
-      }
+export const YayoiNanatsuki = card(322020)
+  .since("v4.1.0")
+  .costSame(1)
+  .support("ally")
+  .on("deductOmniDiceCard", (c, e) => e.hasCardTag("artifact"))
+  .usagePerRound(1)
+  .do((c, e) => {
+    const artifactedCh = c.$$(
+      "my characters has equipment with tag (artifact)",
+    );
+    if (artifactedCh.length >= 2) {
+      e.deductOmniCost(2);
+    } else {
+      e.deductOmniCost(1);
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 322021
@@ -530,14 +448,11 @@ export const Mamere: SupportHandle = card(322021)
  * 对角色打出「天赋」或角色使用技能时：少花费3个元素骰。
  * 可用次数：1
  */
-define status {
-  id 302205 as SandsAndDream;
-  on deductOmniDice {
-    when :(:e.isSkillOrTalentOf(:self.master));
-    usage 1;
-    :e.deductOmniCost(3);
-  }
-}
+export const SandsAndDream = status(302205)
+  .on("deductOmniDice", (c, e) => e.isSkillOrTalentOf(c.self.master))
+  .usage(1)
+  .deductOmniCost(3)
+  .done();
 
 export const DisposedSupportCountExtension = extension(322022, {
   disposedSupportCount: "pair<number>",
@@ -649,14 +564,10 @@ export const SilverAndMelus = card(322023)
  * 结束阶段：造成2点物理伤害。
  * 可用次数：2
  */
-define summon {
-  id 302201 as TaromaruEnraged;
-  hint DamageType.Physical, 2;
-  on endPhase {
-    :damage(DamageType.Physical, 2);
-  }
-  usage 2;
-}
+export const TaromaruEnraged = summon(302201)
+  .endPhaseDamage(DamageType.Physical, 2)
+  .usage(2)
+  .done();
 
 /**
  * @id 322024
@@ -665,25 +576,22 @@ define summon {
  * 入场时：生成4张太郎丸的存款，均匀地置入我方牌库中。
  * 我方打出2张太郎丸的存款后：弃置此牌，召唤愤怒的太郎丸。
  */
-define card {
-  id 322024 as Taroumaru;
-  since "v4.6.0";
-  cost DiceType.Void, 2;
-  support ally {
-    variable count, 0;
-    on enter {
-      :createPileCards(TaroumarusSavings, 4, "spaceAround");
+export const Taroumaru = card(322024)
+  .since("v4.6.0")
+  .costVoid(2)
+  .support("ally")
+  .variable("count", 0)
+  .on("enter")
+  .createPileCards(TaroumarusSavings, 4, "spaceAround")
+  .on("playCard", (c, e) => e.card.definition.id === TaroumarusSavings)
+  .do((c) => {
+    c.addVariable("count", 1);
+    if (c.getVariable("count") >= 2) {
+      c.summon(TaromaruEnraged);
+      c.dispose();
     }
-    on playCard {
-      when :(:e.card.definition.id === TaroumarusSavings);
-      :addVariable("count", 1);
-      if (:getVariable("count") >= 2) {
-        :summon(TaromaruEnraged);
-        :dispose();
-      }
-    }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 322025
@@ -709,24 +617,21 @@ export const TheWhiteGloveAndTheFisherman = card(322025)
  * 我方舍弃或调和1张牌后：此牌累积1点「新闻线索」。（最多累积到2点）
  * 结束阶段：如果此牌已累积2点「新闻线索」，则扣除2点，复制对方牌库顶的1张牌加入我方手牌。
  */
-define card {
-  id 322026 as SirArthur;
-  since "v4.7.0";
-  support ally {
-    variable clue, 0;
-    on disposeOrTuneCard {
-      :addVariableWithMax("clue", 1, 2);
+export const SirArthur = card(322026)
+  .since("v4.7.0")
+  .support("ally")
+  .variable("clue", 0)
+  .on("disposeOrTuneCard")
+  .addVariableWithMax("clue", 1, 2)
+  .on("endPhase", (c) => c.getVariable("clue") >= 2)
+  .do((c) => {
+    c.addVariable("clue", -2);
+    const top = c.oppPlayer.pile[0];
+    if (top) {
+      c.createHandCard(top.definition.id as CardHandle);
     }
-    on endPhase {
-      when :(:getVariable("clue") >= 2);
-      :addVariable("clue", -2);
-      const top = :oppPlayer.pile[0];
-      if (top) {
-        :createHandCard(top.definition.id as CardHandle);
-      }
-    }
-  }
-}
+  })
+  .done();
 
 const PUCAS_ALLIES = () => [
   Paimon,
@@ -757,27 +662,28 @@ const PUCAS_ALLIES = () => [
  * @description
  * 随机生成「伙伴」到场上，直到填满双方支援区。
  */
-define card {
-  id 302213 as PucasSupport;
-  since "v4.8.0";
-  undiscoverable;
-  const myCount = :remainingSupportCount("my");
-  const myAllies = :randomSubset(PUCAS_ALLIES(), myCount);
-  for (const def of myAllies) {
-    :createEntity("support", def, {
-      type: "supports",
-      who: :self.who
-    });
-  }
-  const oppCount = :remainingSupportCount("opp");
-  const oppAllies = :randomSubset(PUCAS_ALLIES(), oppCount);
-  for (const def of oppAllies) {
-    :createEntity("support", def, {
-      type: "supports",
-      who: flip(:self.who)
-    });
-  }
-}
+export const PucasSupport = card(302213)
+  .since("v4.8.0")
+  .undiscoverable()
+  .do((c) => {
+    const myCount = c.remainingSupportCount("my");
+    const myAllies = c.randomSubset(PUCAS_ALLIES(), myCount);
+    for (const def of myAllies) {
+      c.createEntity("support", def, {
+        type: "supports",
+        who: c.self.who
+      });
+    }
+    const oppCount = c.remainingSupportCount("opp");
+    const oppAllies = c.randomSubset(PUCAS_ALLIES(), oppCount);
+    for (const def of oppAllies) {
+      c.createEntity("support", def, {
+        type: "supports",
+        who: flip(c.self.who)
+      });
+    }
+  })
+  .done();
 
 const SERENE_SUPPORTS = [
   SerenesSupport,
@@ -799,22 +705,22 @@ const SERENE_SUPPORTS = [
  * 每回合自动触发1次：将1张随机的「美露莘的声援」放入我方手牌。
  * 可用次数：3
  */
-define card {
-  id 322027 as Serene;
-  since "v4.8.0";
-  cost DiceType.Void, 2;
-  support ally {
-    on enter {
-      const card = :random(SERENE_SUPPORTS);
-      :createHandCard(card);
-    }
-    on actionPhase {
-      usage 2;
-      const card = :random(SERENE_SUPPORTS);
-      :createHandCard(card);
-    }
-  }
-}
+export const Serene = card(322027)
+  .since("v4.8.0")
+  .costVoid(2)
+  .support("ally")
+  .on("enter")
+  .do((c) => {
+    const card = c.random(SERENE_SUPPORTS);
+    c.createHandCard(card);
+  })
+  .on("actionPhase")
+  .usage(2)
+  .do((c) => {
+    const card = c.random(SERENE_SUPPORTS);
+    c.createHandCard(card);
+  })
+  .done();
 
 /**
  * @id 322028
@@ -822,19 +728,14 @@ define card {
  * @description
  * 我方使用「特技」时：少花费1个元素骰。（每回合1次）
  */
-define card {
-  id 322028 as Atea;
-  since "v5.0.0";
-  cost DiceType.Aligned, 1;
-  support ally {
-    on deductOmniDiceTechnique {
-      usage perRound, 1 {
-        visible false;
-      };
-      :e.deductOmniCost(1);
-    }
-  }
-}
+export const Atea = card(322028)
+  .since("v5.0.0")
+  .costSame(1)
+  .support("ally")
+  .on("deductOmniDiceTechnique")
+  .usagePerRound(1)
+  .deductOmniCost(1)
+  .done();
 
 /**
  * @id 322029
@@ -842,25 +743,20 @@ define card {
  * @description
  * 入场时及我方触发元素反应后：从折纸飞鼠、跳跳纸蛙、折纸胖胖鼠中随机生成1张加入手牌。
  */
-define card {
-  id 322029 as ForestBlessing;
-  since "v5.8.0";
-  cost DiceType.Void, 2;
-  support ally {
-    defineSnippet :{
-      const newCard = :random([OrigamiFlyingSquirrel, PopupPaperFrog, OrigamiHamster]);
-      :createHandCard(newCard);
-    };
-    on enter {
-      :callSnippet();
-    }
-    on reaction {
-      when :(:e.caller.isMine());
-      listenTo all;
-      :callSnippet();
-    }
-  }
-}
+export const ForestBlessing = card(322029)
+  .since("v5.8.0")
+  .costVoid(2)
+  .support("ally")
+  .defineSnippet((c, e) => {
+    const newCard = c.random([OrigamiFlyingSquirrel, PopupPaperFrog, OrigamiHamster]);
+    c.createHandCard(newCard);
+  })
+  .on("enter")
+  .callSnippet()
+  .on("reaction", (c, e) => e.caller.isMine())
+  .listenToAll()
+  .callSnippet()
+  .done();
 
 /**
  * @id 322030
@@ -870,24 +766,22 @@ define card {
  * 我方打出「希穆兰卡」召唤物后，使其效果量+1。
  * 可用次数：2
  */
-define card {
-  id 322030 as GiftOfTheGoddessOfProphecy;
-  since "v5.8.0";
-  cost DiceType.Void, 2;
-  support ally {
-    on enter {
-      :createHandCard(ToyGuard);
-      :createHandCard(ToyGuard);
-      :createPileCards(ToyGuard, 2, "random");
-    }
-    on enterRelative {
-      when :(:e.entity.definition.type === "summon" &&
-          (SIMULANKA_SUMMONS as number[]).includes(:e.entity.definition.id));
-      usage 2;
-      :e.entity.cast<"summon">().addVariable("effect", 1);
-    }
-  }
-}
+export const GiftOfTheGoddessOfProphecy = card(322030)
+  .since("v5.8.0")
+  .costVoid(2)
+  .support("ally")
+  .on("enter")
+  .createHandCard(ToyGuard)
+  .createHandCard(ToyGuard)
+  .createPileCards(ToyGuard, 2, "random")
+  .on("enterRelative", (c, e) =>
+    e.entity.definition.type === "summon" &&
+    (SIMULANKA_SUMMONS as number[]).includes(e.entity.definition.id))
+  .usage(2)
+  .do((c, e) => {
+    e.entity.cast<"summon">().addVariable("effect", 1);
+  })
+  .done();
 
 /**
  * @id 322031
@@ -896,27 +790,22 @@ define card {
  * 入场时：复制对方牌组顶的1张牌加入我方手牌。
  * 我方打出名称不存在于本局最初牌组的牌时：冒险1次。（每回合1次，最多生效2次）
  */
-define card {
-  id 322031 as Seymour;
-  since "v6.2.0";
-  cost DiceType.Aligned, 1;
-  support ally {
-    on enter {
-      const oppTop = :oppPlayer.pile[0];
-      if (oppTop) {
-        :createHandCard(oppTop.definition.id as CardHandle);
-      }
+export const Seymour = card(322031)
+  .since("v6.2.0")
+  .costSame(1)
+  .support("ally")
+  .on("enter")
+  .do((c) => {
+    const oppTop = c.oppPlayer.pile[0];
+    if (oppTop) {
+      c.createHandCard(oppTop.definition.id as CardHandle);
     }
-    on playCard {
-      when :(!:isInInitialPile(:e.card));
-      usage 2;
-      usage perRound, 1 {
-        visible false;
-      };
-      :adventure();
-    }
-  }
-}
+  })
+  .on("playCard", (c, e) => !c.isInInitialPile(e.card))
+  .usage(2)
+  .usagePerRound(1)
+  .adventure()
+  .done();
 
 /**
  * @id 322032
@@ -925,22 +814,16 @@ define card {
  * 入场时：冒险1次。
  * 我方使用「特技」后：冒险1次。（每回合1次）
  */
-define card {
-  id 322032 as BonaAndCocouik;
-  since "v6.3.0";
-  cost DiceType.Void, 2;
-  support ally {
-    on enter {
-      :adventure();
-    }
-    on useTechnique {
-      usage perRound, 1 {
-        visible false;
-      };
-      :adventure();
-    }
-  }
-}
+export const BonaAndCocouik = card(322032)
+  .since("v6.3.0")
+  .costVoid(2)
+  .support("ally")
+  .on("enter")
+  .adventure()
+  .on("useTechnique")
+  .usagePerRound(1)
+  .adventure()
+  .done();
 
 /**
  * @id 302220
@@ -948,20 +831,19 @@ define card {
  * @description
  * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到1时，治疗我方受伤最多的角色2点，然后弃置此卡牌。
  */
-define card {
-  id 302220 as MedicalEquipmentInvestmentGrandPlan;
-  undiscoverable;
-  support ally {
-    variable progress, 0;
-    on actionPhase {
-      :addVariable("progress", 1);
-      if (:getVariable("progress") >= 1) {
-        :heal(2, $.macros.myMostInjured);
-        :dispose();
-      }
+export const MedicalEquipmentInvestmentGrandPlan = card(302220)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 1) {
+      c.heal(2, $.macros.myMostInjured);
+      c.dispose();
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 302221
@@ -969,20 +851,19 @@ define card {
  * @description
  * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到2时，治疗我方受伤最多的角色4点，然后弃置此卡牌。
  */
-define card {
-  id 302221 as MedicalEquipmentInvestmentMegaPlan;
-  undiscoverable;
-  support ally {
-    variable progress, 0;
-    on actionPhase {
-      :addVariable("progress", 1);
-      if (:getVariable("progress") >= 2) {
-        :heal(4, $.macros.myMostInjured);
-        :dispose();
-      }
+export const MedicalEquipmentInvestmentMegaPlan = card(302221)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 2) {
+      c.heal(4, $.macros.myMostInjured);
+      c.dispose();
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 302222
@@ -990,20 +871,19 @@ define card {
  * @description
  * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到3时，治疗我方受伤最多的角色6点，然后弃置此卡牌。
  */
-define card {
-  id 302222 as MedicalEquipmentInvestmentSuperMegaPlan;
-  undiscoverable;
-  support ally {
-    variable progress, 0;
-    on actionPhase {
-      :addVariable("progress", 1);
-      if (:getVariable("progress") >= 3) {
-        :heal(6, $.macros.myMostInjured);
-        :dispose();
-      }
+export const MedicalEquipmentInvestmentSuperMegaPlan = card(302222)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 3) {
+      c.heal(6, $.macros.myMostInjured);
+      c.dispose();
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 302229
@@ -1011,22 +891,23 @@ define card {
  * @description
  * 对我方出战角色造成1点穿透伤害，执行1个「治疗」效果相关的计划。
  */
-define card {
-  id 302229 as LepinepaulinesInvestmentInMedicalEquipment;
-  since "v6.5.0";
-  undiscoverable;
-  const lepine = :query($.my.support.def(LepinePauline));
-  if (!lepine) {
-    return;
-  }
-  :damage(DamageType.Piercing, 1, $.my.active);
-  const targetPlan = :random([
-    MedicalEquipmentInvestmentGrandPlan, 
-    MedicalEquipmentInvestmentMegaPlan, 
-    MedicalEquipmentInvestmentSuperMegaPlan
-  ]);
-  :transformDefinition(lepine, targetPlan);
-}
+export const LepinepaulinesInvestmentInMedicalEquipment = card(302229)
+  .since("v6.5.0")
+  .undiscoverable()
+  .do((c) => {
+    const lepine = c.query($.my.support.def(LepinePauline));
+    if (!lepine) {
+      return;
+    }
+    c.damage(DamageType.Piercing, 1, $.my.active);
+    const targetPlan = c.random([
+      MedicalEquipmentInvestmentGrandPlan, 
+      MedicalEquipmentInvestmentMegaPlan, 
+      MedicalEquipmentInvestmentSuperMegaPlan
+    ]);
+    c.transformDefinition(lepine, targetPlan);
+  })
+  .done();
 
 /**
  * @id 302223
@@ -1034,20 +915,19 @@ define card {
  * @description
  * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到1时，抓2张牌，然后弃置此卡牌。
  */
-define card {
-  id 302223 as GraphAdversarialTechnologyInvestmentGrandPlan;
-  undiscoverable;
-  support ally {
-    variable progress, 0;
-    on actionPhase {
-      :addVariable("progress", 1);
-      if (:getVariable("progress") >= 1) {
-        :drawCards(2);
-        :dispose();
-      }
+export const GraphAdversarialTechnologyInvestmentGrandPlan = card(302223)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 1) {
+      c.drawCards(2);
+      c.dispose();
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 302224
@@ -1055,20 +935,19 @@ define card {
  * @description
  * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到2时，抓4张牌，然后弃置此卡牌。
  */
-define card {
-  id 302224 as GraphAdversarialTechnologyInvestmentMegaPlan;
-  undiscoverable;
-  support ally {
-    variable progress, 0;
-    on actionPhase {
-      :addVariable("progress", 1);
-      if (:getVariable("progress") >= 2) {
-        :drawCards(4);
-        :dispose();
-      }
+export const GraphAdversarialTechnologyInvestmentMegaPlan = card(302224)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 2) {
+      c.drawCards(4);
+      c.dispose();
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 302225
@@ -1076,20 +955,19 @@ define card {
  * @description
  * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到3时，抓6张牌，然后弃置此卡牌。
  */
-define card {
-  id 302225 as GraphAdversarialTechnologyInvestmentSuperMegaPlan;
-  undiscoverable;
-  support ally {
-    variable progress, 0;
-    on actionPhase {
-      :addVariable("progress", 1);
-      if (:getVariable("progress") >= 3) {
-        :drawCards(6);
-        :dispose();
-      }
+export const GraphAdversarialTechnologyInvestmentSuperMegaPlan = card(302225)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 3) {
+      c.drawCards(6);
+      c.dispose();
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 302230
@@ -1097,25 +975,26 @@ define card {
  * @description
  * 舍弃1张随机手牌，执行1个「抓牌」效果相关的计划。
  */
-define card {
-  id 302230 as LepinepaulinesInvestmentInGraphAdversarialTechnology;
-  since "v6.5.0";
-  undiscoverable;
-  const lepine = :query($.my.support.def(LepinePauline));
-  if (!lepine) {
-    return;
-  }
-  const randomCard = :random(:player.hands);
-  if (randomCard) {
-    :disposeCard(randomCard);
-    const targetPlan = :random([
-      GraphAdversarialTechnologyInvestmentGrandPlan, GraphAdversarialTechnologyInvestmentMegaPlan, GraphAdversarialTechnologyInvestmentSuperMegaPlan
-    ]);
-    :transformDefinition(lepine, targetPlan);
-  } else {
-    :dispose(lepine);
-  }
-}
+export const LepinepaulinesInvestmentInGraphAdversarialTechnology = card(302230)
+  .since("v6.5.0")
+  .undiscoverable()
+  .do((c) => {
+    const lepine = c.query($.my.support.def(LepinePauline));
+    if (!lepine) {
+      return;
+    }
+    const randomCard = c.random(c.player.hands);
+    if (randomCard) {
+      c.disposeCard(randomCard);
+      const targetPlan = c.random([
+        GraphAdversarialTechnologyInvestmentGrandPlan, GraphAdversarialTechnologyInvestmentMegaPlan, GraphAdversarialTechnologyInvestmentSuperMegaPlan
+      ]);
+      c.transformDefinition(lepine, targetPlan);
+    } else {
+      c.dispose(lepine);
+    }
+  })
+  .done();
 
 /**
  * @id 302226
@@ -1123,20 +1002,19 @@ define card {
  * @description
  * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到1时，获得1个随机基础元素骰，然后弃置此卡牌。
  */
-define card {
-  id 302226 as EnergyMechanismInvestmentGrandPlan;
-  undiscoverable;
-  support ally {
-    variable progress, 0;
-    on actionPhase {
-      :addVariable("progress", 1);
-      if (:getVariable("progress") >= 1) {
-        :generateDice("randomElement", 1);
-        :dispose();
-      }
+export const EnergyMechanismInvestmentGrandPlan = card(302226)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 1) {
+      c.generateDice("randomElement", 1);
+      c.dispose();
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 302227
@@ -1144,20 +1022,19 @@ define card {
  * @description
  * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到2时，获得2个随机基础元素骰，然后弃置此卡牌。
  */
-define card {
-  id 302227 as EnergyMechanismInvestmentMegaPlan;
-  undiscoverable;
-  support ally {
-    variable progress, 0;
-    on actionPhase {
-      :addVariable("progress", 1);
-      if (:getVariable("progress") >= 2) {
-        :generateDice("randomElement", 2);
-        :dispose();
-      }
+export const EnergyMechanismInvestmentMegaPlan = card(302227)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 2) {
+      c.generateDice("randomElement", 2);
+      c.dispose();
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 302228
@@ -1165,20 +1042,19 @@ define card {
  * @description
  * 行动阶段开始时：此卡牌累计1点「进度」。「进度」达到3时，获得3个随机基础元素骰，然后弃置此卡牌。
  */
-define card {
-  id 302228 as EnergyMechanismInvestmentSuperMegaPlan;
-  undiscoverable;
-  support ally {
-    variable progress, 0;
-    on actionPhase {
-      :addVariable("progress", 1);
-      if (:getVariable("progress") >= 3) {
-        :generateDice("randomElement", 3);
-        :dispose();
-      }
+export const EnergyMechanismInvestmentSuperMegaPlan = card(302228)
+  .undiscoverable()
+  .support("ally")
+  .variable("progress", 0)
+  .on("actionPhase")
+  .do((c) => {
+    c.addVariable("progress", 1);
+    if (c.getVariable("progress") >= 3) {
+      c.generateDice("randomElement", 3);
+      c.dispose();
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 302231
@@ -1186,26 +1062,27 @@ define card {
  * @description
  * 移除我方1个元素骰，执行1个「元素骰」效果相关的计划。
  */
-define card {
-  id 302231 as LepinepaulinesInvestmentInEnergyMechanism;
-  since "v6.5.0";
-  undiscoverable;
-  const lepine = :query($.my.support.def(LepinePauline));
-  if (!lepine) {
-    return;
-  }
-  const absorbed = :absorbDice("seq", 1);
-  if (absorbed.length > 0) {
-    const targetPlan = :random([
-      EnergyMechanismInvestmentGrandPlan, 
-      EnergyMechanismInvestmentMegaPlan, 
-      EnergyMechanismInvestmentSuperMegaPlan
-    ]);
-    :transformDefinition(lepine, targetPlan);
-  } else {
-    :dispose(lepine);
-  }
-}
+export const LepinepaulinesInvestmentInEnergyMechanism = card(302231)
+  .since("v6.5.0")
+  .undiscoverable()
+  .do((c) => {
+    const lepine = c.query($.my.support.def(LepinePauline));
+    if (!lepine) {
+      return;
+    }
+    const absorbed = c.absorbDice("seq", 1);
+    if (absorbed.length > 0) {
+      const targetPlan = c.random([
+        EnergyMechanismInvestmentGrandPlan, 
+        EnergyMechanismInvestmentMegaPlan, 
+        EnergyMechanismInvestmentSuperMegaPlan
+      ]);
+      c.transformDefinition(lepine, targetPlan);
+    } else {
+      c.dispose(lepine);
+    }
+  })
+  .done();
 
 
 /**
@@ -1214,20 +1091,17 @@ define card {
  * @description
  * 入场时：挑选1个投资计划。
  */
-define card {
-  id 322033 as LepinePauline;
-  since "v6.5.0";
-  support ally {
-    variable progress, 0;
-    on enter {
-      :selectAndPlay([
-          LepinepaulinesInvestmentInMedicalEquipment,
-          LepinepaulinesInvestmentInGraphAdversarialTechnology,
-          LepinepaulinesInvestmentInEnergyMechanism,
-        ]);
-    }
-  }
-}
+export const LepinePauline = card(322033)
+  .since("v6.5.0")
+  .support("ally")
+  .variable("progress", 0) // for transformed plans to use
+  .on("enter")
+  .selectAndPlay([
+    LepinepaulinesInvestmentInMedicalEquipment,
+    LepinepaulinesInvestmentInGraphAdversarialTechnology,
+    LepinepaulinesInvestmentInEnergyMechanism,
+  ])
+  .done();
 
 /**
  * @id 322034
@@ -1235,17 +1109,11 @@ define card {
  * @description
  * 我方触发月感电或月绽放反应时：我方出战角色附属战斗计划。（每回合1次）
  */
-define card {
-  id 322034 as Netochka;
-  since "v6.6.0";
-  cost DiceType.Aligned, 1;
-  support ally {
-    on dealReaction {
-      when :(([Reaction.LunarElectroCharged, Reaction.LunarBloom] as Reaction[]).includes(:e.type));
-      usage perRound, 1 {
-        visible false;
-      };
-      :characterStatus(BattlePlan, $.my.active);
-    }
-  }
-}
+export const Netochka = card(322034)
+  .since("v6.6.0")
+  .costSame(1)
+  .support("ally")
+  .on("dealReaction", (c, e) => ([Reaction.LunarElectroCharged, Reaction.LunarBloom] as Reaction[]).includes(e.type))
+  .usagePerRound(1)
+  .characterStatus(BattlePlan, $.my.active)
+  .done();

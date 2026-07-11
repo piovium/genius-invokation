@@ -1,12 +1,12 @@
 import { card, character, DamageType, Reaction, skill, status } from "@gi-tcg/core/builder";
-import { Citlali, MamaloacosFrigidRainInEffect } from "../characters/cryo/citlali.gts";
+import { Citlali, MamaloacosFrigidRainInEffect } from "../characters/cryo/citlali.ts";
 import { BondOfLife } from "../commons.gts";
-import { Arlecchino } from "../characters/pyro/arlecchino.gts";
+import { Arlecchino } from "../characters/pyro/arlecchino.ts";
 import { FlamestriderBlazingTrail, FlamestriderFullThrottle, FlamestriderSoaringAscent } from "../characters/pyro/mavuika.gts";
 import { Kachina, TurboTwirlyTriggered } from "../characters/geo/kachina.gts";
-import { GrappleLink, NightRealmsGiftRepaidInFull, NightsoulsBlessing } from "../characters/dendro/kinich.gts";
-import { Emilie, LumidouceCaseLevel1, LumidouceCaseLevel2, LumidouceCaseLevel3 } from "../characters/dendro/emilie.gts";
-import { BloodbondedShadow, FrostyInterjection, OnslaughtStance, SwiftPoint } from "../characters/cryo/frost_operative.gts";
+import { GrappleLink, NightRealmsGiftRepaidInFull, NightsoulsBlessing } from "../characters/dendro/kinich.ts";
+import { Emilie, LumidouceCaseLevel1, LumidouceCaseLevel2, LumidouceCaseLevel3 } from "../characters/dendro/emilie.ts";
+import { BloodbondedShadow, FrostyInterjection, OnslaughtStance, SwiftPoint } from "../characters/cryo/frost_operative.ts";
 
 /**
  * @id 211141

@@ -15,7 +15,7 @@
 
 import { type EntityDefinition, type CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, status, summon, originalDiceCostOfCard, $, type CombatStatusHandle } from "@gi-tcg/core/builder";
 import { BurningFlame, CatalyzingField, CostReduction, DendroCore, EfficientSwitch, Empowerment, ResistantForm, Shield } from "../../commons.gts";
-import { BountifulCore } from "../../characters/hydro/nilou.gts";
+import { BountifulCore } from "../../characters/hydro/nilou";
 
 /**
  * @id 303211
@@ -24,14 +24,10 @@ import { BountifulCore } from "../../characters/hydro/nilou.gts";
  * 结束阶段：造成1点冰元素伤害。
  * 可用次数：2
  */
-define summon {
-  id 303211 as CryoHilichurlShooter;
-  hint DamageType.Cryo, 1;
-  on endPhase {
-    :damage(DamageType.Cryo, 1);
-  }
-  usage 2;
-}
+export const CryoHilichurlShooter = summon(303211)
+  .endPhaseDamage(DamageType.Cryo, 1)
+  .usage(2)
+  .done();
 
 /**
  * @id 303212
@@ -40,14 +36,10 @@ define summon {
  * 结束阶段：造成1点水元素伤害。
  * 可用次数：2
  */
-define summon {
-  id 303212 as HydroSamachurl;
-  hint DamageType.Hydro, 1;
-  on endPhase {
-    :damage(DamageType.Hydro, 1);
-  }
-  usage 2;
-}
+export const HydroSamachurl = summon(303212)
+  .endPhaseDamage(DamageType.Hydro, 1)
+  .usage(2)
+  .done();
 
 
 /**
@@ -57,14 +49,10 @@ define summon {
  * 结束阶段：造成1点火元素伤害。
  * 可用次数：2
  */
-define summon {
-  id 303213 as HilichurlBerserker;
-  hint DamageType.Pyro, 1;
-  on endPhase {
-    :damage(DamageType.Pyro, 1);
-  }
-  usage 2;
-}
+export const HilichurlBerserker = summon(303213)
+  .endPhaseDamage(DamageType.Pyro, 1)
+  .usage(2)
+  .done();
 
 /**
  * @id 303214
@@ -73,14 +61,10 @@ define summon {
  * 结束阶段：造成1点雷元素伤害。
  * 可用次数：2
  */
-define summon {
-  id 303214 as ElectroHilichurlShooter;
-  hint DamageType.Electro, 1;
-  on endPhase {
-    :damage(DamageType.Electro, 1);
-  }
-  usage 2;
-}
+export const ElectroHilichurlShooter = summon(303214)
+  .endPhaseDamage(DamageType.Electro, 1)
+  .usage(2)
+  .done();
 
 /**
  * @id 303216
@@ -89,16 +73,12 @@ define summon {
  * 所在阵营的角色使用技能后：对所在阵营的出战角色造成1点冰元素伤害。（每回合1次）
  * 可用次数：2
  */
-define combatStatus {
-  id 303216 as FatuiAmbusherCryoCicinMage;
-  on useSkill {
-    usage 2;
-    usage perRound, 1 {
-      visible false;
-    };
-    :damage(DamageType.Cryo, 1, "my active");
-  }
-}
+export const FatuiAmbusherCryoCicinMage = combatStatus(303216)
+  .on("useSkill")
+  .usage(2)
+  .usagePerRound(1)
+  .damage(DamageType.Cryo, 1, "my active")
+  .done();
 
 /**
  * @id 303217
@@ -107,16 +87,12 @@ define combatStatus {
  * 所在阵营的角色使用技能后：对所在阵营的出战角色造成1点水元素伤害。（每回合1次）
  * 可用次数：2
  */
-define combatStatus {
-  id 303217 as FatuiAmbusherMirrorMaiden;
-  on useSkill {
-    usage 2;
-    usage perRound, 1 {
-      visible false;
-    };
-    :damage(DamageType.Hydro, 1, "my active");
-  }
-}
+export const FatuiAmbusherMirrorMaiden = combatStatus(303217)
+  .on("useSkill")
+  .usage(2)
+  .usagePerRound(1)
+  .damage(DamageType.Hydro, 1, "my active")
+  .done();
 
 /**
  * @id 303218
@@ -125,16 +101,12 @@ define combatStatus {
  * 所在阵营的角色使用技能后：对所在阵营的出战角色造成1点火元素伤害。（每回合1次）
  * 可用次数：2
  */
-define combatStatus {
-  id 303218 as FatuiAmbusherPyroslingerBracer;
-  on useSkill {
-    usage 2;
-    usage perRound, 1 {
-      visible false;
-    };
-    :damage(DamageType.Pyro, 1, "my active");
-  }
-}
+export const FatuiAmbusherPyroslingerBracer = combatStatus(303218)
+  .on("useSkill")
+  .usage(2)
+  .usagePerRound(1)
+  .damage(DamageType.Pyro, 1, "my active")
+  .done();
 
 /**
  * @id 303219
@@ -143,16 +115,12 @@ define combatStatus {
  * 所在阵营的角色使用技能后：对所在阵营的出战角色造成1点雷元素伤害。（每回合1次）
  * 可用次数：2
  */
-define combatStatus {
-  id 303219 as FatuiAmbusherElectrohammerVanguard;
-  on useSkill {
-    usage 2;
-    usage perRound, 1 {
-      visible false;
-    };
-    :damage(DamageType.Electro, 1, "my active");
-  }
-}
+export const FatuiAmbusherElectrohammerVanguard = combatStatus(303219)
+  .on("useSkill")
+  .usage(2)
+  .usagePerRound(1)
+  .damage(DamageType.Electro, 1, "my active")
+  .done();
 
 /**
  * @id 331102
@@ -178,15 +146,14 @@ export const [ElementalResonanceShatteringIce] = card(331102)
  * 治疗我方出战角色2点。然后，治疗所有我方后台角色1点。
  * （牌组包含至少2个水元素角色，才能加入牌组）
  */
-define card {
-  id 331202 as ElementalResonanceSoothingWater;
-  since "v3.3.0";
-  cost DiceType.Hydro, 1;
-  tags resonance;
-  filter :(:$(`my characters with health < maxHealth`));
-  :heal(2, "my active");
-  :heal(1, "my standby");
-}
+export const ElementalResonanceSoothingWater = card(331202)
+  .since("v3.3.0")
+  .costHydro(1)
+  .tags("resonance")
+  .filter((c) => c.$(`my characters with health < maxHealth`))
+  .heal(2, "my active")
+  .heal(1, "my standby")
+  .done();
 
 /**
  * @id 331302
@@ -212,15 +179,14 @@ export const [ElementalResonanceFerventFlames] = card(331302)
  * 我方出战角色和下一名充能未满的角色获得1点充能。
  * （牌组包含至少2个雷元素角色，才能加入牌组）
  */
-define card {
-  id 331402 as ElementalResonanceHighVoltage;
-  since "v3.3.0";
-  cost DiceType.Electro, 1;
-  tags resonance;
-  filter :(:$(`my characters with energy < maxEnergy`));
-  :gainEnergy(1, "my active");
-  :gainEnergy(1, "my standby character with energy < maxEnergy limit 1");
-}
+export const ElementalResonanceHighVoltage = card(331402)
+  .since("v3.3.0")
+  .costElectro(1)
+  .tags("resonance")
+  .filter((c) => c.$(`my characters with energy < maxEnergy`))
+  .gainEnergy(1, "my active")
+  .gainEnergy(1, "my standby character with energy < maxEnergy limit 1")
+  .done();
 
 /**
  * @id 303133
@@ -228,12 +194,10 @@ define card {
  * @description
  * 我方下次执行「切换角色」行动时：少花费1个元素骰。
  */
-define combatStatus {
-  id 303133 as ElementalResonanceImpetuousWindsInEffect01;
-  once deductOmniDiceSwitch {
-    :e.deductOmniCost(1);
-  }
-}
+export const ElementalResonanceImpetuousWindsInEffect01 = combatStatus(303133)
+  .once("deductOmniDiceSwitch")
+  .deductOmniCost(1)
+  .done();
 
 /**
  * @id 303136
@@ -241,12 +205,10 @@ define combatStatus {
  * @description
  * 我方下次执行「切换角色」行动时：将此次切换视为「快速行动」而非「战斗行动」。
  */
-define combatStatus {
-  id 303136 as ElementalResonanceImpetuousWindsInEffect03;
-  once beforeFastSwitch {
-    :e.setFastAction();
-  }
-}
+export const ElementalResonanceImpetuousWindsInEffect03 = combatStatus(303136)
+  .once("beforeFastSwitch")
+  .setFastAction()
+  .done();
 
 /**
  * @id 303134
@@ -254,27 +216,23 @@ define combatStatus {
  * @description
  * 我方下次触发扩散反应时对目标以外的所有敌方角色造成的伤害+1。
  */
-define combatStatus {
-  id 303134 as ElementalResonanceImpetuousWindsInEffect02;
-  on increaseDamage {
-    when :((
-        ([
-          Reaction.SwirlCryo, 
-          Reaction.SwirlElectro, 
-          Reaction.SwirlHydro, 
-          Reaction.SwirlPyro
-        ] as (Reaction | null)[]).includes(:e.damageInfo.fromReaction)) &&
-        !:e.target.isMine());
-    :e.increaseDamage(1);
-  }
-  on reaction {
-    when :(:e.reactionInfo.fromDamage && 
-        :e.reactionInfo.fromDamage.source.who === :self.who &&
-        :e.relatedTo(DamageType.Anemo));
-    listenTo all;
-    :dispose();
-  }
-}
+export const ElementalResonanceImpetuousWindsInEffect02 = combatStatus(303134)
+  .on("increaseDamage", (c, e) => (
+    ([
+      Reaction.SwirlCryo, 
+      Reaction.SwirlElectro, 
+      Reaction.SwirlHydro, 
+      Reaction.SwirlPyro
+    ] as (Reaction | null)[]).includes(e.damageInfo.fromReaction)) &&
+    !e.target.isMine())
+  .increaseDamage(1)
+  .on("reaction", (c, e) =>
+    e.reactionInfo.fromDamage && 
+    e.reactionInfo.fromDamage.source.who === c.self.who &&
+    e.relatedTo(DamageType.Anemo))
+  .listenToAll()
+  .dispose()
+  .done();
 
 /**
  * @id 331502
@@ -284,15 +242,14 @@ define combatStatus {
  * 我方下次触发扩散反应时对目标以外的所有敌方角色造成的伤害+1。
  * （牌组包含至少2个风元素角色，才能加入牌组）
  */
-define card {
-  id 331502 as ElementalResonanceImpetuousWinds;
-  since "v3.3.0";
-  cost DiceType.Anemo, 1;
-  tags resonance;
-  :combatStatus(ElementalResonanceImpetuousWindsInEffect01);
-  :combatStatus(ElementalResonanceImpetuousWindsInEffect02);
-  :combatStatus(ElementalResonanceImpetuousWindsInEffect03);
-}
+export const ElementalResonanceImpetuousWinds = card(331502)
+  .since("v3.3.0")
+  .costAnemo(1)
+  .tags("resonance")
+  .combatStatus(ElementalResonanceImpetuousWindsInEffect01)
+  .combatStatus(ElementalResonanceImpetuousWindsInEffect02)
+  .combatStatus(ElementalResonanceImpetuousWindsInEffect03)
+  .done();
 
 /**
  * @id 303162
@@ -300,10 +257,9 @@ define card {
  * @description
  * 为我方出战角色提供3点护盾。
  */
-define combatStatus {
-  id 303162 as ResonanceShield;
-  shield 3;
-}
+export const ResonanceShield = combatStatus(303162)
+  .shield(3)
+  .done();
 
 /**
  * @id 331602
@@ -312,13 +268,12 @@ define combatStatus {
  * 为我方出战角色提供3点护盾。
  * （牌组包含至少2个岩元素角色，才能加入牌组）
  */
-define card {
-  id 331602 as ElementalResonanceEnduringRock;
-  since "v3.3.0";
-  cost DiceType.Geo, 1;
-  tags resonance;
-  :combatStatus(ResonanceShield);
-}
+export const ElementalResonanceEnduringRock = card(331602)
+  .since("v3.3.0")
+  .costGeo(1)
+  .tags("resonance")
+  .combatStatus(ResonanceShield)
+  .done();
 
 /**
  * @id 331702
@@ -327,22 +282,27 @@ define card {
  * 若我方场上存在燃烧烈焰/草原核或丰穰之核/激化领域，则对对方出战角色造成1点火元素伤害/水元素伤害/雷元素伤害。
  * （牌组包含至少2个草元素角色，才能加入牌组）
  */
-define card {
-  id 331702 as ElementalResonanceSprawlingGreenery;
-  since "v3.3.0";
-  cost DiceType.Dendro, 1;
-  tags resonance;
-  filter :(:$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore} or my combat status with definition id ${CatalyzingField} or my summon with definition id ${BurningFlame}`));
-  if (:$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`)) {
-    :damage(DamageType.Hydro, 1, "opp active");
-  }
-  if (:$(`my combat status with definition id ${CatalyzingField}`)) {
-    :damage(DamageType.Electro, 1, "opp active");
-  }
-  if (:$(`my summon with definition id ${BurningFlame}`)) {
-    :damage(DamageType.Pyro, 1, "opp active");
-  }
-}
+export const ElementalResonanceSprawlingGreenery = card(331702)
+  .since("v3.3.0")
+  .costDendro(1)
+  .tags("resonance")
+  .filter((c) => c.$(`
+    my combat status with definition id ${DendroCore} or 
+    my summon with definition id ${BountifulCore} or
+    my combat status with definition id ${CatalyzingField} or
+    my summon with definition id ${BurningFlame}`))
+  .do((c) => {
+    if (c.$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`)) {
+      c.damage(DamageType.Hydro, 1, "opp active");
+    }
+    if (c.$(`my combat status with definition id ${CatalyzingField}`)) {
+      c.damage(DamageType.Electro, 1, "opp active");
+    }
+    if (c.$(`my summon with definition id ${BurningFlame}`)) {
+      c.damage(DamageType.Pyro, 1, "opp active");
+    }
+  })
+  .done();
 
 /**
  * @id 331721
@@ -351,21 +311,22 @@ define card {
  * 赋予我方随机1张手牌以及牌组顶的卡牌费用降低。
  * （牌组包含至少2个「挪德卡莱」角色，才能加入牌组）
  */
-define card {
-  id 331721 as MoonsignAscendantGleam;
-  since "v6.5.0";
-  tags resonance;
-  const handCandidates = :queryAll($.macros.myHandsNotFree);
-  if (handCandidates.length > 0) {
-    const handCard = :random(handCandidates);
-    :attachCostReduction(handCard);
-  }
-  // queryAll 返回顺序是底到顶，牌顶是最后一张
-  const pileCard = :queryAll($.macros.myPileNotFree).at(-1);
-  if (pileCard) {
-    :attachCostReduction(pileCard);
-  }
-}
+export const MoonsignAscendantGleam = card(331721)
+  .since("v6.5.0")
+  .tags("resonance")
+  .do((c) => {
+    const handCandidates = c.queryAll($.macros.myHandsNotFree);
+    if (handCandidates.length > 0) {
+      const handCard = c.random(handCandidates);
+      c.attachCostReduction(handCard);
+    }
+    // queryAll 返回顺序是底到顶，牌顶是最后一张
+    const pileCard = c.queryAll($.macros.myPileNotFree).at(-1);
+    if (pileCard) {
+      c.attachCostReduction(pileCard);
+    }
+  })
+  .done();
 
 /**
  * @id 331101
@@ -374,12 +335,11 @@ define card {
  * 生成1个冰元素骰。
  * （牌组包含至少2个冰元素角色，才能加入牌组）
  */
-define card {
-  id 331101 as ElementalResonanceWovenIce;
-  since "v3.3.0";
-  tags resonance;
-  :generateDice(DiceType.Cryo, 1);
-}
+export const ElementalResonanceWovenIce = card(331101)
+  .since("v3.3.0")
+  .tags("resonance")
+  .generateDice(DiceType.Cryo, 1)
+  .done();
 
 /**
  * @id 331201
@@ -388,12 +348,11 @@ define card {
  * 生成1个水元素骰。
  * （牌组包含至少2个水元素角色，才能加入牌组）
  */
-define card {
-  id 331201 as ElementalResonanceWovenWaters;
-  since "v3.3.0";
-  tags resonance;
-  :generateDice(DiceType.Hydro, 1);
-}
+export const ElementalResonanceWovenWaters = card(331201)
+  .since("v3.3.0")
+  .tags("resonance")
+  .generateDice(DiceType.Hydro, 1)
+  .done();
 
 /**
  * @id 331301
@@ -402,12 +361,11 @@ define card {
  * 生成1个火元素骰。
  * （牌组包含至少2个火元素角色，才能加入牌组）
  */
-define card {
-  id 331301 as ElementalResonanceWovenFlames;
-  since "v3.3.0";
-  tags resonance;
-  :generateDice(DiceType.Pyro, 1);
-}
+export const ElementalResonanceWovenFlames = card(331301)
+  .since("v3.3.0")
+  .tags("resonance")
+  .generateDice(DiceType.Pyro, 1)
+  .done();
 
 /**
  * @id 331401
@@ -416,12 +374,11 @@ define card {
  * 生成1个雷元素骰。
  * （牌组包含至少2个雷元素角色，才能加入牌组）
  */
-define card {
-  id 331401 as ElementalResonanceWovenThunder;
-  since "v3.3.0";
-  tags resonance;
-  :generateDice(DiceType.Electro, 1);
-}
+export const ElementalResonanceWovenThunder = card(331401)
+  .since("v3.3.0")
+  .tags("resonance")
+  .generateDice(DiceType.Electro, 1)
+  .done();
 
 /**
  * @id 331501
@@ -430,12 +387,11 @@ define card {
  * 生成1个风元素骰。
  * （牌组包含至少2个风元素角色，才能加入牌组）
  */
-define card {
-  id 331501 as ElementalResonanceWovenWinds;
-  since "v3.3.0";
-  tags resonance;
-  :generateDice(DiceType.Anemo, 1);
-}
+export const ElementalResonanceWovenWinds = card(331501)
+  .since("v3.3.0")
+  .tags("resonance")
+  .generateDice(DiceType.Anemo, 1)
+  .done();
 
 /**
  * @id 331601
@@ -444,12 +400,11 @@ define card {
  * 生成1个岩元素骰。
  * （牌组包含至少2个岩元素角色，才能加入牌组）
  */
-define card {
-  id 331601 as ElementalResonanceWovenStone;
-  since "v3.3.0";
-  tags resonance;
-  :generateDice(DiceType.Geo, 1);
-}
+export const ElementalResonanceWovenStone = card(331601)
+  .since("v3.3.0")
+  .tags("resonance")
+  .generateDice(DiceType.Geo, 1)
+  .done();
 
 /**
  * @id 331701
@@ -458,12 +413,11 @@ define card {
  * 生成1个草元素骰。
  * （牌组包含至少2个草元素角色，才能加入牌组）
  */
-define card {
-  id 331701 as ElementalResonanceWovenWeeds;
-  since "v3.3.0";
-  tags resonance;
-  :generateDice(DiceType.Dendro, 1);
-}
+export const ElementalResonanceWovenWeeds = card(331701)
+  .since("v3.3.0")
+  .tags("resonance")
+  .generateDice(DiceType.Dendro, 1)
+  .done();
 
 /**
  * @id 303181
@@ -471,13 +425,11 @@ define card {
  * @description
  * 本回合中，我方角色使用技能后：将下一个我方后台角色切换到场上。
  */
-define combatStatus {
-  id 303181 as WindAndFreedomInEffect;
-  oneDuration;
-  on useSkill {
-    :switchActive("my next");
-  }
-}
+export const WindAndFreedomInEffect = combatStatus(303181)
+  .oneDuration()
+  .on("useSkill")
+  .switchActive("my next")
+  .done();
 
 /**
  * @id 331801
@@ -486,12 +438,11 @@ define combatStatus {
  * 本回合中，我方角色使用技能后：将下一个我方后台角色切换到场上。
  * （牌组包含至少2个「蒙德」角色，才能加入牌组）
  */
-define card {
-  id 331801 as WindAndFreedom;
-  since "v3.7.0";
-  filter :(:$(`my standby characters`));
-  :combatStatus(WindAndFreedomInEffect);
-}
+export const WindAndFreedom = card(331801)
+  .since("v3.7.0")
+  .filter((c) => c.$(`my standby characters`))
+  .combatStatus(WindAndFreedomInEffect)
+  .done();
 
 /**
  * @id 331802
@@ -516,11 +467,10 @@ export const [StoneAndContracts] = card(331802)
  * 将我方所有元素骰转换为万能元素。
  * （牌组包含至少2个「稻妻」角色，才能加入牌组）
  */
-define card {
-  id 331803 as ThunderAndEternity;
-  since "v3.7.0";
-  :convertDice(DiceType.Omni, "all");
-}
+export const ThunderAndEternity = card(331803)
+  .since("v3.7.0")
+  .convertDice(DiceType.Omni, "all")
+  .done();
 
 /**
  * @id 331804
@@ -529,13 +479,12 @@ define card {
  * 抓1张牌。然后，选择任意手牌替换。
  * （牌组包含至少2个「须弥」角色，才能加入牌组）
  */
-define card {
-  id 331804 as NatureAndWisdom;
-  since "v3.7.0";
-  cost DiceType.Aligned, 1;
-  :drawCards(1);
-  :switchCards();
-}
+export const NatureAndWisdom = card(331804)
+  .since("v3.7.0")
+  .costSame(1)
+  .drawCards(1)
+  .switchCards()
+  .done();
 
 /**
  * @id 331805
@@ -544,27 +493,28 @@ define card {
  * 平均分配我方未被击倒的角色的生命值，然后治疗所有我方角色1点。
  * （牌组包含至少2个「枫丹」角色，才能加入牌组）
  */
-define card {
-  id 331805 as WaterAndJustice;
-  since "v4.7.0";
-  cost DiceType.Void, 2;
-  filter :(:$(`my characters with health < maxHealth`));
-  const chs = :$$("all my characters");
-  const chCount = chs.length;
-  const totalHealth = chs.reduce((acc, ch) => acc + ch.health, 0);
-  const avgHealth = Math.floor(totalHealth / chCount);
-  const remainder = totalHealth % chCount;
-  for (let i = 0; i < chCount; i++) {
-    const currentHealth = chs[i].health;
-    const expectHealth = avgHealth + (i < remainder ? 1 : 0);
-    if (currentHealth > expectHealth) {
-      :damage(DamageType.Piercing, currentHealth - expectHealth, chs[i]);
-    } else if (currentHealth < expectHealth) {
-      :heal(expectHealth - currentHealth, chs[i], { kind: "distribution" });
+export const WaterAndJustice = card(331805)
+  .since("v4.7.0")
+  .costVoid(2)
+  .filter((c) => c.$(`my characters with health < maxHealth`))
+  .do((c) => {
+    const chs = c.$$("all my characters");
+    const chCount = chs.length;
+    const totalHealth = chs.reduce((acc, ch) => acc + ch.health, 0);
+    const avgHealth = Math.floor(totalHealth / chCount);
+    const remainder = totalHealth % chCount;
+    for (let i = 0; i < chCount; i++) {
+      const currentHealth = chs[i].health;
+      const expectHealth = avgHealth + (i < remainder ? 1 : 0);
+      if (currentHealth > expectHealth) {
+        c.damage(DamageType.Piercing, currentHealth - expectHealth, chs[i]);
+      } else if (currentHealth < expectHealth) {
+        c.heal(expectHealth - currentHealth, chs[i], { kind: "distribution" });
+      }
     }
-  }
-  :heal(1, "all my characters");
-}
+    c.heal(1, "all my characters");
+  })
+  .done();
 
 /**
  * @id 303240
@@ -572,17 +522,16 @@ define card {
  * @description
  * 本回合内，所附属角色被击倒时：如可能，消耗等同于此牌「重燃」的元素骰，使角色免于被击倒，并治疗该角色到2点生命值。然后此牌「重燃」+1。
  */
-define status {
-  id 303240 as OdeOfResurrection;
-  oneDuration;
-  variable reignite, 1;
-  on beforeDefeated {
-    when :(:player.dice.length >= :getVariable("reignite"));
-    :absorbDice("seq", :getVariable("reignite"));
-    :immune(1);
-    :addVariable("reignite", 1);
-  }
-}
+export const OdeOfResurrection = status(303240)
+  .oneDuration()
+  .variable("reignite", 1)
+  .on("beforeDefeated", (c, e) => c.player.dice.length >= c.getVariable("reignite"))
+  .do((c) => {
+    c.absorbDice("seq", c.getVariable("reignite"));
+  })
+  .immune(1)
+  .addVariable("reignite", 1)
+  .done();
 
 /**
  * @id 331806
@@ -605,19 +554,16 @@ export const FireAndWar = card(331806)
  * @description
  * 行动阶段开始时：创建所记录的卡牌加入手牌。
  */
-define combatStatus {
-  id 303184 as MoonAndHomelandInEffect02;
-  variable cardDefId, 0 {
-    visible false;
-    forceOverwrite;
-  };
-  once actionPhase {
-    const cardDefId = :getVariable("cardDefId") as CardHandle;
+export const MoonAndHomelandInEffect02 = combatStatus(303184)
+  .variable("cardDefId", 0, { visible: false, forceOverwrite: true })
+  .once("actionPhase")
+  .do((c) => {
+    const cardDefId = c.getVariable("cardDefId") as CardHandle;
     if (cardDefId) {
-      :createHandCard(cardDefId);
+      c.createHandCard(cardDefId);
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 303183
@@ -625,18 +571,17 @@ define combatStatus {
  * @description
  * 本回合内我方打出下张卡牌后：在下个回合开始时，创建1张所打出的卡牌加入手牌。
  */
-define combatStatus {
-  id 303183 as MoonAndHomelandInEffect01;
-  oneDuration;
-  once playCard {
-    when :(:e.card.definition.id !== MoonAndHomeland);
-    :combatStatus(MoonAndHomelandInEffect02, "my", {
+export const MoonAndHomelandInEffect01: CombatStatusHandle = combatStatus(303183)
+  .oneDuration()
+  .once("playCard", (c, e) => e.card.definition.id !== MoonAndHomeland)
+  .do((c, e) => {
+    c.combatStatus(MoonAndHomelandInEffect02, "my", {
       overrideVariables: {
-        cardDefId: :e.card.definition.id,
+        cardDefId: e.card.definition.id,
       }
     })
-  }
-}
+  })
+  .done();
 
 /**
  * @id 331807
@@ -645,11 +590,10 @@ define combatStatus {
  * 本回合内我方打出下张卡牌后：在下个回合开始时，创建1张所打出的卡牌加入手牌。
  * （牌组包含至少2个「挪德卡莱」角色，才能加入牌组）
  */
-define card {
-  id 331807 as MoonAndHomeland;
-  since "v6.5.0";
-  :combatStatus(MoonAndHomelandInEffect01);
-}
+export const MoonAndHomeland = card(331807)
+  .since("v6.5.0")
+  .combatStatus(MoonAndHomelandInEffect01)
+  .done();
 
 /**
  * @id 332001
@@ -657,12 +601,11 @@ define card {
  * @description
  * 生成2个万能元素。
  */
-define card {
-  id 332001 as TheBestestTravelCompanion;
-  since "v3.3.0";
-  cost DiceType.Void, 2;
-  :generateDice(DiceType.Omni, 2);
-}
+export const TheBestestTravelCompanion = card(332001)
+  .since("v3.3.0")
+  .costVoid(2)
+  .generateDice(DiceType.Omni, 2)
+  .done();
 
 /**
  * @id 332002
@@ -684,11 +627,10 @@ export const [ChangingShifts] = card(332002)
  * @description
  * 选择任意元素骰重投，可重投2次。
  */
-define card {
-  id 332003 as TossUp;
-  since "v3.3.0";
-  :rerollDice(2);
-}
+export const TossUp = card(332003)
+  .since("v3.3.0")
+  .rerollDice(2)
+  .done();
 
 /**
  * @id 332004
@@ -696,12 +638,11 @@ define card {
  * @description
  * 抓2张牌。
  */
-define card {
-  id 332004 as Strategize;
-  since "v3.3.0";
-  cost DiceType.Aligned, 1;
-  :drawCards(2);
-}
+export const Strategize = card(332004)
+  .since("v3.3.0")
+  .costSame(1)
+  .drawCards(2)
+  .done();
 
 /**
  * @id 303205
@@ -709,10 +650,9 @@ define card {
  * @description
  * 本回合无法再打出「本大爷还没有输！」。
  */
-define combatStatus {
-  id 303205 as IHaventLostYetCooldown;
-  oneDuration;
-}
+export const IHaventLostYetCooldown = combatStatus(303205)
+  .oneDuration()
+  .done()
 
 /**
  * @id 332005
@@ -720,14 +660,13 @@ define combatStatus {
  * @description
  * 本回合有我方角色被击倒，才能打出：生成1个万能元素，我方当前出战角色获得1点充能。（每回合中，最多只能打出1张「本大爷还没有输！」。）
  */
-define card {
-  id 332005 as IHaventLostYet;
-  since "v3.3.0";
-  filter :(:player.hasDefeated && !:$(`my combat status with definition id ${IHaventLostYetCooldown}`));
-  :generateDice(DiceType.Omni, 1);
-  :gainEnergy(1, "my active");
-  :combatStatus(IHaventLostYetCooldown);
-}
+export const IHaventLostYet = card(332005)
+  .since("v3.3.0")
+  .filter((c) => c.player.hasDefeated && !c.$(`my combat status with definition id ${IHaventLostYetCooldown}`))
+  .generateDice(DiceType.Omni, 1)
+  .gainEnergy(1, "my active")
+  .combatStatus(IHaventLostYetCooldown)
+  .done();
 
 /**
  * @id 332006
@@ -764,13 +703,12 @@ export const [WhenTheCraneReturned] = card(332007)
  * @description
  * 我方当前出战角色获得1点充能。
  */
-define card {
-  id 332008 as Starsigns;
-  since "v3.3.0";
-  cost DiceType.Void, 2;
-  filter :(:$(`my active with energy < maxEnergy`));
-  :$("my active character")?.gainEnergy(1);
-}
+export const Starsigns = card(332008)
+  .since("v3.3.0")
+  .costVoid(2)
+  .filter((c) => c.$(`my active with energy < maxEnergy`))
+  .do((c) => c.$("my active character")?.gainEnergy(1))
+  .done();
 
 /**
  * @id 332009
@@ -778,18 +716,19 @@ define card {
  * @description
  * 从最多2个我方后台角色身上，转移1点充能到我方出战角色。
  */
-define card {
-  id 332009 as CalxsArts;
-  since "v3.3.0";
-  cost DiceType.Aligned, 1;
-  filter :(:$(`my standby with energy > 0`) && :$(`my active with energy < maxEnergy`));
-  const chs = :$$("my standby characters limit 2");
-  let count = 0;
-  for (const ch of chs) {
-    count += ch.loseEnergy();
-  }
-  :$("my active")?.gainEnergy(count);
-}
+export const CalxsArts = card(332009)
+  .since("v3.3.0")
+  .costSame(1)
+  .filter((c) => c.$(`my standby with energy > 0`) && c.$(`my active with energy < maxEnergy`))
+  .do((c) => {
+    const chs = c.$$("my standby characters limit 2");
+    let count = 0;
+    for (const ch of chs) {
+      count += ch.loseEnergy();
+    }
+    c.$("my active")?.gainEnergy(count);
+  })
+  .done();
 
 /**
  * @id 332010
@@ -881,12 +820,11 @@ export const SendOff = card(332013)
  * @description
  * 消灭所有「召唤物」。（不分敌我！）
  */
-define card {
-  id 332014 as GuardiansOath;
-  since "v3.3.0";
-  cost DiceType.Aligned, 4;
-  :dispose("all summons");
-}
+export const GuardiansOath = card(332014)
+  .since("v3.3.0")
+  .costSame(4)
+  .dispose("all summons")
+  .done();
 
 /**
  * @id 332015
@@ -919,20 +857,21 @@ define card {
  * 在对方场上，生成1个随机类型的「愚人众伏兵」。
  * （牌组包含至少2个「愚人众」角色，才能加入牌组）
  */
-define card {
-  id 332016 as FatuiConspiracy;
-  since "v3.7.0";
-  cost DiceType.Aligned, 2;
-  :combatStatus(
-    :random([
-      FatuiAmbusherCryoCicinMage,
-      FatuiAmbusherMirrorMaiden,
-      FatuiAmbusherPyroslingerBracer,
-      FatuiAmbusherElectrohammerVanguard
-    ]),
-    "opp"
-  );
-}
+export const FatuiConspiracy = card(332016)
+  .since("v3.7.0")
+  .costSame(2)
+  .do((c) => {
+    c.combatStatus(
+      c.random([
+        FatuiAmbusherCryoCicinMage,
+        FatuiAmbusherMirrorMaiden,
+        FatuiAmbusherPyroslingerBracer,
+        FatuiAmbusherElectrohammerVanguard
+      ]),
+      "opp"
+    );
+  })
+  .done();
 
 /**
  * @id 332017
@@ -973,12 +912,11 @@ export const [HeavyStrike] = card(332018)
  * @description
  * 生成4个不同类型的基础元素骰。
  */
-define card {
-  id 332019 as TheLegendOfVennessa;
-  since "v3.7.0";
-  cost DiceType.Aligned, 3;
-  :generateDice("randomElement", 4);
-}
+export const TheLegendOfVennessa = card(332019)
+  .since("v3.7.0")
+  .costSame(3)
+  .generateDice("randomElement", 4)
+  .done();
 
 /**
  * @id 332020
@@ -986,17 +924,18 @@ define card {
  * @description
  * 手牌数小于4的牌手抓牌，直到手牌数各为4张。
  */
-define card {
-  id 332020 as FriendshipEternal;
-  since "v3.7.0";
-  cost DiceType.Aligned, 2;
-  if (:player.hands.length < 4) {
-    :drawCards(4 - :player.hands.length, { who: "my" });
-  }
-  if (:oppPlayer.hands.length < 4) {
-    :drawCards(4 - :oppPlayer.hands.length, { who: "opp" });
-  }
-}
+export const FriendshipEternal = card(332020)
+  .since("v3.7.0")
+  .costSame(2)
+  .do((c) => {
+    if (c.player.hands.length < 4) {
+      c.drawCards(4 - c.player.hands.length, { who: "my" });
+    }
+    if (c.oppPlayer.hands.length < 4) {
+      c.drawCards(4 - c.oppPlayer.hands.length, { who: "opp" });
+    }
+  })
+  .done();
 
 /**
  * @id 332021
@@ -1064,14 +1003,11 @@ const LyresongIsFirstExtension = extension(332024, { first: "pair<boolean>" })
  * @description
  * 本回合中，我方下次打出「圣遗物」手牌时：少花费1个元素骰。
  */
-define combatStatus {
-  id 303232 as private LyresongInEffect1;
-  oneDuration;
-  once deductOmniDiceCard {
-    when :(:e.hasCardTag("artifact"));
-    :e.deductOmniCost(1);
-  }
-}
+const LyresongInEffect1 = combatStatus(303232)
+  .oneDuration()
+  .once("deductOmniDiceCard", (c, e) => e.hasCardTag("artifact"))
+  .deductOmniCost(1)
+  .done();
 
 
 /**
@@ -1080,14 +1016,11 @@ define combatStatus {
  * @description
  * 本回合中，我方下次打出「圣遗物」手牌时：少花费2个元素骰。
  */
-define combatStatus {
-  id 303224 as private LyresongInEffect2;
-  oneDuration;
-  once deductOmniDiceCard {
-    when :(:e.hasCardTag("artifact"));
-    :e.deductOmniCost(2);
-  }
-}
+const LyresongInEffect2 = combatStatus(303224)
+  .oneDuration()
+  .once("deductOmniDiceCard", (c, e) => e.hasCardTag("artifact"))
+  .deductOmniCost(2)
+  .done();
 
 /**
  * @id 332024
@@ -1163,13 +1096,12 @@ export const [FlickeringFourleafSigil] = card(332027)
  * @description
  * 对我方「出战角色」造成1点物理伤害。从牌组中随机抽取1张「圣遗物」牌。
  */
-define card {
-  id 332028 as MachineAssemblyLine;
-  since "v4.4.0";
-  cost DiceType.Aligned, 1;
-  :damage(DamageType.Physical, 1, "my active");
-  :drawCards(1, { withTag: "artifact" });
-}
+export const MachineAssemblyLine = card(332028)
+  .since("v4.4.0")
+  .costSame(1)
+  .damage(DamageType.Physical, 1, "my active")
+  .drawCards(1, { withTag: "artifact" })
+  .done();
 
 /**
  * @id 332029
@@ -1201,15 +1133,16 @@ export const [SunyataFlower] = card(332029)
  * @description
  * 对方支援区和召唤物区的卡牌数量总和至少为4时，才能打出：双方所有召唤物的可用次数-1。
  */
-define card {
-  id 332030 as ControlledDirectionalBlast;
-  since "v4.5.0";
-  cost DiceType.Aligned, 1;
-  filter :(:$$("opp summons or opp supports").length >= 4);
-  for (const summon of :$$("all summons")) {
-    summon.consumeUsage();
-  }
-}
+export const ControlledDirectionalBlast = card(332030)
+  .since("v4.5.0")
+  .costSame(1)
+  .filter((c) => c.$$("opp summons or opp supports").length >= 4)
+  .do((c) => {
+    for (const summon of c.$$("all summons")) {
+      summon.consumeUsage();
+    }
+  })
+  .done();
 
 /**
  * @id 302202
@@ -1217,12 +1150,11 @@ define card {
  * @description
  * 生成1个万能元素。
  */
-define card {
-  id 302202 as TaroumarusSavings;
-  since "v4.6.0";
-  undiscoverable;
-  :generateDice(DiceType.Omni, 1);
-}
+export const TaroumarusSavings = card(302202)
+  .since("v4.6.0")
+  .undiscoverable()
+  .generateDice(DiceType.Omni, 1)
+  .done();
 
 /**
  * @id 302203
@@ -1247,10 +1179,9 @@ export const [CalledInForCleanup] = card(302203)
  * @description
  * 本回合此角色不会再受到来自「海底宝藏」的治疗。
  */
-define status {
-  id 303231 as private UnderseaTreasureOnCD;
-  oneDuration;
-}
+const UnderseaTreasureOnCD = status(303231)
+  .oneDuration()
+  .done()
 
 /**
  * @id 303230
@@ -1258,16 +1189,17 @@ define status {
  * @description
  * 生成1个随机基础元素骰，治疗我方出战角色1点。（每个角色每回合最多受到1次来自本效果的治疗）
  */
-define card {
-  id 303230 as UnderseaTreasure;
-  since "v4.6.0";
-  undiscoverable;
-  :generateDice("randomElement", 1);
-  if (!:$(`my active has status with definition id ${UnderseaTreasureOnCD}`)) {
-    :heal(1, "my active")
-    :characterStatus(UnderseaTreasureOnCD, "my active");
-  }
-}
+export const UnderseaTreasure = card(303230)
+  .since("v4.6.0")
+  .undiscoverable()
+  .generateDice("randomElement", 1)
+  .do((c) => {
+    if (!c.$(`my active has status with definition id ${UnderseaTreasureOnCD}`)) {
+      c.heal(1, "my active")
+      c.characterStatus(UnderseaTreasureOnCD, "my active");
+    }
+  })
+  .done();
 
 /**
  * @id 332031
@@ -1275,12 +1207,11 @@ define card {
  * @description
  * 生成6张海底宝藏，随机地置入我方牌库中。
  */
-define card {
-  id 332031 as UnderwaterTreasureHunt;
-  since "v4.6.0";
-  cost DiceType.Aligned, 2;
-  :createPileCards(UnderseaTreasure, 6, "random");
-}
+export const UnderwaterTreasureHunt = card(332031)
+  .since("v4.6.0")
+  .costSame(2)
+  .createPileCards(UnderseaTreasure, 6, "random")
+  .done();
 
 /**
  * @id 124053
@@ -1288,10 +1219,9 @@ define card {
  * @description
  * 本回合无法再打出噬骸能量块。
  */
-define combatStatus {
-  id 124053 as BonecrunchersEnergyBlockCombatStatus;
-  oneDuration;
-}
+export const BonecrunchersEnergyBlockCombatStatus = combatStatus(124053)
+  .oneDuration()
+  .done();
 
 /**
  * @id 124051
@@ -1299,17 +1229,18 @@ define combatStatus {
  * @description
  * 随机舍弃1张当前元素骰费用最高的手牌，生成1个我方出战角色类型的元素骰。（每回合最多打出1张）
  */
-define card {
-  id 124051 as BonecrunchersEnergyBlock;
-  since "v4.7.0";
-  undiscoverable;
-  filter :(!:$(`my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`));
-  :abortPreview();
-  :disposeMaxCostHands(1);
-  const activeCh = :$("my active")!;
-  :generateDice(activeCh.element(), 1);
-  :combatStatus(BonecrunchersEnergyBlockCombatStatus)
-}
+export const BonecrunchersEnergyBlock = card(124051)
+  .since("v4.7.0")
+  .undiscoverable()
+  .filter((c) => !c.$(`my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`))
+  .abortPreview()
+  .do((c) => {
+    c.disposeMaxCostHands(1);
+    const activeCh = c.$("my active")!;
+    c.generateDice(activeCh.element(), 1);
+    c.combatStatus(BonecrunchersEnergyBlockCombatStatus)
+  })
+  .done();
 
 /**
  * @id 301021
@@ -1317,10 +1248,9 @@ define card {
  * @description
  * 本回合无法再打出「禁忌知识」。
  */
-define combatStatus {
-  id 301021 as ForbiddenKnowledgeCoolDown;
-  oneDuration;
-}
+export const ForbiddenKnowledgeCoolDown = combatStatus(301021)
+  .oneDuration()
+  .done();
 
 /**
  * @id 301020
@@ -1399,13 +1329,12 @@ export const CountdownToTheShow1 = card(332034)
  * @description
  * 将我方所有元素骰转换为万能元素，抓4张牌。
  */
-define card {
-  id 332035 as TheShowBegins;
-  since "v4.7.0";
-  undiscoverable;
-  :convertDice(DiceType.Omni, "all");
-  :drawCards(4);
-}
+export const TheShowBegins = card(332035)
+  .since("v4.7.0")
+  .undiscoverable()
+  .convertDice(DiceType.Omni, "all")
+  .drawCards(4)
+  .done();
 
 /**
  * @id 302206
@@ -1413,17 +1342,18 @@ define card {
  * @description
  * 随机将2张美露莘推荐的「料理」加入手牌。
  */
-define card {
-  id 302206 as SerenesSupport;
-  since "v4.8.0";
-  undiscoverable;
-  const candidates = :allCardDefinitions("food");
-  // 似乎是“有放回抽样”，两张牌可重
-  const card0 = :random(candidates);
-  const card1 = :random(candidates);
-  :createHandCard(card0.id as CardHandle);
-  :createHandCard(card1.id as CardHandle);
-}
+export const SerenesSupport = card(302206)
+  .since("v4.8.0")
+  .undiscoverable()
+  .do((c) => {
+    const candidates = c.allCardDefinitions("food");
+    // 似乎是“有放回抽样”，两张牌可重
+    const card0 = c.random(candidates);
+    const card1 = c.random(candidates);
+    c.createHandCard(card0.id as CardHandle);
+    c.createHandCard(card1.id as CardHandle);
+  })
+  .done();
 
 /**
  * @id 302207
@@ -1431,16 +1361,17 @@ define card {
  * @description
  * 随机将2张美露莘好奇的「圣遗物」加入手牌。
  */
-define card {
-  id 302207 as LaumesSupport;
-  since "v4.8.0";
-  undiscoverable;
-  const candidates = :allCardDefinitions("artifact");
-  const card0 = :random(candidates);
-  const card1 = :random(candidates);
-  :createHandCard(card0.id as CardHandle);
-  :createHandCard(card1.id as CardHandle);
-}
+export const LaumesSupport = card(302207)
+  .since("v4.8.0")
+  .undiscoverable()
+  .do((c) => {
+    const candidates = c.allCardDefinitions("artifact");
+    const card0 = c.random(candidates);
+    const card1 = c.random(candidates);
+    c.createHandCard(card0.id as CardHandle);
+    c.createHandCard(card1.id as CardHandle);
+  })
+  .done();
 
 /**
  * @id 302208
@@ -1448,17 +1379,18 @@ define card {
  * @description
  * 随机将2张美露莘称赞的「武器」加入手牌。
  */
-define card {
-  id 302208 as CosanzeanasSupport;
-  since "v4.8.0";
-  undiscoverable;
-  const candidates = :allCardDefinitions("weapon");
-  // 似乎是“有放回抽样”，两张牌可重
-  const card0 = :random(candidates);
-  const card1 = :random(candidates);
-  :createHandCard(card0.id as CardHandle);
-  :createHandCard(card1.id as CardHandle);
-}
+export const CosanzeanasSupport = card(302208)
+  .since("v4.8.0")
+  .undiscoverable()
+  .do((c) => {
+    const candidates = c.allCardDefinitions("weapon");
+    // 似乎是“有放回抽样”，两张牌可重
+    const card0 = c.random(candidates);
+    const card1 = c.random(candidates);
+    c.createHandCard(card0.id as CardHandle);
+    c.createHandCard(card1.id as CardHandle);
+  })
+  .done();
 
 const MELUSINE_EVENT_CARDS = [
   ElementalResonanceShatteringIce,
@@ -1492,17 +1424,18 @@ const getMelusineEventCards = (cards: ReadonlyMap<number, EntityDefinition>): Ca
  * @description
  * 随机将2张美露莘看好的超棒事件牌加入手牌。
  */
-define card {
-  id 302209 as CanotilasSupport;
-  since "v4.8.0";
-  undiscoverable;
-  cost DiceType.Aligned, 1;
-  const cards = getMelusineEventCards(:data.entities);
-  const card0 = :random(cards);
-  const card1 = :random(cards);
-  :createHandCard(card0);
-  :createHandCard(card1);
-}
+export const CanotilasSupport = card(302209)
+  .since("v4.8.0")
+  .undiscoverable()
+  .costSame(1)
+  .do((c) => {
+    const cards = getMelusineEventCards(c.data.entities);
+    const card0 = c.random(cards);
+    const card1 = c.random(cards);
+    c.createHandCard(card0);
+    c.createHandCard(card1);
+  })
+  .done();
 
 /**
  * @id 302219
@@ -1511,15 +1444,15 @@ define card {
  * 回合结束时：随机将1张超棒事件牌加入手牌。
  * 可用次数：3
  */
-define combatStatus {
-  id 302219 as private ThironasGoodWill;
-  on endPhase {
-    usage 3;
-    const cards = getMelusineEventCards(:data.entities);
-    const card = :random(cards);
-    :createHandCard(card);
-  }
-}
+const ThironasGoodWill = combatStatus(302219)
+  .on("endPhase") // 文本有误
+  .usage(3)
+  .do((c) => {
+    const cards = getMelusineEventCards(c.data.entities);
+    const card = c.random(cards);
+    c.createHandCard(card);
+  })
+  .done();
 
 /**
  * @id 302210
@@ -1527,12 +1460,11 @@ define combatStatus {
  * @description
  * 接下来3个回合结束时，各将1张美露莘看好的超棒事件牌加入手牌。
  */
-define card {
-  id 302210 as ThironasSupport;
-  since "v4.8.0";
-  undiscoverable;
-  :combatStatus(ThironasGoodWill);
-}
+export const ThironasSupport = card(302210)
+  .since("v4.8.0")
+  .undiscoverable()
+  .combatStatus(ThironasGoodWill)
+  .done();
 
 /**
  * @id 302211
@@ -1540,15 +1472,16 @@ define card {
  * @description
  * 复制对方牌库顶部的3张牌，加入手牌。
  */
-define card {
-  id 302211 as SluasisSupport;
-  since "v4.8.0";
-  undiscoverable;
-  cost DiceType.Aligned, 1;
-  for (const card of :oppPlayer.pile.slice(0, 3)) {
-    :createHandCard(card.definition.id as CardHandle);
-  };
-}
+export const SluasisSupport = card(302211)
+  .since("v4.8.0")
+  .undiscoverable()
+  .costSame(1)
+  .do((c) => {
+    for (const card of c.oppPlayer.pile.slice(0, 3)) {
+      c.createHandCard(card.definition.id as CardHandle);
+    };
+  })
+  .done();
 
 /**
  * @id 302212
@@ -1556,29 +1489,30 @@ define card {
  * @description
  * 随机将2张「秘传」卡牌加入你的手牌，并恢复双方牌手的「秘传」卡牌使用机会。
  */
-define card {
-  id 302212 as VirdasSupport;
-  since "v4.8.0";
-  undiscoverable;
-  cost DiceType.Void, 2;
-  const candidates = :allCardDefinitions("legend");
-  const card0 = :random(candidates);
-  const card1 = :random(candidates);
-  :createHandCard(card0.id as CardHandle);
-  :createHandCard(card1.id as CardHandle);
-  :mutate({
-    type: "setPlayerFlag",
-    who: 0,
-    flagName: "legendUsed",
-    value: false
-  });
-  :mutate({
-    type: "setPlayerFlag",
-    who: 1,
-    flagName: "legendUsed",
-    value: false
-  });
-}
+export const VirdasSupport = card(302212)
+  .since("v4.8.0")
+  .undiscoverable()
+  .costVoid(2)
+  .do((c) => {
+    const candidates = c.allCardDefinitions("legend");
+    const card0 = c.random(candidates);
+    const card1 = c.random(candidates);
+    c.createHandCard(card0.id as CardHandle);
+    c.createHandCard(card1.id as CardHandle);
+    c.mutate({
+      type: "setPlayerFlag",
+      who: 0,
+      flagName: "legendUsed",
+      value: false
+    });
+    c.mutate({
+      type: "setPlayerFlag",
+      who: 1,
+      flagName: "legendUsed",
+      value: false
+    });
+  })
+  .done();
 
 /**
  * @id 302213
@@ -1594,33 +1528,33 @@ const PucasSupport = void 0; /* moves to support/ally.ts */
  * @description
  * 本回合打出手牌后，随机舍弃1张牌或抓1张牌。
  */
-define combatStatus {
-  id 302216 as private TopyassGoodwill;
-  oneDuration;
-  on playCard {
-    :abortPreview();
+const TopyassGoodwill = combatStatus(302216)
+  .oneDuration()
+  .on("playCard")
+  .abortPreview()
+  .do((c) => {
     let doDrawCard: boolean;
-    if (:player.pile.length === 0 && :player.hands.length === 0) {
+    if (c.player.pile.length === 0 && c.player.hands.length === 0) {
       // 啥也做不了
       return;
-    } else if (:player.pile.length === 0) {
+    } else if (c.player.pile.length === 0) {
       // 只能舍弃
       doDrawCard = false;
-    } else if (:player.hands.length === 0) {
+    } else if (c.player.hands.length === 0) {
       // 只能抽牌
       doDrawCard = true;
     } else {
       // 随机
-      doDrawCard = :random([true, false]);
+      doDrawCard = c.random([true, false]);
     }
     if (doDrawCard) {
-      :drawCards(1);
+      c.drawCards(1);
     } else {
-      const target = :random(:player.hands);
-      :disposeCard(target);
+      const target = c.random(c.player.hands);
+      c.disposeCard(target);
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 302214
@@ -1628,14 +1562,13 @@ define combatStatus {
  * @description
  * 抓2张牌，双方获得以下效果：「本回合打出手牌后，随机舍弃1张牌或抓1张牌。」
  */
-define card {
-  id 302214 as TopyassSupport;
-  since "v4.8.0";
-  undiscoverable;
-  :drawCards(2);
-  :combatStatus(TopyassGoodwill, "my");
-  :combatStatus(TopyassGoodwill, "opp");
-}
+export const TopyassSupport = card(302214)
+  .since("v4.8.0")
+  .undiscoverable()
+  .drawCards(2)
+  .combatStatus(TopyassGoodwill, "my")
+  .combatStatus(TopyassGoodwill, "opp")
+  .done();
 
 /**
  * @id 302217
@@ -1644,19 +1577,19 @@ define card {
  * 我方角色使用技能后：受到2点治疗或2点穿透伤害。
  * 可用次数：2
  */
-define combatStatus {
-  id 302217 as private LutinesGoodwill;
-  on useSkill {
-    usage 2;
-    :abortPreview();
-    const caller = :e.skill.caller.cast<"character">();
-    if (:random([true, false])) {
-      :heal(2, caller);
+const LutinesGoodwill = combatStatus(302217)
+  .on("useSkill")
+  .usage(2)
+  .abortPreview()
+  .do((c, e) => {
+    const caller = e.skill.caller.cast<"character">();
+    if (c.random([true, false])) {
+      c.heal(2, caller);
     } else {
-      :damage(DamageType.Piercing, 2, caller);
+      c.damage(DamageType.Piercing, 2, caller);
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 302215
@@ -1664,14 +1597,13 @@ define combatStatus {
  * @description
  * 抓2张牌，双方获得以下效果：「角色使用技能后，随机受到2点治疗或2点穿透伤害。可用次数：2」
  */
-define card {
-  id 302215 as LutinesSupport;
-  since "v4.8.0";
-  undiscoverable;
-  :drawCards(2);
-  :combatStatus(LutinesGoodwill, "my");
-  :combatStatus(LutinesGoodwill, "opp");
-}
+export const LutinesSupport = card(302215)
+  .since("v4.8.0")
+  .undiscoverable()
+  .drawCards(2)
+  .combatStatus(LutinesGoodwill, "my")
+  .combatStatus(LutinesGoodwill, "opp")
+  .done();
 
 /**
  * @id 302218
@@ -1679,10 +1611,8 @@ define card {
  * @description
  * 效果随机的超棒贴纸，凝聚了美露莘们的心意。
  */
-define card {
-  id 302218 as MelusineSupport;
-  reserved;
-}
+export const MelusineSupport = card(302218)
+  .reserve();
 
 /**
  * @id 303236
@@ -1691,20 +1621,19 @@ define card {
  * 本回合中，对方每获得1个元素骰时，如果你未宣布回合结束，则你生成1个万能元素；否则，生成1点护盾。
  * 可用次数：3
  */
-define combatStatus {
-  id 303236 as IdRatherLoseMoneyMyselfInEffect;
-  oneDuration;
-  on generateDice {
-    when :(:e.who !== :self.who);
-    usage 3;
-    listenTo all;
-    if (!:player.declaredEnd) {
-      :generateDice(DiceType.Omni, 1);
+export const IdRatherLoseMoneyMyselfInEffect = combatStatus(303236)
+  .oneDuration()
+  .on("generateDice", (c, e) => e.who !== c.self.who)
+  .usage(3)
+  .listenToAll()
+  .do((c) => {
+    if (!c.player.declaredEnd) {
+      c.generateDice(DiceType.Omni, 1);
     } else {
-      :combatStatus(Shield);
+      c.combatStatus(Shield);
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 332036
@@ -1713,11 +1642,10 @@ define combatStatus {
  * 本回合中，对方每获得1个元素骰时，如果你未宣布回合结束，则你生成1个万能元素；否则，生成1点护盾。
  * 可用次数：3
  */
-define card {
-  id 332036 as IdRatherLoseMoneyMyself;
-  since "v4.8.0";
-  :combatStatus(IdRatherLoseMoneyMyselfInEffect);
-}
+export const IdRatherLoseMoneyMyself = card(332036)
+  .since("v4.8.0")
+  .combatStatus(IdRatherLoseMoneyMyselfInEffect)
+  .done();
 
 /**
  * @id 332037
@@ -1757,10 +1685,8 @@ export const SaurianDiningBuddies = card(332039)
  * @description
  * 生成6张海底宝藏，随机地置入我方牌库中。
  */
-define card {
-  id 133090 as FakeUnderwaterTreasureHunt;
-  reserved;
-}
+export const FakeUnderwaterTreasureHunt = card(133090) // 骗骗花
+  .reserve();
 
 /**
  * @id 133091
@@ -1768,10 +1694,8 @@ define card {
  * @description
  * 对方支援区和召唤物区的卡牌数量总和至少为4时，才能打出：双方所有召唤物的可用次数-1。
  */
-define card {
-  id 133091 as FakeControlledDirectionalBlast;
-  reserved;
-}
+export const FakeControlledDirectionalBlast = card(133091) // 骗骗花
+  .reserve();
 
 /**
  * @id 133094
@@ -1779,10 +1703,8 @@ define card {
  * @description
  * 生成4个不同类型的基础元素骰。
  */
-define card {
-  id 133094 as TheTaleOfVennessa;
-  reserved;
-}
+export const TheTaleOfVennessa = card(133094) // 骗骗花
+  .reserve();
 
 /**
  * @id 332040
@@ -1792,30 +1714,31 @@ define card {
  * 如果我方存在相同武器类型的角色，则从3张「道具」中挑选1张加入手牌；
  * 如果我方存在相同所属势力的角色，则从3张「料理」中挑选1张加入手牌。
  */
-define card {
-  id 332040 as EremiteTeatime;
-  since "v5.1.0";
-  cost DiceType.Aligned, 2;
-  const characters = :$$("my characters include defeated");
-  const elements = characters.map((ch) => ch.element());
-  const weapons = characters.map((ch) => ch.weaponTag());
-  const nations = characters.flatMap((ch) => ch.nationTags());
-  if (new Set(elements).size < characters.length) {
-    const cards = :allCardDefinitions("place");
-    const candidates = :randomSubset(cards, 3);
-    :selectAndCreateHandCard(candidates);
-  }
-  if (new Set(weapons).size < characters.length) {
-    const cards = :allCardDefinitions("item");
-    const candidates = :randomSubset(cards, 3);
-    :selectAndCreateHandCard(candidates);
-  }
-  if (new Set(nations).size < nations.length) {
-    const cards = :allCardDefinitions("food");
-    const candidates = :randomSubset(cards, 3);
-    :selectAndCreateHandCard(candidates);
-  }
-}
+export const EremiteTeatime = card(332040)
+  .since("v5.1.0")
+  .costSame(2)
+  .do((c) => {
+    const characters = c.$$("my characters include defeated");
+    const elements = characters.map((ch) => ch.element());
+    const weapons = characters.map((ch) => ch.weaponTag());
+    const nations = characters.flatMap((ch) => ch.nationTags());
+    if (new Set(elements).size < characters.length) {
+      const cards = c.allCardDefinitions("place");
+      const candidates = c.randomSubset(cards, 3);
+      c.selectAndCreateHandCard(candidates);
+    }
+    if (new Set(weapons).size < characters.length) {
+      const cards = c.allCardDefinitions("item");
+      const candidates = c.randomSubset(cards, 3);
+      c.selectAndCreateHandCard(candidates);
+    }
+    if (new Set(nations).size < nations.length) {
+      const cards = c.allCardDefinitions("food");
+      const candidates = c.randomSubset(cards, 3);
+      c.selectAndCreateHandCard(candidates);
+    }
+  })
+  .done();
 
 /**
  * @id 332041
@@ -1823,23 +1746,24 @@ define card {
  * @description
  * 战斗行动：双方场上至少存在合计2个「召唤物」时，才能打出，随机触发我方和敌方各1个「召唤物」的「结束阶段」效果。
  */
-define card {
-  id 332041 as UltimateSurfingBuddy;
-  since "v5.2.0";
-  tags action;
-  filter :(:$$(`all summons`).length >= 2);
-  :abortPreview();
-  const mySummons = :$$(`my summons`);
-  if (mySummons.length > 0) {
-    const mySummon = :random(mySummons);
-    :triggerEndPhaseSkill(mySummon);
-  }
-  const oppSummons = :$$(`opp summons`);
-  if (oppSummons.length > 0) {
-    const oppSummon = :random(oppSummons);
-    :triggerEndPhaseSkill(oppSummon);
-  }
-}
+export const UltimateSurfingBuddy = card(332041)
+  .since("v5.2.0")
+  .tags("action")
+  .filter((c) => c.$$(`all summons`).length >= 2)
+  .abortPreview()
+  .do((c) => {
+    const mySummons = c.$$(`my summons`);
+    if (mySummons.length > 0) {
+      const mySummon = c.random(mySummons);
+      c.triggerEndPhaseSkill(mySummon);
+    }
+    const oppSummons = c.$$(`opp summons`);
+    if (oppSummons.length > 0) {
+      const oppSummon = c.random(oppSummons);
+      c.triggerEndPhaseSkill(oppSummon);
+    }
+  })
+  .done();
 
 /**
  * @id 332042
@@ -1863,15 +1787,14 @@ export const [AbundantPhlogiston, AbundantPhlogistonInEffect] = card(332042)
  * @description
  * 向双方牌组中放入2张燃素充盈，随后双方各抓2张牌。
  */
-define card {
-  id 332043 as LittleTepetlisaurTreasureHunterAtLarge;
-  since "v5.4.0";
-  cost DiceType.Aligned, 1;
-  :createPileCards(AbundantPhlogiston, 2, "random", "my");
-  :createPileCards(AbundantPhlogiston, 2, "random", "opp");
-  :drawCards(2, { who: "my" });
-  :drawCards(2, { who: "opp" });
-}
+export const LittleTepetlisaurTreasureHunterAtLarge = card(332043)
+  .since("v5.4.0")
+  .costSame(1)
+  .createPileCards(AbundantPhlogiston, 2, "random", "my")
+  .createPileCards(AbundantPhlogiston, 2, "random", "opp")
+  .drawCards(2, { who: "my" })
+  .drawCards(2, { who: "opp" })
+  .done();
 
 /**
  * @id 332044
@@ -1879,19 +1802,20 @@ define card {
  * @description
  * 交换双方手牌，然后手牌较少的一方抓牌直到手牌数等同于手牌多的一方。
  */
-define card {
-  id 332044 as InTheNameOfTheExtreme;
-  since "v5.5.0";
-  cost DiceType.Aligned, 4;
-  :swapPlayerHandCards();
-  const oppHandsCount = :oppPlayer.hands.length;
-  const myHandsCount = :player.hands.length;
-  if (oppHandsCount < myHandsCount) {
-    :drawCards(myHandsCount - oppHandsCount, { who: "opp" });
-  } else if (oppHandsCount > myHandsCount) {
-    :drawCards(oppHandsCount - myHandsCount, { who: "my" });
-  }
-}
+export const InTheNameOfTheExtreme = card(332044)
+  .since("v5.5.0")
+  .costSame(4)
+  .do((c) => {
+    c.swapPlayerHandCards();
+    const oppHandsCount = c.oppPlayer.hands.length;
+    const myHandsCount = c.player.hands.length;
+    if (oppHandsCount < myHandsCount) {
+      c.drawCards(myHandsCount - oppHandsCount, { who: "opp" });
+    } else if (oppHandsCount > myHandsCount) {
+      c.drawCards(oppHandsCount - myHandsCount, { who: "my" });
+    }
+  })
+  .done();
 
 /**
  * @id 303239
@@ -1899,13 +1823,10 @@ define card {
  * @description
  * 我方下次打出不属于初始卡组的牌费用-2。
  */
-define combatStatus {
-  id 303239 as ArtOfSleepyMeditationInEffect;
-  once deductOmniDiceCard {
-    when :(!:isInInitialPile(:e.action.skill.caller));
-    :e.deductOmniCost(2);
-  }
-}
+export const ArtOfSleepyMeditationInEffect = combatStatus(303239)
+  .once("deductOmniDiceCard", (c, e) => !c.isInInitialPile(e.action.skill.caller))
+  .deductOmniCost(2)
+  .done();
 
 /**
  * @id 332045
@@ -1914,14 +1835,15 @@ define combatStatus {
  * 从随机3张特技牌中挑选1张。
  * 我方下次打出不属于初始卡组的牌少花费2个元素骰。
  */
-define card {
-  id 332045 as ArtOfSleepyMeditation;
-  since "v5.6.0";
-  cost DiceType.Aligned, 1;
-  const candidates = :randomSubset(:allCardDefinitions("technique"), 3);
-  :selectAndCreateHandCard(candidates);
-  :combatStatus(ArtOfSleepyMeditationInEffect);
-}
+export const ArtOfSleepyMeditation = card(332045)
+  .since("v5.6.0")
+  .costSame(1)
+  .do((c) => {
+    const candidates = c.randomSubset(c.allCardDefinitions("technique"), 3);
+    c.selectAndCreateHandCard(candidates);
+    c.combatStatus(ArtOfSleepyMeditationInEffect);
+  })
+  .done();
 
 /**
  * @id 332046
@@ -1963,17 +1885,15 @@ export const FruitsOfTrainingInEffect02 = status(303242)
  * @description
  * 我方其他角色准备技能时：所选角色下次元素战技花费1个元素骰。（至多触发2次，不可叠加）
  */
-define status {
-  id 303241 as FruitsOfTrainingInEffect01;
-  on enterRelative {
-    when :(:e.entity.definition.type === "status" &&
-        :e.entity.definition.tags.includes("preparingSkill") &&
-        :e.entity.cast<"status">().master.id !== :self.master.id);
-    listenTo samePlayer;
-    usage 2;
-    :characterStatus(FruitsOfTrainingInEffect02, "@master");
-  }
-}
+export const FruitsOfTrainingInEffect01 = status(303241)
+  .on("enterRelative", (c, e) =>
+    e.entity.definition.type === "status" &&
+    e.entity.definition.tags.includes("preparingSkill") &&
+    e.entity.cast<"status">().master.id !== c.self.master.id)
+  .listenToPlayer()
+  .usage(2)
+  .characterStatus(FruitsOfTrainingInEffect02, "@master")
+  .done();
 
 /**
  * @id 332048
@@ -2078,13 +1998,12 @@ export const SIMULANKA_QUERY = SIMULANKA_SUMMONS
  * （积木小人：结束阶段：造成1点物理伤害。
  * 可用次数：2）
  */
-define card {
-  id 301033 as ToyGuard;
-  since "v5.8.0";
-  undiscoverable;
-  cost DiceType.Aligned, 1;
-  :summon(ToyGuardSummon);
-}
+export const ToyGuard = card(301033)
+  .since("v5.8.0")
+  .undiscoverable()
+  .costSame(1)
+  .summon(ToyGuardSummon)
+  .done();
 
 /**
  * @id 301034
@@ -2094,13 +2013,12 @@ define card {
  * （折纸飞鼠：结束阶段：获得1层高效切换。
  * 可用次数：2）
  */
-define card {
-  id 301034 as OrigamiFlyingSquirrel;
-  since "v5.8.0";
-  undiscoverable;
-  cost DiceType.Aligned, 1;
-  :summon(OrigamiFlyingSquirrelSummon);
-}
+export const OrigamiFlyingSquirrel = card(301034)
+  .since("v5.8.0")
+  .undiscoverable()
+  .costSame(1)
+  .summon(OrigamiFlyingSquirrelSummon)
+  .done();
 
 /**
  * @id 301035
@@ -2110,13 +2028,12 @@ define card {
  * （跳跳纸蛙：结束阶段：抓1张牌。
  * 可用次数：2）
  */
-define card {
-  id 301035 as PopupPaperFrog;
-  since "v5.8.0";
-  undiscoverable;
-  cost DiceType.Aligned, 1;
-  :summon(PopupPaperFrogSummon);
-}
+export const PopupPaperFrog = card(301035)
+  .since("v5.8.0")
+  .undiscoverable()
+  .costSame(1)
+  .summon(PopupPaperFrogSummon)
+  .done();
 
 /**
  * @id 301036
@@ -2126,13 +2043,12 @@ define card {
  * （折纸胖胖鼠：结束阶段：治疗受伤最多的我方角色2点。
  * 可用次数：1）
  */
-define card {
-  id 301036 as OrigamiHamster;
-  since "v5.8.0";
-  undiscoverable;
-  cost DiceType.Aligned, 1;
-  :summon(OrigamiHamsterSummon);
-}
+export const OrigamiHamster = card(301036)
+  .since("v5.8.0")
+  .undiscoverable()
+  .costSame(1)
+  .summon(OrigamiHamsterSummon)
+  .done();
 
 /**
  * @id 303244
@@ -2140,15 +2056,13 @@ define card {
  * @description
  * 结束阶段：生成一张收获时间，随机置入我方牌组。（可叠加，最多叠加到2）
  */
-define combatStatus {
-  id 303244 as HarvestTimeInEffect;
-  variable cardCount, 1 {
-    append 2;
-  };
-  once endPhase {
-    :createPileCards(HarvestTime, :getVariable("cardCount"), "random");
-  }
-}
+export const HarvestTimeInEffect = combatStatus(303244)
+  .variableCanAppend("cardCount", 1, 2)
+  .once("endPhase")
+  .do((c) => {
+    c.createPileCards(HarvestTime, c.getVariable("cardCount"), "random");
+  })
+  .done();
 
 /**
  * @id 332049
@@ -2157,16 +2071,17 @@ define combatStatus {
  * 从3张随机「料理」牌中挑选1张。
  * 结束阶段：生成一张收获时间，随机置入我方牌组。
  */
-define card {
-  id 332049 as HarvestTime;
-  since "v5.8.0";
-  cost DiceType.Aligned, 1;
-  cost DiceType.Aligned, 1;
-  const allFoods = :allCardDefinitions("food");
-  const candidates = :randomSubset(allFoods, 3);
-  :selectAndCreateHandCard(candidates);
-  :combatStatus(HarvestTimeInEffect);
-}
+export const HarvestTime = card(332049)
+  .since("v5.8.0")
+  .costSame(1)
+  .costSame(1)
+  .do((c, e) => {
+    const allFoods = c.allCardDefinitions("food");
+    const candidates = c.randomSubset(allFoods, 3);
+    c.selectAndCreateHandCard(candidates);
+  })
+  .combatStatus(HarvestTimeInEffect)
+  .done();
 
 /**
  * @id 332050
@@ -2257,12 +2172,11 @@ export const FellDragonsAwakening = card(332051)
  * （积木小人：结束阶段：造成1点物理伤害。
  * 可用次数：2）
  */
-define card {
-  id 332052 as NarrationFootnotes;
-  since "v6.0.0";
-  :summon(ToyGuardSummon);
-  :summon(ToyGuardSummon, "opp");
-}
+export const NarrationFootnotes = card(332052)
+  .since("v6.0.0")
+  .summon(ToyGuardSummon)
+  .summon(ToyGuardSummon, "opp")
+  .done();
 
 /**
  * @id 332054
@@ -2289,18 +2203,19 @@ export const ABlessingFromM = card(332054)
  * @description
  * 抓2张牌，如果我方手牌中的「武器」牌或「圣遗物」牌数量大于1张，则各生成1个万能元素。
  */
-define card {
-  id 332055 as RevelrousBeats;
-  since "v6.0.0";
-  cost DiceType.Void, 2;
-  :drawCards(2);
-  if (:$$("my hands with tag (weapon)").length > 1) {
-    :generateDice(DiceType.Omni, 1);
-  }
-  if (:$$("my hands with tag (artifact)").length > 1) {
-    :generateDice(DiceType.Omni, 1);
-  }
-}
+export const RevelrousBeats = card(332055)
+  .since("v6.0.0")
+  .costVoid(2)
+  .do((c, e) => {
+    c.drawCards(2);
+    if (c.$$("my hands with tag (weapon)").length > 1) {
+      c.generateDice(DiceType.Omni, 1);
+    }
+    if (c.$$("my hands with tag (artifact)").length > 1) {
+      c.generateDice(DiceType.Omni, 1);
+    }
+  })
+  .done();
 
 /**
  * @id 332056
@@ -2308,17 +2223,18 @@ define card {
  * @description
  * 冒险1次。如果我方冒险经历不低于4，则改为对我方「出战角色」造成1点物理伤害，冒险2次。
  */
-define card {
-  id 332056 as AnAncientSacrificeOfSacredBrocade;
-  since "v6.1.0";
-  cost DiceType.Aligned, 1;
-  const exp = :$(`my support with tag (adventureSpot)`)?.variables.exp ?? 0;
-  if (exp >= 4) {
-    :damage(DamageType.Physical, 1, "my active");
-    :adventure();
-  }
-  :adventure();
-}
+export const AnAncientSacrificeOfSacredBrocade = card(332056)
+  .since("v6.1.0")
+  .costSame(1)
+  .do((c) => {
+    const exp = c.$(`my support with tag (adventureSpot)`)?.variables.exp ?? 0;
+    if (exp >= 4) {
+      c.damage(DamageType.Physical, 1, "my active");
+      c.adventure();
+    }
+    c.adventure();
+  })
+  .done();
 
 /**
  * @id 300008
@@ -2326,13 +2242,14 @@ define card {
  * @description
  * 将敌方1张费用最高的手牌置于牌组底。
  */
-define card {
-  id 300008 as DisperseTheCalamity;
-  since "v6.2.0";
-  undiscoverable;
-  const cards = :maxCostHands(1, { who: "opp" });
-  :undrawCards(cards, "bottom", "opp");
-}
+export const DisperseTheCalamity = card(300008)
+  .since("v6.2.0")
+  .undiscoverable()
+  .do((c) => {
+    const cards = c.maxCostHands(1, { who: "opp" });
+    c.undrawCards(cards, "bottom", "opp");
+  })
+  .done();
 
 /**
  * @id 300009
@@ -2340,15 +2257,16 @@ define card {
  * @description
  * 将我方所有手牌置于牌组底，然后抓相同数量+1张手牌。
  */
-define card {
-  id 300009 as SanctifyTheDefiled;
-  since "v6.2.0";
-  undiscoverable;
-  const allHands = [...:player.hands];
-  const count = allHands.length;
-  :undrawCards(allHands, "bottom");
-  :drawCards(count + 1);
-}
+export const SanctifyTheDefiled = card(300009)
+  .since("v6.2.0")
+  .undiscoverable()
+  .do((c) => {
+    const allHands = [...c.player.hands];
+    const count = allHands.length;
+    c.undrawCards(allHands, "bottom");
+    c.drawCards(count + 1);
+  })
+  .done();
 
 /**
  * @id 301038
@@ -2371,14 +2289,13 @@ export const WoodenToySword = card(301038)
  * @description
  * 所附属角色重击后：造成5点该角色元素类型的伤害。
  */
-define status {
-  id 301040 as ReforgeTheHolyBladeInEffect;
-  on useSkill {
-    when :(:e.isChargedAttack());
-    const element = :self.master.element() as number as DamageType;
-    :damage(element, 5);
-  }
-}
+export const ReforgeTheHolyBladeInEffect = status(301040)
+  .on("useSkill", (c, e) => e.isChargedAttack())
+  .do((c) => {
+    const element = c.self.master.element() as number as DamageType;
+    c.damage(element, 5);
+  })
+  .done();
 
 /**
  * @id 301039
@@ -2403,24 +2320,25 @@ export const ReforgeTheHolyBlade = card(301039)
  * 如果我方存在相同武器类型的角色，抓1张牌；
  * 如果我方存在相同所属势力的角色，则冒险1次。
  */
-define card {
-  id 332057 as TheNarzissenkreuzAdventure;
-  since "v6.2.0";
-  cost DiceType.Aligned, 1;
-  const characters = :$$("my characters include defeated");
-  const elements = characters.map((ch) => ch.element());
-  const weapons = characters.map((ch) => ch.weaponTag());
-  const nations = characters.flatMap((ch) => ch.nationTags());
-  if (new Set(elements).size < characters.length) {
-    :heal(1, "my characters order by health - maxHealth limit 1");
-  }
-  if (new Set(weapons).size < characters.length) {
-    :drawCards(1);
-  }
-  if (new Set(nations).size < nations.length) {
-    :adventure();
-  }
-}
+export const TheNarzissenkreuzAdventure = card(332057)
+  .since("v6.2.0")
+  .costSame(1)
+  .do((c) => {
+    const characters = c.$$("my characters include defeated");
+    const elements = characters.map((ch) => ch.element());
+    const weapons = characters.map((ch) => ch.weaponTag());
+    const nations = characters.flatMap((ch) => ch.nationTags());
+    if (new Set(elements).size < characters.length) {
+      c.heal(1, "my characters order by health - maxHealth limit 1");
+    }
+    if (new Set(weapons).size < characters.length) {
+      c.drawCards(1);
+    }
+    if (new Set(nations).size < nations.length) {
+      c.adventure();
+    }
+  })
+  .done();
 
 /**
  * @id 303247
@@ -2451,12 +2369,11 @@ export const PlanToSaveTheWorldInEffect = combatStatus(303247)
  * @description
  * 下回合结束阶段时，双方出战角色生命值变为5。
  */
-define card {
-  id 332058 as PlanToSaveTheWorld;
-  since "v6.2.0";
-  cost DiceType.Aligned, 2;
-  :combatStatus(PlanToSaveTheWorldInEffect);
-}
+export const PlanToSaveTheWorld = card(332058)
+  .since("v6.2.0")
+  .costSame(2)
+  .combatStatus(PlanToSaveTheWorldInEffect)
+  .done();
 
 /**
  * @id 332053
@@ -2576,15 +2493,16 @@ const LepinepaulinesInvestmentInEnergyMechanism = void 0;
  * @description
  * 我方手牌中每存在1种附着状态，则生成1个随机基础元素骰。（至多生成2个）
  */
-define card {
-  id 332062 as CleaningTime;
-  since "v6.5.0";
-  const attachmentsCount = new Set(
-    :queryAll($.my.attachment).map((att) => att.definition.id)
-  ).size;
-  const diceCount = Math.min(attachmentsCount, 2);
-  :generateDice("randomElement", diceCount);
-}
+export const CleaningTime = card(332062)
+  .since("v6.5.0")
+  .do((c) => {
+    const attachmentsCount = new Set(
+      c.queryAll($.my.attachment).map((att) => att.definition.id)
+    ).size;
+    const diceCount = Math.min(attachmentsCount, 2);
+    c.generateDice("randomElement", diceCount);
+  })
+  .done();
 
 /**
  * @id 303249

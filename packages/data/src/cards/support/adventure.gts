@@ -91,23 +91,22 @@ export const TowerOfIpsissimus = card(321033)
  * 结束阶段：造成2点穿透伤害。
  * 此卡牌被弃置时，对双方场上生命值最多的角色造成5点穿透伤害。可用次数：3
  */
-define summon {
-  id 301041 as TideTurningSacredLord;
-  hint DamageType.Physical, "2";
-  on endPhase {
-    usage 3;
-    :damage(DamageType.Piercing, 2);
-  }
-  on selfDispose {
-    const myMaxHpCharacter = :query($.macros.myMaxHealth)!;
-    const oppMaxHpCharacter = :query($.macros.oppMaxHealth)!;
+export const TideTurningSacredLord = summon(301041)
+  .hint(DamageType.Physical, "2")
+  .on("endPhase")
+  .damage(DamageType.Piercing, 2)
+  .usage(3)
+  .on("selfDispose")
+  .do((c) => {
+    const myMaxHpCharacter = c.query($.macros.myMaxHealth)!;
+    const oppMaxHpCharacter = c.query($.macros.oppMaxHealth)!;
     const target =
       myMaxHpCharacter.health > oppMaxHpCharacter.health
         ? myMaxHpCharacter :
         oppMaxHpCharacter;
-    :damage(DamageType.Piercing, 5, target);
-  }
-}
+    c.damage(DamageType.Piercing, 5, target);
+  })
+  .done();
 
 /**
  * @id 321034
@@ -150,28 +149,26 @@ export const Tonatiuh = card(321034)
  * @description
  * 我方本回合内打出2张名称不存在于本局最初牌组的牌时：生成3个万能元素骰，然后弃置层岩巨渊。
  */
-define combatStatus {
-  id 301042 as TheChasmInEffect;
-  variable cardsPlayed, 0;
-  on roundEnd {
-    :setVariable("cardsPlayed", 0);
-  }
-  on playCard {
-    when :(!:isInInitialPile(:e.card));
-    :addVariable("cardsPlayed", 1);
-    if (:getVariable("cardsPlayed") >= 2) {
-      :generateDice(DiceType.Omni, 3);
-      const chasm = :query($.my.support.def(TheChasm));
+export const TheChasmInEffect = combatStatus(301042)
+  .variable("cardsPlayed", 0)
+  .on("roundEnd")
+  .setVariable("cardsPlayed", 0)
+  .on("playCard", (c, e) => !c.isInInitialPile(e.card))
+  .do((c) => {
+    c.addVariable("cardsPlayed", 1);
+    if (c.getVariable("cardsPlayed") >= 2) {
+      c.generateDice(DiceType.Omni, 3);
+      const chasm = c.query($.my.support.def(TheChasm));
       if (chasm) {
-        :dispose(chasm);
-        if (:data.entities.get(AdventureCompleted)) {
-          :combatStatus(AdventureCompleted);
+        c.dispose(chasm);
+        if (c.data.entities.get(AdventureCompleted)) {
+          c.combatStatus(AdventureCompleted);
         }
       }
-      :dispose();
+      c.dispose();
     }
-  }
-}
+  })
+  .done();
 
 /**
  * @id 321040
