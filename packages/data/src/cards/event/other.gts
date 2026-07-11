@@ -844,7 +844,10 @@ define card {
     ElectroHilichurlShooter
   ];
   const summons = :queryAll($.my.summon);
-  :summon(:random(candidates.filter((c) => !summons.some((s) => s.definition.id === c))));
+  const target = :random(candidates.filter((c) => !summons.some((s) => s.definition.id === c)));
+  if (target) {
+    :summon(target);
+  }
 }
 
 /**
