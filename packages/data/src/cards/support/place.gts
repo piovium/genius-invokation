@@ -608,7 +608,7 @@ export const PeopleOfTheSprings = card(321025)
   .on("enterRelative", (c, e) => e.entity.definition.type === "summon")
   .usage(3)
   .do((c, e) => {
-    const target = c.$(`my summons with id ${e.entity.id}`);
+    const target = c.query($.my.summon.id(e.entity.id));
     target?.addVariable("usage", 1);
   })
   .done();
