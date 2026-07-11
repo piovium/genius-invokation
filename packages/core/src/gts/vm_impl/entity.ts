@@ -275,7 +275,6 @@ export class EntityModel implements ICaller {
       console?.trace?.();
     }
     const autoDispose = name === "usage" && option.autoDispose !== false;
-    this.varConfigs.set(name, createVariableConfig(count, option));
     if (autoDispose) {
       if (this.type === "character" || this.type === "attachment") {
         throw new GiTcgDataError(
