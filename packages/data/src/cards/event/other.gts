@@ -833,20 +833,19 @@ export const GuardiansOath = card(332014)
  * 召唤一个随机「丘丘人」召唤物！
  * （牌组包含至少2个「魔物」角色，才能加入牌组）
  */
-export const AbyssalSummons = card(332015)
-  .since("v3.3.0")
-  .costSame(2)
-  .do((c) => {
-    c.summon(
-      c.random([
-        CryoHilichurlShooter, 
-        HydroSamachurl, 
-        HilichurlBerserker, 
-        ElectroHilichurlShooter
-      ])
-    );
-  })
-  .done();
+define card {
+  id 332015 as AbyssalSummons;
+  since "v3.3.0";
+  cost DiceType.Aligned, 2;
+  const candidates = [
+    CryoHilichurlShooter, 
+    HydroSamachurl, 
+    HilichurlBerserker, 
+    ElectroHilichurlShooter
+  ];
+  const summons = :queryAll($.my.summon);
+  :summon(:random(candidates.filter((c) => !summons.some((s) => s.definition.id === c))));
+}
 
 /**
  * @id 332016
