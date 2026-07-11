@@ -19,6 +19,23 @@ import { access, mkdir, readFile, readdir, writeFile, unlink } from "node:fs/pro
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+const INDEX_LICENSE = `// Copyright (C) 2026 Piovium Labs
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+// 
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+`;
+
 type RootBuilder =
   | "attachment"
   | "card"
@@ -252,8 +269,6 @@ const EVENT_ARG_SHORTCUTS = new Set<string>([
   "deductVoidCost",
   "divideDamage",
   "fixDice",
-  "forceCharged",
-  "forcePlunging",
   "increaseDamage",
   "increaseDamageByReaction",
   "increasePiercingOtherDamage",
@@ -687,6 +702,15 @@ function applyCommonVersionStep(step: ChainStep, frame: Frame): boolean {
       return true;
     case "reserve":
       requireArgs(step, 0);
+      if (frame.mode === "skill") {
+        const hasSkillType = frame.block.entries.some(
+          (entry) =>
+            typeof entry === "string" && entry.startsWith("skillType "),
+        );
+        if (!hasSkillType) {
+          frame.block.addLine("skillType passive;");
+        }
+      }
       frame.block.addLine("reserved;");
       return true;
     default:
@@ -1101,11 +1125,7 @@ function applyInitiativeStep(
       frame.block.addLine(`cost ${renderArgs(step.args)};`);
       return true;
     case "addTarget":
-      requireArgs(step, 1);
-      frame.block.addLine(
-        `addTarget ${renderTargetArg(step.args[0]!, state)};`,
-      );
-      return true;
+      throw unsupported(step);
     case "filter":
       requireArgs(step, 1);
       frame.block.addLine(`filter ${renderShortcutFunction(step.args[0]!)};`);
@@ -1790,6 +1810,13 @@ function renderArg(expr: ts.Expression): string {
   if (value !== null) {
     return JSON.stringify(value);
   }
+  if (
+    ts.isAsExpression(expr) ||
+    ts.isSatisfiesExpression(expr) ||
+    ts.isTypeAssertionExpression(expr)
+  ) {
+    return `(${textOf(expr)})`;
+  }
   return textOf(expr);
 }
 
@@ -1801,8 +1828,24 @@ function renderBareArg(expr: ts.Expression): string {
   return textOf(expr);
 }
 
+const RESERVED_IDENTIFIERS = new Set([
+  // ECMAScript reserved words
+  "break", "case", "catch", "class", "const", "continue", "debugger", "default",
+  "delete", "do", "else", "export", "extends", "false", "finally", "for", "function",
+  "if", "import", "in", "instanceof", "new", "null", "return", "super", "switch",
+  "this", "throw", "true", "try", "typeof", "var", "void", "while", "with",
+  // Strict mode reserved words
+  "let", "static", "yield", "await",
+  // Future reserved words
+  "enum", "implements", "interface", "package", "private", "protected", "public",
+  // TypeScript / GTS keywords
+  "type", "define", "as",
+]);
+
 function bareOrQuoted(value: string): string {
-  return /^[A-Za-z_$][\w$]*$/.test(value) ? value : JSON.stringify(value);
+  return /^[A-Za-z_$][\w$]*$/.test(value) && !RESERVED_IDENTIFIERS.has(value)
+    ? value
+    : JSON.stringify(value);
 }
 
 function stringLiteralValue(expr: ts.Expression): string | null {
@@ -2097,7 +2140,7 @@ async function processFile(
     changed: content !== original || outputPath !== inputPath,
     converted,
     skipped,
-    content,
+    content: updateRelativeImports(content),
   };
 }
 
@@ -2145,6 +2188,77 @@ function convertDefinitionWithState(
   return root.render().join("\n") + "\n";
 }
 
+function updateRelativeImports(content: string): string {
+  return content.replace(
+    /(from\s+["'])(\.\.?\/[^"']+)(["'])/g,
+    (match, prefix, sourcePath, suffix) => {
+      if (sourcePath.endsWith(".ts")) {
+        return `${prefix}${sourcePath.slice(0, -3)}.gts${suffix}`;
+      }
+      const lastSegment = sourcePath.split("/").pop() ?? "";
+      if (!lastSegment.includes(".") && !sourcePath.endsWith("/")) {
+        return `${prefix}${sourcePath}.gts${suffix}`;
+      }
+      return match;
+    },
+  );
+}
+
+async function updateAllGtsRelativeImports(): Promise<void> {
+  const files = await collectDefaultFiles();
+  const oldVersionsDir = path.join(SRC_ROOT, "old_versions");
+  let oldVersions: string[] = [];
+  try {
+    oldVersions = (await readdir(oldVersionsDir, { withFileTypes: true }))
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".gts"))
+      .map((entry) => path.join(oldVersionsDir, entry.name));
+  } catch {
+    // old_versions directory may not exist
+  }
+  for (const file of [...files, ...oldVersions]) {
+    if (!file.endsWith(".gts")) continue;
+    const content = await readFile(file, "utf-8");
+    const updated = updateRelativeImports(content);
+    if (updated !== content) {
+      await writeFile(file, updated);
+    }
+  }
+}
+
+async function regenerateIndex(): Promise<void> {
+  const indexPath = path.join(SRC_ROOT, "index.ts");
+  const entries = await readdir(SRC_ROOT, { recursive: true, withFileTypes: true });
+  const files = entries
+    .filter(
+      (entry) =>
+        entry.isFile() &&
+        entry.name.endsWith(".gts") &&
+        entry.parentPath !== SRC_ROOT,
+    )
+    .map((entry) => path.join(entry.parentPath, entry.name))
+    .toSorted((a, b) => a.localeCompare(b));
+
+  const imports = files
+    .map((file) => {
+      const rel = path.relative(SRC_ROOT, file).replace(/\\/g, "/");
+      return `import "./${rel}";`;
+    })
+    .join("\n");
+
+  const content = `${INDEX_LICENSE}// Generated by scripts/generators/imports.ts
+// DO NOT EDIT
+
+import "./begin.ts";
+
+import "./commons.gts";
+${imports}
+
+export * from "./end.ts";
+export { default } from "./end.ts";
+`;
+  await writeFile(indexPath, content);
+}
+
 async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
   const files =
@@ -2181,6 +2295,8 @@ async function main(): Promise<void> {
       }
       written++;
     }
+    await updateAllGtsRelativeImports();
+    await regenerateIndex();
   }
 
   const converted = results.reduce((sum, item) => sum + item.converted, 0);
