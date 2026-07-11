@@ -1,9 +1,9 @@
 import { card, character, combatStatus, DamageType, skill, summon } from "@gi-tcg/core/builder";
 import { DisposedSupportAndSummonsCountExtension } from "../cards/event/other.gts";
-import { Itzpapa, NightsoulsBlessing, OpalShield } from "../characters/cryo/citlali.ts";
-import { CaloricBalancingPlan01, KineticEnergyScale, TeachingsOfTheCollectiveOfPlenty, ThunderboltRush, WeightedSpike } from "../characters/electro/iansan.ts";
+import { Itzpapa, NightsoulsBlessing, OpalShield } from "../characters/cryo/citlali.gts";
+import { CaloricBalancingPlan01, KineticEnergyScale, TeachingsOfTheCollectiveOfPlenty, ThunderboltRush, WeightedSpike } from "../characters/electro/iansan.gts";
 import { ArkheSeatsSacredAndSecular, LetThePeopleRejoice, SalonSolitaireOusia, SalonSolitairePneuma, Skill12114, SoloistsSolicitation, SoloistsSolicitationOusia } from "../characters/hydro/furina.gts";
-import { AllIsAsh, Arlecchino, BalemoonRising, InvitationToABeheading, TheBalemoonAloneMayKnowPassive01, TheBalemoonAloneMayKnowPassive03 } from "../characters/pyro/arlecchino.ts";
+import { AllIsAsh, Arlecchino, BalemoonRising, InvitationToABeheading, TheBalemoonAloneMayKnowPassive01, TheBalemoonAloneMayKnowPassive03 } from "../characters/pyro/arlecchino.gts";
 import { BondOfLife } from "../commons.gts";
 
 /**

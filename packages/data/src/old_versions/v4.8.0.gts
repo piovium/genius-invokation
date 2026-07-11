@@ -1,6 +1,6 @@
 import { card, combatStatus, DamageType, skill, status } from "@gi-tcg/core/builder";
-import { Cyno, PactswornPathclearer, SecretRiteChasmicSoulfarer } from "../characters/electro/cyno.ts";
-import { AlldevouringNarwhal, AnomalousAnatomy, LightlessFeeding } from "../characters/hydro/alldevouring_narwhal.ts";
+import { Cyno, PactswornPathclearer, SecretRiteChasmicSoulfarer } from "../characters/electro/cyno.gts";
+import { AlldevouringNarwhal, AnomalousAnatomy, LightlessFeeding } from "../characters/hydro/alldevouring_narwhal.gts";
 
 /**
  * @id 214041

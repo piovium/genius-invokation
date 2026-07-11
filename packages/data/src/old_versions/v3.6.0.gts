@@ -1,7 +1,7 @@
 import { DamageType, type EquipmentHandle, type SkillHandle, card, character, skill, summon } from "@gi-tcg/core/builder";
 import { LiutianArchery, SacredCryoPearl, TrailOfTheQilin } from "../characters/cryo/ganyu.gts";
-import { MirrorCage, Refraction, Refraction01 } from "../characters/hydro/mirror_maiden.ts";
-import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.ts";
+import { MirrorCage, Refraction, Refraction01 } from "../characters/hydro/mirror_maiden.gts";
+import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.gts";
 import { LithicGuard } from "../cards/equipment/weapon/pole.gts";
 
 /**

@@ -1,5 +1,5 @@
 import { card, status } from "@gi-tcg/core/builder";
-import { StrifefulLightning, ThunderManifestation, ThunderingShacklesSummon } from "../characters/electro/thunder_manifestation.ts";
+import { StrifefulLightning, ThunderManifestation, ThunderingShacklesSummon } from "../characters/electro/thunder_manifestation.gts";
 
 /**
  * @id 330005
