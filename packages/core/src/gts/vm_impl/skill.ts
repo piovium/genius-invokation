@@ -182,6 +182,7 @@ export class TriggeredSkillModel extends SkillModel {
     super();
     this.caller = caller;
     this.detailedEventName = detailedEventName;
+    this.associatedExtensionId = caller.associatedExtensionId;
   }
 
   override get snippets() {
@@ -710,7 +711,7 @@ export const CharacterSkillViewModel = InitiativeSkillViewModel
         const passiveSkillModel = EntityViewModel.parse(
           subView,
           "character",
-          model.id,
+          model,
         );
         model.passiveSkillEntry =
           passiveSkillModel.getEntry() as CharacterPassiveSkillEntry;

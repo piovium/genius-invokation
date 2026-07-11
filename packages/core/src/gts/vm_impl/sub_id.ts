@@ -16,6 +16,9 @@
 const subIdPool = new Map<number, number>();
 
 export function getSubId(mainId: number): number {
+  if (typeof mainId !== "number") {
+    throw new Error(`Invalid main ID: ${mainId}`);
+  }
   let counterValue = subIdPool.get(mainId) ?? 0;
   subIdPool.set(mainId, ++counterValue);
   if (counterValue >= 100) {

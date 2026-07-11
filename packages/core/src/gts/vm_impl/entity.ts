@@ -74,12 +74,16 @@ import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
 import type { Computed } from "../../query/utils";
 import type { AttachmentTag, ModificationGetter } from "../../base/attachment";
 import { getSubId } from "./sub_id";
-import type { SkillContext } from "../../builder/internal_exports";
 import type { TypedSkillContext } from "../../builder/context/skill";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 
 export interface GtsUsageOrUsagePerRoundOptions extends GtsUsageOptions {
   perRound: boolean;
+}
+
+export interface IParentModel {
+  id: number;
+  associatedExtensionId: number | null;
 }
 
 export class EntityModel implements ICaller {
@@ -102,21 +106,12 @@ export class EntityModel implements ICaller {
   descriptionDictionary: Writable<DescriptionDictionary> = {};
   snippets = new Map<string, SnippetOperation<any, any>>();
 
-  constructor(type: ExEntityType, id?: number) {
-    if (typeof id === "number") {
-      this.id = id;
+  constructor(type: ExEntityType, parent?: IParentModel) {
+    if (parent) {
+      this.id = parent.id;
+      this.associatedExtensionId = parent.associatedExtensionId;
     }
     this.type = type;
-    if (this.type === "status" || this.type === "equipment") {
-      // add default defeated dispose skill
-      const skillModel = new TriggeredSkillModel(this, "defeated");
-      skillModel.id = this.getSubId();
-      skillModel.action = function (c) {
-        c.dispose();
-      };
-      skillModel.isDefaultDefeatedDispose = true;
-      this.skillList.push(skillModel.buildSkillDefinition());
-    }
   }
 
   getSubId(): number {
@@ -143,6 +138,16 @@ export class EntityModel implements ICaller {
 
   /** Return all skills including implicit roundEnd */
   getSkills(): SkillDefinition[] {
+    if (this.type === "status" || this.type === "equipment") {
+      // add default defeated dispose skill
+      const skillModel = new TriggeredSkillModel(this, "defeated");
+      skillModel.id = this.getSubId();
+      skillModel.action = function (c) {
+        c.dispose();
+      };
+      skillModel.isDefaultDefeatedDispose = true;
+      this.skillList.unshift(skillModel.buildSkillDefinition());
+    }
     // add clean-up roundEnd skill
     const usagePerRoundNames = USAGE_PER_ROUND_VARIABLE_NAMES.filter((name) =>
       this.varConfigs.has(name),
@@ -286,6 +291,7 @@ export class EntityModel implements ICaller {
 
 export interface ICaller {
   type: ExEntityType;
+  associatedExtensionId: number | null;
   /**
    * Add a usage-related varConfig to the caller
    * @param count initial value for the variable
@@ -338,10 +344,13 @@ export var DEFAULT_ENTITY_VM_META = {
   snippets: {},
 } as const satisfies EntityVMMeta;
 
-export type DefaultEntityVMMeta<T extends ExEntityType> =
-  typeof DEFAULT_ENTITY_VM_META & {
-    type: T;
-  };
+export type DefaultEntityVMMeta<
+  T extends ExEntityType,
+  AssociatedExtension = never,
+> = Omit<typeof DEFAULT_ENTITY_VM_META, "associatedExtension"> & {
+  type: T;
+  associatedExtension: AssociatedExtension;
+};
 
 type SnippetOperation<Meta extends EntityVMMeta, ArgT> = (
   c: TypedSkillContext<

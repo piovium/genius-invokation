@@ -542,6 +542,38 @@ function closeEventIfNeeded(frames: Frame[]): void {
   }
 }
 
+const ACTION_ALLOWED_FRAMES = new Set<FrameMode>([
+  "card",
+  "skill",
+  "passive",
+  "techniqueSkill",
+  "event",
+]);
+
+const RESERVED_VARIABLE_NAMES = new Set<string>([
+  "usage",
+  "duration",
+  "shield",
+  "hintIcon",
+  "nightsouls",
+  "exp",
+  "hintCount",
+  "swirledUsage",
+]);
+
+function allowsTopLevelAction(frame: Frame): boolean {
+  return ACTION_ALLOWED_FRAMES.has(frame.mode);
+}
+
+function isReservedVariableName(arg: ts.Expression): boolean {
+  const value = stringLiteralValue(arg);
+  return value !== null && RESERVED_VARIABLE_NAMES.has(value);
+}
+
+function isSupportBlock(frame: Frame): boolean {
+  return frame.block.header.startsWith("support");
+}
+
 function applyStep(
   step: ChainStep,
   frames: Frame[],
@@ -565,6 +597,9 @@ function applyStep(
   }
   if (step.name === "do") {
     requireArgs(step, 1);
+    if (!allowsTopLevelAction(frame)) {
+      throw new ConversionError(".do() direct actions are not mapped at this block level");
+    }
     frame.block.addAction(convertAction(step.args[0]));
     return;
   }
@@ -573,10 +608,23 @@ function applyStep(
     return;
   }
   if (CONTEXT_SHORTCUTS.has(step.name)) {
+    if (!allowsTopLevelAction(frame)) {
+      throw new ConversionError(`.${step.name}() is not mapped at this block level`);
+    }
+    if (
+      (step.name === "addVariable" || step.name === "setVariable") &&
+      step.args.length > 0 &&
+      isReservedVariableName(step.args[0]!)
+    ) {
+      throw new ConversionError(`.${step.name}() with reserved variable name is not mapped`);
+    }
     frame.block.addAction([`:${step.name}(${renderArgs(step.args)});`]);
     return;
   }
   if (EVENT_ARG_SHORTCUTS.has(step.name)) {
+    if (!allowsTopLevelAction(frame)) {
+      throw new ConversionError(`.${step.name}() is not mapped at this block level`);
+    }
     frame.block.addAction([`:e.${step.name}(${renderArgs(step.args)});`]);
     return;
   }
@@ -762,10 +810,11 @@ function applyCardStep(
       frame.block.addLine(`tags ${renderBareArgs(step.args)};`);
       return;
     case "undiscoverable":
-    case "disableTuning":
       requireArgs(step, 0);
       frame.block.addLine(`${step.name};`);
       return;
+    case "disableTuning":
+      throw new ConversionError("disableTuning is not mapped");
     case "event":
       requireArgs(step, 0);
       frame.block.addLine("event;");
@@ -778,6 +827,9 @@ function applyCardStep(
       return;
     }
     case "food":
+      if (step.args.length > 0) {
+        throw new ConversionError(".food() with options is not mapped");
+      }
       frame.block.addLine(renderFood(step.args, false));
       return;
     case "combatFood":
@@ -921,6 +973,12 @@ function applyEntityLikeStep(step: ChainStep, frame: Frame): boolean {
     case "hint":
       if (step.args.length < 1 || step.args.length > 2) {
         throw new ConversionError(".hint() expects one or two arguments");
+      }
+      if (isSupportBlock(frame)) {
+        throw new ConversionError(".hint() is not mapped inside support blocks");
+      }
+      if (step.args.some((arg) => isFunctionExpression(arg))) {
+        throw new ConversionError(".hint() with function argument is not mapped");
       }
       frame.block.addLine(`hint ${renderArgs(step.args)};`);
       return true;
@@ -1351,17 +1409,98 @@ function convertFunction(fn: ts.Expression): { kind: "block" | "expr"; code: str
   const contextParam = params[0] ?? null;
   const eventParam = params[1] ?? null;
 
+  if (hasNestedFunctionReference(unwrapped, contextParam, eventParam)) {
+    throw new ConversionError("nested function references context/event parameter");
+  }
+  if (hasReservedVariableCall(unwrapped)) {
+    throw new ConversionError("function contains variable operation with reserved variable name");
+  }
+
   if (ts.isBlock(unwrapped.body)) {
     const code = blockBodyText(unwrapped.body);
     return {
       kind: "block",
-      code: replaceContextReferences(dedent(code), contextParam, eventParam),
+      code: collapseMultilineTemplateLiterals(
+        replaceContextReferences(dedent(code), contextParam, eventParam),
+      ),
     };
   }
   return {
     kind: "expr",
-    code: replaceContextReferences(textOf(unwrapped.body), contextParam, eventParam),
+    code: collapseMultilineTemplateLiterals(
+      replaceContextReferences(textOf(unwrapped.body), contextParam, eventParam),
+    ),
   };
+}
+
+function hasReservedVariableCall(fn: ts.ArrowFunction | ts.FunctionExpression): boolean {
+  let result = false;
+  function visit(node: ts.Node) {
+    if (result) return;
+    if (ts.isCallExpression(node)) {
+      const callee = unwrapExpression(node.expression);
+      if (ts.isPropertyAccessExpression(callee)) {
+        const methodName = callee.name.text;
+        if (
+          (methodName === "addVariable" ||
+            methodName === "setVariable" ||
+            methodName === "getVariable") &&
+          node.arguments.length > 0 &&
+          isReservedVariableName(node.arguments[0]!)
+        ) {
+          result = true;
+          return;
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(fn);
+  return result;
+}
+
+function isFunctionExpression(expr: ts.Expression): boolean {
+  const unwrapped = unwrapExpression(expr);
+  return ts.isArrowFunction(unwrapped) || ts.isFunctionExpression(unwrapped);
+}
+
+function hasNestedFunctionReference(
+  fn: ts.ArrowFunction | ts.FunctionExpression,
+  contextParam: string | null,
+  eventParam: string | null,
+): boolean {
+  const targetNames = new Set<string>([contextParam, eventParam].filter(Boolean));
+  let result = false;
+
+  function getParamNames(func: ts.ArrowFunction | ts.FunctionExpression): Set<string> {
+    return new Set(
+      func.parameters
+        .map((p) => (ts.isIdentifier(p.name) ? p.name.text : null))
+        .filter((x): x is string => x !== null),
+    );
+  }
+
+  function visit(node: ts.Node, currentFunction: ts.ArrowFunction | ts.FunctionExpression | null) {
+    if (result) return;
+    if (node === fn) {
+      ts.forEachChild(node, (child) => visit(child, fn));
+    } else if (ts.isParameter(node)) {
+      if (node.type) visit(node.type, currentFunction);
+      if (node.initializer) visit(node.initializer, currentFunction);
+    } else if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
+      ts.forEachChild(node, (child) => visit(child, node));
+    } else if (ts.isIdentifier(node) && targetNames.has(node.text)) {
+      const localNames = currentFunction ? getParamNames(currentFunction) : new Set<string>();
+      if (!localNames.has(node.text) && currentFunction !== fn) {
+        result = true;
+      }
+    } else {
+      ts.forEachChild(node, (child) => visit(child, currentFunction));
+    }
+  }
+
+  visit(fn, null);
+  return result;
 }
 
 function blockBodyText(block: ts.Block): string {
@@ -1369,6 +1508,19 @@ function blockBodyText(block: ts.Block): string {
   return sourceFile.text.slice(block.getStart(sourceFile) + 1, block.end - 1);
 }
 
+function collapseMultilineTemplateLiterals(code: string): string {
+  return code.replace(/`(?:[^`\\]|\\.)*`/gs, (match) => {
+    if (!match.includes("\n")) {
+      return match;
+    }
+    const content = match.slice(1, -1);
+    const collapsed = content
+      .replace(/\\`/g, "`")
+      .replace(/\s+/g, " ")
+      .trim();
+    return `\`${collapsed}\``;
+  });
+}
 function replaceContextReferences(
   code: string,
   contextParam: string | null,
@@ -1460,6 +1612,10 @@ function previousNonWhitespace(text: string): string | null {
   for (let i = text.length - 1; i >= 0; i--) {
     const ch = text[i]!;
     if (!/\s/.test(ch)) {
+      if (ch === "." && text[i - 1] === "." && text[i - 2] === ".") {
+        i -= 2;
+        continue;
+      }
       return ch;
     }
   }
@@ -1521,6 +1677,10 @@ function renderBareArgs(args: readonly ts.Expression[]): string {
 }
 
 function renderArg(expr: ts.Expression): string {
+  const unwrapped = unwrapExpression(expr);
+  if (ts.isArrowFunction(unwrapped) || ts.isFunctionExpression(unwrapped)) {
+    return `(${textOf(expr)})`;
+  }
   const value = stringLiteralValue(expr);
   if (value !== null) {
     return JSON.stringify(value);

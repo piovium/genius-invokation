@@ -23,13 +23,16 @@ import { BondOfLife } from "../../../commons.gts";
  * 角色造成的伤害+1。
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
-export const MagicGuide = card(311101)
-  .since("v3.3.0")
-  .costSame(2)
-  .weapon("catalyst")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .done();
+define card {
+  id 311101 as MagicGuide;
+  since "v3.3.0";
+  cost DiceType.Aligned, 2;
+  weapon catalyst {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+  }
+}
 
 /**
  * @id 311102
@@ -39,18 +42,23 @@ export const MagicGuide = card(311101)
  * 角色使用「元素战技」后：生成1个此角色类型的元素骰。（每回合1次）
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
-export const SacrificialFragments = card(311102)
-  .since("v3.3.0")
-  .costSame(3)
-  .weapon("catalyst")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .on("useSkill", (c, e) => e.isSkillType("elemental"))
-  .usagePerRound(1)
-  .do((c) => {
-    c.generateDice(c.self.master.element(), 1);
-  })
-  .done();
+define card {
+  id 311102 as SacrificialFragments;
+  since "v3.3.0";
+  cost DiceType.Aligned, 3;
+  weapon catalyst {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+    on useSkill {
+      when :(:e.isSkillType("elemental"));
+      usage perRound, 1 {
+        visible false;
+      };
+      :generateDice(:self.master.element(), 1);
+    }
+  }
+}
 
 /**
  * @id 311103
@@ -60,16 +68,23 @@ export const SacrificialFragments = card(311102)
  * 每回合1次：角色使用「普通攻击」造成的伤害额外+1。
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
-export const SkywardAtlas = card(311103)
-  .since("v3.3.0")
-  .costSame(3)
-  .weapon("catalyst")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("normal"))
-  .usagePerRound(1)
-  .increaseDamage(1)
-  .done();
+define card {
+  id 311103 as SkywardAtlas;
+  since "v3.3.0";
+  cost DiceType.Aligned, 3;
+  weapon catalyst {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+    on increaseSkillDamage {
+      when :(:e.viaSkillType("normal"));
+      usage perRound, 1 {
+        visible false;
+      };
+      :e.increaseDamage(1);
+    }
+  }
+}
 
 /**
  * @id 311104
@@ -79,17 +94,24 @@ export const SkywardAtlas = card(311103)
  * 我方角色引发元素反应时：造成的伤害+1。（每回合最多触发2次）
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
-export const AThousandFloatingDreams = card(311104)
-  .since("v3.7.0")
-  .costSame(3)
-  .weapon("catalyst")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .on("increaseSkillDamage", (c, e) => e.getReaction())
-  .listenToPlayer()
-  .usagePerRound(2)
-  .increaseDamage(1)
-  .done();
+define card {
+  id 311104 as AThousandFloatingDreams;
+  since "v3.7.0";
+  cost DiceType.Aligned, 3;
+  weapon catalyst {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+    on increaseSkillDamage {
+      when :(:e.getReaction());
+      listenTo samePlayer;
+      usage perRound, 2 {
+        visible false;
+      };
+      :e.increaseDamage(1);
+    }
+  }
+}
 
 /**
  * @id 311105
@@ -99,15 +121,19 @@ export const AThousandFloatingDreams = card(311104)
  * 入场时：抓2张牌。
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
-export const FruitOfFulfillment = card(311105)
-  .since("v3.8.0")
-  .costVoid(3)
-  .weapon("catalyst")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .on("enter")
-  .drawCards(2)
-  .done();
+define card {
+  id 311105 as FruitOfFulfillment;
+  since "v3.8.0";
+  cost DiceType.Void, 3;
+  weapon catalyst {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+    on enter {
+      :drawCards(2);
+    }
+  }
+}
 
 /**
  * @id 311106
@@ -117,18 +143,20 @@ export const FruitOfFulfillment = card(311105)
  * 结束阶段：此牌累积1点「伤害加成」。（最多累积到2点）
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
-export const LostPrayerToTheSacredWinds = card(311106)
-  .since("v4.3.0")
-  .costSame(2)
-  .weapon("catalyst")
-  .variable("extraDamage", 0)
-  .on("increaseSkillDamage")
-  .do((c, e) => {
-    e.increaseDamage(c.getVariable("extraDamage"));
-  })
-  .on("endPhase")
-  .addVariableWithMax("extraDamage", 1, 2)
-  .done();
+define card {
+  id 311106 as LostPrayerToTheSacredWinds;
+  since "v4.3.0";
+  cost DiceType.Aligned, 2;
+  weapon catalyst {
+    variable extraDamage, 0;
+    on increaseSkillDamage {
+      :e.increaseDamage(:getVariable("extraDamage"));
+    }
+    on endPhase {
+      :addVariableWithMax("extraDamage", 1, 2);
+    }
+  }
+}
 
 /**
  * @id 311107
@@ -138,16 +166,23 @@ export const LostPrayerToTheSacredWinds = card(311106)
  * 角色进行重击时：少花费1个无色元素。（每回合最多触发2次）
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
-export const TulaytullahsRemembrance = card(311107)
-  .since("v4.3.0")
-  .costSame(3)
-  .weapon("catalyst")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .on("deductVoidDiceSkill", (c, e) => e.isChargedAttack())
-  .usagePerRound(2)
-  .deductVoidCost(1)
-  .done();
+define card {
+  id 311107 as TulaytullahsRemembrance;
+  since "v4.3.0";
+  cost DiceType.Aligned, 3;
+  weapon catalyst {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+    on deductVoidDiceSkill {
+      when :(:e.isChargedAttack());
+      usage perRound, 2 {
+        visible false;
+      };
+      :e.deductVoidCost(1);
+    }
+  }
+}
 
 /**
  * @id 301108
@@ -155,11 +190,13 @@ export const TulaytullahsRemembrance = card(311107)
  * @description
  * 角色在本回合中，下次造成的伤害+2。
  */
-export const AeonWave = status(301108)
-  .oneDuration()
-  .once("increaseSkillDamage")
-  .increaseDamage(2)
-  .done();
+define status {
+  id 301108 as AeonWave;
+  oneDuration;
+  once increaseSkillDamage {
+    :e.increaseDamage(2);
+  }
+}
 
 /**
  * @id 311108
@@ -169,21 +206,30 @@ export const AeonWave = status(301108)
  * 角色受到伤害或治疗后：如果本回合已受到伤害或治疗累计2次，则角色本回合中下次造成的伤害+2。（每回合1次）
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
-export const TomeOfTheEternalFlow = card(311108)
-  .since("v4.5.0")
-  .costSame(3)
-  .weapon("catalyst")
-  .variable("count", 0)
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .on("damagedOrHealed")
-  .addVariable("count", 1)
-  .on("damagedOrHealed", (c) => c.getVariable("count") === 2)
-  .usagePerRound(1)
-  .characterStatus(AeonWave, "@master")
-  .on("roundEnd")
-  .setVariable("count", 0)
-  .done();
+define card {
+  id 311108 as TomeOfTheEternalFlow;
+  since "v4.5.0";
+  cost DiceType.Aligned, 3;
+  weapon catalyst {
+    variable count, 0;
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+    on damagedOrHealed {
+      :addVariable("count", 1);
+    }
+    on damagedOrHealed {
+      when :(:getVariable("count") === 2);
+      usage perRound, 1 {
+        visible false;
+      };
+      :characterStatus(AeonWave, "@master");
+    }
+    on roundEnd {
+      :setVariable("count", 0);
+    }
+  }
+}
 
 /**
  * @id 301111
@@ -191,13 +237,18 @@ export const TomeOfTheEternalFlow = card(311108)
  * @description
  * 本回合中，角色下一次「普通攻击」少花费1个无色元素，且造成的伤害+1。
  */
-export const CashflowSupervisionInEffect = status(301111)
-  .oneDuration()
-  .on("deductVoidDiceSkill", (c, e) => e.isSkillType("normal"))
-  .deductVoidCost(1)
-  .once("increaseSkillDamage", (c, e) => e.viaSkillType("normal"))
-  .increaseDamage(1)
-  .done();
+define status {
+  id 301111 as CashflowSupervisionInEffect;
+  oneDuration;
+  on deductVoidDiceSkill {
+    when :(:e.isSkillType("normal"));
+    :e.deductVoidCost(1);
+  }
+  once increaseSkillDamage {
+    when :(:e.viaSkillType("normal"));
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 311109
@@ -206,14 +257,19 @@ export const CashflowSupervisionInEffect = status(301111)
  * 角色受到伤害或治疗后：使角色本回合中下一次「普通攻击」少花费1个无色元素，且造成的伤害+1。（每回合至多2次）
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
-export const CashflowSupervision = card(311109)
-  .since("v4.7.0")
-  .costSame(2)
-  .weapon("catalyst")
-  .on("damagedOrHealed")
-  .usagePerRound(2)
-  .characterStatus(CashflowSupervisionInEffect, "@master")
-  .done();
+define card {
+  id 311109 as CashflowSupervision;
+  since "v4.7.0";
+  cost DiceType.Aligned, 2;
+  weapon catalyst {
+    on damagedOrHealed {
+      usage perRound, 2 {
+        visible false;
+      };
+      :characterStatus(CashflowSupervisionInEffect, "@master");
+    }
+  }
+}
 
 /**
  * @id 133099
@@ -223,8 +279,10 @@ export const CashflowSupervision = card(311109)
  * 角色受到伤害或治疗后：如果本回合已受到伤害或治疗累计2次，则角色本回合中下次造成的伤害+2。（每回合1次）
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
-export const TombOfTheEternalFlow = card(133099) // 骗骗花
-  .reserve();
+define card {
+  id 133099 as TombOfTheEternalFlow;
+  reserved;
+}
 
 /**
  * @id 301112
@@ -232,10 +290,12 @@ export const TombOfTheEternalFlow = card(133099) // 骗骗花
  * @description
  * 所附属角色下次造成的伤害+1。
  */
-export const FlowingPurityInEffect = status(301112)
-  .once("increaseSkillDamage")
-  .increaseDamage(1)
-  .done();
+define status {
+  id 301112 as FlowingPurityInEffect;
+  once increaseSkillDamage {
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 311110
@@ -245,20 +305,28 @@ export const FlowingPurityInEffect = status(301112)
  * 双方选择行动前：所附属角色如果未附属生命之契，则生成1个随机基础元素骰，并且角色下次造成的伤害+1。（每回合1次）
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
-export const FlowingPurity = card(311110)
-  .since("v5.2.0")
-  .costSame(1)
-  .weapon("catalyst")
-  .on("enter")
-  .characterStatus(BondOfLife, "@master")
-  .on("endPhase") // 实为结束阶段时
-  .characterStatus(BondOfLife, "@master")
-  .on("beforeAction", (c) => !c.self.master.hasStatus(BondOfLife))
-  .listenToAll()
-  .usagePerRound(1)
-  .generateDice("randomElement", 1)
-  .characterStatus(FlowingPurityInEffect, "@master")
-  .done();
+define card {
+  id 311110 as FlowingPurity;
+  since "v5.2.0";
+  cost DiceType.Aligned, 1;
+  weapon catalyst {
+    on enter {
+      :characterStatus(BondOfLife, "@master");
+    }
+    on endPhase {
+      :characterStatus(BondOfLife, "@master");
+    }
+    on beforeAction {
+      when :(!:self.master.hasStatus(BondOfLife));
+      listenTo all;
+      usage perRound, 1 {
+        visible false;
+      };
+      :generateDice("randomElement", 1);
+      :characterStatus(FlowingPurityInEffect, "@master");
+    }
+  }
+}
 
 /**
  * @id 311111
@@ -268,15 +336,20 @@ export const FlowingPurity = card(311110)
  * 入场时：所附属角色获得1点最大生命值。
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
-export const EverlastingMoonglow = card(311111)
-  .since("v6.1.0")
-  .costSame(2)
-  .weapon("catalyst")
-  .on("increaseSkillDamage", (c) => c.self.master.health >= 11)
-  .increaseDamage(2)
-  .on("enter")
-  .increaseMaxHealth(1, "@master")
-  .done();
+define card {
+  id 311111 as EverlastingMoonglow;
+  since "v6.1.0";
+  cost DiceType.Aligned, 2;
+  weapon catalyst {
+    on increaseSkillDamage {
+      when :(:self.master.health >= 11);
+      :e.increaseDamage(2);
+    }
+    on enter {
+      :increaseMaxHealth(1, "@master");
+    }
+  }
+}
 
 /**
  * @id 301113
@@ -284,13 +357,15 @@ export const EverlastingMoonglow = card(311111)
  * @description
  * 每层使所附属角色下次造成的伤害+1。（可叠加，最多叠加到2）
  */
-export const StarcallersWatchInEffect = status(301113)
-  .variableCanAppend("increaseDmg", 1, 2)
-  .once("increaseSkillDamage")
-  .do((c, e) => {
-    e.increaseDamage(c.getVariable("increaseDmg"));
-  })
-  .done();
+define status {
+  id 301113 as StarcallersWatchInEffect;
+  variable increaseDmg, 1 {
+    append 2;
+  };
+  once increaseSkillDamage {
+    :e.increaseDamage(:getVariable("increaseDmg"));
+  }
+}
 
 /**
  * @id 311112
@@ -299,12 +374,18 @@ export const StarcallersWatchInEffect = status(301113)
  * 我方每回合首次打出名称不属于初始牌组的牌时：少花费1个元素骰，所附属角色下次造成的伤害+1。（可叠加，最多叠加到2）
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
-export const StarcallersWatch = card(311112)
-  .since("v6.3.0")
-  .costSame(1)
-  .weapon("catalyst")
-  .on("deductOmniDiceCard", (c, e) => !c.isInInitialPile(e.action.skill.caller))
-  .usagePerRound(1)
-  .deductOmniCost(1)
-  .characterStatus(StarcallersWatchInEffect, "@master")
-  .done();
+define card {
+  id 311112 as StarcallersWatch;
+  since "v6.3.0";
+  cost DiceType.Aligned, 1;
+  weapon catalyst {
+    on deductOmniDiceCard {
+      when :(!:isInInitialPile(:e.action.skill.caller));
+      usage perRound, 1 {
+        visible false;
+      };
+      :e.deductOmniCost(1);
+      :characterStatus(StarcallersWatchInEffect, "@master");
+    }
+  }
+}

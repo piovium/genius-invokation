@@ -24,24 +24,24 @@ export const TurboTwirlyTriggered = customEvent("kachina/turboTwirlyTriggered");
  * 结束阶段：造成1点岩元素伤害，对下一个敌方后台角色造成1点穿透伤害。
  * 可用次数：1
  */
-export const TurboTwirlyLetItRip = summon(116103)
-  .since("v5.5.0")
-  .hint(DamageType.Geo, "1")
-  .on("endPhase")
-  .usage(1)
-  .do((c) => {
-    const field = c.$(`my combat status with definition id ${TurboDrillField}`);
+define summon {
+  id 116103 as TurboTwirlyLetItRip;
+  since "v5.5.0";
+  hint DamageType.Geo, "1";
+  on endPhase {
+    usage 1;
+    const field = :$(`my combat status with definition id ${TurboDrillField}`);
     if (field) {
-      c.damage(DamageType.Geo, 2);
-      c.damage(DamageType.Piercing, 2, "opp next");
-      c.consumeUsage(1, field);
+      :damage(DamageType.Geo, 2);
+      :damage(DamageType.Piercing, 2, "opp next");
+      :consumeUsage(1, field);
     } else {
-      c.damage(DamageType.Geo, 1);
-      c.damage(DamageType.Piercing, 1, "opp next");
+      :damage(DamageType.Geo, 1);
+      :damage(DamageType.Piercing, 1, "opp next");
     }
-    c.emitCustomEvent(TurboTwirlyTriggered);
-  })
-  .done();
+    :emitCustomEvent(TurboTwirlyTriggered);
+  }
+}
 
 /**
  * @id 116104
@@ -49,10 +49,11 @@ export const TurboTwirlyLetItRip = summon(116103)
  * @description
  * 所附属角色可累积「夜魂值」。（最多累积到2点）
  */
-export const NightsoulsBlessing = status(116104)
-  .since("v5.5.0")
-  .nightsoulsBlessing(2)
-  .done();
+define status {
+  id 116104 as NightsoulsBlessing;
+  since "v5.5.0";
+  nightsoulsBlessing 2;
+}
 
 /**
  * @id 116102
@@ -102,10 +103,11 @@ define card {
  * 我方冲天转转造成的岩元素伤害+1，造成的穿透伤害+1。
  * 可用次数：3
  */
-export const TurboDrillField = combatStatus(116101)
-  .since("v5.5.0")
-  .usage(3)
-  .done();
+define combatStatus {
+  id 116101 as TurboDrillField;
+  since "v5.5.0";
+  usage 3;
+}
 
 /**
  * @id 16101
@@ -113,12 +115,13 @@ export const TurboDrillField = combatStatus(116101)
  * @description
  * 造成2点物理伤害。
  */
-export const Cragbiter = skill(16101)
-  .type("normal")
-  .costGeo(1)
-  .costVoid(2)
-  .damage(DamageType.Physical, 2)
-  .done();
+define skill {
+  id 16101 as Cragbiter;
+  skillType normal;
+  cost DiceType.Geo, 1;
+  cost DiceType.Void, 2;
+  :damage(DamageType.Physical, 2);
+}
 
 /**
  * @id 16102
@@ -127,13 +130,14 @@ export const Cragbiter = skill(16101)
  * 自身附属冲天转转，然后进入夜魂加持，并获得2点「夜魂值」。（角色进入夜魂加持后不可使用此技能）
  * （附属冲天转转的角色可以使用特技：转转冲击）
  */
-export const GoGoTurboTwirly = skill(16102)
-  .type("elemental")
-  .costGeo(2)
-  .filter((c) => !c.self.hasStatus(NightsoulsBlessing))
-  .equip(TurboTwirly, "@self")
-  .gainNightsoul("@self", 2)
-  .done();
+define skill {
+  id 16102 as GoGoTurboTwirly;
+  skillType elemental;
+  cost DiceType.Geo, 2;
+  filter :(!:self.hasStatus(NightsoulsBlessing));
+  :equip(TurboTwirly, "@self");
+  :gainNightsoul("@self", 2);
+}
 
 /**
  * @id 16103
@@ -141,13 +145,14 @@ export const GoGoTurboTwirly = skill(16102)
  * @description
  * 造成3点岩元素伤害，生成超级钻钻领域。
  */
-export const TimeToGetSerious = skill(16103)
-  .type("burst")
-  .costGeo(3)
-  .costEnergy(3)
-  .damage(DamageType.Geo, 3)
-  .combatStatus(TurboDrillField)
-  .done();
+define skill {
+  id 16103 as TimeToGetSerious;
+  skillType burst;
+  cost DiceType.Geo, 3;
+  cost DiceType.Energy, 3;
+  :damage(DamageType.Geo, 3);
+  :combatStatus(TurboDrillField);
+}
 
 /**
  * @id 1610
@@ -155,14 +160,15 @@ export const TimeToGetSerious = skill(16103)
  * @description
  * 眼泪与勇气熔铸出的宝石。
  */
-export const Kachina = character(1610)
-  .since("v5.5.0")
-  .tags("geo", "pole", "natlan")
-  .health(10)
-  .energy(3)
-  .skills(Cragbiter, GoGoTurboTwirly, TimeToGetSerious)
-  .associateNightsoul(NightsoulsBlessing)
-  .done();
+define character {
+  id 1610 as Kachina;
+  since "v5.5.0";
+  tags geo, pole, natlan;
+  health 10;
+  energy 3;
+  skills Cragbiter, GoGoTurboTwirly, TimeToGetSerious;
+  associateNightsoul NightsoulsBlessing;
+}
 
 /**
  * @id 216101
@@ -171,12 +177,17 @@ export const Kachina = character(1610)
  * 我方冲天转转或冲天转转·脱离触发效果后，抓1张牌。（每回合1次）
  * （牌组中包含卡齐娜，才能加入牌组）
  */
-export const NightRealmsGiftHeartOfUnity = card(216101)
-  .since("v5.5.0")
-  .costGeo(1)
-  .talent(Kachina, "none")
-  .on(TurboTwirlyTriggered)
-  .listenToPlayer()
-  .usagePerRound(1)
-  .drawCards(1)
-  .done();
+define card {
+  id 216101 as NightRealmsGiftHeartOfUnity;
+  since "v5.5.0";
+  cost DiceType.Geo, 1;
+  talent Kachina, none {
+    on TurboTwirlyTriggered {
+      listenTo samePlayer;
+      usage perRound, 1 {
+        visible false;
+      };
+      :drawCards(1);
+    }
+  }
+}

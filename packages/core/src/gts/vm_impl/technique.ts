@@ -19,7 +19,9 @@ import {
   EntityModel,
   EntityViewModel,
   type DefaultEntityVMMeta,
+  type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
+  type IParentModel,
 } from "./entity";
 import {
   DEFAULT_INITIATIVE_SKILL_VM_META,
@@ -165,15 +167,20 @@ export const TechniqueSkillViewModel = InitiativeSkillViewModel
   .bind<typeof DEFAULT_TECHNIQUE_SKILL_VM_META>();
 
 export class TechniqueModel extends EntityModel {
-  constructor(id?: number) {
-    super("equipment", id);
+  constructor(parent?: IParentModel) {
+    super("equipment", parent);
   }
   targetGetter: TargetGetter = function (ctx) {
     return ctx.queryAll($.my.character).map((s) => s.latest());
   };
 }
 
-export type TechniqueVMMeta = DefaultEntityVMMeta<"equipment">;
+export type DefaultTechniqueVMMeta<AssociatedExtension = never> =
+  DefaultEntityVMMeta<"equipment", AssociatedExtension>;
+
+export type TechniqueVMMeta = EntityVMMeta & {
+  type: "equipment";
+}
 
 type TechniqueVMToBuilderMeta<Meta extends TechniqueVMMeta> = {
   callerType: Meta["type"];
@@ -270,4 +277,4 @@ export const TechniqueViewModel = EntityViewModel
       model.skillList.push(skillDef);
     }, TechniqueSkillViewModel.bind(null!)),
   }))
-  .bind<TechniqueVMMeta>();
+  .bind<DefaultTechniqueVMMeta>();
