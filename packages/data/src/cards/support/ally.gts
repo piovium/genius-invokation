@@ -428,7 +428,7 @@ export const YayoiNanatsuki = card(322020)
 export const Mamere: SupportHandle = card(322021)
   .since("v4.3.0")
   .support("ally")
-  .on("playCard", (c, e) => e.card.definition.id !== Mamere && e.hasOneOfCardTag("food", "place", "ally", "item"))
+  .on("playCard", (c, e): boolean => e.card.definition.id !== Mamere && e.hasOneOfCardTag("food", "place", "ally", "item"))
   .usage(3)
   .usagePerRound(1)
   .do((c) => {
