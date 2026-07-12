@@ -192,9 +192,7 @@ define card {
     }
     on deductOmniDiceSkill {
       when :( :e.isSkillType("technique") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductOmniCost(1);
     }
   }

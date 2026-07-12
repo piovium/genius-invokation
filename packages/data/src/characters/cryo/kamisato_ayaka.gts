@@ -200,9 +200,7 @@ define card {
   talent KamisatoAyaka, none {
     on deductOmniDiceSwitch {
       when :( :e.action.to.id === :self.master.id );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductOmniCost(1);
     }
   }

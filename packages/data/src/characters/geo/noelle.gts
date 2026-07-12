@@ -28,9 +28,7 @@ define status {
   duration 2;
   on deductElementDiceSkill {
     when :( :e.isSkillType("normal") && :e.canDeductCostOfType(DiceType.Geo) );
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :e.deductCost(DiceType.Geo, 1);
   }
   on modifySkillDamageType {
@@ -136,9 +134,7 @@ define card {
     }
     on useSkill {
       when :( :e.isSkillType("normal") && :$(`my combat status with definition id ${FullPlate}`) );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :heal(1, "all my characters");
     }
   }

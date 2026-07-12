@@ -30,9 +30,7 @@ define status {
     :e.changeDamageType(DamageType.Geo);
   }
   on increaseSkillDamage {
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :e.increaseDamage(1);
   }
   on dispose {

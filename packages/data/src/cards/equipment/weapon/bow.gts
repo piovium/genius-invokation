@@ -51,9 +51,7 @@ define card {
     }
     on useSkill {
       when :( :e.isSkillType("elemental") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :generateDice(:self.master.element(), 1);
     }
   }
@@ -77,9 +75,7 @@ define card {
     }
     on increaseSkillDamage {
       when :( :e.viaSkillType("normal") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.increaseDamage(1);
     }
   }
@@ -103,9 +99,7 @@ define card {
     }
     on increaseSkillDamage {
       when :( :e.via.definition.initiativeSkillConfig!.computed$costSize >= 5 );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.increaseDamage(2);
     }
   }
@@ -201,9 +195,7 @@ define card {
   cost DiceType.Aligned, 2;
   weapon bow {
     variable fishing, 0;
-    variable additivePerRound, 0 {
-      visible false;
-    };
+    variable additiveperRound, 0;
     on roundEnd {
       :setVariable("additivePerRound", 0);
     }

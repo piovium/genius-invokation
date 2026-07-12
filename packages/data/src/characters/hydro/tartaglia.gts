@@ -39,9 +39,7 @@ define status {
   }
   on increaseSkillDamage {
     when :( :e.target.hasStatus(Riptide) );
-    usage perRound, 2 {
-      visible false;
-    };
+    usage perRound, 2;
     :damage(DamageType.Piercing, 1, "opp next");
   }
 }

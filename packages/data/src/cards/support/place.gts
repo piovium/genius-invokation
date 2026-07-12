@@ -90,9 +90,7 @@ define card {
   cost DiceType.Void, 3;
   support place {
     on deductOmniDiceSwitch {
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :e.deductOmniCost(1);
     }
   }
@@ -214,9 +212,7 @@ define card {
     on deductOmniDice {
       when :( (:e.isUseSkill() || :e.hasCardTag("talent")) &&
           (:player.dice.length <= :player.hands.length) );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductOmniCost(1);
     }
   }
@@ -292,9 +288,7 @@ define card {
     on deductOmniDiceCard {
       when :( :e.hasOneOfCardTag("weapon", "artifact") &&
           :e.currentDiceCostSize() >= 3 );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       usage 2;
       :e.deductOmniCost(1);
     }
@@ -316,9 +310,7 @@ define card {
     on beforeAction {
       when :( :player.dice.length === 0 );
       usage 3;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :generateDice(DiceType.Omni, 1);
     }
   }
@@ -346,9 +338,7 @@ define card {
           (:e.isUseSkill() && :e.currentDiceCostSize() >= 4);
       };
       usage 3;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductOmniCost(1);
     }
   }
@@ -397,9 +387,7 @@ define card {
         return myCost >= oppCost;
       };
       usage 3;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :generateDice(:$("my active")!.element(), 1);
     }
   }

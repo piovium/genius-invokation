@@ -108,9 +108,7 @@ define card {
     }
     on deductOmniDiceSwitch {
       when :( :$(`my summon with definition id ${MelodyLoop}`) );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductOmniCost(1);
     }
   }

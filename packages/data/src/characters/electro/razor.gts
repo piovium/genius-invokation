@@ -108,9 +108,7 @@ define card {
     }
     on useSkill {
       when :( :e.skill.definition.id === ClawAndThunder );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :gainEnergy(1, "my characters with tag (electro) and with energy < maxEnergy limit 1");
     }
   }

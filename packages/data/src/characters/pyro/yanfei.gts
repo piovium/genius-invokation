@@ -46,9 +46,7 @@ define status {
   duration 2;
   on deductElementDiceSkill {
     when :( :e.isChargedAttack() && :e.canDeductCostOfType(DiceType.Pyro) );
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :e.deductCost(DiceType.Pyro, 1);
   }
   on endPhase {

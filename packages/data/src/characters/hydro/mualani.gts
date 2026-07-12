@@ -176,9 +176,7 @@ define card {
     on switchActive {
       when :( :e.switchInfo.to.id === :self.master.id &&
           :$$(`my summon`).length > 0 );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       const summons = :$$(`my summon`);
       if (summons.length > 0) {
         const targetSummon = :random(summons);

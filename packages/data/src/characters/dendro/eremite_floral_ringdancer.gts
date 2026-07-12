@@ -185,9 +185,7 @@ define card {
     on switchActive {
       when :( :e.switchInfo.to.hasTechnique()?.definition.id === SpiritOfOmenDendroSpiritserpent );
       listenTo samePlayer;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :damage(DamageType.Dendro, 1);
     }
   }

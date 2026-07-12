@@ -165,9 +165,7 @@ define card {
       :useSkill(PressurizedFloe);
     }
     on useSkill {
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :drawCards(1);
     }
   }

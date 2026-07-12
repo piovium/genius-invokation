@@ -180,9 +180,7 @@ define card {
     }
     on switchActive {
       listenTo samePlayer;
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :addVariable("feather", 1);
     }
     on increaseSkillDamage {

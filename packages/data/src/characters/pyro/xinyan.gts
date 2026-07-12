@@ -125,9 +125,7 @@ define card {
     }
     on increaseSkillDamage {
       when :( :player.hands.length <= 1 );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.increaseDamage(2);
     }
   }

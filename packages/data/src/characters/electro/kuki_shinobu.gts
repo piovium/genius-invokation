@@ -26,9 +26,7 @@ define combatStatus {
   id 114111 as GrassRingOfSanctification;
   on switchActive {
     usage 3;
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :damage(DamageType.Electro, 1, $.macros.oppActivePrioritized);
     :heal(1, $.macros.myMostInjured);
   }
@@ -114,9 +112,7 @@ define card {
       :useSkill(GyoeiNarukamiKariyamaRite);
     }
     on beforeDefeated {
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :immune(1);
     }
     on increaseSkillDamage {

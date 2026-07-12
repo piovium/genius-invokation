@@ -43,9 +43,7 @@ define combatStatus {
   duration 1;
   on useSkill {
     when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Dendro)) );
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :damage(DamageType.Dendro, 1);
   }
 }

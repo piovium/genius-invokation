@@ -202,9 +202,7 @@ define card {
     on dealDamage {
       when :( (:e.getReaction() === Reaction.Frozen || :e.getReaction() === Reaction.Melt) );
       listenTo all;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :combatStatus(MamaloacosFrigidRainInEffect);
     }
   }

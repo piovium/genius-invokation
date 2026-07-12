@@ -284,9 +284,7 @@ define card {
       :useSkill(StarfallShower);
     }
     on StarfallShowerDisposeCard {
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :heal(:get(:e.arg).diceCost(), "@master")
     }
   }

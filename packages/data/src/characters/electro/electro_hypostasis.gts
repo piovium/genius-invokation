@@ -32,9 +32,7 @@ define summon {
   }
   on addDice {
     when :( :self.who !== :e.action.who && :e.action.type === "switchActive" );
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     listenTo all;
     :e.addCost(DiceType.Void, 1);
   }

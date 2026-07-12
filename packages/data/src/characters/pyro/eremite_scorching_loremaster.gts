@@ -54,9 +54,7 @@ define card {
     variable barrierUsage, 0;
     on decreaseDamaged {
       when :( :self.master.energy > 0 );
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :self.master.loseEnergy(1);
       :e.decreaseDamage(1);
       :combatStatus(ScorpionBlessing);

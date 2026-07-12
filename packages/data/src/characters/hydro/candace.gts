@@ -79,16 +79,12 @@ define combatStatus {
     :e.changeDamageType(DamageType.Hydro);
   }
   on switchActive {
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :damage(DamageType.Hydro, 1);
   }
   on useSkill {
     when :( :e.isSkillType("normal") );
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :damage(DamageType.Hydro, 1);
   }
 }
@@ -119,9 +115,7 @@ define combatStatus {
     :e.changeDamageType(DamageType.Hydro);
   }
   on switchActive {
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :damage(DamageType.Hydro, 1);
   }
 }

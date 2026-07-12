@@ -106,9 +106,7 @@ define card {
     }
     on useSkill {
       when :( :e.skill.definition.id === Frostgnaw );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :heal(2, "@master");
     }
   }

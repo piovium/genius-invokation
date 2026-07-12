@@ -63,9 +63,7 @@ define status {
   }
   on deductOmniDiceSwitch {
     when :( :self.master.isActive() );
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :e.deductOmniCost(1);
   }
 }

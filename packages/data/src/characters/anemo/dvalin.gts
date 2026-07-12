@@ -207,9 +207,7 @@ define card {
     on dispose {
       when :( :$(`opp status with definition id ${TotalCollapse}`)?.id === :e.entity.id );
       listenTo all;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :characterStatus(TotalCollapse, "opp next");
     }
   }

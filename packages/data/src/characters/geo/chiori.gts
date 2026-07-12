@@ -56,9 +56,7 @@ define summon {
     :damage(DamageType.Geo, 1);
   }
   on useSkill {
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :switchActive("my next");
   }
 }
@@ -81,9 +79,7 @@ define summon {
   }
   on useSkill {
     when :( :e.skill.caller.definition.id !== Chiori );
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :damage(DamageType.Geo, 1);
   }
 }
@@ -124,9 +120,7 @@ define summon {
   on increaseDamage {
     when :( ([...DOLLS, Chiori] as number[]).includes(:e.source.definition.id) && 
         :e.type === DamageType.Geo );
-    usage perRound, 2 {
-      visible false;
-    };
+    usage perRound, 2;
     :e.increaseDamage(1);
   }
 }
@@ -149,9 +143,7 @@ define summon {
   }
   on deductOmniDiceSkill {
     when :( :e.action.skill.definition.id === WeavingBlade );
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :e.deductOmniCost(1);
   }
 }

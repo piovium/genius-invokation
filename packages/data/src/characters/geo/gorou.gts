@@ -135,9 +135,7 @@ define card {
       when :( :e.type === DamageType.Geo && 
           :$(`my combat status with definition id ${GeneralsWarBanner}`) );
       listenTo samePlayer;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :drawCards(1);
     }
   }

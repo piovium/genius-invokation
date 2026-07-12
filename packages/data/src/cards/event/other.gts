@@ -93,9 +93,7 @@ define combatStatus {
   id 303216 as FatuiAmbusherCryoCicinMage;
   on useSkill {
     usage 2;
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :damage(DamageType.Cryo, 1, "my active");
   }
 }
@@ -111,9 +109,7 @@ define combatStatus {
   id 303217 as FatuiAmbusherMirrorMaiden;
   on useSkill {
     usage 2;
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :damage(DamageType.Hydro, 1, "my active");
   }
 }
@@ -129,9 +125,7 @@ define combatStatus {
   id 303218 as FatuiAmbusherPyroslingerBracer;
   on useSkill {
     usage 2;
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :damage(DamageType.Pyro, 1, "my active");
   }
 }
@@ -147,9 +141,7 @@ define combatStatus {
   id 303219 as FatuiAmbusherElectrohammerVanguard;
   on useSkill {
     usage 2;
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :damage(DamageType.Electro, 1, "my active");
   }
 }

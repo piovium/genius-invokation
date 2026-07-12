@@ -201,9 +201,7 @@ define card {
     on dealReaction {
       when :( :e.type === Reaction.LunarElectroCharged );
       listenTo samePlayer;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :gainEnergy(1, "@master");
     }
   }

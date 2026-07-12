@@ -51,9 +51,7 @@ define card {
     }
     on useSkill {
       when :( :e.isSkillType("elemental") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :generateDice(:self.master.element(), 1);
     }
   }
@@ -78,9 +76,7 @@ define card {
     on useSkill {
       when :( !:e.skill.caller.isMine() && :self.master.isActive() );
       listenTo all;
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :heal(1, "@master");
     }
   }
@@ -104,9 +100,7 @@ define card {
     }
     on increaseSkillDamage {
       when :( :e.viaSkillType("normal") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.increaseDamage(1);
     }
   }
@@ -130,9 +124,7 @@ define card {
     }
     on useSkill {
       when :( :e.isSkillType("elemental") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :gainEnergy(1, "@master");
     }
   }
@@ -156,9 +148,7 @@ define card {
     }
     on useSkill {
       when :( :e.isSkillType("normal") );
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :generateDice("randomElement", 1);
     }
   }
@@ -220,16 +210,12 @@ define card {
     }
     on deductVoidDiceSkill {
       when :( :e.isSkillType("normal") && :getVariable("lake") >= 12 );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductVoidCost(2);
     }
     on increaseSkillDamage {
       when :( :e.viaSkillType("normal") && :getVariable("lake") >= 12 );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :addVariable("lake", -12);
       :e.increaseDamage(1);
       :heal(1, "@master");
@@ -268,9 +254,7 @@ define card {
     variable solidarity, 0;
     on decreaseDamaged {
       when :( :player.hands.length > 0 );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :disposeMaxCostHands(1);
       :e.decreaseDamage(1);
       :addVariable("solidarity", 1);

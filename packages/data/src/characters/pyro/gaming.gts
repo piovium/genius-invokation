@@ -178,9 +178,7 @@ define card {
     }
     on useSkill {
       when :( :e.isSkillType("elemental") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :heal(2, "@master");
     }
   }

@@ -92,9 +92,7 @@ define status {
   }
   on useSkill {
     when :( :e.isSkillType("normal") );
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :characterStatus(SuperlativeSuperstrength, "@master");
   }
 }

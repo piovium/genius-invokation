@@ -210,9 +210,7 @@ define card {
       when :( :self.master.id === :e.switchInfo.to.id &&
           :player.hands.length <= :oppPlayer.hands.length &&
           :oppPlayer.hands.length > 0 );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       const [targetCard] = :maxCostHands(1, { who: "opp" });
       :stealHandCard(targetCard);
       :drawCards(1, { who: "opp" });

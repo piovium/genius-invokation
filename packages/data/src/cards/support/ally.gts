@@ -48,9 +48,7 @@ define card {
   cost DiceType.Aligned, 1;
   support ally {
     on beforeFastSwitch {
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.setFastAction();
     }
   }
@@ -79,9 +77,7 @@ define card {
     }
     on deductAllDiceCard {
       when :( :e.hasCardTag("artifact") && :getVariable("material") >= :e.diceCostSize() );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :addVariable("material", -:e.diceCostSize());
       :e.deductAllCost();
     }
@@ -116,9 +112,7 @@ define card {
     }
     on deductAllDiceCard {
       when :( :e.hasCardTag("weapon") && :getVariable("material") >= :e.diceCostSize() );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :addVariable("material", -:e.diceCostSize());
       :e.deductAllCost();
     }
@@ -139,9 +133,7 @@ define card {
   support ally {
     on playCard {
       when :( :e.hasCardTag("food") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :generateDice("randomElement", 1);
     }
     on playCard {
@@ -168,9 +160,7 @@ define card {
   support ally {
     on deductOmniDiceCard {
       when :( :e.hasCardTag("place") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductOmniCost(2);
     }
   }
@@ -268,9 +258,7 @@ define card {
           ) > 0
         );
       };
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductOmniCost(1);
     }
   }
@@ -310,9 +298,7 @@ define card {
     on switchActive {
       when :( :e.switchInfo.to.energy === 0 );
       usage 2;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :gainEnergy(1, "my active");
     }
   }
@@ -378,9 +364,7 @@ define card {
   support ally {
     on deductOmniDiceCard {
       when :( :e.hasCardTag("food") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductOmniCost(2);
     }
   }
@@ -400,9 +384,7 @@ define card {
   support ally {
     on deductOmniDiceCard {
       when :( :e.hasCardTag("ally") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductOmniCost(1);
     }
     on playCard {
@@ -429,9 +411,7 @@ define card {
   support ally {
     on useSkill {
       when :( :e.isSkillType("elemental") && :$("my next") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       const next = :$("my next")!;
       :generateDice(next.element(), 1);
     }
@@ -451,9 +431,7 @@ define card {
   support ally {
     on deductOmniDiceCard {
       when :( :e.hasCardTag("weapon") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       const weaponedCh = :$$(
         "my characters has equipment with tag (weapon)",
       ).length;
@@ -496,9 +474,7 @@ define card {
   support ally {
     on deductOmniDiceCard {
       when :( :e.hasCardTag("artifact") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       const artifactedCh = :$$(
         "my characters has equipment with tag (artifact)",
       );
@@ -525,9 +501,7 @@ define card {
     on playCard {
       when :<boolean>( :e.card.definition.id !== Mamere && :e.hasOneOfCardTag("food", "place", "ally", "item") );
       usage 3;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       const tags = ["food", "place", "ally", "item"] as const;
       const candidates = :allCardDefinitions(
         (card) => card.id !== Mamere && tags.some((tag) => card.tags.includes(tag)),
@@ -847,9 +821,7 @@ define card {
   cost DiceType.Aligned, 1;
   support ally {
     on deductOmniDiceTechnique {
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductOmniCost(1);
     }
   }
@@ -929,9 +901,7 @@ define card {
     on playCard {
       when :( !:isInInitialPile(:e.card) );
       usage 2;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :adventure();
     }
   }
@@ -953,9 +923,7 @@ define card {
       :adventure();
     }
     on useTechnique {
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :adventure();
     }
   }
@@ -1261,9 +1229,7 @@ define card {
   support ally {
     on dealReaction {
       when :( ([Reaction.LunarElectroCharged, Reaction.LunarBloom] as Reaction[]).includes(:e.type) );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :characterStatus(BattlePlan, $.my.active);
     }
   }

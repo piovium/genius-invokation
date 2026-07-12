@@ -187,9 +187,7 @@ define card {
     }
     on playCard {
       when :( !:isInInitialPile(:e.card) );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :emitCustomEvent(GluttonousRexTriggerFromTalent);
     }
   }

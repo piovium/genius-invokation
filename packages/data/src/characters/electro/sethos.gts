@@ -163,9 +163,7 @@ define card {
       :gainEnergy(1, "@master");
     }
     on EnergyLost {
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :gainEnergy(1, "@master");
     }
   }

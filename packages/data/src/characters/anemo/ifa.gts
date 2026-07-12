@@ -218,9 +218,7 @@ define card {
       when :( :e.relatedTo(DamageType.Anemo) || 
           ([Reaction.ElectroCharged, Reaction.LunarElectroCharged] as Reaction[]).includes(:e.type) );
       listenTo samePlayer;
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :heal(1, "my characters order by health - maxHealth limit 1");
     }
   }

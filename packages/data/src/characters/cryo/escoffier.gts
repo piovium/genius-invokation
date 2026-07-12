@@ -38,9 +38,7 @@ define summon {
       }
       return :e.isSkillType("normal") && :e.skillCaller.id !== escoffier.id;
     };
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :damage(DamageType.Cryo, 1);
   }
 }

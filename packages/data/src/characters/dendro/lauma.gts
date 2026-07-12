@@ -184,9 +184,7 @@ define card {
     on dealReaction {
       when :( ([Reaction.Bloom, Reaction.LunarBloom] as Reaction[]).includes(:e.type) );
       listenTo samePlayer;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :heal(2, $.macros.myMostInjured);
     }
   }

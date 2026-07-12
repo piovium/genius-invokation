@@ -167,9 +167,7 @@ define card {
     on increaseSkillDamage {
       when :( :e.viaPlungingAttack() );
       listenTo samePlayer;
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :e.increaseDamage(1);
     }
   }

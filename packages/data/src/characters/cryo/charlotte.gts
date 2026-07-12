@@ -130,9 +130,7 @@ define card {
     on useSkill {
       when :( :e.isSkillType("normal") && :$(`opp status with definition id ${SnappySilhouette}`) );
       listenTo samePlayer;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :heal(2, "my active");
     }
   }

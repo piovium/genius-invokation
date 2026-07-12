@@ -36,9 +36,7 @@ define card {
       when :( !:e.target.isMine() &&
           ([DamageType.Physical, DamageType.Cryo] as DamageType[]).includes(:e.type) );
       listenTo all;
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       const target = :random(:oppPlayer.hands);
       if (target) {
         :attach(NoTuningAllowed, target);
@@ -66,9 +64,7 @@ define card {
     }
     on dealReaction {
       when :( :e.type === Reaction.Superconduct );
-      usage perRound, 3 {
-        visible false;
-      };
+      usage perRound, 3;
       :damage(DamageType.Piercing, 1, $.macros.oppMaxHealth);
     }
   }
@@ -135,9 +131,7 @@ define card {
     }
     on dealReaction {
       when :( :e.type === Reaction.Vaporize );
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       const targetCh = :$(`my characters order by health limit 1`);
       if (targetCh) {
         :heal(1, targetCh);
@@ -166,9 +160,7 @@ define card {
     on deductOmniDiceSkill {
       when :( :e.isSkillType("elemental") &&
           :e.action.skill.caller.cast<"character">().element() === DiceType.Pyro );
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :e.deductOmniCost(1);
     }
   }
@@ -255,9 +247,7 @@ define card {
       :e.fixDice(DiceType.Dendro, 2);
     }
     on dealReaction {
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :damage(DamageType.Hydro, 1, $.macros.oppActivePrioritized);
     }
   }
@@ -316,9 +306,7 @@ define card {
         }
         return !!:query($.union($.my.typeStatus.tag("shield"), $.my.combatStatus.tag("shield")));
       };
-      usage perRound, 3 {
-        visible false;
-      };
+      usage perRound, 3;
       :e.increaseDamage(1);
     }
   }
@@ -344,9 +332,7 @@ define card {
       when :( !:e.target.isMine() && 
           ([DamageType.Pyro, DamageType.Geo] as DamageType[]).includes(:e.type) );
       listenTo all;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :combatStatus(Shield, "my", {
           overrideVariables: {
             shield: 2
@@ -431,9 +417,7 @@ define card {
     }
     on useSkill {
       when :( ([Aura.Dendro, Aura.CryoDendro] as (Aura | undefined)[]).includes(:query($.opp.active)?.aura) );
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :drawCards(1);
       :heal(1, $.macros.myMostInjured);
       :cleanAura(Aura.Dendro, $.opp.active);
@@ -516,9 +500,7 @@ define card {
     }
     on dealReaction {
       when :( :e.relatedTo(DamageType.Anemo) );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :damage(DamageType.Anemo, 2, $.macros.oppActivePrioritized);
     }
   }
@@ -571,9 +553,7 @@ define card {
       :e.fixDice(DiceType.Anemo, 2);
     }
     on healed {
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :damage(DamageType.Anemo, 2, $.opp.active);
     }
   }
@@ -597,9 +577,7 @@ define card {
     }
     on increaseDamage {
       when :( :e.isReactionRelatedTo(DamageType.Anemo) );
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :e.increaseDamage(1);
       :heal(1, $.macros.myMostInjured);
     }
@@ -655,9 +633,7 @@ define card {
     on deductOmniDiceSkill {
       when :( :e.isSkillType("burst") &&
           :query($.my.combatStatus.def(CatalyzingField)) );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductOmniCost(2);
     }
   }
@@ -684,9 +660,7 @@ define card {
     on deductOmniDiceSkill {
       when :( :e.isSkillType("elemental") &&
           :query($.my.combatStatus.def(CatalyzingField)) );
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :e.deductOmniCost(1);
     }
   }

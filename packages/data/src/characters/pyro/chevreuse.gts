@@ -43,9 +43,7 @@ define status {
   on damaged {
     when :( :e.getReaction() === Reaction.Overloaded && !:e.target.isMine() );
     listenTo all;
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :createHandCard(OverchargedBall);
   }
 }

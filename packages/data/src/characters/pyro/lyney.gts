@@ -162,9 +162,7 @@ define card {
     on increaseSkillDamage {
       when :( [Lyney as number, GrinmalkinHat as number].includes(:e.source.definition.id) && 
           :e.target.aura === Aura.Pyro );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.increaseDamage(2);
     }
   }

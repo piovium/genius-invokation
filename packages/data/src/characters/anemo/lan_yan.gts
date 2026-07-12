@@ -121,9 +121,7 @@ define card {
     on useSkill {
       when :( :e.isSkillType("normal") );
       listenTo samePlayer;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :combatStatus(SwallowwispShield);
     }
   }

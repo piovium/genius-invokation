@@ -31,9 +31,7 @@ define summon {
     :damage(DamageType.Geo, 1);
   }
   on beforeFastSwitch {
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :e.setFastAction();
   }
 }

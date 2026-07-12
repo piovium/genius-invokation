@@ -184,9 +184,7 @@ define card {
   talent Kachina, none {
     on TurboTwirlyTriggered {
       listenTo samePlayer;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :drawCards(1);
     }
   }

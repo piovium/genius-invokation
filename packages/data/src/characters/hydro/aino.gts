@@ -148,9 +148,7 @@ define card {
             Reaction.LunarBloom
           ] as (Reaction | null)[]).includes(:e.getReaction()) );
       listenTo samePlayer;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.increaseDamage(2);
       const [hand] = :maxCostHands(1);
       if (hand) {

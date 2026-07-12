@@ -58,9 +58,7 @@ define card {
     }
     on playCard {
       when :( :e.hasCardTag("food") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :drawCards(1, { withTag: "food" });
     }
   }
@@ -104,9 +102,7 @@ define card {
   cost DiceType.Aligned, 2;
   support item {
     on switchActive {
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :combatStatus(EfficientSwitch);
       :combatStatus(AgileSwitch);
     }
@@ -148,9 +144,7 @@ define card {
   support item {
     on deductOmniDiceCard {
       when :( :e.currentDiceCostSize() >= 2 && :e.action.skill.caller.definition.type === "support" );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       usage 2;
       :e.deductOmniCost(1);
     }
@@ -191,9 +185,7 @@ define card {
         }
         return :getExtensionState().played[:self.who].includes(:e.action.skill.caller.definition.id);
       };
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductOmniCost(2);
       :addVariable("totalUsage", -1);
       if (:getVariable("totalUsage") <= 0) {
@@ -226,9 +218,7 @@ define card {
     }
     on playCard {
       when :( :getVariable("playedCard") === 3 );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       usage 3;
       :drawCards(1);
       :generateDice(DiceType.Omni, 1);

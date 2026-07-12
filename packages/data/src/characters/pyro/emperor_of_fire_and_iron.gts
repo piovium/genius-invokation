@@ -207,9 +207,7 @@ define card {
           :e.entity.definition.tags.includes("shield");
       };
       listenTo samePlayer;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :characterStatus(ArmoredCrabCarapace, "@master", {
           overrideVariables: {
             shield: 2

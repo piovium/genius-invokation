@@ -134,9 +134,7 @@ define card {
   talent Lisa, none {
     on switchActive {
       when :( :e.switchInfo.to.id === :self.master.id );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :characterStatus(ConductiveLisa, "opp active");
     }
   }

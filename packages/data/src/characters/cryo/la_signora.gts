@@ -214,9 +214,7 @@ define card {
     }
     on decreaseDamaged {
       when :( :e.value >= 3 );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.decreaseDamage(1);
       if (:self.master.definition.id === LaSignora) {
         :characterStatus(SheerCold, "opp active");

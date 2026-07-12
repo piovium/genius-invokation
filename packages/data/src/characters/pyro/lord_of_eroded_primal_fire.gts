@@ -186,9 +186,7 @@ define card {
         return !:isInInitialPile(:e.card, "opp");
       };
       listenTo all;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :gainEnergy(1, "@master");
       :characterStatus(UndyingFuryInEffect, "@master");
     }

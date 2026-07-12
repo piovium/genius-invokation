@@ -34,9 +34,7 @@ define summon {
   }
   on decreaseDamaged {
     when :( :e.target.isActive() );
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :e.decreaseDamage(1);
     :consumeUsage(1);
   }
@@ -191,9 +189,7 @@ define card {
     on modifyReaction {
       when :( :e.type === Reaction.ElectroCharged && :e.reactionInfo.fromDamage && :e.caller.isMine() );
       listenTo all;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.increasePiercingOtherDamage(1);
     }
   }

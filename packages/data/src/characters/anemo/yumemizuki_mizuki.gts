@@ -149,9 +149,7 @@ define card {
       when :( :self.master.isActive() &&
           ([DamageType.Cryo, DamageType.Hydro, DamageType.Pyro, DamageType.Electro] as DamageType[]).includes(:e.type) );
       listenTo samePlayer;
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :e.increaseDamage(1);
     }
   }

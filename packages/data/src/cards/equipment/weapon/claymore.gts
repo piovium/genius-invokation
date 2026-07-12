@@ -51,9 +51,7 @@ define card {
     }
     on useSkill {
       when :( :e.isSkillType("elemental") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :generateDice(:self.master.element(), 1);
     }
   }
@@ -100,9 +98,7 @@ define card {
     }
     on increaseSkillDamage {
       when :( :e.viaSkillType("normal") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.increaseDamage(1);
     }
   }
@@ -298,9 +294,7 @@ define card {
     variable stoic, 0;
     on decreaseDamaged {
       when :( :player.hands.length > 0 );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :disposeMaxCostHands(1);
       :e.decreaseDamage(1);
       :addVariable("stoic", 1);

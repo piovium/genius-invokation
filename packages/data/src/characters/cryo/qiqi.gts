@@ -36,9 +36,7 @@ define summon {
   }
   on useSkill {
     when :( :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal") );
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :heal(1, "my active");
   }
 }

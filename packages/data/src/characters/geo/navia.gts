@@ -169,9 +169,7 @@ define card {
       :useSkill(CeremonialCrystalshot);
     }
     on useSkill {
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :drawCards(2, { withDefinition: CrystalShrapnel });
     }
   }

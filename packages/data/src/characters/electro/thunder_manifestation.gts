@@ -73,9 +73,7 @@ define summon {
 define combatStatus {
   id 124021 as LightningStrikeProbe;
   on useSkill {
-    usage perRound, 1 {
-      visible false;
-    };
+    usage perRound, 1;
     :characterStatus(LightningRod, "my active");
   }
 }
@@ -187,9 +185,7 @@ define card {
     }
     on TalentShouldDrawCard {
       listenTo all;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :drawCards(1);
     }
   }

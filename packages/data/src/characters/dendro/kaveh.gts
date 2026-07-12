@@ -163,9 +163,7 @@ define card {
     }
     on ShouldTriggerTalent {
       listenTo samePlayer;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       const cardDef = :e.arg.definition;
       :createHandCard(cardDef.id as CardHandle);
       if (cardDef.tags.includes("place")) {

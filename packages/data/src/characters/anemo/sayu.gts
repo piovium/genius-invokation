@@ -169,9 +169,7 @@ define card {
     on dealDamage {
       when :( :self.master.isActive() && :e.isSwirl() );
       listenTo samePlayer;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :drawCards(2);
     }
   }

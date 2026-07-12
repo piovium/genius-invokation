@@ -214,9 +214,7 @@ define card {
     }
     on useSkill {
       when :( :e.isSkillType("normal") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       const lumidouceIds = [LumidouceCaseLevel3, LumidouceCaseLevel2, LumidouceCaseLevel1];
       for (const id of lumidouceIds) {
         const lumidouce = :$(`my summons with definition id ${id}`);

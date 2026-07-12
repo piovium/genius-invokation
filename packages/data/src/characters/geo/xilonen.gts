@@ -367,9 +367,7 @@ define card {
     }
     on switchActive {
       when :( :e.switchInfo.to.hasNightsoulsBlessing() );
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :gainNightsoul("@event.switchTo", 1);
     }
   }

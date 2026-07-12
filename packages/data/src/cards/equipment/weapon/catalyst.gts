@@ -52,9 +52,7 @@ define card {
     }
     on useSkill {
       when :( :e.isSkillType("elemental") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :generateDice(:self.master.element(), 1);
     }
   }
@@ -78,9 +76,7 @@ define card {
     }
     on increaseSkillDamage {
       when :( :e.viaSkillType("normal") );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.increaseDamage(1);
     }
   }
@@ -105,9 +101,7 @@ define card {
     on increaseSkillDamage {
       when :( :e.getReaction() );
       listenTo samePlayer;
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :e.increaseDamage(1);
     }
   }
@@ -176,9 +170,7 @@ define card {
     }
     on deductVoidDiceSkill {
       when :( :e.isChargedAttack() );
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :e.deductVoidCost(1);
     }
   }
@@ -220,9 +212,7 @@ define card {
     }
     on damagedOrHealed {
       when :( :getVariable("count") === 2 );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :characterStatus(AeonWave, "@master");
     }
     on roundEnd {
@@ -263,9 +253,7 @@ define card {
   cost DiceType.Aligned, 2;
   weapon catalyst {
     on damagedOrHealed {
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :characterStatus(CashflowSupervisionInEffect, "@master");
     }
   }
@@ -319,9 +307,7 @@ define card {
     on beforeAction {
       when :( !:self.master.hasStatus(BondOfLife) );
       listenTo all;
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :generateDice("randomElement", 1);
       :characterStatus(FlowingPurityInEffect, "@master");
     }
@@ -381,9 +367,7 @@ define card {
   weapon catalyst {
     on deductOmniDiceCard {
       when :( !:isInInitialPile(:e.action.skill.caller) );
-      usage perRound, 1 {
-        visible false;
-      };
+      usage perRound, 1;
       :e.deductOmniCost(1);
       :characterStatus(StarcallersWatchInEffect, "@master");
     }

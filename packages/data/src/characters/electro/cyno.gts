@@ -147,9 +147,7 @@ define card {
         const status = :self.master.hasStatus(PactswornPathclearer)!;
         return :getVariable("reliance", status) >=2 && :e.via.definition.id === SecretRiteChasmicSoulfarer;
       };
-      usage perRound, 2 {
-        visible false;
-      };
+      usage perRound, 2;
       :e.increaseDamage(1);
     }
   }
