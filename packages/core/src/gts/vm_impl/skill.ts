@@ -389,6 +389,15 @@ export const TriggeredSkillViewModel = defineViewModel(
       }
     }),
 
+    asSkillType: h.attribute<{
+      <Meta extends TriggeredSkillVMMeta>(
+        this: Meta["type"] extends "character" ? AR.This<Meta> : never,
+        skillType: CommonSkillType,
+      ): AR.Done;
+    }>((model, [skillType]) => {
+      model.asSkillType = skillType;
+    }),
+
     "~action": h.attribute<{
       <Meta extends TriggeredSkillVMMeta>(
         this: AR.This<Meta>,
@@ -588,6 +597,12 @@ export const InitiativeSkillViewModel = defineViewModel(
       ): AR.Done;
     }>((model, [type, amount]) => {
       model.cost.set(type, amount);
+    }),
+
+    forcePlunging: h.simpleAttribute({
+      uniqueKey: "alwaysPlunging",
+    })(function () {
+      this.alwaysPlunging = true;
     }),
 
     addTarget: h.attribute<{

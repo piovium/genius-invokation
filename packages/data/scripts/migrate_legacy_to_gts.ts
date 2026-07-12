@@ -1037,6 +1037,13 @@ function applyEntityLikeStep(step: ChainStep, frame: Frame): boolean {
       requireArgs(step, 1);
       frame.block.addLine(`conflictWith ${renderArg(step.args[0]!)};`);
       return true;
+    case "unique":
+      if (step.args.length >= 1) {
+        frame.block.addLine(`conflictWith crossCharacter, ${renderArgs(step.args)};`);
+      } else {
+        frame.block.addLine("conflictWith crossCharacter;");
+      }
+      return true;
     case "defineSnippet":
       frame.block.addLine(renderDefineSnippet(step.args));
       return true;
@@ -1044,8 +1051,6 @@ function applyEntityLikeStep(step: ChainStep, frame: Frame): boolean {
       frame.block.addLine("noDefaultDispose;");
       return true;
     case "hintText":
-    case "unique":
-      throw unsupported(step);
     default:
       return false;
   }
@@ -1083,8 +1088,11 @@ function applyEventStep(step: ChainStep, frames: Frame[]): void {
       frame.block.addLine("enablePileTriggering;");
       return;
     case "asSkillType":
+      frame.block.addLine(`asSkillType ${renderBareArgs(step.args)};`);
+      return;
     case "enableHandTriggering":
-      throw unsupported(step);
+      frame.block.addLine("enableHandTriggering;");
+      return;
     case "endOn":
       requireArgs(step, 0);
       popFrame(frames, "event");

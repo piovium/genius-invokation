@@ -777,48 +777,40 @@ export const EntityViewModel = defineViewModel(
     }),
 
     conflictWith: h.attribute<{
-      (id: number): AR.Done;
-    }>((model, [id]) => {
-      // 自身入场时，将位于相同实体区域的目标实体移除
+      (id: number, ...otherIds: number[]): AR.Done;
+      <Meta extends EntityVMMeta>(
+        this: Meta["type"] extends "status" ? AR.This<Meta> : never,
+        mark: "crossCharacter",
+        ...otherIds: number[]
+      ): AR.Done;
+
+    }>((model, args) => {
+      // 自身入场时，将位于相同实体区域（默认）或此方所有角色（crossCharacter）上的目标实体移除
+      let conflictIds = [model.id];
+      let mode: "default" | "crossCharacter" = "default";
+      if (args[0] === "crossCharacter") {
+        mode = "crossCharacter";
+        conflictIds.push(...args.slice(1) as number[]);
+      } else {
+        conflictIds.push(...args as number[]);
+      }
       const enterSkill = new TriggeredSkillModel(model, "enter");
       enterSkill.id = model.getSubId();
-      enterSkill.userFilters.push(function (c) {
-        return c.query($.def(id as HandleT<ExEntityType>));
-      });
       enterSkill.action = function (c) {
         const selfArea = c.self.area;
-        for (const entity of c.queryAll($.def(id as HandleT<ExEntityType>))) {
+        for (const entity of c.queryAll($.union(...conflictIds.map((id) => $.def(id))))) {
+          if (entity.id === c.self.id || c.self.who !== entity.who) {
+            continue;
+          }
           const enteringArea: EntityArea = entity.area;
           if (
             enteringArea.type === "characters" &&
             selfArea.type === "characters"
           ) {
-            if (enteringArea.characterId === selfArea.characterId) {
+            if (mode === "crossCharacter" || enteringArea.characterId === selfArea.characterId) {
               entity.dispose();
             }
           } else if (enteringArea.type === selfArea.type) {
-            entity.dispose();
-          }
-        }
-      };
-      model.skillList.push(enterSkill.buildSkillDefinition());
-    }),
-    unique: h.attribute<{
-      <Meta extends EntityVMMeta>(
-        this: Meta["type"] extends "status" ? AR.This<Meta> : never,
-        ...otherIds: number[]
-      ): AR.Done;
-    }>((model, otherIds) => {
-      const conflictIds = [model.id, ...otherIds];
-      const enterSkill = new TriggeredSkillModel(model, "enter");
-      enterSkill.id = model.getSubId();
-      enterSkill.action = function (c) {
-        const conflictEntities = c.queryAll($.my.typeStatus);
-        for (const entity of conflictEntities) {
-          if (
-            conflictIds.includes(entity.definition.id) &&
-            entity.id !== c.self.id
-          ) {
             entity.dispose();
           }
         }

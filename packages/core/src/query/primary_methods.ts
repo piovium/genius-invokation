@@ -399,7 +399,7 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     return this._self;
   }
   def<T extends HandleT<Meta["type"]>>(id: T): Assign<Meta, DefPatch<T>>;
-  def<T extends number>(id: number extends T ? number : never): Meta;
+  def<T extends number>(id: number extends T ? number : never): Assign<Meta>;
   def(id: number): unknown {
     this._internal.addConstraint(["definition", id]);
     return this._self;

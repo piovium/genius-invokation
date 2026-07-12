@@ -25,7 +25,6 @@ import { character, skill, status, card, DamageType, DiceType, type SkillHandle 
  * （同一方场上最多存在一个此状态）
  */
 export const Refraction01 = status(122022)
-  .conflictWith(122021)
   .unique(122021)
   .duration(3)
   .on("increaseDamaged", (c, e) => e.type === DamageType.Hydro)
@@ -43,7 +42,6 @@ export const Refraction01 = status(122022)
  * （同一方场上最多存在一个此状态）
  */
 export const Refraction = status(122021)
-  .conflictWith(122022)
   .unique(122022)
   .duration(2)
   .on("addDice", (c, e) => e.action.type === "switchActive" && c.self.master.id === e.action.from?.id)

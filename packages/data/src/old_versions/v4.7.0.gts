@@ -435,7 +435,6 @@ const FeatherfallJudgment = card(214041)
  */
 const Refraction = status(122021)
   .until("v4.7.0")
-  .conflictWith(122022)
   .unique(122022)
   .duration(2)
   .on("increaseDamaged", (c, e) => e.type === DamageType.Hydro)
