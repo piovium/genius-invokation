@@ -1057,14 +1057,13 @@ const LyresongIsFirstExtension = extension(332024, { first: "pair<boolean>" })
  * 本回合中，我方下次打出「圣遗物」手牌时：少花费1个元素骰。
  */
 define combatStatus {
-  id 303232 as private LyresongInEffect1;
+  id 303232 as LyresongInEffect1;
   oneDuration;
   once deductOmniDiceCard {
     when :( :e.hasCardTag("artifact") );
     :e.deductOmniCost(1);
   }
 }
-
 
 /**
  * @id 303224
@@ -1073,7 +1072,7 @@ define combatStatus {
  * 本回合中，我方下次打出「圣遗物」手牌时：少花费2个元素骰。
  */
 define combatStatus {
-  id 303224 as private LyresongInEffect2;
+  id 303224 as LyresongInEffect2;
   oneDuration;
   once deductOmniDiceCard {
     when :( :e.hasCardTag("artifact") );
@@ -1125,7 +1124,7 @@ export const [TheBoarPrincess, TheBoarPrincessInEffect] = card(332025)
  * @description
  * 我方至少剩余8个元素骰，且对方未宣布结束时，才能打出：本回合中，双方牌手进行「切换角色」行动时需要额外花费1个元素骰。
  */
-export const [FallsAndFortune] = card(332026)
+export const [FallsAndFortune, FallsAndFortuneInEffect] = card(332026)
   .since("v4.3.0")
   .filter((c) => c.player.dice.length >= 8 && !c.oppPlayer.declaredEnd)
   .toCombatStatus(303226)

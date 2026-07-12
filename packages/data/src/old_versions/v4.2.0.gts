@@ -246,19 +246,17 @@ define card {
   }
 }
 
-
 /**
- * @id 331802
- * @name 岩与契约
+ * @id 303182
+ * @name 岩与契约（生效中）
  * @description
- * 下回合行动阶段开始时：生成3点万能元素。
- * （牌组包含至少2个「璃月」角色，才能加入牌组）
+ * 行动阶段开始时：生成3点万能元素，然后移除此效果。
  */
-const [StoneAndContracts] = card(331802)
-  .until("v4.2.0")
-  .costVoid(3)
-  .toCombatStatus(303182)
-  .once("actionPhase")
-  .generateDice(DiceType.Omni, 3)
-  .done();
-
+define combatStatus {
+  id 303182 as private StoneAndContractsInEffect;
+  oneDuration;
+  on actionPhase {
+    :generateDice(DiceType.Omni, 3);
+    :dispose();
+  }
+}

@@ -5,6 +5,7 @@ import { CaloricBalancingPlan01, KineticEnergyScale, TeachingsOfTheCollectiveOfP
 import { ArkheSeatsSacredAndSecular, LetThePeopleRejoice, SalonSolitaireOusia, SalonSolitairePneuma, Skill12114, SoloistsSolicitation, SoloistsSolicitationOusia } from "../characters/hydro/furina.gts";
 import { AllIsAsh, Arlecchino, BalemoonRising, InvitationToABeheading, TheBalemoonAloneMayKnowPassive01, TheBalemoonAloneMayKnowPassive03 } from "../characters/pyro/arlecchino.gts";
 import { BondOfLife } from "../commons.gts";
+import { SingYourHeartOutInEffect } from "../cards/event/food.gts";
 
 /**
  * @id 11142
@@ -135,15 +136,12 @@ const GuardianVentVolcanoKablam = skill(14155)
  * 所有我方角色获得饱腹，抓3张牌，下2次切换角色少花费1个元素骰。
  * （每回合每个角色最多食用1次「料理」）
  */
-const [SingYourHeartOut] = card(333027)
+const SingYourHeartOut = card(333027)
   .until("v6.1.0")
   .costVoid(3)
   .combatFood({ satiatedFilter: "allNot" })
   .drawCards(3)
-  .toCombatStatus(303321)
-  .on("deductOmniDiceSwitch")
-  .usage(2)
-  .deductOmniCost(1)
+  .combatStatus(SingYourHeartOutInEffect)
   .done();
 
 /**
