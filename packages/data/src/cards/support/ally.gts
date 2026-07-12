@@ -61,7 +61,7 @@ export const Timaeus = card(322003)
   .costSame(2)
   .support("ally")
   .variable("material", 2)
-  .on("enter", (c) => c.player.initialPile.filter((c) => c.tags.includes("artifact")).length >= 6)
+  .on("enter", (c) => c.player.initialPile.filter((card) => card.tags.includes("artifact")).length >= 6)
   .drawCards(1, { withTag: "artifact" })
   .on("endPhase")
   .addVariable("material", 1)
@@ -89,8 +89,8 @@ export const Wagner = card(322004)
   .on("enter")
   .do((c) => {
     const weaponDefs = c.player.initialPile
-      .filter((c) => c.tags.includes("weapon"))
-      .map((c) => c.id);
+      .filter((card) => card.tags.includes("weapon"))
+      .map((card) => card.id);
     const weaponKinds = new Set(weaponDefs).size;
     if (weaponKinds >= 3) {
       c.drawCards(1, { withTag: "weapon" });
@@ -434,7 +434,7 @@ export const Mamere: SupportHandle = card(322021)
   .do((c) => {
     const tags = ["food", "place", "ally", "item"] as const;
     const candidates = c.allCardDefinitions(
-      (c) => c.id !== Mamere && tags.some((tag) => c.tags.includes(tag)),
+      (card) => card.id !== Mamere && tags.some((tag) => card.tags.includes(tag)),
     );
     const card = c.random(candidates);
     c.createHandCard(card.id as CardHandle);

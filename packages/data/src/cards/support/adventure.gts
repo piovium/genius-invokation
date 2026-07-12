@@ -186,7 +186,7 @@ export const TheChasm = card(321040)
   .do((c) => {
     const excludeTags = ["food", "legend"] as const;
     const candidates = c.allCardDefinitions(
-      (c) => c.type === "eventCard" && !excludeTags.some((tag) => c.tags.includes(tag))
+      (card) => card.type === "eventCard" && !excludeTags.some((tag) => card.tags.includes(tag))
     );
     const cards = c.randomSubset(candidates, 5);
     for (const card of cards) {

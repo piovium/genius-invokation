@@ -638,15 +638,6 @@ function applyStep(
         `.${step.name}() is not mapped at this block level`,
       );
     }
-    if (
-      (step.name === "addVariable" || step.name === "setVariable") &&
-      step.args.length > 0 &&
-      isReservedVariableName(step.args[0]!)
-    ) {
-      throw new ConversionError(
-        `.${step.name}() with reserved variable name is not mapped`,
-      );
-    }
     frame.block.addAction([`:${step.name}(${renderArgs(step.args)});`]);
     return;
   }
@@ -872,6 +863,11 @@ function applyCardStep(
       frame.block.addLine(`eventTalent ${renderTalentArgs(step.args)};`);
       return;
     }
+    case "legend": {
+      requireArgs(step, 0);
+      frame.block.addLine("legend;");
+      return;
+    }
     case "food":
       if (step.args.length > 0) {
         throw new ConversionError(".food() with options is not mapped");
@@ -914,7 +910,6 @@ function applyCardStep(
     case "descriptionOnHCI":
     case "doSameWhenDisposed":
     case "equipment":
-    case "legend":
     case "nightsoulTechnique":
     case "onArbitraryEvent":
     case "onDispose":
@@ -1052,8 +1047,10 @@ function applyEntityLikeStep(step: ChainStep, frame: Frame): boolean {
     case "endPhaseDamage":
       pushEndPhaseDamage(frame, step.args);
       return true;
-    case "hintText":
     case "noDefaultDispose":
+      frame.block.addLine("noDefaultDispose;");
+      return true;
+    case "hintText":
     case "unique":
       throw unsupported(step);
     default:

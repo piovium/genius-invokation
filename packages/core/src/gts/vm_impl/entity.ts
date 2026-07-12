@@ -797,6 +797,17 @@ export const EntityViewModel = defineViewModel(
       model.skillList.push(enterSkill.buildSkillDefinition());
     }),
 
+    noDefaultDispose: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: Meta["type"] extends "status" | "equipment"
+          ? AR.This<Meta>
+          : never,
+      ): AR.Done;
+      uniqueKey(): "defaultDispose";
+    }>((model, []) => {
+      model.disposeOnMasterDefeated = false;
+    }),
+
     on: h.attribute<{
       <Meta extends EntityVMMeta, const Event extends DetailedEventNames>(
         this: AR.This<Meta>,

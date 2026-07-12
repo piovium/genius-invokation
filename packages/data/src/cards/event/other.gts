@@ -2446,9 +2446,7 @@ export const ClinkClankLegion = card(332061)
   .since("v6.4.0")
   .costSame(1)
   .do((c) => {
-    const allCards = c
-      .allCardDefinitions()
-      .filter((card) => !card.tags.includes("talent") && originalDiceCostOfCard(card) === 3);
+    const allCards = c.allCardDefinitions().filter((card) => !card.tags.includes("talent") && originalDiceCostOfCard(card) === 3);
     for (let i = 0; i < 3; i++) {
       c.createHandCard(c.random(allCards).id as CardHandle);
     }

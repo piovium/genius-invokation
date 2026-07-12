@@ -406,6 +406,12 @@ export const CardViewModel = InitiativeSkillViewModel
       model.tags.push(...supportTags);
       model.setSupportPlayAction();
     }),
+    legend: h.simpleAttribute({
+      uniqueKey: "legend"
+    })(function () {
+      this.tags.push("legend");
+      this.userFilters.push((c) => !c.player.legendUsed);
+    }),
     food: h.attribute<{
       <Meta extends CardVMMeta>(
         this: NoTargetSpecifiedThis<Meta>,
