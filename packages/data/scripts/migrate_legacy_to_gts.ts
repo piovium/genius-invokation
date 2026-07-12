@@ -573,24 +573,8 @@ const ACTION_ALLOWED_FRAMES = new Set<FrameMode>([
   "event",
 ]);
 
-const RESERVED_VARIABLE_NAMES = new Set<string>([
-  "usage",
-  "duration",
-  "shield",
-  "hintIcon",
-  "nightsouls",
-  "exp",
-  "hintCount",
-  "swirledUsage",
-]);
-
 function allowsTopLevelAction(frame: Frame): boolean {
   return ACTION_ALLOWED_FRAMES.has(frame.mode);
-}
-
-function isReservedVariableName(arg: ts.Expression): boolean {
-  const value = stringLiteralValue(arg);
-  return value !== null && RESERVED_VARIABLE_NAMES.has(value);
 }
 
 function isSupportBlock(frame: Frame): boolean {
@@ -819,6 +803,9 @@ function applyTechniqueSkillStep(
     case "usagePerRound":
       frame.block.addLine(renderUsage("usage", step.args, true));
       return;
+    case "usageCanAppend":
+      frame.block.addLine(renderUsageCanAppend(step.args));
+      return;
     case "endProvide":
       requireArgs(step, 0);
       popFrame(frames, "techniqueSkill");
@@ -869,9 +856,6 @@ function applyCardStep(
       return;
     }
     case "food":
-      if (step.args.length > 0) {
-        throw new ConversionError(".food() with options is not mapped");
-      }
       frame.block.addLine(renderFood(step.args, false));
       return;
     case "combatFood":
@@ -906,13 +890,26 @@ function applyCardStep(
     case "once":
       pushEventBlock(step, frames);
       return;
+    case "nightsoulTechnique": {
+      requireArgs(step, 0);
+      const block = new GtsBlock("technique");
+      block.addLine("nightsoul;");
+      frame.block.addBlock(block);
+      frames.push({ mode: "technique", block });
+      return;
+    }
+    case "onDispose": {
+      requireArgs(step, 1);
+      const block = new GtsBlock("on selfDiscard");
+      block.addAction(convertAction(step.args[0]!));
+      frame.block.addBlock(block);
+      return;
+    }
     case "descriptionOnDraw":
     case "descriptionOnHCI":
     case "doSameWhenDisposed":
     case "equipment":
-    case "nightsoulTechnique":
     case "onArbitraryEvent":
-    case "onDispose":
     case "onHCI":
     case "toCombatStatus":
     case "toStatus":
@@ -929,6 +926,10 @@ function applyEntityStep(
 ): void {
   const frame = current(frames);
   if (applyCommonVersionStep(step, frame)) {
+    return;
+  }
+  if (step.name === "endPhaseDamage") {
+    pushEndPhaseDamage(frames, step.args);
     return;
   }
   if (applyEntityLikeStep(step, frame)) {
@@ -1039,9 +1040,6 @@ function applyEntityLikeStep(step: ChainStep, frame: Frame): boolean {
     case "defineSnippet":
       frame.block.addLine(renderDefineSnippet(step.args));
       return true;
-    case "endPhaseDamage":
-      pushEndPhaseDamage(frame, step.args);
-      return true;
     case "noDefaultDispose":
       frame.block.addLine("noDefaultDispose;");
       return true;
@@ -1061,6 +1059,9 @@ function applyEventStep(step: ChainStep, frames: Frame[]): void {
       return;
     case "usagePerRound":
       frame.block.addLine(renderUsage("usage", step.args, true));
+      return;
+    case "usageCanAppend":
+      frame.block.addLine(renderUsageCanAppend(step.args));
       return;
     case "listenTo":
       requireArgs(step, 1);
@@ -1202,7 +1203,7 @@ function pushEventBlock(step: ChainStep, frames: Frame[]): void {
 }
 
 function pushEndPhaseDamage(
-  frame: Frame,
+  frames: Frame[],
   args: readonly ts.Expression[],
 ): void {
   if (args.length < 2 || args.length > 3) {
@@ -1210,24 +1211,23 @@ function pushEndPhaseDamage(
       ".endPhaseDamage() expects two or three arguments",
     );
   }
+  const frame = current(frames);
   const icon = stringLiteralValue(args[0]!);
+  const target = args[2] ? `, ${renderArg(args[2])}` : "";
+  const block = new GtsBlock("on endPhase");
   if (icon === "swirledAnemo") {
     frame.block.addLine(`hint swirled, ${renderArg(args[1]!)};`);
-    const block = new GtsBlock("on endPhase");
-    const target = args[2] ? `, ${renderArg(args[2])}` : "";
     block.addAction([
       `:damage(:self.variables.hintIcon, ${renderArg(args[1]!)}${target});`,
     ]);
-    frame.block.addBlock(block);
-    return;
+  } else {
+    frame.block.addLine(`hint ${renderArg(args[0]!)}, ${renderArg(args[1]!)};`);
+    block.addAction([
+      `:damage(${renderArg(args[0]!)}, ${renderArg(args[1]!)}${target});`,
+    ]);
   }
-  frame.block.addLine(`hint ${renderArg(args[0]!)}, ${renderArg(args[1]!)};`);
-  const block = new GtsBlock("on endPhase");
-  const target = args[2] ? `, ${renderArg(args[2])}` : "";
-  block.addAction([
-    `:damage(${renderArg(args[0]!)}, ${renderArg(args[1]!)}${target});`,
-  ]);
   frame.block.addBlock(block);
+  frames.push({ mode: "event", block, eventParentMode: frame.mode });
 }
 
 function renderEventName(expr: ts.Expression): string {
@@ -1450,10 +1450,11 @@ function renderListenTo(expr: ts.Expression): string {
 
 function renderShortcutFunction(fn: ts.Expression): string {
   const converted = convertFunction(fn);
+  const typeAnnotation = converted.returnType ? `<${converted.returnType}>` : "";
   if (converted.kind === "expr") {
-    return `:(${converted.code})`;
+    return `:${typeAnnotation}(${converted.code})`;
   }
-  return `:{\n${indentRaw(splitLines(converted.code), 1).join("\n")}\n}`;
+  return `:${typeAnnotation}{\n${indentRaw(splitLines(converted.code), 1).join("\n")}\n}`;
 }
 
 function convertCondition(fn: ts.Expression | undefined): string {
@@ -1481,6 +1482,7 @@ function convertAction(fn: ts.Expression | undefined): string[] {
 function convertFunction(fn: ts.Expression): {
   kind: "block" | "expr";
   code: string;
+  returnType: string | null;
 } {
   const unwrapped = unwrapExpression(fn);
   if (!ts.isArrowFunction(unwrapped) && !ts.isFunctionExpression(unwrapped)) {
@@ -1496,25 +1498,26 @@ function convertFunction(fn: ts.Expression): {
   });
   const contextParam = params[0] ?? null;
   const eventParam = params[1] ?? null;
+  const returnType = unwrapped.type ? textOf(unwrapped.type) : null;
 
   if (ts.isBlock(unwrapped.body)) {
-    const code = blockBodyText(unwrapped.body);
+    const code = replaceContextReferences(
+      unwrapped.body,
+      contextParam,
+      eventParam,
+    );
     return {
       kind: "block",
-      code: collapseMultilineTemplateLiterals(
-        replaceContextReferences(dedent(code), contextParam, eventParam),
-      ),
+      code: collapseMultilineTemplateLiterals(dedent(code)),
+      returnType,
     };
   }
   return {
     kind: "expr",
     code: collapseMultilineTemplateLiterals(
-      replaceContextReferences(
-        textOf(unwrapped.body),
-        contextParam,
-        eventParam,
-      ),
+      replaceContextReferences(unwrapped.body, contextParam, eventParam),
     ),
+    returnType,
   };
 }
 
@@ -1533,73 +1536,161 @@ function collapseMultilineTemplateLiterals(code: string): string {
     return `\`${collapsed}\``;
   });
 }
+
 function replaceContextReferences(
-  code: string,
+  bodyNode: ts.ConciseBody,
   contextParam: string | null,
   eventParam: string | null,
 ): string {
-  let result = "";
-  for (let i = 0; i < code.length; ) {
-    const ch = code[i]!;
-    if (ch === "'" || ch === '"' || ch === "`") {
-      const { text, end } = readStringLike(code, i, ch);
-      result += text;
-      i = end;
-      continue;
-    }
-    if (ch === "/" && code[i + 1] === "/") {
-      const end = code.indexOf("\n", i + 2);
-      if (end === -1) {
-        result += code.slice(i);
-        break;
-      }
-      result += code.slice(i, end);
-      i = end;
-      continue;
-    }
-    if (ch === "/" && code[i + 1] === "*") {
-      const end = code.indexOf("*/", i + 2);
-      const next = end === -1 ? code.length : end + 2;
-      result += code.slice(i, next);
-      i = next;
-      continue;
-    }
-    if (isIdentifierStart(ch)) {
-      const start = i;
-      i++;
-      while (i < code.length && isIdentifierPart(code[i]!)) {
-        i++;
-      }
-      const ident = code.slice(start, i);
-      const prev = previousNonWhitespace(result);
-      if (contextParam && ident === contextParam && prev !== ".") {
-        if (code[i] === ".") {
-          result += ":";
-          i++;
-        } else {
-          throw new ConversionError(
-            `standalone context parameter '${contextParam}' cannot be mapped to GTS`,
-          );
-        }
-      } else if (eventParam && ident === eventParam && prev !== ".") {
-        if (code[i] === ".") {
-          result += ":e.";
-          i++;
-        } else if (code[i] === "?" && code[i + 1] === ".") {
-          result += ":e?.";
-          i += 2;
-        } else {
-          result += ":e";
-        }
-      } else {
-        result += ident;
-      }
-      continue;
-    }
-    result += ch;
-    i++;
+  const sourceFile = bodyNode.getSourceFile();
+  const bodyStart = bodyNode.getStart(sourceFile);
+  const bodyEnd = bodyNode.getEnd();
+  const bodyText = sourceFile.text.slice(bodyStart, bodyEnd);
+  const replacements = computeContextReplacements(
+    bodyNode,
+    contextParam,
+    eventParam,
+  );
+  replacements.sort((a, b) => b.start - a.start);
+  let result = bodyText;
+  for (const { start, end, replacement } of replacements) {
+    result =
+      result.slice(0, start - bodyStart) +
+      replacement +
+      result.slice(end - bodyStart);
+  }
+  if (ts.isBlock(bodyNode)) {
+    result = result.slice(1, -1);
   }
   return result;
+}
+
+function computeContextReplacements(
+  bodyNode: ts.ConciseBody,
+  contextParam: string | null,
+  eventParam: string | null,
+): Array<{ start: number; end: number; replacement: string }> {
+  const sourceFile = bodyNode.getSourceFile();
+  const targetParams = new Set<string>();
+  if (contextParam) targetParams.add(contextParam);
+  if (eventParam) targetParams.add(eventParam);
+
+  const replacements: Array<{ start: number; end: number; replacement: string }> =
+    [];
+  const scopeStack: string[] = [];
+  if (contextParam) scopeStack.push(contextParam);
+  if (eventParam) scopeStack.push(eventParam);
+
+  function isActive(name: string): boolean {
+    if (!targetParams.has(name)) return false;
+    const firstIndex = scopeStack.indexOf(name);
+    const lastIndex = scopeStack.lastIndexOf(name);
+    return firstIndex !== -1 && firstIndex === lastIndex;
+  }
+
+  function pushParamNames(params: ts.NodeArray<ts.ParameterDeclaration>): void {
+    for (const param of params) {
+      if (ts.isIdentifier(param.name)) {
+        const name = param.name.text;
+        if (targetParams.has(name)) scopeStack.push(name);
+      }
+    }
+  }
+
+  function popParamNames(params: ts.NodeArray<ts.ParameterDeclaration>): void {
+    for (const param of params) {
+      if (ts.isIdentifier(param.name)) {
+        const name = param.name.text;
+        if (targetParams.has(name)) scopeStack.pop();
+      }
+    }
+  }
+
+  function visit(node: ts.Node): void {
+    if (
+      ts.isArrowFunction(node) ||
+      ts.isFunctionExpression(node) ||
+      ts.isFunctionDeclaration(node)
+    ) {
+      pushParamNames(node.parameters);
+      if (node.body) visit(node.body);
+      popParamNames(node.parameters);
+      return;
+    }
+    if (ts.isCatchClause(node)) {
+      if (node.variableDeclaration && ts.isIdentifier(node.variableDeclaration.name)) {
+        const name = node.variableDeclaration.name.text;
+        if (targetParams.has(name)) scopeStack.push(name);
+      }
+      if (node.block) visit(node.block);
+      if (node.variableDeclaration && ts.isIdentifier(node.variableDeclaration.name)) {
+        const name = node.variableDeclaration.name.text;
+        if (targetParams.has(name)) scopeStack.pop();
+      }
+      return;
+    }
+    if (ts.isIdentifier(node)) {
+      if (isPropertyName(node)) {
+        return;
+      }
+      const name = node.text;
+      if (isActive(name)) {
+        const parent = node.parent;
+        if (contextParam && name === contextParam) {
+          if (
+            ts.isPropertyAccessExpression(parent) &&
+            parent.expression === node
+          ) {
+            replacements.push({
+              start: parent.getStart(sourceFile),
+              end: parent.getEnd(),
+              replacement: `:${parent.name.text}`,
+            });
+          } else {
+            throw new ConversionError(
+              `standalone context parameter '${contextParam}' cannot be mapped to GTS`,
+            );
+          }
+        } else if (eventParam && name === eventParam) {
+          if (
+            ts.isPropertyAccessExpression(parent) &&
+            parent.expression === node
+          ) {
+            const dot = parent.questionDotToken ? "?." : ".";
+            replacements.push({
+              start: parent.getStart(sourceFile),
+              end: parent.getEnd(),
+              replacement: `:e${dot}${parent.name.text}`,
+            });
+          } else {
+            replacements.push({
+              start: node.getStart(sourceFile),
+              end: node.getEnd(),
+              replacement: ":e",
+            });
+          }
+        }
+      }
+      return;
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(bodyNode);
+  return replacements;
+}
+
+function isPropertyName(node: ts.Identifier): boolean {
+  const parent = node.parent;
+  if (!parent) return false;
+  if (ts.isPropertyAssignment(parent) && parent.name === node) return true;
+  if (ts.isShorthandPropertyAssignment(parent) && parent.name === node) return true;
+  if (ts.isPropertySignature(parent) && parent.name === node) return true;
+  if (ts.isMethodDeclaration(parent) && parent.name === node) return true;
+  if (ts.isEnumMember(parent) && parent.name === node) return true;
+  if (ts.isGetAccessorDeclaration(parent) && parent.name === node) return true;
+  if (ts.isSetAccessorDeclaration(parent) && parent.name === node) return true;
+  return false;
 }
 
 function readStringLike(
@@ -1620,20 +1711,6 @@ function readStringLike(
     i++;
   }
   return { text: code.slice(start), end: code.length };
-}
-
-function previousNonWhitespace(text: string): string | null {
-  for (let i = text.length - 1; i >= 0; i--) {
-    const ch = text[i]!;
-    if (!/\s/.test(ch)) {
-      if (ch === "." && text[i - 1] === "." && text[i - 2] === ".") {
-        i -= 2;
-        continue;
-      }
-      return ch;
-    }
-  }
-  return null;
 }
 
 function renderAttrWithOptions(head: string, options?: ts.Expression): string {

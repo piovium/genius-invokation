@@ -65,7 +65,11 @@ import {
   createVariableCanAppend,
   type TypeHint,
 } from "../../builder/utils";
-import { TriggeredSkillModel, TriggeredSkillViewModel, type TriggeredSkillVMMeta } from "./skill";
+import {
+  TriggeredSkillModel,
+  TriggeredSkillViewModel,
+  type TriggeredSkillVMMeta,
+} from "./skill";
 import { $, DamageType, DiceType, type CustomEvent } from "../../builder";
 import { GlobalUsageVM, PrepareVM, NightsoulVM } from "./entity_auxilary";
 import type { CharacterPassiveSkillEntry } from "../../builder/registry";
@@ -346,10 +350,13 @@ export var DEFAULT_ENTITY_VM_META = {
 export type DefaultEntityVMMeta<
   T extends ExEntityType,
   AssociatedExtension = never,
-> = Omit<typeof DEFAULT_ENTITY_VM_META, "associatedExtension"> & {
-  type: T;
-  associatedExtension: AssociatedExtension;
-};
+> = Computed<
+  Omit<typeof DEFAULT_ENTITY_VM_META, "associatedExtension"> & {
+    type: T;
+    associatedExtension: AssociatedExtension;
+  },
+  EntityVMMeta
+>;
 
 type SnippetOperation<Meta extends EntityVMMeta, ArgT> = (
   c: TypedSkillContext<
@@ -808,11 +815,14 @@ export const EntityViewModel = defineViewModel(
       enterSkill.action = function (c) {
         const conflictEntities = c.queryAll($.my.typeStatus);
         for (const entity of conflictEntities) {
-          if (conflictIds.includes(entity.definition.id) && entity.id !== c.self.id) {
+          if (
+            conflictIds.includes(entity.definition.id) &&
+            entity.id !== c.self.id
+          ) {
             entity.dispose();
           }
         }
-      }
+      };
       model.skillList.push(enterSkill.buildSkillDefinition());
     }),
     noDefaultDispose: h.attribute<{
