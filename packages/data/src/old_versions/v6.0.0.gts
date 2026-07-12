@@ -211,7 +211,7 @@ define combatStatus {
       :setVariable("totalMaxCostCount", 1);
     }
   }
-  on endPhase {
+  on endPhase { // 文本有误，实为结束阶段时
     const extraMaxHealth = :getVariable("extraMaxHealth");
     if (extraMaxHealth) {
       const narwhal = :$(`my character with definition id ${AlldevouringNarwhal}`);

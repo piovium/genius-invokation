@@ -148,8 +148,9 @@ define card {
   talent Arlecchino {
     on enter {
       :characterStatus(BondOfLife, "@master", {
-          overrideVariables: { usage: 3 }
-        });
+        overrideVariables: { usage: 3 }
+      });
+      // 消耗生命之契增伤的部分在被动技能 13147 里
     }
   }
 }

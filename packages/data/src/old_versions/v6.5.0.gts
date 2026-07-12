@@ -229,20 +229,12 @@ define card {
     on enter {
       :characterStatus(Target, $.opp.active);
     }
-    on deductOmniDiceSwitch {                             // 绒翼龙只在可以减费时生效
+    on deductOmniDiceSwitch {                       // 绒翼龙只在可以减费时生效
       when :(
-        console.log(
-          :skillInfo.environment,
-          :query($.opp.active.has($.def(Target))),
-          :e.action.to.id === :self.master.id,
-          :player.hands.length > 0
-        ),
-        
-        
-        
         :query($.opp.active.has($.def(Target))) &&  // 敌方出战角色附属目标
-          :e.action.to.id === :self.master.id &&          // 附属角色切换为出战角色
-          :player.hands.length > 0 );                     // 有手牌（“如可能，舍弃”）
+        :e.action.to.id === :self.master.id &&      // 附属角色切换为出战角色
+        :player.hands.length > 0                    // 有手牌（“如可能，舍弃”）
+      );                     
       :setVariable("deductDiceTriggered", 1);
       // 预计算时不触发弃牌
       if (:skillInfo.environment !== "precalculate") {

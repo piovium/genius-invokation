@@ -180,7 +180,7 @@ define skill {
   id 11054 as private KamisatoArtSenho;
   until "v5.8.0";
   skillType passive {
-    on battleBegin {
+    on battleBegin { // 战斗开始时也附属附魔
       when :( :self.isActive() );
       :characterStatus(CryoElementalInfusion);
     }

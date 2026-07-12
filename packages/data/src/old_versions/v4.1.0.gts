@@ -565,7 +565,7 @@ define combatStatus {
   until "v4.1.0";
   conflictWith 111071;
   variable noUsageEffect, 1 {
-    visible false;
+    visible false; // 每回合一次不消耗可用次数
   };
   on roundEnd {
     :setVariable("noUsageEffect", 1);

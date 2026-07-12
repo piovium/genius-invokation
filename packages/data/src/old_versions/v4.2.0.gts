@@ -122,7 +122,7 @@ define summon {
  * 蛙：抵挡1点出战角色受到的伤害，可用2次；耗尽后，在结束阶段造成2点水元素伤害。
  */
 define summon {
-  id 122014 as private OceanicMimicFrogPreview;
+  id 122014 as private OceanicMimicFrogPreview; // 这是纯水幻形·蛙的预览版本
   until "v4.2.0";
   hint DamageType.Hydro, "2";
   on decreaseDamaged {
