@@ -1,7 +1,7 @@
 import { card, combatStatus, DamageType, skill, type SkillHandle, status, type StatusHandle, summon, type SummonHandle } from "@gi-tcg/core/builder";
-import { VioletArc } from "../characters/electro/lisa.ts";
-import { EremiteScorchingLoremaster, SearingGlare } from "../characters/pyro/eremite_scorching_loremaster.ts";
-import { AwakenMyKindred, HeartOfOasis } from "../characters/dendro/guardian_of_apeps_oasis.ts";
+import { VioletArc } from "../characters/electro/lisa.gts";
+import { EremiteScorchingLoremaster, SearingGlare } from "../characters/pyro/eremite_scorching_loremaster.gts";
+import { AwakenMyKindred, HeartOfOasis } from "../characters/dendro/guardian_of_apeps_oasis.gts";
 
 /**
  * @id 114091

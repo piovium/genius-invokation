@@ -22,23 +22,24 @@ import { AgileSwitch, EfficientSwitch } from "../../commons.gts";
  * @description
  * 双方角色使用技能后：如果造成了元素伤害，此牌累积1个「质变进度」。如果此牌已累积3个「质变进度」，则弃置此牌并生成3个不同的基础元素骰。
  */
-export const ParametricTransformer = card(323001)
-  .since("v3.3.0")
-  .costVoid(2)
-  .support("item")
-  .variable("progress", 0)
-  .on("useSkill", (c) =>
-    c.hasPhaseDamage("all", (e) => e.type !== DamageType.Piercing && e.type !== DamageType.Physical))
-  .listenToAll()
-  .do((c) => {
-    c.addVariable("progress", 1);
-    if (c.getVariable("progress") >= 3) {
-      c.generateDice("randomElement", 3);
-      c.dispose();
-      return;
+define card {
+  id 323001 as ParametricTransformer;
+  since "v3.3.0";
+  cost DiceType.Void, 2;
+  support item {
+    variable progress, 0;
+    on useSkill {
+      when :(:hasPhaseDamage("all", (e) => e.type !== DamageType.Piercing && e.type !== DamageType.Physical));
+      listenTo all;
+      :addVariable("progress", 1);
+      if (:getVariable("progress") >= 3) {
+        :generateDice("randomElement", 3);
+        :dispose();
+        return;
+      }
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 323002
@@ -47,16 +48,23 @@ export const ParametricTransformer = card(323001)
  * 入场时：从牌组中随机抽取1张「料理」事件。
  * 我方打出「料理」事件牌时：从牌组中随机抽取1张「料理」事件牌。（每回合1次）
  */
-export const Nre = card(323002)
-  .since("v3.3.0")
-  .costSame(1)
-  .support("item")
-  .on("enter")
-  .drawCards(1, { withTag: "food" })
-  .on("playCard", (c, e) => e.hasCardTag("food"))
-  .usagePerRound(1)
-  .drawCards(1, { withTag: "food" })
-  .done();
+define card {
+  id 323002 as Nre;
+  since "v3.3.0";
+  cost DiceType.Aligned, 1;
+  support item {
+    on enter {
+      :drawCards(1, { withTag: "food" });
+    }
+    on playCard {
+      when :(:e.hasCardTag("food"));
+      usage perRound, 1 {
+        visible false;
+      };
+      :drawCards(1, { withTag: "food" });
+    }
+  }
+}
 
 /**
  * @id 302303
@@ -64,18 +72,25 @@ export const Nre = card(323002)
  * @description
  * 本回合中，我方执行的下次「切换角色」行动视为「快速行动」而非「战斗行动」，并且少花费1个元素骰。
  */
-export const RedFeatherFanStatus = combatStatus(302303)
-  .oneDuration()
-  .variable("triggered", 0, { visible: false })
-  .on("deductOmniDiceSwitch")
-  .deductOmniCost(1)
-  .setVariable("triggered", 1)
-  .on("beforeFastSwitch")
-  .setFastAction()
-  .setVariable("triggered", 1)
-  .on("switchActive", (c) => c.getVariable("triggered"))
-  .dispose()
-  .done();
+define combatStatus {
+  id 302303 as RedFeatherFanStatus;
+  oneDuration;
+  variable triggered, 0 {
+    visible false;
+  };
+  on deductOmniDiceSwitch {
+    :e.deductOmniCost(1);
+    :setVariable("triggered", 1);
+  }
+  on beforeFastSwitch {
+    :e.setFastAction();
+    :setVariable("triggered", 1);
+  }
+  on switchActive {
+    when :(:getVariable("triggered"));
+    :dispose();
+  }
+}
 
 /**
  * @id 323003
@@ -83,15 +98,20 @@ export const RedFeatherFanStatus = combatStatus(302303)
  * @description
  * 我方切换角色后：我方获得1层高效切换和敏捷切换。（每回合1次）
  */
-export const RedFeatherFan = card(323003)
-  .since("v3.7.0")
-  .costSame(2)
-  .support("item")
-  .on("switchActive")
-  .usagePerRound(1)
-  .combatStatus(EfficientSwitch)
-  .combatStatus(AgileSwitch)
-  .done();
+define card {
+  id 323003 as RedFeatherFan;
+  since "v3.7.0";
+  cost DiceType.Aligned, 2;
+  support item {
+    on switchActive {
+      usage perRound, 1 {
+        visible false;
+      };
+      :combatStatus(EfficientSwitch);
+      :combatStatus(AgileSwitch);
+    }
+  }
+}
 
 /**
  * @id 323004
@@ -99,20 +119,21 @@ export const RedFeatherFan = card(323003)
  * @description
  * 我方角色使用技能后：此牌累积1个「寻宝线索」。如果此牌已累积3个「寻宝线索」，则弃置此牌并抓3张牌。
  */
-export const TreasureseekingSeelie = card(323004)
-  .since("v3.7.0")
-  .costSame(1)
-  .support("item")
-  .variable("clue", 0)
-  .on("useSkill")
-  .do((c) => {
-    c.addVariable("clue", 1);
-    if (c.getVariable("clue") >= 3) {
-      c.drawCards(3);
-      c.dispose();
+define card {
+  id 323004 as TreasureseekingSeelie;
+  since "v3.7.0";
+  cost DiceType.Aligned, 1;
+  support item {
+    variable clue, 0;
+    on useSkill {
+      :addVariable("clue", 1);
+      if (:getVariable("clue") >= 3) {
+        :drawCards(3);
+        :dispose();
+      }
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 323005
@@ -121,14 +142,20 @@ export const TreasureseekingSeelie = card(323004)
  * 我方打出当前元素骰费用至少为2的支援牌时：少花费1个元素骰。（每回合1次）
  * 可用次数：2
  */
-export const SeedDispensary = card(323005)
-  .since("v4.3.0")
-  .support("item")
-  .on("deductOmniDiceCard", (c, e) => e.currentDiceCostSize() >= 2 && e.action.skill.caller.definition.type === "support")
-  .usagePerRound(1)
-  .usage(2)
-  .deductOmniCost(1)
-  .done();
+define card {
+  id 323005 as SeedDispensary;
+  since "v4.3.0";
+  support item {
+    on deductOmniDiceCard {
+      when :(:e.currentDiceCostSize() >= 2 && :e.action.skill.caller.definition.type === "support");
+      usage perRound, 1 {
+        visible false;
+      };
+      usage 2;
+      :e.deductOmniCost(1);
+    }
+  }
+}
 
 const CardPlayedExtension = extension(323006, { played: "pair<number[]>" })
   .initialState({ played: [[], []] })
@@ -150,27 +177,31 @@ const CardPlayedExtension = extension(323006, { played: "pair<number[]>" })
  * 我方打出「武器」/「圣遗物」/「场地」/「伙伴」手牌时：如果本场对局中我方曾经打出过所打出牌的同名卡牌，则少花费2个元素骰。（每回合1次）
  * 可用次数：2
  */
-export const MementoLens = card(323006)
-  .since("v4.3.0")
-  .costSame(1)
-  .support("item")
-  .associateExtension(CardPlayedExtension)
-  .variable("totalUsage", 2)
-  .on("deductOmniDiceCard", (c, e) => {
-    if (!e.hasOneOfCardTag("weapon", "artifact", "place", "ally")) {
-      return false;
+define card {
+  id 323006 as MementoLens;
+  since "v4.3.0";
+  cost DiceType.Aligned, 1;
+  support item {
+    associateExtension CardPlayedExtension;
+    variable totalUsage, 2;
+    on deductOmniDiceCard {
+      when :{
+        if (!:e.hasOneOfCardTag("weapon", "artifact", "place", "ally")) {
+          return false;
+        }
+        return :getExtensionState().played[:self.who].includes(:e.action.skill.caller.definition.id);
+      };
+      usage perRound, 1 {
+        visible false;
+      };
+      :e.deductOmniCost(2);
+      :addVariable("totalUsage", -1);
+      if (:getVariable("totalUsage") <= 0) {
+        :dispose();
+      }
     }
-    return c.getExtensionState().played[c.self.who].includes(e.action.skill.caller.definition.id);
-  })
-  .usagePerRound(1)
-  .do((c, e) => {
-    e.deductOmniCost(2);
-    c.addVariable("totalUsage", -1);
-    if (c.getVariable("totalUsage") <= 0) {
-      c.dispose();
-    }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 323007
@@ -180,22 +211,33 @@ export const MementoLens = card(323006)
  * 可用次数：3
  * 【此卡含描述变量】
  */
-export const LumenstoneAdjuvant = card(323007)
-  .since("v4.5.0")
-  .costVoid(3)
-  .support("item")
-  .variable("playedCard", 0, { visible: false })
-  .replaceDescription("[GCG_TOKEN_COUNTER]", (st, self) => self.variables.playedCard)
-  .on("playCard", (c, e) => e.card.id !== c.self.id)
-  .addVariable("playedCard", 1)
-  .on("playCard", (c, e) => c.getVariable("playedCard") === 3)
-  .usagePerRound(1)
-  .usage(3)
-  .drawCards(1)
-  .generateDice(DiceType.Omni, 1)
-  .on("actionPhase")
-  .setVariable("playedCard", 0)
-  .done();
+define card {
+  id 323007 as LumenstoneAdjuvant;
+  since "v4.5.0";
+  cost DiceType.Void, 3;
+  support item {
+    variable playedCard, 0 {
+      visible false;
+    };
+    replaceDescription "[GCG_TOKEN_COUNTER]", ((st, self) => self.variables.playedCard);
+    on playCard {
+      when :(:e.card.id !== :self.id);
+      :addVariable("playedCard", 1);
+    }
+    on playCard {
+      when :(:getVariable("playedCard") === 3);
+      usage perRound, 1 {
+        visible false;
+      };
+      usage 3;
+      :drawCards(1);
+      :generateDice(DiceType.Omni, 1);
+    }
+    on actionPhase {
+      :setVariable("playedCard", 0);
+    }
+  }
+}
 
 /**
  * @id 323008
@@ -204,28 +246,34 @@ export const LumenstoneAdjuvant = card(323007)
  * 行动阶段开始时：舍弃最多2张当前元素骰费用最高的手牌，每舍弃1张，此牌就累积1点「记忆和梦」。（最多2点）
  * 我方角色使用技能时：如果我方本回合未打出过行动牌，则消耗1点「记忆和梦」，以使此技能少花费1个元素骰。
  */
-export const Kusava = card(323008)
-  .since("v4.7.0")
-  .costSame(1)
-  .support("item")
-  .variable("memory", 0)
-  .variable("cardPlayed", 0, { visible: false })
-  .on("actionPhase")
-  .do((c) => {
-    const memory = c.getVariable("memory");
-    if (memory < 2) {
-      const disposed = c.disposeMaxCostHands(2 - memory);
-      const count = disposed.length;
-      c.addVariableWithMax("memory", count, 2);
+define card {
+  id 323008 as Kusava;
+  since "v4.7.0";
+  cost DiceType.Aligned, 1;
+  support item {
+    variable memory, 0;
+    variable cardPlayed, 0 {
+      visible false;
+    };
+    on actionPhase {
+      const memory = :getVariable("memory");
+      if (memory < 2) {
+        const disposed = :disposeMaxCostHands(2 - memory);
+        const count = disposed.length;
+        :addVariableWithMax("memory", count, 2);
+      }
+      :setVariable("cardPlayed", 0);
     }
-    c.setVariable("cardPlayed", 0);
-  })
-  .on("playCard")
-  .setVariable("cardPlayed", 1)
-  .on("deductOmniDiceSkill", (c, e) => !c.getVariable("cardPlayed") && c.getVariable("memory") > 0)
-  .deductOmniCost(1)
-  .addVariable("memory", -1)
-  .done();
+    on playCard {
+      :setVariable("cardPlayed", 1);
+    }
+    on deductOmniDiceSkill {
+      when :(!:getVariable("cardPlayed") && :getVariable("memory") > 0);
+      :e.deductOmniCost(1);
+      :addVariable("memory", -1);
+    }
+  }
+}
 
 /**
  * @id 133096
@@ -235,5 +283,7 @@ export const Kusava = card(323008)
  * 可用次数：3
  * 【此卡含描述变量】
  */
-export const Lumenarystone = card(133096) // 骗骗花
-  .reserve();
+define card {
+  id 133096 as Lumenarystone;
+  reserved;
+}

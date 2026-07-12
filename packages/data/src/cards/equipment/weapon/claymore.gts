@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, combatStatus, extension, status } from "@gi-tcg/core/builder";
+import { card, combatStatus, DiceType, extension, status } from "@gi-tcg/core/builder";
 
 /**
  * @id 311301
@@ -22,13 +22,16 @@ import { card, combatStatus, extension, status } from "@gi-tcg/core/builder";
  * 角色造成的伤害+1。
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  */
-export const WhiteIronGreatsword = card(311301)
-  .since("v3.3.0")
-  .costSame(2)
-  .weapon("claymore")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .done();
+define card {
+  id 311301 as WhiteIronGreatsword;
+  since "v3.3.0";
+  cost DiceType.Aligned, 2;
+  weapon claymore {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+  }
+}
 
 /**
  * @id 311302
@@ -38,18 +41,23 @@ export const WhiteIronGreatsword = card(311301)
  * 角色使用「元素战技」后：生成1个此角色类型的元素骰。（每回合1次）
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  */
-export const SacrificialGreatsword = card(311302)
-  .since("v3.3.0")
-  .costSame(3)
-  .weapon("claymore")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .on("useSkill", (c, e) => e.isSkillType("elemental"))
-  .usagePerRound(1)
-  .do((c) => {
-    c.generateDice(c.self.master.element(), 1);
-  })
-  .done();
+define card {
+  id 311302 as SacrificialGreatsword;
+  since "v3.3.0";
+  cost DiceType.Aligned, 3;
+  weapon claymore {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+    on useSkill {
+      when :(:e.isSkillType("elemental"));
+      usage perRound, 1 {
+        visible false;
+      };
+      :generateDice(:self.master.element(), 1);
+    }
+  }
+}
 
 /**
  * @id 311303
@@ -59,19 +67,20 @@ export const SacrificialGreatsword = card(311302)
  * 攻击剩余生命值不多于6的目标时，伤害额外+2。
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  */
-export const WolfsGravestone = card(311303)
-  .since("v3.3.0")
-  .costSame(3)
-  .weapon("claymore")
-  .on("increaseSkillDamage")
-  .do((c, e) => {
-    if (e.target.health <= 6) {
-      e.increaseDamage(3);
-    } else {
-      e.increaseDamage(1);
+define card {
+  id 311303 as WolfsGravestone;
+  since "v3.3.0";
+  cost DiceType.Aligned, 3;
+  weapon claymore {
+    on increaseSkillDamage {
+      if (:e.target.health <= 6) {
+        :e.increaseDamage(3);
+      } else {
+        :e.increaseDamage(1);
+      }
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 311304
@@ -81,16 +90,23 @@ export const WolfsGravestone = card(311303)
  * 每回合1次：角色使用「普通攻击」造成的伤害额外+1。
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  */
-export const SkywardPride = card(311304)
-  .since("v3.7.0")
-  .costSame(3)
-  .weapon("claymore")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("normal"))
-  .usagePerRound(1)
-  .increaseDamage(1)
-  .done();
+define card {
+  id 311304 as SkywardPride;
+  since "v3.7.0";
+  cost DiceType.Aligned, 3;
+  weapon claymore {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+    on increaseSkillDamage {
+      when :(:e.viaSkillType("normal"));
+      usage perRound, 1 {
+        visible false;
+      };
+      :e.increaseDamage(1);
+    }
+  }
+}
 
 /**
  * @id 121013
@@ -98,9 +114,10 @@ export const SkywardPride = card(311304)
  * @description
  * 提供1点护盾，保护我方出战角色。（可叠加，最多叠加到2点）
  */
-const RebelliousShield = combatStatus(121013)
-  .shield(1, 2)
-  .done();
+define combatStatus {
+  id 121013 as private RebelliousShield;
+  shield 1, 2;
+}
 
 /**
  * @id 311305
@@ -110,15 +127,19 @@ const RebelliousShield = combatStatus(121013)
  * 角色使用技能后：为我方出战角色提供1点护盾。（每回合1次，可叠加到2点）
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  */
-export const TheBell = card(311305)
-  .since("v3.7.0")
-  .costSame(3)
-  .weapon("claymore")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .on("useSkill")
-  .combatStatus(RebelliousShield)
-  .done();
+define card {
+  id 311305 as TheBell;
+  since "v3.7.0";
+  cost DiceType.Aligned, 3;
+  weapon claymore {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+    on useSkill {
+      :combatStatus(RebelliousShield);
+    }
+  }
+}
 
 /**
  * @id 301105
@@ -126,11 +147,13 @@ export const TheBell = card(311305)
  * @description
  * 本回合内，所附属角色下次造成的伤害额外+1。
  */
-const DesertWatchTakeTheInitiative = status(301105)
-  .oneDuration()
-  .once("increaseSkillDamage")
-  .increaseDamage(1)
-  .done();
+define status {
+  id 301105 as private DesertWatchTakeTheInitiative;
+  oneDuration;
+  once increaseSkillDamage {
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 301106
@@ -138,11 +161,13 @@ const DesertWatchTakeTheInitiative = status(301105)
  * @description
  * 本回合内，所附属角色下次造成的伤害额外+1。
  */
-const DesertWatchOffensiveDefense = status(301106)
-  .oneDuration()
-  .once("increaseSkillDamage")
-  .increaseDamage(1)
-  .done();
+define status {
+  id 301106 as private DesertWatchOffensiveDefense;
+  oneDuration;
+  once increaseSkillDamage {
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 311306
@@ -153,17 +178,22 @@ const DesertWatchOffensiveDefense = status(301106)
  * 角色受到伤害后：本回合内，角色下次造成的伤害额外+1。（每回合1次）
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  */
-export const BeaconOfTheReedSea = card(311306)
-  .since("v4.3.0")
-  .costSame(3)
-  .weapon("claymore")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .on("useSkill")
-  .characterStatus(DesertWatchTakeTheInitiative, "@master")
-  .on("damaged")
-  .characterStatus(DesertWatchOffensiveDefense, "@master")
-  .done();
+define card {
+  id 311306 as BeaconOfTheReedSea;
+  since "v4.3.0";
+  cost DiceType.Aligned, 3;
+  weapon claymore {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+    on useSkill {
+      :characterStatus(DesertWatchTakeTheInitiative, "@master");
+    }
+    on damaged {
+      :characterStatus(DesertWatchOffensiveDefense, "@master");
+    }
+  }
+}
 
 /**
  * @id 301109
@@ -171,13 +201,14 @@ export const BeaconOfTheReedSea = card(311306)
  * @description
  * 角色在本回合中，下次使用「普通攻击」后：生成2个此角色类型的元素骰。
  */
-export const ForestRegaliaInEffect = status(301109)
-  .oneDuration()
-  .once("useSkill", (c, e) => e.isSkillType("normal"))
-  .do((c) => {
-    c.generateDice(c.self.master.element(), 2);
-  })
-  .done();
+define status {
+  id 301109 as ForestRegaliaInEffect;
+  oneDuration;
+  once useSkill {
+    when :(:e.isSkillType("normal"));
+    :generateDice(:self.master.element(), 2);
+  }
+}
 
 /**
  * @id 311307
@@ -187,15 +218,19 @@ export const ForestRegaliaInEffect = status(301109)
  * 入场时：所附属角色在本回合中，下次使用「普通攻击」后：生成2个此角色类型的元素骰。
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  */
-export const ForestRegalia = card(311307)
-  .since("v4.7.0")
-  .costVoid(3)
-  .weapon("claymore")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .on("enter")
-  .characterStatus(ForestRegaliaInEffect, "@master")
-  .done();
+define card {
+  id 311307 as ForestRegalia;
+  since "v4.7.0";
+  cost DiceType.Void, 3;
+  weapon claymore {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
+    }
+    on enter {
+      :characterStatus(ForestRegaliaInEffect, "@master");
+    }
+  }
+}
 
 export const NonInitialPlayedCardExtension = extension(311308, { defIds: "pair<number[]>" })
   .initialState({ defIds: [[], []] })
@@ -218,33 +253,32 @@ export const NonInitialPlayedCardExtension = extension(311308, { defIds: "pair<n
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  * 【此卡含描述变量】
  */
-export const UltimateOverlordsMegaMagicSword = card(311308)
-  .since("v4.8.0")
-  .costSame(2)
-  .weapon("claymore")
-  .variable("supp", 0)
-  .associateExtension(NonInitialPlayedCardExtension)
-  .replaceDescription("[GCG_TOKEN_COUNTER]", (_, { area }, ext) => ext.defIds[area.who].length)
-  .on("enter")
-  .do((c) => {
-    c.setVariable("supp", c.getExtensionState().defIds[c.self.who].length);
-  })
-  .on("playCard")
-  .do((c) => {
-    c.setVariable("supp", c.getExtensionState().defIds[c.self.who].length);
-  })
-  .on("increaseSkillDamage")
-  .do((c, e) => {
-    const supp = c.getVariable("supp");
-    if (supp >= 9) {
-      e.increaseDamage(3);
-    } else if (supp >= 4) {
-      e.increaseDamage(2);
-    } else if (supp >= 2) {
-      e.increaseDamage(1);
+define card {
+  id 311308 as UltimateOverlordsMegaMagicSword;
+  since "v4.8.0";
+  cost DiceType.Aligned, 2;
+  weapon claymore {
+    variable supp, 0;
+    associateExtension NonInitialPlayedCardExtension;
+    replaceDescription "[GCG_TOKEN_COUNTER]", ((_, { area }, ext) => ext.defIds[area.who].length);
+    on enter {
+      :setVariable("supp", :getExtensionState().defIds[:self.who].length);
     }
-  })
-  .done();
+    on playCard {
+      :setVariable("supp", :getExtensionState().defIds[:self.who].length);
+    }
+    on increaseSkillDamage {
+      const supp = :getVariable("supp");
+      if (supp >= 9) {
+        :e.increaseDamage(3);
+      } else if (supp >= 4) {
+        :e.increaseDamage(2);
+      } else if (supp >= 2) {
+        :e.increaseDamage(1);
+      }
+    }
+  }
+}
 
 /**
  * @id 311309
@@ -254,25 +288,31 @@ export const UltimateOverlordsMegaMagicSword = card(311308)
  * 角色造成伤害时：如果此牌已有「坚忍标记」，则消耗所有「坚忍标记」，使此伤害+1，并且每消耗1点「坚忍标记」就抓1张牌。
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  */
-export const PortablePowerSaw = card(311309)
-  .since("v5.1.0")
-  .costSame(2)
-  .weapon("claymore")
-  .tags("barrier")
-  .variable("barrierUsage", 0) // no io hint for now
-  .variable("stoic", 0)
-  .on("decreaseDamaged", (c, e) => c.player.hands.length > 0)
-  .usagePerRound(1)
-  .disposeMaxCostHands(1)
-  .decreaseDamage(1)
-  .addVariable("stoic", 1)
-  .on("increaseSkillDamage", (c) => c.getVariable("stoic") > 0)
-  .do((c, e) => {
-    e.increaseDamage(1);
-    c.drawCards(c.getVariable("stoic"));
-    c.setVariable("stoic", 0);
-  })
-  .done();
+define card {
+  id 311309 as PortablePowerSaw;
+  since "v5.1.0";
+  cost DiceType.Aligned, 2;
+  weapon claymore {
+    tags barrier;
+    variable barrierUsage, 0;
+    variable stoic, 0;
+    on decreaseDamaged {
+      when :(:player.hands.length > 0);
+      usage perRound, 1 {
+        visible false;
+      };
+      :disposeMaxCostHands(1);
+      :e.decreaseDamage(1);
+      :addVariable("stoic", 1);
+    }
+    on increaseSkillDamage {
+      when :(:getVariable("stoic") > 0);
+      :e.increaseDamage(1);
+      :drawCards(:getVariable("stoic"));
+      :setVariable("stoic", 0);
+    }
+  }
+}
 
 /**
  * @id 311310
@@ -282,22 +322,27 @@ export const PortablePowerSaw = card(311309)
  * 我方引发元素反应时：累计1层盛放的思绪，当盛放的思绪不低于2层时，消耗2层盛放的思绪使所附属角色获得1点充能。
  * （「双手剑」角色才能装备。角色最多装备1件「武器」）
  */
-export const FlameforgedInsight = card(311310)
-  .since("v6.3.0")
-  .costVoid(2)
-  .weapon("claymore")
-  .variable("thought", 0)
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("burst"))
-  .increaseDamage(2)
-  .on("increaseSkillDamage", (c, e) => e.getReaction())
-  .increaseDamage(1)
-  .on("dealReaction")
-  .listenToPlayer()
-  .do((c) => {
-    c.addVariable("thought", 1);
-    if (c.getVariable("thought") >= 2) {
-      c.addVariable("thought", -2);
-      c.gainEnergy(1, "@master");
+define card {
+  id 311310 as FlameforgedInsight;
+  since "v6.3.0";
+  cost DiceType.Void, 2;
+  weapon claymore {
+    variable thought, 0;
+    on increaseSkillDamage {
+      when :(:e.viaSkillType("burst"));
+      :e.increaseDamage(2);
     }
-  })
-  .done();
+    on increaseSkillDamage {
+      when :(:e.getReaction());
+      :e.increaseDamage(1);
+    }
+    on dealReaction {
+      listenTo samePlayer;
+      :addVariable("thought", 1);
+      if (:getVariable("thought") >= 2) {
+        :addVariable("thought", -2);
+        :gainEnergy(1, "@master");
+      }
+    }
+  }
+}

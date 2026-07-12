@@ -104,12 +104,15 @@ define card {
  * 治疗目标角色2点。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const MondstadtHashBrown = card(333006)
-  .since("v3.3.0")
-  .costSame(1)
-  .food({ injuredOnly: true })
-  .heal(2, "@targets.0")
-  .done();
+define card {
+  id 333006 as MondstadtHashBrown;
+  since "v3.3.0";
+  cost DiceType.Aligned, 1;
+  food {
+    injuredOnly;
+  };
+  :heal(2, "@targets.0");
+}
 
 /**
  * @id 333007
@@ -135,13 +138,16 @@ export const [MushroomPizza] = card(333007)
  * @description
  * 角色在本回合结束前，之后3次「普通攻击」都少花费1个无色元素。
  */
-export const MintyMeatRollsInEffect = status(303306)
-  .since("v3.3.0")
-  .oneDuration()
-  .on("deductVoidDiceSkill", (c, e) => e.isSkillType("normal"))
-  .usage(3)
-  .deductVoidCost(1)
-  .done();
+define status {
+  id 303306 as MintyMeatRollsInEffect;
+  since "v3.3.0";
+  oneDuration;
+  on deductVoidDiceSkill {
+    when :(:e.isSkillType("normal"));
+    usage 3;
+    :e.deductVoidCost(1);
+  }
+}
 
 /**
  * @id 333008
@@ -150,12 +156,13 @@ export const MintyMeatRollsInEffect = status(303306)
  * 目标角色在本回合结束前，之后3次「普通攻击」都少花费1个无色元素。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const MintyMeatRolls = card(333008)
-  .since("v3.3.0")
-  .costSame(1)
-  .food()
-  .characterStatus(MintyMeatRollsInEffect, "@targets.0")
-  .done();
+define card {
+  id 333008 as MintyMeatRolls;
+  since "v3.3.0";
+  cost DiceType.Aligned, 1;
+  food;
+  :characterStatus(MintyMeatRollsInEffect, "@targets.0");
+}
 
 /**
  * @id 303307
@@ -163,9 +170,10 @@ export const MintyMeatRolls = card(333008)
  * @description
  * 本回合无法通过「料理」复苏角色。
  */
-export const ReviveOnCooldown = combatStatus(303307)
-  .oneDuration()
-  .done();
+define combatStatus {
+  id 303307 as ReviveOnCooldown;
+  oneDuration;
+}
 
 /**
  * @id 333009
@@ -297,8 +305,10 @@ export const [RainbowMacarons, RainbowMacaronsInEffect] = card(333015)
  * 本回合中，所有我方角色下一次「元素战技」造成的伤害+2。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const TandooriGrilledChicken = card(133085) // 骗骗花
-  .reserve();
+define card {
+  id 133085 as TandooriGrilledChicken;
+  reserved;
+}
 
 /**
  * @id 133097
@@ -307,8 +317,10 @@ export const TandooriGrilledChicken = card(133085) // 骗骗花
  * 治疗目标角色1点。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const SweetMaam = card(133097) // 骗骗花
-  .reserve();
+define card {
+  id 133097 as SweetMaam;
+  reserved;
+}
 
 /**
  * @id 133098
@@ -317,8 +329,10 @@ export const SweetMaam = card(133097) // 骗骗花
  * 治疗目标角色1点，该角色接下来3次受到伤害后再治疗其1点。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const DeliciousMacarons = card(133098) // 骗骗花
-  .reserve();
+define card {
+  id 133098 as DeliciousMacarons;
+  reserved;
+}
 
 /**
  * @id 333016
@@ -343,12 +357,13 @@ export const [SaurusCrackers] = card(333016)
  * 目标角色获得1点额外最大生命值。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const GlitteringGemstones = card(333017)
-  .since("v5.3.0")
-  .costSame(1)
-  .food()
-  .increaseMaxHealth(1, "@targets.0")
-  .done();
+define card {
+  id 333017 as GlitteringGemstones;
+  since "v5.3.0";
+  cost DiceType.Aligned, 1;
+  food;
+  :increaseMaxHealth(1, "@targets.0");
+}
 
 /**
  * @id 333018
@@ -374,14 +389,15 @@ export const [PuffPops, PuffPopsInEffect] = card(333018)
  * 治疗目标，其数值等同于我方场上召唤物的数量。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const HotSpringOclock = card(333019)
-  .since("v5.4.0")
-  .costSame(1)
-  .food({ injuredOnly: true })
-  .do((c) => {
-    c.heal(c.$$(`my summons`).length, "@targets.0");
-  })
-  .done();
+define card {
+  id 333019 as HotSpringOclock;
+  since "v5.4.0";
+  cost DiceType.Aligned, 1;
+  food {
+    injuredOnly;
+  };
+  :heal(:$$(`my summons`).length, "@targets.0");
+}
 
 /**
  * @id 333021
@@ -389,12 +405,13 @@ export const HotSpringOclock = card(333019)
  * @description
  * 治疗目标角色2点。
  */
-export const MystiqueSoupHealing = card(333021)
-  .since("v5.5.0")
-  .food()
-  .undiscoverable()
-  .heal(2, "@targets.0")
-  .done();
+define card {
+  id 333021 as MystiqueSoupHealing;
+  since "v5.5.0";
+  food;
+  undiscoverable;
+  :heal(2, "@targets.0");
+}
 
 /**
  * @id 333022
@@ -419,12 +436,14 @@ export const [MystiqueSoupProvidence] = card(333022)
  * 本回合中，该角色下一次造成的伤害+1。
  * 可用次数：2
  */
-export const MystiqueSoupFuryInEffect = status(303318)
-  .oneDuration()
-  .on("increaseSkillDamage")
-  .usage(2)
-  .increaseDamage(1)
-  .done();
+define status {
+  id 303318 as MystiqueSoupFuryInEffect;
+  oneDuration;
+  on increaseSkillDamage {
+    usage 2;
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 333023
@@ -432,12 +451,13 @@ export const MystiqueSoupFuryInEffect = status(303318)
  * @description
  * 本回合中，目标角色下次造成的伤害+1。（最多生效2次）
  */
-export const MystiqueSoupFury = card(333023)
-  .since("v5.5.0")
-  .food()
-  .undiscoverable()
-  .characterStatus(MystiqueSoupFuryInEffect, "@targets.0")
-  .done();
+define card {
+  id 333023 as MystiqueSoupFury;
+  since "v5.5.0";
+  food;
+  undiscoverable;
+  :characterStatus(MystiqueSoupFuryInEffect, "@targets.0");
+}
 
 /**
  * @id 333024
@@ -480,12 +500,13 @@ export const [MystiqueSoupSoothing] = card(333025)
  * @description
  * 目标角色获得1点额外最大生命值。
  */
-export const MystiqueSoupInspiration = card(333026)
-  .since("v5.5.0")
-  .food()
-  .undiscoverable()
-  .increaseMaxHealth(1, "@targets.0")
-  .done();
+define card {
+  id 333026 as MystiqueSoupInspiration;
+  since "v5.5.0";
+  food;
+  undiscoverable;
+  :increaseMaxHealth(1, "@targets.0");
+}
 
 /**
  * @id 333020
@@ -494,16 +515,17 @@ export const MystiqueSoupInspiration = card(333026)
  * 从3个随机效果中挑选1个，对目标角色生效。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const MystiqueSoup = card(333020)
-  .since("v5.5.0")
-  .costSame(1)
-  .food({ noSatiated: true })
-  .do((c, e) => {
-    const allCards = [MystiqueSoupHealing, MystiqueSoupProvidence, MystiqueSoupFury, MystiqueSoupSerenity, MystiqueSoupSoothing, MystiqueSoupInspiration];
-    const candidates = c.randomSubset(allCards, 3);
-    c.selectAndPlay(candidates, e.targets[0]);
-  })
-  .done();
+define card {
+  id 333020 as MystiqueSoup;
+  since "v5.5.0";
+  cost DiceType.Aligned, 1;
+  food {
+    noSatiated;
+  };
+  const allCards = [MystiqueSoupHealing, MystiqueSoupProvidence, MystiqueSoupFury, MystiqueSoupSerenity, MystiqueSoupSoothing, MystiqueSoupInspiration];
+  const candidates = :randomSubset(allCards, 3);
+  :selectAndPlay(candidates, :e.targets[0]);
+}
 
 /**
  * @id 333027
@@ -574,25 +596,24 @@ export const [ChenyuBrew] = card(333029)
  * 目标角色下次造成的伤害+1。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const RouletteSpecial = card(333030)
-  .since("v6.6.0")
-  .costSame(4)
-  .food()
-  .do((c, e) => {
-    c.abortPreview();
-    const target = e.targets[0];
-    const effects = [
-      () => (c.heal(2, target)),
-      () => (c.increaseMaxHealth(1, target)),
-      () => (c.characterStatus(BattlePlan, target)),
-      () => (c.characterStatus(SharpenTheBlade, target)),
-    ];
-    for (let i = 0; i < 4; i++) {
-      const effect = c.random(effects);
-      effect();
-    }
-  })
-  .done();
+define card {
+  id 333030 as RouletteSpecial;
+  since "v6.6.0";
+  cost DiceType.Aligned, 4;
+  food;
+  :abortPreview();
+  const target = :e.targets[0];
+  const effects = [
+    () => (:heal(2, target)),
+    () => (:increaseMaxHealth(1, target)),
+    () => (:characterStatus(BattlePlan, target)),
+    () => (:characterStatus(SharpenTheBlade, target)),
+  ];
+  for (let i = 0; i < 4; i++) {
+    const effect = :random(effects);
+    effect();
+  }
+}
 
 /**
  * @id 303324

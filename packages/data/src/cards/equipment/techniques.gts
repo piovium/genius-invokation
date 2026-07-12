@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { EntityDefinition } from "@gi-tcg/core";
-import { card, combatStatus, DamageType, extension, status, type StatusHandle, $ } from "@gi-tcg/core/builder";
+import { $, card, combatStatus, DamageType, DiceType, extension, status, type StatusHandle } from "@gi-tcg/core/builder";
 import { AgileSwitch, EfficientSwitch } from "../../commons.gts";
 
 /**
@@ -26,14 +26,18 @@ import { AgileSwitch, EfficientSwitch } from "../../commons.gts";
  * （角色最多装备1个「特技」）
  * [3130011: 原海水刃] (2*Void) 造成2点物理伤害。
  */
-export const XenochromaticHuntersRay = card(313001)
-  .since("v5.0.0")
-  .technique()
-  .provideSkill(3130011)
-  .costVoid(2)
-  .usage(2)
-  .damage(DamageType.Physical, 2)
-  .done();
+define card {
+  id 313001 as XenochromaticHuntersRay;
+  since "v5.0.0";
+  technique {
+    skill {
+      id 3130011;
+      cost DiceType.Void, 2;
+      usage 2;
+      :damage(DamageType.Physical, 2);
+    }
+  }
+}
 
 /**
  * @id 313002
@@ -46,25 +50,28 @@ export const XenochromaticHuntersRay = card(313001)
  * 如果我方手牌数不多于2，此特技少花费1个元素骰。
  * [3130022: ] ()
  */
-export const Yumkasaurus = card(313002)
-  .since("v5.0.0")
-  .costSame(1)
-  .technique()
-  .on("deductOmniDiceTechnique", (c, e) => e.action.skill.definition.id === 3130021 && c.player.hands.length <= 2)
-  .deductOmniCost(1)
-  .endOn()
-  .provideSkill(3130021)
-  .costSame(2)
-  .usage(2)
-  .damage(DamageType.Physical, 1)
-  .do((c) => {
-    const [handCard] = c.maxCostHands(1, { who: "opp" });
-    if (handCard) {
-      c.stealHandCard(handCard);
+define card {
+  id 313002 as Yumkasaurus;
+  since "v5.0.0";
+  cost DiceType.Aligned, 1;
+  technique {
+    on deductOmniDiceTechnique {
+      when :(:e.action.skill.definition.id === 3130021 && :player.hands.length <= 2);
+      :e.deductOmniCost(1);
     }
-    c.drawCards(1, { who: "opp" });
-  })
-  .done();
+    skill {
+      id 3130021;
+      cost DiceType.Aligned, 2;
+      usage 2;
+      :damage(DamageType.Physical, 1);
+      const [handCard] = :maxCostHands(1, { who: "opp" });
+      if (handCard) {
+        :stealHandCard(handCard);
+      }
+      :drawCards(1, { who: "opp" });
+    }
+  }
+}
 
 /**
  * @id 313003
@@ -96,9 +103,10 @@ export const Koholasaurus = card(313003)
  * @description
  * 提供2点护盾，保护所附属角色。
  */
-const DiggingDownToPaydirt = status(301301)
-  .shield(2)
-  .done();
+define status {
+  id 301301 as private DiggingDownToPaydirt;
+  shield 2;
+}
 
 /**
  * @id 313004
@@ -109,19 +117,24 @@ const DiggingDownToPaydirt = status(301301)
  * （角色最多装备1个「特技」）
  * [3130041: 掘进突击] (2*Void) 抓2张牌。然后，如果手牌中存在名称不存在于本局最初牌组中的牌，则提供2点护盾保护所附属角色。
  */
-export const Tepetlisaurus = card(313004)
-  .since("v5.1.0")
-  .costSame(2)
-  .technique()
-  .provideSkill(3130041)
-  .usage(2)
-  .costVoid(2)
-  .drawCards(2)
-  .if((c) => {
-    return c.player.hands.some((card) => !c.isInInitialPile(card));
-  })
-  .characterStatus(DiggingDownToPaydirt, "@master")
-  .done();
+define card {
+  id 313004 as Tepetlisaurus;
+  since "v5.1.0";
+  cost DiceType.Aligned, 2;
+  technique {
+    skill {
+      id 3130041;
+      usage 2;
+      cost DiceType.Void, 2;
+      :drawCards(2);
+      if ((() => {
+        return :player.hands.some((card) => !:isInInitialPile(card));
+      })()) {
+        :characterStatus(DiggingDownToPaydirt, "@master");
+      }
+    }
+  }
+}
 
 /**
  * @id 313005
@@ -132,24 +145,26 @@ export const Tepetlisaurus = card(313004)
  * （角色最多装备1个「特技」）
  * [3130051: 灵性援护] (1*Aligned) 从「场地」「道具」「料理」中挑选1张加入手牌，并且治疗附属角色1点。
  */
-export const Iktomisaurus = card(313005)
-  .since("v5.2.0")
-  .costSame(2)
-  .technique()
-  .provideSkill(3130051)
-  .usage(2)
-  .costSame(1)
-  .heal(1, "@master")
-  .do((c) => {
-    const tags = ["place", "item", "food"] as const;
-    const candidates: EntityDefinition[] = [];
-    for (const tag of tags) {
-      const def = c.random(c.allCardDefinitions(tag));
-      candidates.push(def);
+define card {
+  id 313005 as Iktomisaurus;
+  since "v5.2.0";
+  cost DiceType.Aligned, 2;
+  technique {
+    skill {
+      id 3130051;
+      usage 2;
+      cost DiceType.Aligned, 1;
+      :heal(1, "@master");
+      const tags = ["place", "item", "food"] as const;
+      const candidates: EntityDefinition[] = [];
+      for (const tag of tags) {
+        const def = :random(:allCardDefinitions(tag));
+        candidates.push(def);
+      }
+      :selectAndCreateHandCard(candidates);
     }
-    c.selectAndCreateHandCard(candidates);
-  })
-  .done();
+  }
+}
 
 /**
  * @id 301302
@@ -157,21 +172,12 @@ export const Iktomisaurus = card(313005)
  * @description
  * 敌方附属有绒翼龙的角色切换至前台时：自身减少1层效果。
  */
-export const Target: StatusHandle = status(301302)
-  .variableCanAppend("effect", 1, Infinity)
-  // 目标本身实际并无效果
-  // .on("switchActive", (c, e) => {
-  //   const switchTo = e.switchInfo.to;
-  //   return !switchTo.isMine() && switchTo.hasEquipment(Qucusaurus);
-  // })
-  // .listenToAll()
-  // .do((c) => {
-  //   c.addVariable("effect", -1);
-  //   if (c.getVariable("effect") <= 0) {
-  //     c.dispose();
-  //   }
-  // })
-  .done();
+define status {
+  id 301302 as Target;
+  variable effect, 1 {
+    append;
+  };
+}
 
 /**
  * @id 313006
@@ -186,28 +192,35 @@ export const Target: StatusHandle = status(301302)
  * [3130062: ] ()
  * [3130063: 迅疾滑翔] (1*Aligned) 舍弃1张当前元素骰费用最高的手牌，切换到下一名角色，敌方出战角色附属目标。
  */
-export const Qucusaurus = card(313006)
-  .since("v5.3.0")
-  .costSame(1)
-  .technique()
-  .variable("deductDiceTriggered", 0, { visible: false })
-  .on("enter")
-  .characterStatus(Target, $.opp.active)
-  .on("switchActive", (c, e) =>
-    !e.switchInfo.to.isMine() &&
-    e.switchInfo.to.hasStatus(Target))
-  .listenToAll()
-  .combatStatus(EfficientSwitch)
-  .combatStatus(AgileSwitch)
-  .dispose($.opp.typeStatus.def(Target))
-  .endOn()
-  .provideSkill(3130063)
-  .usage(2)
-  .costSame(1)
-  .disposeMaxCostHands(1)
-  .switchActive($.my.next)
-  .characterStatus(Target, $.opp.active)
-  .done();
+define card {
+  id 313006 as Qucusaurus;
+  since "v5.3.0";
+  cost DiceType.Aligned, 1;
+  technique {
+    variable deductDiceTriggered, 0 {
+      visible false;
+    };
+    on enter {
+      :characterStatus(Target, $.opp.active);
+    }
+    on switchActive {
+      when :(!:e.switchInfo.to.isMine() &&
+          :e.switchInfo.to.hasStatus(Target));
+      listenTo all;
+      :combatStatus(EfficientSwitch);
+      :combatStatus(AgileSwitch);
+      :dispose($.opp.typeStatus.def(Target));
+    }
+    skill {
+      id 3130063;
+      usage 2;
+      cost DiceType.Aligned, 1;
+      :disposeMaxCostHands(1);
+      :switchActive($.my.next);
+      :characterStatus(Target, $.opp.active);
+    }
+  }
+}
 
 /**
  * @id 301304
@@ -215,9 +228,10 @@ export const Qucusaurus = card(313006)
  * @description
  * 提供2点护盾，保护所附属角色。
  */
-const WaveriderShield = status(301304)
-  .shield(2)
-  .done();
+define status {
+  id 301304 as private WaveriderShield;
+  shield 2;
+}
 
 /**
  * @id 313007
@@ -232,20 +246,26 @@ const WaveriderShield = status(301304)
  * [3130072: ] () 附属角色切换至后台时，此牌可用次数+1。
  * [3130073: ] () 使用时，生成2点护盾
  */
-export const Waverider = card(313007)
-  .since("v5.5.0")
-  .costSame(5)
-  .technique()
-  .provideSkill(3130071)
-  .usage(2)
-  .costSame(1)
-  .damage(DamageType.Physical, 2)
-  .endProvide()
-  .on("enter")
-  .characterStatus(WaveriderShield, "@master")
-  .on("switchActive", (c, e) => e.switchInfo.from?.id === c.self.master.id)
-  .addVariable("usage", 1)
-  .done();
+define card {
+  id 313007 as Waverider;
+  since "v5.5.0";
+  cost DiceType.Aligned, 5;
+  technique {
+    skill {
+      id 3130071;
+      usage 2;
+      cost DiceType.Aligned, 1;
+      :damage(DamageType.Physical, 2);
+    }
+    on enter {
+      :characterStatus(WaveriderShield, "@master");
+    }
+    on switchActive {
+      when :(:e.switchInfo.from?.id === :self.master.id);
+      :addVariable("usage", 1);
+    }
+  }
+}
 
 /**
  * @id 301305
@@ -253,9 +273,12 @@ export const Waverider = card(313007)
  * @description
  * 本角色将在下次行动时，直接使用技能：普通攻击。
  */
-export const TatankasaurusStatus02 = status(301305)
-  .prepare("normal", { hintCount: 1 })
-  .done();
+define status {
+  id 301305 as TatankasaurusStatus02;
+  prepare "normal" {
+    hintCount 1;
+  };
+}
 
 /**
  * @id 301303
@@ -263,12 +286,13 @@ export const TatankasaurusStatus02 = status(301305)
  * @description
  * 本角色将在下次行动时，直接使用技能：普通攻击。
  */
-export const TatankasaurusStatus01 = status(301303)
-  .prepare("normal", {
-    hintCount: 2,
-    nextStatus: TatankasaurusStatus02,
-  })
-  .done();
+define status {
+  id 301303 as TatankasaurusStatus01;
+  prepare "normal" {
+    hintCount 2;
+    nextStatus TatankasaurusStatus02;
+  };
+}
 
 /**
  * @id 313008
@@ -279,15 +303,19 @@ export const TatankasaurusStatus01 = status(301303)
  * （角色最多装备1个「特技」）
  * [3130081: 昂扬状态] (3*Void) 附属角色准备技能2次「普通攻击」。
  */
-export const Tatankasaurus = card(313008)
-  .since("v5.6.0")
-  .costVoid(4)
-  .technique()
-  .provideSkill(3130081)
-  .usage(2)
-  .costVoid(3)
-  .characterStatus(TatankasaurusStatus01, "@master")
-  .done();
+define card {
+  id 313008 as Tatankasaurus;
+  since "v5.6.0";
+  cost DiceType.Void, 4;
+  technique {
+    skill {
+      id 3130081;
+      usage 2;
+      cost DiceType.Void, 3;
+      :characterStatus(TatankasaurusStatus01, "@master");
+    }
+  }
+}
 
 export const TechniquesPlayedCountExtension = extension(301306, { techniquesPlayedCount: "pair<number>" })
   .initialState({ techniquesPlayedCount: [0, 0] })
@@ -305,25 +333,27 @@ export const TechniquesPlayedCountExtension = extension(301306, { techniquesPlay
  * @description
  * 我方打出特技牌时：若本局游戏我方累计打出了6张特技牌，我方前台获得3点护盾，然后造成3点物理伤害。
  */
-export const Yikes = combatStatus(301306)
-  .associateExtension(TechniquesPlayedCountExtension)
-  .variable("techniquesPlayedCount", 0)
-  .defineSnippet("checkCount", (c) => {
-    if (c.getVariable("techniquesPlayedCount") >= 6){
-      c.characterStatus(SaurianBuddyCheers, "my active")
-      c.damage(DamageType.Physical, 3)
-      c.dispose();
+define combatStatus {
+  id 301306 as Yikes;
+  associateExtension TechniquesPlayedCountExtension;
+  variable techniquesPlayedCount, 0;
+  defineSnippet checkCount, :{
+    if (:getVariable("techniquesPlayedCount") >= 6){
+      :characterStatus(SaurianBuddyCheers, "my active")
+      :damage(DamageType.Physical, 3)
+      :dispose();
     }
-  })
-  .on("enter")
-  .do((c) => {
-    c.setVariable("techniquesPlayedCount", c.getExtensionState().techniquesPlayedCount[c.self.who]);
-  })
-  .callSnippet("checkCount")
-  .on("playCard", (c, e) => e.card.definition.tags.includes("technique"))
-  .addVariable("techniquesPlayedCount", 1)
-  .callSnippet("checkCount")
-  .done();
+  };
+  on enter {
+    :setVariable("techniquesPlayedCount", :getExtensionState().techniquesPlayedCount[:self.who]);
+    :callSnippet.checkCount();
+  }
+  on playCard {
+    when :(:e.card.definition.tags.includes("technique"));
+    :addVariable("techniquesPlayedCount", 1);
+    :callSnippet.checkCount();
+  }
+}
 
 /**
  * @id 301307
@@ -331,9 +361,10 @@ export const Yikes = combatStatus(301306)
  * @description
  * 提供3点护盾，保护所附属角色。
  */
-export const SaurianBuddyCheers = status(301307)
-  .shield(3)
-  .done();
+define status {
+  id 301307 as SaurianBuddyCheers;
+  shield 3;
+}
 
 /**
  * @id 301308
@@ -341,10 +372,13 @@ export const SaurianBuddyCheers = status(301307)
  * @description
  * 我方下次打出特技牌费用-2。
  */
-export const SaurianMoralSupport = combatStatus(301308)
-  .once("deductOmniDiceCard", (c, e) => e.hasCardTag("technique"))
-  .deductOmniCost(2)
-  .done();
+define combatStatus {
+  id 301308 as SaurianMoralSupport;
+  once deductOmniDiceCard {
+    when :(:e.hasCardTag("technique"));
+    :e.deductOmniCost(2);
+  }
+}
 
 /**
  * @id 313009
@@ -357,19 +391,23 @@ export const SaurianMoralSupport = combatStatus(301308)
  * [3130091: ] ()
  * [3130092: 呀！呀！] (2*Void) 从牌库中抓1张特技牌，下次我方打出特技牌少花费2个元素骰。
  */
-export const RawrRawr = card(313009)
-  .since("v5.7.0")
-  .costSame(2)
-  .technique()
-  .on("enter")
-  .combatStatus(Yikes)
-  .endOn()
-  .provideSkill(3130092)
-  .usage(2)
-  .costVoid(2)
-  .drawCards(1, { withTag: "technique" })
-  .combatStatus(SaurianMoralSupport)
-  .done();
+define card {
+  id 313009 as RawrRawr;
+  since "v5.7.0";
+  cost DiceType.Aligned, 2;
+  technique {
+    on enter {
+      :combatStatus(Yikes);
+    }
+    skill {
+      id 3130092;
+      usage 2;
+      cost DiceType.Void, 2;
+      :drawCards(1, { withTag: "technique" });
+      :combatStatus(SaurianMoralSupport);
+    }
+  }
+}
 
 /**
  * @id 313010
@@ -380,28 +418,30 @@ export const RawrRawr = card(313009)
  * （角色最多装备1个「特技」）
  * [3130101: 膨膨音波] (1*Aligned) 切换到下一个角色，从牌组里随机抓1张当前元素骰费用最高或最低的牌。
  */
-export const Blubberbeast = card(313010)
-  .since("v6.5.0")
-  .costSame(1)
-  .technique()
-  .provideSkill(3130101)
-  .usage(2)
-  .costSame(1)
-  .abortPreview()
-  .do((c) => {
-    c.switchActive($.my.next);
-    const takeMax = c.random([true, false]);
-    const pile = Object.groupBy(c.player.pile, (card) => card.diceCost());
-    // ES6 保证从小到大排序，无需再 sort
-    const costs = Object.keys(pile).map(Number);
-    if (costs.length === 0) {
-      return;
+define card {
+  id 313010 as Blubberbeast;
+  since "v6.5.0";
+  cost DiceType.Aligned, 1;
+  technique {
+    skill {
+      id 3130101;
+      usage 2;
+      cost DiceType.Aligned, 1;
+      :abortPreview();
+      :switchActive($.my.next);
+      const takeMax = :random([true, false]);
+      const pile = Object.groupBy(:player.pile, (card) => card.diceCost());
+      // ES6 保证从小到大排序，无需再 sort
+      const costs = Object.keys(pile).map(Number);
+      if (costs.length === 0) {
+        return;
+      }
+      const targetCost = takeMax ? costs[costs.length - 1] : costs[0];
+      const candidates = pile[targetCost]!;
+      const targetCard = :random(candidates);
+      if (targetCard) {
+        :drawCards(targetCard);
+      }
     }
-    const targetCost = takeMax ? costs[costs.length - 1] : costs[0];
-    const candidates = pile[targetCost]!;
-    const targetCard = c.random(candidates);
-    if (targetCard) {
-      c.drawCards(targetCard);
-    }
-  })
-  .done();
+  }
+}
