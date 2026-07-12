@@ -97,7 +97,7 @@ export class EntityModel implements ICaller {
   id!: number;
   type: ExEntityType;
   tags: ((string & {}) | EntityTag)[] = [];
-  versionInfo: VersionInfo = DEFAULT_VERSION_INFO;
+  versionInfo: VersionInfo | null = null;
   obtainable: boolean = true;
 
   varConfigs = new Map<string, VariableConfig>();
@@ -201,7 +201,7 @@ export class EntityModel implements ICaller {
         __definition: "passiveSkills",
         type: "passiveSkill",
         id: this.id,
-        version: this.versionInfo,
+        version: this.versionInfo ?? DEFAULT_VERSION_INFO,
         skills,
         varConfigs: Object.fromEntries(this.varConfigs),
       };
@@ -212,7 +212,7 @@ export class EntityModel implements ICaller {
         id: this.id,
         visibleVarName: this.visibleVarName,
         varConfigs: Object.fromEntries(this.varConfigs),
-        version: this.versionInfo,
+        version: this.versionInfo ?? DEFAULT_VERSION_INFO,
         skills,
         modifications: this.getAttachmentModifications(),
         tags: this.tags as AttachmentTag[],
@@ -226,7 +226,7 @@ export class EntityModel implements ICaller {
         id: this.id,
         obtainable: true,
         disableTuning: false,
-        version: this.versionInfo,
+        version: this.versionInfo ?? DEFAULT_VERSION_INFO,
         visibleVarName: this.visibleVarName,
         varConfigs: Object.fromEntries(this.varConfigs),
         disposeWhenUsageIsZero: this.disposeWhenUsageIsZero,

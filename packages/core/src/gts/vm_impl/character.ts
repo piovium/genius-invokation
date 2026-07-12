@@ -35,7 +35,7 @@ class CharacterModel {
   maxHealth = 10;
   maxEnergy = 3;
   tags: CharacterTag[] = [];
-  versionInfo: VersionInfo = DEFAULT_VERSION_INFO;
+  versionInfo: VersionInfo | null = null;
 
   skillIds: number[] = [];
   associatedNightsoulsBlessingId: number | null = null;
@@ -47,7 +47,7 @@ class CharacterModel {
       __definition: "characters",
       type: "character",
       id: this.id,
-      version: this.versionInfo,
+      version: this.versionInfo ?? DEFAULT_VERSION_INFO,
       tags: this.tags,
       skillIds: this.skillIds,
       varConfigs: {

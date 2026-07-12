@@ -99,7 +99,7 @@ class CardModel extends InitiativeSkillModel implements ICaller {
   obtainable = true;
   disableTuning = false;
   tags: EntityTag[] = [];
-  versionInfo: VersionInfo = DEFAULT_VERSION_INFO;
+  versionInfo: VersionInfo | null = null;
 
   getSubId(): number {
     return getSubId(this.cardId);
@@ -218,7 +218,7 @@ class CardModel extends InitiativeSkillModel implements ICaller {
       disableTuning: this.disableTuning,
       hintText: this.innerModel?.hintText ?? null,
       descriptionDictionary: this.innerModel?.descriptionDictionary ?? {},
-      version: this.innerModel?.versionInfo ?? this.versionInfo,
+      version: this.innerModel?.versionInfo ?? this.versionInfo ?? DEFAULT_VERSION_INFO,
       visibleVarName: this.innerModel?.visibleVarName ?? null,
       varConfigs: this.innerModel
         ? Object.fromEntries(this.innerModel.varConfigs)

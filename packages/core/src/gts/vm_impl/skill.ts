@@ -100,7 +100,7 @@ abstract class SkillModel {
   /** skill id */
   id!: number;
 
-  versionInfo: VersionInfo = DEFAULT_VERSION_INFO;
+  versionInfo: VersionInfo | null = null;
 
   associatedExtensionId: number | null = null;
 
@@ -481,7 +481,7 @@ class CharacterSkillModel extends InitiativeSkillModel {
         type: "initiativeSkill",
         __definition: "initiativeSkills",
         id: this.id,
-        version: this.versionInfo,
+        version: this.versionInfo ?? DEFAULT_VERSION_INFO,
         skill: this.buildSkillDefinition(),
       };
     }
