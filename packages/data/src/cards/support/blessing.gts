@@ -182,7 +182,7 @@ export const BloomBlessingAmrita: SupportHandle = card(303061)
   .on("roll")
   .fixDice(DiceType.Hydro, 2)
   .fixDice(DiceType.Dendro, 2)
-  .on("playCard", (c, e) => e.card.definition.id !== BloomBlessingAmrita)
+  .on("playCard", (c, e): boolean => e.card.definition.id !== BloomBlessingAmrita)
   .do((c) => {
     c.addVariable("playCount", 1);
     if (c.getVariable("playCount") === 2) {
