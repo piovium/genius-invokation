@@ -161,7 +161,6 @@ define skill {
       listenTo samePlayer;
       usage perRound, 2 {
         name "usagePerRound1";
-        visible false;
       };
       :characterStatus(LingeringFragranceInEffect, "@self");
     }

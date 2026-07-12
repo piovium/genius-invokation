@@ -110,7 +110,6 @@ define skill {
       when :( :self.isActive() );
       usage perRound, 1 {
         name "usagePerRound1";
-        visible false;
       };
       :e.setFastAction();
     }

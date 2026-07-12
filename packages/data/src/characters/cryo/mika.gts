@@ -174,7 +174,6 @@ define skill {
     on useSkill {
       usage perRound, 2 {
         name "usagePerRound1";
-        visible false;
       };
       :combatStatus(PhysicalDmgIncrease);
     }

@@ -95,7 +95,6 @@ define skill {
       listenTo samePlayer;
       usage perRound, 1 {
         name "usagePerRound1";
-        visible false;
       };
       const ducky = :query($.my.summon.def(CoolYourJetsDucky));
       if (ducky) {

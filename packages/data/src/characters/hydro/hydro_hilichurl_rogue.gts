@@ -151,7 +151,6 @@ define skill {
     on ShouldGainEnergy {
       usage perRound, 1 {
         name "usagePerRound1";
-        visible false;
       };
       :gainEnergy(1, "@self");
     }

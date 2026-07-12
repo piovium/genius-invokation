@@ -152,7 +152,6 @@ define skill {
       when :( :e.skill.definition.id === SwirlingSchoolOfFish && :self.hasStatus(FontemerPearl) );
       usage perRound, 1 {
         name "usagePerRound1";
-        visible false;
       };
       const pearl = :self.hasStatus(FontemerPearl)!;
       pearl.addVariable("usage", 1);

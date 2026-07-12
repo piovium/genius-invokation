@@ -121,7 +121,6 @@ define skill {
       when :( :e.hasCardTag("food") );
       usage perRound, 2 {
         name "usagePerRound1";
-        visible false;
       };
       :callSnippet();
     }

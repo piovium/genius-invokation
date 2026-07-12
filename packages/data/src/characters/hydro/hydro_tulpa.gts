@@ -156,7 +156,6 @@ define skill {
       listenTo samePlayer;
       usage perRound, 1 {
         name "usagePerRound1";
-        visible false;
       };
       :damage(DamageType.Piercing, 2, "@self");
       if (!:$(`my summon with definition id ${HalfTulpa01}`)) {

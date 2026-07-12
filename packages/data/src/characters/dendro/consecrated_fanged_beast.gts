@@ -105,7 +105,6 @@ define skill {
       listenTo samePlayer;
       usage perRound, 1 {
         name "usagePerRound1";
-        visible false;
       };
       :dispose(:e.entity.cast<"combatStatus">());
     }

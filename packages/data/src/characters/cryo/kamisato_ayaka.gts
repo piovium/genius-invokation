@@ -162,7 +162,6 @@ define skill {
       when :( :e.switchInfo.to.id === :self.id );
       usage perRound, 2 {
         name "usagePerRound1";
-        visible false;
       };
       :characterStatus(KamisatoArtSenhoStatus);
       :addVariable("usagePerRound1", -1);

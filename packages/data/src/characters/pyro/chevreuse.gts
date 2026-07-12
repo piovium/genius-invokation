@@ -138,7 +138,6 @@ define skill {
       listenTo all;
       usage perRound, 1 {
         name "usagePerRound1";
-        visible false;
       };
       :createHandCard(OverchargedBall);
     }

@@ -198,7 +198,6 @@ define skill {
       listenTo samePlayer;
       usage perRound, 3 {
         name "usagePerRound1";
-        visible false;
       };
       :createHandCard(VoidRift);
     }

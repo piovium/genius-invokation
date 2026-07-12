@@ -136,7 +136,6 @@ define skill {
       when :( :self.health <= 7 );
       usage perRound, 1 {
         name "usagePerRound1";
-        visible false;
       };
       :gainEnergy(1, "@self");
     }

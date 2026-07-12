@@ -195,7 +195,9 @@ define card {
   cost DiceType.Aligned, 2;
   weapon bow {
     variable fishing, 0;
-    variable additiveperRound, 0;
+    variable additivePerRound, 0 {
+      visible false;
+    };
     on roundEnd {
       :setVariable("additivePerRound", 0);
     }
