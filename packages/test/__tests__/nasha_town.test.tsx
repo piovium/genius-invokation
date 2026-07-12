@@ -14,9 +14,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Support, Card } from "#test";
-import { BrokenSea } from "@gi-tcg/data/internal/cards/event/other.gts";
-import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
-import { NashaTown } from "@gi-tcg/data/internal/cards/support/place.gts";
+import { BrokenSea } from "@gi-tcg/data/internal/cards/event/other";
+import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
+import { NashaTown } from "@gi-tcg/data/internal/cards/support/place";
 import { test } from "vitest";
 
 test("nasha town: triggered when disposed by broken sea", async () => {

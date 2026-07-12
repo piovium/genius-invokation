@@ -14,8 +14,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Status, $, Equipment, Card, Support, Summon } from "#test";
-import { Qucusaurus, Target } from "@gi-tcg/data/internal/cards/equipment/techniques.gts";
-import { Katheryne } from "@gi-tcg/data/internal/cards/support/ally.gts";
+import { Qucusaurus, Target } from "@gi-tcg/data/internal/cards/equipment/techniques";
+import { Katheryne } from "@gi-tcg/data/internal/cards/support/ally";
 import { Chasca, ShadowhuntShell } from "@gi-tcg/data/internal/characters/anemo/chasca";
 import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona";
 import { test, expect } from "vitest";

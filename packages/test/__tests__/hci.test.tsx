@@ -27,9 +27,9 @@ import {
   $,
 } from "#test";
 import { describe, test, expect } from "vitest";
-import { VeteransVisage } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
-import { PortablePowerSaw } from "@gi-tcg/data/internal/cards/equipment/weapon/claymore.gts";
-import { CountdownToTheShow2, NatureAndWisdom, Strategize, TheNarzissenkreuzAdventure, UnderseaTreasure } from "@gi-tcg/data/internal/cards/event/other.gts";
+import { VeteransVisage } from "@gi-tcg/data/internal/cards/equipment/artifacts";
+import { PortablePowerSaw } from "@gi-tcg/data/internal/cards/equipment/weapon/claymore";
+import { CountdownToTheShow2, NatureAndWisdom, Strategize, TheNarzissenkreuzAdventure, UnderseaTreasure } from "@gi-tcg/data/internal/cards/event/other";
 import {
   Chasca,
   ShadowhuntShell,
@@ -44,21 +44,21 @@ import {
   Xinyan,
 } from "@gi-tcg/data/internal/characters/pyro/xinyan";
 import { Aura } from "@gi-tcg/typings";
-import { PuffPopsInEffect } from "@gi-tcg/data/internal/cards/event/food.gts";
+import { PuffPopsInEffect } from "@gi-tcg/data/internal/cards/event/food";
 import { Keqing } from "@gi-tcg/data/internal/characters/electro/keqing";
-import { Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida.gts";
+import { Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida";
 import {
   GluttonousYumkasaurMountainKing,
   TheAlldevourer,
 } from "@gi-tcg/data/internal/characters/dendro/gluttonous_yumkasaur_mountain_king";
-import { TheMausoleumOfKingDeshret, TheMausoleumOfKingDeshretInEffect } from "@gi-tcg/data/internal/cards/support/place.gts";
+import { TheMausoleumOfKingDeshret, TheMausoleumOfKingDeshretInEffect } from "@gi-tcg/data/internal/cards/support/place";
 import { CrystalShrapnel, Navia } from "@gi-tcg/data/internal/characters/geo/navia";
-import { CostIncrease } from "@gi-tcg/data/internal/commons.gts";
+import { CostIncrease } from "@gi-tcg/data/internal/commons";
 import { Baizhu, SeamlessShield } from "@gi-tcg/data/internal/characters/dendro/baizhu";
 import { Jean } from "@gi-tcg/data/internal/characters/anemo/jean";
 import { Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";
 import { YaeMiko } from "@gi-tcg/data/internal/characters/electro/yae_miko";
-import { TowerOfIpsissimus } from "@gi-tcg/data/internal/cards/support/adventure.gts";
+import { TowerOfIpsissimus } from "@gi-tcg/data/internal/cards/support/adventure";
 
 describe("HCI stuff", () => {
   test("HCI event should be handled after other events", async () => {

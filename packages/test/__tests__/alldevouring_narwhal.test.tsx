@@ -26,7 +26,7 @@ import {
   $,
 } from "#test";
 import { Aura, SkillHandle } from "@gi-tcg/core/builder";
-import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
+import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
 import {
   Chasca,
   NightsoulsBlessing,

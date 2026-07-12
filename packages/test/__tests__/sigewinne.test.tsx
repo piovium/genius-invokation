@@ -24,13 +24,13 @@ import {
   State,
   Status,
 } from "#test";
-import { PortablePowerSaw } from "@gi-tcg/data/internal/cards/equipment/weapon/claymore.gts";
+import { PortablePowerSaw } from "@gi-tcg/data/internal/cards/equipment/weapon/claymore";
 import {
   RainbowMacaronsInEffect,
   SingYourHeartOut,
-} from "@gi-tcg/data/internal/cards/event/food.gts";
-import { TheBestestTravelCompanion } from "@gi-tcg/data/internal/cards/event/other.gts";
-import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
+} from "@gi-tcg/data/internal/cards/event/food";
+import { TheBestestTravelCompanion } from "@gi-tcg/data/internal/cards/event/other";
+import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
 import {
   Keqing,
   StellarRestoration,
@@ -43,7 +43,7 @@ import {
   Sigewinne,
 } from "@gi-tcg/data/internal/characters/hydro/sigewinne";
 import { SweepingFervor, Xinyan } from "@gi-tcg/data/internal/characters/pyro/xinyan";
-import { BondOfLife, Satiated } from "@gi-tcg/data/internal/commons.gts";
+import { BondOfLife, Satiated } from "@gi-tcg/data/internal/commons";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";
 

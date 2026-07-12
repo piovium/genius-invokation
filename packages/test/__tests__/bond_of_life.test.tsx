@@ -14,8 +14,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Status, Card, $ } from "#test";
-import { BondOfLife } from "@gi-tcg/data/internal/commons.gts";
-import { MondstadtHashBrown } from "@gi-tcg/data/internal/cards/event/food.gts";
+import { BondOfLife } from "@gi-tcg/data/internal/commons";
+import { MondstadtHashBrown } from "@gi-tcg/data/internal/cards/event/food";
 import { test } from "vitest";
 
 test("bond of life decrease the heal", async () => {

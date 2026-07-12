@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Support, DeclaredEnd } from "#test";
-import { WangshuInn } from "@gi-tcg/data/internal/cards/support/place.gts";
+import { WangshuInn } from "@gi-tcg/data/internal/cards/support/place";
 import { Keqing } from "@gi-tcg/data/internal/characters/electro/keqing";
 import { AlldevouringNarwhal } from "@gi-tcg/data/internal/characters/hydro/alldevouring_narwhal";
 import { test } from "vitest";

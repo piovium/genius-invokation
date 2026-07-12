@@ -15,10 +15,10 @@
 
 import { test } from "vitest";
 import { $, Character, CombatStatus, setup, State } from "#test"
-import { AllSchemesToKnow, Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida.gts"
+import { AllSchemesToKnow, Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida"
 import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona"
 import { BountifulCore, GoldenChalicesBounty, Nilou } from "@gi-tcg/data/internal/characters/hydro/nilou"
-import { DendroCore } from "@gi-tcg/data/internal/commons.gts"
+import { DendroCore } from "@gi-tcg/data/internal/commons"
 import { Aura } from "@gi-tcg/typings"
 
 test("nilou basic logic", async () => {

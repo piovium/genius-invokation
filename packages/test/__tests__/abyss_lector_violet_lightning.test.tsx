@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Card, $, Status } from "#test";
-import { TandooriRoastChicken } from "@gi-tcg/data/internal/cards/event/food.gts";
+import { TandooriRoastChicken } from "@gi-tcg/data/internal/cards/event/food";
 import { AbyssLectorVioletLightning, ChainLightningCascade, ElectricRebirth, ElectricRebirthHoned } from "@gi-tcg/data/internal/characters/electro/abyss_lector_violet_lightning";
 import { JadeScreen, Ningguang, SparklingScatter } from "@gi-tcg/data/internal/characters/geo/ningguang";
 import { test } from "vitest";

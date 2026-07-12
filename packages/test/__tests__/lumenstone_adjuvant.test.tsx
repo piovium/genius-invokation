@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Equipment, Card, $ } from "#test";
-import { LumenstoneAdjuvant } from "@gi-tcg/data/internal/cards/support/item.gts";
+import { LumenstoneAdjuvant } from "@gi-tcg/data/internal/cards/support/item";
 import { test } from "vitest";
 
 test("lumenstone adjuvant: no trigger on self entering play card", async () => {

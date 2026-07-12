@@ -16,8 +16,8 @@
 
 import { ref, setup, Character, State, Equipment, CombatStatus, Card, $ } from "#test";
 import { BurstScan, Kaveh } from "@gi-tcg/data/internal/characters/dendro/kaveh";
-import { FlamestriderSoaringAscent } from "@gi-tcg/data/internal/characters/pyro/mavuika.gts";
-import { DendroCore } from "@gi-tcg/data/internal/commons.gts";
+import { FlamestriderSoaringAscent } from "@gi-tcg/data/internal/characters/pyro/mavuika";
+import { DendroCore } from "@gi-tcg/data/internal/commons";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";
 

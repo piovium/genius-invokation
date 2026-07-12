@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { $, DeclaredEnd, State, Support, ref, setup } from "#test";
-import { Jeht, KidKujirai } from "@gi-tcg/data/internal/cards/support/ally.gts";
+import { Jeht, KidKujirai } from "@gi-tcg/data/internal/cards/support/ally";
 import { expect, test } from "vitest";
 
 test("Kid Kujirai: move to opponent support area without counting as dispose", async () => {

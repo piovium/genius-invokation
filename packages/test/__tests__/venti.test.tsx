@@ -15,7 +15,7 @@
 
 import { ref, setup, Character, State, Status, Card, Equipment, $, Summon } from "#test";
 import { Sucrose, WindSpiritCreation } from "@gi-tcg/data/internal/characters/anemo/sucrose";
-import { Stormeye, Venti } from "@gi-tcg/data/internal/characters/anemo/venti.gts";
+import { Stormeye, Venti } from "@gi-tcg/data/internal/characters/anemo/venti";
 import { Aura, DamageType } from "@gi-tcg/typings";
 import { test } from "vitest";
 

@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Status, Card, Equipment, $ } from "#test";
-import { MondstadtHashBrown } from "@gi-tcg/data/internal/cards/event/food.gts";
+import { MondstadtHashBrown } from "@gi-tcg/data/internal/cards/event/food";
 import { test } from "vitest";
 import {
   ThunderManifestation,

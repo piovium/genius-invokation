@@ -14,16 +14,16 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Equipment, Card, Summon, CombatStatus, DeclaredEnd, Support, $ } from "#test";
-import { GamblersEarrings } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
-import { FreshWindOfFreedom, FreshWindOfFreedomInEffect } from "@gi-tcg/data/internal/cards/event/legend.gts";
-import { CountdownToTheShow2, IdRatherLoseMoneyMyself } from "@gi-tcg/data/internal/cards/event/other.gts";
-import { Vanarana } from "@gi-tcg/data/internal/cards/support/place.gts";
+import { GamblersEarrings } from "@gi-tcg/data/internal/cards/equipment/artifacts";
+import { FreshWindOfFreedom, FreshWindOfFreedomInEffect } from "@gi-tcg/data/internal/cards/event/legend";
+import { CountdownToTheShow2, IdRatherLoseMoneyMyself } from "@gi-tcg/data/internal/cards/event/other";
+import { Vanarana } from "@gi-tcg/data/internal/cards/support/place";
 import { LargeWindSpirit, Sucrose, WindSpiritCreation } from "@gi-tcg/data/internal/characters/anemo/sucrose";
 import { CeremonialBladework, Icicle, Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";
 import { SesshouSakura, SpiritfoxSineater, YaeMiko } from "@gi-tcg/data/internal/characters/electro/yae_miko";
 import { Chevreuse, SecondaryExplosiveShells } from "@gi-tcg/data/internal/characters/pyro/chevreuse";
 import { Guoba, Xiangling } from "@gi-tcg/data/internal/characters/pyro/xiangling";
-import { Shield } from "@gi-tcg/data/internal/commons.gts";
+import { Shield } from "@gi-tcg/data/internal/commons";
 import { Aura } from "@gi-tcg/typings";
 import { expect, test } from "vitest";
 

@@ -14,8 +14,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Equipment, Card, Summon, CombatStatus, DeclaredEnd, Support, $, DiceCount, Status } from "#test";
-import { RainbowMacaronsInEffect } from "@gi-tcg/data/internal/cards/event/food.gts";
-import { FurinaPneuma, SalonMembers } from "@gi-tcg/data/internal/characters/hydro/furina.gts";
+import { RainbowMacaronsInEffect } from "@gi-tcg/data/internal/cards/event/food";
+import { FurinaPneuma, SalonMembers } from "@gi-tcg/data/internal/characters/hydro/furina";
 import { test } from "vitest";
 
 test("furina: summon endPhase damage contains two skill", async () => {

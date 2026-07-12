@@ -14,10 +14,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Status, Card, Equipment, $, Summon } from "#test";
-import { QuickKnit } from "@gi-tcg/data/internal/cards/event/other.gts";
-import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
+import { QuickKnit } from "@gi-tcg/data/internal/cards/event/other";
+import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
 import { Ineffa } from "@gi-tcg/data/internal/characters/electro/ineffa";
-import { Conductive, Thundercloud } from "@gi-tcg/data/internal/commons.gts";
+import { Conductive, Thundercloud } from "@gi-tcg/data/internal/commons";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";
 

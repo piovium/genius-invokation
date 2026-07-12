@@ -14,8 +14,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Status, Card, Equipment, Support, DeclaredEnd, $ } from "#test";
-import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
-import { TheMausoleumOfKingDeshret } from "@gi-tcg/data/internal/cards/support/place.gts";
+import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
+import { TheMausoleumOfKingDeshret } from "@gi-tcg/data/internal/cards/support/place";
 import { test } from "vitest";
 
 test("the mausoleum of king deshret: trigger on overflowed HCI", async () => {

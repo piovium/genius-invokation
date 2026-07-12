@@ -14,10 +14,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Equipment, Card, Summon, CombatStatus, DeclaredEnd, Support, $, DiceCount } from "#test";
-import { TeyvatFriedEgg } from "@gi-tcg/data/internal/cards/event/food.gts";
-import { FrostflakeArrow, Ganyu, UndividedHeart } from "@gi-tcg/data/internal/characters/cryo/ganyu.gts";
+import { TeyvatFriedEgg } from "@gi-tcg/data/internal/cards/event/food";
+import { FrostflakeArrow, Ganyu, UndividedHeart } from "@gi-tcg/data/internal/characters/cryo/ganyu";
 import { CeremonialBladework, Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";
-import { AgileSwitch, EfficientSwitch } from "@gi-tcg/data/internal/commons.gts";
+import { AgileSwitch, EfficientSwitch } from "@gi-tcg/data/internal/commons";
 import { test } from "vitest";
 
 test("ganyu: FrostflakeArrow usage clear after defeated", async () => {

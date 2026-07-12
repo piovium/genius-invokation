@@ -14,9 +14,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, State, Card, Support, $ } from "#test";
-import { TheBestestTravelCompanion } from "@gi-tcg/data/internal/cards/event/other.gts";
-import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
-import { Kusava } from "@gi-tcg/data/internal/cards/support/item.gts";
+import { TheBestestTravelCompanion } from "@gi-tcg/data/internal/cards/event/other";
+import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
+import { Kusava } from "@gi-tcg/data/internal/cards/support/item";
 import { test } from "vitest";
 
 test("kusava", async () => {

@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { setup, State, Support } from "#test";
-import { SuperconductBlessingDeepFreeze } from "@gi-tcg/data/internal/cards/support/blessing.gts";
+import { SuperconductBlessingDeepFreeze } from "@gi-tcg/data/internal/cards/support/blessing";
 import { expect, test } from "vitest";
 
 test("fixedDice may not overflow initialDiceCount", async () => {

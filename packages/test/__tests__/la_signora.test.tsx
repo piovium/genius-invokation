@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { $, Card, Character, DeclaredEnd, ref, setup, State, Status } from "#test";
-import { TeyvatFriedEgg } from "@gi-tcg/data/internal/cards/event/food.gts";
+import { TeyvatFriedEgg } from "@gi-tcg/data/internal/cards/event/food";
 import {
   IcesealedCrimsonWitchOfEmbers,
   LaSignora,

@@ -14,9 +14,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, State, Character, Support, CombatStatus, Equipment, Status, $ } from "#test";
-import { InstructorsCap } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
-import { ChangTheNinth } from "@gi-tcg/data/internal/cards/support/ally.gts";
-import { ParametricTransformer } from "@gi-tcg/data/internal/cards/support/item.gts";
+import { InstructorsCap } from "@gi-tcg/data/internal/cards/equipment/artifacts";
+import { ChangTheNinth } from "@gi-tcg/data/internal/cards/support/ally";
+import { ParametricTransformer } from "@gi-tcg/data/internal/cards/support/item";
 import { GaleBlade, Jean } from "@gi-tcg/data/internal/characters/anemo/jean";
 import { DriftcloudWave, Xianyun } from "@gi-tcg/data/internal/characters/anemo/xianyun";
 import { ChonghuaFrostField, Chongyun } from "@gi-tcg/data/internal/characters/cryo/chongyun";

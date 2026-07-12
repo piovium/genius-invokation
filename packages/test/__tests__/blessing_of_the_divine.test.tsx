@@ -17,8 +17,8 @@ import { $, Card, Character, Equipment, ref, setup, State } from "#test";
 import {
   ShadowOfTheSandKing,
   VourukashasGlow,
-} from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
-import { BlessingOfTheDivineRelicsInstallation, TheBoarPrincess } from "@gi-tcg/data/internal/cards/event/other.gts";
+} from "@gi-tcg/data/internal/cards/equipment/artifacts";
+import { BlessingOfTheDivineRelicsInstallation, TheBoarPrincess } from "@gi-tcg/data/internal/cards/event/other";
 import { expect, test } from "vitest";
 
 test("blessing of divine: trigger onDispose of overridden", async () => {

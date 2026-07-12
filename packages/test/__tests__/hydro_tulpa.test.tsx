@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Card } from "#test";
-import { TandooriRoastChicken } from "@gi-tcg/data/internal/cards/event/food.gts";
+import { TandooriRoastChicken } from "@gi-tcg/data/internal/cards/event/food";
 import { HydroTulpa, StormSurge } from "@gi-tcg/data/internal/characters/hydro/hydro_tulpa";
 import { test } from "vitest";
 

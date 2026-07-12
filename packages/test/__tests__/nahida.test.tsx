@@ -17,7 +17,7 @@
 import { ref, setup, Character, State, Status, Card, Equipment } from "#test";
 import { test } from "vitest";
 import { Aura } from "@gi-tcg/typings";
-import { Nahida, SeedOfSkandha } from "@gi-tcg/data/internal/characters/dendro/nahida.gts";
+import { Nahida, SeedOfSkandha } from "@gi-tcg/data/internal/characters/dendro/nahida";
 import { Kaboom, Klee } from "@gi-tcg/data/internal/characters/pyro/klee";
 import { SweepingFervor, Xinyan } from "@gi-tcg/data/internal/characters/pyro/xinyan";
 import { Chasca, ShiningShadowhuntShellPyro } from "@gi-tcg/data/internal/characters/anemo/chasca";

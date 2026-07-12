@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Equipment, $ } from "#test";
-import { VeteransVisage } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
+import { VeteransVisage } from "@gi-tcg/data/internal/cards/equipment/artifacts";
 import { Sucrose, WindSpiritCreation } from "@gi-tcg/data/internal/characters/anemo/sucrose";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";

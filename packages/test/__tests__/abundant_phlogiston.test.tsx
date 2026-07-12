@@ -20,7 +20,7 @@ import {
   Mualani,
   SurfsharkWavebreaker,
 } from "@gi-tcg/data/internal/characters/hydro/mualani";
-import { AbundantPhlogiston } from "@gi-tcg/data/internal/cards/event/other.gts";
+import { AbundantPhlogiston } from "@gi-tcg/data/internal/cards/event/other";
 import { expect } from "vitest";
 
 test("abundant phlogiston: mualani", async () => {

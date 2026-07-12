@@ -18,7 +18,7 @@ import {
   Bennett,
   GrandExpectation,
 } from "@gi-tcg/data/internal/characters/pyro/bennett";
-import { Empowerment } from "@gi-tcg/data/internal/commons.gts";
+import { Empowerment } from "@gi-tcg/data/internal/commons";
 import { test, expect } from "vitest";
 
 test("empowerment should not change energy cost", async () => {
