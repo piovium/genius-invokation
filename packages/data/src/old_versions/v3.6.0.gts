@@ -1,4 +1,4 @@
-import { DamageType, type EquipmentHandle, type SkillHandle, card, character, skill, summon } from "@gi-tcg/core/builder";
+import { card, character, DamageType, DiceType, skill, summon, type EquipmentHandle, type SkillHandle } from "@gi-tcg/core/builder";
 import { LiutianArchery, SacredCryoPearl, TrailOfTheQilin } from "../characters/cryo/ganyu.gts";
 import { MirrorCage, Refraction, Refraction01 } from "../characters/hydro/mirror_maiden.gts";
 import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.gts";
@@ -21,20 +21,19 @@ const UndividedHeart = 211011 as EquipmentHandle; // keep same
  * @description
  * 造成2点冰元素伤害，对所有敌方后台角色造成2点穿透伤害。
  */
-const FrostflakeArrow = skill(11013)
-  .until("v3.6.0")
-  .type("normal")
-  .costCryo(5)
-  .do((c) => {
-    if (c.self.hasEquipment(UndividedHeart) && c.countOfSkill() > 0) {
-      c.damage(DamageType.Piercing, 3, "opp standby");
-      c.damage(DamageType.Cryo, 3);
-    } else {
-      c.damage(DamageType.Piercing, 2, "opp standby");
-      c.damage(DamageType.Cryo, 2);
-    }
-  })
-  .done();
+define skill {
+  id 11013 as private FrostflakeArrow;
+  until "v3.6.0";
+  skillType normal;
+  cost DiceType.Cryo, 5;
+  if (:self.hasEquipment(UndividedHeart) && :countOfSkill() > 0) {
+    :damage(DamageType.Piercing, 3, "opp standby");
+    :damage(DamageType.Cryo, 3);
+  } else {
+    :damage(DamageType.Piercing, 2, "opp standby");
+    :damage(DamageType.Cryo, 2);
+  }
+}
 
 /**
  * @id 11014
@@ -42,15 +41,16 @@ const FrostflakeArrow = skill(11013)
  * @description
  * 造成1点冰元素伤害，对所有敌方后台角色造成1点穿透伤害，召唤冰灵珠。
  */
-const CelestialShower = skill(11014)
-  .until("v3.6.0")
-  .type("burst")
-  .costCryo(3)
-  .costEnergy(2)
-  .damage(DamageType.Piercing, 1, "opp standby")
-  .damage(DamageType.Cryo, 1)
-  .summon(SacredCryoPearl)
-  .done();
+define skill {
+  id 11014 as private CelestialShower;
+  until "v3.6.0";
+  skillType burst;
+  cost DiceType.Cryo, 3;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Piercing, 1, "opp standby");
+  :damage(DamageType.Cryo, 1);
+  :summon(SacredCryoPearl);
+}
 
 /**
  * @id 1101
@@ -58,13 +58,14 @@ const CelestialShower = skill(11014)
  * @description
  * 「既然是明早前要，那这份通稿，只要熬夜写完就好。」
  */
-const Ganyu = character(1101)
-  .until("v3.6.0")
-  .tags("cryo", "bow", "liyue")
-  .health(10)
-  .energy(2)
-  .skills(LiutianArchery, TrailOfTheQilin, FrostflakeArrow, CelestialShower)
-  .done();
+define character {
+  id 1101 as private Ganyu;
+  until "v3.6.0";
+  tags cryo, bow, liyue;
+  health 10;
+  energy 2;
+  skills LiutianArchery, TrailOfTheQilin, FrostflakeArrow, CelestialShower;
+}
 
 /**
  * @id 22022
@@ -72,16 +73,19 @@ const Ganyu = character(1101)
  * @description
  * 造成3点水元素伤害，目标角色附属水光破镜。
  */
-export const InfluxBlast: SkillHandle = skill(22022)
-  .until("v3.6.0")
-  .type("elemental")
-  .costHydro(3)
-  .damage(DamageType.Hydro, 3)
-  .if((c) => c.self.hasEquipment(MirrorCage))
-  .characterStatus(Refraction01, "opp active")
-  .else()
-  .characterStatus(Refraction, "opp active")
-  .done();
+define skill {
+  id 22022 as InfluxBlast;
+  until "v3.6.0";
+  skillType elemental;
+  cost DiceType.Hydro, 3;
+  :damage(DamageType.Hydro, 3);
+  if (:self.hasEquipment(MirrorCage)) {
+    :characterStatus(Refraction01, "opp active");
+  }
+  else {
+    :characterStatus(Refraction, "opp active");
+  }
+}
 
 /**
  * @id 116051
@@ -92,18 +96,29 @@ export const InfluxBlast: SkillHandle = skill(22022)
  * 此召唤物在场期间可触发1次：我方出战角色受到伤害后，为荒泷一斗附属乱神之怪力。
  * 结束阶段：弃置此牌，造成1点岩元素伤害。
  */
-const Ushi = summon(116051)
-  .until("v3.6.0")
-  .tags("barrier")
-  .endPhaseDamage(DamageType.Geo, 1)
-  .dispose()
-  .on("decreaseDamaged")
-  .usage(1, { autoDispose: false })
-  .decreaseDamage(1)
-  .on("damaged", (c, e) => e.target.isActive())
-  .usage(1, { name: "addStatusUsage" })
-  .characterStatus(SuperlativeSuperstrength, `my characters with definition id 1605`)
-  .done();
+define summon {
+  id 116051 as private Ushi;
+  until "v3.6.0";
+  tags barrier;
+  hint DamageType.Geo, 1;
+  on endPhase {
+    :damage(DamageType.Geo, 1);
+    :dispose();
+  }
+  on decreaseDamaged {
+    usage 1 {
+      autoDispose false;
+    };
+    :e.decreaseDamage(1);
+  }
+  on damaged {
+    when :( :e.target.isActive() );
+    usage 1 {
+      name "addStatusUsage";
+    };
+    :characterStatus(SuperlativeSuperstrength, "my characters with definition id 1605");
+  }
+}
 
 /**
  * @id 332013
@@ -128,23 +143,26 @@ const SendOff = card(332013)
  * 入场时：我方队伍中每有一名「璃月」角色，此牌就为附属的角色提供1点护盾。（最多3点）
  * （「长柄武器」角色才能装备。角色最多装备1件「武器」）
  */
-const LithicSpear = card(311402)
-  .until("v3.6.0")
-  .costSame(3)
-  .weapon("pole")
-  .on("increaseSkillDamage")
-  .increaseDamage(1)
-  .on("enter")
-  .do((c) => {
-    // 此版本只计算未击倒角色
-    const liyueCount = c.$$(`my characters with tag (liyue)`).length;
-    if (liyueCount > 0) {
-      c.characterStatus(LithicGuard, "@master", {
-        overrideVariables: {
-          shield: Math.min(liyueCount, 3)
-        }
-      });
+define card {
+  id 311402 as private LithicSpear;
+  until "v3.6.0";
+  cost DiceType.Aligned, 3;
+  weapon pole {
+    on increaseSkillDamage {
+      :e.increaseDamage(1);
     }
-  })
-  .done();
+    on enter {
+      void 0;
+      // 此版本只计算未击倒角色
+      const liyueCount = :$$(`my characters with tag (liyue)`).length;
+      if (liyueCount > 0) {
+        :characterStatus(LithicGuard, "@master", {
+          overrideVariables: {
+            shield: Math.min(liyueCount, 3)
+          }
+        });
+      }
+    }
+  }
+}
 

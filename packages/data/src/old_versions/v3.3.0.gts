@@ -1,4 +1,4 @@
-import { DamageType, type SkillHandle, card, character, combatStatus, skill, status } from "@gi-tcg/core/builder";
+import { card, character, combatStatus, DamageType, DiceType, skill, status, type SkillHandle } from "@gi-tcg/core/builder";
 import { AurousBlaze, FireworkFlareup, NiwabiFiredance } from "../characters/pyro/yoimiya.gts";
 import { ShadowswordGallopingFrost, ShadowswordLoneGale, TranscendentAutomaton } from "../characters/anemo/maguu_kenki.gts";
 import { Collei, FloralBrush } from "../characters/dendro/collei.gts";
@@ -9,14 +9,15 @@ import { Collei, FloralBrush } from "../characters/dendro/collei.gts";
  * @description
  * 造成3点火元素伤害，生成琉金火光。
  */
-const RyuukinSaxifrage: SkillHandle = skill(13053)
-  .until("v3.3.0")
-  .type("burst")
-  .costPyro(3)
-  .costEnergy(2)
-  .damage(DamageType.Pyro, 3)
-  .combatStatus(AurousBlaze)
-  .done();
+define skill {
+  id 13053 as private RyuukinSaxifrage;
+  until "v3.3.0";
+  skillType burst;
+  cost DiceType.Pyro, 3;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Pyro, 3);
+  :combatStatus(AurousBlaze);
+}
 
 /**
  * @id 1305
@@ -24,13 +25,14 @@ const RyuukinSaxifrage: SkillHandle = skill(13053)
  * @description
  * 花见坂第十一届全街邀请赛「长野原队」队长兼首发牌手。
  */
-const Yoimiya = character(1305)
-  .until("v3.3.0")
-  .tags("pyro", "bow", "inazuma")
-  .health(10)
-  .energy(2)
-  .skills(FireworkFlareup, NiwabiFiredance, RyuukinSaxifrage)
-  .done();
+define character {
+  id 1305 as private Yoimiya;
+  until "v3.3.0";
+  tags pyro, bow, inazuma;
+  health 10;
+  energy 2;
+  skills FireworkFlareup, NiwabiFiredance, RyuukinSaxifrage;
+}
 
 /**
  * @id 25012
@@ -38,15 +40,17 @@ const Yoimiya = character(1305)
  * @description
  * 造成1点风元素伤害，召唤剑影·孤风。
  */
-const BlusteringBlade: SkillHandle = skill(25012)
-  .until("v3.3.0")
-  .type("elemental")
-  .costAnemo(3)
-  .damage(DamageType.Anemo, 1)
-  .summon(ShadowswordLoneGale)
-  .if((c) => c.self.hasEquipment(TranscendentAutomaton))
-  .switchActive("my next")
-  .done();
+define skill {
+  id 25012 as private BlusteringBlade;
+  until "v3.3.0";
+  skillType elemental;
+  cost DiceType.Anemo, 3;
+  :damage(DamageType.Anemo, 1);
+  :summon(ShadowswordLoneGale);
+  if (:self.hasEquipment(TranscendentAutomaton)) {
+    :switchActive("my next");
+  }
+}
 
 /**
  * @id 25013
@@ -54,15 +58,17 @@ const BlusteringBlade: SkillHandle = skill(25012)
  * @description
  * 造成1点冰元素伤害，召唤剑影·霜驰。
  */
-const FrostyAssault: SkillHandle = skill(25013)
-  .until("v3.3.0")
-  .type("elemental")
-  .costCryo(3)
-  .damage(DamageType.Cryo, 1)
-  .summon(ShadowswordGallopingFrost)
-  .if((c) => c.self.hasEquipment(TranscendentAutomaton))
-  .switchActive("my prev")
-  .done();
+define skill {
+  id 25013 as private FrostyAssault;
+  until "v3.3.0";
+  skillType elemental;
+  cost DiceType.Cryo, 3;
+  :damage(DamageType.Cryo, 1);
+  :summon(ShadowswordGallopingFrost);
+  if (:self.hasEquipment(TranscendentAutomaton)) {
+    :switchActive("my prev");
+  }
+}
 
 /**
  * @id 303306
@@ -70,12 +76,15 @@ const FrostyAssault: SkillHandle = skill(25013)
  * @description
  * 角色在本回合结束前，所有普通攻击都少花费1无色元素。
  */
-const MintyMeatRollsInEffect = status(303306)
-  .until("v3.3.0")
-  .oneDuration()
-  .on("deductVoidDiceSkill", (c, e) => e.isSkillType("normal"))
-  .deductVoidCost(1)
-  .done();
+define status {
+  id 303306 as private MintyMeatRollsInEffect;
+  until "v3.3.0";
+  oneDuration;
+  on deductVoidDiceSkill {
+    when :( :e.isSkillType("normal") );
+    :e.deductVoidCost(1);
+  }
+}
 
 /**
  * @id 117
@@ -84,14 +93,16 @@ const MintyMeatRollsInEffect = status(303306)
  * 我方对敌方出战角色造成雷元素伤害或草元素伤害时，伤害值+1。
  * 可用次数：3
  */
-const CatalyzingField = combatStatus(117)
-  .until("v3.3.0")
-  .on("increaseDamage", (c, e) =>
-    ([DamageType.Electro, DamageType.Dendro] as DamageType[]).includes(e.type) &&
-    e.target.id === c.$("opp active")?.id)
-  .usage(3)
-  .increaseDamage(1)
-  .done();
+define combatStatus {
+  id 117 as private CatalyzingField;
+  until "v3.3.0";
+  on increaseDamage {
+    when :( ([DamageType.Electro, DamageType.Dendro] as DamageType[]).includes(:e.type) &&
+        :e.target.id === :$("opp active")?.id );
+    usage 3;
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 217011
@@ -102,10 +113,13 @@ const CatalyzingField = combatStatus(117)
  * 装备有此牌的柯莱使用了拂花偈叶的回合中，我方角色的技能引发草元素相关反应后：造成1点草元素伤害。（每回合1次）
  * （牌组中包含柯莱，才能加入牌组）
  */
-const FloralSidewinder = card(217011)
-  .until("v3.3.0")
-  .costDendro(3)
-  .talent(Collei)
-  .on("enter")
-  .useSkill(FloralBrush)
-  .done();
+define card {
+  id 217011 as private FloralSidewinder;
+  until "v3.3.0";
+  cost DiceType.Dendro, 3;
+  talent Collei {
+    on enter {
+      :useSkill(FloralBrush);
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { card, character, combatStatus, skill } from "@gi-tcg/core/builder";
+import { card, character, combatStatus, DiceType, skill } from "@gi-tcg/core/builder";
 import { StrictProhibited } from "../cards/support/place.gts";
 import { ConstantOffthecuffCookery, KitchenSkills, LowtemperatureCooking, ScoringCuts } from "../characters/cryo/escoffier.gts";
 import { Breakthrough, DepthclarionDice, LingeringLifeline, StealthyBowshot } from "../characters/hydro/yelan.gts";
@@ -14,13 +14,14 @@ import { FeatherSpreading, MajesticDance, RadicalVitality, VolatileSporeCloud } 
  * @description
  * 调霜焙巧，琢味求臻。
  */
-const Escoffier = character(1115)
-  .until("v6.3.0")
-  .tags("cryo", "pole", "fontaine", "pneuma")
-  .health(11)
-  .energy(2)
-  .skills(KitchenSkills, LowtemperatureCooking, ScoringCuts, ConstantOffthecuffCookery)
-  .done();
+define character {
+  id 1115 as private Escoffier;
+  until "v6.3.0";
+  tags cryo, pole, fontaine, pneuma;
+  health 11;
+  energy 2;
+  skills KitchenSkills, LowtemperatureCooking, ScoringCuts, ConstantOffthecuffCookery;
+}
 
 /**
  * @id 1209
@@ -28,13 +29,14 @@ const Escoffier = character(1115)
  * @description
  * 天地一渺渺，幽客自来去。
  */
-const Yelan = character(1209)
-  .until("v6.3.0")
-  .tags("hydro", "bow", "liyue")
-  .health(10)
-  .energy(3)
-  .skills(StealthyBowshot, LingeringLifeline, DepthclarionDice, Breakthrough)
-  .done();
+define character {
+  id 1209 as private Yelan;
+  until "v6.3.0";
+  tags hydro, bow, liyue;
+  health 10;
+  energy 3;
+  skills StealthyBowshot, LingeringLifeline, DepthclarionDice, Breakthrough;
+}
 
 /**
  * @id 2204
@@ -43,13 +45,14 @@ const Yelan = character(1209)
  * 在最魔幻的故事里或是最疯癫的诳语中，宇宙深处真正的星辰或许也如提瓦特一般充满了生机，而宇宙本身就如同海洋。
  * 或许宇宙渗入提瓦特的过程从未停止；也许更高的意志为它划定了边界是为了保护这个世界。
  */
-const AlldevouringNarwhal = character(2204)
-  .until("v6.3.0")
-  .tags("hydro", "monster", "calamity")
-  .health(5)
-  .energy(2)
-  .skills(ShatteringWaves, StarfallShower, RavagingDevourer, InsatiableAppetite)
-  .done();
+define character {
+  id 2204 as private AlldevouringNarwhal;
+  until "v6.3.0";
+  tags hydro, monster, calamity;
+  health 5;
+  energy 2;
+  skills ShatteringWaves, StarfallShower, RavagingDevourer, InsatiableAppetite;
+}
 
 /**
  * @id 2206
@@ -57,13 +60,14 @@ const AlldevouringNarwhal = character(2204)
  * @description
  * 由无数的水滴凝聚成的，初具人形的魔物。
  */
-const HydroTulpa = character(2206)
-  .until("v6.3.0")
-  .tags("hydro", "monster")
-  .health(11)
-  .energy(3)
-  .skills(SavageSwell, StormSurge, ThunderingTide, BranchingFlow)
-  .done();
+define character {
+  id 2206 as private HydroTulpa;
+  until "v6.3.0";
+  tags hydro, monster;
+  health 11;
+  energy 3;
+  skills SavageSwell, StormSurge, ThunderingTide, BranchingFlow;
+}
 
 /**
  * @id 2301
@@ -71,13 +75,14 @@ const HydroTulpa = character(2206)
  * @description
  * 「死债不可免，活债更难逃…」
  */
-const FatuiPyroAgent = character(2301)
-  .until("v6.3.0")
-  .tags("pyro", "fatui")
-  .health(9)
-  .energy(2)
-  .skills(Thrust, Prowl, BladeAblaze, StealthMaster)
-  .done();
+define character {
+  id 2301 as private FatuiPyroAgent;
+  until "v6.3.0";
+  tags pyro, fatui;
+  health 9;
+  energy 2;
+  skills Thrust, Prowl, BladeAblaze, StealthMaster;
+}
 
 /**
  * @id 2601
@@ -85,13 +90,14 @@ const FatuiPyroAgent = character(2301)
  * @description
  * 绕道而行吧，因为前方是属于「王」的领域。
  */
-const StonehideLawachurl = character(2601)
-  .until("v6.3.0")
-  .tags("geo", "monster", "hilichurl")
-  .health(8)
-  .energy(2)
-  .skills(PlamaLawa, MovoLawa, UpaShato, InfusedStonehide)
-  .done();
+define character {
+  id 2601 as private StonehideLawachurl;
+  until "v6.3.0";
+  tags geo, monster, hilichurl;
+  health 8;
+  energy 2;
+  skills PlamaLawa, MovoLawa, UpaShato, InfusedStonehide;
+}
 
 /**
  * @id 2701
@@ -99,13 +105,14 @@ const StonehideLawachurl = character(2601)
  * @description
  * 悄声静听，可以听到幽林之中，蕈类王者巡视领土的脚步…
  */
-const JadeplumeTerrorshroom = character(2701)
-  .until("v6.3.0")
-  .tags("dendro", "monster")
-  .health(10)
-  .energy(2)
-  .skills(MajesticDance, VolatileSporeCloud, FeatherSpreading, RadicalVitality)
-  .done();
+define character {
+  id 2701 as private JadeplumeTerrorshroom;
+  until "v6.3.0";
+  tags dendro, monster;
+  health 10;
+  energy 2;
+  skills MajesticDance, VolatileSporeCloud, FeatherSpreading, RadicalVitality;
+}
 
 /**
  * @id 312032
@@ -114,14 +121,17 @@ const JadeplumeTerrorshroom = character(2701)
  * 附属角色使用特技后：获得1点充能。（每回合1次)
  * （角色最多装备1件「圣遗物」）
  */
-export const DemonwarriorsFeatherMask = card(312032)
-  .until("v6.3.0")
-  .costVoid(2)
-  .artifact()
-  .on("useTechnique")
-  .usagePerRound(1)
-  .gainEnergy(1, "@master")
-  .done();
+define card {
+  id 312032 as DemonwarriorsFeatherMask;
+  until "v6.3.0";
+  cost DiceType.Void, 2;
+  artifact {
+    on useTechnique {
+      usage perRound, 1;
+      :gainEnergy(1, "@master");
+    }
+  }
+}
 
 /**
  * @id 321018
@@ -130,17 +140,23 @@ export const DemonwarriorsFeatherMask = card(312032)
  * 我方出战角色受到伤害或治疗后：此牌累积1点「禁令」。（最多累积到4点）
  * 行动阶段开始时：如果此牌已有4点「禁令」，则消耗4点，在对方场上生成严格禁令。（本回合中打出的1张事件牌无效）
  */
-const FortressOfMeropide = card(321018)
-  .until("v6.3.0")
-  .costSame(1)
-  .support("place")
-  .variable("forbidden", 0)
-  .on("damagedOrHealed", (c, e) => e.target.isActive())
-  .addVariableWithMax("forbidden", 1, 4)
-  .on("actionPhase", (c) => c.getVariable("forbidden") >= 4)
-  .combatStatus(StrictProhibited, "opp")
-  .addVariable("forbidden", -4)
-  .done();
+define card {
+  id 321018 as private FortressOfMeropide;
+  until "v6.3.0";
+  cost DiceType.Aligned, 1;
+  support place {
+    variable forbidden, 0;
+    on damagedOrHealed {
+      when :( :e.target.isActive() );
+      :addVariableWithMax("forbidden", 1, 4);
+    }
+    on actionPhase {
+      when :( :getVariable("forbidden") >= 4 );
+      :combatStatus(StrictProhibited, "opp");
+      :addVariable("forbidden", -4);
+    }
+  }
+}
 
 /**
  * @id 300003
@@ -149,13 +165,16 @@ const FortressOfMeropide = card(321018)
  * 本回合中，我方打出的事件牌无效。
  * 可用次数：3
  */
-const PassingOfJudgmentInEffect = combatStatus(300003)
-  .until("v6.3.0")
-  .tags("eventEffectless")
-  .oneDuration()
-  .on("playCard", (c, e) => e.card.definition.type === "eventCard")
-  .usage(3)
-  .done();
+define combatStatus {
+  id 300003 as private PassingOfJudgmentInEffect;
+  until "v6.3.0";
+  tags eventEffectless;
+  oneDuration;
+  on playCard {
+    when :( :e.card.definition.type === "eventCard" );
+    usage 3;
+  }
+}
 
 /**
  * @id 330006
@@ -164,12 +183,13 @@ const PassingOfJudgmentInEffect = combatStatus(300003)
  * 本回合中，对方牌手打出的3张事件牌无效。
  * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  */
-const PassingOfJudgment = card(330006)
-  .until("v6.3.0")
-  .costSame(1)
-  .legend()
-  .combatStatus(PassingOfJudgmentInEffect, "opp")
-  .done();
+define card {
+  id 330006 as private PassingOfJudgment;
+  until "v6.3.0";
+  cost DiceType.Aligned, 1;
+  legend;
+  :combatStatus(PassingOfJudgmentInEffect, "opp");
+}
 
 /**
  * @id 332013
@@ -193,11 +213,12 @@ const SendOff = card(332013)
  * 治疗目标角色1点，我方场上每有1个召唤物，则额外治疗1点。
  * （每回合每个角色最多食用1次「料理」）
  */
-const HotSpringOclock = card(333019)
-  .until("v6.3.0")
-  .costSame(1)
-  .food({ injuredOnly: true })
-  .do((c) => {
-    c.heal(1 + c.$$(`my summons`).length, "@targets.0");
-  })
-  .done();
+define card {
+  id 333019 as private HotSpringOclock;
+  until "v6.3.0";
+  cost DiceType.Aligned, 1;
+  food {
+    injuredOnly;
+  };
+  :heal(1 + :$$(`my summons`).length, "@targets.0");
+}

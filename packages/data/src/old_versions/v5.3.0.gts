@@ -1,4 +1,4 @@
-import { card, character, DamageType, skill } from "@gi-tcg/core/builder";
+import { card, character, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
 import { DriftcloudWave, Skyladder } from "../characters/anemo/xianyun.gts";
 import { BattlelineDetonation, BusterBlaze, ImperialPanoply, SearingBlast, ShatterclampStrike } from "../characters/pyro/emperor_of_fire_and_iron.gts";
 import { Chiori, FlutteringHasode } from "../characters/geo/chiori.gts";
@@ -9,13 +9,14 @@ import { Chiori, FlutteringHasode } from "../characters/geo/chiori.gts";
  * @description
  * 矗立在原海异种顶端的两位霸主之一，不遇天敌，不倦狩猎并成长之蟹。有着半是敬畏，半是戏谑的「帝皇」之称。
  */
-const EmperorOfFireAndIron = character(2304)
-  .until("v5.3.0")
-  .tags("pyro", "monster")
-  .health(6)
-  .energy(2)
-  .skills(ShatterclampStrike, BusterBlaze, BattlelineDetonation, ImperialPanoply, SearingBlast)
-  .done();
+define character {
+  id 2304 as private EmperorOfFireAndIron;
+  until "v5.3.0";
+  tags pyro, monster;
+  health 6;
+  energy 2;
+  skills ShatterclampStrike, BusterBlaze, BattlelineDetonation, ImperialPanoply, SearingBlast;
+}
 
 /**
  * @id 15102
@@ -23,14 +24,15 @@ const EmperorOfFireAndIron = character(2304)
  * @description
  * 造成2点风元素伤害，生成步天梯，本角色附属闲云冲击波。
  */
-const WhiteCloudsAtDawn = skill(15102)
-  .until("v5.3.0")
-  .type("elemental")
-  .costAnemo(3)
-  .damage(DamageType.Anemo, 2)
-  .combatStatus(Skyladder)
-  .characterStatus(DriftcloudWave)
-  .done();
+define skill {
+  id 15102 as private WhiteCloudsAtDawn;
+  until "v5.3.0";
+  skillType elemental;
+  cost DiceType.Anemo, 3;
+  :damage(DamageType.Anemo, 2);
+  :combatStatus(Skyladder);
+  :characterStatus(DriftcloudWave);
+}
 
 /**
  * @id 216091
@@ -41,13 +43,16 @@ const WhiteCloudsAtDawn = skill(15102)
  * 装备有此牌的千织使用羽袖一触时：额外召唤1个平静养神之袖，并改为从4个千织的自动制御人形中挑选1个并召唤。
  * （牌组中包含千织，才能加入牌组）
  */
-export const InFiveColorsDyed = card(216091)
-  .until("v5.3.0")
-  .costGeo(3)
-  .talent(Chiori)
-  .on("enter")
-  .useSkill(FlutteringHasode)
-  .done();
+define card {
+  id 216091 as InFiveColorsDyed;
+  until "v5.3.0";
+  cost DiceType.Geo, 3;
+  talent Chiori {
+    on enter {
+      :useSkill(FlutteringHasode);
+    }
+  }
+}
 
 /**
  * @id 313002
@@ -60,21 +65,24 @@ export const InFiveColorsDyed = card(216091)
  * 如果我方手牌数不多于2，此特技少花费1个元素骰。
  * [3130022: ] ()
  */
-const Yumkasaurus = card(313002)
-  .until("v5.3.0")
-  .costSame(1)
-  .technique()
-  .on("deductOmniDiceTechnique", (c, e) => e.action.skill.definition.id === 3130021 && c.player.hands.length <= 2)
-  .deductOmniCost(1)
-  .endOn()
-  .provideSkill(3130021)
-  .costSame(2)
-  .usage(2)
-  .damage(DamageType.Physical, 1)
-  .do((c) => {
-    const [handCard] = c.maxCostHands(1, { who: "opp" });
-    if (handCard) {
-      c.stealHandCard(handCard);
+define card {
+  id 313002 as private Yumkasaurus;
+  until "v5.3.0";
+  cost DiceType.Aligned, 1;
+  technique {
+    on deductOmniDiceTechnique {
+      when :( :e.action.skill.definition.id === 3130021 && :player.hands.length <= 2 );
+      :e.deductOmniCost(1);
     }
-  })
-  .done();
+    skill {
+      id 3130021;
+      cost DiceType.Aligned, 2;
+      usage 2;
+      :damage(DamageType.Physical, 1);
+      const [handCard] = :maxCostHands(1, { who: "opp" });
+      if (handCard) {
+        :stealHandCard(handCard);
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { card, character, DamageType, skill } from "@gi-tcg/core/builder";
+import { card, character, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
 import { DominusLapidisStrikingStone, Zhongli } from "../characters/geo/zhongli.gts";
 import { TurboDrillField, TurboTwirlyLetItRip, TurboTwirlyTriggered } from "../characters/geo/kachina.gts";
 import { Xilonen, YohualsScratch } from "../characters/geo/xilonen.gts";
@@ -23,29 +23,33 @@ import { AbiogenesisSolarIsotoma, FavoniusBladeworkWeiss, RiteOfProgenitureTecto
  * [1161023: ] ()
  * [1161024: ] ()
  */
-const TurboTwirly = card(116102)
-  .until("v5.6.0")
-  .nightsoulTechnique()
-  .on("switchActive", (c, e) => e.switchInfo.from?.id === c.self.master.id)
-  .consumeNightsoul("@master")
-  .summon(TurboTwirlyLetItRip)
-  .endOn()
-  .provideSkill(1161021)
-  .costVoid(1)
-  .consumeNightsoul("@master")
-  .do((c) => {
-    const field = c.$(`my combat status with definition id ${TurboDrillField}`);
-    if (field) {
-      c.damage(DamageType.Geo, 3);
-      c.damage(DamageType.Piercing, 2, "opp next");
-      c.consumeUsage(1, field);
-    } else {
-      c.damage(DamageType.Geo, 2);
-      c.damage(DamageType.Piercing, 1, "opp next");
+define card {
+  id 116102 as private TurboTwirly;
+  until "v5.6.0";
+  technique {
+    nightsoul;
+    on switchActive {
+      when :( :e.switchInfo.from?.id === :self.master.id );
+      :consumeNightsoul("@master");
+      :summon(TurboTwirlyLetItRip);
     }
-    c.emitCustomEvent(TurboTwirlyTriggered);
-  })
-  .done();
+    skill {
+      id 1161021;
+      cost DiceType.Void, 1;
+      :consumeNightsoul("@master");
+      const field = :$(`my combat status with definition id ${TurboDrillField}`);
+      if (field) {
+        :damage(DamageType.Geo, 3);
+        :damage(DamageType.Piercing, 2, "opp next");
+        :consumeUsage(1, field);
+      } else {
+        :damage(DamageType.Geo, 2);
+        :damage(DamageType.Piercing, 1, "opp next");
+      }
+      :emitCustomEvent(TurboTwirlyTriggered);
+    }
+  }
+}
 
 /**
  * @id 216031
@@ -56,21 +60,26 @@ const TurboTwirly = card(116102)
  * 装备有此牌的钟离生命值至少为7时，钟离造成的伤害和我方召唤物造成的岩元素伤害+1。
  * （牌组中包含钟离，才能加入牌组）
  */
-const DominanceOfEarth = card(216031)
-  .until("v5.6.0")
-  .costGeo(5)
-  .talent(Zhongli)
-  .on("enter")
-  .useSkill(DominusLapidisStrikingStone)
-  .on("increaseDamage", (c, e) => {
-    return c.self.master.health >= 7 &&
-    (e.source.definition.id === Zhongli ||
-      e.type === DamageType.Geo &&
-      e.source.definition.type === "summon")
-  })
-  .listenToPlayer()
-  .increaseDamage(1)
-  .done();
+define card {
+  id 216031 as private DominanceOfEarth;
+  until "v5.6.0";
+  cost DiceType.Geo, 5;
+  talent Zhongli {
+    on enter {
+      :useSkill(DominusLapidisStrikingStone);
+    }
+    on increaseDamage {
+      when :{
+        return :self.master.health >= 7 &&
+        (:e.source.definition.id === Zhongli ||
+          :e.type === DamageType.Geo &&
+          :e.source.definition.type === "summon")
+      };
+      listenTo samePlayer;
+      :e.increaseDamage(1);
+    }
+  }
+}
 
 /**
  * @id 22053
@@ -79,14 +88,15 @@ const DominanceOfEarth = card(216031)
  * 造成3点水元素伤害，生成手牌水泡史莱姆。
  * （装备有水泡史莱姆的角色可以使用特技：水泡战法）
  */
-const BubblefloatBlitz = skill(22053)
-  .until("v5.6.0")
-  .type("burst")
-  .costHydro(3)
-  .costEnergy(2)
-  .damage(DamageType.Hydro, 3)
-  .createHandCard(MistBubbleSlime)
-  .done();
+define skill {
+  id 22053 as private BubblefloatBlitz;
+  until "v5.6.0";
+  skillType burst;
+  cost DiceType.Hydro, 3;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Hydro, 3);
+  :createHandCard(MistBubbleSlime);
+}
 
 /**
  * @id 1604
@@ -94,26 +104,28 @@ const BubblefloatBlitz = skill(22053)
  * @description
  * 黑土与白垩，赤成与黄金。
  */
-const Albedo = character(1604)
-  .until("v5.6.0")
-  .tags("geo", "sword", "mondstadt")
-  .health(10)
-  .energy(2)
-  .skills(FavoniusBladeworkWeiss, AbiogenesisSolarIsotoma, RiteOfProgenitureTectonicTide)
-  .done();
+define character {
+  id 1604 as private Albedo;
+  until "v5.6.0";
+  tags geo, sword, mondstadt;
+  health 10;
+  energy 2;
+  skills FavoniusBladeworkWeiss, AbiogenesisSolarIsotoma, RiteOfProgenitureTectonicTide;
+}
 /**
  * @id 1210
  * @name 那维莱特
  * @description
  * 凡高大者，无不蔑视。
  */
-const Neuvillette = character(1210)
-  .until("v5.6.0")
-  .tags("hydro", "catalyst", "fontaine", "ousia")
-  .health(10)
-  .energy(2)
-  .skills(AsWaterSeeksEquilibrium, OTearsIShallRepay, OTidesIHaveReturned, EquitableJudgment, SourcewaterDropletSkill)
-  .done();
+define character {
+  id 1210 as private Neuvillette;
+  until "v5.6.0";
+  tags hydro, catalyst, fontaine, ousia;
+  health 10;
+  energy 2;
+  skills AsWaterSeeksEquilibrium, OTearsIShallRepay, OTidesIHaveReturned, EquitableJudgment, SourcewaterDropletSkill;
+}
 
 /**
  * @id 1405
@@ -121,13 +133,14 @@ const Neuvillette = character(1210)
  * @description
  * 「记住这一天，你差点赢了南十字船队老大的钱。」
  */
-const Beidou = character(1405)
-  .until("v5.6.0")
-  .tags("electro", "claymore", "liyue")
-  .health(10)
-  .energy(3)
-  .skills(Oceanborne, Tidecaller, Stormbreaker, Wavestrider)
-  .done();
+define character {
+  id 1405 as private Beidou;
+  until "v5.6.0";
+  tags electro, claymore, liyue;
+  health 10;
+  energy 3;
+  skills Oceanborne, Tidecaller, Stormbreaker, Wavestrider;
+}
 
 
 /**
@@ -136,13 +149,14 @@ const Beidou = character(1405)
  * @description
  * 赤沙浮金，恪誓戍御。
  */
-const Candace = character(1207)
-  .until("v5.6.0")
-  .tags("hydro", "pole", "sumeru")
-  .health(10)
-  .energy(2)
-  .skills(GleamingSpearGuardianStance, SacredRiteHeronsSanctum, SacredRiteWagtailsTide, HeronStrike)
-  .done();
+define character {
+  id 1207 as private Candace;
+  until "v5.6.0";
+  tags hydro, pole, sumeru;
+  health 10;
+  energy 2;
+  skills GleamingSpearGuardianStance, SacredRiteHeronsSanctum, SacredRiteWagtailsTide, HeronStrike;
+}
 
 /**
  * @id 1705
@@ -150,13 +164,14 @@ const Candace = character(1207)
  * @description
  * 生老三千疾，何处可问医。
  */
-const Baizhu = character(1705)
-  .until("v5.6.0")
-  .tags("dendro", "catalyst", "liyue")
-  .health(10)
-  .energy(2)
-  .skills(TheClassicsOfAcupuncture, UniversalDiagnosis, HolisticRevivification)
-  .done();
+define character {
+  id 1705 as private Baizhu;
+  until "v5.6.0";
+  tags dendro, catalyst, liyue;
+  health 10;
+  energy 2;
+  skills TheClassicsOfAcupuncture, UniversalDiagnosis, HolisticRevivification;
+}
 
 /**
  * @id 2205
@@ -164,13 +179,14 @@ const Baizhu = character(1705)
  * @description
  * 不属于任何部族的丘丘人流浪者，如同自我流放一般在荒野中四处漫游。
  */
-const HydroHilichurlRogue = character(2205)
-  .until("v5.6.0")
-  .tags("hydro", "monster", "hilichurl")
-  .health(10)
-  .energy(2)
-  .skills(WhirlingScythe, SlashOfSurgingTides, BubblefloatBlitz, SlashOfSurgingTidesPassive)
-  .done();
+define character {
+  id 2205 as private HydroHilichurlRogue;
+  until "v5.6.0";
+  tags hydro, monster, hilichurl;
+  health 10;
+  energy 2;
+  skills WhirlingScythe, SlashOfSurgingTides, BubblefloatBlitz, SlashOfSurgingTidesPassive;
+}
 
 /**
  * @id 14073
@@ -178,14 +194,15 @@ const HydroHilichurlRogue = character(2205)
  * @description
  * 造成3点雷元素伤害，其他我方角色获得2点充能。
  */
-const SecretArtMusouShinsetsu = skill(14073)
-  .until("v5.6.0")
-  .type("burst")
-  .costElectro(4)
-  .costEnergy(2)
-  .damage(DamageType.Electro, 3)
-  .gainEnergy(2, "all my characters and not @self")
-  .done();
+define skill {
+  id 14073 as private SecretArtMusouShinsetsu;
+  until "v5.6.0";
+  skillType burst;
+  cost DiceType.Electro, 4;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Electro, 3);
+  :gainEnergy(2, "all my characters and not @self");
+}
 
 
 /**
@@ -197,11 +214,14 @@ const SecretArtMusouShinsetsu = skill(14073)
  * 装备有此牌的雷电将军使用奥义·梦想真说时：每消耗1点「愿力」，都使造成的伤害额外+1。
  * （牌组中包含雷电将军，才能加入牌组）
  */
-const WishesUnnumbered = card(214071)
-  .until("v5.6.0")
-  .costElectro(4)
-  .costEnergy(2)
-  .talent(RaidenShogun)
-  .on("enter")
-  .useSkill(SecretArtMusouShinsetsu)
-  .done();
+define card {
+  id 214071 as private WishesUnnumbered;
+  until "v5.6.0";
+  cost DiceType.Electro, 4;
+  cost DiceType.Energy, 2;
+  talent RaidenShogun {
+    on enter {
+      :useSkill(SecretArtMusouShinsetsu);
+    }
+  }
+}

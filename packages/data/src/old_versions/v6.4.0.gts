@@ -12,13 +12,14 @@ import { TideTurningSacredLord } from "../cards/support/adventure.gts";
  * @description
  * 无论何时都能治愈人心。
  */
-const Barbara = character(1201)
-  .until("v6.4.0")
-  .tags("hydro", "catalyst", "mondstadt")
-  .health(10)
-  .energy(3)
-  .skills(WhisperOfWater, LetTheShowBegin, ShiningMiracle)
-  .done();
+define character {
+  id 1201 as private Barbara;
+  until "v6.4.0";
+  tags hydro, catalyst, mondstadt;
+  health 10;
+  energy 3;
+  skills WhisperOfWater, LetTheShowBegin, ShiningMiracle;
+}
 
 /**
  * @id 111062
@@ -28,27 +29,28 @@ const Barbara = character(1201)
  * 结束阶段：弃置此牌，造成3点物理伤害；每有1点「能量层数」，都使此伤害+1。
  * （影响此牌「可用次数」的效果会作用于「能量层数」。）
  */
-const LightfallSword = summon(111062)
-  .until("v6.4.0")
-  .hint(DamageType.Physical, "3+")
-  .usage(0, { autoDispose: false })
-  .on("useSkill", (c, e) =>
-    e.skill.definition.id === FavoniusBladeworkEdel ||
-    e.skill.definition.id === IcetideVortex)
-  .do((c, e) => {
-    if (e.skill.definition.id === IcetideVortex &&
-      e.skillCaller.cast<"character">().hasEquipment(WellspringOfWarlust)) {
-      c.self.addVariable("usage", 3);
+define summon {
+  id 111062 as private LightfallSword;
+  until "v6.4.0";
+  hint DamageType.Physical, "3+";
+  usage 0 {
+    autoDispose false;
+  };
+  on useSkill {
+    when :( :e.skill.definition.id === FavoniusBladeworkEdel ||
+        :e.skill.definition.id === IcetideVortex );
+    if (:e.skill.definition.id === IcetideVortex &&
+      :e.skillCaller.cast<"character">().hasEquipment(WellspringOfWarlust)) {
+      :self.addVariable("usage", 3);
     } else {
-      c.self.addVariable("usage", 2);
+      :self.addVariable("usage", 2);
     }
-  })
-  .on("endPhase")
-  .do((c) => {
-    c.damage(DamageType.Physical, 3 + c.getVariable("usage"));
-    c.dispose();
-  })
-  .done();
+  }
+  on endPhase {
+    :damage(DamageType.Physical, 3 + :getVariable("usage"));
+    :dispose();
+  }
+}
 
 /**
  * @id 111121
@@ -57,18 +59,25 @@ const LightfallSword = summon(111062)
  * 我方每抓1张牌后：此牌累积1层「压力阶级」。
  * 所附属角色使用浮冰增压时：如果「压力阶级」至少有2层，则移除此效果，使技能少花费1元素骰，且如果此技能结算后「压力阶级」至少有4层，则再额外造成2点物理伤害。
  */
-const PersTimer = status(111121)
-  .until("v6.4.0")
-  .variable("level", 0)
-  .on("drawCard")
-  .addVariable("level", 1)
-  .on("deductOmniDiceSkill", (c, e) => c.getVariable("level") >= 2)
-  .deductOmniCost(1)
-  .on("useSkill", (c, e) => c.getVariable("level") >= 2)
-  .if((c) => c.getVariable("level") >= 4)
-  .damage(DamageType.Physical, 2)
-  .dispose()
-  .done();
+define status {
+  id 111121 as private PersTimer;
+  until "v6.4.0";
+  variable level, 0;
+  on drawCard {
+    :addVariable("level", 1);
+  }
+  on deductOmniDiceSkill {
+    when :( :getVariable("level") >= 2 );
+    :e.deductOmniCost(1);
+  }
+  on useSkill {
+    when :( :getVariable("level") >= 2 );
+    if (:getVariable("level") >= 4) {
+      :damage(DamageType.Physical, 2);
+    }
+    :dispose();
+  }
+}
 
 /**
  * @id 111163
@@ -76,18 +85,17 @@ const PersTimer = status(111121)
  * @description
  * 舍弃1张当前元素骰费用为3的手牌，丝柯克获得2点蛇之狡谋。
  */
-const VoidRift = card(111163)
-  .until("v6.4.0")
-  .undiscoverable()
-  .do((c) => {
-    const hand = c.player.hands.find((card) => card.diceCost() === 3);
-    if (hand) {
-      c.disposeCard(hand);
-      const skirk = c.$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`);
-      skirk?.addVariableWithMax("serpentsSubtlety", 2, 7);
-    }
-  })
-  .done();
+define card {
+  id 111163 as private VoidRift;
+  until "v6.4.0";
+  undiscoverable;
+  const hand = :player.hands.find((card) => card.diceCost() === 3);
+  if (hand) {
+    :disposeCard(hand);
+    const skirk = :$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`);
+    skirk?.addVariableWithMax("serpentsSubtlety", 2, 7);
+  }
+}
 
 /**
  * @id 116051
@@ -98,18 +106,29 @@ const VoidRift = card(111163)
  * 此召唤物在场期间可触发1次：我方角色受到伤害后，为荒泷一斗附属乱神之怪力。
  * 结束阶段：弃置此牌，造成1点岩元素伤害。
  */
-const Ushi = summon(116051)
-  .until("v6.4.0")
-  .tags("barrier")
-  .endPhaseDamage(DamageType.Geo, 1)
-  .dispose()
-  .on("decreaseDamaged", (c, e) => e.target.isActive())
-  .usage(1, { autoDispose: false })
-  .decreaseDamage(1)
-  .on("damaged")
-  .usage(1, { name: "addStatusUsage" })
-  .characterStatus(SuperlativeSuperstrength, `my characters with definition id 1605`)
-  .done();
+define summon {
+  id 116051 as private Ushi;
+  until "v6.4.0";
+  tags barrier;
+  hint DamageType.Geo, 1;
+  on endPhase {
+    :damage(DamageType.Geo, 1);
+    :dispose();
+  }
+  on decreaseDamaged {
+    when :( :e.target.isActive() );
+    usage 1 {
+      autoDispose false;
+    };
+    :e.decreaseDamage(1);
+  }
+  on damaged {
+    usage 1 {
+      name "addStatusUsage";
+    };
+    :characterStatus(SuperlativeSuperstrength, "my characters with definition id 1605");
+  }
+}
 
 /**
  * @id 303318
@@ -117,12 +136,14 @@ const Ushi = summon(116051)
  * @description
  * 本回合中，该角色下一次造成的伤害+2。
  */
-const MystiqueSoupFuryInEffect = status(303318)
-  .until("v6.4.0")
-  .oneDuration()
-  .once("increaseSkillDamage")
-  .increaseDamage(2)
-  .done();
+define status {
+  id 303318 as private MystiqueSoupFuryInEffect;
+  until "v6.4.0";
+  oneDuration;
+  once increaseSkillDamage {
+    :e.increaseDamage(2);
+  }
+}
 
 /**
  * @id 321034
@@ -133,29 +154,47 @@ const MystiqueSoupFuryInEffect = status(303318)
  * 冒险经历达到4时：我方出战角色附属2层战斗计划。
  * 冒险经历达到6时：弃置敌方场上1个随机召唤物，召唤回天的圣主，然后弃置此牌。
  */
-const Tonatiuh = card(321034)
-  .until("v6.4.0")
-  .adventureSpot()
-  .on("adventure")
-  .convertDice(DiceType.Omni, 1)
-  .on("adventure", (c) => c.getVariable("exp") >= 2)
-  .usage(1, { name: "stage1", visible: false })
-  .drawCards(1)
-  .on("adventure", (c) => c.getVariable("exp") >= 4)
-  .usage(1, { name: "stage2", visible: false })
-  .characterStatus(BattlePlan, "my active", {
-    overrideVariables: { usage: 2 }
-  })
-  .on("adventure", (c) => c.getVariable("exp") >= 6)
-  .usage(1, { name: "stage3", visible: false })
-  .do((c) => {
-    const summons = c.$$("opp summons");
-    if (summons.length > 0) {
-      const summon = c.random(summons);
-      c.dispose(summon);
+define card {
+  id 321034 as private Tonatiuh;
+  until "v6.4.0";
+  undiscoverable;
+  support place {
+    adventureSpot;
+    on adventure {
+      :convertDice(DiceType.Omni, 1);
     }
-    c.summon(TideTurningSacredLord);
-    c.finishAdventure();
-  })
-  .done();
+    on adventure {
+      when :( :getVariable("exp") >= 2 );
+      usage 1 {
+        name "stage1";
+        visible false;
+      };
+      :drawCards(1);
+    }
+    on adventure {
+      when :( :getVariable("exp") >= 4 );
+      usage 1 {
+        name "stage2";
+        visible false;
+      };
+      :characterStatus(BattlePlan, "my active", {
+          overrideVariables: { usage: 2 }
+        });
+    }
+    on adventure {
+      when :( :getVariable("exp") >= 6 );
+      usage 1 {
+        name "stage3";
+        visible false;
+      };
+      const summons = :$$("opp summons");
+      if (summons.length > 0) {
+        const summon = :random(summons);
+        :dispose(summon);
+      }
+      :summon(TideTurningSacredLord);
+      :finishAdventure();
+    }
+  }
+}
 

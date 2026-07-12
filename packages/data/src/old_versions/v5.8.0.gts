@@ -17,13 +17,14 @@ import { Frostgnaw, Kaeya } from "../characters/cryo/kaeya.gts";
  * 如果想要成为一名伟大的牌手…
  * 首先，要有坐上牌桌的勇气。
  */
-const Amber = character(1304)
-  .until("v5.8.0")
-  .tags("pyro", "bow", "mondstadt")
-  .health(10)
-  .energy(2)
-  .skills(Sharpshooter, ExplosivePuppet, FieryRain)
-  .done();
+define character {
+  id 1304 as private Amber;
+  until "v5.8.0";
+  tags pyro, bow, mondstadt;
+  health 10;
+  energy 2;
+  skills Sharpshooter, ExplosivePuppet, FieryRain;
+}
 
 
 /**
@@ -32,13 +33,14 @@ const Amber = character(1304)
  * @description
  * 体悟、仁爱与识美之知。
  */
-const Kaveh = character(1708)
-  .until("v5.8.0")
-  .tags("dendro", "claymore", "sumeru")
-  .health(10)
-  .energy(2)
-  .skills(SchematicSetup, ArtisticIngenuity, PaintedDome)
-  .done();
+define character {
+  id 1708 as private Kaveh;
+  until "v5.8.0";
+  tags dendro, claymore, sumeru;
+  health 10;
+  energy 2;
+  skills SchematicSetup, ArtisticIngenuity, PaintedDome;
+}
 
 
 /**
@@ -47,14 +49,15 @@ const Kaveh = character(1708)
  * @description
  * 嵴锋荡响，铄石显金
  */
-const Xilonen = character(1611)
-  .until("v5.8.0")
-  .tags("geo", "sword", "natlan")
-  .health(10)
-  .energy(2)
-  .skills(EhecatlsRoar, YohualsScratch, OcelotlicuePoint, SourceSample)
-  .associateNightsoul(NightsoulsBlessing)
-  .done();
+define character {
+  id 1611 as private Xilonen;
+  until "v5.8.0";
+  tags geo, sword, natlan;
+  health 10;
+  energy 2;
+  skills EhecatlsRoar, YohualsScratch, OcelotlicuePoint, SourceSample;
+  associateNightsoul NightsoulsBlessing;
+}
 
 /**
  * @id 1102
@@ -62,13 +65,14 @@ const Xilonen = character(1611)
  * @description
  * 用1%的力气调酒，99%的力气…拒绝失败。
  */
-const Diona = character(1102)
-  .until("v5.8.0")
-  .tags("cryo", "bow", "mondstadt")
-  .health(10)
-  .energy(3)
-  .skills(KatzleinStyle, IcyPaws, SignatureMix)
-  .done();
+define character {
+  id 1102 as private Diona;
+  until "v5.8.0";
+  tags cryo, bow, mondstadt;
+  health 10;
+  energy 3;
+  skills KatzleinStyle, IcyPaws, SignatureMix;
+}
 
 /**
  * @id 22012
@@ -76,23 +80,22 @@ const Diona = character(1102)
  * @description
  * 随机召唤1种纯水幻形。（优先生成不同的类型，召唤区最多同时存在2种纯水幻形。）
  */
-const OceanidMimicSummoning = skill(22012)
-  .until("v5.8.0")
-  .type("elemental")
-  .costHydro(3)
-  .do((c) => {
-    const mimics = c.isPreview ? PREVIEW_MIMICS : NORMAL_MIMICS;
-    const exists = c.player.summons.map((s) => s.definition.id).filter((id) => mimics.includes(id));
-    let target;
-    if (exists.length >= 2) {
-      target = c.random(exists);
-    } else {
-      const rest = mimics.filter((id) => !exists.includes(id));
-      target = c.random(rest);
-    }
-    c.summon(target as SummonHandle);
-  })
-  .done();
+define skill {
+  id 22012 as private OceanidMimicSummoning;
+  until "v5.8.0";
+  skillType elemental;
+  cost DiceType.Hydro, 3;
+  const mimics = :isPreview ? PREVIEW_MIMICS : NORMAL_MIMICS;
+  const exists = :player.summons.map((s) => s.definition.id).filter((id) => mimics.includes(id));
+  let target;
+  if (exists.length >= 2) {
+    target = :random(exists);
+  } else {
+    const rest = mimics.filter((id) => !exists.includes(id));
+    target = :random(rest);
+  }
+  :summon(target as SummonHandle);
+}
 
 /**
  * @id 22013
@@ -100,26 +103,25 @@ const OceanidMimicSummoning = skill(22012)
  * @description
  * 随机召唤2种纯水幻形。（优先生成不同的类型，召唤区最多同时存在2种纯水幻形。）
  */
-const TheMyriadWilds = skill(22013)
-  .until("v5.8.0")
-  .type("elemental")
-  .costHydro(5)
-  .do((c) => {
-    const mimics = c.isPreview ? PREVIEW_MIMICS : NORMAL_MIMICS;
-    const exists = c.player.summons.map((s) => s.definition.id).filter((id) => mimics.includes(id));
-    for (let i = 0; i < 2; i++) {
-      let target;
-      if (exists.length >= 2) {
-        target = c.random(exists);
-      } else {
-        const rest = mimics.filter((id) => !exists.includes(id));
-        target = c.random(rest);
-      }
-      c.summon(target as SummonHandle);
-      exists.push(target);
+define skill {
+  id 22013 as private TheMyriadWilds;
+  until "v5.8.0";
+  skillType elemental;
+  cost DiceType.Hydro, 5;
+  const mimics = :isPreview ? PREVIEW_MIMICS : NORMAL_MIMICS;
+  const exists = :player.summons.map((s) => s.definition.id).filter((id) => mimics.includes(id));
+  for (let i = 0; i < 2; i++) {
+    let target;
+    if (exists.length >= 2) {
+      target = :random(exists);
+    } else {
+      const rest = mimics.filter((id) => !exists.includes(id));
+      target = :random(rest);
     }
-  })
-  .done();
+    :summon(target as SummonHandle);
+    exists.push(target);
+  }
+}
 
 /**
  * @id 2201
@@ -127,13 +129,14 @@ const TheMyriadWilds = skill(22013)
  * @description
  * 「但，只要百川奔流，雨露不休，水就不会消失…」
  */
-const RhodeiaOfLoch = character(2201)
-  .until("v5.8.0")
-  .tags("hydro", "monster")
-  .health(10)
-  .energy(3)
-  .skills(Surge, OceanidMimicSummoning, TheMyriadWilds, TideAndTorrent)
-  .done();
+define character {
+  id 2201 as private RhodeiaOfLoch;
+  until "v5.8.0";
+  tags hydro, monster;
+  health 10;
+  energy 3;
+  skills Surge, OceanidMimicSummoning, TheMyriadWilds, TideAndTorrent;
+}
 
 /**
  * @id 2704
@@ -141,13 +144,14 @@ const RhodeiaOfLoch = character(2201)
  * @description
  * 自古老的年代存活至今，经历了无数战场的强大匿叶龙。
  */
-const GluttonousYumkasaurMountainKing = character(2704)
-  .until("v5.8.0")
-  .tags("dendro", "monster")
-  .health(7)
-  .energy(2)
-  .skills(CrushingTailAttack, FlyingFruit, FlamegranateConflagration, GluttonousRex01, GluttonousRex02)
-  .done();
+define character {
+  id 2704 as private GluttonousYumkasaurMountainKing;
+  until "v5.8.0";
+  tags dendro, monster;
+  health 7;
+  energy 2;
+  skills CrushingTailAttack, FlyingFruit, FlamegranateConflagration, GluttonousRex01, GluttonousRex02;
+}
 
 /**
  * @id 127041
@@ -155,12 +159,16 @@ const GluttonousYumkasaurMountainKing = character(2704)
  * @description
  * 自身下次造成的伤害+1。（可叠加，没有上限）
  */
-const WellFedAndStrong = status(127041)
-  .until("v5.8.0")
-  .on("increaseSkillDamage")
-  .usageCanAppend(1, Infinity)
-  .increaseDamage(1)
-  .done();
+define status {
+  id 127041 as private WellFedAndStrong;
+  until "v5.8.0";
+  on increaseSkillDamage {
+    usage 1 {
+      append;
+    };
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 11054
@@ -168,17 +176,25 @@ const WellFedAndStrong = status(127041)
  * @description
  * 【被动】此角色被切换为「出战角色」时，附属冰元素附魔。
  */
-const KamisatoArtSenho: PassiveSkillHandle = skill(11054)
-  .until("v5.8.0")
-  .type("passive")
-  .on("battleBegin", (c, e) => c.self.isActive()) // 战斗开始时也附属附魔
-  .characterStatus(CryoElementalInfusion)
-  .on("switchActive", (c, e) => e.switchInfo.to.id === c.self.id)
-  .if((c) => c.self.hasEquipment(KantenSenmyouBlessing))
-  .characterStatus(CryoElementalInfusion01)
-  .else()
-  .characterStatus(CryoElementalInfusion)
-  .done();
+define skill {
+  id 11054 as private KamisatoArtSenho;
+  until "v5.8.0";
+  skillType passive {
+    on battleBegin {
+      when :( :self.isActive() );
+      :characterStatus(CryoElementalInfusion);
+    }
+    on switchActive {
+      when :( :e.switchInfo.to.id === :self.id );
+      if (:self.hasEquipment(KantenSenmyouBlessing)) {
+        :characterStatus(CryoElementalInfusion01);
+      }
+      else {
+        :characterStatus(CryoElementalInfusion);
+      }
+    }
+  }
+}
 
 /**
  * @id 1105
@@ -186,13 +202,14 @@ const KamisatoArtSenho: PassiveSkillHandle = skill(11054)
  * @description
  * 如霜凝华，如鹭在庭。
  */
-const KamisatoAyaka = character(1105)
-  .until("v5.8.0")
-  .tags("cryo", "sword", "inazuma")
-  .health(10)
-  .energy(3)
-  .skills(KamisatoArtKabuki, KamisatoArtHyouka, KamisatoArtSoumetsu, KamisatoArtSenho)
-  .done();
+define character {
+  id 1105 as private KamisatoAyaka;
+  until "v5.8.0";
+  tags cryo, sword, inazuma;
+  health 10;
+  energy 3;
+  skills KamisatoArtKabuki, KamisatoArtHyouka, KamisatoArtSoumetsu, KamisatoArtSenho;
+}
 
 /**
  * @id 216011
@@ -203,13 +220,16 @@ const KamisatoAyaka = character(1105)
  * 装备有此牌的凝光在场时，璇玑屏会使我方造成的岩元素伤害+1。
  * （牌组中包含凝光，才能加入牌组）
  */
-const StrategicReserve = card(216011)
-  .until("v5.8.0")
-  .costGeo(4)
-  .talent(Ningguang)
-  .on("enter")
-  .useSkill(JadeScreen)
-  .done();
+define card {
+  id 216011 as private StrategicReserve;
+  until "v5.8.0";
+  cost DiceType.Geo, 4;
+  talent Ningguang {
+    on enter {
+      :useSkill(JadeScreen);
+    }
+  }
+}
 
 /**
  * @id 211031
@@ -220,16 +240,21 @@ const StrategicReserve = card(216011)
  * 装备有此牌的凯亚使用霜袭后：治疗自身2点。（每回合1次）
  * （牌组中包含凯亚，才能加入牌组）
  */
-const ColdbloodedStrike = card(211031)
-  .until("v5.8.0")
-  .costCryo(4)
-  .talent(Kaeya)
-  .on("enter")
-  .useSkill(Frostgnaw)
-  .on("useSkill", (c, e) => e.skill.definition.id === Frostgnaw)
-  .usagePerRound(1)
-  .heal(2, "@master")
-  .done();
+define card {
+  id 211031 as private ColdbloodedStrike;
+  until "v5.8.0";
+  cost DiceType.Cryo, 4;
+  talent Kaeya {
+    on enter {
+      :useSkill(Frostgnaw);
+    }
+    on useSkill {
+      when :( :e.skill.definition.id === Frostgnaw );
+      usage perRound, 1;
+      :heal(2, "@master");
+    }
+  }
+}
 
 /**
  * @id 321004
@@ -237,14 +262,17 @@ const ColdbloodedStrike = card(211031)
  * @description
  * 我方执行「切换角色」行动时：少花费1个元素骰。（每回合至多2次）
  */
-const DawnWinery = card(321004)
-  .until("v5.8.0")
-  .costSame(2)
-  .support("place")
-  .on("deductOmniDiceSwitch")
-  .usagePerRound(2)
-  .deductOmniCost(1)
-  .done();
+define card {
+  id 321004 as private DawnWinery;
+  until "v5.8.0";
+  cost DiceType.Aligned, 2;
+  support place {
+    on deductOmniDiceSwitch {
+      usage perRound, 2;
+      :e.deductOmniCost(1);
+    }
+  }
+}
 
 /**
  * @id 26032
@@ -252,18 +280,19 @@ const DawnWinery = card(321004)
  * @description
  * 造成1点岩元素伤害，目标角色附属2层黄金侵蚀，召唤兽境犬首。
  */
-const HowlingRiftcall = skill(26032)
-  .until("v5.8.0")
-  .type("elemental")
-  .costGeo(3)
-  .damage(DamageType.Geo, 1)
-  .characterStatus(GoldenCorrosion, "opp active", {
-    overrideVariables: {
-      usage: 2
-    }
-  })
-  .summon(RifthoundSkull)
-  .done();
+define skill {
+  id 26032 as private HowlingRiftcall;
+  until "v5.8.0";
+  skillType elemental;
+  cost DiceType.Geo, 3;
+  :damage(DamageType.Geo, 1);
+  :characterStatus(GoldenCorrosion, "opp active", {
+      overrideVariables: {
+        usage: 2
+      }
+    });
+  :summon(RifthoundSkull);
+}
 
 /**
  * @id 312027
@@ -273,29 +302,33 @@ const HowlingRiftcall = skill(26032)
  * （每回合至多生成2个）
  * （角色最多装备1件「圣遗物」）
  */
-const AmethystCrown = card(312027)
-  .until("v5.8.0")
-  .costSame(1)
-  .artifact()
-  .variable("generatedCount", 0, { visible: false })
-  .variable("crystal", 0)
-  .on("roundEnd")
-  .setVariable("generatedCount", 0)
-  .on("damaged", (c, e) =>
-    !e.target.isMine() &&
-    e.type === DamageType.Dendro &&
-    c.self.master.isActive())
-  .listenToAll()
-  .do((c) => {
-    c.addVariable("crystal", 1);
-    const crystal = c.getVariable("crystal");
-    const hands = c.player.hands.length;
-    if (crystal >= hands && c.getVariable("generatedCount") < 2) {
-      c.generateDice("randomElement", 1);
-      c.addVariable("generatedCount", 1);
+define card {
+  id 312027 as private AmethystCrown;
+  until "v5.8.0";
+  cost DiceType.Aligned, 1;
+  artifact {
+    variable generatedCount, 0 {
+      visible false;
+    };
+    variable crystal, 0;
+    on roundEnd {
+      :setVariable("generatedCount", 0);
     }
-  })
-  .done();
+    on damaged {
+      when :( !:e.target.isMine() &&
+          :e.type === DamageType.Dendro &&
+          :self.master.isActive() );
+      listenTo all;
+      :addVariable("crystal", 1);
+      const crystal = :getVariable("crystal");
+      const hands = :player.hands.length;
+      if (crystal >= hands && :getVariable("generatedCount") < 2) {
+        :generateDice("randomElement", 1);
+        :addVariable("generatedCount", 1);
+      }
+    }
+  }
+}
 
 /**
  * @id 312028
@@ -305,29 +338,33 @@ const AmethystCrown = card(312027)
  * （每回合至多生成2个）
  * （角色最多装备1件「圣遗物」）
  */
-const FlowerOfParadiseLost = card(312028)
-  .until("v5.8.0")
-  .costSame(2)
-  .artifact()
-  .variable("crystal", 0)
-  .variable("generatedCount", 0, { visible: false })
-  .on("roundEnd")
-  .setVariable("generatedCount", 0)
-  .on("damaged", (c, e) =>
-    c.self.master.isActive() &&
-    !e.target.isMine() &&
-    (e.type === DamageType.Dendro || e.isReactionRelatedTo(DamageType.Dendro)))
-  .listenToAll()
-  .do((c) => {
-    c.addVariable("crystal", 2);
-    const crystal = c.getVariable("crystal");
-    const hands = c.player.hands.length;
-    if (crystal >= hands && c.getVariable("generatedCount") < 2) {
-      c.generateDice(DiceType.Omni, 1);
-      c.addVariable("generatedCount", 1);
+define card {
+  id 312028 as private FlowerOfParadiseLost;
+  until "v5.8.0";
+  cost DiceType.Aligned, 2;
+  artifact {
+    variable crystal, 0;
+    variable generatedCount, 0 {
+      visible false;
+    };
+    on roundEnd {
+      :setVariable("generatedCount", 0);
     }
-  })
-  .done();
+    on damaged {
+      when :( :self.master.isActive() &&
+          !:e.target.isMine() &&
+          (:e.type === DamageType.Dendro || :e.isReactionRelatedTo(DamageType.Dendro)) );
+      listenTo all;
+      :addVariable("crystal", 2);
+      const crystal = :getVariable("crystal");
+      const hands = :player.hands.length;
+      if (crystal >= hands && :getVariable("generatedCount") < 2) {
+        :generateDice(DiceType.Omni, 1);
+        :addVariable("generatedCount", 1);
+      }
+    }
+  }
+}
 
 /**
  * @id 321012
@@ -336,16 +373,18 @@ const FlowerOfParadiseLost = card(312028)
  * 行动阶段开始时：如果我方不是「先手牌手」，则生成1个出战角色类型的元素骰。
  * 可用次数：3
  */
-const ChinjuForest = card(321012)
-  .until("v5.8.0")
-  .costSame(1)
-  .support("place")
-  .on("actionPhase", (c) => !c.isMyTurn())
-  .usage(3)
-  .do((c) => {
-    c.generateDice(c.$("my active")!.element(), 1);
-  })
-  .done();
+define card {
+  id 321012 as private ChinjuForest;
+  until "v5.8.0";
+  cost DiceType.Aligned, 1;
+  support place {
+    on actionPhase {
+      when :( !:isMyTurn() );
+      usage 3;
+      :generateDice(:$("my active")!.element(), 1);
+    }
+  }
+}
 
 /**
  * @id 321008
@@ -354,13 +393,17 @@ const ChinjuForest = card(321012)
  * 每回合自动触发1次：生成1个随机的基础元素骰。
  * 可用次数：3
  */
-const GrandNarukamiShrine = card(321008)
-  .until("v5.8.0")
-  .costSame(2)
-  .support("place")
-  .on("enter")
-  .generateDice("randomElement", 1)
-  .on("actionPhase")
-  .usage(2)
-  .generateDice("randomElement", 1)
-  .done();
+define card {
+  id 321008 as private GrandNarukamiShrine;
+  until "v5.8.0";
+  cost DiceType.Aligned, 2;
+  support place {
+    on enter {
+      :generateDice("randomElement", 1);
+    }
+    on actionPhase {
+      usage 2;
+      :generateDice("randomElement", 1);
+    }
+  }
+}

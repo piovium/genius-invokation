@@ -25,18 +25,17 @@ import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.gts";
  * 我方出战角色的元素类型为冰/水/火/雷/草时，才能打出：对我方所有角色附着我方出战角色类型的元素。
  * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  */
-const JoyousCelebration = card(330003)
-  .until("v4.1.0")
-  .costSame(1)
-  .legend()
-  .filter((c) => ([DiceType.Cryo, DiceType.Hydro, DiceType.Pyro, DiceType.Electro, DiceType.Dendro] as (DiceType | undefined)[]).includes(c.$("my active")?.element()))
-  .do((c) => {
-    const element = c.$("my active")!.element() as 1 | 2 | 3 | 4 | 7;
-    // 先挂后台再挂前台（避免前台被超载走导致结算错误）
-    c.apply(element, "my standby character");
-    c.apply(element, "my active character");
-  })
-  .done();
+define card {
+  id 330003 as private JoyousCelebration;
+  until "v4.1.0";
+  cost DiceType.Aligned, 1;
+  legend;
+  filter :( ([DiceType.Cryo, DiceType.Hydro, DiceType.Pyro, DiceType.Electro, DiceType.Dendro] as (DiceType | undefined)[]).includes(:$("my active")?.element()) );
+  const element = :$("my active")!.element() as 1 | 2 | 3 | 4 | 7;
+  // 先挂后台再挂前台（避免前台被超载走导致结算错误）
+  :apply(element, "my standby character");
+  :apply(element, "my active character");
+}
 
 /**
  * @id 212021
@@ -47,13 +46,16 @@ const JoyousCelebration = card(330003)
  * 装备有此牌的行秋生成的雨帘剑，初始可用次数+1。
  * （牌组中包含行秋，才能加入牌组）
  */
-const TheScentRemained = card(212021)
-  .until("v4.1.0")
-  .costHydro(4)
-  .talent(Xingqiu)
-  .on("enter")
-  .useSkill(FatalRainscreen)
-  .done();
+define card {
+  id 212021 as private TheScentRemained;
+  until "v4.1.0";
+  cost DiceType.Hydro, 4;
+  talent Xingqiu {
+    on enter {
+      :useSkill(FatalRainscreen);
+    }
+  }
+}
 
 /**
  * @id 112023
@@ -62,14 +64,17 @@ const TheScentRemained = card(212021)
  * 我方出战角色受到至少为3的伤害时：抵消1点伤害。
  * 可用次数：3
  */
-const RainSword01 = combatStatus(112023)
-  .until("v4.1.0")
-  .tags("barrier")
-  .conflictWith(112021)
-  .on("decreaseDamaged", (c, e) => e.target.isActive() && e.value >= 3)
-  .usage(3)
-  .decreaseDamage(1)
-  .done();
+define combatStatus {
+  id 112023 as private RainSword01;
+  until "v4.1.0";
+  tags barrier;
+  conflictWith 112021;
+  on decreaseDamaged {
+    when :( :e.target.isActive() && :e.value >= 3 );
+    usage 3;
+    :e.decreaseDamage(1);
+  }
+}
 
 /**
  * @id 222021
@@ -81,13 +86,16 @@ const RainSword01 = combatStatus(112023)
  * 初始持续回合+1，并且会使所附属角色切换到其他角色时元素骰费用+1。
  * （牌组中包含愚人众·藏镜仕女，才能加入牌组）
  */
-const MirrorCage = card(222021)
-  .until("v4.1.0")
-  .costHydro(4)
-  .talent(MirrorMaiden)
-  .on("enter")
-  .useSkill(InfluxBlast)
-  .done();
+define card {
+  id 222021 as private MirrorCage;
+  until "v4.1.0";
+  cost DiceType.Hydro, 4;
+  talent MirrorMaiden {
+    on enter {
+      :useSkill(InfluxBlast);
+    }
+  }
+}
 
 
 /**
@@ -99,13 +107,16 @@ const MirrorCage = card(222021)
  * 装备有此牌的芭芭拉在场时，歌声之环会使我方执行「切换角色」行动时少花费1个元素骰。（每回合1次）
  * （牌组中包含芭芭拉，才能加入牌组）
  */
-const GloriousSeason = card(212011)
-  .until("v4.1.0")
-  .costHydro(4)
-  .talent(Barbara)
-  .on("enter")
-  .useSkill(LetTheShowBegin)
-  .done();
+define card {
+  id 212011 as private GloriousSeason;
+  until "v4.1.0";
+  cost DiceType.Hydro, 4;
+  talent Barbara {
+    on enter {
+      :useSkill(LetTheShowBegin);
+    }
+  }
+}
 
 /**
  * @id 224011
@@ -114,13 +125,14 @@ const GloriousSeason = card(212011)
  * 战斗行动：我方出战角色为无相之雷时，治疗该角色3点，并附属雷晶核心。
  * （牌组中包含无相之雷，才能加入牌组）
  */
-const AbsorbingPrism = card(224011)
-  .until("v4.1.0")
-  .costElectro(3)
-  .eventTalent(ElectroHypostasis)
-  .heal(3, "my active")
-  .characterStatus(ElectroCrystalCore, "my active")
-  .done();
+define card {
+  id 224011 as private AbsorbingPrism;
+  until "v4.1.0";
+  cost DiceType.Electro, 3;
+  eventTalent ElectroHypostasis;
+  :heal(3, "my active");
+  :characterStatus(ElectroCrystalCore, "my active");
+}
 
 /**
  * @id 211041
@@ -132,13 +144,16 @@ const AbsorbingPrism = card(224011)
  * 初始持续回合+1，并且使我方单手剑、双手剑或长柄武器角色的普通攻击伤害+1。
  * （牌组中包含重云，才能加入牌组）
  */
-export const SteadyBreathing = card(211041)
-  .until("v4.1.0")
-  .costCryo(4)
-  .talent(Chongyun)
-  .on("enter")
-  .useSkill(ChonghuasLayeredFrost)
-  .done();
+define card {
+  id 211041 as SteadyBreathing;
+  until "v4.1.0";
+  cost DiceType.Cryo, 4;
+  talent Chongyun {
+    on enter {
+      :useSkill(ChonghuasLayeredFrost);
+    }
+  }
+}
 
 /**
  * @id 111042
@@ -147,23 +162,28 @@ export const SteadyBreathing = card(211041)
  * 我方单手剑、双手剑或长柄武器角色造成的物理伤害变为冰元素伤害，普通攻击造成的伤害+1。
  * 持续回合：3
  */
-export const ChonghuaFrostField01 = combatStatus(111042)
-  .until("v4.1.0")
-  .conflictWith(111041)
-  .duration(3)
-  .on("modifySkillDamageType", (c, e) => {
-    if (e.type !== DamageType.Physical) return false;
-    const { tags } = e.source.cast<"character">().definition;
-    return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
-  })
-  .changeDamageType(DamageType.Cryo)
-  .on("increaseSkillDamage", (c, e) => {
-    if (!e.viaSkillType("normal")) return false;
-    const { tags } = e.source.cast<"character">().definition;
-    return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
-  })
-  .increaseDamage(1)
-  .done();
+define combatStatus {
+  id 111042 as ChonghuaFrostField01;
+  until "v4.1.0";
+  conflictWith 111041;
+  duration 3;
+  on modifySkillDamageType {
+    when :{
+      if (:e.type !== DamageType.Physical) return false;
+      const { tags } = :e.source.cast<"character">().definition;
+      return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
+    };
+    :e.changeDamageType(DamageType.Cryo);
+  }
+  on increaseSkillDamage {
+    when :{
+      if (!:e.viaSkillType("normal")) return false;
+      const { tags } = :e.source.cast<"character">().definition;
+      return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
+    };
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 213021
@@ -174,13 +194,16 @@ export const ChonghuaFrostField01 = combatStatus(111042)
  * 装备有此牌的香菱使用锅巴出击时：自身也会造成1点火元素伤害。
  * （牌组中包含香菱，才能加入牌组）
  */
-export const Crossfire = card(213021)
-  .until("v4.1.0")
-  .costPyro(4)
-  .talent(Xiangling)
-  .on("enter")
-  .useSkill(GuobaAttack)
-  .done();
+define card {
+  id 213021 as Crossfire;
+  until "v4.1.0";
+  cost DiceType.Pyro, 4;
+  talent Xiangling {
+    on enter {
+      :useSkill(GuobaAttack);
+    }
+  }
+}
 
 /**
  * @id 13052
@@ -188,13 +211,14 @@ export const Crossfire = card(213021)
  * @description
  * 本角色附属庭火焰硝。（此技能不产生充能）
  */
-const NiwabiFiredance: SkillHandle = skill(13052)
-  .until("v4.1.0")
-  .type("elemental")
-  .costPyro(1)
-  .noEnergy()
-  .characterStatus(NiwabiEnshou)
-  .done();
+define skill {
+  id 13052 as private NiwabiFiredance;
+  until "v4.1.0";
+  skillType elemental;
+  cost DiceType.Pyro, 1;
+  noEnergy;
+  :characterStatus(NiwabiEnshou);
+}
 
 /**
  * @id 213051
@@ -205,15 +229,20 @@ const NiwabiFiredance: SkillHandle = skill(13052)
  * 装备有此牌的宵宫触发庭火焰硝后：额外造成1点火元素伤害。
  * （牌组中包含宵宫，才能加入牌组）
  */
-const NaganoharaMeteorSwarm = card(213051)
-  .until("v4.1.0")
-  .costPyro(2)
-  .talent(Yoimiya)
-  .on("enter")
-  .useSkill(NiwabiFiredance)
-  .on("useSkill", (c, e) => e.isSkillType("normal") && c.self.master.hasStatus(NiwabiEnshou))
-  .damage(DamageType.Pyro, 1)
-  .done();
+define card {
+  id 213051 as private NaganoharaMeteorSwarm;
+  until "v4.1.0";
+  cost DiceType.Pyro, 2;
+  talent Yoimiya {
+    on enter {
+      :useSkill(NiwabiFiredance);
+    }
+    on useSkill {
+      when :( :e.isSkillType("normal") && :self.master.hasStatus(NiwabiEnshou) );
+      :damage(DamageType.Pyro, 1);
+    }
+  }
+}
 
 
 /**
@@ -225,14 +254,17 @@ const NaganoharaMeteorSwarm = card(213051)
  * 装备有此牌的坎蒂丝生成的赤冕祝祷额外具有以下效果：我方角色普通攻击后：造成1点水元素伤害。（每回合1次）
  * （牌组中包含坎蒂丝，才能加入牌组）
  */
-const TheOverflow = card(212071)
-  .until("v4.1.0")
-  .costHydro(4)
-  .costEnergy(2)
-  .talent(Candace)
-  .on("enter")
-  .useSkill(SacredRiteWagtailsTide)
-  .done();
+define card {
+  id 212071 as private TheOverflow;
+  until "v4.1.0";
+  cost DiceType.Hydro, 4;
+  cost DiceType.Energy, 2;
+  talent Candace {
+    on enter {
+      :useSkill(SacredRiteWagtailsTide);
+    }
+  }
+}
 
 /**
  * @id 214021
@@ -243,15 +275,20 @@ const TheOverflow = card(212071)
  * 装备有此牌的雷泽使用利爪与苍雷后：使我方一个雷元素角色获得1点充能。（出战角色优先）
  * （牌组中包含雷泽，才能加入牌组）
  */
-const Awakening = card(214021)
-  .until("v4.1.0")
-  .costElectro(4)
-  .talent(Razor)
-  .on("enter")
-  .useSkill(ClawAndThunder)
-  .on("useSkill", (c, e) => e.skill.definition.id === ClawAndThunder)
-  .gainEnergy(1, "my characters with tag (electro) and with energy < maxEnergy limit 1")
-  .done();
+define card {
+  id 214021 as private Awakening;
+  until "v4.1.0";
+  cost DiceType.Electro, 4;
+  talent Razor {
+    on enter {
+      :useSkill(ClawAndThunder);
+    }
+    on useSkill {
+      when :( :e.skill.definition.id === ClawAndThunder );
+      :gainEnergy(1, "my characters with tag (electro) and with energy < maxEnergy limit 1");
+    }
+  }
+}
 
 /**
  * @id 214051
@@ -262,25 +299,32 @@ const Awakening = card(214021)
  * 装备有此牌的北斗使用踏潮时：如果准备技能期间受到过伤害，则使北斗本回合内「普通攻击」少花费1个无色元素。（最多触发2次）
  * （牌组中包含北斗，才能加入牌组）
  */
-const LightningStorm = card(214051)
-  .until("v4.1.0")
-  .costElectro(3)
-  .talent(Beidou)
-  .on("enter")
-  .useSkill(Tidecaller)
-  .on("useSkill", (c, e) => {
-    if (e.skill.definition.id !== Wavestrider) {
-      return false;
+define card {
+  id 214051 as private LightningStorm;
+  until "v4.1.0";
+  cost DiceType.Electro, 3;
+  talent Beidou {
+    on enter {
+      :useSkill(Tidecaller);
     }
-    const shield = c.$(`status with definition id ${TidecallerSurfEmbrace} at @master`);
-    if (shield && shield.getVariable("shield") === 2) {
-      return false;
+    on useSkill {
+      when :{
+        if (:e.skill.definition.id !== Wavestrider) {
+          return false;
+        }
+        const shield = :$(`status with definition id ${TidecallerSurfEmbrace} at @master`);
+        if (shield && shield.getVariable("shield") === 2) {
+          return false;
+        }
+        return true;
+      };
+      usage 2 {
+        autoDispose false;
+      };
+      :characterStatus(SummonerOfLightning, "@master");
     }
-    return true;
-  })
-  .usage(2, { autoDispose: false })
-  .characterStatus(SummonerOfLightning, "@master")
-  .done();
+  }
+}
 
 /**
  * @id 214061
@@ -291,14 +335,17 @@ const LightningStorm = card(214051)
  * 装备有此牌的九条裟罗在场时，我方附属有鸣煌护持的雷元素角色，元素战技和元素爆发造成的伤害额外+1。
  * （牌组中包含九条裟罗，才能加入牌组）
  */
-const SinOfPride = card(214061)
-  .until("v4.1.0")
-  .costElectro(4)
-  .costEnergy(3)
-  .talent(KujouSara)
-  .on("enter")
-  .useSkill(SubjugationKoukouSendou)
-  .done();
+define card {
+  id 214061 as private SinOfPride;
+  until "v4.1.0";
+  cost DiceType.Electro, 4;
+  cost DiceType.Energy, 3;
+  talent KujouSara {
+    on enter {
+      :useSkill(SubjugationKoukouSendou);
+    }
+  }
+}
 
 /**
  * @id 214041
@@ -309,19 +356,24 @@ const SinOfPride = card(214061)
  * 装备有此牌的赛诺在启途誓使的「凭依」级数为3或5时使用秘仪·律渊渡魂时，造成的伤害额外+1。
  * （牌组中包含赛诺，才能加入牌组）
  */
-const FeatherfallJudgment = card(214041)
-  .until("v4.1.0")
-  .costElectro(3)
-  .talent(Cyno)
-  .on("enter")
-  .useSkill(SecretRiteChasmicSoulfarer)
-  .on("increaseSkillDamage", (c, e) => {
-    const status = c.self.master.hasStatus(PactswornPathclearer)!;
-    const reliance = c.getVariable("reliance", status);
-    return (reliance === 3 || reliance === 5) && e.via.definition.id === SecretRiteChasmicSoulfarer;
-  })
-  .increaseDamage(1)
-  .done();
+define card {
+  id 214041 as private FeatherfallJudgment;
+  until "v4.1.0";
+  cost DiceType.Electro, 3;
+  talent Cyno {
+    on enter {
+      :useSkill(SecretRiteChasmicSoulfarer);
+    }
+    on increaseSkillDamage {
+      when :{
+        const status = :self.master.hasStatus(PactswornPathclearer)!;
+        const reliance = :getVariable("reliance", status);
+        return (reliance === 3 || reliance === 5) && :e.via.definition.id === SecretRiteChasmicSoulfarer;
+      };
+      :e.increaseDamage(1);
+    }
+  }
+}
 
 /**
  * @id 212051
@@ -341,16 +393,18 @@ const TamakushiCasket = 212051 as EquipmentHandle; // Keeps same
  * @description
  * 造成2点水元素伤害，治疗所有我方角色1点，本角色附属仪来羽衣。
  */
-const NereidsAscension = skill(12053)
-  .until("v4.1.0")
-  .type("burst")
-  .costHydro(3)
-  .costEnergy(2)
-  .damage(DamageType.Hydro, 2)
-  .heal(1, "all my characters")
-  .if((c) => c.self.hasEquipment(TamakushiCasket) && c.$(`my summon with definition id ${BakeKurage}`))
-  .summon(BakeKurage)
-  .done();
+define skill {
+  id 12053 as private NereidsAscension;
+  until "v4.1.0";
+  skillType burst;
+  cost DiceType.Hydro, 3;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Hydro, 2);
+  :heal(1, "all my characters");
+  if (:self.hasEquipment(TamakushiCasket) && :$(`my summon with definition id ${BakeKurage}`)) {
+    :summon(BakeKurage);
+  }
+}
 
 /**
  * @id 213041
@@ -361,21 +415,24 @@ const NereidsAscension = skill(12053)
  * 安柏普通攻击后：如果此牌和兔兔伯爵仍在场，则引爆兔兔伯爵，造成3点火元素伤害。
  * （牌组中包含安柏，才能加入牌组）
  */
-const BunnyTriggered = card(213041)
-  .until("v4.1.0")
-  .costPyro(3)
-  .talent(Amber)
-  .on("enter")
-  .useSkill(ExplosivePuppet)
-  .on("useSkill", (c, e) => e.isSkillType("normal"))
-  .do((c) => {
-    const bunny = c.$(`my summon with definition id ${BaronBunny}`);
-    if (bunny) {
-      c.damage(DamageType.Pyro, 3);
-      bunny.dispose();
+define card {
+  id 213041 as private BunnyTriggered;
+  until "v4.1.0";
+  cost DiceType.Pyro, 3;
+  talent Amber {
+    on enter {
+      :useSkill(ExplosivePuppet);
     }
-  })
-  .done();
+    on useSkill {
+      when :( :e.isSkillType("normal") );
+      const bunny = :$(`my summon with definition id ${BaronBunny}`);
+      if (bunny) {
+        :damage(DamageType.Pyro, 3);
+        bunny.dispose();
+      }
+    }
+  }
+}
 
 /**
  * @id 115021
@@ -384,17 +441,21 @@ const BunnyTriggered = card(213041)
  * 结束阶段：造成2点风元素伤害，治疗我方出战角色1点。
  * 可用次数：2
  */
-const DandelionField: SummonHandle = summon(115021)
-  .until("v4.1.0")
-  .endPhaseDamage(DamageType.Anemo, 2)
-  .usage(2)
-  .heal(1, "my active")
-  .on("increaseDamage", (c, e) => 
-    c.$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
-    e.type === DamageType.Anemo
-  )
-  .increaseDamage(1)
-  .done();
+define summon {
+  id 115021 as private DandelionField;
+  until "v4.1.0";
+  hint DamageType.Anemo, 2;
+  on endPhase {
+    usage 2;
+    :damage(DamageType.Anemo, 2);
+    :heal(1, "my active");
+  }
+  on increaseDamage {
+    when :( :$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
+        :e.type === DamageType.Anemo );
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 15023
@@ -402,14 +463,15 @@ const DandelionField: SummonHandle = summon(115021)
  * @description
  * 治疗所有我方角色2点，召唤蒲公英领域。
  */
-const DandelionBreeze = skill(15023)
-  .until("v4.1.0")
-  .type("burst")
-  .costAnemo(4)
-  .costEnergy(3)
-  .heal(2, "all my characters")
-  .summon(DandelionField)
-  .done();
+define skill {
+  id 15023 as private DandelionBreeze;
+  until "v4.1.0";
+  skillType burst;
+  cost DiceType.Anemo, 4;
+  cost DiceType.Energy, 3;
+  :heal(2, "all my characters");
+  :summon(DandelionField);
+}
 
 /**
  * @id 1502
@@ -417,13 +479,14 @@ const DandelionBreeze = skill(15023)
  * @description
  * 在夺得最终的胜利之前，她总是认为自己做得还不够好。
  */
-const Jean = character(1502)
-  .until("v4.1.0")
-  .tags("anemo", "sword", "mondstadt")
-  .health(10)
-  .energy(3)
-  .skills(FavoniusBladework, GaleBlade, DandelionBreeze)
-  .done();
+define character {
+  id 1502 as private Jean;
+  until "v4.1.0";
+  tags anemo, sword, mondstadt;
+  health 10;
+  energy 3;
+  skills FavoniusBladework, GaleBlade, DandelionBreeze;
+}
 
 /**
  * @id 215021
@@ -434,14 +497,17 @@ const Jean = character(1502)
  * 装备有此牌的琴在场时，蒲公英领域会使我方造成的风元素伤害+1。
  * （牌组中包含琴，才能加入牌组）
  */
-const LandsOfDandelion = card(215021)
-  .until("v4.1.0")
-  .costAnemo(4)
-  .costEnergy(3)
-  .talent(Jean)
-  .on("enter")
-  .useSkill(DandelionBreeze)
-  .done();
+define card {
+  id 215021 as private LandsOfDandelion;
+  until "v4.1.0";
+  cost DiceType.Anemo, 4;
+  cost DiceType.Energy, 3;
+  talent Jean {
+    on enter {
+      :useSkill(DandelionBreeze);
+    }
+  }
+}
 
 /**
  * @id 113081
@@ -450,12 +516,15 @@ const LandsOfDandelion = card(215021)
  * 角色进行重击时：造成的伤害+2。
  * 可用次数：1
  */
-const ScarletSeal = status(113081)
-  .until("v4.1.0")
-  .on("increaseSkillDamage", (c, e) => e.viaChargedAttack())
-  .usage(1)
-  .increaseDamage(2)
-  .done();
+define status {
+  id 113081 as private ScarletSeal;
+  until "v4.1.0";
+  on increaseSkillDamage {
+    when :( :e.viaChargedAttack() );
+    usage 1;
+    :e.increaseDamage(2);
+  }
+}
 
 /**
  * @id 213081
@@ -466,17 +535,22 @@ const ScarletSeal = status(113081)
  * 装备有此牌的烟绯进行重击时：对生命值不多于6的敌人造成的伤害+1。
  * （牌组中包含烟绯，才能加入牌组）
  */
-const RightOfFinalInterpretation = card(213081)
-  .until("v4.1.0")
-  .costPyro(1)
-  .costVoid(2)
-  .talent(Yanfei)
-  .variable("triggerSeal", 0)
-  .on("enter")
-  .useSkill(SealOfApproval)
-  .on("increaseSkillDamage", (c, e) => e.viaChargedAttack() && e.target.health <= 6)
-  .increaseDamage(1)
-  .done();
+define card {
+  id 213081 as private RightOfFinalInterpretation;
+  until "v4.1.0";
+  cost DiceType.Pyro, 1;
+  cost DiceType.Void, 2;
+  talent Yanfei {
+    variable triggerSeal, 0;
+    on enter {
+      :useSkill(SealOfApproval);
+    }
+    on increaseSkillDamage {
+      when :( :e.viaChargedAttack() && :e.target.health <= 6 );
+      :e.increaseDamage(1);
+    }
+  }
+}
 
 /**
  * @id 111072
@@ -486,23 +560,29 @@ const RightOfFinalInterpretation = card(213081)
  * 可用次数：3
  * 我方角色通过「普通攻击」触发此效果时，不消耗可用次数。（每回合1次）
  */
-const IcyQuill01 = combatStatus(111072)
-  .until("v4.1.0")
-  .conflictWith(111071)
-  .variable("noUsageEffect", 1, { visible: false }) // 每回合一次不消耗可用次数
-  .on("roundEnd")
-  .setVariable("noUsageEffect", 1)
-  .on("increaseDamage", (c, e) => e.via.caller.definition.type === "character" && e.type === DamageType.Cryo)
-  .usage(3, { autoDecrease: false })
-  .increaseDamage(1)
-  .do((c, e) => {
-    if (e.viaSkillType("normal") && c.getVariable("noUsageEffect")) {
-      c.setVariable("noUsageEffect", 0);
+define combatStatus {
+  id 111072 as private IcyQuill01;
+  until "v4.1.0";
+  conflictWith 111071;
+  variable noUsageEffect, 1 {
+    visible false;
+  };
+  on roundEnd {
+    :setVariable("noUsageEffect", 1);
+  }
+  on increaseDamage {
+    when :( :e.via.caller.definition.type === "character" && :e.type === DamageType.Cryo );
+    usage 3 {
+      autoDecrease false;
+    };
+    :e.increaseDamage(1);
+    if (:e.viaSkillType("normal") && :getVariable("noUsageEffect")) {
+      :setVariable("noUsageEffect", 0);
     } else {
-      c.consumeUsage()
+      :consumeUsage()
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 111071
@@ -511,13 +591,16 @@ const IcyQuill01 = combatStatus(111072)
  * 我方角色造成的冰元素伤害+1。（包括角色引发的冰元素扩散的伤害）
  * 可用次数：3
  */
-const IcyQuill = combatStatus(111071)
-  .until("v4.1.0")
-  .conflictWith(111072)
-  .on("increaseDamage", (c, e) => e.via.caller.definition.type === "character" && e.type === DamageType.Cryo)
-  .usage(3)
-  .increaseDamage(1)
-  .done();
+define combatStatus {
+  id 111071 as private IcyQuill;
+  until "v4.1.0";
+  conflictWith 111072;
+  on increaseDamage {
+    when :( :e.via.caller.definition.type === "character" && :e.type === DamageType.Cryo );
+    usage 3;
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 22014
@@ -525,20 +608,19 @@ const IcyQuill = combatStatus(111071)
  * @description
  * 造成2点水元素伤害；我方每有1个召唤物，再使此伤害+2。
  */
-const TideAndTorrent = skill(22014)
-  .until("v4.1.0")
-  .type("burst")
-  .costHydro(3)
-  .costEnergy(3)
-  .do((c) => {
-    const summons = c.$$("my summons");
-    const damageValue = 2 + summons.length * 2;
-    c.damage(DamageType.Hydro, damageValue);
-    if (c.self.hasEquipment(StreamingSurge)) {
-      summons.forEach((s) => s.addVariable("usage", 1))
-    }
-  })
-  .done();
+define skill {
+  id 22014 as private TideAndTorrent;
+  until "v4.1.0";
+  skillType burst;
+  cost DiceType.Hydro, 3;
+  cost DiceType.Energy, 3;
+  const summons = :$$("my summons");
+  const damageValue = 2 + summons.length * 2;
+  :damage(DamageType.Hydro, damageValue);
+  if (:self.hasEquipment(StreamingSurge)) {
+    summons.forEach((s) => s.addVariable("usage", 1))
+  }
+}
 
 /**
  * @id 116053
@@ -548,17 +630,24 @@ const TideAndTorrent = skill(22014)
  * 持续回合：2
  * 所附属角色普通攻击后：为其附属乱神之怪力。（每回合1次）
  */
-export const RagingOniKing = status(116053)
-  .until("v4.1.0")
-  .duration(2)
-  .on("modifySkillDamageType", (c, e) => e.type === DamageType.Physical)
-  .changeDamageType(DamageType.Geo)
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("normal"))
-  .increaseDamage(2)
-  .on("useSkill", (c, e) => e.isSkillType("normal"))
-  .usagePerRound(1)
-  .characterStatus(SuperlativeSuperstrength, "@master")
-  .done();
+define status {
+  id 116053 as RagingOniKing;
+  until "v4.1.0";
+  duration 2;
+  on modifySkillDamageType {
+    when :( :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Geo);
+  }
+  on increaseSkillDamage {
+    when :( :e.viaSkillType("normal") );
+    :e.increaseDamage(2);
+  }
+  on useSkill {
+    when :( :e.isSkillType("normal") );
+    usage perRound, 1;
+    :characterStatus(SuperlativeSuperstrength, "@master");
+  }
+}
 
 /**
  * @id 16053
@@ -566,12 +655,13 @@ export const RagingOniKing = status(116053)
  * @description
  * 造成5点岩元素伤害，本角色附属怒目鬼王。
  */
-const RoyalDescentBeholdIttoTheEvil = skill(16053)
-  .until("v4.1.0")
-  .type("burst")
-  .costGeo(3)
-  .costEnergy(3)
-  .damage(DamageType.Geo, 5)
-  .characterStatus(RagingOniKing)
-  .done();
+define skill {
+  id 16053 as private RoyalDescentBeholdIttoTheEvil;
+  until "v4.1.0";
+  skillType burst;
+  cost DiceType.Geo, 3;
+  cost DiceType.Energy, 3;
+  :damage(DamageType.Geo, 5);
+  :characterStatus(RagingOniKing);
+}
 

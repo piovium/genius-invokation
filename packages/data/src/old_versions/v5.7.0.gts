@@ -1,4 +1,4 @@
-import { card, character, DamageType, Reaction, skill, status } from "@gi-tcg/core/builder";
+import { card, character, DamageType, DiceType, Reaction, skill, status } from "@gi-tcg/core/builder";
 import { Citlali, MamaloacosFrigidRainInEffect } from "../characters/cryo/citlali.gts";
 import { BondOfLife } from "../commons.gts";
 import { Arlecchino } from "../characters/pyro/arlecchino.gts";
@@ -15,17 +15,20 @@ import { BloodbondedShadow, FrostyInterjection, OnslaughtStance, SwiftPoint } fr
  * 敌方受到冻结或融化反应伤害后：我方下2次造成的水元素伤害和火元素伤害+1，并使茜特菈莉获得1点「夜魂值」。（每回合1次）
  * （牌组中包含茜特菈莉，才能加入牌组）
  */
-const MamaloacosFrigidRain = card(211141)
-  .until("v5.7.0")
-  .costCryo(1)
-  .talent(Citlali, "none")
-  .on("damaged", (c, e) =>
-    (e.getReaction() === Reaction.Frozen || e.getReaction() === Reaction.Melt) &&
-    !e.target.isMine())
-  .listenToAll()
-  .usagePerRound(1)
-  .combatStatus(MamaloacosFrigidRainInEffect)
-  .done();
+define card {
+  id 211141 as private MamaloacosFrigidRain;
+  until "v5.7.0";
+  cost DiceType.Cryo, 1;
+  talent Citlali, none {
+    on damaged {
+      when :( (:e.getReaction() === Reaction.Frozen || :e.getReaction() === Reaction.Melt) &&
+          !:e.target.isMine() );
+      listenTo all;
+      usage perRound, 1;
+      :combatStatus(MamaloacosFrigidRainInEffect);
+    }
+  }
+}
 
 /**
  * @id 13152
@@ -33,17 +36,18 @@ const MamaloacosFrigidRain = card(211141)
  * @description
  * 本角色进入夜魂加持，获得2点「夜魂值」，并从3张驰轮车中挑选1张加入手牌。
  */
-const TheNamedMoment = skill(13152)
-  .until("v5.7.0")
-  .type("elemental")
-  .costPyro(2)
-  .selectAndCreateHandCard([
-    FlamestriderBlazingTrail,
-    FlamestriderFullThrottle,
-    FlamestriderSoaringAscent
-  ])
-  .gainNightsoul("@self", 2)
-  .done();
+define skill {
+  id 13152 as private TheNamedMoment;
+  until "v5.7.0";
+  skillType elemental;
+  cost DiceType.Pyro, 2;
+  :selectAndCreateHandCard([
+      FlamestriderBlazingTrail,
+      FlamestriderFullThrottle,
+      FlamestriderSoaringAscent
+    ]);
+  :gainNightsoul("@self", 2);
+}
 
 /**
  * @id 216101
@@ -52,15 +56,18 @@ const TheNamedMoment = skill(13152)
  * 我方冲天转转或冲天转转·脱离触发效果后，抓1张牌。（每回合2次）
  * （牌组中包含卡齐娜，才能加入牌组）
  */
-const NightRealmsGiftHeartOfUnity = card(216101)
-  .until("v5.7.0")
-  .costGeo(1)
-  .talent(Kachina, "none")
-  .on(TurboTwirlyTriggered)
-  .listenToPlayer()
-  .usagePerRound(2)
-  .drawCards(1)
-  .done();
+define card {
+  id 216101 as private NightRealmsGiftHeartOfUnity;
+  until "v5.7.0";
+  cost DiceType.Geo, 1;
+  talent Kachina, none {
+    on TurboTwirlyTriggered {
+      listenTo samePlayer;
+      usage perRound, 2;
+      :drawCards(1);
+    }
+  }
+}
 
 /**
  * @id 17092
@@ -102,25 +109,29 @@ const CanopyHunterRidingHigh = skill(17092)
  * 装备有此牌的艾梅莉埃普通攻击后：我方最高等级的「柔灯之匣」立刻行动1次。（每回合1次）
  * （牌组中包含艾梅莉埃，才能加入牌组）
  */
-const MarcotteSillage = card(217101)
-  .until("v5.7.0")
-  .costDendro(1)
-  .talent(Emilie, "none")
-  .on("modifySkillDamageType", (c, e) => e.type === DamageType.Physical)
-  .changeDamageType(DamageType.Dendro)
-  .on("useSkill", (c, e) => e.isSkillType("normal"))
-  .usagePerRound(1)
-  .do((c) => {
-    const lumidouceIds = [LumidouceCaseLevel3, LumidouceCaseLevel2, LumidouceCaseLevel1];
-    for (const id of lumidouceIds) {
-      const lumidouce = c.$(`my summons with definition id ${id}`);
-      if (lumidouce) {
-        c.triggerEndPhaseSkill(lumidouce);
-        break;
+define card {
+  id 217101 as private MarcotteSillage;
+  until "v5.7.0";
+  cost DiceType.Dendro, 1;
+  talent Emilie, none {
+    on modifySkillDamageType {
+      when :( :e.type === DamageType.Physical );
+      :e.changeDamageType(DamageType.Dendro);
+    }
+    on useSkill {
+      when :( :e.isSkillType("normal") );
+      usage perRound, 1;
+      const lumidouceIds = [LumidouceCaseLevel3, LumidouceCaseLevel2, LumidouceCaseLevel1];
+      for (const id of lumidouceIds) {
+        const lumidouce = :$(`my summons with definition id ${id}`);
+        if (lumidouce) {
+          :triggerEndPhaseSkill(lumidouce);
+          break;
+        }
       }
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 213141
@@ -130,15 +141,18 @@ const MarcotteSillage = card(217101)
  * 装备有此牌的阿蕾奇诺受到伤害时，若可能，消耗1层生命之契，以抵消1点伤害。
  * （牌组中包含阿蕾奇诺，才能加入牌组）
  */
-const AllReprisalsAndArrearsMineToBear = card(213141)
-  .until("v5.7.0")
-  .costPyro(2)
-  .talent(Arlecchino)
-  .on("enter")
-  .characterStatus(BondOfLife, "@master", {
-    overrideVariables: { usage: 3 }
-  }) // 消耗生命之契增伤的部分在被动技能 13147 里
-  .done();
+define card {
+  id 213141 as private AllReprisalsAndArrearsMineToBear;
+  until "v5.7.0";
+  cost DiceType.Pyro, 2;
+  talent Arlecchino {
+    on enter {
+      :characterStatus(BondOfLife, "@master", {
+          overrideVariables: { usage: 3 }
+        });
+    }
+  }
+}
 
 /**
  * @id 21043
@@ -146,14 +160,15 @@ const AllReprisalsAndArrearsMineToBear = card(213141)
  * @description
  * 造成4点冰元素伤害，本角色附属掠袭锐势。
  */
-const ThornyOnslaught = skill(21043)
-  .until("v5.7.0")
-  .type("burst")
-  .costCryo(3)
-  .costEnergy(2)
-  .damage(DamageType.Cryo, 4)
-  .characterStatus(OnslaughtStance, "@self")
-  .done();
+define skill {
+  id 21043 as private ThornyOnslaught;
+  until "v5.7.0";
+  skillType burst;
+  cost DiceType.Cryo, 3;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Cryo, 4);
+  :characterStatus(OnslaughtStance, "@self");
+}
 
 /**
  * @id 2104
@@ -161,24 +176,26 @@ const ThornyOnslaught = skill(21043)
  * @description
  * 自幼就被选中的人，经长久年月的教化与训练，在无数次的汰换后才能成为所谓的「役人」。
  */
-const FrostOperative = character(2104)
-  .until("v5.7.0")
-  .tags("cryo", "fatui")
-  .health(10)
-  .energy(2)
-  .skills(SwiftPoint, FrostyInterjection, ThornyOnslaught, BloodbondedShadow)
-  .done();
+define character {
+  id 2104 as private FrostOperative;
+  until "v5.7.0";
+  tags cryo, fatui;
+  health 10;
+  energy 2;
+  skills SwiftPoint, FrostyInterjection, ThornyOnslaught, BloodbondedShadow;
+}
 
 /**
  * @id 300005
  * @name 赦免宣告（生效中）
  * 本回合中，所附属角色免疫冻结、眩晕、石化等无法使用技能的效果，并且该角色为「出战角色」时不会因效果而切换。
  */
-const EdictOfAbsolutionInEffect = status(300005)
-  .until("v5.7.0")
-  .tags("immuneControl")
-  .oneDuration()
-  .done();
+define status {
+  id 300005 as private EdictOfAbsolutionInEffect;
+  until "v5.7.0";
+  tags immuneControl;
+  oneDuration;
+}
 
 /**
  * @id 330009

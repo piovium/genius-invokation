@@ -15,13 +15,14 @@ import { GuideToAfterlife, SecretSpearOfWangsheng, SpiritSoother } from "../char
  * 我方一名充能未满的角色获得1点充能。（出战角色优先）
  * （牌组包含至少2个雷元素角色，才能加入牌组）
  */
-const ElementalResonanceHighVoltage = card(331402)
-  .until("v5.4.0")
-  .costElectro(1)
-  .tags("resonance")
-  .filter((c) => c.$(`my characters with energy < maxEnergy`))
-  .gainEnergy(1, "my character with energy < maxEnergy limit 1")
-  .done();
+define card {
+  id 331402 as private ElementalResonanceHighVoltage;
+  until "v5.4.0";
+  cost DiceType.Electro, 1;
+  tags resonance;
+  filter :( :$(`my characters with energy < maxEnergy`) );
+  :gainEnergy(1, "my character with energy < maxEnergy limit 1");
+}
 
 /**
  * @id 331502
@@ -84,67 +85,74 @@ const [ElementalResonanceSprawlingGreenery] = card(331702)
 
 // 以下为 10血->12血
 
-const Jean = character(1502)
-  .until("v5.4.0")
-  .tags("anemo", "sword", "mondstadt")
-  .health(10)
-  .energy(2)
-  .skills(FavoniusBladework, GaleBlade, DandelionBreeze)
-  .done();
+define character {
+  id 1502 as private Jean;
+  until "v5.4.0";
+  tags anemo, sword, mondstadt;
+  health 10;
+  energy 2;
+  skills FavoniusBladework, GaleBlade, DandelionBreeze;
+}
 
-const Venti = character(1503)
-  .until("v5.4.0")
-  .tags("anemo", "bow", "mondstadt")
-  .health(10)
-  .energy(2)
-  .skills(DivineMarksmanship, SkywardSonnet, WindsGrandOde)
-  .done();
+define character {
+  id 1503 as private Venti;
+  until "v5.4.0";
+  tags anemo, bow, mondstadt;
+  health 10;
+  energy 2;
+  skills DivineMarksmanship, SkywardSonnet, WindsGrandOde;
+}
 
-const Ganyu = character(1101)
-  .until("v5.4.0")
-  .tags("cryo", "bow", "liyue")
-  .health(10)
-  .energy(3)
-  .skills(LiutianArchery, TrailOfTheQilin, FrostflakeArrow, CelestialShower)
-  .done();
+define character {
+  id 1101 as private Ganyu;
+  until "v5.4.0";
+  tags cryo, bow, liyue;
+  health 10;
+  energy 3;
+  skills LiutianArchery, TrailOfTheQilin, FrostflakeArrow, CelestialShower;
+}
 
-const Noelle = character(1602)
-  .until("v5.4.0")
-  .tags("geo", "claymore", "mondstadt")
-  .health(10)
-  .energy(2)
-  .skills(FavoniusBladeworkMaid, Breastplate, SweepingTime)
-  .done();
+define character {
+  id 1602 as private Noelle;
+  until "v5.4.0";
+  tags geo, claymore, mondstadt;
+  health 10;
+  energy 2;
+  skills FavoniusBladeworkMaid, Breastplate, SweepingTime;
+}
 
-const Zhongli = character(1603)
-  .until("v5.4.0")
-  .tags("geo", "pole", "liyue")
-  .health(10)
-  .energy(3)
-  .skills(RainOfStone, DominusLapidis, DominusLapidisStrikingStone, PlanetBefall)
-  .done();
+define character {
+  id 1603 as private Zhongli;
+  until "v5.4.0";
+  tags geo, pole, liyue;
+  health 10;
+  energy 3;
+  skills RainOfStone, DominusLapidis, DominusLapidisStrikingStone, PlanetBefall;
+}
 
-const SangonomiyaKokomi = character(1205)
-  .until("v5.4.0")
-  .tags("hydro", "catalyst", "inazuma")
-  .health(10)
-  .energy(2)
-  .skills(TheShapeOfWater, KuragesOath, NereidsAscension)
-  .done();
+define character {
+  id 1205 as private SangonomiyaKokomi;
+  until "v5.4.0";
+  tags hydro, catalyst, inazuma;
+  health 10;
+  energy 2;
+  skills TheShapeOfWater, KuragesOath, NereidsAscension;
+}
 
-const Sigewinne = character(1213)
-  .until("v5.4.0")
-  .tags("hydro", "bow", "fontaine", "pneuma")
-  .health(10)
-  .energy(2)
-  .skills(TargetedTreatment, ReboundHydrotherapy, SuperSaturatedSyringing, DetailedDiagnosisThoroughTreatment01, MedicalInterventionOfPureIntention, 
-    DetailedDiagnosisThoroughTreatment02, DetailedDiagnosisThoroughTreatment03)
-  .done();
+define character {
+  id 1213 as private Sigewinne;
+  until "v5.4.0";
+  tags hydro, bow, fontaine, pneuma;
+  health 10;
+  energy 2;
+  skills TargetedTreatment, ReboundHydrotherapy, SuperSaturatedSyringing, DetailedDiagnosisThoroughTreatment01, MedicalInterventionOfPureIntention, DetailedDiagnosisThoroughTreatment02, DetailedDiagnosisThoroughTreatment03;
+}
 
-const HuTao = character(1307)
-  .until("v5.4.0")
-  .tags("pyro", "pole", "liyue")
-  .health(10)
-  .energy(3)
-  .skills(SecretSpearOfWangsheng, GuideToAfterlife, SpiritSoother)
-  .done();
+define character {
+  id 1307 as private HuTao;
+  until "v5.4.0";
+  tags pyro, pole, liyue;
+  health 10;
+  energy 3;
+  skills SecretSpearOfWangsheng, GuideToAfterlife, SpiritSoother;
+}

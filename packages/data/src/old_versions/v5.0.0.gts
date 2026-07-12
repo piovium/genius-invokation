@@ -1,4 +1,4 @@
-import { card, combatStatus, DamageType, skill, type SkillHandle, status, type StatusHandle, summon, type SummonHandle } from "@gi-tcg/core/builder";
+import { card, combatStatus, DamageType, DiceType, skill, status, summon, type SkillHandle, type StatusHandle, type SummonHandle } from "@gi-tcg/core/builder";
 import { VioletArc } from "../characters/electro/lisa.gts";
 import { EremiteScorchingLoremaster, SearingGlare } from "../characters/pyro/eremite_scorching_loremaster.gts";
 import { AwakenMyKindred, HeartOfOasis } from "../characters/dendro/guardian_of_apeps_oasis.gts";
@@ -11,17 +11,24 @@ import { AwakenMyKindred, HeartOfOasis } from "../characters/dendro/guardian_of_
  * 结束阶段：叠加1层「引雷」。
  * 所附属角色受到苍雷伤害时：移除此状态，每层「引雷」使此伤害+1。
  */
-const Conductive = status(114091)
-  .until("v5.0.0")
-  .variableCanAppend("conductive", 2, 4, 1)
-  .on("endPhase")
-  .addVariableWithMax("conductive", 1, 4)
-  .on("increaseDamaged", (c, e) => e.via.definition.id === VioletArc)
-  .do((c, e) => {
-    e.increaseDamage(c.getVariable("conductive"));
-    c.dispose();
-  })
-  .done();
+define status {
+  id 114091 as private Conductive;
+  until "v5.0.0";
+  variable conductive, 2 {
+    append {
+    limit 4;
+    value 1;
+  };
+  };
+  on endPhase {
+    :addVariableWithMax("conductive", 1, 4);
+  }
+  on increaseDamaged {
+    when :( :e.via.definition.id === VioletArc );
+    :e.increaseDamage(:getVariable("conductive"));
+    :dispose();
+  }
+}
 
 /**
  * @id 14091
@@ -30,15 +37,17 @@ const Conductive = status(114091)
  * 造成1点雷元素伤害；
  * 如果此技能为重击，则使敌方出战角色附属引雷。
  */
-const LightningTouch = skill(14091)
-  .until("v5.0.0")
-  .type("normal")
-  .costElectro(1)
-  .costVoid(2)
-  .damage(DamageType.Electro, 1)
-  .if((c) => c.skillInfo.charged)
-  .characterStatus(Conductive, "opp active")
-  .done();
+define skill {
+  id 14091 as private LightningTouch;
+  until "v5.0.0";
+  skillType normal;
+  cost DiceType.Electro, 1;
+  cost DiceType.Void, 2;
+  :damage(DamageType.Electro, 1);
+  if (:skillInfo.charged) {
+    :characterStatus(Conductive, "opp active");
+  }
+}
 
 /**
  * @id 123033
@@ -46,14 +55,16 @@ const LightningTouch = skill(14091)
  * @description
  * 厄灵·炎之魔蝎在场时：所附属角色受到的伤害-1。（每回合1次）
  */
-const PyroScorpionGuardianStance: StatusHandle = status(123033)
-  .until("v5.0.0")
-  .conflictWith(123034)
-  .on("decreaseDamaged", (c, e) =>
-    c.$(`my summons with definition id ${SpiritOfOmenPyroScorpion01} or my summons with definition id ${SpiritOfOmenPyroScorpion}`))
-  .usagePerRound(1)
-  .decreaseDamage(1)
-  .done();
+define status {
+  id 123033 as private PyroScorpionGuardianStance;
+  until "v5.0.0";
+  conflictWith 123034;
+  on decreaseDamaged {
+    when :( :$(`my summons with definition id ${SpiritOfOmenPyroScorpion01} or my summons with definition id ${SpiritOfOmenPyroScorpion}`) );
+    usage perRound, 1;
+    :e.decreaseDamage(1);
+  }
+}
 
 /**
  * @id 123034
@@ -61,14 +72,16 @@ const PyroScorpionGuardianStance: StatusHandle = status(123033)
  * @description
  * 厄灵·炎之魔蝎在场时：所附属角色受到的伤害-1。（每回合至多2次）
  */
-const PyroScorpionGuardianStance01: StatusHandle = status(123034)
-  .until("v5.0.0")
-  .conflictWith(123033)
-  .on("decreaseDamaged", (c, e) =>
-    c.$(`my summons with definition id ${SpiritOfOmenPyroScorpion01} or my summons with definition id ${SpiritOfOmenPyroScorpion}`))
-  .usagePerRound(2)
-  .decreaseDamage(1)
-  .done();
+define status {
+  id 123034 as private PyroScorpionGuardianStance01;
+  until "v5.0.0";
+  conflictWith 123033;
+  on decreaseDamaged {
+    when :( :$(`my summons with definition id ${SpiritOfOmenPyroScorpion01} or my summons with definition id ${SpiritOfOmenPyroScorpion}`) );
+    usage perRound, 2;
+    :e.decreaseDamage(1);
+  }
+}
 
 
 /**
@@ -79,22 +92,32 @@ const PyroScorpionGuardianStance01: StatusHandle = status(123034)
  * 可用次数：2
  * 入场时和行动阶段开始：使我方镀金旅团·炽沙叙事人附属炎之魔蝎·守势。（厄灵·炎之魔蝎在场时每回合1次，使角色受到的伤害-1。）
  */
-const SpiritOfOmenPyroScorpion = summon(123031)
-  .until("v5.0.0")
-  .conflictWith(123032)
-  .endPhaseDamage(DamageType.Pyro, 1)
-  .usage(2)
-  .on("enter")
-  .if((c) => c.$(`my equipment with definition id ${Scorpocalypse}`))
-  .characterStatus(PyroScorpionGuardianStance01, `my character with definition id 2303`)
-  .else()
-  .characterStatus(PyroScorpionGuardianStance, `my character with definition id 2303`)
-  .on("actionPhase")
-  .if((c) => c.$(`my equipment with definition id ${Scorpocalypse}`))
-  .characterStatus(PyroScorpionGuardianStance01, `my character with definition id 2303`)
-  .else()
-  .characterStatus(PyroScorpionGuardianStance, `my character with definition id 2303`)
-  .done();
+define summon {
+  id 123031 as private SpiritOfOmenPyroScorpion;
+  until "v5.0.0";
+  conflictWith 123032;
+  hint DamageType.Pyro, 1;
+  on endPhase {
+    usage 2;
+    :damage(DamageType.Pyro, 1);
+  }
+  on enter {
+    if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
+      :characterStatus(PyroScorpionGuardianStance01, "my character with definition id 2303");
+    }
+    else {
+      :characterStatus(PyroScorpionGuardianStance, "my character with definition id 2303");
+    }
+  }
+  on actionPhase {
+    if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
+      :characterStatus(PyroScorpionGuardianStance01, "my character with definition id 2303");
+    }
+    else {
+      :characterStatus(PyroScorpionGuardianStance, "my character with definition id 2303");
+    }
+  }
+}
 
 /**
  * @id 123032
@@ -104,31 +127,37 @@ const SpiritOfOmenPyroScorpion = summon(123031)
  * 可用次数：2
  * 入场时和行动阶段开始：使我方镀金旅团·炽沙叙事人附属炎之魔蝎·守势。（厄灵·炎之魔蝎在场时每回合至多2次，使角色受到的伤害-1。）
  */
-const SpiritOfOmenPyroScorpion01 = summon(123032)
-  .until("v5.0.0")
-  .conflictWith(123031)
-  .hint(DamageType.Pyro, "1")
-  .on("endPhase")
-  .usage(2)
-  .do((c) => {
-    if (c.countOfSkill(EremiteScorchingLoremaster, SearingGlare) > 0 ||
-      c.countOfSkill(EremiteScorchingLoremaster, BlazingStrike) > 0) {
-      c.damage(DamageType.Pyro, 2);
+define summon {
+  id 123032 as private SpiritOfOmenPyroScorpion01;
+  until "v5.0.0";
+  conflictWith 123031;
+  hint DamageType.Pyro, "1";
+  on endPhase {
+    usage 2;
+    if (:countOfSkill(EremiteScorchingLoremaster, SearingGlare) > 0 ||
+      :countOfSkill(EremiteScorchingLoremaster, BlazingStrike) > 0) {
+      :damage(DamageType.Pyro, 2);
     } else {
-      c.damage(DamageType.Pyro, 1);
+      :damage(DamageType.Pyro, 1);
     }
-  })
-  .on("enter")
-  .if((c) => c.$(`my equipment with definition id ${Scorpocalypse}`))
-  .characterStatus(PyroScorpionGuardianStance01, `my character with definition id 2303`)
-  .else()
-  .characterStatus(PyroScorpionGuardianStance, `my character with definition id 2303`)
-  .on("actionPhase")
-  .if((c) => c.$(`my equipment with definition id ${Scorpocalypse}`))
-  .characterStatus(PyroScorpionGuardianStance01, `my character with definition id 2303`)
-  .else()
-  .characterStatus(PyroScorpionGuardianStance, `my character with definition id 2303`)
-  .done();
+  }
+  on enter {
+    if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
+      :characterStatus(PyroScorpionGuardianStance01, "my character with definition id 2303");
+    }
+    else {
+      :characterStatus(PyroScorpionGuardianStance, "my character with definition id 2303");
+    }
+  }
+  on actionPhase {
+    if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
+      :characterStatus(PyroScorpionGuardianStance01, "my character with definition id 2303");
+    }
+    else {
+      :characterStatus(PyroScorpionGuardianStance, "my character with definition id 2303");
+    }
+  }
+}
 
 /**
  * @id 23032
@@ -136,12 +165,13 @@ const SpiritOfOmenPyroScorpion01 = summon(123032)
  * @description
  * 造成3点火元素伤害。
  */
-const BlazingStrike = skill(23032)
-  .until("v5.0.0")
-  .type("elemental")
-  .costPyro(3)
-  .damage(DamageType.Pyro, 3)
-  .done();
+define skill {
+  id 23032 as private BlazingStrike;
+  until "v5.0.0";
+  skillType elemental;
+  cost DiceType.Pyro, 3;
+  :damage(DamageType.Pyro, 3);
+}
 
 /**
  * @id 23033
@@ -149,17 +179,20 @@ const BlazingStrike = skill(23032)
  * @description
  * 造成2点火元素伤害，召唤厄灵·炎之魔蝎。
  */
-const SpiritOfOmensAwakeningPyroScorpion: SkillHandle = skill(23033)
-  .until("v5.0.0")
-  .type("burst")
-  .costPyro(3)
-  .costEnergy(2)
-  .damage(DamageType.Pyro, 2)
-  .if((c) => c.self.hasEquipment(Scorpocalypse))
-  .summon(SpiritOfOmenPyroScorpion01)
-  .else()
-  .summon(SpiritOfOmenPyroScorpion)
-  .done();
+define skill {
+  id 23033 as private SpiritOfOmensAwakeningPyroScorpion;
+  until "v5.0.0";
+  skillType burst;
+  cost DiceType.Pyro, 3;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Pyro, 2);
+  if (:self.hasEquipment(Scorpocalypse)) {
+    :summon(SpiritOfOmenPyroScorpion01);
+  }
+  else {
+    :summon(SpiritOfOmenPyroScorpion);
+  }
+}
 
 /**
  * @id 23034
@@ -167,13 +200,19 @@ const SpiritOfOmensAwakeningPyroScorpion: SkillHandle = skill(23033)
  * @description
  * 【被动】此角色受到伤害后：如果此角色生命值不多于7，则获得1点充能。（整场牌局限制1次）
  */
-const SpiritOfOmensPower = skill(23034)
-  .until("v5.0.0")
-  .type("passive")
-  .on("damaged", (c) => c.self.health <= 7)
-  .usage(1, { name: "damagedEnergySkillUsage" })
-  .gainEnergy(1, "@self")
-  .done();
+define skill {
+  id 23034 as private SpiritOfOmensPower;
+  until "v5.0.0";
+  skillType passive {
+    on damaged {
+      when :( :self.health <= 7 );
+      usage 1 {
+        name "damagedEnergySkillUsage";
+      };
+      :gainEnergy(1, "@self");
+    }
+  }
+}
 
 /**
  * @id 223031
@@ -185,14 +224,17 @@ const SpiritOfOmensPower = skill(23034)
  * 厄灵·炎之魔蝎的减伤效果改为每回合至多2次。
  * （牌组中包含镀金旅团·炽沙叙事人，才能加入牌组）
  */
-const Scorpocalypse = card(223031)
-  .until("v5.0.0")
-  .costPyro(3)
-  .costEnergy(2)
-  .talent(EremiteScorchingLoremaster)
-  .on("enter")
-  .useSkill(SpiritOfOmensAwakeningPyroScorpion)
-  .done();
+define card {
+  id 223031 as private Scorpocalypse;
+  until "v5.0.0";
+  cost DiceType.Pyro, 3;
+  cost DiceType.Energy, 2;
+  talent EremiteScorchingLoremaster {
+    on enter {
+      :useSkill(SpiritOfOmensAwakeningPyroScorpion);
+    }
+  }
+}
 
 /**
  * @id 127028
@@ -200,10 +242,11 @@ const Scorpocalypse = card(223031)
  * @description
  * 提供2点护盾，保护所附属角色。
  */
-const OasissAegis = status(127028)
-  .until("v5.0.0")
-  .shield(2)
-  .done();
+define status {
+  id 127028 as private OasissAegis;
+  until "v5.0.0";
+  shield 2;
+}
 
 /**
  * @id 27024
@@ -211,11 +254,14 @@ const OasissAegis = status(127028)
  * @description
  * 【被动】战斗开始时，生成6张唤醒眷属，随机放入牌库。我方召唤4个增殖生命体后，此角色附属重燃的绿洲之心，并获得2点护盾。
  */
-const InvokationOfPropagation = skill(27024)
-  .until("v5.0.0")
-  .type("passive")
-  .variable("organismCount", 0)
-  .on("battleBegin")
-  .createPileCards(AwakenMyKindred, 6, "random")
-  .combatStatus(HeartOfOasis)
-  .done();
+define skill {
+  id 27024 as private InvokationOfPropagation;
+  until "v5.0.0";
+  skillType passive {
+    variable organismCount, 0;
+    on battleBegin {
+      :createPileCards(AwakenMyKindred, 6, "random");
+      :combatStatus(HeartOfOasis);
+    }
+  }
+}

@@ -109,42 +109,48 @@ const ShiningShadowhuntShellCryo = card(115117)
  * 结束阶段和我方宣布结束时：造成此牌「攻击力」值的雷元素伤害。
  * 我方出战角色受到伤害时：抵消1点伤害，然后此牌可用次数-2。
  */
-const DarkShadow = summon(122043)
-  .until("v6.0.0")
-  .tags("barrier")
-  .usage(0)
-  .variable("atk", 0, { visible: false })
-  .variable("barrierUsage", 1, { visible: false })
-  .hint(DamageType.Electro, (c, e) => e.variables.atk)
-  .on("enter")
-  .do((c) => {
-    const domain = c.$(`my combat status with definition id ${DeepDevourersDomain}`)!;
+define summon {
+  id 122043 as private DarkShadow;
+  until "v6.0.0";
+  tags barrier;
+  usage 0;
+  variable atk, 0 {
+    visible false;
+  };
+  variable barrierUsage, 1 {
+    visible false;
+  };
+  hint DamageType.Electro, ((c, e) => e.variables.atk);
+  on enter {
+    const domain = :$(`my combat status with definition id ${DeepDevourersDomain}`)!;
     const maxCost = domain.getVariable("totalMaxCost");
     const count = domain.getVariable("totalMaxCostCount");
     if (count > 0) {
-      c.setVariable("atk", maxCost);
-      c.setVariable("usage", count);
+      :setVariable("atk", maxCost);
+      :setVariable("usage", count);
     } else {
-      c.dispose();
+      :dispose();
     }
-  })
-  .on("endPhase")
-  .do((c) => {
-    c.damage(DamageType.Electro, c.getVariable("atk"));
-    c.consumeUsage();
-  })
-  .on("declareEnd")
-  .do((c) => {
-    c.damage(DamageType.Electro, c.getVariable("atk"));
-    c.consumeUsage();
-  })
-  .on("decreaseDamaged", (c, e) => c.getVariable("barrierUsage") && e.target.isActive())
-  .decreaseDamage(1)
-  .setVariable("barrierUsage", 0)
-  .on("damaged", (c) => !c.getVariable("barrierUsage"))
-  .consumeUsage(2)
-  .setVariable("barrierUsage", 1)
-  .done();
+  }
+  on endPhase {
+    :damage(DamageType.Electro, :getVariable("atk"));
+    :consumeUsage();
+  }
+  on declareEnd {
+    :damage(DamageType.Electro, :getVariable("atk"));
+    :consumeUsage();
+  }
+  on decreaseDamaged {
+    when :( :getVariable("barrierUsage") && :e.target.isActive() );
+    :e.decreaseDamage(1);
+    :setVariable("barrierUsage", 0);
+  }
+  on damaged {
+    when :( !:getVariable("barrierUsage") );
+    :consumeUsage(2);
+    :setVariable("barrierUsage", 1);
+  }
+}
 
 /**
  * @id 122041
@@ -154,62 +160,71 @@ const DarkShadow = summon(122043)
  * 每吞噬3张牌：吞星之鲸在回合结束时获得1点额外最大生命；如果其中存在原本元素骰费用值相同的牌，则额外获得1点；如果3张均相同，再额外获得1点。
  * 【此卡含描述变量】
  */
-const DeepDevourersDomain = combatStatus(122041)
-  .until("v6.0.0")
-  .variable("cardCount", 0)
-  .variable("totalMaxCost", 0, { visible: false })
-  .variable("totalMaxCostCount", 0, { visible: false })
-  .variable("card0Cost", 0, { visible: false })
-  .variable("card1Cost", 0, { visible: false })
-  .variable("extraMaxHealth", 0, { visible: false })
-  .replaceDescription("[GCG_TOKEN_SHIELD]", (_, self) => self.variables.extraMaxHealth)
-  .on("disposeOrTuneCard")
-  .do((c, e) => {
-    const cost = e.diceCost();
-    c.addVariable("cardCount", 1);
-    switch (c.getVariable("cardCount")) {
+define combatStatus {
+  id 122041 as private DeepDevourersDomain;
+  until "v6.0.0";
+  variable cardCount, 0;
+  variable totalMaxCost, 0 {
+    visible false;
+  };
+  variable totalMaxCostCount, 0 {
+    visible false;
+  };
+  variable card0Cost, 0 {
+    visible false;
+  };
+  variable card1Cost, 0 {
+    visible false;
+  };
+  variable extraMaxHealth, 0 {
+    visible false;
+  };
+  replaceDescription "[GCG_TOKEN_SHIELD]", ((_, self) => self.variables.extraMaxHealth);
+  on disposeOrTuneCard {
+    const cost = :e.diceCost();
+    :addVariable("cardCount", 1);
+    switch (:getVariable("cardCount")) {
       case 1: {
-        c.setVariable("card0Cost", cost);
+        :setVariable("card0Cost", cost);
         break;
       }
       case 2: {
-        c.setVariable("card1Cost", cost);
+        :setVariable("card1Cost", cost);
         break;
       }
       case 3: {
-        const card0Cost = c.getVariable("card0Cost");
-        const card1Cost = c.getVariable("card1Cost");
+        const card0Cost = :getVariable("card0Cost");
+        const card1Cost = :getVariable("card1Cost");
         const card2Cost = cost;
         const distinctCostCount = new Set([card0Cost, card1Cost, card2Cost]).size;
         const extraMaxHealth = 4 - distinctCostCount;
-        c.addVariable("extraMaxHealth", extraMaxHealth);
-        c.setVariable("cardCount", 0);
+        :addVariable("extraMaxHealth", extraMaxHealth);
+        :setVariable("cardCount", 0);
         break;
       }
     }
-    const previousTotalMaxCost = c.getVariable("totalMaxCost");
+    const previousTotalMaxCost = :getVariable("totalMaxCost");
     if (cost === previousTotalMaxCost) {
-      c.addVariable("totalMaxCostCount", 1);
+      :addVariable("totalMaxCostCount", 1);
     } else if (cost > previousTotalMaxCost) {
-      c.setVariable("totalMaxCost", cost);
-      c.setVariable("totalMaxCostCount", 1);
+      :setVariable("totalMaxCost", cost);
+      :setVariable("totalMaxCostCount", 1);
     }
-  })
-  .on("endPhase") // 文本有误，实为结束阶段时
-  .do((c, e) => {
-    const extraMaxHealth = c.getVariable("extraMaxHealth");
+  }
+  on endPhase {
+    const extraMaxHealth = :getVariable("extraMaxHealth");
     if (extraMaxHealth) {
-      const narwhal = c.$(`my character with definition id ${AlldevouringNarwhal}`);
+      const narwhal = :$(`my character with definition id ${AlldevouringNarwhal}`);
       if (narwhal) {
         narwhal.addStatus(AnomalousAnatomy, {
           overrideVariables: { extraMaxHealth }
         });
-        c.increaseMaxHealth(extraMaxHealth, narwhal);
+        :increaseMaxHealth(extraMaxHealth, narwhal);
       }
-      c.setVariable("extraMaxHealth", 0);
+      :setVariable("extraMaxHealth", 0);
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 13123
@@ -217,19 +232,18 @@ const DeepDevourersDomain = combatStatus(122041)
  * @description
  * 造成3点物理伤害，对所有敌方后台角色造成2点穿透伤害；舍弃我方所有手牌，生成氛围烈焰。
  */
-const RiffRevolution = skill(13123)
-  .until("v6.0.0")
-  .type("burst")
-  .costPyro(3)
-  .costEnergy(2)
-  .damage(DamageType.Piercing, 2, "opp standby")
-  .damage(DamageType.Physical, 3)
-  .do((c) => {
-    const cards = c.player.hands.toSorted((a, b) => b.diceCost() - a.diceCost());
-    c.disposeCard(...cards);
-  })
-  .combatStatus(FestiveFires)
-  .done();
+define skill {
+  id 13123 as private RiffRevolution;
+  until "v6.0.0";
+  skillType burst;
+  cost DiceType.Pyro, 3;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Piercing, 2, "opp standby");
+  :damage(DamageType.Physical, 3);
+  const cards = :player.hands.toSorted((a, b) => b.diceCost() - a.diceCost());
+  :disposeCard(...cards);
+  :combatStatus(FestiveFires);
+}
 
 /**
  * @id 23052
@@ -237,14 +251,13 @@ const RiffRevolution = skill(13123)
  * @description
  * 造成3点火元素伤害，我方舍弃牌组顶部1张牌。
  */
-const ErodedFlamingFeathers = skill(23052)
-  .until("v6.0.0")
-  .type("elemental")
-  .costPyro(3)
-  .damage(DamageType.Pyro, 3)
-  .do((c) => {
-    if (c.player.pile.length > 0) {
-      c.disposeCard(c.player.pile[0]);
-    }
-  })
-  .done();
+define skill {
+  id 23052 as private ErodedFlamingFeathers;
+  until "v6.0.0";
+  skillType elemental;
+  cost DiceType.Pyro, 3;
+  :damage(DamageType.Pyro, 3);
+  if (:player.pile.length > 0) {
+    :disposeCard(:player.pile[0]);
+  }
+}

@@ -7,15 +7,16 @@ import { VermillionHereafterEffect } from "../cards/equipment/artifacts.gts";
  * @description
  * 投掷阶段：2个元素骰初始总是投出我方出战角色类型的元素。
  */
-const JadeChamber = card(321003)
-  .until("v3.8.0")
-  .costSame(1)
-  .support("place")
-  .on("roll")
-  .do((c, e) => {
-    e.fixDice(c.$("my active")!.element(), 2);
-  })
-  .done();
+define card {
+  id 321003 as private JadeChamber;
+  until "v3.8.0";
+  cost DiceType.Aligned, 1;
+  support place {
+    on roll {
+      :e.fixDice(:$("my active")!.element(), 2);
+    }
+  }
+}
 
 
 /**
@@ -25,14 +26,18 @@ const JadeChamber = card(321003)
  * 对角色打出「天赋」或角色使用技能时：少花费1个冰元素。（每回合1次）
  * （角色最多装备1件「圣遗物」）
  */
-const BrokenRimesEcho = card(312101)
-  .until("v3.8.0")
-  .costSame(2)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Cryo))
-  .usagePerRound(1)
-  .deductCost(DiceType.Cryo, 1)
-  .done();
+define card {
+  id 312101 as private BrokenRimesEcho;
+  until "v3.8.0";
+  cost DiceType.Aligned, 2;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Cryo) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Cryo, 1);
+    }
+  }
+}
 
 /**
  * @id 312201
@@ -41,14 +46,18 @@ const BrokenRimesEcho = card(312101)
  * 对角色打出「天赋」或角色使用技能时：少花费1个水元素。（每回合1次）
  * （角色最多装备1件「圣遗物」）
  */
-const WinestainedTricorne = card(312201)
-  .until("v3.8.0")
-  .costSame(2)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Hydro))
-  .usagePerRound(1)
-  .deductCost(DiceType.Hydro, 1)
-  .done();
+define card {
+  id 312201 as private WinestainedTricorne;
+  until "v3.8.0";
+  cost DiceType.Aligned, 2;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Hydro) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Hydro, 1);
+    }
+  }
+}
 
 /**
  * @id 312301
@@ -57,14 +66,18 @@ const WinestainedTricorne = card(312201)
  * 对角色打出「天赋」或角色使用技能时：少花费1个火元素。（每回合1次）
  * （角色最多装备1件「圣遗物」）
  */
-const WitchsScorchingHat = card(312301)
-  .until("v3.8.0")
-  .costSame(2)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Pyro))
-  .usagePerRound(1)
-  .deductCost(DiceType.Pyro, 1)
-  .done();
+define card {
+  id 312301 as private WitchsScorchingHat;
+  until "v3.8.0";
+  cost DiceType.Aligned, 2;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Pyro) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Pyro, 1);
+    }
+  }
+}
 
 /**
  * @id 312401
@@ -73,14 +86,18 @@ const WitchsScorchingHat = card(312301)
  * 对角色打出「天赋」或角色使用技能时：少花费1个雷元素。（每回合1次）
  * （角色最多装备1件「圣遗物」）
  */
-const ThunderSummonersCrown = card(312401)
-  .until("v3.8.0")
-  .costSame(2)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Electro))
-  .usagePerRound(1)
-  .deductCost(DiceType.Electro, 1)
-  .done();
+define card {
+  id 312401 as private ThunderSummonersCrown;
+  until "v3.8.0";
+  cost DiceType.Aligned, 2;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Electro) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Electro, 1);
+    }
+  }
+}
 
 /**
  * @id 312501
@@ -89,14 +106,18 @@ const ThunderSummonersCrown = card(312401)
  * 对角色打出「天赋」或角色使用技能时：少花费1个风元素。（每回合1次）
  * （角色最多装备1件「圣遗物」）
  */
-const ViridescentVenerersDiadem = card(312501)
-  .until("v3.8.0")
-  .costSame(2)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Anemo))
-  .usagePerRound(1)
-  .deductCost(DiceType.Anemo, 1)
-  .done();
+define card {
+  id 312501 as private ViridescentVenerersDiadem;
+  until "v3.8.0";
+  cost DiceType.Aligned, 2;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Anemo) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Anemo, 1);
+    }
+  }
+}
 
 /**
  * @id 312601
@@ -105,14 +126,18 @@ const ViridescentVenerersDiadem = card(312501)
  * 对角色打出「天赋」或角色使用技能时：少花费1个岩元素。（每回合1次）
  * （角色最多装备1件「圣遗物」）
  */
-const MaskOfSolitudeBasalt = card(312601)
-  .until("v3.8.0")
-  .costSame(2)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Geo))
-  .usagePerRound(1)
-  .deductCost(DiceType.Geo, 1)
-  .done();
+define card {
+  id 312601 as private MaskOfSolitudeBasalt;
+  until "v3.8.0";
+  cost DiceType.Aligned, 2;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Geo) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Geo, 1);
+    }
+  }
+}
 
 /**
  * @id 312701
@@ -121,14 +146,18 @@ const MaskOfSolitudeBasalt = card(312601)
  * 对角色打出「天赋」或角色使用技能时：少花费1个草元素。（每回合1次）
  * （角色最多装备1件「圣遗物」）
  */
-const LaurelCoronet = card(312701)
-  .until("v3.8.0")
-  .costSame(2)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Dendro))
-  .usagePerRound(1)
-  .deductCost(DiceType.Dendro, 1)
-  .done();
+define card {
+  id 312701 as private LaurelCoronet;
+  until "v3.8.0";
+  cost DiceType.Aligned, 2;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Dendro) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Dendro, 1);
+    }
+  }
+}
 
 /**
  * @id 312013
@@ -137,14 +166,18 @@ const LaurelCoronet = card(312701)
  * 对角色打出「天赋」或角色使用「元素战技」时：少花费1个元素骰。（每回合1次）
  * （角色最多装备1件「圣遗物」）
  */
-const CapriciousVisage = card(312013)
-  .until("v3.8.0")
-  .costSame(2)
-  .artifact()
-  .on("deductOmniDice", (c, e) => e.isSkillOrTalentOf(c.self.master, "elemental"))
-  .usagePerRound(1)
-  .deductOmniCost(1)
-  .done();
+define card {
+  id 312013 as private CapriciousVisage;
+  until "v3.8.0";
+  cost DiceType.Aligned, 2;
+  artifact {
+    on deductOmniDice {
+      when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
+      usage perRound, 1;
+      :e.deductOmniCost(1);
+    }
+  }
+}
 
 /**
  * @id 312011
@@ -153,14 +186,18 @@ const CapriciousVisage = card(312013)
  * 对角色打出「天赋」或角色使用「普通攻击」时：少花费1个元素骰。（每回合1次）
  * （角色最多装备1件「圣遗物」）
  */
-const ThunderingPoise = card(312011)
-  .until("v3.8.0")
-  .costSame(2)
-  .artifact()
-  .on("deductOmniDice", (c, e) => e.isSkillOrTalentOf(c.self.master, "normal"))
-  .usagePerRound(1)
-  .deductOmniCost(1)
-  .done();
+define card {
+  id 312011 as private ThunderingPoise;
+  until "v3.8.0";
+  cost DiceType.Aligned, 2;
+  artifact {
+    on deductOmniDice {
+      when :( :e.isSkillOrTalentOf(:self.master, "normal") );
+      usage perRound, 1;
+      :e.deductOmniCost(1);
+    }
+  }
+}
 
 /**
  * @id 312102
@@ -170,16 +207,21 @@ const ThunderingPoise = card(312011)
  * 投掷阶段：2个元素骰初始总是投出冰元素。
  * （角色最多装备1件「圣遗物」）
  */
-const BlizzardStrayer = card(312102)
-  .until("v3.8.0")
-  .costVoid(3)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Cryo))
-  .usagePerRound(1)
-  .deductCost(DiceType.Cryo, 1)
-  .on("roll")
-  .fixDice(DiceType.Cryo, 2)
-  .done();
+define card {
+  id 312102 as private BlizzardStrayer;
+  until "v3.8.0";
+  cost DiceType.Void, 3;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Cryo) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Cryo, 1);
+    }
+    on roll {
+      :e.fixDice(DiceType.Cryo, 2);
+    }
+  }
+}
 
 /**
  * @id 312202
@@ -189,16 +231,21 @@ const BlizzardStrayer = card(312102)
  * 投掷阶段：2个元素骰初始总是投出水元素。
  * （角色最多装备1件「圣遗物」）
  */
-const HeartOfDepth = card(312202)
-  .until("v3.8.0")
-  .costVoid(3)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Hydro))
-  .usagePerRound(1)
-  .deductCost(DiceType.Hydro, 1)
-  .on("roll")
-  .fixDice(DiceType.Hydro, 2)
-  .done();
+define card {
+  id 312202 as private HeartOfDepth;
+  until "v3.8.0";
+  cost DiceType.Void, 3;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Hydro) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Hydro, 1);
+    }
+    on roll {
+      :e.fixDice(DiceType.Hydro, 2);
+    }
+  }
+}
 
 /**
  * @id 312302
@@ -208,16 +255,21 @@ const HeartOfDepth = card(312202)
  * 投掷阶段：2个元素骰初始总是投出火元素。
  * （角色最多装备1件「圣遗物」）
  */
-const CrimsonWitchOfFlames = card(312302)
-  .until("v3.8.0")
-  .costVoid(3)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Pyro))
-  .usagePerRound(1)
-  .deductCost(DiceType.Pyro, 1)
-  .on("roll")
-  .fixDice(DiceType.Pyro, 2)
-  .done();
+define card {
+  id 312302 as private CrimsonWitchOfFlames;
+  until "v3.8.0";
+  cost DiceType.Void, 3;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Pyro) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Pyro, 1);
+    }
+    on roll {
+      :e.fixDice(DiceType.Pyro, 2);
+    }
+  }
+}
 
 /**
  * @id 312402
@@ -227,16 +279,21 @@ const CrimsonWitchOfFlames = card(312302)
  * 投掷阶段：2个元素骰初始总是投出雷元素。
  * （角色最多装备1件「圣遗物」）
  */
-const ThunderingFury = card(312402)
-  .until("v3.8.0")
-  .costVoid(3)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Electro))
-  .usagePerRound(1)
-  .deductCost(DiceType.Electro, 1)
-  .on("roll")
-  .fixDice(DiceType.Electro, 2)
-  .done();
+define card {
+  id 312402 as private ThunderingFury;
+  until "v3.8.0";
+  cost DiceType.Void, 3;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Electro) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Electro, 1);
+    }
+    on roll {
+      :e.fixDice(DiceType.Electro, 2);
+    }
+  }
+}
 
 /**
  * @id 312502
@@ -246,16 +303,21 @@ const ThunderingFury = card(312402)
  * 投掷阶段：2个元素骰初始总是投出风元素。
  * （角色最多装备1件「圣遗物」）
  */
-const ViridescentVenerer = card(312502)
-  .until("v3.8.0")
-  .costVoid(3)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Anemo))
-  .usagePerRound(1)
-  .deductCost(DiceType.Anemo, 1)
-  .on("roll")
-  .fixDice(DiceType.Anemo, 2)
-  .done();
+define card {
+  id 312502 as private ViridescentVenerer;
+  until "v3.8.0";
+  cost DiceType.Void, 3;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Anemo) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Anemo, 1);
+    }
+    on roll {
+      :e.fixDice(DiceType.Anemo, 2);
+    }
+  }
+}
 
 /**
  * @id 312602
@@ -265,16 +327,21 @@ const ViridescentVenerer = card(312502)
  * 投掷阶段：2个元素骰初始总是投出岩元素。
  * （角色最多装备1件「圣遗物」）
  */
-const ArchaicPetra = card(312602)
-  .until("v3.8.0")
-  .costVoid(3)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Geo))
-  .usagePerRound(1)
-  .deductCost(DiceType.Geo, 1)
-  .on("roll")
-  .fixDice(DiceType.Geo, 2)
-  .done();
+define card {
+  id 312602 as private ArchaicPetra;
+  until "v3.8.0";
+  cost DiceType.Void, 3;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Geo) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Geo, 1);
+    }
+    on roll {
+      :e.fixDice(DiceType.Geo, 2);
+    }
+  }
+}
 
 /**
  * @id 312702
@@ -284,16 +351,21 @@ const ArchaicPetra = card(312602)
  * 投掷阶段：2个元素骰初始总是投出草元素。
  * （角色最多装备1件「圣遗物」）
  */
-const DeepwoodMemories = card(312702)
-  .until("v3.8.0")
-  .costVoid(3)
-  .artifact()
-  .on("deductElementDice", (c, e) => e.isSkillOrTalentOf(c.self.master) && e.canDeductCostOfType(DiceType.Dendro))
-  .usagePerRound(1)
-  .deductCost(DiceType.Dendro, 1)
-  .on("roll")
-  .fixDice(DiceType.Dendro, 2)
-  .done();
+define card {
+  id 312702 as private DeepwoodMemories;
+  until "v3.8.0";
+  cost DiceType.Void, 3;
+  artifact {
+    on deductElementDice {
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Dendro) );
+      usage perRound, 1;
+      :e.deductCost(DiceType.Dendro, 1);
+    }
+    on roll {
+      :e.fixDice(DiceType.Dendro, 2);
+    }
+  }
+}
 
 /**
  * @id 312012
@@ -303,16 +375,22 @@ const DeepwoodMemories = card(312702)
  * 角色被切换为「出战角色」后：本回合中，角色「普通攻击」造成的伤害+1。
  * （角色最多装备1件「圣遗物」）
  */
-const VermillionHereafter = card(312012)
-  .until("v3.8.0")
-  .costSame(3)
-  .artifact()
-  .on("deductOmniDice", (c, e) => e.isSkillOrTalentOf(c.self.master, "normal"))
-  .usagePerRound(1)
-  .deductOmniCost(1)
-  .on("switchActive", (c, e) => c.self.master.id === e.switchInfo.to.id)
-  .characterStatus(VermillionHereafterEffect, "@master")
-  .done();
+define card {
+  id 312012 as private VermillionHereafter;
+  until "v3.8.0";
+  cost DiceType.Aligned, 3;
+  artifact {
+    on deductOmniDice {
+      when :( :e.isSkillOrTalentOf(:self.master, "normal") );
+      usage perRound, 1;
+      :e.deductOmniCost(1);
+    }
+    on switchActive {
+      when :( :self.master.id === :e.switchInfo.to.id );
+      :characterStatus(VermillionHereafterEffect, "@master");
+    }
+  }
+}
 
 /**
  * @id 312014
@@ -322,18 +400,23 @@ const VermillionHereafter = card(312012)
  * 如果角色具有至少2点充能，就使角色「普通攻击」和「元素战技」造成的伤害+1。
  * （角色最多装备1件「圣遗物」）
  */
-const ShimenawasReminiscence = card(312014)
-  .until("v3.8.0")
-  .costSame(3)
-  .artifact()
-  .on("deductOmniDice", (c, e) => e.isSkillOrTalentOf(c.self.master, "elemental"))
-  .usagePerRound(1)
-  .deductOmniCost(1)
-  .on("increaseSkillDamage", (c, e) =>
-    c.self.master.energy >= 2 &&
-    (e.viaSkillType("normal") || e.viaSkillType("elemental")))
-  .increaseDamage(1)
-  .done();
+define card {
+  id 312014 as private ShimenawasReminiscence;
+  until "v3.8.0";
+  cost DiceType.Aligned, 3;
+  artifact {
+    on deductOmniDice {
+      when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
+      usage perRound, 1;
+      :e.deductOmniCost(1);
+    }
+    on increaseSkillDamage {
+      when :( :self.master.energy >= 2 &&
+          (:e.viaSkillType("normal") || :e.viaSkillType("elemental")) );
+      :e.increaseDamage(1);
+    }
+  }
+}
 
 /**
  * @id 312007
@@ -342,14 +425,18 @@ const ShimenawasReminiscence = card(312014)
  * 其他我方角色使用「元素爆发」后：所附属角色获得1点充能。
  * （角色最多装备1件「圣遗物」）
  */
-const OrnateKabuto = card(312007)
-  .until("v3.8.0")
-  .costVoid(2)
-  .artifact()
-  .on("useSkill", (c, e) => e.skill.caller.id !== c.self.master.id && e.isSkillType("burst"))
-  .listenToPlayer()
-  .gainEnergy(1, "@master")
-  .done();
+define card {
+  id 312007 as private OrnateKabuto;
+  until "v3.8.0";
+  cost DiceType.Void, 2;
+  artifact {
+    on useSkill {
+      when :( :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst") );
+      listenTo samePlayer;
+      :gainEnergy(1, "@master");
+    }
+  }
+}
 
 /**
  * @id 312008
@@ -359,16 +446,22 @@ const OrnateKabuto = card(312007)
  * 角色使用「元素爆发」造成的伤害+2。
  * （角色最多装备1件「圣遗物」）
  */
-const EmblemOfSeveredFate = card(312008)
-  .until("v3.8.0")
-  .costVoid(3)
-  .artifact()
-  .on("useSkill", (c, e) => e.skill.caller.id !== c.self.master.id && e.isSkillType("burst"))
-  .listenToPlayer()
-  .gainEnergy(1, "@master")
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("burst"))
-  .increaseDamage(2)
-  .done();
+define card {
+  id 312008 as private EmblemOfSeveredFate;
+  until "v3.8.0";
+  cost DiceType.Void, 3;
+  artifact {
+    on useSkill {
+      when :( :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst") );
+      listenTo samePlayer;
+      :gainEnergy(1, "@master");
+    }
+    on increaseSkillDamage {
+      when :( :e.viaSkillType("burst") );
+      :e.increaseDamage(2);
+    }
+  }
+}
 
 /**
  * @id 331803
@@ -377,12 +470,11 @@ const EmblemOfSeveredFate = card(312008)
  * 将我方所有元素骰转换为当前出战角色的类型。
  * （牌组包含至少2个「稻妻」角色，才能加入牌组）
  */
-const ThunderAndEternity = card(331803)
-  .until("v3.8.0")
-  .do((c) => {
-    c.convertDice(c.$("my active")!.element(), "all");
-  })
-  .done();
+define card {
+  id 331803 as private ThunderAndEternity;
+  until "v3.8.0";
+  :convertDice(:$("my active")!.element(), "all");
+}
 
 /**
  * @id 332005
@@ -391,9 +483,10 @@ const ThunderAndEternity = card(331803)
  * 本回合有我方角色被击倒，才能打出：
  * 生成1个万能元素，我方当前出战角色获得1点充能。
  */
-const IHaventLostYet = card(332005)
-  .until("v3.8.0")
-  .filter((c) => c.player.hasDefeated)
-  .generateDice(DiceType.Omni, 1)
-  .gainEnergy(1, "my active")
-  .done();
+define card {
+  id 332005 as private IHaventLostYet;
+  until "v3.8.0";
+  filter :( :player.hasDefeated );
+  :generateDice(DiceType.Omni, 1);
+  :gainEnergy(1, "my active");
+}

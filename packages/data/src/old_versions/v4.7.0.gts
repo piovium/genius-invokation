@@ -17,20 +17,19 @@ import { AnomalousAnatomy, LightlessFeeding } from "../characters/hydro/alldevou
  * @description
  * 随机舍弃1张原本元素骰费用最高的手牌，生成1个我方出战角色类型的元素骰。如果我方出战角色是「圣骸兽」角色，则使其获得1点充能。（每回合最多打出1张）
  */
-const BonecrunchersEnergyBlock = card(124051)
-  .until("v4.7.0")
-  .undiscoverable()
-  .filter((c) => !c.$(`my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`))
-  .do((c) => {
-    c.disposeMaxCostHands(1);
-    const activeCh = c.$("my active")!;
-    c.generateDice(activeCh.element(), 1);
-    if (activeCh.definition.tags.includes("sacread")) {
-      c.gainEnergy(1, activeCh);
-    }
-    c.combatStatus(BonecrunchersEnergyBlockCombatStatus)
-  })
-  .done();
+define card {
+  id 124051 as private BonecrunchersEnergyBlock;
+  until "v4.7.0";
+  undiscoverable;
+  filter :( !:$(`my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`) );
+  :disposeMaxCostHands(1);
+  const activeCh = :$("my active")!;
+  :generateDice(activeCh.element(), 1);
+  if (activeCh.definition.tags.includes("sacread")) {
+    :gainEnergy(1, activeCh);
+  }
+  :combatStatus(BonecrunchersEnergyBlockCombatStatus)
+}
 
 /**
  * @id 25032
@@ -38,20 +37,19 @@ const BonecrunchersEnergyBlock = card(124051)
  * @description
  * 造成2点风元素伤害，抓1张噬骸能量块；然后，手牌中每有1张噬骸能量块，抓1张牌（每回合最多抓2张)。
  */
-const SwirlingSquall = skill(25032)
-  .until("v4.7.0")
-  .type("elemental")
-  .costAnemo(3)
-  .do((c) => {
-    c.damage(DamageType.Anemo, 2);
-    c.drawCards(1, { withDefinition: BonecrunchersEnergyBlock });
-    const cards = c.player.hands.filter((card) => card.definition.id === BonecrunchersEnergyBlock);
-    const drawn = c.self.getVariable("elementalSkillDrawCardsCount");
-    const count = Math.min(cards.length, 2 - drawn);
-    c.drawCards(count);
-    c.self.addVariable("elementalSkillDrawCardsCount", count);
-  })
-  .done();
+define skill {
+  id 25032 as private SwirlingSquall;
+  until "v4.7.0";
+  skillType elemental;
+  cost DiceType.Anemo, 3;
+  :damage(DamageType.Anemo, 2);
+  :drawCards(1, { withDefinition: BonecrunchersEnergyBlock });
+  const cards = :player.hands.filter((card) => card.definition.id === BonecrunchersEnergyBlock);
+  const drawn = :self.getVariable("elementalSkillDrawCardsCount");
+  const count = Math.min(cards.length, 2 - drawn);
+  :drawCards(count);
+  :self.addVariable("elementalSkillDrawCardsCount", count);
+}
 
 /**
  * @id 116073
@@ -61,20 +59,25 @@ const SwirlingSquall = skill(25032)
  * 如果我方手牌数量不多于1，则此技能少花费1个元素骰。
  * 可用次数：1（可叠加，最多叠加到4次）
  */
-const FlyingCloudFlagFormation = combatStatus(116073)
-  .until("v4.7.0")
-  .on("deductOmniDiceSkill", (c, e) => e.isSkillType("normal") && c.player.hands.length <= 1)
-  .deductOmniCost(1)
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("normal"))
-  .usageCanAppend(1, 4)
-  .do((c, e) => {
-    if (c.$(`my equipment with definition id ${DecorousHarmony}`) && c.player.hands.length === 0) {
-      e.increaseDamage(3);
+define combatStatus {
+  id 116073 as private FlyingCloudFlagFormation;
+  until "v4.7.0";
+  on deductOmniDiceSkill {
+    when :( :e.isSkillType("normal") && :player.hands.length <= 1 );
+    :e.deductOmniCost(1);
+  }
+  on increaseSkillDamage {
+    when :( :e.viaSkillType("normal") );
+    usage 1 {
+      append 4;
+    };
+    if (:$(`my equipment with definition id ${DecorousHarmony}`) && :player.hands.length === 0) {
+      :e.increaseDamage(3);
     } else {
-      e.increaseDamage(1);
+      :e.increaseDamage(1);
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 117082
@@ -83,22 +86,25 @@ const FlyingCloudFlagFormation = combatStatus(116073)
  * 双方选择行动前：如果我方场上存在草原核或丰穰之核，则使其可用次数-1，并舍弃我方牌库顶的1张卡牌。然后，造成所舍弃卡牌原本元素骰费用+1的草元素伤害。
  * 可用次数：1（可叠加，最多叠加到3次）
  */
-const BurstScan = combatStatus(117082)
-  .until("v4.7.0")
-  .on("beforeAction", (c) => c.$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`))
-  .listenToAll()
-  .do((c) => {
-    c.disposeCard(c.player.pile[0]);
-  })
-  .on("disposeCard", (c, e) => e.via?.caller.id === c.self.id)
-  .usageCanAppend(1, 3)
-  .do((c, e) => {
-    c.$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`)?.consumeUsage(1);
-    const cost = e.entity.diceCost();
-    c.damage(DamageType.Dendro, cost + 1);
-    c.emitCustomEvent(ShouldTriggerTalent, e.entity.latest());
-  })
-  .done();
+define combatStatus {
+  id 117082 as private BurstScan;
+  until "v4.7.0";
+  on beforeAction {
+    when :( :$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`) );
+    listenTo all;
+    :disposeCard(:player.pile[0]);
+  }
+  on disposeCard {
+    when :( :e.via?.caller.id === :self.id );
+    usage 1 {
+      append 3;
+    };
+    :$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`)?.consumeUsage(1);
+    const cost = :e.entity.diceCost();
+    :damage(DamageType.Dendro, cost + 1);
+    :emitCustomEvent(ShouldTriggerTalent, :e.entity.latest());
+  }
+}
 
 /**
  * @id 22042
@@ -106,22 +112,21 @@ const BurstScan = combatStatus(117082)
  * @description
  * 造成1点水元素伤害，此角色每有3点无尽食欲提供的额外最大生命，此伤害+1（最多+5）。然后舍弃1张原本元素骰费用最高的手牌。
  */
-const StarfallShower = skill(22042)
-  .until("v4.7.0")
-  .type("elemental")
-  .costHydro(3)
-  .do((c) => {
-    const st = c.self.hasStatus(AnomalousAnatomy);
-    const extraDmg = st ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 5) : 0;
-    c.damage(DamageType.Hydro, 1 + extraDmg);
-    const [card] = c.disposeMaxCostHands(1);
-    if (card) {
-      if (c.self.hasEquipment(LightlessFeeding)) {
-        c.heal(card.diceCost(), "@self");
-      }
+define skill {
+  id 22042 as private StarfallShower;
+  until "v4.7.0";
+  skillType elemental;
+  cost DiceType.Hydro, 3;
+  const st = :self.hasStatus(AnomalousAnatomy);
+  const extraDmg = st ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 5) : 0;
+  :damage(DamageType.Hydro, 1 + extraDmg);
+  const [card] = :disposeMaxCostHands(1);
+  if (card) {
+    if (:self.hasEquipment(LightlessFeeding)) {
+      :heal(card.diceCost(), "@self");
     }
-  })
-  .done();
+  }
+}
 
 /**
  * @id 14093
@@ -129,14 +134,15 @@ const StarfallShower = skill(22042)
  * @description
  * 造成2点雷元素伤害，召唤蔷薇雷光。
  */
-const LightningRose = skill(14093)
-  .until("v4.7.0")
-  .type("burst")
-  .costElectro(3)
-  .costEnergy(2)
-  .damage(DamageType.Electro, 2)
-  .summon(LightningRoseSummon)
-  .done();
+define skill {
+  id 14093 as private LightningRose;
+  until "v4.7.0";
+  skillType burst;
+  cost DiceType.Electro, 3;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Electro, 2);
+  :summon(LightningRoseSummon);
+}
 
 /**
  * @id 115051
@@ -145,15 +151,21 @@ const LightningRose = skill(14093)
  * 所附属角色进行下落攻击时：造成的物理伤害变为风元素伤害，且伤害+1。
  * 角色使用技能后：移除此效果。
  */
-const MidareRanzan = status(115051)
-  .until("v4.7.0")
-  .on("modifySkillDamageType", (c, e) => e.viaPlungingAttack() && e.type === DamageType.Physical)
-  .changeDamageType(DamageType.Anemo)
-  .on("increaseSkillDamage", (c, e) => e.viaPlungingAttack())
-  .increaseDamage(1)
-  .on("useSkill")
-  .dispose()
-  .done();
+define status {
+  id 115051 as private MidareRanzan;
+  until "v4.7.0";
+  on modifySkillDamageType {
+    when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Anemo);
+  }
+  on increaseSkillDamage {
+    when :( :e.viaPlungingAttack() );
+    :e.increaseDamage(1);
+  }
+  on useSkill {
+    :dispose();
+  }
+}
 
 /**
  * @id 115053
@@ -162,15 +174,21 @@ const MidareRanzan = status(115051)
  * 所附属角色进行下落攻击时：造成的物理伤害变为冰元素伤害，且伤害+1。
  * 所附属角色使用技能后：移除此效果。
  */
-const MidareRanzanCryo = status(115053)
-  .until("v4.7.0")
-  .on("modifySkillDamageType", (c, e) => e.viaPlungingAttack() && e.type === DamageType.Physical)
-  .changeDamageType(DamageType.Cryo)
-  .on("increaseSkillDamage", (c, e) => e.viaPlungingAttack())
-  .increaseDamage(1)
-  .on("useSkill")
-  .dispose()
-  .done();
+define status {
+  id 115053 as private MidareRanzanCryo;
+  until "v4.7.0";
+  on modifySkillDamageType {
+    when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Cryo);
+  }
+  on increaseSkillDamage {
+    when :( :e.viaPlungingAttack() );
+    :e.increaseDamage(1);
+  }
+  on useSkill {
+    :dispose();
+  }
+}
 
 /**
  * @id 115056
@@ -179,15 +197,21 @@ const MidareRanzanCryo = status(115053)
  * 所附属角色进行下落攻击时：造成的物理伤害变为雷元素伤害，且伤害+1。
  * 所附属角色使用技能后：移除此效果。
  */
-const MidareRanzanElectro = status(115056)
-  .until("v4.7.0")
-  .on("modifySkillDamageType", (c, e) => e.viaPlungingAttack() && e.type === DamageType.Physical)
-  .changeDamageType(DamageType.Electro)
-  .on("increaseSkillDamage", (c, e) => e.viaPlungingAttack())
-  .increaseDamage(1)
-  .on("useSkill")
-  .dispose()
-  .done();
+define status {
+  id 115056 as private MidareRanzanElectro;
+  until "v4.7.0";
+  on modifySkillDamageType {
+    when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Electro);
+  }
+  on increaseSkillDamage {
+    when :( :e.viaPlungingAttack() );
+    :e.increaseDamage(1);
+  }
+  on useSkill {
+    :dispose();
+  }
+}
 
 /**
  * @id 115054
@@ -196,15 +220,21 @@ const MidareRanzanElectro = status(115056)
  * 所附属角色进行下落攻击时：造成的物理伤害变为水元素伤害，且伤害+1。
  * 所附属角色使用技能后：移除此效果。
  */
-const MidareRanzanHydro = status(115054)
-  .until("v4.7.0")
-  .on("modifySkillDamageType", (c, e) => e.viaPlungingAttack() && e.type === DamageType.Physical)
-  .changeDamageType(DamageType.Hydro)
-  .on("increaseSkillDamage", (c, e) => e.viaPlungingAttack())
-  .increaseDamage(1)
-  .on("useSkill")
-  .dispose()
-  .done();
+define status {
+  id 115054 as private MidareRanzanHydro;
+  until "v4.7.0";
+  on modifySkillDamageType {
+    when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Hydro);
+  }
+  on increaseSkillDamage {
+    when :( :e.viaPlungingAttack() );
+    :e.increaseDamage(1);
+  }
+  on useSkill {
+    :dispose();
+  }
+}
 
 /**
  * @id 115055
@@ -213,15 +243,21 @@ const MidareRanzanHydro = status(115054)
  * 所附属角色进行下落攻击时：造成的物理伤害变为火元素伤害，且伤害+1。
  * 所附属角色使用技能后：移除此效果。
  */
-const MidareRanzanPyro = status(115055)
-  .until("v4.7.0")
-  .on("modifySkillDamageType", (c, e) => e.viaPlungingAttack() && e.type === DamageType.Physical)
-  .changeDamageType(DamageType.Pyro)
-  .on("increaseSkillDamage", (c, e) => e.viaPlungingAttack())
-  .increaseDamage(1)
-  .on("useSkill")
-  .dispose()
-  .done();
+define status {
+  id 115055 as private MidareRanzanPyro;
+  until "v4.7.0";
+  on modifySkillDamageType {
+    when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Pyro);
+  }
+  on increaseSkillDamage {
+    when :( :e.viaPlungingAttack() );
+    :e.increaseDamage(1);
+  }
+  on useSkill {
+    :dispose();
+  }
+}
   
 /**
  * @id 15052
@@ -231,35 +267,34 @@ const MidareRanzanPyro = status(115055)
  * 如果此技能引发了扩散，则将乱岚拨止转换为被扩散的元素。
  * 此技能结算后：我方切换到后一个角色。
  */
-const Chihayaburu = skill(15052)
-  .until("v4.7.0")
-  .type("elemental")
-  .costAnemo(3)
-  .do((c) => {
-    const aura = c.$("opp active")?.aura;
-    let midareRanzan;
-    switch (aura) {
-      case Aura.Cryo:
-      case Aura.CryoDendro:
-        midareRanzan = MidareRanzanCryo;
-        break;
-      case Aura.Electro:
-        midareRanzan = MidareRanzanElectro;
-        break;
-      case Aura.Hydro:
-        midareRanzan = MidareRanzanHydro;
-        break;
-      case Aura.Pyro:
-        midareRanzan = MidareRanzanPyro;
-        break;
-      default:
-        midareRanzan = MidareRanzan;
-        break;
-    }
-    c.characterStatus(midareRanzan);
-  })
-  .damage(DamageType.Anemo, 3)
-  .done();
+define skill {
+  id 15052 as private Chihayaburu;
+  until "v4.7.0";
+  skillType elemental;
+  cost DiceType.Anemo, 3;
+  const aura = :$("opp active")?.aura;
+  let midareRanzan;
+  switch (aura) {
+    case Aura.Cryo:
+    case Aura.CryoDendro:
+      midareRanzan = MidareRanzanCryo;
+      break;
+    case Aura.Electro:
+      midareRanzan = MidareRanzanElectro;
+      break;
+    case Aura.Hydro:
+      midareRanzan = MidareRanzanHydro;
+      break;
+    case Aura.Pyro:
+      midareRanzan = MidareRanzanPyro;
+      break;
+    default:
+      midareRanzan = MidareRanzan;
+      break;
+  }
+  :characterStatus(midareRanzan);
+  :damage(DamageType.Anemo, 3);
+}
 
 /**
  * @id 15053
@@ -267,14 +302,15 @@ const Chihayaburu = skill(15052)
  * @description
  * 造成3点风元素伤害，召唤流风秋野。
  */
-const KazuhaSlash = skill(15053)
-  .until("v4.7.0")
-  .type("burst")
-  .costAnemo(3)
-  .costEnergy(2)
-  .damage(DamageType.Anemo, 3)
-  .summon(AutumnWhirlwind)
-  .done();
+define skill {
+  id 15053 as private KazuhaSlash;
+  until "v4.7.0";
+  skillType burst;
+  cost DiceType.Anemo, 3;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Anemo, 3);
+  :summon(AutumnWhirlwind);
+}
 
 /**
  * @id 116041
@@ -284,14 +320,20 @@ const KazuhaSlash = skill(15053)
  * 可用次数：3
  * 此召唤物在场时：我方角色进行下落攻击时少花费1个无色元素。（每回合1次）
  */
-const SolarIsotoma = summon(116041)
-  .until("v4.7.0")
-  .endPhaseDamage(DamageType.Geo, 1)
-  .usage(3)
-  .on("deductVoidDiceSkill", (c, e) => e.isPlungingAttack())
-  .usagePerRound(1)
-  .deductVoidCost(1)
-  .done();
+define summon {
+  id 116041 as private SolarIsotoma;
+  until "v4.7.0";
+  hint DamageType.Geo, 1;
+  on endPhase {
+    usage 3;
+    :damage(DamageType.Geo, 1);
+  }
+  on deductVoidDiceSkill {
+    when :( :e.isPlungingAttack() );
+    usage perRound, 1;
+    :e.deductVoidCost(1);
+  }
+}
 
 /**
  * @id 216041
@@ -302,18 +344,22 @@ const SolarIsotoma = summon(116041)
  * 装备有此牌的阿贝多在场时，如果我方场上存在阳华，则我方角色进行下落攻击时造成的伤害+1。
  * （牌组中包含阿贝多，才能加入牌组）
  */
-const DescentOfDivinity = card(216041)
-  .until("v4.7.0")
-  .costGeo(3)
-  .talent(Albedo)
-  .on("enter")
-  .useSkill(AbiogenesisSolarIsotoma)
-  .on("increaseSkillDamage", (c, e) =>
-    c.$(`my summons with definition id ${SolarIsotoma}`) &&
-    e.viaPlungingAttack())
-  .listenToPlayer()
-  .increaseDamage(1)
-  .done();
+define card {
+  id 216041 as private DescentOfDivinity;
+  until "v4.7.0";
+  cost DiceType.Geo, 3;
+  talent Albedo {
+    on enter {
+      :useSkill(AbiogenesisSolarIsotoma);
+    }
+    on increaseSkillDamage {
+      when :( :$(`my summons with definition id ${SolarIsotoma}`) &&
+          :e.viaPlungingAttack() );
+      listenTo samePlayer;
+      :e.increaseDamage(1);
+    }
+  }
+}
 
 /**
  * @id 216031
@@ -324,19 +370,24 @@ const DescentOfDivinity = card(216041)
  * 我方出战角色在护盾角色状态或护盾出战状态的保护下时，我方召唤物造成的岩元素伤害+1。
  * （牌组中包含钟离，才能加入牌组）
  */
-const DominanceOfEarth = card(216031)
-  .until("v4.7.0")
-  .costGeo(5)
-  .talent(Zhongli)
-  .on("enter")
-  .useSkill(DominusLapidisStrikingStone)
-  .on("increaseDamage", (c, e) => {
-    return e.type === DamageType.Geo &&
-      e.source.definition.type === "summon" &&
-      !!c.$(`(my combat status with tag (shield)) or (status with tag (shield) at my active)`);
-  })
-  .increaseDamage(1)
-  .done();
+define card {
+  id 216031 as private DominanceOfEarth;
+  until "v4.7.0";
+  cost DiceType.Geo, 5;
+  talent Zhongli {
+    on enter {
+      :useSkill(DominusLapidisStrikingStone);
+    }
+    on increaseDamage {
+      when :{
+        return :e.type === DamageType.Geo &&
+          :e.source.definition.type === "summon" &&
+          !!:$(`(my combat status with tag (shield)) or (status with tag (shield) at my active)`);
+      };
+      :e.increaseDamage(1);
+    }
+  }
+}
 
 /**
  * @id 114041
@@ -348,23 +399,27 @@ const DominanceOfEarth = card(216031)
  * 大于等于4级：造成的伤害+2；
  * 大于等于6级时：「凭依」级数-4。
  */
-const PactswornPathclearer = status(114041)
-  .until("v4.7.0")
-  .variable("reliance", 0)
-  .on("endPhase")
-  .do((c) => {
-    const newVal = c.getVariable("reliance") + 1;
+define status {
+  id 114041 as private PactswornPathclearer;
+  until "v4.7.0";
+  variable reliance, 0;
+  on endPhase {
+    const newVal = :getVariable("reliance") + 1;
     if (newVal >= 6) {
-      c.setVariable("reliance", newVal - 4);
+      :setVariable("reliance", newVal - 4);
     } else {
-      c.setVariable("reliance", newVal);
+      :setVariable("reliance", newVal);
     }
-  })
-  .on("modifySkillDamageType", (c, e) => c.getVariable("reliance") >= 2 && e.type === DamageType.Physical)
-  .changeDamageType(DamageType.Electro)
-  .on("increaseSkillDamage", (c, e) => c.getVariable("reliance") >= 4)
-  .increaseDamage(2)
-  .done();
+  }
+  on modifySkillDamageType {
+    when :( :getVariable("reliance") >= 2 && :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Electro);
+  }
+  on increaseSkillDamage {
+    when :( :getVariable("reliance") >= 4 );
+    :e.increaseDamage(2);
+  }
+}
 
 /**
  * @id 14042
@@ -372,12 +427,13 @@ const PactswornPathclearer = status(114041)
  * @description
  * 造成3点雷元素伤害。
  */
-const SecretRiteChasmicSoulfarer = skill(14042)
-  .until("v4.7.0")
-  .type("elemental")
-  .costElectro(3)
-  .damage(DamageType.Electro, 3)
-  .done();
+define skill {
+  id 14042 as private SecretRiteChasmicSoulfarer;
+  until "v4.7.0";
+  skillType elemental;
+  cost DiceType.Electro, 3;
+  :damage(DamageType.Electro, 3);
+}
 
 /**
  * @id 14043
@@ -386,22 +442,21 @@ const SecretRiteChasmicSoulfarer = skill(14042)
  * 造成4点雷元素伤害，
  * 启途誓使的「凭依」级数+2。
  */
-const SacredRiteWolfsSwiftness = skill(14043)
-  .until("v4.7.0")
-  .type("burst")
-  .costElectro(4)
-  .costEnergy(2)
-  .damage(DamageType.Electro, 4)
-  .do((c) => {
-    const status = c.self.hasStatus(PactswornPathclearer)!;
-    const newVal = c.getVariable("reliance", status) + 2;
-    if (newVal >= 6) {
-      c.setVariable("reliance", newVal - 4, status);
-    } else {
-      c.setVariable("reliance", newVal, status);
-    }
-  })
-  .done();
+define skill {
+  id 14043 as private SacredRiteWolfsSwiftness;
+  until "v4.7.0";
+  skillType burst;
+  cost DiceType.Electro, 4;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Electro, 4);
+  const status = :self.hasStatus(PactswornPathclearer)!;
+  const newVal = :getVariable("reliance", status) + 2;
+  if (newVal >= 6) {
+    :setVariable("reliance", newVal - 4, status);
+  } else {
+    :setVariable("reliance", newVal, status);
+  }
+}
 
 /**
  * @id 214041
@@ -412,18 +467,23 @@ const SacredRiteWolfsSwiftness = skill(14043)
  * 装备有此牌的赛诺在启途誓使的「凭依」级数为偶数时，使用秘仪·律渊渡魂造成的伤害+1。
  * （牌组中包含赛诺，才能加入牌组）
  */
-const FeatherfallJudgment = card(214041)
-  .until("v4.7.0")
-  .costElectro(3)
-  .talent(Cyno)
-  .on("enter")
-  .useSkill(SecretRiteChasmicSoulfarer)
-  .on("increaseSkillDamage", (c, e) => {
-    const status = c.self.master.hasStatus(PactswornPathclearer)!;
-    return c.getVariable("reliance", status) % 2 === 0 && e.via.definition.id === SecretRiteChasmicSoulfarer;
-  })
-  .increaseDamage(1)
-  .done();
+define card {
+  id 214041 as private FeatherfallJudgment;
+  until "v4.7.0";
+  cost DiceType.Electro, 3;
+  talent Cyno {
+    on enter {
+      :useSkill(SecretRiteChasmicSoulfarer);
+    }
+    on increaseSkillDamage {
+      when :{
+        const status = :self.master.hasStatus(PactswornPathclearer)!;
+        return :getVariable("reliance", status) % 2 === 0 && :e.via.definition.id === SecretRiteChasmicSoulfarer;
+      };
+      :e.increaseDamage(1);
+    }
+  }
+}
 
 /**
  * @id 122021
@@ -433,13 +493,16 @@ const FeatherfallJudgment = card(214041)
  * 持续回合：2
  * （同一方场上最多存在一个此状态）
  */
-const Refraction = status(122021)
-  .until("v4.7.0")
-  .unique(122022)
-  .duration(2)
-  .on("increaseDamaged", (c, e) => e.type === DamageType.Hydro)
-  .increaseDamage(1)
-  .done();
+define status {
+  id 122021 as private Refraction;
+  until "v4.7.0";
+  conflictWith crossCharacter, 122022;
+  duration 2;
+  on increaseDamaged {
+    when :( :e.type === DamageType.Hydro );
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 332026
@@ -464,11 +527,12 @@ const [FallsAndFortune] = card(332026)
  * @description
  * 治疗我方出战角色1点，生成1个随机基础元素骰。
  */
-const UnderseaTreasure = card(303230)
-  .until("v4.7.0")
-  .heal(1, "my active")
-  .generateDice("randomElement", 1)
-  .done();
+define card {
+  id 303230 as private UnderseaTreasure;
+  until "v4.7.0";
+  :heal(1, "my active");
+  :generateDice("randomElement", 1);
+}
 
 /**
  * @id 332024
@@ -497,22 +561,31 @@ const [Lyresong] = card(332024)
  * 可用次数：3
  * 【此卡含描述变量】
  */
-const LumenstoneAdjuvant = card(323007)
-  .until("v4.7.0")
-  .costSame(2)
-  .support("item")
-  .variable("playedCard", 0, { visible: false })
-  .replaceDescription("[GCG_TOKEN_COUNTER]", (st, self) => self.variables.playedCard)
-  .on("playCard", (c, e) => e.card.id !== c.self.id)
-  .addVariable("playedCard", 1)
-  .on("playCard", (c) => c.getVariable("playedCard") === 3)
-  .usagePerRound(1)
-  .usage(3)
-  .drawCards(1)
-  .generateDice(DiceType.Omni, 1)
-  .on("actionPhase")
-  .setVariable("playedCard", 0)
-  .done();
+define card {
+  id 323007 as private LumenstoneAdjuvant;
+  until "v4.7.0";
+  cost DiceType.Aligned, 2;
+  support item {
+    variable playedCard, 0 {
+      visible false;
+    };
+    replaceDescription "[GCG_TOKEN_COUNTER]", ((st, self) => self.variables.playedCard);
+    on playCard {
+      when :( :e.card.id !== :self.id );
+      :addVariable("playedCard", 1);
+    }
+    on playCard {
+      when :( :getVariable("playedCard") === 3 );
+      usage perRound, 1;
+      usage 3;
+      :drawCards(1);
+      :generateDice(DiceType.Omni, 1);
+    }
+    on actionPhase {
+      :setVariable("playedCard", 0);
+    }
+  }
+}
 
 /**
  * @id 321004
@@ -520,14 +593,17 @@ const LumenstoneAdjuvant = card(323007)
  * @description
  * 我方执行「切换角色」行动时：少花费1个元素骰。（每回合1次）
  */
-const DawnWinery = card(321004)
-  .until("v4.7.0")
-  .costSame(2)
-  .support("place")
-  .on("deductOmniDiceSwitch")
-  .usagePerRound(1)
-  .deductOmniCost(1)
-  .done();
+define card {
+  id 321004 as private DawnWinery;
+  until "v4.7.0";
+  cost DiceType.Aligned, 2;
+  support place {
+    on deductOmniDiceSwitch {
+      usage perRound, 1;
+      :e.deductOmniCost(1);
+    }
+  }
+}
 
 /**
  * @id 323008
@@ -536,24 +612,30 @@ const DawnWinery = card(321004)
  * 行动阶段开始时：舍弃最多2张元素骰费用最高的手牌，每舍弃1张，此牌就累积1点「记忆和梦」。（最多2点）
  * 我方角色使用技能时：如果我方本回合未打出过行动牌，则消耗1点「记忆和梦」，以使此技能少花费1个元素骰。
  */
-const Kusava = card(323008)
-  .until("v4.7.0")
-  .support("item")
-  .variable("memory", 0)
-  .variable("cardPlayed", 0, { visible: false })
-  .on("actionPhase")
-  .do((c) => {
-    const memory = c.getVariable("memory");
-    if (memory < 2) {
-      const disposed = c.disposeMaxCostHands(2 - memory);
-      const count = disposed.length;
-      c.addVariableWithMax("memory", count, 2);
+define card {
+  id 323008 as private Kusava;
+  until "v4.7.0";
+  support item {
+    variable memory, 0;
+    variable cardPlayed, 0 {
+      visible false;
+    };
+    on actionPhase {
+      const memory = :getVariable("memory");
+      if (memory < 2) {
+        const disposed = :disposeMaxCostHands(2 - memory);
+        const count = disposed.length;
+        :addVariableWithMax("memory", count, 2);
+      }
+      :setVariable("cardPlayed", 0);
     }
-    c.setVariable("cardPlayed", 0);
-  })
-  .on("playCard")
-  .setVariable("cardPlayed", 1)
-  .on("deductOmniDiceSkill", (c, e) => !c.getVariable("cardPlayed") && c.getVariable("memory") > 0)
-  .deductOmniCost(1)
-  .addVariable("memory", -1)
-  .done();
+    on playCard {
+      :setVariable("cardPlayed", 1);
+    }
+    on deductOmniDiceSkill {
+      when :( !:getVariable("cardPlayed") && :getVariable("memory") > 0 );
+      :e.deductOmniCost(1);
+      :addVariable("memory", -1);
+    }
+  }
+}

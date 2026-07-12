@@ -14,13 +14,14 @@ import { Satiated } from "../commons.gts";
  * @description
  * 切换为近战状态，然后造成2点水元素伤害。
  */
-const FoulLegacyRagingTide = skill(12042)
-  .until("v4.0.0")
-  .type("elemental")
-  .costHydro(3)
-  .characterStatus(MeleeStance)
-  .damage(DamageType.Hydro, 2)
-  .done();
+define skill {
+  id 12042 as private FoulLegacyRagingTide;
+  until "v4.0.0";
+  skillType elemental;
+  cost DiceType.Hydro, 3;
+  :characterStatus(MeleeStance);
+  :damage(DamageType.Hydro, 2);
+}
 
 /**
  * @id 112043
@@ -30,10 +31,11 @@ const FoulLegacyRagingTide = skill(12042)
  * （处于「近战状态」的达达利亚攻击所附属角色时，会造成额外伤害。）
  * 持续回合：2
  */
-const Riptide = status(112043)
-  .until("v4.0.0")
-  .duration(2)
-  .done();
+define status {
+  id 112043 as private Riptide;
+  until "v4.0.0";
+  duration 2;
+}
 
 /**
  * @id 12043
@@ -43,21 +45,20 @@ const Riptide = status(112043)
  * 远程状态·魔弹一闪：造成4点水元素伤害，返还2点充能，目标角色附属断流。
  * 近战状态·尽灭水光：造成7点水元素伤害。
  */
-const HavocObliteration = skill(12043)
-  .until("v4.0.0")
-  .type("burst")
-  .costHydro(3)
-  .costEnergy(3)
-  .do((c) => {
-    if (c.self.hasStatus(RangedStance)) {
-      c.damage(DamageType.Hydro, 4);
-      c.self.gainEnergy(2);
-      c.characterStatus(Riptide, "opp active");
-    } else {
-      c.damage(DamageType.Hydro, 7);
-    }
-  })
-  .done();
+define skill {
+  id 12043 as private HavocObliteration;
+  until "v4.0.0";
+  skillType burst;
+  cost DiceType.Hydro, 3;
+  cost DiceType.Energy, 3;
+  if (:self.hasStatus(RangedStance)) {
+    :damage(DamageType.Hydro, 4);
+    :self.gainEnergy(2);
+    :characterStatus(Riptide, "opp active");
+  } else {
+    :damage(DamageType.Hydro, 7);
+  }
+}
 
 /**
  * @id 212041
@@ -68,15 +69,20 @@ const HavocObliteration = skill(12043)
  * 结束阶段：对所有附属有断流的敌方角色造成1点穿透伤害。
  * （牌组中包含达达利亚，才能加入牌组）
  */
-const AbyssalMayhemHydrospout = card(212041)
-  .until("v4.0.0")
-  .costHydro(4)
-  .talent(Tartaglia)
-  .on("enter")
-  .useSkill(FoulLegacyRagingTide)
-  .on("endPhase", (c) => c.$(`opp character has status with definition id ${Riptide}`))
-  .damage(DamageType.Piercing, 1, `opp character has status with definition id ${Riptide}`)
-  .done();
+define card {
+  id 212041 as private AbyssalMayhemHydrospout;
+  until "v4.0.0";
+  cost DiceType.Hydro, 4;
+  talent Tartaglia {
+    on enter {
+      :useSkill(FoulLegacyRagingTide);
+    }
+    on endPhase {
+      when :( :$(`opp character has status with definition id ${Riptide}`) );
+      :damage(DamageType.Piercing, 1, `opp character has status with definition id ${Riptide}`);
+    }
+  }
+}
 
 /**
  * @id 112061
@@ -85,16 +91,22 @@ const AbyssalMayhemHydrospout = card(212041)
  * 所附属角色普通攻击造成的伤害+1，造成的物理伤害变为水元素伤害。
  * 可用次数：2
  */
-const TakimeguriKanka: StatusHandle = status(112061)
-  .until("v4.0.0")
-  .on("modifySkillDamageType", (c, e) => e.type === DamageType.Physical)
-  .changeDamageType(DamageType.Hydro)
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("normal"))
-  .usage(2)
-  .increaseDamage(1)
-  .if((c, e) => c.self.master.hasEquipment(KyoukaFuushi) && e.target.health <= 6)
-  .increaseDamage(2)
-  .done();
+define status {
+  id 112061 as private TakimeguriKanka;
+  until "v4.0.0";
+  on modifySkillDamageType {
+    when :( :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Hydro);
+  }
+  on increaseSkillDamage {
+    when :( :e.viaSkillType("normal") );
+    usage 2;
+    :e.increaseDamage(1);
+    if (:self.master.hasEquipment(KyoukaFuushi) && :e.target.health <= 6) {
+      :e.increaseDamage(2);
+    }
+  }
+}
 
 /**
  * @id 12063
@@ -102,14 +114,15 @@ const TakimeguriKanka: StatusHandle = status(112061)
  * @description
  * 造成3点水元素伤害，召唤清净之园囿。
  */
-const KamisatoArtSuiyuu = skill(12063)
-  .until("v4.0.0")
-  .type("burst")
-  .costHydro(3)
-  .costEnergy(3)
-  .damage(DamageType.Hydro, 3)
-  .summon(GardenOfPurity)
-  .done();
+define skill {
+  id 12063 as private KamisatoArtSuiyuu;
+  until "v4.0.0";
+  skillType burst;
+  cost DiceType.Hydro, 3;
+  cost DiceType.Energy, 3;
+  :damage(DamageType.Hydro, 3);
+  :summon(GardenOfPurity);
+}
 
 /**
  * @id 1206
@@ -117,13 +130,14 @@ const KamisatoArtSuiyuu = skill(12063)
  * @description
  * 神守之柏，已焕新材。
  */
-const KamisatoAyato = character(1206)
-  .until("v4.0.0")
-  .tags("hydro", "sword", "inazuma")
-  .health(10)
-  .energy(3)
-  .skills(KamisatoArtMarobashi, KamisatoArtKyouka, KamisatoArtSuiyuu)
-  .done();
+define character {
+  id 1206 as private KamisatoAyato;
+  until "v4.0.0";
+  tags hydro, sword, inazuma;
+  health 10;
+  energy 3;
+  skills KamisatoArtMarobashi, KamisatoArtKyouka, KamisatoArtSuiyuu;
+}
 
 /**
  * @id 121011
@@ -135,15 +149,25 @@ const KamisatoAyato = character(1206)
  * 愚人众·冰萤术士「普通攻击」后：此牌可用次数+1。
  * 我方角色受到发生元素反应的伤害后：此牌可用次数-1。
  */
-const CryoCicins: SummonHandle = summon(121011)
-  .until("v4.0.0")
-  .endPhaseDamage(DamageType.Cryo, 1)
-  .usageCanAppend(2, 3)
-  .on("useSkill", (c, e) => e.skill.caller.definition.id === FatuiCryoCicinMage && e.isSkillType("normal"))
-  .addVariable("usage", 1)
-  .on("damaged", (c, e) => e.getReaction())
-  .consumeUsage()
-  .done();
+define summon {
+  id 121011 as private CryoCicins;
+  until "v4.0.0";
+  hint DamageType.Cryo, 1;
+  on endPhase {
+    usage 2 {
+      append 3;
+    };
+    :damage(DamageType.Cryo, 1);
+  }
+  on useSkill {
+    when :( :e.skill.caller.definition.id === FatuiCryoCicinMage && :e.isSkillType("normal") );
+    :addVariable("usage", 1);
+  }
+  on damaged {
+    when :( :e.getReaction() );
+    :consumeUsage();
+  }
+}
 
 /**
  * @id 211021
@@ -154,13 +178,16 @@ const CryoCicins: SummonHandle = summon(121011)
  * 装备有此牌的迪奥娜生成的猫爪护盾，所提供的护盾值+1。
  * （牌组中包含迪奥娜，才能加入牌组）
  */
-const ShakenNotPurred = card(211021)
-  .until("v4.0.0")
-  .costCryo(4)
-  .talent(Diona)
-  .on("enter")
-  .useSkill(IcyPaws)
-  .done();
+define card {
+  id 211021 as private ShakenNotPurred;
+  until "v4.0.0";
+  cost DiceType.Cryo, 4;
+  talent Diona {
+    on enter {
+      :useSkill(IcyPaws);
+    }
+  }
+}
 
 /**
  * @id 12023
@@ -168,15 +195,16 @@ const ShakenNotPurred = card(211021)
  * @description
  * 造成1点水元素伤害，本角色附着水元素，生成虹剑势。
  */
-const Raincutter = skill(12023)
-  .until("v4.0.0")
-  .type("burst")
-  .costHydro(3)
-  .costEnergy(2)
-  .damage(DamageType.Hydro, 1)
-  .apply(DamageType.Hydro, "@self")
-  .combatStatus(RainbowBladework)
-  .done();
+define skill {
+  id 12023 as private Raincutter;
+  until "v4.0.0";
+  skillType burst;
+  cost DiceType.Hydro, 3;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Hydro, 1);
+  :apply(DamageType.Hydro, "@self");
+  :combatStatus(RainbowBladework);
+}
 
 /**
  * @id 323002
@@ -185,16 +213,21 @@ const Raincutter = skill(12023)
  * 入场时：从牌组中随机抽取1张「料理」事件。
  * 我方打出「料理」事件牌时：从牌组中随机抽取1张「料理」事件牌。（每回合1次）
  */
-const Nre = card(323002)
-  .until("v4.0.0")
-  .costVoid(2)
-  .support("item")
-  .on("enter")
-  .drawCards(1, { withTag: "food" })
-  .on("playCard", (c, e) => e.hasCardTag("food"))
-  .usagePerRound(1)
-  .drawCards(1, { withTag: "food" })
-  .done();
+define card {
+  id 323002 as private Nre;
+  until "v4.0.0";
+  cost DiceType.Void, 2;
+  support item {
+    on enter {
+      :drawCards(1, { withTag: "food" });
+    }
+    on playCard {
+      when :( :e.hasCardTag("food") );
+      usage perRound, 1;
+      :drawCards(1, { withTag: "food" });
+    }
+  }
+}
 
 /**
  * @id 333009
@@ -220,14 +253,18 @@ const TeyvatFriedEgg = card(333009)
  * @description
  * 打出「伙伴」支援牌时：少花费1个元素骰。（每回合1次）
  */
-const Dunyarzad = card(322016)
-  .until("v4.0.0")
-  .costSame(1)
-  .support("ally")
-  .on("deductOmniDiceCard", (c, e) => e.hasCardTag("ally"))
-  .usagePerRound(1)
-  .deductOmniCost(1)
-  .done();
+define card {
+  id 322016 as private Dunyarzad;
+  until "v4.0.0";
+  cost DiceType.Aligned, 1;
+  support ally {
+    on deductOmniDiceCard {
+      when :( :e.hasCardTag("ally") );
+      usage perRound, 1;
+      :e.deductOmniCost(1);
+    }
+  }
+}
 
 /**
  * @id 322005
@@ -235,14 +272,18 @@ const Dunyarzad = card(322016)
  * @description
  * 打出「料理」事件牌后：生成1个随机基础元素骰。（每回合1次）
  */
-const ChefMao = card(322005)
-  .until("v4.0.0")
-  .costSame(1)
-  .support("ally")
-  .on("playCard", (c, e) => e.hasCardTag("food"))
-  .usagePerRound(1)
-  .generateDice("randomElement", 1)
-  .done();
+define card {
+  id 322005 as private ChefMao;
+  until "v4.0.0";
+  cost DiceType.Aligned, 1;
+  support ally {
+    on playCard {
+      when :( :e.hasCardTag("food") );
+      usage perRound, 1;
+      :generateDice("randomElement", 1);
+    }
+  }
+}
 
 /**
  * @id 332010
@@ -296,16 +337,22 @@ const BlessingOfTheDivineRelicsInstallation = card(332011)
  * 角色使用「元素爆发」造成的伤害+2。
  * （角色最多装备1件「圣遗物」）
  */
-const EmblemOfSeveredFate = card(312008)
-  .until("v4.0.0")
-  .costSame(2)
-  .artifact()
-  .on("useSkill", (c, e) => e.skill.caller.id !== c.self.master.id && e.isSkillType("burst"))
-  .listenToPlayer()
-  .gainEnergy(1, "@master")
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("burst"))
-  .increaseDamage(2)
-  .done();
+define card {
+  id 312008 as private EmblemOfSeveredFate;
+  until "v4.0.0";
+  cost DiceType.Aligned, 2;
+  artifact {
+    on useSkill {
+      when :( :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst") );
+      listenTo samePlayer;
+      :gainEnergy(1, "@master");
+    }
+    on increaseSkillDamage {
+      when :( :e.viaSkillType("burst") );
+      :e.increaseDamage(2);
+    }
+  }
+}
 
 /**
  * @id 303181
@@ -314,18 +361,20 @@ const EmblemOfSeveredFate = card(312008)
  * 本回合中，轮到我方行动期间有对方角色被击倒时：本次行动结束后，我方可以再连续行动一次。
  * 可用次数：1
  */
-const WindAndFreedomInEffect = combatStatus(303181) 
-  .until("v4.0.0")
-  .oneDuration()
-  .on("defeated", (c, e) =>
-    c.isMyTurn() && 
-    !c.oppPlayer.declaredEnd &&
-    !e.target.isMine() && 
-    (c.phase === "action" || c.player.defeatedSwitching || c.oppPlayer.defeatedSwitching))
-  .listenToAll()
-  .usage(1)
-  .continueNextTurn()
-  .done();
+define combatStatus {
+  id 303181 as private WindAndFreedomInEffect;
+  until "v4.0.0";
+  oneDuration;
+  on defeated {
+    when :( :isMyTurn() && 
+        !:oppPlayer.declaredEnd &&
+        !:e.target.isMine() && 
+        (:phase === "action" || :player.defeatedSwitching || :oppPlayer.defeatedSwitching) );
+    listenTo all;
+    usage 1;
+    :continueNextTurn();
+  }
+}
 
 /**
  * @id 331801
@@ -335,9 +384,10 @@ const WindAndFreedomInEffect = combatStatus(303181)
  * 可用次数：1
  * （牌组包含至少2个「蒙德」角色，才能加入牌组）
  */
-const WindAndFreedom = card(331801)
-  .until("v4.0.0")
-  .costSame(1)
-  .combatStatus(WindAndFreedomInEffect)
-  .done();
+define card {
+  id 331801 as private WindAndFreedom;
+  until "v4.0.0";
+  cost DiceType.Aligned, 1;
+  :combatStatus(WindAndFreedomInEffect);
+}
   

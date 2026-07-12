@@ -353,9 +353,9 @@ Options:
   --stdout         Print the converted content. Requires exactly one file.
   --help           Show this help.
 
-Without files, the script scans packages/data/src for .ts and .gts files,
-excluding old_versions. .ts inputs are written as sibling .gts files; .gts
-inputs are updated in place unless --out-dir is used.`);
+Without files, the script scans packages/data/src for .ts and .gts files.
+.ts inputs are written as sibling .gts files; .gts inputs are updated in 
+place unless --out-dir is used.`);
   process.exit(1);
 }
 
@@ -410,7 +410,7 @@ async function collectDefaultFiles(): Promise<string[]> {
   await walk(SRC_ROOT, result);
   return result
     .filter((file) => /\.(?:gts|ts)$/.test(file))
-    .filter((file) => !file.includes(`${path.sep}old_versions${path.sep}`))
+    // .filter((file) => !file.includes(`${path.sep}old_versions${path.sep}`))
     .sort();
 }
 
@@ -2185,16 +2185,7 @@ function updateRelativeImports(content: string): string {
 
 async function updateAllGtsRelativeImports(): Promise<void> {
   const files = await collectDefaultFiles();
-  const oldVersionsDir = path.join(SRC_ROOT, "old_versions");
-  let oldVersions: string[] = [];
-  try {
-    oldVersions = (await readdir(oldVersionsDir, { withFileTypes: true }))
-      .filter((entry) => entry.isFile() && entry.name.endsWith(".gts"))
-      .map((entry) => path.join(oldVersionsDir, entry.name));
-  } catch {
-    // old_versions directory may not exist
-  }
-  for (const file of [...files, ...oldVersions]) {
+  for (const file of [...files]) {
     if (!file.endsWith(".gts")) continue;
     const content = await readFile(file, "utf-8");
     const updated = updateRelativeImports(content);

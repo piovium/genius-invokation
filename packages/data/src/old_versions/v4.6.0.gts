@@ -1,4 +1,4 @@
-import { skill, combatStatus, card, DamageType } from "@gi-tcg/core/builder";
+import { card, combatStatus, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
 import { UnderseaTreasure } from "../cards/event/other.gts";
 
 /**
@@ -7,11 +7,12 @@ import { UnderseaTreasure } from "../cards/event/other.gts";
  * @description
  * 生成6张海底宝藏，随机地置入我方牌库中。
  */
-const UnderwaterTreasureHunt = card(332031)
-  .until("v4.6.0")
-  .costSame(1)
-  .createPileCards(UnderseaTreasure, 6, "random")
-  .done();
+define card {
+  id 332031 as private UnderwaterTreasureHunt;
+  until "v4.6.0";
+  cost DiceType.Aligned, 1;
+  :createPileCards(UnderseaTreasure, 6, "random");
+}
 
 /**
  * @id 112092
@@ -20,12 +21,15 @@ const UnderwaterTreasureHunt = card(332031)
  * 我方角色普通攻击后：造成2点水元素伤害。
  * 持续回合：2
  */
-const ExquisiteThrow = combatStatus(112092)
-  .until("v4.6.0")
-  .duration(2)
-  .on("useSkill", (c, e) => e.isSkillType("normal"))
-  .damage(DamageType.Hydro, 2)
-  .done();
+define combatStatus {
+  id 112092 as private ExquisiteThrow;
+  until "v4.6.0";
+  duration 2;
+  on useSkill {
+    when :( :e.isSkillType("normal") );
+    :damage(DamageType.Hydro, 2);
+  }
+}
 
 /**
  * @id 12093
@@ -33,11 +37,12 @@ const ExquisiteThrow = combatStatus(112092)
  * @description
  * 造成1点水元素伤害，生成玄掷玲珑。
  */
-const DepthclarionDice = skill(12093)
-  .until("v4.6.0")
-  .type("burst")
-  .costHydro(3)
-  .costEnergy(3)
-  .damage(DamageType.Hydro, 1)
-  .combatStatus(ExquisiteThrow)
-  .done();
+define skill {
+  id 12093 as private DepthclarionDice;
+  until "v4.6.0";
+  skillType burst;
+  cost DiceType.Hydro, 3;
+  cost DiceType.Energy, 3;
+  :damage(DamageType.Hydro, 1);
+  :combatStatus(ExquisiteThrow);
+}

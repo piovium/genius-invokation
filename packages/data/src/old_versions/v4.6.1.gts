@@ -11,14 +11,13 @@ import { AdeptusArtPreserverOfFortune, Qiqi } from "../characters/cryo/qiqi.gts"
  * 我方抓当前的回合数-1数量的牌。（最多抓4张）
  * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  */
-const InEveryHouseAStove = card(330005)
-  .until("v4.6.1")
-  .legend()
-  .do((c) => {
-    const count = Math.min(c.roundNumber - 1, 4);
-    c.drawCards(count);
-  })
-  .done();
+define card {
+  id 330005 as private InEveryHouseAStove;
+  until "v4.6.1";
+  legend;
+  const count = Math.min(:roundNumber - 1, 4);
+  :drawCards(count);
+}
 
 /**
  * @id 213011
@@ -29,18 +28,22 @@ const InEveryHouseAStove = card(330005)
  * 装备有此牌的迪卢克每回合第2次使用逆焰之刃时：少花费1个火元素。
  * （牌组中包含迪卢克，才能加入牌组）
  */
-const FlowingFlame = card(213011)
-  .until("v4.6.1")
-  .costPyro(3)
-  .talent(Diluc)
-  .on("enter")
-  .useSkill(SearingOnslaught)
-  .on("deductElementDiceSkill", (c, e) =>
-    e.action.skill.definition.id === SearingOnslaught && 
-    c.countOfSkill(Diluc, SearingOnslaught) === 1 &&
-    e.canDeductCostOfType(DiceType.Pyro))
-  .deductCost(DiceType.Pyro, 1)
-  .done();
+define card {
+  id 213011 as private FlowingFlame;
+  until "v4.6.1";
+  cost DiceType.Pyro, 3;
+  talent Diluc {
+    on enter {
+      :useSkill(SearingOnslaught);
+    }
+    on deductElementDiceSkill {
+      when :( :e.action.skill.definition.id === SearingOnslaught && 
+          :countOfSkill(Diluc, SearingOnslaught) === 1 &&
+          :e.canDeductCostOfType(DiceType.Pyro) );
+      :e.deductCost(DiceType.Pyro, 1);
+    }
+  }
+}
 
 /**
  * @id 113051
@@ -49,15 +52,20 @@ const FlowingFlame = card(213011)
  * 所附属角色普通攻击伤害+1，造成的物理伤害变为火元素伤害。
  * 可用次数：2
  */
-const NiwabiEnshou = status(113051)
-  .until("v4.6.1")
-  .conflictWith(113053)
-  .on("modifySkillDamageType", (c, e) => e.type === DamageType.Physical)
-  .changeDamageType(DamageType.Pyro)
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("normal"))
-  .usage(2)
-  .increaseDamage(1)
-  .done();
+define status {
+  id 113051 as private NiwabiEnshou;
+  until "v4.6.1";
+  conflictWith 113053;
+  on modifySkillDamageType {
+    when :( :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Pyro);
+  }
+  on increaseSkillDamage {
+    when :( :e.viaSkillType("normal") );
+    usage 2;
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 213051
@@ -68,13 +76,16 @@ const NiwabiEnshou = status(113051)
  * 装备有此牌的宵宫所生成的庭火焰硝初始可用次数+1，并且触发后额外造成1点火元素伤害。
  * （牌组中包含宵宫，才能加入牌组）
  */
-const NaganoharaMeteorSwarm = card(213051)
-  .until("v4.6.1")
-  .costPyro(2)
-  .talent(Yoimiya)
-  .on("enter")
-  .useSkill(NiwabiFiredance)
-  .done();
+define card {
+  id 213051 as private NaganoharaMeteorSwarm;
+  until "v4.6.1";
+  cost DiceType.Pyro, 2;
+  talent Yoimiya {
+    on enter {
+      :useSkill(NiwabiFiredance);
+    }
+  }
+}
 
 /**
  * @id 112061
@@ -83,16 +94,22 @@ const NaganoharaMeteorSwarm = card(213051)
  * 所附属角色普通攻击造成的伤害+1，造成的物理伤害变为水元素伤害。
  * 可用次数：3
  */
-const TakimeguriKanka: StatusHandle = status(112061)
-  .until("v4.6.1")
-  .on("modifySkillDamageType", (c, e) => e.type === DamageType.Physical)
-  .changeDamageType(DamageType.Hydro)
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("normal"))
-  .usage(3)
-  .increaseDamage(1)
-  .if((c, e) => c.self.master.hasEquipment(KyoukaFuushi) && e.target.health <= 6)
-  .increaseDamage(1)
-  .done();
+define status {
+  id 112061 as private TakimeguriKanka;
+  until "v4.6.1";
+  on modifySkillDamageType {
+    when :( :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Hydro);
+  }
+  on increaseSkillDamage {
+    when :( :e.viaSkillType("normal") );
+    usage 3;
+    :e.increaseDamage(1);
+    if (:self.master.hasEquipment(KyoukaFuushi) && :e.target.health <= 6) {
+      :e.increaseDamage(1);
+    }
+  }
+}
 
 /**
  * @id 111081
@@ -102,13 +119,19 @@ const TakimeguriKanka: StatusHandle = status(112061)
  * 可用次数：3
  * 此召唤物在场时，七七使用「普通攻击」后：治疗受伤最多的我方角色1点。
  */
-export const HeraldOfFrost = summon(111081)
-  .until("v4.6.1")
-  .endPhaseDamage(DamageType.Cryo, 1)
-  .usage(3)
-  .on("useSkill", (c, e) => e.skill.caller.definition.id === Qiqi && e.isSkillType("normal"))
-  .heal(1, "my characters order by health - maxHealth limit 1")
-  .done();
+define summon {
+  id 111081 as HeraldOfFrost;
+  until "v4.6.1";
+  hint DamageType.Cryo, 1;
+  on endPhase {
+    usage 3;
+    :damage(DamageType.Cryo, 1);
+  }
+  on useSkill {
+    when :( :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal") );
+    :heal(1, "my characters order by health - maxHealth limit 1");
+  }
+}
 
 /**
  * @id 211081
@@ -119,18 +142,23 @@ export const HeraldOfFrost = summon(111081)
  * 装备有此牌的七七使用仙法·救苦度厄时：复苏我方所有倒下的角色，并治疗其2点。（整场牌局限制2次）
  * （牌组中包含七七，才能加入牌组）
  */
-export const RiteOfResurrection = card(211081)
-  .until("v4.6.1")
-  .costCryo(5)
-  .costEnergy(3)
-  .talent(Qiqi)
-  .on("enter")
-  .useSkill(AdeptusArtPreserverOfFortune)
-  .on("useSkill", (c, e) => e.skill.definition.id === AdeptusArtPreserverOfFortune)
-  .usage(2, { autoDispose: false })
-  .do((c) => {
-    for (const ch of c.$$(`all my defeated characters`)) {
-      ch.heal(2, { kind: "revive" });
+define card {
+  id 211081 as RiteOfResurrection;
+  until "v4.6.1";
+  cost DiceType.Cryo, 5;
+  cost DiceType.Energy, 3;
+  talent Qiqi {
+    on enter {
+      :useSkill(AdeptusArtPreserverOfFortune);
     }
-  })
-  .done();
+    on useSkill {
+      when :( :e.skill.definition.id === AdeptusArtPreserverOfFortune );
+      usage 2 {
+        autoDispose false;
+      };
+      for (const ch of :$$(`all my defeated characters`)) {
+        ch.heal(2, { kind: "revive" });
+      }
+    }
+  }
+}

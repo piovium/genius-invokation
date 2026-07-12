@@ -1,4 +1,4 @@
-import { card, character, combatStatus, DamageType, skill, summon } from "@gi-tcg/core/builder";
+import { card, character, combatStatus, DamageType, DiceType, skill, summon } from "@gi-tcg/core/builder";
 import { DisposedSupportAndSummonsCountExtension } from "../cards/event/other.gts";
 import { Itzpapa, NightsoulsBlessing, OpalShield } from "../characters/cryo/citlali.gts";
 import { CaloricBalancingPlan01, KineticEnergyScale, TeachingsOfTheCollectiveOfPlenty, ThunderboltRush, WeightedSpike } from "../characters/electro/iansan.gts";
@@ -13,16 +13,17 @@ import { BondOfLife } from "../commons.gts";
  * 造成2点冰元素伤害。
  * 自身进入夜魂加持，并获得1点「夜魂值」；生成1点白曜护盾和伊兹帕帕。（角色进入夜魂加持后不可使用此技能）
  */
-const DawnfrostDarkstar = skill(11142)
-  .until("v6.1.0")
-  .type("elemental")
-  .costCryo(3)
-  .filter((c) => !c.self.hasStatus(NightsoulsBlessing))
-  .damage(DamageType.Cryo, 2)
-  .gainNightsoul("@self", 1)
-  .combatStatus(OpalShield)
-  .combatStatus(Itzpapa)
-  .done();
+define skill {
+  id 11142 as private DawnfrostDarkstar;
+  until "v6.1.0";
+  skillType elemental;
+  cost DiceType.Cryo, 3;
+  filter :( !:self.hasStatus(NightsoulsBlessing) );
+  :damage(DamageType.Cryo, 2);
+  :gainNightsoul("@self", 1);
+  :combatStatus(OpalShield);
+  :combatStatus(Itzpapa);
+}
 
 /**
  * @id 1211
@@ -30,13 +31,14 @@ const DawnfrostDarkstar = skill(11142)
  * @description
  * 永世领唱，无尽圆舞。
  */
-const FurinaPneuma = character(1211)
-  .until("v6.1.0")
-  .tags("hydro", "sword", "fontaine", "pneuma")
-  .health(10)
-  .energy(2)
-  .skills(SoloistsSolicitation, SalonSolitairePneuma, LetThePeopleRejoice, Skill12114, ArkheSeatsSacredAndSecular)
-  .done();
+define character {
+  id 1211 as private FurinaPneuma;
+  until "v6.1.0";
+  tags hydro, sword, fontaine, pneuma;
+  health 10;
+  energy 2;
+  skills SoloistsSolicitation, SalonSolitairePneuma, LetThePeopleRejoice, Skill12114, ArkheSeatsSacredAndSecular;
+}
 
 /**
  * @id 1212
@@ -44,13 +46,14 @@ const FurinaPneuma = character(1211)
  * @description
  *
  */
-const FurinaOusia = character(1212)
-  .until("v6.1.0")
-  .tags("hydro", "sword", "fontaine", "ousia")
-  .health(10)
-  .energy(2)
-  .skills(SoloistsSolicitationOusia, SalonSolitaireOusia, LetThePeopleRejoice, Skill12114, ArkheSeatsSacredAndSecular)
-  .done();
+define character {
+  id 1212 as private FurinaOusia;
+  until "v6.1.0";
+  tags hydro, sword, fontaine, ousia;
+  health 10;
+  energy 2;
+  skills SoloistsSolicitationOusia, SalonSolitaireOusia, LetThePeopleRejoice, Skill12114, ArkheSeatsSacredAndSecular;
+}
 
 /**
  * @id 113141
@@ -59,17 +62,17 @@ const FurinaOusia = character(1212)
  * 我方角色受到伤害后：我方受到伤害的角色和敌方阿蕾奇诺均附属1层生命之契。
  * 可用次数：5
  */
-const BlooddebtDirective = combatStatus(113141)
-  .until("v6.1.0")
-  .on("damaged")
-  .usage(5)
-  .do((c, e) => {
-    if (e.target.variables.alive) {
-      c.characterStatus(BondOfLife, e.target);
+define combatStatus {
+  id 113141 as private BlooddebtDirective;
+  until "v6.1.0";
+  on damaged {
+    usage 5;
+    if (:e.target.variables.alive) {
+      :characterStatus(BondOfLife, :e.target);
     }
-    c.characterStatus(BondOfLife, `opp characters with definition id ${Arlecchino}`);
-  })
-  .done();
+    :characterStatus(BondOfLife, `opp characters with definition id ${Arlecchino}`);
+  }
+}
 
 /**
  * @id 14143
@@ -77,20 +80,23 @@ const BlooddebtDirective = combatStatus(113141)
  * @description
  * 造成3点雷元素伤害，自身进入夜魂加持，获得1点「夜魂值」，生成动能标示。
  */
-const TheThreePrinciplesOfPower = skill(14143)
-  .until("v6.1.0")
-  .type("burst")
-  .costElectro(3)
-  .costEnergy(2)
-  .damage(DamageType.Electro, 3)
-  .gainNightsoul("@self", 1)
-  .if((c) => c.self.hasEquipment(TeachingsOfTheCollectiveOfPlenty))
-  .combatStatus(KineticEnergyScale, "my", {
-    overrideVariables: { usage: 3 }
-  })
-  .else()
-  .combatStatus(KineticEnergyScale)
-  .done();
+define skill {
+  id 14143 as private TheThreePrinciplesOfPower;
+  until "v6.1.0";
+  skillType burst;
+  cost DiceType.Electro, 3;
+  cost DiceType.Energy, 2;
+  :damage(DamageType.Electro, 3);
+  :gainNightsoul("@self", 1);
+  if (:self.hasEquipment(TeachingsOfTheCollectiveOfPlenty)) {
+    :combatStatus(KineticEnergyScale, "my", {
+      overrideVariables: { usage: 3 }
+    });
+  }
+  else {
+    :combatStatus(KineticEnergyScale);
+  }
+}
 
 /**
  * @id 1414
@@ -98,14 +104,15 @@ const TheThreePrinciplesOfPower = skill(14143)
  * @description
  * 早睡早起，低糖低盐。
  */
-const Iansan = character(1414)
-  .until("v6.1.0")
-  .tags("electro", "pole", "natlan")
-  .health(12)
-  .energy(2)
-  .skills(WeightedSpike, ThunderboltRush, TheThreePrinciplesOfPower, CaloricBalancingPlan01)
-  .associateNightsoul(NightsoulsBlessing)
-  .done();
+define character {
+  id 1414 as private Iansan;
+  until "v6.1.0";
+  tags electro, pole, natlan;
+  health 12;
+  energy 2;
+  skills WeightedSpike, ThunderboltRush, TheThreePrinciplesOfPower, CaloricBalancingPlan01;
+  associateNightsoul NightsoulsBlessing;
+}
 
 /**
  * @id 14155
@@ -146,22 +153,23 @@ const [SingYourHeartOut] = card(333027)
  * 结束阶段：造成1点穿透伤害。
  * 可用次数：1
  */
-const FellDragon = summon(303245)
-  .until("v6.1.0")
-  .variable("effect", 1, { forceOverwrite: true })
-  .associateExtension(DisposedSupportAndSummonsCountExtension)
-  .hint(DamageType.Physical, (c, e) => e.variables.effect)
-  .on("endPhase")
-  .usage(1)
-  .do((c, e) => {
-    c.damage(DamageType.Piercing, c.getVariable("effect"));
-  })
-  .on("enter")
-  .do((c, e) => {
-    const ext = c.getExtensionState();
-    const addUsage = Math.min(ext.disposedSupportCount[c.self.who], 5);
-    const addDmg = Math.min(ext.disposedSummonsCount[c.self.who], 5);
-    c.addVariable("usage", addUsage);
-    c.addVariable("effect", addDmg);
-  })
-  .done();
+define summon {
+  id 303245 as private FellDragon;
+  until "v6.1.0";
+  variable effect, 1 {
+    forceOverwrite;
+  };
+  associateExtension DisposedSupportAndSummonsCountExtension;
+  hint DamageType.Physical, ((c, e) => e.variables.effect);
+  on endPhase {
+    usage 1;
+    :damage(DamageType.Piercing, :getVariable("effect"));
+  }
+  on enter {
+    const ext = :getExtensionState();
+    const addUsage = Math.min(ext.disposedSupportCount[:self.who], 5);
+    const addDmg = Math.min(ext.disposedSummonsCount[:self.who], 5);
+    :addVariable("usage", addUsage);
+    :addVariable("effect", addDmg);
+  }
+}
