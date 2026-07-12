@@ -1,4 +1,4 @@
-import { card, character, DamageType, DiceType, Reaction, skill, status } from "@gi-tcg/core/builder";
+import { $, card, character, DamageType, DiceType, Reaction, skill, status } from "@gi-tcg/core/builder";
 import { Citlali, MamaloacosFrigidRainInEffect } from "../characters/cryo/citlali.gts";
 import { BondOfLife } from "../commons.gts";
 import { Arlecchino } from "../characters/pyro/arlecchino.gts";
@@ -79,7 +79,7 @@ const CanopyHunterRidingHigh = skill(17092)
   .until("v5.7.0")
   .type("elemental")
   .costDendro(3)
-  .addTarget("my characters")
+  .addTarget($.my.character)
   .characterStatus(GrappleLink)
   .characterStatus(NightsoulsBlessing)
   .damage(DamageType.Dendro, 2)
@@ -208,7 +208,7 @@ define status {
 const EdictOfAbsolution = card(330009)
   .until("v5.7.0")
   .legend()
-  .addTarget("my characters")
+  .addTarget($.my.character)
   .characterStatus(EdictOfAbsolutionInEffect, "@targets.0")
   .done();
 

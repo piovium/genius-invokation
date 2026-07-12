@@ -35,7 +35,7 @@ const ElementalResonanceImpetuousWinds = card(331502)
   .until("v5.4.0")
   .costAnemo(1)
   .tags("resonance")
-  .addTarget("my character")
+  .addTarget($.my.character)
   .switchActive("@targets.0")
   .generateDice(DiceType.Omni, 1)
   .done();

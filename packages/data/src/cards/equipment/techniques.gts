@@ -91,7 +91,7 @@ export const Koholasaurus = card(313003)
   .costSame(1)
   .usage(2)
   .usagePerRound(1)
-  .addTarget("my summon")
+  .addTarget($.my.summon)
   .do((c, e) => {
     c.triggerEndPhaseSkill(e.targets[0])
   })

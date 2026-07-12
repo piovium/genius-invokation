@@ -57,7 +57,7 @@ define combatStatus {
  */
 define combatStatus {
   id 115032 as Stormzone01;
-  conflictWith Stormzone;
+  conflictWith 115031;
   on deductOmniDiceSwitch {
     usage 2;
     :e.deductOmniCost(1);

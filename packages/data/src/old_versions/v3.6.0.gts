@@ -1,4 +1,4 @@
-import { card, character, DamageType, DiceType, skill, summon, type EquipmentHandle, type SkillHandle } from "@gi-tcg/core/builder";
+import { $, card, character, DamageType, DiceType, skill, summon, type EquipmentHandle, type SkillHandle } from "@gi-tcg/core/builder";
 import { LiutianArchery, SacredCryoPearl, TrailOfTheQilin } from "../characters/cryo/ganyu.gts";
 import { MirrorCage, Refraction, Refraction01 } from "../characters/hydro/mirror_maiden.gts";
 import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.gts";
@@ -129,7 +129,7 @@ define summon {
 const SendOff = card(332013)
   .until("v3.6.0")
   .costSame(2)
-  .addTarget("opp summon")
+  .addTarget($.opp.summon)
   .do((c, e) => {
     e.targets[0].dispose();
   })

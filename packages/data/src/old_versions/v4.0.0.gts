@@ -1,4 +1,4 @@
-import { DamageType, DiceType, type StatusHandle, type SummonHandle, card, character, combatStatus, flip, skill, status, summon } from "@gi-tcg/core/builder";
+import { $, DamageType, DiceType, type StatusHandle, type SummonHandle, card, character, combatStatus, flip, skill, status, summon } from "@gi-tcg/core/builder";
 import { MeleeStance, RangedStance, Tartaglia } from "../characters/hydro/tartaglia.gts";
 import { GardenOfPurity, KamisatoArtKyouka, KamisatoArtMarobashi, KyoukaFuushi } from "../characters/hydro/kamisato_ayato.gts";
 import { FatuiCryoCicinMage } from "../characters/cryo/fatui_cryo_cicin_mage.gts";
@@ -241,7 +241,7 @@ const TeyvatFriedEgg = card(333009)
   .costSame(3)
   .tags("food")
   .filter((c) => !c.$(`my combat status with definition id ${ReviveOnCooldown}`))
-  .addTarget("my defeated characters")
+  .addTarget($.my.character.includesDefeated)
   .heal(1, "@targets.0", { kind: "revive" })
   .characterStatus(Satiated, "@targets.0")
   .combatStatus(ReviveOnCooldown)
@@ -291,21 +291,31 @@ define card {
  * @description
  * 将一个装备在我方角色的「武器」装备牌，转移给另一个武器类型相同的我方角色。
  */
-const MasterOfWeaponry = card(332010)
-  .until("v4.0.0")
-  .addTarget("my character has equipment with tag (weapon)")
-  .addTarget("my character with tag weapon of (@targets.0) and not @targets.0")
-  .do((c, e) => {
-    const weapon = e.targets[0].hasWeapon()!;
-    const target = e.targets[1];
-    const area = {
-      type: "characters" as const,
-      who: target.who,
-      characterId: target.id,
-    };
-    c.moveEntity(weapon, area);
-  })
-  .done();
+
+define card {
+  id 332010 as MasterOfWeaponry;
+  until "v4.0.0";
+  addTarget $.my.character.has($.typeEquipment.tag("weapon"));
+  addTarget :(
+    :queryAll(
+      $.my.character
+        .tagOf("weapon", $.id(:e.targets[0].id))
+        .exclude($.id(:e.targets[0].id))
+    ).map((c) => c.latest())
+  );
+  const weapon = :e.targets[0].hasWeapon()!;
+  const target = :e.targets[1];
+  const area = {
+    type: "characters" as const,
+    who: target.who,
+    characterId: target.id,
+  };
+  const targetOldWeapon = target.hasWeapon();
+  if (targetOldWeapon) {
+    :dispose(targetOldWeapon);
+  }
+  :moveEntity(weapon, area);
+}
 
 /**
  * @id 332011
@@ -313,21 +323,28 @@ const MasterOfWeaponry = card(332010)
  * @description
  * 将一个装备在我方角色的「圣遗物」装备牌，转移给另一个我方角色。
  */
-const BlessingOfTheDivineRelicsInstallation = card(332011)
-  .until("v4.0.0")
-  .addTarget("my character has equipment with tag (artifact)")
-  .addTarget("my character and not @targets.0")
-  .do((c, e) => {
-    const artifact = e.targets[0].hasArtifact()!;
-    const target = e.targets[1];
-    const area = {
-      type: "characters" as const,
-      who: target.who,
-      characterId: target.id,
-    };
-    c.moveEntity(artifact, area);
-  })
-  .done();
+define card {
+  id 332011 as BlessingOfTheDivineRelicsInstallation;
+  until "v4.0.0";
+  addTarget $.my.character.has($.typeEquipment.tag("artifact"));
+  addTarget :(
+    :queryAll(
+      $.my.character.exclude($.id(:e.targets[0].id))
+    ).map((c) => c.latest())
+  );
+  const artifact = :e.targets[0].hasArtifact()!;
+  const target = :e.targets[1];
+  const area = {
+    type: "characters" as const,
+    who: target.who,
+    characterId: target.id,
+  };
+  const targetOldArtifact = target.hasArtifact();
+  if (targetOldArtifact) {
+    :dispose(targetOldArtifact);
+  }
+  :moveEntity(artifact, area);
+}
 
 /**
  * @id 312008

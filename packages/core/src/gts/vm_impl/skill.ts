@@ -624,15 +624,15 @@ export const InitiativeSkillViewModel = defineViewModel(
           context: TypedSkillContext<
             ReadonlyMetaOf<InitiativeSkillVMToBuilderMeta<Meta>>
           >,
-        ) => Ret[number] extends { type: InitiativeSkillTargetKind }
-          ? Ret
-          : never,
+        ) => Ret,
       ): AR.DoneRewriteMeta<
         Omit<Meta, "targetTypes"> & {
           targetTypes: [
             ...Meta["targetTypes"],
-            Ret[number] extends { type: InitiativeSkillTargetKind }
-              ? Ret
+            Ret[number]["definition"] extends {
+              type: infer T extends TargetQueryTypeInfo["type"];
+            }
+              ? T
               : never,
           ];
         }

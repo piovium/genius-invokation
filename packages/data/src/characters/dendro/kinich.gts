@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, Reaction, skill, status, summon } from "@gi-tcg/core/builder";
+import { $, card, character, DamageType, DiceType, Reaction, skill, status, summon } from "@gi-tcg/core/builder";
 
 /**
  * @id 117091
@@ -129,7 +129,7 @@ define skill {
 export const CanopyHunterRidingHigh = skill(17092)
   .type("elemental")
   .costDendro(3)
-  .addTarget("my characters")
+  .addTarget($.my.character)
   .characterStatus(GrappleLink)
   .characterStatus(NightsoulsBlessing)
   .damage(DamageType.Dendro, 1)

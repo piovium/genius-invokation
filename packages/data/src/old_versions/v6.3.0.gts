@@ -1,4 +1,4 @@
-import { card, character, combatStatus, DiceType, skill } from "@gi-tcg/core/builder";
+import { $, card, character, combatStatus, DiceType, skill } from "@gi-tcg/core/builder";
 import { StrictProhibited } from "../cards/support/place.gts";
 import { ConstantOffthecuffCookery, KitchenSkills, LowtemperatureCooking, ScoringCuts } from "../characters/cryo/escoffier.gts";
 import { Breakthrough, DepthclarionDice, LingeringLifeline, StealthyBowshot } from "../characters/hydro/yelan.gts";
@@ -200,7 +200,7 @@ define card {
 const SendOff = card(332013)
   .until("v6.3.0")
   .costSame(2)
-  .addTarget("opp summon")
+  .addTarget($.opp.summon)
   .do((c, e) => {
     e.targets[0].consumeUsage(2);
   })

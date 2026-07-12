@@ -586,7 +586,7 @@ define status {
 export const FireAndWar = card(331806)
   .since("v5.7.0")
   .costSame(1)
-  .addTarget("my characters")
+  .addTarget($.my.character)
   .characterStatus(OdeOfResurrection, "@targets.0")
   .done();
 
@@ -789,26 +789,31 @@ define card {
  * @description
  * 将一个装备在我方角色的「武器」装备牌，转移给另一个武器类型相同的我方角色，并重置其效果的「每回合」次数限制。
  */
-export const MasterOfWeaponry = card(332010)
-  .since("v3.3.0")
-  .addTarget("my character has equipment with tag (weapon)")
-  .addTarget("my character with tag weapon of (@targets.0) and not @targets.0")
-  .do((c, e) => {
-    const weapon = e.targets[0].hasWeapon()!;
-    weapon.resetUsagePerRound();
-    const target = e.targets[1];
-    const area = {
-      type: "characters" as const,
-      who: target.who,
-      characterId: target.id,
-    };
-    const targetOldWeapon = target.hasWeapon();
-    if (targetOldWeapon) {
-      c.dispose(targetOldWeapon);
-    }
-    c.moveEntity(weapon, area);
-  })
-  .done();
+define card {
+  id 332010 as MasterOfWeaponry;
+  since "v3.3.0";
+  addTarget $.my.character.has($.typeEquipment.tag("weapon"));
+  addTarget :(
+    :queryAll(
+      $.my.character
+        .tagOf("weapon", $.id(:e.targets[0].id))
+        .exclude($.id(:e.targets[0].id))
+    ).map((c) => c.latest())
+  );
+  const weapon = :e.targets[0].hasWeapon()!;
+  weapon.resetUsagePerRound();
+  const target = :e.targets[1];
+  const area = {
+    type: "characters" as const,
+    who: target.who,
+    characterId: target.id,
+  };
+  const targetOldWeapon = target.hasWeapon();
+  if (targetOldWeapon) {
+    :dispose(targetOldWeapon);
+  }
+  :moveEntity(weapon, area);
+}
 
 /**
  * @id 332011
@@ -816,26 +821,29 @@ export const MasterOfWeaponry = card(332010)
  * @description
  * 将一个装备在我方角色的「圣遗物」装备牌，转移给另一个我方角色，并重置其效果的「每回合」次数限制。
  */
-export const BlessingOfTheDivineRelicsInstallation = card(332011)
-  .since("v3.3.0")
-  .addTarget("my character has equipment with tag (artifact)")
-  .addTarget("my character and not @targets.0")
-  .do((c, e) => {
-    const artifact = e.targets[0].hasArtifact()!;
-    artifact.resetUsagePerRound();
-    const target = e.targets[1];
-    const area = {
-      type: "characters" as const,
-      who: target.who,
-      characterId: target.id,
-    };
-    const targetOldArtifact = target.hasArtifact();
-    if (targetOldArtifact) {
-      c.dispose(targetOldArtifact);
-    }
-    c.moveEntity(artifact, area);
-  })
-  .done();
+define card {
+  id 332011 as BlessingOfTheDivineRelicsInstallation;
+  since "v3.3.0";
+  addTarget $.my.character.has($.typeEquipment.tag("artifact"));
+  addTarget :(
+    :queryAll(
+      $.my.character.exclude($.id(:e.targets[0].id))
+    ).map((c) => c.latest())
+  );
+  const artifact = :e.targets[0].hasArtifact()!;
+  artifact.resetUsagePerRound();
+  const target = :e.targets[1];
+  const area = {
+    type: "characters" as const,
+    who: target.who,
+    characterId: target.id,
+  };
+  const targetOldArtifact = target.hasArtifact();
+  if (targetOldArtifact) {
+    :dispose(targetOldArtifact);
+  }
+  :moveEntity(artifact, area);
+}
 
 /**
  * @id 332012
@@ -846,7 +854,7 @@ export const BlessingOfTheDivineRelicsInstallation = card(332011)
 export const QuickKnit = card(332012)
   .since("v3.3.0")
   .costSame(1)
-  .addTarget("my summons")
+  .addTarget($.my.summon)
   .do((c, e) => {
     e.targets[0].addVariable("usage", 1);
   })
@@ -861,7 +869,7 @@ export const QuickKnit = card(332012)
 export const SendOff = card(332013)
   .since("v3.3.0")
   .costVoid(2)
-  .addTarget("opp summon")
+  .addTarget($.opp.summon)
   .do((c, e) => {
     e.targets[0].consumeUsage(2);
   })
@@ -936,7 +944,7 @@ export const PlungingStrike = card(332017)
   .since("v3.7.0")
   .costSame(3)
   .tags("action")
-  .addTarget("my characters and not has status with tag (disableSkill)")
+  .addTarget($.my.character.exclude($.has($.typeStatus.tag("disableSkill"))))
   .switchActive("@targets.0")
   .useSkill("normal")
   .done();
@@ -1012,7 +1020,7 @@ export const [RhythmOfTheGreatDream] = card(332021)
  */
 export const [WhereIsTheUnseenRazor] = card(332022)
   .since("v4.0.0")
-  .addTarget("my character has equipment with tag (weapon)")
+  .addTarget($.my.character.has($.typeEquipment.tag("weapon")))
   .do((c, e) => {
     e.targets[0].unequipWeapon();
   })
@@ -1090,7 +1098,7 @@ define combatStatus {
 export const Lyresong = card(332024)
   .since("v4.2.0")
   .associateExtension(LyresongIsFirstExtension)
-  .addTarget("my character has equipment with tag (artifact)")
+  .addTarget($.my.character.has($.typeEquipment.tag("artifact")))
   .do((c, e) => {
     e.targets[0].unequipArtifact();
     if (c.getExtensionState().first[c.self.who]) {
@@ -1142,7 +1150,7 @@ export const [FallsAndFortune, FallsAndFortuneInEffect] = card(332026)
  */
 export const [FlickeringFourleafSigil] = card(332027)
   .since("v4.3.0")
-  .addTarget("my characters")
+  .addTarget($.my.character)
   .toStatus(303227, "@targets.0")
   .on("endPhase")
   .switchActive("@master")
@@ -1171,7 +1179,7 @@ define card {
  */
 export const [SunyataFlower] = card(332029)
   .since("v4.4.0")
-  .addTarget("my supports")
+  .addTarget($.my.support)
   .dispose("@targets.0")
   .do((c) => {
     const candidates = c.allCardDefinitions("support");
@@ -1736,7 +1744,7 @@ export const [Tada] = card(332037)
  */
 export const SaurianDiningBuddies = card(332039)
   .since("v5.0.0")
-  .addTarget("my character has equipment with tag (technique)")
+  .addTarget($.my.character.has($.typeEquipment.tag("technique")))
   .do((c, e) => {
     const technique = e.targets[0].hasTechnique();
     if (technique) {
@@ -1983,7 +1991,7 @@ define status {
  */
 export const FruitsOfTraining = card(332048)
   .since("v5.7.0")
-  .addTarget("my characters")
+  .addTarget($.my.character)
   .characterStatus(FruitsOfTrainingInEffect01, "@targets.0")
   .done();
 
@@ -2281,7 +2289,7 @@ define card {
  */
 export const ABlessingFromM = card(332054)
   .since("v6.0.0")
-  .addTarget("my summon")
+  .addTarget($.my.summon)
   .do((c, e) => {
     const usage = e.targets[0].variables.usage!;
     e.targets[0].dispose();
@@ -2369,7 +2377,7 @@ export const WoodenToySword = card(301038)
   .since("v6.2.0")
   .undiscoverable()
   .costSame(1)
-  .addTarget("my characters")
+  .addTarget($.my.character)
   .heal(2, "@targets.0")
   .generateDice("randomElement", 2)
   .done();
@@ -2399,7 +2407,7 @@ export const ReforgeTheHolyBlade = card(301039)
   .since("v6.2.0")
   .undiscoverable()
   .costVoid(4)
-  .addTarget("my characters")
+  .addTarget($.my.character)
   .heal(12, "@targets.0")
   .characterStatus(ReforgeTheHolyBladeInEffect, "@targets.0")
   .done();
@@ -2477,7 +2485,7 @@ define card {
 export const BrokenSea = card(332053)
   .since("v6.3.0")
   .costSame(1)
-  .addTarget("my supports")
+  .addTarget($.my.support)
   .do((c, e) => {
     c.dispose(e.targets[0]);
     for (const summon of c.$$(SIMULANKA_QUERY)) {

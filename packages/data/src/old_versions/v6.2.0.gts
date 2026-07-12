@@ -1,4 +1,4 @@
-import { card, character, combatStatus, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import { $, card, character, combatStatus, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
 import { CoolcolorCapture, FramingFreezingPointComposition, StillPhotoComprehensiveConfirmation } from "../characters/cryo/charlotte.gts";
 import { KamisatoArtKyouka, KamisatoArtMarobashi, KamisatoArtSuiyuu } from "../characters/hydro/kamisato_ayato.gts";
 import { Brilliance, ScarletSeal } from "../characters/pyro/yanfei.gts";
@@ -248,7 +248,7 @@ define status {
  */
 const MachineAssemblyLine = card(332028)
   .until("v6.2.0")
-  .addTarget("my characters")
+  .addTarget($.my.character)
   .characterStatus(MachineAssemblyLineInEffect, "@targets.0")
   .done();
 

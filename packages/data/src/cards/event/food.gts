@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, type StatusHandle, card, combatStatus, status } from "@gi-tcg/core/builder";
+import { $, DiceType, type StatusHandle, card, combatStatus, status } from "@gi-tcg/core/builder";
 import { BattlePlan, Satiated, SharpenTheBlade } from "../../commons.gts";
 
 /**
@@ -187,7 +187,7 @@ export const TeyvatFriedEgg = card(333009)
   .costSame(2)
   .tags("food")
   .filter((c) => !c.$(`my combat status with definition id ${ReviveOnCooldown}`))
-  .addTarget("my defeated characters")
+  .addTarget($.my.character.includesDefeated)
   .heal(1, "@targets.0", { kind: "revive" })
   .characterStatus(Satiated, "@targets.0")
   .combatStatus(ReviveOnCooldown)

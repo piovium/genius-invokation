@@ -1,4 +1,4 @@
-import { Aura, type CardHandle, DamageType, DiceType, card, combatStatus, skill, status, summon } from "@gi-tcg/core/builder";
+import { $, Aura, type CardHandle, DamageType, DiceType, card, combatStatus, skill, status, summon } from "@gi-tcg/core/builder";
 import { BonecrunchersEnergyBlockCombatStatus, FallsAndFortuneInEffect, LyresongInEffect2 } from "../cards/event/other.gts";
 import { Cyno } from "../characters/electro/cyno.gts";
 import { LightningRoseSummon } from "../characters/electro/lisa.gts";
@@ -540,7 +540,7 @@ define card {
  */
 const Lyresong = card(332024)
   .until("v4.7.0")
-  .addTarget("my character has equipment with tag (artifact)")
+  .addTarget($.my.character.has($.typeEquipment.tag("artifact")))
   .do((c, e) => {
     e.targets[0].unequipArtifact();
   })
