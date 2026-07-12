@@ -1460,7 +1460,7 @@ function renderShortcutFunction(fn: ts.Expression): string {
   const converted = convertFunction(fn);
   const typeAnnotation = converted.returnType ? `<${converted.returnType}>` : "";
   if (converted.kind === "expr") {
-    return `:${typeAnnotation}(${converted.code})`;
+    return `:${typeAnnotation}( ${converted.code} )`;
   }
   return `:${typeAnnotation}{\n${indentRaw(splitLines(converted.code), 1).join("\n")}\n}`;
 }
