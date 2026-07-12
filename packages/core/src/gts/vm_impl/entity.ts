@@ -65,7 +65,7 @@ import {
   createVariableCanAppend,
   type TypeHint,
 } from "../../builder/utils";
-import { TriggeredSkillModel, TriggeredSkillViewModel } from "./skill";
+import { TriggeredSkillModel, TriggeredSkillViewModel, type TriggeredSkillVMMeta } from "./skill";
 import { $, DamageType, DiceType, type CustomEvent } from "../../builder";
 import { GlobalUsageVM, PrepareVM, NightsoulVM } from "./entity_auxilary";
 import type { CharacterPassiveSkillEntry } from "../../builder/registry";
@@ -847,6 +847,15 @@ export const EntityViewModel = defineViewModel(
           }
         >
       >;
+      mergeMeta<
+        Meta extends EntityVMMeta,
+        InnerMeta extends TriggeredSkillVMMeta,
+      >(
+        meta: Meta,
+        innerMeta: InnerMeta,
+      ): Omit<Meta, "variables"> & {
+        variables: Meta["variables"] | InnerMeta["variables"];
+      };
     }>((model, [eventName], subView) => {
       const skillModel = TriggeredSkillViewModel.parse(
         subView,
@@ -882,6 +891,15 @@ export const EntityViewModel = defineViewModel(
         >
       >;
       uniqueKey(): "once";
+      mergeMeta<
+        Meta extends EntityVMMeta,
+        InnerMeta extends TriggeredSkillVMMeta,
+      >(
+        meta: Meta,
+        innerMeta: InnerMeta,
+      ): Omit<Meta, "variables"> & {
+        variables: Meta["variables"] | InnerMeta["variables"];
+      };
     }>((model, [eventName], subView) => {
       const skillModel = TriggeredSkillViewModel.parse(
         subView,

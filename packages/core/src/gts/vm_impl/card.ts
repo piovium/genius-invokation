@@ -54,6 +54,7 @@ import {
   TriggeredSkillModel,
   TriggeredSkillViewModel,
   type TargetGetter,
+  type TriggeredSkillVMMeta,
 } from "./skill";
 import type { SkillContext } from "../../builder/context/skill";
 import { TechniqueViewModel, type DefaultTechniqueVMMeta, type TechniqueVMMeta } from "./technique";
@@ -473,6 +474,15 @@ export const CardViewModel = InitiativeSkillViewModel
           eventArgType: DetailedEventArgOf<Event>;
         }
       >;
+      mergeMeta<
+        Meta extends EntityVMMeta,
+        InnerMeta extends TriggeredSkillVMMeta,
+      >(
+        meta: Meta,
+        innerMeta: InnerMeta,
+      ): Omit<Meta, "variables"> & {
+        variables: Meta["variables"] | InnerMeta["variables"];
+      };
     }>((model, [eventName], subView) => {
       const skillModel = OffStageTriggeredSkillViewModel.parse(
         subView,
