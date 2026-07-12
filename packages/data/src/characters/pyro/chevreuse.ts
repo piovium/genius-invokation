@@ -138,7 +138,7 @@ export const ShortrangeRapidInterdictionFirePassive = skill(13135)
   .type("passive")
   .on("useSkill", (c, e) => e.skill.definition.id === ShortrangeRapidInterdictionFire)
   .do((c) => {
-    const ball = c.player.hands.find((c) => c.definition.id === OverchargedBall);
+    const ball = c.player.hands.find((card) => card.definition.id === OverchargedBall);
     if (ball) {
       c.disposeCard(ball);
       c.heal(1, "my characters order by health - maxHealth limit 1");

@@ -90,11 +90,12 @@ export const [NorthernSmokedChicken] = card(333004)
  * 治疗目标角色1点。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const SweetMadame = card(333005)
-  .since("v3.3.0")
-  .food({ injuredOnly: true })
-  .heal(1, "@targets.0")
-  .done();
+define card {
+  id 333005;
+  since "v3.3.0";
+  food { injuredOnly; };
+  :heal(1, :e.targets[0]);
+}
 
 /**
  * @id 333006

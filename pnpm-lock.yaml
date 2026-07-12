@@ -7,17 +7,17 @@ settings:
 catalogs:
   default:
     '@gi-tcg/gts-runtime':
-      specifier: ^0.6.5
-      version: 0.6.5
+      specifier: ^0.6.6
+      version: 0.6.6
     '@gi-tcg/gts-transpiler':
-      specifier: ^0.6.5
-      version: 0.6.5
+      specifier: ^0.6.6
+      version: 0.6.6
     '@gi-tcg/gtsc':
-      specifier: ^0.6.5
-      version: 0.6.5
+      specifier: ^0.6.6
+      version: 0.6.6
     '@gi-tcg/unplugin-gts':
-      specifier: ^0.6.5
-      version: 0.6.5
+      specifier: ^0.6.6
+      version: 0.6.6
     '@unocss/preset-icons':
       specifier: ^66.3.3
       version: 66.3.3
@@ -79,7 +79,7 @@ importers:
         version: link:packages/config
       '@gi-tcg/unplugin-gts':
         specifier: 'catalog:'
-        version: 0.6.5(esbuild@0.19.11)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.19.11)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.19.11))
+        version: 0.6.6(esbuild@0.19.11)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.19.11)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.19.11))
       '@microsoft/api-extractor':
         specifier: ^7.58.2
         version: 7.58.2(@types/node@26.1.1)
@@ -243,7 +243,7 @@ importers:
     dependencies:
       '@gi-tcg/gts-runtime':
         specifier: 'catalog:'
-        version: 0.6.5
+        version: 0.6.6
       '@gi-tcg/typings':
         specifier: workspace:*
         version: link:../typings
@@ -327,10 +327,10 @@ importers:
         version: link:../config
       '@gi-tcg/gts-transpiler':
         specifier: 'catalog:'
-        version: 0.6.5
+        version: 0.6.6
       '@gi-tcg/gtsc':
         specifier: 'catalog:'
-        version: 0.6.5(typescript@6.0.2)
+        version: 0.6.6(typescript@6.0.2)
       '@microsoft/tsdoc':
         specifier: ^0.14.2
         version: 0.14.2
@@ -2550,25 +2550,25 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@gi-tcg/gts-language-plugin@0.6.5':
-    resolution: {integrity: sha512-pEUXQndEdlmJM8WVolubTPdRXlW80RcpuVpoT8hw/QpBiYsgB5Qtm1mnGsMkZ12oDNci5jzGwZEvnGwe+9S2Vg==}
+  '@gi-tcg/gts-language-plugin@0.6.6':
+    resolution: {integrity: sha512-qi04lD6fW3bkXyoLytns+6mllN/xRF1OJiDcWKPTRtMU2JjiqYwRjbsd1OKNki9Sc3QUKnMQEToXh/2Wkl6ZyA==}
     peerDependencies:
       typescript: npm:@typescript/typescript6@^6.0.1
 
-  '@gi-tcg/gts-runtime@0.6.5':
-    resolution: {integrity: sha512-km2PiuMKTI2haEdLuHOK6M1/WDEpbfIFHfauoq2pr8V0hXHcSGjLGSW5sCSnDsbE0XPyZ+RTj5QHmx8gq/g7cw==}
+  '@gi-tcg/gts-runtime@0.6.6':
+    resolution: {integrity: sha512-CsyGI5VuSt4iMJZWg0eJ+7b7jLuHGF96nLY4erepotfq4dIOPCYU8lMYntVGKz3FMpcUrTLqGnstX3vVE4YuOw==}
 
-  '@gi-tcg/gts-transpiler@0.6.5':
-    resolution: {integrity: sha512-GAsnmKwZ8W+SC2sXan5KQDj7fNQJ9G+oNStsE1nGNzaT47A3oiWo+ysCkHizQgFIP1Oa78h441PpqKfa/jtMtQ==}
+  '@gi-tcg/gts-transpiler@0.6.6':
+    resolution: {integrity: sha512-/l6IyImZypX8Ji6XhoeBcQj4ZAdK6Kt8y55+toWCGeKONYPoejSI+gYElK3hZhAFh2nhuzu9TgRIcDWWpEVgAw==}
 
-  '@gi-tcg/gtsc@0.6.5':
-    resolution: {integrity: sha512-WC+zoa7zotH+VZN002MHDShWi8RxP9fk2/xCwjo4yKMMDllQLLDpzhQB/oVdo4rgoHsG0n/KMGnNNKFz13mjLQ==}
+  '@gi-tcg/gtsc@0.6.6':
+    resolution: {integrity: sha512-CB1YXO+vrupQhlhWeD1WEDO1mu+ZDZCfB5QdbL2/QjTCT6tI7ncJRfXVNOvhuH5x4nZPPbPdYdh09XwiL9FIdQ==}
     hasBin: true
     peerDependencies:
       typescript: npm:@typescript/typescript6@^6.0.1
 
-  '@gi-tcg/unplugin-gts@0.6.5':
-    resolution: {integrity: sha512-/sr849qVLXol4JVOhmOvFYhdCdBvdQqvVf0d71j1bXHqs9LcrUH8oM2eryR+UQ3SBD0wL6fI4lUpVQJNDeg5+w==}
+  '@gi-tcg/unplugin-gts@0.6.6':
+    resolution: {integrity: sha512-00S+FyRSO4xSw13b6yZGyJZUW1f6mYeGyq723GHxIWdLJ4pMNVBnw+heISVMrZeLxAC5HXn5OvcC09b4TIHTxQ==}
     peerDependencies:
       '@rspack/core': ^1
       esbuild: 0.19.11
@@ -10511,9 +10511,9 @@ snapshots:
   '@ffmpeg-installer/win32-x64@4.1.0':
     optional: true
 
-  '@gi-tcg/gts-language-plugin@0.6.5(typescript@6.0.2)':
+  '@gi-tcg/gts-language-plugin@0.6.6(typescript@6.0.2)':
     dependencies:
-      '@gi-tcg/gts-transpiler': 0.6.5
+      '@gi-tcg/gts-transpiler': 0.6.6
       '@volar/language-core': 2.4.28
       '@volar/typescript': 2.4.28
       typescript: 6.0.2
@@ -10521,11 +10521,11 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@gi-tcg/gts-runtime@0.6.5':
+  '@gi-tcg/gts-runtime@0.6.6':
     dependencies:
       ajv: 8.20.0
 
-  '@gi-tcg/gts-transpiler@0.6.5':
+  '@gi-tcg/gts-transpiler@0.6.6':
     dependencies:
       '@sveltejs/acorn-typescript': 1.0.10(acorn@8.16.0)
       '@types/estree': 1.0.9
@@ -10539,17 +10539,17 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@gi-tcg/gtsc@0.6.5(typescript@6.0.2)':
+  '@gi-tcg/gtsc@0.6.6(typescript@6.0.2)':
     dependencies:
-      '@gi-tcg/gts-language-plugin': 0.6.5(typescript@6.0.2)
+      '@gi-tcg/gts-language-plugin': 0.6.6(typescript@6.0.2)
       '@volar/typescript': 2.4.28
       typescript: 6.0.2
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@gi-tcg/unplugin-gts@0.6.5(esbuild@0.19.11)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.19.11)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.19.11))':
+  '@gi-tcg/unplugin-gts@0.6.6(esbuild@0.19.11)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.19.11)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.19.11))':
     dependencies:
-      '@gi-tcg/gts-transpiler': 0.6.5
+      '@gi-tcg/gts-transpiler': 0.6.6
       '@types/bun': 1.3.14
       rollup: 4.46.2
       unplugin: '@gytx/unplugin@3.1.0-patch.2'

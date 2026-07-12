@@ -391,7 +391,7 @@ export const Blubberbeast = card(313010)
   .do((c) => {
     c.switchActive($.my.next);
     const takeMax = c.random([true, false]);
-    const pile = Object.groupBy(c.player.pile, (c) => c.diceCost());
+    const pile = Object.groupBy(c.player.pile, (card) => card.diceCost());
     // ES6 保证从小到大排序，无需再 sort
     const costs = Object.keys(pile).map(Number);
     if (costs.length === 0) {

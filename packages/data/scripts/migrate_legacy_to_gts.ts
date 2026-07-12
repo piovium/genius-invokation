@@ -1026,11 +1026,6 @@ function applyEntityLikeStep(step: ChainStep, frame: Frame): boolean {
           ".hint() is not mapped inside support blocks",
         );
       }
-      if (step.args.some((arg) => isFunctionExpression(arg))) {
-        throw new ConversionError(
-          ".hint() with function argument is not mapped",
-        );
-      }
       frame.block.addLine(`hint ${renderArgs(step.args)};`);
       return true;
     case "hintIcon":
@@ -1521,60 +1516,6 @@ function convertFunction(fn: ts.Expression): {
       ),
     ),
   };
-}
-
-
-function isFunctionExpression(expr: ts.Expression): boolean {
-  const unwrapped = unwrapExpression(expr);
-  return ts.isArrowFunction(unwrapped) || ts.isFunctionExpression(unwrapped);
-}
-
-function hasNestedFunctionReference(
-  fn: ts.ArrowFunction | ts.FunctionExpression,
-  contextParam: string | null,
-  eventParam: string | null,
-): boolean {
-  const targetNames = new Set<string>(
-    [contextParam, eventParam].filter((s) => s !== null),
-  );
-  let result = false;
-
-  function getParamNames(
-    func: ts.ArrowFunction | ts.FunctionExpression,
-  ): Set<string> {
-    return new Set(
-      func.parameters
-        .map((p) => (ts.isIdentifier(p.name) ? p.name.text : null))
-        .filter((x): x is string => x !== null),
-    );
-  }
-
-  function visit(
-    node: ts.Node,
-    currentFunction: ts.ArrowFunction | ts.FunctionExpression | null,
-  ) {
-    if (result) return;
-    if (node === fn) {
-      ts.forEachChild(node, (child) => visit(child, fn));
-    } else if (ts.isParameter(node)) {
-      if (node.type) visit(node.type, currentFunction);
-      if (node.initializer) visit(node.initializer, currentFunction);
-    } else if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
-      ts.forEachChild(node, (child) => visit(child, node));
-    } else if (ts.isIdentifier(node) && targetNames.has(node.text)) {
-      const localNames = currentFunction
-        ? getParamNames(currentFunction)
-        : new Set<string>();
-      if (!localNames.has(node.text) && currentFunction !== fn) {
-        result = true;
-      }
-    } else {
-      ts.forEachChild(node, (child) => visit(child, currentFunction));
-    }
-  }
-
-  visit(fn, null);
-  return result;
 }
 
 function blockBodyText(block: ts.Block): string {
