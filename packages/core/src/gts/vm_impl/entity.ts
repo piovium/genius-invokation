@@ -796,7 +796,25 @@ export const EntityViewModel = defineViewModel(
       };
       model.skillList.push(enterSkill.buildSkillDefinition());
     }),
-
+    unique: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: Meta["type"] extends "status" ? AR.This<Meta> : never,
+        ...otherIds: number[]
+      ): AR.Done;
+    }>((model, otherIds) => {
+      const conflictIds = [model.id, ...otherIds];
+      const enterSkill = new TriggeredSkillModel(model, "enter");
+      enterSkill.id = model.getSubId();
+      enterSkill.action = function (c) {
+        const conflictEntities = c.queryAll($.my.typeStatus);
+        for (const entity of conflictEntities) {
+          if (conflictIds.includes(entity.definition.id) && entity.id !== c.self.id) {
+            entity.dispose();
+          }
+        }
+      }
+      model.skillList.push(enterSkill.buildSkillDefinition());
+    }),
     noDefaultDispose: h.attribute<{
       <Meta extends EntityVMMeta>(
         this: Meta["type"] extends "status" | "equipment"
