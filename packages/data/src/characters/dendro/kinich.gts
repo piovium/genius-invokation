@@ -126,30 +126,29 @@ define skill {
  * @description
  * 选一个我方角色，自身附属钩索链接并进入夜魂加持。造成1点草元素伤害，然后与所选角色交换位置。
  */
-export const CanopyHunterRidingHigh = skill(17092)
-  .type("elemental")
-  .costDendro(3)
-  .addTarget($.my.character)
-  .characterStatus(GrappleLink)
-  .characterStatus(NightsoulsBlessing)
-  .damage(DamageType.Dendro, 1)
-  .swapCharacterPosition("@self", "@targets.0")
-  .do((c) => {
-    const talent = c.self.hasEquipment(NightRealmsGiftRepaidInFull);
-    if (
-      talent &&
-      c.player.hands.length <= c.oppPlayer.hands.length &&
-      talent.variables.usagePerRound! > 0
-    ) {
-      if (c.oppPlayer.hands.length > 0) {
-        const [targetCard] = c.maxCostHands(1, { who: "opp" });
-        c.stealHandCard(targetCard);
-      }
-      c.drawCards(1, { who: "opp" });
-      c.addVariable("usagePerRound", -1, talent);
+define skill {
+  id 17092 as CanopyHunterRidingHigh;
+  skillType elemental;
+  cost DiceType.Dendro, 3;
+  addTarget $.my.character;
+  :characterStatus(GrappleLink);
+  :characterStatus(NightsoulsBlessing);
+  :damage(DamageType.Dendro, 1);
+  :swapCharacterPosition("@self", "@targets.0");
+  const talent = :self.hasEquipment(NightRealmsGiftRepaidInFull);
+  if (
+    talent &&
+    :player.hands.length <= :oppPlayer.hands.length &&
+    talent.variables.usagePerRound! > 0
+  ) {
+    if (:oppPlayer.hands.length > 0) {
+      const [targetCard] = :maxCostHands(1, { who: "opp" });
+      :stealHandCard(targetCard);
     }
-  })
-  .done();
+    :drawCards(1, { who: "opp" });
+    :addVariable("usagePerRound", -1, talent);
+  }
+}
 
 /**
  * @id 17093

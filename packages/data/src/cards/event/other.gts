@@ -583,12 +583,13 @@ define status {
  * 选一个我方角色，使其附属「重燃」为1的还魂诗。（本回合内该角色被击倒时，消耗等同于「重燃」的元素骰，使角色免于被击倒，并治疗该角色到1点生命值，然后「重燃」+1）
  * （牌组包含至少2个「纳塔」角色，才能加入牌组）
  */
-export const FireAndWar = card(331806)
-  .since("v5.7.0")
-  .costSame(1)
-  .addTarget($.my.character)
-  .characterStatus(OdeOfResurrection, "@targets.0")
-  .done();
+define card {
+  id 331806 as FireAndWar;
+  since "v5.7.0";
+  cost DiceType.Aligned, 1;
+  addTarget $.my.character;
+  :characterStatus(OdeOfResurrection, "@targets.0");
+}
 
 
 /**
@@ -851,14 +852,13 @@ define card {
  * @description
  * 选择一个我方「召唤物」，使其「可用次数」+1。
  */
-export const QuickKnit = card(332012)
-  .since("v3.3.0")
-  .costSame(1)
-  .addTarget($.my.summon)
-  .do((c, e) => {
-    e.targets[0].addVariable("usage", 1);
-  })
-  .done();
+define card {
+  id 332012 as QuickKnit;
+  since "v3.3.0";
+  cost DiceType.Aligned, 1;
+  addTarget $.my.summon;
+  :e.targets[0].addVariable("usage", 1);
+}
 
 /**
  * @id 332013
@@ -866,14 +866,13 @@ export const QuickKnit = card(332012)
  * @description
  * 选择一个敌方「召唤物」，使其「可用次数」-2。
  */
-export const SendOff = card(332013)
-  .since("v3.3.0")
-  .costVoid(2)
-  .addTarget($.opp.summon)
-  .do((c, e) => {
-    e.targets[0].consumeUsage(2);
-  })
-  .done();
+define card {
+  id 332013 as SendOff;
+  since "v3.3.0";
+  cost DiceType.Void, 2;
+  addTarget $.opp.summon;
+  :e.targets[0].consumeUsage(2);
+}
 
 /**
  * @id 332014
@@ -940,14 +939,15 @@ define card {
  * @description
  * 战斗行动：切换到目标角色，然后该角色进行「普通攻击」。
  */
-export const PlungingStrike = card(332017)
-  .since("v3.7.0")
-  .costSame(3)
-  .tags("action")
-  .addTarget($.my.character.exclude($.has($.typeStatus.tag("disableSkill"))))
-  .switchActive("@targets.0")
-  .useSkill("normal")
-  .done();
+define card {
+  id 332017 as PlungingStrike;
+  since "v3.7.0";
+  cost DiceType.Aligned, 3;
+  tags action;
+  addTarget $.my.character.exclude($.has($.typeStatus.tag("disableSkill")));
+  :switchActive("@targets.0");
+  :useSkill("normal");
+}
 
 /**
  * @id 332018
@@ -1095,19 +1095,18 @@ define combatStatus {
  * 将一个我方角色所装备的「圣遗物」返回手牌。
  * 本回合中，我方下次打出「圣遗物」手牌时：少花费1个元素骰。如果打出此牌前我方未打出过其他行动牌，则改为少花费2个元素骰。
  */
-export const Lyresong = card(332024)
-  .since("v4.2.0")
-  .associateExtension(LyresongIsFirstExtension)
-  .addTarget($.my.character.has($.typeEquipment.tag("artifact")))
-  .do((c, e) => {
-    e.targets[0].unequipArtifact();
-    if (c.getExtensionState().first[c.self.who]) {
-      c.combatStatus(LyresongInEffect2);
-    } else {
-      c.combatStatus(LyresongInEffect1);
-    }
-  })
-  .done();
+define card {
+  id 332024 as Lyresong;
+  since "v4.2.0";
+  associateExtension LyresongIsFirstExtension;
+  addTarget $.my.character.has($.typeEquipment.tag("artifact"));
+  :e.targets[0].unequipArtifact();
+  if (:getExtensionState().first[:self.who]) {
+    :combatStatus(LyresongInEffect2);
+  } else {
+    :combatStatus(LyresongInEffect1);
+  }
+}
 
 /**
  * @id 332025
@@ -1742,16 +1741,15 @@ export const [Tada] = card(332037)
  * @description
  * 选择一个装备在我方角色的「特技」装备牌，使其可用次数+1。
  */
-export const SaurianDiningBuddies = card(332039)
-  .since("v5.0.0")
-  .addTarget($.my.character.has($.typeEquipment.tag("technique")))
-  .do((c, e) => {
-    const technique = e.targets[0].hasTechnique();
-    if (technique) {
-      c.addVariable("usage", 1, technique);
-    }
-  })
-  .done();
+define card {
+  id 332039 as SaurianDiningBuddies;
+  since "v5.0.0";
+  addTarget $.my.character.has($.typeEquipment.tag("technique"));
+  const technique = :e.targets[0].hasTechnique();
+  if (technique) {
+    :addVariable("usage", 1, technique);
+  }
+}
 
 /**
  * @id 133090
@@ -1989,11 +1987,12 @@ define status {
  * @description
  * 选一个我方角色，我方其他角色准备技能时：所选角色下次元素战技少花费1个元素骰。（至多触发2次，不可叠加）
  */
-export const FruitsOfTraining = card(332048)
-  .since("v5.7.0")
-  .addTarget($.my.character)
-  .characterStatus(FruitsOfTrainingInEffect01, "@targets.0")
-  .done();
+define card {
+  id 332048 as FruitsOfTraining;
+  since "v5.7.0";
+  addTarget $.my.character;
+  :characterStatus(FruitsOfTrainingInEffect01, "@targets.0");
+}
 
 /**
  * @id 301028
@@ -2287,18 +2286,17 @@ define card {
  * @description
  * 选择并弃置一个我方召唤物，将其可用次数转化为至多2个不同类型的基础元素骰，如果其可用次数不低于3，则额外治疗我方受伤最多的角色2点。
  */
-export const ABlessingFromM = card(332054)
-  .since("v6.0.0")
-  .addTarget($.my.summon)
-  .do((c, e) => {
-    const usage = e.targets[0].variables.usage!;
-    e.targets[0].dispose();
-    c.generateDice("randomElement", Math.min(usage, 2));
-    if (usage >= 3) {
-      c.heal(2, "my characters order by health - maxHealth limit 1");
-    }
-  })
-  .done();
+define card {
+  id 332054 as ABlessingFromM;
+  since "v6.0.0";
+  addTarget $.my.summon;
+  const usage = :e.targets[0].variables.usage!;
+  :e.targets[0].dispose();
+  :generateDice("randomElement", Math.min(usage, 2));
+  if (usage >= 3) {
+    :heal(2, "my characters order by health - maxHealth limit 1");
+  }
+}
 
 /**
  * @id 332055
@@ -2373,14 +2371,15 @@ define card {
  * @description
  * 治疗目标角色2点，生成2个随机基础元素骰。
  */
-export const WoodenToySword = card(301038)
-  .since("v6.2.0")
-  .undiscoverable()
-  .costSame(1)
-  .addTarget($.my.character)
-  .heal(2, "@targets.0")
-  .generateDice("randomElement", 2)
-  .done();
+define card {
+  id 301038 as WoodenToySword;
+  since "v6.2.0";
+  undiscoverable;
+  cost DiceType.Aligned, 1;
+  addTarget $.my.character;
+  :heal(2, "@targets.0");
+  :generateDice("randomElement", 2);
+}
 
 /**
  * @id 301040
@@ -2403,14 +2402,15 @@ define status {
  * @description
  * 治疗目标角色12点，使其获得效果：重击后：造成5点该角色元素类型的伤害。
  */
-export const ReforgeTheHolyBlade = card(301039)
-  .since("v6.2.0")
-  .undiscoverable()
-  .costVoid(4)
-  .addTarget($.my.character)
-  .heal(12, "@targets.0")
-  .characterStatus(ReforgeTheHolyBladeInEffect, "@targets.0")
-  .done();
+define card {
+  id 301039 as ReforgeTheHolyBlade;
+  since "v6.2.0";
+  undiscoverable;
+  cost DiceType.Void, 4;
+  addTarget $.my.character;
+  :heal(12, "@targets.0");
+  :characterStatus(ReforgeTheHolyBladeInEffect, "@targets.0");
+}
 
 /**
  * @id 332057
@@ -2482,18 +2482,17 @@ define card {
  * @description
  * 选择一张我方支援区的牌，将其弃置。然后使我方所有「希穆兰卡」召唤物的可用次数和效果量+1。
  */
-export const BrokenSea = card(332053)
-  .since("v6.3.0")
-  .costSame(1)
-  .addTarget($.my.support)
-  .do((c, e) => {
-    c.dispose(e.targets[0]);
-    for (const summon of c.$$(SIMULANKA_QUERY)) {
-      summon.addVariable("effect", 1);
-      summon.addVariable("usage", 1);
-    }
-  })
-  .done();
+define card {
+  id 332053 as BrokenSea;
+  since "v6.3.0";
+  cost DiceType.Aligned, 1;
+  addTarget $.my.support;
+  :dispose(:e.targets[0]);
+  for (const summon of :$$(SIMULANKA_QUERY)) {
+    summon.addVariable("effect", 1);
+    summon.addVariable("usage", 1);
+  }
+}
 
 /**
  * @id 332059

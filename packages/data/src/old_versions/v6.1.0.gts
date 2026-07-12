@@ -121,13 +121,14 @@ define character {
  * @description
  * 造成2点雷元素伤害，此技能视为下落攻击。
  */
-const GuardianVentVolcanoKablam = skill(14155)
-  .until("v6.1.0")
-  .type("burst")
-  .prepared()
-  .forcePlunging()
-  .damage(DamageType.Electro, 2)
-  .done();
+define skill {
+  id 14155 as private GuardianVentVolcanoKablam;
+  until "v6.1.0";
+  skillType burst;
+  prepared;
+  forcePlunging;
+  :damage(DamageType.Electro, 2);
+}
 
 /**
  * @id 333027

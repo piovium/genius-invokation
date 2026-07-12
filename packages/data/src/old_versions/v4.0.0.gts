@@ -236,16 +236,17 @@ define card {
  * 复苏目标角色，并治疗此角色1点。
  * （每回合中，最多通过「料理」复苏1个角色，并且每个角色最多食用1次「料理」）
  */
-const TeyvatFriedEgg = card(333009)
-  .until("v4.0.0")
-  .costSame(3)
-  .tags("food")
-  .filter((c) => !c.$(`my combat status with definition id ${ReviveOnCooldown}`))
-  .addTarget($.my.character.includesDefeated)
-  .heal(1, "@targets.0", { kind: "revive" })
-  .characterStatus(Satiated, "@targets.0")
-  .combatStatus(ReviveOnCooldown)
-  .done();
+define card {
+  id 333009 as private TeyvatFriedEgg;
+  until "v4.0.0";
+  cost DiceType.Aligned, 3;
+  tags food;
+  filter :( !:$(`my combat status with definition id ${ReviveOnCooldown}`) );
+  addTarget $.my.character.includesDefeated;
+  :heal(1, "@targets.0", { kind: "revive" });
+  :characterStatus(Satiated, "@targets.0");
+  :combatStatus(ReviveOnCooldown);
+}
 
 /**
  * @id 322016

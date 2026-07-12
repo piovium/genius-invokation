@@ -246,11 +246,12 @@ define status {
  * 目标我方角色每次受到伤害或治疗后：累积1点「备战度」（最多累积2点）。
  * 我方打出原本费用不多于「备战度」的「武器」或「圣遗物」时：移除所有「备战度」，以免费打出该牌。
  */
-const MachineAssemblyLine = card(332028)
-  .until("v6.2.0")
-  .addTarget($.my.character)
-  .characterStatus(MachineAssemblyLineInEffect, "@targets.0")
-  .done();
+define card {
+  id 332028 as private MachineAssemblyLine;
+  until "v6.2.0";
+  addTarget $.my.character;
+  :characterStatus(MachineAssemblyLineInEffect, "@targets.0");
+}
 
 /**
  * @id 303236

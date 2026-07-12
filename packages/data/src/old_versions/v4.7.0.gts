@@ -538,14 +538,13 @@ define card {
  * 将一个我方角色所装备的「圣遗物」返回手牌。
  * 本回合中，我方下次打出「圣遗物」手牌时：少花费2个元素骰。
  */
-const Lyresong = card(332024)
-  .until("v4.7.0")
-  .addTarget($.my.character.has($.typeEquipment.tag("artifact")))
-  .do((c, e) => {
-    e.targets[0].unequipArtifact();
-  })
-  .combatStatus(LyresongInEffect2)
-  .done();
+define card {
+  id 332024 as private Lyresong;
+  until "v4.7.0";
+  addTarget $.my.character.has($.typeEquipment.tag("artifact"));
+  :e.targets[0].unequipArtifact();
+  :combatStatus(LyresongInEffect2);
+}
 
 /**
  * @id 323007

@@ -230,14 +230,15 @@ define status {
  * 目标角色免疫冻结、眩晕、石化等无法使用技能的效果，并且该角色为「出战角色」时不会因效果而切换，持续2个回合。
  * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  */
-export const EdictOfAbsolution = card(330009)
-  .since("v5.0.0")
-  .costSame(1)
-  .legend()
-  .addTarget($.my.character)
-  .heal(2, "@targets.0")
-  .characterStatus(EdictOfAbsolutionInEffect, "@targets.0")
-  .done();
+define card {
+  id 330009 as EdictOfAbsolution;
+  since "v5.0.0";
+  cost DiceType.Aligned, 1;
+  legend;
+  addTarget $.my.character;
+  :heal(2, "@targets.0");
+  :characterStatus(EdictOfAbsolutionInEffect, "@targets.0");
+}
 
 export const FlamesOfWarExtension = extension(300006, {
     spirit: "pair<number>",

@@ -1126,7 +1126,9 @@ function applyInitiativeStep(
       frame.block.addLine(`cost ${renderArgs(step.args)};`);
       return true;
     case "addTarget":
-      throw unsupported(step);
+      requireArgs(step, 1);
+      frame.block.addLine(`addTarget ${renderArgs(step.args)};`);
+      return true;
     case "filter":
       requireArgs(step, 1);
       frame.block.addLine(`filter ${renderShortcutFunction(step.args[0]!)};`);
@@ -1134,12 +1136,11 @@ function applyInitiativeStep(
     case "hidden":
     case "noEnergy":
     case "prepared":
+    case "forceCharged":
+    case "forcePlunging":
       requireArgs(step, 0);
       frame.block.addLine(`${step.name};`);
       return true;
-    case "forceCharged":
-    case "forcePlunging":
-      throw unsupported(step);
     default:
       return false;
   }
