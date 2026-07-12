@@ -41,7 +41,7 @@ define status {
     append;
   };
   on increaseDamaged {
-    when :(:e.source.definition.id === Mualani || :e.source.definition.id === SharkMissile);
+    when :( :e.source.definition.id === Mualani || :e.source.definition.id === SharkMissile );
     :e.increaseDamage(2 * :getVariable("count"));
     :dispose();
   }
@@ -64,7 +64,7 @@ define card {
   technique {
     nightsoul;
     on switchActive {
-      when :(:self.master.isActive());
+      when :( :self.master.isActive() );
       listenTo all;
       :consumeNightsoul("@master");
       :characterStatus(BiteTarget, "opp active");
@@ -125,7 +125,7 @@ define skill {
   id 12142 as SurfsharkWavebreaker;
   skillType elemental;
   cost DiceType.Hydro, 2;
-  filter :(!:self.hasStatus(NightsoulsBlessing));
+  filter :( !:self.hasStatus(NightsoulsBlessing) );
   :equip(BiteyShark, "@self");
   :gainNightsoul("@self", 2);
 }
@@ -174,8 +174,8 @@ define card {
   cost DiceType.Hydro, 1;
   talent Mualani, none {
     on switchActive {
-      when :(:e.switchInfo.to.id === :self.master.id &&
-          :$$(`my summon`).length > 0);
+      when :( :e.switchInfo.to.id === :self.master.id &&
+          :$$(`my summon`).length > 0 );
       usage perRound, 1 {
         visible false;
       };

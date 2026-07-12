@@ -28,14 +28,14 @@ define summon {
   tags barrier;
   hint DamageType.Hydro, "2";
   on decreaseDamaged {
-    when :(:e.target.isActive());
+    when :( :e.target.isActive() );
     usage 1 {
       autoDispose false;
     };
     :e.decreaseDamage(1);
   }
   on endPhase {
-    when :(:getVariable("usage") <= 0);
+    when :( :getVariable("usage") <= 0 );
     :damage(DamageType.Hydro, 2);
     :dispose();
   }
@@ -104,14 +104,14 @@ define summon {
   id 122014 as OceanicMimicFrogPreview;
   hint DamageType.Hydro, "2";
   on decreaseDamaged {
-    when :(:e.target.isActive());
+    when :( :e.target.isActive() );
     usage 1 {
       autoDispose false;
     };
     :e.decreaseDamage(1);
   }
   on endPhase {
-    when :(:getVariable("usage") <= 0);
+    when :( :getVariable("usage") <= 0 );
     :damage(DamageType.Hydro, 2);
     :dispose();
   }

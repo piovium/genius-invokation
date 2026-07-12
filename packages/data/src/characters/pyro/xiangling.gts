@@ -41,7 +41,7 @@ define summon {
 define combatStatus {
   id 113022 as PyronadoStatus;
   on useSkill {
-    when :(:e.skill.definition.id !== Pyronado);
+    when :( :e.skill.definition.id !== Pyronado );
     usage 2;
     :damage(DamageType.Pyro, 2);
   }

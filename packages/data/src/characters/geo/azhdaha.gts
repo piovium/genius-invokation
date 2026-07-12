@@ -35,7 +35,7 @@ define status {
   id 126021 as StoneFacetsElementalAbsorption;
   associateExtension AbsorbedCountExtension;
   on transformDefinition {
-    when :(:e.oldDefinition.id !== :e.newDefinition.id);
+    when :( :e.oldDefinition.id !== :e.newDefinition.id );
     let diceType: DiceType = DiceType.Geo;
     switch (:self.master.definition.id) {
       case AzhdahaCryo: diceType = DiceType.Cryo; break;

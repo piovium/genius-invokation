@@ -25,7 +25,7 @@ import { card, character, combatStatus, DamageType, DiceType, skill, type SkillH
 define combatStatus {
   id 112022 as RainbowBladework;
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage 3;
     :damage(DamageType.Hydro, 1);
   }
@@ -42,7 +42,7 @@ define combatStatus {
   id 112023 as RainSword01;
   conflictWith 112021;
   on decreaseDamaged {
-    when :(:e.target.isActive() && :e.value >= 2);
+    when :( :e.target.isActive() && :e.value >= 2 );
     usage 3;
     :e.decreaseDamage(1);
   }
@@ -60,7 +60,7 @@ define combatStatus {
   tags barrier;
   conflictWith 112023;
   on decreaseDamaged {
-    when :(:e.target.isActive() && :e.value >= 3);
+    when :( :e.target.isActive() && :e.value >= 3 );
     usage 2;
     :e.decreaseDamage(1);
   }

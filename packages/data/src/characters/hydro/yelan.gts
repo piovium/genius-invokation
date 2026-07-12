@@ -32,7 +32,7 @@ define status {
     :addVariableWithMax("break", 1, 3);
   }
   on modifySkillDamageType {
-    when :(:e.viaSkillType("normal") && :getVariable("break") >= 2);
+    when :( :e.viaSkillType("normal") && :getVariable("break") >= 2 );
     :addVariable("break", -2);
     :e.changeDamageType(DamageType.Hydro);
     :drawCards(1);
@@ -50,7 +50,7 @@ define combatStatus {
   id 112092 as ExquisiteThrow;
   duration 2;
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :damage(DamageType.Hydro, 1);
   }
 }

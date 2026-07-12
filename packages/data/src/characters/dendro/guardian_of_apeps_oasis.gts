@@ -146,12 +146,12 @@ define combatStatus {
   id 127029 as HeartOfOasis;
   variable organismCount, 0;
   on enterRelative {
-    when :([
+    when :( [
           ProliferatedOrganism01,
           ProliferatedOrganism02,
           ProliferatedOrganism03,
           ProliferatedOrganism04,
-        ].includes(:e.entity.definition.id as SummonHandle));
+        ].includes(:e.entity.definition.id as SummonHandle) );
     listenTo samePlayer;
     :addVariable("organismCount", 1);
     if (:getVariable("organismCount") === 4) {
@@ -173,7 +173,7 @@ define combatStatus {
 define combatStatus {
   id 127026 as OasisNourishment;
   on deductOmniDiceCard {
-    when :(:e.action.skill.caller.definition.id === AwakenMyKindred);
+    when :( :e.action.skill.caller.definition.id === AwakenMyKindred );
     usage 1 {
       append 3;
     };
@@ -279,12 +279,12 @@ define card {
       :createPileCards(AwakenMyKindred, 4, "random");
     }
     on increaseDamage {
-      when :([
+      when :( [
             ProliferatedOrganism01,
             ProliferatedOrganism02,
             ProliferatedOrganism03,
             ProliferatedOrganism04,
-          ].includes(:e.source.definition.id as SummonHandle));
+          ].includes(:e.source.definition.id as SummonHandle) );
       listenTo samePlayer;
       :e.increaseDamage(1);
     }

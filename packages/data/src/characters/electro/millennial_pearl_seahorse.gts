@@ -75,7 +75,7 @@ define status {
     :consumeUsage();
   }
   on declareEnd {
-    when :(:self.master.isActive());
+    when :( :self.master.isActive() );
     :drawCards(1);
   }
 }
@@ -149,7 +149,7 @@ define skill {
   id 24037 as SwirlingSchoolOfFishPassive;
   skillType passive {
     on useSkill {
-      when :(:e.skill.definition.id === SwirlingSchoolOfFish && :self.hasStatus(FontemerPearl));
+      when :( :e.skill.definition.id === SwirlingSchoolOfFish && :self.hasStatus(FontemerPearl) );
       usage perRound, 1 {
         name "usagePerRound1";
         visible false;

@@ -25,7 +25,7 @@ import { character, skill, summon, status, card, DamageType, type SkillHandle, $
 define status {
   id 114063 as CrowfeatherCover;
   on increaseSkillDamage {
-    when :(:e.viaSkillType("elemental") || :e.viaSkillType("burst"));
+    when :( :e.viaSkillType("elemental") || :e.viaSkillType("burst") );
     usage 2;
     :e.increaseDamage(1);
     if (:query($.my.typeEquipment.def(SinOfPride))) {

@@ -28,8 +28,8 @@ define status {
     append;
   };
   on useSkill {
-    when :(:e.skill.definition.id === HeartstopperStrike &&
-        :self.getVariable("henkaku") >= 2);
+    when :( :e.skill.definition.id === HeartstopperStrike &&
+        :self.getVariable("henkaku") >= 2 );
     void 0;
     // 使用 勠心拳 后，我方继续行动一个回合
     if(!:oppPlayer.declaredEnd) {
@@ -212,7 +212,7 @@ define skill {
   skillType passive {
     variable increaseDmg, 0;
     on dealDamage {
-      when :(:e.isReactionRelatedTo(DamageType.Anemo));
+      when :( :e.isReactionRelatedTo(DamageType.Anemo) );
       listenTo samePlayer;
       :characterStatus(Declension, "@self");
     }

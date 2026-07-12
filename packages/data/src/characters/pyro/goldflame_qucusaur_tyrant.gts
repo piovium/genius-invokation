@@ -26,7 +26,7 @@ define status {
   id 123061 as GoldflameState;
   since "v6.4.0";
   on endPhase {
-    when :(:self.master.isActive());
+    when :( :self.master.isActive() );
     usage 1 {
       append;
     };
@@ -119,7 +119,7 @@ define skill {
   id 23064 as AncientBloodline;
   skillType passive {
     on actionPhase {
-      when :(:roundNumber % 2 === 0);
+      when :( :roundNumber % 2 === 0 );
       :characterStatus(GoldflameState, "@self");
     }
   }

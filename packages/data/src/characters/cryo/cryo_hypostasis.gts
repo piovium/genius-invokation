@@ -59,7 +59,7 @@ define status {
 define status {
   id 121031 as OverwhelmingIce;
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage 1;
     :damage(DamageType.Piercing, 1, "opp standby");
   }

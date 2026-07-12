@@ -26,7 +26,7 @@ define status {
   id 126031 as GoldenCorrosion;
   since "v5.2.0";
   on endPhase {
-    when :(:$(`opp equipment with definition id ${BeastlyCorrosion}`) || !:self.master.isActive());
+    when :( :$(`opp equipment with definition id ${BeastlyCorrosion}`) || !:self.master.isActive() );
     usage 1 {
       append 5;
     };

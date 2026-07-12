@@ -35,14 +35,14 @@ define status {
     }
   };
   on damaged {
-    when :(:e.getReaction() === Reaction.Burning &&
-        !:e.target.isMine());
+    when :( :e.getReaction() === Reaction.Burning &&
+        !:e.target.isMine() );
     listenTo all;
     :gainNightsoul("@master");
     :callSnippet();
   }
   on beforeTechnique {
-    when :(:e.techniqueCaller.id !== :self.master.id);
+    when :( :e.techniqueCaller.id !== :self.master.id );
     listenTo samePlayer;
     :gainNightsoul("@master");
     :callSnippet();
@@ -101,7 +101,7 @@ define status {
   id 117094 as GrapplePrepare;
   since "v5.4.0";
   once beforeAction {
-    when :(:self.master.isActive());
+    when :( :self.master.isActive() );
     :damage(DamageType.Dendro, 3, "recent opp from @master");
   }
 }
@@ -207,9 +207,9 @@ define card {
   cost DiceType.Dendro, 1;
   talent Kinich, none {
     on switchActive {
-      when :(:self.master.id === :e.switchInfo.to.id &&
+      when :( :self.master.id === :e.switchInfo.to.id &&
           :player.hands.length <= :oppPlayer.hands.length &&
-          :oppPlayer.hands.length > 0);
+          :oppPlayer.hands.length > 0 );
       usage perRound, 1 {
         visible false;
       };

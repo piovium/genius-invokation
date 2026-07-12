@@ -59,7 +59,7 @@ define summon {
     }
   }
   on dealDamage {
-    when :(:e.getReaction() === Reaction.Burning);
+    when :( :e.getReaction() === Reaction.Burning );
     listenTo samePlayer;
     :transformDefinition("@self", LumidouceCaseLevel2);
   }
@@ -157,7 +157,7 @@ define skill {
   id 17104 as LingeringFragrance01;
   skillType passive {
     on enterRelative {
-      when :(:e.entity.definition.id === BurningFlame);
+      when :( :e.entity.definition.id === BurningFlame );
       listenTo samePlayer;
       usage perRound, 2 {
         name "usagePerRound1";
@@ -209,11 +209,11 @@ define card {
   cost DiceType.Dendro, 2;
   talent Emilie, none {
     on modifySkillDamageType {
-      when :(:e.type === DamageType.Physical);
+      when :( :e.type === DamageType.Physical );
       :e.changeDamageType(DamageType.Dendro);
     }
     on useSkill {
-      when :(:e.isSkillType("normal"));
+      when :( :e.isSkillType("normal") );
       usage perRound, 1 {
         visible false;
       };

@@ -31,7 +31,7 @@ define summon {
     :damage(DamageType.Cryo, 1);
   }
   on increaseDamaged {
-    when :(!:e.target.isMine() && ([DamageType.Cryo, DamageType.Physical] as DamageType[]).includes(:e.type));
+    when :( !:e.target.isMine() && ([DamageType.Cryo, DamageType.Physical] as DamageType[]).includes(:e.type) );
     listenTo all;
     :e.increaseDamage(1);
   }
@@ -55,7 +55,7 @@ define combatStatus {
     :setVariable("noUsageEffect", 1);
   }
   on increaseDamage {
-    when :(:e.via.caller.definition.type === "character" && :e.type === DamageType.Cryo);
+    when :( :e.via.caller.definition.type === "character" && :e.type === DamageType.Cryo );
     usage 2 {
       autoDecrease false;
     };
@@ -79,7 +79,7 @@ define combatStatus {
   id 111071 as IcyQuill;
   conflictWith 111072;
   on increaseDamage {
-    when :(:e.via.caller.definition.type === "character" && :e.type === DamageType.Cryo);
+    when :( :e.via.caller.definition.type === "character" && :e.type === DamageType.Cryo );
     usage 2;
     :e.increaseDamage(1);
   }

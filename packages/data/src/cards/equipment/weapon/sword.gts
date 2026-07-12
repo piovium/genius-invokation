@@ -50,7 +50,7 @@ define card {
       :e.increaseDamage(1);
     }
     on useSkill {
-      when :(:e.isSkillType("elemental"));
+      when :( :e.isSkillType("elemental") );
       usage perRound, 1 {
         visible false;
       };
@@ -76,7 +76,7 @@ define card {
       :e.increaseDamage(1);
     }
     on useSkill {
-      when :(!:e.skill.caller.isMine() && :self.master.isActive());
+      when :( !:e.skill.caller.isMine() && :self.master.isActive() );
       listenTo all;
       usage perRound, 2 {
         visible false;
@@ -103,7 +103,7 @@ define card {
       :e.increaseDamage(1);
     }
     on increaseSkillDamage {
-      when :(:e.viaSkillType("normal"));
+      when :( :e.viaSkillType("normal") );
       usage perRound, 1 {
         visible false;
       };
@@ -129,7 +129,7 @@ define card {
       :e.increaseDamage(1);
     }
     on useSkill {
-      when :(:e.isSkillType("elemental"));
+      when :( :e.isSkillType("elemental") );
       usage perRound, 1 {
         visible false;
       };
@@ -155,7 +155,7 @@ define card {
       :e.increaseDamage(1);
     }
     on useSkill {
-      when :(:e.isSkillType("normal"));
+      when :( :e.isSkillType("normal") );
       usage perRound, 2 {
         visible false;
       };
@@ -174,7 +174,7 @@ define status {
   id 301107 as SapwoodBladeStatus;
   oneDuration;
   once useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :generateDice(:self.master.element(), 2);
   }
 }
@@ -219,14 +219,14 @@ define card {
       :addVariable("lake", 1);
     }
     on deductVoidDiceSkill {
-      when :(:e.isSkillType("normal") && :getVariable("lake") >= 12);
+      when :( :e.isSkillType("normal") && :getVariable("lake") >= 12 );
       usage perRound, 1 {
         visible false;
       };
       :e.deductVoidCost(2);
     }
     on increaseSkillDamage {
-      when :(:e.viaSkillType("normal") && :getVariable("lake") >= 12);
+      when :( :e.viaSkillType("normal") && :getVariable("lake") >= 12 );
       usage perRound, 1 {
         visible false;
       };
@@ -267,7 +267,7 @@ define card {
     variable barrierUsage, 0;
     variable solidarity, 0;
     on decreaseDamaged {
-      when :(:player.hands.length > 0);
+      when :( :player.hands.length > 0 );
       usage perRound, 1 {
         visible false;
       };
@@ -276,7 +276,7 @@ define card {
       :addVariable("solidarity", 1);
     }
     on increaseSkillDamage {
-      when :(:getVariable("solidarity") > 0);
+      when :( :getVariable("solidarity") > 0 );
       :e.increaseDamage(1);
       :drawCards(:getVariable("solidarity"));
       :setVariable("solidarity", 0);

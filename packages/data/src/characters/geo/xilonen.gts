@@ -38,7 +38,7 @@ define combatStatus {
   id 216113 as GeoDMGBonus;
   duration 1;
   on increaseDamaged {
-    when :(:e.type === DamageType.Geo);
+    when :( :e.type === DamageType.Geo );
     :e.increaseDamage(1);
   }
 }
@@ -54,7 +54,7 @@ define combatStatus {
   id 216114 as HydroDMGBonus;
   duration 1;
   on increaseDamaged {
-    when :(:e.type === DamageType.Hydro);
+    when :( :e.type === DamageType.Hydro );
     :e.increaseDamage(1);
   }
 }
@@ -70,7 +70,7 @@ define combatStatus {
   id 216115 as PyroDMGBonus;
   duration 1;
   on increaseDamaged {
-    when :(:e.type === DamageType.Pyro);
+    when :( :e.type === DamageType.Pyro );
     :e.increaseDamage(1);
   }
 }
@@ -86,7 +86,7 @@ define combatStatus {
   id 216116 as CryoDMGBonus;
   duration 1;
   on increaseDamaged {
-    when :(:e.type === DamageType.Cryo);
+    when :( :e.type === DamageType.Cryo );
     :e.increaseDamage(1);
   }
 }
@@ -102,7 +102,7 @@ define combatStatus {
   id 216117 as ElectroDMGBonus;
   duration 1;
   on increaseDamaged {
-    when :(:e.type === DamageType.Electro);
+    when :( :e.type === DamageType.Electro );
     :e.increaseDamage(1);
   }
 }
@@ -190,7 +190,7 @@ define card {
   technique {
     nightsoul;
     on modifySkillDamageType {
-      when :(:e.type === DamageType.Physical);
+      when :( :e.type === DamageType.Physical );
       :e.changeDamageType(DamageType.Geo);
     }
     skill {
@@ -234,7 +234,7 @@ define skill {
   id 16112 as YohualsScratch;
   skillType elemental;
   cost DiceType.Geo, 2;
-  filter :(!:self.hasStatus(NightsoulsBlessing));
+  filter :( !:self.hasStatus(NightsoulsBlessing) );
   :equip(CombatBladingGear);
   :gainNightsoul("@self", 1);
 }
@@ -366,7 +366,7 @@ define card {
       :useSkill(YohualsScratch);
     }
     on switchActive {
-      when :(:e.switchInfo.to.hasNightsoulsBlessing());
+      when :( :e.switchInfo.to.hasNightsoulsBlessing() );
       usage perRound, 2 {
         visible false;
       };

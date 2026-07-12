@@ -28,7 +28,7 @@ define combatStatus {
     :addVariable("playedCard", 1);
   }
   on playCard {
-    when :(:getVariable("playedCard") === 3);
+    when :( :getVariable("playedCard") === 3 );
     const cicin = :$(`opp summon with definition id ${ElectroCicin}`);
     if (cicin) {
       cicin.addVariableWithMax("usage", 1, 3);
@@ -54,7 +54,7 @@ define summon {
     :damage(DamageType.Electro, 1);
   }
   on damaged {
-    when :(:e.target.definition.id === FatuiElectroCicinMage && :e.getReaction() !== null);
+    when :( :e.target.definition.id === FatuiElectroCicinMage && :e.getReaction() !== null );
     :consumeUsage();
   }
   on enter {
@@ -64,7 +64,7 @@ define summon {
     :$(`opp combat status with definition id ${CrushingThunder}`)?.dispose();
   }
   on beforeAction {
-    when :(:$(`my equipment with definition id ${ElectroCicinsGleam}`) && :getVariable("usage") >= 3);
+    when :( :$(`my equipment with definition id ${ElectroCicinsGleam}`) && :getVariable("usage") >= 3 );
     :damage(DamageType.Electro, 1);
     :consumeUsage();
   }

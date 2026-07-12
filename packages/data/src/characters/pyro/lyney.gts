@@ -44,11 +44,11 @@ define status {
   id 113102 as PropSurplus;
   variable surplus, 1;
   on increaseSkillDamage {
-    when :(:e.via.definition.id === BewilderingLights);
+    when :( :e.via.definition.id === BewilderingLights );
     :e.increaseDamage(:getVariable("surplus"));
   }
   on useSkill {
-    when :(:e.skill.definition.id === BewilderingLights);
+    when :( :e.skill.definition.id === BewilderingLights );
     const surplus = :getVariable("surplus");
     :heal(surplus, "@master");
     :dispose();
@@ -160,8 +160,8 @@ define card {
       :useSkill(PropArrow);
     }
     on increaseSkillDamage {
-      when :([Lyney as number, GrinmalkinHat as number].includes(:e.source.definition.id) && 
-          :e.target.aura === Aura.Pyro);
+      when :( [Lyney as number, GrinmalkinHat as number].includes(:e.source.definition.id) && 
+          :e.target.aura === Aura.Pyro );
       usage perRound, 1 {
         visible false;
       };

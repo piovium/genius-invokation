@@ -40,7 +40,7 @@ define status {
   since "v6.6.0";
   oneDuration;
   once deductVoidDiceSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :e.deductVoidCost(1);
   }
 }
@@ -57,7 +57,7 @@ define combatStatus {
   since "v6.6.0";
   duration 2;
   on useSkill {
-    when :(:e.skill.definition.id !== GravityApplicationFieldReduction);
+    when :( :e.skill.definition.id !== GravityApplicationFieldReduction );
     listenTo all;
     :characterStatus(Evasion, :e.skill.caller.cast<"character">());
     const target = :e.who === :self.who ? $.my.next : $.opp.next;
@@ -165,7 +165,7 @@ define card {
       :switchActive(target);
     }
     on increaseSkillDamage {
-      when :(:e.viaPlungingAttack());
+      when :( :e.viaPlungingAttack() );
       listenTo samePlayer;
       usage perRound, 2 {
         visible false;

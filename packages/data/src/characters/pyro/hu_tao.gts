@@ -42,11 +42,11 @@ define status {
   id 113071 as ParamitaPapilio;
   duration 2;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
   }
   on increaseSkillDamage {
-    when :(:e.type === DamageType.Pyro);
+    when :( :e.type === DamageType.Pyro );
     :e.increaseDamage(1);
     if (:e.viaChargedAttack()) {
       :characterStatus(BloodBlossom, "@damage.target");
@@ -134,7 +134,7 @@ define card {
       :useSkill(GuideToAfterlife);
     }
     on increaseSkillDamage {
-      when :(:self.master.health <= 6 && :e.type === DamageType.Pyro);
+      when :( :self.master.health <= 6 && :e.type === DamageType.Pyro );
       :e.increaseDamage(1);
     }
   }

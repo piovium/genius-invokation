@@ -37,7 +37,7 @@ define status {
   oneDuration;
   tags disableSkill;
   on increaseDamaged {
-    when :(([DamageType.Pyro, DamageType.Physical] as DamageType[]).includes(:e.type));
+    when :( ([DamageType.Pyro, DamageType.Physical] as DamageType[]).includes(:e.type) );
     :e.increaseDamage(2);
     :dispose();
   }
@@ -82,8 +82,8 @@ define summon {
 define combatStatus {
   id 116 as DendroCore;
   on increaseDamage {
-    when :(([DamageType.Pyro, DamageType.Electro] as DamageType[]).includes(:e.type) &&
-        :e.target.id === :$("opp active")?.id);
+    when :( ([DamageType.Pyro, DamageType.Electro] as DamageType[]).includes(:e.type) &&
+        :e.target.id === :$("opp active")?.id );
     usage 1;
     :e.increaseDamage(2);
   }
@@ -99,8 +99,8 @@ define combatStatus {
 define combatStatus {
   id 117 as CatalyzingField;
   on increaseDamage {
-    when :(([DamageType.Electro, DamageType.Dendro] as DamageType[]).includes(:e.type) &&
-        :e.target.id === :$("opp active")?.id);
+    when :( ([DamageType.Electro, DamageType.Dendro] as DamageType[]).includes(:e.type) &&
+        :e.target.id === :$("opp active")?.id );
     usage 2;
     :e.increaseDamage(1);
   }
@@ -117,7 +117,7 @@ define status {
   id 122 as BondOfLife;
   tags bondOfLife;
   on decreaseHealed {
-    when :(:e.healInfo.healKind !== "distribution");
+    when :( :e.healInfo.healKind !== "distribution" );
     usage 1 {
       append {
       limit Infinity;

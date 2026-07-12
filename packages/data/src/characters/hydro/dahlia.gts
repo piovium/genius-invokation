@@ -136,7 +136,7 @@ define card {
       :useSkill(RadiantPsalter);
     }
     on beforeDefeated {
-      when :(:query($.my.combatStatus.def(FavonianFavor)));
+      when :( :query($.my.combatStatus.def(FavonianFavor)) );
       listenTo samePlayer;
       const favor = :query($.my.combatStatus.def(FavonianFavor));
       if (favor) {

@@ -30,8 +30,8 @@ define summon {
     autoDispose false;
   };
   on useSkill {
-    when :(:e.skill.definition.id === FavoniusBladeworkEdel ||
-        :e.skill.definition.id === IcetideVortex);
+    when :( :e.skill.definition.id === FavoniusBladeworkEdel ||
+        :e.skill.definition.id === IcetideVortex );
     if (:e.skill.definition.id === IcetideVortex &&
       :e.skillCaller.cast<"character">().hasEquipment(WellspringOfWarlust)) {
       :self.addVariable("usage", 3);
@@ -54,7 +54,7 @@ define summon {
 define status {
   id 111061 as Grimheart;
   on increaseSkillDamage {
-    when :(:e.damageInfo.via.definition.id === IcetideVortex);
+    when :( :e.damageInfo.via.definition.id === IcetideVortex );
     :e.increaseDamage(3);
     :dispose();
   }

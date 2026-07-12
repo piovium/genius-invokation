@@ -31,11 +31,11 @@ define summon {
     :damage(DamageType.Cryo, 1);
   }
   on useSkill {
-    when :(:e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal"));
+    when :( :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal") );
     :heal(1, "my characters order by health - maxHealth limit 1");
   }
   on useSkill {
-    when :(:e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal"));
+    when :( :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal") );
     usage perRound, 1 {
       visible false;
     };

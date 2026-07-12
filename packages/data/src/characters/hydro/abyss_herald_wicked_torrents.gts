@@ -73,11 +73,11 @@ define status {
 define status {
   id 122037 as WateryRebirthHoned;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
   }
   on increaseSkillDamage {
-    when :(:e.type === DamageType.Hydro);
+    when :( :e.type === DamageType.Hydro );
     :e.increaseDamage(1);
   }
 }
@@ -112,7 +112,7 @@ define status {
 define combatStatus {
   id 122033 as CurseOfTheUndercurrent;
   on addDice {
-    when :(:e.isSkillType("elemental") || :e.isSkillType("burst"));
+    when :( :e.isSkillType("elemental") || :e.isSkillType("burst") );
     usage 2;
     :e.addCost(DiceType.Omni, 1);
   }
@@ -222,7 +222,7 @@ define character {
 define combatStatus {
   id 122034 as SurgingUndercurrentCombatStatus;
   on defeated {
-    when :(:e.target.definition.id === AbyssHeraldWickedTorrents);
+    when :( :e.target.definition.id === AbyssHeraldWickedTorrents );
     :combatStatus(CurseOfTheUndercurrent, "opp");
     :dispose();
   }

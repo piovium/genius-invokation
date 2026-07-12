@@ -66,11 +66,11 @@ define status {
 define combatStatus {
   id 116073 as FlyingCloudFlagFormation;
   on deductOmniDiceSkill {
-    when :(:e.isSkillType("normal") && :player.hands.length <= 1);
+    when :( :e.isSkillType("normal") && :player.hands.length <= 1 );
     :e.deductOmniCost(1);
   }
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal") && :player.hands.length <= 1);
+    when :( :e.viaSkillType("normal") && :player.hands.length <= 1 );
     usage 1 {
       append 4;
     };

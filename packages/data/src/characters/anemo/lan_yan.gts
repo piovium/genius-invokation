@@ -119,7 +119,7 @@ define card {
       :useSkill(SwallowwispPinionDance);
     }
     on useSkill {
-      when :(:e.isSkillType("normal"));
+      when :( :e.isSkillType("normal") );
       listenTo samePlayer;
       usage perRound, 1 {
         visible false;

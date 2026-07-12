@@ -31,8 +31,8 @@ define summon {
     :heal(1, "my active");
   }
   on increaseDamage {
-    when :(:$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
-        :e.type === DamageType.Anemo);
+    when :( :$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
+        :e.type === DamageType.Anemo );
     :e.increaseDamage(1);
   }
 }

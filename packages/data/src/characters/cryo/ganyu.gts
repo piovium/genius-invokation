@@ -43,7 +43,7 @@ define combatStatus {
   id 111012 as IceLotus;
   tags barrier;
   on decreaseDamaged {
-    when :(:e.target.isActive());
+    when :( :e.target.isActive() );
     usage 2;
     :e.decreaseDamage(1);
   }

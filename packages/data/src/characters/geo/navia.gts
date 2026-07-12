@@ -60,7 +60,7 @@ define status {
   since "v4.8.0";
   duration 2;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Geo);
   }
 }
@@ -123,13 +123,13 @@ define skill {
   id 16084 as MutualAssistanceNetwork;
   skillType passive {
     on damaged {
-      when :(([
+      when :( ([
             Reaction.CrystallizeCryo, 
             Reaction.CrystallizeElectro, 
             Reaction.CrystallizeHydro, 
             Reaction.CrystallizePyro
           ] as Reaction[]).includes(:e.getReaction()!) && 
-          !:e.target.isMine());
+          !:e.target.isMine() );
       listenTo all;
       :createPileCards(CrystalShrapnel, 3, "random");
     }

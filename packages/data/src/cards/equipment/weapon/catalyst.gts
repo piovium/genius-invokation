@@ -51,7 +51,7 @@ define card {
       :e.increaseDamage(1);
     }
     on useSkill {
-      when :(:e.isSkillType("elemental"));
+      when :( :e.isSkillType("elemental") );
       usage perRound, 1 {
         visible false;
       };
@@ -77,7 +77,7 @@ define card {
       :e.increaseDamage(1);
     }
     on increaseSkillDamage {
-      when :(:e.viaSkillType("normal"));
+      when :( :e.viaSkillType("normal") );
       usage perRound, 1 {
         visible false;
       };
@@ -103,7 +103,7 @@ define card {
       :e.increaseDamage(1);
     }
     on increaseSkillDamage {
-      when :(:e.getReaction());
+      when :( :e.getReaction() );
       listenTo samePlayer;
       usage perRound, 2 {
         visible false;
@@ -175,7 +175,7 @@ define card {
       :e.increaseDamage(1);
     }
     on deductVoidDiceSkill {
-      when :(:e.isChargedAttack());
+      when :( :e.isChargedAttack() );
       usage perRound, 2 {
         visible false;
       };
@@ -219,7 +219,7 @@ define card {
       :addVariable("count", 1);
     }
     on damagedOrHealed {
-      when :(:getVariable("count") === 2);
+      when :( :getVariable("count") === 2 );
       usage perRound, 1 {
         visible false;
       };
@@ -241,11 +241,11 @@ define status {
   id 301111 as CashflowSupervisionInEffect;
   oneDuration;
   on deductVoidDiceSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :e.deductVoidCost(1);
   }
   once increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
 }
@@ -317,7 +317,7 @@ define card {
       :characterStatus(BondOfLife, "@master");
     }
     on beforeAction {
-      when :(!:self.master.hasStatus(BondOfLife));
+      when :( !:self.master.hasStatus(BondOfLife) );
       listenTo all;
       usage perRound, 1 {
         visible false;
@@ -342,7 +342,7 @@ define card {
   cost DiceType.Aligned, 2;
   weapon catalyst {
     on increaseSkillDamage {
-      when :(:self.master.health >= 11);
+      when :( :self.master.health >= 11 );
       :e.increaseDamage(2);
     }
     on enter {
@@ -380,7 +380,7 @@ define card {
   cost DiceType.Aligned, 1;
   weapon catalyst {
     on deductOmniDiceCard {
-      when :(!:isInInitialPile(:e.action.skill.caller));
+      when :( !:isInInitialPile(:e.action.skill.caller) );
       usage perRound, 1 {
         visible false;
       };

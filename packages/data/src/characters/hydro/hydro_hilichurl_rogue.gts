@@ -40,7 +40,7 @@ define status {
   since "v5.0.0";
   prepare (1220512 as SkillHandle);
   on dispose {
-    when :(:e.entity.definition.id === MistBubbleSlime);
+    when :( :e.entity.definition.id === MistBubbleSlime );
     :dispose();
   }
 }
@@ -191,7 +191,7 @@ define card {
       :useSkill(SlashOfSurgingTides);
     }
     on deductOmniDiceSkill {
-      when :(:e.isSkillType("technique"));
+      when :( :e.isSkillType("technique") );
       usage perRound, 1 {
         visible false;
       };

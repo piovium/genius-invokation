@@ -120,7 +120,7 @@ define card {
       :immune(1);
     }
     on increaseSkillDamage {
-      when :(:e.source.cast<"character">().health <= 5);
+      when :( :e.source.cast<"character">().health <= 5 );
       :e.increaseDamage(1);
     }
   }

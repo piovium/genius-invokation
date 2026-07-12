@@ -29,7 +29,7 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Cryo));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Cryo) );
       usage perRound, 1 {
         visible false;
       };
@@ -51,7 +51,7 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Hydro));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Hydro) );
       usage perRound, 1 {
         visible false;
       };
@@ -73,7 +73,7 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Pyro));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Pyro) );
       usage perRound, 1 {
         visible false;
       };
@@ -95,7 +95,7 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Electro));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Electro) );
       usage perRound, 1 {
         visible false;
       };
@@ -117,7 +117,7 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Anemo));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Anemo) );
       usage perRound, 1 {
         visible false;
       };
@@ -139,7 +139,7 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Geo));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Geo) );
       usage perRound, 1 {
         visible false;
       };
@@ -161,7 +161,7 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Dendro));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Dendro) );
       usage perRound, 1 {
         visible false;
       };
@@ -184,7 +184,7 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Cryo));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Cryo) );
       usage perRound, 1 {
         visible false;
       };
@@ -210,7 +210,7 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Hydro));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Hydro) );
       usage perRound, 1 {
         visible false;
       };
@@ -236,7 +236,7 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Pyro));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Pyro) );
       usage perRound, 1 {
         visible false;
       };
@@ -262,7 +262,7 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Electro));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Electro) );
       usage perRound, 1 {
         visible false;
       };
@@ -288,7 +288,7 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Anemo));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Anemo) );
       usage perRound, 1 {
         visible false;
       };
@@ -314,7 +314,7 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Geo));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Geo) );
       usage perRound, 1 {
         visible false;
       };
@@ -340,7 +340,7 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :(:e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Dendro));
+      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Dendro) );
       usage perRound, 1 {
         visible false;
       };
@@ -365,7 +365,7 @@ define card {
   cost DiceType.Aligned, 1;
   artifact {
     on useSkill {
-      when :(:e.isSkillType("normal"));
+      when :( :e.isSkillType("normal") );
       usage perRound, 3 {
         visible false;
       };
@@ -387,7 +387,7 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on useSkill {
-      when :(:e.isSkillType("elemental"));
+      when :( :e.isSkillType("elemental") );
       usage perRound, 1 {
         visible false;
       };
@@ -409,7 +409,7 @@ define card {
   cost DiceType.Aligned, 1;
   artifact {
     on useSkill {
-      when :(:e.isSkillType("burst"));
+      when :( :e.isSkillType("burst") );
       usage perRound, 1 {
         visible false;
       };
@@ -431,7 +431,7 @@ define card {
   cost DiceType.Aligned, 1;
   artifact {
     on defeated {
-      when :(:self.master.isActive() && !:e.target.isMine());
+      when :( :self.master.isActive() && !:e.target.isMine() );
       listenTo all;
       usage 3 {
         autoDispose false;
@@ -454,7 +454,7 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on useSkill {
-      when :(:hasPhaseReaction("my"));
+      when :( :hasPhaseReaction("my") );
       usage perRound, 3 {
         visible false;
       };
@@ -476,7 +476,7 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on useSkill {
-      when :(:e.isSkillType("burst"));
+      when :( :e.isSkillType("burst") );
       usage perRound, 1 {
         visible false;
       };
@@ -498,7 +498,7 @@ define card {
   cost DiceType.Aligned, 1;
   artifact {
     on useSkill {
-      when :(:e.skill.caller.id !== :self.master.id && :e.isSkillType("burst"));
+      when :( :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst") );
       listenTo samePlayer;
       :gainEnergy(1, "@master");
     }
@@ -519,12 +519,12 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on useSkill {
-      when :(:e.skill.caller.id !== :self.master.id && :e.isSkillType("burst"));
+      when :( :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst") );
       listenTo samePlayer;
       :gainEnergy(1, "@master");
     }
     on increaseSkillDamage {
-      when :(:e.viaSkillType("burst"));
+      when :( :e.viaSkillType("burst") );
       usage perRound, 1 {
         visible false;
       };
@@ -579,7 +579,7 @@ define card {
       :characterStatus(UnmovableMountain, "@master");
     }
     on damaged {
-      when :(:self.master.isActive());
+      when :( :self.master.isActive() );
       usage perRound, 1 {
         visible false;
       };
@@ -601,7 +601,7 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductOmniDice {
-      when :(:e.isSkillOrTalentOf(:self.master, "normal"));
+      when :( :e.isSkillOrTalentOf(:self.master, "normal") );
       usage perRound, 1 {
         visible false;
       };
@@ -620,7 +620,7 @@ define status {
   id 301203 as VermillionHereafterEffect;
   oneDuration;
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
 }
@@ -639,14 +639,14 @@ define card {
   cost DiceType.Void, 3;
   artifact {
     on deductOmniDice {
-      when :(:e.isSkillOrTalentOf(:self.master, "normal"));
+      when :( :e.isSkillOrTalentOf(:self.master, "normal") );
       usage perRound, 1 {
         visible false;
       };
       :e.deductOmniCost(1);
     }
     on switchActive {
-      when :(:self.master.id === :e.switchInfo.to.id);
+      when :( :self.master.id === :e.switchInfo.to.id );
       :characterStatus(VermillionHereafterEffect, "@master");
     }
   }
@@ -665,7 +665,7 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductOmniDice {
-      when :(:e.isSkillOrTalentOf(:self.master, "elemental"));
+      when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
       usage perRound, 1 {
         visible false;
       };
@@ -688,15 +688,15 @@ define card {
   cost DiceType.Void, 3;
   artifact {
     on deductOmniDice {
-      when :(:e.isSkillOrTalentOf(:self.master, "elemental"));
+      when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
       usage perRound, 1 {
         visible false;
       };
       :e.deductOmniCost(1);
     }
     on increaseSkillDamage {
-      when :(:self.master.energy >= 2 &&
-          (:e.viaSkillType("normal") || :e.viaSkillType("elemental")));
+      when :( :self.master.energy >= 2 &&
+          (:e.viaSkillType("normal") || :e.viaSkillType("elemental")) );
       :e.increaseDamage(1);
     }
   }
@@ -795,7 +795,7 @@ define card {
       :drawCards(1);
     }
     on damaged {
-      when :(!:e.target.isMine() && :self.master.isActive() && :e.getReaction());
+      when :( !:e.target.isMine() && :self.master.isActive() && :e.getReaction() );
       listenTo all;
       usage perRound, 1 {
         visible false;
@@ -828,7 +828,7 @@ define card {
       }
     }
     on damaged {
-      when :(!:e.target.isMine() && :self.master.isActive() && :e.getReaction());
+      when :( !:e.target.isMine() && :self.master.isActive() && :e.getReaction() );
       listenTo all;
       usage perRound, 2 {
         visible false;
@@ -850,7 +850,7 @@ define card {
   since "v4.3.0";
   artifact {
     on useSkill {
-      when :(:e.isSkillType("normal"));
+      when :( :e.isSkillType("normal") );
       usage perRound, 1 {
         visible false;
       };
@@ -873,14 +873,14 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on useSkill {
-      when :(:e.isSkillType("normal"));
+      when :( :e.isSkillType("normal") );
       usage perRound, 1 {
         visible false;
       };
       :drawCards(1);
     }
     on useSkill {
-      when :(:player.dice.length <= :player.hands.length);
+      when :( :player.dice.length <= :player.hands.length );
       usage perRound, 1 {
         visible false;
       };
@@ -901,7 +901,7 @@ define card {
   since "v4.3.0";
   artifact {
     on damaged {
-      when :(:self.master.isActive());
+      when :( :self.master.isActive() );
       usage perRound, 1 {
         visible false;
       };
@@ -924,7 +924,7 @@ define card {
   artifact {
     variable shouldHeal, 0;
     on damaged {
-      when :(:self.master.isActive());
+      when :( :self.master.isActive() );
       usage perRound, 1 {
         visible false;
       };
@@ -932,7 +932,7 @@ define card {
       :drawCards(1);
     }
     on endPhase {
-      when :(:getVariable("shouldHeal"));
+      when :( :getVariable("shouldHeal") );
       :heal(1, "@master");
       :setVariable("shouldHeal", 0);
     }
@@ -985,11 +985,11 @@ define card {
   artifact {
     variable reward, 0;
     on endPhase {
-      when :(!:self.master.isActive());
+      when :( !:self.master.isActive() );
       :addVariableWithMax("reward", 1, 2);
     }
     on deductOmniDice {
-      when :(:e.isSkillOrTalentOf(:self.master, "elemental"));
+      when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
       const reward = :getVariable("reward");
       const currentCost = :e.costSize();
       const deduced = Math.min(reward, currentCost);
@@ -1009,7 +1009,7 @@ define combatStatus {
   id 301209 as AmethystCrownInEffect;
   oneDuration;
   once increaseDamage {
-    when :(:e.getReaction());
+    when :( :e.getReaction() );
     :e.increaseDamage(2);
   }
 }
@@ -1029,14 +1029,14 @@ define card {
   artifact {
     variable crystal, 0;
     on damaged {
-      when :(:getVariable("crystal") < 2 &&
+      when :( :getVariable("crystal") < 2 &&
           !:e.target.isMine() &&
-          (:e.type === DamageType.Dendro || :e.isReactionRelatedTo(DamageType.Dendro)));
+          (:e.type === DamageType.Dendro || :e.isReactionRelatedTo(DamageType.Dendro)) );
       listenTo all;
       :addVariableWithMax("crystal", 1, 2);
     }
     on actionPhase {
-      when :(:getVariable("crystal") === 2);
+      when :( :getVariable("crystal") === 2 );
       :combatStatus(AmethystCrownInEffect);
     }
   }
@@ -1090,11 +1090,11 @@ define card {
   artifact {
     variable reward, 0;
     on endPhase {
-      when :(!:self.master.isActive());
+      when :( !:self.master.isActive() );
       :addVariableWithMax("reward", 2, 4);
     }
     on deductOmniDice {
-      when :(:e.isSkillOrTalentOf(:self.master, "elemental"));
+      when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
       const reward = :getVariable("reward");
       const currentCost = :e.costSize();
       const deduced = Math.min(reward, currentCost);
@@ -1119,19 +1119,19 @@ define card {
   artifact {
     variable crystal, 0;
     on damaged {
-      when :(:getVariable("crystal") < 5 &&
+      when :( :getVariable("crystal") < 5 &&
           !:e.target.isMine() &&
-          (:e.type === DamageType.Dendro || :e.isReactionRelatedTo(DamageType.Dendro)));
+          (:e.type === DamageType.Dendro || :e.isReactionRelatedTo(DamageType.Dendro)) );
       listenTo all;
       :addVariable("crystal", 1);
     }
     on actionPhase {
-      when :(:getVariable("crystal") === 5);
+      when :( :getVariable("crystal") === 5 );
       :generateDice(DiceType.Omni, 1);
       :drawCards(1);
     }
     on reaction {
-      when :(:getVariable("crystal") === 5 && :e.caller.isMine());
+      when :( :getVariable("crystal") === 5 && :e.caller.isMine() );
       listenTo all;
       usage perRound, 1 {
         visible false;
@@ -1154,7 +1154,7 @@ define card {
   since "v4.8.0";
   artifact {
     on deductOmniDiceSkill {
-      when :(:e.isSkillType("normal") && :player.hands.length <= 2);
+      when :( :e.isSkillType("normal") && :player.hands.length <= 2 );
       usage perRound, 1 {
         visible false;
       };
@@ -1199,7 +1199,7 @@ define card {
 define status {
   id 301204 as ConductorsTopHatInEffect;
   on deductOmniDice {
-    when :(:e.isSkillOrTalentOf(:self.master));
+    when :( :e.isSkillOrTalentOf(:self.master) );
     usage 1;
     :e.deductOmniCost(1);
   }
@@ -1218,7 +1218,7 @@ define card {
   cost DiceType.Aligned, 1;
   artifact {
     on switchActive {
-      when :(:e.switchInfo.to.id === :self.master.id && :player.hands.length > 0);
+      when :( :e.switchInfo.to.id === :self.master.id && :player.hands.length > 0 );
       usage perRound, 1 {
         visible false;
       };
@@ -1242,7 +1242,7 @@ define card {
   cost DiceType.Aligned, 1;
   artifact {
     on healed {
-      when :(!(:e.source.definition.type === "equipment" && :e.source.definition.tags.includes("artifact")));
+      when :( !(:e.source.definition.type === "equipment" && :e.source.definition.tags.includes("artifact")) );
       usage perRound, 2 {
         visible false;
       };
@@ -1361,8 +1361,8 @@ define card {
   since "v5.8.0";
   artifact {
     on reaction {
-      when :(:e.caller.isMine() &&
-          :e.type === Reaction.Burning);
+      when :( :e.caller.isMine() &&
+          :e.type === Reaction.Burning );
       listenTo all;
       usage perRound, 1 {
         visible false;
@@ -1418,7 +1418,7 @@ define card {
   since "v6.0.0";
   artifact {
     on useSkill {
-      when :(:e.isSkillType("burst") && :$("my next"));
+      when :( :e.isSkillType("burst") && :$("my next") );
       usage perRound, 1 {
         visible false;
       };
@@ -1440,8 +1440,8 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on increaseDamage {
-      when :(:e.getReaction() === Reaction.Burning ||
-          :e.source.definition.id === BurningFlame);
+      when :( :e.getReaction() === Reaction.Burning ||
+          :e.source.definition.id === BurningFlame );
       listenTo samePlayer;
       usage perRound, 2 {
         visible false;
@@ -1499,7 +1499,7 @@ define card {
   cost DiceType.Aligned, 1;
   artifact {
     on useSkill {
-      when :(:e.isSkillType("elemental"));
+      when :( :e.isSkillType("elemental") );
       usage perRound, 1 {
         visible false;
       };
@@ -1540,7 +1540,7 @@ define card {
       :gainEnergy(1, "@master");
     }
     on useSkill {
-      when :(:e.isSkillType("burst"));
+      when :( :e.isSkillType("burst") );
       :combatStatus(NoblesseObligeInEffect);
     }
   }
@@ -1566,7 +1566,7 @@ define card {
       :adventure();
     }
     on increaseSkillDamage {
-      when :(:$(`my combat status with definition id ${AdventureCompleted}`));
+      when :( :$(`my combat status with definition id ${AdventureCompleted}`) );
       :e.increaseDamage(1);
     }
   }
@@ -1586,14 +1586,14 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on increaseSkillDamage {
-      when :(:e.viaChargedAttack());
+      when :( :e.viaChargedAttack() );
       usage perRound, 1 {
         visible false;
       };
       :e.increaseDamage(1);
     }
     on useSkill {
-      when :(:e.isPlungingAttack());
+      when :( :e.isPlungingAttack() );
       usage perRound, 1 {
         visible false;
       };
@@ -1616,15 +1616,15 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on increaseSkillDamage {
-      when :(:e.type === DamageType.Physical);
+      when :( :e.type === DamageType.Physical );
       :e.increaseDamage(1);
     }
     on deductVoidDiceSkill {
-      when :(:queryAll($.my.character).length === 1 && :e.isSkillType("normal"));
+      when :( :queryAll($.my.character).length === 1 && :e.isSkillType("normal") );
       :e.deductVoidCost(1);
     }
     on increaseDamage {
-      when :(:queryAll($.my.character).length === 1 && :e.viaSkillType("normal"));
+      when :( :queryAll($.my.character).length === 1 && :e.viaSkillType("normal") );
       usage perRound, 2 {
         visible false;
       };

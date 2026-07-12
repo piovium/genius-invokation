@@ -146,8 +146,8 @@ define card {
       :useSkill(AisaUtamakuraPilgrimage);
     }
     on increaseDamage {
-      when :(:self.master.isActive() &&
-          ([DamageType.Cryo, DamageType.Hydro, DamageType.Pyro, DamageType.Electro] as DamageType[]).includes(:e.type));
+      when :( :self.master.isActive() &&
+          ([DamageType.Cryo, DamageType.Hydro, DamageType.Pyro, DamageType.Electro] as DamageType[]).includes(:e.type) );
       listenTo samePlayer;
       usage perRound, 2 {
         visible false;

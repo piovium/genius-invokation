@@ -90,7 +90,7 @@ define skill {
   id 14174 as MoonsignBenedictionAssemblageHub;
   skillType passive {
     on enterRelative {
-      when :(!:e.entity.isMine() && :e.entity.definition.id === Conductive);
+      when :( !:e.entity.isMine() && :e.entity.definition.id === Conductive );
       listenTo all;
       const area = :e.entity.area;
       if (area.type === "hands" || area.type === "pile") {
@@ -152,7 +152,7 @@ define card {
       }
     }
     on dealReaction {
-      when :(:e.type === Reaction.LunarElectroCharged);
+      when :( :e.type === Reaction.LunarElectroCharged );
       listenTo samePlayer;
       const target = :random(:oppPlayer.hands);
       if (target) {

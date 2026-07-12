@@ -32,7 +32,7 @@ define summon {
     :damage(DamageType.Anemo, 1);
   }
   on increaseDamaged {
-    when :(!:e.target.isMine() && :e.type === DamageType.Anemo);
+    when :( !:e.target.isMine() && :e.type === DamageType.Anemo );
     listenTo all;
     :e.increaseDamage(1);
   }
@@ -67,7 +67,7 @@ define summon {
     :damage(DamageType.Anemo, 1);
   }
   on increaseDamaged {
-    when :(!:e.target.isMine() && :e.type === DamageType.Anemo);
+    when :( !:e.target.isMine() && :e.type === DamageType.Anemo );
     listenTo all;
     :e.increaseDamage(1);
   }
@@ -86,11 +86,11 @@ define summon {
 define status {
   id 115091 as ManifestGale;
   on deductVoidDiceSkill {
-    when :(:e.isChargedAttack());
+    when :( :e.isChargedAttack() );
     :e.deductVoidCost(1);
   }
   on modifySkillDamageType {
-    when :(:e.viaChargedAttack());
+    when :( :e.viaChargedAttack() );
     usage 1;
     if (:e.type === DamageType.Physical){
       :e.changeDamageType(DamageType.Anemo);

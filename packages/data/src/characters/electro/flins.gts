@@ -28,11 +28,11 @@ define status {
   since "v6.6.0";
   duration 1;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
   }
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
 }
@@ -91,7 +91,7 @@ define skill {
   id 14182 as AncientRiteArcaneLight;
   skillType elemental;
   cost DiceType.Electro, 2;
-  filter :(:countOfSkill() === 0 || :self.energy >= 1);
+  filter :( :countOfSkill() === 0 || :self.energy >= 1 );
   if (:countOfSkill() === 0) {
     :damage(DamageType.Electro, 1);
     :characterStatus(ManifestFlame, :self);
@@ -124,14 +124,14 @@ define skill {
   id 14184 as MoonsignBenedictionOldWorldSecrets;
   skillType passive {
     on enterRelative {
-      when :(!:e.entity.isMine() && :e.entity.definition.id === Conductive);
+      when :( !:e.entity.isMine() && :e.entity.definition.id === Conductive );
       listenTo all;
       :damage(DamageType.Piercing, 1, $.macros.oppMaxHealth);
     }
     on useSkill {
-      when :(:e.skill.definition.id === AncientRiteArcaneLight &&
+      when :( :e.skill.definition.id === AncientRiteArcaneLight &&
           :countOfSkill(Flins, AncientRiteArcaneLight) >= 2 &&
-          :self.energy >= 2);
+          :self.energy >= 2 );
       asSkillType elemental;
       :self.loseEnergy(2);
       :characterStatus(ThunderousSymphonyStatus, :self);
@@ -199,7 +199,7 @@ define card {
       :gainEnergy(1, "@master");
     }
     on dealReaction {
-      when :(:e.type === Reaction.LunarElectroCharged);
+      when :( :e.type === Reaction.LunarElectroCharged );
       listenTo samePlayer;
       usage perRound, 1 {
         visible false;

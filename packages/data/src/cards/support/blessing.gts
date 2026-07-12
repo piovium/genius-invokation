@@ -33,8 +33,8 @@ define card {
       :e.fixDice(DiceType.Electro, 2);
     }
     on damaged {
-      when :(!:e.target.isMine() &&
-          ([DamageType.Physical, DamageType.Cryo] as DamageType[]).includes(:e.type));
+      when :( !:e.target.isMine() &&
+          ([DamageType.Physical, DamageType.Cryo] as DamageType[]).includes(:e.type) );
       listenTo all;
       usage perRound, 2 {
         visible false;
@@ -65,7 +65,7 @@ define card {
       :e.fixDice(DiceType.Electro, 2);
     }
     on dealReaction {
-      when :(:e.type === Reaction.Superconduct);
+      when :( :e.type === Reaction.Superconduct );
       usage perRound, 3 {
         visible false;
       };
@@ -94,7 +94,7 @@ define card {
       :e.fixDice(DiceType.Electro, 2);
     }
     on dealReaction {
-      when :(:e.type === Reaction.Superconduct);
+      when :( :e.type === Reaction.Superconduct );
       :selectAndCreateHandCard([
           SuperconductBlessingDeepFreeze,
           SuperconductBlessingElectricSurge,
@@ -134,7 +134,7 @@ define card {
       :e.fixDice(DiceType.Pyro, 2);
     }
     on dealReaction {
-      when :(:e.type === Reaction.Vaporize);
+      when :( :e.type === Reaction.Vaporize );
       usage perRound, 2 {
         visible false;
       };
@@ -164,8 +164,8 @@ define card {
       :e.fixDice(DiceType.Pyro, 2);
     }
     on deductOmniDiceSkill {
-      when :(:e.isSkillType("elemental") &&
-          :e.action.skill.caller.cast<"character">().element() === DiceType.Pyro);
+      when :( :e.isSkillType("elemental") &&
+          :e.action.skill.caller.cast<"character">().element() === DiceType.Pyro );
       usage perRound, 2 {
         visible false;
       };
@@ -195,7 +195,7 @@ define card {
       :e.fixDice(DiceType.Pyro, 2);
     }
     on dealReaction {
-      when :(:e.type === Reaction.Vaporize);
+      when :( :e.type === Reaction.Vaporize );
       :selectAndCreateHandCard([
           VaporizeBlessingRagingWaves,
           VaporizeBlessingSearingBurn,
@@ -223,7 +223,7 @@ define card {
       :e.fixDice(DiceType.Dendro, 2);
     }
     on playCard {
-      when :<boolean>(:e.card.definition.id !== BloomBlessingAmrita);
+      when :<boolean>( :e.card.definition.id !== BloomBlessingAmrita );
       :addVariable("playCount", 1);
       if (:getVariable("playCount") === 2) {
         const target = :query($.macros.myMostInjured);
@@ -283,7 +283,7 @@ define card {
       :e.fixDice(DiceType.Dendro, 2);
     }
     on dealReaction {
-      when :(:e.type === Reaction.Bloom || :e.type === Reaction.LunarBloom);
+      when :( :e.type === Reaction.Bloom || :e.type === Reaction.LunarBloom );
       :selectAndCreateHandCard([
           BloomBlessingAmrita,
           BloomBlessingOvergrow,
@@ -341,8 +341,8 @@ define card {
       :e.fixDice(DiceType.Geo, 2);
     }
     on damaged {
-      when :(!:e.target.isMine() && 
-          ([DamageType.Pyro, DamageType.Geo] as DamageType[]).includes(:e.type));
+      when :( !:e.target.isMine() && 
+          ([DamageType.Pyro, DamageType.Geo] as DamageType[]).includes(:e.type) );
       listenTo all;
       usage perRound, 1 {
         visible false;
@@ -376,7 +376,7 @@ define card {
       :e.fixDice(DiceType.Geo, 2);
     }
     on dealReaction {
-      when :(:e.type === Reaction.CrystallizePyro);
+      when :( :e.type === Reaction.CrystallizePyro );
       :selectAndCreateHandCard([
           LavaBlessingTurnfire,
           LavaBlessingRemelting,
@@ -430,7 +430,7 @@ define card {
       :e.fixDice(DiceType.Dendro, 2);
     }
     on useSkill {
-      when :(([Aura.Dendro, Aura.CryoDendro] as (Aura | undefined)[]).includes(:query($.opp.active)?.aura));
+      when :( ([Aura.Dendro, Aura.CryoDendro] as (Aura | undefined)[]).includes(:query($.opp.active)?.aura) );
       usage perRound, 2 {
         visible false;
       };
@@ -461,7 +461,7 @@ define card {
       :e.fixDice(DiceType.Dendro, 2);
     }
     on beforeAction {
-      when :(:query($.opp.character.var("aura", Aura.CryoDendro)));
+      when :( :query($.opp.character.var("aura", Aura.CryoDendro)) );
       :selectAndCreateHandCard([
           RimegrassBlessingThornFrost,
           RimegrassBlessingColdVine,
@@ -515,7 +515,7 @@ define card {
       :e.fixDice(DiceType.Anemo, 2);
     }
     on dealReaction {
-      when :(:e.relatedTo(DamageType.Anemo));
+      when :( :e.relatedTo(DamageType.Anemo) );
       usage perRound, 1 {
         visible false;
       };
@@ -544,7 +544,7 @@ define card {
       :e.fixDice(DiceType.Anemo, 2);
     }
     on dealReaction {
-      when :(:e.type === Reaction.SwirlElectro);
+      when :( :e.type === Reaction.SwirlElectro );
       :selectAndCreateHandCard([
           StormgaleBlessingSwiftBolt,
           StormgaleBlessingWindForce,
@@ -596,7 +596,7 @@ define card {
       :e.fixDice(DiceType.Anemo, 2);
     }
     on increaseDamage {
-      when :(:e.isReactionRelatedTo(DamageType.Anemo));
+      when :( :e.isReactionRelatedTo(DamageType.Anemo) );
       usage perRound, 2 {
         visible false;
       };
@@ -653,8 +653,8 @@ define card {
       :e.fixDice(DiceType.Dendro, 2);
     }
     on deductOmniDiceSkill {
-      when :(:e.isSkillType("burst") &&
-          :query($.my.combatStatus.def(CatalyzingField)));
+      when :( :e.isSkillType("burst") &&
+          :query($.my.combatStatus.def(CatalyzingField)) );
       usage perRound, 1 {
         visible false;
       };
@@ -682,8 +682,8 @@ define card {
       :e.fixDice(DiceType.Dendro, 2);
     }
     on deductOmniDiceSkill {
-      when :(:e.isSkillType("elemental") &&
-          :query($.my.combatStatus.def(CatalyzingField)));
+      when :( :e.isSkillType("elemental") &&
+          :query($.my.combatStatus.def(CatalyzingField)) );
       usage perRound, 2 {
         visible false;
       };

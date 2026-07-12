@@ -41,7 +41,7 @@ define status {
   id 113135 as VerticalForceCoordination;
   since "v4.8.0";
   on damaged {
-    when :(:e.getReaction() === Reaction.Overloaded && !:e.target.isMine());
+    when :( :e.getReaction() === Reaction.Overloaded && !:e.target.isMine() );
     listenTo all;
     usage perRound, 1 {
       visible false;
@@ -77,7 +77,7 @@ define combatStatus {
   id 113134 as VanguardsCoordinatedTacticsInEffect;
   since "v4.8.0";
   on increaseDamage {
-    when :(:e.type === DamageType.Pyro || :e.type === DamageType.Electro);
+    when :( :e.type === DamageType.Pyro || :e.type === DamageType.Electro );
     usage 2;
     :e.increaseDamage(1);
   }
@@ -136,7 +136,7 @@ define skill {
   id 13134 as VerticalForceCoordinationPassive;
   skillType passive {
     on damaged {
-      when :(:e.getReaction() === Reaction.Overloaded && !:e.target.isMine());
+      when :( :e.getReaction() === Reaction.Overloaded && !:e.target.isMine() );
       listenTo all;
       usage perRound, 1 {
         name "usagePerRound1";
@@ -158,7 +158,7 @@ define skill {
   id 13135 as ShortrangeRapidInterdictionFirePassive;
   skillType passive {
     on useSkill {
-      when :(:e.skill.definition.id === ShortrangeRapidInterdictionFire);
+      when :( :e.skill.definition.id === ShortrangeRapidInterdictionFire );
       const ball = :player.hands.find((card) => card.definition.id === OverchargedBall);
       if (ball) {
         :disposeCard(ball);
@@ -201,7 +201,7 @@ define card {
   talent Chevreuse, none {
     since "v4.8.0";
     on damaged {
-      when :(:e.getReaction() === Reaction.Overloaded && !:e.target.isMine());
+      when :( :e.getReaction() === Reaction.Overloaded && !:e.target.isMine() );
       listenTo all;
       :combatStatus(VanguardsCoordinatedTacticsInEffect);
     }

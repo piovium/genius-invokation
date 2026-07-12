@@ -25,8 +25,8 @@ define combatStatus {
   id 113094 as FierySanctumsProtection;
   tags barrier;
   on decreaseDamaged {
-    when :(:e.target.isActive() &&
-        :$(`my standby characters with definition id ${Dehya}`));
+    when :( :e.target.isActive() &&
+        :$(`my standby characters with definition id ${Dehya}`) );
     usage 1 {
       autoDispose false;
     };
@@ -150,7 +150,7 @@ define skill {
   id 13096 as FierySanctumRedmanesBlood;
   skillType passive {
     on damaged {
-      when :(:e.target.id !== :self.id);
+      when :( :e.target.id !== :self.id );
       listenTo samePlayer;
       const protection = :$(`my combat status with definition id ${FierySanctumsProtection}`);
       if (protection?.getVariable("usage") === 0) {
@@ -196,7 +196,7 @@ define card {
       :useSkill(MoltenInferno);
     }
     on endPhase {
-      when :(:self.master.health <= 6);
+      when :( :self.master.health <= 6 );
       :heal(2, "@master");
     }
   }

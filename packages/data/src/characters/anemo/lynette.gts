@@ -25,7 +25,7 @@ define combatStatus {
   id 115083 as BogglecatBoxsTaunt;
   tags barrier;
   on decreaseDamaged {
-    when :(:e.target.isActive());
+    when :( :e.target.isActive() );
     usage 1;
     :e.decreaseDamage(1);
   }
@@ -69,7 +69,7 @@ define status {
   id 115081 as OverawingAssault;
   duration 1;
   on endPhase {
-    when :(:self.master.health >= 6);
+    when :( :self.master.health >= 6 );
     :damage(DamageType.Piercing, 2, "@master");
   }
 }

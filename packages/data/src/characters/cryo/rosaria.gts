@@ -166,11 +166,11 @@ define card {
       :useSkill(RavagingConfession);
     }
     on useSkill {
-      when :(:e.skill.definition.id === RavagingConfession);
+      when :( :e.skill.definition.id === RavagingConfession );
       :createHandCard(ChangingShifts);
     }
     on enterRelative {
-      when :(:e.entity.id === StrikeWhereItHurts);
+      when :( :e.entity.id === StrikeWhereItHurts );
       listenTo samePlayer;
       :createHandCard(ChangingShifts);
     }

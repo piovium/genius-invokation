@@ -31,15 +31,15 @@ define status {
   };
   };
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Dendro);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :damage(DamageType.Dendro, 1);
   }
   on useSkill {
-    when :(:e.isChargedAttack());
+    when :( :e.isChargedAttack() );
     :addVariable("duration", 1);
   }
 }

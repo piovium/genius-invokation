@@ -45,8 +45,8 @@ define card {
     skill {
       id 1151121;
       cost DiceType.Anemo, 2;
-      filter :(:self.master.hasNightsoulsBlessing()?.variables.nightsoul &&
-          :player.hands.length >= 3);
+      filter :( :self.master.hasNightsoulsBlessing()?.variables.nightsoul &&
+          :player.hands.length >= 3 );
       :consumeNightsoul("@master", 1);
       :damage(DamageType.Anemo, 1);
       :disposeMaxCostHands(3, { allowPreview: true });
@@ -209,7 +209,7 @@ define skill {
   id 15112 as SpiritReinsShadowHunt;
   skillType elemental;
   cost DiceType.Anemo, 3;
-  filter :(!:self.hasStatus(NightsoulsBlessing));
+  filter :( !:self.hasStatus(NightsoulsBlessing) );
   :damage(DamageType.Anemo, 1);
   :drawCards(1);
   :gainNightsoul("@self", 2);

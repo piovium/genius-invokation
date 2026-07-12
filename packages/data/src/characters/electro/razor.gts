@@ -26,7 +26,7 @@ define status {
   id 114021 as TheWolfWithin;
   duration 2;
   on useSkill {
-    when :(:e.isSkillType("normal") || :e.isSkillType("elemental"));
+    when :( :e.isSkillType("normal") || :e.isSkillType("elemental") );
     :damage(DamageType.Electro, 2);
   }
 }
@@ -107,7 +107,7 @@ define card {
       :useSkill(ClawAndThunder);
     }
     on useSkill {
-      when :(:e.skill.definition.id === ClawAndThunder);
+      when :( :e.skill.definition.id === ClawAndThunder );
       usage perRound, 1 {
         visible false;
       };

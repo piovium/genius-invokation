@@ -56,7 +56,7 @@ define skill {
 define status {
   id 115051 as MidareRanzan;
   on beforeFastSwitch {
-    when :(:self.master.id === :e.action.to.id);
+    when :( :self.master.id === :e.action.to.id );
     usage 1 {
       autoDispose false;
     };
@@ -66,11 +66,11 @@ define status {
     :useSkill(GaryuuBladework);
   }
   on modifySkillDamageType {
-    when :(:e.viaSkillType("normal") && :e.type === DamageType.Physical);
+    when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Anemo);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :dispose();
   }
 }
@@ -85,7 +85,7 @@ define status {
 define status {
   id 115053 as MidareRanzanCryo;
   on beforeFastSwitch {
-    when :(:self.master.id === :e.action.to.id);
+    when :( :self.master.id === :e.action.to.id );
     usage 1 {
       autoDispose false;
     };
@@ -95,11 +95,11 @@ define status {
     :useSkill(GaryuuBladework);
   }
   on modifySkillDamageType {
-    when :(:e.viaSkillType("normal") && :e.type === DamageType.Physical);
+    when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Cryo);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :dispose();
   }
 }
@@ -114,7 +114,7 @@ define status {
 define status {
   id 115056 as MidareRanzanElectro;
   on beforeFastSwitch {
-    when :(:self.master.id === :e.action.to.id);
+    when :( :self.master.id === :e.action.to.id );
     usage 1 {
       autoDispose false;
     };
@@ -124,11 +124,11 @@ define status {
     :useSkill(GaryuuBladework);
   }
   on modifySkillDamageType {
-    when :(:e.viaSkillType("normal") && :e.type === DamageType.Physical);
+    when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :dispose();
   }
 }
@@ -143,7 +143,7 @@ define status {
 define status {
   id 115054 as MidareRanzanHydro;
   on beforeFastSwitch {
-    when :(:self.master.id === :e.action.to.id);
+    when :( :self.master.id === :e.action.to.id );
     usage 1 {
       autoDispose false;
     };
@@ -153,11 +153,11 @@ define status {
     :useSkill(GaryuuBladework);
   }
   on modifySkillDamageType {
-    when :(:e.viaSkillType("normal") && :e.type === DamageType.Physical);
+    when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :dispose();
   }
 }
@@ -172,7 +172,7 @@ define status {
 define status {
   id 115055 as MidareRanzanPyro;
   on beforeFastSwitch {
-    when :(:self.master.id === :e.action.to.id);
+    when :( :self.master.id === :e.action.to.id );
     usage 1 {
       autoDispose false;
     };
@@ -182,11 +182,11 @@ define status {
     :useSkill(GaryuuBladework);
   }
   on modifySkillDamageType {
-    when :(:e.viaSkillType("normal") && :e.type === DamageType.Physical);
+    when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :dispose();
   }
 }
@@ -201,7 +201,7 @@ define status {
 define combatStatus {
   id 115057 as PoeticsOfFuubutsuCryo;
   on increaseDamage {
-    when :(["character", "summon"].includes(:e.source.definition.type) && :e.type === DamageType.Cryo);
+    when :( ["character", "summon"].includes(:e.source.definition.type) && :e.type === DamageType.Cryo );
     usage 2;
     :e.increaseDamage(1);
   }
@@ -217,7 +217,7 @@ define combatStatus {
 define combatStatus {
   id 115050 as PoeticsOfFuubutsuElectro;
   on increaseDamage {
-    when :(["character", "summon"].includes(:e.source.definition.type) && :e.type === DamageType.Electro);
+    when :( ["character", "summon"].includes(:e.source.definition.type) && :e.type === DamageType.Electro );
     usage 2;
     :e.increaseDamage(1);
   }
@@ -233,7 +233,7 @@ define combatStatus {
 define combatStatus {
   id 115058 as PoeticsOfFuubutsuHydro;
   on increaseDamage {
-    when :(["character", "summon"].includes(:e.source.definition.type) && :e.type === DamageType.Hydro);
+    when :( ["character", "summon"].includes(:e.source.definition.type) && :e.type === DamageType.Hydro );
     usage 2;
     :e.increaseDamage(1);
   }
@@ -249,7 +249,7 @@ define combatStatus {
 define combatStatus {
   id 115059 as PoeticsOfFuubutsuPyro;
   on increaseDamage {
-    when :(["character", "summon"].includes(:e.source.definition.type) && :e.type === DamageType.Pyro);
+    when :( ["character", "summon"].includes(:e.source.definition.type) && :e.type === DamageType.Pyro );
     usage 2;
     :e.increaseDamage(1);
   }
@@ -316,7 +316,7 @@ define skill {
   id 15054 as ChihayaburuPassive;
   skillType passive {
     on useSkill {
-      when :(:e.skill.definition.id === Chihayaburu);
+      when :( :e.skill.definition.id === Chihayaburu );
       :switchActive("my next");
     }
   }
@@ -355,7 +355,7 @@ define card {
       :useSkill(Chihayaburu);
     }
     on dealDamage {
-      when :(:e.isSwirl());
+      when :( :e.isSwirl() );
       const swirled = :e.isSwirl()!;
       switch (swirled) {
         case DamageType.Cryo:

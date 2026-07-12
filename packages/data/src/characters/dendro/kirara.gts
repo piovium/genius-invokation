@@ -33,7 +33,7 @@ define combatStatus {
     :addVariable("playedCard", 1);
   }
   on playCard {
-    when :(:getVariable("playedCard") === 2);
+    when :( :getVariable("playedCard") === 2 );
     usage 2;
     :damage(DamageType.Dendro, 1, "my active");
     :setVariable("playedCard", 0);
@@ -61,7 +61,7 @@ define combatStatus {
 define combatStatus {
   id 117071 as UrgentNekoParcel;
   on switchActive {
-    when :(:e.switchInfo.from?.definition.id === Kirara);
+    when :( :e.switchInfo.from?.definition.id === Kirara );
     usage 1 {
       append 2;
     };
@@ -148,7 +148,7 @@ define card {
       :useSkill(MeowteorKick);
     }
     on deductOmniDiceSwitch {
-      when :(:self.master.isActive());
+      when :( :self.master.isActive() );
       usage perRound, 1 {
         visible false;
       };

@@ -43,11 +43,11 @@ define status {
   conflictWith 111052;
   oneDuration;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Cryo);
   }
   on increaseSkillDamage {
-    when :(:e.type === DamageType.Cryo);
+    when :( :e.type === DamageType.Cryo );
     :e.increaseDamage(1);
   }
 }
@@ -64,7 +64,7 @@ define status {
   conflictWith 111053;
   oneDuration;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Cryo);
   }
 }
@@ -80,7 +80,7 @@ define status {
   since "v6.0.0";
   oneDuration;
   once increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
 }
@@ -138,7 +138,7 @@ define skill {
   id 11054 as KamisatoArtSenho01;
   skillType passive {
     on switchActive {
-      when :(:e.switchInfo.to.id === :self.id);
+      when :( :e.switchInfo.to.id === :self.id );
       if (:self.hasEquipment(KantenSenmyouBlessing)) {
         :characterStatus(CryoElementalInfusion01);
       }
@@ -159,7 +159,7 @@ define skill {
   id 11055 as KamisatoArtSenho02;
   skillType passive {
     on switchActive {
-      when :(:e.switchInfo.to.id === :self.id);
+      when :( :e.switchInfo.to.id === :self.id );
       usage perRound, 2 {
         name "usagePerRound1";
         visible false;
@@ -199,7 +199,7 @@ define card {
   cost DiceType.Cryo, 2;
   talent KamisatoAyaka, none {
     on deductOmniDiceSwitch {
-      when :(:e.action.to.id === :self.master.id);
+      when :( :e.action.to.id === :self.master.id );
       usage perRound, 1 {
         visible false;
       };

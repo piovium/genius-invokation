@@ -53,7 +53,7 @@ define combatStatus {
   id 112135 as Convalescence;
   since "v5.2.0";
   on increaseDamage {
-    when :(:e.viaSkillType("elemental") || :e.source.definition.type === "summon");
+    when :( :e.viaSkillType("elemental") || :e.source.definition.type === "summon" );
     usage 2;
     :e.increaseDamage(1);
   }
@@ -64,7 +64,7 @@ define status {
   id 112136 as DetailedDiagnosisThoroughTreatmentStatus;
   noDefaultDispose;
   on dispose {
-    when :(:e.entity.definition.id === BondOfLife);
+    when :( :e.entity.definition.id === BondOfLife );
     usage 3;
     :increaseMaxHealth(1, "@master");
   }
@@ -204,7 +204,7 @@ define skill {
   id 12137 as DetailedDiagnosisThoroughTreatment03;
   skillType passive {
     on switchActive {
-      when :(:e.switchInfo.to.id === :self.id);
+      when :( :e.switchInfo.to.id === :self.id );
       const droplet = :$(`my combat status with definition id ${SourcewaterDroplet}`);
       if (droplet) {
         :consumeUsage(1, droplet);
@@ -247,7 +247,7 @@ define card {
       :useSkill(ReboundHydrotherapy);
     }
     on useSkill {
-      when :(:e.skill.definition.id === ReboundHydrotherapy);
+      when :( :e.skill.definition.id === ReboundHydrotherapy );
       :combatStatus(Convalescence);
     }
   }

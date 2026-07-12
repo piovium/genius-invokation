@@ -77,11 +77,11 @@ define skill {
   id 22074 as ConsecratedSenses;
   skillType passive {
     on playCard {
-      when :(:e.card.definition.id === BonecrunchersEnergyBlock);
+      when :( :e.card.definition.id === BonecrunchersEnergyBlock );
       :heal(1, "my characters order by health - maxHealth limit 1");
     }
     on disposeCard {
-      when :(:e.entity.definition.id === BonecrunchersEnergyBlock);
+      when :( :e.entity.definition.id === BonecrunchersEnergyBlock );
       :heal(1, "my characters order by health - maxHealth limit 1");
     }
   }
@@ -120,7 +120,7 @@ define card {
       :createHandCard(BonecrunchersEnergyBlock);
     }
     on playCard {
-      when :(:e.card.definition.id === BonecrunchersEnergyBlock);
+      when :( :e.card.definition.id === BonecrunchersEnergyBlock );
       :heal(1, "my characters order by health - maxHealth limit 1");
     }
   }

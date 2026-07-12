@@ -67,7 +67,7 @@ define combatStatus {
   conflictWith 112072;
   duration 2;
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
   on modifySkillDamageType {
@@ -85,7 +85,7 @@ define combatStatus {
     :damage(DamageType.Hydro, 1);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage perRound, 1 {
       visible false;
     };
@@ -107,7 +107,7 @@ define combatStatus {
   conflictWith 112073;
   duration 2;
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
   on modifySkillDamageType {

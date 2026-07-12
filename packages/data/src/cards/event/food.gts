@@ -143,7 +143,7 @@ define status {
   since "v3.3.0";
   oneDuration;
   on deductVoidDiceSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage 3;
     :e.deductVoidCost(1);
   }

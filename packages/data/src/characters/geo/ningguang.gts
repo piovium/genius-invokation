@@ -26,13 +26,13 @@ define combatStatus {
   id 116011 as JadeScreenStatus;
   tags barrier;
   on decreaseDamaged {
-    when :(:e.target.isActive() && :e.value >= 2);
+    when :( :e.target.isActive() && :e.value >= 2 );
     usage 2;
     :e.decreaseDamage(1);
   }
   on increaseDamage {
-    when :(:e.type === DamageType.Geo && 
-        :$(`my equipment with definition id ${StrategicReserve}`));
+    when :( :e.type === DamageType.Geo && 
+        :$(`my equipment with definition id ${StrategicReserve}`) );
     listenTo samePlayer;
     :e.increaseDamage(1);
   }

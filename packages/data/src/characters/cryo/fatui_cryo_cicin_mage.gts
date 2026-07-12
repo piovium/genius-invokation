@@ -34,11 +34,11 @@ define summon {
     :damage(DamageType.Cryo, 1);
   }
   on useSkill {
-    when :(:e.skill.caller.definition.id === FatuiCryoCicinMage && :e.isSkillType("normal"));
+    when :( :e.skill.caller.definition.id === FatuiCryoCicinMage && :e.isSkillType("normal") );
     :addVariable("usage", 1);
   }
   on damaged {
-    when :(:e.target.definition.id === FatuiCryoCicinMage && :e.getReaction());
+    when :( :e.target.definition.id === FatuiCryoCicinMage && :e.getReaction() );
     :consumeUsage();
   }
 }
@@ -156,7 +156,7 @@ define card {
       :useSkill(MistySummons);
     }
     on useSkill {
-      when :(:getVariable("dealDamage"));
+      when :( :getVariable("dealDamage") );
       :damage(DamageType.Cryo, 2);
       :setVariable("dealDamage", 0);
     }

@@ -31,7 +31,7 @@ define summon {
     :damage(DamageType.Electro, 1);
   }
   on addDice {
-    when :(:self.who !== :e.action.who && :e.action.type === "switchActive");
+    when :( :self.who !== :e.action.who && :e.action.type === "switchActive" );
     usage perRound, 1 {
       visible false;
     };

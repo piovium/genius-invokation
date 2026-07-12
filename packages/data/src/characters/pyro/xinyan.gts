@@ -25,7 +25,7 @@ import { card, character, combatStatus, DamageType, DiceType, skill } from "@gi-
 define combatStatus {
   id 113123 as FestiveFires;
   on declareEnd {
-    when :(:player.hands.length <= 1);
+    when :( :player.hands.length <= 1 );
     usage 2;
     :damage(DamageType.Pyro, 1);
   }
@@ -124,7 +124,7 @@ define card {
       :useSkill(DanceOnFire);
     }
     on increaseSkillDamage {
-      when :(:player.hands.length <= 1);
+      when :( :player.hands.length <= 1 );
       usage perRound, 1 {
         visible false;
       };

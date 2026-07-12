@@ -101,7 +101,7 @@ define skill {
       :createPileCards(BonecrunchersEnergyBlock, 2, "bottom");
     }
     on enterRelative {
-      when :(:e.entity.definition.id === BonecrunchersEnergyBlockCombatStatus);
+      when :( :e.entity.definition.id === BonecrunchersEnergyBlockCombatStatus );
       listenTo samePlayer;
       usage perRound, 1 {
         name "usagePerRound1";
@@ -155,12 +155,12 @@ define card {
   talent ConsecratedFangedBeast, none {
     variable usagePerRound, 1;
     on playCard {
-      when :(:getVariable("usagePerRound") && :e.card.definition.id === BonecrunchersEnergyBlock);
+      when :( :getVariable("usagePerRound") && :e.card.definition.id === BonecrunchersEnergyBlock );
       :drawCards(1);
       :setVariable("usagePerRound", 0);
     }
     on disposeCard {
-      when :(:getVariable("usagePerRound") && :e.entity.definition.id === BonecrunchersEnergyBlock);
+      when :( :getVariable("usagePerRound") && :e.entity.definition.id === BonecrunchersEnergyBlock );
       :drawCards(1);
       :setVariable("usagePerRound", 0);
     }

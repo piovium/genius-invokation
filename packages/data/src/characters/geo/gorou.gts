@@ -50,7 +50,7 @@ define combatStatus {
   };
   };
   on increaseSkillDamage {
-    when :(:e.type === DamageType.Geo);
+    when :( :e.type === DamageType.Geo );
     :e.increaseDamage(1);
   }
 }
@@ -132,8 +132,8 @@ define card {
       :useSkill(InuzakaAllroundDefense);
     }
     on skillDamage {
-      when :(:e.type === DamageType.Geo && 
-          :$(`my combat status with definition id ${GeneralsWarBanner}`));
+      when :( :e.type === DamageType.Geo && 
+          :$(`my combat status with definition id ${GeneralsWarBanner}`) );
       listenTo samePlayer;
       usage perRound, 1 {
         visible false;

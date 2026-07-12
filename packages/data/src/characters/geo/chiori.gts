@@ -80,7 +80,7 @@ define summon {
     :damage(DamageType.Geo, 1);
   }
   on useSkill {
-    when :(:e.skill.caller.definition.id !== Chiori);
+    when :( :e.skill.caller.definition.id !== Chiori );
     usage perRound, 1 {
       visible false;
     };
@@ -122,8 +122,8 @@ define summon {
     :damage(DamageType.Geo, 1);
   }
   on increaseDamage {
-    when :(([...DOLLS, Chiori] as number[]).includes(:e.source.definition.id) && 
-        :e.type === DamageType.Geo);
+    when :( ([...DOLLS, Chiori] as number[]).includes(:e.source.definition.id) && 
+        :e.type === DamageType.Geo );
     usage perRound, 2 {
       visible false;
     };
@@ -148,7 +148,7 @@ define summon {
     :damage(DamageType.Geo, 1);
   }
   on deductOmniDiceSkill {
-    when :(:e.action.skill.definition.id === WeavingBlade);
+    when :( :e.action.skill.definition.id === WeavingBlade );
     usage perRound, 1 {
       visible false;
     };
@@ -194,11 +194,11 @@ define status {
   id 116098 as GeoInfusion;
   since "v5.1.0";
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Geo);
   }
 }

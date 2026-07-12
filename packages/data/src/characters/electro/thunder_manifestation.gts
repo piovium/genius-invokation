@@ -28,10 +28,10 @@ define status {
   id 124022 as LightningRod;
   conflictWith crossCharacter;
   on increaseDamaged {
-    when :([
+    when :( [
           ThunderManifestation as number, 
           ThunderingShacklesSummon as number
-        ].includes(:e.source.definition.id));
+        ].includes(:e.source.definition.id) );
     :e.increaseDamage(1);
     :dispose();
   }

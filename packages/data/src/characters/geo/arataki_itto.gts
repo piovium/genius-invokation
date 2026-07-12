@@ -25,15 +25,15 @@ import { character, skill, summon, status, card, DamageType, DiceType, type Summ
 define status {
   id 116054 as SuperlativeSuperstrength;
   on increaseSkillDamage {
-    when :(:e.viaChargedAttack());
+    when :( :e.viaChargedAttack() );
     usage 1 {
       append 3;
     };
     :e.increaseDamage(1);
   }
   on deductVoidDiceSkill {
-    when :(:e.isChargedAttack() && 
-        :getVariable("usage") >= 2);
+    when :( :e.isChargedAttack() && 
+        :getVariable("usage") >= 2 );
     :e.deductVoidCost(1);
   }
 }
@@ -57,7 +57,7 @@ define summon {
     :characterStatus(SuperlativeSuperstrength, ($ => $.my.character.def(AratakiItto)));
   }
   on decreaseDamaged {
-    when :(:e.target.isActive());
+    when :( :e.target.isActive() );
     usage 1 {
       autoDispose false;
     };
@@ -83,15 +83,15 @@ define status {
   id 116053 as RagingOniKing;
   duration 2;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Geo);
   }
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage perRound, 1 {
       visible false;
     };

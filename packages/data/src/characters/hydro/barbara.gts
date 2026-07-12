@@ -107,7 +107,7 @@ define card {
       :useSkill(LetTheShowBegin);
     }
     on deductOmniDiceSwitch {
-      when :(:$(`my summon with definition id ${MelodyLoop}`));
+      when :( :$(`my summon with definition id ${MelodyLoop}`) );
       usage perRound, 1 {
         visible false;
       };

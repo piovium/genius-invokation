@@ -67,7 +67,7 @@ define status {
   id 114152 as ApexDrive;
   since "v6.1.0";
   on switchActive {
-    when :(:e.switchInfo.to.id === :self.master.id);
+    when :( :e.switchInfo.to.id === :self.master.id );
     usage 1;
     :characterStatus(GuardianVentVolcanoKablamStatus, "@master");
   }
@@ -146,7 +146,7 @@ define skill {
   id 14154 as TagteamTripleJump;
   skillType passive {
     on useSkill {
-      when :(:self.hasNightsoulsBlessing()?.variables.nightsoul === 2);
+      when :( :self.hasNightsoulsBlessing()?.variables.nightsoul === 2 );
       :consumeNightsoul("@self", 2);
       :characterStatus(ApexDrive);
       if (:self.hasEquipment(AHeroOfJusticesTriumph)) {
@@ -166,7 +166,7 @@ define skill {
   id 14156 as RidingTheNightrainbowPassive;
   skillType passive {
     on useSkill {
-      when :(:e.skill.definition.id === RidingTheNightrainbow);
+      when :( :e.skill.definition.id === RidingTheNightrainbow );
       :switchActive("my next");
     }
   }
@@ -203,7 +203,7 @@ define card {
   cost DiceType.Electro, 1;
   talent Varesa, none {
     on increaseSkillDamage {
-      when :(:e.viaSkillType("burst"));
+      when :( :e.viaSkillType("burst") );
       :e.increaseDamage(1);
     }
   }

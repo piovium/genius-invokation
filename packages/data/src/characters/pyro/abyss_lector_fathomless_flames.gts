@@ -56,7 +56,7 @@ define status {
 define status {
   id 123026 as FieryRebirthHoned;
   on increaseSkillDamage {
-    when :(:e.type === DamageType.Pyro);
+    when :( :e.type === DamageType.Pyro );
     :e.increaseDamage(1);
   }
 }
@@ -205,7 +205,7 @@ define card {
   cost DiceType.Pyro, 2;
   talent AbyssLectorFathomlessFlames, none {
     on enter {
-      when :(:self.master.getVariable("fieryRebirthTriggered"));
+      when :( :self.master.getVariable("fieryRebirthTriggered") );
       :characterStatus(AegisOfAbyssalFlame, "@master");
       :dispose();
     }

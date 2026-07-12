@@ -128,7 +128,7 @@ define card {
       :useSkill(FramingFreezingPointComposition);
     }
     on useSkill {
-      when :(:e.isSkillType("normal") && :$(`opp status with definition id ${SnappySilhouette}`));
+      when :( :e.isSkillType("normal") && :$(`opp status with definition id ${SnappySilhouette}`) );
       listenTo samePlayer;
       usage perRound, 1 {
         visible false;

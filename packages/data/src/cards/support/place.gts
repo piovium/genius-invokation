@@ -71,7 +71,7 @@ define card {
       :e.fixDice(:$("my active")!.element(), 2);
     }
     on actionPhase {
-      when :(:player.hands.length <= 3);
+      when :( :player.hands.length <= 3 );
       :generateDice(DiceType.Omni, 1);
       :dispose();
     }
@@ -173,7 +173,7 @@ define card {
   cost DiceType.Void, 3;
   support place {
     on useSkill {
-      when :(:player.dice.length % 2 === 1);
+      when :( :player.dice.length % 2 === 1 );
       usage perRound, 2 {
         visible;
       };
@@ -212,8 +212,8 @@ define card {
   cost DiceType.Aligned, 2;
   support place {
     on deductOmniDice {
-      when :((:e.isUseSkill() || :e.hasCardTag("talent")) &&
-          (:player.dice.length <= :player.hands.length));
+      when :( (:e.isUseSkill() || :e.hasCardTag("talent")) &&
+          (:player.dice.length <= :player.hands.length) );
       usage perRound, 1 {
         visible false;
       };
@@ -271,7 +271,7 @@ define card {
   cost DiceType.Aligned, 2;
   support place {
     on deductVoidDiceSkill {
-      when :(:e.isChargedAttack());
+      when :( :e.isChargedAttack() );
       usage 4;
       :e.deductVoidCost(1);
     }
@@ -290,8 +290,8 @@ define card {
   since "v4.0.0";
   support place {
     on deductOmniDiceCard {
-      when :(:e.hasOneOfCardTag("weapon", "artifact") &&
-          :e.currentDiceCostSize() >= 3);
+      when :( :e.hasOneOfCardTag("weapon", "artifact") &&
+          :e.currentDiceCostSize() >= 3 );
       usage perRound, 1 {
         visible false;
       };
@@ -314,7 +314,7 @@ define card {
   cost DiceType.Aligned, 1;
   support place {
     on beforeAction {
-      when :(:player.dice.length === 0);
+      when :( :player.dice.length === 0 );
       usage 3;
       usage perRound, 1 {
         visible false;
@@ -367,7 +367,7 @@ define card {
   cost DiceType.Aligned, 1;
   support place {
     on endPhase {
-      when :(:player.hands.length <= 2);
+      when :( :player.hands.length <= 2 );
       usage 2;
       :drawCards(2);
     }
@@ -417,7 +417,7 @@ define combatStatus {
   tags eventEffectless;
   oneDuration;
   on playCard {
-    when :(:e.card.definition.type === "eventCard");
+    when :( :e.card.definition.type === "eventCard" );
     usage 1;
   }
 }
@@ -435,7 +435,7 @@ define card {
   support place {
     variable forbidden, 0;
     on damagedOrHealed {
-      when :(:e.target.isActive());
+      when :( :e.target.isActive() );
       :addVariableWithMax("forbidden", 1, 6);
       if (:getVariable("forbidden") >= 6 && :oppPlayer.hands.length > 0) {
         :addVariable("forbidden", -6);
@@ -516,7 +516,7 @@ define card {
   support place {
     variable drawnCardCount, 0;
     on drawCard {
-      when :(:e.who !== :self.who);
+      when :( :e.who !== :self.who );
       listenTo all;
       :addVariable("drawnCardCount", 1);
       if (:getVariable("drawnCardCount") === 4) {
@@ -676,7 +676,7 @@ define card {
   support place {
     variable point, 1;
     on playCard {
-      when :(!:isInInitialPile(:e.card) && :e.card.diceCost() >= :getVariable("point"));
+      when :( !:isInInitialPile(:e.card) && :e.card.diceCost() >= :getVariable("point") );
       :generateDice("randomElement", 1);
       :addVariable("point", 1);
     }
@@ -696,7 +696,7 @@ define card {
   cost DiceType.Aligned, 2;
   support place {
     on enterRelative {
-      when :(:e.entity.definition.type === "summon");
+      when :( :e.entity.definition.type === "summon" );
       usage 3;
       const target = :query($.my.summon.id(:e.entity.id));
       target?.addVariable("usage", 1);
@@ -713,7 +713,7 @@ define card {
 define status {
   id 301024 as FlowerfeatherClanInEffect;
   on switchActive {
-    when :(:self.master.id === :e.switchInfo.to.id);
+    when :( :self.master.id === :e.switchInfo.to.id );
     usage 1 {
       append;
     };
@@ -737,7 +737,7 @@ define card {
       :addVariable("disposedCardCount", 1);
     }
     on disposeCard {
-      when :(:getVariable("disposedCardCount") >= 2);
+      when :( :getVariable("disposedCardCount") >= 2 );
       :setVariable("disposedCardCount", 0);
       :characterStatus(FlowerfeatherClanInEffect, "my next");
     }
@@ -762,7 +762,7 @@ define card {
       :setVariable("intuition", newValue);
     }
     on actionPhase {
-      when :(:getVariable("intuition") === 0);
+      when :( :getVariable("intuition") === 0 );
       const cards = :allCardDefinitions("support").filter((card) => originalDiceCostOfCard(card) === 2);
       const candidates = :randomSubset(cards, 3);
       :selectAndPlay(candidates);
@@ -783,11 +783,11 @@ define status {
     append 5;
   };
   on enter {
-    when :((:e.overridden?.variables.layer ?? 0) < 3 && :getVariable("layer") >= 3);
+    when :( (:e.overridden?.variables.layer ?? 0) < 3 && :getVariable("layer") >= 3 );
     :heal(1, "@master");
   }
   on increaseSkillDamage {
-    when :(:getVariable("layer") === 5);
+    when :( :getVariable("layer") === 5 );
     :e.increaseDamage(1);
   }
 }
@@ -806,8 +806,8 @@ define card {
   cost DiceType.Void, 3;
   support place {
     on enterRelative {
-      when :(:e.entity.definition.type === "status" &&
-          :e.entity.definition.tags.includes("preparingSkill"));
+      when :( :e.entity.definition.type === "status" &&
+          :e.entity.definition.tags.includes("preparingSkill") );
       const ch = :e.entity.cast<"status">().master;
       :characterStatus(Exercise, ch, {
         overrideVariables: {
@@ -839,7 +839,7 @@ define card {
       :createHandCard(newCard);
     }
     on declareEnd {
-      when :(:$(SIMULANKA_QUERY));
+      when :( :$(SIMULANKA_QUERY) );
       usage 3;
       const mySimulankaSummons = :$$(SIMULANKA_QUERY);
       const chosen = :random(mySimulankaSummons);
@@ -859,7 +859,7 @@ define card {
 define combatStatus {
   id 301032 as ConstellationMetropoleInEffect01;
   once deductOmniDiceCard {
-    when :(:e.action.skill.caller.definition.id === ToyGuard);
+    when :( :e.action.skill.caller.definition.id === ToyGuard );
     :e.deductOmniCost(1);
   }
 }
@@ -873,7 +873,7 @@ define combatStatus {
 define combatStatus {
   id 301037 as ConstellationMetropoleInEffect02;
   once enterRelative {
-    when :(:e.entity.definition.id === ToyGuardSummon);
+    when :( :e.entity.definition.id === ToyGuardSummon );
     :e.entity.cast<"summon">().addVariable("effect", 1);
   }
 }
@@ -924,7 +924,7 @@ define card {
       :adventure();
     }
     on adventure {
-      when :(:getVariable("usage") === 0);
+      when :( :getVariable("usage") === 0 );
       :dispose();
     }
   }
@@ -943,11 +943,11 @@ define card {
   support place {
     variable count, 0;
     on enterRelative {
-      when :(([CostReduction, Empowerment] as number[]).includes(:e.entity.definition.id));
+      when :( ([CostReduction, Empowerment] as number[]).includes(:e.entity.definition.id) );
       :addVariable("count", 1);
     }
     on actionPhase {
-      when :(:getVariable("count") >= 3);
+      when :( :getVariable("count") >= 3 );
       :addVariable("count", -3);
       :generateDice("randomElement", 1);
     }
@@ -966,7 +966,7 @@ define card {
   since "v6.4.0";
   support place {
     on actionPhase {
-      when :(:oppPlayer.hands.length > 0);
+      when :( :oppPlayer.hands.length > 0 );
       usage 2;
       const target = :random(:oppPlayer.hands);
       :attachCostIncrease(target);
@@ -1026,7 +1026,7 @@ define card {
       }
     }
     on selfDispose {
-      when :(:getVariable("usage") === 0);
+      when :( :getVariable("usage") === 0 );
       :damage(DamageType.Physical, 2);
     }
   }
@@ -1056,7 +1056,7 @@ define card {
       }
     }
     on selfDispose {
-      when :(!:e.isDiscardOrTuning());
+      when :( !:e.isDiscardOrTuning() );
       :drawCards(2, { withAttachment: Empowerment });
       :characterStatus(BattlePlan, "my active");
     }

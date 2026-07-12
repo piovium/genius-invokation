@@ -97,7 +97,7 @@ define status {
 define status {
   id 125021 as TotalCollapse;
   on increaseDamaged {
-    when :(([DamageType.Physical, DamageType.Anemo] as DamageType[]).includes(:e.type));
+    when :( ([DamageType.Physical, DamageType.Anemo] as DamageType[]).includes(:e.type) );
     usage 1;
     :e.increaseDamage(2);
   }
@@ -205,7 +205,7 @@ define card {
       :useSkill(TempestuousBarrage);
     }
     on dispose {
-      when :(:$(`opp status with definition id ${TotalCollapse}`)?.id === :e.entity.id);
+      when :( :$(`opp status with definition id ${TotalCollapse}`)?.id === :e.entity.id );
       listenTo all;
       usage perRound, 1 {
         visible false;

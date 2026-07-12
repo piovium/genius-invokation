@@ -26,7 +26,7 @@ define status {
   since "v6.4.0";
   oneDuration;
   once deductVoidDiceSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :e.deductVoidCost(2);
   }
 }
@@ -42,7 +42,7 @@ define status {
   since "v6.4.0";
   oneDuration;
   once increaseSkillDamage {
-    when :(:e.viaSkillType("normal") && :e.type === DamageType.Physical);
+    when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.increaseDamage(2);
   }
 }
@@ -58,7 +58,7 @@ define combatStatus {
   id 111171 as WindOfBlessing;
   since "v6.4.0";
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage 1;
     :characterStatus(NAttackCostReduction, "@event.skillCaller");
     if (:$(`my equipment with definition id ${CompanionsCounsel}`)) {
@@ -78,7 +78,7 @@ define combatStatus {
   id 111172 as Eagleplume;
   since "v6.4.0";
   on deductOmniDiceSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage 2;
     :e.deductOmniCost(1);
   }
@@ -95,7 +95,7 @@ define combatStatus {
   id 111173 as PhysicalDmgIncrease;
   since "v6.4.0";
   on increaseDamage {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     usage 1;
     :e.increaseDamage(1);
   }
@@ -112,7 +112,7 @@ define combatStatus {
   id 111176 as EagleplumeBlessing;
   since "v6.4.0";
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage 2;
     :heal(1, "@event.skillCaller");
   }

@@ -27,11 +27,11 @@ define status {
   conflictWith 114032;
   duration 3;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
   }
   on increaseSkillDamage {
-    when :(:e.type === DamageType.Electro);
+    when :( :e.type === DamageType.Electro );
     :e.increaseDamage(1);
   }
 }
@@ -48,7 +48,7 @@ define status {
   conflictWith 114034;
   duration 2;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
   }
 }

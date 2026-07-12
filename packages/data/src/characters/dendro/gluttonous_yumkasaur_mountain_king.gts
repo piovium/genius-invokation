@@ -118,7 +118,7 @@ define skill {
       }
     };
     on playCard {
-      when :(:e.hasCardTag("food"));
+      when :( :e.hasCardTag("food") );
       usage perRound, 2 {
         name "usagePerRound1";
         visible false;
@@ -142,7 +142,7 @@ define skill {
   id 27045 as GluttonousRex02;
   skillType passive {
     on enterRelative {
-      when :(:e.entity.definition.id === Satiated);
+      when :( :e.entity.definition.id === Satiated );
       void 0;
       // 不会饱腹 => 饱腹入场时弃置饱腹
       :dispose(:e.entity.cast<"status">());
@@ -186,7 +186,7 @@ define card {
       }
     }
     on playCard {
-      when :(!:isInInitialPile(:e.card));
+      when :( !:isInInitialPile(:e.card) );
       usage perRound, 1 {
         visible false;
       };

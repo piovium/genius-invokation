@@ -28,13 +28,13 @@ define status {
   since "v6.3.0";
   duration 1;
   on deductVoidDiceSkill {
-    when :(:e.isSkillType("normal") && :self.master.getVariable("serpentsSubtlety"));
+    when :( :e.isSkillType("normal") && :self.master.getVariable("serpentsSubtlety") );
     const costSubtelty = Math.min(2, :self.master.getVariable("serpentsSubtlety"));
     :self.master.addVariable("serpentsSubtlety", -costSubtelty);
     :e.deductVoidCost(costSubtelty);
   }
   on modifySkillDamageType {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.changeDamageType(DamageType.Cryo);
   }
   on enter {
@@ -99,7 +99,7 @@ define card {
   id 111163 as VoidRift;
   undiscoverable;
   tags action;
-  filter :(:query($.my.hand.cost(3)));
+  filter :( :query($.my.hand.cost(3)) );
   const hand = :query($.my.hand.cost(3));
   if (hand) {
     :disposeCard(hand);
@@ -132,7 +132,7 @@ define skill {
   id 11162 as HavocWarp;
   skillType elemental;
   cost DiceType.Cryo, 2;
-  filter :(:self.definition.id === Skirk && :self.getVariable("canE"));
+  filter :( :self.definition.id === Skirk && :self.getVariable("canE") );
   :self.addVariableWithMax("serpentsSubtlety", 2, 7);
   :createHandCard(MutualWeaponsMentorship);
   :self.setVariable("canE", 0);
@@ -170,7 +170,7 @@ define skill {
   id 11163 as HavocRuin;
   skillType burst;
   cost DiceType.Cryo, 3;
-  filter :(:self.getVariable("serpentsSubtlety") >= 2);
+  filter :( :self.getVariable("serpentsSubtlety") >= 2 );
   const subtilty = :self.getVariable("serpentsSubtlety");
   :self.setVariable("serpentsSubtlety", 0);
   if (subtilty >= 7) {
@@ -194,7 +194,7 @@ define skill {
     variable serpentsSubtlety, 0;
     variable canE, 1;
     on dealReaction {
-      when :(([Reaction.Frozen, Reaction.SwirlCryo, Reaction.Superconduct, Reaction.CrystallizeCryo] as Reaction[]).includes(:e.type));
+      when :( ([Reaction.Frozen, Reaction.SwirlCryo, Reaction.Superconduct, Reaction.CrystallizeCryo] as Reaction[]).includes(:e.type) );
       listenTo samePlayer;
       usage perRound, 3 {
         name "usagePerRound1";
@@ -269,12 +269,12 @@ define card {
   talent [Skirk, Skirk01], none {
     variable usagePerRound, 1;
     on playCard {
-      when :(:getVariable("usagePerRound") && :e.card.definition.id === VoidRift);
+      when :( :getVariable("usagePerRound") && :e.card.definition.id === VoidRift );
       :damage(DamageType.Cryo, 1, "opp active");
       :setVariable("usagePerRound", 0);
     }
     on disposeCard {
-      when :(:getVariable("usagePerRound") && :e.entity.definition.id === VoidRift);
+      when :( :getVariable("usagePerRound") && :e.entity.definition.id === VoidRift );
       :damage(DamageType.Cryo, 1, "opp active");
       :setVariable("usagePerRound", 0);
     }

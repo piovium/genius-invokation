@@ -30,15 +30,15 @@ define status {
   duration 2;
   conflictWith 112041;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
   }
   on increaseSkillDamage {
-    when :(:e.target.hasStatus(Riptide));
+    when :( :e.target.hasStatus(Riptide) );
     :e.increaseDamage(1);
   }
   on increaseSkillDamage {
-    when :(:e.target.hasStatus(Riptide));
+    when :( :e.target.hasStatus(Riptide) );
     usage perRound, 2 {
       visible false;
     };
@@ -154,7 +154,7 @@ define skill {
       :characterStatus(RangedStance);
     }
     on dispose {
-      when :(:e.entity.definition.id === MeleeStance);
+      when :( :e.entity.definition.id === MeleeStance );
       :characterStatus(RangedStance);
     }
   }
@@ -219,7 +219,7 @@ define card {
       :useSkill(FoulLegacyRagingTide);
     }
     on endPhase {
-      when :(:$(`opp active has status with definition id ${Riptide}`));
+      when :( :$(`opp active has status with definition id ${Riptide}`) );
       :damage(DamageType.Piercing, 1, "opp active");
     }
   }

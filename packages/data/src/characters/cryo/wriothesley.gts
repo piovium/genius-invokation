@@ -26,17 +26,17 @@ import { character, skill, status, combatStatus, card, DamageType, DiceType } fr
 define status {
   id 111111 as ChillingPenalty;
   on deductElementDiceSkill {
-    when :(:self.master.health >= 6 &&
+    when :( :self.master.health >= 6 &&
         :e.isSkillType("normal") &&
-        :e.canDeductCostOfType(DiceType.Cryo));
+        :e.canDeductCostOfType(DiceType.Cryo) );
     :e.deductCost(DiceType.Cryo, 1);
   }
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage 2;
     if (:self.master.health >= 6) {
       :damage(DamageType.Piercing, 1, "@master");
@@ -149,7 +149,7 @@ define skill {
       :addVariable("damageOrHealCount", 1);
     }
     on deductOmniDiceSkill {
-      when :(:e.isSkillType("burst"));
+      when :( :e.isSkillType("burst") );
       const cnt = :getVariable("damageOrHealCount");
       const deducted = Math.min(Math.floor(cnt / 2), 2);
       :e.deductOmniCost(deducted);
@@ -196,7 +196,7 @@ define card {
       :addVariable("count", 1);
     }
     on increaseSkillDamage {
-      when :(:getVariable("count") >= 3);
+      when :( :getVariable("count") >= 3 );
       :addVariable("count", -3);
       :e.increaseDamage(1);
     }

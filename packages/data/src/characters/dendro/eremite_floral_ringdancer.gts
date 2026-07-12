@@ -42,7 +42,7 @@ define combatStatus {
   id 127033 as SpiritserpentsBlessing;
   since "v5.1.0";
   on increaseTechniqueDamage {
-    when :(:e.via.definition.id === 1230311);
+    when :( :e.via.definition.id === 1230311 );
     usage 1 {
       append;
     };
@@ -133,7 +133,7 @@ define skill {
   id 27034 as SpiritOfOmensPower;
   skillType passive {
     on damaged {
-      when :(:self.health <= 7);
+      when :( :self.health <= 7 );
       usage perRound, 1 {
         name "usagePerRound1";
         visible false;
@@ -141,7 +141,7 @@ define skill {
       :gainEnergy(1, "@self");
     }
     on useSkill {
-      when :(:e.skill.definition.id === SpiritOfOmensAwakeningDendroSpiritserpent);
+      when :( :e.skill.definition.id === SpiritOfOmensAwakeningDendroSpiritserpent );
       usage 1 {
         name "createCardUsage";
       };
@@ -183,7 +183,7 @@ define card {
       :useSkill(SpiralingWhirl);
     }
     on switchActive {
-      when :(:e.switchInfo.to.hasTechnique()?.definition.id === SpiritOfOmenDendroSpiritserpent);
+      when :( :e.switchInfo.to.hasTechnique()?.definition.id === SpiritOfOmenDendroSpiritserpent );
       listenTo samePlayer;
       usage perRound, 1 {
         visible false;

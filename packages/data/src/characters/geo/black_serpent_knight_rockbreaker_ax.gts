@@ -157,7 +157,7 @@ define skill {
       :setVariable("shouldAttachCatalysisOfStone", 1);
     }
     on useSkill {
-      when :(:getVariable("shouldAttachCatalysisOfStone"));
+      when :( :getVariable("shouldAttachCatalysisOfStone") );
       listenTo samePlayer;
       :characterStatus(MightOfStone, "@self");
       :setVariable("shouldAttachCatalysisOfStone", 0);

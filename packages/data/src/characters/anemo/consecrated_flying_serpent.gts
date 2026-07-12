@@ -155,7 +155,7 @@ define card {
       :createHandCard(BonecrunchersEnergyBlock);
     }
     on playCard {
-      when :(:e.card.definition.id === BonecrunchersEnergyBlock);
+      when :( :e.card.definition.id === BonecrunchersEnergyBlock );
       :combatStatus(DeathlyCycloneInEffect);
     }
   }

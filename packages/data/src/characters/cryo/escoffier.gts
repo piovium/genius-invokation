@@ -164,7 +164,7 @@ define card {
   undiscoverable;
   support place {
     on reaction {
-      when :(:e.relatedTo(DamageType.Cryo));
+      when :( :e.relatedTo(DamageType.Cryo) );
       listenTo all;
       usage 2;
       const cards = [GildedHall, AutumnFrost, WaveKissedSands, VerdantGift];

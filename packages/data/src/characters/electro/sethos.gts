@@ -27,19 +27,19 @@ define status {
   since "v5.6.0";
   duration 2;
   on deductVoidDiceSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :e.deductVoidCost(1);
   }
   on modifySkillDamageType {
-    when :(:e.viaSkillType("normal") && :e.type === DamageType.Physical);
+    when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
   }
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :damage(DamageType.Piercing, 1, "opp character order by health limit 1");
   }
 }
@@ -55,7 +55,7 @@ define status {
   id 114132 as ThunderConvergence;
   since "v5.6.0";
   on useSkill {
-    when :(:hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Electro)));
+    when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Electro)) );
     listenTo samePlayer;
     usage 1;
     :gainEnergy(1, "@master");
@@ -120,7 +120,7 @@ define skill {
   id 14134 as BlackKitesEnigma;
   skillType passive {
     on useSkill {
-      when :(:e.isSkillType("normal"));
+      when :( :e.isSkillType("normal") );
       const energy = :self.energy;
       if (energy) {
         :self.loseEnergy(energy);

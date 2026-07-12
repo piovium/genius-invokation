@@ -65,11 +65,11 @@ define status {
   id 113162 as SuanniManChai;
   since "v6.2.0";
   on deductOmniDiceSkill {
-    when :(:e.isSkillType("elemental"));
+    when :( :e.isSkillType("elemental") );
     :e.deductOmniCost(1);
   }
   on increaseSkillDamage {
-    when :(:e.viaSkillType("elemental"));
+    when :( :e.viaSkillType("elemental") );
     usage 2 {
       autoDecrease false;
     };
@@ -173,11 +173,11 @@ define card {
       :useSkill(SuannisGildedDance);
     }
     on increaseSkillDamage {
-      when :(:e.viaPlungingAttack());
+      when :( :e.viaPlungingAttack() );
       :e.increaseDamage(1);
     }
     on useSkill {
-      when :(:e.isSkillType("elemental"));
+      when :( :e.isSkillType("elemental") );
       usage perRound, 1 {
         visible false;
       };

@@ -98,7 +98,7 @@ define skill {
   id 11142 as DawnfrostDarkstar;
   skillType elemental;
   cost DiceType.Cryo, 3;
-  filter :(!:self.hasStatus(NightsoulsBlessing));
+  filter :( !:self.hasStatus(NightsoulsBlessing) );
   :damage(DamageType.Cryo, 1);
   :gainNightsoul("@self", 1);
   :combatStatus(OpalShield);
@@ -134,12 +134,12 @@ define skill {
   skillType passive {
     variable gainNightsoulUsagePerRound, 1;
     on selectCard {
-      when :(:getVariable("gainNightsoulUsagePerRound") > 0 && :self.hasStatus(NightsoulsBlessing));
+      when :( :getVariable("gainNightsoulUsagePerRound") > 0 && :self.hasStatus(NightsoulsBlessing) );
       :gainNightsoul("@self");
       :addVariable("gainNightsoulUsagePerRound", -1);
     }
     on dealDamage {
-      when :(:e.getReaction() && :getVariable("gainNightsoulUsagePerRound") > 0 && :self.hasStatus(NightsoulsBlessing));
+      when :( :e.getReaction() && :getVariable("gainNightsoulUsagePerRound") > 0 && :self.hasStatus(NightsoulsBlessing) );
       listenTo samePlayer;
       :gainNightsoul("@self");
       :addVariable("gainNightsoulUsagePerRound", -1);
@@ -177,11 +177,11 @@ define combatStatus {
   id 211142 as MamaloacosFrigidRainInEffect;
   since "v5.7.0";
   on enter {
-    when :(:$(`my character with definition id ${Citlali}`)?.hasNightsoulsBlessing());
+    when :( :$(`my character with definition id ${Citlali}`)?.hasNightsoulsBlessing() );
     :gainNightsoul(`my character with definition id ${Citlali}`);
   }
   on increaseDamage {
-    when :(:e.type === DamageType.Hydro || :e.type === DamageType.Pyro);
+    when :( :e.type === DamageType.Hydro || :e.type === DamageType.Pyro );
     usage 2;
     :e.increaseDamage(1);
   }
@@ -200,7 +200,7 @@ define card {
   cost DiceType.Cryo, 2;
   talent Citlali, none {
     on dealDamage {
-      when :((:e.getReaction() === Reaction.Frozen || :e.getReaction() === Reaction.Melt));
+      when :( (:e.getReaction() === Reaction.Frozen || :e.getReaction() === Reaction.Melt) );
       listenTo all;
       usage perRound, 1 {
         visible false;

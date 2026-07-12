@@ -30,7 +30,7 @@ define summon {
     :damage(DamageType.Cryo, 1);
   }
   on useSkill {
-    when :(:e.skill.definition.id === PseudoTenguSweeper);
+    when :( :e.skill.definition.id === PseudoTenguSweeper );
     :damage(DamageType.Cryo, 1);
   }
 }
@@ -50,7 +50,7 @@ define summon {
     :damage(DamageType.Anemo, 1);
   }
   on useSkill {
-    when :(:e.skill.definition.id === PseudoTenguSweeper);
+    when :( :e.skill.definition.id === PseudoTenguSweeper );
     :damage(DamageType.Anemo, 1);
   }
 }

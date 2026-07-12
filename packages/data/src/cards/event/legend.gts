@@ -45,7 +45,7 @@ define card {
   id 330002 as CovenantOfRock;
   since "v3.8.0";
   legend;
-  filter :(:player.dice.length === 0);
+  filter :( :player.dice.length === 0 );
   :generateDice("randomElement", 2);
 }
 
@@ -60,7 +60,7 @@ define card {
   id 330003 as JoyousCelebration;
   since "v4.0.0";
   legend;
-  filter :(([DiceType.Cryo, DiceType.Hydro, DiceType.Pyro, DiceType.Electro, DiceType.Dendro] as (DiceType | undefined)[]).includes(:$("my active")?.element()));
+  filter :( ([DiceType.Cryo, DiceType.Hydro, DiceType.Pyro, DiceType.Electro, DiceType.Dendro] as (DiceType | undefined)[]).includes(:$("my active")?.element()) );
   const element = :$("my active")!.element() as 1 | 2 | 3 | 4 | 7;
   // 先挂后台再挂前台（避免前台被超载走导致结算错误）
   :apply(element, "my standby character with aura != 0");
@@ -141,7 +141,7 @@ define combatStatus {
   id 300003 as PassingOfJudgmentInEffect;
   oneDuration;
   on playCard {
-    when :(:e.card.definition.type === "eventCard");
+    when :( :e.card.definition.type === "eventCard" );
     usage 1 {
       autoDispose false;
       visible false;
@@ -153,7 +153,7 @@ define combatStatus {
     }
   }
   on disposeCard {
-    when :(:e.from.type === "hands");
+    when :( :e.from.type === "hands" );
     const maxCostHands = :maxCostHands(2);
     :undrawCards(maxCostHands, "bottom");
   }

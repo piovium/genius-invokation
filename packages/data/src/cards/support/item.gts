@@ -29,7 +29,7 @@ define card {
   support item {
     variable progress, 0;
     on useSkill {
-      when :(:hasPhaseDamage("all", (e) => e.type !== DamageType.Piercing && e.type !== DamageType.Physical));
+      when :( :hasPhaseDamage("all", (e) => e.type !== DamageType.Piercing && e.type !== DamageType.Physical) );
       listenTo all;
       :addVariable("progress", 1);
       if (:getVariable("progress") >= 3) {
@@ -57,7 +57,7 @@ define card {
       :drawCards(1, { withTag: "food" });
     }
     on playCard {
-      when :(:e.hasCardTag("food"));
+      when :( :e.hasCardTag("food") );
       usage perRound, 1 {
         visible false;
       };
@@ -87,7 +87,7 @@ define combatStatus {
     :setVariable("triggered", 1);
   }
   on switchActive {
-    when :(:getVariable("triggered"));
+    when :( :getVariable("triggered") );
     :dispose();
   }
 }
@@ -147,7 +147,7 @@ define card {
   since "v4.3.0";
   support item {
     on deductOmniDiceCard {
-      when :(:e.currentDiceCostSize() >= 2 && :e.action.skill.caller.definition.type === "support");
+      when :( :e.currentDiceCostSize() >= 2 && :e.action.skill.caller.definition.type === "support" );
       usage perRound, 1 {
         visible false;
       };
@@ -221,11 +221,11 @@ define card {
     };
     replaceDescription "[GCG_TOKEN_COUNTER]", ((st, self) => self.variables.playedCard);
     on playCard {
-      when :(:e.card.id !== :self.id);
+      when :( :e.card.id !== :self.id );
       :addVariable("playedCard", 1);
     }
     on playCard {
-      when :(:getVariable("playedCard") === 3);
+      when :( :getVariable("playedCard") === 3 );
       usage perRound, 1 {
         visible false;
       };
@@ -268,7 +268,7 @@ define card {
       :setVariable("cardPlayed", 1);
     }
     on deductOmniDiceSkill {
-      when :(!:getVariable("cardPlayed") && :getVariable("memory") > 0);
+      when :( !:getVariable("cardPlayed") && :getVariable("memory") > 0 );
       :e.deductOmniCost(1);
       :addVariable("memory", -1);
     }

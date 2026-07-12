@@ -167,7 +167,7 @@ define card {
       :useSkill(YoohooArtFuuinDash);
     }
     on dealDamage {
-      when :(:self.master.isActive() && :e.isSwirl());
+      when :( :self.master.isActive() && :e.isSwirl() );
       listenTo samePlayer;
       usage perRound, 1 {
         visible false;

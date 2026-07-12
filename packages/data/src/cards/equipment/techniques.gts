@@ -56,7 +56,7 @@ define card {
   cost DiceType.Aligned, 1;
   technique {
     on deductOmniDiceTechnique {
-      when :(:e.action.skill.definition.id === 3130021 && :player.hands.length <= 2);
+      when :( :e.action.skill.definition.id === 3130021 && :player.hands.length <= 2 );
       :e.deductOmniCost(1);
     }
     skill {
@@ -204,8 +204,8 @@ define card {
       :characterStatus(Target, $.opp.active);
     }
     on switchActive {
-      when :(!:e.switchInfo.to.isMine() &&
-          :e.switchInfo.to.hasStatus(Target));
+      when :( !:e.switchInfo.to.isMine() &&
+          :e.switchInfo.to.hasStatus(Target) );
       listenTo all;
       :combatStatus(EfficientSwitch);
       :combatStatus(AgileSwitch);
@@ -261,7 +261,7 @@ define card {
       :characterStatus(WaveriderShield, "@master");
     }
     on switchActive {
-      when :(:e.switchInfo.from?.id === :self.master.id);
+      when :( :e.switchInfo.from?.id === :self.master.id );
       :addVariable("usage", 1);
     }
   }
@@ -349,7 +349,7 @@ define combatStatus {
     :callSnippet.checkCount();
   }
   on playCard {
-    when :(:e.card.definition.tags.includes("technique"));
+    when :( :e.card.definition.tags.includes("technique") );
     :addVariable("techniquesPlayedCount", 1);
     :callSnippet.checkCount();
   }
@@ -375,7 +375,7 @@ define status {
 define combatStatus {
   id 301308 as SaurianMoralSupport;
   once deductOmniDiceCard {
-    when :(:e.hasCardTag("technique"));
+    when :( :e.hasCardTag("technique") );
     :e.deductOmniCost(2);
   }
 }

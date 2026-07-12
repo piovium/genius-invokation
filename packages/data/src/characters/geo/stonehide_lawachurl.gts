@@ -26,7 +26,7 @@ import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/co
 define status {
   id 126012 as StoneForce;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Geo);
   }
   on increaseSkillDamage {
@@ -36,7 +36,7 @@ define status {
     :e.increaseDamage(1);
   }
   on dispose {
-    when :(:e.entity.definition.id === Stonehide);
+    when :( :e.entity.definition.id === Stonehide );
     :dispose();
   }
 }
@@ -151,7 +151,7 @@ define card {
       :useSkill(UpaShato);
     }
     on defeated {
-      when :(:e.source.id === :self.master.id);
+      when :( :e.source.id === :self.master.id );
       listenTo all;
       :characterStatus(Stonehide, "@master");
       :characterStatus(StoneForce, "@master");

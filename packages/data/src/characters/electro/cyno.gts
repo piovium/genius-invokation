@@ -36,11 +36,11 @@ define status {
     }
   }
   on modifySkillDamageType {
-    when :(:getVariable("reliance") >= 2 && :e.type === DamageType.Physical);
+    when :( :getVariable("reliance") >= 2 && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
   }
   on increaseSkillDamage {
-    when :(:getVariable("reliance") >= 4);
+    when :( :getVariable("reliance") >= 4 );
     :e.increaseDamage(2);
   }
 }

@@ -28,7 +28,7 @@ define combatStatus {
     append;
   };
   on increaseTechniqueDamage {
-    when :(:e.via.definition.id === 1230311);
+    when :( :e.via.definition.id === 1230311 );
     :e.increaseDamage(:getVariable("blessing"));
     :dispose();
   }
@@ -53,7 +53,7 @@ define card {
     tags barrier;
     variable barrierUsage, 0;
     on decreaseDamaged {
-      when :(:self.master.energy > 0);
+      when :( :self.master.energy > 0 );
       usage perRound, 2 {
         visible false;
       };
@@ -123,7 +123,7 @@ define skill {
   id 23034 as SpiritOfOmensPower;
   skillType passive {
     on damaged {
-      when :(:self.health <= 7 && :self.energy < :self.maxEnergy);
+      when :( :self.health <= 7 && :self.energy < :self.maxEnergy );
       usage perRound, 1 {
         name "usagePerRound1";
         visible false;
@@ -131,7 +131,7 @@ define skill {
       :gainEnergy(1, "@self");
     }
     on useSkill {
-      when :(:e.skill.definition.id === SpiritOfOmensAwakeningPyroScorpion);
+      when :( :e.skill.definition.id === SpiritOfOmensAwakeningPyroScorpion );
       usage 1 {
         name "createCardUsage";
       };
@@ -174,7 +174,7 @@ define card {
       :useSkill(BlazingStrike);
     }
     on defeated {
-      when :(!:e.target.isMine() && :e.via.definition.id === 1230311);
+      when :( !:e.target.isMine() && :e.via.definition.id === 1230311 );
       listenTo all;
       :createHandCard(SpiritOfOmenPyroScorpion);
     }

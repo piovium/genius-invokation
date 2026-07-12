@@ -32,7 +32,7 @@ define summon {
     :dispose();
   }
   on decreaseDamaged {
-    when :(:e.target.isActive());
+    when :( :e.target.isActive() );
     usage 1 {
       autoDispose false;
     };
@@ -107,7 +107,7 @@ define skill {
   id 12034 as IllusoryTorrent;
   skillType passive {
     on beforeFastSwitch {
-      when :(:self.isActive());
+      when :( :self.isActive() );
       usage perRound, 1 {
         name "usagePerRound1";
         visible false;
@@ -148,8 +148,8 @@ define card {
   cost DiceType.Energy, 3;
   talent Mona {
     on increaseDamage {
-      when :(:self.master.isActive() &&
-          :e.isReactionRelatedTo(DamageType.Hydro));
+      when :( :self.master.isActive() &&
+          :e.isReactionRelatedTo(DamageType.Hydro) );
       listenTo samePlayer;
       :e.increaseDamage(2);
     }

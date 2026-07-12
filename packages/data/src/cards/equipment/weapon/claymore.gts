@@ -50,7 +50,7 @@ define card {
       :e.increaseDamage(1);
     }
     on useSkill {
-      when :(:e.isSkillType("elemental"));
+      when :( :e.isSkillType("elemental") );
       usage perRound, 1 {
         visible false;
       };
@@ -99,7 +99,7 @@ define card {
       :e.increaseDamage(1);
     }
     on increaseSkillDamage {
-      when :(:e.viaSkillType("normal"));
+      when :( :e.viaSkillType("normal") );
       usage perRound, 1 {
         visible false;
       };
@@ -205,7 +205,7 @@ define status {
   id 301109 as ForestRegaliaInEffect;
   oneDuration;
   once useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :generateDice(:self.master.element(), 2);
   }
 }
@@ -297,7 +297,7 @@ define card {
     variable barrierUsage, 0;
     variable stoic, 0;
     on decreaseDamaged {
-      when :(:player.hands.length > 0);
+      when :( :player.hands.length > 0 );
       usage perRound, 1 {
         visible false;
       };
@@ -306,7 +306,7 @@ define card {
       :addVariable("stoic", 1);
     }
     on increaseSkillDamage {
-      when :(:getVariable("stoic") > 0);
+      when :( :getVariable("stoic") > 0 );
       :e.increaseDamage(1);
       :drawCards(:getVariable("stoic"));
       :setVariable("stoic", 0);
@@ -329,11 +329,11 @@ define card {
   weapon claymore {
     variable thought, 0;
     on increaseSkillDamage {
-      when :(:e.viaSkillType("burst"));
+      when :( :e.viaSkillType("burst") );
       :e.increaseDamage(2);
     }
     on increaseSkillDamage {
-      when :(:e.getReaction());
+      when :( :e.getReaction() );
       :e.increaseDamage(1);
     }
     on dealReaction {

@@ -36,7 +36,7 @@ define status {
     :callSnippet.addVitality();
   }
   on endPhase {
-    when :(:getVariable("vitality") >= 3);
+    when :( :getVariable("vitality") >= 3 );
     :setVariable("vitality", 0);
     const ch = :self.master;
     ch.loseEnergy(ch.energy);

@@ -28,20 +28,20 @@ define summon {
   tags barrier;
   hint DamageType.Pyro, "2";
   on decreaseDamaged {
-    when :(:e.target.isActive());
+    when :( :e.target.isActive() );
     usage 1 {
       autoDispose false;
     };
     :e.decreaseDamage(2);
   }
   on endPhase {
-    when :(:getVariable("usage") <= 0);
+    when :( :getVariable("usage") <= 0 );
     :damage(DamageType.Pyro, 2);
     :dispose();
   }
   on useSkill {
-    when :(:$(`@event.skillCaller and character with definition id ${Amber} and has equipment with definition id ${BunnyTriggered}`) &&
-        :e.isSkillType("normal"));
+    when :( :$(`@event.skillCaller and character with definition id ${Amber} and has equipment with definition id ${BunnyTriggered}`) &&
+        :e.isSkillType("normal") );
     :damage(DamageType.Pyro, 4);
     :dispose();
   }

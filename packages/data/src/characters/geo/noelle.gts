@@ -27,18 +27,18 @@ define status {
   id 116022 as SweepingTimeStatus;
   duration 2;
   on deductElementDiceSkill {
-    when :(:e.isSkillType("normal") && :e.canDeductCostOfType(DiceType.Geo));
+    when :( :e.isSkillType("normal") && :e.canDeductCostOfType(DiceType.Geo) );
     usage perRound, 1 {
       visible false;
     };
     :e.deductCost(DiceType.Geo, 1);
   }
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Geo);
   }
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(2);
   }
 }
@@ -54,7 +54,7 @@ define combatStatus {
   id 116021 as FullPlate;
   shield 2;
   on multiplyDamaged {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.divideDamage(2);
   }
 }
@@ -135,7 +135,7 @@ define card {
       :useSkill(Breastplate);
     }
     on useSkill {
-      when :(:e.isSkillType("normal") && :$(`my combat status with definition id ${FullPlate}`));
+      when :( :e.isSkillType("normal") && :$(`my combat status with definition id ${FullPlate}`) );
       usage perRound, 1 {
         visible false;
       };

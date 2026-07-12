@@ -27,15 +27,15 @@ define status {
   id 113053 as NiwabiEnshou01;
   conflictWith 113051;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
   }
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage 3;
     :damage(DamageType.Pyro, 1);
   }
@@ -52,11 +52,11 @@ define status {
   id 113051 as NiwabiEnshou;
   conflictWith 113053;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
   }
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     usage 3;
     :e.increaseDamage(1);
   }
@@ -73,7 +73,7 @@ define combatStatus {
   id 113052 as AurousBlaze;
   duration 2;
   on useSkill {
-    when :(:e.skill.caller.definition.id !== Yoimiya);
+    when :( :e.skill.caller.definition.id !== Yoimiya );
     :damage(DamageType.Pyro, 1);
   }
 }

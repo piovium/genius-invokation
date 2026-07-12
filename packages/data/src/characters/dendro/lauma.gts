@@ -48,7 +48,7 @@ define combatStatus {
   id 117112 as PaleHymn;
   since "v6.6.0";
   on increaseDamage {
-    when :(:e.getReaction() === Reaction.LunarBloom);
+    when :( :e.getReaction() === Reaction.LunarBloom );
     usage 3;
     :e.increaseDamage(1);
   }
@@ -124,7 +124,7 @@ define skill {
   id 17114 as MoonsignBenedictionNaturesChorus;
   skillType passive {
     on reaction {
-      when :(:e.type === Reaction.LunarBloom && !:e.target.isMine());
+      when :( :e.type === Reaction.LunarBloom && !:e.target.isMine() );
       listenTo all;
       const target = :random(:queryAll($.macros.myPileNotFree));
       if (target) {
@@ -182,7 +182,7 @@ define card {
       :useSkill(RunoDawnlessRestOfKarsikko);
     }
     on dealReaction {
-      when :(([Reaction.Bloom, Reaction.LunarBloom] as Reaction[]).includes(:e.type));
+      when :( ([Reaction.Bloom, Reaction.LunarBloom] as Reaction[]).includes(:e.type) );
       listenTo samePlayer;
       usage perRound, 1 {
         visible false;

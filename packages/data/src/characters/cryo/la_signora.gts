@@ -53,7 +53,7 @@ define status {
 define status {
   id 121021 as IcesealedCrimsonWitchOfEmbers;
   on actionPhase {
-    when :(:self.master.health <= 4);
+    when :( :self.master.health <= 4 );
     :dispose();
   }
   on beforeDefeated {
@@ -171,7 +171,7 @@ define skill {
   id 21025 as InfernosAwakening;
   skillType passive {
     on dispose {
-      when :(:e.entity.definition.id === IcesealedCrimsonWitchOfEmbers);
+      when :( :e.entity.definition.id === IcesealedCrimsonWitchOfEmbers );
       :transformDefinition("@master", CrimsonWitchOfEmbers);
     }
   }
@@ -213,7 +213,7 @@ define card {
       :generateDice(:self.master.element(), 3);
     }
     on decreaseDamaged {
-      when :(:e.value >= 3);
+      when :( :e.value >= 3 );
       usage perRound, 1 {
         visible false;
       };

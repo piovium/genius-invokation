@@ -105,7 +105,7 @@ define card {
       :useSkill(Frostgnaw);
     }
     on useSkill {
-      when :(:e.skill.definition.id === Frostgnaw);
+      when :( :e.skill.definition.id === Frostgnaw );
       usage perRound, 1 {
         visible false;
       };

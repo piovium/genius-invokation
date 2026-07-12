@@ -32,7 +32,7 @@ define summon {
     :damage(DamageType.Electro, 1);
   }
   on useSkill {
-    when :(:e.skill.caller.definition.id === Fischl && :e.isSkillType("normal"));
+    when :( :e.skill.caller.definition.id === Fischl && :e.isSkillType("normal") );
     :damage(DamageType.Electro, 2);
     :consumeUsage();
   }

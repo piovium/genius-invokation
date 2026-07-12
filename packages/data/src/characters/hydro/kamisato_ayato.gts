@@ -31,7 +31,7 @@ define summon {
     :damage(DamageType.Hydro, 2);
   }
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
 }
@@ -46,11 +46,11 @@ define summon {
 define status {
   id 112061 as TakimeguriKanka;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
   }
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     usage 3;
     :e.increaseDamage(1);
     const talent = :self.master.hasEquipment(KyoukaFuushi);
@@ -128,7 +128,7 @@ define status {
   id 212062 as KyoukaFuushiInEffect;
   oneDuration;
   once deductVoidDiceSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :e.deductVoidCost(2);
     const talent = :self.master.hasEquipment(KyoukaFuushi);
     if (talent) {
@@ -157,7 +157,7 @@ define card {
       :useSkill(KamisatoArtKyouka);
     }
     on useSkill {
-      when :(:e.isSkillType("normal"));
+      when :( :e.isSkillType("normal") );
       if (:getVariable("skillIsUsedWithKanka") && !:getVariable("deductEffectHasBeenTriggeredFromThisCard")) {
         :characterStatus(KyoukaFuushiInEffect, "@master");
       }

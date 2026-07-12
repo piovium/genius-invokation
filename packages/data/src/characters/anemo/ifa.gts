@@ -142,7 +142,7 @@ define skill {
   id 15152 as AirborneDiseasePrevention;
   skillType elemental;
   cost DiceType.Anemo, 2;
-  filter :(!:self.hasStatus(NightsoulsBlessing));
+  filter :( !:self.hasStatus(NightsoulsBlessing) );
   :damage(DamageType.Anemo, 1);
   :gainNightsoul("@self", 2);
   :equip(Cacucu, "@self");
@@ -215,8 +215,8 @@ define card {
       :heal(1, "my characters order by health - maxHealth limit 1");
     }
     on dealReaction {
-      when :(:e.relatedTo(DamageType.Anemo) || 
-          ([Reaction.ElectroCharged, Reaction.LunarElectroCharged] as Reaction[]).includes(:e.type));
+      when :( :e.relatedTo(DamageType.Anemo) || 
+          ([Reaction.ElectroCharged, Reaction.LunarElectroCharged] as Reaction[]).includes(:e.type) );
       listenTo samePlayer;
       usage perRound, 2 {
         visible false;

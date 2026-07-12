@@ -91,7 +91,7 @@ define skill {
   id 12164 as ModularEfficiencyProtocol;
   skillType passive {
     on enterRelative {
-      when :(:e.entity.definition.id === Empowerment);
+      when :( :e.entity.definition.id === Empowerment );
       listenTo samePlayer;
       usage perRound, 1 {
         name "usagePerRound1";
@@ -141,12 +141,12 @@ define card {
       :useSkill(PrecisionHydronicCooler);
     }
     on increaseDamage {
-      when :(([
+      when :( ([
             Reaction.ElectroCharged,
             Reaction.LunarElectroCharged,
             Reaction.Bloom,
             Reaction.LunarBloom
-          ] as (Reaction | null)[]).includes(:e.getReaction()));
+          ] as (Reaction | null)[]).includes(:e.getReaction()) );
       listenTo samePlayer;
       usage perRound, 1 {
         visible false;

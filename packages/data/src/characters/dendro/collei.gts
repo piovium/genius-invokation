@@ -42,7 +42,7 @@ define combatStatus {
   id 117012 as Sprout;
   duration 1;
   on useSkill {
-    when :(:hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Dendro)));
+    when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Dendro)) );
     usage perRound, 1 {
       visible false;
     };

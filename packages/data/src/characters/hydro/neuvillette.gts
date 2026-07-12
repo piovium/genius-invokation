@@ -134,8 +134,8 @@ define skill {
   id 12105 as SourcewaterDropletSkill;
   skillType passive {
     on useSkill {
-      when :(:e.isSkillType("normal") &&
-          :$(`my combat status with definition id ${SourcewaterDroplet}`));
+      when :( :e.isSkillType("normal") &&
+          :$(`my combat status with definition id ${SourcewaterDroplet}`) );
       const droplet = :$(`my combat status with definition id ${SourcewaterDroplet}`);
       droplet?.consumeUsage();
       :heal(2, "@self");
@@ -180,7 +180,7 @@ define card {
       :useSkill(AsWaterSeeksEquilibrium);
     }
     on useSkill {
-      when :(:hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Hydro)));
+      when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Hydro)) );
       listenTo samePlayer;
       :characterStatus(PastDraconicGlories, "@master");
     }

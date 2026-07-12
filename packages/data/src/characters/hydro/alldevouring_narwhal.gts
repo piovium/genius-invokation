@@ -52,12 +52,12 @@ define summon {
     :consumeUsage();
   }
   on decreaseDamaged {
-    when :(:getVariable("barrierUsage") && :e.target.isActive());
+    when :( :getVariable("barrierUsage") && :e.target.isActive() );
     :e.decreaseDamage(1);
     :setVariable("barrierUsage", 0);
   }
   on damaged {
-    when :(!:getVariable("barrierUsage"));
+    when :( !:getVariable("barrierUsage") );
     :consumeUsage(2);
     :setVariable("barrierUsage", 1);
   }
@@ -126,7 +126,7 @@ define combatStatus {
   };
   replaceDescription "[GCG_TOKEN_SHIELD]", ((_, self) => self.variables.extraMaxHealth);
   on disposeOrTuneCard {
-    when :(:e.from.type === "hands" || :e.isTuning());
+    when :( :e.from.type === "hands" || :e.isTuning() );
     const cost = :e.diceCost();
     :addVariable("cardCount", 1);
     switch (:getVariable("cardCount")) {

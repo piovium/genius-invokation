@@ -105,11 +105,11 @@ define skill {
   id 13144 as TheBalemoonAloneMayKnowPassive01;
   skillType passive {
     on cancelHealed {
-      when :(:e.via.definition.id !== BalemoonRising);
+      when :( :e.via.definition.id !== BalemoonRising );
       :e.cancel();
     }
     on modifySkillDamageType {
-      when :(:e.type === DamageType.Physical && :self.hasStatus(BondOfLife));
+      when :( :e.type === DamageType.Physical && :self.hasStatus(BondOfLife) );
       :e.changeDamageType(DamageType.Pyro);
     }
   }
@@ -140,7 +140,7 @@ define skill {
   id 13147 as TheBalemoonAloneMayKnowPassive03;
   skillType passive {
     on decreaseDamaged {
-      when :(:self.hasEquipment(AllReprisalsAndArrearsMineToBear));
+      when :( :self.hasEquipment(AllReprisalsAndArrearsMineToBear) );
       const bond = :self.hasStatus(BondOfLife);
       if (bond) {
         :e.decreaseDamage(1)

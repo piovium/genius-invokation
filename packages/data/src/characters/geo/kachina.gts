@@ -134,7 +134,7 @@ define skill {
   id 16102 as GoGoTurboTwirly;
   skillType elemental;
   cost DiceType.Geo, 2;
-  filter :(!:self.hasStatus(NightsoulsBlessing));
+  filter :( !:self.hasStatus(NightsoulsBlessing) );
   :equip(TurboTwirly, "@self");
   :gainNightsoul("@self", 2);
 }

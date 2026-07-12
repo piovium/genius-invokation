@@ -49,7 +49,7 @@ define status {
   id 124062 as ElectricRebirthHoned;
   since "v5.1.0";
   on increaseSkillDamage {
-    when :(:e.type === DamageType.Electro);
+    when :( :e.type === DamageType.Electro );
     :e.increaseDamage(1);
   }
 }
@@ -176,7 +176,7 @@ define character {
 define combatStatus {
   id 124065 as ChainLightningCascadeCombatStatus;
   on defeated {
-    when :(:e.target.definition.id === AbyssLectorVioletLightning);
+    when :( :e.target.definition.id === AbyssLectorVioletLightning );
     :query($.opp.active)?.loseEnergy(1);
     :dispose();
   }

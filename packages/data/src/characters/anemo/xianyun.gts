@@ -27,11 +27,11 @@ define status {
   since "v5.0.0";
   tags normalAsPlunging;
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage 1;
     :damage(DamageType.Anemo, 1);
   }
@@ -48,7 +48,7 @@ define status {
   id 115104 as DriftcloudWave;
   since "v5.0.0";
   on switchActive {
-    when :(:self.master.id === :e.switchInfo.to.id);
+    when :( :self.master.id === :e.switchInfo.to.id );
     usage 1 {
       append 2;
     };
@@ -186,7 +186,7 @@ define card {
       :addVariable("feather", 1);
     }
     on increaseSkillDamage {
-      when :(:e.via.definition.id === WordOfWindAndFlower);
+      when :( :e.via.definition.id === WordOfWindAndFlower );
       const feather = :getVariable("feather");
       :e.increaseDamage(feather);
       :setVariable("feather", 0);

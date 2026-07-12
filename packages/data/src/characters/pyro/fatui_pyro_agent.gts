@@ -37,7 +37,7 @@ define status {
     :consumeUsage();
   }
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
   }
 }

@@ -33,7 +33,7 @@ define summon {
     :damage(DamageType.Electro, 1);
   }
   on decreaseDamaged {
-    when :(:e.target.isActive());
+    when :( :e.target.isActive() );
     usage perRound, 1 {
       visible false;
     };
@@ -127,15 +127,15 @@ define skill {
   id 14164 as NightshadeSynesthesia;
   skillType passive {
     on dealReaction {
-      when :(([Reaction.ElectroCharged, Reaction.LunarElectroCharged] as Reaction[]).includes(:e.type) && 
-          (:self.hasNightsoulsBlessing()?.variables.nightsoul ?? 0) >= 2);
+      when :( ([Reaction.ElectroCharged, Reaction.LunarElectroCharged] as Reaction[]).includes(:e.type) && 
+          (:self.hasNightsoulsBlessing()?.variables.nightsoul ?? 0) >= 2 );
       listenTo samePlayer;
       :consumeNightsoul("@self", 2);
       :damage(DamageType.Electro, 1, "opp characters with health > 0 limit 1");
     }
     on dealDamage {
-      when :(([DamageType.Electro, DamageType.Hydro] as DamageType[]).includes(:e.type) &&
-          Math.floor(:e.via.definition.id) !== Math.floor(:skillInfo.definition.id));
+      when :( ([DamageType.Electro, DamageType.Hydro] as DamageType[]).includes(:e.type) &&
+          Math.floor(:e.via.definition.id) !== Math.floor(:skillInfo.definition.id) );
       listenTo samePlayer;
       usage perRound, 1 {
         name "usagePerRound1";
@@ -189,7 +189,7 @@ define card {
   cost DiceType.Electro, 1;
   talent Ororon, none {
     on modifyReaction {
-      when :(:e.type === Reaction.ElectroCharged && :e.reactionInfo.fromDamage && :e.caller.isMine());
+      when :( :e.type === Reaction.ElectroCharged && :e.reactionInfo.fromDamage && :e.caller.isMine() );
       listenTo all;
       usage perRound, 1 {
         visible false;

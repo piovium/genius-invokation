@@ -29,11 +29,11 @@ define status {
   conflictWith crossCharacter, 122021;
   duration 3;
   on increaseDamaged {
-    when :(:e.type === DamageType.Hydro);
+    when :( :e.type === DamageType.Hydro );
     :e.increaseDamage(1);
   }
   on addDice {
-    when :(:e.action.type === "switchActive" && :self.master.id === :e.action.from?.id);
+    when :( :e.action.type === "switchActive" && :self.master.id === :e.action.from?.id );
     :e.addCost(DiceType.Void, 1);
   }
 }
@@ -51,7 +51,7 @@ define status {
   conflictWith crossCharacter, 122022;
   duration 2;
   on addDice {
-    when :(:e.action.type === "switchActive" && :self.master.id === :e.action.from?.id);
+    when :( :e.action.type === "switchActive" && :self.master.id === :e.action.from?.id );
     :e.addCost(DiceType.Void, 1);
   }
 }

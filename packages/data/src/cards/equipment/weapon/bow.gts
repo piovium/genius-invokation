@@ -50,7 +50,7 @@ define card {
       :e.increaseDamage(1);
     }
     on useSkill {
-      when :(:e.isSkillType("elemental"));
+      when :( :e.isSkillType("elemental") );
       usage perRound, 1 {
         visible false;
       };
@@ -76,7 +76,7 @@ define card {
       :e.increaseDamage(1);
     }
     on increaseSkillDamage {
-      when :(:e.viaSkillType("normal"));
+      when :( :e.viaSkillType("normal") );
       usage perRound, 1 {
         visible false;
       };
@@ -102,7 +102,7 @@ define card {
       :e.increaseDamage(1);
     }
     on increaseSkillDamage {
-      when :(:e.via.definition.initiativeSkillConfig!.computed$costSize >= 5);
+      when :( :e.via.definition.initiativeSkillConfig!.computed$costSize >= 5 );
       usage perRound, 1 {
         visible false;
       };
@@ -143,7 +143,7 @@ define card {
       :e.increaseDamage(1);
     }
     on useSkill {
-      when :(:e.isSkillType("burst"));
+      when :( :e.isSkillType("burst") );
       :combatStatus(MillennialMovementFarewellSong);
     }
   }
@@ -160,7 +160,7 @@ define status {
   id 301103 as KingsSquireStatus;
   oneDuration;
   once deductOmniDice {
-    when :(:e.isSkillOrTalentOf(:self.master, "elemental"));
+    when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
     :e.deductOmniCost(2);
   }
 }
@@ -208,7 +208,7 @@ define card {
       :setVariable("additivePerRound", 0);
     }
     on playCard {
-      when :(!:isInInitialPile(:e.card));
+      when :( !:isInInitialPile(:e.card) );
       if (:getVariable("additivePerRound") < 2) {
         :addVariableWithMax("fishing", 1, 2);
         :addVariable("additivePerRound", 1);
@@ -265,7 +265,7 @@ define card {
   cost DiceType.Aligned, 2;
   weapon bow {
     on increaseSkillDamage {
-      when :(:self.master.health >= 11);
+      when :( :self.master.health >= 11 );
       :e.increaseDamage(2);
     }
     on enter {
@@ -289,7 +289,7 @@ define card {
   weapon bow {
     variable agile, 0;
     on increaseSkillDamage {
-      when :(:e.viaSkillType("burst"));
+      when :( :e.viaSkillType("burst") );
       :e.increaseDamage(2);
     }
     on dealReaction {

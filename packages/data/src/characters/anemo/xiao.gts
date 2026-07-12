@@ -26,13 +26,13 @@ import { character, skill, status, card, DamageType, DiceType, type SkillHandle 
 define status {
   id 115042 as ConquerorOfEvilWrathDeity;
   on deductElementDiceSkill {
-    when :(:e.action.skill.definition.id === LemniscaticWindCycling && 
-        :e.canDeductCostOfType(DiceType.Anemo));
+    when :( :e.action.skill.definition.id === LemniscaticWindCycling && 
+        :e.canDeductCostOfType(DiceType.Anemo) );
     usage 2;
     :e.deductCost(DiceType.Anemo, 1);
   }
   on dispose {
-    when :(:e.entity.definition.id === YakshasMask);
+    when :( :e.entity.definition.id === YakshasMask );
     :dispose();
   }
 }
@@ -50,19 +50,19 @@ define status {
   id 115041 as YakshasMask;
   duration 2;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Anemo);
   }
   on increaseSkillDamage {
-    when :(:e.type === DamageType.Anemo);
+    when :( :e.type === DamageType.Anemo );
     :e.increaseDamage(1);
   }
   on increaseSkillDamage {
-    when :(:e.viaPlungingAttack());
+    when :( :e.viaPlungingAttack() );
     :e.increaseDamage(2);
   }
   on deductOmniDiceSwitch {
-    when :(:self.master.isActive());
+    when :( :self.master.isActive() );
     usage perRound, 1 {
       visible false;
     };

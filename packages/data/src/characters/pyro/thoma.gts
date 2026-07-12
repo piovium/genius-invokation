@@ -37,7 +37,7 @@ define combatStatus {
   id 113113 as ScorchingOoyoroi01;
   conflictWith 113112;
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage 3;
     :damage(DamageType.Pyro, 1);
     :combatStatus(BlazingBarrier);
@@ -55,7 +55,7 @@ define combatStatus {
   id 113112 as ScorchingOoyoroi;
   conflictWith 113113;
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage 2;
     :damage(DamageType.Pyro, 1);
     :combatStatus(BlazingBarrier);

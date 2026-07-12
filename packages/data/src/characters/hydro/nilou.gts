@@ -38,7 +38,7 @@ define summon {
     }
   }
   on declareEnd {
-    when :(:getVariable("usage") >= 2);
+    when :( :getVariable("usage") >= 2 );
     if (:$(`my equipment with definition id ${TheStarrySkiesTheirFlowersRain}`)) {
       :damage(DamageType.Dendro, 3);
     }
@@ -73,7 +73,7 @@ define status {
 define combatStatus {
   id 112081 as GoldenChalicesBounty;
   on modifyReaction {
-    when :(:e.type === Reaction.Bloom && !:e.character.isMine());
+    when :( :e.type === Reaction.Bloom && !:e.character.isMine() );
     listenTo all;
     :e.cancelEffects();
     :summon(BountifulCore);

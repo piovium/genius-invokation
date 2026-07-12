@@ -55,7 +55,7 @@ define combatStatus {
     }
   };
   on enter {
-    when :(:e.overridden);
+    when :( :e.overridden );
     :callSnippet();
   }
   on selfDispose {

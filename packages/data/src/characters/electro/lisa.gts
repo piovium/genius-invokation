@@ -51,8 +51,8 @@ define status {
     :addVariableWithMax("conductive", 1, 4);
   }
   on increaseDamaged {
-    when :(:e.via.definition.id === VioletArc || 
-        :e.source.definition.id === LightningRoseSummon);
+    when :( :e.via.definition.id === VioletArc || 
+        :e.source.definition.id === LightningRoseSummon );
     :e.increaseDamage(:getVariable("conductive"));
     :dispose();
   }
@@ -133,7 +133,7 @@ define card {
   cost DiceType.Electro, 1;
   talent Lisa, none {
     on switchActive {
-      when :(:e.switchInfo.to.id === :self.master.id);
+      when :( :e.switchInfo.to.id === :self.master.id );
       usage perRound, 1 {
         visible false;
       };

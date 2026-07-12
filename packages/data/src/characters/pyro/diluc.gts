@@ -26,7 +26,7 @@ define status {
   id 113011 as PyroInfusion;
   duration 2;
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
   }
 }
@@ -111,9 +111,9 @@ define card {
       :useSkill(SearingOnslaught);
     }
     on deductElementDiceSkill {
-      when :(:e.action.skill.definition.id === SearingOnslaught && 
+      when :( :e.action.skill.definition.id === SearingOnslaught && 
           [1, 2].includes(:countOfSkill(Diluc, SearingOnslaught)) &&
-          :e.canDeductCostOfType(DiceType.Pyro));
+          :e.canDeductCostOfType(DiceType.Pyro) );
       :e.deductCost(DiceType.Pyro, 1);
     }
   }

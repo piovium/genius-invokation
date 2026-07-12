@@ -90,7 +90,7 @@ define card {
       :e.increaseDamage(1);
     }
     on increaseSkillDamage {
-      when :(:e.viaSkillType("normal"));
+      when :( :e.viaSkillType("normal") );
       usage perRound, 1 {
         visible false;
       };
@@ -123,7 +123,7 @@ define card {
       :e.increaseDamage(1);
     }
     on useSkill {
-      when :(:e.isSkillType("elemental") && :$("my combat status with tag (shield)"));
+      when :( :e.isSkillType("elemental") && :$("my combat status with tag (shield)") );
       usage perRound, 1 {
         visible false;
       };
@@ -149,11 +149,11 @@ define card {
       :e.increaseDamage(1);
     }
     on enter {
-      when :(:self.master.energy === 0);
+      when :( :self.master.energy === 0 );
       :gainEnergy(1, "@master");
     }
     on actionPhase {
-      when :(:self.master.energy === 0);
+      when :( :self.master.energy === 0 );
       :gainEnergy(1, "@master");
     }
   }
@@ -169,7 +169,7 @@ define status {
   id 301104 as MoonpiercerStatus;
   oneDuration;
   once deductOmniDice {
-    when :(:e.isSkillOrTalentOf(:self.master, "elemental"));
+    when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
     :e.deductOmniCost(2);
   }
 }
@@ -237,11 +237,11 @@ define card {
   weapon pole {
     variable justice, 0;
     on increaseSkillDamage {
-      when :(:e.viaSkillType("burst"));
+      when :( :e.viaSkillType("burst") );
       :e.increaseDamage(2);
     }
     on damagedOrHealed {
-      when :(:e.target.isActive());
+      when :( :e.target.isActive() );
       listenTo samePlayer;
       :addVariable("justice", 1);
       if (:getVariable("justice") >= 4) {
@@ -269,7 +269,7 @@ define card {
     variable barrierUsage, 0;
     variable solidarity, 0;
     on decreaseDamaged {
-      when :(:player.hands.length > 0);
+      when :( :player.hands.length > 0 );
       usage perRound, 1 {
         visible false;
       };
@@ -278,7 +278,7 @@ define card {
       :addVariable("solidarity", 1);
     }
     on increaseSkillDamage {
-      when :(:getVariable("solidarity") > 0);
+      when :( :getVariable("solidarity") > 0 );
       :e.increaseDamage(1);
       :drawCards(:getVariable("solidarity"));
       :setVariable("solidarity", 0);

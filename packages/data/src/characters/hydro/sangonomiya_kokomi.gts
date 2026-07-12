@@ -51,11 +51,11 @@ define status {
   id 112052 as CeremonialGarment;
   duration 2;
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :heal(1, "all my characters");
   }
 }

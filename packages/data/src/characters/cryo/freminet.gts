@@ -30,11 +30,11 @@ define status {
     :addVariable("level", 1);
   }
   on deductOmniDiceSkill {
-    when :(:getVariable("level") >= 2);
+    when :( :getVariable("level") >= 2 );
     :e.deductOmniCost(1);
   }
   on useSkill {
-    when :(:getVariable("level") >= 2);
+    when :( :getVariable("level") >= 2 );
     if (:getVariable("level") >= 4) {
       :damage(DamageType.Physical, 3);
     }
@@ -75,12 +75,12 @@ define status {
     :addVariable("drawnCard", 1);
   }
   on drawCard {
-    when :(:getVariable("drawnCard") === 3);
+    when :( :getVariable("drawnCard") === 3 );
     :characterStatus(SubnauticalShield, "@master");
     :setVariable("drawnCard", 0);
   }
   on useSkill {
-    when :(:e.isSkillType("normal") || :e.isSkillType("elemental"));
+    when :( :e.isSkillType("normal") || :e.isSkillType("elemental") );
     const cards = :maxCostHands(2);
     :undrawCards(cards, "bottom");
     :drawCards(cards.length);

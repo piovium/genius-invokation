@@ -28,12 +28,12 @@ export const ShouldTriggerTalent = customEvent<EntityState>("kaveh/shouldTrigger
 define combatStatus {
   id 117082 as BurstScan;
   on beforeAction {
-    when :(:$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`));
+    when :( :$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`) );
     listenTo all;
     :disposeCard(:player.pile[0]);
   }
   on disposeCard {
-    when :(:e.via?.caller.id === :self.id);
+    when :( :e.via?.caller.id === :self.id );
     usage 1 {
       append 3;
     };
@@ -56,15 +56,15 @@ define status {
   id 117081 as MehraksAssistance;
   duration 2;
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
   }
   on modifySkillDamageType {
-    when :(:e.type === DamageType.Physical);
+    when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Dendro);
   }
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :combatStatus(BurstScan);
   }
 }
@@ -78,7 +78,7 @@ define status {
 define combatStatus {
   id 117083 as TheArtOfBudgetingInEffect;
   once deductOmniDiceCard {
-    when :(:e.action.skill.caller.definition.tags.includes("place"));
+    when :( :e.action.skill.caller.definition.tags.includes("place") );
     :e.deductOmniCost(2);
   }
 }

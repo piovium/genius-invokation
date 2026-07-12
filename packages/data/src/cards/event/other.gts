@@ -183,7 +183,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Hydro, 1;
   tags resonance;
-  filter :(:$(`my characters with health < maxHealth`));
+  filter :( :$(`my characters with health < maxHealth`) );
   :heal(2, "my active");
   :heal(1, "my standby");
 }
@@ -217,7 +217,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Electro, 1;
   tags resonance;
-  filter :(:$(`my characters with energy < maxEnergy`));
+  filter :( :$(`my characters with energy < maxEnergy`) );
   :gainEnergy(1, "my active");
   :gainEnergy(1, "my standby character with energy < maxEnergy limit 1");
 }
@@ -257,20 +257,20 @@ define combatStatus {
 define combatStatus {
   id 303134 as ElementalResonanceImpetuousWindsInEffect02;
   on increaseDamage {
-    when :((
+    when :( (
         ([
           Reaction.SwirlCryo, 
           Reaction.SwirlElectro, 
           Reaction.SwirlHydro, 
           Reaction.SwirlPyro
         ] as (Reaction | null)[]).includes(:e.damageInfo.fromReaction)) &&
-        !:e.target.isMine());
+        !:e.target.isMine() );
     :e.increaseDamage(1);
   }
   on reaction {
-    when :(:e.reactionInfo.fromDamage && 
+    when :( :e.reactionInfo.fromDamage && 
         :e.reactionInfo.fromDamage.source.who === :self.who &&
-        :e.relatedTo(DamageType.Anemo));
+        :e.relatedTo(DamageType.Anemo) );
     listenTo all;
     :dispose();
   }
@@ -332,7 +332,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Dendro, 1;
   tags resonance;
-  filter :(:$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore} or my combat status with definition id ${CatalyzingField} or my summon with definition id ${BurningFlame}`));
+  filter :( :$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore} or my combat status with definition id ${CatalyzingField} or my summon with definition id ${BurningFlame}`) );
   if (:$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`)) {
     :damage(DamageType.Hydro, 1, "opp active");
   }
@@ -489,7 +489,7 @@ define combatStatus {
 define card {
   id 331801 as WindAndFreedom;
   since "v3.7.0";
-  filter :(:$(`my standby characters`));
+  filter :( :$(`my standby characters`) );
   :combatStatus(WindAndFreedomInEffect);
 }
 
@@ -548,7 +548,7 @@ define card {
   id 331805 as WaterAndJustice;
   since "v4.7.0";
   cost DiceType.Void, 2;
-  filter :(:$(`my characters with health < maxHealth`));
+  filter :( :$(`my characters with health < maxHealth`) );
   const chs = :$$("all my characters");
   const chCount = chs.length;
   const totalHealth = chs.reduce((acc, ch) => acc + ch.health, 0);
@@ -577,7 +577,7 @@ define status {
   oneDuration;
   variable reignite, 1;
   on beforeDefeated {
-    when :(:player.dice.length >= :getVariable("reignite"));
+    when :( :player.dice.length >= :getVariable("reignite") );
     :absorbDice("seq", :getVariable("reignite"));
     :immune(1);
     :addVariable("reignite", 1);
@@ -629,7 +629,7 @@ define combatStatus {
   id 303183 as MoonAndHomelandInEffect01;
   oneDuration;
   once playCard {
-    when :(:e.card.definition.id !== MoonAndHomeland);
+    when :( :e.card.definition.id !== MoonAndHomeland );
     :combatStatus(MoonAndHomelandInEffect02, "my", {
       overrideVariables: {
         cardDefId: :e.card.definition.id,
@@ -723,7 +723,7 @@ define combatStatus {
 define card {
   id 332005 as IHaventLostYet;
   since "v3.3.0";
-  filter :(:player.hasDefeated && !:$(`my combat status with definition id ${IHaventLostYetCooldown}`));
+  filter :( :player.hasDefeated && !:$(`my combat status with definition id ${IHaventLostYetCooldown}`) );
   :generateDice(DiceType.Omni, 1);
   :gainEnergy(1, "my active");
   :combatStatus(IHaventLostYetCooldown);
@@ -768,7 +768,7 @@ define card {
   id 332008 as Starsigns;
   since "v3.3.0";
   cost DiceType.Void, 2;
-  filter :(:$(`my active with energy < maxEnergy`));
+  filter :( :$(`my active with energy < maxEnergy`) );
   :$("my active character")?.gainEnergy(1);
 }
 
@@ -782,7 +782,7 @@ define card {
   id 332009 as CalxsArts;
   since "v3.3.0";
   cost DiceType.Aligned, 1;
-  filter :(:$(`my standby with energy > 0`) && :$(`my active with energy < maxEnergy`));
+  filter :( :$(`my standby with energy > 0`) && :$(`my active with energy < maxEnergy`) );
   const chs = :$$("my standby characters limit 2");
   let count = 0;
   for (const ch of chs) {
@@ -1068,7 +1068,7 @@ define combatStatus {
   id 303232 as private LyresongInEffect1;
   oneDuration;
   once deductOmniDiceCard {
-    when :(:e.hasCardTag("artifact"));
+    when :( :e.hasCardTag("artifact") );
     :e.deductOmniCost(1);
   }
 }
@@ -1084,7 +1084,7 @@ define combatStatus {
   id 303224 as private LyresongInEffect2;
   oneDuration;
   once deductOmniDiceCard {
-    when :(:e.hasCardTag("artifact"));
+    when :( :e.hasCardTag("artifact") );
     :e.deductOmniCost(2);
   }
 }
@@ -1205,7 +1205,7 @@ define card {
   id 332030 as ControlledDirectionalBlast;
   since "v4.5.0";
   cost DiceType.Aligned, 1;
-  filter :(:$$("opp summons or opp supports").length >= 4);
+  filter :( :$$("opp summons or opp supports").length >= 4 );
   for (const summon of :$$("all summons")) {
     summon.consumeUsage();
   }
@@ -1303,7 +1303,7 @@ define card {
   id 124051 as BonecrunchersEnergyBlock;
   since "v4.7.0";
   undiscoverable;
-  filter :(!:$(`my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`));
+  filter :( !:$(`my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`) );
   :abortPreview();
   :disposeMaxCostHands(1);
   const activeCh = :$("my active")!;
@@ -1698,7 +1698,7 @@ define combatStatus {
   id 303236 as IdRatherLoseMoneyMyselfInEffect;
   oneDuration;
   on generateDice {
-    when :(:e.who !== :self.who);
+    when :( :e.who !== :self.who );
     usage 3;
     listenTo all;
     if (!:player.declaredEnd) {
@@ -1830,7 +1830,7 @@ define card {
   id 332041 as UltimateSurfingBuddy;
   since "v5.2.0";
   tags action;
-  filter :(:$$(`all summons`).length >= 2);
+  filter :( :$$(`all summons`).length >= 2 );
   :abortPreview();
   const mySummons = :$$(`my summons`);
   if (mySummons.length > 0) {
@@ -1905,7 +1905,7 @@ define card {
 define combatStatus {
   id 303239 as ArtOfSleepyMeditationInEffect;
   once deductOmniDiceCard {
-    when :(!:isInInitialPile(:e.action.skill.caller));
+    when :( !:isInInitialPile(:e.action.skill.caller) );
     :e.deductOmniCost(2);
   }
 }
@@ -1958,7 +1958,7 @@ define card {
 define status {
   id 303242 as FruitsOfTrainingInEffect02;
   on deductOmniDiceSkill {
-    when :(:e.isSkillType("elemental"));
+    when :( :e.isSkillType("elemental") );
     usage 1 {
       append;
     };
@@ -1975,9 +1975,9 @@ define status {
 define status {
   id 303241 as FruitsOfTrainingInEffect01;
   on enterRelative {
-    when :(:e.entity.definition.type === "status" &&
+    when :( :e.entity.definition.type === "status" &&
         :e.entity.definition.tags.includes("preparingSkill") &&
-        :e.entity.cast<"status">().master.id !== :self.master.id);
+        :e.entity.cast<"status">().master.id !== :self.master.id );
     listenTo samePlayer;
     usage 2;
     :characterStatus(FruitsOfTrainingInEffect02, "@master");
@@ -2392,7 +2392,7 @@ export const WoodenToySword = card(301038)
 define status {
   id 301040 as ReforgeTheHolyBladeInEffect;
   on useSkill {
-    when :(:e.isChargedAttack());
+    when :( :e.isChargedAttack() );
     const element = :self.master.element() as number as DamageType;
     :damage(element, 5);
   }
@@ -2450,7 +2450,7 @@ define combatStatus {
   id 303247 as PlanToSaveTheWorldInEffect;
   duration 2;
   on endPhase {
-    when :(:getVariable("duration") === 1);
+    when :( :getVariable("duration") === 1 );
     const actives = :$$(`all active characters`);
     for (const ch of actives) {
       :mutate({

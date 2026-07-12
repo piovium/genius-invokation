@@ -150,9 +150,9 @@ define skill {
   id 22064 as BranchingFlow;
   skillType passive {
     on dispose {
-      when :(:e.entity.definition.type === "summon" &&
+      when :( :e.entity.definition.type === "summon" &&
           !([HalfTulpa01, HalfTulpa02, HalfTulpa03, HalfTulpa04] as number[]).includes(:e.entity.definition.id) &&
-          :self.health >= 3);
+          :self.health >= 3 );
       listenTo samePlayer;
       usage perRound, 1 {
         name "usagePerRound1";
@@ -170,7 +170,7 @@ define skill {
       }
     }
     on useSkill {
-      when :(:e.skill.definition.id === StormSurge);
+      when :( :e.skill.definition.id === StormSurge );
       asSkillType elemental;
       :damage(DamageType.Hydro, 2);
       if (:self.health >= 2) {
@@ -178,17 +178,17 @@ define skill {
       }
     }
     on useSkill {
-      when :(:e.skill.definition.id === StormSurge);
+      when :( :e.skill.definition.id === StormSurge );
       :gainEnergy(1, "@self");
     }
     on useSkill {
-      when :(:e.skill.definition.id === StormSurge && :$(`my summons`));
+      when :( :e.skill.definition.id === StormSurge && :$(`my summons`) );
       :abortPreview();
       const target = :random(:player.summons);
       :triggerEndPhaseSkill(target);
     }
     on useSkill {
-      when :(:e.skill.definition.id === ThunderingTide);
+      when :( :e.skill.definition.id === ThunderingTide );
       for (const summon of :$$(`my summons`)) {
         :triggerEndPhaseSkill(summon);
       }
@@ -276,7 +276,7 @@ define status {
     :e.reApplyTo(DamageType.Hydro);
   }
   on decreaseDamaged {
-    when :(:e.type === DamageType.Hydro);
+    when :( :e.type === DamageType.Hydro );
     :e.decreaseDamage(:e.value);
   }
 }
@@ -298,7 +298,7 @@ define card {
       :characterStatus(ElementalLifeformHydro, "@master");
     }
     on declareEnd {
-      when :(:self.master.health >= 3);
+      when :( :self.master.health >= 3 );
       :damage(DamageType.Piercing, 2, "@master");
       if (!:$(`my summon with definition id ${HalfTulpa01}`)) {
         :summon(HalfTulpa01);

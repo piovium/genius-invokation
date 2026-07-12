@@ -130,7 +130,7 @@ define card {
       :createHandCard(BonecrunchersEnergyBlock);
     }
     on playCard {
-      when :(:e.card.definition.id === BonecrunchersEnergyBlock);
+      when :( :e.card.definition.id === BonecrunchersEnergyBlock );
       :drawCards(1);
       :createPileCards(BonecrunchersEnergyBlock, 1, "random");
     }

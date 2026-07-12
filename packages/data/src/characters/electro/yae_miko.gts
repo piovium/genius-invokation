@@ -34,7 +34,7 @@ define summon {
     :damage(DamageType.Electro, :getVariable("atk"));
   }
   on declareEnd {
-    when :(:getVariable("usage") >= 4);
+    when :( :getVariable("usage") >= 4 );
     :damage(DamageType.Electro, :getVariable("atk"));
     :consumeUsage();
   }
@@ -50,7 +50,7 @@ define status {
   id 114082 as RiteOfDispatch;
   oneDuration;
   once deductOmniDiceSkill {
-    when :(:e.action.skill.definition.id === YakanEvocationSesshouSakura);
+    when :( :e.action.skill.definition.id === YakanEvocationSesshouSakura );
     :e.deductOmniCost(2);
   }
 }

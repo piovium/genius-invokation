@@ -25,11 +25,11 @@ import { character, skill, status, card, DamageType, DiceType } from "@gi-tcg/co
 define status {
   id 115062 as Descent;
   on deductOmniDiceSwitch {
-    when :(:self.master.isActive());
+    when :( :self.master.isActive() );
     :e.deductOmniCost(1);
   }
   on switchActive {
-    when :(:self.master.id === :e.switchInfo.from?.id);
+    when :( :self.master.id === :e.switchInfo.from?.id );
     usage 1;
     :damage(DamageType.Anemo, 1);
   }
@@ -45,7 +45,7 @@ define status {
 define status {
   id 115061 as Windfavored;
   on increaseSkillDamage {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     usage 2;
     :e.increaseDamage(2);
   }
@@ -137,7 +137,7 @@ define card {
       :useSkill(HanegaSongOfTheWind);
     }
     on dealDamage {
-      when :(:self.master.hasStatus(Windfavored) && :e.via.charged);
+      when :( :self.master.hasStatus(Windfavored) && :e.via.charged );
       :characterStatus(Descent, "@master");
     }
   }

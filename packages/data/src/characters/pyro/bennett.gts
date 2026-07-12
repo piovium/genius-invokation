@@ -30,7 +30,7 @@ define combatStatus {
     :e.increaseDamage(2);
   }
   on useSkill {
-    when :(:e.skillCaller.variables.health <= 6);
+    when :( :e.skillCaller.variables.health <= 6 );
     :heal(2, "@event.skillCaller");
   }
 }
@@ -47,11 +47,11 @@ define combatStatus {
   conflictWith 113032;
   duration 2;
   on increaseSkillDamage {
-    when :(:e.source.cast<"character">().health >= 7);
+    when :( :e.source.cast<"character">().health >= 7 );
     :e.increaseDamage(2);
   }
   on useSkill {
-    when :(:e.skillCaller.variables.health <= 6);
+    when :( :e.skillCaller.variables.health <= 6 );
     :heal(2, "@event.skillCaller");
   }
 }

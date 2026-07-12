@@ -26,11 +26,11 @@ define status {
   id 113062 as ExplosiveSpark01;
   conflictWith 113061;
   on deductElementDiceSkill {
-    when :(:e.isChargedAttack() && :e.canDeductCostOfType(DiceType.Pyro));
+    when :( :e.isChargedAttack() && :e.canDeductCostOfType(DiceType.Pyro) );
     :e.deductCost(DiceType.Pyro, 1);
   }
   on increaseSkillDamage {
-    when :(:e.viaChargedAttack());
+    when :( :e.viaChargedAttack() );
     usage 2;
     :e.increaseDamage(1);
   }
@@ -47,11 +47,11 @@ define status {
   id 113061 as ExplosiveSpark;
   conflictWith 113062;
   on deductElementDiceSkill {
-    when :(:e.isChargedAttack() && :e.canDeductCostOfType(DiceType.Pyro));
+    when :( :e.isChargedAttack() && :e.canDeductCostOfType(DiceType.Pyro) );
     :e.deductCost(DiceType.Pyro, 1);
   }
   on increaseSkillDamage {
-    when :(:e.viaChargedAttack());
+    when :( :e.viaChargedAttack() );
     usage 1;
     :e.increaseDamage(1);
   }

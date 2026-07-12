@@ -117,14 +117,14 @@ define card {
       :useSkill(AbiogenesisSolarIsotoma);
     }
     on deductVoidDiceSkill {
-      when :(:$(`my summons with definition id ${SolarIsotoma}`) &&
-          :e.isPlungingAttack());
+      when :( :$(`my summons with definition id ${SolarIsotoma}`) &&
+          :e.isPlungingAttack() );
       listenTo samePlayer;
       :e.deductVoidCost(1);
     }
     on increaseSkillDamage {
-      when :(:$(`my summons with definition id ${SolarIsotoma}`) &&
-          :e.viaPlungingAttack());
+      when :( :$(`my summons with definition id ${SolarIsotoma}`) &&
+          :e.viaPlungingAttack() );
       listenTo samePlayer;
       :e.increaseDamage(1);
     }

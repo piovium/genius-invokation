@@ -134,7 +134,7 @@ define skill {
         });
     }
     on action {
-      when :(:$(`(my statuses with tag (shield) or my combat statuses with tag (shield)) and not with definition id ${ArmoredCrabCarapace}`));
+      when :( :$(`(my statuses with tag (shield) or my combat statuses with tag (shield)) and not with definition id ${ArmoredCrabCarapace}`) );
       const shields = :$$(`my statuses with tag (shield) or my combat statuses with tag (shield)`);
       let shieldValue = 0;
       for (const shield of shields) {

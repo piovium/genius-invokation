@@ -29,7 +29,7 @@ define status {
   since "v5.3.0";
   duration 1;
   on cancelHealed {
-    when :(:e.via.definition.id !== HuntersVigil);
+    when :( :e.via.definition.id !== HuntersVigil );
     const value = :e.expectedValue;
     :e.cancel();
     if (value > 0) {
@@ -41,7 +41,7 @@ define status {
     }
   }
   on modifySkillDamageType {
-    when :(:e.viaSkillType("normal"));
+    when :( :e.viaSkillType("normal") );
     if (:e.type === DamageType.Physical) {
       :e.changeDamageType(DamageType.Electro);
     }
@@ -52,7 +52,7 @@ define status {
       });
   }
   on deductVoidDiceSkill {
-    when :(:e.action.skill.definition.id === OathOfHuntingShadows);
+    when :( :e.action.skill.definition.id === OathOfHuntingShadows );
     :e.deductVoidCost(1);
   }
 }
@@ -164,7 +164,7 @@ define card {
       :useSkill(HuntersVigil);
     }
     on useSkill {
-      when :(:hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Electro)));
+      when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Electro)) );
       listenTo samePlayer;
       :characterStatus(DarkshatteringFlameInEffect, "@master");
     }

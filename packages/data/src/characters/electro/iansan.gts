@@ -132,22 +132,22 @@ define skill {
       :addVariable("gainNightsoulPassiveUsagePerRound", -1);
     };
     on enterRelative {
-      when :(:self.hasNightsoulsBlessing() &&
+      when :( :self.hasNightsoulsBlessing() &&
           :getVariable("gainNightsoulPassiveUsagePerRound") &&
           :e.entity.definition.type === "status" &&
-          :e.entity.definition.tags.includes("preparingSkill"));
+          :e.entity.definition.tags.includes("preparingSkill") );
       listenTo samePlayer;
       :callSnippet();
     }
     on switchActive {
-      when :(:self.hasNightsoulsBlessing());
+      when :( :self.hasNightsoulsBlessing() );
       listenTo samePlayer;
       :addVariable("switchCount", 1);
     }
     on switchActive {
-      when :(:self.hasNightsoulsBlessing() &&
+      when :( :self.hasNightsoulsBlessing() &&
           :getVariable("gainNightsoulPassiveUsagePerRound") &&
-          :getVariable("switchCount") % 2 === 0);
+          :getVariable("switchCount") % 2 === 0 );
       listenTo samePlayer;
       :callSnippet();
     }

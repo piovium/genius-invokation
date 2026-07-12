@@ -71,14 +71,14 @@ define card {
   support ally {
     variable material, 2;
     on enter {
-      when :(:player.initialPile.filter((card) => card.tags.includes("artifact")).length >= 6);
+      when :( :player.initialPile.filter((card) => card.tags.includes("artifact")).length >= 6 );
       :drawCards(1, { withTag: "artifact" });
     }
     on endPhase {
       :addVariable("material", 1);
     }
     on deductAllDiceCard {
-      when :(:e.hasCardTag("artifact") && :getVariable("material") >= :e.diceCostSize());
+      when :( :e.hasCardTag("artifact") && :getVariable("material") >= :e.diceCostSize() );
       usage perRound, 1 {
         visible false;
       };
@@ -115,7 +115,7 @@ define card {
       :addVariable("material", 1);
     }
     on deductAllDiceCard {
-      when :(:e.hasCardTag("weapon") && :getVariable("material") >= :e.diceCostSize());
+      when :( :e.hasCardTag("weapon") && :getVariable("material") >= :e.diceCostSize() );
       usage perRound, 1 {
         visible false;
       };
@@ -138,14 +138,14 @@ define card {
   cost DiceType.Aligned, 1;
   support ally {
     on playCard {
-      when :(:e.hasCardTag("food"));
+      when :( :e.hasCardTag("food") );
       usage perRound, 1 {
         visible false;
       };
       :generateDice("randomElement", 1);
     }
     on playCard {
-      when :(:e.hasCardTag("food"));
+      when :( :e.hasCardTag("food") );
       usage 1 {
         autoDispose false;
         visible false;
@@ -167,7 +167,7 @@ define card {
   cost DiceType.Aligned, 2;
   support ally {
     on deductOmniDiceCard {
-      when :(:e.hasCardTag("place"));
+      when :( :e.hasCardTag("place") );
       usage perRound, 1 {
         visible false;
       };
@@ -236,8 +236,8 @@ define card {
   support ally {
     variable inspiration, 0;
     on useSkill {
-      when :(:hasPhaseDamage("all", (e) => e.type === DamageType.Piercing || e.type === DamageType.Physical) || 
-          :hasPhaseReaction("all"));
+      when :( :hasPhaseDamage("all", (e) => e.type === DamageType.Piercing || e.type === DamageType.Physical) || 
+          :hasPhaseReaction("all") );
       listenTo all;
       :addVariable("inspiration", 1);
       if (:getVariable("inspiration") >= 3) {
@@ -308,7 +308,7 @@ define card {
   cost DiceType.Aligned, 1;
   support ally {
     on switchActive {
-      when :(:e.switchInfo.to.energy === 0);
+      when :( :e.switchInfo.to.energy === 0 );
       usage 2;
       usage perRound, 1 {
         visible false;
@@ -331,12 +331,12 @@ define card {
   support ally {
     variable progress, 0;
     on dispose {
-      when :(:e.entity.definition.type === "summon");
+      when :( :e.entity.definition.type === "summon" );
       listenTo all;
       :addVariableWithMax("progress", 1, 3);
     }
     on deductOmniDiceCard {
-      when :(:e.hasOneOfCardTag("weapon", "artifact") && :getVariable("progress") >= 3);
+      when :( :e.hasOneOfCardTag("weapon", "artifact") && :getVariable("progress") >= 3 );
       :e.deductOmniCost(2);
       :dispose();
     }
@@ -377,7 +377,7 @@ define card {
   cost DiceType.Void, 2;
   support ally {
     on deductOmniDiceCard {
-      when :(:e.hasCardTag("food"));
+      when :( :e.hasCardTag("food") );
       usage perRound, 1 {
         visible false;
       };
@@ -399,14 +399,14 @@ define card {
   cost DiceType.Aligned, 1;
   support ally {
     on deductOmniDiceCard {
-      when :(:e.hasCardTag("ally"));
+      when :( :e.hasCardTag("ally") );
       usage perRound, 1 {
         visible false;
       };
       :e.deductOmniCost(1);
     }
     on playCard {
-      when :(:e.card.id !== :self.id && :e.hasCardTag("ally"));
+      when :( :e.card.id !== :self.id && :e.hasCardTag("ally") );
       usage 1 {
         autoDispose false;
         visible false;
@@ -428,7 +428,7 @@ define card {
   cost DiceType.Aligned, 2;
   support ally {
     on useSkill {
-      when :(:e.isSkillType("elemental") && :$("my next"));
+      when :( :e.isSkillType("elemental") && :$("my next") );
       usage perRound, 1 {
         visible false;
       };
@@ -450,7 +450,7 @@ define card {
   cost DiceType.Aligned, 1;
   support ally {
     on deductOmniDiceCard {
-      when :(:e.hasCardTag("weapon"));
+      when :( :e.hasCardTag("weapon") );
       usage perRound, 1 {
         visible false;
       };
@@ -475,7 +475,7 @@ define card {
   cost DiceType.Aligned, 1;
   support ally {
     on action {
-      when :(:player.hands.length === 0);
+      when :( :player.hands.length === 0 );
       listenTo all;
       usage 3;
       :drawCards(1);
@@ -495,7 +495,7 @@ define card {
   cost DiceType.Aligned, 1;
   support ally {
     on deductOmniDiceCard {
-      when :(:e.hasCardTag("artifact"));
+      when :( :e.hasCardTag("artifact") );
       usage perRound, 1 {
         visible false;
       };
@@ -523,7 +523,7 @@ define card {
   since "v4.3.0";
   support ally {
     on playCard {
-      when :<boolean>(:e.card.definition.id !== Mamere && :e.hasOneOfCardTag("food", "place", "ally", "item"));
+      when :<boolean>( :e.card.definition.id !== Mamere && :e.hasOneOfCardTag("food", "place", "ally", "item") );
       usage 3;
       usage perRound, 1 {
         visible false;
@@ -548,7 +548,7 @@ define card {
 define status {
   id 302205 as SandsAndDream;
   on deductOmniDice {
-    when :(:e.isSkillOrTalentOf(:self.master));
+    when :( :e.isSkillOrTalentOf(:self.master) );
     usage 1;
     :e.deductOmniCost(3);
   }
@@ -690,7 +690,7 @@ define card {
       :createPileCards(TaroumarusSavings, 4, "spaceAround");
     }
     on playCard {
-      when :(:e.card.definition.id === TaroumarusSavings);
+      when :( :e.card.definition.id === TaroumarusSavings );
       :addVariable("count", 1);
       if (:getVariable("count") >= 2) {
         :summon(TaromaruEnraged);
@@ -737,7 +737,7 @@ define card {
       :addVariableWithMax("clue", 1, 2);
     }
     on endPhase {
-      when :(:getVariable("clue") >= 2);
+      when :( :getVariable("clue") >= 2 );
       :addVariable("clue", -2);
       const top = :oppPlayer.pile[0];
       if (top) {
@@ -874,7 +874,7 @@ define card {
       :callSnippet();
     }
     on reaction {
-      when :(:e.caller.isMine());
+      when :( :e.caller.isMine() );
       listenTo all;
       :callSnippet();
     }
@@ -900,8 +900,8 @@ define card {
       :createPileCards(ToyGuard, 2, "random");
     }
     on enterRelative {
-      when :(:e.entity.definition.type === "summon" &&
-          (SIMULANKA_SUMMONS as number[]).includes(:e.entity.definition.id));
+      when :( :e.entity.definition.type === "summon" &&
+          (SIMULANKA_SUMMONS as number[]).includes(:e.entity.definition.id) );
       usage 2;
       :e.entity.cast<"summon">().addVariable("effect", 1);
     }
@@ -927,7 +927,7 @@ define card {
       }
     }
     on playCard {
-      when :(!:isInInitialPile(:e.card));
+      when :( !:isInInitialPile(:e.card) );
       usage 2;
       usage perRound, 1 {
         visible false;
@@ -1260,7 +1260,7 @@ define card {
   cost DiceType.Aligned, 1;
   support ally {
     on dealReaction {
-      when :(([Reaction.LunarElectroCharged, Reaction.LunarBloom] as Reaction[]).includes(:e.type));
+      when :( ([Reaction.LunarElectroCharged, Reaction.LunarBloom] as Reaction[]).includes(:e.type) );
       usage perRound, 1 {
         visible false;
       };

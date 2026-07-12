@@ -25,7 +25,7 @@ import { character, skill, status, card, DamageType, DiceType } from "@gi-tcg/co
 define status {
   id 113081 as ScarletSeal;
   on increaseSkillDamage {
-    when :(:e.viaChargedAttack());
+    when :( :e.viaChargedAttack() );
     usage 1 {
       append 2;
     };
@@ -45,7 +45,7 @@ define status {
   id 113082 as Brilliance;
   duration 2;
   on deductElementDiceSkill {
-    when :(:e.isChargedAttack() && :e.canDeductCostOfType(DiceType.Pyro));
+    when :( :e.isChargedAttack() && :e.canDeductCostOfType(DiceType.Pyro) );
     usage perRound, 1 {
       visible false;
     };
@@ -135,14 +135,14 @@ define card {
       :useSkill(SealOfApproval);
     }
     on increaseSkillDamage {
-      when :(:e.viaChargedAttack() && :e.target.health <= 6);
+      when :( :e.viaChargedAttack() && :e.target.health <= 6 );
       :e.increaseDamage(1);
       if (:self.master.hasStatus(ScarletSeal)) {
         :setVariable("triggerSeal", 1);
       }
     }
     on useSkill {
-      when :(:getVariable("triggerSeal"));
+      when :( :getVariable("triggerSeal") );
       :drawCards(1);
       :setVariable("triggerSeal", 0);
     }

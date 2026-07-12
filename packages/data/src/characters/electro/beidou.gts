@@ -26,7 +26,7 @@ define status {
   id 114052 as SummonerOfLightning;
   oneDuration;
   on deductVoidDiceSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     usage 2;
     :e.deductVoidCost(1);
   }
@@ -86,11 +86,11 @@ define combatStatus {
   tags barrier;
   duration 2;
   on useSkill {
-    when :(:e.isSkillType("normal"));
+    when :( :e.isSkillType("normal") );
     :damage(DamageType.Electro, 1);
   }
   on decreaseDamaged {
-    when :(:e.value >= 3);
+    when :( :e.value >= 3 );
     :e.decreaseDamage(1);
   }
 }
