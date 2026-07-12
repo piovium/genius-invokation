@@ -17,10 +17,10 @@ catalog:
   "@unocss/reset": ^66.3.3
   solid-js: ^1.9.12
   execa: ^9.6.1
-  "@gi-tcg/gts-runtime": ^0.6.4
-  "@gi-tcg/gtsc": ^0.6.4
-  "@gi-tcg/gts-transpiler": ^0.6.4
-  "@gi-tcg/unplugin-gts": ^0.6.4
+  "@gi-tcg/gts-runtime": ^0.6.5
+  "@gi-tcg/gtsc": ^0.6.5
+  "@gi-tcg/gts-transpiler": ^0.6.5
+  "@gi-tcg/unplugin-gts": ^0.6.5
 
 patchedDependencies:
   ohm-js@17.1.0: patches/ohm-js@17.1.0.patch
