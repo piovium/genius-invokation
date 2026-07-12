@@ -1408,12 +1408,6 @@ function renderUsage(
     }
     return true;
   });
-  if (
-    perRoundSugar &&
-    !withoutPerRound.some((line) => /^visible(?:\s|;)/.test(line))
-  ) {
-    withoutPerRound.push("visible false;");
-  }
   const head = perRound
     ? `${attr} perRound, ${renderArg(count)}`
     : `${attr} ${renderArg(count)}`;
