@@ -136,13 +136,16 @@ const GuardianVentVolcanoKablam = skill(14155)
  * 所有我方角色获得饱腹，抓3张牌，下2次切换角色少花费1个元素骰。
  * （每回合每个角色最多食用1次「料理」）
  */
-const SingYourHeartOut = card(333027)
-  .until("v6.1.0")
-  .costVoid(3)
-  .combatFood({ satiatedFilter: "allNot" })
-  .drawCards(3)
-  .combatStatus(SingYourHeartOutInEffect)
-  .done();
+define card {
+  id 333027 as private SingYourHeartOut;
+  until "v6.1.0";
+  cost DiceType.Void, 3;
+  food combat {
+    satiatedFilter "allNot";
+  };
+  :drawCards(3);
+  :combatStatus(SingYourHeartOutInEffect);
+}
 
 /**
  * @id 303245

@@ -63,12 +63,13 @@ define combatStatus {
  * 本回合中，我方角色下一次造成岩元素伤害后：如果我方存在提供「护盾」的出战状态，则为一个此类出战状态补充3点「护盾」。
  * （牌组包含至少2个岩元素角色，才能加入牌组）
  */
-const ElementalResonanceEnduringRock = card(331602)
-  .until("v5.4.0")
-  .costGeo(1)
-  .tags("resonance")
-  .combatStatus(ElementalResonanceEnduringRockInEffect)
-  .done();
+define card {
+  id 331602 as private ElementalResonanceEnduringRock;
+  until "v5.4.0";
+  cost DiceType.Geo, 1;
+  tags resonance;
+  :combatStatus(ElementalResonanceEnduringRockInEffect);
+}
 
 /**
  * @id 303172
@@ -95,17 +96,16 @@ define combatStatus {
  * 使我方场上的燃烧烈焰、草原核和激化领域「可用次数」+1。
  * （牌组包含至少2个草元素角色，才能加入牌组）
  */
-const ElementalResonanceSprawlingGreenery = card(331702)
-  .until("v5.4.0")
-  .costDendro(1)
-  .tags("resonance")
-  .do((c) => {
-    c.$("my summon with definition id 115")?.addVariable("usage", 1);
-    c.$("my combat statuses with definition id 116")?.addVariable("usage", 1);
-    c.$("my combat statuses with definition id 117")?.addVariable("usage", 1);
-  })
-  .combatStatus(ElementalResonanceSprawlingGreeneryInEffect)
-  .done();
+define card {
+  id 331702 as private ElementalResonanceSprawlingGreenery;
+  until "v5.4.0";
+  cost DiceType.Dendro, 1;
+  tags resonance;
+  :$("my summon with definition id 115")?.addVariable("usage", 1);
+  :$("my combat statuses with definition id 116")?.addVariable("usage", 1);
+  :$("my combat statuses with definition id 117")?.addVariable("usage", 1);
+  :combatStatus(ElementalResonanceSprawlingGreeneryInEffect);
+}
 
 // 以下为 10血->12血
 

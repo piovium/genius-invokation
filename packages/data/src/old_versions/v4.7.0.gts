@@ -510,12 +510,13 @@ define status {
  * @description
  * 我方至少剩余8个元素骰，且对方未宣布结束时，才能打出：本回合中，双方牌手进行「切换角色」行动时需要额外花费1个元素骰。
  */
-const FallsAndFortune = card(332026)
-  .until("v4.7.0")
-  .costSame(1)
-  .filter((c) => c.player.dice.length >= 8 && !c.oppPlayer.declaredEnd)
-  .combatStatus(FallsAndFortuneInEffect)
-  .done();
+define card {
+  id 332026 as private FallsAndFortune;
+  until "v4.7.0";
+  cost DiceType.Aligned, 1;
+  filter :( :player.dice.length >= 8 && !:oppPlayer.declaredEnd );
+  :combatStatus(FallsAndFortuneInEffect);
+}
 
 /**
  * @id 303230
