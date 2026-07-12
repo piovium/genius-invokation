@@ -1205,7 +1205,7 @@ define card {
   id 322033 as LepinePauline;
   since "v6.5.0";
   support ally {
-    variable progress, 0;
+    variable progress, 0; // for transformed plans to use
     on enter {
       :selectAndPlay([
           LepinepaulinesInvestmentInMedicalEquipment,

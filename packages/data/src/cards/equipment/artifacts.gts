@@ -1104,7 +1104,7 @@ define card {
  * （角色最多装备1件「圣遗物」）
  */
 define card {
-  id 133086 as FakeTenacityOfTheMillelith;
+  id 133086 as FakeTenacityOfTheMillelith; // 骗骗花
   reserved;
 }
 
@@ -1117,7 +1117,7 @@ define card {
  * （角色最多装备1件「圣遗物」）
  */
 define card {
-  id 133095 as FakeGildedDreams;
+  id 133095 as FakeGildedDreams; // 骗骗花
   reserved;
 }
 

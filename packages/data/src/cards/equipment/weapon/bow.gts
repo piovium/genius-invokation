@@ -241,7 +241,7 @@ define card {
  * （「弓」角色才能装备。角色最多装备1件「武器」）
  */
 define card {
-  id 133093 as AsmosBow;
+  id 133093 as AsmosBow; // 骗骗花
   reserved;
 }
 

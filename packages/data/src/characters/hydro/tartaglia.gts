@@ -37,6 +37,7 @@ define status {
     when :( :e.target.hasStatus(Riptide) );
     :e.increaseDamage(1);
   }
+  // 此处使用 increaseSkillDamage; 因为官方实现中，此穿透伤害是与增伤同时发生的，而非“使用技能后”
   on increaseSkillDamage {
     when :( :e.target.hasStatus(Riptide) );
     usage perRound, 2;
@@ -64,6 +65,9 @@ define status {
  */
 define status {
   id 112043 as Riptide;
+  // 当带有断流的角色被击倒时（也即断流弃置时）：
+  // - 若出战角色被击倒（稍后玩家需选择出战）： 则在下次切换角色后，为新的出战角色附属断流。
+  // - 否则直接为当前出战角色附属断流。
   on selfDispose {
     const active = :query($.my.active.includesDefeated);
     if (active?.variables.alive) {

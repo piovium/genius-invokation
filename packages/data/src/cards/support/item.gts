@@ -274,6 +274,6 @@ define card {
  * 【此卡含描述变量】
  */
 define card {
-  id 133096 as Lumenarystone;
+  id 133096 as Lumenarystone; // 骗骗花
   reserved;
 }

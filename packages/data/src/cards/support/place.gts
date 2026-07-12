@@ -175,7 +175,7 @@ define card {
       usage perRound, 2 {
         visible;
       };
-      :abortPreview();
+      :abortPreview(); // 官方也中断，因为预览的时候骰子数目不对
       :generateDice(DiceType.Omni, 1);
     }
   }
@@ -599,7 +599,7 @@ define card {
  * 我方舍弃或调和1张牌后：此牌累积1点「实验进展」。每当「实验进展」达到3点、6点、9点时，就获得1个万能元素。然后，如果「实验进展」至少为9点，则弃置此牌。
  */
 define card {
-  id 133087 as FormerSiteOfTheCentralLaboratory;
+  id 133087 as FormerSiteOfTheCentralLaboratory; // 骗骗花
   reserved;
 }
 
@@ -611,7 +611,7 @@ define card {
  * 可用次数：2
  */
 define card {
-  id 133088 as FakeFavoniusCathedral;
+  id 133088 as FakeFavoniusCathedral; // 骗骗花
   reserved;
 }
 
@@ -662,7 +662,7 @@ define card {
   id 321024 as ScionsOfTheCanopy;
   since "v5.2.0";
   support place {
-    variable point, 1;
+    variable point, 1; // 神奇
     on playCard {
       when :( !:isInInitialPile(:e.card) && :e.card.diceCost() >= :getVariable("point") );
       :generateDice("randomElement", 1);

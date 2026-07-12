@@ -51,7 +51,7 @@ define card {
   undiscoverable;
   technique {
     tags barrier;
-    variable barrierUsage, 0;
+    variable barrierUsage, 0; // no io hint for now
     on decreaseDamaged {
       when :( :self.master.energy > 0 );
       usage perRound, 2;

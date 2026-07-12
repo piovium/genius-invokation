@@ -108,7 +108,7 @@ define skill {
   if (elements.size === 2 && elements.has(DiceType.Hydro) && elements.has(DiceType.Dendro)) {
     :combatStatus(GoldenChalicesBounty);
   }
-  :damage(DamageType.Hydro, 3);
+  :damage(DamageType.Hydro, 3); // 先给 buff 后出伤，此时产出的草原核也是丰穰之核
 }
 
 /**

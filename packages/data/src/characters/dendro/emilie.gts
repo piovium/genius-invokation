@@ -51,6 +51,7 @@ define summon {
     usage 3 {
       append 6;
     };
+    // 节末升级二阶时仍然使用此技能定义，故检测自身为二阶时改为2伤
     if (:self.definition.id === LumidouceCaseLevel2) {
       :damage(DamageType.Dendro, 2);
     }

@@ -39,6 +39,8 @@ define status {
     :emitCustomEvent(TalentShouldDrawCard);
   }
   on selfDispose {
+    // 雷音权现对已带有雷鸣探知的角色造成伤害会弃置雷鸣探知
+    // 但此行为也会触发天赋的抽牌
     :emitCustomEvent(TalentShouldDrawCard);
   }
 }

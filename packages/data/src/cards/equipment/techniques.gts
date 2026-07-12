@@ -177,6 +177,7 @@ define status {
   variable effect, 1 {
     append;
   };
+  // 目标本身实际并无效果
 }
 
 /**

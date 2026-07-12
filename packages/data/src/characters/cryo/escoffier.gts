@@ -160,7 +160,7 @@ define card {
   id 111159 as AllspectrumMultiuseCookingMek;
   since "v6.2.0";
   undiscoverable;
-  support place {
+  support place { // 神秘
     on reaction {
       when :( :e.relatedTo(DamageType.Cryo) );
       listenTo all;

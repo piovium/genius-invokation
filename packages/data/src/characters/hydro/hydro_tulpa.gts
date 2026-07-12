@@ -124,6 +124,7 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   noEnergy;
+  // 出于神秘原因，e的所有效果，包括获得充能，都以使用技能后的方式写出
 }
 
 /**
@@ -149,6 +150,7 @@ define skill {
 define skill {
   id 22064 as BranchingFlow;
   skillType passive {
+    // 分流：每回合一次在召唤物离场时召唤半幻人
     on dispose {
       when :( :e.entity.definition.type === "summon" &&
           !([HalfTulpa01, HalfTulpa02, HalfTulpa03, HalfTulpa04] as number[]).includes(:e.entity.definition.id) &&
@@ -168,6 +170,7 @@ define skill {
         :summon(HalfTulpa04);
       }
     }
+    // 汛波：造成2点水元素伤害；如果自身生命值不低于2，就造成1点穿透伤害
     on useSkill {
       when :( :e.skill.definition.id === StormSurge );
       asSkillType elemental;
@@ -176,16 +179,19 @@ define skill {
         :damage(DamageType.Piercing, 1, "@self");
       }
     }
+    // 汛波：获得充能
     on useSkill {
       when :( :e.skill.definition.id === StormSurge );
       :gainEnergy(1, "@self");
     }
+    // 汛波：随机触发一个召唤物的结束阶段技能
     on useSkill {
       when :( :e.skill.definition.id === StormSurge && :$(`my summons`) );
       :abortPreview();
       const target = :random(:player.summons);
       :triggerEndPhaseSkill(target);
     }
+    // 洪啸：触发所有召唤物的结束阶段技能
     on useSkill {
       when :( :e.skill.definition.id === ThunderingTide );
       for (const summon of :$$(`my summons`)) {

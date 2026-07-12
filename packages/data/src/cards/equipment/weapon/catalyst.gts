@@ -268,7 +268,7 @@ define card {
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
 define card {
-  id 133099 as TombOfTheEternalFlow;
+  id 133099 as TombOfTheEternalFlow; // 骗骗花
   reserved;
 }
 

@@ -232,7 +232,7 @@ define card {
  * （「单手剑」角色才能装备。角色最多装备1件「武器」）
  */
 define card {
-  id 133089 as SkywardSword;
+  id 133089 as SkywardSword; // 骗骗花
   reserved;
 }
 
@@ -250,7 +250,7 @@ define card {
   cost DiceType.Aligned, 2;
   weapon sword {
     tags barrier;
-    variable barrierUsage, 0;
+    variable barrierUsage, 0; // no io hint for now
     variable solidarity, 0;
     on decreaseDamaged {
       when :( :player.hands.length > 0 );

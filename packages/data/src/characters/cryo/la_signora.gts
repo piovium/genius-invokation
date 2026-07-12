@@ -155,7 +155,7 @@ define skill {
     on battleBegin {
       :characterStatus(IcesealedCrimsonWitchOfEmbers);
     }
-    on revive {
+    on revive { // 女士在转变形态前被击倒，复活后会重新附着复活甲
       :characterStatus(IcesealedCrimsonWitchOfEmbers);
     }
   }
@@ -168,7 +168,7 @@ define skill {
  * 
  */
 define skill {
-  id 21025 as InfernosAwakening;
+  id 21025 as InfernosAwakening; // 定义为：当移除冰封的炽炎魔女时，转换角色形态
   skillType passive {
     on dispose {
       when :( :e.entity.definition.id === IcesealedCrimsonWitchOfEmbers );
@@ -208,7 +208,7 @@ define card {
   cost DiceType.Aligned, 3;
   talent [LaSignora, CrimsonWitchOfEmbers], active {
     tags barrier;
-    variable barrierUsage, 0;
+    variable barrierUsage, 0; // no io hint for now
     on enter {
       :generateDice(:self.master.element(), 3);
     }

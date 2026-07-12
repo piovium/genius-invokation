@@ -290,7 +290,7 @@ define card {
   cost DiceType.Aligned, 2;
   weapon claymore {
     tags barrier;
-    variable barrierUsage, 0;
+    variable barrierUsage, 0; // no io hint for now
     variable stoic, 0;
     on decreaseDamaged {
       when :( :player.hands.length > 0 );

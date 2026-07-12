@@ -78,6 +78,7 @@ define card {
         :dispose();
       }
     }
+    // 切人导致准备中状态消失时，自己如果可用次数耗尽也消失
     on switchActive {
       when :<boolean>{
         const ch = :self.master;

@@ -49,7 +49,7 @@ define combatStatus {
   id 111072 as IcyQuill01;
   conflictWith 111071;
   variable noUsageEffect, 1 {
-    visible false;
+    visible false; // 每回合一次不消耗可用次数
   };
   on roundEnd {
     :setVariable("noUsageEffect", 1);

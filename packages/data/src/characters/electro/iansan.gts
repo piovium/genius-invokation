@@ -131,6 +131,7 @@ define skill {
       }
       :addVariable("gainNightsoulPassiveUsagePerRound", -1);
     };
+    // 我方角色准备技能
     on enterRelative {
       when :( :self.hasNightsoulsBlessing() &&
           :getVariable("gainNightsoulPassiveUsagePerRound") &&
@@ -139,11 +140,13 @@ define skill {
       listenTo samePlayer;
       :callSnippet();
     }
+    // 或累计2次……
     on switchActive {
       when :( :self.hasNightsoulsBlessing() );
       listenTo samePlayer;
       :addVariable("switchCount", 1);
     }
+    // ……「切换角色」后
     on switchActive {
       when :( :self.hasNightsoulsBlessing() &&
           :getVariable("gainNightsoulPassiveUsagePerRound") &&

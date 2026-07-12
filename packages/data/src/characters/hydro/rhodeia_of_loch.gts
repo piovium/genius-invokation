@@ -83,7 +83,7 @@ define summon {
  * 蛙：抵挡1点出战角色受到的伤害，可用1次；耗尽后，在结束阶段造成2点水元素伤害。
  */
 define summon {
-  id 122010 as OceanicMimicRaptorPreview;
+  id 122010 as OceanicMimicRaptorPreview; // 这是纯水幻形·飞鸢的预览版本
   hint DamageType.Hydro, 1;
   on endPhase {
     usage 3;
@@ -101,7 +101,7 @@ define summon {
  * 蛙：抵挡1点出战角色受到的伤害，可用1次；耗尽后，在结束阶段造成2点水元素伤害。
  */
 define summon {
-  id 122014 as OceanicMimicFrogPreview;
+  id 122014 as OceanicMimicFrogPreview; // 这是纯水幻形·蛙的预览版本
   hint DamageType.Hydro, "2";
   on decreaseDamaged {
     when :( :e.target.isActive() );

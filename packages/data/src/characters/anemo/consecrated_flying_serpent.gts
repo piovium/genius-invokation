@@ -115,7 +115,7 @@ define skill {
  */
 define skill {
   id 25035 as SquallDrawCardsCounter;
-  skillType passive {
+  skillType passive { // keep for v4.7.0
     variable elementalSkillDrawCardsCount, 0;
     on roundEnd {
       :setVariable("elementalSkillDrawCardsCount", 0);

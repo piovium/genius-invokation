@@ -306,7 +306,7 @@ export const [RainbowMacarons, RainbowMacaronsInEffect] = card(333015)
  * （每回合每个角色最多食用1次「料理」）
  */
 define card {
-  id 133085 as TandooriGrilledChicken;
+  id 133085 as TandooriGrilledChicken; // 骗骗花
   reserved;
 }
 
@@ -318,7 +318,7 @@ define card {
  * （每回合每个角色最多食用1次「料理」）
  */
 define card {
-  id 133097 as SweetMaam;
+  id 133097 as SweetMaam; // 骗骗花
   reserved;
 }
 
@@ -330,7 +330,7 @@ define card {
  * （每回合每个角色最多食用1次「料理」）
  */
 define card {
-  id 133098 as DeliciousMacarons;
+  id 133098 as DeliciousMacarons; // 骗骗花
   reserved;
 }
 

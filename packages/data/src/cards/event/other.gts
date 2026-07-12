@@ -1508,7 +1508,7 @@ define card {
  */
 define combatStatus {
   id 302219 as private ThironasGoodWill;
-  on endPhase {
+  on endPhase { // 文本有误
     usage 3;
     const cards = getMelusineEventCards(:data.entities);
     const card = :random(cards);
@@ -1753,7 +1753,7 @@ export const SaurianDiningBuddies = card(332039)
  * 生成6张海底宝藏，随机地置入我方牌库中。
  */
 define card {
-  id 133090 as FakeUnderwaterTreasureHunt;
+  id 133090 as FakeUnderwaterTreasureHunt; // 骗骗花
   reserved;
 }
 
@@ -1764,7 +1764,7 @@ define card {
  * 对方支援区和召唤物区的卡牌数量总和至少为4时，才能打出：双方所有召唤物的可用次数-1。
  */
 define card {
-  id 133091 as FakeControlledDirectionalBlast;
+  id 133091 as FakeControlledDirectionalBlast; // 骗骗花
   reserved;
 }
 
@@ -1775,7 +1775,7 @@ define card {
  * 生成4个不同类型的基础元素骰。
  */
 define card {
-  id 133094 as TheTaleOfVennessa;
+  id 133094 as TheTaleOfVennessa; // 骗骗花
   reserved;
 }
 
@@ -1930,14 +1930,14 @@ define card {
   since "v5.7.0";
   cost DiceType.Void, 3;
   on selfDiscard {
-      if(:e.area.type === "hands"){
-        :drawCards(1);
+    if (:e.area.type === "hands") {
+      :drawCards(1);
     }
   }
-    :disposeMaxCostHands(2);
-    const handsLength = :player.hands.length;
-    if (handsLength < 4) {
-      :drawCards(4 - handsLength);
+  :disposeMaxCostHands(2);
+  const handsLength = :player.hands.length;
+  if (handsLength < 4) {
+    :drawCards(4 - handsLength);
   }
 }
 
@@ -1952,7 +1952,7 @@ define status {
   on deductOmniDiceSkill {
     when :( :e.isSkillType("elemental") );
     usage 1 {
-      append;
+      append; // 所谓“不可叠加”是指无法一次减多个骰子，但是可用次数可以叠加
     };
     :e.deductOmniCost(1);
   }
