@@ -172,7 +172,7 @@ export const TechniqueSkillViewModel = InitiativeSkillViewModel
     }>((model, positionals, subView) => {
       const options = UsageVM.parse(subView);
       if (positionals[0] === "perRound") {
-        model.setUsage(positionals[1], { ...options, perRound: true });
+        model.setUsage(positionals[1], { visible: false, ...options, perRound: true });
       } else {
         model.setUsage(positionals[0], { ...options, perRound: false });
       }
