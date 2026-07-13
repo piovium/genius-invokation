@@ -14,13 +14,13 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Card, $ } from "#test";
-import { ScionsOfTheCanopy } from "@gi-tcg/data/internal/cards/support/place";
+import { ScionsOfTheCanopy } from "@gi-tcg/data/internal/cards/support/place.gts";
 import {
   BlazingTrail,
   FlamestriderBlazingTrail,
   Mavuika,
   TheNamedMoment,
-} from "@gi-tcg/data/internal/characters/pyro/mavuika";
+} from "@gi-tcg/data/internal/characters/pyro/mavuika.gts";
 import { expect, test } from "vitest";
 
 test("mavuika: play 'E' card trigger ScionsOfTheCanopy", async () => {

@@ -31,6 +31,7 @@ import {
   type SkillBuilderMetaBase,
   type StrictInitiativeSkillEventArg,
   type WritableMetaOf,
+  type DetailedEventArgOf,
 } from "../../builder/skill";
 import {
   SkillContext,
@@ -383,7 +384,11 @@ export const TriggeredSkillViewModel = defineViewModel(
     }>((model, positionals, subView) => {
       const options = UsageVM.parse(subView);
       if (positionals[0] === "perRound") {
-        model.setUsage(positionals[1], { visible: false, ...options, perRound: true });
+        model.setUsage(positionals[1], {
+          visible: false,
+          ...options,
+          perRound: true,
+        });
       } else {
         model.setUsage(positionals[0], { ...options, perRound: false });
       }
@@ -409,6 +414,41 @@ export const TriggeredSkillViewModel = defineViewModel(
     }),
   }),
   DEFAULT_TRIGGERED_SKILL_VM_META,
+);
+
+class DisposeSameModel extends TriggeredSkillModel {
+  constructor(caller: ICaller) {
+    super(caller, "selfDiscard");
+  }
+}
+
+const DEFAULT_DISPOSE_SAME_VM_META = {
+  ...DEFAULT_TRIGGERED_SKILL_VM_META,
+  eventArgType: null! as DetailedEventArgOf<"selfDiscard">,
+  disposeSameSkill: true,
+} as const satisfies TriggeredSkillVMMeta & { disposeSameSkill: true };
+export type DefaultDisposeSameVMMeta = typeof DEFAULT_DISPOSE_SAME_VM_META;
+
+export const DisposeSameVM = defineViewModel(
+  DisposeSameModel,
+  (h) => ({
+    when: h.attribute<{
+      <Meta extends TriggeredSkillVMMeta>(
+        this: AR.This<Meta>,
+        filter: TriggeredSkillFilterOfVM<Meta>,
+      ): AR.Done;
+    }>((model, [filter]) => {
+      model.userFilters.push(filter);
+    }),
+    abortPreview: h.simpleAttribute({
+      uniqueKey: "abortPreview",
+    })(function () {
+      this.preOperations.push(function (c) {
+        c.abortPreview();
+      });
+    }),
+  }),
+  DEFAULT_DISPOSE_SAME_VM_META,
 );
 
 export type TargetGetter = (ctx: SkillContext<any>) => AnyState[];

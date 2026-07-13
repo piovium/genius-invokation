@@ -14,8 +14,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { $, Character, CombatStatus, ref, setup, State, Status } from "#test";
-import { Declension, HeartstopperStrike, ShikanoinHeizou } from "@gi-tcg/data/internal/characters/anemo/shikanoin_heizou";
-import { AurousBlaze, Yoimiya } from "@gi-tcg/data/internal/characters/pyro/yoimiya";
+import { Declension, HeartstopperStrike, ShikanoinHeizou } from "@gi-tcg/data/internal/characters/anemo/shikanoin_heizou.gts";
+import { AurousBlaze, Yoimiya } from "@gi-tcg/data/internal/characters/pyro/yoimiya.gts";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";
 

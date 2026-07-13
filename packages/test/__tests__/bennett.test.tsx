@@ -26,11 +26,11 @@ import {
 import {
   Bennett,
   InspirationField01,
-} from "@gi-tcg/data/internal/characters/pyro/bennett";
+} from "@gi-tcg/data/internal/characters/pyro/bennett.gts";
 import {
   ElectroHypostasis,
   RockpaperscissorsCombo,
-} from "@gi-tcg/data/internal/characters/electro/electro_hypostasis";
+} from "@gi-tcg/data/internal/characters/electro/electro_hypostasis.gts";
 import { test } from "vitest";
 import { Aura } from "@gi-tcg/typings";
 

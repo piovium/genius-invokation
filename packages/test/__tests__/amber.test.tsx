@@ -14,10 +14,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Status, Equipment, Summon, CombatStatus, $ } from "#test";
-import { WindAndFreedomInEffect } from "@gi-tcg/data/internal/cards/event/other";
-import { Fischl, Oz } from "@gi-tcg/data/internal/characters/electro/fischl";
-import { Mualani, NightRealmsGiftCrestsAndTroughs } from "@gi-tcg/data/internal/characters/hydro/mualani";
-import { Amber, BaronBunny, BunnyTriggered, Sharpshooter } from "@gi-tcg/data/internal/characters/pyro/amber";
+import { WindAndFreedomInEffect } from "@gi-tcg/data/internal/cards/event/other.gts";
+import { Fischl, Oz } from "@gi-tcg/data/internal/characters/electro/fischl.gts";
+import { Mualani, NightRealmsGiftCrestsAndTroughs } from "@gi-tcg/data/internal/characters/hydro/mualani.gts";
+import { Amber, BaronBunny, BunnyTriggered, Sharpshooter } from "@gi-tcg/data/internal/characters/pyro/amber.gts";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";
 

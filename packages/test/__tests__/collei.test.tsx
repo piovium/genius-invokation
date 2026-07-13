@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, State, Character, Card } from "#test";
-import { Collei, FloralSidewinder } from "@gi-tcg/data/internal/characters/dendro/collei";
+import { Collei, FloralSidewinder } from "@gi-tcg/data/internal/characters/dendro/collei.gts";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";
 

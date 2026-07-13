@@ -905,12 +905,18 @@ function applyCardStep(
       frame.block.addBlock(block);
       return;
     }
+    case "onHCI": {
+      requireArgs(step, 1);
+      const block = new GtsBlock("on selfHandCardInserted");
+      block.addAction(convertAction(step.args[0]!));
+      frame.block.addBlock(block);
+      return;
+    }
     case "descriptionOnDraw":
     case "descriptionOnHCI":
     case "doSameWhenDisposed":
     case "equipment":
     case "onArbitraryEvent":
-    case "onHCI":
     case "toCombatStatus":
     case "toStatus":
       throw unsupported(step);

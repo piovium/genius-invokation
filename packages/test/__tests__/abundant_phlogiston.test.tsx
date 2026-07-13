@@ -19,8 +19,8 @@ import {
   CoolingTreatment,
   Mualani,
   SurfsharkWavebreaker,
-} from "@gi-tcg/data/internal/characters/hydro/mualani";
-import { AbundantPhlogiston } from "@gi-tcg/data/internal/cards/event/other";
+} from "@gi-tcg/data/internal/characters/hydro/mualani.gts";
+import { AbundantPhlogiston } from "@gi-tcg/data/internal/cards/event/other.gts";
 import { expect } from "vitest";
 
 test("abundant phlogiston: mualani", async () => {

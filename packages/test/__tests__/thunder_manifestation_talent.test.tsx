@@ -14,14 +14,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Status, Card, Equipment, $ } from "#test";
-import { MondstadtHashBrown } from "@gi-tcg/data/internal/cards/event/food";
+import { MondstadtHashBrown } from "@gi-tcg/data/internal/cards/event/food.gts";
 import { test } from "vitest";
 import {
   ThunderManifestation,
   GrievingEcho,
   LightningRod,
   StrifefulLightning,
-} from "@gi-tcg/data/internal/characters/electro/thunder_manifestation";
+} from "@gi-tcg/data/internal/characters/electro/thunder_manifestation.gts";
 
 test("thunder manifestation: talent works on 'disposed' status", async () => {
   const target = ref();

@@ -14,15 +14,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { $, Card, Character, DeclaredEnd, ref, setup, State, Status } from "#test";
-import { TeyvatFriedEgg } from "@gi-tcg/data/internal/cards/event/food";
+import { TeyvatFriedEgg } from "@gi-tcg/data/internal/cards/event/food.gts";
 import {
   IcesealedCrimsonWitchOfEmbers,
   LaSignora,
-} from "@gi-tcg/data/internal/characters/cryo/la_signora";
+} from "@gi-tcg/data/internal/characters/cryo/la_signora.gts";
 import {
   Chevreuse,
   RingOfBurstingGrenades,
-} from "@gi-tcg/data/internal/characters/pyro/chevreuse";
+} from "@gi-tcg/data/internal/characters/pyro/chevreuse.gts";
 import { Aura } from "@gi-tcg/typings";
 import { expect } from "vitest";
 import { test } from "vitest";

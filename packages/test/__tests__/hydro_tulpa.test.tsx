@@ -15,8 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Card } from "#test";
-import { TandooriRoastChicken } from "@gi-tcg/data/internal/cards/event/food";
-import { HydroTulpa, StormSurge } from "@gi-tcg/data/internal/characters/hydro/hydro_tulpa";
+import { TandooriRoastChicken } from "@gi-tcg/data/internal/cards/event/food.gts";
+import { HydroTulpa, StormSurge } from "@gi-tcg/data/internal/characters/hydro/hydro_tulpa.gts";
 import { test } from "vitest";
 
 test("hydro tulpa: E can be increaseSkillDamage'd", async () => {

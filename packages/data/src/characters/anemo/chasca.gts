@@ -93,19 +93,17 @@ export const ShadowhuntShell = card(115113)
  * @description
  * 打出或从手牌中舍弃此牌时：优先对敌方出战角色造成1点火元素伤害，然后将一张追影弹随机放进牌库。
  */
-export const ShiningShadowhuntShellPyro = card(115114)
-  .since("v5.7.0")
-  .undiscoverable()
-  .costPyro(3)
-  .doSameWhenDisposed({
-    filter: (c, e) => e.from.type === "hands",
-    prependOp: (c) => c.abortPreview(),
-  })
-  .damage(DamageType.Pyro, 1, $.macros.oppActivePrioritized)
-  .do((c) => {
-    c.createPileCards(ShadowhuntShell, 1, "random");
-  })
-  .done();
+define card {
+  id 115114 as ShiningShadowhuntShellPyro;
+  undiscoverable;
+  cost DiceType.Pyro, 3;
+  on selfDiscard, "=play" {
+    when :( :e.from.type === "hands" );
+    abortPreview;
+  }
+  :damage(DamageType.Pyro, 1, $.macros.oppActivePrioritized);
+  :createPileCards(ShadowhuntShell, 1, "random");
+}
 
 /**
  * @id 115115

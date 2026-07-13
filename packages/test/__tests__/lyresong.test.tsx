@@ -14,10 +14,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Character, ref, setup, State, Equipment, Card, $ } from "#test";
-import { GildedDreams, TenacityOfTheMillelith } from "@gi-tcg/data/internal/cards/equipment/artifacts";
-import { LeaveItToMe, Lyresong, TheBoarPrincess, TheBoarPrincessInEffect } from "@gi-tcg/data/internal/cards/event/other";
-import { Ganyu } from "@gi-tcg/data/internal/characters/cryo/ganyu";
-import { KamisatoAyaka } from "@gi-tcg/data/internal/characters/cryo/kamisato_ayaka";
+import { GildedDreams, TenacityOfTheMillelith } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
+import { LeaveItToMe, Lyresong, TheBoarPrincess, TheBoarPrincessInEffect } from "@gi-tcg/data/internal/cards/event/other.gts";
+import { Ganyu } from "@gi-tcg/data/internal/characters/cryo/ganyu.gts";
+import { KamisatoAyaka } from "@gi-tcg/data/internal/characters/cryo/kamisato_ayaka.gts";
 import { expect, test } from "vitest";
 
 test("lyresong: first play deduct 2 omni", async () => {
