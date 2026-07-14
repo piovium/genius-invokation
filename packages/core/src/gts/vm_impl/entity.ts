@@ -196,7 +196,7 @@ export class EntityModel implements ICaller {
     if (this.reserved) {
       return RESERVED;
     } else if (this.type === "character") {
-      const skills = [...this.skillList];
+      const skills = this.getSkills();
       return {
         __definition: "passiveSkills",
         type: "passiveSkill",
