@@ -16,17 +16,22 @@
 
 import { Character, ref, setup, State, Equipment, Card } from "#test";
 import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona";
-import { expect, test } from "vitest";
+import { test } from "vitest";
 
 test("mona: fast switch passive", async () => {
   const mona = ref();
   const target = ref();
   const c = setup(
     <State>
-      <Character my ref={mona} def={Mona} />
+      <Character my active ref={mona} def={Mona} />
       <Character my ref={target} />
     </State>,
   );
   await c.me.switch(target);
+  c.expect(mona).toHaveVariable({ usagePerRound1: 0 });
+
   await c.me.end();
+  await c.opp.end();
+
+  c.expect(mona).toHaveVariable({ usagePerRound1: 1 });
 });
