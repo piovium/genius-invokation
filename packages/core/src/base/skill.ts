@@ -1073,7 +1073,9 @@ export class EnterEventArg extends EntityEventArg {
     super(state, enterInfo.newState);
   }
 
-  get overridden() {
+  get overridden():
+    | ((EntityState | AttachmentState) & { [NoReactiveSymbol]: true })
+    | null {
     const state = getRaw(this.enterInfo.overridden);
     if (state) {
       return { ...state, [NoReactiveSymbol]: true as const };
