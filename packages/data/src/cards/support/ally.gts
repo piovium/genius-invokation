@@ -553,30 +553,31 @@ export const DisposedSupportCountExtension = extension(322022, {
  * 我方角色使用「元素爆发」后：如果「阅历」至少为6，则弃置此牌，对我方出战角色附属沙与梦。
  * 【此卡含描述变量】
  */
-export const Jeht = card(322022)
-  .since("v4.4.0")
-  .costSame(1)
-  .associateExtension(DisposedSupportCountExtension)
-  .replaceDescription("[GCG_TOKEN_COUNTER]", (_, { area }, ext) => ext.disposedSupportCount[area.who])
-  .support("ally")
-  .associateExtension(DisposedSupportCountExtension)
-  .variable("experience", 0)
-  .on("enter")
-  .do((c) => {
-    c.setVariable("experience", Math.min(c.getExtensionState().disposedSupportCount[c.self.who], 6));
-  })
-  .on("dispose", (c, e) => e.entity.definition.type === "support")
-  .do((c) => {
-    c.setVariable("experience", Math.min(c.getExtensionState().disposedSupportCount[c.self.who], 6));
-  })
-  .on("useSkill", (c, e) =>
-    e.isSkillType("burst") &&
-    !e.skillCaller.cast<"character">().hasStatus(SandsAndDream) && // 多个婕德不重复触发
-    c.getVariable("experience") >= 6,
-  )
-  .characterStatus(SandsAndDream, "my active")
-  .dispose()
-  .done();
+define card {
+  id 322022 as Jeht;
+  since "v4.4.0";
+  cost DiceType.Aligned, 1;
+  associateExtension DisposedSupportCountExtension;
+  replaceDescription "[GCG_TOKEN_COUNTER]", ((_, { area }, ext) => ext.disposedSupportCount[area.who]);
+  support ally {
+    associateExtension DisposedSupportCountExtension;
+    variable experience, 0;
+    on enter {
+      :setVariable("experience", Math.min(:getExtensionState().disposedSupportCount[:self.who], 6));
+    }
+    on dispose {
+      when :( :e.entity.definition.type === "support" );
+      :setVariable("experience", Math.min(:getExtensionState().disposedSupportCount[:self.who], 6));
+    }
+    on useSkill {
+      when :( :e.isSkillType("burst") &&
+          !:e.skillCaller.cast<"character">().hasStatus(SandsAndDream) && // 多个婕德不重复触发
+          :getVariable("experience") >= 6 );
+      :characterStatus(SandsAndDream, "my active");
+      :dispose();
+    }
+  }
+}
 
 const DamageTypeCountExtension = extension(322023, {
     damages: type.declare<Pair<DamageType[]>>().type("pair<number[]>")
@@ -602,34 +603,34 @@ const DamageTypeCountExtension = extension(322023, {
  * 结束阶段：如果「侍从的周到」至少为3，则弃置此牌，然后抓「侍从的周到」点数的牌。
  * 【此卡含描述变量】
  */
-export const SilverAndMelus = card(322023)
-  .since("v4.4.0")
-  .costSame(1)
-  .associateExtension(DamageTypeCountExtension)
-  .replaceDescription("[GCG_TOKEN_COUNTER]", (_, { area }, ext) => ext.damages[flip(area.who)].length)
-  .support("ally")
-  .associateExtension(DamageTypeCountExtension)
-  .variable("count", 0)
-  .on("enter")
-  .do((c) => {
-    const count = c.getExtensionState().damages[flip(c.self.who)].length;
-    c.setVariable("count", Math.min(count, 4));
-  })
-  .on("damaged", (c, e) => !e.target.isMine())
-  .listenToAll()
-  .do((c) => {
-    const count = c.getExtensionState().damages[flip(c.self.who)].length;
-    c.setVariable("count", Math.min(count, 4));
-  })
-  .on("endPhase")
-  .do((c) => {
-    const count = c.getVariable("count");
-    if (count >= 3) {
-      c.drawCards(count);
-      c.dispose();
+define card {
+  id 322023 as SilverAndMelus;
+  since "v4.4.0";
+  cost DiceType.Aligned, 1;
+  associateExtension DamageTypeCountExtension;
+  replaceDescription "[GCG_TOKEN_COUNTER]", ((_, { area }, ext) => ext.damages[flip(area.who)].length);
+  support ally {
+    associateExtension DamageTypeCountExtension;
+    variable count, 0;
+    on enter {
+      const count = :getExtensionState().damages[flip(:self.who)].length;
+      :setVariable("count", Math.min(count, 4));
     }
-  })
-  .done();
+    on damaged {
+      when :( !:e.target.isMine() );
+      listenTo all;
+      const count = :getExtensionState().damages[flip(:self.who)].length;
+      :setVariable("count", Math.min(count, 4));
+    }
+    on endPhase {
+      const count = :getVariable("count");
+      if (count >= 3) {
+        :drawCards(count);
+        :dispose();
+      }
+    }
+  }
+}
 
 /**
  * @id 302201

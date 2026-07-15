@@ -2256,14 +2256,15 @@ define summon {
  * 可用次数：1）
  * 【此卡含描述变量】
  */
-export const FellDragonsAwakening = card(332051)
-  .since("v6.0.0")
-  .costSame(2)
-  .associateExtension(DisposedSupportAndSummonsCountExtension)
-  .replaceDescription("[GCG_TOKEN_COUNTER]", (c, { area }, ext) => ext.disposedSupportCount[area.who])
-  .replaceDescription("[GCG_TOKEN_COUNTER_2]", (c, { area }, ext) => ext.disposedSummonsCount[area.who])
-  .summon(FellDragon)
-  .done();
+define card {
+  id 332051 as FellDragonsAwakening;
+  since "v6.0.0";
+  cost DiceType.Aligned, 2;
+  associateExtension DisposedSupportAndSummonsCountExtension;
+  replaceDescription "[GCG_TOKEN_COUNTER]", ((c, { area }, ext) => ext.disposedSupportCount[area.who]);
+  replaceDescription "[GCG_TOKEN_COUNTER_2]", ((c, { area }, ext) => ext.disposedSummonsCount[area.who]);
+  :summon(FellDragon);
+}
 
 /**
  * @id 332052

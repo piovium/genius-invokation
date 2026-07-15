@@ -90,6 +90,29 @@ export interface IParentModel {
   associatedExtensionId: number | null;
 }
 
+export interface IDescriptionReplaceable {
+  descriptionDictionary: Writable<DescriptionDictionary>;
+  associatedExtensionId: number | null;
+}
+
+export function addDescriptionReplacement(
+  model: IDescriptionReplaceable,
+  key: DescriptionDictionaryKey,
+  getter: EntityDescriptionDictionaryGetter<any>,
+) {
+  if (Reflect.has(model.descriptionDictionary, key)) {
+    throw new GiTcgDataError(`Description key ${key} already exists`);
+  }
+  const extId = model.associatedExtensionId;
+  const entry: DescriptionDictionaryEntry = function (st, id) {
+    const ext = st.extensions.find((ext) => ext.definition.id === extId);
+    const self = getEntityById(st, id) as EntityState;
+    const area = getEntityArea(st, id);
+    return String(getter(st, { ...self, area }, ext?.state));
+  };
+  model.descriptionDictionary[key] = entry;
+}
+
 export class EntityModel implements ICaller {
   reserved = false;
   usagePerRoundIndex = 0;
@@ -120,24 +143,6 @@ export class EntityModel implements ICaller {
 
   getSubId(): number {
     return getSubId(this.id);
-  }
-
-  addDescriptionReplacement(
-    key: DescriptionDictionaryKey,
-    getter: EntityDescriptionDictionaryGetter<any>,
-  ) {
-    if (Reflect.has(this.descriptionDictionary, key)) {
-      throw new GiTcgDataError(`Description key ${key} already exists`);
-    }
-    const extId = this.associatedExtensionId;
-    const entry: DescriptionDictionaryEntry = function (st, id) {
-      const ext = st.extensions.find((ext) => ext.definition.id === extId);
-      const self = getEntityById(st, id) as EntityState;
-      const area = getEntityArea(st, id);
-      return String(getter(st, { ...self, area }, ext?.state));
-    };
-    this.descriptionDictionary[key] = entry;
-    return this;
   }
 
   /** Return all skills including implicit roundEnd */
@@ -724,7 +729,7 @@ export const EntityViewModel = defineViewModel(
         getter: EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
       ): AR.Done;
     }>((model, [key, getter]) => {
-      model.addDescriptionReplacement(key, getter);
+      addDescriptionReplacement(model, key, getter);
     }),
     hint: h.attribute<{
       /**
@@ -772,7 +777,7 @@ export const EntityViewModel = defineViewModel(
       if (typeof text === "function") {
         const hintReplacement = "[GCG_TOKEN_HINT_TEXT]";
         model.hintText = `\${${hintReplacement}}`;
-        model.addDescriptionReplacement(hintReplacement, text);
+        addDescriptionReplacement(model, hintReplacement, text);
       } else if (typeof text === "number") {
         model.hintText = String(text);
       } else {

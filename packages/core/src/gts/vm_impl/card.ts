@@ -15,6 +15,8 @@
 
 import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
 import type {
+  DescriptionDictionary,
+  DescriptionDictionaryKey,
   EntityDefinition,
   SupportTag,
   VariableConfig,
@@ -27,6 +29,7 @@ import {
   type VersionInfo,
 } from "../../base/version";
 import {
+  addDescriptionReplacement,
   DEFAULT_ENTITY_VM_META,
   EntityModel,
   EntityViewModel,
@@ -70,6 +73,8 @@ import type { Computed, IUnorderedQuery } from "../../query/utils";
 import { getSubId } from "./sub_id";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 import type { InitiativeSkillEventArg } from "../../base/skill";
+import type { EntityDescriptionDictionaryGetter } from "../../builder/entity";
+import type { Writable } from "../../utils";
 
 const SATIATED_ID = 303300 as StatusHandle;
 
@@ -92,6 +97,7 @@ class CardModel extends InitiativeSkillModel implements ICaller {
   reserved = false;
   cardId!: number;
   skillType = "playCard" as const;
+  descriptionDictionary: Writable<DescriptionDictionary> = {};
 
   public get snippets() {
     return super.snippets;
@@ -231,7 +237,10 @@ class CardModel extends InitiativeSkillModel implements ICaller {
       obtainable: this.obtainable && (this.innerModel?.obtainable ?? true),
       disableTuning: this.disableTuning,
       hintText: this.innerModel?.hintText ?? null,
-      descriptionDictionary: this.innerModel?.descriptionDictionary ?? {},
+      descriptionDictionary: {
+        ...this.descriptionDictionary,
+        ...this.innerModel?.descriptionDictionary,
+      },
       version:
         this.innerModel?.versionInfo ??
         this.versionInfo ??
@@ -500,6 +509,15 @@ export const CardViewModel = InitiativeSkillViewModel
             .map((s) => s.latest());
         });
       }
+    }),
+    replaceDescription: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+        key: DescriptionDictionaryKey,
+        getter: EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
+      ): AR.Done;
+    }>((model, [key, getter]) => {
+      addDescriptionReplacement(model, key, getter);
     }),
 
     on: h.attribute<{

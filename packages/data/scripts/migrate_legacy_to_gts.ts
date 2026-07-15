@@ -912,6 +912,10 @@ function applyCardStep(
       frame.block.addBlock(block);
       return;
     }
+    case "replaceDescription":
+      requireArgs(step, 2);
+      frame.block.addLine(`replaceDescription ${renderArgs(step.args)};`);
+      return;
     case "descriptionOnDraw":
     case "descriptionOnHCI":
     case "doSameWhenDisposed":

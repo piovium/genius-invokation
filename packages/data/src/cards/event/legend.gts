@@ -100,35 +100,34 @@ export const [FreshWindOfFreedom, FreshWindOfFreedomInEffect] = card(330004)
  * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  * 【此卡含描述变量】
  */
-export const InEveryHouseAStove = card(330005)
-  .since("v4.2.0")
-  .legend()
-  .replaceDescription("[T]", (st) => st.roundNumber)
-  .filter((c) => {
-    if (c.roundNumber === 1) {
+define card {
+  id 330005 as InEveryHouseAStove;
+  since "v4.2.0";
+  legend;
+  replaceDescription "[T]", ((st) => st.roundNumber);
+  filter :{
+    if (:roundNumber === 1) {
       return new Set(
-        c.player.initialPile
+        :player.initialPile
           .filter((card) => card.tags.includes("talent"))
           .map((card) => card.id)
       ).size >= 2;
     } else {
       return true;
     }
-  })
-  .do((c) => {
-    if (c.roundNumber === 1) {
-      const initTalentDefIds = c.player.initialPile
-        .filter((card) => card.tags.includes("talent"))
-        .map((card) => card.id)
-      if (new Set(initTalentDefIds).size >= 2) {
-        c.drawCards(1, { withTag: "talent" });
-      }
-    } else {
-      const count = Math.min(c.roundNumber - 1, 4);
-      c.drawCards(count);
+  };
+  if (:roundNumber === 1) {
+    const initTalentDefIds = :player.initialPile
+      .filter((card) => card.tags.includes("talent"))
+      .map((card) => card.id)
+    if (new Set(initTalentDefIds).size >= 2) {
+      :drawCards(1, { withTag: "talent" });
     }
-  })
-  .done();
+  } else {
+    const count = Math.min(:roundNumber - 1, 4);
+    :drawCards(count);
+  }
+}
 
 /**
  * @id 300003
