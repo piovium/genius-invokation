@@ -196,7 +196,7 @@ export class EntityModel implements ICaller {
     if (this.reserved) {
       return RESERVED;
     } else if (this.type === "character") {
-      const skills = [...this.skillList];
+      const skills = this.getSkills();
       return {
         __definition: "passiveSkills",
         type: "passiveSkill",
@@ -581,7 +581,10 @@ export const EntityViewModel = defineViewModel(
     }>((model, [count], subView) => {
       const options = NightsoulVM.parse(subView);
       model.tags.push("nightsoulsBlessing");
-      model.setVariable("nightsouls", count, options);
+      model.setVariable("nightsoul", 0, {
+        append: { limit: count },
+        ...options,
+      });
       if (options.autoDispose) {
         const disposeSkillModel = new TriggeredSkillModel(
           model,
@@ -605,6 +608,7 @@ export const EntityViewModel = defineViewModel(
         max?: number,
       ): AR.DoneRewriteMeta<PushVar<Meta, "shield">>;
     }>((model, [count, max = count]) => {
+      model.tags.push("shield");
       model.setVariable("shield", count, {
         append: { limit: max },
       });
@@ -783,22 +787,23 @@ export const EntityViewModel = defineViewModel(
         mark: "crossCharacter",
         ...otherIds: number[]
       ): AR.Done;
-
     }>((model, args) => {
       // 自身入场时，将位于相同实体区域（默认）或此方所有角色（crossCharacter）上的目标实体移除
       let conflictIds = [model.id];
       let mode: "default" | "crossCharacter" = "default";
       if (args[0] === "crossCharacter") {
         mode = "crossCharacter";
-        conflictIds.push(...args.slice(1) as number[]);
+        conflictIds.push(...(args.slice(1) as number[]));
       } else {
-        conflictIds.push(...args as number[]);
+        conflictIds.push(...(args as number[]));
       }
       const enterSkill = new TriggeredSkillModel(model, "enter");
       enterSkill.id = model.getSubId();
       enterSkill.action = function (c) {
         const selfArea = c.self.area;
-        for (const entity of c.queryAll($.union(...conflictIds.map((id) => $.def(id))))) {
+        for (const entity of c.queryAll(
+          $.union(...conflictIds.map((id) => $.def(id))),
+        )) {
           if (entity.id === c.self.id || c.self.who !== entity.who) {
             continue;
           }
@@ -807,7 +812,10 @@ export const EntityViewModel = defineViewModel(
             enteringArea.type === "characters" &&
             selfArea.type === "characters"
           ) {
-            if (mode === "crossCharacter" || enteringArea.characterId === selfArea.characterId) {
+            if (
+              mode === "crossCharacter" ||
+              enteringArea.characterId === selfArea.characterId
+            ) {
               entity.dispose();
             }
           } else if (enteringArea.type === selfArea.type) {

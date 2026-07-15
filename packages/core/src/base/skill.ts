@@ -225,7 +225,7 @@ export interface SkillInfoOfContextConstruction extends SkillInfo {
   readonly associatedExtensionId: number | null;
   /**
    * 当访问 callSnippet 时查找的 snippet 表。
-   * 
+   *
    */
   readonly gtsSnippets: ReadonlyMap<string, (arg: SkillContext<any>) => void>;
 }
@@ -374,7 +374,10 @@ export class ModifyRollEventArg extends PlayerEventArg {
   fixDice(type: DiceType, count: number): void {
     count = Math.min(
       count,
-      Math.max(0, this.onTimeState.config.initialDiceCount - this._fixedDice.length),
+      Math.max(
+        0,
+        this.onTimeState.config.initialDiceCount - this._fixedDice.length,
+      ),
     );
     this._log += `${stringifyState(
       this.caller,
@@ -1070,8 +1073,14 @@ export class EnterEventArg extends EntityEventArg {
     super(state, enterInfo.newState);
   }
 
-  get overridden() {
-    return this.enterInfo.overridden;
+  get overridden():
+    | ((EntityState | AttachmentState) & { [NoReactiveSymbol]: true })
+    | null {
+    const state = getRaw(this.enterInfo.overridden);
+    if (state) {
+      return { ...state, [NoReactiveSymbol]: true as const };
+    }
+    return null;
   }
   toString(): string {
     return `${super.toString()}, overridden: ${!!this.enterInfo.overridden}`;

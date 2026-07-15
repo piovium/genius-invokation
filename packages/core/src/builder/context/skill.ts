@@ -818,16 +818,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
     if (!snippet) {
       throw new GiTcgDataError(`Snippet ${name} not found`);
     }
-    const { proxy, revoke } = Proxy.revocable(this, {
-      get(target, prop, receiver) {
-        if (prop === "eventArg") {
-          return arg;
-        }
-        return Reflect.get(target, prop, receiver);
-      },
-    });
-    snippet(proxy);
-    revoke();
+    const previousEventArg = this.eventArg;
+    Reflect.set(this, "eventArg", arg);
+    snippet(this);
+    Reflect.set(this, "eventArg", previousEventArg);
   }
 
   switchActive(target: CharacterTargetArg) {
