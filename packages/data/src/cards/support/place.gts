@@ -103,15 +103,19 @@ define card {
  * 结束阶段：治疗受伤最多的我方后台角色2点。
  * 可用次数：2
  */
-export const WangshuInn = card(321005)
-  .since("v3.3.0")
-  .costSame(2)
-  .support("place")
-  .hint(DamageType.Heal, "2")
-  .on("endPhase", (c) => c.$(`my standby with health < maxHealth`))
-  .usage(2)
-  .heal(2, "my standby characters order by health - maxHealth limit 1")
-  .done();
+define card {
+  id 321005 as WangshuInn;
+  since "v3.3.0";
+  cost DiceType.Aligned, 2;
+  support place {
+    hint DamageType.Heal, "2";
+    on endPhase {
+      when :( :$(`my standby with health < maxHealth`) );
+      usage 2;
+      :heal(2, "my standby characters order by health - maxHealth limit 1");
+    }
+  }
+}
 
 /**
  * @id 321006
@@ -120,15 +124,19 @@ export const WangshuInn = card(321005)
  * 结束阶段：治疗我方「出战角色」2点。
  * 可用次数：2
  */
-export const FavoniusCathedral = card(321006)
-  .since("v3.3.0")
-  .costSame(2)
-  .support("place")
-  .hint(DamageType.Heal, "2")
-  .on("endPhase", (c) => c.$(`my active with health < maxHealth`))
-  .usage(2)
-  .heal(2, "my active")
-  .done();
+define card {
+  id 321006 as FavoniusCathedral;
+  since "v3.3.0";
+  cost DiceType.Aligned, 2;
+  support place {
+    hint DamageType.Heal, "2";
+    on endPhase {
+      when :( :$(`my active with health < maxHealth`) );
+      usage 2;
+      :heal(2, "my active");
+    }
+  }
+}
 
 /**
  * @id 321007
@@ -188,15 +196,19 @@ define card {
  * 结束阶段：治疗所有我方角色1点。
  * 可用次数：2
  */
-export const SangonomiyaShrine = card(321009)
-  .since("v3.7.0")
-  .costSame(2)
-  .support("place")
-  .hint(DamageType.Heal, "1")
-  .on("endPhase", (c) => c.$(`my characters with health < maxHealth`))
-  .usage(2)
-  .heal(1, "all my characters")
-  .done();
+define card {
+  id 321009 as SangonomiyaShrine;
+  since "v3.7.0";
+  cost DiceType.Aligned, 2;
+  support place {
+    hint DamageType.Heal, "1";
+    on endPhase {
+      when :( :$(`my characters with health < maxHealth`) );
+      usage 2;
+      :heal(1, "all my characters");
+    }
+  }
+}
 
 /**
  * @id 321010

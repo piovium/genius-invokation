@@ -737,7 +737,7 @@ export const EntityViewModel = defineViewModel(
        * after my character/summon produced a swirling reaction.
        */
       <Meta extends EntityVMMeta>(
-        this: ThisWithType<Meta, "summon">,
+        this: ThisWithType<Meta, "summon" | "support">,
         icon: "swirled",
         text?:
           | number
@@ -745,7 +745,7 @@ export const EntityViewModel = defineViewModel(
           | EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
       ): AR.DoneRewriteMeta<PushVar<Meta, "hintIcon" | "swirledUsage">>;
       <Meta extends EntityVMMeta>(
-        this: ThisWithType<Meta, "summon">,
+        this: ThisWithType<Meta, "summon"| "support">,
         icon: DamageType | CombatStatusHandle,
         text?:
           | number

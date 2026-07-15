@@ -1031,11 +1031,6 @@ function applyEntityLikeStep(step: ChainStep, frame: Frame): boolean {
       if (step.args.length < 1 || step.args.length > 2) {
         throw new ConversionError(".hint() expects one or two arguments");
       }
-      if (isSupportBlock(frame)) {
-        throw new ConversionError(
-          ".hint() is not mapped inside support blocks",
-        );
-      }
       frame.block.addLine(`hint ${renderArgs(step.args)};`);
       return true;
     case "hintIcon":
