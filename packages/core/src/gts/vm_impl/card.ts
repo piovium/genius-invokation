@@ -112,6 +112,7 @@ class CardModel extends InitiativeSkillModel implements ICaller {
   obtainable = true;
   disableTuning = false;
   doSameWhenDisposedSkillModel: TriggeredSkillModel | null = null;
+  onlySelfHci = false;
   tags: EntityTag[] = [];
   versionInfo: VersionInfo | null = null;
 
@@ -203,25 +204,27 @@ class CardModel extends InitiativeSkillModel implements ICaller {
         }
       });
     }
-    this.preOperations.push(function (c) {
-      const self = c.self.cast<"support" | "equipment" | "eventCard">();
-      if (self.definition.type === "eventCard") {
-        c.dispose(self, {
-          reason: "eventCardPlayed",
-          direct: true,
-        });
-      } else {
-        // 打出时移除附属效果
-        for (const att of self.attachments) {
-          c.mutate({
-            type: "removeEntity",
-            from: c.self.area,
-            oldState: att,
-            reason: "other", // TODO: maybe better reason?
+    if (!this.onlySelfHci) {
+      this.preOperations.push(function (c) {
+        const self = c.self.cast<"support" | "equipment" | "eventCard">();
+        if (self.definition.type === "eventCard") {
+          c.dispose(self, {
+            reason: "eventCardPlayed",
+            direct: true,
           });
+        } else {
+          // 打出时移除附属效果
+          for (const att of self.attachments) {
+            c.mutate({
+              type: "removeEntity",
+              from: c.self.area,
+              oldState: att,
+              reason: "other", // TODO: maybe better reason?
+            });
+          }
         }
-      }
-    });
+      });
+    }
     if (this.doSameWhenDisposedSkillModel) {
       this.doSameWhenDisposedSkillModel.action = this.action;
       const disposeSkill =
@@ -594,11 +597,14 @@ export const CardViewModel = InitiativeSkillViewModel
         skillModel.enableHandTriggering = true;
         if (onlySelfHci) {
           skillModel.postOperations.push((c) => {
-            c.dispose(c.self.cast<"eventCard">(), {
-              reason: "eventCardDrawn",
-              direct: true,
-            });
+            if (c.self.area.type !== "removedEntities") {
+              c.dispose(c.self.cast<"eventCard">(), {
+                reason: "eventCardDrawn",
+                direct: true,
+              });
+            }
           });
+          model.onlySelfHci = true;
         }
         const skillDef = skillModel.buildSkillDefinition();
         model.skillList.push(skillDef);
