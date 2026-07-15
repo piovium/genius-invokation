@@ -86,7 +86,7 @@ define status {
  */
 define combatStatus {
   id 117033 as ShrineOfMaya01;
-  conflictWith ShrineOfMaya;
+  conflictWith 117032;
   duration 3;
   on increaseDamage {
     when :( :e.getReaction() );
