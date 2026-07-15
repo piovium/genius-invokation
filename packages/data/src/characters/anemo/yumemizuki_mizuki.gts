@@ -21,19 +21,19 @@ import { ResistantForm } from "../../commons.gts";
  * @description
  * 此卡牌进入手牌时：如果我方出战角色生命值大于5，则造成1点风元素伤害；否则治疗我方出战角色2点。效果结算后抓1张牌，随后弃置此卡牌。
  */
-export const YumemiStyleSpecialSnacks = card(115142)
-  .tags("food")
-  .undiscoverable()
-  .descriptionOnHCI()
-  .do((c) => {
-    if (c.$("my active character with health > 5")){
-      c.damage(DamageType.Anemo, 1, "opp characters with health > 0 limit 1");
+define card {
+  id 115142 as YumemiStyleSpecialSnacks;
+  tags food;
+  undiscoverable;
+  on selfHandCardInserted, only {
+    if (:$("my active character with health > 5")){
+      :damage(DamageType.Anemo, 1, "opp characters with health > 0 limit 1");
     } else {
-      c.heal(2, "my active");
+      :heal(2, "my active");
     }
-    c.drawCards(1);
-  })
-  .done();
+    :drawCards(1);
+  }
+}
 
 /**
  * @id 115143

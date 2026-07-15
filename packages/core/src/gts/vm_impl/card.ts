@@ -34,6 +34,7 @@ import {
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
   type ICaller,
+  type ThisWithType,
 } from "./entity";
 import type {
   CharacterHandle,
@@ -65,7 +66,7 @@ import {
   type TechniqueVMMeta,
 } from "./technique";
 import type { CharacterState, EntityState } from "../../builder";
-import type { IUnorderedQuery } from "../../query/utils";
+import type { Computed, IUnorderedQuery } from "../../query/utils";
 import { getSubId } from "./sub_id";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 import type { InitiativeSkillEventArg } from "../../base/skill";
@@ -412,7 +413,10 @@ export const CardViewModel = InitiativeSkillViewModel
         who: CharacterHandle | CharacterHandle[],
         requires?: TalentRequirement,
       ): AR.DoneRewriteMeta<
-        Omit<Meta, "targetTypes"> & { targetTypes: readonly ["character"] }
+        Computed<
+          Omit<Meta, "targetTypes"> & { targetTypes: readonly ["character"] },
+          CardVMMeta
+        >
       >;
       uniqueKey(): "type";
     }>((model, [who, requires = "action"]) => {
@@ -448,7 +452,10 @@ export const CardViewModel = InitiativeSkillViewModel
       <Meta extends CardVMMeta>(
         this: NoTargetSpecifiedThis<Meta>,
       ): AR.WithRewriteMeta<
-        Omit<Meta, "targetTypes"> & { targetTypes: readonly ["character"] },
+        Computed<
+          Omit<Meta, "targetTypes"> & { targetTypes: readonly ["character"] },
+          CardVMMeta
+        >,
         typeof FoodVM
       >;
       <Meta extends CardVMMeta>(
@@ -500,35 +507,61 @@ export const CardViewModel = InitiativeSkillViewModel
         eventName: "selfDiscard",
         doSameMark: "=play",
       ): AR.With<typeof DisposeSameVM>;
-      <Meta extends EntityVMMeta, const Event extends DetailedEventNames>(
+      <Meta extends CardVMMeta>(
         this: AR.This<Meta>,
+        eventName: "selfHandCardInserted",
+        onlyMark: "only",
+      ): AR.WithRewriteMeta<
+        // rewrite meta to disable ~action
+        Computed<
+          Omit<Meta, "isInitiativeSkill"> & { isInitiativeSkill: false },
+          CardVMMeta
+        >,
+        typeof OffStageTriggeredSkillViewModel,
+        Computed<
+          Omit<Meta, "eventArgType"> & {
+            eventArgType: DetailedEventArgOf<"selfHandCardInserted">;
+          },
+          TriggeredSkillVMMeta
+        >
+      >;
+      <Meta extends CardVMMeta, const Event extends DetailedEventNames>(
+        this: ThisWithType<Meta, "eventCard">,
         eventName: Event,
       ): AR.With<
         typeof OffStageTriggeredSkillViewModel,
-        Omit<Meta, "targetTypes"> & {
-          eventArgType: DetailedEventArgOf<Event>;
-        }
+        Computed<
+          Omit<Meta, "eventArgType"> & {
+            eventArgType: DetailedEventArgOf<Event>;
+          },
+          TriggeredSkillVMMeta
+        >
       >;
-      mergeMeta<Meta extends EntityVMMeta>(
+      mergeMeta<Meta extends CardVMMeta>(
         meta: Meta,
         innerMeta: DefaultDisposeSameVMMeta,
       ): Meta;
       mergeMeta<
-        Meta extends EntityVMMeta,
+        Meta extends CardVMMeta,
         InnerMeta extends TriggeredSkillVMMeta,
       >(
         meta: Meta,
         innerMeta: InnerMeta,
-      ): Omit<Meta, "variables"> & {
-        variables: Meta["variables"] | InnerMeta["variables"];
-      };
-    }>((model, [eventName, maybeEqualMark], subView) => {
-      if (eventName === "selfDiscard" && maybeEqualMark === "=play") {
+      ): Computed<
+        Omit<Meta, "variables"> & {
+          variables: Meta["variables"] | InnerMeta["variables"];
+        },
+        CardVMMeta
+      >;
+    }>((model, [eventName, maybeMark], subView) => {
+      if (eventName === "selfDiscard" && maybeMark === "=play") {
         const skillModel = DisposeSameVM.parse(subView, model);
         skillModel.id = model.getSubId();
         skillModel.enableHandTriggering = true;
         model.doSameWhenDisposedSkillModel = skillModel;
       } else {
+        const onlySelfHci =
+          eventName === "selfHandCardInserted" && maybeMark === "only";
         const skillModel = OffStageTriggeredSkillViewModel.parse(
           subView,
           model,
@@ -536,6 +569,14 @@ export const CardViewModel = InitiativeSkillViewModel
         );
         skillModel.id = model.getSubId();
         skillModel.enableHandTriggering = true;
+        if (onlySelfHci) {
+          skillModel.postOperations.push((c) => {
+            c.dispose(c.self.cast<"eventCard">(), {
+              reason: "eventCardDrawn",
+              direct: true,
+            });
+          });
+        }
         const skillDef = skillModel.buildSkillDefinition();
         model.skillList.push(skillDef);
       }

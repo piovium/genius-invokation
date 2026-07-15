@@ -105,9 +105,9 @@ abstract class SkillModel {
 
   associatedExtensionId: number | null = null;
 
-  protected preOperations: GtsSkillOperation<any>[] = [];
+  preOperations: GtsSkillOperation<any>[] = [];
   action: GtsSkillOperation<any> = () => {};
-  protected postOperations: GtsSkillOperation<any>[] = [];
+  postOperations: GtsSkillOperation<any>[] = [];
   protected filters: GtsSkillOperationFilter<any>[] = [];
   userFilters: GtsSkillOperationFilter<any>[] = [];
 
