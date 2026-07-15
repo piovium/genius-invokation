@@ -457,6 +457,11 @@ export const CardViewModel = InitiativeSkillViewModel
       this.tags.push("legend");
       this.userFilters.push((c) => !c.player.legendUsed);
     }),
+    disableTuning: h.simpleAttribute({
+      uniqueKey: "disableTuning",
+    })(function () {
+      this.disableTuning = true;
+    }),
     food: h.attribute<{
       <Meta extends CardVMMeta>(
         this: NoTargetSpecifiedThis<Meta>,

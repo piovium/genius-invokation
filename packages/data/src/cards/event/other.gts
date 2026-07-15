@@ -1327,16 +1327,17 @@ define combatStatus {
  * 无法使用此牌进行元素调和，且每回合最多只能打出1张「禁忌知识」。
  * 对我方出战角色造成1点穿透伤害，抓1张牌。
  */
-export const ForbiddenKnowledge = card(301020)
-  .since("v4.7.0")
-  .undiscoverable()
-  .tags("abyss")
-  .disableTuning()
-  .filter((c) => !c.$(`my combat status with definition id ${ForbiddenKnowledgeCoolDown}`))
-  .damage(DamageType.Piercing, 1, "my active")
-  .drawCards(1)
-  .combatStatus(ForbiddenKnowledgeCoolDown)
-  .done();
+define card {
+  id 301020 as ForbiddenKnowledge;
+  since "v4.7.0";
+  undiscoverable;
+  tags abyss;
+  disableTuning;
+  filter :( !:$(`my combat status with definition id ${ForbiddenKnowledgeCoolDown}`) );
+  :damage(DamageType.Piercing, 1, "my active");
+  :drawCards(1);
+  :combatStatus(ForbiddenKnowledgeCoolDown);
+}
 
 /**
  * @id 332032

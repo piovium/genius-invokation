@@ -831,12 +831,11 @@ function applyCardStep(
     case "tags":
       frame.block.addLine(`tags ${renderBareArgs(step.args)};`);
       return;
+    case "disableTuning":
     case "undiscoverable":
       requireArgs(step, 0);
       frame.block.addLine(`${step.name};`);
       return;
-    case "disableTuning":
-      throw new ConversionError("disableTuning is not mapped");
     case "event":
       requireArgs(step, 0);
       frame.block.addLine("event;");
