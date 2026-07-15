@@ -608,6 +608,7 @@ export const EntityViewModel = defineViewModel(
         max?: number,
       ): AR.DoneRewriteMeta<PushVar<Meta, "shield">>;
     }>((model, [count, max = count]) => {
+      model.tags.push("shield");
       model.setVariable("shield", count, {
         append: { limit: max },
       });
