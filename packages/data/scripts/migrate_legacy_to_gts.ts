@@ -104,6 +104,27 @@ interface Frame {
 
 class ConversionError extends Error {}
 
+interface EntityMetadata {
+  id: number;
+  name: string;
+  englishName: string;
+  description: string;
+}
+
+interface GeneratedDefinition {
+  documentation: string;
+  block: GtsBlock;
+}
+
+interface ConversionState {
+  needsDiceType: boolean;
+  needsDollar: boolean;
+  entityMetadata: ReadonlyMap<number, EntityMetadata>;
+  derivedBindingNames: string[];
+  exported: boolean;
+  generatedDefinitions: GeneratedDefinition[];
+}
+
 class GtsBlock {
   readonly entries: (string | GtsBlock)[] = [];
   readonly actions: string[] = [];
@@ -340,6 +361,10 @@ const PACKAGE_ROOT = path.resolve(
   "..",
 );
 const SRC_ROOT = path.resolve(PACKAGE_ROOT, "src");
+const ENTITY_METADATA_PATH = path.resolve(
+  PACKAGE_ROOT,
+  "../assets-manager/src/data/CHS/entities.json",
+);
 
 const sourceFileCache = new WeakMap<ts.Node, ts.SourceFile>();
 
@@ -502,21 +527,33 @@ function getChain(expr: ts.Expression): ChainInfo | null {
   return null;
 }
 
-function getBindingName(name: ts.BindingName): string | null {
+function getBindingNames(name: ts.BindingName): string[] | null {
   if (ts.isIdentifier(name)) {
-    return name.text;
+    return [name.text];
   }
-  if (ts.isArrayBindingPattern(name) && name.elements.length === 1) {
-    const [element] = name.elements;
-    if (
-      element &&
-      ts.isBindingElement(element) &&
-      ts.isIdentifier(element.name)
-    ) {
-      return element.name.text;
+  if (
+    ts.isArrayBindingPattern(name) &&
+    name.elements.length >= 1 &&
+    name.elements.length <= 2
+  ) {
+    const names: string[] = [];
+    for (const element of name.elements) {
+      if (
+        !element ||
+        !ts.isBindingElement(element) ||
+        !ts.isIdentifier(element.name)
+      ) {
+        return null;
+      }
+      names.push(element.name.text);
     }
+    return names;
   }
   return null;
+}
+
+function getBindingName(name: ts.BindingName): string | null {
+  return getBindingNames(name)?.[0] ?? null;
 }
 
 function isExported(statement: ts.VariableStatement): boolean {
@@ -584,7 +621,7 @@ function isSupportBlock(frame: Frame): boolean {
 function applyStep(
   step: ChainStep,
   frames: Frame[],
-  state: { needsDiceType: boolean; needsDollar: boolean },
+  state: ConversionState,
 ): void {
   if (step.name === "done") {
     return;
@@ -760,7 +797,7 @@ function applyCharacterStep(step: ChainStep, frame: Frame): void {
 function applySkillStep(
   step: ChainStep,
   frames: Frame[],
-  state: { needsDiceType: boolean; needsDollar: boolean },
+  state: ConversionState,
 ): void {
   const frame = current(frames);
   if (applyCommonVersionStep(step, frame)) {
@@ -790,7 +827,7 @@ function applySkillStep(
 function applyTechniqueSkillStep(
   step: ChainStep,
   frames: Frame[],
-  state: { needsDiceType: boolean; needsDollar: boolean },
+  state: ConversionState,
 ): void {
   const frame = current(frames);
   if (applyInitiativeStep(step, frame, state)) {
@@ -818,7 +855,7 @@ function applyTechniqueSkillStep(
 function applyCardStep(
   step: ChainStep,
   frames: Frame[],
-  state: { needsDiceType: boolean; needsDollar: boolean },
+  state: ConversionState,
 ): void {
   const frame = current(frames);
   if (applyCommonVersionStep(step, frame)) {
@@ -911,17 +948,31 @@ function applyCardStep(
       frame.block.addBlock(block);
       return;
     }
+    case "doSameWhenDisposed":
+      pushDoSameWhenDisposed(step, frame);
+      return;
+    case "descriptionOnHCI": {
+      requireArgs(step, 0);
+      const block = new GtsBlock("on selfHandCardInserted, only");
+      frame.block.addBlock(block);
+      frames.push({ mode: "event", block, eventParentMode: frame.mode });
+      return;
+    }
+    case "onArbitraryEvent":
+      pushArbitraryEventBlock(step, frame);
+      return;
+    case "toStatus":
+      pushDerivedStatusDefinition(step, frames, state, "status");
+      return;
+    case "toCombatStatus":
+      pushDerivedStatusDefinition(step, frames, state, "combatStatus");
+      return;
     case "replaceDescription":
       requireArgs(step, 2);
       frame.block.addLine(`replaceDescription ${renderArgs(step.args)};`);
       return;
     case "descriptionOnDraw":
-    case "descriptionOnHCI":
-    case "doSameWhenDisposed":
     case "equipment":
-    case "onArbitraryEvent":
-    case "toCombatStatus":
-    case "toStatus":
       throw unsupported(step);
     default:
       throw unsupported(step);
@@ -931,7 +982,7 @@ function applyCardStep(
 function applyEntityStep(
   step: ChainStep,
   frames: Frame[],
-  state: { needsDiceType: boolean; needsDollar: boolean },
+  state: ConversionState,
 ): void {
   const frame = current(frames);
   if (applyCommonVersionStep(step, frame)) {
@@ -1114,7 +1165,7 @@ function applyEventStep(step: ChainStep, frames: Frame[]): void {
 function applyInitiativeStep(
   step: ChainStep,
   frame: Frame,
-  state: { needsDiceType: boolean; needsDollar: boolean },
+  state: ConversionState,
 ): boolean {
   if (step.name in COST_METHODS) {
     requireArgs(step, 1);
@@ -1153,7 +1204,7 @@ function applyInitiativeStep(
 function pushCardInnerBlock(
   step: ChainStep,
   frames: Frame[],
-  state: { needsDiceType: boolean; needsDollar: boolean },
+  state: ConversionState,
 ): void {
   const frame = current(frames);
   let header: string;
@@ -1215,6 +1266,204 @@ function pushEventBlock(step: ChainStep, frames: Frame[]): void {
   frames.push({ mode: "event", block, eventParentMode: frame.mode });
 }
 
+function pushDoSameWhenDisposed(step: ChainStep, frame: Frame): void {
+  if (step.args.length > 1) {
+    throw new ConversionError(
+      ".doSameWhenDisposed() expects zero or one argument",
+    );
+  }
+  const block = new GtsBlock('on selfDiscard, "=play"');
+  if (step.args[0]) {
+    const options = objectPropertiesOf(
+      step.args[0],
+      ".doSameWhenDisposed()",
+    );
+    requireOnlyProperties(
+      options,
+      new Set(["filter", "prependOp"]),
+      ".doSameWhenDisposed()",
+    );
+    const filter = options.get("filter");
+    if (filter) {
+      block.addLine(`when ${renderShortcutFunction(filter)};`);
+    }
+    const prependOp = options.get("prependOp");
+    if (prependOp) {
+      const actions = convertAction(prependOp);
+      if (
+        actions.length !== 1 ||
+        actions[0]!.trim() !== ":abortPreview();"
+      ) {
+        throw new ConversionError(
+          ".doSameWhenDisposed() only maps prependOp: c => c.abortPreview()",
+        );
+      }
+      block.addLine("abortPreview;");
+    }
+  }
+  frame.block.addBlock(block);
+}
+
+function pushArbitraryEventBlock(step: ChainStep, frame: Frame): void {
+  requireArgs(step, 2);
+  const options = objectPropertiesOf(step.args[1]!, ".onArbitraryEvent()");
+  requireOnlyProperties(
+    options,
+    new Set(["filter", "operation"]),
+    ".onArbitraryEvent()",
+  );
+  const operation = options.get("operation");
+  if (!operation) {
+    throw new ConversionError(".onArbitraryEvent() requires an operation");
+  }
+  const block = new GtsBlock(`on ${renderEventName(step.args[0]!)}`);
+  const filter = options.get("filter");
+  if (filter) {
+    block.addLine(`when ${renderShortcutFunction(filter)};`);
+  }
+  block.addAction(convertAction(operation));
+  frame.block.addBlock(block);
+}
+
+function pushDerivedStatusDefinition(
+  step: ChainStep,
+  frames: Frame[],
+  state: ConversionState,
+  type: "status" | "combatStatus",
+): void {
+  const frame = current(frames);
+  if (frame.mode !== "card") {
+    throw new ConversionError(`.${step.name}() is only mapped inside a card`);
+  }
+  if (type === "status") {
+    requireArgs(step, 2);
+  } else {
+    requireArgs(step, 1);
+  }
+  const id = numericLiteralValue(step.args[0]!);
+  if (id === null) {
+    throw new ConversionError(
+      `.${step.name}() requires a numeric status id for metadata lookup`,
+    );
+  }
+  const metadata = state.entityMetadata.get(id);
+  if (!metadata) {
+    throw new ConversionError(
+      `no entity metadata found for derived ${type} ${id}`,
+    );
+  }
+  const bindingName = state.derivedBindingNames.shift();
+  const name = bindingName ?? pascalCase(metadata.englishName);
+  if (!name) {
+    throw new ConversionError(
+      `cannot derive an identifier from the english name of ${type} ${id}`,
+    );
+  }
+
+  if (type === "status") {
+    frame.block.addAction([
+      `:characterStatus(${name}, ${renderArg(step.args[1]!)});`,
+    ]);
+  } else {
+    frame.block.addAction([`:combatStatus(${name});`]);
+  }
+
+  const block = new GtsBlock(`define ${type}`);
+  block.addLine(
+    makeIdLine(
+      step.args[0]!,
+      name,
+      bindingName !== undefined && state.exported,
+    ),
+  );
+  copyDefinitionVersionLines(frame.block, block);
+  state.generatedDefinitions.push({
+    documentation: renderEntityDocumentation(metadata),
+    block,
+  });
+  frames.push({ mode: "entity", block });
+}
+
+function objectPropertiesOf(
+  expression: ts.Expression,
+  method: string,
+): Map<string, ts.Expression> {
+  const object = unwrapExpression(expression);
+  if (!ts.isObjectLiteralExpression(object)) {
+    throw new ConversionError(`${method} expects an object literal`);
+  }
+  const properties = new Map<string, ts.Expression>();
+  for (const property of object.properties) {
+    if (
+      !ts.isPropertyAssignment(property) ||
+      (!ts.isIdentifier(property.name) && !ts.isStringLiteral(property.name))
+    ) {
+      throw new ConversionError(`${method} has an unsupported option`);
+    }
+    const name = property.name.text;
+    if (properties.has(name)) {
+      throw new ConversionError(`${method} has a duplicate '${name}' option`);
+    }
+    properties.set(name, property.initializer);
+  }
+  return properties;
+}
+
+function requireOnlyProperties(
+  properties: ReadonlyMap<string, ts.Expression>,
+  allowed: ReadonlySet<string>,
+  method: string,
+): void {
+  for (const name of properties.keys()) {
+    if (!allowed.has(name)) {
+      throw new ConversionError(`${method} does not map the '${name}' option`);
+    }
+  }
+}
+
+function numericLiteralValue(expression: ts.Expression): number | null {
+  const unwrapped = unwrapExpression(expression);
+  if (!ts.isNumericLiteral(unwrapped)) {
+    return null;
+  }
+  const value = Number(unwrapped.text);
+  return Number.isSafeInteger(value) ? value : null;
+}
+
+function pascalCase(value: string): string {
+  return value
+    .replace(/[’']/g, "")
+    .split(/[^A-Za-z0-9]+/)
+    .filter(Boolean)
+    .map((word) => word[0]!.toUpperCase() + word.slice(1))
+    .join("");
+}
+
+function copyDefinitionVersionLines(source: GtsBlock, target: GtsBlock): void {
+  for (const entry of source.entries) {
+    if (
+      typeof entry === "string" &&
+      /^(?:since|until|associateExtension)\b/.test(entry)
+    ) {
+      target.addLine(entry);
+    }
+  }
+}
+
+function renderEntityDocumentation(metadata: EntityMetadata): string {
+  const description = metadata.description
+    .split(/\r?\n/)
+    .map((line) => ` * ${line}`);
+  return [
+    "/**",
+    ` * @id ${metadata.id}`,
+    ` * @name ${metadata.name}`,
+    " * @description",
+    ...description,
+    " */",
+  ].join("\n");
+}
+
 function pushEndPhaseDamage(
   frames: Frame[],
   args: readonly ts.Expression[],
@@ -1273,7 +1522,7 @@ function renderFood(args: readonly ts.Expression[], combat: boolean): string {
 
 function renderTargetArg(
   arg: ts.Expression,
-  state: { needsDollar: boolean },
+  state: Pick<ConversionState, "needsDollar">,
 ): string {
   if (ts.isArrowFunction(arg)) {
     if (arg.parameters.length !== 1) {
@@ -2043,9 +2292,43 @@ function builderImportHas(content: string, name: string): boolean {
     .includes(name);
 }
 
+async function loadEntityMetadata(): Promise<Map<number, EntityMetadata>> {
+  const parsed: unknown = JSON.parse(
+    await readFile(ENTITY_METADATA_PATH, "utf-8"),
+  );
+  if (!Array.isArray(parsed)) {
+    throw new Error(`Expected an array in ${ENTITY_METADATA_PATH}`);
+  }
+  const result = new Map<number, EntityMetadata>();
+  for (const entity of parsed) {
+    if (
+      !entity ||
+      typeof entity !== "object" ||
+      !("id" in entity) ||
+      !("name" in entity) ||
+      !("englishName" in entity) ||
+      !("description" in entity) ||
+      typeof entity.id !== "number" ||
+      typeof entity.name !== "string" ||
+      typeof entity.englishName !== "string" ||
+      typeof entity.description !== "string"
+    ) {
+      continue;
+    }
+    result.set(entity.id, {
+      id: entity.id,
+      name: entity.name,
+      englishName: entity.englishName,
+      description: entity.description,
+    });
+  }
+  return result;
+}
+
 async function processFile(
   inputPath: string,
   options: CliOptions,
+  entityMetadata: ReadonlyMap<number, EntityMetadata>,
 ): Promise<FileResult> {
   const original = await readFile(inputPath, "utf-8");
   const masked = inputPath.endsWith(".gts")
@@ -2081,7 +2364,15 @@ async function processFile(
     }
     const bindingName = getBindingName(declaration.name) ?? "<anonymous>";
     try {
-      const state = { needsDiceType: false, needsDollar: false };
+      const bindingNames = getBindingNames(declaration.name);
+      const state: ConversionState = {
+        needsDiceType: false,
+        needsDollar: false,
+        entityMetadata,
+        derivedBindingNames: bindingNames?.slice(1) ?? [],
+        exported: isExported(statement),
+        generatedDefinitions: [],
+      };
       const replacement = convertDefinitionWithState(
         declaration,
         statement,
@@ -2131,15 +2422,16 @@ async function processFile(
 function convertDefinitionWithState(
   declaration: ts.VariableDeclaration,
   statement: ts.VariableStatement,
-  state: { needsDiceType: boolean; needsDollar: boolean },
+  state: ConversionState,
 ): string {
   if (!declaration.initializer) {
     throw new ConversionError("declaration has no initializer");
   }
-  const bindingName = getBindingName(declaration.name);
-  if (bindingName === null) {
+  const bindingNames = getBindingNames(declaration.name);
+  if (!bindingNames) {
     throw new ConversionError("unsupported binding pattern");
   }
+  const bindingName = bindingNames[0]!;
   const chain = getChain(declaration.initializer);
   if (!chain) {
     throw new ConversionError(
@@ -2169,7 +2461,14 @@ function convertDefinitionWithState(
   ) {
     throw new ConversionError("chain is missing .done() or .reserve()");
   }
-  return root.render().join("\n") + "\n";
+  return [
+    root.render().join("\n"),
+    ...state.generatedDefinitions.map((definition) =>
+      [definition.documentation, definition.block.render().join("\n")].join(
+        "\n",
+      ),
+    ),
+  ].join("\n\n") + "\n";
 }
 
 function updateRelativeImports(content: string): string {
@@ -2238,8 +2537,9 @@ async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
   const files =
     options.files.length > 0 ? options.files : await collectDefaultFiles();
+  const entityMetadata = await loadEntityMetadata();
   const results = await Promise.all(
-    files.map((file) => processFile(file, options)),
+    files.map((file) => processFile(file, options, entityMetadata)),
   );
 
   if (options.stdout) {

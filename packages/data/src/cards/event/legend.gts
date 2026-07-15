@@ -24,15 +24,29 @@ import { IneffectiveWhenPlayed } from "../../commons.gts";
  * 我方有角色已装备「武器」或「圣遗物」时，才能打出：本回合中，我方下次打出「武器」或「圣遗物」装备牌时少花费2个元素骰。
  * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  */
-export const [AncientCourtyard] = card(330001)
-  .since("v3.8.0")
-  .legend()
-  .filter((c) => c.$("my character has equipment with tag (weapon) or my character has equipment with tag (artifact)"))
-  .toCombatStatus(300001)
-  .oneDuration()
-  .once("deductOmniDiceCard", (c, e) => e.hasOneOfCardTag("weapon", "artifact"))
-  .deductOmniCost(2)
-  .done();
+define card {
+  id 330001 as AncientCourtyard;
+  since "v3.8.0";
+  legend;
+  filter :( :$("my character has equipment with tag (weapon) or my character has equipment with tag (artifact)") );
+  :combatStatus(AncientCourtyardInEffect);
+}
+
+/**
+ * @id 300001
+ * @name 旧时庭园（生效中）
+ * @description
+ * 本回合中，我方下次打出「武器」或「圣遗物」装备牌时：少花费2个元素骰。
+ */
+define combatStatus {
+  id 300001 as private AncientCourtyardInEffect;
+  since "v3.8.0";
+  oneDuration;
+  once deductOmniDiceCard {
+    when :( :e.hasOneOfCardTag("weapon", "artifact") );
+    :e.deductOmniCost(2);
+  }
+}
 
 /**
  * @id 330002
@@ -76,20 +90,34 @@ define card {
  * 可用次数：1
  * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  */
-export const [FreshWindOfFreedom, FreshWindOfFreedomInEffect] = card(330004)
-  .since("v4.1.0")
-  .legend()
-  .toCombatStatus(300002)
-  .oneDuration()
-  .on("defeated", (c, e) =>
-    c.isMyTurn() && 
-    !c.oppPlayer.declaredEnd &&
-    !e.target.isMine() && 
-    (c.phase === "action" || c.player.defeatedSwitching || c.oppPlayer.defeatedSwitching))
-  .listenToAll()
-  .usage(1)
-  .continueNextTurn()
-  .done();
+define card {
+  id 330004 as FreshWindOfFreedom;
+  since "v4.1.0";
+  legend;
+  :combatStatus(FreshWindOfFreedomInEffect);
+}
+
+/**
+ * @id 300002
+ * @name 自由的新风（生效中）
+ * @description
+ * 本回合中，轮到我方行动期间有对方角色被击倒时：本次行动结束后，我方可以再连续行动一次。
+ * 可用次数：1
+ */
+define combatStatus {
+  id 300002 as FreshWindOfFreedomInEffect;
+  since "v4.1.0";
+  oneDuration;
+  on defeated {
+    when :( :isMyTurn() && 
+        !:oppPlayer.declaredEnd &&
+        !:e.target.isMine() && 
+        (:phase === "action" || :player.defeatedSwitching || :oppPlayer.defeatedSwitching) );
+    listenTo all;
+    usage 1;
+    :continueNextTurn();
+  }
+}
 
 /**
  * @id 330005
@@ -180,17 +208,31 @@ define card {
  * 本回合中，目标我方角色受到的伤害-1。（最多生效4次）
  * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  */
-export const [DayOfResistanceMomentOfShatteredDreams] = card(330007)
-  .since("v4.5.0")
-  .legend()
-  .addTarget($.my.character)
-  .toStatus(300004, "@targets.0")
-  .tags("barrier")
-  .oneDuration()
-  .on("decreaseDamaged")
-  .usage(4)
-  .decreaseDamage(1)
-  .done();
+define card {
+  id 330007 as DayOfResistanceMomentOfShatteredDreams;
+  since "v4.5.0";
+  legend;
+  addTarget $.my.character;
+  :characterStatus(DayOfResistanceMomentOfShatteredDreamsInEffect, "@targets.0");
+}
+
+/**
+ * @id 300004
+ * @name 抗争之日·碎梦之时（生效中）
+ * @description
+ * 本回合中，所附属角色受到的伤害-1。
+ * 可用次数：4
+ */
+define status {
+  id 300004 as private DayOfResistanceMomentOfShatteredDreamsInEffect;
+  since "v4.5.0";
+  tags barrier;
+  oneDuration;
+  on decreaseDamaged {
+    usage 4;
+    :e.decreaseDamage(1);
+  }
+}
 
 /**
  * @id 330008

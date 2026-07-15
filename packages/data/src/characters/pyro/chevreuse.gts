@@ -22,14 +22,16 @@ import { character, skill, status, combatStatus, card, DamageType, Reaction, Dic
  * 战斗行动：对敌方「出战角色」造成1点火元素伤害。
  * 此牌被舍弃时：对敌方「出战角色」造成1点火元素伤害。
  */
-export const OverchargedBall = card(113131)
-  .since("v4.8.0")
-  .undiscoverable()
-  .costPyro(2)
-  .tags("action")
-  .damage(DamageType.Pyro, 1, "opp active")
-  .doSameWhenDisposed()
-  .done();
+define card {
+  id 113131 as OverchargedBall;
+  since "v4.8.0";
+  undiscoverable;
+  cost DiceType.Pyro, 2;
+  tags action;
+  on selfDiscard, "=play" {
+  }
+  :damage(DamageType.Pyro, 1, "opp active");
+}
 
 /**
  * @id 113135

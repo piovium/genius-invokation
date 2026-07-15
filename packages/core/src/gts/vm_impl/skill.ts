@@ -243,8 +243,13 @@ export class TriggeredSkillModel extends SkillModel {
 
     // 0. 对于并非响应自身弃置的技能，当实体已经被弃置时，不再响应
     if (
-      this.detailedEventName !== "selfDispose" &&
-      this.detailedEventName !== "selfDiscard"
+      !(
+        [
+          "selfDiscard",
+          "selfDispose",
+          "selfHandCardInserted",
+        ] as (typeof this.detailedEventName)[]
+      ).includes(this.detailedEventName)
     ) {
       this.filters.push((c) => {
         return c.self.area.type !== "removedEntities";
