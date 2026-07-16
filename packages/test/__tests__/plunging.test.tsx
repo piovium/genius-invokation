@@ -15,12 +15,12 @@
 
 import { ref, setup, State, Card, Support, Character, Equipment, Summon, DeclaredEnd, Status, $ } from "#test";
 import { SkillHandle } from "@gi-tcg/core/builder";
-import { PlungingStrike } from "@gi-tcg/data/internal/cards/event/other";
-import { WhirlwindThrust, Xiao, YakshasMask } from "@gi-tcg/data/internal/characters/anemo/xiao";
-import { Keqing, YunlaiSwordsmanship } from "@gi-tcg/data/internal/characters/electro/keqing";
-import { AbiogenesisSolarIsotoma, Albedo, DescentOfDivinity, FavoniusBladeworkWeiss, SolarIsotoma } from "@gi-tcg/data/internal/characters/geo/albedo";
-import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona";
-import { BiteyShark, Mualani } from "@gi-tcg/data/internal/characters/hydro/mualani";
+import { PlungingStrike } from "@gi-tcg/data/internal/cards/event/other.gts";
+import { WhirlwindThrust, Xiao, YakshasMask } from "@gi-tcg/data/internal/characters/anemo/xiao.gts";
+import { Keqing, YunlaiSwordsmanship } from "@gi-tcg/data/internal/characters/electro/keqing.gts";
+import { AbiogenesisSolarIsotoma, Albedo, DescentOfDivinity, FavoniusBladeworkWeiss, SolarIsotoma } from "@gi-tcg/data/internal/characters/geo/albedo.gts";
+import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona.gts";
+import { BiteyShark, Mualani } from "@gi-tcg/data/internal/characters/hydro/mualani.gts";
 import { test } from "vitest";
 
 test("plunging : negative test", async () => {

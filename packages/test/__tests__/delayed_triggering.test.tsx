@@ -14,17 +14,17 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, State, Character, Support, CombatStatus, Equipment, Status, $ } from "#test";
-import { InstructorsCap } from "@gi-tcg/data/internal/cards/equipment/artifacts";
-import { ChangTheNinth } from "@gi-tcg/data/internal/cards/support/ally";
-import { ParametricTransformer } from "@gi-tcg/data/internal/cards/support/item";
-import { GaleBlade, Jean } from "@gi-tcg/data/internal/characters/anemo/jean";
-import { DriftcloudWave, Xianyun } from "@gi-tcg/data/internal/characters/anemo/xianyun";
-import { ChonghuaFrostField, Chongyun } from "@gi-tcg/data/internal/characters/cryo/chongyun";
-import { Beidou, Oceanborne, ThunderbeastsTarge } from "@gi-tcg/data/internal/characters/electro/beidou";
-import { GrassRingOfSanctification, KukiShinobu } from "@gi-tcg/data/internal/characters/electro/kuki_shinobu";
-import { AncientRiteTheThunderingSands, Sethos, ThunderConvergence } from "@gi-tcg/data/internal/characters/electro/sethos";
-import { Barbara, WhisperOfWater } from "@gi-tcg/data/internal/characters/hydro/barbara";
-import { AurousBlaze, Yoimiya } from "@gi-tcg/data/internal/characters/pyro/yoimiya";
+import { InstructorsCap } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
+import { ChangTheNinth } from "@gi-tcg/data/internal/cards/support/ally.gts";
+import { ParametricTransformer } from "@gi-tcg/data/internal/cards/support/item.gts";
+import { GaleBlade, Jean } from "@gi-tcg/data/internal/characters/anemo/jean.gts";
+import { DriftcloudWave, Xianyun } from "@gi-tcg/data/internal/characters/anemo/xianyun.gts";
+import { ChonghuaFrostField, Chongyun } from "@gi-tcg/data/internal/characters/cryo/chongyun.gts";
+import { Beidou, Oceanborne, ThunderbeastsTarge } from "@gi-tcg/data/internal/characters/electro/beidou.gts";
+import { GrassRingOfSanctification, KukiShinobu } from "@gi-tcg/data/internal/characters/electro/kuki_shinobu.gts";
+import { AncientRiteTheThunderingSands, Sethos, ThunderConvergence } from "@gi-tcg/data/internal/characters/electro/sethos.gts";
+import { Barbara, WhisperOfWater } from "@gi-tcg/data/internal/characters/hydro/barbara.gts";
+import { AurousBlaze, Yoimiya } from "@gi-tcg/data/internal/characters/pyro/yoimiya.gts";
 import { Aura } from "@gi-tcg/typings";
 import { expect, test } from "vitest";
 

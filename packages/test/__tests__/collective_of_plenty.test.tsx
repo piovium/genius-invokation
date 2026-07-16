@@ -17,7 +17,7 @@ import { $, Character, ref, setup, State, Status, Support } from "#test";
 import {
   CollectiveOfPlenty,
   Exercise,
-} from "@gi-tcg/data/internal/cards/support/place";
+} from "@gi-tcg/data/internal/cards/support/place.gts";
 import { test } from "vitest";
 
 test("collective of plenty: recreating exercise heals when it crosses three layers", async () => {

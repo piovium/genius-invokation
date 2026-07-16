@@ -83,19 +83,21 @@ define card {
  * [3130031: 游隙灵道] (1*Aligned) 选择一个我方「召唤物」，立刻触发其「结束阶段」效果。（每回合最多使用1次）
  * [3130032: ] ()
  */
-export const Koholasaurus = card(313003)
-  .since("v5.0.0")
-  .costSame(2)
-  .technique()
-  .provideSkill(3130031)
-  .costSame(1)
-  .usage(2)
-  .usagePerRound(1)
-  .addTarget("my summon")
-  .do((c, e) => {
-    c.triggerEndPhaseSkill(e.targets[0])
-  })
-  .done();
+define card {
+  id 313003 as Koholasaurus;
+  since "v5.0.0";
+  cost DiceType.Aligned, 2;
+  technique {
+    skill {
+      id 3130031;
+      cost DiceType.Aligned, 1;
+      usage 2;
+      usage perRound, 1;
+      addTarget $.my.summon;
+      :triggerEndPhaseSkill(:e.targets[0])
+    }
+  }
+}
 
 /**
  * @id 301301

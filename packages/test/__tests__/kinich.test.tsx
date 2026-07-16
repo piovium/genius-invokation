@@ -24,14 +24,14 @@ import {
   Status,$
 } from "#test";
 import { SkillHandle } from "@gi-tcg/core/builder";
-import { AbundantPhlogistonInEffect } from "@gi-tcg/data/internal/cards/event/other";
+import { AbundantPhlogistonInEffect } from "@gi-tcg/data/internal/cards/event/other.gts";
 import {
   GrappleLink,
   GrapplePrepare,
   Kinich,
   NightsoulsBlessing as NightsoulsBlessingKinich,
-} from "@gi-tcg/data/internal/characters/dendro/kinich";
-import { Kachina, NightsoulsBlessing as NightsoulsBlessingKachina, TurboTwirly, TurboTwirlyLetItRip } from "@gi-tcg/data/internal/characters/geo/kachina";
+} from "@gi-tcg/data/internal/characters/dendro/kinich.gts";
+import { Kachina, NightsoulsBlessing as NightsoulsBlessingKachina, TurboTwirly, TurboTwirlyLetItRip } from "@gi-tcg/data/internal/characters/geo/kachina.gts";
 import { test } from "vitest";
 
 test("kinich's link handle event earlier then kachina's", async () => {

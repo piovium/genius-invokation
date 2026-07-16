@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, type StatusHandle, card, combatStatus, status } from "@gi-tcg/core/builder";
+import { $, DiceType, type StatusHandle, card, combatStatus, status } from "@gi-tcg/core/builder";
 import { BattlePlan, Satiated, SharpenTheBlade } from "../../commons.gts";
 
 /**
@@ -23,14 +23,28 @@ import { BattlePlan, Satiated, SharpenTheBlade } from "../../commons.gts";
  * 本回合中，目标角色下一次「普通攻击」造成的伤害+1。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [JueyunGuoba] = card(333001)
-  .since("v3.3.0")
-  .food()
-  .toStatus(303301, "@targets.0")
-  .oneDuration()
-  .once("increaseSkillDamage", (c, e) => e.viaSkillType("normal"))
-  .increaseDamage(1)
-  .done();
+define card {
+  id 333001 as JueyunGuoba;
+  since "v3.3.0";
+  food;
+  :characterStatus(JueyunGuobaInEffect, "@targets.0");
+}
+
+/**
+ * @id 303301
+ * @name 绝云锅巴（生效中）
+ * @description
+ * 本回合中，该角色下一次「普通攻击」造成的伤害+1。
+ */
+define status {
+  id 303301 as private JueyunGuobaInEffect;
+  since "v3.3.0";
+  oneDuration;
+  once increaseSkillDamage {
+    when :( :e.viaSkillType("normal") );
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 333002
@@ -39,15 +53,29 @@ export const [JueyunGuoba] = card(333001)
  * 本回合中，目标角色下一次「元素爆发」造成的伤害+3。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [AdeptusTemptation] = card(333002)
-  .since("v3.3.0")
-  .costVoid(2)
-  .food()
-  .toStatus(303302, "@targets.0")
-  .oneDuration()
-  .once("increaseSkillDamage", (c, e) => e.viaSkillType("burst"))
-  .increaseDamage(3)
-  .done();
+define card {
+  id 333002 as AdeptusTemptation;
+  since "v3.3.0";
+  cost DiceType.Void, 2;
+  food;
+  :characterStatus(AdeptusTemptationInEffect, "@targets.0");
+}
+
+/**
+ * @id 303302
+ * @name 仙跳墙（生效中）
+ * @description
+ * 本回合中，该角色下一次「元素爆发」造成的伤害+3。
+ */
+define status {
+  id 303302 as private AdeptusTemptationInEffect;
+  since "v3.3.0";
+  oneDuration;
+  once increaseSkillDamage {
+    when :( :e.viaSkillType("burst") );
+    :e.increaseDamage(3);
+  }
+}
 
 /**
  * @id 333003
@@ -56,16 +84,29 @@ export const [AdeptusTemptation] = card(333002)
  * 本回合中，目标角色下次受到的伤害-3。
  * （每回合中每个角色最多食用1次「料理」）
  */
-export const [LotusFlowerCrisp] = card(333003)
-  .since("v3.3.0")
-  .costSame(1)
-  .food()
-  .toStatus(303303, "@targets.0")
-  .tags("barrier")
-  .oneDuration()
-  .once("decreaseDamaged")
-  .decreaseDamage(3)
-  .done();
+define card {
+  id 333003 as LotusFlowerCrisp;
+  since "v3.3.0";
+  cost DiceType.Aligned, 1;
+  food;
+  :characterStatus(LotusFlowerCrispInEffect, "@targets.0");
+}
+
+/**
+ * @id 303303
+ * @name 莲花酥（生效中）
+ * @description
+ * 本回合中，该角色下次受到的伤害-3。
+ */
+define status {
+  id 303303 as private LotusFlowerCrispInEffect;
+  since "v3.3.0";
+  tags barrier;
+  oneDuration;
+  once decreaseDamaged {
+    :e.decreaseDamage(3);
+  }
+}
 
 /**
  * @id 333004
@@ -74,14 +115,28 @@ export const [LotusFlowerCrisp] = card(333003)
  * 本回合中，目标角色下一次「普通攻击」少花费1个无色元素。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [NorthernSmokedChicken] = card(333004)
-  .since("v3.3.0")
-  .food()
-  .toStatus(303304, "@targets.0")
-  .oneDuration()
-  .once("deductVoidDiceSkill", (c, e) => e.isSkillType("normal"))
-  .deductVoidCost(1)
-  .done();
+define card {
+  id 333004 as NorthernSmokedChicken;
+  since "v3.3.0";
+  food;
+  :characterStatus(NorthernSmokedChickenInEffect, "@targets.0");
+}
+
+/**
+ * @id 303304
+ * @name 北地烟熏鸡（生效中）
+ * @description
+ * 本回合中，该角色下一次「普通攻击」少花费1个无色元素。
+ */
+define status {
+  id 303304 as private NorthernSmokedChickenInEffect;
+  since "v3.3.0";
+  oneDuration;
+  once deductVoidDiceSkill {
+    when :( :e.isSkillType("normal") );
+    :e.deductVoidCost(1);
+  }
+}
 
 /**
  * @id 333005
@@ -121,16 +176,32 @@ define card {
  * 治疗目标角色1点，两回合内结束阶段再治疗此角色1点。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [MushroomPizza] = card(333007)
-  .since("v3.3.0")
-  .costSame(1)
-  .food({ injuredOnly: true })
-  .heal(1, "@targets.0")
-  .toStatus(303305, "@targets.0")
-  .duration(2)
-  .on("endPhase")
-  .heal(1, "@master")
-  .done();
+define card {
+  id 333007 as MushroomPizza;
+  since "v3.3.0";
+  cost DiceType.Aligned, 1;
+  food {
+    injuredOnly;
+  };
+  :heal(1, "@targets.0");
+  :characterStatus(MushroomPizzaInEffect, "@targets.0");
+}
+
+/**
+ * @id 303305
+ * @name 烤蘑菇披萨（生效中）
+ * @description
+ * 结束阶段：治疗该角色1点。
+ * 可用次数：2
+ */
+define status {
+  id 303305 as private MushroomPizzaInEffect;
+  since "v3.3.0";
+  duration 2;
+  on endPhase {
+    :heal(1, "@master");
+  }
+}
 
 /**
  * @id 303306
@@ -182,16 +253,17 @@ define combatStatus {
  * 复苏目标角色，并治疗此角色1点。
  * （每回合中，最多通过「料理」复苏1个角色，并且每个角色最多食用1次「料理」）
  */
-export const TeyvatFriedEgg = card(333009)
-  .since("v3.7.0")
-  .costSame(2)
-  .tags("food")
-  .filter((c) => !c.$(`my combat status with definition id ${ReviveOnCooldown}`))
-  .addTarget("my defeated characters")
-  .heal(1, "@targets.0", { kind: "revive" })
-  .characterStatus(Satiated, "@targets.0")
-  .combatStatus(ReviveOnCooldown)
-  .done();
+define card {
+  id 333009 as TeyvatFriedEgg;
+  since "v3.7.0";
+  cost DiceType.Aligned, 2;
+  tags food;
+  filter :( !:$(`my combat status with definition id ${ReviveOnCooldown}`) );
+  addTarget $.my.character.includesDefeated;
+  :heal(1, "@targets.0", { kind: "revive" });
+  :characterStatus(Satiated, "@targets.0");
+  :combatStatus(ReviveOnCooldown);
+}
 
 /**
  * @id 333010
@@ -200,15 +272,29 @@ export const TeyvatFriedEgg = card(333009)
  * 目标角色在本回合结束前，「普通攻击」造成的伤害+1。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [SashimiPlatter] = card(333010)
-  .since("v3.7.0")
-  .costSame(1)
-  .food()
-  .toStatus(303308, "@targets.0")
-  .oneDuration()
-  .on("increaseSkillDamage", (c, e) => e.viaSkillType("normal"))
-  .increaseDamage(1)
-  .done();
+define card {
+  id 333010 as SashimiPlatter;
+  since "v3.7.0";
+  cost DiceType.Aligned, 1;
+  food;
+  :characterStatus(SashimiPlatterInEffect, "@targets.0");
+}
+
+/**
+ * @id 303308
+ * @name 刺身拼盘（生效中）
+ * @description
+ * 本回合中，该角色「普通攻击」造成的伤害+1。
+ */
+define status {
+  id 303308 as private SashimiPlatterInEffect;
+  since "v3.7.0";
+  oneDuration;
+  on increaseSkillDamage {
+    when :( :e.viaSkillType("normal") );
+    :e.increaseDamage(1);
+  }
+}
 
 /**
  * @id 333011
@@ -217,15 +303,29 @@ export const [SashimiPlatter] = card(333010)
  * 本回合中，所有我方角色下一次「元素战技」造成的伤害+2。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [TandooriRoastChicken] = card(333011)
-  .since("v3.7.0")
-  .costVoid(2)
-  .combatFood()
-  .toStatus(303309, `my characters and not has status with definition id ${Satiated}`)
-  .oneDuration()
-  .once("increaseSkillDamage", (c, e) => e.viaSkillType("elemental"))
-  .increaseDamage(2)
-  .done();
+define card {
+  id 333011 as TandooriRoastChicken;
+  since "v3.7.0";
+  cost DiceType.Void, 2;
+  food combat;
+  :characterStatus(TandooriRoastChickenInEffect, `my characters and not has status with definition id ${Satiated}`);
+}
+
+/**
+ * @id 303309
+ * @name 唐杜尔烤鸡（生效中）
+ * @description
+ * 本回合中，该角色下一次「元素战技」造成的伤害+2。
+ */
+define status {
+  id 303309 as private TandooriRoastChickenInEffect;
+  since "v3.7.0";
+  oneDuration;
+  once increaseSkillDamage {
+    when :( :e.viaSkillType("elemental") );
+    :e.increaseDamage(2);
+  }
+}
 
 /**
  * @id 333012
@@ -234,16 +334,29 @@ export const [TandooriRoastChicken] = card(333011)
  * 本回合中，所有我方角色下次受到的伤害-2。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [ButterCrab] = card(333012)
-  .since("v3.7.0")
-  .costVoid(2)
-  .combatFood()
-  .toStatus(303310, `my characters and not has status with definition id ${Satiated}`)
-  .tags("barrier")
-  .oneDuration()
-  .once("decreaseDamaged")
-  .decreaseDamage(2)
-  .done();
+define card {
+  id 333012 as ButterCrab;
+  since "v3.7.0";
+  cost DiceType.Void, 2;
+  food combat;
+  :characterStatus(ButterCrabInEffect, `my characters and not has status with definition id ${Satiated}`);
+}
+
+/**
+ * @id 303310
+ * @name 黄油蟹蟹（生效中）
+ * @description
+ * 本回合中，该角色下次受到的伤害-2。
+ */
+define status {
+  id 303310 as private ButterCrabInEffect;
+  since "v3.7.0";
+  tags barrier;
+  oneDuration;
+  once decreaseDamaged {
+    :e.decreaseDamage(2);
+  }
+}
 
 /**
  * @id 333013
@@ -252,15 +365,28 @@ export const [ButterCrab] = card(333012)
  * 本回合中，所有我方角色下次使用技能时少花费1个元素骰。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [FishAndChips] = card(333013)
-  .since("v4.3.0")
-  .costVoid(2)
-  .combatFood()
-  .toStatus(303311, `my characters and not has status with definition id ${Satiated}`)
-  .oneDuration()
-  .once("deductOmniDiceSkill")
-  .deductOmniCost(1)
-  .done();
+define card {
+  id 333013 as FishAndChips;
+  since "v4.3.0";
+  cost DiceType.Void, 2;
+  food combat;
+  :characterStatus(FishAndChipsActive, `my characters and not has status with definition id ${Satiated}`);
+}
+
+/**
+ * @id 303311
+ * @name 炸鱼薯条（生效中）
+ * @description
+ * 本回合中，所附属角色下次使用技能时少花费1个元素骰。
+ */
+define status {
+  id 303311 as private FishAndChipsActive;
+  since "v4.3.0";
+  oneDuration;
+  once deductOmniDiceSkill {
+    :e.deductOmniCost(1);
+  }
+}
 
 /**
  * @id 333014
@@ -269,16 +395,32 @@ export const [FishAndChips] = card(333013)
  * 治疗目标角色2点，3回合内的结束阶段再治疗此角色1点。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [MatsutakeMeatRolls] = card(333014)
-  .since("v4.4.0")
-  .costSame(2)
-  .food({ injuredOnly: true })
-  .heal(2, "@targets.0")
-  .toStatus(303312, "@targets.0")
-  .on("endPhase")
-  .usage(3)
-  .heal(1, "@master")
-  .done();
+define card {
+  id 333014 as MatsutakeMeatRolls;
+  since "v4.4.0";
+  cost DiceType.Aligned, 2;
+  food {
+    injuredOnly;
+  };
+  :heal(2, "@targets.0");
+  :characterStatus(MatsutakeMeatRollsInEffect, "@targets.0");
+}
+
+/**
+ * @id 303312
+ * @name 松茸酿肉卷（生效中）
+ * @description
+ * 结束阶段：治疗该角色1点。
+ * 可用次数：3
+ */
+define status {
+  id 303312 as private MatsutakeMeatRollsInEffect;
+  since "v4.4.0";
+  on endPhase {
+    usage 3;
+    :heal(1, "@master");
+  }
+}
 
 /**
  * @id 333015
@@ -287,16 +429,32 @@ export const [MatsutakeMeatRolls] = card(333014)
  * 治疗目标角色1点，该角色接下来3次受到伤害后再治疗其1点。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [RainbowMacarons, RainbowMacaronsInEffect] = card(333015)
-  .since("v4.6.0")
-  .costVoid(2)
-  .food({ injuredOnly: true })
-  .heal(1, "@targets.0")
-  .toStatus(303313, "@targets.0")
-  .on("damaged")
-  .usage(3)
-  .heal(1, "@master")
-  .done();
+define card {
+  id 333015 as RainbowMacarons;
+  since "v4.6.0";
+  cost DiceType.Void, 2;
+  food {
+    injuredOnly;
+  };
+  :heal(1, "@targets.0");
+  :characterStatus(RainbowMacaronsInEffect, "@targets.0");
+}
+
+/**
+ * @id 303313
+ * @name 缤纷马卡龙（生效中）
+ * @description
+ * 所附属角色受到伤害后：治疗该角色1点。
+ * 可用次数：3
+ */
+define status {
+  id 303313 as RainbowMacaronsInEffect;
+  since "v4.6.0";
+  on damaged {
+    usage 3;
+    :heal(1, "@master");
+  }
+}
 
 /**
  * @id 133085
@@ -341,14 +499,27 @@ define card {
  * 本回合中，目标角色下一次使用「特技」少花费1个元素骰。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [SaurusCrackers] = card(333016)
-  .since("v5.1.0")
-  .food()
-  .toStatus(303314, "@targets.0")
-  .oneDuration()
-  .once("deductOmniDiceTechnique")
-  .deductOmniCost(1)
-  .done();
+define card {
+  id 333016 as SaurusCrackers;
+  since "v5.1.0";
+  food;
+  :characterStatus(SaurusCrackersInEffect, "@targets.0");
+}
+
+/**
+ * @id 303314
+ * @name 龙龙饼干（生效中）
+ * @description
+ * 本回合中，该角色下一次使用「特技」少花费1个元素骰。
+ */
+define status {
+  id 303314 as private SaurusCrackersInEffect;
+  since "v5.1.0";
+  oneDuration;
+  once deductOmniDiceTechnique {
+    :e.deductOmniCost(1);
+  }
+}
 
 /**
  * @id 333017
@@ -372,15 +543,30 @@ define card {
  * 接下来3次名称不存在于初始牌组中的牌加入我方手牌时，目标我方角色治疗自身1点。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [PuffPops, PuffPopsInEffect] = card(333018)
-  .since("v5.3.0")
-  .costSame(1)
-  .food()
-  .toStatus(303315, "@targets.0")
-  .on("handCardInserted", (c, e) => !c.isInInitialPile(e.card))
-  .usage(3)
-  .heal(1, "@master")
-  .done();
+define card {
+  id 333018 as PuffPops;
+  since "v5.3.0";
+  cost DiceType.Aligned, 1;
+  food;
+  :characterStatus(PuffPopsInEffect, "@targets.0");
+}
+
+/**
+ * @id 303315
+ * @name 咚咚嘭嘭（生效中）
+ * @description
+ * 名称不存在于初始牌组中的牌加入我方手牌时：治疗该角色1点。
+ * 可用次数：3
+ */
+define status {
+  id 303315 as PuffPopsInEffect;
+  since "v5.3.0";
+  on handCardInserted {
+    when :( !:isInInitialPile(:e.card) );
+    usage 3;
+    :heal(1, "@master");
+  }
+}
 
 /**
  * @id 333019
@@ -419,15 +605,28 @@ define card {
  * @description
  * 本回合中，目标角色下次使用技能时少花费2个元素骰。
  */
-export const [MystiqueSoupProvidence] = card(333022)
-  .since("v5.5.0")
-  .food()
-  .undiscoverable()
-  .toStatus(303317, "@targets.0")
-  .oneDuration()
-  .once("deductOmniDiceSkill")
-  .deductOmniCost(2)
-  .done();
+define card {
+  id 333022 as MystiqueSoupProvidence;
+  since "v5.5.0";
+  food;
+  undiscoverable;
+  :characterStatus(MystiqueSoupProvidenceInEffect, "@targets.0");
+}
+
+/**
+ * @id 303317
+ * @name 奇瑰之汤·助佑（生效中）
+ * @description
+ * 本回合中，该角色下次使用技能时少花费2个元素骰。
+ */
+define status {
+  id 303317 as private MystiqueSoupProvidenceInEffect;
+  since "v5.5.0";
+  oneDuration;
+  once deductOmniDiceSkill {
+    :e.deductOmniCost(2);
+  }
+}
 
 /**
  * @id 303318
@@ -465,16 +664,29 @@ define card {
  * @description
  * 本回合中，目标角色下次受到的伤害-2。
  */
-export const [MystiqueSoupSerenity] = card(333024)
-  .since("v5.5.0")
-  .food()
-  .undiscoverable()
-  .toStatus(303319, "@targets.0")
-  .tags("barrier")
-  .oneDuration()
-  .once("decreaseDamaged")
-  .decreaseDamage(2)
-  .done();
+define card {
+  id 333024 as MystiqueSoupSerenity;
+  since "v5.5.0";
+  food;
+  undiscoverable;
+  :characterStatus(MystiqueSoupSerenityInEffect, "@targets.0");
+}
+
+/**
+ * @id 303319
+ * @name 奇瑰之汤·宁静（生效中）
+ * @description
+ * 本回合中，该角色下次受到的伤害-2。
+ */
+define status {
+  id 303319 as private MystiqueSoupSerenityInEffect;
+  since "v5.5.0";
+  tags barrier;
+  oneDuration;
+  once decreaseDamaged {
+    :e.decreaseDamage(2);
+  }
+}
 
 /**
  * @id 333025
@@ -482,17 +694,31 @@ export const [MystiqueSoupSerenity] = card(333024)
  * @description
  * 本回合中，目标我方角色受到的伤害-1。（最多生效3次）
  */
-export const [MystiqueSoupSoothing] = card(333025)
-  .since("v5.5.0")
-  .food()
-  .undiscoverable()
-  .toStatus(303320, "@targets.0")
-  .tags("barrier")
-  .oneDuration()
-  .on("decreaseDamaged")
-  .usage(3)
-  .decreaseDamage(1)
-  .done();
+define card {
+  id 333025 as MystiqueSoupSoothing;
+  since "v5.5.0";
+  food;
+  undiscoverable;
+  :characterStatus(MystiqueSoupSoothingInEffect, "@targets.0");
+}
+
+/**
+ * @id 303320
+ * @name 奇瑰之汤·安神（生效中）
+ * @description
+ * 本回合中，该我方角色受到的伤害-1。
+ * 可用次数：3
+ */
+define status {
+  id 303320 as private MystiqueSoupSoothingInEffect;
+  since "v5.5.0";
+  tags barrier;
+  oneDuration;
+  on decreaseDamaged {
+    usage 3;
+    :e.decreaseDamage(1);
+  }
+}
 
 /**
  * @id 333026
@@ -534,16 +760,31 @@ define card {
  * 所有我方角色获得饱腹，抓2张牌，下2次切换角色少花费1个元素骰。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [SingYourHeartOut] = card(333027)
-  .since("v5.6.0")
-  .costVoid(3)
-  .combatFood({ satiatedFilter: "allNot" })
-  .drawCards(2)
-  .toCombatStatus(303321)
-  .on("deductOmniDiceSwitch")
-  .usage(2)
-  .deductOmniCost(1)
-  .done();
+define card {
+  id 333027 as SingYourHeartOut;
+  since "v5.6.0";
+  cost DiceType.Void, 3;
+  food combat {
+    satiatedFilter "allNot";
+  };
+  :drawCards(2);
+  :combatStatus(SingYourHeartOutInEffect);
+}
+
+/**
+ * @id 303321
+ * @name 纵声欢唱（生效中）
+ * @description
+ * 下次切换角色少花费1个无色元素。
+ */
+define combatStatus {
+  id 303321 as SingYourHeartOutInEffect;
+  since "v5.6.0";
+  on deductOmniDiceSwitch {
+    usage 2;
+    :e.deductOmniCost(1);
+  }
+}
 
 /**
  * @id 333028
@@ -552,18 +793,32 @@ export const [SingYourHeartOut] = card(333027)
  * 治疗目标角色1点，目标角色之后2次准备技能时：治疗自身1点。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const HarvestsBoon = card(333028)
-  .since("v5.7.0")
-  .costSame(1)
-  .food()
-  .heal(1, "@targets.0")
-  .toStatus(303322, "@targets.0")
-  .on("enterRelative", (c, e) =>
-    e.entity.definition.type === "status" &&
-    e.entity.definition.tags.includes("preparingSkill"))
-  .usage(2)
-  .heal(1, "@master")
-  .done();
+define card {
+  id 333028 as HarvestsBoon;
+  since "v5.7.0";
+  cost DiceType.Aligned, 1;
+  food;
+  :heal(1, "@targets.0");
+  :characterStatus(HarvestsBoonInEffect, "@targets.0");
+}
+
+/**
+ * @id 303322
+ * @name 丰稔之赐（生效中）
+ * @description
+ * 该角色准备技能时：治疗自身1点。
+ * 可用次数：2
+ */
+define status {
+  id 303322 as private HarvestsBoonInEffect;
+  since "v5.7.0";
+  on enterRelative {
+    when :( :e.entity.definition.type === "status" &&
+        :e.entity.definition.tags.includes("preparingSkill") );
+    usage 2;
+    :heal(1, "@master");
+  }
+}
 
 /**
  * @id 333029
@@ -572,18 +827,32 @@ export const HarvestsBoon = card(333028)
  * 选择1个我方角色，我方下2次冒险或结束阶段时，治疗目标角色1点。
  * （每回合每个角色最多食用1次「料理」）
  */
-export const [ChenyuBrew] = card(333029)
-  .since("v6.1.0")
-  .food()
-  .toStatus(303323, "@targets.0")
-  .usage(2)
-  .on("adventure")
-  .heal(1, "@master")
-  .consumeUsage()
-  .on("endPhase")
-  .heal(1, "@master")
-  .consumeUsage()
-  .done();
+define card {
+  id 333029 as ChenyuBrew;
+  since "v6.1.0";
+  food;
+  :characterStatus(ChenyuBrewInEffect, "@targets.0");
+}
+
+/**
+ * @id 303323
+ * @name 沉玉茶露（生效中）
+ * @description
+ * 我方下2次冒险或结束阶段时，治疗所附属角色1点。
+ */
+define status {
+  id 303323 as private ChenyuBrewInEffect;
+  since "v6.1.0";
+  usage 2;
+  on adventure {
+    :heal(1, "@master");
+    :consumeUsage();
+  }
+  on endPhase {
+    :heal(1, "@master");
+    :consumeUsage();
+  }
+}
 
 /**
  * @id 333030

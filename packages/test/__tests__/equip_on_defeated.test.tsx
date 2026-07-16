@@ -14,10 +14,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Equipment, Card, $ } from "#test";
-import { HeartOfKhvarenasBrilliance } from "@gi-tcg/data/internal/cards/equipment/artifacts";
-import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
-import { Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya";
-import { Keqing, YunlaiSwordsmanship } from "@gi-tcg/data/internal/characters/electro/keqing";
+import { HeartOfKhvarenasBrilliance } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
+import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
+import { Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya.gts";
+import { Keqing, YunlaiSwordsmanship } from "@gi-tcg/data/internal/characters/electro/keqing.gts";
 import { test } from "vitest";
 
 test("HeartOfKhvarenasBrilliance should not trigger on defeated damage", async () => {

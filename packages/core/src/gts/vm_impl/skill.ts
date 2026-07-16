@@ -31,6 +31,7 @@ import {
   type SkillBuilderMetaBase,
   type StrictInitiativeSkillEventArg,
   type WritableMetaOf,
+  type DetailedEventArgOf,
 } from "../../builder/skill";
 import {
   SkillContext,
@@ -104,9 +105,9 @@ abstract class SkillModel {
 
   associatedExtensionId: number | null = null;
 
-  protected preOperations: GtsSkillOperation<any>[] = [];
+  preOperations: GtsSkillOperation<any>[] = [];
   action: GtsSkillOperation<any> = () => {};
-  protected postOperations: GtsSkillOperation<any>[] = [];
+  postOperations: GtsSkillOperation<any>[] = [];
   protected filters: GtsSkillOperationFilter<any>[] = [];
   userFilters: GtsSkillOperationFilter<any>[] = [];
 
@@ -242,8 +243,13 @@ export class TriggeredSkillModel extends SkillModel {
 
     // 0. 对于并非响应自身弃置的技能，当实体已经被弃置时，不再响应
     if (
-      this.detailedEventName !== "selfDispose" &&
-      this.detailedEventName !== "selfDiscard"
+      !(
+        [
+          "selfDiscard",
+          "selfDispose",
+          "selfHandCardInserted",
+        ] as (typeof this.detailedEventName)[]
+      ).includes(this.detailedEventName)
     ) {
       this.filters.push((c) => {
         return c.self.area.type !== "removedEntities";
@@ -383,7 +389,11 @@ export const TriggeredSkillViewModel = defineViewModel(
     }>((model, positionals, subView) => {
       const options = UsageVM.parse(subView);
       if (positionals[0] === "perRound") {
-        model.setUsage(positionals[1], { visible: false, ...options, perRound: true });
+        model.setUsage(positionals[1], {
+          visible: false,
+          ...options,
+          perRound: true,
+        });
       } else {
         model.setUsage(positionals[0], { ...options, perRound: false });
       }
@@ -409,6 +419,41 @@ export const TriggeredSkillViewModel = defineViewModel(
     }),
   }),
   DEFAULT_TRIGGERED_SKILL_VM_META,
+);
+
+class DisposeSameModel extends TriggeredSkillModel {
+  constructor(caller: ICaller) {
+    super(caller, "selfDiscard");
+  }
+}
+
+const DEFAULT_DISPOSE_SAME_VM_META = {
+  ...DEFAULT_TRIGGERED_SKILL_VM_META,
+  eventArgType: null! as DetailedEventArgOf<"selfDiscard">,
+  disposeSameSkill: true,
+} as const satisfies TriggeredSkillVMMeta & { disposeSameSkill: true };
+export type DefaultDisposeSameVMMeta = typeof DEFAULT_DISPOSE_SAME_VM_META;
+
+export const DisposeSameVM = defineViewModel(
+  DisposeSameModel,
+  (h) => ({
+    when: h.attribute<{
+      <Meta extends TriggeredSkillVMMeta>(
+        this: AR.This<Meta>,
+        filter: TriggeredSkillFilterOfVM<Meta>,
+      ): AR.Done;
+    }>((model, [filter]) => {
+      model.userFilters.push(filter);
+    }),
+    abortPreview: h.simpleAttribute({
+      uniqueKey: "abortPreview",
+    })(function () {
+      this.preOperations.push(function (c) {
+        c.abortPreview();
+      });
+    }),
+  }),
+  DEFAULT_DISPOSE_SAME_VM_META,
 );
 
 export type TargetGetter = (ctx: SkillContext<any>) => AnyState[];
@@ -624,15 +669,15 @@ export const InitiativeSkillViewModel = defineViewModel(
           context: TypedSkillContext<
             ReadonlyMetaOf<InitiativeSkillVMToBuilderMeta<Meta>>
           >,
-        ) => Ret[number] extends { type: InitiativeSkillTargetKind }
-          ? Ret
-          : never,
+        ) => Ret,
       ): AR.DoneRewriteMeta<
         Omit<Meta, "targetTypes"> & {
           targetTypes: [
             ...Meta["targetTypes"],
-            Ret[number] extends { type: InitiativeSkillTargetKind }
-              ? Ret
+            Ret[number]["definition"] extends {
+              type: infer T extends TargetQueryTypeInfo["type"];
+            }
+              ? T
               : never,
           ];
         }

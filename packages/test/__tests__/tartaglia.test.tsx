@@ -14,8 +14,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Support, DeclaredEnd, Status, $ } from "#test";
-import { Keqing, YunlaiSwordsmanship } from "@gi-tcg/data/internal/characters/electro/keqing";
-import { Riptide, Tartaglia } from "@gi-tcg/data/internal/characters/hydro/tartaglia";
+import { Keqing, YunlaiSwordsmanship } from "@gi-tcg/data/internal/characters/electro/keqing.gts";
+import { Riptide, Tartaglia } from "@gi-tcg/data/internal/characters/hydro/tartaglia.gts";
 import { test } from "vitest";
 
 test("riptide should propagate", async () => {

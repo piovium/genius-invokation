@@ -1,4 +1,4 @@
-import { card, character, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
+import { $, card, character, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
 import { DandelionBreeze, FavoniusBladework, GaleBlade } from "../characters/anemo/jean.gts";
 import { DivineMarksmanship, SkywardSonnet, WindsGrandOde } from "../characters/anemo/venti.gts";
 import { CelestialShower, FrostflakeArrow, LiutianArchery, TrailOfTheQilin } from "../characters/cryo/ganyu.gts";
@@ -31,14 +31,31 @@ define card {
  * 切换到目标角色，并生成1点万能元素。
  * （牌组包含至少2个风元素角色，才能加入牌组）
  */
-const ElementalResonanceImpetuousWinds = card(331502)
-  .until("v5.4.0")
-  .costAnemo(1)
-  .tags("resonance")
-  .addTarget("my character")
-  .switchActive("@targets.0")
-  .generateDice(DiceType.Omni, 1)
-  .done();
+define card {
+  id 331502 as private ElementalResonanceImpetuousWinds;
+  until "v5.4.0";
+  cost DiceType.Anemo, 1;
+  tags resonance;
+  addTarget $.my.character;
+  :switchActive("@targets.0");
+  :generateDice(DiceType.Omni, 1);
+}
+
+/**
+ * @id 303162
+ * @name 元素共鸣：坚定之岩（生效中）
+ * @description
+ * 本回合中，我方角色下一次造成岩元素伤害后：如果我方存在提供「护盾」的出战状态，则为一个此类出战状态补充3点「护盾」。
+ */
+define combatStatus {
+  id 303162 as private ElementalResonanceEnduringRockInEffect;
+  until "v5.4.0";
+  oneDuration;
+  once skillDamage {
+    when :( :e.type === DamageType.Geo );
+    :query($.my.combatStatus.tag("shield").limit(1))?.addVariable("shield", 3);
+  }
+}
 
 /**
  * @id 331602
@@ -47,17 +64,30 @@ const ElementalResonanceImpetuousWinds = card(331502)
  * 本回合中，我方角色下一次造成岩元素伤害后：如果我方存在提供「护盾」的出战状态，则为一个此类出战状态补充3点「护盾」。
  * （牌组包含至少2个岩元素角色，才能加入牌组）
  */
-const [ElementalResonanceEnduringRock] = card(331602)
-  .until("v5.4.0")
-  .costGeo(1)
-  .tags("resonance")
-  .toCombatStatus(303162)
-  .oneDuration()
-  .once("skillDamage", (c, e) => e.type === DamageType.Geo)
-  .do((c) => {
-    c.$("my combat statuses with tag (shield) limit 1")?.addVariable("shield", 3);
-  })
-  .done();
+define card {
+  id 331602 as private ElementalResonanceEnduringRock;
+  until "v5.4.0";
+  cost DiceType.Geo, 1;
+  tags resonance;
+  :combatStatus(ElementalResonanceEnduringRockInEffect);
+}
+
+/**
+ * @id 303172
+ * @name 元素共鸣：蔓生之草（生效中）
+ * @description
+ * 本回合中，我方下一次引发元素反应时，造成的伤害+2。
+ */
+define combatStatus {
+  id 303172 as private ElementalResonanceSprawlingGreeneryInEffect;
+  // 由于 v5.5.0 删去生效中状态，手动将其标记为“主”版本
+  since "v3.3.0";
+  oneDuration;
+  once increaseDamage {
+    when :( :e.getReaction() );
+    :e.increaseDamage(2);
+  }
+}
 
 /**
  * @id 331702
@@ -67,21 +97,16 @@ const [ElementalResonanceEnduringRock] = card(331602)
  * 使我方场上的燃烧烈焰、草原核和激化领域「可用次数」+1。
  * （牌组包含至少2个草元素角色，才能加入牌组）
  */
-const [ElementalResonanceSprawlingGreenery] = card(331702)
-  .until("v5.4.0")
-  .costDendro(1)
-  .tags("resonance")
-  .do((c) => {
-    c.$("my summon with definition id 115")?.addVariable("usage", 1);
-    c.$("my combat statuses with definition id 116")?.addVariable("usage", 1);
-    c.$("my combat statuses with definition id 117")?.addVariable("usage", 1);
-  })
-  .toCombatStatus(303172)
-  .since("v3.3.0") // 由于 v5.4.0 删去生效中状态，手动将其标记为“主”版本
-  .oneDuration()
-  .once("increaseDamage", (c, e) => e.getReaction())
-  .increaseDamage(2)
-  .done();
+define card {
+  id 331702 as private ElementalResonanceSprawlingGreenery;
+  until "v5.4.0";
+  cost DiceType.Dendro, 1;
+  tags resonance;
+  :$("my summon with definition id 115")?.addVariable("usage", 1);
+  :$("my combat statuses with definition id 116")?.addVariable("usage", 1);
+  :$("my combat statuses with definition id 117")?.addVariable("usage", 1);
+  :combatStatus(ElementalResonanceSprawlingGreeneryInEffect);
+}
 
 // 以下为 10血->12血
 

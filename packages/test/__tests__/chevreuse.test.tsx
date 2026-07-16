@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Equipment, Card, $ } from "#test";
-import { Chevreuse, OverchargedBall, ShortrangeRapidInterdictionFire } from "@gi-tcg/data/internal/characters/pyro/chevreuse";
+import { Chevreuse, OverchargedBall, ShortrangeRapidInterdictionFire } from "@gi-tcg/data/internal/characters/pyro/chevreuse.gts";
 
 import { test } from "vitest";
 

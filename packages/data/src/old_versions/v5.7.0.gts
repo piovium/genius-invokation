@@ -1,4 +1,4 @@
-import { card, character, DamageType, DiceType, Reaction, skill, status } from "@gi-tcg/core/builder";
+import { $, card, character, DamageType, DiceType, Reaction, skill, status } from "@gi-tcg/core/builder";
 import { Citlali, MamaloacosFrigidRainInEffect } from "../characters/cryo/citlali.gts";
 import { BondOfLife } from "../commons.gts";
 import { Arlecchino } from "../characters/pyro/arlecchino.gts";
@@ -75,31 +75,30 @@ define card {
  * @description
  * 选一个我方角色，自身附属钩索链接并进入夜魂加持。造成2点草元素伤害，然后与所选角色交换位置。
  */
-const CanopyHunterRidingHigh = skill(17092)
-  .until("v5.7.0")
-  .type("elemental")
-  .costDendro(3)
-  .addTarget("my characters")
-  .characterStatus(GrappleLink)
-  .characterStatus(NightsoulsBlessing)
-  .damage(DamageType.Dendro, 2)
-  .swapCharacterPosition("@self", "@targets.0")
-  .do((c) => {
-    const talent = c.self.hasEquipment(NightRealmsGiftRepaidInFull);
-    if (
-      talent &&
-      c.player.hands.length <= c.oppPlayer.hands.length &&
-      talent.variables.usagePerRound! > 0
-    ) {
-      if (c.oppPlayer.hands.length > 0) {
-        const [targetCard] = c.maxCostHands(1, { who: "opp" });
-        c.stealHandCard(targetCard);
-      }
-      c.drawCards(1, { who: "opp" });
-      c.addVariable("usagePerRound", -1, talent);
+define skill {
+  id 17092 as private CanopyHunterRidingHigh;
+  until "v5.7.0";
+  skillType elemental;
+  cost DiceType.Dendro, 3;
+  addTarget $.my.character;
+  :characterStatus(GrappleLink);
+  :characterStatus(NightsoulsBlessing);
+  :damage(DamageType.Dendro, 2);
+  :swapCharacterPosition("@self", "@targets.0");
+  const talent = :self.hasEquipment(NightRealmsGiftRepaidInFull);
+  if (
+    talent &&
+    :player.hands.length <= :oppPlayer.hands.length &&
+    talent.variables.usagePerRound! > 0
+  ) {
+    if (:oppPlayer.hands.length > 0) {
+      const [targetCard] = :maxCostHands(1, { who: "opp" });
+      :stealHandCard(targetCard);
     }
-  })
-  .done();
+    :drawCards(1, { who: "opp" });
+    :addVariable("usagePerRound", -1, talent);
+  }
+}
 
 /**
  * @id 217101
@@ -205,10 +204,11 @@ define status {
  * 本回合中，目标角色免疫冻结、眩晕、石化等无法使用技能的效果，并且该角色为「出战角色」时不会因效果而切换。
  * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  */
-const EdictOfAbsolution = card(330009)
-  .until("v5.7.0")
-  .legend()
-  .addTarget("my characters")
-  .characterStatus(EdictOfAbsolutionInEffect, "@targets.0")
-  .done();
+define card {
+  id 330009 as private EdictOfAbsolution;
+  until "v5.7.0";
+  legend;
+  addTarget $.my.character;
+  :characterStatus(EdictOfAbsolutionInEffect, "@targets.0");
+}
 

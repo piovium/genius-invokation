@@ -21,12 +21,13 @@ import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/co
  * @description
  * 造成2点火元素伤害。
  */
-export const CharmedCloudstrider = skill(13164)
-  .type("normal")
-  .hidden()
-  .forcePlunging()
-  .damage(DamageType.Pyro, 2)
-  .done();
+define skill {
+  id 13164 as CharmedCloudstrider;
+  skillType normal;
+  hidden;
+  forcePlunging;
+  :damage(DamageType.Pyro, 2);
+}
 
 /**
  * @id 113163

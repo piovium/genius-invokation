@@ -85,23 +85,21 @@ define summon {
  * @description
  * 打出此牌或舍弃此牌时：召唤一个独立的增殖生命体。
  */
-export const AwakenMyKindred = card(127021)
-  .since("v4.7.0")
-  .undiscoverable()
-  .costDendro(2)
-  .do((c) => {
-    if (!c.$(`my summon with definition id ${ProliferatedOrganism01}`)) {
-      c.summon(ProliferatedOrganism01);
-    } else if (!c.$(`my summon with definition id ${ProliferatedOrganism02}`)) {
-      c.summon(ProliferatedOrganism02);
-    } else if (!c.$(`my summon with definition id ${ProliferatedOrganism03}`)) {
-      c.summon(ProliferatedOrganism03);
-    } else {
-      c.summon(ProliferatedOrganism04);
-    }
-  })
-  .doSameWhenDisposed()
-  .done();
+define card {
+  id 127021 as AwakenMyKindred;
+  undiscoverable;
+  cost DiceType.Dendro, 2;
+  on selfDiscard, "=play";
+  if (!:$(`my summon with definition id ${ProliferatedOrganism01}`)) {
+    :summon(ProliferatedOrganism01);
+  } else if (!:$(`my summon with definition id ${ProliferatedOrganism02}`)) {
+    :summon(ProliferatedOrganism02);
+  } else if (!:$(`my summon with definition id ${ProliferatedOrganism03}`)) {
+    :summon(ProliferatedOrganism03);
+  } else {
+    :summon(ProliferatedOrganism04);
+  }
+}
 
 /**
  * @id 127028

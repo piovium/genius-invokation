@@ -1,5 +1,5 @@
-import { Aura, type CardHandle, DamageType, DiceType, card, combatStatus, skill, status, summon } from "@gi-tcg/core/builder";
-import { BonecrunchersEnergyBlockCombatStatus } from "../cards/event/other.gts";
+import { $, Aura, type CardHandle, DamageType, DiceType, card, combatStatus, skill, status, summon } from "@gi-tcg/core/builder";
+import { BonecrunchersEnergyBlockCombatStatus, FallsAndFortuneInEffect, LyresongInEffect2 } from "../cards/event/other.gts";
 import { Cyno } from "../characters/electro/cyno.gts";
 import { LightningRoseSummon } from "../characters/electro/lisa.gts";
 import { DominusLapidisStrikingStone, Zhongli } from "../characters/geo/zhongli.gts";
@@ -510,16 +510,13 @@ define status {
  * @description
  * 我方至少剩余8个元素骰，且对方未宣布结束时，才能打出：本回合中，双方牌手进行「切换角色」行动时需要额外花费1个元素骰。
  */
-const [FallsAndFortune] = card(332026)
-  .until("v4.7.0")
-  .costSame(1)
-  .filter((c) => c.player.dice.length >= 8 && !c.oppPlayer.declaredEnd)
-  .toCombatStatus(303226)
-  .oneDuration()
-  .on("addDice", (c, e) => e.action.type === "switchActive")
-  .listenToAll()
-  .addCost(DiceType.Void, 1)
-  .done();
+define card {
+  id 332026 as private FallsAndFortune;
+  until "v4.7.0";
+  cost DiceType.Aligned, 1;
+  filter :( :player.dice.length >= 8 && !:oppPlayer.declaredEnd );
+  :combatStatus(FallsAndFortuneInEffect);
+}
 
 /**
  * @id 303230
@@ -541,17 +538,13 @@ define card {
  * 将一个我方角色所装备的「圣遗物」返回手牌。
  * 本回合中，我方下次打出「圣遗物」手牌时：少花费2个元素骰。
  */
-const [Lyresong] = card(332024)
-  .until("v4.7.0")
-  .addTarget("my character has equipment with tag (artifact)")
-  .do((c, e) => {
-    e.targets[0].unequipArtifact();
-  })
-  .toCombatStatus(303224)
-  .oneDuration()
-  .once("deductOmniDiceCard", (c, e) => e.hasCardTag("artifact"))
-  .deductOmniCost(2)
-  .done();
+define card {
+  id 332024 as private Lyresong;
+  until "v4.7.0";
+  addTarget $.my.character.has($.typeEquipment.tag("artifact"));
+  :e.targets[0].unequipArtifact();
+  :combatStatus(LyresongInEffect2);
+}
 
 /**
  * @id 323007

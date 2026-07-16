@@ -28,10 +28,10 @@ import {
   Kaboom,
   ExplosiveSpark,
   JumpyDumpty,
-} from "@gi-tcg/data/internal/characters/pyro/klee";
-import { TulaytullahsRemembrance } from "@gi-tcg/data/internal/cards/equipment/weapon/catalyst";
-import { VermillionHereafter } from "@gi-tcg/data/internal/cards/equipment/artifacts";
-import { MintyMeatRolls } from "@gi-tcg/data/internal/cards/event/food";
+} from "@gi-tcg/data/internal/characters/pyro/klee.gts";
+import { TulaytullahsRemembrance } from "@gi-tcg/data/internal/cards/equipment/weapon/catalyst.gts";
+import { VermillionHereafter } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
+import { MintyMeatRolls } from "@gi-tcg/data/internal/cards/event/food.gts";
 import { test } from "vitest";
 import { expect } from "vitest";
 

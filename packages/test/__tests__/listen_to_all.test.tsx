@@ -18,12 +18,12 @@ import { test } from "vitest";
 import {
   AmethystCrown,
   OrnateKabuto,
-} from "@gi-tcg/data/internal/cards/equipment/artifacts";
-import { Akara, Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida";
+} from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
+import { Akara, Nahida } from "@gi-tcg/data/internal/characters/dendro/nahida.gts";
 import {
   Keqing,
   StarwardSword,
-} from "@gi-tcg/data/internal/characters/electro/keqing";
+} from "@gi-tcg/data/internal/characters/electro/keqing.gts";
 
 test("listenToAll works (amethyst crown)", async () => {
   const artifact = ref();

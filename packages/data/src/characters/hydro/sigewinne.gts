@@ -76,13 +76,15 @@ define status {
  * @description
  * 抓到此牌时：治疗所有我方角色1点，生成源水之滴。
  */
-export const SmallBolsteringBubblebalm = card(112133)
-  .since("v5.2.0")
-  .undiscoverable()
-  .descriptionOnHCI()
-  .heal(1, "all my characters")
-  .combatStatus(SourcewaterDroplet)
-  .done();
+define card {
+  id 112133 as SmallBolsteringBubblebalm;
+  since "v5.2.0";
+  undiscoverable;
+  on selfHandCardInserted, only {
+    :heal(1, "all my characters");
+    :combatStatus(SourcewaterDroplet);
+  }
+}
 
 
 /**
@@ -91,13 +93,15 @@ export const SmallBolsteringBubblebalm = card(112133)
  * @description
  * 抓到此牌时：对所在阵营的出战角色造成2点水元素伤害。生成1张激愈水球·小，将其置于对方牌库顶部。
  */
-export const MediumBolsteringBubblebalm = card(112132)
-  .since("v5.2.0")
-  .undiscoverable()
-  .descriptionOnHCI()
-  .damage(DamageType.Hydro, 2, "my active")
-  .createPileCards(SmallBolsteringBubblebalm, 1, "top", "opp")
-  .done();
+define card {
+  id 112132 as MediumBolsteringBubblebalm;
+  since "v5.2.0";
+  undiscoverable;
+  on selfHandCardInserted, only {
+    :damage(DamageType.Hydro, 2, "my active");
+    :createPileCards(SmallBolsteringBubblebalm, 1, "top", "opp");
+  }
+}
 
 /**
  * @id 112131
@@ -105,13 +109,15 @@ export const MediumBolsteringBubblebalm = card(112132)
  * @description
  * 抓到此牌时：治疗我方出战角色3点。生成1张激愈水球·中，将其置于对方牌库顶部第2张牌的位置。
  */
-export const LargeBolsteringBubblebalm = card(112131)
-  .since("v5.2.0")
-  .undiscoverable()
-  .descriptionOnHCI()
-  .heal(3, "my active")
-  .createPileCards(MediumBolsteringBubblebalm, 1, "topIndex1", "opp")
-  .done();
+define card {
+  id 112131 as LargeBolsteringBubblebalm;
+  since "v5.2.0";
+  undiscoverable;
+  on selfHandCardInserted, only {
+    :heal(3, "my active");
+    :createPileCards(MediumBolsteringBubblebalm, 1, "topIndex1", "opp");
+  }
+}
 
 /**
  * @id 12131

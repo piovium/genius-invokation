@@ -14,8 +14,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Status, Equipment, Card, Summon, DeclaredEnd } from "#test";
-import { Collei, CuileinAnbar } from "@gi-tcg/data/internal/characters/dendro/collei";
-import { Emilie, LumidouceCaseLevel1 } from "@gi-tcg/data/internal/characters/dendro/emilie";
+import { Collei, CuileinAnbar } from "@gi-tcg/data/internal/characters/dendro/collei.gts";
+import { Emilie, LumidouceCaseLevel1 } from "@gi-tcg/data/internal/characters/dendro/emilie.gts";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";
 

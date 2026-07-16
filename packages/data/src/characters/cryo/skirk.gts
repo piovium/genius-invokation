@@ -69,25 +69,22 @@ define status {
  * 我方丝柯克附属七相一闪。
  * 回合开始或我方执行切换后：舍弃此牌，获得1点蛇之狡谋。
  */
-export const MutualWeaponsMentorship = card(111161)
-  .undiscoverable() 
-  .addTarget(`my character with definition id 1116`)
-  .characterStatus(SevenphaseFlash, "@targets.0")
-  .onArbitraryEvent("actionPhase", {
-    operation: (c) => {
-      c.disposeCard(c.self);
-      c.$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`)
-        ?.addVariableWithMax("serpentsSubtlety", 1, 7);
-    }
-  })
-  .onArbitraryEvent("switchActive", {
-    operation: (c) => {
-      c.disposeCard(c.self);
-      c.$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`)
-        ?.addVariableWithMax("serpentsSubtlety", 1, 7);
-    }
-  })
-  .done();
+define card {
+  id 111161 as MutualWeaponsMentorship;
+  undiscoverable;
+  addTarget $.my.character.def(Skirk);
+  on actionPhase {
+    :disposeCard(:self);
+    :$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`)
+      ?.addVariableWithMax("serpentsSubtlety", 1, 7);
+  }
+  on switchActive {
+    :disposeCard(:self);
+    :$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`)
+      ?.addVariableWithMax("serpentsSubtlety", 1, 7);
+  }
+  :characterStatus(SevenphaseFlash, "@targets.0");
+}
 
 /**
  * @id 111163

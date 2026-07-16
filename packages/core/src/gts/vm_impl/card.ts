@@ -15,6 +15,8 @@
 
 import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
 import type {
+  DescriptionDictionary,
+  DescriptionDictionaryKey,
   EntityDefinition,
   SupportTag,
   VariableConfig,
@@ -27,6 +29,7 @@ import {
   type VersionInfo,
 } from "../../base/version";
 import {
+  addDescriptionReplacement,
   DEFAULT_ENTITY_VM_META,
   EntityModel,
   EntityViewModel,
@@ -34,6 +37,7 @@ import {
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
   type ICaller,
+  type ThisWithType,
 } from "./entity";
 import type {
   CharacterHandle,
@@ -49,20 +53,28 @@ import type {
 import { CombatFoodVM, FoodVM } from "./entity_auxilary";
 import { $ } from "../../query";
 import {
+  DisposeSameVM,
   InitiativeSkillModel,
   InitiativeSkillViewModel,
   TriggeredSkillModel,
   TriggeredSkillViewModel,
+  type DefaultDisposeSameVMMeta,
   type TargetGetter,
   type TriggeredSkillVMMeta,
 } from "./skill";
 import type { SkillContext } from "../../builder/context/skill";
-import { TechniqueViewModel, type DefaultTechniqueVMMeta, type TechniqueVMMeta } from "./technique";
+import {
+  TechniqueViewModel,
+  type DefaultTechniqueVMMeta,
+  type TechniqueVMMeta,
+} from "./technique";
 import type { CharacterState, EntityState } from "../../builder";
-import type { IUnorderedQuery } from "../../query/utils";
+import type { Computed, IUnorderedQuery } from "../../query/utils";
 import { getSubId } from "./sub_id";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 import type { InitiativeSkillEventArg } from "../../base/skill";
+import type { EntityDescriptionDictionaryGetter } from "../../builder/entity";
+import type { Writable } from "../../utils";
 
 const SATIATED_ID = 303300 as StatusHandle;
 
@@ -85,6 +97,7 @@ class CardModel extends InitiativeSkillModel implements ICaller {
   reserved = false;
   cardId!: number;
   skillType = "playCard" as const;
+  descriptionDictionary: Writable<DescriptionDictionary> = {};
 
   public get snippets() {
     return super.snippets;
@@ -98,6 +111,8 @@ class CardModel extends InitiativeSkillModel implements ICaller {
 
   obtainable = true;
   disableTuning = false;
+  doSameWhenDisposedSkillModel: TriggeredSkillModel | null = null;
+  onlySelfHci = false;
   tags: EntityTag[] = [];
   versionInfo: VersionInfo | null = null;
 
@@ -189,25 +204,33 @@ class CardModel extends InitiativeSkillModel implements ICaller {
         }
       });
     }
-    this.preOperations.push(function (c) {
-      const self = c.self.cast<"support" | "equipment" | "eventCard">();
-      if (self.definition.type === "eventCard") {
-        c.dispose(self, {
-          reason: "eventCardPlayed",
-          direct: true,
-        });
-      } else {
-        // 打出时移除附属效果
-        for (const att of self.attachments) {
-          c.mutate({
-            type: "removeEntity",
-            from: c.self.area,
-            oldState: att,
-            reason: "other", // TODO: maybe better reason?
+    if (!this.onlySelfHci) {
+      this.preOperations.push(function (c) {
+        const self = c.self.cast<"support" | "equipment" | "eventCard">();
+        if (self.definition.type === "eventCard") {
+          c.dispose(self, {
+            reason: "eventCardPlayed",
+            direct: true,
           });
+        } else {
+          // 打出时移除附属效果
+          for (const att of self.attachments) {
+            c.mutate({
+              type: "removeEntity",
+              from: c.self.area,
+              oldState: att,
+              reason: "other", // TODO: maybe better reason?
+            });
+          }
         }
-      }
-    });
+      });
+    }
+    if (this.doSameWhenDisposedSkillModel) {
+      this.doSameWhenDisposedSkillModel.action = this.action;
+      const disposeSkill =
+        this.doSameWhenDisposedSkillModel.buildSkillDefinition();
+      this.skillList.push(disposeSkill);
+    }
     const playSkill = this.buildSkillDefinition();
     return {
       __definition: "entities",
@@ -217,8 +240,14 @@ class CardModel extends InitiativeSkillModel implements ICaller {
       obtainable: this.obtainable && (this.innerModel?.obtainable ?? true),
       disableTuning: this.disableTuning,
       hintText: this.innerModel?.hintText ?? null,
-      descriptionDictionary: this.innerModel?.descriptionDictionary ?? {},
-      version: this.innerModel?.versionInfo ?? this.versionInfo ?? DEFAULT_VERSION_INFO,
+      descriptionDictionary: {
+        ...this.descriptionDictionary,
+        ...this.innerModel?.descriptionDictionary,
+      },
+      version:
+        this.innerModel?.versionInfo ??
+        this.versionInfo ??
+        DEFAULT_VERSION_INFO,
       visibleVarName: this.innerModel?.visibleVarName ?? null,
       varConfigs: this.innerModel
         ? Object.fromEntries(this.innerModel.varConfigs)
@@ -295,7 +324,10 @@ export const CardViewModel = InitiativeSkillViewModel
       <Meta extends CardVMMeta>(
         this: NoTargetSpecifiedThis<Meta>,
         weaponType: WeaponCardTag,
-      ): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"equipment", Meta["associatedExtension"]>>;
+      ): AR.With<
+        typeof EntityViewModel,
+        DefaultEntityVMMeta<"equipment", Meta["associatedExtension"]>
+      >;
       uniqueKey(): "type";
       mergeMeta<Meta extends CardVMMeta, InnerMeta extends EntityVMMeta>(
         meta: Meta,
@@ -317,7 +349,10 @@ export const CardViewModel = InitiativeSkillViewModel
     artifact: h.attribute<{
       <Meta extends CardVMMeta>(
         this: NoTargetSpecifiedThis<Meta>,
-      ): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"equipment", Meta["associatedExtension"]>>;
+      ): AR.With<
+        typeof EntityViewModel,
+        DefaultEntityVMMeta<"equipment", Meta["associatedExtension"]>
+      >;
       uniqueKey(): "type";
       mergeMeta<Meta extends CardVMMeta, InnerMeta extends EntityVMMeta>(
         meta: Meta,
@@ -340,7 +375,10 @@ export const CardViewModel = InitiativeSkillViewModel
     technique: h.attribute<{
       <Meta extends CardVMMeta>(
         this: NoTargetSpecifiedThis<Meta>,
-      ): AR.With<typeof TechniqueViewModel, DefaultTechniqueVMMeta<Meta["associatedExtension"]>>;
+      ): AR.With<
+        typeof TechniqueViewModel,
+        DefaultTechniqueVMMeta<Meta["associatedExtension"]>
+      >;
       uniqueKey(): "type";
       mergeMeta<Meta extends CardVMMeta, InnerMeta extends TechniqueVMMeta>(
         meta: Meta,
@@ -362,7 +400,10 @@ export const CardViewModel = InitiativeSkillViewModel
         this: NoTargetSpecifiedThis<Meta>,
         who: CharacterHandle | CharacterHandle[],
         requires?: TalentRequirement,
-      ): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"equipment", Meta["associatedExtension"]>>;
+      ): AR.With<
+        typeof EntityViewModel,
+        DefaultEntityVMMeta<"equipment", Meta["associatedExtension"]>
+      >;
       uniqueKey(): "type";
       mergeMeta<Meta extends CardVMMeta, InnerMeta extends EntityVMMeta>(
         meta: Meta,
@@ -384,7 +425,10 @@ export const CardViewModel = InitiativeSkillViewModel
         who: CharacterHandle | CharacterHandle[],
         requires?: TalentRequirement,
       ): AR.DoneRewriteMeta<
-        Omit<Meta, "targetTypes"> & { targetTypes: readonly ["character"] }
+        Computed<
+          Omit<Meta, "targetTypes"> & { targetTypes: readonly ["character"] },
+          CardVMMeta
+        >
       >;
       uniqueKey(): "type";
     }>((model, [who, requires = "action"]) => {
@@ -395,7 +439,10 @@ export const CardViewModel = InitiativeSkillViewModel
       <Meta extends CardVMMeta>(
         this: NoTargetSpecifiedThis<Meta>,
         ...supportTags: SupportTag[]
-      ): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"support", Meta["associatedExtension"]>>;
+      ): AR.With<
+        typeof EntityViewModel,
+        DefaultEntityVMMeta<"support", Meta["associatedExtension"]>
+      >;
       uniqueKey(): "type";
       mergeMeta<Meta extends CardVMMeta, InnerMeta extends EntityVMMeta>(
         meta: Meta,
@@ -408,16 +455,24 @@ export const CardViewModel = InitiativeSkillViewModel
       model.setSupportPlayAction();
     }),
     legend: h.simpleAttribute({
-      uniqueKey: "legend"
+      uniqueKey: "legend",
     })(function () {
       this.tags.push("legend");
       this.userFilters.push((c) => !c.player.legendUsed);
+    }),
+    disableTuning: h.simpleAttribute({
+      uniqueKey: "disableTuning",
+    })(function () {
+      this.disableTuning = true;
     }),
     food: h.attribute<{
       <Meta extends CardVMMeta>(
         this: NoTargetSpecifiedThis<Meta>,
       ): AR.WithRewriteMeta<
-        Omit<Meta, "targetTypes"> & { targetTypes: readonly ["character"] },
+        Computed<
+          Omit<Meta, "targetTypes"> & { targetTypes: readonly ["character"] },
+          CardVMMeta
+        >,
         typeof FoodVM
       >;
       <Meta extends CardVMMeta>(
@@ -463,36 +518,97 @@ export const CardViewModel = InitiativeSkillViewModel
         });
       }
     }),
+    replaceDescription: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+        key: DescriptionDictionaryKey,
+        getter: EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
+      ): AR.Done;
+    }>((model, [key, getter]) => {
+      addDescriptionReplacement(model, key, getter);
+    }),
 
     on: h.attribute<{
-      <Meta extends EntityVMMeta, const Event extends DetailedEventNames>(
+      (
+        eventName: "selfDiscard",
+        doSameMark: "=play",
+      ): AR.With<typeof DisposeSameVM>;
+      <Meta extends CardVMMeta>(
         this: AR.This<Meta>,
+        eventName: "selfHandCardInserted",
+        onlyMark: "only",
+      ): AR.WithRewriteMeta<
+        // rewrite meta to disable ~action
+        Computed<
+          Omit<Meta, "isInitiativeSkill"> & { isInitiativeSkill: false },
+          CardVMMeta
+        >,
+        typeof OffStageTriggeredSkillViewModel,
+        Computed<
+          Omit<Meta, "eventArgType"> & {
+            eventArgType: DetailedEventArgOf<"selfHandCardInserted">;
+          },
+          TriggeredSkillVMMeta
+        >
+      >;
+      <Meta extends CardVMMeta, const Event extends DetailedEventNames>(
+        this: ThisWithType<Meta, "eventCard">,
         eventName: Event,
       ): AR.With<
         typeof OffStageTriggeredSkillViewModel,
-        Omit<Meta, "targetTypes"> & {
-          eventArgType: DetailedEventArgOf<Event>;
-        }
+        Computed<
+          Omit<Meta, "eventArgType"> & {
+            eventArgType: DetailedEventArgOf<Event>;
+          },
+          TriggeredSkillVMMeta
+        >
       >;
+      mergeMeta<Meta extends CardVMMeta>(
+        meta: Meta,
+        innerMeta: DefaultDisposeSameVMMeta,
+      ): Meta;
       mergeMeta<
-        Meta extends EntityVMMeta,
+        Meta extends CardVMMeta,
         InnerMeta extends TriggeredSkillVMMeta,
       >(
         meta: Meta,
         innerMeta: InnerMeta,
-      ): Omit<Meta, "variables"> & {
-        variables: Meta["variables"] | InnerMeta["variables"];
-      };
-    }>((model, [eventName], subView) => {
-      const skillModel = OffStageTriggeredSkillViewModel.parse(
-        subView,
-        model,
-        eventName,
-      );
-      skillModel.id = model.getSubId();
-      skillModel.enableHandTriggering = true;
-      const skillDef = skillModel.buildSkillDefinition();
-      model.skillList.push(skillDef);
+      ): Computed<
+        Omit<Meta, "variables"> & {
+          variables: Meta["variables"] | InnerMeta["variables"];
+        },
+        CardVMMeta
+      >;
+    }>((model, [eventName, maybeMark], subView) => {
+      if (eventName === "selfDiscard" && maybeMark === "=play") {
+        const skillModel = DisposeSameVM.parse(subView, model);
+        skillModel.id = model.getSubId();
+        skillModel.enableHandTriggering = true;
+        model.doSameWhenDisposedSkillModel = skillModel;
+      } else {
+        const onlySelfHci =
+          eventName === "selfHandCardInserted" && maybeMark === "only";
+        const skillModel = OffStageTriggeredSkillViewModel.parse(
+          subView,
+          model,
+          eventName,
+        );
+        skillModel.id = model.getSubId();
+        skillModel.enableHandTriggering = true;
+        if (onlySelfHci) {
+          skillModel.postOperations.push((c) => {
+            if (c.self.area.type !== "removedEntities") {
+              c.dispose(c.self.cast<"eventCard">(), {
+                reason: "eventCardDrawn",
+                direct: true,
+              });
+            }
+          });
+          model.onlySelfHci = true;
+        }
+        const skillDef = skillModel.buildSkillDefinition();
+        model.skillList.push(skillDef);
+      }
     }),
   }))
   .bind<typeof DEFAULT_CARD_VM_META>();

@@ -1,4 +1,4 @@
-import { card, character, combatStatus, DiceType, skill } from "@gi-tcg/core/builder";
+import { $, card, character, combatStatus, DiceType, skill } from "@gi-tcg/core/builder";
 import { StrictProhibited } from "../cards/support/place.gts";
 import { ConstantOffthecuffCookery, KitchenSkills, LowtemperatureCooking, ScoringCuts } from "../characters/cryo/escoffier.gts";
 import { Breakthrough, DepthclarionDice, LingeringLifeline, StealthyBowshot } from "../characters/hydro/yelan.gts";
@@ -197,14 +197,13 @@ define card {
  * @description
  * 选择一个敌方「召唤物」，使其「可用次数」-2。
  */
-const SendOff = card(332013)
-  .until("v6.3.0")
-  .costSame(2)
-  .addTarget("opp summon")
-  .do((c, e) => {
-    e.targets[0].consumeUsage(2);
-  })
-  .done();
+define card {
+  id 332013 as private SendOff;
+  until "v6.3.0";
+  cost DiceType.Aligned, 2;
+  addTarget $.opp.summon;
+  :e.targets[0].consumeUsage(2);
+}
 
 /**
  * @id 333019

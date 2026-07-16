@@ -9,28 +9,28 @@ import { FestiveFires } from "../characters/pyro/xinyan.gts";
  * 加入手牌时：若我方出战角色为火/水/雷/冰，则将此牌转化为对应元素。
  * 打出或从手牌中舍弃此牌时：造成1点风元素伤害，然后将一张追影弹随机放进牌库。
  */
-const ShadowhuntShell = card(115113)
-  .until("v6.0.0")
-  .undiscoverable()
-  .costAnemo(3)
-  .onHCI((c) => {
-    const element = c.$(`my active`)?.element();
+define card {
+  id 115113 as private ShadowhuntShell;
+  until "v6.0.0";
+  undiscoverable;
+  cost DiceType.Anemo, 3;
+  on selfHandCardInserted {
+    const element = :$(`my active`)?.element();
     if (element === DiceType.Pyro) {
-      c.transformDefinition(c.self, ShiningShadowhuntShellPyro);
+      :transformDefinition(:self, ShiningShadowhuntShellPyro);
     } else if (element === DiceType.Hydro) {
-      c.transformDefinition(c.self, ShiningShadowhuntShellHydro);
+      :transformDefinition(:self, ShiningShadowhuntShellHydro);
     } else if (element === DiceType.Electro) {
-      c.transformDefinition(c.self, ShiningShadowhuntShellElectro);
+      :transformDefinition(:self, ShiningShadowhuntShellElectro);
     } else if (element === DiceType.Cryo) {
-      c.transformDefinition(c.self, ShiningShadowhuntShellCryo);
+      :transformDefinition(:self, ShiningShadowhuntShellCryo);
     }
-  })
-  .doSameWhenDisposed()
-  .damage(DamageType.Anemo, 1, "opp characters with health > 0 limit 1")
-  .do((c) => {
-    c.createPileCards(ShadowhuntShell, 1, "random");
-  })
-  .done();
+  }
+  on selfDiscard, "=play" {
+  }
+  :damage(DamageType.Anemo, 1, "opp characters with health > 0 limit 1");
+  :createPileCards(ShadowhuntShell, 1, "random");
+}
 
 /**
  * @id 115114
@@ -38,16 +38,16 @@ const ShadowhuntShell = card(115113)
  * @description
  * 打出或从手牌中舍弃此牌时：造成1点火元素伤害，然后将一张追影弹随机放进牌库。
  */
-const ShiningShadowhuntShellPyro = card(115114)
-  .until("v6.0.0")
-  .undiscoverable()
-  .costPyro(3)
-  .doSameWhenDisposed()
-  .damage(DamageType.Pyro, 1, "opp characters with health > 0 limit 1")
-  .do((c) => {
-    c.createPileCards(ShadowhuntShell, 1, "random");
-  })
-  .done();
+define card {
+  id 115114 as private ShiningShadowhuntShellPyro;
+  until "v6.0.0";
+  undiscoverable;
+  cost DiceType.Pyro, 3;
+  on selfDiscard, "=play" {
+  }
+  :damage(DamageType.Pyro, 1, "opp characters with health > 0 limit 1");
+  :createPileCards(ShadowhuntShell, 1, "random");
+}
 
 /**
  * @id 115115
@@ -55,16 +55,16 @@ const ShiningShadowhuntShellPyro = card(115114)
  * @description
  * 打出或从手牌中舍弃此牌时：造成1点水元素伤害，然后将一张追影弹随机放进牌库。
  */
-const ShiningShadowhuntShellHydro = card(115115)
-  .until("v6.0.0")
-  .undiscoverable()
-  .costHydro(3)
-  .doSameWhenDisposed()
-  .damage(DamageType.Hydro, 1, "opp characters with health > 0 limit 1")
-  .do((c) => {
-    c.createPileCards(ShadowhuntShell, 1, "random");
-  })
-  .done();
+define card {
+  id 115115 as private ShiningShadowhuntShellHydro;
+  until "v6.0.0";
+  undiscoverable;
+  cost DiceType.Hydro, 3;
+  on selfDiscard, "=play" {
+  }
+  :damage(DamageType.Hydro, 1, "opp characters with health > 0 limit 1");
+  :createPileCards(ShadowhuntShell, 1, "random");
+}
 
 /**
  * @id 115116
@@ -72,16 +72,16 @@ const ShiningShadowhuntShellHydro = card(115115)
  * @description
  * 打出或从手牌中舍弃此牌时：造成1点雷元素伤害，然后将一张追影弹随机放进牌库。
  */
-const ShiningShadowhuntShellElectro = card(115116)
-  .until("v6.0.0")
-  .undiscoverable()
-  .costElectro(3)
-  .doSameWhenDisposed()
-  .damage(DamageType.Electro, 1, "opp characters with health > 0 limit 1")
-  .do((c) => {
-    c.createPileCards(ShadowhuntShell, 1, "random");
-  })
-  .done();
+define card {
+  id 115116 as private ShiningShadowhuntShellElectro;
+  until "v6.0.0";
+  undiscoverable;
+  cost DiceType.Electro, 3;
+  on selfDiscard, "=play" {
+  }
+  :damage(DamageType.Electro, 1, "opp characters with health > 0 limit 1");
+  :createPileCards(ShadowhuntShell, 1, "random");
+}
 
 /**
  * @id 115117
@@ -89,16 +89,16 @@ const ShiningShadowhuntShellElectro = card(115116)
  * @description
  * 打出或从手牌中舍弃此牌时：造成1点冰元素伤害，然后将一张追影弹随机放进牌库。
  */
-const ShiningShadowhuntShellCryo = card(115117)
-  .until("v6.0.0")
-  .undiscoverable()
-  .costCryo(3)
-  .doSameWhenDisposed()
-  .damage(DamageType.Cryo, 1, "opp characters with health > 0 limit 1")
-  .do((c) => {
-    c.createPileCards(ShadowhuntShell, 1, "random");
-  })
-  .done();
+define card {
+  id 115117 as private ShiningShadowhuntShellCryo;
+  until "v6.0.0";
+  undiscoverable;
+  cost DiceType.Cryo, 3;
+  on selfDiscard, "=play" {
+  }
+  :damage(DamageType.Cryo, 1, "opp characters with health > 0 limit 1");
+  :createPileCards(ShadowhuntShell, 1, "random");
+}
 
 
 /**

@@ -26,17 +26,17 @@ import {
   $,
 } from "#test";
 import { Aura, SkillHandle } from "@gi-tcg/core/builder";
-import { Paimon } from "@gi-tcg/data/internal/cards/support/ally";
+import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
 import {
   Chasca,
   NightsoulsBlessing,
   ShiningShadowhuntShellPyro,
   SoulsniperRitualStaff,
-} from "@gi-tcg/data/internal/characters/anemo/chasca";
+} from "@gi-tcg/data/internal/characters/anemo/chasca.gts";
 import {
   AlldevouringNarwhal,
   DarkShadow,
-} from "@gi-tcg/data/internal/characters/hydro/alldevouring_narwhal";
+} from "@gi-tcg/data/internal/characters/hydro/alldevouring_narwhal.gts";
 import { test } from "vitest";
 
 test("dark shadow: do not barrier on nested damage", async () => {

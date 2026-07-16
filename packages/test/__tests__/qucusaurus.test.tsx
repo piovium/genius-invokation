@@ -14,10 +14,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Status, $, Equipment, Card, Support, Summon } from "#test";
-import { Qucusaurus, Target } from "@gi-tcg/data/internal/cards/equipment/techniques";
-import { Katheryne } from "@gi-tcg/data/internal/cards/support/ally";
-import { Chasca, ShadowhuntShell } from "@gi-tcg/data/internal/characters/anemo/chasca";
-import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona";
+import { Qucusaurus, Target } from "@gi-tcg/data/internal/cards/equipment/techniques.gts";
+import { Katheryne } from "@gi-tcg/data/internal/cards/support/ally.gts";
+import { Chasca, ShadowhuntShell } from "@gi-tcg/data/internal/characters/anemo/chasca.gts";
+import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona.gts";
 import { test, expect } from "vitest";
 
 test("qucusaurus delayed one fast action to next switch", async () => {

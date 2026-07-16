@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Character, ref, setup, State, Equipment, Card } from "#test";
-import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona";
+import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona.gts";
 import { test } from "vitest";
 
 test("mona: fast switch passive", async () => {

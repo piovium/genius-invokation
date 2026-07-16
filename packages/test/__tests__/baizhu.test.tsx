@@ -18,11 +18,11 @@ import {
   Baizhu,
   HolisticRevivification,
   SeamlessShield,
-} from "@gi-tcg/data/internal/characters/dendro/baizhu";
+} from "@gi-tcg/data/internal/characters/dendro/baizhu.gts";
 import {
   Keqing,
   YunlaiSwordsmanship,
-} from "@gi-tcg/data/internal/characters/electro/keqing";
+} from "@gi-tcg/data/internal/characters/electro/keqing.gts";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";
 

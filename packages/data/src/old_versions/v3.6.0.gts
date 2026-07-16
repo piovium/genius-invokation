@@ -1,4 +1,4 @@
-import { card, character, DamageType, DiceType, skill, summon, type EquipmentHandle, type SkillHandle } from "@gi-tcg/core/builder";
+import { $, card, character, DamageType, DiceType, skill, summon, type EquipmentHandle, type SkillHandle } from "@gi-tcg/core/builder";
 import { LiutianArchery, SacredCryoPearl, TrailOfTheQilin } from "../characters/cryo/ganyu.gts";
 import { MirrorCage, Refraction, Refraction01 } from "../characters/hydro/mirror_maiden.gts";
 import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.gts";
@@ -126,14 +126,13 @@ define summon {
  * @description
  * 选择一个敌方「召唤物」，将其消灭。
  */
-const SendOff = card(332013)
-  .until("v3.6.0")
-  .costSame(2)
-  .addTarget("opp summon")
-  .do((c, e) => {
-    e.targets[0].dispose();
-  })
-  .done();
+define card {
+  id 332013 as private SendOff;
+  until "v3.6.0";
+  cost DiceType.Aligned, 2;
+  addTarget $.opp.summon;
+  :e.targets[0].dispose();
+}
 
 /**
  * @id 311402

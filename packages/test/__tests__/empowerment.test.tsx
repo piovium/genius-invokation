@@ -17,8 +17,8 @@ import { ref, setup, Character, State, Card, Attachment, DeclaredEnd } from "#te
 import {
   Bennett,
   GrandExpectation,
-} from "@gi-tcg/data/internal/characters/pyro/bennett";
-import { Empowerment } from "@gi-tcg/data/internal/commons";
+} from "@gi-tcg/data/internal/characters/pyro/bennett.gts";
+import { Empowerment } from "@gi-tcg/data/internal/commons.gts";
 import { test, expect } from "vitest";
 
 test("empowerment should not change energy cost", async () => {

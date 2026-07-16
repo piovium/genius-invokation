@@ -1,4 +1,4 @@
-import { card, character, combatStatus, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import { $, card, character, combatStatus, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
 import { CoolcolorCapture, FramingFreezingPointComposition, StillPhotoComprehensiveConfirmation } from "../characters/cryo/charlotte.gts";
 import { KamisatoArtKyouka, KamisatoArtMarobashi, KamisatoArtSuiyuu } from "../characters/hydro/kamisato_ayato.gts";
 import { Brilliance, ScarletSeal } from "../characters/pyro/yanfei.gts";
@@ -218,27 +218,40 @@ define card {
 }
 
 /**
+ * @id 303228
+ * @name 机关铸成之链（生效中）
+ * @description
+ * 所附属角色每次受到伤害或治疗后：累积1点「备战度」（最多累积2点）。
+ * 我方打出原本费用不多于「备战度」的「武器」或「圣遗物」时：移除此状态，以免费打出该牌。
+ */
+define status {
+  id 303228 as private MachineAssemblyLineInEffect;
+  // v6.3.0 之后，生效中状态被删去，手动将其标记为“主”版本
+  since "v4.4.0";
+  variable readiness, 0;
+  on damagedOrHealed {
+    :addVariableWithMax("readiness", 1, 2);
+  }
+  once deductOmniDiceCard {
+    when :( :e.hasOneOfCardTag("weapon", "artifact") && :e.currentDiceCostSize() <= :getVariable("readiness") );
+    :e.deductOmniCost(:e.diceCostSize());
+    :setVariable("readiness", 0);
+  }
+}
+
+/**
  * @id 332028
  * @name 机关铸成之链
  * @description
  * 目标我方角色每次受到伤害或治疗后：累积1点「备战度」（最多累积2点）。
  * 我方打出原本费用不多于「备战度」的「武器」或「圣遗物」时：移除所有「备战度」，以免费打出该牌。
  */
-const [MachineAssemblyLine] = card(332028)
-  .until("v6.2.0")
-  .addTarget("my characters")
-  .toStatus(303228, "@targets.0")
-  .variable("readiness", 0)
-  .on("damagedOrHealed")
-  .addVariableWithMax("readiness", 1, 2)
-  .once("deductOmniDiceCard", (c, e) =>
-    e.hasOneOfCardTag("weapon", "artifact") &&
-    e.currentDiceCostSize() <= c.getVariable("readiness"))
-  .do((c, e) => {
-    e.deductOmniCost(e.diceCostSize());
-    c.setVariable("readiness", 0);
-  })
-  .done();
+define card {
+  id 332028 as private MachineAssemblyLine;
+  until "v6.2.0";
+  addTarget $.my.character;
+  :characterStatus(MachineAssemblyLineInEffect, "@targets.0");
+}
 
 /**
  * @id 303236

@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Character, ref, setup, State, Equipment, Card, Status, $ } from "#test";
-import { Wanderer, Windfavored, YuubanMeigen } from "@gi-tcg/data/internal/characters/anemo/wanderer";
+import { Wanderer, Windfavored, YuubanMeigen } from "@gi-tcg/data/internal/characters/anemo/wanderer.gts";
 import { test } from "vitest";
 
 test("wanderer: normal attack to opp next", async () => {

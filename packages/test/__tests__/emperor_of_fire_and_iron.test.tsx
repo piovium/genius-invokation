@@ -18,11 +18,11 @@ import {
   ArmoredCrabCarapace,
   EmperorOfFireAndIron,
   ShatterclampStrike,
-} from "@gi-tcg/data/internal/characters/pyro/emperor_of_fire_and_iron";
+} from "@gi-tcg/data/internal/characters/pyro/emperor_of_fire_and_iron.gts";
 import {
   Candace,
   HeronShield,
-} from "@gi-tcg/data/internal/characters/hydro/candace";
+} from "@gi-tcg/data/internal/characters/hydro/candace.gts";
 import { test } from "vitest";
 
 test("Emperor of Fire and Iron absorbs another character's shield after acting", async () => {

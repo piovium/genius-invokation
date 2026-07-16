@@ -14,7 +14,7 @@
       "development": ["./src/index.ts", "./dist/index.js"],
       "import": "./dist/index.js"
     },
-    "./internal/*": "./src/*.gts"
+    "./internal/*": "./src/*"
   },
   "files": [
     "dist"

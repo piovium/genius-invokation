@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import { $, card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
 
 /**
  * @id 114034
@@ -131,15 +131,16 @@ define character {
  * 战斗行动：将刻晴切换到场上，立刻使用星斗归位。本次星斗归位会为刻晴附属雷元素附魔，但是不会再生成雷楔。
  * （刻晴使用星斗归位时，如果此牌在手中：不会再生成雷楔，而是改为舍弃此牌，并为刻晴附属雷元素附魔）
  */
-export const LightningStiletto = card(114031)
-  .since("v3.3.0")
-  .undiscoverable()
-  .costElectro(3)
-  .tags("action", "talent")
-  .addTarget(`my character with definition id ${Keqing} and not has status with tag (disableSkill)`)
-  .switchActive(`@targets.0`)
-  .useSkill(StellarRestoration)
-  .done();
+define card {
+  id 114031 as LightningStiletto;
+  since "v3.3.0";
+  undiscoverable;
+  cost DiceType.Electro, 3;
+  tags action, talent;
+  addTarget $.my.character.def(Keqing).exclude($.has.typeStatus.tag("disableSkill"));
+  :switchActive(:e.targets[0]);
+  :useSkill(StellarRestoration);
+}
 
 /**
  * @id 214031

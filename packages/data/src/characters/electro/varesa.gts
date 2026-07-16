@@ -36,12 +36,13 @@ define status {
  * @description
  * 造成3点雷元素伤害，此技能视为下落攻击。
  */
-export const GuardianVentVolcanoKablam = skill(14155)
-  .type("burst")
-  .prepared()
-  .forcePlunging()
-  .damage(DamageType.Electro, 3)
-  .done();
+define skill {
+  id 14155 as GuardianVentVolcanoKablam;
+  skillType burst;
+  prepared;
+  forcePlunging;
+  :damage(DamageType.Electro, 3);
+}
 
 
 /**
