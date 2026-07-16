@@ -21,6 +21,7 @@ catalog:
   "@gi-tcg/gtsc": ^0.6.7
   "@gi-tcg/gts-transpiler": ^0.6.7
   "@gi-tcg/unplugin-gts": ^0.6.7
+  "@gi-tcg/prettier-plugin-gts": ^0.6.7
 
 patchedDependencies:
   ohm-js@17.1.0: patches/ohm-js@17.1.0.patch

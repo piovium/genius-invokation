@@ -15,6 +15,9 @@ catalogs:
     '@gi-tcg/gtsc':
       specifier: ^0.6.7
       version: 0.6.7
+    '@gi-tcg/prettier-plugin-gts':
+      specifier: ^0.6.7
+      version: 0.6.7
     '@gi-tcg/unplugin-gts':
       specifier: ^0.6.7
       version: 0.6.7
@@ -77,6 +80,9 @@ importers:
       '@gi-tcg/config':
         specifier: workspace:*
         version: link:packages/config
+      '@gi-tcg/prettier-plugin-gts':
+        specifier: 'catalog:'
+        version: 0.6.7(prettier@3.1.1)
       '@gi-tcg/unplugin-gts':
         specifier: 'catalog:'
         version: 0.6.7(esbuild@0.19.11)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.19.11)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.19.11))
@@ -110,6 +116,9 @@ importers:
       jest-extended:
         specifier: ^7.0.0
         version: 7.0.0(typescript@6.0.2)
+      prettier:
+        specifier: 3.1.1
+        version: 3.1.1
       tsdown:
         specifier: ^0.21.7
         version: 0.21.7(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(typescript@6.0.2)
@@ -2566,6 +2575,11 @@ packages:
     hasBin: true
     peerDependencies:
       typescript: npm:@typescript/typescript6@^6.0.1
+
+  '@gi-tcg/prettier-plugin-gts@0.6.7':
+    resolution: {integrity: sha512-jTSl5rTXeLK96gLiA/hxqP/9vtH4Z4vEc3cZS3Cm5jpWbg9tSg4NqRyng/FSWaHgvdDh7d27e22M3nnZNFCD1w==}
+    peerDependencies:
+      prettier: ^3.0.0
 
   '@gi-tcg/unplugin-gts@0.6.7':
     resolution: {integrity: sha512-GITI0iyfhni6PAP4ZYHK21Gikq6vvctHQm8QXTQMfV2ViyKT7hIJil1nHXYZZ5Z80kSpKzpJgSLOtJGAyC45Dg==}
@@ -10544,6 +10558,13 @@ snapshots:
       '@gi-tcg/gts-language-plugin': 0.6.7(typescript@6.0.2)
       '@volar/typescript': 2.4.28
       typescript: 6.0.2
+    transitivePeerDependencies:
+      - babel-plugin-macros
+
+  '@gi-tcg/prettier-plugin-gts@0.6.7(prettier@3.1.1)':
+    dependencies:
+      '@gi-tcg/gts-transpiler': 0.6.7
+      prettier: 3.1.1
     transitivePeerDependencies:
       - babel-plugin-macros
 
