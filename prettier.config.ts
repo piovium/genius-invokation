@@ -18,4 +18,8 @@ import gts from "@gi-tcg/prettier-plugin-gts";
 
 export default {
   plugins: [gts],
+  printWidth: 80,
+  semi: true,
+  trailingComma: "all",
+  singleQuote: false,
 } satisfies Config;
