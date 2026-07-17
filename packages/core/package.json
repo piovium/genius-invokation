@@ -47,7 +47,6 @@
     "@beaker73/async-context": "^0.1.2",
     "@gi-tcg/config": "workspace:*",
     "@ohm-js/cli": "^2.0.0",
-    "prettier": "3.1.1",
     "tsd": "^0.33.0"
   }
 }
