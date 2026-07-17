@@ -1447,12 +1447,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return RET;
   }
   consumeUsagePerRound(count = 1) {
-    if (!("usagePerRoundVariableName" in this.skillInfo.definition)) {
-      throw new GiTcgDataError(`This skill do not have usagePerRound`);
-    }
     const varName = this.skillInfo.definition.usagePerRoundVariableName;
     if (varName === null) {
-      throw new GiTcgDataError(`This skill do not have usagePerRound`);
+      throw new GiTcgDataError(`This skill ${this.skillInfo.definition.id} do not have usagePerRound`);
     }
     const current = this.getVariable(varName, this.self);
     if (current > 0) {

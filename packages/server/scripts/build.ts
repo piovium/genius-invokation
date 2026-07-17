@@ -55,6 +55,7 @@ await build({
   output: {
     dir: `${import.meta.dirname}/../dist`,
     format: "esm",
+    minify: true,
     sourcemap: true,
     assetFileNames: "[name].[ext]",
   },

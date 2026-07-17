@@ -491,7 +491,9 @@ export class InitiativeSkillModel extends SkillModel {
       ),
     };
   }
-  buildSkillDefinition(): InitiativeSkillDefinition {
+  buildSkillDefinition(
+    override: Partial<InitiativeSkillDefinition> = {},
+  ): InitiativeSkillDefinition {
     return {
       type: "skill",
       id: this.id,
@@ -502,6 +504,7 @@ export class InitiativeSkillModel extends SkillModel {
       action: this.buildAction(),
       filter: this.buildFilter(),
       usagePerRoundVariableName: null,
+      ...override,
     };
   }
 }
