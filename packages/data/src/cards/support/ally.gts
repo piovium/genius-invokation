@@ -528,14 +528,16 @@ define status {
   }
 }
 
-export const DisposedSupportCountExtension = extension(322022, {
-  disposedSupportCount: "pair<number>",
-})
-  .initialState({
+define extension {
+  idHint 322022 as DisposedSupportCountExtension;
+  schema ({
+    disposedSupportCount: "pair<number>",
+  });
+  initialState ({
     disposedSupportCount: [0, 0],
-  })
-  .description("记录本场对局中双方支援区弃置卡牌的数量")
-  .mutateWhen("onDispose", (st, e) => {
+  });
+  description "记录本场对局中双方支援区弃置卡牌的数量";
+  mutateWhen onDispose, ((st, e) => {
     if (e.isDiscardOrTuning()) {
       return;
     }
@@ -543,7 +545,7 @@ export const DisposedSupportCountExtension = extension(322022, {
       st.disposedSupportCount[e.who]++;
     }
   })
-  .done();
+}
 
 /**
  * @id 322022
@@ -579,21 +581,23 @@ define card {
   }
 }
 
-const DamageTypeCountExtension = extension(322023, {
+define extension {
+  idHint 322023 as DamageTypeCountExtension;
+  schema ({
     damages: type.declare<Pair<DamageType[]>>().type("pair<number[]>")
   })
-  .initialState({
+  initialState({
     damages: [[], []],
   })
-  .description("记录本场对局中双方角色受到过的元素伤害种类")
-  .mutateWhen("onDamageOrHeal", (st, e) => {
+  description "记录本场对局中双方角色受到过的元素伤害种类";
+  mutateWhen onDamageOrHeal, ((st, e) => {
     if (e.isDamageTypeDamage() &&  e.type !== DamageType.Physical && e.type !== DamageType.Piercing) {
       if (!st.damages[e.targetWho].includes(e.type)) {
         st.damages[e.targetWho].push(e.type);
       }
     }
   })
-  .done();
+}
 
 /**
  * @id 322023

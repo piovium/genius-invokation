@@ -320,15 +320,17 @@ define card {
   }
 }
 
-export const TechniquesPlayedCountExtension = extension(301306, { techniquesPlayedCount: "pair<number>" })
-  .initialState({ techniquesPlayedCount: [0, 0] })
-  .description("记录本场对局中双方打出特技牌的数量")
-  .mutateWhen("onPlayCard", (c, e) => {
+define extension {
+  idHint 301306 as TechniquesPlayedCountExtension;
+  schema ({ techniquesPlayedCount: "pair<number>" });
+  initialState ({ techniquesPlayedCount: [0, 0] });
+  description "记录本场对局中双方打出特技牌的数量";
+  mutateWhen onPlayCard, ((c, e) => {
     if (e.card.definition.tags.includes("technique")) {
       c.techniquesPlayedCount[e.who]++;
     }
   })
-  .done();
+};
 
 /**
  * @id 301306

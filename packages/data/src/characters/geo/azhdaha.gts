@@ -15,14 +15,16 @@
 
 import { character, skill, status, card, DamageType, DiceType, type CharacterHandle, Aura, extension, type, type Pair } from "@gi-tcg/core/builder";
 
-const AbsorbedCountExtension = extension(2602, {
+define extension {
+  idHint 2602 as AbsorbedCountExtension;
+  schema ({
     absorbed: type.declare<Pair<DiceType[]>>().type("pair<number[]>")
-  })
-  .initialState({
+  });
+  initialState({
     absorbed: [[], []],
-  })
-  .description("记录某方若陀龙王已汲取过的元素类型")
-  .done();
+  });
+  description "记录某方若陀龙王已汲取过的元素类型";
+}
 
 /**
  * @id 126021

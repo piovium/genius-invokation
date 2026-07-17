@@ -151,10 +151,12 @@ define card {
   }
 }
 
-const CardPlayedExtension = extension(323006, { played: "pair<number[]>" })
-  .initialState({ played: [[], []] })
-  .description("记录本场对局中双方曾经打出过的行动牌")
-  .mutateWhen("onAction", (st, e) => {
+define extension {
+  idHint 323006 as CardPlayedExtension;
+  schema ({ played: "pair<number[]>" });
+  initialState ({ played: [[], []] });
+  description "记录本场对局中双方曾经打出过的行动牌";
+  mutateWhen onAction, ((st, e) => {
     if (e.isPlayCard()) {
       const defId = e.action.skill.caller.definition.id;
       if (!st.played[e.who].includes(defId)) {
@@ -162,7 +164,7 @@ const CardPlayedExtension = extension(323006, { played: "pair<number[]>" })
       }
     }
   })
-  .done();
+}
 
 /**
  * @id 323006

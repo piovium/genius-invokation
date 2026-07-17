@@ -228,17 +228,19 @@ define card {
   }
 }
 
-export const NonInitialPlayedCardExtension = extension(311308, { defIds: "pair<number[]>" })
-  .initialState({ defIds: [[], []] })
-  .description("记录双方打出过的名称不存在于本局最初牌组中的不同名的行动牌")
-  .mutateWhen("onPlayCard", (c, e) => {
+define extension {
+  idHint 311308 as NonInitialPlayedCardExtension;
+  schema ({ defIds: "pair<number[]>" });
+  initialState ({ defIds: [[], []] });
+  description "记录双方打出过的名称不存在于本局最初牌组中的不同名的行动牌";
+  mutateWhen onPlayCard, ((c, e) => {
     if (e.onTimeState.players[e.who].initialPile.every((card) => card.id !== e.card.definition.id)) {
       if (!c.defIds[e.who].includes(e.card.definition.id)) {
         c.defIds[e.who].push(e.card.definition.id);
       }
     }
   })
-  .done();
+}
 
 /**
  * @id 311308

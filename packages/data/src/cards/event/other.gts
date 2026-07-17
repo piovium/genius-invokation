@@ -1183,12 +1183,14 @@ define combatStatus {
   }
 }
 
-const LyresongIsFirstExtension = extension(332024, { first: "pair<boolean>" })
-  .initialState({ first: [true, true] })
-  .description("打出琴音之诗前该方该轮次未打出过其他行动牌")
-  .mutateWhen("onRoundEnd", (c) => c.first = [true, true])
-  .mutateWhen("onPlayCard", (c, e) => c.first[e.who] = false)
-  .done();
+define extension {
+  idHint 332024 as LyresongIsFirstExtension;
+  schema ({ first: "pair<boolean>" });
+  initialState ({ first: [true, true] });
+  description "打出琴音之诗前该方该轮次未打出过其他行动牌";
+  mutateWhen onRoundEnd, ((c) => c.first = [true, true]);
+  mutateWhen onPlayCard, ((c, e) => c.first[e.who] = false);
+}
 
 /**
  * @id 303232
@@ -2438,16 +2440,18 @@ define combatStatus {
   }
 }
 
-export const DisposedSupportAndSummonsCountExtension = extension(332051, {
-  disposedSupportCount: "pair<number>",
-  disposedSummonsCount: "pair<number>",
-})
-  .initialState({
+define extension {
+  idHint 332051 as DisposedSupportAndSummonsCountExtension;
+  schema ({
+    disposedSupportCount: "pair<number>",
+    disposedSummonsCount: "pair<number>",
+  });
+  initialState ({
     disposedSupportCount: [0, 0],
     disposedSummonsCount: [0, 0],
-  })
-  .description("记录本场对局中双方支援区和召唤区弃置卡牌的数量")
-  .mutateWhen("onDispose", (st, e) => {
+  });
+  description "记录本场对局中双方支援区和召唤区弃置卡牌的数量";
+  mutateWhen onDispose, ((st, e) => {
     if (e.isDiscardOrTuning()) {
       return;
     }
@@ -2457,7 +2461,7 @@ export const DisposedSupportAndSummonsCountExtension = extension(332051, {
       st.disposedSummonsCount[e.who]++;
     }
   })
-  .done();
+}
 
 /**
  * @id 303245

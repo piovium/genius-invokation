@@ -89,16 +89,18 @@ define skill {
   :summon(HeraldOfFrost);
 }
 
-const RiteOfResurrectionUsedExtension = extension(211081, { count: "pair<number>" })
-  .initialState({ count: [0, 0] })
-  .description("本场对局中某方触发起死回骸的次数")
-  .mutateWhen("onDamageOrHeal", (st, e) => {
+define extension {
+  idHint 211081 as RiteOfResurrectionUsedExtension;
+  schema ({ count: "pair<number>" });
+  initialState ({ count: [0, 0] });
+  description "本场对局中某方触发起死回骸的次数";
+  mutateWhen onDamageOrHeal, ((st, e) => {
     // 七七倒下时重置
     if (e.target.definition.id === Qiqi && e.damageInfo.causeDefeated) {
       st.count[e.targetWho] = 0;
     }
   })
-  .done();
+}
 
 /**
  * @id 11083
