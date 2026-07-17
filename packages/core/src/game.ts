@@ -226,6 +226,16 @@ export interface GameOption {
 const VOID_1_DICE_REQUIREMENT: DiceRequirement = new Map([[DiceType.Void, 1]]);
 const EMPTY_DICE_REQUIREMENT: DiceRequirement = new Map();
 
+/**
+ * Interrupts the current phase stack once an event has ended the game.
+ *
+ * Game end is a normal control-flow outcome, rather than an error to expose to
+ * callers.  It must nevertheless unwind the phase handler immediately: phase
+ * handlers may otherwise issue an RPC after an event has changed the phase to
+ * `gameEnd`.
+ */
+class GameEndInterrupt extends Error {}
+
 export class Game {
   private readonly logger: DetailLogger;
   private readonly option: GameOption;
@@ -427,7 +437,9 @@ export class Game {
             await this.mutator.notifyAndPause({ canResume: true });
           }
         } catch (e) {
-          if (e instanceof GiTcgIoError) {
+          if (e instanceof GameEndInterrupt) {
+            await this.gotWinner(this.state.winner);
+          } else if (e instanceof GiTcgIoError) {
             this.onIoError?.(e);
             await this.gotWinner(flip(e.who));
           } else if (e instanceof GiTcgError) {
@@ -521,6 +533,7 @@ export class Game {
     method: M,
     request: RpcRequestPayloadOf<M>,
   ): Promise<RpcResponsePayloadOf<M>> {
+    this.interruptIfGameEnded();
     if (this._terminated) {
       throw new GiTcgCoreInternalError(`Game has been terminated`);
     }
@@ -1176,12 +1189,20 @@ export class Game {
 
   private async executeSkill(skillInfo: SkillInfo, arg: GeneralSkillArg) {
     await SkillExecutor.executeSkill(this.mutator, skillInfo, arg);
+    this.interruptIfGameEnded();
   }
   private async handleEvent(...args: EventAndRequest) {
     await SkillExecutor.handleEvent(this.mutator, ...args);
+    this.interruptIfGameEnded();
   }
   private async handleEvents(events: ReadonlyEventList) {
     await SkillExecutor.handleEvents(this.mutator, events);
+    this.interruptIfGameEnded();
+  }
+  private interruptIfGameEnded() {
+    if (this.state.phase === "gameEnd") {
+      throw new GameEndInterrupt();
+    }
   }
 }
 
