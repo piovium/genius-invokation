@@ -17,11 +17,10 @@ import getData from "@gi-tcg/data";
 import { builderWeakRefs } from "@gi-tcg/core/builder/internal";
 import { test, expect } from "vitest";
 
-test("builders should be gc'd after initialize", () => {
+test("builders should not be called, we'd migrate all data to GTS", () => {
   const data = getData();
   globalThis.gc?.();
-  expect(builderWeakRefs.size).toBeGreaterThan(0);
-  expect(builderWeakRefs.values().some((ref) => ref.deref())).toBe(false);
+  expect(builderWeakRefs.size).toBe(0);
   expect(data).toBeDefined();
 })
 
