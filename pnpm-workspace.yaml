@@ -21,6 +21,7 @@ catalog:
   "@gi-tcg/gtsc": ^0.6.7
   "@gi-tcg/gts-transpiler": ^0.6.7
   "@gi-tcg/unplugin-gts": ^0.6.7
+  "@gi-tcg/prettier-plugin-gts": ^0.6.7
 
 patchedDependencies:
   ohm-js@17.1.0: patches/ohm-js@17.1.0.patch
@@ -33,6 +34,10 @@ minimumReleaseAgeExclude:
 allowBuilds:
   '@bufbuild/buf': true
   '@ffmpeg-installer/darwin-arm64': true
+  '@ffmpeg-installer/darwin-x64': true
+  '@ffmpeg-installer/linux-arm': true
+  '@ffmpeg-installer/linux-arm64': true
+  '@ffmpeg-installer/linux-ia32': true
   '@ffmpeg-installer/linux-x64': true
   '@nestjs/core': true
   '@prisma/engines': true

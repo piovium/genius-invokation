@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.gts"],
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",
@@ -8,6 +8,7 @@
 
     "declaration": true,
     "emitDeclarationOnly": true,
+    
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
     "verbatimModuleSyntax": true,
