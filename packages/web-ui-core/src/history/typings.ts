@@ -27,7 +27,8 @@ export type HistoryDetailBlock =
 
 export type HistoryHintBlock = ChangePhaseHistoryBlock | ActionHistoryBlock;
 
-export type HistoryBlock = HistoryDetailBlock | HistoryHintBlock;
+export type HistoryBlock =
+  HistoryDetailBlock | HistoryHintBlock | BoundaryHistoryBlock;
 
 export type HistoryChildren =
   | SwitchActiveHistoryChild
@@ -96,6 +97,11 @@ export interface PocketHistoryBlock {
   type: "pocket";
   indent: number;
   children: HistoryChildren[];
+}
+
+// 不渲染，用来分隔 parser 的修改边界
+export interface BoundaryHistoryBlock {
+  type: "boundary";
 }
 
 // 切换出战角色
