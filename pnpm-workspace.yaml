@@ -1,9 +1,6 @@
 packages:
   - 'packages/*'
 
-overrides:
-  typescript: 'catalog:'
-
 catalog:
   axios: ^1.16.1
   vite: ^8.0.8

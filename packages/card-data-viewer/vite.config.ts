@@ -29,7 +29,9 @@ export default defineConfig({
     },
     unoCss(),
     solid(),
-    !process.env.NO_TYPING && dts({ bundleTypes: true }),
+    !process.env.NO_TYPING && dts({
+      bundleTypes: true
+    }),
   ],
   build: {
     sourcemap: true,

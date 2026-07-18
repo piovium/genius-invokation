@@ -10,7 +10,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-    "noEmit": true,
+
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "./src",
+    
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
     "strict": true,
