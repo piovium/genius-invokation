@@ -52,10 +52,8 @@ import type {
   HistoryChildren,
   HistoryDetailBlock,
   IncreaseMaxHealthHistoryChild,
-  UseSkillHistoryBlock,
   VariableChangeHistoryChild,
 } from "./typings";
-import { flip } from "@gi-tcg/utils";
 
 export interface HistoryData {
   blocks: HistoryBlock[];
@@ -327,14 +325,12 @@ export class StateRecorder {
         return Map.groupBy(generated, (i) => i)
           .entries()
           .toArray()
-          .map(
-            ([d, arr]): GenerateDiceHistoryChild => ({
-              type: "generateDice",
-              who: mut.who as 0 | 1,
-              diceType: d,
-              count: arr.length,
-            }),
-          );
+          .map(([d, arr]): GenerateDiceHistoryChild => ({
+            type: "generateDice",
+            who: mut.who as 0 | 1,
+            diceType: d,
+            count: arr.length,
+          }));
       }
       case PbResetDiceReason.ABSORB: {
         const diceCount = old.length - new_.length;
@@ -421,7 +417,7 @@ export function updateHistory(
 ) {
   try {
     const lastMainBlock = history.blocks.at(-1);
-    const lastHintBlock = history.blocks.findLast((b) => !("children" in b));
+    const lastActionBlock = history.blocks.findLast((b) => b.type === "action");
 
     let roundNumber = previousState?.roundNumber ?? 0;
     let phase = previousState?.phase ?? PbPhaseType.ACTION;
@@ -445,7 +441,11 @@ export function updateHistory(
       const m = flattenPbOneof(pbm.mutation!);
       switch (m.$case) {
         case "changePhase": {
+          console.log(m);
           if (!m.hasChange) {
+            history.blocks.push({
+              type: "boundary",
+            });
             continue;
           }
           const newPhase = (
@@ -848,8 +848,7 @@ export function updateHistory(
         }
         case "playerStatusChange": {
           if (m.status === PbPlayerStatus.ACTING) {
-            const skip =
-              lastHintBlock?.type === "action" && lastHintBlock.who === m.who;
+            const skip = lastActionBlock?.who === m.who;
             if (!skip) {
               history.blocks.push({
                 type: "action",
