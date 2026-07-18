@@ -76,6 +76,8 @@ export const getDefaultGameConfig = (): GameConfig => ({
   randomSeed: randomSeed(),
 });
 
+export type InsufficientDiceBehavior = "throw" | "skipConsume" | "skipAction";
+
 /**
  * 记录不同版本的核心结算差异。
  */
@@ -103,6 +105,17 @@ export interface VersionBehavior {
    * @note v6.4.0 起设置为 `true`
    */
   readonly diceCostApplyAttachments: boolean;
+
+  /**
+   * modifyAction 级联结算过程中所选骰子已被意外消耗时的处理方式。
+   *
+   * - `throw`：报错并退出对局。
+   * - `skipConsume`：不再消耗骰子，继续执行行动。
+   * - `skipAction`：不再消耗骰子，也不执行行动本身。
+   *
+   * @defaults `skipConsume`
+   */
+  readonly unexpectedInsufficientDice: InsufficientDiceBehavior;
 }
 
 export const getVersionBehavior = (version: Version): VersionBehavior => ({
@@ -112,6 +125,7 @@ export const getVersionBehavior = (version: Version): VersionBehavior => ({
   foodOmitInjuredOnly: !versionLt(version, "v6.1.0"),
   disposeMaxCostHandsAbortPreview: !versionLt(version, "v6.1.0"),
   diceCostApplyAttachments: !versionLt(version, "v6.4.0"),
+  unexpectedInsufficientDice: "skipConsume",
 });
 
 export interface IteratorState {

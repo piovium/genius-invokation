@@ -392,9 +392,14 @@ export class TestController {
 
   /** @internal */
   _start() {
-    this.game.start().then((winner) => {
-      this.stepping?.reject(new Error("Game ended, no more action"));
-    });
+    this.game.start().then(
+      () => {
+        this.stepping.reject(new Error("Game ended, no more action"));
+      },
+      (error) => {
+        this.stepping.reject(error);
+      },
+    );
   }
 
   private stepping = Promise.withResolvers<void>();

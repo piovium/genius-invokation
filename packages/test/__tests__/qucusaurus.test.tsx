@@ -13,12 +13,41 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Status, $, Equipment, Card, Support, Summon } from "#test";
-import { Qucusaurus, Target } from "@gi-tcg/data/internal/cards/equipment/techniques.gts";
+import {
+  ref,
+  setup,
+  Character,
+  State,
+  Status,
+  $,
+  Equipment,
+  Card,
+  Support,
+  Summon,
+  CombatStatus,
+  DiceCount,
+} from "#test";
+import {
+  Qucusaurus,
+  Target,
+} from "@gi-tcg/data/internal/cards/equipment/techniques.gts";
 import { Katheryne } from "@gi-tcg/data/internal/cards/support/ally.gts";
-import { Chasca, ShadowhuntShell } from "@gi-tcg/data/internal/characters/anemo/chasca.gts";
+import {
+  Chasca,
+  ShadowhuntShell,
+} from "@gi-tcg/data/internal/characters/anemo/chasca.gts";
 import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona.gts";
-import { test, expect } from "vitest";
+import {
+  MirrorMaiden,
+  Refraction,
+} from "@gi-tcg/data/internal/characters/hydro/mirror_maiden.gts";
+import {
+  Baizhu,
+  SeamlessShield,
+} from "@gi-tcg/data/internal/characters/dendro/baizhu.gts";
+import { OdeOfResurrection } from "@gi-tcg/data/internal/cards/event/other.gts";
+import { test, expect, vi } from "vitest";
+import { GiTcgCoreConflictError } from "@gi-tcg/core";
 
 test("qucusaurus delayed one fast action to next switch", async () => {
   const switch1Target = ref();
@@ -29,13 +58,12 @@ test("qucusaurus delayed one fast action to next switch", async () => {
         <Status def={Target} />
       </Character>
       <Support my def={Katheryne} />
-      <Character my active ref={mona} def={Mona}>
-      </Character>
+      <Character my active ref={mona} def={Mona} />
       <Character my ref={switch1Target} def={Chasca}>
         <Equipment def={Qucusaurus} />
       </Character>
       <Card my def={ShadowhuntShell} />
-    </State>
+    </State>,
   );
   // 第一次快速行动（绒翼龙减费，莫娜设置快速，绒翼龙快速存到下一次）
   await c.me.switch(switch1Target);
@@ -47,4 +75,58 @@ test("qucusaurus delayed one fast action to next switch", async () => {
   // 依然是快速行动（绒翼龙）
   await c.me.switch(mona);
   await c.me.end();
-})
+});
+
+test.each(["throw", "skipConsume", "skipAction", void 0] as const)(
+  "qucusaurus: insufficient dice behavior",
+  async (unexpectedInsufficientDice) => {
+    const myActive = ref();
+    const myNext = ref();
+    const c = setup(
+      <State
+        dataVersion="v6.5.0"
+        versionBehavior={
+          unexpectedInsufficientDice ? { unexpectedInsufficientDice } : void 0
+        }
+      >
+        <Character opp active def={Baizhu}>
+          <Status def={Target} />
+        </Character>
+        <Character opp def={MirrorMaiden} />
+        <CombatStatus opp def={SeamlessShield} />
+        <DiceCount my count={1} />
+        <Character my active ref={myActive} health={1}>
+          <Status def={Refraction} />
+          <Status def={OdeOfResurrection} />
+        </Character>
+        <Character my ref={myNext} def={Chasca}>
+          <Equipment def={Qucusaurus} />
+        </Character>
+        <Card my def={ShadowhuntShell} />
+      </State>,
+    );
+    if (unexpectedInsufficientDice === "throw") {
+      await expect(c.me.switch(myNext)).rejects.toThrow(GiTcgCoreConflictError);
+      return;
+    }
+    using warn = vi.spyOn(console!, "warn").mockImplementation(() => {});
+    await c.me.switch(myNext);
+    if (
+      !unexpectedInsufficientDice ||
+      unexpectedInsufficientDice === "skipConsume"
+    ) {
+      expect(c.state.players[0].activeCharacterId).toBe(myNext.id);
+      expect(c.state.players[0].dice).toHaveLength(0);
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("unexpectedInsufficientDice: skipConsume"),
+      );
+    } else if (unexpectedInsufficientDice === "skipAction") {
+      expect(c.state.players[0].activeCharacterId).toBe(myActive.id);
+      expect(c.state.players[0].dice).toHaveLength(0);
+
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("unexpectedInsufficientDice: skipAction"),
+      );
+    }
+  },
+);
