@@ -1764,7 +1764,9 @@ function HistoryBlockItem(props: {
   });
 
   const detailData = createMemo(() => {
-    if (isHint(props.block)) return null;
+    if (isHint(props.block) || props.block.type === "boundary") {
+      return null;
+    }
     return renderHistoryBlock(props.block);
   });
 
@@ -1780,7 +1782,7 @@ function HistoryBlockItem(props: {
           onClick={() => props.onSelect(props.block)}
         />
       </Match>
-      <Match when={true}>
+      <Match when={props.block.type !== "boundary"}>
         <HistoryBlockBox
           data={detailData() as HistoryBlockData}
           isSelected={props.isSelected}
