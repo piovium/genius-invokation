@@ -25,6 +25,7 @@ import {
   EntityState,
   AttachmentState,
   Version,
+  VersionBehavior,
   CharacterVariables,
   ExtensionState,
   StateSymbol,
@@ -185,6 +186,7 @@ export function DiceCount(props: DiceCount.Prop): JSX.Element {
 export namespace State {
   export interface Prop {
     dataVersion?: Version;
+    versionBehavior?: Partial<VersionBehavior>;
     enableRoll?: boolean;
     phase?: PhaseType;
     prevPhase?: PhaseType | null;
@@ -536,9 +538,10 @@ export function setup(state: JSX.Element): TestController {
       maxSupportsCount: 4,
       randomSeed: 0,
     },
-    versionBehavior: getVersionBehavior(
-      stateProp.dataVersion ?? CURRENT_VERSION,
-    ),
+    versionBehavior: {
+      ...getVersionBehavior(stateProp.dataVersion ?? CURRENT_VERSION),
+      ...stateProp.versionBehavior,
+    },
     iterators: {
       random: stateProp.random ?? 0,
       id: nextId(),

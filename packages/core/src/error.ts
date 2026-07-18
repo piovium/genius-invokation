@@ -72,6 +72,8 @@ export abstract class GiTcgError extends Error {
 
 export class GiTcgCoreInternalError extends GiTcgError {}
 
+export class GiTcgCoreConflictError extends GiTcgCoreInternalError {}
+
 export class GiTcgCoreInternalEntityNotFoundError extends GiTcgCoreInternalError {
   constructor(
     public readonly state: GameState,
