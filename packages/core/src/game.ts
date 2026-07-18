@@ -724,8 +724,7 @@ export class Game {
             }`,
           );
         }
-        // 先确认客户端选择的骰子确实存在。之后 modifyAction 的连锁结算可能
-        // 合法地消耗这些骰子，此时才会适用 versionBehavior 的兼容策略。
+        // 第一遍确认玩家选择的骰子确实存在；此时不存在为 player 负责的 IoError
         const selectedDice = [...player().dice];
         for (const type of usedDice) {
           const idx = selectedDice.indexOf(type as DiceType);
@@ -762,7 +761,8 @@ export class Game {
             `Elemental tuning cannot use omni dice or active character's element`,
           );
         }
-        // 消耗骰子。modifyAction 的连锁结算可能已合法地消耗所选骰子。
+        // 消耗骰子，同时第二遍检查骰子存在性；
+        // 由于 modifyAction 级联结算可能已（意外地合法）消耗所选骰子，根据 versionBehavior 决定如何处理
         const operatingDice = [...player().dice];
         let shouldConsumeDice = true;
         let skipAction = false;
@@ -792,8 +792,6 @@ export class Game {
             value: operatingDice,
             reason: "consume",
           });
-        }
-        if (!skipAction) {
           // 消耗能量
           const requiredEnergy = actionInfo.cost.get(DiceType.Energy) ?? 0;
           const currentEnergy = activeCh().variables.energy;
@@ -812,7 +810,8 @@ export class Game {
               direction: "decrease",
             });
           }
-
+        }
+        if (!skipAction) {
           switch (actionInfo.type) {
             case "useSkill": {
               const callerArea = getEntityArea(this.state, activeCh().id);
