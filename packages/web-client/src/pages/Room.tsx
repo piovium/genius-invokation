@@ -46,7 +46,10 @@ import { useI18n } from "../i18n";
 
 interface InitializedPayload {
   who: 0 | 1;
-  config: any;
+  config: {
+    watchable: boolean;
+    gameVersion: string;
+  };
   myPlayerInfo: PlayerInfo;
   oppPlayerInfo: PlayerInfo;
 }
@@ -221,7 +224,7 @@ export default function Room() {
     };
     if (payload && !playerIo()) {
       const [io, Ui] = createClient(payload.who, {
-        assetsManager,
+        assetsManager: () => assetsManager(payload.config.gameVersion),
         locale,
         onGiveUp,
         disableAction: !action,
@@ -498,7 +501,7 @@ export default function Room() {
                   <i class="i-mdi-delete" />
                 </button>
               </Show>
-              <Show when={initialized()?.config?.watchable}>
+              <Show when={initialized()?.config.watchable}>
                 <Show when={allowWatchOpp()}>
                   <button
                     class="btn btn-outline-primary"
@@ -506,7 +509,9 @@ export default function Room() {
                   >
                     <i class="i-mdi-video-switch-outline" />
                     <span>
-                      {t(`enter${observerMode() ? "PlayerView" : "ObserverMode"}`)}
+                      {t(
+                        `enter${observerMode() ? "PlayerView" : "ObserverMode"}`,
+                      )}
                     </span>
                   </button>
                 </Show>
