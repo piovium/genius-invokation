@@ -21,9 +21,12 @@ import {
   playSkillOfCard,
 } from "@gi-tcg/core";
 import type { CustomData, CustomSkill } from "@gi-tcg/assets-manager";
+import { transpile } from "@gi-tcg/gts-transpiler";
 
 import getOfficialData, { registry as baseRegistry } from "@gi-tcg/data";
-import { BuilderContext } from "./builder_context";
+import { beginCustomDataRegistration } from "./gts/context";
+import customDataViewModel from "./gts/vm";
+import * as gtsRuntime from "./gts/runtime";
 
 export { getOfficialData };
 
@@ -47,6 +50,52 @@ function placeholderImageUrl(name: string) {
   `)}`;
 }
 
+function compileGts(source: string) {
+  if (/(?:^|\n)\s*(?:import|export)\b/m.test(source)) {
+    throw new Error("Custom GTS modules cannot use import or export statements");
+  }
+  if (/(?:^|[;{}])\s*id(?=\s|;|\()/m.test(source)) {
+    throw new Error("Custom GTS definitions assign IDs automatically; remove id");
+  }
+
+  const { code } = transpile(source, "custom-data.gts", {
+    providerImportSource: "@gi-tcg/custom-data-loader/gts/vm",
+    runtimeImportSource: "@gi-tcg/custom-data-loader/gts/runtime",
+  });
+  const executable = code
+    .replace(
+      /^import\s+\{\s*createDefine as __gts_createDefine,\s*createBinding as __gts_createBinding\s*\}\s+from\s+[^;]+;\s*/m,
+      "",
+    )
+    .replace(/^import\s+__gts_rootVm\s+from\s+[^;]+;\s*/m, "")
+    // GTS emits public bindings as ESM exports. The loader evaluates a single
+    // self-contained document, so they are ordinary local bindings instead.
+    .replace(/^export const /gm, "const ");
+
+  if (/\b(?:import|export)\b/.test(executable)) {
+    throw new Error("Custom GTS modules cannot use import or export statements");
+  }
+  return executable;
+}
+
+function executeGts(source: string) {
+  const code = compileGts(source);
+  const fn = new Function(
+    "__gts_runtime",
+    "__gts_rootVm",
+    `
+      const {
+        createDefine: __gts_createDefine,
+        createBinding: __gts_createBinding,
+      } = __gts_runtime;
+      with (__gts_runtime) {
+        ${code}
+      }
+    `,
+  );
+  fn(gtsRuntime, customDataViewModel);
+}
+
 export class CustomDataLoader {
   private version?: Version;
   private registry = baseRegistry.clone();
@@ -65,24 +114,28 @@ export class CustomDataLoader {
 
   loadMod(...sources: string[]): this {
     for (const src of sources) {
-      const fn = new Function("BuilderContext", `"use strict";` + src);
-      const ctx = new BuilderContext(this.registry, {
-        stepId: () => this.nextId++,
-        registerName: (id, name) => {
+      const scope = this.registry.begin();
+      const definitionIds = new WeakMap<object, number>();
+      const endRegistration = beginCustomDataRegistration({
+        allocateId: (node) => {
+          let id = definitionIds.get(node);
+          if (id === undefined) {
+            id = this.nextId++;
+            definitionIds.set(node, id);
+          }
+          return id;
+        },
+        registerMetadata: ({ id, name, description, image }) => {
           this.names.set(id, name);
-        },
-        registerDescription: (id, desc) => {
-          this.descriptions.set(id, desc);
-        },
-        registerImage: (id, url) => {
-          this.images.set(id, url);
+          this.descriptions.set(id, description);
+          this.images.set(id, image);
         },
       });
-      const param = ctx.beginRegistration();
       try {
-        fn(param);
+        executeGts(src);
       } finally {
-        ctx.endRegistration();
+        endRegistration();
+        scope.end();
       }
     }
     return this;
@@ -98,6 +151,7 @@ export class CustomDataLoader {
       actionCards: [],
       characters: [],
       entities: [],
+      attachments: [],
     };
     const parseSkill = (skill: SkillDefinition): CustomSkill => {
       const name = this.names.get(skill.id) ?? "";
@@ -155,6 +209,20 @@ export class CustomDataLoader {
           ),
         });
       }
+    }
+    for (const [id, attachment] of gameData.attachments) {
+      if (attachment.version.from !== "customData") {
+        continue;
+      }
+      const name = this.names.get(id) ?? "";
+      customData.attachments!.push({
+        id,
+        name,
+        rawDescription: this.descriptions.get(id) ?? "",
+        iconUrl: this.images.get(id) ?? placeholderImageUrl(name),
+        tags: [...attachment.tags],
+        skills: attachment.skills.map(parseSkill),
+      });
     }
     return [gameData, customData];
   }

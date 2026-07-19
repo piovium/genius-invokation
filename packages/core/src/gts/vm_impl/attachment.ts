@@ -29,7 +29,7 @@ import type { DiceType } from "@gi-tcg/typings";
 
 export type CostCountFn = (state: GameState, self: AttachmentState) => number;
 
-class AttachmentModel extends EntityModel {
+export class AttachmentModel extends EntityModel {
   modifications: (
     | AttachmentModification
     | ((state: GameState, id: number) => AttachmentModification)

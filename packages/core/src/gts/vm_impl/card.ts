@@ -93,7 +93,7 @@ const OffStageTriggeredSkillViewModel = TriggeredSkillViewModel.extend(
   }),
 );
 
-class CardModel extends InitiativeSkillModel implements ICaller {
+export class CardModel extends InitiativeSkillModel implements ICaller {
   reserved = false;
   cardId!: number;
   skillType = "playCard" as const;

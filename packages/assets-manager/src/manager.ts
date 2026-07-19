@@ -300,6 +300,27 @@ export class AssetsManager {
         this.customDataImageUrls.set(et.id, et.cardFaceOrBuffIconUrl);
       }
     }
+    for (const attachment of data.attachments ?? []) {
+      const attachmentData: EntityRawData = {
+        // @ts-expect-error
+        category: "entities",
+        id: attachment.id,
+        type: "attachment",
+        name: attachment.name,
+        englishName: "",
+        tags: [...attachment.tags],
+        skills: setupSkill(attachment.skills),
+        rawDescription: attachment.rawDescription,
+        description: "",
+        hidden: false,
+        remainAfterDie: false,
+      };
+      if (!this.dataCacheSync.has(attachment.id)) {
+        this.dataCacheSync.set(attachment.id, attachmentData);
+        this.customDataNames.set(attachment.id, attachment.name);
+        this.customDataImageUrls.set(attachment.id, attachment.iconUrl);
+      }
+    }
   }
 
   async getData(id: number, options: GetDataOptions = {}): Promise<AnyData> {

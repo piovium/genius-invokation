@@ -509,7 +509,7 @@ export class InitiativeSkillModel extends SkillModel {
   }
 }
 
-class CharacterSkillModel extends InitiativeSkillModel {
+export class CharacterSkillModel extends InitiativeSkillModel {
   reserved = false;
   passiveSkillEntry: CharacterPassiveSkillEntry | null = null;
   override get ownerType() {

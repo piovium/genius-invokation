@@ -10,29 +10,53 @@
       "development": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./gts/vm": {
+      "development": "./src/gts/vm.ts",
+      "types": "./dist/gts/vm.d.ts",
+      "import": "./dist/gts/vm.js"
+    },
+    "./gts/runtime": {
+      "development": "./src/gts/runtime.ts",
+      "types": "./dist/gts/runtime.d.ts",
+      "import": "./dist/gts/runtime.js"
     }
   },
   "scripts": {
+    "predev": "pnpm build",
     "dev": "vite",
     "check": "tsc --noEmit",
+    "test": "vitest",
     "build": "tsdown"
   },
   "dependencies": {
-    "@gi-tcg/data": "workspace:*"
+    "@gi-tcg/data": "workspace:*",
+    "@gi-tcg/gts-transpiler": "catalog:"
+  },
+  "gamingTs": {
+    "runtimeImportSource": "@gi-tcg/custom-data-loader/gts/runtime",
+    "providerImportSource": "@gi-tcg/custom-data-loader/gts/vm"
   },
   "peerDependencies": {
     "@gi-tcg/core": "workspace:*"
   },
   "devDependencies": {
     "@gi-tcg/assets-manager": "workspace:*",
+    "@gi-tcg/gts-language-client-code": "^0.6.7",
+    "@gi-tcg/gts-language-server": "^0.6.7",
+    "@codingame/monaco-vscode-keybindings-service-override": "~25.1.2",
+    "@codingame/monaco-vscode-theme-defaults-default-extension": "~25.1.2",
     "rolldown": "^1.0.0-rc.15",
     "rolldown-plugin-dts": "^0.23.2",
     "@gi-tcg/deck-builder": "workspace:*",
     "@gi-tcg/web-ui-core": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
     "monaco-editor": "^0.52.2",
+    "monaco-languageclient": "~10.7.0",
     "solid-js": "catalog:",
     "vite": "catalog:",
-    "vite-plugin-solid": "catalog:"
+    "vite-plugin-solid": "catalog:",
+    "vscode": "npm:@codingame/monaco-vscode-extension-api@~25.1.2",
+    "vscode-languageclient": "~9.0.1"
   }
 }

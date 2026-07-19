@@ -14,3 +14,20 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 export { default } from "./vm_impl/index";
+export { CharacterModel, CharacterViewModel } from "./vm_impl/character";
+export { CardModel, CardViewModel } from "./vm_impl/card";
+export {
+  EntityModel,
+  EntityViewModel,
+  type DefaultEntityVMMeta,
+  type EntityVMMeta,
+} from "./vm_impl/entity";
+export {
+  CharacterSkillModel,
+  CharacterSkillViewModel,
+  type CharacterSkillVMMeta,
+} from "./vm_impl/skill";
+export {
+  AttachmentModel,
+  AttachmentViewModel,
+} from "./vm_impl/attachment";

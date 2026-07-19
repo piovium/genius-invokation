@@ -13,13 +13,22 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import gts from "@gi-tcg/unplugin-gts/rolldown";
 import solid from "vite-plugin-solid";
 
 export default defineConfig({
   esbuild: {
-    target: "es2022"
+    target: "es2022",
+  },
+  worker: {
+    format: "es",
+  },
+  resolve: {
+    conditions: ["import", "default"],
+  },
+  test: {
+    environment: "node",
   },
   plugins: [
     gts(),

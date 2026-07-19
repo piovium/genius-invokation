@@ -13,15 +13,40 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import * as monaco from "monaco-editor";
-import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
-import runtimeDts from "../dist/runtime.d.ts?raw";
+import "@codingame/monaco-vscode-theme-defaults-default-extension";
+import getKeybindingsServiceOverride from "@codingame/monaco-vscode-keybindings-service-override";
+import {
+  EditorApp,
+  type EditorAppConfig,
+} from "monaco-languageclient/editorApp";
+import {
+  LanguageClientWrapper,
+  type LanguageClientConfig,
+} from "monaco-languageclient/lcwrapper";
+import {
+  MonacoVscodeApiWrapper,
+  type MonacoVscodeApiConfig,
+} from "monaco-languageclient/vscodeApiWrapper";
+import { configureDefaultWorkerFactory } from "monaco-languageclient/workerFactory";
+import * as vscode from "vscode";
+import {
+  BrowserMessageReader,
+  BrowserMessageWriter,
+} from "vscode-languageclient/browser.js";
+import type { GtsLanguageServerBrowserInitializationOptions } from "@gi-tcg/gts-language-server/browser";
+import type { RegisterLocalProcessExtensionResult } from "@codingame/monaco-vscode-api/extensions";
+import { registerDecorations } from "@gi-tcg/gts-language-client-code/decoration";
+import providerDts from "../dist/gts/vm.d.ts?raw";
+import runtimeDts from "../dist/gts/runtime.d.ts?raw";
+import gtsLanguageConfiguration from "./gts-language-configuration.json?raw";
+import gtsSyntaxes from "./gts-syntaxes.json?raw";
 
 import {
   Show,
   createEffect,
   createSignal,
   on,
+  onCleanup,
   onMount,
   createMemo,
   type JSX,
@@ -39,24 +64,138 @@ import { createClient } from "@gi-tcg/web-ui-core";
 import "@gi-tcg/deck-builder/style.css";
 import "@gi-tcg/web-ui-core/style.css";
 
-self.MonacoEnvironment = {
-  getWorker: () => new tsWorker(),
-};
-
-monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-  noSemanticValidation: false,
-  noSyntaxValidation: false,
-});
-monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-  target: monaco.languages.typescript.ScriptTarget.ESNext,
-  allowNonTsExtensions: true,
-  strict: true,
-  skipLibCheck: true,
-});
-const libUri = "ts:runtime.d.ts";
-monaco.languages.typescript.javascriptDefaults.addExtraLib(runtimeDts, libUri);
-
 const root = document.querySelector("#root")!;
+
+const GTS_LANGUAGE_ID = "gaming-ts";
+const WORKSPACE_URI = vscode.Uri.file("/workspace");
+const CUSTOM_DATA_FILE_URI = vscode.Uri.file("/workspace/custom-data.gts");
+
+function createLanguageServerWorker() {
+  return new Worker(
+    new URL("./gts-language-server.worker.ts", import.meta.url),
+    {
+      type: "module",
+      name: "GTS Language Server",
+    },
+  );
+}
+
+function createVscodeApiConfig(): MonacoVscodeApiConfig {
+  const extensionFilesOrContents = new Map<string, string | URL>([
+    ["/workspace/language-configuration.json", gtsLanguageConfiguration],
+    ["/workspace/GamingTS.tmLanguage.json", gtsSyntaxes],
+  ]);
+  return {
+    $type: "extended",
+    viewsConfig: {
+      $type: "EditorService",
+    },
+    logLevel: vscode.LogLevel.Warning,
+    serviceOverrides: {
+      ...getKeybindingsServiceOverride(),
+    },
+    userConfiguration: {
+      json: JSON.stringify({
+        "workbench.colorTheme": "Default Dark Modern",
+        "editor.guides.bracketPairsHorizontal": "active",
+        "editor.wordBasedSuggestions": "off",
+        "editor.experimental.asyncTokenization": true,
+      }),
+    },
+    monacoWorkerFactory: configureDefaultWorkerFactory,
+    extensions: [
+      {
+        config: {
+          name: "custom-data-gts",
+          publisher: "gi-tcg",
+          version: "0.0.0",
+          engines: { vscode: "*" },
+          contributes: {
+            languages: [
+              {
+                id: GTS_LANGUAGE_ID,
+                extensions: [".gts"],
+                aliases: ["GamingTS", "gaming-ts", "gts"],
+                configuration: "/workspace/language-configuration.json",
+              },
+            ],
+            grammars: [
+              {
+                language: GTS_LANGUAGE_ID,
+                scopeName: "source.gts",
+                path: "/workspace/GamingTS.tmLanguage.json",
+              },
+            ],
+            semanticTokenModifiers: [
+              {
+                id: "gtsAttribute",
+                description: "Attribute name for GamingTS",
+              },
+            ],
+            semanticTokenScopes: [
+              {
+                language: GTS_LANGUAGE_ID,
+                scopes: { "*.gtsAttribute": ["emphasis"] },
+              },
+            ],
+          },
+        },
+        filesOrContents: extensionFilesOrContents,
+      },
+    ],
+  };
+}
+
+function createLanguageClientConfig(
+  initialCode: string,
+  worker: Worker,
+): LanguageClientConfig {
+  return {
+    languageId: GTS_LANGUAGE_ID,
+    logLevel: vscode.LogLevel.Warning,
+    connection: {
+      options: { $type: "WorkerDirect", worker },
+      messageTransports: {
+        reader: new BrowserMessageReader(worker),
+        writer: new BrowserMessageWriter(worker),
+      },
+    },
+    clientOptions: {
+      documentSelector: [{ language: GTS_LANGUAGE_ID }],
+      workspaceFolder: {
+        index: 0,
+        name: "workspace",
+        uri: WORKSPACE_URI,
+      },
+      initializationOptions: {
+        fs: {
+          "/provider/vm.d.ts": providerDts,
+          "/provider/runtime.d.ts": runtimeDts,
+          [CUSTOM_DATA_FILE_URI.path]: initialCode,
+          "/tsconfig.json": JSON.stringify({
+            compilerOptions: {
+              lib: ["esnext"],
+              types: [],
+              target: "esnext",
+              module: "preserve",
+              verbatimModuleSyntax: true,
+              erasableSyntaxOnly: true,
+              moduleDetection: "force",
+              noEmit: true,
+              strict: true,
+              skipLibCheck: true,
+            },
+            include: ["**/*.gts", "**/*.ts"],
+          }),
+        },
+        inlineGtsConfig: {
+          providerImportSource: "/provider",
+          runtimeImportSource: "/provider/runtime",
+        },
+      } satisfies GtsLanguageServerBrowserInitializationOptions,
+    },
+  };
+}
 
 interface MonacoEditorProps {
   code?: string;
@@ -65,16 +204,72 @@ interface MonacoEditorProps {
 
 const MonacoEditor = (props: MonacoEditorProps) => {
   let container!: HTMLDivElement;
-  let editor: monaco.editor.IStandaloneCodeEditor | null = null;
   onMount(() => {
-    editor = monaco.editor.create(container, {
-      language: "javascript",
-      automaticLayout: true,
-      value: props.code,
-    });
-    editor.onDidChangeModelContent((e) => {
-      const code = editor?.getValue() ?? "";
-      props.onCodeChange?.(code);
+    let disposed = false;
+    let apiWrapper: MonacoVscodeApiWrapper | undefined;
+    let languageClient: LanguageClientWrapper | undefined;
+    let editorApp: EditorApp | undefined;
+    let worker: Worker | undefined;
+    let documentSubscription: vscode.Disposable | undefined;
+
+    void (async () => {
+      apiWrapper = new MonacoVscodeApiWrapper(createVscodeApiConfig());
+      await apiWrapper.start();
+      if (disposed) return;
+
+      const extension = apiWrapper.getExtensionRegisterResult(
+        "custom-data-gts",
+      ) as RegisterLocalProcessExtensionResult | undefined;
+      if (extension) {
+        registerDecorations(await extension.getApi());
+      }
+
+      worker = createLanguageServerWorker();
+      languageClient = new LanguageClientWrapper(
+        createLanguageClientConfig(props.code ?? "", worker),
+      );
+      await languageClient.start();
+      if (disposed) return;
+
+      const editorConfig: EditorAppConfig = {
+        codeResources: {
+          modified: {
+            text: props.code ?? "",
+            uri: CUSTOM_DATA_FILE_URI.path,
+          },
+        },
+        editorOptions: {
+          minimap: { enabled: false },
+          automaticLayout: true,
+        },
+      };
+      editorApp = new EditorApp(editorConfig);
+      editorApp.registerOnTextChangedCallback((changes) => {
+        props.onCodeChange?.(changes.modified ?? "");
+      });
+      await editorApp.start(container);
+      if (disposed) return;
+
+      const document = await vscode.workspace.openTextDocument(
+        CUSTOM_DATA_FILE_URI,
+      );
+      await vscode.window.showTextDocument(document);
+      documentSubscription = vscode.workspace.onDidChangeTextDocument(
+        (event) => {
+          if (event.document.uri.path === CUSTOM_DATA_FILE_URI.path) {
+            props.onCodeChange?.(event.document.getText());
+          }
+        },
+      );
+    })();
+
+    onCleanup(() => {
+      disposed = true;
+      documentSubscription?.dispose();
+      void editorApp?.dispose();
+      void languageClient?.dispose(true);
+      apiWrapper?.dispose();
+      worker?.terminate();
     });
   });
   return <div class="editor" ref={container}></div>;
@@ -87,38 +282,46 @@ const App = () => {
   const [step2Complete, setStep2Complete] = createSignal(false);
 
   // 步骤1：Mod代码编辑器
-  const [code, setCode] = createSignal(`{
-// 在这里编写你的mod代码
-const { card, character, combatStatus, status, summon, skill, extension, DamageType } = BuilderContext;
+  const [code, setCode] = createSignal(`// 在这里编写你的 GTS 模组。定义会自动获得 ID。
+define attachment {
+  name "费用护盾" as CostShield;
+  description "附着于手牌或牌堆中的牌，使其费用增加 1 点。";
+  image "https://example.com/cost-shield.png";
+  addCost 1;
+}
 
-const MyCard = card("掀翻牌桌")
-  .description("对地方全体角色造成10点穿透伤害")
-  .damage(DamageType.Piercing, 10, "all opp character")
-  .done();
+define skill {
+  name "普通攻击" as NormalSkill;
+  description "造成 1 点物理伤害。";
+  skillType normal;
+  cost DiceType.Cryo, 1;
+  cost DiceType.Void, 2;
+  :damage(DamageType.Physical, 1);
+}
 
-const NormalSkill = skill("普攻")
-  .type("normal")
-  .description("造成1点物理伤害")
-  .damage(DamageType.Physical, 1)
-  .done();
+define skill {
+  name "元素战技" as ElementalSkill;
+  description "造成 2 点冰元素伤害。";
+  skillType elemental;
+  cost DiceType.Cryo, 3;
+  :damage(DamageType.Cryo, 2);
+}
 
+define character {
+  name "银狼" as SilverWolf;
+  description "自定义角色示例。";
+  image "https://b0.bdstatic.com/f93f5ab0e2d0848b09255837758ea2ee.jpg@h_1280";
+  tags cryo, catalyst;
+  health 10;
+  energy 2;
+  skills NormalSkill, ElementalSkill;
+}
 
-const ElementalSkill = skill("战技")
-  .type("elemental")
-  .description("造成2点冰元素伤害")
-  .damage(DamageType.Cryo, 2)
-  .done();
-
-const BurstSkill = skill("爆发")
-  .type("elemental")
-  .description("造成3点冰元素伤害")
-  .damage(DamageType.Cryo, 3)
-  .done();
-
-const MyCharacter = character("银狼")
-  .image("https://b0.bdstatic.com/f93f5ab0e2d0848b09255837758ea2ee.jpg@h_1280")
-  .skills(NormalSkill, ElementalSkill, BurstSkill)
-  .done();
+define card {
+  name "掀翻牌桌" as TableFlip;
+  description "对敌方所有角色造成 10 点穿透伤害。";
+  cost DiceType.Omni, 1;
+  :damage(DamageType.Piercing, 10, "all opp character");
 }`);
 
   // 步骤2：卡组构建器

@@ -27,12 +27,30 @@ export default defineConfig([
   },
   {
     platform: "neutral",
-    entry: "./src/runtime.ts",
+    entry: {
+      "gts/vm": "./src/gts/vm.ts",
+      "gts/runtime": "./src/gts/runtime.ts",
+    },
+    dts: false,
+    minify: true,
+  },
+  {
+    platform: "neutral",
+    entry: {
+      "gts/vm": "./src/gts/vm.ts",
+      "gts/runtime": "./src/gts/runtime.ts",
+    },
     dts: {
       emitDtsOnly: true,
     },
     deps: {
-      alwaysBundle: ["@gi-tcg/core/builder"],
-    }
+      alwaysBundle: [
+        "@gi-tcg/core",
+        "@gi-tcg/core/builder",
+        "@gi-tcg/core/gts/runtime",
+        "@gi-tcg/core/gts/vm",
+        "@gi-tcg/gts-runtime",
+      ],
+    },
   },
 ]);
