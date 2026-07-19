@@ -6,6 +6,12 @@ settings:
 
 catalogs:
   default:
+    '@gi-tcg/gts-language-client-code':
+      specifier: ^0.6.7
+      version: 0.6.8
+    '@gi-tcg/gts-language-server':
+      specifier: ^0.6.7
+      version: 0.6.8
     '@gi-tcg/gts-runtime':
       specifier: ^0.6.7
       version: 0.6.7
@@ -291,6 +297,12 @@ importers:
         specifier: 'catalog:'
         version: 0.6.7
     devDependencies:
+      '@codingame/monaco-vscode-api':
+        specifier: ~25.1.2
+        version: 25.1.2
+      '@codingame/monaco-vscode-editor-api':
+        specifier: ~25.1.2
+        version: 25.1.2
       '@codingame/monaco-vscode-keybindings-service-override':
         specifier: ~25.1.2
         version: 25.1.2
@@ -304,10 +316,10 @@ importers:
         specifier: workspace:*
         version: link:../deck-builder
       '@gi-tcg/gts-language-client-code':
-        specifier: ^0.6.7
+        specifier: 'catalog:'
         version: 0.6.8(@codingame/monaco-vscode-extension-api@25.1.2)
       '@gi-tcg/gts-language-server':
-        specifier: ^0.6.7
+        specifier: 'catalog:'
         version: 0.6.8(@volar/language-service@2.4.28)(typescript@6.0.3)
       '@gi-tcg/typings':
         specifier: workspace:*
@@ -315,9 +327,6 @@ importers:
       '@gi-tcg/web-ui-core':
         specifier: workspace:*
         version: link:../web-ui-core
-      monaco-editor:
-        specifier: ^0.52.2
-        version: 0.52.2
       monaco-languageclient:
         specifier: ~10.7.0
         version: 10.7.0
@@ -6676,9 +6685,6 @@ packages:
 
   mlly@1.7.4:
     resolution: {integrity: sha512-qmdSIPC4bDJXgZTCR7XosJiNKySV7O215tsPtDN9iEO/7q/76b/ijtgRu/+epFXSJhijtTCCGp3DWS549P3xKw==}
-
-  monaco-editor@0.52.2:
-    resolution: {integrity: sha512-GEQWEZmfkOGLdd3XK8ryrfWz3AIP8YymVXiPHEdewrUq7mh0qrKrfHLNCXcbB6sTnMLnOZ3ztSiKcciFUkIJwQ==}
 
   monaco-languageclient@10.7.0:
     resolution: {integrity: sha512-oA5cOFixkF4bspVL2zMSn48LvlNR/Cu3vJ8MCVam3PdjobSULGgHtOASuZIi3FgWK42X1z8/6hrG0LCjvNu1Hw==}
@@ -15293,8 +15299,6 @@ snapshots:
       pathe: 2.0.3
       pkg-types: 1.3.1
       ufo: 1.5.4
-
-  monaco-editor@0.52.2: {}
 
   monaco-languageclient@10.7.0:
     dependencies:

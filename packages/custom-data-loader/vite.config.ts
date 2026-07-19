@@ -18,9 +18,6 @@ import gts from "@gi-tcg/unplugin-gts/rolldown";
 import solid from "vite-plugin-solid";
 
 export default defineConfig({
-  esbuild: {
-    target: "es2022",
-  },
   worker: {
     format: "es",
   },

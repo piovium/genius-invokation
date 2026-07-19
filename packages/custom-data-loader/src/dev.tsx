@@ -15,18 +15,8 @@
 
 import "@codingame/monaco-vscode-theme-defaults-default-extension";
 import getKeybindingsServiceOverride from "@codingame/monaco-vscode-keybindings-service-override";
-import {
-  EditorApp,
-  type EditorAppConfig,
-} from "monaco-languageclient/editorApp";
-import {
-  LanguageClientWrapper,
-  type LanguageClientConfig,
-} from "monaco-languageclient/lcwrapper";
-import {
-  MonacoVscodeApiWrapper,
-  type MonacoVscodeApiConfig,
-} from "monaco-languageclient/vscodeApiWrapper";
+import { type LanguageClientConfig } from "monaco-languageclient/lcwrapper";
+import { type MonacoVscodeApiConfig } from "monaco-languageclient/vscodeApiWrapper";
 import { configureDefaultWorkerFactory } from "monaco-languageclient/workerFactory";
 import * as vscode from "vscode";
 import {
@@ -34,8 +24,6 @@ import {
   BrowserMessageWriter,
 } from "vscode-languageclient/browser.js";
 import type { GtsLanguageServerBrowserInitializationOptions } from "@gi-tcg/gts-language-server/browser";
-import type { RegisterLocalProcessExtensionResult } from "@codingame/monaco-vscode-api/extensions";
-import { registerDecorations } from "@gi-tcg/gts-language-client-code/decoration";
 import providerDts from "../dist/gts/vm.d.ts?raw";
 import runtimeDts from "../dist/gts/runtime.d.ts?raw";
 import gtsLanguageConfiguration from "./gts-language-configuration.json?raw";
@@ -204,75 +192,15 @@ interface MonacoEditorProps {
 
 const MonacoEditor = (props: MonacoEditorProps) => {
   let container!: HTMLDivElement;
-  onMount(() => {
-    let disposed = false;
-    let apiWrapper: MonacoVscodeApiWrapper | undefined;
-    let languageClient: LanguageClientWrapper | undefined;
-    let editorApp: EditorApp | undefined;
-    let worker: Worker | undefined;
-    let documentSubscription: vscode.Disposable | undefined;
-
-    void (async () => {
-      apiWrapper = new MonacoVscodeApiWrapper(createVscodeApiConfig());
-      await apiWrapper.start();
-      if (disposed) return;
-
-      const extension = apiWrapper.getExtensionRegisterResult(
-        "custom-data-gts",
-      ) as RegisterLocalProcessExtensionResult | undefined;
-      if (extension) {
-        registerDecorations(await extension.getApi());
-      }
-
-      worker = createLanguageServerWorker();
-      languageClient = new LanguageClientWrapper(
-        createLanguageClientConfig(props.code ?? "", worker),
-      );
-      await languageClient.start();
-      if (disposed) return;
-
-      const editorConfig: EditorAppConfig = {
-        codeResources: {
-          modified: {
-            text: props.code ?? "",
-            uri: CUSTOM_DATA_FILE_URI.path,
-          },
-        },
-        editorOptions: {
-          minimap: { enabled: false },
-          automaticLayout: true,
-        },
-      };
-      editorApp = new EditorApp(editorConfig);
-      editorApp.registerOnTextChangedCallback((changes) => {
-        props.onCodeChange?.(changes.modified ?? "");
-      });
-      await editorApp.start(container);
-      if (disposed) return;
-
-      const document = await vscode.workspace.openTextDocument(
-        CUSTOM_DATA_FILE_URI,
-      );
-      await vscode.window.showTextDocument(document);
-      documentSubscription = vscode.workspace.onDidChangeTextDocument(
-        (event) => {
-          if (event.document.uri.path === CUSTOM_DATA_FILE_URI.path) {
-            props.onCodeChange?.(event.document.getText());
-          }
-        },
-      );
-    })();
-
-    onCleanup(() => {
-      disposed = true;
-      documentSubscription?.dispose();
-      void editorApp?.dispose();
-      void languageClient?.dispose(true);
-      apiWrapper?.dispose();
-      worker?.terminate();
+  onMount(async () => {
+    const { setupEditor } = await import("./dev-editor");
+    const editor = await setupEditor(container, props.code ?? "");
+    editor.onDidChangeModelContent(() => {
+      const newCode = editor.getValue();
+      props.onCodeChange?.(newCode);
     });
   });
-  return <div class="editor" ref={container}></div>;
+  return <div class="editor" ref={container} />;
 };
 
 const App = () => {
@@ -282,7 +210,8 @@ const App = () => {
   const [step2Complete, setStep2Complete] = createSignal(false);
 
   // 步骤1：Mod代码编辑器
-  const [code, setCode] = createSignal(`// 在这里编写你的 GTS 模组。定义会自动获得 ID。
+  const [code, setCode] =
+    createSignal(`// 在这里编写你的 GTS 模组。定义会自动获得 ID。
 define attachment {
   name "费用护盾" as CostShield;
   description "附着于手牌或牌堆中的牌，使其费用增加 1 点。";

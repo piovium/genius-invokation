@@ -74,18 +74,6 @@ type CustomMetadataBlock<Handle> = {
   };
 };
 
-type CustomViewModel<
-  Model,
-  Base extends IViewModel<any, any, any>,
-  Handle,
-  CtorArgs extends any[] = [],
-> = IViewModel<
-  Model,
-  Omit<Base["~namedDefinition"], keyof CustomMetadataBlock<Handle>> &
-    CustomMetadataBlock<Handle> & { "~meta": any },
-  CtorArgs
->;
-
 type CustomEntityMetadataBlock = Omit<
   CustomMetadataBlock<never>,
   "name"
@@ -251,12 +239,7 @@ const CustomCharacterViewModel = CharacterViewModel.extend(
       this.customImage = image;
     }),
   }),
-) as CustomViewModel<
-  CustomCharacterModel,
-  typeof CharacterViewModel,
-  CharacterHandle,
-  [number]
->;
+);
 
 const CustomCardViewModel = CardViewModel.extend(
   CustomCardModel,
@@ -284,7 +267,7 @@ const CustomCardViewModel = CardViewModel.extend(
       this.customImage = image;
     }),
   }),
-) as CustomViewModel<CustomCardModel, typeof CardViewModel, CardHandle, [number]>;
+);
 
 const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
   CustomCharacterSkillModel,
@@ -315,12 +298,7 @@ const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
       this.customImage = image;
     }),
   }),
-) as CustomViewModel<
-  CustomCharacterSkillModel,
-  typeof CharacterSkillViewModel,
-  SkillHandle | PassiveSkillHandle,
-  [number]
->;
+);
 
 const CustomEntityViewModel = EntityViewModel.extend(
   CustomEntityModel,
@@ -353,7 +331,7 @@ const CustomEntityViewModel = EntityViewModel.extend(
       this.customImage = image;
     }),
   }),
-) as CustomEntityViewModelType;
+);
 
 const CustomAttachmentViewModel = AttachmentViewModel.extend(
   CustomAttachmentModel,
@@ -381,12 +359,7 @@ const CustomAttachmentViewModel = AttachmentViewModel.extend(
       this.customImage = image;
     }),
   }),
-) as CustomViewModel<
-  CustomAttachmentModel,
-  typeof AttachmentViewModel,
-  AttachmentHandle,
-  [number]
->;
+);
 
 export default defineViewModel(class CustomDataRootModel {}, (h) => ({
   character: h.attribute<{

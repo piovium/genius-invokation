@@ -38,6 +38,23 @@ export default defineConfig([
     platform: "neutral",
     entry: {
       "gts/vm": "./src/gts/vm.ts",
+    },
+    dts: {
+      emitDtsOnly: true,
+    },
+    deps: {
+      alwaysBundle: [
+        "@gi-tcg/core",
+        "@gi-tcg/core/builder",
+        "@gi-tcg/core/gts/runtime",
+        "@gi-tcg/core/gts/vm",
+        "@gi-tcg/gts-runtime",
+      ],
+    },
+  },
+  {
+    platform: "neutral",
+    entry: {
       "gts/runtime": "./src/gts/runtime.ts",
     },
     dts: {
