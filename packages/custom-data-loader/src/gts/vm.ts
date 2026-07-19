@@ -56,51 +56,6 @@ interface CustomMetadataModel {
   customImage: string;
 }
 
-type CustomMetadataBlock<Handle> = {
-  id: undefined;
-  name: {
-    (name: string): AR.Done;
-    required(): true;
-    uniqueKey(): "name";
-    as(): Handle;
-  };
-  description: {
-    (description: string): AR.Done;
-    uniqueKey(): "description";
-  };
-  image: {
-    (image: string): AR.Done;
-    uniqueKey(): "image";
-  };
-};
-
-type CustomEntityMetadataBlock = Omit<
-  CustomMetadataBlock<never>,
-  "name"
-> & {
-  name: {
-    <Meta extends EntityVMMeta>(
-      this: AR.This<Meta>,
-      name: string,
-    ): AR.Done;
-    required(): true;
-    uniqueKey(): "name";
-    as<Meta extends EntityVMMeta>(
-      this: AR.This<Meta>,
-    ): HandleT<Meta["type"]>;
-  };
-};
-
-type CustomEntityViewModelType = IViewModel<
-  CustomEntityModel,
-  Omit<
-    typeof EntityViewModel["~namedDefinition"],
-    keyof CustomEntityMetadataBlock
-  > &
-    CustomEntityMetadataBlock & { "~meta": any },
-  [ExEntityType, number]
->;
-
 function registerMetadata(model: CustomMetadataModel) {
   if (model.customName === null) {
     throw new Error(`Definition #${model.customDefinitionId} is missing name`);

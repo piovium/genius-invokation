@@ -13,31 +13,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import "@codingame/monaco-vscode-theme-defaults-default-extension";
-import getKeybindingsServiceOverride from "@codingame/monaco-vscode-keybindings-service-override";
-import { type LanguageClientConfig } from "monaco-languageclient/lcwrapper";
-import { type MonacoVscodeApiConfig } from "monaco-languageclient/vscodeApiWrapper";
-import { configureDefaultWorkerFactory } from "monaco-languageclient/workerFactory";
-import * as vscode from "vscode";
-import {
-  BrowserMessageReader,
-  BrowserMessageWriter,
-} from "vscode-languageclient/browser.js";
-import type { GtsLanguageServerBrowserInitializationOptions } from "@gi-tcg/gts-language-server/browser";
-import providerDts from "../dist/gts/vm.d.ts?raw";
-import runtimeDts from "../dist/gts/runtime.d.ts?raw";
-import gtsLanguageConfiguration from "./gts-language-configuration.json?raw";
-import gtsSyntaxes from "./gts-syntaxes.json?raw";
-
 import {
   Show,
   createEffect,
   createSignal,
   on,
-  onCleanup,
   onMount,
   createMemo,
-  type JSX,
   type Component,
 } from "solid-js";
 import { CustomDataLoader } from "..";
@@ -53,137 +35,6 @@ import "@gi-tcg/deck-builder/style.css";
 import "@gi-tcg/web-ui-core/style.css";
 
 const root = document.querySelector("#root")!;
-
-const GTS_LANGUAGE_ID = "gaming-ts";
-const WORKSPACE_URI = vscode.Uri.file("/workspace");
-const CUSTOM_DATA_FILE_URI = vscode.Uri.file("/workspace/custom-data.gts");
-
-function createLanguageServerWorker() {
-  return new Worker(
-    new URL("./gts-language-server.worker.ts", import.meta.url),
-    {
-      type: "module",
-      name: "GTS Language Server",
-    },
-  );
-}
-
-function createVscodeApiConfig(): MonacoVscodeApiConfig {
-  const extensionFilesOrContents = new Map<string, string | URL>([
-    ["/workspace/language-configuration.json", gtsLanguageConfiguration],
-    ["/workspace/GamingTS.tmLanguage.json", gtsSyntaxes],
-  ]);
-  return {
-    $type: "extended",
-    viewsConfig: {
-      $type: "EditorService",
-    },
-    logLevel: vscode.LogLevel.Warning,
-    serviceOverrides: {
-      ...getKeybindingsServiceOverride(),
-    },
-    userConfiguration: {
-      json: JSON.stringify({
-        "workbench.colorTheme": "Default Dark Modern",
-        "editor.guides.bracketPairsHorizontal": "active",
-        "editor.wordBasedSuggestions": "off",
-        "editor.experimental.asyncTokenization": true,
-      }),
-    },
-    monacoWorkerFactory: configureDefaultWorkerFactory,
-    extensions: [
-      {
-        config: {
-          name: "custom-data-gts",
-          publisher: "gi-tcg",
-          version: "0.0.0",
-          engines: { vscode: "*" },
-          contributes: {
-            languages: [
-              {
-                id: GTS_LANGUAGE_ID,
-                extensions: [".gts"],
-                aliases: ["GamingTS", "gaming-ts", "gts"],
-                configuration: "/workspace/language-configuration.json",
-              },
-            ],
-            grammars: [
-              {
-                language: GTS_LANGUAGE_ID,
-                scopeName: "source.gts",
-                path: "/workspace/GamingTS.tmLanguage.json",
-              },
-            ],
-            semanticTokenModifiers: [
-              {
-                id: "gtsAttribute",
-                description: "Attribute name for GamingTS",
-              },
-            ],
-            semanticTokenScopes: [
-              {
-                language: GTS_LANGUAGE_ID,
-                scopes: { "*.gtsAttribute": ["emphasis"] },
-              },
-            ],
-          },
-        },
-        filesOrContents: extensionFilesOrContents,
-      },
-    ],
-  };
-}
-
-function createLanguageClientConfig(
-  initialCode: string,
-  worker: Worker,
-): LanguageClientConfig {
-  return {
-    languageId: GTS_LANGUAGE_ID,
-    logLevel: vscode.LogLevel.Warning,
-    connection: {
-      options: { $type: "WorkerDirect", worker },
-      messageTransports: {
-        reader: new BrowserMessageReader(worker),
-        writer: new BrowserMessageWriter(worker),
-      },
-    },
-    clientOptions: {
-      documentSelector: [{ language: GTS_LANGUAGE_ID }],
-      workspaceFolder: {
-        index: 0,
-        name: "workspace",
-        uri: WORKSPACE_URI,
-      },
-      initializationOptions: {
-        fs: {
-          "/provider/vm.d.ts": providerDts,
-          "/provider/runtime.d.ts": runtimeDts,
-          [CUSTOM_DATA_FILE_URI.path]: initialCode,
-          "/tsconfig.json": JSON.stringify({
-            compilerOptions: {
-              lib: ["esnext"],
-              types: [],
-              target: "esnext",
-              module: "preserve",
-              verbatimModuleSyntax: true,
-              erasableSyntaxOnly: true,
-              moduleDetection: "force",
-              noEmit: true,
-              strict: true,
-              skipLibCheck: true,
-            },
-            include: ["**/*.gts", "**/*.ts"],
-          }),
-        },
-        inlineGtsConfig: {
-          providerImportSource: "/provider",
-          runtimeImportSource: "/provider/runtime",
-        },
-      } satisfies GtsLanguageServerBrowserInitializationOptions,
-    },
-  };
-}
 
 interface MonacoEditorProps {
   code?: string;
