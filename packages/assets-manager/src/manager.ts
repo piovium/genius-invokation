@@ -37,7 +37,7 @@ import type {
 import { DiceType } from "@gi-tcg/typings";
 import { getDeckData, type DeckData } from "./deck_data";
 import { getStaticDeckData } from "./static_deck_data";
-import { DEFAULT_ASSETS_MANAGER } from "./index";
+import { DEFAULT_ASSETS_API_ENDPOINT, DEFAULT_ASSETS_MANAGER, DEFAULT_LANGUAGE, DEFAULT_VERSION } from "./index";
 import { limitFunction } from "p-limit";
 import type { Category } from "./data_types";
 import { staticDecode, staticEncode } from "./sharing";
@@ -73,10 +73,6 @@ export interface AssetsManagerOption {
   concurrency: number;
 }
 
-export const DEFAULT_ASSETS_API_ENDPOINT =
-  import.meta.env?.DEFAULT_ASSETS_API_ENDPOINT ||
-  "https://static-data.piovium.org/api/v4";
-
 const FETCH_OPTION: RequestInit = {
   headers: {
     "X-Gi-Tcg-Assets-Manager": "1",
@@ -101,8 +97,8 @@ export class AssetsManager {
   constructor(options: Partial<AssetsManagerOption> = {}) {
     this.options = {
       apiEndpoint: DEFAULT_ASSETS_API_ENDPOINT,
-      language: "CHS",
-      version: IS_BETA ? "beta" : "latest",
+      language: DEFAULT_LANGUAGE,
+      version: DEFAULT_VERSION,
       customData: [],
       concurrency: 32,
       ...options,
