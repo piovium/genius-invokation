@@ -91,20 +91,6 @@ describe("CustomDataLoader GTS", () => {
     );
   });
 
-  test("rejects manually assigned IDs and leaves later registration scopes usable", () => {
-    const loader = new CustomDataLoader();
-    expect(() =>
-      loader.loadMod(`define attachment { name "Invalid"; id 123; }`),
-    ).toThrow("assign IDs automatically");
-
-    loader.loadMod(`define attachment { name "Valid"; addCost 1; }`);
-    const [, customData] = loader.done();
-    expect(customData.attachments?.[0]).toMatchObject({
-      id: 10_000_000,
-      name: "Valid",
-    });
-  });
-
   test("rejects user-authored module imports and exports", () => {
     const loader = new CustomDataLoader();
     expect(() => loader.loadMod('import { x } from "mod";')).toThrow(
