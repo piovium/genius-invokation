@@ -16,6 +16,7 @@
 
 export {
   AssetsManager,
+  DEFAULT_ASSETS_MANAGER,
   type GetDataOptions,
   type GetImageOptions,
   type AnyData,
