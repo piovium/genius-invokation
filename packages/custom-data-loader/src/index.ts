@@ -51,7 +51,7 @@ function placeholderImageUrl(name: string) {
 }
 
 function compileGts(source: string) {
-  if (/(?:^|\n)\s*(?:import|export)\b/m.test(source)) {
+  if (/\b(import|export)\b/m.test(source)) {
     throw new Error("Custom GTS modules cannot use import or export statements");
   }
   const { code } = transpile(source, "custom-data.gts", {
