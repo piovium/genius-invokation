@@ -54,10 +54,6 @@ function compileGts(source: string) {
   if (/(?:^|\n)\s*(?:import|export)\b/m.test(source)) {
     throw new Error("Custom GTS modules cannot use import or export statements");
   }
-  if (/(?:^|[;{}])\s*id(?=\s|;|\()/m.test(source)) {
-    throw new Error("Custom GTS definitions assign IDs automatically; remove id");
-  }
-
   const { code } = transpile(source, "custom-data.gts", {
     providerImportSource: "@gi-tcg/custom-data-loader/gts/vm",
     runtimeImportSource: "@gi-tcg/custom-data-loader/gts/runtime",
