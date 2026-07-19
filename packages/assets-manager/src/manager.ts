@@ -22,7 +22,6 @@ import type {
   PlayCost,
   SkillRawData,
 } from "./data_types";
-import { IS_BETA } from "@gi-tcg/config";
 import { blobToDataUrl } from "./data_url";
 import { getNameSync } from "./names";
 import type { CustomData, CustomSkill } from "./custom_data";
@@ -37,7 +36,7 @@ import type {
 import { DiceType } from "@gi-tcg/typings";
 import { getDeckData, type DeckData } from "./deck_data";
 import { getStaticDeckData } from "./static_deck_data";
-import { DEFAULT_ASSETS_API_ENDPOINT, DEFAULT_ASSETS_MANAGER, DEFAULT_LANGUAGE, DEFAULT_VERSION } from "./index";
+import { DEFAULT_ASSETS_API_ENDPOINT, DEFAULT_LANGUAGE, DEFAULT_VERSION } from "./constants";
 import { limitFunction } from "p-limit";
 import type { Category } from "./data_types";
 import { staticDecode, staticEncode } from "./sharing";
@@ -514,3 +513,5 @@ export class AssetsManager {
     return staticDecode(code);
   }
 }
+
+export const DEFAULT_ASSETS_MANAGER = new AssetsManager();

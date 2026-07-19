@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { IS_BETA } from "@gi-tcg/config";
-import { AssetsManager, type Language } from "./manager";
-
 export {
   AssetsManager,
   type GetDataOptions,
@@ -26,25 +23,7 @@ export {
   type PrepareForSyncOptions,
   type AssetsManagerOption,
 } from "./manager";
-
-// @ts-expect-error Node.js typing
-const env = import.meta.env || globalThis.process?.env || {};
-
-export const DEFAULT_ASSETS_API_ENDPOINT =
-  env.DEFAULT_ASSETS_API_ENDPOINT || "https://static-data.piovium.org/api/v4";
-
-const preferredLanguage =
-  globalThis?.navigator?.languages?.[0] ??
-  globalThis?.navigator?.language ??
-  globalThis?.Intl?.DateTimeFormat()?.resolvedOptions()?.locale ??
-  "en-US";
-export const DEFAULT_LANGUAGE: Language = preferredLanguage.startsWith("zh")
-  ? "CHS"
-  : "EN";
-export const DEFAULT_VERSION: typeof IS_BETA extends true ? "beta" : "latest" =
-  (IS_BETA ? "beta" : "latest") as any;
-export const DEFAULT_ASSETS_MANAGER = new AssetsManager();
-
+export * from "./constants";
 export { getNameSync } from "./names";
 export type {
   CustomActionCard,
