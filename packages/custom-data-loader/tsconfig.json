@@ -6,8 +6,7 @@
     "moduleResolution": "Bundler",
     "lib": ["ESNext"],
 
-    "declaration": true,
-    "emitDeclarationOnly": true,
+    "noEmit": true,
 
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

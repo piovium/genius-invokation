@@ -117,19 +117,6 @@ function definitionId(view: { _node: object }) {
   return getCustomDataRegistration().allocateId(view._node);
 }
 
-/**
- * `ViewModel.extend` merges enumerable attributes at runtime. Keep the
- * `undefined` marker in the inferred definition type while hiding it from
- * that merge. `CustomDataLoader` rejects `id` before evaluation; omitting the
- * marker from the merge simply avoids the runtime's spurious warning.
- */
-function withoutId<Definition extends { id: undefined }>(
-  definition: Definition,
-): Definition {
-  Object.defineProperty(definition, "id", { enumerable: false });
-  return definition;
-}
-
 export class CustomCharacterModel
   extends CharacterModel
   implements CustomMetadataModel
@@ -215,7 +202,7 @@ export class CustomAttachmentModel
 
 const CustomCharacterViewModel = CharacterViewModel.extend(
   CustomCharacterModel,
-  (h) => withoutId({
+  (h) => ({
     id: undefined,
     name: h.attribute<{
       (name: string): AR.Done;
@@ -243,7 +230,7 @@ const CustomCharacterViewModel = CharacterViewModel.extend(
 
 const CustomCardViewModel = CardViewModel.extend(
   CustomCardModel,
-  (h) => withoutId({
+  (h) => ({
     id: undefined,
     name: h.attribute<{
       (name: string): AR.Done;
@@ -271,7 +258,7 @@ const CustomCardViewModel = CardViewModel.extend(
 
 const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
   CustomCharacterSkillModel,
-  (h) => withoutId({
+  (h) => ({
     id: undefined,
     name: h.attribute<{
       <Meta extends CharacterSkillVMMeta>(
@@ -302,7 +289,7 @@ const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
 
 const CustomEntityViewModel = EntityViewModel.extend(
   CustomEntityModel,
-  (h) => withoutId({
+  (h) => ({
     id: undefined,
     name: h.attribute<{
       <Meta extends EntityVMMeta>(
@@ -335,7 +322,7 @@ const CustomEntityViewModel = EntityViewModel.extend(
 
 const CustomAttachmentViewModel = AttachmentViewModel.extend(
   CustomAttachmentModel,
-  (h) => withoutId({
+  (h) => ({
     id: undefined,
     name: h.attribute<{
       (name: string): AR.Done;
