@@ -628,11 +628,7 @@ class QueryRunner {
           const targetWho = flip(baseEntry.area.who);
           const targetChs = this.#characters
             .values()
-            .filter(
-              (entry) =>
-                entry.area.who === targetWho &&
-                entry.state.variables.alive !== 0,
-            )
+            .filter((entry) => entry.area.who === targetWho)
             .map(
               (entry) =>
                 [
@@ -640,13 +636,20 @@ class QueryRunner {
                   this.#characterHelpers.get(entry.state.id)!.positionIndex(),
                 ] as const,
             )
-            .toArray();
-          if (targetChs.length === 0) {
+            .toArray()
+            .toSorted(([, a], [, b]) => a - b);
+          if (
+            targetChs.length === 0 ||
+            targetChs.every(([entry]) => entry.state.variables.alive === 0)
+          ) {
             continue;
           }
           // 由于“循环”判定距离，第一个也可以以“尾后”位置的方式参与距离计算
           targetChs.unshift([targetChs[0][0], targetChs.length]);
-          const orderFn = ([_, i]: readonly [EntityEntry, number]) => {
+          const orderFn = ([entry, i]: readonly [EntityEntry, number]) => {
+            if (entry.state.variables.alive === 0) {
+              return Infinity;
+            }
             return Math.abs(i - baseIdx);
           };
           results.add(toSortedBy(targetChs, orderFn)[0][0]);

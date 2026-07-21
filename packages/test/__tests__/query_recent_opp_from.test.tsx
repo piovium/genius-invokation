@@ -30,3 +30,18 @@ test("query: recent opp from", async () => {
   );
   c.expect($.recentOppFrom($.my.active)).toHaveVariable({ expected: 1 });
 });
+
+test("query: recent opp from", async () => {
+  const c = setup(
+    <State>
+      <Character opp alive={0} />
+      <Character opp active />
+      <Character opp v={{ expected: 1 }} />
+
+      <Character my alive={0} />
+      <Character my />
+      <Character my active />
+    </State>,
+  );
+  c.expect($.recentOppFrom($.my.active)).toHaveVariable({ expected: 1 });
+});
