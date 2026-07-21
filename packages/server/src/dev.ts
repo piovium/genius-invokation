@@ -33,7 +33,7 @@ const importFlags = [
 async function localDev() {
   const server = await startLocalPrisma("gi-tcg-server-dev");
   try {
-    // Use `pnpm prisma migrate deploy` as a workaround until this fixed: https://github.com/prisma/prisma/issues/29366
+    // Use `pnpm prisma migrate deploy` as a workaround until this is fixed: https://github.com/prisma/prisma/issues/29366
     await $({
       env: { DATABASE_URL: server.ppg.url },
       stdio: "inherit",
