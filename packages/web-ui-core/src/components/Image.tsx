@@ -105,7 +105,7 @@ export function ImageFallback(props: ImageFallbackProps) {
       <Match when={local.type === "card"}>
         <div
           class={`text-center bg-#bdaa8a rounded-md leading-none select-none
-            contain-strict flex justify-center items-center ${local.class ?? ""}`}
+            contain-[size_style] flex justify-center items-center ${local.class ?? ""}`}
           {...rest}
         >
           {local.alt}
@@ -113,7 +113,7 @@ export function ImageFallback(props: ImageFallbackProps) {
       </Match>
       <Match when={local.type === "state"}>
         <div
-          class={`bg-[var(--bg-color)] rounded-full opacity-80 ${local.class ?? ""}`}
+          class={`state-fallback rounded-full ${local.class ?? ""}`}
           style={{
             "--bg-color": `var(--c-${DAMAGE_COLOR[Math.min(local.imageId, 8)]})`,
           }}
