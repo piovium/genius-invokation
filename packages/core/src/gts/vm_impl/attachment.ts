@@ -45,7 +45,7 @@ export class AttachmentModel extends EntityModel {
   }
 }
 
-export const AttachmentViewModel = EntityViewModel
+export class AttachmentViewModel extends EntityViewModel
   //
   .extend(AttachmentModel, (h) => ({
     tags: h.simpleAttribute()(function (...tags: AttachmentTag[]) {
@@ -119,4 +119,4 @@ export const AttachmentViewModel = EntityViewModel
       });
     }),
   }))
-  .bind<DefaultEntityVMMeta<"attachment">>("attachment");
+  .bind<DefaultEntityVMMeta<"attachment">>("attachment") {}

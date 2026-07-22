@@ -65,7 +65,7 @@ export class CharacterModel {
   }
 }
 
-export const CharacterViewModel = defineViewModel(CharacterModel, (h) => ({
+export class CharacterViewModel extends defineViewModel(CharacterModel, (h) => ({
   id: h.simpleAttribute({
     required: true,
     uniqueKey: "id",
@@ -120,4 +120,4 @@ export const CharacterViewModel = defineViewModel(CharacterModel, (h) => ({
   })(function (variableName: string, slotSize: number) {
     this.specialEnergy = { variableName, slotSize };
   }),
-}));
+})) {}

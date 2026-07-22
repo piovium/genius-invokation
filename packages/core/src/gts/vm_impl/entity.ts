@@ -386,7 +386,7 @@ type PushVar<Meta extends EntityVMMeta, Name extends string> = Computed<
   }
 >;
 
-export const EntityViewModel = defineViewModel(
+export class EntityViewModel extends defineViewModel(
   EntityModel,
   (h) => ({
     id: h.attribute<{
@@ -928,4 +928,4 @@ export const EntityViewModel = defineViewModel(
     }),
   }),
   DEFAULT_ENTITY_VM_META,
-);
+) {}

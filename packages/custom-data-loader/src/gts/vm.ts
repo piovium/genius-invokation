@@ -1,5 +1,6 @@
 import {
   defineViewModel,
+  extendViewModel,
   type AR,
   type IViewModel,
 } from "@gi-tcg/core/gts/runtime";
@@ -247,15 +248,10 @@ const CustomEntityViewModel = EntityViewModel.extend(
   (h) => ({
     id: undefined,
     name: h.attribute<{
-      <Meta extends EntityVMMeta>(
-        this: AR.This<Meta>,
-        name: string,
-      ): AR.Done;
+      <Meta extends EntityVMMeta>(this: AR.This<Meta>, name: string): AR.Done;
       required(): true;
       uniqueKey(): "name";
-      as<Meta extends EntityVMMeta>(
-        this: AR.This<Meta>,
-      ): HandleT<Meta["type"]>;
+      as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
     }>(
       (model, [name]) => {
         model.customName = name;
@@ -306,111 +302,135 @@ const CustomAttachmentViewModel = AttachmentViewModel.extend(
 export default defineViewModel(class CustomDataRootModel {}, (h) => ({
   character: h.attribute<{
     (): AR.With<typeof CustomCharacterViewModel>;
-  }>((_, [], subView) => {
-    const model = CustomCharacterViewModel.parse(subView, definitionId(subView));
-    registerMetadata(model);
-    registerCharacter(model.getEntry());
-  }, (_, [], subView) =>
-    CustomCharacterViewModel.parse(subView, definitionId(subView))),
+  }>(
+    (_, [], subView) => {
+      const model = CustomCharacterViewModel.parse(
+        subView,
+        definitionId(subView),
+      );
+      registerMetadata(model);
+      registerCharacter(model.getEntry());
+    },
+    (_, [], subView) =>
+      CustomCharacterViewModel.parse(subView, definitionId(subView)),
+  ),
   skill: h.attribute<{
     (): AR.With<typeof CustomCharacterSkillViewModel>;
-  }>((_, [], subView) => {
-    const model = CustomCharacterSkillViewModel.parse(
-      subView,
-      definitionId(subView),
-    );
-    const entry = model.getEntry();
-    if (typeof entry === "symbol") {
-      return;
-    }
-    registerMetadata(model);
-    if (entry.type === "initiativeSkill") {
-      registerInitiativeSkill(entry);
-    } else {
-      registerPassiveSkill(entry);
-    }
-  }, (_, [], subView) =>
-    CustomCharacterSkillViewModel.parse(subView, definitionId(subView))),
+  }>(
+    (_, [], subView) => {
+      const model = CustomCharacterSkillViewModel.parse(
+        subView,
+        definitionId(subView),
+      );
+      const entry = model.getEntry();
+      if (typeof entry === "symbol") {
+        return;
+      }
+      registerMetadata(model);
+      if (entry.type === "initiativeSkill") {
+        registerInitiativeSkill(entry);
+      } else {
+        registerPassiveSkill(entry);
+      }
+    },
+    (_, [], subView) =>
+      CustomCharacterSkillViewModel.parse(subView, definitionId(subView)),
+  ),
   status: h.attribute<{
     (): AR.With<typeof CustomEntityViewModel, DefaultEntityVMMeta<"status">>;
-  }>((_, [], subView) => {
-    const model = CustomEntityViewModel.parse(
-      subView,
-      "status",
-      definitionId(subView),
-    );
-    const entry = model.getEntry();
-    if (typeof entry === "symbol") {
-      return;
-    }
-    registerMetadata(model);
-    registerEntity(entry as EntityDefinition);
-  }, (_, [], subView) =>
-    CustomEntityViewModel.parse(subView, "status", definitionId(subView))),
+  }>(
+    (_, [], subView) => {
+      const model = CustomEntityViewModel.parse(
+        subView,
+        "status",
+        definitionId(subView),
+      );
+      const entry = model.getEntry();
+      if (typeof entry === "symbol") {
+        return;
+      }
+      registerMetadata(model);
+      registerEntity(entry as EntityDefinition);
+    },
+    (_, [], subView) =>
+      CustomEntityViewModel.parse(subView, "status", definitionId(subView)),
+  ),
   combatStatus: h.attribute<{
     (): AR.With<
       typeof CustomEntityViewModel,
       DefaultEntityVMMeta<"combatStatus">
     >;
-  }>((_, [], subView) => {
-    const model = CustomEntityViewModel.parse(
-      subView,
-      "combatStatus",
-      definitionId(subView),
-    );
-    const entry = model.getEntry();
-    if (typeof entry === "symbol") {
-      return;
-    }
-    registerMetadata(model);
-    registerEntity(entry as EntityDefinition);
-  }, (_, [], subView) =>
-    CustomEntityViewModel.parse(
-      subView,
-      "combatStatus",
-      definitionId(subView),
-    )),
+  }>(
+    (_, [], subView) => {
+      const model = CustomEntityViewModel.parse(
+        subView,
+        "combatStatus",
+        definitionId(subView),
+      );
+      const entry = model.getEntry();
+      if (typeof entry === "symbol") {
+        return;
+      }
+      registerMetadata(model);
+      registerEntity(entry as EntityDefinition);
+    },
+    (_, [], subView) =>
+      CustomEntityViewModel.parse(
+        subView,
+        "combatStatus",
+        definitionId(subView),
+      ),
+  ),
   summon: h.attribute<{
     (): AR.With<typeof CustomEntityViewModel, DefaultEntityVMMeta<"summon">>;
-  }>((_, [], subView) => {
-    const model = CustomEntityViewModel.parse(
-      subView,
-      "summon",
-      definitionId(subView),
-    );
-    const entry = model.getEntry();
-    if (typeof entry === "symbol") {
-      return;
-    }
-    registerMetadata(model);
-    registerEntity(entry as EntityDefinition);
-  }, (_, [], subView) =>
-    CustomEntityViewModel.parse(subView, "summon", definitionId(subView))),
+  }>(
+    (_, [], subView) => {
+      const model = CustomEntityViewModel.parse(
+        subView,
+        "summon",
+        definitionId(subView),
+      );
+      const entry = model.getEntry();
+      if (typeof entry === "symbol") {
+        return;
+      }
+      registerMetadata(model);
+      registerEntity(entry as EntityDefinition);
+    },
+    (_, [], subView) =>
+      CustomEntityViewModel.parse(subView, "summon", definitionId(subView)),
+  ),
   card: h.attribute<{
     (): AR.With<typeof CustomCardViewModel>;
-  }>((_, [], subView) => {
-    const model = CustomCardViewModel.parse(subView, definitionId(subView));
-    const entry = model.getEntry();
-    if (typeof entry === "symbol") {
-      return;
-    }
-    registerMetadata(model);
-    registerEntity(entry);
-  }, (_, [], subView) =>
-    CustomCardViewModel.parse(subView, definitionId(subView))),
+  }>(
+    (_, [], subView) => {
+      const model = CustomCardViewModel.parse(subView, definitionId(subView));
+      const entry = model.getEntry();
+      if (typeof entry === "symbol") {
+        return;
+      }
+      registerMetadata(model);
+      registerEntity(entry);
+    },
+    (_, [], subView) =>
+      CustomCardViewModel.parse(subView, definitionId(subView)),
+  ),
   attachment: h.attribute<{
     (): AR.With<typeof CustomAttachmentViewModel>;
-  }>((_, [], subView) => {
-    const model = CustomAttachmentViewModel.parse(
-      subView,
-      definitionId(subView),
-    );
-    const entry = model.getEntry();
-    if (typeof entry === "symbol") {
-      return;
-    }
-    registerMetadata(model);
-    registerAttachment(entry as AttachmentDefinition);
-  }, (_, [], subView) =>
-    CustomAttachmentViewModel.parse(subView, definitionId(subView))),
+  }>(
+    (_, [], subView) => {
+      const model = CustomAttachmentViewModel.parse(
+        subView,
+        definitionId(subView),
+      );
+      const entry = model.getEntry();
+      if (typeof entry === "symbol") {
+        return;
+      }
+      registerMetadata(model);
+      registerAttachment(entry as AttachmentDefinition);
+    },
+    (_, [], subView) =>
+      CustomAttachmentViewModel.parse(subView, definitionId(subView)),
+  ),
 }));

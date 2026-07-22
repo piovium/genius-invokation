@@ -12,9 +12,6 @@ catalogs:
     '@gi-tcg/gts-language-server':
       specifier: ^0.6.7
       version: 0.6.8
-    '@gi-tcg/gts-runtime':
-      specifier: ^0.6.7
-      version: 0.6.7
     '@gi-tcg/gts-transpiler':
       specifier: ^0.6.7
       version: 0.6.7
@@ -257,8 +254,8 @@ importers:
   packages/core:
     dependencies:
       '@gi-tcg/gts-runtime':
-        specifier: 'catalog:'
-        version: 0.6.7
+        specifier: file:///Users/bytedance/Documents/hobby/gts/packages/runtime
+        version: file:../gts/packages/runtime
       '@gi-tcg/typings':
         specifier: workspace:*
         version: link:../typings
@@ -2737,8 +2734,8 @@ packages:
     resolution: {integrity: sha512-OMEkuO0KOnUU3KnLHIXJrpgkNz6VD0cwQN78/qGSGTl82+/WVj7CD8mqM+jNstXO0Qi/6YE5rvSq/6nIABPsPA==}
     hasBin: true
 
-  '@gi-tcg/gts-runtime@0.6.7':
-    resolution: {integrity: sha512-BabPaX4WO10copfDR1feD72LVwHIMz7pwzjWRlh59XX36qXfmJEU4zvLVOpwUMYkEx+iS5i6xwp1dLhQufbkmA==}
+  '@gi-tcg/gts-runtime@file:../gts/packages/runtime':
+    resolution: {directory: ../gts/packages/runtime, type: directory}
 
   '@gi-tcg/gts-transpiler@0.6.7':
     resolution: {integrity: sha512-uHK+9dX/4m9SR9ZqAld1xfBnnSnniW076yGeu9n2T8nzgxytBIOVsvYJH15oUl9vhBwzTM4a7Aw+mN0gUs/O2A==}
@@ -11078,7 +11075,7 @@ snapshots:
       - babel-plugin-macros
       - typescript
 
-  '@gi-tcg/gts-runtime@0.6.7':
+  '@gi-tcg/gts-runtime@file:../gts/packages/runtime':
     dependencies:
       ajv: 8.20.0
 

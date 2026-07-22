@@ -728,7 +728,7 @@ export const DEFAULT_CHARACTER_SKILL_VM_META = {
   isInitiativeSkill: true as boolean,
 } as const satisfies CharacterSkillVMMeta;
 
-export const CharacterSkillViewModel = InitiativeSkillViewModel
+export class CharacterSkillViewModel extends InitiativeSkillViewModel
   //
   .extend(CharacterSkillModel, (h) => ({
     id: h.attribute<{
@@ -786,4 +786,4 @@ export const CharacterSkillViewModel = InitiativeSkillViewModel
       }
     }),
   }))
-  .bind<typeof DEFAULT_CHARACTER_SKILL_VM_META>();
+  .bind<typeof DEFAULT_CHARACTER_SKILL_VM_META>() {}
