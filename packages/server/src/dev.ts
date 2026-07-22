@@ -27,17 +27,17 @@ async function startLocalPrisma(name: string) {
 
 const importFlags = [
   `--import`,
-  pathToFileURL(path.resolve(import.meta.dirname, "../scripts/ts_preload.js"))
-    .href,
+  pathToFileURL(path.resolve(import.meta.dirname, "../scripts/ts_preload.js")).href,
 ];
 
 async function localDev() {
   const server = await startLocalPrisma("gi-tcg-server-dev");
   try {
+    // Use `pnpm prisma migrate deploy` as a workaround until this is fixed: https://github.com/prisma/prisma/issues/29366
     await $({
       env: { DATABASE_URL: server.ppg.url },
       stdio: "inherit",
-    })`pnpm prisma migrate dev`;
+    })`pnpm prisma migrate deploy`;
     await $({
       stdio: "inherit",
     })`pnpm prisma generate`;
