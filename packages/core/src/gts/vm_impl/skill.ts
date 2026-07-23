@@ -184,6 +184,9 @@ export class TriggeredSkillModel extends SkillModel {
     this.caller = caller;
     this.detailedEventName = detailedEventName;
     this.associatedExtensionId = caller.associatedExtensionId;
+    // attachment 默认允许在手牌/牌库区响应事件
+    this.enableHandTriggering = caller.type === "attachment";
+    this.enablePileTriggering = caller.type === "attachment";
   }
 
   override get snippets() {
