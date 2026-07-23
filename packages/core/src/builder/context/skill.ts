@@ -441,6 +441,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   _terminate(): SkillDescriptionReturn {
     this.mutator.notify();
     const { emittedEvents, causeDefeated } = this.preprocessEventList();
+    this.mutator.notify();
     Object.freeze(emittedEvents);
     Object.freeze(this);
     const resultState = this.rawState;
