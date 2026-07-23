@@ -52,31 +52,49 @@ export default defineViewModel(class RootModel {}, (h) => ({
   }, CharacterSkillViewModel),
   status: h.attribute<{
     (): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"status">>;
-  }>((_, [], subView) => {
-    const entityModel = EntityViewModel.parse(subView, "status");
-    const entry = entityModel.getEntry();
-    if (entry !== RESERVED) {
-      registerEntity(entry as EntityDefinition);
-    }
-  }, EntityViewModel.bind<DefaultEntityVMMeta<"status">>("status")),
+  }>(
+    (_, [], subView) => {
+      const entityModel = EntityViewModel.parse(subView, "status");
+      const entry = entityModel.getEntry();
+      if (entry !== RESERVED) {
+        registerEntity(entry as EntityDefinition);
+      }
+    },
+    EntityViewModel
+      //
+      .bind("status")
+      .narrow(null! as DefaultEntityVMMeta<"status">),
+  ),
   combatStatus: h.attribute<{
     (): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"combatStatus">>;
-  }>((_, [], subView) => {
-    const entityModel = EntityViewModel.parse(subView, "combatStatus");
-    const entry = entityModel.getEntry();
-    if (entry !== RESERVED) {
-      registerEntity(entry as EntityDefinition);
-    }
-  }, EntityViewModel.bind<DefaultEntityVMMeta<"combatStatus">>("combatStatus")),
+  }>(
+    (_, [], subView) => {
+      const entityModel = EntityViewModel.parse(subView, "combatStatus");
+      const entry = entityModel.getEntry();
+      if (entry !== RESERVED) {
+        registerEntity(entry as EntityDefinition);
+      }
+    },
+    EntityViewModel
+      //
+      .bind("combatStatus")
+      .narrow(null! as DefaultEntityVMMeta<"combatStatus">),
+  ),
   summon: h.attribute<{
     (): AR.With<typeof EntityViewModel, DefaultEntityVMMeta<"summon">>;
-  }>((_, [], subView) => {
-    const entityModel = EntityViewModel.parse(subView, "summon");
-    const entry = entityModel.getEntry();
-    if (entry !== RESERVED) {
-      registerEntity(entry as EntityDefinition);
-    }
-  }, EntityViewModel.bind<DefaultEntityVMMeta<"summon">>("summon")),
+  }>(
+    (_, [], subView) => {
+      const entityModel = EntityViewModel.parse(subView, "summon");
+      const entry = entityModel.getEntry();
+      if (entry !== RESERVED) {
+        registerEntity(entry as EntityDefinition);
+      }
+    },
+    EntityViewModel
+      //
+      .bind("summon")
+      .narrow(null! as DefaultEntityVMMeta<"summon">),
+  ),
   card: h.attribute<{
     (): AR.With<typeof CardViewModel>;
   }>((_, [], subView) => {

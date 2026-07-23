@@ -786,4 +786,4 @@ export class CharacterSkillViewModel extends InitiativeSkillViewModel
       }
     }),
   }))
-  .bind<typeof DEFAULT_CHARACTER_SKILL_VM_META>() {}
+  .narrow(DEFAULT_CHARACTER_SKILL_VM_META) {}

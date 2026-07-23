@@ -611,4 +611,4 @@ export class CardViewModel extends InitiativeSkillViewModel
       }
     }),
   }))
-  .bind<typeof DEFAULT_CARD_VM_META>() {}
+  .narrow(DEFAULT_CARD_VM_META) {}

@@ -184,7 +184,7 @@ export const TechniqueSkillViewModel = InitiativeSkillViewModel
       }
     }),
   }))
-  .bind<DefaultTechniqueSkillVMMeta>();
+  .narrow(DEFAULT_TECHNIQUE_SKILL_VM_META);
 
 export class TechniqueModel extends EntityModel {
   constructor(parent?: IParentModel) {
@@ -314,4 +314,4 @@ export const TechniqueViewModel = EntityViewModel
       model.skillList.push(skillDef);
     }, TechniqueSkillViewModel.bind(null!)),
   }))
-  .bind<DefaultTechniqueVMMeta>();
+  .narrow(null! as DefaultTechniqueVMMeta);

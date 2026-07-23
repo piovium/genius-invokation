@@ -119,4 +119,5 @@ export class AttachmentViewModel extends EntityViewModel
       });
     }),
   }))
-  .bind<DefaultEntityVMMeta<"attachment">>("attachment") {}
+  .bind("attachment")
+  .narrow(null! as DefaultEntityVMMeta<"attachment">) {}
