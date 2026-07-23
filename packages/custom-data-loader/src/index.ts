@@ -25,10 +25,32 @@ import { transpile } from "@gi-tcg/gts-transpiler";
 
 import getOfficialData, { registry as baseRegistry } from "@gi-tcg/data";
 import { beginCustomDataRegistration } from "./gts/context";
-import customDataViewModel from "./gts/vm";
 import * as gtsRuntime from "./gts/runtime";
+import {
+  defaultModuleEvaluatorBackend,
+  EsbuildWasmModuleEvaluator,
+  type EsbuildWasmModuleEvaluatorOptions,
+  GTS_RUNTIME_MODULE,
+  type ModuleEvaluator,
+  type ModuleEvaluatorBackend,
+  NodeVmModuleEvaluator,
+  type NodeVmModuleEvaluatorOptions,
+} from "./module-evaluator";
 
 export { getOfficialData };
+export {
+  DEFAULT_ESBUILD_WASM_URL,
+  EsbuildWasmModuleEvaluator,
+  GTS_PROVIDER_VM_MODULE,
+  GTS_RUNTIME_MODULE,
+  NodeVmModuleEvaluator,
+} from "./module-evaluator";
+export type {
+  EsbuildWasmModuleEvaluatorOptions,
+  ModuleEvaluator,
+  ModuleEvaluatorBackend,
+  NodeVmModuleEvaluatorOptions,
+} from "./module-evaluator";
 
 declare const btoa: (str: string) => string;
 function b64EncodeUnicode(str: string) {
@@ -51,45 +73,35 @@ function placeholderImageUrl(name: string) {
 }
 
 function compileGts(source: string) {
-  if (/\b(import|export)\b/m.test(source)) {
-    throw new Error("Custom GTS modules cannot use import or export statements");
-  }
   const { code } = transpile(source, "custom-data.gts", {
     providerImportSource: "@gi-tcg/custom-data-loader/gts/vm",
-    runtimeImportSource: "@gi-tcg/custom-data-loader/gts/runtime",
+    runtimeImportSource: GTS_RUNTIME_MODULE,
   });
-  const executable = code
-    .replace(
-      /^import\s+\{\s*createDefine as __gts_createDefine,\s*createBinding as __gts_createBinding\s*\}\s+from\s+[^;]+;\s*/m,
-      "",
-    )
-    .replace(/^import\s+__gts_rootVm\s+from\s+[^;]+;\s*/m, "")
-    // GTS emits public bindings as ESM exports. The loader evaluates a single
-    // self-contained document, so they are ordinary local bindings instead.
-    .replace(/^export const /gm, "const ");
-
-  if (/\b(?:import|export)\b/.test(executable)) {
-    throw new Error("Custom GTS modules cannot use import or export statements");
-  }
-  return executable;
+  // GTS treats the runtime's values (such as DiceType) as globals. Preserve
+  // that authoring model while keeping the evaluated document a real module.
+  return `import { ${Object.keys(gtsRuntime).join(", ")} } from ${JSON.stringify(GTS_RUNTIME_MODULE)};\n${code}`;
 }
 
-function executeGts(source: string) {
-  const code = compileGts(source);
-  const fn = new Function(
-    "__gts_runtime",
-    "__gts_rootVm",
-    `
-      const {
-        createDefine: __gts_createDefine,
-        createBinding: __gts_createBinding,
-      } = __gts_runtime;
-      with (__gts_runtime) {
-        ${code}
-      }
-    `,
-  );
-  fn(gtsRuntime, customDataViewModel);
+export type CustomDataLoaderOptions =
+  | {
+      backend?: "node-vm";
+      backendOptions?: NodeVmModuleEvaluatorOptions;
+    }
+  | {
+      backend: "esbuild-wasm";
+      backendOptions?: EsbuildWasmModuleEvaluatorOptions;
+    };
+
+function createModuleEvaluator(
+  options: CustomDataLoaderOptions,
+): ModuleEvaluator {
+  const backend = options.backend ?? defaultModuleEvaluatorBackend();
+  switch (backend) {
+    case "node-vm":
+      return new NodeVmModuleEvaluator(options.backendOptions);
+    case "esbuild-wasm":
+      return new EsbuildWasmModuleEvaluator(options.backendOptions);
+  }
 }
 
 export class CustomDataLoader {
@@ -100,15 +112,18 @@ export class CustomDataLoader {
   private names = new Map<number, string>();
   private descriptions = new Map<number, string>();
   private images = new Map<number, string>();
+  private readonly moduleEvaluator: ModuleEvaluator;
 
-  constructor() {}
+  constructor(options: CustomDataLoaderOptions = {}) {
+    this.moduleEvaluator = createModuleEvaluator(options);
+  }
 
   setVersion(version: Version): this {
     this.version = version;
     return this;
   }
 
-  loadMod(...sources: string[]): this {
+  async loadMod(...sources: string[]): Promise<this> {
     for (const src of sources) {
       const scope = this.registry.begin();
       const definitionIds = new WeakMap<object, number>();
@@ -128,7 +143,7 @@ export class CustomDataLoader {
         },
       });
       try {
-        executeGts(src);
+        await this.moduleEvaluator.evaluate(compileGts(src));
       } finally {
         endRegistration();
         scope.end();

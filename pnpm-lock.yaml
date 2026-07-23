@@ -296,6 +296,9 @@ importers:
       '@gi-tcg/gts-transpiler':
         specifier: 'catalog:'
         version: 0.7.0
+      esbuild-wasm:
+        specifier: ^0.27.3
+        version: 0.27.7
     devDependencies:
       '@codingame/monaco-vscode-api':
         specifier: ~25.1.2
@@ -5570,6 +5573,11 @@ packages:
   es-set-tostringtag@2.1.0:
     resolution: {integrity: sha512-j6vWzfrGVfyXxge+O0x5sh6cvxAog0a/4Rdd2K36zCMV5eJ+/+tOAngRO8cODMNWbVRdVlmGZQL2YS3yR8bIUA==}
     engines: {node: '>= 0.4'}
+
+  esbuild-wasm@0.27.7:
+    resolution: {integrity: sha512-1k03e2/tGz+sLz3/xzoZmUsIqtaGIvJa8k4UqUeqCUry83nHmlxQYZUUES0WBFUYilSQUf7nDUGAciIIklljSg==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   esbuild@0.19.11:
     resolution: {integrity: sha512-HJ96Hev2hX/6i5cDVwcqiJBBtuo9+FeIJOtZ9W1kA5M6AMJRHUZlpYZ1/SbEwtO0ioNAW8rUooVpC/WehY2SfA==}
@@ -14157,6 +14165,8 @@ snapshots:
       get-intrinsic: 1.2.7
       has-tostringtag: 1.0.2
       hasown: 2.0.2
+
+  esbuild-wasm@0.27.7: {}
 
   esbuild@0.19.11:
     optionalDependencies:

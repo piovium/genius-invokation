@@ -117,10 +117,10 @@ define card {
   const [assetsManager, setAssetsManager] = createSignal<AssetsManager>();
 
   // 尝试加载mod代码
-  const loadMod = () => {
+  const loadMod = async () => {
     try {
       const loader = new CustomDataLoader();
-      loader.loadMod(code());
+      await loader.loadMod(code());
       const [gameData, customData] = loader.done();
       setGameData(gameData);
 

@@ -43,8 +43,8 @@ define card {
 `;
 
 describe("CustomDataLoader GTS", () => {
-  test("registers generated definitions and their presentation metadata", () => {
-    const loader = new CustomDataLoader().loadMod(customGts);
+  test("registers generated definitions and their presentation metadata", async () => {
+    const loader = await new CustomDataLoader().loadMod(customGts);
     const [gameData, customData] = loader.done();
 
     expect(customData.attachments).toEqual([
@@ -74,9 +74,14 @@ describe("CustomDataLoader GTS", () => {
     );
   });
 
-  test("registers custom attachments with standard assets-manager lookup APIs", () => {
-    const [, customData] = new CustomDataLoader().loadMod(customGts).done();
-    const assets = new AssetsManager({ customData: [customData], concurrency: 0 });
+  test("registers custom attachments with standard assets-manager lookup APIs", async () => {
+    const [, customData] = (
+      await new CustomDataLoader().loadMod(customGts)
+    ).done();
+    const assets = new AssetsManager({
+      customData: [customData],
+      concurrency: 0,
+    });
 
     expect(assets.getNameSync(10_000_000)).toBe("Shield");
     expect(assets.getImageUrlSync(10_000_000)).toBe(
@@ -91,13 +96,11 @@ describe("CustomDataLoader GTS", () => {
     );
   });
 
-  test("rejects user-authored module imports and exports", () => {
+  test("rejects imports other than the GTS runtime and provider VM", async () => {
     const loader = new CustomDataLoader();
-    expect(() => loader.loadMod('import { x } from "mod";')).toThrow(
-      "cannot use import or export",
+    await expect(loader.loadMod('import { x } from "mod";')).rejects.toThrow(
+      "may only import",
     );
-    expect(() => loader.loadMod("export const x = 1;")).toThrow(
-      "cannot use import or export",
-    );
+    await expect(loader.loadMod("export const x = 1;")).resolves.toBe(loader);
   });
 });

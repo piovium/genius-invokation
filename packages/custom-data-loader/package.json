@@ -26,12 +26,13 @@
     "predev": "pnpm build",
     "dev": "vite",
     "check": "tsc --noEmit",
-    "test": "vitest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules vitest",
     "build": "tsdown"
   },
   "dependencies": {
     "@gi-tcg/data": "workspace:*",
-    "@gi-tcg/gts-transpiler": "catalog:"
+    "@gi-tcg/gts-transpiler": "catalog:",
+    "esbuild-wasm": "^0.27.3"
   },
   "gamingTs": {
     "runtimeImportSource": "@gi-tcg/custom-data-loader/gts/runtime",
