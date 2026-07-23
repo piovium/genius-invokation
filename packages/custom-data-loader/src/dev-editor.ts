@@ -21,7 +21,7 @@ import {
 import PROVIDER_VM_DTS from "../dist/gts/vm.d.ts?raw";
 import GTS_RUNTIME_DTS from "../dist/gts/runtime.d.ts?raw";
 import GTS_LANGUAGE_CONFIG from "./gts-language-configuration.json?raw";
-import GTS_SYNTAXES from "./gts-syntaxes.json?raw";
+import GTS_SYNTAXES from "./gts.tmLanguage.json?raw";
 import type { GtsLanguageServerBrowserInitializationOptions } from "@gi-tcg/gts-language-server/browser";
 import type { RegisterLocalProcessExtensionResult } from "@codingame/monaco-vscode-api/extensions";
 import { registerDecorations } from "@gi-tcg/gts-language-client-code/decoration";
