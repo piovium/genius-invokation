@@ -143,7 +143,9 @@ export const TechniqueSkillViewModel = InitiativeSkillViewModel
   .extend(TechniqueSkillModel, (h) => ({
     id: h.attribute<{
       (id: number): AR.Done;
-      required(): true;
+      // TODO custom technique cannot provide required id
+      // we can make `required()` only for official data
+      // required(): true;
       uniqueKey(): "id";
       as(): SkillHandle;
     }>(
@@ -310,6 +312,7 @@ export const TechniqueViewModel = EntityViewModel
       };
     }>((model, [], subView) => {
       const skillModel = TechniqueSkillViewModel.parse(subView, model);
+      skillModel.id ??= model.getSubId();
       const skillDef = skillModel.buildSkillDefinition();
       model.skillList.push(skillDef);
     }, TechniqueSkillViewModel.bind(null!)),

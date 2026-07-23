@@ -249,6 +249,7 @@ export class AssetsManager {
           .filter((s): s is string => !!s),
         cardFace: "",
         icon: "",
+        shareId: ch.obtainable ? Number.MAX_SAFE_INTEGER : undefined,
         obtainable: ch.obtainable,
         skills: setupSkill(ch.skills),
       };
@@ -267,6 +268,7 @@ export class AssetsManager {
         rawDescription: ac.rawDescription,
         description: "",
         cardFace: "",
+        shareId: ac.obtainable ? Number.MAX_SAFE_INTEGER : undefined,
         obtainable: ac.obtainable,
         tags: ac.tags
           .map((tag) => ENTITY_TAG_MAP[tag])

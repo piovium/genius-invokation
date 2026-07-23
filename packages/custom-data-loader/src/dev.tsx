@@ -296,6 +296,7 @@ define card {
               <h2>编辑卡组1</h2>
               <Show when={assetsManager()}>
                 <DeckBuilder
+                  class="h-full"
                   assetsManager={assetsManager()!}
                   deck={deck0()}
                   onChangeDeck={setDeck0}
@@ -321,6 +322,7 @@ define card {
               <h2>编辑卡组2</h2>
               <Show when={assetsManager()}>
                 <DeckBuilder
+                  class="h-full"
                   assetsManager={assetsManager()!}
                   deck={deck1()}
                   onChangeDeck={setDeck1}
