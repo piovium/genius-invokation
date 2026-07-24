@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Status, Card, Equipment, $, Summon } from "#test";
+import { ref, setup, Character, State, Status, Card, Equipment, $, Summon, Attachment, DeclaredEnd } from "#test";
 import { QuickKnit } from "@gi-tcg/data/internal/cards/event/other.gts";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
 import { Ineffa } from "@gi-tcg/data/internal/characters/electro/ineffa.gts";
@@ -36,4 +36,31 @@ test("thundercloud: trigger on gainUsage", async () => {
   await c.me.card(QuickKnit, thundercloud);
   c.expect(thundercloud).toHaveVariable({ usage: 2 });
   c.expect($.attachment.def(Conductive).on($.id(oppHand.id))).toBeExist();
+});
+
+test("conductive: endPhase deals piercing damage to my max-health character", async () => {
+  const active = ref();
+  const standby = ref();
+  const c = setup(
+    <State>
+      <DeclaredEnd opp />
+      <Character my active def={Ineffa} health={9} ref={active} />
+      <Character my health={10} ref={standby} />
+      <Character my alive={0} health={0} />
+      <Card my def={Paimon}>
+        <Attachment def={Conductive} v={{ layer: 1 }} />
+      </Card>
+      <Card my def={QuickKnit}>
+        <Attachment def={Conductive} v={{ layer: 3 }} />
+      </Card>
+      <Card my pile def={Paimon}>
+        <Attachment def={Conductive} v={{ layer: 1 }} />
+      </Card>
+    </State>
+  );
+  await c.me.end();
+  // 第1张手牌的1层电击攻击生命值最高的后台角色：10 -> 9
+  c.expect(standby).toHaveVariable({ health: 9 });
+  // 第2张手牌的3层电击在生命值相同时攻击出战角色：9 -> 6
+  c.expect(active).toHaveVariable({ health: 6 });
 });

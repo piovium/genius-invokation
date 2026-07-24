@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import { card, character, DamageType, DiceType, skill, status, summon, $, type SkillHandle } from "@gi-tcg/core/builder";
 
 /**
  * @id 114092
@@ -83,8 +83,10 @@ define skill {
   id 14092 as VioletArc;
   skillType elemental;
   cost DiceType.Electro, 3;
-  :damage(DamageType.Electro, 2);
-  if (!:$(`status with definition id ${ConductiveLisa} at opp active`)) {
+  if ($.opp.active.has($.typeStatus.def(ConductiveLisa))) {
+    :damage(DamageType.Electro, 2);
+  } else {
+    :damage(DamageType.Electro, 2);
     :characterStatus(ConductiveLisa, "opp active");
   }
 }
