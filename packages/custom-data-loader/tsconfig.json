@@ -10,6 +10,8 @@
     "declaration": true,
     "emitDeclarationOnly": true,
 
+    "verbatimModuleSyntax": true,
+
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     

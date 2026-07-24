@@ -14,10 +14,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
-  GameData,
+  type GameData,
   resolveOfficialVersion,
-  SkillDefinition,
-  Version,
+  type SkillDefinition,
+  type Version,
   playSkillOfCard,
 } from "@gi-tcg/core";
 import type { CustomData, CustomSkill } from "@gi-tcg/assets-manager";
@@ -25,30 +25,21 @@ import { transpile } from "@gi-tcg/gts-transpiler";
 
 import getOfficialData, { registry as baseRegistry } from "@gi-tcg/data";
 import { beginCustomDataRegistration } from "./gts/context";
+import { GTS_RUNTIME_MODULE } from "./module_evaluators/share";
 import {
-  defaultModuleEvaluatorBackend,
-  EsbuildWasmModuleEvaluator,
-  type EsbuildWasmModuleEvaluatorOptions,
-  GTS_RUNTIME_MODULE,
-  type ModuleEvaluator,
   NodeVmModuleEvaluator,
   type NodeVmModuleEvaluatorOptions,
-} from "./module-evaluator";
+} from "./module_evaluators/node_vm";
+import {
+  EsbuildWasmModuleEvaluator,
+  type EsbuildWasmModuleEvaluatorOptions,
+} from "./module_evaluators/esbuild_wasm";
+import {
+  defaultModuleEvaluatorBackend,
+  type ModuleEvaluator,
+} from "./module_evaluators";
 
 export { getOfficialData };
-export {
-  EsbuildWasmModuleEvaluator,
-  GTS_BUILDER_MODULE,
-  GTS_PROVIDER_VM_MODULE,
-  GTS_RUNTIME_MODULE,
-  NodeVmModuleEvaluator,
-} from "./module-evaluator";
-export type {
-  EsbuildWasmModuleEvaluatorOptions,
-  ModuleEvaluator,
-  ModuleEvaluatorBackend,
-  NodeVmModuleEvaluatorOptions,
-} from "./module-evaluator";
 
 declare const btoa: (str: string) => string;
 function b64EncodeUnicode(str: string) {
