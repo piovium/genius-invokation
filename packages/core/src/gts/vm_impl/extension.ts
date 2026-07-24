@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineViewModel, type AR, type Meta } from "@gi-tcg/gts-runtime";
+import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
 import type { TypeInfer, TypeValidate } from "@gi-tcg/utils";
 import type { ExtensionDefinition } from "../../base/extension";
 import type { GameState, TriggeredSkillDefinition } from "../../base/state";
