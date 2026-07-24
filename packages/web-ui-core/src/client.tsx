@@ -23,8 +23,11 @@ import {
   SwitchHandsResponse,
   SelectCardResponse,
   RerollDiceResponse,
+  PbEntityArea,
+  PbEntityType,
   PbPhaseType,
   PbPlayerStatus,
+  type PbExposedMutation,
 } from "@gi-tcg/typings";
 import {
   createMemo,
@@ -56,6 +59,7 @@ import {
   createActionState,
   createChooseActiveState,
   type ActionState,
+  type ActionStep,
 } from "./action";
 import { AssetsManager, DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
 import {
@@ -95,6 +99,46 @@ export const EMPTY_GAME_STATE: PbGameState = {
   roundNumber: 0,
   player: [EMPTY_PLAYER_DATA, EMPTY_PLAYER_DATA],
 };
+
+/** 动画队列中每个任务携带的元数据 */
+interface AnimationMeta {
+  /** 该动画所属的行动轮次 */
+  turn: number;
+  /** 该动画是否涉及我方支援区的创建、删除、移动 */
+  involvesMySupport: boolean;
+}
+
+/** 步进守卫：一个操作判断 + 一个动画判断；操作匹配且队列中存在匹配动画时拒绝步进 */
+interface StepGuard {
+  step: (step: ActionStep) => boolean;
+  animation: (meta: AnimationMeta) => boolean;
+}
+
+/** 判断该批 mutation 是否涉及我方支援区的创建、删除、移动 */
+function involvesMySupportArea(
+  mutations: PbExposedMutation[],
+  who: 0 | 1,
+): boolean {
+  return mutations.some(({ mutation }) => {
+    switch (mutation?.$case) {
+      case "createEntity":
+      case "removeEntity":
+        return (
+          mutation.value.who === who &&
+          mutation.value.where === PbEntityArea.SUPPORT
+        );
+      case "moveEntity":
+        return (
+          (mutation.value.fromWho === who &&
+            mutation.value.fromWhere === PbEntityArea.SUPPORT) ||
+          (mutation.value.toWho === who &&
+            mutation.value.toWhere === PbEntityArea.SUPPORT)
+        );
+      default:
+        return false;
+    }
+  });
+}
 
 export interface ClientOption {
   onGiveUp?: () => void;
@@ -163,7 +207,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   >([]);
   const [opp, setOpp] = createSignal<OppInfo | null>(null);
 
-  const uiQueue = new QueueManager<{ turn: number }>();
+  const uiQueue = new QueueManager<AnimationMeta>();
   let savedState: PbGameState | undefined = void 0;
 
   const actionResolvers: {
@@ -306,6 +350,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         return;
       }
       const turn = state.currentTurn;
+      const involvesMySupport = involvesMySupportArea(mutation, who);
       uiQueue.push(async () => {
         state = oppController.mergeState(state!);
         const parsed = parseMutations(mutation, oppController);
@@ -321,7 +366,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         } satisfies ChessboardData);
         savedState = state;
         await promise;
-      }, { turn });
+      }, { turn, involvesMySupport });
     },
     rpc: async (req) => {
       try {
@@ -333,9 +378,35 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     },
   };
 
+  const stepGuards: StepGuard[] = [
+    {
+      // 技能/切人按钮：等待所有动画播放完毕
+      step: (step) =>
+        step.type === "clickSkillButton" ||
+        step.type === "clickSwitchActiveButton",
+      animation: () => true,
+    },
+    {
+      // 打出支援牌：等待涉及我方支援区的动画播放完毕
+      step: (step) =>
+        step.type === "playCard" &&
+        (savedState?.player[who].handCard.some(
+          (card) =>
+            card.id === step.cardId && card.type === PbEntityType.SUPPORT,
+        ) ??
+          false),
+      animation: (meta) => meta.involvesMySupport,
+    },
+  ];
+
   const onStepActionState: StepActionStateHandler = (step, dice) => {
     const currentActionState = actionState();
     if (!currentActionState) {
+      return;
+    }
+    // 守卫：操作匹配且队列中存在匹配动画时拒绝步进，停留在当前状态
+    const pending = uiQueue.pending();
+    if (stepGuards.some((g) => g.step(step) && pending.some(g.animation))) {
       return;
     }
     const result = currentActionState.step(step, dice);
