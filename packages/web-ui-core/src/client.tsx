@@ -165,6 +165,16 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
 
   const uiQueue = new AsyncQueue();
   let savedState: PbGameState | undefined = void 0;
+  // 队列中尚未播完的、属于对方行动轮次的动画数量
+  let oppTurnAnimationsPending = 0;
+  // 等待"行动轮次切换至我方"的通知动画播放完成
+  let turnSwitchToMe: PromiseWithResolvers<void> | null = null;
+  const createTurnSwitchWaiter = () => {
+    const waiter = Promise.withResolvers<void>();
+    // cancelRpc 可能在无人等待时 reject，避免 unhandled rejection
+    waiter.promise.catch(() => {});
+    return waiter;
+  };
 
   const actionResolvers: {
     [K in RpcMethod]: PromiseWithResolvers<RpcResponsePayloadOf<K>> | null;
@@ -178,6 +188,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
 
   const dispatcher: RpcDispatcher = {
     chooseActive: async ({ candidateIds }) => {
+      // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
+      await uiQueue.push(async () => {});
       const resolver = Promise.withResolvers<ChooseActiveResponse>();
       actionResolvers.chooseActive = resolver;
       const acState = createChooseActiveState(candidateIds, t);
@@ -189,6 +201,11 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       }
     },
     action: async ({ action }) => {
+      if (oppTurnAnimationsPending > 0 || turnSwitchToMe) {
+        // 队列中存在对方行动轮次的动画：等待切换轮次至我方的通知动画播放完成
+        turnSwitchToMe ??= createTurnSwitchWaiter();
+        await turnSwitchToMe.promise;
+      }
       const resolver = Promise.withResolvers<ActionResponse>();
       actionResolvers.action = resolver;
       const acState = createActionState(getAssetsManager(), action, t);
@@ -226,6 +243,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       }
     },
     selectCard: async ({ candidateDefinitionIds }) => {
+      // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
+      await uiQueue.push(async () => {});
       const resolver = Promise.withResolvers<SelectCardResponse>();
       actionResolvers.selectCard = resolver;
       setSelectCardCandidates(candidateDefinitionIds);
@@ -268,6 +287,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   };
 
   const cancelRpc = () => {
+    turnSwitchToMe?.reject();
+    turnSwitchToMe = null;
     actionResolvers.action?.reject();
     actionResolvers.chooseActive?.reject();
     actionResolvers.rerollDice?.reject();
@@ -299,6 +320,13 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       if (!state) {
         return;
       }
+      const isOppTurn = state.currentTurn !== who;
+      if (isOppTurn) {
+        oppTurnAnimationsPending++;
+      } else if (oppTurnAnimationsPending > 0) {
+        // 该通知将行动轮次切换至我方
+        turnSwitchToMe ??= createTurnSwitchWaiter();
+      }
       uiQueue.push(async () => {
         state = oppController.mergeState(state!);
         const parsed = parseMutations(mutation, oppController);
@@ -314,6 +342,13 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         } satisfies ChessboardData);
         savedState = state;
         await promise;
+        if (isOppTurn) {
+          oppTurnAnimationsPending--;
+        } else {
+          // 轮次切换至我方的动画播放完成，放行等待中的 action 请求
+          turnSwitchToMe?.resolve();
+          turnSwitchToMe = null;
+        }
       });
     },
     rpc: async (req) => {
