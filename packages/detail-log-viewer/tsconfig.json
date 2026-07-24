@@ -15,6 +15,7 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "rootDir": "./src",
+    "declarationDir": "./dist",
     
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
