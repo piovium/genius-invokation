@@ -43,7 +43,7 @@
 
 ## 实体定义
 
-`CharacterState` 、`EntityState` 、`AttachmentState` 分别具有对应的 `definition` 属性： `CharacterDefinition` 、`EntityDefinition` 和 `AttachmentDefinition` 类型。这些类型给出了角色/实体/卡牌附着状态的静态属性和行为。官方定义的具体值由 `@gi-tcg/data` 导出 （其内部又通过 `@gi-tcg/core/builder` 定义的构建方法构建，参阅 [data](./data/README.md)）。
+`CharacterState` 、`EntityState` 、`AttachmentState` 分别具有对应的 `definition` 属性： `CharacterDefinition` 、`EntityDefinition` 和 `AttachmentDefinition` 类型。这些类型给出了角色/实体/卡牌附着状态的静态属性和行为。官方定义的具体值由 `@gi-tcg/data` 导出 （其内部通过 GTS（GamingTS DSL）定义，参阅 [data](./data/README.md)）。
 
 所有的实体定义类型包括如下属性：
 - `id` 定义 id，和官方基本保持一致；
