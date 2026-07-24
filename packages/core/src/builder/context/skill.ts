@@ -405,7 +405,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
         hasChange: true,
         newPhase: "gameEnd",
       });
-      this.mutator.notify();
     } else if (failedPlayers.size === 1) {
       const who = [...failedPlayers.values()][0];
       this.mutator.log(
@@ -421,7 +420,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
         type: "setWinner",
         winner: flip(who),
       });
-      this.mutator.notify();
     }
 
     const emittedEvents = [
@@ -439,8 +437,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
    * @internal
    */
   _terminate(): SkillDescriptionReturn {
-    this.mutator.notify();
     const { emittedEvents, causeDefeated } = this.preprocessEventList();
+    this.mutator.notify();
     Object.freeze(emittedEvents);
     Object.freeze(this);
     const resultState = this.rawState;
