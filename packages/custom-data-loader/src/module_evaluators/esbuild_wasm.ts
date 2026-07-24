@@ -68,7 +68,9 @@ export class EsbuildWasmModuleEvaluator implements ModuleEvaluator {
     new Function("require", "module", "exports", cjs)(
       (spec: string) => {
         const mod = moduleFor(spec);
-        return { ...mod, __esModule: true };
+        return Object.hasOwn(mod, "default")
+          ? { ...mod, __esModule: true }
+          : mod;
       },
       module,
       module.exports,
