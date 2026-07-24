@@ -15,5 +15,5 @@
 
     "strict": true,
   },
-  "files": ["src/dev.tsx", "src/vite-env.d.ts"]
+  "files": ["src/dev.tsx", "src/dev-editor.ts", "src/vite-env.d.ts"]
 }

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import { $, DamageType, DiceType } from "@gi-tcg/core/builder";
 
 /**
  * @id 126041
@@ -29,8 +29,7 @@ define status {
     usage 1 {
       append;
     };
-    const targetId = :e.target.id;
-    const entities = :$$(`(opp statuses) or (opp equipments) or (opp combat statuses)`);
+    const entities = [...:e.target.entities, ...:queryAll($.opp.combatStatus)];
     const isUnderShield = entities.some((e) =>
       e.definition.tags.includes("shield") || e.definition.tags.includes("barrier")
     );
@@ -148,7 +147,7 @@ define skill {
     variable shouldAttachCatalysisOfStone, 0;
     on beforeSkill {
       when :{
-        const entities = :$$(`(opp statuses) or (opp equipments) or (opp combat statuses)`);
+        const entities = :queryAll($.union($.opp.typeStatus, $.opp.typeEquipment, $.opp.combatStatus));
         return entities.some((e) =>
           e.definition.tags.includes("shield") || e.definition.tags.includes("barrier")
         );

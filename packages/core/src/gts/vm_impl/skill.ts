@@ -184,6 +184,9 @@ export class TriggeredSkillModel extends SkillModel {
     this.caller = caller;
     this.detailedEventName = detailedEventName;
     this.associatedExtensionId = caller.associatedExtensionId;
+    // attachment 默认允许在手牌/牌库区响应事件
+    this.enableHandTriggering = caller.type === "attachment";
+    this.enablePileTriggering = caller.type === "attachment";
   }
 
   override get snippets() {
@@ -509,7 +512,7 @@ export class InitiativeSkillModel extends SkillModel {
   }
 }
 
-class CharacterSkillModel extends InitiativeSkillModel {
+export class CharacterSkillModel extends InitiativeSkillModel {
   reserved = false;
   passiveSkillEntry: CharacterPassiveSkillEntry | null = null;
   override get ownerType() {
@@ -728,7 +731,7 @@ export const DEFAULT_CHARACTER_SKILL_VM_META = {
   isInitiativeSkill: true as boolean,
 } as const satisfies CharacterSkillVMMeta;
 
-export const CharacterSkillViewModel = InitiativeSkillViewModel
+export class CharacterSkillViewModel extends InitiativeSkillViewModel
   //
   .extend(CharacterSkillModel, (h) => ({
     id: h.attribute<{
@@ -786,4 +789,4 @@ export const CharacterSkillViewModel = InitiativeSkillViewModel
       }
     }),
   }))
-  .bind<typeof DEFAULT_CHARACTER_SKILL_VM_META>();
+  .narrow(DEFAULT_CHARACTER_SKILL_VM_META) {}

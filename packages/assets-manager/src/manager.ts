@@ -22,7 +22,6 @@ import type {
   PlayCost,
   SkillRawData,
 } from "./data_types";
-import { IS_BETA } from "@gi-tcg/config";
 import { blobToDataUrl } from "./data_url";
 import { getNameSync } from "./names";
 import type { CustomData, CustomSkill } from "./custom_data";
@@ -37,7 +36,7 @@ import type {
 import { DiceType } from "@gi-tcg/typings";
 import { getDeckData, type DeckData } from "./deck_data";
 import { getStaticDeckData } from "./static_deck_data";
-import { DEFAULT_ASSETS_MANAGER } from "./index";
+import { DEFAULT_ASSETS_API_ENDPOINT, DEFAULT_LANGUAGE, DEFAULT_VERSION } from "./constants";
 import { limitFunction } from "p-limit";
 import type { Category } from "./data_types";
 import { staticDecode, staticEncode } from "./sharing";
@@ -73,10 +72,6 @@ export interface AssetsManagerOption {
   concurrency: number;
 }
 
-export const DEFAULT_ASSETS_API_ENDPOINT =
-  import.meta.env?.DEFAULT_ASSETS_API_ENDPOINT ||
-  "https://static-data.piovium.org/api/v4";
-
 const FETCH_OPTION: RequestInit = {
   headers: {
     "X-Gi-Tcg-Assets-Manager": "1",
@@ -101,8 +96,8 @@ export class AssetsManager {
   constructor(options: Partial<AssetsManagerOption> = {}) {
     this.options = {
       apiEndpoint: DEFAULT_ASSETS_API_ENDPOINT,
-      language: "CHS",
-      version: IS_BETA ? "beta" : "latest",
+      language: DEFAULT_LANGUAGE,
+      version: DEFAULT_VERSION,
       customData: [],
       concurrency: 32,
       ...options,
@@ -254,6 +249,7 @@ export class AssetsManager {
           .filter((s): s is string => !!s),
         cardFace: "",
         icon: "",
+        shareId: ch.obtainable ? Number.MAX_SAFE_INTEGER : undefined,
         obtainable: ch.obtainable,
         skills: setupSkill(ch.skills),
       };
@@ -272,6 +268,7 @@ export class AssetsManager {
         rawDescription: ac.rawDescription,
         description: "",
         cardFace: "",
+        shareId: ac.obtainable ? Number.MAX_SAFE_INTEGER : undefined,
         obtainable: ac.obtainable,
         tags: ac.tags
           .map((tag) => ENTITY_TAG_MAP[tag])
@@ -303,6 +300,27 @@ export class AssetsManager {
         this.dataCacheSync.set(et.id, data);
         this.customDataNames.set(et.id, et.name);
         this.customDataImageUrls.set(et.id, et.cardFaceOrBuffIconUrl);
+      }
+    }
+    for (const attachment of data.attachments ?? []) {
+      const attachmentData: EntityRawData = {
+        // @ts-expect-error
+        category: "entities",
+        id: attachment.id,
+        type: "attachment",
+        name: attachment.name,
+        englishName: "",
+        tags: [...attachment.tags],
+        skills: setupSkill(attachment.skills),
+        rawDescription: attachment.rawDescription,
+        description: "",
+        hidden: false,
+        remainAfterDie: false,
+      };
+      if (!this.dataCacheSync.has(attachment.id)) {
+        this.dataCacheSync.set(attachment.id, attachmentData);
+        this.customDataNames.set(attachment.id, attachment.name);
+        this.customDataImageUrls.set(attachment.id, attachment.iconUrl);
       }
     }
   }
@@ -518,3 +536,5 @@ export class AssetsManager {
     return staticDecode(code);
   }
 }
+
+export const DEFAULT_ASSETS_MANAGER = new AssetsManager();

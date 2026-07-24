@@ -6,6 +6,9 @@
     ],
     "module": "ESNext",
     "moduleResolution": "Bundler",
+
+    "declaration": true,
+    "emitDeclarationOnly": true,
     
     "useDefineForClassFields": true,
     "esModuleInterop": true,

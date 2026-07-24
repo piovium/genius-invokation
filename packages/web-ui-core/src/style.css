@@ -305,6 +305,10 @@
     animation: 150ms linear 350ms forwards fade-out;
   }
 
+  .state-fallback {
+    background-color: color-mix(in srgb, var(--bg-color) 75%, transparent);
+  }
+
   /* BottomHint */
   .bottom-hint[data-bottom-hint-type="normal"] {
     background-color: #faaa33cc;

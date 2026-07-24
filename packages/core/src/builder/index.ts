@@ -21,7 +21,15 @@ export { attachment } from "./attachment";
 export { extension } from "./extension";
 export {
   Registry,
+  registerAttachment,
+  registerCharacter,
+  registerEntity,
+  registerInitiativeSkill,
+  registerPassiveSkill,
   type GameData,
+  type CharacterEntry,
+  type CharacterInitiativeSkillEntry,
+  type CharacterPassiveSkillEntry,
   type OnResolvedCallback,
   type VersionResolver,
   type IRegistrationScope,
@@ -39,6 +47,8 @@ export type {
   SupportHandle,
   PassiveSkillHandle,
   ExtensionHandle,
+  ExEntityType,
+  HandleT,
 } from "./type";
 export { DiceType, DamageType, Aura, Reaction } from "@gi-tcg/typings";
 export type {

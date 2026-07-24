@@ -14,11 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { AssetsManager } from "./manager";
-
 export {
-  DEFAULT_ASSETS_API_ENDPOINT,
   AssetsManager,
+  DEFAULT_ASSETS_MANAGER,
   type GetDataOptions,
   type GetImageOptions,
   type AnyData,
@@ -26,20 +24,11 @@ export {
   type PrepareForSyncOptions,
   type AssetsManagerOption,
 } from "./manager";
-
-const preferredLanguage =
-  globalThis?.navigator?.languages?.[0] ??
-  globalThis?.navigator?.language ??
-  globalThis?.Intl?.DateTimeFormat()?.resolvedOptions()?.locale ??
-  "en-US";
-
-export const DEFAULT_ASSETS_MANAGER = new AssetsManager({
-  language: preferredLanguage === "zh-CN" ? "CHS" : "EN",
-});
-
+export * from "./constants";
 export { getNameSync } from "./names";
 export type {
   CustomActionCard,
+  CustomAttachment,
   CustomCharacter,
   CustomData,
   CustomEntity,
