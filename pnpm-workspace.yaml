@@ -19,7 +19,7 @@ catalog:
   "@gi-tcg/prettier-plugin-gts": ^0.7.0
   "@gi-tcg/gts-language-client-code": ^0.7.0
   "@gi-tcg/gts-language-server": ^0.7.0
-  typescript: 'npm:typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2'
+  typescript: 'npm:typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2'
 
 patchedDependencies:
   ohm-js@17.1.0: patches/ohm-js@17.1.0.patch

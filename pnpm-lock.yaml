@@ -46,8 +46,8 @@ catalogs:
       specifier: ^1.9.12
       version: 1.9.12
     typescript:
-      specifier: npm:typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
-      version: 6.0.3-bridge.0.tsgo.7.0.2
+      specifier: npm:typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
+      version: 6.0.3-bridge.6.tsgo.7.0.2
     unocss:
       specifier: ^66.3.3
       version: 66.3.3
@@ -98,10 +98,10 @@ importers:
         version: 26.1.1
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.57.2
-        version: 8.57.2(@typescript-eslint/parser@8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+        version: 8.57.2(@typescript-eslint/parser@8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@typescript-eslint/parser':
         specifier: ^8.57.2
-        version: 8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+        version: 8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       dependency-graph:
         specifier: ^1.0.0
         version: 1.0.0
@@ -113,28 +113,28 @@ importers:
         version: 1.2.1
       eslint-plugin-solid:
         specifier: ^0.14.5
-        version: 0.14.5(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+        version: 0.14.5(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       execa:
         specifier: 'catalog:'
         version: 9.6.1
       jest-extended:
         specifier: ^7.0.0
-        version: 7.0.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+        version: 7.0.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       prettier:
         specifier: ^3.9.5
         version: 3.9.5
       tsdown:
         specifier: ^0.21.7
-        version: 0.21.7(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+        version: 0.21.7(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       tsup:
         specifier: ^8.3.0
-        version: 8.3.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(@swc/core@1.15.33)(jiti@2.7.0)(postcss@8.5.9)(tsx@4.21.0)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+        version: 8.3.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(@swc/core@1.15.33)(jiti@2.7.0)(postcss@8.5.9)(tsx@4.21.0)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       type-fest:
         specifier: ^4.26.1
         version: 4.41.0
       typescript:
         specifier: 'catalog:'
-        version: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+        version: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
       vitest:
         specifier: ^4.1.6
         version: 4.1.6(@opentelemetry/api@1.9.0)(@types/node@26.1.1)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))
@@ -181,10 +181,10 @@ importers:
         version: 8.0.1(rollup@4.46.2)
       unocss:
         specifier: 'catalog:'
-        version: 66.3.3(postcss@8.5.9)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))
+        version: 66.3.3(postcss@8.5.9)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))
       unplugin-dts:
         specifier: 'catalog:'
-        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
+        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
       vite:
         specifier: 'catalog:'
         version: 8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
@@ -321,7 +321,7 @@ importers:
         version: 0.7.0(@codingame/monaco-vscode-extension-api@25.1.2)
       '@gi-tcg/gts-language-server':
         specifier: 'catalog:'
-        version: 0.7.0(@volar/language-service@2.4.28)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+        version: 0.7.0(@volar/language-service@2.4.28)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@gi-tcg/typings':
         specifier: workspace:*
         version: link:../typings
@@ -342,7 +342,7 @@ importers:
         version: 1.9.12
       unplugin-dts:
         specifier: ^1.0.0
-        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.15)(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
+        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.15)(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
       vite:
         specifier: 'catalog:'
         version: 8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
@@ -373,7 +373,7 @@ importers:
         version: 0.7.0
       '@gi-tcg/gtsc':
         specifier: 'catalog:'
-        version: 0.7.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+        version: 0.7.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@microsoft/tsdoc':
         specifier: ^0.14.2
         version: 0.14.2
@@ -460,10 +460,10 @@ importers:
         version: 0.29.3(solid-js@1.9.12)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))
       unocss:
         specifier: 'catalog:'
-        version: 66.3.3(postcss@8.5.9)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))
+        version: 66.3.3(postcss@8.5.9)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))
       unplugin-dts:
         specifier: 'catalog:'
-        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
+        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
       vite:
         specifier: 'catalog:'
         version: 8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
@@ -494,10 +494,10 @@ importers:
         version: 0.29.3(solid-js@1.9.12)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))
       unocss:
         specifier: 'catalog:'
-        version: 66.3.3(postcss@8.5.9)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))
+        version: 66.3.3(postcss@8.5.9)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))
       unplugin-dts:
         specifier: 'catalog:'
-        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
+        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
       vite:
         specifier: 'catalog:'
         version: 8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
@@ -551,7 +551,7 @@ importers:
         version: 7.8.0
       '@prisma/client':
         specifier: ^7.8.0
-        version: 7.8.0(prisma@7.8.0(@types/react@19.1.8)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+        version: 7.8.0(prisma@7.8.0(@types/react@19.1.8)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       axios:
         specifier: 'catalog:'
         version: 1.16.1
@@ -594,7 +594,7 @@ importers:
         version: 11.0.16(@swc/core@1.15.33)(@types/node@26.1.1)(esbuild@0.23.1)
       '@prisma/dev':
         specifier: ^0.24.7
-        version: 0.24.7(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+        version: 0.24.7(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@swc/core':
         specifier: ^1.15.33
         version: 1.15.33
@@ -612,13 +612,13 @@ importers:
         version: 7.1.0
       prisma:
         specifier: ^7.8.0
-        version: 7.8.0(@types/react@19.1.8)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+        version: 7.8.0(@types/react@19.1.8)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       rolldown:
         specifier: ^1.0.0-rc.15
         version: 1.0.0-rc.15
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@swc/core@1.15.33)(@types/node@26.1.1)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+        version: 10.9.2(@swc/core@1.15.33)(@types/node@26.1.1)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
 
   packages/standalone:
     dependencies:
@@ -722,10 +722,10 @@ importers:
         version: 8.0.1(rollup@4.46.2)
       unocss:
         specifier: 'catalog:'
-        version: 66.3.3(postcss@8.5.9)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))
+        version: 66.3.3(postcss@8.5.9)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))
       unplugin-dts:
         specifier: 'catalog:'
-        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
+        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
       vite:
         specifier: 'catalog:'
         version: 8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
@@ -878,7 +878,7 @@ importers:
         version: 1.9.12
       unplugin-dts:
         specifier: 'catalog:'
-        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
+        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
       vite:
         specifier: 'catalog:'
         version: 8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
@@ -948,10 +948,10 @@ importers:
         version: 4.0.0
       unocss:
         specifier: 'catalog:'
-        version: 66.3.3(postcss@8.5.9)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))
+        version: 66.3.3(postcss@8.5.9)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))
       unplugin-dts:
         specifier: 'catalog:'
-        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
+        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
       vite:
         specifier: 'catalog:'
         version: 8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
@@ -4700,38 +4700,38 @@ packages:
     resolution: {integrity: sha512-zhahknjobV2FiD6Ee9iLbS7OV9zi10rG26odsQdfBO/hjSzUQbkIYgda+iNKK1zNiW2ey+Lf8MU5btN17V3dUw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@typescript-native-bridge/darwin-arm64@6.0.3-bridge.0.tsgo.7.0.2':
-    resolution: {integrity: sha512-VteawLP9yyPQmT2HobcimGIJqipPNep9A6AwXUJnycV1zMJzsodIg6arpuw83KCu4BNNvXYv7nYCSrQsvYOvWw==}
+  '@typescript-native-bridge/darwin-arm64@6.0.3-bridge.6.tsgo.7.0.2':
+    resolution: {integrity: sha512-MDJ278AxW73T9FH/FGVozOVz3q32m3pTa9qm7Rm6XhXqMMWlsn16RdaWEAlYx3w5ka4QHeDdXt5RIA8C+JNhNA==}
     cpu: [arm64]
     os: [darwin]
 
-  '@typescript-native-bridge/darwin-x64@6.0.3-bridge.0.tsgo.7.0.2':
-    resolution: {integrity: sha512-NtatvdUUSYbbUN3LjzWQnchggLL7acXeWgMy9ZzTu6MtqWkJ4TXwdveDW2GK63Kp369gIYV9y8NR2RbMIJjPyA==}
+  '@typescript-native-bridge/darwin-x64@6.0.3-bridge.6.tsgo.7.0.2':
+    resolution: {integrity: sha512-VT9RtHf1MAv6jpJeTwW7CVIQn096GE/PZclU0VwJvXUOEdaiqN9w23giwvxuZl65TMFBlghBMSGSS09fhpaD1g==}
     cpu: [x64]
     os: [darwin]
 
-  '@typescript-native-bridge/linux-arm64@6.0.3-bridge.0.tsgo.7.0.2':
-    resolution: {integrity: sha512-UzGFYl4uV9StIbboL846V+zpDPuZQiyEsJFDfHMlZb0xrkuQtf59R6dYJCS9tlajMNrI5OE+YxmL/v40gfmNmw==}
+  '@typescript-native-bridge/linux-arm64@6.0.3-bridge.6.tsgo.7.0.2':
+    resolution: {integrity: sha512-YTMHiU5TWRtXzPrE3WiUYAnnoTZfC8DE/R0V1rKaL0N7altt/nNkoh3bRlif0peJgQDC2suqfloNYHG8+z41bw==}
     cpu: [arm64]
     os: [linux]
 
-  '@typescript-native-bridge/linux-arm@6.0.3-bridge.0.tsgo.7.0.2':
-    resolution: {integrity: sha512-RV1heKTevg38oS+aSfCvvbJpTaN64I826ggkuUPFIUwoNzcBYaoYdcAwaHkPuUffv7YVS6criT2B25ER4pOizA==}
+  '@typescript-native-bridge/linux-arm@6.0.3-bridge.6.tsgo.7.0.2':
+    resolution: {integrity: sha512-WdZLFuKn+ym/Zm3XjKJD306O2f4c0E3dhrm9FyF8r27q37k/BnJlyOQHCyKeJw4/lfzrqOPBJqHLXio1UXLF6Q==}
     cpu: [arm]
     os: [linux]
 
-  '@typescript-native-bridge/linux-x64@6.0.3-bridge.0.tsgo.7.0.2':
-    resolution: {integrity: sha512-THZX0xQqDD30Jm+tlwpK9pIHOGyxM+9TtCv0EZIoEVMDZgp0/j+Kv9xwQK20A1uMueC3cLsGriSdfLIDwhcuYg==}
+  '@typescript-native-bridge/linux-x64@6.0.3-bridge.6.tsgo.7.0.2':
+    resolution: {integrity: sha512-IBr5p9z4pJPjYgaucQNsPt7Uv4eiZhWvE3b+vAq8RNJ4DSfLSMvjQT+9cOoEXiumAJzcGVziQzFXipfA1FmnUA==}
     cpu: [x64]
     os: [linux]
 
-  '@typescript-native-bridge/win32-arm64@6.0.3-bridge.0.tsgo.7.0.2':
-    resolution: {integrity: sha512-V52uyYABleqqr4QrMHYyYvulM23FzPKTGn17KLSB4hJzs9gs3+vWy1pO1jhhM641FQTCN4hUOFmmfKaA+Q9azg==}
+  '@typescript-native-bridge/win32-arm64@6.0.3-bridge.6.tsgo.7.0.2':
+    resolution: {integrity: sha512-DA+1VUvNQw9IYn+Jvf36lKecZevMu++Dk6vxLWs46RB1gj7W7LnIzQ6vtA5Xh5pF6i4FnVC3GovdeMsm3EvfZQ==}
     cpu: [arm64]
     os: [win32]
 
-  '@typescript-native-bridge/win32-x64@6.0.3-bridge.0.tsgo.7.0.2':
-    resolution: {integrity: sha512-CAlSbatPgtLd4T18p++KsYwCc9mhFQVBLZ020MSy75JC/MYmor8j8yfCW23aT4OAqWaQewe9/PlKIksteVm62w==}
+  '@typescript-native-bridge/win32-x64@6.0.3-bridge.6.tsgo.7.0.2':
+    resolution: {integrity: sha512-n8Qpt0DrEb43fMEtLk4s7EVY1eunFp27SEib7a/xf0WMv3OVBGRDRPGm5OIxLNcppqmnJEPjg4/Fh/XainY5EA==}
     cpu: [x64]
     os: [win32]
 
@@ -6712,9 +6712,6 @@ packages:
   known-css-properties@0.30.0:
     resolution: {integrity: sha512-VSWXYUnsPu9+WYKkfmJyLKtIvaRJi1kXUqVmBACORXZQxT5oZDsoZ2vQP+bQFDnWtpI/4eq3MLoRMjI2fnLzTQ==}
 
-  koffi@2.16.3:
-    resolution: {integrity: sha512-E9y1AsgYGlaxMhcZzHr8y96QF2U5XzA12GGVAfbWqIubTwPNMXQarfBzePNXHe0xtIEtNd6ifAv3GAKYGUeBAQ==}
-
   kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}
 
@@ -8401,8 +8398,8 @@ packages:
   typescript-auto-import-cache@0.3.6:
     resolution: {integrity: sha512-RpuHXrknHdVdK7wv/8ug3Fr0WNsNi5l5aB8MYYuXhq2UH5lnEB1htJ1smhtD5VeCsGr2p8mUDtd83LCQDFVgjQ==}
 
-  typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2:
-    resolution: {integrity: sha512-h4BemcAOl8w+gxZKkCPFGkJk22lggkFHirKYe3FamYNQraZuhdl9mFWf6e0wTKypSsYVqafhfl7wVMPCvf5ZrA==}
+  typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2:
+    resolution: {integrity: sha512-I8zP90Yds3EVWC0TtQdyZ0vSydsmenoGlUa0tggwYOB/KxWZGdOvfBdE9m6a0tXnyDbEZUP+kOFtooZwn8Gk+g==}
     engines: {node: '>=20.19'}
     hasBin: true
 
@@ -11551,19 +11548,19 @@ snapshots:
       remeda: 2.39.0
       vscode: '@codingame/monaco-vscode-extension-api@25.1.2'
 
-  '@gi-tcg/gts-language-plugin@0.7.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)':
+  '@gi-tcg/gts-language-plugin@0.7.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
       '@gi-tcg/gts-transpiler': 0.7.0
       '@volar/language-core': 2.4.28
       '@volar/typescript': 2.4.28
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
       vscode-uri: 3.1.0
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@gi-tcg/gts-language-server@0.7.0(@volar/language-service@2.4.28)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)':
+  '@gi-tcg/gts-language-server@0.7.0(@volar/language-service@2.4.28)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
-      '@gi-tcg/gts-language-plugin': 0.7.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      '@gi-tcg/gts-language-plugin': 0.7.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@gi-tcg/gts-transpiler': 0.7.0
       '@volar/language-server': 2.4.28
       '@zenfs/core': 2.5.7
@@ -11593,11 +11590,11 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@gi-tcg/gtsc@0.7.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)':
+  '@gi-tcg/gtsc@0.7.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
-      '@gi-tcg/gts-language-plugin': 0.7.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      '@gi-tcg/gts-language-plugin': 0.7.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@volar/typescript': 2.4.28
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
     transitivePeerDependencies:
       - babel-plugin-macros
 
@@ -12062,12 +12059,12 @@ snapshots:
 
   '@prisma/client-runtime-utils@7.8.0': {}
 
-  '@prisma/client@7.8.0(prisma@7.8.0(@types/react@19.1.8)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)':
+  '@prisma/client@7.8.0(prisma@7.8.0(@types/react@19.1.8)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
       '@prisma/client-runtime-utils': 7.8.0
     optionalDependencies:
-      prisma: 7.8.0(@types/react@19.1.8)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      prisma: 7.8.0(@types/react@19.1.8)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
 
   '@prisma/config@7.8.0':
     dependencies:
@@ -12082,7 +12079,7 @@ snapshots:
 
   '@prisma/debug@7.8.0': {}
 
-  '@prisma/dev@0.24.3(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)':
+  '@prisma/dev@0.24.3(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
       '@electric-sql/pglite': 0.4.1
       '@electric-sql/pglite-socket': 0.1.1(@electric-sql/pglite@0.4.1)
@@ -12099,12 +12096,12 @@ snapshots:
       proper-lockfile: 4.1.2
       remeda: 2.33.4
       std-env: 3.10.0
-      valibot: 1.2.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      valibot: 1.2.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       zeptomatch: 2.1.0
     transitivePeerDependencies:
       - typescript
 
-  '@prisma/dev@0.24.7(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)':
+  '@prisma/dev@0.24.7(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
       '@electric-sql/pglite': 0.4.3
       '@electric-sql/pglite-socket': 0.1.3(@electric-sql/pglite@0.4.3)
@@ -12121,7 +12118,7 @@ snapshots:
       proper-lockfile: 4.1.2
       remeda: 2.33.4
       std-env: 3.10.0
-      valibot: 1.2.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      valibot: 1.2.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       zeptomatch: 2.1.0
     transitivePeerDependencies:
       - typescript
@@ -13195,40 +13192,40 @@ snapshots:
       '@types/node': 26.1.1
     optional: true
 
-  '@typescript-eslint/eslint-plugin@8.57.2(@typescript-eslint/parser@8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)':
+  '@typescript-eslint/eslint-plugin@8.57.2(@typescript-eslint/parser@8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
-      '@typescript-eslint/parser': 8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      '@typescript-eslint/parser': 8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@typescript-eslint/scope-manager': 8.57.2
-      '@typescript-eslint/type-utils': 8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
-      '@typescript-eslint/utils': 8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      '@typescript-eslint/type-utils': 8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
+      '@typescript-eslint/utils': 8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@typescript-eslint/visitor-keys': 8.57.2
       eslint: 10.1.0(jiti@2.7.0)
       ignore: 7.0.5
       natural-compare: 1.4.0
-      ts-api-utils: 2.5.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      ts-api-utils: 2.5.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)':
+  '@typescript-eslint/parser@8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
       '@typescript-eslint/scope-manager': 8.57.2
       '@typescript-eslint/types': 8.57.2
-      '@typescript-eslint/typescript-estree': 8.57.2(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      '@typescript-eslint/typescript-estree': 8.57.2(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@typescript-eslint/visitor-keys': 8.57.2
       debug: 4.4.3
       eslint: 10.1.0(jiti@2.7.0)
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/project-service@8.57.2(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)':
+  '@typescript-eslint/project-service@8.57.2(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.57.2(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      '@typescript-eslint/tsconfig-utils': 8.57.2(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@typescript-eslint/types': 8.57.2
       debug: 4.4.3
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
     transitivePeerDependencies:
       - supports-color
 
@@ -13237,19 +13234,19 @@ snapshots:
       '@typescript-eslint/types': 8.57.2
       '@typescript-eslint/visitor-keys': 8.57.2
 
-  '@typescript-eslint/tsconfig-utils@8.57.2(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)':
+  '@typescript-eslint/tsconfig-utils@8.57.2(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
 
-  '@typescript-eslint/type-utils@8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)':
+  '@typescript-eslint/type-utils@8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
       '@typescript-eslint/types': 8.57.2
-      '@typescript-eslint/typescript-estree': 8.57.2(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
-      '@typescript-eslint/utils': 8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      '@typescript-eslint/typescript-estree': 8.57.2(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
+      '@typescript-eslint/utils': 8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       debug: 4.4.3
       eslint: 10.1.0(jiti@2.7.0)
-      ts-api-utils: 2.5.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      ts-api-utils: 2.5.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
     transitivePeerDependencies:
       - supports-color
 
@@ -13257,29 +13254,29 @@ snapshots:
 
   '@typescript-eslint/types@8.60.1': {}
 
-  '@typescript-eslint/typescript-estree@8.57.2(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)':
+  '@typescript-eslint/typescript-estree@8.57.2(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
-      '@typescript-eslint/project-service': 8.57.2(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
-      '@typescript-eslint/tsconfig-utils': 8.57.2(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      '@typescript-eslint/project-service': 8.57.2(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
+      '@typescript-eslint/tsconfig-utils': 8.57.2(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@typescript-eslint/types': 8.57.2
       '@typescript-eslint/visitor-keys': 8.57.2
       debug: 4.4.3
       minimatch: 10.2.4
       semver: 7.7.4
       tinyglobby: 0.2.15
-      ts-api-utils: 2.5.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      ts-api-utils: 2.5.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/utils@8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)':
+  '@typescript-eslint/utils@8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@10.1.0(jiti@2.7.0))
       '@typescript-eslint/scope-manager': 8.57.2
       '@typescript-eslint/types': 8.57.2
-      '@typescript-eslint/typescript-estree': 8.57.2(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      '@typescript-eslint/typescript-estree': 8.57.2(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       eslint: 10.1.0(jiti@2.7.0)
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
     transitivePeerDependencies:
       - supports-color
 
@@ -13288,25 +13285,25 @@ snapshots:
       '@typescript-eslint/types': 8.57.2
       eslint-visitor-keys: 5.0.1
 
-  '@typescript-native-bridge/darwin-arm64@6.0.3-bridge.0.tsgo.7.0.2':
+  '@typescript-native-bridge/darwin-arm64@6.0.3-bridge.6.tsgo.7.0.2':
     optional: true
 
-  '@typescript-native-bridge/darwin-x64@6.0.3-bridge.0.tsgo.7.0.2':
+  '@typescript-native-bridge/darwin-x64@6.0.3-bridge.6.tsgo.7.0.2':
     optional: true
 
-  '@typescript-native-bridge/linux-arm64@6.0.3-bridge.0.tsgo.7.0.2':
+  '@typescript-native-bridge/linux-arm64@6.0.3-bridge.6.tsgo.7.0.2':
     optional: true
 
-  '@typescript-native-bridge/linux-arm@6.0.3-bridge.0.tsgo.7.0.2':
+  '@typescript-native-bridge/linux-arm@6.0.3-bridge.6.tsgo.7.0.2':
     optional: true
 
-  '@typescript-native-bridge/linux-x64@6.0.3-bridge.0.tsgo.7.0.2':
+  '@typescript-native-bridge/linux-x64@6.0.3-bridge.6.tsgo.7.0.2':
     optional: true
 
-  '@typescript-native-bridge/win32-arm64@6.0.3-bridge.0.tsgo.7.0.2':
+  '@typescript-native-bridge/win32-arm64@6.0.3-bridge.6.tsgo.7.0.2':
     optional: true
 
-  '@typescript-native-bridge/win32-x64@6.0.3-bridge.0.tsgo.7.0.2':
+  '@typescript-native-bridge/win32-x64@6.0.3-bridge.6.tsgo.7.0.2':
     optional: true
 
   '@una-ui/preset@0.34.0-beta.1(postcss@8.5.9)(rollup@4.46.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.24.2)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript@6.0.3))':
@@ -13344,11 +13341,11 @@ snapshots:
     transitivePeerDependencies:
       - vue
 
-  '@unocss/astro@66.3.3(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))':
+  '@unocss/astro@66.3.3(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))':
     dependencies:
       '@unocss/core': 66.3.3
       '@unocss/reset': 66.3.3
-      '@unocss/vite': 66.3.3(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))
+      '@unocss/vite': 66.3.3(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))
     optionalDependencies:
       vite: 8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
     transitivePeerDependencies:
@@ -13424,14 +13421,14 @@ snapshots:
     transitivePeerDependencies:
       - vue
 
-  '@unocss/inspector@66.3.3(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))':
+  '@unocss/inspector@66.3.3(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))':
     dependencies:
       '@unocss/core': 66.3.3
       '@unocss/rule-utils': 66.3.3
       colorette: 2.0.20
       gzip-size: 6.0.0
       sirv: 3.0.1
-      vue-flow-layout: 0.1.1(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))
+      vue-flow-layout: 0.1.1(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))
     transitivePeerDependencies:
       - vue
 
@@ -13647,12 +13644,12 @@ snapshots:
     transitivePeerDependencies:
       - vue
 
-  '@unocss/vite@66.3.3(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))':
+  '@unocss/vite@66.3.3(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@unocss/config': 66.3.3
       '@unocss/core': 66.3.3
-      '@unocss/inspector': 66.3.3(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))
+      '@unocss/inspector': 66.3.3(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))
       chokidar: 3.6.0
       magic-string: 0.30.17
       pathe: 2.0.3
@@ -13863,11 +13860,11 @@ snapshots:
       '@vue/shared': 3.5.13
       csstype: 3.2.3
 
-  '@vue/server-renderer@3.5.13(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))':
+  '@vue/server-renderer@3.5.13(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))':
     dependencies:
       '@vue/compiler-ssr': 3.5.13
       '@vue/shared': 3.5.13
-      vue: 3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      vue: 3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
 
   '@vue/server-renderer@3.5.13(vue@3.5.13(typescript@6.0.3))':
     dependencies:
@@ -14835,16 +14832,16 @@ snapshots:
 
   eslint-plugin-only-warn@1.2.1: {}
 
-  eslint-plugin-solid@0.14.5(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2):
+  eslint-plugin-solid@0.14.5(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2):
     dependencies:
-      '@typescript-eslint/utils': 8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      '@typescript-eslint/utils': 8.57.2(eslint@10.1.0(jiti@2.7.0))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       eslint: 10.1.0(jiti@2.7.0)
       estraverse: 5.3.0
       is-html: 2.0.0
       kebab-case: 1.0.2
       known-css-properties: 0.30.0
       style-to-object: 1.0.14
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
     transitivePeerDependencies:
       - supports-color
 
@@ -15546,10 +15543,10 @@ snapshots:
       chalk: 4.1.2
       pretty-format: 30.4.1
 
-  jest-extended@7.0.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2):
+  jest-extended@7.0.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2):
     dependencies:
       jest-diff: 30.4.1
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
 
   jest-get-type@29.6.3: {}
 
@@ -15644,8 +15641,6 @@ snapshots:
   kind-of@6.0.3: {}
 
   known-css-properties@0.30.0: {}
-
-  koffi@2.16.3: {}
 
   kolorist@1.8.0: {}
 
@@ -16383,16 +16378,16 @@ snapshots:
     dependencies:
       parse-ms: 4.0.0
 
-  prisma@7.8.0(@types/react@19.1.8)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2):
+  prisma@7.8.0(@types/react@19.1.8)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2):
     dependencies:
       '@prisma/config': 7.8.0
-      '@prisma/dev': 0.24.3(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      '@prisma/dev': 0.24.3(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@prisma/engines': 7.8.0
       '@prisma/studio-core': 0.27.3(@types/react@19.1.8)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       mysql2: 3.15.3
       postgres: 3.4.7
     optionalDependencies:
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
     transitivePeerDependencies:
       - '@types/react'
       - '@types/react-dom'
@@ -16668,7 +16663,7 @@ snapshots:
     dependencies:
       glob: 7.2.0
 
-  rolldown-plugin-dts@0.23.2(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2):
+  rolldown-plugin-dts@0.23.2(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2):
     dependencies:
       '@babel/generator': 8.0.0-rc.3
       '@babel/helper-validator-identifier': 8.0.0-rc.3
@@ -16682,7 +16677,7 @@ snapshots:
       picomatch: 4.0.4
       rolldown: 1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)
     optionalDependencies:
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
     transitivePeerDependencies:
       - oxc-resolver
 
@@ -17260,9 +17255,9 @@ snapshots:
 
   trim-newlines@3.0.1: {}
 
-  ts-api-utils@2.5.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2):
+  ts-api-utils@2.5.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2):
     dependencies:
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
 
   ts-interface-checker@0.1.13: {}
 
@@ -17271,7 +17266,7 @@ snapshots:
       '@ts-morph/common': 0.27.0
       code-block-writer: 13.0.3
 
-  ts-node@10.9.2(@swc/core@1.15.33)(@types/node@26.1.1)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2):
+  ts-node@10.9.2(@swc/core@1.15.33)(@types/node@26.1.1)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.12
@@ -17285,7 +17280,7 @@ snapshots:
       create-require: 1.1.1
       diff: 4.0.4
       make-error: 1.3.6
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     optionalDependencies:
@@ -17314,7 +17309,7 @@ snapshots:
       path-exists: 4.0.0
       read-pkg-up: 7.0.1
 
-  tsdown@0.21.7(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2):
+  tsdown@0.21.7(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2):
     dependencies:
       ansis: 4.2.0
       cac: 7.0.0
@@ -17325,7 +17320,7 @@ snapshots:
       obug: 2.1.1
       picomatch: 4.0.4
       rolldown: 1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)
-      rolldown-plugin-dts: 0.23.2(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      rolldown-plugin-dts: 0.23.2(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       semver: 7.7.4
       tinyexec: 1.1.1
       tinyglobby: 0.2.15
@@ -17333,7 +17328,7 @@ snapshots:
       unconfig-core: 7.5.0
       unrun: 0.2.34(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)
     optionalDependencies:
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
     transitivePeerDependencies:
       - '@emnapi/core'
       - '@emnapi/runtime'
@@ -17345,7 +17340,7 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsup@8.3.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(@swc/core@1.15.33)(jiti@2.7.0)(postcss@8.5.9)(tsx@4.21.0)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2):
+  tsup@8.3.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(@swc/core@1.15.33)(jiti@2.7.0)(postcss@8.5.9)(tsx@4.21.0)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2):
     dependencies:
       bundle-require: 5.0.0(esbuild@0.23.1)
       cac: 6.7.14
@@ -17367,7 +17362,7 @@ snapshots:
       '@microsoft/api-extractor': 7.58.2(@types/node@26.1.1)
       '@swc/core': 1.15.33
       postcss: 8.5.9
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
     transitivePeerDependencies:
       - jiti
       - supports-color
@@ -17425,17 +17420,15 @@ snapshots:
     dependencies:
       semver: 7.8.0
 
-  typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2:
-    dependencies:
-      koffi: 2.16.3
+  typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2:
     optionalDependencies:
-      '@typescript-native-bridge/darwin-arm64': 6.0.3-bridge.0.tsgo.7.0.2
-      '@typescript-native-bridge/darwin-x64': 6.0.3-bridge.0.tsgo.7.0.2
-      '@typescript-native-bridge/linux-arm': 6.0.3-bridge.0.tsgo.7.0.2
-      '@typescript-native-bridge/linux-arm64': 6.0.3-bridge.0.tsgo.7.0.2
-      '@typescript-native-bridge/linux-x64': 6.0.3-bridge.0.tsgo.7.0.2
-      '@typescript-native-bridge/win32-arm64': 6.0.3-bridge.0.tsgo.7.0.2
-      '@typescript-native-bridge/win32-x64': 6.0.3-bridge.0.tsgo.7.0.2
+      '@typescript-native-bridge/darwin-arm64': 6.0.3-bridge.6.tsgo.7.0.2
+      '@typescript-native-bridge/darwin-x64': 6.0.3-bridge.6.tsgo.7.0.2
+      '@typescript-native-bridge/linux-arm': 6.0.3-bridge.6.tsgo.7.0.2
+      '@typescript-native-bridge/linux-arm64': 6.0.3-bridge.6.tsgo.7.0.2
+      '@typescript-native-bridge/linux-x64': 6.0.3-bridge.6.tsgo.7.0.2
+      '@typescript-native-bridge/win32-arm64': 6.0.3-bridge.6.tsgo.7.0.2
+      '@typescript-native-bridge/win32-x64': 6.0.3-bridge.6.tsgo.7.0.2
 
   typescript@5.9.3: {}
 
@@ -17573,9 +17566,9 @@ snapshots:
       - supports-color
       - vue
 
-  unocss@66.3.3(postcss@8.5.9)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)):
+  unocss@66.3.3(postcss@8.5.9)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)):
     dependencies:
-      '@unocss/astro': 66.3.3(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))
+      '@unocss/astro': 66.3.3(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))
       '@unocss/cli': 66.3.3
       '@unocss/core': 66.3.3
       '@unocss/postcss': 66.3.3(postcss@8.5.9)
@@ -17593,7 +17586,7 @@ snapshots:
       '@unocss/transformer-compile-class': 66.3.3
       '@unocss/transformer-directives': 66.3.3
       '@unocss/transformer-variant-group': 66.3.3
-      '@unocss/vite': 66.3.3(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))
+      '@unocss/vite': 66.3.3(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))
     optionalDependencies:
       vite: 8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
     transitivePeerDependencies:
@@ -17601,7 +17594,7 @@ snapshots:
       - supports-color
       - vue
 
-  unplugin-dts@1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7)):
+  unplugin-dts@1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7)):
     dependencies:
       '@rollup/pluginutils': 5.1.4(rollup@4.46.2)
       '@volar/typescript': 2.4.28
@@ -17610,7 +17603,7 @@ snapshots:
       kolorist: 1.8.0
       local-pkg: 1.1.1
       magic-string: 0.30.17
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
       unplugin: 2.3.11
     optionalDependencies:
       '@microsoft/api-extractor': 7.58.2(@types/node@26.1.1)
@@ -17622,7 +17615,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  unplugin-dts@1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.15)(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7)):
+  unplugin-dts@1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.1))(esbuild@0.27.7)(rolldown@1.0.0-rc.15)(rollup@4.46.2)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7)):
     dependencies:
       '@rollup/pluginutils': 5.1.4(rollup@4.46.2)
       '@volar/typescript': 2.4.28
@@ -17631,7 +17624,7 @@ snapshots:
       kolorist: 1.8.0
       local-pkg: 1.1.1
       magic-string: 0.30.17
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
       unplugin: 2.3.11
     optionalDependencies:
       '@microsoft/api-extractor': 7.58.2(@types/node@26.1.1)
@@ -17688,9 +17681,9 @@ snapshots:
 
   v8-compile-cache-lib@3.0.1: {}
 
-  valibot@1.2.0(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2):
+  valibot@1.2.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2):
     optionalDependencies:
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
 
   validate-html-nesting@1.2.2: {}
 
@@ -17870,23 +17863,23 @@ snapshots:
     dependencies:
       vscode-jsonrpc: 8.2.1
 
-  vue-flow-layout@0.1.1(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)):
+  vue-flow-layout@0.1.1(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)):
     dependencies:
-      vue: 3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2)
+      vue: 3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
 
   vue-flow-layout@0.1.1(vue@3.5.13(typescript@6.0.3)):
     dependencies:
       vue: 3.5.13(typescript@6.0.3)
 
-  vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2):
+  vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2):
     dependencies:
       '@vue/compiler-dom': 3.5.13
       '@vue/compiler-sfc': 3.5.13
       '@vue/runtime-dom': 3.5.13
-      '@vue/server-renderer': 3.5.13(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2))
+      '@vue/server-renderer': 3.5.13(vue@3.5.13(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2))
       '@vue/shared': 3.5.13
     optionalDependencies:
-      typescript: typescript-native-bridge@6.0.3-bridge.0.tsgo.7.0.2
+      typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
 
   vue@3.5.13(typescript@6.0.3):
     dependencies:
