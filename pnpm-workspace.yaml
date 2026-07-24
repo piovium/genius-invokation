@@ -46,6 +46,5 @@ allowBuilds:
   core-js: true
   esbuild: true
   keytar: true
-  koffi: true
   prisma: true
   puppeteer: true
