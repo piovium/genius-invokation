@@ -71,9 +71,10 @@ type DefaultUsageVMMeta = {
   name: "usage";
 };
 
-export const UsageVM = UsageBaseVM.bind<DefaultUsageVMMeta>().extend(
-  GtsUsageModel,
-  (h) => ({
+export const UsageVM = UsageBaseVM
+  //
+  .narrow(null! as DefaultUsageVMMeta)
+  .extend(GtsUsageModel, (h) => ({
     name: h.attribute<{
       <const Meta extends UsageVMMeta, const Name extends string>(
         this: AR.This<Meta>,
@@ -82,5 +83,4 @@ export const UsageVM = UsageBaseVM.bind<DefaultUsageVMMeta>().extend(
     }>((model, [name]) => {
       model.name = name;
     }),
-  }),
-);
+  }));
