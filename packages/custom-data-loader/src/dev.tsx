@@ -13,10 +13,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import * as monaco from "monaco-editor";
-import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
-import runtimeDts from "../dist/runtime.d.ts?raw";
-
 import {
   Show,
   createEffect,
@@ -24,7 +20,6 @@ import {
   on,
   onMount,
   createMemo,
-  type JSX,
   type Component,
 } from "solid-js";
 import { CustomDataLoader } from "..";
@@ -39,23 +34,6 @@ import { createClient } from "@gi-tcg/web-ui-core";
 import "@gi-tcg/deck-builder/style.css";
 import "@gi-tcg/web-ui-core/style.css";
 
-self.MonacoEnvironment = {
-  getWorker: () => new tsWorker(),
-};
-
-monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-  noSemanticValidation: false,
-  noSyntaxValidation: false,
-});
-monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-  target: monaco.languages.typescript.ScriptTarget.ESNext,
-  allowNonTsExtensions: true,
-  strict: true,
-  skipLibCheck: true,
-});
-const libUri = "ts:runtime.d.ts";
-monaco.languages.typescript.javascriptDefaults.addExtraLib(runtimeDts, libUri);
-
 const root = document.querySelector("#root")!;
 
 interface MonacoEditorProps {
@@ -65,19 +43,15 @@ interface MonacoEditorProps {
 
 const MonacoEditor = (props: MonacoEditorProps) => {
   let container!: HTMLDivElement;
-  let editor: monaco.editor.IStandaloneCodeEditor | null = null;
-  onMount(() => {
-    editor = monaco.editor.create(container, {
-      language: "javascript",
-      automaticLayout: true,
-      value: props.code,
-    });
-    editor.onDidChangeModelContent((e) => {
-      const code = editor?.getValue() ?? "";
-      props.onCodeChange?.(code);
+  onMount(async () => {
+    const { setupEditor } = await import("./dev-editor");
+    const editor = await setupEditor(container, props.code ?? "");
+    editor.onDidChangeModelContent(() => {
+      const newCode = editor.getValue();
+      props.onCodeChange?.(newCode);
     });
   });
-  return <div class="editor" ref={container}></div>;
+  return <div class="editor" ref={container} />;
 };
 
 const App = () => {
@@ -87,38 +61,49 @@ const App = () => {
   const [step2Complete, setStep2Complete] = createSignal(false);
 
   // 步骤1：Mod代码编辑器
-  const [code, setCode] = createSignal(`{
-// 在这里编写你的mod代码
-const { card, character, combatStatus, status, summon, skill, extension, DamageType } = BuilderContext;
+  const [code, setCode] =
+    createSignal(`// 在这里编写你的 GTS 模组。定义会自动获得 ID。
+import { DamageType, DiceType } from "@gi-tcg/core/builder";
 
-const MyCard = card("掀翻牌桌")
-  .description("对地方全体角色造成10点穿透伤害")
-  .damage(DamageType.Piercing, 10, "all opp character")
-  .done();
+define attachment {
+  name "费用护盾" as CostShield;
+  description "附着于手牌或牌堆中的牌，使其费用增加 1 点。";
+  image "https://example.com/cost-shield.png";
+  addCost 1;
+}
 
-const NormalSkill = skill("普攻")
-  .type("normal")
-  .description("造成1点物理伤害")
-  .damage(DamageType.Physical, 1)
-  .done();
+define skill {
+  name "普通攻击" as NormalSkill;
+  description "造成 1 点物理伤害。";
+  skillType normal;
+  cost DiceType.Cryo, 1;
+  cost DiceType.Void, 2;
+  :damage(DamageType.Physical, 1);
+}
 
+define skill {
+  name "元素战技" as ElementalSkill;
+  description "造成 2 点冰元素伤害。";
+  skillType elemental;
+  cost DiceType.Cryo, 3;
+  :damage(DamageType.Cryo, 2);
+}
 
-const ElementalSkill = skill("战技")
-  .type("elemental")
-  .description("造成2点冰元素伤害")
-  .damage(DamageType.Cryo, 2)
-  .done();
+define character {
+  name "银狼" as SilverWolf;
+  description "自定义角色示例。";
+  image "https://b0.bdstatic.com/f93f5ab0e2d0848b09255837758ea2ee.jpg@h_1280";
+  tags cryo, catalyst;
+  health 10;
+  energy 2;
+  skills NormalSkill, ElementalSkill;
+}
 
-const BurstSkill = skill("爆发")
-  .type("elemental")
-  .description("造成3点冰元素伤害")
-  .damage(DamageType.Cryo, 3)
-  .done();
-
-const MyCharacter = character("银狼")
-  .image("https://b0.bdstatic.com/f93f5ab0e2d0848b09255837758ea2ee.jpg@h_1280")
-  .skills(NormalSkill, ElementalSkill, BurstSkill)
-  .done();
+define card {
+  name "掀翻牌桌" as TableFlip;
+  description "对敌方所有角色造成 10 点穿透伤害。";
+  cost DiceType.Omni, 1;
+  :damage(DamageType.Piercing, 10, "all opp character");
 }`);
 
   // 步骤2：卡组构建器
@@ -134,10 +119,10 @@ const MyCharacter = character("银狼")
   const [assetsManager, setAssetsManager] = createSignal<AssetsManager>();
 
   // 尝试加载mod代码
-  const loadMod = () => {
+  const loadMod = async () => {
     try {
       const loader = new CustomDataLoader();
-      loader.loadMod(code());
+      await loader.loadMod(code());
       const [gameData, customData] = loader.done();
       setGameData(gameData);
 
@@ -313,6 +298,7 @@ const MyCharacter = character("银狼")
               <h2>编辑卡组1</h2>
               <Show when={assetsManager()}>
                 <DeckBuilder
+                  class="h-full"
                   assetsManager={assetsManager()!}
                   deck={deck0()}
                   onChangeDeck={setDeck0}
@@ -338,6 +324,7 @@ const MyCharacter = character("银狼")
               <h2>编辑卡组2</h2>
               <Show when={assetsManager()}>
                 <DeckBuilder
+                  class="h-full"
                   assetsManager={assetsManager()!}
                   deck={deck1()}
                   onChangeDeck={setDeck1}

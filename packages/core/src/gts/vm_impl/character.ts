@@ -30,7 +30,7 @@ import type {
 } from "../../builder";
 import { createVariable } from "../../builder/utils";
 
-class CharacterModel {
+export class CharacterModel {
   id!: number;
   maxHealth = 10;
   maxEnergy = 3;
@@ -65,7 +65,7 @@ class CharacterModel {
   }
 }
 
-export const CharacterViewModel = defineViewModel(CharacterModel, (h) => ({
+export class CharacterViewModel extends defineViewModel(CharacterModel, (h) => ({
   id: h.simpleAttribute({
     required: true,
     uniqueKey: "id",
@@ -120,4 +120,4 @@ export const CharacterViewModel = defineViewModel(CharacterModel, (h) => ({
   })(function (variableName: string, slotSize: number) {
     this.specialEnergy = { variableName, slotSize };
   }),
-}));
+})) {}

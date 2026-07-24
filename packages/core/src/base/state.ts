@@ -38,7 +38,7 @@ import type {
 import { randomSeed } from "../random";
 import type { Version } from "..";
 import { versionLt } from "./version";
-import type { AttachmentDefinition } from "./attachment";
+import type { AttachmentDefinition, AttachmentModification, AttachmentTag } from "./attachment";
 
 // 为不同层级的 state object 添加 marker symbol
 export type StateKind =
@@ -242,9 +242,11 @@ export type {
   EntityDefinition,
   EntityType,
   EntityTag,
+  AttachmentTag,
   ExtensionDefinition,
   SkillDefinition,
   InitiativeSkillDefinition,
   TriggeredSkillDefinition,
   AttachmentDefinition,
+  AttachmentModification,
 };

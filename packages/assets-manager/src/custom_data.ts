@@ -1,5 +1,11 @@
 import type { DiceRequirement } from "@gi-tcg/typings";
-import type { CharacterTag, CommonSkillType, EntityType, EntityTag } from "@gi-tcg/core";
+import type {
+  AttachmentTag,
+  CharacterTag,
+  CommonSkillType,
+  EntityTag,
+  EntityType,
+} from "@gi-tcg/core";
 export interface CustomActionCard {
   id: number;
   name: string;
@@ -43,9 +49,20 @@ export interface CustomEntity {
   skills: CustomSkill[];
 }
 
+export interface CustomAttachment {
+  id: number;
+  name: string;
+  rawDescription: string;
+  iconUrl: string;
+  tags: AttachmentTag[];
+  skills: CustomSkill[];
+}
+
 export interface CustomData {
   actionCards: CustomActionCard[];
   characters: CustomCharacter[];
   entities: CustomEntity[];
+  /** Optional to keep existing custom-data payloads compatible. */
+  attachments?: CustomAttachment[];
 }
 

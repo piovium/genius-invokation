@@ -10,29 +10,61 @@
       "development": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./gts/vm": {
+      "development": "./src/gts/vm.ts",
+      "types": "./dist/gts/vm.d.ts",
+      "import": "./dist/gts/vm.js"
+    },
+    "./gts/runtime": {
+      "development": "./src/gts/runtime.ts",
+      "types": "./dist/gts/runtime.d.ts",
+      "import": "./dist/gts/runtime.js"
+    },
+    "./gts/builder": {
+      "development": "./src/gts/builder.ts",
+      "types": "./dist/gts/builder.d.ts",
+      "import": "./dist/gts/builder.js"
     }
   },
   "scripts": {
+    "predev": "pnpm build",
     "dev": "vite",
     "check": "tsc --noEmit",
+    "test": "NODE_OPTIONS=--experimental-vm-modules vitest",
     "build": "tsdown"
   },
   "dependencies": {
-    "@gi-tcg/data": "workspace:*"
+    "@gi-tcg/data": "workspace:*",
+    "@gi-tcg/gts-transpiler": "catalog:",
+    "esbuild-wasm": "^0.27.3"
+  },
+  "gamingTs": {
+    "runtimeImportSource": "@gi-tcg/custom-data-loader/gts/runtime",
+    "providerImportSource": "@gi-tcg/custom-data-loader/gts/vm"
   },
   "peerDependencies": {
     "@gi-tcg/core": "workspace:*"
   },
   "devDependencies": {
+    "@codingame/monaco-vscode-api": "~25.1.2",
+    "@codingame/monaco-vscode-editor-api": "~25.1.2",
+    "@codingame/monaco-vscode-keybindings-service-override": "~25.1.2",
+    "@codingame/monaco-vscode-theme-defaults-default-extension": "~25.1.2",
     "@gi-tcg/assets-manager": "workspace:*",
-    "rolldown": "^1.0.0-rc.15",
-    "rolldown-plugin-dts": "^0.23.2",
     "@gi-tcg/deck-builder": "workspace:*",
-    "@gi-tcg/web-ui-core": "workspace:*",
+    "@gi-tcg/gts-language-client-code": "catalog:",
+    "@gi-tcg/gts-language-server": "catalog:",
     "@gi-tcg/typings": "workspace:*",
-    "monaco-editor": "^0.52.2",
+    "@gi-tcg/web-ui-core": "workspace:*",
+    "dts-bundle-generator": "^9.5.1",
+    "monaco-languageclient": "~10.7.0",
+    "rolldown": "^1.0.0-rc.15",
     "solid-js": "catalog:",
+    "unplugin-dts": "^1.0.0",
     "vite": "catalog:",
-    "vite-plugin-solid": "catalog:"
+    "vite-plugin-solid": "catalog:",
+    "vscode": "npm:@codingame/monaco-vscode-extension-api@~25.1.2",
+    "vscode-languageclient": "~9.0.1"
   }
 }

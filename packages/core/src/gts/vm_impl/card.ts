@@ -93,7 +93,7 @@ const OffStageTriggeredSkillViewModel = TriggeredSkillViewModel.extend(
   }),
 );
 
-class CardModel extends InitiativeSkillModel implements ICaller {
+export class CardModel extends InitiativeSkillModel implements ICaller {
   reserved = false;
   cardId!: number;
   skillType = "playCard" as const;
@@ -283,7 +283,7 @@ type NoTargetSpecifiedThis<Meta extends CardVMMeta> = [
   ? AR.This<Meta>
   : never;
 
-export const CardViewModel = InitiativeSkillViewModel
+export class CardViewModel extends InitiativeSkillViewModel
   //
   .extend(CardModel, (h) => ({
     id: h.attribute<{
@@ -394,7 +394,7 @@ export const CardViewModel = InitiativeSkillViewModel
       model.targetGetters = [techniqueModel.targetGetter];
       model.tags.push("technique");
       model.setEquipmentPlayAction();
-    }, TechniqueViewModel),
+    }, TechniqueViewModel.bind(null!)),
     talent: h.attribute<{
       <Meta extends CardVMMeta>(
         this: NoTargetSpecifiedThis<Meta>,
@@ -611,4 +611,4 @@ export const CardViewModel = InitiativeSkillViewModel
       }
     }),
   }))
-  .bind<typeof DEFAULT_CARD_VM_META>();
+  .narrow(DEFAULT_CARD_VM_META) {}

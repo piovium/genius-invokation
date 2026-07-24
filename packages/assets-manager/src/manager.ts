@@ -249,6 +249,7 @@ export class AssetsManager {
           .filter((s): s is string => !!s),
         cardFace: "",
         icon: "",
+        shareId: ch.obtainable ? Number.MAX_SAFE_INTEGER : undefined,
         obtainable: ch.obtainable,
         skills: setupSkill(ch.skills),
       };
@@ -267,6 +268,7 @@ export class AssetsManager {
         rawDescription: ac.rawDescription,
         description: "",
         cardFace: "",
+        shareId: ac.obtainable ? Number.MAX_SAFE_INTEGER : undefined,
         obtainable: ac.obtainable,
         tags: ac.tags
           .map((tag) => ENTITY_TAG_MAP[tag])
@@ -298,6 +300,27 @@ export class AssetsManager {
         this.dataCacheSync.set(et.id, data);
         this.customDataNames.set(et.id, et.name);
         this.customDataImageUrls.set(et.id, et.cardFaceOrBuffIconUrl);
+      }
+    }
+    for (const attachment of data.attachments ?? []) {
+      const attachmentData: EntityRawData = {
+        // @ts-expect-error
+        category: "entities",
+        id: attachment.id,
+        type: "attachment",
+        name: attachment.name,
+        englishName: "",
+        tags: [...attachment.tags],
+        skills: setupSkill(attachment.skills),
+        rawDescription: attachment.rawDescription,
+        description: "",
+        hidden: false,
+        remainAfterDie: false,
+      };
+      if (!this.dataCacheSync.has(attachment.id)) {
+        this.dataCacheSync.set(attachment.id, attachmentData);
+        this.customDataNames.set(attachment.id, attachment.name);
+        this.customDataImageUrls.set(attachment.id, attachment.iconUrl);
       }
     }
   }

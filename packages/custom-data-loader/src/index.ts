@@ -14,16 +14,30 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
-  GameData,
+  type GameData,
   resolveOfficialVersion,
-  SkillDefinition,
-  Version,
+  type SkillDefinition,
+  type Version,
   playSkillOfCard,
 } from "@gi-tcg/core";
 import type { CustomData, CustomSkill } from "@gi-tcg/assets-manager";
+import { transpile } from "@gi-tcg/gts-transpiler";
 
 import getOfficialData, { registry as baseRegistry } from "@gi-tcg/data";
-import { BuilderContext } from "./builder_context";
+import { beginCustomDataRegistration } from "./gts/context";
+import { GTS_RUNTIME_MODULE } from "./module_evaluators/share";
+import {
+  NodeVmModuleEvaluator,
+  type NodeVmModuleEvaluatorOptions,
+} from "./module_evaluators/node_vm";
+import {
+  EsbuildWasmModuleEvaluator,
+  type EsbuildWasmModuleEvaluatorOptions,
+} from "./module_evaluators/esbuild_wasm";
+import {
+  defaultModuleEvaluatorBackend,
+  type ModuleEvaluator,
+} from "./module_evaluators";
 
 export { getOfficialData };
 
@@ -47,6 +61,36 @@ function placeholderImageUrl(name: string) {
   `)}`;
 }
 
+function compileGts(source: string) {
+  const { code } = transpile(source, "custom-data.gts", {
+    providerImportSource: "@gi-tcg/custom-data-loader/gts/vm",
+    runtimeImportSource: GTS_RUNTIME_MODULE,
+  });
+  return code;
+}
+
+export type CustomDataLoaderOptions =
+  | {
+      backend?: "node-vm";
+      backendOptions?: NodeVmModuleEvaluatorOptions;
+    }
+  | {
+      backend: "esbuild-wasm";
+      backendOptions?: EsbuildWasmModuleEvaluatorOptions;
+    };
+
+function createModuleEvaluator(
+  options: CustomDataLoaderOptions,
+): ModuleEvaluator {
+  const backend = options.backend ?? defaultModuleEvaluatorBackend();
+  switch (backend) {
+    case "node-vm":
+      return new NodeVmModuleEvaluator(options.backendOptions);
+    case "esbuild-wasm":
+      return new EsbuildWasmModuleEvaluator(options.backendOptions);
+  }
+}
+
 export class CustomDataLoader {
   private version?: Version;
   private registry = baseRegistry.clone();
@@ -55,34 +99,41 @@ export class CustomDataLoader {
   private names = new Map<number, string>();
   private descriptions = new Map<number, string>();
   private images = new Map<number, string>();
+  private readonly moduleEvaluator: ModuleEvaluator;
 
-  constructor() {}
+  constructor(options: CustomDataLoaderOptions = {}) {
+    this.moduleEvaluator = createModuleEvaluator(options);
+  }
 
   setVersion(version: Version): this {
     this.version = version;
     return this;
   }
 
-  loadMod(...sources: string[]): this {
+  async loadMod(...sources: string[]): Promise<this> {
     for (const src of sources) {
-      const fn = new Function("BuilderContext", `"use strict";` + src);
-      const ctx = new BuilderContext(this.registry, {
-        stepId: () => this.nextId++,
-        registerName: (id, name) => {
+      const scope = this.registry.begin();
+      const definitionIds = new WeakMap<object, number>();
+      const endRegistration = beginCustomDataRegistration({
+        allocateId: (node) => {
+          let id = definitionIds.get(node);
+          if (id === undefined) {
+            id = this.nextId++;
+            definitionIds.set(node, id);
+          }
+          return id;
+        },
+        registerMetadata: ({ id, name, description, image }) => {
           this.names.set(id, name);
-        },
-        registerDescription: (id, desc) => {
-          this.descriptions.set(id, desc);
-        },
-        registerImage: (id, url) => {
-          this.images.set(id, url);
+          this.descriptions.set(id, description);
+          this.images.set(id, image);
         },
       });
-      const param = ctx.beginRegistration();
       try {
-        fn(param);
+        await this.moduleEvaluator.evaluate(compileGts(src));
       } finally {
-        ctx.endRegistration();
+        endRegistration();
+        scope.end();
       }
     }
     return this;
@@ -98,6 +149,7 @@ export class CustomDataLoader {
       actionCards: [],
       characters: [],
       entities: [],
+      attachments: [],
     };
     const parseSkill = (skill: SkillDefinition): CustomSkill => {
       const name = this.names.get(skill.id) ?? "";
@@ -155,6 +207,20 @@ export class CustomDataLoader {
           ),
         });
       }
+    }
+    for (const [id, attachment] of gameData.attachments) {
+      if (attachment.version.from !== "customData") {
+        continue;
+      }
+      const name = this.names.get(id) ?? "";
+      customData.attachments!.push({
+        id,
+        name,
+        rawDescription: this.descriptions.get(id) ?? "",
+        iconUrl: this.images.get(id) ?? placeholderImageUrl(name),
+        tags: [...attachment.tags],
+        skills: attachment.skills.map(parseSkill),
+      });
     }
     return [gameData, customData];
   }
