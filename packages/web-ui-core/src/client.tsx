@@ -108,12 +108,6 @@ interface AnimationMeta {
   involvesMySupport: boolean;
 }
 
-/** 步进守卫：一个操作判断 + 一个动画判断；操作匹配且队列中存在匹配动画时拒绝步进 */
-interface StepGuard {
-  step: (step: ActionStep) => boolean;
-  animation: (meta: AnimationMeta) => boolean;
-}
-
 /** 判断该批 mutation 是否涉及我方支援区的创建、删除、移动 */
 function involvesMySupportArea(
   mutations: PbExposedMutation[],
@@ -222,7 +216,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
 
   const dispatcher: RpcDispatcher = {
     chooseActive: async ({ candidateIds }) => {
-      // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
+      // 等待当前的 ui 动画渲染完成
       await uiQueue.drain();
       const resolver = Promise.withResolvers<ChooseActiveResponse>();
       actionResolvers.chooseActive = resolver;
@@ -235,8 +229,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       }
     },
     action: async ({ action }) => {
-      // 等待对方行动轮次的动画播放完成，但不阻塞后续 ui 更新
-      await uiQueue.waitUntilNoMatch((meta) => meta.turn !== who);
+      // 等待对方行动轮次的动画播放完成
+      await uiQueue.waitUntilNone((meta) => meta.turn !== who);
       const resolver = Promise.withResolvers<ActionResponse>();
       actionResolvers.action = resolver;
       const acState = createActionState(getAssetsManager(), action, t);
@@ -249,7 +243,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     },
     switchHands: async () => {
       if (savedState && savedState.phase >= PbPhaseType.INIT_ACTIVES) {
-        // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
+        // 等待当前的 ui 动画渲染完成
         await uiQueue.drain();
       }
       const resolver = Promise.withResolvers<SwitchHandsResponse>();
@@ -351,22 +345,25 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       }
       const turn = state.currentTurn;
       const involvesMySupport = involvesMySupportArea(mutation, who);
-      uiQueue.push(async () => {
-        state = oppController.mergeState(state!);
-        const parsed = parseMutations(mutation, oppController);
-        setHistory(
-          produce((history) => updateHistory(savedState, mutation, history)),
-        );
-        const { promise, resolve } = Promise.withResolvers<void>();
-        setData({
-          previousState: savedState ?? state,
-          state,
-          onAnimationFinish: resolve,
-          ...parsed,
-        } satisfies ChessboardData);
-        savedState = state;
-        await promise;
-      }, { turn, involvesMySupport });
+      uiQueue.push(
+        async () => {
+          state = oppController.mergeState(state!);
+          const parsed = parseMutations(mutation, oppController);
+          setHistory(
+            produce((history) => updateHistory(savedState, mutation, history)),
+          );
+          const { promise, resolve } = Promise.withResolvers<void>();
+          setData({
+            previousState: savedState ?? state,
+            state,
+            onAnimationFinish: resolve,
+            ...parsed,
+          } satisfies ChessboardData);
+          savedState = state;
+          await promise;
+        },
+        { turn, involvesMySupport },
+      );
     },
     rpc: async (req) => {
       try {
@@ -378,37 +375,32 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     },
   };
 
-  const stepGuards: StepGuard[] = [
-    {
-      // 技能/切人按钮：等待所有动画播放完毕
-      step: (step) =>
-        step.type === "clickSkillButton" ||
-        step.type === "clickSwitchActiveButton",
-      animation: () => true,
-    },
-    {
-      // 打出支援牌：等待涉及我方支援区的动画播放完毕
-      step: (step) =>
-        step.type === "playCard" &&
-        (savedState?.player[who].handCard.some(
-          (card) =>
-            card.id === step.cardId && card.type === PbEntityType.SUPPORT,
-        ) ??
-          false),
-      animation: (meta) => meta.involvesMySupport,
-    },
-  ];
-
   const onStepActionState: StepActionStateHandler = (step, dice) => {
     const currentActionState = actionState();
     if (!currentActionState) {
       return;
     }
-    // 守卫：操作匹配且队列中存在匹配动画时拒绝步进，停留在当前状态
+    // 动画队列 guard：基于当前动画播放状态禁止部分 action step 的提交，以防用户误操作
     const pending = uiQueue.pending();
-    if (stepGuards.some((g) => g.step(step) && pending.some(g.animation))) {
-      return;
+    if (
+      step.type === "clickSkillButton" ||
+      step.type === "clickSwitchActiveButton"
+    ) {
+      // 当存在动画正在播放时，禁用使用技能和切换出战角色
+      if (pending.length > 0) {
+        return;
+      }
+    } else if (
+      step.type === "playCard" &&
+      savedState?.player[who].handCard.find((card) => card.id === step.cardId)
+        ?.type === PbEntityType.SUPPORT
+    ) {
+      // 当存在涉及我方支援区的动画正在播放时，禁用打出支援牌
+      if (pending.some((meta) => meta.involvesMySupport)) {
+        return;
+      }
     }
+
     const result = currentActionState.step(step, dice);
     switch (result.type) {
       case "newState": {

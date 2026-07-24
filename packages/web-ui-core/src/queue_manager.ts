@@ -29,7 +29,7 @@ interface Waiter<M> {
  * 串行任务队列，每个任务可附带元数据（如动画所属的行动轮次），
  * 并支持基于元数据的等待查询。
  */
-export class QueueManager<M> {
+export class QueueManager<M extends {}> {
   private queue: Entry<M>[] = [];
   private currentMeta: M | undefined = void 0;
   private isProcessing: boolean = false;
@@ -37,16 +37,10 @@ export class QueueManager<M> {
 
   push<T>(task: Task<T>, meta?: M): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-      const taskWithPromise = async () => {
-        try {
-          const ret = await task();
-          resolve(ret);
-        } catch (error) {
-          reject(error);
-        }
-      };
-
-      this.queue.push({ task: taskWithPromise, meta });
+      this.queue.push({
+        task: () => Promise.try(task).then(resolve, reject),
+        meta,
+      });
       if (!this.isProcessing) {
         this.processQueue();
       }
@@ -62,7 +56,7 @@ export class QueueManager<M> {
   }
 
   /** 等待直到没有匹配 predicate 的任务（包括正在执行的任务） */
-  waitUntilNoMatch(matches: (meta: M) => boolean): Promise<void> {
+  waitUntilNone(matches: (meta: M) => boolean): Promise<void> {
     if (!this.pending().some(matches)) {
       return Promise.resolve();
     }
@@ -71,7 +65,7 @@ export class QueueManager<M> {
     });
   }
 
-  /** 等待当前已入队的所有任务完成，但不阻塞后续入队 */
+  /** 等待当前已入队的所有任务完成 */
   drain(): Promise<void> {
     return this.push(async () => {});
   }
