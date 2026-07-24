@@ -49,7 +49,7 @@ import type {
   PlayerIO,
   RpcResponsePayloadOf,
 } from "@gi-tcg/core";
-import { AsyncQueue } from "./async_queue";
+import { QueueManager } from "./queue_manager";
 import { parseMutations } from "./mutations";
 import { translations, UiContext, type Locale } from "./hooks/context";
 import {
@@ -163,7 +163,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   >([]);
   const [opp, setOpp] = createSignal<OppInfo | null>(null);
 
-  const uiQueue = new AsyncQueue();
+  const uiQueue = new QueueManager<{ turn: number }>();
   let savedState: PbGameState | undefined = void 0;
 
   const actionResolvers: {
@@ -178,6 +178,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
 
   const dispatcher: RpcDispatcher = {
     chooseActive: async ({ candidateIds }) => {
+      // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
+      await uiQueue.drain();
       const resolver = Promise.withResolvers<ChooseActiveResponse>();
       actionResolvers.chooseActive = resolver;
       const acState = createChooseActiveState(candidateIds, t);
@@ -189,6 +191,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       }
     },
     action: async ({ action }) => {
+      // 等待对方行动轮次的动画播放完成，但不阻塞后续 ui 更新
+      await uiQueue.waitUntilNoMatch((meta) => meta.turn !== who);
       const resolver = Promise.withResolvers<ActionResponse>();
       actionResolvers.action = resolver;
       const acState = createActionState(getAssetsManager(), action, t);
@@ -201,8 +205,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     },
     switchHands: async () => {
       if (savedState && savedState.phase >= PbPhaseType.INIT_ACTIVES) {
-        // 草与智慧：等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
-        await uiQueue.push(async () => {});
+        // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
+        await uiQueue.drain();
       }
       const resolver = Promise.withResolvers<SwitchHandsResponse>();
       actionResolvers.switchHands = resolver;
@@ -216,7 +220,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         if (result && result.removedHandIds.length > 0) {
           setViewType("switchHandsEnd");
           setTimeout(async () => {
-            await uiQueue.push(async () => {});
+            await uiQueue.drain();
             setViewType((t) => (t === "switchHandsEnd" ? "normal" : t));
             forceRefreshData();
           }, 1200);
@@ -226,6 +230,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       }
     },
     selectCard: async ({ candidateDefinitionIds }) => {
+      // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
+      await uiQueue.drain();
       const resolver = Promise.withResolvers<SelectCardResponse>();
       actionResolvers.selectCard = resolver;
       setSelectCardCandidates(candidateDefinitionIds);
@@ -238,7 +244,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     },
     rerollDice: async () => {
       // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
-      await uiQueue.push(async () => {});
+      await uiQueue.drain();
       const resolver = Promise.withResolvers<RerollDiceResponse>();
       actionResolvers.rerollDice = resolver;
       setViewType("rerollDice");
@@ -286,7 +292,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     t,
     who: flip(who),
     onUpdate: async (info) => {
-      await uiQueue.push(async () => {});
+      await uiQueue.drain();
       setOpp(info);
       forceRefreshData();
     },
@@ -299,6 +305,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       if (!state) {
         return;
       }
+      const turn = state.currentTurn;
       uiQueue.push(async () => {
         state = oppController.mergeState(state!);
         const parsed = parseMutations(mutation, oppController);
@@ -314,7 +321,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         } satisfies ChessboardData);
         savedState = state;
         await promise;
-      });
+      }, { turn });
     },
     rpc: async (req) => {
       try {
