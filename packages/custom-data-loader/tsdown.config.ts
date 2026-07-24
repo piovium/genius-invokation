@@ -30,9 +30,22 @@ export default defineConfig([
     entry: {
       "gts/vm": "./src/gts/vm.ts",
       "gts/runtime": "./src/gts/runtime.ts",
+      "gts/builder": "./src/gts/builder.ts",
     },
     dts: false,
     minify: true,
+  },
+  {
+    platform: "neutral",
+    entry: {
+      "gts/builder": "./src/gts/builder.ts",
+    },
+    dts: {
+      emitDtsOnly: true,
+    },
+    deps: {
+      alwaysBundle: ["@gi-tcg/core/builder"],
+    },
   },
   {
     platform: "neutral",

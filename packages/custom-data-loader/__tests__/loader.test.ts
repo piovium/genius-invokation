@@ -4,6 +4,8 @@ import { describe, expect, test } from "vitest";
 import { CustomDataLoader } from "../src";
 
 const customGts = `
+import { DamageType, DiceType } from "@gi-tcg/core/builder";
+
 define attachment {
   name "Shield" as Shield;
   description "An attachment with custom metadata.";
@@ -96,7 +98,7 @@ describe("CustomDataLoader GTS", () => {
     );
   });
 
-  test("rejects imports other than the GTS runtime and provider VM", async () => {
+  test("rejects imports outside the allowed GTS modules", async () => {
     const loader = new CustomDataLoader();
     await expect(loader.loadMod('import { x } from "mod";')).rejects.toThrow(
       "may only import",

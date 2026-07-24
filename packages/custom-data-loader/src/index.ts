@@ -25,22 +25,20 @@ import { transpile } from "@gi-tcg/gts-transpiler";
 
 import getOfficialData, { registry as baseRegistry } from "@gi-tcg/data";
 import { beginCustomDataRegistration } from "./gts/context";
-import * as gtsRuntime from "./gts/runtime";
 import {
   defaultModuleEvaluatorBackend,
   EsbuildWasmModuleEvaluator,
   type EsbuildWasmModuleEvaluatorOptions,
   GTS_RUNTIME_MODULE,
   type ModuleEvaluator,
-  type ModuleEvaluatorBackend,
   NodeVmModuleEvaluator,
   type NodeVmModuleEvaluatorOptions,
 } from "./module-evaluator";
 
 export { getOfficialData };
 export {
-  DEFAULT_ESBUILD_WASM_URL,
   EsbuildWasmModuleEvaluator,
+  GTS_BUILDER_MODULE,
   GTS_PROVIDER_VM_MODULE,
   GTS_RUNTIME_MODULE,
   NodeVmModuleEvaluator,
@@ -77,9 +75,7 @@ function compileGts(source: string) {
     providerImportSource: "@gi-tcg/custom-data-loader/gts/vm",
     runtimeImportSource: GTS_RUNTIME_MODULE,
   });
-  // GTS treats the runtime's values (such as DiceType) as globals. Preserve
-  // that authoring model while keeping the evaluated document a real module.
-  return `import { ${Object.keys(gtsRuntime).join(", ")} } from ${JSON.stringify(GTS_RUNTIME_MODULE)};\n${code}`;
+  return code;
 }
 
 export type CustomDataLoaderOptions =

@@ -13,4 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-export * from "@gi-tcg/core/gts/runtime";
+// This declaration entry is installed in the browser editor's virtual file
+// system as @gi-tcg/core/builder. Its runtime counterpart is linked directly
+// by the module evaluators.
+export * from "@gi-tcg/core/builder";

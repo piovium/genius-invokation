@@ -20,6 +20,11 @@
       "development": "./src/gts/runtime.ts",
       "types": "./dist/gts/runtime.d.ts",
       "import": "./dist/gts/runtime.js"
+    },
+    "./gts/builder": {
+      "development": "./src/gts/builder.ts",
+      "types": "./dist/gts/builder.d.ts",
+      "import": "./dist/gts/builder.js"
     }
   },
   "scripts": {

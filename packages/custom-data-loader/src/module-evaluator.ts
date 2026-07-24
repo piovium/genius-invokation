@@ -14,13 +14,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import * as gtsRuntime from "./gts/runtime";
+import * as gtsBuilder from "./gts/builder";
 import customDataViewModel from "./gts/vm";
 
 export const GTS_RUNTIME_MODULE = "@gi-tcg/custom-data-loader/gts/runtime";
 export const GTS_PROVIDER_VM_MODULE = "@gi-tcg/custom-data-loader/gts/vm/vm";
-
-export const DEFAULT_ESBUILD_WASM_URL =
-  "https://cdn.jsdelivr.net/npm/esbuild-wasm@latest/esbuild.wasm";
+export const GTS_BUILDER_MODULE = "@gi-tcg/core/builder";
 
 export type ModuleEvaluatorBackend = "node-vm" | "esbuild-wasm";
 
@@ -37,7 +36,7 @@ export interface ModuleEvaluator {
 
 function unsupportedModule(specifier: string): never {
   throw new Error(
-    `Custom GTS modules may only import ${GTS_RUNTIME_MODULE} and ${GTS_PROVIDER_VM_MODULE}; received ${JSON.stringify(specifier)}`,
+    `Custom GTS modules may only import ${GTS_RUNTIME_MODULE}, ${GTS_PROVIDER_VM_MODULE}, and ${GTS_BUILDER_MODULE}; received ${JSON.stringify(specifier)}`,
   );
 }
 
@@ -47,6 +46,8 @@ function moduleFor(specifier: string): object {
       return gtsRuntime;
     case GTS_PROVIDER_VM_MODULE:
       return customDataViewModel;
+    case GTS_BUILDER_MODULE:
+      return gtsBuilder;
     default:
       return unsupportedModule(specifier);
   }
@@ -73,11 +74,21 @@ export class NodeVmModuleEvaluator implements ModuleEvaluator {
 
     const context = vm.createContext();
     const runtimeExports = Object.keys(gtsRuntime);
+    const builderExports = Object.keys(gtsBuilder);
     const runtimeModule = new vm.SyntheticModule(
       runtimeExports,
       function () {
         for (const name of runtimeExports) {
           this.setExport(name, gtsRuntime[name as keyof typeof gtsRuntime]);
+        }
+      },
+      { context },
+    );
+    const builderModule = new vm.SyntheticModule(
+      builderExports,
+      function () {
+        for (const name of builderExports) {
+          this.setExport(name, gtsBuilder[name as keyof typeof gtsBuilder]);
         }
       },
       { context },
@@ -97,6 +108,8 @@ export class NodeVmModuleEvaluator implements ModuleEvaluator {
           return runtimeModule;
         case GTS_PROVIDER_VM_MODULE:
           return providerModule;
+        case GTS_BUILDER_MODULE:
+          return builderModule;
         default:
           // Keep module resolution deliberately closed: custom data has no
           // access to Node's module graph.
@@ -110,12 +123,18 @@ export class NodeVmModuleEvaluator implements ModuleEvaluator {
 let esbuildWasm: Promise<typeof import("esbuild-wasm")> | undefined;
 let esbuildWasmURL: string | undefined;
 
-async function getEsbuildWasm(wasmURL: string) {
+function esbuildWasmUrl(version: string): string {
+  return `https://cdn.jsdelivr.net/npm/esbuild-wasm@${version}/esbuild.wasm`;
+}
+
+async function getEsbuildWasm(wasmURL?: string) {
+  const host = await import("esbuild-wasm");
+  const resolvedWasmURL = wasmURL ?? esbuildWasmUrl(host.version);
   if (esbuildWasm === undefined) {
-    esbuildWasmURL = wasmURL;
-    esbuildWasm = import("esbuild-wasm")
+    esbuildWasmURL = resolvedWasmURL;
+    esbuildWasm = Promise.resolve(host)
       .then(async (esbuild) => {
-        await esbuild.initialize({ wasmURL });
+        await esbuild.initialize({ wasmURL: resolvedWasmURL });
         return esbuild;
       })
       .catch((error) => {
@@ -123,9 +142,9 @@ async function getEsbuildWasm(wasmURL: string) {
         esbuildWasmURL = undefined;
         throw error;
       });
-  } else if (esbuildWasmURL !== wasmURL) {
+  } else if (esbuildWasmURL !== resolvedWasmURL) {
     throw new Error(
-      `esbuild-wasm is already initialized with ${JSON.stringify(esbuildWasmURL)}, so it cannot use ${JSON.stringify(wasmURL)}`,
+      `esbuild-wasm is already initialized with ${JSON.stringify(esbuildWasmURL)}, so it cannot use ${JSON.stringify(resolvedWasmURL)}`,
     );
   }
   return esbuildWasm;
@@ -133,10 +152,10 @@ async function getEsbuildWasm(wasmURL: string) {
 
 /** Transpiles ESM to CJS with esbuild-wasm, then supplies its only imports. */
 export class EsbuildWasmModuleEvaluator implements ModuleEvaluator {
-  private readonly wasmURL: string;
+  private readonly wasmURL?: string;
 
   constructor(options: EsbuildWasmModuleEvaluatorOptions = {}) {
-    this.wasmURL = options.wasmURL ?? DEFAULT_ESBUILD_WASM_URL;
+    this.wasmURL = options.wasmURL;
   }
 
   async evaluate(code: string): Promise<void> {
