@@ -9,7 +9,7 @@
   "engines": {
     "node": "^26.1.0"
   },
-  "packageManager": "pnpm@11.3.0",
+  "packageManager": "pnpm@11.17.0",
   "scripts": {
     ".filter": "gnx scripts/filter.ts",
     ".filter-prod": "gnx scripts/filter.ts -P",
@@ -40,7 +40,7 @@
     "tsdown": "^0.21.7",
     "tsup": "^8.3.0",
     "type-fest": "^4.26.1",
-    "typescript": "^6.0.2",
+    "typescript": "catalog:",
     "vitest": "^4.1.6"
   }
 }

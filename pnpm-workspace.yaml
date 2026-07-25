@@ -1,11 +1,6 @@
 packages:
   - 'packages/*'
 
-overrides:
-  esbuild: 0.19.11
-  caniuse-lite: 1.0.30001778
-  babel-plugin-jsx-dom-expressions: 0.39.6
-
 catalog:
   axios: ^1.16.1
   vite: ^8.0.8
@@ -24,6 +19,7 @@ catalog:
   "@gi-tcg/prettier-plugin-gts": ^0.7.0
   "@gi-tcg/gts-language-client-code": ^0.7.0
   "@gi-tcg/gts-language-server": ^0.7.0
+  typescript: 'npm:typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2'
 
 patchedDependencies:
   ohm-js@17.1.0: patches/ohm-js@17.1.0.patch
@@ -32,6 +28,8 @@ patchedDependencies:
 minimumReleaseAgeExclude:
   - '@gi-tcg/*'
   - espolar
+  - typescript-native-bridge
+  - '@typescript-native-bridge/*'
 
 allowBuilds:
   '@bufbuild/buf': true
