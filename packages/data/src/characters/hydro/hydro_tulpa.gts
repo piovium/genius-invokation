@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon } from "@gi-tcg/core/builder";
+import { card, character, DamageType, DiceType, skill, status, summon, $ } from "@gi-tcg/core/builder";
 
 /**
  * @id 122061
@@ -303,7 +303,7 @@ define card {
       :characterStatus(ElementalLifeformHydro, "@master");
     }
     on declareEnd {
-      when :( :self.master.health >= 3 );
+      when :( :self.master.health >= 3 && :queryAll($.my.summon).length < 4 );
       :damage(DamageType.Piercing, 2, "@master");
       if (!:$(`my summon with definition id ${HalfTulpa01}`)) {
         :summon(HalfTulpa01);
