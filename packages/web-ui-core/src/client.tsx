@@ -23,8 +23,11 @@ import {
   SwitchHandsResponse,
   SelectCardResponse,
   RerollDiceResponse,
+  PbEntityArea,
+  PbEntityType,
   PbPhaseType,
   PbPlayerStatus,
+  type PbExposedMutation,
 } from "@gi-tcg/typings";
 import {
   createMemo,
@@ -49,13 +52,14 @@ import type {
   PlayerIO,
   RpcResponsePayloadOf,
 } from "@gi-tcg/core";
-import { AsyncQueue } from "./async_queue";
+import { QueueManager } from "./queue_manager";
 import { parseMutations } from "./mutations";
 import { translations, UiContext, type Locale } from "./hooks/context";
 import {
   createActionState,
   createChooseActiveState,
   type ActionState,
+  type ActionStep,
 } from "./action";
 import { AssetsManager, DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
 import {
@@ -95,6 +99,40 @@ export const EMPTY_GAME_STATE: PbGameState = {
   roundNumber: 0,
   player: [EMPTY_PLAYER_DATA, EMPTY_PLAYER_DATA],
 };
+
+/** 动画队列中每个任务携带的元数据 */
+interface AnimationMeta {
+  /** 该动画所属的行动轮次 */
+  turn: number;
+  /** 该动画是否涉及我方支援区的创建、删除、移动 */
+  involvesMySupport: boolean;
+}
+
+/** 判断该批 mutation 是否涉及我方支援区的创建、删除、移动 */
+function involvesMySupportArea(
+  mutations: PbExposedMutation[],
+  who: 0 | 1,
+): boolean {
+  return mutations.some(({ mutation }) => {
+    switch (mutation?.$case) {
+      case "createEntity":
+      case "removeEntity":
+        return (
+          mutation.value.who === who &&
+          mutation.value.where === PbEntityArea.SUPPORT
+        );
+      case "moveEntity":
+        return (
+          (mutation.value.fromWho === who &&
+            mutation.value.fromWhere === PbEntityArea.SUPPORT) ||
+          (mutation.value.toWho === who &&
+            mutation.value.toWhere === PbEntityArea.SUPPORT)
+        );
+      default:
+        return false;
+    }
+  });
+}
 
 export interface ClientOption {
   onGiveUp?: () => void;
@@ -163,7 +201,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   >([]);
   const [opp, setOpp] = createSignal<OppInfo | null>(null);
 
-  const uiQueue = new AsyncQueue();
+  const uiQueue = new QueueManager<AnimationMeta>();
   let savedState: PbGameState | undefined = void 0;
 
   const actionResolvers: {
@@ -178,6 +216,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
 
   const dispatcher: RpcDispatcher = {
     chooseActive: async ({ candidateIds }) => {
+      // 等待当前的 ui 动画渲染完成
+      await uiQueue.drain();
       const resolver = Promise.withResolvers<ChooseActiveResponse>();
       actionResolvers.chooseActive = resolver;
       const acState = createChooseActiveState(candidateIds, t);
@@ -189,6 +229,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       }
     },
     action: async ({ action }) => {
+      // 等待对方行动轮次的动画播放完成
+      await uiQueue.waitUntilNone((meta) => meta.turn !== who);
       const resolver = Promise.withResolvers<ActionResponse>();
       actionResolvers.action = resolver;
       const acState = createActionState(getAssetsManager(), action, t);
@@ -201,8 +243,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     },
     switchHands: async () => {
       if (savedState && savedState.phase >= PbPhaseType.INIT_ACTIVES) {
-        // 草与智慧：等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
-        await uiQueue.push(async () => {});
+        // 等待当前的 ui 动画渲染完成
+        await uiQueue.drain();
       }
       const resolver = Promise.withResolvers<SwitchHandsResponse>();
       actionResolvers.switchHands = resolver;
@@ -216,7 +258,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         if (result && result.removedHandIds.length > 0) {
           setViewType("switchHandsEnd");
           setTimeout(async () => {
-            await uiQueue.push(async () => {});
+            await uiQueue.drain();
             setViewType((t) => (t === "switchHandsEnd" ? "normal" : t));
             forceRefreshData();
           }, 1200);
@@ -226,6 +268,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       }
     },
     selectCard: async ({ candidateDefinitionIds }) => {
+      // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
+      await uiQueue.drain();
       const resolver = Promise.withResolvers<SelectCardResponse>();
       actionResolvers.selectCard = resolver;
       setSelectCardCandidates(candidateDefinitionIds);
@@ -238,7 +282,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     },
     rerollDice: async () => {
       // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
-      await uiQueue.push(async () => {});
+      await uiQueue.drain();
       const resolver = Promise.withResolvers<RerollDiceResponse>();
       actionResolvers.rerollDice = resolver;
       setViewType("rerollDice");
@@ -286,7 +330,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     t,
     who: flip(who),
     onUpdate: async (info) => {
-      await uiQueue.push(async () => {});
+      await uiQueue.drain();
       setOpp(info);
       forceRefreshData();
     },
@@ -299,22 +343,27 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       if (!state) {
         return;
       }
-      uiQueue.push(async () => {
-        state = oppController.mergeState(state!);
-        const parsed = parseMutations(mutation, oppController);
-        setHistory(
-          produce((history) => updateHistory(savedState, mutation, history)),
-        );
-        const { promise, resolve } = Promise.withResolvers<void>();
-        setData({
-          previousState: savedState ?? state,
-          state,
-          onAnimationFinish: resolve,
-          ...parsed,
-        } satisfies ChessboardData);
-        savedState = state;
-        await promise;
-      });
+      const turn = state.currentTurn;
+      const involvesMySupport = involvesMySupportArea(mutation, who);
+      uiQueue.push(
+        async () => {
+          state = oppController.mergeState(state!);
+          const parsed = parseMutations(mutation, oppController);
+          setHistory(
+            produce((history) => updateHistory(savedState, mutation, history)),
+          );
+          const { promise, resolve } = Promise.withResolvers<void>();
+          setData({
+            previousState: savedState ?? state,
+            state,
+            onAnimationFinish: resolve,
+            ...parsed,
+          } satisfies ChessboardData);
+          savedState = state;
+          await promise;
+        },
+        { turn, involvesMySupport },
+      );
     },
     rpc: async (req) => {
       try {
@@ -331,6 +380,27 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     if (!currentActionState) {
       return;
     }
+    // 动画队列 guard：基于当前动画播放状态禁止部分 action step 的提交，以防用户误操作
+    const pending = uiQueue.pending();
+    if (
+      step.type === "clickSkillButton" ||
+      step.type === "clickSwitchActiveButton"
+    ) {
+      // 当存在动画正在播放时，禁用使用技能和切换出战角色
+      if (pending.length > 0) {
+        return;
+      }
+    } else if (
+      step.type === "playCard" &&
+      savedState?.player[who].handCard.find((card) => card.id === step.cardId)
+        ?.type === PbEntityType.SUPPORT
+    ) {
+      // 当存在涉及我方支援区的动画正在播放时，禁用打出支援牌
+      if (pending.some((meta) => meta.involvesMySupport)) {
+        return;
+      }
+    }
+
     const result = currentActionState.step(step, dice);
     switch (result.type) {
       case "newState": {
