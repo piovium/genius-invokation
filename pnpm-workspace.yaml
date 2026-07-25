@@ -1,11 +1,14 @@
 packages:
-  - 'packages/*'
+  - "packages/*"
+
+overrides:
+  "vite-plugin-solid>babel-preset-solid": 1.9.12
 
 catalog:
   axios: ^1.16.1
   vite: ^8.0.8
   unplugin-dts: ^1.0.0
-  vite-plugin-solid: ^2.11.8
+  vite-plugin-solid: ^2.11.13
   rollup-plugin-node-externals: ^8.0.1
   unocss: ^66.3.3
   "@unocss/preset-icons": ^66.3.3
@@ -19,30 +22,30 @@ catalog:
   "@gi-tcg/prettier-plugin-gts": ^0.7.0
   "@gi-tcg/gts-language-client-code": ^0.7.0
   "@gi-tcg/gts-language-server": ^0.7.0
-  typescript: 'npm:typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2'
+  typescript: "npm:typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2"
 
 patchedDependencies:
   ohm-js@17.1.0: patches/ohm-js@17.1.0.patch
   puppeteer-screen-recorder@3.0.6: patches/puppeteer-screen-recorder@3.0.6.patch
 
 minimumReleaseAgeExclude:
-  - '@gi-tcg/*'
+  - "@gi-tcg/*"
   - espolar
   - typescript-native-bridge
-  - '@typescript-native-bridge/*'
+  - "@typescript-native-bridge/*"
 
 allowBuilds:
-  '@bufbuild/buf': true
-  '@ffmpeg-installer/darwin-arm64': true
-  '@ffmpeg-installer/darwin-x64': true
-  '@ffmpeg-installer/linux-arm': true
-  '@ffmpeg-installer/linux-arm64': true
-  '@ffmpeg-installer/linux-ia32': true
-  '@ffmpeg-installer/linux-x64': true
-  '@nestjs/core': true
-  '@prisma/engines': true
-  '@swc/core': true
-  '@vscode/vsce-sign': true
+  "@bufbuild/buf": true
+  "@ffmpeg-installer/darwin-arm64": true
+  "@ffmpeg-installer/darwin-x64": true
+  "@ffmpeg-installer/linux-arm": true
+  "@ffmpeg-installer/linux-arm64": true
+  "@ffmpeg-installer/linux-ia32": true
+  "@ffmpeg-installer/linux-x64": true
+  "@nestjs/core": true
+  "@prisma/engines": true
+  "@swc/core": true
+  "@vscode/vsce-sign": true
   core-js: true
   esbuild: true
   keytar: true
