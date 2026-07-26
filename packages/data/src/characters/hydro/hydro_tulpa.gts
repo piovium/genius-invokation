@@ -303,7 +303,7 @@ define card {
       :characterStatus(ElementalLifeformHydro, "@master");
     }
     on declareEnd {
-      when :( :self.master.health >= 3 && :queryAll($.my.summon).length < 4 );
+      when :( :self.master.health >= 3 && :queryAll($.my.summon).length < :state.config.maxSummonsCount );
       :damage(DamageType.Piercing, 2, "@master");
       if (!:$(`my summon with definition id ${HalfTulpa01}`)) {
         :summon(HalfTulpa01);
