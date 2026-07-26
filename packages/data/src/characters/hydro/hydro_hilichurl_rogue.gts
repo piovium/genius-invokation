@@ -48,7 +48,7 @@ define status {
 define status {
   id 122053 as MistBubbleLockdownPreparing;
   since "v5.0.0";
-  prepare 1220512 as SkillHandle;
+  prepare MistBubbleLockdown;
   on dispose {
     when :( :e.entity.definition.id === MistBubbleSlime );
     :dispose();
@@ -80,7 +80,7 @@ define card {
       :characterStatus(MistBubbleLockdownPreparing, "@master");
     };
     skill {
-      id 1220512;
+      id 1220512 as MistBubbleLockdown;
       prepared;
       :damage(DamageType.Hydro, 1);
       :characterStatus(MistBubblePrison, "opp active");
