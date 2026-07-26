@@ -145,8 +145,8 @@ define character {
   health 10;
   energy 2;
   skills SpiritfoxSineater,
-  YakanEvocationSesshouSakura,
-  GreatSecretArtTenkoKenshin;
+    YakanEvocationSesshouSakura,
+    GreatSecretArtTenkoKenshin;
 };
 
 /**

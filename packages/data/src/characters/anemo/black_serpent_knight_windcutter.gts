@@ -162,11 +162,11 @@ define character {
   health 10;
   energy 2;
   skills HalfswordTechnique,
-  RisingSlash,
-  GuardStance,
-  VanguardMomentum,
-  RecklessStance,
-  GalePursuit;
+    RisingSlash,
+    GuardStance,
+    VanguardMomentum,
+    RecklessStance,
+    GalePursuit;
 };
 
 /**

@@ -179,9 +179,9 @@ define character {
   health 6;
   energy 2;
   skills DenOfThunder,
-  ShockOfTheEnigmaticAbyss,
-  WildThunderburst,
-  ElectricRebirthPassive;
+    ShockOfTheEnigmaticAbyss,
+    WildThunderburst,
+    ElectricRebirthPassive;
 };
 
 // 侵雷重闪入场时创建此出战状态，检测咏者击倒后夺取1点充能

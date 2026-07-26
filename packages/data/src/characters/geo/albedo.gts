@@ -101,8 +101,8 @@ define character {
   health 12;
   energy 2;
   skills FavoniusBladeworkWeiss,
-  AbiogenesisSolarIsotoma,
-  RiteOfProgenitureTectonicTide;
+    AbiogenesisSolarIsotoma,
+    RiteOfProgenitureTectonicTide;
 };
 
 /**

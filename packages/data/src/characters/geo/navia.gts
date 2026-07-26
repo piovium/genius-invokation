@@ -163,9 +163,9 @@ define character {
   health 10;
   energy 2;
   skills BluntRefusal,
-  CeremonialCrystalshot,
-  AsTheSunlitSkysSingingSalute,
-  MutualAssistanceNetwork;
+    CeremonialCrystalshot,
+    AsTheSunlitSkysSingingSalute,
+    MutualAssistanceNetwork;
 };
 
 /**

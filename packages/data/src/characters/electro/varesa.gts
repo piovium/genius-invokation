@@ -193,11 +193,11 @@ define character {
   health 10;
   energy 3;
   skills ByTheHorns,
-  RidingTheNightrainbow,
-  GuardianVent,
-  TagteamTripleJump,
-  GuardianVentVolcanoKablam,
-  RidingTheNightrainbowPassive;
+    RidingTheNightrainbow,
+    GuardianVent,
+    TagteamTripleJump,
+    GuardianVentVolcanoKablam,
+    RidingTheNightrainbowPassive;
   associateNightsoul NightsoulsBlessing;
 };
 

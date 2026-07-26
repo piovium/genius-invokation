@@ -210,9 +210,9 @@ define character {
   health 11;
   energy 2;
   skills WeightedSpike,
-  ThunderboltRush,
-  TheThreePrinciplesOfPower,
-  CaloricBalancingPlan01;
+    ThunderboltRush,
+    TheThreePrinciplesOfPower,
+    CaloricBalancingPlan01;
   associateNightsoul NightsoulsBlessing;
 };
 

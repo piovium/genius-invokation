@@ -323,10 +323,10 @@ define character {
   energy 0;
   specialEnergy fightingSpirit, 3;
   skills FlamesWeaveLife,
-  TheNamedMoment,
-  HourOfBurningSkies,
-  FightingSpirit,
-  FlamestriderFullThrottlePreparedSkill;
+    TheNamedMoment,
+    HourOfBurningSkies,
+    FightingSpirit,
+    FlamestriderFullThrottlePreparedSkill;
   associateNightsoul NightsoulsBlessing;
 };
 

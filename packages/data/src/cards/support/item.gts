@@ -172,14 +172,14 @@ define extension {
   initialState ({ played: [[], []] });
   description "记录本场对局中双方曾经打出过的行动牌";
   mutateWhen onAction,
-  ((st, e) => {
-    if (e.isPlayCard()) {
-      const defId = e.action.skill.caller.definition.id;
-      if (!st.played[e.who].includes(defId)) {
-        st.played[e.who].push(defId);
+    ((st, e) => {
+      if (e.isPlayCard()) {
+        const defId = e.action.skill.caller.definition.id;
+        if (!st.played[e.who].includes(defId)) {
+          st.played[e.who].push(defId);
+        }
       }
-    }
-  });
+    });
 };
 
 /**
@@ -232,7 +232,7 @@ define card {
       visible false;
     };
     replaceDescription "[GCG_TOKEN_COUNTER]",
-    ((st, self) => self.variables.playedCard);
+      ((st, self) => self.variables.playedCard);
     on playCard {
       when :( :e.card.id !== :self.id );
       :addVariable("playedCard", 1);

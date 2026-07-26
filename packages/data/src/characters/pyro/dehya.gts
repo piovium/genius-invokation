@@ -192,10 +192,10 @@ define character {
   health 10;
   energy 2;
   skills SandstormAssault,
-  MoltenInferno,
-  LeonineBite,
-  IncinerationDrive,
-  FierySanctumRedmanesBlood;
+    MoltenInferno,
+    LeonineBite,
+    IncinerationDrive,
+    FierySanctumRedmanesBlood;
 };
 
 /**

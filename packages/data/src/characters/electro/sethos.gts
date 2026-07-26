@@ -156,9 +156,9 @@ define character {
   health 10;
   energy 4;
   skills RoyalReedArchery,
-  AncientRiteTheThunderingSands,
-  SecretRiteTwilightShadowpiercer,
-  BlackKitesEnigma;
+    AncientRiteTheThunderingSands,
+    SecretRiteTwilightShadowpiercer,
+    BlackKitesEnigma;
 };
 
 /**

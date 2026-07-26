@@ -310,13 +310,13 @@ define summon {
     :damage(DamageType.Electro, 2);
   };
   defineSnippet giveOppRandomCardConductive,
-  :{
-    if (:oppPlayer.hands.length === 0) {
-      return;
-    }
-    const targetHand = :random(:oppPlayer.hands);
-    :attach(Conductive, targetHand);
-  };
+    :{
+      if (:oppPlayer.hands.length === 0) {
+        return;
+      }
+      const targetHand = :random(:oppPlayer.hands);
+      :attach(Conductive, targetHand);
+    };
   on enter {
     :callSnippet.giveOppRandomCardConductive();
   };

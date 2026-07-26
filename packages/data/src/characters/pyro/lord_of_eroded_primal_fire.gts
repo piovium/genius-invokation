@@ -51,7 +51,7 @@ define status {
   since "v6.0.0";
   variable cardCount, 0;
   replaceDescription "[GCG_TOKEN_COUNTER]",
-  ((c, self) => self.variables.cardCount);
+    ((c, self) => self.variables.cardCount);
   on disposeCard {
     :addVariable("cardCount", 1);
     if (:getVariable("cardCount") % 6 === 0) {
@@ -158,9 +158,9 @@ define character {
   health 11;
   energy 2;
   skills VoidClawStrike,
-  ErodedFlamingFeathers,
-  SeveringPrimalFire,
-  ResentmentPassive;
+    ErodedFlamingFeathers,
+    SeveringPrimalFire,
+    ResentmentPassive;
 };
 
 /**

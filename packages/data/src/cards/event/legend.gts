@@ -322,24 +322,24 @@ define extension {
   });
   description "记录双方斗争之火的「斗志」，并在行动阶段开始时设置斗争之火的胜者";
   mutateWhen onDamageOrHeal,
-  ((st, e) => {
-    if (e.sourceWho !== e.targetWho) {
-      st.spirit[e.sourceWho] += e.damageInfo.value;
-    }
-  });
+    ((st, e) => {
+      if (e.sourceWho !== e.targetWho) {
+        st.spirit[e.sourceWho] += e.damageInfo.value;
+      }
+    });
   mutateWhen onActionPhase,
-  ((st) => {
-    const currentSpirits = [...st.spirit];
-    st.win = [false, false];
-    if (currentSpirits[0] >= currentSpirits[1]) {
-      st.win[0] = true;
-      st.spirit[0] = 0;
-    }
-    if (currentSpirits[0] <= currentSpirits[1]) {
-      st.win[1] = true;
-      st.spirit[1] = 0;
-    }
-  });
+    ((st) => {
+      const currentSpirits = [...st.spirit];
+      st.win = [false, false];
+      if (currentSpirits[0] >= currentSpirits[1]) {
+        st.win[0] = true;
+        st.spirit[0] = 0;
+      }
+      if (currentSpirits[0] <= currentSpirits[1]) {
+        st.win[1] = true;
+        st.spirit[1] = 0;
+      }
+    });
 };
 
 /**

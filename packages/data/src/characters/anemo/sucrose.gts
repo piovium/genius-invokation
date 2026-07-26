@@ -127,8 +127,8 @@ define character {
   health 10;
   energy 2;
   skills WindSpiritCreation,
-  AstableAnemohypostasisCreation6308,
-  ForbiddenCreationIsomer75TypeIi;
+    AstableAnemohypostasisCreation6308,
+    ForbiddenCreationIsomer75TypeIi;
 };
 
 /**

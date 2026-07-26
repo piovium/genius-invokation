@@ -202,10 +202,10 @@ define character {
   health 5;
   energy 2;
   skills ShatterclampStrike,
-  BusterBlaze,
-  BattlelineDetonation,
-  ImperialPanoply,
-  SearingBlast;
+    BusterBlaze,
+    BattlelineDetonation,
+    ImperialPanoply,
+    SearingBlast;
 };
 
 /**

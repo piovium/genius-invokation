@@ -197,10 +197,10 @@ define character {
   health 6;
   energy 2;
   skills FlameOfSalvation,
-  SearingPrecept,
-  OminousStar,
-  FieryRebirth,
-  FieryRebirthSkill;
+    SearingPrecept,
+    OminousStar,
+    FieryRebirth,
+    FieryRebirthSkill;
 };
 
 /**

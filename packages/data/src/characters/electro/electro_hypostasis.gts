@@ -206,11 +206,11 @@ define character {
   health 8;
   energy 2;
   skills ElectroCrystalProjection,
-  RockpaperscissorsCombo,
-  LightningLockdown,
-  ElectroCrystalCoreSkill,
-  RockpaperscissorsComboScissors,
-  RockpaperscissorsComboPaper;
+    RockpaperscissorsCombo,
+    LightningLockdown,
+    ElectroCrystalCoreSkill,
+    RockpaperscissorsComboScissors,
+    RockpaperscissorsComboPaper;
 };
 
 /**

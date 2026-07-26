@@ -161,9 +161,9 @@ define character {
   health 10;
   energy 2;
   skills SearingGlare,
-  BlazingStrike,
-  SpiritOfOmensAwakeningPyroScorpion,
-  SpiritOfOmensPower;
+    BlazingStrike,
+    SpiritOfOmensAwakeningPyroScorpion,
+    SpiritOfOmensPower;
 };
 
 /**

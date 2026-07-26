@@ -210,9 +210,9 @@ define character {
   health 10;
   energy 3;
   skills CuttingTorrent,
-  FoulLegacyRagingTide,
-  HavocObliteration,
-  TideWithholder;
+    FoulLegacyRagingTide,
+    HavocObliteration,
+    TideWithholder;
 };
 
 /**

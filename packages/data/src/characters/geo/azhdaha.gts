@@ -259,10 +259,10 @@ define character {
   health 10;
   energy 2;
   skills SunderingCharge,
-  AuraOfMajesty,
-  FrostspikeWave,
-  DecimatingRockfall,
-  StoneFacets;
+    AuraOfMajesty,
+    FrostspikeWave,
+    DecimatingRockfall,
+    StoneFacets;
 };
 
 /**
@@ -292,10 +292,10 @@ define character {
   health 10;
   energy 2;
   skills SunderingCharge,
-  AuraOfMajesty,
-  TorrentialRebuke,
-  DecimatingRockfall,
-  StoneFacets;
+    AuraOfMajesty,
+    TorrentialRebuke,
+    DecimatingRockfall,
+    StoneFacets;
 };
 
 /**
@@ -325,10 +325,10 @@ define character {
   health 10;
   energy 2;
   skills SunderingCharge,
-  AuraOfMajesty,
-  BlazingRebuke,
-  DecimatingRockfall,
-  StoneFacets;
+    AuraOfMajesty,
+    BlazingRebuke,
+    DecimatingRockfall,
+    StoneFacets;
 };
 
 /**
@@ -358,10 +358,10 @@ define character {
   health 10;
   energy 2;
   skills SunderingCharge,
-  AuraOfMajesty,
-  ThunderstormWave,
-  DecimatingRockfall,
-  StoneFacets;
+    AuraOfMajesty,
+    ThunderstormWave,
+    DecimatingRockfall,
+    StoneFacets;
 };
 
 /**

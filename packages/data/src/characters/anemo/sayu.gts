@@ -156,9 +156,9 @@ define character {
   health 10;
   energy 2;
   skills ShuumatsubanNinjaBlade,
-  YoohooArtFuuinDash,
-  YoohooArtMujinaFlurry,
-  FuufuuWhirlwindKick;
+    YoohooArtFuuinDash,
+    YoohooArtMujinaFlurry,
+    FuufuuWhirlwindKick;
 };
 
 /**

@@ -153,8 +153,8 @@ define character {
   health 11;
   energy 2;
   skills GravityApplicationCrush,
-  GravityApplicationPointNull,
-  GravityApplicationFieldReduction;
+    GravityApplicationPointNull,
+    GravityApplicationFieldReduction;
 };
 
 /**

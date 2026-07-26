@@ -266,9 +266,9 @@ define character {
   health 10;
   energy 2;
   skills PhantomFeatherFlurry,
-  SpiritReinsShadowHunt,
-  SoulReapersFatalRound,
-  ShadowhuntShellPassive;
+    SpiritReinsShadowHunt,
+    SoulReapersFatalRound,
+    ShadowhuntShellPassive;
   associateNightsoul NightsoulsBlessing;
 };
 

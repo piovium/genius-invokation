@@ -189,10 +189,10 @@ define character {
   health 10;
   energy 3;
   skills KamisatoArtKabuki,
-  KamisatoArtHyouka,
-  KamisatoArtSoumetsu,
-  KamisatoArtSenho01,
-  KamisatoArtSenho02;
+    KamisatoArtHyouka,
+    KamisatoArtSoumetsu,
+    KamisatoArtSenho01,
+    KamisatoArtSenho02;
 };
 
 /**

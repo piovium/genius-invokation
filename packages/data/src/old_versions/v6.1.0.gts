@@ -72,10 +72,10 @@ define character {
   health 10;
   energy 2;
   skills SoloistsSolicitation,
-  SalonSolitairePneuma,
-  LetThePeopleRejoice,
-  Skill12114,
-  ArkheSeatsSacredAndSecular;
+    SalonSolitairePneuma,
+    LetThePeopleRejoice,
+    Skill12114,
+    ArkheSeatsSacredAndSecular;
 };
 
 /**
@@ -91,10 +91,10 @@ define character {
   health 10;
   energy 2;
   skills SoloistsSolicitationOusia,
-  SalonSolitaireOusia,
-  LetThePeopleRejoice,
-  Skill12114,
-  ArkheSeatsSacredAndSecular;
+    SalonSolitaireOusia,
+    LetThePeopleRejoice,
+    Skill12114,
+    ArkheSeatsSacredAndSecular;
 };
 
 /**
@@ -155,9 +155,9 @@ define character {
   health 12;
   energy 2;
   skills WeightedSpike,
-  ThunderboltRush,
-  TheThreePrinciplesOfPower,
-  CaloricBalancingPlan01;
+    ThunderboltRush,
+    TheThreePrinciplesOfPower,
+    CaloricBalancingPlan01;
   associateNightsoul NightsoulsBlessing;
 };
 

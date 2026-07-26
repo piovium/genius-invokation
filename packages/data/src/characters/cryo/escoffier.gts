@@ -253,9 +253,9 @@ define character {
   health 10;
   energy 2;
   skills KitchenSkills,
-  LowtemperatureCooking,
-  ScoringCuts,
-  ConstantOffthecuffCookery;
+    LowtemperatureCooking,
+    ScoringCuts,
+    ConstantOffthecuffCookery;
 };
 
 /**

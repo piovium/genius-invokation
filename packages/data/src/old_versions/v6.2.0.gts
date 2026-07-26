@@ -58,8 +58,8 @@ define character {
   health 10;
   energy 2;
   skills CoolcolorCapture,
-  FramingFreezingPointComposition,
-  StillPhotoComprehensiveConfirmation;
+    FramingFreezingPointComposition,
+    StillPhotoComprehensiveConfirmation;
 };
 
 /**
@@ -216,9 +216,9 @@ define character {
   health 12;
   energy 2;
   skills VoidClawStrike,
-  ErodedFlamingFeathers,
-  SeveringPrimalFire,
-  ResentmentPassive;
+    ErodedFlamingFeathers,
+    SeveringPrimalFire,
+    ResentmentPassive;
 };
 
 /**
@@ -238,7 +238,7 @@ define card {
     variable supp, 0;
     associateExtension NonInitialPlayedCardExtension;
     replaceDescription "[GCG_TOKEN_COUNTER]",
-    ((_, { area }, ext) => ext.defIds[area.who].length);
+      ((_, { area }, ext) => ext.defIds[area.who].length);
     on enter {
       :setVariable("supp", :getExtensionState().defIds[:self.who].length);
     };

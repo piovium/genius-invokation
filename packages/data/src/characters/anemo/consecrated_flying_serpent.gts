@@ -147,10 +147,10 @@ define character {
   health 10;
   energy 2;
   skills WhirlingTail,
-  SwirlingSquall,
-  ScattershotVortex,
-  ImmortalRemnantsAnemo,
-  SquallDrawCardsCounter;
+    SwirlingSquall,
+    ScattershotVortex,
+    ImmortalRemnantsAnemo,
+    SquallDrawCardsCounter;
 };
 
 /**

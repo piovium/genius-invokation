@@ -134,8 +134,8 @@ define character {
   health 10;
   energy 2;
   skills PureHeartPureDreams,
-  AisaUtamakuraPilgrimage,
-  AnrakuSecretSpringTherapy;
+    AisaUtamakuraPilgrimage,
+    AnrakuSecretSpringTherapy;
 };
 
 /**

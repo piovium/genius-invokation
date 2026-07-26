@@ -197,9 +197,9 @@ define character {
   health 11;
   energy 2;
   skills GleamingSpearGuardianStance,
-  SacredRiteHeronsSanctum,
-  SacredRiteWagtailsTide,
-  HeronStrike;
+    SacredRiteHeronsSanctum,
+    SacredRiteWagtailsTide,
+    HeronStrike;
 };
 
 /**

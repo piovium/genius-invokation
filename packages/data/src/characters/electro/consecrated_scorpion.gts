@@ -120,9 +120,9 @@ define character {
   health 10;
   energy 2;
   skills ScorpionStrike,
-  StingingSpine,
-  ThunderboreBlast,
-  ImmortalRemnantsElectro;
+    StingingSpine,
+    ThunderboreBlast,
+    ImmortalRemnantsElectro;
 };
 
 /**

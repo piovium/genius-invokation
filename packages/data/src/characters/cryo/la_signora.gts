@@ -207,10 +207,10 @@ define character {
   health 10;
   energy 2;
   skills FrostbladeHailstorm,
-  BitingShards,
-  CarmineChrysalis,
-  MightOfDelusion,
-  InfernosAwakening;
+    BitingShards,
+    CarmineChrysalis,
+    MightOfDelusion,
+    InfernosAwakening;
 };
 
 /**

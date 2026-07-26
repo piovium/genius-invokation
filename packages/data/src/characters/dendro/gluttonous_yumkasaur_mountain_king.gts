@@ -176,10 +176,10 @@ define character {
   health 8;
   energy 2;
   skills CrushingTailAttack,
-  FlyingFruit,
-  FlamegranateConflagration,
-  GluttonousRex01,
-  GluttonousRex02;
+    FlyingFruit,
+    FlamegranateConflagration,
+    GluttonousRex01,
+    GluttonousRex02;
 };
 
 /**

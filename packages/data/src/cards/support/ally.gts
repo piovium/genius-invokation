@@ -591,14 +591,14 @@ define extension {
   });
   description "记录本场对局中双方支援区弃置卡牌的数量";
   mutateWhen onDispose,
-  ((st, e) => {
-    if (e.isDiscardOrTuning()) {
-      return;
-    }
-    if (e.entity.definition.type === "support") {
-      st.disposedSupportCount[e.who]++;
-    }
-  });
+    ((st, e) => {
+      if (e.isDiscardOrTuning()) {
+        return;
+      }
+      if (e.entity.definition.type === "support") {
+        st.disposedSupportCount[e.who]++;
+      }
+    });
 };
 
 /**
@@ -615,7 +615,7 @@ define card {
   cost DiceType.Aligned, 1;
   associateExtension DisposedSupportCountExtension;
   replaceDescription "[GCG_TOKEN_COUNTER]",
-  ((_, { area }, ext) => ext.disposedSupportCount[area.who]);
+    ((_, { area }, ext) => ext.disposedSupportCount[area.who]);
   support ally {
     associateExtension DisposedSupportCountExtension;
     variable experience, 0;
@@ -654,17 +654,17 @@ define extension {
   });
   description "记录本场对局中双方角色受到过的元素伤害种类";
   mutateWhen onDamageOrHeal,
-  ((st, e) => {
-    if (
-      e.isDamageTypeDamage() &&
-      e.type !== DamageType.Physical &&
-      e.type !== DamageType.Piercing
-    ) {
-      if (!st.damages[e.targetWho].includes(e.type)) {
-        st.damages[e.targetWho].push(e.type);
+    ((st, e) => {
+      if (
+        e.isDamageTypeDamage() &&
+        e.type !== DamageType.Physical &&
+        e.type !== DamageType.Piercing
+      ) {
+        if (!st.damages[e.targetWho].includes(e.type)) {
+          st.damages[e.targetWho].push(e.type);
+        }
       }
-    }
-  });
+    });
 };
 
 /**
@@ -681,7 +681,7 @@ define card {
   cost DiceType.Aligned, 1;
   associateExtension DamageTypeCountExtension;
   replaceDescription "[GCG_TOKEN_COUNTER]",
-  ((_, { area }, ext) => ext.damages[flip(area.who)].length);
+    ((_, { area }, ext) => ext.damages[flip(area.who)].length);
   support ally {
     associateExtension DamageTypeCountExtension;
     variable count, 0;

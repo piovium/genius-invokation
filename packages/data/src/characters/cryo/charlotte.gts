@@ -120,8 +120,8 @@ define character {
   health 11;
   energy 2;
   skills CoolcolorCapture,
-  FramingFreezingPointComposition,
-  StillPhotoComprehensiveConfirmation;
+    FramingFreezingPointComposition,
+    StillPhotoComprehensiveConfirmation;
 };
 
 /**

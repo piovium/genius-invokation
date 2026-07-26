@@ -189,9 +189,9 @@ define character {
   health 10;
   energy 2;
   skills SpiritvesselSnapshot,
-  NightsSling,
-  DarkVoicesEcho,
-  NightshadeSynesthesia;
+    NightsSling,
+    DarkVoicesEcho,
+    NightshadeSynesthesia;
   associateNightsoul NightsoulsBlessing;
 };
 

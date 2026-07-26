@@ -173,10 +173,10 @@ define character {
   health 11;
   energy 2;
   skills AsWaterSeeksEquilibrium,
-  OTearsIShallRepay,
-  OTidesIHaveReturned,
-  EquitableJudgment,
-  SourcewaterDropletSkill;
+    OTearsIShallRepay,
+    OTidesIHaveReturned,
+    EquitableJudgment,
+    SourcewaterDropletSkill;
 };
 
 /**

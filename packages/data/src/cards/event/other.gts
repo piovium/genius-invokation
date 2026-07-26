@@ -2505,16 +2505,16 @@ define extension {
   });
   description "记录本场对局中双方支援区和召唤区弃置卡牌的数量";
   mutateWhen onDispose,
-  ((st, e) => {
-    if (e.isDiscardOrTuning()) {
-      return;
-    }
-    if (e.entity.definition.type === "support") {
-      st.disposedSupportCount[e.who]++;
-    } else if (e.entity.definition.type === "summon") {
-      st.disposedSummonsCount[e.who]++;
-    }
-  });
+    ((st, e) => {
+      if (e.isDiscardOrTuning()) {
+        return;
+      }
+      if (e.entity.definition.type === "support") {
+        st.disposedSupportCount[e.who]++;
+      } else if (e.entity.definition.type === "summon") {
+        st.disposedSummonsCount[e.who]++;
+      }
+    });
 };
 
 /**
@@ -2560,9 +2560,9 @@ define card {
   cost DiceType.Aligned, 2;
   associateExtension DisposedSupportAndSummonsCountExtension;
   replaceDescription "[GCG_TOKEN_COUNTER]",
-  ((c, { area }, ext) => ext.disposedSupportCount[area.who]);
+    ((c, { area }, ext) => ext.disposedSupportCount[area.who]);
   replaceDescription "[GCG_TOKEN_COUNTER_2]",
-  ((c, { area }, ext) => ext.disposedSummonsCount[area.who]);
+    ((c, { area }, ext) => ext.disposedSummonsCount[area.who]);
   :summon(FellDragon);
 };
 

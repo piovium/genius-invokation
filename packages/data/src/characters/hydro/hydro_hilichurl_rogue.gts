@@ -187,9 +187,9 @@ define character {
   health 11;
   energy 2;
   skills WhirlingScythe,
-  SlashOfSurgingTides,
-  BubblefloatBlitz,
-  SlashOfSurgingTidesPassive;
+    SlashOfSurgingTides,
+    BubblefloatBlitz,
+    SlashOfSurgingTidesPassive;
 };
 
 /**

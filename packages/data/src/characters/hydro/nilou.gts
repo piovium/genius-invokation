@@ -157,8 +157,8 @@ define character {
   health 10;
   energy 2;
   skills DanceOfSamser,
-  DanceOfHaftkarsvar,
-  DanceOfAbzendegiDistantDreamsListeningSpring;
+    DanceOfHaftkarsvar,
+    DanceOfAbzendegiDistantDreamsListeningSpring;
 };
 
 /**

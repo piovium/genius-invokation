@@ -195,11 +195,11 @@ define character {
   health 10;
   energy 2;
   skills LaceratingSlash,
-  TempestuousBarrage,
-  DvalinsCleansing,
-  CaelestinumFinaleTermini,
-  PerpetualCleansing,
-  UltimateCleansing;
+    TempestuousBarrage,
+    DvalinsCleansing,
+    CaelestinumFinaleTermini,
+    PerpetualCleansing,
+    UltimateCleansing;
 };
 
 /**

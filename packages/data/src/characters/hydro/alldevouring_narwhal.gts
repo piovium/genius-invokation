@@ -138,7 +138,7 @@ define combatStatus {
     visible false;
   };
   replaceDescription "[GCG_TOKEN_SHIELD]",
-  ((_, self) => self.variables.extraMaxHealth);
+    ((_, self) => self.variables.extraMaxHealth);
   on disposeOrTuneCard {
     when :( :e.from.type === "hands" || :e.isTuning() );
     const cost = :e.diceCost();

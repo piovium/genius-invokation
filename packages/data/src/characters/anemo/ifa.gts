@@ -205,8 +205,8 @@ define character {
   health 10;
   energy 2;
   skills RiteOfDispellingWinds,
-  AirborneDiseasePrevention,
-  CompoundSedationField;
+    AirborneDiseasePrevention,
+    CompoundSedationField;
   associateNightsoul NightsoulsBlessing;
 };
 

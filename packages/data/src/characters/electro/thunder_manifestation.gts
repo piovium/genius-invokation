@@ -186,9 +186,9 @@ define character {
   health 10;
   energy 2;
   skills ThunderousWingslash,
-  StrifefulLightning,
-  ThunderingShackles,
-  LightningProbe;
+    StrifefulLightning,
+    ThunderingShackles,
+    LightningProbe;
 };
 
 /**

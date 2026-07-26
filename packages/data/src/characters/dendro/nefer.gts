@@ -161,10 +161,10 @@ define character {
   health 10;
   energy 2;
   skills StrikingSerpent,
-  SenetStrategyDanceOfAThousandNights,
-  SacredVowTrueEyesPhantasm,
-  MoonsignBenedictionDusklitEaves,
-  PhantasmPerformance;
+    SenetStrategyDanceOfAThousandNights,
+    SacredVowTrueEyesPhantasm,
+    MoonsignBenedictionDusklitEaves,
+    PhantasmPerformance;
   enabledLunarReactions Reaction.LunarBloom;
 };
 
@@ -183,12 +183,12 @@ define card {
   cost DiceType.Dendro, 3;
   talent Nefer, none {
     defineSnippet attachCostReductionToSeedsOfDeceit,
-    :{
-      const deceitCards = :queryAll($.my.pile.def(SeedsOfDeceit));
-      for (const card of deceitCards) {
-        :attachCostReduction(card);
-      }
-    };
+      :{
+        const deceitCards = :queryAll($.my.pile.def(SeedsOfDeceit));
+        for (const card of deceitCards) {
+          :attachCostReduction(card);
+        }
+      };
     on enter {
       :createPileCards(SeedsOfDeceit, 3, "spaceAround");
       :callSnippet.attachCostReductionToSeedsOfDeceit();

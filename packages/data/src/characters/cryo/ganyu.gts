@@ -91,12 +91,12 @@ define extension {
   schema ({ used: "pair<boolean>" });
   initialState ({ used: [false, false] });
   mutateWhen onDamageOrHeal,
-  ((st, e) => {
-    // 甘雨倒下时重置
-    if (e.target.definition.id === Ganyu && e.damageInfo.causeDefeated) {
-      st.used[e.targetWho] = false;
-    }
-  });
+    ((st, e) => {
+      // 甘雨倒下时重置
+      if (e.target.definition.id === Ganyu && e.damageInfo.causeDefeated) {
+        st.used[e.targetWho] = false;
+      }
+    });
 };
 
 /**

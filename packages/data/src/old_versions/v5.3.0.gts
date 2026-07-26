@@ -28,10 +28,10 @@ define character {
   health 6;
   energy 2;
   skills ShatterclampStrike,
-  BusterBlaze,
-  BattlelineDetonation,
-  ImperialPanoply,
-  SearingBlast;
+    BusterBlaze,
+    BattlelineDetonation,
+    ImperialPanoply,
+    SearingBlast;
 };
 
 /**

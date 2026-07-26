@@ -174,8 +174,8 @@ define character {
   health 10;
   energy 3;
   skills FightClubLegend,
-  MasatsuZetsugiAkaushiBurst,
-  RoyalDescentBeholdIttoTheEvil;
+    MasatsuZetsugiAkaushiBurst,
+    RoyalDescentBeholdIttoTheEvil;
 };
 
 /**

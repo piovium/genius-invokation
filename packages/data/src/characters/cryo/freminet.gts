@@ -78,7 +78,7 @@ define status {
     visible false;
   };
   replaceDescription "[GCG_TOKEN_COUNTER]",
-  ((st, self) => self.variables.drawnCard);
+    ((st, self) => self.variables.drawnCard);
   on drawCard {
     :addVariable("drawnCard", 1);
   };

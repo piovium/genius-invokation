@@ -190,10 +190,10 @@ define character {
   health 10;
   energy 4;
   skills PocztowyDemonspear,
-  AncientRiteArcaneLight,
-  AncientRitualComethTheNight,
-  MoonsignBenedictionOldWorldSecrets,
-  ThunderousSymphony;
+    AncientRiteArcaneLight,
+    AncientRitualComethTheNight,
+    MoonsignBenedictionOldWorldSecrets,
+    ThunderousSymphony;
   enabledLunarReactions Reaction.LunarElectroCharged;
 };
 

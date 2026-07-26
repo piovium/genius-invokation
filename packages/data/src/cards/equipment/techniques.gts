@@ -340,11 +340,11 @@ define extension {
   initialState ({ techniquesPlayedCount: [0, 0] });
   description "记录本场对局中双方打出特技牌的数量";
   mutateWhen onPlayCard,
-  ((c, e) => {
-    if (e.card.definition.tags.includes("technique")) {
-      c.techniquesPlayedCount[e.who]++;
-    }
-  });
+    ((c, e) => {
+      if (e.card.definition.tags.includes("technique")) {
+        c.techniquesPlayedCount[e.who]++;
+      }
+    });
 };
 
 /**
@@ -358,13 +358,13 @@ define combatStatus {
   associateExtension TechniquesPlayedCountExtension;
   variable techniquesPlayedCount, 0;
   defineSnippet checkCount,
-  :{
-    if (:getVariable("techniquesPlayedCount") >= 6) {
-      :characterStatus(SaurianBuddyCheers, "my active");
-      :damage(DamageType.Physical, 3);
-      :dispose();
-    }
-  };
+    :{
+      if (:getVariable("techniquesPlayedCount") >= 6) {
+        :characterStatus(SaurianBuddyCheers, "my active");
+        :damage(DamageType.Physical, 3);
+        :dispose();
+      }
+    };
   on enter {
     :setVariable(
       "techniquesPlayedCount",

@@ -275,9 +275,9 @@ define character {
   health 10;
   energy 2;
   skills StrikeOfTheDispossessed,
-  LifeStream,
-  TheEndFalls,
-  InvokationOfPropagation;
+    LifeStream,
+    TheEndFalls,
+    InvokationOfPropagation;
 };
 
 /**

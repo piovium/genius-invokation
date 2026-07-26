@@ -182,9 +182,9 @@ define character {
   health 10;
   energy 2;
   skills ShadowstealingSpiritVessel,
-  DawnfrostDarkstar,
-  EdictOfEntwinedSplendor,
-  SongsOfProfoundMystery;
+    DawnfrostDarkstar,
+    EdictOfEntwinedSplendor,
+    SongsOfProfoundMystery;
   associateNightsoul NightsoulsBlessing;
 };
 

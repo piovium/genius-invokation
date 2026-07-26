@@ -195,12 +195,12 @@ define character {
   health 12;
   energy 2;
   skills SupremeStrike,
-  AxeAndAegis,
-  StoneStance,
-  AttackingMomentum,
-  GreataxeStrike,
-  MastersStrike,
-  MastersStrike;
+    AxeAndAegis,
+    StoneStance,
+    AttackingMomentum,
+    GreataxeStrike,
+    MastersStrike,
+    MastersStrike;
 };
 
 /**

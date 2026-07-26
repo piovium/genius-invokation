@@ -183,10 +183,10 @@ define character {
   health 8;
   energy 2;
   skills TailSweep,
-  SwirlingSchoolOfFish,
-  FontemerHoarthunder,
-  PearlArmor,
-  SwirlingSchoolOfFishPassive;
+    SwirlingSchoolOfFish,
+    FontemerHoarthunder,
+    PearlArmor,
+    SwirlingSchoolOfFishPassive;
 };
 
 /**

@@ -179,9 +179,9 @@ define character {
   health 11;
   energy 3;
   skills ForcefulFistsOfFrost,
-  IcefangRush,
-  DarkgoldWolfbite,
-  DarkgoldWolfbite01;
+    IcefangRush,
+    DarkgoldWolfbite,
+    DarkgoldWolfbite01;
 };
 
 /**

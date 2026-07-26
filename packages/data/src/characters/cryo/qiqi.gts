@@ -110,12 +110,12 @@ define extension {
   initialState ({ count: [0, 0] });
   description "本场对局中某方触发起死回骸的次数";
   mutateWhen onDamageOrHeal,
-  ((st, e) => {
-    // 七七倒下时重置
-    if (e.target.definition.id === Qiqi && e.damageInfo.causeDefeated) {
-      st.count[e.targetWho] = 0;
-    }
-  });
+    ((st, e) => {
+      // 七七倒下时重置
+      if (e.target.definition.id === Qiqi && e.damageInfo.causeDefeated) {
+        st.count[e.targetWho] = 0;
+      }
+    });
 };
 
 /**

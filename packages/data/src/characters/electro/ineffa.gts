@@ -134,9 +134,9 @@ define character {
   health 10;
   energy 2;
   skills CyclonicDuster,
-  CleaningModeCarrierFrequency,
-  SupremeInstructionCyclonicExterminator,
-  MoonsignBenedictionAssemblageHub;
+    CleaningModeCarrierFrequency,
+    SupremeInstructionCyclonicExterminator,
+    MoonsignBenedictionAssemblageHub;
   enabledLunarReactions Reaction.LunarElectroCharged;
 };
 

@@ -40,7 +40,7 @@ define combatStatus {
     visible false;
   };
   replaceDescription "[GCG_TOKEN_COUNTER]",
-  ((_, self) => self.variables.damageValue);
+    ((_, self) => self.variables.damageValue);
   on endPhase {
     usage 2;
     :damage(DamageType.Dendro, :getVariable("damageValue"));
@@ -171,9 +171,9 @@ define character {
   health 11;
   energy 2;
   skills PeregrinationOfLinnunrata,
-  RunoDawnlessRestOfKarsikko,
-  RunoAllHeartsBecomeTheBeatingMoon,
-  MoonsignBenedictionNaturesChorus;
+    RunoDawnlessRestOfKarsikko,
+    RunoAllHeartsBecomeTheBeatingMoon,
+    MoonsignBenedictionNaturesChorus;
   enabledLunarReactions Reaction.LunarBloom;
 };
 

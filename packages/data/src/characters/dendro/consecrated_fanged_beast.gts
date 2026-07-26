@@ -150,10 +150,10 @@ define character {
   health 10;
   energy 2;
   skills ClawSlash,
-  SiphonWave,
-  SprawlingBlightedVines,
-  HungerFromTheRemains,
-  SproutsOfTheBlightedRot;
+    SiphonWave,
+    SprawlingBlightedVines,
+    HungerFromTheRemains,
+    SproutsOfTheBlightedRot;
 };
 
 /**

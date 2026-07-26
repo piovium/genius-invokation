@@ -175,10 +175,10 @@ define character {
   health 10;
   energy 3;
   skills InvitationToABeheading,
-  AllIsAsh,
-  BalemoonRising,
-  TheBalemoonAloneMayKnowPassive01,
-  TheBalemoonAloneMayKnowPassive03;
+    AllIsAsh,
+    BalemoonRising,
+    TheBalemoonAloneMayKnowPassive01,
+    TheBalemoonAloneMayKnowPassive03;
 };
 
 /**

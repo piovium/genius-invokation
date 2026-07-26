@@ -223,11 +223,11 @@ define character {
   health 6;
   energy 2;
   skills RipplingSlash,
-  VortexEdge,
-  TorrentialShock,
-  WateryRebirth,
-  RipplingBlades,
-  WateryRebirth01;
+    VortexEdge,
+    TorrentialShock,
+    WateryRebirth,
+    RipplingBlades,
+    WateryRebirth01;
 };
 
 // 暗流涌动入场时创建此出战状态，检测使徒击倒后生成暗流的诅咒

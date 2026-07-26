@@ -201,9 +201,9 @@ define character {
   health 10;
   energy 2;
   skills ShadowhuntingSpearCustom,
-  FragranceExtraction,
-  AromaticExplication,
-  LingeringFragrance01;
+    FragranceExtraction,
+    AromaticExplication,
+    LingeringFragrance01;
 };
 
 /**

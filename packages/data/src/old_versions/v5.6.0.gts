@@ -157,8 +157,8 @@ define character {
   health 10;
   energy 2;
   skills FavoniusBladeworkWeiss,
-  AbiogenesisSolarIsotoma,
-  RiteOfProgenitureTectonicTide;
+    AbiogenesisSolarIsotoma,
+    RiteOfProgenitureTectonicTide;
 };
 /**
  * @id 1210
@@ -173,10 +173,10 @@ define character {
   health 10;
   energy 2;
   skills AsWaterSeeksEquilibrium,
-  OTearsIShallRepay,
-  OTidesIHaveReturned,
-  EquitableJudgment,
-  SourcewaterDropletSkill;
+    OTearsIShallRepay,
+    OTidesIHaveReturned,
+    EquitableJudgment,
+    SourcewaterDropletSkill;
 };
 
 /**
@@ -207,9 +207,9 @@ define character {
   health 10;
   energy 2;
   skills GleamingSpearGuardianStance,
-  SacredRiteHeronsSanctum,
-  SacredRiteWagtailsTide,
-  HeronStrike;
+    SacredRiteHeronsSanctum,
+    SacredRiteWagtailsTide,
+    HeronStrike;
 };
 
 /**
@@ -240,9 +240,9 @@ define character {
   health 10;
   energy 2;
   skills WhirlingScythe,
-  SlashOfSurgingTides,
-  BubblefloatBlitz,
-  SlashOfSurgingTidesPassive;
+    SlashOfSurgingTides,
+    BubblefloatBlitz,
+    SlashOfSurgingTidesPassive;
 };
 
 /**

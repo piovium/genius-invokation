@@ -137,9 +137,9 @@ define character {
   health 10;
   energy 3;
   skills RippleOfFate,
-  MirrorReflectionOfDoom,
-  StellarisPhantasm,
-  IllusoryTorrent;
+    MirrorReflectionOfDoom,
+    StellarisPhantasm,
+    IllusoryTorrent;
 };
 
 /**

@@ -33,10 +33,10 @@ define status {
   id 127011 as RadicalVitalityStatus;
   variable vitality, 0;
   defineSnippet addVitality,
-  :{
-    const max = :self.master.hasEquipment(ProliferatingSpores) ? 4 : 3;
-    :addVariableWithMax("vitality", 1, max);
-  };
+    :{
+      const max = :self.master.hasEquipment(ProliferatingSpores) ? 4 : 3;
+      :addVariableWithMax("vitality", 1, max);
+    };
   on dealDamage {
     :callSnippet.addVitality();
   };

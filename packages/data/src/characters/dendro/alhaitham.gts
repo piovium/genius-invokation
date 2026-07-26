@@ -127,8 +127,8 @@ define character {
   health 10;
   energy 2;
   skills AbductiveReasoning,
-  UniversalityAnElaborationOnForm,
-  ParticularFieldFettersOfPhenomena;
+    UniversalityAnElaborationOnForm,
+    ParticularFieldFettersOfPhenomena;
 };
 
 /**

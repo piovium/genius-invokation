@@ -127,9 +127,9 @@ define character {
   health 10;
   energy 2;
   skills BishbashboshRepair,
-  Musecatcher,
-  PrecisionHydronicCooler,
-  ModularEfficiencyProtocol;
+    Musecatcher,
+    PrecisionHydronicCooler,
+    ModularEfficiencyProtocol;
 };
 
 /**

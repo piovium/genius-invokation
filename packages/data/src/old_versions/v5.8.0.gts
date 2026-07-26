@@ -202,10 +202,10 @@ define character {
   health 7;
   energy 2;
   skills CrushingTailAttack,
-  FlyingFruit,
-  FlamegranateConflagration,
-  GluttonousRex01,
-  GluttonousRex02;
+    FlyingFruit,
+    FlamegranateConflagration,
+    GluttonousRex01,
+    GluttonousRex02;
 };
 
 /**
@@ -264,9 +264,9 @@ define character {
   health 10;
   energy 3;
   skills KamisatoArtKabuki,
-  KamisatoArtHyouka,
-  KamisatoArtSoumetsu,
-  KamisatoArtSenho;
+    KamisatoArtHyouka,
+    KamisatoArtSoumetsu,
+    KamisatoArtSenho;
 };
 
 /**

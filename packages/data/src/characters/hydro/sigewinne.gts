@@ -252,12 +252,12 @@ define character {
   health 12;
   energy 2;
   skills TargetedTreatment,
-  ReboundHydrotherapy,
-  SuperSaturatedSyringing,
-  DetailedDiagnosisThoroughTreatment01,
-  MedicalInterventionOfPureIntention,
-  DetailedDiagnosisThoroughTreatment02,
-  DetailedDiagnosisThoroughTreatment03;
+    ReboundHydrotherapy,
+    SuperSaturatedSyringing,
+    DetailedDiagnosisThoroughTreatment01,
+    MedicalInterventionOfPureIntention,
+    DetailedDiagnosisThoroughTreatment02,
+    DetailedDiagnosisThoroughTreatment03;
 };
 
 /**
