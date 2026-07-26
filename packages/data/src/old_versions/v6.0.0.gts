@@ -1,5 +1,15 @@
-import { card, combatStatus, DamageType, DiceType, skill, summon } from "@gi-tcg/core/builder";
-import { AlldevouringNarwhal, AnomalousAnatomy } from "../characters/hydro/alldevouring_narwhal.gts";
+import {
+  card,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+} from "@gi-tcg/core/builder";
+import {
+  AlldevouringNarwhal,
+  AnomalousAnatomy,
+} from "../characters/hydro/alldevouring_narwhal.gts";
 import { FestiveFires } from "../characters/pyro/xinyan.gts";
 
 /**
@@ -25,12 +35,11 @@ define card {
     } else if (element === DiceType.Cryo) {
       :transformDefinition(:self, ShiningShadowhuntShellCryo);
     }
-  }
-  on selfDiscard, "=play" {
-  }
+  };
+  on selfDiscard, "=play";
   :damage(DamageType.Anemo, 1, "opp characters with health > 0 limit 1");
   :createPileCards(ShadowhuntShell, 1, "random");
-}
+};
 
 /**
  * @id 115114
@@ -43,11 +52,10 @@ define card {
   until "v6.0.0";
   undiscoverable;
   cost DiceType.Pyro, 3;
-  on selfDiscard, "=play" {
-  }
+  on selfDiscard, "=play";
   :damage(DamageType.Pyro, 1, "opp characters with health > 0 limit 1");
   :createPileCards(ShadowhuntShell, 1, "random");
-}
+};
 
 /**
  * @id 115115
@@ -60,11 +68,10 @@ define card {
   until "v6.0.0";
   undiscoverable;
   cost DiceType.Hydro, 3;
-  on selfDiscard, "=play" {
-  }
+  on selfDiscard, "=play";
   :damage(DamageType.Hydro, 1, "opp characters with health > 0 limit 1");
   :createPileCards(ShadowhuntShell, 1, "random");
-}
+};
 
 /**
  * @id 115116
@@ -77,11 +84,10 @@ define card {
   until "v6.0.0";
   undiscoverable;
   cost DiceType.Electro, 3;
-  on selfDiscard, "=play" {
-  }
+  on selfDiscard, "=play";
   :damage(DamageType.Electro, 1, "opp characters with health > 0 limit 1");
   :createPileCards(ShadowhuntShell, 1, "random");
-}
+};
 
 /**
  * @id 115117
@@ -94,12 +100,10 @@ define card {
   until "v6.0.0";
   undiscoverable;
   cost DiceType.Cryo, 3;
-  on selfDiscard, "=play" {
-  }
+  on selfDiscard, "=play";
   :damage(DamageType.Cryo, 1, "opp characters with health > 0 limit 1");
   :createPileCards(ShadowhuntShell, 1, "random");
-}
-
+};
 
 /**
  * @id 122043
@@ -122,7 +126,9 @@ define summon {
   };
   hint DamageType.Electro, ((c, e) => e.variables.atk);
   on enter {
-    const domain = :$(`my combat status with definition id ${DeepDevourersDomain}`)!;
+    const domain = :$(
+      `my combat status with definition id ${DeepDevourersDomain}`,
+    )!;
     const maxCost = domain.getVariable("totalMaxCost");
     const count = domain.getVariable("totalMaxCostCount");
     if (count > 0) {
@@ -131,26 +137,26 @@ define summon {
     } else {
       :dispose();
     }
-  }
+  };
   on endPhase {
     :damage(DamageType.Electro, :getVariable("atk"));
     :consumeUsage();
-  }
+  };
   on declareEnd {
     :damage(DamageType.Electro, :getVariable("atk"));
     :consumeUsage();
-  }
+  };
   on decreaseDamaged {
     when :( :getVariable("barrierUsage") && :e.target.isActive() );
     :e.decreaseDamage(1);
     :setVariable("barrierUsage", 0);
-  }
+  };
   on damaged {
     when :( !:getVariable("barrierUsage") );
     :consumeUsage(2);
     :setVariable("barrierUsage", 1);
-  }
-}
+  };
+};
 
 /**
  * @id 122041
@@ -179,7 +185,8 @@ define combatStatus {
   variable extraMaxHealth, 0 {
     visible false;
   };
-  replaceDescription "[GCG_TOKEN_SHIELD]", ((_, self) => self.variables.extraMaxHealth);
+  replaceDescription "[GCG_TOKEN_SHIELD]",
+  ((_, self) => self.variables.extraMaxHealth);
   on disposeOrTuneCard {
     const cost = :e.diceCost();
     :addVariable("cardCount", 1);
@@ -196,7 +203,8 @@ define combatStatus {
         const card0Cost = :getVariable("card0Cost");
         const card1Cost = :getVariable("card1Cost");
         const card2Cost = cost;
-        const distinctCostCount = new Set([card0Cost, card1Cost, card2Cost]).size;
+        const distinctCostCount = new Set([card0Cost, card1Cost, card2Cost])
+          .size;
         const extraMaxHealth = 4 - distinctCostCount;
         :addVariable("extraMaxHealth", extraMaxHealth);
         :setVariable("cardCount", 0);
@@ -210,21 +218,24 @@ define combatStatus {
       :setVariable("totalMaxCost", cost);
       :setVariable("totalMaxCostCount", 1);
     }
-  }
-  on endPhase { // 文本有误，实为结束阶段时
+  };
+  on endPhase {
+    // 文本有误，实为结束阶段时
     const extraMaxHealth = :getVariable("extraMaxHealth");
     if (extraMaxHealth) {
-      const narwhal = :$(`my character with definition id ${AlldevouringNarwhal}`);
+      const narwhal = :$(
+        `my character with definition id ${AlldevouringNarwhal}`,
+      );
       if (narwhal) {
         narwhal.addStatus(AnomalousAnatomy, {
-          overrideVariables: { extraMaxHealth }
+          overrideVariables: { extraMaxHealth },
         });
         :increaseMaxHealth(extraMaxHealth, narwhal);
       }
       :setVariable("extraMaxHealth", 0);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 13123
@@ -243,7 +254,7 @@ define skill {
   const cards = :player.hands.toSorted((a, b) => b.diceCost() - a.diceCost());
   :disposeCard(...cards);
   :combatStatus(FestiveFires);
-}
+};
 
 /**
  * @id 23052
@@ -260,4 +271,4 @@ define skill {
   if (:player.pile.length > 0) {
     :disposeCard(:player.pile[0]);
   }
-}
+};

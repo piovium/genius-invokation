@@ -13,9 +13,32 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, DamageType, DiceType, type EntityState, card, combatStatus, originalDiceCostOfCard, status } from "@gi-tcg/core/builder";
-import { ForbiddenKnowledge, OrigamiFlyingSquirrel, OrigamiHamster, PopupPaperFrog, SIMULANKA_QUERY, ToyGuard, ToyGuardSummon } from "../event/other.gts";
-import { BattlePlan, CostReduction, Empowerment, IneffectiveWhenPlayed, NoTuningAllowed } from "../../commons.gts";
+import {
+  $,
+  DamageType,
+  DiceType,
+  type EntityState,
+  card,
+  combatStatus,
+  originalDiceCostOfCard,
+  status,
+} from "@gi-tcg/core/builder";
+import {
+  ForbiddenKnowledge,
+  OrigamiFlyingSquirrel,
+  OrigamiHamster,
+  PopupPaperFrog,
+  SIMULANKA_QUERY,
+  ToyGuard,
+  ToyGuardSummon,
+} from "../event/other.gts";
+import {
+  BattlePlan,
+  CostReduction,
+  Empowerment,
+  IneffectiveWhenPlayed,
+  NoTuningAllowed,
+} from "../../commons.gts";
 
 /**
  * @id 321001
@@ -32,9 +55,9 @@ define card {
     on endPhase {
       usage 2;
       :drawCards(2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321002
@@ -49,12 +72,12 @@ define card {
   support place {
     on enter {
       :rerollDice(1);
-    }
+    };
     on roll {
       :e.addRerollCount(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321003
@@ -69,14 +92,14 @@ define card {
   support place {
     on roll {
       :e.fixDice(:$("my active")!.element(), 2);
-    }
+    };
     on actionPhase {
       when :( :player.hands.length <= 3 );
       :generateDice(DiceType.Omni, 1);
       :dispose();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321004
@@ -92,9 +115,9 @@ define card {
     on deductOmniDiceSwitch {
       usage perRound, 2;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321005
@@ -113,9 +136,9 @@ define card {
       when :( :$(`my standby with health < maxHealth`) );
       usage 2;
       :heal(2, "my standby characters order by health - maxHealth limit 1");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321006
@@ -134,9 +157,9 @@ define card {
       when :( :$(`my active with health < maxHealth`) );
       usage 2;
       :heal(2, "my active");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321007
@@ -163,9 +186,9 @@ define card {
         return omniCount + nonOmniDice.size >= 5;
       };
       :generateDice(DiceType.Omni, 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321008
@@ -185,9 +208,9 @@ define card {
       };
       :abortPreview(); // 官方也中断，因为预览的时候骰子数目不对
       :generateDice(DiceType.Omni, 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321009
@@ -206,9 +229,9 @@ define card {
       when :( :$(`my characters with health < maxHealth`) );
       usage 2;
       :heal(1, "all my characters");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321010
@@ -222,13 +245,15 @@ define card {
   cost DiceType.Aligned, 2;
   support place {
     on deductOmniDice {
-      when :( (:e.isUseSkill() || :e.hasCardTag("talent")) &&
-          (:player.dice.length <= :player.hands.length) );
+      when :(
+        (:e.isUseSkill() || :e.hasCardTag("talent")) &&
+          :player.dice.length <= :player.hands.length
+      );
       usage perRound, 1;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321011
@@ -253,7 +278,7 @@ define card {
       :setVariable("count", absorbed.length);
       :setVariable("d1", absorbed[0] ?? 0);
       :setVariable("d2", absorbed[1] ?? 0);
-    }
+    };
     on actionPhase {
       if (:getVariable("count") === 2) {
         :generateDice(:getVariable("d1"), 1);
@@ -262,9 +287,9 @@ define card {
         :generateDice(:getVariable("d1"), 1);
       }
       :setVariable("count", 0);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321012
@@ -282,9 +307,9 @@ define card {
       when :( :e.isChargedAttack() );
       usage 4;
       :e.deductVoidCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321013
@@ -298,14 +323,16 @@ define card {
   since "v4.0.0";
   support place {
     on deductOmniDiceCard {
-      when :( :e.hasOneOfCardTag("weapon", "artifact") &&
-          :e.currentDiceCostSize() >= 3 );
+      when :(
+        :e.hasOneOfCardTag("weapon", "artifact") &&
+          :e.currentDiceCostSize() >= 3
+      );
       usage perRound, 1;
       usage 2;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321014
@@ -324,9 +351,9 @@ define card {
       usage 3;
       usage perRound, 1;
       :generateDice(DiceType.Omni, 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321015
@@ -343,18 +370,20 @@ define card {
   support place {
     on enter {
       :drawCards(1, { withTag: "talent" });
-    }
+    };
     on deductOmniDice {
       when :{
-        return :e.hasCardTag("talent") ||
-          (:e.isUseSkill() && :e.currentDiceCostSize() >= 4);
+        return (
+          :e.hasCardTag("talent") ||
+          (:e.isUseSkill() && :e.currentDiceCostSize() >= 4)
+        );
       };
       usage 3;
       usage perRound, 1;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321016
@@ -372,9 +401,9 @@ define card {
       when :( :player.hands.length <= 2 );
       usage 2;
       :drawCards(2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321017
@@ -394,16 +423,20 @@ define card {
           const cardDef = :data.entities.get(equipment.definition.id)!;
           return originalDiceCostOfCard(cardDef);
         }
-        const myCost = :$$(`my equipments`).map((entity) => costOfEquipment(entity)).reduce((a, b) => a + b, 0);
-        const oppCost = :$$(`opp equipments`).map((entity) => costOfEquipment(entity)).reduce((a, b) => a + b, 0);
+        const myCost = :$$(`my equipments`)
+          .map((entity) => costOfEquipment(entity))
+          .reduce((a, b) => a + b, 0);
+        const oppCost = :$$(`opp equipments`)
+          .map((entity) => costOfEquipment(entity))
+          .reduce((a, b) => a + b, 0);
         return myCost >= oppCost;
       };
       usage 3;
       usage perRound, 1;
       :generateDice(:$("my active")!.element(), 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301018
@@ -419,8 +452,8 @@ define combatStatus {
   on playCard {
     when :( :e.card.definition.type === "eventCard" );
     usage 1;
-  }
-}
+  };
+};
 
 /**
  * @id 321018
@@ -440,16 +473,16 @@ define card {
       if (:getVariable("forbidden") >= 6 && :oppPlayer.hands.length > 0) {
         :addVariable("forbidden", -6);
         const candidates = :oppPlayer.hands.filter(
-          (card) => !card.withAttachment(IneffectiveWhenPlayed)
+          (card) => !card.withAttachment(IneffectiveWhenPlayed),
         );
         const target = :random(candidates);
         if (target) {
           :attach(IneffectiveWhenPlayed, target);
         }
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301019
@@ -463,8 +496,8 @@ define status {
   on endPhase {
     usage 1;
     :damage(DamageType.Piercing, 2, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 321019
@@ -482,9 +515,9 @@ define card {
     on healed {
       listenTo all;
       :characterStatus(DistantStorm, :e.target);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301022
@@ -497,11 +530,11 @@ define combatStatus {
   oneDuration;
   on enter {
     :createPileCards(ForbiddenKnowledge, 2, "top");
-  }
+  };
   on drawCard {
     :createPileCards(ForbiddenKnowledge, 1, "random");
-  }
-}
+  };
+};
 
 /**
  * @id 321020
@@ -523,9 +556,9 @@ define card {
         :combatStatus(TheMausoleumOfKingDeshretInEffect, "opp");
         :dispose();
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321021
@@ -548,9 +581,9 @@ define card {
       if (progress >= 9) {
         :dispose();
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301023
@@ -564,8 +597,8 @@ define status {
   duration 2;
   on increaseSkillDamage {
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 321022
@@ -600,9 +633,9 @@ define card {
           break;
         }
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 133087
@@ -613,7 +646,7 @@ define card {
 define card {
   id 133087 as FormerSiteOfTheCentralLaboratory; // 骗骗花
   reserved;
-}
+};
 
 /**
  * @id 133088
@@ -625,7 +658,7 @@ define card {
 define card {
   id 133088 as FakeFavoniusCathedral; // 骗骗花
   reserved;
-}
+};
 
 /**
  * @id 321023
@@ -644,14 +677,16 @@ define card {
       listenTo all;
       const isMine = :e.who === :self.who;
       const player = isMine ? :player : :oppPlayer;
-      if (!player.initialPile.some((card) => card.id === :e.card.definition.id)) {
+      if (
+        !player.initialPile.some((card) => card.id === :e.card.definition.id)
+      ) {
         if (isMine) {
           :addVariable("attention", 1);
         } else if (:getVariable("attention") > 0) {
           :addVariable("attention", -1);
         }
       }
-    }
+    };
     on actionPhase {
       const attention = :getVariable("attention");
       if (attention >= 3) {
@@ -660,9 +695,9 @@ define card {
       if (attention >= 1) {
         :convertDice(DiceType.Omni, 1);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321024
@@ -676,12 +711,15 @@ define card {
   support place {
     variable point, 1; // 神奇
     on playCard {
-      when :( !:isInInitialPile(:e.card) && :e.card.diceCost() >= :getVariable("point") );
+      when :(
+        !:isInInitialPile(:e.card) &&
+          :e.card.diceCost() >= :getVariable("point")
+      );
       :generateDice("randomElement", 1);
       :addVariable("point", 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321025
@@ -700,9 +738,9 @@ define card {
       usage 3;
       const target = :query($.my.summon.id(:e.entity.id));
       target?.addVariable("usage", 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301024
@@ -719,8 +757,8 @@ define status {
     };
     const element = :self.master.element();
     :generateDice(element, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 321026
@@ -735,14 +773,14 @@ define card {
     variable disposedCardCount, 0;
     on disposeCard {
       :addVariable("disposedCardCount", 1);
-    }
+    };
     on disposeCard {
       when :( :getVariable("disposedCardCount") >= 2 );
       :setVariable("disposedCardCount", 0);
       :characterStatus(FlowerfeatherClanInEffect, "my next");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321027
@@ -760,16 +798,18 @@ define card {
     on selectCard {
       const newValue = Math.max(0, :getVariable("intuition") - 1);
       :setVariable("intuition", newValue);
-    }
+    };
     on actionPhase {
       when :( :getVariable("intuition") === 0 );
-      const cards = :allCardDefinitions("support").filter((card) => originalDiceCostOfCard(card) === 2);
+      const cards = :allCardDefinitions("support").filter(
+        (card) => originalDiceCostOfCard(card) === 2,
+      );
       const candidates = :randomSubset(cards, 3);
       :selectAndPlay(candidates);
       :dispose();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301025
@@ -783,14 +823,16 @@ define status {
     append 5;
   };
   on enter {
-    when :( (:e.overridden?.variables.layer ?? 0) < 3 && :getVariable("layer") >= 3 );
+    when :(
+      (:e.overridden?.variables.layer ?? 0) < 3 && :getVariable("layer") >= 3
+    );
     :heal(1, "@master");
-  }
+  };
   on increaseSkillDamage {
     when :( :getVariable("layer") === 5 );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 321028
@@ -806,20 +848,22 @@ define card {
   cost DiceType.Void, 3;
   support place {
     on enterRelative {
-      when :( :e.entity.definition.type === "status" &&
-          :e.entity.definition.tags.includes("preparingSkill") );
+      when :(
+        :e.entity.definition.type === "status" &&
+          :e.entity.definition.tags.includes("preparingSkill")
+      );
       const ch = :e.entity.cast<"status">().master;
       :characterStatus(Exercise, ch, {
         overrideVariables: {
-          layer: 3
-        }
+          layer: 3,
+        },
       });
-    }
+    };
     on switchActive {
       :characterStatus(Exercise, "@event.switchTo");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321029
@@ -835,9 +879,13 @@ define card {
   cost DiceType.Void, 2;
   support place {
     on enter {
-      const newCard = :random([OrigamiFlyingSquirrel, PopupPaperFrog, OrigamiHamster]);
+      const newCard = :random([
+        OrigamiFlyingSquirrel,
+        PopupPaperFrog,
+        OrigamiHamster,
+      ]);
       :createHandCard(newCard);
-    }
+    };
     on declareEnd {
       when :( :$(SIMULANKA_QUERY) );
       usage 3;
@@ -846,9 +894,9 @@ define card {
       if (chosen) {
         :triggerEndPhaseSkill(chosen);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301032
@@ -861,8 +909,8 @@ define combatStatus {
   once deductOmniDiceCard {
     when :( :e.action.skill.caller.definition.id === ToyGuard );
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 301037
@@ -875,8 +923,8 @@ define combatStatus {
   once enterRelative {
     when :( :e.entity.definition.id === ToyGuardSummon );
     :e.entity.cast<"summon">().addVariable("effect", 1);
-  }
-}
+  };
+};
 
 /**
  * @id 321030
@@ -893,17 +941,17 @@ define card {
   support place {
     on enter {
       :createHandCard(ToyGuard);
-    }
+    };
     on useSkill {
       listenTo samePlayer;
-      if (:e.isSkillType("elemental")){
+      if (:e.isSkillType("elemental")) {
         :combatStatus(ConstellationMetropoleInEffect01);
-      } else if (:e.isSkillType("burst")){
+      } else if (:e.isSkillType("burst")) {
         :combatStatus(ConstellationMetropoleInEffect02);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321031
@@ -922,13 +970,13 @@ define card {
         autoDispose false;
       };
       :adventure();
-    }
+    };
     on adventure {
       when :( :getVariable("usage") === 0 );
       :dispose();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321035
@@ -943,16 +991,20 @@ define card {
   support place {
     variable count, 0;
     on enterRelative {
-      when :( ([CostReduction, Empowerment] as number[]).includes(:e.entity.definition.id) );
+      when :(
+        ([CostReduction, Empowerment] as number[]).includes(
+          :e.entity.definition.id,
+        )
+      );
       :addVariable("count", 1);
-    }
+    };
     on actionPhase {
       when :( :getVariable("count") >= 3 );
       :addVariable("count", -3);
       :generateDice("randomElement", 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321036
@@ -971,9 +1023,9 @@ define card {
       const target = :random(:oppPlayer.hands);
       :attachCostIncrease(target);
       :attach(NoTuningAllowed, target);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321037
@@ -991,16 +1043,16 @@ define card {
     on enter {
       :drawCards(2);
       :heal(2, "my characters order by health - maxHealth limit 1");
-    }
+    };
     on endPhase {
       usage 2;
       const chosen = :randomSubset(:queryAll($.macros.myHandsNotFree), 2);
       for (const card of chosen) {
         :attachCostReduction(card);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321038
@@ -1018,19 +1070,19 @@ define card {
     on endPhase {
       usage 2;
       const candidates = :player.hands.filter(
-        (card) => card.diceCost() >= 2 && !card.empowered()
+        (card) => card.diceCost() >= 2 && !card.empowered(),
       );
       const chosen = :randomSubset(candidates, 2);
       for (const card of chosen) {
         :attach(Empowerment, card);
       }
-    }
+    };
     on selfDispose {
       when :( :getVariable("usage") === 0 );
       :damage(DamageType.Physical, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321039
@@ -1049,19 +1101,19 @@ define card {
       usage 2;
       const chosen = :randomSubset(
         :player.pile.filter((card) => !card.empowered()),
-        2
+        2,
       );
       for (const card of chosen) {
         :attach(Empowerment, card);
       }
-    }
+    };
     on selfDispose {
       when :( !:e.isDiscardOrTuning() );
       :drawCards(2, { withAttachment: Empowerment });
       :characterStatus(BattlePlan, "my active");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321041
@@ -1082,12 +1134,12 @@ define card {
       if (myPileTop) {
         :attachCostIncrease(myPileTop);
       }
-    }
+    };
     on enter {
       :callSnippet();
-    }
+    };
     on actionPhase {
       :callSnippet();
-    }
-  }
-}
+    };
+  };
+};

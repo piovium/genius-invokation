@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, DiceType, $ } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  DiceType,
+  $,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 115111
@@ -25,7 +34,7 @@ define status {
   id 115111 as NightsoulsBlessing;
   since "v5.7.0";
   nightsoulsBlessing 2;
-}
+};
 
 /**
  * @id 115112
@@ -45,14 +54,16 @@ define card {
     skill {
       id 1151121;
       cost DiceType.Anemo, 2;
-      filter :( :self.master.hasNightsoulsBlessing()?.variables.nightsoul &&
-          :player.hands.length >= 3 );
+      filter :(
+        :self.master.hasNightsoulsBlessing()?.variables.nightsoul &&
+          :player.hands.length >= 3
+      );
       :consumeNightsoul("@master", 1);
       :damage(DamageType.Anemo, 1);
       :disposeMaxCostHands(3, { allowPreview: true });
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 115113
@@ -77,14 +88,14 @@ define card {
     } else if (element === DiceType.Cryo) {
       :transformDefinition(:self, ShiningShadowhuntShellCryo);
     }
-  }
+  };
   on selfDiscard, "=play" {
     when :( :e.from.type === "hands" );
     abortPreview;
-  }
+  };
   :damage(DamageType.Anemo, 1, $.macros.oppActivePrioritized);
   :createPileCards(ShadowhuntShell, 1, "random");
-}
+};
 
 /**
  * @id 115114
@@ -99,10 +110,10 @@ define card {
   on selfDiscard, "=play" {
     when :( :e.from.type === "hands" );
     abortPreview;
-  }
+  };
   :damage(DamageType.Pyro, 1, $.macros.oppActivePrioritized);
   :createPileCards(ShadowhuntShell, 1, "random");
-}
+};
 
 /**
  * @id 115115
@@ -118,10 +129,10 @@ define card {
   on selfDiscard, "=play" {
     when :( :e.from.type === "hands" );
     abortPreview;
-  }
+  };
   :damage(DamageType.Hydro, 1, $.macros.oppActivePrioritized);
   :createPileCards(ShadowhuntShell, 1, "random");
-}
+};
 
 /**
  * @id 115116
@@ -137,10 +148,10 @@ define card {
   on selfDiscard, "=play" {
     when :( :e.from.type === "hands" );
     abortPreview;
-  }
+  };
   :damage(DamageType.Electro, 1, $.macros.oppActivePrioritized);
   :createPileCards(ShadowhuntShell, 1, "random");
-}
+};
 
 /**
  * @id 115117
@@ -156,10 +167,10 @@ define card {
   on selfDiscard, "=play" {
     when :( :e.from.type === "hands" );
     abortPreview;
-  }
+  };
   :damage(DamageType.Cryo, 1, $.macros.oppActivePrioritized);
   :createPileCards(ShadowhuntShell, 1, "random");
-}
+};
 
 /**
  * @id 115118
@@ -174,8 +185,8 @@ define combatStatus {
   on switchActive {
     usage 2;
     :drawCards(1);
-  }
-}
+  };
+};
 
 /**
  * @id 15111
@@ -189,7 +200,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 15112
@@ -209,7 +220,7 @@ define skill {
   :gainNightsoul("@self", 2);
   :equip(SoulsniperRitualStaff, "@self");
   :combatStatus(IntentToCover);
-}
+};
 
 /**
  * @id 15113
@@ -225,7 +236,7 @@ define skill {
   :damage(DamageType.Piercing, 1, "opp standby");
   :damage(DamageType.Anemo, 1);
   :drawCards(3);
-}
+};
 
 /**
  * @id 15114
@@ -238,9 +249,9 @@ define skill {
   skillType passive {
     on battleBegin {
       :createPileCards(ShadowhuntShell, 6, "random");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1511
@@ -254,9 +265,12 @@ define character {
   tags anemo, bow, natlan;
   health 10;
   energy 2;
-  skills PhantomFeatherFlurry, SpiritReinsShadowHunt, SoulReapersFatalRound, ShadowhuntShellPassive;
+  skills PhantomFeatherFlurry,
+  SpiritReinsShadowHunt,
+  SoulReapersFatalRound,
+  ShadowhuntShellPassive;
   associateNightsoul NightsoulsBlessing;
-}
+};
 
 /**
  * @id 215111
@@ -271,4 +285,4 @@ define card {
   cost DiceType.Anemo, 1;
   eventTalent Chasca, none;
   :createHandCard(ShadowhuntShell);
-}
+};

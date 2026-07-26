@@ -1,19 +1,26 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 114021
@@ -28,8 +35,8 @@ define status {
   on useSkill {
     when :( :e.isSkillType("normal") || :e.isSkillType("elemental") );
     :damage(DamageType.Electro, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 14021
@@ -43,7 +50,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 14022
@@ -56,7 +63,7 @@ define skill {
   skillType elemental;
   cost DiceType.Electro, 3;
   :damage(DamageType.Electro, 3);
-}
+};
 
 /**
  * @id 14023
@@ -71,7 +78,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 3);
   :characterStatus(TheWolfWithin);
-}
+};
 
 /**
  * @id 1402
@@ -87,7 +94,7 @@ define character {
   health 10;
   energy 2;
   skills SteelFang, ClawAndThunder, LightningFang;
-}
+};
 
 /**
  * @id 214021
@@ -105,11 +112,14 @@ define card {
   talent Razor {
     on enter {
       :useSkill(ClawAndThunder);
-    }
+    };
     on useSkill {
       when :( :e.skill.definition.id === ClawAndThunder );
       usage perRound, 1;
-      :gainEnergy(1, "my characters with tag (electro) and with energy < maxEnergy limit 1");
-    }
-  }
-}
+      :gainEnergy(
+        1,
+        "my characters with tag (electro) and with energy < maxEnergy limit 1",
+      );
+    };
+  };
+};

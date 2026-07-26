@@ -1,19 +1,26 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 123051
@@ -29,8 +36,8 @@ define status {
   };
   on increaseDamage {
     :e.increaseDamage(:getVariable("layer"));
-  }
-}
+  };
+};
 
 /**
  * @id 123052
@@ -43,14 +50,15 @@ define status {
   id 123052 as CardsDiscarded;
   since "v6.0.0";
   variable cardCount, 0;
-  replaceDescription "[GCG_TOKEN_COUNTER]", ((c, self) => self.variables.cardCount);
+  replaceDescription "[GCG_TOKEN_COUNTER]",
+  ((c, self) => self.variables.cardCount);
   on disposeCard {
     :addVariable("cardCount", 1);
-    if (:getVariable("cardCount") % 6 === 0){
+    if (:getVariable("cardCount") % 6 === 0) {
       :characterStatus(Resentment, "@master");
     }
-  }
-}
+  };
+};
 
 /**
  * @id 23051
@@ -64,7 +72,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 23052
@@ -81,7 +89,7 @@ define skill {
   if (:player.pile.length > 0) {
     :disposeCard(:player.pile[0]);
   }
-}
+};
 
 /**
  * @id 23053
@@ -104,7 +112,7 @@ define skill {
     }
   }
   :characterStatus(Resentment, "@self");
-}
+};
 
 /**
  * @id 23054
@@ -117,12 +125,12 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(CardsDiscarded);
-    }
+    };
     on revive {
       :characterStatus(CardsDiscarded);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 23056
@@ -134,8 +142,8 @@ define skill {
   id 23056 as Resentment02;
   skillType passive {
     reserved;
-  }
-}
+  };
+};
 
 /**
  * @id 2305
@@ -149,8 +157,11 @@ define character {
   tags pyro, monster;
   health 11;
   energy 2;
-  skills VoidClawStrike, ErodedFlamingFeathers, SeveringPrimalFire, ResentmentPassive;
-}
+  skills VoidClawStrike,
+  ErodedFlamingFeathers,
+  SeveringPrimalFire,
+  ResentmentPassive;
+};
 
 /**
  * @id 223052
@@ -162,8 +173,8 @@ define status {
   id 223052 as UndyingFuryInEffect;
   once increaseDamage {
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 223051
@@ -189,6 +200,6 @@ define card {
       usage perRound, 1;
       :gainEnergy(1, "@master");
       :characterStatus(UndyingFuryInEffect, "@master");
-    }
-  }
-}
+    };
+  };
+};

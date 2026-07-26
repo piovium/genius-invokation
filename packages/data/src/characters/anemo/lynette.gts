@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 115083
@@ -28,8 +38,8 @@ define combatStatus {
     when :( :e.target.isActive() );
     usage 1;
     :e.decreaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 115082
@@ -46,17 +56,17 @@ define summon {
   on endPhase {
     usage 2;
     :damage(:self.variables.hintIcon, 1);
-  }
+  };
   on enter {
     :combatStatus(BogglecatBoxsTaunt);
-  }
+  };
   on actionPhase {
     :combatStatus(BogglecatBoxsTaunt);
-  }
+  };
   on selfDispose {
     :$(`my combat status with definition id ${BogglecatBoxsTaunt}`)?.dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 115081
@@ -71,8 +81,8 @@ define status {
   on endPhase {
     when :( :self.master.health >= 6 );
     :damage(DamageType.Piercing, 2, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 15081
@@ -86,7 +96,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 15082
@@ -109,7 +119,7 @@ define skill {
   } else {
     :damage(DamageType.Anemo, 3);
   }
-}
+};
 
 /**
  * @id 15083
@@ -124,7 +134,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Anemo, 2);
   :summon(BogglecatBox);
-}
+};
 
 /**
  * @id 1508
@@ -139,7 +149,7 @@ define character {
   health 10;
   energy 2;
   skills RapidRitesword, EnigmaticFeint, MagicTrickAstonishingShift;
-}
+};
 
 /**
  * @id 215081
@@ -157,6 +167,6 @@ define card {
   talent Lynette {
     on enter {
       :useSkill(EnigmaticFeint);
-    }
-  }
-}
+    };
+  };
+};

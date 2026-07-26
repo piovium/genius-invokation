@@ -13,7 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+} from "@gi-tcg/core/builder";
 import { BonecrunchersEnergyBlock } from "../../cards/event/other.gts";
 
 /**
@@ -30,8 +37,8 @@ define combatStatus {
       append 3;
     };
     :damage(DamageType.Electro, 2, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 24051
@@ -45,7 +52,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 24052
@@ -60,7 +67,7 @@ define skill {
   cost DiceType.Electro, 3;
   :damage(DamageType.Electro, 3);
   :createPileCards(BonecrunchersEnergyBlock, 1, "topRange2");
-}
+};
 
 /**
  * @id 24053
@@ -74,14 +81,16 @@ define skill {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 3);
-  const cards = :player.hands.filter((card) => card.definition.id === BonecrunchersEnergyBlock).slice(0, 3);
+  const cards = :player.hands
+    .filter((card) => card.definition.id === BonecrunchersEnergyBlock)
+    .slice(0, 3);
   :disposeCard(...cards);
   if (cards.length) {
     :combatStatus(ThunderboreTrap, "opp", {
-      overrideVariables: { usage: cards.length }
+      overrideVariables: { usage: cards.length },
     });
   }
-}
+};
 
 /**
  * @id 24054
@@ -94,9 +103,9 @@ define skill {
   skillType passive {
     on roundEnd {
       :createPileCards(BonecrunchersEnergyBlock, 2, "topRange10");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2405
@@ -110,8 +119,11 @@ define character {
   tags electro, monster, sacread;
   health 10;
   energy 2;
-  skills ScorpionStrike, StingingSpine, ThunderboreBlast, ImmortalRemnantsElectro;
-}
+  skills ScorpionStrike,
+  StingingSpine,
+  ThunderboreBlast,
+  ImmortalRemnantsElectro;
+};
 
 /**
  * @id 224051
@@ -128,14 +140,14 @@ define card {
   talent ConsecratedScorpion, none {
     on enter {
       :createHandCard(BonecrunchersEnergyBlock);
-    }
+    };
     on playCard {
       when :( :e.card.definition.id === BonecrunchersEnergyBlock );
       :drawCards(1);
       :createPileCards(BonecrunchersEnergyBlock, 1, "random");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 124053

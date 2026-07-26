@@ -1,8 +1,19 @@
-import { card, skill, DiceType, status, DamageType, type StatusHandle, summon } from "@gi-tcg/core/builder";
+import {
+  card,
+  skill,
+  DiceType,
+  status,
+  DamageType,
+  type StatusHandle,
+  summon,
+} from "@gi-tcg/core/builder";
 import { Diluc, SearingOnslaught } from "../characters/pyro/diluc.gts";
 import { NiwabiFiredance, Yoimiya } from "../characters/pyro/yoimiya.gts";
 import { KyoukaFuushi } from "../characters/hydro/kamisato_ayato.gts";
-import { AdeptusArtPreserverOfFortune, Qiqi } from "../characters/cryo/qiqi.gts";
+import {
+  AdeptusArtPreserverOfFortune,
+  Qiqi,
+} from "../characters/cryo/qiqi.gts";
 
 /**
  * @id 330005
@@ -17,7 +28,7 @@ define card {
   legend;
   const count = Math.min(:roundNumber - 1, 4);
   :drawCards(count);
-}
+};
 
 /**
  * @id 213011
@@ -35,15 +46,17 @@ define card {
   talent Diluc {
     on enter {
       :useSkill(SearingOnslaught);
-    }
+    };
     on deductElementDiceSkill {
-      when :( :e.action.skill.definition.id === SearingOnslaught && 
+      when :(
+        :e.action.skill.definition.id === SearingOnslaught &&
           :countOfSkill(Diluc, SearingOnslaught) === 1 &&
-          :e.canDeductCostOfType(DiceType.Pyro) );
+          :e.canDeductCostOfType(DiceType.Pyro)
+      );
       :e.deductCost(DiceType.Pyro, 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 113051
@@ -59,13 +72,13 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     usage 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 213051
@@ -83,9 +96,9 @@ define card {
   talent Yoimiya {
     on enter {
       :useSkill(NiwabiFiredance);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 112061
@@ -100,7 +113,7 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     usage 3;
@@ -108,8 +121,8 @@ define status {
     if (:self.master.hasEquipment(KyoukaFuushi) && :e.target.health <= 6) {
       :e.increaseDamage(1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 111081
@@ -126,12 +139,14 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Cryo, 1);
-  }
+  };
   on useSkill {
-    when :( :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal") );
+    when :(
+      :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal")
+    );
     :heal(1, "my characters order by health - maxHealth limit 1");
-  }
-}
+  };
+};
 
 /**
  * @id 211081
@@ -150,7 +165,7 @@ define card {
   talent Qiqi {
     on enter {
       :useSkill(AdeptusArtPreserverOfFortune);
-    }
+    };
     on useSkill {
       when :( :e.skill.definition.id === AdeptusArtPreserverOfFortune );
       usage 2 {
@@ -159,6 +174,6 @@ define card {
       for (const ch of :$$(`all my defeated characters`)) {
         ch.heal(2, { kind: "revive" });
       }
-    }
-  }
-}
+    };
+  };
+};

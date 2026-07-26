@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, DiceType, type CardHandle } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  DiceType,
+  type CardHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 116071
@@ -24,7 +33,7 @@ import { character, skill, status, combatStatus, card, DamageType, DiceType, typ
 define status {
   id 116071 as ShieldOfSwirlingClouds;
   shield 2;
-}
+};
 
 /**
  * @id 16074
@@ -39,11 +48,10 @@ define skill {
   :$(`status with definition id ${ShieldOfSwirlingClouds} at @self`)?.dispose();
   if (:self.getVariable("disposeOrTuneCardCount") > 0) {
     :damage(DamageType.Geo, 3);
-  }
-  else {
+  } else {
     :damage(DamageType.Geo, 2);
   }
-}
+};
 
 /**
  * @id 116072
@@ -54,7 +62,7 @@ define skill {
 define status {
   id 116072 as SpearFlourishStatus;
   prepare SpearFlourish;
-}
+};
 
 /**
  * @id 116073
@@ -68,18 +76,20 @@ define combatStatus {
   on deductOmniDiceSkill {
     when :( :e.isSkillType("normal") && :player.hands.length <= 1 );
     :e.deductOmniCost(1);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") && :player.hands.length <= 1 );
     usage 1 {
       append 4;
     };
-    if (:$(`my equipment with definition id ${DecorousHarmony}`) && // 装备了天赋
-        :player.hands.length === 0) {
+    if (
+      :$(`my equipment with definition id ${DecorousHarmony}`) && // 装备了天赋
+      :player.hands.length === 0
+    ) {
       :e.increaseDamage(2);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 16071
@@ -93,7 +103,7 @@ define skill {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 16072
@@ -108,7 +118,7 @@ define skill {
   :combatStatus(FlyingCloudFlagFormation);
   :characterStatus(SpearFlourishStatus);
   :characterStatus(ShieldOfSwirlingClouds);
-}
+};
 
 /**
  * @id 16073
@@ -123,15 +133,15 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Geo, 3);
   :combatStatus(FlyingCloudFlagFormation, "my", {
-      overrideVariables: { usage: 3 }
-    });
-}
+    overrideVariables: { usage: 3 },
+  });
+};
 
 /**
  * @id 16075
- * @name 
+ * @name
  * @description
- * 
+ *
  */
 define skill {
   id 16075 as CountDisposeOrTune;
@@ -139,12 +149,12 @@ define skill {
     variable disposeOrTuneCardCount, 0;
     on disposeOrTuneCard {
       :addVariable("disposeOrTuneCardCount", 1);
-    }
+    };
     on roundEnd {
       :setVariable("disposeOrTuneCardCount", 0);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1607
@@ -158,8 +168,12 @@ define character {
   tags geo, pole, liyue;
   health 10;
   energy 2;
-  skills CloudgrazingStrike, OpeningFlourish, CliffbreakersBanner, SpearFlourish, CountDisposeOrTune;
-}
+  skills CloudgrazingStrike,
+  OpeningFlourish,
+  CliffbreakersBanner,
+  SpearFlourish,
+  CountDisposeOrTune;
+};
 
 /**
  * @id 216071
@@ -178,6 +192,6 @@ define card {
   talent YunJin {
     on enter {
       :useSkill(CliffbreakersBanner);
-    }
-  }
-}
+    };
+  };
+};

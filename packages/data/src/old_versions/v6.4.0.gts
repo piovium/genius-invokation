@@ -1,6 +1,22 @@
-import { card, character, DamageType, DiceType, skill, status, summon } from "@gi-tcg/core/builder";
-import { LetTheShowBegin, ShiningMiracle, WhisperOfWater } from "../characters/hydro/barbara.gts";
-import { FavoniusBladeworkEdel, IcetideVortex, WellspringOfWarlust } from "../characters/cryo/eula.gts";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
+import {
+  LetTheShowBegin,
+  ShiningMiracle,
+  WhisperOfWater,
+} from "../characters/hydro/barbara.gts";
+import {
+  FavoniusBladeworkEdel,
+  IcetideVortex,
+  WellspringOfWarlust,
+} from "../characters/cryo/eula.gts";
 import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.gts";
 import { Skirk, Skirk01 } from "../characters/cryo/skirk.gts";
 import { BattlePlan, CostReduction } from "../commons.gts";
@@ -19,7 +35,7 @@ define character {
   health 10;
   energy 3;
   skills WhisperOfWater, LetTheShowBegin, ShiningMiracle;
-}
+};
 
 /**
  * @id 111062
@@ -37,20 +53,24 @@ define summon {
     autoDispose false;
   };
   on useSkill {
-    when :( :e.skill.definition.id === FavoniusBladeworkEdel ||
-        :e.skill.definition.id === IcetideVortex );
-    if (:e.skill.definition.id === IcetideVortex &&
-      :e.skillCaller.cast<"character">().hasEquipment(WellspringOfWarlust)) {
+    when :(
+      :e.skill.definition.id === FavoniusBladeworkEdel ||
+        :e.skill.definition.id === IcetideVortex
+    );
+    if (
+      :e.skill.definition.id === IcetideVortex &&
+      :e.skillCaller.cast<"character">().hasEquipment(WellspringOfWarlust)
+    ) {
       :self.addVariable("usage", 3);
     } else {
       :self.addVariable("usage", 2);
     }
-  }
+  };
   on endPhase {
     :damage(DamageType.Physical, 3 + :getVariable("usage"));
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 111121
@@ -65,19 +85,19 @@ define status {
   variable level, 0;
   on drawCard {
     :addVariable("level", 1);
-  }
+  };
   on deductOmniDiceSkill {
     when :( :getVariable("level") >= 2 );
     :e.deductOmniCost(1);
-  }
+  };
   on useSkill {
     when :( :getVariable("level") >= 2 );
     if (:getVariable("level") >= 4) {
       :damage(DamageType.Physical, 2);
     }
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 111163
@@ -92,10 +112,12 @@ define card {
   const hand = :player.hands.find((card) => card.diceCost() === 3);
   if (hand) {
     :disposeCard(hand);
-    const skirk = :$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`);
+    const skirk = :$(
+      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    );
     skirk?.addVariableWithMax("serpentsSubtlety", 2, 7);
   }
-}
+};
 
 /**
  * @id 116051
@@ -114,21 +136,24 @@ define summon {
   on endPhase {
     :damage(DamageType.Geo, 1);
     :dispose();
-  }
+  };
   on decreaseDamaged {
     when :( :e.target.isActive() );
     usage 1 {
       autoDispose false;
     };
     :e.decreaseDamage(1);
-  }
+  };
   on damaged {
     usage 1 {
       name "addStatusUsage";
     };
-    :characterStatus(SuperlativeSuperstrength, "my characters with definition id 1605");
-  }
-}
+    :characterStatus(
+      SuperlativeSuperstrength,
+      "my characters with definition id 1605",
+    );
+  };
+};
 
 /**
  * @id 303318
@@ -142,8 +167,8 @@ define status {
   oneDuration;
   once increaseSkillDamage {
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 321034
@@ -162,7 +187,7 @@ define card {
     adventureSpot;
     on adventure {
       :convertDice(DiceType.Omni, 1);
-    }
+    };
     on adventure {
       when :( :getVariable("exp") >= 2 );
       usage 1 {
@@ -170,7 +195,7 @@ define card {
         visible false;
       };
       :drawCards(1);
-    }
+    };
     on adventure {
       when :( :getVariable("exp") >= 4 );
       usage 1 {
@@ -178,9 +203,9 @@ define card {
         visible false;
       };
       :characterStatus(BattlePlan, "my active", {
-          overrideVariables: { usage: 2 }
-        });
-    }
+        overrideVariables: { usage: 2 },
+      });
+    };
     on adventure {
       when :( :getVariable("exp") >= 6 );
       usage 1 {
@@ -194,7 +219,6 @@ define card {
       }
       :summon(TideTurningSacredLord);
       :finishAdventure();
-    }
-  }
-}
-
+    };
+  };
+};

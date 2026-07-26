@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 import { AgileSwitch } from "../../commons.gts";
 
 /**
@@ -29,7 +38,7 @@ define status {
   nightsoulsBlessing 2 {
     autoDispose;
   };
-}
+};
 
 /**
  * @id 114142
@@ -47,14 +56,13 @@ define combatStatus {
     };
     :e.increaseDamage(2);
     const iansan = :$(`my character with definition id ${Iansan}`);
-    if (iansan?.hasNightsoulsBlessing()){
+    if (iansan?.hasNightsoulsBlessing()) {
       :consumeNightsoul(iansan);
     } else {
       :consumeUsage();
     }
-  }
-}
-
+  };
+};
 
 /**
  * @id 14141
@@ -68,7 +76,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 14142
@@ -83,7 +91,7 @@ define skill {
   :damage(DamageType.Electro, 2);
   :gainNightsoul("@self", 1);
   :combatStatus(AgileSwitch);
-}
+};
 
 /**
  * @id 14143
@@ -100,13 +108,12 @@ define skill {
   :gainNightsoul("@self", 1);
   if (:self.hasEquipment(TeachingsOfTheCollectiveOfPlenty)) {
     :combatStatus(KineticEnergyScale, "my", {
-      overrideVariables: { usage: 3 }
+      overrideVariables: { usage: 3 },
     });
-  }
-  else {
+  } else {
     :combatStatus(KineticEnergyScale);
   }
-}
+};
 
 /**
  * @id 14144
@@ -133,32 +140,36 @@ define skill {
     };
     // 我方角色准备技能
     on enterRelative {
-      when :( :self.hasNightsoulsBlessing() &&
+      when :(
+        :self.hasNightsoulsBlessing() &&
           :getVariable("gainNightsoulPassiveUsagePerRound") &&
           :e.entity.definition.type === "status" &&
-          :e.entity.definition.tags.includes("preparingSkill") );
+          :e.entity.definition.tags.includes("preparingSkill")
+      );
       listenTo samePlayer;
       :callSnippet();
-    }
+    };
     // 或累计2次……
     on switchActive {
       when :( :self.hasNightsoulsBlessing() );
       listenTo samePlayer;
       :addVariable("switchCount", 1);
-    }
+    };
     // ……「切换角色」后
     on switchActive {
-      when :( :self.hasNightsoulsBlessing() &&
+      when :(
+        :self.hasNightsoulsBlessing() &&
           :getVariable("gainNightsoulPassiveUsagePerRound") &&
-          :getVariable("switchCount") % 2 === 0 );
+          :getVariable("switchCount") % 2 === 0
+      );
       listenTo samePlayer;
       :callSnippet();
-    }
+    };
     on roundEnd {
       :setVariable("gainNightsoulPassiveUsagePerRound", 3);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 14145
@@ -170,8 +181,8 @@ define skill {
   id 14145 as CaloricBalancingPlan02;
   skillType passive {
     reserved;
-  }
-}
+  };
+};
 
 /**
  * @id 14146
@@ -183,8 +194,8 @@ define skill {
   id 14146 as CaloricBalancingPlan03;
   skillType passive {
     reserved;
-  }
-}
+  };
+};
 
 /**
  * @id 1414
@@ -198,9 +209,12 @@ define character {
   tags electro, pole, natlan;
   health 11;
   energy 2;
-  skills WeightedSpike, ThunderboltRush, TheThreePrinciplesOfPower, CaloricBalancingPlan01;
+  skills WeightedSpike,
+  ThunderboltRush,
+  TheThreePrinciplesOfPower,
+  CaloricBalancingPlan01;
   associateNightsoul NightsoulsBlessing;
-}
+};
 
 /**
  * @id 214141
@@ -219,6 +233,6 @@ define card {
   talent Iansan {
     on enter {
       :useSkill(TheThreePrinciplesOfPower);
-    }
-  }
-}
+    };
+  };
+};

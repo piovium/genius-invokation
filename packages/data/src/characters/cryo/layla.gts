@@ -13,7 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, summon } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111093
@@ -32,8 +40,8 @@ define summon {
     if (star) {
       star.addVariable("star", 1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 111091
@@ -44,7 +52,7 @@ define summon {
 define combatStatus {
   id 111091 as CurtainOfSlumberShield;
   shield 2;
-}
+};
 
 /**
  * @id 111092
@@ -57,9 +65,9 @@ define combatStatus {
   id 111092 as ShootingStar;
   variable star, 0 {
     append {
-    limit Infinity;
-    value 2;
-  };
+      limit Infinity;
+      value 2;
+    };
   };
   on useSkill {
     :addVariable("star", 1);
@@ -70,8 +78,8 @@ define combatStatus {
         :drawCards(1);
       }
     }
-  }
-}
+  };
+};
 
 /**
  * @id 11091
@@ -85,7 +93,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 11092
@@ -99,7 +107,7 @@ define skill {
   cost DiceType.Cryo, 3;
   :combatStatus(CurtainOfSlumberShield);
   :combatStatus(ShootingStar);
-}
+};
 
 /**
  * @id 11093
@@ -114,7 +122,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 3);
   :summon(CelestialDreamsphere);
-}
+};
 
 /**
  * @id 1109
@@ -129,7 +137,7 @@ define character {
   health 10;
   energy 2;
   skills SwordOfTheRadiantPath, NightsOfFormalFocus, DreamOfTheStarstreamShaker;
-}
+};
 
 /**
  * @id 211091
@@ -147,6 +155,6 @@ define card {
   talent Layla {
     on enter {
       :useSkill(NightsOfFormalFocus);
-    }
-  }
-}
+    };
+  };
+};

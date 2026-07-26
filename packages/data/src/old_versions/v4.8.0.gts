@@ -1,6 +1,21 @@
-import { card, combatStatus, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
-import { Cyno, PactswornPathclearer, SecretRiteChasmicSoulfarer } from "../characters/electro/cyno.gts";
-import { AlldevouringNarwhal, AnomalousAnatomy, LightlessFeeding } from "../characters/hydro/alldevouring_narwhal.gts";
+import {
+  card,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
+import {
+  Cyno,
+  PactswornPathclearer,
+  SecretRiteChasmicSoulfarer,
+} from "../characters/electro/cyno.gts";
+import {
+  AlldevouringNarwhal,
+  AnomalousAnatomy,
+  LightlessFeeding,
+} from "../characters/hydro/alldevouring_narwhal.gts";
 
 /**
  * @id 214041
@@ -18,17 +33,20 @@ define card {
   talent Cyno {
     on enter {
       :useSkill(SecretRiteChasmicSoulfarer);
-    }
+    };
     on increaseSkillDamage {
       when :{
         const status = :self.master.hasStatus(PactswornPathclearer)!;
-        return :getVariable("reliance", status) >=2 && :e.via.definition.id === SecretRiteChasmicSoulfarer;
+        return (
+          :getVariable("reliance", status) >= 2 &&
+          :e.via.definition.id === SecretRiteChasmicSoulfarer
+        );
       };
       usage perRound, 1;
       :e.increaseDamage(2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 122041
@@ -69,9 +87,12 @@ define combatStatus {
         const card0Cost = :getVariable("card0Cost");
         const card1Cost = :getVariable("card1Cost");
         const card2Cost = cost;
-        const distinctCostCount = new Set([card0Cost, card1Cost, card2Cost]).size;
+        const distinctCostCount = new Set([card0Cost, card1Cost, card2Cost])
+          .size;
         const extraMaxHealth = 4 - distinctCostCount;
-        const narwhal = :$(`my character with definition id ${AlldevouringNarwhal}`);
+        const narwhal = :$(
+          `my character with definition id ${AlldevouringNarwhal}`,
+        );
         if (narwhal) {
           for (let i = 0; i < extraMaxHealth; i++) {
             narwhal.addStatus(AnomalousAnatomy);
@@ -89,8 +110,8 @@ define combatStatus {
       :setVariable("totalMaxCost", cost);
       :setVariable("totalMaxCostCount", 1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 22042
@@ -104,7 +125,9 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   const st = :self.hasStatus(AnomalousAnatomy);
-  const extraDmg = st ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 4) : 0;
+  const extraDmg = st
+    ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 4)
+    : 0;
   :damage(DamageType.Hydro, 1 + extraDmg);
   const [card] = :disposeMaxCostHands(1);
   if (card) {
@@ -112,7 +135,7 @@ define skill {
       :heal(card.diceCost(), "@self");
     }
   }
-}
+};
 
 /**
  * @id 311409
@@ -134,15 +157,15 @@ define card {
       :disposeMaxCostHands(1);
       :e.decreaseDamage(1);
       :addVariable("solidarity", 1);
-    }
+    };
     on increaseSkillDamage {
       when :( :getVariable("solidarity") > 0 );
       :e.increaseDamage(1);
       :drawCards(:getVariable("solidarity"));
       :setVariable("solidarity", 0);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 122
@@ -162,5 +185,5 @@ define status {
     const deducted = Math.min(:getVariable("usage"), :e.expectedValue);
     :e.decreaseHeal(deducted);
     :consumeUsage(deducted);
-  }
-}
+  };
+};

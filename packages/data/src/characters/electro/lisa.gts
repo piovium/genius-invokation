@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon, $, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  $,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 114092
@@ -28,8 +38,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Electro, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 114091
@@ -43,20 +53,22 @@ define status {
   id 114091 as ConductiveLisa;
   variable conductive, 2 {
     append {
-    limit 4;
-    value 1;
-  };
+      limit 4;
+      value 1;
+    };
   };
   on endPhase {
     :addVariableWithMax("conductive", 1, 4);
-  }
+  };
   on increaseDamaged {
-    when :( :e.via.definition.id === VioletArc || 
-        :e.source.definition.id === LightningRoseSummon );
+    when :(
+      :e.via.definition.id === VioletArc ||
+        :e.source.definition.id === LightningRoseSummon
+    );
     :e.increaseDamage(:getVariable("conductive"));
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 14091
@@ -71,7 +83,7 @@ define skill {
   cost DiceType.Void, 2;
   :damage(DamageType.Electro, 1);
   :characterStatus(ConductiveLisa, "opp active");
-}
+};
 
 /**
  * @id 14092
@@ -89,7 +101,7 @@ define skill {
     :damage(DamageType.Electro, 2);
     :characterStatus(ConductiveLisa, "opp active");
   }
-}
+};
 
 /**
  * @id 14093
@@ -105,7 +117,7 @@ define skill {
   :damage(DamageType.Electro, 2);
   :summon(LightningRoseSummon);
   :characterStatus(ConductiveLisa, "opp active");
-}
+};
 
 /**
  * @id 1409
@@ -120,7 +132,7 @@ define character {
   health 10;
   energy 2;
   skills LightningTouch, VioletArc, LightningRose;
-}
+};
 
 /**
  * @id 214091
@@ -138,6 +150,6 @@ define card {
       when :( :e.switchInfo.to.id === :self.master.id );
       usage perRound, 1;
       :characterStatus(ConductiveLisa, "opp active");
-    }
-  }
-}
+    };
+  };
+};

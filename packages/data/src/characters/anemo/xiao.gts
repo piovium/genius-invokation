@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  card,
+  DamageType,
+  DiceType,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 115042
@@ -26,16 +34,18 @@ import { character, skill, status, card, DamageType, DiceType, type SkillHandle 
 define status {
   id 115042 as ConquerorOfEvilWrathDeity;
   on deductElementDiceSkill {
-    when :( :e.action.skill.definition.id === LemniscaticWindCycling && 
-        :e.canDeductCostOfType(DiceType.Anemo) );
+    when :(
+      :e.action.skill.definition.id === LemniscaticWindCycling &&
+        :e.canDeductCostOfType(DiceType.Anemo)
+    );
     usage 2;
     :e.deductCost(DiceType.Anemo, 1);
-  }
+  };
   on dispose {
     when :( :e.entity.definition.id === YakshasMask );
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 115041
@@ -52,21 +62,21 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Anemo);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.type === DamageType.Anemo );
     :e.increaseDamage(1);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaPlungingAttack() );
     :e.increaseDamage(2);
-  }
+  };
   on deductOmniDiceSwitch {
     when :( :self.master.isActive() );
     usage perRound, 1;
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 15041
@@ -80,7 +90,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 15042
@@ -93,7 +103,7 @@ define skill {
   skillType elemental;
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 3);
-}
+};
 
 /**
  * @id 15043
@@ -111,7 +121,7 @@ define skill {
   if (:self.hasEquipment(ConquerorOfEvilGuardianYaksha)) {
     :characterStatus(ConquerorOfEvilWrathDeity);
   }
-}
+};
 
 /**
  * @id 1504
@@ -126,7 +136,7 @@ define character {
   health 10;
   energy 2;
   skills WhirlwindThrust, LemniscaticWindCycling, BaneOfAllEvil;
-}
+};
 
 /**
  * @id 215041
@@ -145,6 +155,6 @@ define card {
   talent Xiao {
     on enter {
       :useSkill(BaneOfAllEvil);
-    }
-  }
-}
+    };
+  };
+};

@@ -13,7 +13,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111062
@@ -30,20 +39,24 @@ define summon {
     autoDispose false;
   };
   on useSkill {
-    when :( :e.skill.definition.id === FavoniusBladeworkEdel ||
-        :e.skill.definition.id === IcetideVortex );
-    if (:e.skill.definition.id === IcetideVortex &&
-      :e.skillCaller.cast<"character">().hasEquipment(WellspringOfWarlust)) {
+    when :(
+      :e.skill.definition.id === FavoniusBladeworkEdel ||
+        :e.skill.definition.id === IcetideVortex
+    );
+    if (
+      :e.skill.definition.id === IcetideVortex &&
+      :e.skillCaller.cast<"character">().hasEquipment(WellspringOfWarlust)
+    ) {
       :self.addVariable("usage", 3);
     } else {
       :self.addVariable("usage", 2);
     }
-  }
+  };
   on endPhase {
     :damage(DamageType.Physical, 4 + :getVariable("usage"));
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 111061
@@ -57,8 +70,8 @@ define status {
     when :( :e.damageInfo.via.definition.id === IcetideVortex );
     :e.increaseDamage(3);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 11061
@@ -76,7 +89,7 @@ define skill {
   if (!:$(`my summons with definition id ${LightfallSword}`)) {
     :gainEnergy(1, "@self");
   }
-}
+};
 
 /**
  * @id 11062
@@ -97,7 +110,7 @@ define skill {
   if (!:$(`my summons with definition id ${LightfallSword}`)) {
     :gainEnergy(1, "@self");
   }
-}
+};
 
 /**
  * @id 11063
@@ -112,7 +125,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 2);
   :summon(LightfallSword);
-}
+};
 
 /**
  * @id 1106
@@ -127,7 +140,7 @@ define character {
   health 10;
   energy 2;
   skills FavoniusBladeworkEdel, IcetideVortex, GlacialIllumination;
-}
+};
 
 /**
  * @id 211061
@@ -146,6 +159,6 @@ define card {
   talent Eula {
     on enter {
       :useSkill(GlacialIllumination);
-    }
-  }
-}
+    };
+  };
+};

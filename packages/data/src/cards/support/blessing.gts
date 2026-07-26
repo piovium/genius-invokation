@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, Aura, card, DamageType, DiceType, Reaction, status, type SupportHandle } from "@gi-tcg/core/builder";
+import {
+  $,
+  Aura,
+  card,
+  DamageType,
+  DiceType,
+  Reaction,
+  status,
+  type SupportHandle,
+} from "@gi-tcg/core/builder";
 import { CatalyzingField, NoTuningAllowed, Shield } from "../../commons.gts";
 
 /**
@@ -31,10 +40,14 @@ define card {
     on roll {
       :e.fixDice(DiceType.Cryo, 2);
       :e.fixDice(DiceType.Electro, 2);
-    }
+    };
     on damaged {
-      when :( !:e.target.isMine() &&
-          ([DamageType.Physical, DamageType.Cryo] as DamageType[]).includes(:e.type) );
+      when :(
+        !:e.target.isMine() &&
+          ([DamageType.Physical, DamageType.Cryo] as DamageType[]).includes(
+            :e.type,
+          )
+      );
       listenTo all;
       usage perRound, 2;
       const target = :random(:oppPlayer.hands);
@@ -42,9 +55,9 @@ define card {
         :attach(NoTuningAllowed, target);
         :attachCostIncrease(target);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303042
@@ -61,14 +74,14 @@ define card {
     on roll {
       :e.fixDice(DiceType.Cryo, 2);
       :e.fixDice(DiceType.Electro, 2);
-    }
+    };
     on dealReaction {
       when :( :e.type === Reaction.Superconduct );
       usage perRound, 3;
       :damage(DamageType.Piercing, 1, $.macros.oppMaxHealth);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 331004
@@ -88,17 +101,17 @@ define card {
     on roll {
       :e.fixDice(DiceType.Cryo, 2);
       :e.fixDice(DiceType.Electro, 2);
-    }
+    };
     on dealReaction {
       when :( :e.type === Reaction.Superconduct );
       :selectAndCreateHandCard([
-          SuperconductBlessingDeepFreeze,
-          SuperconductBlessingElectricSurge,
-        ]);
+        SuperconductBlessingDeepFreeze,
+        SuperconductBlessingElectricSurge,
+      ]);
       :dispose();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303053
@@ -110,8 +123,8 @@ define status {
   id 303053 as VaporizeBlessingRagingWavesInEffect;
   once increaseSkillDamage {
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 303051
@@ -128,7 +141,7 @@ define card {
     on roll {
       :e.fixDice(DiceType.Hydro, 2);
       :e.fixDice(DiceType.Pyro, 2);
-    }
+    };
     on dealReaction {
       when :( :e.type === Reaction.Vaporize );
       usage perRound, 2;
@@ -137,9 +150,9 @@ define card {
         :heal(1, targetCh);
         :characterStatus(VaporizeBlessingRagingWavesInEffect, targetCh);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303052
@@ -156,16 +169,17 @@ define card {
     on roll {
       :e.fixDice(DiceType.Hydro, 2);
       :e.fixDice(DiceType.Pyro, 2);
-    }
+    };
     on deductOmniDiceSkill {
-      when :( :e.isSkillType("elemental") &&
-          :e.action.skill.caller.cast<"character">().element() === DiceType.Pyro );
+      when :(
+        :e.isSkillType("elemental") &&
+          :e.action.skill.caller.cast<"character">().element() === DiceType.Pyro
+      );
       usage perRound, 2;
       :e.deductOmniCost(1);
-    }
-  }
-}
-
+    };
+  };
+};
 
 /**
  * @id 331005
@@ -185,17 +199,17 @@ define card {
     on roll {
       :e.fixDice(DiceType.Hydro, 2);
       :e.fixDice(DiceType.Pyro, 2);
-    }
+    };
     on dealReaction {
       when :( :e.type === Reaction.Vaporize );
       :selectAndCreateHandCard([
-          VaporizeBlessingRagingWaves,
-          VaporizeBlessingSearingBurn,
-        ]);
+        VaporizeBlessingRagingWaves,
+        VaporizeBlessingSearingBurn,
+      ]);
       :dispose();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303061
@@ -213,7 +227,7 @@ define card {
     on roll {
       :e.fixDice(DiceType.Hydro, 2);
       :e.fixDice(DiceType.Dendro, 2);
-    }
+    };
     on playCard {
       when :<boolean>( :e.card.definition.id !== BloomBlessingAmrita );
       :addVariable("playCount", 1);
@@ -223,12 +237,12 @@ define card {
           :increaseMaxHealth(2, target);
         }
       }
-    }
+    };
     on roundEnd {
       :setVariable("playCount", 0);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303062
@@ -245,13 +259,13 @@ define card {
     on roll {
       :e.fixDice(DiceType.Hydro, 2);
       :e.fixDice(DiceType.Dendro, 2);
-    }
+    };
     on dealReaction {
       usage perRound, 1;
       :damage(DamageType.Hydro, 1, $.macros.oppActivePrioritized);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 331006
@@ -271,17 +285,14 @@ define card {
     on roll {
       :e.fixDice(DiceType.Hydro, 2);
       :e.fixDice(DiceType.Dendro, 2);
-    }
+    };
     on dealReaction {
       when :( :e.type === Reaction.Bloom || :e.type === Reaction.LunarBloom );
-      :selectAndCreateHandCard([
-          BloomBlessingAmrita,
-          BloomBlessingOvergrow,
-        ]);
+      :selectAndCreateHandCard([BloomBlessingAmrita, BloomBlessingOvergrow]);
       :dispose();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303071
@@ -298,19 +309,26 @@ define card {
     on roll {
       :e.fixDice(DiceType.Pyro, 2);
       :e.fixDice(DiceType.Geo, 2);
-    }
+    };
     on increaseDamage {
       when :{
-        if (!([DamageType.Pyro, DamageType.Geo] as DamageType[]).includes(:e.type)) {
+        if (
+          !([DamageType.Pyro, DamageType.Geo] as DamageType[]).includes(:e.type)
+        ) {
           return false;
         }
-        return !!:query($.union($.my.typeStatus.tag("shield"), $.my.combatStatus.tag("shield")));
+        return !!:query(
+          $.union(
+            $.my.typeStatus.tag("shield"),
+            $.my.combatStatus.tag("shield"),
+          ),
+        );
       };
       usage perRound, 3;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303072
@@ -327,20 +345,22 @@ define card {
     on roll {
       :e.fixDice(DiceType.Pyro, 2);
       :e.fixDice(DiceType.Geo, 2);
-    }
+    };
     on damaged {
-      when :( !:e.target.isMine() && 
-          ([DamageType.Pyro, DamageType.Geo] as DamageType[]).includes(:e.type) );
+      when :(
+        !:e.target.isMine() &&
+          ([DamageType.Pyro, DamageType.Geo] as DamageType[]).includes(:e.type)
+      );
       listenTo all;
       usage perRound, 1;
       :combatStatus(Shield, "my", {
-          overrideVariables: {
-            shield: 2
-          }
-        });
-    }
-  }
-}
+        overrideVariables: {
+          shield: 2,
+        },
+      });
+    };
+  };
+};
 
 /**
  * @id 331007
@@ -360,17 +380,14 @@ define card {
     on roll {
       :e.fixDice(DiceType.Pyro, 2);
       :e.fixDice(DiceType.Geo, 2);
-    }
+    };
     on dealReaction {
       when :( :e.type === Reaction.CrystallizePyro );
-      :selectAndCreateHandCard([
-          LavaBlessingTurnfire,
-          LavaBlessingRemelting,
-        ]);
+      :selectAndCreateHandCard([LavaBlessingTurnfire, LavaBlessingRemelting]);
       :dispose();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303081
@@ -386,18 +403,18 @@ define card {
     on roll {
       :e.fixDice(DiceType.Cryo, 2);
       :e.fixDice(DiceType.Dendro, 2);
-    }
+    };
     on endPhase {
-      const targets = :oppPlayer.characters.filter((ch) => 
-        ([Aura.Cryo, Aura.CryoDendro] as Aura[]).includes(ch.aura)
+      const targets = :oppPlayer.characters.filter((ch) =>
+        ([Aura.Cryo, Aura.CryoDendro] as Aura[]).includes(ch.aura),
       );
       for (const target of targets) {
         :damage(DamageType.Piercing, 2, target);
         :cleanAura(Aura.Cryo, target);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303082
@@ -414,16 +431,20 @@ define card {
     on roll {
       :e.fixDice(DiceType.Cryo, 2);
       :e.fixDice(DiceType.Dendro, 2);
-    }
+    };
     on useSkill {
-      when :( ([Aura.Dendro, Aura.CryoDendro] as (Aura | undefined)[]).includes(:query($.opp.active)?.aura) );
+      when :(
+        ([Aura.Dendro, Aura.CryoDendro] as (Aura | undefined)[]).includes(
+          :query($.opp.active)?.aura,
+        )
+      );
       usage perRound, 2;
       :drawCards(1);
       :heal(1, $.macros.myMostInjured);
       :cleanAura(Aura.Dendro, $.opp.active);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 331008
@@ -443,17 +464,17 @@ define card {
     on roll {
       :e.fixDice(DiceType.Cryo, 2);
       :e.fixDice(DiceType.Dendro, 2);
-    }
+    };
     on beforeAction {
       when :( :query($.opp.character.var("aura", Aura.CryoDendro)) );
       :selectAndCreateHandCard([
-          RimegrassBlessingThornFrost,
-          RimegrassBlessingColdVine,
-        ]);
+        RimegrassBlessingThornFrost,
+        RimegrassBlessingColdVine,
+      ]);
       :dispose();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303091
@@ -470,17 +491,16 @@ define card {
     on roll {
       :e.fixDice(DiceType.Electro, 2);
       :e.fixDice(DiceType.Anemo, 2);
-    }
+    };
     on endPhase {
       void 0;
-      ;
-          const count = :queryAll($.opp.character.var("aura", Aura.Electro)).length;
-          for (let i = 0; i < count; i++) {
-            :query($.macros.myEnergyNotFull)?.gainEnergy(1);
-          }
-    }
-  }
-}
+      const count = :queryAll($.opp.character.var("aura", Aura.Electro)).length;
+      for (let i = 0; i < count; i++) {
+        :query($.macros.myEnergyNotFull)?.gainEnergy(1);
+      }
+    };
+  };
+};
 
 /**
  * @id 303092
@@ -497,14 +517,14 @@ define card {
     on roll {
       :e.fixDice(DiceType.Electro, 2);
       :e.fixDice(DiceType.Anemo, 2);
-    }
+    };
     on dealReaction {
       when :( :e.relatedTo(DamageType.Anemo) );
       usage perRound, 1;
       :damage(DamageType.Anemo, 2, $.macros.oppActivePrioritized);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 331009
@@ -524,17 +544,17 @@ define card {
     on roll {
       :e.fixDice(DiceType.Electro, 2);
       :e.fixDice(DiceType.Anemo, 2);
-    }
+    };
     on dealReaction {
       when :( :e.type === Reaction.SwirlElectro );
       :selectAndCreateHandCard([
-          StormgaleBlessingSwiftBolt,
-          StormgaleBlessingWindForce,
-        ]);
+        StormgaleBlessingSwiftBolt,
+        StormgaleBlessingWindForce,
+      ]);
       :dispose();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303101
@@ -551,13 +571,13 @@ define card {
     on roll {
       :e.fixDice(DiceType.Hydro, 2);
       :e.fixDice(DiceType.Anemo, 2);
-    }
+    };
     on healed {
       usage perRound, 1;
       :damage(DamageType.Anemo, 2, $.opp.active);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303102
@@ -574,16 +594,15 @@ define card {
     on roll {
       :e.fixDice(DiceType.Hydro, 2);
       :e.fixDice(DiceType.Anemo, 2);
-    }
+    };
     on increaseDamage {
       when :( :e.isReactionRelatedTo(DamageType.Anemo) );
       usage perRound, 2;
       :e.increaseDamage(1);
       :heal(1, $.macros.myMostInjured);
-    }
-  }
-}
-
+    };
+  };
+};
 
 /**
  * @id 331010
@@ -602,17 +621,17 @@ define card {
     on roll {
       :e.fixDice(DiceType.Hydro, 2);
       :e.fixDice(DiceType.Anemo, 2);
-    }
+    };
     on dealReaction {
-      when :( :e.type === Reaction.SwirlHydro);
+      when :( :e.type === Reaction.SwirlHydro );
       :selectAndCreateHandCard([
         AquabreezeBlessingWaterburst,
         AquabreezeBlessingVortex,
       ]);
       :dispose();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303111
@@ -629,15 +648,17 @@ define card {
     on roll {
       :e.fixDice(DiceType.Electro, 2);
       :e.fixDice(DiceType.Dendro, 2);
-    }
+    };
     on deductOmniDiceSkill {
-      when :( :e.isSkillType("burst") &&
-          :query($.my.combatStatus.def(CatalyzingField)) );
+      when :(
+        :e.isSkillType("burst") &&
+          :query($.my.combatStatus.def(CatalyzingField))
+      );
       usage perRound, 1;
       :e.deductOmniCost(2);
-    }
-  }
-}
+    };
+  };
+};
 
 // 下面这个是七位数 id 因为 303112 已被占用
 
@@ -656,15 +677,17 @@ define card {
     on roll {
       :e.fixDice(DiceType.Electro, 2);
       :e.fixDice(DiceType.Dendro, 2);
-    }
+    };
     on deductOmniDiceSkill {
-      when :( :e.isSkillType("elemental") &&
-          :query($.my.combatStatus.def(CatalyzingField)) );
+      when :(
+        :e.isSkillType("elemental") &&
+          :query($.my.combatStatus.def(CatalyzingField))
+      );
       usage perRound, 2;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 331011
@@ -683,14 +706,14 @@ define card {
     on roll {
       :e.fixDice(DiceType.Electro, 2);
       :e.fixDice(DiceType.Dendro, 2);
-    }
+    };
     on dealReaction {
-      when :( :e.type === Reaction.Quicken);
+      when :( :e.type === Reaction.Quicken );
       :selectAndCreateHandCard([
         ThunderbloomBlessingShatterbolt,
         ThunderbloomBlessingShatteringThunder,
       ]);
       :dispose();
-    }
-  }
-}
+    };
+  };
+};

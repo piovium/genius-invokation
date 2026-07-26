@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 112141
@@ -25,7 +34,7 @@ define status {
   id 112141 as NightsoulsBlessing;
   since "v5.3.0";
   nightsoulsBlessing 2;
-}
+};
 
 /**
  * @id 112143
@@ -41,11 +50,14 @@ define status {
     append;
   };
   on increaseDamaged {
-    when :( :e.source.definition.id === Mualani || :e.source.definition.id === SharkMissile );
+    when :(
+      :e.source.definition.id === Mualani ||
+        :e.source.definition.id === SharkMissile
+    );
     :e.increaseDamage(2 * :getVariable("count"));
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 112142
@@ -68,7 +80,7 @@ define card {
       listenTo all;
       :consumeNightsoul("@master");
       :characterStatus(BiteTarget, "opp active");
-    }
+    };
     skill {
       id 1121422;
       cost DiceType.Hydro, 1;
@@ -77,9 +89,9 @@ define card {
       if (:$$(`my standby`).length === 0) {
         :consumeNightsoul("@master");
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 112144
@@ -97,8 +109,8 @@ define summon {
       append;
     };
     :damage(DamageType.Hydro, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 12141
@@ -112,7 +124,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Hydro, 1);
-}
+};
 
 /**
  * @id 12142
@@ -128,7 +140,7 @@ define skill {
   filter :( !:self.hasStatus(NightsoulsBlessing) );
   :equip(BiteyShark, "@self");
   :gainNightsoul("@self", 2);
-}
+};
 
 /**
  * @id 12143
@@ -143,7 +155,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
   :summon(SharkMissile);
-}
+};
 
 /**
  * @id 1214
@@ -159,7 +171,7 @@ define character {
   energy 2;
   skills CoolingTreatment, SurfsharkWavebreaker, BoomsharkaLaka;
   associateNightsoul NightsoulsBlessing;
-}
+};
 
 /**
  * @id 212141
@@ -174,14 +186,15 @@ define card {
   cost DiceType.Hydro, 1;
   talent Mualani, none {
     on switchActive {
-      when :( :e.switchInfo.to.id === :self.master.id &&
-          :$$(`my summon`).length > 0 );
+      when :(
+        :e.switchInfo.to.id === :self.master.id && :$$(`my summon`).length > 0
+      );
       usage perRound, 1;
       const summons = :$$(`my summon`);
       if (summons.length > 0) {
         const targetSummon = :random(summons);
         :triggerEndPhaseSkill(targetSummon);
       }
-    }
-  }
-}
+    };
+  };
+};

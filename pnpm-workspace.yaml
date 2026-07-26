@@ -15,13 +15,13 @@ catalog:
   "@unocss/reset": ^66.3.3
   solid-js: ^1.9.12
   execa: ^9.6.1
-  "@gi-tcg/gts-runtime": ^0.7.0
-  "@gi-tcg/gtsc": ^0.7.0
-  "@gi-tcg/gts-transpiler": ^0.7.0
-  "@gi-tcg/unplugin-gts": ^0.7.0
-  "@gi-tcg/prettier-plugin-gts": ^0.7.0
-  "@gi-tcg/gts-language-client-code": ^0.7.0
-  "@gi-tcg/gts-language-server": ^0.7.0
+  "@gi-tcg/gts-transpiler": &GTS_VERSION "^0.7.3"
+  "@gi-tcg/gts-runtime": *GTS_VERSION
+  "@gi-tcg/gtsc": *GTS_VERSION
+  "@gi-tcg/unplugin-gts": *GTS_VERSION
+  "@gi-tcg/prettier-plugin-gts": *GTS_VERSION
+  "@gi-tcg/gts-language-client-code": *GTS_VERSION
+  "@gi-tcg/gts-language-server": *GTS_VERSION
   typescript: "npm:typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2"
 
 patchedDependencies:

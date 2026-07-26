@@ -13,7 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, summon } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+} from "@gi-tcg/core/builder";
 import { ChangingShifts } from "../../cards/event/other.gts";
 
 /**
@@ -28,8 +36,8 @@ define combatStatus {
   on multiplySkillDamage {
     :e.multiplyDamage(2);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 111131
@@ -56,8 +64,8 @@ define combatStatus {
         :dispose();
       }
     }
-  }
-}
+  };
+};
 
 /**
  * @id 111132
@@ -74,12 +82,12 @@ define summon {
     usage 2;
     :damage(DamageType.Cryo, 1);
     :combatStatus(ScopeOutSoftSpots, "my", {
-        overrideVariables: {
-          layer: 2
-        }
-      });
-  }
-}
+      overrideVariables: {
+        layer: 2,
+      },
+    });
+  };
+};
 
 /**
  * @id 11131
@@ -93,7 +101,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 11132
@@ -107,11 +115,11 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 1);
   :combatStatus(ScopeOutSoftSpots, "my", {
-      overrideVariables: {
-        layer: 1
-      }
-    });
-}
+    overrideVariables: {
+      layer: 1,
+    },
+  });
+};
 
 /**
  * @id 11133
@@ -126,12 +134,12 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 1);
   :combatStatus(ScopeOutSoftSpots, "my", {
-      overrideVariables: {
-        layer: 2
-      }
-    });
+    overrideVariables: {
+      layer: 2,
+    },
+  });
   :summon(EvercoldFrostlance);
-}
+};
 
 /**
  * @id 1113
@@ -146,7 +154,7 @@ define character {
   health 10;
   energy 2;
   skills SpearOfTheChurch, RavagingConfession, RitesOfTermination;
-}
+};
 
 /**
  * @id 211131
@@ -164,15 +172,15 @@ define card {
   talent Rosaria {
     on enter {
       :useSkill(RavagingConfession);
-    }
+    };
     on useSkill {
       when :( :e.skill.definition.id === RavagingConfession );
       :createHandCard(ChangingShifts);
-    }
+    };
     on enterRelative {
       when :( :e.entity.id === StrikeWhereItHurts );
       listenTo samePlayer;
       :createHandCard(ChangingShifts);
-    }
-  }
-}
+    };
+  };
+};

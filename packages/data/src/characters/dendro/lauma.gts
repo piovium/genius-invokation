@@ -1,19 +1,28 @@
 // Copyright (C) 2026 Piovium Labs
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, card, character, combatStatus, DamageType, DiceType, Reaction, skill } from "@gi-tcg/core/builder";
+import {
+  $,
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  Reaction,
+  skill,
+} from "@gi-tcg/core/builder";
 import { CostReduction } from "../../commons.gts";
 
 /**
@@ -30,12 +39,13 @@ define combatStatus {
   variable damageValue, 1 {
     visible false;
   };
-  replaceDescription "[GCG_TOKEN_COUNTER]", ((_, self) => self.variables.damageValue);
+  replaceDescription "[GCG_TOKEN_COUNTER]",
+  ((_, self) => self.variables.damageValue);
   on endPhase {
     usage 2;
-    :damage(DamageType.Dendro, :getVariable("damageValue"))
-  }
-}
+    :damage(DamageType.Dendro, :getVariable("damageValue"));
+  };
+};
 
 /**
  * @id 117112
@@ -51,8 +61,8 @@ define combatStatus {
     when :( :e.getReaction() === Reaction.LunarBloom );
     usage 3;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 17111
@@ -66,7 +76,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Dendro, 1);
-}
+};
 
 /**
  * @id 17112
@@ -86,13 +96,13 @@ define skill {
       overrideVariables: {
         damageValue: 2,
       },
-    })
+    });
     // 去除一层降低就是加一层提高
     :attachCostIncrease(target);
   } else {
     :combatStatus(FrostgroveSanctuary);
   }
-}
+};
 
 /**
  * @id 17113
@@ -111,7 +121,7 @@ define skill {
     :attachCostReduction(target);
   }
   :combatStatus(PaleHymn);
-}
+};
 
 /**
  * @id 17114
@@ -130,9 +140,9 @@ define skill {
       if (target) {
         :attachCostReduction(target);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 17115
@@ -145,8 +155,8 @@ define skill {
   id 17115 as MoonsignBenedictionNaturesChorus01;
   skillType passive {
     reserved;
-  }
-}
+  };
+};
 
 /**
  * @id 1711
@@ -160,9 +170,12 @@ define character {
   tags dendro, catalyst, nodkrai;
   health 11;
   energy 2;
-  skills PeregrinationOfLinnunrata, RunoDawnlessRestOfKarsikko, RunoAllHeartsBecomeTheBeatingMoon, MoonsignBenedictionNaturesChorus;
+  skills PeregrinationOfLinnunrata,
+  RunoDawnlessRestOfKarsikko,
+  RunoAllHeartsBecomeTheBeatingMoon,
+  MoonsignBenedictionNaturesChorus;
   enabledLunarReactions Reaction.LunarBloom;
-}
+};
 
 /**
  * @id 217111
@@ -180,12 +193,14 @@ define card {
   talent Lauma {
     on enter {
       :useSkill(RunoDawnlessRestOfKarsikko);
-    }
+    };
     on dealReaction {
-      when :( ([Reaction.Bloom, Reaction.LunarBloom] as Reaction[]).includes(:e.type) );
+      when :(
+        ([Reaction.Bloom, Reaction.LunarBloom] as Reaction[]).includes(:e.type)
+      );
       listenTo samePlayer;
       usage perRound, 1;
       :heal(2, $.macros.myMostInjured);
-    }
-  }
-}
+    };
+  };
+};

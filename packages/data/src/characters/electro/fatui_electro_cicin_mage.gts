@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 124044
@@ -26,7 +36,7 @@ define combatStatus {
   variable playedCard, 0;
   on playCard {
     :addVariable("playedCard", 1);
-  }
+  };
   on playCard {
     when :( :getVariable("playedCard") === 3 );
     const cicin = :$(`opp summon with definition id ${ElectroCicin}`);
@@ -34,8 +44,8 @@ define combatStatus {
       cicin.addVariableWithMax("usage", 1, 3);
     }
     :setVariable("playedCard", 0);
-  }
-}
+  };
+};
 
 /**
  * @id 124041
@@ -52,23 +62,29 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Electro, 1);
-  }
+  };
   on damaged {
-    when :( :e.target.definition.id === FatuiElectroCicinMage && :e.getReaction() !== null );
+    when :(
+      :e.target.definition.id === FatuiElectroCicinMage &&
+        :e.getReaction() !== null
+    );
     :consumeUsage();
-  }
+  };
   on enter {
     :combatStatus(CrushingThunder, "opp");
-  }
+  };
   on selfDispose {
     :$(`opp combat status with definition id ${CrushingThunder}`)?.dispose();
-  }
+  };
   on beforeAction {
-    when :( :$(`my equipment with definition id ${ElectroCicinsGleam}`) && :getVariable("usage") >= 3 );
+    when :(
+      :$(`my equipment with definition id ${ElectroCicinsGleam}`) &&
+        :getVariable("usage") >= 3
+    );
     :damage(DamageType.Electro, 1);
     :consumeUsage();
-  }
-}
+  };
+};
 
 /**
  * @id 24044
@@ -82,7 +98,7 @@ define skill {
   skillType burst;
   prepared;
   :damage(DamageType.Electro, 2);
-}
+};
 
 /**
  * @id 124043
@@ -93,7 +109,7 @@ define skill {
 define status {
   id 124043 as SurgingThunderStatus;
   prepare SurgingThunder;
-}
+};
 
 /**
  * @id 124042
@@ -111,8 +127,8 @@ define combatStatus {
       const usage = cicin.getVariable("usage");
       :addVariable("shield", Math.min(usage, 3));
     }
-  }
-}
+  };
+};
 
 /**
  * @id 24041
@@ -126,7 +142,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Electro, 1);
-}
+};
 
 /**
  * @id 24042
@@ -139,7 +155,7 @@ define skill {
   skillType elemental;
   cost DiceType.Electro, 3;
   :summon(ElectroCicin);
-}
+};
 
 /**
  * @id 24043
@@ -156,7 +172,7 @@ define skill {
   :apply(DamageType.Electro, "@self");
   :combatStatus(ElectroCicinShield);
   :characterStatus(SurgingThunderStatus);
-}
+};
 
 /**
  * @id 2404
@@ -171,7 +187,7 @@ define character {
   health 10;
   energy 2;
   skills HurtlingBolts, MistyCall, ThunderingShield, SurgingThunder;
-}
+};
 
 /**
  * @id 224041
@@ -189,6 +205,6 @@ define card {
   talent FatuiElectroCicinMage {
     on enter {
       :useSkill(MistyCall);
-    }
-  }
-}
+    };
+  };
+};

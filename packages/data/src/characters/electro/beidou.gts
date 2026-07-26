@@ -13,7 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 114052
@@ -29,8 +37,8 @@ define status {
     when :( :e.isSkillType("normal") );
     usage 2;
     :e.deductVoidCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 14054
@@ -45,10 +53,10 @@ define skill {
   prepared;
   :$(`status with definition id ${TidecallerSurfEmbrace} at @self`)?.dispose();
   :damage(DamageType.Electro, 3);
-  if (:self.hasEquipment(LightningStorm)){
-    :characterStatus(SummonerOfLightning, "@self")
+  if (:self.hasEquipment(LightningStorm)) {
+    :characterStatus(SummonerOfLightning, "@self");
   }
-}
+};
 
 /**
  * @id 114051
@@ -59,7 +67,7 @@ define skill {
 define status {
   id 114051 as TidecallerSurfEmbrace;
   shield 2;
-}
+};
 
 /**
  * @id 114055
@@ -70,8 +78,7 @@ define status {
 define status {
   id 114055 as WavestriderStatus;
   prepare Wavestrider;
-}
-
+};
 
 /**
  * @id 114053
@@ -88,12 +95,12 @@ define combatStatus {
   on useSkill {
     when :( :e.isSkillType("normal") );
     :damage(DamageType.Electro, 1);
-  }
+  };
   on decreaseDamaged {
     when :( :e.value >= 3 );
     :e.decreaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 14051
@@ -107,7 +114,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 14052
@@ -121,7 +128,7 @@ define skill {
   cost DiceType.Electro, 3;
   :characterStatus(TidecallerSurfEmbrace);
   :characterStatus(WavestriderStatus);
-}
+};
 
 /**
  * @id 14053
@@ -136,7 +143,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Electro, 2);
   :combatStatus(ThunderbeastsTarge);
-}
+};
 
 /**
  * @id 1405
@@ -151,7 +158,7 @@ define character {
   health 11;
   energy 3;
   skills Oceanborne, Tidecaller, Stormbreaker, Wavestrider;
-}
+};
 
 /**
  * @id 214051
@@ -169,6 +176,6 @@ define card {
   talent Beidou {
     on enter {
       :useSkill(Tidecaller);
-    }
-  }
-}
+    };
+  };
+};

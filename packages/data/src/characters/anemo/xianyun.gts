@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 115103
@@ -29,13 +37,13 @@ define status {
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     usage 1;
     :damage(DamageType.Anemo, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 115104
@@ -53,8 +61,8 @@ define status {
       append 2;
     };
     :damage(DamageType.Anemo, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 115101
@@ -71,8 +79,8 @@ define combatStatus {
       append 2;
     };
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 115102
@@ -94,9 +102,9 @@ define card {
       usage 2;
       :heal(2, "@master");
       :characterStatus(SoaringOnTheWind, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 15101
@@ -110,7 +118,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Anemo, 1);
-}
+};
 
 /**
  * @id 15102
@@ -125,7 +133,7 @@ define skill {
   :damage(DamageType.Anemo, 1);
   :combatStatus(Skyladder);
   :characterStatus(DriftcloudWave);
-}
+};
 
 /**
  * @id 15103
@@ -142,7 +150,7 @@ define skill {
   :damage(DamageType.Anemo, 1);
   :heal(1, "all my characters");
   :createHandCard(Starwicker);
-}
+};
 
 /**
  * @id 1510
@@ -157,7 +165,7 @@ define character {
   health 11;
   energy 2;
   skills WordOfWindAndFlower, WhiteCloudsAtDawn, StarsGatherAtDusk;
-}
+};
 
 /**
  * @id 215101
@@ -177,17 +185,17 @@ define card {
     variable feather, 0;
     on enter {
       :useSkill(WhiteCloudsAtDawn);
-    }
+    };
     on switchActive {
       listenTo samePlayer;
       usage perRound, 2;
       :addVariable("feather", 1);
-    }
+    };
     on increaseSkillDamage {
       when :( :e.via.definition.id === WordOfWindAndFlower );
       const feather = :getVariable("feather");
       :e.increaseDamage(feather);
       :setVariable("feather", 0);
-    }
-  }
-}
+    };
+  };
+};

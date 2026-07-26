@@ -1,15 +1,40 @@
-import { $, Aura, type CardHandle, DamageType, DiceType, card, combatStatus, skill, status, summon } from "@gi-tcg/core/builder";
-import { BonecrunchersEnergyBlockCombatStatus, FallsAndFortuneInEffect, LyresongInEffect2 } from "../cards/event/other.gts";
+import {
+  $,
+  Aura,
+  type CardHandle,
+  DamageType,
+  DiceType,
+  card,
+  combatStatus,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
+import {
+  BonecrunchersEnergyBlockCombatStatus,
+  FallsAndFortuneInEffect,
+  LyresongInEffect2,
+} from "../cards/event/other.gts";
 import { Cyno } from "../characters/electro/cyno.gts";
 import { LightningRoseSummon } from "../characters/electro/lisa.gts";
-import { DominusLapidisStrikingStone, Zhongli } from "../characters/geo/zhongli.gts";
+import {
+  DominusLapidisStrikingStone,
+  Zhongli,
+} from "../characters/geo/zhongli.gts";
 import { AutumnWhirlwind } from "../characters/anemo/kaedehara_kazuha.gts";
 import { AbiogenesisSolarIsotoma, Albedo } from "../characters/geo/albedo.gts";
 import { DecorousHarmony } from "../characters/geo/yun_jin.gts";
 import { DendroCore } from "../commons.gts";
 import { BountifulCore } from "../characters/hydro/nilou.gts";
-import { TheArtOfBudgeting, TheArtOfBudgetingInEffect, ShouldTriggerTalent } from "../characters/dendro/kaveh.gts";
-import { AnomalousAnatomy, LightlessFeeding } from "../characters/hydro/alldevouring_narwhal.gts";
+import {
+  TheArtOfBudgeting,
+  TheArtOfBudgetingInEffect,
+  ShouldTriggerTalent,
+} from "../characters/dendro/kaveh.gts";
+import {
+  AnomalousAnatomy,
+  LightlessFeeding,
+} from "../characters/hydro/alldevouring_narwhal.gts";
 
 /**
  * @id 124051
@@ -21,15 +46,19 @@ define card {
   id 124051 as private BonecrunchersEnergyBlock;
   until "v4.7.0";
   undiscoverable;
-  filter :( !:$(`my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`) );
+  filter :(
+    !:$(
+      `my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`,
+    )
+  );
   :disposeMaxCostHands(1);
   const activeCh = :$("my active")!;
   :generateDice(activeCh.element(), 1);
   if (activeCh.definition.tags.includes("sacread")) {
     :gainEnergy(1, activeCh);
   }
-  :combatStatus(BonecrunchersEnergyBlockCombatStatus)
-}
+  :combatStatus(BonecrunchersEnergyBlockCombatStatus);
+};
 
 /**
  * @id 25032
@@ -44,12 +73,14 @@ define skill {
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 2);
   :drawCards(1, { withDefinition: BonecrunchersEnergyBlock });
-  const cards = :player.hands.filter((card) => card.definition.id === BonecrunchersEnergyBlock);
+  const cards = :player.hands.filter(
+    (card) => card.definition.id === BonecrunchersEnergyBlock,
+  );
   const drawn = :self.getVariable("elementalSkillDrawCardsCount");
   const count = Math.min(cards.length, 2 - drawn);
   :drawCards(count);
   :self.addVariable("elementalSkillDrawCardsCount", count);
-}
+};
 
 /**
  * @id 116073
@@ -65,19 +96,22 @@ define combatStatus {
   on deductOmniDiceSkill {
     when :( :e.isSkillType("normal") && :player.hands.length <= 1 );
     :e.deductOmniCost(1);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     usage 1 {
       append 4;
     };
-    if (:$(`my equipment with definition id ${DecorousHarmony}`) && :player.hands.length === 0) {
+    if (
+      :$(`my equipment with definition id ${DecorousHarmony}`) &&
+      :player.hands.length === 0
+    ) {
       :e.increaseDamage(3);
     } else {
       :e.increaseDamage(1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 117082
@@ -90,21 +124,27 @@ define combatStatus {
   id 117082 as private BurstScan;
   until "v4.7.0";
   on beforeAction {
-    when :( :$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`) );
+    when :(
+      :$(
+        `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`,
+      )
+    );
     listenTo all;
     :disposeCard(:player.pile[0]);
-  }
+  };
   on disposeCard {
     when :( :e.via?.caller.id === :self.id );
     usage 1 {
       append 3;
     };
-    :$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`)?.consumeUsage(1);
+    :$(
+      `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`,
+    )?.consumeUsage(1);
     const cost = :e.entity.diceCost();
     :damage(DamageType.Dendro, cost + 1);
     :emitCustomEvent(ShouldTriggerTalent, :e.entity.latest());
-  }
-}
+  };
+};
 
 /**
  * @id 22042
@@ -118,7 +158,9 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   const st = :self.hasStatus(AnomalousAnatomy);
-  const extraDmg = st ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 5) : 0;
+  const extraDmg = st
+    ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 5)
+    : 0;
   :damage(DamageType.Hydro, 1 + extraDmg);
   const [card] = :disposeMaxCostHands(1);
   if (card) {
@@ -126,7 +168,7 @@ define skill {
       :heal(card.diceCost(), "@self");
     }
   }
-}
+};
 
 /**
  * @id 14093
@@ -142,7 +184,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 2);
   :summon(LightningRoseSummon);
-}
+};
 
 /**
  * @id 115051
@@ -157,15 +199,15 @@ define status {
   on modifySkillDamageType {
     when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Anemo);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaPlungingAttack() );
     :e.increaseDamage(1);
-  }
+  };
   on useSkill {
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 115053
@@ -180,15 +222,15 @@ define status {
   on modifySkillDamageType {
     when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Cryo);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaPlungingAttack() );
     :e.increaseDamage(1);
-  }
+  };
   on useSkill {
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 115056
@@ -203,15 +245,15 @@ define status {
   on modifySkillDamageType {
     when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaPlungingAttack() );
     :e.increaseDamage(1);
-  }
+  };
   on useSkill {
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 115054
@@ -226,15 +268,15 @@ define status {
   on modifySkillDamageType {
     when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaPlungingAttack() );
     :e.increaseDamage(1);
-  }
+  };
   on useSkill {
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 115055
@@ -249,16 +291,16 @@ define status {
   on modifySkillDamageType {
     when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaPlungingAttack() );
     :e.increaseDamage(1);
-  }
+  };
   on useSkill {
     :dispose();
-  }
-}
-  
+  };
+};
+
 /**
  * @id 15052
  * @name 千早振
@@ -294,7 +336,7 @@ define skill {
   }
   :characterStatus(midareRanzan);
   :damage(DamageType.Anemo, 3);
-}
+};
 
 /**
  * @id 15053
@@ -310,7 +352,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Anemo, 3);
   :summon(AutumnWhirlwind);
-}
+};
 
 /**
  * @id 116041
@@ -327,13 +369,13 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Geo, 1);
-  }
+  };
   on deductVoidDiceSkill {
     when :( :e.isPlungingAttack() );
     usage perRound, 1;
     :e.deductVoidCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 216041
@@ -351,15 +393,17 @@ define card {
   talent Albedo {
     on enter {
       :useSkill(AbiogenesisSolarIsotoma);
-    }
+    };
     on increaseSkillDamage {
-      when :( :$(`my summons with definition id ${SolarIsotoma}`) &&
-          :e.viaPlungingAttack() );
+      when :(
+        :$(`my summons with definition id ${SolarIsotoma}`) &&
+          :e.viaPlungingAttack()
+      );
       listenTo samePlayer;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 216031
@@ -377,17 +421,21 @@ define card {
   talent Zhongli {
     on enter {
       :useSkill(DominusLapidisStrikingStone);
-    }
+    };
     on increaseDamage {
       when :{
-        return :e.type === DamageType.Geo &&
+        return (
+          :e.type === DamageType.Geo &&
           :e.source.definition.type === "summon" &&
-          !!:$(`(my combat status with tag (shield)) or (status with tag (shield) at my active)`);
+          !!:$(
+            `(my combat status with tag (shield)) or (status with tag (shield) at my active)`,
+          )
+        );
       };
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 114041
@@ -410,16 +458,16 @@ define status {
     } else {
       :setVariable("reliance", newVal);
     }
-  }
+  };
   on modifySkillDamageType {
     when :( :getVariable("reliance") >= 2 && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
-  }
+  };
   on increaseSkillDamage {
     when :( :getVariable("reliance") >= 4 );
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 14042
@@ -433,7 +481,7 @@ define skill {
   skillType elemental;
   cost DiceType.Electro, 3;
   :damage(DamageType.Electro, 3);
-}
+};
 
 /**
  * @id 14043
@@ -456,7 +504,7 @@ define skill {
   } else {
     :setVariable("reliance", newVal, status);
   }
-}
+};
 
 /**
  * @id 214041
@@ -474,16 +522,19 @@ define card {
   talent Cyno {
     on enter {
       :useSkill(SecretRiteChasmicSoulfarer);
-    }
+    };
     on increaseSkillDamage {
       when :{
         const status = :self.master.hasStatus(PactswornPathclearer)!;
-        return :getVariable("reliance", status) % 2 === 0 && :e.via.definition.id === SecretRiteChasmicSoulfarer;
+        return (
+          :getVariable("reliance", status) % 2 === 0 &&
+          :e.via.definition.id === SecretRiteChasmicSoulfarer
+        );
       };
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 122021
@@ -501,8 +552,8 @@ define status {
   on increaseDamaged {
     when :( :e.type === DamageType.Hydro );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 332026
@@ -516,7 +567,7 @@ define card {
   cost DiceType.Aligned, 1;
   filter :( :player.dice.length >= 8 && !:oppPlayer.declaredEnd );
   :combatStatus(FallsAndFortuneInEffect);
-}
+};
 
 /**
  * @id 303230
@@ -529,7 +580,7 @@ define card {
   until "v4.7.0";
   :heal(1, "my active");
   :generateDice("randomElement", 1);
-}
+};
 
 /**
  * @id 332024
@@ -544,7 +595,7 @@ define card {
   addTarget $.my.character.has($.typeEquipment.tag("artifact"));
   :e.targets[0].unequipArtifact();
   :combatStatus(LyresongInEffect2);
-}
+};
 
 /**
  * @id 323007
@@ -562,23 +613,24 @@ define card {
     variable playedCard, 0 {
       visible false;
     };
-    replaceDescription "[GCG_TOKEN_COUNTER]", ((st, self) => self.variables.playedCard);
+    replaceDescription "[GCG_TOKEN_COUNTER]",
+    ((st, self) => self.variables.playedCard);
     on playCard {
       when :( :e.card.id !== :self.id );
       :addVariable("playedCard", 1);
-    }
+    };
     on playCard {
       when :( :getVariable("playedCard") === 3 );
       usage perRound, 1;
       usage 3;
       :drawCards(1);
       :generateDice(DiceType.Omni, 1);
-    }
+    };
     on actionPhase {
       :setVariable("playedCard", 0);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321004
@@ -594,9 +646,9 @@ define card {
     on deductOmniDiceSwitch {
       usage perRound, 1;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 323008
@@ -621,14 +673,14 @@ define card {
         :addVariableWithMax("memory", count, 2);
       }
       :setVariable("cardPlayed", 0);
-    }
+    };
     on playCard {
       :setVariable("cardPlayed", 1);
-    }
+    };
     on deductOmniDiceSkill {
       when :( !:getVariable("cardPlayed") && :getVariable("memory") > 0 );
       :e.deductOmniCost(1);
       :addVariable("memory", -1);
-    }
-  }
-}
+    };
+  };
+};

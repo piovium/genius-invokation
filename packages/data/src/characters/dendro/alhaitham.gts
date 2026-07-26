@@ -1,19 +1,26 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 117061
@@ -27,22 +34,22 @@ define status {
   id 117061 as ChisellightMirror;
   duration 2 {
     append {
-    limit 3;
-  };
+      limit 3;
+    };
   };
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Dendro);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     :damage(DamageType.Dendro, 1);
-  }
+  };
   on useSkill {
     when :( :e.isChargedAttack() );
     :addVariable("duration", 1);
-  }
-}
+  };
+};
 
 /**
  * @id 17061
@@ -56,7 +63,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 17062
@@ -70,7 +77,7 @@ define skill {
   cost DiceType.Dendro, 3;
   :damage(DamageType.Dendro, 2);
   :characterStatus(ChisellightMirror);
-}
+};
 
 /**
  * @id 17063
@@ -85,7 +92,7 @@ define skill {
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
   const mirror = :self.hasStatus(ChisellightMirror);
-  const duration = mirror ? :getVariable("duration", mirror) : 0 ;
+  const duration = mirror ? :getVariable("duration", mirror) : 0;
   const damageValue = 4 + duration;
   if (mirror) {
     :dispose(mirror);
@@ -94,18 +101,18 @@ define skill {
   if (duration >= 1 && :self.hasEquipment(Structuration)) {
     :self.addStatus(ChisellightMirror, {
       overrideVariables: {
-        duration: 3
-      }
+        duration: 3,
+      },
     });
     :drawCards(1);
-  } else if (duration < 3){
-      :self.addStatus(ChisellightMirror, {
-        overrideVariables: {
-          duration: 3 - duration
-        }
-      });
-    }
-}
+  } else if (duration < 3) {
+    :self.addStatus(ChisellightMirror, {
+      overrideVariables: {
+        duration: 3 - duration,
+      },
+    });
+  }
+};
 
 /**
  * @id 1706
@@ -119,8 +126,10 @@ define character {
   tags dendro, sword, sumeru;
   health 10;
   energy 2;
-  skills AbductiveReasoning, UniversalityAnElaborationOnForm, ParticularFieldFettersOfPhenomena;
-}
+  skills AbductiveReasoning,
+  UniversalityAnElaborationOnForm,
+  ParticularFieldFettersOfPhenomena;
+};
 
 /**
  * @id 217061
@@ -139,6 +148,6 @@ define card {
   talent Alhaitham {
     on enter {
       :useSkill(ParticularFieldFettersOfPhenomena);
-    }
-  }
-}
+    };
+  };
+};

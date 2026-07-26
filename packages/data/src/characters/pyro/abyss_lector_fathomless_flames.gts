@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 123021
@@ -29,8 +37,8 @@ define summon {
     usage 2;
     :damage(DamageType.Piercing, 1, "opp standby");
     :damage(DamageType.Pyro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 123024
@@ -44,8 +52,8 @@ define status {
   shield 2;
   on selfDispose {
     :damage(DamageType.Piercing, 1, "all opp characters");
-  }
-}
+  };
+};
 
 /**
  * @id 123026
@@ -58,8 +66,8 @@ define status {
   on increaseSkillDamage {
     when :( :e.type === DamageType.Pyro );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 123022
@@ -79,8 +87,8 @@ define status {
     :self.master.setVariable("fieryRebirthTriggered", 1);
     :characterStatus(FieryRebirthHoned, "@master");
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 123025
@@ -92,7 +100,7 @@ define status {
 define status {
   id 123025 as QuenchedEmbers;
   reserved;
-}
+};
 
 /**
  * @id 123023
@@ -104,7 +112,7 @@ define status {
 define status {
   id 123023 as ShieldOfSurgingFlame;
   reserved;
-}
+};
 
 /**
  * @id 23021
@@ -118,7 +126,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Pyro, 1);
-}
+};
 
 /**
  * @id 23022
@@ -131,7 +139,7 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 3);
-}
+};
 
 /**
  * @id 23023
@@ -146,7 +154,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Pyro, 3);
   :summon(DarkfireFurnace);
-}
+};
 
 /**
  * @id 23024
@@ -159,22 +167,22 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(FieryRebirthStatus);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 23028
  * @name 火之新生
  * @description
- * 
+ *
  */
 define skill {
   id 23028 as FieryRebirthSkill;
   skillType passive {
     variable fieryRebirthTriggered, 0;
-  }
-}
+  };
+};
 
 /**
  * @id 2302
@@ -188,8 +196,12 @@ define character {
   tags pyro, monster;
   health 6;
   energy 2;
-  skills FlameOfSalvation, SearingPrecept, OminousStar, FieryRebirth, FieryRebirthSkill;
-}
+  skills FlameOfSalvation,
+  SearingPrecept,
+  OminousStar,
+  FieryRebirth,
+  FieryRebirthSkill;
+};
 
 /**
  * @id 223021
@@ -208,6 +220,6 @@ define card {
       when :( :self.master.getVariable("fieryRebirthTriggered") );
       :characterStatus(AegisOfAbyssalFlame, "@master");
       :dispose();
-    }
-  }
-}
+    };
+  };
+};

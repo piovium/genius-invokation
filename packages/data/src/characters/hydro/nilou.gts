@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, combatStatus, card, DamageType, DiceType, Reaction } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  DiceType,
+  Reaction,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 112082
@@ -30,24 +40,26 @@ define summon {
     usage 1 {
       append 3;
     };
-    if (:$(`my equipment with definition id ${TheStarrySkiesTheirFlowersRain}`)) {
+    if (
+      :$(`my equipment with definition id ${TheStarrySkiesTheirFlowersRain}`)
+    ) {
       :damage(DamageType.Dendro, 3);
-    }
-    else {
+    } else {
       :damage(DamageType.Dendro, 2);
     }
-  }
+  };
   on declareEnd {
     when :( :getVariable("usage") >= 2 );
-    if (:$(`my equipment with definition id ${TheStarrySkiesTheirFlowersRain}`)) {
+    if (
+      :$(`my equipment with definition id ${TheStarrySkiesTheirFlowersRain}`)
+    ) {
       :damage(DamageType.Dendro, 3);
-    }
-    else {
+    } else {
       :damage(DamageType.Dendro, 2);
     }
     :consumeUsage();
-  }
-}
+  };
+};
 
 /**
  * @id 112083
@@ -61,8 +73,8 @@ define status {
   on endPhase {
     usage 1;
     :damage(DamageType.Hydro, 2, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 112081
@@ -77,8 +89,8 @@ define combatStatus {
     listenTo all;
     :e.cancelEffects();
     :summon(BountifulCore);
-  }
-}
+  };
+};
 
 /**
  * @id 12081
@@ -92,7 +104,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 12082
@@ -104,12 +116,18 @@ define skill {
   id 12082 as DanceOfHaftkarsvar;
   skillType elemental;
   cost DiceType.Hydro, 3;
-  const elements = new Set(:$$(`all my characters include defeated`).map((ch) => ch.element()));
-  if (elements.size === 2 && elements.has(DiceType.Hydro) && elements.has(DiceType.Dendro)) {
+  const elements = new Set(
+    :$$(`all my characters include defeated`).map((ch) => ch.element()),
+  );
+  if (
+    elements.size === 2 &&
+    elements.has(DiceType.Hydro) &&
+    elements.has(DiceType.Dendro)
+  ) {
     :combatStatus(GoldenChalicesBounty);
   }
   :damage(DamageType.Hydro, 3); // 先给 buff 后出伤，此时产出的草原核也是丰穰之核
-}
+};
 
 /**
  * @id 12083
@@ -124,7 +142,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
   :characterStatus(LingeringAeon, "opp active or opp next");
-}
+};
 
 /**
  * @id 1208
@@ -138,8 +156,10 @@ define character {
   tags hydro, sword, sumeru;
   health 10;
   energy 2;
-  skills DanceOfSamser, DanceOfHaftkarsvar, DanceOfAbzendegiDistantDreamsListeningSpring;
-}
+  skills DanceOfSamser,
+  DanceOfHaftkarsvar,
+  DanceOfAbzendegiDistantDreamsListeningSpring;
+};
 
 /**
  * @id 212081
@@ -157,6 +177,6 @@ define card {
   talent Nilou {
     on enter {
       :useSkill(DanceOfHaftkarsvar);
-    }
-  }
-}
+    };
+  };
+};

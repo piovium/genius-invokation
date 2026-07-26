@@ -1,19 +1,25 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DamageType, DiceType, card, combatStatus, extension } from "@gi-tcg/core/builder";
+import {
+  DamageType,
+  DiceType,
+  card,
+  combatStatus,
+  extension,
+} from "@gi-tcg/core/builder";
 import { AgileSwitch, EfficientSwitch } from "../../commons.gts";
 
 /**
@@ -29,7 +35,13 @@ define card {
   support item {
     variable progress, 0;
     on useSkill {
-      when :( :hasPhaseDamage("all", (e) => e.type !== DamageType.Piercing && e.type !== DamageType.Physical) );
+      when :(
+        :hasPhaseDamage(
+          "all",
+          (e) =>
+            e.type !== DamageType.Piercing && e.type !== DamageType.Physical,
+        )
+      );
       listenTo all;
       :addVariable("progress", 1);
       if (:getVariable("progress") >= 3) {
@@ -37,9 +49,9 @@ define card {
         :dispose();
         return;
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 323002
@@ -55,14 +67,14 @@ define card {
   support item {
     on enter {
       :drawCards(1, { withTag: "food" });
-    }
+    };
     on playCard {
       when :( :e.hasCardTag("food") );
       usage perRound, 1;
       :drawCards(1, { withTag: "food" });
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 302303
@@ -79,16 +91,16 @@ define combatStatus {
   on deductOmniDiceSwitch {
     :e.deductOmniCost(1);
     :setVariable("triggered", 1);
-  }
+  };
   on beforeFastSwitch {
     :e.setFastAction();
     :setVariable("triggered", 1);
-  }
+  };
   on switchActive {
     when :( :getVariable("triggered") );
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 323003
@@ -105,9 +117,9 @@ define card {
       usage perRound, 1;
       :combatStatus(EfficientSwitch);
       :combatStatus(AgileSwitch);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 323004
@@ -127,9 +139,9 @@ define card {
         :drawCards(3);
         :dispose();
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 323005
@@ -143,28 +155,32 @@ define card {
   since "v4.3.0";
   support item {
     on deductOmniDiceCard {
-      when :( :e.currentDiceCostSize() >= 2 && :e.action.skill.caller.definition.type === "support" );
+      when :(
+        :e.currentDiceCostSize() >= 2 &&
+          :e.action.skill.caller.definition.type === "support"
+      );
       usage perRound, 1;
       usage 2;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 define extension {
   idHint 323006 as CardPlayedExtension;
   schema ({ played: "pair<number[]>" });
   initialState ({ played: [[], []] });
   description "记录本场对局中双方曾经打出过的行动牌";
-  mutateWhen onAction, ((st, e) => {
+  mutateWhen onAction,
+  ((st, e) => {
     if (e.isPlayCard()) {
       const defId = e.action.skill.caller.definition.id;
       if (!st.played[e.who].includes(defId)) {
         st.played[e.who].push(defId);
       }
     }
-  })
-}
+  });
+};
 
 /**
  * @id 323006
@@ -185,7 +201,9 @@ define card {
         if (!:e.hasOneOfCardTag("weapon", "artifact", "place", "ally")) {
           return false;
         }
-        return :getExtensionState().played[:self.who].includes(:e.action.skill.caller.definition.id);
+        return :getExtensionState().played[:self.who].includes(
+          :e.action.skill.caller.definition.id,
+        );
       };
       usage perRound, 1;
       :e.deductOmniCost(2);
@@ -193,9 +211,9 @@ define card {
       if (:getVariable("totalUsage") <= 0) {
         :dispose();
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 323007
@@ -213,23 +231,24 @@ define card {
     variable playedCard, 0 {
       visible false;
     };
-    replaceDescription "[GCG_TOKEN_COUNTER]", ((st, self) => self.variables.playedCard);
+    replaceDescription "[GCG_TOKEN_COUNTER]",
+    ((st, self) => self.variables.playedCard);
     on playCard {
       when :( :e.card.id !== :self.id );
       :addVariable("playedCard", 1);
-    }
+    };
     on playCard {
       when :( :getVariable("playedCard") === 3 );
       usage perRound, 1;
       usage 3;
       :drawCards(1);
       :generateDice(DiceType.Omni, 1);
-    }
+    };
     on actionPhase {
       :setVariable("playedCard", 0);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 323008
@@ -255,17 +274,17 @@ define card {
         :addVariableWithMax("memory", count, 2);
       }
       :setVariable("cardPlayed", 0);
-    }
+    };
     on playCard {
       :setVariable("cardPlayed", 1);
-    }
+    };
     on deductOmniDiceSkill {
       when :( !:getVariable("cardPlayed") && :getVariable("memory") > 0 );
       :e.deductOmniCost(1);
       :addVariable("memory", -1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 133096
@@ -278,4 +297,4 @@ define card {
 define card {
   id 133096 as Lumenarystone; // 骗骗花
   reserved;
-}
+};

@@ -1,15 +1,15 @@
 // Copyright (C) 2026 Piovium Labs
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -26,7 +26,7 @@ define status {
   id 125041 as RecklessStanceStatus;
   since "v6.7.0";
   prepare RecklessStance;
-}
+};
 
 /**
  * @id 125042
@@ -38,7 +38,7 @@ define status {
   id 125042 as GalePursuitStatus;
   since "v6.7.0";
   prepare GalePursuit;
-}
+};
 
 /**
  * @id 25041
@@ -52,7 +52,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 25042
@@ -66,7 +66,7 @@ define skill {
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 3);
   :drawCards(1);
-}
+};
 
 /**
  * @id 25043
@@ -80,7 +80,7 @@ define skill {
   cost DiceType.Anemo, 3;
   cost DiceType.Energy, 2;
   :characterStatus(RecklessStanceStatus);
-}
+};
 
 /**
  * @id 25044
@@ -93,26 +93,32 @@ define skill {
   skillType passive {
     variable drawCardsUsagePerRound, 2;
     on dealReaction {
-      when :( :getVariable("drawCardsUsagePerRound") > 0 && :e.relatedTo(DamageType.Anemo) );
+      when :(
+        :getVariable("drawCardsUsagePerRound") > 0 &&
+          :e.relatedTo(DamageType.Anemo)
+      );
       listenTo samePlayer;
       :drawCards(1);
       :addVariable("drawCardsUsagePerRound", -1);
-    }
+    };
     on dispose {
-      when :( 0 &&
-        !:e.entity.isMine() &&
-        (:e.entity.definition.type === "status" || :e.entity.definition.type === "combatStatus") &&
-        (:e.entity.definition.tags.includes("shield") || :e.entity.definition.tags.includes("barrier"))
+      when :(
+        0 &&
+          !:e.entity.isMine() &&
+          (:e.entity.definition.type === "status" ||
+            :e.entity.definition.type === "combatStatus") &&
+          (:e.entity.definition.tags.includes("shield") ||
+            :e.entity.definition.tags.includes("barrier"))
       );
       listenTo all;
       :drawCards(1);
       :addVariable("drawCardsUsagePerRound", -1);
-    }
+    };
     on roundEnd {
       :setVariable("drawCardsUsagePerRound", 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 25045
@@ -127,7 +133,7 @@ define skill {
   :damage(DamageType.Anemo, 3);
   :disposeMaxCostHands(1);
   :characterStatus(GalePursuitStatus);
-}
+};
 
 /**
  * @id 25046
@@ -141,7 +147,7 @@ define skill {
   prepared;
   :damage(DamageType.Anemo, 3);
   :disposeMaxCostHands(1);
-}
+};
 
 /**
  * @id 2504
@@ -155,8 +161,13 @@ define character {
   tags anemo, monster;
   health 10;
   energy 2;
-  skills HalfswordTechnique, RisingSlash, GuardStance, VanguardMomentum, RecklessStance, GalePursuit;
-}
+  skills HalfswordTechnique,
+  RisingSlash,
+  GuardStance,
+  VanguardMomentum,
+  RecklessStance,
+  GalePursuit;
+};
 
 /**
  * @id 225041
@@ -174,18 +185,18 @@ define card {
   talent BlackSerpentKnightWindcutter {
     on enter {
       :useSkill(RisingSlash);
-    }
+    };
     on actionPhase {
       if (:oppPlayer.hands.length >= 7) {
-        :characterStatus(RES, $.opp.active)
+        :characterStatus(RES, $.opp.active);
       }
       if (:player.hands.length >= 7) {
         :characterStatus(RES, $.my.active, {
           overrideVariables: {
-            usage: 2
-          }
-        })
+            usage: 2,
+          },
+        });
       }
-    }
-  }
-}
+    };
+  };
+};

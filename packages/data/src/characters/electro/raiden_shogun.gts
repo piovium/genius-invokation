@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  status,
+  card,
+  DamageType,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 114071
@@ -29,12 +37,12 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Electro, 1);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("burst") );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 114072
@@ -47,10 +55,10 @@ define status {
   id 114072 as ChakraDesiderataStatus;
   variable chakra, 0;
   on useSkill {
-    when :( :e.isSkillType("burst") && :e.skill.caller.id !== :self.master.id )
+    when :( :e.isSkillType("burst") && :e.skill.caller.id !== :self.master.id );
     listenTo samePlayer;
     :addVariableWithMax("chakra", 1, 3);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.via.definition.id === SecretArtMusouShinsetsu );
     const currentVal = :getVariable("chakra");
@@ -60,8 +68,8 @@ define status {
       :e.increaseDamage(currentVal);
     }
     :setVariable("chakra", 0);
-  }
-}
+  };
+};
 
 /**
  * @id 14071
@@ -75,7 +83,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 14072
@@ -88,7 +96,7 @@ define skill {
   skillType elemental;
   cost DiceType.Electro, 3;
   :summon(EyeOfStormyJudgment);
-}
+};
 
 /**
  * @id 14073
@@ -103,7 +111,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 3);
   :gainEnergy(2, "all my characters and not @self");
-}
+};
 
 /**
  * @id 14074
@@ -115,13 +123,13 @@ define skill {
   id 14074 as ChakraDesiderata;
   skillType passive {
     on battleBegin {
-      :characterStatus(ChakraDesiderataStatus)
-    }
+      :characterStatus(ChakraDesiderataStatus);
+    };
     on revive {
-      :characterStatus(ChakraDesiderataStatus)
-    }
-  }
-}
+      :characterStatus(ChakraDesiderataStatus);
+    };
+  };
+};
 
 /**
  * @id 1407
@@ -135,8 +143,11 @@ define character {
   tags electro, pole, inazuma;
   health 10;
   energy 2;
-  skills Origin, TranscendenceBalefulOmen, SecretArtMusouShinsetsu, ChakraDesiderata;
-}
+  skills Origin,
+  TranscendenceBalefulOmen,
+  SecretArtMusouShinsetsu,
+  ChakraDesiderata;
+};
 
 /**
  * @id 214071
@@ -155,6 +166,6 @@ define card {
   talent RaidenShogun {
     on enter {
       :useSkill(SecretArtMusouShinsetsu);
-    }
-  }
-}
+    };
+  };
+};

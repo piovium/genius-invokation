@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 113111
@@ -24,7 +32,7 @@ import { card, character, combatStatus, DamageType, DiceType, skill, type SkillH
 define combatStatus {
   id 113111 as BlazingBarrier;
   shield 1, 3;
-}
+};
 
 /**
  * @id 113113
@@ -41,8 +49,8 @@ define combatStatus {
     usage 3;
     :damage(DamageType.Pyro, 1);
     :combatStatus(BlazingBarrier);
-  }
-}
+  };
+};
 
 /**
  * @id 113112
@@ -59,8 +67,8 @@ define combatStatus {
     usage 2;
     :damage(DamageType.Pyro, 1);
     :combatStatus(BlazingBarrier);
-  }
-}
+  };
+};
 
 /**
  * @id 13111
@@ -74,7 +82,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 13112
@@ -88,7 +96,7 @@ define skill {
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 2);
   :combatStatus(BlazingBarrier);
-}
+};
 
 /**
  * @id 13113
@@ -105,11 +113,10 @@ define skill {
   :combatStatus(BlazingBarrier);
   if (:self.hasEquipment(ASubordinatesSkills)) {
     :combatStatus(ScorchingOoyoroi01);
-  }
-  else {
+  } else {
     :combatStatus(ScorchingOoyoroi);
   }
-}
+};
 
 /**
  * @id 1311
@@ -124,7 +131,7 @@ define character {
   health 12;
   energy 2;
   skills SwiftshatterSpear, BlazingBlessing, CrimsonOoyoroi;
-}
+};
 
 /**
  * @id 213111
@@ -143,6 +150,6 @@ define card {
   talent Thoma {
     on enter {
       :useSkill(CrimsonOoyoroi);
-    }
-  }
-}
+    };
+  };
+};

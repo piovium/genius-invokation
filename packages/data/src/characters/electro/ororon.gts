@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, Reaction, skill, status, summon } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  Reaction,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 114161
@@ -31,14 +41,14 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Electro, 1);
-  }
+  };
   on decreaseDamaged {
     when :( :e.target.isActive() );
     usage perRound, 1;
     :e.decreaseDamage(1);
     :consumeUsage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 114163
@@ -53,7 +63,7 @@ define status {
   nightsoulsBlessing 2 {
     autoDispose;
   };
-}
+};
 
 /**
  * @id 114162
@@ -68,8 +78,8 @@ define combatStatus {
   on actionPhase {
     usage 1;
     :damage(DamageType.Electro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 14161
@@ -83,7 +93,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 14162
@@ -97,7 +107,7 @@ define skill {
   cost DiceType.Electro, 3;
   :damage(DamageType.Electro, 2);
   :combatStatus(SpiritOrb);
-}
+};
 
 /**
  * @id 14163
@@ -112,7 +122,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 2);
   :summon(SupersonicOculus);
-}
+};
 
 /**
  * @id 14164
@@ -125,23 +135,32 @@ define skill {
   id 14164 as NightshadeSynesthesia;
   skillType passive {
     on dealReaction {
-      when :( ([Reaction.ElectroCharged, Reaction.LunarElectroCharged] as Reaction[]).includes(:e.type) && 
-          (:self.hasNightsoulsBlessing()?.variables.nightsoul ?? 0) >= 2 );
+      when :(
+        (
+          [Reaction.ElectroCharged, Reaction.LunarElectroCharged] as Reaction[]
+        ).includes(:e.type) &&
+          (:self.hasNightsoulsBlessing()?.variables.nightsoul ?? 0) >= 2
+      );
       listenTo samePlayer;
       :consumeNightsoul("@self", 2);
       :damage(DamageType.Electro, 1, "opp characters with health > 0 limit 1");
-    }
+    };
     on dealDamage {
-      when :( ([DamageType.Electro, DamageType.Hydro] as DamageType[]).includes(:e.type) &&
-          Math.floor(:e.via.definition.id) !== Math.floor(:skillInfo.definition.id) );
+      when :(
+        ([DamageType.Electro, DamageType.Hydro] as DamageType[]).includes(
+          :e.type,
+        ) &&
+          Math.floor(:e.via.definition.id) !==
+            Math.floor(:skillInfo.definition.id)
+      );
       listenTo samePlayer;
       usage perRound, 1 {
         name "usagePerRound1";
       };
       :gainNightsoul("@self", 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 14165
@@ -154,8 +173,8 @@ define skill {
   id 14165 as NightshadeSynesthesia01;
   skillType passive {
     reserved;
-  }
-}
+  };
+};
 
 /**
  * @id 1416
@@ -169,9 +188,12 @@ define character {
   tags electro, bow, natlan;
   health 10;
   energy 2;
-  skills SpiritvesselSnapshot, NightsSling, DarkVoicesEcho, NightshadeSynesthesia;
+  skills SpiritvesselSnapshot,
+  NightsSling,
+  DarkVoicesEcho,
+  NightshadeSynesthesia;
   associateNightsoul NightsoulsBlessing;
-}
+};
 
 /**
  * @id 214161
@@ -187,10 +209,14 @@ define card {
   cost DiceType.Electro, 1;
   talent Ororon, none {
     on modifyReaction {
-      when :( :e.type === Reaction.ElectroCharged && :e.reactionInfo.fromDamage && :e.caller.isMine() );
+      when :(
+        :e.type === Reaction.ElectroCharged &&
+          :e.reactionInfo.fromDamage &&
+          :e.caller.isMine()
+      );
       listenTo all;
       usage perRound, 1;
       :e.increasePiercingOtherDamage(1);
-    }
-  }
-}
+    };
+  };
+};

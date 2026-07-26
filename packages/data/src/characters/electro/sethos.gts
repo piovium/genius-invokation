@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, customEvent, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  customEvent,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 114131
@@ -29,20 +37,20 @@ define status {
   on deductVoidDiceSkill {
     when :( :e.isSkillType("normal") );
     :e.deductVoidCost(1);
-  }
+  };
   on modifySkillDamageType {
     when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     :damage(DamageType.Piercing, 1, "opp character order by health limit 1");
-  }
-}
+  };
+};
 
 /**
  * @id 114132
@@ -59,8 +67,8 @@ define status {
     listenTo samePlayer;
     usage 1;
     :gainEnergy(1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 14131
@@ -75,7 +83,7 @@ define skill {
   cost DiceType.Void, 2;
   noEnergy;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 14132
@@ -90,7 +98,7 @@ define skill {
   :apply(DamageType.Electro, "opp active");
   :switchActive("my next");
   :characterStatus(ThunderConvergence, "@self");
-}
+};
 
 /**
  * @id 14133
@@ -105,7 +113,7 @@ define skill {
   cost DiceType.Energy, 4;
   :damage(DamageType.Electro, 3);
   :characterStatus(TwilightMeditation, "@self");
-}
+};
 
 const EnergyLost = customEvent("sethos/energyLost");
 
@@ -124,12 +132,16 @@ define skill {
       const energy = :self.energy;
       if (energy) {
         :self.loseEnergy(energy);
-        :damage(DamageType.Piercing, energy + 1, "opp character order by health limit 1");
+        :damage(
+          DamageType.Piercing,
+          energy + 1,
+          "opp character order by health limit 1",
+        );
         :emitCustomEvent(EnergyLost);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1413
@@ -143,8 +155,11 @@ define character {
   tags electro, bow, sumeru;
   health 10;
   energy 4;
-  skills RoyalReedArchery, AncientRiteTheThunderingSands, SecretRiteTwilightShadowpiercer, BlackKitesEnigma;
-}
+  skills RoyalReedArchery,
+  AncientRiteTheThunderingSands,
+  SecretRiteTwilightShadowpiercer,
+  BlackKitesEnigma;
+};
 
 /**
  * @id 214131
@@ -161,10 +176,10 @@ define card {
   talent Sethos, none {
     on enter {
       :gainEnergy(1, "@master");
-    }
+    };
     on EnergyLost {
       usage perRound, 1;
       :gainEnergy(1, "@master");
-    }
-  }
-}
+    };
+  };
+};

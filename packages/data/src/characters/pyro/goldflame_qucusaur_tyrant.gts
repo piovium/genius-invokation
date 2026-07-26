@@ -1,19 +1,26 @@
 // Copyright (C) 2026 Piovium Labs
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 123061
@@ -39,8 +46,8 @@ define status {
     if (chosen) {
       :disposeCard(chosen);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 123062
@@ -58,8 +65,8 @@ define status {
       append;
     };
     :e.decreaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 23061
@@ -73,7 +80,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 23062
@@ -87,11 +94,11 @@ define skill {
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 1);
   :characterStatus(FlyingSwirl, "@self", {
-      overrideVariables: {
-        usage: 2
-      }
-    });
-}
+    overrideVariables: {
+      usage: 2,
+    },
+  });
+};
 
 /**
  * @id 23063
@@ -107,7 +114,7 @@ define skill {
   :damage(DamageType.Piercing, 1, "opp standby");
   :damage(DamageType.Pyro, 3);
   :characterStatus(GoldflameState, "@self");
-}
+};
 
 /**
  * @id 23064
@@ -121,9 +128,9 @@ define skill {
     on actionPhase {
       when :( :roundNumber % 2 === 0 );
       :characterStatus(GoldflameState, "@self");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2306
@@ -138,7 +145,7 @@ define character {
   health 11;
   energy 2;
   skills Wingcleave, HotRisingWind, GoldflameExplosion, AncientBloodline;
-}
+};
 
 /**
  * @id 223061
@@ -157,6 +164,6 @@ define card {
   talent GoldflameQucusaurTyrant {
     on enter {
       :useSkill(GoldflameExplosion);
-    }
-  }
-}
+    };
+  };
+};

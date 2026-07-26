@@ -1,6 +1,23 @@
-import { card, character, DamageType, DiceType, skill, summon, type SummonHandle } from "@gi-tcg/core/builder";
-import { NORMAL_MIMICS, PREVIEW_MIMICS } from "../characters/hydro/rhodeia_of_loch.gts";
-import { BladeAblaze, Prowl, Stealth, StealthMaster, Thrust } from "../characters/pyro/fatui_pyro_agent.gts";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
+import {
+  NORMAL_MIMICS,
+  PREVIEW_MIMICS,
+} from "../characters/hydro/rhodeia_of_loch.gts";
+import {
+  BladeAblaze,
+  Prowl,
+  Stealth,
+  StealthMaster,
+  Thrust,
+} from "../characters/pyro/fatui_pyro_agent.gts";
 import { WindAndFreedomInEffect } from "../cards/event/other.gts";
 
 /**
@@ -16,7 +33,7 @@ define card {
   cost DiceType.Aligned, 1;
   filter :( :$(`my standby characters`) );
   :combatStatus(WindAndFreedomInEffect);
-}
+};
 
 /**
  * @id 330003
@@ -30,12 +47,22 @@ define card {
   until "v4.2.0";
   cost DiceType.Aligned, 1;
   legend;
-  filter :( ([DiceType.Cryo, DiceType.Hydro, DiceType.Pyro, DiceType.Electro, DiceType.Dendro] as (DiceType | undefined)[]).includes(:$("my active")?.element()) );
+  filter :(
+    (
+      [
+        DiceType.Cryo,
+        DiceType.Hydro,
+        DiceType.Pyro,
+        DiceType.Electro,
+        DiceType.Dendro,
+      ] as (DiceType | undefined)[]
+    ).includes(:$("my active")?.element())
+  );
   const element = :$("my active")!.element() as 1 | 2 | 3 | 4 | 7;
   // 先挂后台再挂前台（避免前台被超载走导致结算错误）
   :apply(element, "my standby character with aura != 0");
   :apply(element, "my active character with aura != 0");
-}
+};
 
 /**
  * @id 22012
@@ -49,7 +76,9 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   const mimics = :isPreview ? PREVIEW_MIMICS : NORMAL_MIMICS;
-  const exists = :player.summons.map((s) => s.definition.id).filter((id) => mimics.includes(id));
+  const exists = :player.summons
+    .map((s) => s.definition.id)
+    .filter((id) => mimics.includes(id));
   let target;
   if (exists.length >= 3) {
     target = :random(exists);
@@ -58,7 +87,7 @@ define skill {
     target = :random(rest);
   }
   :summon(target as SummonHandle);
-}
+};
 
 /**
  * @id 22013
@@ -72,7 +101,9 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 5;
   const mimics = :isPreview ? PREVIEW_MIMICS : NORMAL_MIMICS;
-  const exists = :player.summons.map((s) => s.definition.id).filter((id) => mimics.includes(id));
+  const exists = :player.summons
+    .map((s) => s.definition.id)
+    .filter((id) => mimics.includes(id));
   for (let i = 0; i < 2; i++) {
     let target;
     if (exists.length >= 3) {
@@ -84,7 +115,7 @@ define skill {
     :summon(target as SummonHandle);
     exists.push(target);
   }
-}
+};
 
 /**
  * @id 122013
@@ -104,13 +135,13 @@ define summon {
       autoDispose false;
     };
     :e.decreaseDamage(1);
-  }
+  };
   on endPhase {
     when :( :getVariable("usage") <= 0 );
     :damage(DamageType.Hydro, 2);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 122014
@@ -131,13 +162,13 @@ define summon {
       autoDispose false;
     };
     :e.decreaseDamage(1);
-  }
+  };
   on endPhase {
     when :( :getVariable("usage") <= 0 );
     :damage(DamageType.Hydro, 2);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 2301
@@ -152,7 +183,7 @@ define character {
   health 10;
   energy 2;
   skills Thrust, Prowl, BladeAblaze, StealthMaster;
-}
+};
 
 /**
  * @id 312016
@@ -174,7 +205,7 @@ define card {
     variable bubble, 0;
     on enter {
       :heal(3, "@master");
-    }
+    };
     on healed {
       listenTo samePlayer;
       :addVariable("healedPts", :e.value);
@@ -183,15 +214,14 @@ define card {
       const restPts = totalPts % 3;
       :addVariableWithMax("bubble", generatedBubbleCount, 2);
       :setVariable("healedPts", restPts);
-    }
+    };
     on increaseSkillDamage {
       const bubbleCount = :getVariable("bubble");
       :setVariable("bubble", 0);
       :e.increaseDamage(bubbleCount);
-    }
-  }
-}
-
+    };
+  };
+};
 
 /**
  * @id 322003
@@ -209,16 +239,18 @@ define card {
     variable material, 2;
     on endPhase {
       :addVariable("material", 1);
-    }
+    };
     on deductAllDiceCard {
-      when :( :e.hasCardTag("artifact") && :getVariable("material") >= :e.diceCostSize() );
+      when :(
+        :e.hasCardTag("artifact") &&
+          :getVariable("material") >= :e.diceCostSize()
+      );
       usage perRound, 1;
       :addVariable("material", -:e.diceCostSize());
       :e.deductAllCost();
-    }
-  }
-}
-
+    };
+  };
+};
 
 /**
  * @id 322004
@@ -236,15 +268,17 @@ define card {
     variable material, 2;
     on endPhase {
       :addVariable("material", 1);
-    }
+    };
     on deductAllDiceCard {
-      when :( :e.hasCardTag("weapon") && :getVariable("material") >= :e.diceCostSize() );
+      when :(
+        :e.hasCardTag("weapon") && :getVariable("material") >= :e.diceCostSize()
+      );
       usage perRound, 1;
       :addVariable("material", -:e.diceCostSize());
       :e.deductAllCost();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303182
@@ -258,5 +292,5 @@ define combatStatus {
   on actionPhase {
     :generateDice(DiceType.Omni, 3);
     :dispose();
-  }
-}
+  };
+};

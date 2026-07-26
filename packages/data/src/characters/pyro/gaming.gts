@@ -1,19 +1,26 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 13164
@@ -27,7 +34,7 @@ define skill {
   hidden;
   forcePlunging;
   :damage(DamageType.Pyro, 2);
-}
+};
 
 /**
  * @id 113163
@@ -38,7 +45,7 @@ define skill {
 define status {
   id 113163 as CharmedCloudstriderStatus;
   reserved;
-}
+};
 
 /**
  * @id 113161
@@ -51,8 +58,8 @@ define status {
   since "v6.2.0";
   once replaceActionBySkill {
     :useSkill(CharmedCloudstrider);
-  }
-}
+  };
+};
 
 /**
  * @id 113162
@@ -68,7 +75,7 @@ define status {
   on deductOmniDiceSkill {
     when :( :e.isSkillType("elemental") );
     :e.deductOmniCost(1);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("elemental") );
     usage 2 {
@@ -80,8 +87,8 @@ define status {
     } else {
       :consumeUsage();
     }
-  }
-}
+  };
+};
 
 /**
  * @id 13161
@@ -95,7 +102,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 13162
@@ -110,7 +117,7 @@ define skill {
   :damage(DamageType.Pyro, 1);
   :characterStatus(WushouArts, "@self");
   :switchActive("my next");
-}
+};
 
 /**
  * @id 13163
@@ -125,7 +132,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Pyro, 2);
   :characterStatus(SuanniManChai, "@self");
-}
+};
 
 /**
  * @id 13165
@@ -137,7 +144,7 @@ define skill {
   id 13165 as BestialAscentPassive;
   skillType passive;
   reserved;
-}
+};
 
 /**
  * @id 1316
@@ -152,7 +159,7 @@ define character {
   health 10;
   energy 3;
   skills StellarRend, BestialAscent, SuannisGildedDance, CharmedCloudstrider;
-}
+};
 
 /**
  * @id 213161
@@ -172,15 +179,15 @@ define card {
   talent Gaming {
     on enter {
       :useSkill(SuannisGildedDance);
-    }
+    };
     on increaseSkillDamage {
       when :( :e.viaPlungingAttack() );
       :e.increaseDamage(1);
-    }
+    };
     on useSkill {
       when :( :e.isSkillType("elemental") );
       usage perRound, 1;
       :heal(2, "@master");
-    }
-  }
-}
+    };
+  };
+};

@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status, type CharacterHandle, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type CharacterHandle,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 12104
@@ -32,7 +42,7 @@ define skill {
   } else {
     :damage(DamageType.Hydro, 2);
   }
-}
+};
 
 /**
  * @id 112102
@@ -43,7 +53,7 @@ define skill {
 define status {
   id 112102 as EquitableJudgmentStatus;
   prepare EquitableJudgment;
-}
+};
 
 /**
  * @id 112103
@@ -57,8 +67,8 @@ define status {
   on increaseSkillDamage {
     usage 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 112101
@@ -71,10 +81,10 @@ define combatStatus {
   id 112101 as SourcewaterDroplet;
   usage 1 {
     append {
-    limit 3;
+      limit 3;
+    };
   };
-  };
-}
+};
 
 /**
  * @id 12101
@@ -88,7 +98,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Hydro, 1);
-}
+};
 
 /**
  * @id 12102
@@ -102,7 +112,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 2);
   :combatStatus(SourcewaterDroplet);
-}
+};
 
 /**
  * @id 12103
@@ -118,33 +128,37 @@ define skill {
   :damage(DamageType.Piercing, 1, "opp standby");
   :damage(DamageType.Hydro, 2);
   :combatStatus(SourcewaterDroplet, "my", {
-      overrideVariables: {
-        usage: 2
-      }
-    });
-}
+    overrideVariables: {
+      usage: 2,
+    },
+  });
+};
 
 /**
  * @id 12105
  * @name 源水之滴
  * @description
- * 
+ *
  */
 define skill {
   id 12105 as SourcewaterDropletSkill;
   skillType passive {
     on useSkill {
-      when :( :e.isSkillType("normal") &&
-          :$(`my combat status with definition id ${SourcewaterDroplet}`) );
-      const droplet = :$(`my combat status with definition id ${SourcewaterDroplet}`);
+      when :(
+        :e.isSkillType("normal") &&
+          :$(`my combat status with definition id ${SourcewaterDroplet}`)
+      );
+      const droplet = :$(
+        `my combat status with definition id ${SourcewaterDroplet}`,
+      );
       droplet?.consumeUsage();
       :heal(2, "@self");
       if (:self.isActive()) {
         :characterStatus(EquitableJudgmentStatus, "@self");
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1210
@@ -158,8 +172,12 @@ define character {
   tags hydro, catalyst, fontaine, ousia;
   health 11;
   energy 2;
-  skills AsWaterSeeksEquilibrium, OTearsIShallRepay, OTidesIHaveReturned, EquitableJudgment, SourcewaterDropletSkill;
-}
+  skills AsWaterSeeksEquilibrium,
+  OTearsIShallRepay,
+  OTidesIHaveReturned,
+  EquitableJudgment,
+  SourcewaterDropletSkill;
+};
 
 /**
  * @id 212101
@@ -178,11 +196,11 @@ define card {
   talent Neuvillette {
     on enter {
       :useSkill(AsWaterSeeksEquilibrium);
-    }
+    };
     on useSkill {
       when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Hydro)) );
       listenTo samePlayer;
       :characterStatus(PastDraconicGlories, "@master");
-    }
-  }
-}
+    };
+  };
+};

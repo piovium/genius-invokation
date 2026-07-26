@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 112091
@@ -30,14 +38,14 @@ define status {
   };
   on endPhase {
     :addVariableWithMax("break", 1, 3);
-  }
+  };
   on modifySkillDamageType {
     when :( :e.viaSkillType("normal") && :getVariable("break") >= 2 );
     :addVariable("break", -2);
     :e.changeDamageType(DamageType.Hydro);
     :drawCards(1);
-  }
-}
+  };
+};
 
 /**
  * @id 112092
@@ -52,8 +60,8 @@ define combatStatus {
   on useSkill {
     when :( :e.isSkillType("normal") );
     :damage(DamageType.Hydro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 12091
@@ -67,7 +75,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 12092
@@ -82,7 +90,7 @@ define skill {
   :damage(DamageType.Hydro, 3);
   const breakSt = :self.hasStatus(BreakthroughStatus)!;
   breakSt.addVariableWithMax("break", 2, 3);
-}
+};
 
 /**
  * @id 12093
@@ -97,7 +105,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Hydro, 3);
   :combatStatus(ExquisiteThrow);
-}
+};
 
 /**
  * @id 12094
@@ -110,12 +118,12 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(BreakthroughStatus);
-    }
+    };
     on revive {
       :characterStatus(BreakthroughStatus);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1209
@@ -130,7 +138,7 @@ define character {
   health 11;
   energy 3;
   skills StealthyBowshot, LingeringLifeline, DepthclarionDice, Breakthrough;
-}
+};
 
 /**
  * @id 212091
@@ -148,10 +156,12 @@ define card {
   talent Yelan {
     on enter {
       :useSkill(LingeringLifeline);
-    }
+    };
     on roll {
-      const elements = new Set(:$$("my characters include defeated").map((char) => char.element()));
+      const elements = new Set(
+        :$$("my characters include defeated").map((char) => char.element()),
+      );
       :e.fixDice(DiceType.Omni, Math.min(elements.size, 3));
-    }
-  }
-}
+    };
+  };
+};

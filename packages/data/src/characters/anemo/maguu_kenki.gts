@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon, type SkillHandle, type SummonHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type SkillHandle,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 125012
@@ -28,12 +38,12 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Cryo, 1);
-  }
+  };
   on useSkill {
     when :( :e.skill.definition.id === PseudoTenguSweeper );
     :damage(DamageType.Cryo, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 125011
@@ -48,12 +58,12 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Anemo, 1);
-  }
+  };
   on useSkill {
     when :( :e.skill.definition.id === PseudoTenguSweeper );
     :damage(DamageType.Anemo, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 125013
@@ -64,7 +74,7 @@ define summon {
 define status {
   id 125013 as TerrormasksReturn;
   reserved;
-}
+};
 
 /**
  * @id 25011
@@ -78,7 +88,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 25012
@@ -94,7 +104,7 @@ define skill {
   if (:self.hasEquipment(TranscendentAutomaton)) {
     :switchActive("my next");
   }
-}
+};
 
 /**
  * @id 25013
@@ -110,7 +120,7 @@ define skill {
   if (:self.hasEquipment(TranscendentAutomaton)) {
     :switchActive("my prev");
   }
-}
+};
 
 /**
  * @id 25014
@@ -124,7 +134,7 @@ define skill {
   cost DiceType.Anemo, 3;
   cost DiceType.Energy, 3;
   :damage(DamageType.Anemo, 4);
-}
+};
 
 /**
  * @id 2501
@@ -139,7 +149,7 @@ define character {
   health 10;
   energy 3;
   skills Ichimonji, BlusteringBlade, FrostyAssault, PseudoTenguSweeper;
-}
+};
 
 /**
  * @id 225011
@@ -157,6 +167,6 @@ define card {
   talent MaguuKenki {
     on enter {
       :useSkill(BlusteringBlade);
-    }
-  }
-}
+    };
+  };
+};

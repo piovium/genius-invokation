@@ -1,19 +1,26 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 114041
@@ -34,16 +41,16 @@ define status {
     } else {
       :setVariable("reliance", newVal);
     }
-  }
+  };
   on modifySkillDamageType {
     when :( :getVariable("reliance") >= 2 && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
-  }
+  };
   on increaseSkillDamage {
     when :( :getVariable("reliance") >= 4 );
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 14041
@@ -57,7 +64,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 14042
@@ -73,7 +80,7 @@ define skill {
   :damage(DamageType.Electro, 3);
   const status = :self.hasStatus(PactswornPathclearer)!;
   status.addVariable("reliance", 1);
-}
+};
 
 /**
  * @id 14043
@@ -90,7 +97,7 @@ define skill {
   :damage(DamageType.Electro, 4);
   const status = :self.hasStatus(PactswornPathclearer)!;
   status.addVariable("reliance", 2);
-}
+};
 
 /**
  * @id 14044
@@ -103,12 +110,12 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(PactswornPathclearer);
-    }
+    };
     on revive {
       :characterStatus(PactswornPathclearer);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1404
@@ -122,8 +129,11 @@ define character {
   tags electro, pole, sumeru;
   health 10;
   energy 2;
-  skills InvokersSpear, SecretRiteChasmicSoulfarer, SacredRiteWolfsSwiftness, LawfulEnforcer;
-}
+  skills InvokersSpear,
+  SecretRiteChasmicSoulfarer,
+  SacredRiteWolfsSwiftness,
+  LawfulEnforcer;
+};
 
 /**
  * @id 214041
@@ -141,14 +151,17 @@ define card {
   talent Cyno {
     on enter {
       :useSkill(SecretRiteChasmicSoulfarer);
-    }
+    };
     on increaseSkillDamage {
       when :{
         const status = :self.master.hasStatus(PactswornPathclearer)!;
-        return :getVariable("reliance", status) >=2 && :e.via.definition.id === SecretRiteChasmicSoulfarer;
+        return (
+          :getVariable("reliance", status) >= 2 &&
+          :e.via.definition.id === SecretRiteChasmicSoulfarer
+        );
       };
       usage perRound, 2;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};

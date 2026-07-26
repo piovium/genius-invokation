@@ -1,12 +1,42 @@
-import { $, card, character, DamageType, DiceType, Reaction, skill, status } from "@gi-tcg/core/builder";
-import { Citlali, MamaloacosFrigidRainInEffect } from "../characters/cryo/citlali.gts";
+import {
+  $,
+  card,
+  character,
+  DamageType,
+  DiceType,
+  Reaction,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
+import {
+  Citlali,
+  MamaloacosFrigidRainInEffect,
+} from "../characters/cryo/citlali.gts";
 import { BondOfLife } from "../commons.gts";
 import { Arlecchino } from "../characters/pyro/arlecchino.gts";
-import { FlamestriderBlazingTrail, FlamestriderFullThrottle, FlamestriderSoaringAscent } from "../characters/pyro/mavuika.gts";
+import {
+  FlamestriderBlazingTrail,
+  FlamestriderFullThrottle,
+  FlamestriderSoaringAscent,
+} from "../characters/pyro/mavuika.gts";
 import { Kachina, TurboTwirlyTriggered } from "../characters/geo/kachina.gts";
-import { GrappleLink, NightRealmsGiftRepaidInFull, NightsoulsBlessing } from "../characters/dendro/kinich.gts";
-import { Emilie, LumidouceCaseLevel1, LumidouceCaseLevel2, LumidouceCaseLevel3 } from "../characters/dendro/emilie.gts";
-import { BloodbondedShadow, FrostyInterjection, OnslaughtStance, SwiftPoint } from "../characters/cryo/frost_operative.gts";
+import {
+  GrappleLink,
+  NightRealmsGiftRepaidInFull,
+  NightsoulsBlessing,
+} from "../characters/dendro/kinich.gts";
+import {
+  Emilie,
+  LumidouceCaseLevel1,
+  LumidouceCaseLevel2,
+  LumidouceCaseLevel3,
+} from "../characters/dendro/emilie.gts";
+import {
+  BloodbondedShadow,
+  FrostyInterjection,
+  OnslaughtStance,
+  SwiftPoint,
+} from "../characters/cryo/frost_operative.gts";
 
 /**
  * @id 211141
@@ -21,14 +51,17 @@ define card {
   cost DiceType.Cryo, 1;
   talent Citlali, none {
     on damaged {
-      when :( (:e.getReaction() === Reaction.Frozen || :e.getReaction() === Reaction.Melt) &&
-          !:e.target.isMine() );
+      when :(
+        (:e.getReaction() === Reaction.Frozen ||
+          :e.getReaction() === Reaction.Melt) &&
+          !:e.target.isMine()
+      );
       listenTo all;
       usage perRound, 1;
       :combatStatus(MamaloacosFrigidRainInEffect);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 13152
@@ -42,12 +75,12 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 2;
   :selectAndCreateHandCard([
-      FlamestriderBlazingTrail,
-      FlamestriderFullThrottle,
-      FlamestriderSoaringAscent
-    ]);
+    FlamestriderBlazingTrail,
+    FlamestriderFullThrottle,
+    FlamestriderSoaringAscent,
+  ]);
   :gainNightsoul("@self", 2);
-}
+};
 
 /**
  * @id 216101
@@ -65,9 +98,9 @@ define card {
       listenTo samePlayer;
       usage perRound, 2;
       :drawCards(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 17092
@@ -98,7 +131,7 @@ define skill {
     :drawCards(1, { who: "opp" });
     :addVariable("usagePerRound", -1, talent);
   }
-}
+};
 
 /**
  * @id 217101
@@ -116,11 +149,15 @@ define card {
     on modifySkillDamageType {
       when :( :e.type === DamageType.Physical );
       :e.changeDamageType(DamageType.Dendro);
-    }
+    };
     on useSkill {
       when :( :e.isSkillType("normal") );
       usage perRound, 1;
-      const lumidouceIds = [LumidouceCaseLevel3, LumidouceCaseLevel2, LumidouceCaseLevel1];
+      const lumidouceIds = [
+        LumidouceCaseLevel3,
+        LumidouceCaseLevel2,
+        LumidouceCaseLevel1,
+      ];
       for (const id of lumidouceIds) {
         const lumidouce = :$(`my summons with definition id ${id}`);
         if (lumidouce) {
@@ -128,9 +165,9 @@ define card {
           break;
         }
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 213141
@@ -147,12 +184,12 @@ define card {
   talent Arlecchino {
     on enter {
       :characterStatus(BondOfLife, "@master", {
-        overrideVariables: { usage: 3 }
+        overrideVariables: { usage: 3 },
       });
       // 消耗生命之契增伤的部分在被动技能 13147 里
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 21043
@@ -168,7 +205,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 4);
   :characterStatus(OnslaughtStance, "@self");
-}
+};
 
 /**
  * @id 2104
@@ -183,7 +220,7 @@ define character {
   health 10;
   energy 2;
   skills SwiftPoint, FrostyInterjection, ThornyOnslaught, BloodbondedShadow;
-}
+};
 
 /**
  * @id 300005
@@ -195,7 +232,7 @@ define status {
   until "v5.7.0";
   tags immuneControl;
   oneDuration;
-}
+};
 
 /**
  * @id 330009
@@ -210,5 +247,4 @@ define card {
   legend;
   addTarget $.my.character;
   :characterStatus(EdictOfAbsolutionInEffect, "@targets.0");
-}
-
+};

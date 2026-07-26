@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, DiceType, card, combatStatus, extension, flip, status } from "@gi-tcg/core/builder";
+import {
+  $,
+  DiceType,
+  card,
+  combatStatus,
+  extension,
+  flip,
+  status,
+} from "@gi-tcg/core/builder";
 import { DisperseTheCalamity, SanctifyTheDefiled } from "./other.gts";
 import { IneffectiveWhenPlayed } from "../../commons.gts";
 
@@ -28,9 +36,13 @@ define card {
   id 330001 as AncientCourtyard;
   since "v3.8.0";
   legend;
-  filter :( :$("my character has equipment with tag (weapon) or my character has equipment with tag (artifact)") );
+  filter :(
+    :$(
+      "my character has equipment with tag (weapon) or my character has equipment with tag (artifact)",
+    )
+  );
   :combatStatus(AncientCourtyardInEffect);
-}
+};
 
 /**
  * @id 300001
@@ -45,8 +57,8 @@ define combatStatus {
   once deductOmniDiceCard {
     when :( :e.hasOneOfCardTag("weapon", "artifact") );
     :e.deductOmniCost(2);
-  }
-}
+  };
+};
 
 /**
  * @id 330002
@@ -61,7 +73,7 @@ define card {
   legend;
   filter :( :player.dice.length === 0 );
   :generateDice("randomElement", 2);
-}
+};
 
 /**
  * @id 330003
@@ -74,13 +86,22 @@ define card {
   id 330003 as JoyousCelebration;
   since "v4.0.0";
   legend;
-  filter :( ([DiceType.Cryo, DiceType.Hydro, DiceType.Pyro, DiceType.Electro, DiceType.Dendro] as (DiceType | undefined)[]).includes(:$("my active")?.element()) );
+  filter :(
+    (
+      [
+        DiceType.Cryo,
+        DiceType.Hydro,
+        DiceType.Pyro,
+        DiceType.Electro,
+        DiceType.Dendro,
+      ] as (DiceType | undefined)[]
+    ).includes(:$("my active")?.element())
+  );
   const element = :$("my active")!.element() as 1 | 2 | 3 | 4 | 7;
   // 先挂后台再挂前台（避免前台被超载走导致结算错误）
   :apply(element, "my standby character with aura != 0");
   :apply(element, "my active character with aura != 0");
-}
-
+};
 
 /**
  * @id 330004
@@ -95,7 +116,7 @@ define card {
   since "v4.1.0";
   legend;
   :combatStatus(FreshWindOfFreedomInEffect);
-}
+};
 
 /**
  * @id 300002
@@ -109,15 +130,19 @@ define combatStatus {
   since "v4.1.0";
   oneDuration;
   on defeated {
-    when :( :isMyTurn() && 
+    when :(
+      :isMyTurn() &&
         !:oppPlayer.declaredEnd &&
-        !:e.target.isMine() && 
-        (:phase === "action" || :player.defeatedSwitching || :oppPlayer.defeatedSwitching) );
+        !:e.target.isMine() &&
+        (:phase === "action" ||
+          :player.defeatedSwitching ||
+          :oppPlayer.defeatedSwitching)
+    );
     listenTo all;
     usage 1;
     :continueNextTurn();
-  }
-}
+  };
+};
 
 /**
  * @id 330005
@@ -135,11 +160,13 @@ define card {
   replaceDescription "[T]", ((st) => st.roundNumber);
   filter :{
     if (:roundNumber === 1) {
-      return new Set(
-        :player.initialPile
-          .filter((card) => card.tags.includes("talent"))
-          .map((card) => card.id)
-      ).size >= 2;
+      return (
+        new Set(
+          :player.initialPile
+            .filter((card) => card.tags.includes("talent"))
+            .map((card) => card.id),
+        ).size >= 2
+      );
     } else {
       return true;
     }
@@ -147,7 +174,7 @@ define card {
   if (:roundNumber === 1) {
     const initTalentDefIds = :player.initialPile
       .filter((card) => card.tags.includes("talent"))
-      .map((card) => card.id)
+      .map((card) => card.id);
     if (new Set(initTalentDefIds).size >= 2) {
       :drawCards(1, { withTag: "talent" });
     }
@@ -155,7 +182,7 @@ define card {
     const count = Math.min(:roundNumber - 1, 4);
     :drawCards(count);
   }
-}
+};
 
 /**
  * @id 300003
@@ -178,13 +205,13 @@ define combatStatus {
         :attach(IneffectiveWhenPlayed, hand);
       }
     }
-  }
+  };
   on disposeCard {
     when :( :e.from.type === "hands" );
     const maxCostHands = :maxCostHands(2);
     :undrawCards(maxCostHands, "bottom");
-  }
-}
+  };
+};
 
 /**
  * @id 330006
@@ -199,7 +226,7 @@ define card {
   since "v4.3.0";
   legend;
   :combatStatus(PassingOfJudgmentInEffect, "opp");
-}
+};
 
 /**
  * @id 330007
@@ -213,8 +240,11 @@ define card {
   since "v4.5.0";
   legend;
   addTarget $.my.character;
-  :characterStatus(DayOfResistanceMomentOfShatteredDreamsInEffect, "@targets.0");
-}
+  :characterStatus(
+    DayOfResistanceMomentOfShatteredDreamsInEffect,
+    "@targets.0",
+  );
+};
 
 /**
  * @id 300004
@@ -231,8 +261,8 @@ define status {
   on decreaseDamaged {
     usage 4;
     :e.decreaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 330008
@@ -246,7 +276,7 @@ define card {
   since "v4.7.0";
   legend;
   :$("opp active")?.loseEnergy(1);
-}
+};
 
 /**
  * @id 300005
@@ -260,8 +290,7 @@ define status {
   since "v5.0.0";
   tags immuneControl;
   duration 2;
-}
-
+};
 
 /**
  * @id 330009
@@ -279,25 +308,27 @@ define card {
   addTarget $.my.character;
   :heal(2, "@targets.0");
   :characterStatus(EdictOfAbsolutionInEffect, "@targets.0");
-}
+};
 
 define extension {
   idHint 300006 as FlamesOfWarExtension;
   schema ({
     spirit: "pair<number>",
     win: "pair<boolean>",
-  })
+  });
   initialState ({
     spirit: [0, 0],
     win: [false, false],
-  })
+  });
   description "记录双方斗争之火的「斗志」，并在行动阶段开始时设置斗争之火的胜者";
-  mutateWhen onDamageOrHeal, ((st, e) => {
+  mutateWhen onDamageOrHeal,
+  ((st, e) => {
     if (e.sourceWho !== e.targetWho) {
       st.spirit[e.sourceWho] += e.damageInfo.value;
     }
-  })
-  mutateWhen onActionPhase, ((st) => {
+  });
+  mutateWhen onActionPhase,
+  ((st) => {
     const currentSpirits = [...st.spirit];
     st.win = [false, false];
     if (currentSpirits[0] >= currentSpirits[1]) {
@@ -308,32 +339,32 @@ define extension {
       st.win[1] = true;
       st.spirit[1] = 0;
     }
-  })
-}
-  
-  /**
-   * @id 300007
-   * @name 斗争之火（生效中）
-   * @description
-   * 附属角色本回合造成的伤害+1。（可叠加）
-   */
-  define status {
+  });
+};
+
+/**
+ * @id 300007
+ * @name 斗争之火（生效中）
+ * @description
+ * 附属角色本回合造成的伤害+1。（可叠加）
+ */
+define status {
   id 300007 as FlamesOfWarInEffect;
   oneDuration;
   variable increasedDamage, 1;
   on increaseSkillDamage {
     :e.increaseDamage(:getVariable("increasedDamage"));
-  }
-}
-  
-  /**
-   * @id 300006
-   * @name 斗争之火
-   * @description
-   * 此牌会记录本回合你对敌方角色造成的伤害，记为「斗志」。
-   * 行动阶段开始时：若此牌是场上「斗志」最高的斗争之火，则清空此牌的「斗志」，使我方出战角色本回合造成的伤害+1。
-   */
-  define card {
+  };
+};
+
+/**
+ * @id 300006
+ * @name 斗争之火
+ * @description
+ * 此牌会记录本回合你对敌方角色造成的伤害，记为「斗志」。
+ * 行动阶段开始时：若此牌是场上「斗志」最高的斗争之火，则清空此牌的「斗志」，使我方出战角色本回合造成的伤害+1。
+ */
+define card {
   id 300006 as FlamesOfWar;
   undiscoverable;
   support {
@@ -343,23 +374,23 @@ define extension {
       :setExtensionState((st) => {
         st.spirit[:self.who] = :getVariable("spirit");
       });
-    }
+    };
     on dealDamage {
       :setVariable("spirit", :getExtensionState().spirit[:self.who]);
-    }
+    };
     on actionPhase {
       :setVariable("spirit", :getExtensionState().spirit[:self.who]);
       if (:getExtensionState().win[:self.who]) {
         :characterStatus(FlamesOfWarInEffect, "my active");
       }
-    }
+    };
     on selfDispose {
       :setExtensionState((st) => {
         st.spirit[:self.who] = 0;
       });
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 330010
@@ -377,24 +408,28 @@ define card {
   if (myExistsFlame) {
     myExistsFlame.addVariable("spirit", 1);
   } else if (:remainingSupportCount("my") > 0) {
-    :createEntity("support", FlamesOfWar, {
-      who: :self.who,
-      type: "supports"
-    }, {
-      overrideVariables: {
-        spirit: 1
-      }
-    });
+    :createEntity(
+      "support",
+      FlamesOfWar,
+      {
+        who: :self.who,
+        type: "supports",
+      },
+      {
+        overrideVariables: {
+          spirit: 1,
+        },
+      },
+    );
   }
   if (oppExistsFlame) {
-    // do nothing
   } else if (:remainingSupportCount("opp") > 0) {
     :createEntity("support", FlamesOfWar, {
       who: flip(:self.who),
-      type: "supports"
+      type: "supports",
     });
   }
-}
+};
 
 /**
  * @id 330011
@@ -415,7 +450,7 @@ define card {
     const increasedValue = defeatedCount * 2;
     :increaseMaxHealth(increasedValue, `my characters`);
   }
-}
+};
 
 /**
  * @id 330012
@@ -432,7 +467,7 @@ define card {
   since "v6.2.0";
   legend;
   :selectAndPlay([DisperseTheCalamity, SanctifyTheDefiled]);
-}
+};
 
 /**
  * @id 300010
@@ -447,8 +482,8 @@ define combatStatus {
     if (target) {
       :attachCostReduction(target);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 330013
@@ -466,4 +501,4 @@ define card {
     :attachCostReduction(target);
   }
   :combatStatus(TheOtherSideOfTheFrostmoonInEffect);
-}
+};

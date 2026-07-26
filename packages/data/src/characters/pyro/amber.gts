@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, summon, type SummonHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 113041
@@ -33,19 +41,22 @@ define summon {
       autoDispose false;
     };
     :e.decreaseDamage(2);
-  }
+  };
   on endPhase {
     when :( :getVariable("usage") <= 0 );
     :damage(DamageType.Pyro, 2);
     :dispose();
-  }
+  };
   on useSkill {
-    when :( :$(`@event.skillCaller and character with definition id ${Amber} and has equipment with definition id ${BunnyTriggered}`) &&
-        :e.isSkillType("normal") );
+    when :(
+      :$(
+        `@event.skillCaller and character with definition id ${Amber} and has equipment with definition id ${BunnyTriggered}`,
+      ) && :e.isSkillType("normal")
+    );
     :damage(DamageType.Pyro, 4);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 13041
@@ -59,7 +70,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 13042
@@ -72,7 +83,7 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   :summon(BaronBunny);
-}
+};
 
 /**
  * @id 13043
@@ -87,7 +98,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Piercing, 2, "opp standby");
   :damage(DamageType.Pyro, 2);
-}
+};
 
 /**
  * @id 1304
@@ -103,7 +114,7 @@ define character {
   health 12;
   energy 2;
   skills Sharpshooter, ExplosivePuppet, FieryRain;
-}
+};
 
 /**
  * @id 213041
@@ -121,6 +132,6 @@ define card {
   talent Amber {
     on enter {
       :useSkill(ExplosivePuppet);
-    }
-  }
-}
+    };
+  };
+};

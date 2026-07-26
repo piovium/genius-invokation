@@ -1,7 +1,24 @@
-import { card, combatStatus, DamageType, DiceType, skill, status, summon, type SkillHandle, type StatusHandle, type SummonHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type SkillHandle,
+  type StatusHandle,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
 import { VioletArc } from "../characters/electro/lisa.gts";
-import { EremiteScorchingLoremaster, SearingGlare } from "../characters/pyro/eremite_scorching_loremaster.gts";
-import { AwakenMyKindred, HeartOfOasis } from "../characters/dendro/guardian_of_apeps_oasis.gts";
+import {
+  EremiteScorchingLoremaster,
+  SearingGlare,
+} from "../characters/pyro/eremite_scorching_loremaster.gts";
+import {
+  AwakenMyKindred,
+  HeartOfOasis,
+} from "../characters/dendro/guardian_of_apeps_oasis.gts";
 
 /**
  * @id 114091
@@ -16,19 +33,19 @@ define status {
   until "v5.0.0";
   variable conductive, 2 {
     append {
-    limit 4;
-    value 1;
-  };
+      limit 4;
+      value 1;
+    };
   };
   on endPhase {
     :addVariableWithMax("conductive", 1, 4);
-  }
+  };
   on increaseDamaged {
     when :( :e.via.definition.id === VioletArc );
     :e.increaseDamage(:getVariable("conductive"));
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 14091
@@ -47,7 +64,7 @@ define skill {
   if (:skillInfo.charged) {
     :characterStatus(Conductive, "opp active");
   }
-}
+};
 
 /**
  * @id 123033
@@ -60,11 +77,15 @@ define status {
   until "v5.0.0";
   conflictWith 123034;
   on decreaseDamaged {
-    when :( :$(`my summons with definition id ${SpiritOfOmenPyroScorpion01} or my summons with definition id ${SpiritOfOmenPyroScorpion}`) );
+    when :(
+      :$(
+        `my summons with definition id ${SpiritOfOmenPyroScorpion01} or my summons with definition id ${SpiritOfOmenPyroScorpion}`,
+      )
+    );
     usage perRound, 1;
     :e.decreaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 123034
@@ -77,12 +98,15 @@ define status {
   until "v5.0.0";
   conflictWith 123033;
   on decreaseDamaged {
-    when :( :$(`my summons with definition id ${SpiritOfOmenPyroScorpion01} or my summons with definition id ${SpiritOfOmenPyroScorpion}`) );
+    when :(
+      :$(
+        `my summons with definition id ${SpiritOfOmenPyroScorpion01} or my summons with definition id ${SpiritOfOmenPyroScorpion}`,
+      )
+    );
     usage perRound, 2;
     :e.decreaseDamage(1);
-  }
-}
-
+  };
+};
 
 /**
  * @id 123031
@@ -100,24 +124,34 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Pyro, 1);
-  }
+  };
   on enter {
     if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
-      :characterStatus(PyroScorpionGuardianStance01, "my character with definition id 2303");
+      :characterStatus(
+        PyroScorpionGuardianStance01,
+        "my character with definition id 2303",
+      );
+    } else {
+      :characterStatus(
+        PyroScorpionGuardianStance,
+        "my character with definition id 2303",
+      );
     }
-    else {
-      :characterStatus(PyroScorpionGuardianStance, "my character with definition id 2303");
-    }
-  }
+  };
   on actionPhase {
     if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
-      :characterStatus(PyroScorpionGuardianStance01, "my character with definition id 2303");
+      :characterStatus(
+        PyroScorpionGuardianStance01,
+        "my character with definition id 2303",
+      );
+    } else {
+      :characterStatus(
+        PyroScorpionGuardianStance,
+        "my character with definition id 2303",
+      );
     }
-    else {
-      :characterStatus(PyroScorpionGuardianStance, "my character with definition id 2303");
-    }
-  }
-}
+  };
+};
 
 /**
  * @id 123032
@@ -134,30 +168,42 @@ define summon {
   hint DamageType.Pyro, "1";
   on endPhase {
     usage 2;
-    if (:countOfSkill(EremiteScorchingLoremaster, SearingGlare) > 0 ||
-      :countOfSkill(EremiteScorchingLoremaster, BlazingStrike) > 0) {
+    if (
+      :countOfSkill(EremiteScorchingLoremaster, SearingGlare) > 0 ||
+      :countOfSkill(EremiteScorchingLoremaster, BlazingStrike) > 0
+    ) {
       :damage(DamageType.Pyro, 2);
     } else {
       :damage(DamageType.Pyro, 1);
     }
-  }
+  };
   on enter {
     if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
-      :characterStatus(PyroScorpionGuardianStance01, "my character with definition id 2303");
+      :characterStatus(
+        PyroScorpionGuardianStance01,
+        "my character with definition id 2303",
+      );
+    } else {
+      :characterStatus(
+        PyroScorpionGuardianStance,
+        "my character with definition id 2303",
+      );
     }
-    else {
-      :characterStatus(PyroScorpionGuardianStance, "my character with definition id 2303");
-    }
-  }
+  };
   on actionPhase {
     if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
-      :characterStatus(PyroScorpionGuardianStance01, "my character with definition id 2303");
+      :characterStatus(
+        PyroScorpionGuardianStance01,
+        "my character with definition id 2303",
+      );
+    } else {
+      :characterStatus(
+        PyroScorpionGuardianStance,
+        "my character with definition id 2303",
+      );
     }
-    else {
-      :characterStatus(PyroScorpionGuardianStance, "my character with definition id 2303");
-    }
-  }
-}
+  };
+};
 
 /**
  * @id 23032
@@ -171,7 +217,7 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 3);
-}
+};
 
 /**
  * @id 23033
@@ -188,11 +234,10 @@ define skill {
   :damage(DamageType.Pyro, 2);
   if (:self.hasEquipment(Scorpocalypse)) {
     :summon(SpiritOfOmenPyroScorpion01);
-  }
-  else {
+  } else {
     :summon(SpiritOfOmenPyroScorpion);
   }
-}
+};
 
 /**
  * @id 23034
@@ -210,9 +255,9 @@ define skill {
         name "damagedEnergySkillUsage";
       };
       :gainEnergy(1, "@self");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 223031
@@ -232,9 +277,9 @@ define card {
   talent EremiteScorchingLoremaster {
     on enter {
       :useSkill(SpiritOfOmensAwakeningPyroScorpion);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 127028
@@ -246,7 +291,7 @@ define status {
   id 127028 as private OasissAegis;
   until "v5.0.0";
   shield 2;
-}
+};
 
 /**
  * @id 27024
@@ -262,6 +307,6 @@ define skill {
     on battleBegin {
       :createPileCards(AwakenMyKindred, 6, "random");
       :combatStatus(HeartOfOasis);
-    }
-  }
-}
+    };
+  };
+};

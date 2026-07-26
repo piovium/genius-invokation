@@ -1,19 +1,27 @@
 // Copyright (C) 2024 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, type EquipmentHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  type EquipmentHandle,
+} from "@gi-tcg/core/builder";
 import { BondOfLife } from "../../commons.gts";
 
 /**
@@ -30,14 +38,18 @@ define combatStatus {
     usage 3;
     if (:e.target.variables.alive) {
       :characterStatus(BondOfLife, :e.target, {
-        overrideVariables: { usage: 2 }
+        overrideVariables: { usage: 2 },
       });
     }
-    :characterStatus(BondOfLife, `opp characters with definition id ${Arlecchino}`, {
-      overrideVariables: { usage: 2 }
-    });
-  }
-}
+    :characterStatus(
+      BondOfLife,
+      `opp characters with definition id ${Arlecchino}`,
+      {
+        overrideVariables: { usage: 2 },
+      },
+    );
+  };
+};
 
 /**
  * @id 13141
@@ -57,7 +69,7 @@ define skill {
     :consumeUsage(increasedValue, bond);
   }
   :damage(DamageType.Physical, 2 + increasedValue);
-}
+};
 
 /**
  * @id 13142
@@ -71,7 +83,7 @@ define skill {
   cost DiceType.Pyro, 3;
   :combatStatus(BlooddebtDirective, "opp");
   :damage(DamageType.Pyro, 2);
-}
+};
 
 /**
  * @id 13143
@@ -92,7 +104,7 @@ define skill {
     bond.dispose();
   }
   :heal(healValue, "@self");
-}
+};
 
 /**
  * @id 13144
@@ -107,13 +119,13 @@ define skill {
     on cancelHealed {
       when :( :e.via.definition.id !== BalemoonRising );
       :e.cancel();
-    }
+    };
     on modifySkillDamageType {
       when :( :e.type === DamageType.Physical && :self.hasStatus(BondOfLife) );
       :e.changeDamageType(DamageType.Pyro);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 13146
@@ -126,8 +138,8 @@ define skill {
   id 13146 as TheBalemoonAloneMayKnowPassive02;
   skillType passive {
     reserved;
-  }
-}
+  };
+};
 
 /**
  * @id 13147
@@ -143,12 +155,12 @@ define skill {
       when :( :self.hasEquipment(AllReprisalsAndArrearsMineToBear) );
       const bond = :self.hasStatus(BondOfLife);
       if (bond) {
-        :e.decreaseDamage(1)
+        :e.decreaseDamage(1);
         :consumeUsage(1, bond);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1314
@@ -162,8 +174,12 @@ define character {
   tags pyro, pole, fatui;
   health 10;
   energy 3;
-  skills InvitationToABeheading, AllIsAsh, BalemoonRising, TheBalemoonAloneMayKnowPassive01, TheBalemoonAloneMayKnowPassive03;
-}
+  skills InvitationToABeheading,
+  AllIsAsh,
+  BalemoonRising,
+  TheBalemoonAloneMayKnowPassive01,
+  TheBalemoonAloneMayKnowPassive03;
+};
 
 /**
  * @id 213141
@@ -180,9 +196,9 @@ define card {
   talent Arlecchino, action {
     on enter {
       :characterStatus(BondOfLife, "@master", {
-          overrideVariables: { usage: 3 }
-        });
+        overrideVariables: { usage: 3 },
+      });
       // 消耗生命之契增伤的部分在被动技能 13147 里
-    }
-  }
-}
+    };
+  };
+};

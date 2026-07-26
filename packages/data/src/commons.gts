@@ -13,7 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { status, combatStatus, summon, DamageType, attachment, DiceType, $ } from "@gi-tcg/core/builder";
+import {
+  status,
+  combatStatus,
+  summon,
+  DamageType,
+  attachment,
+  DiceType,
+  $,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 100
@@ -23,7 +31,7 @@ import { status, combatStatus, summon, DamageType, attachment, DiceType, $ } fro
 define status {
   id 100 as ResistantForm;
   tags immuneControl;
-}
+};
 
 /**
  * @id 106
@@ -37,11 +45,13 @@ define status {
   oneDuration;
   tags disableSkill;
   on increaseDamaged {
-    when :( ([DamageType.Pyro, DamageType.Physical] as DamageType[]).includes(:e.type) );
+    when :(
+      ([DamageType.Pyro, DamageType.Physical] as DamageType[]).includes(:e.type)
+    );
     :e.increaseDamage(2);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 111
@@ -52,7 +62,7 @@ define status {
 define combatStatus {
   id 111 as Crystallize;
   shield 1, 2;
-}
+};
 
 /**
  * @id 115
@@ -69,8 +79,8 @@ define summon {
       append 2;
     };
     :damage(DamageType.Pyro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 116
@@ -82,12 +92,15 @@ define summon {
 define combatStatus {
   id 116 as DendroCore;
   on increaseDamage {
-    when :( ([DamageType.Pyro, DamageType.Electro] as DamageType[]).includes(:e.type) &&
-        :e.target.id === :$("opp active")?.id );
+    when :(
+      ([DamageType.Pyro, DamageType.Electro] as DamageType[]).includes(
+        :e.type,
+      ) && :e.target.id === :$("opp active")?.id
+    );
     usage 1;
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 117
@@ -99,12 +112,15 @@ define combatStatus {
 define combatStatus {
   id 117 as CatalyzingField;
   on increaseDamage {
-    when :( ([DamageType.Electro, DamageType.Dendro] as DamageType[]).includes(:e.type) &&
-        :e.target.id === :$("opp active")?.id );
+    when :(
+      ([DamageType.Electro, DamageType.Dendro] as DamageType[]).includes(
+        :e.type,
+      ) && :e.target.id === :$("opp active")?.id
+    );
     usage 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 122
@@ -120,15 +136,15 @@ define status {
     when :( :e.healInfo.healKind !== "distribution" );
     usage 1 {
       append {
-      limit Infinity;
-    };
+        limit Infinity;
+      };
       autoDecrease false;
     };
     const deducted = Math.min(:getVariable("usage"), :e.expectedValue);
     :e.decreaseHeal(deducted);
     :consumeUsage(deducted);
-  }
-}
+  };
+};
 
 /**
  * @id 169
@@ -143,8 +159,8 @@ define combatStatus {
       append;
     };
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 170
@@ -159,8 +175,8 @@ define combatStatus {
       append;
     };
     :e.setFastAction();
-  }
-}
+  };
+};
 
 /**
  * @id 171
@@ -173,7 +189,7 @@ define combatStatus {
   variable layer, 1 {
     append;
   };
-}
+};
 
 /**
  * @id 172
@@ -189,8 +205,8 @@ define status {
       append;
     };
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 209
@@ -206,8 +222,8 @@ define status {
       append;
     };
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 210
@@ -219,10 +235,10 @@ define status {
   id 210 as RES;
   tags barrier;
   on decreaseDamaged {
-    usage 1 { append };
+    usage 1 { append; };
     :e.decreaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 201
@@ -232,9 +248,9 @@ define status {
  */
 define attachment {
   id 201 as CostIncrease;
-  variable layer, 1 { append };
+  variable layer, 1 { append; };
   addCost ((st, self) => self.variables.layer);
-}
+};
 
 /**
  * @id 202
@@ -244,7 +260,7 @@ define attachment {
  */
 define attachment {
   id 202 as CostReduction;
-  variable layer, 1 { append };
+  variable layer, 1 { append; };
   deductCost ((st, self) => self.variables.layer);
 };
 
@@ -257,7 +273,7 @@ define attachment {
 define combatStatus {
   id 203 as Shield;
   shield 1, Infinity;
-}
+};
 
 /**
  * @id 204
@@ -268,15 +284,15 @@ define combatStatus {
 define attachment {
   id 204 as Conductive;
   tags conductive;
-  variable layer, 1 { append };
+  variable layer, 1 { append; };
   on endPhase {
     when :( :self.area.type === "hands" );
     const target = :query($.macros.myMaxHealth);
     if (target) {
       :damage(DamageType.Piercing, :getVariable("layer"), target);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 205
@@ -290,24 +306,25 @@ define summon {
   id 205 as Thundercloud;
   hint DamageType.Electro, 2;
   on endPhase {
-    usage 1 { append };
+    usage 1 { append; };
     :damage(DamageType.Electro, 2);
-  }
-  defineSnippet giveOppRandomCardConductive, :{
+  };
+  defineSnippet giveOppRandomCardConductive,
+  :{
     if (:oppPlayer.hands.length === 0) {
       return;
     }
     const targetHand = :random(:oppPlayer.hands);
     :attach(Conductive, targetHand);
-  }
+  };
   on enter {
     :callSnippet.giveOppRandomCardConductive();
-  }
+  };
   on gainUsage {
     when :( :e.entity.id === :self.id );
     :callSnippet.giveOppRandomCardConductive();
-  }
-}
+  };
+};
 
 /**
  * @id 206
@@ -320,7 +337,7 @@ define attachment {
   id 206 as Empowerment;
   changeCostType DiceType.Void;
   changeTuningTarget DiceType.Omni;
-}
+};
 
 /**
  * @id 207
@@ -331,7 +348,7 @@ define attachment {
 define attachment {
   id 207 as NoTuningAllowed;
   disableTuning;
-}
+};
 
 /**
  * @id 208
@@ -342,7 +359,7 @@ define attachment {
 define attachment {
   id 208 as IneffectiveWhenPlayed;
   makeEffectless;
-}
+};
 
 /**
  * @id 303300
@@ -353,4 +370,4 @@ define attachment {
 define status {
   id 303300 as Satiated;
   oneDuration;
-}
+};

@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, customEvent, DamageType, DiceType, skill, status, type SkillHandle, type StatusHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  customEvent,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type SkillHandle,
+  type StatusHandle,
+} from "@gi-tcg/core/builder";
 import { Frozen } from "../../commons.gts";
 
 /**
@@ -27,7 +37,7 @@ define status {
   since "v5.0.0";
   oneDuration;
   tags disableSkill;
-}
+};
 
 /**
  * @id 122053
@@ -38,12 +48,12 @@ define status {
 define status {
   id 122053 as MistBubbleLockdownPreparing;
   since "v5.0.0";
-  prepare (1220512 as SkillHandle);
+  prepare 1220512 as SkillHandle;
   on dispose {
     when :( :e.entity.definition.id === MistBubbleSlime );
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 122051
@@ -68,7 +78,7 @@ define card {
         autoDispose false;
       };
       :characterStatus(MistBubbleLockdownPreparing, "@master");
-    }
+    };
     skill {
       id 1220512;
       prepared;
@@ -77,19 +87,21 @@ define card {
       if (:getVariable("usage") === 0) {
         :dispose();
       }
-    }
+    };
     // 切人导致准备中状态消失时，自己如果可用次数耗尽也消失
     on switchActive {
       when :<boolean>{
         const ch = :self.master;
-        return ch.id === :e.switchInfo.from?.id &&
+        return (
+          ch.id === :e.switchInfo.from?.id &&
           !!ch.hasStatus(MistBubbleLockdownPreparing) &&
-          :getVariable("usage") === 0;
+          :getVariable("usage") === 0
+        );
       };
       :dispose();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 22051
@@ -103,7 +115,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 export const ShouldGainEnergy = customEvent("hydroHilichurl/shouldGainEnergy");
 
@@ -119,10 +131,14 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 3);
-  if (:$(`opp characters has status with definition id ${Frozen} or opp characters has status with definition id ${MistBubblePrison}`)) {
+  if (
+    :$(
+      `opp characters has status with definition id ${Frozen} or opp characters has status with definition id ${MistBubblePrison}`,
+    )
+  ) {
     :emitCustomEvent(ShouldGainEnergy);
   }
-}
+};
 
 /**
  * @id 22053
@@ -138,13 +154,13 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 4);
   :createHandCard(MistBubbleSlime);
-}
+};
 
 /**
  * @id 22054
  * @name 狂澜镰击
  * @description
- * 
+ *
  */
 define skill {
   id 22054 as SlashOfSurgingTidesPassive;
@@ -154,9 +170,9 @@ define skill {
         name "usagePerRound1";
       };
       :gainEnergy(1, "@self");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2205
@@ -170,8 +186,11 @@ define character {
   tags hydro, monster, hilichurl;
   health 11;
   energy 2;
-  skills WhirlingScythe, SlashOfSurgingTides, BubblefloatBlitz, SlashOfSurgingTidesPassive;
-}
+  skills WhirlingScythe,
+  SlashOfSurgingTides,
+  BubblefloatBlitz,
+  SlashOfSurgingTidesPassive;
+};
 
 /**
  * @id 222051
@@ -189,11 +208,11 @@ define card {
   talent HydroHilichurlRogue {
     on enter {
       :useSkill(SlashOfSurgingTides);
-    }
+    };
     on deductOmniDiceSkill {
       when :( :e.isSkillType("technique") );
       usage perRound, 1;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};

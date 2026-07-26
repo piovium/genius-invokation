@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, type EquipmentHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  type EquipmentHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 113032
@@ -28,12 +36,12 @@ define combatStatus {
   duration 2;
   on increaseSkillDamage {
     :e.increaseDamage(2);
-  }
+  };
   on useSkill {
     when :( :e.skillCaller.variables.health <= 6 );
     :heal(2, "@event.skillCaller");
-  }
-}
+  };
+};
 
 /**
  * @id 113031
@@ -49,12 +57,12 @@ define combatStatus {
   on increaseSkillDamage {
     when :( :e.source.cast<"character">().health >= 7 );
     :e.increaseDamage(2);
-  }
+  };
   on useSkill {
     when :( :e.skillCaller.variables.health <= 6 );
     :heal(2, "@event.skillCaller");
-  }
-}
+  };
+};
 
 /**
  * @id 13031
@@ -68,7 +76,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 13032
@@ -81,7 +89,7 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 3);
-}
+};
 
 /**
  * @id 13033
@@ -97,11 +105,10 @@ define skill {
   :damage(DamageType.Pyro, 2);
   if (:self.hasEquipment(GrandExpectation)) {
     :combatStatus(InspirationField01);
-  }
-  else {
+  } else {
     :combatStatus(InspirationField);
   }
-}
+};
 
 /**
  * @id 1303
@@ -116,7 +123,7 @@ define character {
   health 10;
   energy 2;
   skills StrikeOfFortune, PassionOverload, FantasticVoyage;
-}
+};
 
 /**
  * @id 213031
@@ -135,6 +142,6 @@ define card {
   talent Bennett {
     on enter {
       :useSkill(FantasticVoyage);
-    }
-  }
-}
+    };
+  };
+};

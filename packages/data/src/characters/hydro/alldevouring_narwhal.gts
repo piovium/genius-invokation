@@ -13,7 +13,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, customEvent, DamageType, DiceType, skill, status, summon, type EntityState } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  customEvent,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type EntityState,
+} from "@gi-tcg/core/builder";
 
 // 入场时：获得我方已吞噬卡牌中最高元素骰费用值的「攻击力」，获得该费用的已吞噬卡牌数量的可用次数。
 
@@ -37,7 +48,9 @@ define summon {
   };
   hint DamageType.Electro, ((c, e) => e.variables.atk);
   on enter {
-    const domain = :$(`my combat status with definition id ${DeepDevourersDomain}`)!;
+    const domain = :$(
+      `my combat status with definition id ${DeepDevourersDomain}`,
+    )!;
     const maxCost = domain.getVariable("totalMaxCost");
     const count = domain.getVariable("totalMaxCostCount");
     if (count > 0) {
@@ -46,22 +59,22 @@ define summon {
     } else {
       :dispose();
     }
-  }
+  };
   on endPhase {
     :damage(DamageType.Electro, :getVariable("atk"));
     :consumeUsage();
-  }
+  };
   on decreaseDamaged {
     when :( :getVariable("barrierUsage") && :e.target.isActive() );
     :e.decreaseDamage(1);
     :setVariable("barrierUsage", 0);
-  }
+  };
   on damaged {
     when :( !:getVariable("barrierUsage") );
     :consumeUsage(2);
     :setVariable("barrierUsage", 1);
-  }
-}
+  };
+};
 
 /**
  * @id 122042
@@ -74,7 +87,7 @@ define status {
   variable extraMaxHealth, 1 {
     append;
   };
-}
+};
 
 /**
  * @id 122045
@@ -85,7 +98,7 @@ define status {
 define status {
   id 122045 as DevourersImpulse;
   reserved;
-}
+};
 
 /**
  * @id 122044
@@ -96,7 +109,7 @@ define status {
 define status {
   id 122044 as DevourersInstinct;
   reserved;
-}
+};
 
 /**
  * @id 122041
@@ -124,7 +137,8 @@ define combatStatus {
   variable extraMaxHealth, 0 {
     visible false;
   };
-  replaceDescription "[GCG_TOKEN_SHIELD]", ((_, self) => self.variables.extraMaxHealth);
+  replaceDescription "[GCG_TOKEN_SHIELD]",
+  ((_, self) => self.variables.extraMaxHealth);
   on disposeOrTuneCard {
     when :( :e.from.type === "hands" || :e.isTuning() );
     const cost = :e.diceCost();
@@ -142,7 +156,8 @@ define combatStatus {
         const card0Cost = :getVariable("card0Cost");
         const card1Cost = :getVariable("card1Cost");
         const card2Cost = cost;
-        const distinctCostCount = new Set([card0Cost, card1Cost, card2Cost]).size;
+        const distinctCostCount = new Set([card0Cost, card1Cost, card2Cost])
+          .size;
         const extraMaxHealth = 4 - distinctCostCount;
         :addVariable("extraMaxHealth", extraMaxHealth);
         :setVariable("cardCount", 0);
@@ -156,21 +171,24 @@ define combatStatus {
       :setVariable("totalMaxCost", cost);
       :setVariable("totalMaxCostCount", 1);
     }
-  }
-  on endPhase { // 文本有误，实为结束阶段时
+  };
+  on endPhase {
+    // 文本有误，实为结束阶段时
     const extraMaxHealth = :getVariable("extraMaxHealth");
     if (extraMaxHealth) {
-      const narwhal = :$(`my character with definition id ${AlldevouringNarwhal}`);
+      const narwhal = :$(
+        `my character with definition id ${AlldevouringNarwhal}`,
+      );
       if (narwhal) {
         narwhal.addStatus(AnomalousAnatomy, {
-          overrideVariables: { extraMaxHealth }
+          overrideVariables: { extraMaxHealth },
         });
         :increaseMaxHealth(extraMaxHealth, narwhal);
       }
       :setVariable("extraMaxHealth", 0);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 22041
@@ -184,9 +202,11 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
-const StarfallShowerDisposeCard = customEvent<EntityState>("alldevouringNarwhal/starfallShowerDisposeCard");
+const StarfallShowerDisposeCard = customEvent<EntityState>(
+  "alldevouringNarwhal/starfallShowerDisposeCard",
+);
 
 /**
  * @id 22042
@@ -199,13 +219,15 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   const st = :self.hasStatus(AnomalousAnatomy);
-  const extraDmg = st ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 3) : 0;
+  const extraDmg = st
+    ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 3)
+    : 0;
   :damage(DamageType.Hydro, 1 + extraDmg);
   const [card] = :disposeMaxCostHands(1);
-  if (card){
+  if (card) {
     :emitCustomEvent(StarfallShowerDisposeCard, card.latest());
   }
-}
+};
 
 /**
  * @id 22043
@@ -221,7 +243,7 @@ define skill {
   :damage(DamageType.Piercing, 1, "opp standby");
   :damage(DamageType.Hydro, 1);
   :summon(DarkShadow);
-}
+};
 
 /**
  * @id 22044
@@ -234,9 +256,9 @@ define skill {
   skillType passive {
     on battleBegin {
       :combatStatus(DeepDevourersDomain);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 22045
@@ -248,7 +270,7 @@ define skill {
   id 22045 as InsatiableAppetite01;
   skillType passive;
   reserved;
-}
+};
 
 /**
  * @id 2204
@@ -264,7 +286,7 @@ define character {
   health 6;
   energy 2;
   skills ShatteringWaves, StarfallShower, RavagingDevourer, InsatiableAppetite;
-}
+};
 
 /**
  * @id 222041
@@ -282,10 +304,10 @@ define card {
   talent AlldevouringNarwhal {
     on enter {
       :useSkill(StarfallShower);
-    }
+    };
     on StarfallShowerDisposeCard {
       usage perRound, 1;
-      :heal(:get(:e.arg).diceCost(), "@master")
-    }
-  }
-}
+      :heal(:get(:e.arg).diceCost(), "@master");
+    };
+  };
+};

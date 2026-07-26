@@ -1,12 +1,61 @@
-import { card, character, DamageType, DiceType, type PassiveSkillHandle, skill, status, summon, type SummonHandle } from "@gi-tcg/core/builder";
-import { CryoElementalInfusion, CryoElementalInfusion01, KamisatoArtHyouka, KamisatoArtKabuki, KamisatoArtSoumetsu, KantenSenmyouBlessing } from "../characters/cryo/kamisato_ayaka.gts";
-import { NORMAL_MIMICS, PREVIEW_MIMICS, Surge, TideAndTorrent } from "../characters/hydro/rhodeia_of_loch.gts";
-import { GoldenCorrosion, RifthoundSkull } from "../characters/geo/golden_wolflord.gts";
-import { ExplosivePuppet, FieryRain, Sharpshooter } from "../characters/pyro/amber.gts";
-import { ArtisticIngenuity, PaintedDome, SchematicSetup } from "../characters/dendro/kaveh.gts";
-import { EhecatlsRoar, NightsoulsBlessing, OcelotlicuePoint, SourceSample, YohualsScratch } from "../characters/geo/xilonen.gts";
-import { IcyPaws, KatzleinStyle, SignatureMix } from "../characters/cryo/diona.gts";
-import { CrushingTailAttack, FlamegranateConflagration, FlyingFruit, GluttonousRex01, GluttonousRex02 } from "../characters/dendro/gluttonous_yumkasaur_mountain_king.gts";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  type PassiveSkillHandle,
+  skill,
+  status,
+  summon,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
+import {
+  CryoElementalInfusion,
+  CryoElementalInfusion01,
+  KamisatoArtHyouka,
+  KamisatoArtKabuki,
+  KamisatoArtSoumetsu,
+  KantenSenmyouBlessing,
+} from "../characters/cryo/kamisato_ayaka.gts";
+import {
+  NORMAL_MIMICS,
+  PREVIEW_MIMICS,
+  Surge,
+  TideAndTorrent,
+} from "../characters/hydro/rhodeia_of_loch.gts";
+import {
+  GoldenCorrosion,
+  RifthoundSkull,
+} from "../characters/geo/golden_wolflord.gts";
+import {
+  ExplosivePuppet,
+  FieryRain,
+  Sharpshooter,
+} from "../characters/pyro/amber.gts";
+import {
+  ArtisticIngenuity,
+  PaintedDome,
+  SchematicSetup,
+} from "../characters/dendro/kaveh.gts";
+import {
+  EhecatlsRoar,
+  NightsoulsBlessing,
+  OcelotlicuePoint,
+  SourceSample,
+  YohualsScratch,
+} from "../characters/geo/xilonen.gts";
+import {
+  IcyPaws,
+  KatzleinStyle,
+  SignatureMix,
+} from "../characters/cryo/diona.gts";
+import {
+  CrushingTailAttack,
+  FlamegranateConflagration,
+  FlyingFruit,
+  GluttonousRex01,
+  GluttonousRex02,
+} from "../characters/dendro/gluttonous_yumkasaur_mountain_king.gts";
 import { JadeScreen, Ningguang } from "../characters/geo/ningguang.gts";
 import { Frostgnaw, Kaeya } from "../characters/cryo/kaeya.gts";
 
@@ -24,8 +73,7 @@ define character {
   health 10;
   energy 2;
   skills Sharpshooter, ExplosivePuppet, FieryRain;
-}
-
+};
 
 /**
  * @id 1708
@@ -40,8 +88,7 @@ define character {
   health 10;
   energy 2;
   skills SchematicSetup, ArtisticIngenuity, PaintedDome;
-}
-
+};
 
 /**
  * @id 1611
@@ -57,7 +104,7 @@ define character {
   energy 2;
   skills EhecatlsRoar, YohualsScratch, OcelotlicuePoint, SourceSample;
   associateNightsoul NightsoulsBlessing;
-}
+};
 
 /**
  * @id 1102
@@ -72,7 +119,7 @@ define character {
   health 10;
   energy 3;
   skills KatzleinStyle, IcyPaws, SignatureMix;
-}
+};
 
 /**
  * @id 22012
@@ -86,7 +133,9 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   const mimics = :isPreview ? PREVIEW_MIMICS : NORMAL_MIMICS;
-  const exists = :player.summons.map((s) => s.definition.id).filter((id) => mimics.includes(id));
+  const exists = :player.summons
+    .map((s) => s.definition.id)
+    .filter((id) => mimics.includes(id));
   let target;
   if (exists.length >= 2) {
     target = :random(exists);
@@ -95,7 +144,7 @@ define skill {
     target = :random(rest);
   }
   :summon(target as SummonHandle);
-}
+};
 
 /**
  * @id 22013
@@ -109,7 +158,9 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 5;
   const mimics = :isPreview ? PREVIEW_MIMICS : NORMAL_MIMICS;
-  const exists = :player.summons.map((s) => s.definition.id).filter((id) => mimics.includes(id));
+  const exists = :player.summons
+    .map((s) => s.definition.id)
+    .filter((id) => mimics.includes(id));
   for (let i = 0; i < 2; i++) {
     let target;
     if (exists.length >= 2) {
@@ -121,7 +172,7 @@ define skill {
     :summon(target as SummonHandle);
     exists.push(target);
   }
-}
+};
 
 /**
  * @id 2201
@@ -136,7 +187,7 @@ define character {
   health 10;
   energy 3;
   skills Surge, OceanidMimicSummoning, TheMyriadWilds, TideAndTorrent;
-}
+};
 
 /**
  * @id 2704
@@ -150,8 +201,12 @@ define character {
   tags dendro, monster;
   health 7;
   energy 2;
-  skills CrushingTailAttack, FlyingFruit, FlamegranateConflagration, GluttonousRex01, GluttonousRex02;
-}
+  skills CrushingTailAttack,
+  FlyingFruit,
+  FlamegranateConflagration,
+  GluttonousRex01,
+  GluttonousRex02;
+};
 
 /**
  * @id 127041
@@ -167,8 +222,8 @@ define status {
       append;
     };
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 11054
@@ -180,21 +235,21 @@ define skill {
   id 11054 as private KamisatoArtSenho;
   until "v5.8.0";
   skillType passive {
-    on battleBegin { // 战斗开始时也附属附魔
+    on battleBegin {
+      // 战斗开始时也附属附魔
       when :( :self.isActive() );
       :characterStatus(CryoElementalInfusion);
-    }
+    };
     on switchActive {
       when :( :e.switchInfo.to.id === :self.id );
       if (:self.hasEquipment(KantenSenmyouBlessing)) {
         :characterStatus(CryoElementalInfusion01);
-      }
-      else {
+      } else {
         :characterStatus(CryoElementalInfusion);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1105
@@ -208,8 +263,11 @@ define character {
   tags cryo, sword, inazuma;
   health 10;
   energy 3;
-  skills KamisatoArtKabuki, KamisatoArtHyouka, KamisatoArtSoumetsu, KamisatoArtSenho;
-}
+  skills KamisatoArtKabuki,
+  KamisatoArtHyouka,
+  KamisatoArtSoumetsu,
+  KamisatoArtSenho;
+};
 
 /**
  * @id 216011
@@ -227,9 +285,9 @@ define card {
   talent Ningguang {
     on enter {
       :useSkill(JadeScreen);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 211031
@@ -247,14 +305,14 @@ define card {
   talent Kaeya {
     on enter {
       :useSkill(Frostgnaw);
-    }
+    };
     on useSkill {
       when :( :e.skill.definition.id === Frostgnaw );
       usage perRound, 1;
       :heal(2, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321004
@@ -270,9 +328,9 @@ define card {
     on deductOmniDiceSwitch {
       usage perRound, 2;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 26032
@@ -287,12 +345,12 @@ define skill {
   cost DiceType.Geo, 3;
   :damage(DamageType.Geo, 1);
   :characterStatus(GoldenCorrosion, "opp active", {
-      overrideVariables: {
-        usage: 2
-      }
-    });
+    overrideVariables: {
+      usage: 2,
+    },
+  });
   :summon(RifthoundSkull);
-}
+};
 
 /**
  * @id 312027
@@ -313,11 +371,13 @@ define card {
     variable crystal, 0;
     on roundEnd {
       :setVariable("generatedCount", 0);
-    }
+    };
     on damaged {
-      when :( !:e.target.isMine() &&
+      when :(
+        !:e.target.isMine() &&
           :e.type === DamageType.Dendro &&
-          :self.master.isActive() );
+          :self.master.isActive()
+      );
       listenTo all;
       :addVariable("crystal", 1);
       const crystal = :getVariable("crystal");
@@ -326,9 +386,9 @@ define card {
         :generateDice("randomElement", 1);
         :addVariable("generatedCount", 1);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312028
@@ -349,11 +409,14 @@ define card {
     };
     on roundEnd {
       :setVariable("generatedCount", 0);
-    }
+    };
     on damaged {
-      when :( :self.master.isActive() &&
+      when :(
+        :self.master.isActive() &&
           !:e.target.isMine() &&
-          (:e.type === DamageType.Dendro || :e.isReactionRelatedTo(DamageType.Dendro)) );
+          (:e.type === DamageType.Dendro ||
+            :e.isReactionRelatedTo(DamageType.Dendro))
+      );
       listenTo all;
       :addVariable("crystal", 2);
       const crystal = :getVariable("crystal");
@@ -362,9 +425,9 @@ define card {
         :generateDice(DiceType.Omni, 1);
         :addVariable("generatedCount", 1);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321012
@@ -382,9 +445,9 @@ define card {
       when :( !:isMyTurn() );
       usage 3;
       :generateDice(:$("my active")!.element(), 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321008
@@ -400,10 +463,10 @@ define card {
   support place {
     on enter {
       :generateDice("randomElement", 1);
-    }
+    };
     on actionPhase {
       usage 2;
       :generateDice("randomElement", 1);
-    }
-  }
-}
+    };
+  };
+};

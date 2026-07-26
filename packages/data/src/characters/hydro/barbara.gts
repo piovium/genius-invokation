@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, card, DamageType, DiceType, type SummonHandle } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  card,
+  DamageType,
+  DiceType,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 112011
@@ -29,8 +37,8 @@ define summon {
     usage 2;
     :damage(DamageType.Heal, 1, "all my characters");
     :apply(DamageType.Hydro, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 12011
@@ -44,7 +52,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Hydro, 1);
-}
+};
 
 /**
  * @id 12012
@@ -58,7 +66,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 1);
   :summon(MelodyLoop);
-}
+};
 
 /**
  * @id 12013
@@ -72,7 +80,7 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 3;
   :heal(4, "all my characters");
-}
+};
 
 /**
  * @id 1201
@@ -87,7 +95,7 @@ define character {
   health 12;
   energy 3;
   skills WhisperOfWater, LetTheShowBegin, ShiningMiracle;
-}
+};
 
 /**
  * @id 212011
@@ -105,11 +113,11 @@ define card {
   talent Barbara {
     on enter {
       :useSkill(LetTheShowBegin);
-    }
+    };
     on deductOmniDiceSwitch {
       when :( :$(`my summon with definition id ${MelodyLoop}`) );
       usage perRound, 1;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};

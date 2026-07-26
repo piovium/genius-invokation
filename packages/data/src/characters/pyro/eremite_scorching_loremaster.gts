@@ -1,19 +1,30 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status, summon, type PassiveSkillHandle, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type PassiveSkillHandle,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 123032
@@ -31,8 +42,8 @@ define combatStatus {
     when :( :e.via.definition.id === 1230311 );
     :e.increaseDamage(:getVariable("blessing"));
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 123031
@@ -58,15 +69,15 @@ define card {
       :self.master.loseEnergy(1);
       :e.decreaseDamage(1);
       :combatStatus(ScorpionBlessing);
-    }
+    };
     skill {
       id 1230311;
       cost DiceType.Aligned, 2;
       usage 1;
       :damage(DamageType.Pyro, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 23031
@@ -80,7 +91,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Pyro, 1);
-}
+};
 
 /**
  * @id 23032
@@ -94,7 +105,7 @@ define skill {
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 3);
   :combatStatus(ScorpionBlessing);
-}
+};
 
 /**
  * @id 23033
@@ -109,7 +120,7 @@ define skill {
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Pyro, 3);
-}
+};
 
 /**
  * @id 23034
@@ -126,16 +137,16 @@ define skill {
         name "usagePerRound1";
       };
       :gainEnergy(1, "@self");
-    }
+    };
     on useSkill {
       when :( :e.skill.definition.id === SpiritOfOmensAwakeningPyroScorpion );
       usage 1 {
         name "createCardUsage";
       };
       :createHandCard(SpiritOfOmenPyroScorpion);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2303
@@ -149,8 +160,11 @@ define character {
   tags pyro, eremite;
   health 10;
   energy 2;
-  skills SearingGlare, BlazingStrike, SpiritOfOmensAwakeningPyroScorpion, SpiritOfOmensPower;
-}
+  skills SearingGlare,
+  BlazingStrike,
+  SpiritOfOmensAwakeningPyroScorpion,
+  SpiritOfOmensPower;
+};
 
 /**
  * @id 223031
@@ -169,17 +183,17 @@ define card {
   talent EremiteScorchingLoremaster {
     on enter {
       :useSkill(BlazingStrike);
-    }
+    };
     on defeated {
       when :( !:e.target.isMine() && :e.via.definition.id === 1230311 );
       listenTo all;
       :createHandCard(SpiritOfOmenPyroScorpion);
-    }
+    };
     on roundEnd {
       :combatStatus(ScorpionBlessing);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 123033
@@ -191,7 +205,7 @@ define status {
   id 123033 as PyroScorpionGuardianStance01;
   tags barrier;
   reserved;
-}
+};
 
 /**
  * @id 123034
@@ -203,4 +217,4 @@ define status {
   id 123034 as PyroScorpionGuardianStance;
   tags barrier;
   reserved;
-}
+};

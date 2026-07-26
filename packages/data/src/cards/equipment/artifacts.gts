@@ -13,8 +13,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, DamageType, DiceType, Reaction, card, combatStatus, status } from "@gi-tcg/core/builder";
-import { AdventureCompleted, BondOfLife, BurningFlame, EfficientSwitch } from "../../commons.gts";
+import {
+  $,
+  DamageType,
+  DiceType,
+  Reaction,
+  card,
+  combatStatus,
+  status,
+} from "@gi-tcg/core/builder";
+import {
+  AdventureCompleted,
+  BondOfLife,
+  BurningFlame,
+  EfficientSwitch,
+} from "../../commons.gts";
 
 /**
  * @id 312101
@@ -29,12 +42,15 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Cryo) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Cryo)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Cryo, 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312201
@@ -49,12 +65,15 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Hydro) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Hydro)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Hydro, 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312301
@@ -69,12 +88,15 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Pyro) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Pyro)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Pyro, 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312401
@@ -89,12 +111,15 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Electro) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Electro)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Electro, 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312501
@@ -109,12 +134,15 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Anemo) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Anemo)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Anemo, 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312601
@@ -129,12 +157,15 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Geo) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Geo)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Geo, 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312701
@@ -149,12 +180,15 @@ define card {
   cost DiceType.Void, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Dendro) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Dendro)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Dendro, 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312102
@@ -170,15 +204,18 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Cryo) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Cryo)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Cryo, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Cryo, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312202
@@ -194,15 +231,18 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Hydro) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Hydro)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Hydro, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Hydro, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312302
@@ -218,15 +258,18 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Pyro) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Pyro)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Pyro, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Pyro, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312402
@@ -242,15 +285,18 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Electro) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Electro)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Electro, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Electro, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312502
@@ -266,15 +312,18 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Anemo) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Anemo)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Anemo, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Anemo, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312602
@@ -290,15 +339,18 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Geo) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Geo)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Geo, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Geo, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312702
@@ -314,15 +366,18 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Dendro) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Dendro)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Dendro, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Dendro, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312001
@@ -340,9 +395,9 @@ define card {
       when :( :e.isSkillType("normal") );
       usage perRound, 3;
       :heal(1, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312002
@@ -360,9 +415,9 @@ define card {
       when :( :e.isSkillType("elemental") );
       usage perRound, 1;
       :heal(2, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312003
@@ -380,9 +435,9 @@ define card {
       when :( :e.isSkillType("burst") );
       usage perRound, 1;
       :heal(1, "all my characters");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312004
@@ -403,9 +458,9 @@ define card {
         autoDispose false;
       };
       :generateDice(DiceType.Omni, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312005
@@ -423,9 +478,9 @@ define card {
       when :( :hasPhaseReaction("my") );
       usage perRound, 3;
       :generateDice(:self.master.element(), 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312006
@@ -443,9 +498,9 @@ define card {
       when :( :e.isSkillType("burst") );
       usage perRound, 1;
       :gainEnergy(1, "my standby");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312007
@@ -460,12 +515,14 @@ define card {
   cost DiceType.Aligned, 1;
   artifact {
     on useSkill {
-      when :( :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst") );
+      when :(
+        :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst")
+      );
       listenTo samePlayer;
       :gainEnergy(1, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312008
@@ -481,17 +538,19 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on useSkill {
-      when :( :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst") );
+      when :(
+        :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst")
+      );
       listenTo samePlayer;
       :gainEnergy(1, "@master");
-    }
+    };
     on increaseSkillDamage {
       when :( :e.viaSkillType("burst") );
       usage perRound, 1;
       :e.increaseDamage(2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301201
@@ -502,7 +561,7 @@ define card {
 define status {
   id 301201 as UnmovableMountain;
   shield 2;
-}
+};
 
 /**
  * @id 312009
@@ -518,9 +577,9 @@ define card {
   artifact {
     on actionPhase {
       :characterStatus(UnmovableMountain, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312010
@@ -537,14 +596,14 @@ define card {
   artifact {
     on actionPhase {
       :characterStatus(UnmovableMountain, "@master");
-    }
+    };
     on damaged {
       when :( :self.master.isActive() );
       usage perRound, 1;
       :generateDice(:self.master.element(), 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312011
@@ -562,9 +621,9 @@ define card {
       when :( :e.isSkillOrTalentOf(:self.master, "normal") );
       usage perRound, 1;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301203
@@ -578,8 +637,8 @@ define status {
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 312012
@@ -598,13 +657,13 @@ define card {
       when :( :e.isSkillOrTalentOf(:self.master, "normal") );
       usage perRound, 1;
       :e.deductOmniCost(1);
-    }
+    };
     on switchActive {
       when :( :self.master.id === :e.switchInfo.to.id );
       :characterStatus(VermillionHereafterEffect, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312013
@@ -622,9 +681,9 @@ define card {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
       usage perRound, 1;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312014
@@ -643,14 +702,16 @@ define card {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
       usage perRound, 1;
       :e.deductOmniCost(1);
-    }
+    };
     on increaseSkillDamage {
-      when :( :self.master.energy >= 2 &&
-          (:e.viaSkillType("normal") || :e.viaSkillType("elemental")) );
+      when :(
+        :self.master.energy >= 2 &&
+          (:e.viaSkillType("normal") || :e.viaSkillType("elemental"))
+      );
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312015
@@ -670,7 +731,8 @@ define card {
       visible false;
     };
     variable bubble, 0;
-    replaceDescription "[GCG_TOKEN_SHIELD]", ((_, self) => self.variables.healedPts);
+    replaceDescription "[GCG_TOKEN_SHIELD]",
+    ((_, self) => self.variables.healedPts);
     on healed {
       listenTo samePlayer;
       :addVariable("healedPts", :e.value);
@@ -679,14 +741,14 @@ define card {
       const restPts = totalPts % 3;
       :addVariableWithMax("bubble", generatedBubbleCount, 2);
       :setVariable("healedPts", restPts);
-    }
+    };
     on increaseSkillDamage {
       const bubbleCount = :getVariable("bubble");
       :setVariable("bubble", 0);
       :e.increaseDamage(bubbleCount);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312016
@@ -707,10 +769,11 @@ define card {
       visible false;
     };
     variable bubble, 0;
-    replaceDescription "[GCG_TOKEN_SHIELD]", ((_, self) => self.variables.healedPts);
+    replaceDescription "[GCG_TOKEN_SHIELD]",
+    ((_, self) => self.variables.healedPts);
     on enter {
       :heal(2, "@master");
-    }
+    };
     on healed {
       listenTo samePlayer;
       :addVariable("healedPts", :e.value);
@@ -719,14 +782,14 @@ define card {
       const restPts = totalPts % 3;
       :addVariableWithMax("bubble", generatedBubbleCount, 2);
       :setVariable("healedPts", restPts);
-    }
+    };
     on increaseSkillDamage {
       const bubbleCount = :getVariable("bubble");
       :setVariable("bubble", 0);
       :e.increaseDamage(bubbleCount);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312017
@@ -743,15 +806,17 @@ define card {
   artifact {
     on enter {
       :drawCards(1);
-    }
+    };
     on damaged {
-      when :( !:e.target.isMine() && :self.master.isActive() && :e.getReaction() );
+      when :(
+        !:e.target.isMine() && :self.master.isActive() && :e.getReaction()
+      );
       listenTo all;
       usage perRound, 1;
       :drawCards(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312018
@@ -768,21 +833,25 @@ define card {
   artifact {
     on enter {
       const diceType = :self.master.element();
-      const elementKinds = new Set(:$$("my characters include defeated").map((ch) => ch.element()));
+      const elementKinds = new Set(
+        :$$("my characters include defeated").map((ch) => ch.element()),
+      );
       if (elementKinds.size >= 3) {
         :generateDice(diceType, 2);
       } else {
         :generateDice(diceType, 1);
       }
-    }
+    };
     on damaged {
-      when :( !:e.target.isMine() && :self.master.isActive() && :e.getReaction() );
+      when :(
+        !:e.target.isMine() && :self.master.isActive() && :e.getReaction()
+      );
       listenTo all;
       usage perRound, 2;
       :drawCards(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312019
@@ -799,9 +868,9 @@ define card {
       when :( :e.isSkillType("normal") );
       usage perRound, 1;
       :drawCards(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312020
@@ -820,14 +889,14 @@ define card {
       when :( :e.isSkillType("normal") );
       usage perRound, 1;
       :drawCards(1);
-    }
+    };
     on useSkill {
       when :( :player.dice.length <= :player.hands.length );
       usage perRound, 1;
       :generateDice(:self.master.element(), 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312021
@@ -844,9 +913,9 @@ define card {
       when :( :self.master.isActive() );
       usage perRound, 1;
       :drawCards(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312022
@@ -866,14 +935,14 @@ define card {
       usage perRound, 1;
       :addVariable("shouldHeal", 1);
       :drawCards(1);
-    }
+    };
     on endPhase {
       when :( :getVariable("shouldHeal") );
       :heal(1, "@master");
       :setVariable("shouldHeal", 0);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312023
@@ -892,7 +961,7 @@ define card {
     variable count, 0;
     on roundEnd {
       :setVariable("count", 0);
-    }
+    };
     on damagedOrHealed {
       if (:getVariable("count") < 2) {
         :addVariable("count", 1);
@@ -903,9 +972,9 @@ define card {
           :drawCards(1);
         }
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312025
@@ -923,7 +992,7 @@ define card {
     on endPhase {
       when :( !:self.master.isActive() );
       :addVariableWithMax("reward", 1, 2);
-    }
+    };
     on deductOmniDice {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
       const reward = :getVariable("reward");
@@ -931,9 +1000,9 @@ define card {
       const deduced = Math.min(reward, currentCost);
       :e.deductOmniCost(deduced);
       :addVariable("reward", -deduced);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301209
@@ -947,8 +1016,8 @@ define combatStatus {
   once increaseDamage {
     when :( :e.getReaction() );
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 312027
@@ -965,18 +1034,21 @@ define card {
   artifact {
     variable crystal, 0;
     on damaged {
-      when :( :getVariable("crystal") < 2 &&
+      when :(
+        :getVariable("crystal") < 2 &&
           !:e.target.isMine() &&
-          (:e.type === DamageType.Dendro || :e.isReactionRelatedTo(DamageType.Dendro)) );
+          (:e.type === DamageType.Dendro ||
+            :e.isReactionRelatedTo(DamageType.Dendro))
+      );
       listenTo all;
       :addVariableWithMax("crystal", 1, 2);
-    }
+    };
     on actionPhase {
       when :( :getVariable("crystal") === 2 );
       :combatStatus(AmethystCrownInEffect);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312024
@@ -996,7 +1068,7 @@ define card {
     variable count, 0;
     on roundEnd {
       :setVariable("count", 0);
-    }
+    };
     on damagedOrHealed {
       if (:getVariable("count") < 4) {
         :addVariable("count", 1);
@@ -1004,12 +1076,12 @@ define card {
         if (v === 1 || v === 4) {
           :generateDice(:self.master.element(), 1);
         } else if (v === 2) {
-          :drawCards(1)
+          :drawCards(1);
         }
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312026
@@ -1028,7 +1100,7 @@ define card {
     on endPhase {
       when :( !:self.master.isActive() );
       :addVariableWithMax("reward", 2, 4);
-    }
+    };
     on deductOmniDice {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
       const reward = :getVariable("reward");
@@ -1036,9 +1108,9 @@ define card {
       const deduced = Math.min(reward, currentCost);
       :e.deductOmniCost(deduced);
       :addVariable("reward", -deduced);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312028
@@ -1055,26 +1127,29 @@ define card {
   artifact {
     variable crystal, 0;
     on damaged {
-      when :( :getVariable("crystal") < 5 &&
+      when :(
+        :getVariable("crystal") < 5 &&
           !:e.target.isMine() &&
-          (:e.type === DamageType.Dendro || :e.isReactionRelatedTo(DamageType.Dendro)) );
+          (:e.type === DamageType.Dendro ||
+            :e.isReactionRelatedTo(DamageType.Dendro))
+      );
       listenTo all;
       :addVariable("crystal", 1);
-    }
+    };
     on actionPhase {
       when :( :getVariable("crystal") === 5 );
       :generateDice(DiceType.Omni, 1);
       :drawCards(1);
-    }
+    };
     on reaction {
       when :( :getVariable("crystal") === 5 && :e.caller.isMine() );
       listenTo all;
       usage perRound, 1;
       :generateDice(DiceType.Omni, 1);
       :drawCards(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312029
@@ -1091,9 +1166,9 @@ define card {
       when :( :e.isSkillType("normal") && :player.hands.length <= 2 );
       usage perRound, 1;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 133086
@@ -1106,7 +1181,7 @@ define card {
 define card {
   id 133086 as FakeTenacityOfTheMillelith; // 骗骗花
   reserved;
-}
+};
 
 /**
  * @id 133095
@@ -1119,7 +1194,7 @@ define card {
 define card {
   id 133095 as FakeGildedDreams; // 骗骗花
   reserved;
-}
+};
 
 /**
  * @id 301204
@@ -1134,8 +1209,8 @@ define status {
     when :( :e.isSkillOrTalentOf(:self.master) );
     usage 1;
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 312030
@@ -1150,14 +1225,16 @@ define card {
   cost DiceType.Aligned, 1;
   artifact {
     on switchActive {
-      when :( :e.switchInfo.to.id === :self.master.id && :player.hands.length > 0 );
+      when :(
+        :e.switchInfo.to.id === :self.master.id && :player.hands.length > 0
+      );
       usage perRound, 1;
       :disposeMaxCostHands(1);
       :convertDice(DiceType.Omni, 2);
       :characterStatus(ConductorsTopHatInEffect, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312031
@@ -1172,12 +1249,17 @@ define card {
   cost DiceType.Aligned, 1;
   artifact {
     on healed {
-      when :( !(:e.source.definition.type === "equipment" && :e.source.definition.tags.includes("artifact")) );
+      when :(
+        !(
+          :e.source.definition.type === "equipment" &&
+          :e.source.definition.tags.includes("artifact")
+        )
+      );
       usage perRound, 2;
       :heal(1, "my characters order by health - maxHealth limit 1");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312032
@@ -1194,9 +1276,9 @@ define card {
     on useTechnique {
       usage perRound, 1;
       :gainEnergy(1, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301205
@@ -1209,12 +1291,12 @@ define status {
   on increaseSkillDamage {
     :e.increaseDamage(1);
     :dispose();
-  }
+  };
   on increaseTechniqueDamage {
     :e.increaseDamage(1);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 312033
@@ -1231,9 +1313,9 @@ define card {
     on consumeNightsoul {
       usage perRound, 2;
       :characterStatus(CrownOfTheSaintsInEffect, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312034
@@ -1251,9 +1333,9 @@ define card {
       usage perRound, 1;
       :gainEnergy(1, "my characters with energy < maxEnergy limit 1");
       :gainEnergy(1, "my characters with energy < maxEnergy limit 1");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301206
@@ -1268,8 +1350,8 @@ define status {
   };
   once increaseDamaged {
     :e.increaseDamage(:getVariable("layer"));
-  }
-}
+  };
+};
 
 /**
  * @id 312035
@@ -1283,14 +1365,16 @@ define card {
   since "v5.8.0";
   artifact {
     on reaction {
-      when :( :e.caller.isMine() &&
-          :e.type === Reaction.Burning );
+      when :( :e.caller.isMine() && :e.type === Reaction.Burning );
       listenTo all;
       usage perRound, 1;
-      :characterStatus(CrownlessCrownInEffect, "opp characters with health > 0 limit 1");
-    }
-  }
-}
+      :characterStatus(
+        CrownlessCrownInEffect,
+        "opp characters with health > 0 limit 1",
+      );
+    };
+  };
+};
 
 /**
  * @id 312036
@@ -1306,9 +1390,9 @@ define card {
     on useSkill {
       usage perRound, 1;
       :characterStatus(BondOfLife, "my active or opp active");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301208
@@ -1321,8 +1405,8 @@ define status {
   oneDuration;
   on increaseDamage {
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 312037
@@ -1339,9 +1423,9 @@ define card {
       when :( :e.isSkillType("burst") && :$("my next") );
       usage perRound, 1;
       :characterStatus(RoyalMasqueInEffect, "my next");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312038
@@ -1356,14 +1440,16 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on increaseDamage {
-      when :( :e.getReaction() === Reaction.Burning ||
-          :e.source.definition.id === BurningFlame );
+      when :(
+        :e.getReaction() === Reaction.Burning ||
+          :e.source.definition.id === BurningFlame
+      );
       listenTo samePlayer;
       usage perRound, 2;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301207
@@ -1375,8 +1461,8 @@ define combatStatus {
   id 301207 as HarmoniousSymphonyPreludeInEffect;
   once deductOmniDiceSkill {
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 312039
@@ -1394,9 +1480,9 @@ define card {
       usage perRound, 1;
       :characterStatus(BondOfLife, "my characters");
       :combatStatus(HarmoniousSymphonyPreludeInEffect);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312040
@@ -1414,9 +1500,9 @@ define card {
       when :( :e.isSkillType("elemental") );
       usage perRound, 1;
       :adventure();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301210
@@ -1430,8 +1516,8 @@ define combatStatus {
   on increaseSkillDamage {
     usage 3;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 312041
@@ -1448,13 +1534,13 @@ define card {
   artifact {
     on enter {
       :gainEnergy(1, "@master");
-    }
+    };
     on useSkill {
       when :( :e.isSkillType("burst") );
       :combatStatus(NoblesseObligeInEffect);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312043
@@ -1472,13 +1558,13 @@ define card {
     on useSkill {
       usage perRound, 2;
       :adventure();
-    }
+    };
     on increaseSkillDamage {
       when :( :$(`my combat status with definition id ${AdventureCompleted}`) );
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312044
@@ -1497,14 +1583,14 @@ define card {
       when :( :e.viaChargedAttack() );
       usage perRound, 1;
       :e.increaseDamage(1);
-    }
+    };
     on useSkill {
       when :( :e.isPlungingAttack() );
       usage perRound, 1;
       :combatStatus(EfficientSwitch);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312045
@@ -1522,15 +1608,19 @@ define card {
     on increaseSkillDamage {
       when :( :e.type === DamageType.Physical );
       :e.increaseDamage(1);
-    }
+    };
     on deductVoidDiceSkill {
-      when :( :queryAll($.my.character).length === 1 && :e.isSkillType("normal") );
+      when :(
+        :queryAll($.my.character).length === 1 && :e.isSkillType("normal")
+      );
       :e.deductVoidCost(1);
-    }
+    };
     on increaseDamage {
-      when :( :queryAll($.my.character).length === 1 && :e.viaSkillType("normal") );
+      when :(
+        :queryAll($.my.character).length === 1 && :e.viaSkillType("normal")
+      );
       usage perRound, 2;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};

@@ -1,19 +1,30 @@
 // Copyright (C) 2026 Piovium Labs
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, card, character, DamageType, DiceType, Reaction, skill, status, type CharacterHandle, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  $,
+  card,
+  character,
+  DamageType,
+  DiceType,
+  Reaction,
+  skill,
+  status,
+  type CharacterHandle,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 import { Conductive, Thundercloud } from "../../commons.gts";
 
 /**
@@ -30,12 +41,12 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 14185
@@ -49,11 +60,10 @@ define skill {
   prepared;
   if (:query($.my.summon.def(Thundercloud))) {
     :damage(DamageType.Electro, 4);
-  }
-  else {
+  } else {
     :damage(DamageType.Electro, 2);
   }
-}
+};
 
 /**
  * @id 114182
@@ -65,7 +75,7 @@ define status {
   id 114182 as ThunderousSymphonyStatus;
   since "v6.6.0";
   prepare ThunderousSymphony;
-}
+};
 
 /**
  * @id 14181
@@ -79,7 +89,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 14182
@@ -96,7 +106,7 @@ define skill {
     :damage(DamageType.Electro, 1);
     :characterStatus(ManifestFlame, :self);
   }
-}
+};
 
 /**
  * @id 14183
@@ -111,7 +121,7 @@ define skill {
   cost DiceType.Energy, 4;
   :damage(DamageType.Piercing, 2, $.opp.standby);
   :damage(DamageType.Electro, 6);
-}
+};
 
 /**
  * @id 14184
@@ -127,17 +137,19 @@ define skill {
       when :( !:e.entity.isMine() && :e.entity.definition.id === Conductive );
       listenTo all;
       :damage(DamageType.Piercing, 1, $.macros.oppMaxHealth);
-    }
+    };
     on useSkill {
-      when :( :e.skill.definition.id === AncientRiteArcaneLight &&
+      when :(
+        :e.skill.definition.id === AncientRiteArcaneLight &&
           :countOfSkill(Flins, AncientRiteArcaneLight) >= 2 &&
-          :self.energy >= 2 );
+          :self.energy >= 2
+      );
       asSkillType elemental;
       :self.loseEnergy(2);
       :characterStatus(ThunderousSymphonyStatus, :self);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 14186
@@ -150,8 +162,8 @@ define skill {
   id 14186 as MoonsignBenedictionOldWorldSecrets01;
   skillType passive {
     reserved;
-  }
-}
+  };
+};
 
 /**
  * @id 14187
@@ -163,7 +175,7 @@ define skill {
   id 14187 as AncientRiteArcaneLight01;
   skillType elemental;
   reserved;
-}
+};
 
 /**
  * @id 1418
@@ -177,9 +189,13 @@ define character {
   tags electro, pole, nodkrai;
   health 10;
   energy 4;
-  skills PocztowyDemonspear, AncientRiteArcaneLight, AncientRitualComethTheNight, MoonsignBenedictionOldWorldSecrets, ThunderousSymphony;
+  skills PocztowyDemonspear,
+  AncientRiteArcaneLight,
+  AncientRitualComethTheNight,
+  MoonsignBenedictionOldWorldSecrets,
+  ThunderousSymphony;
   enabledLunarReactions Reaction.LunarElectroCharged;
-}
+};
 
 /**
  * @id 214181
@@ -197,12 +213,12 @@ define card {
   talent Flins, none {
     on enter {
       :gainEnergy(1, "@master");
-    }
+    };
     on dealReaction {
       when :( :e.type === Reaction.LunarElectroCharged );
       listenTo samePlayer;
       usage perRound, 1;
       :gainEnergy(1, "@master");
-    }
-  }
-}
+    };
+  };
+};

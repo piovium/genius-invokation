@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, combatStatus, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  card,
+  DamageType,
+  combatStatus,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 116111
@@ -25,7 +33,7 @@ define status {
   id 116111 as NightsoulsBlessing;
   since "v5.6.0";
   nightsoulsBlessing 2;
-}
+};
 
 /**
  * @id 216113
@@ -40,8 +48,8 @@ define combatStatus {
   on increaseDamaged {
     when :( :e.type === DamageType.Geo );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 216114
@@ -56,8 +64,8 @@ define combatStatus {
   on increaseDamaged {
     when :( :e.type === DamageType.Hydro );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 216115
@@ -72,8 +80,8 @@ define combatStatus {
   on increaseDamaged {
     when :( :e.type === DamageType.Pyro );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 216116
@@ -88,8 +96,8 @@ define combatStatus {
   on increaseDamaged {
     when :( :e.type === DamageType.Cryo );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 216117
@@ -104,8 +112,8 @@ define combatStatus {
   on increaseDamaged {
     when :( :e.type === DamageType.Electro );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 116113
@@ -118,7 +126,7 @@ define status {
   since "v5.6.0";
   noDefaultDispose;
   variable layer, 1;
-}
+};
 
 /**
  * @id 116114
@@ -131,7 +139,7 @@ define status {
   since "v5.6.0";
   noDefaultDispose;
   variable layer, 1;
-}
+};
 
 /**
  * @id 116115
@@ -144,7 +152,7 @@ define status {
   since "v5.6.0";
   noDefaultDispose;
   variable layer, 1;
-}
+};
 
 /**
  * @id 116116
@@ -157,7 +165,7 @@ define status {
   since "v5.6.0";
   noDefaultDispose;
   variable layer, 1;
-}
+};
 
 /**
  * @id 116117
@@ -170,7 +178,7 @@ define status {
   since "v5.6.0";
   noDefaultDispose;
   variable layer, 1;
-}
+};
 
 /**
  * @id 116112
@@ -192,15 +200,15 @@ define card {
     on modifySkillDamageType {
       when :( :e.type === DamageType.Physical );
       :e.changeDamageType(DamageType.Geo);
-    }
+    };
     skill {
       id 1161121;
       cost DiceType.Void, 2;
       :consumeNightsoul("@master");
       :drawCards(3);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 16111
@@ -217,11 +225,11 @@ define skill {
   if (:self.hasStatus(NightsoulsBlessing)) {
     :characterStatus(NightsoulsBlessing, "@self", {
       overrideVariables: {
-        nightsoul: 1
-      }
+        nightsoul: 1,
+      },
     });
   }
-}
+};
 
 /**
  * @id 16112
@@ -237,7 +245,7 @@ define skill {
   filter :( !:self.hasStatus(NightsoulsBlessing) );
   :equip(CombatBladingGear);
   :gainNightsoul("@self", 1);
-}
+};
 
 /**
  * @id 16113
@@ -265,7 +273,7 @@ define skill {
   }
   :heal(healCount, `my characters order by health - maxHealth limit 1`);
   :drawCards(drawCount);
-}
+};
 
 const sampleMap = {
   [DiceType.Geo]: SourceSampleGeo,
@@ -284,7 +292,7 @@ const dmgBonusMap = {
 } as const;
 
 type SampleType = keyof typeof sampleMap;
-  
+
 /**
  * @id 16114
  * @name 「源音采样」
@@ -296,10 +304,12 @@ define skill {
   skillType passive {
     on battleBegin {
       const sampleCount = Object.fromEntries(
-        Object.keys(sampleMap).map((k) => [k, 0])
+        Object.keys(sampleMap).map((k) => [k, 0]),
       ) as Record<SampleType, number>;
       sampleCount[DiceType.Geo] = 3;
-      const elements = new Set(:$$(`my characters includes defeated`).map((ch) => ch.element()));
+      const elements = new Set(
+        :$$(`my characters includes defeated`).map((ch) => ch.element()),
+      );
       for (const e of elements) {
         if (e !== DiceType.Geo && e in sampleCount) {
           sampleCount[e as SampleType]++;
@@ -309,11 +319,11 @@ define skill {
       for (const [element, layer] of Object.entries(sampleCount)) {
         if (layer > 0) {
           :characterStatus(sampleMap[Number(element) as SampleType], "@self", {
-            overrideVariables: { layer }
-          })
+            overrideVariables: { layer },
+          });
         }
       }
-    }
+    };
     on actionPhase {
       const nightsoul = :self.hasStatus(NightsoulsBlessing);
       if (nightsoul && nightsoul.getVariable("nightsoul") >= 2) {
@@ -324,9 +334,9 @@ define skill {
         }
         :consumeNightsoul("@self", 2);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1611
@@ -342,7 +352,7 @@ define character {
   energy 2;
   skills EhecatlsRoar, YohualsScratch, OcelotlicuePoint, SourceSample;
   associateNightsoul NightsoulsBlessing;
-}
+};
 
 /**
  * @id 216111
@@ -364,11 +374,11 @@ define card {
   talent Xilonen {
     on enter {
       :useSkill(YohualsScratch);
-    }
+    };
     on switchActive {
       when :( :e.switchInfo.to.hasNightsoulsBlessing() );
       usage perRound, 2;
       :gainNightsoul("@event.switchTo", 1);
-    }
-  }
-}
+    };
+  };
+};

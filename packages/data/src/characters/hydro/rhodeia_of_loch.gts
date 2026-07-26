@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, summon, type SummonHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 122013
@@ -33,13 +41,13 @@ define summon {
       autoDispose false;
     };
     :e.decreaseDamage(1);
-  }
+  };
   on endPhase {
     when :( :getVariable("usage") <= 0 );
     :damage(DamageType.Hydro, 2);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 122012
@@ -54,8 +62,8 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Hydro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 122011
@@ -70,8 +78,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Hydro, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 122010
@@ -88,8 +96,8 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Hydro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 122014
@@ -109,13 +117,13 @@ define summon {
       autoDispose false;
     };
     :e.decreaseDamage(1);
-  }
+  };
   on endPhase {
     when :( :getVariable("usage") <= 0 );
     :damage(DamageType.Hydro, 2);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 22011
@@ -129,11 +137,19 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Hydro, 1);
-}
+};
 
-export const NORMAL_MIMICS = [OceanicMimicSquirrel, OceanicMimicRaptor, OceanicMimicFrog] as number[];
+export const NORMAL_MIMICS = [
+  OceanicMimicSquirrel,
+  OceanicMimicRaptor,
+  OceanicMimicFrog,
+] as number[];
 
-export const PREVIEW_MIMICS = [OceanicMimicSquirrel, OceanicMimicRaptorPreview, OceanicMimicFrogPreview] as number[];
+export const PREVIEW_MIMICS = [
+  OceanicMimicSquirrel,
+  OceanicMimicRaptorPreview,
+  OceanicMimicFrogPreview,
+] as number[];
 
 /**
  * @id 22012
@@ -146,7 +162,9 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   const mimics = :isPreview ? PREVIEW_MIMICS : NORMAL_MIMICS;
-  const exists = :player.summons.map((s) => s.definition.id).filter((id) => mimics.includes(id));
+  const exists = :player.summons
+    .map((s) => s.definition.id)
+    .filter((id) => mimics.includes(id));
   let target;
   const rest = mimics.filter((id) => !exists.includes(id));
   if (rest.length > 0) {
@@ -155,7 +173,7 @@ define skill {
     target = :random(mimics);
   }
   :summon(target as SummonHandle);
-}
+};
 
 /**
  * @id 22013
@@ -168,7 +186,9 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 5;
   const mimics = :isPreview ? PREVIEW_MIMICS : NORMAL_MIMICS;
-  const exists = :player.summons.map((s) => s.definition.id).filter((id) => mimics.includes(id));
+  const exists = :player.summons
+    .map((s) => s.definition.id)
+    .filter((id) => mimics.includes(id));
   for (let i = 0; i < 2; i++) {
     let target;
     const rest = mimics.filter((id) => !exists.includes(id));
@@ -180,7 +200,7 @@ define skill {
     :summon(target as SummonHandle);
     exists.push(target);
   }
-}
+};
 
 /**
  * @id 22014
@@ -197,9 +217,9 @@ define skill {
   const damageValue = 4 + summons.length;
   :damage(DamageType.Hydro, damageValue);
   if (:self.hasEquipment(StreamingSurge)) {
-    summons.forEach((s) => s.addVariable("usage", 1))
+    summons.forEach((s) => s.addVariable("usage", 1));
   }
-}
+};
 
 /**
  * @id 2201
@@ -214,7 +234,7 @@ define character {
   health 11;
   energy 3;
   skills Surge, OceanidMimicSummoning, TheMyriadWilds, TideAndTorrent;
-}
+};
 
 /**
  * @id 222011
@@ -233,6 +253,6 @@ define card {
   talent RhodeiaOfLoch {
     on enter {
       :useSkill(TideAndTorrent);
-    }
-  }
-}
+    };
+  };
+};

@@ -1,15 +1,15 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -30,16 +30,18 @@ define status {
       append;
     };
     const entities = [...:e.target.entities, ...:queryAll($.opp.combatStatus)];
-    const isUnderShield = entities.some((e) =>
-      e.definition.tags.includes("shield") || e.definition.tags.includes("barrier")
+    const isUnderShield = entities.some(
+      (e) =>
+        e.definition.tags.includes("shield") ||
+        e.definition.tags.includes("barrier"),
     );
     if (isUnderShield) {
       :e.increaseDamage(3);
     } else {
       :e.increaseDamage(1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 26047
@@ -52,7 +54,7 @@ define skill {
   skillType burst;
   prepared;
   :damage(DamageType.Geo, 3);
-}
+};
 
 /**
  * @id 126043
@@ -64,7 +66,7 @@ define status {
   id 126043 as MastersStrikeStatus;
   since "v6.2.0";
   prepare MastersStrike;
-}
+};
 
 /**
  * @id 26045
@@ -77,7 +79,7 @@ define skill {
   skillType burst;
   prepared;
   :damage(DamageType.Geo, 3);
-}
+};
 
 /**
  * @id 126042
@@ -91,7 +93,7 @@ define status {
   prepare GreataxeStrike {
     nextStatus MastersStrikeStatus;
   };
-}
+};
 
 /**
  * @id 26041
@@ -105,7 +107,7 @@ define skill {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 26042
@@ -118,7 +120,7 @@ define skill {
   skillType elemental;
   cost DiceType.Geo, 3;
   :damage(DamageType.Geo, 3);
-}
+};
 
 /**
  * @id 26043
@@ -133,7 +135,7 @@ define skill {
   cost DiceType.Energy, 2;
   :apply(DamageType.Geo, "@self");
   :characterStatus(GreataxeStrikeStatus, "@self");
-}
+};
 
 /**
  * @id 26044
@@ -147,22 +149,26 @@ define skill {
     variable shouldAttachCatalysisOfStone, 0;
     on beforeSkill {
       when :{
-        const entities = :queryAll($.union($.opp.typeStatus, $.opp.typeEquipment, $.opp.combatStatus));
-        return entities.some((e) =>
-          e.definition.tags.includes("shield") || e.definition.tags.includes("barrier")
+        const entities = :queryAll(
+          $.union($.opp.typeStatus, $.opp.typeEquipment, $.opp.combatStatus),
+        );
+        return entities.some(
+          (e) =>
+            e.definition.tags.includes("shield") ||
+            e.definition.tags.includes("barrier"),
         );
       };
       listenTo samePlayer;
       :setVariable("shouldAttachCatalysisOfStone", 1);
-    }
+    };
     on useSkill {
       when :( :getVariable("shouldAttachCatalysisOfStone") );
       listenTo samePlayer;
       :characterStatus(MightOfStone, "@self");
       :setVariable("shouldAttachCatalysisOfStone", 0);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 26046
@@ -174,7 +180,7 @@ define skill {
   id 26046 as MastersStrikePassive;
   skillType passive;
   reserved;
-}
+};
 
 /**
  * @id 2604
@@ -188,8 +194,14 @@ define character {
   tags geo, monster;
   health 12;
   energy 2;
-  skills SupremeStrike, AxeAndAegis, StoneStance, AttackingMomentum, GreataxeStrike, MastersStrike, MastersStrike;
-}
+  skills SupremeStrike,
+  AxeAndAegis,
+  StoneStance,
+  AttackingMomentum,
+  GreataxeStrike,
+  MastersStrike,
+  MastersStrike;
+};
 
 /**
  * @id 226041
@@ -206,9 +218,9 @@ define card {
   talent BlackSerpentKnightRockbreakerAx {
     on enter {
       :apply(DamageType.Geo, "@master");
-    }
+    };
     on actionPhase {
       :apply(DamageType.Geo, "@master");
-    }
-  }
-}
+    };
+  };
+};

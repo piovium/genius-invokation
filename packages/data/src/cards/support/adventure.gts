@@ -1,21 +1,34 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, card, type CardHandle, combatStatus, DamageType, DiceType, summon } from "@gi-tcg/core/builder";
+import {
+  $,
+  card,
+  type CardHandle,
+  combatStatus,
+  DamageType,
+  DiceType,
+  summon,
+} from "@gi-tcg/core/builder";
 import { ChenyuBrew } from "../event/food.gts";
-import { AdventureCompleted, AgileSwitch, BattlePlan, EfficientSwitch } from "../../commons.gts";
+import {
+  AdventureCompleted,
+  AgileSwitch,
+  BattlePlan,
+  EfficientSwitch,
+} from "../../commons.gts";
 import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other.gts";
 
 /**
@@ -40,7 +53,7 @@ define card {
       };
       :createHandCard(ChenyuBrew);
       :createHandCard(ChenyuBrew);
-    }
+    };
     on adventure {
       when :( :getVariable("exp") >= 4 );
       usage 1 {
@@ -48,16 +61,16 @@ define card {
         visible false;
       };
       :combatStatus(EfficientSwitch, "my", {
-          overrideVariables: {
-            usage: 3
-          }
-        });
+        overrideVariables: {
+          usage: 3,
+        },
+      });
       :combatStatus(AgileSwitch, "my", {
-          overrideVariables: {
-            usage: 3
-          }
-        });
-    }
+        overrideVariables: {
+          usage: 3,
+        },
+      });
+    };
     on adventure {
       when :( :getVariable("exp") >= 8 );
       usage 1 {
@@ -72,9 +85,9 @@ define card {
       :increaseMaxHealth(2, targetCh);
       :heal(10, targetCh);
       :finishAdventure();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321033
@@ -94,11 +107,11 @@ define card {
     on enter {
       when :( !:e.overridden );
       :damage(DamageType.Piercing, 1, "all my characters");
-    }
+    };
     on adventure {
       when :( :getVariable("exp") % 2 === 0 );
       :generateDice("randomElement", 1);
-    }
+    };
     on adventure {
       when :( :getVariable("exp") >= 5 );
       usage 1 {
@@ -106,7 +119,7 @@ define card {
         visible false;
       };
       :createHandCard(WoodenToySword);
-    }
+    };
     on adventure {
       when :( :getVariable("exp") >= 12 );
       usage 1 {
@@ -115,9 +128,9 @@ define card {
       };
       :createHandCard(ReforgeTheHolyBlade);
       :finishAdventure();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301041
@@ -132,17 +145,17 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Piercing, 2);
-  }
+  };
   on selfDispose {
     const myMaxHpCharacter = :query($.macros.myMaxHealth)!;
     const oppMaxHpCharacter = :query($.macros.oppMaxHealth)!;
     const target =
       myMaxHpCharacter.health > oppMaxHpCharacter.health
-        ? myMaxHpCharacter :
-        oppMaxHpCharacter;
+        ? myMaxHpCharacter
+        : oppMaxHpCharacter;
     :damage(DamageType.Piercing, 5, target);
-  }
-}
+  };
+};
 
 /**
  * @id 321034
@@ -161,7 +174,7 @@ define card {
     adventureSpot;
     on adventure {
       :convertDice(DiceType.Omni, 1);
-    }
+    };
     on adventure {
       when :( :getVariable("exp") >= 2 );
       usage 1 {
@@ -169,7 +182,7 @@ define card {
         visible false;
       };
       :drawCards(2);
-    }
+    };
     on adventure {
       when :( :getVariable("exp") >= 4 );
       usage 1 {
@@ -177,9 +190,9 @@ define card {
         visible false;
       };
       :characterStatus(BattlePlan, "my active", {
-          overrideVariables: { usage: 2 }
-        });
-    }
+        overrideVariables: { usage: 2 },
+      });
+    };
     on adventure {
       when :( :getVariable("exp") >= 6 );
       usage 1 {
@@ -193,9 +206,9 @@ define card {
       }
       :summon(TideTurningSacredLord);
       :finishAdventure();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301042
@@ -208,7 +221,7 @@ define combatStatus {
   variable cardsPlayed, 0;
   on roundEnd {
     :setVariable("cardsPlayed", 0);
-  }
+  };
   on playCard {
     when :( !:isInInitialPile(:e.card) );
     :addVariable("cardsPlayed", 1);
@@ -223,8 +236,8 @@ define combatStatus {
       }
       :dispose();
     }
-  }
-}
+  };
+};
 
 /**
  * @id 321040
@@ -245,18 +258,20 @@ define card {
       when :( !:e.overridden );
       const excludeTags = ["food", "legend"] as const;
       const candidates = :allCardDefinitions(
-        (card) => card.type === "eventCard" && !excludeTags.some((tag) => card.tags.includes(tag))
+        (card) =>
+          card.type === "eventCard" &&
+          !excludeTags.some((tag) => card.tags.includes(tag)),
       );
       const cards = :randomSubset(candidates, 5);
       for (const card of cards) {
         :createPileCards(card.id as CardHandle, 1, "random");
       }
-    }
+    };
     on adventure {
       when :( :getVariable("exp") % 2 === 0 );
       :generateDice("randomElement", 1);
       :drawCards(1);
-    }
+    };
     on adventure {
       when :( :getVariable("exp") >= 10 );
       usage 1 {
@@ -264,6 +279,6 @@ define card {
         visible false;
       };
       :combatStatus(TheChasmInEffect);
-    }
-  }
-}
+    };
+  };
+};

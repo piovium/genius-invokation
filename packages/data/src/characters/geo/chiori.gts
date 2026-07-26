@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon, type CardHandle, type SummonHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type CardHandle,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 116091
@@ -30,14 +40,14 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Geo, 1);
-  }
+  };
   on enter {
     :characterStatus(GeoInfusion, `my character with definition id ${Chiori}`);
-  }
+  };
   on selfDispose {
     :$(`my status with definition id ${GeoInfusion}`)?.dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 116092
@@ -54,12 +64,12 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Geo, 1);
-  }
+  };
   on useSkill {
     usage perRound, 1;
     :switchActive("my next");
-  }
-}
+  };
+};
 
 /**
  * @id 116093
@@ -76,13 +86,13 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Geo, 1);
-  }
+  };
   on useSkill {
     when :( :e.skill.caller.definition.id !== Chiori );
     usage perRound, 1;
     :damage(DamageType.Geo, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 116094
@@ -98,8 +108,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Geo, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 116095
@@ -116,14 +126,16 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Geo, 1);
-  }
+  };
   on increaseDamage {
-    when :( ([...DOLLS, Chiori] as number[]).includes(:e.source.definition.id) && 
-        :e.type === DamageType.Geo );
+    when :(
+      ([...DOLLS, Chiori] as number[]).includes(:e.source.definition.id) &&
+        :e.type === DamageType.Geo
+    );
     usage perRound, 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 116096
@@ -140,13 +152,13 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Geo, 1);
-  }
+  };
   on deductOmniDiceSkill {
     when :( :e.action.skill.definition.id === WeavingBlade );
     usage perRound, 1;
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 116097
@@ -161,8 +173,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Geo, 1);
-  }
-}
+  };
+};
 
 const USEFUL_DOLLS: SummonHandle[] = [
   GrouchyKnifewieldingTamoto,
@@ -171,10 +183,7 @@ const USEFUL_DOLLS: SummonHandle[] = [
   FightingWithHerEyesShutTamoto,
   BombasticSideeyeTamoto,
 ];
-const DOLLS: SummonHandle[] = [
-  ...USEFUL_DOLLS, 
-  TranquillyTakingTenTamoto
-];
+const DOLLS: SummonHandle[] = [...USEFUL_DOLLS, TranquillyTakingTenTamoto];
 
 /**
  * @id 116098
@@ -188,12 +197,12 @@ define status {
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
+  };
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Geo);
-  }
-}
+  };
+};
 
 /**
  * @id 16091
@@ -207,7 +216,7 @@ define skill {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 16092
@@ -226,7 +235,7 @@ define skill {
   }
   const candidates = :randomSubset(USEFUL_DOLLS, count);
   :selectAndSummon(candidates);
-}
+};
 
 /**
  * @id 16093
@@ -240,7 +249,7 @@ define skill {
   cost DiceType.Geo, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Geo, 5);
-}
+};
 
 /**
  * @id 1609
@@ -255,7 +264,7 @@ define character {
   health 10;
   energy 2;
   skills WeavingBlade, FlutteringHasode, HiyokuTwinBlades;
-}
+};
 
 /**
  * @id 216091
@@ -273,6 +282,6 @@ define card {
   talent Chiori {
     on enter {
       :useSkill(FlutteringHasode);
-    }
-  }
-}
+    };
+  };
+};

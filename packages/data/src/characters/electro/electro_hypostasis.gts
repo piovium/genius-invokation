@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  status,
+  card,
+  DamageType,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 124013
@@ -29,14 +37,14 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Electro, 1);
-  }
+  };
   on addDice {
     when :( :self.who !== :e.action.who && :e.action.type === "switchActive" );
     usage perRound, 1;
     listenTo all;
     :e.addCost(DiceType.Void, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 124015
@@ -47,7 +55,7 @@ define summon {
 define status {
   id 124015 as ElectroCrystalCore01;
   reserved;
-}
+};
 
 /**
  * @id 124016
@@ -58,7 +66,7 @@ define status {
 define status {
   id 124016 as ElectroCrystalCore02;
   reserved;
-}
+};
 
 /**
  * @id 124014
@@ -71,8 +79,8 @@ define status {
   on beforeDefeated {
     :immune(1);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 24016
@@ -86,7 +94,7 @@ define skill {
   skillType elemental;
   prepared;
   :damage(DamageType.Electro, 3);
-}
+};
 
 /**
  * @id 124012
@@ -97,7 +105,7 @@ define skill {
 define status {
   id 124012 as RockpaperscissorsComboPaperStatus;
   prepare RockpaperscissorsComboPaper;
-}
+};
 
 /**
  * @id 24015
@@ -111,7 +119,7 @@ define skill {
   skillType elemental;
   prepared;
   :damage(DamageType.Electro, 2);
-}
+};
 
 /**
  * @id 124011
@@ -124,7 +132,7 @@ define status {
   prepare RockpaperscissorsComboScissors {
     nextStatus RockpaperscissorsComboPaperStatus;
   };
-}
+};
 
 /**
  * @id 24011
@@ -138,7 +146,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Electro, 1);
-}
+};
 
 /**
  * @id 24012
@@ -152,7 +160,7 @@ define skill {
   cost DiceType.Electro, 5;
   :damage(DamageType.Electro, 2);
   :characterStatus(RockpaperscissorsComboScissorsStatus);
-}
+};
 
 /**
  * @id 24013
@@ -167,7 +175,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 2);
   :summon(ChainsOfWardingThunder);
-}
+};
 
 /**
  * @id 24014
@@ -180,9 +188,9 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(ElectroCrystalCore);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2401
@@ -197,8 +205,13 @@ define character {
   tags electro, monster;
   health 8;
   energy 2;
-  skills ElectroCrystalProjection, RockpaperscissorsCombo, LightningLockdown, ElectroCrystalCoreSkill, RockpaperscissorsComboScissors, RockpaperscissorsComboPaper;
-}
+  skills ElectroCrystalProjection,
+  RockpaperscissorsCombo,
+  LightningLockdown,
+  ElectroCrystalCoreSkill,
+  RockpaperscissorsComboScissors,
+  RockpaperscissorsComboPaper;
+};
 
 /**
  * @id 224011
@@ -214,4 +227,4 @@ define card {
   eventTalent ElectroHypostasis;
   :heal(3, "my active");
   :characterStatus(ElectroCrystalCore, "my active");
-}
+};

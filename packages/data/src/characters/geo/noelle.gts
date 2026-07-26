@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 116022
@@ -30,16 +38,16 @@ define status {
     when :( :e.isSkillType("normal") && :e.canDeductCostOfType(DiceType.Geo) );
     usage perRound, 1;
     :e.deductCost(DiceType.Geo, 1);
-  }
+  };
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Geo);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 116021
@@ -54,8 +62,8 @@ define combatStatus {
   on multiplyDamaged {
     when :( :e.type === DamageType.Physical );
     :e.divideDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 16021
@@ -69,7 +77,7 @@ define skill {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 16022
@@ -83,7 +91,7 @@ define skill {
   cost DiceType.Geo, 3;
   :damage(DamageType.Geo, 1);
   :combatStatus(FullPlate);
-}
+};
 
 /**
  * @id 16023
@@ -98,7 +106,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Geo, 4);
   :characterStatus(SweepingTimeStatus);
-}
+};
 
 /**
  * @id 1602
@@ -113,7 +121,7 @@ define character {
   health 12;
   energy 2;
   skills FavoniusBladeworkMaid, Breastplate, SweepingTime;
-}
+};
 
 /**
  * @id 216021
@@ -131,11 +139,14 @@ define card {
   talent Noelle {
     on enter {
       :useSkill(Breastplate);
-    }
+    };
     on useSkill {
-      when :( :e.isSkillType("normal") && :$(`my combat status with definition id ${FullPlate}`) );
+      when :(
+        :e.isSkillType("normal") &&
+          :$(`my combat status with definition id ${FullPlate}`)
+      );
       usage perRound, 1;
       :heal(1, "all my characters");
-    }
-  }
-}
+    };
+  };
+};

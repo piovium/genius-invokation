@@ -1,19 +1,29 @@
 // Copyright (C) 2026 Piovium Labs
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, card, character, combatStatus, DamageType, DiceType, skill, status, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  $,
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 import { EfficientSwitch } from "../../commons.gts";
 
 /**
@@ -27,7 +37,7 @@ define status {
   id 126053 as Evasion;
   since "v6.6.0";
   duration 1;
-}
+};
 
 /**
  * @id 126054
@@ -42,8 +52,8 @@ define status {
   once deductVoidDiceSkill {
     when :( :e.isSkillType("normal") );
     :e.deductVoidCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 126051
@@ -62,8 +72,8 @@ define combatStatus {
     :characterStatus(Evasion, :e.skill.caller.cast<"character">());
     const target = :e.who === :self.who ? $.my.next : $.opp.next;
     :switchActive(target);
-  }
-}
+  };
+};
 
 /**
  * @id 126052
@@ -78,8 +88,8 @@ define combatStatus {
   duration 2;
   on endPhase {
     :damage(DamageType.Piercing, 1, $.character.exclude($.has.def(Evasion)));
-  }
-}
+  };
+};
 
 /**
  * @id 26051
@@ -93,7 +103,7 @@ define skill {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 26052
@@ -107,11 +117,11 @@ define skill {
   cost DiceType.Geo, 3;
   :damage(DamageType.Geo, 2);
   :combatStatus(EfficientSwitch, "my", {
-      overrideVariables: {
-        usage: 2
-      }
-    });
-}
+    overrideVariables: {
+      usage: 2,
+    },
+  });
+};
 
 /**
  * @id 26053
@@ -128,7 +138,7 @@ define skill {
   :combatStatus(LowGravityBackground);
   :combatStatus(ShockBlast);
   :characterStatus(ForceFieldManipulation, $.my.standby);
-}
+};
 
 /**
  * @id 2605
@@ -142,8 +152,10 @@ define character {
   tags geo, monster;
   health 11;
   energy 2;
-  skills GravityApplicationCrush, GravityApplicationPointNull, GravityApplicationFieldReduction;
-}
+  skills GravityApplicationCrush,
+  GravityApplicationPointNull,
+  GravityApplicationFieldReduction;
+};
 
 /**
  * @id 226051
@@ -163,12 +175,12 @@ define card {
       listenTo all;
       const target = :e.who === :self.who ? $.my.next : $.opp.next;
       :switchActive(target);
-    }
+    };
     on increaseSkillDamage {
       when :( :e.viaPlungingAttack() );
       listenTo samePlayer;
       usage perRound, 2;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};

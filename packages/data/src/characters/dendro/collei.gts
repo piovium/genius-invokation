@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, card, character, combatStatus, DamageType, DiceType, skill, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  $,
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 117011
@@ -28,8 +38,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Dendro, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 117012
@@ -45,8 +55,8 @@ define combatStatus {
     when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Dendro)) );
     usage perRound, 1;
     :damage(DamageType.Dendro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 117013
@@ -57,7 +67,7 @@ define combatStatus {
 define combatStatus {
   id 117013 as SproutCreated;
   oneDuration;
-}
+};
 
 /**
  * @id 17011
@@ -71,7 +81,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 17012
@@ -84,11 +94,14 @@ define skill {
   skillType elemental;
   cost DiceType.Dendro, 3;
   :damage(DamageType.Dendro, 3);
-  if (:self.hasEquipment(FloralSidewinder) && !:query($.my.combatStatus.def(SproutCreated))) {
+  if (
+    :self.hasEquipment(FloralSidewinder) &&
+    !:query($.my.combatStatus.def(SproutCreated))
+  ) {
     :combatStatus(Sprout);
     :combatStatus(SproutCreated);
   }
-}
+};
 
 /**
  * @id 17013
@@ -103,7 +116,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Dendro, 2);
   :summon(CuileinAnbar);
-}
+};
 
 /**
  * @id 1701
@@ -118,7 +131,7 @@ define character {
   health 11;
   energy 2;
   skills SupplicantsBowmanship, FloralBrush, TrumpcardKitty;
-}
+};
 
 /**
  * @id 217011
@@ -136,6 +149,6 @@ define card {
   talent Collei {
     on enter {
       :useSkill(FloralBrush);
-    }
-  }
-}
+    };
+  };
+};

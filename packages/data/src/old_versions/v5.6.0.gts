@@ -1,14 +1,56 @@
-import { card, character, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
-import { DominusLapidisStrikingStone, Zhongli } from "../characters/geo/zhongli.gts";
-import { TurboDrillField, TurboTwirlyLetItRip, TurboTwirlyTriggered } from "../characters/geo/kachina.gts";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+} from "@gi-tcg/core/builder";
+import {
+  DominusLapidisStrikingStone,
+  Zhongli,
+} from "../characters/geo/zhongli.gts";
+import {
+  TurboDrillField,
+  TurboTwirlyLetItRip,
+  TurboTwirlyTriggered,
+} from "../characters/geo/kachina.gts";
 import { Xilonen, YohualsScratch } from "../characters/geo/xilonen.gts";
-import { MistBubbleSlime, SlashOfSurgingTides, SlashOfSurgingTidesPassive, WhirlingScythe } from "../characters/hydro/hydro_hilichurl_rogue.gts";
-import { AsWaterSeeksEquilibrium, EquitableJudgment, OTearsIShallRepay, OTidesIHaveReturned, SourcewaterDropletSkill } from "../characters/hydro/neuvillette.gts";
-import { Oceanborne, Stormbreaker, Tidecaller, Wavestrider } from "../characters/electro/beidou.gts";
-import { GleamingSpearGuardianStance, HeronStrike, SacredRiteHeronsSanctum, SacredRiteWagtailsTide } from "../characters/hydro/candace.gts";
-import { HolisticRevivification, TheClassicsOfAcupuncture, UniversalDiagnosis } from "../characters/dendro/baizhu.gts";
+import {
+  MistBubbleSlime,
+  SlashOfSurgingTides,
+  SlashOfSurgingTidesPassive,
+  WhirlingScythe,
+} from "../characters/hydro/hydro_hilichurl_rogue.gts";
+import {
+  AsWaterSeeksEquilibrium,
+  EquitableJudgment,
+  OTearsIShallRepay,
+  OTidesIHaveReturned,
+  SourcewaterDropletSkill,
+} from "../characters/hydro/neuvillette.gts";
+import {
+  Oceanborne,
+  Stormbreaker,
+  Tidecaller,
+  Wavestrider,
+} from "../characters/electro/beidou.gts";
+import {
+  GleamingSpearGuardianStance,
+  HeronStrike,
+  SacredRiteHeronsSanctum,
+  SacredRiteWagtailsTide,
+} from "../characters/hydro/candace.gts";
+import {
+  HolisticRevivification,
+  TheClassicsOfAcupuncture,
+  UniversalDiagnosis,
+} from "../characters/dendro/baizhu.gts";
 import { RaidenShogun } from "../characters/electro/raiden_shogun.gts";
-import { AbiogenesisSolarIsotoma, FavoniusBladeworkWeiss, RiteOfProgenitureTectonicTide } from "../characters/geo/albedo.gts";
+import {
+  AbiogenesisSolarIsotoma,
+  FavoniusBladeworkWeiss,
+  RiteOfProgenitureTectonicTide,
+} from "../characters/geo/albedo.gts";
 
 /**
  * @id 116102
@@ -32,12 +74,14 @@ define card {
       when :( :e.switchInfo.from?.id === :self.master.id );
       :consumeNightsoul("@master");
       :summon(TurboTwirlyLetItRip);
-    }
+    };
     skill {
       id 1161021;
       cost DiceType.Void, 1;
       :consumeNightsoul("@master");
-      const field = :$(`my combat status with definition id ${TurboDrillField}`);
+      const field = :$(
+        `my combat status with definition id ${TurboDrillField}`,
+      );
       if (field) {
         :damage(DamageType.Geo, 3);
         :damage(DamageType.Piercing, 2, "opp next");
@@ -47,9 +91,9 @@ define card {
         :damage(DamageType.Piercing, 1, "opp next");
       }
       :emitCustomEvent(TurboTwirlyTriggered);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 216031
@@ -67,19 +111,21 @@ define card {
   talent Zhongli {
     on enter {
       :useSkill(DominusLapidisStrikingStone);
-    }
+    };
     on increaseDamage {
       when :{
-        return :self.master.health >= 7 &&
-        (:e.source.definition.id === Zhongli ||
-          :e.type === DamageType.Geo &&
-          :e.source.definition.type === "summon")
+        return (
+          :self.master.health >= 7 &&
+          (:e.source.definition.id === Zhongli ||
+            (:e.type === DamageType.Geo &&
+              :e.source.definition.type === "summon"))
+        );
       };
       listenTo samePlayer;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 22053
@@ -96,7 +142,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 3);
   :createHandCard(MistBubbleSlime);
-}
+};
 
 /**
  * @id 1604
@@ -110,8 +156,10 @@ define character {
   tags geo, sword, mondstadt;
   health 10;
   energy 2;
-  skills FavoniusBladeworkWeiss, AbiogenesisSolarIsotoma, RiteOfProgenitureTectonicTide;
-}
+  skills FavoniusBladeworkWeiss,
+  AbiogenesisSolarIsotoma,
+  RiteOfProgenitureTectonicTide;
+};
 /**
  * @id 1210
  * @name 那维莱特
@@ -124,8 +172,12 @@ define character {
   tags hydro, catalyst, fontaine, ousia;
   health 10;
   energy 2;
-  skills AsWaterSeeksEquilibrium, OTearsIShallRepay, OTidesIHaveReturned, EquitableJudgment, SourcewaterDropletSkill;
-}
+  skills AsWaterSeeksEquilibrium,
+  OTearsIShallRepay,
+  OTidesIHaveReturned,
+  EquitableJudgment,
+  SourcewaterDropletSkill;
+};
 
 /**
  * @id 1405
@@ -140,8 +192,7 @@ define character {
   health 10;
   energy 3;
   skills Oceanborne, Tidecaller, Stormbreaker, Wavestrider;
-}
-
+};
 
 /**
  * @id 1207
@@ -155,8 +206,11 @@ define character {
   tags hydro, pole, sumeru;
   health 10;
   energy 2;
-  skills GleamingSpearGuardianStance, SacredRiteHeronsSanctum, SacredRiteWagtailsTide, HeronStrike;
-}
+  skills GleamingSpearGuardianStance,
+  SacredRiteHeronsSanctum,
+  SacredRiteWagtailsTide,
+  HeronStrike;
+};
 
 /**
  * @id 1705
@@ -171,7 +225,7 @@ define character {
   health 10;
   energy 2;
   skills TheClassicsOfAcupuncture, UniversalDiagnosis, HolisticRevivification;
-}
+};
 
 /**
  * @id 2205
@@ -185,8 +239,11 @@ define character {
   tags hydro, monster, hilichurl;
   health 10;
   energy 2;
-  skills WhirlingScythe, SlashOfSurgingTides, BubblefloatBlitz, SlashOfSurgingTidesPassive;
-}
+  skills WhirlingScythe,
+  SlashOfSurgingTides,
+  BubblefloatBlitz,
+  SlashOfSurgingTidesPassive;
+};
 
 /**
  * @id 14073
@@ -202,8 +259,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 3);
   :gainEnergy(2, "all my characters and not @self");
-}
-
+};
 
 /**
  * @id 214071
@@ -222,6 +278,6 @@ define card {
   talent RaidenShogun {
     on enter {
       :useSkill(SecretArtMusouShinsetsu);
-    }
-  }
-}
+    };
+  };
+};

@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111073
@@ -29,13 +38,18 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Cryo, 1);
-  }
+  };
   on increaseDamaged {
-    when :( !:e.target.isMine() && ([DamageType.Cryo, DamageType.Physical] as DamageType[]).includes(:e.type) );
+    when :(
+      !:e.target.isMine() &&
+        ([DamageType.Cryo, DamageType.Physical] as DamageType[]).includes(
+          :e.type,
+        )
+    );
     listenTo all;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 111072
@@ -53,9 +67,12 @@ define combatStatus {
   };
   on roundEnd {
     :setVariable("noUsageEffect", 1);
-  }
+  };
   on increaseDamage {
-    when :( :e.via.caller.definition.type === "character" && :e.type === DamageType.Cryo );
+    when :(
+      :e.via.caller.definition.type === "character" &&
+        :e.type === DamageType.Cryo
+    );
     usage 2 {
       autoDecrease false;
     };
@@ -63,10 +80,10 @@ define combatStatus {
     if (:e.viaSkillType("normal") && :getVariable("noUsageEffect")) {
       :setVariable("noUsageEffect", 0);
     } else {
-      :consumeUsage()
+      :consumeUsage();
     }
-  }
-}
+  };
+};
 
 /**
  * @id 111071
@@ -79,11 +96,14 @@ define combatStatus {
   id 111071 as IcyQuill;
   conflictWith 111072;
   on increaseDamage {
-    when :( :e.via.caller.definition.type === "character" && :e.type === DamageType.Cryo );
+    when :(
+      :e.via.caller.definition.type === "character" &&
+        :e.type === DamageType.Cryo
+    );
     usage 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 11071
@@ -97,7 +117,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 11072
@@ -112,11 +132,10 @@ define skill {
   :damage(DamageType.Cryo, 2);
   if (:self.hasEquipment(MysticalAbandon)) {
     :combatStatus(IcyQuill01);
-  }
-  else {
+  } else {
     :combatStatus(IcyQuill);
   }
-}
+};
 
 /**
  * @id 11073
@@ -131,7 +150,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 1);
   :summon(TalismanSpirit);
-}
+};
 
 /**
  * @id 1107
@@ -146,7 +165,7 @@ define character {
   health 10;
   energy 2;
   skills DawnstarPiercer, SpringSpiritSummoning, DivineMaidensDeliverance;
-}
+};
 
 /**
  * @id 211071
@@ -164,6 +183,6 @@ define card {
   talent Shenhe {
     on enter {
       :useSkill(SpringSpiritSummoning);
-    }
-  }
-}
+    };
+  };
+};

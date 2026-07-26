@@ -1,19 +1,26 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  card,
+  DamageType,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 113081
@@ -30,8 +37,8 @@ define status {
       append 2;
     };
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 113082
@@ -48,11 +55,11 @@ define status {
     when :( :e.isChargedAttack() && :e.canDeductCostOfType(DiceType.Pyro) );
     usage perRound, 1;
     :e.deductCost(DiceType.Pyro, 1);
-  }
+  };
   on endPhase {
     :characterStatus(ScarletSeal, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 13081
@@ -66,7 +73,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Pyro, 1);
-}
+};
 
 /**
  * @id 13082
@@ -80,7 +87,7 @@ define skill {
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 3);
   :characterStatus(ScarletSeal);
-}
+};
 
 /**
  * @id 13083
@@ -96,7 +103,7 @@ define skill {
   :damage(DamageType.Pyro, 4);
   :characterStatus(ScarletSeal);
   :characterStatus(Brilliance);
-}
+};
 
 /**
  * @id 1308
@@ -111,7 +118,7 @@ define character {
   health 10;
   energy 2;
   skills SealOfApproval, SignedEdict, DoneDeal;
-}
+};
 
 /**
  * @id 213081
@@ -131,18 +138,18 @@ define card {
     variable triggerSeal, 0;
     on enter {
       :useSkill(SealOfApproval);
-    }
+    };
     on increaseSkillDamage {
       when :( :e.viaChargedAttack() && :e.target.health <= 6 );
       :e.increaseDamage(1);
       if (:self.master.hasStatus(ScarletSeal)) {
         :setVariable("triggerSeal", 1);
       }
-    }
+    };
     on useSkill {
       when :( :getVariable("triggerSeal") );
       :drawCards(1);
       :setVariable("triggerSeal", 0);
-    }
-  }
-}
+    };
+  };
+};

@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 113053
@@ -29,17 +38,17 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     usage 3;
     :damage(DamageType.Pyro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 113051
@@ -54,13 +63,13 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     usage 3;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 113052
@@ -75,8 +84,8 @@ define combatStatus {
   on useSkill {
     when :( :e.skill.caller.definition.id !== Yoimiya );
     :damage(DamageType.Pyro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 13051
@@ -90,7 +99,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 13052
@@ -105,11 +114,10 @@ define skill {
   noEnergy;
   if (:self.hasEquipment(NaganoharaMeteorSwarm)) {
     :characterStatus(NiwabiEnshou01);
-  }
-  else {
+  } else {
     :characterStatus(NiwabiEnshou);
   }
-}
+};
 
 /**
  * @id 13053
@@ -124,7 +132,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Pyro, 3);
   :combatStatus(AurousBlaze);
-}
+};
 
 /**
  * @id 1305
@@ -139,7 +147,7 @@ define character {
   health 10;
   energy 3;
   skills FireworkFlareup, NiwabiFiredance, RyuukinSaxifrage;
-}
+};
 
 /**
  * @id 213051
@@ -157,6 +165,6 @@ define card {
   talent Yoimiya {
     on enter {
       :useSkill(NiwabiFiredance);
-    }
-  }
-}
+    };
+  };
+};

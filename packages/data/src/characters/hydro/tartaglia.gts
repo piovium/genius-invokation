@@ -13,7 +13,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, card, character, combatStatus, DamageType, DiceType, skill, status, type StatusHandle } from "@gi-tcg/core/builder";
+import {
+  $,
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type StatusHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 112042
@@ -32,18 +42,18 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.target.hasStatus(Riptide) );
     :e.increaseDamage(1);
-  }
+  };
   // 此处使用 increaseSkillDamage; 因为官方实现中，此穿透伤害是与增伤同时发生的，而非“使用技能后”
   on increaseSkillDamage {
     when :( :e.target.hasStatus(Riptide) );
     usage perRound, 2;
     :damage(DamageType.Piercing, 1, "opp next");
-  }
-}
+  };
+};
 
 /**
  * @id 112041
@@ -54,7 +64,7 @@ define status {
 define status {
   id 112041 as RangedStance;
   conflictWith 112042;
-}
+};
 
 /**
  * @id 112043
@@ -75,15 +85,15 @@ define status {
     } else {
       :combatStatus(Riptide2);
     }
-  }
-}
+  };
+};
 
 define combatStatus {
   id 112044 as private Riptide2;
   once switchActive {
     :characterStatus(Riptide, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 12041
@@ -100,7 +110,7 @@ define skill {
   if (:skillInfo.charged) {
     :characterStatus(Riptide, "opp active");
   }
-}
+};
 
 /**
  * @id 12042
@@ -115,7 +125,7 @@ define skill {
   :characterStatus(MeleeStance);
   :damage(DamageType.Hydro, 2);
   :characterStatus(Riptide, "opp active");
-}
+};
 
 /**
  * @id 12043
@@ -137,7 +147,7 @@ define skill {
   } else {
     :damage(DamageType.Hydro, 7);
   }
-}
+};
 
 /**
  * @id 12044
@@ -151,16 +161,16 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(RangedStance);
-    }
+    };
     on revive {
       :characterStatus(RangedStance);
-    }
+    };
     on dispose {
       when :( :e.entity.definition.id === MeleeStance );
       :characterStatus(RangedStance);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 12045
@@ -172,9 +182,8 @@ define skill {
   id 12045 as private RangedStanceSkill;
   skillType passive {
     reserved;
-  }
-}
-
+  };
+};
 
 /**
  * @id 12046
@@ -186,7 +195,7 @@ define skill {
   id 12046 as private UnknownSkill;
   skillType passive;
   reserved;
-}
+};
 
 /**
  * @id 1204
@@ -200,8 +209,11 @@ define character {
   tags hydro, bow, fatui;
   health 10;
   energy 3;
-  skills CuttingTorrent, FoulLegacyRagingTide, HavocObliteration, TideWithholder;
-}
+  skills CuttingTorrent,
+  FoulLegacyRagingTide,
+  HavocObliteration,
+  TideWithholder;
+};
 
 /**
  * @id 212041
@@ -219,10 +231,10 @@ define card {
   talent Tartaglia {
     on enter {
       :useSkill(FoulLegacyRagingTide);
-    }
+    };
     on endPhase {
       when :( :$(`opp active has status with definition id ${Riptide}`) );
       :damage(DamageType.Piercing, 1, "opp active");
-    }
-  }
-}
+    };
+  };
+};

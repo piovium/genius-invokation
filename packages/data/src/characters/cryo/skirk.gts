@@ -1,19 +1,30 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, type SkillHandle, DiceType, Reaction, originalDiceCostOfCard, $ } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  card,
+  DamageType,
+  type SkillHandle,
+  DiceType,
+  Reaction,
+  originalDiceCostOfCard,
+  $,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111162
@@ -28,25 +39,30 @@ define status {
   since "v6.3.0";
   duration 1;
   on deductVoidDiceSkill {
-    when :( :e.isSkillType("normal") && :self.master.getVariable("serpentsSubtlety") );
-    const costSubtelty = Math.min(2, :self.master.getVariable("serpentsSubtlety"));
+    when :(
+      :e.isSkillType("normal") && :self.master.getVariable("serpentsSubtlety")
+    );
+    const costSubtelty = Math.min(
+      2,
+      :self.master.getVariable("serpentsSubtlety"),
+    );
     :self.master.addVariable("serpentsSubtlety", -costSubtelty);
     :e.deductVoidCost(costSubtelty);
-  }
+  };
   on modifySkillDamageType {
     when :( :e.viaSkillType("normal") );
     :e.changeDamageType(DamageType.Cryo);
-  }
+  };
   on enter {
     :transformDefinition(:self.master, Skirk01);
-  }
+  };
   on selfDispose {
     const ch = :$(`my character with definition id ${Skirk01}`);
     if (ch) {
       :transformDefinition(ch, Skirk);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 111164
@@ -59,8 +75,8 @@ define status {
   since "v6.3.0";
   once increaseSkillDamage {
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 111161
@@ -75,16 +91,18 @@ define card {
   addTarget $.my.character.def(Skirk);
   on actionPhase {
     :disposeCard(:self);
-    :$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`)
-      ?.addVariableWithMax("serpentsSubtlety", 1, 7);
-  }
+    :$(
+      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    )?.addVariableWithMax("serpentsSubtlety", 1, 7);
+  };
   on switchActive {
     :disposeCard(:self);
-    :$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`)
-      ?.addVariableWithMax("serpentsSubtlety", 1, 7);
-  }
+    :$(
+      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    )?.addVariableWithMax("serpentsSubtlety", 1, 7);
+  };
   :characterStatus(SevenphaseFlash, "@targets.0");
-}
+};
 
 /**
  * @id 111163
@@ -100,10 +118,12 @@ define card {
   const hand = :query($.my.hand.cost(3));
   if (hand) {
     :disposeCard(hand);
-    const skirk = :query($.union($.my.character.def(Skirk), $.my.character.def(Skirk01)));
+    const skirk = :query(
+      $.union($.my.character.def(Skirk), $.my.character.def(Skirk01)),
+    );
     skirk?.addVariableWithMax("serpentsSubtlety", 2, 7);
   }
-}
+};
 
 /**
  * @id 11161
@@ -117,7 +137,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 11162
@@ -133,7 +153,7 @@ define skill {
   :self.addVariableWithMax("serpentsSubtlety", 2, 7);
   :createHandCard(MutualWeaponsMentorship);
   :self.setVariable("canE", 0);
-}
+};
 
 /**
  * @id 11165
@@ -147,15 +167,17 @@ define skill {
   cost DiceType.Cryo, 1;
   void 0;
   // 假定（大抵确实如此）先转换基础骰子再转换万能骰子
-  const nonOmniCount =  :player.dice.filter((d) => d !== DiceType.Omni).length;
+  const nonOmniCount = :player.dice.filter((d) => d !== DiceType.Omni).length;
   const convertCount = Math.min(2, nonOmniCount);
   :convertDice(DiceType.Cryo, convertCount);
-  const hands = :player.hands.filter((card) => card.diceCost() === 0).slice(0, 2);
+  const hands = :player.hands
+    .filter((card) => card.diceCost() === 0)
+    .slice(0, 2);
   if (hands.length > 0) {
     :disposeCard(...hands);
     :self.addVariableWithMax("serpentsSubtlety", hands.length, 7);
   }
-}
+};
 
 /**
  * @id 11163
@@ -176,7 +198,7 @@ define skill {
     :damage(DamageType.Piercing, 2, "opp standby");
   }
   :damage(DamageType.Cryo, subtilty);
-}
+};
 
 /**
  * @id 11164
@@ -191,18 +213,27 @@ define skill {
     variable serpentsSubtlety, 0;
     variable canE, 1;
     on dealReaction {
-      when :( ([Reaction.Frozen, Reaction.SwirlCryo, Reaction.Superconduct, Reaction.CrystallizeCryo] as Reaction[]).includes(:e.type) );
+      when :(
+        (
+          [
+            Reaction.Frozen,
+            Reaction.SwirlCryo,
+            Reaction.Superconduct,
+            Reaction.CrystallizeCryo,
+          ] as Reaction[]
+        ).includes(:e.type)
+      );
       listenTo samePlayer;
       usage perRound, 3 {
         name "usagePerRound1";
       };
       :createHandCard(VoidRift);
-    }
+    };
     on roundEnd {
       :setVariable("canE", 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 11167
@@ -215,8 +246,8 @@ define skill {
   id 11167 as ReasonBeyondReason01;
   skillType passive {
     reserved;
-  }
-}
+  };
+};
 
 /**
  * @id 1116
@@ -232,13 +263,13 @@ define character {
   energy 0;
   specialEnergy "serpentsSubtlety", 7;
   skills HavocSunder, HavocWarp, HavocRuin, ReasonBeyondReason;
-}
+};
 
 /**
  * @id 6605
  * @name 丝柯克
  * @description
- * 
+ *
  */
 define character {
   id 6605 as Skirk01;
@@ -248,7 +279,7 @@ define character {
   energy 0;
   specialEnergy "serpentsSubtlety", 7;
   skills HavocSunder, HavocWarp, HavocExtinction, ReasonBeyondReason;
-}
+};
 
 /**
  * @id 211161
@@ -265,20 +296,24 @@ define card {
   talent [Skirk, Skirk01], none {
     variable usagePerRound, 1;
     on playCard {
-      when :( :getVariable("usagePerRound") && :e.card.definition.id === VoidRift );
+      when :(
+        :getVariable("usagePerRound") && :e.card.definition.id === VoidRift
+      );
       :damage(DamageType.Cryo, 1, "opp active");
       :setVariable("usagePerRound", 0);
-    }
+    };
     on disposeCard {
-      when :( :getVariable("usagePerRound") && :e.entity.definition.id === VoidRift );
+      when :(
+        :getVariable("usagePerRound") && :e.entity.definition.id === VoidRift
+      );
       :damage(DamageType.Cryo, 1, "opp active");
       :setVariable("usagePerRound", 0);
-    }
+    };
     on roundEnd {
       :setVariable("usagePerRound", 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 11166
@@ -291,5 +326,5 @@ define skill {
   id 11166 as ReasonBeyondReason02;
   skillType passive {
     reserved;
-  }
-}
+  };
+};

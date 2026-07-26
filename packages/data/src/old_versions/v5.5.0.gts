@@ -1,4 +1,10 @@
-import { card, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 import { BurningFlame, CatalyzingField, DendroCore } from "../commons.gts";
 
 /**
@@ -13,7 +19,11 @@ define card {
   until "v5.5.0";
   cost DiceType.Dendro, 1;
   tags resonance;
-  filter :( :$(`my combat status with definition id ${DendroCore} or my combat status with definition id ${CatalyzingField} or my summon with definition id ${BurningFlame}`) );
+  filter :(
+    :$(
+      `my combat status with definition id ${DendroCore} or my combat status with definition id ${CatalyzingField} or my summon with definition id ${BurningFlame}`,
+    )
+  );
   if (:$(`my combat status with definition id ${DendroCore}`)) {
     :damage(DamageType.Hydro, 1, "opp active");
   }
@@ -23,7 +33,7 @@ define card {
   if (:$(`my summon with definition id ${BurningFlame}`)) {
     :damage(DamageType.Pyro, 1, "opp active");
   }
-}
+};
 
 /**
  * @id 112083
@@ -38,8 +48,8 @@ define status {
   on endPhase {
     usage 1;
     :damage(DamageType.Hydro, 3, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 12083
@@ -55,4 +65,4 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
   :characterStatus(LingeringAeon, "opp active");
-}
+};

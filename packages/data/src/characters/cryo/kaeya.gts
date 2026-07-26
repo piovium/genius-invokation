@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111031
@@ -27,8 +35,8 @@ define combatStatus {
   on switchActive {
     usage 3;
     :damage(DamageType.Cryo, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 11031
@@ -42,7 +50,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 11032
@@ -55,7 +63,7 @@ define skill {
   skillType elemental;
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 3);
-}
+};
 
 /**
  * @id 11033
@@ -70,7 +78,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 1);
   :combatStatus(Icicle);
-}
+};
 
 /**
  * @id 1103
@@ -85,7 +93,7 @@ define character {
   health 10;
   energy 2;
   skills CeremonialBladework, Frostgnaw, GlacialWaltz;
-}
+};
 
 /**
  * @id 211031
@@ -103,11 +111,11 @@ define card {
   talent Kaeya {
     on enter {
       :useSkill(Frostgnaw);
-    }
+    };
     on useSkill {
       when :( :e.skill.definition.id === Frostgnaw );
       usage perRound, 1;
       :heal(2, "@master");
-    }
-  }
-}
+    };
+  };
+};

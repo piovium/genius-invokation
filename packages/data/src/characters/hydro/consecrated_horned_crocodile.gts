@@ -1,19 +1,25 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+} from "@gi-tcg/core/builder";
 import { BonecrunchersEnergyBlock } from "../../cards/event/other.gts";
 
 /**
@@ -28,7 +34,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 22072
@@ -40,11 +46,11 @@ define skill {
   id 22072 as SawtoothedSurge;
   skillType elemental;
   cost DiceType.Hydro, 3;
-  :damage(DamageType.Hydro, 3)
+  :damage(DamageType.Hydro, 3);
   const undrawn = :maxCostHands(1);
   :undrawCards(undrawn, "bottom");
   :createHandCard(BonecrunchersEnergyBlock);
-}
+};
 
 /**
  * @id 22073
@@ -58,14 +64,16 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 4);
-  const blocks = :player.hands.filter((card) => card.definition.id === BonecrunchersEnergyBlock).slice(0, 3);
+  const blocks = :player.hands
+    .filter((card) => card.definition.id === BonecrunchersEnergyBlock)
+    .slice(0, 3);
   :disposeCard(...blocks);
   const target = :$(`my characters order by health - maxHealth limit 1`);
   if (target) {
     :heal(blocks.length, target);
     :increaseMaxHealth(blocks.length, target);
   }
-}
+};
 
 /**
  * @id 22074
@@ -79,13 +87,13 @@ define skill {
     on playCard {
       when :( :e.card.definition.id === BonecrunchersEnergyBlock );
       :heal(1, "my characters order by health - maxHealth limit 1");
-    }
+    };
     on disposeCard {
       when :( :e.entity.definition.id === BonecrunchersEnergyBlock );
       :heal(1, "my characters order by health - maxHealth limit 1");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2207
@@ -100,7 +108,7 @@ define character {
   health 11;
   energy 2;
   skills FangBite, SawtoothedSurge, ReptilianRage, ConsecratedSenses;
-}
+};
 
 /**
  * @id 222071
@@ -118,10 +126,10 @@ define card {
   talent ConsecratedHornedCrocodile, none {
     on enter {
       :createHandCard(BonecrunchersEnergyBlock);
-    }
+    };
     on playCard {
       when :( :e.card.definition.id === BonecrunchersEnergyBlock );
       :heal(1, "my characters order by health - maxHealth limit 1");
-    }
-  }
-}
+    };
+  };
+};

@@ -1,19 +1,30 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Aura, card, character, combatStatus, DamageType, DiceType, skill, status, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  Aura,
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 115052
@@ -29,8 +40,8 @@ define summon {
   on endPhase {
     usage 3;
     :damage(:self.variables.hintIcon, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 15051
@@ -44,7 +55,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 115051
@@ -61,19 +72,19 @@ define status {
       autoDispose false;
     };
     :e.setFastAction();
-  }
+  };
   on replaceActionBySkill {
     :useSkill(GaryuuBladework);
-  }
+  };
   on modifySkillDamageType {
     when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Anemo);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 115053
@@ -90,19 +101,19 @@ define status {
       autoDispose false;
     };
     :e.setFastAction();
-  }
+  };
   on replaceActionBySkill {
     :useSkill(GaryuuBladework);
-  }
+  };
   on modifySkillDamageType {
     when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Cryo);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 115056
@@ -119,19 +130,19 @@ define status {
       autoDispose false;
     };
     :e.setFastAction();
-  }
+  };
   on replaceActionBySkill {
     :useSkill(GaryuuBladework);
-  }
+  };
   on modifySkillDamageType {
     when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 115054
@@ -148,19 +159,19 @@ define status {
       autoDispose false;
     };
     :e.setFastAction();
-  }
+  };
   on replaceActionBySkill {
     :useSkill(GaryuuBladework);
-  }
+  };
   on modifySkillDamageType {
     when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 115055
@@ -177,19 +188,19 @@ define status {
       autoDispose false;
     };
     :e.setFastAction();
-  }
+  };
   on replaceActionBySkill {
     :useSkill(GaryuuBladework);
-  }
+  };
   on modifySkillDamageType {
     when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 115057
@@ -201,11 +212,14 @@ define status {
 define combatStatus {
   id 115057 as PoeticsOfFuubutsuCryo;
   on increaseDamage {
-    when :( ["character", "summon"].includes(:e.source.definition.type) && :e.type === DamageType.Cryo );
+    when :(
+      ["character", "summon"].includes(:e.source.definition.type) &&
+        :e.type === DamageType.Cryo
+    );
     usage 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 115050
@@ -217,11 +231,14 @@ define combatStatus {
 define combatStatus {
   id 115050 as PoeticsOfFuubutsuElectro;
   on increaseDamage {
-    when :( ["character", "summon"].includes(:e.source.definition.type) && :e.type === DamageType.Electro );
+    when :(
+      ["character", "summon"].includes(:e.source.definition.type) &&
+        :e.type === DamageType.Electro
+    );
     usage 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 115058
@@ -233,11 +250,14 @@ define combatStatus {
 define combatStatus {
   id 115058 as PoeticsOfFuubutsuHydro;
   on increaseDamage {
-    when :( ["character", "summon"].includes(:e.source.definition.type) && :e.type === DamageType.Hydro );
+    when :(
+      ["character", "summon"].includes(:e.source.definition.type) &&
+        :e.type === DamageType.Hydro
+    );
     usage 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 115059
@@ -249,11 +269,14 @@ define combatStatus {
 define combatStatus {
   id 115059 as PoeticsOfFuubutsuPyro;
   on increaseDamage {
-    when :( ["character", "summon"].includes(:e.source.definition.type) && :e.type === DamageType.Pyro );
+    when :(
+      ["character", "summon"].includes(:e.source.definition.type) &&
+        :e.type === DamageType.Pyro
+    );
     usage 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 15052
@@ -289,7 +312,7 @@ define skill {
   }
   :characterStatus(midareRanzan);
   :damage(DamageType.Anemo, 1);
-}
+};
 
 /**
  * @id 15053
@@ -304,13 +327,13 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Anemo, 1);
   :summon(AutumnWhirlwind);
-}
+};
 
 /**
  * @id 15054
  * @name 千早振
  * @description
- * 
+ *
  */
 define skill {
   id 15054 as ChihayaburuPassive;
@@ -318,9 +341,9 @@ define skill {
     on useSkill {
       when :( :e.skill.definition.id === Chihayaburu );
       :switchActive("my next");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1505
@@ -335,7 +358,7 @@ define character {
   health 10;
   energy 2;
   skills GaryuuBladework, Chihayaburu, KazuhaSlash, ChihayaburuPassive;
-}
+};
 
 /**
  * @id 215051
@@ -353,7 +376,7 @@ define card {
   talent KaedeharaKazuha {
     on enter {
       :useSkill(Chihayaburu);
-    }
+    };
     on dealDamage {
       when :( :e.isSwirl() );
       const swirled = :e.isSwirl()!;
@@ -371,6 +394,6 @@ define card {
           :combatStatus(PoeticsOfFuubutsuPyro);
           break;
       }
-    }
-  }
-}
+    };
+  };
+};

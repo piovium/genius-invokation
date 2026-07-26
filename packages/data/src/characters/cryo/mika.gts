@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status, type CombatStatusHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type CombatStatusHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111174
@@ -28,8 +37,8 @@ define status {
   once deductVoidDiceSkill {
     when :( :e.isSkillType("normal") );
     :e.deductVoidCost(2);
-  }
-}
+  };
+};
 
 /**
  * @id 111175
@@ -44,8 +53,8 @@ define status {
   once increaseSkillDamage {
     when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 111171
@@ -64,8 +73,8 @@ define combatStatus {
     if (:$(`my equipment with definition id ${CompanionsCounsel}`)) {
       :characterStatus(PhysicalDmgIncrease01, "@event.skillCaller");
     }
-  }
-}
+  };
+};
 
 /**
  * @id 111172
@@ -81,8 +90,8 @@ define combatStatus {
     when :( :e.isSkillType("normal") );
     usage 2;
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 111173
@@ -98,8 +107,8 @@ define combatStatus {
     when :( :e.type === DamageType.Physical );
     usage 1;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 111176
@@ -115,8 +124,8 @@ define combatStatus {
     when :( :e.isSkillType("normal") );
     usage 2;
     :heal(1, "@event.skillCaller");
-  }
-}
+  };
+};
 
 /**
  * @id 11171
@@ -130,7 +139,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 11172
@@ -144,7 +153,7 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 2);
   :combatStatus(WindOfBlessing);
-}
+};
 
 /**
  * @id 11173
@@ -160,7 +169,7 @@ define skill {
   :heal(1, "all my characters");
   :combatStatus(Eagleplume);
   :combatStatus(EagleplumeBlessing);
-}
+};
 
 /**
  * @id 11174
@@ -176,9 +185,9 @@ define skill {
         name "usagePerRound1";
       };
       :combatStatus(PhysicalDmgIncrease);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1117
@@ -192,8 +201,11 @@ define character {
   tags cryo, pole, mondstadt;
   health 10;
   energy 2;
-  skills SpearOfFavoniusArrowsPassage, StarfrostSwirl, SkyfeatherSong, ReconnaissanceExperience;
-}
+  skills SpearOfFavoniusArrowsPassage,
+  StarfrostSwirl,
+  SkyfeatherSong,
+  ReconnaissanceExperience;
+};
 
 /**
  * @id 211171
@@ -211,6 +223,6 @@ define card {
   talent Mika {
     on enter {
       :useSkill(StarfrostSwirl);
-    }
-  }
-}
+    };
+  };
+};

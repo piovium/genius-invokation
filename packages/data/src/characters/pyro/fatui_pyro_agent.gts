@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 123012
@@ -31,16 +39,16 @@ define status {
   on decreaseDamaged {
     :e.decreaseDamage(1);
     :consumeUsage();
-  }
+  };
   on increaseSkillDamage {
     :e.increaseDamage(1);
     :consumeUsage();
-  }
+  };
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
-  }
-}
+  };
+};
 
 /**
  * @id 123011
@@ -57,12 +65,12 @@ define status {
   on decreaseDamaged {
     :e.decreaseDamage(1);
     :consumeUsage();
-  }
+  };
   on increaseSkillDamage {
     :e.increaseDamage(1);
     :consumeUsage();
-  }
-}
+  };
+};
 
 /**
  * @id 23011
@@ -76,7 +84,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 23012
@@ -91,11 +99,10 @@ define skill {
   :damage(DamageType.Pyro, 1);
   if (:self.hasEquipment(PaidInFull)) {
     :characterStatus(Stealth01);
-  }
-  else {
+  } else {
     :characterStatus(Stealth);
   }
-}
+};
 
 /**
  * @id 23013
@@ -109,7 +116,7 @@ define skill {
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Pyro, 5);
-}
+};
 
 /**
  * @id 23014
@@ -122,9 +129,9 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(Stealth);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2301
@@ -139,7 +146,7 @@ define character {
   health 11;
   energy 2;
   skills Thrust, Prowl, BladeAblaze, StealthMaster;
-}
+};
 
 /**
  * @id 223011
@@ -158,6 +165,6 @@ define card {
   talent FatuiPyroAgent {
     on enter {
       :useSkill(Prowl);
-    }
-  }
-}
+    };
+  };
+};

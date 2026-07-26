@@ -1,15 +1,15 @@
 // Copyright (C) 2026 Piovium Labs
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -31,8 +31,8 @@ define summon {
   on endPhase {
     usage 1;
     :damage(DamageType.Cryo, :getVariable("damageValue"));
-  }
-}
+  };
+};
 
 /**
  * @id 121051
@@ -48,9 +48,9 @@ define card {
   :combatStatus(Shield, "my", {
     overrideVariables: {
       shield: 2,
-    }
+    },
   });
-}
+};
 
 /**
  * @id 221052
@@ -62,10 +62,10 @@ define combatStatus {
   id 221052 as RadiantHuesIcicleInEffect;
   variable damageValue, 1 { append; };
   on playCard {
-    when :( :e.card.definition.id === RadiantHues )
+    when :( :e.card.definition.id === RadiantHues );
     :damage(DamageType.Cryo, :getVariable("damageValue"));
-  } 
-}
+  };
+};
 
 /**
  * @id 121054
@@ -78,7 +78,7 @@ define card {
   since "v6.7.0";
   undiscoverable;
   :combatStatus(RadiantHuesIcicleInEffect);
-}
+};
 
 /**
  * @id 221053
@@ -90,14 +90,14 @@ define combatStatus {
   id 221053 as RadiantHuesEchoesInEffect;
   variable damageValue, 1 { append; };
   on playCard {
-    when :( :e.card.definition.id === RadiantHues )
+    when :( :e.card.definition.id === RadiantHues );
     :summon(RadiantReflection, "my", {
       overrideVariables: {
         damageValue: :getVariable("damageValue"),
-      }
+      },
     });
-  }
-}
+  };
+};
 
 /**
  * @id 121055
@@ -110,7 +110,7 @@ define card {
   since "v6.7.0";
   undiscoverable;
   :combatStatus(RadiantHuesEchoesInEffect);
-}
+};
 
 /**
  * @id 221054
@@ -122,10 +122,10 @@ define combatStatus {
   id 221054 as RadiantHuesManifestationInEffect;
   variable drawValue, 1 { append; };
   on playCard {
-    when :( :e.card.definition.id === RadiantHues )
+    when :( :e.card.definition.id === RadiantHues );
     :drawCards(:getVariable("drawValue"));
-  }
-}
+  };
+};
 
 /**
  * @id 121056
@@ -138,7 +138,7 @@ define card {
   since "v6.7.0";
   undiscoverable;
   :combatStatus(RadiantHuesManifestationInEffect);
-}
+};
 
 /**
  * @id 221055
@@ -150,14 +150,14 @@ define combatStatus {
   id 221055 as RadiantHuesPillarInEffect;
   variable shieldValue, 1 { append; };
   on playCard {
-    when :( :e.card.definition.id === RadiantHues )
+    when :( :e.card.definition.id === RadiantHues );
     :combatStatus(Shield, "my", {
       overrideVariables: {
         shield: :getVariable("shieldValue"),
-      }
+      },
     });
-  }
-}
+  };
+};
 
 /**
  * @id 121057
@@ -170,7 +170,7 @@ define card {
   since "v6.7.0";
   undiscoverable;
   :combatStatus(RadiantHuesPillarInEffect);
-}
+};
 
 /**
  * @id 221056
@@ -182,14 +182,14 @@ define combatStatus {
   id 221056 as RadiantHuesSolidIceInEffect;
   variable layer, 1 { append; };
   on playCard {
-    when :( :e.card.definition.id === RadiantHues )
+    when :( :e.card.definition.id === RadiantHues );
     :characterStatus(BattlePlan, $.my.active, {
       overrideVariables: {
         usage: :getVariable("layer"),
-      }
+      },
     });
-  }
-}
+  };
+};
 
 /**
  * @id 121058
@@ -202,7 +202,7 @@ define card {
   since "v6.7.0";
   undiscoverable;
   :combatStatus(RadiantHuesSolidIceInEffect);
-}
+};
 
 /**
  * @id 221057
@@ -216,8 +216,8 @@ define combatStatus {
   on deductOmniDiceCard {
     when :( :e.action.skill.caller.definition.id === RadiantHues );
     :e.deductOmniCost(:getVariable("reductCount"));
-  }
-}
+  };
+};
 
 /**
  * @id 121059
@@ -230,7 +230,7 @@ define card {
   since "v6.7.0";
   undiscoverable;
   :combatStatus(RadiantHuesSwiftShadowInEffect);
-}
+};
 
 /**
  * @id 121053
@@ -242,7 +242,7 @@ define combatStatus {
   id 121053 as private Untitled13;
   since "v6.7.0";
   reserved;
-}
+};
 
 /**
  * @id 21051
@@ -256,7 +256,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Cryo, 1);
-}
+};
 
 /**
  * @id 21052
@@ -270,16 +270,19 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 1);
   :createPileCards(RadiantHues, 1, "topIndex2");
-  const candidates = :randomSubset([
-    RadiantHuesIcicle,
-    RadiantHuesEchoes,
-    RadiantHuesManifestation,
-    RadiantHuesPillar,
-    RadiantHuesSolidIce,
-    RadiantHuesSwiftShadow,
-  ], 3)
+  const candidates = :randomSubset(
+    [
+      RadiantHuesIcicle,
+      RadiantHuesEchoes,
+      RadiantHuesManifestation,
+      RadiantHuesPillar,
+      RadiantHuesSolidIce,
+      RadiantHuesSwiftShadow,
+    ],
+    3,
+  );
   :selectAndPlay(candidates);
-}
+};
 
 /**
  * @id 21053
@@ -292,9 +295,9 @@ define skill {
   skillType burst;
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Cryo, 4)
-  :createHandCard(RadiantHues)
-}
+  :damage(DamageType.Cryo, 4);
+  :createHandCard(RadiantHues);
+};
 
 /**
  * @id 21054
@@ -307,9 +310,9 @@ define skill {
   skillType passive {
     on battleBegin {
       :createPileCards(RadiantHues, 3, "spaceAround");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2105
@@ -323,8 +326,11 @@ define character {
   tags cryo, monster;
   health 10;
   energy 2;
-  skills SpiritspeakingFrostStar, RadianceInFlux, ChillingIllustration, IridescentSilhouette;
-}
+  skills SpiritspeakingFrostStar,
+  RadianceInFlux,
+  ChillingIllustration,
+  IridescentSilhouette;
+};
 
 /**
  * @id 221051
@@ -342,15 +348,15 @@ define card {
   talent WaywardHermeticSpiritspeaker, none {
     on enter {
       :createHandCard(RadiantHues);
-    }
+    };
     on playCard {
       when :( :e.card.definition.id === RadiantHues );
       usage perRound, 1;
       :combatStatus(Shield, "my", {
         overrideVariables: {
           shield: 2,
-        }
+        },
       });
-    }
-  }
-}
+    };
+  };
+};

@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 113094
@@ -25,14 +35,16 @@ define combatStatus {
   id 113094 as FierySanctumsProtection;
   tags barrier;
   on decreaseDamaged {
-    when :( :e.target.isActive() &&
-        :$(`my standby characters with definition id ${Dehya}`) );
+    when :(
+      :e.target.isActive() &&
+        :$(`my standby characters with definition id ${Dehya}`)
+    );
     usage 1 {
       autoDispose false;
     };
     :e.decreaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 113093
@@ -48,17 +60,19 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Pyro, 1);
-  }
+  };
   on enter {
     :combatStatus(FierySanctumsProtection);
-  }
+  };
   on actionPhase {
     :combatStatus(FierySanctumsProtection);
-  }
+  };
   on selfDispose {
-    :$(`my combat status with definition id ${FierySanctumsProtection}`)?.dispose();
-  }
-}
+    :$(
+      `my combat status with definition id ${FierySanctumsProtection}`,
+    )?.dispose();
+  };
+};
 
 /**
  * @id 113091
@@ -69,7 +83,7 @@ define summon {
 define status {
   id 113091 as BlazingLionessFlamemanesFist;
   reserved;
-}
+};
 
 /**
  * @id 13095
@@ -82,7 +96,7 @@ define skill {
   skillType burst;
   prepared;
   :damage(DamageType.Pyro, 3);
-}
+};
 
 /**
  * @id 113092
@@ -93,7 +107,7 @@ define skill {
 define status {
   id 113092 as BlazingLionessIncinerationDrive;
   prepare IncinerationDrive;
-}
+};
 
 /**
  * @id 13091
@@ -107,7 +121,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 13092
@@ -123,7 +137,7 @@ define skill {
     :damage(DamageType.Pyro, 1);
   }
   :summon(FierySanctumField);
-}
+};
 
 /**
  * @id 13093
@@ -138,13 +152,13 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Pyro, 3);
   :characterStatus(BlazingLionessIncinerationDrive);
-}
+};
 
 /**
  * @id 13096
  * @name 净焰剑狱·赤鬃之血
  * @description
- * 
+ *
  */
 define skill {
   id 13096 as FierySanctumRedmanesBlood;
@@ -152,16 +166,18 @@ define skill {
     on damaged {
       when :( :e.target.id !== :self.id );
       listenTo samePlayer;
-      const protection = :$(`my combat status with definition id ${FierySanctumsProtection}`);
+      const protection = :$(
+        `my combat status with definition id ${FierySanctumsProtection}`,
+      );
       if (protection?.getVariable("usage") === 0) {
         protection.dispose();
         if (:self.health >= 7) {
           :damage(DamageType.Piercing, 1, "@self");
         }
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1309
@@ -175,8 +191,12 @@ define character {
   tags pyro, claymore, sumeru, eremite;
   health 10;
   energy 2;
-  skills SandstormAssault, MoltenInferno, LeonineBite, IncinerationDrive, FierySanctumRedmanesBlood;
-}
+  skills SandstormAssault,
+  MoltenInferno,
+  LeonineBite,
+  IncinerationDrive,
+  FierySanctumRedmanesBlood;
+};
 
 /**
  * @id 213091
@@ -194,10 +214,10 @@ define card {
   talent Dehya {
     on enter {
       :useSkill(MoltenInferno);
-    }
+    };
     on endPhase {
       when :( :self.master.health <= 6 );
       :heal(2, "@master");
-    }
-  }
-}
+    };
+  };
+};

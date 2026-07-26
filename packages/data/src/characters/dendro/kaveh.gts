@@ -1,23 +1,36 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, customEvent, DamageType, DiceType, skill, status, type CardHandle, type EntityState } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  customEvent,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type CardHandle,
+  type EntityState,
+} from "@gi-tcg/core/builder";
 import { BountifulCore } from "../hydro/nilou.gts";
 import { DendroCore } from "../../commons.gts";
 
-export const ShouldTriggerTalent = customEvent<EntityState>("kaveh/shouldTriggerTalent");
+export const ShouldTriggerTalent = customEvent<EntityState>(
+  "kaveh/shouldTriggerTalent",
+);
 /**
  * @id 117082
  * @name 迸发扫描
@@ -28,21 +41,27 @@ export const ShouldTriggerTalent = customEvent<EntityState>("kaveh/shouldTrigger
 define combatStatus {
   id 117082 as BurstScan;
   on beforeAction {
-    when :( :$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`) );
+    when :(
+      :$(
+        `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`,
+      )
+    );
     listenTo all;
     :disposeCard(:player.pile[0]);
-  }
+  };
   on disposeCard {
     when :( :e.via?.caller.id === :self.id );
     usage 1 {
       append 3;
     };
-    :$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`)?.consumeUsage(1);
+    :$(
+      `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`,
+    )?.consumeUsage(1);
     const cost = :e.entity.diceCost();
     :damage(DamageType.Dendro, cost);
     :emitCustomEvent(ShouldTriggerTalent, :e.entity.latest());
-  }
-}
+  };
+};
 
 /**
  * @id 117081
@@ -58,16 +77,16 @@ define status {
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
+  };
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Dendro);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     :combatStatus(BurstScan);
-  }
-}
+  };
+};
 
 /**
  * @id 117083
@@ -80,8 +99,8 @@ define combatStatus {
   once deductOmniDiceCard {
     when :( :e.action.skill.caller.definition.tags.includes("place") );
     :e.deductOmniCost(2);
-  }
-}
+  };
+};
 
 /**
  * @id 17081
@@ -95,7 +114,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 17082
@@ -109,7 +128,7 @@ define skill {
   cost DiceType.Dendro, 3;
   :damage(DamageType.Dendro, 2);
   :combatStatus(BurstScan);
-}
+};
 
 /**
  * @id 17083
@@ -125,9 +144,9 @@ define skill {
   :damage(DamageType.Dendro, 3);
   :characterStatus(MehraksAssistance, "@self");
   :combatStatus(BurstScan, "my", {
-      overrideVariables: { usage: 2 }
-    });
-}
+    overrideVariables: { usage: 2 },
+  });
+};
 
 /**
  * @id 1708
@@ -142,7 +161,7 @@ define character {
   health 12;
   energy 2;
   skills SchematicSetup, ArtisticIngenuity, PaintedDome;
-}
+};
 
 /**
  * @id 217081
@@ -160,7 +179,7 @@ define card {
   talent Kaveh {
     on enter {
       :useSkill(ArtisticIngenuity);
-    }
+    };
     on ShouldTriggerTalent {
       listenTo samePlayer;
       usage perRound, 1;
@@ -169,6 +188,6 @@ define card {
       if (cardDef.tags.includes("place")) {
         :combatStatus(TheArtOfBudgetingInEffect);
       }
-    }
-  }
-}
+    };
+  };
+};

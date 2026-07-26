@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 117042
@@ -35,8 +44,8 @@ define summon {
       :damage(DamageType.Dendro, 1);
       :heal(1, "my characters order by health - maxHealth limit 1");
     }
-  }
-}
+  };
+};
 
 /**
  * @id 117041
@@ -53,8 +62,8 @@ define summon {
     usage 2;
     :damage(DamageType.Dendro, 1);
     :heal(1, "my characters order by health - maxHealth limit 1");
-  }
-}
+  };
+};
 
 /**
  * @id 117043
@@ -69,8 +78,8 @@ define combatStatus {
     usage 3;
     :damage(DamageType.Dendro, 1);
     :heal(1, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 17041
@@ -84,7 +93,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 17042
@@ -98,11 +107,10 @@ define skill {
   cost DiceType.Dendro, 3;
   if (:self.hasEquipment(Beneficent)) {
     :summon(YueguiThrowingMode01);
-  }
-  else {
+  } else {
     :summon(YueguiThrowingMode);
   }
-}
+};
 
 /**
  * @id 17043
@@ -117,7 +125,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Dendro, 1);
   :combatStatus(AdeptalLegacy);
-}
+};
 
 /**
  * @id 1704
@@ -132,7 +140,7 @@ define character {
   health 10;
   energy 2;
   skills TossNTurnSpear, RaphanusSkyCluster, MoonjadeDescent;
-}
+};
 
 /**
  * @id 217041
@@ -150,6 +158,6 @@ define card {
   talent Yaoyao {
     on enter {
       :useSkill(RaphanusSkyCluster);
-    }
-  }
-}
+    };
+  };
+};

@@ -28,8 +28,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Geo, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 116033
@@ -41,7 +41,7 @@ define status {
   id 116033 as Petrification;
   oneDuration;
   tags disableSkill;
-}
+};
 
 /**
  * @id 116032
@@ -52,7 +52,7 @@ define status {
 define combatStatus {
   id 116032 as JadeShield;
   shield 2;
-}
+};
 
 /**
  * @id 16031
@@ -60,13 +60,13 @@ define combatStatus {
  * @description
  * 造成2点物理伤害。
  */
-define skill { 
+define skill {
   id 16031 as RainOfStone;
   skillType normal;
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 16032
@@ -80,7 +80,7 @@ define skill {
   cost DiceType.Geo, 3;
   :damage(DamageType.Geo, 1);
   :summon(StoneStele);
-}
+};
 
 /**
  * @id 16033
@@ -95,7 +95,7 @@ define skill {
   :damage(DamageType.Geo, 3);
   :summon(StoneStele);
   :combatStatus(JadeShield);
-}
+};
 
 /**
  * @id 16034
@@ -110,7 +110,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Geo, 4);
   :characterStatus(Petrification, $.opp.active);
-}
+};
 
 /**
  * @id 1603
@@ -125,7 +125,7 @@ define character {
   health 12;
   energy 3;
   skills RainOfStone, DominusLapidis, DominusLapidisStrikingStone, PlanetBefall;
-}
+};
 
 /**
  * @id 216031
@@ -143,17 +143,19 @@ define card {
   talent Zhongli {
     on enter {
       :useSkill(DominusLapidisStrikingStone);
-    }
+    };
     on increaseDamage {
       when :{
-        return :self.master.health >= 7 &&
-        (:e.source.definition.id === Zhongli ||
-          :e.type === DamageType.Geo &&
-          :e.source.definition.type === "summon")
+        return (
+          :self.master.health >= 7 &&
+          (:e.source.definition.id === Zhongli ||
+            (:e.type === DamageType.Geo &&
+              :e.source.definition.type === "summon"))
+        );
       };
       listenTo samePlayer;
       usage perRound, 3;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};

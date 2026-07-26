@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  card,
+  DamageType,
+  DiceType,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 122022
@@ -31,12 +39,15 @@ define status {
   on increaseDamaged {
     when :( :e.type === DamageType.Hydro );
     :e.increaseDamage(1);
-  }
+  };
   on addDice {
-    when :( :e.action.type === "switchActive" && :self.master.id === :e.action.from?.id );
+    when :(
+      :e.action.type === "switchActive" &&
+        :self.master.id === :e.action.from?.id
+    );
     :e.addCost(DiceType.Void, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 122021
@@ -51,10 +62,13 @@ define status {
   conflictWith crossCharacter, 122022;
   duration 2;
   on addDice {
-    when :( :e.action.type === "switchActive" && :self.master.id === :e.action.from?.id );
+    when :(
+      :e.action.type === "switchActive" &&
+        :self.master.id === :e.action.from?.id
+    );
     :e.addCost(DiceType.Void, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 22021
@@ -68,7 +82,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Hydro, 1);
-}
+};
 
 /**
  * @id 22022
@@ -83,11 +97,10 @@ define skill {
   :damage(DamageType.Hydro, 3);
   if (:self.hasEquipment(MirrorCage)) {
     :characterStatus(Refraction01, "opp active");
-  }
-  else {
+  } else {
     :characterStatus(Refraction, "opp active");
   }
-}
+};
 
 /**
  * @id 22023
@@ -101,7 +114,7 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 5);
-}
+};
 
 /**
  * @id 2202
@@ -116,7 +129,7 @@ define character {
   health 10;
   energy 2;
   skills WaterBall, InfluxBlast, RippledReflection;
-}
+};
 
 /**
  * @id 222021
@@ -134,6 +147,6 @@ define card {
   talent MirrorMaiden {
     on enter {
       :useSkill(InfluxBlast);
-    }
-  }
-}
+    };
+  };
+};

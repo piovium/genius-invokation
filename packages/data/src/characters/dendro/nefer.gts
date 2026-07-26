@@ -1,15 +1,15 @@
 // Copyright (C) 2026 Piovium Labs
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -29,9 +29,11 @@ define card {
   cost DiceType.Dendro, 5;
   tags action;
   undiscoverable;
-  addTarget $.my.active.def(Nefer).exclude($.has.typeStatus.tag("disableSkill"));
+  addTarget $.my.active
+    .def(Nefer)
+    .exclude($.has.typeStatus.tag("disableSkill"));
   :useSkill(PhantasmPerformance);
-}
+};
 
 /**
  * @id 117122
@@ -44,13 +46,13 @@ define combatStatus {
   since "v6.7.0";
   once beforeAction {
     const candidates = :maxCostHands(3, {
-      filter: (card) => card.definition.id === SeedsOfDeceit
+      filter: (card) => card.definition.id === SeedsOfDeceit,
     });
     for (const card of candidates) {
       :attachCostReduction(card);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 17121
@@ -64,7 +66,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Dendro, 1);
-}
+};
 
 /**
  * @id 17122
@@ -79,7 +81,7 @@ define skill {
   :damage(DamageType.Dendro, 1);
   :characterStatus(RES, :self);
   :combatStatus(SenetStrategyDanceOfAThousandNightsInEffect);
-}
+};
 
 /**
  * @id 17123
@@ -94,7 +96,7 @@ define skill {
   cost DiceType.Energy, 2;
   const deceitCount = :queryAll($.my.hand.def(SeedsOfDeceit)).length;
   :damage(DamageType.Dendro, 4 + Math.min(deceitCount, 2));
-}
+};
 
 /**
  * @id 17124
@@ -108,16 +110,16 @@ define skill {
   skillType passive {
     on reaction {
       when :(
-        !:e.target.isMine() && 
-        :e.type === Reaction.LunarBloom &&
-        :queryAll($.my.hand.def(SeedsOfDeceit)).length < 3
+        !:e.target.isMine() &&
+          :e.type === Reaction.LunarBloom &&
+          :queryAll($.my.hand.def(SeedsOfDeceit)).length < 3
       );
-      usage perRound, 2 { name usagePerRound1 };
+      usage perRound, 2 { name usagePerRound1; };
       listenTo all;
       :createHandCard(SeedsOfDeceit);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 17125
@@ -130,7 +132,7 @@ define skill {
   id 17125 as MoonsignBenedictionDusklitEaves01;
   skillType passive;
   reserved;
-}
+};
 
 /**
  * @id 17126
@@ -144,7 +146,7 @@ define skill {
   hidden;
   noEnergy;
   :damage(DamageType.Dendro, 4);
-}
+};
 
 /**
  * @id 1712
@@ -158,9 +160,13 @@ define character {
   tags dendro, catalyst, sumeru, nodkrai;
   health 10;
   energy 2;
-  skills StrikingSerpent, SenetStrategyDanceOfAThousandNights, SacredVowTrueEyesPhantasm, MoonsignBenedictionDusklitEaves, PhantasmPerformance;
+  skills StrikingSerpent,
+  SenetStrategyDanceOfAThousandNights,
+  SacredVowTrueEyesPhantasm,
+  MoonsignBenedictionDusklitEaves,
+  PhantasmPerformance;
   enabledLunarReactions Reaction.LunarBloom;
-}
+};
 
 /**
  * @id 217121
@@ -176,21 +182,22 @@ define card {
   since "v6.7.0";
   cost DiceType.Dendro, 3;
   talent Nefer, none {
-    defineSnippet attachCostReductionToSeedsOfDeceit, :{
+    defineSnippet attachCostReductionToSeedsOfDeceit,
+    :{
       const deceitCards = :queryAll($.my.pile.def(SeedsOfDeceit));
       for (const card of deceitCards) {
         :attachCostReduction(card);
       }
-    }
+    };
     on enter {
       :createPileCards(SeedsOfDeceit, 3, "spaceAround");
       :callSnippet.attachCostReductionToSeedsOfDeceit();
-    }
+    };
     on skillDamage {
       when :( :e.via.definition.id === PhantasmPerformance );
       usage perRound, 2;
       :drawCards(1);
       :callSnippet.attachCostReductionToSeedsOfDeceit();
-    }
-  }
-}
+    };
+  };
+};

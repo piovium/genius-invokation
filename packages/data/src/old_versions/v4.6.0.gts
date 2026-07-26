@@ -1,4 +1,10 @@
-import { card, combatStatus, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
+import {
+  card,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+} from "@gi-tcg/core/builder";
 import { UnderseaTreasure } from "../cards/event/other.gts";
 
 /**
@@ -12,7 +18,7 @@ define card {
   until "v4.6.0";
   cost DiceType.Aligned, 1;
   :createPileCards(UnderseaTreasure, 6, "random");
-}
+};
 
 /**
  * @id 112092
@@ -28,8 +34,8 @@ define combatStatus {
   on useSkill {
     when :( :e.isSkillType("normal") );
     :damage(DamageType.Hydro, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 12093
@@ -45,4 +51,4 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Hydro, 1);
   :combatStatus(ExquisiteThrow);
-}
+};

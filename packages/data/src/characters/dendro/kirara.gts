@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, combatStatus, card, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  combatStatus,
+  card,
+  DamageType,
+  DiceType,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 117073
@@ -28,17 +36,18 @@ define combatStatus {
   variable playedCard, 0 {
     visible false;
   };
-  replaceDescription "[GCG_TOKEN_COUNTER]", ((st, self) => self.variables.playedCard);
+  replaceDescription "[GCG_TOKEN_COUNTER]",
+  ((st, self) => self.variables.playedCard);
   on playCard {
     :addVariable("playedCard", 1);
-  }
+  };
   on playCard {
     when :( :getVariable("playedCard") === 2 );
     usage 2;
     :damage(DamageType.Dendro, 1, "my active");
     :setVariable("playedCard", 0);
-  }
-}
+  };
+};
 
 /**
  * @id 117072
@@ -49,7 +58,7 @@ define combatStatus {
 define combatStatus {
   id 117072 as ShieldOfSafeTransport;
   shield 1, Infinity;
-}
+};
 
 /**
  * @id 117071
@@ -67,8 +76,8 @@ define combatStatus {
     };
     :damage(DamageType.Dendro, 2);
     :drawCards(1);
-  }
-}
+  };
+};
 
 /**
  * @id 17071
@@ -82,7 +91,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 17072
@@ -96,9 +105,9 @@ define skill {
   cost DiceType.Dendro, 3;
   :combatStatus(UrgentNekoParcel);
   :combatStatus(ShieldOfSafeTransport, "my", {
-      overrideVariables: { shield: 2 }
-    });
-}
+    overrideVariables: { shield: 2 },
+  });
+};
 
 /**
  * @id 17073
@@ -113,7 +122,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Dendro, 4);
   :combatStatus(CatGrassCardamom, "opp");
-}
+};
 
 /**
  * @id 1707
@@ -128,7 +137,7 @@ define character {
   health 10;
   energy 2;
   skills Boxcutter, MeowteorKick, SecretArtSurpriseDispatch;
-}
+};
 
 /**
  * @id 217071
@@ -146,11 +155,11 @@ define card {
   talent Kirara {
     on enter {
       :useSkill(MeowteorKick);
-    }
+    };
     on deductOmniDiceSwitch {
       when :( :self.master.isActive() );
       usage perRound, 1;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};

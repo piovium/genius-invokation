@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 124031
@@ -28,8 +36,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Electro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 124033
@@ -43,7 +51,7 @@ define status {
   id 124033 as FontemerPearl01;
   tags barrier;
   reserved;
-}
+};
 
 /**
  * @id 124032
@@ -59,7 +67,7 @@ define status {
   variable decreaseDamageFromSummon, 0;
   on roundEnd {
     :setVariable("decreaseDamageFromSummon", 0);
-  }
+  };
   on decreaseDamaged {
     usage 2 {
       autoDecrease false;
@@ -73,12 +81,12 @@ define status {
       }
     }
     :consumeUsage();
-  }
+  };
   on declareEnd {
     when :( :self.master.isActive() );
     :drawCards(1);
-  }
-}
+  };
+};
 
 /**
  * @id 24031
@@ -92,7 +100,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 24032
@@ -106,7 +114,7 @@ define skill {
   skillType elemental;
   cost DiceType.Electro, 3;
   :damage(DamageType.Electro, 3);
-}
+};
 
 /**
  * @id 24033
@@ -122,7 +130,7 @@ define skill {
   :damage(DamageType.Electro, 1);
   :characterStatus(FontemerPearl);
   :summon(ResonantCoralOrb);
-}
+};
 
 /**
  * @id 24034
@@ -135,29 +143,32 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(FontemerPearl);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 24037
  * @name 霰舞鱼群
  * @description
- * 
+ *
  */
 define skill {
   id 24037 as SwirlingSchoolOfFishPassive;
   skillType passive {
     on useSkill {
-      when :( :e.skill.definition.id === SwirlingSchoolOfFish && :self.hasStatus(FontemerPearl) );
+      when :(
+        :e.skill.definition.id === SwirlingSchoolOfFish &&
+          :self.hasStatus(FontemerPearl)
+      );
       usage perRound, 1 {
         name "usagePerRound1";
       };
       const pearl = :self.hasStatus(FontemerPearl)!;
       pearl.addVariable("usage", 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2403
@@ -171,8 +182,12 @@ define character {
   tags electro, monster;
   health 8;
   energy 2;
-  skills TailSweep, SwirlingSchoolOfFish, FontemerHoarthunder, PearlArmor, SwirlingSchoolOfFishPassive;
-}
+  skills TailSweep,
+  SwirlingSchoolOfFish,
+  FontemerHoarthunder,
+  PearlArmor,
+  SwirlingSchoolOfFishPassive;
+};
 
 /**
  * @id 224031
@@ -193,10 +208,10 @@ define card {
       } else {
         :characterStatus(FontemerPearl, "@master", {
           overrideVariables: {
-            usage: 1
-          }
+            usage: 1,
+          },
         });
       }
-    }
-  }
-}
+    };
+  };
+};

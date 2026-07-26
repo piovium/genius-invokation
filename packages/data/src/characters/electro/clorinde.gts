@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 import { BondOfLife } from "../../commons.gts";
 
 /**
@@ -35,27 +43,27 @@ define status {
     if (value > 0) {
       :characterStatus(BondOfLife, "@master", {
         overrideVariables: {
-          usage: value
-        }
+          usage: value,
+        },
       });
     }
-  }
+  };
   on modifySkillDamageType {
     when :( :e.viaSkillType("normal") );
     if (:e.type === DamageType.Physical) {
       :e.changeDamageType(DamageType.Electro);
     }
     :characterStatus(BondOfLife, "@master", {
-        overrideVariables: {
-          usage: 2
-        }
-      });
-  }
+      overrideVariables: {
+        usage: 2,
+      },
+    });
+  };
   on deductVoidDiceSkill {
     when :( :e.action.skill.definition.id === OathOfHuntingShadows );
     :e.deductVoidCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 114122
@@ -72,8 +80,8 @@ define status {
       append 3;
     };
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 14121
@@ -87,7 +95,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 1);
-}
+};
 
 /**
  * @id 14122
@@ -110,7 +118,7 @@ define skill {
     :damage(DamageType.Electro, value);
   }
   :heal(value, "@self");
-}
+};
 
 /**
  * @id 14123
@@ -125,11 +133,11 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 3);
   :characterStatus(BondOfLife, "@self", {
-      overrideVariables: {
-        usage: 4
-      }
-    });
-}
+    overrideVariables: {
+      usage: 4,
+    },
+  });
+};
 
 /**
  * @id 1412
@@ -144,7 +152,7 @@ define character {
   health 10;
   energy 2;
   skills OathOfHuntingShadows, HuntersVigil, LastLightfall;
-}
+};
 
 /**
  * @id 214121
@@ -162,11 +170,11 @@ define card {
   talent Clorinde {
     on enter {
       :useSkill(HuntersVigil);
-    }
+    };
     on useSkill {
       when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Electro)) );
       listenTo samePlayer;
       :characterStatus(DarkshatteringFlameInEffect, "@master");
-    }
-  }
-}
+    };
+  };
+};

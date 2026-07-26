@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, combatStatus, card, DamageType, extension, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  combatStatus,
+  card,
+  DamageType,
+  extension,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111011
@@ -29,8 +38,8 @@ define summon {
     usage 2;
     :damage(DamageType.Cryo, 1);
     :damage(DamageType.Piercing, 1, "opp standby");
-  }
-}
+  };
+};
 
 /**
  * @id 111012
@@ -46,8 +55,8 @@ define combatStatus {
     when :( :e.target.isActive() );
     usage 2;
     :e.decreaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 11011
@@ -61,7 +70,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 11012
@@ -75,19 +84,20 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 1);
   :combatStatus(IceLotus);
-}
+};
 
 define extension {
   idHint 11013 as private FrostflakeArrowUsedExtension;
   schema ({ used: "pair<boolean>" });
   initialState ({ used: [false, false] });
-  mutateWhen onDamageOrHeal, ((st, e) => {
+  mutateWhen onDamageOrHeal,
+  ((st, e) => {
     // 甘雨倒下时重置
     if (e.target.definition.id === Ganyu && e.damageInfo.causeDefeated) {
       st.used[e.targetWho] = false;
     }
   });
-}
+};
 
 /**
  * @id 11013
@@ -100,14 +110,17 @@ define skill {
   skillType normal;
   cost DiceType.Cryo, 5;
   associateExtension FrostflakeArrowUsedExtension;
-  if (:self.hasEquipment(UndividedHeart) && :getExtensionState().used[:self.who]) {
+  if (
+    :self.hasEquipment(UndividedHeart) &&
+    :getExtensionState().used[:self.who]
+  ) {
     :damage(DamageType.Piercing, 3, "opp standby");
   } else {
     :damage(DamageType.Piercing, 2, "opp standby");
   }
   :damage(DamageType.Cryo, 2);
-  :setExtensionState((st) => st.used[:self.who] = true);
-}
+  :setExtensionState((st) => (st.used[:self.who] = true));
+};
 
 /**
  * @id 11014
@@ -123,7 +136,7 @@ define skill {
   :damage(DamageType.Piercing, 1, "opp standby");
   :damage(DamageType.Cryo, 2);
   :summon(SacredCryoPearl);
-}
+};
 
 /**
  * @id 1101
@@ -138,7 +151,7 @@ define character {
   health 12;
   energy 3;
   skills LiutianArchery, TrailOfTheQilin, FrostflakeArrow, CelestialShower;
-}
+};
 
 /**
  * @id 211011
@@ -156,6 +169,6 @@ define card {
   talent Ganyu {
     on enter {
       :useSkill(FrostflakeArrow);
-    }
-  }
-}
+    };
+  };
+};

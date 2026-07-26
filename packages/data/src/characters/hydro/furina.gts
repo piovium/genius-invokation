@@ -26,8 +26,17 @@ define card {
   id 112113 as SeatsSacredAndSecular;
   since "v4.7.0";
   undiscoverable;
-  filter :( :query($.union($.my.character.def(FurinaPneuma), $.my.character.def(FurinaOusia))) );
-  const furina = :query($.union($.my.character.def(FurinaPneuma), $.my.character.def(FurinaOusia)))
+  filter :(
+    :query(
+      $.union(
+        $.my.character.def(FurinaPneuma),
+        $.my.character.def(FurinaOusia),
+      ),
+    )
+  );
+  const furina = :query(
+    $.union($.my.character.def(FurinaPneuma), $.my.character.def(FurinaOusia)),
+  );
   if (!furina) {
     return;
   }
@@ -42,11 +51,11 @@ define card {
     :transformDefinition(furina, FurinaPneuma);
     const summon = :query($.my.summon.def(SingerOfManyWaters));
     if (summon) {
-      :transformDefinition(summon, SalonMembers)
+      :transformDefinition(summon, SalonMembers);
       summon.setVariable("hintIcon", DamageType.Hydro);
     }
   }
-}
+};
 
 /**
  * @id 112111
@@ -56,19 +65,19 @@ define card {
  * 可用次数：2（可叠加，最多叠加到4次）
  */
 define summon {
-  id 112111 as SalonMembers
+  id 112111 as SalonMembers;
   hint DamageType.Hydro, 1;
   on endPhase {
     :damage(DamageType.Hydro, 1);
-  }
+  };
   // 将两段伤害拆成两个技能，从而中间可以插入第一段伤害引发的事件（如缤纷马卡龙）
   on endPhase {
-    usage 2 { append 4 };
+    usage 2 { append 4; };
     if (:query($.my.character.var("health", ">=", 6))) {
       :damage(DamageType.Piercing, 1, $.macros.myLeastInjured);
       :damage(DamageType.Hydro, 1);
     }
-  }
+  };
 };
 
 /**
@@ -82,13 +91,13 @@ define summon {
   id 112112 as SingerOfManyWaters;
   hint DamageType.Heal, 1;
   on endPhase {
-    usage 2 { append 4 };
+    usage 2 { append 4; };
     :heal(1, $.my.character);
     if (:query($.my.character.var("health", "<=", 5))) {
       :heal(1, $.macros.myMostInjured);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 112116
@@ -102,7 +111,7 @@ define status {
   on modifySkillDamageType {
     when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     usage 1;
@@ -112,8 +121,8 @@ define status {
       :e.increaseDamage(2);
       :damage(DamageType.Piercing, 1, $.macros.myLeastInjured);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 112115
@@ -125,10 +134,10 @@ define status {
 define combatStatus {
   id 112115 as Revelry;
   on increaseDamage {
-    usage 1 { append };
+    usage 1 { append; };
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 112114
@@ -143,8 +152,8 @@ define combatStatus {
   on damagedOrHealed {
     when :( :e.target.isActive() );
     :combatStatus(Revelry);
-  }
-}
+  };
+};
 
 /**
  * @id 12111
@@ -159,7 +168,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 12112
@@ -173,7 +182,7 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   :summon(SalonMembers);
-}
+};
 
 /**
  * @id 12113
@@ -186,9 +195,9 @@ define skill {
   skillType burst;
   cost DiceType.Hydro, 4;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Hydro, 2)
-  :combatStatus(UniversalRevelry)
-}
+  :damage(DamageType.Hydro, 2);
+  :combatStatus(UniversalRevelry);
+};
 
 /**
  * @id 12114
@@ -200,15 +209,17 @@ define skill {
   id 12114 as Skill12114;
   skillType passive {
     on useSkill {
-      when :( 
+      when :(
         :e.isSkillType("normal") &&
-        !:player.hands.find((card) => card.definition.id === SeatsSacredAndSecular)
+          !:player.hands.find(
+            (card) => card.definition.id === SeatsSacredAndSecular,
+          )
       );
-      usage perRound, 1 { name usagePerRound1 };
+      usage perRound, 1 { name usagePerRound1; };
       :createHandCard(SeatsSacredAndSecular);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 12115
@@ -220,10 +231,10 @@ define skill {
   id 12115 as ArkheSeatsSacredAndSecular;
   skillType passive {
     on battleBegin {
-      :createHandCard(SeatsSacredAndSecular)
-    }
-  }
-}
+      :createHandCard(SeatsSacredAndSecular);
+    };
+  };
+};
 
 /**
  * @id 1211
@@ -237,9 +248,12 @@ define character {
   tags hydro, sword, fontaine, pneuma;
   health 12;
   energy 2;
-  skills SoloistsSolicitation, SalonSolitairePneuma, LetThePeopleRejoice, Skill12114, ArkheSeatsSacredAndSecular;
-}
-
+  skills SoloistsSolicitation,
+  SalonSolitairePneuma,
+  LetThePeopleRejoice,
+  Skill12114,
+  ArkheSeatsSacredAndSecular;
+};
 
 /**
  * @id 12121
@@ -254,7 +268,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 /**
  * @id 12122
  * @name 孤心沙龙
@@ -267,7 +281,7 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   :summon(SingerOfManyWaters);
-}
+};
 
 /**
  * @id 1212
@@ -281,8 +295,12 @@ define character {
   tags hydro, sword, fontaine, ousia;
   health 12;
   energy 2;
-  skills SoloistsSolicitationOusia, SalonSolitaireOusia, LetThePeopleRejoice, Skill12114, ArkheSeatsSacredAndSecular;
-}
+  skills SoloistsSolicitationOusia,
+  SalonSolitaireOusia,
+  LetThePeopleRejoice,
+  Skill12114,
+  ArkheSeatsSacredAndSecular;
+};
 
 /**
  * @id 212111
@@ -304,10 +322,10 @@ define card {
       } else {
         :useSkill(SalonSolitaireOusia);
       }
-    }
+    };
     on useSkill {
-      when :( :e.isSkillType("elemental") )
-      :characterStatus(CenterOfAttention, "@master")
-    }
-  }
-}
+      when :( :e.isSkillType("elemental") );
+      :characterStatus(CenterOfAttention, "@master");
+    };
+  };
+};

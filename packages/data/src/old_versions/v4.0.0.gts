@@ -1,12 +1,33 @@
-import { $, DamageType, DiceType, type StatusHandle, type SummonHandle, card, character, combatStatus, flip, skill, status, summon } from "@gi-tcg/core/builder";
-import { MeleeStance, RangedStance, Tartaglia } from "../characters/hydro/tartaglia.gts";
-import { GardenOfPurity, KamisatoArtKyouka, KamisatoArtMarobashi, KyoukaFuushi } from "../characters/hydro/kamisato_ayato.gts";
+import {
+  $,
+  DamageType,
+  DiceType,
+  type StatusHandle,
+  type SummonHandle,
+  card,
+  character,
+  combatStatus,
+  flip,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
+import {
+  MeleeStance,
+  RangedStance,
+  Tartaglia,
+} from "../characters/hydro/tartaglia.gts";
+import {
+  GardenOfPurity,
+  KamisatoArtKyouka,
+  KamisatoArtMarobashi,
+  KyoukaFuushi,
+} from "../characters/hydro/kamisato_ayato.gts";
 import { FatuiCryoCicinMage } from "../characters/cryo/fatui_cryo_cicin_mage.gts";
 import { Diona, IcyPaws } from "../characters/cryo/diona.gts";
 import { RainbowBladework } from "../characters/hydro/xingqiu.gts";
 import { ReviveOnCooldown } from "../cards/event/food.gts";
 import { Satiated } from "../commons.gts";
-
 
 /**
  * @id 12042
@@ -21,7 +42,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :characterStatus(MeleeStance);
   :damage(DamageType.Hydro, 2);
-}
+};
 
 /**
  * @id 112043
@@ -35,7 +56,7 @@ define status {
   id 112043 as private Riptide;
   until "v4.0.0";
   duration 2;
-}
+};
 
 /**
  * @id 12043
@@ -58,7 +79,7 @@ define skill {
   } else {
     :damage(DamageType.Hydro, 7);
   }
-}
+};
 
 /**
  * @id 212041
@@ -76,13 +97,17 @@ define card {
   talent Tartaglia {
     on enter {
       :useSkill(FoulLegacyRagingTide);
-    }
+    };
     on endPhase {
       when :( :$(`opp character has status with definition id ${Riptide}`) );
-      :damage(DamageType.Piercing, 1, `opp character has status with definition id ${Riptide}`);
-    }
-  }
-}
+      :damage(
+        DamageType.Piercing,
+        1,
+        `opp character has status with definition id ${Riptide}`,
+      );
+    };
+  };
+};
 
 /**
  * @id 112061
@@ -97,7 +122,7 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     usage 2;
@@ -105,8 +130,8 @@ define status {
     if (:self.master.hasEquipment(KyoukaFuushi) && :e.target.health <= 6) {
       :e.increaseDamage(2);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 12063
@@ -122,7 +147,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Hydro, 3);
   :summon(GardenOfPurity);
-}
+};
 
 /**
  * @id 1206
@@ -137,7 +162,7 @@ define character {
   health 10;
   energy 3;
   skills KamisatoArtMarobashi, KamisatoArtKyouka, KamisatoArtSuiyuu;
-}
+};
 
 /**
  * @id 121011
@@ -145,7 +170,7 @@ define character {
  * @description
  * 结束阶段：造成1点冰元素伤害。
  * 可用次数：2（可叠加，最多叠加到3次）
- * 
+ *
  * 愚人众·冰萤术士「普通攻击」后：此牌可用次数+1。
  * 我方角色受到发生元素反应的伤害后：此牌可用次数-1。
  */
@@ -158,16 +183,19 @@ define summon {
       append 3;
     };
     :damage(DamageType.Cryo, 1);
-  }
+  };
   on useSkill {
-    when :( :e.skill.caller.definition.id === FatuiCryoCicinMage && :e.isSkillType("normal") );
+    when :(
+      :e.skill.caller.definition.id === FatuiCryoCicinMage &&
+        :e.isSkillType("normal")
+    );
     :addVariable("usage", 1);
-  }
+  };
   on damaged {
     when :( :e.getReaction() );
     :consumeUsage();
-  }
-}
+  };
+};
 
 /**
  * @id 211021
@@ -185,9 +213,9 @@ define card {
   talent Diona {
     on enter {
       :useSkill(IcyPaws);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 12023
@@ -204,7 +232,7 @@ define skill {
   :damage(DamageType.Hydro, 1);
   :apply(DamageType.Hydro, "@self");
   :combatStatus(RainbowBladework);
-}
+};
 
 /**
  * @id 323002
@@ -220,14 +248,14 @@ define card {
   support item {
     on enter {
       :drawCards(1, { withTag: "food" });
-    }
+    };
     on playCard {
       when :( :e.hasCardTag("food") );
       usage perRound, 1;
       :drawCards(1, { withTag: "food" });
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 333009
@@ -246,7 +274,7 @@ define card {
   :heal(1, "@targets.0", { kind: "revive" });
   :characterStatus(Satiated, "@targets.0");
   :combatStatus(ReviveOnCooldown);
-}
+};
 
 /**
  * @id 322016
@@ -263,9 +291,9 @@ define card {
       when :( :e.hasCardTag("ally") );
       usage perRound, 1;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 322005
@@ -282,9 +310,9 @@ define card {
       when :( :e.hasCardTag("food") );
       usage perRound, 1;
       :generateDice("randomElement", 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 332010
@@ -301,7 +329,7 @@ define card {
     :queryAll(
       $.my.character
         .tagOf("weapon", $.id(:e.targets[0].id))
-        .exclude($.id(:e.targets[0].id))
+        .exclude($.id(:e.targets[0].id)),
     ).map((c) => c.latest())
   );
   const weapon = :e.targets[0].hasWeapon()!;
@@ -316,7 +344,7 @@ define card {
     :dispose(targetOldWeapon);
   }
   :moveEntity(weapon, area);
-}
+};
 
 /**
  * @id 332011
@@ -329,9 +357,9 @@ define card {
   until "v4.0.0";
   addTarget $.my.character.has($.typeEquipment.tag("artifact"));
   addTarget :(
-    :queryAll(
-      $.my.character.exclude($.id(:e.targets[0].id))
-    ).map((c) => c.latest())
+    :queryAll($.my.character.exclude($.id(:e.targets[0].id))).map((c) =>
+      c.latest(),
+    )
   );
   const artifact = :e.targets[0].hasArtifact()!;
   const target = :e.targets[1];
@@ -345,7 +373,7 @@ define card {
     :dispose(targetOldArtifact);
   }
   :moveEntity(artifact, area);
-}
+};
 
 /**
  * @id 312008
@@ -361,16 +389,18 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on useSkill {
-      when :( :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst") );
+      when :(
+        :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst")
+      );
       listenTo samePlayer;
       :gainEnergy(1, "@master");
-    }
+    };
     on increaseSkillDamage {
       when :( :e.viaSkillType("burst") );
       :e.increaseDamage(2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303181
@@ -384,15 +414,19 @@ define combatStatus {
   until "v4.0.0";
   oneDuration;
   on defeated {
-    when :( :isMyTurn() && 
+    when :(
+      :isMyTurn() &&
         !:oppPlayer.declaredEnd &&
-        !:e.target.isMine() && 
-        (:phase === "action" || :player.defeatedSwitching || :oppPlayer.defeatedSwitching) );
+        !:e.target.isMine() &&
+        (:phase === "action" ||
+          :player.defeatedSwitching ||
+          :oppPlayer.defeatedSwitching)
+    );
     listenTo all;
     usage 1;
     :continueNextTurn();
-  }
-}
+  };
+};
 
 /**
  * @id 331801
@@ -407,5 +441,4 @@ define card {
   until "v4.0.0";
   cost DiceType.Aligned, 1;
   :combatStatus(WindAndFreedomInEffect);
-}
-  
+};

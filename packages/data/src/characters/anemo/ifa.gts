@@ -1,19 +1,30 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, Aura, card, character, DamageType, DiceType, Reaction, skill, status, type StatusHandle } from "@gi-tcg/core/builder";
+import {
+  $,
+  Aura,
+  card,
+  character,
+  DamageType,
+  DiceType,
+  Reaction,
+  skill,
+  status,
+  type StatusHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 115151
@@ -25,8 +36,7 @@ define status {
   id 115151 as NightsoulsBlessing;
   since "v6.1.0";
   nightsoulsBlessing 2;
-}
-
+};
 
 /**
  * @id 115153
@@ -41,8 +51,8 @@ define status {
   on beforeAction {
     usage 1;
     :damage(DamageType.Cryo, 2, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 115154
@@ -57,8 +67,8 @@ define status {
   on beforeAction {
     usage 1;
     :damage(DamageType.Hydro, 2, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 115155
@@ -73,8 +83,8 @@ define status {
   on beforeAction {
     usage 1;
     :damage(DamageType.Pyro, 2, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 115156
@@ -89,8 +99,8 @@ define status {
   on beforeAction {
     usage 1;
     :damage(DamageType.Electro, 2, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 115152
@@ -113,9 +123,9 @@ define card {
       :consumeNightsoul("@master", 1);
       :damage(DamageType.Anemo, 1, $.opp.prev.orElse($.opp.active));
       :heal(2, $.macros.myMostInjured);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 15151
@@ -129,7 +139,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Anemo, 1);
-}
+};
 
 /**
  * @id 15152
@@ -146,7 +156,7 @@ define skill {
   :damage(DamageType.Anemo, 1);
   :gainNightsoul("@self", 2);
   :equip(Cacucu, "@self");
-}
+};
 
 /**
  * @id 15153
@@ -180,7 +190,7 @@ define skill {
   if (mark) {
     :characterStatus(mark, "opp active");
   }
-}
+};
 
 /**
  * @id 1515
@@ -194,9 +204,11 @@ define character {
   tags anemo, catalyst, natlan;
   health 10;
   energy 2;
-  skills RiteOfDispellingWinds, AirborneDiseasePrevention, CompoundSedationField;
+  skills RiteOfDispellingWinds,
+  AirborneDiseasePrevention,
+  CompoundSedationField;
   associateNightsoul NightsoulsBlessing;
-}
+};
 
 /**
  * @id 215151
@@ -213,13 +225,20 @@ define card {
   talent Ifa, none {
     on enter {
       :heal(1, "my characters order by health - maxHealth limit 1");
-    }
+    };
     on dealReaction {
-      when :( :e.relatedTo(DamageType.Anemo) || 
-          ([Reaction.ElectroCharged, Reaction.LunarElectroCharged] as Reaction[]).includes(:e.type) );
+      when :(
+        :e.relatedTo(DamageType.Anemo) ||
+          (
+            [
+              Reaction.ElectroCharged,
+              Reaction.LunarElectroCharged,
+            ] as Reaction[]
+          ).includes(:e.type)
+      );
       listenTo samePlayer;
       usage perRound, 2;
       :heal(1, "my characters order by health - maxHealth limit 1");
-    }
-  }
-}
+    };
+  };
+};

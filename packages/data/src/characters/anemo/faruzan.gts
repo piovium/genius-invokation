@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, combatStatus, card, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  DiceType,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 115093
@@ -30,13 +40,13 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Anemo, 1);
-  }
+  };
   on increaseDamaged {
     when :( !:e.target.isMine() && :e.type === DamageType.Anemo );
     listenTo all;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 115095
@@ -47,7 +57,7 @@ define summon {
 define combatStatus {
   id 115095 as TheWondrousPathOfTruthActive;
   reserved;
-}
+};
 
 /**
  * @id 115096
@@ -65,16 +75,16 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Anemo, 1);
-  }
+  };
   on increaseDamaged {
     when :( !:e.target.isMine() && :e.type === DamageType.Anemo );
     listenTo all;
     :e.increaseDamage(1);
-  }
+  };
   on actionPhase {
     :generateDice(DiceType.Anemo, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 115091
@@ -88,16 +98,16 @@ define status {
   on deductVoidDiceSkill {
     when :( :e.isChargedAttack() );
     :e.deductVoidCost(1);
-  }
+  };
   on modifySkillDamageType {
     when :( :e.viaChargedAttack() );
     usage 1;
-    if (:e.type === DamageType.Physical){
+    if (:e.type === DamageType.Physical) {
       :e.changeDamageType(DamageType.Anemo);
     }
     :characterStatus(PressurizedCollapse, :e.target);
-  }
-}
+  };
+};
 
 /**
  * @id 115092
@@ -113,8 +123,8 @@ define status {
   on endPhase {
     usage 1;
     :switchActive("@master");
-  }
-}
+  };
+};
 
 /**
  * @id 15091
@@ -128,7 +138,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 15092
@@ -142,7 +152,7 @@ define skill {
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 3);
   :characterStatus(ManifestGale, "@self");
-}
+};
 
 /**
  * @id 15093
@@ -162,7 +172,7 @@ define skill {
   } else {
     :summon(DazzlingPolyhedron);
   }
-}
+};
 
 /**
  * @id 1509
@@ -177,7 +187,7 @@ define character {
   health 10;
   energy 2;
   skills ParthianShot, WindRealmOfNasamjnin, TheWindsSecretWays;
-}
+};
 
 /**
  * @id 215091
@@ -196,6 +206,6 @@ define card {
   talent Faruzan {
     on enter {
       :useSkill(TheWindsSecretWays);
-    }
-  }
-}
+    };
+  };
+};

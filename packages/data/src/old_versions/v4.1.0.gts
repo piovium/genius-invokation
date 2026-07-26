@@ -1,18 +1,59 @@
-import { DamageType, DiceType, type EquipmentHandle, type SkillHandle, type SummonHandle, card, character, combatStatus, skill, status, summon } from "@gi-tcg/core/builder";
+import {
+  DamageType,
+  DiceType,
+  type EquipmentHandle,
+  type SkillHandle,
+  type SummonHandle,
+  card,
+  character,
+  combatStatus,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
 import { FatalRainscreen, Xingqiu } from "../characters/hydro/xingqiu.gts";
-import { InfluxBlast, MirrorMaiden } from "../characters/hydro/mirror_maiden.gts";
+import {
+  InfluxBlast,
+  MirrorMaiden,
+} from "../characters/hydro/mirror_maiden.gts";
 import { Barbara, LetTheShowBegin } from "../characters/hydro/barbara.gts";
-import { ElectroCrystalCore, ElectroHypostasis } from "../characters/electro/electro_hypostasis.gts";
-import { ChonghuasLayeredFrost, Chongyun } from "../characters/cryo/chongyun.gts";
+import {
+  ElectroCrystalCore,
+  ElectroHypostasis,
+} from "../characters/electro/electro_hypostasis.gts";
+import {
+  ChonghuasLayeredFrost,
+  Chongyun,
+} from "../characters/cryo/chongyun.gts";
 import { GuobaAttack, Xiangling } from "../characters/pyro/xiangling.gts";
 import { NiwabiEnshou, Yoimiya } from "../characters/pyro/yoimiya.gts";
-import { Candace, SacredRiteWagtailsTide } from "../characters/hydro/candace.gts";
+import {
+  Candace,
+  SacredRiteWagtailsTide,
+} from "../characters/hydro/candace.gts";
 import { ClawAndThunder, Razor } from "../characters/electro/razor.gts";
-import { Beidou, SummonerOfLightning, Tidecaller, TidecallerSurfEmbrace, Wavestrider } from "../characters/electro/beidou.gts";
-import { KujouSara, SubjugationKoukouSendou } from "../characters/electro/kujou_sara.gts";
-import { Cyno, PactswornPathclearer, SecretRiteChasmicSoulfarer } from "../characters/electro/cyno.gts";
+import {
+  Beidou,
+  SummonerOfLightning,
+  Tidecaller,
+  TidecallerSurfEmbrace,
+  Wavestrider,
+} from "../characters/electro/beidou.gts";
+import {
+  KujouSara,
+  SubjugationKoukouSendou,
+} from "../characters/electro/kujou_sara.gts";
+import {
+  Cyno,
+  PactswornPathclearer,
+  SecretRiteChasmicSoulfarer,
+} from "../characters/electro/cyno.gts";
 import { BakeKurage } from "../characters/hydro/sangonomiya_kokomi.gts";
-import { Amber, BaronBunny, ExplosivePuppet } from "../characters/pyro/amber.gts";
+import {
+  Amber,
+  BaronBunny,
+  ExplosivePuppet,
+} from "../characters/pyro/amber.gts";
 import { FavoniusBladework, GaleBlade } from "../characters/anemo/jean.gts";
 import { SealOfApproval, Yanfei } from "../characters/pyro/yanfei.gts";
 import { StreamingSurge } from "../characters/hydro/rhodeia_of_loch.gts";
@@ -30,12 +71,22 @@ define card {
   until "v4.1.0";
   cost DiceType.Aligned, 1;
   legend;
-  filter :( ([DiceType.Cryo, DiceType.Hydro, DiceType.Pyro, DiceType.Electro, DiceType.Dendro] as (DiceType | undefined)[]).includes(:$("my active")?.element()) );
+  filter :(
+    (
+      [
+        DiceType.Cryo,
+        DiceType.Hydro,
+        DiceType.Pyro,
+        DiceType.Electro,
+        DiceType.Dendro,
+      ] as (DiceType | undefined)[]
+    ).includes(:$("my active")?.element())
+  );
   const element = :$("my active")!.element() as 1 | 2 | 3 | 4 | 7;
   // 先挂后台再挂前台（避免前台被超载走导致结算错误）
   :apply(element, "my standby character");
   :apply(element, "my active character");
-}
+};
 
 /**
  * @id 212021
@@ -53,9 +104,9 @@ define card {
   talent Xingqiu {
     on enter {
       :useSkill(FatalRainscreen);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 112023
@@ -73,8 +124,8 @@ define combatStatus {
     when :( :e.target.isActive() && :e.value >= 3 );
     usage 3;
     :e.decreaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 222021
@@ -93,10 +144,9 @@ define card {
   talent MirrorMaiden {
     on enter {
       :useSkill(InfluxBlast);
-    }
-  }
-}
-
+    };
+  };
+};
 
 /**
  * @id 212011
@@ -114,9 +164,9 @@ define card {
   talent Barbara {
     on enter {
       :useSkill(LetTheShowBegin);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 224011
@@ -132,7 +182,7 @@ define card {
   eventTalent ElectroHypostasis;
   :heal(3, "my active");
   :characterStatus(ElectroCrystalCore, "my active");
-}
+};
 
 /**
  * @id 211041
@@ -151,9 +201,9 @@ define card {
   talent Chongyun {
     on enter {
       :useSkill(ChonghuasLayeredFrost);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 111042
@@ -171,19 +221,27 @@ define combatStatus {
     when :{
       if (:e.type !== DamageType.Physical) return false;
       const { tags } = :e.source.cast<"character">().definition;
-      return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
+      return (
+        tags.includes("sword") ||
+        tags.includes("claymore") ||
+        tags.includes("pole")
+      );
     };
     :e.changeDamageType(DamageType.Cryo);
-  }
+  };
   on increaseSkillDamage {
     when :{
       if (!:e.viaSkillType("normal")) return false;
       const { tags } = :e.source.cast<"character">().definition;
-      return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
+      return (
+        tags.includes("sword") ||
+        tags.includes("claymore") ||
+        tags.includes("pole")
+      );
     };
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 213021
@@ -201,9 +259,9 @@ define card {
   talent Xiangling {
     on enter {
       :useSkill(GuobaAttack);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 13052
@@ -218,7 +276,7 @@ define skill {
   cost DiceType.Pyro, 1;
   noEnergy;
   :characterStatus(NiwabiEnshou);
-}
+};
 
 /**
  * @id 213051
@@ -236,14 +294,15 @@ define card {
   talent Yoimiya {
     on enter {
       :useSkill(NiwabiFiredance);
-    }
+    };
     on useSkill {
-      when :( :e.isSkillType("normal") && :self.master.hasStatus(NiwabiEnshou) );
+      when :(
+        :e.isSkillType("normal") && :self.master.hasStatus(NiwabiEnshou)
+      );
       :damage(DamageType.Pyro, 1);
-    }
-  }
-}
-
+    };
+  };
+};
 
 /**
  * @id 212071
@@ -262,9 +321,9 @@ define card {
   talent Candace {
     on enter {
       :useSkill(SacredRiteWagtailsTide);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 214021
@@ -282,13 +341,16 @@ define card {
   talent Razor {
     on enter {
       :useSkill(ClawAndThunder);
-    }
+    };
     on useSkill {
       when :( :e.skill.definition.id === ClawAndThunder );
-      :gainEnergy(1, "my characters with tag (electro) and with energy < maxEnergy limit 1");
-    }
-  }
-}
+      :gainEnergy(
+        1,
+        "my characters with tag (electro) and with energy < maxEnergy limit 1",
+      );
+    };
+  };
+};
 
 /**
  * @id 214051
@@ -306,13 +368,15 @@ define card {
   talent Beidou {
     on enter {
       :useSkill(Tidecaller);
-    }
+    };
     on useSkill {
       when :{
         if (:e.skill.definition.id !== Wavestrider) {
           return false;
         }
-        const shield = :$(`status with definition id ${TidecallerSurfEmbrace} at @master`);
+        const shield = :$(
+          `status with definition id ${TidecallerSurfEmbrace} at @master`,
+        );
         if (shield && shield.getVariable("shield") === 2) {
           return false;
         }
@@ -322,9 +386,9 @@ define card {
         autoDispose false;
       };
       :characterStatus(SummonerOfLightning, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 214061
@@ -343,9 +407,9 @@ define card {
   talent KujouSara {
     on enter {
       :useSkill(SubjugationKoukouSendou);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 214041
@@ -363,17 +427,20 @@ define card {
   talent Cyno {
     on enter {
       :useSkill(SecretRiteChasmicSoulfarer);
-    }
+    };
     on increaseSkillDamage {
       when :{
         const status = :self.master.hasStatus(PactswornPathclearer)!;
         const reliance = :getVariable("reliance", status);
-        return (reliance === 3 || reliance === 5) && :e.via.definition.id === SecretRiteChasmicSoulfarer;
+        return (
+          (reliance === 3 || reliance === 5) &&
+          :e.via.definition.id === SecretRiteChasmicSoulfarer
+        );
       };
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 212051
@@ -401,10 +468,13 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
   :heal(1, "all my characters");
-  if (:self.hasEquipment(TamakushiCasket) && :$(`my summon with definition id ${BakeKurage}`)) {
+  if (
+    :self.hasEquipment(TamakushiCasket) &&
+    :$(`my summon with definition id ${BakeKurage}`)
+  ) {
     :summon(BakeKurage);
   }
-}
+};
 
 /**
  * @id 213041
@@ -422,7 +492,7 @@ define card {
   talent Amber {
     on enter {
       :useSkill(ExplosivePuppet);
-    }
+    };
     on useSkill {
       when :( :e.isSkillType("normal") );
       const bunny = :$(`my summon with definition id ${BaronBunny}`);
@@ -430,9 +500,9 @@ define card {
         :damage(DamageType.Pyro, 3);
         bunny.dispose();
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 115021
@@ -449,13 +519,15 @@ define summon {
     usage 2;
     :damage(DamageType.Anemo, 2);
     :heal(1, "my active");
-  }
+  };
   on increaseDamage {
-    when :( :$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
-        :e.type === DamageType.Anemo );
+    when :(
+      :$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
+        :e.type === DamageType.Anemo
+    );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 15023
@@ -471,7 +543,7 @@ define skill {
   cost DiceType.Energy, 3;
   :heal(2, "all my characters");
   :summon(DandelionField);
-}
+};
 
 /**
  * @id 1502
@@ -486,7 +558,7 @@ define character {
   health 10;
   energy 3;
   skills FavoniusBladework, GaleBlade, DandelionBreeze;
-}
+};
 
 /**
  * @id 215021
@@ -505,9 +577,9 @@ define card {
   talent Jean {
     on enter {
       :useSkill(DandelionBreeze);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 113081
@@ -523,8 +595,8 @@ define status {
     when :( :e.viaChargedAttack() );
     usage 1;
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 213081
@@ -544,13 +616,13 @@ define card {
     variable triggerSeal, 0;
     on enter {
       :useSkill(SealOfApproval);
-    }
+    };
     on increaseSkillDamage {
       when :( :e.viaChargedAttack() && :e.target.health <= 6 );
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 111072
@@ -569,9 +641,12 @@ define combatStatus {
   };
   on roundEnd {
     :setVariable("noUsageEffect", 1);
-  }
+  };
   on increaseDamage {
-    when :( :e.via.caller.definition.type === "character" && :e.type === DamageType.Cryo );
+    when :(
+      :e.via.caller.definition.type === "character" &&
+        :e.type === DamageType.Cryo
+    );
     usage 3 {
       autoDecrease false;
     };
@@ -579,10 +654,10 @@ define combatStatus {
     if (:e.viaSkillType("normal") && :getVariable("noUsageEffect")) {
       :setVariable("noUsageEffect", 0);
     } else {
-      :consumeUsage()
+      :consumeUsage();
     }
-  }
-}
+  };
+};
 
 /**
  * @id 111071
@@ -596,11 +671,14 @@ define combatStatus {
   until "v4.1.0";
   conflictWith 111072;
   on increaseDamage {
-    when :( :e.via.caller.definition.type === "character" && :e.type === DamageType.Cryo );
+    when :(
+      :e.via.caller.definition.type === "character" &&
+        :e.type === DamageType.Cryo
+    );
     usage 3;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 22014
@@ -618,9 +696,9 @@ define skill {
   const damageValue = 2 + summons.length * 2;
   :damage(DamageType.Hydro, damageValue);
   if (:self.hasEquipment(StreamingSurge)) {
-    summons.forEach((s) => s.addVariable("usage", 1))
+    summons.forEach((s) => s.addVariable("usage", 1));
   }
-}
+};
 
 /**
  * @id 116053
@@ -637,17 +715,17 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Geo);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(2);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     usage perRound, 1;
     :characterStatus(SuperlativeSuperstrength, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 16053
@@ -663,5 +741,4 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Geo, 5);
   :characterStatus(RagingOniKing);
-}
-
+};

@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, Reaction, skill, status, summon, type SummonHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  Reaction,
+  skill,
+  status,
+  summon,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
 import { BurningFlame } from "../../commons.gts";
 
 /**
@@ -32,8 +42,8 @@ define summon {
       append 6;
     };
     :damage(DamageType.Dendro, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 117101
@@ -54,17 +64,16 @@ define summon {
     // 节末升级二阶时仍然使用此技能定义，故检测自身为二阶时改为2伤
     if (:self.definition.id === LumidouceCaseLevel2) {
       :damage(DamageType.Dendro, 2);
-    }
-    else {
+    } else {
       :damage(DamageType.Dendro, 1);
     }
-  }
+  };
   on dealDamage {
     when :( :e.getReaction() === Reaction.Burning );
     listenTo samePlayer;
     :transformDefinition("@self", LumidouceCaseLevel2);
-  }
-}
+  };
+};
 
 /**
  * @id 117103
@@ -80,8 +89,8 @@ define summon {
   on endPhase {
     usage 1;
     :damage(DamageType.Dendro, 1, "all opp characters");
-  }
-}
+  };
+};
 
 /**
  * @id 117104
@@ -98,8 +107,8 @@ define status {
     if (burning) {
       :triggerEndPhaseSkill(burning);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 17101
@@ -113,7 +122,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 17102
@@ -127,11 +136,10 @@ define skill {
   cost DiceType.Dendro, 3;
   if (:$(`my summons with definition id ${LumidouceCaseLevel2}`)) {
     :summon(LumidouceCaseLevel2);
-  }
-  else {
+  } else {
     :summon(LumidouceCaseLevel1);
   }
-}
+};
 
 /**
  * @id 17103
@@ -146,7 +154,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Dendro, 1);
   :summon(LumidouceCaseLevel3);
-}
+};
 
 /**
  * @id 17104
@@ -164,9 +172,9 @@ define skill {
         name "usagePerRound1";
       };
       :characterStatus(LingeringFragranceInEffect, "@self");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 17105
@@ -178,7 +186,7 @@ define skill {
   id 17105 as LingeringFragrance02;
   skillType passive;
   reserved;
-}
+};
 
 /**
  * @id 1710
@@ -192,8 +200,11 @@ define character {
   tags dendro, pole, fontaine, ousia;
   health 10;
   energy 2;
-  skills ShadowhuntingSpearCustom, FragranceExtraction, AromaticExplication, LingeringFragrance01;
-}
+  skills ShadowhuntingSpearCustom,
+  FragranceExtraction,
+  AromaticExplication,
+  LingeringFragrance01;
+};
 
 /**
  * @id 217101
@@ -211,11 +222,15 @@ define card {
     on modifySkillDamageType {
       when :( :e.type === DamageType.Physical );
       :e.changeDamageType(DamageType.Dendro);
-    }
+    };
     on useSkill {
       when :( :e.isSkillType("normal") );
       usage perRound, 1;
-      const lumidouceIds = [LumidouceCaseLevel3, LumidouceCaseLevel2, LumidouceCaseLevel1];
+      const lumidouceIds = [
+        LumidouceCaseLevel3,
+        LumidouceCaseLevel2,
+        LumidouceCaseLevel1,
+      ];
       for (const id of lumidouceIds) {
         const lumidouce = :$(`my summons with definition id ${id}`);
         if (lumidouce) {
@@ -223,6 +238,6 @@ define card {
           break;
         }
       }
-    }
-  }
-}
+    };
+  };
+};
