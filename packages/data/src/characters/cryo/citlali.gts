@@ -13,7 +13,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, Reaction, skill, status, type CombatStatusHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  Reaction,
+  skill,
+  status,
+  type CombatStatusHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111141
@@ -27,7 +37,7 @@ define status {
   since "v5.7.0";
   duration 2;
   nightsoulsBlessing 2;
-}
+};
 
 /**
  * @id 111142
@@ -39,7 +49,7 @@ define combatStatus {
   id 111142 as OpalShield;
   since "v5.7.0";
   shield 1, Infinity;
-}
+};
 
 /**
  * @id 111143
@@ -55,13 +65,15 @@ define combatStatus {
   duration 2;
   on damaged {
     when :{
-      const st = :$(`my character with definition id ${Citlali}`)?.hasNightsoulsBlessing();
-      return st && st.variables.nightsoul > 0
+      const st = :$(
+        `my character with definition id ${Citlali}`,
+      )?.hasNightsoulsBlessing();
+      return st && st.variables.nightsoul > 0;
     };
     listenTo samePlayer;
-    :consumeNightsoul(`my character with definition id ${Citlali}`)
+    :consumeNightsoul(`my character with definition id ${Citlali}`);
     :combatStatus(OpalShield);
-  }
+  };
   on gainNightsoul {
     when :{
       if (:e.entity.definition.id !== NightsoulsBlessing) {
@@ -70,8 +82,8 @@ define combatStatus {
       return :e.entity.getVariable("nightsoul") === 2;
     };
     :damage(DamageType.Cryo, 1, "opp characters with health > 0 limit 1");
-  }
-}
+  };
+};
 
 /**
  * @id 11141
@@ -85,7 +97,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Cryo, 1);
-}
+};
 
 /**
  * @id 11142
@@ -103,7 +115,7 @@ define skill {
   :gainNightsoul("@self", 1);
   :combatStatus(OpalShield);
   :combatStatus(Itzpapa);
-}
+};
 
 /**
  * @id 11143
@@ -121,7 +133,7 @@ define skill {
   if (:self.hasStatus(NightsoulsBlessing)) {
     :gainNightsoul("@self", 2);
   }
-}
+};
 
 /**
  * @id 11144
@@ -134,21 +146,28 @@ define skill {
   skillType passive {
     variable gainNightsoulUsagePerRound, 1;
     on selectCard {
-      when :( :getVariable("gainNightsoulUsagePerRound") > 0 && :self.hasStatus(NightsoulsBlessing) );
+      when :(
+        :getVariable("gainNightsoulUsagePerRound") > 0 &&
+          :self.hasStatus(NightsoulsBlessing)
+      );
       :gainNightsoul("@self");
       :addVariable("gainNightsoulUsagePerRound", -1);
-    }
+    };
     on dealDamage {
-      when :( :e.getReaction() && :getVariable("gainNightsoulUsagePerRound") > 0 && :self.hasStatus(NightsoulsBlessing) );
+      when :(
+        :e.getReaction() &&
+          :getVariable("gainNightsoulUsagePerRound") > 0 &&
+          :self.hasStatus(NightsoulsBlessing)
+      );
       listenTo samePlayer;
       :gainNightsoul("@self");
       :addVariable("gainNightsoulUsagePerRound", -1);
-    }
+    };
     on roundEnd {
       :setVariable("gainNightsoulUsagePerRound", 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1114
@@ -162,9 +181,12 @@ define character {
   tags cryo, catalyst, natlan;
   health 10;
   energy 2;
-  skills ShadowstealingSpiritVessel, DawnfrostDarkstar, EdictOfEntwinedSplendor, SongsOfProfoundMystery;
+  skills ShadowstealingSpiritVessel,
+    DawnfrostDarkstar,
+    EdictOfEntwinedSplendor,
+    SongsOfProfoundMystery;
   associateNightsoul NightsoulsBlessing;
-}
+};
 
 /**
  * @id 211142
@@ -177,15 +199,17 @@ define combatStatus {
   id 211142 as MamaloacosFrigidRainInEffect;
   since "v5.7.0";
   on enter {
-    when :( :$(`my character with definition id ${Citlali}`)?.hasNightsoulsBlessing() );
+    when :(
+      :$(`my character with definition id ${Citlali}`)?.hasNightsoulsBlessing()
+    );
     :gainNightsoul(`my character with definition id ${Citlali}`);
-  }
+  };
   on increaseDamage {
     when :( :e.type === DamageType.Hydro || :e.type === DamageType.Pyro );
     usage 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 211141
@@ -200,10 +224,13 @@ define card {
   cost DiceType.Cryo, 2;
   talent Citlali, none {
     on dealDamage {
-      when :( (:e.getReaction() === Reaction.Frozen || :e.getReaction() === Reaction.Melt) );
+      when :(
+        :e.getReaction() === Reaction.Frozen ||
+          :e.getReaction() === Reaction.Melt
+      );
       listenTo all;
       usage perRound, 1;
       :combatStatus(MamaloacosFrigidRainInEffect);
-    }
-  }
-}
+    };
+  };
+};

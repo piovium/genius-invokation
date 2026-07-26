@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, summon, type SummonHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 115021
@@ -29,13 +37,15 @@ define summon {
     usage 3;
     :damage(DamageType.Anemo, 1);
     :heal(1, "my active");
-  }
+  };
   on increaseDamage {
-    when :( :$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
-        :e.type === DamageType.Anemo );
+    when :(
+      :$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
+        :e.type === DamageType.Anemo
+    );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 15021
@@ -49,7 +59,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 15022
@@ -63,7 +73,7 @@ define skill {
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 3);
   :switchActive("opp next");
-}
+};
 
 /**
  * @id 15023
@@ -78,7 +88,7 @@ define skill {
   cost DiceType.Energy, 2;
   :heal(2, "all my characters");
   :summon(DandelionField);
-}
+};
 
 /**
  * @id 1502
@@ -93,7 +103,7 @@ define character {
   health 12;
   energy 2;
   skills FavoniusBladework, GaleBlade, DandelionBreeze;
-}
+};
 
 /**
  * @id 215021
@@ -112,6 +122,6 @@ define card {
   talent Jean {
     on enter {
       :useSkill(DandelionBreeze);
-    }
-  }
-}
+    };
+  };
+};

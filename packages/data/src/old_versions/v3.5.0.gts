@@ -1,5 +1,14 @@
-import { DamageType, DiceType, card, combatStatus, skill } from "@gi-tcg/core/builder";
-import { BakeKurage, TamakushiCasket } from "../characters/hydro/sangonomiya_kokomi.gts";
+import {
+  DamageType,
+  DiceType,
+  card,
+  combatStatus,
+  skill,
+} from "@gi-tcg/core/builder";
+import {
+  BakeKurage,
+  TamakushiCasket,
+} from "../characters/hydro/sangonomiya_kokomi.gts";
 
 /**
  * @id 322002
@@ -15,9 +24,9 @@ define card {
     on beforeFastSwitch {
       usage perRound, 1;
       :e.setFastAction();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 12053
@@ -32,10 +41,13 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 3);
-  if (:self.hasEquipment(TamakushiCasket) && :$(`my summon with definition id ${BakeKurage}`)) {
+  if (
+    :self.hasEquipment(TamakushiCasket) &&
+    :$(`my summon with definition id ${BakeKurage}`)
+  ) {
     :summon(BakeKurage);
   }
-}
+};
 
 /**
  * @id 112022
@@ -51,8 +63,8 @@ define combatStatus {
     when :( :e.isSkillType("normal") );
     usage 3;
     :damage(DamageType.Hydro, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 312102
@@ -68,15 +80,18 @@ define card {
   cost DiceType.Aligned, 3;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Cryo) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Cryo)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Cryo, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Cryo, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312202
@@ -92,15 +107,18 @@ define card {
   cost DiceType.Aligned, 3;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Hydro) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Hydro)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Hydro, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Hydro, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312302
@@ -116,15 +134,18 @@ define card {
   cost DiceType.Aligned, 3;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Pyro) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Pyro)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Pyro, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Pyro, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312402
@@ -140,15 +161,18 @@ define card {
   cost DiceType.Aligned, 3;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Electro) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Electro)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Electro, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Electro, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312502
@@ -164,15 +188,18 @@ define card {
   cost DiceType.Aligned, 3;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Anemo) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Anemo)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Anemo, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Anemo, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312602
@@ -188,15 +215,18 @@ define card {
   cost DiceType.Aligned, 3;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Geo) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Geo)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Geo, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Geo, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 312702
@@ -212,13 +242,15 @@ define card {
   cost DiceType.Aligned, 3;
   artifact {
     on deductElementDice {
-      when :( :e.isSkillOrTalentOf(:self.master) && :e.canDeductCostOfType(DiceType.Dendro) );
+      when :(
+        :e.isSkillOrTalentOf(:self.master) &&
+          :e.canDeductCostOfType(DiceType.Dendro)
+      );
       usage perRound, 1;
       :e.deductCost(DiceType.Dendro, 1);
-    }
+    };
     on roll {
       :e.fixDice(DiceType.Dendro, 2);
-    }
-  }
-}
-
+    };
+  };
+};

@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  status,
+  card,
+  DamageType,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 117022
@@ -30,8 +38,8 @@ define summon {
       append 2;
     };
     :damage(DamageType.Dendro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 117021
@@ -45,13 +53,13 @@ define status {
   on modifySkillDamageType {
     when :( :e.viaChargedAttack() && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Dendro);
-  }
+  };
   on useSkill {
     when :( :e.isChargedAttack() );
     usage 2;
     :summon(ClusterbloomArrow);
-  }
-}
+  };
+};
 
 /**
  * @id 17021
@@ -65,7 +73,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 17022
@@ -79,7 +87,7 @@ define skill {
   cost DiceType.Dendro, 3;
   :damage(DamageType.Dendro, 2);
   :characterStatus(VijnanaSuffusion);
-}
+};
 
 /**
  * @id 17023
@@ -94,7 +102,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Piercing, 1, "opp standby");
   :damage(DamageType.Dendro, 4);
-}
+};
 
 /**
  * @id 1702
@@ -109,7 +117,7 @@ define character {
   health 10;
   energy 2;
   skills KhandaBarrierbuster, VijnanaphalaMine, FashionersTanglevineShaft;
-}
+};
 
 /**
  * @id 217021
@@ -127,11 +135,12 @@ define card {
   talent Tighnari {
     on enter {
       :useSkill(VijnanaphalaMine);
-    }
+    };
     on deductVoidDiceSkill {
-      when :( :self.master.hasStatus(VijnanaSuffusion) && 
-          :e.isChargedAttack() );
+      when :(
+        :self.master.hasStatus(VijnanaSuffusion) && :e.isChargedAttack()
+      );
       :e.deductVoidCost(1);
-    }
-  }
-}
+    };
+  };
+};

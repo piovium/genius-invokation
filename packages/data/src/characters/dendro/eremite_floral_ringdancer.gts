@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 127030
@@ -47,8 +55,8 @@ define combatStatus {
       append;
     };
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 127032
@@ -73,12 +81,14 @@ define card {
         autoDecrease false;
       };
       :damage(DamageType.Dendro, 1);
-      if (!:$(`my combat status with definition id ${SpiritserpentsBlessing}`)) {
+      if (
+        !:$(`my combat status with definition id ${SpiritserpentsBlessing}`)
+      ) {
         :consumeUsage(1);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 27031
@@ -92,7 +102,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 27032
@@ -106,7 +116,7 @@ define skill {
   cost DiceType.Dendro, 3;
   :damage(DamageType.Dendro, 3);
   :combatStatus(SpiritserpentsBlessing);
-}
+};
 
 /**
  * @id 27033
@@ -121,7 +131,7 @@ define skill {
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Dendro, 4);
-}
+};
 
 /**
  * @id 27034
@@ -138,16 +148,18 @@ define skill {
         name "usagePerRound1";
       };
       :gainEnergy(1, "@self");
-    }
+    };
     on useSkill {
-      when :( :e.skill.definition.id === SpiritOfOmensAwakeningDendroSpiritserpent );
+      when :(
+        :e.skill.definition.id === SpiritOfOmensAwakeningDendroSpiritserpent
+      );
       usage 1 {
         name "createCardUsage";
       };
       :createHandCard(SpiritOfOmenDendroSpiritserpent);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2703
@@ -161,8 +173,11 @@ define character {
   tags dendro, eremite;
   health 10;
   energy 2;
-  skills FloralringCaress, SpiralingWhirl, SpiritOfOmensAwakeningDendroSpiritserpent, SpiritOfOmensPower;
-}
+  skills FloralringCaress,
+    SpiralingWhirl,
+    SpiritOfOmensAwakeningDendroSpiritserpent,
+    SpiritOfOmensPower;
+};
 
 /**
  * @id 227031
@@ -180,12 +195,15 @@ define card {
   talent EremiteFloralRingdancer {
     on enter {
       :useSkill(SpiralingWhirl);
-    }
+    };
     on switchActive {
-      when :( :e.switchInfo.to.hasTechnique()?.definition.id === SpiritOfOmenDendroSpiritserpent );
+      when :(
+        :e.switchInfo.to.hasTechnique()?.definition.id ===
+          SpiritOfOmenDendroSpiritserpent
+      );
       listenTo samePlayer;
       usage perRound, 1;
       :damage(DamageType.Dendro, 1);
-    }
-  }
-}
+    };
+  };
+};

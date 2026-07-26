@@ -1,20 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { EntityDefinition } from "@gi-tcg/core";
-import { $, card, combatStatus, DamageType, DiceType, extension, status, type StatusHandle } from "@gi-tcg/core/builder";
+import {
+  $,
+  card,
+  combatStatus,
+  DamageType,
+  DiceType,
+  extension,
+  status,
+  type StatusHandle,
+} from "@gi-tcg/core/builder";
 import { AgileSwitch, EfficientSwitch } from "../../commons.gts";
 
 /**
@@ -35,9 +44,9 @@ define card {
       cost DiceType.Void, 2;
       usage 2;
       :damage(DamageType.Physical, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 313002
@@ -56,9 +65,11 @@ define card {
   cost DiceType.Aligned, 1;
   technique {
     on deductOmniDiceTechnique {
-      when :( :e.action.skill.definition.id === 3130021 && :player.hands.length <= 2 );
+      when :(
+        :e.action.skill.definition.id === 3130021 && :player.hands.length <= 2
+      );
       :e.deductOmniCost(1);
-    }
+    };
     skill {
       id 3130021;
       cost DiceType.Aligned, 2;
@@ -69,9 +80,9 @@ define card {
         :stealHandCard(handCard);
       }
       :drawCards(1, { who: "opp" });
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 313003
@@ -94,10 +105,10 @@ define card {
       usage 2;
       usage perRound, 1;
       addTarget $.my.summon;
-      :triggerEndPhaseSkill(:e.targets[0])
-    }
-  }
-}
+      :triggerEndPhaseSkill(:e.targets[0]);
+    };
+  };
+};
 
 /**
  * @id 301301
@@ -108,7 +119,7 @@ define card {
 define status {
   id 301301 as private DiggingDownToPaydirt;
   shield 2;
-}
+};
 
 /**
  * @id 313004
@@ -129,14 +140,16 @@ define card {
       usage 2;
       cost DiceType.Void, 2;
       :drawCards(2);
-      if ((() => {
-        return :player.hands.some((card) => !:isInInitialPile(card));
-      })()) {
+      if (
+        (() => {
+          return :player.hands.some((card) => !:isInInitialPile(card));
+        })()
+      ) {
         :characterStatus(DiggingDownToPaydirt, "@master");
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 313005
@@ -164,9 +177,9 @@ define card {
         candidates.push(def);
       }
       :selectAndCreateHandCard(candidates);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301302
@@ -180,7 +193,7 @@ define status {
     append;
   };
   // 目标本身实际并无效果
-}
+};
 
 /**
  * @id 313006
@@ -205,15 +218,16 @@ define card {
     };
     on enter {
       :characterStatus(Target, $.opp.active);
-    }
+    };
     on switchActive {
-      when :( !:e.switchInfo.to.isMine() &&
-          :e.switchInfo.to.hasStatus(Target) );
+      when :(
+        !:e.switchInfo.to.isMine() && :e.switchInfo.to.hasStatus(Target)
+      );
       listenTo all;
       :combatStatus(EfficientSwitch);
       :combatStatus(AgileSwitch);
       :dispose($.opp.typeStatus.def(Target));
-    }
+    };
     skill {
       id 3130063;
       usage 2;
@@ -221,9 +235,9 @@ define card {
       :disposeMaxCostHands(1);
       :switchActive($.my.next);
       :characterStatus(Target, $.opp.active);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301304
@@ -234,7 +248,7 @@ define card {
 define status {
   id 301304 as private WaveriderShield;
   shield 2;
-}
+};
 
 /**
  * @id 313007
@@ -259,16 +273,16 @@ define card {
       usage 2;
       cost DiceType.Aligned, 1;
       :damage(DamageType.Physical, 2);
-    }
+    };
     on enter {
       :characterStatus(WaveriderShield, "@master");
-    }
+    };
     on switchActive {
       when :( :e.switchInfo.from?.id === :self.master.id );
       :addVariable("usage", 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301305
@@ -281,7 +295,7 @@ define status {
   prepare "normal" {
     hintCount 1;
   };
-}
+};
 
 /**
  * @id 301303
@@ -295,7 +309,7 @@ define status {
     hintCount 2;
     nextStatus TatankasaurusStatus02;
   };
-}
+};
 
 /**
  * @id 313008
@@ -316,20 +330,21 @@ define card {
       usage 2;
       cost DiceType.Void, 3;
       :characterStatus(TatankasaurusStatus01, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 define extension {
   idHint 301306 as TechniquesPlayedCountExtension;
   schema ({ techniquesPlayedCount: "pair<number>" });
   initialState ({ techniquesPlayedCount: [0, 0] });
   description "记录本场对局中双方打出特技牌的数量";
-  mutateWhen onPlayCard, ((c, e) => {
-    if (e.card.definition.tags.includes("technique")) {
-      c.techniquesPlayedCount[e.who]++;
-    }
-  })
+  mutateWhen onPlayCard,
+    ((c, e) => {
+      if (e.card.definition.tags.includes("technique")) {
+        c.techniquesPlayedCount[e.who]++;
+      }
+    });
 };
 
 /**
@@ -342,23 +357,27 @@ define combatStatus {
   id 301306 as Yikes;
   associateExtension TechniquesPlayedCountExtension;
   variable techniquesPlayedCount, 0;
-  defineSnippet checkCount, :{
-    if (:getVariable("techniquesPlayedCount") >= 6){
-      :characterStatus(SaurianBuddyCheers, "my active")
-      :damage(DamageType.Physical, 3)
-      :dispose();
-    }
-  };
+  defineSnippet checkCount,
+    :{
+      if (:getVariable("techniquesPlayedCount") >= 6) {
+        :characterStatus(SaurianBuddyCheers, "my active");
+        :damage(DamageType.Physical, 3);
+        :dispose();
+      }
+    };
   on enter {
-    :setVariable("techniquesPlayedCount", :getExtensionState().techniquesPlayedCount[:self.who]);
+    :setVariable(
+      "techniquesPlayedCount",
+      :getExtensionState().techniquesPlayedCount[:self.who],
+    );
     :callSnippet.checkCount();
-  }
+  };
   on playCard {
     when :( :e.card.definition.tags.includes("technique") );
     :addVariable("techniquesPlayedCount", 1);
     :callSnippet.checkCount();
-  }
-}
+  };
+};
 
 /**
  * @id 301307
@@ -369,7 +388,7 @@ define combatStatus {
 define status {
   id 301307 as SaurianBuddyCheers;
   shield 3;
-}
+};
 
 /**
  * @id 301308
@@ -382,8 +401,8 @@ define combatStatus {
   once deductOmniDiceCard {
     when :( :e.hasCardTag("technique") );
     :e.deductOmniCost(2);
-  }
-}
+  };
+};
 
 /**
  * @id 313009
@@ -403,16 +422,16 @@ define card {
   technique {
     on enter {
       :combatStatus(Yikes);
-    }
+    };
     skill {
       id 3130092;
       usage 2;
       cost DiceType.Void, 2;
       :drawCards(1, { withTag: "technique" });
       :combatStatus(SaurianMoralSupport);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 313010
@@ -447,6 +466,6 @@ define card {
       if (targetCard) {
         :drawCards(targetCard);
       }
-    }
-  }
-}
+    };
+  };
+};

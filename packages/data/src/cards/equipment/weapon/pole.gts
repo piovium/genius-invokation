@@ -29,9 +29,9 @@ define card {
   weapon pole {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301101
@@ -42,7 +42,7 @@ define card {
 define status {
   id 301101 as LithicGuard;
   shield 0, 3;
-}
+};
 
 /**
  * @id 311402
@@ -59,19 +59,21 @@ define card {
   weapon pole {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on enter {
-      const liyueCount = :$$(`my characters include defeated with tag (liyue)`).length;
+      const liyueCount = :$$(
+        `my characters include defeated with tag (liyue)`,
+      ).length;
       if (liyueCount > 0) {
         :characterStatus(LithicGuard, "@master", {
           overrideVariables: {
-            shield: Math.min(liyueCount, 3)
-          }
+            shield: Math.min(liyueCount, 3),
+          },
         });
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311403
@@ -88,14 +90,14 @@ define card {
   weapon pole {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on increaseSkillDamage {
       when :( :e.viaSkillType("normal") );
       usage perRound, 1;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311404
@@ -113,20 +115,24 @@ define card {
   weapon pole {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on increaseSkillDamage {
       when :{
-        return !!:$("(my combat statuses with tag (shield)) or status with tag (shield) at @master");
+        return !!:$(
+          "(my combat statuses with tag (shield)) or status with tag (shield) at @master",
+        );
       };
       :e.increaseDamage(1);
-    }
+    };
     on useSkill {
-      when :( :e.isSkillType("elemental") && :$("my combat status with tag (shield)") );
+      when :(
+        :e.isSkillType("elemental") && :$("my combat status with tag (shield)")
+      );
       usage perRound, 1;
-      :$("my combat status with tag (shield)")?.addVariable("shield", 1)
-    }
-  }
-}
+      :$("my combat status with tag (shield)")?.addVariable("shield", 1);
+    };
+  };
+};
 
 /**
  * @id 311405
@@ -143,17 +149,17 @@ define card {
   weapon pole {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on enter {
       when :( :self.master.energy === 0 );
       :gainEnergy(1, "@master");
-    }
+    };
     on actionPhase {
       when :( :self.master.energy === 0 );
       :gainEnergy(1, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301104
@@ -167,8 +173,8 @@ define status {
   once deductOmniDice {
     when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
     :e.deductOmniCost(2);
-  }
-}
+  };
+};
 
 /**
  * @id 311406
@@ -185,12 +191,12 @@ define card {
   weapon pole {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on enter {
       :characterStatus(MoonpiercerStatus, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311407
@@ -208,15 +214,15 @@ define card {
     variable extraDamage, 1;
     on roundEnd {
       :setVariable("extraDamage", 1);
-    }
+    };
     on increaseSkillDamage {
       :e.increaseDamage(:getVariable("extraDamage"));
-    }
+    };
     on useSkill {
       :addVariableWithMax("extraDamage", 1, 3);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311408
@@ -235,7 +241,7 @@ define card {
     on increaseSkillDamage {
       when :( :e.viaSkillType("burst") );
       :e.increaseDamage(2);
-    }
+    };
     on damagedOrHealed {
       when :( :e.target.isActive() );
       listenTo samePlayer;
@@ -244,9 +250,9 @@ define card {
         :addVariable("justice", -4);
         :gainEnergy(1, "@master");
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311409
@@ -270,12 +276,12 @@ define card {
       :disposeMaxCostHands(1);
       :e.decreaseDamage(1);
       :addVariable("solidarity", 1);
-    }
+    };
     on increaseSkillDamage {
       when :( :getVariable("solidarity") > 0 );
       :e.increaseDamage(1);
       :drawCards(:getVariable("solidarity"));
       :setVariable("solidarity", 0);
-    }
-  }
-}
+    };
+  };
+};

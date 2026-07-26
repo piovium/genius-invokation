@@ -1,5 +1,9 @@
 import { card, DiceType, status } from "@gi-tcg/core/builder";
-import { StrifefulLightning, ThunderManifestation, ThunderingShacklesSummon } from "../characters/electro/thunder_manifestation.gts";
+import {
+  StrifefulLightning,
+  ThunderManifestation,
+  ThunderingShacklesSummon,
+} from "../characters/electro/thunder_manifestation.gts";
 
 /**
  * @id 330005
@@ -14,7 +18,7 @@ define card {
   legend;
   const count = Math.min(:roundNumber, 4);
   :drawCards(count);
-}
+};
 
 /**
  * @id 312022
@@ -33,12 +37,12 @@ define card {
       when :( :self.master.isActive() );
       usage perRound, 1;
       :drawCards(1);
-    }
+    };
     on endPhase {
       :heal(1, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 124022
@@ -52,16 +56,18 @@ define status {
   until "v4.3.0";
   conflictWith crossCharacter;
   on increaseDamaged {
-    when :( [
-          ThunderManifestation as number, 
-          ThunderingShacklesSummon as number
-        ].includes(:e.source.definition.id) );
+    when :(
+      [
+        ThunderManifestation as number,
+        ThunderingShacklesSummon as number,
+      ].includes(:e.source.definition.id)
+    );
     usage 1 {
       autoDispose false;
     };
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 224021
@@ -79,7 +85,6 @@ define card {
       listenTo all;
       usage perRound, 1;
       :drawCards(1);
-    }
-  }
-}
-
+    };
+  };
+};

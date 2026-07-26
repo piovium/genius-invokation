@@ -1,9 +1,26 @@
-import { DamageType, DiceType, type SkillHandle, card, character, skill, status, summon } from "@gi-tcg/core/builder";
+import {
+  DamageType,
+  DiceType,
+  type SkillHandle,
+  card,
+  character,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
 import { AurousBlaze } from "../characters/pyro/yoimiya.gts";
 import { ThunderbeastsTarge } from "../characters/electro/beidou.gts";
 import { PyronadoStatus } from "../characters/pyro/xiangling.gts";
-import { ClawAndThunder, SteelFang, TheWolfWithin } from "../characters/electro/razor.gts";
-import { FavoniusBladeworkEdel, IcetideVortex, WellspringOfWarlust } from "../characters/cryo/eula.gts";
+import {
+  ClawAndThunder,
+  SteelFang,
+  TheWolfWithin,
+} from "../characters/electro/razor.gts";
+import {
+  FavoniusBladeworkEdel,
+  IcetideVortex,
+  WellspringOfWarlust,
+} from "../characters/cryo/eula.gts";
 
 /**
  * @id 312004
@@ -21,9 +38,9 @@ define card {
       when :( :self.master.isActive() && !:e.target.isMine() );
       listenTo all;
       :generateDice(DiceType.Omni, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 13053
@@ -39,7 +56,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Pyro, 4);
   :combatStatus(AurousBlaze);
-}
+};
 
 /**
  * @id 14054
@@ -54,7 +71,7 @@ define skill {
   skillType elemental;
   noEnergy;
   :damage(DamageType.Electro, 2);
-}
+};
 
 /**
  * @id 14053
@@ -70,7 +87,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Electro, 3);
   :combatStatus(ThunderbeastsTarge);
-}
+};
 
 /**
  * @id 13023
@@ -86,7 +103,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Pyro, 2);
   :combatStatus(PyronadoStatus);
-}
+};
 
 /**
  * @id 14023
@@ -102,7 +119,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Electro, 5);
   :characterStatus(TheWolfWithin);
-}
+};
 
 /**
  * @id 1402
@@ -118,7 +135,7 @@ define character {
   health 10;
   energy 3;
   skills SteelFang, ClawAndThunder, LightningFang;
-}
+};
 
 /**
  * @id 111061
@@ -133,8 +150,8 @@ define status {
     when :( :e.damageInfo.via.definition.id === IcetideVortex );
     :e.increaseDamage(2);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 111062
@@ -152,18 +169,21 @@ define summon {
     autoDispose false;
   };
   on useSkill {
-    when :( :e.skill.definition.id === FavoniusBladeworkEdel || 
-        :e.skill.definition.id === IcetideVortex );
-    if (:e.skill.definition.id === IcetideVortex &&
-      :e.skill.caller.cast<"character">().hasEquipment(WellspringOfWarlust)) {
+    when :(
+      :e.skill.definition.id === FavoniusBladeworkEdel ||
+        :e.skill.definition.id === IcetideVortex
+    );
+    if (
+      :e.skill.definition.id === IcetideVortex &&
+      :e.skill.caller.cast<"character">().hasEquipment(WellspringOfWarlust)
+    ) {
       :self.addVariable("usage", 3);
     } else {
       :self.addVariable("usage", 2);
     }
-  }
+  };
   on endPhase {
     :damage(DamageType.Physical, 2 + :getVariable("usage"));
     :dispose();
-  }
-}
-
+  };
+};

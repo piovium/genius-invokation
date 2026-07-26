@@ -29,9 +29,9 @@ define card {
   weapon bow {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311202
@@ -48,14 +48,14 @@ define card {
   weapon bow {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on useSkill {
       when :( :e.isSkillType("elemental") );
       usage perRound, 1;
       :generateDice(:self.master.element(), 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311203
@@ -72,14 +72,14 @@ define card {
   weapon bow {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on increaseSkillDamage {
       when :( :e.viaSkillType("normal") );
       usage perRound, 1;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311204
@@ -96,14 +96,14 @@ define card {
   weapon bow {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on increaseSkillDamage {
       when :( :e.via.definition.initiativeSkillConfig!.computed$costSize >= 5 );
       usage perRound, 1;
       :e.increaseDamage(2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301102
@@ -117,8 +117,8 @@ define combatStatus {
   duration 2;
   on increaseSkillDamage {
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 311205
@@ -135,14 +135,13 @@ define card {
   weapon bow {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on useSkill {
       when :( :e.isSkillType("burst") );
       :combatStatus(MillennialMovementFarewellSong);
-    }
-  }
-}
-
+    };
+  };
+};
 
 /**
  * @id 301103
@@ -156,8 +155,8 @@ define status {
   once deductOmniDice {
     when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
     :e.deductOmniCost(2);
-  }
-}
+  };
+};
 
 /**
  * @id 311206
@@ -174,12 +173,12 @@ define card {
   weapon bow {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on enter {
       :characterStatus(KingsSquireStatus, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311207
@@ -200,24 +199,24 @@ define card {
     };
     on roundEnd {
       :setVariable("additivePerRound", 0);
-    }
+    };
     on playCard {
       when :( !:isInInitialPile(:e.card) );
       if (:getVariable("additivePerRound") < 2) {
         :addVariableWithMax("fishing", 1, 2);
         :addVariable("additivePerRound", 1);
       }
-    }
+    };
     on increaseSkillDamage {
       const fishing = :getVariable("fishing");
       if (fishing > 0) {
-        :e.increaseDamage(1)
+        :e.increaseDamage(1);
         :drawCards(fishing);
         :setVariable("fishing", 0);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 133092
@@ -230,7 +229,7 @@ define card {
 define card {
   id 133092 as KingsValet;
   reserved;
-}
+};
 
 /**
  * @id 133093
@@ -243,7 +242,7 @@ define card {
 define card {
   id 133093 as AsmosBow; // 骗骗花
   reserved;
-}
+};
 
 /**
  * @id 311208
@@ -261,12 +260,12 @@ define card {
     on increaseSkillDamage {
       when :( :self.master.health >= 11 );
       :e.increaseDamage(2);
-    }
+    };
     on enter {
       :increaseMaxHealth(1, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311209
@@ -285,14 +284,17 @@ define card {
     on increaseSkillDamage {
       when :( :e.viaSkillType("burst") );
       :e.increaseDamage(2);
-    }
+    };
     on dealReaction {
       listenTo samePlayer;
       :addVariable("agile", 1);
-      if (:getVariable("agile") >= 2 && :self.master.energy < :self.master.maxEnergy) {
+      if (
+        :getVariable("agile") >= 2 &&
+        :self.master.energy < :self.master.maxEnergy
+      ) {
         :addVariable("agile", -2);
         :gainEnergy(1, :self.master);
       }
-    }
-  }
-}
+    };
+  };
+};

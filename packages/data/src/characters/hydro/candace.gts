@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 12074
@@ -28,7 +37,7 @@ define skill {
   prepared;
   :$(`status with definition id ${HeronShield} at @self`)?.dispose();
   :damage(DamageType.Hydro, 3);
-}
+};
 
 /**
  * @id 112071
@@ -39,7 +48,7 @@ define skill {
 define status {
   id 112071 as HeronShield;
   shield 2;
-}
+};
 
 /**
  * @id 112074
@@ -50,7 +59,7 @@ define status {
 define status {
   id 112074 as HeronStrikeStatus;
   prepare HeronStrike;
-}
+};
 
 /**
  * @id 112073
@@ -69,25 +78,29 @@ define combatStatus {
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
+  };
   on modifySkillDamageType {
     when :{
       if (:e.type !== DamageType.Physical) return false;
       const { tags } = :e.source.cast<"character">().definition;
-      return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
+      return (
+        tags.includes("sword") ||
+        tags.includes("claymore") ||
+        tags.includes("pole")
+      );
     };
     :e.changeDamageType(DamageType.Hydro);
-  }
+  };
   on switchActive {
     usage perRound, 1;
     :damage(DamageType.Hydro, 1);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     usage perRound, 1;
     :damage(DamageType.Hydro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 112072
@@ -105,20 +118,24 @@ define combatStatus {
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
+  };
   on modifySkillDamageType {
     when :{
       if (:e.type !== DamageType.Physical) return false;
       const { tags } = :e.source.cast<"character">().definition;
-      return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
+      return (
+        tags.includes("sword") ||
+        tags.includes("claymore") ||
+        tags.includes("pole")
+      );
     };
     :e.changeDamageType(DamageType.Hydro);
-  }
+  };
   on switchActive {
     usage perRound, 1;
     :damage(DamageType.Hydro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 12071
@@ -132,7 +149,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 12072
@@ -146,7 +163,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :characterStatus(HeronShield);
   :characterStatus(HeronStrikeStatus);
-}
+};
 
 /**
  * @id 12073
@@ -162,11 +179,10 @@ define skill {
   :damage(DamageType.Hydro, 2);
   if (:self.hasEquipment(TheOverflow)) {
     :combatStatus(PrayerOfTheCrimsonCrown01);
-  }
-  else {
+  } else {
     :combatStatus(PrayerOfTheCrimsonCrown);
   }
-}
+};
 
 /**
  * @id 1207
@@ -180,8 +196,11 @@ define character {
   tags hydro, pole, sumeru;
   health 11;
   energy 2;
-  skills GleamingSpearGuardianStance, SacredRiteHeronsSanctum, SacredRiteWagtailsTide, HeronStrike;
-}
+  skills GleamingSpearGuardianStance,
+    SacredRiteHeronsSanctum,
+    SacredRiteWagtailsTide,
+    HeronStrike;
+};
 
 /**
  * @id 212071
@@ -200,6 +219,6 @@ define card {
   talent Candace {
     on enter {
       :useSkill(SacredRiteWagtailsTide);
-    }
-  }
-}
+    };
+  };
+};

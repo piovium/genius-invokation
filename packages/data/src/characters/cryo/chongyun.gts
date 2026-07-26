@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111042
@@ -30,19 +38,27 @@ define combatStatus {
     when :{
       if (:e.type !== DamageType.Physical) return false;
       const { tags } = :e.source.cast<"character">().definition;
-      return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
+      return (
+        tags.includes("sword") ||
+        tags.includes("claymore") ||
+        tags.includes("pole")
+      );
     };
     :e.changeDamageType(DamageType.Cryo);
-  }
+  };
   on increaseSkillDamage {
     when :{
       if (!:e.viaSkillType("normal")) return false;
       const { tags } = :e.source.cast<"character">().definition;
-      return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
+      return (
+        tags.includes("sword") ||
+        tags.includes("claymore") ||
+        tags.includes("pole")
+      );
     };
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 111041
@@ -59,11 +75,15 @@ define combatStatus {
     when :{
       if (:e.type !== DamageType.Physical) return false;
       const { tags } = :e.source.cast<"character">().definition;
-      return tags.includes("sword") || tags.includes("claymore") || tags.includes("pole");
+      return (
+        tags.includes("sword") ||
+        tags.includes("claymore") ||
+        tags.includes("pole")
+      );
     };
     :e.changeDamageType(DamageType.Cryo);
-  }
-}
+  };
+};
 
 /**
  * @id 11041
@@ -77,7 +97,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 11042
@@ -92,11 +112,10 @@ define skill {
   :damage(DamageType.Cryo, 3);
   if (:self.hasEquipment(SteadyBreathing)) {
     :combatStatus(ChonghuaFrostField01);
-  }
-  else {
+  } else {
     :combatStatus(ChonghuaFrostField);
   }
-}
+};
 
 /**
  * @id 11043
@@ -110,7 +129,7 @@ define skill {
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 3;
   :damage(DamageType.Cryo, 7);
-}
+};
 
 /**
  * @id 1104
@@ -125,7 +144,7 @@ define character {
   health 10;
   energy 3;
   skills Demonbane, ChonghuasLayeredFrost, CloudpartingStar;
-}
+};
 
 /**
  * @id 211041
@@ -144,6 +163,6 @@ define card {
   talent Chongyun {
     on enter {
       :useSkill(ChonghuasLayeredFrost);
-    }
-  }
-}
+    };
+  };
+};

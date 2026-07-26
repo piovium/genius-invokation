@@ -1,12 +1,43 @@
-import { card, skill, $, character, type SkillHandle, DamageType, DiceType, combatStatus } from "@gi-tcg/core/builder";
-import { DarkgoldWolfbite, DarkgoldWolfbite01, ForcefulFistsOfFrost, IcefangRush } from "../characters/cryo/wriothesley.gts";
-import { DeathsCrossing, SevenphaseFlash, Skirk, Skirk01 } from "../characters/cryo/skirk.gts";
-import { SinOfPride, TenguJuuraiStormcluster } from "../characters/electro/kujou_sara.gts";
-import { StarsGatherAtDusk, WhiteCloudsAtDawn, WordOfWindAndFlower } from "../characters/anemo/xianyun.gts";
+import {
+  card,
+  skill,
+  $,
+  character,
+  type SkillHandle,
+  DamageType,
+  DiceType,
+  combatStatus,
+} from "@gi-tcg/core/builder";
+import {
+  DarkgoldWolfbite,
+  DarkgoldWolfbite01,
+  ForcefulFistsOfFrost,
+  IcefangRush,
+} from "../characters/cryo/wriothesley.gts";
+import {
+  DeathsCrossing,
+  SevenphaseFlash,
+  Skirk,
+  Skirk01,
+} from "../characters/cryo/skirk.gts";
+import {
+  SinOfPride,
+  TenguJuuraiStormcluster,
+} from "../characters/electro/kujou_sara.gts";
+import {
+  StarsGatherAtDusk,
+  WhiteCloudsAtDawn,
+  WordOfWindAndFlower,
+} from "../characters/anemo/xianyun.gts";
 import { status } from "@gi-tcg/core/builder";
 import { Kirara } from "../characters/dendro/kirara.gts";
 import { Target } from "../cards/equipment/techniques.gts";
-import { AgileSwitch, EfficientSwitch, IneffectiveWhenPlayed, NoTuningAllowed } from "../commons.gts";
+import {
+  AgileSwitch,
+  EfficientSwitch,
+  IneffectiveWhenPlayed,
+  NoTuningAllowed,
+} from "../commons.gts";
 import { ChenyuBrew } from "../cards/event/food.gts";
 import { RedFeatherFanStatus } from "../cards/support/item.gts";
 
@@ -22,8 +53,11 @@ define character {
   tags cryo, catalyst, fontaine, pneuma;
   health 10;
   energy 3;
-  skills ForcefulFistsOfFrost, IcefangRush, DarkgoldWolfbite, DarkgoldWolfbite01;
-}
+  skills ForcefulFistsOfFrost,
+    IcefangRush,
+    DarkgoldWolfbite,
+    DarkgoldWolfbite01;
+};
 
 /**
  * @id 111161
@@ -39,17 +73,19 @@ define card {
   addTarget $.my.character.def(Skirk);
   on actionPhase {
     :disposeCard(:self);
-    :$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`)
-      ?.addVariableWithMax("serpentsSubtlety", 1, 7);
-  }
+    :$(
+      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    )?.addVariableWithMax("serpentsSubtlety", 1, 7);
+  };
   on switchActive {
     :disposeCard(:self);
-    :$(`my character with definition id ${Skirk} or my character with definition id ${Skirk01}`)
-      ?.addVariableWithMax("serpentsSubtlety", 1, 7);
-  }
+    :$(
+      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    )?.addVariableWithMax("serpentsSubtlety", 1, 7);
+  };
   :characterStatus(SevenphaseFlash, "@targets.0");
   :characterStatus(DeathsCrossing, "@targets.0");
-}
+};
 
 /**
  * @id 14063
@@ -65,7 +101,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 1);
   :summon(TenguJuuraiStormcluster);
-}
+};
 
 /**
  * @id 114063
@@ -81,11 +117,14 @@ define status {
     when :( :e.viaSkillType("elemental") || :e.viaSkillType("burst") );
     usage 2;
     :e.increaseDamage(1);
-    if (:self.master.element() === DiceType.Electro && :query($.my.typeEquipment.def(SinOfPride))) {
+    if (
+      :self.master.element() === DiceType.Electro &&
+      :query($.my.typeEquipment.def(SinOfPride))
+    ) {
       :e.increaseDamage(1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 1510
@@ -100,7 +139,7 @@ define character {
   health 10;
   energy 2;
   skills WordOfWindAndFlower, WhiteCloudsAtDawn, StarsGatherAtDusk;
-}
+};
 
 /**
  * @id 117072
@@ -112,7 +151,7 @@ define combatStatus {
   id 117072 as private ShieldOfSafeTransport;
   until "v6.5.0";
   shield 2;
-}
+};
 
 /**
  * @id 117071
@@ -131,8 +170,8 @@ define combatStatus {
     };
     :damage(DamageType.Dendro, 1);
     :drawCards(1);
-  }
-}
+  };
+};
 
 /**
  * @id 17072
@@ -147,7 +186,7 @@ define skill {
   cost DiceType.Dendro, 3;
   :combatStatus(UrgentNekoParcel);
   :combatStatus(ShieldOfSafeTransport);
-}
+};
 
 /**
  * @id 311106
@@ -165,12 +204,12 @@ define card {
     variable extraDamage, 0;
     on increaseSkillDamage {
       :e.increaseDamage(:getVariable("extraDamage"));
-    }
+    };
     on endPhase {
       :addVariableWithMax("extraDamage", 1, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311408
@@ -189,7 +228,7 @@ define card {
     on increaseSkillDamage {
       when :( :e.viaSkillType("burst") );
       :e.increaseDamage(2);
-    }
+    };
     on damagedOrHealed {
       when :( :e.target.isActive() );
       listenTo samePlayer;
@@ -198,9 +237,9 @@ define card {
         :addVariable("justice", -3);
         :gainEnergy(1, "@master");
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 313006
@@ -225,13 +264,14 @@ define card {
     };
     on enter {
       :characterStatus(Target, $.opp.active);
-    }
-    on deductOmniDiceSwitch {                       // 绒翼龙只在可以减费时生效
+    };
+    on deductOmniDiceSwitch {
+      // 绒翼龙只在可以减费时生效
       when :(
-        :query($.opp.active.has($.def(Target))) &&  // 敌方出战角色附属目标
-        :e.action.to.id === :self.master.id &&      // 附属角色切换为出战角色
-        :player.hands.length > 0                    // 有手牌（“如可能，舍弃”）
-      );                     
+        :query($.opp.active.has($.def(Target))) && // 敌方出战角色附属目标
+          :e.action.to.id === :self.master.id && // 附属角色切换为出战角色
+          :player.hands.length > 0 // 有手牌（“如可能，舍弃”）
+      );
       :setVariable("deductDiceTriggered", 1);
       // 预计算时不触发弃牌
       if (:skillInfo.environment !== "precalculate") {
@@ -241,21 +281,21 @@ define card {
         st.dispose();
       }
       :e.deductOmniCost(1);
-    }
+    };
     on beforeFastSwitch {
       when :( :getVariable("deductDiceTriggered") ); // 将此次切换视为「快速行动」
       :setVariable("deductDiceTriggered", 0);
       :e.setFastAction();
-    }
+    };
     skill {
       id 3130063;
       usage 2;
       cost DiceType.Aligned, 1;
       :switchActive("my next");
       :characterStatus(Target, "opp active");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321018
@@ -275,16 +315,16 @@ define card {
       if (:getVariable("forbidden") >= 5 && :oppPlayer.hands.length > 0) {
         :addVariable("forbidden", -5);
         const candidates = :oppPlayer.hands.filter(
-          (card) => !card.withAttachment(IneffectiveWhenPlayed)
+          (card) => !card.withAttachment(IneffectiveWhenPlayed),
         );
         const target = :random(candidates);
         if (target) {
           :attach(IneffectiveWhenPlayed, target);
         }
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321032
@@ -308,7 +348,7 @@ define card {
       };
       :createHandCard(ChenyuBrew);
       :createHandCard(ChenyuBrew);
-    }
+    };
     on adventure {
       when :( :getVariable("exp") >= 4 );
       usage 1 {
@@ -316,16 +356,16 @@ define card {
         visible false;
       };
       :combatStatus(EfficientSwitch, "my", {
-          overrideVariables: {
-            usage: 3
-          }
-        });
+        overrideVariables: {
+          usage: 3,
+        },
+      });
       :combatStatus(AgileSwitch, "my", {
-          overrideVariables: {
-            usage: 3
-          }
-        });
-    }
+        overrideVariables: {
+          usage: 3,
+        },
+      });
+    };
     on adventure {
       when :( :getVariable("exp") >= 8 );
       usage 1 {
@@ -341,9 +381,9 @@ define card {
       const healValue = 999; // interesting.
       :heal(healValue, targetCh);
       :finishAdventure();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 323003
@@ -359,6 +399,6 @@ define card {
     on switchActive {
       usage perRound, 1;
       :combatStatus(RedFeatherFanStatus);
-    }
-  }
-}
+    };
+  };
+};

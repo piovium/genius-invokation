@@ -13,7 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 import { SourcewaterDroplet } from "./neuvillette.gts";
 import { BondOfLife } from "../../commons.gts";
 
@@ -28,7 +36,7 @@ define skill {
   skillType burst;
   prepared;
   :damage(DamageType.Hydro, 2);
-}
+};
 
 /**
  * @id 112134
@@ -40,7 +48,7 @@ define status {
   id 112134 as MedicalInterventionOfPureIntentionStatus;
   since "v5.2.0";
   prepare MedicalInterventionOfPureIntention;
-}
+};
 
 /**
  * @id 112135
@@ -53,11 +61,13 @@ define combatStatus {
   id 112135 as Convalescence;
   since "v5.2.0";
   on increaseDamage {
-    when :( :e.viaSkillType("elemental") || :e.source.definition.type === "summon" );
+    when :(
+      :e.viaSkillType("elemental") || :e.source.definition.type === "summon"
+    );
     usage 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 // 所附属角色的生命之契完全移除后，提高此角色1点最大生命值。
 define status {
@@ -67,8 +77,8 @@ define status {
     when :( :e.entity.definition.id === BondOfLife );
     usage 3;
     :increaseMaxHealth(1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 112133
@@ -83,9 +93,8 @@ define card {
   on selfHandCardInserted, only {
     :heal(1, "all my characters");
     :combatStatus(SourcewaterDroplet);
-  }
-}
-
+  };
+};
 
 /**
  * @id 112132
@@ -100,8 +109,8 @@ define card {
   on selfHandCardInserted, only {
     :damage(DamageType.Hydro, 2, "my active");
     :createPileCards(SmallBolsteringBubblebalm, 1, "top", "opp");
-  }
-}
+  };
+};
 
 /**
  * @id 112131
@@ -116,8 +125,8 @@ define card {
   on selfHandCardInserted, only {
     :heal(3, "my active");
     :createPileCards(MediumBolsteringBubblebalm, 1, "topIndex1", "opp");
-  }
-}
+  };
+};
 
 /**
  * @id 12131
@@ -131,7 +140,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 12132
@@ -145,11 +154,11 @@ define skill {
   cost DiceType.Hydro, 3;
   :createPileCards(LargeBolsteringBubblebalm, 1, "topIndex2");
   :characterStatus(BondOfLife, "@self", {
-      overrideVariables: {
-        usage: 3
-      }
-    });
-}
+    overrideVariables: {
+      usage: 3,
+    },
+  });
+};
 
 /**
  * @id 12133
@@ -164,7 +173,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
   :characterStatus(MedicalInterventionOfPureIntentionStatus, "@self");
-}
+};
 
 /**
  * @id 12134
@@ -177,13 +186,19 @@ define skill {
   id 12134 as DetailedDiagnosisThoroughTreatment01;
   skillType passive {
     on battleBegin {
-      :characterStatus(DetailedDiagnosisThoroughTreatmentStatus, "all my characters");
-    }
+      :characterStatus(
+        DetailedDiagnosisThoroughTreatmentStatus,
+        "all my characters",
+      );
+    };
     on revive {
-      :characterStatus(DetailedDiagnosisThoroughTreatmentStatus, "all my characters");
-    }
-  }
-}
+      :characterStatus(
+        DetailedDiagnosisThoroughTreatmentStatus,
+        "all my characters",
+      );
+    };
+  };
+};
 
 /**
  * @id 12136
@@ -195,10 +210,12 @@ define skill {
   id 12136 as DetailedDiagnosisThoroughTreatment02;
   skillType passive {
     on defeated {
-      :dispose(`all my status with definition id ${DetailedDiagnosisThoroughTreatmentStatus}`);
-    }
-  }
-}
+      :dispose(
+        `all my status with definition id ${DetailedDiagnosisThoroughTreatmentStatus}`,
+      );
+    };
+  };
+};
 
 /**
  * @id 12137
@@ -211,14 +228,16 @@ define skill {
   skillType passive {
     on switchActive {
       when :( :e.switchInfo.to.id === :self.id );
-      const droplet = :$(`my combat status with definition id ${SourcewaterDroplet}`);
+      const droplet = :$(
+        `my combat status with definition id ${SourcewaterDroplet}`,
+      );
       if (droplet) {
         :consumeUsage(1, droplet);
         :gainEnergy(1, "@self");
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1213
@@ -232,8 +251,14 @@ define character {
   tags hydro, bow, fontaine, pneuma;
   health 12;
   energy 2;
-  skills TargetedTreatment, ReboundHydrotherapy, SuperSaturatedSyringing, DetailedDiagnosisThoroughTreatment01, MedicalInterventionOfPureIntention, DetailedDiagnosisThoroughTreatment02, DetailedDiagnosisThoroughTreatment03;
-}
+  skills TargetedTreatment,
+    ReboundHydrotherapy,
+    SuperSaturatedSyringing,
+    DetailedDiagnosisThoroughTreatment01,
+    MedicalInterventionOfPureIntention,
+    DetailedDiagnosisThoroughTreatment02,
+    DetailedDiagnosisThoroughTreatment03;
+};
 
 /**
  * @id 212131
@@ -251,10 +276,10 @@ define card {
   talent Sigewinne {
     on enter {
       :useSkill(ReboundHydrotherapy);
-    }
+    };
     on useSkill {
       when :( :e.skill.definition.id === ReboundHydrotherapy );
       :combatStatus(Convalescence);
-    }
-  }
-}
+    };
+  };
+};

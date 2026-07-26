@@ -7,26 +7,26 @@ settings:
 catalogs:
   default:
     '@gi-tcg/gts-language-client-code':
-      specifier: ^0.7.0
-      version: 0.7.0
+      specifier: ^0.7.4
+      version: 0.7.4
     '@gi-tcg/gts-language-server':
-      specifier: ^0.7.0
-      version: 0.7.0
+      specifier: ^0.7.4
+      version: 0.7.4
     '@gi-tcg/gts-runtime':
-      specifier: ^0.7.0
-      version: 0.7.0
+      specifier: ^0.7.4
+      version: 0.7.4
     '@gi-tcg/gts-transpiler':
-      specifier: ^0.7.0
-      version: 0.7.0
+      specifier: ^0.7.4
+      version: 0.7.4
     '@gi-tcg/gtsc':
-      specifier: ^0.7.0
-      version: 0.7.0
+      specifier: ^0.7.4
+      version: 0.7.4
     '@gi-tcg/prettier-plugin-gts':
-      specifier: ^0.7.0
-      version: 0.7.0
+      specifier: ^0.7.4
+      version: 0.7.4
     '@gi-tcg/unplugin-gts':
-      specifier: ^0.7.0
-      version: 0.7.0
+      specifier: ^0.7.4
+      version: 0.7.4
     '@unocss/preset-icons':
       specifier: ^66.3.3
       version: 66.3.3
@@ -89,10 +89,10 @@ importers:
         version: link:packages/config
       '@gi-tcg/prettier-plugin-gts':
         specifier: 'catalog:'
-        version: 0.7.0(prettier@3.9.5)
+        version: 0.7.4(prettier@3.9.5)
       '@gi-tcg/unplugin-gts':
         specifier: 'catalog:'
-        version: 0.7.0(esbuild@0.23.1)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.23.1))
+        version: 0.7.4(esbuild@0.23.1)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.23.1))
       '@microsoft/api-extractor':
         specifier: ^7.58.2
         version: 7.58.2(@types/node@26.1.1)
@@ -259,7 +259,7 @@ importers:
     dependencies:
       '@gi-tcg/gts-runtime':
         specifier: 'catalog:'
-        version: 0.7.0
+        version: 0.7.4
       '@gi-tcg/typings':
         specifier: workspace:*
         version: link:../typings
@@ -296,7 +296,7 @@ importers:
         version: link:../data
       '@gi-tcg/gts-transpiler':
         specifier: 'catalog:'
-        version: 0.7.0
+        version: 0.7.4
       esbuild-wasm:
         specifier: ^0.27.3
         version: 0.27.7
@@ -321,10 +321,10 @@ importers:
         version: link:../deck-builder
       '@gi-tcg/gts-language-client-code':
         specifier: 'catalog:'
-        version: 0.7.0(@codingame/monaco-vscode-extension-api@25.1.2)
+        version: 0.7.4(@codingame/monaco-vscode-extension-api@25.1.2)
       '@gi-tcg/gts-language-server':
         specifier: 'catalog:'
-        version: 0.7.0(@volar/language-service@2.4.28)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
+        version: 0.7.4(@volar/language-service@2.4.28)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@gi-tcg/typings':
         specifier: workspace:*
         version: link:../typings
@@ -373,10 +373,10 @@ importers:
         version: link:../config
       '@gi-tcg/gts-transpiler':
         specifier: 'catalog:'
-        version: 0.7.0
+        version: 0.7.4
       '@gi-tcg/gtsc':
         specifier: 'catalog:'
-        version: 0.7.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
+        version: 0.7.4(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@microsoft/tsdoc':
         specifier: ^0.14.2
         version: 0.14.2
@@ -3028,39 +3028,39 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@gi-tcg/gts-language-client-code@0.7.0':
-    resolution: {integrity: sha512-nCGdLBkeaX8ghOV88AMOTq6WvbsJeZy3n82Uo1u1FTQR85AdTXYn7kMj7uRfD7TESne7RUAsKjssJhhX+ZjPGw==}
+  '@gi-tcg/gts-language-client-code@0.7.4':
+    resolution: {integrity: sha512-FAjgFX9owBGfxw1M8jE69OXm2mNK7S1GBBtuqygeONo/v0sjJm8Jz8agpA+zGbPyYoAim2XiS8nsduZLKF2GOQ==}
     peerDependencies:
       vscode: '*'
 
-  '@gi-tcg/gts-language-plugin@0.7.0':
-    resolution: {integrity: sha512-M51TxXUQm4aK4gweKQICKYhF7QuNcmKeNtudaaHz07cauTkwSEueHQa3O1Q63kukaluswVTvcTxNRru/qAhTzQ==}
+  '@gi-tcg/gts-language-plugin@0.7.4':
+    resolution: {integrity: sha512-hA/uxIX2ZUV5KAowatBYc6HMbx9b8K3D0jY3z0fmgBKBKYgsajYYruTMtHsS47l0sw8TommOlDqv41kKpJ81Qw==}
     peerDependencies:
       typescript: npm:@typescript/typescript6@^6.0.1
 
-  '@gi-tcg/gts-language-server@0.7.0':
-    resolution: {integrity: sha512-CvrTWJa6ljfxF3cjoHjoNbSCILc2rw4kO+4YvcyKNbyr++QR7/l4DKRPg3fvMPUAhORE6WsTmcovvJqmFGQq2A==}
+  '@gi-tcg/gts-language-server@0.7.4':
+    resolution: {integrity: sha512-LWBKjrdu8YBlLzsACO1/qfkabPY79Cxklse0jSRvyZ2EIKZKtyzGXj5LHc47TVVlkpyvw7tU1rRWuAatwM+IdQ==}
     hasBin: true
 
-  '@gi-tcg/gts-runtime@0.7.0':
-    resolution: {integrity: sha512-AgiiiKzWmVS9cuqIoNhLd7pJO6XR7NEm8aX2ZzUkyPGW2lm6yriyWp6l/lOK9caKPO9Ys82IAZ3QkC/gk6km4Q==}
+  '@gi-tcg/gts-runtime@0.7.4':
+    resolution: {integrity: sha512-u0KB9CGmRES9pXaINqEauYIU2btvzkBduaioUiREBHicTrbV9pV0c05Ue/LgJ7dRprKTfsolTlMa3hkaFfSPGw==}
 
-  '@gi-tcg/gts-transpiler@0.7.0':
-    resolution: {integrity: sha512-y3cRrQj0YihU8/EYthewEM+vAw7XGxi1a4JRkkvbm+dRYBW2WJnq1evlFpGRD4oG3UOdeJruoA/FfcBq1JigNQ==}
+  '@gi-tcg/gts-transpiler@0.7.4':
+    resolution: {integrity: sha512-eIBwSBzWfPcWbYZKalZdCHW2KAj+ogIGK+u7+p/rTt08t2ubpSPEohfKQ9QIa6yOnIxShV/bHPNdHpyRibmYMg==}
 
-  '@gi-tcg/gtsc@0.7.0':
-    resolution: {integrity: sha512-NTrVI3cnPOvGKCG/+9yuMWSv8YrjrZLMA9V6Wb0plhJisQbA5gDLfejxVYHWpWDhak9MM58Avu4yMwa/WTKguA==}
+  '@gi-tcg/gtsc@0.7.4':
+    resolution: {integrity: sha512-tLsU+lqCO2Zl3aDzbAEggZuNJ43HKqkPH7n/Rdv0KUwuuijqyTHdofFsv0aSljDEf+9ByqznG47SXyc7X4dTVw==}
     hasBin: true
     peerDependencies:
       typescript: npm:@typescript/typescript6@^6.0.1
 
-  '@gi-tcg/prettier-plugin-gts@0.7.0':
-    resolution: {integrity: sha512-oAq66YLLT+E4PRPvp9dedRgiaMzXVPfIfZ1fVec77ybihJszPzk6/qv/OGT8xWHhQgK2/F82MT30L9WqstbIfg==}
+  '@gi-tcg/prettier-plugin-gts@0.7.4':
+    resolution: {integrity: sha512-cMpkj+74tpo72tum6wcixhKkOKqnjMMCo8RTcJtsmIsx4qnTlYheMSyNvoj4EKHRQecH56Y50hMY16iWnbbhPw==}
     peerDependencies:
       prettier: ^3.0.0
 
-  '@gi-tcg/unplugin-gts@0.7.0':
-    resolution: {integrity: sha512-mAjUMueQROYHbHDxvW7b5kqCTDgpYGEJZ5O6vc3VqVwFt+8wtAbZUUdtPnzhWJaGEkCi0iq84m8thj5r7zkd5g==}
+  '@gi-tcg/unplugin-gts@0.7.4':
+    resolution: {integrity: sha512-eAR0l0OZrZNFR1/mUZM/0i7CdezzbaUNZzqSO2Cu2RJWK5+ED//vdmNirs9pv31mxoTwWwTMVOJQL+7qGYFC2w==}
     peerDependencies:
       '@rspack/core': ^1
       esbuild: '*'
@@ -5999,8 +5999,8 @@ packages:
       jiti:
         optional: true
 
-  espolar@0.6.3:
-    resolution: {integrity: sha512-8iFVcKJS3fWbnzEZ+vO0cfdrU3atpoSltvYlEsoMjnMGhqPsPEWB4Zix/o7I3nB8rr4bQFlkRXxI7u+esMDvFg==}
+  espolar@0.6.5:
+    resolution: {integrity: sha512-2aLLfbxaAWmKguSYljKJBYQMqHU9UKrK9PIZo4WLgXC8SO69ZECEil/ZfkhQUpoFMi8mbE/xdGyIkudYqlbAqQ==}
     engines: {node: '>= 26.0.0'}
     peerDependencies:
       '@types/estree': ^1.0.9
@@ -11547,14 +11547,14 @@ snapshots:
   '@ffmpeg-installer/win32-x64@4.1.0':
     optional: true
 
-  '@gi-tcg/gts-language-client-code@0.7.0(@codingame/monaco-vscode-extension-api@25.1.2)':
+  '@gi-tcg/gts-language-client-code@0.7.4(@codingame/monaco-vscode-extension-api@25.1.2)':
     dependencies:
       remeda: 2.39.0
       vscode: '@codingame/monaco-vscode-extension-api@25.1.2'
 
-  '@gi-tcg/gts-language-plugin@0.7.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
+  '@gi-tcg/gts-language-plugin@0.7.4(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
-      '@gi-tcg/gts-transpiler': 0.7.0
+      '@gi-tcg/gts-transpiler': 0.7.4
       '@volar/language-core': 2.4.28
       '@volar/typescript': 2.4.28
       typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
@@ -11562,10 +11562,10 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@gi-tcg/gts-language-server@0.7.0(@volar/language-service@2.4.28)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
+  '@gi-tcg/gts-language-server@0.7.4(@volar/language-service@2.4.28)(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
-      '@gi-tcg/gts-language-plugin': 0.7.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
-      '@gi-tcg/gts-transpiler': 0.7.0
+      '@gi-tcg/gts-language-plugin': 0.7.4(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
+      '@gi-tcg/gts-transpiler': 0.7.4
       '@volar/language-server': 2.4.28
       '@zenfs/core': 2.5.7
       path-browserify-esm: 1.0.6
@@ -11576,17 +11576,17 @@ snapshots:
       - babel-plugin-macros
       - typescript
 
-  '@gi-tcg/gts-runtime@0.7.0':
+  '@gi-tcg/gts-runtime@0.7.4':
     dependencies:
       ajv: 8.20.0
 
-  '@gi-tcg/gts-transpiler@0.7.0':
+  '@gi-tcg/gts-transpiler@0.7.4':
     dependencies:
       '@sveltejs/acorn-typescript': 1.0.10(acorn@8.16.0)
       '@types/estree': 1.0.9
       acorn: 8.16.0
       dedent: 1.7.2
-      espolar: 0.6.3(@types/estree@1.0.9)
+      espolar: 0.6.5(@types/estree@1.0.9)
       esrap: 2.2.1
       magic-string: 0.30.21
       path-browserify-esm: 1.0.6
@@ -11594,24 +11594,24 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@gi-tcg/gtsc@0.7.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
+  '@gi-tcg/gtsc@0.7.4(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)':
     dependencies:
-      '@gi-tcg/gts-language-plugin': 0.7.0(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
+      '@gi-tcg/gts-language-plugin': 0.7.4(typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2)
       '@volar/typescript': 2.4.28
       typescript: typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@gi-tcg/prettier-plugin-gts@0.7.0(prettier@3.9.5)':
+  '@gi-tcg/prettier-plugin-gts@0.7.4(prettier@3.9.5)':
     dependencies:
-      '@gi-tcg/gts-transpiler': 0.7.0
+      '@gi-tcg/gts-transpiler': 0.7.4
       prettier: 3.9.5
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@gi-tcg/unplugin-gts@0.7.0(esbuild@0.23.1)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.23.1))':
+  '@gi-tcg/unplugin-gts@0.7.4(esbuild@0.23.1)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.1.1)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.23.1))':
     dependencies:
-      '@gi-tcg/gts-transpiler': 0.7.0
+      '@gi-tcg/gts-transpiler': 0.7.4
       '@types/bun': 1.3.14
       rollup: 4.46.2
       unplugin: '@gytx/unplugin@3.1.0-patch.2'
@@ -14912,7 +14912,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  espolar@0.6.3(@types/estree@1.0.9):
+  espolar@0.6.5(@types/estree@1.0.9):
     dependencies:
       '@typescript-eslint/types': 8.60.1
       '@volar/source-map': 2.4.28

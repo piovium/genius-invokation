@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 114101
@@ -28,8 +36,8 @@ define summon {
   on endPhase {
     usage 1;
     :damage(DamageType.Electro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 114103
@@ -56,8 +64,8 @@ define summon {
     } else {
       ch.gainEnergy(1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 114102
@@ -74,8 +82,8 @@ define summon {
     usage 2;
     :damage(DamageType.Heal, 2, "my active");
     :gainEnergy(1, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 14101
@@ -89,7 +97,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 14102
@@ -103,7 +111,7 @@ define skill {
   cost DiceType.Electro, 3;
   :damage(DamageType.Electro, 2);
   :summon(AftersalesServiceRounds);
-}
+};
 
 /**
  * @id 14103
@@ -119,11 +127,10 @@ define skill {
   :damage(DamageType.Electro, 1);
   if (:self.hasEquipment(DiscretionarySupplement)) {
     :summon(Jinni01);
-  }
-  else {
+  } else {
     :summon(Jinni);
   }
-}
+};
 
 /**
  * @id 1410
@@ -137,8 +144,10 @@ define character {
   tags electro, claymore, sumeru;
   health 10;
   energy 2;
-  skills MarvelousSworddanceModified, SpiritwardingLampTroubleshooterCannon, AlcazarzaraysExactitude;
-}
+  skills MarvelousSworddanceModified,
+    SpiritwardingLampTroubleshooterCannon,
+    AlcazarzaraysExactitude;
+};
 
 /**
  * @id 214101
@@ -157,6 +166,6 @@ define card {
   talent Dori {
     on enter {
       :useSkill(AlcazarzaraysExactitude);
-    }
-  }
-}
+    };
+  };
+};

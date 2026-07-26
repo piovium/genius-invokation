@@ -13,7 +13,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, combatStatus, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 114081
@@ -32,13 +41,13 @@ define summon {
       append 6;
     };
     :damage(DamageType.Electro, :getVariable("atk"));
-  }
+  };
   on declareEnd {
     when :( :getVariable("usage") >= 4 );
     :damage(DamageType.Electro, :getVariable("atk"));
     :consumeUsage();
-  }
-}
+  };
+};
 
 /**
  * @id 114082
@@ -52,8 +61,8 @@ define status {
   once deductOmniDiceSkill {
     when :( :e.action.skill.definition.id === YakanEvocationSesshouSakura );
     :e.deductOmniCost(2);
-  }
-}
+  };
+};
 
 /**
  * @id 114083
@@ -67,8 +76,8 @@ define combatStatus {
   on beforeAction {
     usage 1;
     :damage(DamageType.Electro, 3);
-  }
-}
+  };
+};
 
 /**
  * @id 14081
@@ -82,7 +91,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Electro, 1);
-}
+};
 
 /**
  * @id 14082
@@ -99,7 +108,7 @@ define skill {
     sakura.addVariable("atk", 1);
   }
   :summon(SesshouSakura);
-}
+};
 
 /**
  * @id 14083
@@ -112,7 +121,7 @@ define skill {
   skillType burst;
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Electro, 4)
+  :damage(DamageType.Electro, 4);
   const sakura = :$(`my summon with definition id ${SesshouSakura}`);
   if (sakura) {
     sakura.dispose();
@@ -121,7 +130,7 @@ define skill {
       :characterStatus(RiteOfDispatch);
     }
   }
-}
+};
 
 /**
  * @id 1408
@@ -135,8 +144,10 @@ define character {
   tags electro, catalyst, inazuma;
   health 10;
   energy 2;
-  skills SpiritfoxSineater, YakanEvocationSesshouSakura, GreatSecretArtTenkoKenshin;
-}
+  skills SpiritfoxSineater,
+    YakanEvocationSesshouSakura,
+    GreatSecretArtTenkoKenshin;
+};
 
 /**
  * @id 214081
@@ -155,6 +166,6 @@ define card {
   talent YaeMiko {
     on enter {
       :useSkill(GreatSecretArtTenkoKenshin);
-    }
-  }
-}
+    };
+  };
+};

@@ -13,7 +13,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, combatStatus, DiceType, extension, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  combatStatus,
+  DiceType,
+  extension,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 311301
@@ -29,9 +35,9 @@ define card {
   weapon claymore {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311302
@@ -48,14 +54,14 @@ define card {
   weapon claymore {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on useSkill {
       when :( :e.isSkillType("elemental") );
       usage perRound, 1;
       :generateDice(:self.master.element(), 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311303
@@ -76,9 +82,9 @@ define card {
       } else {
         :e.increaseDamage(1);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311304
@@ -95,14 +101,14 @@ define card {
   weapon claymore {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on increaseSkillDamage {
       when :( :e.viaSkillType("normal") );
       usage perRound, 1;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 121013
@@ -113,7 +119,7 @@ define card {
 define combatStatus {
   id 121013 as private RebelliousShield;
   shield 1, 2;
-}
+};
 
 /**
  * @id 311305
@@ -130,12 +136,12 @@ define card {
   weapon claymore {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on useSkill {
       :combatStatus(RebelliousShield);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301105
@@ -148,8 +154,8 @@ define status {
   oneDuration;
   once increaseSkillDamage {
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 301106
@@ -162,8 +168,8 @@ define status {
   oneDuration;
   once increaseSkillDamage {
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 311306
@@ -181,15 +187,15 @@ define card {
   weapon claymore {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on useSkill {
       :characterStatus(DesertWatchTakeTheInitiative, "@master");
-    }
+    };
     on damaged {
       :characterStatus(DesertWatchOffensiveDefense, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301109
@@ -203,8 +209,8 @@ define status {
   once useSkill {
     when :( :e.isSkillType("normal") );
     :generateDice(:self.master.element(), 2);
-  }
-}
+  };
+};
 
 /**
  * @id 311307
@@ -221,26 +227,31 @@ define card {
   weapon claymore {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on enter {
       :characterStatus(ForestRegaliaInEffect, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 define extension {
   idHint 311308 as NonInitialPlayedCardExtension;
   schema ({ defIds: "pair<number[]>" });
   initialState ({ defIds: [[], []] });
   description "记录双方打出过的名称不存在于本局最初牌组中的不同名的行动牌";
-  mutateWhen onPlayCard, ((c, e) => {
-    if (e.onTimeState.players[e.who].initialPile.every((card) => card.id !== e.card.definition.id)) {
-      if (!c.defIds[e.who].includes(e.card.definition.id)) {
-        c.defIds[e.who].push(e.card.definition.id);
+  mutateWhen onPlayCard,
+    ((c, e) => {
+      if (
+        e.onTimeState.players[e.who].initialPile.every(
+          (card) => card.id !== e.card.definition.id,
+        )
+      ) {
+        if (!c.defIds[e.who].includes(e.card.definition.id)) {
+          c.defIds[e.who].push(e.card.definition.id);
+        }
       }
-    }
-  })
-}
+    });
+};
 
 /**
  * @id 311308
@@ -258,13 +269,14 @@ define card {
   weapon claymore {
     variable supp, 0;
     associateExtension NonInitialPlayedCardExtension;
-    replaceDescription "[GCG_TOKEN_COUNTER]", ((_, { area }, ext) => ext.defIds[area.who].length);
+    replaceDescription "[GCG_TOKEN_COUNTER]",
+      ((_, { area }, ext) => ext.defIds[area.who].length);
     on enter {
       :setVariable("supp", :getExtensionState().defIds[:self.who].length);
-    }
+    };
     on playCard {
       :setVariable("supp", :getExtensionState().defIds[:self.who].length);
-    }
+    };
     on increaseSkillDamage {
       const supp = :getVariable("supp");
       if (supp >= 9) {
@@ -274,9 +286,9 @@ define card {
       } else if (supp >= 2) {
         :e.increaseDamage(1);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311309
@@ -300,15 +312,15 @@ define card {
       :disposeMaxCostHands(1);
       :e.decreaseDamage(1);
       :addVariable("stoic", 1);
-    }
+    };
     on increaseSkillDamage {
       when :( :getVariable("stoic") > 0 );
       :e.increaseDamage(1);
       :drawCards(:getVariable("stoic"));
       :setVariable("stoic", 0);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311310
@@ -327,11 +339,11 @@ define card {
     on increaseSkillDamage {
       when :( :e.viaSkillType("burst") );
       :e.increaseDamage(2);
-    }
+    };
     on increaseSkillDamage {
       when :( :e.getReaction() );
       :e.increaseDamage(1);
-    }
+    };
     on dealReaction {
       listenTo samePlayer;
       :addVariable("thought", 1);
@@ -339,6 +351,6 @@ define card {
         :addVariable("thought", -2);
         :gainEnergy(1, "@master");
       }
-    }
-  }
-}
+    };
+  };
+};

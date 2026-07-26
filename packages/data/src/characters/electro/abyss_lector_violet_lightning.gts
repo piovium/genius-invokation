@@ -13,7 +13,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, Aura, card, character, combatStatus, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  $,
+  Aura,
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 124063
@@ -25,7 +35,7 @@ import { $, Aura, card, character, combatStatus, DamageType, DiceType, skill, st
 define status {
   id 124063 as ThunderousWard;
   reserved;
-}
+};
 
 /**
  * @id 124064
@@ -37,7 +47,7 @@ define status {
 define status {
   id 124064 as RollingAbyssalThunder;
   reserved;
-}
+};
 
 /**
  * @id 124062
@@ -51,8 +61,8 @@ define status {
   on increaseSkillDamage {
     when :( :e.type === DamageType.Electro );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 124061
@@ -72,8 +82,8 @@ define status {
     }
     :characterStatus(ElectricRebirthHoned, "@master");
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 24061
@@ -87,7 +97,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Electro, 1);
-}
+};
 
 /**
  * @id 24062
@@ -108,7 +118,7 @@ define skill {
     }
   }
   :damage(DamageType.Electro, 3);
-}
+};
 
 /**
  * @id 24063
@@ -124,11 +134,10 @@ define skill {
   cost DiceType.Energy, 2;
   if (:$("opp active")!.energy <= 1) {
     :damage(DamageType.Electro, 5);
-  }
-  else {
+  } else {
     :damage(DamageType.Electro, 3);
   }
-}
+};
 
 /**
  * @id 24064
@@ -141,9 +150,9 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(ElectricRebirth);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 24065
@@ -155,7 +164,7 @@ define skill {
   id 24065 as ElectricRebirthPassive01;
   skillType passive;
   reserved;
-}
+};
 
 /**
  * @id 2406
@@ -169,8 +178,11 @@ define character {
   tags electro, monster;
   health 6;
   energy 2;
-  skills DenOfThunder, ShockOfTheEnigmaticAbyss, WildThunderburst, ElectricRebirthPassive;
-}
+  skills DenOfThunder,
+    ShockOfTheEnigmaticAbyss,
+    WildThunderburst,
+    ElectricRebirthPassive;
+};
 
 // 侵雷重闪入场时创建此出战状态，检测咏者击倒后夺取1点充能
 define combatStatus {
@@ -179,8 +191,8 @@ define combatStatus {
     when :( :e.target.definition.id === AbyssLectorVioletLightning );
     :query($.opp.active)?.loseEnergy(1);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 224061
@@ -200,6 +212,6 @@ define card {
       if (!:self.master.hasStatus(ElectricRebirth)) {
         :query($.opp.active)?.loseEnergy(1);
       }
-    }
-  }
-}
+    };
+  };
+};

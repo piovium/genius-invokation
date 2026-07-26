@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, Reaction, skill, summon } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  Reaction,
+  skill,
+  summon,
+} from "@gi-tcg/core/builder";
 import { Conductive, NoTuningAllowed, Shield } from "../../commons.gts";
 import type { EntityType } from "@gi-tcg/core";
 
@@ -31,8 +39,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Electro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 14171
@@ -46,7 +54,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 14172
@@ -59,10 +67,10 @@ define skill {
   skillType elemental;
   cost DiceType.Electro, 3;
   :combatStatus(Shield, "my", {
-      overrideVariables: { shield: 2 }
-    });
+    overrideVariables: { shield: 2 },
+  });
   :summon(Birgitta);
-}
+};
 
 /**
  * @id 14173
@@ -77,7 +85,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 4);
   :summon(Birgitta);
-}
+};
 
 /**
  * @id 14174
@@ -96,9 +104,9 @@ define skill {
       if (area.type === "hands" || area.type === "pile") {
         :attach(NoTuningAllowed, :get<EntityType>(area.cardId));
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 14175
@@ -111,7 +119,7 @@ define skill {
   id 14175 as MoonsignBenedictionAssemblageHub01;
   skillType passive;
   reserved;
-}
+};
 
 /**
  * @id 1417
@@ -125,9 +133,12 @@ define character {
   tags electro, pole, nodkrai;
   health 10;
   energy 2;
-  skills CyclonicDuster, CleaningModeCarrierFrequency, SupremeInstructionCyclonicExterminator, MoonsignBenedictionAssemblageHub;
+  skills CyclonicDuster,
+    CleaningModeCarrierFrequency,
+    SupremeInstructionCyclonicExterminator,
+    MoonsignBenedictionAssemblageHub;
   enabledLunarReactions Reaction.LunarElectroCharged;
-}
+};
 
 /**
  * @id 214171
@@ -150,7 +161,7 @@ define card {
           :attach(Conductive, target);
         }
       }
-    }
+    };
     on dealReaction {
       when :( :e.type === Reaction.LunarElectroCharged );
       listenTo samePlayer;
@@ -158,6 +169,6 @@ define card {
       if (target) {
         :attachCostIncrease(target);
       }
-    }
-  }
-}
+    };
+  };
+};

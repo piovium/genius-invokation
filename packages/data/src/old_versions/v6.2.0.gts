@@ -1,11 +1,46 @@
-import { $, card, character, combatStatus, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
-import { CoolcolorCapture, FramingFreezingPointComposition, StillPhotoComprehensiveConfirmation } from "../characters/cryo/charlotte.gts";
-import { KamisatoArtKyouka, KamisatoArtMarobashi, KamisatoArtSuiyuu } from "../characters/hydro/kamisato_ayato.gts";
+import {
+  $,
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
+import {
+  CoolcolorCapture,
+  FramingFreezingPointComposition,
+  StillPhotoComprehensiveConfirmation,
+} from "../characters/cryo/charlotte.gts";
+import {
+  KamisatoArtKyouka,
+  KamisatoArtMarobashi,
+  KamisatoArtSuiyuu,
+} from "../characters/hydro/kamisato_ayato.gts";
 import { Brilliance, ScarletSeal } from "../characters/pyro/yanfei.gts";
-import { BlazingBlessing, CrimsonOoyoroi, SwiftshatterSpear } from "../characters/pyro/thoma.gts";
-import { FloralBrush, SupplicantsBowmanship, TrumpcardKitty } from "../characters/dendro/collei.gts";
-import { BranchingFlow, SavageSwell, StormSurge, ThunderingTide } from "../characters/hydro/hydro_tulpa.gts";
-import { ErodedFlamingFeathers, ResentmentPassive, SeveringPrimalFire, VoidClawStrike } from "../characters/pyro/lord_of_eroded_primal_fire.gts";
+import {
+  BlazingBlessing,
+  CrimsonOoyoroi,
+  SwiftshatterSpear,
+} from "../characters/pyro/thoma.gts";
+import {
+  FloralBrush,
+  SupplicantsBowmanship,
+  TrumpcardKitty,
+} from "../characters/dendro/collei.gts";
+import {
+  BranchingFlow,
+  SavageSwell,
+  StormSurge,
+  ThunderingTide,
+} from "../characters/hydro/hydro_tulpa.gts";
+import {
+  ErodedFlamingFeathers,
+  ResentmentPassive,
+  SeveringPrimalFire,
+  VoidClawStrike,
+} from "../characters/pyro/lord_of_eroded_primal_fire.gts";
 import { NonInitialPlayedCardExtension } from "../cards/equipment/weapon/claymore.gts";
 import { ChenyuBrew } from "../cards/event/food.gts";
 import { AgileSwitch, EfficientSwitch } from "../commons.gts";
@@ -22,8 +57,10 @@ define character {
   tags cryo, catalyst, fontaine, ousia;
   health 10;
   energy 2;
-  skills CoolcolorCapture, FramingFreezingPointComposition, StillPhotoComprehensiveConfirmation;
-}
+  skills CoolcolorCapture,
+    FramingFreezingPointComposition,
+    StillPhotoComprehensiveConfirmation;
+};
 
 /**
  * @id 112061
@@ -38,7 +75,7 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     usage 3;
@@ -46,8 +83,8 @@ define status {
     if (:self.master.hasEquipment(KyoukaFuushi) && :e.target.health <= 6) {
       :e.increaseDamage(2);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 1206
@@ -62,7 +99,7 @@ define character {
   health 11;
   energy 2;
   skills KamisatoArtMarobashi, KamisatoArtKyouka, KamisatoArtSuiyuu;
-}
+};
 
 /**
  * @id 212061
@@ -80,9 +117,9 @@ define card {
   talent KamisatoAyato {
     on enter {
       :useSkill(KamisatoArtKyouka);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 13083
@@ -99,7 +136,7 @@ define skill {
   :damage(DamageType.Pyro, 3);
   :characterStatus(ScarletSeal);
   :characterStatus(Brilliance);
-}
+};
 
 /**
  * @id 1311
@@ -114,7 +151,7 @@ define character {
   health 10;
   energy 2;
   skills SwiftshatterSpear, BlazingBlessing, CrimsonOoyoroi;
-}
+};
 
 /**
  * @id 1701
@@ -129,7 +166,7 @@ define character {
   health 10;
   energy 2;
   skills SupplicantsBowmanship, FloralBrush, TrumpcardKitty;
-}
+};
 
 /**
  * @id 217011
@@ -147,9 +184,9 @@ define card {
   talent Collei {
     on enter {
       :useSkill(FloralBrush);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2206
@@ -164,7 +201,7 @@ define character {
   health 12;
   energy 3;
   skills SavageSwell, StormSurge, ThunderingTide, BranchingFlow;
-}
+};
 
 /**
  * @id 2305
@@ -178,8 +215,11 @@ define character {
   tags pyro, monster;
   health 12;
   energy 2;
-  skills VoidClawStrike, ErodedFlamingFeathers, SeveringPrimalFire, ResentmentPassive;
-}
+  skills VoidClawStrike,
+    ErodedFlamingFeathers,
+    SeveringPrimalFire,
+    ResentmentPassive;
+};
 
 /**
  * @id 311308
@@ -197,13 +237,14 @@ define card {
   weapon claymore {
     variable supp, 0;
     associateExtension NonInitialPlayedCardExtension;
-    replaceDescription "[GCG_TOKEN_COUNTER]", ((_, { area }, ext) => ext.defIds[area.who].length);
+    replaceDescription "[GCG_TOKEN_COUNTER]",
+      ((_, { area }, ext) => ext.defIds[area.who].length);
     on enter {
       :setVariable("supp", :getExtensionState().defIds[:self.who].length);
-    }
+    };
     on playCard {
       :setVariable("supp", :getExtensionState().defIds[:self.who].length);
-    }
+    };
     on increaseSkillDamage {
       const supp = :getVariable("supp");
       if (supp >= 8) {
@@ -213,9 +254,9 @@ define card {
       } else if (supp >= 2) {
         :e.increaseDamage(1);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303228
@@ -231,13 +272,16 @@ define status {
   variable readiness, 0;
   on damagedOrHealed {
     :addVariableWithMax("readiness", 1, 2);
-  }
+  };
   once deductOmniDiceCard {
-    when :( :e.hasOneOfCardTag("weapon", "artifact") && :e.currentDiceCostSize() <= :getVariable("readiness") );
+    when :(
+      :e.hasOneOfCardTag("weapon", "artifact") &&
+        :e.currentDiceCostSize() <= :getVariable("readiness")
+    );
     :e.deductOmniCost(:e.diceCostSize());
     :setVariable("readiness", 0);
-  }
-}
+  };
+};
 
 /**
  * @id 332028
@@ -251,7 +295,7 @@ define card {
   until "v6.2.0";
   addTarget $.my.character;
   :characterStatus(MachineAssemblyLineInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303236
@@ -264,15 +308,18 @@ define combatStatus {
   oneDuration;
   variable count, 0;
   on generateDice {
-    when :( :e.who !== :self.who && :e.via.caller.definition.id !== :self.definition.id );
+    when :(
+      :e.who !== :self.who &&
+        :e.via.caller.definition.id !== :self.definition.id
+    );
     listenTo all;
     :addVariable("count", 1);
     if (:getVariable("count") === 2) {
       :generateDice(DiceType.Omni, 1);
       :setVariable("count", 0);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 321032
@@ -296,7 +343,7 @@ define card {
       };
       :createHandCard(ChenyuBrew);
       :createHandCard(ChenyuBrew);
-    }
+    };
     on adventure {
       when :( :getVariable("exp") >= 4 );
       usage 1 {
@@ -304,16 +351,16 @@ define card {
         visible false;
       };
       :combatStatus(EfficientSwitch, "my", {
-          overrideVariables: {
-            usage: 3
-          }
-        });
+        overrideVariables: {
+          usage: 3,
+        },
+      });
       :combatStatus(AgileSwitch, "my", {
-          overrideVariables: {
-            usage: 3
-          }
-        });
-    }
+        overrideVariables: {
+          usage: 3,
+        },
+      });
+    };
     on adventure {
       when :( :getVariable("exp") >= 7 );
       usage 1 {
@@ -329,9 +376,9 @@ define card {
       const healValue = 999; // interesting.
       :heal(healValue, targetCh);
       :finishAdventure();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 332041
@@ -354,4 +401,4 @@ define card {
     const oppSummon = :random(oppSummons);
     :triggerEndPhaseSkill(oppSummon);
   }
-}
+};

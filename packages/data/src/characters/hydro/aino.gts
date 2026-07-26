@@ -1,19 +1,28 @@
 // Copyright (C) 2026 Piovium Labs
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, card, character, DamageType, DiceType, Reaction, skill, summon } from "@gi-tcg/core/builder";
+import {
+  $,
+  card,
+  character,
+  DamageType,
+  DiceType,
+  Reaction,
+  skill,
+  summon,
+} from "@gi-tcg/core/builder";
 import { AgileSwitch, Empowerment } from "../../commons.gts";
 
 /**
@@ -30,8 +39,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Hydro, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 12161
@@ -45,7 +54,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 12162
@@ -59,12 +68,11 @@ define skill {
   cost DiceType.Hydro, 3;
   if (:query($.my.hand.with($.def(Empowerment)))) {
     :damage(DamageType.Hydro, 3);
-  }
-  else {
+  } else {
     :damage(DamageType.Hydro, 2);
   }
   :combatStatus(AgileSwitch);
-}
+};
 
 /**
  * @id 12163
@@ -79,7 +87,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
   :summon(CoolYourJetsDucky);
-}
+};
 
 /**
  * @id 12164
@@ -102,9 +110,9 @@ define skill {
       } else {
         :gainEnergy(1, :self);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1216
@@ -118,8 +126,11 @@ define character {
   tags hydro, claymore, nodkrai;
   health 10;
   energy 2;
-  skills BishbashboshRepair, Musecatcher, PrecisionHydronicCooler, ModularEfficiencyProtocol;
-}
+  skills BishbashboshRepair,
+    Musecatcher,
+    PrecisionHydronicCooler,
+    ModularEfficiencyProtocol;
+};
 
 /**
  * @id 212161
@@ -138,14 +149,18 @@ define card {
   talent Aino {
     on enter {
       :useSkill(PrecisionHydronicCooler);
-    }
+    };
     on increaseDamage {
-      when :( ([
+      when :(
+        (
+          [
             Reaction.ElectroCharged,
             Reaction.LunarElectroCharged,
             Reaction.Bloom,
-            Reaction.LunarBloom
-          ] as (Reaction | null)[]).includes(:e.getReaction()) );
+            Reaction.LunarBloom,
+          ] as (Reaction | null)[]
+        ).includes(:e.getReaction())
+      );
       listenTo samePlayer;
       usage perRound, 1;
       :e.increaseDamage(2);
@@ -153,6 +168,6 @@ define card {
       if (hand) {
         :attach(Empowerment, hand);
       }
-    }
-  }
-}
+    };
+  };
+};

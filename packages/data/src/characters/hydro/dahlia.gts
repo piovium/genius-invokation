@@ -1,19 +1,27 @@
 // Copyright (C) 2026 Piovium Labs
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, card, character, combatStatus, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
+import {
+  $,
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+} from "@gi-tcg/core/builder";
 import { Shield } from "../../commons.gts";
 
 /**
@@ -29,8 +37,8 @@ define combatStatus {
   on damaged {
     usage 2;
     :combatStatus(Shield);
-  }
-}
+  };
+};
 
 /**
  * @id 112152
@@ -51,8 +59,8 @@ define combatStatus {
     } else {
       :damage(DamageType.Hydro, 1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 12151
@@ -66,7 +74,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 12152
@@ -80,7 +88,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 2);
   :combatStatus(SacramentalShower);
-}
+};
 
 /**
  * @id 12153
@@ -95,12 +103,12 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
   :combatStatus(Shield, "my", {
-      overrideVariables: {
-        shield: 2
-      }
-    });
+    overrideVariables: {
+      shield: 2,
+    },
+  });
   :combatStatus(FavonianFavor);
-}
+};
 
 /**
  * @id 1215
@@ -115,7 +123,7 @@ define character {
   health 10;
   energy 2;
   skills FavoniusBladeworkRitual, ImmersiveOrdinance, RadiantPsalter;
-}
+};
 
 /**
  * @id 212151
@@ -134,7 +142,7 @@ define card {
   talent Dahlia {
     on enter {
       :useSkill(RadiantPsalter);
-    }
+    };
     on beforeDefeated {
       when :( :query($.my.combatStatus.def(FavonianFavor)) );
       listenTo samePlayer;
@@ -143,6 +151,6 @@ define card {
         :dispose(favor);
       }
       :immune(2);
-    }
-  }
-}
+    };
+  };
+};

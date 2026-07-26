@@ -1,9 +1,42 @@
-import { card, character, combatStatus, DamageType, DiceType, skill, summon } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+} from "@gi-tcg/core/builder";
 import { DisposedSupportAndSummonsCountExtension } from "../cards/event/other.gts";
-import { Itzpapa, NightsoulsBlessing, OpalShield } from "../characters/cryo/citlali.gts";
-import { CaloricBalancingPlan01, KineticEnergyScale, TeachingsOfTheCollectiveOfPlenty, ThunderboltRush, WeightedSpike } from "../characters/electro/iansan.gts";
-import { ArkheSeatsSacredAndSecular, LetThePeopleRejoice, SalonSolitaireOusia, SalonSolitairePneuma, Skill12114, SoloistsSolicitation, SoloistsSolicitationOusia } from "../characters/hydro/furina.gts";
-import { AllIsAsh, Arlecchino, BalemoonRising, InvitationToABeheading, TheBalemoonAloneMayKnowPassive01, TheBalemoonAloneMayKnowPassive03 } from "../characters/pyro/arlecchino.gts";
+import {
+  Itzpapa,
+  NightsoulsBlessing,
+  OpalShield,
+} from "../characters/cryo/citlali.gts";
+import {
+  CaloricBalancingPlan01,
+  KineticEnergyScale,
+  TeachingsOfTheCollectiveOfPlenty,
+  ThunderboltRush,
+  WeightedSpike,
+} from "../characters/electro/iansan.gts";
+import {
+  ArkheSeatsSacredAndSecular,
+  LetThePeopleRejoice,
+  SalonSolitaireOusia,
+  SalonSolitairePneuma,
+  Skill12114,
+  SoloistsSolicitation,
+  SoloistsSolicitationOusia,
+} from "../characters/hydro/furina.gts";
+import {
+  AllIsAsh,
+  Arlecchino,
+  BalemoonRising,
+  InvitationToABeheading,
+  TheBalemoonAloneMayKnowPassive01,
+  TheBalemoonAloneMayKnowPassive03,
+} from "../characters/pyro/arlecchino.gts";
 import { BondOfLife } from "../commons.gts";
 import { SingYourHeartOutInEffect } from "../cards/event/food.gts";
 
@@ -24,7 +57,7 @@ define skill {
   :gainNightsoul("@self", 1);
   :combatStatus(OpalShield);
   :combatStatus(Itzpapa);
-}
+};
 
 /**
  * @id 1211
@@ -38,8 +71,12 @@ define character {
   tags hydro, sword, fontaine, pneuma;
   health 10;
   energy 2;
-  skills SoloistsSolicitation, SalonSolitairePneuma, LetThePeopleRejoice, Skill12114, ArkheSeatsSacredAndSecular;
-}
+  skills SoloistsSolicitation,
+    SalonSolitairePneuma,
+    LetThePeopleRejoice,
+    Skill12114,
+    ArkheSeatsSacredAndSecular;
+};
 
 /**
  * @id 1212
@@ -53,8 +90,12 @@ define character {
   tags hydro, sword, fontaine, ousia;
   health 10;
   energy 2;
-  skills SoloistsSolicitationOusia, SalonSolitaireOusia, LetThePeopleRejoice, Skill12114, ArkheSeatsSacredAndSecular;
-}
+  skills SoloistsSolicitationOusia,
+    SalonSolitaireOusia,
+    LetThePeopleRejoice,
+    Skill12114,
+    ArkheSeatsSacredAndSecular;
+};
 
 /**
  * @id 113141
@@ -71,9 +112,12 @@ define combatStatus {
     if (:e.target.variables.alive) {
       :characterStatus(BondOfLife, :e.target);
     }
-    :characterStatus(BondOfLife, `opp characters with definition id ${Arlecchino}`);
-  }
-}
+    :characterStatus(
+      BondOfLife,
+      `opp characters with definition id ${Arlecchino}`,
+    );
+  };
+};
 
 /**
  * @id 14143
@@ -91,13 +135,12 @@ define skill {
   :gainNightsoul("@self", 1);
   if (:self.hasEquipment(TeachingsOfTheCollectiveOfPlenty)) {
     :combatStatus(KineticEnergyScale, "my", {
-      overrideVariables: { usage: 3 }
+      overrideVariables: { usage: 3 },
     });
-  }
-  else {
+  } else {
     :combatStatus(KineticEnergyScale);
   }
-}
+};
 
 /**
  * @id 1414
@@ -111,9 +154,12 @@ define character {
   tags electro, pole, natlan;
   health 12;
   energy 2;
-  skills WeightedSpike, ThunderboltRush, TheThreePrinciplesOfPower, CaloricBalancingPlan01;
+  skills WeightedSpike,
+    ThunderboltRush,
+    TheThreePrinciplesOfPower,
+    CaloricBalancingPlan01;
   associateNightsoul NightsoulsBlessing;
-}
+};
 
 /**
  * @id 14155
@@ -128,7 +174,7 @@ define skill {
   prepared;
   forcePlunging;
   :damage(DamageType.Electro, 2);
-}
+};
 
 /**
  * @id 333027
@@ -146,7 +192,7 @@ define card {
   };
   :drawCards(3);
   :combatStatus(SingYourHeartOutInEffect);
-}
+};
 
 /**
  * @id 303245
@@ -166,12 +212,12 @@ define summon {
   on endPhase {
     usage 1;
     :damage(DamageType.Piercing, :getVariable("effect"));
-  }
+  };
   on enter {
     const ext = :getExtensionState();
     const addUsage = Math.min(ext.disposedSupportCount[:self.who], 5);
     const addDmg = Math.min(ext.disposedSummonsCount[:self.who], 5);
     :addVariable("usage", addUsage);
     :addVariable("effect", addDmg);
-  }
-}
+  };
+};

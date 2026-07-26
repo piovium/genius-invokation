@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, summon } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+} from "@gi-tcg/core/builder";
 import { Crystallize } from "../../commons.gts";
 
 /**
@@ -32,8 +40,8 @@ define summon {
     if (:$$(`my character include defeated with tag (geo)`).length >= 2) {
       :combatStatus(Crystallize);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 116061
@@ -46,14 +54,14 @@ define combatStatus {
   id 116061 as GeneralsWarBanner;
   duration 2 {
     append {
-    limit 3;
-  };
+      limit 3;
+    };
   };
   on increaseSkillDamage {
     when :( :e.type === DamageType.Geo );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 16061
@@ -67,7 +75,7 @@ define skill {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 16062
@@ -81,7 +89,7 @@ define skill {
   cost DiceType.Geo, 3;
   :damage(DamageType.Geo, 2);
   :combatStatus(GeneralsWarBanner);
-}
+};
 
 /**
  * @id 16063
@@ -97,7 +105,7 @@ define skill {
   :damage(DamageType.Geo, 2);
   :combatStatus(GeneralsWarBanner);
   :summon(GeneralsGlory);
-}
+};
 
 /**
  * @id 1606
@@ -112,7 +120,7 @@ define character {
   health 10;
   energy 2;
   skills RippingFangFletching, InuzakaAllroundDefense, JuugaForwardUntoVictory;
-}
+};
 
 /**
  * @id 216061
@@ -130,13 +138,15 @@ define card {
   talent Gorou {
     on enter {
       :useSkill(InuzakaAllroundDefense);
-    }
+    };
     on skillDamage {
-      when :( :e.type === DamageType.Geo && 
-          :$(`my combat status with definition id ${GeneralsWarBanner}`) );
+      when :(
+        :e.type === DamageType.Geo &&
+          :$(`my combat status with definition id ${GeneralsWarBanner}`)
+      );
       listenTo samePlayer;
       usage perRound, 1;
       :drawCards(1);
-    }
-  }
-}
+    };
+  };
+};

@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Aura, card, character, combatStatus, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
+import {
+  Aura,
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+} from "@gi-tcg/core/builder";
 import { EfficientSwitch } from "../../commons.gts";
 
 /**
@@ -26,7 +34,7 @@ define combatStatus {
   id 115121 as SwallowwispShield;
   since "v5.8.0";
   shield 1, Infinity;
-}
+};
 
 /**
  * @id 15121
@@ -40,7 +48,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Anemo, 1);
-}
+};
 
 /**
  * @id 15122
@@ -54,7 +62,7 @@ define skill {
   cost DiceType.Anemo, 3;
   const aura = :$("opp active")?.aura;
   :combatStatus(SwallowwispShield, "my", {
-    overrideVariables: { shield: 2 }
+    overrideVariables: { shield: 2 },
   });
   :combatStatus(EfficientSwitch);
   :damage(DamageType.Anemo, 1);
@@ -67,7 +75,7 @@ define skill {
       :combatStatus(SwallowwispShield);
       break;
   }
-}
+};
 
 /**
  * @id 15123
@@ -82,9 +90,9 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Anemo, 3);
   :combatStatus(SwallowwispShield, "my", {
-      overrideVariables: { shield: 2 }
-    });
-}
+    overrideVariables: { shield: 2 },
+  });
+};
 
 /**
  * @id 1512
@@ -99,7 +107,7 @@ define character {
   health 10;
   energy 2;
   skills BlackPheasantStridesOnWater, SwallowwispPinionDance, LustrousMoonrise;
-}
+};
 
 /**
  * @id 215121
@@ -117,12 +125,12 @@ define card {
   talent LanYan {
     on enter {
       :useSkill(SwallowwispPinionDance);
-    }
+    };
     on useSkill {
       when :( :e.isSkillType("normal") );
       listenTo samePlayer;
       usage perRound, 1;
       :combatStatus(SwallowwispShield);
-    }
-  }
-}
+    };
+  };
+};

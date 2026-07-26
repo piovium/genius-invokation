@@ -1,19 +1,26 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 113072
@@ -27,8 +34,8 @@ define status {
   on endPhase {
     usage 1;
     :damage(DamageType.Pyro, 1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 113071
@@ -44,15 +51,15 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.type === DamageType.Pyro );
     :e.increaseDamage(1);
     if (:e.viaChargedAttack()) {
       :characterStatus(BloodBlossom, "@damage.target");
     }
-  }
-}
+  };
+};
 
 /**
  * @id 13071
@@ -66,7 +73,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 13072
@@ -79,7 +86,7 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 2;
   :characterStatus(ParamitaPapilio);
-}
+};
 
 /**
  * @id 13073
@@ -99,7 +106,7 @@ define skill {
     :damage(DamageType.Pyro, 4);
     :heal(2, "@self");
   }
-}
+};
 
 /**
  * @id 1307
@@ -114,7 +121,7 @@ define character {
   health 12;
   energy 3;
   skills SecretSpearOfWangsheng, GuideToAfterlife, SpiritSoother;
-}
+};
 
 /**
  * @id 213071
@@ -132,10 +139,10 @@ define card {
   talent HuTao {
     on enter {
       :useSkill(GuideToAfterlife);
-    }
+    };
     on increaseSkillDamage {
       when :( :self.master.health <= 6 && :e.type === DamageType.Pyro );
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};

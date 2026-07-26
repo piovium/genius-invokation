@@ -1,4 +1,10 @@
-import { DamageType, DiceType, card, skill, status } from "@gi-tcg/core/builder";
+import {
+  DamageType,
+  DiceType,
+  card,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 import { EmbersRekindled } from "../characters/pyro/abyss_lector_fathomless_flames.gts";
 import { HeronStrike } from "../characters/hydro/candace.gts";
 import { Wavestrider } from "../characters/electro/beidou.gts";
@@ -21,8 +27,8 @@ define status {
       :characterStatus(AegisOfAbyssalFlame, "@master");
     }
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 123024
@@ -38,8 +44,8 @@ define status {
   on increaseSkillDamage {
     when :( :e.type === DamageType.Pyro );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 112071
@@ -53,7 +59,7 @@ define status {
   until "v4.5.0";
   shield 2;
   prepare HeronStrike;
-}
+};
 
 /**
  * @id 12072
@@ -67,7 +73,7 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   :characterStatus(HeronShield);
-}
+};
 
 /**
  * @id 114051
@@ -81,7 +87,7 @@ define status {
   until "v4.5.0";
   prepare Wavestrider;
   shield 2;
-}
+};
 
 /**
  * @id 14052
@@ -95,7 +101,7 @@ define skill {
   skillType elemental;
   cost DiceType.Electro, 3;
   :characterStatus(TidecallerSurfEmbrace);
-}
+};
 
 /**
  * @id 322020
@@ -111,11 +117,13 @@ define card {
     on deductOmniDiceCard {
       when :( :e.hasCardTag("artifact") );
       usage perRound, 1;
-      const artifactedCh = :$$("my characters has equipment with tag (artifact)").length;
+      const artifactedCh = :$$(
+        "my characters has equipment with tag (artifact)",
+      ).length;
       :e.deductOmniCost(1 + artifactedCh);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 323005
@@ -129,14 +137,18 @@ define card {
   until "v4.5.0";
   support item {
     on deductOmniDiceCard {
-      when :( :e.currentDiceCostSize() === 1 &&
-          ["equipment", "support"].includes(:e.action.skill.caller.definition.type) );
+      when :(
+        :e.currentDiceCostSize() === 1 &&
+          ["equipment", "support"].includes(
+            :e.action.skill.caller.definition.type,
+          )
+      );
       usage perRound, 1;
       usage 2;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 322022
@@ -153,12 +165,18 @@ define card {
     associateExtension DisposedSupportCountExtension;
     variable experience, 0;
     on enter {
-      :setVariable("experience", Math.min(:getExtensionState().disposedSupportCount[:self.who], 6));
-    }
+      :setVariable(
+        "experience",
+        Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
+      );
+    };
     on dispose {
       when :( :e.entity.definition.type === "support" );
-      :setVariable("experience", Math.min(:getExtensionState().disposedSupportCount[:self.who], 6));
-    }
+      :setVariable(
+        "experience",
+        Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
+      );
+    };
     on useSkill {
       when :( :e.isSkillType("burst") );
       const exp = :getVariable("experience");
@@ -166,6 +184,6 @@ define card {
         :generateDice(DiceType.Omni, exp - 2);
         :dispose();
       }
-    }
-  }
-}
+    };
+  };
+};

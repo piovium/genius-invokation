@@ -13,7 +13,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, card, character, DamageType, DiceType, Reaction, skill, status, summon } from "@gi-tcg/core/builder";
+import {
+  $,
+  card,
+  character,
+  DamageType,
+  DiceType,
+  Reaction,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 117091
@@ -29,37 +39,42 @@ define status {
   duration 2;
   defineSnippet :{
     const nightsoul = :self.master.hasNightsoulsBlessing();
-    if (nightsoul && nightsoul.getVariable("nightsoul") === 2 && !:self.master.hasStatus(GrapplePrepare)) {
+    if (
+      nightsoul &&
+      nightsoul.getVariable("nightsoul") === 2 &&
+      !:self.master.hasStatus(GrapplePrepare)
+    ) {
       :self.master.addStatus(GrapplePrepare);
       :consumeNightsoul("@master", 2);
     }
   };
   on damaged {
-    when :( :e.getReaction() === Reaction.Burning &&
-        !:e.target.isMine() );
+    when :( :e.getReaction() === Reaction.Burning && !:e.target.isMine() );
     listenTo all;
     :gainNightsoul("@master");
     :callSnippet();
-  }
+  };
   on beforeTechnique {
     when :( :e.techniqueCaller.id !== :self.master.id );
     listenTo samePlayer;
     :gainNightsoul("@master");
     :callSnippet();
-  }
+  };
   on beforeAction {
     listenTo all;
     :callSnippet();
-  }
+  };
   on selfDispose {
     void 0;
     // 钩锁链接离场时，角色退出夜魂加持
-    const nightsoul = :$(`my characters with definition id ${Kinich}`)?.hasNightsoulsBlessing();
+    const nightsoul = :$(
+      `my characters with definition id ${Kinich}`,
+    )?.hasNightsoulsBlessing();
     if (nightsoul) {
       :dispose(nightsoul);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 117092
@@ -71,7 +86,7 @@ define status {
   id 117092 as NightsoulsBlessing;
   since "v5.4.0";
   nightsoulsBlessing 2;
-}
+};
 
 /**
  * @id 117093
@@ -88,8 +103,8 @@ define summon {
     usage 2;
     :damage(DamageType.Dendro, 1);
     :damage(DamageType.Dendro, 1, "opp next");
-  }
-}
+  };
+};
 
 /**
  * @id 117094
@@ -103,8 +118,8 @@ define status {
   once beforeAction {
     when :( :self.master.isActive() );
     :damage(DamageType.Dendro, 3, "recent opp from @master");
-  }
-}
+  };
+};
 
 /**
  * @id 17091
@@ -118,7 +133,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 17092
@@ -148,7 +163,7 @@ define skill {
     :drawCards(1, { who: "opp" });
     :addVariable("usagePerRound", -1, talent);
   }
-}
+};
 
 /**
  * @id 17093
@@ -163,7 +178,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Dendro, 1);
   :summon(AlmightyDragonlordAjaw);
-}
+};
 
 /**
  * @id 17094
@@ -175,7 +190,7 @@ define skill {
   id 17094 as Untitled11;
   skillType passive;
   reserved;
-}
+};
 
 /**
  * @id 1709
@@ -191,7 +206,7 @@ define character {
   energy 2;
   skills NightsunStyle, CanopyHunterRidingHigh, HailToTheAlmightyDragonlord;
   associateNightsoul NightsoulsBlessing;
-}
+};
 
 /**
  * @id 217091
@@ -206,13 +221,15 @@ define card {
   cost DiceType.Dendro, 1;
   talent Kinich, none {
     on switchActive {
-      when :( :self.master.id === :e.switchInfo.to.id &&
+      when :(
+        :self.master.id === :e.switchInfo.to.id &&
           :player.hands.length <= :oppPlayer.hands.length &&
-          :oppPlayer.hands.length > 0 );
+          :oppPlayer.hands.length > 0
+      );
       usage perRound, 1;
       const [targetCard] = :maxCostHands(1, { who: "opp" });
       :stealHandCard(targetCard);
       :drawCards(1, { who: "opp" });
-    }
-  }
-}
+    };
+  };
+};

@@ -1,6 +1,18 @@
-import { card, character, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+} from "@gi-tcg/core/builder";
 import { DriftcloudWave, Skyladder } from "../characters/anemo/xianyun.gts";
-import { BattlelineDetonation, BusterBlaze, ImperialPanoply, SearingBlast, ShatterclampStrike } from "../characters/pyro/emperor_of_fire_and_iron.gts";
+import {
+  BattlelineDetonation,
+  BusterBlaze,
+  ImperialPanoply,
+  SearingBlast,
+  ShatterclampStrike,
+} from "../characters/pyro/emperor_of_fire_and_iron.gts";
 import { Chiori, FlutteringHasode } from "../characters/geo/chiori.gts";
 
 /**
@@ -15,8 +27,12 @@ define character {
   tags pyro, monster;
   health 6;
   energy 2;
-  skills ShatterclampStrike, BusterBlaze, BattlelineDetonation, ImperialPanoply, SearingBlast;
-}
+  skills ShatterclampStrike,
+    BusterBlaze,
+    BattlelineDetonation,
+    ImperialPanoply,
+    SearingBlast;
+};
 
 /**
  * @id 15102
@@ -32,7 +48,7 @@ define skill {
   :damage(DamageType.Anemo, 2);
   :combatStatus(Skyladder);
   :characterStatus(DriftcloudWave);
-}
+};
 
 /**
  * @id 216091
@@ -50,9 +66,9 @@ define card {
   talent Chiori {
     on enter {
       :useSkill(FlutteringHasode);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 313002
@@ -71,9 +87,11 @@ define card {
   cost DiceType.Aligned, 1;
   technique {
     on deductOmniDiceTechnique {
-      when :( :e.action.skill.definition.id === 3130021 && :player.hands.length <= 2 );
+      when :(
+        :e.action.skill.definition.id === 3130021 && :player.hands.length <= 2
+      );
       :e.deductOmniCost(1);
-    }
+    };
     skill {
       id 3130021;
       cost DiceType.Aligned, 2;
@@ -83,6 +101,6 @@ define card {
       if (handCard) {
         :stealHandCard(handCard);
       }
-    }
-  }
-}
+    };
+  };
+};

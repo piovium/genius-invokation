@@ -30,9 +30,9 @@ define card {
   weapon catalyst {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311102
@@ -49,14 +49,14 @@ define card {
   weapon catalyst {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on useSkill {
       when :( :e.isSkillType("elemental") );
       usage perRound, 1;
       :generateDice(:self.master.element(), 1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311103
@@ -73,14 +73,14 @@ define card {
   weapon catalyst {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on increaseSkillDamage {
       when :( :e.viaSkillType("normal") );
       usage perRound, 1;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311104
@@ -97,15 +97,15 @@ define card {
   weapon catalyst {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on increaseSkillDamage {
       when :( :e.getReaction() );
       listenTo samePlayer;
       usage perRound, 2;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311105
@@ -122,12 +122,12 @@ define card {
   weapon catalyst {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on enter {
       :drawCards(2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311106
@@ -145,12 +145,12 @@ define card {
     variable extraDamage, 0;
     on increaseSkillDamage {
       :e.increaseDamage(:getVariable("extraDamage"));
-    }
+    };
     on endPhase {
       :addVariableWithMax("extraDamage", 1, 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311107
@@ -167,14 +167,14 @@ define card {
   weapon catalyst {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on deductVoidDiceSkill {
       when :( :e.isChargedAttack() );
       usage perRound, 2;
       :e.deductVoidCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301108
@@ -187,8 +187,8 @@ define status {
   oneDuration;
   once increaseSkillDamage {
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 311108
@@ -206,20 +206,20 @@ define card {
     variable count, 0;
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on damagedOrHealed {
       :addVariable("count", 1);
-    }
+    };
     on damagedOrHealed {
       when :( :getVariable("count") === 2 );
       usage perRound, 1;
       :characterStatus(AeonWave, "@master");
-    }
+    };
     on roundEnd {
       :setVariable("count", 0);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301111
@@ -233,12 +233,12 @@ define status {
   on deductVoidDiceSkill {
     when :( :e.isSkillType("normal") );
     :e.deductVoidCost(1);
-  }
+  };
   once increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 311109
@@ -255,9 +255,9 @@ define card {
     on damagedOrHealed {
       usage perRound, 2;
       :characterStatus(CashflowSupervisionInEffect, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 133099
@@ -270,7 +270,7 @@ define card {
 define card {
   id 133099 as TombOfTheEternalFlow; // 骗骗花
   reserved;
-}
+};
 
 /**
  * @id 301112
@@ -282,8 +282,8 @@ define status {
   id 301112 as FlowingPurityInEffect;
   once increaseSkillDamage {
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 311110
@@ -300,19 +300,19 @@ define card {
   weapon catalyst {
     on enter {
       :characterStatus(BondOfLife, "@master");
-    }
+    };
     on endPhase {
       :characterStatus(BondOfLife, "@master");
-    }
+    };
     on beforeAction {
       when :( !:self.master.hasStatus(BondOfLife) );
       listenTo all;
       usage perRound, 1;
       :generateDice("randomElement", 1);
       :characterStatus(FlowingPurityInEffect, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 311111
@@ -330,12 +330,12 @@ define card {
     on increaseSkillDamage {
       when :( :self.master.health >= 11 );
       :e.increaseDamage(2);
-    }
+    };
     on enter {
       :increaseMaxHealth(1, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 301113
@@ -350,8 +350,8 @@ define status {
   };
   once increaseSkillDamage {
     :e.increaseDamage(:getVariable("increaseDmg"));
-  }
-}
+  };
+};
 
 /**
  * @id 311112
@@ -370,6 +370,6 @@ define card {
       usage perRound, 1;
       :e.deductOmniCost(1);
       :characterStatus(StarcallersWatchInEffect, "@master");
-    }
-  }
-}
+    };
+  };
+};

@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon, type StatusHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type StatusHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 112062
@@ -29,12 +38,12 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Hydro, 2);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 112061
@@ -48,7 +57,7 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     usage 3;
@@ -57,8 +66,8 @@ define status {
     if (talent) {
       talent.setVariable("skillIsUsedWithKanka", 1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 12061
@@ -72,7 +81,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 12062
@@ -86,7 +95,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 2);
   :characterStatus(TakimeguriKanka);
-}
+};
 
 /**
  * @id 12063
@@ -101,7 +110,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 1);
   :summon(GardenOfPurity);
-}
+};
 
 /**
  * @id 1206
@@ -116,7 +125,7 @@ define character {
   health 11;
   energy 2;
   skills KamisatoArtMarobashi, KamisatoArtKyouka, KamisatoArtSuiyuu;
-}
+};
 
 /**
  * @id 212062
@@ -134,8 +143,8 @@ define status {
     if (talent) {
       talent.setVariable("deductEffectHasBeenTriggeredFromThisCard", 1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 212061
@@ -155,14 +164,17 @@ define card {
     variable skillIsUsedWithKanka, 0;
     on enter {
       :useSkill(KamisatoArtKyouka);
-    }
+    };
     on useSkill {
       when :( :e.isSkillType("normal") );
-      if (:getVariable("skillIsUsedWithKanka") && !:getVariable("deductEffectHasBeenTriggeredFromThisCard")) {
+      if (
+        :getVariable("skillIsUsedWithKanka") &&
+        !:getVariable("deductEffectHasBeenTriggeredFromThisCard")
+      ) {
         :characterStatus(KyoukaFuushiInEffect, "@master");
       }
       :setVariable("deductEffectHasBeenTriggeredFromThisCard", 0);
       :setVariable("skillIsUsedWithKanka", 0);
-    }
-  }
-}
+    };
+  };
+};

@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, Reaction, skill, status, summon } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  Reaction,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 116081
@@ -28,7 +37,7 @@ define card {
   cost DiceType.Aligned, 1;
   :damage(DamageType.Physical, 1, "opp active");
   :drawCards(1);
-}
+};
 
 /**
  * @id 116082
@@ -45,8 +54,8 @@ define summon {
     usage 2;
     :damage(DamageType.Geo, 1);
     :drawCards(1, { withDefinition: CrystalShrapnel });
-  }
-}
+  };
+};
 
 /**
  * @id 116084
@@ -62,8 +71,8 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Geo);
-  }
-}
+  };
+};
 
 /**
  * @id 16081
@@ -77,7 +86,7 @@ define skill {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 16082
@@ -90,11 +99,13 @@ define skill {
   skillType elemental;
   cost DiceType.Geo, 3;
   :characterStatus(GeoInfusion);
-  const shrapnels = :player.hands.filter((card) => card.definition.id === CrystalShrapnel).slice(0, 5);
+  const shrapnels = :player.hands
+    .filter((card) => card.definition.id === CrystalShrapnel)
+    .slice(0, 5);
   :damage(DamageType.Geo, 3 + shrapnels.length);
   :disposeCard(...shrapnels);
   :drawCards(shrapnels.length);
-}
+};
 
 /**
  * @id 16083
@@ -111,7 +122,7 @@ define skill {
   :damage(DamageType.Geo, 1);
   :summon(RosulaDorataSalute);
   :createHandCard(CrystalShrapnel);
-}
+};
 
 /**
  * @id 16084
@@ -123,18 +134,21 @@ define skill {
   id 16084 as MutualAssistanceNetwork;
   skillType passive {
     on damaged {
-      when :( ([
-            Reaction.CrystallizeCryo, 
-            Reaction.CrystallizeElectro, 
-            Reaction.CrystallizeHydro, 
-            Reaction.CrystallizePyro
-          ] as Reaction[]).includes(:e.getReaction()!) && 
-          !:e.target.isMine() );
+      when :(
+        (
+          [
+            Reaction.CrystallizeCryo,
+            Reaction.CrystallizeElectro,
+            Reaction.CrystallizeHydro,
+            Reaction.CrystallizePyro,
+          ] as Reaction[]
+        ).includes(:e.getReaction()!) && !:e.target.isMine()
+      );
       listenTo all;
       :createPileCards(CrystalShrapnel, 3, "random");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1608
@@ -148,8 +162,11 @@ define character {
   tags geo, claymore, fontaine, pneuma;
   health 10;
   energy 2;
-  skills BluntRefusal, CeremonialCrystalshot, AsTheSunlitSkysSingingSalute, MutualAssistanceNetwork;
-}
+  skills BluntRefusal,
+    CeremonialCrystalshot,
+    AsTheSunlitSkysSingingSalute,
+    MutualAssistanceNetwork;
+};
 
 /**
  * @id 216081
@@ -167,10 +184,10 @@ define card {
   talent Navia {
     on enter {
       :useSkill(CeremonialCrystalshot);
-    }
+    };
     on useSkill {
       usage perRound, 1;
       :drawCards(2, { withDefinition: CrystalShrapnel });
-    }
-  }
-}
+    };
+  };
+};

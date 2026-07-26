@@ -1,20 +1,32 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status, type CharacterHandle } from "@gi-tcg/core/builder";
-import { BlazingHeat, CrimsonWitchOfEmbers } from "../pyro/crimson_witch_of_embers.gts";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type CharacterHandle,
+} from "@gi-tcg/core/builder";
+import {
+  BlazingHeat,
+  CrimsonWitchOfEmbers,
+} from "../pyro/crimson_witch_of_embers.gts";
 
 /**
  * @id 121023
@@ -27,7 +39,7 @@ import { BlazingHeat, CrimsonWitchOfEmbers } from "../pyro/crimson_witch_of_embe
 define status {
   id 121023 as private IcesealedCrimsonWitchOfEmbers02;
   reserved;
-}
+};
 
 /**
  * @id 121024
@@ -40,7 +52,7 @@ define status {
 define status {
   id 121024 as private IcesealedCrimsonWitchOfEmbers01;
   reserved;
-}
+};
 
 /**
  * @id 121021
@@ -55,12 +67,12 @@ define status {
   on actionPhase {
     when :( :self.master.health <= 4 );
     :dispose();
-  }
+  };
   on beforeDefeated {
     :immune(1);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 121022
@@ -76,8 +88,8 @@ define status {
   on endPhase {
     usage 1;
     :damage(DamageType.Cryo, 1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 121025
@@ -96,8 +108,8 @@ define combatStatus {
       :characterStatus(SheerCold, "my active");
       laSignora.loseEnergy(1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 21021
@@ -111,7 +123,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Cryo, 1);
-}
+};
 
 /**
  * @id 21022
@@ -125,7 +137,7 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 2);
   :characterStatus(SheerCold, "opp active");
-}
+};
 
 /**
  * @id 21023
@@ -140,8 +152,10 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 4);
   :heal(2, "@self");
-  :dispose(`status with definition id ${IcesealedCrimsonWitchOfEmbers} at @self`);
-}
+  :dispose(
+    `status with definition id ${IcesealedCrimsonWitchOfEmbers} at @self`,
+  );
+};
 
 /**
  * @id 21024
@@ -154,18 +168,19 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(IcesealedCrimsonWitchOfEmbers);
-    }
-    on revive { // 女士在转变形态前被击倒，复活后会重新附着复活甲
+    };
+    on revive {
+      // 女士在转变形态前被击倒，复活后会重新附着复活甲
       :characterStatus(IcesealedCrimsonWitchOfEmbers);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 21025
  * @name 炽炎醒燃
  * @description
- * 
+ *
  */
 define skill {
   id 21025 as InfernosAwakening; // 定义为：当移除冰封的炽炎魔女时，转换角色形态
@@ -173,9 +188,9 @@ define skill {
     on dispose {
       when :( :e.entity.definition.id === IcesealedCrimsonWitchOfEmbers );
       :transformDefinition("@master", CrimsonWitchOfEmbers);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2102
@@ -191,8 +206,12 @@ define character {
   tags cryo, fatui;
   health 10;
   energy 2;
-  skills FrostbladeHailstorm, BitingShards, CarmineChrysalis, MightOfDelusion, InfernosAwakening;
-}
+  skills FrostbladeHailstorm,
+    BitingShards,
+    CarmineChrysalis,
+    MightOfDelusion,
+    InfernosAwakening;
+};
 
 /**
  * @id 221021
@@ -211,7 +230,7 @@ define card {
     variable barrierUsage, 0; // no io hint for now
     on enter {
       :generateDice(:self.master.element(), 3);
-    }
+    };
     on decreaseDamaged {
       when :( :e.value >= 3 );
       usage perRound, 1;
@@ -221,6 +240,6 @@ define card {
       } else {
         :characterStatus(BlazingHeat, "opp active");
       }
-    }
-  }
-}
+    };
+  };
+};

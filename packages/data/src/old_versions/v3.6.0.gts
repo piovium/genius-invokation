@@ -1,6 +1,24 @@
-import { $, card, character, DamageType, DiceType, skill, summon, type EquipmentHandle, type SkillHandle } from "@gi-tcg/core/builder";
-import { LiutianArchery, SacredCryoPearl, TrailOfTheQilin } from "../characters/cryo/ganyu.gts";
-import { MirrorCage, Refraction, Refraction01 } from "../characters/hydro/mirror_maiden.gts";
+import {
+  $,
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type EquipmentHandle,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
+import {
+  LiutianArchery,
+  SacredCryoPearl,
+  TrailOfTheQilin,
+} from "../characters/cryo/ganyu.gts";
+import {
+  MirrorCage,
+  Refraction,
+  Refraction01,
+} from "../characters/hydro/mirror_maiden.gts";
 import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.gts";
 import { LithicGuard } from "../cards/equipment/weapon/pole.gts";
 
@@ -33,7 +51,7 @@ define skill {
     :damage(DamageType.Piercing, 2, "opp standby");
     :damage(DamageType.Cryo, 2);
   }
-}
+};
 
 /**
  * @id 11014
@@ -50,7 +68,7 @@ define skill {
   :damage(DamageType.Piercing, 1, "opp standby");
   :damage(DamageType.Cryo, 1);
   :summon(SacredCryoPearl);
-}
+};
 
 /**
  * @id 1101
@@ -65,7 +83,7 @@ define character {
   health 10;
   energy 2;
   skills LiutianArchery, TrailOfTheQilin, FrostflakeArrow, CelestialShower;
-}
+};
 
 /**
  * @id 22022
@@ -81,11 +99,10 @@ define skill {
   :damage(DamageType.Hydro, 3);
   if (:self.hasEquipment(MirrorCage)) {
     :characterStatus(Refraction01, "opp active");
-  }
-  else {
+  } else {
     :characterStatus(Refraction, "opp active");
   }
-}
+};
 
 /**
  * @id 116051
@@ -104,21 +121,24 @@ define summon {
   on endPhase {
     :damage(DamageType.Geo, 1);
     :dispose();
-  }
+  };
   on decreaseDamaged {
     usage 1 {
       autoDispose false;
     };
     :e.decreaseDamage(1);
-  }
+  };
   on damaged {
     when :( :e.target.isActive() );
     usage 1 {
       name "addStatusUsage";
     };
-    :characterStatus(SuperlativeSuperstrength, "my characters with definition id 1605");
-  }
-}
+    :characterStatus(
+      SuperlativeSuperstrength,
+      "my characters with definition id 1605",
+    );
+  };
+};
 
 /**
  * @id 332013
@@ -132,7 +152,7 @@ define card {
   cost DiceType.Aligned, 2;
   addTarget $.opp.summon;
   :e.targets[0].dispose();
-}
+};
 
 /**
  * @id 311402
@@ -149,7 +169,7 @@ define card {
   weapon pole {
     on increaseSkillDamage {
       :e.increaseDamage(1);
-    }
+    };
     on enter {
       void 0;
       // 此版本只计算未击倒角色
@@ -157,11 +177,10 @@ define card {
       if (liyueCount > 0) {
         :characterStatus(LithicGuard, "@master", {
           overrideVariables: {
-            shield: Math.min(liyueCount, 3)
-          }
+            shield: Math.min(liyueCount, 3),
+          },
         });
       }
-    }
-  }
-}
-
+    };
+  };
+};

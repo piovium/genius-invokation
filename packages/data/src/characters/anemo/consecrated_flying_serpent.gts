@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 import { BonecrunchersEnergyBlock } from "../../cards/event/other.gts";
 
 /**
@@ -27,8 +35,8 @@ define status {
   variable stack, 0;
   once multiplySkillDamage {
     :e.multiplyDamage(2 ** :getVariable("stack"));
-  }
-}
+  };
+};
 
 /**
  * @id 125032
@@ -41,8 +49,8 @@ define combatStatus {
   oneDuration;
   once switchActive {
     :generateDice(:$("my active")!.element(), 1);
-  }
-}
+  };
+};
 
 /**
  * @id 25031
@@ -56,7 +64,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 25032
@@ -70,7 +78,7 @@ define skill {
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 3);
   :drawCards(1);
-}
+};
 
 /**
  * @id 25033
@@ -83,14 +91,16 @@ define skill {
   skillType burst;
   cost DiceType.Anemo, 3;
   cost DiceType.Energy, 2;
-  const cards = :player.hands.filter((card) => card.definition.id === BonecrunchersEnergyBlock);
+  const cards = :player.hands.filter(
+    (card) => card.definition.id === BonecrunchersEnergyBlock,
+  );
   const stack = Math.floor(cards.length / 2);
   :characterStatus(BonecrunchersEnergyBlockAccumulated, "@self", {
-    overrideVariables: { stack }
+    overrideVariables: { stack },
   });
   :damage(DamageType.Anemo, 2);
   :disposeCard(...cards);
-}
+};
 
 /**
  * @id 25034
@@ -103,9 +113,9 @@ define skill {
   skillType passive {
     on battleBegin {
       :createPileCards(BonecrunchersEnergyBlock, 6, "spaceAround");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 25035
@@ -115,13 +125,14 @@ define skill {
  */
 define skill {
   id 25035 as SquallDrawCardsCounter;
-  skillType passive { // keep for v4.7.0
+  skillType passive {
+    // keep for v4.7.0
     variable elementalSkillDrawCardsCount, 0;
     on roundEnd {
       :setVariable("elementalSkillDrawCardsCount", 0);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2503
@@ -135,8 +146,12 @@ define character {
   tags anemo, monster, sacread;
   health 10;
   energy 2;
-  skills WhirlingTail, SwirlingSquall, ScattershotVortex, ImmortalRemnantsAnemo, SquallDrawCardsCounter;
-}
+  skills WhirlingTail,
+    SwirlingSquall,
+    ScattershotVortex,
+    ImmortalRemnantsAnemo,
+    SquallDrawCardsCounter;
+};
 
 /**
  * @id 225031
@@ -153,10 +168,10 @@ define card {
   talent ConsecratedFlyingSerpent, none {
     on enter {
       :createHandCard(BonecrunchersEnergyBlock);
-    }
+    };
     on playCard {
       when :( :e.card.definition.id === BonecrunchersEnergyBlock );
       :combatStatus(DeathlyCycloneInEffect);
-    }
-  }
-}
+    };
+  };
+};

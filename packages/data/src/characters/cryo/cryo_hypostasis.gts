@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon, type StatusHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type StatusHandle,
+} from "@gi-tcg/core/builder";
 import { SheerCold } from "./la_signora.gts";
 
 /**
@@ -29,8 +38,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Cryo, 1, "recent opp from my active");
-  }
-}
+  };
+};
 
 /**
  * @id 121034
@@ -46,8 +55,8 @@ define status {
       :characterStatus(SheerCold, "opp active");
     }
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 121031
@@ -62,8 +71,8 @@ define status {
     when :( :e.isSkillType("normal") );
     usage 1;
     :damage(DamageType.Piercing, 1, "opp standby");
-  }
-}
+  };
+};
 
 /**
  * @id 21031
@@ -77,7 +86,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Cryo, 1);
-}
+};
 
 /**
  * @id 21032
@@ -91,7 +100,7 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 3);
   :characterStatus(OverwhelmingIce);
-}
+};
 
 /**
  * @id 21033
@@ -107,7 +116,7 @@ define skill {
   :damage(DamageType.Piercing, 1, "opp standby");
   :damage(DamageType.Cryo, 2);
   :summon(PiercingIceridge);
-}
+};
 
 /**
  * @id 21034
@@ -120,9 +129,9 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(CryoCrystalCore);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 121035
@@ -133,7 +142,7 @@ define skill {
 define status {
   id 121035 as CryoCrystalCore01;
   reserved;
-}
+};
 
 /**
  * @id 121036
@@ -144,7 +153,7 @@ define status {
 define status {
   id 121036 as CryoCrystalCore02;
   reserved;
-}
+};
 
 /**
  * @id 2103
@@ -160,7 +169,7 @@ define character {
   health 8;
   energy 2;
   skills IcespikeShot, IceRingWaltz, PlungingIceShards, CryoCrystalCoreSkill;
-}
+};
 
 /**
  * @id 221031
@@ -177,6 +186,6 @@ define card {
   talent CryoHypostasis, active {
     on enter {
       :characterStatus(CryoCrystalCore, "@master");
-    }
-  }
-}
+    };
+  };
+};

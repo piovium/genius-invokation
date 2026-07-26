@@ -1,12 +1,57 @@
-import { $, card, character, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
-import { DandelionBreeze, FavoniusBladework, GaleBlade } from "../characters/anemo/jean.gts";
-import { DivineMarksmanship, SkywardSonnet, WindsGrandOde } from "../characters/anemo/venti.gts";
-import { CelestialShower, FrostflakeArrow, LiutianArchery, TrailOfTheQilin } from "../characters/cryo/ganyu.gts";
-import { Breastplate, FavoniusBladeworkMaid, SweepingTime } from "../characters/geo/noelle.gts";
-import { DominusLapidis, DominusLapidisStrikingStone, PlanetBefall, RainOfStone } from "../characters/geo/zhongli.gts";
-import { KuragesOath, NereidsAscension, TheShapeOfWater } from "../characters/hydro/sangonomiya_kokomi.gts";
-import { DetailedDiagnosisThoroughTreatment01, DetailedDiagnosisThoroughTreatment02, DetailedDiagnosisThoroughTreatment03, MedicalInterventionOfPureIntention, ReboundHydrotherapy, SuperSaturatedSyringing, TargetedTreatment } from "../characters/hydro/sigewinne.gts";
-import { GuideToAfterlife, SecretSpearOfWangsheng, SpiritSoother } from "../characters/pyro/hu_tao.gts";
+import {
+  $,
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+} from "@gi-tcg/core/builder";
+import {
+  DandelionBreeze,
+  FavoniusBladework,
+  GaleBlade,
+} from "../characters/anemo/jean.gts";
+import {
+  DivineMarksmanship,
+  SkywardSonnet,
+  WindsGrandOde,
+} from "../characters/anemo/venti.gts";
+import {
+  CelestialShower,
+  FrostflakeArrow,
+  LiutianArchery,
+  TrailOfTheQilin,
+} from "../characters/cryo/ganyu.gts";
+import {
+  Breastplate,
+  FavoniusBladeworkMaid,
+  SweepingTime,
+} from "../characters/geo/noelle.gts";
+import {
+  DominusLapidis,
+  DominusLapidisStrikingStone,
+  PlanetBefall,
+  RainOfStone,
+} from "../characters/geo/zhongli.gts";
+import {
+  KuragesOath,
+  NereidsAscension,
+  TheShapeOfWater,
+} from "../characters/hydro/sangonomiya_kokomi.gts";
+import {
+  DetailedDiagnosisThoroughTreatment01,
+  DetailedDiagnosisThoroughTreatment02,
+  DetailedDiagnosisThoroughTreatment03,
+  MedicalInterventionOfPureIntention,
+  ReboundHydrotherapy,
+  SuperSaturatedSyringing,
+  TargetedTreatment,
+} from "../characters/hydro/sigewinne.gts";
+import {
+  GuideToAfterlife,
+  SecretSpearOfWangsheng,
+  SpiritSoother,
+} from "../characters/pyro/hu_tao.gts";
 
 /**
  * @id 331402
@@ -22,7 +67,7 @@ define card {
   tags resonance;
   filter :( :$(`my characters with energy < maxEnergy`) );
   :gainEnergy(1, "my character with energy < maxEnergy limit 1");
-}
+};
 
 /**
  * @id 331502
@@ -39,7 +84,7 @@ define card {
   addTarget $.my.character;
   :switchActive("@targets.0");
   :generateDice(DiceType.Omni, 1);
-}
+};
 
 /**
  * @id 303162
@@ -54,8 +99,8 @@ define combatStatus {
   once skillDamage {
     when :( :e.type === DamageType.Geo );
     :query($.my.combatStatus.tag("shield").limit(1))?.addVariable("shield", 3);
-  }
-}
+  };
+};
 
 /**
  * @id 331602
@@ -70,7 +115,7 @@ define card {
   cost DiceType.Geo, 1;
   tags resonance;
   :combatStatus(ElementalResonanceEnduringRockInEffect);
-}
+};
 
 /**
  * @id 303172
@@ -86,8 +131,8 @@ define combatStatus {
   once increaseDamage {
     when :( :e.getReaction() );
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 331702
@@ -106,7 +151,7 @@ define card {
   :$("my combat statuses with definition id 116")?.addVariable("usage", 1);
   :$("my combat statuses with definition id 117")?.addVariable("usage", 1);
   :combatStatus(ElementalResonanceSprawlingGreeneryInEffect);
-}
+};
 
 // 以下为 10血->12血
 
@@ -117,7 +162,7 @@ define character {
   health 10;
   energy 2;
   skills FavoniusBladework, GaleBlade, DandelionBreeze;
-}
+};
 
 define character {
   id 1503 as private Venti;
@@ -126,7 +171,7 @@ define character {
   health 10;
   energy 2;
   skills DivineMarksmanship, SkywardSonnet, WindsGrandOde;
-}
+};
 
 define character {
   id 1101 as private Ganyu;
@@ -135,7 +180,7 @@ define character {
   health 10;
   energy 3;
   skills LiutianArchery, TrailOfTheQilin, FrostflakeArrow, CelestialShower;
-}
+};
 
 define character {
   id 1602 as private Noelle;
@@ -144,7 +189,7 @@ define character {
   health 10;
   energy 2;
   skills FavoniusBladeworkMaid, Breastplate, SweepingTime;
-}
+};
 
 define character {
   id 1603 as private Zhongli;
@@ -153,7 +198,7 @@ define character {
   health 10;
   energy 3;
   skills RainOfStone, DominusLapidis, DominusLapidisStrikingStone, PlanetBefall;
-}
+};
 
 define character {
   id 1205 as private SangonomiyaKokomi;
@@ -162,7 +207,7 @@ define character {
   health 10;
   energy 2;
   skills TheShapeOfWater, KuragesOath, NereidsAscension;
-}
+};
 
 define character {
   id 1213 as private Sigewinne;
@@ -170,8 +215,14 @@ define character {
   tags hydro, bow, fontaine, pneuma;
   health 10;
   energy 2;
-  skills TargetedTreatment, ReboundHydrotherapy, SuperSaturatedSyringing, DetailedDiagnosisThoroughTreatment01, MedicalInterventionOfPureIntention, DetailedDiagnosisThoroughTreatment02, DetailedDiagnosisThoroughTreatment03;
-}
+  skills TargetedTreatment,
+    ReboundHydrotherapy,
+    SuperSaturatedSyringing,
+    DetailedDiagnosisThoroughTreatment01,
+    MedicalInterventionOfPureIntention,
+    DetailedDiagnosisThoroughTreatment02,
+    DetailedDiagnosisThoroughTreatment03;
+};
 
 define character {
   id 1307 as private HuTao;
@@ -180,4 +231,4 @@ define character {
   health 10;
   energy 3;
   skills SecretSpearOfWangsheng, GuideToAfterlife, SpiritSoother;
-}
+};

@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Aura, card, character, DamageType, DiceType, skill, status, summon } from "@gi-tcg/core/builder";
+import {
+  Aura,
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111102
@@ -29,8 +38,8 @@ define summon {
     usage 2;
     :damage(DamageType.Cryo, 1);
     :heal(1, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 111101
@@ -43,13 +52,16 @@ define status {
   id 111101 as SnappySilhouette;
   on endPhase {
     usage 2;
-    if (([Aura.Cryo, Aura.CryoDendro] as Aura[]).includes(:self.master.aura) && :getVariable("usage") === 1) {
+    if (
+      ([Aura.Cryo, Aura.CryoDendro] as Aura[]).includes(:self.master.aura) &&
+      :getVariable("usage") === 1
+    ) {
       :damage(DamageType.Cryo, 2, "@master");
     } else {
       :damage(DamageType.Cryo, 1, "@master");
     }
-  }
-}
+  };
+};
 
 /**
  * @id 11101
@@ -63,7 +75,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Cryo, 1);
-}
+};
 
 /**
  * @id 11102
@@ -77,7 +89,7 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 1);
   :characterStatus(SnappySilhouette, "opp active");
-}
+};
 
 /**
  * @id 11103
@@ -93,7 +105,7 @@ define skill {
   :damage(DamageType.Cryo, 1);
   :heal(1, "all my characters");
   :summon(NewsflashField);
-}
+};
 
 /**
  * @id 1110
@@ -107,8 +119,10 @@ define character {
   tags cryo, catalyst, fontaine, ousia;
   health 11;
   energy 2;
-  skills CoolcolorCapture, FramingFreezingPointComposition, StillPhotoComprehensiveConfirmation;
-}
+  skills CoolcolorCapture,
+    FramingFreezingPointComposition,
+    StillPhotoComprehensiveConfirmation;
+};
 
 /**
  * @id 211101
@@ -126,12 +140,15 @@ define card {
   talent Charlotte {
     on enter {
       :useSkill(FramingFreezingPointComposition);
-    }
+    };
     on useSkill {
-      when :( :e.isSkillType("normal") && :$(`opp status with definition id ${SnappySilhouette}`) );
+      when :(
+        :e.isSkillType("normal") &&
+          :$(`opp status with definition id ${SnappySilhouette}`)
+      );
       listenTo samePlayer;
       usage perRound, 1;
       :heal(2, "my active");
-    }
-  }
-}
+    };
+  };
+};

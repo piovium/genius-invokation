@@ -15,19 +15,23 @@ define card {
   artifact {
     on enter {
       :generateDice(:self.master.element(), 1);
-      const elementKinds = new Set(:$$("my characters include defeated").map((ch) => ch.element()));
+      const elementKinds = new Set(
+        :$$("my characters include defeated").map((ch) => ch.element()),
+      );
       if (elementKinds.size >= 3) {
         :generateDice(DiceType.Omni, 1);
       }
-    }
+    };
     on damaged {
-      when :( !:e.target.isMine() && :self.master.isActive() && :e.getReaction() );
+      when :(
+        !:e.target.isMine() && :self.master.isActive() && :e.getReaction()
+      );
       listenTo all;
       usage perRound, 2;
       :drawCards(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321003
@@ -41,9 +45,9 @@ define card {
   support place {
     on roll {
       :e.fixDice(:$("my active")!.element(), 2);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321002
@@ -59,9 +63,9 @@ define card {
   support place {
     on enter {
       :rerollDice(1);
-    }
+    };
     on roll {
       :e.addRerollCount(1);
-    }
-  }
-}
+    };
+  };
+};

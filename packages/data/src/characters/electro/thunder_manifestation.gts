@@ -1,21 +1,35 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, customEvent, DamageType, DiceType, skill, status, summon, type CombatStatusHandle, type StatusHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  customEvent,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type CombatStatusHandle,
+  type StatusHandle,
+} from "@gi-tcg/core/builder";
 
-const TalentShouldDrawCard = customEvent("thunderManifestation/talentShouldDrawCard");
+const TalentShouldDrawCard = customEvent(
+  "thunderManifestation/talentShouldDrawCard",
+);
 
 /**
  * @id 124022
@@ -28,22 +42,24 @@ define status {
   id 124022 as LightningRod;
   conflictWith crossCharacter;
   on increaseDamaged {
-    when :( [
-          ThunderManifestation as number, 
-          ThunderingShacklesSummon as number
-        ].includes(:e.source.definition.id) );
+    when :(
+      [
+        ThunderManifestation as number,
+        ThunderingShacklesSummon as number,
+      ].includes(:e.source.definition.id)
+    );
     :e.increaseDamage(1);
     :dispose();
-  }
+  };
   on damaged {
     :emitCustomEvent(TalentShouldDrawCard);
-  }
+  };
   on selfDispose {
     // 雷音权现对已带有雷鸣探知的角色造成伤害会弃置雷鸣探知
     // 但此行为也会触发天赋的抽牌
     :emitCustomEvent(TalentShouldDrawCard);
-  }
-}
+  };
+};
 
 /**
  * @id 124023
@@ -57,14 +73,16 @@ define summon {
   hint DamageType.Electro, "3";
   on endPhase {
     usage 1;
-    const target = :$(`opp character has status with definition id ${LightningRod}`);
+    const target = :$(
+      `opp character has status with definition id ${LightningRod}`,
+    );
     if (target) {
       :damage(DamageType.Electro, 3, target);
     } else {
       :damage(DamageType.Electro, 3, "opp active");
     }
-  }
-}
+  };
+};
 
 /**
  * @id 124021
@@ -77,8 +95,8 @@ define combatStatus {
   on useSkill {
     usage perRound, 1;
     :characterStatus(LightningRod, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 124024
@@ -89,7 +107,7 @@ define combatStatus {
 define combatStatus {
   id 124024 as RollingThunder;
   reserved;
-}
+};
 
 /**
  * @id 24021
@@ -103,7 +121,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Electro, 1);
-}
+};
 
 /**
  * @id 24022
@@ -115,13 +133,15 @@ define skill {
   id 24022 as StrifefulLightning;
   skillType elemental;
   cost DiceType.Electro, 3;
-  const target = :$(`opp character has status with definition id ${LightningRod}`);
+  const target = :$(
+    `opp character has status with definition id ${LightningRod}`,
+  );
   if (target) {
     :damage(DamageType.Electro, 3, target);
   } else {
     :damage(DamageType.Electro, 3, "opp active");
   }
-}
+};
 
 /**
  * @id 24023
@@ -136,7 +156,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 2);
   :summon(ThunderingShacklesSummon);
-}
+};
 
 /**
  * @id 24024
@@ -149,9 +169,9 @@ define skill {
   skillType passive {
     on battleBegin {
       :combatStatus(LightningStrikeProbe, "opp");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2402
@@ -165,8 +185,11 @@ define character {
   tags electro, monster;
   health 10;
   energy 2;
-  skills ThunderousWingslash, StrifefulLightning, ThunderingShackles, LightningProbe;
-}
+  skills ThunderousWingslash,
+    StrifefulLightning,
+    ThunderingShackles,
+    LightningProbe;
+};
 
 /**
  * @id 224021
@@ -184,11 +207,11 @@ define card {
   talent ThunderManifestation {
     on enter {
       :useSkill(StrifefulLightning);
-    }
+    };
     on TalentShouldDrawCard {
       listenTo all;
       usage perRound, 1;
       :drawCards(1);
-    }
-  }
-}
+    };
+  };
+};

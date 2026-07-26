@@ -13,7 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 122036
@@ -25,7 +33,7 @@ import { character, skill, status, combatStatus, card, DamageType, DiceType } fr
 define status {
   id 122036 as AbyssalTides;
   reserved;
-}
+};
 
 /**
  * @id 22035
@@ -39,7 +47,7 @@ define skill {
   prepared;
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 1);
-}
+};
 
 /**
  * @id 122032
@@ -50,7 +58,7 @@ define skill {
 define status {
   id 122032 as RipplingBladesStatus;
   prepare RipplingBlades;
-}
+};
 
 /**
  * @id 122035
@@ -62,7 +70,7 @@ define status {
 define status {
   id 122035 as SurgingShield;
   reserved;
-}
+};
 
 /**
  * @id 122037
@@ -75,12 +83,12 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.type === DamageType.Hydro );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 122031
@@ -99,8 +107,8 @@ define status {
     :self.master.setVariable("wateryRebirthTriggered", 1);
     :characterStatus(WateryRebirthHoned, "@master");
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 122033
@@ -115,8 +123,8 @@ define combatStatus {
     when :( :e.isSkillType("elemental") || :e.isSkillType("burst") );
     usage 2;
     :e.addCost(DiceType.Omni, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 22031
@@ -130,7 +138,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 22032
@@ -144,7 +152,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 1);
   :characterStatus(RipplingBladesStatus, "@self");
-}
+};
 
 /**
  * @id 22033
@@ -159,7 +167,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 3);
   :combatStatus(CurseOfTheUndercurrent, "opp");
-}
+};
 
 /**
  * @id 22034
@@ -172,10 +180,9 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(WateryRebirthStatus);
-    }
-  }
-}
-
+    };
+  };
+};
 
 /**
  * @id 22037
@@ -187,8 +194,8 @@ define skill {
   id 22037 as BrokenShield;
   skillType passive {
     reserved;
-  }
-}
+  };
+};
 
 /**
  * @id 22038
@@ -200,8 +207,8 @@ define skill {
   id 22038 as WateryRebirth01;
   skillType passive {
     variable wateryRebirthTriggered, 0;
-  }
-}
+  };
+};
 
 /**
  * @id 2203
@@ -215,8 +222,13 @@ define character {
   tags hydro, monster;
   health 6;
   energy 2;
-  skills RipplingSlash, VortexEdge, TorrentialShock, WateryRebirth, RipplingBlades, WateryRebirth01;
-}
+  skills RipplingSlash,
+    VortexEdge,
+    TorrentialShock,
+    WateryRebirth,
+    RipplingBlades,
+    WateryRebirth01;
+};
 
 // 暗流涌动入场时创建此出战状态，检测使徒击倒后生成暗流的诅咒
 define combatStatus {
@@ -225,8 +237,8 @@ define combatStatus {
     when :( :e.target.definition.id === AbyssHeraldWickedTorrents );
     :combatStatus(CurseOfTheUndercurrent, "opp");
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 222031
@@ -246,6 +258,6 @@ define card {
       if (:self.master.getVariable("wateryRebirthTriggered")) {
         :combatStatus(CurseOfTheUndercurrent, "opp");
       }
-    }
-  }
-}
+    };
+  };
+};

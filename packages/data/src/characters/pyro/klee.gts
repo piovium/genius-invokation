@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  DiceType,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 113062
@@ -28,13 +37,13 @@ define status {
   on deductElementDiceSkill {
     when :( :e.isChargedAttack() && :e.canDeductCostOfType(DiceType.Pyro) );
     :e.deductCost(DiceType.Pyro, 1);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaChargedAttack() );
     usage 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 113061
@@ -49,13 +58,13 @@ define status {
   on deductElementDiceSkill {
     when :( :e.isChargedAttack() && :e.canDeductCostOfType(DiceType.Pyro) );
     :e.deductCost(DiceType.Pyro, 1);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaChargedAttack() );
     usage 1;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 113063
@@ -69,8 +78,8 @@ define combatStatus {
   on useSkill {
     usage 2;
     :damage(DamageType.Pyro, 2, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 13061
@@ -84,7 +93,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Pyro, 1);
-}
+};
 
 /**
  * @id 13062
@@ -99,11 +108,10 @@ define skill {
   :damage(DamageType.Pyro, 3);
   if (:self.hasEquipment(PoundingSurprise)) {
     :characterStatus(ExplosiveSpark01);
-  }
-  else {
+  } else {
     :characterStatus(ExplosiveSpark);
   }
-}
+};
 
 /**
  * @id 13063
@@ -118,7 +126,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Pyro, 3);
   :combatStatus(SparksNSplashStatus, "opp");
-}
+};
 
 /**
  * @id 1306
@@ -133,7 +141,7 @@ define character {
   health 10;
   energy 3;
   skills Kaboom, JumpyDumpty, SparksNSplash;
-}
+};
 
 /**
  * @id 213061
@@ -151,6 +159,6 @@ define card {
   talent Klee {
     on enter {
       :useSkill(JumpyDumpty);
-    }
-  }
-}
+    };
+  };
+};

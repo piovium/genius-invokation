@@ -13,7 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 import { BondOfLife } from "../../commons.gts";
 
 /**
@@ -28,9 +35,13 @@ define status {
   since "v4.8.0";
   duration 2;
   on endPhase {
-    :damage(DamageType.Piercing, 1, `opp characters has status with definition id ${BondOfLife}`);
-  }
-}
+    :damage(
+      DamageType.Piercing,
+      1,
+      `opp characters has status with definition id ${BondOfLife}`,
+    );
+  };
+};
 
 /**
  * @id 21041
@@ -44,7 +55,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 21042
@@ -57,7 +68,7 @@ define skill {
   skillType elemental;
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 3);
-}
+};
 
 /**
  * @id 21043
@@ -72,7 +83,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 5);
   :characterStatus(OnslaughtStance, "@self");
-}
+};
 
 /**
  * @id 21044
@@ -86,25 +97,27 @@ define skill {
     variable damageValue, 0;
     on skillDamage {
       :addVariable("damageValue", :e.damageInfo.value);
-    }
+    };
     on useSkill {
       const usage = Math.min(:getVariable("damageValue") - 2, 5);
       :setVariable("damageValue", 0);
       if (usage > 0) {
         :characterStatus(BondOfLife, "opp active", {
-          overrideVariables: { usage }
+          overrideVariables: { usage },
         });
         if (:self.hasEquipment(RimeflowRapier)) {
-          const bondSt = :$(`status with definition id ${BondOfLife} at opp active`);
+          const bondSt = :$(
+            `status with definition id ${BondOfLife} at opp active`,
+          );
           if (bondSt) {
             const oldUsage = bondSt.getVariable("usage");
             bondSt.setVariable("usage", oldUsage * 2);
           }
         }
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2104
@@ -119,7 +132,7 @@ define character {
   health 11;
   energy 2;
   skills SwiftPoint, FrostyInterjection, ThornyOnslaught, BloodbondedShadow;
-}
+};
 
 /**
  * @id 221041
@@ -137,6 +150,6 @@ define card {
   talent FrostOperative {
     on enter {
       :useSkill(FrostyInterjection);
-    }
-  }
-}
+    };
+  };
+};

@@ -13,7 +13,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, summon, type SummonHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 121011
@@ -32,16 +41,21 @@ define summon {
       append 3;
     };
     :damage(DamageType.Cryo, 1);
-  }
+  };
   on useSkill {
-    when :( :e.skill.caller.definition.id === FatuiCryoCicinMage && :e.isSkillType("normal") );
+    when :(
+      :e.skill.caller.definition.id === FatuiCryoCicinMage &&
+        :e.isSkillType("normal")
+    );
     :addVariable("usage", 1);
-  }
+  };
   on damaged {
-    when :( :e.target.definition.id === FatuiCryoCicinMage && :e.getReaction() );
+    when :(
+      :e.target.definition.id === FatuiCryoCicinMage && :e.getReaction()
+    );
     :consumeUsage();
-  }
-}
+  };
+};
 
 /**
  * @id 121012
@@ -59,8 +73,8 @@ define combatStatus {
       const extraShield = Math.min(cicins.getVariable("usage"), 3);
       :addVariable("shield", extraShield);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 121013
@@ -71,7 +85,7 @@ define combatStatus {
 define combatStatus {
   id 121013 as RebelliousShield;
   reserved;
-} // 错误分类至此
+}; // 错误分类至此
 
 /**
  * @id 21011
@@ -85,7 +99,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Cryo, 1);
-}
+};
 
 /**
  * @id 21012
@@ -104,7 +118,7 @@ define skill {
     talent.setVariable("dealDamage", 1);
   }
   :summon(CryoCicins);
-}
+};
 
 /**
  * @id 21013
@@ -120,7 +134,7 @@ define skill {
   :damage(DamageType.Cryo, 5);
   :apply(DamageType.Cryo, "@self");
   :combatStatus(FlowingCicinShield);
-}
+};
 
 /**
  * @id 2101
@@ -135,7 +149,7 @@ define character {
   health 10;
   energy 3;
   skills CicinIcicle, MistySummons, BlizzardBranchBlossom;
-}
+};
 
 /**
  * @id 221011
@@ -154,11 +168,11 @@ define card {
     variable dealDamage, 0;
     on enter {
       :useSkill(MistySummons);
-    }
+    };
     on useSkill {
       when :( :getVariable("dealDamage") );
       :damage(DamageType.Cryo, 2);
       :setVariable("dealDamage", 0);
-    }
-  }
-}
+    };
+  };
+};

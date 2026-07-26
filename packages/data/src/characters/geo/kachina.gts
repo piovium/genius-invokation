@@ -1,19 +1,30 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, combatStatus, card, DamageType, customEvent, DiceType, $ } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  customEvent,
+  DiceType,
+  $,
+} from "@gi-tcg/core/builder";
 
 export const TurboTwirlyTriggered = customEvent("kachina/turboTwirlyTriggered");
 
@@ -40,8 +51,8 @@ define summon {
       :damage(DamageType.Piercing, 1, "opp next");
     }
     :emitCustomEvent(TurboTwirlyTriggered);
-  }
-}
+  };
+};
 
 /**
  * @id 116104
@@ -53,7 +64,7 @@ define status {
   id 116104 as NightsoulsBlessing;
   since "v5.5.0";
   nightsoulsBlessing 2;
-}
+};
 
 /**
  * @id 116102
@@ -73,15 +84,15 @@ define card {
   since "v5.5.0";
   technique {
     nightsoul;
-    on  switchActive {
+    on switchActive {
       when :( :e.switchInfo.from?.id === :self.master.id );
       :consumeNightsoul("@master");
       :summon(TurboTwirlyLetItRip);
-    }
+    };
     skill {
       id 1161021;
       cost DiceType.Geo, 1;
-      :consumeNightsoul("@master")
+      :consumeNightsoul("@master");
       const field = :query($.my.combatStatus.def(TurboDrillField));
       if (field) {
         :damage(DamageType.Geo, 3);
@@ -92,9 +103,9 @@ define card {
         :damage(DamageType.Piercing, 1, "opp next");
       }
       :emitCustomEvent(TurboTwirlyTriggered);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 116101
@@ -107,7 +118,7 @@ define combatStatus {
   id 116101 as TurboDrillField;
   since "v5.5.0";
   usage 3;
-}
+};
 
 /**
  * @id 16101
@@ -121,7 +132,7 @@ define skill {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 16102
@@ -137,7 +148,7 @@ define skill {
   filter :( !:self.hasStatus(NightsoulsBlessing) );
   :equip(TurboTwirly, "@self");
   :gainNightsoul("@self", 2);
-}
+};
 
 /**
  * @id 16103
@@ -152,7 +163,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Geo, 3);
   :combatStatus(TurboDrillField);
-}
+};
 
 /**
  * @id 1610
@@ -168,7 +179,7 @@ define character {
   energy 3;
   skills Cragbiter, GoGoTurboTwirly, TimeToGetSerious;
   associateNightsoul NightsoulsBlessing;
-}
+};
 
 /**
  * @id 216101
@@ -186,6 +197,6 @@ define card {
       listenTo samePlayer;
       usage perRound, 1;
       :drawCards(1);
-    }
-  }
-}
+    };
+  };
+};

@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Aura, card, character, DamageType, DiceType, skill, status, summon } from "@gi-tcg/core/builder";
+import {
+  Aura,
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 115072
@@ -29,8 +38,8 @@ define summon {
     usage 2;
     :damage(DamageType.Anemo, 1);
     :heal(2, "my characters order by health - maxHealth limit 1");
-  }
-}
+  };
+};
 
 /**
  * @id 15074
@@ -50,7 +59,7 @@ define skill {
   } else {
     :damage(DamageType.Anemo, 2);
   }
-}
+};
 
 /**
  * @id 115071
@@ -64,7 +73,7 @@ define status {
     visible false;
   };
   prepare FuufuuWhirlwindKick;
-}
+};
 
 /**
  * @id 15071
@@ -78,7 +87,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 15072
@@ -113,11 +122,11 @@ define skill {
   }
   :characterStatus(FuufuuWindwheel, "@self", {
     overrideVariables: {
-      swirled: fuufuuWindType
-    }
+      swirled: fuufuuWindType,
+    },
   });
   :damage(DamageType.Anemo, 1);
-}
+};
 
 /**
  * @id 15073
@@ -132,7 +141,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Anemo, 1);
   :summon(MujimujiDaruma);
-}
+};
 
 /**
  * @id 1507
@@ -146,8 +155,11 @@ define character {
   tags anemo, claymore, inazuma;
   health 10;
   energy 2;
-  skills ShuumatsubanNinjaBlade, YoohooArtFuuinDash, YoohooArtMujinaFlurry, FuufuuWhirlwindKick;
-}
+  skills ShuumatsubanNinjaBlade,
+    YoohooArtFuuinDash,
+    YoohooArtMujinaFlurry,
+    FuufuuWhirlwindKick;
+};
 
 /**
  * @id 215071
@@ -165,12 +177,12 @@ define card {
   talent Sayu {
     on enter {
       :useSkill(YoohooArtFuuinDash);
-    }
+    };
     on dealDamage {
       when :( :self.master.isActive() && :e.isSwirl() );
       listenTo samePlayer;
       usage perRound, 1;
       :drawCards(2);
-    }
-  }
-}
+    };
+  };
+};

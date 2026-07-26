@@ -1,19 +1,29 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, card, DamageType, type SkillHandle, $, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  status,
+  card,
+  DamageType,
+  type SkillHandle,
+  $,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 114063
@@ -31,8 +41,8 @@ define status {
     if (:query($.my.typeEquipment.def(SinOfPride))) {
       :e.increaseDamage(1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 114061
@@ -48,8 +58,8 @@ define summon {
     usage 1;
     :damage(DamageType.Electro, 1);
     :characterStatus(CrowfeatherCover, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 114062
@@ -65,8 +75,8 @@ define summon {
     usage 2;
     :damage(DamageType.Electro, 2);
     :characterStatus(CrowfeatherCover, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 14061
@@ -80,7 +90,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 14062
@@ -94,7 +104,7 @@ define skill {
   cost DiceType.Electro, 3;
   :damage(DamageType.Electro, 1);
   :summon(TenguJuuraiAmbush);
-}
+};
 
 /**
  * @id 14063
@@ -109,7 +119,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 2);
   :summon(TenguJuuraiStormcluster);
-}
+};
 
 /**
  * @id 1406
@@ -124,7 +134,7 @@ define character {
   health 10;
   energy 2;
   skills TenguBowmanship, TenguStormcall, SubjugationKoukouSendou;
-}
+};
 
 /**
  * @id 214061
@@ -142,6 +152,6 @@ define card {
   talent KujouSara {
     on enter {
       :useSkill(TenguStormcall);
-    }
-  }
-}
+    };
+  };
+};

@@ -1,19 +1,26 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 126012
@@ -28,16 +35,16 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Geo);
-  }
+  };
   on increaseSkillDamage {
     usage perRound, 1;
     :e.increaseDamage(1);
-  }
+  };
   on dispose {
     when :( :e.entity.definition.id === Stonehide );
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 126011
@@ -55,8 +62,8 @@ define status {
     if (:e.type === DamageType.Geo) {
       :addVariable("usage", -1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 26011
@@ -70,7 +77,7 @@ define skill {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 26012
@@ -83,7 +90,7 @@ define skill {
   skillType elemental;
   cost DiceType.Geo, 3;
   :damage(DamageType.Physical, 3);
-}
+};
 
 /**
  * @id 26013
@@ -97,7 +104,7 @@ define skill {
   cost DiceType.Geo, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Physical, 5);
-}
+};
 
 /**
  * @id 26014
@@ -111,9 +118,9 @@ define skill {
     on battleBegin {
       :characterStatus(Stonehide);
       :characterStatus(StoneForce);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2601
@@ -128,7 +135,7 @@ define character {
   health 10;
   energy 2;
   skills PlamaLawa, MovoLawa, UpaShato, InfusedStonehide;
-}
+};
 
 /**
  * @id 226011
@@ -147,12 +154,12 @@ define card {
   talent StonehideLawachurl {
     on enter {
       :useSkill(UpaShato);
-    }
+    };
     on defeated {
       when :( :e.source.id === :self.master.id );
       listenTo all;
       :characterStatus(Stonehide, "@master");
       :characterStatus(StoneForce, "@master");
-    }
-  }
-}
+    };
+  };
+};

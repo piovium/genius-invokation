@@ -1,12 +1,54 @@
-import { $, card, character, combatStatus, DiceType, skill } from "@gi-tcg/core/builder";
+import {
+  $,
+  card,
+  character,
+  combatStatus,
+  DiceType,
+  skill,
+} from "@gi-tcg/core/builder";
 import { StrictProhibited } from "../cards/support/place.gts";
-import { ConstantOffthecuffCookery, KitchenSkills, LowtemperatureCooking, ScoringCuts } from "../characters/cryo/escoffier.gts";
-import { Breakthrough, DepthclarionDice, LingeringLifeline, StealthyBowshot } from "../characters/hydro/yelan.gts";
-import { InsatiableAppetite, RavagingDevourer, ShatteringWaves, StarfallShower } from "../characters/hydro/alldevouring_narwhal.gts";
-import { BranchingFlow, SavageSwell, StormSurge, ThunderingTide } from "../characters/hydro/hydro_tulpa.gts";
-import { BladeAblaze, Prowl, StealthMaster, Thrust } from "../characters/pyro/fatui_pyro_agent.gts";
-import { InfusedStonehide, MovoLawa, PlamaLawa, UpaShato } from "../characters/geo/stonehide_lawachurl.gts";
-import { FeatherSpreading, MajesticDance, RadicalVitality, VolatileSporeCloud } from "../characters/dendro/jadeplume_terrorshroom.gts";
+import {
+  ConstantOffthecuffCookery,
+  KitchenSkills,
+  LowtemperatureCooking,
+  ScoringCuts,
+} from "../characters/cryo/escoffier.gts";
+import {
+  Breakthrough,
+  DepthclarionDice,
+  LingeringLifeline,
+  StealthyBowshot,
+} from "../characters/hydro/yelan.gts";
+import {
+  InsatiableAppetite,
+  RavagingDevourer,
+  ShatteringWaves,
+  StarfallShower,
+} from "../characters/hydro/alldevouring_narwhal.gts";
+import {
+  BranchingFlow,
+  SavageSwell,
+  StormSurge,
+  ThunderingTide,
+} from "../characters/hydro/hydro_tulpa.gts";
+import {
+  BladeAblaze,
+  Prowl,
+  StealthMaster,
+  Thrust,
+} from "../characters/pyro/fatui_pyro_agent.gts";
+import {
+  InfusedStonehide,
+  MovoLawa,
+  PlamaLawa,
+  UpaShato,
+} from "../characters/geo/stonehide_lawachurl.gts";
+import {
+  FeatherSpreading,
+  MajesticDance,
+  RadicalVitality,
+  VolatileSporeCloud,
+} from "../characters/dendro/jadeplume_terrorshroom.gts";
 
 /**
  * @id 1115
@@ -20,8 +62,11 @@ define character {
   tags cryo, pole, fontaine, pneuma;
   health 11;
   energy 2;
-  skills KitchenSkills, LowtemperatureCooking, ScoringCuts, ConstantOffthecuffCookery;
-}
+  skills KitchenSkills,
+    LowtemperatureCooking,
+    ScoringCuts,
+    ConstantOffthecuffCookery;
+};
 
 /**
  * @id 1209
@@ -36,7 +81,7 @@ define character {
   health 10;
   energy 3;
   skills StealthyBowshot, LingeringLifeline, DepthclarionDice, Breakthrough;
-}
+};
 
 /**
  * @id 2204
@@ -52,7 +97,7 @@ define character {
   health 5;
   energy 2;
   skills ShatteringWaves, StarfallShower, RavagingDevourer, InsatiableAppetite;
-}
+};
 
 /**
  * @id 2206
@@ -67,7 +112,7 @@ define character {
   health 11;
   energy 3;
   skills SavageSwell, StormSurge, ThunderingTide, BranchingFlow;
-}
+};
 
 /**
  * @id 2301
@@ -82,7 +127,7 @@ define character {
   health 9;
   energy 2;
   skills Thrust, Prowl, BladeAblaze, StealthMaster;
-}
+};
 
 /**
  * @id 2601
@@ -97,7 +142,7 @@ define character {
   health 8;
   energy 2;
   skills PlamaLawa, MovoLawa, UpaShato, InfusedStonehide;
-}
+};
 
 /**
  * @id 2701
@@ -112,7 +157,7 @@ define character {
   health 10;
   energy 2;
   skills MajesticDance, VolatileSporeCloud, FeatherSpreading, RadicalVitality;
-}
+};
 
 /**
  * @id 312032
@@ -129,9 +174,9 @@ define card {
     on useTechnique {
       usage perRound, 1;
       :gainEnergy(1, "@master");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 321018
@@ -149,14 +194,14 @@ define card {
     on damagedOrHealed {
       when :( :e.target.isActive() );
       :addVariableWithMax("forbidden", 1, 4);
-    }
+    };
     on actionPhase {
       when :( :getVariable("forbidden") >= 4 );
       :combatStatus(StrictProhibited, "opp");
       :addVariable("forbidden", -4);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 300003
@@ -173,8 +218,8 @@ define combatStatus {
   on playCard {
     when :( :e.card.definition.type === "eventCard" );
     usage 3;
-  }
-}
+  };
+};
 
 /**
  * @id 330006
@@ -189,7 +234,7 @@ define card {
   cost DiceType.Aligned, 1;
   legend;
   :combatStatus(PassingOfJudgmentInEffect, "opp");
-}
+};
 
 /**
  * @id 332013
@@ -203,7 +248,7 @@ define card {
   cost DiceType.Aligned, 2;
   addTarget $.opp.summon;
   :e.targets[0].consumeUsage(2);
-}
+};
 
 /**
  * @id 333019
@@ -220,4 +265,4 @@ define card {
     injuredOnly;
   };
   :heal(1 + :$$(`my summons`).length, "@targets.0");
-}
+};

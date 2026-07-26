@@ -1,19 +1,26 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  card,
+  DamageType,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 116041
@@ -29,12 +36,12 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Geo, 1);
-  }
+  };
   on beforeFastSwitch {
     usage perRound, 1;
     :e.setFastAction();
-  }
-}
+  };
+};
 
 /**
  * @id 16041
@@ -48,7 +55,7 @@ define skill {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 16042
@@ -61,7 +68,7 @@ define skill {
   skillType elemental;
   cost DiceType.Geo, 3;
   :summon(SolarIsotoma);
-}
+};
 
 /**
  * @id 16043
@@ -76,11 +83,10 @@ define skill {
   cost DiceType.Energy, 2;
   if (:$(`my summons with definition id ${SolarIsotoma}`)) {
     :damage(DamageType.Geo, 6);
-  }
-  else {
+  } else {
     :damage(DamageType.Geo, 4);
   }
-}
+};
 
 /**
  * @id 1604
@@ -94,8 +100,10 @@ define character {
   tags geo, sword, mondstadt;
   health 12;
   energy 2;
-  skills FavoniusBladeworkWeiss, AbiogenesisSolarIsotoma, RiteOfProgenitureTectonicTide;
-}
+  skills FavoniusBladeworkWeiss,
+    AbiogenesisSolarIsotoma,
+    RiteOfProgenitureTectonicTide;
+};
 
 /**
  * @id 216041
@@ -113,18 +121,22 @@ define card {
   talent Albedo {
     on enter {
       :useSkill(AbiogenesisSolarIsotoma);
-    }
+    };
     on deductVoidDiceSkill {
-      when :( :$(`my summons with definition id ${SolarIsotoma}`) &&
-          :e.isPlungingAttack() );
+      when :(
+        :$(`my summons with definition id ${SolarIsotoma}`) &&
+          :e.isPlungingAttack()
+      );
       listenTo samePlayer;
       :e.deductVoidCost(1);
-    }
+    };
     on increaseSkillDamage {
-      when :( :$(`my summons with definition id ${SolarIsotoma}`) &&
-          :e.viaPlungingAttack() );
+      when :(
+        :$(`my summons with definition id ${SolarIsotoma}`) &&
+          :e.viaPlungingAttack()
+      );
       listenTo samePlayer;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};

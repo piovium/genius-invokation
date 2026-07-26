@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Aura, card, character, DamageType, DiceType, skill, status, summon } from "@gi-tcg/core/builder";
+import {
+  Aura,
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 113101
@@ -30,8 +39,8 @@ define summon {
       append 2;
     };
     :damage(DamageType.Pyro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 113102
@@ -46,14 +55,14 @@ define status {
   on increaseSkillDamage {
     when :( :e.via.definition.id === BewilderingLights );
     :e.increaseDamage(:getVariable("surplus"));
-  }
+  };
   on useSkill {
     when :( :e.skill.definition.id === BewilderingLights );
     const surplus = :getVariable("surplus");
     :heal(surplus, "@master");
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 13101
@@ -67,7 +76,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 13102
@@ -86,12 +95,12 @@ define skill {
   if (surplusSt) {
     :addVariableWithMax("surplus", 1, 3, surplusSt);
   } else {
-    :self.addStatus(PropSurplus);  
+    :self.addStatus(PropSurplus);
   }
   if (:self.health >= 6) {
     :damage(DamageType.Piercing, 1, "@self");
   }
-}
+};
 
 /**
  * @id 13103
@@ -104,7 +113,7 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 3);
-}
+};
 
 /**
  * @id 13104
@@ -125,7 +134,7 @@ define skill {
   } else {
     :self.addStatus(PropSurplus);
   }
-}
+};
 
 /**
  * @id 1310
@@ -139,8 +148,11 @@ define character {
   tags pyro, bow, fontaine, fatui, ousia;
   health 10;
   energy 2;
-  skills CardForceTranslocation, PropArrow, BewilderingLights, WondrousTrickMiracleParade;
-}
+  skills CardForceTranslocation,
+    PropArrow,
+    BewilderingLights,
+    WondrousTrickMiracleParade;
+};
 
 /**
  * @id 213101
@@ -158,12 +170,15 @@ define card {
   talent Lyney {
     on enter {
       :useSkill(PropArrow);
-    }
+    };
     on increaseSkillDamage {
-      when :( [Lyney as number, GrinmalkinHat as number].includes(:e.source.definition.id) && 
-          :e.target.aura === Aura.Pyro );
+      when :(
+        [Lyney as number, GrinmalkinHat as number].includes(
+          :e.source.definition.id,
+        ) && :e.target.aura === Aura.Pyro
+      );
       usage perRound, 1;
       :e.increaseDamage(2);
-    }
-  }
-}
+    };
+  };
+};

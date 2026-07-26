@@ -1,19 +1,30 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, combatStatus, card, DamageType, type SummonHandle, type CardHandle, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  type SummonHandle,
+  type CardHandle,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 127022
@@ -28,8 +39,8 @@ define summon {
   on endPhase {
     usage 1;
     :damage(DamageType.Dendro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 127023
@@ -44,8 +55,8 @@ define summon {
   on endPhase {
     usage 1;
     :damage(DamageType.Dendro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 127024
@@ -60,8 +71,8 @@ define summon {
   on endPhase {
     usage 1;
     :damage(DamageType.Dendro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 127025
@@ -76,8 +87,8 @@ define summon {
   on endPhase {
     usage 1;
     :damage(DamageType.Dendro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 127021
@@ -99,7 +110,7 @@ define card {
   } else {
     :summon(ProliferatedOrganism04);
   }
-}
+};
 
 /**
  * @id 127028
@@ -110,7 +121,7 @@ define card {
 define status {
   id 127028 as OasissAegis;
   shield 1;
-}
+};
 
 /**
  * @id 127027
@@ -123,16 +134,18 @@ define status {
   id 127027 as ReignitedHeartOfOasis;
   on increaseSkillDamage {
     :e.increaseDamage(3);
-  }
+  };
   on useSkill {
-    const nourishment = :$(`my combat status with definition id ${OasisNourishment}`);
+    const nourishment = :$(
+      `my combat status with definition id ${OasisNourishment}`,
+    );
     if (nourishment) {
       const usage = nourishment.getVariable("usage");
       nourishment.dispose();
       :heal(usage, "@master");
     }
-  }
-}
+  };
+};
 
 /**
  * @id 127029
@@ -144,22 +157,26 @@ define combatStatus {
   id 127029 as HeartOfOasis;
   variable organismCount, 0;
   on enterRelative {
-    when :( [
-          ProliferatedOrganism01,
-          ProliferatedOrganism02,
-          ProliferatedOrganism03,
-          ProliferatedOrganism04,
-        ].includes(:e.entity.definition.id as SummonHandle) );
+    when :(
+      [
+        ProliferatedOrganism01,
+        ProliferatedOrganism02,
+        ProliferatedOrganism03,
+        ProliferatedOrganism04,
+      ].includes(:e.entity.definition.id as SummonHandle)
+    );
     listenTo samePlayer;
     :addVariable("organismCount", 1);
     if (:getVariable("organismCount") === 4) {
-      const apep = :$(`my character with definition id ${GuardianOfApepsOasis}`);
+      const apep = :$(
+        `my character with definition id ${GuardianOfApepsOasis}`,
+      );
       apep?.addStatus(ReignitedHeartOfOasis);
       apep?.addStatus(OasissAegis);
       :dispose();
     }
-  }
-}
+  };
+};
 
 /**
  * @id 127026
@@ -176,8 +193,8 @@ define combatStatus {
       append 3;
     };
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 27021
@@ -191,7 +208,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 27022
@@ -206,7 +223,7 @@ define skill {
   :damage(DamageType.Dendro, 2);
   :drawCards(1, { withDefinition: AwakenMyKindred });
   :combatStatus(OasisNourishment, "my");
-}
+};
 
 /**
  * @id 27023
@@ -222,9 +239,9 @@ define skill {
   :damage(DamageType.Dendro, 4);
   :drawCards(1, { withDefinition: AwakenMyKindred });
   :combatStatus(OasisNourishment, "my", {
-      overrideVariables: { usage: 2 }
-    });
-}
+    overrideVariables: { usage: 2 },
+  });
+};
 
 /**
  * @id 27024
@@ -239,9 +256,9 @@ define skill {
     on battleBegin {
       :createPileCards(AwakenMyKindred, 5, "random");
       :combatStatus(HeartOfOasis);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2702
@@ -257,8 +274,11 @@ define character {
   tags dendro, monster;
   health 10;
   energy 2;
-  skills StrikeOfTheDispossessed, LifeStream, TheEndFalls, InvokationOfPropagation;
-}
+  skills StrikeOfTheDispossessed,
+    LifeStream,
+    TheEndFalls,
+    InvokationOfPropagation;
+};
 
 /**
  * @id 227021
@@ -275,16 +295,18 @@ define card {
   talent GuardianOfApepsOasis, none {
     on enter {
       :createPileCards(AwakenMyKindred, 4, "random");
-    }
+    };
     on increaseDamage {
-      when :( [
-            ProliferatedOrganism01,
-            ProliferatedOrganism02,
-            ProliferatedOrganism03,
-            ProliferatedOrganism04,
-          ].includes(:e.source.definition.id as SummonHandle) );
+      when :(
+        [
+          ProliferatedOrganism01,
+          ProliferatedOrganism02,
+          ProliferatedOrganism03,
+          ProliferatedOrganism04,
+        ].includes(:e.source.definition.id as SummonHandle)
+      );
       listenTo samePlayer;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};

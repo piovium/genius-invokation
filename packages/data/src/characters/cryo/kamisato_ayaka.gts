@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, card, DamageType, type PassiveSkillHandle, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  status,
+  card,
+  DamageType,
+  type PassiveSkillHandle,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111051
@@ -28,8 +37,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Cryo, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 111053
@@ -45,12 +54,12 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Cryo);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.type === DamageType.Cryo );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 111052
@@ -66,8 +75,8 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Cryo);
-  }
-}
+  };
+};
 
 /**
  * @id 111054
@@ -82,9 +91,8 @@ define status {
   once increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
-}
-
+  };
+};
 
 /**
  * @id 11051
@@ -98,7 +106,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 11052
@@ -111,7 +119,7 @@ define skill {
   skillType elemental;
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 3);
-}
+};
 
 /**
  * @id 11053
@@ -126,7 +134,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Cryo, 4);
   :summon(FrostflakeSekiNoTo);
-}
+};
 
 /**
  * @id 11054
@@ -141,13 +149,12 @@ define skill {
       when :( :e.switchInfo.to.id === :self.id );
       if (:self.hasEquipment(KantenSenmyouBlessing)) {
         :characterStatus(CryoElementalInfusion01);
-      }
-      else {
+      } else {
         :characterStatus(CryoElementalInfusion);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 11055
@@ -165,9 +172,9 @@ define skill {
       };
       :characterStatus(KamisatoArtSenhoStatus);
       :addVariable("usagePerRound1", -1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1105
@@ -181,8 +188,12 @@ define character {
   tags cryo, sword, inazuma;
   health 10;
   energy 3;
-  skills KamisatoArtKabuki, KamisatoArtHyouka, KamisatoArtSoumetsu, KamisatoArtSenho01, KamisatoArtSenho02;
-}
+  skills KamisatoArtKabuki,
+    KamisatoArtHyouka,
+    KamisatoArtSoumetsu,
+    KamisatoArtSenho01,
+    KamisatoArtSenho02;
+};
 
 /**
  * @id 211051
@@ -201,6 +212,6 @@ define card {
       when :( :e.action.to.id === :self.master.id );
       usage perRound, 1;
       :e.deductOmniCost(1);
-    }
-  }
-}
+    };
+  };
+};

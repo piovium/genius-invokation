@@ -1,19 +1,26 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 113123
@@ -28,8 +35,8 @@ define combatStatus {
     when :( :player.hands.length <= 1 );
     usage 2;
     :damage(DamageType.Pyro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 113121
@@ -40,7 +47,7 @@ define combatStatus {
 define combatStatus {
   id 113121 as ShieldOfPassion;
   shield 2;
-}
+};
 
 /**
  * @id 13121
@@ -54,7 +61,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 13122
@@ -69,7 +76,7 @@ define skill {
   :damage(DamageType.Pyro, 2);
   :disposeMaxCostHands(1);
   :combatStatus(ShieldOfPassion);
-}
+};
 
 /**
  * @id 13123
@@ -88,7 +95,7 @@ define skill {
   const cards = :player.hands.toSorted((a, b) => b.diceCost() - a.diceCost());
   :disposeCard(...cards);
   :combatStatus(FestiveFires);
-}
+};
 
 /**
  * @id 1312
@@ -103,7 +110,7 @@ define character {
   health 10;
   energy 2;
   skills DanceOnFire, SweepingFervor, RiffRevolution;
-}
+};
 
 /**
  * @id 213121
@@ -122,11 +129,11 @@ define card {
   talent Xinyan {
     on enter {
       :useSkill(DanceOnFire);
-    }
+    };
     on increaseSkillDamage {
       when :( :player.hands.length <= 1 );
       usage perRound, 1;
       :e.increaseDamage(2);
-    }
-  }
-}
+    };
+  };
+};

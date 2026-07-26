@@ -1,19 +1,26 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 127011
@@ -25,23 +32,24 @@ import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/co
 define status {
   id 127011 as RadicalVitalityStatus;
   variable vitality, 0;
-  defineSnippet addVitality, :{
-    const max = :self.master.hasEquipment(ProliferatingSpores) ? 4 : 3;
-    :addVariableWithMax("vitality", 1, max);
-  };
+  defineSnippet addVitality,
+    :{
+      const max = :self.master.hasEquipment(ProliferatingSpores) ? 4 : 3;
+      :addVariableWithMax("vitality", 1, max);
+    };
   on dealDamage {
     :callSnippet.addVitality();
-  }
+  };
   on damaged {
     :callSnippet.addVitality();
-  }
+  };
   on endPhase {
     when :( :getVariable("vitality") >= 3 );
     :setVariable("vitality", 0);
     const ch = :self.master;
     ch.loseEnergy(ch.energy);
-  }
-}
+  };
+};
 
 /**
  * @id 27011
@@ -55,7 +63,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 27012
@@ -68,7 +76,7 @@ define skill {
   skillType elemental;
   cost DiceType.Dendro, 3;
   :damage(DamageType.Dendro, 3);
-}
+};
 
 /**
  * @id 27013
@@ -81,9 +89,12 @@ define skill {
   skillType burst;
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
-  const val = :$(`status with definition id ${RadicalVitalityStatus} at @self`)?.getVariable("vitality") ?? 0;
+  const val =
+    :$(
+      `status with definition id ${RadicalVitalityStatus} at @self`,
+    )?.getVariable("vitality") ?? 0;
   :damage(DamageType.Dendro, 4 + val);
-}
+};
 
 /**
  * @id 27014
@@ -96,12 +107,12 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(RadicalVitalityStatus);
-    }
+    };
     on revive {
       :characterStatus(RadicalVitalityStatus);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2701
@@ -116,7 +127,7 @@ define character {
   health 12;
   energy 2;
   skills MajesticDance, VolatileSporeCloud, FeatherSpreading, RadicalVitality;
-}
+};
 
 /**
  * @id 227011
@@ -134,6 +145,6 @@ define card {
   talent JadeplumeTerrorshroom {
     on enter {
       :useSkill(VolatileSporeCloud);
-    }
-  }
-}
+    };
+  };
+};

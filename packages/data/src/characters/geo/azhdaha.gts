@@ -1,30 +1,42 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, DiceType, type CharacterHandle, Aura, extension, type, type Pair } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  card,
+  DamageType,
+  DiceType,
+  type CharacterHandle,
+  Aura,
+  extension,
+  type,
+  type Pair,
+} from "@gi-tcg/core/builder";
 
 define extension {
   idHint 2602 as AbsorbedCountExtension;
   schema ({
-    absorbed: type.declare<Pair<DiceType[]>>().type("pair<number[]>")
+    absorbed: type.declare<Pair<DiceType[]>>().type("pair<number[]>"),
   });
-  initialState({
+  initialState ({
     absorbed: [[], []],
   });
   description "记录某方若陀龙王已汲取过的元素类型";
-}
+};
 
 /**
  * @id 126021
@@ -40,19 +52,27 @@ define status {
     when :( :e.oldDefinition.id !== :e.newDefinition.id );
     let diceType: DiceType = DiceType.Geo;
     switch (:self.master.definition.id) {
-      case AzhdahaCryo: diceType = DiceType.Cryo; break;
-      case AzhdahaHydro: diceType = DiceType.Hydro; break;
-      case AzhdahaPyro: diceType = DiceType.Pyro; break;
-      case AzhdahaElectro: diceType = DiceType.Electro; break;
-    };
+      case AzhdahaCryo:
+        diceType = DiceType.Cryo;
+        break;
+      case AzhdahaHydro:
+        diceType = DiceType.Hydro;
+        break;
+      case AzhdahaPyro:
+        diceType = DiceType.Pyro;
+        break;
+      case AzhdahaElectro:
+        diceType = DiceType.Electro;
+        break;
+    }
     :setExtensionState((st) => {
       if (!st.absorbed[:self.who].includes(diceType)) {
         st.absorbed[:self.who].push(diceType);
       }
     });
     :generateDice(diceType, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 126022
@@ -65,18 +85,27 @@ define status {
   on damaged {
     let targetDef: CharacterHandle;
     switch (:e.type) {
-      case DamageType.Cryo: targetDef = AzhdahaCryo; break;
-      case DamageType.Hydro: targetDef = AzhdahaHydro; break;
-      case DamageType.Pyro: targetDef = AzhdahaPyro; break;
-      case DamageType.Electro: targetDef = AzhdahaElectro; break;
-      default: return;
+      case DamageType.Cryo:
+        targetDef = AzhdahaCryo;
+        break;
+      case DamageType.Hydro:
+        targetDef = AzhdahaHydro;
+        break;
+      case DamageType.Pyro:
+        targetDef = AzhdahaPyro;
+        break;
+      case DamageType.Electro:
+        targetDef = AzhdahaElectro;
+        break;
+      default:
+        return;
     }
     if (:self.master.definition.id !== targetDef) {
       :transformDefinition("@master", targetDef);
       :dispose();
     }
-  }
-}
+  };
+};
 
 /**
  * @id 126023
@@ -92,13 +121,21 @@ define status {
   id 126023 as StoneFacetsElementalSummoning;
   on endPhase {
     switch (:self.master.definition.id) {
-      default: :transformDefinition("@master", AzhdahaHydro); break;
-      case AzhdahaHydro: :transformDefinition("@master", AzhdahaCryo); break;
-      case AzhdahaCryo: :transformDefinition("@master", AzhdahaPyro); break;
-      case AzhdahaPyro: :transformDefinition("@master", AzhdahaElectro); break;
+      default:
+        :transformDefinition("@master", AzhdahaHydro);
+        break;
+      case AzhdahaHydro:
+        :transformDefinition("@master", AzhdahaCryo);
+        break;
+      case AzhdahaCryo:
+        :transformDefinition("@master", AzhdahaPyro);
+        break;
+      case AzhdahaPyro:
+        :transformDefinition("@master", AzhdahaElectro);
+        break;
     }
-  }
-}
+  };
+};
 
 /**
  * @id 26021
@@ -112,7 +149,7 @@ define skill {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 26022
@@ -128,13 +165,23 @@ define skill {
   const targetAura = :$("opp active")?.aura;
   :damage(DamageType.Geo, 3);
   switch (targetAura) {
-    case Aura.Cryo: :transformDefinition("@master", AzhdahaCryo); break;
-    case Aura.Hydro: :transformDefinition("@master", AzhdahaHydro); break;
-    case Aura.Pyro: :transformDefinition("@master", AzhdahaPyro); break;
-    case Aura.Electro: :transformDefinition("@master", AzhdahaElectro); break;
-    default: :characterStatus(StoneFacetsElementalCrystallization); break;
+    case Aura.Cryo:
+      :transformDefinition("@master", AzhdahaCryo);
+      break;
+    case Aura.Hydro:
+      :transformDefinition("@master", AzhdahaHydro);
+      break;
+    case Aura.Pyro:
+      :transformDefinition("@master", AzhdahaPyro);
+      break;
+    case Aura.Electro:
+      :transformDefinition("@master", AzhdahaElectro);
+      break;
+    default:
+      :characterStatus(StoneFacetsElementalCrystallization);
+      break;
   }
-}
+};
 
 /**
  * @id 26024
@@ -150,7 +197,7 @@ define skill {
   associateExtension AbsorbedCountExtension;
   const bonus = :getExtensionState().absorbed[:self.who].length;
   :damage(DamageType.Geo, 4 + bonus);
-}
+};
 
 /**
  * @id 26025
@@ -163,12 +210,12 @@ define skill {
   skillType passive {
     on battleBegin {
       :characterStatus(StoneFacetsElementalAbsorption);
-    }
+    };
     on revive {
       :characterStatus(StoneFacetsElementalAbsorption);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2602
@@ -183,7 +230,7 @@ define character {
   health 10;
   energy 2;
   skills SunderingCharge, AuraOfMajesty, DecimatingRockfall, StoneFacets;
-}
+};
 
 /**
  * @id 66013
@@ -197,13 +244,13 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 3);
   :characterStatus(StoneFacetsElementalCrystallization);
-}
+};
 
 /**
  * @id 6601
  * @name 若陀龙王
  * @description
- * 
+ *
  */
 define character {
   id 6601 as AzhdahaCryo;
@@ -211,8 +258,12 @@ define character {
   tags geo, monster;
   health 10;
   energy 2;
-  skills SunderingCharge, AuraOfMajesty, FrostspikeWave, DecimatingRockfall, StoneFacets;
-}
+  skills SunderingCharge,
+    AuraOfMajesty,
+    FrostspikeWave,
+    DecimatingRockfall,
+    StoneFacets;
+};
 
 /**
  * @id 66023
@@ -226,13 +277,13 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 3);
   :characterStatus(StoneFacetsElementalCrystallization);
-}
+};
 
 /**
  * @id 6602
  * @name 若陀龙王
  * @description
- * 
+ *
  */
 define character {
   id 6602 as AzhdahaHydro;
@@ -240,8 +291,12 @@ define character {
   tags geo, monster;
   health 10;
   energy 2;
-  skills SunderingCharge, AuraOfMajesty, TorrentialRebuke, DecimatingRockfall, StoneFacets;
-}
+  skills SunderingCharge,
+    AuraOfMajesty,
+    TorrentialRebuke,
+    DecimatingRockfall,
+    StoneFacets;
+};
 
 /**
  * @id 66033
@@ -255,13 +310,13 @@ define skill {
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 3);
   :characterStatus(StoneFacetsElementalCrystallization);
-}
+};
 
 /**
  * @id 6603
  * @name 若陀龙王
  * @description
- * 
+ *
  */
 define character {
   id 6603 as AzhdahaPyro;
@@ -269,8 +324,12 @@ define character {
   tags geo, monster;
   health 10;
   energy 2;
-  skills SunderingCharge, AuraOfMajesty, BlazingRebuke, DecimatingRockfall, StoneFacets;
-}
+  skills SunderingCharge,
+    AuraOfMajesty,
+    BlazingRebuke,
+    DecimatingRockfall,
+    StoneFacets;
+};
 
 /**
  * @id 66043
@@ -284,13 +343,13 @@ define skill {
   cost DiceType.Electro, 3;
   :damage(DamageType.Electro, 3);
   :characterStatus(StoneFacetsElementalCrystallization);
-}
+};
 
 /**
  * @id 6604
  * @name 若陀龙王
  * @description
- * 
+ *
  */
 define character {
   id 6604 as AzhdahaElectro;
@@ -298,8 +357,12 @@ define character {
   tags geo, monster;
   health 10;
   energy 2;
-  skills SunderingCharge, AuraOfMajesty, ThunderstormWave, DecimatingRockfall, StoneFacets;
-}
+  skills SunderingCharge,
+    AuraOfMajesty,
+    ThunderstormWave,
+    DecimatingRockfall,
+    StoneFacets;
+};
 
 /**
  * @id 226022
@@ -314,8 +377,10 @@ define card {
   cost DiceType.Aligned, 2;
   eventTalent [Azhdaha, AzhdahaCryo, AzhdahaHydro, AzhdahaPyro, AzhdahaElectro];
   :characterStatus(StoneFacetsElementalCrystallization, "@targets.0");
-  const elements = new Set(:$$(`my characters include defeated`).map((ch) => ch.element()))
+  const elements = new Set(
+    :$$(`my characters include defeated`).map((ch) => ch.element()),
+  );
   for (const element of elements) {
     :generateDice(element, 1);
   }
-}
+};

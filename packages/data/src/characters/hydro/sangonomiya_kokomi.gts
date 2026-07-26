@@ -13,7 +13,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon, type SummonHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 112051
@@ -29,15 +38,17 @@ define summon {
     usage 2 {
       append 4;
     };
-    if (:$(`my equipment with definition id ${TamakushiCasket}`) && :$(`my status with definition id ${CeremonialGarment}`)) {
+    if (
+      :$(`my equipment with definition id ${TamakushiCasket}`) &&
+      :$(`my status with definition id ${CeremonialGarment}`)
+    ) {
       :damage(DamageType.Hydro, 2);
-    }
-    else {
+    } else {
       :damage(DamageType.Hydro, 1);
     }
     :heal(1, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 112052
@@ -53,12 +64,12 @@ define status {
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     :heal(1, "all my characters");
-  }
-}
+  };
+};
 
 /**
  * @id 12051
@@ -72,7 +83,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Hydro, 1);
-}
+};
 
 /**
  * @id 12052
@@ -86,7 +97,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :apply(DamageType.Hydro, "@self");
   :summon(BakeKurage);
-}
+};
 
 /**
  * @id 12053
@@ -111,7 +122,7 @@ define skill {
       summon.setVariable("usage", 1);
     }
   }
-}
+};
 
 /**
  * @id 1205
@@ -126,7 +137,7 @@ define character {
   health 12;
   energy 2;
   skills TheShapeOfWater, KuragesOath, NereidsAscension;
-}
+};
 
 /**
  * @id 212051
@@ -146,6 +157,6 @@ define card {
   talent SangonomiyaKokomi {
     on enter {
       :useSkill(NereidsAscension);
-    }
-  }
-}
+    };
+  };
+};

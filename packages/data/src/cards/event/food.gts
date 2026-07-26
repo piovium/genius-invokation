@@ -13,7 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, DiceType, type StatusHandle, card, combatStatus, status } from "@gi-tcg/core/builder";
+import {
+  $,
+  DiceType,
+  type StatusHandle,
+  card,
+  combatStatus,
+  status,
+} from "@gi-tcg/core/builder";
 import { BattlePlan, Satiated, SharpenTheBlade } from "../../commons.gts";
 
 /**
@@ -28,7 +35,7 @@ define card {
   since "v3.3.0";
   food;
   :characterStatus(JueyunGuobaInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303301
@@ -43,8 +50,8 @@ define status {
   once increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 333002
@@ -59,7 +66,7 @@ define card {
   cost DiceType.Void, 2;
   food;
   :characterStatus(AdeptusTemptationInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303302
@@ -74,8 +81,8 @@ define status {
   once increaseSkillDamage {
     when :( :e.viaSkillType("burst") );
     :e.increaseDamage(3);
-  }
-}
+  };
+};
 
 /**
  * @id 333003
@@ -90,7 +97,7 @@ define card {
   cost DiceType.Aligned, 1;
   food;
   :characterStatus(LotusFlowerCrispInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303303
@@ -105,8 +112,8 @@ define status {
   oneDuration;
   once decreaseDamaged {
     :e.decreaseDamage(3);
-  }
-}
+  };
+};
 
 /**
  * @id 333004
@@ -120,7 +127,7 @@ define card {
   since "v3.3.0";
   food;
   :characterStatus(NorthernSmokedChickenInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303304
@@ -135,8 +142,8 @@ define status {
   once deductVoidDiceSkill {
     when :( :e.isSkillType("normal") );
     :e.deductVoidCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 333005
@@ -150,7 +157,7 @@ define card {
   since "v3.3.0";
   food { injuredOnly; };
   :heal(1, :e.targets[0]);
-}
+};
 
 /**
  * @id 333006
@@ -167,7 +174,7 @@ define card {
     injuredOnly;
   };
   :heal(2, "@targets.0");
-}
+};
 
 /**
  * @id 333007
@@ -185,7 +192,7 @@ define card {
   };
   :heal(1, "@targets.0");
   :characterStatus(MushroomPizzaInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303305
@@ -200,8 +207,8 @@ define status {
   duration 2;
   on endPhase {
     :heal(1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 303306
@@ -217,8 +224,8 @@ define status {
     when :( :e.isSkillType("normal") );
     usage 3;
     :e.deductVoidCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 333008
@@ -233,7 +240,7 @@ define card {
   cost DiceType.Aligned, 1;
   food;
   :characterStatus(MintyMeatRollsInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303307
@@ -244,7 +251,7 @@ define card {
 define combatStatus {
   id 303307 as ReviveOnCooldown;
   oneDuration;
-}
+};
 
 /**
  * @id 333009
@@ -263,7 +270,7 @@ define card {
   :heal(1, "@targets.0", { kind: "revive" });
   :characterStatus(Satiated, "@targets.0");
   :combatStatus(ReviveOnCooldown);
-}
+};
 
 /**
  * @id 333010
@@ -278,7 +285,7 @@ define card {
   cost DiceType.Aligned, 1;
   food;
   :characterStatus(SashimiPlatterInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303308
@@ -293,8 +300,8 @@ define status {
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 333011
@@ -308,8 +315,11 @@ define card {
   since "v3.7.0";
   cost DiceType.Void, 2;
   food combat;
-  :characterStatus(TandooriRoastChickenInEffect, `my characters and not has status with definition id ${Satiated}`);
-}
+  :characterStatus(
+    TandooriRoastChickenInEffect,
+    `my characters and not has status with definition id ${Satiated}`,
+  );
+};
 
 /**
  * @id 303309
@@ -324,8 +334,8 @@ define status {
   once increaseSkillDamage {
     when :( :e.viaSkillType("elemental") );
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 333012
@@ -339,8 +349,11 @@ define card {
   since "v3.7.0";
   cost DiceType.Void, 2;
   food combat;
-  :characterStatus(ButterCrabInEffect, `my characters and not has status with definition id ${Satiated}`);
-}
+  :characterStatus(
+    ButterCrabInEffect,
+    `my characters and not has status with definition id ${Satiated}`,
+  );
+};
 
 /**
  * @id 303310
@@ -355,8 +368,8 @@ define status {
   oneDuration;
   once decreaseDamaged {
     :e.decreaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 333013
@@ -370,8 +383,11 @@ define card {
   since "v4.3.0";
   cost DiceType.Void, 2;
   food combat;
-  :characterStatus(FishAndChipsActive, `my characters and not has status with definition id ${Satiated}`);
-}
+  :characterStatus(
+    FishAndChipsActive,
+    `my characters and not has status with definition id ${Satiated}`,
+  );
+};
 
 /**
  * @id 303311
@@ -385,8 +401,8 @@ define status {
   oneDuration;
   once deductOmniDiceSkill {
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 333014
@@ -404,7 +420,7 @@ define card {
   };
   :heal(2, "@targets.0");
   :characterStatus(MatsutakeMeatRollsInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303312
@@ -419,8 +435,8 @@ define status {
   on endPhase {
     usage 3;
     :heal(1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 333015
@@ -438,7 +454,7 @@ define card {
   };
   :heal(1, "@targets.0");
   :characterStatus(RainbowMacaronsInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303313
@@ -453,8 +469,8 @@ define status {
   on damaged {
     usage 3;
     :heal(1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 133085
@@ -466,7 +482,7 @@ define status {
 define card {
   id 133085 as TandooriGrilledChicken; // 骗骗花
   reserved;
-}
+};
 
 /**
  * @id 133097
@@ -478,7 +494,7 @@ define card {
 define card {
   id 133097 as SweetMaam; // 骗骗花
   reserved;
-}
+};
 
 /**
  * @id 133098
@@ -490,7 +506,7 @@ define card {
 define card {
   id 133098 as DeliciousMacarons; // 骗骗花
   reserved;
-}
+};
 
 /**
  * @id 333016
@@ -504,7 +520,7 @@ define card {
   since "v5.1.0";
   food;
   :characterStatus(SaurusCrackersInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303314
@@ -518,8 +534,8 @@ define status {
   oneDuration;
   once deductOmniDiceTechnique {
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 333017
@@ -534,7 +550,7 @@ define card {
   cost DiceType.Aligned, 1;
   food;
   :increaseMaxHealth(1, "@targets.0");
-}
+};
 
 /**
  * @id 333018
@@ -549,7 +565,7 @@ define card {
   cost DiceType.Aligned, 1;
   food;
   :characterStatus(PuffPopsInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303315
@@ -565,8 +581,8 @@ define status {
     when :( !:isInInitialPile(:e.card) );
     usage 3;
     :heal(1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 333019
@@ -583,7 +599,7 @@ define card {
     injuredOnly;
   };
   :heal(:$$(`my summons`).length, "@targets.0");
-}
+};
 
 /**
  * @id 333021
@@ -597,7 +613,7 @@ define card {
   food;
   undiscoverable;
   :heal(2, "@targets.0");
-}
+};
 
 /**
  * @id 333022
@@ -611,7 +627,7 @@ define card {
   food;
   undiscoverable;
   :characterStatus(MystiqueSoupProvidenceInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303317
@@ -625,8 +641,8 @@ define status {
   oneDuration;
   once deductOmniDiceSkill {
     :e.deductOmniCost(2);
-  }
-}
+  };
+};
 
 /**
  * @id 303318
@@ -641,8 +657,8 @@ define status {
   on increaseSkillDamage {
     usage 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 333023
@@ -656,7 +672,7 @@ define card {
   food;
   undiscoverable;
   :characterStatus(MystiqueSoupFuryInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 333024
@@ -670,7 +686,7 @@ define card {
   food;
   undiscoverable;
   :characterStatus(MystiqueSoupSerenityInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303319
@@ -685,8 +701,8 @@ define status {
   oneDuration;
   once decreaseDamaged {
     :e.decreaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 333025
@@ -700,7 +716,7 @@ define card {
   food;
   undiscoverable;
   :characterStatus(MystiqueSoupSoothingInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303320
@@ -717,8 +733,8 @@ define status {
   on decreaseDamaged {
     usage 3;
     :e.decreaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 333026
@@ -732,7 +748,7 @@ define card {
   food;
   undiscoverable;
   :increaseMaxHealth(1, "@targets.0");
-}
+};
 
 /**
  * @id 333020
@@ -748,10 +764,17 @@ define card {
   food {
     noSatiated;
   };
-  const allCards = [MystiqueSoupHealing, MystiqueSoupProvidence, MystiqueSoupFury, MystiqueSoupSerenity, MystiqueSoupSoothing, MystiqueSoupInspiration];
+  const allCards = [
+    MystiqueSoupHealing,
+    MystiqueSoupProvidence,
+    MystiqueSoupFury,
+    MystiqueSoupSerenity,
+    MystiqueSoupSoothing,
+    MystiqueSoupInspiration,
+  ];
   const candidates = :randomSubset(allCards, 3);
   :selectAndPlay(candidates, :e.targets[0]);
-}
+};
 
 /**
  * @id 333027
@@ -769,7 +792,7 @@ define card {
   };
   :drawCards(2);
   :combatStatus(SingYourHeartOutInEffect);
-}
+};
 
 /**
  * @id 303321
@@ -783,8 +806,8 @@ define combatStatus {
   on deductOmniDiceSwitch {
     usage 2;
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 333028
@@ -800,7 +823,7 @@ define card {
   food;
   :heal(1, "@targets.0");
   :characterStatus(HarvestsBoonInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303322
@@ -813,12 +836,14 @@ define status {
   id 303322 as private HarvestsBoonInEffect;
   since "v5.7.0";
   on enterRelative {
-    when :( :e.entity.definition.type === "status" &&
-        :e.entity.definition.tags.includes("preparingSkill") );
+    when :(
+      :e.entity.definition.type === "status" &&
+        :e.entity.definition.tags.includes("preparingSkill")
+    );
     usage 2;
     :heal(1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 333029
@@ -832,7 +857,7 @@ define card {
   since "v6.1.0";
   food;
   :characterStatus(ChenyuBrewInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 303323
@@ -847,12 +872,12 @@ define status {
   on adventure {
     :heal(1, "@master");
     :consumeUsage();
-  }
+  };
   on endPhase {
     :heal(1, "@master");
     :consumeUsage();
-  }
-}
+  };
+};
 
 /**
  * @id 333030
@@ -882,7 +907,7 @@ define card {
     const effect = :random(effects);
     effect();
   }
-}
+};
 
 /**
  * @id 303324
@@ -897,8 +922,8 @@ define status {
   on deductOmniDiceSkill {
     usage 2;
     :e.deductOmniCost(2);
-  }
-}
+  };
+};
 
 /**
  * @id 333031
@@ -913,4 +938,4 @@ define card {
   cost DiceType.Aligned, 4;
   food;
   :characterStatus(LakkaberryPieInEffect, :e.targets[0]);
-}
+};

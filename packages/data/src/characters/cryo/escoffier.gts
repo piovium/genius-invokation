@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111151
@@ -29,7 +38,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Cryo, 1);
-  }
+  };
   on useSkill {
     when :{
       const escoffier = :$(`my character with definition id ${Escoffier}`);
@@ -40,8 +49,8 @@ define summon {
     };
     usage perRound, 1;
     :damage(DamageType.Cryo, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 111156
@@ -55,8 +64,8 @@ define status {
   oneDuration;
   once increaseSkillDamage {
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 111157
@@ -69,8 +78,8 @@ define status {
   since "v6.2.0";
   once deductOmniDiceSkill {
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 111158
@@ -83,8 +92,8 @@ define status {
   since "v6.2.0";
   once increaseSkillDamage {
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 111152
@@ -98,7 +107,7 @@ define card {
   undiscoverable;
   food;
   :characterStatus(GildedHallInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 111153
@@ -113,7 +122,7 @@ define card {
   food;
   :heal(1, "@targets.0");
   :increaseMaxHealth(1, "@targets.0");
-}
+};
 
 /**
  * @id 111154
@@ -130,7 +139,7 @@ define card {
   };
   cost DiceType.Void, 2;
   :characterStatus(WavekissedSandsInEffect, "all my characters");
-}
+};
 
 /**
  * @id 111155
@@ -147,7 +156,7 @@ define card {
   };
   cost DiceType.Aligned, 1;
   :characterStatus(VerdantGiftInEffect, "all my characters");
-}
+};
 
 /**
  * @id 111159
@@ -160,17 +169,18 @@ define card {
   id 111159 as AllspectrumMultiuseCookingMek;
   since "v6.2.0";
   undiscoverable;
-  support place { // 神秘
+  support place {
+    // 神秘
     on reaction {
       when :( :e.relatedTo(DamageType.Cryo) );
       listenTo all;
       usage 2;
       const cards = [GildedHall, AutumnFrost, WaveKissedSands, VerdantGift];
-      const selected = :random(cards)
+      const selected = :random(cards);
       :createHandCard(selected);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 11151
@@ -184,7 +194,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 11152
@@ -198,7 +208,7 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 1);
   :summon(CookingMekColdStorageMode);
-}
+};
 
 /**
  * @id 11153
@@ -213,7 +223,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 1);
   :heal(2, "all my characters");
-}
+};
 
 /**
  * @id 11154
@@ -226,9 +236,9 @@ define skill {
   skillType passive {
     on battleBegin {
       :createEntity("support", AllspectrumMultiuseCookingMek);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1115
@@ -242,8 +252,11 @@ define character {
   tags cryo, pole, fontaine, pneuma;
   health 10;
   energy 2;
-  skills KitchenSkills, LowtemperatureCooking, ScoringCuts, ConstantOffthecuffCookery;
-}
+  skills KitchenSkills,
+    LowtemperatureCooking,
+    ScoringCuts,
+    ConstantOffthecuffCookery;
+};
 
 /**
  * @id 211151
@@ -261,6 +274,6 @@ define card {
   talent Escoffier {
     on enter {
       :useSkill(LowtemperatureCooking);
-    }
-  }
-}
+    };
+  };
+};

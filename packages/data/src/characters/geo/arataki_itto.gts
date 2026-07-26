@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, summon, status, card, DamageType, DiceType, type SummonHandle } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  summon,
+  status,
+  card,
+  DamageType,
+  DiceType,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 116054
@@ -30,13 +39,12 @@ define status {
       append 3;
     };
     :e.increaseDamage(1);
-  }
+  };
   on deductVoidDiceSkill {
-    when :( :e.isChargedAttack() && 
-        :getVariable("usage") >= 2 );
+    when :( :e.isChargedAttack() && :getVariable("usage") >= 2 );
     :e.deductVoidCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 116051
@@ -54,22 +62,26 @@ define summon {
   on endPhase {
     :damage(DamageType.Geo, 1);
     :dispose();
-    :characterStatus(SuperlativeSuperstrength, ($ => $.my.character.def(AratakiItto)));
-  }
+    :characterStatus(SuperlativeSuperstrength, ($) =>
+      $.my.character.def(AratakiItto),
+    );
+  };
   on decreaseDamaged {
     when :( :e.target.isActive() );
     usage 1 {
       autoDispose false;
     };
     :e.decreaseDamage(1);
-  }
+  };
   on damaged {
     usage 1 {
       name "addStatusUsage";
     };
-    :characterStatus(SuperlativeSuperstrength, ($ => $.my.character.def(AratakiItto)));
-  }
-}
+    :characterStatus(SuperlativeSuperstrength, ($) =>
+      $.my.character.def(AratakiItto),
+    );
+  };
+};
 
 /**
  * @id 116053
@@ -85,17 +97,17 @@ define status {
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Geo);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     usage perRound, 1;
     :characterStatus(SuperlativeSuperstrength, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 16051
@@ -109,15 +121,15 @@ define skill {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   if (
-      :self.hasEquipment(AratakiIchiban) &&  // 带有装备
-      :countOfSkill() > 0 &&                 // 本回合使用过
-      :skillInfo.charged                     // 触发乱神之怪力（重击）
-    ) {
+    :self.hasEquipment(AratakiIchiban) && // 带有装备
+    :countOfSkill() > 0 && // 本回合使用过
+    :skillInfo.charged // 触发乱神之怪力（重击）
+  ) {
     :damage(DamageType.Physical, 3);
   } else {
     :damage(DamageType.Physical, 2);
   }
-}
+};
 
 /**
  * @id 16052
@@ -132,7 +144,7 @@ define skill {
   :damage(DamageType.Geo, 1);
   :summon(Ushi);
   :characterStatus(SuperlativeSuperstrength);
-}
+};
 
 /**
  * @id 16053
@@ -147,7 +159,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Geo, 4);
   :characterStatus(RagingOniKing);
-}
+};
 
 /**
  * @id 1605
@@ -161,8 +173,10 @@ define character {
   tags geo, claymore, inazuma;
   health 10;
   energy 3;
-  skills FightClubLegend, MasatsuZetsugiAkaushiBurst, RoyalDescentBeholdIttoTheEvil;
-}
+  skills FightClubLegend,
+    MasatsuZetsugiAkaushiBurst,
+    RoyalDescentBeholdIttoTheEvil;
+};
 
 /**
  * @id 216051
@@ -181,6 +195,6 @@ define card {
   talent AratakiItto {
     on enter {
       :useSkill(FightClubLegend);
-    }
-  }
-}
+    };
+  };
+};

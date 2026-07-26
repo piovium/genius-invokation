@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 115012
@@ -31,15 +39,15 @@ define summon {
   on endPhase {
     usage 3;
     :damage(:self.variables.hintIcon, 2);
-  }
+  };
   on increaseDamage {
     when :{
       const color = :getVariable("hintIcon");
       return color !== DamageType.Anemo && color === :e.type;
     };
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 115011
@@ -56,8 +64,8 @@ define summon {
   on endPhase {
     usage 3;
     :damage(:self.variables.hintIcon, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 15011
@@ -71,7 +79,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Anemo, 1);
-}
+};
 
 /**
  * @id 15012
@@ -85,7 +93,7 @@ define skill {
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 3);
   :switchActive("opp prev");
-}
+};
 
 /**
  * @id 15013
@@ -101,11 +109,10 @@ define skill {
   :damage(DamageType.Anemo, 1);
   if (:self.hasEquipment(ChaoticEntropy)) {
     :summon(LargeWindSpirit01);
-  }
-  else {
+  } else {
     :summon(LargeWindSpirit);
   }
-}
+};
 
 /**
  * @id 1501
@@ -119,8 +126,10 @@ define character {
   tags anemo, catalyst, mondstadt;
   health 10;
   energy 2;
-  skills WindSpiritCreation, AstableAnemohypostasisCreation6308, ForbiddenCreationIsomer75TypeIi;
-}
+  skills WindSpiritCreation,
+    AstableAnemohypostasisCreation6308,
+    ForbiddenCreationIsomer75TypeIi;
+};
 
 /**
  * @id 215011
@@ -139,6 +148,6 @@ define card {
   talent Sucrose {
     on enter {
       :useSkill(ForbiddenCreationIsomer75TypeIi);
-    }
-  }
-}
+    };
+  };
+};

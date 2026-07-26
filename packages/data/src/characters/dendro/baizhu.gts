@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, summon, type CombatStatusHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type CombatStatusHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 117051
@@ -29,8 +38,8 @@ define summon {
     usage 1;
     :damage(DamageType.Dendro, 1);
     :heal(1, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 117053
@@ -43,7 +52,7 @@ define combatStatus {
   id 117053 as SeamlessShield;
   shield 1;
   defineSnippet :{
-    :damage(DamageType.Dendro, 1)
+    :damage(DamageType.Dendro, 1);
     const active = :$("my active");
     if (!active) {
       // 出战角色被击倒，治疗和生成骰子不生效
@@ -57,11 +66,11 @@ define combatStatus {
   on enter {
     when :( :e.overridden );
     :callSnippet();
-  }
+  };
   on selfDispose {
     :callSnippet();
-  }
-}
+  };
+};
 
 /**
  * @id 117052
@@ -75,8 +84,8 @@ define combatStatus {
   on actionPhase {
     usage 2;
     :combatStatus(SeamlessShield);
-  }
-}
+  };
+};
 
 /**
  * @id 17051
@@ -90,7 +99,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Dendro, 1);
-}
+};
 
 /**
  * @id 17052
@@ -104,7 +113,7 @@ define skill {
   cost DiceType.Dendro, 3;
   :damage(DamageType.Dendro, 1);
   :summon(GossamerSprite);
-}
+};
 
 /**
  * @id 17053
@@ -119,7 +128,7 @@ define skill {
   cost DiceType.Energy, 2;
   :combatStatus(PulsingClarity);
   :combatStatus(SeamlessShield);
-}
+};
 
 /**
  * @id 1705
@@ -134,7 +143,7 @@ define character {
   health 11;
   energy 2;
   skills TheClassicsOfAcupuncture, UniversalDiagnosis, HolisticRevivification;
-}
+};
 
 /**
  * @id 217051
@@ -153,6 +162,6 @@ define card {
   talent Baizhu {
     on enter {
       :useSkill(HolisticRevivification);
-    }
-  }
-}
+    };
+  };
+};

@@ -1,19 +1,26 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 163011
@@ -29,8 +36,8 @@ define status {
   on endPhase {
     usage 1;
     :damage(DamageType.Pyro, 1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 63014
@@ -42,7 +49,7 @@ define skill {
   id 63014 as CrimsonFlamespin;
   skillType passive;
   reserved;
-}
+};
 
 /**
  * @id 163012
@@ -54,7 +61,7 @@ define skill {
 define status {
   id 163012 as EncarmineVortex;
   reserved;
-}
+};
 
 /**
  * @id 63011
@@ -68,7 +75,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Pyro, 1);
-}
+};
 
 /**
  * @id 63012
@@ -82,7 +89,7 @@ define skill {
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 2);
   :characterStatus(BlazingHeat, "opp active");
-}
+};
 
 /**
  * @id 63013
@@ -96,13 +103,13 @@ define skill {
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Pyro, 6);
-}
+};
 
 /**
  * @id 6301
  * @name 焚尽的炽炎魔女
  * @description
- * 
+ *
  */
 define character {
   id 6301 as CrimsonWitchOfEmbers;
@@ -111,4 +118,4 @@ define character {
   health 10;
   energy 2;
   skills CrimsonLotusMoth, DecimatingLash, WhirlingBlaze;
-}
+};

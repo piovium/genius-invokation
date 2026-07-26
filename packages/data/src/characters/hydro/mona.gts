@@ -13,7 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, summon } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 112031
@@ -30,15 +38,15 @@ define summon {
   on endPhase {
     :damage(DamageType.Hydro, 1);
     :dispose();
-  }
+  };
   on decreaseDamaged {
     when :( :e.target.isActive() );
     usage 1 {
       autoDispose false;
     };
     :e.decreaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 112032
@@ -51,8 +59,8 @@ define combatStatus {
   on multiplySkillDamage {
     :e.multiplyDamage(2);
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 12031
@@ -66,7 +74,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Hydro, 1);
-}
+};
 
 /**
  * @id 12032
@@ -80,7 +88,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 1);
   :summon(Reflection);
-}
+};
 
 /**
  * @id 12033
@@ -95,7 +103,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Hydro, 4);
   :combatStatus(IllusoryBubble);
-}
+};
 
 /**
  * @id 12034
@@ -112,9 +120,9 @@ define skill {
         name "usagePerRound1";
       };
       :e.setFastAction();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1203
@@ -128,8 +136,11 @@ define character {
   tags hydro, catalyst, mondstadt;
   health 10;
   energy 3;
-  skills RippleOfFate, MirrorReflectionOfDoom, StellarisPhantasm, IllusoryTorrent;
-}
+  skills RippleOfFate,
+    MirrorReflectionOfDoom,
+    StellarisPhantasm,
+    IllusoryTorrent;
+};
 
 /**
  * @id 212031
@@ -147,10 +158,11 @@ define card {
   cost DiceType.Energy, 3;
   talent Mona {
     on increaseDamage {
-      when :( :self.master.isActive() &&
-          :e.isReactionRelatedTo(DamageType.Hydro) );
+      when :(
+        :self.master.isActive() && :e.isReactionRelatedTo(DamageType.Hydro)
+      );
       listenTo samePlayer;
       :e.increaseDamage(2);
-    }
-  }
-}
+    };
+  };
+};

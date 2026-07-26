@@ -1,15 +1,15 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -37,26 +37,24 @@ define status {
     when :( :e.getReaction() !== null );
     if (
       // 由于蕴种印在对方场上，故查找我方信息时使用 opp
-      :query($.opp.typeEquipment.def(TheSeedOfStoredKnowledge)) &&  // 装备有心识蕴藏之种
-      (
-        :query($.opp.combatStatus.def(ShrineOfMaya)) ||
-        :query($.opp.combatStatus.def(ShrineOfMaya01))
-      ) &&                                                          // 摩耶之殿在场时
-      :query($.opp.character.includesDefeated.tag("pyro"))        // 我方队伍中存在火元素
+      :query($.opp.typeEquipment.def(TheSeedOfStoredKnowledge)) && // 装备有心识蕴藏之种
+      (:query($.opp.combatStatus.def(ShrineOfMaya)) ||
+        :query($.opp.combatStatus.def(ShrineOfMaya01))) && // 摩耶之殿在场时
+      :query($.opp.character.includesDefeated.tag("pyro")) // 我方队伍中存在火元素
     ) {
-      :damage(DamageType.Dendro, 1, "@master")
+      :damage(DamageType.Dendro, 1, "@master");
     } else {
-      :damage(DamageType.Piercing, 1, "@master")
+      :damage(DamageType.Piercing, 1, "@master");
     }
     :consumeUsage();
     :emitCustomEvent(TriggerOtherSeed);
-  }
+  };
   on TriggerOtherSeed {
     when :( :e.entity.id !== :self.id );
     listenTo samePlayer;
     :damage(DamageType.Piercing, 1, "@master");
     :consumeUsage();
-  }
+  };
   // 自身因元素反应伤害击倒而弃置时
   on selfDispose {
     when :{
@@ -67,15 +65,17 @@ define status {
       if (:get(fromChId).variables.alive) {
         return;
       }
-      return :hasPhaseDamage("all", (e) =>
-        e.getReaction() !== null && 
-        e.damageInfo.causeDefeated && 
-        e.damageInfo.target.id === fromChId
+      return :hasPhaseDamage(
+        "all",
+        (e) =>
+          e.getReaction() !== null &&
+          e.damageInfo.causeDefeated &&
+          e.damageInfo.target.id === fromChId,
       );
-    }
+    };
     :emitCustomEvent(TriggerOtherSeed);
-  }
-}
+  };
+};
 
 /**
  * @id 117033
@@ -91,18 +91,20 @@ define combatStatus {
   on increaseDamage {
     when :( :e.getReaction() );
     :e.increaseDamage(1);
-  }
+  };
   on enter {
     when :(
-      :query($.my.character.has($.typeEquipment.def(TheSeedOfStoredKnowledge))) && // 装备有心识蕴藏之种
-      :query($.my.character.includesDefeated.tag("electro"))                     // 我方队伍中存在雷元素
+      :query(
+        $.my.character.has($.typeEquipment.def(TheSeedOfStoredKnowledge)),
+      ) && // 装备有心识蕴藏之种
+        :query($.my.character.includesDefeated.tag("electro")) // 我方队伍中存在雷元素
     );
     // 对方场上蕴种印的可用次数+1
     for (const state of :queryAll($.opp.typeStatus.def(SeedOfSkandha))) {
       state.addVariable("usage", 1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 117032
@@ -111,25 +113,27 @@ define combatStatus {
  * 我方引发元素反应时：伤害额外+1。
  * 持续回合：2
  */
-define combatStatus{
+define combatStatus {
   id 117032 as ShrineOfMaya;
   conflictWith ShrineOfMaya01;
   duration 2;
   on increaseDamage {
     when :( :e.getReaction() );
     :e.increaseDamage(1);
-  }
+  };
   on enter {
     when :(
-      :query($.my.character.has($.typeEquipment.def(TheSeedOfStoredKnowledge))) && // 装备有心识蕴藏之种
-      :query($.my.character.includesDefeated.tag("electro"))                     // 我方队伍中存在雷元素
+      :query(
+        $.my.character.has($.typeEquipment.def(TheSeedOfStoredKnowledge)),
+      ) && // 装备有心识蕴藏之种
+        :query($.my.character.includesDefeated.tag("electro")) // 我方队伍中存在雷元素
     );
     // 对方场上蕴种印的可用次数+1
     for (const state of :queryAll($.opp.typeStatus.def(SeedOfSkandha))) {
       state.addVariable("usage", 1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 17031
@@ -142,8 +146,8 @@ define skill {
   skillType normal;
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
-  :damage(DamageType.Dendro, 1)
-}
+  :damage(DamageType.Dendro, 1);
+};
 
 /**
  * @id 17032
@@ -161,8 +165,7 @@ define skill {
     :characterStatus(SeedOfSkandha, $.opp.active);
   }
   :damage(DamageType.Dendro, 2);
-}
-
+};
 
 /**
  * @id 17033
@@ -176,7 +179,7 @@ define skill {
   cost DiceType.Dendro, 5;
   :characterStatus(SeedOfSkandha, "all opp characters");
   :damage(DamageType.Dendro, 3);
-}
+};
 
 /**
  * @id 17034
@@ -184,12 +187,12 @@ define skill {
  * @description
  * 造成4点草元素伤害，生成摩耶之殿。
  */
-define skill{
+define skill {
   id 17034 as IllusoryHeart;
   skillType burst;
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Dendro, 4)
+  :damage(DamageType.Dendro, 4);
   if (
     :self.hasEquipment(TheSeedOfStoredKnowledge) && // 装备有心识蕴藏之种
     :query($.my.character.includesDefeated.tag("hydro")) // 我方队伍中存在水元素
@@ -198,8 +201,7 @@ define skill{
   } else {
     :combatStatus(ShrineOfMaya);
   }
-}
-
+};
 
 /**
  * @id 1703
@@ -214,7 +216,7 @@ define character {
   health 10;
   energy 2;
   skills Akara, AllSchemesToKnow, AllSchemesToKnowTathata, IllusoryHeart;
-}
+};
 
 /**
  * @id 217031
@@ -236,6 +238,6 @@ define card {
   talent Nahida {
     on enter {
       :useSkill(IllusoryHeart);
-    }
-  }
-}
+    };
+  };
+};

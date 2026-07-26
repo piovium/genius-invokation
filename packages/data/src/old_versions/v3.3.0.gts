@@ -1,6 +1,23 @@
-import { card, character, combatStatus, DamageType, DiceType, skill, status, type SkillHandle } from "@gi-tcg/core/builder";
-import { AurousBlaze, FireworkFlareup, NiwabiFiredance } from "../characters/pyro/yoimiya.gts";
-import { ShadowswordGallopingFrost, ShadowswordLoneGale, TranscendentAutomaton } from "../characters/anemo/maguu_kenki.gts";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
+import {
+  AurousBlaze,
+  FireworkFlareup,
+  NiwabiFiredance,
+} from "../characters/pyro/yoimiya.gts";
+import {
+  ShadowswordGallopingFrost,
+  ShadowswordLoneGale,
+  TranscendentAutomaton,
+} from "../characters/anemo/maguu_kenki.gts";
 import { Collei, FloralBrush } from "../characters/dendro/collei.gts";
 
 /**
@@ -17,7 +34,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Pyro, 3);
   :combatStatus(AurousBlaze);
-}
+};
 
 /**
  * @id 1305
@@ -32,7 +49,7 @@ define character {
   health 10;
   energy 2;
   skills FireworkFlareup, NiwabiFiredance, RyuukinSaxifrage;
-}
+};
 
 /**
  * @id 25012
@@ -50,7 +67,7 @@ define skill {
   if (:self.hasEquipment(TranscendentAutomaton)) {
     :switchActive("my next");
   }
-}
+};
 
 /**
  * @id 25013
@@ -68,7 +85,7 @@ define skill {
   if (:self.hasEquipment(TranscendentAutomaton)) {
     :switchActive("my prev");
   }
-}
+};
 
 /**
  * @id 303306
@@ -83,8 +100,8 @@ define status {
   on deductVoidDiceSkill {
     when :( :e.isSkillType("normal") );
     :e.deductVoidCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 117
@@ -97,12 +114,15 @@ define combatStatus {
   id 117 as private CatalyzingField;
   until "v3.3.0";
   on increaseDamage {
-    when :( ([DamageType.Electro, DamageType.Dendro] as DamageType[]).includes(:e.type) &&
-        :e.target.id === :$("opp active")?.id );
+    when :(
+      ([DamageType.Electro, DamageType.Dendro] as DamageType[]).includes(
+        :e.type,
+      ) && :e.target.id === :$("opp active")?.id
+    );
     usage 3;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 217011
@@ -120,6 +140,6 @@ define card {
   talent Collei {
     on enter {
       :useSkill(FloralBrush);
-    }
-  }
-}
+    };
+  };
+};

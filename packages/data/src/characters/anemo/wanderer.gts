@@ -1,19 +1,26 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  card,
+  DamageType,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 115062
@@ -27,13 +34,13 @@ define status {
   on deductOmniDiceSwitch {
     when :( :self.master.isActive() );
     :e.deductOmniCost(1);
-  }
+  };
   on switchActive {
     when :( :self.master.id === :e.switchInfo.from?.id );
     usage 1;
     :damage(DamageType.Anemo, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 115061
@@ -48,8 +55,8 @@ define status {
     when :( :e.viaSkillType("normal") );
     usage 2;
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 15061
@@ -64,11 +71,10 @@ define skill {
   cost DiceType.Void, 2;
   if (:self.hasStatus(Windfavored) && :$("opp next")) {
     :damage(DamageType.Anemo, 1, "opp next");
-  }
-  else {
+  } else {
     :damage(DamageType.Anemo, 1);
   }
-}
+};
 
 /**
  * @id 15062
@@ -82,7 +88,7 @@ define skill {
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 2);
   :characterStatus(Windfavored);
-}
+};
 
 /**
  * @id 15063
@@ -102,7 +108,7 @@ define skill {
   } else {
     :damage(DamageType.Anemo, 7);
   }
-}
+};
 
 /**
  * @id 1506
@@ -117,7 +123,7 @@ define character {
   health 10;
   energy 3;
   skills YuubanMeigen, HanegaSongOfTheWind, KyougenFiveCeremonialPlays;
-}
+};
 
 /**
  * @id 215061
@@ -135,10 +141,10 @@ define card {
   talent Wanderer {
     on enter {
       :useSkill(HanegaSongOfTheWind);
-    }
+    };
     on dealDamage {
       when :( :self.master.hasStatus(Windfavored) && :e.via.charged );
       :characterStatus(Descent, "@master");
-    }
-  }
-}
+    };
+  };
+};

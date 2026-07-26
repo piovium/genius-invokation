@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111023
@@ -29,8 +38,8 @@ define summon {
     usage 2;
     :damage(DamageType.Cryo, 1);
     :heal(2, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 111022
@@ -42,7 +51,7 @@ define combatStatus {
   id 111022 as CatclawShield01;
   conflictWith 111021;
   shield 2;
-}
+};
 
 /**
  * @id 111021
@@ -54,7 +63,7 @@ define combatStatus {
   id 111021 as CatclawShield;
   conflictWith 111022;
   shield 1;
-}
+};
 
 /**
  * @id 11021
@@ -68,7 +77,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 11022
@@ -83,11 +92,10 @@ define skill {
   :damage(DamageType.Cryo, 2);
   if (:self.hasEquipment(ShakenNotPurred)) {
     :combatStatus(CatclawShield01);
-  }
-  else {
+  } else {
     :combatStatus(CatclawShield);
   }
-}
+};
 
 /**
  * @id 11023
@@ -103,7 +111,7 @@ define skill {
   :damage(DamageType.Cryo, 1);
   :heal(2, "@self");
   :summon(DrunkenMist);
-}
+};
 
 /**
  * @id 1102
@@ -118,7 +126,7 @@ define character {
   health 12;
   energy 3;
   skills KatzleinStyle, IcyPaws, SignatureMix;
-}
+};
 
 /**
  * @id 211021
@@ -136,6 +144,6 @@ define card {
   talent Diona {
     on enter {
       :useSkill(IcyPaws);
-    }
-  }
-}
+    };
+  };
+};

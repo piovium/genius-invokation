@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Aura, card, character, DamageType, DiceType, skill, status, type StatusHandle } from "@gi-tcg/core/builder";
+import {
+  Aura,
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  type StatusHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 115132
@@ -28,12 +37,14 @@ define status {
     append;
   };
   on useSkill {
-    when :( :e.skill.definition.id === HeartstopperStrike &&
-        :self.getVariable("henkaku") >= 2 );
+    when :(
+      :e.skill.definition.id === HeartstopperStrike &&
+        :self.getVariable("henkaku") >= 2
+    );
     void 0;
     // 使用 勠心拳 后，我方继续行动一个回合
-    if(!:oppPlayer.declaredEnd) {
-      :continueNextTurn();      
+    if (!:oppPlayer.declaredEnd) {
+      :continueNextTurn();
     }
     // 为 角色 添加 增伤数值
     if (:self.master.hasEquipment(CuriousCasefiles)) {
@@ -43,11 +54,11 @@ define status {
     }
     // 消耗 2 层变格
     :addVariable("henkaku", -2);
-    if (:getVariable("henkaku") <= 0){
+    if (:getVariable("henkaku") <= 0) {
       :dispose();
     }
-  }
-}
+  };
+};
 
 /**
  * @id 15135
@@ -64,7 +75,7 @@ define skill {
   const increaseDmg = :self.getVariable("increaseDmg") ?? 0;
   :damage(DamageType.Anemo, 4 + increaseDmg);
   :self.setVariable("increaseDmg", 0);
-}
+};
 
 /**
  * @id 115131
@@ -76,7 +87,7 @@ define status {
   id 115131 as PreexistingGuilt;
   since "v5.8.0";
   prepare HeartstopperStrikeCharge;
-}
+};
 
 /**
  * @id 115133
@@ -91,8 +102,8 @@ define status {
   on beforeAction {
     usage 1;
     :damage(DamageType.Cryo, 1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 115134
@@ -107,8 +118,8 @@ define status {
   on beforeAction {
     usage 1;
     :damage(DamageType.Hydro, 1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 115135
@@ -123,8 +134,8 @@ define status {
   on beforeAction {
     usage 1;
     :damage(DamageType.Pyro, 1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 115136
@@ -139,8 +150,8 @@ define status {
   on beforeAction {
     usage 1;
     :damage(DamageType.Electro, 1, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 15131
@@ -154,7 +165,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Anemo, 1);
-}
+};
 
 /**
  * @id 15132
@@ -167,7 +178,7 @@ define skill {
   skillType elemental;
   cost DiceType.Anemo, 3;
   :characterStatus(PreexistingGuilt);
-}
+};
 
 /**
  * @id 15133
@@ -199,7 +210,7 @@ define skill {
     default:
       break;
   }
-}
+};
 
 /**
  * @id 15134
@@ -215,9 +226,9 @@ define skill {
       when :( :e.isReactionRelatedTo(DamageType.Anemo) );
       listenTo samePlayer;
       :characterStatus(Declension, "@self");
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1513
@@ -231,8 +242,12 @@ define character {
   tags anemo, catalyst, inazuma;
   health 10;
   energy 2;
-  skills FudouStyleMartialArts, HeartstopperStrike, WindmusterKick, ParadoxicalPractice, HeartstopperStrikeCharge;
-}
+  skills FudouStyleMartialArts,
+    HeartstopperStrike,
+    WindmusterKick,
+    ParadoxicalPractice,
+    HeartstopperStrikeCharge;
+};
 
 /**
  * @id 215131
@@ -250,6 +265,6 @@ define card {
   talent ShikanoinHeizou {
     on enter {
       :useSkill(HeartstopperStrike);
-    }
-  }
-}
+    };
+  };
+};

@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, Reaction, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  Reaction,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 113131
@@ -28,10 +37,9 @@ define card {
   undiscoverable;
   cost DiceType.Pyro, 2;
   tags action;
-  on selfDiscard, "=play" {
-  }
+  on selfDiscard, "=play";
   :damage(DamageType.Pyro, 1, "opp active");
-}
+};
 
 /**
  * @id 113135
@@ -47,8 +55,8 @@ define status {
     listenTo all;
     usage perRound, 1;
     :createHandCard(OverchargedBall);
-  }
-}
+  };
+};
 
 /**
  * @id 113132
@@ -63,8 +71,8 @@ define combatStatus {
   on switchActive {
     usage 2;
     :damage(DamageType.Pyro, 1, "@event.switchTo");
-  }
-}
+  };
+};
 
 /**
  * @id 113134
@@ -80,8 +88,8 @@ define combatStatus {
     when :( :e.type === DamageType.Pyro || :e.type === DamageType.Electro );
     usage 2;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 13131
@@ -95,7 +103,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 13132
@@ -109,7 +117,7 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 2);
-}
+};
 
 /**
  * @id 13133
@@ -124,7 +132,7 @@ define skill {
   cost DiceType.Energy, 2;
   :combatStatus(SecondaryExplosiveShells, "opp");
   :damage(DamageType.Pyro, 2);
-}
+};
 
 /**
  * @id 13134
@@ -142,9 +150,9 @@ define skill {
         name "usagePerRound1";
       };
       :createHandCard(OverchargedBall);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 13135
@@ -158,14 +166,16 @@ define skill {
   skillType passive {
     on useSkill {
       when :( :e.skill.definition.id === ShortrangeRapidInterdictionFire );
-      const ball = :player.hands.find((card) => card.definition.id === OverchargedBall);
+      const ball = :player.hands.find(
+        (card) => card.definition.id === OverchargedBall,
+      );
       if (ball) {
         :disposeCard(ball);
         :heal(1, "my characters order by health - maxHealth limit 1");
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1313
@@ -179,8 +189,12 @@ define character {
   tags pyro, pole, fontaine, pneuma;
   health 10;
   energy 2;
-  skills LineBayonetThrustEx, ShortrangeRapidInterdictionFire, RingOfBurstingGrenades, VerticalForceCoordinationPassive, ShortrangeRapidInterdictionFirePassive;
-}
+  skills LineBayonetThrustEx,
+    ShortrangeRapidInterdictionFire,
+    RingOfBurstingGrenades,
+    VerticalForceCoordinationPassive,
+    ShortrangeRapidInterdictionFirePassive;
+};
 
 /**
  * @id 213131
@@ -194,8 +208,14 @@ define card {
   id 213131 as VanguardsCoordinatedTactics;
   cost DiceType.Pyro, 2;
   filter :{
-    const elements = new Set(:$$(`all my characters include defeated`).map((ch) => ch.element()));
-    return elements.size === 2 && elements.has(DiceType.Pyro) && elements.has(DiceType.Electro);
+    const elements = new Set(
+      :$$(`all my characters include defeated`).map((ch) => ch.element()),
+    );
+    return (
+      elements.size === 2 &&
+      elements.has(DiceType.Pyro) &&
+      elements.has(DiceType.Electro)
+    );
   };
   talent Chevreuse, none {
     since "v4.8.0";
@@ -203,6 +223,6 @@ define card {
       when :( :e.getReaction() === Reaction.Overloaded && !:e.target.isMine() );
       listenTo all;
       :combatStatus(VanguardsCoordinatedTacticsInEffect);
-    }
-  }
-}
+    };
+  };
+};

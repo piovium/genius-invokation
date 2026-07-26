@@ -1,20 +1,31 @@
 // Copyright (C) 2026 Piovium Labs
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
-import { BonecrunchersEnergyBlock, BonecrunchersEnergyBlockCombatStatus } from "../../cards/event/other.gts";
+import {
+  $,
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
+import {
+  BonecrunchersEnergyBlock,
+  BonecrunchersEnergyBlockCombatStatus,
+} from "../../cards/event/other.gts";
 
 /**
  * @id 27055
@@ -27,7 +38,7 @@ define skill {
   skillType burst;
   prepared;
   :damage(DamageType.Dendro, 2);
-}
+};
 
 /**
  * @id 127051
@@ -39,7 +50,7 @@ define status {
   id 127051 as SproutsOfTheBlightedRotStatus;
   since "v6.5.0";
   prepare SproutsOfTheBlightedRot;
-}
+};
 
 /**
  * @id 27051
@@ -53,7 +64,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 27052
@@ -67,7 +78,7 @@ define skill {
   cost DiceType.Dendro, 3;
   :damage(DamageType.Dendro, 2);
   :drawCards(1, { withDefinition: BonecrunchersEnergyBlock });
-}
+};
 
 /**
  * @id 27053
@@ -86,7 +97,7 @@ define skill {
     :disposeCard(block);
     :characterStatus(SproutsOfTheBlightedRotStatus, "@self");
   }
-}
+};
 
 /**
  * @id 27054
@@ -99,17 +110,19 @@ define skill {
   skillType passive {
     on battleBegin {
       :createPileCards(BonecrunchersEnergyBlock, 2, "bottom");
-    }
+    };
     on enterRelative {
-      when :( :e.entity.definition.id === BonecrunchersEnergyBlockCombatStatus );
+      when :(
+        :e.entity.definition.id === BonecrunchersEnergyBlockCombatStatus
+      );
       listenTo samePlayer;
       usage perRound, 1 {
         name "usagePerRound1";
       };
       :dispose(:e.entity.cast<"combatStatus">());
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 27056
@@ -121,8 +134,8 @@ define skill {
   id 27056 as HungerFromTheRemains01;
   skillType passive {
     reserved;
-  }
-}
+  };
+};
 
 /**
  * @id 2705
@@ -136,8 +149,12 @@ define character {
   tags dendro, monster, sacread;
   health 10;
   energy 2;
-  skills ClawSlash, SiphonWave, SprawlingBlightedVines, HungerFromTheRemains, SproutsOfTheBlightedRot;
-}
+  skills ClawSlash,
+    SiphonWave,
+    SprawlingBlightedVines,
+    HungerFromTheRemains,
+    SproutsOfTheBlightedRot;
+};
 
 /**
  * @id 227051
@@ -154,17 +171,23 @@ define card {
   talent ConsecratedFangedBeast, none {
     variable usagePerRound, 1;
     on playCard {
-      when :( :getVariable("usagePerRound") && :e.card.definition.id === BonecrunchersEnergyBlock );
+      when :(
+        :getVariable("usagePerRound") &&
+          :e.card.definition.id === BonecrunchersEnergyBlock
+      );
       :drawCards(1);
       :setVariable("usagePerRound", 0);
-    }
+    };
     on disposeCard {
-      when :( :getVariable("usagePerRound") && :e.entity.definition.id === BonecrunchersEnergyBlock );
+      when :(
+        :getVariable("usagePerRound") &&
+          :e.entity.definition.id === BonecrunchersEnergyBlock
+      );
       :drawCards(1);
       :setVariable("usagePerRound", 0);
-    }
+    };
     on roundEnd {
       :setVariable("usagePerRound", 1);
-    }
-  }
-}
+    };
+  };
+};

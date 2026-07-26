@@ -1,12 +1,27 @@
-import { card, DamageType, DiceType, skill, summon, type SkillHandle, type SummonHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type SkillHandle,
+  type SummonHandle,
+} from "@gi-tcg/core/builder";
 import { ScopeOutSoftSpots } from "../characters/cryo/rosaria.gts";
 import { TamakushiCasket } from "../characters/hydro/sangonomiya_kokomi.gts";
 import { SesshouSakura } from "../characters/electro/yae_miko.gts";
 import { LandsOfDandelion } from "../characters/anemo/jean.gts";
 import { SoaringOnTheWind } from "../characters/anemo/xianyun.gts";
-import { MirrorCage, Refraction, Refraction01 } from "../characters/hydro/mirror_maiden.gts";
+import {
+  MirrorCage,
+  Refraction,
+  Refraction01,
+} from "../characters/hydro/mirror_maiden.gts";
 import { RipplingBladesStatus } from "../characters/hydro/abyss_herald_wicked_torrents.gts";
-import { GyoeiNarukamiKariyamaRite, KukiShinobu } from "../characters/electro/kuki_shinobu.gts";
+import {
+  GyoeiNarukamiKariyamaRite,
+  KukiShinobu,
+} from "../characters/electro/kuki_shinobu.gts";
 
 /**
  * @id 22022
@@ -22,11 +37,10 @@ define skill {
   :damage(DamageType.Hydro, 2);
   if (:self.hasEquipment(MirrorCage)) {
     :characterStatus(Refraction01, "opp active");
-  }
-  else {
+  } else {
     :characterStatus(Refraction, "opp active");
   }
-}
+};
 
 /**
  * @id 115021
@@ -43,13 +57,15 @@ define summon {
     usage 2;
     :damage(DamageType.Anemo, 1);
     :heal(1, "my active");
-  }
+  };
   on increaseDamage {
-    when :( :$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
-        :e.type === DamageType.Anemo );
+    when :(
+      :$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
+        :e.type === DamageType.Anemo
+    );
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 112051
@@ -66,13 +82,12 @@ define summon {
     usage 2;
     if (:$(`my equipment with definition id ${TamakushiCasket}`)) {
       :damage(DamageType.Hydro, 2);
-    }
-    else {
+    } else {
       :damage(DamageType.Hydro, 1);
     }
     :heal(1, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 14082
@@ -86,7 +101,7 @@ define skill {
   skillType elemental;
   cost DiceType.Electro, 3;
   :summon(SesshouSakura);
-}
+};
 
 /**
  * @id 22032
@@ -101,9 +116,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 2);
   :characterStatus(RipplingBladesStatus, "@self");
-}
-
-
+};
 
 /**
  * @id 111132
@@ -120,8 +133,8 @@ define summon {
     usage 2;
     :damage(DamageType.Cryo, 1);
     :combatStatus(ScopeOutSoftSpots);
-  }
-}
+  };
+};
 
 /**
  * @id 214111
@@ -141,17 +154,17 @@ define card {
   talent KukiShinobu {
     on enter {
       :useSkill(GyoeiNarukamiKariyamaRite);
-    }
+    };
     on beforeDefeated {
       usage perRound, 1;
       :immune(1);
-    }
+    };
     on increaseSkillDamage {
       when :( :e.source.cast<"character">().health <= 5 );
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 11132
@@ -166,8 +179,8 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 1);
   :combatStatus(ScopeOutSoftSpots, "my", {
-      overrideVariables: {
-        layer: 2
-      }
-    });
-}
+    overrideVariables: {
+      layer: 2,
+    },
+  });
+};

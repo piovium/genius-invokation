@@ -1,19 +1,30 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, card, character, combatStatus, DamageType, DiceType, extension, skill, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  $,
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  extension,
+  skill,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111081
@@ -29,17 +40,21 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Cryo, 1);
-  }
+  };
   on useSkill {
-    when :( :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal") );
+    when :(
+      :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal")
+    );
     :heal(1, "my characters order by health - maxHealth limit 1");
-  }
+  };
   on useSkill {
-    when :( :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal") );
+    when :(
+      :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal")
+    );
     usage perRound, 1;
     :heal(1, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 111082
@@ -55,12 +70,12 @@ define combatStatus {
       if (:e.skill.definition.id === AdeptusArtPreserverOfFortune) {
         return false;
       }
-      return :$(`@event.skillCaller and character with health < maxHealth`)
+      return :$(`@event.skillCaller and character with health < maxHealth`);
     };
     usage 3;
     :heal(2, "@event.skillCaller");
-  }
-}
+  };
+};
 
 /**
  * @id 11081
@@ -74,7 +89,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 11082
@@ -87,20 +102,21 @@ define skill {
   skillType elemental;
   cost DiceType.Cryo, 3;
   :summon(HeraldOfFrost);
-}
+};
 
 define extension {
   idHint 211081 as RiteOfResurrectionUsedExtension;
   schema ({ count: "pair<number>" });
   initialState ({ count: [0, 0] });
   description "本场对局中某方触发起死回骸的次数";
-  mutateWhen onDamageOrHeal, ((st, e) => {
-    // 七七倒下时重置
-    if (e.target.definition.id === Qiqi && e.damageInfo.causeDefeated) {
-      st.count[e.targetWho] = 0;
-    }
-  })
-}
+  mutateWhen onDamageOrHeal,
+    ((st, e) => {
+      // 七七倒下时重置
+      if (e.target.definition.id === Qiqi && e.damageInfo.causeDefeated) {
+        st.count[e.targetWho] = 0;
+      }
+    });
+};
 
 /**
  * @id 11083
@@ -116,15 +132,17 @@ define skill {
   associateExtension RiteOfResurrectionUsedExtension;
   :damage(DamageType.Cryo, 3);
   :combatStatus(FortunepreservingTalisman);
-  if (:self.hasEquipment(RiteOfResurrection) && 
-    :getExtensionState().count[:self.who] < 2) {
+  if (
+    :self.hasEquipment(RiteOfResurrection) &&
+    :getExtensionState().count[:self.who] < 2
+  ) {
     :setExtensionState((st) => st.count[:self.who]++);
     const defeated = :queryAll($.my.character.onlyDefeated);
     for (const ch of defeated) {
       ch.heal(2, { kind: "revive" });
     }
   }
-}
+};
 
 /**
  * @id 1108
@@ -139,7 +157,7 @@ define character {
   health 10;
   energy 3;
   skills AncientSwordArt, AdeptusArtHeraldOfFrost, AdeptusArtPreserverOfFortune;
-}
+};
 
 /**
  * @id 211081
@@ -158,6 +176,6 @@ define card {
   talent Qiqi {
     on enter {
       :useSkill(AdeptusArtPreserverOfFortune);
-    }
-  }
-}
+    };
+  };
+};

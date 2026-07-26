@@ -1,20 +1,43 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { type EntityDefinition, type CardHandle, DamageType, DiceType, Reaction, card, combatStatus, extension, status, summon, originalDiceCostOfCard, $, type CombatStatusHandle } from "@gi-tcg/core/builder";
-import { BurningFlame, CatalyzingField, CostReduction, DendroCore, EfficientSwitch, Empowerment, ResistantForm, Shield } from "../../commons.gts";
+import {
+  type EntityDefinition,
+  type CardHandle,
+  DamageType,
+  DiceType,
+  Reaction,
+  card,
+  combatStatus,
+  extension,
+  status,
+  summon,
+  originalDiceCostOfCard,
+  $,
+  type CombatStatusHandle,
+} from "@gi-tcg/core/builder";
+import {
+  BurningFlame,
+  CatalyzingField,
+  CostReduction,
+  DendroCore,
+  EfficientSwitch,
+  Empowerment,
+  ResistantForm,
+  Shield,
+} from "../../commons.gts";
 import { BountifulCore } from "../../characters/hydro/nilou.gts";
 
 /**
@@ -30,8 +53,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Cryo, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 303212
@@ -46,9 +69,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Hydro, 1);
-  }
-}
-
+  };
+};
 
 /**
  * @id 303213
@@ -63,8 +85,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Pyro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 303214
@@ -79,8 +101,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Electro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 303216
@@ -95,8 +117,8 @@ define combatStatus {
     usage 2;
     usage perRound, 1;
     :damage(DamageType.Cryo, 1, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 303217
@@ -111,8 +133,8 @@ define combatStatus {
     usage 2;
     usage perRound, 1;
     :damage(DamageType.Hydro, 1, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 303218
@@ -127,8 +149,8 @@ define combatStatus {
     usage 2;
     usage perRound, 1;
     :damage(DamageType.Pyro, 1, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 303219
@@ -143,8 +165,8 @@ define combatStatus {
     usage 2;
     usage perRound, 1;
     :damage(DamageType.Electro, 1, "my active");
-  }
-}
+  };
+};
 
 /**
  * @id 331102
@@ -159,7 +181,7 @@ define card {
   cost DiceType.Cryo, 1;
   tags resonance;
   :characterStatus(ElementalResonanceShatteringIceInEffect, "my active");
-}
+};
 
 /**
  * @id 303112
@@ -173,8 +195,8 @@ define status {
   oneDuration;
   once increaseSkillDamage {
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 331202
@@ -191,7 +213,7 @@ define card {
   filter :( :$(`my characters with health < maxHealth`) );
   :heal(2, "my active");
   :heal(1, "my standby");
-}
+};
 
 /**
  * @id 331302
@@ -206,7 +228,7 @@ define card {
   cost DiceType.Pyro, 1;
   tags resonance;
   :characterStatus(ElementalResonanceFerventFlamesInEffect, "my active");
-}
+};
 
 /**
  * @id 303132
@@ -221,8 +243,8 @@ define status {
   once increaseSkillDamage {
     when :( :e.isReactionRelatedTo(DamageType.Pyro) );
     :e.increaseDamage(3);
-  }
-}
+  };
+};
 
 /**
  * @id 331402
@@ -239,7 +261,7 @@ define card {
   filter :( :$(`my characters with energy < maxEnergy`) );
   :gainEnergy(1, "my active");
   :gainEnergy(1, "my standby character with energy < maxEnergy limit 1");
-}
+};
 
 /**
  * @id 303133
@@ -251,8 +273,8 @@ define combatStatus {
   id 303133 as ElementalResonanceImpetuousWindsInEffect01;
   once deductOmniDiceSwitch {
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 303136
@@ -264,8 +286,8 @@ define combatStatus {
   id 303136 as ElementalResonanceImpetuousWindsInEffect03;
   once beforeFastSwitch {
     :e.setFastAction();
-  }
-}
+  };
+};
 
 /**
  * @id 303134
@@ -276,24 +298,28 @@ define combatStatus {
 define combatStatus {
   id 303134 as ElementalResonanceImpetuousWindsInEffect02;
   on increaseDamage {
-    when :( (
-        ([
-          Reaction.SwirlCryo, 
-          Reaction.SwirlElectro, 
-          Reaction.SwirlHydro, 
-          Reaction.SwirlPyro
-        ] as (Reaction | null)[]).includes(:e.damageInfo.fromReaction)) &&
-        !:e.target.isMine() );
+    when :(
+      (
+        [
+          Reaction.SwirlCryo,
+          Reaction.SwirlElectro,
+          Reaction.SwirlHydro,
+          Reaction.SwirlPyro,
+        ] as (Reaction | null)[]
+      ).includes(:e.damageInfo.fromReaction) && !:e.target.isMine()
+    );
     :e.increaseDamage(1);
-  }
+  };
   on reaction {
-    when :( :e.reactionInfo.fromDamage && 
+    when :(
+      :e.reactionInfo.fromDamage &&
         :e.reactionInfo.fromDamage.source.who === :self.who &&
-        :e.relatedTo(DamageType.Anemo) );
+        :e.relatedTo(DamageType.Anemo)
+    );
     listenTo all;
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 331502
@@ -311,7 +337,7 @@ define card {
   :combatStatus(ElementalResonanceImpetuousWindsInEffect01);
   :combatStatus(ElementalResonanceImpetuousWindsInEffect02);
   :combatStatus(ElementalResonanceImpetuousWindsInEffect03);
-}
+};
 
 /**
  * @id 303162
@@ -322,7 +348,7 @@ define card {
 define combatStatus {
   id 303162 as ResonanceShield;
   shield 3;
-}
+};
 
 /**
  * @id 331602
@@ -337,7 +363,7 @@ define card {
   cost DiceType.Geo, 1;
   tags resonance;
   :combatStatus(ResonanceShield);
-}
+};
 
 /**
  * @id 331702
@@ -351,8 +377,16 @@ define card {
   since "v3.3.0";
   cost DiceType.Dendro, 1;
   tags resonance;
-  filter :( :$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore} or my combat status with definition id ${CatalyzingField} or my summon with definition id ${BurningFlame}`) );
-  if (:$(`my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`)) {
+  filter :(
+    :$(
+      `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore} or my combat status with definition id ${CatalyzingField} or my summon with definition id ${BurningFlame}`,
+    )
+  );
+  if (
+    :$(
+      `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`,
+    )
+  ) {
     :damage(DamageType.Hydro, 1, "opp active");
   }
   if (:$(`my combat status with definition id ${CatalyzingField}`)) {
@@ -361,7 +395,7 @@ define card {
   if (:$(`my summon with definition id ${BurningFlame}`)) {
     :damage(DamageType.Pyro, 1, "opp active");
   }
-}
+};
 
 /**
  * @id 331721
@@ -384,7 +418,7 @@ define card {
   if (pileCard) {
     :attachCostReduction(pileCard);
   }
-}
+};
 
 /**
  * @id 331101
@@ -398,7 +432,7 @@ define card {
   since "v3.3.0";
   tags resonance;
   :generateDice(DiceType.Cryo, 1);
-}
+};
 
 /**
  * @id 331201
@@ -412,7 +446,7 @@ define card {
   since "v3.3.0";
   tags resonance;
   :generateDice(DiceType.Hydro, 1);
-}
+};
 
 /**
  * @id 331301
@@ -426,7 +460,7 @@ define card {
   since "v3.3.0";
   tags resonance;
   :generateDice(DiceType.Pyro, 1);
-}
+};
 
 /**
  * @id 331401
@@ -440,7 +474,7 @@ define card {
   since "v3.3.0";
   tags resonance;
   :generateDice(DiceType.Electro, 1);
-}
+};
 
 /**
  * @id 331501
@@ -454,7 +488,7 @@ define card {
   since "v3.3.0";
   tags resonance;
   :generateDice(DiceType.Anemo, 1);
-}
+};
 
 /**
  * @id 331601
@@ -468,7 +502,7 @@ define card {
   since "v3.3.0";
   tags resonance;
   :generateDice(DiceType.Geo, 1);
-}
+};
 
 /**
  * @id 331701
@@ -482,7 +516,7 @@ define card {
   since "v3.3.0";
   tags resonance;
   :generateDice(DiceType.Dendro, 1);
-}
+};
 
 /**
  * @id 303181
@@ -495,8 +529,8 @@ define combatStatus {
   oneDuration;
   on useSkill {
     :switchActive("my next");
-  }
-}
+  };
+};
 
 /**
  * @id 331801
@@ -510,7 +544,7 @@ define card {
   since "v3.7.0";
   filter :( :$(`my standby characters`) );
   :combatStatus(WindAndFreedomInEffect);
-}
+};
 
 /**
  * @id 331802
@@ -524,7 +558,7 @@ define card {
   since "v3.7.0";
   cost DiceType.Void, 3;
   :combatStatus(StoneAndContractsInEffect);
-}
+};
 
 /**
  * @id 303182
@@ -538,8 +572,8 @@ define combatStatus {
   once actionPhase {
     :generateDice(DiceType.Omni, 3);
     :drawCards(1);
-  }
-}
+  };
+};
 
 /**
  * @id 331803
@@ -552,7 +586,7 @@ define card {
   id 331803 as ThunderAndEternity;
   since "v3.7.0";
   :convertDice(DiceType.Omni, "all");
-}
+};
 
 /**
  * @id 331804
@@ -567,7 +601,7 @@ define card {
   cost DiceType.Aligned, 1;
   :drawCards(1);
   :switchCards();
-}
+};
 
 /**
  * @id 331805
@@ -596,7 +630,7 @@ define card {
     }
   }
   :heal(1, "all my characters");
-}
+};
 
 /**
  * @id 303240
@@ -613,8 +647,8 @@ define status {
     :absorbDice("seq", :getVariable("reignite"));
     :immune(1);
     :addVariable("reignite", 1);
-  }
-}
+  };
+};
 
 /**
  * @id 331806
@@ -629,8 +663,7 @@ define card {
   cost DiceType.Aligned, 1;
   addTarget $.my.character;
   :characterStatus(OdeOfResurrection, "@targets.0");
-}
-
+};
 
 /**
  * @id 303184
@@ -649,8 +682,8 @@ define combatStatus {
     if (cardDefId) {
       :createHandCard(cardDefId);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 303183
@@ -666,10 +699,10 @@ define combatStatus {
     :combatStatus(MoonAndHomelandInEffect02, "my", {
       overrideVariables: {
         cardDefId: :e.card.definition.id,
-      }
-    })
-  }
-}
+      },
+    });
+  };
+};
 
 /**
  * @id 331807
@@ -682,7 +715,7 @@ define card {
   id 331807 as MoonAndHomeland;
   since "v6.5.0";
   :combatStatus(MoonAndHomelandInEffect01);
-}
+};
 
 /**
  * @id 332001
@@ -695,7 +728,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Void, 2;
   :generateDice(DiceType.Omni, 2);
-}
+};
 
 /**
  * @id 332002
@@ -708,7 +741,7 @@ define card {
   since "v3.3.0";
   filter :( :$(`my standby characters`) );
   :combatStatus(ChangingShiftsInEffect);
-}
+};
 
 /**
  * @id 303202
@@ -721,8 +754,8 @@ define combatStatus {
   since "v3.3.0";
   once deductOmniDiceSwitch {
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 332003
@@ -734,7 +767,7 @@ define card {
   id 332003 as TossUp;
   since "v3.3.0";
   :rerollDice(2);
-}
+};
 
 /**
  * @id 332004
@@ -747,7 +780,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Aligned, 1;
   :drawCards(2);
-}
+};
 
 /**
  * @id 303205
@@ -758,7 +791,7 @@ define card {
 define combatStatus {
   id 303205 as IHaventLostYetCooldown;
   oneDuration;
-}
+};
 
 /**
  * @id 332005
@@ -769,11 +802,14 @@ define combatStatus {
 define card {
   id 332005 as IHaventLostYet;
   since "v3.3.0";
-  filter :( :player.hasDefeated && !:$(`my combat status with definition id ${IHaventLostYetCooldown}`) );
+  filter :(
+    :player.hasDefeated &&
+      !:$(`my combat status with definition id ${IHaventLostYetCooldown}`)
+  );
   :generateDice(DiceType.Omni, 1);
   :gainEnergy(1, "my active");
   :combatStatus(IHaventLostYetCooldown);
-}
+};
 
 /**
  * @id 332006
@@ -786,7 +822,7 @@ define card {
   since "v3.3.0";
   filter :( :$(`my standby characters`) );
   :combatStatus(LeaveItToMeInEffect);
-}
+};
 
 /**
  * @id 303206
@@ -799,8 +835,8 @@ define combatStatus {
   since "v3.3.0";
   once beforeFastSwitch {
     :e.setFastAction();
-  }
-}
+  };
+};
 
 /**
  * @id 332007
@@ -814,7 +850,7 @@ define card {
   filter :( :$(`my standby characters`) );
   cost DiceType.Aligned, 1;
   :combatStatus(WhenTheCraneReturnedInEffect);
-}
+};
 
 /**
  * @id 303207
@@ -827,8 +863,8 @@ define combatStatus {
   since "v3.3.0";
   once useSkill {
     :switchActive("my next");
-  }
-}
+  };
+};
 
 /**
  * @id 332008
@@ -842,7 +878,7 @@ define card {
   cost DiceType.Void, 2;
   filter :( :$(`my active with energy < maxEnergy`) );
   :$("my active character")?.gainEnergy(1);
-}
+};
 
 /**
  * @id 332009
@@ -854,14 +890,16 @@ define card {
   id 332009 as CalxsArts;
   since "v3.3.0";
   cost DiceType.Aligned, 1;
-  filter :( :$(`my standby with energy > 0`) && :$(`my active with energy < maxEnergy`) );
+  filter :(
+    :$(`my standby with energy > 0`) && :$(`my active with energy < maxEnergy`)
+  );
   const chs = :$$("my standby characters limit 2");
   let count = 0;
   for (const ch of chs) {
     count += ch.loseEnergy();
   }
   :$("my active")?.gainEnergy(count);
-}
+};
 
 /**
  * @id 332010
@@ -877,7 +915,7 @@ define card {
     :queryAll(
       $.my.character
         .tagOf("weapon", $.id(:e.targets[0].id))
-        .exclude($.id(:e.targets[0].id))
+        .exclude($.id(:e.targets[0].id)),
     ).map((c) => c.latest())
   );
   const weapon = :e.targets[0].hasWeapon()!;
@@ -893,7 +931,7 @@ define card {
     :dispose(targetOldWeapon);
   }
   :moveEntity(weapon, area);
-}
+};
 
 /**
  * @id 332011
@@ -906,9 +944,9 @@ define card {
   since "v3.3.0";
   addTarget $.my.character.has($.typeEquipment.tag("artifact"));
   addTarget :(
-    :queryAll(
-      $.my.character.exclude($.id(:e.targets[0].id))
-    ).map((c) => c.latest())
+    :queryAll($.my.character.exclude($.id(:e.targets[0].id))).map((c) =>
+      c.latest(),
+    )
   );
   const artifact = :e.targets[0].hasArtifact()!;
   artifact.resetUsagePerRound();
@@ -923,7 +961,7 @@ define card {
     :dispose(targetOldArtifact);
   }
   :moveEntity(artifact, area);
-}
+};
 
 /**
  * @id 332012
@@ -937,7 +975,7 @@ define card {
   cost DiceType.Aligned, 1;
   addTarget $.my.summon;
   :e.targets[0].addVariable("usage", 1);
-}
+};
 
 /**
  * @id 332013
@@ -951,7 +989,7 @@ define card {
   cost DiceType.Void, 2;
   addTarget $.opp.summon;
   :e.targets[0].consumeUsage(2);
-}
+};
 
 /**
  * @id 332014
@@ -964,7 +1002,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Aligned, 4;
   :dispose("all summons");
-}
+};
 
 /**
  * @id 332015
@@ -978,17 +1016,19 @@ define card {
   since "v3.3.0";
   cost DiceType.Aligned, 2;
   const candidates = [
-    CryoHilichurlShooter, 
-    HydroSamachurl, 
-    HilichurlBerserker, 
-    ElectroHilichurlShooter
+    CryoHilichurlShooter,
+    HydroSamachurl,
+    HilichurlBerserker,
+    ElectroHilichurlShooter,
   ];
   const summons = :queryAll($.my.summon);
-  const target = :random(candidates.filter((c) => !summons.some((s) => s.definition.id === c)));
+  const target = :random(
+    candidates.filter((c) => !summons.some((s) => s.definition.id === c)),
+  );
   if (target) {
     :summon(target);
   }
-}
+};
 
 /**
  * @id 332016
@@ -1006,11 +1046,11 @@ define card {
       FatuiAmbusherCryoCicinMage,
       FatuiAmbusherMirrorMaiden,
       FatuiAmbusherPyroslingerBracer,
-      FatuiAmbusherElectrohammerVanguard
+      FatuiAmbusherElectrohammerVanguard,
     ]),
-    "opp"
+    "opp",
   );
-}
+};
 
 /**
  * @id 332017
@@ -1026,7 +1066,7 @@ define card {
   addTarget $.my.character.exclude($.has($.typeStatus.tag("disableSkill")));
   :switchActive("@targets.0");
   :useSkill("normal");
-}
+};
 
 /**
  * @id 332018
@@ -1040,7 +1080,7 @@ define card {
   since "v3.7.0";
   cost DiceType.Aligned, 1;
   :characterStatus(HeavyStrikeInEffect, "my active");
-}
+};
 
 /**
  * @id 303220
@@ -1059,8 +1099,8 @@ define status {
     if (:e.viaChargedAttack()) {
       :e.increaseDamage(1);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 332019
@@ -1073,7 +1113,7 @@ define card {
   since "v3.7.0";
   cost DiceType.Aligned, 3;
   :generateDice("randomElement", 4);
-}
+};
 
 /**
  * @id 332020
@@ -1091,7 +1131,7 @@ define card {
   if (:oppPlayer.hands.length < 4) {
     :drawCards(4 - :oppPlayer.hands.length, { who: "opp" });
   }
-}
+};
 
 /**
  * @id 332021
@@ -1103,7 +1143,7 @@ define card {
   id 332021 as RhythmOfTheGreatDream;
   since "v3.8.0";
   :combatStatus(RhythmOfTheGreatDreamInEffect);
-}
+};
 
 /**
  * @id 302021
@@ -1117,8 +1157,8 @@ define combatStatus {
   once deductOmniDiceCard {
     when :( :e.hasOneOfCardTag("weapon", "artifact") );
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 332022
@@ -1133,7 +1173,7 @@ define card {
   addTarget $.my.character.has($.typeEquipment.tag("weapon"));
   :e.targets[0].unequipWeapon();
   :combatStatus(WhereIsTheUnseenRazorInEffect);
-}
+};
 
 /**
  * @id 303222
@@ -1148,8 +1188,8 @@ define combatStatus {
   once deductOmniDiceCard {
     when :( :e.hasCardTag("weapon") );
     :e.deductOmniCost(2);
-  }
-}
+  };
+};
 
 /**
  * @id 332023
@@ -1162,7 +1202,7 @@ define card {
   since "v4.1.0";
   filter :( :player.dice.length >= 8 && !:oppPlayer.declaredEnd );
   :combatStatus(PankrationInEffect);
-}
+};
 
 /**
  * @id 303223
@@ -1180,17 +1220,17 @@ define combatStatus {
     } else {
       :drawCards(2, { who: "my" });
     }
-  }
-}
+  };
+};
 
 define extension {
   idHint 332024 as LyresongIsFirstExtension;
   schema ({ first: "pair<boolean>" });
   initialState ({ first: [true, true] });
   description "打出琴音之诗前该方该轮次未打出过其他行动牌";
-  mutateWhen onRoundEnd, ((c) => c.first = [true, true]);
-  mutateWhen onPlayCard, ((c, e) => c.first[e.who] = false);
-}
+  mutateWhen onRoundEnd, ((c) => (c.first = [true, true]));
+  mutateWhen onPlayCard, ((c, e) => (c.first[e.who] = false));
+};
 
 /**
  * @id 303232
@@ -1204,8 +1244,8 @@ define combatStatus {
   once deductOmniDiceCard {
     when :( :e.hasCardTag("artifact") );
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 303224
@@ -1219,8 +1259,8 @@ define combatStatus {
   once deductOmniDiceCard {
     when :( :e.hasCardTag("artifact") );
     :e.deductOmniCost(2);
-  }
-}
+  };
+};
 
 /**
  * @id 332024
@@ -1240,7 +1280,7 @@ define card {
   } else {
     :combatStatus(LyresongInEffect1);
   }
-}
+};
 
 /**
  * @id 332025
@@ -1253,7 +1293,7 @@ define card {
   id 332025 as TheBoarPrincess;
   since "v4.3.0";
   :combatStatus(TheBoarPrincessInEffect);
-}
+};
 
 /**
  * @id 303225
@@ -1272,8 +1312,8 @@ define combatStatus {
     when :( :e.entity.definition.type === "equipment" );
     :generateDice(DiceType.Omni, 1);
     :consumeUsage();
-  }
-}
+  };
+};
 
 /**
  * @id 332026
@@ -1286,7 +1326,7 @@ define card {
   since "v4.3.0";
   filter :( :player.dice.length >= 8 && !:oppPlayer.declaredEnd );
   :combatStatus(FallsAndFortuneInEffect);
-}
+};
 
 /**
  * @id 303226
@@ -1302,8 +1342,8 @@ define combatStatus {
     when :( :e.action.type === "switchActive" );
     listenTo all;
     :e.addCost(DiceType.Void, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 332027
@@ -1316,7 +1356,7 @@ define card {
   since "v4.3.0";
   addTarget $.my.character;
   :characterStatus(FourLeafSigil, "@targets.0");
-}
+};
 
 /**
  * @id 303227
@@ -1329,8 +1369,8 @@ define status {
   since "v4.3.0";
   on endPhase {
     :switchActive("@master");
-  }
-}
+  };
+};
 
 /**
  * @id 332028
@@ -1344,7 +1384,7 @@ define card {
   cost DiceType.Aligned, 1;
   :damage(DamageType.Physical, 1, "my active");
   :drawCards(1, { withTag: "artifact" });
-}
+};
 
 /**
  * @id 332029
@@ -1364,7 +1404,7 @@ define card {
   :createHandCard(card0.id as CardHandle);
   :createHandCard(card1.id as CardHandle);
   :combatStatus(SunyataFlowerInEffect);
-}
+};
 
 /**
  * @id 303229
@@ -1379,8 +1419,8 @@ define combatStatus {
   once deductOmniDiceCard {
     when :( :e.action.skill.caller.definition.type === "support" );
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 332030
@@ -1396,7 +1436,7 @@ define card {
   for (const summon of :$$("all summons")) {
     summon.consumeUsage();
   }
-}
+};
 
 /**
  * @id 302202
@@ -1409,7 +1449,7 @@ define card {
   since "v4.6.0";
   undiscoverable;
   :generateDice(DiceType.Omni, 1);
-}
+};
 
 /**
  * @id 302203
@@ -1422,7 +1462,7 @@ define card {
   since "v4.6.0";
   undiscoverable;
   :combatStatus(CalledInForCleanupActive);
-}
+};
 
 /**
  * @id 302204
@@ -1438,8 +1478,8 @@ define combatStatus {
   };
   once increaseSkillDamage {
     :e.increaseDamage(:getVariable("damage"));
-  }
-}
+  };
+};
 
 /**
  * @id 303231
@@ -1450,7 +1490,7 @@ define combatStatus {
 define status {
   id 303231 as private UnderseaTreasureOnCD;
   oneDuration;
-}
+};
 
 /**
  * @id 303230
@@ -1464,10 +1504,10 @@ define card {
   undiscoverable;
   :generateDice("randomElement", 1);
   if (!:$(`my active has status with definition id ${UnderseaTreasureOnCD}`)) {
-    :heal(1, "my active")
+    :heal(1, "my active");
     :characterStatus(UnderseaTreasureOnCD, "my active");
   }
-}
+};
 
 /**
  * @id 332031
@@ -1480,7 +1520,7 @@ define card {
   since "v4.6.0";
   cost DiceType.Aligned, 2;
   :createPileCards(UnderseaTreasure, 6, "random");
-}
+};
 
 /**
  * @id 124053
@@ -1491,7 +1531,7 @@ define card {
 define combatStatus {
   id 124053 as BonecrunchersEnergyBlockCombatStatus;
   oneDuration;
-}
+};
 
 /**
  * @id 124051
@@ -1503,13 +1543,17 @@ define card {
   id 124051 as BonecrunchersEnergyBlock;
   since "v4.7.0";
   undiscoverable;
-  filter :( !:$(`my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`) );
+  filter :(
+    !:$(
+      `my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`,
+    )
+  );
   :abortPreview();
   :disposeMaxCostHands(1);
   const activeCh = :$("my active")!;
   :generateDice(activeCh.element(), 1);
-  :combatStatus(BonecrunchersEnergyBlockCombatStatus)
-}
+  :combatStatus(BonecrunchersEnergyBlockCombatStatus);
+};
 
 /**
  * @id 301021
@@ -1520,7 +1564,7 @@ define card {
 define combatStatus {
   id 301021 as ForbiddenKnowledgeCoolDown;
   oneDuration;
-}
+};
 
 /**
  * @id 301020
@@ -1535,11 +1579,13 @@ define card {
   undiscoverable;
   tags abyss;
   disableTuning;
-  filter :( !:$(`my combat status with definition id ${ForbiddenKnowledgeCoolDown}`) );
+  filter :(
+    !:$(`my combat status with definition id ${ForbiddenKnowledgeCoolDown}`)
+  );
   :damage(DamageType.Piercing, 1, "my active");
   :drawCards(1);
   :combatStatus(ForbiddenKnowledgeCoolDown);
-}
+};
 
 /**
  * @id 332032
@@ -1554,10 +1600,10 @@ define card {
   cost DiceType.Aligned, 3;
   on selfDiscard {
     :createPileCards(CountdownToTheShow2, 1, "top");
-  }
+  };
   :convertDice(DiceType.Omni, "all");
   :drawCards(4);
-}
+};
 
 /**
  * @id 332033
@@ -1573,10 +1619,10 @@ define card {
   cost DiceType.Aligned, 2;
   on selfDiscard {
     :createPileCards(CountdownToTheShow1, 1, "top");
-  }
+  };
   :convertDice(DiceType.Omni, "all");
   :drawCards(4);
-}
+};
 
 /**
  * @id 332034
@@ -1592,10 +1638,10 @@ define card {
   cost DiceType.Aligned, 1;
   on selfDiscard {
     :createPileCards(TheShowBegins, 1, "top");
-  }
+  };
   :convertDice(DiceType.Omni, "all");
   :drawCards(4);
-}
+};
 
 /**
  * @id 332035
@@ -1609,7 +1655,7 @@ define card {
   undiscoverable;
   :convertDice(DiceType.Omni, "all");
   :drawCards(4);
-}
+};
 
 /**
  * @id 302206
@@ -1627,7 +1673,7 @@ define card {
   const card1 = :random(candidates);
   :createHandCard(card0.id as CardHandle);
   :createHandCard(card1.id as CardHandle);
-}
+};
 
 /**
  * @id 302207
@@ -1644,7 +1690,7 @@ define card {
   const card1 = :random(candidates);
   :createHandCard(card0.id as CardHandle);
   :createHandCard(card1.id as CardHandle);
-}
+};
 
 /**
  * @id 302208
@@ -1662,7 +1708,7 @@ define card {
   const card1 = :random(candidates);
   :createHandCard(card0.id as CardHandle);
   :createHandCard(card1.id as CardHandle);
-}
+};
 
 const MELUSINE_EVENT_CARDS = [
   ElementalResonanceShatteringIce,
@@ -1679,16 +1725,17 @@ const MELUSINE_EVENT_CARDS = [
   WaterAndJustice,
   FireAndWar,
   MoonAndHomeland,
-  // 331808 
+  // 331808
 ];
 
 // 筛出当前版本存在的卡
-const getMelusineEventCards = (cards: ReadonlyMap<number, EntityDefinition>): CardHandle[] => {
-  return MELUSINE_EVENT_CARDS
-    .map(id => cards.get(id))
-    .filter(def => !!def)
+const getMelusineEventCards = (
+  cards: ReadonlyMap<number, EntityDefinition>,
+): CardHandle[] => {
+  return MELUSINE_EVENT_CARDS.map((id) => cards.get(id))
+    .filter((def) => !!def)
     .map((def) => def.id as CardHandle);
-}
+};
 
 /**
  * @id 302209
@@ -1706,7 +1753,7 @@ define card {
   const card1 = :random(cards);
   :createHandCard(card0);
   :createHandCard(card1);
-}
+};
 
 /**
  * @id 302219
@@ -1717,13 +1764,14 @@ define card {
  */
 define combatStatus {
   id 302219 as private ThironasGoodWill;
-  on endPhase { // 文本有误
+  on endPhase {
+    // 文本有误
     usage 3;
     const cards = getMelusineEventCards(:data.entities);
     const card = :random(cards);
     :createHandCard(card);
-  }
-}
+  };
+};
 
 /**
  * @id 302210
@@ -1736,7 +1784,7 @@ define card {
   since "v4.8.0";
   undiscoverable;
   :combatStatus(ThironasGoodWill);
-}
+};
 
 /**
  * @id 302211
@@ -1751,8 +1799,8 @@ define card {
   cost DiceType.Aligned, 1;
   for (const card of :oppPlayer.pile.slice(0, 3)) {
     :createHandCard(card.definition.id as CardHandle);
-  };
-}
+  }
+};
 
 /**
  * @id 302212
@@ -1774,15 +1822,15 @@ define card {
     type: "setPlayerFlag",
     who: 0,
     flagName: "legendUsed",
-    value: false
+    value: false,
   });
   :mutate({
     type: "setPlayerFlag",
     who: 1,
     flagName: "legendUsed",
-    value: false
+    value: false,
   });
-}
+};
 
 /**
  * @id 302213
@@ -1823,8 +1871,8 @@ define combatStatus {
       const target = :random(:player.hands);
       :disposeCard(target);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 302214
@@ -1839,7 +1887,7 @@ define card {
   :drawCards(2);
   :combatStatus(TopyassGoodwill, "my");
   :combatStatus(TopyassGoodwill, "opp");
-}
+};
 
 /**
  * @id 302217
@@ -1859,8 +1907,8 @@ define combatStatus {
     } else {
       :damage(DamageType.Piercing, 2, caller);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 302215
@@ -1875,7 +1923,7 @@ define card {
   :drawCards(2);
   :combatStatus(LutinesGoodwill, "my");
   :combatStatus(LutinesGoodwill, "opp");
-}
+};
 
 /**
  * @id 302218
@@ -1886,7 +1934,7 @@ define card {
 define card {
   id 302218 as MelusineSupport;
   reserved;
-}
+};
 
 /**
  * @id 303236
@@ -1907,8 +1955,8 @@ define combatStatus {
     } else {
       :combatStatus(Shield);
     }
-  }
-}
+  };
+};
 
 /**
  * @id 332036
@@ -1921,7 +1969,7 @@ define card {
   id 332036 as IdRatherLoseMoneyMyself;
   since "v4.8.0";
   :combatStatus(IdRatherLoseMoneyMyselfInEffect);
-}
+};
 
 /**
  * @id 332037
@@ -1934,7 +1982,7 @@ define card {
   since "v4.8.0";
   :damage(DamageType.Physical, 1, "my active");
   :combatStatus(TadaInEffect);
-}
+};
 
 /**
  * @id 303237
@@ -1949,8 +1997,8 @@ define combatStatus {
   on endPhase {
     usage 1;
     :drawCards(1);
-  }
-}
+  };
+};
 
 /**
  * @id 332039
@@ -1966,7 +2014,7 @@ define card {
   if (technique) {
     :addVariable("usage", 1, technique);
   }
-}
+};
 
 /**
  * @id 133090
@@ -1977,7 +2025,7 @@ define card {
 define card {
   id 133090 as FakeUnderwaterTreasureHunt; // 骗骗花
   reserved;
-}
+};
 
 /**
  * @id 133091
@@ -1988,7 +2036,7 @@ define card {
 define card {
   id 133091 as FakeControlledDirectionalBlast; // 骗骗花
   reserved;
-}
+};
 
 /**
  * @id 133094
@@ -1999,7 +2047,7 @@ define card {
 define card {
   id 133094 as TheTaleOfVennessa; // 骗骗花
   reserved;
-}
+};
 
 /**
  * @id 332040
@@ -2032,7 +2080,7 @@ define card {
     const candidates = :randomSubset(cards, 3);
     :selectAndCreateHandCard(candidates);
   }
-}
+};
 
 /**
  * @id 332041
@@ -2056,7 +2104,7 @@ define card {
     const oppSummon = :random(oppSummons);
     :triggerEndPhaseSkill(oppSummon);
   }
-}
+};
 
 /**
  * @id 332042
@@ -2068,7 +2116,7 @@ define card {
   id 332042 as AbundantPhlogiston;
   since "v5.3.0";
   :combatStatus(AbundantPhlogistonInEffect);
-}
+};
 
 /**
  * @id 303238
@@ -2082,8 +2130,8 @@ define combatStatus {
   oneDuration;
   once consumeNightsoul {
     :gainNightsoul(:e.entity.cast<"status">().master, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 332043
@@ -2099,7 +2147,7 @@ define card {
   :createPileCards(AbundantPhlogiston, 2, "random", "opp");
   :drawCards(2, { who: "my" });
   :drawCards(2, { who: "opp" });
-}
+};
 
 /**
  * @id 332044
@@ -2119,7 +2167,7 @@ define card {
   } else if (oppHandsCount > myHandsCount) {
     :drawCards(oppHandsCount - myHandsCount, { who: "my" });
   }
-}
+};
 
 /**
  * @id 303239
@@ -2132,8 +2180,8 @@ define combatStatus {
   once deductOmniDiceCard {
     when :( !:isInInitialPile(:e.action.skill.caller) );
     :e.deductOmniCost(2);
-  }
-}
+  };
+};
 
 /**
  * @id 332045
@@ -2149,7 +2197,7 @@ define card {
   const candidates = :randomSubset(:allCardDefinitions("technique"), 3);
   :selectAndCreateHandCard(candidates);
   :combatStatus(ArtOfSleepyMeditationInEffect);
-}
+};
 
 /**
  * @id 332046
@@ -2166,13 +2214,13 @@ define card {
     if (:e.area.type === "hands") {
       :drawCards(1);
     }
-  }
+  };
   :disposeMaxCostHands(2);
   const handsLength = :player.hands.length;
   if (handsLength < 4) {
     :drawCards(4 - handsLength);
   }
-}
+};
 
 /**
  * @id 303242
@@ -2188,8 +2236,8 @@ define status {
       append; // 所谓“不可叠加”是指无法一次减多个骰子，但是可用次数可以叠加
     };
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 303241
@@ -2200,14 +2248,16 @@ define status {
 define status {
   id 303241 as FruitsOfTrainingInEffect01;
   on enterRelative {
-    when :( :e.entity.definition.type === "status" &&
+    when :(
+      :e.entity.definition.type === "status" &&
         :e.entity.definition.tags.includes("preparingSkill") &&
-        :e.entity.cast<"status">().master.id !== :self.master.id );
+        :e.entity.cast<"status">().master.id !== :self.master.id
+    );
     listenTo samePlayer;
     usage 2;
     :characterStatus(FruitsOfTrainingInEffect02, "@master");
-  }
-}
+  };
+};
 
 /**
  * @id 332048
@@ -2220,7 +2270,7 @@ define card {
   since "v5.7.0";
   addTarget $.my.character;
   :characterStatus(FruitsOfTrainingInEffect01, "@targets.0");
-}
+};
 
 /**
  * @id 301028
@@ -2238,8 +2288,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Physical, :getVariable("effect"));
-  }
-}
+  };
+};
 
 /**
  * @id 301029
@@ -2258,11 +2308,11 @@ define summon {
     usage 2;
     :combatStatus(EfficientSwitch, "my", {
       overrideVariables: {
-        usage: :getVariable("effect")
-      }
-    })
-  }
-}
+        usage: :getVariable("effect"),
+      },
+    });
+  };
+};
 
 /**
  * @id 301030
@@ -2280,8 +2330,8 @@ define summon {
   on endPhase {
     usage 2;
     :drawCards(:getVariable("effect"));
-  }
-}
+  };
+};
 
 /**
  * @id 301031
@@ -2298,20 +2348,23 @@ define summon {
   hint DamageType.Heal, ((c, e) => e.variables.effect);
   on endPhase {
     usage 1;
-    :heal(:getVariable("effect"), "my characters order by health - maxHealth limit 1");
-  }
-}
+    :heal(
+      :getVariable("effect"),
+      "my characters order by health - maxHealth limit 1",
+    );
+  };
+};
 
 export const SIMULANKA_SUMMONS = [
   ToyGuardSummon,
   OrigamiFlyingSquirrelSummon,
   PopupPaperFrogSummon,
-  OrigamiHamsterSummon
+  OrigamiHamsterSummon,
 ];
 
-export const SIMULANKA_QUERY = SIMULANKA_SUMMONS
-  .map((id) => `(my summons with definition id ${id})`)
-  .join(` or `) as `${string} summons ${string}`;
+export const SIMULANKA_QUERY = SIMULANKA_SUMMONS.map(
+  (id) => `(my summons with definition id ${id})`,
+).join(` or `) as `${string} summons ${string}`;
 
 /**
  * @id 301033
@@ -2327,7 +2380,7 @@ define card {
   undiscoverable;
   cost DiceType.Aligned, 1;
   :summon(ToyGuardSummon);
-}
+};
 
 /**
  * @id 301034
@@ -2343,7 +2396,7 @@ define card {
   undiscoverable;
   cost DiceType.Aligned, 1;
   :summon(OrigamiFlyingSquirrelSummon);
-}
+};
 
 /**
  * @id 301035
@@ -2359,7 +2412,7 @@ define card {
   undiscoverable;
   cost DiceType.Aligned, 1;
   :summon(PopupPaperFrogSummon);
-}
+};
 
 /**
  * @id 301036
@@ -2375,7 +2428,7 @@ define card {
   undiscoverable;
   cost DiceType.Aligned, 1;
   :summon(OrigamiHamsterSummon);
-}
+};
 
 /**
  * @id 303244
@@ -2390,8 +2443,8 @@ define combatStatus {
   };
   once endPhase {
     :createPileCards(HarvestTime, :getVariable("cardCount"), "random");
-  }
-}
+  };
+};
 
 /**
  * @id 332049
@@ -2409,7 +2462,7 @@ define card {
   const candidates = :randomSubset(allFoods, 3);
   :selectAndCreateHandCard(candidates);
   :combatStatus(HarvestTimeInEffect);
-}
+};
 
 /**
  * @id 332050
@@ -2421,9 +2474,9 @@ define card {
   id 332050 as AwesomeBro;
   since "v5.8.0";
   cost DiceType.Aligned, 1;
-  :drawCards(1, {withTag: "technique"});
+  :drawCards(1, { withTag: "technique" });
   :combatStatus(AwesomeBroInEffect);
-}
+};
 
 /**
  * @id 303243
@@ -2437,8 +2490,8 @@ define combatStatus {
   once playCard {
     when :( :e.hasCardTag("technique") );
     :generateDice(DiceType.Omni, 1);
-  }
-}
+  };
+};
 
 define extension {
   idHint 332051 as DisposedSupportAndSummonsCountExtension;
@@ -2451,17 +2504,18 @@ define extension {
     disposedSummonsCount: [0, 0],
   });
   description "记录本场对局中双方支援区和召唤区弃置卡牌的数量";
-  mutateWhen onDispose, ((st, e) => {
-    if (e.isDiscardOrTuning()) {
-      return;
-    }
-    if (e.entity.definition.type === "support") {
-      st.disposedSupportCount[e.who]++;
-    } else if (e.entity.definition.type === "summon") {
-      st.disposedSummonsCount[e.who]++;
-    }
-  })
-}
+  mutateWhen onDispose,
+    ((st, e) => {
+      if (e.isDiscardOrTuning()) {
+        return;
+      }
+      if (e.entity.definition.type === "support") {
+        st.disposedSupportCount[e.who]++;
+      } else if (e.entity.definition.type === "summon") {
+        st.disposedSummonsCount[e.who]++;
+      }
+    });
+};
 
 /**
  * @id 303245
@@ -2480,15 +2534,15 @@ define summon {
   on endPhase {
     usage 1;
     :damage(DamageType.Piercing, :getVariable("effect"));
-  }
+  };
   on enter {
     const ext = :getExtensionState();
     const addUsage = Math.min(ext.disposedSupportCount[:self.who], 4);
     const addDmg = Math.min(ext.disposedSummonsCount[:self.who], 4);
     :addVariable("usage", addUsage);
     :addVariable("effect", addDmg);
-  }
-}
+  };
+};
 
 /**
  * @id 332051
@@ -2505,10 +2559,12 @@ define card {
   since "v6.0.0";
   cost DiceType.Aligned, 2;
   associateExtension DisposedSupportAndSummonsCountExtension;
-  replaceDescription "[GCG_TOKEN_COUNTER]", ((c, { area }, ext) => ext.disposedSupportCount[area.who]);
-  replaceDescription "[GCG_TOKEN_COUNTER_2]", ((c, { area }, ext) => ext.disposedSummonsCount[area.who]);
+  replaceDescription "[GCG_TOKEN_COUNTER]",
+    ((c, { area }, ext) => ext.disposedSupportCount[area.who]);
+  replaceDescription "[GCG_TOKEN_COUNTER_2]",
+    ((c, { area }, ext) => ext.disposedSummonsCount[area.who]);
   :summon(FellDragon);
-}
+};
 
 /**
  * @id 332052
@@ -2523,7 +2579,7 @@ define card {
   since "v6.0.0";
   :summon(ToyGuardSummon);
   :summon(ToyGuardSummon, "opp");
-}
+};
 
 /**
  * @id 332054
@@ -2541,7 +2597,7 @@ define card {
   if (usage >= 3) {
     :heal(2, "my characters order by health - maxHealth limit 1");
   }
-}
+};
 
 /**
  * @id 332055
@@ -2560,7 +2616,7 @@ define card {
   if (:$$("my hands with tag (artifact)").length > 1) {
     :generateDice(DiceType.Omni, 1);
   }
-}
+};
 
 /**
  * @id 332056
@@ -2578,7 +2634,7 @@ define card {
     :adventure();
   }
   :adventure();
-}
+};
 
 /**
  * @id 300008
@@ -2592,7 +2648,7 @@ define card {
   undiscoverable;
   const cards = :maxCostHands(1, { who: "opp" });
   :undrawCards(cards, "bottom", "opp");
-}
+};
 
 /**
  * @id 300009
@@ -2608,7 +2664,7 @@ define card {
   const count = allHands.length;
   :undrawCards(allHands, "bottom");
   :drawCards(count + 1);
-}
+};
 
 /**
  * @id 301038
@@ -2624,7 +2680,7 @@ define card {
   addTarget $.my.character;
   :heal(2, "@targets.0");
   :generateDice("randomElement", 2);
-}
+};
 
 /**
  * @id 301040
@@ -2638,8 +2694,8 @@ define status {
     when :( :e.isChargedAttack() );
     const element = :self.master.element() as number as DamageType;
     :damage(element, 5);
-  }
-}
+  };
+};
 
 /**
  * @id 301039
@@ -2655,7 +2711,7 @@ define card {
   addTarget $.my.character;
   :heal(12, "@targets.0");
   :characterStatus(ReforgeTheHolyBladeInEffect, "@targets.0");
-}
+};
 
 /**
  * @id 332057
@@ -2682,7 +2738,7 @@ define card {
   if (new Set(nations).size < nations.length) {
     :adventure();
   }
-}
+};
 
 /**
  * @id 303247
@@ -2705,8 +2761,8 @@ define combatStatus {
         direction: ch.health > 5 ? "decrease" : "increase",
       });
     }
-  }
-}
+  };
+};
 
 /**
  * @id 332058
@@ -2719,7 +2775,7 @@ define card {
   since "v6.2.0";
   cost DiceType.Aligned, 2;
   :combatStatus(PlanToSaveTheWorldInEffect);
-}
+};
 
 /**
  * @id 332053
@@ -2737,7 +2793,7 @@ define card {
     summon.addVariable("effect", 1);
     summon.addVariable("usage", 1);
   }
-}
+};
 
 /**
  * @id 332059
@@ -2751,13 +2807,13 @@ define card {
   since "v6.3.0";
   on selfDiscard {
     :adventure();
-  }
+  };
   const minCostCards = :player.hands
     .toSorted((a, b) => a.diceCost() - b.diceCost())
     .slice(0, 2);
   :undrawCards(minCostCards, "bottom");
   :drawCards(minCostCards.length);
-}
+};
 
 /**
  * @id 332060
@@ -2776,7 +2832,7 @@ define card {
   for (const card of hands) {
     :attach(Empowerment, card);
   }
-}
+};
 
 /**
  * @id 332061
@@ -2789,7 +2845,10 @@ define card {
   id 332061 as ClinkClankLegion;
   since "v6.4.0";
   cost DiceType.Aligned, 1;
-  const allCards = :allCardDefinitions().filter((card) => !card.tags.includes("talent") && originalDiceCostOfCard(card) === 3);
+  const allCards = :allCardDefinitions().filter(
+    (card) =>
+      !card.tags.includes("talent") && originalDiceCostOfCard(card) === 3,
+  );
   for (let i = 0; i < 3; i++) {
     :createHandCard(:random(allCards).id as CardHandle);
   }
@@ -2801,7 +2860,7 @@ define card {
       :attach(Empowerment, card);
     }
   }
-}
+};
 
 /**
  * @id 302229
@@ -2837,11 +2896,11 @@ define card {
   id 332062 as CleaningTime;
   since "v6.5.0";
   const attachmentsCount = new Set(
-    :queryAll($.my.attachment).map((att) => att.definition.id)
+    :queryAll($.my.attachment).map((att) => att.definition.id),
   ).size;
   const diceCount = Math.min(attachmentsCount, 2);
   :generateDice("randomElement", diceCount);
-}
+};
 
 /**
  * @id 303249
@@ -2853,8 +2912,8 @@ define status {
   id 303249 as LilFungisFuntasticFiestaInEffect;
   on increaseDamage {
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 332063
@@ -2874,17 +2933,17 @@ define card {
       :e.skillCaller.cast<"character">().definition.tags.includes("monster")
     );
     :attachCostReduction(:self);
-  }
+  };
   on selfDiscard {
     enablePileTriggering;
     const target = :random(:queryAll($.my.character.tag("monster")));
     if (target) {
       :increaseMaxHealth(1, target);
     }
-  }
+  };
   addTarget $.my.character.tag("monster");
-  :characterStatus(LilFungisFuntasticFiestaInEffect, :e.targets[0])
-}
+  :characterStatus(LilFungisFuntasticFiestaInEffect, :e.targets[0]);
+};
 
 /**
  * @id 303248
@@ -2899,8 +2958,8 @@ define combatStatus {
     when :( :e.card.diceCost() >= 3 );
     usage 3;
     :generateDice("randomElement", 1);
-  }
-}
+  };
+};
 
 /**
  * @id 332064
@@ -2913,4 +2972,4 @@ define card {
   since "v6.7.0";
   cost DiceType.Aligned, 1;
   :combatStatus(ThePowerOfResearchInEffect);
-}
+};

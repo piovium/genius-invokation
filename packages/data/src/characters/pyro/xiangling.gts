@@ -1,19 +1,28 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, summon, type SkillHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  summon,
+  type SkillHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 113021
@@ -28,8 +37,8 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Pyro, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 113022
@@ -44,8 +53,8 @@ define combatStatus {
     when :( :e.skill.definition.id !== Pyronado );
     usage 2;
     :damage(DamageType.Pyro, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 13021
@@ -59,7 +68,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 13022
@@ -75,7 +84,7 @@ define skill {
     :damage(DamageType.Pyro, 1);
   }
   :summon(Guoba);
-}
+};
 
 /**
  * @id 13023
@@ -90,7 +99,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Pyro, 3);
   :combatStatus(PyronadoStatus);
-}
+};
 
 /**
  * @id 1302
@@ -105,7 +114,7 @@ define character {
   health 10;
   energy 2;
   skills DoughFu, GuobaAttack, Pyronado;
-}
+};
 
 /**
  * @id 213021
@@ -123,6 +132,6 @@ define card {
   talent Xiangling {
     on enter {
       :useSkill(GuobaAttack);
-    }
-  }
-}
+    };
+  };
+};

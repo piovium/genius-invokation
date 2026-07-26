@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status, summon } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+  summon,
+} from "@gi-tcg/core/builder";
 import { ResistantForm } from "../../commons.gts";
 /**
  * @id 115142
@@ -26,14 +34,14 @@ define card {
   tags food;
   undiscoverable;
   on selfHandCardInserted, only {
-    if (:$("my active character with health > 5")){
+    if (:$("my active character with health > 5")) {
       :damage(DamageType.Anemo, 1, "opp characters with health > 0 limit 1");
     } else {
       :heal(2, "my active");
     }
     :drawCards(1);
-  }
-}
+  };
+};
 
 /**
  * @id 115143
@@ -49,8 +57,8 @@ define summon {
   on endPhase {
     usage 3;
     :createPileCards(YumemiStyleSpecialSnacks, 1, "top");
-  }
-}
+  };
+};
 
 /**
  * @id 115141
@@ -66,8 +74,8 @@ define status {
     usage 1;
     :switchActive("@master");
     :damage(DamageType.Anemo, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 15141
@@ -81,7 +89,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Anemo, 1);
-}
+};
 
 /**
  * @id 15142
@@ -95,7 +103,7 @@ define skill {
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 2);
   :characterStatus(Dreamdrifter, "@self");
-}
+};
 
 /**
  * @id 15143
@@ -111,7 +119,7 @@ define skill {
   :damage(DamageType.Anemo, 3);
   :createPileCards(YumemiStyleSpecialSnacks, 1, "top");
   :summon(MiniBaku);
-}
+};
 
 /**
  * @id 1514
@@ -125,8 +133,10 @@ define character {
   tags anemo, catalyst, inazuma;
   health 10;
   energy 2;
-  skills PureHeartPureDreams, AisaUtamakuraPilgrimage, AnrakuSecretSpringTherapy;
-}
+  skills PureHeartPureDreams,
+    AisaUtamakuraPilgrimage,
+    AnrakuSecretSpringTherapy;
+};
 
 /**
  * @id 215141
@@ -144,13 +154,22 @@ define card {
   talent YumemizukiMizuki {
     on enter {
       :useSkill(AisaUtamakuraPilgrimage);
-    }
+    };
     on increaseDamage {
-      when :( :self.master.isActive() &&
-          ([DamageType.Cryo, DamageType.Hydro, DamageType.Pyro, DamageType.Electro] as DamageType[]).includes(:e.type) );
+      when :(
+        :self.master.isActive() &&
+          (
+            [
+              DamageType.Cryo,
+              DamageType.Hydro,
+              DamageType.Pyro,
+              DamageType.Electro,
+            ] as DamageType[]
+          ).includes(:e.type)
+      );
       listenTo samePlayer;
       usage perRound, 2;
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};

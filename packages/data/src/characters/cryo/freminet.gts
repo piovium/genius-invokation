@@ -13,7 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111121
@@ -28,19 +35,19 @@ define status {
   variable level, 0;
   on drawCard {
     :addVariable("level", 1);
-  }
+  };
   on deductOmniDiceSkill {
     when :( :getVariable("level") >= 2 );
     :e.deductOmniCost(1);
-  }
+  };
   on useSkill {
     when :( :getVariable("level") >= 2 );
     if (:getVariable("level") >= 4) {
       :damage(DamageType.Physical, 3);
     }
     :dispose();
-  }
-}
+  };
+};
 
 /**
  * @id 111123
@@ -52,7 +59,7 @@ define status {
   id 111123 as SubnauticalShield;
   since "v5.0.0";
   shield 1, 2;
-}
+};
 
 /**
  * @id 111122
@@ -70,22 +77,23 @@ define status {
   variable drawnCard, 0 {
     visible false;
   };
-  replaceDescription "[GCG_TOKEN_COUNTER]", ((st, self) => self.variables.drawnCard);
+  replaceDescription "[GCG_TOKEN_COUNTER]",
+    ((st, self) => self.variables.drawnCard);
   on drawCard {
     :addVariable("drawnCard", 1);
-  }
+  };
   on drawCard {
     when :( :getVariable("drawnCard") === 3 );
     :characterStatus(SubnauticalShield, "@master");
     :setVariable("drawnCard", 0);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") || :e.isSkillType("elemental") );
     const cards = :maxCostHands(2);
     :undrawCards(cards, "bottom");
     :drawCards(cards.length);
-  }
-}
+  };
+};
 
 /**
  * @id 11121
@@ -99,7 +107,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 11122
@@ -115,7 +123,7 @@ define skill {
   if (!:self.hasStatus(PersTimer)) {
     :characterStatus(PersTimer, "@self");
   }
-}
+};
 
 /**
  * @id 11123
@@ -130,7 +138,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 4);
   :characterStatus(SubnauticalHunterMode, "@self");
-}
+};
 
 /**
  * @id 1112
@@ -145,7 +153,7 @@ define character {
   health 10;
   energy 2;
   skills FlowingEddies, PressurizedFloe, ShadowhuntersAmbush;
-}
+};
 
 /**
  * @id 211121
@@ -163,10 +171,10 @@ define card {
   talent Freminet {
     on enter {
       :useSkill(PressurizedFloe);
-    }
+    };
     on useSkill {
       usage perRound, 2;
       :drawCards(1);
-    }
-  }
-}
+    };
+  };
+};

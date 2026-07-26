@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 125024
@@ -24,7 +32,7 @@ import { card, character, combatStatus, DamageType, DiceType, skill, status } fr
 define status {
   id 125024 as DraconicMajesty;
   reserved;
-}
+};
 
 /**
  * @id 25026
@@ -39,11 +47,10 @@ define skill {
   prepared;
   if (:$("opp prev")) {
     :damage(DamageType.Anemo, 2, "opp prev");
-  }
-  else {
+  } else {
     :damage(DamageType.Anemo, 2);
   }
-}
+};
 
 /**
  * @id 125023
@@ -54,7 +61,7 @@ define skill {
 define status {
   id 125023 as DvalinsSigh01;
   prepare UltimateCleansing;
-}
+};
 
 /**
  * @id 25025
@@ -69,12 +76,11 @@ define skill {
   prepared;
   if (:$("opp next")) {
     :damage(DamageType.Anemo, 1, "opp next");
-  }
-  else {
+  } else {
     :damage(DamageType.Anemo, 1);
   }
   :characterStatus(DvalinsSigh01);
-}
+};
 
 /**
  * @id 125022
@@ -85,7 +91,7 @@ define skill {
 define status {
   id 125022 as DvalinsSigh;
   prepare PerpetualCleansing;
-}
+};
 
 /**
  * @id 125021
@@ -97,11 +103,15 @@ define status {
 define status {
   id 125021 as TotalCollapse;
   on increaseDamaged {
-    when :( ([DamageType.Physical, DamageType.Anemo] as DamageType[]).includes(:e.type) );
+    when :(
+      ([DamageType.Physical, DamageType.Anemo] as DamageType[]).includes(
+        :e.type,
+      )
+    );
     usage 1;
     :e.increaseDamage(2);
-  }
-}
+  };
+};
 
 /**
  * @id 125025
@@ -112,7 +122,7 @@ define status {
 define combatStatus {
   id 125025 as CollapsingPlatform;
   reserved;
-}
+};
 
 /**
  * @id 25021
@@ -126,7 +136,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 25022
@@ -140,7 +150,7 @@ define skill {
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 2);
   :characterStatus(TotalCollapse, "opp active");
-}
+};
 
 /**
  * @id 25023
@@ -154,7 +164,7 @@ define skill {
   cost DiceType.Anemo, 5;
   :damage(DamageType.Anemo, 2);
   :characterStatus(DvalinsSigh);
-}
+};
 
 /**
  * @id 25024
@@ -169,7 +179,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Anemo, 5);
   :characterStatus(TotalCollapse, "opp standby");
-}
+};
 
 /**
  * @id 2502
@@ -184,8 +194,13 @@ define character {
   tags anemo, monster;
   health 10;
   energy 2;
-  skills LaceratingSlash, TempestuousBarrage, DvalinsCleansing, CaelestinumFinaleTermini, PerpetualCleansing, UltimateCleansing;
-}
+  skills LaceratingSlash,
+    TempestuousBarrage,
+    DvalinsCleansing,
+    CaelestinumFinaleTermini,
+    PerpetualCleansing,
+    UltimateCleansing;
+};
 
 /**
  * @id 225021
@@ -203,12 +218,15 @@ define card {
   talent Dvalin {
     on enter {
       :useSkill(TempestuousBarrage);
-    }
+    };
     on dispose {
-      when :( :$(`opp status with definition id ${TotalCollapse}`)?.id === :e.entity.id );
+      when :(
+        :$(`opp status with definition id ${TotalCollapse}`)?.id ===
+          :e.entity.id
+      );
       listenTo all;
       usage perRound, 1;
       :characterStatus(TotalCollapse, "opp next");
-    }
-  }
-}
+    };
+  };
+};

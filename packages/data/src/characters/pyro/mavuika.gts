@@ -1,15 +1,15 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -25,11 +25,13 @@ import { DamageType, DiceType, $ } from "@gi-tcg/core/builder";
 define status {
   id 113151 as NightsoulsBlessing;
   since "v5.7.0";
-  nightsoulsBlessing 2 { autoDispose };
+  nightsoulsBlessing 2 { autoDispose; };
   on selfDispose {
-    :query($.my.combatStatus.def(AllfireArmamentsRingOfSearingRadiance))?.dispose();
-  }
-}
+    :query(
+      $.my.combatStatus.def(AllfireArmamentsRingOfSearingRadiance),
+    )?.dispose();
+  };
+};
 
 /**
  * @id 113152
@@ -48,13 +50,13 @@ define status {
     listenTo samePlayer;
     :e.increaseDamage(1);
     :consumeUsage();
-  }
+  };
   on cancelConsumeNightsoul {
     listenTo samePlayer;
     :e.cancel();
     :consumeUsage(:e.info.diffValue);
-  }
-}
+  };
+};
 
 /**
  * @id 113158
@@ -67,8 +69,8 @@ define combatStatus {
   since "v5.7.0";
   once actionPhase {
     :generateDice(DiceType.Omni, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 13155
@@ -81,7 +83,7 @@ define skill {
   skillType elemental;
   prepared;
   :combatStatus(FlamestriderFullThrottleInEffect);
-}
+};
 
 /**
  * @id 113157
@@ -93,7 +95,7 @@ define status {
   id 113157 as FlamestriderFullThrottleInEffectPrepareStatus;
   since "v5.7.0";
   prepare FlamestriderFullThrottlePreparedSkill;
-}
+};
 
 /**
  * @id 113154
@@ -115,7 +117,7 @@ define card {
   on selfDiscard {
     enablePileTriggering;
     :damage(DamageType.Pyro, 1);
-  }
+  };
   technique {
     target $.my.character.def(Mavuika);
     skill {
@@ -125,9 +127,9 @@ define card {
       filter :( :self.master.hasNightsoulsBlessing()?.variables.nightsoul );
       :consumeNightsoul("@master");
       :damage(DamageType.Pyro, 4);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 113155
@@ -154,7 +156,7 @@ define card {
         const summon = :random(summons);
         :triggerEndPhaseSkill(summon);
       }
-    }
+    };
     skill {
       id 1131551 as BlazingTrail;
       usage 2;
@@ -163,9 +165,9 @@ define card {
       if (!:oppPlayer.declaredEnd) {
         :continueNextTurn();
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 113156
@@ -189,15 +191,18 @@ define card {
       id 1131561 as FullThrottle;
       usage 2;
       cost DiceType.Void, 2;
-      filter :( :self.master.hasNightsoulsBlessing()?.variables.nightsoul )
-      :consumeNightsoul("@master")
-      :characterStatus(FlamestriderFullThrottleInEffectPrepareStatus, "@master")
+      filter :( :self.master.hasNightsoulsBlessing()?.variables.nightsoul );
+      :consumeNightsoul("@master");
+      :characterStatus(
+        FlamestriderFullThrottleInEffectPrepareStatus,
+        "@master",
+      );
       if (:getVariable("usage") === 1) {
         :drawCards(4);
       }
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 113153
@@ -210,9 +215,9 @@ define combatStatus {
   since "v5.7.0";
   on useSkillOrTechnique {
     when :{
-      if (:e.isSkillType("normal")){
+      if (:e.isSkillType("normal")) {
         return :e.skillCaller.definition.id !== Mavuika;
-      } else if (:e.isSkillType("technique")){
+      } else if (:e.isSkillType("technique")) {
         return :e.techniqueCaller.definition.id !== Mavuika;
       } else {
         return false;
@@ -220,8 +225,8 @@ define combatStatus {
     };
     :consumeNightsoul($.my.character.def(Mavuika));
     :damage(DamageType.Pyro, 1);
-  }
-}
+  };
+};
 
 /**
  * @id 13151
@@ -232,10 +237,10 @@ define combatStatus {
 define skill {
   id 13151 as FlamesWeaveLife;
   skillType normal;
-  cost DiceType.Pyro, 1
-  cost DiceType.Void, 2
-  :damage(DamageType.Physical, 2)
-}
+  cost DiceType.Pyro, 1;
+  cost DiceType.Void, 2;
+  :damage(DamageType.Physical, 2);
+};
 
 /**
  * @id 13152
@@ -250,10 +255,10 @@ define skill {
   :selectAndCreateHandCard([
     FlamestriderBlazingTrail,
     FlamestriderFullThrottle,
-    FlamestriderSoaringAscent
+    FlamestriderSoaringAscent,
   ]);
   :gainNightsoul("@self", 2);
-}
+};
 
 /**
  * @id 13153
@@ -270,11 +275,11 @@ define skill {
   :gainNightsoul(:self, 1);
   const spirit = :self.getVariable("fightingSpirit");
   :damage(DamageType.Pyro, spirit);
-  if (spirit >= 6){
+  if (spirit >= 6) {
     :characterStatus(CrucibleOfDeathAndLife);
   }
   :self.setVariable("fightingSpirit", 0);
-}
+};
 
 /**
  * @id 13154
@@ -296,13 +301,13 @@ define skill {
       listenTo samePlayer;
       when :( :e.isSkillType("normal") );
       :addVariableWithMax("fightingSpirit", 1, 6);
-    }
+    };
     on useSkill {
       when :( :e.isSkillType("elemental") || :e.isSkillType("burst") );
       :combatStatus(AllfireArmamentsRingOfSearingRadiance);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1315
@@ -317,9 +322,13 @@ define character {
   health 10;
   energy 0;
   specialEnergy fightingSpirit, 3;
-  skills FlamesWeaveLife, TheNamedMoment, HourOfBurningSkies, FightingSpirit, FlamestriderFullThrottlePreparedSkill;
+  skills FlamesWeaveLife,
+    TheNamedMoment,
+    HourOfBurningSkies,
+    FightingSpirit,
+    FlamestriderFullThrottlePreparedSkill;
   associateNightsoul NightsoulsBlessing;
-}
+};
 
 /**
  * @id 213151
@@ -338,13 +347,15 @@ define card {
       :selectAndCreateHandCard([
         FlamestriderBlazingTrail,
         FlamestriderFullThrottle,
-        FlamestriderSoaringAscent
+        FlamestriderSoaringAscent,
       ]);
-    }
+    };
     on playCard {
-      when :( :e.hasCardTag("technique") && :self.master.hasStatus(NightsoulsBlessing) );
+      when :(
+        :e.hasCardTag("technique") && :self.master.hasStatus(NightsoulsBlessing)
+      );
       usage perRound, 1;
       :gainNightsoul("@master", 1);
-    }
-  }
-}
+    };
+  };
+};

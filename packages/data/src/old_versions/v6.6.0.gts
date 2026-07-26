@@ -1,5 +1,9 @@
 import { DiceType, DamageType, $, card, Reaction } from "@gi-tcg/core/builder";
-import { Tighnari, VijnanaphalaMine, VijnanaSuffusion } from "../characters/dendro/tighnari.gts";
+import {
+  Tighnari,
+  VijnanaphalaMine,
+  VijnanaSuffusion,
+} from "../characters/dendro/tighnari.gts";
 import { Shield } from "../commons.gts";
 
 /**
@@ -18,14 +22,15 @@ define card {
   talent Tighnari {
     on enter {
       :useSkill(VijnanaphalaMine);
-    }
+    };
     on deductVoidDiceSkill {
-      when :( :self.master.hasStatus(VijnanaSuffusion) && 
-          :e.isChargedAttack() );
+      when :(
+        :self.master.hasStatus(VijnanaSuffusion) && :e.isChargedAttack()
+      );
       :e.deductVoidCost(1);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 303042
@@ -43,14 +48,18 @@ define card {
     on roll {
       :e.fixDice(DiceType.Cryo, 2);
       :e.fixDice(DiceType.Electro, 2);
-    }
+    };
     on dealReaction {
       when :( :e.type === Reaction.Superconduct );
       usage perRound, 3;
-      :damage(DamageType.Piercing, 2, "opp characters order by 0 - health limit 1");
-    }
-  }
-}
+      :damage(
+        DamageType.Piercing,
+        2,
+        "opp characters order by 0 - health limit 1",
+      );
+    };
+  };
+};
 
 /**
  * @id 303072
@@ -68,15 +77,17 @@ define card {
     on roll {
       :e.fixDice(DiceType.Pyro, 2);
       :e.fixDice(DiceType.Geo, 2);
-    }
+    };
     on dealDamage {
-      when :( ([DamageType.Pyro, DamageType.Geo] as DamageType[]).includes(:e.type) );
+      when :(
+        ([DamageType.Pyro, DamageType.Geo] as DamageType[]).includes(:e.type)
+      );
       usage perRound, 1;
       :combatStatus(Shield, "my", {
-          overrideVariables: {
-            shield: 2
-          }
-        });
-    }
-  }
-}
+        overrideVariables: {
+          shield: 2,
+        },
+      });
+    };
+  };
+};

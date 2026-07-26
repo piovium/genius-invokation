@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, customEvent, DamageType, DiceType, skill, status } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  customEvent,
+  DamageType,
+  DiceType,
+  skill,
+  status,
+} from "@gi-tcg/core/builder";
 import { Satiated } from "../../commons.gts";
 
 /**
@@ -33,8 +41,8 @@ define status {
     const effectiveLayers = Math.min(currentUsage, 2);
     :e.increaseDamage(effectiveLayers);
     :consumeUsage(effectiveLayers);
-  }
-}
+  };
+};
 
 /**
  * @id 127042
@@ -51,8 +59,8 @@ define status {
       append;
     };
     :e.decreaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 27041
@@ -66,7 +74,7 @@ define skill {
   cost DiceType.Dendro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 27042
@@ -80,7 +88,7 @@ define skill {
   cost DiceType.Dendro, 3;
   :damage(DamageType.Dendro, 2);
   :drawCards(1, { withTag: "food" });
-}
+};
 
 /**
  * @id 27043
@@ -94,9 +102,11 @@ define skill {
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Pyro, 5);
-}
+};
 
-const GluttonousRexTriggerFromTalent = customEvent("mountainKing/gluttonousTriggerFromTalent");
+const GluttonousRexTriggerFromTalent = customEvent(
+  "mountainKing/gluttonousTriggerFromTalent",
+);
 
 /**
  * @id 27044
@@ -110,7 +120,11 @@ define skill {
   skillType passive {
     defineSnippet :{
       :abortPreview();
-      const choice = :random([WellFedAndStrong, WellFedAndSturdy, "incMaxHealth"] as const);
+      const choice = :random([
+        WellFedAndStrong,
+        WellFedAndSturdy,
+        "incMaxHealth",
+      ] as const);
       if (choice === "incMaxHealth") {
         :increaseMaxHealth(1, "@self");
       } else {
@@ -123,12 +137,12 @@ define skill {
         name "usagePerRound1";
       };
       :callSnippet();
-    }
+    };
     on GluttonousRexTriggerFromTalent {
       :callSnippet();
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 27045
@@ -145,9 +159,9 @@ define skill {
       void 0;
       // 不会饱腹 => 饱腹入场时弃置饱腹
       :dispose(:e.entity.cast<"status">());
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 2704
@@ -161,8 +175,12 @@ define character {
   tags dendro, monster;
   health 8;
   energy 2;
-  skills CrushingTailAttack, FlyingFruit, FlamegranateConflagration, GluttonousRex01, GluttonousRex02;
-}
+  skills CrushingTailAttack,
+    FlyingFruit,
+    FlamegranateConflagration,
+    GluttonousRex01,
+    GluttonousRex02;
+};
 
 /**
  * @id 227041
@@ -178,16 +196,16 @@ define card {
   cost DiceType.Dendro, 1;
   talent GluttonousYumkasaurMountainKing, none {
     on enter {
-      :drawCards(1, {who: "opp"});
+      :drawCards(1, { who: "opp" });
       const [handCard] = :maxCostHands(1, { who: "opp" });
       if (handCard) {
         :stealHandCard(handCard);
       }
-    }
+    };
     on playCard {
       when :( !:isInInitialPile(:e.card) );
       usage perRound, 1;
       :emitCustomEvent(GluttonousRexTriggerFromTalent);
-    }
-  }
-}
+    };
+  };
+};

@@ -13,7 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { character, skill, status, combatStatus, card, DamageType, DiceType } from "@gi-tcg/core/builder";
+import {
+  character,
+  skill,
+  status,
+  combatStatus,
+  card,
+  DamageType,
+  DiceType,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 111111
@@ -26,26 +34,27 @@ import { character, skill, status, combatStatus, card, DamageType, DiceType } fr
 define status {
   id 111111 as ChillingPenalty;
   on deductElementDiceSkill {
-    when :( :self.master.health >= 6 &&
+    when :(
+      :self.master.health >= 6 &&
         :e.isSkillType("normal") &&
-        :e.canDeductCostOfType(DiceType.Cryo) );
+        :e.canDeductCostOfType(DiceType.Cryo)
+    );
     :e.deductCost(DiceType.Cryo, 1);
-  }
+  };
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     :e.increaseDamage(1);
-  }
+  };
   on useSkill {
     when :( :e.isSkillType("normal") );
     usage 2;
     if (:self.master.health >= 6) {
       :damage(DamageType.Piercing, 1, "@master");
-    }
-    else {
+    } else {
       :heal(2, "@master");
     }
-  }
-}
+  };
+};
 
 /**
  * @id 111112
@@ -59,8 +68,8 @@ define combatStatus {
   on beforeAction {
     usage 1;
     :damage(DamageType.Cryo, 2);
-  }
-}
+  };
+};
 
 /**
  * @id 11111
@@ -74,7 +83,7 @@ define skill {
   cost DiceType.Cryo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Cryo, 1);
-}
+};
 
 /**
  * @id 11112
@@ -88,7 +97,7 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 2);
   :characterStatus(ChillingPenalty);
-}
+};
 
 /**
  * @id 11113
@@ -104,7 +113,7 @@ define skill {
   cost DiceType.Energy, 3;
   :damage(DamageType.Cryo, 2);
   :combatStatus(LingeringIcicles);
-}
+};
 
 /**
  * @id 11114
@@ -116,8 +125,8 @@ define skill {
   id 11114 as Skill11114;
   skillType passive {
     reserved;
-  }
-}
+  };
+};
 
 /**
  * @id 11115
@@ -129,8 +138,8 @@ define skill {
   id 11115 as Skill11115;
   skillType passive {
     reserved;
-  }
-}
+  };
+};
 
 /**
  * @id 11116
@@ -144,18 +153,18 @@ define skill {
     variable damageOrHealCount, 0;
     on roundEnd {
       :setVariable("damageOrHealCount", 0);
-    }
+    };
     on damagedOrHealed {
       :addVariable("damageOrHealCount", 1);
-    }
+    };
     on deductOmniDiceSkill {
       when :( :e.isSkillType("burst") );
       const cnt = :getVariable("damageOrHealCount");
       const deducted = Math.min(Math.floor(cnt / 2), 2);
       :e.deductOmniCost(deducted);
-    }
-  }
-}
+    };
+  };
+};
 
 /**
  * @id 1111
@@ -169,8 +178,11 @@ define character {
   tags cryo, catalyst, fontaine, pneuma;
   health 11;
   energy 3;
-  skills ForcefulFistsOfFrost, IcefangRush, DarkgoldWolfbite, DarkgoldWolfbite01;
-}
+  skills ForcefulFistsOfFrost,
+    IcefangRush,
+    DarkgoldWolfbite,
+    DarkgoldWolfbite01;
+};
 
 /**
  * @id 211111
@@ -191,14 +203,14 @@ define card {
     variable count, 0;
     on enter {
       :useSkill(ForcefulFistsOfFrost);
-    }
+    };
     on damagedOrHealed {
       :addVariable("count", 1);
-    }
+    };
     on increaseSkillDamage {
       when :( :getVariable("count") >= 3 );
       :addVariable("count", -3);
       :e.increaseDamage(1);
-    }
-  }
-}
+    };
+  };
+};

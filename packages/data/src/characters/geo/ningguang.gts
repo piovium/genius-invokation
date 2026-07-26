@@ -1,19 +1,27 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { card, character, combatStatus, DamageType, DiceType, skill, type CombatStatusHandle } from "@gi-tcg/core/builder";
+import {
+  card,
+  character,
+  combatStatus,
+  DamageType,
+  DiceType,
+  skill,
+  type CombatStatusHandle,
+} from "@gi-tcg/core/builder";
 
 /**
  * @id 116011
@@ -29,14 +37,16 @@ define combatStatus {
     when :( :e.target.isActive() && :e.value >= 2 );
     usage 2;
     :e.decreaseDamage(1);
-  }
+  };
   on increaseDamage {
-    when :( :e.type === DamageType.Geo && 
-        :$(`my equipment with definition id ${StrategicReserve}`) );
+    when :(
+      :e.type === DamageType.Geo &&
+        :$(`my equipment with definition id ${StrategicReserve}`)
+    );
     listenTo samePlayer;
     :e.increaseDamage(1);
-  }
-}
+  };
+};
 
 /**
  * @id 16011
@@ -50,7 +60,7 @@ define skill {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Geo, 1);
-}
+};
 
 /**
  * @id 16012
@@ -64,7 +74,7 @@ define skill {
   cost DiceType.Geo, 3;
   :damage(DamageType.Geo, 2);
   :combatStatus(JadeScreenStatus);
-}
+};
 
 /**
  * @id 16013
@@ -79,11 +89,10 @@ define skill {
   cost DiceType.Energy, 3;
   if (:$(`my combat status with definition id ${JadeScreenStatus}`)) {
     :damage(DamageType.Geo, 8);
-  }
-  else {
+  } else {
     :damage(DamageType.Geo, 6);
   }
-}
+};
 
 /**
  * @id 1601
@@ -98,7 +107,7 @@ define character {
   health 10;
   energy 3;
   skills SparklingScatter, JadeScreen, Starshatter;
-}
+};
 
 /**
  * @id 216011
@@ -116,6 +125,6 @@ define card {
   talent Ningguang {
     on enter {
       :useSkill(JadeScreen);
-    }
-  }
-}
+    };
+  };
+};

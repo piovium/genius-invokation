@@ -1,15 +1,15 @@
 // Copyright (C) 2024-2025 Guyutongxue
-// 
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
 // License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -30,8 +30,8 @@ define summon {
     usage 2;
     :damage(:getVariable("hintIcon"), 2);
     :switchActive($.recentOppFrom.my.active);
-  }
-}
+  };
+};
 
 /**
  * @id 115033
@@ -45,8 +45,8 @@ define combatStatus {
   once deductVoidDiceSkill {
     when :( :e.isSkillType("normal") );
     :e.deductVoidCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 115032
@@ -62,8 +62,8 @@ define combatStatus {
     usage 2;
     :e.deductOmniCost(1);
     :combatStatus(WindsOfHarmony);
-  }
-}
+  };
+};
 
 /**
  * @id 115031
@@ -72,14 +72,14 @@ define combatStatus {
  * 我方执行「切换角色」行动时：少花费1个元素骰。
  * 可用次数：2
  */
-define combatStatus { 
+define combatStatus {
   id 115031 as Stormzone;
   conflictWith Stormzone01;
   on deductOmniDiceSwitch {
     usage 2;
     :e.deductOmniCost(1);
-  }
-}
+  };
+};
 
 /**
  * @id 15031
@@ -93,7 +93,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 15032
@@ -111,7 +111,7 @@ define skill {
   } else {
     :combatStatus(Stormzone);
   }
-}
+};
 
 /**
  * @id 15033
@@ -126,7 +126,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Anemo, 2);
   :summon(Stormeye);
-}
+};
 
 /**
  * @id 1503
@@ -143,7 +143,7 @@ define character {
   health 12;
   energy 2;
   skills DivineMarksmanship, SkywardSonnet, WindsGrandOde;
-}
+};
 
 /**
  * @id 215031
@@ -161,6 +161,6 @@ define card {
   talent Venti {
     on enter {
       :useSkill(SkywardSonnet);
-    }
-  }
-}
+    };
+  };
+};
