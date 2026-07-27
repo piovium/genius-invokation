@@ -27,6 +27,7 @@ import {
   originalDiceCostOfCard,
   $,
   type CombatStatusHandle,
+  type IQuery,
 } from "@gi-tcg/core/builder";
 import {
   BurningFlame,
@@ -2363,9 +2364,11 @@ export const SIMULANKA_SUMMONS = [
   OrigamiHamsterSummon,
 ];
 
-export const SIMULANKA_QUERY = SIMULANKA_SUMMONS.map(
-  (id) => `(my summons with definition id ${id})`,
-).join(` or `) as `${string} summons ${string}`;
+export const SIMULANKA_QUERY: IQuery<{
+  type: "summon";
+  areaType: "summons";
+  variables: never;
+}> = $.union(...SIMULANKA_SUMMONS.map((id) => $.my.summon.def(id)));
 
 /**
  * @id 301033
@@ -2790,7 +2793,7 @@ define card {
   cost DiceType.Aligned, 1;
   addTarget $.my.support;
   :dispose(:e.targets[0]);
-  for (const summon of :$$(SIMULANKA_QUERY)) {
+  for (const summon of :queryAll(SIMULANKA_QUERY)) {
     summon.addVariable("effect", 1);
     summon.addVariable("usage", 1);
   }

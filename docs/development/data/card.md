@@ -71,7 +71,7 @@ define card {
   support place {
     on endPhase {
       usage 2;
-      :heal(2, "my active");
+      :heal(2, $.my.active);
     };
   };
 };

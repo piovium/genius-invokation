@@ -887,9 +887,9 @@ define card {
       :createHandCard(newCard);
     };
     on declareEnd {
-      when :( :$(SIMULANKA_QUERY) );
+      when :( :query(SIMULANKA_QUERY) );
       usage 3;
-      const mySimulankaSummons = :$$(SIMULANKA_QUERY);
+      const mySimulankaSummons = :queryAll(SIMULANKA_QUERY);
       const chosen = :random(mySimulankaSummons);
       if (chosen) {
         :triggerEndPhaseSkill(chosen);
