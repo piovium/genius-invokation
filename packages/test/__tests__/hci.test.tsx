@@ -59,6 +59,7 @@ import { Jean } from "@gi-tcg/data/internal/characters/anemo/jean.gts";
 import { Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya.gts";
 import { YaeMiko } from "@gi-tcg/data/internal/characters/electro/yae_miko.gts";
 import { TowerOfIpsissimus } from "@gi-tcg/data/internal/cards/support/adventure.gts";
+import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
 
 describe("HCI stuff", () => {
   test("HCI event should be handled after other events", async () => {
@@ -280,4 +281,20 @@ describe("HCI stuff", () => {
     c.expect($.my.typeStatus.def(PuffPopsInEffect)).toHaveVariable({ usage: 2 });
   })
 
+
+  test("Mountain King steal the just-drawn card wont trigger HCI", async () => {
+    const myActive = ref();
+    const c = setup(
+      <State>
+        <Card opp pile def={Paimon} />
+        <Support my def={TheMausoleumOfKingDeshret} />
+        <Character my active def={GluttonousYumkasaurMountainKing} ref={myActive} />
+        <Card my def={TheAlldevourer} />
+      </State>
+    );
+    await c.me.card(TheAlldevourer, myActive);
+    c.expect($.my.hand.def(Paimon)).toBeExist();
+    // 山王偷走派蒙后，派蒙的 HCI 不会触发
+    c.expect($.my.typeSupport.def(TheMausoleumOfKingDeshret)).toHaveVariable({ drawnCardCount: 0 });
+  })
 });
