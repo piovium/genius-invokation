@@ -1,71 +1,30 @@
 # 用户自定义事件
 
-## 定义自定义事件
+从 `@gi-tcg/core/builder` 导入 `customEvent` 创建一个具名的事件对象。事件对象可以带 TypeScript 参数类型：
 
-使用 `customEvent` 函数生成一个自定义事件。
+```gts
+import { customEvent } from "@gi-tcg/core/builder";
 
-```ts
-const myEvent = customEvent("myEvent"); // 名称参数是可选的
+const marked = customEvent<number>("example/marked");
 ```
 
-## 引发自定义事件
+在 GTS 事件块中使用 `:emitCustomEvent(事件[, 参数]);` 发出事件；用 `on <事件变量> { ... };` 监听它。监听回调的 `:e.arg` 即发出时传入的参数。
 
-用户可在 `SkillContext` 或其声明域中使用 `.emitCustomEvent`：
+```gts
+define status {
+  id 100001 as Marker;
+  on damaged {
+    :emitCustomEvent(marked, 1);
+  };
+};
 
-```ts
-// 雷鸣探知
-const lightingRod = status(124022)
-  // [...]
-  .on("damaged")
-  .emitCustomEvent(myEvent)     // 声明域引发事件
-  .on("selfDispose")
-  .do((c) => {
-    c.emitCustomEvent(myEvent); // 脚本域引发事件
-  })
-  .done();
+define status {
+  id 100002 as Receiver;
+  on marked {
+    when :( :e.arg === 1 );
+    :drawCards(1);
+  };
+};
 ```
 
-## 监听并响应自定义事件
-
-用户可在 `.on` 中直接使用自定义事件以响应。其 `listenTo` 针对引发事件的实体，例如 `.on(myEvent)` 下 `.listenToPlayer()` 只会监听我方实体引发的 `myEvent`。
-
-```ts
-// 悲号回唱
-const GrievingEcho = card(224021)
-  .talent(ThunderManifestation)
-  // [...]
-  .on(myEvent)
-  .listenToAll()    // 监听场上所有实体引发的 myEvent 自定义事件
-  .usagePerRound(1)
-  .drawCards(1)
-  .done();
-```
-
-`.on` 对自定义事件也可使用触发条件。
-
-## 引发事件时携带参数
-
-使用 `customEvent` 构造时传入参数类型，并在引发时传入对应的实参。
-
-```ts
-const myEventWithArg = customEvent<number>();
-
-const myEntity = status(100001)
-  .on("damaged")
-  .emitCustomEvent(myEventWithArg, 1)
-  .on("selfDispose")
-  .emitCustomEvent(myEventWithArg, 2)
-  .done();
-```
-
-在响应自定义事件时，访问 `e.arg` 获取引发时传入的实参。
-
-```ts
-const myReceiver = status(100002)
-  .on(myEventWithArg, (c, e) => e.arg === 1)
-  .do((c) => {
-    // 只会响应 myEntity damaged 引发的 myEventWithArg
-    // [...]
-  })
-  .done();
-```
+自定义事件沿用实体事件的默认监听范围。需要让响应者接收同阵营或全场实体发出的事件时，分别写 `listenTo samePlayer;` 或 `listenTo all;`。事件对象本身用于区分事件，建议使用稳定且具命名空间的名称。

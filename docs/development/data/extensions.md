@@ -1,49 +1,49 @@
 # 扩展点
 
-部分卡牌需要依赖某些“全局”变量或者跟踪它们。扩展点机制为这些卡牌提供了无需关联核心既可实现的办法。
+扩展点为整局游戏保存独立状态，适合记录“即使相关实体尚未入场也要持续统计”的信息。它们使用 `define extension` 定义：
 
-以“捷德”为例。“捷德”需要记录整场牌局中的弃置支援牌数量（即便全场没有入场的捷德）。为此，使用 `extension` 来定义一个扩展点：
-
-```ts
-import { extension } from "@gi-tcg/core/builder";
-
-const DisposedSupportCountExtension = extension(322022, { disposedSupportCount: "pair<number>" })
-  .initialState({ disposedSupportCount: [0, 0] })
-  .mutateWhen("onDispose", (st, e) => {
-    if (e.entity.definition.type === "support") {
-      st.disposedSupportCount[e.who]++;
-    }
-  })
-  .done();
+```gts
+define extension {
+  idHint 322022 as DisposedSupportCountExtension;
+  schema ({ disposedSupportCount: "pair<number>" });
+  initialState ({ disposedSupportCount: [0, 0] });
+  description "记录本场对局中双方支援区弃置卡牌的数量";
+  mutateWhen onDispose,
+    ((st, e) => {
+      if (!e.isDiscardOrTuning() && e.entity.definition.type === "support") {
+        st.disposedSupportCount[e.who]++;
+      }
+    });
+};
 ```
 
-其含义为：对局状态将额外存储一个 `Pair<number>`，初始值为 `[0, 0]`，代表双方弃置的支援牌数量。在每次 `onDispose` 事件引发后，若被弃置的是支援牌，则修改对应玩家的值。
+- `idHint` 是唯一的 id 提示，通常使用相关卡牌或技能的 id；运行时会加上扩展点 id 偏移。
+- `schema` 是状态结构的 ArkType 描述，支持对象、数组和 `pair<T>` 等 JSON 可序列化类型。
+- `initialState` 是必填的初始状态，必须符合 `schema`。
+- `mutateWhen <核心事件>, <回调>;` 在每次核心事件发生时更新状态。回调参数依次是可写草稿、事件参数和当时的只读游戏状态。
+- `description` 可选，用于描述该全局状态。
 
-一个实体、技能、手牌可最多关联一个扩展点，以使用或修改其中的状态数据。如“捷德”在入场时，将读取此扩展点状态中的数据：
+扩展点没有阵营和监听范围；`mutateWhen` 使用的是核心事件名（例如 `onDispose`、`onDamageOrHeal`），而不是 `dealDamage` 等细分事件名。需要只统计特定情况时，在回调中检查事件参数。
 
-```ts
-export const Jeht = card(322022)
-  .costVoid(2)
-  .support("ally")
-  .associateExtension(DisposedSupportCountExtension) // <-- 此实体将与该扩展点关联…
-  .variable("experience", 0)
-  .on("enter")
-  .do((c) => {
-    // …从而通过 c.getExtensionState() 来获取扩展点中的数据
-    const count = c.getExtensionState().disposedSupportCount[c.self.who];
-    c.setVariable("experience", Math.min(count, 6));
-  })
-  // [...]
+## 在数据定义中使用
+
+为角色、技能、实体或行动牌写 `associateExtension <扩展点>;`，之后其效果可使用 `:getExtensionState()` 和 `:setExtensionState(...)`：
+
+```gts
+define card {
+  id 322022 as Jeht;
+  associateExtension DisposedSupportCountExtension;
+  support ally {
+    associateExtension DisposedSupportCountExtension;
+    variable experience, 0;
+    on enter {
+      :setVariable(
+        "experience",
+        Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
+      );
+    };
+  };
+};
 ```
 
-## 具体语法
-
-- `extension(idHint, type)`：开始一个扩展点的定义。`idHint` 为扩展点的 id 提示，通常与使用该扩展点的实体/技能/手牌相关联；全局的所有扩展点的 `idHint` 不能重复。`type` 为该扩展点所扩展的状态变量的结构，以 ArkType 语法的类型说明。与实体不同，此结构可使用任意的对象、数组等可 JSON 序列化的结构。
-- `.initialState(state)` （必需）该扩展点的初始状态。
-- `.mutateWhen(event, callback)` 设置该扩展点的自动修改行为。与被动技能定义不同，`event` 是核心事件名称而非细分事件名称（因为扩展点是**全局的，不分敌我**，因此也不可设置 `listenTo`）。`callback` 将传入如下三个参数：
-  - `extensionState` 一份可修改的扩展点状态的草稿，对其的改动将在回调执行完毕后作为一次对对局状态的 mutation；
-  - `eventArg`，和 `event` 对应的事件参数；
-  - `currentGameState` 当前的对局状态（只读，不可写）。
-- `.done()` 完成扩展点定义，可传入实体/技能/手牌 builder chain 的 `.associateExtension` 方法中。
-
-在关联了扩展点的 `SkillContext` 内，使用 `getExtensionState()` 获取扩展点状态，使用 `setExensionState(setter)` 设置扩展点状态。`setter` 是一个接受 `draft` 的修改描述函数。
+`associateExtension` 只提供对该扩展点的上下文访问权限；它不会自动同步实体变量。需要同步时，在 `on enter`、相关事件或操作中显式读取并写入。
