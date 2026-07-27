@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   combatStatus,
   DamageType,
@@ -90,9 +91,7 @@ define combatStatus {
         const distinctCostCount = new Set([card0Cost, card1Cost, card2Cost])
           .size;
         const extraMaxHealth = 4 - distinctCostCount;
-        const narwhal = :$(
-          `my character with definition id ${AlldevouringNarwhal}`,
-        );
+        const narwhal = :query($.my.character.def(AlldevouringNarwhal));
         if (narwhal) {
           for (let i = 0; i < extraMaxHealth; i++) {
             narwhal.addStatus(AnomalousAnatomy);

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   Aura,
   card,
   character,
@@ -100,7 +101,7 @@ define skill {
   id 15072 as YoohooArtFuuinDash;
   skillType elemental;
   cost DiceType.Anemo, 3;
-  const aura = :$("opp active")?.aura;
+  const aura = :query($.opp.active)?.aura;
   let fuufuuWindType: DamageType;
   switch (aura) {
     case Aura.Cryo:

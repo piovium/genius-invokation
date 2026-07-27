@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   Aura,
   card,
   character,
@@ -144,7 +145,7 @@ define card {
     on useSkill {
       when :(
         :e.isSkillType("normal") &&
-          :$(`opp status with definition id ${SnappySilhouette}`)
+          :query($.opp.typeStatus.def(SnappySilhouette))
       );
       listenTo samePlayer;
       usage perRound, 1;

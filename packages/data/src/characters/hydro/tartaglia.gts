@@ -233,7 +233,7 @@ define card {
       :useSkill(FoulLegacyRagingTide);
     };
     on endPhase {
-      when :( :$(`opp active has status with definition id ${Riptide}`) );
+      when :( :query($.opp.active.has($.typeStatus.def(Riptide))) );
       :damage(DamageType.Piercing, 1, "opp active");
     };
   };

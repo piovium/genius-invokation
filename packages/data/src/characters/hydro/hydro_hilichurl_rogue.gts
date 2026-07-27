@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   customEvent,
@@ -132,8 +133,10 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 3);
   if (
-    :$(
-      `opp characters has status with definition id ${Frozen} or opp characters has status with definition id ${MistBubblePrison}`,
+    :query(
+      $.opp.character
+        .has($.typeStatus.def(Frozen))
+        .union($.opp.character.has($.typeStatus.def(MistBubblePrison))),
     )
   ) {
     :emitCustomEvent(ShouldGainEnergy);

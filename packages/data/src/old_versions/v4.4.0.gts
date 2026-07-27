@@ -1,4 +1,4 @@
-import { DiceType, card } from "@gi-tcg/core/builder";
+import { $, DiceType, card } from "@gi-tcg/core/builder";
 
 /**
  * @id 312018
@@ -16,7 +16,7 @@ define card {
     on enter {
       :generateDice(:self.master.element(), 1);
       const elementKinds = new Set(
-        :$$("my characters include defeated").map((ch) => ch.element()),
+        :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
       );
       if (elementKinds.size >= 3) {
         :generateDice(DiceType.Omni, 1);
@@ -44,7 +44,7 @@ define card {
   until "v4.4.0";
   support place {
     on roll {
-      :e.fixDice(:$("my active")!.element(), 2);
+      :e.fixDice(:query($.my.active)!.element(), 2);
     };
   };
 };

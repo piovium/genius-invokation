@@ -47,12 +47,10 @@ define card {
   until "v4.7.0";
   undiscoverable;
   filter :(
-    !:$(
-      `my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`,
-    )
+    !:query($.my.combatStatus.def(BonecrunchersEnergyBlockCombatStatus))
   );
   :disposeMaxCostHands(1);
-  const activeCh = :$("my active")!;
+  const activeCh = :query($.my.active)!;
   :generateDice(activeCh.element(), 1);
   if (activeCh.definition.tags.includes("sacread")) {
     :gainEnergy(1, activeCh);
@@ -103,7 +101,7 @@ define combatStatus {
       append 4;
     };
     if (
-      :$(`my equipment with definition id ${DecorousHarmony}`) &&
+      :query($.my.typeEquipment.def(DecorousHarmony)) &&
       :player.hands.length === 0
     ) {
       :e.increaseDamage(3);
@@ -125,8 +123,8 @@ define combatStatus {
   until "v4.7.0";
   on beforeAction {
     when :(
-      :$(
-        `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`,
+      :query(
+        $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
       )
     );
     listenTo all;
@@ -137,8 +135,8 @@ define combatStatus {
     usage 1 {
       append 3;
     };
-    :$(
-      `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`,
+    :query(
+      $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
     )?.consumeUsage(1);
     const cost = :e.entity.diceCost();
     :damage(DamageType.Dendro, cost + 1);
@@ -314,7 +312,7 @@ define skill {
   until "v4.7.0";
   skillType elemental;
   cost DiceType.Anemo, 3;
-  const aura = :$("opp active")?.aura;
+  const aura = :query($.opp.active)?.aura;
   let midareRanzan;
   switch (aura) {
     case Aura.Cryo:
@@ -395,10 +393,7 @@ define card {
       :useSkill(AbiogenesisSolarIsotoma);
     };
     on increaseSkillDamage {
-      when :(
-        :$(`my summons with definition id ${SolarIsotoma}`) &&
-          :e.viaPlungingAttack()
-      );
+      when :( :query($.my.summon.def(SolarIsotoma)) && :e.viaPlungingAttack() );
       listenTo samePlayer;
       :e.increaseDamage(1);
     };
@@ -427,8 +422,10 @@ define card {
         return (
           :e.type === DamageType.Geo &&
           :e.source.definition.type === "summon" &&
-          !!:$(
-            `(my combat status with tag (shield)) or (status with tag (shield) at my active)`,
+          !!:query(
+            $.my.combatStatus
+              .tag("shield")
+              .union($.typeStatus.tag("shield").at($.my.active)),
           )
         );
       };

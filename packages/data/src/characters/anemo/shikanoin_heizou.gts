@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   Aura,
   card,
   character,
@@ -191,7 +192,7 @@ define skill {
   skillType burst;
   cost DiceType.Anemo, 3;
   cost DiceType.Energy, 2;
-  const aura = :$("opp active")?.aura;
+  const aura = :query($.opp.active)?.aura;
   :damage(DamageType.Anemo, 4);
   switch (aura) {
     case Aura.Cryo:

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -39,8 +40,8 @@ define summon {
       append 4;
     };
     if (
-      :$(`my equipment with definition id ${TamakushiCasket}`) &&
-      :$(`my status with definition id ${CeremonialGarment}`)
+      :query($.my.typeEquipment.def(TamakushiCasket)) &&
+      :query($.my.typeStatus.def(CeremonialGarment))
     ) {
       :damage(DamageType.Hydro, 2);
     } else {
@@ -114,7 +115,7 @@ define skill {
   :heal(1, "all my characters");
   :characterStatus(CeremonialGarment);
   if (:self.hasEquipment(TamakushiCasket)) {
-    let summon = :$(`my summon with definition id ${BakeKurage}`);
+    let summon = :query($.my.summon.def(BakeKurage));
     if (summon) {
       summon.addVariable("usage", 1);
     } else {

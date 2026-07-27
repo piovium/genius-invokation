@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -41,7 +42,7 @@ define combatStatus {
   on increaseDamage {
     when :(
       :e.type === DamageType.Geo &&
-        :$(`my equipment with definition id ${StrategicReserve}`)
+        :query($.my.typeEquipment.def(StrategicReserve))
     );
     listenTo samePlayer;
     :e.increaseDamage(1);
@@ -87,7 +88,7 @@ define skill {
   skillType burst;
   cost DiceType.Geo, 3;
   cost DiceType.Energy, 3;
-  if (:$(`my combat status with definition id ${JadeScreenStatus}`)) {
+  if (:query($.my.combatStatus.def(JadeScreenStatus))) {
     :damage(DamageType.Geo, 8);
   } else {
     :damage(DamageType.Geo, 6);

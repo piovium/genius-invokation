@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   summon,
@@ -40,9 +41,7 @@ define summon {
     usage 1 {
       append 3;
     };
-    if (
-      :$(`my equipment with definition id ${TheStarrySkiesTheirFlowersRain}`)
-    ) {
+    if (:query($.my.typeEquipment.def(TheStarrySkiesTheirFlowersRain))) {
       :damage(DamageType.Dendro, 3);
     } else {
       :damage(DamageType.Dendro, 2);
@@ -50,9 +49,7 @@ define summon {
   };
   on declareEnd {
     when :( :getVariable("usage") >= 2 );
-    if (
-      :$(`my equipment with definition id ${TheStarrySkiesTheirFlowersRain}`)
-    ) {
+    if (:query($.my.typeEquipment.def(TheStarrySkiesTheirFlowersRain))) {
       :damage(DamageType.Dendro, 3);
     } else {
       :damage(DamageType.Dendro, 2);
@@ -117,7 +114,7 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   const elements = new Set(
-    :$$(`all my characters include defeated`).map((ch) => ch.element()),
+    :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
   );
   if (
     elements.size === 2 &&

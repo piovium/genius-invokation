@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   skill,
   DiceType,
@@ -171,7 +172,7 @@ define card {
       usage 2 {
         autoDispose false;
       };
-      for (const ch of :$$(`all my defeated characters`)) {
+      for (const ch of :queryAll($.my.character.onlyDefeated)) {
         ch.heal(2, { kind: "revive" });
       }
     };

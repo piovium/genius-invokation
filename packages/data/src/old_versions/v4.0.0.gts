@@ -99,7 +99,7 @@ define card {
       :useSkill(FoulLegacyRagingTide);
     };
     on endPhase {
-      when :( :$(`opp character has status with definition id ${Riptide}`) );
+      when :( :query($.opp.character.has($.typeStatus.def(Riptide))) );
       :damage(
         DamageType.Piercing,
         1,
@@ -269,7 +269,7 @@ define card {
   until "v4.0.0";
   cost DiceType.Aligned, 3;
   tags food;
-  filter :( !:$(`my combat status with definition id ${ReviveOnCooldown}`) );
+  filter :( !:query($.my.combatStatus.def(ReviveOnCooldown)) );
   addTarget $.my.character.includesDefeated;
   :heal(1, "@targets.0", { kind: "revive" });
   :characterStatus(Satiated, "@targets.0");

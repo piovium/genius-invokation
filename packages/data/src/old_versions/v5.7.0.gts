@@ -159,7 +159,7 @@ define card {
         LumidouceCaseLevel1,
       ];
       for (const id of lumidouceIds) {
-        const lumidouce = :$(`my summons with definition id ${id}`);
+        const lumidouce = :query($.my.summon.def(id));
         if (lumidouce) {
           :triggerEndPhaseSkill(lumidouce);
           break;

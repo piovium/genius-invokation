@@ -78,7 +78,7 @@ define status {
     const talent = :self.master.hasEquipment(ChainLightningCascade);
     if (talent) {
       :dispose(talent);
-      :$("opp active")?.loseEnergy(1);
+      :query($.opp.active)?.loseEnergy(1);
     }
     :characterStatus(ElectricRebirthHoned, "@master");
     :dispose();
@@ -110,11 +110,11 @@ define skill {
   id 24062 as ShockOfTheEnigmaticAbyss;
   skillType elemental;
   cost DiceType.Electro, 3;
-  const target = :$("opp active");
+  const target = :query($.opp.active);
   if (target?.aura === Aura.Electro) {
     const energy = target.loseEnergy(1);
     if (energy > 0) {
-      :$("my characters with energy < maxEnergy")?.gainEnergy(1);
+      :query($.my.character.var("energy", "<", "maxEnergy"))?.gainEnergy(1);
     }
   }
   :damage(DamageType.Electro, 3);
@@ -132,7 +132,7 @@ define skill {
   skillType burst;
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
-  if (:$("opp active")!.energy <= 1) {
+  if (:query($.opp.active)!.energy <= 1) {
     :damage(DamageType.Electro, 5);
   } else {
     :damage(DamageType.Electro, 3);

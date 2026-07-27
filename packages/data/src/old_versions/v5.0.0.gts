@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   combatStatus,
   DamageType,
@@ -78,8 +79,10 @@ define status {
   conflictWith 123034;
   on decreaseDamaged {
     when :(
-      :$(
-        `my summons with definition id ${SpiritOfOmenPyroScorpion01} or my summons with definition id ${SpiritOfOmenPyroScorpion}`,
+      :query(
+        $.my.summon
+          .def(SpiritOfOmenPyroScorpion01)
+          .union($.my.summon.def(SpiritOfOmenPyroScorpion)),
       )
     );
     usage perRound, 1;
@@ -99,8 +102,10 @@ define status {
   conflictWith 123033;
   on decreaseDamaged {
     when :(
-      :$(
-        `my summons with definition id ${SpiritOfOmenPyroScorpion01} or my summons with definition id ${SpiritOfOmenPyroScorpion}`,
+      :query(
+        $.my.summon
+          .def(SpiritOfOmenPyroScorpion01)
+          .union($.my.summon.def(SpiritOfOmenPyroScorpion)),
       )
     );
     usage perRound, 2;
@@ -126,7 +131,7 @@ define summon {
     :damage(DamageType.Pyro, 1);
   };
   on enter {
-    if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
+    if (:query($.my.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
         "my character with definition id 2303",
@@ -139,7 +144,7 @@ define summon {
     }
   };
   on actionPhase {
-    if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
+    if (:query($.my.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
         "my character with definition id 2303",
@@ -178,7 +183,7 @@ define summon {
     }
   };
   on enter {
-    if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
+    if (:query($.my.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
         "my character with definition id 2303",
@@ -191,7 +196,7 @@ define summon {
     }
   };
   on actionPhase {
-    if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
+    if (:query($.my.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
         "my character with definition id 2303",

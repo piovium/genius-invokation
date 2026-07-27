@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -45,7 +46,7 @@ define summon {
     :characterStatus(GeoInfusion, `my character with definition id ${Chiori}`);
   };
   on selfDispose {
-    :$(`my status with definition id ${GeoInfusion}`)?.dispose();
+    :query($.my.typeStatus.def(GeoInfusion))?.dispose();
   };
 };
 

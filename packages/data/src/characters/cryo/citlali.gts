@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -65,9 +66,7 @@ define combatStatus {
   duration 2;
   on damaged {
     when :{
-      const st = :$(
-        `my character with definition id ${Citlali}`,
-      )?.hasNightsoulsBlessing();
+      const st = :query($.my.character.def(Citlali))?.hasNightsoulsBlessing();
       return st && st.variables.nightsoul > 0;
     };
     listenTo samePlayer;
@@ -199,9 +198,7 @@ define combatStatus {
   id 211142 as MamaloacosFrigidRainInEffect;
   since "v5.7.0";
   on enter {
-    when :(
-      :$(`my character with definition id ${Citlali}`)?.hasNightsoulsBlessing()
-    );
+    when :( :query($.my.character.def(Citlali))?.hasNightsoulsBlessing() );
     :gainNightsoul(`my character with definition id ${Citlali}`);
   };
   on increaseDamage {

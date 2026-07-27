@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -262,7 +263,7 @@ define skill {
   let healCount = 1;
   let drawCount = 1;
   for (const [type, def] of Object.entries(sampleMap)) {
-    const st = :$(`my status with definition id ${def}`);
+    const st = :query($.my.typeStatus.def(def));
     if (st) {
       if (def === SourceSampleGeo) {
         drawCount += st.getVariable("layer");
@@ -308,7 +309,7 @@ define skill {
       ) as Record<SampleType, number>;
       sampleCount[DiceType.Geo] = 3;
       const elements = new Set(
-        :$$(`my characters includes defeated`).map((ch) => ch.element()),
+        :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
       );
       for (const e of elements) {
         if (e !== DiceType.Geo && e in sampleCount) {
@@ -328,7 +329,7 @@ define skill {
       const nightsoul = :self.hasStatus(NightsoulsBlessing);
       if (nightsoul && nightsoul.getVariable("nightsoul") >= 2) {
         for (const [type, def] of Object.entries(sampleMap)) {
-          if (:$(`my status with definition id ${def}`)) {
+          if (:query($.my.typeStatus.def(def))) {
             :combatStatus(dmgBonusMap[Number(type) as SampleType], "opp");
           }
         }
@@ -368,7 +369,7 @@ define card {
   since "v5.6.0";
   cost DiceType.Geo, 2;
   filter :{
-    const ch = :$(`my character with definition id ${Xilonen}`);
+    const ch = :query($.my.character.def(Xilonen));
     return ch && !ch.hasNightsoulsBlessing();
   };
   talent Xilonen {

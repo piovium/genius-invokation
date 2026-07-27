@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -100,10 +101,10 @@ define status {
 define combatStatus {
   id 121025 as IncandescentFrostPermeating;
   on endPhase {
-    if (:$(`opp characters with definition id ${CrimsonWitchOfEmbers}`)) {
+    if (:query($.opp.character.def(CrimsonWitchOfEmbers))) {
       :characterStatus(BlazingHeat, "my active");
     }
-    const laSignora = :$(`opp characters with definition id ${LaSignora}`);
+    const laSignora = :query($.opp.character.def(LaSignora));
     if (laSignora) {
       :characterStatus(SheerCold, "my active");
       laSignora.loseEnergy(1);

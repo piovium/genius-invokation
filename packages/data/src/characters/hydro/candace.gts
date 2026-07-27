@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -35,7 +36,7 @@ define skill {
   id 12074 as HeronStrike;
   skillType elemental;
   prepared;
-  :$(`status with definition id ${HeronShield} at @self`)?.dispose();
+  :query($.typeStatus.def(HeronShield).at($.id(:self.id)))?.dispose();
   :damage(DamageType.Hydro, 3);
 };
 

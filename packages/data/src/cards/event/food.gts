@@ -265,7 +265,7 @@ define card {
   since "v3.7.0";
   cost DiceType.Aligned, 2;
   tags food;
-  filter :( !:$(`my combat status with definition id ${ReviveOnCooldown}`) );
+  filter :( !:query($.my.combatStatus.def(ReviveOnCooldown)) );
   addTarget $.my.character.onlyDefeated;
   :heal(1, "@targets.0", { kind: "revive" });
   :characterStatus(Satiated, "@targets.0");
@@ -598,7 +598,7 @@ define card {
   food {
     injuredOnly;
   };
-  :heal(:$$(`my summons`).length, "@targets.0");
+  :heal(:queryAll($.my.summon).length, "@targets.0");
 };
 
 /**

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -55,7 +56,7 @@ define combatStatus {
       autoDecrease false;
     };
     :e.increaseDamage(2);
-    const iansan = :$(`my character with definition id ${Iansan}`);
+    const iansan = :query($.my.character.def(Iansan));
     if (iansan?.hasNightsoulsBlessing()) {
       :consumeNightsoul(iansan);
     } else {

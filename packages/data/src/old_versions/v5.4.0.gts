@@ -65,7 +65,7 @@ define card {
   until "v5.4.0";
   cost DiceType.Electro, 1;
   tags resonance;
-  filter :( :$(`my characters with energy < maxEnergy`) );
+  filter :( :query($.my.character.var("energy", "<", "maxEnergy")) );
   :gainEnergy(1, "my character with energy < maxEnergy limit 1");
 };
 
@@ -147,9 +147,9 @@ define card {
   until "v5.4.0";
   cost DiceType.Dendro, 1;
   tags resonance;
-  :$("my summon with definition id 115")?.addVariable("usage", 1);
-  :$("my combat statuses with definition id 116")?.addVariable("usage", 1);
-  :$("my combat statuses with definition id 117")?.addVariable("usage", 1);
+  :query($.my.summon.def(115 as number))?.addVariable("usage", 1);
+  :query($.my.combatStatus.def(116 as number))?.addVariable("usage", 1);
+  :query($.my.combatStatus.def(117 as number))?.addVariable("usage", 1);
   :combatStatus(ElementalResonanceSprawlingGreeneryInEffect);
 };
 

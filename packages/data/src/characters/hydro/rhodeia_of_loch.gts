@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -213,7 +214,7 @@ define skill {
   skillType burst;
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 3;
-  const summons = :$$("my summons");
+  const summons = :queryAll($.my.summon);
   const damageValue = 4 + summons.length;
   :damage(DamageType.Hydro, damageValue);
   if (:self.hasEquipment(StreamingSurge)) {

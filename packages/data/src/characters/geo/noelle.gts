@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -142,8 +143,7 @@ define card {
     };
     on useSkill {
       when :(
-        :e.isSkillType("normal") &&
-          :$(`my combat status with definition id ${FullPlate}`)
+        :e.isSkillType("normal") && :query($.my.combatStatus.def(FullPlate))
       );
       usage perRound, 1;
       :heal(1, "all my characters");

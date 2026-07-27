@@ -210,7 +210,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Hydro, 1;
   tags resonance;
-  filter :( :$(`my characters with health < maxHealth`) );
+  filter :( :query($.my.character.var("health", "<", "maxHealth")) );
   :heal(2, "my active");
   :heal(1, "my standby");
 };
@@ -258,7 +258,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Electro, 1;
   tags resonance;
-  filter :( :$(`my characters with energy < maxEnergy`) );
+  filter :( :query($.my.character.var("energy", "<", "maxEnergy")) );
   :gainEnergy(1, "my active");
   :gainEnergy(1, "my standby character with energy < maxEnergy limit 1");
 };
@@ -378,21 +378,25 @@ define card {
   cost DiceType.Dendro, 1;
   tags resonance;
   filter :(
-    :$(
-      `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore} or my combat status with definition id ${CatalyzingField} or my summon with definition id ${BurningFlame}`,
+    :query(
+      $.my.combatStatus
+        .def(DendroCore)
+        .union($.my.summon.def(BountifulCore))
+        .union($.my.combatStatus.def(CatalyzingField))
+        .union($.my.summon.def(BurningFlame)),
     )
   );
   if (
-    :$(
-      `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`,
+    :query(
+      $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
     )
   ) {
     :damage(DamageType.Hydro, 1, "opp active");
   }
-  if (:$(`my combat status with definition id ${CatalyzingField}`)) {
+  if (:query($.my.combatStatus.def(CatalyzingField))) {
     :damage(DamageType.Electro, 1, "opp active");
   }
-  if (:$(`my summon with definition id ${BurningFlame}`)) {
+  if (:query($.my.summon.def(BurningFlame))) {
     :damage(DamageType.Pyro, 1, "opp active");
   }
 };
@@ -542,7 +546,7 @@ define combatStatus {
 define card {
   id 331801 as WindAndFreedom;
   since "v3.7.0";
-  filter :( :$(`my standby characters`) );
+  filter :( :query($.my.standby) );
   :combatStatus(WindAndFreedomInEffect);
 };
 
@@ -614,8 +618,8 @@ define card {
   id 331805 as WaterAndJustice;
   since "v4.7.0";
   cost DiceType.Void, 2;
-  filter :( :$(`my characters with health < maxHealth`) );
-  const chs = :$$("all my characters");
+  filter :( :query($.my.character.var("health", "<", "maxHealth")) );
+  const chs = :queryAll($.my.character);
   const chCount = chs.length;
   const totalHealth = chs.reduce((acc, ch) => acc + ch.health, 0);
   const avgHealth = Math.floor(totalHealth / chCount);
@@ -739,7 +743,7 @@ define card {
 define card {
   id 332002 as ChangingShifts;
   since "v3.3.0";
-  filter :( :$(`my standby characters`) );
+  filter :( :query($.my.standby) );
   :combatStatus(ChangingShiftsInEffect);
 };
 
@@ -804,7 +808,7 @@ define card {
   since "v3.3.0";
   filter :(
     :player.hasDefeated &&
-      !:$(`my combat status with definition id ${IHaventLostYetCooldown}`)
+      !:query($.my.combatStatus.def(IHaventLostYetCooldown))
   );
   :generateDice(DiceType.Omni, 1);
   :gainEnergy(1, "my active");
@@ -820,7 +824,7 @@ define card {
 define card {
   id 332006 as LeaveItToMe;
   since "v3.3.0";
-  filter :( :$(`my standby characters`) );
+  filter :( :query($.my.standby) );
   :combatStatus(LeaveItToMeInEffect);
 };
 
@@ -847,7 +851,7 @@ define combatStatus {
 define card {
   id 332007 as WhenTheCraneReturned;
   since "v3.3.0";
-  filter :( :$(`my standby characters`) );
+  filter :( :query($.my.standby) );
   cost DiceType.Aligned, 1;
   :combatStatus(WhenTheCraneReturnedInEffect);
 };
@@ -876,8 +880,8 @@ define card {
   id 332008 as Starsigns;
   since "v3.3.0";
   cost DiceType.Void, 2;
-  filter :( :$(`my active with energy < maxEnergy`) );
-  :$("my active character")?.gainEnergy(1);
+  filter :( :query($.my.active.var("energy", "<", "maxEnergy")) );
+  :query($.my.active)?.gainEnergy(1);
 };
 
 /**
@@ -891,14 +895,15 @@ define card {
   since "v3.3.0";
   cost DiceType.Aligned, 1;
   filter :(
-    :$(`my standby with energy > 0`) && :$(`my active with energy < maxEnergy`)
+    :query($.my.standby.var("energy", ">", 0)) &&
+      :query($.my.active.var("energy", "<", "maxEnergy"))
   );
-  const chs = :$$("my standby characters limit 2");
+  const chs = :queryAll($.my.standby.limit(2));
   let count = 0;
   for (const ch of chs) {
     count += ch.loseEnergy();
   }
-  :$("my active")?.gainEnergy(count);
+  :query($.my.active)?.gainEnergy(count);
 };
 
 /**
@@ -1432,8 +1437,8 @@ define card {
   id 332030 as ControlledDirectionalBlast;
   since "v4.5.0";
   cost DiceType.Aligned, 1;
-  filter :( :$$("opp summons or opp supports").length >= 4 );
-  for (const summon of :$$("all summons")) {
+  filter :( :queryAll($.opp.summon.union($.opp.support)).length >= 4 );
+  for (const summon of :queryAll($.summon)) {
     summon.consumeUsage();
   }
 };
@@ -1503,7 +1508,7 @@ define card {
   since "v4.6.0";
   undiscoverable;
   :generateDice("randomElement", 1);
-  if (!:$(`my active has status with definition id ${UnderseaTreasureOnCD}`)) {
+  if (!:query($.my.active.has($.typeStatus.def(UnderseaTreasureOnCD)))) {
     :heal(1, "my active");
     :characterStatus(UnderseaTreasureOnCD, "my active");
   }
@@ -1544,13 +1549,11 @@ define card {
   since "v4.7.0";
   undiscoverable;
   filter :(
-    !:$(
-      `my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`,
-    )
+    !:query($.my.combatStatus.def(BonecrunchersEnergyBlockCombatStatus))
   );
   :abortPreview();
   :disposeMaxCostHands(1);
-  const activeCh = :$("my active")!;
+  const activeCh = :query($.my.active)!;
   :generateDice(activeCh.element(), 1);
   :combatStatus(BonecrunchersEnergyBlockCombatStatus);
 };
@@ -1579,9 +1582,7 @@ define card {
   undiscoverable;
   tags abyss;
   disableTuning;
-  filter :(
-    !:$(`my combat status with definition id ${ForbiddenKnowledgeCoolDown}`)
-  );
+  filter :( !:query($.my.combatStatus.def(ForbiddenKnowledgeCoolDown)) );
   :damage(DamageType.Piercing, 1, "my active");
   :drawCards(1);
   :combatStatus(ForbiddenKnowledgeCoolDown);
@@ -2061,7 +2062,7 @@ define card {
   id 332040 as EremiteTeatime;
   since "v5.1.0";
   cost DiceType.Aligned, 2;
-  const characters = :$$("my characters include defeated");
+  const characters = :queryAll($.my.character.includesDefeated);
   const elements = characters.map((ch) => ch.element());
   const weapons = characters.map((ch) => ch.weaponTag());
   const nations = characters.flatMap((ch) => ch.nationTags());
@@ -2092,14 +2093,14 @@ define card {
   id 332041 as UltimateSurfingBuddy;
   since "v5.2.0";
   tags action;
-  filter :( :$$(`all summons`).length >= 2 );
+  filter :( :queryAll($.summon).length >= 2 );
   :abortPreview();
-  const mySummons = :$$(`my summons`);
+  const mySummons = :queryAll($.my.summon);
   if (mySummons.length > 0) {
     const mySummon = :random(mySummons);
     :triggerEndPhaseSkill(mySummon);
   }
-  const oppSummons = :$$(`opp summons`);
+  const oppSummons = :queryAll($.opp.summon);
   if (oppSummons.length > 0) {
     const oppSummon = :random(oppSummons);
     :triggerEndPhaseSkill(oppSummon);
@@ -2610,10 +2611,10 @@ define card {
   since "v6.0.0";
   cost DiceType.Void, 2;
   :drawCards(2);
-  if (:$$("my hands with tag (weapon)").length > 1) {
+  if (:queryAll($.my.hand.tag("weapon")).length > 1) {
     :generateDice(DiceType.Omni, 1);
   }
-  if (:$$("my hands with tag (artifact)").length > 1) {
+  if (:queryAll($.my.hand.tag("artifact")).length > 1) {
     :generateDice(DiceType.Omni, 1);
   }
 };
@@ -2628,7 +2629,7 @@ define card {
   id 332056 as AnAncientSacrificeOfSacredBrocade;
   since "v6.1.0";
   cost DiceType.Aligned, 1;
-  const exp = :$(`my support with tag (adventureSpot)`)?.variables.exp ?? 0;
+  const exp = :query($.my.support.tag("adventureSpot"))?.variables.exp ?? 0;
   if (exp >= 4) {
     :damage(DamageType.Physical, 1, "my active");
     :adventure();
@@ -2725,7 +2726,7 @@ define card {
   id 332057 as TheNarzissenkreuzAdventure;
   since "v6.2.0";
   cost DiceType.Aligned, 1;
-  const characters = :$$("my characters include defeated");
+  const characters = :queryAll($.my.character.includesDefeated);
   const elements = characters.map((ch) => ch.element());
   const weapons = characters.map((ch) => ch.weaponTag());
   const nations = characters.flatMap((ch) => ch.nationTags());
@@ -2751,7 +2752,7 @@ define combatStatus {
   duration 2;
   on endPhase {
     when :( :getVariable("duration") === 1 );
-    const actives = :$$(`all active characters`);
+    const actives = :queryAll($.active);
     for (const ch of actives) {
       :mutate({
         type: "modifyEntityVar",

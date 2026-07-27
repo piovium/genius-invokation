@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   character,
   DamageType,
@@ -444,7 +445,7 @@ define card {
     on actionPhase {
       when :( !:isMyTurn() );
       usage 3;
-      :generateDice(:$("my active")!.element(), 1);
+      :generateDice(:query($.my.active)!.element(), 1);
     };
   };
 };

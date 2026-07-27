@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -106,9 +107,7 @@ define skill {
           overrideVariables: { usage },
         });
         if (:self.hasEquipment(RimeflowRapier)) {
-          const bondSt = :$(
-            `status with definition id ${BondOfLife} at opp active`,
-          );
+          const bondSt = :query($.typeStatus.def(BondOfLife).at($.opp.active));
           if (bondSt) {
             const oldUsage = bondSt.getVariable("usage");
             bondSt.setVariable("usage", oldUsage * 2);

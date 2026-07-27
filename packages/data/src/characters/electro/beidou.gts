@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -51,7 +52,7 @@ define skill {
   id 14054 as Wavestrider;
   skillType elemental;
   prepared;
-  :$(`status with definition id ${TidecallerSurfEmbrace} at @self`)?.dispose();
+  :query($.typeStatus.def(TidecallerSurfEmbrace).at($.id(:self.id)))?.dispose();
   :damage(DamageType.Electro, 3);
   if (:self.hasEquipment(LightningStorm)) {
     :characterStatus(SummonerOfLightning, "@self");

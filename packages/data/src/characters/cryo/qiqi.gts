@@ -70,7 +70,11 @@ define combatStatus {
       if (:e.skill.definition.id === AdeptusArtPreserverOfFortune) {
         return false;
       }
-      return :$(`@event.skillCaller and character with health < maxHealth`);
+      return :query(
+        $.id(:e.skillCaller.id).intersection(
+          $.character.var("health", "<", "maxHealth"),
+        ),
+      );
     };
     usage 3;
     :heal(2, "@event.skillCaller");

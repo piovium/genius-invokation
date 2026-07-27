@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -34,7 +35,7 @@ define card {
   tags food;
   undiscoverable;
   on selfHandCardInserted, only {
-    if (:$("my active character with health > 5")) {
+    if (:query($.my.active.var("health", ">", 5))) {
       :damage(DamageType.Anemo, 1, "opp characters with health > 0 limit 1");
     } else {
       :heal(2, "my active");

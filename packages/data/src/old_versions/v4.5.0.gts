@@ -1,4 +1,5 @@
 import {
+  $,
   DamageType,
   DiceType,
   card,
@@ -117,8 +118,8 @@ define card {
     on deductOmniDiceCard {
       when :( :e.hasCardTag("artifact") );
       usage perRound, 1;
-      const artifactedCh = :$$(
-        "my characters has equipment with tag (artifact)",
+      const artifactedCh = :queryAll(
+        $.my.character.has($.typeEquipment.tag("artifact")),
       ).length;
       :e.deductOmniCost(1 + artifactedCh);
     };

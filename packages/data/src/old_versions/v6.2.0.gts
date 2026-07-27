@@ -368,7 +368,7 @@ define card {
         visible false;
       };
       :apply(DamageType.Hydro, "all my characters");
-      const targetCh = :$(`my characters order by health - maxHealth limit 1`);
+      const targetCh = :query($.macros.myMostInjured);
       if (!targetCh) {
         return;
       }
@@ -389,14 +389,14 @@ define card {
 define card {
   id 332041 as private UltimateSurfingBuddy;
   until "v6.2.0";
-  filter :( :$$(`all summons`).length >= 2 );
+  filter :( :queryAll($.summon).length >= 2 );
   :abortPreview();
-  const mySummons = :$$(`my summons`);
+  const mySummons = :queryAll($.my.summon);
   if (mySummons.length > 0) {
     const mySummon = :random(mySummons);
     :triggerEndPhaseSkill(mySummon);
   }
-  const oppSummons = :$$(`opp summons`);
+  const oppSummons = :queryAll($.opp.summon);
   if (oppSummons.length > 0) {
     const oppSummon = :random(oppSummons);
     :triggerEndPhaseSkill(oppSummon);

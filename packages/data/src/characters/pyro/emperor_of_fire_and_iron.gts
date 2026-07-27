@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -36,8 +37,8 @@ define skill {
   prepared;
   :damage(DamageType.Piercing, 2, "opp standby");
   const value =
-    :$(
-      `status with definition id ${ArmoredCrabCarapace} at @self`,
+    :query(
+      $.typeStatus.def(ArmoredCrabCarapace).at($.id(:self.id)),
     )?.getVariable("shield") ?? 0;
   :damage(DamageType.Pyro, 1 + Math.floor(value / 2));
 };
@@ -101,8 +102,8 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   const value =
-    :$(
-      `status with definition id ${ArmoredCrabCarapace} at @self`,
+    :query(
+      $.typeStatus.def(ArmoredCrabCarapace).at($.id(:self.id)),
     )?.getVariable("shield") ?? 0;
   if (value >= 7) {
     :damage(DamageType.Pyro, 2);
@@ -149,12 +150,15 @@ define skill {
     };
     on action {
       when :(
-        :$(
-          `(my statuses with tag (shield) or my combat statuses with tag (shield)) and not with definition id ${ArmoredCrabCarapace}`,
+        :query(
+          $.my.typeStatus
+            .tag("shield")
+            .union($.my.combatStatus.tag("shield"))
+            .intersection($.not($.any.def(ArmoredCrabCarapace))),
         )
       );
-      const shields = :$$(
-        `my statuses with tag (shield) or my combat statuses with tag (shield)`,
+      const shields = :queryAll(
+        $.my.typeStatus.tag("shield").union($.my.combatStatus.tag("shield")),
       );
       let shieldValue = 0;
       for (const shield of shields) {

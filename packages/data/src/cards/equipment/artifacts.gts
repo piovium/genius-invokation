@@ -834,7 +834,7 @@ define card {
     on enter {
       const diceType = :self.master.element();
       const elementKinds = new Set(
-        :$$("my characters include defeated").map((ch) => ch.element()),
+        :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
       );
       if (elementKinds.size >= 3) {
         :generateDice(diceType, 2);
@@ -1420,7 +1420,7 @@ define card {
   since "v6.0.0";
   artifact {
     on useSkill {
-      when :( :e.isSkillType("burst") && :$("my next") );
+      when :( :e.isSkillType("burst") && :query($.my.next) );
       usage perRound, 1;
       :characterStatus(RoyalMasqueInEffect, "my next");
     };
@@ -1560,7 +1560,7 @@ define card {
       :adventure();
     };
     on increaseSkillDamage {
-      when :( :$(`my combat status with definition id ${AdventureCompleted}`) );
+      when :( :query($.my.combatStatus.def(AdventureCompleted)) );
       :e.increaseDamage(1);
     };
   };

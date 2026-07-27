@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   DamageType,
   DiceType,
@@ -60,7 +61,7 @@ define summon {
   };
   on increaseDamage {
     when :(
-      :$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
+      :query($.my.typeEquipment.def(LandsOfDandelion)) && // 装备有天赋的琴在场时
         :e.type === DamageType.Anemo
     );
     :e.increaseDamage(1);
@@ -80,7 +81,7 @@ define summon {
   hint DamageType.Hydro, "1";
   on endPhase {
     usage 2;
-    if (:$(`my equipment with definition id ${TamakushiCasket}`)) {
+    if (:query($.my.typeEquipment.def(TamakushiCasket))) {
       :damage(DamageType.Hydro, 2);
     } else {
       :damage(DamageType.Hydro, 1);

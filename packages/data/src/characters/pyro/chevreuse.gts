@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -209,7 +210,7 @@ define card {
   cost DiceType.Pyro, 2;
   filter :{
     const elements = new Set(
-      :$$(`all my characters include defeated`).map((ch) => ch.element()),
+      :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
     );
     return (
       elements.size === 2 &&

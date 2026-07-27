@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -41,7 +42,7 @@ define summon {
   };
   on useSkill {
     when :{
-      const escoffier = :$(`my character with definition id ${Escoffier}`);
+      const escoffier = :query($.my.character.def(Escoffier));
       if (!escoffier || !escoffier.hasEquipment(TeaPartiesBurstingWithColor)) {
         return false;
       }

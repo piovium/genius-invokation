@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -81,9 +82,7 @@ define card {
         autoDecrease false;
       };
       :damage(DamageType.Dendro, 1);
-      if (
-        !:$(`my combat status with definition id ${SpiritserpentsBlessing}`)
-      ) {
+      if (!:query($.my.combatStatus.def(SpiritserpentsBlessing))) {
         :consumeUsage(1);
       }
     };

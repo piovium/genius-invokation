@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -64,7 +65,7 @@ define summon {
     :combatStatus(BogglecatBoxsTaunt);
   };
   on selfDispose {
-    :$(`my combat status with definition id ${BogglecatBoxsTaunt}`)?.dispose();
+    :query($.my.combatStatus.def(BogglecatBoxsTaunt))?.dispose();
   };
 };
 

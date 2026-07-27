@@ -173,11 +173,11 @@ define skill {
         name "usagePerRound1";
       };
       :damage(DamageType.Piercing, 2, "@self");
-      if (!:$(`my summon with definition id ${HalfTulpa01}`)) {
+      if (!:query($.my.summon.def(HalfTulpa01))) {
         :summon(HalfTulpa01);
-      } else if (!:$(`my summon with definition id ${HalfTulpa02}`)) {
+      } else if (!:query($.my.summon.def(HalfTulpa02))) {
         :summon(HalfTulpa02);
-      } else if (!:$(`my summon with definition id ${HalfTulpa03}`)) {
+      } else if (!:query($.my.summon.def(HalfTulpa03))) {
         :summon(HalfTulpa03);
       } else {
         :summon(HalfTulpa04);
@@ -199,7 +199,7 @@ define skill {
     };
     // 汛波：随机触发一个召唤物的结束阶段技能
     on useSkill {
-      when :( :e.skill.definition.id === StormSurge && :$(`my summons`) );
+      when :( :e.skill.definition.id === StormSurge && :query($.my.summon) );
       :abortPreview();
       const target = :random(:player.summons);
       :triggerEndPhaseSkill(target);
@@ -207,7 +207,7 @@ define skill {
     // 洪啸：触发所有召唤物的结束阶段技能
     on useSkill {
       when :( :e.skill.definition.id === ThunderingTide );
-      for (const summon of :$$(`my summons`)) {
+      for (const summon of :queryAll($.my.summon)) {
         :triggerEndPhaseSkill(summon);
       }
     };
@@ -321,11 +321,11 @@ define card {
           :queryAll($.my.summon).length < :state.config.maxSummonsCount
       );
       :damage(DamageType.Piercing, 2, "@master");
-      if (!:$(`my summon with definition id ${HalfTulpa01}`)) {
+      if (!:query($.my.summon.def(HalfTulpa01))) {
         :summon(HalfTulpa01);
-      } else if (!:$(`my summon with definition id ${HalfTulpa02}`)) {
+      } else if (!:query($.my.summon.def(HalfTulpa02))) {
         :summon(HalfTulpa02);
-      } else if (!:$(`my summon with definition id ${HalfTulpa03}`)) {
+      } else if (!:query($.my.summon.def(HalfTulpa03))) {
         :summon(HalfTulpa03);
       } else {
         :summon(HalfTulpa04);

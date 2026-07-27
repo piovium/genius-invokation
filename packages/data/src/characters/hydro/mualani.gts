@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -86,7 +87,7 @@ define card {
       cost DiceType.Hydro, 1;
       :switchActive("my prev");
       :characterStatus(BiteTarget, "opp active");
-      if (:$$(`my standby`).length === 0) {
+      if (:queryAll($.my.standby).length === 0) {
         :consumeNightsoul("@master");
       }
     };
@@ -187,10 +188,11 @@ define card {
   talent Mualani, none {
     on switchActive {
       when :(
-        :e.switchInfo.to.id === :self.master.id && :$$(`my summon`).length > 0
+        :e.switchInfo.to.id === :self.master.id &&
+          :queryAll($.my.summon).length > 0
       );
       usage perRound, 1;
-      const summons = :$$(`my summon`);
+      const summons = :queryAll($.my.summon);
       if (summons.length > 0) {
         const targetSummon = :random(summons);
         :triggerEndPhaseSkill(targetSummon);

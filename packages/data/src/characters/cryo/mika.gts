@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -70,7 +71,7 @@ define combatStatus {
     when :( :e.isSkillType("normal") );
     usage 1;
     :characterStatus(NAttackCostReduction, "@event.skillCaller");
-    if (:$(`my equipment with definition id ${CompanionsCounsel}`)) {
+    if (:query($.my.typeEquipment.def(CompanionsCounsel))) {
       :characterStatus(PhysicalDmgIncrease01, "@event.skillCaller");
     }
   };

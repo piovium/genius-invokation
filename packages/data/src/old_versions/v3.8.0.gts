@@ -1,4 +1,4 @@
-import { DamageType, DiceType, card, skill } from "@gi-tcg/core/builder";
+import { $, DamageType, DiceType, card, skill } from "@gi-tcg/core/builder";
 import { VermillionHereafterEffect } from "../cards/equipment/artifacts.gts";
 
 /**
@@ -13,7 +13,7 @@ define card {
   cost DiceType.Aligned, 1;
   support place {
     on roll {
-      :e.fixDice(:$("my active")!.element(), 2);
+      :e.fixDice(:query($.my.active)!.element(), 2);
     };
   };
 };
@@ -520,7 +520,7 @@ define card {
 define card {
   id 331803 as private ThunderAndEternity;
   until "v3.8.0";
-  :convertDice(:$("my active")!.element(), "all");
+  :convertDice(:query($.my.active)!.element(), "all");
 };
 
 /**

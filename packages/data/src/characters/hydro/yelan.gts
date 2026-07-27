@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -159,7 +160,9 @@ define card {
     };
     on roll {
       const elements = new Set(
-        :$$("my characters include defeated").map((char) => char.element()),
+        :queryAll($.my.character.includesDefeated).map((char) =>
+          char.element(),
+        ),
       );
       :e.fixDice(DiceType.Omni, Math.min(elements.size, 3));
     };

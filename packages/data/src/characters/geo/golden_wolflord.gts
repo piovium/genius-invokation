@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -37,7 +38,7 @@ define status {
   since "v5.2.0";
   on endPhase {
     when :(
-      :$(`opp equipment with definition id ${BeastlyCorrosion}`) ||
+      :query($.opp.typeEquipment.def(BeastlyCorrosion)) ||
         !:self.master.isActive()
     );
     usage 1 {
@@ -47,7 +48,7 @@ define status {
   };
   on enter {
     if (
-      !:$(`opp equipment with definition id ${BeastlyCorrosion}`) &&
+      !:query($.opp.typeEquipment.def(BeastlyCorrosion)) &&
       :getVariable("usage") > 3
     ) {
       :setVariable("usage", 3);

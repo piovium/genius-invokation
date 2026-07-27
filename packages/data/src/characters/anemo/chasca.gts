@@ -78,7 +78,7 @@ define card {
   undiscoverable;
   cost DiceType.Anemo, 3;
   on selfHandCardInserted {
-    const element = :$(`my active`)?.element();
+    const element = :query($.my.active)?.element();
     if (element === DiceType.Pyro) {
       :transformDefinition(:self, ShiningShadowhuntShellPyro);
     } else if (element === DiceType.Hydro) {

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -45,7 +46,9 @@ define skill {
   id 16074 as SpearFlourish;
   skillType elemental;
   prepared;
-  :$(`status with definition id ${ShieldOfSwirlingClouds} at @self`)?.dispose();
+  :query(
+    $.typeStatus.def(ShieldOfSwirlingClouds).at($.id(:self.id)),
+  )?.dispose();
   if (:self.getVariable("disposeOrTuneCardCount") > 0) {
     :damage(DamageType.Geo, 3);
   } else {
@@ -83,7 +86,7 @@ define combatStatus {
       append 4;
     };
     if (
-      :$(`my equipment with definition id ${DecorousHarmony}`) && // 装备了天赋
+      :query($.my.typeEquipment.def(DecorousHarmony)) && // 装备了天赋
       :player.hands.length === 0
     ) {
       :e.increaseDamage(2);

@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   character,
   DamageType,
@@ -79,9 +80,7 @@ define card {
       id 1161021;
       cost DiceType.Void, 1;
       :consumeNightsoul("@master");
-      const field = :$(
-        `my combat status with definition id ${TurboDrillField}`,
-      );
+      const field = :query($.my.combatStatus.def(TurboDrillField));
       if (field) {
         :damage(DamageType.Geo, 3);
         :damage(DamageType.Piercing, 2, "opp next");

@@ -41,7 +41,7 @@ define summon {
   hint DamageType.Geo, "1";
   on endPhase {
     usage 1;
-    const field = :$(`my combat status with definition id ${TurboDrillField}`);
+    const field = :query($.my.combatStatus.def(TurboDrillField));
     if (field) {
       :damage(DamageType.Geo, 2);
       :damage(DamageType.Piercing, 2, "opp next");

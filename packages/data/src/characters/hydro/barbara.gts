@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   summon,
@@ -115,7 +116,7 @@ define card {
       :useSkill(LetTheShowBegin);
     };
     on deductOmniDiceSwitch {
-      when :( :$(`my summon with definition id ${MelodyLoop}`) );
+      when :( :query($.my.summon.def(MelodyLoop)) );
       usage perRound, 1;
       :e.deductOmniCost(1);
     };

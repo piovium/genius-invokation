@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -40,7 +41,7 @@ define summon {
   };
   on increaseDamage {
     when :(
-      :$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
+      :query($.my.typeEquipment.def(LandsOfDandelion)) && // 装备有天赋的琴在场时
         :e.type === DamageType.Anemo
     );
     :e.increaseDamage(1);

@@ -67,8 +67,8 @@ define status {
   on selfDispose {
     void 0;
     // 钩锁链接离场时，角色退出夜魂加持
-    const nightsoul = :$(
-      `my characters with definition id ${Kinich}`,
+    const nightsoul = :query(
+      $.my.character.def(Kinich),
     )?.hasNightsoulsBlessing();
     if (nightsoul) {
       :dispose(nightsoul);

@@ -1,4 +1,5 @@
 import {
+  $,
   DamageType,
   DiceType,
   type EquipmentHandle,
@@ -80,9 +81,9 @@ define card {
         DiceType.Electro,
         DiceType.Dendro,
       ] as (DiceType | undefined)[]
-    ).includes(:$("my active")?.element())
+    ).includes(:query($.my.active)?.element())
   );
-  const element = :$("my active")!.element() as 1 | 2 | 3 | 4 | 7;
+  const element = :query($.my.active)!.element() as 1 | 2 | 3 | 4 | 7;
   // 先挂后台再挂前台（避免前台被超载走导致结算错误）
   :apply(element, "my standby character");
   :apply(element, "my active character");
@@ -374,8 +375,8 @@ define card {
         if (:e.skill.definition.id !== Wavestrider) {
           return false;
         }
-        const shield = :$(
-          `status with definition id ${TidecallerSurfEmbrace} at @master`,
+        const shield = :query(
+          $.typeStatus.def(TidecallerSurfEmbrace).at($.id(:self.master.id)),
         );
         if (shield && shield.getVariable("shield") === 2) {
           return false;
@@ -470,7 +471,7 @@ define skill {
   :heal(1, "all my characters");
   if (
     :self.hasEquipment(TamakushiCasket) &&
-    :$(`my summon with definition id ${BakeKurage}`)
+    :query($.my.summon.def(BakeKurage))
   ) {
     :summon(BakeKurage);
   }
@@ -495,7 +496,7 @@ define card {
     };
     on useSkill {
       when :( :e.isSkillType("normal") );
-      const bunny = :$(`my summon with definition id ${BaronBunny}`);
+      const bunny = :query($.my.summon.def(BaronBunny));
       if (bunny) {
         :damage(DamageType.Pyro, 3);
         bunny.dispose();
@@ -522,7 +523,7 @@ define summon {
   };
   on increaseDamage {
     when :(
-      :$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
+      :query($.my.typeEquipment.def(LandsOfDandelion)) && // 装备有天赋的琴在场时
         :e.type === DamageType.Anemo
     );
     :e.increaseDamage(1);
@@ -692,7 +693,7 @@ define skill {
   skillType burst;
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 3;
-  const summons = :$$("my summons");
+  const summons = :queryAll($.my.summon);
   const damageValue = 2 + summons.length * 2;
   :damage(DamageType.Hydro, damageValue);
   if (:self.hasEquipment(StreamingSurge)) {

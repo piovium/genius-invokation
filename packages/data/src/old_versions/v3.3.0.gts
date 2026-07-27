@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -117,7 +118,7 @@ define combatStatus {
     when :(
       ([DamageType.Electro, DamageType.Dendro] as DamageType[]).includes(
         :e.type,
-      ) && :e.target.id === :$("opp active")?.id
+      ) && :e.target.id === :query($.opp.active)?.id
     );
     usage 3;
     :e.increaseDamage(1);

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -162,7 +163,7 @@ define skill {
   id 26022 as AuraOfMajesty;
   skillType elemental;
   cost DiceType.Geo, 3;
-  const targetAura = :$("opp active")?.aura;
+  const targetAura = :query($.opp.active)?.aura;
   :damage(DamageType.Geo, 3);
   switch (targetAura) {
     case Aura.Cryo:
@@ -378,7 +379,7 @@ define card {
   eventTalent [Azhdaha, AzhdahaCryo, AzhdahaHydro, AzhdahaPyro, AzhdahaElectro];
   :characterStatus(StoneFacetsElementalCrystallization, "@targets.0");
   const elements = new Set(
-    :$$(`my characters include defeated`).map((ch) => ch.element()),
+    :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
   );
   for (const element of elements) {
     :generateDice(element, 1);

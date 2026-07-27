@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   summon,
@@ -101,11 +102,11 @@ define card {
   undiscoverable;
   cost DiceType.Dendro, 2;
   on selfDiscard, "=play";
-  if (!:$(`my summon with definition id ${ProliferatedOrganism01}`)) {
+  if (!:query($.my.summon.def(ProliferatedOrganism01))) {
     :summon(ProliferatedOrganism01);
-  } else if (!:$(`my summon with definition id ${ProliferatedOrganism02}`)) {
+  } else if (!:query($.my.summon.def(ProliferatedOrganism02))) {
     :summon(ProliferatedOrganism02);
-  } else if (!:$(`my summon with definition id ${ProliferatedOrganism03}`)) {
+  } else if (!:query($.my.summon.def(ProliferatedOrganism03))) {
     :summon(ProliferatedOrganism03);
   } else {
     :summon(ProliferatedOrganism04);
@@ -136,9 +137,7 @@ define status {
     :e.increaseDamage(3);
   };
   on useSkill {
-    const nourishment = :$(
-      `my combat status with definition id ${OasisNourishment}`,
-    );
+    const nourishment = :query($.my.combatStatus.def(OasisNourishment));
     if (nourishment) {
       const usage = nourishment.getVariable("usage");
       nourishment.dispose();
@@ -168,9 +167,7 @@ define combatStatus {
     listenTo samePlayer;
     :addVariable("organismCount", 1);
     if (:getVariable("organismCount") === 4) {
-      const apep = :$(
-        `my character with definition id ${GuardianOfApepsOasis}`,
-      );
+      const apep = :query($.my.character.def(GuardianOfApepsOasis));
       apep?.addStatus(ReignitedHeartOfOasis);
       apep?.addStatus(OasissAegis);
       :dispose();

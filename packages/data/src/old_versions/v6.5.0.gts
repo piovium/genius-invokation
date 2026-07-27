@@ -73,14 +73,14 @@ define card {
   addTarget $.my.character.def(Skirk);
   on actionPhase {
     :disposeCard(:self);
-    :$(
-      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    :query(
+      $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     )?.addVariableWithMax("serpentsSubtlety", 1, 7);
   };
   on switchActive {
     :disposeCard(:self);
-    :$(
-      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    :query(
+      $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     )?.addVariableWithMax("serpentsSubtlety", 1, 7);
   };
   :characterStatus(SevenphaseFlash, "@targets.0");
@@ -373,7 +373,7 @@ define card {
         visible false;
       };
       :apply(DamageType.Hydro, "all my characters");
-      const targetCh = :$(`my characters order by health - maxHealth limit 1`);
+      const targetCh = :query($.macros.myMostInjured);
       if (!targetCh) {
         return;
       }

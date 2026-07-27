@@ -264,5 +264,5 @@ define card {
   food {
     injuredOnly;
   };
-  :heal(1 + :$$(`my summons`).length, "@targets.0");
+  :heal(1 + :queryAll($.my.summon).length, "@targets.0");
 };

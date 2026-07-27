@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   DamageType,
   DiceType,
@@ -20,17 +21,20 @@ define card {
   cost DiceType.Dendro, 1;
   tags resonance;
   filter :(
-    :$(
-      `my combat status with definition id ${DendroCore} or my combat status with definition id ${CatalyzingField} or my summon with definition id ${BurningFlame}`,
+    :query(
+      $.my.combatStatus
+        .def(DendroCore)
+        .union($.my.combatStatus.def(CatalyzingField))
+        .union($.my.summon.def(BurningFlame)),
     )
   );
-  if (:$(`my combat status with definition id ${DendroCore}`)) {
+  if (:query($.my.combatStatus.def(DendroCore))) {
     :damage(DamageType.Hydro, 1, "opp active");
   }
-  if (:$(`my combat status with definition id ${CatalyzingField}`)) {
+  if (:query($.my.combatStatus.def(CatalyzingField))) {
     :damage(DamageType.Electro, 1, "opp active");
   }
-  if (:$(`my summon with definition id ${BurningFlame}`)) {
+  if (:query($.my.summon.def(BurningFlame))) {
     :damage(DamageType.Pyro, 1, "opp active");
   }
 };

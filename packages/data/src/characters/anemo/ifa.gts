@@ -169,7 +169,7 @@ define skill {
   skillType burst;
   cost DiceType.Anemo, 3;
   cost DiceType.Energy, 2;
-  const aura = :$(`opp active`)?.aura;
+  const aura = :query($.opp.active)?.aura;
   :damage(DamageType.Anemo, 2);
   :heal(2, `my characters order by health - maxHealth limit 1`);
   let mark: StatusHandle | null = null;

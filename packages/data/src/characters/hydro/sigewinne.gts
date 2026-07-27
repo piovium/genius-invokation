@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -228,9 +229,7 @@ define skill {
   skillType passive {
     on switchActive {
       when :( :e.switchInfo.to.id === :self.id );
-      const droplet = :$(
-        `my combat status with definition id ${SourcewaterDroplet}`,
-      );
+      const droplet = :query($.my.combatStatus.def(SourcewaterDroplet));
       if (droplet) {
         :consumeUsage(1, droplet);
         :gainEnergy(1, "@self");

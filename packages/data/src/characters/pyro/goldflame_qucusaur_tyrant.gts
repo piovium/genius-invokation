@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -37,7 +38,7 @@ define status {
     usage 1 {
       append;
     };
-    const chosen = :$(`my equipment with definition id ${FlamelordsBlessing}`)
+    const chosen = :query($.my.typeEquipment.def(FlamelordsBlessing))
       ? :random(:player.hands)
       : null;
     const damageValue = 1 + (chosen?.diceCost() ?? 0);

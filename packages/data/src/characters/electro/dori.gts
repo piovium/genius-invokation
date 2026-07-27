@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -53,7 +54,7 @@ define summon {
   hint DamageType.Heal, "2";
   on endPhase {
     usage 2;
-    const ch = :$("my active")!;
+    const ch = :query($.my.active)!;
     if (ch.health <= 6) {
       ch.heal(3);
     } else {

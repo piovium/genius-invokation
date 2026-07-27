@@ -95,7 +95,7 @@ define combatStatus {
     when :(
       ([DamageType.Pyro, DamageType.Electro] as DamageType[]).includes(
         :e.type,
-      ) && :e.target.id === :$("opp active")?.id
+      ) && :e.target.id === :query($.opp.active)?.id
     );
     usage 1;
     :e.increaseDamage(2);
@@ -115,7 +115,7 @@ define combatStatus {
     when :(
       ([DamageType.Electro, DamageType.Dendro] as DamageType[]).includes(
         :e.type,
-      ) && :e.target.id === :$("opp active")?.id
+      ) && :e.target.id === :query($.opp.active)?.id
     );
     usage 2;
     :e.increaseDamage(1);

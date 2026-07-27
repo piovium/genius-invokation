@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -86,7 +87,7 @@ define skill {
   cost DiceType.Void, 2;
   noEnergy;
   :damage(DamageType.Physical, 2);
-  if (!:$(`my summons with definition id ${LightfallSword}`)) {
+  if (!:query($.my.summon.def(LightfallSword))) {
     :gainEnergy(1, "@self");
   }
 };
@@ -107,7 +108,7 @@ define skill {
   if (!hasHeart) {
     :characterStatus(Grimheart, "@self");
   }
-  if (!:$(`my summons with definition id ${LightfallSword}`)) {
+  if (!:query($.my.summon.def(LightfallSword))) {
     :gainEnergy(1, "@self");
   }
 };

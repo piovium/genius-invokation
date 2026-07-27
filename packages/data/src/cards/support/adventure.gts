@@ -199,7 +199,7 @@ define card {
         name "stage3";
         visible false;
       };
-      const summons = :$$("opp summons");
+      const summons = :queryAll($.opp.summon);
       if (summons.length > 0) {
         const summon = :random(summons);
         :dispose(summon);

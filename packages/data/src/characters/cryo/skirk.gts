@@ -57,7 +57,7 @@ define status {
     :transformDefinition(:self.master, Skirk01);
   };
   on selfDispose {
-    const ch = :$(`my character with definition id ${Skirk01}`);
+    const ch = :query($.my.character.def(Skirk01));
     if (ch) {
       :transformDefinition(ch, Skirk);
     }
@@ -91,14 +91,14 @@ define card {
   addTarget $.my.character.def(Skirk);
   on actionPhase {
     :disposeCard(:self);
-    :$(
-      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    :query(
+      $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     )?.addVariableWithMax("serpentsSubtlety", 1, 7);
   };
   on switchActive {
     :disposeCard(:self);
-    :$(
-      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    :query(
+      $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     )?.addVariableWithMax("serpentsSubtlety", 1, 7);
   };
   :characterStatus(SevenphaseFlash, "@targets.0");
