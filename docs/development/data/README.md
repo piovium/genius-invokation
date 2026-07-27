@@ -1,100 +1,77 @@
 # 卡牌数据定义
 
-官方卡牌数据均定义于 `@gi-tcg/data` 包；但是定义的方法来自于 `@gi-tcg/core` 的 `builder` 子导出。目前的定义方法是：
+官方卡牌数据位于 `@gi-tcg/data`，以 [GTS](https://github.com/piovium/gts) 文件（`.gts`）编写。GTS 在 TypeScript 中加入了面向数据定义的声明块：每个 `define` 块声明一个角色、技能、实体、行动牌或扩展点；普通 TypeScript 的 `import`、变量、函数、分支和循环仍可直接使用。
 
-```ts
-import { Registry } from "@gi-tcg/core/builder";
+```gts
+import { DamageType, DiceType } from "@gi-tcg/core/builder";
 
-const registry = new Registry();
-const scope = registry.begin();
-
-// 所有的数据定义于此
-
-scope.end();
-export const dataGetter =
-  (version: Version) => registry.resolve(/* version-resolvers */);
+/**
+ * @id 11011
+ * @name 流天射术
+ * @description
+ * 造成2点物理伤害。
+ */
+define skill {
+  id 11011 as LiutianArchery;
+  skillType normal;
+  cost DiceType.Cryo, 1;
+  cost DiceType.Void, 2;
+  :damage(DamageType.Physical, 2);
+};
 ```
 
-`@gi-tcg/data` 在全局作用域中给出官方卡牌的数据定义，通过有序的 `import` 插入到 `scope` 指定的注册范围内，最后导出获取数据的 `DataGetter`。
+`define` 的类型为 `character`、`skill`、`status`、`combatStatus`、`summon`、`card`、`attachment` 或 `extension`。块内以分号结束语句；带 `:` 的表达式会在结算时以技能上下文执行，例如 `:damage(...)`、`:self` 和 `:e`。不带 `:` 的 TypeScript 代码在定义的技能执行时按原样运行；可用它组织局部变量、条件和循环。
 
-## 注册方法
+## 定义与引用
 
-调用 `scope.begin()` 后，全局调用 `character(...)`、`card(...)` 等方法将提供卡牌定义注入到该 `scope` 的 `Registry` 中。这些方法包括：
-- `character` 定义角色牌
-- `card` 定义行动牌
-- `skill` 定义角色技能
-- `status` 定义角色状态
-- `combatStatus` 定义出战状态
-- `summon` 定义召唤物
+每个可被引用的定义都应给出官方 id，并通常使用 `as` 导出一个同文件、后续导入可用的句柄：
 
-> 此外 `equipment` 定义角色装备和 `support` 定义支援区实体，它们不应被直接使用而是在 `card` 的后续链方法中给出。
+```gts
+define summon {
+  id 111011 as SacredCryoPearl;
+  on endPhase {
+    usage 2;
+    :damage(DamageType.Cryo, 1);
+  };
+};
 
-这些方法是 builder chain——在随后通过 `.foo(...).bar(...)` 的形式给出更进一步的定义，并最终用 `.done();` 结束链，完成定义。一个简单的例子如下：
-
-```ts
-/** 运筹帷幄 */
-const Strategize = card(332004) // 给出行动牌 id
-  .costSame(1)                  // 消耗 1 个同色骰子
-  .drawCards(2)                 // 效果：抽两张牌
-  .done();                      // 结束定义
+define skill {
+  id 11014 as CelestialShower;
+  skillType burst;
+  cost DiceType.Cryo, 3;
+  cost DiceType.Energy, 3;
+  :summon(SacredCryoPearl);
+};
 ```
 
-角色牌、行动牌、实体、技能的 id 应当和官方数据 id 保持一致。如果技术限制无法做到，可以使用小数作为 id，只需确保 `Math.floor(id)` 等于官方数据 id。
+同一文件中的 `as` 名称直接可用；跨文件使用普通的 ESM 导入，例如 `import { SacredCryoPearl } from "./ganyu.gts"`。官方 id 应与静态数据一致；保留但不参与游戏的数据使用 `reserved;`，而不是删除其定义。
 
-`.done()` 会返回 `id` 本身，但是在本文档里称其为“句柄”，并在 TypeScript 中约束为特别的具名类型（如 `character` 的 `.done()` 返回 `CharacterHandle`，而 `.talent` 等方法只接受 `CharacterHandle` 而非 `number`）。如果一个方法期望句柄，但是你只持有 `number` 类型的 `id`（比如是来自[对局状态结构](../state.md)的数据），那么你需要一个 `as` 显式转换，即你自己保证这个 `id` 存在一个合法的定义。
+`@gi-tcg/data/src/index.ts` 由生成脚本维护，按确定顺序导入所有 `.gts` 文件。文件加载期间，GTS 运行时会把各个 `define` 块注册到数据注册表；`end.ts` 冻结注册表并导出按游戏版本解析后的 `GameData`。维护卡牌时不需要手动创建注册表或管理注册作用域。
 
-具体每种数据的定义方式参考一下条目：
-- [角色牌与角色技能](./character.md)
+## 常用结构
+
+- [角色与角色技能](./character.md)
 - [行动牌](./card.md)
 - [状态、出战状态和召唤物](./entity.md)
-
-## 官方卡牌数据自动化维护
-
-`@gi-tcg/data` 的数据维护工作基于自动化工作流，参考 [generator](./generator.md)。
+- [操作与上下文表达式](./operations.md)
+- [事件](./events.md)
+- [扩展点](./extensions.md)
+- [游戏版本](./version.md)
 
 ## 版本解析
 
-允许在注册范围内注册相同 id 的定义，以表示该 id 的不同版本。版本信息是指一个命名空间外加该命名空间下的版本类型，对于官方版本命名空间 `official` 而言是
+同一 id 可在不同版本下拥有多个定义。`since` 与 `until` 写在对应定义块内：
 
-```ts
-interface OfficialVersionInfo {
-  predicate: "since" | "until";
-  version: Version;
-}
+```gts
+define card {
+  id 330005 as InEveryHouseAStove;
+  until "v4.6.1";
+  legend;
+};
 ```
 
-未来将支持自定义卡、实体牌等不同命名空间。所有命名空间的版本类型通过 `@gi-tcg/core` 的 `GiTcg.VersionMetadata` 接口给出，如支持自定义卡版本信息：
+`@gi-tcg/data` 的默认导出为 `(version?) => GameData`。省略参数时取得最新版本；传入版本号则由 `resolveOfficialVersion` 选中在该版本有效的定义。详见[游戏版本](./version.md)。
 
-```ts
-declare module "@gi-tcg/core" {
-  namespace GiTcg {
-    interface VersionMetadata {
-      official: OfficialVersionInfo;
-      customData: { /* 自定义卡的版本信息类型结构 */ }
-    }
-  }
-}
-```
+## 官方卡牌数据自动化维护
 
-在卡牌定义代码中使用 `setVersionInfo` 设置版本信息。该链方法会读取所有 `GiTcg.VersionMetadata` 中定义的键为命名空间，值为该命名空间的版本信息参数类型，如：
-
-```ts
-const MyCustomCard = card(1000000)
-  .setVersionInfo("customData", { /* 自定义卡的版本信息 */ })
-  // [...]
-```
-
-对于官方版本而言使用 `.since` 和 `.until` 等价于 `.setVersionInfo("official", { ... })`，具体用法可参考 [游戏版本](./version.md)。
-
-为了选中某个 id 的确切版本，需要调用 `registry.resolve` 并传入版本解析函数。对于维护官方数据的 `@gi-tcg/data` 而言，它直接传入了 `@gi-tcg/core` 定义的 `resolveOfficialVersion`，其解析流程在 [游戏版本](./version.md) 中描述。版本解析函数的调用签名是：
-
-```ts
-type Entry = { id: number, versionInfo: { from: string, value: unknown } };
-type VersionResolver = <T extends Entry>(items: T[]) => T | null;
-
-interface Registry {
-  resolve(...resolvers: VersionResolver[]): GameData;
-}
-```
-
-其中 `Entry` 的 `versionInfo` 给出该版本的命名空间和版本信息（从 `setVersionInfo` 传入），`VersionResolver` 负责筛选出其中一个；它也可以不做任何筛选（返回 `null`），此时由下一个版本解析函数处理它们。如果所有版本解析函数都不处理这一 id，那么最终 `registry.resolve` 得到的数据将不包含它。
+数据维护脚本和生成规则参见 [generator](./generator.md)。

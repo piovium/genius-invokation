@@ -1,27 +1,35 @@
 # 开发文档
 
-本项目目前使用 monorepo 划分和管理包，共有如下包：
+本项目使用 monorepo 管理以下包和配套工程：
 
-- **核心部分**
-  - `@gi-tcg/core` 核心逻辑与游戏流程
-  - `@gi-tcg/data` 官方卡牌数据表示
-- **界面部分**
-  - `@gi-tcg/web-ui-core` 基于 Solid 的 Web 用户界面组件
-  - `@gi-tcg/web-ui` 基于 Web Component 的用户界面包装
+- **核心与数据**
+  - `@gi-tcg/core` 核心规则、游戏流程与查询系统
+  - `@gi-tcg/data` 使用 GTS 编写的官方卡牌数据
+  - `@gi-tcg/typings` 基础数据类型、前后端通信格式与 Protocol Buffer 代码
+  - `@gi-tcg/utils` 通用工具与类型工具
+  - `@gi-tcg/assets-manager` 获取和管理官方静态资源
+- **界面与调试工具**
+  - `@gi-tcg/web-ui-core` 基于 Solid 的用户界面组件
+  - `@gi-tcg/web-ui` 基于 Web Component 的用户界面封装
   - `@gi-tcg/deck-builder` Web 端组牌器组件
-  - `@gi-tcg/detail-log-viewer` Web 端核心结算细节日志查看组件
-  - `@gi-tcg/standalone` 用于调试的集成 Web 用户界面
-- **对战平台相关**
-  - `@gi-tcg/server` 对战平台服务器实现
-  - `@gi-tcg/web-client` 对战平台客户端（Web 版）实现
+  - `@gi-tcg/card-data-viewer` Solid 卡牌信息查看组件
+  - `@gi-tcg/detail-log-viewer` 核心结算细节日志查看组件
+  - `@gi-tcg/state-editor` 对局状态编辑器
+  - `@gi-tcg/standalone` 集成调试 Web 界面
+- **对战平台**
+  - `@gi-tcg/server` 对战平台服务端
+  - `@gi-tcg/web-client` 对战平台 Web 客户端
+- **数据与开发工具**
+  - `@gi-tcg/custom-data-loader` 自定义 GTS 数据加载器及示例页面
+  - `@gi-tcg/data-code-analyzer` 卡牌数据代码分析工具
+  - `@gi-tcg/data-vscode-ext` `@gi-tcg/data` 编辑辅助的 VS Code 扩展
+  - `@gi-tcg/config` 私有构建与开发配置
+  - `@gi-tcg/test` 核心和卡牌数据测试框架
 - **跨语言绑定**
-  - `@gi-tcg/cbinding` 提供核心模拟器+官方卡牌数据的 C 接口
-  - `@gi-tcg/pybinding` 基于 C 接口的 Python 接口实现
-- **其它**
-  - `@gi-tcg/assets-manager` 获取官方静态数据
-  - `@gi-tcg/typings` 定义基本数据类型前后端通信格式
-  - `@gi-tcg/utils` 实用工具集合
-  - `@gi-tcg/test` 核心与卡牌数据测试框架
+  - `@gi-tcg/cbinding` 提供核心模拟器和官方卡牌数据的 C 接口
+  - `@gi-tcg/pybinding` 基于 C 接口的 Python 包
+  - `packages/csbinding` C# 绑定工程
+  - `packages/csbinding-gen` 用于生成 C# P/Invoke 声明的 Rust 工具
 
 下一步……
 - 如果你需要在你的程序中**使用这些项目组件**，请参阅下方[使用接口](#使用接口)以及对应包的 `README.md`了解使用方式；
@@ -92,7 +100,7 @@ pnpm build
 
 ### 关于运行时
 
-由于项目使用 TypeScript 编写，由于包含历史代码、生成代码等原因，项目多数无法直接简单转译为 JavaScript（如 `enum`、构造函数自动参数、不带扩展名的 `import`、legacy 装饰器等），故项目使用预加载 `tsx` 的 `node` 来运行这些代码（从而不用在开发时进行额外转译构建步骤）。在 `@gi-tcg/config` 中定义了 `gnx` 脚本（auGmented Node eXecution）来包装 `node` 以支持 TypeScript 模块解析和转译，之后该入口也将为 DSL 转译做准备。
+由于项目使用 TypeScript 和 GTS 编写，且包含历史代码、生成代码等，许多源码不能直接作为普通 JavaScript 执行（如 `enum`、构造函数自动参数、不带扩展名的 `import`、legacy 装饰器与 `.gts` 文件）。`@gi-tcg/config` 的 `gnx`（auGmented Node eXecution）包装 `node`，提供 TypeScript 模块解析和转译；GTS 文件则由对应的构建与类型检查工具处理。
 
 - 在 `scripts` 中，使用 `gnx` 来替代 `node`，如: `gnx scripts/foo.ts`；
 - 在命令行中，使用 `pnpm gnx`。

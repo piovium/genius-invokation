@@ -43,7 +43,7 @@
 
 ## 实体定义
 
-`CharacterState` 、`EntityState` 、`AttachmentState` 分别具有对应的 `definition` 属性： `CharacterDefinition` 、`EntityDefinition` 和 `AttachmentDefinition` 类型。这些类型给出了角色/实体/卡牌附着状态的静态属性和行为。官方定义的具体值由 `@gi-tcg/data` 导出 （其内部又通过 `@gi-tcg/core/builder` 定义的构建方法构建，参阅 [data](./data/README.md)）。
+`CharacterState` 、`EntityState` 、`AttachmentState` 分别具有对应的 `definition` 属性： `CharacterDefinition` 、`EntityDefinition` 和 `AttachmentDefinition` 类型。这些类型给出了角色/实体/卡牌附着状态的静态属性和行为。官方定义的具体值由 `@gi-tcg/data` 导出，并由其中的 GTS 数据定义编译、注册，参阅 [data](./data/README.md)。
 
 所有的实体定义类型包括如下属性：
 - `id` 定义 id，和官方基本保持一致；
@@ -121,4 +121,3 @@ interface SkillInfo {
 - `onSwitchActive` 等，引发了新一步的事件。`Game` 需要将技能中引发的事件广播给所有实体，然后继续调用它们的技能响应。
 
 至于 `Arg`，通常包含了事件的具体信息，比如 `onSwitchActive` 中是从哪个角色切换到了哪个角色。对于卡牌描述，`Arg` 包含了卡牌的使用目标（也包括支援牌在支援区已满时“踢出”的实体）。
-
