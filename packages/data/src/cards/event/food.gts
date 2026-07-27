@@ -317,7 +317,7 @@ define card {
   food combat;
   :characterStatus(
     TandooriRoastChickenInEffect,
-    $.my.character.intersection($.not($.has($.typeStatus.def(Satiated)))),
+    $.my.character.exclude($.has.typeStatus.def(Satiated)),
   );
 };
 
@@ -351,7 +351,7 @@ define card {
   food combat;
   :characterStatus(
     ButterCrabInEffect,
-    $.my.character.intersection($.not($.has($.typeStatus.def(Satiated)))),
+    $.my.character.exclude($.has.typeStatus.def(Satiated)),
   );
 };
 
@@ -385,7 +385,7 @@ define card {
   food combat;
   :characterStatus(
     FishAndChipsActive,
-    $.my.character.intersection($.not($.has($.typeStatus.def(Satiated)))),
+    $.my.character.exclude($.has.typeStatus.def(Satiated)),
   );
 };
 

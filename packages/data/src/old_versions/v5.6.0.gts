@@ -257,7 +257,7 @@ define skill {
   cost DiceType.Electro, 4;
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 3);
-  :gainEnergy(2, $.my.character.intersection($.not($.character.id(:self.id))));
+  :gainEnergy(2, $.my.character.exclude($.character.id(:self.id)));
 };
 
 /**

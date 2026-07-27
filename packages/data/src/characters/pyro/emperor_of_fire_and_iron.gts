@@ -154,7 +154,7 @@ define skill {
           $.my.typeStatus
             .tag("shield")
             .union($.my.combatStatus.tag("shield"))
-            .intersection($.not($.any.def(ArmoredCrabCarapace))),
+            .exclude($.def(ArmoredCrabCarapace)),
         )
       );
       const shields = :queryAll(
