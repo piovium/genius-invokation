@@ -37,9 +37,9 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 2);
   if (:self.hasEquipment(MirrorCage)) {
-    :characterStatus(Refraction01, "opp active");
+    :characterStatus(Refraction01, $.opp.active);
   } else {
-    :characterStatus(Refraction, "opp active");
+    :characterStatus(Refraction, $.opp.active);
   }
 };
 
@@ -57,7 +57,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Anemo, 1);
-    :heal(1, "my active");
+    :heal(1, $.my.active);
   };
   on increaseDamage {
     when :(
@@ -86,7 +86,7 @@ define summon {
     } else {
       :damage(DamageType.Hydro, 1);
     }
-    :heal(1, "my active");
+    :heal(1, $.my.active);
   };
 };
 
@@ -116,7 +116,7 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 2);
-  :characterStatus(RipplingBladesStatus, "@self");
+  :characterStatus(RipplingBladesStatus, :self);
 };
 
 /**

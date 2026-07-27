@@ -133,7 +133,7 @@ define skill {
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 3;
   :damage(DamageType.Cryo, 5);
-  :apply(DamageType.Cryo, "@self");
+  :apply(DamageType.Cryo, :self);
   :combatStatus(FlowingCicinShield);
 };
 

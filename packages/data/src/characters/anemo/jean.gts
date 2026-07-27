@@ -37,7 +37,7 @@ define summon {
   on endPhase {
     usage 3;
     :damage(DamageType.Anemo, 1);
-    :heal(1, "my active");
+    :heal(1, $.my.active);
   };
   on increaseDamage {
     when :(
@@ -73,7 +73,7 @@ define skill {
   skillType elemental;
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 3);
-  :switchActive("opp next");
+  :switchActive($.opp.next);
 };
 
 /**
@@ -87,7 +87,7 @@ define skill {
   skillType burst;
   cost DiceType.Anemo, 4;
   cost DiceType.Energy, 2;
-  :heal(2, "all my characters");
+  :heal(2, $.my.character);
   :summon(DandelionField);
 };
 

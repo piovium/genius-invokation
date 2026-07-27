@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -136,7 +137,7 @@ define skill {
       usage perRound, 1 {
         name "usagePerRound1";
       };
-      :gainEnergy(1, "@self");
+      :gainEnergy(1, :self);
     };
     on useSkill {
       when :( :e.skill.definition.id === SpiritOfOmensAwakeningPyroScorpion );

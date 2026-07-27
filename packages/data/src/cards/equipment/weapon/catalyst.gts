@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DamageType, DiceType, card, status } from "@gi-tcg/core/builder";
+import { $, DamageType, DiceType, card, status } from "@gi-tcg/core/builder";
 import { BondOfLife } from "../../../commons.gts";
 
 /**
@@ -213,7 +213,7 @@ define card {
     on damagedOrHealed {
       when :( :getVariable("count") === 2 );
       usage perRound, 1;
-      :characterStatus(AeonWave, "@master");
+      :characterStatus(AeonWave, :self.master);
     };
     on roundEnd {
       :setVariable("count", 0);
@@ -254,7 +254,7 @@ define card {
   weapon catalyst {
     on damagedOrHealed {
       usage perRound, 2;
-      :characterStatus(CashflowSupervisionInEffect, "@master");
+      :characterStatus(CashflowSupervisionInEffect, :self.master);
     };
   };
 };
@@ -299,17 +299,17 @@ define card {
   cost DiceType.Aligned, 1;
   weapon catalyst {
     on enter {
-      :characterStatus(BondOfLife, "@master");
+      :characterStatus(BondOfLife, :self.master);
     };
     on endPhase {
-      :characterStatus(BondOfLife, "@master");
+      :characterStatus(BondOfLife, :self.master);
     };
     on beforeAction {
       when :( !:self.master.hasStatus(BondOfLife) );
       listenTo all;
       usage perRound, 1;
       :generateDice("randomElement", 1);
-      :characterStatus(FlowingPurityInEffect, "@master");
+      :characterStatus(FlowingPurityInEffect, :self.master);
     };
   };
 };
@@ -332,7 +332,7 @@ define card {
       :e.increaseDamage(2);
     };
     on enter {
-      :increaseMaxHealth(1, "@master");
+      :increaseMaxHealth(1, :self.master);
     };
   };
 };
@@ -369,7 +369,7 @@ define card {
       when :( !:isInInitialPile(:e.action.skill.caller) );
       usage perRound, 1;
       :e.deductOmniCost(1);
-      :characterStatus(StarcallersWatchInEffect, "@master");
+      :characterStatus(StarcallersWatchInEffect, :self.master);
     };
   };
 };

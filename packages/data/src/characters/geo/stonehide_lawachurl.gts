@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -158,8 +159,8 @@ define card {
     on defeated {
       when :( :e.source.id === :self.master.id );
       listenTo all;
-      :characterStatus(Stonehide, "@master");
-      :characterStatus(StoneForce, "@master");
+      :characterStatus(Stonehide, :self.master);
+      :characterStatus(StoneForce, :self.master);
     };
   };
 };

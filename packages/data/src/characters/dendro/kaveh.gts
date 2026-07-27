@@ -143,7 +143,7 @@ define skill {
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Dendro, 3);
-  :characterStatus(MehraksAssistance, "@self");
+  :characterStatus(MehraksAssistance, :self);
   :combatStatus(BurstScan, "my", {
     overrideVariables: { usage: 2 },
   });

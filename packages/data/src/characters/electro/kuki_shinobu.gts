@@ -66,7 +66,7 @@ define skill {
   cost DiceType.Electro, 3;
   :combatStatus(GrassRingOfSanctification);
   if (:self.health >= 6) {
-    :damage(DamageType.Piercing, 2, "@self");
+    :damage(DamageType.Piercing, 2, :self);
   }
 };
 
@@ -82,7 +82,7 @@ define skill {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 4);
-  :heal(2, "@self");
+  :heal(2, :self);
 };
 
 /**

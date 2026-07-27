@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -77,7 +78,7 @@ define combatStatus {
   id 113063 as SparksNSplashStatus;
   on useSkill {
     usage 2;
-    :damage(DamageType.Pyro, 2, "my active");
+    :damage(DamageType.Pyro, 2, $.my.active);
   };
 };
 

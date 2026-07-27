@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   Aura,
   card,
   character,
@@ -59,7 +60,7 @@ define status {
   on useSkill {
     when :( :e.skill.definition.id === BewilderingLights );
     const surplus = :getVariable("surplus");
-    :heal(surplus, "@master");
+    :heal(surplus, :self.master);
     :dispose();
   };
 };
@@ -98,7 +99,7 @@ define skill {
     :self.addStatus(PropSurplus);
   }
   if (:self.health >= 6) {
-    :damage(DamageType.Piercing, 1, "@self");
+    :damage(DamageType.Piercing, 1, :self);
   }
 };
 

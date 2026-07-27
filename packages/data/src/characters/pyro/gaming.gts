@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -83,7 +84,7 @@ define status {
     };
     :e.increaseDamage(1);
     if (:self.master.health >= 5) {
-      :damage(DamageType.Piercing, 1, "@master");
+      :damage(DamageType.Piercing, 1, :self.master);
     } else {
       :consumeUsage();
     }
@@ -115,8 +116,8 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 1);
-  :characterStatus(WushouArts, "@self");
-  :switchActive("my next");
+  :characterStatus(WushouArts, :self);
+  :switchActive($.my.next);
 };
 
 /**
@@ -131,7 +132,7 @@ define skill {
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 3;
   :damage(DamageType.Pyro, 2);
-  :characterStatus(SuanniManChai, "@self");
+  :characterStatus(SuanniManChai, :self);
 };
 
 /**
@@ -187,7 +188,7 @@ define card {
     on useSkill {
       when :( :e.isSkillType("elemental") );
       usage perRound, 1;
-      :heal(2, "@master");
+      :heal(2, :self.master);
     };
   };
 };

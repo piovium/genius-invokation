@@ -146,7 +146,7 @@ define skill {
       usage perRound, 1 {
         name "usagePerRound1";
       };
-      :gainEnergy(1, "@self");
+      :gainEnergy(1, :self);
     };
     on useSkill {
       when :(

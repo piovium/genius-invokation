@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   combatStatus,
@@ -44,7 +45,7 @@ define combatStatus {
   on playCard {
     when :( :getVariable("playedCard") === 2 );
     usage 2;
-    :damage(DamageType.Dendro, 1, "my active");
+    :damage(DamageType.Dendro, 1, $.my.active);
     :setVariable("playedCard", 0);
   };
 };

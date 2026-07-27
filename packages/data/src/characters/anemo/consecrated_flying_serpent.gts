@@ -96,7 +96,7 @@ define skill {
     (card) => card.definition.id === BonecrunchersEnergyBlock,
   );
   const stack = Math.floor(cards.length / 2);
-  :characterStatus(BonecrunchersEnergyBlockAccumulated, "@self", {
+  :characterStatus(BonecrunchersEnergyBlockAccumulated, :self, {
     overrideVariables: { stack },
   });
   :damage(DamageType.Anemo, 2);

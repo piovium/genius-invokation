@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -89,7 +90,7 @@ define skill {
   skillType burst;
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Piercing, 2, "opp standby");
+  :damage(DamageType.Piercing, 2, $.opp.standby);
   :damage(DamageType.Physical, 3);
   :abortPreview();
   const cards = :player.hands.toSorted((a, b) => b.diceCost() - a.diceCost());

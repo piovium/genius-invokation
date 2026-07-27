@@ -38,7 +38,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Anemo, 1);
-    :heal(2, "my characters order by health - maxHealth limit 1");
+    :heal(2, $.macros.myMostInjured);
   };
 };
 
@@ -121,7 +121,7 @@ define skill {
       fuufuuWindType = DamageType.Anemo;
       break;
   }
-  :characterStatus(FuufuuWindwheel, "@self", {
+  :characterStatus(FuufuuWindwheel, :self, {
     overrideVariables: {
       swirled: fuufuuWindType,
     },

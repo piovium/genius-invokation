@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   summon,
@@ -122,7 +123,7 @@ define status {
   conflictWith crossCharacter;
   on endPhase {
     usage 1;
-    :switchActive("@master");
+    :switchActive(:self.master);
   };
 };
 
@@ -151,7 +152,7 @@ define skill {
   skillType elemental;
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 3);
-  :characterStatus(ManifestGale, "@self");
+  :characterStatus(ManifestGale, :self);
 };
 
 /**

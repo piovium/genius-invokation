@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -84,7 +85,7 @@ define status {
   };
   on drawCard {
     when :( :getVariable("drawnCard") === 3 );
-    :characterStatus(SubnauticalShield, "@master");
+    :characterStatus(SubnauticalShield, :self.master);
     :setVariable("drawnCard", 0);
   };
   on useSkill {
@@ -121,7 +122,7 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 2);
   if (!:self.hasStatus(PersTimer)) {
-    :characterStatus(PersTimer, "@self");
+    :characterStatus(PersTimer, :self);
   }
 };
 
@@ -137,7 +138,7 @@ define skill {
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 4);
-  :characterStatus(SubnauticalHunterMode, "@self");
+  :characterStatus(SubnauticalHunterMode, :self);
 };
 
 /**

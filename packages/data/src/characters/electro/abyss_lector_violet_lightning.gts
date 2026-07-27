@@ -80,7 +80,7 @@ define status {
       :dispose(talent);
       :query($.opp.active)?.loseEnergy(1);
     }
-    :characterStatus(ElectricRebirthHoned, "@master");
+    :characterStatus(ElectricRebirthHoned, :self.master);
     :dispose();
   };
 };

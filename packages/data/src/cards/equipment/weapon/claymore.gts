@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   combatStatus,
   DiceType,
@@ -189,10 +190,10 @@ define card {
       :e.increaseDamage(1);
     };
     on useSkill {
-      :characterStatus(DesertWatchTakeTheInitiative, "@master");
+      :characterStatus(DesertWatchTakeTheInitiative, :self.master);
     };
     on damaged {
-      :characterStatus(DesertWatchOffensiveDefense, "@master");
+      :characterStatus(DesertWatchOffensiveDefense, :self.master);
     };
   };
 };
@@ -229,7 +230,7 @@ define card {
       :e.increaseDamage(1);
     };
     on enter {
-      :characterStatus(ForestRegaliaInEffect, "@master");
+      :characterStatus(ForestRegaliaInEffect, :self.master);
     };
   };
 };
@@ -349,7 +350,7 @@ define card {
       :addVariable("thought", 1);
       if (:getVariable("thought") >= 2) {
         :addVariable("thought", -2);
-        :gainEnergy(1, "@master");
+        :gainEnergy(1, :self.master);
       }
     };
   };

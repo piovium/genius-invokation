@@ -79,16 +79,16 @@ define card {
     on switchActive {
       when :( :self.master.isActive() );
       listenTo all;
-      :consumeNightsoul("@master");
-      :characterStatus(BiteTarget, "opp active");
+      :consumeNightsoul(:self.master);
+      :characterStatus(BiteTarget, $.opp.active);
     };
     skill {
       id 1121422;
       cost DiceType.Hydro, 1;
-      :switchActive("my prev");
-      :characterStatus(BiteTarget, "opp active");
+      :switchActive($.my.prev);
+      :characterStatus(BiteTarget, $.opp.active);
       if (:queryAll($.my.standby).length === 0) {
-        :consumeNightsoul("@master");
+        :consumeNightsoul(:self.master);
       }
     };
   };
@@ -139,8 +139,8 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 2;
   filter :( !:self.hasStatus(NightsoulsBlessing) );
-  :equip(BiteyShark, "@self");
-  :gainNightsoul("@self", 2);
+  :equip(BiteyShark, :self);
+  :gainNightsoul(:self, 2);
 };
 
 /**

@@ -87,11 +87,11 @@ define skill {
   skillType passive {
     on playCard {
       when :( :e.card.definition.id === BonecrunchersEnergyBlock );
-      :heal(1, "my characters order by health - maxHealth limit 1");
+      :heal(1, $.macros.myMostInjured);
     };
     on disposeCard {
       when :( :e.entity.definition.id === BonecrunchersEnergyBlock );
-      :heal(1, "my characters order by health - maxHealth limit 1");
+      :heal(1, $.macros.myMostInjured);
     };
   };
 };
@@ -130,7 +130,7 @@ define card {
     };
     on playCard {
       when :( :e.card.definition.id === BonecrunchersEnergyBlock );
-      :heal(1, "my characters order by health - maxHealth limit 1");
+      :heal(1, $.macros.myMostInjured);
     };
   };
 };

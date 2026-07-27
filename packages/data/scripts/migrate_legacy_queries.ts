@@ -14,9 +14,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Migrate legacy GTS query helpers (`:$` and `:$$`) to the fluent query API.
+ * Migrate legacy GTS query helpers (`:$` and `:$$`) and action targets to the
+ * fluent query API.
  *
  * String literals and structurally-known template literals are converted.
+ * Single external entity targets (`@self`, `@targets.0`, and similar) become
+ * their direct GTS expressions because action methods already accept entities.
  * Query expressions supplied through a variable are intentionally left alone:
  * they can depend on runtime values (for example, `SIMULANKA_QUERY`) and need
  * a hand-written fluent equivalent.
@@ -49,6 +52,13 @@ interface ScanResult {
   replacements: Replacement[];
   dynamicQueries: number;
   unsupportedQueries: UnsupportedQuery[];
+}
+
+type QueryTargetKind = "character" | "entity";
+
+interface TargetArgument {
+  index: number;
+  kind: QueryTargetKind;
 }
 
 interface UnsupportedQuery {
@@ -87,7 +97,36 @@ const MACROS: Readonly<Record<string, string>> = {
   "opp pile with diceCost > 0": "$.macros.oppPileNotFree",
 };
 
+/**
+ * GTS action methods whose argument is a legacy query target. Keep this list
+ * deliberately tied to the builder API: strings in other positions (such as
+ * `:summon(Foo, "opp")`) are ordinary option values, not queries.
+ */
+const TARGET_ARGUMENTS: Readonly<Record<string, readonly TargetArgument[]>> = {
+  apply: [{ index: 1, kind: "character" }],
+  attachCostIncrease: [{ index: 0, kind: "entity" }],
+  attachCostReduction: [{ index: 0, kind: "entity" }],
+  characterStatus: [{ index: 1, kind: "character" }],
+  cleanAura: [{ index: 1, kind: "character" }],
+  consumeNightsoul: [{ index: 0, kind: "character" }],
+  damage: [{ index: 2, kind: "character" }],
+  dispose: [{ index: 0, kind: "entity" }],
+  equip: [{ index: 1, kind: "character" }],
+  gainEnergy: [{ index: 1, kind: "character" }],
+  gainNightsoul: [{ index: 0, kind: "character" }],
+  heal: [{ index: 1, kind: "character" }],
+  increaseMaxHealth: [{ index: 1, kind: "character" }],
+  swapCharacterPosition: [
+    { index: 0, kind: "character" },
+    { index: 1, kind: "character" },
+  ],
+  switchActive: [{ index: 0, kind: "character" }],
+  transformDefinition: [{ index: 0, kind: "entity" }],
+};
+
 let activeInterpolations: ReadonlyMap<string, string> | null = null;
+let activeTargetKind: QueryTargetKind | null = null;
+let activeMasterIsSelf = false;
 
 const querySemantics = grammar.createSemantics().addOperation("fluent()", {
   Query(orQuery: any, orderBy: any, limit: any) {
@@ -266,12 +305,21 @@ function canonicalQuery(who: string, type: string): string {
 }
 
 function externalQuery(source: string): string {
+  const idQuery = activeTargetKind === "character" ? "$.character.id" : "$.id";
+  const selectedTarget = /^@targets\.(\d+)$/.exec(source);
+  if (selectedTarget) {
+    return `${idQuery}(:e.targets[${selectedTarget[1]}].id)`;
+  }
   const external: Record<string, string> = {
-    "@self": "$.id(:self.id)",
-    "@master": "$.id(:self.master.id)",
-    "@event.skillCaller": "$.id(:e.skillCaller.id)",
-    "@event.switchTo": "$.id(:e.switchInfo.to.id)",
-    "@damage.target": "$.id(:e.target.id)",
+    "@self": `${idQuery}(:self.id)`,
+    // `@master` always resolves to the character that owns `self`, including
+    // when `self` is already that character. The explicit character query is
+    // needed so GTS keeps the surrounding `self` type instead of inferring it
+    // from the generic entity-target overload.
+    "@master": `$.character.id(:self${activeMasterIsSelf ? "" : ".master"}.id)`,
+    "@event.skillCaller": `${idQuery}(:e.skillCaller.id)`,
+    "@event.switchTo": `${idQuery}(:e.switchInfo.to.id)`,
+    "@damage.target": `${idQuery}(:e.target.id)`,
   };
   const result = external[source];
   if (!result) {
@@ -363,6 +411,8 @@ function renderVariableOrNumber(source: string): string {
 function translateQuery(
   source: string,
   interpolations: ReadonlyMap<string, string> = new Map(),
+  targetKind: QueryTargetKind | null = null,
+  masterIsSelf = false,
 ): string {
   const normalized = source.trim().replace(/\s+/g, " ");
   const macro = MACROS[normalized];
@@ -374,11 +424,17 @@ function translateQuery(
     throw new TranslationError(match.message ?? `invalid query '${source}'`);
   }
   const previousInterpolations = activeInterpolations;
+  const previousTargetKind = activeTargetKind;
+  const previousMasterIsSelf = activeMasterIsSelf;
   activeInterpolations = interpolations;
+  activeTargetKind = targetKind;
+  activeMasterIsSelf = masterIsSelf;
   try {
     return querySemantics(match).fluent() as string;
   } finally {
     activeInterpolations = previousInterpolations;
+    activeTargetKind = previousTargetKind;
+    activeMasterIsSelf = previousMasterIsSelf;
   }
 }
 
@@ -471,7 +527,12 @@ function scanLegacyQueries(content: string): ScanResult {
       continue;
     }
     try {
-      const fluent = translateQuery(call.query, call.interpolations);
+      const fluent = translateQuery(
+        call.query,
+        call.interpolations,
+        null,
+        isMasterSelf(content, call.start),
+      );
       replacements.push({
         start: call.start,
         end: call.end,
@@ -486,7 +547,217 @@ function scanLegacyQueries(content: string): ScanResult {
     }
   }
 
+  scanTargetArguments(content, replacements, unsupportedQueries);
+
   return { replacements, dynamicQueries, unsupportedQueries };
+}
+
+function scanTargetArguments(
+  content: string,
+  replacements: Replacement[],
+  unsupportedQueries: UnsupportedQuery[],
+): void {
+  for (let index = 0; index < content.length;) {
+    const ch = content[index]!;
+    if (ch === '"' || ch === "'" || ch === "`") {
+      index = skipString(content, index);
+      continue;
+    }
+    if (ch === "/" && content[index + 1] === "/") {
+      const lineEnd = content.indexOf("\n", index + 2);
+      index = lineEnd === -1 ? content.length : lineEnd + 1;
+      continue;
+    }
+    if (ch === "/" && content[index + 1] === "*") {
+      const commentEnd = content.indexOf("*/", index + 2);
+      index = commentEnd === -1 ? content.length : commentEnd + 2;
+      continue;
+    }
+
+    const call = readTargetCall(content, index);
+    if (!call) {
+      index++;
+      continue;
+    }
+    index = call.openParen + 1;
+
+    for (const target of call.targets) {
+      const argument = call.arguments[target.index];
+      if (!argument) continue;
+      const literalStart = skipWhitespace(content, argument.start);
+      const directTarget = directTargetExpression(
+        content.slice(literalStart, argument.end).trim(),
+        isMasterSelf(content, literalStart),
+      );
+      if (directTarget) {
+        replacements.push({
+          start: literalStart,
+          end: argument.end,
+          text: directTarget,
+        });
+        continue;
+      }
+      if (
+        content[literalStart] !== '"' &&
+        content[literalStart] !== "'" &&
+        content[literalStart] !== "`"
+      ) {
+        continue;
+      }
+
+      const literal = readStringLiteral(content, literalStart);
+      if (
+        !literal.valid ||
+        skipWhitespace(content, literal.end) !== argument.end
+      ) {
+        continue;
+      }
+      try {
+        const directTarget = directTargetExpression(
+          literal.value,
+          isMasterSelf(content, literalStart),
+        );
+        replacements.push({
+          start: literalStart,
+          end: literal.end,
+          text:
+            directTarget ??
+            translateQuery(
+              literal.value,
+              literal.interpolations,
+              target.kind,
+              isMasterSelf(content, literalStart),
+            ),
+        });
+      } catch (error) {
+        unsupportedQueries.push({
+          offset: literalStart,
+          source: literal.value,
+          reason: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+  }
+}
+
+function directTargetExpression(
+  source: string,
+  masterIsSelf = false,
+): string | null {
+  const normalized = source.replace(/\s+/g, "");
+  if (normalized === ":self.master" && masterIsSelf) {
+    return ":self";
+  }
+  if (normalized === ":e.skillCaller") {
+    return ':e.skillCaller.cast<"character">()';
+  }
+  const directExternals: Readonly<Record<string, string>> = {
+    "@self": ":self",
+    "@master": masterIsSelf ? ":self" : ":self.master",
+    "@event.skillCaller": ':e.skillCaller.cast<"character">()',
+    "@event.switchTo": ":e.switchInfo.to",
+    "@damage.target": ":e.target",
+  };
+  const directExternal = directExternals[source];
+  if (directExternal) return directExternal;
+
+  const selectedTarget = /^@targets\.(\d+)$/.exec(source);
+  if (selectedTarget) return `:e.targets[${selectedTarget[1]}]`;
+
+  const idQuery =
+    /^\$\.(?:any\.|character\.)?id\(:(?<target>(?:self(?:\.master)?|e\.(?:skillCaller|target)|e\.switchInfo\.to|e\.targets\[\d+\]))\.id\)$/.exec(
+      normalized,
+    );
+  if (!idQuery?.groups?.target) return null;
+  if (idQuery.groups.target === "self.master" && masterIsSelf) {
+    return ":self";
+  }
+  if (idQuery.groups.target === "e.skillCaller") {
+    return ':e.skillCaller.cast<"character">()';
+  }
+  return `:${idQuery.groups.target}`;
+}
+
+function isMasterSelf(content: string, offset: number): boolean {
+  const definition =
+    /\bdefine\s+(character|skill|status|combatStatus|summon|support|card|extension)\b/g;
+  let lastType: string | null = null;
+  for (
+    let match = definition.exec(content);
+    match && match.index < offset;
+    match = definition.exec(content)
+  ) {
+    lastType = match[1]!;
+  }
+  return lastType === "character" || lastType === "skill";
+}
+
+interface TargetCall {
+  openParen: number;
+  targets: readonly TargetArgument[];
+  arguments: readonly CallArgument[];
+}
+
+interface CallArgument {
+  start: number;
+  end: number;
+}
+
+function readTargetCall(content: string, start: number): TargetCall | null {
+  if (content[start] !== ":") return null;
+  const nameMatch = /^:([A-Za-z_$][\w$]*)/.exec(content.slice(start));
+  if (!nameMatch) return null;
+  const targets = TARGET_ARGUMENTS[nameMatch[1]!];
+  if (!targets) return null;
+
+  const openParen = skipWhitespace(content, start + nameMatch[0].length);
+  if (content[openParen] !== "(") return null;
+  const closeParen = findMatchingParen(content, openParen);
+  if (closeParen <= openParen) return null;
+  return {
+    openParen,
+    targets,
+    arguments: splitCallArguments(content, openParen, closeParen),
+  };
+}
+
+function splitCallArguments(
+  content: string,
+  openParen: number,
+  closeParen: number,
+): CallArgument[] {
+  const arguments_: CallArgument[] = [];
+  let start = openParen + 1;
+  let depth = 0;
+  for (let index = start; index < closeParen; index++) {
+    const ch = content[index]!;
+    if (ch === '"' || ch === "'" || ch === "`") {
+      index = skipString(content, index) - 1;
+      continue;
+    }
+    if (ch === "/" && content[index + 1] === "/") {
+      const lineEnd = content.indexOf("\n", index + 2);
+      index = (lineEnd === -1 ? closeParen : lineEnd) - 1;
+      continue;
+    }
+    if (ch === "/" && content[index + 1] === "*") {
+      const commentEnd = content.indexOf("*/", index + 2);
+      index = (commentEnd === -1 ? closeParen : commentEnd + 2) - 1;
+      continue;
+    }
+    if (ch === "(" || ch === "[" || ch === "{") {
+      depth++;
+    } else if (ch === ")" || ch === "]" || ch === "}") {
+      depth--;
+    } else if (ch === "," && depth === 0) {
+      arguments_.push({ start, end: index });
+      start = index + 1;
+    }
+  }
+  if (start < closeParen || content.slice(openParen + 1, closeParen).trim()) {
+    arguments_.push({ start, end: closeParen });
+  }
+  return arguments_;
 }
 
 interface LegacyQueryCall {
@@ -773,7 +1044,7 @@ async function main(): Promise<void> {
   const changedFiles = results.filter((result) => result.changed).length;
 
   console.log(
-    `${options.write ? "Wrote" : "Dry run:"} ${converted} query helper(s) in ${changedFiles} file(s); ${dynamic} non-literal query helper(s) left unchanged; ${unsupported.length} known literal(s) need manual migration.`,
+    `${options.write ? "Wrote" : "Dry run:"} ${converted} legacy query expression(s) in ${changedFiles} file(s); ${dynamic} non-literal helper query(ies) left unchanged; ${unsupported.length} known literal(s) need manual migration.`,
   );
   for (const { file, query } of unsupported) {
     const content = await readFile(file, "utf-8");

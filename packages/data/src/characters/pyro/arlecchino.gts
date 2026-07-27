@@ -42,13 +42,9 @@ define combatStatus {
         overrideVariables: { usage: 2 },
       });
     }
-    :characterStatus(
-      BondOfLife,
-      `opp characters with definition id ${Arlecchino}`,
-      {
-        overrideVariables: { usage: 2 },
-      },
-    );
+    :characterStatus(BondOfLife, $.opp.character.def(Arlecchino), {
+      overrideVariables: { usage: 2 },
+    });
   };
 };
 
@@ -104,7 +100,7 @@ define skill {
     healValue = bond.getVariable("usage");
     bond.dispose();
   }
-  :heal(healValue, "@self");
+  :heal(healValue, :self);
 };
 
 /**
@@ -196,7 +192,7 @@ define card {
   cost DiceType.Pyro, 1;
   talent Arlecchino, action {
     on enter {
-      :characterStatus(BondOfLife, "@master", {
+      :characterStatus(BondOfLife, :self.master, {
         overrideVariables: { usage: 3 },
       });
       // 消耗生命之契增伤的部分在被动技能 13147 里

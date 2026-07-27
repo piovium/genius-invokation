@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -142,8 +143,8 @@ define skill {
           (:self.hasNightsoulsBlessing()?.variables.nightsoul ?? 0) >= 2
       );
       listenTo samePlayer;
-      :consumeNightsoul("@self", 2);
-      :damage(DamageType.Electro, 1, "opp characters with health > 0 limit 1");
+      :consumeNightsoul(:self, 2);
+      :damage(DamageType.Electro, 1, $.macros.oppActivePrioritized);
     };
     on dealDamage {
       when :(
@@ -157,7 +158,7 @@ define skill {
       usage perRound, 1 {
         name "usagePerRound1";
       };
-      :gainNightsoul("@self", 1);
+      :gainNightsoul(:self, 1);
     };
   };
 };

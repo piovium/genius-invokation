@@ -78,13 +78,13 @@ define card {
       usage 2 {
         autoDispose false;
       };
-      :characterStatus(MistBubbleLockdownPreparing, "@master");
+      :characterStatus(MistBubbleLockdownPreparing, :self.master);
     };
     skill {
       id 1220512 as MistBubbleLockdown;
       prepared;
       :damage(DamageType.Hydro, 1);
-      :characterStatus(MistBubblePrison, "opp active");
+      :characterStatus(MistBubblePrison, $.opp.active);
       if (:getVariable("usage") === 0) {
         :dispose();
       }
@@ -172,7 +172,7 @@ define skill {
       usage perRound, 1 {
         name "usagePerRound1";
       };
-      :gainEnergy(1, "@self");
+      :gainEnergy(1, :self);
     };
   };
 };

@@ -101,8 +101,8 @@ define card {
   );
   const element = :query($.my.active)!.element() as 1 | 2 | 3 | 4 | 7;
   // 先挂后台再挂前台（避免前台被超载走导致结算错误）
-  :apply(element, "my standby character with aura != 0");
-  :apply(element, "my active character with aura != 0");
+  :apply(element, $.my.standby.var("aura", "!=", 0));
+  :apply(element, $.my.active.var("aura", "!=", 0));
 };
 
 /**
@@ -244,7 +244,7 @@ define card {
   addTarget $.my.character;
   :characterStatus(
     DayOfResistanceMomentOfShatteredDreamsInEffect,
-    "@targets.0",
+    :e.targets[0],
   );
 };
 
@@ -308,8 +308,8 @@ define card {
   cost DiceType.Aligned, 1;
   legend;
   addTarget $.my.character;
-  :heal(2, "@targets.0");
-  :characterStatus(EdictOfAbsolutionInEffect, "@targets.0");
+  :heal(2, :e.targets[0]);
+  :characterStatus(EdictOfAbsolutionInEffect, :e.targets[0]);
 };
 
 define extension {
@@ -383,7 +383,7 @@ define card {
     on actionPhase {
       :setVariable("spirit", :getExtensionState().spirit[:self.who]);
       if (:getExtensionState().win[:self.who]) {
-        :characterStatus(FlamesOfWarInEffect, "my active");
+        :characterStatus(FlamesOfWarInEffect, $.my.active);
       }
     };
     on selfDispose {
@@ -450,7 +450,7 @@ define card {
   const defeatedCount = :queryAll($.my.character.onlyDefeated).length;
   if (defeatedCount > 0) {
     const increasedValue = defeatedCount * 2;
-    :increaseMaxHealth(increasedValue, `my characters`);
+    :increaseMaxHealth(increasedValue, $.my.character);
   }
 };
 

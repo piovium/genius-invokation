@@ -39,7 +39,7 @@ define card {
   cost DiceType.Pyro, 2;
   tags action;
   on selfDiscard, "=play";
-  :damage(DamageType.Pyro, 1, "opp active");
+  :damage(DamageType.Pyro, 1, $.opp.active);
 };
 
 /**
@@ -71,7 +71,7 @@ define combatStatus {
   since "v4.8.0";
   on switchActive {
     usage 2;
-    :damage(DamageType.Pyro, 1, "@event.switchTo");
+    :damage(DamageType.Pyro, 1, :e.switchInfo.to);
   };
 };
 
@@ -172,7 +172,7 @@ define skill {
       );
       if (ball) {
         :disposeCard(ball);
-        :heal(1, "my characters order by health - maxHealth limit 1");
+        :heal(1, $.macros.myMostInjured);
       }
     };
   };

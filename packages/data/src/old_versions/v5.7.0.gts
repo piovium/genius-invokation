@@ -79,7 +79,7 @@ define skill {
     FlamestriderFullThrottle,
     FlamestriderSoaringAscent,
   ]);
-  :gainNightsoul("@self", 2);
+  :gainNightsoul(:self, 2);
 };
 
 /**
@@ -117,7 +117,7 @@ define skill {
   :characterStatus(GrappleLink);
   :characterStatus(NightsoulsBlessing);
   :damage(DamageType.Dendro, 2);
-  :swapCharacterPosition("@self", "@targets.0");
+  :swapCharacterPosition(:self, :e.targets[0]);
   const talent = :self.hasEquipment(NightRealmsGiftRepaidInFull);
   if (
     talent &&
@@ -183,7 +183,7 @@ define card {
   cost DiceType.Pyro, 2;
   talent Arlecchino {
     on enter {
-      :characterStatus(BondOfLife, "@master", {
+      :characterStatus(BondOfLife, :self.master, {
         overrideVariables: { usage: 3 },
       });
       // 消耗生命之契增伤的部分在被动技能 13147 里
@@ -204,7 +204,7 @@ define skill {
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 4);
-  :characterStatus(OnslaughtStance, "@self");
+  :characterStatus(OnslaughtStance, :self);
 };
 
 /**
@@ -246,5 +246,5 @@ define card {
   until "v5.7.0";
   legend;
   addTarget $.my.character;
-  :characterStatus(EdictOfAbsolutionInEffect, "@targets.0");
+  :characterStatus(EdictOfAbsolutionInEffect, :e.targets[0]);
 };

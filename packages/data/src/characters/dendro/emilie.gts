@@ -72,7 +72,7 @@ define summon {
   on dealDamage {
     when :( :e.getReaction() === Reaction.Burning );
     listenTo samePlayer;
-    :transformDefinition("@self", LumidouceCaseLevel2);
+    :transformDefinition(:self, LumidouceCaseLevel2);
   };
 };
 
@@ -89,7 +89,7 @@ define summon {
   hint DamageType.Dendro, 1;
   on endPhase {
     usage 1;
-    :damage(DamageType.Dendro, 1, "all opp characters");
+    :damage(DamageType.Dendro, 1, $.opp.character);
   };
 };
 
@@ -172,7 +172,7 @@ define skill {
       usage perRound, 2 {
         name "usagePerRound1";
       };
-      :characterStatus(LingeringFragranceInEffect, "@self");
+      :characterStatus(LingeringFragranceInEffect, :self);
     };
   };
 };

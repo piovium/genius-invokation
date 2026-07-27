@@ -146,7 +146,7 @@ define card {
         :e.isSkillType("normal") && :query($.my.combatStatus.def(FullPlate))
       );
       usage perRound, 1;
-      :heal(1, "all my characters");
+      :heal(1, $.my.character);
     };
   };
 };

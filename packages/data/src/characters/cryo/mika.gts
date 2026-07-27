@@ -70,9 +70,12 @@ define combatStatus {
   on useSkill {
     when :( :e.isSkillType("normal") );
     usage 1;
-    :characterStatus(NAttackCostReduction, "@event.skillCaller");
+    :characterStatus(NAttackCostReduction, :e.skillCaller.cast<"character">());
     if (:query($.my.typeEquipment.def(CompanionsCounsel))) {
-      :characterStatus(PhysicalDmgIncrease01, "@event.skillCaller");
+      :characterStatus(
+        PhysicalDmgIncrease01,
+        :e.skillCaller.cast<"character">(),
+      );
     }
   };
 };
@@ -124,7 +127,7 @@ define combatStatus {
   on useSkill {
     when :( :e.isSkillType("normal") );
     usage 2;
-    :heal(1, "@event.skillCaller");
+    :heal(1, :e.skillCaller.cast<"character">());
   };
 };
 
@@ -167,7 +170,7 @@ define skill {
   skillType burst;
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
-  :heal(1, "all my characters");
+  :heal(1, $.my.character);
   :combatStatus(Eagleplume);
   :combatStatus(EagleplumeBlessing);
 };

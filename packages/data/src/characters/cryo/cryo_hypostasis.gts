@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -37,7 +38,7 @@ define summon {
   hint DamageType.Cryo, 1;
   on endPhase {
     usage 2;
-    :damage(DamageType.Cryo, 1, "recent opp from my active");
+    :damage(DamageType.Cryo, 1, $.recentOppFrom($.my.active));
   };
 };
 
@@ -52,7 +53,7 @@ define status {
   on beforeDefeated {
     :immune(1);
     if (:self.master.hasEquipment(SternfrostPrism)) {
-      :characterStatus(SheerCold, "opp active");
+      :characterStatus(SheerCold, $.opp.active);
     }
     :dispose();
   };
@@ -70,7 +71,7 @@ define status {
   on useSkill {
     when :( :e.isSkillType("normal") );
     usage 1;
-    :damage(DamageType.Piercing, 1, "opp standby");
+    :damage(DamageType.Piercing, 1, $.opp.standby);
   };
 };
 
@@ -113,7 +114,7 @@ define skill {
   skillType burst;
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Piercing, 1, "opp standby");
+  :damage(DamageType.Piercing, 1, $.opp.standby);
   :damage(DamageType.Cryo, 2);
   :summon(PiercingIceridge);
 };
@@ -185,7 +186,7 @@ define card {
   cost DiceType.Cryo, 1;
   talent CryoHypostasis, active {
     on enter {
-      :characterStatus(CryoCrystalCore, "@master");
+      :characterStatus(CryoCrystalCore, :self.master);
     };
   };
 };

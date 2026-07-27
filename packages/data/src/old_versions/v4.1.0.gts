@@ -85,8 +85,8 @@ define card {
   );
   const element = :query($.my.active)!.element() as 1 | 2 | 3 | 4 | 7;
   // 先挂后台再挂前台（避免前台被超载走导致结算错误）
-  :apply(element, "my standby character");
-  :apply(element, "my active character");
+  :apply(element, $.my.standby);
+  :apply(element, $.my.active);
 };
 
 /**
@@ -181,8 +181,8 @@ define card {
   until "v4.1.0";
   cost DiceType.Electro, 3;
   eventTalent ElectroHypostasis;
-  :heal(3, "my active");
-  :characterStatus(ElectroCrystalCore, "my active");
+  :heal(3, $.my.active);
+  :characterStatus(ElectroCrystalCore, $.my.active);
 };
 
 /**
@@ -347,7 +347,10 @@ define card {
       when :( :e.skill.definition.id === ClawAndThunder );
       :gainEnergy(
         1,
-        "my characters with tag (electro) and with energy < maxEnergy limit 1",
+        $.my.character
+          .tag("electro")
+          .intersection($.any.var("energy", "<", "maxEnergy"))
+          .limit(1),
       );
     };
   };
@@ -386,7 +389,7 @@ define card {
       usage 2 {
         autoDispose false;
       };
-      :characterStatus(SummonerOfLightning, "@master");
+      :characterStatus(SummonerOfLightning, :self.master);
     };
   };
 };
@@ -468,7 +471,7 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
-  :heal(1, "all my characters");
+  :heal(1, $.my.character);
   if (
     :self.hasEquipment(TamakushiCasket) &&
     :query($.my.summon.def(BakeKurage))
@@ -519,7 +522,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Anemo, 2);
-    :heal(1, "my active");
+    :heal(1, $.my.active);
   };
   on increaseDamage {
     when :(
@@ -542,7 +545,7 @@ define skill {
   skillType burst;
   cost DiceType.Anemo, 4;
   cost DiceType.Energy, 3;
-  :heal(2, "all my characters");
+  :heal(2, $.my.character);
   :summon(DandelionField);
 };
 
@@ -724,7 +727,7 @@ define status {
   on useSkill {
     when :( :e.isSkillType("normal") );
     usage perRound, 1;
-    :characterStatus(SuperlativeSuperstrength, "@master");
+    :characterStatus(SuperlativeSuperstrength, :self.master);
   };
 };
 

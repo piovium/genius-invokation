@@ -73,21 +73,21 @@ define card {
     nightsoul;
     on switchActive {
       when :( :e.switchInfo.from?.id === :self.master.id );
-      :consumeNightsoul("@master");
+      :consumeNightsoul(:self.master);
       :summon(TurboTwirlyLetItRip);
     };
     skill {
       id 1161021;
       cost DiceType.Void, 1;
-      :consumeNightsoul("@master");
+      :consumeNightsoul(:self.master);
       const field = :query($.my.combatStatus.def(TurboDrillField));
       if (field) {
         :damage(DamageType.Geo, 3);
-        :damage(DamageType.Piercing, 2, "opp next");
+        :damage(DamageType.Piercing, 2, $.opp.next);
         :consumeUsage(1, field);
       } else {
         :damage(DamageType.Geo, 2);
-        :damage(DamageType.Piercing, 1, "opp next");
+        :damage(DamageType.Piercing, 1, $.opp.next);
       }
       :emitCustomEvent(TurboTwirlyTriggered);
     };
@@ -257,7 +257,7 @@ define skill {
   cost DiceType.Electro, 4;
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 3);
-  :gainEnergy(2, "all my characters and not @self");
+  :gainEnergy(2, $.my.character.intersection($.not($.character.id(:self.id))));
 };
 
 /**

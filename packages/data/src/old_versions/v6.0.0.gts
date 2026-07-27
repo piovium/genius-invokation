@@ -38,7 +38,7 @@ define card {
     }
   };
   on selfDiscard, "=play";
-  :damage(DamageType.Anemo, 1, "opp characters with health > 0 limit 1");
+  :damage(DamageType.Anemo, 1, $.macros.oppActivePrioritized);
   :createPileCards(ShadowhuntShell, 1, "random");
 };
 
@@ -54,7 +54,7 @@ define card {
   undiscoverable;
   cost DiceType.Pyro, 3;
   on selfDiscard, "=play";
-  :damage(DamageType.Pyro, 1, "opp characters with health > 0 limit 1");
+  :damage(DamageType.Pyro, 1, $.macros.oppActivePrioritized);
   :createPileCards(ShadowhuntShell, 1, "random");
 };
 
@@ -70,7 +70,7 @@ define card {
   undiscoverable;
   cost DiceType.Hydro, 3;
   on selfDiscard, "=play";
-  :damage(DamageType.Hydro, 1, "opp characters with health > 0 limit 1");
+  :damage(DamageType.Hydro, 1, $.macros.oppActivePrioritized);
   :createPileCards(ShadowhuntShell, 1, "random");
 };
 
@@ -86,7 +86,7 @@ define card {
   undiscoverable;
   cost DiceType.Electro, 3;
   on selfDiscard, "=play";
-  :damage(DamageType.Electro, 1, "opp characters with health > 0 limit 1");
+  :damage(DamageType.Electro, 1, $.macros.oppActivePrioritized);
   :createPileCards(ShadowhuntShell, 1, "random");
 };
 
@@ -102,7 +102,7 @@ define card {
   undiscoverable;
   cost DiceType.Cryo, 3;
   on selfDiscard, "=play";
-  :damage(DamageType.Cryo, 1, "opp characters with health > 0 limit 1");
+  :damage(DamageType.Cryo, 1, $.macros.oppActivePrioritized);
   :createPileCards(ShadowhuntShell, 1, "random");
 };
 
@@ -246,7 +246,7 @@ define skill {
   skillType burst;
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Piercing, 2, "opp standby");
+  :damage(DamageType.Piercing, 2, $.opp.standby);
   :damage(DamageType.Physical, 3);
   const cards = :player.hands.toSorted((a, b) => b.diceCost() - a.diceCost());
   :disposeCard(...cards);

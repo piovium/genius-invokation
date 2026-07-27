@@ -163,7 +163,7 @@ define skill {
   const [card] = :disposeMaxCostHands(1);
   if (card) {
     if (:self.hasEquipment(LightlessFeeding)) {
-      :heal(card.diceCost(), "@self");
+      :heal(card.diceCost(), :self);
     }
   }
 };
@@ -575,7 +575,7 @@ define card {
 define card {
   id 303230 as private UnderseaTreasure;
   until "v4.7.0";
-  :heal(1, "my active");
+  :heal(1, $.my.active);
   :generateDice("randomElement", 1);
 };
 

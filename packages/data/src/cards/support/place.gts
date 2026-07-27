@@ -135,7 +135,7 @@ define card {
     on endPhase {
       when :( :query($.my.standby.var("health", "<", "maxHealth")) );
       usage 2;
-      :heal(2, "my standby characters order by health - maxHealth limit 1");
+      :heal(2, $.my.standby.orderBy("health", "-", "maxHealth").limit(1));
     };
   };
 };
@@ -156,7 +156,7 @@ define card {
     on endPhase {
       when :( :query($.my.active.var("health", "<", "maxHealth")) );
       usage 2;
-      :heal(2, "my active");
+      :heal(2, $.my.active);
     };
   };
 };
@@ -228,7 +228,7 @@ define card {
     on endPhase {
       when :( :query($.my.character.var("health", "<", "maxHealth")) );
       usage 2;
-      :heal(1, "all my characters");
+      :heal(1, $.my.character);
     };
   };
 };
@@ -495,7 +495,7 @@ define status {
   id 301019 as DistantStorm;
   on endPhase {
     usage 1;
-    :damage(DamageType.Piercing, 2, "@master");
+    :damage(DamageType.Piercing, 2, :self.master);
   };
 };
 
@@ -624,11 +624,11 @@ define card {
           break;
         }
         case 4: {
-          :heal(2, "my active");
+          :heal(2, $.my.active);
           break;
         }
         case 6: {
-          :characterStatus(StadiumOfTheSacredFlameInEffect, "my active");
+          :characterStatus(StadiumOfTheSacredFlameInEffect, $.my.active);
           :dispose();
           break;
         }
@@ -777,7 +777,7 @@ define card {
     on disposeCard {
       when :( :getVariable("disposedCardCount") >= 2 );
       :setVariable("disposedCardCount", 0);
-      :characterStatus(FlowerfeatherClanInEffect, "my next");
+      :characterStatus(FlowerfeatherClanInEffect, $.my.next);
     };
   };
 };
@@ -826,7 +826,7 @@ define status {
     when :(
       (:e.overridden?.variables.layer ?? 0) < 3 && :getVariable("layer") >= 3
     );
-    :heal(1, "@master");
+    :heal(1, :self.master);
   };
   on increaseSkillDamage {
     when :( :getVariable("layer") === 5 );
@@ -860,7 +860,7 @@ define card {
       });
     };
     on switchActive {
-      :characterStatus(Exercise, "@event.switchTo");
+      :characterStatus(Exercise, :e.switchInfo.to);
     };
   };
 };
@@ -1042,7 +1042,7 @@ define card {
   support place {
     on enter {
       :drawCards(2);
-      :heal(2, "my characters order by health - maxHealth limit 1");
+      :heal(2, $.macros.myMostInjured);
     };
     on endPhase {
       usage 2;
@@ -1110,7 +1110,7 @@ define card {
     on selfDispose {
       when :( !:e.isDiscardOrTuning() );
       :drawCards(2, { withAttachment: Empowerment });
-      :characterStatus(BattlePlan, "my active");
+      :characterStatus(BattlePlan, $.my.active);
     };
   };
 };

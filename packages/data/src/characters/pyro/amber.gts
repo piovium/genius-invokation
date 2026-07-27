@@ -99,7 +99,7 @@ define skill {
   skillType burst;
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Piercing, 2, "opp standby");
+  :damage(DamageType.Piercing, 2, $.opp.standby);
   :damage(DamageType.Pyro, 2);
 };
 

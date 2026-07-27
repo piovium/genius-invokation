@@ -102,7 +102,7 @@ define status {
         return;
     }
     if (:self.master.definition.id !== targetDef) {
-      :transformDefinition("@master", targetDef);
+      :transformDefinition(:self.master, targetDef);
       :dispose();
     }
   };
@@ -123,16 +123,16 @@ define status {
   on endPhase {
     switch (:self.master.definition.id) {
       default:
-        :transformDefinition("@master", AzhdahaHydro);
+        :transformDefinition(:self.master, AzhdahaHydro);
         break;
       case AzhdahaHydro:
-        :transformDefinition("@master", AzhdahaCryo);
+        :transformDefinition(:self.master, AzhdahaCryo);
         break;
       case AzhdahaCryo:
-        :transformDefinition("@master", AzhdahaPyro);
+        :transformDefinition(:self.master, AzhdahaPyro);
         break;
       case AzhdahaPyro:
-        :transformDefinition("@master", AzhdahaElectro);
+        :transformDefinition(:self.master, AzhdahaElectro);
         break;
     }
   };
@@ -167,16 +167,16 @@ define skill {
   :damage(DamageType.Geo, 3);
   switch (targetAura) {
     case Aura.Cryo:
-      :transformDefinition("@master", AzhdahaCryo);
+      :transformDefinition(:self, AzhdahaCryo);
       break;
     case Aura.Hydro:
-      :transformDefinition("@master", AzhdahaHydro);
+      :transformDefinition(:self, AzhdahaHydro);
       break;
     case Aura.Pyro:
-      :transformDefinition("@master", AzhdahaPyro);
+      :transformDefinition(:self, AzhdahaPyro);
       break;
     case Aura.Electro:
-      :transformDefinition("@master", AzhdahaElectro);
+      :transformDefinition(:self, AzhdahaElectro);
       break;
     default:
       :characterStatus(StoneFacetsElementalCrystallization);
@@ -377,7 +377,7 @@ define card {
   since "v4.3.0";
   cost DiceType.Aligned, 2;
   eventTalent [Azhdaha, AzhdahaCryo, AzhdahaHydro, AzhdahaPyro, AzhdahaElectro];
-  :characterStatus(StoneFacetsElementalCrystallization, "@targets.0");
+  :characterStatus(StoneFacetsElementalCrystallization, :e.targets[0]);
   const elements = new Set(
     :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
   );

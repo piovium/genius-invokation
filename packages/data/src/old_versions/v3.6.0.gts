@@ -45,10 +45,10 @@ define skill {
   skillType normal;
   cost DiceType.Cryo, 5;
   if (:self.hasEquipment(UndividedHeart) && :countOfSkill() > 0) {
-    :damage(DamageType.Piercing, 3, "opp standby");
+    :damage(DamageType.Piercing, 3, $.opp.standby);
     :damage(DamageType.Cryo, 3);
   } else {
-    :damage(DamageType.Piercing, 2, "opp standby");
+    :damage(DamageType.Piercing, 2, $.opp.standby);
     :damage(DamageType.Cryo, 2);
   }
 };
@@ -65,7 +65,7 @@ define skill {
   skillType burst;
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Piercing, 1, "opp standby");
+  :damage(DamageType.Piercing, 1, $.opp.standby);
   :damage(DamageType.Cryo, 1);
   :summon(SacredCryoPearl);
 };
@@ -98,9 +98,9 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 3);
   if (:self.hasEquipment(MirrorCage)) {
-    :characterStatus(Refraction01, "opp active");
+    :characterStatus(Refraction01, $.opp.active);
   } else {
-    :characterStatus(Refraction, "opp active");
+    :characterStatus(Refraction, $.opp.active);
   }
 };
 
@@ -135,7 +135,7 @@ define summon {
     };
     :characterStatus(
       SuperlativeSuperstrength,
-      "my characters with definition id 1605",
+      $.my.character.def(1605 as number),
     );
   };
 };
@@ -175,7 +175,7 @@ define card {
       // 此版本只计算未击倒角色
       const liyueCount = :queryAll($.my.character.tag("liyue")).length;
       if (liyueCount > 0) {
-        :characterStatus(LithicGuard, "@master", {
+        :characterStatus(LithicGuard, :self.master, {
           overrideVariables: {
             shield: Math.min(liyueCount, 3),
           },

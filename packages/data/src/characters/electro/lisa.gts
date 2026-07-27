@@ -82,7 +82,7 @@ define skill {
   cost DiceType.Electro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Electro, 1);
-  :characterStatus(ConductiveLisa, "opp active");
+  :characterStatus(ConductiveLisa, $.opp.active);
 };
 
 /**
@@ -99,7 +99,7 @@ define skill {
     :damage(DamageType.Electro, 2);
   } else {
     :damage(DamageType.Electro, 2);
-    :characterStatus(ConductiveLisa, "opp active");
+    :characterStatus(ConductiveLisa, $.opp.active);
   }
 };
 
@@ -116,7 +116,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 2);
   :summon(LightningRoseSummon);
-  :characterStatus(ConductiveLisa, "opp active");
+  :characterStatus(ConductiveLisa, $.opp.active);
 };
 
 /**
@@ -149,7 +149,7 @@ define card {
     on switchActive {
       when :( :e.switchInfo.to.id === :self.master.id );
       usage perRound, 1;
-      :characterStatus(ConductiveLisa, "opp active");
+      :characterStatus(ConductiveLisa, $.opp.active);
     };
   };
 };

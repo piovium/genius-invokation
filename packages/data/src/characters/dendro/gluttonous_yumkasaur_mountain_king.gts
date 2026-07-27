@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   customEvent,
@@ -126,9 +127,9 @@ define skill {
         "incMaxHealth",
       ] as const);
       if (choice === "incMaxHealth") {
-        :increaseMaxHealth(1, "@self");
+        :increaseMaxHealth(1, :self);
       } else {
-        :characterStatus(choice, "@self");
+        :characterStatus(choice, :self);
       }
     };
     on playCard {

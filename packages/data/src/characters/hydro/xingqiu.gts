@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -99,7 +100,7 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 2);
-  :apply(DamageType.Hydro, "@self");
+  :apply(DamageType.Hydro, :self);
   if (:self.hasEquipment(TheScentRemained)) {
     :combatStatus(RainSword01);
   } else {
@@ -119,7 +120,7 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
-  :apply(DamageType.Hydro, "@self");
+  :apply(DamageType.Hydro, :self);
   :combatStatus(RainbowBladework);
 };
 

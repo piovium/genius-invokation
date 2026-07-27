@@ -75,7 +75,7 @@ define skill {
   if (:self.hasStatus(RangedStance)) {
     :damage(DamageType.Hydro, 4);
     :self.gainEnergy(2);
-    :characterStatus(Riptide, "opp active");
+    :characterStatus(Riptide, $.opp.active);
   } else {
     :damage(DamageType.Hydro, 7);
   }
@@ -103,7 +103,7 @@ define card {
       :damage(
         DamageType.Piercing,
         1,
-        `opp character has status with definition id ${Riptide}`,
+        $.opp.character.has($.typeStatus.def(Riptide)),
       );
     };
   };
@@ -230,7 +230,7 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 1);
-  :apply(DamageType.Hydro, "@self");
+  :apply(DamageType.Hydro, :self);
   :combatStatus(RainbowBladework);
 };
 
@@ -271,8 +271,8 @@ define card {
   tags food;
   filter :( !:query($.my.combatStatus.def(ReviveOnCooldown)) );
   addTarget $.my.character.includesDefeated;
-  :heal(1, "@targets.0", { kind: "revive" });
-  :characterStatus(Satiated, "@targets.0");
+  :heal(1, :e.targets[0], { kind: "revive" });
+  :characterStatus(Satiated, :e.targets[0]);
   :combatStatus(ReviveOnCooldown);
 };
 
@@ -393,7 +393,7 @@ define card {
         :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst")
       );
       listenTo samePlayer;
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
     on increaseSkillDamage {
       when :( :e.viaSkillType("burst") );

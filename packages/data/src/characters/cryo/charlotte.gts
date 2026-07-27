@@ -38,7 +38,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Cryo, 1);
-    :heal(1, "my active");
+    :heal(1, $.my.active);
   };
 };
 
@@ -57,9 +57,9 @@ define status {
       ([Aura.Cryo, Aura.CryoDendro] as Aura[]).includes(:self.master.aura) &&
       :getVariable("usage") === 1
     ) {
-      :damage(DamageType.Cryo, 2, "@master");
+      :damage(DamageType.Cryo, 2, :self.master);
     } else {
-      :damage(DamageType.Cryo, 1, "@master");
+      :damage(DamageType.Cryo, 1, :self.master);
     }
   };
 };
@@ -89,7 +89,7 @@ define skill {
   skillType elemental;
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 1);
-  :characterStatus(SnappySilhouette, "opp active");
+  :characterStatus(SnappySilhouette, $.opp.active);
 };
 
 /**
@@ -104,7 +104,7 @@ define skill {
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 1);
-  :heal(1, "all my characters");
+  :heal(1, $.my.character);
   :summon(NewsflashField);
 };
 
@@ -149,7 +149,7 @@ define card {
       );
       listenTo samePlayer;
       usage perRound, 1;
-      :heal(2, "my active");
+      :heal(2, $.my.active);
     };
   };
 };

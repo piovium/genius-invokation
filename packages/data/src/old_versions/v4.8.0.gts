@@ -131,7 +131,7 @@ define skill {
   const [card] = :disposeMaxCostHands(1);
   if (card) {
     if (:self.hasEquipment(LightlessFeeding)) {
-      :heal(card.diceCost(), "@self");
+      :heal(card.diceCost(), :self);
     }
   }
 };

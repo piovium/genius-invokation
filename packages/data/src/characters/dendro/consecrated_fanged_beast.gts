@@ -95,7 +95,7 @@ define skill {
   const block = :query($.my.hand.def(BonecrunchersEnergyBlock));
   if (block) {
     :disposeCard(block);
-    :characterStatus(SproutsOfTheBlightedRotStatus, "@self");
+    :characterStatus(SproutsOfTheBlightedRotStatus, :self);
   }
 };
 

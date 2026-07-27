@@ -25,7 +25,7 @@ define status {
     const talent = :self.master.hasEquipment(EmbersRekindled);
     if (talent) {
       :dispose(talent);
-      :characterStatus(AegisOfAbyssalFlame, "@master");
+      :characterStatus(AegisOfAbyssalFlame, :self.master);
     }
     :dispose();
   };

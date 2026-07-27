@@ -81,8 +81,8 @@ define summon {
   hint DamageType.Heal, 2;
   on endPhase {
     usage 2;
-    :damage(DamageType.Heal, 2, "my active");
-    :gainEnergy(1, "my active");
+    :damage(DamageType.Heal, 2, $.my.active);
+    :gainEnergy(1, $.my.active);
   };
 };
 

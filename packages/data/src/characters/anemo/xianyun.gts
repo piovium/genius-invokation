@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -100,8 +101,8 @@ define card {
       id 1151021;
       cost DiceType.Aligned, 1;
       usage 2;
-      :heal(2, "@master");
-      :characterStatus(SoaringOnTheWind, "@master");
+      :heal(2, :self.master);
+      :characterStatus(SoaringOnTheWind, :self.master);
     };
   };
 };
@@ -148,7 +149,7 @@ define skill {
   cost DiceType.Anemo, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Anemo, 1);
-  :heal(1, "all my characters");
+  :heal(1, $.my.character);
   :createHandCard(Starwicker);
 };
 

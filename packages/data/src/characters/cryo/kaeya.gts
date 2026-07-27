@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -115,7 +116,7 @@ define card {
     on useSkill {
       when :( :e.skill.definition.id === Frostgnaw );
       usage perRound, 1;
-      :heal(2, "@master");
+      :heal(2, :self.master);
     };
   };
 };

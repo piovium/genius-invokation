@@ -141,7 +141,7 @@ define status {
     if (nourishment) {
       const usage = nourishment.getVariable("usage");
       nourishment.dispose();
-      :heal(usage, "@master");
+      :heal(usage, :self.master);
     }
   };
 };

@@ -145,7 +145,7 @@ define summon {
     when :(
       :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal")
     );
-    :heal(1, "my characters order by health - maxHealth limit 1");
+    :heal(1, $.macros.myMostInjured);
   };
 };
 

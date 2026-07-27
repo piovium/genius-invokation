@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   customEvent,
@@ -48,7 +49,7 @@ define status {
   };
   on useSkill {
     when :( :e.isSkillType("normal") );
-    :damage(DamageType.Piercing, 1, "opp character order by health limit 1");
+    :damage(DamageType.Piercing, 1, $.opp.character.orderBy("health").limit(1));
   };
 };
 
@@ -66,7 +67,7 @@ define status {
     when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Electro)) );
     listenTo samePlayer;
     usage 1;
-    :gainEnergy(1, "@master");
+    :gainEnergy(1, :self.master);
   };
 };
 
@@ -95,9 +96,9 @@ define skill {
   id 14132 as AncientRiteTheThunderingSands;
   skillType elemental;
   cost DiceType.Electro, 2;
-  :apply(DamageType.Electro, "opp active");
-  :switchActive("my next");
-  :characterStatus(ThunderConvergence, "@self");
+  :apply(DamageType.Electro, $.opp.active);
+  :switchActive($.my.next);
+  :characterStatus(ThunderConvergence, :self);
 };
 
 /**
@@ -112,7 +113,7 @@ define skill {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 4;
   :damage(DamageType.Electro, 3);
-  :characterStatus(TwilightMeditation, "@self");
+  :characterStatus(TwilightMeditation, :self);
 };
 
 const EnergyLost = customEvent("sethos/energyLost");
@@ -135,7 +136,7 @@ define skill {
         :damage(
           DamageType.Piercing,
           energy + 1,
-          "opp character order by health limit 1",
+          $.opp.character.orderBy("health").limit(1),
         );
         :emitCustomEvent(EnergyLost);
       }
@@ -175,11 +176,11 @@ define card {
   cost DiceType.Electro, 1;
   talent Sethos, none {
     on enter {
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
     on EnergyLost {
       usage perRound, 1;
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
   };
 };

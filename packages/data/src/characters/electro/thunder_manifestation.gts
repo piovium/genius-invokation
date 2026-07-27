@@ -78,7 +78,7 @@ define summon {
     if (target) {
       :damage(DamageType.Electro, 3, target);
     } else {
-      :damage(DamageType.Electro, 3, "opp active");
+      :damage(DamageType.Electro, 3, $.opp.active);
     }
   };
 };
@@ -93,7 +93,7 @@ define combatStatus {
   id 124021 as LightningStrikeProbe;
   on useSkill {
     usage perRound, 1;
-    :characterStatus(LightningRod, "my active");
+    :characterStatus(LightningRod, $.my.active);
   };
 };
 
@@ -136,7 +136,7 @@ define skill {
   if (target) {
     :damage(DamageType.Electro, 3, target);
   } else {
-    :damage(DamageType.Electro, 3, "opp active");
+    :damage(DamageType.Electro, 3, $.opp.active);
   }
 };
 

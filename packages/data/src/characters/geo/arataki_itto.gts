@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   summon,
@@ -105,7 +106,7 @@ define status {
   on useSkill {
     when :( :e.isSkillType("normal") );
     usage perRound, 1;
-    :characterStatus(SuperlativeSuperstrength, "@master");
+    :characterStatus(SuperlativeSuperstrength, :self.master);
   };
 };
 

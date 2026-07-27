@@ -66,7 +66,7 @@ define card {
   cost DiceType.Electro, 1;
   tags resonance;
   filter :( :query($.my.character.var("energy", "<", "maxEnergy")) );
-  :gainEnergy(1, "my character with energy < maxEnergy limit 1");
+  :gainEnergy(1, $.my.character.var("energy", "<", "maxEnergy").limit(1));
 };
 
 /**
@@ -82,7 +82,7 @@ define card {
   cost DiceType.Anemo, 1;
   tags resonance;
   addTarget $.my.character;
-  :switchActive("@targets.0");
+  :switchActive(:e.targets[0]);
   :generateDice(DiceType.Omni, 1);
 };
 

@@ -81,7 +81,7 @@ define status {
   duration 1;
   on endPhase {
     when :( :self.master.health >= 6 );
-    :damage(DamageType.Piercing, 2, "@master");
+    :damage(DamageType.Piercing, 2, :self.master);
   };
 };
 
@@ -111,12 +111,12 @@ define skill {
   cost DiceType.Anemo, 3;
   const count = :countOfSkill();
   if (count === 0 && :self.health <= 8) {
-    :heal(2, "@self");
-    :characterStatus(OverawingAssault, "@self");
+    :heal(2, :self);
+    :characterStatus(OverawingAssault, :self);
   }
   if (count === 1 && :self.hasEquipment(AColdBladeLikeAShadow)) {
     :damage(DamageType.Anemo, 5);
-    :switchActive("opp prev");
+    :switchActive($.opp.prev);
   } else {
     :damage(DamageType.Anemo, 3);
   }

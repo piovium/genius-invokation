@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -57,7 +58,7 @@ define status {
     :e.deductCost(DiceType.Pyro, 1);
   };
   on endPhase {
-    :characterStatus(ScarletSeal, "@master");
+    :characterStatus(ScarletSeal, :self.master);
   };
 };
 

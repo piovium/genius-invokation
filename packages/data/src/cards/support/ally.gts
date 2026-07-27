@@ -324,7 +324,7 @@ define card {
   support ally {
     on endPhase {
       usage 2;
-      :gainEnergy(1, "my characters with energy < maxEnergy limit 1");
+      :gainEnergy(1, $.macros.myEnergyNotFull);
     };
   };
 };
@@ -345,7 +345,7 @@ define card {
       when :( :e.switchInfo.to.energy === 0 );
       usage 2;
       usage perRound, 1;
-      :gainEnergy(1, "my active");
+      :gainEnergy(1, $.my.active);
     };
   };
 };
@@ -638,7 +638,7 @@ define card {
           !:e.skillCaller.cast<"character">().hasStatus(SandsAndDream) && // 多个婕德不重复触发
           :getVariable("experience") >= 6
       );
-      :characterStatus(SandsAndDream, "my active");
+      :characterStatus(SandsAndDream, $.my.active);
       :dispose();
     };
   };

@@ -63,7 +63,7 @@ define skill {
   cost DiceType.Void, 2;
   :damage(DamageType.Electro, 1);
   if (:skillInfo.charged) {
-    :characterStatus(Conductive, "opp active");
+    :characterStatus(Conductive, $.opp.active);
   }
 };
 
@@ -134,12 +134,12 @@ define summon {
     if (:query($.my.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     } else {
       :characterStatus(
         PyroScorpionGuardianStance,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     }
   };
@@ -147,12 +147,12 @@ define summon {
     if (:query($.my.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     } else {
       :characterStatus(
         PyroScorpionGuardianStance,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     }
   };
@@ -186,12 +186,12 @@ define summon {
     if (:query($.my.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     } else {
       :characterStatus(
         PyroScorpionGuardianStance,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     }
   };
@@ -199,12 +199,12 @@ define summon {
     if (:query($.my.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     } else {
       :characterStatus(
         PyroScorpionGuardianStance,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     }
   };
@@ -259,7 +259,7 @@ define skill {
       usage 1 {
         name "damagedEnergySkillUsage";
       };
-      :gainEnergy(1, "@self");
+      :gainEnergy(1, :self);
     };
   };
 };

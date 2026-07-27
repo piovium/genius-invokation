@@ -394,7 +394,7 @@ define card {
     on useSkill {
       when :( :e.isSkillType("normal") );
       usage perRound, 3;
-      :heal(1, "@master");
+      :heal(1, :self.master);
     };
   };
 };
@@ -414,7 +414,7 @@ define card {
     on useSkill {
       when :( :e.isSkillType("elemental") );
       usage perRound, 1;
-      :heal(2, "@master");
+      :heal(2, :self.master);
     };
   };
 };
@@ -434,7 +434,7 @@ define card {
     on useSkill {
       when :( :e.isSkillType("burst") );
       usage perRound, 1;
-      :heal(1, "all my characters");
+      :heal(1, $.my.character);
     };
   };
 };
@@ -497,7 +497,7 @@ define card {
     on useSkill {
       when :( :e.isSkillType("burst") );
       usage perRound, 1;
-      :gainEnergy(1, "my standby");
+      :gainEnergy(1, $.my.standby);
     };
   };
 };
@@ -519,7 +519,7 @@ define card {
         :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst")
       );
       listenTo samePlayer;
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
   };
 };
@@ -542,7 +542,7 @@ define card {
         :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst")
       );
       listenTo samePlayer;
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
     on increaseSkillDamage {
       when :( :e.viaSkillType("burst") );
@@ -576,7 +576,7 @@ define card {
   cost DiceType.Aligned, 2;
   artifact {
     on actionPhase {
-      :characterStatus(UnmovableMountain, "@master");
+      :characterStatus(UnmovableMountain, :self.master);
     };
   };
 };
@@ -595,7 +595,7 @@ define card {
   cost DiceType.Aligned, 3;
   artifact {
     on actionPhase {
-      :characterStatus(UnmovableMountain, "@master");
+      :characterStatus(UnmovableMountain, :self.master);
     };
     on damaged {
       when :( :self.master.isActive() );
@@ -660,7 +660,7 @@ define card {
     };
     on switchActive {
       when :( :self.master.id === :e.switchInfo.to.id );
-      :characterStatus(VermillionHereafterEffect, "@master");
+      :characterStatus(VermillionHereafterEffect, :self.master);
     };
   };
 };
@@ -772,7 +772,7 @@ define card {
     replaceDescription "[GCG_TOKEN_SHIELD]",
       ((_, self) => self.variables.healedPts);
     on enter {
-      :heal(2, "@master");
+      :heal(2, :self.master);
     };
     on healed {
       listenTo samePlayer;
@@ -938,7 +938,7 @@ define card {
     };
     on endPhase {
       when :( :getVariable("shouldHeal") );
-      :heal(1, "@master");
+      :heal(1, :self.master);
       :setVariable("shouldHeal", 0);
     };
   };
@@ -1231,7 +1231,7 @@ define card {
       usage perRound, 1;
       :disposeMaxCostHands(1);
       :convertDice(DiceType.Omni, 2);
-      :characterStatus(ConductorsTopHatInEffect, "@master");
+      :characterStatus(ConductorsTopHatInEffect, :self.master);
     };
   };
 };
@@ -1256,7 +1256,7 @@ define card {
         )
       );
       usage perRound, 2;
-      :heal(1, "my characters order by health - maxHealth limit 1");
+      :heal(1, $.macros.myMostInjured);
     };
   };
 };
@@ -1275,7 +1275,7 @@ define card {
   artifact {
     on useTechnique {
       usage perRound, 1;
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
   };
 };
@@ -1312,7 +1312,7 @@ define card {
   artifact {
     on consumeNightsoul {
       usage perRound, 2;
-      :characterStatus(CrownOfTheSaintsInEffect, "@master");
+      :characterStatus(CrownOfTheSaintsInEffect, :self.master);
     };
   };
 };
@@ -1331,8 +1331,8 @@ define card {
   artifact {
     on consumeNightsoul {
       usage perRound, 1;
-      :gainEnergy(1, "my characters with energy < maxEnergy limit 1");
-      :gainEnergy(1, "my characters with energy < maxEnergy limit 1");
+      :gainEnergy(1, $.macros.myEnergyNotFull);
+      :gainEnergy(1, $.macros.myEnergyNotFull);
     };
   };
 };
@@ -1368,10 +1368,7 @@ define card {
       when :( :e.caller.isMine() && :e.type === Reaction.Burning );
       listenTo all;
       usage perRound, 1;
-      :characterStatus(
-        CrownlessCrownInEffect,
-        "opp characters with health > 0 limit 1",
-      );
+      :characterStatus(CrownlessCrownInEffect, $.macros.oppActivePrioritized);
     };
   };
 };
@@ -1389,7 +1386,7 @@ define card {
   artifact {
     on useSkill {
       usage perRound, 1;
-      :characterStatus(BondOfLife, "my active or opp active");
+      :characterStatus(BondOfLife, $.my.active.union($.opp.active));
     };
   };
 };
@@ -1422,7 +1419,7 @@ define card {
     on useSkill {
       when :( :e.isSkillType("burst") && :query($.my.next) );
       usage perRound, 1;
-      :characterStatus(RoyalMasqueInEffect, "my next");
+      :characterStatus(RoyalMasqueInEffect, $.my.next);
     };
   };
 };
@@ -1478,7 +1475,7 @@ define card {
   artifact {
     on useSkill {
       usage perRound, 1;
-      :characterStatus(BondOfLife, "my characters");
+      :characterStatus(BondOfLife, $.my.character);
       :combatStatus(HarmoniousSymphonyPreludeInEffect);
     };
   };
@@ -1533,7 +1530,7 @@ define card {
   cost DiceType.Void, 3;
   artifact {
     on enter {
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
     on useSkill {
       when :( :e.isSkillType("burst") );

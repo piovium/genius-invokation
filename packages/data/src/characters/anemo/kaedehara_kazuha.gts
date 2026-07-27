@@ -341,7 +341,7 @@ define skill {
   skillType passive {
     on useSkill {
       when :( :e.skill.definition.id === Chihayaburu );
-      :switchActive("my next");
+      :switchActive($.my.next);
     };
   };
 };

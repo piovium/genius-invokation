@@ -35,7 +35,7 @@ define skill {
   id 23046 as SearingBlast;
   skillType burst;
   prepared;
-  :damage(DamageType.Piercing, 2, "opp standby");
+  :damage(DamageType.Piercing, 2, $.opp.standby);
   const value =
     :query(
       $.typeStatus.def(ArmoredCrabCarapace).at($.id(:self.id)),
@@ -110,7 +110,7 @@ define skill {
   } else {
     :damage(DamageType.Pyro, 1);
   }
-  :characterStatus(ArmoredCrabCarapace, "@self", {
+  :characterStatus(ArmoredCrabCarapace, :self, {
     overrideVariables: {
       shield: 2,
     },
@@ -128,7 +128,7 @@ define skill {
   skillType burst;
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
-  :characterStatus(AccruingPower, "@self");
+  :characterStatus(AccruingPower, :self);
 };
 
 /**
@@ -142,7 +142,7 @@ define skill {
   id 23044 as ImperialPanoply;
   skillType passive {
     on battleBegin {
-      :characterStatus(ArmoredCrabCarapace, "@master", {
+      :characterStatus(ArmoredCrabCarapace, :self, {
         overrideVariables: {
           shield: 5,
         },
@@ -170,7 +170,7 @@ define skill {
         shield.dispose();
       }
       if (shieldValue > 0) {
-        :characterStatus(ArmoredCrabCarapace, "@master", {
+        :characterStatus(ArmoredCrabCarapace, :self, {
           overrideVariables: {
             shield: shieldValue,
           },
@@ -226,7 +226,7 @@ define card {
   cost DiceType.Pyro, 1;
   talent EmperorOfFireAndIron, none {
     on enter {
-      :apply(DamageType.Pyro, "@master");
+      :apply(DamageType.Pyro, :self.master);
     };
     on dispose {
       when :{
@@ -239,7 +239,7 @@ define card {
       };
       listenTo samePlayer;
       usage perRound, 1;
-      :characterStatus(ArmoredCrabCarapace, "@master", {
+      :characterStatus(ArmoredCrabCarapace, :self.master, {
         overrideVariables: {
           shield: 2,
         },

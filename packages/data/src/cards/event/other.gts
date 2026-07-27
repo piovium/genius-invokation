@@ -117,7 +117,7 @@ define combatStatus {
   on useSkill {
     usage 2;
     usage perRound, 1;
-    :damage(DamageType.Cryo, 1, "my active");
+    :damage(DamageType.Cryo, 1, $.my.active);
   };
 };
 
@@ -133,7 +133,7 @@ define combatStatus {
   on useSkill {
     usage 2;
     usage perRound, 1;
-    :damage(DamageType.Hydro, 1, "my active");
+    :damage(DamageType.Hydro, 1, $.my.active);
   };
 };
 
@@ -149,7 +149,7 @@ define combatStatus {
   on useSkill {
     usage 2;
     usage perRound, 1;
-    :damage(DamageType.Pyro, 1, "my active");
+    :damage(DamageType.Pyro, 1, $.my.active);
   };
 };
 
@@ -165,7 +165,7 @@ define combatStatus {
   on useSkill {
     usage 2;
     usage perRound, 1;
-    :damage(DamageType.Electro, 1, "my active");
+    :damage(DamageType.Electro, 1, $.my.active);
   };
 };
 
@@ -181,7 +181,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Cryo, 1;
   tags resonance;
-  :characterStatus(ElementalResonanceShatteringIceInEffect, "my active");
+  :characterStatus(ElementalResonanceShatteringIceInEffect, $.my.active);
 };
 
 /**
@@ -212,8 +212,8 @@ define card {
   cost DiceType.Hydro, 1;
   tags resonance;
   filter :( :query($.my.character.var("health", "<", "maxHealth")) );
-  :heal(2, "my active");
-  :heal(1, "my standby");
+  :heal(2, $.my.active);
+  :heal(1, $.my.standby);
 };
 
 /**
@@ -228,7 +228,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Pyro, 1;
   tags resonance;
-  :characterStatus(ElementalResonanceFerventFlamesInEffect, "my active");
+  :characterStatus(ElementalResonanceFerventFlamesInEffect, $.my.active);
 };
 
 /**
@@ -260,8 +260,8 @@ define card {
   cost DiceType.Electro, 1;
   tags resonance;
   filter :( :query($.my.character.var("energy", "<", "maxEnergy")) );
-  :gainEnergy(1, "my active");
-  :gainEnergy(1, "my standby character with energy < maxEnergy limit 1");
+  :gainEnergy(1, $.my.active);
+  :gainEnergy(1, $.my.standby.var("energy", "<", "maxEnergy").limit(1));
 };
 
 /**
@@ -392,13 +392,13 @@ define card {
       $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
     )
   ) {
-    :damage(DamageType.Hydro, 1, "opp active");
+    :damage(DamageType.Hydro, 1, $.opp.active);
   }
   if (:query($.my.combatStatus.def(CatalyzingField))) {
-    :damage(DamageType.Electro, 1, "opp active");
+    :damage(DamageType.Electro, 1, $.opp.active);
   }
   if (:query($.my.summon.def(BurningFlame))) {
-    :damage(DamageType.Pyro, 1, "opp active");
+    :damage(DamageType.Pyro, 1, $.opp.active);
   }
 };
 
@@ -533,7 +533,7 @@ define combatStatus {
   id 303181 as WindAndFreedomInEffect;
   oneDuration;
   on useSkill {
-    :switchActive("my next");
+    :switchActive($.my.next);
   };
 };
 
@@ -634,7 +634,7 @@ define card {
       :heal(expectHealth - currentHealth, chs[i], { kind: "distribution" });
     }
   }
-  :heal(1, "all my characters");
+  :heal(1, $.my.character);
 };
 
 /**
@@ -667,7 +667,7 @@ define card {
   since "v5.7.0";
   cost DiceType.Aligned, 1;
   addTarget $.my.character;
-  :characterStatus(OdeOfResurrection, "@targets.0");
+  :characterStatus(OdeOfResurrection, :e.targets[0]);
 };
 
 /**
@@ -812,7 +812,7 @@ define card {
       !:query($.my.combatStatus.def(IHaventLostYetCooldown))
   );
   :generateDice(DiceType.Omni, 1);
-  :gainEnergy(1, "my active");
+  :gainEnergy(1, $.my.active);
   :combatStatus(IHaventLostYetCooldown);
 };
 
@@ -867,7 +867,7 @@ define combatStatus {
   id 303207 as private WhenTheCraneReturnedInEffect;
   since "v3.3.0";
   once useSkill {
-    :switchActive("my next");
+    :switchActive($.my.next);
   };
 };
 
@@ -1007,7 +1007,7 @@ define card {
   id 332014 as GuardiansOath;
   since "v3.3.0";
   cost DiceType.Aligned, 4;
-  :dispose("all summons");
+  :dispose($.summon);
 };
 
 /**
@@ -1070,7 +1070,7 @@ define card {
   cost DiceType.Aligned, 3;
   tags action;
   addTarget $.my.character.exclude($.has($.typeStatus.tag("disableSkill")));
-  :switchActive("@targets.0");
+  :switchActive(:e.targets[0]);
   :useSkill("normal");
 };
 
@@ -1085,7 +1085,7 @@ define card {
   id 332018 as HeavyStrike;
   since "v3.7.0";
   cost DiceType.Aligned, 1;
-  :characterStatus(HeavyStrikeInEffect, "my active");
+  :characterStatus(HeavyStrikeInEffect, $.my.active);
 };
 
 /**
@@ -1361,7 +1361,7 @@ define card {
   id 332027 as FlickeringFourleafSigil;
   since "v4.3.0";
   addTarget $.my.character;
-  :characterStatus(FourLeafSigil, "@targets.0");
+  :characterStatus(FourLeafSigil, :e.targets[0]);
 };
 
 /**
@@ -1374,7 +1374,7 @@ define status {
   id 303227 as private FourLeafSigil;
   since "v4.3.0";
   on endPhase {
-    :switchActive("@master");
+    :switchActive(:self.master);
   };
 };
 
@@ -1388,7 +1388,7 @@ define card {
   id 332028 as MachineAssemblyLine;
   since "v4.4.0";
   cost DiceType.Aligned, 1;
-  :damage(DamageType.Physical, 1, "my active");
+  :damage(DamageType.Physical, 1, $.my.active);
   :drawCards(1, { withTag: "artifact" });
 };
 
@@ -1403,7 +1403,7 @@ define card {
   id 332029 as SunyataFlower;
   since "v4.4.0";
   addTarget $.my.support;
-  :dispose("@targets.0");
+  :dispose(:e.targets[0]);
   const candidates = :allCardDefinitions("support");
   const card0 = :random(candidates);
   const card1 = :random(candidates);
@@ -1510,8 +1510,8 @@ define card {
   undiscoverable;
   :generateDice("randomElement", 1);
   if (!:query($.my.active.has($.typeStatus.def(UnderseaTreasureOnCD)))) {
-    :heal(1, "my active");
-    :characterStatus(UnderseaTreasureOnCD, "my active");
+    :heal(1, $.my.active);
+    :characterStatus(UnderseaTreasureOnCD, $.my.active);
   }
 };
 
@@ -1584,7 +1584,7 @@ define card {
   tags abyss;
   disableTuning;
   filter :( !:query($.my.combatStatus.def(ForbiddenKnowledgeCoolDown)) );
-  :damage(DamageType.Piercing, 1, "my active");
+  :damage(DamageType.Piercing, 1, $.my.active);
   :drawCards(1);
   :combatStatus(ForbiddenKnowledgeCoolDown);
 };
@@ -1982,7 +1982,7 @@ define card {
 define card {
   id 332037 as Tada;
   since "v4.8.0";
-  :damage(DamageType.Physical, 1, "my active");
+  :damage(DamageType.Physical, 1, $.my.active);
   :combatStatus(TadaInEffect);
 };
 
@@ -2257,7 +2257,7 @@ define status {
     );
     listenTo samePlayer;
     usage 2;
-    :characterStatus(FruitsOfTrainingInEffect02, "@master");
+    :characterStatus(FruitsOfTrainingInEffect02, :self.master);
   };
 };
 
@@ -2271,7 +2271,7 @@ define card {
   id 332048 as FruitsOfTraining;
   since "v5.7.0";
   addTarget $.my.character;
-  :characterStatus(FruitsOfTrainingInEffect01, "@targets.0");
+  :characterStatus(FruitsOfTrainingInEffect01, :e.targets[0]);
 };
 
 /**
@@ -2350,10 +2350,7 @@ define summon {
   hint DamageType.Heal, ((c, e) => e.variables.effect);
   on endPhase {
     usage 1;
-    :heal(
-      :getVariable("effect"),
-      "my characters order by health - maxHealth limit 1",
-    );
+    :heal(:getVariable("effect"), $.macros.myMostInjured);
   };
 };
 
@@ -2599,7 +2596,7 @@ define card {
   :e.targets[0].dispose();
   :generateDice("randomElement", Math.min(usage, 2));
   if (usage >= 3) {
-    :heal(2, "my characters order by health - maxHealth limit 1");
+    :heal(2, $.macros.myMostInjured);
   }
 };
 
@@ -2634,7 +2631,7 @@ define card {
   cost DiceType.Aligned, 1;
   const exp = :query($.my.support.tag("adventureSpot"))?.variables.exp ?? 0;
   if (exp >= 4) {
-    :damage(DamageType.Physical, 1, "my active");
+    :damage(DamageType.Physical, 1, $.my.active);
     :adventure();
   }
   :adventure();
@@ -2682,7 +2679,7 @@ define card {
   undiscoverable;
   cost DiceType.Aligned, 1;
   addTarget $.my.character;
-  :heal(2, "@targets.0");
+  :heal(2, :e.targets[0]);
   :generateDice("randomElement", 2);
 };
 
@@ -2713,8 +2710,8 @@ define card {
   undiscoverable;
   cost DiceType.Void, 4;
   addTarget $.my.character;
-  :heal(12, "@targets.0");
-  :characterStatus(ReforgeTheHolyBladeInEffect, "@targets.0");
+  :heal(12, :e.targets[0]);
+  :characterStatus(ReforgeTheHolyBladeInEffect, :e.targets[0]);
 };
 
 /**
@@ -2734,7 +2731,7 @@ define card {
   const weapons = characters.map((ch) => ch.weaponTag());
   const nations = characters.flatMap((ch) => ch.nationTags());
   if (new Set(elements).size < characters.length) {
-    :heal(1, "my characters order by health - maxHealth limit 1");
+    :heal(1, $.macros.myMostInjured);
   }
   if (new Set(weapons).size < characters.length) {
     :drawCards(1);

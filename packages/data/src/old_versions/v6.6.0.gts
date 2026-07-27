@@ -52,11 +52,7 @@ define card {
     on dealReaction {
       when :( :e.type === Reaction.Superconduct );
       usage perRound, 3;
-      :damage(
-        DamageType.Piercing,
-        2,
-        "opp characters order by 0 - health limit 1",
-      );
+      :damage(DamageType.Piercing, 2, $.macros.oppMaxHealth);
     };
   };
 };

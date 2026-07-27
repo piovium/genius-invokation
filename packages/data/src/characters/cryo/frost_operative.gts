@@ -39,7 +39,7 @@ define status {
     :damage(
       DamageType.Piercing,
       1,
-      `opp characters has status with definition id ${BondOfLife}`,
+      $.opp.character.has($.typeStatus.def(BondOfLife)),
     );
   };
 };
@@ -83,7 +83,7 @@ define skill {
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 5);
-  :characterStatus(OnslaughtStance, "@self");
+  :characterStatus(OnslaughtStance, :self);
 };
 
 /**
@@ -103,7 +103,7 @@ define skill {
       const usage = Math.min(:getVariable("damageValue") - 2, 5);
       :setVariable("damageValue", 0);
       if (usage > 0) {
-        :characterStatus(BondOfLife, "opp active", {
+        :characterStatus(BondOfLife, $.opp.active, {
           overrideVariables: { usage },
         });
         if (:self.hasEquipment(RimeflowRapier)) {

@@ -88,7 +88,7 @@ define skill {
   noEnergy;
   :damage(DamageType.Physical, 2);
   if (!:query($.my.summon.def(LightfallSword))) {
-    :gainEnergy(1, "@self");
+    :gainEnergy(1, :self);
   }
 };
 
@@ -106,10 +106,10 @@ define skill {
   const hasHeart = :self.hasStatus(Grimheart);
   :damage(DamageType.Cryo, 2);
   if (!hasHeart) {
-    :characterStatus(Grimheart, "@self");
+    :characterStatus(Grimheart, :self);
   }
   if (!:query($.my.summon.def(LightfallSword))) {
-    :gainEnergy(1, "@self");
+    :gainEnergy(1, :self);
   }
 };
 

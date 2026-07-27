@@ -44,10 +44,10 @@ define skill {
 
 | 用途             | GTS 调用示例                                                                                                        |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------- |
-| 伤害、治疗、附着 | `:damage(DamageType.Pyro, 2);`、`:heal(2, "my active");`、`:apply(DamageType.Hydro, "opp active");`                 |
-| 切人、充能       | `:switchActive(:e.targets[0]);`、`:gainEnergy(1, "@self");`                                                         |
-| 创建实体         | `:summon(Summon);`、`:characterStatus(Status, "@self");`、`:combatStatus(Status, "opp");`                           |
-| 变量与可用次数   | `:addVariable("usage", 1);`、`:consumeUsage(1);`、`:consumeNightsoul("@master");`                                   |
+| 伤害、治疗、附着 | `:damage(DamageType.Pyro, 2);`、`:heal(2, $.my.active);`、`:apply(DamageType.Hydro, "opp active");`                 |
+| 切人、充能       | `:switchActive(:e.targets[0]);`、`:gainEnergy(1, :self);`                                                         |
+| 创建实体         | `:summon(Summon);`、`:characterStatus(Status, :self);`、`:combatStatus(Status, "opp");`                           |
+| 变量与可用次数   | `:addVariable("usage", 1);`、`:consumeUsage(1);`、`:consumeNightsoul(:self.master);`                                   |
 | 牌与骰子         | `:drawCards(2);`、`:createHandCard(Card);`、`:createPileCards(Card, 1, "top");`、`:generateDice(DiceType.Omni, 1);` |
 | 移除或转换       | `:dispose();`、`:disposeCard(card);`、`:transformDefinition("@self", NewDefinition);`                               |
 | 请求后续操作     | `:useSkill(Skill);`、`:rerollDice(1);`、`:switchCards();`、`:selectAndSummon([A, B]);`                              |

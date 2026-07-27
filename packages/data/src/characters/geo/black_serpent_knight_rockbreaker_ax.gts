@@ -133,8 +133,8 @@ define skill {
   skillType burst;
   cost DiceType.Geo, 3;
   cost DiceType.Energy, 2;
-  :apply(DamageType.Geo, "@self");
-  :characterStatus(GreataxeStrikeStatus, "@self");
+  :apply(DamageType.Geo, :self);
+  :characterStatus(GreataxeStrikeStatus, :self);
 };
 
 /**
@@ -164,7 +164,7 @@ define skill {
     on useSkill {
       when :( :getVariable("shouldAttachCatalysisOfStone") );
       listenTo samePlayer;
-      :characterStatus(MightOfStone, "@self");
+      :characterStatus(MightOfStone, :self);
       :setVariable("shouldAttachCatalysisOfStone", 0);
     };
   };
@@ -217,10 +217,10 @@ define card {
   cost DiceType.Geo, 1;
   talent BlackSerpentKnightRockbreakerAx {
     on enter {
-      :apply(DamageType.Geo, "@master");
+      :apply(DamageType.Geo, :self.master);
     };
     on actionPhase {
-      :apply(DamageType.Geo, "@master");
+      :apply(DamageType.Geo, :self.master);
     };
   };
 };

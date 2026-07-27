@@ -65,7 +65,7 @@ define card {
         $.my.character.includesDefeated.tag("liyue"),
       ).length;
       if (liyueCount > 0) {
-        :characterStatus(LithicGuard, "@master", {
+        :characterStatus(LithicGuard, :self.master, {
           overrideVariables: {
             shield: Math.min(liyueCount, 3),
           },
@@ -154,11 +154,11 @@ define card {
     };
     on enter {
       when :( :self.master.energy === 0 );
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
     on actionPhase {
       when :( :self.master.energy === 0 );
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
   };
 };
@@ -195,7 +195,7 @@ define card {
       :e.increaseDamage(1);
     };
     on enter {
-      :characterStatus(MoonpiercerStatus, "@master");
+      :characterStatus(MoonpiercerStatus, :self.master);
     };
   };
 };
@@ -250,7 +250,7 @@ define card {
       :addVariable("justice", 1);
       if (:getVariable("justice") >= 4) {
         :addVariable("justice", -4);
-        :gainEnergy(1, "@master");
+        :gainEnergy(1, :self.master);
       }
     };
   };

@@ -45,19 +45,19 @@ define status {
       !:self.master.hasStatus(GrapplePrepare)
     ) {
       :self.master.addStatus(GrapplePrepare);
-      :consumeNightsoul("@master", 2);
+      :consumeNightsoul(:self.master, 2);
     }
   };
   on damaged {
     when :( :e.getReaction() === Reaction.Burning && !:e.target.isMine() );
     listenTo all;
-    :gainNightsoul("@master");
+    :gainNightsoul(:self.master);
     :callSnippet();
   };
   on beforeTechnique {
     when :( :e.techniqueCaller.id !== :self.master.id );
     listenTo samePlayer;
-    :gainNightsoul("@master");
+    :gainNightsoul(:self.master);
     :callSnippet();
   };
   on beforeAction {
@@ -102,7 +102,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Dendro, 1);
-    :damage(DamageType.Dendro, 1, "opp next");
+    :damage(DamageType.Dendro, 1, $.opp.next);
   };
 };
 
@@ -117,7 +117,11 @@ define status {
   since "v5.4.0";
   once beforeAction {
     when :( :self.master.isActive() );
-    :damage(DamageType.Dendro, 3, "recent opp from @master");
+    :damage(
+      DamageType.Dendro,
+      3,
+      $.recentOppFrom($.character.id(:self.master.id)),
+    );
   };
 };
 
@@ -149,7 +153,7 @@ define skill {
   :characterStatus(GrappleLink);
   :characterStatus(NightsoulsBlessing);
   :damage(DamageType.Dendro, 1);
-  :swapCharacterPosition("@self", "@targets.0");
+  :swapCharacterPosition(:self, :e.targets[0]);
   const talent = :self.hasEquipment(NightRealmsGiftRepaidInFull);
   if (
     talent &&

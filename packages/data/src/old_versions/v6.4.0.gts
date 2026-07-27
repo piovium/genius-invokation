@@ -151,7 +151,7 @@ define summon {
     };
     :characterStatus(
       SuperlativeSuperstrength,
-      "my characters with definition id 1605",
+      $.my.character.def(1605 as number),
     );
   };
 };
@@ -203,7 +203,7 @@ define card {
         name "stage2";
         visible false;
       };
-      :characterStatus(BattlePlan, "my active", {
+      :characterStatus(BattlePlan, $.my.active, {
         overrideVariables: { usage: 2 },
       });
     };

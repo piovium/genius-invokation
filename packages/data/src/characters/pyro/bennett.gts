@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -39,7 +40,7 @@ define combatStatus {
   };
   on useSkill {
     when :( :e.skillCaller.variables.health <= 6 );
-    :heal(2, "@event.skillCaller");
+    :heal(2, :e.skillCaller.cast<"character">());
   };
 };
 
@@ -60,7 +61,7 @@ define combatStatus {
   };
   on useSkill {
     when :( :e.skillCaller.variables.health <= 6 );
-    :heal(2, "@event.skillCaller");
+    :heal(2, :e.skillCaller.cast<"character">());
   };
 };
 

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -41,7 +42,7 @@ define status {
     const value = :e.expectedValue;
     :e.cancel();
     if (value > 0) {
-      :characterStatus(BondOfLife, "@master", {
+      :characterStatus(BondOfLife, :self.master, {
         overrideVariables: {
           usage: value,
         },
@@ -53,7 +54,7 @@ define status {
     if (:e.type === DamageType.Physical) {
       :e.changeDamageType(DamageType.Electro);
     }
-    :characterStatus(BondOfLife, "@master", {
+    :characterStatus(BondOfLife, :self.master, {
       overrideVariables: {
         usage: 2,
       },
@@ -107,7 +108,7 @@ define skill {
   id 14122 as HuntersVigil;
   skillType elemental;
   cost DiceType.Electro, 2;
-  :characterStatus(NightVigil, "@self");
+  :characterStatus(NightVigil, :self);
   const st = :self.hasStatus(BondOfLife);
   let value = 0;
   if (st) {
@@ -117,7 +118,7 @@ define skill {
   if (value > 0) {
     :damage(DamageType.Electro, value);
   }
-  :heal(value, "@self");
+  :heal(value, :self);
 };
 
 /**
@@ -132,7 +133,7 @@ define skill {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 3);
-  :characterStatus(BondOfLife, "@self", {
+  :characterStatus(BondOfLife, :self, {
     overrideVariables: {
       usage: 4,
     },
@@ -174,7 +175,7 @@ define card {
     on useSkill {
       when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Electro)) );
       listenTo samePlayer;
-      :characterStatus(DarkshatteringFlameInEffect, "@master");
+      :characterStatus(DarkshatteringFlameInEffect, :self.master);
     };
   };
 };

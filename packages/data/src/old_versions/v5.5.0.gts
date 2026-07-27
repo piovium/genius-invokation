@@ -29,13 +29,13 @@ define card {
     )
   );
   if (:query($.my.combatStatus.def(DendroCore))) {
-    :damage(DamageType.Hydro, 1, "opp active");
+    :damage(DamageType.Hydro, 1, $.opp.active);
   }
   if (:query($.my.combatStatus.def(CatalyzingField))) {
-    :damage(DamageType.Electro, 1, "opp active");
+    :damage(DamageType.Electro, 1, $.opp.active);
   }
   if (:query($.my.summon.def(BurningFlame))) {
-    :damage(DamageType.Pyro, 1, "opp active");
+    :damage(DamageType.Pyro, 1, $.opp.active);
   }
 };
 
@@ -51,7 +51,7 @@ define status {
   until "v5.5.0";
   on endPhase {
     usage 1;
-    :damage(DamageType.Hydro, 3, "@master");
+    :damage(DamageType.Hydro, 3, :self.master);
   };
 };
 
@@ -68,5 +68,5 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
-  :characterStatus(LingeringAeon, "opp active");
+  :characterStatus(LingeringAeon, $.opp.active);
 };

@@ -310,7 +310,7 @@ define card {
     on useSkill {
       when :( :e.skill.definition.id === Frostgnaw );
       usage perRound, 1;
-      :heal(2, "@master");
+      :heal(2, :self.master);
     };
   };
 };
@@ -345,7 +345,7 @@ define skill {
   skillType elemental;
   cost DiceType.Geo, 3;
   :damage(DamageType.Geo, 1);
-  :characterStatus(GoldenCorrosion, "opp active", {
+  :characterStatus(GoldenCorrosion, $.opp.active, {
     overrideVariables: {
       usage: 2,
     },

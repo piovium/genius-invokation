@@ -294,7 +294,7 @@ define card {
   id 332028 as private MachineAssemblyLine;
   until "v6.2.0";
   addTarget $.my.character;
-  :characterStatus(MachineAssemblyLineInEffect, "@targets.0");
+  :characterStatus(MachineAssemblyLineInEffect, :e.targets[0]);
 };
 
 /**
@@ -367,7 +367,7 @@ define card {
         name "stage3";
         visible false;
       };
-      :apply(DamageType.Hydro, "all my characters");
+      :apply(DamageType.Hydro, $.my.character);
       const targetCh = :query($.macros.myMostInjured);
       if (!targetCh) {
         return;

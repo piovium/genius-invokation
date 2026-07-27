@@ -47,7 +47,7 @@ define skill {
   skillType elemental;
   prepared;
   if (:query($.opp.prev)) {
-    :damage(DamageType.Anemo, 2, "opp prev");
+    :damage(DamageType.Anemo, 2, $.opp.prev);
   } else {
     :damage(DamageType.Anemo, 2);
   }
@@ -76,7 +76,7 @@ define skill {
   skillType elemental;
   prepared;
   if (:query($.opp.next)) {
-    :damage(DamageType.Anemo, 1, "opp next");
+    :damage(DamageType.Anemo, 1, $.opp.next);
   } else {
     :damage(DamageType.Anemo, 1);
   }
@@ -150,7 +150,7 @@ define skill {
   skillType elemental;
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 2);
-  :characterStatus(TotalCollapse, "opp active");
+  :characterStatus(TotalCollapse, $.opp.active);
 };
 
 /**
@@ -179,7 +179,7 @@ define skill {
   cost DiceType.Anemo, 4;
   cost DiceType.Energy, 2;
   :damage(DamageType.Anemo, 5);
-  :characterStatus(TotalCollapse, "opp standby");
+  :characterStatus(TotalCollapse, $.opp.standby);
 };
 
 /**
@@ -226,7 +226,7 @@ define card {
       );
       listenTo all;
       usage perRound, 1;
-      :characterStatus(TotalCollapse, "opp next");
+      :characterStatus(TotalCollapse, $.opp.next);
     };
   };
 };

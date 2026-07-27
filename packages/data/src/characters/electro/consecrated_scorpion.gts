@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -36,7 +37,7 @@ define combatStatus {
     usage 0 {
       append 3;
     };
-    :damage(DamageType.Electro, 2, "my active");
+    :damage(DamageType.Electro, 2, $.my.active);
   };
 };
 

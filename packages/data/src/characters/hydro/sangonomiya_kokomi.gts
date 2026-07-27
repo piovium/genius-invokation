@@ -47,7 +47,7 @@ define summon {
     } else {
       :damage(DamageType.Hydro, 1);
     }
-    :heal(1, "my active");
+    :heal(1, $.my.active);
   };
 };
 
@@ -68,7 +68,7 @@ define status {
   };
   on useSkill {
     when :( :e.isSkillType("normal") );
-    :heal(1, "all my characters");
+    :heal(1, $.my.character);
   };
 };
 
@@ -96,7 +96,7 @@ define skill {
   id 12052 as KuragesOath;
   skillType elemental;
   cost DiceType.Hydro, 3;
-  :apply(DamageType.Hydro, "@self");
+  :apply(DamageType.Hydro, :self);
   :summon(BakeKurage);
 };
 
@@ -112,7 +112,7 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
-  :heal(1, "all my characters");
+  :heal(1, $.my.character);
   :characterStatus(CeremonialGarment);
   if (:self.hasEquipment(TamakushiCasket)) {
     let summon = :query($.my.summon.def(BakeKurage));

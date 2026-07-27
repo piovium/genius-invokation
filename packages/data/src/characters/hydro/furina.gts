@@ -325,7 +325,7 @@ define card {
     };
     on useSkill {
       when :( :e.isSkillType("elemental") );
-      :characterStatus(CenterOfAttention, "@master");
+      :characterStatus(CenterOfAttention, :self.master);
     };
   };
 };

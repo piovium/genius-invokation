@@ -43,7 +43,7 @@ define summon {
     :damage(DamageType.Geo, 1);
   };
   on enter {
-    :characterStatus(GeoInfusion, `my character with definition id ${Chiori}`);
+    :characterStatus(GeoInfusion, $.my.character.def(Chiori));
   };
   on selfDispose {
     :query($.my.typeStatus.def(GeoInfusion))?.dispose();
@@ -68,7 +68,7 @@ define summon {
   };
   on useSkill {
     usage perRound, 1;
-    :switchActive("my next");
+    :switchActive($.my.next);
   };
 };
 

@@ -69,7 +69,7 @@ define status {
   id 112083 as LingeringAeon;
   on endPhase {
     usage 1;
-    :damage(DamageType.Hydro, 2, "@master");
+    :damage(DamageType.Hydro, 2, :self.master);
   };
 };
 
@@ -138,7 +138,7 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
-  :characterStatus(LingeringAeon, "opp active or opp next");
+  :characterStatus(LingeringAeon, $.opp.active.union($.opp.next));
 };
 
 /**

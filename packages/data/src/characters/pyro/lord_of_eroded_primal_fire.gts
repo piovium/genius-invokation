@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -55,7 +56,7 @@ define status {
   on disposeCard {
     :addVariable("cardCount", 1);
     if (:getVariable("cardCount") % 6 === 0) {
-      :characterStatus(Resentment, "@master");
+      :characterStatus(Resentment, :self.master);
     }
   };
 };
@@ -103,7 +104,7 @@ define skill {
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
   const layer = :self.hasStatus(Resentment)?.getVariable("layer") ?? 0;
-  :damage(DamageType.Piercing, layer + 1, "opp standby");
+  :damage(DamageType.Piercing, layer + 1, $.opp.standby);
   :damage(DamageType.Pyro, 1);
   :abortPreview();
   for (const player of [:player, :oppPlayer]) {
@@ -111,7 +112,7 @@ define skill {
       :disposeCard(card);
     }
   }
-  :characterStatus(Resentment, "@self");
+  :characterStatus(Resentment, :self);
 };
 
 /**
@@ -198,8 +199,8 @@ define card {
       };
       listenTo all;
       usage perRound, 1;
-      :gainEnergy(1, "@master");
-      :characterStatus(UndyingFuryInEffect, "@master");
+      :gainEnergy(1, :self.master);
+      :characterStatus(UndyingFuryInEffect, :self.master);
     };
   };
 };

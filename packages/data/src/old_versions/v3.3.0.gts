@@ -66,7 +66,7 @@ define skill {
   :damage(DamageType.Anemo, 1);
   :summon(ShadowswordLoneGale);
   if (:self.hasEquipment(TranscendentAutomaton)) {
-    :switchActive("my next");
+    :switchActive($.my.next);
   }
 };
 
@@ -84,7 +84,7 @@ define skill {
   :damage(DamageType.Cryo, 1);
   :summon(ShadowswordGallopingFrost);
   if (:self.hasEquipment(TranscendentAutomaton)) {
-    :switchActive("my prev");
+    :switchActive($.my.prev);
   }
 };
 

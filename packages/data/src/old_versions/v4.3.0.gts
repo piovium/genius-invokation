@@ -1,4 +1,4 @@
-import { card, DiceType, status } from "@gi-tcg/core/builder";
+import { $, card, DiceType, status } from "@gi-tcg/core/builder";
 import {
   StrifefulLightning,
   ThunderManifestation,
@@ -39,7 +39,7 @@ define card {
       :drawCards(1);
     };
     on endPhase {
-      :heal(1, "@master");
+      :heal(1, :self.master);
     };
   };
 };

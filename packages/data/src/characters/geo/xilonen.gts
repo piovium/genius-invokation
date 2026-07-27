@@ -205,7 +205,7 @@ define card {
     skill {
       id 1161121;
       cost DiceType.Void, 2;
-      :consumeNightsoul("@master");
+      :consumeNightsoul(:self.master);
       :drawCards(3);
     };
   };
@@ -224,7 +224,7 @@ define skill {
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
   if (:self.hasStatus(NightsoulsBlessing)) {
-    :characterStatus(NightsoulsBlessing, "@self", {
+    :characterStatus(NightsoulsBlessing, :self, {
       overrideVariables: {
         nightsoul: 1,
       },
@@ -245,7 +245,7 @@ define skill {
   cost DiceType.Geo, 2;
   filter :( !:self.hasStatus(NightsoulsBlessing) );
   :equip(CombatBladingGear);
-  :gainNightsoul("@self", 1);
+  :gainNightsoul(:self, 1);
 };
 
 /**
@@ -272,7 +272,7 @@ define skill {
       }
     }
   }
-  :heal(healCount, `my characters order by health - maxHealth limit 1`);
+  :heal(healCount, $.macros.myMostInjured);
   :drawCards(drawCount);
 };
 
@@ -319,7 +319,7 @@ define skill {
       }
       for (const [element, layer] of Object.entries(sampleCount)) {
         if (layer > 0) {
-          :characterStatus(sampleMap[Number(element) as SampleType], "@self", {
+          :characterStatus(sampleMap[Number(element) as SampleType], :self, {
             overrideVariables: { layer },
           });
         }
@@ -333,7 +333,7 @@ define skill {
             :combatStatus(dmgBonusMap[Number(type) as SampleType], "opp");
           }
         }
-        :consumeNightsoul("@self", 2);
+        :consumeNightsoul(:self, 2);
       }
     };
   };
@@ -379,7 +379,7 @@ define card {
     on switchActive {
       when :( :e.switchInfo.to.hasNightsoulsBlessing() );
       usage perRound, 2;
-      :gainNightsoul("@event.switchTo", 1);
+      :gainNightsoul(:e.switchInfo.to, 1);
     };
   };
 };

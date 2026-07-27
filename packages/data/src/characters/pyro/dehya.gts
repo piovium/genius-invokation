@@ -166,7 +166,7 @@ define skill {
       if (protection?.getVariable("usage") === 0) {
         protection.dispose();
         if (:self.health >= 7) {
-          :damage(DamageType.Piercing, 1, "@self");
+          :damage(DamageType.Piercing, 1, :self);
         }
       }
     };
@@ -211,7 +211,7 @@ define card {
     };
     on endPhase {
       when :( :self.master.health <= 6 );
-      :heal(2, "@master");
+      :heal(2, :self.master);
     };
   };
 };

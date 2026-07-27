@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -105,7 +106,7 @@ define status {
       :combatStatus(CurseOfTheUndercurrent, "opp");
     }
     :self.master.setVariable("wateryRebirthTriggered", 1);
-    :characterStatus(WateryRebirthHoned, "@master");
+    :characterStatus(WateryRebirthHoned, :self.master);
     :dispose();
   };
 };
@@ -151,7 +152,7 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 1);
-  :characterStatus(RipplingBladesStatus, "@self");
+  :characterStatus(RipplingBladesStatus, :self);
 };
 
 /**

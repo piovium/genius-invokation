@@ -50,7 +50,7 @@ define status {
   since "v6.1.0";
   on beforeAction {
     usage 1;
-    :damage(DamageType.Cryo, 2, "@master");
+    :damage(DamageType.Cryo, 2, :self.master);
   };
 };
 
@@ -66,7 +66,7 @@ define status {
   since "v6.1.0";
   on beforeAction {
     usage 1;
-    :damage(DamageType.Hydro, 2, "@master");
+    :damage(DamageType.Hydro, 2, :self.master);
   };
 };
 
@@ -82,7 +82,7 @@ define status {
   since "v6.1.0";
   on beforeAction {
     usage 1;
-    :damage(DamageType.Pyro, 2, "@master");
+    :damage(DamageType.Pyro, 2, :self.master);
   };
 };
 
@@ -98,7 +98,7 @@ define status {
   since "v6.1.0";
   on beforeAction {
     usage 1;
-    :damage(DamageType.Electro, 2, "@master");
+    :damage(DamageType.Electro, 2, :self.master);
   };
 };
 
@@ -120,7 +120,7 @@ define card {
     skill {
       id 1151521;
       cost DiceType.Void, 2;
-      :consumeNightsoul("@master", 1);
+      :consumeNightsoul(:self.master, 1);
       :damage(DamageType.Anemo, 1, $.opp.prev.orElse($.opp.active));
       :heal(2, $.macros.myMostInjured);
     };
@@ -154,8 +154,8 @@ define skill {
   cost DiceType.Anemo, 2;
   filter :( !:self.hasStatus(NightsoulsBlessing) );
   :damage(DamageType.Anemo, 1);
-  :gainNightsoul("@self", 2);
-  :equip(Cacucu, "@self");
+  :gainNightsoul(:self, 2);
+  :equip(Cacucu, :self);
 };
 
 /**
@@ -171,7 +171,7 @@ define skill {
   cost DiceType.Energy, 2;
   const aura = :query($.opp.active)?.aura;
   :damage(DamageType.Anemo, 2);
-  :heal(2, `my characters order by health - maxHealth limit 1`);
+  :heal(2, $.macros.myMostInjured);
   let mark: StatusHandle | null = null;
   switch (aura) {
     case Aura.Cryo:
@@ -188,7 +188,7 @@ define skill {
       break;
   }
   if (mark) {
-    :characterStatus(mark, "opp active");
+    :characterStatus(mark, $.opp.active);
   }
 };
 
@@ -224,7 +224,7 @@ define card {
   cost DiceType.Anemo, 1;
   talent Ifa, none {
     on enter {
-      :heal(1, "my characters order by health - maxHealth limit 1");
+      :heal(1, $.macros.myMostInjured);
     };
     on dealReaction {
       when :(
@@ -238,7 +238,7 @@ define card {
       );
       listenTo samePlayer;
       usage perRound, 2;
-      :heal(1, "my characters order by health - maxHealth limit 1");
+      :heal(1, $.macros.myMostInjured);
     };
   };
 };

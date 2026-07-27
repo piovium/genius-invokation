@@ -102,7 +102,7 @@ define status {
   since "v5.8.0";
   on beforeAction {
     usage 1;
-    :damage(DamageType.Cryo, 1, "@master");
+    :damage(DamageType.Cryo, 1, :self.master);
   };
 };
 
@@ -118,7 +118,7 @@ define status {
   since "v5.8.0";
   on beforeAction {
     usage 1;
-    :damage(DamageType.Hydro, 1, "@master");
+    :damage(DamageType.Hydro, 1, :self.master);
   };
 };
 
@@ -134,7 +134,7 @@ define status {
   since "v5.8.0";
   on beforeAction {
     usage 1;
-    :damage(DamageType.Pyro, 1, "@master");
+    :damage(DamageType.Pyro, 1, :self.master);
   };
 };
 
@@ -150,7 +150,7 @@ define status {
   since "v5.8.0";
   on beforeAction {
     usage 1;
-    :damage(DamageType.Electro, 1, "@master");
+    :damage(DamageType.Electro, 1, :self.master);
   };
 };
 
@@ -197,16 +197,16 @@ define skill {
   switch (aura) {
     case Aura.Cryo:
     case Aura.CryoDendro:
-      :characterStatus(WindmusterIrisCryo, "opp active");
+      :characterStatus(WindmusterIrisCryo, $.opp.active);
       break;
     case Aura.Hydro:
-      :characterStatus(WindmusterIrisHydro, "opp active");
+      :characterStatus(WindmusterIrisHydro, $.opp.active);
       break;
     case Aura.Pyro:
-      :characterStatus(WindmusterIrisPyro, "opp active");
+      :characterStatus(WindmusterIrisPyro, $.opp.active);
       break;
     case Aura.Electro:
-      :characterStatus(WindmusterIrisElectro, "opp active");
+      :characterStatus(WindmusterIrisElectro, $.opp.active);
       break;
     default:
       break;
@@ -226,7 +226,7 @@ define skill {
     on dealDamage {
       when :( :e.isReactionRelatedTo(DamageType.Anemo) );
       listenTo samePlayer;
-      :characterStatus(Declension, "@self");
+      :characterStatus(Declension, :self);
     };
   };
 };

@@ -36,8 +36,8 @@ define summon {
   hint DamageType.Heal, 1;
   on endPhase {
     usage 2;
-    :damage(DamageType.Heal, 1, "all my characters");
-    :apply(DamageType.Hydro, "my active");
+    :damage(DamageType.Heal, 1, $.my.character);
+    :apply(DamageType.Hydro, $.my.active);
   };
 };
 
@@ -80,7 +80,7 @@ define skill {
   skillType burst;
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 3;
-  :heal(4, "all my characters");
+  :heal(4, $.my.character);
 };
 
 /**

@@ -237,7 +237,7 @@ define skill {
   skillType burst;
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Piercing, 1, "opp standby");
+  :damage(DamageType.Piercing, 1, $.opp.standby);
   :damage(DamageType.Hydro, 1);
   :summon(DarkShadow);
 };
@@ -304,7 +304,7 @@ define card {
     };
     on StarfallShowerDisposeCard {
       usage perRound, 1;
-      :heal(:get(:e.arg).diceCost(), "@master");
+      :heal(:get(:e.arg).diceCost(), :self.master);
     };
   };
 };

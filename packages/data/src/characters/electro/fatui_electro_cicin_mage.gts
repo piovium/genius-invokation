@@ -170,7 +170,7 @@ define skill {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 1);
-  :apply(DamageType.Electro, "@self");
+  :apply(DamageType.Electro, :self);
   :combatStatus(ElectroCicinShield);
   :characterStatus(SurgingThunderStatus);
 };

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   summon,
@@ -225,6 +226,6 @@ define card {
   since "v3.7.0";
   cost DiceType.Electro, 2;
   eventTalent ElectroHypostasis;
-  :heal(3, "my active");
-  :characterStatus(ElectroCrystalCore, "my active");
+  :heal(3, $.my.active);
+  :characterStatus(ElectroCrystalCore, $.my.active);
 };

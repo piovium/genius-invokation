@@ -34,7 +34,7 @@ define card {
   id 333001 as JueyunGuoba;
   since "v3.3.0";
   food;
-  :characterStatus(JueyunGuobaInEffect, "@targets.0");
+  :characterStatus(JueyunGuobaInEffect, :e.targets[0]);
 };
 
 /**
@@ -65,7 +65,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Void, 2;
   food;
-  :characterStatus(AdeptusTemptationInEffect, "@targets.0");
+  :characterStatus(AdeptusTemptationInEffect, :e.targets[0]);
 };
 
 /**
@@ -96,7 +96,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Aligned, 1;
   food;
-  :characterStatus(LotusFlowerCrispInEffect, "@targets.0");
+  :characterStatus(LotusFlowerCrispInEffect, :e.targets[0]);
 };
 
 /**
@@ -126,7 +126,7 @@ define card {
   id 333004 as NorthernSmokedChicken;
   since "v3.3.0";
   food;
-  :characterStatus(NorthernSmokedChickenInEffect, "@targets.0");
+  :characterStatus(NorthernSmokedChickenInEffect, :e.targets[0]);
 };
 
 /**
@@ -173,7 +173,7 @@ define card {
   food {
     injuredOnly;
   };
-  :heal(2, "@targets.0");
+  :heal(2, :e.targets[0]);
 };
 
 /**
@@ -190,8 +190,8 @@ define card {
   food {
     injuredOnly;
   };
-  :heal(1, "@targets.0");
-  :characterStatus(MushroomPizzaInEffect, "@targets.0");
+  :heal(1, :e.targets[0]);
+  :characterStatus(MushroomPizzaInEffect, :e.targets[0]);
 };
 
 /**
@@ -206,7 +206,7 @@ define status {
   since "v3.3.0";
   duration 2;
   on endPhase {
-    :heal(1, "@master");
+    :heal(1, :self.master);
   };
 };
 
@@ -239,7 +239,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Aligned, 1;
   food;
-  :characterStatus(MintyMeatRollsInEffect, "@targets.0");
+  :characterStatus(MintyMeatRollsInEffect, :e.targets[0]);
 };
 
 /**
@@ -267,8 +267,8 @@ define card {
   tags food;
   filter :( !:query($.my.combatStatus.def(ReviveOnCooldown)) );
   addTarget $.my.character.onlyDefeated;
-  :heal(1, "@targets.0", { kind: "revive" });
-  :characterStatus(Satiated, "@targets.0");
+  :heal(1, :e.targets[0], { kind: "revive" });
+  :characterStatus(Satiated, :e.targets[0]);
   :combatStatus(ReviveOnCooldown);
 };
 
@@ -284,7 +284,7 @@ define card {
   since "v3.7.0";
   cost DiceType.Aligned, 1;
   food;
-  :characterStatus(SashimiPlatterInEffect, "@targets.0");
+  :characterStatus(SashimiPlatterInEffect, :e.targets[0]);
 };
 
 /**
@@ -317,7 +317,7 @@ define card {
   food combat;
   :characterStatus(
     TandooriRoastChickenInEffect,
-    `my characters and not has status with definition id ${Satiated}`,
+    $.my.character.intersection($.not($.has($.typeStatus.def(Satiated)))),
   );
 };
 
@@ -351,7 +351,7 @@ define card {
   food combat;
   :characterStatus(
     ButterCrabInEffect,
-    `my characters and not has status with definition id ${Satiated}`,
+    $.my.character.intersection($.not($.has($.typeStatus.def(Satiated)))),
   );
 };
 
@@ -385,7 +385,7 @@ define card {
   food combat;
   :characterStatus(
     FishAndChipsActive,
-    `my characters and not has status with definition id ${Satiated}`,
+    $.my.character.intersection($.not($.has($.typeStatus.def(Satiated)))),
   );
 };
 
@@ -418,8 +418,8 @@ define card {
   food {
     injuredOnly;
   };
-  :heal(2, "@targets.0");
-  :characterStatus(MatsutakeMeatRollsInEffect, "@targets.0");
+  :heal(2, :e.targets[0]);
+  :characterStatus(MatsutakeMeatRollsInEffect, :e.targets[0]);
 };
 
 /**
@@ -434,7 +434,7 @@ define status {
   since "v4.4.0";
   on endPhase {
     usage 3;
-    :heal(1, "@master");
+    :heal(1, :self.master);
   };
 };
 
@@ -452,8 +452,8 @@ define card {
   food {
     injuredOnly;
   };
-  :heal(1, "@targets.0");
-  :characterStatus(RainbowMacaronsInEffect, "@targets.0");
+  :heal(1, :e.targets[0]);
+  :characterStatus(RainbowMacaronsInEffect, :e.targets[0]);
 };
 
 /**
@@ -468,7 +468,7 @@ define status {
   since "v4.6.0";
   on damaged {
     usage 3;
-    :heal(1, "@master");
+    :heal(1, :self.master);
   };
 };
 
@@ -519,7 +519,7 @@ define card {
   id 333016 as SaurusCrackers;
   since "v5.1.0";
   food;
-  :characterStatus(SaurusCrackersInEffect, "@targets.0");
+  :characterStatus(SaurusCrackersInEffect, :e.targets[0]);
 };
 
 /**
@@ -549,7 +549,7 @@ define card {
   since "v5.3.0";
   cost DiceType.Aligned, 1;
   food;
-  :increaseMaxHealth(1, "@targets.0");
+  :increaseMaxHealth(1, :e.targets[0]);
 };
 
 /**
@@ -564,7 +564,7 @@ define card {
   since "v5.3.0";
   cost DiceType.Aligned, 1;
   food;
-  :characterStatus(PuffPopsInEffect, "@targets.0");
+  :characterStatus(PuffPopsInEffect, :e.targets[0]);
 };
 
 /**
@@ -580,7 +580,7 @@ define status {
   on handCardInserted {
     when :( !:isInInitialPile(:e.card) );
     usage 3;
-    :heal(1, "@master");
+    :heal(1, :self.master);
   };
 };
 
@@ -598,7 +598,7 @@ define card {
   food {
     injuredOnly;
   };
-  :heal(:queryAll($.my.summon).length, "@targets.0");
+  :heal(:queryAll($.my.summon).length, :e.targets[0]);
 };
 
 /**
@@ -612,7 +612,7 @@ define card {
   since "v5.5.0";
   food;
   undiscoverable;
-  :heal(2, "@targets.0");
+  :heal(2, :e.targets[0]);
 };
 
 /**
@@ -626,7 +626,7 @@ define card {
   since "v5.5.0";
   food;
   undiscoverable;
-  :characterStatus(MystiqueSoupProvidenceInEffect, "@targets.0");
+  :characterStatus(MystiqueSoupProvidenceInEffect, :e.targets[0]);
 };
 
 /**
@@ -671,7 +671,7 @@ define card {
   since "v5.5.0";
   food;
   undiscoverable;
-  :characterStatus(MystiqueSoupFuryInEffect, "@targets.0");
+  :characterStatus(MystiqueSoupFuryInEffect, :e.targets[0]);
 };
 
 /**
@@ -685,7 +685,7 @@ define card {
   since "v5.5.0";
   food;
   undiscoverable;
-  :characterStatus(MystiqueSoupSerenityInEffect, "@targets.0");
+  :characterStatus(MystiqueSoupSerenityInEffect, :e.targets[0]);
 };
 
 /**
@@ -715,7 +715,7 @@ define card {
   since "v5.5.0";
   food;
   undiscoverable;
-  :characterStatus(MystiqueSoupSoothingInEffect, "@targets.0");
+  :characterStatus(MystiqueSoupSoothingInEffect, :e.targets[0]);
 };
 
 /**
@@ -747,7 +747,7 @@ define card {
   since "v5.5.0";
   food;
   undiscoverable;
-  :increaseMaxHealth(1, "@targets.0");
+  :increaseMaxHealth(1, :e.targets[0]);
 };
 
 /**
@@ -821,8 +821,8 @@ define card {
   since "v5.7.0";
   cost DiceType.Aligned, 1;
   food;
-  :heal(1, "@targets.0");
-  :characterStatus(HarvestsBoonInEffect, "@targets.0");
+  :heal(1, :e.targets[0]);
+  :characterStatus(HarvestsBoonInEffect, :e.targets[0]);
 };
 
 /**
@@ -841,7 +841,7 @@ define status {
         :e.entity.definition.tags.includes("preparingSkill")
     );
     usage 2;
-    :heal(1, "@master");
+    :heal(1, :self.master);
   };
 };
 
@@ -856,7 +856,7 @@ define card {
   id 333029 as ChenyuBrew;
   since "v6.1.0";
   food;
-  :characterStatus(ChenyuBrewInEffect, "@targets.0");
+  :characterStatus(ChenyuBrewInEffect, :e.targets[0]);
 };
 
 /**
@@ -870,11 +870,11 @@ define status {
   since "v6.1.0";
   usage 2;
   on adventure {
-    :heal(1, "@master");
+    :heal(1, :self.master);
     :consumeUsage();
   };
   on endPhase {
-    :heal(1, "@master");
+    :heal(1, :self.master);
     :consumeUsage();
   };
 };

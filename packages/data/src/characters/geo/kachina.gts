@@ -44,11 +44,11 @@ define summon {
     const field = :query($.my.combatStatus.def(TurboDrillField));
     if (field) {
       :damage(DamageType.Geo, 2);
-      :damage(DamageType.Piercing, 2, "opp next");
+      :damage(DamageType.Piercing, 2, $.opp.next);
       :consumeUsage(1, field);
     } else {
       :damage(DamageType.Geo, 1);
-      :damage(DamageType.Piercing, 1, "opp next");
+      :damage(DamageType.Piercing, 1, $.opp.next);
     }
     :emitCustomEvent(TurboTwirlyTriggered);
   };
@@ -86,21 +86,21 @@ define card {
     nightsoul;
     on switchActive {
       when :( :e.switchInfo.from?.id === :self.master.id );
-      :consumeNightsoul("@master");
+      :consumeNightsoul(:self.master);
       :summon(TurboTwirlyLetItRip);
     };
     skill {
       id 1161021;
       cost DiceType.Geo, 1;
-      :consumeNightsoul("@master");
+      :consumeNightsoul(:self.master);
       const field = :query($.my.combatStatus.def(TurboDrillField));
       if (field) {
         :damage(DamageType.Geo, 3);
-        :damage(DamageType.Piercing, 2, "opp next");
+        :damage(DamageType.Piercing, 2, $.opp.next);
         :consumeUsage(1, field);
       } else {
         :damage(DamageType.Geo, 2);
-        :damage(DamageType.Piercing, 1, "opp next");
+        :damage(DamageType.Piercing, 1, $.opp.next);
       }
       :emitCustomEvent(TurboTwirlyTriggered);
     };
@@ -146,8 +146,8 @@ define skill {
   skillType elemental;
   cost DiceType.Geo, 2;
   filter :( !:self.hasStatus(NightsoulsBlessing) );
-  :equip(TurboTwirly, "@self");
-  :gainNightsoul("@self", 2);
+  :equip(TurboTwirly, :self);
+  :gainNightsoul(:self, 2);
 };
 
 /**

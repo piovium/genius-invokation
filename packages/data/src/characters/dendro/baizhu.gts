@@ -38,7 +38,7 @@ define summon {
   on endPhase {
     usage 1;
     :damage(DamageType.Dendro, 1);
-    :heal(1, "my active");
+    :heal(1, $.my.active);
   };
 };
 
