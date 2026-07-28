@@ -61,7 +61,7 @@ define summon {
   };
   on increaseDamage {
     when :(
-      :query($.my.onStage.typeEquipment.def(LandsOfDandelion)) && // 装备有天赋的琴在场时
+      :query($.my.equipped.def(LandsOfDandelion)) && // 装备有天赋的琴在场时
         :e.type === DamageType.Anemo
     );
     :e.increaseDamage(1);
@@ -81,7 +81,7 @@ define summon {
   hint DamageType.Hydro, "1";
   on endPhase {
     usage 2;
-    if (:query($.my.onStage.typeEquipment.def(TamakushiCasket))) {
+    if (:query($.my.equipped.def(TamakushiCasket))) {
       :damage(DamageType.Hydro, 2);
     } else {
       :damage(DamageType.Hydro, 1);

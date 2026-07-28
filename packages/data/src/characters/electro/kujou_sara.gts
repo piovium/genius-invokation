@@ -38,7 +38,7 @@ define status {
     when :( :e.viaSkillType("elemental") || :e.viaSkillType("burst") );
     usage 2;
     :e.increaseDamage(1);
-    if (:query($.my.onStage.typeEquipment.def(SinOfPride))) {
+    if (:query($.my.equipped.def(SinOfPride))) {
       :e.increaseDamage(1);
     }
   };

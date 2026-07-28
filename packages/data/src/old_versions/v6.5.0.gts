@@ -119,7 +119,7 @@ define status {
     :e.increaseDamage(1);
     if (
       :self.master.element() === DiceType.Electro &&
-      :query($.my.onStage.typeEquipment.def(SinOfPride))
+      :query($.my.equipped.def(SinOfPride))
     ) {
       :e.increaseDamage(1);
     }
