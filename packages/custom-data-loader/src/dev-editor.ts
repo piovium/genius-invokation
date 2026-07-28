@@ -18,9 +18,6 @@ import {
   BrowserMessageReader,
   BrowserMessageWriter,
 } from "vscode-languageclient/browser.js";
-import PROVIDER_VM_DTS from "../dist/gts/vm.d.ts?raw";
-import GTS_RUNTIME_DTS from "../dist/gts/runtime.d.ts?raw";
-import DATA_DTS from "../dist/gts/data.d.ts?raw";
 import GTS_LANGUAGE_CONFIG from "./gts-language-configuration.json?raw";
 import GTS_SYNTAXES from "./gts.tmLanguage.json?raw";
 import type { GtsLanguageServerBrowserInitializationOptions } from "@gi-tcg/gts-language-server/browser";
@@ -31,6 +28,21 @@ import type { editor } from "@codingame/monaco-vscode-editor-api";
 const GTS_LANGUAGE_ID = "gaming-ts";
 const WORKSPACE_URI = vscode.Uri.file("/workspace");
 const EXAMPLE_FILE_URI = vscode.Uri.file("/workspace/example.gts");
+const PROVIDER_DTS_FILES = import.meta.glob<string>(
+  "../dist/gts/**/*.d.ts",
+  {
+    eager: true,
+    query: "?raw",
+    import: "default",
+  },
+);
+
+const PROVIDER_VIRTUAL_FILES = Object.fromEntries(
+  Object.entries(PROVIDER_DTS_FILES).map(([path, content]) => {
+    const relativePath = path.split("/dist/gts/")[1];
+    return [`/provider/${relativePath}`, content];
+  }),
+);
 
 const loadGtsLanguageServerWorker = () => {
   const worker = new Worker(
@@ -129,7 +141,6 @@ const setupLanguageClientConfig = (): LanguageClientConfig => {
   const worker = loadGtsLanguageServerWorker();
   const reader = new BrowserMessageReader(worker);
   const writer = new BrowserMessageWriter(worker);
-  console.log({ PROVIDER_VM_DTS });
   return {
     languageId: GTS_LANGUAGE_ID,
     logLevel: vscode.LogLevel.Debug,
@@ -149,9 +160,9 @@ const setupLanguageClientConfig = (): LanguageClientConfig => {
       },
       initializationOptions: {
         fs: {
-          "/provider/vm.d.ts": PROVIDER_VM_DTS,
-          "/provider/runtime.d.ts": GTS_RUNTIME_DTS,
-          "/node_modules/@gi-tcg/core/data.d.ts": DATA_DTS,
+          ...PROVIDER_VIRTUAL_FILES,
+          "/node_modules/@gi-tcg/core/data.d.ts":
+            'export * from "/provider/data.js";',
           "/workspace/test2.gts": "export const A = 1",
           "/tsconfig.json": JSON.stringify({
             compilerOptions: {

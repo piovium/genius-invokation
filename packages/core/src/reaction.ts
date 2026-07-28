@@ -14,10 +14,7 @@ import type {
   SummonHandle,
 } from "./data/type";
 import { $ } from "./query";
-import {
-  SkillContext,
-  type TypedSkillContext,
-} from "./runtime/context/skill";
+import { SkillContext, type TypedSkillContext } from "./runtime/context/skill";
 
 export const CALLED_FROM_REACTION: unique symbol = Symbol();
 
@@ -47,10 +44,7 @@ type ReactionContextMeta = {
   shortcutReceiver: unknown;
   gtsSnippets: {};
 };
-type ReactionAction = (
-  context: TypedSkillContext<ReactionContextMeta>,
-  event: ReactionDescriptionEventArg,
-) => void;
+type ReactionAction = (context: TypedSkillContext<ReactionContextMeta>) => void;
 
 const descriptions: Partial<Record<Reaction, ReactionDescription>> = {};
 
@@ -66,7 +60,7 @@ function defineReaction(reaction: Reaction, action: ReactionAction) {
       event,
     );
     Reflect.set(context, CALLED_FROM_REACTION, reaction);
-    action(context as unknown as TypedSkillContext<ReactionContextMeta>, event);
+    action(context as unknown as TypedSkillContext<ReactionContextMeta>);
     return context._terminate();
   };
 }
@@ -77,62 +71,68 @@ function charactersExcept(event: ReactionDescriptionEventArg) {
 }
 
 function initialize() {
-  defineReaction(Reaction.Overloaded, (context, event) => {
-    if (event.isActive) {
-      context.switchActive(event.where === "my" ? $.my.next : $.opp.next);
+  defineReaction(Reaction.Overloaded, (context) => {
+    if (context.eventArg.isActive) {
+      context.switchActive(
+        context.eventArg.where === "my" ? $.my.next : $.opp.next,
+      );
     }
   });
 
-  const pierceToOther: ReactionAction = (context, event) => {
-    if (event.isDamage) {
+  const pierceToOther: ReactionAction = (context) => {
+    if (context.eventArg.isDamage) {
       context.damage(
         DamageType.Piercing,
-        event.piercingOtherDamage,
-        charactersExcept(event),
+        context.eventArg.piercingOtherDamage,
+        charactersExcept(context.eventArg),
       );
     }
   };
   defineReaction(Reaction.Superconduct, pierceToOther);
   defineReaction(Reaction.ElectroCharged, pierceToOther);
 
-  defineReaction(Reaction.Frozen, (context, event) => {
-    context.characterStatus(Frozen, $.id(event.id));
+  defineReaction(Reaction.Frozen, (context) => {
+    context.characterStatus(Frozen, $.id(context.eventArg.id));
   });
 
   const swirl = (element: SwirlableElement): ReactionAction => {
-    return (context, event) => context.damage(element, 1, charactersExcept(event));
+    return (context) =>
+      context.damage(element, 1, charactersExcept(context.eventArg));
   };
   defineReaction(Reaction.SwirlCryo, swirl(DamageType.Cryo));
   defineReaction(Reaction.SwirlHydro, swirl(DamageType.Hydro));
   defineReaction(Reaction.SwirlPyro, swirl(DamageType.Pyro));
   defineReaction(Reaction.SwirlElectro, swirl(DamageType.Electro));
 
-  defineReaction(Reaction.CrystallizeCryo, (context, event) =>
-    context.combatStatus(Crystallize, event.here),
+  defineReaction(Reaction.CrystallizeCryo, (context) =>
+    context.combatStatus(Crystallize, context.eventArg.here),
   );
-  defineReaction(Reaction.CrystallizeHydro, (context, event) =>
-    context.combatStatus(Crystallize, event.here),
+  defineReaction(Reaction.CrystallizeHydro, (context) =>
+    context.combatStatus(Crystallize, context.eventArg.here),
   );
-  defineReaction(Reaction.CrystallizePyro, (context, event) =>
-    context.combatStatus(Crystallize, event.here),
+  defineReaction(Reaction.CrystallizePyro, (context) =>
+    context.combatStatus(Crystallize, context.eventArg.here),
   );
-  defineReaction(Reaction.CrystallizeElectro, (context, event) =>
-    context.combatStatus(Crystallize, event.here),
+  defineReaction(Reaction.CrystallizeElectro, (context) =>
+    context.combatStatus(Crystallize, context.eventArg.here),
   );
-  defineReaction(Reaction.Burning, (context, event) =>
-    context.summon(BurningFlame, event.here),
+  defineReaction(Reaction.Burning, (context) =>
+    context.summon(BurningFlame, context.eventArg.here),
   );
-  defineReaction(Reaction.Bloom, (context, event) =>
-    context.combatStatus(DendroCore, event.here),
+  defineReaction(Reaction.Bloom, (context) =>
+    context.combatStatus(DendroCore, context.eventArg.here),
   );
-  defineReaction(Reaction.Quicken, (context, event) =>
-    context.combatStatus(CatalyzingField, event.here),
+  defineReaction(Reaction.Quicken, (context) =>
+    context.combatStatus(CatalyzingField, context.eventArg.here),
   );
-  defineReaction(Reaction.LunarElectroCharged, (context, event) =>
-    context.summon(Thundercloud, event.here),
+  defineReaction(Reaction.LunarElectroCharged, (context) =>
+    context.summon(Thundercloud, context.eventArg.here),
   );
-  defineReaction(Reaction.LunarBloom, (context, event) => {
-    const query = event.here === "my" ? $.macros.myHandsNotFree : $.macros.oppHandsNotFree;
+  defineReaction(Reaction.LunarBloom, (context) => {
+    const query =
+      context.eventArg.here === "my"
+        ? $.macros.myHandsNotFree
+        : $.macros.oppHandsNotFree;
     const hands = context.queryAll(query);
     if (hands.length > 0) {
       context.attachCostReduction(context.random(hands));
@@ -141,7 +141,9 @@ function initialize() {
 }
 
 let initialized = false;
-export function getReactionDescription(reaction: Reaction): ReactionDescription | null {
+export function getReactionDescription(
+  reaction: Reaction,
+): ReactionDescription | null {
   if (!initialized) {
     initialized = true;
     initialize();

@@ -63,7 +63,7 @@ const App = () => {
   // 步骤1：Mod代码编辑器
   const [code, setCode] =
     createSignal(`// 在这里编写你的 GTS 模组。定义会自动获得 ID。
-import { DamageType, DiceType } from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 define attachment {
   name "费用护盾" as CostShield;
@@ -103,7 +103,7 @@ define card {
   name "掀翻牌桌" as TableFlip;
   description "对敌方所有角色造成 10 点穿透伤害。";
   cost DiceType.Omni, 1;
-  :damage(DamageType.Piercing, 10, "all opp character");
+  :damage(DamageType.Piercing, 10, $.opp.character);
 }`);
 
   // 步骤2：卡组构建器
