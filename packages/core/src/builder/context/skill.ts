@@ -385,9 +385,14 @@ export class SkillContext<Meta extends ContextMetaBase> {
           safeDamageEvents.push(event);
         }
       } else if (name === "onHandCardInserted") {
-        const shouldDrop =
-          !arg.overflowed && this.get(arg.card).area.type === "removedEntities";
-        if (!shouldDrop) {
+        let shouldEmitHci: boolean;
+        if (arg.overflowed) {
+          shouldEmitHci = true;
+        } else {
+          const area = this.get(arg.card).area;
+          shouldEmitHci = area.who === arg.who && area.type === "hands";
+        }
+        if (shouldEmitHci) {
           hciEvents.push(event);
         }
       } else {
