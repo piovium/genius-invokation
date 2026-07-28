@@ -911,7 +911,7 @@ define card {
 define card {
   id 332010 as MasterOfWeaponry;
   since "v3.3.0";
-  addTarget $.my.character.has($.typeEquipment.tag("weapon"));
+  addTarget $.my.character.has($.equipped.tag("weapon"));
   addTarget :(
     :queryAll(
       $.my.character
@@ -943,7 +943,7 @@ define card {
 define card {
   id 332011 as BlessingOfTheDivineRelicsInstallation;
   since "v3.3.0";
-  addTarget $.my.character.has($.typeEquipment.tag("artifact"));
+  addTarget $.my.character.has($.equipped.tag("artifact"));
   addTarget :(
     :queryAll($.my.character.exclude($.id(:e.targets[0].id))).map((c) =>
       c.latest(),
@@ -1171,7 +1171,7 @@ define combatStatus {
 define card {
   id 332022 as WhereIsTheUnseenRazor;
   since "v4.0.0";
-  addTarget $.my.character.has($.typeEquipment.tag("weapon"));
+  addTarget $.my.character.has($.equipped.tag("weapon"));
   :e.targets[0].unequipWeapon();
   :combatStatus(WhereIsTheUnseenRazorInEffect);
 };
@@ -1274,7 +1274,7 @@ define card {
   id 332024 as Lyresong;
   since "v4.2.0";
   associateExtension LyresongIsFirstExtension;
-  addTarget $.my.character.has($.typeEquipment.tag("artifact"));
+  addTarget $.my.character.has($.equipped.tag("artifact"));
   :e.targets[0].unequipArtifact();
   if (:getExtensionState().first[:self.who]) {
     :combatStatus(LyresongInEffect2);
@@ -2006,7 +2006,7 @@ define combatStatus {
 define card {
   id 332039 as SaurianDiningBuddies;
   since "v5.0.0";
-  addTarget $.my.character.has($.typeEquipment.tag("technique"));
+  addTarget $.my.character.has($.equipped.tag("technique"));
   const technique = :e.targets[0].hasTechnique();
   if (technique) {
     :addVariable("usage", 1, technique);

@@ -116,7 +116,7 @@ define card {
       when :( :e.hasCardTag("artifact") );
       usage perRound, 1;
       const artifactedCh = :queryAll(
-        $.my.character.has($.typeEquipment.tag("artifact")),
+        $.my.character.has($.equipped.tag("artifact")),
       ).length;
       :e.deductOmniCost(1 + artifactedCh);
     };

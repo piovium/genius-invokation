@@ -150,7 +150,7 @@ define skill {
     on beforeSkill {
       when :{
         const entities = :queryAll(
-          $.union($.opp.typeStatus, $.opp.typeEquipment, $.opp.combatStatus),
+          $.union($.opp.typeStatus, $.opp.equipped, $.opp.combatStatus),
         );
         return entities.some(
           (e) =>

@@ -73,7 +73,7 @@ define summon {
   };
   on beforeAction {
     when :(
-      :query($.my.typeEquipment.def(ElectroCicinsGleam)) &&
+      :query($.my.equipped.def(ElectroCicinsGleam)) &&
         :getVariable("usage") >= 3
     );
     :damage(DamageType.Electro, 1);

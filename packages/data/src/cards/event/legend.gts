@@ -35,8 +35,8 @@ define card {
   filter :(
     :query(
       $.my.character
-        .has($.typeEquipment.tag("weapon"))
-        .union($.my.character.has($.typeEquipment.tag("artifact"))),
+        .has($.equipped.tag("weapon"))
+        .union($.my.character.has($.equipped.tag("artifact"))),
     )
   );
   :combatStatus(AncientCourtyardInEffect);

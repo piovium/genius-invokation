@@ -49,7 +49,7 @@ define summon {
       :query(
         $.id(:e.skillCaller.id)
           .intersection($.character.def(Amber))
-          .intersection($.has($.typeEquipment.def(BunnyTriggered))),
+          .intersection($.has($.equipped.def(BunnyTriggered))),
       ) && :e.isSkillType("normal")
     );
     :damage(DamageType.Pyro, 4);

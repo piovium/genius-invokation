@@ -33,7 +33,7 @@ define status {
   since "v5.2.0";
   on endPhase {
     when :(
-      :query($.opp.typeEquipment.def(BeastlyCorrosion)) ||
+      :query($.opp.equipped.def(BeastlyCorrosion)) ||
         !:self.master.isActive()
     );
     usage 1 {
@@ -43,7 +43,7 @@ define status {
   };
   on enter {
     if (
-      !:query($.opp.typeEquipment.def(BeastlyCorrosion)) &&
+      !:query($.opp.equipped.def(BeastlyCorrosion)) &&
       :getVariable("usage") > 3
     ) {
       :setVariable("usage", 3);

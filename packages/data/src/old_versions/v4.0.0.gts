@@ -318,7 +318,7 @@ define card {
 define card {
   id 332010 as MasterOfWeaponry;
   until "v4.0.0";
-  addTarget $.my.character.has($.typeEquipment.tag("weapon"));
+  addTarget $.my.character.has($.equipped.tag("weapon"));
   addTarget :(
     :queryAll(
       $.my.character
@@ -349,7 +349,7 @@ define card {
 define card {
   id 332011 as BlessingOfTheDivineRelicsInstallation;
   until "v4.0.0";
-  addTarget $.my.character.has($.typeEquipment.tag("artifact"));
+  addTarget $.my.character.has($.equipped.tag("artifact"));
   addTarget :(
     :queryAll($.my.character.exclude($.id(:e.targets[0].id))).map((c) =>
       c.latest(),

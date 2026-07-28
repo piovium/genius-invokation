@@ -269,6 +269,11 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     this._internal.addConstraint(["type", "eventCard"]);
     return this._self;
   }
+  /** Shortcut for .onStage.typeEquipment */
+  get equipped(): Assign<Meta, { type: "equipment"; areaType: "characters" }> {
+    this._internal.addConstraint(["onStage"], ["type", "equipment"]);
+    return this._self;
+  }
   // alternative type methods, but not recommended (disambiguate from path)
   /** @deprecated Use `typeEquipment` instead. */
   get equipment() {

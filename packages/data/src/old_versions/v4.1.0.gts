@@ -520,7 +520,7 @@ define summon {
   };
   on increaseDamage {
     when :(
-      :query($.my.typeEquipment.def(LandsOfDandelion)) && // 装备有天赋的琴在场时
+      :query($.my.equipped.def(LandsOfDandelion)) && // 装备有天赋的琴在场时
         :e.type === DamageType.Anemo
     );
     :e.increaseDamage(1);

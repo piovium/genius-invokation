@@ -55,7 +55,7 @@ define combatStatus {
       return;
     }
     :heal(1, active);
-    if (:query($.my.typeEquipment.def(AllThingsAreOfTheEarth))) {
+    if (:query($.my.equipped.def(AllThingsAreOfTheEarth))) {
       :generateDice(active.element(), 1);
     }
   };

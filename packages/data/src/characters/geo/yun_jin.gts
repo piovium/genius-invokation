@@ -81,7 +81,7 @@ define combatStatus {
       append 4;
     };
     if (
-      :query($.my.typeEquipment.def(DecorousHarmony)) && // 装备了天赋
+      :query($.my.equipped.def(DecorousHarmony)) && // 装备了天赋
       :player.hands.length === 0
     ) {
       :e.increaseDamage(2);

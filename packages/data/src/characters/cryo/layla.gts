@@ -70,7 +70,7 @@ define combatStatus {
     if (:getVariable("star") >= 4) {
       :addVariable("star", -4);
       :damage(DamageType.Cryo, 1);
-      if (:query($.my.typeEquipment.def(LightsRemit))) {
+      if (:query($.my.equipped.def(LightsRemit))) {
         :drawCards(1);
       }
     }
