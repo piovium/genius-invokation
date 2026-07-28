@@ -15,7 +15,7 @@
 
 import type { Draft } from "immer";
 import type { GameState } from "./base/state";
-import type { GameData } from "./builder";
+import type { GameData } from "./data";
 import { CORE_VERSION, StateSymbol } from "./index";
 import type { SkillEnvironment } from "./base/skill";
 

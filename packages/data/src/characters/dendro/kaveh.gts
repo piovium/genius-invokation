@@ -15,17 +15,12 @@
 
 import {
   $,
-  card,
-  character,
-  combatStatus,
   customEvent,
   DamageType,
   DiceType,
-  skill,
-  status,
   type CardHandle,
   type EntityState,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { BountifulCore } from "../hydro/nilou.gts";
 import { DendroCore } from "../../commons.gts";
 

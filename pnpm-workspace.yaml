@@ -25,7 +25,6 @@ catalog:
   typescript: ~6.0.3
 
 patchedDependencies:
-  ohm-js@17.1.0: patches/ohm-js@17.1.0.patch
   puppeteer-screen-recorder@3.0.6: patches/puppeteer-screen-recorder@3.0.6.patch
 
 minimumReleaseAgeExclude:

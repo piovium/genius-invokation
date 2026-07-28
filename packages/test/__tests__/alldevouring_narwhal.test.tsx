@@ -25,7 +25,7 @@ import {
   Status,
   $,
 } from "#test";
-import { Aura, SkillHandle } from "@gi-tcg/core/builder";
+import { Aura, SkillHandle } from "@gi-tcg/core/data";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
 import {
   Chasca,

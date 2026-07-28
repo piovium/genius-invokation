@@ -19,16 +19,11 @@ import {
   DamageType,
   DiceType,
   Reaction,
-  card,
-  combatStatus,
-  extension,
-  status,
-  summon,
   originalDiceCostOfCard,
   $,
   type CombatStatusHandle,
   type IQuery,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   BurningFlame,
   CatalyzingField,

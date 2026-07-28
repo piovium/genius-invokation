@@ -22,7 +22,7 @@ import {
   registerExtension,
   registerInitiativeSkill,
   registerPassiveSkill,
-} from "../../builder/registry";
+} from "../../data/registry";
 import { EntityViewModel, type DefaultEntityVMMeta } from "./entity";
 import { AttachmentViewModel } from "./attachment";
 import { ExtensionViewModel } from "./extension";

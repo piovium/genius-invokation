@@ -15,12 +15,8 @@
 
 import {
   $,
-  card,
-  combatStatus,
   DiceType,
-  extension,
-  status,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 
 /**
  * @id 311301

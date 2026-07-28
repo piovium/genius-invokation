@@ -23,7 +23,7 @@ import {
   ReactiveStateBase,
   ReactiveStateSymbol,
 } from "./reactive_base";
-import type { ExEntityState, ExEntityType } from "../type";
+import type { ExEntityState, ExEntityType } from "../../data/type";
 import { Attachment, type TypedAttachment } from "./attachment";
 
 type ReactiveClassMap<Meta extends ContextMetaBase> = {

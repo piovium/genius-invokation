@@ -14,12 +14,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import * as gtsRuntime from "../gts/runtime";
-import * as gtsBuilder from "../gts/builder";
+import * as gtsData from "../gts/data";
 import * as gtsProviderVm from "../gts/vm";
 
 export const GTS_RUNTIME_MODULE = "@gi-tcg/custom-data-loader/gts/runtime";
 export const GTS_PROVIDER_VM_MODULE = "@gi-tcg/custom-data-loader/gts/vm/vm";
-export const GTS_BUILDER_MODULE = "@gi-tcg/core/builder";
+export const GTS_DATA_MODULE = "@gi-tcg/core/data";
 
 export type ModuleEvaluatorBackend = "node-vm" | "esbuild-wasm";
 
@@ -29,7 +29,7 @@ export interface ModuleEvaluator {
 
 function unsupportedModule(specifier: string): never {
   throw new Error(
-    `Custom GTS modules may only import ${GTS_RUNTIME_MODULE}, ${GTS_PROVIDER_VM_MODULE}, and ${GTS_BUILDER_MODULE}; received ${JSON.stringify(specifier)}`,
+    `Custom GTS modules may only import ${GTS_RUNTIME_MODULE}, ${GTS_PROVIDER_VM_MODULE}, and ${GTS_DATA_MODULE}; received ${JSON.stringify(specifier)}`,
   );
 }
 
@@ -39,8 +39,8 @@ export function moduleFor(specifier: string): object {
       return gtsRuntime;
     case GTS_PROVIDER_VM_MODULE:
       return gtsProviderVm;
-    case GTS_BUILDER_MODULE:
-      return gtsBuilder;
+    case GTS_DATA_MODULE:
+      return gtsData;
     default:
       return unsupportedModule(specifier);
   }

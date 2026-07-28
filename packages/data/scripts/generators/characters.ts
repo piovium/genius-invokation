@@ -145,7 +145,7 @@ export async function generateCharacters() {
       snakeCase(ch.englishName);
 
     const { items } = getAuxiliaryOfCharacter(ch.id);
-    const initCode = `import { DiceType, DamageType, $ } from "@gi-tcg/core/builder";\n`;
+    const initCode = `import { DiceType, DamageType, $ } from "@gi-tcg/core/data";\n`;
     const skills = ch.skills;
 
     const todoLine = items.push(

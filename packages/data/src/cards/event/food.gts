@@ -17,10 +17,7 @@ import {
   $,
   DiceType,
   type StatusHandle,
-  card,
-  combatStatus,
-  status,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { BattlePlan, Satiated, SharpenTheBlade } from "../../commons.gts";
 
 /**

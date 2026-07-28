@@ -1,10 +1,7 @@
 import {
-  card,
-  combatStatus,
   DamageType,
   DiceType,
-  skill,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { UnderseaTreasure } from "../cards/event/other.gts";
 
 /**

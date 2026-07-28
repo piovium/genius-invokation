@@ -15,17 +15,11 @@
 
 import {
   $,
-  card,
-  character,
-  combatStatus,
   customEvent,
   DamageType,
   DiceType,
-  skill,
-  status,
-  summon,
   type EntityState,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 
 // 入场时：获得我方已吞噬卡牌中最高元素骰费用值的「攻击力」，获得该费用的已吞噬卡牌数量的可用次数。
 

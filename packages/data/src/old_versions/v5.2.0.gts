@@ -1,13 +1,10 @@
 import {
   $,
-  card,
   DamageType,
   DiceType,
-  skill,
-  summon,
   type SkillHandle,
   type SummonHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { ScopeOutSoftSpots } from "../characters/cryo/rosaria.gts";
 import { TamakushiCasket } from "../characters/hydro/sangonomiya_kokomi.gts";
 import { SesshouSakura } from "../characters/electro/yae_miko.gts";

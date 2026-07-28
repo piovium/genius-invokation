@@ -1,4 +1,4 @@
-import { $, DamageType, DiceType, card, skill } from "@gi-tcg/core/builder";
+import { $, DamageType, DiceType} from "@gi-tcg/core/data";
 import { VermillionHereafterEffect } from "../cards/equipment/artifacts.gts";
 
 /**

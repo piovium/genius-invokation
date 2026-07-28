@@ -40,7 +40,7 @@ import {
   type DetailedEventNames,
   type SkillOperation,
   type WritableMetaOf,
-} from "../../builder/skill";
+} from "../../runtime/skill";
 import {
   DEFAULT_VERSION_INFO,
   type Version,
@@ -53,7 +53,7 @@ import type {
   HandleT,
   SkillHandle,
   SupportHandle,
-} from "../../builder/type";
+} from "../../data/type";
 import {
   VariablesVM,
   type GtsAppendOptions,
@@ -64,21 +64,21 @@ import {
   createVariable,
   createVariableCanAppend,
   type TypeHint,
-} from "../../builder/utils";
+} from "../../data/utils";
 import {
   TriggeredSkillModel,
   TriggeredSkillViewModel,
   type TriggeredSkillVMMeta,
 } from "./skill";
-import { $, DamageType, DiceType, type CustomEvent } from "../../builder";
+import { $, DamageType, DiceType, type CustomEvent } from "../../data";
 import { GlobalUsageVM, PrepareVM, NightsoulVM } from "./entity_auxilary";
-import type { CharacterPassiveSkillEntry } from "../../builder/registry";
-import type { EntityDescriptionDictionaryGetter } from "../../builder/entity";
+import type { CharacterPassiveSkillEntry } from "../../data/registry";
+import type { EntityDescriptionDictionaryGetter } from "../../runtime/entity";
 import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
 import type { Computed } from "../../query/utils";
 import type { AttachmentTag, ModificationGetter } from "../../base/attachment";
 import { getSubId } from "./sub_id";
-import type { TypedSkillContext } from "../../builder/context/skill";
+import type { TypedSkillContext } from "../../runtime/context/skill";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 
 export interface GtsUsageOrUsagePerRoundOptions extends GtsUsageOptions {

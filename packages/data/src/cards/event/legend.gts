@@ -16,12 +16,8 @@
 import {
   $,
   DiceType,
-  card,
-  combatStatus,
-  extension,
   flip,
-  status,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { DisperseTheCalamity, SanctifyTheDefiled } from "./other.gts";
 import { IneffectiveWhenPlayed } from "../../commons.gts";
 

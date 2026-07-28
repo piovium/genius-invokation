@@ -78,7 +78,7 @@ import { getReaction, type NontrivialDamageType } from "./base/reaction";
 import {
   getReactionDescription,
   type ReactionDescriptionEventArg,
-} from "./builder/reaction";
+} from "./reaction";
 import { exposeHealKind } from "./io";
 import type { AttachmentDefinition } from "./base/attachment";
 import type { LunarReaction } from "@gi-tcg/typings";

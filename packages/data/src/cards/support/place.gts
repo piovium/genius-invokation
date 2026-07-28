@@ -18,11 +18,8 @@ import {
   DamageType,
   DiceType,
   type EntityState,
-  card,
-  combatStatus,
   originalDiceCostOfCard,
-  status,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   ForbiddenKnowledge,
   OrigamiFlyingSquirrel,

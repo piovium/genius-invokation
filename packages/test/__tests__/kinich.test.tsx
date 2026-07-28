@@ -23,7 +23,7 @@ import {
   Card,
   Status,$
 } from "#test";
-import { SkillHandle } from "@gi-tcg/core/builder";
+import { SkillHandle } from "@gi-tcg/core/data";
 import { AbundantPhlogistonInEffect } from "@gi-tcg/data/internal/cards/event/other.gts";
 import {
   GrappleLink,

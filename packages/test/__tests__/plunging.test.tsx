@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, State, Card, Support, Character, Equipment, Summon, DeclaredEnd, Status, $ } from "#test";
-import { SkillHandle } from "@gi-tcg/core/builder";
+import { SkillHandle } from "@gi-tcg/core/data";
 import { PlungingStrike } from "@gi-tcg/data/internal/cards/event/other.gts";
 import { WhirlwindThrust, Xiao, YakshasMask } from "@gi-tcg/data/internal/characters/anemo/xiao.gts";
 import { Keqing, YunlaiSwordsmanship } from "@gi-tcg/data/internal/characters/electro/keqing.gts";

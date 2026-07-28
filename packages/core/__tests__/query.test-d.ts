@@ -6,8 +6,8 @@ import {
 } from "tsd";
 import { $ } from "../src/query/dollar";
 import { type IsEqual, typingInfo, type IQuery, type InferResult } from "../src/query/utils";
-import { CharacterHandle, SummonHandle } from "../src/builder";
-import { AttachmentHandle, ExEntityType } from "../src/builder/type";
+import type { CharacterHandle, SummonHandle } from "../src/data";
+import type { AttachmentHandle, ExEntityType } from "../src/data/type";
 
 declare const infer: <Q extends IQuery>(q: Q) => InferResult<Q>;
 

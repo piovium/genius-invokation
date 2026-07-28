@@ -3,7 +3,7 @@
 官方卡牌数据位于 `@gi-tcg/data`，以 [GTS](https://github.com/piovium/gts) 文件（`.gts`）编写。GTS 在 TypeScript 中加入了面向数据定义的声明块：每个 `define` 块声明一个角色、技能、实体、行动牌或扩展点；普通 TypeScript 的 `import`、变量、函数、分支和循环仍可直接使用。
 
 ```gts
-import { DamageType, DiceType } from "@gi-tcg/core/builder";
+import { DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 11011

@@ -39,7 +39,7 @@ import {
   CharacterHandle,
   DiceType,
   SkillHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { Ref } from "./setup";
 import { StatesMatcher } from "./matcher";
 

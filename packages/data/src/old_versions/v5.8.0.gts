@@ -1,15 +1,10 @@
 import {
   $,
-  card,
-  character,
   DamageType,
   DiceType,
   type PassiveSkillHandle,
-  skill,
-  status,
-  summon,
   type SummonHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   CryoElementalInfusion,
   CryoElementalInfusion01,

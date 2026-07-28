@@ -18,10 +18,7 @@ import {
   DamageType,
   DiceType,
   Reaction,
-  card,
-  combatStatus,
-  status,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   AdventureCompleted,
   BondOfLife,

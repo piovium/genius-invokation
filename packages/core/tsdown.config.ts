@@ -19,7 +19,7 @@ export default defineConfig({
   platform: "neutral",
   entry: {
     index: "./src/index.ts",
-    builder: "./src/builder/index.ts",
+    data: "./src/data/index.ts",
     "gts/runtime": "./src/gts/runtime.ts",
     "gts/vm": "./src/gts/vm.ts",
   },

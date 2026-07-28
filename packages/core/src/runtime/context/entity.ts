@@ -24,7 +24,7 @@ import {
   ReactiveStateBase,
   ReactiveStateSymbol,
 } from "./reactive_base";
-import type { AttachmentHandle } from "../type";
+import type { AttachmentHandle } from "../../data/type";
 
 class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
   override get [ReactiveStateSymbol](): "entity" {

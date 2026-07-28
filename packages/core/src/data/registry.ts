@@ -184,12 +184,6 @@ class RegistrationScope implements IRegistrationScope {
   }
 }
 
-/**
- * @internal
- * 用于检查构造完数据后是否存在泄漏的（被引用的）builder
- */
-export const builderWeakRefs = new Set<WeakRef<any>>();
-
 function combineObject<T extends {}, U extends {}>(a: T, b: U): T & U {
   const combined = { ...a, ...b };
   const overlappingKeys = Object.keys(a).filter((key) => key in b);

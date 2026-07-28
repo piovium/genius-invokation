@@ -15,18 +15,12 @@
 
 import {
   $,
-  card,
-  character,
-  combatStatus,
   customEvent,
   DamageType,
   DiceType,
-  skill,
-  status,
-  summon,
   type CombatStatusHandle,
   type StatusHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 
 const TalentShouldDrawCard = customEvent(
   "thunderManifestation/talentShouldDrawCard",

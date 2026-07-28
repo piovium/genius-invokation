@@ -17,7 +17,7 @@ import { type TypeInfer, type } from "@gi-tcg/utils";
 import { GtsVariableOptions } from "./variables";
 import { defineSimpleViewModel} from "@gi-tcg/gts-runtime";
 import type { CreateEntityOptions } from "../../utils";
-import type { StatusHandle } from "../../builder";
+import type { StatusHandle } from "../../data";
 
 const GtsNightsoulOptions = GtsVariableOptions.merge({
   /**

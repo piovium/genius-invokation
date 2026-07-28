@@ -1,13 +1,9 @@
 import {
   $,
-  card,
-  character,
   DamageType,
   DiceType,
-  skill,
-  summon,
   type SummonHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   NORMAL_MIMICS,
   PREVIEW_MIMICS,

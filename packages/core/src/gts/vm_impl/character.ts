@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { defineViewModel } from "@gi-tcg/gts-runtime";
-import type { CharacterEntry } from "../../builder/registry";
+import type { CharacterEntry } from "../../data/registry";
 import {
   DEFAULT_VERSION_INFO,
   type Version,
@@ -27,8 +27,8 @@ import type {
   PassiveSkillHandle,
   SkillHandle,
   StatusHandle,
-} from "../../builder";
-import { createVariable } from "../../builder/utils";
+} from "../../data";
+import { createVariable } from "../../data/utils";
 
 export class CharacterModel {
   id!: number;

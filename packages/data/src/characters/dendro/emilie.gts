@@ -15,16 +15,11 @@
 
 import {
   $,
-  card,
-  character,
   DamageType,
   DiceType,
   Reaction,
-  skill,
-  status,
-  summon,
   type SummonHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { BurningFlame } from "../../commons.gts";
 
 /**

@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, DamageType, DiceType, card, status } from "@gi-tcg/core/builder";
+import { $, DamageType, DiceType} from "@gi-tcg/core/data";
 import { BondOfLife } from "../../../commons.gts";
 
 /**

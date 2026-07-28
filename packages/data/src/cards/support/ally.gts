@@ -23,13 +23,9 @@ import {
   Reaction,
   type SkillHandle,
   type SupportHandle,
-  card,
-  extension,
   flip,
-  status,
-  summon,
   type,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   CalledInForCleanup,
   CanotilasSupport,

@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { AR } from "@gi-tcg/gts-runtime";
-import { ListenTo, type ReadonlyMetaOf } from "../../builder/skill";
+import { ListenTo, type ReadonlyMetaOf } from "../../runtime/skill";
 import {
   EntityModel,
   EntityViewModel,
@@ -36,8 +36,8 @@ import type { AnyState, InitiativeSkillDefinition } from "../../base/state";
 import type {
   SkillContext,
   TypedSkillContext,
-} from "../../builder/context/skill";
-import type { SkillHandle } from "../../builder";
+} from "../../runtime/context/skill";
+import type { SkillHandle } from "../../data";
 import { UsageVM, type UsageVMMeta } from "./variables";
 import type { UsagePerRoundVariableNames } from "../../base/entity";
 import { GiTcgDataError } from "../..";
@@ -204,7 +204,7 @@ export type TechniqueVMMeta = EntityVMMeta & {
   type: "equipment";
 };
 
-type TechniqueVMToBuilderMeta<Meta extends TechniqueVMMeta> = {
+type TechniqueVMToContextMeta<Meta extends TechniqueVMMeta> = {
   callerType: Meta["type"];
   callerVars: Meta["variables"];
   associatedExtension: Meta["associatedExtension"];
@@ -227,7 +227,7 @@ export const TechniqueViewModel = EntityViewModel
         this: AR.This<Meta>,
         queryFn: (
           context: TypedSkillContext<
-            ReadonlyMetaOf<TechniqueVMToBuilderMeta<Meta>>
+            ReadonlyMetaOf<TechniqueVMToContextMeta<Meta>>
           >,
         ) => Ret[number] extends { type: "character" } ? Ret : never,
       ): AR.Done;

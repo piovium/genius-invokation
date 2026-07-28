@@ -1,13 +1,8 @@
 import {
   $,
-  card,
-  character,
-  combatStatus,
   DamageType,
   DiceType,
-  skill,
-  summon,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { DisposedSupportAndSummonsCountExtension } from "../cards/event/other.gts";
 import {
   Itzpapa,

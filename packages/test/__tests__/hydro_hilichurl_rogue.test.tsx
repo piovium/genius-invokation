@@ -15,7 +15,7 @@
 
 import { Card, Character, DeclaredEnd, Equipment, ref, setup, State, Status, $ } from "#test";
 import { test } from "vitest";
-import { Aura, SkillHandle } from "@gi-tcg/core/builder";
+import { Aura, SkillHandle } from "@gi-tcg/core/data";
 import { Keqing, StellarRestoration } from "@gi-tcg/data/internal/characters/electro/keqing.gts";
 import { HydroHilichurlRogue, MistBubbleSlime, SlashOfSurgingTides } from "@gi-tcg/data/internal/characters/hydro/hydro_hilichurl_rogue.gts";
 

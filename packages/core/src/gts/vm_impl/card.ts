@@ -43,13 +43,13 @@ import type {
   CharacterHandle,
   HandleT,
   StatusHandle,
-} from "../../builder/type";
-import type { TalentRequirement } from "../../builder/card";
+} from "../../data/type";
+import type { TalentRequirement } from "../../runtime/card";
 import type {
   DetailedEventArgOf,
   DetailedEventNames,
   InitiativeSkillTargetKind,
-} from "../../builder/skill";
+} from "../../runtime/skill";
 import { CombatFoodVM, FoodVM } from "./entity_auxilary";
 import { $ } from "../../query";
 import {
@@ -62,18 +62,18 @@ import {
   type TargetGetter,
   type TriggeredSkillVMMeta,
 } from "./skill";
-import type { SkillContext } from "../../builder/context/skill";
+import type { SkillContext } from "../../runtime/context/skill";
 import {
   TechniqueViewModel,
   type DefaultTechniqueVMMeta,
   type TechniqueVMMeta,
 } from "./technique";
-import type { CharacterState, EntityState } from "../../builder";
+import type { CharacterState, EntityState } from "../../data";
 import type { Computed, IUnorderedQuery } from "../../query/utils";
 import { getSubId } from "./sub_id";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 import type { InitiativeSkillEventArg } from "../../base/skill";
-import type { EntityDescriptionDictionaryGetter } from "../../builder/entity";
+import type { EntityDescriptionDictionaryGetter } from "../../runtime/entity";
 import type { Writable } from "../../utils";
 
 const SATIATED_ID = 303300 as StatusHandle;

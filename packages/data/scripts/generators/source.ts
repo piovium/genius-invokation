@@ -275,7 +275,7 @@ const OLD_VERSION_PATH = path.resolve(
 if (SAVE_OLD_CODES && !existsSync(OLD_VERSION_PATH)) {
   await writeFile(
     OLD_VERSION_PATH,
-    `import { DiceType, DamageType, $ } from "@gi-tcg/core/builder";\n`,
+    `import { DiceType, DamageType, $ } from "@gi-tcg/core/data";\n`,
   );
 }
 

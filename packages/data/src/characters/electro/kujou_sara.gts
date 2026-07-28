@@ -14,16 +14,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
-  character,
-  skill,
-  summon,
-  status,
-  card,
   DamageType,
   type SkillHandle,
   $,
   DiceType,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 
 /**
  * @id 114063

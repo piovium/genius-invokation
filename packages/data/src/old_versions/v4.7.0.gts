@@ -4,12 +4,7 @@ import {
   type CardHandle,
   DamageType,
   DiceType,
-  card,
-  combatStatus,
-  skill,
-  status,
-  summon,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   BonecrunchersEnergyBlockCombatStatus,
   FallsAndFortuneInEffect,

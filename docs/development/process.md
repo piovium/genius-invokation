@@ -1,6 +1,6 @@
 # 结算流程设计
 
-本文描述当前 `@gi-tcg/core` 的实现，主要对应 `game.ts`、`skill_executor.ts`、`builder/context/skill.ts` 和 `mutator.ts`。实现以不可变 `GameState` 和 `Mutation` 为基础：技能在私有的 `SkillContext` 中收集状态变更与事件，随后由 `SkillExecutor` 递归结算事件和请求。
+本文描述当前 `@gi-tcg/core` 的实现，主要对应 `game.ts`、`skill_executor.ts`、`runtime/context/skill.ts` 和 `mutator.ts`。实现以不可变 `GameState` 和 `Mutation` 为基础：技能在私有的 `SkillContext` 中收集状态变更与事件，随后由 `SkillExecutor` 递归结算事件和请求。
 
 ```text
 Game 阶段 / 玩家行动

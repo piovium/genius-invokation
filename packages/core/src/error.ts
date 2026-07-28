@@ -16,7 +16,6 @@
 import { getAsyncContextValue } from "./async_context";
 import type { GameState } from "./base/state";
 import type { DetailLogEntry } from "./log";
-import type { QueryArgs } from "./query-legacy/semantic";
 
 declare global {
   // V8 and JSC only
@@ -84,17 +83,6 @@ export class GiTcgCoreInternalEntityNotFoundError extends GiTcgCoreInternalError
 }
 
 export class GiTcgDataError extends GiTcgError {}
-
-export class GiTcgQueryError extends GiTcgDataError {
-  constructor(
-    public readonly source: string,
-    public readonly args: QueryArgs,
-    message?: string,
-    options?: ErrorOptions,
-  ) {
-    super(message, options);
-  }
-}
 
 export class GiTcgIoError extends GiTcgError {
   constructor(

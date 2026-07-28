@@ -1,11 +1,8 @@
 import {
   $,
-  card,
   DamageType,
   DiceType,
-  skill,
-  status,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { BurningFlame, CatalyzingField, DendroCore } from "../commons.gts";
 
 /**

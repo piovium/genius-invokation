@@ -63,7 +63,6 @@ import {
   type ExPlainEntityState,
   type PlainAttachmentState,
 } from "./utils";
-import { runLegacyQueryWithContext } from "../../query-legacy";
 import type {
   AppliableDamageType,
   CardHandle,
@@ -77,9 +76,8 @@ import type {
   SummonHandle,
   EquipmentHandle,
   AttachmentHandle,
-} from "../type";
-import type { GuessedTypeOfQuery } from "../../query-legacy/types";
-import { CALLED_FROM_REACTION } from "../reaction";
+} from "../../data/type";
+import { CALLED_FROM_REACTION } from "../../reaction";
 import { flip, toSortedBy } from "@gi-tcg/utils";
 import { GiTcgDataError, GiTcgPreviewAbortedError } from "../../error";
 import { DetailLogType } from "../../log";
@@ -116,7 +114,7 @@ import {
 } from "../../query";
 import type { NotFunctionPrototype } from "../../query/utils";
 
-type GeneralQueryTargetArg = string | IQuery | QueryFn;
+type GeneralQueryTargetArg = IQuery | QueryFn;
 type CharacterTargetArg =
   | PlainCharacterState
   | PlainCharacterState[]
@@ -517,32 +515,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return this.rawState.currentTurn === this.callerArea.who;
   }
 
-  $<const Q extends string>(
-    arg: Q,
-  ): RxEntityState<Meta, GuessedTypeOfQuery<Q>> | undefined;
-  /** @deprecated use `query` */
-  $<const Q extends IQuery>(
-    arg: (($: IDollar) => Q) | Q,
-  ): RxEntityState<Meta, InferResult<Q>["type"]> | undefined;
-  $(arg: any): any {
-    const result = this.$$(arg);
-    return result[0];
-  }
-
-  $$<const Q extends string>(
-    arg: Q,
-  ): RxEntityState<Meta, GuessedTypeOfQuery<Q>>[];
-  /** @deprecated use `queryAll` */
-  $$<const Q extends IQuery>(
-    arg: (($: IDollar) => Q) | Q,
-  ): RxEntityState<Meta, InferResult<Q>["type"]>[];
-  $$(arg: string | IQuery | ((dollar: IDollar) => IQuery)): any[] {
-    if (typeof arg === "string") {
-      return runLegacyQueryWithContext(this, arg);
-    }
-    return this.queryAll(arg);
-  }
-
   query<const Q extends IQuery>(
     arg: (($: IDollar) => Q) | Q,
   ): RxEntityState<Meta, InferResult<Q>["type"]> | undefined {
@@ -589,8 +561,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
   ): RxEntityState<Meta, TypeT>[] {
     if (Array.isArray(q)) {
       return q.map((s) => this.get(s));
-    } else if (typeof q === "string") {
-      return this.$$(q) as RxEntityState<Meta, TypeT>[];
     } else if (typeof q === "function" || toExpression in q) {
       return this.queryAll(q) as RxEntityState<Meta, TypeT>[];
     } else {
@@ -951,7 +921,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   damage(
     type: DamageType,
     value: number,
-    target: CharacterTargetArg = "opp active",
+    target: CharacterTargetArg = $.opp.active,
   ) {
     if (type === DamageType.Heal) {
       return this.heal(value, target);
@@ -1140,10 +1110,12 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
   characterStatus(
     id: StatusHandle,
-    target: CharacterTargetArg = "@self",
+    target?: CharacterTargetArg,
     opt: CreateEntityOptions = {},
   ) {
-    const targets = this.queryCoerceToCharacters(target);
+    const targets = this.queryCoerceToCharacters(
+      target ?? (this.self.latest() as PlainCharacterState),
+    );
     for (const t of targets) {
       this.createEntity("status", id, t.area, opt);
     }
@@ -1151,10 +1123,12 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
   equip(
     idOrState: EquipmentHandle | PlainEntityState,
-    target: CharacterTargetArg = "@self",
+    target?: CharacterTargetArg,
     opt: CreateEntityOptions = {},
   ) {
-    const targets = this.queryCoerceToCharacters(target);
+    const targets = this.queryCoerceToCharacters(
+      target ?? (this.self.latest() as PlainCharacterState),
+    );
     const def =
       typeof idOrState === "number"
         ? this.state.data.entities.get(idOrState)
@@ -1311,10 +1285,12 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   dispose(
-    target: EntityTargetArg = "@self",
+    target?: EntityTargetArg,
     { reason = "other", direct }: DisposeOption = {},
   ) {
-    const targets = this.queryOrGet(target);
+    const targets = this.queryOrGet(
+      target ?? (this.self.latest() as PlainEntityState),
+    );
     for (const t of targets) {
       let target = t.latest();
       if (target.definition.type === "character") {
@@ -1355,7 +1331,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   // NOTICE: getVariable/setVariable/addVariable 应当将 caller 的严格版声明放在最后一个
-  // 因为 (...args: infer R) 只能获取到重载列表中的最后一个，而严格版是 BuilderWithShortcut 需要的
+  // 因为 (...args: infer R) 只能获取到重载列表中的最后一个，而严格版供链式上下文操作使用
 
   getVariable(prop: string, target: PlainAnyState): number;
   getVariable(prop: Meta["callerVars"]): number;
@@ -1510,13 +1486,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   transformDefinition<DefT extends EntityType | "character">(
-    target: ExPlainEntityState<DefT>,
+    x: ExPlainEntityState<DefT>,
     newDefId: HandleT<DefT>,
-  ): ShortcutReturn<Meta>;
-  transformDefinition(target: string, newDefId: number): ShortcutReturn<Meta>;
-  transformDefinition<DefT extends EntityType | "character">(
-    x: string | ExPlainEntityState<DefT>,
-    newDefId: number,
   ) {
     const targets = this.queryOrGet<DefT>(x);
     for (const t of targets) {
@@ -2015,7 +1986,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   consumeNightsoul(target: CharacterTargetArg, count = 1) {
     const targets = this.queryCoerceToCharacters(target);
     for (const target of targets) {
-      const st = target.$$(`status with tag (nightsoulsBlessing)`)[0];
+      const st = target.hasNightsoulsBlessing();
       if (st) {
         const oldValue = this.getVariable("nightsoul", st);
         const newValue = Math.max(0, oldValue - count);
@@ -2124,7 +2095,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     const RET = this.enableShortcut();
     let skillId: number;
     if (skill === "normal") {
-      const normalSkill = this.$("my active")!.definition.skills.find(
+      const normalSkill = this.query($.my.active)?.definition.skills.find(
         (sk) => sk.skillType === "normal",
       );
       if (normalSkill) {

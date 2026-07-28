@@ -15,15 +15,10 @@
 
 import {
   $,
-  card,
-  character,
-  combatStatus,
   DamageType,
   DiceType,
-  skill,
-  status,
   type CharacterHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   BlazingHeat,
   CrimsonWitchOfEmbers,

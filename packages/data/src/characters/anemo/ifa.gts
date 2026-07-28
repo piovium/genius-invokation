@@ -16,15 +16,11 @@
 import {
   $,
   Aura,
-  card,
-  character,
   DamageType,
   DiceType,
   Reaction,
-  skill,
-  status,
   type StatusHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 
 /**
  * @id 115151

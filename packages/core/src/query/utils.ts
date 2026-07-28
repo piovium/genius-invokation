@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { EntityArea } from "../base/entity";
-import type { ExEntityType } from "../builder/type";
+import type { ExEntityType } from "../data/type";
 import type { SExprSchema } from "./expr_schema";
 import type { CharacterVariableConfigs } from "../base/character";
 
@@ -60,7 +60,7 @@ type NotStrictlySuperTypeOf<T, U> = StrictlySuperTypeOf<T, U> extends true
  * This is used to check whether a property in `PrimaryMethod` should be omitted. It should omit if
  * all configured properties of `Meta` is not a strictly super type of `ConfigMeta`, which means
  * `ConfigMeta` do not provide more information than (or unrelated information to) current `Meta`, so
- * won't be provide as a method from current builder chain point.
+ * won't be provided as a method from the current query chain point.
  */
 export type AllPropsNotStrictlySuperTypeOf<
   Meta,

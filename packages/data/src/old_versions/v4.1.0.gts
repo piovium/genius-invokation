@@ -5,13 +5,7 @@ import {
   type EquipmentHandle,
   type SkillHandle,
   type SummonHandle,
-  card,
-  character,
-  combatStatus,
-  skill,
-  status,
-  summon,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { FatalRainscreen, Xingqiu } from "../characters/hydro/xingqiu.gts";
 import {
   InfluxBlast,

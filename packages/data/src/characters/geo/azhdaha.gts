@@ -15,18 +15,13 @@
 
 import {
   $,
-  character,
-  skill,
-  status,
-  card,
   DamageType,
   DiceType,
   type CharacterHandle,
   Aura,
-  extension,
   type,
   type Pair,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 
 define extension {
   idHint 2602 as AbsorbedCountExtension;

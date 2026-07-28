@@ -1,13 +1,9 @@
 import {
-  card,
-  skill,
   $,
-  character,
   type SkillHandle,
   DamageType,
   DiceType,
-  combatStatus,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   DarkgoldWolfbite,
   DarkgoldWolfbite01,
@@ -29,7 +25,6 @@ import {
   WhiteCloudsAtDawn,
   WordOfWindAndFlower,
 } from "../characters/anemo/xianyun.gts";
-import { status } from "@gi-tcg/core/builder";
 import { Kirara } from "../characters/dendro/kirara.gts";
 import { Target } from "../cards/equipment/techniques.gts";
 import {

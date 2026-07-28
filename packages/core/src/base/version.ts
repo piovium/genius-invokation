@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { BETA_VERSION, IS_BETA } from "@gi-tcg/config";
-import type { VersionResolver } from "../builder";
+import type { VersionResolver } from "../data";
 
 type BetaVersions = typeof IS_BETA extends true ? [typeof BETA_VERSION] : [];
 const BETA_VERSIONS = (IS_BETA ? [BETA_VERSION] : []) as BetaVersions;

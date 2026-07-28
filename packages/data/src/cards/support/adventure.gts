@@ -15,13 +15,10 @@
 
 import {
   $,
-  card,
   type CardHandle,
-  combatStatus,
   DamageType,
   DiceType,
-  summon,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { ChenyuBrew } from "../event/food.gts";
 import {
   AdventureCompleted,

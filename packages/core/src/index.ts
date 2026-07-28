@@ -44,7 +44,6 @@ export {
   resolveOfficialVersion,
   resolveManuallySelectedOfficialVersion,
 } from "./base/version";
-export { runLegacyQuery } from "./query-legacy";
 export * from "./query";
 export {
   type PlayerIO,
@@ -64,7 +63,7 @@ import type {
   HandleT,
   ExEntityState,
   ExTag,
-} from "./builder/type";
-export declare namespace BuilderTypes {
+} from "./data/type";
+export declare namespace DataTypes {
   export type { ExEntityType, HandleT, ExEntityState, ExTag };
 }
