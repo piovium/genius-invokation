@@ -223,8 +223,8 @@ define skill {
   id 15134 as ParadoxicalPractice;
   skillType passive {
     variable increaseDmg, 0;
-    on dealDamage {
-      when :( :e.isReactionRelatedTo(DamageType.Anemo) );
+    on dealReaction {
+      when :( :e.relatedTo(DamageType.Anemo) );
       listenTo samePlayer;
       :characterStatus(Declension, :self);
     };
