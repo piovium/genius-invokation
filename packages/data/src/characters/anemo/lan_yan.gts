@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   Aura,
   card,
   character,
@@ -60,7 +61,7 @@ define skill {
   id 15122 as SwallowwispPinionDance;
   skillType elemental;
   cost DiceType.Anemo, 3;
-  const aura = :$("opp active")?.aura;
+  const aura = :query($.opp.active)?.aura;
   :combatStatus(SwallowwispShield, "my", {
     overrideVariables: { shield: 2 },
   });

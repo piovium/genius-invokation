@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -68,7 +69,7 @@ define skill {
     .filter((card) => card.definition.id === BonecrunchersEnergyBlock)
     .slice(0, 3);
   :disposeCard(...blocks);
-  const target = :$(`my characters order by health - maxHealth limit 1`);
+  const target = :query($.macros.myMostInjured);
   if (target) {
     :heal(blocks.length, target);
     :increaseMaxHealth(blocks.length, target);
@@ -86,11 +87,11 @@ define skill {
   skillType passive {
     on playCard {
       when :( :e.card.definition.id === BonecrunchersEnergyBlock );
-      :heal(1, "my characters order by health - maxHealth limit 1");
+      :heal(1, $.macros.myMostInjured);
     };
     on disposeCard {
       when :( :e.entity.definition.id === BonecrunchersEnergyBlock );
-      :heal(1, "my characters order by health - maxHealth limit 1");
+      :heal(1, $.macros.myMostInjured);
     };
   };
 };
@@ -129,7 +130,7 @@ define card {
     };
     on playCard {
       when :( :e.card.definition.id === BonecrunchersEnergyBlock );
-      :heal(1, "my characters order by health - maxHealth limit 1");
+      :heal(1, $.macros.myMostInjured);
     };
   };
 };

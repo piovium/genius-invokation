@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -35,10 +36,7 @@ define combatStatus {
   id 113094 as FierySanctumsProtection;
   tags barrier;
   on decreaseDamaged {
-    when :(
-      :e.target.isActive() &&
-        :$(`my standby characters with definition id ${Dehya}`)
-    );
+    when :( :e.target.isActive() && :query($.my.standby.def(Dehya)) );
     usage 1 {
       autoDispose false;
     };
@@ -68,9 +66,7 @@ define summon {
     :combatStatus(FierySanctumsProtection);
   };
   on selfDispose {
-    :$(
-      `my combat status with definition id ${FierySanctumsProtection}`,
-    )?.dispose();
+    :query($.my.combatStatus.def(FierySanctumsProtection))?.dispose();
   };
 };
 
@@ -133,7 +129,7 @@ define skill {
   id 13092 as MoltenInferno;
   skillType elemental;
   cost DiceType.Pyro, 3;
-  if (:$(`my summon with definition id ${FierySanctumField}`)) {
+  if (:query($.my.summon.def(FierySanctumField))) {
     :damage(DamageType.Pyro, 1);
   }
   :summon(FierySanctumField);
@@ -166,13 +162,11 @@ define skill {
     on damaged {
       when :( :e.target.id !== :self.id );
       listenTo samePlayer;
-      const protection = :$(
-        `my combat status with definition id ${FierySanctumsProtection}`,
-      );
+      const protection = :query($.my.combatStatus.def(FierySanctumsProtection));
       if (protection?.getVariable("usage") === 0) {
         protection.dispose();
         if (:self.health >= 7) {
-          :damage(DamageType.Piercing, 1, "@self");
+          :damage(DamageType.Piercing, 1, :self);
         }
       }
     };
@@ -217,7 +211,7 @@ define card {
     };
     on endPhase {
       when :( :self.master.health <= 6 );
-      :heal(2, "@master");
+      :heal(2, :self.master);
     };
   };
 };

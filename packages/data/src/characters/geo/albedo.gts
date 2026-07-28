@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   summon,
@@ -81,7 +82,7 @@ define skill {
   skillType burst;
   cost DiceType.Geo, 3;
   cost DiceType.Energy, 2;
-  if (:$(`my summons with definition id ${SolarIsotoma}`)) {
+  if (:query($.my.summon.def(SolarIsotoma))) {
     :damage(DamageType.Geo, 6);
   } else {
     :damage(DamageType.Geo, 4);
@@ -123,18 +124,12 @@ define card {
       :useSkill(AbiogenesisSolarIsotoma);
     };
     on deductVoidDiceSkill {
-      when :(
-        :$(`my summons with definition id ${SolarIsotoma}`) &&
-          :e.isPlungingAttack()
-      );
+      when :( :query($.my.summon.def(SolarIsotoma)) && :e.isPlungingAttack() );
       listenTo samePlayer;
       :e.deductVoidCost(1);
     };
     on increaseSkillDamage {
-      when :(
-        :$(`my summons with definition id ${SolarIsotoma}`) &&
-          :e.viaPlungingAttack()
-      );
+      when :( :query($.my.summon.def(SolarIsotoma)) && :e.viaPlungingAttack() );
       listenTo samePlayer;
       :e.increaseDamage(1);
     };

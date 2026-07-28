@@ -57,7 +57,7 @@ define summon {
   on endPhase {
     usage 1;
     :damage(DamageType.Electro, 1);
-    :characterStatus(CrowfeatherCover, "my active");
+    :characterStatus(CrowfeatherCover, $.my.active);
   };
 };
 
@@ -74,7 +74,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Electro, 2);
-    :characterStatus(CrowfeatherCover, "my active");
+    :characterStatus(CrowfeatherCover, $.my.active);
   };
 };
 

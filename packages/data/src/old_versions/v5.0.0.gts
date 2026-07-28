@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   combatStatus,
   DamageType,
@@ -62,7 +63,7 @@ define skill {
   cost DiceType.Void, 2;
   :damage(DamageType.Electro, 1);
   if (:skillInfo.charged) {
-    :characterStatus(Conductive, "opp active");
+    :characterStatus(Conductive, $.opp.active);
   }
 };
 
@@ -78,8 +79,10 @@ define status {
   conflictWith 123034;
   on decreaseDamaged {
     when :(
-      :$(
-        `my summons with definition id ${SpiritOfOmenPyroScorpion01} or my summons with definition id ${SpiritOfOmenPyroScorpion}`,
+      :query(
+        $.my.summon
+          .def(SpiritOfOmenPyroScorpion01)
+          .union($.my.summon.def(SpiritOfOmenPyroScorpion)),
       )
     );
     usage perRound, 1;
@@ -99,8 +102,10 @@ define status {
   conflictWith 123033;
   on decreaseDamaged {
     when :(
-      :$(
-        `my summons with definition id ${SpiritOfOmenPyroScorpion01} or my summons with definition id ${SpiritOfOmenPyroScorpion}`,
+      :query(
+        $.my.summon
+          .def(SpiritOfOmenPyroScorpion01)
+          .union($.my.summon.def(SpiritOfOmenPyroScorpion)),
       )
     );
     usage perRound, 2;
@@ -126,28 +131,28 @@ define summon {
     :damage(DamageType.Pyro, 1);
   };
   on enter {
-    if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
+    if (:query($.my.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     } else {
       :characterStatus(
         PyroScorpionGuardianStance,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     }
   };
   on actionPhase {
-    if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
+    if (:query($.my.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     } else {
       :characterStatus(
         PyroScorpionGuardianStance,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     }
   };
@@ -178,28 +183,28 @@ define summon {
     }
   };
   on enter {
-    if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
+    if (:query($.my.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     } else {
       :characterStatus(
         PyroScorpionGuardianStance,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     }
   };
   on actionPhase {
-    if (:$(`my equipment with definition id ${Scorpocalypse}`)) {
+    if (:query($.my.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     } else {
       :characterStatus(
         PyroScorpionGuardianStance,
-        "my character with definition id 2303",
+        $.my.character.def(2303 as number),
       );
     }
   };
@@ -254,7 +259,7 @@ define skill {
       usage 1 {
         name "damagedEnergySkillUsage";
       };
-      :gainEnergy(1, "@self");
+      :gainEnergy(1, :self);
     };
   };
 };

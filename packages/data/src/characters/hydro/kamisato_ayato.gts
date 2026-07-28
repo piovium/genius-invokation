@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -171,7 +172,7 @@ define card {
         :getVariable("skillIsUsedWithKanka") &&
         !:getVariable("deductEffectHasBeenTriggeredFromThisCard")
       ) {
-        :characterStatus(KyoukaFuushiInEffect, "@master");
+        :characterStatus(KyoukaFuushiInEffect, :self.master);
       }
       :setVariable("deductEffectHasBeenTriggeredFromThisCard", 0);
       :setVariable("skillIsUsedWithKanka", 0);

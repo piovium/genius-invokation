@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   Aura,
   card,
   character,
@@ -37,7 +38,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Anemo, 1);
-    :heal(2, "my characters order by health - maxHealth limit 1");
+    :heal(2, $.macros.myMostInjured);
   };
 };
 
@@ -100,7 +101,7 @@ define skill {
   id 15072 as YoohooArtFuuinDash;
   skillType elemental;
   cost DiceType.Anemo, 3;
-  const aura = :$("opp active")?.aura;
+  const aura = :query($.opp.active)?.aura;
   let fuufuuWindType: DamageType;
   switch (aura) {
     case Aura.Cryo:
@@ -120,7 +121,7 @@ define skill {
       fuufuuWindType = DamageType.Anemo;
       break;
   }
-  :characterStatus(FuufuuWindwheel, "@self", {
+  :characterStatus(FuufuuWindwheel, :self, {
     overrideVariables: {
       swirled: fuufuuWindType,
     },

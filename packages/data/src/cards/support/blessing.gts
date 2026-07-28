@@ -145,7 +145,7 @@ define card {
     on dealReaction {
       when :( :e.type === Reaction.Vaporize );
       usage perRound, 2;
-      const targetCh = :$(`my characters order by health limit 1`);
+      const targetCh = :query($.macros.myMinHealth);
       if (targetCh) {
         :heal(1, targetCh);
         :characterStatus(VaporizeBlessingRagingWavesInEffect, targetCh);

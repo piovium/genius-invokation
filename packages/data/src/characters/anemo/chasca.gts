@@ -58,7 +58,7 @@ define card {
         :self.master.hasNightsoulsBlessing()?.variables.nightsoul &&
           :player.hands.length >= 3
       );
-      :consumeNightsoul("@master", 1);
+      :consumeNightsoul(:self.master, 1);
       :damage(DamageType.Anemo, 1);
       :disposeMaxCostHands(3, { allowPreview: true });
     };
@@ -78,7 +78,7 @@ define card {
   undiscoverable;
   cost DiceType.Anemo, 3;
   on selfHandCardInserted {
-    const element = :$(`my active`)?.element();
+    const element = :query($.my.active)?.element();
     if (element === DiceType.Pyro) {
       :transformDefinition(:self, ShiningShadowhuntShellPyro);
     } else if (element === DiceType.Hydro) {
@@ -217,8 +217,8 @@ define skill {
   filter :( !:self.hasStatus(NightsoulsBlessing) );
   :damage(DamageType.Anemo, 1);
   :drawCards(1);
-  :gainNightsoul("@self", 2);
-  :equip(SoulsniperRitualStaff, "@self");
+  :gainNightsoul(:self, 2);
+  :equip(SoulsniperRitualStaff, :self);
   :combatStatus(IntentToCover);
 };
 
@@ -233,7 +233,7 @@ define skill {
   skillType burst;
   cost DiceType.Anemo, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Piercing, 1, "opp standby");
+  :damage(DamageType.Piercing, 1, $.opp.standby);
   :damage(DamageType.Anemo, 1);
   :drawCards(3);
 };

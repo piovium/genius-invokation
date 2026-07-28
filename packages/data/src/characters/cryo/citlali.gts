@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -65,13 +66,11 @@ define combatStatus {
   duration 2;
   on damaged {
     when :{
-      const st = :$(
-        `my character with definition id ${Citlali}`,
-      )?.hasNightsoulsBlessing();
+      const st = :query($.my.character.def(Citlali))?.hasNightsoulsBlessing();
       return st && st.variables.nightsoul > 0;
     };
     listenTo samePlayer;
-    :consumeNightsoul(`my character with definition id ${Citlali}`);
+    :consumeNightsoul($.my.character.def(Citlali));
     :combatStatus(OpalShield);
   };
   on gainNightsoul {
@@ -81,7 +80,7 @@ define combatStatus {
       }
       return :e.entity.getVariable("nightsoul") === 2;
     };
-    :damage(DamageType.Cryo, 1, "opp characters with health > 0 limit 1");
+    :damage(DamageType.Cryo, 1, $.macros.oppActivePrioritized);
   };
 };
 
@@ -112,7 +111,7 @@ define skill {
   cost DiceType.Cryo, 3;
   filter :( !:self.hasStatus(NightsoulsBlessing) );
   :damage(DamageType.Cryo, 1);
-  :gainNightsoul("@self", 1);
+  :gainNightsoul(:self, 1);
   :combatStatus(OpalShield);
   :combatStatus(Itzpapa);
 };
@@ -128,10 +127,10 @@ define skill {
   skillType burst;
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Piercing, 1, "opp standby");
+  :damage(DamageType.Piercing, 1, $.opp.standby);
   :damage(DamageType.Cryo, 2);
   if (:self.hasStatus(NightsoulsBlessing)) {
-    :gainNightsoul("@self", 2);
+    :gainNightsoul(:self, 2);
   }
 };
 
@@ -150,7 +149,7 @@ define skill {
         :getVariable("gainNightsoulUsagePerRound") > 0 &&
           :self.hasStatus(NightsoulsBlessing)
       );
-      :gainNightsoul("@self");
+      :gainNightsoul(:self);
       :addVariable("gainNightsoulUsagePerRound", -1);
     };
     on dealDamage {
@@ -160,7 +159,7 @@ define skill {
           :self.hasStatus(NightsoulsBlessing)
       );
       listenTo samePlayer;
-      :gainNightsoul("@self");
+      :gainNightsoul(:self);
       :addVariable("gainNightsoulUsagePerRound", -1);
     };
     on roundEnd {
@@ -199,10 +198,8 @@ define combatStatus {
   id 211142 as MamaloacosFrigidRainInEffect;
   since "v5.7.0";
   on enter {
-    when :(
-      :$(`my character with definition id ${Citlali}`)?.hasNightsoulsBlessing()
-    );
-    :gainNightsoul(`my character with definition id ${Citlali}`);
+    when :( :query($.my.character.def(Citlali))?.hasNightsoulsBlessing() );
+    :gainNightsoul($.my.character.def(Citlali));
   };
   on increaseDamage {
     when :( :e.type === DamageType.Hydro || :e.type === DamageType.Pyro );

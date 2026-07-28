@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -206,7 +207,7 @@ define card {
       if (exists) {
         exists.addVariable("usage", 1);
       } else {
-        :characterStatus(FontemerPearl, "@master", {
+        :characterStatus(FontemerPearl, :self.master, {
           overrideVariables: {
             usage: 1,
           },

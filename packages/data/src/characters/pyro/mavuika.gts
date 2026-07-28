@@ -125,7 +125,7 @@ define card {
       usage 2;
       cost DiceType.Void, 1;
       filter :( :self.master.hasNightsoulsBlessing()?.variables.nightsoul );
-      :consumeNightsoul("@master");
+      :consumeNightsoul(:self.master);
       :damage(DamageType.Pyro, 4);
     };
   };
@@ -160,7 +160,7 @@ define card {
     skill {
       id 1131551 as BlazingTrail;
       usage 2;
-      :switchActive("my next");
+      :switchActive($.my.next);
       :convertDice(DiceType.Omni, 2);
       if (!:oppPlayer.declaredEnd) {
         :continueNextTurn();
@@ -192,10 +192,10 @@ define card {
       usage 2;
       cost DiceType.Void, 2;
       filter :( :self.master.hasNightsoulsBlessing()?.variables.nightsoul );
-      :consumeNightsoul("@master");
+      :consumeNightsoul(:self.master);
       :characterStatus(
         FlamestriderFullThrottleInEffectPrepareStatus,
-        "@master",
+        :self.master,
       );
       if (:getVariable("usage") === 1) {
         :drawCards(4);
@@ -257,7 +257,7 @@ define skill {
     FlamestriderFullThrottle,
     FlamestriderSoaringAscent,
   ]);
-  :gainNightsoul("@self", 2);
+  :gainNightsoul(:self, 2);
 };
 
 /**
@@ -355,7 +355,7 @@ define card {
         :e.hasCardTag("technique") && :self.master.hasStatus(NightsoulsBlessing)
       );
       usage perRound, 1;
-      :gainNightsoul("@master", 1);
+      :gainNightsoul(:self.master, 1);
     };
   };
 };

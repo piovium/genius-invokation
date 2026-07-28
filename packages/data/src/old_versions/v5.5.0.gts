@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   DamageType,
   DiceType,
@@ -20,18 +21,21 @@ define card {
   cost DiceType.Dendro, 1;
   tags resonance;
   filter :(
-    :$(
-      `my combat status with definition id ${DendroCore} or my combat status with definition id ${CatalyzingField} or my summon with definition id ${BurningFlame}`,
+    :query(
+      $.my.combatStatus
+        .def(DendroCore)
+        .union($.my.combatStatus.def(CatalyzingField))
+        .union($.my.summon.def(BurningFlame)),
     )
   );
-  if (:$(`my combat status with definition id ${DendroCore}`)) {
-    :damage(DamageType.Hydro, 1, "opp active");
+  if (:query($.my.combatStatus.def(DendroCore))) {
+    :damage(DamageType.Hydro, 1, $.opp.active);
   }
-  if (:$(`my combat status with definition id ${CatalyzingField}`)) {
-    :damage(DamageType.Electro, 1, "opp active");
+  if (:query($.my.combatStatus.def(CatalyzingField))) {
+    :damage(DamageType.Electro, 1, $.opp.active);
   }
-  if (:$(`my summon with definition id ${BurningFlame}`)) {
-    :damage(DamageType.Pyro, 1, "opp active");
+  if (:query($.my.summon.def(BurningFlame))) {
+    :damage(DamageType.Pyro, 1, $.opp.active);
   }
 };
 
@@ -47,7 +51,7 @@ define status {
   until "v5.5.0";
   on endPhase {
     usage 1;
-    :damage(DamageType.Hydro, 3, "@master");
+    :damage(DamageType.Hydro, 3, :self.master);
   };
 };
 
@@ -64,5 +68,5 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
-  :characterStatus(LingeringAeon, "opp active");
+  :characterStatus(LingeringAeon, $.opp.active);
 };

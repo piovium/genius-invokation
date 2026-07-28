@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -42,8 +43,8 @@ define combatStatus {
   id 117082 as BurstScan;
   on beforeAction {
     when :(
-      :$(
-        `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`,
+      :query(
+        $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
       )
     );
     listenTo all;
@@ -54,8 +55,8 @@ define combatStatus {
     usage 1 {
       append 3;
     };
-    :$(
-      `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`,
+    :query(
+      $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
     )?.consumeUsage(1);
     const cost = :e.entity.diceCost();
     :damage(DamageType.Dendro, cost);
@@ -142,7 +143,7 @@ define skill {
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Dendro, 3);
-  :characterStatus(MehraksAssistance, "@self");
+  :characterStatus(MehraksAssistance, :self);
   :combatStatus(BurstScan, "my", {
     overrideVariables: { usage: 2 },
   });

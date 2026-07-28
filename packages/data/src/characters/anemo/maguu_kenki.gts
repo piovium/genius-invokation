@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -102,7 +103,7 @@ define skill {
   cost DiceType.Anemo, 3;
   :summon(ShadowswordLoneGale);
   if (:self.hasEquipment(TranscendentAutomaton)) {
-    :switchActive("my next");
+    :switchActive($.my.next);
   }
 };
 
@@ -118,7 +119,7 @@ define skill {
   cost DiceType.Cryo, 3;
   :summon(ShadowswordGallopingFrost);
   if (:self.hasEquipment(TranscendentAutomaton)) {
-    :switchActive("my prev");
+    :switchActive($.my.prev);
   }
 };
 

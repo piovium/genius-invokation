@@ -57,7 +57,7 @@ define status {
     :transformDefinition(:self.master, Skirk01);
   };
   on selfDispose {
-    const ch = :$(`my character with definition id ${Skirk01}`);
+    const ch = :query($.my.character.def(Skirk01));
     if (ch) {
       :transformDefinition(ch, Skirk);
     }
@@ -91,17 +91,17 @@ define card {
   addTarget $.my.character.def(Skirk);
   on actionPhase {
     :disposeCard(:self);
-    :$(
-      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    :query(
+      $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     )?.addVariableWithMax("serpentsSubtlety", 1, 7);
   };
   on switchActive {
     :disposeCard(:self);
-    :$(
-      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    :query(
+      $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     )?.addVariableWithMax("serpentsSubtlety", 1, 7);
   };
-  :characterStatus(SevenphaseFlash, "@targets.0");
+  :characterStatus(SevenphaseFlash, :e.targets[0]);
 };
 
 /**
@@ -193,9 +193,9 @@ define skill {
   const subtilty = :self.getVariable("serpentsSubtlety");
   :self.setVariable("serpentsSubtlety", 0);
   if (subtilty >= 7) {
-    :damage(DamageType.Piercing, 3, "opp standby");
+    :damage(DamageType.Piercing, 3, $.opp.standby);
   } else {
-    :damage(DamageType.Piercing, 2, "opp standby");
+    :damage(DamageType.Piercing, 2, $.opp.standby);
   }
   :damage(DamageType.Cryo, subtilty);
 };
@@ -299,14 +299,14 @@ define card {
       when :(
         :getVariable("usagePerRound") && :e.card.definition.id === VoidRift
       );
-      :damage(DamageType.Cryo, 1, "opp active");
+      :damage(DamageType.Cryo, 1, $.opp.active);
       :setVariable("usagePerRound", 0);
     };
     on disposeCard {
       when :(
         :getVariable("usagePerRound") && :e.entity.definition.id === VoidRift
       );
-      :damage(DamageType.Cryo, 1, "opp active");
+      :damage(DamageType.Cryo, 1, $.opp.active);
       :setVariable("usagePerRound", 0);
     };
     on roundEnd {

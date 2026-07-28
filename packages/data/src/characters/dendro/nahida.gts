@@ -42,9 +42,9 @@ define status {
         :query($.opp.combatStatus.def(ShrineOfMaya01))) && // 摩耶之殿在场时
       :query($.opp.character.includesDefeated.tag("pyro")) // 我方队伍中存在火元素
     ) {
-      :damage(DamageType.Dendro, 1, "@master");
+      :damage(DamageType.Dendro, 1, :self.master);
     } else {
-      :damage(DamageType.Piercing, 1, "@master");
+      :damage(DamageType.Piercing, 1, :self.master);
     }
     :consumeUsage();
     :emitCustomEvent(TriggerOtherSeed);
@@ -52,7 +52,7 @@ define status {
   on TriggerOtherSeed {
     when :( :e.entity.id !== :self.id );
     listenTo samePlayer;
-    :damage(DamageType.Piercing, 1, "@master");
+    :damage(DamageType.Piercing, 1, :self.master);
     :consumeUsage();
   };
   // 自身因元素反应伤害击倒而弃置时
@@ -177,7 +177,7 @@ define skill {
   id 17033 as AllSchemesToKnowTathata;
   skillType elemental;
   cost DiceType.Dendro, 5;
-  :characterStatus(SeedOfSkandha, "all opp characters");
+  :characterStatus(SeedOfSkandha, $.opp.character);
   :damage(DamageType.Dendro, 3);
 };
 

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -41,13 +42,9 @@ define combatStatus {
         overrideVariables: { usage: 2 },
       });
     }
-    :characterStatus(
-      BondOfLife,
-      `opp characters with definition id ${Arlecchino}`,
-      {
-        overrideVariables: { usage: 2 },
-      },
-    );
+    :characterStatus(BondOfLife, $.opp.character.def(Arlecchino), {
+      overrideVariables: { usage: 2 },
+    });
   };
 };
 
@@ -63,7 +60,7 @@ define skill {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   let increasedValue = 0;
-  const bond = :$(`status with definition id ${BondOfLife} at opp active`);
+  const bond = :query($.typeStatus.def(BondOfLife).at($.opp.active));
   if (bond) {
     increasedValue = Math.min(3, bond.getVariable("usage"));
     :consumeUsage(increasedValue, bond);
@@ -97,13 +94,13 @@ define skill {
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 3;
   :damage(DamageType.Pyro, 4);
-  const bond = :$(`status with definition id ${BondOfLife} at my active`);
+  const bond = :query($.typeStatus.def(BondOfLife).at($.my.active));
   let healValue = 0;
   if (bond) {
     healValue = bond.getVariable("usage");
     bond.dispose();
   }
-  :heal(healValue, "@self");
+  :heal(healValue, :self);
 };
 
 /**
@@ -195,7 +192,7 @@ define card {
   cost DiceType.Pyro, 1;
   talent Arlecchino, action {
     on enter {
-      :characterStatus(BondOfLife, "@master", {
+      :characterStatus(BondOfLife, :self.master, {
         overrideVariables: { usage: 3 },
       });
       // 消耗生命之契增伤的部分在被动技能 13147 里

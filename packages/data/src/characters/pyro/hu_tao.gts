@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -33,7 +34,7 @@ define status {
   id 113072 as BloodBlossom;
   on endPhase {
     usage 1;
-    :damage(DamageType.Pyro, 1, "@master");
+    :damage(DamageType.Pyro, 1, :self.master);
   };
 };
 
@@ -56,7 +57,7 @@ define status {
     when :( :e.type === DamageType.Pyro );
     :e.increaseDamage(1);
     if (:e.viaChargedAttack()) {
-      :characterStatus(BloodBlossom, "@damage.target");
+      :characterStatus(BloodBlossom, :e.target);
     }
   };
 };
@@ -101,10 +102,10 @@ define skill {
   cost DiceType.Energy, 3;
   if (:self.health <= 6) {
     :damage(DamageType.Pyro, 5);
-    :heal(3, "@self");
+    :heal(3, :self);
   } else {
     :damage(DamageType.Pyro, 4);
-    :heal(2, "@self");
+    :heal(2, :self);
   }
 };
 

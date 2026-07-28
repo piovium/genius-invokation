@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -118,7 +119,10 @@ define card {
       usage perRound, 1;
       :gainEnergy(
         1,
-        "my characters with tag (electro) and with energy < maxEnergy limit 1",
+        $.my.character
+          .tag("electro")
+          .intersection($.any.var("energy", "<", "maxEnergy"))
+          .limit(1),
       );
     };
   };

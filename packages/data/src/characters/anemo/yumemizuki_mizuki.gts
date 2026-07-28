@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -34,10 +35,10 @@ define card {
   tags food;
   undiscoverable;
   on selfHandCardInserted, only {
-    if (:$("my active character with health > 5")) {
-      :damage(DamageType.Anemo, 1, "opp characters with health > 0 limit 1");
+    if (:query($.my.active.var("health", ">", 5))) {
+      :damage(DamageType.Anemo, 1, $.macros.oppActivePrioritized);
     } else {
-      :heal(2, "my active");
+      :heal(2, $.my.active);
     }
     :drawCards(1);
   };
@@ -72,7 +73,7 @@ define status {
   since "v6.0.0";
   on declareEnd {
     usage 1;
-    :switchActive("@master");
+    :switchActive(:self.master);
     :damage(DamageType.Anemo, 1);
   };
 };
@@ -102,7 +103,7 @@ define skill {
   skillType elemental;
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 2);
-  :characterStatus(Dreamdrifter, "@self");
+  :characterStatus(Dreamdrifter, :self);
 };
 
 /**

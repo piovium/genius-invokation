@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -49,9 +50,9 @@ define status {
     when :( :e.isSkillType("normal") );
     usage 2;
     if (:self.master.health >= 6) {
-      :damage(DamageType.Piercing, 1, "@master");
+      :damage(DamageType.Piercing, 1, :self.master);
     } else {
-      :heal(2, "@master");
+      :heal(2, :self.master);
     }
   };
 };

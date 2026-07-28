@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -39,7 +40,7 @@ define combatStatus {
   };
   on playCard {
     when :( :getVariable("playedCard") === 3 );
-    const cicin = :$(`opp summon with definition id ${ElectroCicin}`);
+    const cicin = :query($.opp.summon.def(ElectroCicin));
     if (cicin) {
       cicin.addVariableWithMax("usage", 1, 3);
     }
@@ -74,11 +75,11 @@ define summon {
     :combatStatus(CrushingThunder, "opp");
   };
   on selfDispose {
-    :$(`opp combat status with definition id ${CrushingThunder}`)?.dispose();
+    :query($.opp.combatStatus.def(CrushingThunder))?.dispose();
   };
   on beforeAction {
     when :(
-      :$(`my equipment with definition id ${ElectroCicinsGleam}`) &&
+      :query($.my.typeEquipment.def(ElectroCicinsGleam)) &&
         :getVariable("usage") >= 3
     );
     :damage(DamageType.Electro, 1);
@@ -122,7 +123,7 @@ define combatStatus {
   id 124042 as ElectroCicinShield;
   shield 1;
   on enter {
-    const cicin = :$(`my summon with definition id ${ElectroCicin}`);
+    const cicin = :query($.my.summon.def(ElectroCicin));
     if (cicin) {
       const usage = cicin.getVariable("usage");
       :addVariable("shield", Math.min(usage, 3));
@@ -169,7 +170,7 @@ define skill {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 1);
-  :apply(DamageType.Electro, "@self");
+  :apply(DamageType.Electro, :self);
   :combatStatus(ElectroCicinShield);
   :characterStatus(SurgingThunderStatus);
 };

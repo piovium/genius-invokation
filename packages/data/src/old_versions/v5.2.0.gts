@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   DamageType,
   DiceType,
@@ -36,9 +37,9 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 2);
   if (:self.hasEquipment(MirrorCage)) {
-    :characterStatus(Refraction01, "opp active");
+    :characterStatus(Refraction01, $.opp.active);
   } else {
-    :characterStatus(Refraction, "opp active");
+    :characterStatus(Refraction, $.opp.active);
   }
 };
 
@@ -56,11 +57,11 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Anemo, 1);
-    :heal(1, "my active");
+    :heal(1, $.my.active);
   };
   on increaseDamage {
     when :(
-      :$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
+      :query($.my.typeEquipment.def(LandsOfDandelion)) && // 装备有天赋的琴在场时
         :e.type === DamageType.Anemo
     );
     :e.increaseDamage(1);
@@ -80,12 +81,12 @@ define summon {
   hint DamageType.Hydro, "1";
   on endPhase {
     usage 2;
-    if (:$(`my equipment with definition id ${TamakushiCasket}`)) {
+    if (:query($.my.typeEquipment.def(TamakushiCasket))) {
       :damage(DamageType.Hydro, 2);
     } else {
       :damage(DamageType.Hydro, 1);
     }
-    :heal(1, "my active");
+    :heal(1, $.my.active);
   };
 };
 
@@ -115,7 +116,7 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 2);
-  :characterStatus(RipplingBladesStatus, "@self");
+  :characterStatus(RipplingBladesStatus, :self);
 };
 
 /**

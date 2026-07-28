@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -65,7 +66,7 @@ define skill {
   :damage(DamageType.Anemo, 1);
   :summon(ShadowswordLoneGale);
   if (:self.hasEquipment(TranscendentAutomaton)) {
-    :switchActive("my next");
+    :switchActive($.my.next);
   }
 };
 
@@ -83,7 +84,7 @@ define skill {
   :damage(DamageType.Cryo, 1);
   :summon(ShadowswordGallopingFrost);
   if (:self.hasEquipment(TranscendentAutomaton)) {
-    :switchActive("my prev");
+    :switchActive($.my.prev);
   }
 };
 
@@ -117,7 +118,7 @@ define combatStatus {
     when :(
       ([DamageType.Electro, DamageType.Dendro] as DamageType[]).includes(
         :e.type,
-      ) && :e.target.id === :$("opp active")?.id
+      ) && :e.target.id === :query($.opp.active)?.id
     );
     usage 3;
     :e.increaseDamage(1);

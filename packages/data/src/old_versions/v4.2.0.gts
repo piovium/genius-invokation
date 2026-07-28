@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   character,
   DamageType,
@@ -31,7 +32,7 @@ define card {
   id 331801 as private WindAndFreedom;
   until "v4.2.0";
   cost DiceType.Aligned, 1;
-  filter :( :$(`my standby characters`) );
+  filter :( :query($.my.standby) );
   :combatStatus(WindAndFreedomInEffect);
 };
 
@@ -56,12 +57,12 @@ define card {
         DiceType.Electro,
         DiceType.Dendro,
       ] as (DiceType | undefined)[]
-    ).includes(:$("my active")?.element())
+    ).includes(:query($.my.active)?.element())
   );
-  const element = :$("my active")!.element() as 1 | 2 | 3 | 4 | 7;
+  const element = :query($.my.active)!.element() as 1 | 2 | 3 | 4 | 7;
   // 先挂后台再挂前台（避免前台被超载走导致结算错误）
-  :apply(element, "my standby character with aura != 0");
-  :apply(element, "my active character with aura != 0");
+  :apply(element, $.my.standby.var("aura", "!=", 0));
+  :apply(element, $.my.active.var("aura", "!=", 0));
 };
 
 /**
@@ -204,7 +205,7 @@ define card {
     };
     variable bubble, 0;
     on enter {
-      :heal(3, "@master");
+      :heal(3, :self.master);
     };
     on healed {
       listenTo samePlayer;

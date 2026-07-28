@@ -1,4 +1,5 @@
 import {
+  $,
   DamageType,
   DiceType,
   type EquipmentHandle,
@@ -80,12 +81,12 @@ define card {
         DiceType.Electro,
         DiceType.Dendro,
       ] as (DiceType | undefined)[]
-    ).includes(:$("my active")?.element())
+    ).includes(:query($.my.active)?.element())
   );
-  const element = :$("my active")!.element() as 1 | 2 | 3 | 4 | 7;
+  const element = :query($.my.active)!.element() as 1 | 2 | 3 | 4 | 7;
   // 先挂后台再挂前台（避免前台被超载走导致结算错误）
-  :apply(element, "my standby character");
-  :apply(element, "my active character");
+  :apply(element, $.my.standby);
+  :apply(element, $.my.active);
 };
 
 /**
@@ -180,8 +181,8 @@ define card {
   until "v4.1.0";
   cost DiceType.Electro, 3;
   eventTalent ElectroHypostasis;
-  :heal(3, "my active");
-  :characterStatus(ElectroCrystalCore, "my active");
+  :heal(3, $.my.active);
+  :characterStatus(ElectroCrystalCore, $.my.active);
 };
 
 /**
@@ -346,7 +347,10 @@ define card {
       when :( :e.skill.definition.id === ClawAndThunder );
       :gainEnergy(
         1,
-        "my characters with tag (electro) and with energy < maxEnergy limit 1",
+        $.my.character
+          .tag("electro")
+          .intersection($.any.var("energy", "<", "maxEnergy"))
+          .limit(1),
       );
     };
   };
@@ -374,8 +378,8 @@ define card {
         if (:e.skill.definition.id !== Wavestrider) {
           return false;
         }
-        const shield = :$(
-          `status with definition id ${TidecallerSurfEmbrace} at @master`,
+        const shield = :query(
+          $.typeStatus.def(TidecallerSurfEmbrace).at($.id(:self.master.id)),
         );
         if (shield && shield.getVariable("shield") === 2) {
           return false;
@@ -385,7 +389,7 @@ define card {
       usage 2 {
         autoDispose false;
       };
-      :characterStatus(SummonerOfLightning, "@master");
+      :characterStatus(SummonerOfLightning, :self.master);
     };
   };
 };
@@ -467,10 +471,10 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
-  :heal(1, "all my characters");
+  :heal(1, $.my.character);
   if (
     :self.hasEquipment(TamakushiCasket) &&
-    :$(`my summon with definition id ${BakeKurage}`)
+    :query($.my.summon.def(BakeKurage))
   ) {
     :summon(BakeKurage);
   }
@@ -495,7 +499,7 @@ define card {
     };
     on useSkill {
       when :( :e.isSkillType("normal") );
-      const bunny = :$(`my summon with definition id ${BaronBunny}`);
+      const bunny = :query($.my.summon.def(BaronBunny));
       if (bunny) {
         :damage(DamageType.Pyro, 3);
         bunny.dispose();
@@ -518,11 +522,11 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Anemo, 2);
-    :heal(1, "my active");
+    :heal(1, $.my.active);
   };
   on increaseDamage {
     when :(
-      :$(`my equipment with definition id ${LandsOfDandelion}`) && // 装备有天赋的琴在场时
+      :query($.my.typeEquipment.def(LandsOfDandelion)) && // 装备有天赋的琴在场时
         :e.type === DamageType.Anemo
     );
     :e.increaseDamage(1);
@@ -541,7 +545,7 @@ define skill {
   skillType burst;
   cost DiceType.Anemo, 4;
   cost DiceType.Energy, 3;
-  :heal(2, "all my characters");
+  :heal(2, $.my.character);
   :summon(DandelionField);
 };
 
@@ -692,7 +696,7 @@ define skill {
   skillType burst;
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 3;
-  const summons = :$$("my summons");
+  const summons = :queryAll($.my.summon);
   const damageValue = 2 + summons.length * 2;
   :damage(DamageType.Hydro, damageValue);
   if (:self.hasEquipment(StreamingSurge)) {
@@ -723,7 +727,7 @@ define status {
   on useSkill {
     when :( :e.isSkillType("normal") );
     usage perRound, 1;
-    :characterStatus(SuperlativeSuperstrength, "@master");
+    :characterStatus(SuperlativeSuperstrength, :self.master);
   };
 };
 

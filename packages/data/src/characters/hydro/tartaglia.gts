@@ -51,7 +51,7 @@ define status {
   on increaseSkillDamage {
     when :( :e.target.hasStatus(Riptide) );
     usage perRound, 2;
-    :damage(DamageType.Piercing, 1, "opp next");
+    :damage(DamageType.Piercing, 1, $.opp.next);
   };
 };
 
@@ -91,7 +91,7 @@ define status {
 define combatStatus {
   id 112044 as private Riptide2;
   once switchActive {
-    :characterStatus(Riptide, "my active");
+    :characterStatus(Riptide, $.my.active);
   };
 };
 
@@ -108,7 +108,7 @@ define skill {
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
   if (:skillInfo.charged) {
-    :characterStatus(Riptide, "opp active");
+    :characterStatus(Riptide, $.opp.active);
   }
 };
 
@@ -124,7 +124,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :characterStatus(MeleeStance);
   :damage(DamageType.Hydro, 2);
-  :characterStatus(Riptide, "opp active");
+  :characterStatus(Riptide, $.opp.active);
 };
 
 /**
@@ -143,7 +143,7 @@ define skill {
   if (:self.hasStatus(RangedStance)) {
     :damage(DamageType.Hydro, 5);
     :self.gainEnergy(2);
-    :characterStatus(Riptide, "opp active");
+    :characterStatus(Riptide, $.opp.active);
   } else {
     :damage(DamageType.Hydro, 7);
   }
@@ -233,8 +233,8 @@ define card {
       :useSkill(FoulLegacyRagingTide);
     };
     on endPhase {
-      when :( :$(`opp active has status with definition id ${Riptide}`) );
-      :damage(DamageType.Piercing, 1, "opp active");
+      when :( :query($.opp.active.has($.typeStatus.def(Riptide))) );
+      :damage(DamageType.Piercing, 1, $.opp.active);
     };
   };
 };

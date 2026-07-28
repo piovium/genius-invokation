@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -204,7 +205,7 @@ define card {
     skill {
       id 1161121;
       cost DiceType.Void, 2;
-      :consumeNightsoul("@master");
+      :consumeNightsoul(:self.master);
       :drawCards(3);
     };
   };
@@ -223,7 +224,7 @@ define skill {
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
   if (:self.hasStatus(NightsoulsBlessing)) {
-    :characterStatus(NightsoulsBlessing, "@self", {
+    :characterStatus(NightsoulsBlessing, :self, {
       overrideVariables: {
         nightsoul: 1,
       },
@@ -244,7 +245,7 @@ define skill {
   cost DiceType.Geo, 2;
   filter :( !:self.hasStatus(NightsoulsBlessing) );
   :equip(CombatBladingGear);
-  :gainNightsoul("@self", 1);
+  :gainNightsoul(:self, 1);
 };
 
 /**
@@ -262,7 +263,7 @@ define skill {
   let healCount = 1;
   let drawCount = 1;
   for (const [type, def] of Object.entries(sampleMap)) {
-    const st = :$(`my status with definition id ${def}`);
+    const st = :query($.my.typeStatus.def(def));
     if (st) {
       if (def === SourceSampleGeo) {
         drawCount += st.getVariable("layer");
@@ -271,7 +272,7 @@ define skill {
       }
     }
   }
-  :heal(healCount, `my characters order by health - maxHealth limit 1`);
+  :heal(healCount, $.macros.myMostInjured);
   :drawCards(drawCount);
 };
 
@@ -308,7 +309,7 @@ define skill {
       ) as Record<SampleType, number>;
       sampleCount[DiceType.Geo] = 3;
       const elements = new Set(
-        :$$(`my characters includes defeated`).map((ch) => ch.element()),
+        :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
       );
       for (const e of elements) {
         if (e !== DiceType.Geo && e in sampleCount) {
@@ -318,7 +319,7 @@ define skill {
       }
       for (const [element, layer] of Object.entries(sampleCount)) {
         if (layer > 0) {
-          :characterStatus(sampleMap[Number(element) as SampleType], "@self", {
+          :characterStatus(sampleMap[Number(element) as SampleType], :self, {
             overrideVariables: { layer },
           });
         }
@@ -328,11 +329,11 @@ define skill {
       const nightsoul = :self.hasStatus(NightsoulsBlessing);
       if (nightsoul && nightsoul.getVariable("nightsoul") >= 2) {
         for (const [type, def] of Object.entries(sampleMap)) {
-          if (:$(`my status with definition id ${def}`)) {
+          if (:query($.my.typeStatus.def(def))) {
             :combatStatus(dmgBonusMap[Number(type) as SampleType], "opp");
           }
         }
-        :consumeNightsoul("@self", 2);
+        :consumeNightsoul(:self, 2);
       }
     };
   };
@@ -368,7 +369,7 @@ define card {
   since "v5.6.0";
   cost DiceType.Geo, 2;
   filter :{
-    const ch = :$(`my character with definition id ${Xilonen}`);
+    const ch = :query($.my.character.def(Xilonen));
     return ch && !ch.hasNightsoulsBlessing();
   };
   talent Xilonen {
@@ -378,7 +379,7 @@ define card {
     on switchActive {
       when :( :e.switchInfo.to.hasNightsoulsBlessing() );
       usage perRound, 2;
-      :gainNightsoul("@event.switchTo", 1);
+      :gainNightsoul(:e.switchInfo.to, 1);
     };
   };
 };

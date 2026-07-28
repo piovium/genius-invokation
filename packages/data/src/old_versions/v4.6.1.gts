@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   skill,
   DiceType,
@@ -144,7 +145,7 @@ define summon {
     when :(
       :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal")
     );
-    :heal(1, "my characters order by health - maxHealth limit 1");
+    :heal(1, $.macros.myMostInjured);
   };
 };
 
@@ -171,7 +172,7 @@ define card {
       usage 2 {
         autoDispose false;
       };
-      for (const ch of :$$(`all my defeated characters`)) {
+      for (const ch of :queryAll($.my.character.onlyDefeated)) {
         ch.heal(2, { kind: "revive" });
       }
     };

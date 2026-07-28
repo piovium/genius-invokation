@@ -77,7 +77,7 @@ define card {
         name "stage3";
         visible false;
       };
-      :apply(DamageType.Hydro, "all my characters");
+      :apply(DamageType.Hydro, $.my.character);
       const targetCh = :query($.macros.myMostInjured);
       if (!targetCh) {
         return;
@@ -106,7 +106,7 @@ define card {
     adventureSpot;
     on enter {
       when :( !:e.overridden );
-      :damage(DamageType.Piercing, 1, "all my characters");
+      :damage(DamageType.Piercing, 1, $.my.character);
     };
     on adventure {
       when :( :getVariable("exp") % 2 === 0 );
@@ -189,7 +189,7 @@ define card {
         name "stage2";
         visible false;
       };
-      :characterStatus(BattlePlan, "my active", {
+      :characterStatus(BattlePlan, $.my.active, {
         overrideVariables: { usage: 2 },
       });
     };
@@ -199,7 +199,7 @@ define card {
         name "stage3";
         visible false;
       };
-      const summons = :$$("opp summons");
+      const summons = :queryAll($.opp.summon);
       if (summons.length > 0) {
         const summon = :random(summons);
         :dispose(summon);

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -37,7 +38,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Geo, 1);
-    if (:$$(`my character include defeated with tag (geo)`).length >= 2) {
+    if (:queryAll($.my.character.includesDefeated.tag("geo")).length >= 2) {
       :combatStatus(Crystallize);
     }
   };
@@ -142,7 +143,7 @@ define card {
     on skillDamage {
       when :(
         :e.type === DamageType.Geo &&
-          :$(`my combat status with definition id ${GeneralsWarBanner}`)
+          :query($.my.combatStatus.def(GeneralsWarBanner))
       );
       listenTo samePlayer;
       usage perRound, 1;

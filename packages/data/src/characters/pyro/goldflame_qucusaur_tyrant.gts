@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -37,11 +38,11 @@ define status {
     usage 1 {
       append;
     };
-    const chosen = :$(`my equipment with definition id ${FlamelordsBlessing}`)
+    const chosen = :query($.my.typeEquipment.def(FlamelordsBlessing))
       ? :random(:player.hands)
       : null;
     const damageValue = 1 + (chosen?.diceCost() ?? 0);
-    :damage(DamageType.Piercing, 1, "opp standby");
+    :damage(DamageType.Piercing, 1, $.opp.standby);
     :damage(DamageType.Pyro, damageValue);
     if (chosen) {
       :disposeCard(chosen);
@@ -93,7 +94,7 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 1);
-  :characterStatus(FlyingSwirl, "@self", {
+  :characterStatus(FlyingSwirl, :self, {
     overrideVariables: {
       usage: 2,
     },
@@ -111,9 +112,9 @@ define skill {
   skillType burst;
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Piercing, 1, "opp standby");
+  :damage(DamageType.Piercing, 1, $.opp.standby);
   :damage(DamageType.Pyro, 3);
-  :characterStatus(GoldflameState, "@self");
+  :characterStatus(GoldflameState, :self);
 };
 
 /**
@@ -127,7 +128,7 @@ define skill {
   skillType passive {
     on actionPhase {
       when :( :roundNumber % 2 === 0 );
-      :characterStatus(GoldflameState, "@self");
+      :characterStatus(GoldflameState, :self);
     };
   };
 };

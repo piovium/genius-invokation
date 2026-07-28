@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -37,7 +38,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Cryo, 1);
-    :heal(2, "my active");
+    :heal(2, $.my.active);
   };
 };
 
@@ -109,7 +110,7 @@ define skill {
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 3;
   :damage(DamageType.Cryo, 1);
-  :heal(2, "@self");
+  :heal(2, :self);
   :summon(DrunkenMist);
 };
 

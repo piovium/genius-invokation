@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -54,7 +55,7 @@ define skill {
   cost DiceType.Cryo, 3;
   filter :( !:self.hasStatus(NightsoulsBlessing) );
   :damage(DamageType.Cryo, 2);
-  :gainNightsoul("@self", 1);
+  :gainNightsoul(:self, 1);
   :combatStatus(OpalShield);
   :combatStatus(Itzpapa);
 };
@@ -112,10 +113,7 @@ define combatStatus {
     if (:e.target.variables.alive) {
       :characterStatus(BondOfLife, :e.target);
     }
-    :characterStatus(
-      BondOfLife,
-      `opp characters with definition id ${Arlecchino}`,
-    );
+    :characterStatus(BondOfLife, $.opp.character.def(Arlecchino));
   };
 };
 
@@ -132,7 +130,7 @@ define skill {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 3);
-  :gainNightsoul("@self", 1);
+  :gainNightsoul(:self, 1);
   if (:self.hasEquipment(TeachingsOfTheCollectiveOfPlenty)) {
     :combatStatus(KineticEnergyScale, "my", {
       overrideVariables: { usage: 3 },

@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -41,7 +42,7 @@ define summon {
   };
   on useSkill {
     when :{
-      const escoffier = :$(`my character with definition id ${Escoffier}`);
+      const escoffier = :query($.my.character.def(Escoffier));
       if (!escoffier || !escoffier.hasEquipment(TeaPartiesBurstingWithColor)) {
         return false;
       }
@@ -106,7 +107,7 @@ define card {
   id 111152 as GildedHall;
   undiscoverable;
   food;
-  :characterStatus(GildedHallInEffect, "@targets.0");
+  :characterStatus(GildedHallInEffect, :e.targets[0]);
 };
 
 /**
@@ -120,8 +121,8 @@ define card {
   id 111153 as AutumnFrost;
   undiscoverable;
   food;
-  :heal(1, "@targets.0");
-  :increaseMaxHealth(1, "@targets.0");
+  :heal(1, :e.targets[0]);
+  :increaseMaxHealth(1, :e.targets[0]);
 };
 
 /**
@@ -138,7 +139,7 @@ define card {
     satiatedFilter "allNot";
   };
   cost DiceType.Void, 2;
-  :characterStatus(WavekissedSandsInEffect, "all my characters");
+  :characterStatus(WavekissedSandsInEffect, $.my.character);
 };
 
 /**
@@ -155,7 +156,7 @@ define card {
     satiatedFilter "allNot";
   };
   cost DiceType.Aligned, 1;
-  :characterStatus(VerdantGiftInEffect, "all my characters");
+  :characterStatus(VerdantGiftInEffect, $.my.character);
 };
 
 /**
@@ -222,7 +223,7 @@ define skill {
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 1);
-  :heal(2, "all my characters");
+  :heal(2, $.my.character);
 };
 
 /**

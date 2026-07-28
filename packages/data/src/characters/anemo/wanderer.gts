@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -69,8 +70,8 @@ define skill {
   skillType normal;
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
-  if (:self.hasStatus(Windfavored) && :$("opp next")) {
-    :damage(DamageType.Anemo, 1, "opp next");
+  if (:self.hasStatus(Windfavored) && :query($.opp.next)) {
+    :damage(DamageType.Anemo, 1, $.opp.next);
   } else {
     :damage(DamageType.Anemo, 1);
   }
@@ -144,7 +145,7 @@ define card {
     };
     on dealDamage {
       when :( :self.master.hasStatus(Windfavored) && :e.via.charged );
-      :characterStatus(Descent, "@master");
+      :characterStatus(Descent, :self.master);
     };
   };
 };

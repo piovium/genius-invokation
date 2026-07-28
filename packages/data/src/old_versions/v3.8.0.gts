@@ -1,4 +1,4 @@
-import { DamageType, DiceType, card, skill } from "@gi-tcg/core/builder";
+import { $, DamageType, DiceType, card, skill } from "@gi-tcg/core/builder";
 import { VermillionHereafterEffect } from "../cards/equipment/artifacts.gts";
 
 /**
@@ -13,7 +13,7 @@ define card {
   cost DiceType.Aligned, 1;
   support place {
     on roll {
-      :e.fixDice(:$("my active")!.element(), 2);
+      :e.fixDice(:query($.my.active)!.element(), 2);
     };
   };
 };
@@ -428,7 +428,7 @@ define card {
     };
     on switchActive {
       when :( :self.master.id === :e.switchInfo.to.id );
-      :characterStatus(VermillionHereafterEffect, "@master");
+      :characterStatus(VermillionHereafterEffect, :self.master);
     };
   };
 };
@@ -478,7 +478,7 @@ define card {
         :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst")
       );
       listenTo samePlayer;
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
   };
 };
@@ -501,7 +501,7 @@ define card {
         :e.skill.caller.id !== :self.master.id && :e.isSkillType("burst")
       );
       listenTo samePlayer;
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
     on increaseSkillDamage {
       when :( :e.viaSkillType("burst") );
@@ -520,7 +520,7 @@ define card {
 define card {
   id 331803 as private ThunderAndEternity;
   until "v3.8.0";
-  :convertDice(:$("my active")!.element(), "all");
+  :convertDice(:query($.my.active)!.element(), "all");
 };
 
 /**
@@ -535,5 +535,5 @@ define card {
   until "v3.8.0";
   filter :( :player.hasDefeated );
   :generateDice(DiceType.Omni, 1);
-  :gainEnergy(1, "my active");
+  :gainEnergy(1, $.my.active);
 };

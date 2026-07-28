@@ -1,4 +1,5 @@
 import {
+  $,
   DamageType,
   DiceType,
   card,
@@ -43,7 +44,7 @@ define skill {
   :damage(DamageType.Hydro, 3);
   if (
     :self.hasEquipment(TamakushiCasket) &&
-    :$(`my summon with definition id ${BakeKurage}`)
+    :query($.my.summon.def(BakeKurage))
   ) {
     :summon(BakeKurage);
   }

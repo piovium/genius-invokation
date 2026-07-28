@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -35,7 +36,7 @@ define summon {
   hint DamageType.Pyro, "1";
   on endPhase {
     usage 2;
-    :damage(DamageType.Piercing, 1, "opp standby");
+    :damage(DamageType.Piercing, 1, $.opp.standby);
     :damage(DamageType.Pyro, 1);
   };
 };
@@ -51,7 +52,7 @@ define status {
   id 123024 as AegisOfAbyssalFlame;
   shield 2;
   on selfDispose {
-    :damage(DamageType.Piercing, 1, "all opp characters");
+    :damage(DamageType.Piercing, 1, $.opp.character);
   };
 };
 
@@ -82,10 +83,10 @@ define status {
     const talent = :self.master.hasEquipment(EmbersRekindled);
     if (talent) {
       :dispose(talent);
-      :characterStatus(AegisOfAbyssalFlame, "@master");
+      :characterStatus(AegisOfAbyssalFlame, :self.master);
     }
     :self.master.setVariable("fieryRebirthTriggered", 1);
-    :characterStatus(FieryRebirthHoned, "@master");
+    :characterStatus(FieryRebirthHoned, :self.master);
     :dispose();
   };
 };
@@ -218,7 +219,7 @@ define card {
   talent AbyssLectorFathomlessFlames, none {
     on enter {
       when :( :self.master.getVariable("fieryRebirthTriggered") );
-      :characterStatus(AegisOfAbyssalFlame, "@master");
+      :characterStatus(AegisOfAbyssalFlame, :self.master);
       :dispose();
     };
   };

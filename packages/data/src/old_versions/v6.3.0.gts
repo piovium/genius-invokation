@@ -173,7 +173,7 @@ define card {
   artifact {
     on useTechnique {
       usage perRound, 1;
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
   };
 };
@@ -264,5 +264,5 @@ define card {
   food {
     injuredOnly;
   };
-  :heal(1 + :$$(`my summons`).length, "@targets.0");
+  :heal(1 + :queryAll($.my.summon).length, :e.targets[0]);
 };

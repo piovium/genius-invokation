@@ -27,6 +27,7 @@ import {
   originalDiceCostOfCard,
   $,
   type CombatStatusHandle,
+  type IQuery,
 } from "@gi-tcg/core/builder";
 import {
   BurningFlame,
@@ -116,7 +117,7 @@ define combatStatus {
   on useSkill {
     usage 2;
     usage perRound, 1;
-    :damage(DamageType.Cryo, 1, "my active");
+    :damage(DamageType.Cryo, 1, $.my.active);
   };
 };
 
@@ -132,7 +133,7 @@ define combatStatus {
   on useSkill {
     usage 2;
     usage perRound, 1;
-    :damage(DamageType.Hydro, 1, "my active");
+    :damage(DamageType.Hydro, 1, $.my.active);
   };
 };
 
@@ -148,7 +149,7 @@ define combatStatus {
   on useSkill {
     usage 2;
     usage perRound, 1;
-    :damage(DamageType.Pyro, 1, "my active");
+    :damage(DamageType.Pyro, 1, $.my.active);
   };
 };
 
@@ -164,7 +165,7 @@ define combatStatus {
   on useSkill {
     usage 2;
     usage perRound, 1;
-    :damage(DamageType.Electro, 1, "my active");
+    :damage(DamageType.Electro, 1, $.my.active);
   };
 };
 
@@ -180,7 +181,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Cryo, 1;
   tags resonance;
-  :characterStatus(ElementalResonanceShatteringIceInEffect, "my active");
+  :characterStatus(ElementalResonanceShatteringIceInEffect, $.my.active);
 };
 
 /**
@@ -210,9 +211,9 @@ define card {
   since "v3.3.0";
   cost DiceType.Hydro, 1;
   tags resonance;
-  filter :( :$(`my characters with health < maxHealth`) );
-  :heal(2, "my active");
-  :heal(1, "my standby");
+  filter :( :query($.my.character.var("health", "<", "maxHealth")) );
+  :heal(2, $.my.active);
+  :heal(1, $.my.standby);
 };
 
 /**
@@ -227,7 +228,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Pyro, 1;
   tags resonance;
-  :characterStatus(ElementalResonanceFerventFlamesInEffect, "my active");
+  :characterStatus(ElementalResonanceFerventFlamesInEffect, $.my.active);
 };
 
 /**
@@ -258,9 +259,9 @@ define card {
   since "v3.3.0";
   cost DiceType.Electro, 1;
   tags resonance;
-  filter :( :$(`my characters with energy < maxEnergy`) );
-  :gainEnergy(1, "my active");
-  :gainEnergy(1, "my standby character with energy < maxEnergy limit 1");
+  filter :( :query($.my.character.var("energy", "<", "maxEnergy")) );
+  :gainEnergy(1, $.my.active);
+  :gainEnergy(1, $.my.standby.var("energy", "<", "maxEnergy").limit(1));
 };
 
 /**
@@ -378,22 +379,26 @@ define card {
   cost DiceType.Dendro, 1;
   tags resonance;
   filter :(
-    :$(
-      `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore} or my combat status with definition id ${CatalyzingField} or my summon with definition id ${BurningFlame}`,
+    :query(
+      $.my.combatStatus
+        .def(DendroCore)
+        .union($.my.summon.def(BountifulCore))
+        .union($.my.combatStatus.def(CatalyzingField))
+        .union($.my.summon.def(BurningFlame)),
     )
   );
   if (
-    :$(
-      `my combat status with definition id ${DendroCore} or my summon with definition id ${BountifulCore}`,
+    :query(
+      $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
     )
   ) {
-    :damage(DamageType.Hydro, 1, "opp active");
+    :damage(DamageType.Hydro, 1, $.opp.active);
   }
-  if (:$(`my combat status with definition id ${CatalyzingField}`)) {
-    :damage(DamageType.Electro, 1, "opp active");
+  if (:query($.my.combatStatus.def(CatalyzingField))) {
+    :damage(DamageType.Electro, 1, $.opp.active);
   }
-  if (:$(`my summon with definition id ${BurningFlame}`)) {
-    :damage(DamageType.Pyro, 1, "opp active");
+  if (:query($.my.summon.def(BurningFlame))) {
+    :damage(DamageType.Pyro, 1, $.opp.active);
   }
 };
 
@@ -528,7 +533,7 @@ define combatStatus {
   id 303181 as WindAndFreedomInEffect;
   oneDuration;
   on useSkill {
-    :switchActive("my next");
+    :switchActive($.my.next);
   };
 };
 
@@ -542,7 +547,7 @@ define combatStatus {
 define card {
   id 331801 as WindAndFreedom;
   since "v3.7.0";
-  filter :( :$(`my standby characters`) );
+  filter :( :query($.my.standby) );
   :combatStatus(WindAndFreedomInEffect);
 };
 
@@ -614,8 +619,8 @@ define card {
   id 331805 as WaterAndJustice;
   since "v4.7.0";
   cost DiceType.Void, 2;
-  filter :( :$(`my characters with health < maxHealth`) );
-  const chs = :$$("all my characters");
+  filter :( :query($.my.character.var("health", "<", "maxHealth")) );
+  const chs = :queryAll($.my.character);
   const chCount = chs.length;
   const totalHealth = chs.reduce((acc, ch) => acc + ch.health, 0);
   const avgHealth = Math.floor(totalHealth / chCount);
@@ -629,7 +634,7 @@ define card {
       :heal(expectHealth - currentHealth, chs[i], { kind: "distribution" });
     }
   }
-  :heal(1, "all my characters");
+  :heal(1, $.my.character);
 };
 
 /**
@@ -662,7 +667,7 @@ define card {
   since "v5.7.0";
   cost DiceType.Aligned, 1;
   addTarget $.my.character;
-  :characterStatus(OdeOfResurrection, "@targets.0");
+  :characterStatus(OdeOfResurrection, :e.targets[0]);
 };
 
 /**
@@ -739,7 +744,7 @@ define card {
 define card {
   id 332002 as ChangingShifts;
   since "v3.3.0";
-  filter :( :$(`my standby characters`) );
+  filter :( :query($.my.standby) );
   :combatStatus(ChangingShiftsInEffect);
 };
 
@@ -804,10 +809,10 @@ define card {
   since "v3.3.0";
   filter :(
     :player.hasDefeated &&
-      !:$(`my combat status with definition id ${IHaventLostYetCooldown}`)
+      !:query($.my.combatStatus.def(IHaventLostYetCooldown))
   );
   :generateDice(DiceType.Omni, 1);
-  :gainEnergy(1, "my active");
+  :gainEnergy(1, $.my.active);
   :combatStatus(IHaventLostYetCooldown);
 };
 
@@ -820,7 +825,7 @@ define card {
 define card {
   id 332006 as LeaveItToMe;
   since "v3.3.0";
-  filter :( :$(`my standby characters`) );
+  filter :( :query($.my.standby) );
   :combatStatus(LeaveItToMeInEffect);
 };
 
@@ -847,7 +852,7 @@ define combatStatus {
 define card {
   id 332007 as WhenTheCraneReturned;
   since "v3.3.0";
-  filter :( :$(`my standby characters`) );
+  filter :( :query($.my.standby) );
   cost DiceType.Aligned, 1;
   :combatStatus(WhenTheCraneReturnedInEffect);
 };
@@ -862,7 +867,7 @@ define combatStatus {
   id 303207 as private WhenTheCraneReturnedInEffect;
   since "v3.3.0";
   once useSkill {
-    :switchActive("my next");
+    :switchActive($.my.next);
   };
 };
 
@@ -876,8 +881,8 @@ define card {
   id 332008 as Starsigns;
   since "v3.3.0";
   cost DiceType.Void, 2;
-  filter :( :$(`my active with energy < maxEnergy`) );
-  :$("my active character")?.gainEnergy(1);
+  filter :( :query($.my.active.var("energy", "<", "maxEnergy")) );
+  :query($.my.active)?.gainEnergy(1);
 };
 
 /**
@@ -891,14 +896,15 @@ define card {
   since "v3.3.0";
   cost DiceType.Aligned, 1;
   filter :(
-    :$(`my standby with energy > 0`) && :$(`my active with energy < maxEnergy`)
+    :query($.my.standby.var("energy", ">", 0)) &&
+      :query($.my.active.var("energy", "<", "maxEnergy"))
   );
-  const chs = :$$("my standby characters limit 2");
+  const chs = :queryAll($.my.standby.limit(2));
   let count = 0;
   for (const ch of chs) {
     count += ch.loseEnergy();
   }
-  :$("my active")?.gainEnergy(count);
+  :query($.my.active)?.gainEnergy(count);
 };
 
 /**
@@ -1001,7 +1007,7 @@ define card {
   id 332014 as GuardiansOath;
   since "v3.3.0";
   cost DiceType.Aligned, 4;
-  :dispose("all summons");
+  :dispose($.summon);
 };
 
 /**
@@ -1064,7 +1070,7 @@ define card {
   cost DiceType.Aligned, 3;
   tags action;
   addTarget $.my.character.exclude($.has($.typeStatus.tag("disableSkill")));
-  :switchActive("@targets.0");
+  :switchActive(:e.targets[0]);
   :useSkill("normal");
 };
 
@@ -1079,7 +1085,7 @@ define card {
   id 332018 as HeavyStrike;
   since "v3.7.0";
   cost DiceType.Aligned, 1;
-  :characterStatus(HeavyStrikeInEffect, "my active");
+  :characterStatus(HeavyStrikeInEffect, $.my.active);
 };
 
 /**
@@ -1355,7 +1361,7 @@ define card {
   id 332027 as FlickeringFourleafSigil;
   since "v4.3.0";
   addTarget $.my.character;
-  :characterStatus(FourLeafSigil, "@targets.0");
+  :characterStatus(FourLeafSigil, :e.targets[0]);
 };
 
 /**
@@ -1368,7 +1374,7 @@ define status {
   id 303227 as private FourLeafSigil;
   since "v4.3.0";
   on endPhase {
-    :switchActive("@master");
+    :switchActive(:self.master);
   };
 };
 
@@ -1382,7 +1388,7 @@ define card {
   id 332028 as MachineAssemblyLine;
   since "v4.4.0";
   cost DiceType.Aligned, 1;
-  :damage(DamageType.Physical, 1, "my active");
+  :damage(DamageType.Physical, 1, $.my.active);
   :drawCards(1, { withTag: "artifact" });
 };
 
@@ -1397,7 +1403,7 @@ define card {
   id 332029 as SunyataFlower;
   since "v4.4.0";
   addTarget $.my.support;
-  :dispose("@targets.0");
+  :dispose(:e.targets[0]);
   const candidates = :allCardDefinitions("support");
   const card0 = :random(candidates);
   const card1 = :random(candidates);
@@ -1432,8 +1438,8 @@ define card {
   id 332030 as ControlledDirectionalBlast;
   since "v4.5.0";
   cost DiceType.Aligned, 1;
-  filter :( :$$("opp summons or opp supports").length >= 4 );
-  for (const summon of :$$("all summons")) {
+  filter :( :queryAll($.opp.summon.union($.opp.support)).length >= 4 );
+  for (const summon of :queryAll($.summon)) {
     summon.consumeUsage();
   }
 };
@@ -1503,9 +1509,9 @@ define card {
   since "v4.6.0";
   undiscoverable;
   :generateDice("randomElement", 1);
-  if (!:$(`my active has status with definition id ${UnderseaTreasureOnCD}`)) {
-    :heal(1, "my active");
-    :characterStatus(UnderseaTreasureOnCD, "my active");
+  if (!:query($.my.active.has($.typeStatus.def(UnderseaTreasureOnCD)))) {
+    :heal(1, $.my.active);
+    :characterStatus(UnderseaTreasureOnCD, $.my.active);
   }
 };
 
@@ -1544,13 +1550,11 @@ define card {
   since "v4.7.0";
   undiscoverable;
   filter :(
-    !:$(
-      `my combat status with definition id ${BonecrunchersEnergyBlockCombatStatus}`,
-    )
+    !:query($.my.combatStatus.def(BonecrunchersEnergyBlockCombatStatus))
   );
   :abortPreview();
   :disposeMaxCostHands(1);
-  const activeCh = :$("my active")!;
+  const activeCh = :query($.my.active)!;
   :generateDice(activeCh.element(), 1);
   :combatStatus(BonecrunchersEnergyBlockCombatStatus);
 };
@@ -1579,10 +1583,8 @@ define card {
   undiscoverable;
   tags abyss;
   disableTuning;
-  filter :(
-    !:$(`my combat status with definition id ${ForbiddenKnowledgeCoolDown}`)
-  );
-  :damage(DamageType.Piercing, 1, "my active");
+  filter :( !:query($.my.combatStatus.def(ForbiddenKnowledgeCoolDown)) );
+  :damage(DamageType.Piercing, 1, $.my.active);
   :drawCards(1);
   :combatStatus(ForbiddenKnowledgeCoolDown);
 };
@@ -1980,7 +1982,7 @@ define card {
 define card {
   id 332037 as Tada;
   since "v4.8.0";
-  :damage(DamageType.Physical, 1, "my active");
+  :damage(DamageType.Physical, 1, $.my.active);
   :combatStatus(TadaInEffect);
 };
 
@@ -2061,7 +2063,7 @@ define card {
   id 332040 as EremiteTeatime;
   since "v5.1.0";
   cost DiceType.Aligned, 2;
-  const characters = :$$("my characters include defeated");
+  const characters = :queryAll($.my.character.includesDefeated);
   const elements = characters.map((ch) => ch.element());
   const weapons = characters.map((ch) => ch.weaponTag());
   const nations = characters.flatMap((ch) => ch.nationTags());
@@ -2092,14 +2094,14 @@ define card {
   id 332041 as UltimateSurfingBuddy;
   since "v5.2.0";
   tags action;
-  filter :( :$$(`all summons`).length >= 2 );
+  filter :( :queryAll($.summon).length >= 2 );
   :abortPreview();
-  const mySummons = :$$(`my summons`);
+  const mySummons = :queryAll($.my.summon);
   if (mySummons.length > 0) {
     const mySummon = :random(mySummons);
     :triggerEndPhaseSkill(mySummon);
   }
-  const oppSummons = :$$(`opp summons`);
+  const oppSummons = :queryAll($.opp.summon);
   if (oppSummons.length > 0) {
     const oppSummon = :random(oppSummons);
     :triggerEndPhaseSkill(oppSummon);
@@ -2255,7 +2257,7 @@ define status {
     );
     listenTo samePlayer;
     usage 2;
-    :characterStatus(FruitsOfTrainingInEffect02, "@master");
+    :characterStatus(FruitsOfTrainingInEffect02, :self.master);
   };
 };
 
@@ -2269,7 +2271,7 @@ define card {
   id 332048 as FruitsOfTraining;
   since "v5.7.0";
   addTarget $.my.character;
-  :characterStatus(FruitsOfTrainingInEffect01, "@targets.0");
+  :characterStatus(FruitsOfTrainingInEffect01, :e.targets[0]);
 };
 
 /**
@@ -2348,10 +2350,7 @@ define summon {
   hint DamageType.Heal, ((c, e) => e.variables.effect);
   on endPhase {
     usage 1;
-    :heal(
-      :getVariable("effect"),
-      "my characters order by health - maxHealth limit 1",
-    );
+    :heal(:getVariable("effect"), $.macros.myMostInjured);
   };
 };
 
@@ -2362,9 +2361,11 @@ export const SIMULANKA_SUMMONS = [
   OrigamiHamsterSummon,
 ];
 
-export const SIMULANKA_QUERY = SIMULANKA_SUMMONS.map(
-  (id) => `(my summons with definition id ${id})`,
-).join(` or `) as `${string} summons ${string}`;
+export const SIMULANKA_QUERY: IQuery<{
+  type: "summon";
+  areaType: "summons";
+  variables: never;
+}> = $.union(...SIMULANKA_SUMMONS.map((id) => $.my.summon.def(id)));
 
 /**
  * @id 301033
@@ -2595,7 +2596,7 @@ define card {
   :e.targets[0].dispose();
   :generateDice("randomElement", Math.min(usage, 2));
   if (usage >= 3) {
-    :heal(2, "my characters order by health - maxHealth limit 1");
+    :heal(2, $.macros.myMostInjured);
   }
 };
 
@@ -2610,10 +2611,10 @@ define card {
   since "v6.0.0";
   cost DiceType.Void, 2;
   :drawCards(2);
-  if (:$$("my hands with tag (weapon)").length > 1) {
+  if (:queryAll($.my.hand.tag("weapon")).length > 1) {
     :generateDice(DiceType.Omni, 1);
   }
-  if (:$$("my hands with tag (artifact)").length > 1) {
+  if (:queryAll($.my.hand.tag("artifact")).length > 1) {
     :generateDice(DiceType.Omni, 1);
   }
 };
@@ -2628,9 +2629,9 @@ define card {
   id 332056 as AnAncientSacrificeOfSacredBrocade;
   since "v6.1.0";
   cost DiceType.Aligned, 1;
-  const exp = :$(`my support with tag (adventureSpot)`)?.variables.exp ?? 0;
+  const exp = :query($.my.support.tag("adventureSpot"))?.variables.exp ?? 0;
   if (exp >= 4) {
-    :damage(DamageType.Physical, 1, "my active");
+    :damage(DamageType.Physical, 1, $.my.active);
     :adventure();
   }
   :adventure();
@@ -2678,7 +2679,7 @@ define card {
   undiscoverable;
   cost DiceType.Aligned, 1;
   addTarget $.my.character;
-  :heal(2, "@targets.0");
+  :heal(2, :e.targets[0]);
   :generateDice("randomElement", 2);
 };
 
@@ -2709,8 +2710,8 @@ define card {
   undiscoverable;
   cost DiceType.Void, 4;
   addTarget $.my.character;
-  :heal(12, "@targets.0");
-  :characterStatus(ReforgeTheHolyBladeInEffect, "@targets.0");
+  :heal(12, :e.targets[0]);
+  :characterStatus(ReforgeTheHolyBladeInEffect, :e.targets[0]);
 };
 
 /**
@@ -2725,12 +2726,12 @@ define card {
   id 332057 as TheNarzissenkreuzAdventure;
   since "v6.2.0";
   cost DiceType.Aligned, 1;
-  const characters = :$$("my characters include defeated");
+  const characters = :queryAll($.my.character.includesDefeated);
   const elements = characters.map((ch) => ch.element());
   const weapons = characters.map((ch) => ch.weaponTag());
   const nations = characters.flatMap((ch) => ch.nationTags());
   if (new Set(elements).size < characters.length) {
-    :heal(1, "my characters order by health - maxHealth limit 1");
+    :heal(1, $.macros.myMostInjured);
   }
   if (new Set(weapons).size < characters.length) {
     :drawCards(1);
@@ -2751,7 +2752,7 @@ define combatStatus {
   duration 2;
   on endPhase {
     when :( :getVariable("duration") === 1 );
-    const actives = :$$(`all active characters`);
+    const actives = :queryAll($.active);
     for (const ch of actives) {
       :mutate({
         type: "modifyEntityVar",
@@ -2789,7 +2790,7 @@ define card {
   cost DiceType.Aligned, 1;
   addTarget $.my.support;
   :dispose(:e.targets[0]);
-  for (const summon of :$$(SIMULANKA_QUERY)) {
+  for (const summon of :queryAll(SIMULANKA_QUERY)) {
     summon.addVariable("effect", 1);
     summon.addVariable("usage", 1);
   }

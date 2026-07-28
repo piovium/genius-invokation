@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   summon,
@@ -110,7 +111,7 @@ define skill {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 3);
-  :gainEnergy(2, "all my characters and not @self");
+  :gainEnergy(2, $.my.character.exclude($.character.id(:self.id)));
 };
 
 /**

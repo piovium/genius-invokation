@@ -145,7 +145,7 @@ define card {
           return :player.hands.some((card) => !:isInInitialPile(card));
         })()
       ) {
-        :characterStatus(DiggingDownToPaydirt, "@master");
+        :characterStatus(DiggingDownToPaydirt, :self.master);
       }
     };
   };
@@ -169,7 +169,7 @@ define card {
       id 3130051;
       usage 2;
       cost DiceType.Aligned, 1;
-      :heal(1, "@master");
+      :heal(1, :self.master);
       const tags = ["place", "item", "food"] as const;
       const candidates: EntityDefinition[] = [];
       for (const tag of tags) {
@@ -275,7 +275,7 @@ define card {
       :damage(DamageType.Physical, 2);
     };
     on enter {
-      :characterStatus(WaveriderShield, "@master");
+      :characterStatus(WaveriderShield, :self.master);
     };
     on switchActive {
       when :( :e.switchInfo.from?.id === :self.master.id );
@@ -329,7 +329,7 @@ define card {
       id 3130081;
       usage 2;
       cost DiceType.Void, 3;
-      :characterStatus(TatankasaurusStatus01, "@master");
+      :characterStatus(TatankasaurusStatus01, :self.master);
     };
   };
 };
@@ -360,7 +360,7 @@ define combatStatus {
   defineSnippet checkCount,
     :{
       if (:getVariable("techniquesPlayedCount") >= 6) {
-        :characterStatus(SaurianBuddyCheers, "my active");
+        :characterStatus(SaurianBuddyCheers, $.my.active);
         :damage(DamageType.Physical, 3);
         :dispose();
       }

@@ -212,13 +212,13 @@ define card {
   cost DiceType.Electro, 1;
   talent Flins, none {
     on enter {
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
     on dealReaction {
       when :( :e.type === Reaction.LunarElectroCharged );
       listenTo samePlayer;
       usage perRound, 1;
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
   };
 };

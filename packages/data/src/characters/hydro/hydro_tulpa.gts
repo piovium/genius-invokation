@@ -41,7 +41,7 @@ define summon {
     :damage(DamageType.Hydro, 1);
   };
   on selfDispose {
-    :heal(2, "my characters with definition id 2206");
+    :heal(2, $.my.character.def(2206 as number));
   };
 };
 
@@ -62,7 +62,7 @@ define summon {
     :damage(DamageType.Hydro, 1);
   };
   on selfDispose {
-    :heal(2, "my characters with definition id 2206");
+    :heal(2, $.my.character.def(2206 as number));
   };
 };
 
@@ -83,7 +83,7 @@ define summon {
     :damage(DamageType.Hydro, 1);
   };
   on selfDispose {
-    :heal(2, "my characters with definition id 2206");
+    :heal(2, $.my.character.def(2206 as number));
   };
 };
 
@@ -104,7 +104,7 @@ define summon {
     :damage(DamageType.Hydro, 1);
   };
   on selfDispose {
-    :heal(2, "my characters with definition id 2206");
+    :heal(2, $.my.character.def(2206 as number));
   };
 };
 
@@ -172,12 +172,12 @@ define skill {
       usage perRound, 1 {
         name "usagePerRound1";
       };
-      :damage(DamageType.Piercing, 2, "@self");
-      if (!:$(`my summon with definition id ${HalfTulpa01}`)) {
+      :damage(DamageType.Piercing, 2, :self);
+      if (!:query($.my.summon.def(HalfTulpa01))) {
         :summon(HalfTulpa01);
-      } else if (!:$(`my summon with definition id ${HalfTulpa02}`)) {
+      } else if (!:query($.my.summon.def(HalfTulpa02))) {
         :summon(HalfTulpa02);
-      } else if (!:$(`my summon with definition id ${HalfTulpa03}`)) {
+      } else if (!:query($.my.summon.def(HalfTulpa03))) {
         :summon(HalfTulpa03);
       } else {
         :summon(HalfTulpa04);
@@ -189,17 +189,17 @@ define skill {
       asSkillType elemental;
       :damage(DamageType.Hydro, 2);
       if (:self.health >= 2) {
-        :damage(DamageType.Piercing, 1, "@self");
+        :damage(DamageType.Piercing, 1, :self);
       }
     };
     // 汛波：获得充能
     on useSkill {
       when :( :e.skill.definition.id === StormSurge );
-      :gainEnergy(1, "@self");
+      :gainEnergy(1, :self);
     };
     // 汛波：随机触发一个召唤物的结束阶段技能
     on useSkill {
-      when :( :e.skill.definition.id === StormSurge && :$(`my summons`) );
+      when :( :e.skill.definition.id === StormSurge && :query($.my.summon) );
       :abortPreview();
       const target = :random(:player.summons);
       :triggerEndPhaseSkill(target);
@@ -207,7 +207,7 @@ define skill {
     // 洪啸：触发所有召唤物的结束阶段技能
     on useSkill {
       when :( :e.skill.definition.id === ThunderingTide );
-      for (const summon of :$$(`my summons`)) {
+      for (const summon of :queryAll($.my.summon)) {
         :triggerEndPhaseSkill(summon);
       }
     };
@@ -288,7 +288,7 @@ define status {
   id 222062 as ElementalLifeformHydro;
   duration 2;
   on enter {
-    :apply(DamageType.Hydro, "@master");
+    :apply(DamageType.Hydro, :self.master);
   };
   on modifyReaction {
     :e.reApplyTo(DamageType.Hydro);
@@ -313,19 +313,19 @@ define card {
   cost DiceType.Hydro, 2;
   talent HydroTulpa, none {
     on enter {
-      :characterStatus(ElementalLifeformHydro, "@master");
+      :characterStatus(ElementalLifeformHydro, :self.master);
     };
     on declareEnd {
       when :(
         :self.master.health >= 3 &&
           :queryAll($.my.summon).length < :state.config.maxSummonsCount
       );
-      :damage(DamageType.Piercing, 2, "@master");
-      if (!:$(`my summon with definition id ${HalfTulpa01}`)) {
+      :damage(DamageType.Piercing, 2, :self.master);
+      if (!:query($.my.summon.def(HalfTulpa01))) {
         :summon(HalfTulpa01);
-      } else if (!:$(`my summon with definition id ${HalfTulpa02}`)) {
+      } else if (!:query($.my.summon.def(HalfTulpa02))) {
         :summon(HalfTulpa02);
-      } else if (!:$(`my summon with definition id ${HalfTulpa03}`)) {
+      } else if (!:query($.my.summon.def(HalfTulpa03))) {
         :summon(HalfTulpa03);
       } else {
         :summon(HalfTulpa04);

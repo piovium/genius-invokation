@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   summon,
@@ -103,7 +104,7 @@ define skill {
   id 14082 as YakanEvocationSesshouSakura;
   skillType elemental;
   cost DiceType.Electro, 3;
-  const sakura = :$(`my summon with definition id ${SesshouSakura}`);
+  const sakura = :query($.my.summon.def(SesshouSakura));
   if (sakura && sakura.getVariable("atk") === 1) {
     sakura.addVariable("atk", 1);
   }
@@ -122,7 +123,7 @@ define skill {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 4);
-  const sakura = :$(`my summon with definition id ${SesshouSakura}`);
+  const sakura = :query($.my.summon.def(SesshouSakura));
   if (sakura) {
     sakura.dispose();
     :combatStatus(TenkoThunderbolts);

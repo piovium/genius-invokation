@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, card, status } from "@gi-tcg/core/builder";
+import { $, DiceType, card, status } from "@gi-tcg/core/builder";
 
 /**
  * @id 311401
@@ -61,11 +61,11 @@ define card {
       :e.increaseDamage(1);
     };
     on enter {
-      const liyueCount = :$$(
-        `my characters include defeated with tag (liyue)`,
+      const liyueCount = :queryAll(
+        $.my.character.includesDefeated.tag("liyue"),
       ).length;
       if (liyueCount > 0) {
-        :characterStatus(LithicGuard, "@master", {
+        :characterStatus(LithicGuard, :self.master, {
           overrideVariables: {
             shield: Math.min(liyueCount, 3),
           },
@@ -118,18 +118,20 @@ define card {
     };
     on increaseSkillDamage {
       when :{
-        return !!:$(
-          "(my combat statuses with tag (shield)) or status with tag (shield) at @master",
+        return !!:query(
+          $.my.combatStatus
+            .tag("shield")
+            .union($.typeStatus.tag("shield").at($.id(:self.master.id))),
         );
       };
       :e.increaseDamage(1);
     };
     on useSkill {
       when :(
-        :e.isSkillType("elemental") && :$("my combat status with tag (shield)")
+        :e.isSkillType("elemental") && :query($.my.combatStatus.tag("shield"))
       );
       usage perRound, 1;
-      :$("my combat status with tag (shield)")?.addVariable("shield", 1);
+      :query($.my.combatStatus.tag("shield"))?.addVariable("shield", 1);
     };
   };
 };
@@ -152,11 +154,11 @@ define card {
     };
     on enter {
       when :( :self.master.energy === 0 );
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
     on actionPhase {
       when :( :self.master.energy === 0 );
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
   };
 };
@@ -193,7 +195,7 @@ define card {
       :e.increaseDamage(1);
     };
     on enter {
-      :characterStatus(MoonpiercerStatus, "@master");
+      :characterStatus(MoonpiercerStatus, :self.master);
     };
   };
 };
@@ -248,7 +250,7 @@ define card {
       :addVariable("justice", 1);
       if (:getVariable("justice") >= 4) {
         :addVariable("justice", -4);
-        :gainEnergy(1, "@master");
+        :gainEnergy(1, :self.master);
       }
     };
   };

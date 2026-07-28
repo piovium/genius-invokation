@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   summon,
@@ -37,7 +38,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Cryo, 1);
-    :damage(DamageType.Piercing, 1, "opp standby");
+    :damage(DamageType.Piercing, 1, $.opp.standby);
   };
 };
 
@@ -114,9 +115,9 @@ define skill {
     :self.hasEquipment(UndividedHeart) &&
     :getExtensionState().used[:self.who]
   ) {
-    :damage(DamageType.Piercing, 3, "opp standby");
+    :damage(DamageType.Piercing, 3, $.opp.standby);
   } else {
-    :damage(DamageType.Piercing, 2, "opp standby");
+    :damage(DamageType.Piercing, 2, $.opp.standby);
   }
   :damage(DamageType.Cryo, 2);
   :setExtensionState((st) => (st.used[:self.who] = true));
@@ -133,7 +134,7 @@ define skill {
   skillType burst;
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 3;
-  :damage(DamageType.Piercing, 1, "opp standby");
+  :damage(DamageType.Piercing, 1, $.opp.standby);
   :damage(DamageType.Cryo, 2);
   :summon(SacredCryoPearl);
 };

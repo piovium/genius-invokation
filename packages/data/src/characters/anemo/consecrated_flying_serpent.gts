@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -48,7 +49,7 @@ define combatStatus {
   id 125032 as DeathlyCycloneInEffect;
   oneDuration;
   once switchActive {
-    :generateDice(:$("my active")!.element(), 1);
+    :generateDice(:query($.my.active)!.element(), 1);
   };
 };
 
@@ -95,7 +96,7 @@ define skill {
     (card) => card.definition.id === BonecrunchersEnergyBlock,
   );
   const stack = Math.floor(cards.length / 2);
-  :characterStatus(BonecrunchersEnergyBlockAccumulated, "@self", {
+  :characterStatus(BonecrunchersEnergyBlockAccumulated, :self, {
     overrideVariables: { stack },
   });
   :damage(DamageType.Anemo, 2);

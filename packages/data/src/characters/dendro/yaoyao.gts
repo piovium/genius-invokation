@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -39,10 +40,10 @@ define summon {
     usage 2;
     if (:getVariable("usage") === 1) {
       :damage(DamageType.Dendro, 2);
-      :heal(2, "my characters order by health - maxHealth limit 1");
+      :heal(2, $.macros.myMostInjured);
     } else {
       :damage(DamageType.Dendro, 1);
-      :heal(1, "my characters order by health - maxHealth limit 1");
+      :heal(1, $.macros.myMostInjured);
     }
   };
 };
@@ -61,7 +62,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Dendro, 1);
-    :heal(1, "my characters order by health - maxHealth limit 1");
+    :heal(1, $.macros.myMostInjured);
   };
 };
 
@@ -77,7 +78,7 @@ define combatStatus {
   on switchActive {
     usage 3;
     :damage(DamageType.Dendro, 1);
-    :heal(1, "my active");
+    :heal(1, $.my.active);
   };
 };
 

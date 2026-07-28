@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -55,7 +56,7 @@ define combatStatus {
       autoDecrease false;
     };
     :e.increaseDamage(2);
-    const iansan = :$(`my character with definition id ${Iansan}`);
+    const iansan = :query($.my.character.def(Iansan));
     if (iansan?.hasNightsoulsBlessing()) {
       :consumeNightsoul(iansan);
     } else {
@@ -89,7 +90,7 @@ define skill {
   skillType elemental;
   cost DiceType.Electro, 3;
   :damage(DamageType.Electro, 2);
-  :gainNightsoul("@self", 1);
+  :gainNightsoul(:self, 1);
   :combatStatus(AgileSwitch);
 };
 
@@ -105,7 +106,7 @@ define skill {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 2);
-  :gainNightsoul("@self", 1);
+  :gainNightsoul(:self, 1);
   if (:self.hasEquipment(TeachingsOfTheCollectiveOfPlenty)) {
     :combatStatus(KineticEnergyScale, "my", {
       overrideVariables: { usage: 3 },
@@ -132,9 +133,9 @@ define skill {
         return;
       }
       if (nightsoul.getVariable("nightsoul") === 2) {
-        :heal(1, "my characters order by health - maxHealth limit 1");
+        :heal(1, $.macros.myMostInjured);
       } else {
-        :gainNightsoul("@self");
+        :gainNightsoul(:self);
       }
       :addVariable("gainNightsoulPassiveUsagePerRound", -1);
     };

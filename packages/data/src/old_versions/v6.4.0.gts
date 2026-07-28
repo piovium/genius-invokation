@@ -1,4 +1,5 @@
 import {
+  $,
   card,
   character,
   DamageType,
@@ -112,8 +113,8 @@ define card {
   const hand = :player.hands.find((card) => card.diceCost() === 3);
   if (hand) {
     :disposeCard(hand);
-    const skirk = :$(
-      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    const skirk = :query(
+      $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     );
     skirk?.addVariableWithMax("serpentsSubtlety", 2, 7);
   }
@@ -150,7 +151,7 @@ define summon {
     };
     :characterStatus(
       SuperlativeSuperstrength,
-      "my characters with definition id 1605",
+      $.my.character.def(1605 as number),
     );
   };
 };
@@ -202,7 +203,7 @@ define card {
         name "stage2";
         visible false;
       };
-      :characterStatus(BattlePlan, "my active", {
+      :characterStatus(BattlePlan, $.my.active, {
         overrideVariables: { usage: 2 },
       });
     };
@@ -212,7 +213,7 @@ define card {
         name "stage3";
         visible false;
       };
-      const summons = :$$("opp summons");
+      const summons = :queryAll($.opp.summon);
       if (summons.length > 0) {
         const summon = :random(summons);
         :dispose(summon);

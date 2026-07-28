@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   customEvent,
@@ -77,13 +78,13 @@ define card {
       usage 2 {
         autoDispose false;
       };
-      :characterStatus(MistBubbleLockdownPreparing, "@master");
+      :characterStatus(MistBubbleLockdownPreparing, :self.master);
     };
     skill {
       id 1220512 as MistBubbleLockdown;
       prepared;
       :damage(DamageType.Hydro, 1);
-      :characterStatus(MistBubblePrison, "opp active");
+      :characterStatus(MistBubblePrison, $.opp.active);
       if (:getVariable("usage") === 0) {
         :dispose();
       }
@@ -132,8 +133,10 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 3);
   if (
-    :$(
-      `opp characters has status with definition id ${Frozen} or opp characters has status with definition id ${MistBubblePrison}`,
+    :query(
+      $.opp.character
+        .has($.typeStatus.def(Frozen))
+        .union($.opp.character.has($.typeStatus.def(MistBubblePrison))),
     )
   ) {
     :emitCustomEvent(ShouldGainEnergy);
@@ -169,7 +172,7 @@ define skill {
       usage perRound, 1 {
         name "usagePerRound1";
       };
-      :gainEnergy(1, "@self");
+      :gainEnergy(1, :self);
     };
   };
 };

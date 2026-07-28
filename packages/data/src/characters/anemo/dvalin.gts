@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -45,8 +46,8 @@ define skill {
   id 25026 as UltimateCleansing;
   skillType elemental;
   prepared;
-  if (:$("opp prev")) {
-    :damage(DamageType.Anemo, 2, "opp prev");
+  if (:query($.opp.prev)) {
+    :damage(DamageType.Anemo, 2, $.opp.prev);
   } else {
     :damage(DamageType.Anemo, 2);
   }
@@ -74,8 +75,8 @@ define skill {
   id 25025 as PerpetualCleansing;
   skillType elemental;
   prepared;
-  if (:$("opp next")) {
-    :damage(DamageType.Anemo, 1, "opp next");
+  if (:query($.opp.next)) {
+    :damage(DamageType.Anemo, 1, $.opp.next);
   } else {
     :damage(DamageType.Anemo, 1);
   }
@@ -149,7 +150,7 @@ define skill {
   skillType elemental;
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 2);
-  :characterStatus(TotalCollapse, "opp active");
+  :characterStatus(TotalCollapse, $.opp.active);
 };
 
 /**
@@ -178,7 +179,7 @@ define skill {
   cost DiceType.Anemo, 4;
   cost DiceType.Energy, 2;
   :damage(DamageType.Anemo, 5);
-  :characterStatus(TotalCollapse, "opp standby");
+  :characterStatus(TotalCollapse, $.opp.standby);
 };
 
 /**
@@ -221,12 +222,11 @@ define card {
     };
     on dispose {
       when :(
-        :$(`opp status with definition id ${TotalCollapse}`)?.id ===
-          :e.entity.id
+        :query($.opp.typeStatus.def(TotalCollapse))?.id === :e.entity.id
       );
       listenTo all;
       usage perRound, 1;
-      :characterStatus(TotalCollapse, "opp next");
+      :characterStatus(TotalCollapse, $.opp.next);
     };
   };
 };

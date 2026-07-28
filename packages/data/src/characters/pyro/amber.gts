@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -49,8 +50,10 @@ define summon {
   };
   on useSkill {
     when :(
-      :$(
-        `@event.skillCaller and character with definition id ${Amber} and has equipment with definition id ${BunnyTriggered}`,
+      :query(
+        $.id(:e.skillCaller.id)
+          .intersection($.character.def(Amber))
+          .intersection($.has($.typeEquipment.def(BunnyTriggered))),
       ) && :e.isSkillType("normal")
     );
     :damage(DamageType.Pyro, 4);
@@ -96,7 +99,7 @@ define skill {
   skillType burst;
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Piercing, 2, "opp standby");
+  :damage(DamageType.Piercing, 2, $.opp.standby);
   :damage(DamageType.Pyro, 2);
 };
 

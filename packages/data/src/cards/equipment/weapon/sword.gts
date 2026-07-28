@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, card, status } from "@gi-tcg/core/builder";
+import { $, DiceType, card, status } from "@gi-tcg/core/builder";
 
 /**
  * @id 311501
@@ -77,7 +77,7 @@ define card {
       when :( !:e.skill.caller.isMine() && :self.master.isActive() );
       listenTo all;
       usage perRound, 2;
-      :heal(1, "@master");
+      :heal(1, :self.master);
     };
   };
 };
@@ -125,7 +125,7 @@ define card {
     on useSkill {
       when :( :e.isSkillType("elemental") );
       usage perRound, 1;
-      :gainEnergy(1, "@master");
+      :gainEnergy(1, :self.master);
     };
   };
 };
@@ -186,7 +186,7 @@ define card {
       :e.increaseDamage(1);
     };
     on enter {
-      :characterStatus(SapwoodBladeStatus, "@master");
+      :characterStatus(SapwoodBladeStatus, :self.master);
     };
   };
 };
@@ -218,7 +218,7 @@ define card {
       usage perRound, 1;
       :addVariable("lake", -12);
       :e.increaseDamage(1);
-      :heal(1, "@master");
+      :heal(1, :self.master);
     };
   };
 };

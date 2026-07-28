@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -73,13 +74,11 @@ define summon {
   hint DamageType.Electro, "3";
   on endPhase {
     usage 1;
-    const target = :$(
-      `opp character has status with definition id ${LightningRod}`,
-    );
+    const target = :query($.opp.character.has($.typeStatus.def(LightningRod)));
     if (target) {
       :damage(DamageType.Electro, 3, target);
     } else {
-      :damage(DamageType.Electro, 3, "opp active");
+      :damage(DamageType.Electro, 3, $.opp.active);
     }
   };
 };
@@ -94,7 +93,7 @@ define combatStatus {
   id 124021 as LightningStrikeProbe;
   on useSkill {
     usage perRound, 1;
-    :characterStatus(LightningRod, "my active");
+    :characterStatus(LightningRod, $.my.active);
   };
 };
 
@@ -133,13 +132,11 @@ define skill {
   id 24022 as StrifefulLightning;
   skillType elemental;
   cost DiceType.Electro, 3;
-  const target = :$(
-    `opp character has status with definition id ${LightningRod}`,
-  );
+  const target = :query($.opp.character.has($.typeStatus.def(LightningRod)));
   if (target) {
     :damage(DamageType.Electro, 3, target);
   } else {
-    :damage(DamageType.Electro, 3, "opp active");
+    :damage(DamageType.Electro, 3, $.opp.active);
   }
 };
 

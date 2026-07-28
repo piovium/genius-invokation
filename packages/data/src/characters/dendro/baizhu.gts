@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -37,7 +38,7 @@ define summon {
   on endPhase {
     usage 1;
     :damage(DamageType.Dendro, 1);
-    :heal(1, "my active");
+    :heal(1, $.my.active);
   };
 };
 
@@ -53,13 +54,13 @@ define combatStatus {
   shield 1;
   defineSnippet :{
     :damage(DamageType.Dendro, 1);
-    const active = :$("my active");
+    const active = :query($.my.active);
     if (!active) {
       // 出战角色被击倒，治疗和生成骰子不生效
       return;
     }
     :heal(1, active);
-    if (:$(`my equipment with definition id ${AllThingsAreOfTheEarth}`)) {
+    if (:query($.my.typeEquipment.def(AllThingsAreOfTheEarth))) {
       :generateDice(active.element(), 1);
     }
   };

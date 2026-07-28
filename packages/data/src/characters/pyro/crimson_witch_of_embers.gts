@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -35,7 +36,7 @@ define status {
   conflictWith 121022;
   on endPhase {
     usage 1;
-    :damage(DamageType.Pyro, 1, "@master");
+    :damage(DamageType.Pyro, 1, :self.master);
   };
 };
 
@@ -88,7 +89,7 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 2);
-  :characterStatus(BlazingHeat, "opp active");
+  :characterStatus(BlazingHeat, $.opp.active);
 };
 
 /**

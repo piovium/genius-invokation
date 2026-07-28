@@ -37,8 +37,10 @@ define card {
   since "v3.8.0";
   legend;
   filter :(
-    :$(
-      "my character has equipment with tag (weapon) or my character has equipment with tag (artifact)",
+    :query(
+      $.my.character
+        .has($.typeEquipment.tag("weapon"))
+        .union($.my.character.has($.typeEquipment.tag("artifact"))),
     )
   );
   :combatStatus(AncientCourtyardInEffect);
@@ -95,12 +97,12 @@ define card {
         DiceType.Electro,
         DiceType.Dendro,
       ] as (DiceType | undefined)[]
-    ).includes(:$("my active")?.element())
+    ).includes(:query($.my.active)?.element())
   );
-  const element = :$("my active")!.element() as 1 | 2 | 3 | 4 | 7;
+  const element = :query($.my.active)!.element() as 1 | 2 | 3 | 4 | 7;
   // 先挂后台再挂前台（避免前台被超载走导致结算错误）
-  :apply(element, "my standby character with aura != 0");
-  :apply(element, "my active character with aura != 0");
+  :apply(element, $.my.standby.var("aura", "!=", 0));
+  :apply(element, $.my.active.var("aura", "!=", 0));
 };
 
 /**
@@ -242,7 +244,7 @@ define card {
   addTarget $.my.character;
   :characterStatus(
     DayOfResistanceMomentOfShatteredDreamsInEffect,
-    "@targets.0",
+    :e.targets[0],
   );
 };
 
@@ -275,7 +277,7 @@ define card {
   id 330008 as ViciousAncientBattle;
   since "v4.7.0";
   legend;
-  :$("opp active")?.loseEnergy(1);
+  :query($.opp.active)?.loseEnergy(1);
 };
 
 /**
@@ -306,8 +308,8 @@ define card {
   cost DiceType.Aligned, 1;
   legend;
   addTarget $.my.character;
-  :heal(2, "@targets.0");
-  :characterStatus(EdictOfAbsolutionInEffect, "@targets.0");
+  :heal(2, :e.targets[0]);
+  :characterStatus(EdictOfAbsolutionInEffect, :e.targets[0]);
 };
 
 define extension {
@@ -381,7 +383,7 @@ define card {
     on actionPhase {
       :setVariable("spirit", :getExtensionState().spirit[:self.who]);
       if (:getExtensionState().win[:self.who]) {
-        :characterStatus(FlamesOfWarInEffect, "my active");
+        :characterStatus(FlamesOfWarInEffect, $.my.active);
       }
     };
     on selfDispose {
@@ -403,8 +405,8 @@ define card {
   id 330010 as PilgrimageOfTheReturnOfTheSacredFlame;
   since "v5.3.0";
   legend;
-  const myExistsFlame = :$(`my support with definition id ${FlamesOfWar}`);
-  const oppExistsFlame = :$(`opp support with definition id ${FlamesOfWar}`);
+  const myExistsFlame = :query($.my.support.def(FlamesOfWar));
+  const oppExistsFlame = :query($.opp.support.def(FlamesOfWar));
   if (myExistsFlame) {
     myExistsFlame.addVariable("spirit", 1);
   } else if (:remainingSupportCount("my") > 0) {
@@ -445,10 +447,10 @@ define card {
   cost DiceType.Aligned, 1;
   legend;
   :drawCards(1);
-  const defeatedCount = :$$(`my defeated characters`).length;
+  const defeatedCount = :queryAll($.my.character.onlyDefeated).length;
   if (defeatedCount > 0) {
     const increasedValue = defeatedCount * 2;
-    :increaseMaxHealth(increasedValue, `my characters`);
+    :increaseMaxHealth(increasedValue, $.my.character);
   }
 };
 

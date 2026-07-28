@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -37,17 +38,17 @@ define status {
   since "v5.2.0";
   on endPhase {
     when :(
-      :$(`opp equipment with definition id ${BeastlyCorrosion}`) ||
+      :query($.opp.typeEquipment.def(BeastlyCorrosion)) ||
         !:self.master.isActive()
     );
     usage 1 {
       append 5;
     };
-    :damage(DamageType.Piercing, :getVariable("usage"), "@master");
+    :damage(DamageType.Piercing, :getVariable("usage"), :self.master);
   };
   on enter {
     if (
-      !:$(`opp equipment with definition id ${BeastlyCorrosion}`) &&
+      !:query($.opp.typeEquipment.def(BeastlyCorrosion)) &&
       :getVariable("usage") > 3
     ) {
       :setVariable("usage", 3);
@@ -69,7 +70,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Geo, 1);
-    :characterStatus(GoldenCorrosion, "opp active");
+    :characterStatus(GoldenCorrosion, $.opp.active);
   };
 };
 
@@ -98,7 +99,7 @@ define skill {
   skillType elemental;
   cost DiceType.Geo, 3;
   :damage(DamageType.Geo, 2);
-  :characterStatus(GoldenCorrosion, "opp active", {
+  :characterStatus(GoldenCorrosion, $.opp.active, {
     overrideVariables: {
       usage: 2,
     },
@@ -118,8 +119,8 @@ define skill {
   cost DiceType.Geo, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Geo, 3);
-  :damage(DamageType.Piercing, 1, "opp standby");
-  :characterStatus(GoldenCorrosion, "all opp characters");
+  :damage(DamageType.Piercing, 1, $.opp.standby);
+  :characterStatus(GoldenCorrosion, $.opp.character);
 };
 
 /**

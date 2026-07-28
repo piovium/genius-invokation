@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -38,7 +39,7 @@ define skill {
   prepared;
   if (:self.health >= 6) {
     :damage(DamageType.Hydro, 3);
-    :damage(DamageType.Piercing, 1, "@self");
+    :damage(DamageType.Piercing, 1, :self);
   } else {
     :damage(DamageType.Hydro, 2);
   }
@@ -125,7 +126,7 @@ define skill {
   skillType burst;
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Piercing, 1, "opp standby");
+  :damage(DamageType.Piercing, 1, $.opp.standby);
   :damage(DamageType.Hydro, 2);
   :combatStatus(SourcewaterDroplet, "my", {
     overrideVariables: {
@@ -146,15 +147,13 @@ define skill {
     on useSkill {
       when :(
         :e.isSkillType("normal") &&
-          :$(`my combat status with definition id ${SourcewaterDroplet}`)
+          :query($.my.combatStatus.def(SourcewaterDroplet))
       );
-      const droplet = :$(
-        `my combat status with definition id ${SourcewaterDroplet}`,
-      );
+      const droplet = :query($.my.combatStatus.def(SourcewaterDroplet));
       droplet?.consumeUsage();
-      :heal(2, "@self");
+      :heal(2, :self);
       if (:self.isActive()) {
-        :characterStatus(EquitableJudgmentStatus, "@self");
+        :characterStatus(EquitableJudgmentStatus, :self);
       }
     };
   };
@@ -200,7 +199,7 @@ define card {
     on useSkill {
       when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Hydro)) );
       listenTo samePlayer;
-      :characterStatus(PastDraconicGlories, "@master");
+      :characterStatus(PastDraconicGlories, :self.master);
     };
   };
 };

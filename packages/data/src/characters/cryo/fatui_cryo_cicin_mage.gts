@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -68,7 +69,7 @@ define combatStatus {
   id 121012 as FlowingCicinShield;
   shield 1;
   on enter {
-    const cicins = :$(`my summons with definition id ${CryoCicins}`);
+    const cicins = :query($.my.summon.def(CryoCicins));
     if (cicins) {
       const extraShield = Math.min(cicins.getVariable("usage"), 3);
       :addVariable("shield", extraShield);
@@ -113,7 +114,7 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 1);
   const talent = :self.hasEquipment(CicinsColdGlare);
-  const cicins = :$(`my summons with definition id ${CryoCicins}`);
+  const cicins = :query($.my.summon.def(CryoCicins));
   if (talent && cicins && cicins.getVariable("usage") >= 2) {
     talent.setVariable("dealDamage", 1);
   }
@@ -132,7 +133,7 @@ define skill {
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 3;
   :damage(DamageType.Cryo, 5);
-  :apply(DamageType.Cryo, "@self");
+  :apply(DamageType.Cryo, :self);
   :combatStatus(FlowingCicinShield);
 };
 

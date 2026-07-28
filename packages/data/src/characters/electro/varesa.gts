@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -77,7 +78,7 @@ define status {
   on switchActive {
     when :( :e.switchInfo.to.id === :self.master.id );
     usage 1;
-    :characterStatus(GuardianVentVolcanoKablamStatus, "@master");
+    :characterStatus(GuardianVentVolcanoKablamStatus, :self.master);
   };
 };
 
@@ -91,7 +92,7 @@ define status {
   id 114154 as SuddenOnrush;
   since "v6.1.0";
   once beforeAction {
-    :switchActive("@master");
+    :switchActive(:self.master);
   };
 };
 
@@ -108,7 +109,7 @@ define skill {
   cost DiceType.Void, 2;
   if (:skillInfo.plunging) {
     :damage(DamageType.Electro, 2);
-    :gainNightsoul("@self", 1);
+    :gainNightsoul(:self, 1);
   } else {
     :damage(DamageType.Electro, 1);
   }
@@ -126,7 +127,7 @@ define skill {
   cost DiceType.Electro, 3;
   :damage(DamageType.Electro, 2);
   :characterStatus(SuddenOnrush);
-  :gainNightsoul("@self", 1);
+  :gainNightsoul(:self, 1);
 };
 
 /**
@@ -155,10 +156,10 @@ define skill {
   skillType passive {
     on useSkill {
       when :( :self.hasNightsoulsBlessing()?.variables.nightsoul === 2 );
-      :consumeNightsoul("@self", 2);
+      :consumeNightsoul(:self, 2);
       :characterStatus(ApexDrive);
       if (:self.hasEquipment(AHeroOfJusticesTriumph)) {
-        :gainEnergy(1, "@self");
+        :gainEnergy(1, :self);
       }
     };
   };
@@ -175,7 +176,7 @@ define skill {
   skillType passive {
     on useSkill {
       when :( :e.skill.definition.id === RidingTheNightrainbow );
-      :switchActive("my next");
+      :switchActive($.my.next);
     };
   };
 };

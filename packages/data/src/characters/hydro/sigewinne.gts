@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -76,7 +77,7 @@ define status {
   on dispose {
     when :( :e.entity.definition.id === BondOfLife );
     usage 3;
-    :increaseMaxHealth(1, "@master");
+    :increaseMaxHealth(1, :self.master);
   };
 };
 
@@ -91,7 +92,7 @@ define card {
   since "v5.2.0";
   undiscoverable;
   on selfHandCardInserted, only {
-    :heal(1, "all my characters");
+    :heal(1, $.my.character);
     :combatStatus(SourcewaterDroplet);
   };
 };
@@ -107,7 +108,7 @@ define card {
   since "v5.2.0";
   undiscoverable;
   on selfHandCardInserted, only {
-    :damage(DamageType.Hydro, 2, "my active");
+    :damage(DamageType.Hydro, 2, $.my.active);
     :createPileCards(SmallBolsteringBubblebalm, 1, "top", "opp");
   };
 };
@@ -123,7 +124,7 @@ define card {
   since "v5.2.0";
   undiscoverable;
   on selfHandCardInserted, only {
-    :heal(3, "my active");
+    :heal(3, $.my.active);
     :createPileCards(MediumBolsteringBubblebalm, 1, "topIndex1", "opp");
   };
 };
@@ -153,7 +154,7 @@ define skill {
   skillType elemental;
   cost DiceType.Hydro, 3;
   :createPileCards(LargeBolsteringBubblebalm, 1, "topIndex2");
-  :characterStatus(BondOfLife, "@self", {
+  :characterStatus(BondOfLife, :self, {
     overrideVariables: {
       usage: 3,
     },
@@ -172,7 +173,7 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
-  :characterStatus(MedicalInterventionOfPureIntentionStatus, "@self");
+  :characterStatus(MedicalInterventionOfPureIntentionStatus, :self);
 };
 
 /**
@@ -188,13 +189,13 @@ define skill {
     on battleBegin {
       :characterStatus(
         DetailedDiagnosisThoroughTreatmentStatus,
-        "all my characters",
+        $.my.character,
       );
     };
     on revive {
       :characterStatus(
         DetailedDiagnosisThoroughTreatmentStatus,
-        "all my characters",
+        $.my.character,
       );
     };
   };
@@ -210,9 +211,7 @@ define skill {
   id 12136 as DetailedDiagnosisThoroughTreatment02;
   skillType passive {
     on defeated {
-      :dispose(
-        `all my status with definition id ${DetailedDiagnosisThoroughTreatmentStatus}`,
-      );
+      :dispose($.my.typeStatus.def(DetailedDiagnosisThoroughTreatmentStatus));
     };
   };
 };
@@ -228,12 +227,10 @@ define skill {
   skillType passive {
     on switchActive {
       when :( :e.switchInfo.to.id === :self.id );
-      const droplet = :$(
-        `my combat status with definition id ${SourcewaterDroplet}`,
-      );
+      const droplet = :query($.my.combatStatus.def(SourcewaterDroplet));
       if (droplet) {
         :consumeUsage(1, droplet);
-        :gainEnergy(1, "@self");
+        :gainEnergy(1, :self);
       }
     };
   };

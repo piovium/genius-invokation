@@ -9,7 +9,7 @@ define card {
   cost DiceType.Aligned, 3;
   tags action;
   addTarget $.my.character.exclude($.has($.typeStatus.tag("disableSkill")));
-  :switchActive("@targets.0");
+  :switchActive(:e.targets[0]);
   :useSkill("normal");
 };
 ```
@@ -42,7 +42,7 @@ define card {
   id 333006 as MondstadtHashBrown;
   cost DiceType.Aligned, 1;
   food { injuredOnly; };
-  :heal(2, "@targets.0");
+  :heal(2, :e.targets[0]);
 };
 ```
 
@@ -71,7 +71,7 @@ define card {
   support place {
     on endPhase {
       usage 2;
-      :heal(2, "my active");
+      :heal(2, $.my.active);
     };
   };
 };

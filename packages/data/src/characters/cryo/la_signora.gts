@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -87,7 +88,7 @@ define status {
   conflictWith 163011;
   on endPhase {
     usage 1;
-    :damage(DamageType.Cryo, 1, "@master");
+    :damage(DamageType.Cryo, 1, :self.master);
   };
 };
 
@@ -100,12 +101,12 @@ define status {
 define combatStatus {
   id 121025 as IncandescentFrostPermeating;
   on endPhase {
-    if (:$(`opp characters with definition id ${CrimsonWitchOfEmbers}`)) {
-      :characterStatus(BlazingHeat, "my active");
+    if (:query($.opp.character.def(CrimsonWitchOfEmbers))) {
+      :characterStatus(BlazingHeat, $.my.active);
     }
-    const laSignora = :$(`opp characters with definition id ${LaSignora}`);
+    const laSignora = :query($.opp.character.def(LaSignora));
     if (laSignora) {
-      :characterStatus(SheerCold, "my active");
+      :characterStatus(SheerCold, $.my.active);
       laSignora.loseEnergy(1);
     }
   };
@@ -136,7 +137,7 @@ define skill {
   skillType elemental;
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 2);
-  :characterStatus(SheerCold, "opp active");
+  :characterStatus(SheerCold, $.opp.active);
 };
 
 /**
@@ -151,10 +152,8 @@ define skill {
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 4);
-  :heal(2, "@self");
-  :dispose(
-    `status with definition id ${IcesealedCrimsonWitchOfEmbers} at @self`,
-  );
+  :heal(2, :self);
+  :dispose($.typeStatus.def(IcesealedCrimsonWitchOfEmbers).at($.id(:self.id)));
 };
 
 /**
@@ -187,7 +186,7 @@ define skill {
   skillType passive {
     on dispose {
       when :( :e.entity.definition.id === IcesealedCrimsonWitchOfEmbers );
-      :transformDefinition("@master", CrimsonWitchOfEmbers);
+      :transformDefinition(:self, CrimsonWitchOfEmbers);
     };
   };
 };
@@ -236,9 +235,9 @@ define card {
       usage perRound, 1;
       :e.decreaseDamage(1);
       if (:self.master.definition.id === LaSignora) {
-        :characterStatus(SheerCold, "opp active");
+        :characterStatus(SheerCold, $.opp.active);
       } else {
-        :characterStatus(BlazingHeat, "opp active");
+        :characterStatus(BlazingHeat, $.opp.active);
       }
     };
   };

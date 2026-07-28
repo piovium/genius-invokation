@@ -324,7 +324,7 @@ define card {
   support ally {
     on endPhase {
       usage 2;
-      :gainEnergy(1, "my characters with energy < maxEnergy limit 1");
+      :gainEnergy(1, $.macros.myEnergyNotFull);
     };
   };
 };
@@ -345,7 +345,7 @@ define card {
       when :( :e.switchInfo.to.energy === 0 );
       usage 2;
       usage perRound, 1;
-      :gainEnergy(1, "my active");
+      :gainEnergy(1, $.my.active);
     };
   };
 };
@@ -459,9 +459,9 @@ define card {
   cost DiceType.Aligned, 2;
   support ally {
     on useSkill {
-      when :( :e.isSkillType("elemental") && :$("my next") );
+      when :( :e.isSkillType("elemental") && :query($.my.next) );
       usage perRound, 1;
-      const next = :$("my next")!;
+      const next = :query($.my.next)!;
       :generateDice(next.element(), 1);
     };
   };
@@ -481,8 +481,8 @@ define card {
     on deductOmniDiceCard {
       when :( :e.hasCardTag("weapon") );
       usage perRound, 1;
-      const weaponedCh = :$$(
-        "my characters has equipment with tag (weapon)",
+      const weaponedCh = :queryAll(
+        $.my.character.has($.typeEquipment.tag("weapon")),
       ).length;
       :e.deductOmniCost(1 + weaponedCh);
     };
@@ -524,8 +524,8 @@ define card {
     on deductOmniDiceCard {
       when :( :e.hasCardTag("artifact") );
       usage perRound, 1;
-      const artifactedCh = :$$(
-        "my characters has equipment with tag (artifact)",
+      const artifactedCh = :queryAll(
+        $.my.character.has($.typeEquipment.tag("artifact")),
       );
       if (artifactedCh.length >= 2) {
         :e.deductOmniCost(2);
@@ -638,7 +638,7 @@ define card {
           !:e.skillCaller.cast<"character">().hasStatus(SandsAndDream) && // 多个婕德不重复触发
           :getVariable("experience") >= 6
       );
-      :characterStatus(SandsAndDream, "my active");
+      :characterStatus(SandsAndDream, $.my.active);
       :dispose();
     };
   };

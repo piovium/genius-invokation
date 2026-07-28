@@ -91,7 +91,7 @@ define card {
   since "v3.3.0";
   support place {
     on roll {
-      :e.fixDice(:$("my active")!.element(), 2);
+      :e.fixDice(:query($.my.active)!.element(), 2);
     };
     on actionPhase {
       when :( :player.hands.length <= 3 );
@@ -133,9 +133,9 @@ define card {
   support place {
     hint DamageType.Heal, "2";
     on endPhase {
-      when :( :$(`my standby with health < maxHealth`) );
+      when :( :query($.my.standby.var("health", "<", "maxHealth")) );
       usage 2;
-      :heal(2, "my standby characters order by health - maxHealth limit 1");
+      :heal(2, $.my.standby.orderBy("health", "-", "maxHealth").limit(1));
     };
   };
 };
@@ -154,9 +154,9 @@ define card {
   support place {
     hint DamageType.Heal, "2";
     on endPhase {
-      when :( :$(`my active with health < maxHealth`) );
+      when :( :query($.my.active.var("health", "<", "maxHealth")) );
       usage 2;
-      :heal(2, "my active");
+      :heal(2, $.my.active);
     };
   };
 };
@@ -226,9 +226,9 @@ define card {
   support place {
     hint DamageType.Heal, "1";
     on endPhase {
-      when :( :$(`my characters with health < maxHealth`) );
+      when :( :query($.my.character.var("health", "<", "maxHealth")) );
       usage 2;
-      :heal(1, "all my characters");
+      :heal(1, $.my.character);
     };
   };
 };
@@ -423,17 +423,17 @@ define card {
           const cardDef = :data.entities.get(equipment.definition.id)!;
           return originalDiceCostOfCard(cardDef);
         }
-        const myCost = :$$(`my equipments`)
+        const myCost = :queryAll($.my.typeEquipment)
           .map((entity) => costOfEquipment(entity))
           .reduce((a, b) => a + b, 0);
-        const oppCost = :$$(`opp equipments`)
+        const oppCost = :queryAll($.opp.typeEquipment)
           .map((entity) => costOfEquipment(entity))
           .reduce((a, b) => a + b, 0);
         return myCost >= oppCost;
       };
       usage 3;
       usage perRound, 1;
-      :generateDice(:$("my active")!.element(), 1);
+      :generateDice(:query($.my.active)!.element(), 1);
     };
   };
 };
@@ -495,7 +495,7 @@ define status {
   id 301019 as DistantStorm;
   on endPhase {
     usage 1;
-    :damage(DamageType.Piercing, 2, "@master");
+    :damage(DamageType.Piercing, 2, :self.master);
   };
 };
 
@@ -624,11 +624,11 @@ define card {
           break;
         }
         case 4: {
-          :heal(2, "my active");
+          :heal(2, $.my.active);
           break;
         }
         case 6: {
-          :characterStatus(StadiumOfTheSacredFlameInEffect, "my active");
+          :characterStatus(StadiumOfTheSacredFlameInEffect, $.my.active);
           :dispose();
           break;
         }
@@ -777,7 +777,7 @@ define card {
     on disposeCard {
       when :( :getVariable("disposedCardCount") >= 2 );
       :setVariable("disposedCardCount", 0);
-      :characterStatus(FlowerfeatherClanInEffect, "my next");
+      :characterStatus(FlowerfeatherClanInEffect, $.my.next);
     };
   };
 };
@@ -826,7 +826,7 @@ define status {
     when :(
       (:e.overridden?.variables.layer ?? 0) < 3 && :getVariable("layer") >= 3
     );
-    :heal(1, "@master");
+    :heal(1, :self.master);
   };
   on increaseSkillDamage {
     when :( :getVariable("layer") === 5 );
@@ -860,7 +860,7 @@ define card {
       });
     };
     on switchActive {
-      :characterStatus(Exercise, "@event.switchTo");
+      :characterStatus(Exercise, :e.switchInfo.to);
     };
   };
 };
@@ -887,9 +887,9 @@ define card {
       :createHandCard(newCard);
     };
     on declareEnd {
-      when :( :$(SIMULANKA_QUERY) );
+      when :( :query(SIMULANKA_QUERY) );
       usage 3;
-      const mySimulankaSummons = :$$(SIMULANKA_QUERY);
+      const mySimulankaSummons = :queryAll(SIMULANKA_QUERY);
       const chosen = :random(mySimulankaSummons);
       if (chosen) {
         :triggerEndPhaseSkill(chosen);
@@ -1042,7 +1042,7 @@ define card {
   support place {
     on enter {
       :drawCards(2);
-      :heal(2, "my characters order by health - maxHealth limit 1");
+      :heal(2, $.macros.myMostInjured);
     };
     on endPhase {
       usage 2;
@@ -1110,7 +1110,7 @@ define card {
     on selfDispose {
       when :( !:e.isDiscardOrTuning() );
       :drawCards(2, { withAttachment: Empowerment });
-      :characterStatus(BattlePlan, "my active");
+      :characterStatus(BattlePlan, $.my.active);
     };
   };
 };

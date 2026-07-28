@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   character,
   skill,
   status,
@@ -96,9 +97,9 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 3);
   if (:self.hasEquipment(MirrorCage)) {
-    :characterStatus(Refraction01, "opp active");
+    :characterStatus(Refraction01, $.opp.active);
   } else {
-    :characterStatus(Refraction, "opp active");
+    :characterStatus(Refraction, $.opp.active);
   }
 };
 

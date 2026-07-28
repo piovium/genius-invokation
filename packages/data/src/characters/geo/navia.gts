@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -35,7 +36,7 @@ define card {
   since "v4.8.0";
   undiscoverable;
   cost DiceType.Aligned, 1;
-  :damage(DamageType.Physical, 1, "opp active");
+  :damage(DamageType.Physical, 1, $.opp.active);
   :drawCards(1);
 };
 
@@ -118,7 +119,7 @@ define skill {
   skillType burst;
   cost DiceType.Geo, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Piercing, 1, "opp standby");
+  :damage(DamageType.Piercing, 1, $.opp.standby);
   :damage(DamageType.Geo, 1);
   :summon(RosulaDorataSalute);
   :createHandCard(CrystalShrapnel);

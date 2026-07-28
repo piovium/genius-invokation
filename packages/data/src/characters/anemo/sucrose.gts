@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -92,7 +93,7 @@ define skill {
   skillType elemental;
   cost DiceType.Anemo, 3;
   :damage(DamageType.Anemo, 3);
-  :switchActive("opp prev");
+  :switchActive($.opp.prev);
 };
 
 /**

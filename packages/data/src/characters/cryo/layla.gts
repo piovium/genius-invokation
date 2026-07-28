@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -36,7 +37,7 @@ define summon {
   on endPhase {
     usage 2;
     :damage(DamageType.Cryo, 1);
-    const star = :$(`my combat status with definition id ${ShootingStar}`);
+    const star = :query($.my.combatStatus.def(ShootingStar));
     if (star) {
       star.addVariable("star", 1);
     }
@@ -74,7 +75,7 @@ define combatStatus {
     if (:getVariable("star") >= 4) {
       :addVariable("star", -4);
       :damage(DamageType.Cryo, 1);
-      if (:$(`my equipment with definition id ${LightsRemit}`)) {
+      if (:query($.my.typeEquipment.def(LightsRemit))) {
         :drawCards(1);
       }
     }

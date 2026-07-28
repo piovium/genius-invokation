@@ -73,18 +73,18 @@ define card {
   addTarget $.my.character.def(Skirk);
   on actionPhase {
     :disposeCard(:self);
-    :$(
-      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    :query(
+      $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     )?.addVariableWithMax("serpentsSubtlety", 1, 7);
   };
   on switchActive {
     :disposeCard(:self);
-    :$(
-      `my character with definition id ${Skirk} or my character with definition id ${Skirk01}`,
+    :query(
+      $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     )?.addVariableWithMax("serpentsSubtlety", 1, 7);
   };
-  :characterStatus(SevenphaseFlash, "@targets.0");
-  :characterStatus(DeathsCrossing, "@targets.0");
+  :characterStatus(SevenphaseFlash, :e.targets[0]);
+  :characterStatus(DeathsCrossing, :e.targets[0]);
 };
 
 /**
@@ -235,7 +235,7 @@ define card {
       :addVariable("justice", 1);
       if (:getVariable("justice") >= 3) {
         :addVariable("justice", -3);
-        :gainEnergy(1, "@master");
+        :gainEnergy(1, :self.master);
       }
     };
   };
@@ -291,8 +291,8 @@ define card {
       id 3130063;
       usage 2;
       cost DiceType.Aligned, 1;
-      :switchActive("my next");
-      :characterStatus(Target, "opp active");
+      :switchActive($.my.next);
+      :characterStatus(Target, $.opp.active);
     };
   };
 };
@@ -372,8 +372,8 @@ define card {
         name "stage3";
         visible false;
       };
-      :apply(DamageType.Hydro, "all my characters");
-      const targetCh = :$(`my characters order by health - maxHealth limit 1`);
+      :apply(DamageType.Hydro, $.my.character);
+      const targetCh = :query($.macros.myMostInjured);
       if (!targetCh) {
         return;
       }

@@ -45,14 +45,14 @@ define summon {
     when :(
       :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal")
     );
-    :heal(1, "my characters order by health - maxHealth limit 1");
+    :heal(1, $.macros.myMostInjured);
   };
   on useSkill {
     when :(
       :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal")
     );
     usage perRound, 1;
-    :heal(1, "my active");
+    :heal(1, $.my.active);
   };
 };
 
@@ -70,10 +70,14 @@ define combatStatus {
       if (:e.skill.definition.id === AdeptusArtPreserverOfFortune) {
         return false;
       }
-      return :$(`@event.skillCaller and character with health < maxHealth`);
+      return :query(
+        $.id(:e.skillCaller.id).intersection(
+          $.character.var("health", "<", "maxHealth"),
+        ),
+      );
     };
     usage 3;
-    :heal(2, "@event.skillCaller");
+    :heal(2, :e.skillCaller.cast<"character">());
   };
 };
 

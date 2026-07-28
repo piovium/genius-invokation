@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   combatStatus,
@@ -48,9 +49,7 @@ define summon {
   };
   hint DamageType.Electro, ((c, e) => e.variables.atk);
   on enter {
-    const domain = :$(
-      `my combat status with definition id ${DeepDevourersDomain}`,
-    )!;
+    const domain = :query($.my.combatStatus.def(DeepDevourersDomain))!;
     const maxCost = domain.getVariable("totalMaxCost");
     const count = domain.getVariable("totalMaxCostCount");
     if (count > 0) {
@@ -176,9 +175,7 @@ define combatStatus {
     // 文本有误，实为结束阶段时
     const extraMaxHealth = :getVariable("extraMaxHealth");
     if (extraMaxHealth) {
-      const narwhal = :$(
-        `my character with definition id ${AlldevouringNarwhal}`,
-      );
+      const narwhal = :query($.my.character.def(AlldevouringNarwhal));
       if (narwhal) {
         narwhal.addStatus(AnomalousAnatomy, {
           overrideVariables: { extraMaxHealth },
@@ -240,7 +237,7 @@ define skill {
   skillType burst;
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
-  :damage(DamageType.Piercing, 1, "opp standby");
+  :damage(DamageType.Piercing, 1, $.opp.standby);
   :damage(DamageType.Hydro, 1);
   :summon(DarkShadow);
 };
@@ -307,7 +304,7 @@ define card {
     };
     on StarfallShowerDisposeCard {
       usage perRound, 1;
-      :heal(:get(:e.arg).diceCost(), "@master");
+      :heal(:get(:e.arg).diceCost(), :self.master);
     };
   };
 };

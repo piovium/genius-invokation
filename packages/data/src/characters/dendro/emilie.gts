@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  $,
   card,
   character,
   DamageType,
@@ -71,7 +72,7 @@ define summon {
   on dealDamage {
     when :( :e.getReaction() === Reaction.Burning );
     listenTo samePlayer;
-    :transformDefinition("@self", LumidouceCaseLevel2);
+    :transformDefinition(:self, LumidouceCaseLevel2);
   };
 };
 
@@ -88,7 +89,7 @@ define summon {
   hint DamageType.Dendro, 1;
   on endPhase {
     usage 1;
-    :damage(DamageType.Dendro, 1, "all opp characters");
+    :damage(DamageType.Dendro, 1, $.opp.character);
   };
 };
 
@@ -103,7 +104,7 @@ define status {
   since "v5.5.0";
   once useSkill {
     listenTo all;
-    const burning = :$(`my summons with definition id ${BurningFlame}`);
+    const burning = :query($.my.summon.def(BurningFlame));
     if (burning) {
       :triggerEndPhaseSkill(burning);
     }
@@ -134,7 +135,7 @@ define skill {
   id 17102 as FragranceExtraction;
   skillType elemental;
   cost DiceType.Dendro, 3;
-  if (:$(`my summons with definition id ${LumidouceCaseLevel2}`)) {
+  if (:query($.my.summon.def(LumidouceCaseLevel2))) {
     :summon(LumidouceCaseLevel2);
   } else {
     :summon(LumidouceCaseLevel1);
@@ -171,7 +172,7 @@ define skill {
       usage perRound, 2 {
         name "usagePerRound1";
       };
-      :characterStatus(LingeringFragranceInEffect, "@self");
+      :characterStatus(LingeringFragranceInEffect, :self);
     };
   };
 };
@@ -232,7 +233,7 @@ define card {
         LumidouceCaseLevel1,
       ];
       for (const id of lumidouceIds) {
-        const lumidouce = :$(`my summons with definition id ${id}`);
+        const lumidouce = :query($.my.summon.def(id));
         if (lumidouce) {
           :triggerEndPhaseSkill(lumidouce);
           break;
