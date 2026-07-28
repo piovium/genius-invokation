@@ -21,8 +21,7 @@
   - `@gi-tcg/web-client` 对战平台 Web 客户端
 - **数据与开发工具**
   - `@gi-tcg/custom-data-loader` 自定义 GTS 数据加载器及示例页面
-  - `@gi-tcg/data-code-analyzer` 卡牌数据代码分析工具
-  - `@gi-tcg/data-vscode-ext` `@gi-tcg/data` 编辑辅助的 VS Code 扩展
+  - `@gi-tcg/data-code-analyzer` 卡牌数据代码分析工具（not work，待适配重构）
   - `@gi-tcg/config` 私有构建与开发配置
   - `@gi-tcg/test` 核心和卡牌数据测试框架
 - **跨语言绑定**
