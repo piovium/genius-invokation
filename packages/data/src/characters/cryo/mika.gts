@@ -71,7 +71,7 @@ define combatStatus {
     when :( :e.isSkillType("normal") );
     usage 1;
     :characterStatus(NAttackCostReduction, :e.skillCaller.cast<"character">());
-    if (:query($.my.typeEquipment.def(CompanionsCounsel))) {
+    if (:query($.my.equipped.def(CompanionsCounsel))) {
       :characterStatus(
         PhysicalDmgIncrease01,
         :e.skillCaller.cast<"character">(),

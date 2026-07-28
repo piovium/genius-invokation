@@ -37,7 +37,7 @@ define status {
     when :( :e.getReaction() !== null );
     if (
       // 由于蕴种印在对方场上，故查找我方信息时使用 opp
-      :query($.opp.typeEquipment.def(TheSeedOfStoredKnowledge)) && // 装备有心识蕴藏之种
+      :query($.opp.equipped.def(TheSeedOfStoredKnowledge)) && // 装备有心识蕴藏之种
       (:query($.opp.combatStatus.def(ShrineOfMaya)) ||
         :query($.opp.combatStatus.def(ShrineOfMaya01))) && // 摩耶之殿在场时
       :query($.opp.character.includesDefeated.tag("pyro")) // 我方队伍中存在火元素
@@ -95,7 +95,7 @@ define combatStatus {
   on enter {
     when :(
       :query(
-        $.my.character.has($.typeEquipment.def(TheSeedOfStoredKnowledge)),
+        $.my.character.has($.equipped.def(TheSeedOfStoredKnowledge)),
       ) && // 装备有心识蕴藏之种
         :query($.my.character.includesDefeated.tag("electro")) // 我方队伍中存在雷元素
     );
@@ -124,7 +124,7 @@ define combatStatus {
   on enter {
     when :(
       :query(
-        $.my.character.has($.typeEquipment.def(TheSeedOfStoredKnowledge)),
+        $.my.character.has($.equipped.def(TheSeedOfStoredKnowledge)),
       ) && // 装备有心识蕴藏之种
         :query($.my.character.includesDefeated.tag("electro")) // 我方队伍中存在雷元素
     );

@@ -482,7 +482,7 @@ define card {
       when :( :e.hasCardTag("weapon") );
       usage perRound, 1;
       const weaponedCh = :queryAll(
-        $.my.character.has($.typeEquipment.tag("weapon")),
+        $.my.character.has($.equipped.tag("weapon")),
       ).length;
       :e.deductOmniCost(1 + weaponedCh);
     };
@@ -525,7 +525,7 @@ define card {
       when :( :e.hasCardTag("artifact") );
       usage perRound, 1;
       const artifactedCh = :queryAll(
-        $.my.character.has($.typeEquipment.tag("artifact")),
+        $.my.character.has($.equipped.tag("artifact")),
       );
       if (artifactedCh.length >= 2) {
         :e.deductOmniCost(2);

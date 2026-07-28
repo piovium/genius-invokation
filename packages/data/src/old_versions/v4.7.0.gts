@@ -101,7 +101,7 @@ define combatStatus {
       append 4;
     };
     if (
-      :query($.my.typeEquipment.def(DecorousHarmony)) &&
+      :query($.my.equipped.def(DecorousHarmony)) &&
       :player.hands.length === 0
     ) {
       :e.increaseDamage(3);
@@ -589,7 +589,7 @@ define card {
 define card {
   id 332024 as private Lyresong;
   until "v4.7.0";
-  addTarget $.my.character.has($.typeEquipment.tag("artifact"));
+  addTarget $.my.character.has($.equipped.tag("artifact"));
   :e.targets[0].unequipArtifact();
   :combatStatus(LyresongInEffect2);
 };

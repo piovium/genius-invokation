@@ -38,7 +38,7 @@ define status {
     usage 1 {
       append;
     };
-    const chosen = :query($.my.typeEquipment.def(FlamelordsBlessing))
+    const chosen = :query($.my.equipped.def(FlamelordsBlessing))
       ? :random(:player.hands)
       : null;
     const damageValue = 1 + (chosen?.diceCost() ?? 0);
