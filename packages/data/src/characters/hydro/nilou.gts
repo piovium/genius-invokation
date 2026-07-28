@@ -41,7 +41,7 @@ define summon {
     usage 1 {
       append 3;
     };
-    if (:query($.my.typeEquipment.def(TheStarrySkiesTheirFlowersRain))) {
+    if (:query($.my.onStage.typeEquipment.def(TheStarrySkiesTheirFlowersRain))) {
       :damage(DamageType.Dendro, 3);
     } else {
       :damage(DamageType.Dendro, 2);
@@ -49,7 +49,7 @@ define summon {
   };
   on declareEnd {
     when :( :getVariable("usage") >= 2 );
-    if (:query($.my.typeEquipment.def(TheStarrySkiesTheirFlowersRain))) {
+    if (:query($.my.onStage.typeEquipment.def(TheStarrySkiesTheirFlowersRain))) {
       :damage(DamageType.Dendro, 3);
     } else {
       :damage(DamageType.Dendro, 2);

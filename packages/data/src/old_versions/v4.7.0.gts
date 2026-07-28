@@ -101,7 +101,7 @@ define combatStatus {
       append 4;
     };
     if (
-      :query($.my.typeEquipment.def(DecorousHarmony)) &&
+      :query($.my.onStage.typeEquipment.def(DecorousHarmony)) &&
       :player.hands.length === 0
     ) {
       :e.increaseDamage(3);

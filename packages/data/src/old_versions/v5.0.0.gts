@@ -131,7 +131,7 @@ define summon {
     :damage(DamageType.Pyro, 1);
   };
   on enter {
-    if (:query($.my.typeEquipment.def(Scorpocalypse))) {
+    if (:query($.my.onStage.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
         $.my.character.def(2303 as number),
@@ -144,7 +144,7 @@ define summon {
     }
   };
   on actionPhase {
-    if (:query($.my.typeEquipment.def(Scorpocalypse))) {
+    if (:query($.my.onStage.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
         $.my.character.def(2303 as number),
@@ -183,7 +183,7 @@ define summon {
     }
   };
   on enter {
-    if (:query($.my.typeEquipment.def(Scorpocalypse))) {
+    if (:query($.my.onStage.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
         $.my.character.def(2303 as number),
@@ -196,7 +196,7 @@ define summon {
     }
   };
   on actionPhase {
-    if (:query($.my.typeEquipment.def(Scorpocalypse))) {
+    if (:query($.my.onStage.typeEquipment.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
         $.my.character.def(2303 as number),

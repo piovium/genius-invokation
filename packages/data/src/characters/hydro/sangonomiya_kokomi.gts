@@ -40,7 +40,7 @@ define summon {
       append 4;
     };
     if (
-      :query($.my.typeEquipment.def(TamakushiCasket)) &&
+      :query($.my.onStage.typeEquipment.def(TamakushiCasket)) &&
       :query($.my.typeStatus.def(CeremonialGarment))
     ) {
       :damage(DamageType.Hydro, 2);

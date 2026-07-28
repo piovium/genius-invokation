@@ -37,7 +37,7 @@ define status {
     when :( :e.getReaction() !== null );
     if (
       // 由于蕴种印在对方场上，故查找我方信息时使用 opp
-      :query($.opp.typeEquipment.def(TheSeedOfStoredKnowledge)) && // 装备有心识蕴藏之种
+      :query($.opp.onStage.typeEquipment.def(TheSeedOfStoredKnowledge)) && // 装备有心识蕴藏之种
       (:query($.opp.combatStatus.def(ShrineOfMaya)) ||
         :query($.opp.combatStatus.def(ShrineOfMaya01))) && // 摩耶之殿在场时
       :query($.opp.character.includesDefeated.tag("pyro")) // 我方队伍中存在火元素

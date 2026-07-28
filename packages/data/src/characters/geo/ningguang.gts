@@ -42,7 +42,7 @@ define combatStatus {
   on increaseDamage {
     when :(
       :e.type === DamageType.Geo &&
-        :query($.my.typeEquipment.def(StrategicReserve))
+        :query($.my.onStage.typeEquipment.def(StrategicReserve))
     );
     listenTo samePlayer;
     :e.increaseDamage(1);

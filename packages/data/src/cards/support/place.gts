@@ -423,10 +423,10 @@ define card {
           const cardDef = :data.entities.get(equipment.definition.id)!;
           return originalDiceCostOfCard(cardDef);
         }
-        const myCost = :queryAll($.my.vCharacter.typeEquipment)
+        const myCost = :queryAll($.my.onStage.typeEquipment)
           .map((entity) => costOfEquipment(entity))
           .reduce((a, b) => a + b, 0);
-        const oppCost = :queryAll($.opp.vCharacter.typeEquipment)
+        const oppCost = :queryAll($.opp.onStage.typeEquipment)
           .map((entity) => costOfEquipment(entity))
           .reduce((a, b) => a + b, 0);
         return myCost >= oppCost;
