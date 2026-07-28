@@ -22,7 +22,7 @@ catalog:
   "@gi-tcg/prettier-plugin-gts": *GTS_VERSION
   "@gi-tcg/gts-language-client-code": *GTS_VERSION
   "@gi-tcg/gts-language-server": *GTS_VERSION
-  typescript: "npm:typescript-native-bridge@6.0.3-bridge.6.tsgo.7.0.2"
+  typescript: ~6.0.3
 
 patchedDependencies:
   ohm-js@17.1.0: patches/ohm-js@17.1.0.patch
@@ -31,8 +31,6 @@ patchedDependencies:
 minimumReleaseAgeExclude:
   - "@gi-tcg/*"
   - espolar
-  - typescript-native-bridge
-  - "@typescript-native-bridge/*"
 
 allowBuilds:
   "@bufbuild/buf": true
