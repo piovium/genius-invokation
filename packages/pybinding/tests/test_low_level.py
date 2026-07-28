@@ -61,7 +61,9 @@ class TestLowLevelGitcg(unittest.TestCase):
         json = low_level.state_to_json(state)
         # print(json)
 
-        entities = low_level.state_query(state, 0, "my pile cards")
+        entities = low_level.state_query(
+            state, 0, "(intersection (who my) (area pile true))"
+        )
         self.assertEqual(len(entities), 30)
         first_def_id = low_level.entity_get_definition_id(entities[0])
         self.assertIsInstance(first_def_id, int)

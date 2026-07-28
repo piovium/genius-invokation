@@ -31,7 +31,8 @@ import {
   deserializeGameStateLog,
   GiTcgIoError,
   Game as InternalGame,
-  runLegacyQuery,
+  parseSExpr,
+  runSExprQuery,
   serializeGameStateLog,
   setAsyncContext,
   VERSIONS,
@@ -236,7 +237,9 @@ class State {
     );
   }
   query(who: 0 | 1, query: string): Entity[] {
-    return runLegacyQuery(this.state, who, query).map((st) => new Entity(st));
+    return runSExprQuery(this.state, who, parseSExpr(query)).map(
+      (st) => new Entity(st),
+    );
   }
   getAttribute(attribute: number): number {
     switch (attribute) {

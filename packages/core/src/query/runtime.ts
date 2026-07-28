@@ -13,7 +13,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { EntityState, CharacterTag, GameState } from "../base/state";
+import type {
+  AnyState,
+  EntityState,
+  CharacterTag,
+  GameState,
+} from "../base/state";
 import {
   diceCostKey,
   inInitialPileKey,
@@ -830,11 +835,11 @@ class QueryRunner {
 }
 
 const runners = new WeakMap<GameState, QueryRunner>();
-export function runQuery<T extends IQuery>(
+export function runSExprQuery(
   state: GameState,
   who: 0 | 1,
-  query: T,
-): ExEntityState<InferResult<T>["type"]>[] {
+  expr: Expression,
+): AnyState[] {
   let runner = runners.get(state);
   if (!runner) {
     runner = new QueryRunner(state);
@@ -842,6 +847,16 @@ export function runQuery<T extends IQuery>(
   }
   runner.who = who;
   return runner
-    .execute(query[toExpression]())
-    .map((entry) => entry.state) as ExEntityState<InferResult<T>["type"]>[];
+    .execute(expr as SExprSchema.Query)
+    .map((entry) => entry.state);
+}
+
+export function runQuery<T extends IQuery>(
+  state: GameState,
+  who: 0 | 1,
+  query: T,
+): ExEntityState<InferResult<T>["type"]>[] {
+  return runSExprQuery(state, who, query[toExpression]()) as ExEntityState<
+    InferResult<T>["type"]
+  >[];
 }
