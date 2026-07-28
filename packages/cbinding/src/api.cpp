@@ -224,13 +224,13 @@ int gitcg_entity_free(gitcg_entity_t entity) try {
   return -1;
 }
 
-int gitcg_state_query(gitcg_state_t state, int who, const char* query_string,
+int gitcg_state_query(gitcg_state_t state, int who, const char* query_s_expr,
                       gitcg_entity_t** result, size_t* result_size) try {
   if (!state) [[unlikely]] {
     throw std::invalid_argument("state is nullptr");
   }
-  if (!query_string) [[unlikely]] {
-    throw std::invalid_argument("query_string is nullptr");
+  if (!query_s_expr) [[unlikely]] {
+    throw std::invalid_argument("query_s_expr is nullptr");
   }
   if (!result) [[unlikely]] {
     throw std::invalid_argument("result is nullptr");
@@ -239,7 +239,7 @@ int gitcg_state_query(gitcg_state_t state, int who, const char* query_string,
     throw std::invalid_argument("result_size is nullptr");
   }
   auto state_obj = reinterpret_cast<gitcg::State*>(state);
-  auto entities = state_obj->query(who, query_string);
+  auto entities = state_obj->query(who, query_s_expr);
   auto buffer = static_cast<void**>(
       std::malloc(entities.size() * sizeof(gitcg_entity_t)));
   if (buffer == nullptr) {

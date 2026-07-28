@@ -187,20 +187,23 @@ typedef struct gitcg_entity* gitcg_entity_t;
 GITCG_API int gitcg_entity_free(gitcg_entity_t entity);
 
 /**
- * @brief Execute query (Entity Query Syntax) on the given game state.
+ * @brief Execute an S-expression entity query on the given game state.
+ *
+ * The query syntax is documented at
+ * https://github.com/piovium/genius-invokation/tree/main/docs/development/query
  *
  * The result array is allocated by `malloc` and should be freed by `free`.
  *
  * @param state The game state
  * @param who Defines `my` semantics in the query
- * @param query_string
+ * @param query_s_expr A null-terminated S-expression query string.
  * @param result A pointer to `gitcg_entity_t*` that will be set to the result
  * array
  * @param result_size A pointer to `size_t` that will be set to the size of the
  * result array
  */
 GITCG_API int gitcg_state_query(gitcg_state_t state, int who,
-                                const char* query_string,
+                                const char* query_s_expr,
                                 gitcg_entity_t** result, size_t* result_size);
 
 GITCG_API int gitcg_entity_get_id(gitcg_entity_t entity, int* id);

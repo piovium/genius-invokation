@@ -57,9 +57,11 @@ class State:
 
     def query(self, who: int, query: str) -> list[Entity]:
         """
-        Execute query on `who`'s perspective. The query syntax can be found [here](https://github.com/piovium/genius-invokation/blob/main/docs/development/query.md).
+        Execute an S-expression query on `who`'s perspective. The query syntax
+        can be found [here](https://github.com/piovium/genius-invokation/tree/main/docs/development/query).
         ```py
-        state.query(0, "my characters") # returns my character information
+        state.query(0, "(intersection (who my) (type character))")
+        # returns my character information
         ```
         """
         assert who == 0 or who == 1

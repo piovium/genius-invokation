@@ -115,7 +115,8 @@ int main(int argc, char** argv) {
 
   size_t entity_size;
   gitcg_entity_t* entities;
-  gitcg_state_query(state, 0, "my characters", &entities, &entity_size);
+  gitcg_state_query(state, 0, "(intersection (who my) (type character))",
+                    &entities, &entity_size);
   for (size_t i = 0; i < entity_size; ++i) {
     int def_id;
     gitcg_entity_get_definition_id(entities[i], &def_id);

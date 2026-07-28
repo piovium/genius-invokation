@@ -18,8 +18,12 @@ import type { IQuery } from "./utils";
 
 export { $, type IDollar } from "./dollar";
 export { queryToExpression } from "./runtime";
-export { stringifySExpr, prettyStringifySExpr } from "./s_expr";
+export {
+  parseSExpr,
+  stringifySExpr,
+  prettyStringifySExpr,
+} from "./s_expr";
 export { type IQuery, type InferResult, toExpression } from "./utils";
-export { runQuery } from "./runtime";
+export { runQuery, runSExprQuery } from "./runtime";
 
 export type QueryFn = ($: IDollar) => IQuery;
