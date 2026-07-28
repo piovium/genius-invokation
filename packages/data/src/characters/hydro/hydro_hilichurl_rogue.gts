@@ -15,16 +15,12 @@
 
 import {
   $,
-  card,
-  character,
   customEvent,
   DamageType,
   DiceType,
-  skill,
-  status,
   type SkillHandle,
   type StatusHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { Frozen } from "../../commons.gts";
 
 /**

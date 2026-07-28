@@ -1,4 +1,4 @@
-import { DiceType, DamageType, $, card, Reaction } from "@gi-tcg/core/builder";
+import { DiceType, DamageType, $, Reaction } from "@gi-tcg/core/data";
 import {
   Tighnari,
   VijnanaphalaMine,

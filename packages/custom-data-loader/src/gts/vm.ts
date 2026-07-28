@@ -48,7 +48,7 @@ import {
   type HandleT,
   type PassiveSkillHandle,
   type SkillHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import type { AttachmentDefinition, VersionInfo } from "@gi-tcg/core";
 import { getCustomDataRegistration } from "./context";
 

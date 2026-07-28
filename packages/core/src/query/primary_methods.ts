@@ -25,7 +25,7 @@ import type {
   StatusHandle,
   SummonHandle,
   SupportHandle,
-} from "../builder/type";
+} from "../data/type";
 import type { PrimaryMethodsInternal, PrimaryQuery } from "./primary_query";
 import {
   type AttachmentReq,

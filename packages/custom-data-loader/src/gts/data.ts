@@ -14,6 +14,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // This declaration entry is installed in the browser editor's virtual file
-// system as @gi-tcg/core/builder. Its runtime counterpart is linked directly
+// system as @gi-tcg/core/data. Its runtime counterpart is linked directly
 // by the module evaluators.
-export * from "@gi-tcg/core/builder";
+export * from "@gi-tcg/core/data";

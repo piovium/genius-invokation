@@ -16,13 +16,9 @@
 import {
   $,
   Aura,
-  card,
-  character,
-  combatStatus,
   DamageType,
   DiceType,
-  skill,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { EfficientSwitch } from "../../commons.gts";
 
 /**

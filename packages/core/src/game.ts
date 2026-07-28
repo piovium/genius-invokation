@@ -70,7 +70,7 @@ import {
   isChargedPlunging,
   applyAttachmentModifications,
 } from "./utils";
-import type { GameData } from "./builder/registry";
+import type { GameData } from "./data/registry";
 import {
   ActionEventArg,
   type ActionInfo,
@@ -85,7 +85,6 @@ import {
   type InitiativeSkillEventArg,
   defineSkillInfo,
 } from "./base/skill";
-import { runLegacyQuery } from "./query-legacy";
 import {
   GiTcgCoreConflictError,
   GiTcgCoreInternalError,
@@ -335,10 +334,7 @@ export class Game {
     }
   }
 
-  query(who: 0 | 1, query: string | QueryFn | IQuery): AnyState[] {
-    if (typeof query === "string") {
-      return runLegacyQuery(this.state, who, query);
-    }
+  query(who: 0 | 1, query: QueryFn | IQuery): AnyState[] {
     if (typeof query === "function") {
       return runQuery(this.state, who, query($));
     }

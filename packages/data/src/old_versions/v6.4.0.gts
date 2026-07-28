@@ -1,13 +1,8 @@
 import {
   $,
-  card,
-  character,
   DamageType,
   DiceType,
-  skill,
-  status,
-  summon,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   LetTheShowBegin,
   ShiningMiracle,

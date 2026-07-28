@@ -16,14 +16,10 @@
 import type { EntityDefinition } from "@gi-tcg/core";
 import {
   $,
-  card,
-  combatStatus,
   DamageType,
   DiceType,
-  extension,
-  status,
   type StatusHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { AgileSwitch, EfficientSwitch } from "../../commons.gts";
 
 /**

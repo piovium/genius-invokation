@@ -1,14 +1,10 @@
 import {
   $,
-  card,
-  character,
   DamageType,
   DiceType,
-  skill,
-  summon,
   type EquipmentHandle,
   type SkillHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   LiutianArchery,
   SacredCryoPearl,

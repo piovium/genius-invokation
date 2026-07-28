@@ -63,7 +63,7 @@ const App = () => {
   // 步骤1：Mod代码编辑器
   const [code, setCode] =
     createSignal(`// 在这里编写你的 GTS 模组。定义会自动获得 ID。
-import { DamageType, DiceType } from "@gi-tcg/core/builder";
+import { DamageType, DiceType } from "@gi-tcg/core/data";
 
 define attachment {
   name "费用护盾" as CostShield;

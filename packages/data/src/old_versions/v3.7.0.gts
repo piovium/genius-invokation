@@ -2,12 +2,7 @@ import {
   DamageType,
   DiceType,
   type SkillHandle,
-  card,
-  character,
-  skill,
-  status,
-  summon,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { AurousBlaze } from "../characters/pyro/yoimiya.gts";
 import { ThunderbeastsTarge } from "../characters/electro/beidou.gts";
 import { PyronadoStatus } from "../characters/pyro/xiangling.gts";

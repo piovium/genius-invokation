@@ -43,7 +43,7 @@ import type {
   AppliableDamageType,
   EquipmentHandle,
   StatusHandle,
-} from "../type";
+} from "../../data/type";
 import {
   LatestStateSymbol,
   RawStateSymbol,
@@ -53,9 +53,7 @@ import {
 import {
   applyReactive,
   type ApplyReactive,
-  type RxEntityState,
 } from "./reactive";
-import type { GuessedTypeOfQuery } from "../../query-legacy/types";
 
 export type CharacterPosition = "active" | "next" | "prev" | "standby";
 
@@ -203,12 +201,6 @@ export class ReadonlyCharacter<
 
   get entities(): ApplyReactive<Meta, EntityState[]> {
     return applyReactive(this.skillContext, this.state.entities);
-  }
-
-  $$<const Q extends string>(
-    arg: Q,
-  ): RxEntityState<Meta, GuessedTypeOfQuery<Q>>[] {
-    return this.skillContext.$$(`(${arg}) at (with id ${this._id})`);
   }
 
   isMine() {

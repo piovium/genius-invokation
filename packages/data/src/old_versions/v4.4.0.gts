@@ -1,4 +1,4 @@
-import { $, DiceType, card } from "@gi-tcg/core/builder";
+import { $, DiceType} from "@gi-tcg/core/data";
 
 /**
  * @id 312018

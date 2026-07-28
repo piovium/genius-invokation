@@ -1,13 +1,9 @@
 import {
   $,
-  card,
-  skill,
   DiceType,
-  status,
   DamageType,
   type StatusHandle,
-  summon,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { Diluc, SearingOnslaught } from "../characters/pyro/diluc.gts";
 import { NiwabiFiredance, Yoimiya } from "../characters/pyro/yoimiya.gts";
 import { KyoukaFuushi } from "../characters/hydro/kamisato_ayato.gts";

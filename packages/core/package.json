@@ -14,17 +14,16 @@
       "development": ["./src/index.ts", "./dist/index.js"],
       "import": "./dist/index.js"
     },
-    "./builder": {
-      "types": "./dist/builder.d.ts",
-      "development": ["./src/builder/index.ts", "./dist/builder.js"],
-      "import": "./dist/builder.js"
+    "./data": {
+      "types": "./dist/data.d.ts",
+      "development": ["./src/data/index.ts", "./dist/data.js"],
+      "import": "./dist/data.js"
     },
     "./gts/*": {
       "types": "./dist/gts/*.d.ts",
       "development": "./src/gts/*.ts",
       "import": "./dist/gts/*.js"
-    },
-    "./builder/internal": "./src/builder/internal_exports.ts"
+    }
   },
   "files": [
     "dist"
@@ -32,21 +31,18 @@
   "scripts": {
     "check": "tsc --noEmit",
     "test": "vitest",
-    "build:ohm": "ohm generateBundles -et src/query-legacy/query.ohm",
-    "build": "pnpm build:ohm && tsdown",
+    "build": "tsdown",
     "gen:s_expr_schema": "gnx scripts/gen_s_expr_schema.ts"
   },
   "dependencies": {
     "@gi-tcg/gts-runtime": "catalog:",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
-    "immer": "^11.1.4",
-    "ohm-js": "^17.1.0"
+    "immer": "^11.1.4"
   },
   "devDependencies": {
     "@beaker73/async-context": "^0.1.2",
     "@gi-tcg/config": "workspace:*",
-    "@ohm-js/cli": "^2.0.0",
     "tsd": "^0.33.0"
   }
 }

@@ -15,17 +15,11 @@
 
 import {
   $,
-  character,
-  skill,
-  summon,
-  status,
-  combatStatus,
-  card,
   DamageType,
   type SummonHandle,
   type CardHandle,
   DiceType,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 
 /**
  * @id 127022

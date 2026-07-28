@@ -15,14 +15,9 @@
 
 import {
   $,
-  card,
-  character,
-  combatStatus,
   DamageType,
   DiceType,
-  skill,
-  status,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { SourcewaterDroplet } from "./neuvillette.gts";
 import { BondOfLife } from "../../commons.gts";
 

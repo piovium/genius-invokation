@@ -27,7 +27,7 @@ import {
   getEntityArea as getEntityAreaOriginal,
   getEntityById as getEntityByIdOriginal,
 } from "../../utils";
-import type { ExEntityType } from "../type";
+import type { ExEntityType } from "../../data/type";
 
 export function getEntityArea(state: GameState, id: number) {
   return getEntityAreaOriginal(getRaw(state), id);

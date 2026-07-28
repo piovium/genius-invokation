@@ -11,11 +11,11 @@ A example package including:
 `loadMod` is asynchronous. In Node.js it uses the `node-vm` evaluator by
 default (Node must be started with `--experimental-vm-modules`); in browsers
 it uses `esbuild-wasm` by default. Both evaluators expose only the GTS runtime,
-custom provider VM, and the builder module to the custom module. Import builder
+custom provider VM, and the data module to the custom module. Import data
 values explicitly instead of relying on globals. 
 
 ```ts
-import { DamageType, DiceType } from "@gi-tcg/core/builder";
+import { DamageType, DiceType } from "@gi-tcg/core/data";
 ```
 
 ```ts

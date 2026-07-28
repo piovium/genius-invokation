@@ -17,8 +17,8 @@ import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
 import type { TypeInfer, TypeValidate } from "@gi-tcg/utils";
 import type { ExtensionDefinition } from "../../base/extension";
 import type { GameState, TriggeredSkillDefinition } from "../../base/state";
-import { EXTENSION_ID_OFFSET } from "../../builder/extension";
-import type { ExtensionHandle } from "../../builder";
+import { EXTENSION_ID_OFFSET } from "../../data/extension";
+import type { ExtensionHandle } from "../../data";
 import type { Computed } from "../../query/utils";
 import type {
   EventArgOf,
@@ -26,8 +26,8 @@ import type {
   SkillDescription,
 } from "../../base/skill";
 import type { Draft } from "immer";
-import { SkillContext } from "../../builder/internal_exports";
-import { wrapSkillInfoWithExt } from "../../builder/skill";
+import { SkillContext } from "../../runtime/context/skill";
+import { wrapSkillInfoWithExt } from "../../runtime/skill";
 import { DEFAULT_VERSION_INFO } from "../../base/version";
 import { getSubId } from "./sub_id";
 

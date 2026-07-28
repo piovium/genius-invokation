@@ -15,16 +15,12 @@
 
 import {
   $,
-  card,
-  character,
   DamageType,
   DiceType,
   Reaction,
-  skill,
-  status,
   type CharacterHandle,
   type SkillHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { Conductive, Thundercloud } from "../../commons.gts";
 
 /**

@@ -15,14 +15,10 @@
 
 import {
   $,
-  card,
-  character,
   DamageType,
   DiceType,
-  skill,
-  status,
   type SkillHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { BondOfLife } from "../../commons.gts";
 
 /**

@@ -16,13 +16,11 @@
 import {
   $,
   Aura,
-  card,
   DamageType,
   DiceType,
   Reaction,
-  status,
   type SupportHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { CatalyzingField, NoTuningAllowed, Shield } from "../../commons.gts";
 
 /**

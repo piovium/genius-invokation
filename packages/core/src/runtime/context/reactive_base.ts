@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { StateKind } from "../../base/state";
-import type { ExEntityType } from "../type";
+import type { ExEntityType } from "../../data/type";
 
 export const ReactiveStateSymbol: unique symbol = Symbol("ReactiveState");
 export type ReactiveStateSymbol = typeof ReactiveStateSymbol;

@@ -1,5 +1,5 @@
 import { Expression, Node, ts, VariableDeclaration } from "ts-morph";
-import { EXTENSION_ID_OFFSET } from "@gi-tcg/core/builder/internal";
+import { EXTENSION_ID_OFFSET } from "@gi-tcg/core/data";
 import { base } from "./index";
 import path from "node:path";
 

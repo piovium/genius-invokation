@@ -64,13 +64,13 @@ import {
 } from "../utils";
 import type { IDetailLogger } from "../log";
 import type { CustomEvent } from "./custom_event";
-import { getRaw, NoReactiveSymbol } from "../builder/context/reactive";
-import type { PlainCharacterState } from "../builder/context/utils";
-import type { AppliableDamageType } from "../builder/type";
+import { getRaw, NoReactiveSymbol } from "../runtime/context/reactive";
+import type { PlainCharacterState } from "../runtime/context/utils";
+import type { AppliableDamageType } from "../data/type";
 import type { MoveEntityM, RemoveEntityM } from "./mutation";
 import type { LunarReaction } from "@gi-tcg/typings";
 import type { DamageOption, ReadonlyEventList } from "../mutator";
-import type { SkillContext } from "../builder/internal_exports";
+import type { SkillContext } from "../runtime/context/skill";
 
 export interface SkillDefinitionBase<Arg> {
   readonly type: "skill";
@@ -220,7 +220,7 @@ export function defineSkillInfo(init: InitSkillInfo): SkillInfo {
 export interface SkillInfoOfContextConstruction extends SkillInfo {
   /**
    * 当访问 setExtensionState 时操作的扩展点 id。
-   * 在传入 SkillContext 时，由 GTS/SkillBuilder 指定好。
+   * 在传入 SkillContext 时，由 GTS 运行时指定好。
    */
   readonly associatedExtensionId: number | null;
   /**

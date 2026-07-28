@@ -23,7 +23,7 @@ import {
   TechniqueBuilder,
   TriggeredSkillBuilder,
   EVENT_MAP,
-} from "@gi-tcg/core/builder/internal";
+} from "@gi-tcg/core/data";
 import { writeFile } from "node:fs/promises";
 
 const OUTPUT_FILE = `${import.meta.dirname}/../src/names.json`;

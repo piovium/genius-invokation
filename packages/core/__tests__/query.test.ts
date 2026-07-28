@@ -5,7 +5,7 @@ import {
   prettyStringifySExpr,
   stringifySExpr,
 } from "../src/query";
-import { AttachmentHandle } from "../src/builder/type";
+import type { AttachmentHandle } from "../src/data/type";
 
 test("'Fluent API' building tests", () => {
   expect(

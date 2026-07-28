@@ -35,10 +35,10 @@ import {
   type EntityWithArea,
 } from "../utils";
 import type { SExprSchema } from "./expr_schema";
-import { CharacterBase } from "../builder/context/character";
+import { CharacterBase } from "../runtime/context/character";
 import { flip, toSortedBy } from "@gi-tcg/utils";
 import type { EntityArea } from "../base/entity";
-import type { ExEntityState } from "../builder/type";
+import type { ExEntityState } from "../data/type";
 
 export function queryToExpression(query: IQuery): SExprSchema.Query {
   return query[toExpression]();

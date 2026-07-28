@@ -28,7 +28,7 @@ import type {
   EntityVariableConfigs,
   VariableOfConfig,
 } from "./entity";
-import type { GameData } from "../builder/registry";
+import type { GameData } from "../data/registry";
 import type { ExtensionDefinition } from "./extension";
 import type {
   SkillDefinition,

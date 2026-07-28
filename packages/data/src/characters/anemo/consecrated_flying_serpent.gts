@@ -15,14 +15,9 @@
 
 import {
   $,
-  card,
-  character,
-  combatStatus,
   DamageType,
   DiceType,
-  skill,
-  status,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { BonecrunchersEnergyBlock } from "../../cards/event/other.gts";
 
 /**

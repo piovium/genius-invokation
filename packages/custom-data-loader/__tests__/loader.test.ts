@@ -4,7 +4,7 @@ import { describe, expect, test } from "vitest";
 import { CustomDataLoader } from "../src";
 
 const customGts = `
-import { DamageType, DiceType } from "@gi-tcg/core/builder";
+import { DamageType, DiceType } from "@gi-tcg/core/data";
 
 define attachment {
   name "Shield" as Shield;

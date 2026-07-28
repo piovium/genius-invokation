@@ -17,26 +17,27 @@ import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
 import type {
   CharacterInitiativeSkillEntry,
   CharacterPassiveSkillEntry,
-} from "../../builder/registry";
+} from "../../data/registry";
 import { type AnyState, type GameState } from "../../base/state";
 import { $, toExpression, type InferResult, type IQuery } from "../../query";
 import type { UsagePerRoundVariableNames } from "../../base/entity";
-import { ListenTo, type CustomEvent } from "../../builder";
+import { type CustomEvent } from "../../data";
 import {
+  ListenTo,
   buildTargetGetter,
   detailedEventDictionary,
   type DetailedEventNames,
   type InitiativeSkillTargetKind,
   type ReadonlyMetaOf,
-  type SkillBuilderMetaBase,
+  type SkillContextMeta,
   type StrictInitiativeSkillEventArg,
   type WritableMetaOf,
   type DetailedEventArgOf,
-} from "../../builder/skill";
+} from "../../runtime/skill";
 import {
   SkillContext,
   type TypedSkillContext,
-} from "../../builder/context/skill";
+} from "../../runtime/context/skill";
 import {
   DEFAULT_ENTITY_VM_META,
   EntityViewModel,
@@ -50,7 +51,7 @@ import type {
   ExtensionHandle,
   PassiveSkillHandle,
   SkillHandle,
-} from "../../builder/type";
+} from "../../data/type";
 import {
   DEFAULT_VERSION_INFO,
   type Version,
@@ -89,11 +90,11 @@ export function wrapSkillInfoFromGts(
   };
 }
 
-type GtsSkillOperation<Meta extends SkillBuilderMetaBase> = (
+type GtsSkillOperation<Meta extends SkillContextMeta> = (
   c: TypedSkillContext<WritableMetaOf<Meta>>,
 ) => void;
 
-type GtsSkillOperationFilter<Meta extends SkillBuilderMetaBase> = (
+type GtsSkillOperationFilter<Meta extends SkillContextMeta> = (
   c: TypedSkillContext<ReadonlyMetaOf<Meta>>,
 ) => unknown;
 
@@ -341,7 +342,7 @@ const DEFAULT_TRIGGERED_SKILL_VM_META = {
   eventArgType: null as never,
 } as const satisfies TriggeredSkillVMMeta;
 
-type TriggeredSkillVMToBuilderMeta<Meta extends TriggeredSkillVMMeta> = {
+type TriggeredSkillVMToContextMeta<Meta extends TriggeredSkillVMMeta> = {
   callerType: Meta["type"];
   associatedExtension: Meta["associatedExtension"];
   callerVars: Meta["variables"];
@@ -349,9 +350,9 @@ type TriggeredSkillVMToBuilderMeta<Meta extends TriggeredSkillVMMeta> = {
   gtsSnippets: Meta["snippets"];
 };
 type TriggeredSkillOperationOfVM<Meta extends TriggeredSkillVMMeta> =
-  GtsSkillOperation<TriggeredSkillVMToBuilderMeta<Meta>>;
+  GtsSkillOperation<TriggeredSkillVMToContextMeta<Meta>>;
 type TriggeredSkillFilterOfVM<Meta extends TriggeredSkillVMMeta> =
-  GtsSkillOperationFilter<TriggeredSkillVMToBuilderMeta<Meta>>;
+  GtsSkillOperationFilter<TriggeredSkillVMToContextMeta<Meta>>;
 
 export const TriggeredSkillViewModel = defineViewModel(
   TriggeredSkillModel,
@@ -563,7 +564,7 @@ export type TargetQueryTypeInfo =
       areaType: "supports";
     };
 
-type InitiativeSkillVMToBuilderMeta<Meta extends InitiativeSkillVMMeta> = {
+type InitiativeSkillVMToContextMeta<Meta extends InitiativeSkillVMMeta> = {
   callerType: Meta["type"];
   associatedExtension: Meta["associatedExtension"];
   callerVars: Meta["variables"];
@@ -572,9 +573,9 @@ type InitiativeSkillVMToBuilderMeta<Meta extends InitiativeSkillVMMeta> = {
 };
 
 type InitiativeSkillOperationOfVM<Meta extends InitiativeSkillVMMeta> =
-  GtsSkillOperation<InitiativeSkillVMToBuilderMeta<Meta>>;
+  GtsSkillOperation<InitiativeSkillVMToContextMeta<Meta>>;
 type InitiativeSkillFilterOfVM<Meta extends InitiativeSkillVMMeta> =
-  GtsSkillOperationFilter<InitiativeSkillVMToBuilderMeta<Meta>>;
+  GtsSkillOperationFilter<InitiativeSkillVMToContextMeta<Meta>>;
 
 type NotCharacterPassiveThis<Meta extends InitiativeSkillVMMeta> =
   Meta extends { isInitiativeSkill: false } ? never : AR.This<Meta>;
@@ -673,7 +674,7 @@ export const InitiativeSkillViewModel = defineViewModel(
         this: NotCharacterPassiveThis<Meta>,
         queryFn: (
           context: TypedSkillContext<
-            ReadonlyMetaOf<InitiativeSkillVMToBuilderMeta<Meta>>
+            ReadonlyMetaOf<InitiativeSkillVMToContextMeta<Meta>>
           >,
         ) => Ret,
       ): AR.DoneRewriteMeta<

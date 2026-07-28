@@ -2,10 +2,7 @@ import {
   $,
   DamageType,
   DiceType,
-  card,
-  combatStatus,
-  skill,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   BakeKurage,
   TamakushiCasket,

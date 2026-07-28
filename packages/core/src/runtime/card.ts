@@ -1,4 +1,4 @@
-// Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -11,16 +11,7 @@
 // GNU Affero General Public License for more details.
 //
 // You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import getData from "@gi-tcg/data";
-import { builderWeakRefs } from "@gi-tcg/core/builder/internal";
-import { test, expect } from "vitest";
-
-test("builders should not be called, we'd migrate all data to GTS", () => {
-  const data = getData();
-  globalThis.gc?.();
-  expect(builderWeakRefs.size).toBe(0);
-  expect(data).toBeDefined();
-})
-
+/** Eligibility mode for a talent card declared through GTS. */
+export type TalentRequirement = "action" | "actionSkill" | "active" | "none";

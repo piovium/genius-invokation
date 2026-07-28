@@ -1,12 +1,8 @@
 import {
   $,
-  card,
-  combatStatus,
   DamageType,
   DiceType,
-  skill,
-  status,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   Cyno,
   PactswornPathclearer,

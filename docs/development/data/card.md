@@ -1,6 +1,6 @@
 # 定义行动牌
 
-行动牌使用 `define card`。未指定子类型时为事件牌；`cost`、`tags`、`legend`、`addTarget` 和 `filter` 等语句定义打出条件与效果。需要从 `@gi-tcg/core/builder` 导入 `DamageType`、`DiceType` 等运行时常量。
+行动牌使用 `define card`。未指定子类型时为事件牌；`cost`、`tags`、`legend`、`addTarget` 和 `filter` 等语句定义打出条件与效果。需要从 `@gi-tcg/core/data` 导入 `DamageType`、`DiceType` 等运行时常量。
 
 ```gts
 /** 下落斩 */

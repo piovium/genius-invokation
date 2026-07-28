@@ -15,14 +15,9 @@
 
 import {
   $,
-  card,
-  character,
   DamageType,
   DiceType,
-  skill,
-  status,
-  summon,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { ResistantForm } from "../../commons.gts";
 /**
  * @id 115142

@@ -1,9 +1,9 @@
 # 用户自定义事件
 
-从 `@gi-tcg/core/builder` 导入 `customEvent` 创建一个具名的事件对象。事件对象可以带 TypeScript 参数类型：
+从 `@gi-tcg/core/data` 导入 `customEvent` 创建一个具名的事件对象。事件对象可以带 TypeScript 参数类型：
 
 ```gts
-import { customEvent } from "@gi-tcg/core/builder";
+import { customEvent } from "@gi-tcg/core/data";
 
 const marked = customEvent<number>("example/marked");
 ```

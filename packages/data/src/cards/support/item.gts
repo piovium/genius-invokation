@@ -16,10 +16,7 @@
 import {
   DamageType,
   DiceType,
-  card,
-  combatStatus,
-  extension,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { AgileSwitch, EfficientSwitch } from "../../commons.gts";
 
 /**

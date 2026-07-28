@@ -1,13 +1,9 @@
 import {
   $,
-  card,
-  character,
   DamageType,
   DiceType,
   Reaction,
-  skill,
-  status,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   Citlali,
   MamaloacosFrigidRainInEffect,

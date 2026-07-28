@@ -4,14 +4,8 @@ import {
   DiceType,
   type StatusHandle,
   type SummonHandle,
-  card,
-  character,
-  combatStatus,
   flip,
-  skill,
-  status,
-  summon,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import {
   MeleeStance,
   RangedStance,

@@ -14,14 +14,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
-  card,
-  character,
   DamageType,
   DiceType,
   Reaction,
-  skill,
-  summon,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { Conductive, NoTuningAllowed, Shield } from "../../commons.gts";
 import type { EntityType } from "@gi-tcg/core";
 

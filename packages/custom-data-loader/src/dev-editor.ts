@@ -20,7 +20,7 @@ import {
 } from "vscode-languageclient/browser.js";
 import PROVIDER_VM_DTS from "../dist/gts/vm.d.ts?raw";
 import GTS_RUNTIME_DTS from "../dist/gts/runtime.d.ts?raw";
-import BUILDER_DTS from "../dist/gts/builder.d.ts?raw";
+import DATA_DTS from "../dist/gts/data.d.ts?raw";
 import GTS_LANGUAGE_CONFIG from "./gts-language-configuration.json?raw";
 import GTS_SYNTAXES from "./gts.tmLanguage.json?raw";
 import type { GtsLanguageServerBrowserInitializationOptions } from "@gi-tcg/gts-language-server/browser";
@@ -151,7 +151,7 @@ const setupLanguageClientConfig = (): LanguageClientConfig => {
         fs: {
           "/provider/vm.d.ts": PROVIDER_VM_DTS,
           "/provider/runtime.d.ts": GTS_RUNTIME_DTS,
-          "/node_modules/@gi-tcg/core/builder.d.ts": BUILDER_DTS,
+          "/node_modules/@gi-tcg/core/data.d.ts": DATA_DTS,
           "/workspace/test2.gts": "export const A = 1",
           "/tsconfig.json": JSON.stringify({
             compilerOptions: {

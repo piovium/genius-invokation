@@ -45,7 +45,7 @@ import {
   StatusHandle,
   SummonHandle,
   SupportHandle,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { TestController } from "./controller";
 
 await setAsyncContext(true);

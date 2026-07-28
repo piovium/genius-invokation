@@ -1,11 +1,7 @@
 import {
   $,
-  card,
-  character,
-  combatStatus,
   DiceType,
-  skill,
-} from "@gi-tcg/core/builder";
+} from "@gi-tcg/core/data";
 import { StrictProhibited } from "../cards/support/place.gts";
 import {
   ConstantOffthecuffCookery,
