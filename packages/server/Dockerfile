@@ -5,7 +5,7 @@ ARG DEFAULT_ASSETS_API_ENDPOINT
 COPY . .
 RUN pnpm install --frozen-lockfile && pnpm build:no-typing server...
 
-FROM node:26 AS deploy
+FROM gcr.io/distroless/nodejs26-debian13 AS deploy
 COPY --from=build /app/packages/server/dist/* /app/packages/server/prisma /app/packages/server/prisma.config.ts ./
 
 CMD ["node", "--enable-source-maps", "main.js"]
