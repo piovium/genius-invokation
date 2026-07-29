@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
+import * as R from "remeda";
 import {
   USAGE_PER_ROUND_VARIABLE_NAMES,
   type DescriptionDictionary,
@@ -81,6 +82,20 @@ import { getSubId } from "./sub_id";
 import type { TypedSkillContext } from "../../runtime/context/skill";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 
+interface DeclaredUsageInfo {
+  autoDispose: boolean;
+  autoDecrease: boolean;
+  perRound: boolean;
+}
+
+interface SetVariableOptions {
+  option: GtsVariableOptions;
+  duplicateGuard?: (
+    existingConfig: VariableConfig,
+    incomingConfig: VariableConfig,
+  ) => false | GiTcgDataError | "ignore" | "overwrite";
+}
+
 export interface GtsUsageOrUsagePerRoundOptions extends GtsUsageOptions {
   perRound: boolean;
 }
@@ -124,6 +139,7 @@ export class EntityModel implements ICaller {
   obtainable: boolean = true;
 
   varConfigs = new Map<string, VariableConfig>();
+  #declaredUsages = new Map<string, DeclaredUsageInfo>();
   skillList: SkillDefinition[] = [];
   disposeWhenUsageIsZero = false;
   disposeOnMasterDefeated = false;
@@ -245,12 +261,36 @@ export class EntityModel implements ICaller {
     }
   }
 
-  setVariable(name: string, initValue: number, option: GtsVariableOptions) {
+  #setVariableImpl(
+    name: string,
+    initValue: number,
+    { option, duplicateGuard = () => false }: SetVariableOptions,
+  ) {
     const varConfig = createVariableConfig(initValue, option);
+    const existingVarConfig = this.varConfigs.get(name);
+    if (existingVarConfig) {
+      const guardResult = duplicateGuard(existingVarConfig, varConfig);
+      if (guardResult instanceof GiTcgDataError) {
+        throw guardResult;
+      }
+      switch (guardResult) {
+        case false:
+          throw new GiTcgDataError(
+            `Variable ${name} already exists in entity ${this.id} (${this.type})`,
+          );
+        case "ignore":
+          return;
+        case "overwrite":
+          break;
+      }
+    }
     this.varConfigs.set(name, varConfig);
     if (option.visible !== false) {
       this.visibleVarName = name;
     }
+  }
+  setVariable(name: string, initValue: number, option: GtsVariableOptions) {
+    this.#setVariableImpl(name, initValue, { option });
   }
 
   setUsage(count: number, option: GtsUsageOrUsagePerRoundOptions): string {
@@ -292,7 +332,27 @@ export class EntityModel implements ICaller {
       }
       this.disposeWhenUsageIsZero = true;
     }
-    this.setVariable(name, count, option);
+    const incomingDeclInfo: DeclaredUsageInfo = {
+      perRound,
+      autoDispose,
+      autoDecrease: option.autoDecrease !== false,
+    };
+    this.#setVariableImpl(name, count, {
+      option,
+      duplicateGuard: (existing, incoming) => {
+        const existingDeclInfo = this.#declaredUsages.get(name);
+        if (
+          R.isDeepEqual(existing, incoming) &&
+          R.isDeepEqual(existingDeclInfo, incomingDeclInfo)
+        ) {
+          return "ignore";
+        }
+        return new GiTcgDataError(
+          `Incompatible usage "${name}" specified in entity ${this.id} (${this.type})`,
+        );
+      },
+    });
+    this.#declaredUsages.set(name, incomingDeclInfo);
     return name;
   }
 }
@@ -745,7 +805,7 @@ export class EntityViewModel extends defineViewModel(
           | EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
       ): AR.DoneRewriteMeta<PushVar<Meta, "hintIcon" | "swirledUsage">>;
       <Meta extends EntityVMMeta>(
-        this: ThisWithType<Meta, "summon"| "support">,
+        this: ThisWithType<Meta, "summon" | "support">,
         icon: DamageType | CombatStatusHandle,
         text?:
           | number

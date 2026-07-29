@@ -33,7 +33,7 @@
     "@gi-tcg/utils": "workspace:*",
     "@solid-primitives/i18n": "^2.2.1",
     "@solid-primitives/keyed": "^1.4.0",
-    "remeda": "^2.26.1"
+    "remeda": "^2.39.0"
   },
   "peerDependencies": {
     "solid-js": "catalog:"
