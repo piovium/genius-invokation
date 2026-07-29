@@ -113,6 +113,12 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 2);
+  const ball = :player.hands.find(
+    (card) => card.definition.id === OverchargedBall,
+  );
+  if (ball) {
+    :self.setVariable("shot", 1);
+  }
 };
 
 /**
@@ -160,8 +166,12 @@ define skill {
 define skill {
   id 13135 as ShortrangeRapidInterdictionFirePassive;
   skillType passive {
+    variable shot, 0;
     on useSkill {
-      when :( :e.skill.definition.id === ShortrangeRapidInterdictionFire );
+      when :(
+        :e.skill.definition.id === ShortrangeRapidInterdictionFire &&
+          :getVariable("shot")
+      );
       const ball = :player.hands.find(
         (card) => card.definition.id === OverchargedBall,
       );
