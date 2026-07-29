@@ -90,10 +90,9 @@ define skill {
   id 14092 as VioletArc;
   skillType elemental;
   cost DiceType.Electro, 3;
-  if ($.opp.active.has($.typeStatus.def(ConductiveLisa))) {
-    :damage(DamageType.Electro, 2);
-  } else {
-    :damage(DamageType.Electro, 2);
+  const hasConductive = :query($.opp.active.has($.typeStatus.def(ConductiveLisa)));
+  :damage(DamageType.Electro, 2)  
+  if (!hasConductive) {
     :characterStatus(ConductiveLisa, $.opp.active);
   }
 };
