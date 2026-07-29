@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  Reaction,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, Reaction, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 113131
@@ -113,11 +108,9 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 2);
-  const ball = :player.hands.find(
-    (card) => card.definition.id === OverchargedBall,
-  );
-  if (ball) {
-    :self.setVariable("shot", 1);
+  // 使用技能时、使用技能后都存在弹头时，才舍弃之
+  if (:query($.my.hand.def(OverchargedBall))) {
+    :self.setVariable("canShot", 1);
   }
 };
 
@@ -166,13 +159,13 @@ define skill {
 define skill {
   id 13135 as ShortrangeRapidInterdictionFirePassive;
   skillType passive {
-    variable shot, 0;
+    variable canShot, 0;
     on useSkill {
       when :(
         :e.skill.definition.id === ShortrangeRapidInterdictionFire &&
-          :getVariable("shot")
+          :getVariable("canShot")
       );
-      :setVariable("shot", 0);
+      :setVariable("canShot", 0);
       const ball = :player.hands.find(
         (card) => card.definition.id === OverchargedBall,
       );
