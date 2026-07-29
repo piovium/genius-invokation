@@ -161,12 +161,12 @@ define skill {
   id 11055 as KamisatoArtSenho02;
   skillType passive {
     on switchActive {
-      when :( :e.switchInfo.to.id === :self.id );
-      usage perRound, 2 {
-        name "usagePerRound1";
-      };
+      when :(
+        :e.switchInfo.to.id === :self.id &&
+          !:self.hasStatus(KamisatoArtSenhoStatus)
+      );
+      usage perRound, 2 { name "usagePerRound1"; };
       :characterStatus(KamisatoArtSenhoStatus);
-      :addVariable("usagePerRound1", -1);
     };
   };
 };

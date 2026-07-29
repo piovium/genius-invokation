@@ -20,7 +20,7 @@
     "@gi-tcg/data": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
-    "remeda": "^2.33.6",
+    "remeda": "^2.39.0",
     "solid-js": "catalog:"
   },
   "devDependencies": {

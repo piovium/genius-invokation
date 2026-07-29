@@ -165,25 +165,15 @@ define card {
   since "v6.5.0";
   cost DiceType.Dendro, 1;
   talent ConsecratedFangedBeast, none {
-    variable usagePerRound, 1;
     on playCard {
-      when :(
-        :getVariable("usagePerRound") &&
-          :e.card.definition.id === BonecrunchersEnergyBlock
-      );
+      when :( :e.card.definition.id === BonecrunchersEnergyBlock );
+      usage perRound, 1 { name "usagePerRound1"; };
       :drawCards(1);
-      :setVariable("usagePerRound", 0);
     };
     on disposeCard {
-      when :(
-        :getVariable("usagePerRound") &&
-          :e.entity.definition.id === BonecrunchersEnergyBlock
-      );
+      when :( :e.entity.definition.id === BonecrunchersEnergyBlock );
+      usage perRound, 1 { name "usagePerRound1"; };
       :drawCards(1);
-      :setVariable("usagePerRound", 0);
-    };
-    on roundEnd {
-      :setVariable("usagePerRound", 1);
     };
   };
 };

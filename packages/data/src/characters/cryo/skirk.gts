@@ -290,23 +290,15 @@ define card {
   since "v6.3.0";
   cost DiceType.Cryo, 1;
   talent [Skirk, Skirk01], none {
-    variable usagePerRound, 1;
     on playCard {
-      when :(
-        :getVariable("usagePerRound") && :e.card.definition.id === VoidRift
-      );
+      when :( :e.card.definition.id === VoidRift );
+      usage perRound, 1 { name "usagePerRound1"; };
       :damage(DamageType.Cryo, 1, $.opp.active);
-      :setVariable("usagePerRound", 0);
     };
     on disposeCard {
-      when :(
-        :getVariable("usagePerRound") && :e.entity.definition.id === VoidRift
-      );
+      when :( :e.entity.definition.id === VoidRift );
+      usage perRound, 1 { name "usagePerRound1"; };
       :damage(DamageType.Cryo, 1, $.opp.active);
-      :setVariable("usagePerRound", 0);
-    };
-    on roundEnd {
-      :setVariable("usagePerRound", 1);
     };
   };
 };
