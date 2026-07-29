@@ -172,6 +172,7 @@ define skill {
         :e.skill.definition.id === ShortrangeRapidInterdictionFire &&
           :getVariable("shot")
       );
+      :setVariable("shot", 0);
       const ball = :player.hands.find(
         (card) => card.definition.id === OverchargedBall,
       );
