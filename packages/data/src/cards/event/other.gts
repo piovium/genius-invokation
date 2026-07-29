@@ -362,6 +362,52 @@ define card {
 };
 
 /**
+ * @id 303173
+ * @name 元素共鸣：蔓生之草（生效中）
+ * @description
+ */
+define combatStatus {
+  id 303173 as ElementalResonanceSprawlingGreeneryInEffectHydro;
+  once playCard {
+    if (
+      :query(
+        $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
+      )
+    ) {
+      :damage(DamageType.Hydro, 1, $.opp.active);
+    }
+  };
+};
+
+/**
+ * @id 303174
+ * @name 元素共鸣：蔓生之草（生效中）
+ * @description
+ */
+define combatStatus {
+  id 303174 as ElementalResonanceSprawlingGreeneryInEffectElectro;
+  once playCard {
+    if (:query($.my.combatStatus.def(CatalyzingField))) {
+      :damage(DamageType.Electro, 1, $.opp.active);
+    }
+  };
+};
+
+/**
+ * @id 303175
+ * @name 元素共鸣：蔓生之草（生效中）
+ * @description
+ */
+define combatStatus {
+  id 303175 as ElementalResonanceSprawlingGreeneryInEffectPyro;
+  once playCard {
+    if (:query($.my.summon.def(BurningFlame))) {
+      :damage(DamageType.Pyro, 1, $.opp.active);
+    }
+  };
+};
+
+/**
  * @id 331702
  * @name 元素共鸣：蔓生之草
  * @description
@@ -382,19 +428,9 @@ define card {
         .union($.my.summon.def(BurningFlame)),
     )
   );
-  if (
-    :query(
-      $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
-    )
-  ) {
-    :damage(DamageType.Hydro, 1, $.opp.active);
-  }
-  if (:query($.my.combatStatus.def(CatalyzingField))) {
-    :damage(DamageType.Electro, 1, $.opp.active);
-  }
-  if (:query($.my.summon.def(BurningFlame))) {
-    :damage(DamageType.Pyro, 1, $.opp.active);
-  }
+  :combatStatus(ElementalResonanceSprawlingGreeneryInEffectHydro);
+  :combatStatus(ElementalResonanceSprawlingGreeneryInEffectElectro);
+  :combatStatus(ElementalResonanceSprawlingGreeneryInEffectPyro);
 };
 
 /**
