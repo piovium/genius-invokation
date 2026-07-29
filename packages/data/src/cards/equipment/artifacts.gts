@@ -1135,13 +1135,14 @@ define card {
     };
     on actionPhase {
       when :( :getVariable("crystal") === 5 );
+      usage perRound, 2 {name "usagePerRound1"};
       :generateDice(DiceType.Omni, 1);
       :drawCards(1);
     };
     on reaction {
       when :( :getVariable("crystal") === 5 && :e.caller.isMine() );
       listenTo all;
-      usage perRound, 1;
+      usage perRound, 2 {name "usagePerRound1"};
       :generateDice(DiceType.Omni, 1);
       :drawCards(1);
     };
