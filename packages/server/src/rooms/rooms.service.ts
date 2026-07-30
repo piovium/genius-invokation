@@ -961,14 +961,28 @@ export class RoomsService {
       });
     });
     room.start();
-    await redis?.hset("meta:active_rooms", roomId, JSON.stringify(room.config));
-    await redis?.hexpire(
-      "meta:active_rooms",
-      1 * 60 * 60,
-      "FIELDS",
-      1,
-      String(room.id),
-    );
+    try {
+      await redis?.hset(
+        "meta:active_rooms",
+        String(room.id),
+        JSON.stringify(room.config),
+      );
+      await redis?.hexpire(
+        "meta:active_rooms",
+        1 * 60 * 60,
+        "FIELDS",
+        1,
+        String(room.id),
+      );
+      // If the room already stopped before we finished updating Redis, avoid leaving a stale entry.
+      if (room.status === RoomStatus.Finished) {
+        await redis?.hdel("meta:active_rooms", String(room.id));
+      }
+    } catch (e) {
+      this.logger.warn(
+        `Failed to update meta:active_rooms for room ${room.id}: ${e}`,
+      );
+    }
     this.metrics.incrementStartedRooms();
   }
 
