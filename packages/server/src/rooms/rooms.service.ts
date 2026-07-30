@@ -964,7 +964,7 @@ export class RoomsService {
     try {
       await redis?.hset(
         "meta:active_rooms",
-        String(room.id),
+        String(roomId),
         JSON.stringify(room.config),
       );
       await redis?.hexpire(
@@ -972,7 +972,7 @@ export class RoomsService {
         1 * 60 * 60,
         "FIELDS",
         1,
-        String(room.id),
+        String(roomId),
       );
     } catch (e) {
       this.logger.warn(
