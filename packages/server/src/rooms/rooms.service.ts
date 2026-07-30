@@ -792,14 +792,6 @@ export class RoomsService {
       throw new InternalServerErrorException("no room available");
     }
     const room = new Room(roomId, roomConfig);
-    await redis?.hset("meta:active_rooms", roomId, JSON.stringify(roomConfig));
-    await redis?.hexpire(
-      "meta:active_rooms",
-      1 * 60 * 60,
-      "FIELDS",
-      1,
-      String(roomId),
-    );
     this.rooms.set(roomId, room);
     this.roomIdPool.shift();
     this.metrics.incrementCreatedRooms();
@@ -969,6 +961,14 @@ export class RoomsService {
       });
     });
     room.start();
+    await redis?.hset("meta:active_rooms", roomId, JSON.stringify(room.config));
+    await redis?.hexpire(
+      "meta:active_rooms",
+      1 * 60 * 60,
+      "FIELDS",
+      1,
+      String(room.id),
+    );
     this.metrics.incrementStartedRooms();
   }
 
