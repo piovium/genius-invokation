@@ -16,6 +16,7 @@
 import {
   Controller,
   Get,
+  Header,
   Headers,
   ImATeapotException,
   ServiceUnavailableException,
@@ -69,6 +70,7 @@ export class AppController {
 
   @Public()
   @Get("/data_code_analyzer_result")
+  @Header("Access-Control-Allow-Origin", "*")
   async getDataCodeAnalyzerResult() {
     const { analyzeResult } = await import("@gi-tcg/data-code-analyzer");
     return analyzeResult;
