@@ -21,6 +21,7 @@
     "@gi-tcg/config": "workspace:*",
     "@gi-tcg/core": "workspace:*",
     "@gi-tcg/data": "workspace:*",
+    "@gi-tcg/data-code-analyzer": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
     "@nestjs/common": "^11.1.17",
