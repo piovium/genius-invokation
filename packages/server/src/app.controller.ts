@@ -68,6 +68,13 @@ export class AppController {
   }
 
   @Public()
+  @Get("/data_code_analyzer_result")
+  async getDataCodeAnalyzerResult() {
+    const { analyzeResult } = await import("@gi-tcg/data-code-analyzer");
+    return analyzeResult;
+  }
+
+  @Public()
   @Get("/teapot")
   imATeapot() {
     throw new ImATeapotException("I'm a teapot~");
