@@ -13,12 +13,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Card, $ } from "#test";
+import { ref, setup, Character, State, Card, Status, $ } from "#test";
 import { ScionsOfTheCanopy } from "@gi-tcg/data/internal/cards/support/place.gts";
 import {
   BlazingTrail,
+  CrucibleOfDeathAndLife,
   FlamestriderBlazingTrail,
+  FlamestriderSoaringAscent,
   Mavuika,
+  NightsoulsBlessing,
+  SoaringAscent,
   TheNamedMoment,
 } from "@gi-tcg/data/internal/characters/pyro/mavuika.gts";
 import { expect, test } from "vitest";
@@ -47,5 +51,27 @@ test("mavuika: play 'E' card trigger ScionsOfTheCanopy", async () => {
   c.expect($.my.prev).toBeDefinition(Mavuika);
   c.expect($.my.typeEquipment.def(FlamestriderBlazingTrail)).toHaveVariable({
     usage: 1,
+  });
+});
+
+test("mavuika: technique consumes Crucible of Death and Life usage", async () => {
+  const mavuika = ref();
+  const c = setup(
+    <State>
+      <Character my active def={Mavuika} ref={mavuika}>
+        <Status def={NightsoulsBlessing} v={{ nightsoul: 1 }} />
+        <Status def={CrucibleOfDeathAndLife} />
+      </Character>
+      <Card my def={FlamestriderSoaringAscent} />
+    </State>,
+  );
+  await c.me.card(FlamestriderSoaringAscent, mavuika);
+  await c.me.skill(SoaringAscent);
+
+  c.expect($.my.typeStatus.def(CrucibleOfDeathAndLife)).toHaveVariable({
+    usage: 1,
+  });
+  c.expect($.my.typeStatus.def(NightsoulsBlessing)).toHaveVariable({
+    nightsoul: 1,
   });
 });

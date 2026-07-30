@@ -54,7 +54,7 @@ define status {
   on cancelConsumeNightsoul {
     listenTo samePlayer;
     :e.cancel();
-    :consumeUsage(:e.info.diffValue);
+    :consumeUsage(-:e.info.diffValue);
   };
 };
 
