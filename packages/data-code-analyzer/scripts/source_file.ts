@@ -1,145 +1,303 @@
-import {
-  ImportDeclaration,
-  SourceFile,
-  ts,
-  VariableDeclaration,
-} from "ts-morph";
-import { TcgDataDeclaration, TcgEntityDeclaration } from "./declaration";
-import { TcgDataProject } from "./project";
-import { TcgDataImportDecl } from "./imports";
+// Copyright (C) 2026 Piovium Labs
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-export class TcgDataSourceFile {
-  imports = new Map<string, TcgDataImportDecl>();
-  varDecls = new Map<string, TcgDataDeclaration>();
+import path from "node:path";
+import { EXTENSION_ID_OFFSET } from "@gi-tcg/core/data";
+import { parse, type AST } from "@gi-tcg/gts-transpiler";
+import type { Location } from "./declaration";
 
-  constructor(
-    public readonly project: TcgDataProject,
-    public readonly file: SourceFile,
-  ) {
-    for (const stmt of file.getStatements()) {
-      if (stmt.isKind(ts.SyntaxKind.ImportDeclaration)) {
-        this.#addImport(stmt);
-      } else if (stmt.isKind(ts.SyntaxKind.VariableStatement)) {
-        for (const decl of stmt.getDeclarations()) {
-          this.#addDeclaration(decl);
+export interface EntityDefinition {
+  id: number;
+  bindingNames: string[];
+  code: string;
+  location: Location;
+  node: AST.GTSDefineStatement;
+}
+
+export interface EntityBinding {
+  kind: "entity";
+  entity: EntityDefinition;
+  exported: boolean;
+}
+
+export interface VariableBinding {
+  kind: "variable";
+  initializer: AST.Expression;
+  exported: boolean;
+}
+
+export type Binding = EntityBinding | VariableBinding;
+
+interface ImportBinding {
+  filename: string;
+  importedName: string;
+}
+
+const SKIPPED_AST_KEYS = new Set(["start", "end", "loc", "range"]);
+
+function isAstNode(value: unknown): value is AST.Node {
+  return typeof value === "object" && value !== null && "type" in value;
+}
+
+function getName(node: AST.Identifier | AST.Literal): string | null {
+  if (node.type === "Identifier") {
+    return node.name;
+  }
+  return typeof node.value === "string" ? node.value : null;
+}
+
+function visitAst(
+  node: AST.Node,
+  visitor: (
+    node: AST.Node,
+    parent: AST.Node | null,
+    key: string | null,
+  ) => void,
+  parent: AST.Node | null = null,
+  key: string | null = null,
+) {
+  visitor(node, parent, key);
+  for (const [childKey, value] of Object.entries(node)) {
+    if (SKIPPED_AST_KEYS.has(childKey)) {
+      continue;
+    }
+    if (Array.isArray(value)) {
+      for (const child of value) {
+        if (isAstNode(child)) {
+          visitAst(child, visitor, node, childKey);
         }
       }
+    } else if (isAstNode(value)) {
+      visitAst(value, visitor, node, childKey);
     }
   }
+}
 
-  #addImport(importDecl: ImportDeclaration) {
-    const moduleSpec = importDecl.getModuleSpecifierSourceFile();
-    if (!moduleSpec) {
+function isReferenceIdentifier(
+  parent: AST.Node | null,
+  key: string | null,
+): boolean {
+  if (!parent || !key) {
+    return true;
+  }
+
+  switch (parent.type) {
+    case "GTSNamedAttributeDefinition":
+      return key !== "name" && key !== "bindingName";
+    case "GTSShortcutArgumentExpression":
+      return false;
+    case "MemberExpression":
+      return !(key === "property" && !isComputed(parent));
+    case "Property":
+    case "PropertyDefinition":
+    case "MethodDefinition":
+      return !(key === "key" && !isComputed(parent));
+    case "VariableDeclarator":
+      return key !== "id";
+    case "FunctionDeclaration":
+    case "FunctionExpression":
+    case "ArrowFunctionExpression":
+      return key !== "id" && key !== "params";
+    case "LabeledStatement":
+    case "BreakStatement":
+    case "ContinueStatement":
+      return key !== "label";
+    default:
+      return true;
+  }
+}
+
+function isComputed(node: AST.Node): boolean {
+  return "computed" in node && node.computed === true;
+}
+
+export function getReferencedNames(node: AST.Node): Set<string> {
+  const result = new Set<string>();
+  visitAst(node, (child, parent, key) => {
+    if (child.type === "Identifier" && isReferenceIdentifier(parent, key)) {
+      result.add(child.name);
+    }
+  });
+  return result;
+}
+
+function getLocation(filename: string, node: AST.Node): Location {
+  if (!node.loc) {
+    throw new Error(`Missing location for ${filename}`);
+  }
+  return {
+    filename,
+    line: node.loc.start.line,
+    column: node.loc.start.column,
+  };
+}
+
+function getRootId(
+  definition: AST.GTSDefineStatement,
+  filename: string,
+): number {
+  const rootName = getName(definition.body.name);
+  const idAttributeName = rootName === "extension" ? "idHint" : "id";
+  const attributes = definition.body.body.namedAttributes?.attributes ?? [];
+  const idAttribute = attributes.find(
+    (attribute) => getName(attribute.name) === idAttributeName,
+  );
+  const id = idAttribute?.body.positionalAttributes.attributes[0];
+  if (id?.type !== "Literal" || typeof id.value !== "number") {
+    throw new Error(
+      `Expected numeric ${idAttributeName} in ${filename}:${definition.loc?.start.line ?? 0}`,
+    );
+  }
+  const idValue = id.value;
+  return rootName === "extension" ? idValue + EXTENSION_ID_OFFSET : idValue;
+}
+
+function getBindingNames(definition: AST.GTSDefineStatement): string[] {
+  const result: string[] = [];
+  visitAst(definition, (node) => {
+    if (node.type !== "GTSNamedAttributeDefinition") {
       return;
     }
-    if (importDecl.getDefaultImport()) {
-      console.warn(
-        `Default import in ${this.file.getFilePath()}:${importDecl.getStartLineNumber()} is not supported`,
-      );
+    const bindingName = node.bindingName;
+    if (bindingName) {
+      result.push(bindingName.name);
     }
-    for (const namedImport of importDecl.getNamedImports()) {
-      const srcName = namedImport.getName();
-      const name = namedImport.getAliasNode()?.getText() ?? srcName;
-      const tcgImport = new TcgDataImportDecl(name, srcName, importDecl);
-      this.imports.set(srcName, tcgImport);
+  });
+  return result;
+}
+
+export class TcgDataSourceFile {
+  readonly definitions: EntityDefinition[] = [];
+  readonly bindings = new Map<string, Binding>();
+  readonly imports = new Map<string, ImportBinding>();
+
+  constructor(
+    public readonly base: string,
+    public readonly filepath: string,
+    public readonly source: string,
+  ) {
+    for (const statement of parse(source).body) {
+      this.addTopLevelStatement(statement);
     }
   }
 
-  #addDeclaration(decl: VariableDeclaration) {
-    const name = decl.getNameNode();
-    if (name.isKind(ts.SyntaxKind.Identifier)) {
-      const tcgDecl = new TcgDataDeclaration(name.getText(), null, decl);
-      this.varDecls.set(tcgDecl.name, tcgDecl);
-    } else if (name.isKind(ts.SyntaxKind.ArrayBindingPattern)) {
-      const arrayElements = name.getElements();
-      for (let i = 0; i < arrayElements.length; i++) {
-        const element = arrayElements[i];
-        if (element.isKind(ts.SyntaxKind.OmittedExpression)) {
-          continue;
-        }
-        const elementName = element.getNameNode();
-        if (elementName.isKind(ts.SyntaxKind.Identifier)) {
-          const tcgDecl = new TcgDataDeclaration(
-            elementName.getText(),
-            i,
-            decl,
-          );
-          this.varDecls.set(tcgDecl.name, tcgDecl);
-        } else {
-          console.warn(
-            `Unsupported nesting array binding pattern in ${this.file.getFilePath()}:${element.getStartLineNumber()}`,
-          );
-        }
+  get filename() {
+    return path.relative(this.base, this.filepath).replaceAll(path.sep, "/");
+  }
+
+  getBinding(name: string, exportedOnly = false): Binding | null {
+    const binding = this.bindings.get(name);
+    if (!binding || (exportedOnly && !binding.exported)) {
+      return null;
+    }
+    return binding;
+  }
+
+  private addTopLevelStatement(statement: AST.Node) {
+    if (statement.type === "GTSDefineStatement") {
+      this.addDefinition(statement);
+      return;
+    }
+    if (statement.type === "ImportDeclaration") {
+      this.addImport(statement);
+      return;
+    }
+    if (statement.type === "VariableDeclaration") {
+      this.addVariableDeclaration(statement, false);
+      return;
+    }
+    if (statement.type === "ExportNamedDeclaration") {
+      const declaration = statement.declaration;
+      if (
+        isAstNode(declaration) &&
+        declaration.type === "VariableDeclaration"
+      ) {
+        this.addVariableDeclaration(declaration, true);
       }
-    } else {
-      console.warn(
-        `Unsupported variable declaration kind ${name.getKindName()} in ${this.file.getFilePath()}:${name.getStartLineNumber()}`,
-      );
     }
   }
 
-  #referenceCache = new Map<TcgDataDeclaration, Set<TcgEntityDeclaration>>();
-  getReferencesOfDecl(
-    decl: TcgDataDeclaration,
-    from: TcgDataDeclaration[] = [],
-  ): Set<TcgEntityDeclaration> {
-    if (this.#referenceCache.has(decl)) {
-      return this.#referenceCache.get(decl)!;
+  private addDefinition(node: AST.GTSDefineStatement) {
+    if (!node.range) {
+      throw new Error(`Missing range for ${this.filename}`);
     }
-    let result = new Set<TcgEntityDeclaration>();
-    for (const name of decl.referencingIdentifiers()) {
-      const text = name.getText();
-      const varDecl = this.varDecls.get(text);
-      if (varDecl) {
-        if (from.includes(varDecl)) {
-          continue;
-        }
-        if (varDecl.isEntity()) {
-          result.add(varDecl);
-        } else {
-          result = result.union(
-            this.getReferencesOfDecl(varDecl, [...from, decl]),
-          );
-        }
+    const definition: EntityDefinition = {
+      id: getRootId(node, this.filename),
+      bindingNames: getBindingNames(node),
+      code: this.source.slice(...node.range).replaceAll("\r\n", "\n"),
+      location: getLocation(this.filename, node),
+      node,
+    };
+    this.definitions.push(definition);
+
+    visitAst(node, (child) => {
+      if (child.type !== "GTSNamedAttributeDefinition") {
+        return;
+      }
+      const attribute = child;
+      if (!attribute.bindingName) {
+        return;
+      }
+      this.addBinding(attribute.bindingName.name, {
+        kind: "entity",
+        entity: definition,
+        exported: attribute.bindingAccessModifier !== "private",
+      });
+    });
+  }
+
+  private addImport(node: AST.ImportDeclaration) {
+    if (typeof node.source.value !== "string") {
+      return;
+    }
+    const filename = path.resolve(
+      path.dirname(this.filepath),
+      node.source.value,
+    );
+    for (const specifier of node.specifiers) {
+      if (specifier.type !== "ImportSpecifier") {
         continue;
       }
-      const importDecl = this.imports.get(text);
-      if (importDecl) {
-        const file = importDecl.getSource();
-        const tcgFile = this.project.files.get(file);
-        if (!tcgFile) {
-          continue;
-        }
-        const thatDecl = tcgFile.getExportedDeclFromName(text);
-        if (!thatDecl) {
-          console.warn(
-            `Cannot find exported declaration ${text} in ${file.getFilePath()}`,
-          );
-          continue;
-        }
-        if (thatDecl.isEntity()) {
-          result.add(thatDecl);
-        } else {
-          result = result.union(
-            tcgFile.getReferencesOfDecl(thatDecl, [...from, decl]),
-          );
-        }
-        continue;
+      const { imported, local } = specifier;
+      const importedName = getName(imported);
+      if (importedName) {
+        this.imports.set(local.name, { filename, importedName });
       }
     }
-    this.#referenceCache.set(decl, result);
-    return result;
   }
 
-  getExportedDeclFromName(name: string): TcgDataDeclaration | null {
-    const varDecl = this.varDecls.get(name);
-    if (varDecl?.isExported) {
-      return varDecl;
+  private addVariableDeclaration(
+    node: AST.VariableDeclaration,
+    exported: boolean,
+  ) {
+    for (const declaration of node.declarations) {
+      if (declaration.id.type !== "Identifier" || !declaration.init) {
+        continue;
+      }
+      this.addBinding(declaration.id.name, {
+        kind: "variable",
+        initializer: declaration.init,
+        exported,
+      });
     }
-    return null;
   }
 
-  getPath() {
-    return this.file.getFilePath();
+  private addBinding(name: string, binding: Binding) {
+    if (this.bindings.has(name)) {
+      throw new Error(`Duplicate binding ${name} in ${this.filename}`);
+    }
+    this.bindings.set(name, binding);
   }
 }

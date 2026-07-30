@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  type CardHandle,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, type CardHandle, DamageType, DiceType } from "@gi-tcg/core/data";
 import { ChenyuBrew } from "../event/food.gts";
 import {
   AdventureCompleted,
@@ -223,13 +218,13 @@ define combatStatus {
     when :( !:isInInitialPile(:e.card) );
     :addVariable("cardsPlayed", 1);
     if (:getVariable("cardsPlayed") >= 2) {
-      :generateDice(DiceType.Omni, 3);
       const chasm = :query($.my.support.def(TheChasm));
       if (chasm) {
         :dispose(chasm);
-        if (:data.entities.get(AdventureCompleted)) {
-          :combatStatus(AdventureCompleted);
-        }
+      }
+      :generateDice(DiceType.Omni, 3);
+      if (:data.entities.get(AdventureCompleted)) {
+        :combatStatus(AdventureCompleted);
       }
       :dispose();
     }

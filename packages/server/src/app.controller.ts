@@ -16,6 +16,7 @@
 import {
   Controller,
   Get,
+  Header,
   Headers,
   ImATeapotException,
   ServiceUnavailableException,
@@ -65,6 +66,14 @@ export class AppController {
       currentGameVersion: CURRENT_VERSION,
       coreVersion: CORE_VERSION,
     };
+  }
+
+  @Public()
+  @Get("/data_code_analyzer_result")
+  @Header("Access-Control-Allow-Origin", "*")
+  async getDataCodeAnalyzerResult() {
+    const { analyzeResult } = await import("@gi-tcg/data-code-analyzer");
+    return analyzeResult;
   }
 
   @Public()
