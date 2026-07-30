@@ -17,6 +17,7 @@ import {
   type CoreSkillResult,
   defineSkillInfo,
   DisposeEventArg,
+  EntityEventArg,
   type Event,
   type EventAndRequest,
   EventArg,
@@ -476,27 +477,21 @@ export class SkillExecutor {
         const currentSpot = hisSupports.find((et) =>
           et.definition.tags.includes("adventureSpot"),
         );
+        let selectCardInfo: SelectCardInfo | null = null;
         if (currentSpot) {
-          const { events } = this.mutator.insertEntityOnStage(
-            { definition: currentSpot.definition },
-            {
-              type: "supports",
-              who: arg.who,
-            },
-            {
-              modifyOverriddenVariablesOnly: true,
-              overrideVariables: {
-                exp: 1,
-              },
-            },
-          );
-          await this.handleEvent(...events);
+          this.mutate({
+            type: "modifyEntityVar",
+            state: currentSpot,
+            varName: "exp",
+            value: currentSpot.variables.exp + 1,
+            direction: "increase",
+          });
         } else if (hisSupports.length < this.state.config.maxSupportsCount) {
           const spots = this.state.data.entities
             .values()
             .filter((d) => d.tags.includes("adventureSpot"))
             .toArray();
-          const selectCardInfo: SelectCardInfo = {
+          selectCardInfo = {
             type: "requestPlayCard",
             cards: spots,
             targets: [],
@@ -507,6 +502,17 @@ export class SkillExecutor {
             selectCardInfo,
           );
           await this.handleEvent(...events);
+        }
+        const adventureSpot = this.state.players[arg.who].supports.find((et) =>
+          et.definition.tags.includes("adventureSpot"),
+        );
+        if (adventureSpot) {
+          await this.handleEvent([
+            "onAdventure",
+            new EntityEventArg(this.state, adventureSpot),
+          ]);
+        }
+        if (selectCardInfo) {
           await this.handleEvent([
             "onSelectCard",
             new SelectCardEventArg(this.state, arg.who, selectCardInfo),
