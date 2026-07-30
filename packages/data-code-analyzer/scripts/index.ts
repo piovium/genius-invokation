@@ -1,4 +1,4 @@
-// Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -15,53 +15,44 @@
 
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { Project } from "ts-morph";
+import { glob, readFile, writeFile } from "node:fs/promises";
+import { type AnalyzeResult } from "./declaration";
 import { TcgDataProject } from "./project";
-import { Location } from "./declaration";
-import { glob, writeFile } from "node:fs/promises";
+import { TcgDataSourceFile } from "./source_file";
 
-export const base = fileURLToPath(new URL("../../data", import.meta.url).href);
+export type { AnalyzeResult } from "./declaration";
 
-const project = new Project({
-  tsConfigFilePath: path.join(base, "tsconfig.json"),
-});
+export const base = fileURLToPath(new URL("../../data", import.meta.url));
 
-const tcgProject = new TcgDataProject(project);
-for await (const filepath of glob(`${base}/src/**/*.ts`)) {
-  if (filepath.includes("old_versions")) {
-    continue;
+const project = new TcgDataProject();
+const filepaths: string[] = [];
+for await (const filepath of glob(`${base}/src/**/*.gts`)) {
+  if (!filepath.includes(`${path.sep}old_versions${path.sep}`)) {
+    filepaths.push(filepath);
   }
-  const source = project.getSourceFileOrThrow(filepath);
-  tcgProject.addFile(source);
 }
 
-export interface AnalyzeResult {
-  id: number;
-  dependencies: number[];
-  variableName: string;
-  nameIndex: number | null;
-  // jsdocComment: string;
-  code: string;
-  location: Location;
+for (const filepath of filepaths.sort()) {
+  const source = await readFile(filepath, "utf8");
+  project.addFile(new TcgDataSourceFile(base, filepath, source));
 }
 
 const result: AnalyzeResult[] = [];
-for (const [, file] of tcgProject.files) {
-  for (const [name, decl] of file.varDecls) {
-    if (!decl.isEntity()) {
-      continue;
-    }
-    const references = file.getReferencesOfDecl(decl);
+for (const file of project.files.values()) {
+  for (const definition of file.definitions) {
     result.push({
-      id: decl.id,
-      dependencies: references.values().map((r) => r.id).toArray(),
-      variableName: name,
-      nameIndex: decl.nameIndex,
-      // jsdocComment: decl.getJsDocComment(),
-      code: decl.getCode(),
-      location: decl.getLocation(),
+      id: definition.id,
+      dependencies: [...project.getDependencies(file, definition)]
+        .map((dependency) => dependency.id)
+        .sort((a, b) => a - b),
+      bindingNames: definition.bindingNames,
+      code: definition.code,
+      location: definition.location,
     });
   }
 }
 
-await writeFile(`${import.meta.dirname}/../src/result.json`, JSON.stringify(result, null, 2));
+await writeFile(
+  path.join(import.meta.dirname, "../src/result.json"),
+  JSON.stringify(result, null, 2),
+);
