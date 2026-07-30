@@ -60,7 +60,8 @@ StateMutator 通知前端、请求 Player IO、记录 Mutation 与详细日志
 
 - 对普通核心事件：先收集该事件的所有监听技能，再按 `allSkills` 的当前实体顺序逐一检查 filter 并结算。`onDispose` 会额外让刚被弃置的实体自身响应。
 - 对 `requestReroll`、`requestSwitchHands`、`requestSelectCard`：调用相应 Player IO，再立即递归处理操作产生的事件；选牌完成后额外触发 `onSelectCard`。
-- 对 `requestUseSkill`、`requestPlayCard`、`requestAdventure`、`requestTriggerEndPhaseSkill`：验证当前可用对象后执行相应技能或实体操作，再递归处理其事件。
+- 对 `requestUseSkill`、`requestPlayCard`、`requestTriggerEndPhaseSkill`：验证当前可用对象后执行相应技能或实体操作，再递归处理其事件。
+- 对 `requestAdventure`：若已有冒险地点则增加其 `exp`，否则在有空位时请求选择冒险地点；随后触发该地点的 `onAdventure`，若发生过选牌则最后触发 `onSelectCard`。
 
 监听技能的收集包括扩展点和当前场上的实体，不包括 `removedEntities`。扩展点以当前行动方的出战角色作为 caller；实体的默认监听范围和细分事件过滤由数据定义层完成，参见[事件](./data/events.md)。
 
