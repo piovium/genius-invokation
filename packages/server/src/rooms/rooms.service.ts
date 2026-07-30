@@ -974,10 +974,6 @@ export class RoomsService {
         1,
         String(room.id),
       );
-      // If the room already stopped before we finished updating Redis, avoid leaving a stale entry.
-      if (room.status === RoomStatus.Finished) {
-        await redis?.hdel("meta:active_rooms", String(room.id));
-      }
     } catch (e) {
       this.logger.warn(
         `Failed to update meta:active_rooms for room ${room.id}: ${e}`,
