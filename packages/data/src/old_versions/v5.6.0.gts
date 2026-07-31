@@ -1,8 +1,4 @@
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 import {
   DominusLapidisStrikingStone,
   Zhongli,
@@ -105,7 +101,7 @@ define card {
   until "v5.6.0";
   cost DiceType.Geo, 5;
   talent Zhongli {
-    on enter {
+    on staged {
       :useSkill(DominusLapidisStrikingStone);
     };
     on increaseDamage {
@@ -272,7 +268,7 @@ define card {
   cost DiceType.Electro, 4;
   cost DiceType.Energy, 2;
   talent RaidenShogun {
-    on enter {
+    on staged {
       :useSkill(SecretArtMusouShinsetsu);
     };
   };

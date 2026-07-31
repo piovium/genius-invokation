@@ -1383,6 +1383,7 @@ export const EVENT_MAP = {
   onChangeVariable: VariableEventArg,
 
   onSelectCard: SelectCardEventArg,
+  onAdventure: EntityEventArg,
 
   modifyDamage0: ModifyDamage0EventArg, // 类型
   modifyDamage1: ModifyDamage1EventArg, // 加

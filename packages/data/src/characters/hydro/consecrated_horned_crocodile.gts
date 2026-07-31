@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 import { BonecrunchersEnergyBlock } from "../../cards/event/other.gts";
 
 /**
@@ -122,7 +118,7 @@ define card {
   since "v6.3.0";
   cost DiceType.Hydro, 1;
   talent ConsecratedHornedCrocodile, none {
-    on enter {
+    on staged {
       :createHandCard(BonecrunchersEnergyBlock);
     };
     on playCard {

@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SkillHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/data";
 import { AgileSwitch } from "../../commons.gts";
 
 /**
@@ -122,7 +117,7 @@ define skill {
   skillType passive {
     variable switchCount, 0;
     variable gainNightsoulPassiveUsagePerRound, 3;
-    defineSnippet :{
+    defineSnippet {
       const nightsoul = :self.hasNightsoulsBlessing();
       if (!nightsoul) {
         return;
@@ -227,7 +222,7 @@ define card {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   talent Iansan {
-    on enter {
+    on staged {
       :useSkill(TheThreePrinciplesOfPower);
     };
   };

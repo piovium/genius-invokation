@@ -150,7 +150,7 @@ define card {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   talent KukiShinobu {
-    on enter {
+    on staged {
       :useSkill(GyoeiNarukamiKariyamaRite);
     };
     on beforeDefeated {

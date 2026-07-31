@@ -16,11 +16,6 @@
 import { ref, setup, Character, State, Status, Card, $ } from "#test";
 import { AnAncientSacrificeOfSacredBrocade } from "@gi-tcg/data/internal/cards/event/other.gts";
 import { ChenyuVale } from "@gi-tcg/data/internal/cards/support/adventure.gts";
-import {
-  SkywardSonnet,
-  Venti,
-} from "@gi-tcg/data/internal/characters/anemo/venti.gts";
-import { Satiated } from "@gi-tcg/data/internal/commons.gts";
 import { test } from "vitest";
 
 test("adventure: basic", async () => {

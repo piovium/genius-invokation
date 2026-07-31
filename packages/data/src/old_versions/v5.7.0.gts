@@ -1,9 +1,4 @@
-import {
-  $,
-  DamageType,
-  DiceType,
-  Reaction,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, Reaction } from "@gi-tcg/core/data";
 import {
   Citlali,
   MamaloacosFrigidRainInEffect,
@@ -178,7 +173,7 @@ define card {
   until "v5.7.0";
   cost DiceType.Pyro, 2;
   talent Arlecchino {
-    on enter {
+    on staged {
       :characterStatus(BondOfLife, :self.master, {
         overrideVariables: { usage: 3 },
       });

@@ -96,8 +96,7 @@ define card {
   undiscoverable;
   support place {
     adventureSpot;
-    on enter {
-      when :( !:e.overridden );
+    on staged {
       :damage(DamageType.Piercing, 1, $.my.character);
     };
     on adventure {
@@ -246,8 +245,7 @@ define card {
   undiscoverable;
   support place {
     adventureSpot;
-    on enter {
-      when :( !:e.overridden );
+    on staged {
       const excludeTags = ["food", "legend"] as const;
       const candidates = :allCardDefinitions(
         (card) =>

@@ -13,10 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 311301
@@ -225,7 +222,7 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on enter {
+    on staged {
       :characterStatus(ForestRegaliaInEffect, :self.master);
     };
   };
@@ -268,7 +265,7 @@ define card {
     associateExtension NonInitialPlayedCardExtension;
     replaceDescription "[GCG_TOKEN_COUNTER]",
       ((_, { area }, ext) => ext.defIds[area.who].length);
-    on enter {
+    on staged {
       :setVariable("supp", :getExtensionState().defIds[:self.who].length);
     };
     on playCard {

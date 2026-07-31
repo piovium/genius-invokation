@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 125024
@@ -212,7 +208,7 @@ define card {
   since "v4.3.0";
   cost DiceType.Anemo, 3;
   talent Dvalin {
-    on enter {
+    on staged {
       :useSkill(TempestuousBarrage);
     };
     on dispose {

@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 113081
@@ -133,7 +129,7 @@ define card {
   cost DiceType.Void, 2;
   talent Yanfei {
     variable triggerSeal, 0;
-    on enter {
+    on staged {
       :useSkill(SealOfApproval);
     };
     on increaseSkillDamage {

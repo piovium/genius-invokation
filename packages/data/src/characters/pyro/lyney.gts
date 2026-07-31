@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  Aura,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, Aura, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 113101
@@ -164,7 +159,7 @@ define card {
   since "v4.3.0";
   cost DiceType.Pyro, 3;
   talent Lyney {
-    on enter {
+    on staged {
       :useSkill(PropArrow);
     };
     on increaseSkillDamage {

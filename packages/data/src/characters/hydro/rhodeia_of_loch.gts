@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SummonHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type SummonHandle } from "@gi-tcg/core/data";
 
 /**
  * @id 122013
@@ -248,7 +243,7 @@ define card {
   cost DiceType.Hydro, 4;
   cost DiceType.Energy, 3;
   talent RhodeiaOfLoch {
-    on enter {
+    on staged {
       :useSkill(TideAndTorrent);
     };
   };

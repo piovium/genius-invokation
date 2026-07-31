@@ -47,7 +47,7 @@ define summon {
 define combatStatus {
   id 117053 as SeamlessShield;
   shield 1;
-  defineSnippet :{
+  defineSnippet {
     :damage(DamageType.Dendro, 1);
     const active = :query($.my.active);
     if (!active) {
@@ -156,7 +156,7 @@ define card {
   cost DiceType.Dendro, 4;
   cost DiceType.Energy, 2;
   talent Baizhu {
-    on enter {
+    on staged {
       :useSkill(HolisticRevivification);
     };
   };

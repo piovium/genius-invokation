@@ -97,12 +97,13 @@ define card {
   cost DiceType.Aligned, 2;
   support ally {
     variable material, 2;
-    on enter {
-      when :(
+    on staged {
+      if (
         :player.initialPile.filter((card) => card.tags.includes("artifact"))
           .length >= 6
-      );
-      :drawCards(1, { withTag: "artifact" });
+      ) {
+        :drawCards(1, { withTag: "artifact" });
+      }
     };
     on endPhase {
       :addVariable("material", 1);
@@ -133,7 +134,7 @@ define card {
   cost DiceType.Aligned, 2;
   support ally {
     variable material, 2;
-    on enter {
+    on staged {
       const weaponDefs = :player.initialPile
         .filter((card) => card.tags.includes("weapon"))
         .map((card) => card.id);
@@ -615,7 +616,7 @@ define card {
   support ally {
     associateExtension DisposedSupportCountExtension;
     variable experience, 0;
-    on enter {
+    on staged {
       :setVariable(
         "experience",
         Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
@@ -681,7 +682,7 @@ define card {
   support ally {
     associateExtension DamageTypeCountExtension;
     variable count, 0;
-    on enter {
+    on staged {
       const count = :getExtensionState().damages[flip(:self.who)].length;
       :setVariable("count", Math.min(count, 4));
     };
@@ -730,7 +731,7 @@ define card {
   cost DiceType.Void, 2;
   support ally {
     variable count, 0;
-    on enter {
+    on staged {
       :createPileCards(TaroumarusSavings, 4, "spaceAround");
     };
     on playCard {
@@ -867,7 +868,7 @@ define card {
   since "v4.8.0";
   cost DiceType.Void, 2;
   support ally {
-    on enter {
+    on staged {
       const card = :random(SERENE_SUPPORTS);
       :createHandCard(card);
     };
@@ -908,7 +909,7 @@ define card {
   since "v5.8.0";
   cost DiceType.Void, 2;
   support ally {
-    defineSnippet :{
+    defineSnippet {
       const newCard = :random([
         OrigamiFlyingSquirrel,
         PopupPaperFrog,
@@ -916,7 +917,7 @@ define card {
       ]);
       :createHandCard(newCard);
     };
-    on enter {
+    on staged {
       :callSnippet();
     };
     on reaction {
@@ -940,7 +941,7 @@ define card {
   since "v5.8.0";
   cost DiceType.Void, 2;
   support ally {
-    on enter {
+    on staged {
       :createHandCard(ToyGuard);
       :createHandCard(ToyGuard);
       :createPileCards(ToyGuard, 2, "random");
@@ -968,7 +969,7 @@ define card {
   since "v6.2.0";
   cost DiceType.Aligned, 1;
   support ally {
-    on enter {
+    on staged {
       const oppTop = :oppPlayer.pile[0];
       if (oppTop) {
         :createHandCard(oppTop.definition.id as CardHandle);
@@ -995,7 +996,7 @@ define card {
   since "v6.3.0";
   cost DiceType.Void, 2;
   support ally {
-    on enter {
+    on staged {
       :adventure();
     };
     on useTechnique {
@@ -1283,7 +1284,7 @@ define card {
   since "v6.5.0";
   support ally {
     variable progress, 0; // for transformed plans to use
-    on enter {
+    on staged {
       :selectAndPlay([
         LepinepaulinesInvestmentInMedicalEquipment,
         LepinepaulinesInvestmentInGraphAdversarialTechnology,

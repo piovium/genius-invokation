@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  Reaction,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, Reaction } from "@gi-tcg/core/data";
 import {
   AdventureCompleted,
   BondOfLife,
@@ -768,7 +763,7 @@ define card {
     variable bubble, 0;
     replaceDescription "[GCG_TOKEN_SHIELD]",
       ((_, self) => self.variables.healedPts);
-    on enter {
+    on staged {
       :heal(2, :self.master);
     };
     on healed {
@@ -801,7 +796,7 @@ define card {
   since "v4.2.0";
   cost DiceType.Aligned, 1;
   artifact {
-    on enter {
+    on staged {
       :drawCards(1);
     };
     on damaged {
@@ -828,7 +823,7 @@ define card {
   since "v4.3.0";
   cost DiceType.Aligned, 3;
   artifact {
-    on enter {
+    on staged {
       const diceType = :self.master.element();
       const elementKinds = new Set(
         :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
@@ -1527,7 +1522,7 @@ define card {
   since "v6.1.0";
   cost DiceType.Void, 3;
   artifact {
-    on enter {
+    on staged {
       :gainEnergy(1, :self.master);
     };
     on useSkill {

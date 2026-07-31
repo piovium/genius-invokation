@@ -39,11 +39,7 @@ import {
   type ICaller,
   type ThisWithType,
 } from "./entity";
-import type {
-  CharacterHandle,
-  HandleT,
-  StatusHandle,
-} from "../../data/type";
+import type { CharacterHandle, HandleT, StatusHandle } from "../../data/type";
 import type { TalentRequirement } from "../../runtime/card";
 import type {
   DetailedEventArgOf,
@@ -100,7 +96,7 @@ export class CardModel extends InitiativeSkillModel implements ICaller {
   descriptionDictionary: Writable<DescriptionDictionary> = {};
 
   public get snippets() {
-    return super.snippets;
+    return this.innerModel?.snippets ?? super.snippets;
   }
 
   type: "support" | "equipment" | "eventCard" = "eventCard";
@@ -128,13 +124,18 @@ export class CardModel extends InitiativeSkillModel implements ICaller {
   }
 
   setEquipmentPlayAction(): void {
+    const stagedOperations = this.innerModel?.stagedOperations ?? [];
     this.action = function (c) {
       for (const ch of c.eventArg.targets) {
         ch.equip(c.self);
       }
+      for (const operation of stagedOperations) {
+        operation(c);
+      }
     };
   }
   setSupportPlayAction(): void {
+    const stagedOperations = this.innerModel?.stagedOperations ?? [];
     this.action = function (c) {
       // 支援牌的目标是要弃置的支援区卡牌
       const [target] = c.eventArg.targets;
@@ -149,6 +150,9 @@ export class CardModel extends InitiativeSkillModel implements ICaller {
         { who: c.self.who, type: "supports" },
         "createSupport",
       );
+      for (const operation of stagedOperations) {
+        operation(c);
+      }
     };
   }
 

@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 116041
@@ -116,7 +112,7 @@ define card {
   since "v4.0.0";
   cost DiceType.Geo, 3;
   talent Albedo {
-    on enter {
+    on staged {
       :useSkill(AbiogenesisSolarIsotoma);
     };
     on deductVoidDiceSkill {

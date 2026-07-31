@@ -150,7 +150,7 @@ define card {
   cost DiceType.Void, 2;
   technique {
     target $.my.character.def(Mavuika);
-    on enter {
+    on staged {
       const summons = :queryAll($.my.summon);
       if (summons.length > 0) {
         const summon = :random(summons);
@@ -343,7 +343,7 @@ define card {
   since "v5.7.0";
   cost DiceType.Pyro, 1;
   talent Mavuika, none {
-    on enter {
+    on staged {
       :selectAndCreateHandCard([
         FlamestriderBlazingTrail,
         FlamestriderFullThrottle,

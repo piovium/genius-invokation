@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  DamageType,
-  customEvent,
-  DiceType,
-  $,
-} from "@gi-tcg/core/data";
+import { DamageType, customEvent, DiceType, $ } from "@gi-tcg/core/data";
 
 export const TurboTwirlyTriggered = customEvent("kachina/turboTwirlyTriggered");
 

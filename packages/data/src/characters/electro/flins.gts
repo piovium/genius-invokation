@@ -207,7 +207,7 @@ define card {
   since "v6.6.0";
   cost DiceType.Electro, 1;
   talent Flins, none {
-    on enter {
+    on staged {
       :gainEnergy(1, :self.master);
     };
     on dealReaction {

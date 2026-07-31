@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 111121
@@ -166,7 +162,7 @@ define card {
   since "v5.0.0";
   cost DiceType.Cryo, 3;
   talent Freminet {
-    on enter {
+    on staged {
       :useSkill(PressurizedFloe);
     };
     on useSkill {

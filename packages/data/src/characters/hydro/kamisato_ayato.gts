@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type StatusHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type StatusHandle } from "@gi-tcg/core/data";
 
 /**
  * @id 112062
@@ -158,7 +153,7 @@ define card {
   talent KamisatoAyato {
     variable deductEffectHasBeenTriggeredFromThisCard, 0;
     variable skillIsUsedWithKanka, 0;
-    on enter {
+    on staged {
       :useSkill(KamisatoArtKyouka);
     };
     on useSkill {
