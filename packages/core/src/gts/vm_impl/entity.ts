@@ -927,7 +927,9 @@ export class EntityViewModel extends defineViewModel(
 
     on: h.attribute<{
       <Meta extends EntityVMMeta>(
-        this: AR.This<Meta>,
+        this: Meta["type"] extends "support" | "equipment"
+          ? AR.This<Meta>
+          : never,
         eventName: "staged",
       ): AR.With<StagedOperationVM, Meta>;
       <Meta extends EntityVMMeta, const Event extends DetailedEventNames>(
@@ -965,11 +967,6 @@ export class EntityViewModel extends defineViewModel(
       ): Meta;
     }>((model, [eventName], subView) => {
       if (eventName === "staged") {
-        if (model.type !== "support" && model.type !== "equipment") {
-          throw new GiTcgDataError(
-            "`on staged` is only available for support and equipment.",
-          );
-        }
         const stagedAction = StagedOperationVM.parse(subView);
         model.stagedOperations.push(stagedAction.action);
         return;
