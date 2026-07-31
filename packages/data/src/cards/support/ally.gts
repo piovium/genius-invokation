@@ -614,7 +614,6 @@ define card {
   replaceDescription "[GCG_TOKEN_COUNTER]",
     ((_, { area }, ext) => ext.disposedSupportCount[area.who]);
   support ally {
-    associateExtension DisposedSupportCountExtension;
     variable experience, 0;
     on staged {
       :setVariable(
@@ -680,7 +679,6 @@ define card {
   replaceDescription "[GCG_TOKEN_COUNTER]",
     ((_, { area }, ext) => ext.damages[flip(area.who)].length);
   support ally {
-    associateExtension DamageTypeCountExtension;
     variable count, 0;
     on staged {
       const count = :getExtensionState().damages[flip(:self.who)].length;

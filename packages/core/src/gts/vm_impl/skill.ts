@@ -76,16 +76,18 @@ import { GiTcgDataError } from "../../error";
 import type { Computed } from "../../query/utils";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 
+export class SkillWrappingData {
+  associatedExtensionId: number | null = null;
+  snippets: Map<string, (arg: any) => any> = new Map();
+}
+
 export function wrapSkillInfoFromGts(
   skillInfo: SkillInfo,
-  data: {
-    extId: number | null;
-    snippets: ReadonlyMap<string, (arg: any) => any>;
-  },
+  data:SkillWrappingData,
 ): SkillInfoOfContextConstruction {
   return {
     ...skillInfo,
-    associatedExtensionId: data.extId,
+    associatedExtensionId: data.associatedExtensionId,
     gtsSnippets: data.snippets,
   };
 }
@@ -104,29 +106,21 @@ abstract class SkillModel {
 
   versionInfo: VersionInfo | null = null;
 
-  associatedExtensionId: number | null = null;
-
   preOperations: GtsSkillOperation<any>[] = [];
   action: GtsSkillOperation<any> = () => {};
   postOperations: GtsSkillOperation<any>[] = [];
   protected filters: GtsSkillOperationFilter<any>[] = [];
   userFilters: GtsSkillOperationFilter<any>[] = [];
 
-  readonly #emptySnippets: ReadonlyMap<string, (arg: any) => any> = new Map();
-  protected get snippets() {
-    return this.#emptySnippets;
-  }
+  abstract get wrapData(): SkillWrappingData;
 
   protected buildAction(): SkillDescription<any> {
-    const wrapData = {
-      extId: this.associatedExtensionId,
-      snippets: this.snippets,
-    };
     const operations = [
       ...this.preOperations,
       this.action,
       ...this.postOperations,
     ];
+    const wrapData = this.wrapData;
     return function (state: GameState, skillInfo: SkillInfo, arg: any) {
       const context = new SkillContext(
         state,
@@ -140,11 +134,7 @@ abstract class SkillModel {
     };
   }
   protected buildFilter(): SkillActionFilter<any> {
-    const wrapData = {
-      extId: this.associatedExtensionId,
-      // disable callSnippet in a filter
-      snippets: this.#emptySnippets,
-    };
+    const wrapData = this.wrapData;
     const filters = [...this.filters, ...this.userFilters];
     return function (state: GameState, skillInfo: SkillInfo, arg: any) {
       const context = new SkillContext(
@@ -177,6 +167,10 @@ export class TriggeredSkillModel extends SkillModel {
   } | null = null;
   listenTo: ListenTo = ListenTo.SameArea;
 
+  get wrapData(): SkillWrappingData {
+    return this.caller.wrapData;
+  }
+
   constructor(
     caller: ICaller,
     detailedEventName: DetailedEventNames | CustomEvent,
@@ -184,14 +178,9 @@ export class TriggeredSkillModel extends SkillModel {
     super();
     this.caller = caller;
     this.detailedEventName = detailedEventName;
-    this.associatedExtensionId = caller.associatedExtensionId;
     // attachment 默认允许在手牌/牌库区响应事件
     this.enableHandTriggering = caller.type === "attachment";
     this.enablePileTriggering = caller.type === "attachment";
-  }
-
-  override get snippets() {
-    return this.caller.snippets;
   }
 
   setUsage(count: number, option: GtsUsageOrUsagePerRoundOptions): void {
@@ -478,6 +467,11 @@ export class InitiativeSkillModel extends SkillModel {
     return false;
   }
 
+  #wrapData = new SkillWrappingData();
+  get wrapData() {
+    return this.#wrapData;
+  }
+
   private buildInitiativeSkillConfig(): InitiativeSkillConfig {
     return {
       requiredCost: normalizeCost(this.cost),
@@ -491,7 +485,7 @@ export class InitiativeSkillModel extends SkillModel {
       omitEvents: this.omitEvents,
       getTarget: buildTargetGetter(
         this.targetGetters,
-        this.associatedExtensionId,
+        this.wrapData.associatedExtensionId,
       ),
     };
   }
@@ -612,7 +606,7 @@ export const InitiativeSkillViewModel = defineViewModel(
       >;
       uniqueKey(): "associatedExtension";
     }>((model, [extId]) => {
-      model.associatedExtensionId = extId;
+      model.wrapData.associatedExtensionId = extId;
     }),
 
     prepared: h.attribute<{
