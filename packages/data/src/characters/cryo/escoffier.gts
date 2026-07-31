@@ -263,9 +263,8 @@ define card {
   since "v6.2.0";
   cost DiceType.Cryo, 4;
   talent Escoffier {
-    on staged,
-      :{
-        :useSkill(LowtemperatureCooking);
-      };
+    on staged {
+      :useSkill(LowtemperatureCooking);
+    };
   };
 };

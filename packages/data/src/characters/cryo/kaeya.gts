@@ -101,10 +101,9 @@ define card {
   since "v3.3.0";
   cost DiceType.Cryo, 3;
   talent Kaeya {
-    on staged,
-      :{
-        :useSkill(Frostgnaw);
-      };
+    on staged {
+      :useSkill(Frostgnaw);
+    };
     on useSkill {
       when :( :e.skill.definition.id === Frostgnaw );
       usage perRound, 1;

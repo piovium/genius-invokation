@@ -101,10 +101,9 @@ define card {
   until "v5.6.0";
   cost DiceType.Geo, 5;
   talent Zhongli {
-    on staged,
-      :{
-        :useSkill(DominusLapidisStrikingStone);
-      };
+    on staged {
+      :useSkill(DominusLapidisStrikingStone);
+    };
     on increaseDamage {
       when :{
         return (
@@ -269,9 +268,8 @@ define card {
   cost DiceType.Electro, 4;
   cost DiceType.Energy, 2;
   talent RaidenShogun {
-    on staged,
-      :{
-        :useSkill(SecretArtMusouShinsetsu);
-      };
+    on staged {
+      :useSkill(SecretArtMusouShinsetsu);
+    };
   };
 };

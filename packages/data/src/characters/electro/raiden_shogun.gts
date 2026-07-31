@@ -156,9 +156,8 @@ define card {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   talent RaidenShogun {
-    on staged,
-      :{
-        :useSkill(SecretArtMusouShinsetsu);
-      };
+    on staged {
+      :useSkill(SecretArtMusouShinsetsu);
+    };
   };
 };

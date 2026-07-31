@@ -194,9 +194,8 @@ define card {
   cost DiceType.Anemo, 3;
   cost DiceType.Energy, 2;
   talent Faruzan {
-    on staged,
-      :{
-        :useSkill(TheWindsSecretWays);
-      };
+    on staged {
+      :useSkill(TheWindsSecretWays);
+    };
   };
 };

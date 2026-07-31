@@ -146,15 +146,14 @@ define card {
   since "v6.4.0";
   cost DiceType.Electro, 1;
   talent Ineffa, none {
-    on staged,
-      :{
-        for (let i = 0; i < 2; i++) {
-          const target = :random(:oppPlayer.hands);
-          if (target) {
-            :attach(Conductive, target);
-          }
+    on staged {
+      for (let i = 0; i < 2; i++) {
+        const target = :random(:oppPlayer.hands);
+        if (target) {
+          :attach(Conductive, target);
         }
-      };
+      }
+    };
     on dealReaction {
       when :( :e.type === Reaction.LunarElectroCharged );
       listenTo samePlayer;

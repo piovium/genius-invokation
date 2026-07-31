@@ -140,9 +140,8 @@ define card {
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
   talent Thoma {
-    on staged,
-      :{
-        :useSkill(CrimsonOoyoroi);
-      };
+    on staged {
+      :useSkill(CrimsonOoyoroi);
+    };
   };
 };

@@ -763,10 +763,9 @@ define card {
     variable bubble, 0;
     replaceDescription "[GCG_TOKEN_SHIELD]",
       ((_, self) => self.variables.healedPts);
-    on staged,
-      :{
-        :heal(2, :self.master);
-      };
+    on staged {
+      :heal(2, :self.master);
+    };
     on healed {
       listenTo samePlayer;
       :addVariable("healedPts", :e.value);
@@ -797,10 +796,9 @@ define card {
   since "v4.2.0";
   cost DiceType.Aligned, 1;
   artifact {
-    on staged,
-      :{
-        :drawCards(1);
-      };
+    on staged {
+      :drawCards(1);
+    };
     on damaged {
       when :(
         !:e.target.isMine() && :self.master.isActive() && :e.getReaction()
@@ -825,18 +823,17 @@ define card {
   since "v4.3.0";
   cost DiceType.Aligned, 3;
   artifact {
-    on staged,
-      :{
-        const diceType = :self.master.element();
-        const elementKinds = new Set(
-          :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
-        );
-        if (elementKinds.size >= 3) {
-          :generateDice(diceType, 2);
-        } else {
-          :generateDice(diceType, 1);
-        }
-      };
+    on staged {
+      const diceType = :self.master.element();
+      const elementKinds = new Set(
+        :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
+      );
+      if (elementKinds.size >= 3) {
+        :generateDice(diceType, 2);
+      } else {
+        :generateDice(diceType, 1);
+      }
+    };
     on damaged {
       when :(
         !:e.target.isMine() && :self.master.isActive() && :e.getReaction()
@@ -1525,10 +1522,9 @@ define card {
   since "v6.1.0";
   cost DiceType.Void, 3;
   artifact {
-    on staged,
-      :{
-        :gainEnergy(1, :self.master);
-      };
+    on staged {
+      :gainEnergy(1, :self.master);
+    };
     on useSkill {
       when :( :e.isSkillType("burst") );
       :combatStatus(NoblesseObligeInEffect);

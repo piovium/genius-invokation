@@ -172,9 +172,8 @@ define card {
   since "v3.7.0";
   cost DiceType.Cryo, 3;
   talent Shenhe {
-    on staged,
-      :{
-        :useSkill(SpringSpiritSummoning);
-      };
+    on staged {
+      :useSkill(SpringSpiritSummoning);
+    };
   };
 };

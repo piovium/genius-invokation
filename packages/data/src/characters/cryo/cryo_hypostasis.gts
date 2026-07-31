@@ -175,9 +175,8 @@ define card {
   since "v4.4.0";
   cost DiceType.Cryo, 1;
   talent CryoHypostasis, active {
-    on staged,
-      :{
-        :characterStatus(CryoCrystalCore, :self.master);
-      };
+    on staged {
+      :characterStatus(CryoCrystalCore, :self.master);
+    };
   };
 };

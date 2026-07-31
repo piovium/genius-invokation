@@ -166,9 +166,8 @@ define card {
   since "v3.4.0";
   cost DiceType.Electro, 3;
   talent Beidou {
-    on staged,
-      :{
-        :useSkill(Tidecaller);
-      };
+    on staged {
+      :useSkill(Tidecaller);
+    };
   };
 };

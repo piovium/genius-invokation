@@ -129,10 +129,9 @@ define card {
   cost DiceType.Void, 2;
   talent Yanfei {
     variable triggerSeal, 0;
-    on staged,
-      :{
-        :useSkill(SealOfApproval);
-      };
+    on staged {
+      :useSkill(SealOfApproval);
+    };
     on increaseSkillDamage {
       when :( :e.viaChargedAttack() && :e.target.health <= 6 );
       :e.increaseDamage(1);

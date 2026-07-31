@@ -195,10 +195,9 @@ define card {
   since "v4.1.0";
   cost DiceType.Pyro, 4;
   talent Dehya {
-    on staged,
-      :{
-        :useSkill(MoltenInferno);
-      };
+    on staged {
+      :useSkill(MoltenInferno);
+    };
     on endPhase {
       when :( :self.master.health <= 6 );
       :heal(2, :self.master);

@@ -159,10 +159,9 @@ define card {
   since "v4.3.0";
   cost DiceType.Pyro, 3;
   talent Lyney {
-    on staged,
-      :{
-        :useSkill(PropArrow);
-      };
+    on staged {
+      :useSkill(PropArrow);
+    };
     on increaseSkillDamage {
       when :(
         [Lyney as number, GrinmalkinHat as number].includes(

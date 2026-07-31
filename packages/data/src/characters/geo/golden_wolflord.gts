@@ -146,9 +146,8 @@ define card {
   since "v5.2.0";
   cost DiceType.Geo, 3;
   talent GoldenWolflord {
-    on staged,
-      :{
-        :useSkill(HowlingRiftcall);
-      };
+    on staged {
+      :useSkill(HowlingRiftcall);
+    };
   };
 };

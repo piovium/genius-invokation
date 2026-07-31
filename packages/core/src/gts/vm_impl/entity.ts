@@ -13,7 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
+import {
+  defineViewModel,
+  defineActionViewModel,
+  type AR,
+} from "@gi-tcg/gts-runtime";
 import * as R from "remeda";
 import {
   USAGE_PER_ROUND_VARIABLE_NAMES,
@@ -451,6 +455,13 @@ type PushVar<Meta extends EntityVMMeta, Name extends string> = Computed<
     variables: Meta["variables"] | Name;
   }
 >;
+
+class StagedOperationVM extends defineActionViewModel<
+  <Meta extends EntityVMMeta>(
+    this: AR.This<Meta>,
+    operation: StagedOperation<Meta>,
+  ) => AR.Done
+>() {}
 
 export class EntityViewModel extends defineViewModel(
   EntityModel,
@@ -911,8 +922,7 @@ export class EntityViewModel extends defineViewModel(
       <Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
         eventName: "staged",
-        operation: StagedOperation<Meta>,
-      ): AR.Done;
+      ): AR.With<StagedOperationVM, Meta>;
       <Meta extends EntityVMMeta, const Event extends DetailedEventNames>(
         this: AR.This<Meta>,
         eventName: Event,
@@ -942,22 +952,27 @@ export class EntityViewModel extends defineViewModel(
       ): Omit<Meta, "variables"> & {
         variables: Meta["variables"] | InnerMeta["variables"];
       };
-    }>((model, [eventName, operation], subView) => {
+      mergeMeta<Meta extends EntityVMMeta>(
+        meta: Meta,
+        innerMeta: unknown,
+      ): Meta;
+    }>((model, [eventName], subView) => {
       if (eventName === "staged") {
         if (model.type !== "support" && model.type !== "equipment") {
           throw new GiTcgDataError(
             "`on staged` is only available for support and equipment.",
           );
         }
-        model.stagedOperations.push(operation);
+        const stagedAction = StagedOperationVM.parse(subView);
+        model.stagedOperations.push(stagedAction.action);
         return;
       }
       if (
         eventName === "enter" &&
-        (model.type === "support" || model.type === "equipment")
+        !(["status", "combatStatus", "summon"].includes(model.type))
       ) {
         throw new GiTcgDataError(
-          "Support and equipment cannot define `on enter`; use `on staged, :{ ... };` instead.",
+          "Only status, combatStatus, and summon can have `enter` handling. For support and equipment, use `on staged { ... };` instead.",
         );
       }
       const skillModel = TriggeredSkillViewModel.parse(

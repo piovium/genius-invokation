@@ -67,10 +67,9 @@ define card {
   id 321002 as KnightsOfFavoniusLibrary;
   since "v3.3.0";
   support place {
-    on staged,
-      :{
-        :rerollDice(1);
-      };
+    on staged {
+      :rerollDice(1);
+    };
     on roll {
       :e.addRerollCount(1);
     };
@@ -366,10 +365,9 @@ define card {
   since "v4.2.0";
   cost DiceType.Aligned, 2;
   support place {
-    on staged,
-      :{
-        :drawCards(1, { withTag: "talent" });
-      };
+    on staged {
+      :drawCards(1, { withTag: "talent" });
+    };
     on deductOmniDice {
       when :{
         return (
@@ -877,15 +875,14 @@ define card {
   since "v5.8.0";
   cost DiceType.Void, 2;
   support place {
-    on staged,
-      :{
-        const newCard = :random([
-          OrigamiFlyingSquirrel,
-          PopupPaperFrog,
-          OrigamiHamster,
-        ]);
-        :createHandCard(newCard);
-      };
+    on staged {
+      const newCard = :random([
+        OrigamiFlyingSquirrel,
+        PopupPaperFrog,
+        OrigamiHamster,
+      ]);
+      :createHandCard(newCard);
+    };
     on declareEnd {
       when :( :query(SIMULANKA_QUERY) );
       usage 3;
@@ -939,10 +936,9 @@ define card {
   since "v5.8.0";
   cost DiceType.Aligned, 2;
   support place {
-    on staged,
-      :{
-        :createHandCard(ToyGuard);
-      };
+    on staged {
+      :createHandCard(ToyGuard);
+    };
     on useSkill {
       listenTo samePlayer;
       if (:e.isSkillType("elemental")) {
@@ -1041,11 +1037,10 @@ define card {
   since "v6.4.0";
   cost DiceType.Aligned, 4;
   support place {
-    on staged,
-      :{
-        :drawCards(2);
-        :heal(2, $.macros.myMostInjured);
-      };
+    on staged {
+      :drawCards(2);
+      :heal(2, $.macros.myMostInjured);
+    };
     on endPhase {
       usage 2;
       const chosen = :randomSubset(:queryAll($.macros.myHandsNotFree), 2);
@@ -1137,10 +1132,9 @@ define card {
         :attachCostIncrease(myPileTop);
       }
     };
-    on staged,
-      :{
-        :callSnippet();
-      };
+    on staged {
+      :callSnippet();
+    };
     on actionPhase {
       :callSnippet();
     };

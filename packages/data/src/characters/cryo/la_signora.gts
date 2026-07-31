@@ -222,10 +222,9 @@ define card {
   talent [LaSignora, CrimsonWitchOfEmbers], active {
     tags barrier;
     variable barrierUsage, 0; // no io hint for now
-    on staged,
-      :{
-        :generateDice(:self.master.element(), 3);
-      };
+    on staged {
+      :generateDice(:self.master.element(), 3);
+    };
     on decreaseDamaged {
       when :( :e.value >= 3 );
       usage perRound, 1;

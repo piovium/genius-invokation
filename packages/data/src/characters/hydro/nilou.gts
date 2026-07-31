@@ -161,9 +161,8 @@ define card {
   since "v4.2.0";
   cost DiceType.Hydro, 3;
   talent Nilou {
-    on staged,
-      :{
-        :useSkill(DanceOfHaftkarsvar);
-      };
+    on staged {
+      :useSkill(DanceOfHaftkarsvar);
+    };
   };
 };

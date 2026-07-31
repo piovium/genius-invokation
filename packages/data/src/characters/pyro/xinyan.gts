@@ -120,10 +120,9 @@ define card {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   talent Xinyan {
-    on staged,
-      :{
-        :useSkill(DanceOnFire);
-      };
+    on staged {
+      :useSkill(DanceOnFire);
+    };
     on increaseSkillDamage {
       when :( :player.hands.length <= 1 );
       usage perRound, 1;

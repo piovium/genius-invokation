@@ -162,9 +162,8 @@ define card {
   since "v3.3.0";
   cost DiceType.Electro, 3;
   talent Keqing {
-    on staged,
-      :{
-        :useSkill(StellarRestoration);
-      };
+    on staged {
+      :useSkill(StellarRestoration);
+    };
   };
 };

@@ -219,10 +219,9 @@ define card {
   since "v3.7.0";
   cost DiceType.Hydro, 3;
   talent Tartaglia {
-    on staged,
-      :{
-        :useSkill(FoulLegacyRagingTide);
-      };
+    on staged {
+      :useSkill(FoulLegacyRagingTide);
+    };
     on endPhase {
       when :( :query($.opp.active.has($.typeStatus.def(Riptide))) );
       :damage(DamageType.Piercing, 1, $.opp.active);

@@ -36,10 +36,9 @@ define card {
   until "v4.6.1";
   cost DiceType.Pyro, 3;
   talent Diluc {
-    on staged,
-      :{
-        :useSkill(SearingOnslaught);
-      };
+    on staged {
+      :useSkill(SearingOnslaught);
+    };
     on deductElementDiceSkill {
       when :(
         :e.action.skill.definition.id === SearingOnslaught &&
@@ -87,10 +86,9 @@ define card {
   until "v4.6.1";
   cost DiceType.Pyro, 2;
   talent Yoimiya {
-    on staged,
-      :{
-        :useSkill(NiwabiFiredance);
-      };
+    on staged {
+      :useSkill(NiwabiFiredance);
+    };
   };
 };
 
@@ -157,10 +155,9 @@ define card {
   cost DiceType.Cryo, 5;
   cost DiceType.Energy, 3;
   talent Qiqi {
-    on staged,
-      :{
-        :useSkill(AdeptusArtPreserverOfFortune);
-      };
+    on staged {
+      :useSkill(AdeptusArtPreserverOfFortune);
+    };
     on useSkill {
       when :( :e.skill.definition.id === AdeptusArtPreserverOfFortune );
       usage 2 {

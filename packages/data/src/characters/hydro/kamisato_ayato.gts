@@ -153,10 +153,9 @@ define card {
   talent KamisatoAyato {
     variable deductEffectHasBeenTriggeredFromThisCard, 0;
     variable skillIsUsedWithKanka, 0;
-    on staged,
-      :{
-        :useSkill(KamisatoArtKyouka);
-      };
+    on staged {
+      :useSkill(KamisatoArtKyouka);
+    };
     on useSkill {
       when :( :e.isSkillType("normal") );
       if (

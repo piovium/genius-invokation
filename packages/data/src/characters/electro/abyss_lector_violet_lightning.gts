@@ -197,12 +197,11 @@ define card {
   since "v5.1.0";
   cost DiceType.Electro, 1;
   talent AbyssLectorVioletLightning, none {
-    on staged,
-      :{
-        :combatStatus(ChainLightningCascadeCombatStatus);
-        if (!:self.master.hasStatus(ElectricRebirth)) {
-          :query($.opp.active)?.loseEnergy(1);
-        }
-      };
+    on staged {
+      :combatStatus(ChainLightningCascadeCombatStatus);
+      if (!:self.master.hasStatus(ElectricRebirth)) {
+        :query($.opp.active)?.loseEnergy(1);
+      }
+    };
   };
 };

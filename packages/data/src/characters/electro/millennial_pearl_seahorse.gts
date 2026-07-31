@@ -193,18 +193,17 @@ define card {
   id 224031 as PearlSolidification;
   since "v4.4.0";
   talent MillennialPearlSeahorse, active {
-    on staged,
-      :{
-        const exists = :self.master.hasStatus(FontemerPearl);
-        if (exists) {
-          exists.addVariable("usage", 1);
-        } else {
-          :characterStatus(FontemerPearl, :self.master, {
-            overrideVariables: {
-              usage: 1,
-            },
-          });
-        }
-      };
+    on staged {
+      const exists = :self.master.hasStatus(FontemerPearl);
+      if (exists) {
+        exists.addVariable("usage", 1);
+      } else {
+        :characterStatus(FontemerPearl, :self.master, {
+          overrideVariables: {
+            usage: 1,
+          },
+        });
+      }
+    };
   };
 };

@@ -174,10 +174,9 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on staged,
-      :{
-        :characterStatus(KingsSquireStatus, :self.master);
-      };
+    on staged {
+      :characterStatus(KingsSquireStatus, :self.master);
+    };
   };
 };
 
@@ -262,10 +261,9 @@ define card {
       when :( :self.master.health >= 11 );
       :e.increaseDamage(2);
     };
-    on staged,
-      :{
-        :increaseMaxHealth(1, :self.master);
-      };
+    on staged {
+      :increaseMaxHealth(1, :self.master);
+    };
   };
 };
 

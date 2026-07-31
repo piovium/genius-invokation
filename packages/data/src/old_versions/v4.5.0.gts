@@ -158,13 +158,12 @@ define card {
   support ally {
     associateExtension DisposedSupportCountExtension;
     variable experience, 0;
-    on staged,
-      :{
-        :setVariable(
-          "experience",
-          Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
-        );
-      };
+    on staged {
+      :setVariable(
+        "experience",
+        Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
+      );
+    };
     on dispose {
       when :( :e.entity.definition.type === "support" );
       :setVariable(

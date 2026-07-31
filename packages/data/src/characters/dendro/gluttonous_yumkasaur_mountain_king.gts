@@ -187,14 +187,13 @@ define card {
   since "v5.8.0";
   cost DiceType.Dendro, 1;
   talent GluttonousYumkasaurMountainKing, none {
-    on staged,
-      :{
-        :drawCards(1, { who: "opp" });
-        const [handCard] = :maxCostHands(1, { who: "opp" });
-        if (handCard) {
-          :stealHandCard(handCard);
-        }
-      };
+    on staged {
+      :drawCards(1, { who: "opp" });
+      const [handCard] = :maxCostHands(1, { who: "opp" });
+      if (handCard) {
+        :stealHandCard(handCard);
+      }
+    };
     on playCard {
       when :( !:isInInitialPile(:e.card) );
       usage perRound, 1;

@@ -13,16 +13,15 @@ define card {
   until "v4.4.0";
   cost DiceType.Void, 3;
   artifact {
-    on staged,
-      :{
-        :generateDice(:self.master.element(), 1);
-        const elementKinds = new Set(
-          :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
-        );
-        if (elementKinds.size >= 3) {
-          :generateDice(DiceType.Omni, 1);
-        }
-      };
+    on staged {
+      :generateDice(:self.master.element(), 1);
+      const elementKinds = new Set(
+        :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
+      );
+      if (elementKinds.size >= 3) {
+        :generateDice(DiceType.Omni, 1);
+      }
+    };
     on damaged {
       when :(
         !:e.target.isMine() && :self.master.isActive() && :e.getReaction()
@@ -62,10 +61,9 @@ define card {
   until "v4.4.0";
   cost DiceType.Aligned, 1;
   support place {
-    on staged,
-      :{
-        :rerollDice(1);
-      };
+    on staged {
+      :rerollDice(1);
+    };
     on roll {
       :e.addRerollCount(1);
     };

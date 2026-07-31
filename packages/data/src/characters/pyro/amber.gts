@@ -124,9 +124,8 @@ define card {
   since "v3.7.0";
   cost DiceType.Pyro, 3;
   talent Amber {
-    on staged,
-      :{
-        :useSkill(ExplosivePuppet);
-      };
+    on staged {
+      :useSkill(ExplosivePuppet);
+    };
   };
 };

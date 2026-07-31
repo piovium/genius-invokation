@@ -158,10 +158,9 @@ define card {
   since "v4.7.0";
   cost DiceType.Anemo, 1;
   talent ConsecratedFlyingSerpent, none {
-    on staged,
-      :{
-        :createHandCard(BonecrunchersEnergyBlock);
-      };
+    on staged {
+      :createHandCard(BonecrunchersEnergyBlock);
+    };
     on playCard {
       when :( :e.card.definition.id === BonecrunchersEnergyBlock );
       :combatStatus(DeathlyCycloneInEffect);

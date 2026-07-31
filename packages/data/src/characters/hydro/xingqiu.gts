@@ -144,9 +144,8 @@ define card {
   since "v3.3.0";
   cost DiceType.Hydro, 3;
   talent Xingqiu {
-    on staged,
-      :{
-        :useSkill(FatalRainscreen);
-      };
+    on staged {
+      :useSkill(FatalRainscreen);
+    };
   };
 };

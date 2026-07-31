@@ -139,9 +139,8 @@ define card {
   since "v4.8.0";
   cost DiceType.Cryo, 3;
   talent FrostOperative {
-    on staged,
-      :{
-        :useSkill(FrostyInterjection);
-      };
+    on staged {
+      :useSkill(FrostyInterjection);
+    };
   };
 };

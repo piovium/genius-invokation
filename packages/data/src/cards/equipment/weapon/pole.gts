@@ -60,19 +60,18 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on staged,
-      :{
-        const liyueCount = :queryAll(
-          $.my.character.includesDefeated.tag("liyue"),
-        ).length;
-        if (liyueCount > 0) {
-          :characterStatus(LithicGuard, :self.master, {
-            overrideVariables: {
-              shield: Math.min(liyueCount, 3),
-            },
-          });
-        }
-      };
+    on staged {
+      const liyueCount = :queryAll(
+        $.my.character.includesDefeated.tag("liyue"),
+      ).length;
+      if (liyueCount > 0) {
+        :characterStatus(LithicGuard, :self.master, {
+          overrideVariables: {
+            shield: Math.min(liyueCount, 3),
+          },
+        });
+      }
+    };
   };
 };
 
@@ -153,12 +152,11 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on staged,
-      :{
-        if (:self.master.energy === 0) {
-          :gainEnergy(1, :self.master);
-        }
-      };
+    on staged {
+      if (:self.master.energy === 0) {
+        :gainEnergy(1, :self.master);
+      }
+    };
     on actionPhase {
       when :( :self.master.energy === 0 );
       :gainEnergy(1, :self.master);
@@ -197,10 +195,9 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on staged,
-      :{
-        :characterStatus(MoonpiercerStatus, :self.master);
-      };
+    on staged {
+      :characterStatus(MoonpiercerStatus, :self.master);
+    };
   };
 };
 

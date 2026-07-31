@@ -133,9 +133,8 @@ define card {
   since "v3.3.0";
   cost DiceType.Cryo, 3;
   talent Diona {
-    on staged,
-      :{
-        :useSkill(IcyPaws);
-      };
+    on staged {
+      :useSkill(IcyPaws);
+    };
   };
 };

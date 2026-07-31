@@ -138,9 +138,8 @@ define card {
   cost DiceType.Anemo, 3;
   cost DiceType.Energy, 2;
   talent Sucrose {
-    on staged,
-      :{
-        :useSkill(ForbiddenCreationIsomer75TypeIi);
-      };
+    on staged {
+      :useSkill(ForbiddenCreationIsomer75TypeIi);
+    };
   };
 };

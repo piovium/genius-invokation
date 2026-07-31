@@ -153,9 +153,8 @@ define card {
   since "v3.3.0";
   cost DiceType.Cryo, 3;
   talent Chongyun {
-    on staged,
-      :{
-        :useSkill(ChonghuasLayeredFrost);
-      };
+    on staged {
+      :useSkill(ChonghuasLayeredFrost);
+    };
   };
 };

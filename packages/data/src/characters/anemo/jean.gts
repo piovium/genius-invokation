@@ -112,9 +112,8 @@ define card {
   cost DiceType.Anemo, 4;
   cost DiceType.Energy, 2;
   talent Jean {
-    on staged,
-      :{
-        :useSkill(DandelionBreeze);
-      };
+    on staged {
+      :useSkill(DandelionBreeze);
+    };
   };
 };

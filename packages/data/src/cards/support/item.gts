@@ -59,10 +59,9 @@ define card {
   since "v3.3.0";
   cost DiceType.Aligned, 1;
   support item {
-    on staged,
-      :{
-        :drawCards(1, { withTag: "food" });
-      };
+    on staged {
+      :drawCards(1, { withTag: "food" });
+    };
     on playCard {
       when :( :e.hasCardTag("food") );
       usage perRound, 1;

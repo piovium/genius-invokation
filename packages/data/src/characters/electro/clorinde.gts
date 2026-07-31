@@ -160,10 +160,9 @@ define card {
   since "v5.3.0";
   cost DiceType.Electro, 2;
   talent Clorinde {
-    on staged,
-      :{
-        :useSkill(HuntersVigil);
-      };
+    on staged {
+      :useSkill(HuntersVigil);
+    };
     on useSkill {
       when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Electro)) );
       listenTo samePlayer;

@@ -195,10 +195,9 @@ define card {
       visible false;
     };
     variable bubble, 0;
-    on staged,
-      :{
-        :heal(3, :self.master);
-      };
+    on staged {
+      :heal(3, :self.master);
+    };
     on healed {
       listenTo samePlayer;
       :addVariable("healedPts", :e.value);

@@ -103,10 +103,9 @@ define card {
   since "v3.3.0";
   cost DiceType.Hydro, 3;
   talent Barbara {
-    on staged,
-      :{
-        :useSkill(LetTheShowBegin);
-      };
+    on staged {
+      :useSkill(LetTheShowBegin);
+    };
     on deductOmniDiceSwitch {
       when :( :query($.my.summon.def(MelodyLoop)) );
       usage perRound, 1;

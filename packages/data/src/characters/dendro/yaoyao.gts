@@ -147,9 +147,8 @@ define card {
   since "v4.1.0";
   cost DiceType.Dendro, 3;
   talent Yaoyao {
-    on staged,
-      :{
-        :useSkill(RaphanusSkyCluster);
-      };
+    on staged {
+      :useSkill(RaphanusSkyCluster);
+    };
   };
 };

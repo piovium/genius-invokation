@@ -222,9 +222,8 @@ define card {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   talent Iansan {
-    on staged,
-      :{
-        :useSkill(TheThreePrinciplesOfPower);
-      };
+    on staged {
+      :useSkill(TheThreePrinciplesOfPower);
+    };
   };
 };

@@ -145,10 +145,9 @@ define card {
   since "v4.5.0";
   cost DiceType.Dendro, 3;
   talent Kirara {
-    on staged,
-      :{
-        :useSkill(MeowteorKick);
-      };
+    on staged {
+      :useSkill(MeowteorKick);
+    };
     on deductOmniDiceSwitch {
       when :( :self.master.isActive() );
       usage perRound, 1;

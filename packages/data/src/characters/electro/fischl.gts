@@ -134,9 +134,8 @@ define card {
   since "v3.3.0";
   cost DiceType.Electro, 3;
   talent Fischl {
-    on staged,
-      :{
-        :useSkill(Nightrider);
-      };
+    on staged {
+      :useSkill(Nightrider);
+    };
   };
 };

@@ -148,9 +148,8 @@ define card {
   since "v3.4.0";
   cost DiceType.Pyro, 3;
   talent Klee {
-    on staged,
-      :{
-        :useSkill(JumpyDumpty);
-      };
+    on staged {
+      :useSkill(JumpyDumpty);
+    };
   };
 };

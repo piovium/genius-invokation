@@ -162,10 +162,9 @@ define card {
   since "v5.2.0";
   cost DiceType.Cryo, 3;
   talent Rosaria {
-    on staged,
-      :{
-        :useSkill(RavagingConfession);
-      };
+    on staged {
+      :useSkill(RavagingConfession);
+    };
     on useSkill {
       when :( :e.skill.definition.id === RavagingConfession );
       :createHandCard(ChangingShifts);

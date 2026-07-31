@@ -155,9 +155,8 @@ define card {
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
   talent GoldflameQucusaurTyrant {
-    on staged,
-      :{
-        :useSkill(GoldflameExplosion);
-      };
+    on staged {
+      :useSkill(GoldflameExplosion);
+    };
   };
 };

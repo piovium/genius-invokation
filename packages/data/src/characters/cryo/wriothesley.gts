@@ -193,10 +193,9 @@ define card {
   cost DiceType.Void, 2;
   talent Wriothesley {
     variable count, 0;
-    on staged,
-      :{
-        :useSkill(ForcefulFistsOfFrost);
-      };
+    on staged {
+      :useSkill(ForcefulFistsOfFrost);
+    };
     on damagedOrHealed {
       :addVariable("count", 1);
     };

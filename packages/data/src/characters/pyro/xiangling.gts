@@ -121,9 +121,8 @@ define card {
   since "v3.3.0";
   cost DiceType.Pyro, 3;
   talent Xiangling {
-    on staged,
-      :{
-        :useSkill(GuobaAttack);
-      };
+    on staged {
+      :useSkill(GuobaAttack);
+    };
   };
 };

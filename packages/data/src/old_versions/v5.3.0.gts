@@ -58,10 +58,9 @@ define card {
   until "v5.3.0";
   cost DiceType.Geo, 3;
   talent Chiori {
-    on staged,
-      :{
-        :useSkill(FlutteringHasode);
-      };
+    on staged {
+      :useSkill(FlutteringHasode);
+    };
   };
 };
 

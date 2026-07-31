@@ -129,10 +129,9 @@ define card {
   since "v3.3.0";
   cost DiceType.Geo, 3;
   talent Noelle {
-    on staged,
-      :{
-        :useSkill(Breastplate);
-      };
+    on staged {
+      :useSkill(Breastplate);
+    };
     on useSkill {
       when :(
         :e.isSkillType("normal") && :query($.my.combatStatus.def(FullPlate))

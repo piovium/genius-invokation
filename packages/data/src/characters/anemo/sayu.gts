@@ -166,10 +166,9 @@ define card {
   since "v4.4.0";
   cost DiceType.Anemo, 3;
   talent Sayu {
-    on staged,
-      :{
-        :useSkill(YoohooArtFuuinDash);
-      };
+    on staged {
+      :useSkill(YoohooArtFuuinDash);
+    };
     on dealDamage {
       when :( :self.master.isActive() && :e.isSwirl() );
       listenTo samePlayer;

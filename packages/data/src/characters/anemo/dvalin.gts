@@ -208,10 +208,9 @@ define card {
   since "v4.3.0";
   cost DiceType.Anemo, 3;
   talent Dvalin {
-    on staged,
-      :{
-        :useSkill(TempestuousBarrage);
-      };
+    on staged {
+      :useSkill(TempestuousBarrage);
+    };
     on dispose {
       when :(
         :query($.opp.typeStatus.def(TotalCollapse))?.id === :e.entity.id

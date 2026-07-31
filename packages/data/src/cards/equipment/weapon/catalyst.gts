@@ -123,10 +123,9 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on staged,
-      :{
-        :drawCards(2);
-      };
+    on staged {
+      :drawCards(2);
+    };
   };
 };
 
@@ -299,10 +298,9 @@ define card {
   since "v5.2.0";
   cost DiceType.Aligned, 1;
   weapon catalyst {
-    on staged,
-      :{
-        :characterStatus(BondOfLife, :self.master);
-      };
+    on staged {
+      :characterStatus(BondOfLife, :self.master);
+    };
     on endPhase {
       :characterStatus(BondOfLife, :self.master);
     };
@@ -333,10 +331,9 @@ define card {
       when :( :self.master.health >= 11 );
       :e.increaseDamage(2);
     };
-    on staged,
-      :{
-        :increaseMaxHealth(1, :self.master);
-      };
+    on staged {
+      :increaseMaxHealth(1, :self.master);
+    };
   };
 };
 

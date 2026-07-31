@@ -130,10 +130,9 @@ define card {
   since "v3.7.0";
   cost DiceType.Pyro, 2;
   talent HuTao {
-    on staged,
-      :{
-        :useSkill(GuideToAfterlife);
-      };
+    on staged {
+      :useSkill(GuideToAfterlife);
+    };
     on increaseSkillDamage {
       when :( :self.master.health <= 6 && :e.type === DamageType.Pyro );
       :e.increaseDamage(1);

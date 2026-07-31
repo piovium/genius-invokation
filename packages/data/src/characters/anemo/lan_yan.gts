@@ -115,10 +115,9 @@ define card {
   since "v5.8.0";
   cost DiceType.Anemo, 3;
   talent LanYan {
-    on staged,
-      :{
-        :useSkill(SwallowwispPinionDance);
-      };
+    on staged {
+      :useSkill(SwallowwispPinionDance);
+    };
     on useSkill {
       when :( :e.isSkillType("normal") );
       listenTo samePlayer;

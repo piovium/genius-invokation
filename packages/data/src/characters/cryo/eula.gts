@@ -148,9 +148,8 @@ define card {
   cost DiceType.Cryo, 3;
   cost DiceType.Energy, 2;
   talent Eula {
-    on staged,
-      :{
-        :useSkill(GlacialIllumination);
-      };
+    on staged {
+      :useSkill(GlacialIllumination);
+    };
   };
 };

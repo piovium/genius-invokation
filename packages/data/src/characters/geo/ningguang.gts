@@ -119,9 +119,8 @@ define card {
   since "v3.3.0";
   cost DiceType.Geo, 3;
   talent Ningguang {
-    on staged,
-      :{
-        :useSkill(JadeScreen);
-      };
+    on staged {
+      :useSkill(JadeScreen);
+    };
   };
 };

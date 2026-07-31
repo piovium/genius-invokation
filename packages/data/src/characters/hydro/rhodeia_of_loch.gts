@@ -243,9 +243,8 @@ define card {
   cost DiceType.Hydro, 4;
   cost DiceType.Energy, 3;
   talent RhodeiaOfLoch {
-    on staged,
-      :{
-        :useSkill(TideAndTorrent);
-      };
+    on staged {
+      :useSkill(TideAndTorrent);
+    };
   };
 };

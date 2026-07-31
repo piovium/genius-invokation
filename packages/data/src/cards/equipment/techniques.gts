@@ -207,10 +207,9 @@ define card {
     variable deductDiceTriggered, 0 {
       visible false;
     };
-    on staged,
-      :{
-        :characterStatus(Target, $.opp.active);
-      };
+    on staged {
+      :characterStatus(Target, $.opp.active);
+    };
     on switchActive {
       when :(
         !:e.switchInfo.to.isMine() && :e.switchInfo.to.hasStatus(Target)
@@ -266,10 +265,9 @@ define card {
       cost DiceType.Aligned, 1;
       :damage(DamageType.Physical, 2);
     };
-    on staged,
-      :{
-        :characterStatus(WaveriderShield, :self.master);
-      };
+    on staged {
+      :characterStatus(WaveriderShield, :self.master);
+    };
     on switchActive {
       when :( :e.switchInfo.from?.id === :self.master.id );
       :addVariable("usage", 1);
@@ -413,10 +411,9 @@ define card {
   since "v5.7.0";
   cost DiceType.Aligned, 2;
   technique {
-    on staged,
-      :{
-        :combatStatus(Yikes);
-      };
+    on staged {
+      :combatStatus(Yikes);
+    };
     skill {
       id 3130092;
       usage 2;

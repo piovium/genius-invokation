@@ -145,10 +145,9 @@ define card {
   cost DiceType.Geo, 4;
   cost DiceType.Energy, 2;
   talent StonehideLawachurl {
-    on staged,
-      :{
-        :useSkill(UpaShato);
-      };
+    on staged {
+      :useSkill(UpaShato);
+    };
     on defeated {
       when :( :e.source.id === :self.master.id );
       listenTo all;

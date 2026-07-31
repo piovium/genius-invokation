@@ -293,10 +293,9 @@ define card {
   since "v4.7.0";
   cost DiceType.Hydro, 4;
   talent AlldevouringNarwhal {
-    on staged,
-      :{
-        :useSkill(StarfallShower);
-      };
+    on staged {
+      :useSkill(StarfallShower);
+    };
     on StarfallShowerDisposeCard {
       usage perRound, 1;
       :heal(:get(:e.arg).diceCost(), :self.master);

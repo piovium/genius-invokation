@@ -1,8 +1,4 @@
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 import {
   DandelionBreeze,
   FavoniusBladework,

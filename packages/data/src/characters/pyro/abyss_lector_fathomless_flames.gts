@@ -208,12 +208,11 @@ define card {
   since "v3.7.0";
   cost DiceType.Pyro, 2;
   talent AbyssLectorFathomlessFlames, none {
-    on staged,
-      :{
-        if (:self.master.getVariable("fieryRebirthTriggered")) {
-          :characterStatus(AegisOfAbyssalFlame, :self.master);
-          :dispose();
-        }
-      };
+    on staged {
+      if (:self.master.getVariable("fieryRebirthTriggered")) {
+        :characterStatus(AegisOfAbyssalFlame, :self.master);
+        :dispose();
+      }
+    };
   };
 };

@@ -140,9 +140,8 @@ define card {
   since "v3.5.0";
   cost DiceType.Electro, 3;
   talent KujouSara {
-    on staged,
-      :{
-        :useSkill(TenguStormcall);
-      };
+    on staged {
+      :useSkill(TenguStormcall);
+    };
   };
 };

@@ -106,10 +106,9 @@ define card {
   since "v3.3.0";
   cost DiceType.Pyro, 3;
   talent Diluc {
-    on staged,
-      :{
-        :useSkill(SearingOnslaught);
-      };
+    on staged {
+      :useSkill(SearingOnslaught);
+    };
     on deductElementDiceSkill {
       when :(
         :e.action.skill.definition.id === SearingOnslaught &&

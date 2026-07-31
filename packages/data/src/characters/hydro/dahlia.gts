@@ -132,10 +132,9 @@ define card {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   talent Dahlia {
-    on staged,
-      :{
-        :useSkill(RadiantPsalter);
-      };
+    on staged {
+      :useSkill(RadiantPsalter);
+    };
     on beforeDefeated {
       when :( :query($.my.combatStatus.def(FavonianFavor)) );
       listenTo samePlayer;

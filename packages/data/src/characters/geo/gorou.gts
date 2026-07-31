@@ -128,10 +128,9 @@ define card {
   since "v4.3.0";
   cost DiceType.Geo, 3;
   talent Gorou {
-    on staged,
-      :{
-        :useSkill(InuzakaAllroundDefense);
-      };
+    on staged {
+      :useSkill(InuzakaAllroundDefense);
+    };
     on skillDamage {
       when :(
         :e.type === DamageType.Geo &&

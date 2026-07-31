@@ -136,9 +136,8 @@ define card {
   since "v3.3.0";
   cost DiceType.Dendro, 3;
   talent JadeplumeTerrorshroom {
-    on staged,
-      :{
-        :useSkill(VolatileSporeCloud);
-      };
+    on staged {
+      :useSkill(VolatileSporeCloud);
+    };
   };
 };

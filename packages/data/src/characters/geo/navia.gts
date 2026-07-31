@@ -173,10 +173,9 @@ define card {
   since "v4.8.0";
   cost DiceType.Geo, 3;
   talent Navia {
-    on staged,
-      :{
-        :useSkill(CeremonialCrystalshot);
-      };
+    on staged {
+      :useSkill(CeremonialCrystalshot);
+    };
     on useSkill {
       usage perRound, 1;
       :drawCards(2, { withDefinition: CrystalShrapnel });

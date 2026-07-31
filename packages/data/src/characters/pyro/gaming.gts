@@ -170,10 +170,9 @@ define card {
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 3;
   talent Gaming {
-    on staged,
-      :{
-        :useSkill(SuannisGildedDance);
-      };
+    on staged {
+      :useSkill(SuannisGildedDance);
+    };
     on increaseSkillDamage {
       when :( :e.viaPlungingAttack() );
       :e.increaseDamage(1);

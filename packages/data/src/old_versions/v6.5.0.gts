@@ -252,10 +252,9 @@ define card {
     variable deductDiceTriggered, 0 {
       visible false;
     };
-    on staged,
-      :{
-        :characterStatus(Target, $.opp.active);
-      };
+    on staged {
+      :characterStatus(Target, $.opp.active);
+    };
     on deductOmniDiceSwitch {
       // 绒翼龙只在可以减费时生效
       when :(

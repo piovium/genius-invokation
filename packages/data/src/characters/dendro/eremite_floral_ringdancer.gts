@@ -183,10 +183,9 @@ define card {
   since "v5.1.0";
   cost DiceType.Dendro, 3;
   talent EremiteFloralRingdancer {
-    on staged,
-      :{
-        :useSkill(SpiralingWhirl);
-      };
+    on staged {
+      :useSkill(SpiralingWhirl);
+    };
     on switchActive {
       when :(
         :e.switchInfo.to.hasTechnique()?.definition.id ===

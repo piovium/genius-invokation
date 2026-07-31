@@ -1,7 +1,4 @@
-import {
-  $,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DiceType } from "@gi-tcg/core/data";
 import { StrictProhibited } from "../cards/support/place.gts";
 import {
   ConstantOffthecuffCookery,

@@ -166,10 +166,9 @@ define card {
   since "v5.6.0";
   cost DiceType.Electro, 1;
   talent Sethos, none {
-    on staged,
-      :{
-        :gainEnergy(1, :self.master);
-      };
+    on staged {
+      :gainEnergy(1, :self.master);
+    };
     on EnergyLost {
       usage perRound, 1;
       :gainEnergy(1, :self.master);

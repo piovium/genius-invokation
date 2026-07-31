@@ -155,9 +155,8 @@ define card {
   since "v3.3.0";
   cost DiceType.Pyro, 3;
   talent FatuiPyroAgent {
-    on staged,
-      :{
-        :useSkill(Prowl);
-      };
+    on staged {
+      :useSkill(Prowl);
+    };
   };
 };

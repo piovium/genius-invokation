@@ -24,10 +24,9 @@ define card {
   until "v4.8.0";
   cost DiceType.Electro, 3;
   talent Cyno {
-    on staged,
-      :{
-        :useSkill(SecretRiteChasmicSoulfarer);
-      };
+    on staged {
+      :useSkill(SecretRiteChasmicSoulfarer);
+    };
     on increaseSkillDamage {
       when :{
         const status = :self.master.hasStatus(PactswornPathclearer)!;

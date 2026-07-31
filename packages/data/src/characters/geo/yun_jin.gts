@@ -183,9 +183,8 @@ define card {
   cost DiceType.Geo, 3;
   cost DiceType.Energy, 2;
   talent YunJin {
-    on staged,
-      :{
-        :useSkill(CliffbreakersBanner);
-      };
+    on staged {
+      :useSkill(CliffbreakersBanner);
+    };
   };
 };

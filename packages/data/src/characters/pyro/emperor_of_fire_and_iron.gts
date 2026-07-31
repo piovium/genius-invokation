@@ -216,10 +216,9 @@ define card {
   since "v4.6.0";
   cost DiceType.Pyro, 1;
   talent EmperorOfFireAndIron, none {
-    on staged,
-      :{
-        :apply(DamageType.Pyro, :self.master);
-      };
+    on staged {
+      :apply(DamageType.Pyro, :self.master);
+    };
     on dispose {
       when :{
         return (

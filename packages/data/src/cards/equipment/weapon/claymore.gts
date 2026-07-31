@@ -222,10 +222,9 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on staged,
-      :{
-        :characterStatus(ForestRegaliaInEffect, :self.master);
-      };
+    on staged {
+      :characterStatus(ForestRegaliaInEffect, :self.master);
+    };
   };
 };
 
@@ -266,10 +265,9 @@ define card {
     associateExtension NonInitialPlayedCardExtension;
     replaceDescription "[GCG_TOKEN_COUNTER]",
       ((_, { area }, ext) => ext.defIds[area.who].length);
-    on staged,
-      :{
-        :setVariable("supp", :getExtensionState().defIds[:self.who].length);
-      };
+    on staged {
+      :setVariable("supp", :getExtensionState().defIds[:self.who].length);
+    };
     on playCard {
       :setVariable("supp", :getExtensionState().defIds[:self.who].length);
     };

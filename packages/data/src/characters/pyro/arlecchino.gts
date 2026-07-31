@@ -187,12 +187,11 @@ define card {
   since "v5.4.0";
   cost DiceType.Pyro, 1;
   talent Arlecchino, action {
-    on staged,
-      :{
-        :characterStatus(BondOfLife, :self.master, {
-          overrideVariables: { usage: 3 },
-        });
-        // 消耗生命之契增伤的部分在被动技能 13147 里
-      };
+    on staged {
+      :characterStatus(BondOfLife, :self.master, {
+        overrideVariables: { usage: 3 },
+      });
+      // 消耗生命之契增伤的部分在被动技能 13147 里
+    };
   };
 };

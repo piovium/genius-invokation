@@ -103,10 +103,9 @@ define card {
   since "v3.3.0";
   cost DiceType.Electro, 3;
   talent Razor {
-    on staged,
-      :{
-        :useSkill(ClawAndThunder);
-      };
+    on staged {
+      :useSkill(ClawAndThunder);
+    };
     on useSkill {
       when :( :e.skill.definition.id === ClawAndThunder );
       usage perRound, 1;

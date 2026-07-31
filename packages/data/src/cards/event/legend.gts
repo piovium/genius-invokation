@@ -364,12 +364,11 @@ define card {
   support {
     variable spirit, 0;
     associateExtension FlamesOfWarExtension;
-    on staged,
-      :{
-        :setExtensionState((st) => {
-          st.spirit[:self.who] = :getVariable("spirit");
-        });
-      };
+    on staged {
+      :setExtensionState((st) => {
+        st.spirit[:self.who] = :getVariable("spirit");
+      });
+    };
     on dealDamage {
       :setVariable("spirit", :getExtensionState().spirit[:self.who]);
     };

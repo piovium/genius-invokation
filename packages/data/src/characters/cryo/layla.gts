@@ -145,9 +145,8 @@ define card {
   since "v4.3.0";
   cost DiceType.Cryo, 3;
   talent Layla {
-    on staged,
-      :{
-        :useSkill(NightsOfFormalFocus);
-      };
+    on staged {
+      :useSkill(NightsOfFormalFocus);
+    };
   };
 };

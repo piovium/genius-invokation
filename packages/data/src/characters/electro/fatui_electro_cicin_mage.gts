@@ -193,9 +193,8 @@ define card {
   since "v4.5.0";
   cost DiceType.Electro, 3;
   talent FatuiElectroCicinMage {
-    on staged,
-      :{
-        :useSkill(MistyCall);
-      };
+    on staged {
+      :useSkill(MistyCall);
+    };
   };
 };

@@ -132,10 +132,9 @@ define card {
   since "v4.1.0";
   cost DiceType.Anemo, 4;
   talent Wanderer {
-    on staged,
-      :{
-        :useSkill(HanegaSongOfTheWind);
-      };
+    on staged {
+      :useSkill(HanegaSongOfTheWind);
+    };
     on dealDamage {
       when :( :self.master.hasStatus(Windfavored) && :e.via.charged );
       :characterStatus(Descent, :self.master);

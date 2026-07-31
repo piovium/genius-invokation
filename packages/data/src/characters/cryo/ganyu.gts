@@ -158,9 +158,8 @@ define card {
   since "v3.3.0";
   cost DiceType.Cryo, 5;
   talent Ganyu {
-    on staged,
-      :{
-        :useSkill(FrostflakeArrow);
-      };
+    on staged {
+      :useSkill(FrostflakeArrow);
+    };
   };
 };

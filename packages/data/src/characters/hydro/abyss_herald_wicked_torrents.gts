@@ -245,12 +245,11 @@ define card {
   since "v4.6.0";
   cost DiceType.Hydro, 1;
   talent AbyssHeraldWickedTorrents, none {
-    on staged,
-      :{
-        :combatStatus(SurgingUndercurrentCombatStatus);
-        if (:self.master.getVariable("wateryRebirthTriggered")) {
-          :combatStatus(CurseOfTheUndercurrent, "opp");
-        }
-      };
+    on staged {
+      :combatStatus(SurgingUndercurrentCombatStatus);
+      if (:self.master.getVariable("wateryRebirthTriggered")) {
+        :combatStatus(CurseOfTheUndercurrent, "opp");
+      }
+    };
   };
 };

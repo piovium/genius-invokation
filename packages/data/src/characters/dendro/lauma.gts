@@ -182,10 +182,9 @@ define card {
   since "v6.6.0";
   cost DiceType.Dendro, 3;
   talent Lauma {
-    on staged,
-      :{
-        :useSkill(RunoDawnlessRestOfKarsikko);
-      };
+    on staged {
+      :useSkill(RunoDawnlessRestOfKarsikko);
+    };
     on dealReaction {
       when :(
         ([Reaction.Bloom, Reaction.LunarBloom] as Reaction[]).includes(:e.type)

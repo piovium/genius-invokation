@@ -162,10 +162,9 @@ define card {
   since "v5.0.0";
   cost DiceType.Cryo, 3;
   talent Freminet {
-    on staged,
-      :{
-        :useSkill(PressurizedFloe);
-      };
+    on staged {
+      :useSkill(PressurizedFloe);
+    };
     on useSkill {
       usage perRound, 2;
       :drawCards(1);

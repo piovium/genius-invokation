@@ -173,10 +173,9 @@ define card {
   since "v4.7.0";
   cost DiceType.Dendro, 3;
   talent Kaveh {
-    on staged,
-      :{
-        :useSkill(ArtisticIngenuity);
-      };
+    on staged {
+      :useSkill(ArtisticIngenuity);
+    };
     on ShouldTriggerTalent {
       listenTo samePlayer;
       usage perRound, 1;

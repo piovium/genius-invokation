@@ -232,9 +232,8 @@ define card {
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
   talent Nahida {
-    on staged,
-      :{
-        :useSkill(IllusoryHeart);
-      };
+    on staged {
+      :useSkill(IllusoryHeart);
+    };
   };
 };

@@ -137,9 +137,8 @@ define card {
   since "v3.3.0";
   cost DiceType.Hydro, 3;
   talent MirrorMaiden {
-    on staged,
-      :{
-        :useSkill(InfluxBlast);
-      };
+    on staged {
+      :useSkill(InfluxBlast);
+    };
   };
 };

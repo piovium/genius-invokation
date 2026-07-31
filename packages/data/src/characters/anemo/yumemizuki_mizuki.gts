@@ -144,10 +144,9 @@ define card {
   since "v6.0.0";
   cost DiceType.Anemo, 3;
   talent YumemizukiMizuki {
-    on staged,
-      :{
-        :useSkill(AisaUtamakuraPilgrimage);
-      };
+    on staged {
+      :useSkill(AisaUtamakuraPilgrimage);
+    };
     on increaseDamage {
       when :(
         :self.master.isActive() &&

@@ -364,10 +364,9 @@ define card {
     return ch && !ch.hasNightsoulsBlessing();
   };
   talent Xilonen {
-    on staged,
-      :{
-        :useSkill(YohualsScratch);
-      };
+    on staged {
+      :useSkill(YohualsScratch);
+    };
     on switchActive {
       when :( :e.switchInfo.to.hasNightsoulsBlessing() );
       usage perRound, 2;

@@ -188,10 +188,9 @@ define card {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   talent Neuvillette {
-    on staged,
-      :{
-        :useSkill(AsWaterSeeksEquilibrium);
-      };
+    on staged {
+      :useSkill(AsWaterSeeksEquilibrium);
+    };
     on useSkill {
       when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Hydro)) );
       listenTo samePlayer;

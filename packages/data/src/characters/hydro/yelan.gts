@@ -146,10 +146,9 @@ define card {
   since "v4.3.0";
   cost DiceType.Hydro, 3;
   talent Yelan {
-    on staged,
-      :{
-        :useSkill(LingeringLifeline);
-      };
+    on staged {
+      :useSkill(LingeringLifeline);
+    };
     on roll {
       const elements = new Set(
         :queryAll($.my.character.includesDefeated).map((char) =>

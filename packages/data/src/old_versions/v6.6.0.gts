@@ -20,10 +20,9 @@ define card {
   until "v6.6.0";
   cost DiceType.Dendro, 4;
   talent Tighnari {
-    on staged,
-      :{
-        :useSkill(VijnanaphalaMine);
-      };
+    on staged {
+      :useSkill(VijnanaphalaMine);
+    };
     on deductVoidDiceSkill {
       when :(
         :self.master.hasStatus(VijnanaSuffusion) && :e.isChargedAttack()

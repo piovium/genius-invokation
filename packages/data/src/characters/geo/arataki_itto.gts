@@ -184,9 +184,8 @@ define card {
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
   talent AratakiItto {
-    on staged,
-      :{
-        :useSkill(FightClubLegend);
-      };
+    on staged {
+      :useSkill(FightClubLegend);
+    };
   };
 };

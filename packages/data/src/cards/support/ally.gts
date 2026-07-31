@@ -97,15 +97,14 @@ define card {
   cost DiceType.Aligned, 2;
   support ally {
     variable material, 2;
-    on staged,
-      :{
-        if (
-          :player.initialPile.filter((card) => card.tags.includes("artifact"))
-            .length >= 6
-        ) {
-          :drawCards(1, { withTag: "artifact" });
-        }
-      };
+    on staged {
+      if (
+        :player.initialPile.filter((card) => card.tags.includes("artifact"))
+          .length >= 6
+      ) {
+        :drawCards(1, { withTag: "artifact" });
+      }
+    };
     on endPhase {
       :addVariable("material", 1);
     };
@@ -135,16 +134,15 @@ define card {
   cost DiceType.Aligned, 2;
   support ally {
     variable material, 2;
-    on staged,
-      :{
-        const weaponDefs = :player.initialPile
-          .filter((card) => card.tags.includes("weapon"))
-          .map((card) => card.id);
-        const weaponKinds = new Set(weaponDefs).size;
-        if (weaponKinds >= 3) {
-          :drawCards(1, { withTag: "weapon" });
-        }
-      };
+    on staged {
+      const weaponDefs = :player.initialPile
+        .filter((card) => card.tags.includes("weapon"))
+        .map((card) => card.id);
+      const weaponKinds = new Set(weaponDefs).size;
+      if (weaponKinds >= 3) {
+        :drawCards(1, { withTag: "weapon" });
+      }
+    };
     on endPhase {
       :addVariable("material", 1);
     };
@@ -618,13 +616,12 @@ define card {
   support ally {
     associateExtension DisposedSupportCountExtension;
     variable experience, 0;
-    on staged,
-      :{
-        :setVariable(
-          "experience",
-          Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
-        );
-      };
+    on staged {
+      :setVariable(
+        "experience",
+        Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
+      );
+    };
     on dispose {
       when :( :e.entity.definition.type === "support" );
       :setVariable(
@@ -685,11 +682,10 @@ define card {
   support ally {
     associateExtension DamageTypeCountExtension;
     variable count, 0;
-    on staged,
-      :{
-        const count = :getExtensionState().damages[flip(:self.who)].length;
-        :setVariable("count", Math.min(count, 4));
-      };
+    on staged {
+      const count = :getExtensionState().damages[flip(:self.who)].length;
+      :setVariable("count", Math.min(count, 4));
+    };
     on damaged {
       when :( !:e.target.isMine() );
       listenTo all;
@@ -735,10 +731,9 @@ define card {
   cost DiceType.Void, 2;
   support ally {
     variable count, 0;
-    on staged,
-      :{
-        :createPileCards(TaroumarusSavings, 4, "spaceAround");
-      };
+    on staged {
+      :createPileCards(TaroumarusSavings, 4, "spaceAround");
+    };
     on playCard {
       when :( :e.card.definition.id === TaroumarusSavings );
       :addVariable("count", 1);
@@ -873,11 +868,10 @@ define card {
   since "v4.8.0";
   cost DiceType.Void, 2;
   support ally {
-    on staged,
-      :{
-        const card = :random(SERENE_SUPPORTS);
-        :createHandCard(card);
-      };
+    on staged {
+      const card = :random(SERENE_SUPPORTS);
+      :createHandCard(card);
+    };
     on actionPhase {
       usage 2;
       const card = :random(SERENE_SUPPORTS);
@@ -923,10 +917,9 @@ define card {
       ]);
       :createHandCard(newCard);
     };
-    on staged,
-      :{
-        :callSnippet();
-      };
+    on staged {
+      :callSnippet();
+    };
     on reaction {
       when :( :e.caller.isMine() );
       listenTo all;
@@ -948,12 +941,11 @@ define card {
   since "v5.8.0";
   cost DiceType.Void, 2;
   support ally {
-    on staged,
-      :{
-        :createHandCard(ToyGuard);
-        :createHandCard(ToyGuard);
-        :createPileCards(ToyGuard, 2, "random");
-      };
+    on staged {
+      :createHandCard(ToyGuard);
+      :createHandCard(ToyGuard);
+      :createPileCards(ToyGuard, 2, "random");
+    };
     on enterRelative {
       when :(
         :e.entity.definition.type === "summon" &&
@@ -977,13 +969,12 @@ define card {
   since "v6.2.0";
   cost DiceType.Aligned, 1;
   support ally {
-    on staged,
-      :{
-        const oppTop = :oppPlayer.pile[0];
-        if (oppTop) {
-          :createHandCard(oppTop.definition.id as CardHandle);
-        }
-      };
+    on staged {
+      const oppTop = :oppPlayer.pile[0];
+      if (oppTop) {
+        :createHandCard(oppTop.definition.id as CardHandle);
+      }
+    };
     on playCard {
       when :( !:isInInitialPile(:e.card) );
       usage 2;
@@ -1005,10 +996,9 @@ define card {
   since "v6.3.0";
   cost DiceType.Void, 2;
   support ally {
-    on staged,
-      :{
-        :adventure();
-      };
+    on staged {
+      :adventure();
+    };
     on useTechnique {
       usage perRound, 1;
       :adventure();
@@ -1294,14 +1284,13 @@ define card {
   since "v6.5.0";
   support ally {
     variable progress, 0; // for transformed plans to use
-    on staged,
-      :{
-        :selectAndPlay([
-          LepinepaulinesInvestmentInMedicalEquipment,
-          LepinepaulinesInvestmentInGraphAdversarialTechnology,
-          LepinepaulinesInvestmentInEnergyMechanism,
-        ]);
-      };
+    on staged {
+      :selectAndPlay([
+        LepinepaulinesInvestmentInMedicalEquipment,
+        LepinepaulinesInvestmentInGraphAdversarialTechnology,
+        LepinepaulinesInvestmentInEnergyMechanism,
+      ]);
+    };
   };
 };
 

@@ -167,9 +167,8 @@ define card {
   cost DiceType.Cryo, 4;
   cost DiceType.Energy, 3;
   talent Qiqi {
-    on staged,
-      :{
-        :useSkill(AdeptusArtPreserverOfFortune);
-      };
+    on staged {
+      :useSkill(AdeptusArtPreserverOfFortune);
+    };
   };
 };

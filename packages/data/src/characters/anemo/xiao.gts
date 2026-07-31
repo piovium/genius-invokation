@@ -145,9 +145,8 @@ define card {
   cost DiceType.Anemo, 3;
   cost DiceType.Energy, 2;
   talent Xiao {
-    on staged,
-      :{
-        :useSkill(BaneOfAllEvil);
-      };
+    on staged {
+      :useSkill(BaneOfAllEvil);
+    };
   };
 };

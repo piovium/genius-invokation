@@ -157,10 +157,9 @@ define card {
   cost DiceType.Cryo, 3;
   talent FatuiCryoCicinMage {
     variable dealDamage, 0;
-    on staged,
-      :{
-        :useSkill(MistySummons);
-      };
+    on staged {
+      :useSkill(MistySummons);
+    };
     on useSkill {
       when :( :getVariable("dealDamage") );
       :damage(DamageType.Cryo, 2);

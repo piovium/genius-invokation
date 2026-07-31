@@ -89,10 +89,9 @@ define card {
   until "v4.0.0";
   cost DiceType.Hydro, 4;
   talent Tartaglia {
-    on staged,
-      :{
-        :useSkill(FoulLegacyRagingTide);
-      };
+    on staged {
+      :useSkill(FoulLegacyRagingTide);
+    };
     on endPhase {
       when :( :query($.opp.character.has($.typeStatus.def(Riptide))) );
       :damage(
@@ -206,10 +205,9 @@ define card {
   until "v4.0.0";
   cost DiceType.Cryo, 4;
   talent Diona {
-    on staged,
-      :{
-        :useSkill(IcyPaws);
-      };
+    on staged {
+      :useSkill(IcyPaws);
+    };
   };
 };
 
@@ -242,10 +240,9 @@ define card {
   until "v4.0.0";
   cost DiceType.Void, 2;
   support item {
-    on staged,
-      :{
-        :drawCards(1, { withTag: "food" });
-      };
+    on staged {
+      :drawCards(1, { withTag: "food" });
+    };
     on playCard {
       when :( :e.hasCardTag("food") );
       usage perRound, 1;

@@ -303,10 +303,9 @@ define card {
   since "v6.1.0";
   cost DiceType.Hydro, 2;
   talent HydroTulpa, none {
-    on staged,
-      :{
-        :characterStatus(ElementalLifeformHydro, :self.master);
-      };
+    on staged {
+      :characterStatus(ElementalLifeformHydro, :self.master);
+    };
     on declareEnd {
       when :(
         :self.master.health >= 3 &&

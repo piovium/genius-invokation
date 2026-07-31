@@ -155,9 +155,8 @@ define card {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   talent YaeMiko {
-    on staged,
-      :{
-        :useSkill(GreatSecretArtTenkoKenshin);
-      };
+    on staged {
+      :useSkill(GreatSecretArtTenkoKenshin);
+    };
   };
 };

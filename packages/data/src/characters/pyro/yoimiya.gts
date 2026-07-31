@@ -154,9 +154,8 @@ define card {
   since "v3.3.0";
   cost DiceType.Pyro, 1;
   talent Yoimiya {
-    on staged,
-      :{
-        :useSkill(NiwabiFiredance);
-      };
+    on staged {
+      :useSkill(NiwabiFiredance);
+    };
   };
 };

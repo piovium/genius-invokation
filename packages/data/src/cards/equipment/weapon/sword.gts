@@ -185,10 +185,9 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on staged,
-      :{
-        :characterStatus(SapwoodBladeStatus, :self.master);
-      };
+    on staged {
+      :characterStatus(SapwoodBladeStatus, :self.master);
+    };
   };
 };
 

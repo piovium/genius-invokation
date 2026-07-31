@@ -262,10 +262,9 @@ define card {
   since "v5.2.0";
   cost DiceType.Hydro, 3;
   talent Sigewinne {
-    on staged,
-      :{
-        :useSkill(ReboundHydrotherapy);
-      };
+    on staged {
+      :useSkill(ReboundHydrotherapy);
+    };
     on useSkill {
       when :( :e.skill.definition.id === ReboundHydrotherapy );
       :combatStatus(Convalescence);

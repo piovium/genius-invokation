@@ -156,9 +156,8 @@ define card {
   cost DiceType.Electro, 3;
   cost DiceType.Energy, 2;
   talent Dori {
-    on staged,
-      :{
-        :useSkill(AlcazarzaraysExactitude);
-      };
+    on staged {
+      :useSkill(AlcazarzaraysExactitude);
+    };
   };
 };

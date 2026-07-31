@@ -129,10 +129,9 @@ define card {
   since "v4.5.0";
   cost DiceType.Cryo, 3;
   talent Charlotte {
-    on staged,
-      :{
-        :useSkill(FramingFreezingPointComposition);
-      };
+    on staged {
+      :useSkill(FramingFreezingPointComposition);
+    };
     on useSkill {
       when :(
         :e.isSkillType("normal") &&

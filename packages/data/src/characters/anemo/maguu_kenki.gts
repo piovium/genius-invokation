@@ -161,9 +161,8 @@ define card {
   since "v3.3.0";
   cost DiceType.Anemo, 3;
   talent MaguuKenki {
-    on staged,
-      :{
-        :useSkill(BlusteringBlade);
-      };
+    on staged {
+      :useSkill(BlusteringBlade);
+    };
   };
 };

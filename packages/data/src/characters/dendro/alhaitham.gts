@@ -139,9 +139,8 @@ define card {
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
   talent Alhaitham {
-    on staged,
-      :{
-        :useSkill(ParticularFieldFettersOfPhenomena);
-      };
+    on staged {
+      :useSkill(ParticularFieldFettersOfPhenomena);
+    };
   };
 };

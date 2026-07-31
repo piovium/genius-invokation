@@ -175,10 +175,9 @@ define card {
   cost DiceType.Anemo, 3;
   talent Xianyun {
     variable feather, 0;
-    on staged,
-      :{
-        :useSkill(WhiteCloudsAtDawn);
-      };
+    on staged {
+      :useSkill(WhiteCloudsAtDawn);
+    };
     on switchActive {
       listenTo samePlayer;
       usage perRound, 2;

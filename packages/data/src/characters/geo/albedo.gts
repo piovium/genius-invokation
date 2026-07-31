@@ -112,10 +112,9 @@ define card {
   since "v4.0.0";
   cost DiceType.Geo, 3;
   talent Albedo {
-    on staged,
-      :{
-        :useSkill(AbiogenesisSolarIsotoma);
-      };
+    on staged {
+      :useSkill(AbiogenesisSolarIsotoma);
+    };
     on deductVoidDiceSkill {
       when :( :query($.my.summon.def(SolarIsotoma)) && :e.isPlungingAttack() );
       listenTo samePlayer;

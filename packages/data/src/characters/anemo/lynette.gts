@@ -155,9 +155,8 @@ define card {
   since "v4.3.0";
   cost DiceType.Anemo, 3;
   talent Lynette {
-    on staged,
-      :{
-        :useSkill(EnigmaticFeint);
-      };
+    on staged {
+      :useSkill(EnigmaticFeint);
+    };
   };
 };

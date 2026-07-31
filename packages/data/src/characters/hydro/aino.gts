@@ -138,10 +138,9 @@ define card {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   talent Aino {
-    on staged,
-      :{
-        :useSkill(PrecisionHydronicCooler);
-      };
+    on staged {
+      :useSkill(PrecisionHydronicCooler);
+    };
     on increaseDamage {
       when :(
         (
