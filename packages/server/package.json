@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "@gi-tcg/web-client": "workspace:*",
+    "@gi-tcg/unplugin-gts": "catalog:",
     "@nestjs/cli": "^11.0.16",
     "@prisma/dev": "^0.24.7",
     "@swc/core": "^1.15.33",

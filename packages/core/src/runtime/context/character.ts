@@ -191,6 +191,10 @@ export class ReadonlyCharacter<
     return this.skillContext.rawState;
   }
 
+  override get area(): EntityArea {
+    return this.skillContext._getEntityArea(this._id);
+  }
+
   override get [LatestStateSymbol](): CharacterState {
     const state = getEntityById(
       this.skillContext.rawState,
@@ -204,7 +208,7 @@ export class ReadonlyCharacter<
   }
 
   isMine() {
-    return this.area.who === this.skillContext.callerArea.who;
+    return this.area.who === this.skillContext.self.who;
   }
   private hasEquipmentWithTag(tag: EntityTag) {
     return (

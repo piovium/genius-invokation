@@ -16,7 +16,7 @@
 import type { EntityState, EntityVariables } from "../../base/state";
 import { GiTcgDataError } from "../../error";
 import { type EntityArea, type EntityDefinition } from "../../base/entity";
-import { diceCostSizeOfCard, getEntityArea, getEntityById } from "./utils";
+import { diceCostSizeOfCard, getEntityById } from "./utils";
 import type { ContextMetaBase, SkillContext } from "./skill";
 import {
   LatestStateSymbol,
@@ -39,8 +39,6 @@ class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
     return state;
   }
 
-  // 行动牌 area 可能会变动，不缓存
-  // protected _area: EntityArea | undefined;
   constructor(
     protected readonly skillContext: SkillContext<Meta>,
     public readonly id: number,
@@ -55,13 +53,13 @@ class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
     return this.state.definition;
   }
   get area(): EntityArea {
-    return (getEntityArea(this.skillContext.rawState, this.id));
+    return this.skillContext._getEntityArea(this.id);
   }
   get who() {
     return this.area.who;
   }
   isMine() {
-    return this.area.who === this.skillContext.callerArea.who;
+    return this.area.who === this.skillContext.self.who;
   }
   getVariable<Name extends string>(
     name: Name,
