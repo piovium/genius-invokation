@@ -299,7 +299,7 @@ define card {
   cost DiceType.Aligned, 1;
   weapon catalyst {
     on staged {
-      :characterStatus(BondOfLife, :self.master);
+      :characterStatus(BondOfLife, :e.targets[0].cast<"character">());
     };
     on endPhase {
       :characterStatus(BondOfLife, :self.master);
@@ -332,7 +332,7 @@ define card {
       :e.increaseDamage(2);
     };
     on staged {
-      :increaseMaxHealth(1, :self.master);
+      :increaseMaxHealth(1, :e.targets[0].cast<"character">());
     };
   };
 };

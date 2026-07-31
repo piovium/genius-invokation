@@ -208,7 +208,7 @@ define card {
   cost DiceType.Electro, 1;
   talent Flins, none {
     on staged {
-      :gainEnergy(1, :self.master);
+      :gainEnergy(1, :e.targets[0].cast<"character">());
     };
     on dealReaction {
       when :( :e.type === Reaction.LunarElectroCharged );

@@ -764,7 +764,8 @@ define card {
     replaceDescription "[GCG_TOKEN_SHIELD]",
       ((_, self) => self.variables.healedPts);
     on staged {
-      :heal(2, :self.master);
+      // TODO explicit cast here
+      :heal(2, :e.targets[0].cast<"character">());
     };
     on healed {
       listenTo samePlayer;
@@ -824,7 +825,7 @@ define card {
   cost DiceType.Aligned, 3;
   artifact {
     on staged {
-      const diceType = :self.master.element();
+      const diceType = :e.targets[0].cast<"character">().element();
       const elementKinds = new Set(
         :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
       );
@@ -1523,7 +1524,7 @@ define card {
   cost DiceType.Void, 3;
   artifact {
     on staged {
-      :gainEnergy(1, :self.master);
+      :gainEnergy(1, :e.targets[0].cast<"character">());
     };
     on useSkill {
       when :( :e.isSkillType("burst") );

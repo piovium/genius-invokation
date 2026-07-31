@@ -247,7 +247,7 @@ define card {
   talent AbyssHeraldWickedTorrents, none {
     on staged {
       :combatStatus(SurgingUndercurrentCombatStatus);
-      if (:self.master.getVariable("wateryRebirthTriggered")) {
+      if (:e.targets[0].cast<"character">().getVariable("wateryRebirthTriggered")) {
         :combatStatus(CurseOfTheUndercurrent, "opp");
       }
     };

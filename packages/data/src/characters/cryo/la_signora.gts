@@ -223,7 +223,7 @@ define card {
     tags barrier;
     variable barrierUsage, 0; // no io hint for now
     on staged {
-      :generateDice(:self.master.element(), 3);
+      :generateDice(:e.targets[0].cast<"character">().element(), 3);
     };
     on decreaseDamaged {
       when :( :e.value >= 3 );

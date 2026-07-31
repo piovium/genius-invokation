@@ -217,7 +217,7 @@ define card {
   cost DiceType.Geo, 1;
   talent BlackSerpentKnightRockbreakerAx {
     on staged {
-      :apply(DamageType.Geo, :self.master);
+      :apply(DamageType.Geo, :e.targets[0].cast<"character">());
     };
     on actionPhase {
       :apply(DamageType.Geo, :self.master);

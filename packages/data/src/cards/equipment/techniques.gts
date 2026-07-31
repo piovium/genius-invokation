@@ -266,7 +266,7 @@ define card {
       :damage(DamageType.Physical, 2);
     };
     on staged {
-      :characterStatus(WaveriderShield, :self.master);
+      :characterStatus(WaveriderShield, :e.targets[0].cast<"character">());
     };
     on switchActive {
       when :( :e.switchInfo.from?.id === :self.master.id );
