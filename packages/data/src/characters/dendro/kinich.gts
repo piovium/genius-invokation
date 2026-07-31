@@ -27,7 +27,7 @@ define status {
   id 117091 as GrappleLink;
   since "v5.4.0";
   duration 2;
-  defineSnippet :{
+  defineSnippet {
     const nightsoul = :self.master.hasNightsoulsBlessing();
     if (
       nightsoul &&

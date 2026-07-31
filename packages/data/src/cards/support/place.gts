@@ -1122,7 +1122,7 @@ define card {
   id 321041 as NightmareOmen;
   since "v6.7.0";
   support place {
-    defineSnippet :{
+    defineSnippet {
       const [oppTarget] = :maxCostHands(1, { who: "opp" });
       if (oppTarget) {
         :attachCostIncrease(oppTarget);

@@ -110,7 +110,7 @@ const GluttonousRexTriggerFromTalent = customEvent(
 define skill {
   id 27044 as GluttonousRex01;
   skillType passive {
-    defineSnippet :{
+    defineSnippet {
       :abortPreview();
       const choice = :random([
         WellFedAndStrong,

@@ -463,6 +463,13 @@ class StagedOperationVM extends defineActionViewModel<
   ) => AR.Done
 >() {}
 
+class SnippetOperationVM extends defineActionViewModel<
+  <Meta extends EntityVMMeta>(
+    this: AR.This<Meta>,
+    operation: SnippetOperation<Meta, void>,
+  ) => AR.Done
+>() {}
+
 export class EntityViewModel extends defineViewModel(
   EntityModel,
   (h) => ({
@@ -525,67 +532,67 @@ export class EntityViewModel extends defineViewModel(
     defineSnippet: h.attribute<{
       <Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
-        operation: SnippetOperation<Meta, void>,
-      ): AR.DoneRewriteMeta<
+      ): AR.WithRewriteMeta<
         Computed<
           Omit<Meta, "snippets"> & {
             snippets: Meta["snippets"] & { default: void };
           }
-        >
+        >,
+        SnippetOperationVM,
+        Meta
       >;
       <Meta extends EntityVMMeta, const Name extends string>(
         this: AR.This<Meta>,
         name: Name,
-        operation: SnippetOperation<Meta, void>,
-      ): AR.DoneRewriteMeta<
+      ): AR.WithRewriteMeta<
         Computed<
           Omit<Meta, "snippets"> & {
             snippets: Meta["snippets"] & { [K in Name]: void };
           }
-        >
+        >,
+        SnippetOperationVM,
+        Meta
       >;
       <Meta extends EntityVMMeta, ArgT>(
         this: AR.This<Meta>,
         typeHint: TypeHint<ArgT>,
-        operation: SnippetOperation<Meta, ArgT>,
-      ): AR.DoneRewriteMeta<
+      ): AR.WithRewriteMeta<
         Computed<
           Omit<Meta, "snippets"> & {
             snippets: Meta["snippets"] & { default: ArgT };
           }
-        >
+        >,
+        SnippetOperationVM,
+        Meta
       >;
       <Meta extends EntityVMMeta, const Name extends string, ArgT>(
         this: AR.This<Meta>,
         name: Name,
         typeHint: TypeHint<ArgT>,
-        operation: SnippetOperation<Meta, ArgT>,
-      ): AR.DoneRewriteMeta<
+      ): AR.WithRewriteMeta<
         Computed<
           Omit<Meta, "snippets"> & {
             snippets: Meta["snippets"] & { [K in Name]: ArgT };
           }
-        >
+        >,
+        SnippetOperationVM,
+        Meta
       >;
-    }>((model, args) => {
+    }>((model, args, subView) => {
       let name: string;
-      let operation: SnippetOperation<any, any>;
-      if (args.length === 1) {
+      if (args.length === 0) {
         name = "default";
-        operation = args[0];
-      } else if (args.length === 2) {
+      } else if (args.length === 1) {
         if (typeof args[0] === "string") {
           name = args[0];
-          operation = args[1];
         } else {
           name = "default";
-          operation = args[1];
         }
       } else {
         name = args[0];
-        operation = args[2];
       }
-      model.snippets.set(name, operation);
+      const snippetModel = SnippetOperationVM.parse(subView);
+      model.snippets.set(name, snippetModel.action);
     }),
 
     prepare: h.attribute<{
@@ -969,7 +976,7 @@ export class EntityViewModel extends defineViewModel(
       }
       if (
         eventName === "enter" &&
-        !(["status", "combatStatus", "summon"].includes(model.type))
+        !["status", "combatStatus", "summon"].includes(model.type)
       ) {
         throw new GiTcgDataError(
           "Only status, combatStatus, and summon can have `enter` handling. For support and equipment, use `on staged { ... };` instead.",

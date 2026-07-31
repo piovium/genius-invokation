@@ -348,14 +348,13 @@ define combatStatus {
   id 301306 as Yikes;
   associateExtension TechniquesPlayedCountExtension;
   variable techniquesPlayedCount, 0;
-  defineSnippet checkCount,
-    :{
-      if (:getVariable("techniquesPlayedCount") >= 6) {
-        :characterStatus(SaurianBuddyCheers, $.my.active);
-        :damage(DamageType.Physical, 3);
-        :dispose();
-      }
-    };
+  defineSnippet checkCount {
+    if (:getVariable("techniquesPlayedCount") >= 6) {
+      :characterStatus(SaurianBuddyCheers, $.my.active);
+      :damage(DamageType.Physical, 3);
+      :dispose();
+    }
+  };
   on enter {
     :setVariable(
       "techniquesPlayedCount",

@@ -909,7 +909,7 @@ define card {
   since "v5.8.0";
   cost DiceType.Void, 2;
   support ally {
-    defineSnippet :{
+    defineSnippet {
       const newCard = :random([
         OrigamiFlyingSquirrel,
         PopupPaperFrog,

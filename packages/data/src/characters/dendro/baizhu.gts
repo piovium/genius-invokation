@@ -47,7 +47,7 @@ define summon {
 define combatStatus {
   id 117053 as SeamlessShield;
   shield 1;
-  defineSnippet :{
+  defineSnippet {
     :damage(DamageType.Dendro, 1);
     const active = :query($.my.active);
     if (!active) {

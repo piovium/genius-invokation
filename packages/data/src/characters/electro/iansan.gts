@@ -117,7 +117,7 @@ define skill {
   skillType passive {
     variable switchCount, 0;
     variable gainNightsoulPassiveUsagePerRound, 3;
-    defineSnippet :{
+    defineSnippet {
       const nightsoul = :self.hasNightsoulsBlessing();
       if (!nightsoul) {
         return;
