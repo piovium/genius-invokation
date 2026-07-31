@@ -1,8 +1,4 @@
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 import {
   CoolcolorCapture,
   FramingFreezingPointComposition,
@@ -110,9 +106,10 @@ define card {
   until "v6.2.0";
   cost DiceType.Hydro, 3;
   talent KamisatoAyato {
-    on enter {
-      :useSkill(KamisatoArtKyouka);
-    };
+    on staged,
+      :{
+        :useSkill(KamisatoArtKyouka);
+      };
   };
 };
 
@@ -177,9 +174,10 @@ define card {
   until "v6.2.0";
   cost DiceType.Dendro, 4;
   talent Collei {
-    on enter {
-      :useSkill(FloralBrush);
-    };
+    on staged,
+      :{
+        :useSkill(FloralBrush);
+      };
   };
 };
 
@@ -234,9 +232,10 @@ define card {
     associateExtension NonInitialPlayedCardExtension;
     replaceDescription "[GCG_TOKEN_COUNTER]",
       ((_, { area }, ext) => ext.defIds[area.who].length);
-    on enter {
-      :setVariable("supp", :getExtensionState().defIds[:self.who].length);
-    };
+    on staged,
+      :{
+        :setVariable("supp", :getExtensionState().defIds[:self.who].length);
+      };
     on playCard {
       :setVariable("supp", :getExtensionState().defIds[:self.who].length);
     };

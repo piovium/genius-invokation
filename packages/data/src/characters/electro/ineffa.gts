@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  DamageType,
-  DiceType,
-  Reaction,
-} from "@gi-tcg/core/data";
+import { DamageType, DiceType, Reaction } from "@gi-tcg/core/data";
 import { Conductive, NoTuningAllowed, Shield } from "../../commons.gts";
 import type { EntityType } from "@gi-tcg/core";
 
@@ -150,14 +146,15 @@ define card {
   since "v6.4.0";
   cost DiceType.Electro, 1;
   talent Ineffa, none {
-    on enter {
-      for (let i = 0; i < 2; i++) {
-        const target = :random(:oppPlayer.hands);
-        if (target) {
-          :attach(Conductive, target);
+    on staged,
+      :{
+        for (let i = 0; i < 2; i++) {
+          const target = :random(:oppPlayer.hands);
+          if (target) {
+            :attach(Conductive, target);
+          }
         }
-      }
-    };
+      };
     on dealReaction {
       when :( :e.type === Reaction.LunarElectroCharged );
       listenTo samePlayer;

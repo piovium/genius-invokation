@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, DiceType} from "@gi-tcg/core/data";
+import { $, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 311401
@@ -60,18 +60,19 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on enter {
-      const liyueCount = :queryAll(
-        $.my.character.includesDefeated.tag("liyue"),
-      ).length;
-      if (liyueCount > 0) {
-        :characterStatus(LithicGuard, :self.master, {
-          overrideVariables: {
-            shield: Math.min(liyueCount, 3),
-          },
-        });
-      }
-    };
+    on staged,
+      :{
+        const liyueCount = :queryAll(
+          $.my.character.includesDefeated.tag("liyue"),
+        ).length;
+        if (liyueCount > 0) {
+          :characterStatus(LithicGuard, :self.master, {
+            overrideVariables: {
+              shield: Math.min(liyueCount, 3),
+            },
+          });
+        }
+      };
   };
 };
 
@@ -152,10 +153,12 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on enter {
-      when :( :self.master.energy === 0 );
-      :gainEnergy(1, :self.master);
-    };
+    on staged,
+      :{
+        if (:self.master.energy === 0) {
+          :gainEnergy(1, :self.master);
+        }
+      };
     on actionPhase {
       when :( :self.master.energy === 0 );
       :gainEnergy(1, :self.master);
@@ -194,9 +197,10 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on enter {
-      :characterStatus(MoonpiercerStatus, :self.master);
-    };
+    on staged,
+      :{
+        :characterStatus(MoonpiercerStatus, :self.master);
+      };
   };
 };
 

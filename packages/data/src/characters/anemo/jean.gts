@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SummonHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type SummonHandle } from "@gi-tcg/core/data";
 
 /**
  * @id 115021
@@ -117,8 +112,9 @@ define card {
   cost DiceType.Anemo, 4;
   cost DiceType.Energy, 2;
   talent Jean {
-    on enter {
-      :useSkill(DandelionBreeze);
-    };
+    on staged,
+      :{
+        :useSkill(DandelionBreeze);
+      };
   };
 };

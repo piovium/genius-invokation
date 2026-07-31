@@ -13,10 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { DamageType, DiceType } from "@gi-tcg/core/data";
 import { AgileSwitch, EfficientSwitch } from "../../commons.gts";
 
 /**
@@ -62,9 +59,10 @@ define card {
   since "v3.3.0";
   cost DiceType.Aligned, 1;
   support item {
-    on enter {
-      :drawCards(1, { withTag: "food" });
-    };
+    on staged,
+      :{
+        :drawCards(1, { withTag: "food" });
+      };
     on playCard {
       when :( :e.hasCardTag("food") );
       usage perRound, 1;

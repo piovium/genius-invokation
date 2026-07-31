@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  DamageType,
-  DiceType,
-  type SkillHandle,
-} from "@gi-tcg/core/data";
+import { DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/data";
 
 /**
  * @id 113111
@@ -144,8 +140,9 @@ define card {
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
   talent Thoma {
-    on enter {
-      :useSkill(CrimsonOoyoroi);
-    };
+    on staged,
+      :{
+        :useSkill(CrimsonOoyoroi);
+      };
   };
 };

@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SkillHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/data";
 
 /**
  * @id 113094
@@ -200,9 +195,10 @@ define card {
   since "v4.1.0";
   cost DiceType.Pyro, 4;
   talent Dehya {
-    on enter {
-      :useSkill(MoltenInferno);
-    };
+    on staged,
+      :{
+        :useSkill(MoltenInferno);
+      };
     on endPhase {
       when :( :self.master.health <= 6 );
       :heal(2, :self.master);

@@ -156,8 +156,9 @@ define card {
   cost DiceType.Dendro, 4;
   cost DiceType.Energy, 2;
   talent Baizhu {
-    on enter {
-      :useSkill(HolisticRevivification);
-    };
+    on staged,
+      :{
+        :useSkill(HolisticRevivification);
+      };
   };
 };

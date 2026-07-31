@@ -1,7 +1,4 @@
-import {
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { DamageType, DiceType } from "@gi-tcg/core/data";
 import { DriftcloudWave, Skyladder } from "../characters/anemo/xianyun.gts";
 import {
   BattlelineDetonation,
@@ -61,9 +58,10 @@ define card {
   until "v5.3.0";
   cost DiceType.Geo, 3;
   talent Chiori {
-    on enter {
-      :useSkill(FlutteringHasode);
-    };
+    on staged,
+      :{
+        :useSkill(FlutteringHasode);
+      };
   };
 };
 

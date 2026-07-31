@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 113123
@@ -124,9 +120,10 @@ define card {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   talent Xinyan {
-    on enter {
-      :useSkill(DanceOnFire);
-    };
+    on staged,
+      :{
+        :useSkill(DanceOnFire);
+      };
     on increaseSkillDamage {
       when :( :player.hands.length <= 1 );
       usage perRound, 1;

@@ -205,9 +205,10 @@ define card {
   since "v5.0.0";
   cost DiceType.Hydro, 3;
   talent HydroHilichurlRogue {
-    on enter {
-      :useSkill(SlashOfSurgingTides);
-    };
+    on staged,
+      :{
+        :useSkill(SlashOfSurgingTides);
+      };
     on deductOmniDiceSkill {
       when :( :e.isSkillType("technique") );
       usage perRound, 1;

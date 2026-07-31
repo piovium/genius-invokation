@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  customEvent,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, customEvent, DamageType, DiceType } from "@gi-tcg/core/data";
 import { Satiated } from "../../commons.gts";
 
 /**
@@ -192,13 +187,14 @@ define card {
   since "v5.8.0";
   cost DiceType.Dendro, 1;
   talent GluttonousYumkasaurMountainKing, none {
-    on enter {
-      :drawCards(1, { who: "opp" });
-      const [handCard] = :maxCostHands(1, { who: "opp" });
-      if (handCard) {
-        :stealHandCard(handCard);
-      }
-    };
+    on staged,
+      :{
+        :drawCards(1, { who: "opp" });
+        const [handCard] = :maxCostHands(1, { who: "opp" });
+        if (handCard) {
+          :stealHandCard(handCard);
+        }
+      };
     on playCard {
       when :( !:isInInitialPile(:e.card) );
       usage perRound, 1;

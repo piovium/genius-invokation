@@ -96,10 +96,10 @@ define card {
   undiscoverable;
   support place {
     adventureSpot;
-    on enter {
-      when :( !:e.overridden );
-      :damage(DamageType.Piercing, 1, $.my.character);
-    };
+    on staged,
+      :{
+        :damage(DamageType.Piercing, 1, $.my.character);
+      };
     on adventure {
       when :( :getVariable("exp") % 2 === 0 );
       :generateDice("randomElement", 1);
@@ -246,19 +246,19 @@ define card {
   undiscoverable;
   support place {
     adventureSpot;
-    on enter {
-      when :( !:e.overridden );
-      const excludeTags = ["food", "legend"] as const;
-      const candidates = :allCardDefinitions(
-        (card) =>
-          card.type === "eventCard" &&
-          !excludeTags.some((tag) => card.tags.includes(tag)),
-      );
-      const cards = :randomSubset(candidates, 5);
-      for (const card of cards) {
-        :createPileCards(card.id as CardHandle, 1, "random");
-      }
-    };
+    on staged,
+      :{
+        const excludeTags = ["food", "legend"] as const;
+        const candidates = :allCardDefinitions(
+          (card) =>
+            card.type === "eventCard" &&
+            !excludeTags.some((tag) => card.tags.includes(tag)),
+        );
+        const cards = :randomSubset(candidates, 5);
+        for (const card of cards) {
+          :createPileCards(card.id as CardHandle, 1, "random");
+        }
+      };
     on adventure {
       when :( :getVariable("exp") % 2 === 0 );
       :generateDice("randomElement", 1);

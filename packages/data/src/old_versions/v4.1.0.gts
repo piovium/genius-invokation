@@ -97,9 +97,10 @@ define card {
   until "v4.1.0";
   cost DiceType.Hydro, 4;
   talent Xingqiu {
-    on enter {
-      :useSkill(FatalRainscreen);
-    };
+    on staged,
+      :{
+        :useSkill(FatalRainscreen);
+      };
   };
 };
 
@@ -137,9 +138,10 @@ define card {
   until "v4.1.0";
   cost DiceType.Hydro, 4;
   talent MirrorMaiden {
-    on enter {
-      :useSkill(InfluxBlast);
-    };
+    on staged,
+      :{
+        :useSkill(InfluxBlast);
+      };
   };
 };
 
@@ -157,9 +159,10 @@ define card {
   until "v4.1.0";
   cost DiceType.Hydro, 4;
   talent Barbara {
-    on enter {
-      :useSkill(LetTheShowBegin);
-    };
+    on staged,
+      :{
+        :useSkill(LetTheShowBegin);
+      };
   };
 };
 
@@ -194,9 +197,10 @@ define card {
   until "v4.1.0";
   cost DiceType.Cryo, 4;
   talent Chongyun {
-    on enter {
-      :useSkill(ChonghuasLayeredFrost);
-    };
+    on staged,
+      :{
+        :useSkill(ChonghuasLayeredFrost);
+      };
   };
 };
 
@@ -252,9 +256,10 @@ define card {
   until "v4.1.0";
   cost DiceType.Pyro, 4;
   talent Xiangling {
-    on enter {
-      :useSkill(GuobaAttack);
-    };
+    on staged,
+      :{
+        :useSkill(GuobaAttack);
+      };
   };
 };
 
@@ -287,9 +292,10 @@ define card {
   until "v4.1.0";
   cost DiceType.Pyro, 2;
   talent Yoimiya {
-    on enter {
-      :useSkill(NiwabiFiredance);
-    };
+    on staged,
+      :{
+        :useSkill(NiwabiFiredance);
+      };
     on useSkill {
       when :(
         :e.isSkillType("normal") && :self.master.hasStatus(NiwabiEnshou)
@@ -314,9 +320,10 @@ define card {
   cost DiceType.Hydro, 4;
   cost DiceType.Energy, 2;
   talent Candace {
-    on enter {
-      :useSkill(SacredRiteWagtailsTide);
-    };
+    on staged,
+      :{
+        :useSkill(SacredRiteWagtailsTide);
+      };
   };
 };
 
@@ -334,9 +341,10 @@ define card {
   until "v4.1.0";
   cost DiceType.Electro, 4;
   talent Razor {
-    on enter {
-      :useSkill(ClawAndThunder);
-    };
+    on staged,
+      :{
+        :useSkill(ClawAndThunder);
+      };
     on useSkill {
       when :( :e.skill.definition.id === ClawAndThunder );
       :gainEnergy(
@@ -364,9 +372,10 @@ define card {
   until "v4.1.0";
   cost DiceType.Electro, 3;
   talent Beidou {
-    on enter {
-      :useSkill(Tidecaller);
-    };
+    on staged,
+      :{
+        :useSkill(Tidecaller);
+      };
     on useSkill {
       when :{
         if (:e.skill.definition.id !== Wavestrider) {
@@ -403,9 +412,10 @@ define card {
   cost DiceType.Electro, 4;
   cost DiceType.Energy, 3;
   talent KujouSara {
-    on enter {
-      :useSkill(SubjugationKoukouSendou);
-    };
+    on staged,
+      :{
+        :useSkill(SubjugationKoukouSendou);
+      };
   };
 };
 
@@ -423,9 +433,10 @@ define card {
   until "v4.1.0";
   cost DiceType.Electro, 3;
   talent Cyno {
-    on enter {
-      :useSkill(SecretRiteChasmicSoulfarer);
-    };
+    on staged,
+      :{
+        :useSkill(SecretRiteChasmicSoulfarer);
+      };
     on increaseSkillDamage {
       when :{
         const status = :self.master.hasStatus(PactswornPathclearer)!;
@@ -488,9 +499,10 @@ define card {
   until "v4.1.0";
   cost DiceType.Pyro, 3;
   talent Amber {
-    on enter {
-      :useSkill(ExplosivePuppet);
-    };
+    on staged,
+      :{
+        :useSkill(ExplosivePuppet);
+      };
     on useSkill {
       when :( :e.isSkillType("normal") );
       const bunny = :query($.my.summon.def(BaronBunny));
@@ -573,9 +585,10 @@ define card {
   cost DiceType.Anemo, 4;
   cost DiceType.Energy, 3;
   talent Jean {
-    on enter {
-      :useSkill(DandelionBreeze);
-    };
+    on staged,
+      :{
+        :useSkill(DandelionBreeze);
+      };
   };
 };
 
@@ -612,9 +625,10 @@ define card {
   cost DiceType.Void, 2;
   talent Yanfei {
     variable triggerSeal, 0;
-    on enter {
-      :useSkill(SealOfApproval);
-    };
+    on staged,
+      :{
+        :useSkill(SealOfApproval);
+      };
     on increaseSkillDamage {
       when :( :e.viaChargedAttack() && :e.target.health <= 6 );
       :e.increaseDamage(1);

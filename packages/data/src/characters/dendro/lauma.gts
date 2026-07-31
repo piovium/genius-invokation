@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  Reaction,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, Reaction } from "@gi-tcg/core/data";
 import { CostReduction } from "../../commons.gts";
 
 /**
@@ -187,9 +182,10 @@ define card {
   since "v6.6.0";
   cost DiceType.Dendro, 3;
   talent Lauma {
-    on enter {
-      :useSkill(RunoDawnlessRestOfKarsikko);
-    };
+    on staged,
+      :{
+        :useSkill(RunoDawnlessRestOfKarsikko);
+      };
     on dealReaction {
       when :(
         ([Reaction.Bloom, Reaction.LunarBloom] as Reaction[]).includes(:e.type)

@@ -279,9 +279,10 @@ define card {
   until "v5.8.0";
   cost DiceType.Geo, 4;
   talent Ningguang {
-    on enter {
-      :useSkill(JadeScreen);
-    };
+    on staged,
+      :{
+        :useSkill(JadeScreen);
+      };
   };
 };
 
@@ -299,9 +300,10 @@ define card {
   until "v5.8.0";
   cost DiceType.Cryo, 4;
   talent Kaeya {
-    on enter {
-      :useSkill(Frostgnaw);
-    };
+    on staged,
+      :{
+        :useSkill(Frostgnaw);
+      };
     on useSkill {
       when :( :e.skill.definition.id === Frostgnaw );
       usage perRound, 1;
@@ -457,9 +459,10 @@ define card {
   until "v5.8.0";
   cost DiceType.Aligned, 2;
   support place {
-    on enter {
-      :generateDice("randomElement", 1);
-    };
+    on staged,
+      :{
+        :generateDice("randomElement", 1);
+      };
     on actionPhase {
       usage 2;
       :generateDice("randomElement", 1);

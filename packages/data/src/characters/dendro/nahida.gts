@@ -94,9 +94,7 @@ define combatStatus {
   };
   on enter {
     when :(
-      :query(
-        $.my.character.has($.equipped.def(TheSeedOfStoredKnowledge)),
-      ) && // 装备有心识蕴藏之种
+      :query($.my.character.has($.equipped.def(TheSeedOfStoredKnowledge))) && // 装备有心识蕴藏之种
         :query($.my.character.includesDefeated.tag("electro")) // 我方队伍中存在雷元素
     );
     // 对方场上蕴种印的可用次数+1
@@ -123,9 +121,7 @@ define combatStatus {
   };
   on enter {
     when :(
-      :query(
-        $.my.character.has($.equipped.def(TheSeedOfStoredKnowledge)),
-      ) && // 装备有心识蕴藏之种
+      :query($.my.character.has($.equipped.def(TheSeedOfStoredKnowledge))) && // 装备有心识蕴藏之种
         :query($.my.character.includesDefeated.tag("electro")) // 我方队伍中存在雷元素
     );
     // 对方场上蕴种印的可用次数+1
@@ -236,8 +232,9 @@ define card {
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
   talent Nahida {
-    on enter {
-      :useSkill(IllusoryHeart);
-    };
+    on staged,
+      :{
+        :useSkill(IllusoryHeart);
+      };
   };
 };

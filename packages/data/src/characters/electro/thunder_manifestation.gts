@@ -196,9 +196,10 @@ define card {
   since "v4.3.0";
   cost DiceType.Electro, 3;
   talent ThunderManifestation {
-    on enter {
-      :useSkill(StrifefulLightning);
-    };
+    on staged,
+      :{
+        :useSkill(StrifefulLightning);
+      };
     on TalentShouldDrawCard {
       listenTo all;
       usage perRound, 1;

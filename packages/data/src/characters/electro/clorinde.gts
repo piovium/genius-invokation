@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SkillHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/data";
 import { BondOfLife } from "../../commons.gts";
 
 /**
@@ -165,9 +160,10 @@ define card {
   since "v5.3.0";
   cost DiceType.Electro, 2;
   talent Clorinde {
-    on enter {
-      :useSkill(HuntersVigil);
-    };
+    on staged,
+      :{
+        :useSkill(HuntersVigil);
+      };
     on useSkill {
       when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Electro)) );
       listenTo samePlayer;

@@ -384,9 +384,10 @@ define card {
   until "v4.7.0";
   cost DiceType.Geo, 3;
   talent Albedo {
-    on enter {
-      :useSkill(AbiogenesisSolarIsotoma);
-    };
+    on staged,
+      :{
+        :useSkill(AbiogenesisSolarIsotoma);
+      };
     on increaseSkillDamage {
       when :( :query($.my.summon.def(SolarIsotoma)) && :e.viaPlungingAttack() );
       listenTo samePlayer;
@@ -409,9 +410,10 @@ define card {
   until "v4.7.0";
   cost DiceType.Geo, 5;
   talent Zhongli {
-    on enter {
-      :useSkill(DominusLapidisStrikingStone);
-    };
+    on staged,
+      :{
+        :useSkill(DominusLapidisStrikingStone);
+      };
     on increaseDamage {
       when :{
         return (
@@ -512,9 +514,10 @@ define card {
   until "v4.7.0";
   cost DiceType.Electro, 3;
   talent Cyno {
-    on enter {
-      :useSkill(SecretRiteChasmicSoulfarer);
-    };
+    on staged,
+      :{
+        :useSkill(SecretRiteChasmicSoulfarer);
+      };
     on increaseSkillDamage {
       when :{
         const status = :self.master.hasStatus(PactswornPathclearer)!;

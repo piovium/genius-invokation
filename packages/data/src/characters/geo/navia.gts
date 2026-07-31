@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  Reaction,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, Reaction } from "@gi-tcg/core/data";
 
 /**
  * @id 116081
@@ -178,9 +173,10 @@ define card {
   since "v4.8.0";
   cost DiceType.Geo, 3;
   talent Navia {
-    on enter {
-      :useSkill(CeremonialCrystalshot);
-    };
+    on staged,
+      :{
+        :useSkill(CeremonialCrystalshot);
+      };
     on useSkill {
       usage perRound, 1;
       :drawCards(2, { withDefinition: CrystalShrapnel });

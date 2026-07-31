@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  DamageType,
-  DiceType,
-  type SkillHandle,
-} from "@gi-tcg/core/data";
+import { DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/data";
 
 /**
  * @id 123012
@@ -159,8 +155,9 @@ define card {
   since "v3.3.0";
   cost DiceType.Pyro, 3;
   talent FatuiPyroAgent {
-    on enter {
-      :useSkill(Prowl);
-    };
+    on staged,
+      :{
+        :useSkill(Prowl);
+      };
   };
 };

@@ -36,14 +36,15 @@ define card {
   support ally {
     associateExtension DisposedSupportCountExtension;
     variable experience, 0;
-    on enter {
-      :setVariable(
-        "experience",
-        Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
-      );
-    };
+    on staged,
+      :{
+        :setVariable(
+          "experience",
+          Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
+        );
+      };
   };
 };
 ```
 
-`associateExtension` 只提供对该扩展点的上下文访问权限；它不会自动同步实体变量。需要同步时，在 `on enter`、相关事件或操作中显式读取并写入。
+`associateExtension` 只提供对该扩展点的上下文访问权限；它不会自动同步实体变量。需要同步时，在 `on staged`、相关事件或操作中显式读取并写入。

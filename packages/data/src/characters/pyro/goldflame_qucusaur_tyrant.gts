@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 123061
@@ -159,8 +155,9 @@ define card {
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
   talent GoldflameQucusaurTyrant {
-    on enter {
-      :useSkill(GoldflameExplosion);
-    };
+    on staged,
+      :{
+        :useSkill(GoldflameExplosion);
+      };
   };
 };

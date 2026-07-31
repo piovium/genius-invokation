@@ -189,10 +189,11 @@ define card {
           :attachCostReduction(card);
         }
       };
-    on enter {
-      :createPileCards(SeedsOfDeceit, 3, "spaceAround");
-      :callSnippet.attachCostReductionToSeedsOfDeceit();
-    };
+    on staged,
+      :{
+        :createPileCards(SeedsOfDeceit, 3, "spaceAround");
+        :callSnippet.attachCostReductionToSeedsOfDeceit();
+      };
     on skillDamage {
       when :( :e.via.definition.id === PhantasmPerformance );
       usage perRound, 2;

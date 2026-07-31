@@ -141,9 +141,10 @@ define card {
   since "v3.7.0";
   cost DiceType.Geo, 5;
   talent Zhongli {
-    on enter {
-      :useSkill(DominusLapidisStrikingStone);
-    };
+    on staged,
+      :{
+        :useSkill(DominusLapidisStrikingStone);
+      };
     on increaseDamage {
       when :{
         return (

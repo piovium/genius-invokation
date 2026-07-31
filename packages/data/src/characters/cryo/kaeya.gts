@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SkillHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/data";
 
 /**
  * @id 111031
@@ -106,9 +101,10 @@ define card {
   since "v3.3.0";
   cost DiceType.Cryo, 3;
   talent Kaeya {
-    on enter {
-      :useSkill(Frostgnaw);
-    };
+    on staged,
+      :{
+        :useSkill(Frostgnaw);
+      };
     on useSkill {
       when :( :e.skill.definition.id === Frostgnaw );
       usage perRound, 1;

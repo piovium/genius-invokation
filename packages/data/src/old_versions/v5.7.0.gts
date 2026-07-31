@@ -1,9 +1,4 @@
-import {
-  $,
-  DamageType,
-  DiceType,
-  Reaction,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, Reaction } from "@gi-tcg/core/data";
 import {
   Citlali,
   MamaloacosFrigidRainInEffect,
@@ -178,12 +173,13 @@ define card {
   until "v5.7.0";
   cost DiceType.Pyro, 2;
   talent Arlecchino {
-    on enter {
-      :characterStatus(BondOfLife, :self.master, {
-        overrideVariables: { usage: 3 },
-      });
-      // 消耗生命之契增伤的部分在被动技能 13147 里
-    };
+    on staged,
+      :{
+        :characterStatus(BondOfLife, :self.master, {
+          overrideVariables: { usage: 3 },
+        });
+        // 消耗生命之契增伤的部分在被动技能 13147 里
+      };
   };
 };
 

@@ -150,13 +150,14 @@ define card {
   cost DiceType.Void, 2;
   technique {
     target $.my.character.def(Mavuika);
-    on enter {
-      const summons = :queryAll($.my.summon);
-      if (summons.length > 0) {
-        const summon = :random(summons);
-        :triggerEndPhaseSkill(summon);
-      }
-    };
+    on staged,
+      :{
+        const summons = :queryAll($.my.summon);
+        if (summons.length > 0) {
+          const summon = :random(summons);
+          :triggerEndPhaseSkill(summon);
+        }
+      };
     skill {
       id 1131551 as BlazingTrail;
       usage 2;
@@ -343,13 +344,14 @@ define card {
   since "v5.7.0";
   cost DiceType.Pyro, 1;
   talent Mavuika, none {
-    on enter {
-      :selectAndCreateHandCard([
-        FlamestriderBlazingTrail,
-        FlamestriderFullThrottle,
-        FlamestriderSoaringAscent,
-      ]);
-    };
+    on staged,
+      :{
+        :selectAndCreateHandCard([
+          FlamestriderBlazingTrail,
+          FlamestriderFullThrottle,
+          FlamestriderSoaringAscent,
+        ]);
+      };
     on playCard {
       when :(
         :e.hasCardTag("technique") && :self.master.hasStatus(NightsoulsBlessing)

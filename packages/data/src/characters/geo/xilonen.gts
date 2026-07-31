@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 116111
@@ -368,9 +364,10 @@ define card {
     return ch && !ch.hasNightsoulsBlessing();
   };
   talent Xilonen {
-    on enter {
-      :useSkill(YohualsScratch);
-    };
+    on staged,
+      :{
+        :useSkill(YohualsScratch);
+      };
     on switchActive {
       when :( :e.switchInfo.to.hasNightsoulsBlessing() );
       usage perRound, 2;

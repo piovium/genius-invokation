@@ -1,9 +1,4 @@
-import {
-  $,
-  type SkillHandle,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, type SkillHandle, DamageType, DiceType } from "@gi-tcg/core/data";
 import {
   DarkgoldWolfbite,
   DarkgoldWolfbite01,
@@ -257,9 +252,10 @@ define card {
     variable deductDiceTriggered, 0 {
       visible false;
     };
-    on enter {
-      :characterStatus(Target, $.opp.active);
-    };
+    on staged,
+      :{
+        :characterStatus(Target, $.opp.active);
+      };
     on deductOmniDiceSwitch {
       // 绒翼龙只在可以减费时生效
       when :(

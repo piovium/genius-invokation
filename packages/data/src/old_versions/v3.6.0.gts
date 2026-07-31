@@ -166,17 +166,18 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on enter {
-      void 0;
-      // 此版本只计算未击倒角色
-      const liyueCount = :queryAll($.my.character.tag("liyue")).length;
-      if (liyueCount > 0) {
-        :characterStatus(LithicGuard, :self.master, {
-          overrideVariables: {
-            shield: Math.min(liyueCount, 3),
-          },
-        });
-      }
-    };
+    on staged,
+      :{
+        void 0;
+        // 此版本只计算未击倒角色
+        const liyueCount = :queryAll($.my.character.tag("liyue")).length;
+        if (liyueCount > 0) {
+          :characterStatus(LithicGuard, :self.master, {
+            overrideVariables: {
+              shield: Math.min(liyueCount, 3),
+            },
+          });
+        }
+      };
   };
 };

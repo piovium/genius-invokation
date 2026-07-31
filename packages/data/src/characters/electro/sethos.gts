@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  customEvent,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, customEvent, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 114131
@@ -171,9 +166,10 @@ define card {
   since "v5.6.0";
   cost DiceType.Electro, 1;
   talent Sethos, none {
-    on enter {
-      :gainEnergy(1, :self.master);
-    };
+    on staged,
+      :{
+        :gainEnergy(1, :self.master);
+      };
     on EnergyLost {
       usage perRound, 1;
       :gainEnergy(1, :self.master);

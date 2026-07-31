@@ -1,9 +1,4 @@
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SummonHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type SummonHandle } from "@gi-tcg/core/data";
 import {
   NORMAL_MIMICS,
   PREVIEW_MIMICS,
@@ -200,9 +195,10 @@ define card {
       visible false;
     };
     variable bubble, 0;
-    on enter {
-      :heal(3, :self.master);
-    };
+    on staged,
+      :{
+        :heal(3, :self.master);
+      };
     on healed {
       listenTo samePlayer;
       :addVariable("healedPts", :e.value);

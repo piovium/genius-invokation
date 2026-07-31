@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 124031
@@ -197,17 +193,18 @@ define card {
   id 224031 as PearlSolidification;
   since "v4.4.0";
   talent MillennialPearlSeahorse, active {
-    on enter {
-      const exists = :self.master.hasStatus(FontemerPearl);
-      if (exists) {
-        exists.addVariable("usage", 1);
-      } else {
-        :characterStatus(FontemerPearl, :self.master, {
-          overrideVariables: {
-            usage: 1,
-          },
-        });
-      }
-    };
+    on staged,
+      :{
+        const exists = :self.master.hasStatus(FontemerPearl);
+        if (exists) {
+          exists.addVariable("usage", 1);
+        } else {
+          :characterStatus(FontemerPearl, :self.master, {
+            overrideVariables: {
+              usage: 1,
+            },
+          });
+        }
+      };
   };
 };

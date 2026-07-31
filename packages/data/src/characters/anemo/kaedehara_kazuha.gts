@@ -369,9 +369,10 @@ define card {
   since "v3.8.0";
   cost DiceType.Anemo, 3;
   talent KaedeharaKazuha {
-    on enter {
-      :useSkill(Chihayaburu);
-    };
+    on staged,
+      :{
+        :useSkill(Chihayaburu);
+      };
     on dealDamage {
       when :( :e.isSwirl() );
       const swirled = :e.isSwirl()!;

@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 import { Crystallize } from "../../commons.gts";
 
 /**
@@ -132,9 +128,10 @@ define card {
   since "v4.3.0";
   cost DiceType.Geo, 3;
   talent Gorou {
-    on enter {
-      :useSkill(InuzakaAllroundDefense);
-    };
+    on staged,
+      :{
+        :useSkill(InuzakaAllroundDefense);
+      };
     on skillDamage {
       when :(
         :e.type === DamageType.Geo &&

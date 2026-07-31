@@ -1,9 +1,4 @@
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SkillHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/data";
 import {
   AurousBlaze,
   FireworkFlareup,
@@ -134,8 +129,9 @@ define card {
   until "v3.3.0";
   cost DiceType.Dendro, 3;
   talent Collei {
-    on enter {
-      :useSkill(FloralBrush);
-    };
+    on staged,
+      :{
+        :useSkill(FloralBrush);
+      };
   };
 };

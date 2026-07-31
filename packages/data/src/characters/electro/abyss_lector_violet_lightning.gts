@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  Aura,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, Aura, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 124063
@@ -202,11 +197,12 @@ define card {
   since "v5.1.0";
   cost DiceType.Electro, 1;
   talent AbyssLectorVioletLightning, none {
-    on enter {
-      :combatStatus(ChainLightningCascadeCombatStatus);
-      if (!:self.master.hasStatus(ElectricRebirth)) {
-        :query($.opp.active)?.loseEnergy(1);
-      }
-    };
+    on staged,
+      :{
+        :combatStatus(ChainLightningCascadeCombatStatus);
+        if (!:self.master.hasStatus(ElectricRebirth)) {
+          :query($.opp.active)?.loseEnergy(1);
+        }
+      };
   };
 };

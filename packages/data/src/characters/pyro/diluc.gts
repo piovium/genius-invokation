@@ -13,10 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 113011
@@ -109,9 +106,10 @@ define card {
   since "v3.3.0";
   cost DiceType.Pyro, 3;
   talent Diluc {
-    on enter {
-      :useSkill(SearingOnslaught);
-    };
+    on staged,
+      :{
+        :useSkill(SearingOnslaught);
+      };
     on deductElementDiceSkill {
       when :(
         :e.action.skill.definition.id === SearingOnslaught &&

@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 13164
@@ -174,9 +170,10 @@ define card {
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 3;
   talent Gaming {
-    on enter {
-      :useSkill(SuannisGildedDance);
-    };
+    on staged,
+      :{
+        :useSkill(SuannisGildedDance);
+      };
     on increaseSkillDamage {
       when :( :e.viaPlungingAttack() );
       :e.increaseDamage(1);

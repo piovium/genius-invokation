@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 116022
@@ -133,9 +129,10 @@ define card {
   since "v3.3.0";
   cost DiceType.Geo, 3;
   talent Noelle {
-    on enter {
-      :useSkill(Breastplate);
-    };
+    on staged,
+      :{
+        :useSkill(Breastplate);
+      };
     on useSkill {
       when :(
         :e.isSkillType("normal") && :query($.my.combatStatus.def(FullPlate))

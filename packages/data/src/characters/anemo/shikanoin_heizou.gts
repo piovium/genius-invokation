@@ -260,8 +260,9 @@ define card {
   since "v5.8.0";
   cost DiceType.Anemo, 3;
   talent ShikanoinHeizou {
-    on enter {
-      :useSkill(HeartstopperStrike);
-    };
+    on staged,
+      :{
+        :useSkill(HeartstopperStrike);
+      };
   };
 };

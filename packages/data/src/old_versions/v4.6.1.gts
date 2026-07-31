@@ -1,9 +1,4 @@
-import {
-  $,
-  DiceType,
-  DamageType,
-  type StatusHandle,
-} from "@gi-tcg/core/data";
+import { $, DiceType, DamageType, type StatusHandle } from "@gi-tcg/core/data";
 import { Diluc, SearingOnslaught } from "../characters/pyro/diluc.gts";
 import { NiwabiFiredance, Yoimiya } from "../characters/pyro/yoimiya.gts";
 import { KyoukaFuushi } from "../characters/hydro/kamisato_ayato.gts";
@@ -41,9 +36,10 @@ define card {
   until "v4.6.1";
   cost DiceType.Pyro, 3;
   talent Diluc {
-    on enter {
-      :useSkill(SearingOnslaught);
-    };
+    on staged,
+      :{
+        :useSkill(SearingOnslaught);
+      };
     on deductElementDiceSkill {
       when :(
         :e.action.skill.definition.id === SearingOnslaught &&
@@ -91,9 +87,10 @@ define card {
   until "v4.6.1";
   cost DiceType.Pyro, 2;
   talent Yoimiya {
-    on enter {
-      :useSkill(NiwabiFiredance);
-    };
+    on staged,
+      :{
+        :useSkill(NiwabiFiredance);
+      };
   };
 };
 
@@ -160,9 +157,10 @@ define card {
   cost DiceType.Cryo, 5;
   cost DiceType.Energy, 3;
   talent Qiqi {
-    on enter {
-      :useSkill(AdeptusArtPreserverOfFortune);
-    };
+    on staged,
+      :{
+        :useSkill(AdeptusArtPreserverOfFortune);
+      };
     on useSkill {
       when :( :e.skill.definition.id === AdeptusArtPreserverOfFortune );
       usage 2 {

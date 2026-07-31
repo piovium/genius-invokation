@@ -31,6 +31,7 @@ import type {
   DamageInfo,
   DamageOrHealEventArg,
   EnterEventArg,
+  InitiativeSkillEventArg,
   ModifyDamage3EventArg,
   SkillDefinition,
 } from "../../base/skill";
@@ -39,7 +40,6 @@ import {
   ListenTo,
   type DetailedEventArgOf,
   type DetailedEventNames,
-  type SkillOperation,
   type WritableMetaOf,
 } from "../../runtime/skill";
 import {
@@ -148,6 +148,7 @@ export class EntityModel implements ICaller {
   hintText: string | null = null;
   descriptionDictionary: Writable<DescriptionDictionary> = {};
   snippets = new Map<string, SnippetOperation<any, any>>();
+  stagedOperations: StagedOperation<any>[] = [];
 
   constructor(type: ExEntityType, parent?: IParentModel) {
     if (parent) {
@@ -434,6 +435,11 @@ type SnippetOperation<Meta extends EntityVMMeta, ArgT> = (
     }>
   >,
 ) => void;
+
+type StagedOperation<Meta extends EntityVMMeta> = SnippetOperation<
+  Meta,
+  InitiativeSkillEventArg
+>;
 
 export type ThisWithType<
   Meta extends EntityVMMeta,
@@ -902,6 +908,11 @@ export class EntityViewModel extends defineViewModel(
     }),
 
     on: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+        eventName: "staged",
+        operation: StagedOperation<Meta>,
+      ): AR.Done;
       <Meta extends EntityVMMeta, const Event extends DetailedEventNames>(
         this: AR.This<Meta>,
         eventName: Event,
@@ -931,7 +942,24 @@ export class EntityViewModel extends defineViewModel(
       ): Omit<Meta, "variables"> & {
         variables: Meta["variables"] | InnerMeta["variables"];
       };
-    }>((model, [eventName], subView) => {
+    }>((model, [eventName, operation], subView) => {
+      if (eventName === "staged") {
+        if (model.type !== "support" && model.type !== "equipment") {
+          throw new GiTcgDataError(
+            "`on staged` is only available for support and equipment.",
+          );
+        }
+        model.stagedOperations.push(operation);
+        return;
+      }
+      if (
+        eventName === "enter" &&
+        (model.type === "support" || model.type === "equipment")
+      ) {
+        throw new GiTcgDataError(
+          "Support and equipment cannot define `on enter`; use `on staged, :{ ... };` instead.",
+        );
+      }
       const skillModel = TriggeredSkillViewModel.parse(
         subView,
         model,

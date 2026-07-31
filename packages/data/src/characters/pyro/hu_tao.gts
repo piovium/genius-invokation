@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 113072
@@ -134,9 +130,10 @@ define card {
   since "v3.7.0";
   cost DiceType.Pyro, 2;
   talent HuTao {
-    on enter {
-      :useSkill(GuideToAfterlife);
-    };
+    on staged,
+      :{
+        :useSkill(GuideToAfterlife);
+      };
     on increaseSkillDamage {
       when :( :self.master.health <= 6 && :e.type === DamageType.Pyro );
       :e.increaseDamage(1);

@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  Aura,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, Aura, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 115072
@@ -171,9 +166,10 @@ define card {
   since "v4.4.0";
   cost DiceType.Anemo, 3;
   talent Sayu {
-    on enter {
-      :useSkill(YoohooArtFuuinDash);
-    };
+    on staged,
+      :{
+        :useSkill(YoohooArtFuuinDash);
+      };
     on dealDamage {
       when :( :self.master.isActive() && :e.isSwirl() );
       listenTo samePlayer;

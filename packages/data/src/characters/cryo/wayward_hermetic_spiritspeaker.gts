@@ -346,9 +346,10 @@ define card {
   since "v6.7.0";
   cost DiceType.Cryo, 1;
   talent WaywardHermeticSpiritspeaker, none {
-    on enter {
-      :createHandCard(RadiantHues);
-    };
+    on staged,
+      :{
+        :createHandCard(RadiantHues);
+      };
     on playCard {
       when :( :e.card.definition.id === RadiantHues );
       usage perRound, 1;

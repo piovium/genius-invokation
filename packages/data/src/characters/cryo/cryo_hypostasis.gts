@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type StatusHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type StatusHandle } from "@gi-tcg/core/data";
 import { SheerCold } from "./la_signora.gts";
 
 /**
@@ -180,8 +175,9 @@ define card {
   since "v4.4.0";
   cost DiceType.Cryo, 1;
   talent CryoHypostasis, active {
-    on enter {
-      :characterStatus(CryoCrystalCore, :self.master);
-    };
+    on staged,
+      :{
+        :characterStatus(CryoCrystalCore, :self.master);
+      };
   };
 };

@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 122036
@@ -249,11 +245,12 @@ define card {
   since "v4.6.0";
   cost DiceType.Hydro, 1;
   talent AbyssHeraldWickedTorrents, none {
-    on enter {
-      :combatStatus(SurgingUndercurrentCombatStatus);
-      if (:self.master.getVariable("wateryRebirthTriggered")) {
-        :combatStatus(CurseOfTheUndercurrent, "opp");
-      }
-    };
+    on staged,
+      :{
+        :combatStatus(SurgingUndercurrentCombatStatus);
+        if (:self.master.getVariable("wateryRebirthTriggered")) {
+          :combatStatus(CurseOfTheUndercurrent, "opp");
+        }
+      };
   };
 };

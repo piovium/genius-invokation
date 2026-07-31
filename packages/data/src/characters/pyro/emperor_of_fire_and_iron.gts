@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type CardHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type CardHandle } from "@gi-tcg/core/data";
 
 /**
  * @id 23046
@@ -221,9 +216,10 @@ define card {
   since "v4.6.0";
   cost DiceType.Pyro, 1;
   talent EmperorOfFireAndIron, none {
-    on enter {
-      :apply(DamageType.Pyro, :self.master);
-    };
+    on staged,
+      :{
+        :apply(DamageType.Pyro, :self.master);
+      };
     on dispose {
       when :{
         return (

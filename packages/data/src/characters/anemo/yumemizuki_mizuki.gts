@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 import { ResistantForm } from "../../commons.gts";
 /**
  * @id 115142
@@ -148,9 +144,10 @@ define card {
   since "v6.0.0";
   cost DiceType.Anemo, 3;
   talent YumemizukiMizuki {
-    on enter {
-      :useSkill(AisaUtamakuraPilgrimage);
-    };
+    on staged,
+      :{
+        :useSkill(AisaUtamakuraPilgrimage);
+      };
     on increaseDamage {
       when :(
         :self.master.isActive() &&
