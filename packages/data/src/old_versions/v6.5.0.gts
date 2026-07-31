@@ -1,9 +1,4 @@
-import {
-  $,
-  type SkillHandle,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, type SkillHandle, DamageType, DiceType } from "@gi-tcg/core/data";
 import {
   DarkgoldWolfbite,
   DarkgoldWolfbite01,
@@ -257,7 +252,7 @@ define card {
     variable deductDiceTriggered, 0 {
       visible false;
     };
-    on enter {
+    on staged {
       :characterStatus(Target, $.opp.active);
     };
     on deductOmniDiceSwitch {

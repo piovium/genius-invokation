@@ -346,7 +346,7 @@ define card {
   since "v6.7.0";
   cost DiceType.Cryo, 1;
   talent WaywardHermeticSpiritspeaker, none {
-    on enter {
+    on staged {
       :createHandCard(RadiantHues);
     };
     on playCard {

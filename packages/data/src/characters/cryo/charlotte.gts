@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  Aura,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, Aura, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 111102
@@ -134,7 +129,7 @@ define card {
   since "v4.5.0";
   cost DiceType.Cryo, 3;
   talent Charlotte {
-    on enter {
+    on staged {
       :useSkill(FramingFreezingPointComposition);
     };
     on useSkill {

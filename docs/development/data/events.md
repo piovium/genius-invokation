@@ -20,7 +20,7 @@ define combatStatus {
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 阶段             | `onBattleBegin`、`onRoundBegin`、`onRoundEnd`、`onActionPhase`、`onEndPhase`                                                                                                     |
 | 行动             | `replaceAction`、`onBeforeAction`、`onAction`、`onBeforeUseSkill`、`onUseSkill`、`onBeforePlayCard`、`onPlayCard`、`onSwitchActive`                                              |
-| 牌与实体         | `onHandCardInserted`、`onEnter`、`onDispose`、`onSelectCard`、`onTransformDefinition`、`onGenerateDice`                                                                          |
+| 牌与实体         | `onHandCardInserted`、`onEnter`、`onDispose`、`onSelectCard`、`onAdventure`、`onTransformDefinition`、`onGenerateDice`                                                           |
 | 伤害、治疗与反应 | `onDamageOrHeal`、`onReaction`、`onRevive`                                                                                                                                       |
 | 可修改的效果     | `modifyRoll`、`modifyAction0` 至 `modifyAction4`、`modifyDamage0` 至 `modifyDamage3`、`modifyHeal0`、`modifyHeal1`、`modifyReaction`、`modifyChangeVariable`、`modifyZeroHealth` |
 | 自定义           | `onCustomEvent`                                                                                                                                                                  |
@@ -53,7 +53,8 @@ define combatStatus {
 | `disposeCard`、`disposeOrTuneCard`、`selfDiscard`、`dispose`、`selfDispose`                                      | `onDispose`                    | 弃牌、调和、实体离场       |
 | `dealDamage`、`skillDamage`、`damaged`、`healed`、`damagedOrHealed`、`defeated`                                  | `onDamageOrHeal`               | 伤害、治疗和倒下           |
 | `reaction`、`dealReaction`、`modifyReaction`                                                                     | `onReaction`、`modifyReaction` | 元素反应                   |
-| `enter`、`enterRelative`、`adventure`                                                                            | `onEnter`                      | 自身或相关实体入场         |
+| `enter`、`enterRelative`                                                                                         | `onEnter`                      | 自身或相关实体入场         |
+| `adventure`                                                                                                      | `onAdventure`                  | 自身进行冒险               |
 | `revive`、`transformDefinition`、`generateDice`、`selectCard`                                                    | 对应同名核心事件               | 复苏、变身、生成骰子、选牌 |
 | `cancelConsumeNightsoul`、`consumeNightsoul`、`gainNightsoul`、`gainUsage`                                       | 变量修改事件                   | 夜魂值或可用次数           |
 

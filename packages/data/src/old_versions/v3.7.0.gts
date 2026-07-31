@@ -1,8 +1,4 @@
-import {
-  DamageType,
-  DiceType,
-  type SkillHandle,
-} from "@gi-tcg/core/data";
+import { DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/data";
 import { AurousBlaze } from "../characters/pyro/yoimiya.gts";
 import { ThunderbeastsTarge } from "../characters/electro/beidou.gts";
 import { PyronadoStatus } from "../characters/pyro/xiangling.gts";

@@ -1,7 +1,4 @@
-import {
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { DamageType, DiceType } from "@gi-tcg/core/data";
 import { UnderseaTreasure } from "../cards/event/other.gts";
 
 /**

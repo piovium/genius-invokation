@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SkillHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/data";
 
 /**
  * @id 111151
@@ -268,7 +263,7 @@ define card {
   since "v6.2.0";
   cost DiceType.Cryo, 4;
   talent Escoffier {
-    on enter {
+    on staged {
       :useSkill(LowtemperatureCooking);
     };
   };

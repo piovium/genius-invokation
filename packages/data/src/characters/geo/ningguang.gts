@@ -37,8 +37,7 @@ define combatStatus {
   };
   on increaseDamage {
     when :(
-      :e.type === DamageType.Geo &&
-        :query($.my.equipped.def(StrategicReserve))
+      :e.type === DamageType.Geo && :query($.my.equipped.def(StrategicReserve))
     );
     listenTo samePlayer;
     :e.increaseDamage(1);
@@ -120,7 +119,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Geo, 3;
   talent Ningguang {
-    on enter {
+    on staged {
       :useSkill(JadeScreen);
     };
   };

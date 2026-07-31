@@ -369,7 +369,7 @@ define card {
   since "v3.8.0";
   cost DiceType.Anemo, 3;
   talent KaedeharaKazuha {
-    on enter {
+    on staged {
       :useSkill(Chihayaburu);
     };
     on dealDamage {

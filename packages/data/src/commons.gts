@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  DamageType,
-  DiceType,
-  $,
-} from "@gi-tcg/core/data";
+import { DamageType, DiceType, $ } from "@gi-tcg/core/data";
 
 /**
  * @id 100
@@ -305,14 +301,13 @@ define summon {
     usage 1 { append; };
     :damage(DamageType.Electro, 2);
   };
-  defineSnippet giveOppRandomCardConductive,
-    :{
-      if (:oppPlayer.hands.length === 0) {
-        return;
-      }
-      const targetHand = :random(:oppPlayer.hands);
-      :attach(Conductive, targetHand);
-    };
+  defineSnippet giveOppRandomCardConductive {
+    if (:oppPlayer.hands.length === 0) {
+      return;
+    }
+    const targetHand = :random(:oppPlayer.hands);
+    :attach(Conductive, targetHand);
+  };
   on enter {
     :callSnippet.giveOppRandomCardConductive();
   };

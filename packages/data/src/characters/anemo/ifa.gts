@@ -219,7 +219,7 @@ define card {
   since "v6.1.0";
   cost DiceType.Anemo, 1;
   talent Ifa, none {
-    on enter {
+    on staged {
       :heal(1, $.macros.myMostInjured);
     };
     on dealReaction {

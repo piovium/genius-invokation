@@ -275,7 +275,7 @@ define card {
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
   talent EremiteScorchingLoremaster {
-    on enter {
+    on staged {
       :useSkill(SpiritOfOmensAwakeningPyroScorpion);
     };
   };

@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  DamageType,
-  type SkillHandle,
-  $,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { DamageType, type SkillHandle, $, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 114063
@@ -145,7 +140,7 @@ define card {
   since "v3.5.0";
   cost DiceType.Electro, 3;
   talent KujouSara {
-    on enter {
+    on staged {
       :useSkill(TenguStormcall);
     };
   };

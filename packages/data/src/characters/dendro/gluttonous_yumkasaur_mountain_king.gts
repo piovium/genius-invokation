@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  customEvent,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, customEvent, DamageType, DiceType } from "@gi-tcg/core/data";
 import { Satiated } from "../../commons.gts";
 
 /**
@@ -115,7 +110,7 @@ const GluttonousRexTriggerFromTalent = customEvent(
 define skill {
   id 27044 as GluttonousRex01;
   skillType passive {
-    defineSnippet :{
+    defineSnippet {
       :abortPreview();
       const choice = :random([
         WellFedAndStrong,
@@ -192,7 +187,7 @@ define card {
   since "v5.8.0";
   cost DiceType.Dendro, 1;
   talent GluttonousYumkasaurMountainKing, none {
-    on enter {
+    on staged {
       :drawCards(1, { who: "opp" });
       const [handCard] = :maxCostHands(1, { who: "opp" });
       if (handCard) {

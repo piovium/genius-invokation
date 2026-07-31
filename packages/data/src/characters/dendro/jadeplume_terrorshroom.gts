@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 127011
@@ -29,11 +25,10 @@ import {
 define status {
   id 127011 as RadicalVitalityStatus;
   variable vitality, 0;
-  defineSnippet addVitality,
-    :{
-      const max = :self.master.hasEquipment(ProliferatingSpores) ? 4 : 3;
-      :addVariableWithMax("vitality", 1, max);
-    };
+  defineSnippet addVitality {
+    const max = :self.master.hasEquipment(ProliferatingSpores) ? 4 : 3;
+    :addVariableWithMax("vitality", 1, max);
+  };
   on dealDamage {
     :callSnippet.addVitality();
   };
@@ -140,7 +135,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Dendro, 3;
   talent JadeplumeTerrorshroom {
-    on enter {
+    on staged {
       :useSkill(VolatileSporeCloud);
     };
   };

@@ -33,8 +33,7 @@ define status {
   since "v5.2.0";
   on endPhase {
     when :(
-      :query($.opp.equipped.def(BeastlyCorrosion)) ||
-        !:self.master.isActive()
+      :query($.opp.equipped.def(BeastlyCorrosion)) || !:self.master.isActive()
     );
     usage 1 {
       append 5;
@@ -147,7 +146,7 @@ define card {
   since "v5.2.0";
   cost DiceType.Geo, 3;
   talent GoldenWolflord {
-    on enter {
+    on staged {
       :useSkill(HowlingRiftcall);
     };
   };

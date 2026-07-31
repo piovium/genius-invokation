@@ -187,7 +187,7 @@ define card {
   since "v5.4.0";
   cost DiceType.Pyro, 1;
   talent Arlecchino, action {
-    on enter {
+    on staged {
       :characterStatus(BondOfLife, :self.master, {
         overrideVariables: { usage: 3 },
       });

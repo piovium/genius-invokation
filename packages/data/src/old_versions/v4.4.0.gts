@@ -1,4 +1,4 @@
-import { $, DiceType} from "@gi-tcg/core/data";
+import { $, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 312018
@@ -13,7 +13,7 @@ define card {
   until "v4.4.0";
   cost DiceType.Void, 3;
   artifact {
-    on enter {
+    on staged {
       :generateDice(:self.master.element(), 1);
       const elementKinds = new Set(
         :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
@@ -61,7 +61,7 @@ define card {
   until "v4.4.0";
   cost DiceType.Aligned, 1;
   support place {
-    on enter {
+    on staged {
       :rerollDice(1);
     };
     on roll {

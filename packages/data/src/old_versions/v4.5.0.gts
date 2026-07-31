@@ -1,8 +1,4 @@
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 import { EmbersRekindled } from "../characters/pyro/abyss_lector_fathomless_flames.gts";
 import { HeronStrike } from "../characters/hydro/candace.gts";
 import { Wavestrider } from "../characters/electro/beidou.gts";
@@ -162,7 +158,7 @@ define card {
   support ally {
     associateExtension DisposedSupportCountExtension;
     variable experience, 0;
-    on enter {
+    on staged {
       :setVariable(
         "experience",
         Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),

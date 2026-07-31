@@ -137,7 +137,7 @@ define card {
   cost DiceType.Pyro, 4;
   cost DiceType.Energy, 2;
   talent Bennett {
-    on enter {
+    on staged {
       :useSkill(FantasticVoyage);
     };
   };

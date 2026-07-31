@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SummonHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type SummonHandle } from "@gi-tcg/core/data";
 
 /**
  * @id 121011
@@ -162,7 +157,7 @@ define card {
   cost DiceType.Cryo, 3;
   talent FatuiCryoCicinMage {
     variable dealDamage, 0;
-    on enter {
+    on staged {
       :useSkill(MistySummons);
     };
     on useSkill {

@@ -276,7 +276,7 @@ define card {
   since "v5.1.0";
   cost DiceType.Geo, 4;
   talent Chiori {
-    on enter {
+    on staged {
       :useSkill(FlutteringHasode);
     };
   };

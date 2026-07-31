@@ -89,7 +89,7 @@ define card {
   until "v4.0.0";
   cost DiceType.Hydro, 4;
   talent Tartaglia {
-    on enter {
+    on staged {
       :useSkill(FoulLegacyRagingTide);
     };
     on endPhase {
@@ -205,7 +205,7 @@ define card {
   until "v4.0.0";
   cost DiceType.Cryo, 4;
   talent Diona {
-    on enter {
+    on staged {
       :useSkill(IcyPaws);
     };
   };
@@ -240,7 +240,7 @@ define card {
   until "v4.0.0";
   cost DiceType.Void, 2;
   support item {
-    on enter {
+    on staged {
       :drawCards(1, { withTag: "food" });
     };
     on playCard {

@@ -13,7 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
+import {
+  defineViewModel,
+  defineActionViewModel,
+  type AR,
+} from "@gi-tcg/gts-runtime";
 import * as R from "remeda";
 import {
   USAGE_PER_ROUND_VARIABLE_NAMES,
@@ -31,6 +35,7 @@ import type {
   DamageInfo,
   DamageOrHealEventArg,
   EnterEventArg,
+  InitiativeSkillEventArg,
   ModifyDamage3EventArg,
   SkillDefinition,
 } from "../../base/skill";
@@ -39,7 +44,6 @@ import {
   ListenTo,
   type DetailedEventArgOf,
   type DetailedEventNames,
-  type SkillOperation,
   type WritableMetaOf,
 } from "../../runtime/skill";
 import {
@@ -148,6 +152,7 @@ export class EntityModel implements ICaller {
   hintText: string | null = null;
   descriptionDictionary: Writable<DescriptionDictionary> = {};
   snippets = new Map<string, SnippetOperation<any, any>>();
+  stagedOperations: StagedOperation<any>[] = [];
 
   constructor(type: ExEntityType, parent?: IParentModel) {
     if (parent) {
@@ -435,6 +440,11 @@ type SnippetOperation<Meta extends EntityVMMeta, ArgT> = (
   >,
 ) => void;
 
+type StagedOperation<Meta extends EntityVMMeta> = SnippetOperation<
+  Meta,
+  InitiativeSkillEventArg
+>;
+
 export type ThisWithType<
   Meta extends EntityVMMeta,
   T extends ExEntityType,
@@ -445,6 +455,20 @@ type PushVar<Meta extends EntityVMMeta, Name extends string> = Computed<
     variables: Meta["variables"] | Name;
   }
 >;
+
+class StagedOperationVM extends defineActionViewModel<
+  <Meta extends EntityVMMeta>(
+    this: AR.This<Meta>,
+    operation: StagedOperation<Meta>,
+  ) => AR.Done
+>() {}
+
+class SnippetOperationVM extends defineActionViewModel<
+  <Meta extends EntityVMMeta>(
+    this: AR.This<Meta>,
+    operation: SnippetOperation<Meta, void>,
+  ) => AR.Done
+>() {}
 
 export class EntityViewModel extends defineViewModel(
   EntityModel,
@@ -508,67 +532,67 @@ export class EntityViewModel extends defineViewModel(
     defineSnippet: h.attribute<{
       <Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
-        operation: SnippetOperation<Meta, void>,
-      ): AR.DoneRewriteMeta<
+      ): AR.WithRewriteMeta<
         Computed<
           Omit<Meta, "snippets"> & {
             snippets: Meta["snippets"] & { default: void };
           }
-        >
+        >,
+        SnippetOperationVM,
+        Meta
       >;
       <Meta extends EntityVMMeta, const Name extends string>(
         this: AR.This<Meta>,
         name: Name,
-        operation: SnippetOperation<Meta, void>,
-      ): AR.DoneRewriteMeta<
+      ): AR.WithRewriteMeta<
         Computed<
           Omit<Meta, "snippets"> & {
             snippets: Meta["snippets"] & { [K in Name]: void };
           }
-        >
+        >,
+        SnippetOperationVM,
+        Meta
       >;
       <Meta extends EntityVMMeta, ArgT>(
         this: AR.This<Meta>,
         typeHint: TypeHint<ArgT>,
-        operation: SnippetOperation<Meta, ArgT>,
-      ): AR.DoneRewriteMeta<
+      ): AR.WithRewriteMeta<
         Computed<
           Omit<Meta, "snippets"> & {
             snippets: Meta["snippets"] & { default: ArgT };
           }
-        >
+        >,
+        SnippetOperationVM,
+        Meta
       >;
       <Meta extends EntityVMMeta, const Name extends string, ArgT>(
         this: AR.This<Meta>,
         name: Name,
         typeHint: TypeHint<ArgT>,
-        operation: SnippetOperation<Meta, ArgT>,
-      ): AR.DoneRewriteMeta<
+      ): AR.WithRewriteMeta<
         Computed<
           Omit<Meta, "snippets"> & {
             snippets: Meta["snippets"] & { [K in Name]: ArgT };
           }
-        >
+        >,
+        SnippetOperationVM,
+        Meta
       >;
-    }>((model, args) => {
+    }>((model, args, subView) => {
       let name: string;
-      let operation: SnippetOperation<any, any>;
-      if (args.length === 1) {
+      if (args.length === 0) {
         name = "default";
-        operation = args[0];
-      } else if (args.length === 2) {
+      } else if (args.length === 1) {
         if (typeof args[0] === "string") {
           name = args[0];
-          operation = args[1];
         } else {
           name = "default";
-          operation = args[1];
         }
       } else {
         name = args[0];
-        operation = args[2];
       }
-      model.snippets.set(name, operation);
+      const snippetModel = SnippetOperationVM.parse(subView);
+      model.snippets.set(name, snippetModel.action);
     }),
 
     prepare: h.attribute<{
@@ -902,6 +926,12 @@ export class EntityViewModel extends defineViewModel(
     }),
 
     on: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: Meta["type"] extends "support" | "equipment"
+          ? AR.This<Meta>
+          : never,
+        eventName: "staged",
+      ): AR.With<StagedOperationVM, Meta>;
       <Meta extends EntityVMMeta, const Event extends DetailedEventNames>(
         this: AR.This<Meta>,
         eventName: Event,
@@ -931,7 +961,24 @@ export class EntityViewModel extends defineViewModel(
       ): Omit<Meta, "variables"> & {
         variables: Meta["variables"] | InnerMeta["variables"];
       };
+      mergeMeta<Meta extends EntityVMMeta>(
+        meta: Meta,
+        innerMeta: unknown,
+      ): Meta;
     }>((model, [eventName], subView) => {
+      if (eventName === "staged") {
+        const stagedAction = StagedOperationVM.parse(subView);
+        model.stagedOperations.push(stagedAction.action);
+        return;
+      }
+      if (
+        eventName === "enter" &&
+        !["status", "combatStatus", "summon"].includes(model.type)
+      ) {
+        throw new GiTcgDataError(
+          "Only status, combatStatus, and summon can have `enter` handling. For support and equipment, use `on staged { ... };` instead.",
+        );
+      }
       const skillModel = TriggeredSkillViewModel.parse(
         subView,
         model,

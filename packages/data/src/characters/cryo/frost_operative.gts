@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 import { BondOfLife } from "../../commons.gts";
 
 /**
@@ -143,7 +139,7 @@ define card {
   since "v4.8.0";
   cost DiceType.Cryo, 3;
   talent FrostOperative {
-    on enter {
+    on staged {
       :useSkill(FrostyInterjection);
     };
   };
