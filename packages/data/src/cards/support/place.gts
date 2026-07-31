@@ -301,7 +301,7 @@ define card {
   cost DiceType.Aligned, 2;
   support place {
     on deductVoidDiceSkill {
-      when :( :e.isChargedAttack() );
+      when :( :e.isChargedAttack() && :player.dice.length % 2 === 0 );
       usage 4;
       :e.deductVoidCost(1);
     };
