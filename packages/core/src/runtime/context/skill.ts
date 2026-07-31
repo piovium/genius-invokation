@@ -270,12 +270,13 @@ export class SkillContext<Meta extends ContextMetaBase> {
   ) {
     const mutatorConfig: MutatorConfig = {
       logger: skillInfo.logger,
-      onMutation: (mutation) => this.afterMutation(mutation),
       onNotify: (opt) => this.onNotify(opt),
       onPause: () =>
         Promise.reject(
           new GiTcgDataError(`Async operation is not permitted in skill`),
         ),
+      onMutation: (mutation) => this.afterMutation(mutation),
+      onResetState: () => this.areaCache.clear(),
     };
     this.mutator = new StateMutator(state, mutatorConfig);
     this.eventArg = applyReactive(this, eventArg);

@@ -39,8 +39,6 @@ class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
     return state;
   }
 
-  // 行动牌 area 可能会变动，不缓存
-  // protected _area: EntityArea | undefined;
   constructor(
     protected readonly skillContext: SkillContext<Meta>,
     public readonly id: number,
