@@ -95,10 +95,6 @@ export class CardModel extends InitiativeSkillModel implements ICaller {
   skillType = "playCard" as const;
   descriptionDictionary: Writable<DescriptionDictionary> = {};
 
-  public get snippets() {
-    return this.innerModel?.snippets ?? super.snippets;
-  }
-
   type: "support" | "equipment" | "eventCard" = "eventCard";
   override get ownerType() {
     return this.type;

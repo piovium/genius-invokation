@@ -71,6 +71,7 @@ import {
   type TypeHint,
 } from "../../data/utils";
 import {
+  SkillWrappingData,
   TriggeredSkillModel,
   TriggeredSkillViewModel,
   type TriggeredSkillVMMeta,
@@ -106,12 +107,12 @@ export interface GtsUsageOrUsagePerRoundOptions extends GtsUsageOptions {
 
 export interface IParentModel {
   id: number;
-  associatedExtensionId: number | null;
+  wrapData: SkillWrappingData;
 }
 
 export interface IDescriptionReplaceable {
   descriptionDictionary: Writable<DescriptionDictionary>;
-  associatedExtensionId: number | null;
+  wrapData: SkillWrappingData;
 }
 
 export function addDescriptionReplacement(
@@ -122,9 +123,9 @@ export function addDescriptionReplacement(
   if (Reflect.has(model.descriptionDictionary, key)) {
     throw new GiTcgDataError(`Description key ${key} already exists`);
   }
-  const extId = model.associatedExtensionId;
+  const extId = model.wrapData.associatedExtensionId;
   const entry: DescriptionDictionaryEntry = function (st, id) {
-    const ext = st.extensions.find((ext) => ext.definition.id === extId);
+   const ext = st.extensions.find((ext) => ext.definition.id === extId);
     const self = getEntityById(st, id) as EntityState;
     const area = getEntityArea(st, id);
     return String(getter(st, { ...self, area }, ext?.state));
@@ -148,16 +149,23 @@ export class EntityModel implements ICaller {
   disposeWhenUsageIsZero = false;
   disposeOnMasterDefeated = false;
   visibleVarName: string | null = null;
-  associatedExtensionId: number | null = null;
+
   hintText: string | null = null;
   descriptionDictionary: Writable<DescriptionDictionary> = {};
-  snippets = new Map<string, SnippetOperation<any, any>>();
+  
   stagedOperations: StagedOperation<any>[] = [];
+
+  #wrapData: SkillWrappingData;
+  get wrapData() {
+    return this.#wrapData;
+  }
 
   constructor(type: ExEntityType, parent?: IParentModel) {
     if (parent) {
       this.id = parent.id;
-      this.associatedExtensionId = parent.associatedExtensionId;
+      this.#wrapData = parent.wrapData;
+    } else {
+      this.#wrapData = new SkillWrappingData();
     }
     this.type = type;
   }
@@ -364,7 +372,6 @@ export class EntityModel implements ICaller {
 
 export interface ICaller {
   type: ExEntityType;
-  associatedExtensionId: number | null;
   /**
    * Add a usage-related varConfig to the caller
    * @param count initial value for the variable
@@ -372,10 +379,7 @@ export interface ICaller {
    * @returns the name of the variable that was added
    */
   setUsage(count: number, option: GtsUsageOptions): string;
-  /**
-   * Get registered snippets of the caller.
-   */
-  snippets: ReadonlyMap<string, SnippetOperation<any, any>>;
+  wrapData: SkillWrappingData;
 }
 
 export const createVariableConfig = (
@@ -496,7 +500,7 @@ export class EntityViewModel extends defineViewModel(
     }),
     associateExtension: h.attribute<{
       <Meta extends EntityVMMeta, NewExtT>(
-        this: AR.This<Meta>,
+        this: [Meta["associatedExtension"]] extends [never] ? AR.This<Meta> : never,
         ext: ExtensionHandle<NewExtT>,
       ): AR.DoneRewriteMeta<
         Computed<
@@ -507,7 +511,7 @@ export class EntityViewModel extends defineViewModel(
       >;
       uniqueKey(): "associatedExtension";
     }>((model, [extId]) => {
-      model.associatedExtensionId = extId;
+      model.wrapData.associatedExtensionId = extId;
     }),
     since: h.simpleAttribute({
       uniqueKey: "version",
@@ -592,7 +596,7 @@ export class EntityViewModel extends defineViewModel(
         name = args[0];
       }
       const snippetModel = SnippetOperationVM.parse(subView);
-      model.snippets.set(name, snippetModel.action);
+      model.wrapData.snippets.set(name, snippetModel.action);
     }),
 
     prepare: h.attribute<{
