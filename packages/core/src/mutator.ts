@@ -107,6 +107,9 @@ export interface MutatorConfig {
    */
   readonly logger?: IDetailLogger;
 
+  /** Callback after mutation. */
+  readonly onMutation?: (mutation: Mutation) => void;
+
   /**
    * `notify` 时调用的接口。
    */
@@ -321,6 +324,7 @@ export class StateMutator {
     }
     this._mutationsToBeNotified.push(mutation);
     this._mutationsToBePause.push(mutation);
+    this.config.onMutation?.(mutation);
   }
 
   private createNotifyInternalOption(opt: NotifyOption): InternalNotifyOption {
