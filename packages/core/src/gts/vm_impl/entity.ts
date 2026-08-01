@@ -497,9 +497,10 @@ class SnippetOperationVM extends defineActionViewModel<
   ) => AR.Done
 >() {}
 
-interface TriggeredSkillVMMetaFromEntity<
+interface TriggeredSkillVMMetaFromEntityLike<
   Meta extends EntityVMMeta,
   EventName extends DetailedEventNames | CustomEvent,
+  DefaultCallingArea extends CallingAreaType,
 > {
   readonly type: Meta["type"];
   readonly variables: Meta["variables"];
@@ -507,7 +508,7 @@ interface TriggeredSkillVMMetaFromEntity<
   readonly snippets: Meta["snippets"];
   readonly callingArea: EventName extends "selfDispose" | "selfDiscard"
     ? "disposed"
-    : "onStage";
+    : DefaultCallingArea;
   readonly eventArgType: [EventName] extends [DetailedEventNames]
     ? DetailedEventArgOf<EventName>
     : EventName extends CustomEvent<infer T>
@@ -515,6 +516,15 @@ interface TriggeredSkillVMMetaFromEntity<
       : never;
   readonly stagedEventArgType: unknown;
 }
+
+export interface TriggeredSkillVMMetaFromEntity<
+  Meta extends EntityVMMeta,
+  EventName extends DetailedEventNames | CustomEvent,
+> extends TriggeredSkillVMMetaFromEntityLike<Meta, EventName, "onStage"> {}
+export interface TriggeredSkillVMMetaFromCard<
+  Meta extends EntityVMMeta,
+  EventName extends DetailedEventNames | CustomEvent,
+> extends TriggeredSkillVMMetaFromEntityLike<Meta, EventName, "offStage"> {}
 
 export class EntityViewModel extends defineViewModel(
   EntityModel,

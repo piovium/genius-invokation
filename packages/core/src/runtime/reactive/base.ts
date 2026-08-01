@@ -37,6 +37,20 @@ export type EntityTypeToStateKind = {
   attachment: "attachment";
 };
 
+export interface ExtraInfo<Ty extends ExEntityType> {
+  variables: string;
+  areaType:
+    | (Ty extends "character" | "equipment" | "status" ? "characters" : never)
+    | (Ty extends "combatStatus" ? "combatStatuses" : never)
+    | (Ty extends "summon" ? "summons" : never)
+    | (Ty extends "support" ? "supports" : never)
+    | (Ty extends "eventCard" | "support" | "equipment" | "attachment"
+        ? "hands" | "pile"
+        : never)
+    | "disposedEntities";
+}
+
+
 export abstract class ReactiveStateBase {
   abstract get [ReactiveStateSymbol](): StateKind;
   declare [RawStateSymbol]: object;

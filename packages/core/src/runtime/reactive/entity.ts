@@ -13,7 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { EntityState, EntityVariables } from "../../base/state";
+import type {
+  EntityState,
+  EntityType,
+  EntityVariables,
+} from "../../base/state";
 import { GiTcgDataError } from "../../error";
 import { type EntityArea, type EntityDefinition } from "../../base/entity";
 import { diceCostSizeOfCard, getEntityById } from "./utils";
@@ -25,6 +29,7 @@ import {
   ReactiveStateSymbol,
 } from "./base";
 import type { AttachmentHandle } from "../../data/type";
+import type { ExtraInfo } from "./base";
 
 class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
   override get [ReactiveStateSymbol](): "entity" {
@@ -73,13 +78,12 @@ class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
   }
 
   withAttachment(id: AttachmentHandle) {
-    return this.state.attachments.some(att => att.definition.id === id);
+    return this.state.attachments.some((att) => att.definition.id === id);
   }
   empowered() {
     // Empowerment: 206
     return this.withAttachment(206 as AttachmentHandle);
   }
-
 
   get master() {
     if (this.area.type !== "characters") {
@@ -114,5 +118,8 @@ export class Entity<Meta extends ContextMetaBase> extends ReadonlyEntity<Meta> {
   }
 }
 
-export type TypedEntity<Meta extends ContextMetaBase> =
-  Meta["readonly"] extends true ? ReadonlyEntity<Meta> : Entity<Meta>;
+export type TypedEntity<
+  Meta extends ContextMetaBase,
+  Ty extends EntityType,
+  Extra extends ExtraInfo<Ty>,
+> = Meta["readonly"] extends true ? ReadonlyEntity<Meta> : Entity<Meta>;

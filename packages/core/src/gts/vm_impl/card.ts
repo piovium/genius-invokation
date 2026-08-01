@@ -37,10 +37,10 @@ import {
   type GtsUsageOrUsagePerRoundOptions,
   type ICaller,
   type ThisWithType,
+  type TriggeredSkillVMMetaFromCard,
 } from "./entity";
 import type { CharacterHandle, HandleT, StatusHandle } from "../../data/type";
 import type {
-  DetailedEventArgOf,
   DetailedEventNames,
   InitiativeSkillTargetKind,
   StrictInitiativeSkillEventArg,
@@ -68,7 +68,10 @@ import type { CharacterState, CustomEvent } from "../../data";
 import type { Computed, IUnorderedQuery } from "../../query/utils";
 import { getSubId } from "./sub_id";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
-import type { InitiativeSkillEventArg } from "../../base/skill";
+import type {
+  CustomEventEventArg,
+  InitiativeSkillEventArg,
+} from "../../base/skill";
 import type { Writable } from "../../utils";
 
 const SATIATED_ID = 303300 as StatusHandle;
@@ -274,7 +277,7 @@ export class CardModel extends InitiativeSkillModel implements ICaller {
 
 interface CardVMMeta extends EntityVMMeta, InitiativeSkillVMMeta {
   readonly type: "support" | "equipment" | "eventCard";
-  readonly isInitiativeSkill: true;
+  readonly isInitiativeSkill: boolean;
   readonly callingArea: "offStage";
   readonly targetTypes: InitiativeSkillTargetKind;
   readonly stagedEventArgType: never;
@@ -565,24 +568,14 @@ export class CardViewModel extends InitiativeSkillViewModel
           CardVMMeta
         >,
         typeof OffStageTriggeredSkillViewModel,
-        Computed<
-          Omit<Meta, "eventArgType"> & {
-            eventArgType: DetailedEventArgOf<"selfHandCardInserted">;
-          },
-          TriggeredSkillVMMeta
-        >
+        TriggeredSkillVMMetaFromCard<Meta, "selfHandCardInserted">
       >;
       <Meta extends CardVMMeta, const Event extends DetailedEventNames>(
         this: ThisWithType<Meta, "eventCard">,
         eventName: Event,
       ): AR.With<
         typeof OffStageTriggeredSkillViewModel,
-        Computed<
-          Omit<Meta, "eventArgType"> & {
-            eventArgType: DetailedEventArgOf<Event>;
-          },
-          TriggeredSkillVMMeta
-        >
+        TriggeredSkillVMMetaFromCard<Meta, Event>
       >;
       mergeMeta<Meta extends CardVMMeta>(
         meta: Meta,
