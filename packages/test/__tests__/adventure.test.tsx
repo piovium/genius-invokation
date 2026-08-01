@@ -13,18 +13,48 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Status, Card, $ } from "#test";
+import { ref, setup, Character, State, Status, Card, $, DiceCount } from "#test";
 import { AnAncientSacrificeOfSacredBrocade } from "@gi-tcg/data/internal/cards/event/other.gts";
-import { ChenyuVale } from "@gi-tcg/data/internal/cards/support/adventure.gts";
-import { test } from "vitest";
+import {
+  ChenyuVale,
+  TheChasm,
+  Tonatiuh,
+} from "@gi-tcg/data/internal/cards/support/adventure.gts";
+import { DiceType } from "@gi-tcg/typings";
+import { describe, expect, test } from "vitest";
 
-test("adventure: basic", async () => {
-  const c = setup(
-    <State>
-      <Card my def={AnAncientSacrificeOfSacredBrocade} />
-    </State>,
-  );
-  await c.me.card(AnAncientSacrificeOfSacredBrocade);
-  await c.me.selectCard(ChenyuVale);
-  c.expect($.my.support.def(ChenyuVale)).toHaveVariable({ exp: 1 });
+describe("adventure", () => {
+  test("chenyuvale basic", async () => {
+    const c = setup(
+      <State>
+        <Card my def={AnAncientSacrificeOfSacredBrocade} />
+      </State>,
+    );
+    await c.me.card(AnAncientSacrificeOfSacredBrocade);
+    await c.me.selectCard(ChenyuVale);
+    c.expect($.my.support.def(ChenyuVale)).toHaveVariable({ exp: 1 });
+  });
+
+  test("chasm basic", async () => {
+    const c = setup(
+      <State>
+        <Card my def={AnAncientSacrificeOfSacredBrocade} />
+      </State>,
+    );
+    await c.me.card(AnAncientSacrificeOfSacredBrocade);
+    await c.me.selectCard(TheChasm);
+    c.expect($.my.pile).toBeCount(5);
+  });
+
+  test("tonatiuh basic", async () => {
+    const c = setup(
+      <State>
+        <Card my def={AnAncientSacrificeOfSacredBrocade} />
+        <DiceCount my count={2} type={DiceType.Cryo} />
+      </State>,
+    );
+    await c.me.card(AnAncientSacrificeOfSacredBrocade);
+    await c.me.selectCard(Tonatiuh);
+    expect(c.state.players[0].dice).toEqual([DiceType.Omni]);
+  })
 });
