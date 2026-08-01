@@ -169,7 +169,7 @@ define card {
       when :( :e.skill.definition.id === RavagingConfession );
       :createHandCard(ChangingShifts);
     };
-    on enterRelative {
+    on enter {
       when :( :e.entity.id === StrikeWhereItHurts );
       listenTo samePlayer;
       :createHandCard(ChangingShifts);

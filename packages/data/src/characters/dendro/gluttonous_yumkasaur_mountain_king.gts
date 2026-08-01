@@ -146,7 +146,7 @@ define skill {
 define skill {
   id 27045 as GluttonousRex02;
   skillType passive {
-    on enterRelative {
+    on enter {
       when :( :e.entity.definition.id === Satiated );
       void 0;
       // 不会饱腹 => 饱腹入场时弃置饱腹

@@ -525,7 +525,7 @@ define card {
 define combatStatus {
   id 301022 as TheMausoleumOfKingDeshretInEffect;
   oneDuration;
-  on enter {
+  on selfEnter {
     :createPileCards(ForbiddenKnowledge, 2, "top");
   };
   on drawCard {
@@ -730,7 +730,7 @@ define card {
   since "v5.3.0";
   cost DiceType.Aligned, 2;
   support place {
-    on enterRelative {
+    on enter {
       when :( :e.entity.definition.type === "summon" );
       usage 3;
       const target = :query($.my.summon.id(:e.entity.id));
@@ -819,7 +819,7 @@ define status {
   variable layer, 2 {
     append 5;
   };
-  on enter {
+  on selfEnter {
     when :(
       (:e.overridden?.variables.layer ?? 0) < 3 && :getVariable("layer") >= 3
     );
@@ -844,7 +844,7 @@ define card {
   since "v5.6.0";
   cost DiceType.Void, 3;
   support place {
-    on enterRelative {
+    on enter {
       when :(
         :e.entity.definition.type === "status" &&
           :e.entity.definition.tags.includes("preparingSkill")
@@ -917,7 +917,7 @@ define combatStatus {
  */
 define combatStatus {
   id 301037 as ConstellationMetropoleInEffect02;
-  once enterRelative {
+  once enter {
     when :( :e.entity.definition.id === ToyGuardSummon );
     :e.entity.cast<"summon">().addVariable("effect", 1);
   };
@@ -987,7 +987,7 @@ define card {
   since "v6.4.0";
   support place {
     variable count, 0;
-    on enterRelative {
+    on enter {
       when :(
         ([CostReduction, Empowerment] as number[]).includes(
           :e.entity.definition.id,

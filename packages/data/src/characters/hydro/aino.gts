@@ -89,7 +89,7 @@ define skill {
 define skill {
   id 12164 as ModularEfficiencyProtocol;
   skillType passive {
-    on enterRelative {
+    on enter {
       when :( :e.entity.definition.id === Empowerment );
       listenTo samePlayer;
       usage perRound, 1 {

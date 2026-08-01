@@ -828,7 +828,7 @@ define card {
 define status {
   id 303322 as private HarvestsBoonInEffect;
   since "v5.7.0";
-  on enterRelative {
+  on enter {
     when :(
       :e.entity.definition.type === "status" &&
         :e.entity.definition.tags.includes("preparingSkill")

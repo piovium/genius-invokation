@@ -92,7 +92,7 @@ define combatStatus {
     when :( :e.getReaction() );
     :e.increaseDamage(1);
   };
-  on enter {
+  on selfEnter {
     when :(
       :query($.my.character.has($.equipped.def(TheSeedOfStoredKnowledge))) && // 装备有心识蕴藏之种
         :query($.my.character.includesDefeated.tag("electro")) // 我方队伍中存在雷元素
@@ -119,7 +119,7 @@ define combatStatus {
     when :( :e.getReaction() );
     :e.increaseDamage(1);
   };
-  on enter {
+  on selfEnter {
     when :(
       :query($.my.character.has($.equipped.def(TheSeedOfStoredKnowledge))) && // 装备有心识蕴藏之种
         :query($.my.character.includesDefeated.tag("electro")) // 我方队伍中存在雷元素

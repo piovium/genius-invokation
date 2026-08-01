@@ -1020,11 +1020,11 @@ export class EntityViewModel extends defineViewModel(
         return;
       }
       if (
-        eventName === "enter" &&
+        eventName === "selfEnter" &&
         !["status", "combatStatus", "summon"].includes(model.type)
       ) {
         throw new GiTcgDataError(
-          "Only status, combatStatus, and summon can have `enter` handling. For support and equipment, use `on staged { ... };` instead.",
+          "Only status, combatStatus, and summon can have `selfEnter` handling. For support and equipment, use `on staged { ... };` instead.",
         );
       }
       const skillModel = TriggeredSkillViewModel.parse(

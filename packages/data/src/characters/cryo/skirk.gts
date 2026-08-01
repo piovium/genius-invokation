@@ -50,7 +50,7 @@ define status {
     when :( :e.viaSkillType("normal") );
     :e.changeDamageType(DamageType.Cryo);
   };
-  on enter {
+  on selfEnter {
     :transformDefinition(:self.master, Skirk01);
   };
   on selfDispose {

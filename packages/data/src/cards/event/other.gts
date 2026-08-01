@@ -2280,7 +2280,7 @@ define status {
  */
 define status {
   id 303241 as FruitsOfTrainingInEffect01;
-  on enterRelative {
+  on enter {
     when :(
       :e.entity.definition.type === "status" &&
         :e.entity.definition.tags.includes("preparingSkill") &&
@@ -2567,7 +2567,7 @@ define summon {
     usage 1;
     :damage(DamageType.Piercing, :getVariable("effect"));
   };
-  on enter {
+  on selfEnter {
     const ext = :getExtensionState();
     const addUsage = Math.min(ext.disposedSupportCount[:self.who], 4);
     const addDmg = Math.min(ext.disposedSummonsCount[:self.who], 4);

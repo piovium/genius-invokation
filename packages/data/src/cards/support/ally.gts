@@ -944,7 +944,7 @@ define card {
       :createHandCard(ToyGuard);
       :createPileCards(ToyGuard, 2, "random");
     };
-    on enterRelative {
+    on enter {
       when :(
         :e.entity.definition.type === "summon" &&
           (SIMULANKA_SUMMONS as number[]).includes(:e.entity.definition.id)

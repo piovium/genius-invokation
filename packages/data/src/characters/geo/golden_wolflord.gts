@@ -40,7 +40,7 @@ define status {
     };
     :damage(DamageType.Piercing, :getVariable("usage"), :self.master);
   };
-  on enter {
+  on selfEnter {
     if (
       !:query($.opp.equipped.def(BeastlyCorrosion)) &&
       :getVariable("usage") > 3

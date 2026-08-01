@@ -37,7 +37,7 @@ define summon {
     usage 2;
     :damage(DamageType.Geo, 1);
   };
-  on enter {
+  on selfEnter {
     :characterStatus(GeoInfusion, $.my.character.def(Chiori));
   };
   on selfDispose {

@@ -60,7 +60,7 @@ define summon {
     );
     :consumeUsage();
   };
-  on enter {
+  on selfEnter {
     :combatStatus(CrushingThunder, "opp");
   };
   on selfDispose {
@@ -111,7 +111,7 @@ define status {
 define combatStatus {
   id 124042 as ElectroCicinShield;
   shield 1;
-  on enter {
+  on selfEnter {
     const cicin = :query($.my.summon.def(ElectroCicin));
     if (cicin) {
       const usage = cicin.getVariable("usage");

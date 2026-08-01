@@ -103,7 +103,7 @@ define skill {
     on battleBegin {
       :createPileCards(BonecrunchersEnergyBlock, 2, "bottom");
     };
-    on enterRelative {
+    on enter {
       when :(
         :e.entity.definition.id === BonecrunchersEnergyBlockCombatStatus
       );

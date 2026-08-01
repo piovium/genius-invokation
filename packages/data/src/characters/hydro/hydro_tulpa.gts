@@ -278,7 +278,7 @@ define character {
 define status {
   id 222062 as ElementalLifeformHydro;
   duration 2;
-  on enter {
+  on selfEnter {
     :apply(DamageType.Hydro, :self.master);
   };
   on modifyReaction {

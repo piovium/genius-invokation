@@ -308,7 +308,7 @@ define summon {
     const targetHand = :random(:oppPlayer.hands);
     :attach(Conductive, targetHand);
   };
-  on enter {
+  on selfEnter {
     :callSnippet.giveOppRandomCardConductive();
   };
   on gainUsage {

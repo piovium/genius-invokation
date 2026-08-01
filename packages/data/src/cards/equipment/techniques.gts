@@ -355,7 +355,7 @@ define combatStatus {
       :dispose();
     }
   };
-  on enter {
+  on selfEnter {
     :setVariable(
       "techniquesPlayedCount",
       :getExtensionState().techniquesPlayedCount[:self.who],
