@@ -859,7 +859,7 @@ define card {
  * 我方下2次冒险或结束阶段时，治疗所附属角色1点。
  */
 define status {
-  id 303323 as private ChenyuBrewInEffect;
+  id 303323 as ChenyuBrewInEffect;
   since "v6.1.0";
   usage 2;
   on adventure {

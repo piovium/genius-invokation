@@ -34,11 +34,7 @@ import {
   PlayerConfig,
   QueryFn,
 } from "@gi-tcg/core";
-import {
-  CardHandle,
-  CharacterHandle,
-  SkillHandle,
-} from "@gi-tcg/core/data";
+import { CardHandle, CharacterHandle, SkillHandle } from "@gi-tcg/core/data";
 import { Ref } from "./setup";
 import { StatesMatcher } from "./matcher";
 
@@ -387,7 +383,7 @@ export class TestController {
   _start() {
     this.game.start().then(
       () => {
-        this.stepping.reject(new Error("Game ended, no more action"));
+        this.stepping.resolve();
       },
       (error) => {
         this.stepping.reject(error);
