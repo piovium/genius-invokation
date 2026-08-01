@@ -38,6 +38,7 @@ import {
 } from "@gi-tcg/data/internal/cards/support/adventure.gts";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
 import { AquabreezeBlessingWaterburst } from "@gi-tcg/data/internal/cards/support/blessing.gts";
+import { MastersOfTheNightwind } from "@gi-tcg/data/internal/cards/support/place.gts";
 import { DiceType } from "@gi-tcg/typings";
 import { describe, expect, test } from "vitest";
 
@@ -74,6 +75,34 @@ describe("adventure", () => {
     await c.me.card(AnAncientSacrificeOfSacredBrocade);
     await c.me.selectCard(Tonatiuh);
     expect(c.state.players[0].dice).toEqual([DiceType.Omni]);
+  });
+
+  test("support area full: selecting an adventure only triggers on select card", async () => {
+    const c = setup(
+      <State>
+        <Character my active health={1}>
+          <Status my def={ChenyuBrewInEffect} />
+        </Character>
+        <Support my def={MastersOfTheNightwind} />
+        <Support my def={Paimon} />
+        <Support my def={Paimon} />
+        <Support my def={Paimon} />
+        <Card my def={AnAncientSacrificeOfSacredBrocade} />
+        <DiceCount my count={2} type={DiceType.Cryo} />
+      </State>,
+    );
+
+    await c.me.card(AnAncientSacrificeOfSacredBrocade);
+    await c.me.selectCard(Tonatiuh);
+
+    // 冒险地点未能入场，但挑选后触发
+    c.expect($.my.support.def(MastersOfTheNightwind)).toHaveVariable({
+      intuition: 3,
+    });
+    c.expect($.my.support.def(Tonatiuh)).toNotExist();
+    // 天蛇船的首次冒险（入场）效果不触发
+    expect(c.state.players[0].dice).toEqual([DiceType.Cryo]);
+    c.expect($.my.active).toHaveVariable({ health: 1 });
   });
 
   describe("adventure (exp=1), spot 'triggered' before status", () => {
