@@ -20,7 +20,7 @@ import type {
 } from "../../data/registry";
 import { type AnyState, type GameState } from "../../base/state";
 import { $, toExpression, type InferResult, type IQuery } from "../../query";
-import type { UsagePerRoundVariableNames } from "../../base/entity";
+import type { EntityArea, UsagePerRoundVariableNames } from "../../base/entity";
 import { type CustomEvent } from "../../data";
 import {
   ListenTo,
@@ -36,6 +36,7 @@ import {
 } from "../../runtime/skill";
 import {
   SkillContext,
+  type CallingAreaType,
   type TypedSkillContext,
 } from "../../runtime/skill_context";
 import {
@@ -83,7 +84,7 @@ export class SkillWrappingData {
 
 export function wrapSkillInfoFromGts(
   skillInfo: SkillInfo,
-  data:SkillWrappingData,
+  data: SkillWrappingData,
 ): SkillInfoOfContextConstruction {
   return {
     ...skillInfo,
@@ -160,6 +161,7 @@ export class TriggeredSkillModel extends SkillModel {
   detailedEventName: DetailedEventNames | CustomEvent;
   enableHandTriggering = false;
   enablePileTriggering = false;
+  enableOnStageTriggering = true;
   usageOpt: { name: string; autoDecrease: boolean } | null = null;
   usagePerRoundOpt: {
     name: UsagePerRoundVariableNames;
@@ -259,6 +261,14 @@ export class TriggeredSkillModel extends SkillModel {
         return c.self.area.type !== "pile";
       });
     }
+    // 1'. off-stage 触发技能禁止场上触发
+    if (!this.enableOnStageTriggering) {
+      this.filters.push((c) => {
+        return (
+          ["hands", "pile", "removedEntities"] as EntityArea["type"][]
+        ).includes(c.self.area.type);
+      });
+    }
     // 2. 被动技能要求角色存活
     if (
       this.caller.type === "character" &&
@@ -324,18 +334,21 @@ export class TriggeredSkillModel extends SkillModel {
 }
 
 export interface TriggeredSkillVMMeta extends EntityVMMeta {
-  eventArgType: unknown;
+  readonly callingArea: CallingAreaType;
+  readonly eventArgType: unknown;
 }
 const DEFAULT_TRIGGERED_SKILL_VM_META = {
   ...DEFAULT_ENTITY_VM_META,
+  callingArea: "" as CallingAreaType,
   eventArgType: null as never,
 } as const satisfies TriggeredSkillVMMeta;
 
 type TriggeredSkillVMToRwContextMeta<Meta extends TriggeredSkillVMMeta> = {
   callerType: Meta["type"];
-  associatedExtension: Meta["associatedExtension"];
   callerVars: Meta["variables"];
+  callingArea: Meta["callingArea"];
   eventArgType: Meta["eventArgType"];
+  associatedExtension: Meta["associatedExtension"];
   gtsSnippets: Meta["snippets"];
 };
 type TriggeredSkillOperationOfVM<Meta extends TriggeredSkillVMMeta> =
@@ -515,9 +528,7 @@ export class CharacterSkillModel extends InitiativeSkillModel {
   }
 
   getEntry():
-    | Reserved
-    | CharacterInitiativeSkillEntry
-    | CharacterPassiveSkillEntry {
+    Reserved | CharacterInitiativeSkillEntry | CharacterPassiveSkillEntry {
     if (this.reserved) {
       return RESERVED;
     } else if (this.passiveSkillEntry) {
@@ -535,12 +546,14 @@ export class CharacterSkillModel extends InitiativeSkillModel {
 }
 
 export interface InitiativeSkillVMMeta extends EntityVMMeta {
+  readonly callingArea: CallingAreaType;
   readonly targetTypes: InitiativeSkillTargetKind;
 }
 // This variable is type-only but may fell into TDZ after bundling.
 // Declare it as var.
 export var DEFAULT_INITIATIVE_SKILL_VM_META = {
   ...DEFAULT_ENTITY_VM_META,
+  callingArea: "" as CallingAreaType,
   targetTypes: [],
 } as const satisfies InitiativeSkillVMMeta;
 
@@ -560,9 +573,10 @@ export type TargetQueryTypeInfo =
 
 type InitiativeSkillVMToRwContextMeta<Meta extends InitiativeSkillVMMeta> = {
   callerType: Meta["type"];
-  associatedExtension: Meta["associatedExtension"];
   callerVars: Meta["variables"];
+  callingArea: Meta["callingArea"];
   eventArgType: StrictInitiativeSkillEventArg<Meta["targetTypes"]>;
+  associatedExtension: Meta["associatedExtension"];
   gtsSnippets: Meta["snippets"];
 };
 
@@ -722,6 +736,7 @@ export interface CharacterSkillVMMeta extends InitiativeSkillVMMeta {
 export const DEFAULT_CHARACTER_SKILL_VM_META = {
   ...DEFAULT_ENTITY_VM_META,
   type: "character",
+  callingArea: "onStage",
   targetTypes: [],
   isInitiativeSkill: true as boolean,
 } as const satisfies CharacterSkillVMMeta;

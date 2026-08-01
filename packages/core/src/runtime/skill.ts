@@ -42,6 +42,7 @@ import type {
   GameState,
 } from "../base/state";
 import {
+  type CallingAreaType,
   type ContextMetaBase,
   SkillContext,
   type TypedSkillContext,
@@ -114,10 +115,12 @@ export interface StrictInitiativeSkillEventArg<
 type InitiativeSkillMeta<
   CallerType extends ExEntityType,
   KindTs extends InitiativeSkillTargetKind,
+  Area extends CallingAreaType,
   AssociatedExt extends ExtensionHandle,
 > = {
   callerType: CallerType;
   callerVars: never;
+  callingArea: Area;
   eventArgType: StrictInitiativeSkillEventArg<KindTs>;
   associatedExtension: AssociatedExt;
   gtsSnippets: {};
@@ -139,9 +142,10 @@ export type CreateSkillMeta<
 export type StrictInitiativeSkillFilter<
   CallerType extends ExEntityType,
   KindTs extends InitiativeSkillTargetKind,
+  Area extends CallingAreaType,
   AssociatedExt extends ExtensionHandle,
 > = SkillOperationFilter<
-  InitiativeSkillMeta<CallerType, KindTs, AssociatedExt>
+  InitiativeSkillMeta<CallerType, KindTs, Area, AssociatedExt>
 >;
 
 /** @deprecated use string literal instead */

@@ -14,7 +14,7 @@ import type {
   SummonHandle,
 } from "./data/type";
 import { $ } from "./query";
-import { SkillContext, type TypedSkillContext } from "./runtime/skill_context";
+import { SkillContext, type CallingAreaType, type TypedSkillContext } from "./runtime/skill_context";
 
 export const CALLED_FROM_REACTION: unique symbol = Symbol();
 
@@ -40,6 +40,7 @@ type ReactionContextMeta = {
   callerVars: never;
   eventArgType: ReactionDescriptionEventArg;
   callerType: never;
+  callingArea: CallingAreaType;
   associatedExtension: never;
   gtsSnippets: {};
 };

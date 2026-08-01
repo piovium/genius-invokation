@@ -194,7 +194,7 @@ define card {
   since "v4.4.0";
   talent MillennialPearlSeahorse, active {
     on staged {
-      const exists = :e.targets[0].cast<"character">().hasStatus(FontemerPearl);
+      const exists = :e.targets[0].hasStatus(FontemerPearl);
       if (exists) {
         exists.addVariable("usage", 1);
       } else {

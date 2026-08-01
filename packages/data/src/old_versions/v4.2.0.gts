@@ -196,7 +196,7 @@ define card {
     };
     variable bubble, 0;
     on staged {
-      :heal(3, :e.targets[0].cast<"character">());
+      :heal(3, :e.targets[0]);
     };
     on healed {
       listenTo samePlayer;

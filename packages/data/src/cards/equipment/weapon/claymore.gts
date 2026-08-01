@@ -223,7 +223,7 @@ define card {
       :e.increaseDamage(1);
     };
     on staged {
-      :characterStatus(ForestRegaliaInEffect, :e.targets[0].cast<"character">());
+      :characterStatus(ForestRegaliaInEffect, :e.targets[0]);
     };
   };
 };

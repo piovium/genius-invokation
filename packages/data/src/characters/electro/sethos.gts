@@ -167,7 +167,7 @@ define card {
   cost DiceType.Electro, 1;
   talent Sethos, none {
     on staged {
-      :gainEnergy(1, :e.targets[0].cast<"character">());
+      :gainEnergy(1, :e.targets[0]);
     };
     on EnergyLost {
       usage perRound, 1;

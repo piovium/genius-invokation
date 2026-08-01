@@ -175,7 +175,7 @@ define card {
       :e.increaseDamage(1);
     };
     on staged {
-      :characterStatus(KingsSquireStatus, :e.targets[0].cast<"character">());
+      :characterStatus(KingsSquireStatus, :e.targets[0]);
     };
   };
 };
@@ -262,7 +262,7 @@ define card {
       :e.increaseDamage(2);
     };
     on staged {
-      :increaseMaxHealth(1, :e.targets[0].cast<"character">());
+      :increaseMaxHealth(1, :e.targets[0]);
     };
   };
 };

@@ -19,7 +19,6 @@ import type {
   DescriptionDictionaryKey,
   EntityDefinition,
   SupportTag,
-  VariableConfig,
   WeaponCardTag,
 } from "../../base/entity";
 import type { AnyState, EntityTag, SkillDefinition } from "../../base/state";
@@ -33,7 +32,6 @@ import {
   DEFAULT_ENTITY_VM_META,
   EntityModel,
   EntityViewModel,
-  type DefaultEntityVMMeta,
   type EntityDescriptionDictionaryGetter,
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
@@ -45,6 +43,7 @@ import type {
   DetailedEventArgOf,
   DetailedEventNames,
   InitiativeSkillTargetKind,
+  StrictInitiativeSkillEventArg,
 } from "../../runtime/skill";
 import { CombatFoodVM, FoodVM } from "./entity_auxilary";
 import { $ } from "../../query";
@@ -55,6 +54,7 @@ import {
   TriggeredSkillModel,
   TriggeredSkillViewModel,
   type DefaultDisposeSameVMMeta,
+  type InitiativeSkillVMMeta,
   type TargetGetter,
   type TriggeredSkillVMMeta,
 } from "./skill";
@@ -64,7 +64,7 @@ import {
   type DefaultTechniqueVMMeta,
   type TechniqueVMMeta,
 } from "./technique";
-import type { CharacterState, EntityState } from "../../data";
+import type { CharacterState, CustomEvent } from "../../data";
 import type { Computed, IUnorderedQuery } from "../../query/utils";
 import { getSubId } from "./sub_id";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
@@ -74,7 +74,14 @@ import type { Writable } from "../../utils";
 const SATIATED_ID = 303300 as StatusHandle;
 
 class OffStageTriggeredSkillModel extends TriggeredSkillModel {
-  enablePileTriggering = false;
+  constructor(
+    caller: ICaller,
+    detailedEventName: DetailedEventNames | CustomEvent,
+  ) {
+    super(caller, detailedEventName);
+    this.enableHandTriggering = true;
+    this.enableOnStageTriggering = false;
+  }
 }
 
 const OffStageTriggeredSkillViewModel = TriggeredSkillViewModel.extend(
@@ -265,16 +272,32 @@ export class CardModel extends InitiativeSkillModel implements ICaller {
   }
 }
 
-interface CardVMMeta extends EntityVMMeta {
+interface CardVMMeta extends EntityVMMeta, InitiativeSkillVMMeta {
   readonly type: "support" | "equipment" | "eventCard";
-  readonly isInitiativeSkill: boolean;
+  readonly isInitiativeSkill: true;
+  readonly callingArea: "offStage";
   readonly targetTypes: InitiativeSkillTargetKind;
+  readonly stagedEventArgType: never;
+}
+
+interface EntityVMMetaFromCard<
+  Meta extends CardVMMeta,
+  Type extends "support" | "equipment",
+> {
+  type: Type;
+  variables: never;
+  stagedEventArgType: StrictInitiativeSkillEventArg<
+    [Type] extends ["equipment"] ? readonly ["character"] : readonly []
+  >;
+  associatedExtension: Meta["associatedExtension"];
+  snippets: {};
 }
 
 const DEFAULT_CARD_VM_META = {
   ...DEFAULT_ENTITY_VM_META,
   type: "eventCard",
   isInitiativeSkill: true,
+  callingArea: "offStage",
   targetTypes: [],
 } as const satisfies CardVMMeta;
 
@@ -327,7 +350,7 @@ export class CardViewModel extends InitiativeSkillViewModel
         weaponType: WeaponCardTag,
       ): AR.With<
         typeof EntityViewModel,
-        DefaultEntityVMMeta<"equipment", Meta["associatedExtension"]>
+        EntityVMMetaFromCard<Meta, "equipment">
       >;
       uniqueKey(): "type";
       mergeMeta<Meta extends CardVMMeta, InnerMeta extends EntityVMMeta>(
@@ -352,7 +375,7 @@ export class CardViewModel extends InitiativeSkillViewModel
         this: NoTargetSpecifiedThis<Meta>,
       ): AR.With<
         typeof EntityViewModel,
-        DefaultEntityVMMeta<"equipment", Meta["associatedExtension"]>
+        EntityVMMetaFromCard<Meta, "equipment">
       >;
       uniqueKey(): "type";
       mergeMeta<Meta extends CardVMMeta, InnerMeta extends EntityVMMeta>(
@@ -403,7 +426,7 @@ export class CardViewModel extends InitiativeSkillViewModel
         requires?: TalentRequirement,
       ): AR.With<
         typeof EntityViewModel,
-        DefaultEntityVMMeta<"equipment", Meta["associatedExtension"]>
+        EntityVMMetaFromCard<Meta, "equipment">
       >;
       uniqueKey(): "type";
       mergeMeta<Meta extends CardVMMeta, InnerMeta extends EntityVMMeta>(
@@ -440,10 +463,7 @@ export class CardViewModel extends InitiativeSkillViewModel
       <Meta extends CardVMMeta>(
         this: NoTargetSpecifiedThis<Meta>,
         ...supportTags: SupportTag[]
-      ): AR.With<
-        typeof EntityViewModel,
-        DefaultEntityVMMeta<"support", Meta["associatedExtension"]>
-      >;
+      ): AR.With<typeof EntityViewModel, EntityVMMetaFromCard<Meta, "support">>;
       uniqueKey(): "type";
       mergeMeta<Meta extends CardVMMeta, InnerMeta extends EntityVMMeta>(
         meta: Meta,

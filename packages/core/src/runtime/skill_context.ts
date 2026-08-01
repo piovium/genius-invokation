@@ -171,11 +171,14 @@ export interface IncreaseMaxHealthOption {
 
 type Setter<T> = (draft: Draft<T>) => void;
 
+export type CallingAreaType = "onStage" | "offStage" | "disposed";
+
 export type ContextMetaBase = {
   readonly: boolean;
   eventArgType: unknown;
   callerVars: string;
   callerType: ExEntityType;
+  callingArea: CallingAreaType;
   associatedExtension: ExtensionHandle;
   gtsSnippets: Record<string, unknown>;
 };
