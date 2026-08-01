@@ -169,6 +169,7 @@ define card {
     };
     on adventure {
       when :( :getVariable("exp") !== 1 );
+      :convertDice(DiceType.Omni, 1);
     };
     on adventure {
       when :( :getVariable("exp") >= 2 );
