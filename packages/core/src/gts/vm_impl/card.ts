@@ -73,6 +73,7 @@ import type {
   InitiativeSkillEventArg,
 } from "../../base/skill";
 import type { Writable } from "../../utils";
+import type { Character } from "../../runtime/reactive/character";
 
 const SATIATED_ID = 303300 as StatusHandle;
 
@@ -133,8 +134,8 @@ export class CardModel extends InitiativeSkillModel implements ICaller {
   setEquipmentPlayAction(): void {
     const stagedOperations = this.innerModel?.stagedOperations ?? [];
     this.action = function (c) {
-      for (const ch of c.eventArg.targets) {
-        ch.equip(c.self);
+      for (const ch of c.eventArg.targets as Character<any>[]) {
+        ch.equip(c.self.cast<"equipment">());
       }
       for (const operation of stagedOperations) {
         operation(c);
@@ -152,13 +153,18 @@ export class CardModel extends InitiativeSkillModel implements ICaller {
           direct: true,
         });
       }
-      c.moveEntity(
-        c.self.cast<"support">(),
+      const self = c.self.cast<"support">();
+      const newEntity = c.moveEntity(
+        self,
         { who: c.self.who, type: "supports" },
         "createSupport",
       );
-      for (const operation of stagedOperations) {
-        operation(c);
+      if (newEntity) {
+        for (const operation of stagedOperations) {
+          operation(c);
+        }
+      } else {
+        c.dispose(self, { direct: true, reason: "overflow" });
       }
     };
   }
@@ -477,6 +483,12 @@ export class CardViewModel extends InitiativeSkillViewModel
       model.innerModel = EntityViewModel.parse(subView, "support", model);
       model.tags.push(...supportTags);
       model.setSupportPlayAction();
+      if (model.innerModel.tags.includes("adventureSpot")) {
+        // 冒险地点入场时触发一次冒险后
+        model.innerModel.stagedOperations.push((c) => {
+          c.emitEvent("onAdventure", c.rawState, c.self.latest());
+        });
+      }
     }),
     legend: h.simpleAttribute({
       uniqueKey: "legend",

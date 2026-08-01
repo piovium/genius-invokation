@@ -1082,9 +1082,19 @@ export class SkillContext<Meta extends ContextMetaBase> {
     area: EntityArea,
     reason: MoveEntityM["reason"] = "other",
   ) {
-    this.callAndEmit("insertEntityOnStage", this.get(state).latest(), area, {
-      moveReason: reason,
-    });
+    const { newState } = this.callAndEmit(
+      "insertEntityOnStage",
+      this.get(state).latest(),
+      area,
+      {
+        moveReason: reason,
+      },
+    );
+    if (newState) {
+      return this.get(newState.id);
+    } else {
+      return null;
+    }
   }
   summon(
     id: SummonHandle,

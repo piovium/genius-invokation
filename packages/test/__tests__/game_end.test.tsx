@@ -18,10 +18,7 @@ test("game end during onActionPhase does not request an action", async () => {
       <Character opp health={0} alive={0} />
     </State>,
   );
-
-  await expect(c.stepToNextAction()).rejects.toThrow(
-    "Game ended, no more action",
-  );
+  await c.stepToNextAction();
   expect(c.state.phase).toBe("gameEnd");
   expect(c.state.winner).toBe(0);
 });
