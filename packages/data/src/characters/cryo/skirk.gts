@@ -34,6 +34,7 @@ define status {
   id 111162 as SevenphaseFlash;
   since "v6.3.0";
   duration 1;
+  noDefaultDispose;
   on deductVoidDiceSkill {
     when :(
       :e.isSkillType("normal") && :self.master.getVariable("serpentsSubtlety")
@@ -161,11 +162,7 @@ define skill {
   id 11165 as HavocExtinction;
   skillType burst;
   cost DiceType.Cryo, 1;
-  void 0;
-  // 假定（大抵确实如此）先转换基础骰子再转换万能骰子
-  const nonOmniCount = :player.dice.filter((d) => d !== DiceType.Omni).length;
-  const convertCount = Math.min(2, nonOmniCount);
-  :convertDice(DiceType.Cryo, convertCount);
+  :convertDice(DiceType.Cryo, 2);
   const hands = :player.hands
     .filter((card) => card.diceCost() === 0)
     .slice(0, 2);
