@@ -207,6 +207,7 @@ export type TechniqueVMMeta = EntityVMMeta & {
 type TechniqueVMToRwContextMeta<Meta extends TechniqueVMMeta> = {
   callerType: Meta["type"];
   callerVars: Meta["variables"];
+  callingArea: "onStage";
   associatedExtension: Meta["associatedExtension"];
   eventArgType: never;
   gtsSnippets: {};
