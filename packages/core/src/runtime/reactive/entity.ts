@@ -23,7 +23,7 @@ import {
   RawStateSymbol,
   ReactiveStateBase,
   ReactiveStateSymbol,
-} from "./reactive_base";
+} from "./base";
 import type { AttachmentHandle } from "../../data/type";
 
 class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {

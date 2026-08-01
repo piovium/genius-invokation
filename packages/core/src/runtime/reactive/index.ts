@@ -22,7 +22,7 @@ import {
   RawStateSymbol,
   ReactiveStateBase,
   ReactiveStateSymbol,
-} from "./reactive_base";
+} from "./base";
 import type { ExEntityState, ExEntityType } from "../../data/type";
 import { Attachment, type TypedAttachment } from "./attachment";
 

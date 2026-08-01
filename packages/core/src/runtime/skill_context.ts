@@ -99,8 +99,8 @@ import {
   getRaw,
   type ApplyReactive,
   type RxEntityState,
-} from "./reactive/reactive";
-import { ReactiveStateSymbol } from "./reactive/reactive_base";
+} from "./reactive";
+import { ReactiveStateSymbol } from "./reactive/base";
 import { computeConvertDice, type CreateEntityOptions } from "../utils";
 import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "./skill";
 import type { LunarReaction } from "@gi-tcg/typings";

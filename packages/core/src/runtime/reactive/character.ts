@@ -49,11 +49,11 @@ import {
   RawStateSymbol,
   ReactiveStateBase,
   ReactiveStateSymbol,
-} from "./reactive_base";
+} from "./base";
 import {
   applyReactive,
   type ApplyReactive,
-} from "./reactive";
+} from ".";
 
 export type CharacterPosition = "active" | "next" | "prev" | "standby";
 

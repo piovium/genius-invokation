@@ -27,9 +27,9 @@ import {
   RawStateSymbol,
   ReactiveStateBase,
   ReactiveStateSymbol,
-} from "./reactive_base";
+} from "./base";
 import type { AttachmentDefinition } from "../../base/attachment";
-import type { RxEntityState } from "./reactive";
+import type { RxEntityState } from ".";
 
 class ReadonlyAttachment<
   Meta extends ContextMetaBase,

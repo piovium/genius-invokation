@@ -64,7 +64,7 @@ import {
 } from "../utils";
 import type { IDetailLogger } from "../log";
 import type { CustomEvent } from "./custom_event";
-import { getRaw, NoReactiveSymbol } from "../runtime/reactive/reactive";
+import { getRaw, NoReactiveSymbol } from "../runtime/reactive";
 import type { PlainCharacterState } from "../runtime/reactive/utils";
 import type { AppliableDamageType } from "../data/type";
 import type { MoveEntityM, RemoveEntityM } from "./mutation";

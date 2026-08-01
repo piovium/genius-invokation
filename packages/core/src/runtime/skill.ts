@@ -56,7 +56,7 @@ import {
   normalizeCost,
 } from "../utils";
 import { GiTcgDataError } from "../error";
-import type { ApplyReactive } from "./reactive/reactive";
+import type { ApplyReactive } from "./reactive";
 
 export type InitiativeSkillTargetKind = readonly (
   "character" | "summon" | "support"
