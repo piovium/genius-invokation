@@ -65,7 +65,7 @@ define card {
         $.my.character.includesDefeated.tag("liyue"),
       ).length;
       if (liyueCount > 0) {
-        :characterStatus(LithicGuard, :e.targets[0].cast<"character">(), {
+        :characterStatus(LithicGuard, :e.targets[0], {
           overrideVariables: {
             shield: Math.min(liyueCount, 3),
           },
@@ -153,8 +153,8 @@ define card {
       :e.increaseDamage(1);
     };
     on staged {
-      if (:e.targets[0].cast<"character">().energy === 0) {
-        :gainEnergy(1, :e.targets[0].cast<"character">());
+      if (:e.targets[0].energy === 0) {
+        :gainEnergy(1, :e.targets[0]);
       }
     };
     on actionPhase {
@@ -196,7 +196,7 @@ define card {
       :e.increaseDamage(1);
     };
     on staged {
-      :characterStatus(MoonpiercerStatus, :e.targets[0].cast<"character">());
+      :characterStatus(MoonpiercerStatus, :e.targets[0]);
     };
   };
 };

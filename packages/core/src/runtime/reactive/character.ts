@@ -37,7 +37,7 @@ import {
   type PlainEntityState,
 } from "./utils";
 import { isSkillDisabled, type CreateEntityOptions } from "../../utils";
-import type { ContextMetaBase, HealOption, SkillContext } from "./skill";
+import type { ContextMetaBase, HealOption, SkillContext } from "../skill_context";
 import { Aura, DamageType, DiceType } from "@gi-tcg/typings";
 import type {
   AppliableDamageType,
@@ -49,11 +49,11 @@ import {
   RawStateSymbol,
   ReactiveStateBase,
   ReactiveStateSymbol,
-} from "./reactive_base";
+} from "./base";
 import {
   applyReactive,
   type ApplyReactive,
-} from "./reactive";
+} from ".";
 
 export type CharacterPosition = "active" | "next" | "prev" | "standby";
 

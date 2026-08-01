@@ -186,7 +186,7 @@ define card {
       :e.increaseDamage(1);
     };
     on staged {
-      :characterStatus(SapwoodBladeStatus, :e.targets[0].cast<"character">());
+      :characterStatus(SapwoodBladeStatus, :e.targets[0]);
     };
   };
 };

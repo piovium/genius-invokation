@@ -21,15 +21,15 @@ import type {
 import { GiTcgDataError } from "../../error";
 import { type EntityArea, type EntityDefinition } from "../../base/entity";
 import { getEntityById } from "./utils";
-import type { ContextMetaBase, SkillContext } from "./skill";
+import type { ContextMetaBase, SkillContext } from "../skill_context";
 import {
   LatestStateSymbol,
   RawStateSymbol,
   ReactiveStateBase,
   ReactiveStateSymbol,
-} from "./reactive_base";
+} from "./base";
 import type { AttachmentDefinition } from "../../base/attachment";
-import type { RxEntityState } from "./reactive";
+import type { RxEntityState } from ".";
 
 class ReadonlyAttachment<
   Meta extends ContextMetaBase,

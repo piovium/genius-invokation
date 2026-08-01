@@ -22,8 +22,8 @@ import {
   type EntityTag,
   type EntityType,
   stringifyEntityArea,
-} from "../../base/entity";
-import type { MoveEntityM, Mutation, RemoveEntityM } from "../../base/mutation";
+} from "../base/entity";
+import type { MoveEntityM, Mutation, RemoveEntityM } from "../base/mutation";
 import {
   type VariableValueChangeInfo,
   type DamageInfo,
@@ -41,7 +41,7 @@ import {
   ZeroHealthEventArg,
   ReactionEventArg,
   type CoreSkillResult,
-} from "../../base/skill";
+} from "../base/skill";
 import {
   type CharacterState as CharacterStateO,
   type EntityState as EntityStateO,
@@ -51,7 +51,7 @@ import {
   type PhaseType,
   type PlayerState,
   stringifyState,
-} from "../../base/state";
+} from "../base/state";
 import {
   getEntityArea,
   getEntityById,
@@ -63,7 +63,7 @@ import {
   type PlainAnyState,
   type ExPlainEntityState,
   type PlainAttachmentState,
-} from "./utils";
+} from "./reactive/utils";
 import type {
   AppliableDamageType,
   CardHandle,
@@ -77,11 +77,11 @@ import type {
   SummonHandle,
   EquipmentHandle,
   AttachmentHandle,
-} from "../../data/type";
-import { CALLED_FROM_REACTION } from "../../reaction";
+} from "../data/type";
+import { CALLED_FROM_REACTION } from "../reaction";
 import { flip, toSortedBy } from "@gi-tcg/utils";
-import { GiTcgDataError, GiTcgPreviewAbortedError } from "../../error";
-import { DetailLogType } from "../../log";
+import { GiTcgDataError, GiTcgPreviewAbortedError } from "../error";
+import { DetailLogType } from "../log";
 import {
   EventList,
   type InsertPileStrategy,
@@ -90,19 +90,19 @@ import {
   type MutatorConfig,
   type ReadonlyEventList,
   StateMutator,
-} from "../../mutator";
+} from "../mutator";
 import { type Draft, produce } from "immer";
-import { nextRandom } from "../../random";
-import type { CustomEvent } from "../../base/custom_event";
+import { nextRandom } from "../random";
+import type { CustomEvent } from "../base/custom_event";
 import {
   applyReactive,
   getRaw,
   type ApplyReactive,
   type RxEntityState,
 } from "./reactive";
-import { ReactiveStateSymbol } from "./reactive_base";
-import { computeConvertDice, type CreateEntityOptions } from "../../utils";
-import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "../skill";
+import { ReactiveStateSymbol } from "./reactive/base";
+import { computeConvertDice, type CreateEntityOptions } from "../utils";
+import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "./skill";
 import type { LunarReaction } from "@gi-tcg/typings";
 import {
   $,
@@ -112,8 +112,8 @@ import {
   type InferResult,
   type IQuery,
   type QueryFn,
-} from "../../query";
-import type { NotFunctionPrototype } from "../../query/utils";
+} from "../query";
+import type { NotFunctionPrototype } from "../query/utils";
 
 type GeneralQueryTargetArg = IQuery | QueryFn;
 type CharacterTargetArg =
@@ -171,13 +171,15 @@ export interface IncreaseMaxHealthOption {
 
 type Setter<T> = (draft: Draft<T>) => void;
 
+export type CallingAreaType = "onStage" | "offStage" | "disposed";
+
 export type ContextMetaBase = {
   readonly: boolean;
   eventArgType: unknown;
   callerVars: string;
   callerType: ExEntityType;
+  callingArea: CallingAreaType;
   associatedExtension: ExtensionHandle;
-  shortcutReceiver: unknown;
   gtsSnippets: Record<string, unknown>;
 };
 
