@@ -34,13 +34,13 @@ import {
   EntityModel,
   EntityViewModel,
   type DefaultEntityVMMeta,
+  type EntityDescriptionDictionaryGetter,
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
   type ICaller,
   type ThisWithType,
 } from "./entity";
 import type { CharacterHandle, HandleT, StatusHandle } from "../../data/type";
-import type { TalentRequirement } from "../../runtime/card";
 import type {
   DetailedEventArgOf,
   DetailedEventNames,
@@ -58,7 +58,7 @@ import {
   type TargetGetter,
   type TriggeredSkillVMMeta,
 } from "./skill";
-import type { SkillContext } from "../../runtime/context/skill";
+import type { SkillContext } from "../../runtime/skill_context";
 import {
   TechniqueViewModel,
   type DefaultTechniqueVMMeta,
@@ -69,7 +69,6 @@ import type { Computed, IUnorderedQuery } from "../../query/utils";
 import { getSubId } from "./sub_id";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 import type { InitiativeSkillEventArg } from "../../base/skill";
-import type { EntityDescriptionDictionaryGetter } from "../../runtime/entity";
 import type { Writable } from "../../utils";
 
 const SATIATED_ID = 303300 as StatusHandle;
@@ -88,6 +87,8 @@ const OffStageTriggeredSkillViewModel = TriggeredSkillViewModel.extend(
     }),
   }),
 );
+
+export type TalentRequirement = "action" | "actionSkill" | "active" | "none";
 
 export class CardModel extends InitiativeSkillModel implements ICaller {
   reserved = false;

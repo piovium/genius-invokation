@@ -29,7 +29,7 @@ import {
   type EntityTag,
   type VariableConfig,
 } from "../../base/entity";
-import type { AttachmentDefinition, EntityState } from "../../base/state";
+import type { AttachmentDefinition, EntityState, GameState } from "../../base/state";
 import type {
   CustomEventEventArg,
   DamageInfo,
@@ -79,13 +79,22 @@ import {
 import { $, DamageType, DiceType, type CustomEvent } from "../../data";
 import { GlobalUsageVM, PrepareVM, NightsoulVM } from "./entity_auxilary";
 import type { CharacterPassiveSkillEntry } from "../../data/registry";
-import type { EntityDescriptionDictionaryGetter } from "../../runtime/entity";
 import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
 import type { Computed } from "../../query/utils";
 import type { AttachmentTag, ModificationGetter } from "../../base/attachment";
 import { getSubId } from "./sub_id";
-import type { TypedSkillContext } from "../../runtime/context/skill";
+import type { TypedSkillContext } from "../../runtime/skill_context";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
+
+/** A GTS definition's lazy description replacement. */
+export type EntityDescriptionDictionaryGetter<
+  AssociatedExt extends ExtensionHandle,
+> = (
+  state: GameState,
+  self: EntityState & { readonly area: EntityArea },
+  extensionState: AssociatedExt["type"],
+) => string | number;
+
 
 interface DeclaredUsageInfo {
   autoDispose: boolean;

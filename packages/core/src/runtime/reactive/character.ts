@@ -37,7 +37,7 @@ import {
   type PlainEntityState,
 } from "./utils";
 import { isSkillDisabled, type CreateEntityOptions } from "../../utils";
-import type { ContextMetaBase, HealOption, SkillContext } from "./skill";
+import type { ContextMetaBase, HealOption, SkillContext } from "../skill_context";
 import { Aura, DamageType, DiceType } from "@gi-tcg/typings";
 import type {
   AppliableDamageType,

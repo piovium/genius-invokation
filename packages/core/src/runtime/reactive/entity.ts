@@ -13,40 +13,32 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type {
-  AttachmentState,
-  EntityState,
-  EntityVariables,
-} from "../../base/state";
+import type { EntityState, EntityVariables } from "../../base/state";
 import { GiTcgDataError } from "../../error";
 import { type EntityArea, type EntityDefinition } from "../../base/entity";
-import { getEntityById } from "./utils";
-import type { ContextMetaBase, SkillContext } from "./skill";
+import { diceCostSizeOfCard, getEntityById } from "./utils";
+import type { ContextMetaBase, SkillContext } from "../skill_context";
 import {
   LatestStateSymbol,
   RawStateSymbol,
   ReactiveStateBase,
   ReactiveStateSymbol,
 } from "./reactive_base";
-import type { AttachmentDefinition } from "../../base/attachment";
-import type { RxEntityState } from "./reactive";
+import type { AttachmentHandle } from "../../data/type";
 
-class ReadonlyAttachment<
-  Meta extends ContextMetaBase,
-> extends ReactiveStateBase {
-  override get [ReactiveStateSymbol](): "attachment" {
-    return "attachment";
+class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
+  override get [ReactiveStateSymbol](): "entity" {
+    return "entity";
   }
-  declare [RawStateSymbol]: AttachmentState;
-  override get [LatestStateSymbol](): AttachmentState {
+  declare [RawStateSymbol]: EntityState;
+  override get [LatestStateSymbol](): EntityState {
     const state = getEntityById(
       this.skillContext.rawState,
       this.id,
-    ) as AttachmentState;
+    ) as EntityState;
     return state;
   }
 
-  // protected _area: EntityArea | undefined;
   constructor(
     protected readonly skillContext: SkillContext<Meta>,
     public readonly id: number,
@@ -54,10 +46,10 @@ class ReadonlyAttachment<
     super();
   }
 
-  protected get state(): AttachmentState {
+  protected get state(): EntityState {
     return this[LatestStateSymbol];
   }
-  get definition(): AttachmentDefinition {
+  get definition(): EntityDefinition {
     return this.state.definition;
   }
   get area(): EntityArea {
@@ -75,19 +67,29 @@ class ReadonlyAttachment<
     return this.state.variables[name];
   }
 
-  get master(): RxEntityState<Meta, "eventCard" | "support" | "equipment"> {
-    if (this.area.type !== "hands" && this.area.type !== "pile") {
-      throw new GiTcgDataError("master expect a hands/pile area");
+  /** 当前元素骰费用 */
+  diceCost() {
+    return diceCostSizeOfCard(this.skillContext.rawState, this.latest());
+  }
+
+  withAttachment(id: AttachmentHandle) {
+    return this.state.attachments.some(att => att.definition.id === id);
+  }
+  empowered() {
+    // Empowerment: 206
+    return this.withAttachment(206 as AttachmentHandle);
+  }
+
+
+  get master() {
+    if (this.area.type !== "characters") {
+      throw new GiTcgDataError("master expect a character area");
     }
-    return this.skillContext.get<"eventCard" | "support" | "equipment">(
-      this.area.cardId,
-    );
+    return this.skillContext.get<"character">(this.area.characterId);
   }
 }
 
-export class Attachment<
-  Meta extends ContextMetaBase,
-> extends ReadonlyAttachment<Meta> {
+export class Entity<Meta extends ContextMetaBase> extends ReadonlyEntity<Meta> {
   setVariable(prop: string, value: number) {
     this.skillContext.setVariable(prop, value, this.state);
   }
@@ -97,6 +99,9 @@ export class Attachment<
   addVariableWithMax(prop: string, value: number, maxLimit: number) {
     this.skillContext.addVariableWithMax(prop, value, maxLimit, this.state);
   }
+  consumeUsage(count = 1) {
+    this.skillContext.consumeUsage(count, this.state);
+  }
   resetUsagePerRound() {
     this.skillContext.mutate({
       type: "resetVariables",
@@ -104,12 +109,10 @@ export class Attachment<
       state: this.state,
     });
   }
-  dispose(): never {
-    throw new GiTcgDataError(
-      "Attachment can not be disposed directly, for now",
-    );
+  dispose() {
+    this.skillContext.dispose(this.state);
   }
 }
 
-export type TypedAttachment<Meta extends ContextMetaBase> =
-  Meta["readonly"] extends true ? ReadonlyAttachment<Meta> : Attachment<Meta>;
+export type TypedEntity<Meta extends ContextMetaBase> =
+  Meta["readonly"] extends true ? ReadonlyEntity<Meta> : Entity<Meta>;

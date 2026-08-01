@@ -16,7 +16,7 @@
 import { StateSymbol, type StateKind } from "../../base/state";
 import { Character, type TypedCharacter } from "./character";
 import { Entity, type TypedEntity } from "./entity";
-import type { ContextMetaBase, SkillContext } from "./skill";
+import type { ContextMetaBase, SkillContext } from "../skill_context";
 import {
   LatestStateSymbol,
   RawStateSymbol,

@@ -29,7 +29,7 @@ import {
   type DetailedEventNames,
   type InitiativeSkillTargetKind,
   type ReadonlyMetaOf,
-  type SkillContextMeta,
+  type RwContextMeta,
   type StrictInitiativeSkillEventArg,
   type WritableMetaOf,
   type DetailedEventArgOf,
@@ -37,7 +37,7 @@ import {
 import {
   SkillContext,
   type TypedSkillContext,
-} from "../../runtime/context/skill";
+} from "../../runtime/skill_context";
 import {
   DEFAULT_ENTITY_VM_META,
   EntityViewModel,
@@ -92,11 +92,11 @@ export function wrapSkillInfoFromGts(
   };
 }
 
-type GtsSkillOperation<Meta extends SkillContextMeta> = (
+type GtsSkillOperation<Meta extends RwContextMeta> = (
   c: TypedSkillContext<WritableMetaOf<Meta>>,
 ) => void;
 
-type GtsSkillOperationFilter<Meta extends SkillContextMeta> = (
+type GtsSkillOperationFilter<Meta extends RwContextMeta> = (
   c: TypedSkillContext<ReadonlyMetaOf<Meta>>,
 ) => unknown;
 
@@ -331,7 +331,7 @@ const DEFAULT_TRIGGERED_SKILL_VM_META = {
   eventArgType: null as never,
 } as const satisfies TriggeredSkillVMMeta;
 
-type TriggeredSkillVMToContextMeta<Meta extends TriggeredSkillVMMeta> = {
+type TriggeredSkillVMToRwContextMeta<Meta extends TriggeredSkillVMMeta> = {
   callerType: Meta["type"];
   associatedExtension: Meta["associatedExtension"];
   callerVars: Meta["variables"];
@@ -339,9 +339,9 @@ type TriggeredSkillVMToContextMeta<Meta extends TriggeredSkillVMMeta> = {
   gtsSnippets: Meta["snippets"];
 };
 type TriggeredSkillOperationOfVM<Meta extends TriggeredSkillVMMeta> =
-  GtsSkillOperation<TriggeredSkillVMToContextMeta<Meta>>;
+  GtsSkillOperation<TriggeredSkillVMToRwContextMeta<Meta>>;
 type TriggeredSkillFilterOfVM<Meta extends TriggeredSkillVMMeta> =
-  GtsSkillOperationFilter<TriggeredSkillVMToContextMeta<Meta>>;
+  GtsSkillOperationFilter<TriggeredSkillVMToRwContextMeta<Meta>>;
 
 export const TriggeredSkillViewModel = defineViewModel(
   TriggeredSkillModel,
@@ -558,7 +558,7 @@ export type TargetQueryTypeInfo =
       areaType: "supports";
     };
 
-type InitiativeSkillVMToContextMeta<Meta extends InitiativeSkillVMMeta> = {
+type InitiativeSkillVMToRwContextMeta<Meta extends InitiativeSkillVMMeta> = {
   callerType: Meta["type"];
   associatedExtension: Meta["associatedExtension"];
   callerVars: Meta["variables"];
@@ -567,9 +567,9 @@ type InitiativeSkillVMToContextMeta<Meta extends InitiativeSkillVMMeta> = {
 };
 
 type InitiativeSkillOperationOfVM<Meta extends InitiativeSkillVMMeta> =
-  GtsSkillOperation<InitiativeSkillVMToContextMeta<Meta>>;
+  GtsSkillOperation<InitiativeSkillVMToRwContextMeta<Meta>>;
 type InitiativeSkillFilterOfVM<Meta extends InitiativeSkillVMMeta> =
-  GtsSkillOperationFilter<InitiativeSkillVMToContextMeta<Meta>>;
+  GtsSkillOperationFilter<InitiativeSkillVMToRwContextMeta<Meta>>;
 
 type NotCharacterPassiveThis<Meta extends InitiativeSkillVMMeta> =
   Meta extends { isInitiativeSkill: false } ? never : AR.This<Meta>;
@@ -668,7 +668,7 @@ export const InitiativeSkillViewModel = defineViewModel(
         this: NotCharacterPassiveThis<Meta>,
         queryFn: (
           context: TypedSkillContext<
-            ReadonlyMetaOf<InitiativeSkillVMToContextMeta<Meta>>
+            ReadonlyMetaOf<InitiativeSkillVMToRwContextMeta<Meta>>
           >,
         ) => Ret,
       ): AR.DoneRewriteMeta<

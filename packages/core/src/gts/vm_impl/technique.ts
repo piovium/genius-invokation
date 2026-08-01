@@ -36,7 +36,7 @@ import type { AnyState, InitiativeSkillDefinition } from "../../base/state";
 import type {
   SkillContext,
   TypedSkillContext,
-} from "../../runtime/context/skill";
+} from "../../runtime/skill_context";
 import type { SkillHandle } from "../../data";
 import { UsageVM, type UsageVMMeta } from "./variables";
 import type { UsagePerRoundVariableNames } from "../../base/entity";
@@ -204,7 +204,7 @@ export type TechniqueVMMeta = EntityVMMeta & {
   type: "equipment";
 };
 
-type TechniqueVMToContextMeta<Meta extends TechniqueVMMeta> = {
+type TechniqueVMToRwContextMeta<Meta extends TechniqueVMMeta> = {
   callerType: Meta["type"];
   callerVars: Meta["variables"];
   associatedExtension: Meta["associatedExtension"];
@@ -227,7 +227,7 @@ export const TechniqueViewModel = EntityViewModel
         this: AR.This<Meta>,
         queryFn: (
           context: TypedSkillContext<
-            ReadonlyMetaOf<TechniqueVMToContextMeta<Meta>>
+            ReadonlyMetaOf<TechniqueVMToRwContextMeta<Meta>>
           >,
         ) => Ret[number] extends { type: "character" } ? Ret : never,
       ): AR.Done;

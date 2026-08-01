@@ -35,7 +35,7 @@ import {
   type EntityWithArea,
 } from "../utils";
 import type { SExprSchema } from "./expr_schema";
-import { CharacterBase } from "../runtime/context/character";
+import { CharacterBase } from "../runtime/reactive/character";
 import { flip, toSortedBy } from "@gi-tcg/utils";
 import type { EntityArea } from "../base/entity";
 import type { ExEntityState } from "../data/type";
