@@ -477,7 +477,6 @@ export class SkillExecutor {
         const currentSpot = hisSupports.find((et) =>
           et.definition.tags.includes("adventureSpot"),
         );
-        let selectCardInfo: SelectCardInfo | null = null;
         if (currentSpot) {
           this.mutate({
             type: "modifyEntityVar",
@@ -486,12 +485,16 @@ export class SkillExecutor {
             value: currentSpot.variables.exp + 1,
             direction: "increase",
           });
-        } else if (hisSupports.length < this.state.config.maxSupportsCount) {
+          await this.handleEvent([
+            "onAdventure",
+            new EntityEventArg(this.state, currentSpot),
+          ]);
+        } else {
           const spots = this.state.data.entities
             .values()
             .filter((d) => d.tags.includes("adventureSpot"))
             .toArray();
-          selectCardInfo = {
+          const selectCardInfo: SelectCardInfo = {
             type: "requestPlayCard",
             cards: spots,
             targets: [],
@@ -502,17 +505,6 @@ export class SkillExecutor {
             selectCardInfo,
           );
           await this.handleEvent(...events);
-        }
-        const adventureSpot = this.state.players[arg.who].supports.find((et) =>
-          et.definition.tags.includes("adventureSpot"),
-        );
-        if (adventureSpot) {
-          await this.handleEvent([
-            "onAdventure",
-            new EntityEventArg(this.state, adventureSpot),
-          ]);
-        }
-        if (selectCardInfo) {
           await this.handleEvent([
             "onSelectCard",
             new SelectCardEventArg(this.state, arg.who, selectCardInfo),

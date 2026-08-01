@@ -477,6 +477,12 @@ export class CardViewModel extends InitiativeSkillViewModel
       model.innerModel = EntityViewModel.parse(subView, "support", model);
       model.tags.push(...supportTags);
       model.setSupportPlayAction();
+      if (model.innerModel.tags.includes("adventureSpot")) {
+        // 冒险地点入场时触发一次冒险后
+        model.postOperations.push((c) => {
+          c.emitEvent("onAdventure", c.rawState, c.self.latest());
+        });
+      }
     }),
     legend: h.simpleAttribute({
       uniqueKey: "legend",
