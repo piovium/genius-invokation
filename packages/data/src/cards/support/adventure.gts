@@ -163,7 +163,12 @@ define card {
   undiscoverable;
   support place {
     adventureSpot;
+    // 第一次冒险后实为打出效果
+    on staged {
+      :convertDice(DiceType.Omni, 1);
+    };
     on adventure {
+      when :( :getVariable("exp") !== 1 );
       :convertDice(DiceType.Omni, 1);
     };
     on adventure {

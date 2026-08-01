@@ -177,6 +177,7 @@ export namespace DiceCount {
     my?: boolean;
     opp?: boolean;
     count: number;
+    type?: DiceType;
   }
 }
 export function DiceCount(props: DiceCount.Prop): JSX.Element {
@@ -272,7 +273,10 @@ export function setup(state: JSX.Element): TestController {
       }
       continue;
     } else if (comp === DiceCount) {
-      const diceArr = Array.from({ length: prop.count }, () => DiceType.Omni);
+      const diceArr = Array.from(
+        { length: prop.count },
+        () => prop.type ?? DiceType.Omni,
+      );
       if (prop.my) {
         players[0].dice = diceArr;
       }
@@ -516,13 +520,11 @@ export function setup(state: JSX.Element): TestController {
 
   const extensions = data.extensions
     .values()
-    .map(
-      (def): ExtensionState => ({
-        [StateSymbol]: "extension",
-        definition: def,
-        state: def.initialState,
-      }),
-    )
+    .map((def): ExtensionState => ({
+      [StateSymbol]: "extension",
+      definition: def,
+      state: def.initialState,
+    }))
     .toArray();
   const gameState: GameState = {
     [StateSymbol]: "game",

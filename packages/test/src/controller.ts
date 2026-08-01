@@ -34,12 +34,7 @@ import {
   PlayerConfig,
   QueryFn,
 } from "@gi-tcg/core";
-import {
-  CardHandle,
-  CharacterHandle,
-  DiceType,
-  SkillHandle,
-} from "@gi-tcg/core/data";
+import { CardHandle, CharacterHandle, SkillHandle } from "@gi-tcg/core/data";
 import { Ref } from "./setup";
 import { StatesMatcher } from "./matcher";
 
@@ -121,10 +116,6 @@ class IoController {
     return rpc.request.value.action;
   }
 
-  private generateCost(length: number) {
-    return Array.from({ length }, () => DiceType.Omni);
-  }
-
   skill(id: SkillHandle, ...targets: Ref[]): IoResultPromise {
     return IoResultPromise.create(this.controller, () => {
       const actions = this.listAvailableActions();
@@ -139,13 +130,10 @@ class IoController {
         throw new Error(`You cannot use skill ${id} (with given targets)`);
       }
       const action = actions[chosenActionIndex];
-      const usedDice = this.generateCost(
-        action.requiredCost.reduce(
-          (a, { type, count }) => a + (type === DiceType.Energy ? 0 : count),
-          0,
-        ),
-      );
-      const response: ActionResponse = { chosenActionIndex, usedDice };
+      const response: ActionResponse = {
+        chosenActionIndex,
+        usedDice: action.autoSelectedDice,
+      };
       this.awaitingRpc!.resolve(response);
     });
   }
@@ -174,13 +162,10 @@ class IoController {
         throw new Error(`You cannot play card ${cardId} (with given targets)`);
       }
       const action = actions[chosenActionIndex];
-      const usedDice = this.generateCost(
-        action.requiredCost.reduce(
-          (a, { type, count }) => a + (type === DiceType.Energy ? 0 : count),
-          0,
-        ),
-      );
-      const response: ActionResponse = { chosenActionIndex, usedDice };
+      const response: ActionResponse = {
+        chosenActionIndex,
+        usedDice: action.autoSelectedDice,
+      };
       this.awaitingRpc!.resolve(response);
     });
   }
@@ -206,8 +191,11 @@ class IoController {
       if (chosenActionIndex === -1) {
         throw new Error(`You cannot tune card ${cardId}`);
       }
-      const usedDice = this.generateCost(1);
-      const response: ActionResponse = { chosenActionIndex, usedDice };
+      const action = actions[chosenActionIndex];
+      const response: ActionResponse = {
+        chosenActionIndex,
+        usedDice: action.autoSelectedDice,
+      };
       this.awaitingRpc!.resolve(response);
     });
   }
@@ -234,13 +222,10 @@ class IoController {
         throw new Error(`You cannot switch to character ${characterId}`);
       }
       const action = actions[chosenActionIndex];
-      const usedDice = this.generateCost(
-        action.requiredCost.reduce(
-          (a, { type, count }) => a + (type === DiceType.Energy ? 0 : count),
-          0,
-        ),
-      );
-      const response: ActionResponse = { chosenActionIndex, usedDice };
+      const response: ActionResponse = {
+        chosenActionIndex,
+        usedDice: action.autoSelectedDice,
+      };
       this.awaitingRpc!.resolve(response);
     });
   }
@@ -254,7 +239,11 @@ class IoController {
       if (chosenActionIndex === -1) {
         throw new Error("You cannot declare end (wtf?)");
       }
-      const response: ActionResponse = { chosenActionIndex, usedDice: [] };
+      const action = actions[chosenActionIndex];
+      const response: ActionResponse = {
+        chosenActionIndex,
+        usedDice: action.autoSelectedDice,
+      };
       this.awaitingRpc!.resolve(response);
     });
   }
@@ -394,7 +383,7 @@ export class TestController {
   _start() {
     this.game.start().then(
       () => {
-        this.stepping.reject(new Error("Game ended, no more action"));
+        this.stepping.resolve();
       },
       (error) => {
         this.stepping.reject(error);
