@@ -1,4 +1,4 @@
-import { $, DiceType} from "@gi-tcg/core/data";
+import { $, DiceType } from "@gi-tcg/core/data";
 import {
   StrifefulLightning,
   ThunderManifestation,

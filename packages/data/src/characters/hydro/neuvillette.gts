@@ -188,7 +188,7 @@ define card {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   talent Neuvillette {
-    on enter {
+    on staged {
       :useSkill(AsWaterSeeksEquilibrium);
     };
     on useSkill {

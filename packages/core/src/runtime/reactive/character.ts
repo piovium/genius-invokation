@@ -37,7 +37,7 @@ import {
   type PlainEntityState,
 } from "./utils";
 import { isSkillDisabled, type CreateEntityOptions } from "../../utils";
-import type { ContextMetaBase, HealOption, SkillContext } from "./skill";
+import type { ContextMetaBase, HealOption, SkillContext } from "../skill_context";
 import { Aura, DamageType, DiceType } from "@gi-tcg/typings";
 import type {
   AppliableDamageType,
@@ -49,11 +49,11 @@ import {
   RawStateSymbol,
   ReactiveStateBase,
   ReactiveStateSymbol,
-} from "./reactive_base";
+} from "./base";
 import {
   applyReactive,
   type ApplyReactive,
-} from "./reactive";
+} from ".";
 
 export type CharacterPosition = "active" | "next" | "prev" | "standby";
 
@@ -191,6 +191,10 @@ export class ReadonlyCharacter<
     return this.skillContext.rawState;
   }
 
+  override get area(): EntityArea {
+    return this.skillContext._getEntityArea(this._id);
+  }
+
   override get [LatestStateSymbol](): CharacterState {
     const state = getEntityById(
       this.skillContext.rawState,
@@ -204,7 +208,7 @@ export class ReadonlyCharacter<
   }
 
   isMine() {
-    return this.area.who === this.skillContext.callerArea.who;
+    return this.area.who === this.skillContext.self.who;
   }
   private hasEquipmentWithTag(tag: EntityTag) {
     return (

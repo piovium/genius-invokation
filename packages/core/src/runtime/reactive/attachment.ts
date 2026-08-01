@@ -20,16 +20,16 @@ import type {
 } from "../../base/state";
 import { GiTcgDataError } from "../../error";
 import { type EntityArea, type EntityDefinition } from "../../base/entity";
-import { getEntityArea, getEntityById } from "./utils";
-import type { ContextMetaBase, SkillContext } from "./skill";
+import { getEntityById } from "./utils";
+import type { ContextMetaBase, SkillContext } from "../skill_context";
 import {
   LatestStateSymbol,
   RawStateSymbol,
   ReactiveStateBase,
   ReactiveStateSymbol,
-} from "./reactive_base";
+} from "./base";
 import type { AttachmentDefinition } from "../../base/attachment";
-import type { RxEntityState } from "./reactive";
+import type { RxEntityState } from ".";
 
 class ReadonlyAttachment<
   Meta extends ContextMetaBase,
@@ -61,13 +61,13 @@ class ReadonlyAttachment<
     return this.state.definition;
   }
   get area(): EntityArea {
-    return getEntityArea(this.skillContext.rawState, this.id);
+    return this.skillContext._getEntityArea(this.id);
   }
   get who() {
     return this.area.who;
   }
   isMine() {
-    return this.area.who === this.skillContext.callerArea.who;
+    return this.area.who === this.skillContext.self.who;
   }
   getVariable<Name extends string>(
     name: Name,

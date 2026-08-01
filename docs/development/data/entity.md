@@ -87,7 +87,7 @@ define combatStatus {
 define status {
   id 127011 as RadicalVitalityStatus;
   variable vitality, 0;
-  defineSnippet addVitality, :{
+  defineSnippet addVitality {
     :addVariableWithMax("vitality", 1, 3);
   };
   on dealDamage {

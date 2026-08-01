@@ -67,7 +67,7 @@ define card {
   id 321002 as KnightsOfFavoniusLibrary;
   since "v3.3.0";
   support place {
-    on enter {
+    on staged {
       :rerollDice(1);
     };
     on roll {
@@ -365,7 +365,7 @@ define card {
   since "v4.2.0";
   cost DiceType.Aligned, 2;
   support place {
-    on enter {
+    on staged {
       :drawCards(1, { withTag: "talent" });
     };
     on deductOmniDice {
@@ -875,7 +875,7 @@ define card {
   since "v5.8.0";
   cost DiceType.Void, 2;
   support place {
-    on enter {
+    on staged {
       const newCard = :random([
         OrigamiFlyingSquirrel,
         PopupPaperFrog,
@@ -936,7 +936,7 @@ define card {
   since "v5.8.0";
   cost DiceType.Aligned, 2;
   support place {
-    on enter {
+    on staged {
       :createHandCard(ToyGuard);
     };
     on useSkill {
@@ -1037,7 +1037,7 @@ define card {
   since "v6.4.0";
   cost DiceType.Aligned, 4;
   support place {
-    on enter {
+    on staged {
       :drawCards(2);
       :heal(2, $.macros.myMostInjured);
     };
@@ -1122,7 +1122,7 @@ define card {
   id 321041 as NightmareOmen;
   since "v6.7.0";
   support place {
-    defineSnippet :{
+    defineSnippet {
       const [oppTarget] = :maxCostHands(1, { who: "opp" });
       if (oppTarget) {
         :attachCostIncrease(oppTarget);
@@ -1132,7 +1132,7 @@ define card {
         :attachCostIncrease(myPileTop);
       }
     };
-    on enter {
+    on staged {
       :callSnippet();
     };
     on actionPhase {

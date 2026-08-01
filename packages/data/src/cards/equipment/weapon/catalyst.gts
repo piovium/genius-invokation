@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, DamageType, DiceType} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 import { BondOfLife } from "../../../commons.gts";
 
 /**
@@ -123,7 +123,7 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on enter {
+    on staged {
       :drawCards(2);
     };
   };
@@ -298,8 +298,8 @@ define card {
   since "v5.2.0";
   cost DiceType.Aligned, 1;
   weapon catalyst {
-    on enter {
-      :characterStatus(BondOfLife, :self.master);
+    on staged {
+      :characterStatus(BondOfLife, :e.targets[0]);
     };
     on endPhase {
       :characterStatus(BondOfLife, :self.master);
@@ -331,8 +331,8 @@ define card {
       when :( :self.master.health >= 11 );
       :e.increaseDamage(2);
     };
-    on enter {
-      :increaseMaxHealth(1, :self.master);
+    on staged {
+      :increaseMaxHealth(1, :e.targets[0]);
     };
   };
 };

@@ -3,6 +3,7 @@ RUN pnpm runtime set node 26 -g
 WORKDIR /app
 ARG DEFAULT_ASSETS_API_ENDPOINT
 COPY . .
+ENV FROM_SOURCE=1
 RUN pnpm install --frozen-lockfile && pnpm build:no-typing server...
 
 FROM node:26 AS deploy

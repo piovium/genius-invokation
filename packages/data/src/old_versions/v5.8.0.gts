@@ -279,7 +279,7 @@ define card {
   until "v5.8.0";
   cost DiceType.Geo, 4;
   talent Ningguang {
-    on enter {
+    on staged {
       :useSkill(JadeScreen);
     };
   };
@@ -299,7 +299,7 @@ define card {
   until "v5.8.0";
   cost DiceType.Cryo, 4;
   talent Kaeya {
-    on enter {
+    on staged {
       :useSkill(Frostgnaw);
     };
     on useSkill {
@@ -457,7 +457,7 @@ define card {
   until "v5.8.0";
   cost DiceType.Aligned, 2;
   support place {
-    on enter {
+    on staged {
       :generateDice("randomElement", 1);
     };
     on actionPhase {

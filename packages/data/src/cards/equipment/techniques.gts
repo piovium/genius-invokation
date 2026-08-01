@@ -14,12 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { EntityDefinition } from "@gi-tcg/core";
-import {
-  $,
-  DamageType,
-  DiceType,
-  type StatusHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type StatusHandle } from "@gi-tcg/core/data";
 import { AgileSwitch, EfficientSwitch } from "../../commons.gts";
 
 /**
@@ -212,7 +207,7 @@ define card {
     variable deductDiceTriggered, 0 {
       visible false;
     };
-    on enter {
+    on staged {
       :characterStatus(Target, $.opp.active);
     };
     on switchActive {
@@ -270,8 +265,8 @@ define card {
       cost DiceType.Aligned, 1;
       :damage(DamageType.Physical, 2);
     };
-    on enter {
-      :characterStatus(WaveriderShield, :self.master);
+    on staged {
+      :characterStatus(WaveriderShield, :e.targets[0]);
     };
     on switchActive {
       when :( :e.switchInfo.from?.id === :self.master.id );
@@ -353,14 +348,13 @@ define combatStatus {
   id 301306 as Yikes;
   associateExtension TechniquesPlayedCountExtension;
   variable techniquesPlayedCount, 0;
-  defineSnippet checkCount,
-    :{
-      if (:getVariable("techniquesPlayedCount") >= 6) {
-        :characterStatus(SaurianBuddyCheers, $.my.active);
-        :damage(DamageType.Physical, 3);
-        :dispose();
-      }
-    };
+  defineSnippet checkCount {
+    if (:getVariable("techniquesPlayedCount") >= 6) {
+      :characterStatus(SaurianBuddyCheers, $.my.active);
+      :damage(DamageType.Physical, 3);
+      :dispose();
+    }
+  };
   on enter {
     :setVariable(
       "techniquesPlayedCount",
@@ -416,7 +410,7 @@ define card {
   since "v5.7.0";
   cost DiceType.Aligned, 2;
   technique {
-    on enter {
+    on staged {
       :combatStatus(Yikes);
     };
     skill {

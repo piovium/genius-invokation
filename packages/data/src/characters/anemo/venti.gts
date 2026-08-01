@@ -159,7 +159,7 @@ define card {
   since "v3.7.0";
   cost DiceType.Anemo, 3;
   talent Venti {
-    on enter {
+    on staged {
       :useSkill(SkywardSonnet);
     };
   };

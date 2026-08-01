@@ -183,7 +183,7 @@ define card {
   since "v6.7.0";
   cost DiceType.Anemo, 3;
   talent BlackSerpentKnightWindcutter {
-    on enter {
+    on staged {
       :useSkill(RisingSlash);
     };
     on actionPhase {

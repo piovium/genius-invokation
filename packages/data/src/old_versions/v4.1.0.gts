@@ -97,7 +97,7 @@ define card {
   until "v4.1.0";
   cost DiceType.Hydro, 4;
   talent Xingqiu {
-    on enter {
+    on staged {
       :useSkill(FatalRainscreen);
     };
   };
@@ -137,7 +137,7 @@ define card {
   until "v4.1.0";
   cost DiceType.Hydro, 4;
   talent MirrorMaiden {
-    on enter {
+    on staged {
       :useSkill(InfluxBlast);
     };
   };
@@ -157,7 +157,7 @@ define card {
   until "v4.1.0";
   cost DiceType.Hydro, 4;
   talent Barbara {
-    on enter {
+    on staged {
       :useSkill(LetTheShowBegin);
     };
   };
@@ -194,7 +194,7 @@ define card {
   until "v4.1.0";
   cost DiceType.Cryo, 4;
   talent Chongyun {
-    on enter {
+    on staged {
       :useSkill(ChonghuasLayeredFrost);
     };
   };
@@ -252,7 +252,7 @@ define card {
   until "v4.1.0";
   cost DiceType.Pyro, 4;
   talent Xiangling {
-    on enter {
+    on staged {
       :useSkill(GuobaAttack);
     };
   };
@@ -287,7 +287,7 @@ define card {
   until "v4.1.0";
   cost DiceType.Pyro, 2;
   talent Yoimiya {
-    on enter {
+    on staged {
       :useSkill(NiwabiFiredance);
     };
     on useSkill {
@@ -314,7 +314,7 @@ define card {
   cost DiceType.Hydro, 4;
   cost DiceType.Energy, 2;
   talent Candace {
-    on enter {
+    on staged {
       :useSkill(SacredRiteWagtailsTide);
     };
   };
@@ -334,7 +334,7 @@ define card {
   until "v4.1.0";
   cost DiceType.Electro, 4;
   talent Razor {
-    on enter {
+    on staged {
       :useSkill(ClawAndThunder);
     };
     on useSkill {
@@ -364,7 +364,7 @@ define card {
   until "v4.1.0";
   cost DiceType.Electro, 3;
   talent Beidou {
-    on enter {
+    on staged {
       :useSkill(Tidecaller);
     };
     on useSkill {
@@ -403,7 +403,7 @@ define card {
   cost DiceType.Electro, 4;
   cost DiceType.Energy, 3;
   talent KujouSara {
-    on enter {
+    on staged {
       :useSkill(SubjugationKoukouSendou);
     };
   };
@@ -423,7 +423,7 @@ define card {
   until "v4.1.0";
   cost DiceType.Electro, 3;
   talent Cyno {
-    on enter {
+    on staged {
       :useSkill(SecretRiteChasmicSoulfarer);
     };
     on increaseSkillDamage {
@@ -488,7 +488,7 @@ define card {
   until "v4.1.0";
   cost DiceType.Pyro, 3;
   talent Amber {
-    on enter {
+    on staged {
       :useSkill(ExplosivePuppet);
     };
     on useSkill {
@@ -573,7 +573,7 @@ define card {
   cost DiceType.Anemo, 4;
   cost DiceType.Energy, 3;
   talent Jean {
-    on enter {
+    on staged {
       :useSkill(DandelionBreeze);
     };
   };
@@ -612,7 +612,7 @@ define card {
   cost DiceType.Void, 2;
   talent Yanfei {
     variable triggerSeal, 0;
-    on enter {
+    on staged {
       :useSkill(SealOfApproval);
     };
     on increaseSkillDamage {

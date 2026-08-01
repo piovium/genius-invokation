@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SkillHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/data";
 
 /**
  * @id 112022
@@ -149,7 +144,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Hydro, 3;
   talent Xingqiu {
-    on enter {
+    on staged {
       :useSkill(FatalRainscreen);
     };
   };

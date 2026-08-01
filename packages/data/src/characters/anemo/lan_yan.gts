@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  Aura,
-  DamageType,
-  DiceType,
-} from "@gi-tcg/core/data";
+import { $, Aura, DamageType, DiceType } from "@gi-tcg/core/data";
 import { EfficientSwitch } from "../../commons.gts";
 
 /**
@@ -120,7 +115,7 @@ define card {
   since "v5.8.0";
   cost DiceType.Anemo, 3;
   talent LanYan {
-    on enter {
+    on staged {
       :useSkill(SwallowwispPinionDance);
     };
     on useSkill {

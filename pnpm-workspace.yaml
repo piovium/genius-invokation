@@ -15,7 +15,7 @@ catalog:
   "@unocss/reset": ^66.3.3
   solid-js: ^1.9.12
   execa: ^9.6.1
-  "@gi-tcg/gts-transpiler": &GTS_VERSION "^0.7.4"
+  "@gi-tcg/gts-transpiler": &GTS_VERSION "^0.7.5"
   "@gi-tcg/gts-runtime": *GTS_VERSION
   "@gi-tcg/gtsc": *GTS_VERSION
   "@gi-tcg/unplugin-gts": *GTS_VERSION

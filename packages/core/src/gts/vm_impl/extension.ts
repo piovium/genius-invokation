@@ -26,7 +26,7 @@ import type {
   SkillDescription,
 } from "../../base/skill";
 import type { Draft } from "immer";
-import { SkillContext } from "../../runtime/context/skill";
+import { SkillContext } from "../../runtime/skill_context";
 import { wrapSkillInfoWithExt } from "../../runtime/skill";
 import { DEFAULT_VERSION_INFO } from "../../base/version";
 import { getSubId } from "./sub_id";

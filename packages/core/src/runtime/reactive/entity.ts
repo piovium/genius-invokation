@@ -13,22 +13,27 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { EntityState, EntityVariables } from "../../base/state";
+import type {
+  EntityState,
+  EntityType,
+  EntityVariables,
+} from "../../base/state";
 import { GiTcgDataError } from "../../error";
 import { type EntityArea, type EntityDefinition } from "../../base/entity";
-import { diceCostSizeOfCard, getEntityArea, getEntityById } from "./utils";
-import type { ContextMetaBase, SkillContext } from "./skill";
+import { diceCostSizeOfCard, getEntityById } from "./utils";
+import type { ContextMetaBase, SkillContext } from "../skill_context";
 import {
   LatestStateSymbol,
   RawStateSymbol,
   ReactiveStateBase,
   ReactiveStateSymbol,
-} from "./reactive_base";
+} from "./base";
 import type { AttachmentHandle } from "../../data/type";
+import type { ExtraInfo } from "./base";
 
 class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
-  override get [ReactiveStateSymbol](): "entity" {
-    return "entity";
+  override get [ReactiveStateSymbol](): EntityType {
+    return this.definition.type;
   }
   declare [RawStateSymbol]: EntityState;
   override get [LatestStateSymbol](): EntityState {
@@ -39,8 +44,6 @@ class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
     return state;
   }
 
-  // 行动牌 area 可能会变动，不缓存
-  // protected _area: EntityArea | undefined;
   constructor(
     protected readonly skillContext: SkillContext<Meta>,
     public readonly id: number,
@@ -55,13 +58,13 @@ class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
     return this.state.definition;
   }
   get area(): EntityArea {
-    return (getEntityArea(this.skillContext.rawState, this.id));
+    return this.skillContext._getEntityArea(this.id);
   }
   get who() {
     return this.area.who;
   }
   isMine() {
-    return this.area.who === this.skillContext.callerArea.who;
+    return this.area.who === this.skillContext.self.who;
   }
   getVariable<Name extends string>(
     name: Name,
@@ -75,13 +78,12 @@ class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
   }
 
   withAttachment(id: AttachmentHandle) {
-    return this.state.attachments.some(att => att.definition.id === id);
+    return this.state.attachments.some((att) => att.definition.id === id);
   }
   empowered() {
     // Empowerment: 206
     return this.withAttachment(206 as AttachmentHandle);
   }
-
 
   get master() {
     if (this.area.type !== "characters") {
@@ -116,5 +118,8 @@ export class Entity<Meta extends ContextMetaBase> extends ReadonlyEntity<Meta> {
   }
 }
 
-export type TypedEntity<Meta extends ContextMetaBase> =
-  Meta["readonly"] extends true ? ReadonlyEntity<Meta> : Entity<Meta>;
+export type TypedEntity<
+  Meta extends ContextMetaBase,
+  Ty extends EntityType,
+  Extra extends ExtraInfo<Ty>,
+> = Meta["readonly"] extends true ? ReadonlyEntity<Meta> : Entity<Meta>;

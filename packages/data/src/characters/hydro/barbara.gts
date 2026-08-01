@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SummonHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type SummonHandle } from "@gi-tcg/core/data";
 
 /**
  * @id 112011
@@ -108,7 +103,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Hydro, 3;
   talent Barbara {
-    on enter {
+    on staged {
       :useSkill(LetTheShowBegin);
     };
     on deductOmniDiceSwitch {

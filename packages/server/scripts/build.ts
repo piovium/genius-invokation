@@ -17,6 +17,7 @@ import { glob, readFile } from "node:fs/promises";
 import path from "node:path";
 import { build, type Plugin } from "rolldown";
 import { replacePlugin } from "rolldown/plugins";
+import gts from "@gi-tcg/unplugin-gts/rolldown";
 
 const frontendDir = path.join(import.meta.dirname, "../../web-client/dist");
 
@@ -39,7 +40,9 @@ const inlineFrontendPlugin: Plugin = {
     })) {
       if (dirent.isFile()) {
         const filepath = path.resolve(dirent.parentPath, dirent.name);
-        const relativePath = path.relative(frontendDir, filepath).replaceAll(path.sep, "/");
+        const relativePath = path
+          .relative(frontendDir, filepath)
+          .replaceAll(path.sep, "/");
         contents[relativePath] = (await readFile(filepath)).toString("base64");
       }
     }
@@ -71,9 +74,12 @@ await build({
     replacePlugin({
       "process.env.NODE_ENV": '"production"',
     }),
+    !!process.env.FROM_SOURCE && gts(),
   ],
   platform: "node",
   resolve: {
-    conditionNames: ["es2015", "module"],
+    conditionNames: process.env.FROM_SOURCE
+      ? ["development", "es2015", "module"]
+      : ["production", "es2015", "module"],
   },
 });

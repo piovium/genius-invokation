@@ -187,8 +187,8 @@ define card {
   since "v5.4.0";
   cost DiceType.Pyro, 1;
   talent Arlecchino, action {
-    on enter {
-      :characterStatus(BondOfLife, :self.master, {
+    on staged {
+      :characterStatus(BondOfLife, :e.targets[0], {
         overrideVariables: { usage: 3 },
       });
       // 消耗生命之契增伤的部分在被动技能 13147 里

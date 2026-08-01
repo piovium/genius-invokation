@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DiceType,
-  flip,
-} from "@gi-tcg/core/data";
+import { $, DiceType, flip } from "@gi-tcg/core/data";
 import { DisperseTheCalamity, SanctifyTheDefiled } from "./other.gts";
 import { IneffectiveWhenPlayed } from "../../commons.gts";
 
@@ -368,7 +364,7 @@ define card {
   support {
     variable spirit, 0;
     associateExtension FlamesOfWarExtension;
-    on enter {
+    on staged {
       :setExtensionState((st) => {
         st.spirit[:self.who] = :getVariable("spirit");
       });

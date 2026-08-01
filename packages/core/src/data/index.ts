@@ -66,7 +66,7 @@ export type {
   PlainCharacterState as CharacterState,
   PlainEntityState as EntityState,
   PlainAttachmentState as AttachmentState,
-} from "../runtime/context/utils";
+} from "../runtime/reactive/utils";
 export type { CharacterDefinition, EntityDefinition } from "../base/state";
 export {
   type CustomEvent,

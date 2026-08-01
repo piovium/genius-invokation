@@ -13,42 +13,53 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { StateSymbol, type StateKind } from "../../base/state";
+import { StateSymbol, type EntityType, type StateKind } from "../../base/state";
 import { Character, type TypedCharacter } from "./character";
 import { Entity, type TypedEntity } from "./entity";
-import type { ContextMetaBase, SkillContext } from "./skill";
+import type { ContextMetaBase, SkillContext } from "../skill_context";
 import {
   LatestStateSymbol,
   RawStateSymbol,
   ReactiveStateBase,
   ReactiveStateSymbol,
-} from "./reactive_base";
+  type ExtraInfo,
+} from "./base";
 import type { ExEntityState, ExEntityType } from "../../data/type";
 import { Attachment, type TypedAttachment } from "./attachment";
 
-type ReactiveClassMap<Meta extends ContextMetaBase> = {
-  character: TypedCharacter<Meta>;
-  entity: TypedEntity<Meta>;
-  attachment: TypedAttachment<Meta>;
-};
 type ReactiveClassCtor = new (
   skillContext: SkillContext<any>,
   id: number,
 ) => ReactiveStateBase;
 
-export const NoReactiveSymbol = Symbol("GiTcgCoreStateNoReactive");
+export const NoReactiveSymbol: unique symbol = Symbol(
+  "GiTcgCoreStateNoReactive",
+);
 export type NoReactiveSymbol = typeof NoReactiveSymbol;
 
-type ReactiveState<Meta extends ContextMetaBase, State> = State extends {
-  readonly [StateSymbol]: infer S extends keyof ReactiveClassMap<Meta>;
+type ReactiveState<
+  Meta extends ContextMetaBase,
+  State,
+  Extra extends ExtraInfo<any> = ExtraInfo<any>,
+> = State extends {
+  readonly [StateSymbol]: unknown;
+  readonly definition: { readonly type: infer Ty extends ExEntityType };
 }
-  ? Omit<State, StateSymbol> & ReactiveClassMap<Meta>[S]
+  ? Omit<State, StateSymbol> &
+      (Ty extends "character"
+        ? TypedCharacter<Meta>
+        : Ty extends "attachment"
+          ? TypedAttachment<Meta>
+          : Ty extends EntityType
+            ? TypedEntity<Meta, Ty, Extra>
+            : never)
   : never;
 
 export type RxEntityState<
   Meta extends ContextMetaBase,
-  T extends ExEntityType,
-> = ReactiveState<Meta, ExEntityState<T>>;
+  Ty extends ExEntityType,
+  Extra extends ExtraInfo<Ty> = ExtraInfo<Ty>,
+> = ReactiveState<Meta, ExEntityState<Ty>, Extra>;
 
 type Primitive = string | number | boolean | bigint | symbol | null | undefined;
 type AtomicObject =
@@ -67,7 +78,8 @@ export type ApplyReactive<
 > = A extends AtomicObject
   ? A
   : A extends {
-        readonly [StateSymbol]: keyof ReactiveClassMap<Meta>;
+        readonly [StateSymbol]: unknown;
+        readonly definition: { readonly type: ExEntityType };
       }
     ? ReactiveState<Meta, A>
     : A extends ReadonlyMap<infer K, infer V>

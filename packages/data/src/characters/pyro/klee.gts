@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SkillHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/data";
 
 /**
  * @id 113062
@@ -153,7 +148,7 @@ define card {
   since "v3.4.0";
   cost DiceType.Pyro, 3;
   talent Klee {
-    on enter {
+    on staged {
       :useSkill(JumpyDumpty);
     };
   };

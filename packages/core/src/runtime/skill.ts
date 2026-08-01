@@ -42,14 +42,13 @@ import type {
   GameState,
 } from "../base/state";
 import {
+  type CallingAreaType,
   type ContextMetaBase,
   SkillContext,
   type TypedSkillContext,
-} from "./context/skill";
+} from "./skill_context";
 import type { ExEntityType, ExtensionHandle, SkillHandle } from "../data/type";
-import {
-  type EntityArea,
-} from "../base/entity";
+import { type EntityArea } from "../base/entity";
 import {
   getActiveCharacterIndex,
   getEntityArea,
@@ -58,26 +57,21 @@ import {
   normalizeCost,
 } from "../utils";
 import { GiTcgDataError } from "../error";
-import type { ApplyReactive } from "./context/reactive";
+import type { ApplyReactive } from "./reactive";
 
 export type InitiativeSkillTargetKind = readonly (
-  | "character"
-  | "summon"
-  | "support"
+  "character" | "summon" | "support"
 )[];
 
-export type SkillContextMeta = Omit<
-  ContextMetaBase,
-  "readonly" | "shortcutReceiver"
->;
-export type ReadonlyMetaOf<BM extends SkillContextMeta> = {
-  [K in keyof SkillContextMeta]: BM[K];
-} & { readonly: true; shortcutReceiver: unknown };
-export type WritableMetaOf<BM extends SkillContextMeta> = {
-  [K in keyof SkillContextMeta]: BM[K];
-} & { readonly: false; shortcutReceiver: unknown };
+export type RwContextMeta = Omit<ContextMetaBase, "readonly">;
+export type ReadonlyMetaOf<BM extends RwContextMeta> = {
+  [K in keyof RwContextMeta]: BM[K];
+} & { readonly: true };
+export type WritableMetaOf<BM extends RwContextMeta> = {
+  [K in keyof RwContextMeta]: BM[K];
+} & { readonly: false };
 
-export type SkillOperation<Meta extends SkillContextMeta> = (
+export type SkillOperation<Meta extends RwContextMeta> = (
   c: TypedSkillContext<WritableMetaOf<Meta>>,
   e: ApplyReactive<
     WritableMetaOf<Meta>,
@@ -85,7 +79,7 @@ export type SkillOperation<Meta extends SkillContextMeta> = (
   >,
 ) => void;
 
-export type SkillOperationFilter<Meta extends SkillContextMeta> = (
+export type SkillOperationFilter<Meta extends RwContextMeta> = (
   c: TypedSkillContext<ReadonlyMetaOf<Meta>>,
   e: ApplyReactive<
     ReadonlyMetaOf<Meta>,
@@ -93,7 +87,7 @@ export type SkillOperationFilter<Meta extends SkillContextMeta> = (
   >,
 ) => unknown;
 
-type SkillProjection<Projected, Meta extends SkillContextMeta> = (
+type SkillProjection<Projected, Meta extends RwContextMeta> = (
   c: TypedSkillContext<ReadonlyMetaOf<Meta>>,
   e: ApplyReactive<
     ReadonlyMetaOf<Meta>,
@@ -121,10 +115,12 @@ export interface StrictInitiativeSkillEventArg<
 type InitiativeSkillMeta<
   CallerType extends ExEntityType,
   KindTs extends InitiativeSkillTargetKind,
+  Area extends CallingAreaType,
   AssociatedExt extends ExtensionHandle,
 > = {
   callerType: CallerType;
   callerVars: never;
+  callingArea: Area;
   eventArgType: StrictInitiativeSkillEventArg<KindTs>;
   associatedExtension: AssociatedExt;
   gtsSnippets: {};
@@ -146,9 +142,10 @@ export type CreateSkillMeta<
 export type StrictInitiativeSkillFilter<
   CallerType extends ExEntityType,
   KindTs extends InitiativeSkillTargetKind,
+  Area extends CallingAreaType,
   AssociatedExt extends ExtensionHandle,
 > = SkillOperationFilter<
-  InitiativeSkillMeta<CallerType, KindTs, AssociatedExt>
+  InitiativeSkillMeta<CallerType, KindTs, Area, AssociatedExt>
 >;
 
 /** @deprecated use string literal instead */
@@ -590,11 +587,8 @@ export const detailedEventDictionary = {
   selectCard: defineDescriptor("onSelectCard", (e, r) => {
     return checkRelative(e.onTimeState, { who: e.who }, r);
   }),
-  adventure: defineDescriptor("onEnter", (e, r) => {
-    return (
-      checkRelative(e.onTimeState, { who: e.who }, r) &&
-      (e.entity as EntityState).definition.tags.includes("adventureSpot")
-    );
+  adventure: defineDescriptor("onAdventure", (e, r) => {
+    return checkRelative(e.onTimeState, { who: e.who }, r);
   }),
   customEvent: defineDescriptor("onCustomEvent", (e, r) => {
     return checkRelative(e.onTimeState, e.entity.id, r);
@@ -636,7 +630,7 @@ export function wrapSkillInfoWithExt(
   return {
     ...skillInfo,
     associatedExtensionId,
-    gtsSnippets: new Map()
+    gtsSnippets: new Map(),
   };
 }
 
@@ -653,7 +647,7 @@ function generateTargetList(
     return [[]];
   }
   const [first, ...rest] = getTarget;
-  const ctx = new SkillContext<ReadonlyMetaOf<SkillContextMeta>>(
+  const ctx = new SkillContext<ReadonlyMetaOf<RwContextMeta>>(
     state,
     wrapSkillInfoWithExt(skillInfo, associatedExtensionId),
     {

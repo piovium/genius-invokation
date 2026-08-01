@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, DiceType} from "@gi-tcg/core/data";
+import { $, DiceType } from "@gi-tcg/core/data";
 
 /**
  * @id 311201
@@ -174,8 +174,8 @@ define card {
     on increaseSkillDamage {
       :e.increaseDamage(1);
     };
-    on enter {
-      :characterStatus(KingsSquireStatus, :self.master);
+    on staged {
+      :characterStatus(KingsSquireStatus, :e.targets[0]);
     };
   };
 };
@@ -261,8 +261,8 @@ define card {
       when :( :self.master.health >= 11 );
       :e.increaseDamage(2);
     };
-    on enter {
-      :increaseMaxHealth(1, :self.master);
+    on staged {
+      :increaseMaxHealth(1, :e.targets[0]);
     };
   };
 };

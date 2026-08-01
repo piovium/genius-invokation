@@ -220,7 +220,7 @@ define card {
   since "v6.4.0";
   cost DiceType.Cryo, 3;
   talent Mika {
-    on enter {
+    on staged {
       :useSkill(StarfrostSwirl);
     };
   };

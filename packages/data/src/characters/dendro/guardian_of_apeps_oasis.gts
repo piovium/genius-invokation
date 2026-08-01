@@ -284,7 +284,7 @@ define card {
   since "v4.7.0";
   cost DiceType.Dendro, 2;
   talent GuardianOfApepsOasis, none {
-    on enter {
+    on staged {
       :createPileCards(AwakenMyKindred, 4, "random");
     };
     on increaseDamage {

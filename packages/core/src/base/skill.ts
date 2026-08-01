@@ -64,13 +64,13 @@ import {
 } from "../utils";
 import type { IDetailLogger } from "../log";
 import type { CustomEvent } from "./custom_event";
-import { getRaw, NoReactiveSymbol } from "../runtime/context/reactive";
-import type { PlainCharacterState } from "../runtime/context/utils";
+import { getRaw, NoReactiveSymbol } from "../runtime/reactive";
+import type { PlainCharacterState } from "../runtime/reactive/utils";
 import type { AppliableDamageType } from "../data/type";
 import type { MoveEntityM, RemoveEntityM } from "./mutation";
 import type { LunarReaction } from "@gi-tcg/typings";
 import type { DamageOption, ReadonlyEventList } from "../mutator";
-import type { SkillContext } from "../runtime/context/skill";
+import type { SkillContext } from "../runtime/skill_context";
 
 export interface SkillDefinitionBase<Arg> {
   readonly type: "skill";
@@ -1383,6 +1383,7 @@ export const EVENT_MAP = {
   onChangeVariable: VariableEventArg,
 
   onSelectCard: SelectCardEventArg,
+  onAdventure: EntityEventArg,
 
   modifyDamage0: ModifyDamage0EventArg, // 类型
   modifyDamage1: ModifyDamage1EventArg, // 加

@@ -13,11 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  DamageType,
-  DiceType,
-  $,
-} from "@gi-tcg/core/data";
+import { DamageType, DiceType, $ } from "@gi-tcg/core/data";
 
 /**
  * @id 122061
@@ -307,8 +303,8 @@ define card {
   since "v6.1.0";
   cost DiceType.Hydro, 2;
   talent HydroTulpa, none {
-    on enter {
-      :characterStatus(ElementalLifeformHydro, :self.master);
+    on staged {
+      :characterStatus(ElementalLifeformHydro, :e.targets[0]);
     };
     on declareEnd {
       when :(

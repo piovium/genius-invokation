@@ -176,7 +176,7 @@ define card {
   since "v4.3.0";
   cost DiceType.Pyro, 3;
   talent EremiteScorchingLoremaster {
-    on enter {
+    on staged {
       :useSkill(BlazingStrike);
     };
     on defeated {

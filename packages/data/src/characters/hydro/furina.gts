@@ -316,8 +316,8 @@ define card {
   since "v4.7.0";
   cost DiceType.Hydro, 3;
   talent [FurinaPneuma, FurinaOusia] {
-    on enter {
-      if (:self.master.definition.id === FurinaPneuma) {
+    on staged {
+      if (:e.targets[0].definition.id === FurinaPneuma) {
         :useSkill(SalonSolitairePneuma);
       } else {
         :useSkill(SalonSolitaireOusia);

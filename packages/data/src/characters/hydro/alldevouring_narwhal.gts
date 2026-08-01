@@ -293,7 +293,7 @@ define card {
   since "v4.7.0";
   cost DiceType.Hydro, 4;
   talent AlldevouringNarwhal {
-    on enter {
+    on staged {
       :useSkill(StarfallShower);
     };
     on StarfallShowerDisposeCard {

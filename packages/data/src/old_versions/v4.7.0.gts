@@ -384,7 +384,7 @@ define card {
   until "v4.7.0";
   cost DiceType.Geo, 3;
   talent Albedo {
-    on enter {
+    on staged {
       :useSkill(AbiogenesisSolarIsotoma);
     };
     on increaseSkillDamage {
@@ -409,7 +409,7 @@ define card {
   until "v4.7.0";
   cost DiceType.Geo, 5;
   talent Zhongli {
-    on enter {
+    on staged {
       :useSkill(DominusLapidisStrikingStone);
     };
     on increaseDamage {
@@ -512,7 +512,7 @@ define card {
   until "v4.7.0";
   cost DiceType.Electro, 3;
   talent Cyno {
-    on enter {
+    on staged {
       :useSkill(SecretRiteChasmicSoulfarer);
     };
     on increaseSkillDamage {
