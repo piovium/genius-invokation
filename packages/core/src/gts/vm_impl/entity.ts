@@ -29,7 +29,11 @@ import {
   type EntityTag,
   type VariableConfig,
 } from "../../base/entity";
-import type { AttachmentDefinition, EntityState } from "../../base/state";
+import type {
+  AttachmentDefinition,
+  EntityState,
+  GameState,
+} from "../../base/state";
 import type {
   CustomEventEventArg,
   DamageInfo,
@@ -71,6 +75,7 @@ import {
   type TypeHint,
 } from "../../data/utils";
 import {
+  SkillWrappingData,
   TriggeredSkillModel,
   TriggeredSkillViewModel,
   type TriggeredSkillVMMeta,
@@ -78,13 +83,24 @@ import {
 import { $, DamageType, DiceType, type CustomEvent } from "../../data";
 import { GlobalUsageVM, PrepareVM, NightsoulVM } from "./entity_auxilary";
 import type { CharacterPassiveSkillEntry } from "../../data/registry";
-import type { EntityDescriptionDictionaryGetter } from "../../runtime/entity";
 import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
 import type { Computed } from "../../query/utils";
 import type { AttachmentTag, ModificationGetter } from "../../base/attachment";
 import { getSubId } from "./sub_id";
-import type { TypedSkillContext } from "../../runtime/context/skill";
+import type {
+  CallingAreaType,
+  TypedSkillContext,
+} from "../../runtime/skill_context";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
+
+/** A GTS definition's lazy description replacement. */
+export type EntityDescriptionDictionaryGetter<
+  AssociatedExt extends ExtensionHandle,
+> = (
+  state: GameState,
+  self: EntityState & { readonly area: EntityArea },
+  extensionState: AssociatedExt["type"],
+) => string | number;
 
 interface DeclaredUsageInfo {
   autoDispose: boolean;
@@ -106,12 +122,12 @@ export interface GtsUsageOrUsagePerRoundOptions extends GtsUsageOptions {
 
 export interface IParentModel {
   id: number;
-  associatedExtensionId: number | null;
+  wrapData: SkillWrappingData;
 }
 
 export interface IDescriptionReplaceable {
   descriptionDictionary: Writable<DescriptionDictionary>;
-  associatedExtensionId: number | null;
+  wrapData: SkillWrappingData;
 }
 
 export function addDescriptionReplacement(
@@ -122,7 +138,7 @@ export function addDescriptionReplacement(
   if (Reflect.has(model.descriptionDictionary, key)) {
     throw new GiTcgDataError(`Description key ${key} already exists`);
   }
-  const extId = model.associatedExtensionId;
+  const extId = model.wrapData.associatedExtensionId;
   const entry: DescriptionDictionaryEntry = function (st, id) {
     const ext = st.extensions.find((ext) => ext.definition.id === extId);
     const self = getEntityById(st, id) as EntityState;
@@ -148,16 +164,23 @@ export class EntityModel implements ICaller {
   disposeWhenUsageIsZero = false;
   disposeOnMasterDefeated = false;
   visibleVarName: string | null = null;
-  associatedExtensionId: number | null = null;
+
   hintText: string | null = null;
   descriptionDictionary: Writable<DescriptionDictionary> = {};
-  snippets = new Map<string, SnippetOperation<any, any>>();
+
   stagedOperations: StagedOperation<any>[] = [];
+
+  #wrapData: SkillWrappingData;
+  get wrapData() {
+    return this.#wrapData;
+  }
 
   constructor(type: ExEntityType, parent?: IParentModel) {
     if (parent) {
       this.id = parent.id;
-      this.associatedExtensionId = parent.associatedExtensionId;
+      this.#wrapData = parent.wrapData;
+    } else {
+      this.#wrapData = new SkillWrappingData();
     }
     this.type = type;
   }
@@ -364,7 +387,6 @@ export class EntityModel implements ICaller {
 
 export interface ICaller {
   type: ExEntityType;
-  associatedExtensionId: number | null;
   /**
    * Add a usage-related varConfig to the caller
    * @param count initial value for the variable
@@ -372,10 +394,7 @@ export interface ICaller {
    * @returns the name of the variable that was added
    */
   setUsage(count: number, option: GtsUsageOptions): string;
-  /**
-   * Get registered snippets of the caller.
-   */
-  snippets: ReadonlyMap<string, SnippetOperation<any, any>>;
+  wrapData: SkillWrappingData;
 }
 
 export const createVariableConfig = (
@@ -406,6 +425,7 @@ export interface EntityVMMeta {
   readonly variables: string;
   readonly associatedExtension: ExtensionHandle;
   readonly snippets: Record<string, unknown>;
+  readonly stagedEventArgType: unknown;
 }
 
 // This variable is type-only but may fell into TDZ after bundling.
@@ -413,6 +433,7 @@ export interface EntityVMMeta {
 export var DEFAULT_ENTITY_VM_META = {
   type: "" as ExEntityType,
   variables: null as never,
+  stagedEventArgType: null as never,
   associatedExtension: null as never,
   snippets: {},
 } as const satisfies EntityVMMeta;
@@ -428,10 +449,15 @@ export type DefaultEntityVMMeta<
   EntityVMMeta
 >;
 
-type SnippetOperation<Meta extends EntityVMMeta, ArgT> = (
+type SnippetOperation<
+  Meta extends EntityVMMeta,
+  ArgT,
+  Area extends CallingAreaType = CallingAreaType,
+> = (
   c: TypedSkillContext<
     WritableMetaOf<{
       callerType: Meta["type"];
+      callingArea: Area;
       associatedExtension: Meta["associatedExtension"];
       callerVars: Meta["variables"];
       eventArgType: ArgT;
@@ -442,7 +468,8 @@ type SnippetOperation<Meta extends EntityVMMeta, ArgT> = (
 
 type StagedOperation<Meta extends EntityVMMeta> = SnippetOperation<
   Meta,
-  InitiativeSkillEventArg
+  Meta["stagedEventArgType"],
+  "onStage" | "disposed"
 >;
 
 export type ThisWithType<
@@ -470,6 +497,35 @@ class SnippetOperationVM extends defineActionViewModel<
   ) => AR.Done
 >() {}
 
+interface TriggeredSkillVMMetaFromEntityLike<
+  Meta extends EntityVMMeta,
+  EventName extends DetailedEventNames | CustomEvent,
+  DefaultCallingArea extends CallingAreaType,
+> {
+  readonly type: Meta["type"];
+  readonly variables: Meta["variables"];
+  readonly associatedExtension: Meta["associatedExtension"];
+  readonly snippets: Meta["snippets"];
+  readonly callingArea: EventName extends "selfDispose" | "selfDiscard"
+    ? "disposed"
+    : DefaultCallingArea;
+  readonly eventArgType: [EventName] extends [DetailedEventNames]
+    ? DetailedEventArgOf<EventName>
+    : EventName extends CustomEvent<infer T>
+      ? CustomEventEventArg<T>
+      : never;
+  readonly stagedEventArgType: unknown;
+}
+
+export interface TriggeredSkillVMMetaFromEntity<
+  Meta extends EntityVMMeta,
+  EventName extends DetailedEventNames | CustomEvent,
+> extends TriggeredSkillVMMetaFromEntityLike<Meta, EventName, "onStage"> {}
+export interface TriggeredSkillVMMetaFromCard<
+  Meta extends EntityVMMeta,
+  EventName extends DetailedEventNames | CustomEvent,
+> extends TriggeredSkillVMMetaFromEntityLike<Meta, EventName, "offStage"> {}
+
 export class EntityViewModel extends defineViewModel(
   EntityModel,
   (h) => ({
@@ -496,7 +552,9 @@ export class EntityViewModel extends defineViewModel(
     }),
     associateExtension: h.attribute<{
       <Meta extends EntityVMMeta, NewExtT>(
-        this: AR.This<Meta>,
+        this: [Meta["associatedExtension"]] extends [never]
+          ? AR.This<Meta>
+          : never,
         ext: ExtensionHandle<NewExtT>,
       ): AR.DoneRewriteMeta<
         Computed<
@@ -507,7 +565,7 @@ export class EntityViewModel extends defineViewModel(
       >;
       uniqueKey(): "associatedExtension";
     }>((model, [extId]) => {
-      model.associatedExtensionId = extId;
+      model.wrapData.associatedExtensionId = extId;
     }),
     since: h.simpleAttribute({
       uniqueKey: "version",
@@ -592,7 +650,7 @@ export class EntityViewModel extends defineViewModel(
         name = args[0];
       }
       const snippetModel = SnippetOperationVM.parse(subView);
-      model.snippets.set(name, snippetModel.action);
+      model.wrapData.snippets.set(name, snippetModel.action);
     }),
 
     prepare: h.attribute<{
@@ -872,7 +930,7 @@ export class EntityViewModel extends defineViewModel(
     conflictWith: h.attribute<{
       (id: number, ...otherIds: number[]): AR.Done;
       <Meta extends EntityVMMeta>(
-        this: Meta["type"] extends "status" ? AR.This<Meta> : never,
+        this: ThisWithType<Meta, "status">,
         mark: "crossCharacter",
         ...otherIds: number[]
       ): AR.Done;
@@ -916,9 +974,7 @@ export class EntityViewModel extends defineViewModel(
     }),
     noDefaultDispose: h.attribute<{
       <Meta extends EntityVMMeta>(
-        this: Meta["type"] extends "status" | "equipment"
-          ? AR.This<Meta>
-          : never,
+        this: ThisWithType<Meta, "status" | "equipment">,
       ): AR.Done;
       uniqueKey(): "defaultDispose";
     }>((model, []) => {
@@ -927,9 +983,7 @@ export class EntityViewModel extends defineViewModel(
 
     on: h.attribute<{
       <Meta extends EntityVMMeta>(
-        this: Meta["type"] extends "support" | "equipment"
-          ? AR.This<Meta>
-          : never,
+        this: ThisWithType<Meta, "support" | "equipment">,
         eventName: "staged",
       ): AR.With<StagedOperationVM, Meta>;
       <Meta extends EntityVMMeta, const Event extends DetailedEventNames>(
@@ -937,20 +991,14 @@ export class EntityViewModel extends defineViewModel(
         eventName: Event,
       ): AR.With<
         typeof TriggeredSkillViewModel,
-        Meta & {
-          eventArgType: DetailedEventArgOf<Event>;
-        }
+        TriggeredSkillVMMetaFromEntity<Meta, Event>
       >;
       <Meta extends EntityVMMeta, T = void>(
         this: AR.This<Meta>,
         customEvent: CustomEvent<T>,
       ): AR.With<
         typeof TriggeredSkillViewModel,
-        Computed<
-          Meta & {
-            eventArgType: CustomEventEventArg<T>;
-          }
-        >
+        TriggeredSkillVMMetaFromEntity<Meta, CustomEvent<T>>
       >;
       mergeMeta<
         Meta extends EntityVMMeta,
@@ -995,22 +1043,14 @@ export class EntityViewModel extends defineViewModel(
         eventName: Event,
       ): AR.With<
         typeof TriggeredSkillViewModel,
-        Computed<
-          Meta & {
-            eventArgType: DetailedEventArgOf<Event>;
-          }
-        >
+        TriggeredSkillVMMetaFromEntity<Meta, Event>
       >;
       <Meta extends EntityVMMeta, T = void>(
         this: AR.This<Meta>,
         customEvent: CustomEvent<T>,
       ): AR.With<
         typeof TriggeredSkillViewModel,
-        Computed<
-          Meta & {
-            eventArgType: CustomEventEventArg<T>;
-          }
-        >
+        TriggeredSkillVMMetaFromEntity<Meta, CustomEvent<T>>
       >;
       uniqueKey(): "once";
       mergeMeta<

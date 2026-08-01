@@ -107,6 +107,11 @@ export interface MutatorConfig {
    */
   readonly logger?: IDetailLogger;
 
+  /** Callback after mutation. */
+  readonly onMutation?: (mutation: Mutation) => void;
+  /** Callback after reset state */
+  readonly onResetState?: (newState: GameState) => void;
+
   /**
    * `notify` 时调用的接口。
    */
@@ -291,6 +296,9 @@ export class StateMutator {
     withMutations: StateMutationAndExposedMutation,
     notifyOpt?: Omit<NotifyOption, "mutations">,
   ) {
+    if (newState === this._state) {
+      return;
+    }
     if (this._mutationsToBeNotified.length > 0) {
       console?.warn?.("Resetting state with pending mutations not notified");
       console?.warn?.(this._mutationsToBeNotified);
@@ -304,6 +312,7 @@ export class StateMutator {
       ...notifyOpt,
       mutations: withMutations.exposedMutations,
     });
+    this.config.onResetState?.(newState);
   }
 
   log(type: DetailLogType, value: string): void {
@@ -321,6 +330,7 @@ export class StateMutator {
     }
     this._mutationsToBeNotified.push(mutation);
     this._mutationsToBePause.push(mutation);
+    this.config.onMutation?.(mutation);
   }
 
   private createNotifyInternalOption(opt: NotifyOption): InternalNotifyOption {

@@ -171,7 +171,7 @@ define card {
       // 此版本只计算未击倒角色
       const liyueCount = :queryAll($.my.character.tag("liyue")).length;
       if (liyueCount > 0) {
-        :characterStatus(LithicGuard, :self.master, {
+        :characterStatus(LithicGuard, :e.targets[0], {
           overrideVariables: {
             shield: Math.min(liyueCount, 3),
           },

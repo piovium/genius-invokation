@@ -14,7 +14,7 @@ define card {
   cost DiceType.Void, 3;
   artifact {
     on staged {
-      :generateDice(:self.master.element(), 1);
+      :generateDice(:e.targets[0].element(), 1);
       const elementKinds = new Set(
         :queryAll($.my.character.includesDefeated).map((ch) => ch.element()),
       );

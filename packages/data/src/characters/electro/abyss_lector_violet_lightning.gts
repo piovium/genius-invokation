@@ -199,7 +199,7 @@ define card {
   talent AbyssLectorVioletLightning, none {
     on staged {
       :combatStatus(ChainLightningCascadeCombatStatus);
-      if (!:self.master.hasStatus(ElectricRebirth)) {
+      if (!:e.targets[0].hasStatus(ElectricRebirth)) {
         :query($.opp.active)?.loseEnergy(1);
       }
     };

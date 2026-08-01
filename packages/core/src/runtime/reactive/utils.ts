@@ -22,7 +22,7 @@ import type {
   GameState,
   StateSymbol,
 } from "../../base/state";
-import { getRaw } from "./reactive";
+import { getRaw } from ".";
 import {
   getEntityArea as getEntityAreaOriginal,
   getEntityById as getEntityByIdOriginal,
