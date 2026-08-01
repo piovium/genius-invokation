@@ -93,7 +93,9 @@ describe("adventure", () => {
     );
 
     await c.me.card(AnAncientSacrificeOfSacredBrocade);
+    c.expect($.my.hand).toNotExist();
     await c.me.selectCard(Tonatiuh);
+    c.expect($.my.hand).toNotExist();
 
     // 冒险地点未能入场，但挑选后触发
     c.expect($.my.support.def(MastersOfTheNightwind)).toHaveVariable({
@@ -103,6 +105,7 @@ describe("adventure", () => {
     // 天蛇船的首次冒险（入场）效果不触发
     expect(c.state.players[0].dice).toEqual([DiceType.Cryo]);
     c.expect($.my.active).toHaveVariable({ health: 1 });
+    
   });
 
   describe("adventure (exp=1), spot 'triggered' before status", () => {

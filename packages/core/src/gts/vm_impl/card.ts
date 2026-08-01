@@ -153,8 +153,9 @@ export class CardModel extends InitiativeSkillModel implements ICaller {
           direct: true,
         });
       }
+      const self = c.self.cast<"support">();
       const newEntity = c.moveEntity(
-        c.self.cast<"support">(),
+        self,
         { who: c.self.who, type: "supports" },
         "createSupport",
       );
@@ -162,6 +163,8 @@ export class CardModel extends InitiativeSkillModel implements ICaller {
         for (const operation of stagedOperations) {
           operation(c);
         }
+      } else {
+        c.dispose(self, { direct: true, reason: "overflow" });
       }
     };
   }
