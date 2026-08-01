@@ -32,8 +32,8 @@ import type { AttachmentHandle } from "../../data/type";
 import type { ExtraInfo } from "./base";
 
 class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
-  override get [ReactiveStateSymbol](): "entity" {
-    return "entity";
+  override get [ReactiveStateSymbol](): EntityType {
+    return this.definition.type;
   }
   declare [RawStateSymbol]: EntityState;
   override get [LatestStateSymbol](): EntityState {
