@@ -199,6 +199,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
 
   const uiQueue = new QueueManager<AnimationMeta>();
   let savedState: PbGameState | undefined = void 0;
+  let rpcGeneration = 0;
 
   const actionResolvers: {
     [K in RpcMethod]: PromiseWithResolvers<RpcResponsePayloadOf<K>> | null;
@@ -210,10 +211,18 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     action: null,
   };
 
-  const dispatcher: RpcDispatcher = {
+  const isRpcActive = (generation: number) => generation === rpcGeneration;
+  const ensureRpcActive = (generation: number) => {
+    if (!isRpcActive(generation)) {
+      throw new Error("RPC cancelled");
+    }
+  };
+
+  const createDispatcher = (generation: number): RpcDispatcher => ({
     chooseActive: async ({ candidateIds }) => {
       // 等待当前的 ui 动画渲染完成
       await uiQueue.drain();
+      ensureRpcActive(generation);
       const resolver = Promise.withResolvers<ChooseActiveResponse>();
       actionResolvers.chooseActive = resolver;
       const acState = createChooseActiveState(candidateIds, t);
@@ -221,12 +230,18 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       try {
         return await resolver.promise;
       } finally {
-        setActionState(null);
+        if (actionResolvers.chooseActive === resolver) {
+          actionResolvers.chooseActive = null;
+        }
+        if (isRpcActive(generation)) {
+          setActionState(null);
+        }
       }
     },
     action: async ({ action }) => {
       // 等待对方行动轮次的动画播放完成
       await uiQueue.waitUntilNone((meta) => meta.turn !== who);
+      ensureRpcActive(generation);
       const resolver = Promise.withResolvers<ActionResponse>();
       actionResolvers.action = resolver;
       const acState = createActionState(getAssetsManager(), action, t);
@@ -234,7 +249,12 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       try {
         return await resolver.promise;
       } finally {
-        setActionState(null);
+        if (actionResolvers.action === resolver) {
+          actionResolvers.action = null;
+        }
+        if (isRpcActive(generation)) {
+          setActionState(null);
+        }
       }
     },
     switchHands: async () => {
@@ -242,6 +262,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         // 等待当前的 ui 动画渲染完成
         await uiQueue.drain();
       }
+      ensureRpcActive(generation);
       const resolver = Promise.withResolvers<SwitchHandsResponse>();
       actionResolvers.switchHands = resolver;
       // return { removedHandIds: [] };
@@ -251,21 +272,29 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         result = await resolver.promise;
         return result;
       } finally {
-        if (result && result.removedHandIds.length > 0) {
-          setViewType("switchHandsEnd");
-          setTimeout(async () => {
-            await uiQueue.drain();
-            setViewType((t) => (t === "switchHandsEnd" ? "normal" : t));
-            forceRefreshData();
-          }, 1200);
-        } else {
-          setViewType("normal");
+        if (actionResolvers.switchHands === resolver) {
+          actionResolvers.switchHands = null;
+        }
+        if (isRpcActive(generation)) {
+          if (result && result.removedHandIds.length > 0) {
+            setViewType("switchHandsEnd");
+            setTimeout(async () => {
+              await uiQueue.drain();
+              if (isRpcActive(generation)) {
+                setViewType((t) => (t === "switchHandsEnd" ? "normal" : t));
+                forceRefreshData();
+              }
+            }, 1200);
+          } else {
+            setViewType("normal");
+          }
         }
       }
     },
     selectCard: async ({ candidateDefinitionIds }) => {
       // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
       await uiQueue.drain();
+      ensureRpcActive(generation);
       const resolver = Promise.withResolvers<SelectCardResponse>();
       actionResolvers.selectCard = resolver;
       setSelectCardCandidates(candidateDefinitionIds);
@@ -273,26 +302,38 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       try {
         return await resolver.promise;
       } finally {
-        setViewType("normal");
+        if (actionResolvers.selectCard === resolver) {
+          actionResolvers.selectCard = null;
+        }
+        if (isRpcActive(generation)) {
+          setViewType("normal");
+        }
       }
     },
     rerollDice: async () => {
       // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
       await uiQueue.drain();
+      ensureRpcActive(generation);
       const resolver = Promise.withResolvers<RerollDiceResponse>();
       actionResolvers.rerollDice = resolver;
       setViewType("rerollDice");
       try {
         return await resolver.promise;
       } finally {
-        setViewType("rerollDiceEnd");
-        setTimeout(
-          () => setViewType((t) => (t === "rerollDiceEnd" ? "normal" : t)),
-          500,
-        );
+        if (actionResolvers.rerollDice === resolver) {
+          actionResolvers.rerollDice = null;
+        }
+        if (isRpcActive(generation)) {
+          setViewType("rerollDiceEnd");
+          setTimeout(() => {
+            if (isRpcActive(generation)) {
+              setViewType((t) => (t === "rerollDiceEnd" ? "normal" : t));
+            }
+          }, 500);
+        }
       }
     },
-  };
+  });
 
   const forceRefreshData = () => {
     if (!savedState) {
@@ -308,11 +349,16 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   };
 
   const cancelRpc = () => {
+    rpcGeneration++;
     actionResolvers.action?.reject();
     actionResolvers.chooseActive?.reject();
     actionResolvers.rerollDice?.reject();
     actionResolvers.selectCard?.reject();
     actionResolvers.switchHands?.reject();
+    setActionState(null);
+    setViewType("normal");
+    setSelectCardCandidates([]);
+    setDoingRpc(false);
   };
 
   const [history, setHistory] = createStore<HistoryData>({
@@ -367,11 +413,15 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       );
     },
     rpc: async (req) => {
+      cancelRpc();
+      const generation = rpcGeneration;
       try {
         setDoingRpc(true);
-        return await dispatchRpc(dispatcher)(req);
+        return await dispatchRpc(createDispatcher(generation))(req);
       } finally {
-        setDoingRpc(false);
+        if (isRpcActive(generation)) {
+          setDoingRpc(false);
+        }
       }
     },
   };

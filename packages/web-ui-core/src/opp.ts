@@ -15,8 +15,8 @@
 
 import type { AssetsManager } from "@gi-tcg/assets-manager";
 import {
+  type CancellablePlayerIO,
   type Notification,
-  type PlayerIO,
   type RpcDispatcher,
 } from "@gi-tcg/core";
 import {
@@ -47,7 +47,7 @@ export interface OppInfo {
 }
 
 export class OppChessboardController implements IOppChessboardController {
-  #playerIo: PlayerIO;
+  #playerIo: CancellablePlayerIO;
   #close: boolean = true;
   #playerStatus: PbPlayerStatus = PbPlayerStatus.UNSPECIFIED;
   #actionState: ActionState | null = null;
@@ -82,6 +82,13 @@ export class OppChessboardController implements IOppChessboardController {
       viewType: this.#viewType,
       selectCardCandidates: this.#selectCardCandidates,
     };
+  }
+
+  private cancelRpc() {
+    this.#actionState = null;
+    this.#viewType = "normal";
+    this.#selectCardCandidates = [];
+    this.onUpdate();
   }
 
   constructor(private readonly opt: OppChessboardControllerOption) {
@@ -138,6 +145,7 @@ export class OppChessboardController implements IOppChessboardController {
           return rawRpc(req);
         }
       },
+      cancelRpc: () => this.cancelRpc(),
     };
   }
 
@@ -154,19 +162,22 @@ export class OppChessboardController implements IOppChessboardController {
     return original;
   }
 
-  open(): PlayerIO {
+  open(): CancellablePlayerIO {
     this.#close = false;
     this.onUpdate();
     return this.#playerIo;
   }
   close(): void {
-    this.opt.onUpdate(null);
     this.#close = true;
+    this.#actionState = null;
+    this.#viewType = "normal";
+    this.#selectCardCandidates = [];
+    this.opt.onUpdate(null);
   }
 }
 
 export interface IOppChessboardController {
   readonly closed: boolean;
-  open(): PlayerIO;
+  open(): CancellablePlayerIO;
   close(): void;
 }

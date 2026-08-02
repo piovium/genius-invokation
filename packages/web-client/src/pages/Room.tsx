@@ -235,14 +235,22 @@ export default function Room() {
   });
 
   const onActionRequested = async (payload: ActionRequestPayload) => {
+    const generation = ++myRpcGeneration;
     setCurrentMyTimer(payload.timer);
     currentRpcId.value = payload.id;
     playerIo()?.cancelRpc();
     await new Promise((r) => setTimeout(r, 100)); // wait for UI notifications?
+    if (generation !== myRpcGeneration || currentRpcId.value !== payload.id) {
+      return;
+    }
     const response = await playerIo()
       ?.rpc(payload.request)
       .catch(() => void 0);
-    if (!response) {
+    if (
+      !response ||
+      generation !== myRpcGeneration ||
+      currentRpcId.value !== payload.id
+    ) {
       return;
     }
     setCurrentMyTimer(null);
@@ -254,7 +262,9 @@ export default function Room() {
           response,
         },
       );
-      currentRpcId.value = null;
+      if (currentRpcId.value === payload.id) {
+        currentRpcId.value = null;
+      }
       await reply;
     } catch (e) {
       if (e instanceof AxiosError) {
@@ -286,19 +296,29 @@ export default function Room() {
     null,
   );
   const currentRpcId: { value: number | null } = { value: null };
+  const currentOppRpcId: { value: number | null } = { value: null };
+  let myRpcGeneration = 0;
+  let oppRpcGeneration = 0;
   let countDownTimerIntervalId: number | null = null;
   const countDownTimer = () => {
-    for (const [timer, setTimer] of [
-      [currentMyTimer(), setCurrentMyTimer] as const,
-      [currentOppTimer(), setCurrentOppTimer] as const,
-    ]) {
-      if (timer) {
-        const current = timer.current - 1;
-        setTimer({ ...timer, current });
-        if (current <= 0) {
-          playerIo()?.cancelRpc();
-          setTimer(null);
-        }
+    const myTimer = currentMyTimer();
+    if (myTimer) {
+      const current = myTimer.current - 1;
+      setCurrentMyTimer({ ...myTimer, current });
+      if (current <= 0) {
+        myRpcGeneration++;
+        playerIo()?.cancelRpc();
+        setCurrentMyTimer(null);
+      }
+    }
+    const oppTimer = currentOppTimer();
+    if (oppTimer) {
+      const current = oppTimer.current - 1;
+      setCurrentOppTimer({ ...oppTimer, current });
+      if (current <= 0) {
+        oppRpcGeneration++;
+        oppPlayerIo()?.cancelRpc?.();
+        setCurrentOppTimer(null);
       }
     }
   };
@@ -340,6 +360,8 @@ export default function Room() {
                 mut.mutation.value.status === PbPlayerStatus.UNSPECIFIED,
             )
           ) {
+            myRpcGeneration++;
+            currentRpcId.value = null;
             playerIo()?.cancelRpc();
             setCurrentMyTimer(null);
           }
@@ -386,26 +408,38 @@ export default function Room() {
         case "notification": {
           const notification: Notification = payload.data;
           oppPlayerIo()?.notify(notification);
-          // 观战时，收到我方状态变更为非行动通知时，取消 rpc
+          const myWho = initialized()?.who;
+          const oppWho = myWho === undefined ? undefined : myWho === 0 ? 1 : 0;
+          // 观战时，收到对方状态变更为非行动通知时，使延迟中的 rpc 失效
           if (
             notification.mutation.find(
               (mut) =>
                 mut.mutation?.$case === "playerStatusChange" &&
-                mut.mutation.value.who === initialized()?.who &&
+                mut.mutation.value.who === oppWho &&
                 mut.mutation.value.status === PbPlayerStatus.UNSPECIFIED,
             )
           ) {
-            oppPlayerIo()?.cancelRpc?.();
+            oppRpcGeneration++;
+            currentOppRpcId.value = null;
           }
           break;
         }
         case "rpc": {
-          oppPlayerIo()?.cancelRpc?.();
-          setTimeout(() => {
-            oppPlayerIo()
-              ?.rpc(payload.request)
-              .catch(() => void 0);
-          }, 100);
+          if (payload.id !== currentOppRpcId.value) {
+            const generation = ++oppRpcGeneration;
+            currentOppRpcId.value = payload.id;
+            oppPlayerIo()?.cancelRpc?.();
+            setTimeout(() => {
+              if (
+                generation === oppRpcGeneration &&
+                currentOppRpcId.value === payload.id
+              ) {
+                oppPlayerIo()
+                  ?.rpc(payload.request)
+                  .catch(() => void 0);
+              }
+            }, 100);
+          }
           break;
         }
         case "error": {
@@ -424,8 +458,11 @@ export default function Room() {
     if (observerMode()) {
       fetchOppNotification();
     } else {
+      oppRpcGeneration++;
+      currentOppRpcId.value = null;
       abortOppNotification();
       playerIo()?.oppController.close();
+      setOppPlayerIo();
     }
   });
 
