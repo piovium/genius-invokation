@@ -96,12 +96,22 @@ export interface ParsedMutation {
   disposingEntities: number[];
 }
 
+export interface ParseMutationContext {
+  oppController: OppChessboardController;
+  previousPlayerStatusMutationWho: 0 | 1 | null;
+  previousPlayerStatusMutationStatus: PbPlayerStatus | null;
+}
+
 export function parseMutations(
   mutations: PbExposedMutation[],
-  oppController?: OppChessboardController,
+  context?: ParseMutationContext,
 ): ParsedMutation {
-  const oppKnownCardState =
-    !oppController || oppController.closed ? null : oppController.handCards;
+  let oppKnownCardState = null;
+  if (context) {
+    if (!context.oppController.closed) {
+      oppKnownCardState = context.oppController.handCards;
+    }
+  }
 
   let playingCard: PlayingCardInfo | null = null;
   const animatingCards: AnimatingCardWithDestination[] = [];
@@ -343,8 +353,26 @@ export function parseMutations(
         break;
       }
       case "playerStatusChange": {
-        if (mutation.value.status === PbPlayerStatus.ACTING) {
-          roundAndPhase.who = mutation.value.who as 0 | 1;
+        const who = mutation.value.who as 0 | 1;
+        let shouldShowActing = true;
+        if (context && mutation.value.status !== PbPlayerStatus.UNSPECIFIED) {
+          if (
+            context.previousPlayerStatusMutationWho !== null &&
+            context.previousPlayerStatusMutationStatus !== null
+          ) {
+            shouldShowActing =
+              context.previousPlayerStatusMutationStatus !==
+                PbPlayerStatus.ACTING ||
+              context.previousPlayerStatusMutationWho !== who;
+          }
+          context.previousPlayerStatusMutationWho = who;
+          context.previousPlayerStatusMutationStatus = mutation.value.status;
+        }
+        if (
+          mutation.value.status === PbPlayerStatus.ACTING &&
+          shouldShowActing
+        ) {
+          roundAndPhase.who = who;
           roundAndPhase.value = "action";
         }
         break;

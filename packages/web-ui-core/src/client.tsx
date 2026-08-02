@@ -1,4 +1,5 @@
 // Copyright (C) 2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -33,7 +34,6 @@ import {
   createMemo,
   createSignal,
   type Accessor,
-  type Component,
   type ComponentProps,
   type JSX,
 } from "solid-js";
@@ -43,23 +43,19 @@ import {
   type ChessboardData,
   type StepActionStateHandler,
   type RpcTimer,
-  type ChessboardProps,
 } from "./components/Chessboard";
 import type {
   ChooseActiveResponse,
   PbDiceType,
-  PbSkillInfo,
-  PlayerIO,
   RpcResponsePayloadOf,
 } from "@gi-tcg/core";
 import { QueueManager } from "./queue_manager";
-import { parseMutations } from "./mutations";
+import { parseMutations, type ParseMutationContext } from "./mutations";
 import { translations, UiContext, type Locale } from "./hooks/context";
 import {
   createActionState,
   createChooseActiveState,
   type ActionState,
-  type ActionStep,
 } from "./action";
 import { AssetsManager, DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
 import {
@@ -303,7 +299,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       return;
     }
     const state = oppController.mergeState(savedState);
-    const parsed = parseMutations([], oppController);
+    const parsed = parseMutations([], parseMutationContext);
     setData({
       previousState: state,
       state,
@@ -335,6 +331,11 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       forceRefreshData();
     },
   });
+  const parseMutationContext: ParseMutationContext = {
+    oppController,
+    previousPlayerStatusMutationWho: null,
+    previousPlayerStatusMutationStatus: null,
+  };
 
   const io: WebUiPlayerIO = {
     oppController,
@@ -348,7 +349,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       uiQueue.push(
         async () => {
           state = oppController.mergeState(state!);
-          const parsed = parseMutations(mutation, oppController);
+          const parsed = parseMutations(mutation, parseMutationContext);
           setHistory(
             produce((history) => updateHistory(savedState, mutation, history)),
           );
