@@ -1058,13 +1058,14 @@ define card {
     HilichurlBerserker,
     ElectroHilichurlShooter,
   ];
-  const summons = :queryAll($.my.summon);
-  const target = :random(
-    candidates.filter((c) => !summons.some((s) => s.definition.id === c)),
+  const existingSummons = :queryAll($.my.summon);
+  const filteredCandidates = candidates.filter(
+    (c) => !existingSummons.some((s) => s.definition.id === c),
   );
-  if (target) {
-    :summon(target);
-  }
+  const target = :random(
+    filteredCandidates.length > 0 ? filteredCandidates : candidates,
+  );
+  :summon(target);
 };
 
 /**
@@ -1078,15 +1079,20 @@ define card {
   id 332016 as FatuiConspiracy;
   since "v3.7.0";
   cost DiceType.Aligned, 2;
-  :combatStatus(
-    :random([
-      FatuiAmbusherCryoCicinMage,
-      FatuiAmbusherMirrorMaiden,
-      FatuiAmbusherPyroslingerBracer,
-      FatuiAmbusherElectrohammerVanguard,
-    ]),
-    "opp",
+  const candidates = [
+    FatuiAmbusherCryoCicinMage,
+    FatuiAmbusherMirrorMaiden,
+    FatuiAmbusherPyroslingerBracer,
+    FatuiAmbusherElectrohammerVanguard,
+  ];
+  const existingCombatStatuses = :queryAll($.opp.combatStatus);
+  const filteredCandidates = candidates.filter(
+    (c) => !existingCombatStatuses.some((cs) => cs.definition.id === c),
   );
+  const target = :random(
+    filteredCandidates.length > 0 ? filteredCandidates : candidates,
+  );
+  :combatStatus(target, "opp");
 };
 
 /**
