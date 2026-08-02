@@ -39,7 +39,7 @@ define skill {
   :query(
     $.typeStatus.def(ShieldOfSwirlingClouds).at($.id(:self.id)),
   )?.dispose();
-  if (:self.getVariable("disposeOrTuneCardCount") > 0) {
+  if (:self.getVariable("discardOrTuneCardCount") > 0) {
     :damage(DamageType.Geo, 3);
   } else {
     :damage(DamageType.Geo, 2);
@@ -137,14 +137,14 @@ define skill {
  *
  */
 define skill {
-  id 16075 as CountDisposeOrTune;
+  id 16075 as CountDiscardOrTune;
   skillType passive {
-    variable disposeOrTuneCardCount, 0;
+    variable discardOrTuneCardCount, 0;
     on discardOrTuneCard {
-      :addVariable("disposeOrTuneCardCount", 1);
+      :addVariable("discardOrTuneCardCount", 1);
     };
     on roundEnd {
-      :setVariable("disposeOrTuneCardCount", 0);
+      :setVariable("discardOrTuneCardCount", 0);
     };
   };
 };
@@ -165,7 +165,7 @@ define character {
     OpeningFlourish,
     CliffbreakersBanner,
     SpearFlourish,
-    CountDisposeOrTune;
+    CountDiscardOrTune;
 };
 
 /**
