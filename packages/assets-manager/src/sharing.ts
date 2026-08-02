@@ -222,7 +222,16 @@ const BLOCK_WORDS: string[] = [
   "yaoi",
   "yiffy",
 ];
-const BLOCK_WORDS_RE = new RegExp(BLOCK_WORDS.join("|"), "i");
+/**
+ * 分享码由 base64 组成，其中包含 `+` 和 `/` 两个符号。
+ * 服务器端对屏蔽词的匹配会忽略（跳过）这两个符号，
+ * 因此形如 `nt+r`、`n/t/r` 的分享码也会被 `ntr` 拦截。
+ * 这里在屏蔽词各字符之间允许插入任意数量的 `+` 或 `/`，以复现该行为。
+ */
+const BLOCK_WORDS_RE = new RegExp(
+  BLOCK_WORDS.map((word) => word.split("").join("[+/]*")).join("|"),
+  "i",
+);
 
 /** 解析原始分享码为分享码 id 数组 */
 export function decodeRaw(src: string) {
