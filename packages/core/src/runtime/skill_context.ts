@@ -1923,7 +1923,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         "onDispose",
         this.rawState,
         cardState as EntityStateO,
-        "cardDisposed",
+        "discarded",
         area,
         this.skillInfo,
       );
@@ -1931,7 +1931,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         type: "removeEntity",
         from: area,
         oldState: cardState,
-        reason: "cardDisposed",
+        reason: "discarded",
       });
     }
   }

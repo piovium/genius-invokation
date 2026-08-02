@@ -140,7 +140,7 @@ export interface RemoveEntityM {
   readonly from: EntityArea;
   readonly oldState: AnyState;
   readonly reason:
-    | "cardDisposed" // 舍弃
+    | "discarded" // 舍弃
     | "targetOfSupportPlayed"
     | "eventCardPlayed"
     | "eventCardDrawn"

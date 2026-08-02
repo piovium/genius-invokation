@@ -1100,7 +1100,7 @@ export class DisposeEventArg extends EntityEventArg<EntityState> {
 
   /** 是否是舍弃手牌 */
   isDiscard() {
-    return this.reason === "cardDisposed";
+    return this.reason === "discarded";
   }
 
   /** 是否是元素调和 */

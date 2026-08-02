@@ -609,7 +609,7 @@ export function updateHistory(
                 who: m.who as 0 | 1,
                 cardDefinitionId: definitionId,
               });
-            } else if (m.reason === PbRemoveEntityReason.CARD_DISPOSED) {
+            } else if (m.reason === PbRemoveEntityReason.DISCARDED) {
               children.push({
                 type: "removeCard",
                 who: m.who as 0 | 1,
