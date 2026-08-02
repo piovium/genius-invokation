@@ -65,7 +65,7 @@ define combatStatus {
 define status {
   id 112136 as DetailedDiagnosisThoroughTreatmentStatus;
   noDefaultDispose;
-  on dispose {
+  on entityDispose {
     when :( :e.entity.definition.id === BondOfLife );
     usage 3;
     :increaseMaxHealth(1, :self.master);

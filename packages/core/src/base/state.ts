@@ -95,10 +95,10 @@ export interface VersionBehavior {
   readonly foodOmitInjuredOnly: boolean;
 
   /**
-   * `disposeMaxCostHands` 是否终止预览。
+   * `discardMaxCostHands` 是否终止预览。
    * @note v6.1.0 起设置为 `true`
    */
-  readonly disposeMaxCostHandsAbortPreview: boolean;
+  readonly discardMaxCostHandsAbortPreview: boolean;
 
   /**
    * 计算卡牌元素骰费用时，使用“原本元素骰费用”还是“当前元素骰费用”。
@@ -123,7 +123,7 @@ export const getVersionBehavior = (version: Version): VersionBehavior => ({
     ? "overwrite"
     : "takeMax",
   foodOmitInjuredOnly: !versionLt(version, "v6.1.0"),
-  disposeMaxCostHandsAbortPreview: !versionLt(version, "v6.1.0"),
+  discardMaxCostHandsAbortPreview: !versionLt(version, "v6.1.0"),
   diceCostApplyAttachments: !versionLt(version, "v6.4.0"),
   unexpectedInsufficientDice: "skipConsume",
 });

@@ -178,7 +178,7 @@ define combatStatus {
   };
   replaceDescription "[GCG_TOKEN_SHIELD]",
     ((_, self) => self.variables.extraMaxHealth);
-  on disposeOrTuneCard {
+  on discardOrTuneCard {
     const cost = :e.diceCost();
     :addVariable("cardCount", 1);
     switch (:getVariable("cardCount")) {
@@ -241,7 +241,7 @@ define skill {
   :damage(DamageType.Piercing, 2, $.opp.standby);
   :damage(DamageType.Physical, 3);
   const cards = :player.hands.toSorted((a, b) => b.diceCost() - a.diceCost());
-  :disposeCard(...cards);
+  :discard(...cards);
   :combatStatus(FestiveFires);
 };
 
@@ -258,6 +258,6 @@ define skill {
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 3);
   if (:player.pile.length > 0) {
-    :disposeCard(:player.pile[0]);
+    :discard(:player.pile[0]);
   }
 };

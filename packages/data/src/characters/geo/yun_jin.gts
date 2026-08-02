@@ -140,7 +140,7 @@ define skill {
   id 16075 as CountDisposeOrTune;
   skillType passive {
     variable disposeOrTuneCardCount, 0;
-    on disposeOrTuneCard {
+    on discardOrTuneCard {
       :addVariable("disposeOrTuneCardCount", 1);
     };
     on roundEnd {

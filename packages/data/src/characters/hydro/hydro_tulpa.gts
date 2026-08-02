@@ -151,7 +151,7 @@ define skill {
   id 22064 as BranchingFlow;
   skillType passive {
     // 分流：每回合一次在召唤物离场时召唤半幻人
-    on dispose {
+    on entityDispose {
       when :(
         :e.entity.definition.type === "summon" &&
           !(

@@ -45,7 +45,7 @@ define status {
   variable cardCount, 0;
   replaceDescription "[GCG_TOKEN_COUNTER]",
     ((c, self) => self.variables.cardCount);
-  on disposeCard {
+  on discard {
     :addVariable("cardCount", 1);
     if (:getVariable("cardCount") % 6 === 0) {
       :characterStatus(Resentment, :self.master);
@@ -80,7 +80,7 @@ define skill {
   :damage(DamageType.Pyro, 3);
   :abortPreview();
   if (:player.pile.length > 0) {
-    :disposeCard(:player.pile[0]);
+    :discard(:player.pile[0]);
   }
 };
 
@@ -101,7 +101,7 @@ define skill {
   :abortPreview();
   for (const player of [:player, :oppPlayer]) {
     for (const card of player.pile.slice(0, 3)) {
-      :disposeCard(card);
+      :discard(card);
     }
   }
   :characterStatus(Resentment, :self);

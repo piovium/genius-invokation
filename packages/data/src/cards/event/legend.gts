@@ -200,7 +200,7 @@ define combatStatus {
       }
     }
   };
-  on disposeCard {
+  on discard {
     when :( :e.from.type === "hands" );
     const maxCostHands = :maxCostHands(2);
     :undrawCards(maxCostHands, "bottom");

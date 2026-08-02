@@ -62,13 +62,13 @@ define card {
   undiscoverable;
   addTarget $.my.character.def(Skirk);
   on actionPhase {
-    :disposeCard(:self);
+    :discard(:self);
     :query(
       $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     )?.addVariableWithMax("serpentsSubtlety", 1, 7);
   };
   on switchActive {
-    :disposeCard(:self);
+    :discard(:self);
     :query(
       $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     )?.addVariableWithMax("serpentsSubtlety", 1, 7);
@@ -265,7 +265,7 @@ define card {
       :setVariable("deductDiceTriggered", 1);
       // 预计算时不触发弃牌
       if (:skillInfo.environment !== "precalculate") {
-        :disposeMaxCostHands(1);
+        :discardMaxCostHands(1);
       }
       for (const st of :queryAll($.opp.typeStatus.def(Target))) {
         st.dispose();

@@ -64,7 +64,7 @@ define combatStatus {
   variable card1Cost, 0 {
     visible false;
   };
-  on disposeOrTuneCard {
+  on discardOrTuneCard {
     const cost = :e.diceCost();
     :addVariable("cardCount", 1);
     switch (:getVariable("cardCount")) {
@@ -120,7 +120,7 @@ define skill {
     ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 4)
     : 0;
   :damage(DamageType.Hydro, 1 + extraDmg);
-  const [card] = :disposeMaxCostHands(1);
+  const [card] = :discardMaxCostHands(1);
   if (card) {
     if (:self.hasEquipment(LightlessFeeding)) {
       :heal(card.diceCost(), :self);
@@ -145,7 +145,7 @@ define card {
     on decreaseDamaged {
       when :( :player.hands.length > 0 );
       usage perRound, 2;
-      :disposeMaxCostHands(1);
+      :discardMaxCostHands(1);
       :e.decreaseDamage(1);
       :addVariable("solidarity", 1);
     };

@@ -101,7 +101,7 @@ define skill {
       :drawCards(1);
       :addVariable("drawCardsUsagePerRound", -1);
     };
-    on dispose {
+    on entityDispose {
       when :(
         0 &&
           !:e.entity.isMine() &&
@@ -131,7 +131,7 @@ define skill {
   skillType burst;
   prepared;
   :damage(DamageType.Anemo, 3);
-  :disposeMaxCostHands(1);
+  :discardMaxCostHands(1);
   :characterStatus(GalePursuitStatus);
 };
 
@@ -146,7 +146,7 @@ define skill {
   skillType burst;
   prepared;
   :damage(DamageType.Anemo, 3);
-  :disposeMaxCostHands(1);
+  :discardMaxCostHands(1);
 };
 
 /**

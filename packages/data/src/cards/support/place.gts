@@ -569,7 +569,7 @@ define card {
   cost DiceType.Aligned, 1;
   support place {
     variable progress, 0;
-    on disposeOrTuneCard {
+    on discardOrTuneCard {
       :addVariable("progress", 1);
       const progress = :getVariable("progress");
       if (progress % 3 === 0) {
@@ -730,7 +730,7 @@ define card {
   since "v5.3.0";
   cost DiceType.Aligned, 2;
   support place {
-    on enter {
+    on entityEnter {
       when :( :e.entity.definition.type === "summon" );
       usage 3;
       const target = :query($.my.summon.id(:e.entity.id));
@@ -768,10 +768,10 @@ define card {
   since "v5.4.0";
   support place {
     variable disposedCardCount, 0;
-    on disposeCard {
+    on discard {
       :addVariable("disposedCardCount", 1);
     };
-    on disposeCard {
+    on discard {
       when :( :getVariable("disposedCardCount") >= 2 );
       :setVariable("disposedCardCount", 0);
       :characterStatus(FlowerfeatherClanInEffect, $.my.next);
@@ -844,7 +844,7 @@ define card {
   since "v5.6.0";
   cost DiceType.Void, 3;
   support place {
-    on enter {
+    on entityEnter {
       when :(
         :e.entity.definition.type === "status" &&
           :e.entity.definition.tags.includes("preparingSkill")
@@ -917,7 +917,7 @@ define combatStatus {
  */
 define combatStatus {
   id 301037 as ConstellationMetropoleInEffect02;
-  once enter {
+  once entityEnter {
     when :( :e.entity.definition.id === ToyGuardSummon );
     :e.entity.cast<"summon">().addVariable("effect", 1);
   };
@@ -987,7 +987,7 @@ define card {
   since "v6.4.0";
   support place {
     variable count, 0;
-    on enter {
+    on entityEnter {
       when :(
         ([CostReduction, Empowerment] as number[]).includes(
           :e.entity.definition.id,

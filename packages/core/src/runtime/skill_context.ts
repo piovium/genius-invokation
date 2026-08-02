@@ -1902,8 +1902,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
     }
   }
 
-  /** 弃置一张行动牌，并触发其“弃置时”效果。 */
-  disposeCard(...cards: PlainEntityState[]) {
+  /** 舍弃一张行动牌，并触发其“舍弃时”效果。 */
+  discard(...cards: PlainEntityState[]) {
     for (const c of cards) {
       const card = this.get(c);
       const cardState = card.latest();
@@ -1937,19 +1937,19 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   /**
-   * 弃置我方当前元素骰费用最多的 `count` 张牌
-   * @param count 弃置的牌数
-   * @param option.allowPreview 总是允许预览（即使版本行为 `disposeMaxCostHandsAbortPreview = true` 也如此）
+   * 舍弃我方当前元素骰费用最多的 `count` 张牌
+   * @param count 舍弃的牌数
+   * @param option.allowPreview 总是允许预览（即使版本行为 `discardMaxCostHandsAbortPreview = true` 也如此）
    */
-  disposeMaxCostHands(count: number, option: { allowPreview?: boolean } = {}) {
+  discardMaxCostHands(count: number, option: { allowPreview?: boolean } = {}) {
     const disposed = this.maxCostHands(count, { useTieBreak: true });
     if (
-      this.state.versionBehavior.disposeMaxCostHandsAbortPreview &&
+      this.state.versionBehavior.discardMaxCostHandsAbortPreview &&
       !option.allowPreview
     ) {
       this.abortPreview();
     }
-    this.disposeCard(...disposed);
+    this.discard(...disposed);
     return disposed;
   }
 
@@ -2213,8 +2213,8 @@ type SkillContextMutativeProps =
   | "generateDice"
   | "createHandCard"
   | "createPileCards"
-  | "disposeCard"
-  | "disposeMaxCostHands"
+  | "discard"
+  | "discardMaxCostHands"
   | "drawCards"
   | "undrawCards"
   | "stealHandCard"

@@ -211,7 +211,7 @@ define card {
     on staged {
       :useSkill(TempestuousBarrage);
     };
-    on dispose {
+    on entityDispose {
       when :(
         :query($.opp.typeStatus.def(TotalCollapse))?.id === :e.entity.id
       );

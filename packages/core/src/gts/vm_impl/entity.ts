@@ -827,7 +827,7 @@ export class EntityViewModel extends defineViewModel(
         if (c.self.area.type !== "hands") {
           return;
         }
-        c.disposeCard(self);
+        c.discard(self);
         c.createEntity("support", self.definition.id as SupportHandle, {
           who: c.self.area.who,
           type: "supports",
@@ -944,7 +944,7 @@ export class EntityViewModel extends defineViewModel(
       } else {
         conflictIds.push(...(args as number[]));
       }
-      const enterSkill = new TriggeredSkillModel(model, "enter");
+      const enterSkill = new TriggeredSkillModel(model, "selfEnter");
       enterSkill.id = model.getSubId();
       enterSkill.action = function (c) {
         const selfArea = c.self.area;

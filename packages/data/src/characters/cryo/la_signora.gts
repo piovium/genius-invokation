@@ -179,7 +179,7 @@ define skill {
 define skill {
   id 21025 as InfernosAwakening; // 定义为：当移除冰封的炽炎魔女时，转换角色形态
   skillType passive {
-    on dispose {
+    on entityDispose {
       when :( :e.entity.definition.id === IcesealedCrimsonWitchOfEmbers );
       :transformDefinition(:self, CrimsonWitchOfEmbers);
     };

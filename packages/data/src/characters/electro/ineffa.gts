@@ -89,7 +89,7 @@ define skill {
 define skill {
   id 14174 as MoonsignBenedictionAssemblageHub;
   skillType passive {
-    on enter {
+    on entityEnter {
       when :( !:e.entity.isMine() && :e.entity.definition.id === Conductive );
       listenTo all;
       const area = :e.entity.area;

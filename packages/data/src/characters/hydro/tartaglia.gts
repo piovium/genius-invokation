@@ -155,7 +155,7 @@ define skill {
     on revive {
       :characterStatus(RangedStance);
     };
-    on dispose {
+    on entityDispose {
       when :( :e.entity.definition.id === MeleeStance );
       :characterStatus(RangedStance);
     };

@@ -129,7 +129,7 @@ define skill {
 define skill {
   id 14184 as MoonsignBenedictionOldWorldSecrets;
   skillType passive {
-    on enter {
+    on entityEnter {
       when :( !:e.entity.isMine() && :e.entity.definition.id === Conductive );
       listenTo all;
       :damage(DamageType.Piercing, 1, $.macros.oppMaxHealth);

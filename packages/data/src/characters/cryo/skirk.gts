@@ -87,13 +87,13 @@ define card {
   undiscoverable;
   addTarget $.my.character.def(Skirk);
   on actionPhase {
-    :disposeCard(:self);
+    :discard(:self);
     :query(
       $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     )?.addVariableWithMax("serpentsSubtlety", 1, 7);
   };
   on switchActive {
-    :disposeCard(:self);
+    :discard(:self);
     :query(
       $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     )?.addVariableWithMax("serpentsSubtlety", 1, 7);
@@ -114,7 +114,7 @@ define card {
   filter :( :query($.my.hand.cost(3)) );
   const hand = :query($.my.hand.cost(3));
   if (hand) {
-    :disposeCard(hand);
+    :discard(hand);
     const skirk = :query(
       $.union($.my.character.def(Skirk), $.my.character.def(Skirk01)),
     );
@@ -167,7 +167,7 @@ define skill {
     .filter((card) => card.diceCost() === 0)
     .slice(0, 2);
   if (hands.length > 0) {
-    :disposeCard(...hands);
+    :discard(...hands);
     :self.addVariableWithMax("serpentsSubtlety", hands.length, 7);
   }
 };
@@ -292,7 +292,7 @@ define card {
       usage perRound, 1 { name "usagePerRound1"; };
       :damage(DamageType.Cryo, 1, $.opp.active);
     };
-    on disposeCard {
+    on discard {
       when :( :e.entity.definition.id === VoidRift );
       usage perRound, 1 { name "usagePerRound1"; };
       :damage(DamageType.Cryo, 1, $.opp.active);

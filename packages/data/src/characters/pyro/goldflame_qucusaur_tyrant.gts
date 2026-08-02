@@ -37,7 +37,7 @@ define status {
     :damage(DamageType.Piercing, 1, $.opp.standby);
     :damage(DamageType.Pyro, damageValue);
     if (chosen) {
-      :disposeCard(chosen);
+      :discard(chosen);
     }
   };
 };

@@ -86,7 +86,7 @@ define skill {
   :damage(DamageType.Dendro, 4);
   const block = :query($.my.hand.def(BonecrunchersEnergyBlock));
   if (block) {
-    :disposeCard(block);
+    :discard(block);
     :characterStatus(SproutsOfTheBlightedRotStatus, :self);
   }
 };
@@ -103,7 +103,7 @@ define skill {
     on battleBegin {
       :createPileCards(BonecrunchersEnergyBlock, 2, "bottom");
     };
-    on enter {
+    on entityEnter {
       when :(
         :e.entity.definition.id === BonecrunchersEnergyBlockCombatStatus
       );
@@ -166,7 +166,7 @@ define card {
       usage perRound, 1 { name "usagePerRound1"; };
       :drawCards(1);
     };
-    on disposeCard {
+    on discard {
       when :( :e.entity.definition.id === BonecrunchersEnergyBlock );
       usage perRound, 1 { name "usagePerRound1"; };
       :drawCards(1);

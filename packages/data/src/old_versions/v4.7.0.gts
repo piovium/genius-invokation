@@ -44,7 +44,7 @@ define card {
   filter :(
     !:query($.my.combatStatus.def(BonecrunchersEnergyBlockCombatStatus))
   );
-  :disposeMaxCostHands(1);
+  :discardMaxCostHands(1);
   const activeCh = :query($.my.active)!;
   :generateDice(activeCh.element(), 1);
   if (activeCh.definition.tags.includes("sacread")) {
@@ -123,9 +123,9 @@ define combatStatus {
       )
     );
     listenTo all;
-    :disposeCard(:player.pile[0]);
+    :discard(:player.pile[0]);
   };
-  on disposeCard {
+  on discard {
     when :( :e.via?.caller.id === :self.id );
     usage 1 {
       append 3;
@@ -155,7 +155,7 @@ define skill {
     ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 5)
     : 0;
   :damage(DamageType.Hydro, 1 + extraDmg);
-  const [card] = :disposeMaxCostHands(1);
+  const [card] = :discardMaxCostHands(1);
   if (card) {
     if (:self.hasEquipment(LightlessFeeding)) {
       :heal(card.diceCost(), :self);
@@ -660,7 +660,7 @@ define card {
     on actionPhase {
       const memory = :getVariable("memory");
       if (memory < 2) {
-        const disposed = :disposeMaxCostHands(2 - memory);
+        const disposed = :discardMaxCostHands(2 - memory);
         const count = disposed.length;
         :addVariableWithMax("memory", count, 2);
       }

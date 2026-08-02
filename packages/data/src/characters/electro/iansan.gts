@@ -130,7 +130,7 @@ define skill {
       :addVariable("gainNightsoulPassiveUsagePerRound", -1);
     };
     // 我方角色准备技能
-    on enter {
+    on entityEnter {
       when :(
         :self.hasNightsoulsBlessing() &&
           :getVariable("gainNightsoulPassiveUsagePerRound") &&
