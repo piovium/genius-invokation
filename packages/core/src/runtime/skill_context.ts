@@ -41,6 +41,7 @@ import {
   ZeroHealthEventArg,
   ReactionEventArg,
   type CoreSkillResult,
+  HandCardInsertedEventArg,
 } from "../base/skill";
 import {
   type CharacterState as CharacterStateO,
@@ -306,7 +307,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
    */
   private preprocessEventList(): CoreSkillResult {
     const otherEvents: EventAndRequest[] = [];
-    const hciEvents: EventAndRequest[] = [];
+    const hciEvents: Extract<
+      EventAndRequest,
+      ["onHandCardInserted", unknown]
+    >[] = [];
     const safeDamageEvents: EventAndRequest[] = [];
     const criticalDamageEvents: EventAndRequest[] = [];
 
@@ -434,6 +438,20 @@ export class SkillContext<Meta extends ContextMetaBase> {
         type: "setWinner",
         winner: flip(who),
       });
+    }
+    if (this.rawState.config.hostRelatedExecution) {
+      const cards = [
+        ...this.rawState.players[this.rawState.config.hostWho].hands,
+        ...this.rawState.players[flip(this.rawState.config.hostWho)].hands,
+      ];
+      const indexOfHciEvent = (e: HandCardInsertedEventArg) => {
+        const index = cards.findIndex((c) => c.id === e.card.id);
+        if (index === -1) {
+          return Number.POSITIVE_INFINITY;
+        }
+        return index;
+      };
+      hciEvents.sort(([, a], [, b]) => indexOfHciEvent(a) - indexOfHciEvent(b));
     }
 
     const emittedEvents = [

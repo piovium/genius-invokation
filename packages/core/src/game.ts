@@ -758,15 +758,14 @@ export class Game {
           );
         }
         // 消耗骰子，同时第二遍检查骰子存在性；
-        // 由于 modifyAction 级联结算可能已（意外地合法）消耗所选骰子，根据 versionBehavior 决定如何处理
+        // 由于 modifyAction 级联结算可能已（意外地合法）消耗所选骰子，根据 config 决定如何处理
         const operatingDice = [...player().dice];
         let shouldConsumeDice = true;
         let skipAction = false;
         for (const type of usedDice) {
           const idx = operatingDice.indexOf(type as DiceType);
           if (idx === -1) {
-            const behavior =
-              this.state.versionBehavior.unexpectedInsufficientDice;
+            const behavior = this.state.config.unexpectedInsufficientDice;
             if (behavior === "throw") {
               throw new GiTcgCoreConflictError(
                 `Due to action modification, selected dice ${type} doesn't found in player ${who}. Current dice: ${JSON.stringify(player().dice)}`,

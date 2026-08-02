@@ -83,12 +83,7 @@ test.each(["throw", "skipConsume", "skipAction", void 0] as const)(
     const myActive = ref();
     const myNext = ref();
     const c = setup(
-      <State
-        dataVersion="v6.5.0"
-        versionBehavior={
-          unexpectedInsufficientDice ? { unexpectedInsufficientDice } : void 0
-        }
-      >
+      <State dataVersion="v6.5.0" config={{ unexpectedInsufficientDice }}>
         <Character opp active def={Baizhu}>
           <Status def={Target} />
         </Character>
