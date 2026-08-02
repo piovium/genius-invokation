@@ -219,7 +219,7 @@ define card {
     on staged {
       :apply(DamageType.Pyro, :e.targets[0]);
     };
-    on dispose {
+    on entityDispose {
       when :{
         return (
           (:e.entity.definition.type === "combatStatus" ||

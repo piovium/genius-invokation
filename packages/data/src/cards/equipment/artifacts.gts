@@ -1222,7 +1222,7 @@ define card {
         :e.switchInfo.to.id === :self.master.id && :player.hands.length > 0
       );
       usage perRound, 1;
-      :disposeMaxCostHands(1);
+      :discardMaxCostHands(1);
       :convertDice(DiceType.Omni, 2);
       :characterStatus(ConductorsTopHatInEffect, :self.master);
     };

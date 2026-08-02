@@ -67,7 +67,7 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   :damage(DamageType.Pyro, 2);
-  :disposeMaxCostHands(1);
+  :discardMaxCostHands(1);
   :combatStatus(ShieldOfPassion);
 };
 
@@ -86,7 +86,7 @@ define skill {
   :damage(DamageType.Physical, 3);
   :abortPreview();
   const cards = :player.hands.toSorted((a, b) => b.diceCost() - a.diceCost());
-  :disposeCard(...cards);
+  :discard(...cards);
   :combatStatus(FestiveFires);
 };
 

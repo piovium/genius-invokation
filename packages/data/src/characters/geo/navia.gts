@@ -94,7 +94,7 @@ define skill {
     .filter((card) => card.definition.id === CrystalShrapnel)
     .slice(0, 5);
   :damage(DamageType.Geo, 3 + shrapnels.length);
-  :disposeCard(...shrapnels);
+  :discard(...shrapnels);
   :drawCards(shrapnels.length);
 };
 

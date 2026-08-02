@@ -33,7 +33,7 @@ define status {
     usage perRound, 1;
     :e.increaseDamage(1);
   };
-  on dispose {
+  on entityDispose {
     when :( :e.entity.definition.id === Stonehide );
     :dispose();
   };

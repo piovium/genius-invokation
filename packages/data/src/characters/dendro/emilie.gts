@@ -161,7 +161,7 @@ define skill {
 define skill {
   id 17104 as LingeringFragrance01;
   skillType passive {
-    on enterRelative {
+    on entityEnter {
       when :( :e.entity.definition.id === BurningFlame );
       listenTo samePlayer;
       usage perRound, 2 {

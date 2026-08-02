@@ -46,7 +46,7 @@ define status {
   id 122053 as MistBubbleLockdownPreparing;
   since "v5.0.0";
   prepare MistBubbleLockdown;
-  on dispose {
+  on entityDispose {
     when :( :e.entity.definition.id === MistBubbleSlime );
     :dispose();
   };

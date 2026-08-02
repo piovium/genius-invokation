@@ -202,7 +202,7 @@ define summon {
     usage 1;
     :damage(DamageType.Piercing, :getVariable("effect"));
   };
-  on enter {
+  on selfEnter {
     const ext = :getExtensionState();
     const addUsage = Math.min(ext.disposedSupportCount[:self.who], 5);
     const addDmg = Math.min(ext.disposedSummonsCount[:self.who], 5);

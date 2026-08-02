@@ -90,7 +90,7 @@ define skill {
       :characterStatus(ElectroElementalInfusion);
     }
     if (lightningStilettoCard) {
-      :disposeCard(lightningStilettoCard);
+      :discard(lightningStilettoCard);
     }
   } else {
     :createHandCard(LightningStiletto);

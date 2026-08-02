@@ -149,7 +149,7 @@ define status {
 define combatStatus {
   id 127029 as HeartOfOasis;
   variable organismCount, 0;
-  on enterRelative {
+  on entityEnter {
     when :(
       [
         ProliferatedOrganism01,

@@ -43,7 +43,12 @@ import {
   type CreateEntityOptions,
   type InsertEntityOptions,
 } from "./utils";
-import { GiTcgCoreInternalError, GiTcgDataError, GiTcgIoError, GiTcgIoNotProvideError } from "./error";
+import {
+  GiTcgCoreInternalError,
+  GiTcgDataError,
+  GiTcgIoError,
+  GiTcgIoNotProvideError,
+} from "./error";
 import {
   CharacterEventArg,
   type DamageInfo,
@@ -177,8 +182,7 @@ export type InsertHandPayload =
     });
 
 export type InsertPilePayload =
-  | Omit<CreateEntityM, "targetIndex">
-  | Omit<MoveEntityM, "targetIndex">;
+  Omit<CreateEntityM, "targetIndex"> | Omit<MoveEntityM, "targetIndex">;
 
 export interface InsertHandCardOption {
   /** 不执行爆牌逻辑；用于直接打出的场景（冒险/汤/烟谜主） */
@@ -988,7 +992,7 @@ export class StateMutator {
         DetailLogType.Other,
         "Because of immuneControl, entities with disableSkill cannot be created",
       );
-      return { oldState: null, newState: null, events: [] };
+      return { oldState: null, newState: null, events };
     }
     const oldState = shouldEnterOverride(entitiesAtArea, definition);
     const newVariables = getInsertedStateVariables({
@@ -1001,11 +1005,6 @@ export class StateMutator {
     let newStateId: number;
     const moveFrom =
       "id" in stateOrDef ? getEntityArea(this.state, stateOrDef.id) : null;
-    // 移入场上，触发 onEnter
-    const shouldEmitEnter =
-      moveFrom === null ||
-      moveFrom.type === "hands" ||
-      moveFrom.type === "pile";
 
     if (oldState) {
       if (moveFrom) {
@@ -1029,7 +1028,6 @@ export class StateMutator {
         )} at same area. Rewriting variables`,
       );
       for (const [varName, value] of Object.entries(newVariables)) {
-        const oldValue = oldState.variables[varName];
         this.mutate({
           type: "modifyEntityVar",
           state: oldState,
@@ -1044,13 +1042,13 @@ export class StateMutator {
         area.type === "summons" &&
         entitiesAtArea.length >= this.state.config.maxSummonsCount
       ) {
-        return { oldState: null, newState: null, events: [] };
+        return { oldState: null, newState: null, events };
       }
       if (
         area.type === "supports" &&
         entitiesAtArea.length >= this.state.config.maxSupportsCount
       ) {
-        return { oldState: null, newState: null, events: [] };
+        return { oldState: null, newState: null, events };
       }
 
       if (moveFrom) {
@@ -1088,7 +1086,7 @@ export class StateMutator {
       }
     }
     const newState = getEntityById(this.state, newStateId) as EntityState;
-    if (shouldEmitEnter) {
+    if (!moveFrom) {
       events.push([
         "onEnter",
         new EnterEventArg(this.state, {

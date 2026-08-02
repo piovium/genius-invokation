@@ -1345,7 +1345,7 @@ define combatStatus {
   since "v4.3.0";
   usage 2;
   oneDuration;
-  on dispose {
+  on entityDispose {
     when :( :e.entity.definition.type === "equipment" );
     :generateDice(DiceType.Omni, 1);
     :consumeUsage();
@@ -1584,7 +1584,7 @@ define card {
     !:query($.my.combatStatus.def(BonecrunchersEnergyBlockCombatStatus))
   );
   :abortPreview();
-  :disposeMaxCostHands(1);
+  :discardMaxCostHands(1);
   const activeCh = :query($.my.active)!;
   :generateDice(activeCh.element(), 1);
   :combatStatus(BonecrunchersEnergyBlockCombatStatus);
@@ -1902,7 +1902,7 @@ define combatStatus {
       :drawCards(1);
     } else {
       const target = :random(:player.hands);
-      :disposeCard(target);
+      :discard(target);
     }
   };
 };
@@ -2248,7 +2248,7 @@ define card {
       :drawCards(1);
     }
   };
-  :disposeMaxCostHands(2);
+  :discardMaxCostHands(2);
   const handsLength = :player.hands.length;
   if (handsLength < 4) {
     :drawCards(4 - handsLength);
@@ -2280,7 +2280,7 @@ define status {
  */
 define status {
   id 303241 as FruitsOfTrainingInEffect01;
-  on enterRelative {
+  on entityEnter {
     when :(
       :e.entity.definition.type === "status" &&
         :e.entity.definition.tags.includes("preparingSkill") &&
@@ -2567,7 +2567,7 @@ define summon {
     usage 1;
     :damage(DamageType.Piercing, :getVariable("effect"));
   };
-  on enter {
+  on selfEnter {
     const ext = :getExtensionState();
     const addUsage = Math.min(ext.disposedSupportCount[:self.who], 4);
     const addDmg = Math.min(ext.disposedSummonsCount[:self.who], 4);

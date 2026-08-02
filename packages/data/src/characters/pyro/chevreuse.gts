@@ -170,7 +170,7 @@ define skill {
         (card) => card.definition.id === OverchargedBall,
       );
       if (ball) {
-        :disposeCard(ball);
+        :discard(ball);
         :heal(1, $.macros.myMostInjured);
       }
     };

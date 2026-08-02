@@ -47,7 +47,7 @@ define summon {
     usage 2;
     :damage(:self.variables.hintIcon, 1);
   };
-  on enter {
+  on selfEnter {
     :combatStatus(BogglecatBoxsTaunt);
   };
   on actionPhase {

@@ -223,7 +223,7 @@ define card {
       id 3130063;
       usage 2;
       cost DiceType.Aligned, 1;
-      :disposeMaxCostHands(1);
+      :discardMaxCostHands(1);
       :switchActive($.my.next);
       :characterStatus(Target, $.opp.active);
     };
@@ -355,7 +355,7 @@ define combatStatus {
       :dispose();
     }
   };
-  on enter {
+  on selfEnter {
     :setVariable(
       "techniquesPlayedCount",
       :getExtensionState().techniquesPlayedCount[:self.who],

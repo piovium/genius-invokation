@@ -48,7 +48,7 @@ define summon {
     usage 3;
     :damage(DamageType.Pyro, 1);
   };
-  on enter {
+  on selfEnter {
     :combatStatus(FierySanctumsProtection);
   };
   on actionPhase {

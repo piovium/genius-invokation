@@ -33,7 +33,7 @@ define status {
     usage 2;
     :e.deductCost(DiceType.Anemo, 1);
   };
-  on dispose {
+  on entityDispose {
     when :( :e.entity.definition.id === YakshasMask );
     :dispose();
   };

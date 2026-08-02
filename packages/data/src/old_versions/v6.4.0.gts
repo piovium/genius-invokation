@@ -103,7 +103,7 @@ define card {
   undiscoverable;
   const hand = :player.hands.find((card) => card.diceCost() === 3);
   if (hand) {
-    :disposeCard(hand);
+    :discard(hand);
     const skirk = :query(
       $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     );

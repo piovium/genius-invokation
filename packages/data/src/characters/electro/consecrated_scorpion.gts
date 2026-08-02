@@ -77,7 +77,7 @@ define skill {
   const cards = :player.hands
     .filter((card) => card.definition.id === BonecrunchersEnergyBlock)
     .slice(0, 3);
-  :disposeCard(...cards);
+  :discard(...cards);
   if (cards.length) {
     :combatStatus(ThunderboreTrap, "opp", {
       overrideVariables: { usage: cards.length },

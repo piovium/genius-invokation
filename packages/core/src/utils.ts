@@ -536,19 +536,11 @@ export function shouldEnterOverride<T extends AnyState>(
   exists: T[],
   incoming: T["definition"],
 ): T | null {
-  if (incoming.type === "character") {
+  if (incoming.type === "character" || incoming.type === "support") {
     return null;
   }
   const existOne =
     exists.find((et) => et.definition.id === incoming.id) ?? null;
-  if (incoming.type === "support") {
-    // 仅冒险地点可叠加
-    if (incoming.tags.includes("adventureSpot")) {
-      return existOne;
-    } else {
-      return null;
-    }
-  }
   // 状态、装备、出战状态、召唤物 可叠加
   return existOne;
 }
@@ -1035,12 +1027,8 @@ export function computeConvertDice(
   return finalDice;
 }
 
-type TupleIndices<T extends readonly unknown[]> = Extract<
-  keyof T,
-  `${number}`
-> extends `${infer N extends number}`
-  ? N
-  : never;
+type TupleIndices<T extends readonly unknown[]> =
+  Extract<keyof T, `${number}`> extends `${infer N extends number}` ? N : never;
 
 declare global {
   interface ReadonlyArray<T> {

@@ -255,7 +255,7 @@ define card {
     on decreaseDamaged {
       when :( :player.hands.length > 0 );
       usage perRound, 1;
-      :disposeMaxCostHands(1);
+      :discardMaxCostHands(1);
       :e.decreaseDamage(1);
       :addVariable("solidarity", 1);
     };

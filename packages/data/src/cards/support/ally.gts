@@ -359,7 +359,7 @@ define card {
   since "v3.7.0";
   support ally {
     variable progress, 0;
-    on dispose {
+    on entityDispose {
       when :( :e.entity.definition.type === "summon" );
       listenTo all;
       :addVariableWithMax("progress", 1, 3);
@@ -621,7 +621,7 @@ define card {
         Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
       );
     };
-    on dispose {
+    on entityDispose {
       when :( :e.entity.definition.type === "support" );
       :setVariable(
         "experience",
@@ -776,7 +776,7 @@ define card {
   since "v4.7.0";
   support ally {
     variable clue, 0;
-    on disposeOrTuneCard {
+    on discardOrTuneCard {
       :addVariableWithMax("clue", 1, 2);
     };
     on endPhase {
@@ -944,7 +944,7 @@ define card {
       :createHandCard(ToyGuard);
       :createPileCards(ToyGuard, 2, "random");
     };
-    on enterRelative {
+    on entityEnter {
       when :(
         :e.entity.definition.type === "summon" &&
           (SIMULANKA_SUMMONS as number[]).includes(:e.entity.definition.id)
@@ -1169,7 +1169,7 @@ define card {
   }
   const randomCard = :random(:player.hands);
   if (randomCard) {
-    :disposeCard(randomCard);
+    :discard(randomCard);
     const targetPlan = :random([
       GraphAdversarialTechnologyInvestmentGrandPlan,
       GraphAdversarialTechnologyInvestmentMegaPlan,

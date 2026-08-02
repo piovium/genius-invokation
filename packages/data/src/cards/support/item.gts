@@ -263,7 +263,7 @@ define card {
     on actionPhase {
       const memory = :getVariable("memory");
       if (memory < 2) {
-        const disposed = :disposeMaxCostHands(2 - memory);
+        const disposed = :discardMaxCostHands(2 - memory);
         const count = disposed.length;
         :addVariableWithMax("memory", count, 2);
       }

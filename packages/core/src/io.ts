@@ -358,7 +358,7 @@ export function exposeMutation(
         ["overflow", "elementalTuning"].includes(m.reason);
       const REASON_MAP: Record<RemoveEntityM["reason"], PbRemoveEntityReason> =
         {
-          cardDisposed: PbRemoveEntityReason.CARD_DISPOSED,
+          discarded: PbRemoveEntityReason.DISCARDED,
           targetOfSupportPlayed:
             PbRemoveEntityReason.TARGET_OF_SUPPORT_PLAYED,
           elementalTuning: PbRemoveEntityReason.ELEMENTAL_TUNING,

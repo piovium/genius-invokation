@@ -42,7 +42,7 @@ define summon {
     visible false;
   };
   hint DamageType.Electro, ((c, e) => e.variables.atk);
-  on enter {
+  on selfEnter {
     const domain = :query($.my.combatStatus.def(DeepDevourersDomain))!;
     const maxCost = domain.getVariable("totalMaxCost");
     const count = domain.getVariable("totalMaxCostCount");
@@ -132,7 +132,7 @@ define combatStatus {
   };
   replaceDescription "[GCG_TOKEN_SHIELD]",
     ((_, self) => self.variables.extraMaxHealth);
-  on disposeOrTuneCard {
+  on discardOrTuneCard {
     when :( :e.from.type === "hands" || :e.isTuning() );
     const cost = :e.diceCost();
     :addVariable("cardCount", 1);
@@ -214,7 +214,7 @@ define skill {
     ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 3)
     : 0;
   :damage(DamageType.Hydro, 1 + extraDmg);
-  const [card] = :disposeMaxCostHands(1);
+  const [card] = :discardMaxCostHands(1);
   if (card) {
     :emitCustomEvent(StarfallShowerDisposeCard, card.latest());
   }

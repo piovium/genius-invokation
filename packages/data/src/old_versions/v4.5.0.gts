@@ -164,7 +164,7 @@ define card {
         Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
       );
     };
-    on dispose {
+    on entityDispose {
       when :( :e.entity.definition.type === "support" );
       :setVariable(
         "experience",

@@ -43,9 +43,9 @@ define combatStatus {
       )
     );
     listenTo all;
-    :disposeCard(:player.pile[0]);
+    :discard(:player.pile[0]);
   };
-  on disposeCard {
+  on discard {
     when :( :e.via?.caller.id === :self.id );
     usage 1 {
       append 3;

@@ -192,7 +192,7 @@ define character {
 define combatStatus {
   id 211142 as MamaloacosFrigidRainInEffect;
   since "v5.7.0";
-  on enter {
+  on selfEnter {
     when :( :query($.my.character.def(Citlali))?.hasNightsoulsBlessing() );
     :gainNightsoul($.my.character.def(Citlali));
   };

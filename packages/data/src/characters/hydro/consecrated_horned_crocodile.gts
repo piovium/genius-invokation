@@ -61,7 +61,7 @@ define skill {
   const blocks = :player.hands
     .filter((card) => card.definition.id === BonecrunchersEnergyBlock)
     .slice(0, 3);
-  :disposeCard(...blocks);
+  :discard(...blocks);
   const target = :query($.macros.myMostInjured);
   if (target) {
     :heal(blocks.length, target);
@@ -82,7 +82,7 @@ define skill {
       when :( :e.card.definition.id === BonecrunchersEnergyBlock );
       :heal(1, $.macros.myMostInjured);
     };
-    on disposeCard {
+    on discard {
       when :( :e.entity.definition.id === BonecrunchersEnergyBlock );
       :heal(1, $.macros.myMostInjured);
     };

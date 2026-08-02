@@ -125,7 +125,7 @@ define summon {
     usage 2;
     :damage(DamageType.Pyro, 1);
   };
-  on enter {
+  on selfEnter {
     if (:query($.my.equipped.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,
@@ -177,7 +177,7 @@ define summon {
       :damage(DamageType.Pyro, 1);
     }
   };
-  on enter {
+  on selfEnter {
     if (:query($.my.equipped.def(Scorpocalypse))) {
       :characterStatus(
         PyroScorpionGuardianStance01,

@@ -827,7 +827,7 @@ export class EntityViewModel extends defineViewModel(
         if (c.self.area.type !== "hands") {
           return;
         }
-        c.disposeCard(self);
+        c.discard(self);
         c.createEntity("support", self.definition.id as SupportHandle, {
           who: c.self.area.who,
           type: "supports",
@@ -944,7 +944,7 @@ export class EntityViewModel extends defineViewModel(
       } else {
         conflictIds.push(...(args as number[]));
       }
-      const enterSkill = new TriggeredSkillModel(model, "enter");
+      const enterSkill = new TriggeredSkillModel(model, "selfEnter");
       enterSkill.id = model.getSubId();
       enterSkill.action = function (c) {
         const selfArea = c.self.area;
@@ -1020,11 +1020,11 @@ export class EntityViewModel extends defineViewModel(
         return;
       }
       if (
-        eventName === "enter" &&
+        eventName === "selfEnter" &&
         !["status", "combatStatus", "summon"].includes(model.type)
       ) {
         throw new GiTcgDataError(
-          "Only status, combatStatus, and summon can have `enter` handling. For support and equipment, use `on staged { ... };` instead.",
+          "Only status, combatStatus, and summon can have `selfEnter` handling. For support and equipment, use `on staged { ... };` instead.",
         );
       }
       const skillModel = TriggeredSkillViewModel.parse(

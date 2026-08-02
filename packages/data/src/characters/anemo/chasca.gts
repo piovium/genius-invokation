@@ -51,7 +51,7 @@ define card {
       );
       :consumeNightsoul(:self.master, 1);
       :damage(DamageType.Anemo, 1);
-      :disposeMaxCostHands(3, { allowPreview: true });
+      :discardMaxCostHands(3, { allowPreview: true });
     };
   };
 };

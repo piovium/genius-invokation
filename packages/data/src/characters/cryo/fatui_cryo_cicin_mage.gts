@@ -58,7 +58,7 @@ define summon {
 define combatStatus {
   id 121012 as FlowingCicinShield;
   shield 1;
-  on enter {
+  on selfEnter {
     const cicins = :query($.my.summon.def(CryoCicins));
     if (cicins) {
       const extraShield = Math.min(cicins.getVariable("usage"), 3);

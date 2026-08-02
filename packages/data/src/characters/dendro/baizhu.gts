@@ -59,7 +59,7 @@ define combatStatus {
       :generateDice(active.element(), 1);
     }
   };
-  on enter {
+  on selfEnter {
     when :( :e.overridden );
     :callSnippet();
   };

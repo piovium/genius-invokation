@@ -91,7 +91,7 @@ define skill {
     overrideVariables: { stack },
   });
   :damage(DamageType.Anemo, 2);
-  :disposeCard(...cards);
+  :discard(...cards);
 };
 
 /**

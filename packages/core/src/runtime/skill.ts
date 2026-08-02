@@ -485,10 +485,10 @@ export const detailedEventDictionary = {
       return r.callerId === e.card.id && r.callerArea.type !== "pile";
     },
   ),
-  disposeCard: defineDescriptor("onDispose", (e, r) => {
+  discard: defineDescriptor("onDispose", (e, r) => {
     return e.isDiscard() && checkRelative(e.onTimeState, { who: e.who }, r);
   }),
-  disposeOrTuneCard: defineDescriptor("onDispose", (e, r) => {
+  discardOrTuneCard: defineDescriptor("onDispose", (e, r) => {
     return (
       e.isDiscardOrTuning() && checkRelative(e.onTimeState, { who: e.who }, r)
     );
@@ -527,19 +527,19 @@ export const detailedEventDictionary = {
   dealReaction: defineDescriptor("onReaction", (e, r) => {
     return checkRelative(e.onTimeState, e.caller.id, r);
   }),
-  enter: defineDescriptor("onEnter", (e, r) => {
+  selfEnter: defineDescriptor("onEnter", (e, r) => {
     return e.entity.id === r.callerId;
   }),
-  enterRelative: defineDescriptor("onEnter", (e, r) => {
+  entityEnter: defineDescriptor("onEnter", (e, r) => {
     return checkRelative(e.onTimeState, e.entity.id, r);
-  }),
-  dispose: defineDescriptor("onDispose", (e, r) => {
-    return (
-      !e.isDiscardOrTuning() && checkRelative(e.onTimeState, e.entity.id, r)
-    );
   }),
   selfDispose: defineDescriptor("onDispose", (e, r) => {
     return e.entity.id === r.callerId;
+  }),
+  entityDispose: defineDescriptor("onDispose", (e, r) => {
+    return (
+      !e.isDiscardOrTuning() && checkRelative(e.onTimeState, e.entity.id, r)
+    );
   }),
   defeated: defineDescriptor("onDamageOrHeal", (e, r) => {
     return (
