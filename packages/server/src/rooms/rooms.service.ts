@@ -72,19 +72,21 @@ import type {
 import { DecksService } from "../decks/decks.service";
 import { UsersService } from "../users/users.service";
 import { GamesService } from "../games/games.service";
-import { inspect  } from "node:util";
+import { inspect } from "node:util";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import semver from "semver";
 import { redis } from "../redis";
 
-const s3 = process.env.S3_ENDPOINT ? new S3Client({
-  region: process.env.S3_REGION,
-  endpoint: process.env.S3_ENDPOINT,
-  credentials: {
-    accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-  }
-}) : null;
+const s3 = process.env.S3_ENDPOINT
+  ? new S3Client({
+      region: process.env.S3_REGION,
+      endpoint: process.env.S3_ENDPOINT,
+      credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+      },
+    })
+  : null;
 
 interface RoomConfig extends Partial<GameConfig> {
   initTotalActionTime: number; // defaults 45
@@ -516,6 +518,8 @@ class Room {
         decks: [player0.playerInfo.deck, player1.playerInfo.deck],
         data: getData(this.config.gameVersion),
         versionBehavior: this.config.gameVersion,
+        hostRelatedExecution: true,
+        hostWho: this.hostWho,
       });
     } catch (e) {
       this.stop();
@@ -740,7 +744,7 @@ export class RoomsService {
   }
 
   private async createRoom(playerInfo: PlayerInfo, params: CreateRoomDto) {
-    let deploying = await redis?.get("meta:deploying") ?? null;
+    let deploying = (await redis?.get("meta:deploying")) ?? null;
     if (this.shutdownResolvers || deploying !== null) {
       throw new ConflictException(
         "Creating room is disabled now; we are planning a maintenance",
@@ -801,7 +805,7 @@ export class RoomsService {
       if (game) {
         this.metrics.incrementFinishedRooms();
       }
-      let deploying = await redis?.get("meta:deploying") ?? null;      
+      let deploying = (await redis?.get("meta:deploying")) ?? null;
 
       const keepRoomDuration =
         (this.shutdownResolvers || deploying ? 1 : 5) * 60 * 1000;
@@ -814,7 +818,7 @@ export class RoomsService {
       }
       this.logger.log(`Room ${room.id} removed`);
       await redis?.hdel("meta:active_rooms", String(room.id));
-      
+
       this.rooms.delete(room.id);
       this.roomIdPool.push(room.id);
       if (this.rooms.size === 0) {
@@ -937,12 +941,11 @@ export class RoomsService {
           Body: gameData,
           ContentType: "application/json",
         });
-        s3.send(command)
-          .catch((error) => {
-            this.logger.warn(
-              `Failed to upload room ${room.id} game log: ${error}`,
-            );
-          });
+        s3.send(command).catch((error) => {
+          this.logger.warn(
+            `Failed to upload room ${room.id} game log: ${error}`,
+          );
+        });
       }
       if (players.some((p) => p.playerInfo.isGuest)) {
         return;

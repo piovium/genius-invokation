@@ -33,6 +33,7 @@ import {
   CURRENT_VERSION,
   EntityDefinition,
   setAsyncContext,
+  mergeGameConfigWithDefault,
 } from "@gi-tcg/core";
 import {
   Aura,
@@ -187,6 +188,7 @@ export function DiceCount(props: DiceCount.Prop): JSX.Element {
 export namespace State {
   export interface Prop {
     dataVersion?: Version;
+    config?: Partial<GameState["config"]>;
     versionBehavior?: Partial<VersionBehavior>;
     enableRoll?: boolean;
     phase?: PhaseType;
@@ -530,15 +532,8 @@ export function setup(state: JSX.Element): TestController {
     [StateSymbol]: "game",
     data,
     config: {
-      initialDiceCount: 8,
-      initialHandsCount: 5,
-      maxDiceCount: 16,
-      maxHandsCount: 10,
-      maxPileCount: 200,
-      maxRoundsCount: 15,
-      maxSummonsCount: 4,
-      maxSupportsCount: 4,
-      randomSeed: 0,
+      ...mergeGameConfigWithDefault(stateProp.config),
+      randomSeed: stateProp.config?.randomSeed ?? 0,
     },
     versionBehavior: {
       ...getVersionBehavior(stateProp.dataVersion ?? CURRENT_VERSION),
