@@ -53,7 +53,7 @@ import type {
   RpcResponsePayloadOf,
 } from "@gi-tcg/core";
 import { QueueManager } from "./queue_manager";
-import { parseMutations } from "./mutations";
+import { ActionNotificationTracker, parseMutations } from "./mutations";
 import { translations, UiContext, type Locale } from "./hooks/context";
 import {
   createActionState,
@@ -202,6 +202,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   const [opp, setOpp] = createSignal<OppInfo | null>(null);
 
   const uiQueue = new QueueManager<AnimationMeta>();
+  const actionNotificationTracker = new ActionNotificationTracker();
   let savedState: PbGameState | undefined = void 0;
 
   const actionResolvers: {
@@ -348,7 +349,11 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       uiQueue.push(
         async () => {
           state = oppController.mergeState(state!);
-          const parsed = parseMutations(mutation, oppController);
+          const parsed = parseMutations(
+            mutation,
+            oppController,
+            actionNotificationTracker,
+          );
           setHistory(
             produce((history) => updateHistory(savedState, mutation, history)),
           );

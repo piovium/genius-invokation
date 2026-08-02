@@ -96,9 +96,36 @@ export interface ParsedMutation {
   disposingEntities: number[];
 }
 
+interface RpcInfo {
+  who: 0 | 1;
+  status: PbPlayerStatus;
+}
+
+/**
+ * Tracks RPC requests to avoid repeating the action-turn notification for
+ * consecutive action RPCs belonging to the same player.
+ */
+export class ActionNotificationTracker {
+  private previousRpc: RpcInfo | null = null;
+
+  update(who: 0 | 1, status: PbPlayerStatus): boolean {
+    if (status === PbPlayerStatus.UNSPECIFIED) {
+      return false;
+    }
+    const shouldShow =
+      status === PbPlayerStatus.ACTING &&
+      this.previousRpc !== null &&
+      (this.previousRpc.status !== PbPlayerStatus.ACTING ||
+        this.previousRpc.who !== who);
+    this.previousRpc = { who, status };
+    return shouldShow;
+  }
+}
+
 export function parseMutations(
   mutations: PbExposedMutation[],
   oppController?: OppChessboardController,
+  actionNotificationTracker?: ActionNotificationTracker,
 ): ParsedMutation {
   const oppKnownCardState =
     !oppController || oppController.closed ? null : oppController.handCards;
@@ -343,8 +370,16 @@ export function parseMutations(
         break;
       }
       case "playerStatusChange": {
-        if (mutation.value.status === PbPlayerStatus.ACTING) {
-          roundAndPhase.who = mutation.value.who as 0 | 1;
+        const who = mutation.value.who as 0 | 1;
+        const shouldShowAction = actionNotificationTracker?.update(
+          who,
+          mutation.value.status,
+        );
+        if (
+          mutation.value.status === PbPlayerStatus.ACTING &&
+          (actionNotificationTracker === void 0 || shouldShowAction)
+        ) {
+          roundAndPhase.who = who;
           roundAndPhase.value = "action";
         }
         break;
