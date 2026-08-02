@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { version } from "../package.json" /*  with { type: "json" } */;
+import { version } from "../package.json"; /*  with { type: "json" } */
 export { version as CORE_VERSION };
 export {
   Game,
@@ -58,12 +58,7 @@ export * from "./error";
 export { getEntityById, getEntityArea, playSkillOfCard } from "./utils";
 export * from "@gi-tcg/typings";
 
-import type {
-  ExEntityType,
-  HandleT,
-  ExEntityState,
-  ExTag,
-} from "./data/type";
+import type { ExEntityType, HandleT, ExEntityState, ExTag } from "./data/type";
 export declare namespace DataTypes {
   export type { ExEntityType, HandleT, ExEntityState, ExTag };
 }

@@ -62,6 +62,31 @@ export interface GameConfig {
   readonly maxSummonsCount: number;
   readonly initialDiceCount: number;
   readonly maxDiceCount: number;
+
+  /**
+   * modifyAction 级联结算过程中所选骰子已被意外消耗时的处理方式。
+   *
+   * - `throw`：报错并退出对局。
+   * - `skipConsume`：不再消耗骰子，继续执行行动。
+   * - `skipAction`：不再消耗骰子，也不执行行动本身。
+   *
+   * @defaults `skipConsume`
+   */
+  readonly unexpectedInsufficientDice: InsufficientDiceBehavior;
+
+  /**
+   * 房主玩家编号。当开启 `hostRelatedExecution` 时，房主-房客顺序将影响部分结算效果。
+   */
+  readonly hostWho: 0 | 1;
+
+  /**
+   * 是否启用房主-房客相关的结算执行顺序。
+   * 1. 战斗开始时的事件响应顺序为房主 -> 房客，而非默认的 0 -> 1。
+   * 2. HCI 事件的重排顺序为 0 -> 1，而非触发先后顺序。
+   * 
+   * @defaults `false`
+   */
+  readonly hostRelatedExecution: boolean;
 }
 
 export const getDefaultGameConfig = (): GameConfig => ({
@@ -74,6 +99,9 @@ export const getDefaultGameConfig = (): GameConfig => ({
   maxSummonsCount: 4,
   maxSupportsCount: 4,
   randomSeed: randomSeed(),
+  unexpectedInsufficientDice: "skipConsume",
+  hostWho: 0,
+  hostRelatedExecution: false,
 });
 
 export type InsufficientDiceBehavior = "throw" | "skipConsume" | "skipAction";
@@ -105,17 +133,6 @@ export interface VersionBehavior {
    * @note v6.4.0 起设置为 `true`
    */
   readonly diceCostApplyAttachments: boolean;
-
-  /**
-   * modifyAction 级联结算过程中所选骰子已被意外消耗时的处理方式。
-   *
-   * - `throw`：报错并退出对局。
-   * - `skipConsume`：不再消耗骰子，继续执行行动。
-   * - `skipAction`：不再消耗骰子，也不执行行动本身。
-   *
-   * @defaults `skipConsume`
-   */
-  readonly unexpectedInsufficientDice: InsufficientDiceBehavior;
 }
 
 export const getVersionBehavior = (version: Version): VersionBehavior => ({
@@ -125,7 +142,6 @@ export const getVersionBehavior = (version: Version): VersionBehavior => ({
   foodOmitInjuredOnly: !versionLt(version, "v6.1.0"),
   discardMaxCostHandsAbortPreview: !versionLt(version, "v6.1.0"),
   diceCostApplyAttachments: !versionLt(version, "v6.4.0"),
-  unexpectedInsufficientDice: "skipConsume",
 });
 
 export interface IteratorState {

@@ -276,6 +276,24 @@ function getAllEntitiesImpl(
   return withArea ? resultWithArea : result;
 }
 
+/**
+ * Get all characters listening to `onBattleBegin`. Consider `config.hostRelatedExecution`.
+ * @param state
+ * @returns
+ */
+export function getAllCharacters(state: GameState): CharacterState[] {
+  if (state.config.hostRelatedExecution) {
+    return [
+      ...state.players[state.config.hostWho].characters,
+      ...state.players[flip(state.config.hostWho)].characters,
+    ];
+  } else {
+    return getAllEntities(state).filter(
+      (st): st is CharacterState => st.definition.type === "character",
+    );
+  }
+}
+
 export interface CallerAndTriggeredSkill {
   caller: AnyState;
   skill: TriggeredSkillDefinition;
@@ -355,7 +373,9 @@ export function allSkills(
       }
     }
   }
-  for (const entity of getAllEntities(state)) {
+  const collectFn =
+    triggerOn === "onBattleBegin" ? getAllCharacters : getAllEntities;
+  for (const entity of collectFn(state)) {
     for (const skill of entity.definition.skills) {
       if (skill.triggerOn === triggerOn) {
         result.push({ caller: entity, skill });
