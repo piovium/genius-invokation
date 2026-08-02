@@ -572,7 +572,7 @@ define card {
     };
     on healed {
       usage perRound, 1;
-      :damage(DamageType.Anemo, 2, $.opp.active);
+      :damage(DamageType.Anemo, 2, $.macros.oppActivePrioritized);
     };
   };
 };
