@@ -96,39 +96,22 @@ export interface ParsedMutation {
   disposingEntities: number[];
 }
 
-interface RpcInfo {
-  who: 0 | 1;
-  status: PbPlayerStatus;
-}
-
-/**
- * Tracks RPC requests to avoid repeating the action-turn notification for
- * consecutive action RPCs belonging to the same player.
- */
-export class ActionNotificationTracker {
-  private previousRpc: RpcInfo | null = null;
-
-  update(who: 0 | 1, status: PbPlayerStatus): boolean {
-    if (status === PbPlayerStatus.UNSPECIFIED) {
-      return false;
-    }
-    const shouldShow =
-      status === PbPlayerStatus.ACTING &&
-      this.previousRpc !== null &&
-      (this.previousRpc.status !== PbPlayerStatus.ACTING ||
-        this.previousRpc.who !== who);
-    this.previousRpc = { who, status };
-    return shouldShow;
-  }
+export interface ParseMutationContext {
+  oppController: OppChessboardController;
+  previousPlayerStatusMutationWho: 0 | 1 | null;
+  previousPlayerStatusMutationStatus: PbPlayerStatus | null;
 }
 
 export function parseMutations(
   mutations: PbExposedMutation[],
-  oppController?: OppChessboardController,
-  actionNotificationTracker?: ActionNotificationTracker,
+  context?: ParseMutationContext,
 ): ParsedMutation {
-  const oppKnownCardState =
-    !oppController || oppController.closed ? null : oppController.handCards;
+  let oppKnownCardState = null;
+  if (context) {
+    if (!context.oppController.closed) {
+      oppKnownCardState = context.oppController.handCards;
+    }
+  }
 
   let playingCard: PlayingCardInfo | null = null;
   const animatingCards: AnimatingCardWithDestination[] = [];
@@ -371,13 +354,23 @@ export function parseMutations(
       }
       case "playerStatusChange": {
         const who = mutation.value.who as 0 | 1;
-        const shouldShowAction = actionNotificationTracker?.update(
-          who,
-          mutation.value.status,
-        );
+        let shouldShowActing = true;
+        if (context && mutation.value.status !== PbPlayerStatus.UNSPECIFIED) {
+          if (
+            context.previousPlayerStatusMutationWho !== null &&
+            context.previousPlayerStatusMutationStatus !== null
+          ) {
+            shouldShowActing =
+              context.previousPlayerStatusMutationStatus !==
+                PbPlayerStatus.ACTING ||
+              context.previousPlayerStatusMutationWho !== who;
+          }
+          context.previousPlayerStatusMutationWho = who;
+          context.previousPlayerStatusMutationStatus = mutation.value.status;
+        }
         if (
           mutation.value.status === PbPlayerStatus.ACTING &&
-          (actionNotificationTracker === void 0 || shouldShowAction)
+          shouldShowActing
         ) {
           roundAndPhase.who = who;
           roundAndPhase.value = "action";
