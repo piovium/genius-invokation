@@ -277,7 +277,8 @@ function getAllEntitiesImpl(
 }
 
 /**
- * Get all characters listening to `onBattleBegin`. Consider `config.hostRelatedExecution`.
+ * Get all characters may be able to trigger on `onBattleBegin`.
+ * Consider `config.hostRelatedExecution`.
  * @param state
  * @returns
  */

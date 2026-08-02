@@ -441,8 +441,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
     }
     if (this.rawState.config.hostRelatedExecution) {
       const cards = [
-        ...this.rawState.players[this.state.config.hostWho].hands,
-        ...this.rawState.players[flip(this.state.config.hostWho)].pile,
+        ...this.rawState.players[this.rawState.config.hostWho].hands,
+        ...this.rawState.players[flip(this.rawState.config.hostWho)].hands,
       ];
       const indexOfHciEvent = (e: HandCardInsertedEventArg) => {
         const index = cards.findIndex((c) => c.id === e.card.id);
