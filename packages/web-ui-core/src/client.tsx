@@ -428,8 +428,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         setDoingRpc(true);
         return await dispatchRpc(createDispatcher(controller.signal))(req);
       } finally {
-        // Keep the scope alive after a successful response: its delayed UI
-        // cleanup still belongs to this RPC and must be aborted by the next one.
+        // 若此时当前 RPC “身份”已变化，则不取消之
         if (rpcScope === controller) {
           setDoingRpc(false);
         }

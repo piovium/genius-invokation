@@ -341,8 +341,7 @@ export default function Room() {
           if (rpc) {
             onActionRequested(rpc);
           } else {
-            // Active players close the UI by responding; spectators cannot
-            // respond and therefore follow the server-side RPC lifecycle.
+            // 观战方收到 RPC 状态变化时取消 RPC（玩家已完成 RPC 无需取消）
             if (!action) {
               playerIo()?.cancelRpc();
             }
