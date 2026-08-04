@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { checkDice, flip, toSortedBy } from "@gi-tcg/utils";
+import { checkDice, flip } from "@gi-tcg/utils";
 import {
   DiceType,
   type ExposedMutation,
@@ -127,6 +127,7 @@ function initPlayerState(
   data: GameData,
   deck: DeckConfig,
   idIter: IdIter,
+  initialHandsCount: number,
 ): PlayerState {
   let initialPile: readonly EntityDefinition[] = deck.cards.map((id) => {
     const def = data.entities.get(id);
@@ -147,15 +148,18 @@ function initPlayerState(
   if (!deck.noShuffle) {
     initialPile = shuffle(initialPile);
   }
-  // 将秘传牌放在最前面
-  const compFn = (def: EntityDefinition) => {
-    if (def.tags.includes("legend")) {
-      return 0;
-    } else {
-      return 1;
-    }
-  };
-  initialPile = toSortedBy(initialPile, compFn);
+  // 最多将初始手牌数量的秘传牌提升至牌组顶部，保证首次抓牌必能抓到秘传牌，
+  // 其余秘传牌仍随机分布在牌组中。
+  const legendsToTop = initialPile
+    .filter((def) => def.tags.includes("legend"))
+    .slice(0, initialHandsCount);
+  if (legendsToTop.length > 0) {
+    const legendSet = new Set(legendsToTop);
+    initialPile = [
+      ...legendsToTop,
+      ...initialPile.filter((def) => !legendSet.has(def)),
+    ];
+  }
   const characters: CharacterState[] = [];
   const pile: EntityState[] = [];
   for (const definition of characterDefs) {
@@ -299,8 +303,8 @@ export class Game {
       config,
       versionBehavior: behavior,
       players: [
-        initPlayerState(0, data, decks[0], idIter),
-        initPlayerState(1, data, decks[1], idIter),
+        initPlayerState(0, data, decks[0], idIter, config.initialHandsCount),
+        initPlayerState(1, data, decks[1], idIter, config.initialHandsCount),
       ],
       iterators: {
         random: config.randomSeed,
