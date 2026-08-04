@@ -15,15 +15,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
-  ActionResponse,
   dispatchRpc,
+  type ActionResponse,
   type RpcMethod,
   type PbGameState,
   type PbPlayerState,
   type RpcDispatcher,
-  SwitchHandsResponse,
-  SelectCardResponse,
-  RerollDiceResponse,
+  type SwitchHandsResponse,
+  type SelectCardResponse,
+  type RerollDiceResponse,
   PbEntityArea,
   PbEntityType,
   PbPhaseType,
@@ -199,100 +199,144 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
 
   const uiQueue = new QueueManager<AnimationMeta>();
   let savedState: PbGameState | undefined = void 0;
+  let rpcScope: AbortController | null = null;
 
-  const actionResolvers: {
-    [K in RpcMethod]: PromiseWithResolvers<RpcResponsePayloadOf<K>> | null;
-  } = {
-    selectCard: null,
-    chooseActive: null,
-    rerollDice: null,
-    switchHands: null,
-    action: null,
+  interface PendingRpcResponse {
+    method: RpcMethod;
+    resolve: (value: unknown) => void;
+  }
+  let pendingRpcResponse: PendingRpcResponse | null = null;
+
+  const ensureRpcActive = (signal: AbortSignal) => {
+    if (signal.aborted) {
+      throw signal.reason;
+    }
   };
 
-  const dispatcher: RpcDispatcher = {
+  const waitForUi = async (wait: Promise<unknown>, signal: AbortSignal) => {
+    ensureRpcActive(signal);
+    const cancelled = Promise.withResolvers<never>();
+    const abort = () => cancelled.reject(signal.reason);
+    signal.addEventListener("abort", abort, { once: true });
+    try {
+      await Promise.race([wait, cancelled.promise]);
+    } finally {
+      signal.removeEventListener("abort", abort);
+    }
+    ensureRpcActive(signal);
+  };
+
+  const waitForResponse = async <T,>(
+    method: RpcMethod,
+    signal: AbortSignal,
+    show: () => void,
+    finish: (result: T | null) => void,
+  ): Promise<T> => {
+    ensureRpcActive(signal);
+    const resolver = Promise.withResolvers<T>();
+    const pending: PendingRpcResponse = {
+      method,
+      resolve: (value) => resolver.resolve(value as T),
+    };
+    pendingRpcResponse = pending;
+    const abort = () => resolver.reject(signal.reason);
+    signal.addEventListener("abort", abort, { once: true });
+    let result: T | null = null;
+    try {
+      show();
+      result = await resolver.promise;
+      return result;
+    } finally {
+      signal.removeEventListener("abort", abort);
+      if (pendingRpcResponse === pending) {
+        pendingRpcResponse = null;
+      }
+      if (!signal.aborted) {
+        finish(result);
+      }
+    }
+  };
+
+  const createDispatcher = (signal: AbortSignal): RpcDispatcher => ({
     chooseActive: async ({ candidateIds }) => {
       // 等待当前的 ui 动画渲染完成
-      await uiQueue.drain();
-      const resolver = Promise.withResolvers<ChooseActiveResponse>();
-      actionResolvers.chooseActive = resolver;
-      const acState = createChooseActiveState(candidateIds, t);
-      setActionState(acState);
-      try {
-        return await resolver.promise;
-      } finally {
-        setActionState(null);
-      }
+      await waitForUi(uiQueue.drain(), signal);
+      return waitForResponse<ChooseActiveResponse>(
+        "chooseActive",
+        signal,
+        () => setActionState(createChooseActiveState(candidateIds, t)),
+        () => setActionState(null),
+      );
     },
     action: async ({ action }) => {
       // 等待对方行动轮次的动画播放完成
-      await uiQueue.waitUntilNone((meta) => meta.turn !== who);
-      const resolver = Promise.withResolvers<ActionResponse>();
-      actionResolvers.action = resolver;
-      const acState = createActionState(getAssetsManager(), action, t);
-      setActionState(acState);
-      try {
-        return await resolver.promise;
-      } finally {
-        setActionState(null);
-      }
+      await waitForUi(
+        uiQueue.waitUntilNone((meta) => meta.turn !== who),
+        signal,
+      );
+      return waitForResponse<ActionResponse>(
+        "action",
+        signal,
+        () => setActionState(createActionState(getAssetsManager(), action, t)),
+        () => setActionState(null),
+      );
     },
     switchHands: async () => {
       if (savedState && savedState.phase >= PbPhaseType.INIT_ACTIVES) {
         // 等待当前的 ui 动画渲染完成
-        await uiQueue.drain();
+        await waitForUi(uiQueue.drain(), signal);
       }
-      const resolver = Promise.withResolvers<SwitchHandsResponse>();
-      actionResolvers.switchHands = resolver;
-      // return { removedHandIds: [] };
-      setViewType("switchHands");
-      let result: SwitchHandsResponse | null = null;
-      try {
-        result = await resolver.promise;
-        return result;
-      } finally {
-        if (result && result.removedHandIds.length > 0) {
-          setViewType("switchHandsEnd");
-          setTimeout(async () => {
-            await uiQueue.drain();
-            setViewType((t) => (t === "switchHandsEnd" ? "normal" : t));
-            forceRefreshData();
-          }, 1200);
-        } else {
-          setViewType("normal");
-        }
-      }
+      return waitForResponse<SwitchHandsResponse>(
+        "switchHands",
+        signal,
+        () => setViewType("switchHands"),
+        (result) => {
+          if (result && result.removedHandIds.length > 0) {
+            setViewType("switchHandsEnd");
+            setTimeout(async () => {
+              await uiQueue.drain();
+              if (!signal.aborted) {
+                setViewType((t) => (t === "switchHandsEnd" ? "normal" : t));
+                forceRefreshData();
+              }
+            }, 1200);
+          } else {
+            setViewType("normal");
+          }
+        },
+      );
     },
     selectCard: async ({ candidateDefinitionIds }) => {
       // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
-      await uiQueue.drain();
-      const resolver = Promise.withResolvers<SelectCardResponse>();
-      actionResolvers.selectCard = resolver;
-      setSelectCardCandidates(candidateDefinitionIds);
-      setViewType("selectCard");
-      try {
-        return await resolver.promise;
-      } finally {
-        setViewType("normal");
-      }
+      await waitForUi(uiQueue.drain(), signal);
+      return waitForResponse<SelectCardResponse>(
+        "selectCard",
+        signal,
+        () => {
+          setSelectCardCandidates(candidateDefinitionIds);
+          setViewType("selectCard");
+        },
+        () => setViewType("normal"),
+      );
     },
     rerollDice: async () => {
       // 等待当前的 ui 动画渲染完成，但不阻塞后续 ui 更新
-      await uiQueue.drain();
-      const resolver = Promise.withResolvers<RerollDiceResponse>();
-      actionResolvers.rerollDice = resolver;
-      setViewType("rerollDice");
-      try {
-        return await resolver.promise;
-      } finally {
-        setViewType("rerollDiceEnd");
-        setTimeout(
-          () => setViewType((t) => (t === "rerollDiceEnd" ? "normal" : t)),
-          500,
-        );
-      }
+      await waitForUi(uiQueue.drain(), signal);
+      return waitForResponse<RerollDiceResponse>(
+        "rerollDice",
+        signal,
+        () => setViewType("rerollDice"),
+        () => {
+          setViewType("rerollDiceEnd");
+          setTimeout(() => {
+            if (!signal.aborted) {
+              setViewType((t) => (t === "rerollDiceEnd" ? "normal" : t));
+            }
+          }, 500);
+        },
+      );
     },
-  };
+  });
 
   const forceRefreshData = () => {
     if (!savedState) {
@@ -308,11 +352,21 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   };
 
   const cancelRpc = () => {
-    actionResolvers.action?.reject();
-    actionResolvers.chooseActive?.reject();
-    actionResolvers.rerollDice?.reject();
-    actionResolvers.selectCard?.reject();
-    actionResolvers.switchHands?.reject();
+    rpcScope?.abort(new Error("RPC cancelled"));
+    rpcScope = null;
+    setActionState(null);
+    setViewType("normal");
+    setSelectCardCandidates([]);
+    setDoingRpc(false);
+  };
+
+  const resolveRpc = <K extends RpcMethod>(
+    method: K,
+    response: RpcResponsePayloadOf<K>,
+  ) => {
+    if (pendingRpcResponse?.method === method) {
+      pendingRpcResponse.resolve(response);
+    }
   };
 
   const [history, setHistory] = createStore<HistoryData>({
@@ -367,11 +421,17 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
       );
     },
     rpc: async (req) => {
+      cancelRpc();
+      const controller = new AbortController();
+      rpcScope = controller;
       try {
         setDoingRpc(true);
-        return await dispatchRpc(dispatcher)(req);
+        return await dispatchRpc(createDispatcher(controller.signal))(req);
       } finally {
-        setDoingRpc(false);
+        // 若此时当前 RPC “身份”已变化，则不取消之
+        if (rpcScope === controller) {
+          setDoingRpc(false);
+        }
       }
     },
   };
@@ -412,7 +472,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         if (option.disableAction) {
           break;
         }
-        actionResolvers.action?.resolve(result);
+        resolveRpc("action", result);
         setActionState(null);
         break;
       }
@@ -420,7 +480,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         if (option.disableAction) {
           break;
         }
-        actionResolvers.chooseActive?.resolve(result);
+        resolveRpc("chooseActive", result);
         setActionState(null);
         break;
       }
@@ -431,19 +491,19 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     if (option.disableAction) {
       return;
     }
-    actionResolvers.rerollDice?.resolve({ diceToReroll });
+    resolveRpc("rerollDice", { diceToReroll });
   };
   const onSwitchHands = (removedHandIds: number[]) => {
     if (option.disableAction) {
       return;
     }
-    actionResolvers.switchHands?.resolve({ removedHandIds });
+    resolveRpc("switchHands", { removedHandIds });
   };
   const onSelectCard = (selectedDefinitionId: number) => {
     if (option.disableAction) {
       return;
     }
-    actionResolvers.selectCard?.resolve({ selectedDefinitionId });
+    resolveRpc("selectCard", { selectedDefinitionId });
   };
 
   const onGiveUp = () => {

@@ -31,11 +31,7 @@ import {
 import axios, { AxiosError } from "axios";
 import "@gi-tcg/web-ui-core/style.css";
 import EventSourceStream from "@server-sent-stream/web";
-import {
-  PbPlayerStatus,
-  type Notification,
-  type RpcRequest,
-} from "@gi-tcg/typings";
+import { type Notification, type RpcRequest } from "@gi-tcg/typings";
 import { Client, createClient, WebUiPlayerIO } from "@gi-tcg/web-ui-core";
 import { useMobile } from "../App";
 import { Dynamic } from "solid-js/web";
@@ -208,8 +204,7 @@ export default function Room() {
     console.error(e);
   };
 
-  createEffect(() => {
-    const payload = initialized();
+  const initializeClient = (payload: InitializedPayload) => {
     const onGiveUp = async () => {
       try {
         const { data } = await axios.post(
@@ -222,7 +217,7 @@ export default function Room() {
         console.error(e);
       }
     };
-    if (payload && !playerIo()) {
+    if (!playerIo()) {
       const [io, Ui] = createClient(payload.who, {
         assetsManager: () => assetsManager(payload.config.gameVersion),
         locale,
@@ -232,17 +227,17 @@ export default function Room() {
       setChessboard(() => Ui);
       setPlayerIo(io);
     }
-  });
+  };
 
   const onActionRequested = async (payload: ActionRequestPayload) => {
+    const io = playerIo();
+    if (!io || payload.id === lastRpcId) {
+      return;
+    }
+    lastRpcId = payload.id;
     setCurrentMyTimer(payload.timer);
-    currentRpcId.value = payload.id;
-    playerIo()?.cancelRpc();
-    await new Promise((r) => setTimeout(r, 100)); // wait for UI notifications?
-    const response = await playerIo()
-      ?.rpc(payload.request)
-      .catch(() => void 0);
-    if (!response) {
+    const response = await io.rpc(payload.request).catch(() => void 0);
+    if (!response || lastRpcId !== payload.id) {
       return;
     }
     setCurrentMyTimer(null);
@@ -254,7 +249,6 @@ export default function Room() {
           response,
         },
       );
-      currentRpcId.value = null;
       await reply;
     } catch (e) {
       if (e instanceof AxiosError) {
@@ -285,20 +279,25 @@ export default function Room() {
   const [currentOppTimer, setCurrentOppTimer] = createSignal<RpcTimer | null>(
     null,
   );
-  const currentRpcId: { value: number | null } = { value: null };
+  let lastRpcId: number | null = null;
   let countDownTimerIntervalId: number | null = null;
   const countDownTimer = () => {
-    for (const [timer, setTimer] of [
-      [currentMyTimer(), setCurrentMyTimer] as const,
-      [currentOppTimer(), setCurrentOppTimer] as const,
-    ]) {
-      if (timer) {
-        const current = timer.current - 1;
-        setTimer({ ...timer, current });
-        if (current <= 0) {
-          playerIo()?.cancelRpc();
-          setTimer(null);
-        }
+    const myTimer = currentMyTimer();
+    if (myTimer) {
+      const current = myTimer.current - 1;
+      setCurrentMyTimer({ ...myTimer, current });
+      if (current <= 0) {
+        playerIo()?.cancelRpc();
+        setCurrentMyTimer(null);
+      }
+    }
+    const oppTimer = currentOppTimer();
+    if (oppTimer) {
+      const current = oppTimer.current - 1;
+      setCurrentOppTimer({ ...oppTimer, current });
+      if (current <= 0) {
+        oppPlayerIo()?.cancelRpc?.();
+        setCurrentOppTimer(null);
       }
     }
   };
@@ -322,6 +321,7 @@ export default function Room() {
       switch (payload.type) {
         case "initialized": {
           setInitialized(payload);
+          initializeClient(payload);
           if (payload?.config?.watchable && allowWatchOpp()) {
             setObserverMode(true);
           }
@@ -330,19 +330,6 @@ export default function Room() {
         case "notification": {
           const notification: Notification = payload.data;
           playerIo()?.notify(notification);
-          // 观战时，收到我方状态变更为非行动通知时，取消 rpc
-          if (
-            !action &&
-            notification.mutation.find(
-              (mut) =>
-                mut.mutation?.$case === "playerStatusChange" &&
-                mut.mutation.value.who === initialized()?.who &&
-                mut.mutation.value.status === PbPlayerStatus.UNSPECIFIED,
-            )
-          ) {
-            playerIo()?.cancelRpc();
-            setCurrentMyTimer(null);
-          }
           break;
         }
         case "oppRpc": {
@@ -350,8 +337,15 @@ export default function Room() {
           break;
         }
         case "rpc": {
-          if (payload.id !== currentRpcId.value) {
-            onActionRequested(payload);
+          const rpc: ActionRequestPayload | null = payload.data;
+          if (rpc) {
+            onActionRequested(rpc);
+          } else {
+            // 观战方收到 RPC 状态变化时取消 RPC（玩家已完成 RPC 无需取消）
+            if (!action) {
+              playerIo()?.cancelRpc();
+            }
+            setCurrentMyTimer(null);
           }
           break;
         }
@@ -386,26 +380,18 @@ export default function Room() {
         case "notification": {
           const notification: Notification = payload.data;
           oppPlayerIo()?.notify(notification);
-          // 观战时，收到我方状态变更为非行动通知时，取消 rpc
-          if (
-            notification.mutation.find(
-              (mut) =>
-                mut.mutation?.$case === "playerStatusChange" &&
-                mut.mutation.value.who === initialized()?.who &&
-                mut.mutation.value.status === PbPlayerStatus.UNSPECIFIED,
-            )
-          ) {
-            oppPlayerIo()?.cancelRpc?.();
-          }
           break;
         }
         case "rpc": {
-          oppPlayerIo()?.cancelRpc?.();
-          setTimeout(() => {
+          const rpc: ActionRequestPayload | null = payload.data;
+          if (rpc) {
             oppPlayerIo()
-              ?.rpc(payload.request)
+              ?.rpc(rpc.request)
               .catch(() => void 0);
-          }, 100);
+          } else {
+            oppPlayerIo()?.cancelRpc?.();
+            setCurrentOppTimer(null);
+          }
           break;
         }
         case "error": {
@@ -426,6 +412,7 @@ export default function Room() {
     } else {
       abortOppNotification();
       playerIo()?.oppController.close();
+      setOppPlayerIo();
     }
   });
 
