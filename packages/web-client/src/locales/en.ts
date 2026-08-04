@@ -27,7 +27,7 @@ export default {
   gameVersion: "Game version",
   latestBeta: "Latest beta",
   simulatorVersion: "Simulator version",
-  joinPlayerGroup: "Join the player Discord group",
+  joinPlayerGroup: "Join our Discord Server",
   playerGroupLink: "https://discord.com/invite/vGjh6XAKqk",
   loadingNow: "Loading now, please wait...",
   loading: "Loading...",
