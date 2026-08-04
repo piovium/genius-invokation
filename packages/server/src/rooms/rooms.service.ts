@@ -48,13 +48,11 @@ import {
   ReplaySubject,
   Subject,
   concat,
-  defer,
   filter,
   finalize,
   interval,
   map,
   mergeWith,
-  of,
   takeUntil,
 } from "rxjs";
 import { createGuestId, DeckVerificationError, verifyDeck } from "../utils";
@@ -157,9 +155,12 @@ export interface SSEError {
 }
 export interface SSERpc {
   type: "rpc";
-  id: number;
-  timer: RpcTimer;
-  request: RpcRequest;
+  /** The current RPC request. `null` means that the previous RPC has ended. */
+  data: {
+    id: number;
+    timer: RpcTimer;
+    request: RpcRequest;
+  } | null;
 }
 export interface SSEOppRpc {
   type: "oppRpc";
@@ -193,7 +194,10 @@ class Player implements PlayerIOWithError {
   private readonly initializedSubject = new ReplaySubject<
     SSEInitialized | SSEWaiting
   >();
-  private readonly actionSseSource = new Subject<SSEPayload>();
+  private readonly actionSseSource = new BehaviorSubject<SSERpc>({
+    type: "rpc",
+    data: null,
+  });
   private readonly errorSseSource = new BehaviorSubject<SSEError | null>(null);
   private readonly oppRpcSseSource = new BehaviorSubject<SSEOppRpc>({
     type: "oppRpc",
@@ -204,10 +208,7 @@ class Player implements PlayerIOWithError {
   public readonly notificationSse$: Observable<SSEPayload> = concat<
     (SSEPayload | null)[]
   >(this.initializedSubject, this.notificationSseSource).pipe(
-    mergeWith(
-      defer(() => of(this.currentAction())),
-      this.errorSseSource,
-    ),
+    mergeWith(this.errorSseSource),
     filter((data): data is SSEPayload => data !== null),
     mergeWith(this.actionSseSource, this.oppRpcSseSource, pingInterval),
     takeUntil(this.completeSubject),
@@ -238,16 +239,18 @@ class Player implements PlayerIOWithError {
     this._initialRoundTimeout = this._roundTimeout =
       this._timeoutConfig?.roundTotalActionTime ?? Infinity;
   }
-  currentAction(): SSERpc | null {
+  currentAction(): SSERpc {
     if (this._rpcResolver) {
       return {
         type: "rpc",
-        id: this._rpcResolver.id,
-        timer: this.getTimer()!,
-        request: this._rpcResolver.request,
+        data: {
+          id: this._rpcResolver.id,
+          timer: this.getTimer()!,
+          request: this._rpcResolver.request,
+        },
       };
     } else {
-      return null;
+      return { type: "rpc", data: null };
     }
   }
   getTimer(): RpcTimer | null {
@@ -359,7 +362,7 @@ class Player implements PlayerIOWithError {
           },
         };
         this._rpcResolver = resolver;
-        this.actionSseSource.next(this.currentAction()!);
+        this.actionSseSource.next(this.currentAction());
         this._oppPlayer?.sendOppRpc(this.getTimer()!);
         const interval = setInterval(() => {
           resolver.timeout--;
@@ -374,6 +377,7 @@ class Player implements PlayerIOWithError {
       });
     } finally {
       this._rpcResolver = null;
+      this.actionSseSource.next(this.currentAction());
       this._oppPlayer?.sendOppRpc(null);
     }
   }

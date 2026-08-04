@@ -24,8 +24,6 @@ import {
   PbDiceType,
   PbEntityState,
   PbGameState,
-  PbPlayerState,
-  PbPlayerStatus,
   PbSkillInfo,
 } from "@gi-tcg/typings";
 import { createActionState, type ActionState } from "./action";
@@ -49,7 +47,6 @@ export interface OppInfo {
 export class OppChessboardController implements IOppChessboardController {
   #playerIo: CancellablePlayerIO;
   #close: boolean = true;
-  #playerStatus: PbPlayerStatus = PbPlayerStatus.UNSPECIFIED;
   #actionState: ActionState | null = null;
   #dice: PbDiceType[] = [];
   #handCards: Map<number, PbEntityState> = new Map();
@@ -84,10 +81,14 @@ export class OppChessboardController implements IOppChessboardController {
     };
   }
 
-  private cancelRpc() {
+  private resetRpcUi() {
     this.#actionState = null;
     this.#viewType = "normal";
     this.#selectCardCandidates = [];
+  }
+
+  private cancelRpc() {
+    this.resetRpcUi();
     this.onUpdate();
   }
 
@@ -126,15 +127,10 @@ export class OppChessboardController implements IOppChessboardController {
     this.#playerIo = {
       notify: (notification: Notification) => {
         const state = notification.state!;
-        this.#playerStatus = state.player[this.who].status;
         this.#dice = state.player[this.who].dice;
         this.#initiativeSkills = state.player[this.who].initiativeSkill;
         for (const hand of state.player[this.who].handCard) {
           this.#handCards.set(hand.id, hand);
-        }
-        if (this.#playerStatus === PbPlayerStatus.UNSPECIFIED) {
-          this.#actionState = null;
-          this.#viewType = "normal";
         }
         this.onUpdate();
       },
@@ -169,9 +165,7 @@ export class OppChessboardController implements IOppChessboardController {
   }
   close(): void {
     this.#close = true;
-    this.#actionState = null;
-    this.#viewType = "normal";
-    this.#selectCardCandidates = [];
+    this.resetRpcUi();
     this.opt.onUpdate(null);
   }
 }
