@@ -87,7 +87,7 @@ define combatStatus {
   id 124021 as LightningStrikeProbe;
   on useSkill {
     usage perRound, 1;
-    :characterStatus(LightningRod, $.my.active);
+    :characterStatus(LightningRod, :e.skillCaller.cast<"character">());
   };
 };
 
