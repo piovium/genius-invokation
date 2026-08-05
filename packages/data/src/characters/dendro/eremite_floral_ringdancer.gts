@@ -58,7 +58,7 @@ define combatStatus {
  * 可用次数：2
  * （角色最多装备1个「特技」）
  * [1270321: 藤蔓锋鳞] (1*Aligned, 1*Energy) 造成1点草元素伤害。
- * [2270312: ] () 我方装备了厄灵·草之灵蛇的角色切换至出战时：若我方镀金旅团·叶轮舞者装备了天赋牌灵蛇旋嘶，造成1点草元素伤害。（每回合1次）
+ * [2270312: ] ()
  */
 define card {
   id 127032 as SpiritOfOmenDendroSpiritserpent;
@@ -86,7 +86,6 @@ define card {
               .has($.equipped.def(SpiritSerpentsSwirl)),
           )
       );
-      listenTo samePlayer;
       usage perRound, 1;
       :damage(DamageType.Dendro, 1);
     };
