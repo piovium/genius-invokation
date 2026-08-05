@@ -79,7 +79,7 @@ define card {
     };
     on switchActive {
       when :<boolean>(
-        :e.switchInfo.to === :self.master &&
+        :e.switchInfo.to.id === :self.master.id &&
           !!:query(
             $.my.character
               .def(EremiteFloralRingdancer)
