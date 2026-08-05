@@ -77,6 +77,18 @@ define card {
         :consumeUsage(1);
       }
     };
+    on switchActive {
+      when :<boolean>(
+        :e.switchInfo.to.id === :self.master.id &&
+          !!:query(
+            $.my.character
+              .def(EremiteFloralRingdancer)
+              .has($.equipped.def(SpiritSerpentsSwirl)),
+          )
+      );
+      usage perRound, 1;
+      :damage(DamageType.Dendro, 1);
+    };
   };
 };
 
@@ -185,15 +197,6 @@ define card {
   talent EremiteFloralRingdancer {
     on staged {
       :useSkill(SpiralingWhirl);
-    };
-    on switchActive {
-      when :(
-        :e.switchInfo.to.hasTechnique()?.definition.id ===
-          SpiritOfOmenDendroSpiritserpent
-      );
-      listenTo samePlayer;
-      usage perRound, 1;
-      :damage(DamageType.Dendro, 1);
     };
   };
 };
