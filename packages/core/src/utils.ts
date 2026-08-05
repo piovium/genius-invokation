@@ -1071,7 +1071,7 @@ export function shiftLeft<T>(arr: readonly T[], idx: number): T[] {
 }
 
 /** Shuffle an array. No use of state random generator */
-export function shuffle<T>(arr: readonly T[]): readonly T[] {
+export function shuffle<T>(arr: readonly T[]): T[] {
   const result = [...arr];
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

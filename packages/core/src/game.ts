@@ -127,9 +127,9 @@ function initPlayerState(
   data: GameData,
   deck: DeckConfig,
   idIter: IdIter,
-  initialHandsCount: number,
+  gameConfig: GameConfig,
 ): PlayerState {
-  let initialPile: readonly EntityDefinition[] = deck.cards.map((id) => {
+  let initialPile: EntityDefinition[] = deck.cards.map((id) => {
     const def = data.entities.get(id);
     if (typeof def === "undefined") {
       throw new GiTcgDataError(`Unknown card id ${id}`);
@@ -148,17 +148,16 @@ function initPlayerState(
   if (!deck.noShuffle) {
     initialPile = shuffle(initialPile);
   }
-  // 最多将初始手牌数量的秘传牌提升至牌组顶部，保证首次抓牌必能抓到秘传牌，
-  // 其余秘传牌仍随机分布在牌组中。
-  const legendsToTop = initialPile
-    .filter((def) => def.tags.includes("legend"))
-    .slice(0, initialHandsCount);
-  if (legendsToTop.length > 0) {
-    const legendSet = new Set(legendsToTop);
-    initialPile = [
-      ...legendsToTop,
-      ...initialPile.filter((def) => !legendSet.has(def)),
-    ];
+  let j = 0;
+  for (
+    let i = 0;
+    i < initialPile.length && j < gameConfig.initialHandsCount;
+    i++
+  ) {
+    if (initialPile[i].tags.includes("legend")) {
+      [initialPile[i], initialPile[j]] = [initialPile[j], initialPile[i]];
+      j++;
+    }
   }
   const characters: CharacterState[] = [];
   const pile: EntityState[] = [];
@@ -303,8 +302,8 @@ export class Game {
       config,
       versionBehavior: behavior,
       players: [
-        initPlayerState(0, data, decks[0], idIter, config.initialHandsCount),
-        initPlayerState(1, data, decks[1], idIter, config.initialHandsCount),
+        initPlayerState(0, data, decks[0], idIter, config),
+        initPlayerState(1, data, decks[1], idIter, config),
       ],
       iterators: {
         random: config.randomSeed,
