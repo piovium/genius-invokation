@@ -148,6 +148,7 @@ function initPlayerState(
   if (!deck.noShuffle) {
     initialPile = shuffle(initialPile);
   }
+  // 将秘传牌放在最前面
   let j = 0;
   for (
     let i = 0;
