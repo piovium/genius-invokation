@@ -193,7 +193,8 @@
   }
 
   .equipment-effect[data-usable] {
-    scale: 80%;
+    scale: 75%;
+    opacity: 0.8;
     box-shadow:
       0 0 2px 2px var(--light-white),
       inset 0 0 4px 4px var(--light-white);

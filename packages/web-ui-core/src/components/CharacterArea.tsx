@@ -762,7 +762,7 @@ interface HealthProps {
 
 function Health(props: HealthProps) {
   return (
-    <div class="absolute z-1 left-1.5 top--2 h-10 w-10 -translate-x-50% grid children:grid-area-[1/1]">
+    <div class="absolute z-1 left-1.25 top--2 h-10 w-10 -translate-x-50% grid children:grid-area-[1/1]">
       <Show
         when={props.bondOfLife}
         fallback={<HealthIcon class="w-full h-full" />}
