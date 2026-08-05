@@ -471,7 +471,7 @@ export class Game {
         hasChange: true,
         newPhase: "gameEnd",
       });
-      if (winner && winner !== this.state.winner) {
+      if (winner !== null && winner !== this.state.winner) {
         this.mutate({
           type: "setWinner",
           winner,
