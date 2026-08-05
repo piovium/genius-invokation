@@ -58,7 +58,7 @@ define combatStatus {
  * 可用次数：2
  * （角色最多装备1个「特技」）
  * [1270321: 藤蔓锋鳞] (1*Aligned, 1*Energy) 造成1点草元素伤害。
- * [2270312: ] ()
+ * [2270312: ] () 我方装备了厄灵·草之灵蛇的角色切换至出战时：若我方镀金旅团·叶轮舞者装备了天赋牌灵蛇旋嘶，造成1点草元素伤害。（每回合1次）
  */
 define card {
   id 127032 as SpiritOfOmenDendroSpiritserpent;
@@ -76,6 +76,19 @@ define card {
       if (!:query($.my.combatStatus.def(SpiritserpentsBlessing))) {
         :consumeUsage(1);
       }
+    };
+    on switchActive {
+      when :<boolean>(
+        :e.switchInfo.to === :self.master &&
+          !!:query(
+            $.my.character
+              .def(EremiteFloralRingdancer)
+              .has($.equipped.def(SpiritSerpentsSwirl)),
+          )
+      );
+      listenTo samePlayer;
+      usage perRound, 1;
+      :damage(DamageType.Dendro, 1);
     };
   };
 };
@@ -185,15 +198,6 @@ define card {
   talent EremiteFloralRingdancer {
     on staged {
       :useSkill(SpiralingWhirl);
-    };
-    on switchActive {
-      when :(
-        :e.switchInfo.to.hasTechnique()?.definition.id ===
-          SpiritOfOmenDendroSpiritserpent
-      );
-      listenTo samePlayer;
-      usage perRound, 1;
-      :damage(DamageType.Dendro, 1);
     };
   };
 };
