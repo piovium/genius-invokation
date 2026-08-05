@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { checkDice, flip, toSortedBy } from "@gi-tcg/utils";
+import { checkDice, flip } from "@gi-tcg/utils";
 import {
   DiceType,
   type ExposedMutation,
@@ -127,8 +127,9 @@ function initPlayerState(
   data: GameData,
   deck: DeckConfig,
   idIter: IdIter,
+  gameConfig: GameConfig,
 ): PlayerState {
-  let initialPile: readonly EntityDefinition[] = deck.cards.map((id) => {
+  let initialPile: EntityDefinition[] = deck.cards.map((id) => {
     const def = data.entities.get(id);
     if (typeof def === "undefined") {
       throw new GiTcgDataError(`Unknown card id ${id}`);
@@ -148,14 +149,17 @@ function initPlayerState(
     initialPile = shuffle(initialPile);
   }
   // 将秘传牌放在最前面
-  const compFn = (def: EntityDefinition) => {
-    if (def.tags.includes("legend")) {
-      return 0;
-    } else {
-      return 1;
+  let j = 0;
+  for (
+    let i = 0;
+    i < initialPile.length && j < gameConfig.initialHandsCount;
+    i++
+  ) {
+    if (initialPile[i].tags.includes("legend")) {
+      [initialPile[i], initialPile[j]] = [initialPile[j], initialPile[i]];
+      j++;
     }
-  };
-  initialPile = toSortedBy(initialPile, compFn);
+  }
   const characters: CharacterState[] = [];
   const pile: EntityState[] = [];
   for (const definition of characterDefs) {
@@ -299,8 +303,8 @@ export class Game {
       config,
       versionBehavior: behavior,
       players: [
-        initPlayerState(0, data, decks[0], idIter),
-        initPlayerState(1, data, decks[1], idIter),
+        initPlayerState(0, data, decks[0], idIter, config),
+        initPlayerState(1, data, decks[1], idIter, config),
       ],
       iterators: {
         random: config.randomSeed,
