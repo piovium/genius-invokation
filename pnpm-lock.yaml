@@ -479,6 +479,34 @@ importers:
         specifier: 'catalog:'
         version: 2.11.13(solid-js@1.9.12)(supports-color@8.1.1)(vite@8.0.8(@types/node@26.1.2)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))
 
+  packages/process-viewer:
+    dependencies:
+      elkjs:
+        specifier: ^0.12.0
+        version: 0.12.0
+      solid-js:
+        specifier: 'catalog:'
+        version: 1.9.12
+    devDependencies:
+      '@gi-tcg/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: latest
+        version: 26.1.2
+      rollup-plugin-node-externals:
+        specifier: 'catalog:'
+        version: 8.0.1(rollup@4.46.2)
+      unplugin-dts:
+        specifier: 'catalog:'
+        version: 1.0.0(@microsoft/api-extractor@7.58.2(@types/node@26.1.2))(esbuild@0.27.7)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(supports-color@8.1.1)(typescript@6.0.3)(vite@8.0.8(@types/node@26.1.2)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
+      vite:
+        specifier: 'catalog:'
+        version: 8.0.8(@types/node@26.1.2)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0)
+      vite-plugin-solid:
+        specifier: 'catalog:'
+        version: 2.11.13(solid-js@1.9.12)(supports-color@8.1.1)(vite@8.0.8(@types/node@26.1.2)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))
+
   packages/server:
     dependencies:
       '@aws-sdk/client-s3':
@@ -620,6 +648,9 @@ importers:
       '@gi-tcg/detail-log-viewer':
         specifier: workspace:*
         version: link:../detail-log-viewer
+      '@gi-tcg/process-viewer':
+        specifier: workspace:*
+        version: link:../process-viewer
       '@gi-tcg/state-editor':
         specifier: workspace:*
         version: link:../state-editor
@@ -4455,9 +4486,6 @@ packages:
   '@types/node@25.9.5':
     resolution: {integrity: sha512-OScDchr2fwuUmWdf4kZ9h7PcJiYDVInhJizG/biAq3cAvqwYktuy/TYGGdZNMtNTFUP7rnb0NU4TUdm82kt4Rg==}
 
-  '@types/node@26.1.1':
-    resolution: {integrity: sha512-nxAkRSVkN1Y0JC1W8ky/fTfkGsMmcrRsbx+3XoZE+rMOX71kLYTV7fLXpqud1GpbpP5TuffXFqfX7fH2GgZREw==}
-
   '@types/node@26.1.2':
     resolution: {integrity: sha512-Vu4a5UFA9rIIFJ7rB/Vaafh9lrCQszopTCx6KjFboXTGQbPNasehVR5TEiithSDGyd1DEiUByggTZsg8jukeIg==}
 
@@ -5558,6 +5586,9 @@ packages:
 
   electron-to-chromium@1.5.313:
     resolution: {integrity: sha512-QBMrTWEf00GXZmJyx2lbYD45jpI3TUFnNIzJ5BBc8piGUDwMPa1GV6HJWTZVvY/eiN3fSopl7NRbgGp9sZ9LTA==}
+
+  elkjs@0.12.0:
+    resolution: {integrity: sha512-YZcKynxVxYoKIOEpywEPwCFdg+BTbxQRNf3pbwdDCvc8O3kQD8bmIwSxKU1eOTVc4Xo+VG9Te+575mlfvOrhEQ==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -12337,7 +12368,7 @@ snapshots:
   '@types/jsonwebtoken@9.0.10':
     dependencies:
       '@types/ms': 2.1.0
-      '@types/node': 26.1.1
+      '@types/node': 26.1.2
 
   '@types/minimist@1.2.5': {}
 
@@ -12347,10 +12378,6 @@ snapshots:
     dependencies:
       undici-types: 7.24.6
 
-  '@types/node@26.1.1':
-    dependencies:
-      undici-types: 8.3.0
-
   '@types/node@26.1.2':
     dependencies:
       undici-types: 8.3.0
@@ -12359,7 +12386,7 @@ snapshots:
 
   '@types/pg@8.20.0':
     dependencies:
-      '@types/node': 26.1.1
+      '@types/node': 26.1.2
       pg-protocol: 1.10.3
       pg-types: 2.2.0
 
@@ -13692,6 +13719,8 @@ snapshots:
       fast-check: 3.23.2
 
   electron-to-chromium@1.5.313: {}
+
+  elkjs@0.12.0: {}
 
   emoji-regex@8.0.0: {}
 

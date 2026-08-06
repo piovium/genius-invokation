@@ -13,7 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { For, Match, Show, Switch, createSignal } from "solid-js";
+import {
+  For,
+  Match,
+  Show,
+  Switch,
+  createSignal,
+  onCleanup,
+  onMount,
+} from "solid-js";
 import getData from "@gi-tcg/data";
 import {
   CURRENT_VERSION,
@@ -31,14 +39,19 @@ import { IS_BETA, SERVER_HOST, WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
 import { DeckBuilder } from "@gi-tcg/deck-builder";
 import "@gi-tcg/deck-builder/style.css";
 import "@gi-tcg/state-editor/style.css";
+import "@gi-tcg/process-viewer/style.css";
 import { DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
 import { GameStateEditor } from "@gi-tcg/state-editor";
+import { SettlementFlowViewer } from "@gi-tcg/process-viewer";
 
 enum GameMode {
   NotStarted = 0,
   Standalone = 1,
   Editor = 2,
+  Process = 3,
 }
+
+const PROCESS_VIEWER_HASH = "#settlement-flow";
 
 const INIT_DECK0 =
   "FZDByRUNGRCB0WoNFlGgWpEPE0AB9TAPFGCB9kgWGIERCoEQDLFADcQQDPFgacYWDJAA";
@@ -54,11 +67,38 @@ export function App() {
     // eslint-disable-next-line solid/components-return-once
     return <StandaloneChild />;
   }
-  const [mode, setMode] = createSignal<GameMode>(GameMode.NotStarted);
+  const [mode, setMode] = createSignal<GameMode>(
+    window.location.hash === PROCESS_VIEWER_HASH
+      ? GameMode.Process
+      : GameMode.NotStarted,
+  );
   const [logs, setLogs] = createSignal<GameStateLogEntry[]>();
   const [deck0, setDeck0] = createSignal(INIT_DECK0);
   const [deck1, setDeck1] = createSignal(INIT_DECK1);
   const [version, setVersion] = createSignal<Version>(CURRENT_VERSION);
+
+  onMount(() => {
+    const syncProcessViewerFromHash = () => {
+      if (window.location.hash === PROCESS_VIEWER_HASH) {
+        setMode(GameMode.Process);
+      } else if (mode() === GameMode.Process) {
+        setMode(GameMode.NotStarted);
+      }
+    };
+    window.addEventListener("hashchange", syncProcessViewerFromHash);
+    onCleanup(() =>
+      window.removeEventListener("hashchange", syncProcessViewerFromHash),
+    );
+  });
+
+  const closeProcessViewer = () => {
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${window.location.search}`,
+    );
+    setMode(GameMode.NotStarted);
+  };
 
   const importLog = async () => {
     return new Promise<GameStateLogEntry[]>((resolve, reject) => {
@@ -262,6 +302,9 @@ export function App() {
               获取牌组码：<button onClick={openDeckBuilder}>启动组牌器</button>
             </li>
             <li>
+              开发文档：<a href={PROCESS_VIEWER_HASH}>结算流程图</a>
+            </li>
+            <li>
               此项目{" "}
               <a
                 href="https://github.com/Guyutongxue/genius-invokation"
@@ -271,10 +314,7 @@ export function App() {
               </a>
             </li>
             <li>
-              <a
-                href="https://gi-tcg.taim.site"
-                target="_blank"
-              >
+              <a href="https://gi-tcg.taim.site" target="_blank">
                 Taimevraiment 七圣召唤模拟器
               </a>
               （
@@ -351,6 +391,17 @@ export function App() {
               返回首页
             </button>
           </GameStateEditor>
+        </Match>
+        <Match when={mode() === GameMode.Process}>
+          <SettlementFlowViewer class="standalone-process-viewer">
+            <button
+              class="editor-back-button"
+              type="button"
+              onClick={closeProcessViewer}
+            >
+              返回首页
+            </button>
+          </SettlementFlowViewer>
         </Match>
       </Switch>
       <dialog ref={deckBuilderDialog!} class="deck-builder-dialog">

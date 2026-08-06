@@ -1,6 +1,6 @@
 # 结算流程设计
 
-本文描述当前 `@gi-tcg/core` 的实现，主要对应 `game.ts`、`skill_executor.ts`、`runtime/context/skill.ts` 和 `mutator.ts`。实现以不可变 `GameState` 和 `Mutation` 为基础：技能在私有的 `SkillContext` 中收集状态变更与事件，随后由 `SkillExecutor` 递归结算事件和请求。
+本文描述当前 `@gi-tcg/core` 的实现，主要对应 `game.ts`、`skill_executor.ts`、`runtime/skill_context.ts` 和 `mutator.ts`。实现以不可变 `GameState` 和 `Mutation` 为基础：技能在私有的 `SkillContext` 中收集状态变更与事件，随后由 `SkillExecutor` 递归结算事件和请求。
 
 ```text
 Game 阶段 / 玩家行动
@@ -14,6 +14,8 @@ SkillExecutor.finalizeSkill
         ▼
 StateMutator 通知前端、请求 Player IO、记录 Mutation 与详细日志
 ```
+
+![结算流程总览](../images/process-overview.svg)
 
 `Game` 不直接修改状态；它通过 `StateMutator` 应用 mutation。`StateMutator` 在普通通知时调用 `onNotify`，只在阶段切换、初始换牌等明确暂停点调用 `onPause`。技能与事件结算过程中不会因为每次 mutation 自动暂停。
 
@@ -33,6 +35,8 @@ StateMutator 通知前端、请求 Player IO、记录 Mutation 与详细日志
 行动阶段中，核心先处理 `onBeforeAction`，再检查首个可用的 `replaceAction` 技能；若存在便执行它并跳过玩家操作。否则，核心生成可用的技能、打牌、切人、元素调和和宣布结束行动，预计算修改与预览后请求玩家选择。选定后依次处理 `modifyAction0` 至 `modifyAction4`，校验并支付骰子和能量，执行实际行动，触发 `onAction`；非快速行动再切换行动方。
 
 ## 执行一个技能
+
+![技能结算流程](../images/process-skill.svg)
 
 `SkillExecutor.finalizeSkill(skillInfo, arg)` 的顺序如下：
 
@@ -56,6 +60,8 @@ StateMutator 通知前端、请求 Player IO、记录 Mutation 与详细日志
 
 ## 事件与请求
 
+![事件结算流程](../images/process-event.svg)
+
 `SkillExecutor.handleEvent(...events)` 按列表顺序逐个处理，子事件会在当前位置递归完成后才继续后续事件。
 
 - 对普通核心事件：先收集该事件的所有监听技能，再按 `allSkills` 的当前实体顺序逐一检查 filter 并结算。`onDispose` 会额外让刚被弃置的实体自身响应。
@@ -65,7 +71,9 @@ StateMutator 通知前端、请求 Player IO、记录 Mutation 与详细日志
 
 监听技能的收集包括扩展点和当前场上的实体，不包括 `removedEntities`。扩展点以当前行动方的出战角色作为 caller；实体的默认监听范围和细分事件过滤由数据定义层完成，参见[事件](./data/events.md)。
 
-## 击倒出站角色后的选人
+当前实现只有上述递归的完整事件结算路径，不再区分“浅层事件结算”。
+
+## 击倒出战角色后的选人
 
 在递归处理完技能事件后，若该技能造成某方角色倒下：
 
