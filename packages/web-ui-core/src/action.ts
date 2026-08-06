@@ -78,8 +78,7 @@ export function getHintTextOfCardOrSkill(
 ): string[] {
   try {
     const data = assetsManager.getDataSync(definitionId) as
-      | SkillRawData
-      | ActionCardRawData;
+      SkillRawData | ActionCardRawData;
     if (data.type === "GCG_CARD_ASSIST") {
       return Array.from({ length: 2 }, () =>
         t("action.chooseSupportToDispose"),
@@ -741,6 +740,7 @@ function createMultiStepState<T extends UseSkillAction | PlayCardAction>(
         ui: ActionStepEntityUi.Selected,
         equip: ctx.equipMap.get(id),
       };
+      const autoSelectedDice = node.value.action.autoSelectedDice as DiceType[];
       const resultState: ActionState = {
         availableSteps: [
           CANCEL_ACTION_STEP,
@@ -753,10 +753,9 @@ function createMultiStepState<T extends UseSkillAction | PlayCardAction>(
         showSkillButtons: isSkill,
         hintText: hintTexts[0],
         ...bottomHintOfAction(node.value.action, ctx.t),
-        dicePanel:
-          node.value.action.autoSelectedDice.length > 0 ? "visible" : "wrapped",
-        autoSelectedDice: null,
-        maxSelectedDiceCount: node.value.action.autoSelectedDice.length,
+        dicePanel: autoSelectedDice.length > 0 ? "visible" : "wrapped",
+        autoSelectedDice,
+        maxSelectedDiceCount: autoSelectedDice.length,
         showBackdrop: true,
         previewData: parsePreviewData(node.value.action.preview),
         step: (step, dice) => {
