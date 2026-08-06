@@ -756,7 +756,7 @@ function createMultiStepState<T extends UseSkillAction | PlayCardAction>(
         dicePanel:
           node.value.action.autoSelectedDice.length > 0 ? "visible" : "wrapped",
         autoSelectedDice: null,
-        maxSelectedDiceCount: null,
+        maxSelectedDiceCount: node.value.action.autoSelectedDice.length,
         showBackdrop: true,
         previewData: parsePreviewData(node.value.action.preview),
         step: (step, dice) => {

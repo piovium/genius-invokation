@@ -75,10 +75,16 @@ export function DicePanel(props: DicePanelProps) {
     if (props.disabledDiceTypes.includes(dice)) {
       return;
     }
+    if (props.maxSelectedCount === 0) {
+      return;
+    }
     const rawSelectedDice = props.selectedDice;
     const selectedDice = Array.from(props.dice, (_, i) => !!rawSelectedDice[i]);
     const selectedCount = selectedDice.filter(Boolean).length;
-    if (!props.maxSelectedCount || selectedCount < props.maxSelectedCount) {
+    if (
+      props.maxSelectedCount === null ||
+      selectedCount < props.maxSelectedCount
+    ) {
       selectedDice[index] = !selectedDice[index];
     } else {
       if (selectedDice[index]) {
