@@ -1856,9 +1856,13 @@ export function Chessboard(props: ChessboardProps) {
                     ? (card().kind === "switching") !== specialViewVisible()
                     : false
                 }
-                realCost={localProps.actionState?.realCosts.cards.get(
-                  card().id,
-                )}
+                realCost={
+                  card().kind === "oppHand"
+                    ? localProps.opp?.actionState?.realCosts.cards.get(
+                        card().id,
+                      )
+                    : localProps.actionState?.realCosts.cards.get(card().id)
+                }
                 onClick={(e, t) => onCardClick(e, t, card())}
                 onPointerEnter={(e, t) => onCardPointerEnter(e, t, card())}
                 onPointerLeave={(e, t) => onCardPointerLeave(e, t, card())}
