@@ -1282,17 +1282,11 @@ export function createActionState(
         break;
       }
       case "elementalTuning": {
-        if (
-          validity !== ActionValidity.VALID &&
-          validity !== ActionValidity.NO_DICE
-        ) {
-          continue;
-        }
         const step: ElementalTuningActionStep = {
           type: "elementalTuning",
           cardId: action.value.removedCardId,
         };
-        if (validity === ActionValidity.NO_DICE) {
+        if (validity !== ActionValidity.VALID) {
           steps.set(step, () => ({
             type: "newState",
             newState: {

@@ -87,7 +87,7 @@ function App() {
       ? mergeIo(io1, io0.oppController.open())
       : io1;
     game.players[0].config.alwaysOmni = true;
-    game.players[0].config.allowTuningAnyDice = true;
+    // game.players[0].config.allowTuningAnyDice = true;
     game.onIoError = console.error;
     game.onPause = async () => setLogs([...game.detailLog]);
     game.start();

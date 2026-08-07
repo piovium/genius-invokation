@@ -24,7 +24,6 @@
   "scripts": {
     "dev": "vite",
     "check": "tsc --noEmit",
-    "test": "vitest --environment node",
     "build": "vite build",
     "svg_render": "gnx ./scripts/svg_render.ts"
   },
