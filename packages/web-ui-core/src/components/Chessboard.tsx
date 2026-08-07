@@ -259,10 +259,11 @@ export interface ChessboardData extends ParsedMutation {
   onAnimationFinish?: () => void;
 }
 
+/** Returns whether the step was accepted and its UI transition may run. */
 export type StepActionStateHandler = (
   step: ActionStep,
   selectedDice: DiceType[],
-) => void;
+) => boolean;
 
 export type ChessboardViewType =
   | "normal"
@@ -1648,13 +1649,25 @@ export function Chessboard(props: ChessboardProps) {
     const [tuningAreaX] = getTuningAreaPos(size, dragging);
     const shouldFocusingHand = shouldFocusHandWhenDragging(size, dragging.y);
     if (cardInfo.tuneStep && dragging.x + CARD_WIDTH > tuningAreaX) {
-      localProps.onStepActionState?.(cardInfo.tuneStep, selectedDiceValue());
-      setDraggingHand({ ...dragging, status: "end" });
+      const accepted =
+        localProps.onStepActionState?.(
+          cardInfo.tuneStep,
+          selectedDiceValue(),
+        ) ?? false;
+      if (cardInfo.tuneStep.playable && accepted) {
+        setDraggingHand({ ...dragging, status: "end" });
+      } else {
+        setDraggingHand(null);
+      }
       return;
     }
     if (!shouldFocusingHand && cardInfo.playStep) {
-      localProps.onStepActionState?.(cardInfo.playStep, selectedDiceValue());
-      if (cardInfo.playStep.playable) {
+      const accepted =
+        localProps.onStepActionState?.(
+          cardInfo.playStep,
+          selectedDiceValue(),
+        ) ?? false;
+      if (cardInfo.playStep.playable && accepted) {
         setDraggingHand({ ...dragging, status: "end" });
       } else {
         setDraggingHand(null);
