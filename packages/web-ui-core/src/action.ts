@@ -1282,13 +1282,20 @@ export function createActionState(
         break;
       }
       case "elementalTuning": {
-        if (validity !== ActionValidity.VALID) {
-          continue;
-        }
         const step: ElementalTuningActionStep = {
           type: "elementalTuning",
           cardId: action.value.removedCardId,
         };
+        if (validity !== ActionValidity.VALID) {
+          steps.set(step, () => ({
+            type: "newState",
+            newState: {
+              ...root,
+              alertText: validityText(validity, t),
+            },
+          }));
+          break;
+        }
         const state = createElementalTuningActionState(root, {
           assetsManager,
           equipMap,
