@@ -438,8 +438,8 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
 
   const onStepActionState: StepActionStateHandler = (step, dice) => {
     const currentActionState = actionState();
-    if (!currentActionState) {
-      return;
+    if (!currentActionState || option.disableAction) {
+      return false;
     }
     // 动画队列 guard：基于当前动画播放状态禁止部分 action step 的提交，以防用户误操作
     const pending = uiQueue.pending();
@@ -449,7 +449,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     ) {
       // 当存在动画正在播放时，禁用使用技能和切换出战角色
       if (pending.length > 0) {
-        return;
+        return false;
       }
     } else if (
       step.type === "playCard" &&
@@ -458,7 +458,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     ) {
       // 当存在涉及我方支援区的动画正在播放时，禁用打出支援牌
       if (pending.some((meta) => meta.involvesMySupport)) {
-        return;
+        return false;
       }
     }
 
@@ -466,23 +466,17 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
     switch (result.type) {
       case "newState": {
         setActionState(result.newState);
-        break;
+        return true;
       }
       case "actionCommitted": {
-        if (option.disableAction) {
-          break;
-        }
         resolveRpc("action", result);
         setActionState(null);
-        break;
+        return true;
       }
       case "chooseActiveCommitted": {
-        if (option.disableAction) {
-          break;
-        }
         resolveRpc("chooseActive", result);
         setActionState(null);
-        break;
+        return true;
       }
     }
   };

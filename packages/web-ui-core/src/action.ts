@@ -103,6 +103,7 @@ export interface PlayCardActionStep {
 export interface ElementalTuningActionStep {
   readonly type: "elementalTuning";
   readonly cardId: number;
+  readonly playable: boolean;
 }
 
 export enum ActionStepEntityUi {
@@ -1285,6 +1286,7 @@ export function createActionState(
         const step: ElementalTuningActionStep = {
           type: "elementalTuning",
           cardId: action.value.removedCardId,
+          playable: validity === ActionValidity.VALID,
         };
         if (validity !== ActionValidity.VALID) {
           steps.set(step, () => ({
