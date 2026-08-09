@@ -684,9 +684,6 @@ export class Game {
         "onBeforeAction",
         new PlayerEventArg(this.state, who),
       );
-      // 重击标志需要依据 onBeforeAction 事件结算后的对局状态设置，
-      // 例如欧庇克莱歌剧院在 onBeforeAction 中生成了元素骰，
-      // 需要据此重新判断元素骰总数的奇偶性。
       this.mutate({
         type: "setPlayerFlag",
         who,

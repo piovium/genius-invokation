@@ -85,9 +85,9 @@ test("opera epiclese: only counts equipment on characters", async () => {
 });
 
 test("opera epiclese: canCharged is set after onBeforeAction", async () => {
-  // 我方可莉附属爆裂火花，我方支援区存在欧庇克莱歌剧院（存在可用次数、双方均无其他装备），
-  // 初始元素骰为奇数。经过 onBeforeAction 事件后，欧庇克莱歌剧院生成 1 个元素骰，
-  // 元素骰总数变为偶数，可莉使用普通攻击，应当视为重击。
+  // 初始元素骰为奇数；
+  // 经过 onBeforeAction 事件后，欧庇克莱歌剧院生成 1 个元素骰；
+  // 元素骰总数变为偶数，可莉使用普通攻击，应当视为重击
   const c = setup(
     <State>
       <Character my active def={Klee}>
@@ -103,8 +103,8 @@ test("opera epiclese: canCharged is set after onBeforeAction", async () => {
   expect(c.state.players[0].canCharged).toBe(true);
 
   await c.me.skill(Kaboom);
-  // 视为重击：爆裂火花使重击少花费 1 个火元素，故本次普通攻击只消耗 2 个元素骰
+  // 视为重击：少花费 1 火，只消耗 2 个元素骰
   expect(c.state.players[0].dice).toBeArrayOfSize(6);
-  // 视为重击：爆裂火花使重击伤害 +1，伤害为 1 + 1 = 2
+  // 视为重击：伤害 + 1 = 2
   c.expect($.opp.active).toHaveVariable({ health: 8 });
 });
