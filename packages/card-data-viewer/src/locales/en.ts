@@ -3,6 +3,7 @@ import type { I18nDictionary } from ".";
 export default {
   loading: "Loading...",
   loadFailed: "Load failed",
+  retry: "Retry",
   equipment: "Character Equipment",
   status: "Character Status",
   equipAndStatus: "Equipment & Status",
