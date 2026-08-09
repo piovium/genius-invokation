@@ -34,11 +34,7 @@ import { CardFace } from "./CardFace";
 
 type MainStateType = "character" | "card" | "entity" | "skill" | "keyword";
 type SubStateType =
-  | "equipment"
-  | "status"
-  | "equipAndStatus"
-  | "combatStatus"
-  | "attachment";
+  "equipment" | "status" | "equipAndStatus" | "combatStatus" | "attachment";
 
 export type StateType = MainStateType | SubStateType;
 
@@ -123,9 +119,12 @@ function CardDataViewer(props: CardDataViewerProps) {
   return (
     <div class="gi-tcg-card-data-viewer reset">
       <ErrorBoundary
-        fallback={(err) => (
+        fallback={(err, reset) => (
           <div class="card-panel">
-            <p>{t("loadFailed")}</p>
+            <p>
+              {t("loadFailed")}
+              <button onClick={reset}>{t("retry")}</button>
+            </p>
             <pre class="whitespace-pre-wrap">
               {"message" in err ? (console.error(err), err.message) : `${err}`}
             </pre>

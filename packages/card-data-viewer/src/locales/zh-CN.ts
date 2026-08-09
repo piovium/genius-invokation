@@ -16,6 +16,7 @@
 export default {
   loading: "加载中...",
   loadFailed: "加载失败",
+  retry: "重试",
   equipment: "角色装备",
   status: "角色状态",
   equipAndStatus: "角色装备与状态",
