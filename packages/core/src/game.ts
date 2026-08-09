@@ -661,12 +661,6 @@ export class Game {
     const player = () => this.state.players[who];
     const activeCh = () =>
       player().characters[getActiveCharacterIndex(player())];
-    this.mutate({
-      type: "setPlayerFlag",
-      who,
-      flagName: "canCharged",
-      value: player().dice.length % 2 === 0,
-    });
     if (player().declaredEnd) {
       this.mutate({
         type: "switchTurn",
@@ -690,6 +684,12 @@ export class Game {
         "onBeforeAction",
         new PlayerEventArg(this.state, who),
       );
+      this.mutate({
+        type: "setPlayerFlag",
+        who,
+        flagName: "canCharged",
+        value: player().dice.length % 2 === 0,
+      });
       // A test reported that there do have a clearPhaseLog between onBeforeAction and action.
       // See packages/test/__tests__/superconduct_blessing.test.tsx involving Heizou's one
       this.mutate({ type: "clearPhaseLogs" });
