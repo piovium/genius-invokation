@@ -27,9 +27,7 @@ export const base = fileURLToPath(new URL("../../data", import.meta.url));
 const project = new TcgDataProject();
 const filepaths: string[] = [];
 for await (const filepath of glob(`${base}/src/**/*.gts`)) {
-  if (!filepath.includes(`${path.sep}old_versions${path.sep}`)) {
-    filepaths.push(filepath);
-  }
+  filepaths.push(filepath);
 }
 
 for (const filepath of filepaths.sort()) {
