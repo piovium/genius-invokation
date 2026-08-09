@@ -661,12 +661,6 @@ export class Game {
     const player = () => this.state.players[who];
     const activeCh = () =>
       player().characters[getActiveCharacterIndex(player())];
-    this.mutate({
-      type: "setPlayerFlag",
-      who,
-      flagName: "canCharged",
-      value: player().dice.length % 2 === 0,
-    });
     if (player().declaredEnd) {
       this.mutate({
         type: "switchTurn",
@@ -690,6 +684,15 @@ export class Game {
         "onBeforeAction",
         new PlayerEventArg(this.state, who),
       );
+      // 重击标志需要依据 onBeforeAction 事件结算后的对局状态设置，
+      // 例如欧庇克莱歌剧院在 onBeforeAction 中生成了元素骰，
+      // 需要据此重新判断元素骰总数的奇偶性。
+      this.mutate({
+        type: "setPlayerFlag",
+        who,
+        flagName: "canCharged",
+        value: player().dice.length % 2 === 0,
+      });
       // A test reported that there do have a clearPhaseLog between onBeforeAction and action.
       // See packages/test/__tests__/superconduct_blessing.test.tsx involving Heizou's one
       this.mutate({ type: "clearPhaseLogs" });
