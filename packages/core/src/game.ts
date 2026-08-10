@@ -896,6 +896,10 @@ export class Game {
                 flagName: "declaredEnd",
                 value: true,
               });
+              await this.handleEvent(
+                "onDeclareEnd",
+                new PlayerEventArg(this.state, who),
+              );
               break;
             }
           }
