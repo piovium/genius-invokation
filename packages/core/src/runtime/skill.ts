@@ -452,8 +452,8 @@ export const detailedEventDictionary = {
       !e.skill.definition.initiativeSkillConfig.omitEvents
     );
   }),
-  declareEnd: defineDescriptor("onAction", (e, r) => {
-    return checkRelative(e.onTimeState, { who: e.who }, r) && e.isDeclareEnd();
+  declareEnd: defineDescriptor("onDeclareEnd", (e, r) => {
+    return checkRelative(e.onTimeState, { who: e.who }, r);
   }),
   switchActive: defineDescriptor("onSwitchActive", (e, r) => {
     return (

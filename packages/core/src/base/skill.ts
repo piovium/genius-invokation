@@ -1373,6 +1373,7 @@ export const EVENT_MAP = {
   onUseSkill: UseSkillEventArg,
   onBeforePlayCard: PlayCardEventArg,
   onPlayCard: PlayCardEventArg,
+  onDeclareEnd: PlayerEventArg,
 
   onSwitchActive: SwitchActiveEventArg,
   onHandCardInserted: HandCardInsertedEventArg,

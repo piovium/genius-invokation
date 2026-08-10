@@ -19,6 +19,7 @@ import {
   DisposeEventArg,
   GenericModifyActionEventArg,
   PlayCardEventArg,
+  PlayerEventArg,
   UseSkillEventArg,
   type ActionInfo,
   type ActionInfoBase,
@@ -360,6 +361,10 @@ export class ActionPreviewer {
           flagName: "declaredEnd",
           value: true,
         });
+        await ctx.previewEvent(
+          "onDeclareEnd",
+          new PlayerEventArg(ctx.state, this.who),
+        );
         break;
       }
     }
