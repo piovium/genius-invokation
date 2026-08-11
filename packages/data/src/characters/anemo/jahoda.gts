@@ -247,9 +247,8 @@ define skill {
  */
 define skill {
   id 15165 as MoonsignBenedictionRooftopDash01;
-  skillType passive {
-    // TODO
-  }
+  skillType passive;
+  reserved;
 }
 
 /**
@@ -281,6 +280,19 @@ define card {
   since "v7.0.0";
   cost DiceType.Anemo, 3;
   talent Jahoda {
-    // TODO
-  }
+    on staged {
+      :useSkill(SavvyStrategySplittingTheSpoils);
+    };
+    on switchActive {
+      when :(
+        :e.switchInfo.to.definition.id === Jahoda &&
+          :oppPlayer.hands.length >= :player.hands.length
+      );
+      usage perRound, 1;
+      const randomCards = :randomSubset(:oppPlayer.hands, 2);
+      for (const card of randomCards) {
+        :createHandCard(card.definition.id as CardHandle);
+      }
+    };
+  };
 }
