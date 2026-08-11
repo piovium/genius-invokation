@@ -58,6 +58,11 @@ define skill {
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 1);
   :createPileCards(RadiantHues, 1, "topIndex2");
+  const swiftShadowStatus = :query(
+    $.my.combatStatus.def(RadiantHuesSwiftShadowInEffect),
+  );
+  const swiftShadowStacks =
+    swiftShadowStatus?.getVariable("reductCount") ?? 0;
   const candidates = :randomSubset(
     [
       RadiantHuesIcicle,
@@ -66,7 +71,9 @@ define skill {
       RadiantHuesPillar,
       RadiantHuesSolidIce,
       RadiantHuesSwiftShadow,
-    ],
+    ].filter(
+      (id) => !(id === RadiantHuesSwiftShadow && swiftShadowStacks >= 2),
+    ),
     3,
   );
   :selectAndPlay(candidates);
