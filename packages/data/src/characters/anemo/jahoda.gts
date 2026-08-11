@@ -47,6 +47,7 @@ define card {
     }
   };
   :damage(DamageType.Anemo, 2);
+  :eventBoundary();
   :damage(DamageType.Anemo, 1, $.macros.oppActivePrioritized);
 }
 
@@ -62,6 +63,7 @@ define card {
   cost DiceType.Aligned, 4;
   tags action;
   :damage(DamageType.Pyro, 2);
+  :eventBoundary();
   :damage(DamageType.Pyro, 1, $.macros.oppActivePrioritized);
 }
 
@@ -77,6 +79,7 @@ define card {
   cost DiceType.Aligned, 4;
   tags action;
   :damage(DamageType.Hydro, 2);
+  :eventBoundary();
   :damage(DamageType.Hydro, 1, $.macros.oppActivePrioritized);
 }
 
@@ -92,6 +95,7 @@ define card {
   cost DiceType.Aligned, 4;
   tags action;
   :damage(DamageType.Electro, 2);
+  :eventBoundary();
   :damage(DamageType.Electro, 1, $.macros.oppActivePrioritized);
 }
 
@@ -107,6 +111,7 @@ define card {
   cost DiceType.Aligned, 4;
   tags action;
   :damage(DamageType.Cryo, 2);
+  :eventBoundary();
   :damage(DamageType.Cryo, 1, $.macros.oppActivePrioritized);
 }
 
