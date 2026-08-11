@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DamageType, DiceType } from "@gi-tcg/core/data";
+import { DamageType, DiceType, Reaction } from "@gi-tcg/core/data";
 
 /**
  * @id 112031
@@ -156,5 +156,49 @@ define card {
       listenTo samePlayer;
       :e.increaseDamage(2);
     };
+  };
+};
+
+/**
+ * @id 212032
+ * @name 天步真原
+ * @description
+ * 战斗行动：我方出战角色为莫娜时，装备此牌。
+ * 莫娜装备此牌后，我方下次蒸发反应造成的伤害+2并立刻使用一次因果点破。
+ * 莫娜「普通攻击」少花费1个无色元素，并且「普通攻击」后使我方下次蒸发反应造成的伤害+2。
+ * （牌组中包含莫娜，才能加入牌组）
+ */
+define card {
+  id 212032 as GenesisOfStarsigns;
+  since "v7.0.0";
+  cost DiceType.Hydro, 1;
+  cost DiceType.Void, 1;
+  talent Mona {
+    on staged {
+      :combatStatus(MakotoOfTheHeavenStepsInEffect);
+      :useSkill(RippleOfFate);
+    };
+    on deductVoidDiceSkill {
+      when :( :e.isSkillType("normal") );
+      :e.deductVoidCost(1);
+    };
+    on useSkill {
+      when :( :e.isSkillType("normal") );
+      :combatStatus(MakotoOfTheHeavenStepsInEffect);
+    };
+  };
+}
+
+/**
+ * @id 212033
+ * @name 天步真原（生效中）
+ * @description
+ * 我方下次蒸发反应造成的伤害+2。
+ */
+define combatStatus {
+  id 212033 as MakotoOfTheHeavenStepsInEffect;
+  once increaseDamage {
+    when :( :e.getReaction() === Reaction.Vaporize );
+    :e.increaseDamage(2);
   };
 };

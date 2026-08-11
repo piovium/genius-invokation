@@ -141,15 +141,15 @@ define skill {
  * @id 15152
  * @name 空天疾护
  * @description
- * 造成1点风元素伤害，自身进入夜魂加持，获得2点「夜魂值」，并附属咔库库。（角色进入夜魂加持后不可使用此技能）
+ * 造成2点风元素伤害，自身进入夜魂加持，获得2点「夜魂值」，并附属咔库库。（角色进入夜魂加持后不可使用此技能）
  * （附属咔库库的角色可以使用特技：援护射击）
  */
 define skill {
   id 15152 as AirborneDiseasePrevention;
   skillType elemental;
-  cost DiceType.Anemo, 2;
+  cost DiceType.Anemo, 3;
   filter :( !:self.hasStatus(NightsoulsBlessing) );
-  :damage(DamageType.Anemo, 1);
+  :damage(DamageType.Anemo, 2);
   :gainNightsoul(:self, 2);
   :equip(Cacucu, :self);
 };

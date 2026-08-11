@@ -164,3 +164,48 @@ define card {
     };
   };
 };
+
+/**
+ * @id 215032
+ * @name 颂时风若
+ * @description
+ * 快速行动：装备给我方的温迪。
+ * 召唤暴风之眼。
+ * 我方召唤暴风之眼后，本回合中所附属角色下2次「普通攻击」造成的物理伤害变为风元素伤害，并且少花费2个无色元素。
+ * （牌组中包含温迪，才能加入牌组）
+ */
+define card {
+  id 215032 as TemporalWindsEulogy;
+  since "v7.0.0";
+  cost DiceType.Anemo, 3;
+  talent Venti, none {
+    on staged {
+      :summon(Stormeye);
+    };
+    on entityEnter {
+      when :( :e.entity.definition.id === Stormeye );
+      listenTo samePlayer;
+      :characterStatus(WindsweptFeathersInEffect, :self.master);
+    };
+  };
+}
+
+/**
+ * @id 215033
+ * @name 颂时风若（生效中）
+ * @description
+ * 本回合中所附属角色角色下2次「普通攻击」造成的物理伤害变为风元素伤害，并且少花费2个无色元素。
+ */
+define status {
+  id 215033 as WindsweptFeathersInEffect;
+  oneDuration;
+  on deductVoidDiceSkill {
+    when :( :e.isSkillType("normal") );
+    :e.deductVoidCost(2);
+  };
+  on modifySkillDamageType {
+    when :( :e.viaSkillType("normal") && :e.type === DamageType.Physical );
+    usage 2;
+    :e.changeDamageType(DamageType.Anemo);
+  };
+};

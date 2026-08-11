@@ -142,7 +142,7 @@ define combatStatus {
  * @id 330005
  * @name 万家灶火
  * @description
- * 第1回合打出此牌时：如果我方牌组中初始包含至少2张不同的「天赋」牌，则抓1张「天赋」牌。
+ * 第1回合打出此牌时：如果我方牌组中初始包含至少4/2张不同的「天赋」牌，则抓2/1张「天赋」牌。
  * 第2回合及以后打出此牌时：我方抓当前的回合数-1数量的牌。（最多抓4张）
  * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
  * 【此卡含描述变量】
@@ -169,7 +169,10 @@ define card {
     const initTalentDefIds = :player.initialPile
       .filter((card) => card.tags.includes("talent"))
       .map((card) => card.id);
-    if (new Set(initTalentDefIds).size >= 2) {
+    const size = new Set(initTalentDefIds).size;
+    if (size >= 4) {
+      :drawCards(2, { withTag: "talent" });
+    } else if (size >= 2) {
       :drawCards(1, { withTag: "talent" });
     }
   } else {

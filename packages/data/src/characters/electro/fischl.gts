@@ -139,3 +139,36 @@ define card {
     };
   };
 };
+
+/**
+ * @id 214012
+ * @name 宵世幻奏
+ * @description
+ * 快速行动：装备给我方的菲谢尔。
+ * 召唤奥兹。
+ * 奥兹在场时，我方雷元素相关反应造成的伤害+1。（每回合3次）
+ * （牌组中包含菲谢尔，才能加入牌组）
+ */
+define card {
+  id 214012 as PhantasmalNocturne;
+  since "v7.0.0";
+  cost DiceType.Electro, 2;
+  talent Fischl, none {
+    on staged {
+      if (:e.targets[0].hasEquipment(StellarPredator)) {
+        :summon(Oz01);
+      } else {
+        :summon(Oz);
+      }
+    };
+    on increaseDamage {
+      when :(
+        (:query($.my.summon.def(Oz)) || :query($.my.summon.def(Oz01))) &&
+          :e.isReactionRelatedTo(DamageType.Electro)
+      );
+      usage perRound, 3;
+      listenTo samePlayer;
+      :e.increaseDamage(1);
+    };
+  };
+}
