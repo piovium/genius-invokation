@@ -279,6 +279,30 @@ if (SAVE_OLD_CODES && !existsSync(OLD_VERSION_PATH)) {
   );
 }
 
+export function setOldVersion(code: string): string {
+  const versionLine =
+    /^([^\S\r\n]*)(?:since|until)[^\S\r\n]+"[^"\r\n]*";[^\S\r\n]*(\r?)$/m;
+  if (versionLine.test(code)) {
+    return code.replace(
+      versionLine,
+      (_line, indentation: string, carriageReturn: string) =>
+        `${indentation}until "${OLD_VERSION}";${carriageReturn}`,
+    );
+  }
+
+  const idLine = /^([^\S\r\n]*)id[^\S\r\n]+[^;\r\n]+;[^\S\r\n]*(\r?)$/m;
+  if (!idLine.test(code)) {
+    throw new Error(
+      "Cannot add an until version to a definition without an id",
+    );
+  }
+  return code.replace(
+    idLine,
+    (line, indentation: string, carriageReturn: string) =>
+      `${line}\n${indentation}until "${OLD_VERSION}";${carriageReturn}`,
+  );
+}
+
 let untitledId = 1;
 export function identifier(name: string) {
   return pascalCase(name || `untitled_${untitledId++}`);
@@ -350,12 +374,9 @@ export async function writeSourceCode(
  * @description
  * ${writeDescriptionAsComment(item.description)}
  */
-${item.code
-  .replace(/export /, "")
-  .replace(/ as /, " as private ")
-  .replace(/\n(  \.?since(\(| )".*?"(\)|;)\n)?/, (str) =>
-    str.replace(/since/, "until").replace(/".*?"/, `"${OLD_VERSION}"`),
-  )}
+${setOldVersion(
+  item.code.replace(/export /, "").replace(/ as /, " as private "),
+)}
 `,
         );
       }

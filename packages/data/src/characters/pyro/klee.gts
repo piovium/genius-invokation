@@ -153,3 +153,32 @@ define card {
     };
   };
 };
+
+/**
+ * @id 213062
+ * @name 火花魔法
+ * @description
+ * 快速行动：装备给我方的可莉。
+ * 可莉附属爆裂火花。
+ * 所附属角色进行重击后：造成2点火元素伤害。（每回合2次）
+ * （牌组中包含可莉，才能加入牌组）
+ */
+define card {
+  id 213062 as SparkborneMagic;
+  since "v7.0.0";
+  cost DiceType.Pyro, 1;
+  talent Klee, none {
+    on staged {
+      if (:e.targets[0].hasEquipment(PoundingSurprise)) {
+        :characterStatus(ExplosiveSpark01, :e.targets[0]);
+      } else {
+        :characterStatus(ExplosiveSpark, :e.targets[0]);
+      }
+    };
+    on useSkill {
+      when :( :e.isChargedAttack() );
+      usage perRound, 2;
+      :damage(DamageType.Pyro, 2, $.macros.oppActivePrioritized);
+    };
+  };
+}

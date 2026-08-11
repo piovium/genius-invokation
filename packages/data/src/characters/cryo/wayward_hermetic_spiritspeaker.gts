@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, DamageType, $ } from "@gi-tcg/core/data";
+import { DiceType, DamageType, $, pair } from "@gi-tcg/core/data";
 import { BattlePlan, Shield } from "../../commons.gts";
 
 /**
@@ -208,14 +208,17 @@ define card {
  * @id 221057
  * @name 浮彩·迅影
  * @description
- * 打出浮彩少花费等于此状态层数个元素骰。
+ * 打出浮彩时：赋予我方费用最高的1张随机手牌等于此状态层数层费用降低。
  */
 define combatStatus {
   id 221057 as RadiantHuesSwiftShadowInEffect;
   variable reductCount, 1 { append; };
   on deductOmniDiceCard {
     when :( :e.action.skill.caller.definition.id === RadiantHues );
-    :e.deductOmniCost(:getVariable("reductCount"));
+    const [maxCostHand] = :maxCostHands(1);
+    if (maxCostHand) {
+      :attachCostReduction(maxCostHand, :getVariable("reductCount"));
+    }
   };
 };
 
@@ -223,7 +226,7 @@ define combatStatus {
  * @id 121059
  * @name 浮彩·迅影
  * @description
- * 打出浮彩少花费1个元素骰。（重复选择时将额外少花费1个元素骰）
+ * 打出浮彩时：赋予我方费用最高的1张随机手牌费用降低。（重复选择时将额外赋予1层）
  */
 define card {
   id 121059 as RadiantHuesSwiftShadow;
@@ -258,30 +261,46 @@ define skill {
   :damage(DamageType.Cryo, 1);
 };
 
+define extension {
+  idHint 21052 as RadianceInFluxExtension;
+  description "记录本局游戏灵觉·浮彩的使用次数";
+  schema ({ usedCount: "pair<number>" });
+  initialState ({ usedCount: pair(0) });
+  mutateWhen onUseSkill,
+    ((st, e) => {
+      if (e.skill.definition.id === RadianceInFlux) {
+        st.usedCount[e.who]++;
+      }
+    });
+};
+
 /**
  * @id 21052
  * @name 千变的浮彩
  * @description
- * 造成1点冰元素伤害，将1张浮彩加入牌库中第3张的位置，并从3个随机的浮彩强化效果中挑选1个。
+ * 造成1点冰元素伤害，将1张浮彩加入牌库中第3张的位置。如果是本局游戏前4次使用此技能，则从3个随机的浮彩强化效果中挑选1个。
  */
 define skill {
   id 21052 as RadianceInFlux;
   skillType elemental;
   cost DiceType.Cryo, 3;
+  associateExtension RadianceInFluxExtension;
   :damage(DamageType.Cryo, 1);
   :createPileCards(RadiantHues, 1, "topIndex2");
-  const candidates = :randomSubset(
-    [
-      RadiantHuesIcicle,
-      RadiantHuesEchoes,
-      RadiantHuesManifestation,
-      RadiantHuesPillar,
-      RadiantHuesSolidIce,
-      RadiantHuesSwiftShadow,
-    ],
-    3,
-  );
-  :selectAndPlay(candidates);
+  if (:getExtensionState().usedCount[:self.who] < 4) {
+    const candidates = :randomSubset(
+      [
+        RadiantHuesIcicle,
+        RadiantHuesEchoes,
+        RadiantHuesManifestation,
+        RadiantHuesPillar,
+        RadiantHuesSolidIce,
+        RadiantHuesSwiftShadow,
+      ],
+      3,
+    );
+    :selectAndPlay(candidates);
+  }
 };
 
 /**

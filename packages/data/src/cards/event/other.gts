@@ -3011,3 +3011,53 @@ define card {
   cost DiceType.Aligned, 1;
   :combatStatus(ThePowerOfResearchInEffect);
 };
+
+/**
+ * @id 332065
+ * @name 「魔女的课业」
+ * @description
+ * 抓1张「天赋」牌。如果我方牌组中初始包含至少3张「天赋」牌，则赋予手牌中当前元素骰费用最高的随机1张「天赋」牌费用降低。
+ */
+define card {
+  id 332065 as WitchsHomework;
+  since "v7.0.0";
+  cost DiceType.Aligned, 1;
+  :drawCards(1, { withTag: "talent" });
+  if (
+    :player.initialPile.filter((c) => c.tags.includes("talent")).length >= 3
+  ) {
+    const maxCostTargets = :maxCostHands(1, {
+      filter: (card) => card.definition.tags.includes("talent"),
+    });
+    if (maxCostTargets.length > 0) {
+      :attachCostReduction(:random(maxCostTargets));
+    }
+  }
+}
+
+/**
+ * @id 332066
+ * @name 齐聚共饮
+ * @description
+ * 下个回合开始时：双方各抓2张牌，随机生成2个随机元素骰。
+ */
+define card {
+  id 332066 as FeastingInASharedToast;
+  since "v7.0.0";
+  :combatStatus(GatherForADrinkInEffect, "my");
+  :combatStatus(GatherForADrinkInEffect, "opp");
+}
+
+/**
+ * @id 303250
+ * @name 齐聚共饮（生效中）
+ * @description
+ * 下个回合开始时：抓2张牌，然后生成2个随机元素骰。
+ */
+define combatStatus {
+  id 303250 as GatherForADrinkInEffect;
+  once actionPhase {
+    :drawCards(2);
+    :generateDice("randomElement", 2);
+  };
+};

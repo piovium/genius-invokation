@@ -128,7 +128,7 @@ define card {
  * @name 回天的圣主
  * @description
  * 结束阶段：造成2点穿透伤害。
- * 此卡牌被弃置时，对双方场上生命值最多的角色造成5点穿透伤害。可用次数：3
+ * 此卡牌被弃置时，对双方场上生命值最多的角色造成3点穿透伤害。可用次数：3
  */
 define summon {
   id 301041 as TideTurningSacredLord;
@@ -144,7 +144,7 @@ define summon {
       myMaxHpCharacter.health > oppMaxHpCharacter.health
         ? myMaxHpCharacter
         : oppMaxHpCharacter;
-    :damage(DamageType.Piercing, 5, target);
+    :damage(DamageType.Piercing, 3, target);
   };
 };
 
@@ -153,7 +153,7 @@ define summon {
  * @name 天蛇船
  * @description
  * 冒险经历增加时：将1个元素骰转换为万能元素。
- * 冒险经历达到2时：抓2张牌。
+ * 冒险经历达到2时：抓1张牌。
  * 冒险经历达到4时：我方出战角色附属2层战斗计划。
  * 冒险经历达到6时：弃置敌方场上1个随机召唤物，召唤回天的圣主，然后弃置此牌。
  */
@@ -177,7 +177,7 @@ define card {
         name "stage1";
         visible false;
       };
-      :drawCards(2);
+      :drawCards(1);
     };
     on adventure {
       when :( :getVariable("exp") >= 4 );
