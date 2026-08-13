@@ -802,7 +802,7 @@ define card {
         (card) => originalDiceCostOfCard(card) === 2,
       );
       const candidates = :randomSubset(cards, 3);
-      :selectAndPlay(candidates);
+      :selectAndPlay(candidates, "first");
       :dispose();
     };
   };

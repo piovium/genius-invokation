@@ -1446,7 +1446,7 @@ export type SelectCardInfo =
       readonly type: "requestPlayCard";
       readonly cards: readonly EntityDefinition[];
       /** 使用手牌的目标 */
-      readonly targets: AnyState[];
+      readonly target: PlayCardTarget;
     };
 
 class SelectCardRequestArg extends RequestArg {
@@ -1499,11 +1499,14 @@ export class PlayCardRequestArg extends RequestArg {
     requestBy: SkillInfo,
     public readonly who: 0 | 1,
     public readonly card: EntityState,
-    public readonly targets: AnyState[],
+    public readonly target: PlayCardTarget,
   ) {
     super(requestBy);
   }
 }
+
+export type PlayCardTarget<T = AnyState> =
+  readonly T[] | "skipIfRequired" | "first" | "random";
 
 class TriggerEndPhaseSkillRequestArg extends RequestArg {
   constructor(

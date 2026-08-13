@@ -64,6 +64,7 @@ import {
   isSkillDisabled,
   initiativeSkillsOfPlayer,
   getEntityArea,
+  getPlayCardTargetCandidates,
   playSkillOfCard,
   type Writable,
   applyAutoSelectedDiceToAction,
@@ -1060,18 +1061,12 @@ export class Game {
           targets: [],
           willBeEffectless,
         };
-        // 当支援区满时，卡牌目标为“要离场的支援牌”
-        if (
-          card.definition.type === "support" &&
-          player.supports.length === this.state.config.maxSupportsCount
-        ) {
-          allTargets = player.supports.map((st) => ({ targets: [st] }));
-        } else {
-          allTargets = (0, skillDef.initiativeSkillConfig.getTarget)(
-            this.state,
-            skillInfo,
-          );
-        }
+        allTargets = getPlayCardTargetCandidates(
+          this.state,
+          who,
+          card,
+          skillInfo,
+        );
         if (allTargets.length === 0) {
           const fakeActionInfo: ActionInfo = {
             ...actionInfoBase,

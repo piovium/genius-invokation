@@ -22,6 +22,8 @@ import {
   type EventAndRequest,
   EventArg,
   type InitiativeSkillEventArg,
+  type PlayCardSkillInfo,
+  type PlayCardTarget,
   SelectCardEventArg,
   type SelectCardInfo,
   type SkillEnvironment,
@@ -32,6 +34,7 @@ import {
 import {
   type AnyState,
   type CharacterState,
+  type EntityState,
   type GameState,
   stringifyState,
 } from "./base/state";
@@ -46,6 +49,7 @@ import {
   isCharacterInitiativeSkill,
   isChargedPlunging,
   isSkillDisabled,
+  getPlayCardTargetCandidates,
   playSkillOfCard,
   shiftLeft,
 } from "./utils";
@@ -459,7 +463,20 @@ export class SkillExecutor {
           definition: skillDef,
           requestBy: arg.via,
         });
-        await this.finalizeSkill(skillInfo, { targets: arg.targets });
+        const targets = this.resolvePlayCardTargets(
+          arg.who,
+          arg.card,
+          skillInfo,
+          arg.target,
+        );
+        if (!targets) {
+          this.mutator.log(
+            DetailLogType.Other,
+            `Card ${stringifyState(arg.card)} has no valid requested targets, skip playing`,
+          );
+          continue;
+        }
+        await this.finalizeSkill(skillInfo, targets);
       } else if (name === "requestAdventure") {
         using l = this.mutator.subLog(
           DetailLogType.Event,
@@ -489,7 +506,7 @@ export class SkillExecutor {
           const selectCardInfo: SelectCardInfo = {
             type: "requestPlayCard",
             cards: spots,
-            targets: [],
+            target: [],
           };
           const events = await this.mutator.selectCard(
             arg.who,
@@ -545,6 +562,37 @@ export class SkillExecutor {
 
   private ended() {
     return this.state.phase === "gameEnd";
+  }
+
+  private resolvePlayCardTargets(
+    who: 0 | 1,
+    card: EntityState,
+    skillInfo: PlayCardSkillInfo,
+    target: PlayCardTarget,
+  ): InitiativeSkillEventArg | null {
+    const skill = skillInfo.definition;
+    if (Array.isArray(target)) {
+      const arg = { targets: [...target] };
+      return (0, skill.filter)(this.state, skillInfo, arg) ? arg : null;
+    }
+
+    const candidates = getPlayCardTargetCandidates(
+      this.state,
+      who,
+      card,
+      skillInfo,
+    ).filter((arg) => (0, skill.filter)(this.state, skillInfo, arg));
+    if (target === "skipIfRequired") {
+      return candidates.find((arg) => arg.targets.length === 0) ?? null;
+    }
+    if (candidates.length === 0) {
+      return null;
+    }
+    if (target === "first") {
+      return candidates[0];
+    }
+    const randomValue = this.mutator.stepRandom();
+    return candidates[randomValue % candidates.length];
   }
 
   static async executeSkill(
