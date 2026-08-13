@@ -241,8 +241,13 @@ define status {
 define card {
   id 211 as LunarSymphony;
   cost DiceType.Geo, 2;
-  :summon(Moondrift);
-}
+  const moondrift = :query($.my.summon.def(Moondrift));
+  if (moondrift) {
+    moondrift.addVariable("effect", 1);
+  } else {
+    :summon(Moondrift);
+  }
+};
 
 /**
  * @id 212
@@ -254,12 +259,12 @@ define card {
  */
 define summon {
   id 212 as Moondrift;
-  hint DamageType.Geo, ((st, self) => self.variables.effect)
+  hint DamageType.Geo, ((st, self) => self.variables.effect);
   variable effect, 1 { append; };
   on endPhase {
     usage 2;
     :damage(DamageType.Geo, :getVariable("effect"));
-  }
+  };
   on gainEffect {
     when :( :e.entity.id === :self.id );
     if (:getVariable("effect") >= 3) {
@@ -267,7 +272,7 @@ define summon {
       :setVariable("effect", 1);
     }
   };
-}
+};
 
 /**
  * @id 201
