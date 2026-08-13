@@ -43,8 +43,10 @@ import {
   defineSkillInfo,
   EventArg,
   type EventNames,
+  type InitiativeSkillEventArg,
   type InitiativeSkillDefinition,
   type InitiativeSkillInfo,
+  type PlayCardSkillInfo,
   type SkillDefinition,
   type SkillInfo,
   type SkillType,
@@ -738,6 +740,26 @@ export function playSkillOfCard(
     (sk): sk is InitiativeSkillDefinition => sk.skillType === "playCard",
   );
   return skillDefinition ?? null;
+}
+
+/** Get target candidates for playing a card, including support replacement. */
+export function getPlayCardTargetCandidates(
+  state: GameState,
+  who: 0 | 1,
+  card: EntityState,
+  skillInfo: PlayCardSkillInfo,
+): InitiativeSkillEventArg[] {
+  const player = state.players[who];
+  if (
+    card.definition.type === "support" &&
+    player.supports.length === state.config.maxSupportsCount
+  ) {
+    return player.supports.map((support) => ({ targets: [support] }));
+  }
+  return (0, skillInfo.definition.initiativeSkillConfig.getTarget)(
+    state,
+    skillInfo,
+  );
 }
 
 export function normalizeCost(req: DiceRequirement): DiceRequirement {

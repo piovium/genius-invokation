@@ -766,7 +766,7 @@ define card {
     MystiqueSoupInspiration,
   ];
   const candidates = :randomSubset(allCards, 3);
-  :selectAndPlay(candidates, :e.targets[0]);
+  :selectAndPlay(candidates, [:e.targets[0]]);
 };
 
 /**

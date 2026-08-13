@@ -35,6 +35,7 @@ import {
   type StateMutationAndExposedMutation,
   type SkillDescriptionReturn,
   type SkillInfoOfContextConstruction,
+  type PlayCardTarget,
   constructEventAndRequestArg,
   type UseSkillRequestOption,
   BeforeVariableEventArg,
@@ -2114,7 +2115,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
   playCard(
     card: PlainEntityState,
-    ...targets: (PlainCharacterState | PlainEntityState)[]
+    target: PlayCardTarget<PlainCharacterState | PlainEntityState>,
   ) {
     const cardEntity = this.get(card);
     const cardState = cardEntity.latest();
@@ -2130,7 +2131,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
       this.skillInfo,
       this.self.who,
       cardState,
-      targets.map((target) => this.get(target).latest()),
+      typeof target !== "string"
+        ? target.map((state) => this.get(state).latest())
+        : target,
     );
   }
 
@@ -2172,12 +2175,17 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
   selectAndPlay(
     cards: (CardHandle | EntityDefinition)[],
-    ...targets: (PlainCharacterState | PlainEntityState)[]
+    target: PlayCardTarget<
+      PlainCharacterState | PlainEntityState
+    > = "skipIfRequired",
   ) {
     this.emitEvent("requestSelectCard", this.skillInfo, this.self.who, {
       type: "requestPlayCard",
       cards: this.getCardsDefinition(cards),
-      targets: targets.map((target) => this.get(target).latest()),
+      target:
+        typeof target !== "string"
+          ? target.map((state) => this.get(state).latest())
+          : target,
     });
   }
   /** 冒险 */
