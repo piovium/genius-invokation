@@ -235,7 +235,7 @@ function isDebuff(state: GameState, damageInfo: DamageInfo): boolean {
 /**
  * 可以触发 modifyChangeVariable / onChangeVariable 事件的变量名列表。
  */
-export const VARIABLE_NAME_CAN_EMIT_EVENTS = ["usage", "nightsoul"];
+export const VARIABLE_NAME_CAN_EMIT_EVENTS = ["usage", "nightsoul", "effect"];
 
 /**
  * 定义数据描述中的触发事件名。
@@ -577,9 +577,30 @@ export const detailedEventDictionary = {
       e.info.direction === "increase"
     );
   }),
+  consumeUsage: defineDescriptor("onChangeVariable", (e, r) => {
+    return (
+      e.info.varName === "usage" &&
+      checkRelative(e.onTimeState, e.area, r) &&
+      e.info.direction === "decrease"
+    );
+  }),
   gainUsage: defineDescriptor("onChangeVariable", (e, r) => {
     return (
       e.info.varName === "usage" &&
+      checkRelative(e.onTimeState, e.area, r) &&
+      e.info.direction === "increase"
+    );
+  }),
+  consumeEffect: defineDescriptor("onChangeVariable", (e, r) => {
+    return (
+      e.info.varName === "effect" &&
+      checkRelative(e.onTimeState, e.area, r) &&
+      e.info.direction === "decrease"
+    );
+  }),
+  gainEffect: defineDescriptor("onChangeVariable", (e, r) => {
+    return (
+      e.info.varName === "effect" &&
       checkRelative(e.onTimeState, e.area, r) &&
       e.info.direction === "increase"
     );

@@ -1689,23 +1689,22 @@ export class SkillContext<Meta extends ContextMetaBase> {
 
   createHandCard(
     cardId: CardHandle,
+    where: "my" | "opp" = "my",
   ): RxEntityState<Meta, EntityType> | undefined {
+    const player = this.getRawPlayer(where);
+    const who = where === "my" ? this.self.who : flip(this.self.who);
     const cardDef = this.state.data.entities.get(cardId);
     if (typeof cardDef === "undefined") {
       throw new GiTcgDataError(`Unknown card definition id ${cardId}`);
     }
-    if (this.player.hands.length >= this.state.config.maxHandsCount) {
+    if (player.hands.length >= this.state.config.maxHandsCount) {
       this.mutator.log(
         DetailLogType.Other,
         `Cannot create hand card [${cardDef.type}:${cardId}] because player's hand is full`,
       );
       return;
     }
-    const { state } = this.callAndEmit(
-      "createHandCard",
-      this.self.who,
-      cardDef,
-    );
+    const { state } = this.callAndEmit("createHandCard", who, cardDef);
     return this.get(state);
   }
 
