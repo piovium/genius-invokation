@@ -233,6 +233,48 @@ define status {
 };
 
 /**
+ * @id 211
+ * @name 月笼协奏
+ * @description
+ * 召唤月笼协奏。若我方场上已有月笼协奏，则使其效果量+1。
+ */
+define card {
+  id 211 as LunarSymphony;
+  cost DiceType.Geo, 2;
+  const moondrift = :query($.my.summon.def(Moondrift));
+  if (moondrift) {
+    moondrift.addVariable("effect", 1);
+  } else {
+    :summon(Moondrift);
+  }
+};
+
+/**
+ * @id 212
+ * @name 月笼
+ * @description
+ * 结束阶段：造成1点岩元素伤害。
+ * 可用次数：2
+ * 此牌效果量累计到3时：立刻造成3点岩元素伤害，然后将此牌的效果量改为1。
+ */
+define summon {
+  id 212 as Moondrift;
+  hint DamageType.Geo, ((st, self) => self.variables.effect);
+  variable effect, 1 { append; };
+  on endPhase {
+    usage 2;
+    :damage(DamageType.Geo, :getVariable("effect"));
+  };
+  on gainEffect {
+    when :( :e.entity.id === :self.id );
+    if (:getVariable("effect") >= 3) {
+      :damage(DamageType.Geo, 3);
+      :setVariable("effect", 1);
+    }
+  };
+};
+
+/**
  * @id 201
  * @name 费用增加
  * @description

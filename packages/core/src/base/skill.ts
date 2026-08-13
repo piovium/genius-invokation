@@ -152,8 +152,7 @@ export interface InitiativeSkillConfig {
   readonly omitEvents: boolean;
 }
 
-export interface InitiativeSkillDefinition
-  extends SkillDefinitionBase<InitiativeSkillEventArg> {
+export interface InitiativeSkillDefinition extends SkillDefinitionBase<InitiativeSkillEventArg> {
   readonly triggerOn: "initiative";
   readonly initiativeSkillConfig: InitiativeSkillConfig;
 }
@@ -792,7 +791,7 @@ export class DamageOrHealEventArg<
         : getEntityArea(state, _damageInfo.source.id).who;
     this.targetWho = getEntityArea(state, _damageInfo.target.id).who;
     this.enabledLunarReactions =
-      typeof option === "object" ? option.enabledLunarReactions ?? [] : [];
+      typeof option === "object" ? (option.enabledLunarReactions ?? []) : [];
   }
   toString() {
     return stringifyDamageInfo(this.damageInfo).split("\n")[0];
@@ -997,6 +996,7 @@ export class ModifyDamageByReactionEventArg extends ModifyDamageEventArgBase {
       case Reaction.Bloom:
       case Reaction.Quicken:
       case Reaction.LunarBloom:
+      case Reaction.LunarCrystallizeHydro:
         this._increased += 1;
         this._log += `${damageInfo.log}\nReaction (${reaction}) increase damage by 1`;
         break;
@@ -1074,8 +1074,7 @@ export class EnterEventArg extends EntityEventArg {
   }
 
   get overridden():
-    | ((EntityState | AttachmentState) & { [NoReactiveSymbol]: true })
-    | null {
+    ((EntityState | AttachmentState) & { [NoReactiveSymbol]: true }) | null {
     const state = getRaw(this.enterInfo.overridden);
     if (state) {
       return { ...state, [NoReactiveSymbol]: true as const };
@@ -1565,15 +1564,15 @@ export type SkillActionFilter<Arg> = (
   arg: Arg,
 ) => boolean;
 
-export interface TriggeredSkillDefinition<E extends EventNames = EventNames>
-  extends SkillDefinitionBase<EventArgOf<E>> {
+export interface TriggeredSkillDefinition<
+  E extends EventNames = EventNames,
+> extends SkillDefinitionBase<EventArgOf<E>> {
   readonly triggerOn: E;
   readonly initiativeSkillConfig: null;
 }
 
 export type SkillDefinition =
-  | InitiativeSkillDefinition
-  | TriggeredSkillDefinition;
+  InitiativeSkillDefinition | TriggeredSkillDefinition;
 
 export function stringifyDamageInfo(damage: DamageInfo | HealInfo): string {
   if (damage.type === DamageType.Heal) {

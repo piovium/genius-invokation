@@ -9,6 +9,7 @@ import { DamageType, Reaction } from "@gi-tcg/typings";
 import type { SwirlableElement } from "./base/reaction";
 import type { SkillDescription } from "./base/skill";
 import type {
+  CardHandle,
   CombatStatusHandle,
   StatusHandle,
   SummonHandle,
@@ -24,6 +25,7 @@ const BurningFlame = 115 as SummonHandle;
 const DendroCore = 116 as CombatStatusHandle;
 const CatalyzingField = 117 as CombatStatusHandle;
 const Thundercloud = 205 as SummonHandle;
+const LunarSymphony = 211 as CardHandle;
 
 export interface ReactionDescriptionEventArg {
   where: "my" | "opp";
@@ -137,6 +139,9 @@ function initialize() {
     if (hands.length > 0) {
       context.attachCostReduction(context.random(hands));
     }
+  });
+  defineReaction(Reaction.LunarCrystallizeHydro, (context) => {
+    context.createHandCard(LunarSymphony, context.eventArg.here);
   });
 }
 
