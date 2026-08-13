@@ -429,7 +429,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
           }
           return index;
         };
-        hciEvents.sort(([, a], [, b]) => indexOfHciEvent(a) - indexOfHciEvent(b));
+        hciEvents.sort(
+          ([, a], [, b]) => indexOfHciEvent(a) - indexOfHciEvent(b),
+        );
       }
 
       emittedEvents.push(
@@ -2108,6 +2110,27 @@ export class SkillContext<Meta extends ContextMetaBase> {
       this.self.who,
       skillId,
       option,
+    );
+  }
+  playCard(
+    card: PlainEntityState,
+    ...targets: (PlainCharacterState | PlainEntityState)[]
+  ) {
+    const cardEntity = this.get(card);
+    const cardState = cardEntity.latest();
+    if (cardEntity.area.type !== "hands") {
+      throw new GiTcgDataError(
+        `Cannot play card ${stringifyState(cardState)} from player ${
+          cardEntity.area.who
+        }, not found in hands`,
+      );
+    }
+    this.emitEvent(
+      "requestPlayCard",
+      this.skillInfo,
+      this.self.who,
+      cardState,
+      targets.map((target) => this.get(target).latest()),
     );
   }
 

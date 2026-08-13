@@ -443,27 +443,19 @@ export class SkillExecutor {
       } else if (name === "requestPlayCard") {
         using l = this.mutator.subLog(
           DetailLogType.Event,
-          `request player ${arg.who} to play card [card:${arg.cardDefinition.id}]`,
+          `request player ${arg.who} to play card ${stringifyState(arg.card)}`,
         );
 
-        // 临时将这张卡放到我方手牌，随后执行其打出后效果
-        const { state } = this.mutator.createHandCard(
-          arg.who,
-          arg.cardDefinition,
-          {
-            noOverflow: true,
-          },
-        );
-        const skillDef = playSkillOfCard(state.definition);
+        const skillDef = playSkillOfCard(arg.card.definition);
         if (!skillDef) {
           this.mutator.log(
             DetailLogType.Other,
-            `Card [card:${arg.cardDefinition.id}] has no play skill, skip playing`,
+            `Card ${stringifyState(arg.card)} has no play skill, skip playing`,
           );
           continue;
         }
         const skillInfo = defineSkillInfo({
-          caller: state,
+          caller: arg.card,
           definition: skillDef,
           requestBy: arg.via,
         });
