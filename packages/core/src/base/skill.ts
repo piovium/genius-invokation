@@ -1498,7 +1498,7 @@ export class PlayCardRequestArg extends RequestArg {
   constructor(
     requestBy: SkillInfo,
     public readonly who: 0 | 1,
-    public readonly cardDefinition: EntityDefinition,
+    public readonly card: EntityState,
     public readonly targets: AnyState[],
   ) {
     super(requestBy);

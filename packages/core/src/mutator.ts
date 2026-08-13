@@ -1417,11 +1417,14 @@ export class StateMutator {
         if (!cardDefinition) {
           throw new GiTcgDataError(`Unknown card definition id ${selected}`);
         }
-        assertValidActionCard(cardDefinition);
+        // 临时将这张卡放到我方手牌，随后执行其打出后效果
+        const { state } = this.createHandCard(who, cardDefinition, {
+          noOverflow: true,
+        });
         return [
           [
             "requestPlayCard",
-            new PlayCardRequestArg(via, who, cardDefinition, info.targets),
+            new PlayCardRequestArg(via, who, state, info.targets),
           ],
         ];
       }
