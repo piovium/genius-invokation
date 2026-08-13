@@ -25,6 +25,7 @@ test("lunar crystalize: playing LunarSymphony strengthens Moondrift and bursts a
       <Card my def={LunarSymphony} />
       <Card my def={LunarSymphony} />
       <Card my def={LunarSymphony} />
+      <Card my def={LunarSymphony} />
     </State>,
   );
   await c.me.card(LunarSymphony);
@@ -34,23 +35,6 @@ test("lunar crystalize: playing LunarSymphony strengthens Moondrift and bursts a
   // effect reaches 3: immediately deal 3 Geo damage, then reset effect to 1
   await c.me.card(LunarSymphony);
   c.expect($.my.summon.def(Moondrift)).toHaveVariable({ effect: 1 });
-  c.expect($.opp.active).toHaveVariable({ health: 7 });
-});
-
-test("lunar crystalize: burst only triggers once per effect 3 accumulation", async () => {
-  const c = setup(
-    <State>
-      <Character my active />
-      <Character opp active health={10} />
-      <Card my def={LunarSymphony} />
-      <Card my def={LunarSymphony} />
-      <Card my def={LunarSymphony} />
-      <Card my def={LunarSymphony} />
-    </State>,
-  );
-  await c.me.card(LunarSymphony);
-  await c.me.card(LunarSymphony);
-  await c.me.card(LunarSymphony);
   c.expect($.opp.active).toHaveVariable({ health: 7 });
   await c.me.card(LunarSymphony);
   c.expect($.my.summon.def(Moondrift)).toHaveVariable({ effect: 2 });
