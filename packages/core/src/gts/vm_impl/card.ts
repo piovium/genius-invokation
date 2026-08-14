@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
+import { DiceType } from "@gi-tcg/typings";
 import type {
   DescriptionDictionary,
   DescriptionDictionaryKey,
@@ -494,7 +495,7 @@ export class CardViewModel extends InitiativeSkillViewModel
       uniqueKey: "legend",
     })(function () {
       this.tags.push("legend");
-      this.userFilters.push((c) => !c.player.legendUsed);
+      this.cost.set(DiceType.Legend, 1);
     }),
     disableTuning: h.simpleAttribute({
       uniqueKey: "disableTuning",

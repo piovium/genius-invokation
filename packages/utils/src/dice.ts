@@ -20,9 +20,10 @@ const VOID = 0;
 const OMNI: typeof DiceType.Omni = 8;
 const ALIGNED: typeof DiceType.Aligned = 8;
 const ENERGY = 9;
+const LEGEND = 10;
 
 /**
- * "智能"选骰算法（不检查能量）
+ * "智能"选骰算法（不检查能量和秘传揭令）
  * @param required 卡牌或技能需要的骰子类型
  * @param dice 当前持有的骰子
  * @param usefulDice 有效骰，在无效骰数量不足时才会被选择
@@ -134,7 +135,7 @@ export function chooseDiceValue(
 }
 
 /**
- * 检查骰子是否符合要求（不检查能量）
+ * 检查骰子是否符合要求（不检查能量和秘传揭令）
  * @param required 卡牌或技能需要的骰子类型
  * @param chosen 已选择的骰子
  * @returns 是否符合要求
@@ -164,7 +165,7 @@ export function checkDice(
   const chosen2 = [...chosen];
   let voidCount = 0;
   for (const r of requiredArray) {
-    if (r === ENERGY) continue;
+    if (r === ENERGY || r === LEGEND) continue;
     // 记录无色的个数，最后检查剩余个数是否一致
     if (r === VOID) {
       voidCount++;

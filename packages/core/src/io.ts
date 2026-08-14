@@ -496,12 +496,6 @@ export function exposeEntity(
   const definitionCost: PbDiceRequirement[] = [];
   if (!hide) {
     definitionCost.push(...exposeDiceRequirement(costOfCard(e.definition)));
-    if (e.definition.tags.includes("legend")) {
-      definitionCost.push({
-        type: PbDiceRequirementType.LEGEND,
-        count: 1,
-      });
-    }
   }
   const EXPOSED_TAGS: Partial<Record<EntityTag | AttachmentTag, number>> = {
     abyss: CARD_TAG_ABYSS,

@@ -473,6 +473,8 @@ const validityText = (
       return t("action.noDice");
     case ActionValidity.NO_ENERGY:
       return t("action.noEnergy");
+    case ActionValidity.NO_LEGEND:
+      return t("action.noLegend");
   }
 };
 

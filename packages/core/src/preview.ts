@@ -34,6 +34,7 @@ import { getActiveCharacterIndex, getEntityArea, type Writable } from "./utils";
 import { GiTcgPreviewAbortedError } from "./error";
 import {
   ActionValidity,
+  DiceType,
   type ExposedMutation,
   type FlattenOneof,
   type PreviewData,
@@ -300,7 +301,7 @@ export class ActionPreviewer {
       }
       case "playCard": {
         const card = newActionInfo.skill.caller;
-        if (card.definition.tags.includes("legend")) {
+        if ((newActionInfo.cost.get(DiceType.Legend) ?? 0) > 0) {
           ctx.mutate({
             type: "setPlayerFlag",
             who: this.who,
