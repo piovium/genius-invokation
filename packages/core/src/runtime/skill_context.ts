@@ -2130,9 +2130,13 @@ export class SkillContext<Meta extends ContextMetaBase> {
       this.skillInfo,
       this.self.who,
       cardState,
-      typeof target !== "string"
-        ? target.map((state) => this.get(state).latest())
-        : target,
+      {
+        target:
+          typeof target !== "string"
+            ? target.map((state) => this.get(state).latest())
+            : target,
+        viaSelect: false,
+      },
     );
   }
 

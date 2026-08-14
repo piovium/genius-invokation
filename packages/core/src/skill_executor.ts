@@ -22,6 +22,7 @@ import {
   type EventAndRequest,
   EventArg,
   type InitiativeSkillEventArg,
+  PlayCardEventArg,
   type PlayCardSkillInfo,
   type PlayCardTarget,
   SelectCardEventArg,
@@ -450,6 +451,20 @@ export class SkillExecutor {
           `request player ${arg.who} to play card ${stringifyState(arg.card)}`,
         );
 
+        let played = false;
+        using disposeViaSelectCard_ = {
+          [Symbol.dispose]: () => {
+            if (arg.requestOption.viaSelect && !played) {
+              this.mutate({
+                type: "removeEntity",
+                from: { who: arg.who, type: "hands", cardId: arg.card.id },
+                oldState: arg.card,
+                reason: "other", // maybe better reason
+              });
+            }
+          },
+        };
+
         const skillDef = playSkillOfCard(arg.card.definition);
         if (!skillDef) {
           this.mutator.log(
@@ -467,7 +482,7 @@ export class SkillExecutor {
           arg.who,
           arg.card,
           skillInfo,
-          arg.target,
+          arg.requestOption.target,
         );
         if (!targets) {
           this.mutator.log(
@@ -477,6 +492,19 @@ export class SkillExecutor {
           continue;
         }
         await this.finalizeSkill(skillInfo, targets);
+        played = true;
+        if (!arg.requestOption.viaSelect) {
+          await this.handleEvent([
+            "onPlayCard",
+            new PlayCardEventArg(this.state, {
+              type: "playCard",
+              who: arg.who,
+              skill: skillInfo,
+              targets: targets.targets,
+              willBeEffectless: false,
+            }),
+          ]);
+        }
       } else if (name === "requestAdventure") {
         using l = this.mutator.subLog(
           DetailLogType.Event,
@@ -506,7 +534,7 @@ export class SkillExecutor {
           const selectCardInfo: SelectCardInfo = {
             type: "requestPlayCard",
             cards: spots,
-            target: [],
+            target: "skipIfRequired",
           };
           const events = await this.mutator.selectCard(
             arg.who,
