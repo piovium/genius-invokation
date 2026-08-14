@@ -438,7 +438,7 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
 
   const onStepActionState: StepActionStateHandler = (step, dice) => {
     const currentActionState = actionState();
-    if (!currentActionState || option.disableAction) {
+    if (!currentActionState) {
       return false;
     }
     // 动画队列 guard：基于当前动画播放状态禁止部分 action step 的提交，以防用户误操作
@@ -469,11 +469,17 @@ export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
         return true;
       }
       case "actionCommitted": {
+        if (option.disableAction) {
+          return false;
+        }
         resolveRpc("action", result);
         setActionState(null);
         return true;
       }
       case "chooseActiveCommitted": {
+        if (option.disableAction) {
+          return false;
+        }
         resolveRpc("chooseActive", result);
         setActionState(null);
         return true;
