@@ -727,6 +727,13 @@ export function applyAutoSelectedDiceToAction(
       validity: ActionValidity.NO_ENERGY,
     };
   }
+  const requiredLegend = actionInfo.cost.get(DiceType.Legend) ?? 0;
+  if (player.legendUsed && requiredLegend > 0) {
+    return {
+      ...actionInfo,
+      validity: ActionValidity.NO_LEGEND,
+    };
+  }
   return {
     ...actionInfo,
     autoSelectedDice,
@@ -792,7 +799,9 @@ export function diceCostSize(req: ReadonlyDiceRequirement): number {
   return req
     .entries()
     .reduce(
-      (acc, [dice, count]) => acc + (dice !== DiceType.Energy ? count : 0),
+      (acc, [dice, count]) =>
+        acc +
+        (dice !== DiceType.Energy && dice !== DiceType.Legend ? count : 0),
       0,
     );
 }
@@ -948,9 +957,13 @@ export function applyAttachmentModifications(
   if (changedCostType !== null) {
     const diceSize = diceCostSize(costs);
     const energyCost = costs.get(DiceType.Energy) ?? 0;
+    const legendCost = costs.get(DiceType.Legend) ?? 0;
     costs = new Map([[changedCostType, diceSize]]);
     if (energyCost > 0) {
       costs.set(DiceType.Energy, energyCost);
+    }
+    if (legendCost > 0) {
+      costs.set(DiceType.Legend, legendCost);
     }
   }
   return {

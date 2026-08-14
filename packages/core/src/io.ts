@@ -359,8 +359,7 @@ export function exposeMutation(
       const REASON_MAP: Record<RemoveEntityM["reason"], PbRemoveEntityReason> =
         {
           discarded: PbRemoveEntityReason.DISCARDED,
-          targetOfSupportPlayed:
-            PbRemoveEntityReason.TARGET_OF_SUPPORT_PLAYED,
+          targetOfSupportPlayed: PbRemoveEntityReason.TARGET_OF_SUPPORT_PLAYED,
           elementalTuning: PbRemoveEntityReason.ELEMENTAL_TUNING,
           eventCardDrawn: PbRemoveEntityReason.EVENT_CARD_DRAWN,
           eventCardPlayed: PbRemoveEntityReason.EVENT_CARD_PLAYED,
@@ -496,10 +495,13 @@ export function exposeEntity(
   const definitionCost: PbDiceRequirement[] = [];
   if (!hide) {
     definitionCost.push(...exposeDiceRequirement(costOfCard(e.definition)));
-    if (e.definition.tags.includes("legend")) {
-      definitionCost.push({
-        type: PbDiceRequirementType.LEGEND,
-        count: 1,
+    if (
+      definitionCost.length === 1 &&
+      definitionCost[0].type === PbDiceRequirementType.LEGEND
+    ) {
+      definitionCost.unshift({
+        type: PbDiceRequirementType.ALIGNED,
+        count: 0,
       });
     }
   }
@@ -523,7 +525,7 @@ export function exposeEntity(
     type: hide ? PbEntityType.UNSPECIFIED : exposeEntityType(e.definition.type),
     definitionId: hide ? 0 : e.definition.id,
     variableValue: e.definition.visibleVarName
-      ? e.variables[e.definition.visibleVarName] ?? void 0
+      ? (e.variables[e.definition.visibleVarName] ?? void 0)
       : void 0,
     variableName: e.definition.visibleVarName ?? void 0,
     hasUsagePerRound,
@@ -558,7 +560,7 @@ export function exposeAttachment(
     descriptionDictionary,
     variableName: att.definition.visibleVarName ?? void 0,
     variableValue: att.definition.visibleVarName
-      ? att.variables[att.definition.visibleVarName] ?? void 0
+      ? (att.variables[att.definition.visibleVarName] ?? void 0)
       : void 0,
   };
 }

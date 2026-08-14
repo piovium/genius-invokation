@@ -810,6 +810,19 @@ export class Game {
               direction: "decrease",
             });
           }
+          // 消耗秘传揭令
+          const requiredLegend = actionInfo.cost.get(DiceType.Legend) ?? 0;
+          if (requiredLegend > 0) {
+            if (player().legendUsed) {
+              throw new GiTcgIoError(who, `Player has already used legend`);
+            }
+            this.mutate({
+              type: "setPlayerFlag",
+              who,
+              flagName: "legendUsed",
+              value: true,
+            });
+          }
         }
         if (!skipAction) {
           switch (actionInfo.type) {
@@ -830,14 +843,6 @@ export class Game {
             }
             case "playCard": {
               const card = actionInfo.skill.caller;
-              if (card.definition.tags.includes("legend")) {
-                this.mutate({
-                  type: "setPlayerFlag",
-                  who,
-                  flagName: "legendUsed",
-                  value: true,
-                });
-              }
               await this.handleEvent(
                 "onBeforePlayCard",
                 new PlayCardEventArg(this.state, actionInfo),

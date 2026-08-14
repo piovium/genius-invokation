@@ -56,6 +56,7 @@ export default {
     noTarget: "没有可用的目标",
     noDice: "元素骰子不足",
     noEnergy: "角色充能不足",
+    noLegend: "秘传揭令不足",
     disabled: "不可进行此操作",
 
     payCostNoDice: "无需支付更多元素骰",

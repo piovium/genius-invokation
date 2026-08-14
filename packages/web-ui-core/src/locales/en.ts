@@ -55,6 +55,7 @@ export default {
     noTarget: "No Valid Targets",
     noDice: "Insufficient Elemental Dice",
     noEnergy: "Insufficient Energy",
+    noLegend: "Insufficient Arcane Legend",
     disabled: "This action is not available",
     payCostNoDice: "No need to pay more Elemental Dice",
     payCost: "Pay {{cost}}",
