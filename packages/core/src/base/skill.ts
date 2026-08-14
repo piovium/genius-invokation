@@ -1493,19 +1493,24 @@ class UseSkillRequestArg extends RequestArg {
   }
 }
 
+export type PlayCardTarget<T = AnyState> =
+  readonly T[] | "skipIfRequired" | "first" | "random";
+
+export interface PlayCardRequestOption {
+  readonly target: PlayCardTarget;
+  readonly viaSelect: boolean;
+}
+
 export class PlayCardRequestArg extends RequestArg {
   constructor(
     requestBy: SkillInfo,
     public readonly who: 0 | 1,
     public readonly card: EntityState,
-    public readonly target: PlayCardTarget,
+    public readonly requestOption: PlayCardRequestOption,
   ) {
     super(requestBy);
   }
 }
-
-export type PlayCardTarget<T = AnyState> =
-  readonly T[] | "skipIfRequired" | "first" | "random";
 
 class TriggerEndPhaseSkillRequestArg extends RequestArg {
   constructor(

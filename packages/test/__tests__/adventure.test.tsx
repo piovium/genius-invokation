@@ -37,7 +37,10 @@ import {
   Tonatiuh,
 } from "@gi-tcg/data/internal/cards/support/adventure.gts";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
-import { AquabreezeBlessingWaterburst } from "@gi-tcg/data/internal/cards/support/blessing.gts";
+import {
+  AquabreezeBlessingWaterburst,
+  BloomBlessingAmrita,
+} from "@gi-tcg/data/internal/cards/support/blessing.gts";
 import { MastersOfTheNightwind } from "@gi-tcg/data/internal/cards/support/place.gts";
 import { DiceType } from "@gi-tcg/typings";
 import { describe, expect, test } from "vitest";
@@ -57,12 +60,17 @@ describe("adventure", () => {
   test("chasm basic", async () => {
     const c = setup(
       <State>
+        <Support my def={BloomBlessingAmrita} />
         <Card my def={AnAncientSacrificeOfSacredBrocade} />
       </State>,
     );
     await c.me.card(AnAncientSacrificeOfSacredBrocade);
     await c.me.selectCard(TheChasm);
     c.expect($.my.pile).toBeCount(5);
+    // 锦鲤触发一次打出卡牌事件，挑选产生的打牌不触发
+    c.expect($.my.def(BloomBlessingAmrita)).toHaveVariable({
+      playCount: 1,
+    });
   });
 
   test("tonatiuh basic", async () => {
@@ -86,7 +94,7 @@ describe("adventure", () => {
         <Support my def={MastersOfTheNightwind} />
         <Support my def={Paimon} />
         <Support my def={Paimon} />
-        <Support my def={Paimon} />
+        <Support my def={BloomBlessingAmrita} />
         <Card my def={AnAncientSacrificeOfSacredBrocade} />
         <DiceCount my count={2} type={DiceType.Cryo} />
       </State>,
@@ -102,10 +110,13 @@ describe("adventure", () => {
       intuition: 3,
     });
     c.expect($.my.support.def(Tonatiuh)).toNotExist();
+    // 锦鲤触发一次打出卡牌事件，挑选产生的打牌不触发
+    c.expect($.my.support.def(BloomBlessingAmrita)).toHaveVariable({
+      playCount: 1,
+    });
     // 天蛇船的首次冒险（入场）效果不触发
     expect(c.state.players[0].dice).toEqual([DiceType.Cryo]);
     c.expect($.my.active).toHaveVariable({ health: 1 });
-    
   });
 
   describe("adventure (exp=1), spot 'triggered' before status", () => {
@@ -116,12 +127,12 @@ describe("adventure", () => {
           <Character opp alive={0} health={0} />
           <Character opp active health={1} />
           <Character my active>
-          <Status my def={ChenyuBrewInEffect} />
+            <Status my def={ChenyuBrewInEffect} />
           </Character>
           <Support my def={AquabreezeBlessingWaterburst} />
           <Card my def={AnAncientSacrificeOfSacredBrocade} />
           <DiceCount my count={2} type={DiceType.Cryo} />
-        </State>
+        </State>,
       );
       // 冒险
       await c.me.card(AnAncientSacrificeOfSacredBrocade);
@@ -131,7 +142,7 @@ describe("adventure", () => {
       // 沉玉茶露治疗，触发水风幻变击倒仅存角色，获得胜利
       expect(c.state.phase).toBe("gameEnd");
       expect(c.state.winner).toBe(0);
-    })
+    });
 
     test("chasm", async () => {
       const c = setup(
@@ -141,7 +152,7 @@ describe("adventure", () => {
             <Status my def={ChenyuBrewInEffect} />
           </Character>
           <Card my def={AnAncientSacrificeOfSacredBrocade} />
-        </State>
+        </State>,
       );
       // 冒险
       await c.me.card(AnAncientSacrificeOfSacredBrocade);
@@ -151,7 +162,7 @@ describe("adventure", () => {
       c.expect($.def(VeteransVisage)).toHaveVariable({ count: 2 });
       c.expect($.my.hand).toBeCount(1);
       c.expect($.my.pile).toBeCount(4);
-    })
+    });
   });
 
   test("adventure (exp>=2), spot triggered after status", async () => {

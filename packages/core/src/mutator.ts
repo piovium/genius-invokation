@@ -1424,7 +1424,10 @@ export class StateMutator {
         return [
           [
             "requestPlayCard",
-            new PlayCardRequestArg(via, who, state, info.target),
+            new PlayCardRequestArg(via, who, state, {
+              target: info.target,
+              viaSelect: true,
+            }),
           ],
         ];
       }
