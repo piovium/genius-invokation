@@ -12,6 +12,7 @@ import {
   type EntityVariables,
   type ExtensionState,
   type GameData,
+  type GameConfig,
   type GameState,
   type PlayerState,
 } from "@gi-tcg/core";
@@ -122,7 +123,6 @@ export function createDefaultGameState(): GameState {
   const data = getData(CURRENT_VERSION);
   const randomSeed = 0;
   const config = {
-    errorLevel: "strict",
     initialDiceCount: 8,
     initialHandsCount: 5,
     maxDiceCount: 16,
@@ -132,7 +132,10 @@ export function createDefaultGameState(): GameState {
     maxSummonsCount: 4,
     maxSupportsCount: 4,
     randomSeed,
-  } as const;
+    unexpectedInsufficientDice: "skipConsume",
+    hostWho: 0,
+    hostRelatedExecution: false,
+  } as const satisfies GameConfig;
   const extensions: ExtensionState[] = Array.from(data.extensions.values()).map(
     (definition) => ({
       [StateSymbol]: "extension",
