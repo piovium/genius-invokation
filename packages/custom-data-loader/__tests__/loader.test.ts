@@ -1,5 +1,5 @@
 import { AssetsManager } from "@gi-tcg/assets-manager";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 import { CustomDataLoader } from "../src";
 
@@ -41,6 +41,57 @@ define card {
   description "A custom event card.";
   cost DiceType.Omni, 1;
   :damage(DamageType.Piercing, 1);
+}
+`;
+
+const overrideGts = `
+import { DamageType, DiceType } from "@gi-tcg/core/data";
+
+define status {
+  id 100 as ResistantFormOverride;
+  name "Custom Resistant Form";
+  description "Custom status description.";
+  image "https://example.test/status.png";
+  usage 2;
+}
+
+define attachment {
+  id 201 as CostIncreaseOverride;
+  name "Custom Cost Increase";
+  description "Custom attachment description.";
+  image "https://example.test/attachment.png";
+  tags artifact;
+  addCost 2;
+}
+
+define skill {
+  id 11011 as LiutianArcheryOverride;
+  name "Custom Liutian Archery";
+  description "Custom skill description.";
+  image "https://example.test/skill.png";
+  skillType burst;
+  cost DiceType.Cryo, 2;
+  :damage(DamageType.Cryo, 5);
+}
+
+define character {
+  id 20000000 as ExplicitIdCharacter;
+  name "Explicit ID Character";
+  health 10;
+  energy 2;
+}
+
+define card {
+  id 20000001 as ExplicitIdCard;
+  name "Explicit ID Card";
+  cost DiceType.Omni, 1;
+  :damage(DamageType.Piercing, 1);
+}
+
+define status {
+  name "Auto ID Status" as AutoIdStatus;
+  description "Still uses the first generated ID.";
+  usage 1;
 }
 `;
 
@@ -96,6 +147,101 @@ describe("CustomDataLoader GTS", () => {
         rawDescription: "An attachment with custom metadata.",
       }),
     );
+  });
+
+  test("explicit ids override official game data without consuming generated ids", async () => {
+    const [gameData, customData] = (
+      await new CustomDataLoader().loadMod(overrideGts)
+    ).done();
+
+    expect(gameData.entities.get(100)?.version.from).toBe("customData");
+    expect(gameData.attachments.get(201)?.version.from).toBe("customData");
+    expect(gameData.characters.get(20_000_000)?.version.from).toBe(
+      "customData",
+    );
+    expect(gameData.entities.get(20_000_001)?.version.from).toBe("customData");
+    expect(gameData.entities.get(10_000_000)?.version.from).toBe("customData");
+    expect(
+      gameData.entities
+        .get(20_000_001)
+        ?.skills.find((skill) => skill.skillType === "playCard")?.id,
+    ).toBeCloseTo(20_000_001.01);
+
+    const overriddenSkill = gameData.characters
+      .get(1101)
+      ?.skills.find((skill) => skill.id === 11011);
+    expect(overriddenSkill).toEqual(
+      expect.objectContaining({
+        id: 11011,
+        skillType: "burst",
+      }),
+    );
+    expect(customData.skills).toContainEqual(
+      expect.objectContaining({
+        id: 11011,
+        name: "Custom Liutian Archery",
+        rawDescription: "Custom skill description.",
+        skillIconUrl: "https://example.test/skill.png",
+      }),
+    );
+  });
+
+  test("explicit-id metadata overrides official assets", async () => {
+    const [, customData] = (
+      await new CustomDataLoader().loadMod(overrideGts)
+    ).done();
+    const fetchMock = vi.fn(async () => ({
+      json: async () => ({
+        data: [
+          { id: 100, rawDescription: "Official status description." },
+          { id: 201, rawDescription: "Official attachment description." },
+          { id: 11011, rawDescription: "Official skill description." },
+        ],
+      }),
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    try {
+      const assets = new AssetsManager({
+        customData: [customData],
+        concurrency: 0,
+      });
+
+      await assets.prepareForSync();
+
+      expect(fetchMock).toHaveBeenCalledOnce();
+      expect(assets.getNameSync(100)).toBe("Custom Resistant Form");
+      expect(assets.getImageUrlSync(100)).toBe(
+        "https://example.test/status.png",
+      );
+      expect(assets.getDataSync(100)).toEqual(
+        expect.objectContaining({
+          rawDescription: "Custom status description.",
+        }),
+      );
+
+      expect(assets.getNameSync(201)).toBe("Custom Cost Increase");
+      expect(assets.getImageUrlSync(201)).toBe(
+        "https://example.test/attachment.png",
+      );
+      expect(assets.getDataSync(201)).toEqual(
+        expect.objectContaining({
+          rawDescription: "Custom attachment description.",
+        }),
+      );
+
+      expect(assets.getNameSync(11011)).toBe("Custom Liutian Archery");
+      expect(assets.getImageUrlSync(11011)).toBe(
+        "https://example.test/skill.png",
+      );
+      expect(assets.getDataSync(11011)).toEqual(
+        expect.objectContaining({
+          rawDescription: "Custom skill description.",
+        }),
+      );
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   test("rejects imports outside the allowed GTS modules", async () => {

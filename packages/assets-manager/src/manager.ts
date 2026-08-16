@@ -36,7 +36,11 @@ import type {
 import { DiceType } from "@gi-tcg/typings";
 import { getDeckData, type DeckData } from "./deck_data";
 import { getStaticDeckData } from "./static_deck_data";
-import { DEFAULT_ASSETS_API_ENDPOINT, DEFAULT_LANGUAGE, DEFAULT_VERSION } from "./constants";
+import {
+  DEFAULT_ASSETS_API_ENDPOINT,
+  DEFAULT_LANGUAGE,
+  DEFAULT_VERSION,
+} from "./constants";
 import { limitFunction } from "p-limit";
 import type { Category } from "./data_types";
 import { staticDecode, staticEncode } from "./sharing";
@@ -235,6 +239,7 @@ export class AssetsManager {
       }
       return skills;
     };
+    setupSkill(data.skills ?? []);
     for (const ch of data.characters) {
       const data: CharacterRawData = {
         // @ts-expect-error

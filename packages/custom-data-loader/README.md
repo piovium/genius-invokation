@@ -12,7 +12,7 @@ A example package including:
 default (Node must be started with `--experimental-vm-modules`); in browsers
 it uses `esbuild-wasm` by default. Both evaluators expose only the GTS runtime,
 custom provider VM, and the data module to the custom module. Import data
-values explicitly instead of relying on globals. 
+values explicitly instead of relying on globals.
 
 ```ts
 import { DamageType, DiceType } from "@gi-tcg/core/data";
@@ -24,6 +24,26 @@ const loader = new CustomDataLoader({
 });
 await loader.loadMod(source);
 ```
+
+## Overriding official data
+
+Specify an official ID to replace its game definition and presentation data:
+
+```gts
+define status {
+  id 100 as ResistantFormOverride;
+  name "Custom Resistant Form";
+  description "Custom status description.";
+  image "https://example.test/status.png";
+  usage 2;
+};
+```
+
+An explicit `id` does not consume an automatically generated ID. The custom
+definition takes precedence over the official definition with the same ID, and
+its name, description, and image are used by `AssetsManager`. `name` remains
+required; omitted descriptions and images keep the same defaults as other
+custom definitions.
 
 ## Note
 

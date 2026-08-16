@@ -141,14 +141,16 @@ export class CustomDataLoader {
 
   done(): [GameData, CustomData] {
     const gameData = this.registry.resolve(
-      (items) => resolveOfficialVersion(items, this.version),
       (items) =>
         items.find((item) => item.version.from === "customData") ?? null,
+      (items) => resolveOfficialVersion(items, this.version),
     );
+    const standaloneSkills: CustomSkill[] = [];
     const customData: CustomData = {
       actionCards: [],
       characters: [],
       entities: [],
+      skills: standaloneSkills,
       attachments: [],
     };
     const parseSkill = (skill: SkillDefinition): CustomSkill => {
@@ -163,7 +165,16 @@ export class CustomDataLoader {
         playCost: new Map(skill.initiativeSkillConfig?.requiredCost),
       };
     };
+    const customSkills = new Map<number, CustomSkill>();
+    const collectCustomSkills = (skills: readonly SkillDefinition[]) => {
+      for (const skill of skills) {
+        if (this.names.has(skill.id)) {
+          customSkills.set(skill.id, parseSkill(skill));
+        }
+      }
+    };
     for (const [id, ch] of gameData.characters) {
+      collectCustomSkills(ch.skills);
       if (ch.version.from !== "customData") {
         continue;
       }
@@ -181,6 +192,7 @@ export class CustomDataLoader {
       });
     }
     for (const [id, et] of gameData.entities) {
+      collectCustomSkills(et.skills);
       if (et.version.from !== "customData") {
         continue;
       }
@@ -209,6 +221,7 @@ export class CustomDataLoader {
       }
     }
     for (const [id, attachment] of gameData.attachments) {
+      collectCustomSkills(attachment.skills);
       if (attachment.version.from !== "customData") {
         continue;
       }
@@ -222,6 +235,7 @@ export class CustomDataLoader {
         skills: attachment.skills.map(parseSkill),
       });
     }
+    standaloneSkills.push(...customSkills.values());
     return [gameData, customData];
   }
 }

@@ -16,8 +16,10 @@
 import {
   defineViewModel,
   extendViewModel,
+  getCurrentContext,
   type AR,
   type IViewModel,
+  type View,
 } from "@gi-tcg/core/gts/runtime";
 import {
   AttachmentModel,
@@ -84,7 +86,17 @@ function registerMetadata(model: CustomMetadataModel) {
   });
 }
 
-function definitionId(view: { _node: object }) {
+function definitionId(view: View<any>) {
+  const idAttribute = view._node.attributes.find(
+    (attribute) => attribute.name === "id",
+  );
+  if (idAttribute) {
+    const [id] = idAttribute.positionals();
+    if (typeof id !== "number") {
+      throw new Error(`Definition id must be a number`);
+    }
+    return id;
+  }
   return getCustomDataRegistration().allocateId(view._node);
 }
 
@@ -115,7 +127,7 @@ export class CustomCardModel extends CardModel implements CustomMetadataModel {
     super();
     this.customDefinitionId = id;
     this.cardId = this.customDefinitionId;
-    this.id = this.getSubId();
+    this.id = getCurrentContext() === "action" ? this.getSubId() : this.cardId;
     this.versionInfo = CUSTOM_DATA_VERSION_INFO;
   }
 }
@@ -174,7 +186,14 @@ export class CustomAttachmentModel
 const CustomCharacterViewModel = CharacterViewModel.extend(
   CustomCharacterModel,
   (h) => ({
-    id: undefined,
+    id: h.attribute<{
+      (id: number): AR.Done;
+      uniqueKey(): "id";
+      as(): CharacterHandle;
+    }>(
+      () => {},
+      (model) => model.customDefinitionId as CharacterHandle,
+    ),
     name: h.attribute<{
       (name: string): AR.Done;
       required(): true;
@@ -199,38 +218,49 @@ const CustomCharacterViewModel = CharacterViewModel.extend(
   }),
 );
 
-const CustomCardViewModel = CardViewModel.extend(
-  CustomCardModel,
-  (h) => ({
-    id: undefined,
-    name: h.attribute<{
-      (name: string): AR.Done;
-      required(): true;
-      uniqueKey(): "name";
-      as(): CardHandle;
-    }>(
-      (model, [name]) => {
-        model.customName = name;
-      },
-      (model) => model.cardId as CardHandle,
-    ),
-    description: h.simpleAttribute({
-      uniqueKey: "description",
-    })(function (description: string) {
-      this.customDescription = description;
-    }),
-    image: h.simpleAttribute({
-      uniqueKey: "image",
-    })(function (image: string) {
-      this.customImage = image;
-    }),
+const CustomCardViewModel = CardViewModel.extend(CustomCardModel, (h) => ({
+  id: h.attribute<{
+    (id: number): AR.Done;
+    uniqueKey(): "id";
+    as(): CardHandle;
+  }>(
+    () => {},
+    (model) => model.customDefinitionId as CardHandle,
+  ),
+  name: h.attribute<{
+    (name: string): AR.Done;
+    required(): true;
+    uniqueKey(): "name";
+    as(): CardHandle;
+  }>(
+    (model, [name]) => {
+      model.customName = name;
+    },
+    (model) => model.cardId as CardHandle,
+  ),
+  description: h.simpleAttribute({
+    uniqueKey: "description",
+  })(function (description: string) {
+    this.customDescription = description;
   }),
-);
+  image: h.simpleAttribute({
+    uniqueKey: "image",
+  })(function (image: string) {
+    this.customImage = image;
+  }),
+}));
 
 const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
   CustomCharacterSkillModel,
   (h) => ({
-    id: undefined,
+    id: h.attribute<{
+      (id: number): AR.Done;
+      uniqueKey(): "id";
+      as(): SkillHandle | PassiveSkillHandle;
+    }>(
+      () => {},
+      (model) => model.customDefinitionId as SkillHandle,
+    ),
     name: h.attribute<{
       <Meta extends CharacterSkillVMMeta>(
         this: AR.This<Meta>,
@@ -261,7 +291,14 @@ const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
 const CustomEntityViewModel = EntityViewModel.extend(
   CustomEntityModel,
   (h) => ({
-    id: undefined,
+    id: h.attribute<{
+      <Meta extends EntityVMMeta>(this: AR.This<Meta>, id: number): AR.Done;
+      uniqueKey(): "id";
+      as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
+    }>(
+      () => {},
+      (model) => model.customDefinitionId as any,
+    ),
     name: h.attribute<{
       <Meta extends EntityVMMeta>(this: AR.This<Meta>, name: string): AR.Done;
       required(): true;
@@ -289,7 +326,14 @@ const CustomEntityViewModel = EntityViewModel.extend(
 const CustomAttachmentViewModel = AttachmentViewModel.extend(
   CustomAttachmentModel,
   (h) => ({
-    id: undefined,
+    id: h.attribute<{
+      (id: number): AR.Done;
+      uniqueKey(): "id";
+      as(): AttachmentHandle;
+    }>(
+      () => {},
+      (model) => model.customDefinitionId as AttachmentHandle,
+    ),
     name: h.attribute<{
       (name: string): AR.Done;
       required(): true;
