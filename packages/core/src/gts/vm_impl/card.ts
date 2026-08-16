@@ -104,7 +104,7 @@ export type TalentRequirement = "action" | "actionSkill" | "active" | "none";
 
 export class CardModel extends InitiativeSkillModel implements ICaller {
   reserved = false;
-  cardId!: number;
+  accessor cardId!: number;
   skillType = "playCard" as const;
   descriptionDictionary: Writable<DescriptionDictionary> = {};
 

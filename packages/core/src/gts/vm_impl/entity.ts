@@ -152,7 +152,7 @@ export class EntityModel implements ICaller {
   reserved = false;
   usagePerRoundIndex = 0;
 
-  id!: number;
+  accessor id!: number;
   type: ExEntityType;
   tags: ((string & {}) | EntityTag)[] = [];
   versionInfo: VersionInfo | null = null;

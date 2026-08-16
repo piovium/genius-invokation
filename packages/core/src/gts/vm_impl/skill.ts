@@ -103,7 +103,7 @@ type GtsSkillOperationFilter<Meta extends RwContextMeta> = (
 
 abstract class SkillModel {
   /** skill id */
-  id!: number;
+  accessor id!: number;
 
   versionInfo: VersionInfo | null = null;
 

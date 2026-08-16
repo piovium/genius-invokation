@@ -31,7 +31,7 @@ import type {
 import { createVariable } from "../../data/utils";
 
 export class CharacterModel {
-  id!: number;
+  accessor id!: number;
   maxHealth = 10;
   maxEnergy = 3;
   tags: CharacterTag[] = [];
