@@ -119,6 +119,8 @@ export class CustomDataLoader {
           let id = definitionIds.get(node);
           if (id === undefined) {
             id = this.nextId++;
+            console?.error(node, id);
+            console?.trace();
             definitionIds.set(node, id);
           }
           return id;

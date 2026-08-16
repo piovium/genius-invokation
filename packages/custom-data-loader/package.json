@@ -31,7 +31,7 @@
     "predev": "pnpm build",
     "dev": "vite",
     "check": "tsc --noEmit",
-    "test": "NODE_OPTIONS=--experimental-vm-modules vitest",
+    "test": "vitest",
     "build": "tsdown"
   },
   "dependencies": {

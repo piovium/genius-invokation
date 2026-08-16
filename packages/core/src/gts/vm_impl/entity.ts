@@ -152,7 +152,15 @@ export class EntityModel implements ICaller {
   reserved = false;
   usagePerRoundIndex = 0;
 
-  accessor id!: number;
+  // FIXME: use accessor when decorators are in stage 4
+  #id!: number;
+  get id() {
+    return this.#id;
+  }
+  set id(value: number) {
+    this.#id = value;
+  }
+  
   type: ExEntityType;
   tags: ((string & {}) | EntityTag)[] = [];
   versionInfo: VersionInfo | null = null;

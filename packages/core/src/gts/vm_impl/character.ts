@@ -31,7 +31,15 @@ import type {
 import { createVariable } from "../../data/utils";
 
 export class CharacterModel {
-  accessor id!: number;
+  // FIXME: use accessor when decorators are in stage 4
+  #id!: number;
+  get id() {
+    return this.#id;
+  }
+  set id(value: number) {
+    this.#id = value;
+  }
+
   maxHealth = 10;
   maxEnergy = 3;
   tags: CharacterTag[] = [];

@@ -213,7 +213,9 @@ const CustomCharacterViewModel = CharacterViewModel.extend(
       uniqueKey(): "id";
       as(): CharacterHandle;
     }>(
-      () => {},
+      (model, [id]) => {
+        model.metadata.specifyId(id);
+      },
       (model, [id]) => model.id as CharacterHandle,
     ),
     name: h.attribute<{
@@ -246,7 +248,9 @@ const CustomCardViewModel = CardViewModel.extend(CustomCardModel, (h) => ({
     uniqueKey(): "id";
     as(): CardHandle;
   }>(
-    () => {},
+    (model, [id]) => {
+      model.metadata.specifyId(id);
+    },
     (model, [id]) => id as CardHandle,
   ),
   name: h.attribute<{
@@ -280,7 +284,9 @@ const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
       uniqueKey(): "id";
       as(): SkillHandle | PassiveSkillHandle;
     }>(
-      () => {},
+      (model, [id]) => {
+        model.metadata.specifyId(id);
+      },
       (model, [id]) => id as SkillHandle,
     ),
     name: h.attribute<{
@@ -353,7 +359,9 @@ const CustomAttachmentViewModel = AttachmentViewModel.extend(
       uniqueKey(): "id";
       as(): AttachmentHandle;
     }>(
-      () => {},
+      (model, [id]) => {
+        model.metadata.specifyId(id);
+      },
       (model, [id]) => id as AttachmentHandle,
     ),
     name: h.attribute<{
