@@ -1,8 +1,18 @@
-import { For } from "solid-js";
-import { NumberField, SectionTitle, SelectField, Surface } from "./Fields";
+import { For, Show } from "solid-js";
+import {
+  BooleanField,
+  NumberField,
+  SectionTitle,
+  SelectField,
+  Surface,
+} from "./Fields";
 import { useStateEditorContext } from "./GameStateEditor";
 import { PHASE_LABELS } from "../constants";
-import type { GameState, PhaseType } from "@gi-tcg/core";
+import type {
+  GameState,
+  InsufficientDiceBehavior,
+  PhaseType,
+} from "@gi-tcg/core";
 import { ExtensionModal } from "./ExtensionModal";
 import { ListItem, type ListItemButton } from "./ListItem";
 
@@ -63,6 +73,51 @@ export function GlobalSection(props: GlobalSectionProps) {
               })
             }
           />
+        </div>
+
+        <div class="rounded-3xl border border-white/10 bg-slate-950/20 p-4">
+          <SectionTitle title="结算配置" />
+          <div class="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <SelectField
+              label="骰子意外消耗"
+              value={state().config.unexpectedInsufficientDice}
+              options={[
+                { value: "throw", label: "报错并退出对局" },
+                { value: "skipConsume", label: "跳过消耗，继续行动" },
+                { value: "skipAction", label: "跳过消耗和行动" },
+              ]}
+              onChange={(value) =>
+                updateState((draft) => {
+                  draft.config.unexpectedInsufficientDice =
+                    value as InsufficientDiceBehavior;
+                })
+              }
+            />
+            <BooleanField
+              label="启用房主相关结算"
+              value={state().config.hostRelatedExecution}
+              onChange={(value) =>
+                updateState((draft) => {
+                  draft.config.hostRelatedExecution = value;
+                })
+              }
+            />
+            <Show when={state().config.hostRelatedExecution}>
+              <SelectField
+                label="房主"
+                value={state().config.hostWho}
+                options={[
+                  { value: 0, label: "玩家 0" },
+                  { value: 1, label: "玩家 1" },
+                ]}
+                onChange={(value) =>
+                  updateState((draft) => {
+                    draft.config.hostWho = Number(value) as 0 | 1;
+                  })
+                }
+              />
+            </Show>
+          </div>
         </div>
 
         <div class="rounded-3xl border border-white/10 bg-slate-950/20 p-4">
