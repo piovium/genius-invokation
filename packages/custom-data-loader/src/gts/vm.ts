@@ -13,14 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  defineViewModel,
-  extendViewModel,
-  getCurrentContext,
-  type AR,
-  type IViewModel,
-  type View,
-} from "@gi-tcg/core/gts/runtime";
+import { defineViewModel, type AR } from "@gi-tcg/core/gts/runtime";
 import {
   AttachmentModel,
   AttachmentViewModel,
@@ -51,7 +44,11 @@ import {
   type PassiveSkillHandle,
   type SkillHandle,
 } from "@gi-tcg/core/data";
-import type { AttachmentDefinition, VersionInfo } from "@gi-tcg/core";
+import type {
+  AttachmentDefinition,
+  EntityType,
+  VersionInfo,
+} from "@gi-tcg/core";
 import { getCustomDataRegistration } from "./context";
 
 declare global {
@@ -68,7 +65,7 @@ const CUSTOM_DATA_VERSION_INFO: VersionInfo = {
 };
 
 interface CustomMetadataModel {
-  readonly customDefinitionId: number;
+  id: number;
   customName: string | null;
   customDescription: string;
   customImage: string;
@@ -76,28 +73,14 @@ interface CustomMetadataModel {
 
 function registerMetadata(model: CustomMetadataModel) {
   if (model.customName === null) {
-    throw new Error(`Definition #${model.customDefinitionId} is missing name`);
+    throw new Error(`Definition #${model.id} is missing name`);
   }
   getCustomDataRegistration().registerMetadata({
-    id: model.customDefinitionId,
+    id: model.id,
     name: model.customName,
     description: model.customDescription,
     image: model.customImage,
   });
-}
-
-function definitionId(view: View<any>) {
-  const idAttribute = view._node.attributes.find(
-    (attribute) => attribute.name === "id",
-  );
-  if (idAttribute) {
-    const [id] = idAttribute.positionals();
-    if (typeof id !== "number") {
-      throw new Error(`Definition id must be a number`);
-    }
-    return id;
-  }
-  return getCustomDataRegistration().allocateId(view._node);
 }
 
 export class CustomCharacterModel
@@ -109,7 +92,7 @@ export class CustomCharacterModel
   customDescription = "";
   customImage = "";
 
-  constructor(id: number) {
+  constructor() {
     super();
     this.customDefinitionId = id;
     this.id = this.customDefinitionId;
@@ -118,16 +101,14 @@ export class CustomCharacterModel
 }
 
 export class CustomCardModel extends CardModel implements CustomMetadataModel {
-  readonly customDefinitionId: number;
   customName: string | null = null;
   customDescription = "";
   customImage = "";
 
-  constructor(id: number) {
+  constructor() {
     super();
-    this.customDefinitionId = id;
-    this.cardId = this.customDefinitionId;
-    this.id = getCurrentContext() === "action" ? this.getSubId() : this.cardId;
+    this.cardId = id;
+    this.id = this.getSubId();
     this.versionInfo = CUSTOM_DATA_VERSION_INFO;
   }
 }
@@ -136,14 +117,12 @@ export class CustomCharacterSkillModel
   extends CharacterSkillModel
   implements CustomMetadataModel
 {
-  readonly customDefinitionId: number;
   customName: string | null = null;
   customDescription = "";
   customImage = "";
 
-  constructor(id: number) {
+  constructor() {
     super();
-    this.customDefinitionId = id;
     this.id = this.customDefinitionId;
     this.versionInfo = CUSTOM_DATA_VERSION_INFO;
   }
@@ -153,14 +132,12 @@ export class CustomEntityModel
   extends EntityModel
   implements CustomMetadataModel
 {
-  readonly customDefinitionId: number;
   customName: string | null = null;
   customDescription = "";
   customImage = "";
 
-  constructor(type: ExEntityType, id: number) {
+  constructor(type: ExEntityType) {
     super(type);
-    this.customDefinitionId = id;
     this.id = this.customDefinitionId;
     this.versionInfo = CUSTOM_DATA_VERSION_INFO;
   }
@@ -170,14 +147,12 @@ export class CustomAttachmentModel
   extends AttachmentModel
   implements CustomMetadataModel
 {
-  readonly customDefinitionId: number;
   customName: string | null = null;
   customDescription = "";
   customImage = "";
 
-  constructor(id: number) {
+  constructor() {
     super("attachment");
-    this.customDefinitionId = id;
     this.id = this.customDefinitionId;
     this.versionInfo = CUSTOM_DATA_VERSION_INFO;
   }
@@ -225,7 +200,7 @@ const CustomCardViewModel = CardViewModel.extend(CustomCardModel, (h) => ({
     as(): CardHandle;
   }>(
     () => {},
-    (model) => model.customDefinitionId as CardHandle,
+    (model, [id]) => id as CardHandle,
   ),
   name: h.attribute<{
     (name: string): AR.Done;
@@ -259,7 +234,7 @@ const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
       as(): SkillHandle | PassiveSkillHandle;
     }>(
       () => {},
-      (model) => model.customDefinitionId as SkillHandle,
+      (model, [id]) => id as SkillHandle,
     ),
     name: h.attribute<{
       <Meta extends CharacterSkillVMMeta>(
@@ -297,7 +272,7 @@ const CustomEntityViewModel = EntityViewModel.extend(
       as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
     }>(
       () => {},
-      (model) => model.customDefinitionId as any,
+      (model, [id]) => id as HandleT<EntityType>,
     ),
     name: h.attribute<{
       <Meta extends EntityVMMeta>(this: AR.This<Meta>, name: string): AR.Done;
@@ -332,7 +307,7 @@ const CustomAttachmentViewModel = AttachmentViewModel.extend(
       as(): AttachmentHandle;
     }>(
       () => {},
-      (model) => model.customDefinitionId as AttachmentHandle,
+      (model, [id]) => id as AttachmentHandle,
     ),
     name: h.attribute<{
       (name: string): AR.Done;
@@ -363,24 +338,17 @@ export default defineViewModel(class CustomDataRootModel {}, (h) => ({
     (): AR.With<typeof CustomCharacterViewModel>;
   }>(
     (_, [], subView) => {
-      const model = CustomCharacterViewModel.parse(
-        subView,
-        definitionId(subView),
-      );
+      const model = CustomCharacterViewModel.parse(subView);
       registerMetadata(model);
       registerCharacter(model.getEntry());
     },
-    (_, [], subView) =>
-      CustomCharacterViewModel.parse(subView, definitionId(subView)),
+    (_, [], subView) => CustomCharacterViewModel.parse(subView),
   ),
   skill: h.attribute<{
     (): AR.With<typeof CustomCharacterSkillViewModel>;
   }>(
     (_, [], subView) => {
-      const model = CustomCharacterSkillViewModel.parse(
-        subView,
-        definitionId(subView),
-      );
+      const model = CustomCharacterSkillViewModel.parse(subView);
       const entry = model.getEntry();
       if (typeof entry === "symbol") {
         return;
@@ -392,18 +360,13 @@ export default defineViewModel(class CustomDataRootModel {}, (h) => ({
         registerPassiveSkill(entry);
       }
     },
-    (_, [], subView) =>
-      CustomCharacterSkillViewModel.parse(subView, definitionId(subView)),
+    (_, [], subView) => CustomCharacterSkillViewModel.parse(subView),
   ),
   status: h.attribute<{
     (): AR.With<typeof CustomEntityViewModel, DefaultEntityVMMeta<"status">>;
   }>(
     (_, [], subView) => {
-      const model = CustomEntityViewModel.parse(
-        subView,
-        "status",
-        definitionId(subView),
-      );
+      const model = CustomEntityViewModel.parse(subView, "status");
       const entry = model.getEntry();
       if (typeof entry === "symbol") {
         return;
@@ -411,8 +374,7 @@ export default defineViewModel(class CustomDataRootModel {}, (h) => ({
       registerMetadata(model);
       registerEntity(entry as EntityDefinition);
     },
-    (_, [], subView) =>
-      CustomEntityViewModel.parse(subView, "status", definitionId(subView)),
+    (_, [], subView) => CustomEntityViewModel.parse(subView, "status"),
   ),
   combatStatus: h.attribute<{
     (): AR.With<
@@ -421,49 +383,29 @@ export default defineViewModel(class CustomDataRootModel {}, (h) => ({
     >;
   }>(
     (_, [], subView) => {
-      const model = CustomEntityViewModel.parse(
-        subView,
-        "combatStatus",
-        definitionId(subView),
-      );
-      const entry = model.getEntry();
-      if (typeof entry === "symbol") {
-        return;
-      }
+      const model = CustomEntityViewModel.parse(subView, "combatStatus");
+      const entry = model.getEntry() as EntityDefinition;
       registerMetadata(model);
-      registerEntity(entry as EntityDefinition);
+      registerEntity(entry);
     },
-    (_, [], subView) =>
-      CustomEntityViewModel.parse(
-        subView,
-        "combatStatus",
-        definitionId(subView),
-      ),
+    (_, [], subView) => CustomEntityViewModel.parse(subView, "combatStatus"),
   ),
   summon: h.attribute<{
     (): AR.With<typeof CustomEntityViewModel, DefaultEntityVMMeta<"summon">>;
   }>(
     (_, [], subView) => {
-      const model = CustomEntityViewModel.parse(
-        subView,
-        "summon",
-        definitionId(subView),
-      );
-      const entry = model.getEntry();
-      if (typeof entry === "symbol") {
-        return;
-      }
+      const model = CustomEntityViewModel.parse(subView, "summon");
+      const entry = model.getEntry() as EntityDefinition;
       registerMetadata(model);
-      registerEntity(entry as EntityDefinition);
+      registerEntity(entry);
     },
-    (_, [], subView) =>
-      CustomEntityViewModel.parse(subView, "summon", definitionId(subView)),
+    (_, [], subView) => CustomEntityViewModel.parse(subView, "summon"),
   ),
   card: h.attribute<{
     (): AR.With<typeof CustomCardViewModel>;
   }>(
     (_, [], subView) => {
-      const model = CustomCardViewModel.parse(subView, definitionId(subView));
+      const model = CustomCardViewModel.parse(subView);
       const entry = model.getEntry();
       if (typeof entry === "symbol") {
         return;
@@ -471,17 +413,13 @@ export default defineViewModel(class CustomDataRootModel {}, (h) => ({
       registerMetadata(model);
       registerEntity(entry);
     },
-    (_, [], subView) =>
-      CustomCardViewModel.parse(subView, definitionId(subView)),
+    (_, [], subView) => CustomCardViewModel.parse(subView),
   ),
   attachment: h.attribute<{
     (): AR.With<typeof CustomAttachmentViewModel>;
   }>(
     (_, [], subView) => {
-      const model = CustomAttachmentViewModel.parse(
-        subView,
-        definitionId(subView),
-      );
+      const model = CustomAttachmentViewModel.parse(subView);
       const entry = model.getEntry();
       if (typeof entry === "symbol") {
         return;
@@ -489,7 +427,6 @@ export default defineViewModel(class CustomDataRootModel {}, (h) => ({
       registerMetadata(model);
       registerAttachment(entry as AttachmentDefinition);
     },
-    (_, [], subView) =>
-      CustomAttachmentViewModel.parse(subView, definitionId(subView)),
+    (_, [], subView) => CustomAttachmentViewModel.parse(subView),
   ),
 }));

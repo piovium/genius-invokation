@@ -239,7 +239,7 @@ export class AssetsManager {
       }
       return skills;
     };
-    setupSkill(data.skills ?? []);
+    setupSkill(data.skills);
     for (const ch of data.characters) {
       const data: CharacterRawData = {
         // @ts-expect-error

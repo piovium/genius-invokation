@@ -63,7 +63,6 @@ export interface CustomData {
   characters: CustomCharacter[];
   entities: CustomEntity[];
   /** Standalone skills, including overrides whose character is official. */
-  skills?: CustomSkill[];
-  /** Optional to keep existing custom-data payloads compatible. */
-  attachments?: CustomAttachment[];
+  skills: CustomSkill[];
+  attachments: CustomAttachment[];
 }
