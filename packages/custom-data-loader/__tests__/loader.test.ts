@@ -107,9 +107,6 @@ describe("CustomDataLoader GTS", () => {
   test("registers generated definitions and their presentation metadata", async () => {
     const loader = await new CustomDataLoader().loadMod(customGts);
     const [gameData, customData] = loader.done();
-
-    console.log(customData);
-
     expect(customData.attachments).toEqual([
       expect.objectContaining({
         id: 10_000_000,

@@ -102,7 +102,7 @@ export class CustomCardModel extends CardModel {
 
   #skillId: number | null = null;
   override get id() {
-    return this.#skillId ?? this.getSubId();
+    return this.#skillId ??= this.getSubId();
   }
   override set id(id: number) {
     throw new Error(`Cannot set id directly here`);

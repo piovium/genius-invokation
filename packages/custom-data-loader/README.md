@@ -41,9 +41,7 @@ define status {
 
 An explicit `id` does not consume an automatically generated ID. The custom
 definition takes precedence over the official definition with the same ID, and
-its name, description, and image are used by `AssetsManager`. `name` remains
-required; omitted descriptions and images keep the same defaults as other
-custom definitions.
+its name, description, and image are used by `AssetsManager`.
 
 ## Note
 
