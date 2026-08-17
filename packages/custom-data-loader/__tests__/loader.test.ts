@@ -95,6 +95,14 @@ define status {
 }
 `;
 
+const conflictingCustomDataGts = `
+define status {
+  id 100 as ConflictingStatus;
+  name "Conflicting Status";
+  usage 1;
+}
+`;
+
 describe("CustomDataLoader GTS", () => {
   test("registers generated definitions and their presentation metadata", async () => {
     const loader = await new CustomDataLoader().loadMod(customGts);
@@ -244,6 +252,17 @@ describe("CustomDataLoader GTS", () => {
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+
+  test("rejects multiple custom data versions for the same id", async () => {
+    const loader = await new CustomDataLoader().loadMod(
+      conflictingCustomDataGts,
+      conflictingCustomDataGts,
+    );
+
+    expect(() => loader.done()).toThrow(
+      "Multiple custom data versions found for id 100",
+    );
   });
 
   test("rejects imports outside the allowed GTS modules", async () => {

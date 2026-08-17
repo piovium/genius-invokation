@@ -143,8 +143,17 @@ export class CustomDataLoader {
 
   done(): [GameData, CustomData] {
     const gameData = this.registry.resolve(
-      (items) =>
-        items.find((item) => item.version.from === "customData") ?? null,
+      (items) => {
+        const customDataItems = items.filter(
+          (item) => item.version.from === "customData",
+        );
+        if (customDataItems.length > 1) {
+          throw new Error(
+            `Multiple custom data versions found for id ${customDataItems[0]!.id}`,
+          );
+        }
+        return customDataItems[0] ?? null;
+      },
       (items) => resolveOfficialVersion(items, this.version),
     );
     const standaloneSkills: CustomSkill[] = [];
