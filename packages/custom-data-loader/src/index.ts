@@ -117,10 +117,8 @@ export class CustomDataLoader {
       const endRegistration = beginCustomDataRegistration({
         allocateId: (node) => {
           let id = definitionIds.get(node);
-          if (id === undefined) {
+          if (typeof id === "undefined") {
             id = this.nextId++;
-            console?.error?.(node, id);
-            console?.trace?.();
             definitionIds.set(node, id);
           }
           return id;
