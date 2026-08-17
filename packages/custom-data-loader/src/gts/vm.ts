@@ -175,10 +175,11 @@ const CustomCharacterViewModel = CharacterViewModel.extend(
       uniqueKey(): "id";
       as(): CharacterHandle;
     }>(
+      () => {},
       (model, [id]) => {
         model.metadata.specifyId(id);
+        return id as CharacterHandle;
       },
-      (model, [id]) => id as CharacterHandle,
     ),
     name: h.attribute<{
       (name: string): AR.Done;
@@ -210,10 +211,11 @@ const CustomCardViewModel = CardViewModel.extend(CustomCardModel, (h) => ({
     uniqueKey(): "id";
     as(): CardHandle;
   }>(
-    (model, [id]) => {
-      model.metadata.specifyId(id);
-    },
-    (model, [id]) => id as CardHandle,
+      () => {},
+      (model, [id]) => {
+        model.metadata.specifyId(id);
+        return id as CardHandle;
+      },
   ),
   name: h.attribute<{
     (name: string): AR.Done;
@@ -246,10 +248,11 @@ const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
       uniqueKey(): "id";
       as(): SkillHandle | PassiveSkillHandle;
     }>(
+      () => {},
       (model, [id]) => {
         model.metadata.specifyId(id);
+        return id as SkillHandle;
       },
-      (model, [id]) => id as SkillHandle,
     ),
     name: h.attribute<{
       <Meta extends CharacterSkillVMMeta>(
@@ -286,10 +289,11 @@ const CustomEntityViewModel = EntityViewModel.extend(
       uniqueKey(): "id";
       as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
     }>(
+      () => {},
       (model, [id]) => {
         model.metadata.specifyId(id);
+        return id as HandleT<EntityType>;
       },
-      (model, [id]) => id as HandleT<EntityType>,
     ),
     name: h.attribute<{
       <Meta extends EntityVMMeta>(this: AR.This<Meta>, name: string): AR.Done;
@@ -323,10 +327,11 @@ const CustomAttachmentViewModel = AttachmentViewModel.extend(
       uniqueKey(): "id";
       as(): AttachmentHandle;
     }>(
+      () => {},
       (model, [id]) => {
         model.metadata.specifyId(id);
+        return id as AttachmentHandle;
       },
-      (model, [id]) => id as AttachmentHandle,
     ),
     name: h.attribute<{
       (name: string): AR.Done;
