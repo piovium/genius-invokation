@@ -119,16 +119,18 @@ export class CustomDataLoader {
           let id = definitionIds.get(node);
           if (id === undefined) {
             id = this.nextId++;
-            console?.error(node, id);
-            console?.trace();
+            console?.error?.(node, id);
+            console?.trace?.();
             definitionIds.set(node, id);
           }
           return id;
         },
-        registerMetadata: ({ id, name, description, image }) => {
+        registerMetadata: (md) => {
+          const id = md.id;
+          const name = md.customName ?? "";
           this.names.set(id, name);
-          this.descriptions.set(id, description);
-          this.images.set(id, image);
+          this.descriptions.set(id, md.customDescription ?? "");
+          this.images.set(id, md.customImage ?? placeholderImageUrl(name));
         },
       });
       try {

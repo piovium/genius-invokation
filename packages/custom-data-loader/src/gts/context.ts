@@ -15,16 +15,40 @@
 
 import { GiTcgDataError } from "@gi-tcg/core";
 
-export interface CustomDataMetadata {
-  id: number;
-  name: string;
-  description: string;
-  image: string;
-}
+export class CustomMetadata {
+  customName: string | null = null;
+  customDescription: string | null = null;
+  customImage: string | null = null;
 
+  #specifiedId: number | null = null;
+  #allocatedId: number | null = null;
+
+  specifyId(id: number) {
+    if (this.#specifiedId !== null) {
+      throw new Error(
+        `Definition #${this.#specifiedId} already specified an ID`,
+      );
+    }
+    this.#specifiedId = id;
+  }
+
+  #allocateId() {
+    if (this.#specifiedId !== null) {
+      throw new Error(
+        `Definition #${this.#specifiedId} already specified an ID`,
+      );
+    }
+    const registration = getCustomDataRegistration();
+    return (this.#allocatedId = registration.allocateId(this));
+  }
+
+  get id(): number {
+    return this.#specifiedId ?? this.#allocatedId ?? this.#allocateId();
+  }
+}
 export interface CustomDataRegistration {
   allocateId(node: object): number;
-  registerMetadata(metadata: CustomDataMetadata): void;
+  registerMetadata(metadata: CustomMetadata): void;
 }
 
 let currentRegistration: CustomDataRegistration | null = null;

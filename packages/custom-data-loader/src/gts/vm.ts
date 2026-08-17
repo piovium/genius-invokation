@@ -51,7 +51,7 @@ import type {
   EntityType,
   VersionInfo,
 } from "@gi-tcg/core";
-import { getCustomDataRegistration } from "./context";
+import { CustomMetadata, getCustomDataRegistration } from "./context";
 
 declare global {
   namespace GiTcg {
@@ -66,46 +66,8 @@ const CUSTOM_DATA_VERSION_INFO: VersionInfo = {
   value: {},
 };
 
-class CustomMetadata {
-  customName: string | null = null;
-  customDescription: string | null = null;
-  customImage: string | null = null;
-
-  #specifiedId: number | null = null;
-  #allocatedId: number | null = null;
-
-  specifyId(id: number) {
-    if (this.#specifiedId !== null) {
-      throw new Error(
-        `Definition #${this.#specifiedId} already specified an ID`,
-      );
-    }
-    this.#specifiedId = id;
-  }
-
-  #allocateId() {
-    if (this.#specifiedId !== null) {
-      throw new Error(
-        `Definition #${this.#specifiedId} already specified an ID`,
-      );
-    }
-    const registration = getCustomDataRegistration();
-    return (this.#allocatedId = registration.allocateId(this));
-  }
-
-  get id(): number {
-    return this.#specifiedId ?? this.#allocatedId ?? this.#allocateId();
-  }
-}
-
 function registerMetadata(md: CustomMetadata) {
-  getCustomDataRegistration().registerMetadata({
-    id: md.id,
-    // TODO: check this fallbacks
-    name: md.customName ?? "",
-    description: md.customDescription ?? "",
-    image: md.customImage ?? "",
-  });
+  getCustomDataRegistration().registerMetadata(md);
 }
 
 export class CustomCharacterModel extends CharacterModel {
