@@ -71,7 +71,7 @@ function registerMetadata(md: CustomMetadata) {
 }
 
 export class CustomCharacterModel extends CharacterModel {
-  readonly metadata = new CustomMetadata();
+  readonly metadata = CustomMetadata.create();
 
   override set id(id: number) {
     throw new Error(
@@ -89,7 +89,7 @@ export class CustomCharacterModel extends CharacterModel {
 }
 
 export class CustomCardModel extends CardModel {
-  readonly metadata = new CustomMetadata();
+  readonly metadata = CustomMetadata.create();
 
   override set cardId(id: number) {
     throw new Error(
@@ -115,7 +115,7 @@ export class CustomCardModel extends CardModel {
 }
 
 export class CustomCharacterSkillModel extends CharacterSkillModel {
-  readonly metadata = new CustomMetadata();
+  readonly metadata = CustomMetadata.create();
 
   override set id(id: number) {
     throw new Error(
@@ -133,7 +133,7 @@ export class CustomCharacterSkillModel extends CharacterSkillModel {
 }
 
 export class CustomEntityModel extends EntityModel {
-  readonly metadata = new CustomMetadata();
+  readonly metadata = CustomMetadata.create();
 
   override set id(id: number) {
     throw new Error(
@@ -150,7 +150,7 @@ export class CustomEntityModel extends EntityModel {
 }
 
 export class CustomAttachmentModel extends AttachmentModel {
-  readonly metadata = new CustomMetadata();
+  readonly metadata = CustomMetadata.create();
 
   override set id(id: number) {
     throw new Error(

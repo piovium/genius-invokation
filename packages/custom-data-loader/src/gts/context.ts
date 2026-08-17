@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { GiTcgDataError } from "@gi-tcg/core";
+import { getCurrentView, type View } from "./runtime";
 
 export class CustomMetadata {
   customName: string | null = null;
@@ -22,6 +23,23 @@ export class CustomMetadata {
 
   #specifiedId: number | null = null;
   #allocatedId: number | null = null;
+
+  private constructor() {}
+  static metadataRegistry = new WeakMap<View<any>, CustomMetadata>();
+  static create(): CustomMetadata {
+    const view = getCurrentView();
+    if (!view) {
+      throw new Error(
+        `Please call CustomMetadata.create() inside GTS Model construction.`,
+      );
+    }
+    let metadata = this.metadataRegistry.get(view);
+    if (!metadata) {
+      metadata = new CustomMetadata();
+      this.metadataRegistry.set(view, metadata);
+    }
+    return metadata;
+  }
 
   specifyId(id: number) {
     if (this.#specifiedId !== null) {
