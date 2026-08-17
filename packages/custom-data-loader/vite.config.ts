@@ -21,14 +21,17 @@ export default defineConfig({
   worker: {
     format: "es",
   },
-  resolve: {
-    conditions: ["import", "default"],
-  },
   test: {
     environment: "node",
+    env: {
+      NODE_OPTIONS: "--experimental-vm-modules",
+    },
   },
-  plugins: [
-    gts(),
-    solid(),
-  ],
+  plugins: [gts(), solid()],
+  ssr: {
+    // https://vitest.dev/guide/common-errors.html#custom-package-conditions-are-not-resolved
+    resolve: {
+      conditions: ["development", "import", "default"],
+    },
+  },
 });

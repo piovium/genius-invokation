@@ -102,8 +102,15 @@ type GtsSkillOperationFilter<Meta extends RwContextMeta> = (
 ) => unknown;
 
 abstract class SkillModel {
+  // FIXME: use accessor when decorators are in stage 4
+  #id!: number;
   /** skill id */
-  id!: number;
+  get id() {
+    return this.#id;
+  }
+  set id(value: number) {
+    this.#id = value;
+  }
 
   versionInfo: VersionInfo | null = null;
 

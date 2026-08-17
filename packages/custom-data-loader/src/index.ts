@@ -117,16 +117,18 @@ export class CustomDataLoader {
       const endRegistration = beginCustomDataRegistration({
         allocateId: (node) => {
           let id = definitionIds.get(node);
-          if (id === undefined) {
+          if (typeof id === "undefined") {
             id = this.nextId++;
             definitionIds.set(node, id);
           }
           return id;
         },
-        registerMetadata: ({ id, name, description, image }) => {
+        registerMetadata: (md) => {
+          const id = md.id;
+          const name = md.customName ?? "";
           this.names.set(id, name);
-          this.descriptions.set(id, description);
-          this.images.set(id, image);
+          this.descriptions.set(id, md.customDescription ?? "");
+          this.images.set(id, md.customImage ?? placeholderImageUrl(name));
         },
       });
       try {
@@ -141,14 +143,25 @@ export class CustomDataLoader {
 
   done(): [GameData, CustomData] {
     const gameData = this.registry.resolve(
+      (items) => {
+        const customDataItems = items.filter(
+          (item) => item.version.from === "customData",
+        );
+        if (customDataItems.length > 1) {
+          throw new Error(
+            `Multiple custom data versions found for id ${customDataItems[0]!.id}`,
+          );
+        }
+        return customDataItems[0] ?? null;
+      },
       (items) => resolveOfficialVersion(items, this.version),
-      (items) =>
-        items.find((item) => item.version.from === "customData") ?? null,
     );
+    const standaloneSkills: CustomSkill[] = [];
     const customData: CustomData = {
       actionCards: [],
       characters: [],
       entities: [],
+      skills: standaloneSkills,
       attachments: [],
     };
     const parseSkill = (skill: SkillDefinition): CustomSkill => {
@@ -163,7 +176,16 @@ export class CustomDataLoader {
         playCost: new Map(skill.initiativeSkillConfig?.requiredCost),
       };
     };
+    const customSkills = new Map<number, CustomSkill>();
+    const collectCustomSkills = (skills: readonly SkillDefinition[]) => {
+      for (const skill of skills) {
+        if (this.names.has(skill.id)) {
+          customSkills.set(skill.id, parseSkill(skill));
+        }
+      }
+    };
     for (const [id, ch] of gameData.characters) {
+      collectCustomSkills(ch.skills);
       if (ch.version.from !== "customData") {
         continue;
       }
@@ -181,6 +203,7 @@ export class CustomDataLoader {
       });
     }
     for (const [id, et] of gameData.entities) {
+      collectCustomSkills(et.skills);
       if (et.version.from !== "customData") {
         continue;
       }
@@ -209,6 +232,7 @@ export class CustomDataLoader {
       }
     }
     for (const [id, attachment] of gameData.attachments) {
+      collectCustomSkills(attachment.skills);
       if (attachment.version.from !== "customData") {
         continue;
       }
@@ -222,6 +246,7 @@ export class CustomDataLoader {
         skills: attachment.skills.map(parseSkill),
       });
     }
+    standaloneSkills.push(...customSkills.values());
     return [gameData, customData];
   }
 }

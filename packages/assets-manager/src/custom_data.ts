@@ -62,7 +62,7 @@ export interface CustomData {
   actionCards: CustomActionCard[];
   characters: CustomCharacter[];
   entities: CustomEntity[];
-  /** Optional to keep existing custom-data payloads compatible. */
-  attachments?: CustomAttachment[];
+  /** Standalone skills, including overrides whose character is official. */
+  skills: CustomSkill[];
+  attachments: CustomAttachment[];
 }
-

@@ -104,7 +104,16 @@ export type TalentRequirement = "action" | "actionSkill" | "active" | "none";
 
 export class CardModel extends InitiativeSkillModel implements ICaller {
   reserved = false;
-  cardId!: number;
+  
+  // FIXME: use accessor when decorators are in stage 4
+  #cardId!: number;
+  get cardId() {
+    return this.#cardId;
+  }
+  set cardId(value: number) {
+    this.#cardId = value;
+  }
+
   skillType = "playCard" as const;
   descriptionDictionary: Writable<DescriptionDictionary> = {};
 

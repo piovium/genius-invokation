@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  defineViewModel,
-  extendViewModel,
-  type AR,
-  type IViewModel,
-} from "@gi-tcg/core/gts/runtime";
+import { defineViewModel, type AR } from "@gi-tcg/core/gts/runtime";
 import {
   AttachmentModel,
   AttachmentViewModel,
@@ -43,14 +38,20 @@ import {
   type AttachmentHandle,
   type CardHandle,
   type CharacterHandle,
+  type CharacterInitiativeSkillEntry,
+  type CharacterPassiveSkillEntry,
   type EntityDefinition,
   type ExEntityType,
   type HandleT,
   type PassiveSkillHandle,
   type SkillHandle,
 } from "@gi-tcg/core/data";
-import type { AttachmentDefinition, VersionInfo } from "@gi-tcg/core";
-import { getCustomDataRegistration } from "./context";
+import type {
+  AttachmentDefinition,
+  EntityType,
+  VersionInfo,
+} from "@gi-tcg/core";
+import { CustomMetadata, getCustomDataRegistration } from "./context";
 
 declare global {
   namespace GiTcg {
@@ -65,108 +66,103 @@ const CUSTOM_DATA_VERSION_INFO: VersionInfo = {
   value: {},
 };
 
-interface CustomMetadataModel {
-  readonly customDefinitionId: number;
-  customName: string | null;
-  customDescription: string;
-  customImage: string;
+function registerMetadata(md: CustomMetadata) {
+  getCustomDataRegistration().registerMetadata(md);
 }
 
-function registerMetadata(model: CustomMetadataModel) {
-  if (model.customName === null) {
-    throw new Error(`Definition #${model.customDefinitionId} is missing name`);
+export class CustomCharacterModel extends CharacterModel {
+  readonly metadata = CustomMetadata.create();
+
+  override set id(id: number) {
+    throw new Error(
+      `Cannot set id directly here, please use metadata's method`,
+    );
   }
-  getCustomDataRegistration().registerMetadata({
-    id: model.customDefinitionId,
-    name: model.customName,
-    description: model.customDescription,
-    image: model.customImage,
-  });
-}
+  override get id() {
+    return this.metadata.id;
+  }
 
-function definitionId(view: { _node: object }) {
-  return getCustomDataRegistration().allocateId(view._node);
-}
-
-export class CustomCharacterModel
-  extends CharacterModel
-  implements CustomMetadataModel
-{
-  readonly customDefinitionId: number;
-  customName: string | null = null;
-  customDescription = "";
-  customImage = "";
-
-  constructor(id: number) {
+  constructor() {
     super();
-    this.customDefinitionId = id;
-    this.id = this.customDefinitionId;
     this.versionInfo = CUSTOM_DATA_VERSION_INFO;
   }
 }
 
-export class CustomCardModel extends CardModel implements CustomMetadataModel {
-  readonly customDefinitionId: number;
-  customName: string | null = null;
-  customDescription = "";
-  customImage = "";
+export class CustomCardModel extends CardModel {
+  readonly metadata = CustomMetadata.create();
 
-  constructor(id: number) {
+  override set cardId(id: number) {
+    throw new Error(
+      `Cannot set id directly here, please use metadata's method`,
+    );
+  }
+  override get cardId() {
+    return this.metadata.id;
+  }
+
+  #skillId: number | null = null;
+  override get id() {
+    return this.#skillId ??= this.getSubId();
+  }
+  override set id(id: number) {
+    throw new Error(`Cannot set id directly here`);
+  }
+
+  constructor() {
     super();
-    this.customDefinitionId = id;
-    this.cardId = this.customDefinitionId;
-    this.id = this.getSubId();
     this.versionInfo = CUSTOM_DATA_VERSION_INFO;
   }
 }
 
-export class CustomCharacterSkillModel
-  extends CharacterSkillModel
-  implements CustomMetadataModel
-{
-  readonly customDefinitionId: number;
-  customName: string | null = null;
-  customDescription = "";
-  customImage = "";
+export class CustomCharacterSkillModel extends CharacterSkillModel {
+  readonly metadata = CustomMetadata.create();
 
-  constructor(id: number) {
+  override set id(id: number) {
+    throw new Error(
+      `Cannot set id directly here, please use metadata's method`,
+    );
+  }
+  override get id() {
+    return this.metadata.id;
+  }
+
+  constructor() {
     super();
-    this.customDefinitionId = id;
-    this.id = this.customDefinitionId;
     this.versionInfo = CUSTOM_DATA_VERSION_INFO;
   }
 }
 
-export class CustomEntityModel
-  extends EntityModel
-  implements CustomMetadataModel
-{
-  readonly customDefinitionId: number;
-  customName: string | null = null;
-  customDescription = "";
-  customImage = "";
+export class CustomEntityModel extends EntityModel {
+  readonly metadata = CustomMetadata.create();
 
-  constructor(type: ExEntityType, id: number) {
+  override set id(id: number) {
+    throw new Error(
+      `Cannot set id directly here, please use metadata's method`,
+    );
+  }
+  override get id() {
+    return this.metadata.id;
+  }
+  constructor(type: ExEntityType) {
     super(type);
-    this.customDefinitionId = id;
-    this.id = this.customDefinitionId;
     this.versionInfo = CUSTOM_DATA_VERSION_INFO;
   }
 }
 
-export class CustomAttachmentModel
-  extends AttachmentModel
-  implements CustomMetadataModel
-{
-  readonly customDefinitionId: number;
-  customName: string | null = null;
-  customDescription = "";
-  customImage = "";
+export class CustomAttachmentModel extends AttachmentModel {
+  readonly metadata = CustomMetadata.create();
 
-  constructor(id: number) {
+  override set id(id: number) {
+    throw new Error(
+      `Cannot set id directly here, please use metadata's method`,
+    );
+  }
+  override get id() {
+    return this.metadata.id;
+  }
+
+  constructor() {
     super("attachment");
-    this.customDefinitionId = id;
-    this.id = this.customDefinitionId;
     this.versionInfo = CUSTOM_DATA_VERSION_INFO;
   }
 }
@@ -174,7 +170,17 @@ export class CustomAttachmentModel
 const CustomCharacterViewModel = CharacterViewModel.extend(
   CustomCharacterModel,
   (h) => ({
-    id: undefined,
+    id: h.attribute<{
+      (id: number): AR.Done;
+      uniqueKey(): "id";
+      as(): CharacterHandle;
+    }>(
+      () => {},
+      (model, [id]) => {
+        model.metadata.specifyId(id);
+        return id as CharacterHandle;
+      },
+    ),
     name: h.attribute<{
       (name: string): AR.Done;
       required(): true;
@@ -182,55 +188,72 @@ const CustomCharacterViewModel = CharacterViewModel.extend(
       as(): CharacterHandle;
     }>(
       (model, [name]) => {
-        model.customName = name;
+        model.metadata.customName = name;
       },
       (model) => model.id as CharacterHandle,
     ),
     description: h.simpleAttribute({
       uniqueKey: "description",
     })(function (description: string) {
-      this.customDescription = description;
+      this.metadata.customDescription = description;
     }),
     image: h.simpleAttribute({
       uniqueKey: "image",
     })(function (image: string) {
-      this.customImage = image;
+      this.metadata.customImage = image;
     }),
   }),
 );
 
-const CustomCardViewModel = CardViewModel.extend(
-  CustomCardModel,
-  (h) => ({
-    id: undefined,
-    name: h.attribute<{
-      (name: string): AR.Done;
-      required(): true;
-      uniqueKey(): "name";
-      as(): CardHandle;
-    }>(
-      (model, [name]) => {
-        model.customName = name;
+const CustomCardViewModel = CardViewModel.extend(CustomCardModel, (h) => ({
+  id: h.attribute<{
+    (id: number): AR.Done;
+    uniqueKey(): "id";
+    as(): CardHandle;
+  }>(
+      () => {},
+      (model, [id]) => {
+        model.metadata.specifyId(id);
+        return id as CardHandle;
       },
-      (model) => model.cardId as CardHandle,
-    ),
-    description: h.simpleAttribute({
-      uniqueKey: "description",
-    })(function (description: string) {
-      this.customDescription = description;
-    }),
-    image: h.simpleAttribute({
-      uniqueKey: "image",
-    })(function (image: string) {
-      this.customImage = image;
-    }),
+  ),
+  name: h.attribute<{
+    (name: string): AR.Done;
+    required(): true;
+    uniqueKey(): "name";
+    as(): CardHandle;
+  }>(
+    (model, [name]) => {
+      model.metadata.customName = name;
+    },
+    (model) => model.cardId as CardHandle,
+  ),
+  description: h.simpleAttribute({
+    uniqueKey: "description",
+  })(function (description: string) {
+    this.metadata.customDescription = description;
   }),
-);
+  image: h.simpleAttribute({
+    uniqueKey: "image",
+  })(function (image: string) {
+    this.metadata.customImage = image;
+  }),
+}));
 
 const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
   CustomCharacterSkillModel,
   (h) => ({
-    id: undefined,
+    id: h.attribute<{
+      (id: number): AR.Done;
+      uniqueKey(): "id";
+      as(): SkillHandle | PassiveSkillHandle;
+    }>(
+      () => {},
+      (model, [id]) => {
+        model.metadata.specifyId(id);
+        return id as SkillHandle;
+      },
+    ),
     name: h.attribute<{
       <Meta extends CharacterSkillVMMeta>(
         this: AR.This<Meta>,
@@ -241,19 +264,19 @@ const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
       as(): SkillHandle | PassiveSkillHandle;
     }>(
       (model, [name]) => {
-        model.customName = name;
+        model.metadata.customName = name;
       },
       (model) => model.id as SkillHandle,
     ),
     description: h.simpleAttribute({
       uniqueKey: "description",
     })(function (description: string) {
-      this.customDescription = description;
+      this.metadata.customDescription = description;
     }),
     image: h.simpleAttribute({
       uniqueKey: "image",
     })(function (image: string) {
-      this.customImage = image;
+      this.metadata.customImage = image;
     }),
   }),
 );
@@ -261,7 +284,17 @@ const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
 const CustomEntityViewModel = EntityViewModel.extend(
   CustomEntityModel,
   (h) => ({
-    id: undefined,
+    id: h.attribute<{
+      <Meta extends EntityVMMeta>(this: AR.This<Meta>, id: number): AR.Done;
+      uniqueKey(): "id";
+      as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
+    }>(
+      () => {},
+      (model, [id]) => {
+        model.metadata.specifyId(id);
+        return id as HandleT<EntityType>;
+      },
+    ),
     name: h.attribute<{
       <Meta extends EntityVMMeta>(this: AR.This<Meta>, name: string): AR.Done;
       required(): true;
@@ -269,19 +302,19 @@ const CustomEntityViewModel = EntityViewModel.extend(
       as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
     }>(
       (model, [name]) => {
-        model.customName = name;
+        model.metadata.customName = name;
       },
       (model) => model.id as any,
     ),
     description: h.simpleAttribute({
       uniqueKey: "description",
     })(function (description: string) {
-      this.customDescription = description;
+      this.metadata.customDescription = description;
     }),
     image: h.simpleAttribute({
       uniqueKey: "image",
     })(function (image: string) {
-      this.customImage = image;
+      this.metadata.customImage = image;
     }),
   }),
 );
@@ -289,7 +322,17 @@ const CustomEntityViewModel = EntityViewModel.extend(
 const CustomAttachmentViewModel = AttachmentViewModel.extend(
   CustomAttachmentModel,
   (h) => ({
-    id: undefined,
+    id: h.attribute<{
+      (id: number): AR.Done;
+      uniqueKey(): "id";
+      as(): AttachmentHandle;
+    }>(
+      () => {},
+      (model, [id]) => {
+        model.metadata.specifyId(id);
+        return id as AttachmentHandle;
+      },
+    ),
     name: h.attribute<{
       (name: string): AR.Done;
       required(): true;
@@ -297,19 +340,19 @@ const CustomAttachmentViewModel = AttachmentViewModel.extend(
       as(): AttachmentHandle;
     }>(
       (model, [name]) => {
-        model.customName = name;
+        model.metadata.customName = name;
       },
       (model) => model.id as AttachmentHandle,
     ),
     description: h.simpleAttribute({
       uniqueKey: "description",
     })(function (description: string) {
-      this.customDescription = description;
+      this.metadata.customDescription = description;
     }),
     image: h.simpleAttribute({
       uniqueKey: "image",
     })(function (image: string) {
-      this.customImage = image;
+      this.metadata.customImage = image;
     }),
   }),
 );
@@ -319,56 +362,38 @@ export default defineViewModel(class CustomDataRootModel {}, (h) => ({
     (): AR.With<typeof CustomCharacterViewModel>;
   }>(
     (_, [], subView) => {
-      const model = CustomCharacterViewModel.parse(
-        subView,
-        definitionId(subView),
-      );
-      registerMetadata(model);
+      const model = CustomCharacterViewModel.parse(subView);
+      registerMetadata(model.metadata);
       registerCharacter(model.getEntry());
     },
-    (_, [], subView) =>
-      CustomCharacterViewModel.parse(subView, definitionId(subView)),
+    (_, [], subView) => CustomCharacterViewModel.parse(subView),
   ),
   skill: h.attribute<{
     (): AR.With<typeof CustomCharacterSkillViewModel>;
   }>(
     (_, [], subView) => {
-      const model = CustomCharacterSkillViewModel.parse(
-        subView,
-        definitionId(subView),
-      );
-      const entry = model.getEntry();
-      if (typeof entry === "symbol") {
-        return;
-      }
-      registerMetadata(model);
+      const model = CustomCharacterSkillViewModel.parse(subView);
+      const entry = model.getEntry() as
+        CharacterInitiativeSkillEntry | CharacterPassiveSkillEntry;
+      registerMetadata(model.metadata);
       if (entry.type === "initiativeSkill") {
         registerInitiativeSkill(entry);
       } else {
         registerPassiveSkill(entry);
       }
     },
-    (_, [], subView) =>
-      CustomCharacterSkillViewModel.parse(subView, definitionId(subView)),
+    (_, [], subView) => CustomCharacterSkillViewModel.parse(subView),
   ),
   status: h.attribute<{
     (): AR.With<typeof CustomEntityViewModel, DefaultEntityVMMeta<"status">>;
   }>(
     (_, [], subView) => {
-      const model = CustomEntityViewModel.parse(
-        subView,
-        "status",
-        definitionId(subView),
-      );
-      const entry = model.getEntry();
-      if (typeof entry === "symbol") {
-        return;
-      }
-      registerMetadata(model);
-      registerEntity(entry as EntityDefinition);
+      const model = CustomEntityViewModel.parse(subView, "status");
+      const entry = model.getEntry() as EntityDefinition;
+      registerMetadata(model.metadata);
+      registerEntity(entry);
     },
-    (_, [], subView) =>
-      CustomEntityViewModel.parse(subView, "status", definitionId(subView)),
+    (_, [], subView) => CustomEntityViewModel.parse(subView, "status"),
   ),
   combatStatus: h.attribute<{
     (): AR.With<
@@ -377,75 +402,47 @@ export default defineViewModel(class CustomDataRootModel {}, (h) => ({
     >;
   }>(
     (_, [], subView) => {
-      const model = CustomEntityViewModel.parse(
-        subView,
-        "combatStatus",
-        definitionId(subView),
-      );
-      const entry = model.getEntry();
-      if (typeof entry === "symbol") {
-        return;
-      }
-      registerMetadata(model);
-      registerEntity(entry as EntityDefinition);
+      const model = CustomEntityViewModel.parse(subView, "combatStatus");
+      const entry = model.getEntry() as EntityDefinition;
+      registerMetadata(model.metadata);
+      registerEntity(entry);
     },
-    (_, [], subView) =>
-      CustomEntityViewModel.parse(
-        subView,
-        "combatStatus",
-        definitionId(subView),
-      ),
+    (_, [], subView) => CustomEntityViewModel.parse(subView, "combatStatus"),
   ),
   summon: h.attribute<{
     (): AR.With<typeof CustomEntityViewModel, DefaultEntityVMMeta<"summon">>;
   }>(
     (_, [], subView) => {
-      const model = CustomEntityViewModel.parse(
-        subView,
-        "summon",
-        definitionId(subView),
-      );
-      const entry = model.getEntry();
-      if (typeof entry === "symbol") {
-        return;
-      }
-      registerMetadata(model);
-      registerEntity(entry as EntityDefinition);
+      const model = CustomEntityViewModel.parse(subView, "summon");
+      const entry = model.getEntry() as EntityDefinition;
+      registerMetadata(model.metadata);
+      registerEntity(entry);
     },
-    (_, [], subView) =>
-      CustomEntityViewModel.parse(subView, "summon", definitionId(subView)),
+    (_, [], subView) => CustomEntityViewModel.parse(subView, "summon"),
   ),
   card: h.attribute<{
     (): AR.With<typeof CustomCardViewModel>;
   }>(
     (_, [], subView) => {
-      const model = CustomCardViewModel.parse(subView, definitionId(subView));
+      const model = CustomCardViewModel.parse(subView);
       const entry = model.getEntry();
       if (typeof entry === "symbol") {
         return;
       }
-      registerMetadata(model);
+      registerMetadata(model.metadata);
       registerEntity(entry);
     },
-    (_, [], subView) =>
-      CustomCardViewModel.parse(subView, definitionId(subView)),
+    (_, [], subView) => CustomCardViewModel.parse(subView),
   ),
   attachment: h.attribute<{
     (): AR.With<typeof CustomAttachmentViewModel>;
   }>(
     (_, [], subView) => {
-      const model = CustomAttachmentViewModel.parse(
-        subView,
-        definitionId(subView),
-      );
-      const entry = model.getEntry();
-      if (typeof entry === "symbol") {
-        return;
-      }
-      registerMetadata(model);
-      registerAttachment(entry as AttachmentDefinition);
+      const model = CustomAttachmentViewModel.parse(subView);
+      const entry = model.getEntry() as AttachmentDefinition;
+      registerMetadata(model.metadata);
+      registerAttachment(entry);
     },
-    (_, [], subView) =>
-      CustomAttachmentViewModel.parse(subView, definitionId(subView)),
+    (_, [], subView) => CustomAttachmentViewModel.parse(subView),
   ),
 }));
