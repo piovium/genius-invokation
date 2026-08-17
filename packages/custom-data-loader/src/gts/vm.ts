@@ -178,7 +178,7 @@ const CustomCharacterViewModel = CharacterViewModel.extend(
       (model, [id]) => {
         model.metadata.specifyId(id);
       },
-      (model, [id]) => model.id as CharacterHandle,
+      (model, [id]) => id as CharacterHandle,
     ),
     name: h.attribute<{
       (name: string): AR.Done;
@@ -286,7 +286,9 @@ const CustomEntityViewModel = EntityViewModel.extend(
       uniqueKey(): "id";
       as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
     }>(
-      () => {},
+      (model, [id]) => {
+        model.metadata.specifyId(id);
+      },
       (model, [id]) => id as HandleT<EntityType>,
     ),
     name: h.attribute<{
