@@ -70,7 +70,7 @@ define card {
 };
 ```
 
-`@gi-tcg/data` 的默认导出为 `(version?) => GameData`。省略参数时取得最新版本；传入版本号则由 `resolveOfficialVersion` 选中在该版本有效的定义。详见[游戏版本](./version.md)。
+`@gi-tcg/data` 的默认导出为 `(version?) => GameData`。省略参数时取得最新版本；传入版本号则由 `createOfficialVersionResolver` 选中在该版本有效的定义。详见[游戏版本](./version.md)。
 
 ## 官方卡牌数据自动化维护
 
