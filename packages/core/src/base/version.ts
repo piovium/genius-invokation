@@ -70,7 +70,7 @@ export const CURRENT_VERSION = VERSIONS[lastVersionIndex];
 
 export const versionLt = (a: Version, b: Version): boolean => {
   return VERSIONS.indexOf(a) < VERSIONS.indexOf(b);
-}
+};
 
 export interface OfficialVersionData {
   readonly predicate: "since" | "until";
@@ -107,9 +107,9 @@ export function versionCompare(a: Version, b: Version) {
   return versionIdxMap[a] - versionIdxMap[b];
 }
 
-export function resolveOfficialVersion<T extends WithVersionInfo>(
+function resolveOfficialVersion<T extends WithVersionInfo>(
   candidates: readonly T[],
-  requiredVersion: Version = CURRENT_VERSION,
+  requiredVersion: Version,
 ): T | null {
   const since = candidates.find(
     ({ version }) =>
@@ -137,15 +137,61 @@ export function resolveOfficialVersion<T extends WithVersionInfo>(
   return until[0] ?? null;
 }
 
-export function resolveManuallySelectedOfficialVersion(
-  versions: Record<number, Version>,
+export interface DependencyInfo {
+  readonly id: number;
+  readonly dependencies: readonly number[];
+}
+
+export function createOfficialVersionResolver(
   baseVersion: Version = CURRENT_VERSION,
+  versions: Record<number, Version> = {},
+  dependencies: readonly DependencyInfo[] = [],
 ): VersionResolver {
+  const dependencyMap = new Map(
+    dependencies.map(({ id, dependencies }) => [id, dependencies] as const),
+  );
+  const propagatedVersions = new Map<number, Version>();
+
+  const propagateVersion = (
+    id: number,
+    version: Version,
+    isRoot: boolean,
+    visiting: Set<number>,
+  ) => {
+    if (!isRoot && versions[id]) {
+      return;
+    }
+    if (!isRoot) {
+      const propagatedVersion = propagatedVersions.get(id);
+      if (propagatedVersion) {
+        if (propagatedVersion !== version) {
+          throw new Error(
+            `Entity ${id} has conflicting propagated versions: ${propagatedVersion} vs ${version}`,
+          );
+        }
+        return;
+      }
+      propagatedVersions.set(id, version);
+    }
+    if (visiting.has(id)) {
+      return;
+    }
+    visiting.add(id);
+    for (const dependencyId of dependencyMap.get(id) ?? []) {
+      propagateVersion(dependencyId, version, false, visiting);
+    }
+    visiting.delete(id);
+  };
+
+  for (const [id, version] of Object.entries(versions)) {
+    propagateVersion(Number(id), version, true, new Set());
+  }
+
   return <T extends WithVersionInfo>(candidates: readonly T[]) => {
     const id = candidates[0].id;
-    const version = versions[id] ?? baseVersion;
+    const version = versions[id] ?? propagatedVersions.get(id) ?? baseVersion;
     return resolveOfficialVersion(candidates, version);
-  }
+  };
 }
 
 export const DEFAULT_VERSION_INFO: VersionInfo = {

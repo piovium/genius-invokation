@@ -15,7 +15,7 @@
 
 import {
   type GameData,
-  resolveOfficialVersion,
+  createOfficialVersionResolver,
   type SkillDefinition,
   type Version,
   playSkillOfCard,
@@ -154,7 +154,7 @@ export class CustomDataLoader {
         }
         return customDataItems[0] ?? null;
       },
-      (items) => resolveOfficialVersion(items, this.version),
+      createOfficialVersionResolver(this.version),
     );
     const standaloneSkills: CustomSkill[] = [];
     const customData: CustomData = {

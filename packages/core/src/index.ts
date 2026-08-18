@@ -41,8 +41,7 @@ export {
   type VersionInfo,
   VERSIONS,
   CURRENT_VERSION,
-  resolveOfficialVersion,
-  resolveManuallySelectedOfficialVersion,
+  createOfficialVersionResolver,
 } from "./base/version";
 export * from "./query";
 export {
