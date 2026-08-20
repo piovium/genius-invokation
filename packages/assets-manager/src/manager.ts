@@ -148,9 +148,6 @@ export class AssetsManager {
     for (const data of this.options.customData) {
       this.setupCustomData(data);
     }
-    for (const [id, data] of this.dataCacheSync) {
-      this.dataCacheSync.set(id, this.applyDataOverride(data));
-    }
     if (this.options.concurrency > 0) {
       this.limitedFetch = limitFunction(fetch, {
         concurrency: this.options.concurrency,
@@ -382,7 +379,7 @@ export class AssetsManager {
   }
 
   private getCategoryVersion(force: boolean): string {
-    if (this.versionMap.$category !== undefined) {
+    if (typeof this.versionMap.$category === "string") {
       return this.versionMap.$category;
     }
     if (
@@ -561,8 +558,10 @@ export class AssetsManager {
   }
 
   getNameSync(id: number) {
+    const overrideName = this.dataOverrides.get(id)?.name;
     return (
       this.customDataNames.get(id) ??
+      overrideName ??
       this.dataCacheSync.get(id)?.name ??
       getNameSync(this.language, id)
     );

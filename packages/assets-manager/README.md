@@ -34,11 +34,14 @@ returning inconsistent aggregate data. Pass `{ force: true }` to explicitly use
 ## Data overrides
 
 Use `overrideData` to shallowly replace properties of data with matching IDs.
-Overrides apply to individual datum requests and data cached by
-`prepareForSync`; `getCategory` returns the raw category response:
+Overrides apply to individual datum requests.
 
 ```ts
 const assets = new AssetsManager({
   overrideData: [{ id: 1101, name: "Custom name", hp: 12 }],
 });
 ```
+
+Data overrides do not apply to `customData` and data returned from `getCategory`.
+
+The `skills` field of characters and entities won't be override by an individual Skill-`id` `overrideData`.

@@ -141,12 +141,14 @@ describe("category version selection", () => {
     const fetchMock = stubFetch();
     const overrideManager = new AssetsManager({
       apiEndpoint: API_ENDPOINT,
+      language: "EN",
       version: { $base: "v7.0.0" },
       overrideData: [{ id: 1, name: "overridden" }],
       concurrency: 0,
     });
     const versionManager = new AssetsManager({
       apiEndpoint: API_ENDPOINT,
+      language: "EN",
       version: { $base: "v7.0.0", 1: "v3.5.0" },
       concurrency: 0,
     });
@@ -198,6 +200,15 @@ describe("category version selection", () => {
 });
 
 describe("data overrides", () => {
+  test("uses override names synchronously before fetching data", () => {
+    const manager = new AssetsManager({
+      concurrency: 0,
+      overrideData: [{ id: 1, name: "overridden" }],
+    });
+
+    expect(manager.getNameSync(1)).toBe("overridden");
+  });
+
   test("shallowly overrides datum and keyword responses by id", async () => {
     const fetchMock = vi.fn(async (url: string | URL) => ({
       json: async () => {
