@@ -122,7 +122,7 @@ export class AssetsManager {
         $category: this.options.version,
       };
     } else {
-      this.versionMap = this.options.version;
+      this.versionMap = { ...this.options.version };
     }
     this.language = this.options.language;
     for (const data of this.options.customData) {

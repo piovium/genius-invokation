@@ -49,7 +49,7 @@ test("find version", () => {
   expect(resolved("v4.2.0")?.id).toBe(999);
 });
 
-describe("resolveManuallySelectedOfficialVersion", () => {
+describe("OfficialVersionResolver", () => {
   const resolvedVersion = (resolver: VersionResolver, id: number) => {
     const candidates: any[] = [
       {
