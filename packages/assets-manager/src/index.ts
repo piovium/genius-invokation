@@ -18,6 +18,7 @@ export {
   AssetsManager,
   DEFAULT_ASSETS_MANAGER,
   type GetDataOptions,
+  type GetCategoryOptions,
   type GetImageOptions,
   type AnyData,
   type Progress,
@@ -25,6 +26,7 @@ export {
   type AssetsVersion,
   type AssetsVersionMap,
   type AssetsManagerOption,
+  type OverrideData,
 } from "./manager";
 export * from "./constants";
 export { getNameSync } from "./names";
