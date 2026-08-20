@@ -39,6 +39,8 @@ export { type CommonSkillType } from "./base/skill";
 export {
   type Version,
   type VersionInfo,
+  type OfficialVersionMap,
+  type OfficialVersionResolver,
   VERSIONS,
   CURRENT_VERSION,
   createOfficialVersionResolver,

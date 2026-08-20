@@ -68,9 +68,18 @@ export interface PrepareForSyncOptions {}
 
 export type Language = "EN" | "CHS";
 
+export interface AssetsVersionMap {
+  readonly [id: number]: string;
+  readonly $base: string;
+  readonly $category?: string;
+}
+
+export type AssetsVersion =
+  "beta" | "latest" | (string & {}) | AssetsVersionMap;
+
 export interface AssetsManagerOption {
   apiEndpoint: string;
-  version: "beta" | "latest" | (string & {});
+  version: AssetsVersion;
   language: Language;
   customData: CustomData[];
   concurrency: number;
@@ -91,6 +100,7 @@ export class AssetsManager {
   private readonly customDataNames = new Map<number, string>();
   private readonly customDataImageUrls = new Map<number, string>();
   private readonly options: AssetsManagerOption;
+  private readonly versionMap: AssetsVersionMap;
 
   private readonly limitedFetch: (
     url: string | URL,
@@ -106,6 +116,14 @@ export class AssetsManager {
       concurrency: 32,
       ...options,
     };
+    if (typeof this.options.version === "string") {
+      this.versionMap = {
+        $base: this.options.version,
+        $category: this.options.version,
+      };
+    } else {
+      this.versionMap = { ...this.options.version };
+    }
     this.language = this.options.language;
     for (const data of this.options.customData) {
       this.setupCustomData(data);
@@ -330,6 +348,14 @@ export class AssetsManager {
     }
   }
 
+  private getDatumVersion(id: number): string {
+    return this.versionMap[id] ?? this.versionMap.$base;
+  }
+
+  private getCategoryVersion(): string | undefined {
+    return this.versionMap.$category;
+  }
+
   async getData(id: number, options: GetDataOptions = {}): Promise<AnyData> {
     if (id < 0) {
       return this.getKeyword(-id, options);
@@ -340,7 +366,8 @@ export class AssetsManager {
     if (this.dataCache.has(id)) {
       return this.dataCache.get(id)!;
     }
-    const url = `${this.options.apiEndpoint}/datum/${this.options.version}/${this.options.language}/${id}`;
+    const version = this.getDatumVersion(id);
+    const url = `${this.options.apiEndpoint}/datum/${version}/${this.options.language}/${id}`;
     const promise = this.limitedFetch(url, FETCH_OPTION)
       .then((r) => r.json())
       .then((data) => {
@@ -358,9 +385,9 @@ export class AssetsManager {
     if (this.dataCache.has(-id)) {
       return this.dataCache.get(-id)!;
     }
-    const url = `${this.options.apiEndpoint}/datum/${this.options.version}/${
-      this.options.language
-    }/${-id}`;
+    const datumId = -id;
+    const version = this.getDatumVersion(datumId);
+    const url = `${this.options.apiEndpoint}/datum/${version}/${this.options.language}/${datumId}`;
     const promise = this.limitedFetch(url, FETCH_OPTION)
       .then((r) => r.json())
       .then((data) => {
@@ -399,7 +426,13 @@ export class AssetsManager {
   ): Promise<
     (ActionCardRawData | CharacterRawData | EntityRawData | KeywordRawData)[]
   > {
-    const dataUrl = `${this.options.apiEndpoint}/data/${this.options.version}/${this.options.language}/${category}`;
+    const version = this.getCategoryVersion();
+    if (version === undefined) {
+      throw new Error(
+        "Category data is disabled: assets version map does not contain $category",
+      );
+    }
+    const dataUrl = `${this.options.apiEndpoint}/data/${version}/${this.options.language}/${category}`;
     const { data } = await this.limitedFetch(dataUrl, FETCH_OPTION).then((r) =>
       r.json(),
     );
@@ -494,7 +527,11 @@ export class AssetsManager {
   private preparedSyncData: Promise<void> | undefined;
   private prepareSyncData() {
     return (this.preparedSyncData ??= (async () => {
-      const dataUrl = `${this.options.apiEndpoint}/data/${this.options.version}/${this.options.language}/all`;
+      const version = this.getCategoryVersion();
+      if (version === undefined) {
+        return;
+      }
+      const dataUrl = `${this.options.apiEndpoint}/data/${version}/${this.options.language}/all`;
       const { data } = await this.limitedFetch(dataUrl, FETCH_OPTION).then(
         (r) => r.json(),
       );
