@@ -54,6 +54,10 @@ export type AnyData =
 
 export interface GetDataOptions {}
 
+export interface GetCategoryOptions {
+  force?: boolean;
+}
+
 export interface GetImageOptions {
   type?: "cardFace" | "icon" | "unspecified";
   thumbnail?: boolean;
@@ -77,11 +81,17 @@ export interface AssetsVersionMap {
 export type AssetsVersion =
   "beta" | "latest" | (string & {}) | AssetsVersionMap;
 
+export interface OverrideData {
+  readonly id: number;
+  readonly [prop: string]: unknown;
+}
+
 export interface AssetsManagerOption {
   apiEndpoint: string;
   version: AssetsVersion;
   language: Language;
   customData: CustomData[];
+  overrideData: OverrideData[];
   concurrency: number;
 }
 
@@ -91,6 +101,8 @@ const FETCH_OPTION: RequestInit = {
   },
 };
 
+class CategoryVersionRequiredError extends Error {}
+
 export class AssetsManager {
   public readonly language: Language;
   private readonly dataCacheSync = new Map<number, AnyData>();
@@ -99,6 +111,7 @@ export class AssetsManager {
   private readonly imageCache = new Map<string, Promise<Blob>>();
   private readonly customDataNames = new Map<number, string>();
   private readonly customDataImageUrls = new Map<number, string>();
+  private readonly dataOverrides = new Map<number, OverrideData>();
   private readonly options: AssetsManagerOption;
   private readonly versionMap: AssetsVersionMap;
 
@@ -113,9 +126,16 @@ export class AssetsManager {
       language: DEFAULT_LANGUAGE,
       version: DEFAULT_VERSION,
       customData: [],
+      overrideData: [],
       concurrency: 32,
       ...options,
     };
+    for (const override of this.options.overrideData) {
+      this.dataOverrides.set(override.id, {
+        ...this.dataOverrides.get(override.id),
+        ...override,
+      });
+    }
     if (typeof this.options.version === "string") {
       this.versionMap = {
         $base: this.options.version,
@@ -127,6 +147,9 @@ export class AssetsManager {
     this.language = this.options.language;
     for (const data of this.options.customData) {
       this.setupCustomData(data);
+    }
+    for (const [id, data] of this.dataCacheSync) {
+      this.dataCacheSync.set(id, this.applyDataOverride(data));
     }
     if (this.options.concurrency > 0) {
       this.limitedFetch = limitFunction(fetch, {
@@ -352,8 +375,33 @@ export class AssetsManager {
     return this.versionMap[id] ?? this.versionMap.$base;
   }
 
-  private getCategoryVersion(): string | undefined {
-    return this.versionMap.$category;
+  private hasCustomVersionResolution(): boolean {
+    return Object.keys(this.versionMap).some(
+      (key) => key !== "$base" && key !== "$category",
+    );
+  }
+
+  private getCategoryVersion(force: boolean): string {
+    if (this.versionMap.$category !== undefined) {
+      return this.versionMap.$category;
+    }
+    if (
+      !force &&
+      (this.dataOverrides.size > 0 || this.hasCustomVersionResolution())
+    ) {
+      throw new CategoryVersionRequiredError(
+        "Category data requires $category when overrideData or per-ID versions are configured; pass force: true to use $base",
+      );
+    }
+    return this.versionMap.$base;
+  }
+
+  private applyDataOverride<T extends { id: number }>(data: T): T {
+    const override = this.dataOverrides.get(data.id);
+    if (!override) {
+      return data;
+    }
+    return { ...data, ...override } as T;
   }
 
   async getData(id: number, options: GetDataOptions = {}): Promise<AnyData> {
@@ -371,8 +419,9 @@ export class AssetsManager {
     const promise = this.limitedFetch(url, FETCH_OPTION)
       .then((r) => r.json())
       .then((data) => {
-        this.dataCacheSync.set(id, data);
-        return data;
+        const overriddenData = this.applyDataOverride(data);
+        this.dataCacheSync.set(id, overriddenData);
+        return overriddenData;
       });
     this.dataCache.set(id, promise);
     return promise;
@@ -391,8 +440,9 @@ export class AssetsManager {
     const promise = this.limitedFetch(url, FETCH_OPTION)
       .then((r) => r.json())
       .then((data) => {
-        this.dataCacheSync.set(-id, data);
-        return data;
+        const overriddenData = this.applyDataOverride(data);
+        this.dataCacheSync.set(-id, overriddenData);
+        return overriddenData;
       });
     this.dataCache.set(-id, promise);
     return promise;
@@ -400,38 +450,39 @@ export class AssetsManager {
 
   async getCategory(
     category: "characters",
-    options?: GetDataOptions,
+    options?: GetCategoryOptions,
   ): Promise<CharacterRawData[]>;
   async getCategory(
     category: "action_cards",
-    options?: GetDataOptions,
+    options?: GetCategoryOptions,
   ): Promise<ActionCardRawData[]>;
   async getCategory(
     category: "entities",
-    options?: GetDataOptions,
+    options?: GetCategoryOptions,
   ): Promise<EntityRawData[]>;
   async getCategory(
     category: "keywords",
-    options?: GetDataOptions,
+    options?: GetCategoryOptions,
   ): Promise<KeywordRawData[]>;
   async getCategory(
-    category: Category,
-    options?: GetDataOptions,
+    category: "all",
+    options?: GetCategoryOptions,
   ): Promise<
     (ActionCardRawData | CharacterRawData | EntityRawData | KeywordRawData)[]
   >;
   async getCategory(
-    category: Category,
-    options: GetDataOptions = {},
+    category: Category | "all",
+    options?: GetCategoryOptions,
+  ): Promise<
+    (ActionCardRawData | CharacterRawData | EntityRawData | KeywordRawData)[]
+  >;
+  async getCategory(
+    category: Category | "all",
+    options: GetCategoryOptions = {},
   ): Promise<
     (ActionCardRawData | CharacterRawData | EntityRawData | KeywordRawData)[]
   > {
-    const version = this.getCategoryVersion();
-    if (version === undefined) {
-      throw new Error(
-        "Category data is disabled: assets version map does not contain $category",
-      );
-    }
+    const version = this.getCategoryVersion(options.force ?? false);
     const dataUrl = `${this.options.apiEndpoint}/data/${version}/${this.options.language}/${category}`;
     const { data } = await this.limitedFetch(dataUrl, FETCH_OPTION).then((r) =>
       r.json(),
@@ -527,18 +578,21 @@ export class AssetsManager {
   private preparedSyncData: Promise<void> | undefined;
   private prepareSyncData() {
     return (this.preparedSyncData ??= (async () => {
-      const version = this.getCategoryVersion();
-      if (version === undefined) {
-        return;
+      let data: (
+        ActionCardRawData | CharacterRawData | EntityRawData | KeywordRawData
+      )[];
+      try {
+        data = await this.getCategory("all", { force: false });
+      } catch (error) {
+        if (error instanceof CategoryVersionRequiredError) {
+          return;
+        }
+        throw error;
       }
-      const dataUrl = `${this.options.apiEndpoint}/data/${version}/${this.options.language}/all`;
-      const { data } = await this.limitedFetch(dataUrl, FETCH_OPTION).then(
-        (r) => r.json(),
-      );
       // Data
       for (const d of data) {
         if (!this.dataCacheSync.has(d.id)) {
-          this.dataCacheSync.set(d.id, d);
+          this.dataCacheSync.set(d.id, this.applyDataOverride(d));
         }
       }
     })());

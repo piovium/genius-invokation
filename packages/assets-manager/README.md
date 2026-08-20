@@ -26,4 +26,19 @@ const assets = new AssetsManager({
 });
 ```
 
-Without `$category`, `getCategory` is disabled and `prepareForSync` is a no-op.
+Without `$category`, category requests use `$base` as long as no per-ID version
+or `overrideData` is configured. In those cases `getCategory` throws to avoid
+returning inconsistent aggregate data. Pass `{ force: true }` to explicitly use
+`$base` anyway.
+
+## Data overrides
+
+Use `overrideData` to shallowly replace properties of data with matching IDs.
+Overrides apply to individual datum requests and data cached by
+`prepareForSync`; `getCategory` returns the raw category response:
+
+```ts
+const assets = new AssetsManager({
+  overrideData: [{ id: 1101, name: "Custom name", hp: 12 }],
+});
+```
