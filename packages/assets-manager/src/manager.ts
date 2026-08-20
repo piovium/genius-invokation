@@ -557,8 +557,8 @@ export class AssetsManager {
     return blobToDataUrl(blob);
   }
 
-  getNameSync(id: number) {
-    const overrideName = this.dataOverrides.get(id)?.name;
+  getNameSync(id: number): string | undefined {
+    const overrideName = this.dataOverrides.get(id)?.name as string | undefined;
     return (
       this.customDataNames.get(id) ??
       overrideName ??
