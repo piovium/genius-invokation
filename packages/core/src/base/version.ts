@@ -142,11 +142,21 @@ export interface DependencyInfo {
   readonly dependencies: readonly number[];
 }
 
+export type OfficialVersionMap = Readonly<
+  Record<number, Version> & {
+    readonly $base: Version;
+  }
+>;
+
+export type OfficialVersionResolver = VersionResolver & {
+  readonly versionMap: OfficialVersionMap;
+};
+
 export function createOfficialVersionResolver(
   baseVersion: Version = CURRENT_VERSION,
   versions: Record<number, Version> = {},
   dependencies: readonly DependencyInfo[] = [],
-): VersionResolver {
+): OfficialVersionResolver {
   const dependencyMap = new Map(
     dependencies.map(({ id, dependencies }) => [id, dependencies] as const),
   );
@@ -187,11 +197,19 @@ export function createOfficialVersionResolver(
     propagateVersion(Number(id), version, true, new Set());
   }
 
-  return <T extends WithVersionInfo>(candidates: readonly T[]) => {
+  const versionMap: OfficialVersionMap = {
+    $base: baseVersion,
+    ...versions,
+    ...Object.fromEntries(propagatedVersions),
+  };
+  const resolver: VersionResolver = <T extends WithVersionInfo>(
+    candidates: readonly T[],
+  ) => {
     const id = candidates[0].id;
-    const version = versions[id] ?? propagatedVersions.get(id) ?? baseVersion;
+    const version = versionMap[id] ?? versionMap.$base;
     return resolveOfficialVersion(candidates, version);
   };
+  return Object.assign(resolver, { versionMap });
 }
 
 export const DEFAULT_VERSION_INFO: VersionInfo = {

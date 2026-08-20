@@ -42,7 +42,7 @@ const write = async (data: unknown, ...paths: string[]) => {
   const finalPath = path.resolve(DESTINATION_DIR, ...paths);
   await mkdir(path.dirname(finalPath), { recursive: true });
   await writeFile(finalPath, JSON.stringify(data, mapReplacer, 2) + "\n");
-  console?.log(`Wrote ${finalPath}`);
+  console?.log?.(`Wrote ${finalPath}`);
 };
 
 for (const language of ["EN", "CHS"] as const) {

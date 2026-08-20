@@ -74,6 +74,10 @@ describe("resolveManuallySelectedOfficialVersion", () => {
 
   test("manually selected versions w/o dependencies", () => {
     const resolver = createOfficialVersionResolver("v4.2.0", { 1: "v3.5.0" });
+    expect(resolver.versionMap).toEqual({
+      $base: "v4.2.0",
+      1: "v3.5.0",
+    });
     expect(resolvedVersion(resolver, 1)).toBe("old");
     expect(resolvedVersion(resolver, 2)).toBe("new");
   });
@@ -84,6 +88,13 @@ describe("resolveManuallySelectedOfficialVersion", () => {
       { id: 2, dependencies: [3] },
       { id: 4, dependencies: [3] },
     ]);
+    expect(resolver.versionMap).toEqual({
+      $base: "v4.2.0",
+      1: "v3.5.0",
+      2: "v3.5.0",
+      3: "v3.5.0",
+      4: "v3.5.0",
+    });
     expect(resolvedVersion(resolver, 2)).toBe("old");
     expect(resolvedVersion(resolver, 3)).toBe("old");
   });

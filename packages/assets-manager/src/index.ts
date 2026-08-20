@@ -22,6 +22,8 @@ export {
   type AnyData,
   type Progress,
   type PrepareForSyncOptions,
+  type AssetsVersion,
+  type AssetsVersionMap,
   type AssetsManagerOption,
 } from "./manager";
 export * from "./constants";

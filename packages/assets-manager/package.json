@@ -34,6 +34,7 @@
     "dist"
   ],
   "scripts": {
+    "test": "vitest",
     "build:data": "gnx --import=./scripts/fetch_preload.ts ./scripts/fetch.ts",
     "build:ts": "tsdown",
     "build": "pnpm build:data && pnpm build:ts"
