@@ -141,6 +141,7 @@ define card {
   until "v4.8.0";
   cost DiceType.Aligned, 2;
   weapon pole {
+    tags barrier;
     variable solidarity, 0;
     on decreaseDamaged {
       when :( :player.hands.length > 0 );
