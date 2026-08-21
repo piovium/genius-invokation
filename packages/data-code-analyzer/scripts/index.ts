@@ -16,11 +16,9 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { glob, readFile, writeFile } from "node:fs/promises";
-import { type AnalyzeResult } from "./declaration";
+import type { AnalyzeResult } from "../src/types";
 import { TcgDataProject } from "./project";
 import { TcgDataSourceFile } from "./source_file";
-
-export type { AnalyzeResult } from "./declaration";
 
 export const base = fileURLToPath(new URL("../../data", import.meta.url));
 
