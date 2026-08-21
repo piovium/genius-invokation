@@ -27,7 +27,8 @@ async function startLocalPrisma(name: string) {
 
 const importFlags = [
   `--import`,
-  pathToFileURL(path.resolve(import.meta.dirname, "../scripts/ts_preload.js")).href,
+  pathToFileURL(path.resolve(import.meta.dirname, "../scripts/ts_preload.js"))
+    .href,
 ];
 
 async function localDev() {
@@ -48,7 +49,7 @@ async function localDev() {
       },
       reject: false,
       stdio: "inherit",
-    })`node ${importFlags} --watch ${path.resolve(import.meta.dirname, "main.ts")}`;
+    })`node --experimental-vm-modules ${importFlags} --watch ${path.resolve(import.meta.dirname, "main.ts")}`;
   } finally {
     await server.close!();
   }
@@ -65,7 +66,7 @@ async function remoteDev() {
     env: { DATABASE_URL: process.env.DATABASE_URL! },
     reject: false,
     stdio: "inherit",
-  })`node ${importFlags} --watch ${path.resolve(import.meta.dirname, "main.ts")}`;
+  })`node --experimental-vm-modules ${importFlags} --watch ${path.resolve(import.meta.dirname, "main.ts")}`;
 }
 
 if (process.env.DATABASE_URL) {

@@ -9,4 +9,4 @@ RUN pnpm install --frozen-lockfile && pnpm build:no-typing server...
 FROM node:26 AS deploy
 COPY --from=build /app/packages/server/dist/* /app/packages/server/prisma /app/packages/server/prisma.config.ts ./
 
-CMD ["node", "--enable-source-maps", "main.js"]
+CMD ["node", "--experimental-vm-modules", "--enable-source-maps", "main.js"]
