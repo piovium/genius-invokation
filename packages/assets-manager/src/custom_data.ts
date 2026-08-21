@@ -1,4 +1,4 @@
-import type { DiceRequirement } from "@gi-tcg/typings";
+import type { DiceType } from "@gi-tcg/typings";
 import type {
   AttachmentTag,
   CharacterTag,
@@ -6,6 +6,12 @@ import type {
   EntityTag,
   EntityType,
 } from "@gi-tcg/core";
+
+export interface CustomPlayCost {
+  type: DiceType;
+  count: number;
+}
+
 export interface CustomActionCard {
   id: number;
   name: string;
@@ -16,7 +22,7 @@ export interface CustomActionCard {
   obtainable: boolean;
   type: EntityType;
   tags: EntityTag[];
-  playCost: DiceRequirement;
+  playCost: CustomPlayCost[];
 }
 
 export interface CustomCharacter {
@@ -37,7 +43,7 @@ export interface CustomSkill {
   rawDescription: string;
   skillIconUrl: string;
   type: CommonSkillType | "passive";
-  playCost: DiceRequirement;
+  playCost: CustomPlayCost[];
 }
 
 export interface CustomEntity {

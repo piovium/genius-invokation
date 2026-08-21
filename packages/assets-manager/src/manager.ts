@@ -24,12 +24,11 @@ import type {
 } from "./data_types";
 import { blobToDataUrl } from "./data_url";
 import { getNameSync } from "./names";
-import type { CustomData, CustomSkill } from "./custom_data";
+import type { CustomData, CustomPlayCost, CustomSkill } from "./custom_data";
 import type {
   CharacterTag,
   CommonSkillType,
   Deck,
-  DiceRequirement,
   EntityTag,
   EntityType,
 } from "@gi-tcg/core";
@@ -240,9 +239,9 @@ export class AssetsManager {
       [DiceType.Energy]: "GCG_COST_ENERGY",
       [DiceType.Legend]: "GCG_COST_LEGEND",
     };
-    const genCost = (cost: DiceRequirement, isLegend: boolean): PlayCost[] => {
+    const genCost = (cost: CustomPlayCost[], isLegend: boolean): PlayCost[] => {
       const result: PlayCost[] = [];
-      for (const [type, count] of cost) {
+      for (const { type, count } of cost) {
         result.push({
           type: COST_TYPE_MAP[type],
           count,
