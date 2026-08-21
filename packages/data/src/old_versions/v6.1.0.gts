@@ -2,12 +2,13 @@ import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 import { DisposedSupportAndSummonsCountExtension } from "../cards/event/other.gts";
 import {
   Itzpapa,
-  NightsoulsBlessing,
+  NightsoulsBlessing as CitlaliNightsoulsBlessing,
   OpalShield,
 } from "../characters/cryo/citlali.gts";
 import {
   CaloricBalancingPlan01,
   KineticEnergyScale,
+  NightsoulsBlessing as IansanNightsoulsBlessing,
   TeachingsOfTheCollectiveOfPlenty,
   ThunderboltRush,
   WeightedSpike,
@@ -44,7 +45,7 @@ define skill {
   until "v6.1.0";
   skillType elemental;
   cost DiceType.Cryo, 3;
-  filter :( !:self.hasStatus(NightsoulsBlessing) );
+  filter :( !:self.hasStatus(CitlaliNightsoulsBlessing) );
   :damage(DamageType.Cryo, 2);
   :gainNightsoul(:self, 1);
   :combatStatus(OpalShield);
@@ -147,7 +148,7 @@ define character {
     ThunderboltRush,
     TheThreePrinciplesOfPower,
     CaloricBalancingPlan01;
-  associateNightsoul NightsoulsBlessing;
+  associateNightsoul IansanNightsoulsBlessing;
 };
 
 /**
