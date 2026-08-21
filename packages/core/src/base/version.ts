@@ -160,47 +160,60 @@ export function createOfficialVersionResolver(
   const dependencyMap = new Map(
     dependencies.map(({ id, dependencies }) => [id, dependencies] as const),
   );
-  const propagatedVersions = new Map<number, Version>();
+  const propagatedVersions = new Map<
+    number,
+    { readonly version: Version; readonly path: readonly number[] }
+  >();
 
   const propagateVersion = (
     id: number,
     version: Version,
     isRoot: boolean,
     visiting: Set<number>,
+    path: readonly number[],
   ) => {
     if (!isRoot && versions[id]) {
       return;
     }
     if (!isRoot) {
-      const propagatedVersion = propagatedVersions.get(id);
-      if (propagatedVersion) {
-        if (propagatedVersion !== version) {
+      const propagated = propagatedVersions.get(id);
+      if (propagated) {
+        if (propagated.version !== version) {
           throw new Error(
-            `Entity ${id} has conflicting propagated versions: ${propagatedVersion} vs ${version}`,
+            `Entity ${id} has conflicting propagated versions: ${propagated.version} vs ${version}\n` +
+              `Propagation paths:\n` +
+              `  ${propagated.version}: ${propagated.path.join(" -> ")}\n` +
+              `  ${version}: ${path.join(" -> ")}`,
           );
         }
         return;
       }
-      propagatedVersions.set(id, version);
+      propagatedVersions.set(id, { version, path });
     }
     if (visiting.has(id)) {
       return;
     }
     visiting.add(id);
     for (const dependencyId of dependencyMap.get(id) ?? []) {
-      propagateVersion(dependencyId, version, false, visiting);
+      propagateVersion(dependencyId, version, false, visiting, [
+        ...path,
+        dependencyId,
+      ]);
     }
     visiting.delete(id);
   };
 
   for (const [id, version] of Object.entries(versions)) {
-    propagateVersion(Number(id), version, true, new Set());
+    const rootId = Number(id);
+    propagateVersion(rootId, version, true, new Set(), [rootId]);
   }
 
   const versionMap: OfficialVersionMap = {
     $base: baseVersion,
     ...versions,
-    ...Object.fromEntries(propagatedVersions),
+    ...Object.fromEntries(
+      [...propagatedVersions].map(([id, { version }]) => [id, version]),
+    ),
   };
   const resolver: VersionResolver = <T extends WithVersionInfo>(
     candidates: readonly T[],
