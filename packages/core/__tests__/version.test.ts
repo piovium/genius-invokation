@@ -118,7 +118,14 @@ describe("OfficialVersionResolver", () => {
         { id: 1, dependencies: [3] },
         { id: 2, dependencies: [3] },
       ]),
-    ).toThrow("Entity 3 has conflicting propagated versions: v3.5.0 vs v4.2.0");
+    ).toThrow(
+      [
+        "Entity 3 has conflicting propagated versions: v3.5.0 vs v4.2.0",
+        "Propagation paths:",
+        "  v3.5.0: 1 -> 3",
+        "  v4.2.0: 2 -> 3",
+      ].join("\n"),
+    );
   });
 });
 
