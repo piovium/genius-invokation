@@ -190,7 +190,7 @@ export class CustomDataLoader {
     const serializePlayCost = (
       playCost: ReadonlyMap<CustomPlayCost["type"], number> | undefined,
     ): CustomPlayCost[] =>
-      Array.from(playCost ?? [], ([type, value]) => ({ type, value }));
+      Array.from(playCost ?? [], ([type, count]) => ({ type, count }));
     const parseSkill = (skill: SkillDefinition): CustomSkill => {
       const name = this.names.get(skill.id) ?? "";
       const skillType = skill.skillType ?? "passive";
