@@ -218,7 +218,6 @@ const CustomCardViewModel = CardViewModel.extend(CustomCardModel, (h) => ({
   ),
   name: h.attribute<{
     (name: string): AR.Done;
-    required(): true;
     uniqueKey(): "name";
     as(): CardHandle;
   }>(
@@ -258,7 +257,6 @@ const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
         this: AR.This<Meta>,
         name: string,
       ): AR.Done;
-      required(): true;
       uniqueKey(): "name";
       as(): SkillHandle | PassiveSkillHandle;
     }>(
@@ -296,7 +294,6 @@ const CustomEntityViewModel = EntityViewModel.extend(
     ),
     name: h.attribute<{
       <Meta extends EntityVMMeta>(this: AR.This<Meta>, name: string): AR.Done;
-      required(): true;
       uniqueKey(): "name";
       as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
     }>(
@@ -334,7 +331,6 @@ const CustomAttachmentViewModel = AttachmentViewModel.extend(
     ),
     name: h.attribute<{
       (name: string): AR.Done;
-      required(): true;
       uniqueKey(): "name";
       as(): AttachmentHandle;
     }>(
