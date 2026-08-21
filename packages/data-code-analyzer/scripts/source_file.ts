@@ -16,7 +16,7 @@
 import path from "node:path";
 import { EXTENSION_ID_OFFSET } from "@gi-tcg/core/data";
 import { parse, type AST } from "@gi-tcg/gts-transpiler";
-import type { Location } from "./declaration";
+import type { Location } from "../src/types";
 
 export interface EntityDefinition {
   id: number;
