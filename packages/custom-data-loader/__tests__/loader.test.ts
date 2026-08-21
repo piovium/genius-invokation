@@ -9,6 +9,7 @@ import { DamageType, DiceType } from "@gi-tcg/core/data";
 define attachment {
   name "Shield" as Shield;
   description "An attachment with custom metadata.";
+  playingDescription "Shield currently attached.";
   image "https://example.test/shield.png";
   tags artifact;
   addCost 1;
@@ -33,12 +34,15 @@ define character {
 define status {
   name "Marked" as Marked;
   description "A custom status.";
+  playingDescription "Marked is active.";
   usage 1;
 }
 
 define card {
   name "Impact" as Impact;
   description "A custom event card.";
+  playingDescription "Impact is being played.";
+  dynamicDescription "Impact has dynamic data.";
   cost DiceType.Omni, 1;
   :damage(DamageType.Piercing, 1);
 }
@@ -51,6 +55,7 @@ define status {
   id 100 as ResistantFormOverride;
   name "Custom Resistant Form";
   description "Custom status description.";
+  playingDescription "Custom playing status description.";
   image "https://example.test/status.png";
   usage 2;
 }
@@ -84,6 +89,7 @@ define character {
 define card {
   id 20000001 as ExplicitIdCard;
   name "Explicit ID Card";
+  dynamicDescription "Custom dynamic card description.";
   cost DiceType.Omni, 1;
   :damage(DamageType.Piercing, 1);
 }
@@ -106,28 +112,38 @@ define status {
 describe("CustomDataLoader GTS", () => {
   test("registers generated definitions and their presentation metadata", async () => {
     const loader = await new CustomDataLoader().loadMod(customGts);
-    const [gameData, customData] = loader.done();
-    expect(customData.attachments).toEqual([
+    const [gameData, { customData = [] }] = loader.done();
+    expect(customData[0].attachments).toEqual([
       expect.objectContaining({
         id: 10_000_000,
         name: "Shield",
         rawDescription: "An attachment with custom metadata.",
+        rawPlayingDescription: "Shield currently attached.",
         iconUrl: "https://example.test/shield.png",
         tags: ["artifact"],
       }),
     ]);
-    expect(customData.characters).toEqual([
+    expect(customData[0].characters).toEqual([
       expect.objectContaining({
         id: 10_000_002,
         name: "Tester",
         skills: [expect.objectContaining({ id: 10_000_001, name: "Strike" })],
       }),
     ]);
-    expect(customData.entities).toContainEqual(
-      expect.objectContaining({ id: 10_000_003, name: "Marked" }),
+    expect(customData[0].entities).toContainEqual(
+      expect.objectContaining({
+        id: 10_000_003,
+        name: "Marked",
+        rawPlayingDescription: "Marked is active.",
+      }),
     );
-    expect(customData.actionCards).toContainEqual(
-      expect.objectContaining({ id: 10_000_004, name: "Impact" }),
+    expect(customData[0].actionCards).toContainEqual(
+      expect.objectContaining({
+        id: 10_000_004,
+        name: "Impact",
+        rawPlayingDescription: "Impact is being played.",
+        rawDynamicDescription: "Impact has dynamic data.",
+      }),
     );
     expect(gameData.attachments.get(10_000_000)?.version.from).toBe(
       "customData",
@@ -135,13 +151,10 @@ describe("CustomDataLoader GTS", () => {
   });
 
   test("registers custom attachments with standard assets-manager lookup APIs", async () => {
-    const [, customData] = (
+    const [, amOptions] = (
       await new CustomDataLoader().loadMod(customGts)
     ).done();
-    const assets = new AssetsManager({
-      customData: [customData],
-      concurrency: 0,
-    });
+    const assets = new AssetsManager(amOptions);
 
     expect(assets.getNameSync(10_000_000)).toBe("Shield");
     expect(assets.getImageUrlSync(10_000_000)).toBe(
@@ -152,12 +165,13 @@ describe("CustomDataLoader GTS", () => {
         category: "entities",
         type: "attachment",
         rawDescription: "An attachment with custom metadata.",
+        rawPlayingDescription: "Shield currently attached.",
       }),
     );
   });
 
   test("explicit ids override official game data without consuming generated ids", async () => {
-    const [gameData, customData] = (
+    const [gameData, { customData = [], overrideData }] = (
       await new CustomDataLoader().loadMod(overrideGts)
     ).done();
 
@@ -183,69 +197,104 @@ describe("CustomDataLoader GTS", () => {
         skillType: "burst",
       }),
     );
-    expect(customData.skills).toContainEqual(
+    expect(customData[0].skills).not.toContainEqual(
       expect.objectContaining({
         id: 11011,
-        name: "Custom Liutian Archery",
-        rawDescription: "Custom skill description.",
-        skillIconUrl: "https://example.test/skill.png",
       }),
+    );
+    expect(customData[0].characters).not.toContainEqual(
+      expect.objectContaining({ id: 20_000_000 }),
+    );
+    expect(customData[0].actionCards).not.toContainEqual(
+      expect.objectContaining({ id: 20_000_001 }),
+    );
+    expect(overrideData).toEqual(
+      expect.arrayContaining([
+        {
+          id: 100,
+          name: "Custom Resistant Form",
+          rawDescription: "Custom status description.",
+          rawPlayingDescription: "Custom playing status description.",
+        },
+        {
+          id: 11011,
+          name: "Custom Liutian Archery",
+          rawDescription: "Custom skill description.",
+        },
+        {
+          id: 20_000_001,
+          name: "Explicit ID Card",
+          rawDynamicDescription: "Custom dynamic card description.",
+        },
+      ]),
     );
   });
 
-  test("explicit-id metadata overrides official assets", async () => {
-    const [, customData] = (
+  test("explicit-id metadata shallowly overrides official assets", async () => {
+    const [, { customData, overrideData }] = (
       await new CustomDataLoader().loadMod(overrideGts)
     ).done();
-    const fetchMock = vi.fn(async () => ({
-      json: async () => ({
-        data: [
-          { id: 100, rawDescription: "Official status description." },
-          { id: 201, rawDescription: "Official attachment description." },
-          { id: 11011, rawDescription: "Official skill description." },
-        ],
-      }),
-    }));
+    const fetchMock = vi.fn(async (url: string | URL) => {
+      const id = Number(String(url).split("/").at(-1));
+      return {
+        json: async () => ({
+          id,
+          name: `Official ${id}`,
+          rawDescription: `Official description ${id}`,
+          rawPlayingDescription: `Official playing description ${id}`,
+          rawDynamicDescription: `Official dynamic description ${id}`,
+          officialOnly: true,
+        }),
+      };
+    });
     vi.stubGlobal("fetch", fetchMock);
 
     try {
       const assets = new AssetsManager({
-        customData: [customData],
+        customData,
+        overrideData,
         concurrency: 0,
       });
 
-      await assets.prepareForSync();
-
-      expect(fetchMock).toHaveBeenCalledOnce();
       expect(assets.getNameSync(100)).toBe("Custom Resistant Form");
-      expect(assets.getImageUrlSync(100)).toBe(
+      expect(assets.getImageUrlSync(100)).not.toBe(
         "https://example.test/status.png",
       );
-      expect(assets.getDataSync(100)).toEqual(
+      await expect(assets.getData(100)).resolves.toEqual(
         expect.objectContaining({
+          name: "Custom Resistant Form",
           rawDescription: "Custom status description.",
+          rawPlayingDescription: "Custom playing status description.",
+          rawDynamicDescription: "Official dynamic description 100",
+          officialOnly: true,
         }),
       );
 
       expect(assets.getNameSync(201)).toBe("Custom Cost Increase");
-      expect(assets.getImageUrlSync(201)).toBe(
-        "https://example.test/attachment.png",
-      );
-      expect(assets.getDataSync(201)).toEqual(
+      await expect(assets.getData(201)).resolves.toEqual(
         expect.objectContaining({
           rawDescription: "Custom attachment description.",
+          rawPlayingDescription: "Official playing description 201",
+          officialOnly: true,
         }),
       );
 
       expect(assets.getNameSync(11011)).toBe("Custom Liutian Archery");
-      expect(assets.getImageUrlSync(11011)).toBe(
-        "https://example.test/skill.png",
-      );
-      expect(assets.getDataSync(11011)).toEqual(
+      await expect(assets.getData(11011)).resolves.toEqual(
         expect.objectContaining({
           rawDescription: "Custom skill description.",
+          officialOnly: true,
         }),
       );
+      await expect(assets.getData(20_000_001)).resolves.toEqual(
+        expect.objectContaining({
+          name: "Explicit ID Card",
+          rawDescription: "Official description 20000001",
+          rawDynamicDescription: "Custom dynamic card description.",
+          rawPlayingDescription: "Official playing description 20000001",
+        }),
+      );
+      expect(fetchMock).toHaveBeenCalledTimes(4);
     } finally {
       vi.unstubAllGlobals();
     }

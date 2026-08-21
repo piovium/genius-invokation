@@ -123,12 +123,10 @@ define card {
     try {
       const loader = new CustomDataLoader();
       await loader.loadMod(code());
-      const [gameData, customData] = loader.done();
+      const [gameData, amOptions] = loader.done();
       setGameData(gameData);
 
-      const am = new AssetsManager({
-        customData: [customData],
-      });
+      const am = new AssetsManager(amOptions);
       setAssetsManager(am);
       am.prepareForSync();
 

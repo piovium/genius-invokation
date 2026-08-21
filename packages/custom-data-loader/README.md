@@ -27,21 +27,29 @@ await loader.loadMod(source);
 
 ## Overriding official data
 
-Specify an official ID to replace its game definition and presentation data:
+Specify an official ID to replace its game definition and shallowly override
+its presentation data:
 
 ```gts
 define status {
   id 100 as ResistantFormOverride;
   name "Custom Resistant Form";
   description "Custom status description.";
-  image "https://example.test/status.png";
+  playingDescription "Description while the status is on stage.";
   usage 2;
 };
 ```
 
 An explicit `id` does not consume an automatically generated ID. The custom
-definition takes precedence over the official definition with the same ID, and
-its name, description, and image are used by `AssetsManager`.
+definition takes precedence over the official game definition with the same
+ID. `done()` returns a `AssetsManagerOptions` that can be
+passed to `AssetsManager`:
+
+```ts
+const [gameData, amOptions] = loader.done();
+const assets = new AssetsManager(amOptions);
+```
+
 
 ## Note
 

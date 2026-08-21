@@ -19,6 +19,8 @@ import { getCurrentView, type View } from "./runtime";
 export class CustomMetadata {
   customName: string | null = null;
   customDescription: string | null = null;
+  customPlayingDescription: string | null = null;
+  customDynamicDescription: string | null = null;
   customImage: string | null = null;
 
   #specifiedId: number | null = null;
@@ -62,6 +64,10 @@ export class CustomMetadata {
 
   get id(): number {
     return this.#specifiedId ?? this.#allocatedId ?? this.#allocateId();
+  }
+
+  get hasSpecifiedId(): boolean {
+    return this.#specifiedId !== null;
   }
 }
 export interface CustomDataRegistration {
