@@ -10,6 +10,8 @@ export interface CustomActionCard {
   id: number;
   name: string;
   rawDescription: string;
+  rawPlayingDescription?: string;
+  rawDynamicDescription?: string;
   cardFaceUrl: string;
   obtainable: boolean;
   type: EntityType;
@@ -42,6 +44,7 @@ export interface CustomEntity {
   id: number;
   name: string;
   rawDescription: string;
+  rawPlayingDescription?: string;
   type: EntityType;
   cardFaceOrBuffIconUrl: string;
   // tags: EntityTag[];
@@ -53,6 +56,7 @@ export interface CustomAttachment {
   id: number;
   name: string;
   rawDescription: string;
+  rawPlayingDescription?: string;
   iconUrl: string;
   tags: AttachmentTag[];
   skills: CustomSkill[];

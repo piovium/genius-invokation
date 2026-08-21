@@ -102,7 +102,7 @@ export class CustomCardModel extends CardModel {
 
   #skillId: number | null = null;
   override get id() {
-    return this.#skillId ??= this.getSubId();
+    return (this.#skillId ??= this.getSubId());
   }
   override set id(id: number) {
     throw new Error(`Cannot set id directly here`);
@@ -210,11 +210,11 @@ const CustomCardViewModel = CardViewModel.extend(CustomCardModel, (h) => ({
     uniqueKey(): "id";
     as(): CardHandle;
   }>(
-      () => {},
-      (model, [id]) => {
-        model.metadata.specifyId(id);
-        return id as CardHandle;
-      },
+    () => {},
+    (model, [id]) => {
+      model.metadata.specifyId(id);
+      return id as CardHandle;
+    },
   ),
   name: h.attribute<{
     (name: string): AR.Done;
@@ -230,6 +230,16 @@ const CustomCardViewModel = CardViewModel.extend(CustomCardModel, (h) => ({
     uniqueKey: "description",
   })(function (description: string) {
     this.metadata.customDescription = description;
+  }),
+  playingDescription: h.simpleAttribute({
+    uniqueKey: "playingDescription",
+  })(function (description: string) {
+    this.metadata.customPlayingDescription = description;
+  }),
+  dynamicDescription: h.simpleAttribute({
+    uniqueKey: "dynamicDescription",
+  })(function (description: string) {
+    this.metadata.customDynamicDescription = description;
   }),
   image: h.simpleAttribute({
     uniqueKey: "image",
@@ -307,6 +317,11 @@ const CustomEntityViewModel = EntityViewModel.extend(
     })(function (description: string) {
       this.metadata.customDescription = description;
     }),
+    playingDescription: h.simpleAttribute({
+      uniqueKey: "playingDescription",
+    })(function (description: string) {
+      this.metadata.customPlayingDescription = description;
+    }),
     image: h.simpleAttribute({
       uniqueKey: "image",
     })(function (image: string) {
@@ -343,6 +358,11 @@ const CustomAttachmentViewModel = AttachmentViewModel.extend(
       uniqueKey: "description",
     })(function (description: string) {
       this.metadata.customDescription = description;
+    }),
+    playingDescription: h.simpleAttribute({
+      uniqueKey: "playingDescription",
+    })(function (description: string) {
+      this.metadata.customPlayingDescription = description;
     }),
     image: h.simpleAttribute({
       uniqueKey: "image",

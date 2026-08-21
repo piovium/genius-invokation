@@ -20,7 +20,12 @@ import {
   type Version,
   playSkillOfCard,
 } from "@gi-tcg/core";
-import type { CustomData, CustomSkill } from "@gi-tcg/assets-manager";
+import type {
+  AssetsManagerOption,
+  CustomData,
+  CustomSkill,
+  OverrideData,
+} from "@gi-tcg/assets-manager";
 import { transpile } from "@gi-tcg/gts-transpiler";
 
 import getOfficialData, { registry as baseRegistry } from "@gi-tcg/data";
@@ -98,7 +103,10 @@ export class CustomDataLoader {
 
   private names = new Map<number, string>();
   private descriptions = new Map<number, string>();
+  private playingDescriptions = new Map<number, string>();
+  private dynamicDescriptions = new Map<number, string>();
   private images = new Map<number, string>();
+  private dataOverrides = new Map<number, OverrideData>();
   private readonly moduleEvaluator: ModuleEvaluator;
 
   constructor(options: CustomDataLoaderOptions = {}) {
@@ -128,7 +136,25 @@ export class CustomDataLoader {
           const name = md.customName ?? "";
           this.names.set(id, name);
           this.descriptions.set(id, md.customDescription ?? "");
+          this.playingDescriptions.set(id, md.customPlayingDescription ?? "");
+          this.dynamicDescriptions.set(id, md.customDynamicDescription ?? "");
           this.images.set(id, md.customImage ?? placeholderImageUrl(name));
+          if (md.hasSpecifiedId) {
+            this.dataOverrides.set(id, {
+              ...this.dataOverrides.get(id),
+              id,
+              ...(md.customName === null ? {} : { name: md.customName }),
+              ...(md.customDescription === null
+                ? {}
+                : { rawDescription: md.customDescription }),
+              ...(md.customPlayingDescription === null
+                ? {}
+                : { rawPlayingDescription: md.customPlayingDescription }),
+              ...(md.customDynamicDescription === null
+                ? {}
+                : { rawDynamicDescription: md.customDynamicDescription }),
+            });
+          }
         },
       });
       try {
@@ -141,27 +167,23 @@ export class CustomDataLoader {
     return this;
   }
 
-  done(): [GameData, CustomData] {
-    const gameData = this.registry.resolve(
-      (items) => {
-        const customDataItems = items.filter(
-          (item) => item.version.from === "customData",
+  done(): [GameData, Partial<AssetsManagerOption>] {
+    const gameData = this.registry.resolve((items) => {
+      const customDataItems = items.filter(
+        (item) => item.version.from === "customData",
+      );
+      if (customDataItems.length > 1) {
+        throw new Error(
+          `Multiple custom data versions found for id ${customDataItems[0]!.id}`,
         );
-        if (customDataItems.length > 1) {
-          throw new Error(
-            `Multiple custom data versions found for id ${customDataItems[0]!.id}`,
-          );
-        }
-        return customDataItems[0] ?? null;
-      },
-      createOfficialVersionResolver(this.version),
-    );
-    const standaloneSkills: CustomSkill[] = [];
+      }
+      return customDataItems[0] ?? null;
+    }, createOfficialVersionResolver(this.version));
     const customData: CustomData = {
       actionCards: [],
       characters: [],
       entities: [],
-      skills: standaloneSkills,
+      skills: [],
       attachments: [],
     };
     const parseSkill = (skill: SkillDefinition): CustomSkill => {
@@ -176,17 +198,16 @@ export class CustomDataLoader {
         playCost: new Map(skill.initiativeSkillConfig?.requiredCost),
       };
     };
-    const customSkills = new Map<number, CustomSkill>();
     const collectCustomSkills = (skills: readonly SkillDefinition[]) => {
       for (const skill of skills) {
-        if (this.names.has(skill.id)) {
-          customSkills.set(skill.id, parseSkill(skill));
+        if (this.names.has(skill.id) && !this.dataOverrides.has(skill.id)) {
+          customData.skills.push(parseSkill(skill));
         }
       }
     };
     for (const [id, ch] of gameData.characters) {
       collectCustomSkills(ch.skills);
-      if (ch.version.from !== "customData") {
+      if (ch.version.from !== "customData" || this.dataOverrides.has(ch.id)) {
         continue;
       }
       const name = this.names.get(ch.id) ?? "";
@@ -204,7 +225,7 @@ export class CustomDataLoader {
     }
     for (const [id, et] of gameData.entities) {
       collectCustomSkills(et.skills);
-      if (et.version.from !== "customData") {
+      if (et.version.from !== "customData" || this.dataOverrides.has(et.id)) {
         continue;
       }
       const name = this.names.get(id) ?? "";
@@ -213,6 +234,7 @@ export class CustomDataLoader {
         type: et.type,
         name,
         rawDescription: this.descriptions.get(et.id) ?? "",
+        rawPlayingDescription: this.playingDescriptions.get(et.id) || undefined,
         cardFaceOrBuffIconUrl: this.images.get(id) ?? placeholderImageUrl(name),
         skills: et.skills.map(parseSkill),
       });
@@ -222,6 +244,8 @@ export class CustomDataLoader {
           name,
           type: et.type,
           rawDescription: this.descriptions.get(id) ?? "",
+          rawPlayingDescription: this.playingDescriptions.get(id) || undefined,
+          rawDynamicDescription: this.dynamicDescriptions.get(id) || undefined,
           cardFaceUrl: this.images.get(id) ?? placeholderImageUrl(name),
           obtainable: et.obtainable,
           tags: [...et.tags],
@@ -233,7 +257,10 @@ export class CustomDataLoader {
     }
     for (const [id, attachment] of gameData.attachments) {
       collectCustomSkills(attachment.skills);
-      if (attachment.version.from !== "customData") {
+      if (
+        attachment.version.from !== "customData" ||
+        this.dataOverrides.has(attachment.id)
+      ) {
         continue;
       }
       const name = this.names.get(id) ?? "";
@@ -241,12 +268,18 @@ export class CustomDataLoader {
         id,
         name,
         rawDescription: this.descriptions.get(id) ?? "",
+        rawPlayingDescription: this.playingDescriptions.get(id) || undefined,
         iconUrl: this.images.get(id) ?? placeholderImageUrl(name),
         tags: [...attachment.tags],
         skills: attachment.skills.map(parseSkill),
       });
     }
-    standaloneSkills.push(...customSkills.values());
-    return [gameData, customData];
+    return [
+      gameData,
+      {
+        customData: [customData],
+        overrideData: [...this.dataOverrides.values()],
+      },
+    ];
   }
 }
