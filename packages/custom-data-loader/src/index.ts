@@ -23,6 +23,7 @@ import {
 import type {
   AssetsManagerOption,
   CustomData,
+  CustomPlayCost,
   CustomSkill,
   OverrideData,
 } from "@gi-tcg/assets-manager";
@@ -186,6 +187,10 @@ export class CustomDataLoader {
       skills: [],
       attachments: [],
     };
+    const serializePlayCost = (
+      playCost: ReadonlyMap<CustomPlayCost["type"], number> | undefined,
+    ): CustomPlayCost[] =>
+      Array.from(playCost ?? [], ([type, value]) => ({ type, value }));
     const parseSkill = (skill: SkillDefinition): CustomSkill => {
       const name = this.names.get(skill.id) ?? "";
       const skillType = skill.skillType ?? "passive";
@@ -195,7 +200,7 @@ export class CustomDataLoader {
         name,
         rawDescription: this.descriptions.get(skill.id) ?? "",
         skillIconUrl: this.images.get(skill.id) ?? "",
-        playCost: new Map(skill.initiativeSkillConfig?.requiredCost),
+        playCost: serializePlayCost(skill.initiativeSkillConfig?.requiredCost),
       };
     };
     const collectCustomSkills = (skills: readonly SkillDefinition[]) => {
@@ -249,7 +254,7 @@ export class CustomDataLoader {
           cardFaceUrl: this.images.get(id) ?? placeholderImageUrl(name),
           obtainable: et.obtainable,
           tags: [...et.tags],
-          playCost: new Map(
+          playCost: serializePlayCost(
             playSkillOfCard(et)?.initiativeSkillConfig.requiredCost,
           ),
         });

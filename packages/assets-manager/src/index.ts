@@ -36,6 +36,7 @@ export type {
   CustomCharacter,
   CustomData,
   CustomEntity,
+  CustomPlayCost,
   CustomSkill,
 } from "./custom_data";
 export {

@@ -1,4 +1,8 @@
-import { AssetsManager } from "@gi-tcg/assets-manager";
+import {
+  AssetsManager,
+  type AssetsManagerOption,
+} from "@gi-tcg/assets-manager";
+import { DiceType } from "@gi-tcg/typings";
 import { describe, expect, test, vi } from "vitest";
 
 import { CustomDataLoader } from "../src";
@@ -20,6 +24,7 @@ define skill {
   description "Deal one physical damage.";
   skillType normal;
   cost DiceType.Cryo, 1;
+  cost DiceType.Void, 2;
   :damage(DamageType.Physical, 1);
 }
 
@@ -130,6 +135,10 @@ describe("CustomDataLoader GTS", () => {
         skills: [expect.objectContaining({ id: 10_000_001, name: "Strike" })],
       }),
     ]);
+    expect(customData[0].characters[0]?.skills[0]?.playCost).toEqual([
+      { type: DiceType.Cryo, count: 1 },
+      { type: DiceType.Void, count: 2 },
+    ]);
     expect(customData[0].entities).toContainEqual(
       expect.objectContaining({
         id: 10_000_003,
@@ -145,16 +154,22 @@ describe("CustomDataLoader GTS", () => {
         rawDynamicDescription: "Impact has dynamic data.",
       }),
     );
+    expect(customData[0].actionCards[0]?.playCost).toEqual([
+      { type: DiceType.Omni, count: 1 },
+    ]);
     expect(gameData.attachments.get(10_000_000)?.version.from).toBe(
       "customData",
     );
   });
 
-  test("registers custom attachments with standard assets-manager lookup APIs", async () => {
+  test("round-trips assets-manager options through JSON", async () => {
     const [, amOptions] = (
       await new CustomDataLoader().loadMod(customGts)
     ).done();
-    const assets = new AssetsManager(amOptions);
+    const roundTrippedOptions = JSON.parse(
+      JSON.stringify(amOptions),
+    ) as Partial<AssetsManagerOption>;
+    const assets = new AssetsManager(roundTrippedOptions);
 
     expect(assets.getNameSync(10_000_000)).toBe("Shield");
     expect(assets.getImageUrlSync(10_000_000)).toBe(
@@ -166,6 +181,19 @@ describe("CustomDataLoader GTS", () => {
         type: "attachment",
         rawDescription: "An attachment with custom metadata.",
         rawPlayingDescription: "Shield currently attached.",
+      }),
+    );
+    expect(assets.getDataSync(10_000_001)).toEqual(
+      expect.objectContaining({
+        playCost: [
+          { type: "GCG_COST_DICE_CRYO", count: 1 },
+          { type: "GCG_COST_DICE_VOID", count: 2 },
+        ],
+      }),
+    );
+    expect(assets.getDataSync(10_000_004)).toEqual(
+      expect.objectContaining({
+        playCost: [{ type: "GCG_COST_DICE_ALIGNED", count: 1 }],
       }),
     );
   });
