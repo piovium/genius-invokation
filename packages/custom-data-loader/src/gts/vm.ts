@@ -183,7 +183,6 @@ const CustomCharacterViewModel = CharacterViewModel.extend(
     ),
     name: h.attribute<{
       (name: string): AR.Done;
-      required(): true;
       uniqueKey(): "name";
       as(): CharacterHandle;
     }>(
