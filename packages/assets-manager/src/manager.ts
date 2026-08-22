@@ -91,6 +91,7 @@ export interface AssetsManagerOption {
   language: Language;
   customData: CustomData[];
   overrideData: OverrideData[];
+  defaultDeckCompatible: boolean;
   concurrency: number;
 }
 
@@ -126,6 +127,7 @@ export class AssetsManager {
       version: DEFAULT_VERSION,
       customData: [],
       overrideData: [],
+      defaultDeckCompatible: false,
       concurrency: 32,
       ...options,
     };
@@ -609,7 +611,7 @@ export class AssetsManager {
   }
 
   async getDeckData(): Promise<DeckData> {
-    if (this === DEFAULT_ASSETS_MANAGER) {
+    if (this.options.defaultDeckCompatible) {
       return getStaticDeckData();
     }
     await this.prepareForSync();
@@ -625,7 +627,7 @@ export class AssetsManager {
   }
 
   encode(deck: Deck) {
-    if (this === DEFAULT_ASSETS_MANAGER) {
+    if (this.options.defaultDeckCompatible) {
       return staticEncode(deck);
     }
     throw new Error(`Unsupported`);
@@ -635,4 +637,4 @@ export class AssetsManager {
   }
 }
 
-export const DEFAULT_ASSETS_MANAGER = new AssetsManager();
+export const DEFAULT_ASSETS_MANAGER = new AssetsManager({ defaultDeckCompatible: true });
