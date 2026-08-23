@@ -32,6 +32,7 @@ import {
 } from "@gi-tcg/typings";
 import {
   createMemo,
+  createEffect,
   createSignal,
   type Accessor,
   type ComponentProps,
@@ -55,6 +56,7 @@ import { translations, UiContext, type Locale } from "./hooks/context";
 import {
   createActionState,
   createChooseActiveState,
+  prepareActionCardsCache,
   type ActionState,
 } from "./action";
 import { AssetsManager, DEFAULT_ASSETS_MANAGER } from "@gi-tcg/assets-manager";
@@ -168,6 +170,9 @@ export interface ClientChessboardProps extends ComponentProps<"div"> {
 export function createClient(who: 0 | 1, option: ClientOption = {}): Client {
   const getAssetsManager = () =>
     option.assetsManager?.() ?? DEFAULT_ASSETS_MANAGER;
+  createEffect(() => {
+    void prepareActionCardsCache(getAssetsManager());
+  });
   const getLocale = () => option.locale?.() ?? "zh-CN";
   const dict = createMemo(() => flatten(translations[getLocale()]));
   const t = translator(dict, resolveTemplate);

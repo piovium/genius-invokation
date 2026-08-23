@@ -38,7 +38,7 @@ import {
 import type { DicePanelState } from "./components/DicePanel";
 import { DICE_COLOR } from "./components/Dice";
 import { checkDice } from "@gi-tcg/utils";
-import type { SkillRawData, ActionCardRawData } from "@gi-tcg/assets-manager";
+import type { ActionCardRawData } from "@gi-tcg/assets-manager";
 import type { AssetsManager } from "@gi-tcg/assets-manager";
 import type { ReactionInfo } from "./components/Chessboard";
 import type { Translator } from "./locales";
@@ -70,6 +70,18 @@ function getDiceText(type: DiceType, t: Translator) {
   }
 }
 
+const actionCardsCache = new WeakMap<
+  AssetsManager,
+  readonly ActionCardRawData[]
+>();
+
+export async function prepareActionCardsCache(
+  assetsManager: AssetsManager,
+): Promise<void> {
+  const actionCards = await assetsManager.getCategory("action_cards");
+  actionCardsCache.set(assetsManager, actionCards);
+}
+
 export function getHintTextOfCardOrSkill(
   assetsManager: AssetsManager,
   definitionId: number,
@@ -77,8 +89,12 @@ export function getHintTextOfCardOrSkill(
   t: Translator,
 ): string[] {
   try {
-    const data = assetsManager.getDataSync(definitionId) as
-      SkillRawData | ActionCardRawData;
+    const data = actionCardsCache
+      .get(assetsManager)
+      ?.find(({ id }) => id === definitionId);
+    if (!data) {
+      throw new Error(`Action card data not found for ID ${definitionId}`);
+    }
     if (data.type === "GCG_CARD_ASSIST") {
       return Array.from({ length: 2 }, () =>
         t("action.chooseSupportToDispose"),
@@ -1193,7 +1209,6 @@ export function createActionState(
   actions: Action[],
   t: Translator,
 ): ActionState {
-  assetsManager.prepareForSync();
   const realCosts: RealCosts = {
     cards: new Map(),
     skills: new Map(),

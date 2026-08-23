@@ -22,7 +22,7 @@ export default {
   collapse: "收起",
   invalid: "失效",
   selected: "已选",
-  selectedCount: "已选 {{count}} 张",
+  selectedCount: "已选{{count}}张",
   loadingCards: "加载卡牌中...",
   loadCardsFailed: "加载卡牌失败！",
   elementType: "元素类型",
