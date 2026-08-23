@@ -43,6 +43,7 @@ export default {
   myDecks: "我的牌组",
   myDecksMore: "我的牌组…",
   add: "添加",
+  manage: "管理",
   noDecksAddHint: "暂无牌组，可点击 + 添加",
   newDeck: "新建牌组",
   deckNotFound: "未找到该牌组",

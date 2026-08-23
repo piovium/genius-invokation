@@ -155,12 +155,19 @@ export default function Home() {
               </div>
               <div class="flex flex-grow flex-col-reverse md:flex-row gap-8 md:gap-0 min-h-0">
                 <div class="h-full w-full md:w-128 flex flex-col items-start md:bottom-opacity-gradient">
-                  <A
-                    href="/decks"
-                    class="text-xl font-bold text-blue-500 hover:underline mb-4"
-                  >
-                    {t("myDecks")}
-                  </A>
+                  <div class="flex flex-row justify-between mb-4 w-full md:pr-6 items-end">
+                    <A href="/decks" class="text-xl font-bold">
+                      {t("myDecks")}
+                    </A>
+                    <div class="flex flex-row gap-2">
+                      <A href="/decks/new" class="btn btn-outline-green h-6 py-0">
+                        {t("add")}
+                      </A>
+                      <A href="/decks" class="btn btn-outline-blue h-6 py-0">
+                        {t("manage")}
+                      </A>
+                    </div>
+                  </div>
                   <Switch>
                     <Match when={decksLoading()}>
                       <div class="text-gray-500">{t("deckInfoLoading")}</div>
