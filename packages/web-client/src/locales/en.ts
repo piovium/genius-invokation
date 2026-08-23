@@ -45,6 +45,7 @@ export default {
   myDecks: "My Deck(s)",
   myDecksMore: "My Deck(s)...",
   add: "Add",
+  manage: "Manage",
   noDecksAddHint: "No decks yet. Click + to add one.",
   newDeck: "New Deck",
   deckNotFound: "Deck not found",
