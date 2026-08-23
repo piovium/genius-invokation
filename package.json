@@ -15,7 +15,7 @@
     ".filter-prod": "gnx scripts/filter.ts -P",
     "build": "pnpm .filter build",
     "test": "pnpm -r test",
-    "publish": "pnpm -r publish",
+    "publish": "gnx scripts/publish.ts",
     "build:no-typing": "NO_TYPING=1 pnpm build"
   },
   "devDependencies": {
