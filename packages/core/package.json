@@ -31,6 +31,22 @@
       "import": "./dist/gts/*.js"
     }
   },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./data": {
+        "types": "./dist/data.d.ts",
+        "import": "./dist/data.js"
+      },
+      "./gts/*": {
+        "types": "./dist/gts/*.d.ts",
+        "import": "./dist/gts/*.js"
+      }
+    }
+  },
   "files": [
     "dist"
   ],
