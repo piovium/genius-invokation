@@ -219,7 +219,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
     ReturnType<typeof Proxy.revocable>
   >();
 
-  private readonly eventAndRequests: EventList[] = [new EventList()];
+  private readonly processedEvents: EventAndRequest[] = [];
+  private currentEvents = new EventList();
+  private causeDefeated = false;
   private mainDamage: DamageInfo | null = null;
   private readonly areaCache = new Map<number, EntityArea>();
 
@@ -306,143 +308,139 @@ export class SkillContext<Meta extends ContextMetaBase> {
   /**
    * 对技能返回的事件列表预处理。
    */
-  private preprocessEventList(): CoreSkillResult {
+  private preprocessEvent(): CoreSkillResult {
     const emittedEvents: EventAndRequest[] = [];
 
     const failedPlayers = new Set<0 | 1>();
     let causeDefeated = false;
 
-    for (const events of this.eventAndRequests) {
-      const otherEvents: EventAndRequest[] = [];
-      const hciEvents: Extract<
-        EventAndRequest,
-        ["onHandCardInserted", unknown]
-      >[] = [];
-      const safeDamageEvents: EventAndRequest[] = [];
-      const criticalDamageEvents: EventAndRequest[] = [];
-      // 将 originalEvents 分类
-      // - 对于 damage，先判断：
-      //   - 若可能击倒但应用 modifyZeroHealth 后免于被击倒，则内联执行后
-      //     将事件继续添加到 originalEvents 中（通常仅有治疗事件）
-      //   - 若确实击倒切无法被免于被击倒，则归类为 criticalDamageEvents，
-      //     否则归类为 safeDamageEvents
-      // - 对于 HCI，删去目标已被舍弃的事件，其余归入 hciEvents
-      // - 其余类型归类为 otherEvents
-      for (const event of events) {
-        const [name, arg] = event;
-        if (name === "onDamageOrHeal" && arg.isDamageTypeDamage()) {
-          if (arg.damageInfo.causeDefeated) {
-            // Wrap original EventArg to ZeroHealthEventArg
-            const zeroHealthEventArg = new ZeroHealthEventArg(
-              arg.onTimeState,
-              arg.damageInfo,
-              arg.option,
-            );
-            events.push(
-              ...this.mutator.handleInlineEvent(
-                this.skillInfo,
-                "modifyZeroHealth",
-                zeroHealthEventArg,
-              ),
-            );
-            if (!zeroHealthEventArg._immuneInfo) {
-              const defeatedCh = this.get(arg.target);
-              if (defeatedCh.variables.alive) {
-                this.mutator.log(
-                  DetailLogType.Primitive,
-                  `${stringifyState(
-                    defeatedCh,
-                  )} is defeated (and no immune available)`,
-                );
-                this.mutate({
-                  type: "modifyEntityVar",
-                  state: defeatedCh.latest(),
-                  varName: "alive",
-                  value: 0,
-                  direction: "decrease",
-                });
-                const energyVarName =
-                  defeatedCh.definition.specialEnergy?.variableName ?? "energy";
-                this.mutate({
-                  type: "modifyEntityVar",
-                  state: defeatedCh.latest(),
-                  varName: energyVarName,
-                  value: 0,
-                  direction: "decrease",
-                });
-                this.mutate({
-                  type: "modifyEntityVar",
-                  state: defeatedCh.latest(),
-                  varName: "aura",
-                  value: Aura.None,
-                  direction: null,
-                });
-                this.mutate({
-                  type: "setPlayerFlag",
-                  who: defeatedCh.who,
-                  flagName: "hasDefeated",
-                  value: true,
-                });
-                this.mutate({
-                  type: "removeRoundSkillLog",
-                  caller: defeatedCh.latest(),
-                });
-                const player = this.state.players[defeatedCh.who];
-                const aliveCharacters = player.characters.filter(
-                  (ch) => ch.variables.alive,
-                );
-                if (aliveCharacters.length === 0) {
-                  failedPlayers.add(defeatedCh.who);
-                }
+    const otherEvents: EventAndRequest[] = [];
+    const hciEvents: Extract<
+      EventAndRequest,
+      ["onHandCardInserted", unknown]
+    >[] = [];
+    const safeDamageEvents: EventAndRequest[] = [];
+    const criticalDamageEvents: EventAndRequest[] = [];
+    // 将 currentEvents 分类
+    // - 对于 damage，先判断：
+    //   - 若可能击倒但应用 modifyZeroHealth 后免于被击倒，则内联执行后
+    //     将事件继续添加到 currentEvents 中（通常仅有治疗事件）
+    //   - 若确实击倒切无法被免于被击倒，则归类为 criticalDamageEvents，
+    //     否则归类为 safeDamageEvents
+    // - 对于 HCI，删去目标已被舍弃的事件，其余归入 hciEvents
+    // - 其余类型归类为 otherEvents
+    for (const event of this.currentEvents) {
+      const [name, arg] = event;
+      if (name === "onDamageOrHeal" && arg.isDamageTypeDamage()) {
+        if (arg.damageInfo.causeDefeated) {
+          // Wrap original EventArg to ZeroHealthEventArg
+          const zeroHealthEventArg = new ZeroHealthEventArg(
+            arg.onTimeState,
+            arg.damageInfo,
+            arg.option,
+          );
+          this.currentEvents.push(
+            ...this.mutator.handleInlineEvent(
+              this.skillInfo,
+              "modifyZeroHealth",
+              zeroHealthEventArg,
+            ),
+          );
+          if (!zeroHealthEventArg._immuneInfo) {
+            const defeatedCh = this.get(arg.target);
+            if (defeatedCh.variables.alive) {
+              this.mutator.log(
+                DetailLogType.Primitive,
+                `${stringifyState(
+                  defeatedCh,
+                )} is defeated (and no immune available)`,
+              );
+              this.mutate({
+                type: "modifyEntityVar",
+                state: defeatedCh.latest(),
+                varName: "alive",
+                value: 0,
+                direction: "decrease",
+              });
+              const energyVarName =
+                defeatedCh.definition.specialEnergy?.variableName ?? "energy";
+              this.mutate({
+                type: "modifyEntityVar",
+                state: defeatedCh.latest(),
+                varName: energyVarName,
+                value: 0,
+                direction: "decrease",
+              });
+              this.mutate({
+                type: "modifyEntityVar",
+                state: defeatedCh.latest(),
+                varName: "aura",
+                value: Aura.None,
+                direction: null,
+              });
+              this.mutate({
+                type: "setPlayerFlag",
+                who: defeatedCh.who,
+                flagName: "hasDefeated",
+                value: true,
+              });
+              this.mutate({
+                type: "removeRoundSkillLog",
+                caller: defeatedCh.latest(),
+              });
+              const player = this.state.players[defeatedCh.who];
+              const aliveCharacters = player.characters.filter(
+                (ch) => ch.variables.alive,
+              );
+              if (aliveCharacters.length === 0) {
+                failedPlayers.add(defeatedCh.who);
               }
-              criticalDamageEvents.push(event);
-            } else {
-              safeDamageEvents.push(["onDamageOrHeal", zeroHealthEventArg]);
             }
+            criticalDamageEvents.push(event);
           } else {
-            safeDamageEvents.push(event);
-          }
-        } else if (name === "onHandCardInserted") {
-          let shouldEmitHci: boolean;
-          if (arg.overflowed) {
-            shouldEmitHci = true;
-          } else {
-            const area = this.get(arg.card).area;
-            shouldEmitHci = area.who === arg.who && area.type === "hands";
-          }
-          if (shouldEmitHci) {
-            hciEvents.push(event);
+            safeDamageEvents.push(["onDamageOrHeal", zeroHealthEventArg]);
           }
         } else {
-          otherEvents.push(event);
+          safeDamageEvents.push(event);
         }
+      } else if (name === "onHandCardInserted") {
+        let shouldEmitHci: boolean;
+        if (arg.overflowed) {
+          shouldEmitHci = true;
+        } else {
+          const area = this.get(arg.card).area;
+          shouldEmitHci = area.who === arg.who && area.type === "hands";
+        }
+        if (shouldEmitHci) {
+          hciEvents.push(event);
+        }
+      } else {
+        otherEvents.push(event);
       }
-
-      if (this.rawState.config.hostRelatedExecution) {
-        const cards = [
-          ...this.rawState.players[this.rawState.config.hostWho].hands,
-          ...this.rawState.players[flip(this.rawState.config.hostWho)].hands,
-        ];
-        const indexOfHciEvent = (e: HandCardInsertedEventArg) => {
-          const index = cards.findIndex((c) => c.id === e.card.id);
-          if (index === -1) {
-            return Number.POSITIVE_INFINITY;
-          }
-          return index;
-        };
-        hciEvents.sort(
-          ([, a], [, b]) => indexOfHciEvent(a) - indexOfHciEvent(b),
-        );
-      }
-
-      emittedEvents.push(
-        ...otherEvents,
-        ...hciEvents,
-        ...safeDamageEvents,
-        ...criticalDamageEvents,
-      );
-      causeDefeated ||= criticalDamageEvents.length > 0;
     }
+
+    if (this.rawState.config.hostRelatedExecution) {
+      const cards = [
+        ...this.rawState.players[this.rawState.config.hostWho].hands,
+        ...this.rawState.players[flip(this.rawState.config.hostWho)].hands,
+      ];
+      const indexOfHciEvent = (e: HandCardInsertedEventArg) => {
+        const index = cards.findIndex((c) => c.id === e.card.id);
+        if (index === -1) {
+          return Number.POSITIVE_INFINITY;
+        }
+        return index;
+      };
+      hciEvents.sort(([, a], [, b]) => indexOfHciEvent(a) - indexOfHciEvent(b));
+    }
+
+    emittedEvents.push(
+      ...otherEvents,
+      ...hciEvents,
+      ...safeDamageEvents,
+      ...criticalDamageEvents,
+    );
+    causeDefeated ||= criticalDamageEvents.length > 0;
 
     if (failedPlayers.size === 2) {
       this.mutator.log(
@@ -479,9 +477,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
    * @internal
    */
   _terminate(): SkillDescriptionReturn {
-    const { emittedEvents, causeDefeated } = this.preprocessEventList();
+    this.eventBoundary();
     this.mutator.notify();
-    Object.freeze(emittedEvents);
+    Object.freeze(this.processedEvents);
     Object.freeze(this);
     const resultState = this.rawState;
     for (const [, { revoke }] of this._reactiveProxies) {
@@ -490,10 +488,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return [
       resultState,
       {
-        emittedEvents,
+        emittedEvents: this.processedEvents,
         innerNotify: this._savedNotify,
         mainDamage: this.mainDamage,
-        causeDefeated,
+        causeDefeated: this.causeDefeated,
       },
     ];
   }
@@ -760,11 +758,14 @@ export class SkillContext<Meta extends ContextMetaBase> {
   // MUTATIONS
 
   private get events() {
-    return this.eventAndRequests.at(-1)!;
+    return this.currentEvents;
   }
 
   eventBoundary() {
-    this.eventAndRequests.push(new EventList());
+    const { emittedEvents, causeDefeated } = this.preprocessEvent();
+    this.processedEvents.push(...emittedEvents);
+    this.causeDefeated ||= causeDefeated;
+    this.currentEvents = new EventList();
   }
 
   emitEvent<E extends EventAndRequestNames>(
