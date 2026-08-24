@@ -16,6 +16,7 @@
 import {
   type GameData,
   createOfficialVersionResolver,
+  type OfficialVersionResolver,
   type SkillDefinition,
   type Version,
   playSkillOfCard,
@@ -98,7 +99,7 @@ function createModuleEvaluator(
 }
 
 export class CustomDataLoader {
-  private version?: Version;
+  private version?: Version | OfficialVersionResolver;
   private registry = baseRegistry.clone();
   private nextId = 10_000_000;
 
@@ -114,7 +115,7 @@ export class CustomDataLoader {
     this.moduleEvaluator = createModuleEvaluator(options);
   }
 
-  setVersion(version: Version): this {
+  setVersion(version?: Version | OfficialVersionResolver | undefined): this {
     this.version = version;
     return this;
   }
@@ -169,6 +170,10 @@ export class CustomDataLoader {
   }
 
   done(): [GameData, Partial<AssetsManagerOption>] {
+    const officialVersionResolver =
+      typeof this.version === "function"
+        ? this.version
+        : createOfficialVersionResolver(this.version);
     const gameData = this.registry.resolve((items) => {
       const customDataItems = items.filter(
         (item) => item.version.from === "customData",
@@ -179,7 +184,7 @@ export class CustomDataLoader {
         );
       }
       return customDataItems[0] ?? null;
-    }, createOfficialVersionResolver(this.version));
+    }, officialVersionResolver);
     const customData: CustomData = {
       actionCards: [],
       characters: [],
