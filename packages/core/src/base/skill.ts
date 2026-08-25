@@ -563,7 +563,7 @@ export class ModifyActionEventArgBase<
     return this.cost.has(type) || this.cost.has(DiceType.Void);
   }
   canDeductCost() {
-    return this.cost.values().reduce((acc, v) => acc + v, 0) > 0;
+    return diceCostSize(this.cost) > 0;
   }
 }
 
