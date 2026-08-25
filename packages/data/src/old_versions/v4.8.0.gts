@@ -120,7 +120,7 @@ define skill {
     ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 4)
     : 0;
   :damage(DamageType.Hydro, 1 + extraDmg);
-  const [card] = :discardMaxCostHands(1);
+  const [card] = :discardMaxCostHands(1, { allowPreview: true });
   if (card) {
     if (:self.hasEquipment(LightlessFeeding)) {
       :heal(card.diceCost(), :self);
