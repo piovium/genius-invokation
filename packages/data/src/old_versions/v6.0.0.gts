@@ -228,25 +228,6 @@ define combatStatus {
 };
 
 /**
- * @id 124051
- * @name 噬骸能量块
- * @description
- * 随机舍弃1张当前元素骰费用最高的手牌，生成1个我方出战角色类型的元素骰。（每回合最多打出1张）
- */
-define card {
-  id 124051 as BonecrunchersEnergyBlock;
-  until "v6.0.0";
-  undiscoverable;
-  filter :(
-    !:query($.my.combatStatus.def(BonecrunchersEnergyBlockCombatStatus))
-  );
-  :discardMaxCostHands(1);
-  const activeCh = :query($.my.active)!;
-  :generateDice(activeCh.element(), 1);
-  :combatStatus(BonecrunchersEnergyBlockCombatStatus);
-};
-
-/**
  * @id 13123
  * @name 叛逆刮弦
  * @description

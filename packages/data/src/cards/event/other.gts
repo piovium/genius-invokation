@@ -1589,7 +1589,6 @@ define card {
   filter :(
     !:query($.my.combatStatus.def(BonecrunchersEnergyBlockCombatStatus))
   );
-  :abortPreview();
   :discardMaxCostHands(1);
   const activeCh = :query($.my.active)!;
   :generateDice(activeCh.element(), 1);
