@@ -28,6 +28,7 @@ define card {
   since "v7.0.0";
   cost DiceType.Aligned, 4;
   tags action;
+  undiscoverable;
   on switchActive {
     when :(
       :e.switchInfo.to.definition.id === Jahoda &&
@@ -62,6 +63,7 @@ define card {
   since "v7.0.0";
   cost DiceType.Aligned, 4;
   tags action;
+  undiscoverable;
   :damage(DamageType.Pyro, 2);
   :eventBoundary();
   :damage(DamageType.Pyro, 1, $.macros.oppActivePrioritized);
@@ -78,6 +80,7 @@ define card {
   since "v7.0.0";
   cost DiceType.Aligned, 4;
   tags action;
+  undiscoverable;
   :damage(DamageType.Hydro, 2);
   :eventBoundary();
   :damage(DamageType.Hydro, 1, $.macros.oppActivePrioritized);
@@ -94,6 +97,7 @@ define card {
   since "v7.0.0";
   cost DiceType.Aligned, 4;
   tags action;
+  undiscoverable;
   :damage(DamageType.Electro, 2);
   :eventBoundary();
   :damage(DamageType.Electro, 1, $.macros.oppActivePrioritized);
@@ -110,6 +114,7 @@ define card {
   since "v7.0.0";
   cost DiceType.Aligned, 4;
   tags action;
+  undiscoverable;
   :damage(DamageType.Cryo, 2);
   :eventBoundary();
   :damage(DamageType.Cryo, 1, $.macros.oppActivePrioritized);
