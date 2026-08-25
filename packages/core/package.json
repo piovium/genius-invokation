@@ -1,6 +1,6 @@
 {
   "name": "@gi-tcg/core",
-  "version": "0.20.7",
+  "version": "0.20.8",
   "type": "module",
   "description": "Genius Invokation TCG Simulator core library",
   "types": "./dist/index.d.ts",
@@ -29,6 +29,22 @@
       "types": "./dist/gts/*.d.ts",
       "development": "./src/gts/*.ts",
       "import": "./dist/gts/*.js"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./data": {
+        "types": "./dist/data.d.ts",
+        "import": "./dist/data.js"
+      },
+      "./gts/*": {
+        "types": "./dist/gts/*.d.ts",
+        "import": "./dist/gts/*.js"
+      }
     }
   },
   "files": [

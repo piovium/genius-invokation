@@ -1,6 +1,6 @@
 {
   "name": "@gi-tcg/assets-manager",
-  "version": "0.20.7",
+  "version": "0.20.8",
   "type": "module",
   "description": "Manage assets of GI-TCG for Web app",
   "repository": {
@@ -28,6 +28,17 @@
     "./data/*": {
       "development": ["./src/data/*.json", "./dist/data/*.json"],
       "import": "./dist/data/*.json"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./data/*": {
+        "import": "./dist/data/*.json"
+      }
     }
   },
   "files": [

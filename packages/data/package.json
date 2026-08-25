@@ -16,6 +16,15 @@
     },
     "./internal/*": "./src/*"
   },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./internal/*": "./src/*"
+    }
+  },
   "files": [
     "dist"
   ],
