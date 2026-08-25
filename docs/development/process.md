@@ -46,7 +46,7 @@ StateMutator 通知前端、请求 Player IO、记录 Mutation 与详细日志
 
 ## 技能返回事件的预处理
 
-`SkillContext._terminate()` 在技能结束时按队列预处理全部事件。事件默认加入当前队列；`eventBoundary()` 会开启新队列。每个队列的 `EventList` 会先合并同一目标的伤害事件；然后按以下规则分类：
+事件默认加入当前队列；`eventBoundary()` 会立即预处理当前队列，然后开启新队列；技能结束时，`SkillContext._terminate()` 会调用一次 `eventBoundary()` 处理最后一个队列。每个队列的 `EventList` 会先合并同一目标的伤害事件；然后按以下规则分类：
 
 1. 对每个伤害事件，若其 `causeDefeated` 为真，立即以内联方式广播 `modifyZeroHealth`。
 2. 若没有技能调用 `immune(...)`，立即将目标标记为倒下、清空其能量和元素附着、清除该角色的本回合技能记录，并设置玩家的 `hasDefeated` 标志。若一方已无存活角色，立即切换到 `gameEnd` 并设置胜者；双方同时无存活角色则为平局。

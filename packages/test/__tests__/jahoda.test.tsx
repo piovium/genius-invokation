@@ -13,12 +13,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Card, Character, Equipment, State, $ } from "#test";
+import {
+  ref,
+  setup,
+  Card,
+  Character,
+  Equipment,
+  State,
+  Status,
+  $,
+} from "#test";
 import { VeteransVisage } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
 import {
   Jahoda,
   PurrloinedTreasureFlask,
 } from "@gi-tcg/data/internal/characters/anemo/jahoda.gts";
+import {
+  AbyssLectorVioletLightning,
+  ElectricRebirth,
+} from "@gi-tcg/data/internal/characters/electro/abyss_lector_violet_lightning.gts";
 import { test } from "vitest";
 
 test("jahoda: treasure flask triggers Veteran's Visage twice", async () => {
@@ -40,4 +53,27 @@ test("jahoda: treasure flask triggers Veteran's Visage twice", async () => {
   c.expect(target).toHaveVariable({ health: 7 });
   c.expect(veteran).toHaveVariable({ count: 2 });
   c.expect($.opp.hand).toBeCount(1);
+});
+
+test("jahoda: treasure flask resolves revival between damage instances", async () => {
+  const target = ref();
+  const c = setup(
+    <State>
+      <Character
+        opp
+        active
+        def={AbyssLectorVioletLightning}
+        health={1}
+        ref={target}
+      >
+        <Status def={ElectricRebirth} />
+      </Character>
+      <Character my active def={Jahoda} />
+      <Card my def={PurrloinedTreasureFlask} />
+    </State>,
+  );
+
+  await c.me.card(PurrloinedTreasureFlask);
+
+  c.expect(target).toHaveVariable({ alive: 1, health: 3 });
 });
