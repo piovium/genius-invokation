@@ -45,8 +45,9 @@ export function Image(props: ImageProps) {
     "type",
   ]);
   const { assetsManager } = useUiContext();
+  const imageId = createMemo(() => local.imageId);
   const [url] = createResource(
-    () => [local.imageId, local.type, assetsManager()] as const,
+    () => [imageId(), local.type, assetsManager()] as const,
     ([imageId, type, manager]) =>
       manager.getImageUrl(imageId, {
         type: type,
@@ -55,7 +56,7 @@ export function Image(props: ImageProps) {
   );
 
   const showImage = () => {
-    if (local.imageId === 0 && local.zero === "unknown") {
+    if (imageId() === 0 && local.zero === "unknown") {
       return false;
     } else {
       return url.state === "ready";
@@ -68,7 +69,7 @@ export function Image(props: ImageProps) {
       ...rest,
       class: `${rest.class ?? ""} ${classNames}`,
       src: url.state === "ready" ? url() : void 0,
-      alt: assetsManager().getNameSync(local.imageId) ?? `${local.imageId}`,
+      alt: assetsManager().getNameSync(imageId()) ?? `${imageId()}`,
       draggable: "false",
     }),
   );
@@ -79,7 +80,7 @@ export function Image(props: ImageProps) {
       fallback={
         <ImageFallback
           type={local.fallback}
-          imageId={local.imageId}
+          imageId={imageId()}
           {...innerProps()}
         />
       }
