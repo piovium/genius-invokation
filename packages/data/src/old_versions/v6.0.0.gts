@@ -235,7 +235,7 @@ define combatStatus {
  */
 define card {
   id 124051 as BonecrunchersEnergyBlock;
-  since "v4.7.0";
+  until "v6.0.0";
   undiscoverable;
   filter :(
     !:query($.my.combatStatus.def(BonecrunchersEnergyBlockCombatStatus))
