@@ -22,14 +22,7 @@ import {
   SoloistsSolicitation,
   SoloistsSolicitationOusia,
 } from "../characters/hydro/furina.gts";
-import {
-  AllIsAsh,
-  Arlecchino,
-  BalemoonRising,
-  InvitationToABeheading,
-  TheBalemoonAloneMayKnowPassive01,
-  TheBalemoonAloneMayKnowPassive03,
-} from "../characters/pyro/arlecchino.gts";
+import { Arlecchino } from "../characters/pyro/arlecchino.gts";
 import { BondOfLife } from "../commons.gts";
 import { SingYourHeartOutInEffect } from "../cards/event/food.gts";
 
