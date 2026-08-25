@@ -44,7 +44,9 @@ import getData from "@gi-tcg/data";
 import { flip } from "@gi-tcg/utils";
 import {
   BehaviorSubject,
+  defer,
   Observable,
+  of,
   ReplaySubject,
   Subject,
   concat,
@@ -194,17 +196,26 @@ class Player implements PlayerIOWithError {
   private readonly initializedSubject = new ReplaySubject<
     SSEInitialized | SSEWaiting
   >();
-  private readonly actionSseSource = new BehaviorSubject<SSERpc>({
-    type: "rpc",
-    data: null,
-  });
+  private readonly actionSubject = new Subject<SSERpc>();
+  private readonly oppRpcSubject = new Subject<SSEOppRpc>();
+
+  private readonly actionSseSource = defer(() =>
+    concat(of(this.currentAction()), this.actionSubject),
+  );
+  private readonly oppRpcSseSource = defer(() =>
+    concat(
+      of<SSEOppRpc>({
+        type: "oppRpc",
+        oppTimer: this._oppPlayer?.getTimer() ?? null,
+      }),
+      this.oppRpcSubject,
+    ),
+  );
+
   private readonly errorSseSource = new BehaviorSubject<SSEError | null>(null);
-  private readonly oppRpcSseSource = new BehaviorSubject<SSEOppRpc>({
-    type: "oppRpc",
-    oppTimer: null,
-  });
   private readonly notificationSseSource =
     new BehaviorSubject<SSENotification | null>(null);
+
   public readonly notificationSse$: Observable<SSEPayload> = concat<
     (SSEPayload | null)[]
   >(this.initializedSubject, this.notificationSseSource).pipe(
@@ -282,7 +293,7 @@ class Player implements PlayerIOWithError {
     this._mutationExtraTimeout += 0.5 * notification.mutation.length;
   }
   sendOppRpc(oppTimer: RpcTimer | null) {
-    this.oppRpcSseSource.next({
+    this.oppRpcSubject.next({
       type: "oppRpc",
       oppTimer,
     });
@@ -362,7 +373,7 @@ class Player implements PlayerIOWithError {
           },
         };
         this._rpcResolver = resolver;
-        this.actionSseSource.next(this.currentAction());
+        this.actionSubject.next(this.currentAction());
         this._oppPlayer?.sendOppRpc(this.getTimer()!);
         const interval = setInterval(() => {
           resolver.timeout--;
@@ -377,7 +388,7 @@ class Player implements PlayerIOWithError {
       });
     } finally {
       this._rpcResolver = null;
-      this.actionSseSource.next(this.currentAction());
+      this.actionSubject.next(this.currentAction());
       this._oppPlayer?.sendOppRpc(null);
     }
   }
