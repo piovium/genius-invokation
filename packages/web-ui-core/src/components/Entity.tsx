@@ -47,8 +47,9 @@ export interface EntityProps extends EntityInfo {
 
 const EntityTopHint = (props: { cardDefinitionId: number; value: number }) => {
   const { assetsManager } = useUiContext();
+  const defId = createMemo(() => props.cardDefinitionId);
   const [data] = createResource(
-    () => [props.cardDefinitionId, assetsManager()] as const,
+    () => [defId(), assetsManager()] as const,
     ([id, manager]) => manager.getData(id),
   );
   const ICON_MAP: Record<string, Component> = {
