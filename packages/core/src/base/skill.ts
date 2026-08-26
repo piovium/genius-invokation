@@ -1142,6 +1142,9 @@ export class ReactionEventArg extends CharacterEventArg {
     super(state, _reactionInfo.target);
     this._callerArea = getEntityArea(state, _reactionInfo.via.caller.id);
   }
+  get fromDamage() {
+    return this._reactionInfo.fromDamage;
+  }
 
   get reactionInfo() {
     return this._reactionInfo;
@@ -1177,29 +1180,22 @@ export class ReactionEventArg extends CharacterEventArg {
 }
 
 export class ModifyReactionEventArg extends ReactionEventArg {
-  private _cancelEffects = false;
-  private _postApply: AppliableDamageType | null = null;
-  private _piercingOtherDamage: number;
-  constructor(state: GameState, _reactionInfo: ReactionInfo) {
+  public readonly where: "my" | "opp";
+  public readonly here: "my" | "opp";
+  _cancelCoreEffects = false;
+  constructor(
+    state: GameState,
+    protected readonly _reactionInfo: ReactionInfo,
+  ) {
     super(state, _reactionInfo);
-    this._piercingOtherDamage = _reactionInfo.piercingOtherDamage;
+    [this.where, this.here] =
+      this.viaWho === this.who ? ["my", "opp"] : ["opp", "my"];
   }
-  cancelEffects() {
-    this._cancelEffects = true;
+  cancelCoreEffects() {
+    this._cancelCoreEffects = true;
   }
-  reApplyTo(type: AppliableDamageType) {
-    this._postApply = type;
-  }
-  increasePiercingOtherDamage(value: number) {
-    this._piercingOtherDamage += value;
-  }
-  get reactionInfo(): ReactionInfo {
-    return {
-      ...this._reactionInfo,
-      cancelEffects: this._cancelEffects,
-      postApply: this._postApply,
-      piercingOtherDamage: this._piercingOtherDamage,
-    };
+  get reactionInfo() {
+    return this._reactionInfo;
   }
 }
 

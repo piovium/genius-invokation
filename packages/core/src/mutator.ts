@@ -80,10 +80,7 @@ import {
   stringifyEntityArea,
 } from "./base/entity";
 import { getReaction, type NontrivialDamageType } from "./base/reaction";
-import {
-  getReactionDescription,
-  type ReactionDescriptionEventArg,
-} from "./reaction";
+import { getReactionDescription, type ReactionDescription } from "./reaction";
 import { exposeHealKind } from "./io";
 import type { AttachmentDefinition } from "./base/attachment";
 import type { LunarReaction } from "@gi-tcg/typings";
@@ -505,48 +502,30 @@ export class StateMutator {
         via: opt.via,
         fromDamage: opt.fromDamage,
       };
+      const modifyReactionEvent = new ModifyReactionEventArg(
+        this.state,
+        reactionInfo,
+      );
+      this.handleInlineEvent(opt.via, "modifyReaction", modifyReactionEvent);
+      let reactionDescription: ReactionDescription | null;
+      if (
+        !modifyReactionEvent._cancelCoreEffects &&
+        (reactionDescription = getReactionDescription(reaction))
+      ) {
+        events.push(
+          ...this.executeInlineSkill(
+            reactionDescription,
+            opt.via,
+            modifyReactionEvent,
+          ),
+        );
+      }
       const reactionEvent = new ReactionEventArg(this.state, reactionInfo);
       this.mutate({
         type: "pushPhaseReactionLog",
         reactionEvent,
       });
       events.push(["onReaction", reactionEvent]);
-      const modifyEventArg = new ModifyReactionEventArg(
-        this.state,
-        reactionInfo,
-      );
-      this.handleInlineEvent(opt.via, "modifyReaction", modifyEventArg);
-      const reactionDescriptionEventArg: ReactionDescriptionEventArg = {
-        where: opt.targetWho === opt.callerWho ? "my" : "opp",
-        here: opt.targetWho === opt.callerWho ? "opp" : "my",
-        id: target.id,
-        isDamage: !!opt.fromDamage,
-        isActive: opt.targetIsActive,
-      };
-      const reactionDescription = getReactionDescription(reaction);
-      if (!reactionInfo.cancelEffects && reactionDescription) {
-        events.push(
-          ...this.executeInlineSkill(
-            reactionDescription,
-            opt.via,
-            reactionDescriptionEventArg,
-          ),
-        );
-      }
-      if (reactionInfo.postApply) {
-        const { newAura: postAura } = getReaction({
-          targetAura: newAura,
-          type: reactionInfo.postApply,
-          enabledLunarReactions: opt.enabledLunarReactions,
-        });
-        this.mutate({
-          type: "modifyEntityVar",
-          state: target,
-          varName: "aura",
-          value: postAura,
-          direction: null,
-        });
-      }
     }
     return events;
   }

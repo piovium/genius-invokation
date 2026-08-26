@@ -7,7 +7,7 @@
 
 import { DamageType, Reaction } from "@gi-tcg/typings";
 import type { SwirlableElement } from "./base/reaction";
-import type { SkillDescription } from "./base/skill";
+import type { ModifyReactionEventArg, SkillDescription } from "./base/skill";
 import type {
   CardHandle,
   CombatStatusHandle,
@@ -15,7 +15,11 @@ import type {
   SummonHandle,
 } from "./data/type";
 import { $ } from "./query";
-import { SkillContext, type CallingAreaType, type TypedSkillContext } from "./runtime/skill_context";
+import {
+  SkillContext,
+  type CallingAreaType,
+  type TypedSkillContext,
+} from "./runtime/skill_context";
 
 export const CALLED_FROM_REACTION: unique symbol = Symbol();
 
@@ -27,19 +31,11 @@ const CatalyzingField = 117 as CombatStatusHandle;
 const Thundercloud = 205 as SummonHandle;
 const LunarSymphony = 211 as CardHandle;
 
-export interface ReactionDescriptionEventArg {
-  where: "my" | "opp";
-  isDamage: boolean;
-  id: number;
-  isActive: boolean;
-  here: "my" | "opp";
-}
-
-type ReactionDescription = SkillDescription<ReactionDescriptionEventArg>;
+export type ReactionDescription = SkillDescription<ModifyReactionEventArg>;
 type ReactionContextMeta = {
   readonly: false;
   callerVars: never;
-  eventArgType: ReactionDescriptionEventArg;
+  eventArgType: ModifyReactionEventArg;
   callerType: never;
   callingArea: CallingAreaType;
   associatedExtension: never;
@@ -66,14 +62,15 @@ function defineReaction(reaction: Reaction, action: ReactionAction) {
   };
 }
 
-function charactersExcept(event: ReactionDescriptionEventArg) {
-  const characters = event.where === "my" ? $.my.character : $.opp.character;
-  return characters.exclude($.id(event.id));
+function charactersExcept(context: TypedSkillContext<ReactionContextMeta>) {
+  const characters =
+    context.eventArg.where === "my" ? $.my.character : $.opp.character;
+  return characters.exclude($.id(context.eventArg.target.id));
 }
 
 function initialize() {
   defineReaction(Reaction.Overloaded, (context) => {
-    if (context.eventArg.isActive) {
+    if (context.eventArg.target.isActive()) {
       context.switchActive(
         context.eventArg.where === "my" ? $.my.next : $.opp.next,
       );
@@ -81,24 +78,20 @@ function initialize() {
   });
 
   const pierceToOther: ReactionAction = (context) => {
-    if (context.eventArg.isDamage) {
-      context.damage(
-        DamageType.Piercing,
-        1,
-        charactersExcept(context.eventArg),
-      );
+    if (context.eventArg.fromDamage) {
+      context.damage(DamageType.Piercing, 1, charactersExcept(context));
     }
   };
   defineReaction(Reaction.Superconduct, pierceToOther);
   defineReaction(Reaction.ElectroCharged, pierceToOther);
 
   defineReaction(Reaction.Frozen, (context) => {
-    context.characterStatus(Frozen, $.id(context.eventArg.id));
+    context.characterStatus(Frozen, $.id(context.eventArg.target.id));
   });
 
   const swirl = (element: SwirlableElement): ReactionAction => {
     return (context) =>
-      context.damage(element, 1, charactersExcept(context.eventArg));
+      context.damage(element, 1, charactersExcept(context));
   };
   defineReaction(Reaction.SwirlCryo, swirl(DamageType.Cryo));
   defineReaction(Reaction.SwirlHydro, swirl(DamageType.Hydro));
