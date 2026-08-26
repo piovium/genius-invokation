@@ -73,7 +73,7 @@ define combatStatus {
   on modifyReaction {
     when :( :e.type === Reaction.Bloom && !:e.character.isMine() );
     listenTo all;
-    :e.cancelEffects();
+    :e.cancelCoreEffects();
     :summon(BountifulCore);
   };
 };

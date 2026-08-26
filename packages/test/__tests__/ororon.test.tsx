@@ -13,15 +13,34 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Status, $ } from "#test";
+import { ref, setup, Character, State, Status, Equipment, $ } from "#test";
 import {
   Ororon,
   NightsSling,
   NightsoulsBlessing,
+  TrailsAmidstTheForestFog,
 } from "@gi-tcg/data/internal/characters/electro/ororon.gts";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";
 
+test("ororon talent: first electro-charged deals 2 piercing damage", async () => {
+  const oppActive = ref();
+  const oppStandby = ref();
+  const c = setup(
+    <State>
+      <Character opp active ref={oppActive} aura={Aura.Hydro} />
+      <Character opp ref={oppStandby} />
+      <Character my active def={Ororon}>
+        <Equipment def={TrailsAmidstTheForestFog} />
+      </Character>
+    </State>,
+  );
+
+  await c.me.skill(NightsSling);
+
+  c.expect(oppActive).toHaveVariable({ health: 7, aura: Aura.None });
+  c.expect(oppStandby).toHaveVariable({ health: 8 });
+});
 
 test("ororon passive: electro-charged at 1 nightsoul does NOT trigger passive damage", async () => {
   // 欧洛仑1点夜魂值，对方出战角色附着水元素，欧洛仑使用E技能触发感电

@@ -282,7 +282,7 @@ define status {
     :apply(DamageType.Hydro, :self.master);
   };
   on modifyReaction {
-    :e.reApplyTo(DamageType.Hydro);
+    :apply(DamageType.Hydro, :self.master);
   };
   on decreaseDamaged {
     when :( :e.type === DamageType.Hydro );

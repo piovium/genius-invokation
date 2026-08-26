@@ -206,7 +206,9 @@ define card {
       );
       listenTo all;
       usage perRound, 1;
-      :e.increasePiercingOtherDamage(1);
+      :e.cancelCoreEffects();
+      const characters = $[:e.where].character;
+      :damage(DamageType.Piercing, 2, characters.exclude($.id(:e.target.id)));
     };
   };
 };
