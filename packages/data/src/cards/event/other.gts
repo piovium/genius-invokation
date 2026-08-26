@@ -2574,10 +2574,10 @@ define summon {
   };
   on selfEnter {
     const ext = :getExtensionState();
-    const addUsage = Math.min(ext.disposedSupportCount[:self.who], 4);
-    const addDmg = Math.min(ext.disposedSummonsCount[:self.who], 4);
-    :addVariable("usage", addUsage);
-    :addVariable("effect", addDmg);
+    const addUsage = ext.disposedSupportCount[:self.who];
+    const addDmg = ext.disposedSummonsCount[:self.who];
+    :addVariableWithMax("usage", addUsage, 5);
+    :addVariableWithMax("effect", addDmg, 5);
   };
 };
 
