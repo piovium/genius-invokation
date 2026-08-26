@@ -28,6 +28,7 @@ import {
   createMemo,
   createEffect,
   untrack,
+  ErrorBoundary,
 } from "solid-js";
 import { useUiContext } from "../hooks/context";
 import type {
@@ -41,11 +42,7 @@ import type {
   HistoryHintBlock,
 } from "../history/typings";
 import { Image } from "./Image";
-import type {
-  ActionCardRawData,
-  AnyData,
-  EntityRawData,
-} from "@gi-tcg/assets-manager";
+import type { ActionCardRawData, EntityRawData } from "@gi-tcg/assets-manager";
 import TuningIcon from "../svg/TuningIcon.svg?fb";
 import DefeatedPreviewIcon from "../svg/DefeatedPreviewIcon.svg?fb";
 import RevivePreviewIcon from "../svg/RevivePreviewIcon.svg?fb";
@@ -85,10 +82,10 @@ const createRenderName = () => {
     definitionId ? assetsManager().getNameSync(definitionId) : "???";
 };
 
-const renderHistoryChild = (
+const renderHistoryChild = async (
   child: HistoryChildren,
   parentCallerDefinitionId?: number,
-) => {
+): Promise<HistoryChildData> => {
   const who = useWho();
   const { assetsManager, t } = useUiContext();
   let result: HistoryChildData;
@@ -134,14 +131,11 @@ const renderHistoryChild = (
     return `(<image type="element" id="${base}" /><image type="element" id="${apply}" />${t(nameKey)})`;
   };
 
-  const variableNameText = (id: number, name: string) => {
-    const [data] = createResource(
-      () => [id, assetsManager()] as const,
-      ([id, manager]) => manager.getData(id),
-    );
-    const tokenName = (data: AnyData) =>
-      "shownTokenName" in data ? data.shownTokenName : name;
-    return `<tooltip title="${name}">${data.state === "ready" ? tokenName(data()) : name}</tooltip>`;
+  const variableNameText = async (id: number, name: string) => {
+    const manager = assetsManager();
+    const data = await manager.getData(id);
+    const tokenName = "shownTokenName" in data ? data.shownTokenName : name;
+    return `<tooltip title="${name}">${tokenName}</tooltip>`;
   };
 
   switch (child.type) {
@@ -422,7 +416,7 @@ const renderHistoryChild = (
         opp: opp(child.who),
         imageId: child.cardDefinitionId,
         title: renderName(child.cardDefinitionId),
-        content: `${variableNameText(child.cardDefinitionId, child.variableName)}: ${child.oldValue}→${child.newValue}`,
+        content: `${await variableNameText(child.cardDefinitionId, child.variableName)}: ${child.oldValue}→${child.newValue}`,
       };
       break;
     }
@@ -1920,11 +1914,21 @@ function HistoryBlockDetailPanel(props: {
           </div>
         </Show>
         <For each={props.block.children}>
-          {(child) => (
-            <HistoryChildBox
-              data={renderHistoryChild(child, renderBlock().callerId)}
-            />
-          )}
+          {(child) => {
+            const [childData] = createResource(renderBlock, (rb) =>
+              renderHistoryChild(child, rb.callerId),
+            );
+            return (
+              <Show
+                when={childData.state === "ready" && childData()}
+                fallback="" // just hide the child when not ready
+              >
+                {(data) => {
+                  <HistoryChildBox data={data()} />;
+                }}
+              </Show>
+            );
+          }}
         </For>
       </div>
     </div>
