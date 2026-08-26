@@ -41,7 +41,11 @@ import type {
   HistoryHintBlock,
 } from "../history/typings";
 import { Image } from "./Image";
-import type { ActionCardRawData, EntityRawData } from "@gi-tcg/assets-manager";
+import type {
+  ActionCardRawData,
+  AnyData,
+  EntityRawData,
+} from "@gi-tcg/assets-manager";
 import TuningIcon from "../svg/TuningIcon.svg?fb";
 import DefeatedPreviewIcon from "../svg/DefeatedPreviewIcon.svg?fb";
 import RevivePreviewIcon from "../svg/RevivePreviewIcon.svg?fb";
@@ -131,10 +135,13 @@ const renderHistoryChild = (
   };
 
   const variableNameText = (id: number, name: string) => {
-    const manager = assetsManager();
-    const data = manager.getDataSync(id);
-    const tokenName = "shownTokenName" in data ? data.shownTokenName : name;
-    return `<tooltip title="${name}">${tokenName}</tooltip>`;
+    const [data] = createResource(
+      () => [id, assetsManager()] as const,
+      ([id, manager]) => manager.getData(id),
+    );
+    const tokenName = (data: AnyData) =>
+      "shownTokenName" in data ? data.shownTokenName : name;
+    return `<tooltip title="${name}">${data.state === "ready" ? tokenName(data()) : name}</tooltip>`;
   };
 
   switch (child.type) {
