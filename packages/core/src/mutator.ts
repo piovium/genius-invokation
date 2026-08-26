@@ -499,34 +499,29 @@ export class StateMutator {
         DetailLogType.Other,
         `Apply reaction ${reaction} to ${stringifyState(target)}`,
       );
-      let reactionInfo: ReactionInfo = {
+      const reactionInfo: ReactionInfo = {
         target: target,
         type: reaction,
         via: opt.via,
         fromDamage: opt.fromDamage,
-        cancelEffects: false,
-        piercingOtherDamage: 1,
-        postApply: null,
       };
-      const modifyEventArg = new ModifyReactionEventArg(
-        this.state,
-        reactionInfo,
-      );
-      this.handleInlineEvent(opt.via, "modifyReaction", modifyEventArg);
-      reactionInfo = modifyEventArg.reactionInfo;
       const reactionEvent = new ReactionEventArg(this.state, reactionInfo);
       this.mutate({
         type: "pushPhaseReactionLog",
         reactionEvent,
       });
       events.push(["onReaction", reactionEvent]);
+      const modifyEventArg = new ModifyReactionEventArg(
+        this.state,
+        reactionInfo,
+      );
+      this.handleInlineEvent(opt.via, "modifyReaction", modifyEventArg);
       const reactionDescriptionEventArg: ReactionDescriptionEventArg = {
         where: opt.targetWho === opt.callerWho ? "my" : "opp",
         here: opt.targetWho === opt.callerWho ? "opp" : "my",
         id: target.id,
         isDamage: !!opt.fromDamage,
         isActive: opt.targetIsActive,
-        piercingOtherDamage: reactionInfo.piercingOtherDamage,
       };
       const reactionDescription = getReactionDescription(reaction);
       if (!reactionInfo.cancelEffects && reactionDescription) {

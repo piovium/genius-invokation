@@ -269,9 +269,6 @@ export interface ReactionInfo {
   readonly via: SkillInfo;
   readonly target: CharacterState;
   readonly fromDamage: DamageInfo | null;
-  readonly cancelEffects: boolean;
-  readonly piercingOtherDamage: number;
-  readonly postApply: AppliableDamageType | null;
 }
 
 export interface UseSkillInfo {

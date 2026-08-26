@@ -33,7 +33,6 @@ export interface ReactionDescriptionEventArg {
   id: number;
   isActive: boolean;
   here: "my" | "opp";
-  piercingOtherDamage: number;
 }
 
 type ReactionDescription = SkillDescription<ReactionDescriptionEventArg>;
@@ -85,7 +84,7 @@ function initialize() {
     if (context.eventArg.isDamage) {
       context.damage(
         DamageType.Piercing,
-        context.eventArg.piercingOtherDamage,
+        1,
         charactersExcept(context.eventArg),
       );
     }
