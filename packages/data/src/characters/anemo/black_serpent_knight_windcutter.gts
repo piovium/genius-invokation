@@ -103,8 +103,7 @@ define skill {
     };
     on entityDispose {
       when :(
-        0 &&
-          !:e.entity.isMine() &&
+        !:e.entity.isMine() &&
           (:e.entity.definition.type === "status" ||
             :e.entity.definition.type === "combatStatus") &&
           (:e.entity.definition.tags.includes("shield") ||
