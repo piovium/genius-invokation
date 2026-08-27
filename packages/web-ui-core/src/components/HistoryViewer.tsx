@@ -81,10 +81,10 @@ const createRenderName = () => {
     definitionId ? assetsManager().getNameSync(definitionId) : "???";
 };
 
-const renderHistoryChild = (
+const renderHistoryChild = async (
   child: HistoryChildren,
   parentCallerDefinitionId?: number,
-) => {
+): Promise<HistoryChildData> => {
   const who = useWho();
   const { assetsManager, t } = useUiContext();
   let result: HistoryChildData;
@@ -130,9 +130,9 @@ const renderHistoryChild = (
     return `(<image type="element" id="${base}" /><image type="element" id="${apply}" />${t(nameKey)})`;
   };
 
-  const variableNameText = (id: number, name: string) => {
+  const variableNameText = async (id: number, name: string) => {
     const manager = assetsManager();
-    const data = manager.getDataSync(id);
+    const data = await manager.getData(id);
     const tokenName = "shownTokenName" in data ? data.shownTokenName : name;
     return `<tooltip title="${name}">${tokenName}</tooltip>`;
   };
@@ -415,7 +415,7 @@ const renderHistoryChild = (
         opp: opp(child.who),
         imageId: child.cardDefinitionId,
         title: renderName(child.cardDefinitionId),
-        content: `${variableNameText(child.cardDefinitionId, child.variableName)}: ${child.oldValue}→${child.newValue}`,
+        content: `${await variableNameText(child.cardDefinitionId, child.variableName)}: ${child.oldValue}→${child.newValue}`,
       };
       break;
     }
@@ -1913,11 +1913,19 @@ function HistoryBlockDetailPanel(props: {
           </div>
         </Show>
         <For each={props.block.children}>
-          {(child) => (
-            <HistoryChildBox
-              data={renderHistoryChild(child, renderBlock().callerId)}
-            />
-          )}
+          {(child) => {
+            const [childData] = createResource(renderBlock, (rb) =>
+              renderHistoryChild(child, rb.callerId),
+            );
+            return (
+              <Show
+                when={childData.state === "ready" && childData()}
+                fallback="" // just hide the child when not ready
+              >
+                {(data) => <HistoryChildBox data={data()} />}
+              </Show>
+            );
+          }}
         </For>
       </div>
     </div>

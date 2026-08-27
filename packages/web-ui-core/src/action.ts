@@ -78,7 +78,7 @@ const actionCardsCache = new WeakMap<
 export async function prepareActionCardsCache(
   assetsManager: AssetsManager,
 ): Promise<void> {
-  const actionCards = await assetsManager.getCategory("action_cards");
+  const actionCards = await assetsManager.getCategory("action_cards").catch(() => []);
   actionCardsCache.set(assetsManager, actionCards);
 }
 
