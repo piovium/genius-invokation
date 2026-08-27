@@ -28,7 +28,6 @@ import {
   createMemo,
   createEffect,
   untrack,
-  ErrorBoundary,
 } from "solid-js";
 import { useUiContext } from "../hooks/context";
 import type {
@@ -1923,9 +1922,7 @@ function HistoryBlockDetailPanel(props: {
                 when={childData.state === "ready" && childData()}
                 fallback="" // just hide the child when not ready
               >
-                {(data) => {
-                  <HistoryChildBox data={data()} />;
-                }}
+                {(data) => <HistoryChildBox data={data()} />}
               </Show>
             );
           }}
