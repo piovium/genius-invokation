@@ -78,7 +78,7 @@ define skill {
 };
 
 define extension {
-  idHint 11013 as private FrostflakeArrowUsedExtension;
+  idHint 11013 as FrostflakeArrowUsedExtension;
   schema ({ used: "pair<boolean>" });
   initialState ({ used: [false, false] });
   mutateWhen onDamageOrHeal,
