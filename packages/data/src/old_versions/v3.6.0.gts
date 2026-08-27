@@ -9,6 +9,8 @@ import {
   LiutianArchery,
   SacredCryoPearl,
   TrailOfTheQilin,
+  UndividedHeart,
+  FrostflakeArrowUsedExtension,
 } from "../characters/cryo/ganyu.gts";
 import {
   MirrorCage,
@@ -17,17 +19,6 @@ import {
 } from "../characters/hydro/mirror_maiden.gts";
 import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.gts";
 import { LithicGuard } from "../cards/equipment/weapon/pole.gts";
-
-/**
- * @id 211011
- * @name 唯此一心
- * @description
- * 战斗行动：我方出战角色为甘雨时，装备此牌。
- * 甘雨装备此牌后，立刻使用一次霜华矢。
- * 装备有此牌的甘雨使用霜华矢时：如果此技能在本场对局中曾经被使用过，则其造成的冰元素伤害+1，并且改为对敌方后台角色造成3点穿透伤害。
- * （牌组中包含甘雨，才能加入牌组）
- */
-const UndividedHeart = 211011 as EquipmentHandle; // keep same
 
 /**
  * @id 11013
@@ -40,13 +31,18 @@ define skill {
   until "v3.6.0";
   skillType normal;
   cost DiceType.Cryo, 5;
-  if (:self.hasEquipment(UndividedHeart) && :countOfSkill() > 0) {
+  associateExtension FrostflakeArrowUsedExtension;
+  if (
+    :self.hasEquipment(UndividedHeart) &&
+    :getExtensionState().used[:self.who]
+  ) {
     :damage(DamageType.Piercing, 3, $.opp.standby);
     :damage(DamageType.Cryo, 3);
   } else {
     :damage(DamageType.Piercing, 2, $.opp.standby);
     :damage(DamageType.Cryo, 2);
   }
+  :setExtensionState((st) => (st.used[:self.who] = true));
 };
 
 /**
