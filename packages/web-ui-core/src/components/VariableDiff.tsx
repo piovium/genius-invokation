@@ -42,7 +42,7 @@ export function VariableDiff(props: VariableDiffProps) {
   });
   const increase = createMemo<boolean>(() => {
     const showingValue = showValue();
-    if (typeof showingValue === "number") {
+    if (showingValue) {
       return showingValue > 0;
     } else if (props.direction) {
       return props.direction !== PbModifyDirection.DECREASE;
