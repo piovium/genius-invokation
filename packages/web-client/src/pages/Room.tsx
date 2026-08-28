@@ -31,13 +31,7 @@ import {
 import axios, { AxiosError } from "axios";
 import "@gi-tcg/web-ui-core/style.css";
 import EventSourceStream from "@server-sent-stream/web";
-import {
-  base64Decode,
-  base64Encode,
-  Notification,
-  RpcRequest,
-  RpcResponse,
-} from "@gi-tcg/typings";
+import { type Notification, type RpcRequest } from "@gi-tcg/typings";
 import { Client, createClient, WebUiPlayerIO } from "@gi-tcg/web-ui-core";
 import { useMobile } from "../App";
 import { Dynamic } from "solid-js/web";
@@ -64,7 +58,7 @@ interface RpcTimer {
 interface ActionRequestPayload {
   id: number;
   timer: RpcTimer;
-  request: string;
+  request: RpcRequest;
 }
 
 const SSE_RECONNECT_TIMEOUT = 30 * 1000;
@@ -242,8 +236,7 @@ export default function Room() {
     }
     lastRpcId = payload.id;
     setCurrentMyTimer(payload.timer);
-    const request = RpcRequest.decode(base64Decode(payload.request));
-    const response = await io.rpc(request).catch(() => void 0);
+    const response = await io.rpc(payload.request).catch(() => void 0);
     if (!response || lastRpcId !== payload.id) {
       return;
     }
@@ -253,7 +246,7 @@ export default function Room() {
         `rooms/${id}/players/${playerId}/actionResponse`,
         {
           id: payload.id,
-          response: base64Encode(RpcResponse.encode(response).finish()),
+          response,
         },
       );
       await reply;
@@ -335,7 +328,7 @@ export default function Room() {
           break;
         }
         case "notification": {
-          const notification = Notification.decode(base64Decode(payload.data));
+          const notification: Notification = payload.data;
           playerIo()?.notify(notification);
           break;
         }
@@ -385,16 +378,15 @@ export default function Room() {
           break;
         }
         case "notification": {
-          const notification = Notification.decode(base64Decode(payload.data));
+          const notification: Notification = payload.data;
           oppPlayerIo()?.notify(notification);
           break;
         }
         case "rpc": {
           const rpc: ActionRequestPayload | null = payload.data;
           if (rpc) {
-            const request = RpcRequest.decode(base64Decode(rpc.request));
             oppPlayerIo()
-              ?.rpc(request)
+              ?.rpc(rpc.request)
               .catch(() => void 0);
           } else {
             oppPlayerIo()?.cancelRpc?.();
