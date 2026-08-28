@@ -1974,7 +1974,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
    * @param option.allowPreview 总是允许预览（即使版本行为 `discardMaxCostHandsAbortPreview = true` 也如此）
    */
   discardMaxCostHands(count: number, option: { allowPreview?: boolean } = {}) {
-    const disposed = this.maxCostHands(count, { useTieBreak: true });
+    const disposed = this.maxCostHands(count, { useTieBreak: false });
     if (
       this.state.versionBehavior.discardMaxCostHandsAbortPreview &&
       !option.allowPreview
