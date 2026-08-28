@@ -26,10 +26,10 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import {
+  IsBase64,
   IsBoolean,
   IsInt,
   IsNumber,
-  IsObject,
   IsOptional,
   Length,
   Max,
@@ -39,7 +39,6 @@ import {
 } from "class-validator";
 import { RoomsService, type PlayerId } from "./rooms.service";
 import { Guest, User, UserOrGuest } from "../auth/user.decorator";
-import type { RpcMethod, RpcResponse, RpcResponsePayloadOf } from "@gi-tcg/typings";
 import { VERSIONS, type Version } from "@gi-tcg/core";
 import { DeckDto } from "../decks/decks.controller";
 import { Public } from "../auth/auth.guard";
@@ -139,8 +138,8 @@ export class PlayerActionResponseDto {
   @IsInt()
   id!: number;
 
-  @IsObject()
-  response!: RpcResponsePayloadOf<RpcMethod>;
+  @IsBase64()
+  response!: string;
 }
 
 @Controller("rooms")
