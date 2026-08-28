@@ -30,24 +30,16 @@ import {
   type Notification,
   type PlayerIO,
   type RpcRequest,
-  type RpcResponse,
   serializeGameStateLog,
   CORE_VERSION,
   VERSIONS,
+  RpcResponse,
   CURRENT_VERSION,
   type Version,
   type GameState,
   setAsyncContext,
 } from "@gi-tcg/core";
-import {
-  base64Decode,
-  base64Encode,
-  dispatchRpc,
-  Notification as PbNotification,
-  RpcRequest as PbRpcRequest,
-  RpcResponse as PbRpcResponse,
-  type Deck,
-} from "@gi-tcg/typings";
+import { dispatchRpc, type Deck } from "@gi-tcg/typings";
 import getData from "@gi-tcg/data";
 import { flip } from "@gi-tcg/utils";
 import {
@@ -157,7 +149,7 @@ export interface SSEInitialized {
 
 export interface SSENotification {
   type: "notification";
-  data: string;
+  data: Notification;
 }
 export interface SSEError {
   type: "error";
@@ -169,7 +161,7 @@ export interface SSERpc {
   data: {
     id: number;
     timer: RpcTimer;
-    request: string;
+    request: RpcRequest;
   } | null;
 }
 export interface SSEOppRpc {
@@ -265,9 +257,7 @@ class Player implements PlayerIOWithError {
         data: {
           id: this._rpcResolver.id,
           timer: this.getTimer()!,
-          request: base64Encode(
-            PbRpcRequest.encode(this._rpcResolver.request).finish(),
-          ),
+          request: this._rpcResolver.request,
         },
       };
     } else {
@@ -292,24 +282,13 @@ class Player implements PlayerIOWithError {
       console.error(this._rpcResolver, response);
       throw new NotFoundException(`Rpc id not match`);
     }
-    try {
-      const rpcResponse = PbRpcResponse.decode(base64Decode(response.response));
-      if (
-        !rpcResponse.response ||
-        rpcResponse.response.$case !== this._rpcResolver.request.request?.$case
-      ) {
-        throw new Error("RPC response method mismatch");
-      }
-      this._rpcResolver.resolve(rpcResponse);
-    } catch {
-      throw new BadRequestException("Invalid RPC response");
-    }
+    this._rpcResolver.resolve(response.response);
   }
 
   notify(notification: Notification) {
     this.notificationSseSource.next({
       type: "notification",
-      data: base64Encode(PbNotification.encode(notification).finish()),
+      data: notification,
     });
     this._mutationExtraTimeout += 0.5 * notification.mutation.length;
   }
