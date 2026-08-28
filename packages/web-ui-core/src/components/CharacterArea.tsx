@@ -822,7 +822,7 @@ function Technique(props: TechniqueProps) {
   return (
     <div class="w-7 h-7 mt-0.5 grid children:grid-area-[1/1]">
       <Image
-        class="technique-icon"
+        class="w-7 h-7 technique-icon"
         imageId={data().data.definitionId}
         type={"icon"}
         fallback="technique"
@@ -856,7 +856,7 @@ function Equipment(props: EquipmentProps) {
     <div class="w-7 h-7 mb--0.5 grid children:grid-area-[1/1]">
       <Dynamic<Component<ComponentProps<"div">>>
         component={props.icon}
-        class="equipment-icon"
+        class="w-7 h-7 equipment-icon"
         bool:data-entering={data().animation === "entering"}
         bool:data-disposing={data().animation === "disposing"}
       />
