@@ -253,6 +253,7 @@ define card {
   cost DiceType.Aligned, 2;
   weapon catalyst {
     on damagedOrHealed {
+      when :( !:self.master.hasStatus(CashflowSupervisionInEffect) );
       usage perRound, 2;
       :characterStatus(CashflowSupervisionInEffect, :self.master);
     };
