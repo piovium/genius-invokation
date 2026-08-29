@@ -128,7 +128,6 @@ type EntityDefinitionFilterFn = (card: EntityDefinition) => boolean;
 interface MaxCostHandsOpt {
   who?: "my" | "opp";
   filter?: (card: PlainEntityState) => boolean;
-  useTieBreak?: boolean;
 }
 
 interface DrawCardsOpt {
@@ -682,32 +681,21 @@ export class SkillContext<Meta extends ContextMetaBase> {
   /**
    * 某方玩家手牌，并按照元素骰费用降序排序
    * @param who 我方还是对方
-   * @param useTiebreak 是否使用“破平值”，若否，使用“手牌序”（即摸上来的顺序）
    */
   private costSortedHands({
     who = "my",
     filter = () => true,
-    useTieBreak = false,
   }: MaxCostHandsOpt): RxEntityState<Meta, EntityType>[] {
     const player = who === "my" ? this.player : this.oppPlayer;
-    const tb = useTieBreak
-      ? (card: EntityStateO) => {
-          return nextRandom(card.id) ^ this.rawState.iterators.random;
-        }
-      : (_: EntityStateO) => 0;
     const sortData = new Map(
       this.getRawPlayer(who).hands.map(
-        (c) =>
-          [
-            c.id,
-            { cost: -diceCostSizeOfCard(this.rawState, c), tb: tb(c) },
-          ] as const,
+        (c) => [c.id, { cost: -diceCostSizeOfCard(this.rawState, c) }] as const,
       ),
     );
-    return toSortedBy(player.hands.filter(filter), (card) => [
-      sortData.get(card.id)!.cost,
-      sortData.get(card.id)!.tb,
-    ]);
+    return toSortedBy(
+      player.hands.filter(filter),
+      (card) => sortData.get(card.id)!.cost,
+    );
   }
 
   /** 我方或对方当前元素骰费用最多的 `count` 张手牌 */
@@ -1974,7 +1962,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
    * @param option.allowPreview 总是允许预览（即使版本行为 `discardMaxCostHandsAbortPreview = true` 也如此）
    */
   discardMaxCostHands(count: number, option: { allowPreview?: boolean } = {}) {
-    const disposed = this.maxCostHands(count, { useTieBreak: true });
+    const disposed = this.maxCostHands(count);
     if (
       this.state.versionBehavior.discardMaxCostHandsAbortPreview &&
       !option.allowPreview
