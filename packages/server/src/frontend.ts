@@ -16,7 +16,7 @@
 import mime from "mime";
 import type { FastifyInstance, RouteHandlerMethod } from "fastify";
 import fastifyEtag from "@fastify/etag";
-import { WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
+import { IS_BETA, WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
 
 export async function frontend(app: FastifyInstance) {
   await app.register(fastifyEtag);
@@ -42,7 +42,13 @@ export async function frontend(app: FastifyInstance) {
       });
     }
 
-    const indexHtmlBuffer = Buffer.from(indexHtml!, "base64");
+    const indexHtml = Buffer.from(indexHtml!, "base64").toString();
+    const indexHtmlBuffer = Buffer.from(
+      indexHtml.replace(
+        /<!--\s*robots\s*-->/g,
+        IS_BETA ? '<meta name="robots" content="noindex" />' : "",
+      ),
+    );
     const indexHtmlHandler: RouteHandlerMethod = (_req, reply) => {
       return reply
         .header("Cache-Control", "public, no-cache, must-revalidate")
