@@ -23,6 +23,7 @@ import {
   Reaction,
   type SkillHandle,
   type SupportHandle,
+  customEvent,
   flip,
   type,
 } from "@gi-tcg/core/data";
@@ -955,6 +956,9 @@ define card {
   };
 };
 
+// 保证弃置在冒险后
+const SeymourTriggered = customEvent("SeymourTriggered");
+
 /**
  * @id 322031
  * @name 西摩尔
@@ -975,9 +979,14 @@ define card {
     };
     on playCard {
       when :( !:isInInitialPile(:e.card) );
-      usage 2;
       usage perRound, 1;
+      :emitCustomEvent(SeymourTriggered);
+    };
+    on SeymourTriggered {
       :adventure();
+    };
+    on SeymourTriggered {
+      usage 2;
     };
   };
 };
