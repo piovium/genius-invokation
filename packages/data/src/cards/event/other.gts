@@ -2933,7 +2933,7 @@ define card {
   id 332062 as CleaningTime;
   since "v6.5.0";
   const attachmentsCount = new Set(
-    :queryAll($.my.attachment).map((att) => att.definition.id),
+    :queryAll($.my.attachment.vHand).map((att) => att.definition.id),
   ).size;
   const diceCount = Math.min(attachmentsCount, 2);
   :generateDice("randomElement", diceCount);
