@@ -34,7 +34,6 @@ import {
   type HealKind,
   type StateMutationAndExposedMutation,
   type SkillDescriptionReturn,
-  type SkillInfoOfContextConstruction,
   type PlayCardTarget,
   constructEventAndRequestArg,
   type UseSkillRequestOption,
@@ -43,6 +42,9 @@ import {
   ReactionEventArg,
   type CoreSkillResult,
   HandCardInsertedEventArg,
+  type SkillInfo,
+  type SkillContextOptions,
+  type SkillDescription,
 } from "../base/skill";
 import {
   type CharacterState as CharacterStateO,
@@ -93,8 +95,7 @@ import {
   type ReadonlyEventList,
   StateMutator,
 } from "../mutator";
-import { type Draft, produce } from "immer";
-import { nextRandom } from "../random";
+import { type Draft, type Immutable, produce } from "immer";
 import type { CustomEvent } from "../base/custom_event";
 import {
   applyReactive,
@@ -202,8 +203,8 @@ type CallAndEmitResult<K extends MutatorMethodCanEmit> =
       : never;
 
 /**
- * 用于描述技能的上下文对象。
- * 它们出现在 `.do()` 形式内，将其作为参数传入。
+ * GTS 中，用于描述技能的上下文对象。
+ * 使用 `SkillContext.encapsulate` 创建的技能描述函数会在执行时创建一个 `SkillContext` 实例供使用。
  */
 export class SkillContext<Meta extends ContextMetaBase> {
   private readonly mutator: StateMutator;
@@ -270,8 +271,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
    */
   constructor(
     state: GameState,
-    public readonly skillInfo: SkillInfoOfContextConstruction,
+    public readonly skillInfo: SkillInfo,
     eventArg: Meta["eventArgType"],
+    public readonly options: Immutable<SkillContextOptions>,
   ) {
     const mutatorConfig: MutatorConfig = {
       logger: skillInfo.logger,
@@ -302,6 +304,40 @@ export class SkillContext<Meta extends ContextMetaBase> {
         },
       },
     ) as typeof this.callSnippet;
+  }
+
+  static encapsulate<Meta extends ContextMetaBase>(
+    options: Immutable<SkillContextOptions>,
+    action: (
+      context: SkillContext<Meta>,
+      rawArgs: Parameters<SkillDescription<Meta["eventArgType"]>>,
+    ) => void,
+  ): SkillDescription<Meta["eventArgType"]> {
+    return function (...rawArgs) {
+      const context = new SkillContext(...rawArgs, options);
+      try {
+        action(context, rawArgs);
+        return context.terminate();
+      } catch (e) {
+        return context.terminate(e);
+      }
+    };
+  }
+  static encapsulateForRet<Ret, Meta extends ContextMetaBase>(
+    options: Immutable<SkillContextOptions>,
+    action: (
+      context: SkillContext<Meta>,
+      rawArgs: Parameters<SkillDescription<Meta["eventArgType"]>>,
+    ) => Ret,
+  ): (
+    state: GameState,
+    skillInfo: SkillInfo,
+    eventArg: Meta["eventArgType"],
+  ) => Ret {
+    return function (...rawArgs) {
+      const context = new SkillContext(...rawArgs, options);
+      return action(context, rawArgs);
+    };
   }
 
   /**
@@ -473,9 +509,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
 
   /**
    * 技能执行完毕，发出通知，禁止后续改动。
-   * @internal
    */
-  _terminate(): SkillDescriptionReturn {
+  private terminate(error: unknown = null): SkillDescriptionReturn {
     this.eventBoundary();
     this.mutator.notify();
     Object.freeze(this.processedEvents);
@@ -489,6 +524,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       {
         emittedEvents: this.processedEvents,
         innerNotify: this._savedNotify,
+        error,
         mainDamage: this.mainDamage,
         causeDefeated: this.causeDefeated,
       },
@@ -500,7 +536,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     exposedMutations: [],
   };
 
-  // 将技能中引发的通知保存下来，最后调用 _terminate 时返回
+  // 将技能中引发的通知保存下来，最后调用 terminate 时返回
   private onNotify(opt: InternalNotifyOption): void {
     this._savedNotify.stateMutations.push(...opt.stateMutations);
     this._savedNotify.exposedMutations.push(...opt.exposedMutations);
@@ -618,11 +654,11 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   getExtensionState(): Meta["associatedExtension"]["type"] {
-    if (typeof this.skillInfo.associatedExtensionId === "undefined") {
+    if (typeof this.options.associatedExtensionId === "undefined") {
       throw new GiTcgDataError("No associated extension registered");
     }
     const ext = this.state.extensions.find(
-      (ext) => ext.definition.id === this.skillInfo.associatedExtensionId,
+      (ext) => ext.definition.id === this.options.associatedExtensionId,
     );
     if (!ext) {
       throw new GiTcgDataError("Associated extension not found");
@@ -816,7 +852,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   } & NotFunctionPrototype;
 
   private _callSnippetByName(name: string, arg: any) {
-    const snippet = this.skillInfo.gtsSnippets.get(name);
+    const snippet = this.options.gtsSnippets.get(name);
     if (!snippet) {
       throw new GiTcgDataError(`Snippet ${name} not found`);
     }
@@ -2058,7 +2094,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     });
     this.mutate({
       type: "mutateExtensionState",
-      extensionId: this.skillInfo.associatedExtensionId!,
+      extensionId: this.options.associatedExtensionId!,
       newState,
     });
   }
