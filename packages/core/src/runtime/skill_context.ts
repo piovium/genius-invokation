@@ -317,6 +317,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       const context = new SkillContext(...rawArgs, options);
       try {
         action(context, rawArgs);
+        context.eventBoundary();
         return context.terminate();
       } catch (e) {
         return context.terminate(e);
@@ -506,10 +507,11 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   /**
-   * 技能执行完毕，发出通知，禁止后续改动。
+   * - 技能执行完毕，发出通知，禁止后续改动。
+   * - *Must* calls `this.eventBoundary` to collect event list.
+   * @throws {never}
    */
   private terminate(error: unknown = null): SkillDescriptionReturn {
-    this.eventBoundary();
     this.mutator.notify();
     Object.freeze(this.processedEvents);
     Object.freeze(this);

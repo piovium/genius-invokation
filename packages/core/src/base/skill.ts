@@ -71,7 +71,7 @@ import type { MoveEntityM, RemoveEntityM } from "./mutation";
 import type { LunarReaction } from "@gi-tcg/typings";
 import type { DamageOption, ReadonlyEventList } from "../mutator";
 import type { SkillContext } from "../runtime/skill_context";
-import type { Immutable } from "immer";
+import { freeze, immerable, type Immutable } from "immer";
 
 export interface SkillDefinitionBase<Arg> {
   readonly type: "skill";
@@ -98,17 +98,6 @@ export interface SkillResult extends CoreSkillResult {
   readonly innerNotify: StateMutationAndExposedMutation;
   readonly mainDamage: DamageInfo | null;
 }
-
-export const EMPTY_SKILL_RESULT: SkillResult = {
-  emittedEvents: [],
-  innerNotify: {
-    exposedMutations: [],
-    stateMutations: [],
-  },
-  error: null,
-  mainDamage: null,
-  causeDefeated: false,
-};
 
 export type SkillDescriptionReturn = readonly [GameState, SkillResult];
 
@@ -222,6 +211,7 @@ export function defineSkillInfo(init: InitSkillInfo): SkillInfo {
 export type LooseSkillOperation<Ret = void> = (c: SkillContext<any>) => Ret;
 
 export class SkillContextOptions {
+  [immerable] = true;
   #phantomData = 0;
   /**
    * 当访问 setExtensionState 时操作的扩展点 id。
@@ -239,7 +229,7 @@ export class SkillContextOptions {
     result.associatedExtensionId = extId;
     return result;
   }
-  static plain: Immutable<SkillContextOptions> = new SkillContextOptions();
+  static plain: Immutable<SkillContextOptions> = freeze(new SkillContextOptions());
 }
 
 export interface DamageInfo {
