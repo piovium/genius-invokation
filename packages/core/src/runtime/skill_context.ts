@@ -343,11 +343,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
   /**
    * 对技能返回的事件列表预处理。
    */
-  private preprocessEvent(): CoreSkillResult {
+  private preprocessEvent(): EventAndRequest[] {
     const emittedEvents: EventAndRequest[] = [];
 
     const failedPlayers = new Set<0 | 1>();
-    let causeDefeated = false;
 
     const otherEvents: EventAndRequest[] = [];
     const hciEvents: Extract<
@@ -374,13 +373,13 @@ export class SkillContext<Meta extends ContextMetaBase> {
             arg.damageInfo,
             arg.option,
           );
-          this.currentEvents.push(
-            ...this.mutator.handleInlineEvent(
-              this.skillInfo,
-              "modifyZeroHealth",
-              zeroHealthEventArg,
-            ),
+          const innerResult = this.mutator.handleInlineEvent(
+            this.skillInfo,
+            "modifyZeroHealth",
+            zeroHealthEventArg,
           );
+          this.currentEvents.push(...innerResult.events);
+          this.causeDefeated ||= innerResult.causeDefeated;
           if (!zeroHealthEventArg._immuneInfo) {
             const defeatedCh = this.get(arg.target);
             if (defeatedCh.variables.alive) {
@@ -475,7 +474,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
       ...safeDamageEvents,
       ...criticalDamageEvents,
     );
-    causeDefeated ||= criticalDamageEvents.length > 0;
 
     if (failedPlayers.size === 2) {
       this.mutator.log(
@@ -504,7 +502,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       });
     }
 
-    return { emittedEvents, causeDefeated };
+    return emittedEvents;
   }
 
   /**
@@ -786,9 +784,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   eventBoundary() {
-    const { emittedEvents, causeDefeated } = this.preprocessEvent();
-    this.processedEvents.push(...emittedEvents);
-    this.causeDefeated ||= causeDefeated;
+    this.processedEvents.push(...this.preprocessEvent());
     this.currentEvents = new EventList();
   }
 
@@ -912,10 +908,11 @@ export class SkillContext<Meta extends ContextMetaBase> {
   ) {
     const targets = this.queryCoerceToCharacters(target);
     for (const target of targets) {
-      this.callAndEmit("heal", value, target.latest(), {
+      const { causeDefeated } = this.callAndEmit("heal", value, target.latest(), {
         via: this.skillInfo,
         kind,
       });
+      this.causeDefeated ||= causeDefeated;
     }
   }
 
@@ -1008,7 +1005,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         causeDefeated: !!alive && health <= value,
         fromReaction: this.fromReaction,
       };
-      const { damageInfo: damageInfo2 } = this.callAndEmit(
+      const { damageInfo: damageInfo2, causeDefeated } = this.callAndEmit(
         "damage",
         damageInfo,
         {
@@ -1022,6 +1019,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       if (isSkillMainDamage) {
         this.mainDamage = damageInfo2;
       }
+      this.causeDefeated ||= causeDefeated;
     }
   }
 
@@ -1037,7 +1035,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         DetailLogType.Primitive,
         `Apply [damage:${type}] to ${stringifyState(ch)}`,
       );
-      this.callAndEmit("apply", ch.latest(), type, {
+      const { causeDefeated } = this.callAndEmit("apply", ch.latest(), type, {
         fromDamage: null,
         via: this.skillInfo,
         callerWho: this.self.who,
@@ -1045,6 +1043,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         targetIsActive: ch.isActive(),
         enabledLunarReactions: this.getEnabledLunarReactions(ch.who),
       });
+      this.causeDefeated ||= causeDefeated;
     }
   }
 
