@@ -315,13 +315,14 @@ export class SkillContext<Meta extends ContextMetaBase> {
   ): SkillDescription<Meta["eventArgType"]> {
     return function (...rawArgs) {
       const context = new SkillContext(...rawArgs, options);
+      let error = null;
       try {
         action(context, rawArgs);
         context.eventBoundary();
-        return context.terminate();
       } catch (e) {
-        return context.terminate(e);
+        error = e;
       }
+      return context.terminate(error);
     };
   }
   static encapsulateForRet<Ret, Meta extends ContextMetaBase>(
@@ -337,7 +338,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
   ) => Ret {
     return function (...rawArgs) {
       const context = new SkillContext(...rawArgs, options);
-      return action(context, rawArgs);
+      const ret = action(context, rawArgs);
+      context.finalize();
+      return ret;
     };
   }
 
@@ -432,6 +435,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
               }
             }
             criticalDamageEvents.push(event);
+            this.causeDefeated ||= true;
           } else {
             safeDamageEvents.push(["onDamageOrHeal", zeroHealthEventArg]);
           }
@@ -507,18 +511,15 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   /**
-   * - 技能执行完毕，发出通知，禁止后续改动。
-   * - *Must* calls `this.eventBoundary` to collect event list.
+   * Terminate the skill execution with notification and Context finalization.
+   * - Precondition: *Must* calls `this.eventBoundary` to collect event list.
+   * @param error encapsulation caught error; null for success
    * @throws {never}
    */
-  private terminate(error: unknown = null): SkillDescriptionReturn {
+  private terminate(error: unknown): SkillDescriptionReturn {
     this.mutator.notify();
-    Object.freeze(this.processedEvents);
-    Object.freeze(this);
+    this.finalize();
     const resultState = this.rawState;
-    for (const [, { revoke }] of this._reactiveProxies) {
-      revoke();
-    }
     return [
       resultState,
       {
@@ -529,6 +530,13 @@ export class SkillContext<Meta extends ContextMetaBase> {
         causeDefeated: this.causeDefeated,
       },
     ];
+  }
+  private finalize() {
+    Object.freeze(this.processedEvents);
+    Object.freeze(this);
+    for (const [, { revoke }] of this._reactiveProxies) {
+      revoke();
+    }
   }
 
   private readonly _savedNotify: StateMutationAndExposedMutation = {
