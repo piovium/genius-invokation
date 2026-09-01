@@ -13,6 +13,7 @@ import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.gts";
 import { Skirk, Skirk01 } from "../characters/cryo/skirk.gts";
 import { BattlePlan, CostReduction } from "../commons.gts";
 import { TideTurningSacredLord } from "../cards/support/adventure.gts";
+import { PressurizedFloe } from "../characters/cryo/freminet.gts";
 
 /**
  * @id 1201
@@ -80,13 +81,14 @@ define status {
     :addVariable("level", 1);
   };
   on deductOmniDiceSkill {
+    when :( :e.action.skill.definition.id === PressurizedFloe );
     if (:getVariable("level") >= 2) {
       :e.deductOmniCost(1);
     }
     :setVariable("canDispose", 1);
   };
   on useSkill {
-    when :( :getVariable("canDispose") );
+    when :( :e.skill.definition.id === PressurizedFloe && :getVariable("canDispose") );
     if (:getVariable("level") >= 4) {
       :damage(DamageType.Physical, 2);
     }
