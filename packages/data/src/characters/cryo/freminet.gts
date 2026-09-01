@@ -26,19 +26,28 @@ define status {
   id 111121 as PersTimer;
   since "v5.0.0";
   variable level, 0;
+  variable enableUseSkillTriggering, 0;
   on drawCard {
     :addVariable("level", 1);
   };
   on deductOmniDiceSkill {
-    when :( :getVariable("level") >= 2 );
-    :e.deductOmniCost(1);
+    when :( :e.action.skill.definition.id === PressurizedFloe );
+    if (:getVariable("level") >= 2) {
+      :e.deductOmniCost(1);
+    }
+    :setVariable("enableUseSkillTriggering", 1);
   };
   on useSkill {
-    when :( :getVariable("level") >= 2 );
+    when :(
+      :e.skill.definition.id === PressurizedFloe &&
+        :getVariable("enableUseSkillTriggering")
+    );
     if (:getVariable("level") >= 4) {
       :damage(DamageType.Physical, 3);
     }
-    :dispose();
+    if (:getVariable("level") >= 2) {
+      :dispose();
+    }
   };
 };
 

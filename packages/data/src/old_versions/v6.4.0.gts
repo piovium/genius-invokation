@@ -13,6 +13,7 @@ import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.gts";
 import { Skirk, Skirk01 } from "../characters/cryo/skirk.gts";
 import { BattlePlan, CostReduction } from "../commons.gts";
 import { TideTurningSacredLord } from "../cards/support/adventure.gts";
+import { PressurizedFloe } from "../characters/cryo/freminet.gts";
 
 /**
  * @id 1201
@@ -75,19 +76,28 @@ define status {
   id 111121 as private PersTimer;
   until "v6.4.0";
   variable level, 0;
+  variable enableUseSkillTriggering, 0;
   on drawCard {
     :addVariable("level", 1);
   };
   on deductOmniDiceSkill {
-    when :( :getVariable("level") >= 2 );
-    :e.deductOmniCost(1);
+    when :( :e.action.skill.definition.id === PressurizedFloe );
+    if (:getVariable("level") >= 2) {
+      :e.deductOmniCost(1);
+    }
+    :setVariable("enableUseSkillTriggering", 1);
   };
   on useSkill {
-    when :( :getVariable("level") >= 2 );
+    when :(
+      :e.skill.definition.id === PressurizedFloe &&
+        :getVariable("enableUseSkillTriggering")
+    );
     if (:getVariable("level") >= 4) {
       :damage(DamageType.Physical, 2);
     }
-    :dispose();
+    if (:getVariable("level") >= 2) {
+      :dispose();
+    }
   };
 };
 
