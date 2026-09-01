@@ -26,7 +26,7 @@ define status {
   id 111121 as PersTimer;
   since "v5.0.0";
   variable level, 0;
-  variable canDispose, 0;
+  variable enableUseSkillTriggering, 0;
   on drawCard {
     :addVariable("level", 1);
   };
@@ -35,11 +35,12 @@ define status {
     if (:getVariable("level") >= 2) {
       :e.deductOmniCost(1);
     }
-    :setVariable("canDispose", 1);
+    :setVariable("enableUseSkillTriggering", 1);
   };
   on useSkill {
     when :(
-      :e.skill.definition.id === PressurizedFloe && :getVariable("canDispose")
+      :e.skill.definition.id === PressurizedFloe &&
+        :getVariable("enableUseSkillTriggering")
     );
     if (:getVariable("level") >= 4) {
       :damage(DamageType.Physical, 3);
