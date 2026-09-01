@@ -521,7 +521,15 @@ export class StateMutator {
         this.state,
         reactionInfo,
       );
-      this.handleInlineEvent(opt.via, "modifyReaction", modifyReactionEvent);
+      {
+        const inlineResult = this.handleInlineEvent(
+          opt.via,
+          "modifyReaction",
+          modifyReactionEvent,
+        );
+        events.push(...inlineResult.events);
+        causeDefeated ||= inlineResult.causeDefeated;
+      }
       let reactionDescription: ReactionDescription | null;
       if (
         !modifyReactionEvent._cancelCoreEffects &&
@@ -750,7 +758,7 @@ export class StateMutator {
       events.push(...innerResult.events);
       causeDefeated ||= innerResult.causeDefeated;
     }
-    causeDefeated ||= damageInfo.causeDefeated;
+    // DO NOT `causeDefeated ||= damageInfo.causeDefeated` since we can immune later.ß
     return { damageInfo, events, causeDefeated };
   }
 
