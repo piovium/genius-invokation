@@ -70,6 +70,16 @@ function registerMetadata(md: CustomMetadata) {
   getCustomDataRegistration().registerMetadata(md);
 }
 
+type IdOfVMMeta<Meta> = Meta extends {
+  readonly id: infer Id extends number;
+}
+  ? Id
+  : number;
+
+type WithIdVMMeta<Meta, Id extends number> = Omit<Meta, "id"> & {
+  readonly id: Id;
+};
+
 export class CustomCharacterModel extends CharacterModel {
   readonly metadata = CustomMetadata.create();
 
@@ -171,9 +181,13 @@ const CustomCharacterViewModel = CharacterViewModel.extend(
   CustomCharacterModel,
   (h) => ({
     id: h.attribute<{
-      (id: number): AR.Done;
+      <const Id extends number>(
+        id: Id,
+      ): AR.DoneRewriteMeta<{ readonly id: Id }>;
       uniqueKey(): "id";
-      as(): CharacterHandle;
+      as<Meta extends { readonly id: number }>(
+        this: AR.This<Meta>,
+      ): CharacterHandle<Meta["id"]>;
     }>(
       () => {},
       (model, [id]) => {
@@ -206,9 +220,14 @@ const CustomCharacterViewModel = CharacterViewModel.extend(
 
 const CustomCardViewModel = CardViewModel.extend(CustomCardModel, (h) => ({
   id: h.attribute<{
-    (id: number): AR.Done;
+    <Meta extends EntityVMMeta, const Id extends number>(
+      this: AR.This<Meta>,
+      id: Id,
+    ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
     uniqueKey(): "id";
-    as(): CardHandle;
+    as<Meta extends EntityVMMeta>(
+      this: AR.This<Meta>,
+    ): CardHandle<IdOfVMMeta<Meta>>;
   }>(
     () => {},
     (model, [id]) => {
@@ -252,14 +271,21 @@ const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
   CustomCharacterSkillModel,
   (h) => ({
     id: h.attribute<{
-      (id: number): AR.Done;
+      <Meta extends CharacterSkillVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       uniqueKey(): "id";
-      as(): SkillHandle | PassiveSkillHandle;
+      as<Meta extends CharacterSkillVMMeta>(
+        this: AR.This<Meta>,
+      ): Meta extends { isInitiativeSkill: true }
+        ? SkillHandle<IdOfVMMeta<Meta>>
+        : PassiveSkillHandle<IdOfVMMeta<Meta>>;
     }>(
       () => {},
       (model, [id]) => {
         model.metadata.specifyId(id);
-        return id as SkillHandle;
+        return id as any;
       },
     ),
     name: h.attribute<{
@@ -292,9 +318,14 @@ const CustomEntityViewModel = EntityViewModel.extend(
   CustomEntityModel,
   (h) => ({
     id: h.attribute<{
-      <Meta extends EntityVMMeta>(this: AR.This<Meta>, id: number): AR.Done;
+      <Meta extends EntityVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       uniqueKey(): "id";
-      as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
+      as<Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+      ): HandleT<Meta["type"], IdOfVMMeta<Meta>>;
     }>(
       () => {},
       (model, [id]) => {
@@ -334,9 +365,14 @@ const CustomAttachmentViewModel = AttachmentViewModel.extend(
   CustomAttachmentModel,
   (h) => ({
     id: h.attribute<{
-      (id: number): AR.Done;
+      <Meta extends EntityVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       uniqueKey(): "id";
-      as(): AttachmentHandle;
+      as<Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+      ): AttachmentHandle<IdOfVMMeta<Meta>>;
     }>(
       () => {},
       (model, [id]) => {

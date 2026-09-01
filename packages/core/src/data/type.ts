@@ -22,24 +22,39 @@ import type {
   EntityState,
 } from "../base/state";
 
-export type CharacterHandle = number & { readonly _char: unique symbol };
-export type SkillHandle = number & { readonly _skill: unique symbol };
-export type PassiveSkillHandle = number & {
+export type CharacterHandle<Id extends number = number> = Id & {
+  readonly _char: unique symbol;
+};
+export type SkillHandle<Id extends number = number> = Id & {
+  readonly _skill: unique symbol;
+};
+export type PassiveSkillHandle<Id extends number = number> = Id & {
   readonly _passiveSkill: unique symbol;
 };
-export type EntityHandle = number & { readonly _entity: unique symbol };
-export type CardHandle = EntityHandle & { readonly _card: unique symbol };
-export type StatusHandle = EntityHandle & { readonly _stat: unique symbol };
-export type CombatStatusHandle = EntityHandle & {
-  readonly _cStat: unique symbol;
+export type EntityHandle<Id extends number = number> = Id & {
+  readonly _entity: unique symbol;
 };
-export type SummonHandle = number & { readonly sm: unique symbol };
-export type SupportHandle = EntityHandle &
-  CardHandle & { readonly _support: unique symbol };
-export type EquipmentHandle = EntityHandle &
-  CardHandle & { readonly _equip: unique symbol };
+export type CardHandle<Id extends number = number> = EntityHandle<Id> & {
+  readonly _card: unique symbol;
+};
+export type StatusHandle<Id extends number = number> = EntityHandle<Id> & {
+  readonly _stat: unique symbol;
+};
+export type CombatStatusHandle<Id extends number = number> =
+  EntityHandle<Id> & {
+    readonly _cStat: unique symbol;
+  };
+export type SummonHandle<Id extends number = number> = Id & {
+  readonly sm: unique symbol;
+};
+export type SupportHandle<Id extends number = number> = EntityHandle<Id> &
+  CardHandle<Id> & { readonly _support: unique symbol };
+export type EquipmentHandle<Id extends number = number> = EntityHandle<Id> &
+  CardHandle<Id> & { readonly _equip: unique symbol };
 
-export type AttachmentHandle = number & { readonly _attach: unique symbol };
+export type AttachmentHandle<Id extends number = number> = Id & {
+  readonly _attach: unique symbol;
+};
 
 export type ExtensionHandle<T = unknown> = number & {
   readonly _extSym: unique symbol;
@@ -55,24 +70,27 @@ export type ExEntityState<TypeT extends ExEntityType> =
       ? AttachmentState
       : EntityState;
 
-export type HandleT<T extends ExEntityType> = T extends "character"
-  ? CharacterHandle
+export type HandleT<
+  T extends ExEntityType,
+  Id extends number = number,
+> = T extends "character"
+  ? CharacterHandle<Id>
   : T extends "attachment"
-    ? AttachmentHandle
+    ? AttachmentHandle<Id>
     : T extends "eventCard"
-      ? CardHandle
+      ? CardHandle<Id>
       : T extends "combatStatus"
-        ? CombatStatusHandle
+        ? CombatStatusHandle<Id>
         : T extends "status"
-          ? StatusHandle
+          ? StatusHandle<Id>
           : T extends "equipment"
-            ? EquipmentHandle
+            ? EquipmentHandle<Id>
             : T extends "summon"
-              ? SummonHandle
+              ? SummonHandle<Id>
               : T extends "support"
-                ? SupportHandle
+                ? SupportHandle<Id>
                 : T extends "passiveSkill"
-                  ? SkillHandle
+                  ? SkillHandle<Id>
                   : never;
 
 export type ExTag<TypeT extends ExEntityType> = TypeT extends "character"

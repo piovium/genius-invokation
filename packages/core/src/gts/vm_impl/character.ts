@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineViewModel } from "@gi-tcg/gts-runtime";
+import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
 import type { CharacterEntry } from "../../data/registry";
 import {
   DEFAULT_VERSION_INFO,
@@ -74,14 +74,18 @@ export class CharacterModel {
 }
 
 export class CharacterViewModel extends defineViewModel(CharacterModel, (h) => ({
-  id: h.simpleAttribute({
-    required: true,
-    uniqueKey: "id",
-  })(
-    function (id: number) {
-      this.id = id;
+  id: h.attribute<{
+    <const Id extends number>(id: Id): AR.DoneRewriteMeta<{ readonly id: Id }>;
+    required(): true;
+    uniqueKey(): "id";
+    as<Meta extends { readonly id: number }>(
+      this: AR.This<Meta>,
+    ): CharacterHandle<Meta["id"]>;
+  }>(
+    (model, [id]) => {
+      model.id = id;
     },
-    (id: number) => id as CharacterHandle,
+    (_, [id]) => id as CharacterHandle,
   ),
   since: h.simpleAttribute({
     uniqueKey: "version",

@@ -61,6 +61,7 @@ import type {
   ExtensionHandle,
   HandleT,
   SkillHandle,
+  StatusHandle,
   SupportHandle,
 } from "../../data/type";
 import {
@@ -435,6 +436,16 @@ export interface EntityVMMeta {
   readonly stagedEventArgType: unknown;
 }
 
+export type IdOfVMMeta<Meta> = Meta extends {
+  readonly id: infer Id extends number;
+}
+  ? Id
+  : number;
+
+export type WithIdVMMeta<Meta, Id extends number> = Computed<
+  Omit<Meta, "id"> & { readonly id: Id }
+>;
+
 // This variable is type-only but may fell into TDZ after bundling.
 // Declare it as var.
 export var DEFAULT_ENTITY_VM_META = {
@@ -537,8 +548,13 @@ export class EntityViewModel extends defineViewModel(
   EntityModel,
   (h) => ({
     id: h.attribute<{
-      (id: number): AR.Done;
-      as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
+      <Meta extends EntityVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
+      as<Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+      ): HandleT<Meta["type"], IdOfVMMeta<Meta>>;
       as(this: AR.This<ReservedMeta>): undefined;
       required<Meta extends EntityVMMeta>(): Meta extends {
         type: "summon" | "status" | "combatStatus";
@@ -895,7 +911,7 @@ export class EntityViewModel extends defineViewModel(
       ): AR.DoneRewriteMeta<PushVar<Meta, "hintIcon" | "swirledUsage">>;
       <Meta extends EntityVMMeta>(
         this: ThisWithType<Meta, "summon" | "support">,
-        icon: DamageType | CombatStatusHandle,
+        icon: DamageType | CombatStatusHandle | StatusHandle,
         text?:
           | number
           | string

@@ -21,7 +21,9 @@ import {
   type DefaultEntityVMMeta,
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
+  type IdOfVMMeta,
   type IParentModel,
+  type WithIdVMMeta,
 } from "./entity";
 import {
   DEFAULT_INITIATIVE_SKILL_VM_META,
@@ -142,12 +144,17 @@ export const TechniqueSkillViewModel = InitiativeSkillViewModel
   //
   .extend(TechniqueSkillModel, (h) => ({
     id: h.attribute<{
-      (id: number): AR.Done;
+      <Meta extends TechniqueSkillVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       // TODO custom technique cannot provide required id
       // we can make `required()` only for official data
       // required(): true;
       uniqueKey(): "id";
-      as(): SkillHandle;
+      as<Meta extends TechniqueSkillVMMeta>(
+        this: AR.This<Meta>,
+      ): SkillHandle<IdOfVMMeta<Meta>>;
     }>(
       (model, [id]) => {
         model.id = id;
@@ -197,8 +204,12 @@ export class TechniqueModel extends EntityModel {
   };
 }
 
-export type DefaultTechniqueVMMeta<AssociatedExtension = never> =
-  DefaultEntityVMMeta<"equipment", AssociatedExtension>;
+export type DefaultTechniqueVMMeta<
+  AssociatedExtension = never,
+  Id extends number = number,
+> = DefaultEntityVMMeta<"equipment", AssociatedExtension> & {
+  readonly id: Id;
+};
 
 export type TechniqueVMMeta = EntityVMMeta & {
   type: "equipment";
