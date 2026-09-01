@@ -34,14 +34,14 @@ import type {
   EntityState,
   GameState,
 } from "../../base/state";
-import type {
-  CustomEventEventArg,
-  DamageInfo,
-  DamageOrHealEventArg,
-  EnterEventArg,
-  InitiativeSkillEventArg,
-  ModifyDamage3EventArg,
-  SkillDefinition,
+import {
+  SkillContextOptions,
+  type CustomEventEventArg,
+  type DamageInfo,
+  type DamageOrHealEventArg,
+  type LooseSkillOperation,
+  type ModifyDamage3EventArg,
+  type SkillDefinition,
 } from "../../base/skill";
 import { getEntityArea, getEntityById, type Writable } from "../../utils";
 import {
@@ -75,7 +75,6 @@ import {
   type TypeHint,
 } from "../../data/utils";
 import {
-  SkillWrappingData,
   TriggeredSkillModel,
   TriggeredSkillViewModel,
   type TriggeredSkillVMMeta,
@@ -122,12 +121,12 @@ export interface GtsUsageOrUsagePerRoundOptions extends GtsUsageOptions {
 
 export interface IParentModel {
   id: number;
-  wrapData: SkillWrappingData;
+  contextOptions: SkillContextOptions;
 }
 
 export interface IDescriptionReplaceable {
   descriptionDictionary: Writable<DescriptionDictionary>;
-  wrapData: SkillWrappingData;
+  contextOptions: SkillContextOptions;
 }
 
 export function addDescriptionReplacement(
@@ -138,7 +137,7 @@ export function addDescriptionReplacement(
   if (Reflect.has(model.descriptionDictionary, key)) {
     throw new GiTcgDataError(`Description key ${key} already exists`);
   }
-  const extId = model.wrapData.associatedExtensionId;
+  const extId = model.contextOptions.associatedExtensionId;
   const entry: DescriptionDictionaryEntry = function (st, id) {
     const ext = st.extensions.find((ext) => ext.definition.id === extId);
     const self = getEntityById(st, id) as EntityState;
@@ -178,17 +177,17 @@ export class EntityModel implements ICaller {
 
   stagedOperations: StagedOperation<any>[] = [];
 
-  #wrapData: SkillWrappingData;
-  get wrapData() {
-    return this.#wrapData;
+  #contextOptions: SkillContextOptions;
+  get contextOptions() {
+    return this.#contextOptions;
   }
 
   constructor(type: ExEntityType, parent?: IParentModel) {
     if (parent) {
       this.id = parent.id;
-      this.#wrapData = parent.wrapData;
+      this.#contextOptions = parent.contextOptions;
     } else {
-      this.#wrapData = new SkillWrappingData();
+      this.#contextOptions = new SkillContextOptions();
     }
     this.type = type;
   }
@@ -402,7 +401,7 @@ export interface ICaller {
    * @returns the name of the variable that was added
    */
   setUsage(count: number, option: GtsUsageOptions): string;
-  wrapData: SkillWrappingData;
+  contextOptions: SkillContextOptions;
 }
 
 export const createVariableConfig = (
@@ -573,7 +572,7 @@ export class EntityViewModel extends defineViewModel(
       >;
       uniqueKey(): "associatedExtension";
     }>((model, [extId]) => {
-      model.wrapData.associatedExtensionId = extId;
+      model.contextOptions.associatedExtensionId = extId;
     }),
     since: h.simpleAttribute({
       uniqueKey: "version",
@@ -658,7 +657,7 @@ export class EntityViewModel extends defineViewModel(
         name = args[0];
       }
       const snippetModel = SnippetOperationVM.parse(subView);
-      model.wrapData.snippets.set(name, snippetModel.action);
+      model.contextOptions.gtsSnippets.set(name, snippetModel.action as LooseSkillOperation);
     }),
 
     prepare: h.attribute<{

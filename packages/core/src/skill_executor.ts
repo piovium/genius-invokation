@@ -119,7 +119,7 @@ export class SkillExecutor {
 
     const oldState = this.state;
     this.mutator.notify();
-    const [newState, { innerNotify, emittedEvents, causeDefeated }] = (0,
+    const [newState, { innerNotify, emittedEvents, error, causeDefeated }] = (0,
     skillDef.action)(
       this.state,
       {
@@ -183,8 +183,11 @@ export class SkillExecutor {
 
     innerNotify.exposedMutations.unshift(...prependMutations);
     this.mutator.resetState(newState, innerNotify);
-
-    return { emittedEvents, causeDefeated };
+    if (error) {
+      throw error;
+    } else {
+      return { emittedEvents, causeDefeated };
+    }
   }
 
   async finalizeSkill(

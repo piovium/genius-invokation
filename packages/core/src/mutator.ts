@@ -51,6 +51,7 @@ import {
 } from "./error";
 import {
   CharacterEventArg,
+  type CoreSkillResult,
   type DamageInfo,
   DamageOrHealEventArg,
   EnterEventArg,
@@ -261,6 +262,11 @@ declare global {
   var console: MaybeConsole | undefined;
 }
 
+interface EventListAndCauseDefeated {
+  readonly events: ReadonlyEventList;
+  readonly causeDefeated: boolean;
+}
+
 /**
  * 管理一个状态和状态的修改；同时也进行日志管理。
  *
@@ -405,26 +411,30 @@ export class StateMutator {
     skillDescription: SkillDescription<Arg>,
     skill: SkillInfo,
     arg: Arg,
-  ): ReadonlyEventList {
+  ): CoreSkillResult {
     this.notify();
-    const [newState, { innerNotify, emittedEvents }] = skillDescription(
+    const [newState, { innerNotify, error, ...result }] = skillDescription(
       this.state,
       skill,
       arg,
     );
     this.resetState(newState, innerNotify);
-    return emittedEvents;
+    if (error) {
+      throw error;
+    }
+    return result;
   }
   /* private */ handleInlineEvent<E extends InlineEventNames>(
     parentSkill: SkillInfo,
     event: E,
     arg: EventArgOf<E>,
-  ): ReadonlyEventList {
+  ): EventListAndCauseDefeated {
     using l = this.subLog(
       DetailLogType.Event,
       `Handling inline event ${event} (${arg.toString()}):`,
     );
     const events = new EventList();
+    let causeDefeated = false;
     const infos = allSkills(this.state, event).map<SkillInfo>(
       ({ caller, skill }) => ({
         caller,
@@ -446,10 +456,11 @@ export class StateMutator {
         `Using skill [skill:${info.definition.id}]`,
       );
       const desc = info.definition.action as SkillDescription<EventArgOf<E>>;
-      const emitted = this.executeInlineSkill(desc, info, arg);
-      events.push(...emitted);
+      const inlineResult = this.executeInlineSkill(desc, info, arg);
+      events.push(...inlineResult.emittedEvents);
+      causeDefeated ||= inlineResult.causeDefeated;
     }
-    return events;
+    return { events, causeDefeated };
   }
 
   // --- BASIC MUTATIVE PRIMITIVES ---
@@ -458,11 +469,15 @@ export class StateMutator {
     target: CharacterState,
     type: NontrivialDamageType,
     opt: ApplyOption,
-  ): ReadonlyEventList {
+  ): EventListAndCauseDefeated {
     if (!target.variables.alive) {
-      return [];
+      return {
+        events: [],
+        causeDefeated: false,
+      };
     }
     const events = new EventList();
+    let causeDefeated = false;
     const aura = target.variables.aura;
     const { newAura, reaction } = getReaction({
       type,
@@ -506,19 +521,27 @@ export class StateMutator {
         this.state,
         reactionInfo,
       );
-      this.handleInlineEvent(opt.via, "modifyReaction", modifyReactionEvent);
+      {
+        const inlineResult = this.handleInlineEvent(
+          opt.via,
+          "modifyReaction",
+          modifyReactionEvent,
+        );
+        events.push(...inlineResult.events);
+        causeDefeated ||= inlineResult.causeDefeated;
+      }
       let reactionDescription: ReactionDescription | null;
       if (
         !modifyReactionEvent._cancelCoreEffects &&
         (reactionDescription = getReactionDescription(reaction))
       ) {
-        events.push(
-          ...this.executeInlineSkill(
-            reactionDescription,
-            opt.via,
-            modifyReactionEvent,
-          ),
+        const inlineResult = this.executeInlineSkill(
+          reactionDescription,
+          opt.via,
+          modifyReactionEvent,
         );
+        events.push(...inlineResult.emittedEvents);
+        causeDefeated ||= inlineResult.causeDefeated;
       }
       const reactionEvent = new ReactionEventArg(this.state, reactionInfo);
       this.mutate({
@@ -527,16 +550,17 @@ export class StateMutator {
       });
       events.push(["onReaction", reactionEvent]);
     }
-    return events;
+    return { events, causeDefeated };
   }
 
   heal(
     value: number,
     targetState: CharacterState,
     opt: InternalHealOption,
-  ): ReadonlyEventList {
+  ): EventListAndCauseDefeated {
     const damageType = DamageType.Heal;
     const events = new EventList();
+    let causeDefeated = false;
     if (!targetState.variables.alive) {
       if (opt.kind === "revive") {
         this.log(
@@ -556,7 +580,7 @@ export class StateMutator {
         ]);
       } else {
         // Cannot apply non-revive heal on a dead character
-        return [];
+        return { events, causeDefeated };
       }
     } else if (
       (targetState.variables.health === 0) !==
@@ -593,10 +617,13 @@ export class StateMutator {
       healInfo,
       "HEAL",
     );
-    events.push(...this.handleInlineEvent(opt.via, "modifyHeal0", modifier));
-    events.push(...this.handleInlineEvent(opt.via, "modifyHeal1", modifier));
+    for (const eventName of ["modifyHeal0", "modifyHeal1"] as const) {
+      const inlineResult = this.handleInlineEvent(opt.via, eventName, modifier);
+      events.push(...inlineResult.events);
+      causeDefeated ||= inlineResult.causeDefeated;
+    }
     if (modifier.cancelled) {
-      return events;
+      return { events, causeDefeated };
     }
     healInfo = modifier.healInfo;
     const newHealth =
@@ -635,7 +662,7 @@ export class StateMutator {
       "onDamageOrHeal",
       new DamageOrHealEventArg(this.state, healInfo, "HEAL"),
     ]);
-    return events;
+    return { events, causeDefeated };
   }
 
   damage(damageInfo: DamageInfo, opt: DamageOption) {
@@ -647,25 +674,32 @@ export class StateMutator {
       }] damage to ${stringifyState(target)}`,
     );
     const events = new EventList();
+    let causeDefeated = false;
     if (damageInfo.type !== DamageType.Piercing) {
       const modifier = new GenericModifyDamageEventArg(
         this.state,
         damageInfo,
         opt,
       );
-      events.push(
-        ...this.handleInlineEvent(opt.via, "modifyDamage0", modifier),
-      );
-      modifier.increaseDamageByReaction();
-      events.push(
-        ...this.handleInlineEvent(opt.via, "modifyDamage1", modifier),
-      );
-      events.push(
-        ...this.handleInlineEvent(opt.via, "modifyDamage2", modifier),
-      );
-      events.push(
-        ...this.handleInlineEvent(opt.via, "modifyDamage3", modifier),
-      );
+      for (const eventName of [
+        "modifyDamage0",
+        "$REACTION",
+        "modifyDamage1",
+        "modifyDamage2",
+        "modifyDamage3",
+      ] as const) {
+        if (eventName === "$REACTION") {
+          modifier.increaseDamageByReaction();
+        } else {
+          const innerResult = this.handleInlineEvent(
+            opt.via,
+            eventName,
+            modifier,
+          );
+          events.push(...innerResult.events);
+          causeDefeated ||= innerResult.causeDefeated;
+        }
+      }
       damageInfo = modifier.damageInfo;
     }
     this.log(
@@ -717,14 +751,15 @@ export class StateMutator {
       damageInfo.type !== DamageType.Physical &&
       damageInfo.type !== DamageType.Piercing
     ) {
-      events.push(
-        ...this.apply(target, damageInfo.type, {
-          fromDamage: damageInfo,
-          ...opt,
-        }),
-      );
+      const innerResult = this.apply(target, damageInfo.type, {
+        fromDamage: damageInfo,
+        ...opt,
+      });
+      events.push(...innerResult.events);
+      causeDefeated ||= innerResult.causeDefeated;
     }
-    return { damageInfo, events };
+    // DO NOT `causeDefeated ||= damageInfo.causeDefeated` since we can immune later.ß
+    return { damageInfo, events, causeDefeated };
   }
 
   insertHandCard(
