@@ -263,8 +263,11 @@ define card {
           :player.hands.length > 0 // 有手牌（“如可能，舍弃”）
       );
       :setVariable("deductDiceTriggered", 1);
-      // 预计算时不触发弃牌
-      if (:skillInfo.environment !== "precalculate") {
+      // 预计算时不触发弃牌，避免其中止预览无法响应 fastSwitch
+      if (!(
+        :skillInfo.environment === "precalculate" &&
+        :state.versionBehavior.discardMaxCostHandsAbortPreview
+      )) {
         :discardMaxCostHands(1);
       }
       for (const st of :queryAll($.opp.typeStatus.def(Target))) {
