@@ -983,9 +983,11 @@ define card {
       :emitCustomEvent(SeymourTriggered);
     };
     on SeymourTriggered {
+      listenTo myself;
       :adventure();
     };
     on SeymourTriggered {
+      listenTo myself;
       usage 2;
     };
   };
