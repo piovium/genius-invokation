@@ -45,7 +45,6 @@ import {
   type DefaultEntityVMMeta,
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
-  type IdOfVMMeta,
   type ICaller,
   type WithIdVMMeta,
 } from "./entity";
@@ -738,8 +737,8 @@ export class CharacterSkillViewModel extends InitiativeSkillViewModel
       as<Meta extends CharacterSkillVMMeta>(
         this: AR.This<Meta>,
       ): Meta extends { isInitiativeSkill: true }
-        ? SkillHandle<IdOfVMMeta<Meta>>
-        : PassiveSkillHandle<IdOfVMMeta<Meta>>;
+        ? SkillHandle<Meta["id"]>
+        : PassiveSkillHandle<Meta["id"]>;
       as(this: AR.This<ReservedMeta>): undefined;
     }>(
       (model, [id]) => {

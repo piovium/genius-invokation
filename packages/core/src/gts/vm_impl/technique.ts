@@ -21,7 +21,6 @@ import {
   type DefaultEntityVMMeta,
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
-  type IdOfVMMeta,
   type IParentModel,
   type WithIdVMMeta,
 } from "./entity";
@@ -154,7 +153,7 @@ export const TechniqueSkillViewModel = InitiativeSkillViewModel
       uniqueKey(): "id";
       as<Meta extends TechniqueSkillVMMeta>(
         this: AR.This<Meta>,
-      ): SkillHandle<IdOfVMMeta<Meta>>;
+      ): SkillHandle<Meta["id"]>;
     }>(
       (model, [id]) => {
         model.id = id;

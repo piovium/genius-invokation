@@ -429,6 +429,7 @@ export const createVariableConfig = (
 };
 
 export interface EntityVMMeta {
+  readonly id: number;
   readonly type: ExEntityType;
   readonly variables: string;
   readonly associatedExtension: ExtensionHandle;
@@ -436,19 +437,14 @@ export interface EntityVMMeta {
   readonly stagedEventArgType: unknown;
 }
 
-export type IdOfVMMeta<Meta> = Meta extends {
-  readonly id: infer Id extends number;
-}
-  ? Id
-  : number;
-
-export type WithIdVMMeta<Meta, Id extends number> = Computed<
+export type WithIdVMMeta<Meta extends { readonly id: number }, Id extends number> = Computed<
   Omit<Meta, "id"> & { readonly id: Id }
 >;
 
 // This variable is type-only but may fell into TDZ after bundling.
 // Declare it as var.
 export var DEFAULT_ENTITY_VM_META = {
+  id: 0 as number,
   type: "" as ExEntityType,
   variables: null as never,
   stagedEventArgType: null as never,
@@ -520,6 +516,7 @@ interface TriggeredSkillVMMetaFromEntityLike<
   EventName extends DetailedEventNames | CustomEvent,
   DefaultCallingArea extends CallingAreaType,
 > {
+  readonly id: Meta["id"];
   readonly type: Meta["type"];
   readonly variables: Meta["variables"];
   readonly associatedExtension: Meta["associatedExtension"];
@@ -554,7 +551,7 @@ export class EntityViewModel extends defineViewModel(
       ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       as<Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
-      ): HandleT<Meta["type"], IdOfVMMeta<Meta>>;
+      ): HandleT<Meta["type"], Meta["id"]>;
       as(this: AR.This<ReservedMeta>): undefined;
       required<Meta extends EntityVMMeta>(): Meta extends {
         type: "summon" | "status" | "combatStatus";

@@ -73,63 +73,77 @@ export class CharacterModel {
   }
 }
 
-export class CharacterViewModel extends defineViewModel(CharacterModel, (h) => ({
-  id: h.attribute<{
-    <const Id extends number>(id: Id): AR.DoneRewriteMeta<{ readonly id: Id }>;
-    required(): true;
-    uniqueKey(): "id";
-    as<Meta extends { readonly id: number }>(
-      this: AR.This<Meta>,
-    ): CharacterHandle<Meta["id"]>;
-  }>(
-    (model, [id]) => {
-      model.id = id;
-    },
-    (_, [id]) => id as CharacterHandle,
-  ),
-  since: h.simpleAttribute({
-    uniqueKey: "version",
-  })(function (version: Version) {
-    this.versionInfo = {
-      from: "official",
-      value: { predicate: "since", version },
-    };
+export interface CharacterVMMeta {
+  readonly id: number;
+}
+
+export const DEFAULT_CHARACTER_VM_META = {
+  id: 0 as number,
+} as const satisfies CharacterVMMeta;
+
+export class CharacterViewModel extends defineViewModel(
+  CharacterModel,
+  (h) => ({
+    id: h.attribute<{
+      <const Id extends number>(
+        id: Id,
+      ): AR.DoneRewriteMeta<{ readonly id: Id }>;
+      required(): true;
+      uniqueKey(): "id";
+      as<Meta extends CharacterVMMeta>(
+        this: AR.This<Meta>,
+      ): CharacterHandle<Meta["id"]>;
+    }>(
+      (model, [id]) => {
+        model.id = id;
+      },
+      (_, [id]) => id as CharacterHandle,
+    ),
+    since: h.simpleAttribute({
+      uniqueKey: "version",
+    })(function (version: Version) {
+      this.versionInfo = {
+        from: "official",
+        value: { predicate: "since", version },
+      };
+    }),
+    until: h.simpleAttribute({
+      uniqueKey: "version",
+    })(function (version: Version) {
+      this.versionInfo = {
+        from: "official",
+        value: { predicate: "until", version },
+      };
+    }),
+    tags: h.simpleAttribute()(function (...tags: CharacterTag[]) {
+      this.tags.push(...tags);
+    }),
+    health: h.simpleAttribute()(function (maxHealth: number) {
+      this.maxHealth = maxHealth;
+    }),
+    energy: h.simpleAttribute()(function (maxEnergy: number) {
+      this.maxEnergy = maxEnergy;
+    }),
+    skills: h.simpleAttribute()(function (
+      ...skillIds: (SkillHandle | PassiveSkillHandle)[]
+    ) {
+      this.skillIds.push(...skillIds);
+    }),
+    associateNightsoul: h.simpleAttribute({
+      uniqueKey: "associateNightsoul",
+    })(function (blessingId: StatusHandle) {
+      this.associatedNightsoulsBlessingId = blessingId;
+    }),
+    enabledLunarReactions: h.simpleAttribute()(function (
+      ...reactions: LunarReaction[]
+    ) {
+      this.enabledLunarReactions.push(...reactions);
+    }),
+    specialEnergy: h.simpleAttribute({
+      uniqueKey: "specialEnergy",
+    })(function (variableName: string, slotSize: number) {
+      this.specialEnergy = { variableName, slotSize };
+    }),
   }),
-  until: h.simpleAttribute({
-    uniqueKey: "version",
-  })(function (version: Version) {
-    this.versionInfo = {
-      from: "official",
-      value: { predicate: "until", version },
-    };
-  }),
-  tags: h.simpleAttribute()(function (...tags: CharacterTag[]) {
-    this.tags.push(...tags);
-  }),
-  health: h.simpleAttribute()(function (maxHealth: number) {
-    this.maxHealth = maxHealth;
-  }),
-  energy: h.simpleAttribute()(function (maxEnergy: number) {
-    this.maxEnergy = maxEnergy;
-  }),
-  skills: h.simpleAttribute()(function (
-    ...skillIds: (SkillHandle | PassiveSkillHandle)[]
-  ) {
-    this.skillIds.push(...skillIds);
-  }),
-  associateNightsoul: h.simpleAttribute({
-    uniqueKey: "associateNightsoul",
-  })(function (blessingId: StatusHandle) {
-    this.associatedNightsoulsBlessingId = blessingId;
-  }),
-  enabledLunarReactions: h.simpleAttribute()(function (
-    ...reactions: LunarReaction[]
-  ) {
-    this.enabledLunarReactions.push(...reactions);
-  }),
-  specialEnergy: h.simpleAttribute({
-    uniqueKey: "specialEnergy",
-  })(function (variableName: string, slotSize: number) {
-    this.specialEnergy = { variableName, slotSize };
-  }),
-})) {}
+  DEFAULT_CHARACTER_VM_META,
+) {}

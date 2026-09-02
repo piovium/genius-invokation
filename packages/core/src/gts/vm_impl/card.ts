@@ -36,7 +36,6 @@ import {
   type EntityDescriptionDictionaryGetter,
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
-  type IdOfVMMeta,
   type ICaller,
   type ThisWithType,
   type TriggeredSkillVMMetaFromCard,
@@ -305,14 +304,14 @@ interface EntityVMMetaFromCard<
   Meta extends CardVMMeta,
   Type extends "support" | "equipment",
 > {
-  readonly id: IdOfVMMeta<Meta>;
-  type: Type;
-  variables: never;
-  stagedEventArgType: StrictInitiativeSkillEventArg<
+  readonly id: Meta["id"];
+  readonly type: Type;
+  readonly variables: never;
+  readonly stagedEventArgType: StrictInitiativeSkillEventArg<
     [Type] extends ["equipment"] ? readonly ["character"] : readonly []
   >;
-  associatedExtension: Meta["associatedExtension"];
-  snippets: {};
+  readonly associatedExtension: Meta["associatedExtension"];
+  readonly snippets: {};
 }
 
 const DEFAULT_CARD_VM_META = {
@@ -341,7 +340,7 @@ export class CardViewModel extends InitiativeSkillViewModel
       uniqueKey(): "id";
       as<Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
-      ): HandleT<Meta["type"], IdOfVMMeta<Meta>>;
+      ): HandleT<Meta["type"], Meta["id"]>;
       as(this: AR.This<ReservedMeta>): undefined;
     }>(
       (model, [id]) => {
@@ -428,7 +427,7 @@ export class CardViewModel extends InitiativeSkillViewModel
         this: NoTargetSpecifiedThis<Meta>,
       ): AR.With<
         typeof TechniqueViewModel,
-        DefaultTechniqueVMMeta<Meta["associatedExtension"], IdOfVMMeta<Meta>>
+        DefaultTechniqueVMMeta<Meta["associatedExtension"], Meta["id"]>
       >;
       uniqueKey(): "type";
       mergeMeta<Meta extends CardVMMeta, InnerMeta extends TechniqueVMMeta>(
