@@ -31,7 +31,7 @@ import {
 import type { GameState } from "./base/state";
 import { SkillExecutor } from "./skill_executor";
 import { getActiveCharacterIndex, getEntityArea, type Writable } from "./utils";
-import { GiTcgPreviewAbortedError } from "./error";
+import { GiTcgIoNotProvideError, GiTcgPreviewAbortedError } from "./error";
 import {
   ActionValidity,
   DiceType,
@@ -139,8 +139,8 @@ class PreviewContext implements Disposable {
     try {
       await executor.handleEvent(event);
     } catch (e) {
-      if (this.skipError) {
-        // skip.
+      if (this.skipError || e instanceof GiTcgIoNotProvideError) {
+        // skip. Precalculation should not be aborted by absence of IO.
       } else {
         throw e;
       }
