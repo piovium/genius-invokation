@@ -70,12 +70,6 @@ function registerMetadata(md: CustomMetadata) {
   getCustomDataRegistration().registerMetadata(md);
 }
 
-type IdOfVMMeta<Meta> = Meta extends {
-  readonly id: infer Id extends number;
-}
-  ? Id
-  : number;
-
 type WithIdVMMeta<Meta, Id extends number> = Omit<Meta, "id"> & {
   readonly id: Id;
 };
@@ -227,7 +221,7 @@ const CustomCardViewModel = CardViewModel.extend(CustomCardModel, (h) => ({
     uniqueKey(): "id";
     as<Meta extends EntityVMMeta>(
       this: AR.This<Meta>,
-    ): CardHandle<IdOfVMMeta<Meta>>;
+    ): CardHandle<Meta["id"]>;
   }>(
     () => {},
     (model, [id]) => {
@@ -279,8 +273,8 @@ const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
       as<Meta extends CharacterSkillVMMeta>(
         this: AR.This<Meta>,
       ): Meta extends { isInitiativeSkill: true }
-        ? SkillHandle<IdOfVMMeta<Meta>>
-        : PassiveSkillHandle<IdOfVMMeta<Meta>>;
+        ? SkillHandle<Meta["id"]>
+        : PassiveSkillHandle<Meta["id"]>;
     }>(
       () => {},
       (model, [id]) => {
@@ -325,7 +319,7 @@ const CustomEntityViewModel = EntityViewModel.extend(
       uniqueKey(): "id";
       as<Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
-      ): HandleT<Meta["type"], IdOfVMMeta<Meta>>;
+      ): HandleT<Meta["type"], Meta["id"]>;
     }>(
       () => {},
       (model, [id]) => {
@@ -372,7 +366,7 @@ const CustomAttachmentViewModel = AttachmentViewModel.extend(
       uniqueKey(): "id";
       as<Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
-      ): AttachmentHandle<IdOfVMMeta<Meta>>;
+      ): AttachmentHandle<Meta["id"]>;
     }>(
       () => {},
       (model, [id]) => {
