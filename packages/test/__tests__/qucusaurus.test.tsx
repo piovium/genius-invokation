@@ -77,6 +77,31 @@ test("qucusaurus delayed one fast action to next switch", async () => {
   await c.me.end();
 });
 
+test("qucusaurus: defeated switch during precalculation does not block action modifiers", async () => {
+  const oppNext = ref();
+  const switchTarget = ref();
+  const c = setup(
+    <State dataVersion="v6.0.0">
+      <Character opp active health={1}>
+        <Status def={Target} />
+      </Character>
+      <Character opp ref={oppNext} />
+      <Character my active />
+      <Character my ref={switchTarget}>
+        <Equipment def={Qucusaurus} />
+      </Character>
+      <Card my def={ShadowhuntShell} />
+      <DiceCount my count={1} />
+    </State>,
+  );
+
+  await c.me.switch(switchTarget);
+  await c.opp.chooseActive(oppNext);
+
+  expect(c.state.players[0].dice).toHaveLength(1);
+  await c.me.end();
+});
+
 test.each(["throw", "skipConsume", "skipAction", void 0] as const)(
   "qucusaurus: insufficient dice behavior",
   async (unexpectedInsufficientDice) => {
