@@ -40,7 +40,7 @@ define summon {
       :damage(DamageType.Hydro, 2);
     }
   };
-}
+};
 
 /**
  * @id 122081
@@ -55,7 +55,7 @@ define status {
     :immune(1);
     :dispose();
   };
-}
+};
 
 /**
  * @id 122083
@@ -67,7 +67,7 @@ define status {
   id 122083 as SwellingTorrent;
   since "v7.0.0";
   prepare Overflow;
-}
+};
 
 /**
  * @id 22081
@@ -81,7 +81,7 @@ define skill {
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Hydro, 1);
-}
+};
 
 /**
  * @id 22082
@@ -95,7 +95,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 2);
   :characterStatus(SwellingTorrent, :self);
-}
+};
 
 /**
  * @id 22083
@@ -110,7 +110,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 3);
   :summon(WaterDroplet);
-}
+};
 
 /**
  * @id 22084
@@ -133,7 +133,7 @@ define skill {
       }
     };
   };
-}
+};
 
 /**
  * @id 22085
@@ -146,7 +146,7 @@ define skill {
   skillType elemental;
   prepared;
   :damage(DamageType.Hydro, 1);
-}
+};
 
 /**
  * @id 22086
@@ -158,7 +158,7 @@ define skill {
   id 22086 as HydroCrystalCorePassive01;
   skillType passive;
   reserved;
-}
+};
 
 /**
  * @id 2208
@@ -172,15 +172,19 @@ define character {
   tags hydro, monster;
   health 8;
   energy 2;
-  skills DropletDiffusion, SurgingTides, CalamitousTides, HydroCrystalCorePassive, Overflow;
-}
+  skills DropletDiffusion,
+    SurgingTides,
+    CalamitousTides,
+    HydroCrystalCorePassive,
+    Overflow;
+};
 
 /**
  * @id 222081
  * @name 诡谲恶浪
  * @description
  * 快速行动：装备给我方的无相之水。
- * 无相之水或水滴造成伤害后，治疗我方受伤最多的魔物1点。（每回合3次）
+ * 无相之水或水滴造成伤害后，治疗我方生命值最低的魔物1点。（每回合3次）
  * （牌组中包含无相之水，才能加入牌组）
  */
 define card {
@@ -196,13 +200,7 @@ define card {
       );
       listenTo samePlayer;
       usage perRound, 3;
-      :heal(
-        1,
-        $.my.character
-          .tag("monster")
-          .orderBy("health", "-", "maxHealth")
-          .limit(1),
-      );
+      :heal(1, $.macros.myMinHealth);
     };
   };
-}
+};
