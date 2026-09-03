@@ -182,6 +182,7 @@ define card {
           :queryAll($.my.summon).length > 0
       );
       usage perRound, 1;
+      :abortPreview();
       const summons = :queryAll($.my.summon);
       if (summons.length > 0) {
         const targetSummon = :random(summons);

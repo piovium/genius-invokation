@@ -151,6 +151,7 @@ define card {
   technique {
     target $.my.character.def(Mavuika);
     on staged {
+      :abortPreview();
       const summons = :queryAll($.my.summon);
       if (summons.length > 0) {
         const summon = :random(summons);
