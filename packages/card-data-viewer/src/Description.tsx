@@ -26,7 +26,7 @@ import { createStore, produce } from "solid-js/store";
 import { Reference } from "./Entity";
 import { useAssetsManager } from "./context";
 
-type DescriptionItem =
+type DescriptionItem = (
   | {
       type: "text";
       content: string;
@@ -43,37 +43,52 @@ type DescriptionItem =
       type: "reference";
       rType: string; // "C" | "K" | "S" | "A"
       id: number;
-    };
+    }
+) & { color?: string };
+
+const COLOR_TAG_PATTERN = /<color(?:=([^>]*))?>([\s\S]*?)<\/color>/gi;
 
 const descriptionToItems = (
   description: string,
   keyMap: Record<string, string> = {},
 ): DescriptionItem[] => {
-  const text = description
-    .replace(/<[^>]+>/g, "")
-    .replace(/\\n/g, "\n")
-    .replace(/\$?\{(.*?)\}/g, (_, g1: string) => {
-      return keyMap[g1] ?? "";
-    });
-  const segs = text.replace(/\$\[(.*?)\]/g, "$$[$1$$[").split("$[");
-  const result: DescriptionItem[] = [];
-  for (let i = 0; i < segs.length; i++) {
-    result.push({ type: "text", content: segs[i] });
-    i++;
-    if (i >= segs.length) break;
-    if (segs[i] === "D__KEY__ELEMENT") {
-      result.push({ type: "damage", dType: keyMap[segs[i]] });
-    } else if (keyMap[segs[i]]) {
-      result.push({ type: "key", content: keyMap[segs[i]] });
-    } else {
-      const rType = segs[i][0];
-      let id = Number(segs[i].substring(1));
-      if (rType === "K") {
-        id *= -1;
+  const parseSegment = (segment: string, color?: string) => {
+    const text = segment
+      .replace(/<[^>]+>/g, "")
+      .replace(/\\n/g, "\n")
+      .replace(/\$?\{(.*?)\}/g, (_, g1: string) => {
+        return keyMap[g1] ?? "";
+      });
+    const segs = text.replace(/\$\[(.*?)\]/g, "$$[$1$$[").split("$[");
+    const result: DescriptionItem[] = [];
+    for (let i = 0; i < segs.length; i++) {
+      result.push({ type: "text", content: segs[i], color });
+      i++;
+      if (i >= segs.length) break;
+      if (segs[i] === "D__KEY__ELEMENT") {
+        result.push({ type: "damage", dType: keyMap[segs[i]], color });
+      } else if (keyMap[segs[i]]) {
+        result.push({ type: "key", content: keyMap[segs[i]], color });
+      } else {
+        const rType = segs[i][0];
+        let id = Number(segs[i].substring(1));
+        if (rType === "K") {
+          id *= -1;
+        }
+        result.push({ type: "reference", rType, id, color });
       }
-      result.push({ type: "reference", rType, id });
     }
+    return result;
+  };
+
+  const result: DescriptionItem[] = [];
+  let start = 0;
+  for (const match of description.matchAll(COLOR_TAG_PATTERN)) {
+    result.push(...parseSegment(description.slice(start, match.index)));
+    result.push(...parseSegment(match[2], match[1]));
+    start = match.index + match[0].length;
   }
+  result.push(...parseSegment(description.slice(start)));
   return result;
 };
 
@@ -179,7 +194,16 @@ export function Description(props: DescriptionProps) {
           {(item) => (
             <Switch>
               <Match when={item.type === "text" && item} keyed>
-                {(item) => <span>{item.content}</span>}
+                {(item) => (
+                  <span
+                    classList={{
+                      "description-dynamic": item.color === "#D3BC8EFF",
+                      "description-strong": item.color === "#FFFFFFFF",
+                    }}
+                  >
+                    {item.content}
+                  </span>
+                )}
               </Match>
               <Match when={item.type === "key" && item} keyed>
                 {(item) => <span>{item.content}</span>}
@@ -197,7 +221,7 @@ export function Description(props: DescriptionProps) {
                   <Show
                     when={item.rType === "K"}
                     fallback={
-                      <span class="description-strong">
+                      <span class="description-keyword">
                         <ReferenceName definitionId={item.id} />
                       </span>
                     }
