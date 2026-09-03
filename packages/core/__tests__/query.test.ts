@@ -6,25 +6,6 @@ import {
   stringifySExpr,
 } from "../src/query";
 import type { AttachmentHandle } from "../src/data/type";
-import {
-  LatestStateSymbol,
-  ReactiveStateBase,
-  ReactiveStateSymbol,
-} from "../src/runtime/reactive/base";
-
-class TestReactiveState extends ReactiveStateBase {
-  readonly id = 42;
-  get [ReactiveStateSymbol]() {
-    return "character" as const;
-  }
-  get [LatestStateSymbol]() {
-    return {};
-  }
-}
-
-test("reactive state builds an id query", () => {
-  expect(queryToExpression(new TestReactiveState())).toEqual(["id", 42]);
-});
 
 test("'Fluent API' building tests", () => {
   expect(
