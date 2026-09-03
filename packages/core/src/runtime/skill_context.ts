@@ -640,6 +640,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
   ): RxEntityState<Meta, TypeT>[] {
     if (Array.isArray(q)) {
       return q.map((s) => this.get(s));
+    } else if (typeof q !== "function" && ReactiveStateSymbol in q) {
+      // Reactive states are also queries, but direct-target APIs should keep
+      // their existing eager-target semantics.
+      return [q as RxEntityState<Meta, TypeT>];
     } else if (typeof q === "function" || toExpression in q) {
       return this.queryAll(q) as RxEntityState<Meta, TypeT>[];
     } else {

@@ -148,7 +148,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Cryo, 4);
   :heal(2, :self);
-  :dispose($.typeStatus.def(IcesealedCrimsonWitchOfEmbers).at($.id(:self.id)));
+  :dispose($.typeStatus.def(IcesealedCrimsonWitchOfEmbers).at(:self));
 };
 
 /**

@@ -14,6 +14,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { ExEntityType } from "../../data/type";
+import type { SExprSchema } from "../../query/expr_schema";
+import {
+  toExpression,
+  toExpressionUnordered,
+  type IUnorderedQuery,
+  type typingInfo,
+  type TypingInfoBase,
+} from "../../query/utils";
 
 export const ReactiveStateSymbol: unique symbol = Symbol("ReactiveState");
 export type ReactiveStateSymbol = typeof ReactiveStateSymbol;
@@ -34,14 +42,21 @@ export interface ExtraInfo<Ty extends ExEntityType> {
     | (Ty extends "eventCard" | "support" | "equipment" | "attachment"
         ? "hands" | "pile"
         : never)
-    | "disposedEntities";
+    | "removedEntities";
 }
 
-
-export abstract class ReactiveStateBase {
+export abstract class ReactiveStateBase implements IUnorderedQuery {
+  declare [typingInfo]: TypingInfoBase;
+  abstract readonly id: number;
   abstract get [ReactiveStateSymbol](): ExEntityType;
   declare [RawStateSymbol]: object;
   abstract get [LatestStateSymbol](): object;
+  [toExpressionUnordered](): SExprSchema.UnorderedQuery {
+    return ["id", this.id];
+  }
+  [toExpression](): SExprSchema.Query {
+    return this[toExpressionUnordered]();
+  }
   cast<Ty extends ExEntityType>(): this & {
     readonly [ReactiveStateSymbol]: Ty;
   } {

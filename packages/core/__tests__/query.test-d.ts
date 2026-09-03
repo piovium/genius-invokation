@@ -8,6 +8,8 @@ import { $ } from "../src/query/dollar";
 import { type IsEqual, typingInfo, type IQuery, type InferResult } from "../src/query/utils";
 import type { CharacterHandle, SummonHandle } from "../src/data";
 import type { AttachmentHandle, ExEntityType } from "../src/data/type";
+import type { ContextMetaBase } from "../src/runtime/skill_context";
+import type { RxEntityState } from "../src/runtime/reactive";
 
 declare const infer: <Q extends IQuery>(q: Q) => InferResult<Q>;
 
@@ -36,6 +38,14 @@ expectEntityType<"character">()($.character);
 expectEntityType<"character">()($.active);
 expectEntityType<"character">()($.prev);
 expectEntityType<"character">()($.next);
+
+// reactive states are queries for their own entity id
+declare const reactiveCharacter: RxEntityState<ContextMetaBase, "character">;
+declare const reactiveStatus: RxEntityState<ContextMetaBase, "status">;
+expectEntityType<"character">()(reactiveCharacter);
+expectEntityType<"character">()($.character.intersection(reactiveCharacter));
+expectEntityType<"status">()($.typeStatus.at(reactiveCharacter));
+expectEntityType<"character">()($.character.has(reactiveStatus));
 
 expectEntityType<"eventCard" | "equipment" | "support" | "attachment">()(
   $.vHand,
