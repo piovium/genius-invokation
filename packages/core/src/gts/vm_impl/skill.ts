@@ -46,6 +46,7 @@ import {
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
   type ICaller,
+  type WithIdVMMeta,
 } from "./entity";
 import type {
   ExEntityType,
@@ -727,14 +728,17 @@ export class CharacterSkillViewModel extends InitiativeSkillViewModel
   //
   .extend(CharacterSkillModel, (h) => ({
     id: h.attribute<{
-      (id: number): AR.Done;
+      <Meta extends CharacterSkillVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       required(): true;
       uniqueKey(): "id";
       as<Meta extends CharacterSkillVMMeta>(
         this: AR.This<Meta>,
       ): Meta extends { isInitiativeSkill: true }
-        ? SkillHandle
-        : PassiveSkillHandle;
+        ? SkillHandle<Meta["id"]>
+        : PassiveSkillHandle<Meta["id"]>;
       as(this: AR.This<ReservedMeta>): undefined;
     }>(
       (model, [id]) => {

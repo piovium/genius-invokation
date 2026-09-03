@@ -151,12 +151,14 @@ define combatStatus {
   variable organismCount, 0;
   on entityEnter {
     when :(
-      [
-        ProliferatedOrganism01,
-        ProliferatedOrganism02,
-        ProliferatedOrganism03,
-        ProliferatedOrganism04,
-      ].includes(:e.entity.definition.id as SummonHandle)
+      (
+        [
+          ProliferatedOrganism01,
+          ProliferatedOrganism02,
+          ProliferatedOrganism03,
+          ProliferatedOrganism04,
+        ] as SummonHandle[]
+      ).includes(:e.entity.definition.id as SummonHandle)
     );
     listenTo samePlayer;
     :addVariable("organismCount", 1);
@@ -289,12 +291,14 @@ define card {
     };
     on increaseDamage {
       when :(
-        [
-          ProliferatedOrganism01,
-          ProliferatedOrganism02,
-          ProliferatedOrganism03,
-          ProliferatedOrganism04,
-        ].includes(:e.source.definition.id as SummonHandle)
+        (
+          [
+            ProliferatedOrganism01,
+            ProliferatedOrganism02,
+            ProliferatedOrganism03,
+            ProliferatedOrganism04,
+          ] as SummonHandle[]
+        ).includes(:e.source.definition.id as SummonHandle)
       );
       listenTo samePlayer;
       :e.increaseDamage(1);
