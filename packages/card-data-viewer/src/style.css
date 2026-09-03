@@ -148,7 +148,15 @@
     font-size: 1em;
   }
 
+  .description-dynamic {
+    color: var(--text-color-h3);
+  }
+
   .description-strong {
+    color: var(--text-color-strong);
+  }
+
+  .description-keyword {
     color: var(--text-color-strong);
     margin-inline: 0.125em;
   }
