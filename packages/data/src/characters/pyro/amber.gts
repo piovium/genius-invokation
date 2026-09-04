@@ -42,9 +42,11 @@ define summon {
   on useSkill {
     when :(
       :query(
-        $.id(:e.skillCaller.id)
-          .intersection($.character.def(Amber))
-          .intersection($.has($.equipped.def(BunnyTriggered))),
+        $.intersection(
+          :e.skillCaller,
+          $.character.def(Amber),
+          $.has($.equipped.def(BunnyTriggered)),
+        ),
       ) && :e.isSkillType("normal")
     );
     :damage(DamageType.Pyro, 4);

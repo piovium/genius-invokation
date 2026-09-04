@@ -82,9 +82,9 @@ define skill {
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
   const val =
-    :query(
-      $.typeStatus.def(RadicalVitalityStatus).at($.id(:self.id)),
-    )?.getVariable("vitality") ?? 0;
+    :query($.typeStatus.def(RadicalVitalityStatus).at(:self))?.getVariable(
+      "vitality",
+    ) ?? 0;
   :damage(DamageType.Dendro, 4 + val);
 };
 

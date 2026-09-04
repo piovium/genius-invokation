@@ -121,7 +121,7 @@ define card {
         return !!:query(
           $.my.combatStatus
             .tag("shield")
-            .union($.typeStatus.tag("shield").at($.id(:self.master.id))),
+            .union($.typeStatus.tag("shield").at(:self.master)),
         );
       };
       :e.increaseDamage(1);

@@ -640,6 +640,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
   ): RxEntityState<Meta, TypeT>[] {
     if (Array.isArray(q)) {
       return q.map((s) => this.get(s));
+    } else if (ReactiveStateSymbol in q) {
+      // Reactive states are also IQuery, check them before toExpression
+      return [q as RxEntityState<Meta, TypeT>];
     } else if (typeof q === "function" || toExpression in q) {
       return this.queryAll(q) as RxEntityState<Meta, TypeT>[];
     } else {

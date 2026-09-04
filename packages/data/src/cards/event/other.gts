@@ -950,9 +950,7 @@ define card {
   addTarget $.my.character.has($.equipped.tag("weapon"));
   addTarget :(
     :queryAll(
-      $.my.character
-        .tagOf("weapon", $.id(:e.targets[0].id))
-        .exclude($.id(:e.targets[0].id)),
+      $.my.character.tagOf("weapon", :e.targets[0]).exclude(:e.targets[0]),
     ).map((c) => c.latest())
   );
   const weapon = :e.targets[0].hasWeapon()!;
@@ -981,9 +979,7 @@ define card {
   since "v3.3.0";
   addTarget $.my.character.has($.equipped.tag("artifact"));
   addTarget :(
-    :queryAll($.my.character.exclude($.id(:e.targets[0].id))).map((c) =>
-      c.latest(),
-    )
+    :queryAll($.my.character.exclude(:e.targets[0])).map((c) => c.latest())
   );
   const artifact = :e.targets[0].hasArtifact()!;
   artifact.resetUsagePerRound();
@@ -3025,11 +3021,12 @@ define card {
   if (
     :player.initialPile.filter((c) => c.tags.includes("talent")).length >= 3
   ) {
+    // 7.0实测为没有随机，直接取第1个
     const maxCostTargets = :maxCostHands(1, {
       filter: (card) => card.definition.tags.includes("talent"),
     });
     if (maxCostTargets.length > 0) {
-      :attachCostReduction(:random(maxCostTargets));
+      :attachCostReduction(maxCostTargets);
     }
   }
 }
