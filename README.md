@@ -9,7 +9,6 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/piovium/genius-invokation/main.yml)
 ![NPM Version](https://img.shields.io/npm/v/%40gi-tcg%2Fcore)
 ![PyPI - Version](https://img.shields.io/pypi/v/gitcg)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/piovium/genius-invokation)
 
 [中文版](./README.md)  | [English Version](./README.en.md) | [日本語版](./README.jp.md)
 
