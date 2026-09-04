@@ -43,7 +43,7 @@ define skill {
   id 14054 as Wavestrider;
   skillType elemental;
   prepared;
-  :query($.typeStatus.def(TidecallerSurfEmbrace).at($.id(:self.id)))?.dispose();
+  :query($.typeStatus.def(TidecallerSurfEmbrace).at(:self))?.dispose();
   :damage(DamageType.Electro, 3);
   if (:self.hasEquipment(LightningStorm)) {
     :characterStatus(SummonerOfLightning, :self);

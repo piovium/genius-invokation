@@ -26,6 +26,7 @@ import {
 } from "./base";
 import type { ExEntityState, ExEntityType } from "../../data/type";
 import { Attachment, type TypedAttachment } from "./attachment";
+import type { IUnorderedQuery } from "../../query/utils";
 
 type ReactiveClassCtor = new (
   skillContext: SkillContext<any>,
@@ -52,7 +53,12 @@ type ReactiveState<
           ? TypedAttachment<Meta>
           : Ty extends EntityType
             ? TypedEntity<Meta, Ty, Extra>
-            : never)
+            : never) &
+      IUnorderedQuery<{
+        type: Ty;
+        areaType: Extra["areaType"];
+        variables: Extra["variables"];
+      }>
   : never;
 
 export type RxEntityState<
