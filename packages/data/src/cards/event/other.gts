@@ -3021,11 +3021,12 @@ define card {
   if (
     :player.initialPile.filter((c) => c.tags.includes("talent")).length >= 3
   ) {
+    // 7.0实测为没有随机，直接取第1个
     const maxCostTargets = :maxCostHands(1, {
       filter: (card) => card.definition.tags.includes("talent"),
     });
     if (maxCostTargets.length > 0) {
-      :attachCostReduction(:random(maxCostTargets));
+      :attachCostReduction(maxCostTargets);
     }
   }
 }
