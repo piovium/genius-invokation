@@ -263,7 +263,7 @@ define skill {
 
 define extension {
   idHint 21052 as RadianceInFluxExtension;
-  description "记录本局游戏灵觉·浮彩的使用次数";
+  description "记录本局游戏千变的浮彩的使用次数";
   schema ({ usedCount: "pair<number>" });
   initialState ({ usedCount: pair(0) });
   mutateWhen onUseSkill,
