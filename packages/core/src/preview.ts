@@ -323,11 +323,11 @@ export class ActionPreviewer {
         } else {
           const arg = { targets: newActionInfo.targets };
           await ctx.previewSkill(newActionInfo.skill, arg);
-          await ctx.previewEvent(
-            "onPlayCard",
-            new PlayCardEventArg(ctx.state, newActionInfo),
-          );
         }
+        await ctx.previewEvent(
+          "onPlayCard",
+          new PlayCardEventArg(ctx.state, newActionInfo),
+        );
         break;
       }
       case "switchActive": {
