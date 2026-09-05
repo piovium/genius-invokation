@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "gnx scripts/index.ts && tsdown"
+    "build": "gnx scripts/index.ts && tsdown",
+    "test": "vitest"
   },
   "devDependencies": {
     "@gi-tcg/data": "workspace:*",

@@ -53,61 +53,6 @@ function getName(node: AST.Identifier | AST.Literal): string | null {
   return typeof node.value === "string" ? node.value : null;
 }
 
-function isReferenceIdentifier(
-  parent: AST.Node | null,
-  key: string | null,
-): boolean {
-  if (!parent || !key) {
-    return true;
-  }
-
-  switch (parent.type) {
-    case "GTSNamedAttributeDefinition":
-      return key !== "name" && key !== "bindingName";
-    case "GTSShortcutArgumentExpression":
-      return false;
-    case "MemberExpression":
-      return !(key === "property" && !isComputed(parent));
-    case "Property":
-    case "PropertyDefinition":
-    case "MethodDefinition":
-      return !(key === "key" && !isComputed(parent));
-    case "VariableDeclarator":
-      return key !== "id";
-    case "FunctionDeclaration":
-    case "FunctionExpression":
-    case "ArrowFunctionExpression":
-      return key !== "id" && key !== "params";
-    case "LabeledStatement":
-    case "BreakStatement":
-    case "ContinueStatement":
-      return key !== "label";
-    default:
-      return true;
-  }
-}
-
-function isComputed(node: AST.Node): boolean {
-  return "computed" in node && node.computed === true;
-}
-
-export function getReferencedNames(node: AST.Node): Set<string> {
-  const result = new Set<string>();
-  walk(node, null, {
-    _(node, { path, next }) {
-      const parent = path.at(-1) ?? null;
-      const key =
-        Object.keys(parent ?? {}).find((k) => (parent as any)[k] === node) ??
-        null;
-      if (node.type === "Identifier" && isReferenceIdentifier(parent, key)) {
-        result.add(node.name);
-      }
-      next();
-    },
-  });
-  return result;
-}
-
 function getLocation(filename: string, node: AST.Node): Location {
   if (!node.loc) {
     throw new Error(`Missing location for ${filename}`);
