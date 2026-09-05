@@ -87,7 +87,7 @@ define card {
       :e.deductOmniCost(1);
     };
     skill {
-      id 3130021;
+      id 3130021 as private ArtfulGrapple;
       cost DiceType.Aligned, 2;
       usage 2;
       :damage(DamageType.Physical, 1);

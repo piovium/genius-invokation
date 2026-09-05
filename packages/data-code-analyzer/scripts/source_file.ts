@@ -17,6 +17,7 @@ import path from "node:path";
 import { EXTENSION_ID_OFFSET } from "@gi-tcg/core/data";
 import { parse, type AST } from "@gi-tcg/gts-transpiler";
 import type { Location } from "../src/types";
+import { walk } from "zimmerframe";
 
 export interface EntityDefinition {
   id: number;
@@ -45,44 +46,11 @@ interface ImportBinding {
   importedName: string;
 }
 
-const SKIPPED_AST_KEYS = new Set(["start", "end", "loc", "range"]);
-
-function isAstNode(value: unknown): value is AST.Node {
-  return typeof value === "object" && value !== null && "type" in value;
-}
-
 function getName(node: AST.Identifier | AST.Literal): string | null {
   if (node.type === "Identifier") {
     return node.name;
   }
   return typeof node.value === "string" ? node.value : null;
-}
-
-function visitAst(
-  node: AST.Node,
-  visitor: (
-    node: AST.Node,
-    parent: AST.Node | null,
-    key: string | null,
-  ) => void,
-  parent: AST.Node | null = null,
-  key: string | null = null,
-) {
-  visitor(node, parent, key);
-  for (const [childKey, value] of Object.entries(node)) {
-    if (SKIPPED_AST_KEYS.has(childKey)) {
-      continue;
-    }
-    if (Array.isArray(value)) {
-      for (const child of value) {
-        if (isAstNode(child)) {
-          visitAst(child, visitor, node, childKey);
-        }
-      }
-    } else if (isAstNode(value)) {
-      visitAst(value, visitor, node, childKey);
-    }
-  }
 }
 
 function isReferenceIdentifier(
@@ -125,10 +93,17 @@ function isComputed(node: AST.Node): boolean {
 
 export function getReferencedNames(node: AST.Node): Set<string> {
   const result = new Set<string>();
-  visitAst(node, (child, parent, key) => {
-    if (child.type === "Identifier" && isReferenceIdentifier(parent, key)) {
-      result.add(child.name);
-    }
+  walk(node, null, {
+    _(node, { path, next }) {
+      const parent = path.at(-1) ?? null;
+      const key =
+        Object.keys(parent ?? {}).find((k) => (parent as any)[k] === node) ??
+        null;
+      if (node.type === "Identifier" && isReferenceIdentifier(parent, key)) {
+        result.add(node.name);
+      }
+      next();
+    },
   });
   return result;
 }
@@ -144,6 +119,33 @@ function getLocation(filename: string, node: AST.Node): Location {
   };
 }
 
+function getAttributeId(
+  attribute: AST.GTSNamedAttributeDefinition,
+): number | null {
+  const id = attribute.body.positionalAttributes.attributes[0];
+  return id?.type === "Literal" && typeof id.value === "number"
+    ? id.value
+    : null;
+}
+
+export function getInlineIds(node: AST.Node): Set<number> {
+  const result = new Set<number>();
+  walk(node, null, {
+    GTSNamedAttributeDefinition(node, { next }) {
+      if (node.bindingName) {
+        const id = getAttributeId(node);
+        if (id !== null) {
+          result.add(
+            getName(node.name) === "idHint" ? id + EXTENSION_ID_OFFSET : id,
+          );
+        }
+      }
+      next();
+    },
+  });
+  return result;
+}
+
 function getRootId(
   definition: AST.GTSDefineStatement,
   filename: string,
@@ -154,26 +156,25 @@ function getRootId(
   const idAttribute = attributes.find(
     (attribute) => getName(attribute.name) === idAttributeName,
   );
-  const id = idAttribute?.body.positionalAttributes.attributes[0];
-  if (id?.type !== "Literal" || typeof id.value !== "number") {
+  const id = idAttribute ? getAttributeId(idAttribute) : null;
+  if (id === null) {
     throw new Error(
       `Expected numeric ${idAttributeName} in ${filename}:${definition.loc?.start.line ?? 0}`,
     );
   }
-  const idValue = id.value;
-  return rootName === "extension" ? idValue + EXTENSION_ID_OFFSET : idValue;
+  return rootName === "extension" ? id + EXTENSION_ID_OFFSET : id;
 }
 
 function getBindingNames(definition: AST.GTSDefineStatement): string[] {
   const result: string[] = [];
-  visitAst(definition, (node) => {
-    if (node.type !== "GTSNamedAttributeDefinition") {
-      return;
-    }
-    const bindingName = node.bindingName;
-    if (bindingName) {
-      result.push(bindingName.name);
-    }
+  walk(definition as AST.Node, null, {
+    GTSNamedAttributeDefinition(node, { next }) {
+      const bindingName = node.bindingName;
+      if (bindingName) {
+        result.push(bindingName.name);
+      }
+      next();
+    },
   });
   return result;
 }
@@ -220,10 +221,7 @@ export class TcgDataSourceFile {
     }
     if (statement.type === "ExportNamedDeclaration") {
       const declaration = statement.declaration;
-      if (
-        isAstNode(declaration) &&
-        declaration.type === "VariableDeclaration"
-      ) {
+      if (declaration?.type === "VariableDeclaration") {
         this.addVariableDeclaration(declaration, true);
       }
     }
@@ -242,19 +240,17 @@ export class TcgDataSourceFile {
     };
     this.definitions.push(definition);
 
-    visitAst(node, (child) => {
-      if (child.type !== "GTSNamedAttributeDefinition") {
-        return;
-      }
-      const attribute = child;
-      if (!attribute.bindingName) {
-        return;
-      }
-      this.addBinding(attribute.bindingName.name, {
-        kind: "entity",
-        entity: definition,
-        exported: attribute.bindingAccessModifier !== "private",
-      });
+    walk(node as AST.Node, null, {
+      GTSNamedAttributeDefinition: (attribute, { next }) => {
+        if (attribute.bindingName) {
+          this.addBinding(attribute.bindingName.name, {
+            kind: "entity",
+            entity: definition,
+            exported: attribute.bindingAccessModifier !== "private",
+          });
+        }
+        next();
+      },
     });
   }
 
