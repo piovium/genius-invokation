@@ -275,7 +275,7 @@ define card {
       :e.setFastAction();
     };
     skill {
-      id 3130063;
+      id 3130063 as private SwiftGlide;
       usage 2;
       cost DiceType.Aligned, 1;
       :switchActive($.my.next);

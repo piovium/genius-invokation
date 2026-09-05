@@ -13,10 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { getReferencedNames } from "./referenced_names";
 import {
   type Binding,
   type EntityDefinition,
-  getReferencedNames,
+  getInlineIds,
   TcgDataSourceFile,
 } from "./source_file";
 
@@ -30,15 +31,14 @@ export class TcgDataProject {
   getDependencies(
     file: TcgDataSourceFile,
     definition: EntityDefinition,
-  ): Set<EntityDefinition> {
-    const dependencies = new Set<EntityDefinition>();
+  ): Set<number> {
+    const dependencies = getInlineIds(definition.node);
     for (const name of getReferencedNames(definition.node)) {
       for (const dependency of this.resolveName(file, name, new Set())) {
-        if (dependency !== definition) {
-          dependencies.add(dependency);
-        }
+        dependencies.add(dependency.id);
       }
     }
+    dependencies.delete(definition.id);
     return dependencies;
   }
 

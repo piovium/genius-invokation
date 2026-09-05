@@ -89,7 +89,7 @@ define card {
   undiscoverable;
   technique {
     skill {
-      id 1151021;
+      id 1151021 as AdeptalAssistance;
       cost DiceType.Aligned, 1;
       usage 2;
       :heal(2, :self.master);

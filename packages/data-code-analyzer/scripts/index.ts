@@ -38,9 +38,9 @@ for (const file of project.files.values()) {
   for (const definition of file.definitions) {
     result.push({
       id: definition.id,
-      dependencies: [...project.getDependencies(file, definition)]
-        .map((dependency) => dependency.id)
-        .sort((a, b) => a - b),
+      dependencies: [...project.getDependencies(file, definition)].sort(
+        (a, b) => a - b,
+      ),
       bindingNames: definition.bindingNames,
       code: definition.code,
       location: definition.location,

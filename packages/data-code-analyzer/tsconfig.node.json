@@ -10,7 +10,8 @@
     "types": ["node"],
   },
   "include": [
-    "scripts/**/*.ts", 
+    "scripts/**/*.ts",
+    "__tests__/**/*.ts",
     "tsdown.config.ts",
   ]
 }
