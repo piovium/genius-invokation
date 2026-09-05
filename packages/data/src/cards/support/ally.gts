@@ -322,7 +322,7 @@ define card {
   support ally {
     on endPhase {
       usage 2;
-      :gainEnergy(1, $.macros.myEnergyNotFull);
+      :gainEnergy(1, $.macros.myFirstEnergyNotFull);
     };
   };
 };
