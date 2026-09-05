@@ -494,7 +494,7 @@ define card {
       void 0;
       const count = :queryAll($.opp.character.var("aura", Aura.Electro)).length;
       for (let i = 0; i < count; i++) {
-        :query($.macros.myEnergyNotFull)?.gainEnergy(1);
+        :query($.macros.myFirstEnergyNotFull)?.gainEnergy(1);
       }
     };
   };

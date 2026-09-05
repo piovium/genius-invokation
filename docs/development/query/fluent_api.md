@@ -231,7 +231,7 @@ $.my.character.orderBy("health", "-", "maxHealth").limit(1); // 受伤最重的�
 | ------------------------------- | --------------------------- |
 | `$.macros.myActive`             | 我方出战角色                |
 | `$.macros.oppActive`            | 敌方出战角色                |
-| `$.macros.myEnergyNotFull`      | 我方充能未满的角色          |
+| `$.macros.myFirstEnergyNotFull` | 我方第一个充能未满的角色    |
 | `$.macros.oppActivePrioritized` | “优先”敌方出战角色          |
 | `$.macros.myMinHealth`          | 我方生命值最少的角色        |
 | `$.macros.oppMinHealth`         | 敌方生命值最少的角色        |
