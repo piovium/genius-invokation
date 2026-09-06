@@ -50,6 +50,69 @@ define card {
       shield: 2,
     },
   });
+  // [浮彩·支柱] 打出浮彩时：生成等于此状态层数层护盾。
+  const radiantHuesPillarInEffect = :query(
+    $.my.combatStatus.def(RadiantHuesPillarInEffect),
+  );
+  if (radiantHuesPillarInEffect) {
+    :combatStatus(Shield, "my", {
+      overrideVariables: {
+        shield: radiantHuesPillarInEffect.getVariable("shieldValue"),
+      },
+    });
+  }
+  // [浮彩·冰凌] 打出浮彩时：造成等于此状态层数点冰元素伤害。
+  const radiantHuesIcicleInEffect = :query(
+    $.my.combatStatus.def(RadiantHuesIcicleInEffect),
+  );
+  if (radiantHuesIcicleInEffect) {
+    :damage(
+      DamageType.Cryo,
+      radiantHuesIcicleInEffect.getVariable("damageValue"),
+    );
+  }
+  // [浮彩·多重] 打出浮彩时：召唤浮彩分身。（浮彩分身造成的伤害等于此状态层数）
+  const radiantHuesEchoesInEffect = :query(
+    $.my.combatStatus.def(RadiantHuesEchoesInEffect),
+  );
+  if (radiantHuesEchoesInEffect) {
+    :summon(RadiantReflection, "my", {
+      overrideVariables: {
+        damageValue: radiantHuesEchoesInEffect.getVariable("damageValue"),
+      },
+    });
+  }
+  // [浮彩·实像] 打出浮彩时：抓等于此状态层数张牌。
+  const radiantHuesManifestationInEffect = :query(
+    $.my.combatStatus.def(RadiantHuesManifestationInEffect),
+  );
+  if (radiantHuesManifestationInEffect) {
+    :drawCards(radiantHuesManifestationInEffect.getVariable("drawValue"));
+  }
+  // [浮彩·坚冰] 打出浮彩时：使我方出战角色附属等于此状态层数层战斗计划。
+  const radiantHuesSolidIceInEffect = :query(
+    $.my.combatStatus.def(RadiantHuesSolidIceInEffect),
+  );
+  if (radiantHuesSolidIceInEffect) {
+    :characterStatus(BattlePlan, $.my.active, {
+      overrideVariables: {
+        usage: radiantHuesSolidIceInEffect.getVariable("layer"),
+      },
+    });
+  }
+  // [浮彩·迅影] 打出浮彩时：赋予我方费用最高的1张随机手牌等于此状态层数层费用降低。
+  const radiantHuesSwiftShadowInEffect = :query(
+    $.my.combatStatus.def(RadiantHuesSwiftShadowInEffect),
+  );
+  if (radiantHuesSwiftShadowInEffect) {
+    const [maxCostHand] = :maxCostHands(1);
+    if (maxCostHand) {
+      :attachCostReduction(
+        maxCostHand,
+        radiantHuesSwiftShadowInEffect.getVariable("reductCount"),
+      );
+    }
+  }
 };
 
 /**
@@ -61,10 +124,6 @@ define card {
 define combatStatus {
   id 221052 as RadiantHuesIcicleInEffect;
   variable damageValue, 1 { append; };
-  on playCard {
-    when :( :e.card.definition.id === RadiantHues );
-    :damage(DamageType.Cryo, :getVariable("damageValue"));
-  };
 };
 
 /**
@@ -89,14 +148,6 @@ define card {
 define combatStatus {
   id 221053 as RadiantHuesEchoesInEffect;
   variable damageValue, 1 { append; };
-  on playCard {
-    when :( :e.card.definition.id === RadiantHues );
-    :summon(RadiantReflection, "my", {
-      overrideVariables: {
-        damageValue: :getVariable("damageValue"),
-      },
-    });
-  };
 };
 
 /**
@@ -121,10 +172,6 @@ define card {
 define combatStatus {
   id 221054 as RadiantHuesManifestationInEffect;
   variable drawValue, 1 { append; };
-  on playCard {
-    when :( :e.card.definition.id === RadiantHues );
-    :drawCards(:getVariable("drawValue"));
-  };
 };
 
 /**
@@ -149,14 +196,6 @@ define card {
 define combatStatus {
   id 221055 as RadiantHuesPillarInEffect;
   variable shieldValue, 1 { append; };
-  on playCard {
-    when :( :e.card.definition.id === RadiantHues );
-    :combatStatus(Shield, "my", {
-      overrideVariables: {
-        shield: :getVariable("shieldValue"),
-      },
-    });
-  };
 };
 
 /**
@@ -181,14 +220,6 @@ define card {
 define combatStatus {
   id 221056 as RadiantHuesSolidIceInEffect;
   variable layer, 1 { append; };
-  on playCard {
-    when :( :e.card.definition.id === RadiantHues );
-    :characterStatus(BattlePlan, $.my.active, {
-      overrideVariables: {
-        usage: :getVariable("layer"),
-      },
-    });
-  };
 };
 
 /**
@@ -213,13 +244,6 @@ define card {
 define combatStatus {
   id 221057 as RadiantHuesSwiftShadowInEffect;
   variable reductCount, 1 { append; };
-  on deductOmniDiceCard {
-    when :( :e.action.skill.caller.definition.id === RadiantHues );
-    const [maxCostHand] = :maxCostHands(1);
-    if (maxCostHand) {
-      :attachCostReduction(maxCostHand, :getVariable("reductCount"));
-    }
-  };
 };
 
 /**
