@@ -17,7 +17,6 @@ import type { CharacterTag, EntityTag, EntityType } from "..";
 import type { AttachmentTag } from "../base/attachment";
 import type {
   AttachmentHandle,
-  CardHandle,
   CharacterHandle,
   EquipmentHandle,
   ExEntityType,
@@ -28,8 +27,6 @@ import type {
 } from "../data/type";
 import type { PrimaryMethodsInternal, PrimaryQuery } from "./primary_query";
 import {
-  type AttachmentReq,
-  type CardReq,
   type CharacterReq,
   type Computed,
   type Constructor,
@@ -53,6 +50,8 @@ import {
   variableKeyToPropertyCode,
   diceCostKey,
   inInitialPileKey,
+  type VariableName,
+  type QueryVariables,
 } from "./utils";
 
 type EventCardHandle = number & { readonly _eventCard: unique symbol };
@@ -143,13 +142,11 @@ type AssignVarAndActionCard<
 
 type RelationOp = "<" | "<=" | "=" | ">=" | ">" | "!=";
 
-type VariableName<Meta extends MetaBase> =
-  | TypingInfoFromMeta<Meta>["variables"]
-  | (string & {})
-  | Exclude<StateVariablesKey, string>;
-
-type QueryVariables<Meta extends MetaBase> = StateVariables &
-  Record<TypingInfoFromMeta<Meta>["variables"], number>;
+type VarNameFromMeta<Meta extends HeterogeneousMetaBase> = VariableName<
+  TypingInfoFromMeta<Meta>
+>;
+type QueryVariablesFromMeta<Meta extends HeterogeneousMetaBase> =
+  QueryVariables<TypingInfoFromMeta<Meta>>;
 
 // Make CodeQL happy
 function escapeUnsafeChars(str: string) {
@@ -163,7 +160,7 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
   private get _self(): any {
     return this;
   }
-  private declare _internal: PrimaryMethodsInternal;
+  declare private _internal: PrimaryMethodsInternal;
   // who
   get my(): Assign<Meta, { who: "my" }> {
     this._internal.addConstraint(["who", "my"]);
@@ -329,32 +326,30 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     return this._self;
   }
   // with
-  var<const Name extends VariableName<Meta>>(
+  var<const Name extends VarNameFromMeta<Meta>>(
     name: Name,
     value: number,
   ): AssignVar<Meta, Name>;
-  var<const Name extends VariableName<Meta>>(
+  var<const Name extends VarNameFromMeta<Meta>>(
     name: Name,
     op: RelationOp,
     value: number,
   ): AssignVar<Meta, Name>;
   var<
-    const Name extends VariableName<Meta>,
-    const Name2 extends VariableName<Meta>,
+    const Name extends VarNameFromMeta<Meta>,
+    const Name2 extends VarNameFromMeta<Meta>,
   >(name: Name, op: RelationOp, ref: Name2): AssignVar<Meta, Name | Name2>;
-  var<const Name extends VariableName<Meta>>(
+  var<const Name extends VarNameFromMeta<Meta>>(
     name: Name,
     pred: (value: number) => unknown,
   ): AssignVar<Meta, Name>;
-  var(
-    pred: (values: QueryVariables<Meta>) => unknown,
-  ): Assign<Meta>;
+  var(pred: (values: QueryVariablesFromMeta<Meta>) => unknown): Assign<Meta>;
   var(
     ...args:
       | [StateVariablesKey, number]
       | [StateVariablesKey, RelationOp, number | StateVariablesKey]
       | [StateVariablesKey, (value: number) => unknown]
-      | [(values: QueryVariables<Meta>) => unknown]
+      | [(values: QueryVariablesFromMeta<Meta>) => unknown]
   ): any {
     if (typeof args[0] !== "function") {
       const [name, opOrValue, valueOrRefOrUndefined] = args;
@@ -486,7 +481,9 @@ type _Check = StaticAssert<
   IsExtends<
     PrimaryMethodRestrictionConfig,
     {
-      [K in keyof PrimaryMethodRestrictionConfig]: Partial<HeterogeneousMetaBase>;
+      [
+        K in keyof PrimaryMethodRestrictionConfig
+      ]: Partial<HeterogeneousMetaBase>;
     }
   >
 >;

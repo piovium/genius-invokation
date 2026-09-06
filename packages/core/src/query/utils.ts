@@ -19,28 +19,29 @@ import type { SExprSchema } from "./expr_schema";
 import type { CharacterVariableConfigs } from "../base/character";
 
 export type IsExtends<T, U> = [T] extends [U] ? true : false;
-export type Related<T, U> = IsExtends<T, U> extends true
-  ? true
-  : IsExtends<U, T> extends true
+export type Related<T, U> =
+  IsExtends<T, U> extends true
     ? true
-    : false;
+    : IsExtends<U, T> extends true
+      ? true
+      : false;
 export type Computed<T, R = any> = {
   [K in keyof T]: T[K];
 } extends infer O extends R
   ? O
   : never;
 
-export type IsEqual<T, U> = (<G>() => G extends T ? 1 : 2) extends <
-  G,
->() => G extends U ? 1 : 2
-  ? true
-  : false;
+export type IsEqual<T, U> =
+  (<G>() => G extends T ? 1 : 2) extends <G>() => G extends U ? 1 : 2
+    ? true
+    : false;
 
-export type StrictlySuperTypeOf<T, U> = IsExtends<U, T> extends true
-  ? IsExtends<T, U> extends true
-    ? false
-    : true
-  : false;
+export type StrictlySuperTypeOf<T, U> =
+  IsExtends<U, T> extends true
+    ? IsExtends<T, U> extends true
+      ? false
+      : true
+    : false;
 
 /**
  * T is not a strictly super type of U.
@@ -49,9 +50,8 @@ export type StrictlySuperTypeOf<T, U> = IsExtends<U, T> extends true
  * - a sub type of U
  * - not related to U
  */
-type NotStrictlySuperTypeOf<T, U> = StrictlySuperTypeOf<T, U> extends true
-  ? false
-  : true;
+type NotStrictlySuperTypeOf<T, U> =
+  StrictlySuperTypeOf<T, U> extends true ? false : true;
 
 /**
  * For all properties `K` in `ConfigMeta`, if `Meta[K]` is not a strictly super type of `ConfigMeta[K]`,
@@ -111,13 +111,15 @@ type _CheckFunctionPrototypePropertyExhausted = StaticAssert<
 >;
 
 export type NonIndexKeyOf<T> = keyof {
-  [K in keyof T as string extends K
-    ? never
-    : number extends K
+  [
+    K in keyof T as string extends K
       ? never
-      : symbol extends K
+      : number extends K
         ? never
-        : K]: 0;
+        : symbol extends K
+          ? never
+          : K
+  ]: 0;
 };
 
 export type AnyTuple = [unknown, ...unknown[]] | [];
@@ -130,11 +132,10 @@ export type UnionToIntersection<U> = (
   ? I
   : never;
 
-export type LastOf<U> = UnionToIntersection<
-  U extends any ? () => U : never
-> extends () => infer R
-  ? R
-  : never;
+export type LastOf<U> =
+  UnionToIntersection<U extends any ? () => U : never> extends () => infer R
+    ? R
+    : never;
 
 // Recursive helper that generates an intersected structure of combinations
 // By sequentially pulling individual keys, mapping over their unions, and stacking them.
@@ -150,11 +151,12 @@ type ExplodeImpl<T, K = keyof T, Last = LastOf<K>> = [K] extends [never]
 
 // Formatter helper that cleans up intersections into distinct flat objects
 // (Converts `{a: 1} & {b: 1}` to `{a: 1, b: 1}`)
-type Explode<T> = ExplodeImpl<T> extends infer O
-  ? O extends any
-    ? { [K in keyof O]: O[K] }
-    : never
-  : never;
+type Explode<T> =
+  ExplodeImpl<T> extends infer O
+    ? O extends any
+      ? { [K in keyof O]: O[K] }
+      : never
+    : never;
 
 // type ExplodedMetaBase = Explode<MetaBase>;
 
@@ -184,7 +186,7 @@ export const inInitialPileKey: unique symbol = Symbol.for(
 export type InInitialPileKey = typeof inInitialPileKey;
 
 export interface StateVariables {
-  [key: string]: number;
+  [key: string]: number | undefined;
   [diceCostKey]?: number;
   [inInitialPileKey]?: number;
 }
@@ -204,8 +206,9 @@ export interface IQuery<Ty extends TypingInfoBase = TypingInfoBase> {
   [toExpression](): SExprSchema.Query;
 }
 
-export interface IUnorderedQuery<Ty extends TypingInfoBase = TypingInfoBase>
-  extends IQuery<Ty> {
+export interface IUnorderedQuery<
+  Ty extends TypingInfoBase = TypingInfoBase,
+> extends IQuery<Ty> {
   [toExpressionUnordered]: () => SExprSchema.UnorderedQuery;
 }
 
@@ -330,6 +333,15 @@ export type RelatedToReq<
   Input extends TypingInfoBase,
   Req extends ReqBase,
 > = PropsRelated<Input, Req, "type" | "areaType">;
+
+export type VariableName<Ty extends TypingInfoBase> =
+  | Ty["variables"]
+  | (string & {})
+  | typeof diceCostKey
+  | typeof inInitialPileKey;
+
+export type QueryVariables<Ty extends TypingInfoBase> = StateVariables &
+  Record<Ty["variables"], number>;
 
 export function variableKeyToExpr(
   key: StateVariablesKey,

@@ -2396,7 +2396,7 @@ export const SIMULANKA_SUMMONS = [
 export const SIMULANKA_QUERY: IQuery<{
   type: "summon";
   areaType: "summons";
-  variables: never;
+  variables: "usage" | "hintIcon" | "effect";
 }> = $.union(...SIMULANKA_SUMMONS.map((id) => $.my.summon.def(id)));
 
 /**

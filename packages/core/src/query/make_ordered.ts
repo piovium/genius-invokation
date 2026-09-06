@@ -13,11 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { CharacterVariableConfigs } from "../base/character";
 import type { SExprSchema } from "./expr_schema";
 import {
-  diceCostKey,
-  inInitialPileKey,
   stringifyFunction,
   toExpression,
   toExpressionUnordered,
@@ -25,24 +22,19 @@ import {
   variableKeyToExpr,
   type IQuery,
   type IUnorderedQuery,
-  type NonIndexKeyOf,
+  type QueryVariables,
   type StateVariablesKey,
   type TypingInfoBase,
+  type VariableName,
 } from "./utils";
 
 const isUnorderedQuery = (query: unknown): query is IUnorderedQuery => {
   return !!query && typeof query === "object" && toExpressionUnordered in query;
 };
 
-type VarName<Ty extends TypingInfoBase> =
-  | Ty["variables"]
-  | (string & {})
-  | typeof diceCostKey
-  | typeof inInitialPileKey;
-
-export class MakeOrderedMethods<Ty extends TypingInfoBase>
-  implements IQuery<Ty>
-{
+export class MakeOrderedMethods<
+  Ty extends TypingInfoBase,
+> implements IQuery<Ty> {
   declare [typingInfo]: Ty;
 
   private _unorderedQuery: SExprSchema.UnorderedQuery;
@@ -64,15 +56,15 @@ export class MakeOrderedMethods<Ty extends TypingInfoBase>
     }
   }
   orderByFn(
-    fn: (variables: Record<VarName<Ty>, number>) => number,
+    fn: (variables: QueryVariables<Ty>) => number,
   ): MakeOrderedMethods<Ty> {
     const self = this._makeThisOrdered();
     const fnCode = stringifyFunction(fn);
     self._orderBySpecs.push(["fn", fnCode]);
     return self;
   }
-  orderBy<V extends VarName<Ty>>(variable: V): MakeOrderedMethods<Ty>;
-  orderBy<V1 extends VarName<Ty>, V2 extends VarName<Ty>>(
+  orderBy<V extends VariableName<Ty>>(variable: V): MakeOrderedMethods<Ty>;
+  orderBy<V1 extends VariableName<Ty>, V2 extends VariableName<Ty>>(
     lhs: V1 | number,
     op: "+" | "-" | "*" | "/" | "%",
     rhs: V2 | number,
