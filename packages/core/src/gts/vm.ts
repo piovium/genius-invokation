@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 export { default } from "./vm_impl/index";
-export { CharacterModel, CharacterViewModel } from "./vm_impl/character";
+export { CharacterModel, CharacterViewModel, type CharacterVMMeta } from "./vm_impl/character";
 export { CardModel, CardViewModel } from "./vm_impl/card";
 export {
   EntityModel,

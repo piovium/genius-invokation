@@ -21,7 +21,11 @@ import {
   type VersionInfo,
 } from "../../base/version";
 import { Aura, type LunarReaction } from "@gi-tcg/typings";
-import type { CharacterTag, SpecialEnergyConfig } from "../../base/character";
+import type {
+  CharacterTag,
+  CharacterCoreVariableConfigs,
+  SpecialEnergyConfig,
+} from "../../base/character";
 import type {
   CharacterHandle,
   PassiveSkillHandle,
@@ -29,6 +33,8 @@ import type {
   StatusHandle,
 } from "../../data";
 import { createVariable } from "../../data/utils";
+import type { CharacterVariables } from "../..";
+import type { WithIdVMMeta } from "./entity";
 
 export class CharacterModel {
   // FIXME: use accessor when decorators are in stage 4
@@ -75,24 +81,27 @@ export class CharacterModel {
 
 export interface CharacterVMMeta {
   readonly id: number;
+  readonly variables: string;
 }
 
 export const DEFAULT_CHARACTER_VM_META = {
   id: 0 as number,
+  variables: "" as keyof CharacterCoreVariableConfigs & {},
 } as const satisfies CharacterVMMeta;
 
 export class CharacterViewModel extends defineViewModel(
   CharacterModel,
   (h) => ({
     id: h.attribute<{
-      <const Id extends number>(
+      <Meta extends CharacterVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
         id: Id,
-      ): AR.DoneRewriteMeta<{ readonly id: Id }>;
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       required(): true;
       uniqueKey(): "id";
       as<Meta extends CharacterVMMeta>(
         this: AR.This<Meta>,
-      ): CharacterHandle<Meta["id"]>;
+      ): CharacterHandle<Meta>;
     }>(
       (model, [id]) => {
         model.id = id;

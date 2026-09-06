@@ -22,6 +22,7 @@ import {
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
   type IParentModel,
+  type PushMetaVar,
   type WithIdVMMeta,
 } from "./entity";
 import {
@@ -153,7 +154,7 @@ export const TechniqueSkillViewModel = InitiativeSkillViewModel
       uniqueKey(): "id";
       as<Meta extends TechniqueSkillVMMeta>(
         this: AR.This<Meta>,
-      ): SkillHandle<Meta["id"]>;
+      ): SkillHandle<Meta>;
     }>(
       (model, [id]) => {
         model.id = id;
@@ -176,9 +177,7 @@ export const TechniqueSkillViewModel = InitiativeSkillViewModel
       >(
         meta: Meta,
         innerMeta: InnerMeta,
-      ): Omit<Meta, "variables"> & {
-        variables: Meta["variables"] | InnerMeta["name"];
-      };
+      ): PushMetaVar<Meta, InnerMeta["name"]>;
     }>((model, positionals, subView) => {
       const options = UsageVM.parse(subView);
       if (positionals[0] === "perRound") {
@@ -289,13 +288,11 @@ export const TechniqueViewModel = EntityViewModel
           if (disposingArea.type !== "characters") {
             return;
           }
-          c
-            .query(
-              $.typeStatus
-                .tag("nightsoulsBlessing")
-                .at($.id(disposingArea.characterId)),
-            )
-            ?.dispose();
+          c.query(
+            $.typeStatus
+              .tag("nightsoulsBlessing")
+              .at($.id(disposingArea.characterId)),
+          )?.dispose();
         };
         model.skillList.push(disposeNightsoulSkill.buildSkillDefinition());
       }
@@ -318,9 +315,7 @@ export const TechniqueViewModel = EntityViewModel
       >(
         meta: Meta,
         innerMeta: InnerMeta,
-      ): Omit<Meta, "variables"> & {
-        variables: Meta["variables"] | InnerMeta["variables"];
-      };
+      ): PushMetaVar<Meta, InnerMeta["variables"]>;
     }>((model, [], subView) => {
       const skillModel = TechniqueSkillViewModel.parse(subView, model);
       skillModel.id ??= model.getSubId();
