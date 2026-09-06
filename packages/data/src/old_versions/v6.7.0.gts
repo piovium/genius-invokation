@@ -1,14 +1,19 @@
 import { DiceType, DamageType, $ } from "@gi-tcg/core/data";
-import { BattlePlan } from "../commons.gts";
+import { BattlePlan, Shield } from "../commons.gts";
 import { Cacucu, NightsoulsBlessing } from "../characters/anemo/ifa.gts";
 import {
-  RadiantHues,
   RadiantHuesEchoes,
+  RadiantHuesEchoesInEffect,
   RadiantHuesIcicle,
+  RadiantHuesIcicleInEffect,
   RadiantHuesManifestation,
+  RadiantHuesManifestationInEffect,
   RadiantHuesPillar,
+  RadiantHuesPillarInEffect,
   RadiantHuesSolidIce,
+  RadiantHuesSolidIceInEffect,
   RadiantHuesSwiftShadow,
+  RadiantReflection,
 } from "../characters/cryo/wayward_hermetic_spiritspeaker.gts";
 
 /**
@@ -27,6 +32,75 @@ define skill {
   :damage(DamageType.Anemo, 1);
   :gainNightsoul(:self, 2);
   :equip(Cacucu, :self);
+};
+
+/**
+ * @id 121051
+ * @name 浮彩
+ * @description
+ * 战斗行动：生成2层护盾。
+ */
+define card {
+  id 121051 as private RadiantHues;
+  until "v6.7.0";
+  cost DiceType.Cryo, 2;
+  tags action;
+  :combatStatus(Shield, "my", {
+    overrideVariables: {
+      shield: 2,
+    },
+  });
+  // [浮彩·支柱] 打出浮彩时：生成等于此状态层数层护盾。
+  const radiantHuesPillarInEffect = :query(
+    $.my.combatStatus.def(RadiantHuesPillarInEffect),
+  );
+  if (radiantHuesPillarInEffect) {
+    :combatStatus(Shield, "my", {
+      overrideVariables: {
+        shield: radiantHuesPillarInEffect.getVariable("shieldValue"),
+      },
+    });
+  }
+  // [浮彩·冰凌] 打出浮彩时：造成等于此状态层数点冰元素伤害。
+  const radiantHuesIcicleInEffect = :query(
+    $.my.combatStatus.def(RadiantHuesIcicleInEffect),
+  );
+  if (radiantHuesIcicleInEffect) {
+    :damage(
+      DamageType.Cryo,
+      radiantHuesIcicleInEffect.getVariable("damageValue"),
+    );
+  }
+  // [浮彩·多重] 打出浮彩时：召唤浮彩分身。（浮彩分身造成的伤害等于此状态层数）
+  const radiantHuesEchoesInEffect = :query(
+    $.my.combatStatus.def(RadiantHuesEchoesInEffect),
+  );
+  if (radiantHuesEchoesInEffect) {
+    :summon(RadiantReflection, "my", {
+      overrideVariables: {
+        damageValue: radiantHuesEchoesInEffect.getVariable("damageValue"),
+      },
+    });
+  }
+  // [浮彩·实像] 打出浮彩时：抓等于此状态层数张牌。
+  const radiantHuesManifestationInEffect = :query(
+    $.my.combatStatus.def(RadiantHuesManifestationInEffect),
+  );
+  if (radiantHuesManifestationInEffect) {
+    :drawCards(radiantHuesManifestationInEffect.getVariable("drawValue"));
+  }
+  // [浮彩·坚冰] 打出浮彩时：使我方出战角色附属等于此状态层数层战斗计划。
+  const radiantHuesSolidIceInEffect = :query(
+    $.my.combatStatus.def(RadiantHuesSolidIceInEffect),
+  );
+  if (radiantHuesSolidIceInEffect) {
+    :characterStatus(BattlePlan, $.my.active, {
+      overrideVariables: {
+        usage: radiantHuesSolidIceInEffect.getVariable("layer"),
+      },
+    });
+  }
+  // [浮彩·迅影] 打出浮彩少花费等于此状态层数个元素骰。
 };
 
 /**
@@ -61,8 +135,7 @@ define skill {
   const swiftShadowStatus = :query(
     $.my.combatStatus.def(RadiantHuesSwiftShadowInEffect),
   );
-  const swiftShadowStacks =
-    swiftShadowStatus?.getVariable("reductCount") ?? 0;
+  const swiftShadowStacks = swiftShadowStatus?.getVariable("reductCount") ?? 0;
   const candidates = :randomSubset(
     [
       RadiantHuesIcicle,
