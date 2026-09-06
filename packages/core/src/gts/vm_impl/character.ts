@@ -33,7 +33,6 @@ import type {
   StatusHandle,
 } from "../../data";
 import { createVariable } from "../../data/utils";
-import type { CharacterVariables } from "../..";
 import type { WithIdVMMeta } from "./entity";
 
 export class CharacterModel {
