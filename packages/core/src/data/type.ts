@@ -21,40 +21,87 @@ import type {
   CharacterState,
   EntityState,
 } from "../base/state";
+import type { Computed } from "../query/utils";
 
-export type CharacterHandle<Id extends number = number> = Id & {
-  readonly _char: unique symbol;
-};
-export type SkillHandle<Id extends number = number> = Id & {
-  readonly _skill: unique symbol;
-};
-export type PassiveSkillHandle<Id extends number = number> = Id & {
-  readonly _passiveSkill: unique symbol;
-};
-export type EntityHandle<Id extends number = number> = Id & {
-  readonly _entity: unique symbol;
-};
-export type CardHandle<Id extends number = number> = EntityHandle<Id> & {
-  readonly _card: unique symbol;
-};
-export type StatusHandle<Id extends number = number> = EntityHandle<Id> & {
-  readonly _stat: unique symbol;
-};
-export type CombatStatusHandle<Id extends number = number> =
-  EntityHandle<Id> & {
-    readonly _cStat: unique symbol;
-  };
-export type SummonHandle<Id extends number = number> = Id & {
-  readonly sm: unique symbol;
-};
-export type SupportHandle<Id extends number = number> = EntityHandle<Id> &
-  CardHandle<Id> & { readonly _support: unique symbol };
-export type EquipmentHandle<Id extends number = number> = EntityHandle<Id> &
-  CardHandle<Id> & { readonly _equip: unique symbol };
+interface HandleMeta {
+  readonly id: number;
+  readonly variables: string;
+}
 
-export type AttachmentHandle<Id extends number = number> = Id & {
-  readonly _attach: unique symbol;
-};
+/** A numeric definition ID carrying its metadata at the type level. */
+type Handle<Meta extends HandleMeta, Brand extends {} = {}> = Meta["id"] &
+  Computed<
+    {
+      readonly _meta: Meta;
+    } & Brand
+  >;
+
+export type CharacterHandle<Meta extends HandleMeta = HandleMeta> = Handle<
+  Meta,
+  {
+    readonly _char: unique symbol;
+  }
+>;
+export type SkillHandle<Meta extends HandleMeta = HandleMeta> = Handle<
+  Meta,
+  {
+    readonly _skill: unique symbol;
+  }
+>;
+export type PassiveSkillHandle<Meta extends HandleMeta = HandleMeta> = Handle<
+  Meta,
+  {
+    readonly _passiveSkill: unique symbol;
+  }
+>;
+export type EntityHandle<
+  Meta extends HandleMeta = HandleMeta,
+  Brand extends {} = {},
+> = Handle<
+  Meta,
+  {
+    readonly _entity: unique symbol;
+  } & Brand
+>;
+export type CardHandle<Meta extends HandleMeta = HandleMeta> = EntityHandle<
+  Meta,
+  {
+    readonly _card: unique symbol;
+  }
+>;
+export type StatusHandle<Meta extends HandleMeta = HandleMeta> = EntityHandle<
+  Meta,
+  {
+    readonly _stat: unique symbol;
+  }
+>;
+export type CombatStatusHandle<Meta extends HandleMeta = HandleMeta> =
+  EntityHandle<
+    Meta,
+    {
+      readonly _cStat: unique symbol;
+    }
+  >;
+export type SummonHandle<Meta extends HandleMeta = HandleMeta> = Handle<
+  Meta,
+  {
+    readonly _summon: unique symbol;
+  }
+>;
+export type SupportHandle<Meta extends HandleMeta = HandleMeta> = EntityHandle<
+  Meta,
+  { readonly _support: unique symbol }
+> &
+  CardHandle<Meta>;
+export type EquipmentHandle<Meta extends HandleMeta = HandleMeta> =
+  EntityHandle<Meta, { readonly _equip: unique symbol }> & CardHandle<Meta>;
+
+export type AttachmentHandle<Meta extends HandleMeta = HandleMeta> = Handle<
+  Meta,
+  {
+    readonly _attach: unique symbol;
+  }
+>;
 
 export type ExtensionHandle<T = unknown> = number & {
   readonly _extSym: unique symbol;
@@ -72,25 +119,25 @@ export type ExEntityState<TypeT extends ExEntityType> =
 
 export type HandleT<
   T extends ExEntityType,
-  Id extends number = number,
+  Meta extends HandleMeta = HandleMeta,
 > = T extends "character"
-  ? CharacterHandle<Id>
+  ? CharacterHandle<Meta>
   : T extends "attachment"
-    ? AttachmentHandle<Id>
+    ? AttachmentHandle<Meta>
     : T extends "eventCard"
-      ? CardHandle<Id>
+      ? CardHandle<Meta>
       : T extends "combatStatus"
-        ? CombatStatusHandle<Id>
+        ? CombatStatusHandle<Meta>
         : T extends "status"
-          ? StatusHandle<Id>
+          ? StatusHandle<Meta>
           : T extends "equipment"
-            ? EquipmentHandle<Id>
+            ? EquipmentHandle<Meta>
             : T extends "summon"
-              ? SummonHandle<Id>
+              ? SummonHandle<Meta>
               : T extends "support"
-                ? SupportHandle<Id>
+                ? SupportHandle<Meta>
                 : T extends "passiveSkill"
-                  ? SkillHandle<Id>
+                  ? SkillHandle<Meta>
                   : never;
 
 export type ExTag<TypeT extends ExEntityType> = TypeT extends "character"

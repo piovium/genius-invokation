@@ -85,12 +85,16 @@ export interface SpecialEnergyConfig {
   readonly slotSize: number;
 }
 
-export interface CharacterVariableConfigs {
+export interface CharacterCoreVariableConfigs {
   readonly health: VariableConfig;
   readonly energy: VariableConfig;
   readonly maxHealth: VariableConfig;
   readonly maxEnergy: VariableConfig;
   readonly aura: VariableConfig<Aura>;
   readonly alive: VariableConfig<0 | 1>;
+
+}
+
+export interface CharacterVariableConfigs extends CharacterCoreVariableConfigs {
   readonly [x: string]: VariableConfig;
 }

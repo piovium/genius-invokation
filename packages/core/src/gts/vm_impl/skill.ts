@@ -46,6 +46,7 @@ import {
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
   type ICaller,
+  type PushMetaVar,
   type WithIdVMMeta,
 } from "./entity";
 import type {
@@ -372,9 +373,7 @@ export const TriggeredSkillViewModel = defineViewModel(
       >(
         meta: Meta,
         innerMeta: InnerMeta,
-      ): Omit<Meta, "variables"> & {
-        variables: Meta["variables"] | InnerMeta["name"];
-      };
+      ): PushMetaVar<Meta, InnerMeta["name"]>;
     }>((model, positionals, subView) => {
       const options = UsageVM.parse(subView);
       if (positionals[0] === "perRound") {
@@ -597,7 +596,7 @@ export const InitiativeSkillViewModel = defineViewModel(
       ): AR.DoneRewriteMeta<
         Computed<
           Omit<Meta, "associatedExtension"> & {
-            associatedExtension: ExtensionHandle<NewExtT>;
+            readonly associatedExtension: ExtensionHandle<NewExtT>;
           }
         >
       >;
@@ -654,7 +653,7 @@ export const InitiativeSkillViewModel = defineViewModel(
         query: InferResult<Q> extends TargetQueryTypeInfo ? Q : never,
       ): AR.DoneRewriteMeta<
         Omit<Meta, "targetTypes"> & {
-          targetTypes: [
+          readonly targetTypes: readonly [
             ...Meta["targetTypes"],
             InferResult<Q> extends { type: infer T } ? T : never,
           ];
@@ -670,7 +669,7 @@ export const InitiativeSkillViewModel = defineViewModel(
         ) => Ret,
       ): AR.DoneRewriteMeta<
         Omit<Meta, "targetTypes"> & {
-          targetTypes: [
+          readonly targetTypes: readonly [
             ...Meta["targetTypes"],
             Ret[number]["definition"] extends {
               type: infer T extends TargetQueryTypeInfo["type"];
@@ -737,8 +736,8 @@ export class CharacterSkillViewModel extends InitiativeSkillViewModel
       as<Meta extends CharacterSkillVMMeta>(
         this: AR.This<Meta>,
       ): Meta extends { isInitiativeSkill: true }
-        ? SkillHandle<Meta["id"]>
-        : PassiveSkillHandle<Meta["id"]>;
+        ? SkillHandle<Meta>
+        : PassiveSkillHandle<Meta>;
       as(this: AR.This<ReservedMeta>): undefined;
     }>(
       (model, [id]) => {
@@ -756,13 +755,13 @@ export class CharacterSkillViewModel extends InitiativeSkillViewModel
         this: AR.This<Meta>,
         type: "normal" | "elemental" | "burst",
       ): AR.DoneRewriteMeta<
-        Omit<Meta, "isInitiativeSkill"> & { isInitiativeSkill: true }
+        Omit<Meta, "isInitiativeSkill"> & { readonly isInitiativeSkill: true }
       >;
       <Meta extends CharacterSkillVMMeta>(
         this: AR.This<Meta>,
         type: "passive",
       ): AR.WithRewriteMeta<
-        Omit<Meta, "isInitiativeSkill"> & { isInitiativeSkill: false },
+        Omit<Meta, "isInitiativeSkill"> & { readonly isInitiativeSkill: false },
         typeof EntityViewModel,
         DefaultEntityVMMeta<"character">
       >;

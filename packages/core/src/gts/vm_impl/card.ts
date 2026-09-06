@@ -37,6 +37,7 @@ import {
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
   type ICaller,
+  type PushMetaVar,
   type ThisWithType,
   type TriggeredSkillVMMetaFromCard,
   type WithIdVMMeta,
@@ -105,7 +106,7 @@ export type TalentRequirement = "action" | "actionSkill" | "active" | "none";
 
 export class CardModel extends InitiativeSkillModel implements ICaller {
   reserved = false;
-  
+
   // FIXME: use accessor when decorators are in stage 4
   #cardId!: number;
   get cardId() {
@@ -340,7 +341,7 @@ export class CardViewModel extends InitiativeSkillViewModel
       uniqueKey(): "id";
       as<Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
-      ): HandleT<Meta["type"], Meta["id"]>;
+      ): HandleT<Meta["type"], Meta>;
       as(this: AR.This<ReservedMeta>): undefined;
     }>(
       (model, [id]) => {
@@ -476,7 +477,9 @@ export class CardViewModel extends InitiativeSkillViewModel
         requires?: TalentRequirement,
       ): AR.DoneRewriteMeta<
         Computed<
-          Omit<Meta, "targetTypes"> & { targetTypes: readonly ["character"] },
+          Omit<Meta, "targetTypes"> & {
+            readonly targetTypes: readonly ["character"];
+          },
           CardVMMeta
         >
       >;
@@ -523,7 +526,9 @@ export class CardViewModel extends InitiativeSkillViewModel
         this: NoTargetSpecifiedThis<Meta>,
       ): AR.WithRewriteMeta<
         Computed<
-          Omit<Meta, "targetTypes"> & { targetTypes: readonly ["character"] },
+          Omit<Meta, "targetTypes"> & {
+            readonly targetTypes: readonly ["character"];
+          },
           CardVMMeta
         >,
         typeof FoodVM
@@ -593,7 +598,9 @@ export class CardViewModel extends InitiativeSkillViewModel
       ): AR.WithRewriteMeta<
         // rewrite meta to disable ~action
         Computed<
-          Omit<Meta, "isInitiativeSkill"> & { isInitiativeSkill: false },
+          Omit<Meta, "isInitiativeSkill"> & {
+            readonly isInitiativeSkill: false;
+          },
           CardVMMeta
         >,
         typeof OffStageTriggeredSkillViewModel,
@@ -616,12 +623,7 @@ export class CardViewModel extends InitiativeSkillViewModel
       >(
         meta: Meta,
         innerMeta: InnerMeta,
-      ): Computed<
-        Omit<Meta, "variables"> & {
-          variables: Meta["variables"] | InnerMeta["variables"];
-        },
-        CardVMMeta
-      >;
+      ): PushMetaVar<Meta, InnerMeta["variables"]>;
     }>((model, [eventName, maybeMark], subView) => {
       if (eventName === "selfDiscard" && maybeMark === "=play") {
         const skillModel = DisposeSameVM.parse(subView, model);
