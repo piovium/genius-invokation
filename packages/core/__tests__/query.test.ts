@@ -60,7 +60,7 @@ test("'Fluent API' building tests", () => {
 test("stringify of functions", () => {
   expect(
     prettyStringifySExpr(
-      queryToExpression($.my.summon.var(({ usage }) => usage >= 2)),
+      queryToExpression($.my.summon.var(({ usage }) => usage! >= 2)),
     ),
   ).toBe(dedent`
     (intersection (defeated ignore)
@@ -70,7 +70,7 @@ test("stringify of functions", () => {
   `);
 
   const obj = {
-    seemsAlive({ health }: Record<string, number>) {
+    seemsAlive({ health }: { health: number }) {
       return health > 0;
     },
   };
