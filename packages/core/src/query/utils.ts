@@ -233,9 +233,9 @@ export type TypingInfoFromMeta<M extends MetaBase> = {
   areaType: M["areaType"];
   variables:
     | Extract<keyof M["variables"], string>
-    | IsEqual<M["type"], "character"> extends true
-    ? NonIndexKeyOf<CharacterVariableConfigs>
-    : never;
+    | (IsEqual<M["type"], "character"> extends true
+        ? NonIndexKeyOf<CharacterVariableConfigs>
+        : never);
 };
 
 export type ReturnOfMeta<M extends MetaBase> = Computed<

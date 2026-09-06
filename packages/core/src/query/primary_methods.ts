@@ -100,6 +100,7 @@ type DefPatch<T extends HandleT<ExEntityType>> = (T extends EquipmentHandle
                 }
               : {}) & {
   definition: T & { readonly _defSpecified: unique symbol };
+  variables: { [K in T["_meta"]["variables"]]: 0 };
 };
 
 type HandsOrPileEntityType = "eventCard" | "equipment" | "support";
@@ -141,6 +142,14 @@ type AssignVarAndActionCard<
 >;
 
 type RelationOp = "<" | "<=" | "=" | ">=" | ">" | "!=";
+
+type VariableName<Meta extends MetaBase> =
+  | TypingInfoFromMeta<Meta>["variables"]
+  | (string & {})
+  | Exclude<StateVariablesKey, string>;
+
+type QueryVariables<Meta extends MetaBase> = StateVariables &
+  Record<TypingInfoFromMeta<Meta>["variables"], number>;
 
 // Make CodeQL happy
 function escapeUnsafeChars(str: string) {
@@ -320,32 +329,32 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     return this._self;
   }
   // with
-  var<const Name extends StateVariablesKey>(
+  var<const Name extends VariableName<Meta>>(
     name: Name,
     value: number,
   ): AssignVar<Meta, Name>;
-  var<const Name extends StateVariablesKey>(
+  var<const Name extends VariableName<Meta>>(
     name: Name,
     op: RelationOp,
     value: number,
   ): AssignVar<Meta, Name>;
   var<
-    const Name extends StateVariablesKey,
-    const Name2 extends StateVariablesKey,
+    const Name extends VariableName<Meta>,
+    const Name2 extends VariableName<Meta>,
   >(name: Name, op: RelationOp, ref: Name2): AssignVar<Meta, Name | Name2>;
-  var<const Name extends StateVariablesKey>(
+  var<const Name extends VariableName<Meta>>(
     name: Name,
     pred: (value: number) => unknown,
   ): AssignVar<Meta, Name>;
-  var<const Name extends StateVariablesKey>(
-    pred: (values: StateVariables) => unknown,
-  ): AssignVar<Meta, Name>;
+  var(
+    pred: (values: QueryVariables<Meta>) => unknown,
+  ): Assign<Meta>;
   var(
     ...args:
       | [StateVariablesKey, number]
       | [StateVariablesKey, RelationOp, number | StateVariablesKey]
       | [StateVariablesKey, (value: number) => unknown]
-      | [(values: StateVariables) => unknown]
+      | [(values: QueryVariables<Meta>) => unknown]
   ): any {
     if (typeof args[0] !== "function") {
       const [name, opOrValue, valueOrRefOrUndefined] = args;
