@@ -23,7 +23,10 @@ export default defineConfig({
     env: {
       NODE_OPTIONS: "--expose-gc",
     },
-    typecheck: { enabled: true },
+    typecheck: {
+      enabled: true,
+      tsconfig: `${import.meta.dirname}/tsconfig.vitest.json`,
+    },
   },
   plugins: [gts()],
   ssr: {

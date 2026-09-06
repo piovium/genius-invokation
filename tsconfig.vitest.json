@@ -1,0 +1,13 @@
+{
+  "extends": "./packages/core/tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "emitDeclarationOnly": false,
+    "noEmit": true
+  },
+  "include": [
+    "packages/**/*.test-d.ts",
+    "packages/**/*.spec-d.ts",
+    "vitest.setup.ts"
+  ]
+}
