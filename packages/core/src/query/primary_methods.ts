@@ -376,7 +376,7 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
       } else if (typeof opOrValue === "function") {
         const fnCode = stringifyFunction(opOrValue);
         const prop = escapeUnsafeChars(variableKeyToPropertyCode(name));
-        const wrappedSource = `(v) => (${fnCode})(v[${prop}])`;
+        const wrappedSource = `(v) => v[${prop}] === v[${prop}] && (${fnCode})(v[${prop}])`;
         this._internal.addConstraint(["variables", ["fn", wrappedSource]]);
       } else {
         const _exhaustiveCheck: never = opOrValue!;
@@ -391,14 +391,14 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
   }
 
   cost(value: number): AssignVarAndActionCard<Meta, typeof diceCostKey>;
-  cost(
-    op: RelationOp,
+  cost<const Op extends RelationOp>(
+    op: Op,
     value: number,
-  ): AssignVarAndActionCard<Meta, typeof diceCostKey>;
+  ): AssignVarAndActionCard<Meta, "!=" extends Op ? never : typeof diceCostKey>;
   cost(
     pred: (value: number) => unknown,
   ): AssignVarAndActionCard<Meta, typeof diceCostKey>;
-  cost(...args: any[]) {
+  cost(...args: any[]): any {
     // @ts-expect-error - overloads are not properly inferred here
     return this.var(diceCostKey, ...args);
   }
