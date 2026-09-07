@@ -376,7 +376,10 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
       } else if (typeof opOrValue === "function") {
         const fnCode = stringifyFunction(opOrValue);
         const prop = escapeUnsafeChars(variableKeyToPropertyCode(name));
-        const wrappedSource = `(v) => v[${prop}] === v[${prop}] && (${fnCode})(v[${prop}])`;
+        const wrappedSource = `(v) => {
+          const value = Number(v[${prop}]);
+          return value === value && (${fnCode})(value);
+        }`;
         this._internal.addConstraint(["variables", ["fn", wrappedSource]]);
       } else {
         const _exhaustiveCheck: never = opOrValue!;
