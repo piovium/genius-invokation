@@ -330,15 +330,20 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     name: Name,
     value: number,
   ): AssignVar<Meta, Name>;
-  var<const Name extends VarNameFromMeta<Meta>>(
+  var<const Name extends VarNameFromMeta<Meta>, const Op extends RelationOp>(
     name: Name,
-    op: RelationOp,
+    op: Op,
     value: number,
-  ): AssignVar<Meta, Name>;
+  ): AssignVar<Meta, "!=" extends Op ? never : Name>;
   var<
     const Name extends VarNameFromMeta<Meta>,
+    const Op extends RelationOp,
     const Name2 extends VarNameFromMeta<Meta>,
-  >(name: Name, op: RelationOp, ref: Name2): AssignVar<Meta, Name | Name2>;
+  >(
+    name: Name,
+    op: Op,
+    ref: Name2,
+  ): AssignVar<Meta, "!=" extends Op ? never : Name | Name2>;
   var<const Name extends VarNameFromMeta<Meta>>(
     name: Name,
     pred: (value: number) => unknown,
