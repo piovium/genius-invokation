@@ -129,7 +129,6 @@ define status {
     when :( :e.healInfo.healKind !== "distribution" );
     usage 1 {
       append;
-      range Infinity;
       autoDecrease false;
     };
     const deducted = Math.min(:getVariable("usage"), :e.expectedValue);

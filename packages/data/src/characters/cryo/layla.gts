@@ -57,7 +57,6 @@ define combatStatus {
   id 111092 as ShootingStar;
   variable star, 0 {
     append { value 2; };
-    range Infinity;
   };
   on useSkill {
     :addVariable("star", 1);
