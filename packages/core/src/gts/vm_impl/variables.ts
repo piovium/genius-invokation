@@ -30,7 +30,7 @@ export const GtsVariableOptions = type({
    * 指定 `append` 时此选项无效。
    */
   "forceOverwrite?": "boolean",
-  /** 变量的取值范围为 [0, range]。 */
+  /** 变量的取值范围为 [0, range] 或 [min, max]，默认为 [0, 2 ** 31 - 1]。 */
   "range?": type("number").or(["number", "number"]),
   /**
    * 是否声明为可见变量。

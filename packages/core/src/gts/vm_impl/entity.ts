@@ -414,8 +414,7 @@ export const createVariableConfig = (
         typeof options.append === "object" ? options.append.value : undefined,
       )
     : createVariable(initialValue, options.forceOverwrite);
-  let lowerBound = Number.NEGATIVE_INFINITY;
-  let upperBound = Number.POSITIVE_INFINITY;
+  let { lowerBound, upperBound } = config;
   if (typeof options.range === "number") {
     lowerBound = 0;
     upperBound = options.range;

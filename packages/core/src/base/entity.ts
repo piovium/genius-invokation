@@ -116,9 +116,9 @@ export type EntityArea =
 
 export interface VariableConfig<ValueT extends number = number> {
   readonly initialValue: ValueT;
-  /** Inclusive lower bound; defaults to -Infinity. */
+  /** Inclusive lower bound; defaults to 0. */
   readonly lowerBound: number;
-  /** Inclusive upper bound; defaults to Infinity. */
+  /** Inclusive upper bound; defaults to 2 ** 31 - 1. */
   readonly upperBound: number;
   readonly recreateBehavior: VariableRecreateBehavior<ValueT>;
 }
