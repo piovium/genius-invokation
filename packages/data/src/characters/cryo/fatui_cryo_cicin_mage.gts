@@ -29,7 +29,8 @@ define summon {
   hint DamageType.Cryo, 1;
   on endPhase {
     usage 2 {
-      append 3;
+      append;
+      range 3;
     };
     :damage(DamageType.Cryo, 1);
   };

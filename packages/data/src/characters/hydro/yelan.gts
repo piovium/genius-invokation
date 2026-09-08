@@ -26,10 +26,11 @@ import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 define status {
   id 112091 as BreakthroughStatus;
   variable "break", 1 {
-    append 3;
+    append;
+    range 3;
   };
   on endPhase {
-    :addVariableWithMax("break", 1, 3);
+    :addVariable("break", 1);
   };
   on modifySkillDamageType {
     when :( :e.viaSkillType("normal") && :getVariable("break") >= 2 );
@@ -81,7 +82,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 3);
   const breakSt = :self.hasStatus(BreakthroughStatus)!;
-  breakSt.addVariableWithMax("break", 2, 3);
+  breakSt.addVariable("break", 2);
 };
 
 /**

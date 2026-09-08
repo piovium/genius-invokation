@@ -35,7 +35,8 @@ define summon {
   hint DamageType.Dendro, 2;
   on endPhase {
     usage 3 {
-      append 6;
+      append;
+      range 6;
     };
     :damage(DamageType.Dendro, 2);
   };
@@ -55,7 +56,8 @@ define summon {
   hint DamageType.Dendro, "1";
   on endPhase {
     usage 3 {
-      append 6;
+      append;
+      range 6;
     };
     // 节末升级二阶时仍然使用此技能定义，故检测自身为二阶时改为2伤
     if (:self.definition.id === LumidouceCaseLevel2) {

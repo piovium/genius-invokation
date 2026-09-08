@@ -27,7 +27,8 @@ define status {
   on increaseSkillDamage {
     when :( :e.viaChargedAttack() );
     usage 1 {
-      append 2;
+      append;
+      range 2;
     };
     :e.increaseDamage(2);
   };

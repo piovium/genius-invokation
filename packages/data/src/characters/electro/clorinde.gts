@@ -69,7 +69,8 @@ define status {
   since "v5.3.0";
   on increaseSkillDamage {
     usage 1 {
-      append 3;
+      append;
+      range 3;
     };
     :e.increaseDamage(1);
   };

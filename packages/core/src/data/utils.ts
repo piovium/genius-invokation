@@ -15,25 +15,34 @@
 
 import type { VariableConfig } from "../base/entity";
 
-export function createVariable<const T extends number>(initialValue: T, forceOverwrite = false): VariableConfig<T> {
+export function createVariable<const T extends number>(
+  initialValue: T,
+  forceOverwrite = false,
+): VariableConfig<T> {
   return {
     initialValue,
+    lowerBound: -Infinity,
+    upperBound: Infinity,
     recreateBehavior: {
       type: forceOverwrite ? "overwrite" : "default",
     },
   };
 }
 
-export function createVariableCanAppend(initialValue: number, appendLimit = Infinity, appendValue?: number): VariableConfig {
+export function createVariableCanAppend(
+  initialValue: number,
+  appendValue?: number,
+): VariableConfig {
   appendValue ??= initialValue;
   return {
     initialValue,
+    lowerBound: -Infinity,
+    upperBound: Infinity,
     recreateBehavior: {
       type: "append",
-      appendLimit,
       appendValue,
-    }
-  }
+    },
+  };
 }
 
 export interface TypeHint<T> {
@@ -41,4 +50,9 @@ export interface TypeHint<T> {
 }
 export function typeHint<T>() {
   return {} as TypeHint<T>;
+}
+
+/** Clamp a variable to its declared inclusive bounds. */
+export function clampVariable(value: number, config: VariableConfig): number {
+  return Math.min(config.upperBound, Math.max(config.lowerBound, value));
 }

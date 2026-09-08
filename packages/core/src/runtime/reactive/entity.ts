@@ -100,9 +100,6 @@ export class Entity<Meta extends ContextMetaBase> extends ReadonlyEntity<Meta> {
   addVariable(prop: string, value: number) {
     this.skillContext.addVariable(prop, value, this.state);
   }
-  addVariableWithMax(prop: string, value: number, maxLimit: number) {
-    this.skillContext.addVariableWithMax(prop, value, maxLimit, this.state);
-  }
   consumeUsage(count = 1) {
     this.skillContext.consumeUsage(count, this.state);
   }

@@ -117,7 +117,7 @@ define card {
     const skirk = :query(
       $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
     );
-    skirk?.addVariableWithMax("serpentsSubtlety", 2, 7);
+    skirk?.addVariable("serpentsSubtlety", 2);
   }
 };
 

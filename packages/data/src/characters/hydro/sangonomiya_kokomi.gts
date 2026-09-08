@@ -27,7 +27,8 @@ define summon {
   hint DamageType.Hydro, "1";
   on endPhase {
     usage 2 {
-      append 4;
+      append;
+      range 4;
     };
     if (
       :query($.my.equipped.def(TamakushiCasket)) &&

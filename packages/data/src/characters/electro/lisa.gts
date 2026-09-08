@@ -42,13 +42,11 @@ define summon {
 define status {
   id 114091 as ConductiveLisa;
   variable conductive, 2 {
-    append {
-      limit 4;
-      value 1;
-    };
+    append { value 1; };
+    range 4;
   };
   on endPhase {
-    :addVariableWithMax("conductive", 1, 4);
+    :addVariable("conductive", 1);
   };
   on increaseDamaged {
     when :(

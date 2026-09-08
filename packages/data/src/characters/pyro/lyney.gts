@@ -27,7 +27,8 @@ define summon {
   hint DamageType.Pyro, 1;
   on endPhase {
     usage 1 {
-      append 2;
+      append;
+      range 2;
     };
     :damage(DamageType.Pyro, 1);
   };
@@ -42,7 +43,7 @@ define summon {
  */
 define status {
   id 113102 as PropSurplus;
-  variable surplus, 1;
+  variable surplus, 1 { range 3; };
   on increaseSkillDamage {
     when :( :e.via.definition.id === BewilderingLights );
     :e.increaseDamage(:getVariable("surplus"));
@@ -84,7 +85,7 @@ define skill {
   :summon(GrinmalkinHat);
   const surplusSt = :self.hasStatus(PropSurplus);
   if (surplusSt) {
-    :addVariableWithMax("surplus", 1, 3, surplusSt);
+    :addVariable("surplus", 1, surplusSt);
   } else {
     :self.addStatus(PropSurplus);
   }
@@ -121,7 +122,7 @@ define skill {
   :summon(GrinmalkinHat);
   const surplusSt = :self.hasStatus(PropSurplus);
   if (surplusSt) {
-    :addVariableWithMax("surplus", 1, 3, surplusSt);
+    :addVariable("surplus", 1, surplusSt);
   } else {
     :self.addStatus(PropSurplus);
   }

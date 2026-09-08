@@ -214,7 +214,7 @@ define card {
   since "v4.3.0";
   cost DiceType.Aligned, 3;
   weapon pole {
-    variable extraDamage, 1;
+    variable extraDamage, 1 { range 3; };
     on roundEnd {
       :setVariable("extraDamage", 1);
     };
@@ -222,7 +222,7 @@ define card {
       :e.increaseDamage(:getVariable("extraDamage"));
     };
     on useSkill {
-      :addVariableWithMax("extraDamage", 1, 3);
+      :addVariable("extraDamage", 1);
     };
   };
 };

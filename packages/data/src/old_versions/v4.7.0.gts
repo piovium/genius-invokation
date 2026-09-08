@@ -93,7 +93,8 @@ define combatStatus {
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     usage 1 {
-      append 4;
+      append;
+      range 4;
     };
     if (
       :query($.my.equipped.def(DecorousHarmony)) &&
@@ -128,7 +129,8 @@ define combatStatus {
   on discard {
     when :( :e.via?.caller.id === :self.id );
     usage 1 {
-      append 3;
+      append;
+      range 3;
     };
     :query(
       $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
@@ -653,7 +655,7 @@ define card {
   id 323008 as private Kusava;
   until "v4.7.0";
   support item {
-    variable memory, 0;
+    variable memory, 0 { range 2; };
     variable cardPlayed, 0 {
       visible false;
     };
@@ -662,7 +664,7 @@ define card {
       if (memory < 2) {
         const disposed = :discardMaxCostHands(2 - memory);
         const count = disposed.length;
-        :addVariableWithMax("memory", count, 2);
+        :addVariable("memory", count);
       }
       :setVariable("cardPlayed", 0);
     };

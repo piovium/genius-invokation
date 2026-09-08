@@ -50,7 +50,8 @@ define status {
   on switchActive {
     when :( :self.master.id === :e.switchInfo.to.id );
     usage 1 {
-      append 2;
+      append;
+      range 2;
     };
     :damage(DamageType.Anemo, 1);
   };
@@ -68,7 +69,8 @@ define combatStatus {
   since "v5.0.0";
   on deductOmniDiceSwitch {
     usage 1 {
-      append 2;
+      append;
+      range 2;
     };
     :e.deductOmniCost(1);
   };

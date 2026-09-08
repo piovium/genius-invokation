@@ -260,9 +260,9 @@ define status {
   id 303228 as private MachineAssemblyLineInEffect;
   // v6.3.0 之后，生效中状态被删去，手动将其标记为“主”版本
   since "v4.4.0";
-  variable readiness, 0;
+  variable readiness, 0 { range 2; };
   on damagedOrHealed {
-    :addVariableWithMax("readiness", 1, 2);
+    :addVariable("readiness", 1);
   };
   once deductOmniDiceCard {
     when :(

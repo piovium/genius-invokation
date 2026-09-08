@@ -722,7 +722,7 @@ define card {
     variable healedPts, 0 {
       visible false;
     };
-    variable bubble, 0;
+    variable bubble, 0 { range 2; };
     replaceDescription "[GCG_TOKEN_SHIELD]",
       ((_, self) => self.variables.healedPts);
     on healed {
@@ -731,7 +731,7 @@ define card {
       const totalPts = :getVariable("healedPts");
       const generatedBubbleCount = Math.floor(totalPts / 3);
       const restPts = totalPts % 3;
-      :addVariableWithMax("bubble", generatedBubbleCount, 2);
+      :addVariable("bubble", generatedBubbleCount);
       :setVariable("healedPts", restPts);
     };
     on increaseSkillDamage {
@@ -760,7 +760,7 @@ define card {
     variable healedPts, 0 {
       visible false;
     };
-    variable bubble, 0;
+    variable bubble, 0 { range 2; };
     replaceDescription "[GCG_TOKEN_SHIELD]",
       ((_, self) => self.variables.healedPts);
     on staged {
@@ -772,7 +772,7 @@ define card {
       const totalPts = :getVariable("healedPts");
       const generatedBubbleCount = Math.floor(totalPts / 3);
       const restPts = totalPts % 3;
-      :addVariableWithMax("bubble", generatedBubbleCount, 2);
+      :addVariable("bubble", generatedBubbleCount);
       :setVariable("healedPts", restPts);
     };
     on increaseSkillDamage {
@@ -980,10 +980,10 @@ define card {
   id 312025 as GoldenTroupesReward;
   since "v4.5.0";
   artifact {
-    variable reward, 0;
+    variable reward, 0 { range 2; };
     on endPhase {
       when :( !:self.master.isActive() );
-      :addVariableWithMax("reward", 1, 2);
+      :addVariable("reward", 1);
     };
     on deductOmniDice {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
@@ -1024,7 +1024,7 @@ define card {
   since "v4.6.0";
   cost DiceType.Aligned, 0;
   artifact {
-    variable crystal, 0;
+    variable crystal, 0 { range 2; };
     on damaged {
       when :(
         :getVariable("crystal") < 2 &&
@@ -1033,7 +1033,7 @@ define card {
             :e.isReactionRelatedTo(DamageType.Dendro))
       );
       listenTo all;
-      :addVariableWithMax("crystal", 1, 2);
+      :addVariable("crystal", 1);
     };
     on actionPhase {
       when :( :getVariable("crystal") === 2 );
@@ -1088,10 +1088,10 @@ define card {
   since "v4.7.0";
   cost DiceType.Aligned, 2;
   artifact {
-    variable reward, 0;
+    variable reward, 0 { range 4; };
     on endPhase {
       when :( !:self.master.isActive() );
-      :addVariableWithMax("reward", 2, 4);
+      :addVariable("reward", 2);
     };
     on deductOmniDice {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );

@@ -310,9 +310,6 @@ export class Character<
   addVariable(prop: string, value: number) {
     this.skillContext.addVariable(prop, value, this.state);
   }
-  addVariableWithMax(prop: string, value: number, maxLimit: number) {
-    this.skillContext.addVariableWithMax(prop, value, maxLimit, this.state);
-  }
   dispose(): never {
     throw new GiTcgDataError(`Cannot dispose character (or passive skill)`);
   }

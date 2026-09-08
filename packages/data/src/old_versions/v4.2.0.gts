@@ -194,7 +194,7 @@ define card {
     variable healedPts, 0 {
       visible false;
     };
-    variable bubble, 0;
+    variable bubble, 0 { range 2; };
     on staged {
       :heal(3, :e.targets[0]);
     };
@@ -204,7 +204,7 @@ define card {
       const totalPts = :getVariable("healedPts");
       const generatedBubbleCount = Math.floor(totalPts / 3);
       const restPts = totalPts % 3;
-      :addVariableWithMax("bubble", generatedBubbleCount, 2);
+      :addVariable("bubble", generatedBubbleCount);
       :setVariable("healedPts", restPts);
     };
     on increaseSkillDamage {

@@ -359,11 +359,11 @@ define card {
   id 322013 as Hanachirusato;
   since "v3.7.0";
   support ally {
-    variable progress, 0;
+    variable progress, 0 { range 3; };
     on entityDispose {
       when :( :e.entity.definition.type === "summon" );
       listenTo all;
-      :addVariableWithMax("progress", 1, 3);
+      :addVariable("progress", 1);
     };
     on deductOmniDiceCard {
       when :(
@@ -776,9 +776,9 @@ define card {
   id 322026 as SirArthur;
   since "v4.7.0";
   support ally {
-    variable clue, 0;
+    variable clue, 0 { range 2; };
     on discardOrTuneCard {
-      :addVariableWithMax("clue", 1, 2);
+      :addVariable("clue", 1);
     };
     on endPhase {
       when :( :getVariable("clue") >= 2 );

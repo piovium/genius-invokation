@@ -293,15 +293,15 @@ define skill {
 define skill {
   id 13154 as private FightingSpirit;
   skillType passive {
-    variable fightingSpirit, 0;
+    variable fightingSpirit, 0 { range 6; };
     on consumeNightsoul {
       listenTo samePlayer;
-      :addVariableWithMax("fightingSpirit", 1, 6);
+      :addVariable("fightingSpirit", 1);
     };
     on useSkill {
       listenTo samePlayer;
       when :( :e.isSkillType("normal") );
-      :addVariableWithMax("fightingSpirit", 1, 6);
+      :addVariable("fightingSpirit", 1);
     };
     on useSkill {
       when :( :e.isSkillType("elemental") || :e.isSkillType("burst") );

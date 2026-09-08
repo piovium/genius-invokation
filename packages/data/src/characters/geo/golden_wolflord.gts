@@ -36,7 +36,8 @@ define status {
       :query($.opp.equipped.def(BeastlyCorrosion)) || !:self.master.isActive()
     );
     usage 1 {
-      append 5;
+      append;
+      range 5;
     };
     :damage(DamageType.Piercing, :getVariable("usage"), :self.master);
   };

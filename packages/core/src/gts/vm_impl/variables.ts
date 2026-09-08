@@ -17,8 +17,6 @@ import { defineSimpleViewModel, type AR } from "@gi-tcg/gts-runtime";
 import { type, type TypeInfer } from "@gi-tcg/utils";
 
 const GtsAppendOptions = type({
-  /** 重复创建时的累积值上限 */
-  "limit?": "number",
   /** 重复创建时累积的值 */
   "value?": "number",
 });
@@ -26,12 +24,14 @@ export type GtsAppendOptions = TypeInfer<typeof GtsAppendOptions>;
 
 export const GtsVariableOptions = type({
   /** 该值在重复创建时是否允许叠加。 */
-  "append?": GtsAppendOptions.or("boolean | number"),
+  "append?": GtsAppendOptions.or("boolean"),
   /**
    * 该值在重复创建时将强制重置为默认值（而非默认值和当前值的最大值）。
    * 指定 `append` 时此选项无效。
    */
   "forceOverwrite?": "boolean",
+  /** 变量的取值范围为 [0, range]。 */
+  "range?": "number",
   /**
    * 是否声明为可见变量。
    * @default true

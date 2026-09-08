@@ -256,7 +256,7 @@ define card {
   since "v4.7.0";
   cost DiceType.Aligned, 1;
   support item {
-    variable memory, 0;
+    variable memory, 0 { range 2; };
     variable cardPlayed, 0 {
       visible false;
     };
@@ -265,7 +265,7 @@ define card {
       if (memory < 2) {
         const disposed = :discardMaxCostHands(2 - memory);
         const count = disposed.length;
-        :addVariableWithMax("memory", count, 2);
+        :addVariable("memory", count);
       }
       :setVariable("cardPlayed", 0);
     };

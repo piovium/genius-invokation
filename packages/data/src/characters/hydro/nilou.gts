@@ -28,7 +28,8 @@ define summon {
   hint DamageType.Dendro, "2";
   on endPhase {
     usage 1 {
-      append 3;
+      append;
+      range 3;
     };
     if (:query($.my.equipped.def(TheStarrySkiesTheirFlowersRain))) {
       :damage(DamageType.Dendro, 3);

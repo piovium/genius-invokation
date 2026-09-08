@@ -188,19 +188,20 @@ define summon {
   id 303245 as private FellDragon;
   until "v6.1.0";
   variable effect, 1 {
+    range 6;
     forceOverwrite;
   };
   associateExtension DisposedSupportAndSummonsCountExtension;
   hint DamageType.Physical, ((c, e) => e.variables.effect);
   on endPhase {
-    usage 1;
+    usage 1 { range 6; };
     :damage(DamageType.Piercing, :getVariable("effect"));
   };
   on selfEnter {
     const ext = :getExtensionState();
     const addUsage = ext.disposedSupportCount[:self.who];
     const addDmg = ext.disposedSummonsCount[:self.who];
-    :addVariableWithMax("usage", addUsage, 6);
-    :addVariableWithMax("effect", addDmg, 6);
+    :addVariable("usage", addUsage);
+    :addVariable("effect", addDmg);
   };
 };

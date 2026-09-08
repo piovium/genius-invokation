@@ -45,11 +45,11 @@ define summon {
  */
 define status {
   id 114072 as ChakraDesiderataStatus;
-  variable chakra, 0;
+  variable chakra, 0 { range 3; };
   on useSkill {
     when :( :e.isSkillType("burst") && :e.skill.caller.id !== :self.master.id );
     listenTo samePlayer;
-    :addVariableWithMax("chakra", 1, 3);
+    :addVariable("chakra", 1);
   };
   on increaseSkillDamage {
     when :( :e.via.definition.id === SecretArtMusouShinsetsu );

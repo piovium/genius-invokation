@@ -1513,7 +1513,8 @@ define combatStatus {
   id 302204 as private CalledInForCleanupActive;
   since "v4.6.0";
   variable damage, 1 {
-    append 2;
+    append;
+    range 2;
   };
   once increaseSkillDamage {
     :e.increaseDamage(:getVariable("damage"));
@@ -2472,7 +2473,8 @@ define card {
 define combatStatus {
   id 303244 as HarvestTimeInEffect;
   variable cardCount, 1 {
-    append 2;
+    append;
+    range 2;
   };
   once endPhase {
     :createPileCards(HarvestTime, :getVariable("cardCount"), "random");
@@ -2560,20 +2562,21 @@ define extension {
 define summon {
   id 303245 as FellDragon;
   variable effect, 1 {
+    range 5;
     forceOverwrite;
   };
   associateExtension DisposedSupportAndSummonsCountExtension;
   hint DamageType.Physical, ((c, e) => e.variables.effect);
   on endPhase {
-    usage 1;
+    usage 1 { range 5; };
     :damage(DamageType.Piercing, :getVariable("effect"));
   };
   on selfEnter {
     const ext = :getExtensionState();
     const addUsage = ext.disposedSupportCount[:self.who];
     const addDmg = ext.disposedSummonsCount[:self.who];
-    :addVariableWithMax("usage", addUsage, 5);
-    :addVariableWithMax("effect", addDmg, 5);
+    :addVariable("usage", addUsage);
+    :addVariable("effect", addDmg);
   };
 };
 
@@ -3029,7 +3032,7 @@ define card {
       :attachCostReduction(maxCostTargets);
     }
   }
-}
+};
 
 /**
  * @id 332066
@@ -3042,7 +3045,7 @@ define card {
   since "v7.0.0";
   :combatStatus(GatherForADrinkInEffect, "my");
   :combatStatus(GatherForADrinkInEffect, "opp");
-}
+};
 
 /**
  * @id 303250

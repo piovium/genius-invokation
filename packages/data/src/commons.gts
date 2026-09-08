@@ -68,7 +68,8 @@ define summon {
   hint DamageType.Pyro, 1;
   on endPhase {
     usage 1 {
-      append 2;
+      append;
+      range 2;
     };
     :damage(DamageType.Pyro, 1);
   };
@@ -127,9 +128,8 @@ define status {
   on decreaseHealed {
     when :( :e.healInfo.healKind !== "distribution" );
     usage 1 {
-      append {
-        limit Infinity;
-      };
+      append;
+      range Infinity;
       autoDecrease false;
     };
     const deducted = Math.min(:getVariable("usage"), :e.expectedValue);

@@ -27,7 +27,8 @@ define combatStatus {
   id 124052 as ThunderboreTrap;
   on useSkill {
     usage 0 {
-      append 3;
+      append;
+      range 3;
     };
     :damage(DamageType.Electro, 2, $.my.active);
   };

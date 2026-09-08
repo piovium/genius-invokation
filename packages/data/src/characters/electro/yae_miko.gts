@@ -29,7 +29,8 @@ define summon {
   hint DamageType.Electro, ((c, e) => e.variables.atk);
   on endPhase {
     usage 3 {
-      append 6;
+      append;
+      range 6;
     };
     :damage(DamageType.Electro, :getVariable("atk"));
   };

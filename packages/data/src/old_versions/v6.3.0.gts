@@ -183,10 +183,10 @@ define card {
   until "v6.3.0";
   cost DiceType.Aligned, 1;
   support place {
-    variable forbidden, 0;
+    variable forbidden, 0 { range 4; };
     on damagedOrHealed {
       when :( :e.target.isActive() );
-      :addVariableWithMax("forbidden", 1, 4);
+      :addVariable("forbidden", 1);
     };
     on actionPhase {
       when :( :getVariable("forbidden") >= 4 );

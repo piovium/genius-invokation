@@ -65,13 +65,13 @@ define card {
     :discard(:self);
     :query(
       $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
-    )?.addVariableWithMax("serpentsSubtlety", 1, 7);
+    )?.addVariable("serpentsSubtlety", 1);
   };
   on switchActive {
     :discard(:self);
     :query(
       $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
-    )?.addVariableWithMax("serpentsSubtlety", 1, 7);
+    )?.addVariable("serpentsSubtlety", 1);
   };
   :characterStatus(SevenphaseFlash, :e.targets[0]);
   :characterStatus(DeathsCrossing, :e.targets[0]);
@@ -156,7 +156,8 @@ define combatStatus {
   on switchActive {
     when :( :e.switchInfo.from?.definition.id === Kirara );
     usage 1 {
-      append 2;
+      append;
+      range 2;
     };
     :damage(DamageType.Dendro, 1);
     :drawCards(1);
@@ -191,12 +192,12 @@ define card {
   until "v6.5.0";
   cost DiceType.Aligned, 3;
   weapon catalyst {
-    variable extraDamage, 0;
+    variable extraDamage, 0 { range 2; };
     on increaseSkillDamage {
       :e.increaseDamage(:getVariable("extraDamage"));
     };
     on endPhase {
-      :addVariableWithMax("extraDamage", 1, 2);
+      :addVariable("extraDamage", 1);
     };
   };
 };
@@ -295,10 +296,10 @@ define card {
   until "v6.5.0";
   cost DiceType.Aligned, 1;
   support place {
-    variable forbidden, 0;
+    variable forbidden, 0 { range 5; };
     on damagedOrHealed {
       when :( :e.target.isActive() );
-      :addVariableWithMax("forbidden", 1, 5);
+      :addVariable("forbidden", 1);
       if (:getVariable("forbidden") >= 5 && :oppPlayer.hands.length > 0) {
         :addVariable("forbidden", -5);
         const candidates = :oppPlayer.hands.filter(

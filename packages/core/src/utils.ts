@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { clampVariable } from "./data/utils";
 import type { Draft } from "immer";
 import {
   ActionValidity,
@@ -634,17 +635,9 @@ export function getInsertedStateVariables<T extends AnyState>({
           break;
         }
         case "append": {
-          if (oldValue > recreateBehavior.appendLimit) {
-            // 如果当前值已经超过可叠加的上限，则不再叠加
-            break;
-          }
           const appendValue =
             incomingVariables[name] ?? recreateBehavior.appendValue;
-          const appendResult = appendValue + oldValue;
-          newValues[name] = Math.min(
-            appendResult,
-            recreateBehavior.appendLimit,
-          );
+          newValues[name] = appendValue + oldValue;
           break;
         }
         default: {
@@ -653,12 +646,15 @@ export function getInsertedStateVariables<T extends AnyState>({
         }
       }
     }
+    for (const name in newValues) {
+      newValues[name] = clampVariable(newValues[name], varConfigs[name]);
+    }
     return newValues;
   } else {
     return Object.fromEntries(
-      Object.entries(definition.varConfigs).map(([name, { initialValue }]) => [
+      Object.entries(definition.varConfigs).map(([name, config]) => [
         name,
-        incomingVariables[name] ?? initialValue,
+        clampVariable(incomingVariables[name] ?? config.initialValue, config),
       ]),
     );
   }

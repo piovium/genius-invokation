@@ -463,10 +463,10 @@ define card {
   since "v4.5.0";
   cost DiceType.Aligned, 1;
   support place {
-    variable forbidden, 0;
+    variable forbidden, 0 { range 6; };
     on damagedOrHealed {
       when :( :e.target.isActive() );
-      :addVariableWithMax("forbidden", 1, 6);
+      :addVariable("forbidden", 1);
       if (:getVariable("forbidden") >= 6 && :oppPlayer.hands.length > 0) {
         :addVariable("forbidden", -6);
         const candidates = :oppPlayer.hands.filter(
@@ -817,7 +817,8 @@ define card {
 define status {
   id 301025 as Exercise;
   variable layer, 2 {
-    append 5;
+    append;
+    range 5;
   };
   on selfEnter {
     when :(

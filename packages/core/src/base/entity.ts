@@ -116,6 +116,10 @@ export type EntityArea =
 
 export interface VariableConfig<ValueT extends number = number> {
   readonly initialValue: ValueT;
+  /** Inclusive lower bound; defaults to -Infinity. */
+  readonly lowerBound: number;
+  /** Inclusive upper bound; defaults to Infinity. */
+  readonly upperBound: number;
   readonly recreateBehavior: VariableRecreateBehavior<ValueT>;
 }
 
@@ -136,7 +140,6 @@ export type VariableRecreateBehavior<ValueT extends number = number> =
   | {
       readonly type: "append";
       readonly appendValue: ValueT;
-      readonly appendLimit: ValueT;
     };
 
 export const USAGE_PER_ROUND_VARIABLE_NAMES = [

@@ -142,12 +142,12 @@ define card {
   since "v4.3.0";
   cost DiceType.Aligned, 2;
   weapon catalyst {
-    variable extraDamage, 0;
+    variable extraDamage, 0 { range 2; };
     on increaseSkillDamage {
       :e.increaseDamage(:getVariable("extraDamage"));
     };
     on endPhase {
-      :addVariableWithMax("extraDamage", 1, 2);
+      :addVariable("extraDamage", 1);
     };
   };
 };
@@ -347,7 +347,8 @@ define card {
 define status {
   id 301113 as StarcallersWatchInEffect;
   variable increaseDmg, 1 {
-    append 2;
+    append;
+    range 2;
   };
   once increaseSkillDamage {
     :e.increaseDamage(:getVariable("increaseDmg"));

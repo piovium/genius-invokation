@@ -193,7 +193,7 @@ define card {
   since "v4.7.0";
   cost DiceType.Aligned, 2;
   weapon bow {
-    variable fishing, 0;
+    variable fishing, 0 { range 2; };
     variable additivePerRound, 0 {
       visible false;
     };
@@ -203,7 +203,7 @@ define card {
     on playCard {
       when :( !:isInInitialPile(:e.card) );
       if (:getVariable("additivePerRound") < 2) {
-        :addVariableWithMax("fishing", 1, 2);
+        :addVariable("fishing", 1);
         :addVariable("additivePerRound", 1);
       }
     };

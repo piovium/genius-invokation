@@ -33,7 +33,7 @@ define skill {
 - `:e`：当前事件或主动技能的参数。例如 `:e.targets` 是打牌/使用技能时的目标，`:e.increaseDamage(1)` 修改伤害事件。
 - `:state`、`:player`、`:oppPlayer`：当前状态、我方玩家和对方玩家。
 - `:query(查询)` 或 `:queryAll(查询)`：查询一个或全部实体。优先使用新的 `$` 查询表达式，如 `$.my.active`、`$.opp.summon`。
-- `:getVariable(name[, target])`、`:setVariable(name, value[, target])`、`:addVariable(...)`、`:addVariableWithMax(...)`：读写状态变量。
+- `:getVariable(name[, target])`、`:setVariable(name, value[, target])`、`:addVariable(...)`：读写状态变量。
 - `:getExtensionState()` 与 `:setExtensionState((draft) => { ... })`：读写关联的扩展点状态。
 
 `self` 和查询结果是便捷上下文对象。常用属性包括 `.who`、`.definition`、`.variables`、`.area`；角色还可使用 `.isActive()`、`.hasEquipment(...)`、`.element()`，状态、装备也可用 `.master` 取得附属角色。状态随每次操作更新，跨多步逻辑时应重新读取需要的字段。

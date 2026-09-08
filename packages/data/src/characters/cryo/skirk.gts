@@ -90,13 +90,13 @@ define card {
     :discard(:self);
     :query(
       $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
-    )?.addVariableWithMax("serpentsSubtlety", 1, 7);
+    )?.addVariable("serpentsSubtlety", 1);
   };
   on switchActive {
     :discard(:self);
     :query(
       $.my.character.def(Skirk).union($.my.character.def(Skirk01)),
-    )?.addVariableWithMax("serpentsSubtlety", 1, 7);
+    )?.addVariable("serpentsSubtlety", 1);
   };
   :characterStatus(SevenphaseFlash, :e.targets[0]);
 };
@@ -118,7 +118,7 @@ define card {
     const skirk = :query(
       $.union($.my.character.def(Skirk), $.my.character.def(Skirk01)),
     );
-    skirk?.addVariableWithMax("serpentsSubtlety", 2, 7);
+    skirk?.addVariable("serpentsSubtlety", 2);
   }
 };
 
@@ -147,7 +147,7 @@ define skill {
   skillType elemental;
   cost DiceType.Cryo, 2;
   filter :( :self.definition.id === Skirk && :self.getVariable("canE") );
-  :self.addVariableWithMax("serpentsSubtlety", 2, 7);
+  :self.addVariable("serpentsSubtlety", 2);
   :createHandCard(MutualWeaponsMentorship);
   :self.setVariable("canE", 0);
 };
@@ -168,7 +168,7 @@ define skill {
     .slice(0, 2);
   if (hands.length > 0) {
     :discard(...hands);
-    :self.addVariableWithMax("serpentsSubtlety", hands.length, 7);
+    :self.addVariable("serpentsSubtlety", hands.length);
   }
 };
 
@@ -203,7 +203,7 @@ define skill {
 define skill {
   id 11164 as ReasonBeyondReason;
   skillType passive {
-    variable serpentsSubtlety, 0;
+    variable serpentsSubtlety, 0 { range 7; };
     variable canE, 1;
     on dealReaction {
       when :(

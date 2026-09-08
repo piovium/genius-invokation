@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { clampVariable } from "../data/utils";
 import { Aura, DamageType, DiceType, Reaction } from "@gi-tcg/typings";
 
 import {
@@ -1416,6 +1417,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   setVariable(prop: Meta["callerVars"], value: number): void;
   setVariable(prop: string, value: number, target?: PlainAnyState) {
     target ??= this.self;
+    value = clampVariable(value, target.definition.varConfigs[prop]);
     this.setVariableImpl(target, {
       varName: prop,
       oldValue: target.variables[prop],
@@ -1434,31 +1436,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
     this.setVariable(prop, finalValue, target);
   }
 
-  addVariableWithMax(
-    prop: string,
-    value: number,
-    maxLimit: number,
-    target: PlainAnyState,
-  ): void;
-  addVariableWithMax(
-    prop: Meta["callerVars"],
-    value: number,
-    maxLimit: number,
-  ): void;
-  addVariableWithMax(
-    prop: any,
-    value: number,
-    maxLimit: number,
-    target?: PlainAnyState,
-  ) {
-    target ??= this.self;
-    if (target.variables[prop] > maxLimit) {
-      // 如果当前值已经超过可叠加的上限，则不再叠加
-      return;
-    }
-    const finalValue = Math.min(maxLimit, value + target.variables[prop]);
-    this.setVariable(prop, finalValue, target);
-  }
   consumeUsage(count = 1, target?: PlainEntityState) {
     if (typeof target === "undefined") {
       if (this.self.definition.type === "character") {
@@ -2071,20 +2048,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
           continue;
         }
       }
-      // awkward...
-      // TODO: make setVariable clamped to some configs
-      const oldValue = nightsoulStatus.variables.nightsoul ?? 0;
-      const { recreateBehavior } =
-        nightsoulStatus.definition.varConfigs.nightsoul ?? {};
-      const maxValue =
-        recreateBehavior?.type === "append"
-          ? recreateBehavior.appendLimit
-          : Infinity;
-      this.setVariable(
-        "nightsoul",
-        Math.min(maxValue, oldValue + count),
-        nightsoulStatus,
-      );
+      this.addVariable("nightsoul", count, nightsoulStatus);
     }
   }
 
@@ -2302,7 +2266,6 @@ type SkillContextMutativeProps =
   | "dispose"
   | "setVariable"
   | "addVariable"
-  | "addVariableWithMax"
   | "consumeUsage"
   | "consumeUsagePerRound"
   | "consumeNightsoul"

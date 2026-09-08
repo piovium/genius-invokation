@@ -71,7 +71,8 @@ define combatStatus {
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") && :player.hands.length <= 1 );
     usage 1 {
-      append 4;
+      append;
+      range 4;
     };
     if (
       :query($.my.equipped.def(DecorousHarmony)) && // 装备了天赋

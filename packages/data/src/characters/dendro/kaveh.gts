@@ -48,7 +48,8 @@ define combatStatus {
   on discard {
     when :( :e.via?.caller.id === :self.id );
     usage 1 {
-      append 3;
+      append;
+      range 3;
     };
     :query(
       $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),

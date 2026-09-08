@@ -66,7 +66,6 @@ import type {
 } from "../../data/type";
 import {
   VariablesVM,
-  type GtsAppendOptions,
   type GtsUsageOptions,
   type GtsVariableOptions,
 } from "./variables";
@@ -409,23 +408,17 @@ export const createVariableConfig = (
   initialValue: number,
   options: GtsVariableOptions,
 ): VariableConfig => {
-  let appendOpt: GtsAppendOptions | undefined;
-  if (typeof options.append === "object") {
-    appendOpt = options.append;
-  } else if (typeof options.append === "number") {
-    appendOpt = { limit: options.append };
-  } else if (options.append === true) {
-    appendOpt = {};
-  }
-  if (appendOpt) {
-    return createVariableCanAppend(
-      initialValue,
-      appendOpt.limit,
-      appendOpt.value,
-    );
-  } else {
-    return createVariable(initialValue, options.forceOverwrite);
-  }
+  const config = options.append
+    ? createVariableCanAppend(
+        initialValue,
+        typeof options.append === "object" ? options.append.value : undefined,
+      )
+    : createVariable(initialValue, options.forceOverwrite);
+  return {
+    ...config,
+    lowerBound: options.range === undefined ? -Infinity : 0,
+    upperBound: options.range ?? Infinity,
+  };
 };
 
 export interface EntityVMMeta {
@@ -753,7 +746,8 @@ export class EntityViewModel extends defineViewModel(
       const options = NightsoulVM.parse(subView);
       model.tags.push("nightsoulsBlessing");
       model.setVariable("nightsoul", 0, {
-        append: { limit: count },
+        append: true,
+        range: count,
         ...options,
       });
       if (options.autoDispose) {
@@ -781,7 +775,8 @@ export class EntityViewModel extends defineViewModel(
     }>((model, [count, max = count]) => {
       model.tags.push("shield");
       model.setVariable("shield", count, {
-        append: { limit: max },
+        append: true,
+        range: max,
       });
       const decreaseDmgSkill = new TriggeredSkillModel(
         model,

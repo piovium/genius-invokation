@@ -28,13 +28,11 @@ define status {
   id 114091 as private Conductive;
   until "v5.0.0";
   variable conductive, 2 {
-    append {
-      limit 4;
-      value 1;
-    };
+    append { value 1; };
+    range 4;
   };
   on endPhase {
-    :addVariableWithMax("conductive", 1, 4);
+    :addVariable("conductive", 1);
   };
   on increaseDamaged {
     when :( :e.via.definition.id === VioletArc );
