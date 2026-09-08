@@ -414,10 +414,19 @@ export const createVariableConfig = (
         typeof options.append === "object" ? options.append.value : undefined,
       )
     : createVariable(initialValue, options.forceOverwrite);
+  let lowerBound = Number.NEGATIVE_INFINITY;
+  let upperBound = Number.POSITIVE_INFINITY;
+  if (typeof options.range === "number") {
+    lowerBound = 0;
+    upperBound = options.range;
+  } else if (Array.isArray(options.range)) {
+    lowerBound = options.range[0];
+    upperBound = options.range[1];
+  }
   return {
     ...config,
-    lowerBound: options.range === undefined ? -Infinity : 0,
-    upperBound: options.range ?? Infinity,
+    lowerBound,
+    upperBound,
   };
 };
 

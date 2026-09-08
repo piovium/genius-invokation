@@ -31,7 +31,7 @@ export const GtsVariableOptions = type({
    */
   "forceOverwrite?": "boolean",
   /** 变量的取值范围为 [0, range]。 */
-  "range?": "number",
+  "range?": type("number").or(["number", "number"]),
   /**
    * 是否声明为可见变量。
    * @default true
