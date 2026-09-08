@@ -364,7 +364,11 @@ export class Game {
     ].map((m) => ({
       mutation: unFlattenOneof<PbExposedMutation["mutation"]>(m),
     }));
-    playerIo.notify({ mutation, state });
+    try {
+      Promise.resolve(playerIo.notify({ mutation, state })).catch(() => {});
+    } catch {
+      // Notifications are best-effort and must not interrupt the game.
+    }
   }
   private notifyOne(who: 0 | 1, mutation?: ExposedMutation, state?: GameState) {
     this.notifyOneImpl(who, {
@@ -375,7 +379,7 @@ export class Game {
     });
   }
 
-  private async mutatorNotifyHandler(opt: InternalNotifyOption) {
+  private mutatorNotifyHandler(opt: InternalNotifyOption) {
     if (this._terminated) {
       return;
     }
@@ -388,7 +392,13 @@ export class Game {
       return;
     }
     const { state, canResume, stateMutations } = opt;
-    await this.onPause?.(state, [...stateMutations], canResume);
+    try {
+      await this.onPause?.(state, [...stateMutations], canResume);
+    } catch (e) {
+      // Pause may also run outside start(), e.g. when a player gives up.
+      this.finishResolvers?.reject(e);
+      this.terminate();
+    }
   }
 
   async start(): Promise<0 | 1 | null> {

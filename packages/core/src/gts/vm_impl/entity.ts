@@ -832,6 +832,7 @@ export class EntityViewModel extends defineViewModel(
       model.obtainable = false;
       model.tags.push("blessing");
       const autoPlaySkill = new TriggeredSkillModel(model, "actionPhase");
+      autoPlaySkill.id = model.getSubId();
       autoPlaySkill.enableHandTriggering = true;
       autoPlaySkill.enablePileTriggering = true;
       autoPlaySkill.userFilters.push(function (c) {
