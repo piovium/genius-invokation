@@ -27,7 +27,9 @@ define status {
   variable vitality, 0;
   defineSnippet addVitality {
     const max = :self.master.hasEquipment(ProliferatingSpores) ? 4 : 3;
-    :addVariableWithMax("vitality", 1, max);
+    if (:getVariable("vitality") < max) {
+      :addVariable("vitality", 1);
+    }
   };
   on dealDamage {
     :callSnippet.addVitality();
@@ -36,7 +38,10 @@ define status {
     :callSnippet.addVitality();
   };
   on endPhase {
-    when :( :getVariable("vitality") >= 3 );
+    when :{
+      const max = :self.master.hasEquipment(ProliferatingSpores) ? 4 : 3;
+      return :getVariable("vitality") >= max;
+    };
     :setVariable("vitality", 0);
     const ch = :self.master;
     ch.loseEnergy(ch.energy);
