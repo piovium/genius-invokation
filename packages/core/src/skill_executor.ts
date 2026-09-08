@@ -23,6 +23,7 @@ import {
   EventArg,
   type InitiativeSkillEventArg,
   PlayCardEventArg,
+  type PlayCardInfo,
   type PlayCardSkillInfo,
   type PlayCardTarget,
   SelectCardEventArg,
@@ -36,12 +37,12 @@ import {
   type AnyState,
   type CharacterState,
   type EntityState,
-  type GameState,
   stringifyState,
 } from "./base/state";
 import { PbSkillType, type ExposedMutation } from "@gi-tcg/typings";
 import {
   allSkills,
+  applyAttachmentModifications,
   type CallerAndTriggeredSkill,
   getActiveCharacterIndex,
   getEntityArea,
@@ -119,7 +120,7 @@ export class SkillExecutor {
 
     const oldState = this.state;
     this.mutator.notify();
-    const [newState, { innerNotify, emittedEvents, causeDefeated }] = (0,
+    const [newState, { innerNotify, emittedEvents, error, causeDefeated }] = (0,
     skillDef.action)(
       this.state,
       {
@@ -183,8 +184,11 @@ export class SkillExecutor {
 
     innerNotify.exposedMutations.unshift(...prependMutations);
     this.mutator.resetState(newState, innerNotify);
-
-    return { emittedEvents, causeDefeated };
+    if (error) {
+      throw error;
+    } else {
+      return { emittedEvents, causeDefeated };
+    }
   }
 
   async finalizeSkill(
@@ -491,18 +495,38 @@ export class SkillExecutor {
           );
           continue;
         }
-        await this.finalizeSkill(skillInfo, targets);
+        const { willBeEffectless } = applyAttachmentModifications(
+          this.state,
+          arg.card,
+        );
+        const playCardInfo: PlayCardInfo = {
+          type: "playCard",
+          who: arg.who,
+          skill: skillInfo,
+          targets: targets.targets,
+          willBeEffectless,
+        };
+        if (!arg.requestOption.viaSelect) {
+          await this.handleEvent([
+            "onBeforePlayCard",
+            new PlayCardEventArg(this.state, playCardInfo),
+          ]);
+        }
+        if (playCardInfo.willBeEffectless) {
+          this.mutate({
+            type: "removeEntity",
+            from: { who: arg.who, type: "hands", cardId: arg.card.id },
+            oldState: arg.card,
+            reason: "eventCardPlayNoEffect",
+          });
+        } else {
+          await this.finalizeSkill(skillInfo, targets);
+        }
         played = true;
         if (!arg.requestOption.viaSelect) {
           await this.handleEvent([
             "onPlayCard",
-            new PlayCardEventArg(this.state, {
-              type: "playCard",
-              who: arg.who,
-              skill: skillInfo,
-              targets: targets.targets,
-              willBeEffectless: false,
-            }),
+            new PlayCardEventArg(this.state, playCardInfo),
           ]);
         }
       } else if (name === "requestAdventure") {

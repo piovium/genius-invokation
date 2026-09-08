@@ -1324,8 +1324,8 @@ define card {
   artifact {
     on consumeNightsoul {
       usage perRound, 1;
-      :gainEnergy(1, $.macros.myEnergyNotFull);
-      :gainEnergy(1, $.macros.myEnergyNotFull);
+      :gainEnergy(1, $.macros.myFirstEnergyNotFull);
+      :gainEnergy(1, $.macros.myFirstEnergyNotFull);
     };
   };
 };

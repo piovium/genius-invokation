@@ -46,6 +46,8 @@ import {
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
   type ICaller,
+  type PushMetaVar,
+  type WithIdVMMeta,
 } from "./entity";
 import type {
   ExEntityType,
@@ -59,16 +61,16 @@ import {
   type VersionInfo,
 } from "../../base/version";
 import { costSize, diceCostSize, normalizeCost } from "../../utils";
-import type {
-  CommonSkillType,
-  InitiativeSkillConfig,
-  InitiativeSkillDefinition,
-  SkillActionFilter,
-  SkillDefinition,
-  SkillDescription,
-  SkillInfo,
-  SkillInfoOfContextConstruction,
-  SkillType,
+import {
+  SkillContextOptions,
+  type CommonSkillType,
+  type InitiativeSkillConfig,
+  type InitiativeSkillDefinition,
+  type LooseSkillOperation,
+  type SkillActionFilter,
+  type SkillDefinition,
+  type SkillDescription,
+  type SkillType,
 } from "../../base/skill";
 import type { DiceRequirement, DiceType } from "@gi-tcg/typings";
 import { UsageVM, type UsageVMMeta } from "./variables";
@@ -77,22 +79,6 @@ import { GiTcgDataError } from "../../error";
 import type { Computed } from "../../query/utils";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 
-export class SkillWrappingData {
-  associatedExtensionId: number | null = null;
-  snippets: Map<string, (arg: any) => any> = new Map();
-}
-
-export function wrapSkillInfoFromGts(
-  skillInfo: SkillInfo,
-  data: SkillWrappingData,
-): SkillInfoOfContextConstruction {
-  return {
-    ...skillInfo,
-    associatedExtensionId: data.associatedExtensionId,
-    gtsSnippets: data.snippets,
-  };
-}
-
 type GtsSkillOperation<Meta extends RwContextMeta> = (
   c: TypedSkillContext<WritableMetaOf<Meta>>,
 ) => void;
@@ -100,6 +86,7 @@ type GtsSkillOperation<Meta extends RwContextMeta> = (
 type GtsSkillOperationFilter<Meta extends RwContextMeta> = (
   c: TypedSkillContext<ReadonlyMetaOf<Meta>>,
 ) => unknown;
+type LooseSkillOperationFilter = LooseSkillOperation<boolean>;
 
 abstract class SkillModel {
   // FIXME: use accessor when decorators are in stage 4
@@ -120,43 +107,33 @@ abstract class SkillModel {
   protected filters: GtsSkillOperationFilter<any>[] = [];
   userFilters: GtsSkillOperationFilter<any>[] = [];
 
-  abstract get wrapData(): SkillWrappingData;
+  abstract get contextOptions(): SkillContextOptions;
 
   protected buildAction(): SkillDescription<any> {
     const operations = [
       ...this.preOperations,
       this.action,
       ...this.postOperations,
-    ];
-    const wrapData = this.wrapData;
-    return function (state: GameState, skillInfo: SkillInfo, arg: any) {
-      const context = new SkillContext(
-        state,
-        wrapSkillInfoFromGts(skillInfo, wrapData),
-        arg,
-      );
+    ] as LooseSkillOperation[];
+    return SkillContext.encapsulate(this.contextOptions, (context) => {
       for (const action of operations) {
-        action(context as any);
+        action(context);
       }
-      return context._terminate();
-    };
+    });
   }
   protected buildFilter(): SkillActionFilter<any> {
-    const wrapData = this.wrapData;
-    const filters = [...this.filters, ...this.userFilters];
-    return function (state: GameState, skillInfo: SkillInfo, arg: any) {
-      const context = new SkillContext(
-        state,
-        wrapSkillInfoFromGts(skillInfo, wrapData),
-        arg,
-      );
+    const filters = [
+      ...this.filters,
+      ...this.userFilters,
+    ] as LooseSkillOperationFilter[];
+    return SkillContext.encapsulateForRet(this.contextOptions, (context) => {
       for (const filter of filters) {
-        if (!filter(context as any)) {
+        if (!filter(context)) {
           return false;
         }
       }
       return true;
-    };
+    });
   }
 }
 
@@ -176,8 +153,8 @@ export class TriggeredSkillModel extends SkillModel {
   } | null = null;
   listenTo: ListenTo = ListenTo.SameArea;
 
-  get wrapData(): SkillWrappingData {
-    return this.caller.wrapData;
+  get contextOptions(): SkillContextOptions {
+    return this.caller.contextOptions;
   }
 
   constructor(
@@ -396,9 +373,7 @@ export const TriggeredSkillViewModel = defineViewModel(
       >(
         meta: Meta,
         innerMeta: InnerMeta,
-      ): Omit<Meta, "variables"> & {
-        variables: Meta["variables"] | InnerMeta["name"];
-      };
+      ): PushMetaVar<Meta, InnerMeta["name"]>;
     }>((model, positionals, subView) => {
       const options = UsageVM.parse(subView);
       if (positionals[0] === "perRound") {
@@ -487,9 +462,9 @@ export class InitiativeSkillModel extends SkillModel {
     return false;
   }
 
-  #wrapData = new SkillWrappingData();
-  get wrapData() {
-    return this.#wrapData;
+  #contextOptions = new SkillContextOptions();
+  get contextOptions() {
+    return this.#contextOptions;
   }
 
   private buildInitiativeSkillConfig(): InitiativeSkillConfig {
@@ -505,7 +480,7 @@ export class InitiativeSkillModel extends SkillModel {
       omitEvents: this.omitEvents,
       getTarget: buildTargetGetter(
         this.targetGetters,
-        this.wrapData.associatedExtensionId,
+        this.contextOptions.associatedExtensionId,
       ),
     };
   }
@@ -621,13 +596,13 @@ export const InitiativeSkillViewModel = defineViewModel(
       ): AR.DoneRewriteMeta<
         Computed<
           Omit<Meta, "associatedExtension"> & {
-            associatedExtension: ExtensionHandle<NewExtT>;
+            readonly associatedExtension: ExtensionHandle<NewExtT>;
           }
         >
       >;
       uniqueKey(): "associatedExtension";
     }>((model, [extId]) => {
-      model.wrapData.associatedExtensionId = extId;
+      model.contextOptions.associatedExtensionId = extId;
     }),
 
     prepared: h.attribute<{
@@ -678,7 +653,7 @@ export const InitiativeSkillViewModel = defineViewModel(
         query: InferResult<Q> extends TargetQueryTypeInfo ? Q : never,
       ): AR.DoneRewriteMeta<
         Omit<Meta, "targetTypes"> & {
-          targetTypes: [
+          readonly targetTypes: readonly [
             ...Meta["targetTypes"],
             InferResult<Q> extends { type: infer T } ? T : never,
           ];
@@ -694,7 +669,7 @@ export const InitiativeSkillViewModel = defineViewModel(
         ) => Ret,
       ): AR.DoneRewriteMeta<
         Omit<Meta, "targetTypes"> & {
-          targetTypes: [
+          readonly targetTypes: readonly [
             ...Meta["targetTypes"],
             Ret[number]["definition"] extends {
               type: infer T extends TargetQueryTypeInfo["type"];
@@ -752,14 +727,17 @@ export class CharacterSkillViewModel extends InitiativeSkillViewModel
   //
   .extend(CharacterSkillModel, (h) => ({
     id: h.attribute<{
-      (id: number): AR.Done;
+      <Meta extends CharacterSkillVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       required(): true;
       uniqueKey(): "id";
       as<Meta extends CharacterSkillVMMeta>(
         this: AR.This<Meta>,
       ): Meta extends { isInitiativeSkill: true }
-        ? SkillHandle
-        : PassiveSkillHandle;
+        ? SkillHandle<Meta>
+        : PassiveSkillHandle<Meta>;
       as(this: AR.This<ReservedMeta>): undefined;
     }>(
       (model, [id]) => {
@@ -777,13 +755,13 @@ export class CharacterSkillViewModel extends InitiativeSkillViewModel
         this: AR.This<Meta>,
         type: "normal" | "elemental" | "burst",
       ): AR.DoneRewriteMeta<
-        Omit<Meta, "isInitiativeSkill"> & { isInitiativeSkill: true }
+        Omit<Meta, "isInitiativeSkill"> & { readonly isInitiativeSkill: true }
       >;
       <Meta extends CharacterSkillVMMeta>(
         this: AR.This<Meta>,
         type: "passive",
       ): AR.WithRewriteMeta<
-        Omit<Meta, "isInitiativeSkill"> & { isInitiativeSkill: false },
+        Omit<Meta, "isInitiativeSkill"> & { readonly isInitiativeSkill: false },
         typeof EntityViewModel,
         DefaultEntityVMMeta<"character">
       >;

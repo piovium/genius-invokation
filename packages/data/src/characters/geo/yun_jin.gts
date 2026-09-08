@@ -36,9 +36,7 @@ define skill {
   id 16074 as SpearFlourish;
   skillType elemental;
   prepared;
-  :query(
-    $.typeStatus.def(ShieldOfSwirlingClouds).at($.id(:self.id)),
-  )?.dispose();
+  :query($.typeStatus.def(ShieldOfSwirlingClouds).at(:self))?.dispose();
   if (:self.getVariable("discardOrTuneCardCount") > 0) {
     :damage(DamageType.Geo, 3);
   } else {

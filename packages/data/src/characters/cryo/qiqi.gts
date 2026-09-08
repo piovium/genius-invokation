@@ -60,7 +60,8 @@ define combatStatus {
         return false;
       }
       return :query(
-        $.id(:e.skillCaller.id).intersection(
+        $.intersection(
+          :e.skillCaller,
           $.character.var("health", "<", "maxHealth"),
         ),
       );

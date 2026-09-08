@@ -43,7 +43,7 @@ define card {
   technique {
     nightsoul;
     skill {
-      id 1151121;
+      id 1151121 as MultitargetFire;
       cost DiceType.Anemo, 2;
       filter :(
         :self.master.hasNightsoulsBlessing()?.variables.nightsoul &&

@@ -1,133 +1,199 @@
-import {
-  expectAssignable,
-  expectType,
-  expectDeprecated,
-  expectError,
-} from "tsd";
-import { $ } from "../src/query/dollar";
-import { type IsEqual, typingInfo, type IQuery, type InferResult } from "../src/query/utils";
+import { expectTypeOf, test } from "vitest";
+import { $ } from "../src/query";
 import type { CharacterHandle, SummonHandle } from "../src/data";
-import type { AttachmentHandle, ExEntityType } from "../src/data/type";
+import type { AttachmentHandle } from "../src/data/type";
+import type { ContextMetaBase } from "../src/runtime/skill_context";
+import type { RxEntityState } from "../src/runtime/reactive";
+import type { InferResult, IQuery } from "../src/query/utils";
 
 declare const infer: <Q extends IQuery>(q: Q) => InferResult<Q>;
-
-const expectEntityType =
-  <T extends ExEntityType>() =>
-  <Q extends IQuery>(
-    q: IsEqual<T, InferResult<Q>["type"]> extends true ? Q : never,
-  ) => {};
-
-// basic entity types
-expectEntityType<"equipment">()($.typeEquipment);
-expectEntityType<"status">()($.typeStatus);
-expectEntityType<"combatStatus">()($.combatStatus);
-expectEntityType<"summon">()($.summon);
-expectEntityType<"support">()($.support);
-expectEntityType<"eventCard">()($.typeEventCard);
-expectEntityType<"attachment">()($.attachment);
-
-expectEntityType<"eventCard" | "equipment" | "support">()($.hand);
-expectEntityType<"eventCard" | "equipment" | "support">()($.pile);
-
-expectEntityType<"eventCard" | "equipment" | "support">()($.my.pile.cost(">", 0));
-expectEntityType<"eventCard" | "equipment" | "support">()($.hand.notInitial);
-
-expectEntityType<"character">()($.character);
-expectEntityType<"character">()($.active);
-expectEntityType<"character">()($.prev);
-expectEntityType<"character">()($.next);
-
-expectEntityType<"eventCard" | "equipment" | "support" | "attachment">()(
-  $.vHand,
-);
-
-// @ts-expect-error
-expectError(infer($.status.support));
-
-// combining who
-expectAssignable<{}>(infer($.my));
-expectAssignable<{}>(infer($.my.combatStatus));
-expectAssignable<{}>(infer($.my.support));
-expectAssignable<{}>(infer($.opp.pile));
-expectAssignable<{}>(infer($.opp.onStage.typeEquipment));
-// @ts-expect-error
-expectError(infer($.my.my));
-// @ts-expect-error
-expectError(infer($.my.opp));
-
-// specifying id/def
+declare const reactiveCharacter: RxEntityState<ContextMetaBase, "character">;
+declare const reactiveStatus: RxEntityState<ContextMetaBase, "status">;
 declare const summonId: SummonHandle;
-expectAssignable<{ type: "summon" }>(infer($.def(summonId)));
-// @ts-expect-error
-expectError(infer($.support.def(summonId)));
-// @ts-expect-error
-expectError(infer($.def(summonId).status));
-// @ts-expect-error
-expectError(infer($.id(1).id(2)));
-
-// specifying variables
-expectAssignable<{ variables: "foo" | "bar" }>(
-  infer($.var("foo", 1).var("bar", 2)),
-);
-expectAssignable<{ variables: "foo" }>(infer($.var("foo", ">=", 1)));
-expectAssignable<{ variables: "foo" }>(infer($.var("foo", (x) => x >= 1)));
-
-// unary operators
-expectEntityType<"character">()($.recentOppFrom($.opp.active));
-expectEntityType<"character">()($.has($.typeStatus));
-expectEntityType<"character">()($.has.typeStatus);
-expectEntityType<"character">()($.has.typeEquipment);
-expectEntityType<"equipment" | "status">()($.at.my.active);
-// @ts-expect-error
-expectError(infer($.has($.character)));
-// @ts-expect-error
-expectError(infer($.has($.support)));
-// @ts-expect-error
-expectError(infer($.at($.summon)));
-// @ts-expect-error
-expectError(infer($.recentOppFrom($.support)));
-// using Function.prototype
-expectDeprecated($.has.call);
-expectDeprecated($.at.name);
-
-const x = infer($.on.pile);
-type X = typeof x;
-
-// hasAt method
 declare const characterId: CharacterHandle;
-expectEntityType<"character">()($.character.has($.typeEquipment));
-expectEntityType<"status">()($.my.typeStatus.at($.def(characterId)));
-// @ts-expect-error
-expectError(infer($.equipment.at($.summon)));
-// @ts-expect-error
-expectError(infer($.status.at($.hand)));
-// @ts-expect-error
-expectError(infer($.status.at($.def(summonId))));
-
 declare const attachmentId: AttachmentHandle;
-expectAssignable<{ areaType: "hands" }>(
-  infer($.hand.with($.def(attachmentId))),
-);
-expectEntityType<"attachment">()($.on.pile);
 
-// binary operator
-expectEntityType<"character">()($.opp.next.orElse($.opp.active));
+test("query types", () => {
+  // basic entity types
+  expectTypeOf(() => infer($.typeEquipment))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"equipment">();
+  expectTypeOf(() => infer($.typeStatus))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"status">();
+  expectTypeOf(() => infer($.combatStatus))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"combatStatus">();
+  expectTypeOf(() => infer($.summon))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"summon">();
+  expectTypeOf(() => infer($.support))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"support">();
+  expectTypeOf(() => infer($.typeEventCard))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"eventCard">();
+  expectTypeOf(() => infer($.attachment))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"attachment">();
 
-// complex example
-// Lisp style
-expectEntityType<"status" | "combatStatus" | "summon">()(
-  $.intersection(
-    $.opp,
-    $.union($.typeStatus, $.combatStatus, $.summon),
-    $.union($.tag("barrier"), $.tag("shield")),
-  ),
-);
-// Java style
-expectEntityType<"status" | "combatStatus" | "summon">()(
-  $.opp
-    .intersection($.typeStatus.union($.combatStatus).union($.summon))
-    .intersection($.tag("barrier").union($.tag("shield"))),
-);
+  expectTypeOf(() => infer($.hand))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"eventCard" | "equipment" | "support">();
+  expectTypeOf(() => infer($.pile))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"eventCard" | "equipment" | "support">();
+  expectTypeOf(() => infer($.my.pile.cost(">", 0)))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"eventCard" | "equipment" | "support">();
+  expectTypeOf(() => infer($.hand.notInitial))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"eventCard" | "equipment" | "support">();
 
-// orderBy & limit
-$.my.character.orderBy("health").limit(1);
+  expectTypeOf(() => infer($.character))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"character">();
+  expectTypeOf(() => infer($.active))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"character">();
+  expectTypeOf(() => infer($.prev))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"character">();
+  expectTypeOf(() => infer($.next))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"character">();
+
+  // reactive states are queries for their own entity id
+  expectTypeOf(() => infer(reactiveCharacter))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"character">();
+  expectTypeOf(() => infer($.character.intersection(reactiveCharacter)))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"character">();
+  expectTypeOf(() => infer($.typeStatus.at(reactiveCharacter)))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"status">();
+  expectTypeOf(() => infer($.character.has(reactiveStatus)))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"character">();
+
+  expectTypeOf(() => infer($.vHand))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"eventCard" | "equipment" | "support" | "attachment">();
+
+  // @ts-expect-error status cannot be combined with support
+  expectTypeOf(() => infer($.status.support));
+
+  // combining who
+  expectTypeOf(() => infer($.my)).returns.toExtend<{}>();
+  expectTypeOf(() => infer($.my.combatStatus)).returns.toExtend<{}>();
+  expectTypeOf(() => infer($.my.support)).returns.toExtend<{}>();
+  expectTypeOf(() => infer($.opp.pile)).returns.toExtend<{}>();
+  expectTypeOf(() => infer($.opp.onStage.typeEquipment)).returns.toExtend<{}>();
+  // @ts-expect-error who can only be specified once
+  expectTypeOf(() => infer($.my.my));
+  // @ts-expect-error who can only be specified once
+  expectTypeOf(() => infer($.my.opp));
+
+  // specifying id/def
+  expectTypeOf(() => infer($.def(summonId))).returns.toExtend<{
+    type: "summon";
+  }>();
+  // @ts-expect-error summon definitions cannot be combined with support
+  expectTypeOf(() => infer($.support.def(summonId)));
+  // @ts-expect-error entity type can only be specified once
+  expectTypeOf(() => infer($.def(summonId).status));
+  // @ts-expect-error id can only be specified once
+  expectTypeOf(() => infer($.id(1).id(2)));
+
+  // specifying variables
+  expectTypeOf(() => infer($.var("foo", 1).var("bar", 2))).returns.toExtend<{
+    variables: "foo" | "bar";
+  }>();
+  expectTypeOf(() => infer($.var("foo", ">=", 1))).returns.toExtend<{
+    variables: "foo";
+  }>();
+  expectTypeOf(() => infer($.var("foo", (x) => x >= 1))).returns.toExtend<{
+    variables: "foo";
+  }>();
+
+  // unary operators
+  expectTypeOf(() => infer($.recentOppFrom($.opp.active)))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"character">();
+  expectTypeOf(() => infer($.has($.typeStatus)))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"character">();
+  expectTypeOf(() => infer($.has.typeStatus))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"character">();
+  expectTypeOf(() => infer($.has.typeEquipment))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"character">();
+  expectTypeOf(() => infer($.at.my.active))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"equipment" | "status">();
+  // @ts-expect-error has only accepts attachments
+  expectTypeOf(() => infer($.has($.character)));
+  // @ts-expect-error has only accepts attachments
+  expectTypeOf(() => infer($.has($.support)));
+  // @ts-expect-error at only accepts characters
+  expectTypeOf(() => infer($.at($.summon)));
+  // @ts-expect-error recentOppFrom only accepts characters
+  expectTypeOf(() => infer($.recentOppFrom($.support)));
+
+  // has/at methods
+  expectTypeOf(() => infer($.character.has($.typeEquipment)))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"character">();
+  expectTypeOf(() => infer($.my.typeStatus.at($.def(characterId))))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"status">();
+  // @ts-expect-error equipment can only be attached to characters
+  expectTypeOf(() => infer($.typeEquipment.at($.summon)));
+  // @ts-expect-error status cannot be attached to cards
+  expectTypeOf(() => infer($.typeStatus.at($.hand)));
+  // @ts-expect-error status cannot be attached to a summon
+  expectTypeOf(() => infer($.typeStatus.at($.def(summonId))));
+
+  expectTypeOf(() => infer($.hand.with($.def(attachmentId)))).returns.toExtend<{
+    areaType: "hands";
+  }>();
+  expectTypeOf(() => infer($.on.pile))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"attachment">();
+
+  // binary operator
+  expectTypeOf(() => infer($.opp.next.orElse($.opp.active)))
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"character">();
+
+  // complex example, Lisp style
+  expectTypeOf(() =>
+    infer(
+      $.intersection(
+        $.opp,
+        $.union($.typeStatus, $.combatStatus, $.summon),
+        $.union($.tag("barrier"), $.tag("shield")),
+      ),
+    ),
+  )
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"status" | "combatStatus" | "summon">();
+
+  // complex example, Java style
+  expectTypeOf(() =>
+    infer(
+      $.opp
+        .intersection($.typeStatus.union($.combatStatus).union($.summon))
+        .intersection($.tag("barrier").union($.tag("shield"))),
+    ),
+  )
+    .returns.toHaveProperty("type")
+    .toEqualTypeOf<"status" | "combatStatus" | "summon">();
+
+  // orderBy & limit
+  expectTypeOf(() =>
+    $.my.character.orderBy("health").limit(1),
+  ).returns.toExtend<IQuery>();
+});

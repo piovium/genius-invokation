@@ -66,7 +66,7 @@ define card {
   undiscoverable;
   technique {
     skill {
-      id 1270321;
+      id 1270321 as VinyRazorscale;
       cost DiceType.Aligned, 1;
       cost DiceType.Energy, 1;
       usage 2 {

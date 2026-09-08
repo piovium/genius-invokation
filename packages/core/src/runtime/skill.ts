@@ -28,12 +28,12 @@ import {
   ModifyAction3EventArg,
   type DamageInfo,
   type InitiativeSkillTargetGetter,
-  type SkillInfoOfContextConstruction,
   ModifyHeal0EventArg,
   ModifyHeal1EventArg,
   UseSkillEventArg,
   DamageOrHealEventArg,
   ModifyAction4EventArg,
+  SkillContextOptions,
 } from "../base/skill";
 import type {
   AnyState,
@@ -644,17 +644,6 @@ export type DetailedEventArgOf<E extends DetailedEventNames> =
 
 export type SkillInfoGetter = () => SkillInfo;
 
-export function wrapSkillInfoWithExt(
-  skillInfo: SkillInfo,
-  associatedExtensionId: number | null,
-): SkillInfoOfContextConstruction {
-  return {
-    ...skillInfo,
-    associatedExtensionId,
-    gtsSnippets: new Map(),
-  };
-}
-
 export type TargetGetter = (ctx: SkillContext<any>) => AnyState[];
 
 function generateTargetList(
@@ -668,14 +657,12 @@ function generateTargetList(
     return [[]];
   }
   const [first, ...rest] = getTarget;
-  const ctx = new SkillContext<ReadonlyMetaOf<RwContextMeta>>(
-    state,
-    wrapSkillInfoWithExt(skillInfo, associatedExtensionId),
-    {
-      targets: known,
-    },
-  );
-  const states = first(ctx);
+  const states = SkillContext.encapsulateForRet(
+    SkillContextOptions.fromExtId(associatedExtensionId),
+    first,
+  )(state, skillInfo, {
+    targets: known,
+  });
   return states.flatMap((st) =>
     generateTargetList(
       state,

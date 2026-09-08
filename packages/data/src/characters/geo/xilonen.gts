@@ -194,7 +194,7 @@ define card {
       :e.changeDamageType(DamageType.Geo);
     };
     skill {
-      id 1161121;
+      id 1161121 as HighspeedLeap;
       cost DiceType.Void, 2;
       :consumeNightsoul(:self.master);
       :drawCards(3);

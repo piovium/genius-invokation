@@ -22,6 +22,8 @@ import {
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
   type IParentModel,
+  type PushMetaVar,
+  type WithIdVMMeta,
 } from "./entity";
 import {
   DEFAULT_INITIATIVE_SKILL_VM_META,
@@ -142,12 +144,17 @@ export const TechniqueSkillViewModel = InitiativeSkillViewModel
   //
   .extend(TechniqueSkillModel, (h) => ({
     id: h.attribute<{
-      (id: number): AR.Done;
+      <Meta extends TechniqueSkillVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       // TODO custom technique cannot provide required id
       // we can make `required()` only for official data
       // required(): true;
       uniqueKey(): "id";
-      as(): SkillHandle;
+      as<Meta extends TechniqueSkillVMMeta>(
+        this: AR.This<Meta>,
+      ): SkillHandle<Meta>;
     }>(
       (model, [id]) => {
         model.id = id;
@@ -170,9 +177,7 @@ export const TechniqueSkillViewModel = InitiativeSkillViewModel
       >(
         meta: Meta,
         innerMeta: InnerMeta,
-      ): Omit<Meta, "variables"> & {
-        variables: Meta["variables"] | InnerMeta["name"];
-      };
+      ): PushMetaVar<Meta, InnerMeta["name"]>;
     }>((model, positionals, subView) => {
       const options = UsageVM.parse(subView);
       if (positionals[0] === "perRound") {
@@ -197,8 +202,12 @@ export class TechniqueModel extends EntityModel {
   };
 }
 
-export type DefaultTechniqueVMMeta<AssociatedExtension = never> =
-  DefaultEntityVMMeta<"equipment", AssociatedExtension>;
+export type DefaultTechniqueVMMeta<
+  AssociatedExtension = never,
+  Id extends number = number,
+> = DefaultEntityVMMeta<"equipment", AssociatedExtension> & {
+  readonly id: Id;
+};
 
 export type TechniqueVMMeta = EntityVMMeta & {
   type: "equipment";
@@ -279,13 +288,11 @@ export const TechniqueViewModel = EntityViewModel
           if (disposingArea.type !== "characters") {
             return;
           }
-          c
-            .query(
-              $.typeStatus
-                .tag("nightsoulsBlessing")
-                .at($.id(disposingArea.characterId)),
-            )
-            ?.dispose();
+          c.query(
+            $.typeStatus
+              .tag("nightsoulsBlessing")
+              .at($.id(disposingArea.characterId)),
+          )?.dispose();
         };
         model.skillList.push(disposeNightsoulSkill.buildSkillDefinition());
       }
@@ -308,9 +315,7 @@ export const TechniqueViewModel = EntityViewModel
       >(
         meta: Meta,
         innerMeta: InnerMeta,
-      ): Omit<Meta, "variables"> & {
-        variables: Meta["variables"] | InnerMeta["variables"];
-      };
+      ): PushMetaVar<Meta, InnerMeta["variables"]>;
     }>((model, [], subView) => {
       const skillModel = TechniqueSkillViewModel.parse(subView, model);
       skillModel.id ??= model.getSubId();

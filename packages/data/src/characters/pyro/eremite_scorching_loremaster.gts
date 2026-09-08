@@ -66,7 +66,7 @@ define card {
       :combatStatus(ScorpionBlessing);
     };
     skill {
-      id 1230311;
+      id 1230311 as BurningAssault;
       cost DiceType.Aligned, 2;
       usage 1;
       :damage(DamageType.Pyro, 2);

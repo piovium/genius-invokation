@@ -69,7 +69,7 @@ define card {
   undiscoverable;
   technique {
     skill {
-      id 1220511;
+      id 1220511 as BubbleBattleTactics;
       cost DiceType.Aligned, 1;
       usage 2 {
         autoDispose false;

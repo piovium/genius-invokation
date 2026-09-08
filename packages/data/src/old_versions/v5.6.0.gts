@@ -70,7 +70,7 @@ define card {
       :summon(TurboTwirlyLetItRip);
     };
     skill {
-      id 1161021;
+      id 1161021 as private TwirlyTwirlyBamBam;
       cost DiceType.Void, 1;
       :consumeNightsoul(:self.master);
       const field = :query($.my.combatStatus.def(TurboDrillField));

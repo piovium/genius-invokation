@@ -37,8 +37,10 @@ import {
   type EntityVMMeta,
   type GtsUsageOrUsagePerRoundOptions,
   type ICaller,
+  type PushMetaVar,
   type ThisWithType,
   type TriggeredSkillVMMetaFromCard,
+  type WithIdVMMeta,
 } from "./entity";
 import type { CharacterHandle, HandleT, StatusHandle } from "../../data/type";
 import type {
@@ -104,7 +106,7 @@ export type TalentRequirement = "action" | "actionSkill" | "active" | "none";
 
 export class CardModel extends InitiativeSkillModel implements ICaller {
   reserved = false;
-  
+
   // FIXME: use accessor when decorators are in stage 4
   #cardId!: number;
   get cardId() {
@@ -303,13 +305,14 @@ interface EntityVMMetaFromCard<
   Meta extends CardVMMeta,
   Type extends "support" | "equipment",
 > {
-  type: Type;
-  variables: never;
-  stagedEventArgType: StrictInitiativeSkillEventArg<
+  readonly id: Meta["id"];
+  readonly type: Type;
+  readonly variables: never;
+  readonly stagedEventArgType: StrictInitiativeSkillEventArg<
     [Type] extends ["equipment"] ? readonly ["character"] : readonly []
   >;
-  associatedExtension: Meta["associatedExtension"];
-  snippets: {};
+  readonly associatedExtension: Meta["associatedExtension"];
+  readonly snippets: {};
 }
 
 const DEFAULT_CARD_VM_META = {
@@ -330,10 +333,15 @@ export class CardViewModel extends InitiativeSkillViewModel
   //
   .extend(CardModel, (h) => ({
     id: h.attribute<{
-      (id: number): AR.Done;
+      <Meta extends EntityVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       required(): true;
       uniqueKey(): "id";
-      as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
+      as<Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+      ): HandleT<Meta["type"], Meta>;
       as(this: AR.This<ReservedMeta>): undefined;
     }>(
       (model, [id]) => {
@@ -420,7 +428,7 @@ export class CardViewModel extends InitiativeSkillViewModel
         this: NoTargetSpecifiedThis<Meta>,
       ): AR.With<
         typeof TechniqueViewModel,
-        DefaultTechniqueVMMeta<Meta["associatedExtension"]>
+        DefaultTechniqueVMMeta<Meta["associatedExtension"], Meta["id"]>
       >;
       uniqueKey(): "type";
       mergeMeta<Meta extends CardVMMeta, InnerMeta extends TechniqueVMMeta>(
@@ -469,7 +477,9 @@ export class CardViewModel extends InitiativeSkillViewModel
         requires?: TalentRequirement,
       ): AR.DoneRewriteMeta<
         Computed<
-          Omit<Meta, "targetTypes"> & { targetTypes: readonly ["character"] },
+          Omit<Meta, "targetTypes"> & {
+            readonly targetTypes: readonly ["character"];
+          },
           CardVMMeta
         >
       >;
@@ -516,7 +526,9 @@ export class CardViewModel extends InitiativeSkillViewModel
         this: NoTargetSpecifiedThis<Meta>,
       ): AR.WithRewriteMeta<
         Computed<
-          Omit<Meta, "targetTypes"> & { targetTypes: readonly ["character"] },
+          Omit<Meta, "targetTypes"> & {
+            readonly targetTypes: readonly ["character"];
+          },
           CardVMMeta
         >,
         typeof FoodVM
@@ -586,7 +598,9 @@ export class CardViewModel extends InitiativeSkillViewModel
       ): AR.WithRewriteMeta<
         // rewrite meta to disable ~action
         Computed<
-          Omit<Meta, "isInitiativeSkill"> & { isInitiativeSkill: false },
+          Omit<Meta, "isInitiativeSkill"> & {
+            readonly isInitiativeSkill: false;
+          },
           CardVMMeta
         >,
         typeof OffStageTriggeredSkillViewModel,
@@ -609,12 +623,7 @@ export class CardViewModel extends InitiativeSkillViewModel
       >(
         meta: Meta,
         innerMeta: InnerMeta,
-      ): Computed<
-        Omit<Meta, "variables"> & {
-          variables: Meta["variables"] | InnerMeta["variables"];
-        },
-        CardVMMeta
-      >;
+      ): PushMetaVar<Meta, InnerMeta["variables"]>;
     }>((model, [eventName, maybeMark], subView) => {
       if (eventName === "selfDiscard" && maybeMark === "=play") {
         const skillModel = DisposeSameVM.parse(subView, model);

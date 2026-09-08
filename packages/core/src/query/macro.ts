@@ -11,7 +11,9 @@ export function createMacros($: IDollar) {
     myActive: ch($.my.active),
     oppActive: ch($.opp.active),
 
-    myEnergyNotFull: ch($.my.character.var("energy", "<", "maxEnergy")),
+    myFirstEnergyNotFull: ch(
+      $.my.character.var("energy", "<", "maxEnergy").limit(1),
+    ),
 
     oppActivePrioritized: ch($.opp.character.var("health", ">", 0).limit(1)),
 

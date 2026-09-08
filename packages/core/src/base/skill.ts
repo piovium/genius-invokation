@@ -71,6 +71,7 @@ import type { MoveEntityM, RemoveEntityM } from "./mutation";
 import type { LunarReaction } from "@gi-tcg/typings";
 import type { DamageOption, ReadonlyEventList } from "../mutator";
 import type { SkillContext } from "../runtime/skill_context";
+import { freeze, immerable, type Immutable } from "immer";
 
 export interface SkillDefinitionBase<Arg> {
   readonly type: "skill";
@@ -93,19 +94,10 @@ export interface CoreSkillResult {
 }
 
 export interface SkillResult extends CoreSkillResult {
+  readonly error: unknown;
   readonly innerNotify: StateMutationAndExposedMutation;
   readonly mainDamage: DamageInfo | null;
 }
-
-export const EMPTY_SKILL_RESULT: SkillResult = {
-  emittedEvents: [],
-  innerNotify: {
-    exposedMutations: [],
-    stateMutations: [],
-  },
-  mainDamage: null,
-  causeDefeated: false,
-};
 
 export type SkillDescriptionReturn = readonly [GameState, SkillResult];
 
@@ -216,17 +208,28 @@ export function defineSkillInfo(init: InitSkillInfo): SkillInfo {
   };
 }
 
-export interface SkillInfoOfContextConstruction extends SkillInfo {
+export type LooseSkillOperation<Ret = void> = (c: SkillContext<any>) => Ret;
+
+export class SkillContextOptions {
+  [immerable] = true;
+  #phantomData = 0;
   /**
    * 当访问 setExtensionState 时操作的扩展点 id。
    * 在传入 SkillContext 时，由 GTS 运行时指定好。
    */
-  readonly associatedExtensionId: number | null;
+  associatedExtensionId: number | null = null;
   /**
    * 当访问 callSnippet 时查找的 snippet 表。
    *
    */
-  readonly gtsSnippets: ReadonlyMap<string, (arg: SkillContext<any>) => void>;
+  gtsSnippets: Map<string, LooseSkillOperation> = new Map();
+
+  static fromExtId(extId: number | null): SkillContextOptions {
+    const result = new SkillContextOptions();
+    result.associatedExtensionId = extId;
+    return result;
+  }
+  static plain: Immutable<SkillContextOptions> = freeze(new SkillContextOptions());
 }
 
 export interface DamageInfo {

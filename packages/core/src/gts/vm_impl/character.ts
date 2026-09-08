@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { defineViewModel } from "@gi-tcg/gts-runtime";
+import { defineViewModel, type AR } from "@gi-tcg/gts-runtime";
 import type { CharacterEntry } from "../../data/registry";
 import {
   DEFAULT_VERSION_INFO,
@@ -21,7 +21,11 @@ import {
   type VersionInfo,
 } from "../../base/version";
 import { Aura, type LunarReaction } from "@gi-tcg/typings";
-import type { CharacterTag, SpecialEnergyConfig } from "../../base/character";
+import type {
+  CharacterTag,
+  CharacterCoreVariableConfigs,
+  SpecialEnergyConfig,
+} from "../../base/character";
 import type {
   CharacterHandle,
   PassiveSkillHandle,
@@ -29,6 +33,7 @@ import type {
   StatusHandle,
 } from "../../data";
 import { createVariable } from "../../data/utils";
+import type { WithIdVMMeta } from "./entity";
 
 export class CharacterModel {
   // FIXME: use accessor when decorators are in stage 4
@@ -73,59 +78,80 @@ export class CharacterModel {
   }
 }
 
-export class CharacterViewModel extends defineViewModel(CharacterModel, (h) => ({
-  id: h.simpleAttribute({
-    required: true,
-    uniqueKey: "id",
-  })(
-    function (id: number) {
-      this.id = id;
-    },
-    (id: number) => id as CharacterHandle,
-  ),
-  since: h.simpleAttribute({
-    uniqueKey: "version",
-  })(function (version: Version) {
-    this.versionInfo = {
-      from: "official",
-      value: { predicate: "since", version },
-    };
+export interface CharacterVMMeta {
+  readonly id: number;
+  readonly variables: string;
+}
+
+export const DEFAULT_CHARACTER_VM_META = {
+  id: 0 as number,
+  variables: "" as keyof CharacterCoreVariableConfigs & {},
+} as const satisfies CharacterVMMeta;
+
+export class CharacterViewModel extends defineViewModel(
+  CharacterModel,
+  (h) => ({
+    id: h.attribute<{
+      <Meta extends CharacterVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
+      required(): true;
+      uniqueKey(): "id";
+      as<Meta extends CharacterVMMeta>(
+        this: AR.This<Meta>,
+      ): CharacterHandle<Meta>;
+    }>(
+      (model, [id]) => {
+        model.id = id;
+      },
+      (_, [id]) => id as CharacterHandle,
+    ),
+    since: h.simpleAttribute({
+      uniqueKey: "version",
+    })(function (version: Version) {
+      this.versionInfo = {
+        from: "official",
+        value: { predicate: "since", version },
+      };
+    }),
+    until: h.simpleAttribute({
+      uniqueKey: "version",
+    })(function (version: Version) {
+      this.versionInfo = {
+        from: "official",
+        value: { predicate: "until", version },
+      };
+    }),
+    tags: h.simpleAttribute()(function (...tags: CharacterTag[]) {
+      this.tags.push(...tags);
+    }),
+    health: h.simpleAttribute()(function (maxHealth: number) {
+      this.maxHealth = maxHealth;
+    }),
+    energy: h.simpleAttribute()(function (maxEnergy: number) {
+      this.maxEnergy = maxEnergy;
+    }),
+    skills: h.simpleAttribute()(function (
+      ...skillIds: (SkillHandle | PassiveSkillHandle)[]
+    ) {
+      this.skillIds.push(...skillIds);
+    }),
+    associateNightsoul: h.simpleAttribute({
+      uniqueKey: "associateNightsoul",
+    })(function (blessingId: StatusHandle) {
+      this.associatedNightsoulsBlessingId = blessingId;
+    }),
+    enabledLunarReactions: h.simpleAttribute()(function (
+      ...reactions: LunarReaction[]
+    ) {
+      this.enabledLunarReactions.push(...reactions);
+    }),
+    specialEnergy: h.simpleAttribute({
+      uniqueKey: "specialEnergy",
+    })(function (variableName: string, slotSize: number) {
+      this.specialEnergy = { variableName, slotSize };
+    }),
   }),
-  until: h.simpleAttribute({
-    uniqueKey: "version",
-  })(function (version: Version) {
-    this.versionInfo = {
-      from: "official",
-      value: { predicate: "until", version },
-    };
-  }),
-  tags: h.simpleAttribute()(function (...tags: CharacterTag[]) {
-    this.tags.push(...tags);
-  }),
-  health: h.simpleAttribute()(function (maxHealth: number) {
-    this.maxHealth = maxHealth;
-  }),
-  energy: h.simpleAttribute()(function (maxEnergy: number) {
-    this.maxEnergy = maxEnergy;
-  }),
-  skills: h.simpleAttribute()(function (
-    ...skillIds: (SkillHandle | PassiveSkillHandle)[]
-  ) {
-    this.skillIds.push(...skillIds);
-  }),
-  associateNightsoul: h.simpleAttribute({
-    uniqueKey: "associateNightsoul",
-  })(function (blessingId: StatusHandle) {
-    this.associatedNightsoulsBlessingId = blessingId;
-  }),
-  enabledLunarReactions: h.simpleAttribute()(function (
-    ...reactions: LunarReaction[]
-  ) {
-    this.enabledLunarReactions.push(...reactions);
-  }),
-  specialEnergy: h.simpleAttribute({
-    uniqueKey: "specialEnergy",
-  })(function (variableName: string, slotSize: number) {
-    this.specialEnergy = { variableName, slotSize };
-  }),
-})) {}
+  DEFAULT_CHARACTER_VM_META,
+) {}

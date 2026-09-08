@@ -17,7 +17,6 @@ import type { CharacterTag, EntityTag, EntityType } from "..";
 import type { AttachmentTag } from "../base/attachment";
 import type {
   AttachmentHandle,
-  CardHandle,
   CharacterHandle,
   EquipmentHandle,
   ExEntityType,
@@ -28,8 +27,6 @@ import type {
 } from "../data/type";
 import type { PrimaryMethodsInternal, PrimaryQuery } from "./primary_query";
 import {
-  type AttachmentReq,
-  type CardReq,
   type CharacterReq,
   type Computed,
   type Constructor,
@@ -53,6 +50,8 @@ import {
   variableKeyToPropertyCode,
   diceCostKey,
   inInitialPileKey,
+  type VariableName,
+  type QueryVariables,
 } from "./utils";
 
 type EventCardHandle = number & { readonly _eventCard: unique symbol };
@@ -100,6 +99,7 @@ type DefPatch<T extends HandleT<ExEntityType>> = (T extends EquipmentHandle
                 }
               : {}) & {
   definition: T & { readonly _defSpecified: unique symbol };
+  variables: { [K in T["_meta"]["variables"]]: 0 };
 };
 
 type HandsOrPileEntityType = "eventCard" | "equipment" | "support";
@@ -142,6 +142,12 @@ type AssignVarAndActionCard<
 
 type RelationOp = "<" | "<=" | "=" | ">=" | ">" | "!=";
 
+type VarNameFromMeta<Meta extends HeterogeneousMetaBase> = VariableName<
+  TypingInfoFromMeta<Meta>
+>;
+type QueryVariablesFromMeta<Meta extends HeterogeneousMetaBase> =
+  QueryVariables<TypingInfoFromMeta<Meta>>;
+
 // Make CodeQL happy
 function escapeUnsafeChars(str: string) {
   return str.replace(
@@ -154,7 +160,7 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
   private get _self(): any {
     return this;
   }
-  private declare _internal: PrimaryMethodsInternal;
+  declare private _internal: PrimaryMethodsInternal;
   // who
   get my(): Assign<Meta, { who: "my" }> {
     this._internal.addConstraint(["who", "my"]);
@@ -320,32 +326,35 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     return this._self;
   }
   // with
-  var<const Name extends StateVariablesKey>(
+  var<const Name extends VarNameFromMeta<Meta>>(
     name: Name,
     value: number,
   ): AssignVar<Meta, Name>;
-  var<const Name extends StateVariablesKey>(
+  var<const Name extends VarNameFromMeta<Meta>, const Op extends RelationOp>(
     name: Name,
-    op: RelationOp,
+    op: Op,
     value: number,
-  ): AssignVar<Meta, Name>;
+  ): AssignVar<Meta, "!=" extends Op ? never : Name>;
   var<
-    const Name extends StateVariablesKey,
-    const Name2 extends StateVariablesKey,
-  >(name: Name, op: RelationOp, ref: Name2): AssignVar<Meta, Name | Name2>;
-  var<const Name extends StateVariablesKey>(
+    const Name extends VarNameFromMeta<Meta>,
+    const Op extends RelationOp,
+    const Name2 extends VarNameFromMeta<Meta>,
+  >(
+    name: Name,
+    op: Op,
+    ref: Name2,
+  ): AssignVar<Meta, "!=" extends Op ? never : Name | Name2>;
+  var<const Name extends VarNameFromMeta<Meta>>(
     name: Name,
     pred: (value: number) => unknown,
   ): AssignVar<Meta, Name>;
-  var<const Name extends StateVariablesKey>(
-    pred: (values: StateVariables) => unknown,
-  ): AssignVar<Meta, Name>;
+  var(pred: (values: QueryVariablesFromMeta<Meta>) => unknown): Assign<Meta>;
   var(
     ...args:
       | [StateVariablesKey, number]
       | [StateVariablesKey, RelationOp, number | StateVariablesKey]
       | [StateVariablesKey, (value: number) => unknown]
-      | [(values: StateVariables) => unknown]
+      | [(values: QueryVariablesFromMeta<Meta>) => unknown]
   ): any {
     if (typeof args[0] !== "function") {
       const [name, opOrValue, valueOrRefOrUndefined] = args;
@@ -367,7 +376,10 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
       } else if (typeof opOrValue === "function") {
         const fnCode = stringifyFunction(opOrValue);
         const prop = escapeUnsafeChars(variableKeyToPropertyCode(name));
-        const wrappedSource = `(v) => (${fnCode})(v[${prop}])`;
+        const wrappedSource = `(v) => {
+          const value = Number(v[${prop}]);
+          return value === value && (${fnCode})(value);
+        }`;
         this._internal.addConstraint(["variables", ["fn", wrappedSource]]);
       } else {
         const _exhaustiveCheck: never = opOrValue!;
@@ -382,14 +394,14 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
   }
 
   cost(value: number): AssignVarAndActionCard<Meta, typeof diceCostKey>;
-  cost(
-    op: RelationOp,
+  cost<const Op extends RelationOp>(
+    op: Op,
     value: number,
-  ): AssignVarAndActionCard<Meta, typeof diceCostKey>;
+  ): AssignVarAndActionCard<Meta, "!=" extends Op ? never : typeof diceCostKey>;
   cost(
     pred: (value: number) => unknown,
   ): AssignVarAndActionCard<Meta, typeof diceCostKey>;
-  cost(...args: any[]) {
+  cost(...args: any[]): any {
     // @ts-expect-error - overloads are not properly inferred here
     return this.var(diceCostKey, ...args);
   }
@@ -477,7 +489,9 @@ type _Check = StaticAssert<
   IsExtends<
     PrimaryMethodRestrictionConfig,
     {
-      [K in keyof PrimaryMethodRestrictionConfig]: Partial<HeterogeneousMetaBase>;
+      [
+        K in keyof PrimaryMethodRestrictionConfig
+      ]: Partial<HeterogeneousMetaBase>;
     }
   >
 >;

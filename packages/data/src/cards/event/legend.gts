@@ -193,10 +193,6 @@ define combatStatus {
   oneDuration;
   on playCard {
     when :( :e.card.definition.type === "eventCard" );
-    usage 1 {
-      autoDispose false;
-      visible false;
-    };
     for (const hand of :player.hands) {
       if (hand.definition.type === "eventCard") {
         :attach(IneffectiveWhenPlayed, hand);

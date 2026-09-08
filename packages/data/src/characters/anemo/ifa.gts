@@ -114,7 +114,7 @@ define card {
   technique {
     nightsoul;
     skill {
-      id 1151521;
+      id 1151521 as SupportingFire;
       cost DiceType.Void, 2;
       :consumeNightsoul(:self.master, 1);
       :damage(DamageType.Anemo, 1, $.opp.prev.orElse($.opp.active));

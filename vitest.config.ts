@@ -23,10 +23,12 @@ export default defineConfig({
     env: {
       NODE_OPTIONS: "--expose-gc",
     },
+    typecheck: {
+      enabled: true,
+      tsconfig: `${import.meta.dirname}/tsconfig.vitest.json`,
+    },
   },
-  plugins: [
-    gts(),
-  ],
+  plugins: [gts()],
   ssr: {
     // https://vitest.dev/guide/common-errors.html#custom-package-conditions-are-not-resolved
     resolve: {

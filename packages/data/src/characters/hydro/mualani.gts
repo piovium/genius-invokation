@@ -73,7 +73,7 @@ define card {
       :characterStatus(BiteTarget, $.opp.active);
     };
     skill {
-      id 1121422;
+      id 1121422 as SharkySurfboard;
       cost DiceType.Hydro, 1;
       :switchActive($.my.prev);
       :characterStatus(BiteTarget, $.opp.active);
@@ -182,6 +182,7 @@ define card {
           :queryAll($.my.summon).length > 0
       );
       usage perRound, 1;
+      :abortPreview();
       const summons = :queryAll($.my.summon);
       if (summons.length > 0) {
         const targetSummon = :random(summons);

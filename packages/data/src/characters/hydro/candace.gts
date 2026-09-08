@@ -26,7 +26,7 @@ define skill {
   id 12074 as HeronStrike;
   skillType elemental;
   prepared;
-  :query($.typeStatus.def(HeronShield).at($.id(:self.id)))?.dispose();
+  :query($.typeStatus.def(HeronShield).at(:self))?.dispose();
   :damage(DamageType.Hydro, 3);
 };
 

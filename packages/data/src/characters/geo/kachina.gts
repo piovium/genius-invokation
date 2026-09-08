@@ -79,7 +79,7 @@ define card {
       :summon(TurboTwirlyLetItRip);
     };
     skill {
-      id 1161021;
+      id 1161021 as TwirlyTwirlyBamBam;
       cost DiceType.Geo, 1;
       :consumeNightsoul(:self.master);
       const field = :query($.my.combatStatus.def(TurboDrillField));

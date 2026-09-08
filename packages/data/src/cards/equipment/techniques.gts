@@ -31,7 +31,7 @@ define card {
   since "v5.0.0";
   technique {
     skill {
-      id 3130011;
+      id 3130011 as FontemerWaterBlades;
       cost DiceType.Void, 2;
       usage 2;
       :damage(DamageType.Physical, 2);
@@ -62,7 +62,7 @@ define card {
       :e.deductOmniCost(1);
     };
     skill {
-      id 3130021;
+      id 3130021 as ArtfulGrapple;
       cost DiceType.Aligned, 2;
       usage 2;
       :damage(DamageType.Physical, 1);
@@ -91,7 +91,7 @@ define card {
   cost DiceType.Aligned, 2;
   technique {
     skill {
-      id 3130031;
+      id 3130031 as Spiritway;
       cost DiceType.Aligned, 1;
       usage 2;
       usage perRound, 1;
@@ -127,7 +127,7 @@ define card {
   cost DiceType.Aligned, 2;
   technique {
     skill {
-      id 3130041;
+      id 3130041 as BurrowingAssault;
       usage 2;
       cost DiceType.Void, 2;
       :drawCards(2);
@@ -157,7 +157,7 @@ define card {
   cost DiceType.Aligned, 2;
   technique {
     skill {
-      id 3130051;
+      id 3130051 as SpiritualSupport;
       usage 2;
       cost DiceType.Aligned, 1;
       :heal(1, :self.master);
@@ -220,7 +220,7 @@ define card {
       :dispose($.opp.typeStatus.def(Target));
     };
     skill {
-      id 3130063;
+      id 3130063 as SwiftGlide;
       usage 2;
       cost DiceType.Aligned, 1;
       :discardMaxCostHands(1);
@@ -260,7 +260,7 @@ define card {
   cost DiceType.Aligned, 5;
   technique {
     skill {
-      id 3130071;
+      id 3130071 as WaveriderSwiftstrikeCannon;
       usage 2;
       cost DiceType.Aligned, 1;
       :damage(DamageType.Physical, 2);
@@ -317,7 +317,7 @@ define card {
   cost DiceType.Void, 4;
   technique {
     skill {
-      id 3130081;
+      id 3130081 as SpiritedState;
       usage 2;
       cost DiceType.Void, 3;
       :characterStatus(TatankasaurusStatus01, :self.master);
@@ -414,7 +414,7 @@ define card {
       :combatStatus(Yikes);
     };
     skill {
-      id 3130092;
+      id 3130092 as RawrRawrSkill;
       usage 2;
       cost DiceType.Void, 2;
       :drawCards(1, { withTag: "technique" });
@@ -438,7 +438,7 @@ define card {
   cost DiceType.Aligned, 1;
   technique {
     skill {
-      id 3130101;
+      id 3130101 as SonarWaves;
       usage 2;
       cost DiceType.Aligned, 1;
       :abortPreview();

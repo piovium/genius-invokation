@@ -20,14 +20,14 @@ import type { GameState, TriggeredSkillDefinition } from "../../base/state";
 import { EXTENSION_ID_OFFSET } from "../../data/extension";
 import type { ExtensionHandle } from "../../data";
 import type { Computed } from "../../query/utils";
-import type {
-  EventArgOf,
-  EventNames,
-  SkillDescription,
+import {
+  SkillContextOptions,
+  type EventArgOf,
+  type EventNames,
+  type SkillDescription,
 } from "../../base/skill";
 import type { Draft } from "immer";
 import { SkillContext } from "../../runtime/skill_context";
-import { wrapSkillInfoWithExt } from "../../runtime/skill";
 import { DEFAULT_VERSION_INFO } from "../../base/version";
 import { getSubId } from "./sub_id";
 
@@ -129,15 +129,14 @@ export const ExtensionViewModel = defineViewModel(
       ): AR.Done;
     }>((model, [event, operation]) => {
       const extId = model.id;
-      const action: SkillDescription<any> = (state, skillInfo, arg) => {
-        const ctx = new SkillContext<any>(
-          state,
-          wrapSkillInfoWithExt(skillInfo, extId),
-          arg,
-        );
-        ctx.setExtensionState((st) => operation(st, arg, state));
-        return ctx._terminate();
-      };
+      const action = SkillContext.encapsulate<any>(
+        SkillContextOptions.fromExtId(extId),
+        (context, [, , eventArg]) => {
+          context.setExtensionState((st) =>
+            operation(st, eventArg, context.rawState),
+          );
+        },
+      );
       const def: TriggeredSkillDefinition = {
         type: "skill",
         initiativeSkillConfig: null,

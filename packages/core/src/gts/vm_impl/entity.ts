@@ -34,14 +34,14 @@ import type {
   EntityState,
   GameState,
 } from "../../base/state";
-import type {
-  CustomEventEventArg,
-  DamageInfo,
-  DamageOrHealEventArg,
-  EnterEventArg,
-  InitiativeSkillEventArg,
-  ModifyDamage3EventArg,
-  SkillDefinition,
+import {
+  SkillContextOptions,
+  type CustomEventEventArg,
+  type DamageInfo,
+  type DamageOrHealEventArg,
+  type LooseSkillOperation,
+  type ModifyDamage3EventArg,
+  type SkillDefinition,
 } from "../../base/skill";
 import { getEntityArea, getEntityById, type Writable } from "../../utils";
 import {
@@ -61,6 +61,7 @@ import type {
   ExtensionHandle,
   HandleT,
   SkillHandle,
+  StatusHandle,
   SupportHandle,
 } from "../../data/type";
 import {
@@ -75,7 +76,6 @@ import {
   type TypeHint,
 } from "../../data/utils";
 import {
-  SkillWrappingData,
   TriggeredSkillModel,
   TriggeredSkillViewModel,
   type TriggeredSkillVMMeta,
@@ -122,12 +122,12 @@ export interface GtsUsageOrUsagePerRoundOptions extends GtsUsageOptions {
 
 export interface IParentModel {
   id: number;
-  wrapData: SkillWrappingData;
+  contextOptions: SkillContextOptions;
 }
 
 export interface IDescriptionReplaceable {
   descriptionDictionary: Writable<DescriptionDictionary>;
-  wrapData: SkillWrappingData;
+  contextOptions: SkillContextOptions;
 }
 
 export function addDescriptionReplacement(
@@ -138,7 +138,7 @@ export function addDescriptionReplacement(
   if (Reflect.has(model.descriptionDictionary, key)) {
     throw new GiTcgDataError(`Description key ${key} already exists`);
   }
-  const extId = model.wrapData.associatedExtensionId;
+  const extId = model.contextOptions.associatedExtensionId;
   const entry: DescriptionDictionaryEntry = function (st, id) {
     const ext = st.extensions.find((ext) => ext.definition.id === extId);
     const self = getEntityById(st, id) as EntityState;
@@ -160,7 +160,7 @@ export class EntityModel implements ICaller {
   set id(value: number) {
     this.#id = value;
   }
-  
+
   type: ExEntityType;
   tags: ((string & {}) | EntityTag)[] = [];
   versionInfo: VersionInfo | null = null;
@@ -178,17 +178,17 @@ export class EntityModel implements ICaller {
 
   stagedOperations: StagedOperation<any>[] = [];
 
-  #wrapData: SkillWrappingData;
-  get wrapData() {
-    return this.#wrapData;
+  #contextOptions: SkillContextOptions;
+  get contextOptions() {
+    return this.#contextOptions;
   }
 
   constructor(type: ExEntityType, parent?: IParentModel) {
     if (parent) {
       this.id = parent.id;
-      this.#wrapData = parent.wrapData;
+      this.#contextOptions = parent.contextOptions;
     } else {
-      this.#wrapData = new SkillWrappingData();
+      this.#contextOptions = new SkillContextOptions();
     }
     this.type = type;
   }
@@ -402,7 +402,7 @@ export interface ICaller {
    * @returns the name of the variable that was added
    */
   setUsage(count: number, option: GtsUsageOptions): string;
-  wrapData: SkillWrappingData;
+  contextOptions: SkillContextOptions;
 }
 
 export const createVariableConfig = (
@@ -429,6 +429,7 @@ export const createVariableConfig = (
 };
 
 export interface EntityVMMeta {
+  readonly id: number;
   readonly type: ExEntityType;
   readonly variables: string;
   readonly associatedExtension: ExtensionHandle;
@@ -436,9 +437,15 @@ export interface EntityVMMeta {
   readonly stagedEventArgType: unknown;
 }
 
+export type WithIdVMMeta<
+  Meta extends { readonly id: number },
+  Id extends number,
+> = Computed<Omit<Meta, "id"> & { readonly id: Id }>;
+
 // This variable is type-only but may fell into TDZ after bundling.
 // Declare it as var.
 export var DEFAULT_ENTITY_VM_META = {
+  id: 0 as number,
   type: "" as ExEntityType,
   variables: null as never,
   stagedEventArgType: null as never,
@@ -485,9 +492,9 @@ export type ThisWithType<
   T extends ExEntityType,
 > = Meta["type"] extends T ? AR.This<Meta> : never;
 
-type PushVar<Meta extends EntityVMMeta, Name extends string> = Computed<
+export type PushMetaVar<Meta extends EntityVMMeta, Name extends string> = Computed<
   Omit<Meta, "variables"> & {
-    variables: Meta["variables"] | Name;
+    readonly variables: Meta["variables"] | Name;
   }
 >;
 
@@ -510,6 +517,7 @@ interface TriggeredSkillVMMetaFromEntityLike<
   EventName extends DetailedEventNames | CustomEvent,
   DefaultCallingArea extends CallingAreaType,
 > {
+  readonly id: Meta["id"];
   readonly type: Meta["type"];
   readonly variables: Meta["variables"];
   readonly associatedExtension: Meta["associatedExtension"];
@@ -538,8 +546,13 @@ export class EntityViewModel extends defineViewModel(
   EntityModel,
   (h) => ({
     id: h.attribute<{
-      (id: number): AR.Done;
-      as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
+      <Meta extends EntityVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
+      as<Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+      ): HandleT<Meta["type"], Meta>;
       as(this: AR.This<ReservedMeta>): undefined;
       required<Meta extends EntityVMMeta>(): Meta extends {
         type: "summon" | "status" | "combatStatus";
@@ -567,13 +580,13 @@ export class EntityViewModel extends defineViewModel(
       ): AR.DoneRewriteMeta<
         Computed<
           Omit<Meta, "associatedExtension"> & {
-            associatedExtension: ExtensionHandle<NewExtT>;
+            readonly associatedExtension: ExtensionHandle<NewExtT>;
           }
         >
       >;
       uniqueKey(): "associatedExtension";
     }>((model, [extId]) => {
-      model.wrapData.associatedExtensionId = extId;
+      model.contextOptions.associatedExtensionId = extId;
     }),
     since: h.simpleAttribute({
       uniqueKey: "version",
@@ -601,7 +614,7 @@ export class EntityViewModel extends defineViewModel(
       ): AR.WithRewriteMeta<
         Computed<
           Omit<Meta, "snippets"> & {
-            snippets: Meta["snippets"] & { default: void };
+            readonly snippets: Meta["snippets"] & { default: void };
           }
         >,
         SnippetOperationVM,
@@ -613,7 +626,7 @@ export class EntityViewModel extends defineViewModel(
       ): AR.WithRewriteMeta<
         Computed<
           Omit<Meta, "snippets"> & {
-            snippets: Meta["snippets"] & { [K in Name]: void };
+            readonly snippets: Meta["snippets"] & { [K in Name]: void };
           }
         >,
         SnippetOperationVM,
@@ -625,7 +638,7 @@ export class EntityViewModel extends defineViewModel(
       ): AR.WithRewriteMeta<
         Computed<
           Omit<Meta, "snippets"> & {
-            snippets: Meta["snippets"] & { default: ArgT };
+            readonly snippets: Meta["snippets"] & { default: ArgT };
           }
         >,
         SnippetOperationVM,
@@ -638,7 +651,7 @@ export class EntityViewModel extends defineViewModel(
       ): AR.WithRewriteMeta<
         Computed<
           Omit<Meta, "snippets"> & {
-            snippets: Meta["snippets"] & { [K in Name]: ArgT };
+            readonly snippets: Meta["snippets"] & { [K in Name]: ArgT };
           }
         >,
         SnippetOperationVM,
@@ -658,7 +671,10 @@ export class EntityViewModel extends defineViewModel(
         name = args[0];
       }
       const snippetModel = SnippetOperationVM.parse(subView);
-      model.wrapData.snippets.set(name, snippetModel.action);
+      model.contextOptions.gtsSnippets.set(
+        name,
+        snippetModel.action as LooseSkillOperation,
+      );
     }),
 
     prepare: h.attribute<{
@@ -711,7 +727,7 @@ export class EntityViewModel extends defineViewModel(
         this: AR.This<Meta>,
         name: Name,
         initialValue: number,
-      ): AR.WithRewriteMeta<PushVar<Meta, Name>, typeof VariablesVM>;
+      ): AR.WithRewriteMeta<PushMetaVar<Meta, Name>, typeof VariablesVM>;
     }>((model, [name, initValue], subView) => {
       const options = VariablesVM.parse(subView);
       model.setVariable(name, initValue, options);
@@ -720,7 +736,7 @@ export class EntityViewModel extends defineViewModel(
       <Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
         count: number,
-      ): AR.WithRewriteMeta<PushVar<Meta, "usage">, typeof GlobalUsageVM>;
+      ): AR.WithRewriteMeta<PushMetaVar<Meta, "usage">, typeof GlobalUsageVM>;
     }>((model, [count], subView) => {
       const options = GlobalUsageVM.parse(subView);
       model.setUsage(count, { ...options, perRound: false });
@@ -732,7 +748,7 @@ export class EntityViewModel extends defineViewModel(
       <Meta extends EntityVMMeta>(
         this: ThisWithType<Meta, "status">,
         count: number,
-      ): AR.WithRewriteMeta<PushVar<Meta, "nightsoul">, typeof NightsoulVM>;
+      ): AR.WithRewriteMeta<PushMetaVar<Meta, "nightsoul">, typeof NightsoulVM>;
     }>((model, [count], subView) => {
       const options = NightsoulVM.parse(subView);
       model.tags.push("nightsoulsBlessing");
@@ -761,7 +777,7 @@ export class EntityViewModel extends defineViewModel(
         this: ThisWithType<Meta, "status" | "combatStatus">,
         count: number,
         max?: number,
-      ): AR.DoneRewriteMeta<PushVar<Meta, "shield">>;
+      ): AR.DoneRewriteMeta<PushMetaVar<Meta, "shield">>;
     }>((model, [count, max = count]) => {
       model.tags.push("shield");
       model.setVariable("shield", count, {
@@ -796,7 +812,7 @@ export class EntityViewModel extends defineViewModel(
     adventureSpot: h.attribute<{
       <Meta extends EntityVMMeta>(
         this: ThisWithType<Meta, "support">,
-      ): AR.DoneRewriteMeta<PushVar<Meta, "exp">>;
+      ): AR.DoneRewriteMeta<PushMetaVar<Meta, "exp">>;
     }>((model, []) => {
       model.obtainable = false;
       model.tags.push("adventureSpot");
@@ -850,7 +866,7 @@ export class EntityViewModel extends defineViewModel(
       <Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
         value: number,
-      ): AR.WithRewriteMeta<PushVar<Meta, "duration">, typeof VariablesVM>;
+      ): AR.WithRewriteMeta<PushMetaVar<Meta, "duration">, typeof VariablesVM>;
     }>((model, [value], subView) => {
       const options = VariablesVM.parse(subView);
       model.setVariable("duration", value, options);
@@ -858,12 +874,7 @@ export class EntityViewModel extends defineViewModel(
     oneDuration: h.attribute<{
       <Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
-      ): AR.WithRewriteMeta<
-        Omit<Meta, "variables"> & {
-          variables: Meta["variables"] | "duration";
-        },
-        typeof VariablesVM
-      >;
+      ): AR.WithRewriteMeta<PushMetaVar<Meta, "duration">, typeof VariablesVM>;
     }>((model, [], subView) => {
       const options = VariablesVM.parse(subView);
       model.setVariable("duration", 1, {
@@ -893,15 +904,15 @@ export class EntityViewModel extends defineViewModel(
           | number
           | string
           | EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
-      ): AR.DoneRewriteMeta<PushVar<Meta, "hintIcon" | "swirledUsage">>;
+      ): AR.DoneRewriteMeta<PushMetaVar<Meta, "hintIcon" | "swirledUsage">>;
       <Meta extends EntityVMMeta>(
         this: ThisWithType<Meta, "summon" | "support">,
-        icon: DamageType | CombatStatusHandle,
+        icon: DamageType | CombatStatusHandle | StatusHandle,
         text?:
           | number
           | string
           | EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
-      ): AR.DoneRewriteMeta<PushVar<Meta, "hintIcon">>;
+      ): AR.DoneRewriteMeta<PushMetaVar<Meta, "hintIcon">>;
     }>((model, [icon, text]) => {
       if (icon === "swirled") {
         icon = DamageType.Anemo;
@@ -1014,9 +1025,7 @@ export class EntityViewModel extends defineViewModel(
       >(
         meta: Meta,
         innerMeta: InnerMeta,
-      ): Omit<Meta, "variables"> & {
-        variables: Meta["variables"] | InnerMeta["variables"];
-      };
+      ): PushMetaVar<Meta, InnerMeta["variables"]>;
       mergeMeta<Meta extends EntityVMMeta>(
         meta: Meta,
         innerMeta: unknown,
@@ -1072,9 +1081,7 @@ export class EntityViewModel extends defineViewModel(
       >(
         meta: Meta,
         innerMeta: InnerMeta,
-      ): Omit<Meta, "variables"> & {
-        variables: Meta["variables"] | InnerMeta["variables"];
-      };
+      ): PushMetaVar<Meta, InnerMeta["variables"]>;
     }>((model, [eventName], subView) => {
       const skillModel = TriggeredSkillViewModel.parse(
         subView,

@@ -107,11 +107,7 @@ define status {
   since "v5.4.0";
   once beforeAction {
     when :( :self.master.isActive() );
-    :damage(
-      DamageType.Dendro,
-      3,
-      $.recentOppFrom($.character.id(:self.master.id)),
-    );
+    :damage(DamageType.Dendro, 3, $.recentOppFrom(:self.master));
   };
 };
 

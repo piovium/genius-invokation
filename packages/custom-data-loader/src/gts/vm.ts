@@ -26,6 +26,7 @@ import {
   EntityModel,
   EntityViewModel,
   type CharacterSkillVMMeta,
+  type CharacterVMMeta,
   type DefaultEntityVMMeta,
   type EntityVMMeta,
 } from "@gi-tcg/core/gts/vm";
@@ -69,6 +70,10 @@ const CUSTOM_DATA_VERSION_INFO: VersionInfo = {
 function registerMetadata(md: CustomMetadata) {
   getCustomDataRegistration().registerMetadata(md);
 }
+
+type WithIdVMMeta<Meta, Id extends number> = Omit<Meta, "id"> & {
+  readonly id: Id;
+};
 
 export class CustomCharacterModel extends CharacterModel {
   readonly metadata = CustomMetadata.create();
@@ -171,9 +176,14 @@ const CustomCharacterViewModel = CharacterViewModel.extend(
   CustomCharacterModel,
   (h) => ({
     id: h.attribute<{
-      (id: number): AR.Done;
+      <Meta extends CharacterVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       uniqueKey(): "id";
-      as(): CharacterHandle;
+      as<Meta extends CharacterVMMeta>(
+        this: AR.This<Meta>,
+      ): CharacterHandle<Meta>;
     }>(
       () => {},
       (model, [id]) => {
@@ -206,14 +216,17 @@ const CustomCharacterViewModel = CharacterViewModel.extend(
 
 const CustomCardViewModel = CardViewModel.extend(CustomCardModel, (h) => ({
   id: h.attribute<{
-    (id: number): AR.Done;
+    <Meta extends EntityVMMeta, const Id extends number>(
+      this: AR.This<Meta>,
+      id: Id,
+    ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
     uniqueKey(): "id";
-    as(): CardHandle;
+    as<Meta extends EntityVMMeta>(this: AR.This<Meta>): CardHandle<Meta>;
   }>(
     () => {},
     (model, [id]) => {
       model.metadata.specifyId(id);
-      return id as CardHandle;
+      return id as CardHandle<EntityVMMeta>;
     },
   ),
   name: h.attribute<{
@@ -252,14 +265,21 @@ const CustomCharacterSkillViewModel = CharacterSkillViewModel.extend(
   CustomCharacterSkillModel,
   (h) => ({
     id: h.attribute<{
-      (id: number): AR.Done;
+      <Meta extends CharacterSkillVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       uniqueKey(): "id";
-      as(): SkillHandle | PassiveSkillHandle;
+      as<Meta extends CharacterSkillVMMeta>(
+        this: AR.This<Meta>,
+      ): Meta extends { isInitiativeSkill: true }
+        ? SkillHandle<Meta>
+        : PassiveSkillHandle<Meta>;
     }>(
       () => {},
       (model, [id]) => {
         model.metadata.specifyId(id);
-        return id as SkillHandle;
+        return id as any;
       },
     ),
     name: h.attribute<{
@@ -292,20 +312,27 @@ const CustomEntityViewModel = EntityViewModel.extend(
   CustomEntityModel,
   (h) => ({
     id: h.attribute<{
-      <Meta extends EntityVMMeta>(this: AR.This<Meta>, id: number): AR.Done;
+      <Meta extends EntityVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       uniqueKey(): "id";
-      as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
+      as<Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+      ): HandleT<Meta["type"], Meta>;
     }>(
       () => {},
       (model, [id]) => {
         model.metadata.specifyId(id);
-        return id as HandleT<EntityType>;
+        return id as HandleT<EntityType, EntityVMMeta>;
       },
     ),
     name: h.attribute<{
       <Meta extends EntityVMMeta>(this: AR.This<Meta>, name: string): AR.Done;
       uniqueKey(): "name";
-      as<Meta extends EntityVMMeta>(this: AR.This<Meta>): HandleT<Meta["type"]>;
+      as<Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+      ): HandleT<Meta["type"], Meta>;
     }>(
       (model, [name]) => {
         model.metadata.customName = name;
@@ -334,14 +361,19 @@ const CustomAttachmentViewModel = AttachmentViewModel.extend(
   CustomAttachmentModel,
   (h) => ({
     id: h.attribute<{
-      (id: number): AR.Done;
+      <Meta extends EntityVMMeta, const Id extends number>(
+        this: AR.This<Meta>,
+        id: Id,
+      ): AR.DoneRewriteMeta<WithIdVMMeta<Meta, Id>>;
       uniqueKey(): "id";
-      as(): AttachmentHandle;
+      as<Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+      ): AttachmentHandle<Meta>;
     }>(
       () => {},
       (model, [id]) => {
         model.metadata.specifyId(id);
-        return id as AttachmentHandle;
+        return id as AttachmentHandle<EntityVMMeta>;
       },
     ),
     name: h.attribute<{

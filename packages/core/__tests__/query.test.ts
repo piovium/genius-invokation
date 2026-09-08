@@ -1,10 +1,5 @@
 import { expect, test } from "vitest";
-import {
-  queryToExpression,
-  $,
-  prettyStringifySExpr,
-  stringifySExpr,
-} from "../src/query";
+import { queryToExpression, $, prettyStringifySExpr } from "../src/query";
 import type { AttachmentHandle } from "../src/data/type";
 
 test("'Fluent API' building tests", () => {
@@ -36,13 +31,8 @@ test("'Fluent API' building tests", () => {
              1)
   `);
 
-  expect(
-    prettyStringifySExpr(
-      queryToExpression(
-        $.my.pile.cost(">", 0)
-      )
-    )
-  ).toBe(dedent`
+  expect(prettyStringifySExpr(queryToExpression($.my.pile.cost(">", 0))))
+    .toBe(dedent`
     (intersection (defeated ignore)
                   (who my)
                   (area pile true)
@@ -54,7 +44,7 @@ test("'Fluent API' building tests", () => {
 test("stringify of functions", () => {
   expect(
     prettyStringifySExpr(
-      queryToExpression($.my.summon.var(({ usage }) => usage >= 2)),
+      queryToExpression($.my.summon.var(({ usage }) => usage! >= 2)),
     ),
   ).toBe(dedent`
     (intersection (defeated ignore)
@@ -64,7 +54,7 @@ test("stringify of functions", () => {
   `);
 
   const obj = {
-    seemsAlive({ health }: Record<string, number>) {
+    seemsAlive({ health }: { health: number }) {
       return health > 0;
     },
   };

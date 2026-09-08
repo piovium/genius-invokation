@@ -23,6 +23,7 @@ import {
   Reaction,
   type SkillHandle,
   type SupportHandle,
+  customEvent,
   flip,
   type,
 } from "@gi-tcg/core/data";
@@ -321,7 +322,7 @@ define card {
   support ally {
     on endPhase {
       usage 2;
-      :gainEnergy(1, $.macros.myEnergyNotFull);
+      :gainEnergy(1, $.macros.myFirstEnergyNotFull);
     };
   };
 };
@@ -955,6 +956,9 @@ define card {
   };
 };
 
+// 保证弃置在冒险后
+const SeymourTriggered = customEvent("SeymourTriggered");
+
 /**
  * @id 322031
  * @name 西摩尔
@@ -975,9 +979,16 @@ define card {
     };
     on playCard {
       when :( !:isInInitialPile(:e.card) );
-      usage 2;
       usage perRound, 1;
+      :emitCustomEvent(SeymourTriggered);
+    };
+    on SeymourTriggered {
+      listenTo myself;
       :adventure();
+    };
+    on SeymourTriggered {
+      listenTo myself;
+      usage 2;
     };
   };
 };

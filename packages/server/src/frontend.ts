@@ -16,7 +16,28 @@
 import mime from "mime";
 import type { FastifyInstance, RouteHandlerMethod } from "fastify";
 import fastifyEtag from "@fastify/etag";
-import { WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
+import { IS_BETA, WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
+
+const HTML_INJECTION_PLACEHOLDERS = {
+  head: "<!-- server:head -->",
+  body: "<!-- server:body -->",
+} as const;
+
+export function injectHtml(
+  html: string,
+  injections: Partial<Record<keyof typeof HTML_INJECTION_PLACEHOLDERS, string>>,
+) {
+  return (Object.keys(HTML_INJECTION_PLACEHOLDERS) as Array<
+    keyof typeof HTML_INJECTION_PLACEHOLDERS
+  >).reduce(
+    (result, position) =>
+      result.replace(
+        HTML_INJECTION_PLACEHOLDERS[position],
+        injections[position] ?? "",
+      ),
+    html,
+  );
+}
 
 export async function frontend(app: FastifyInstance) {
   await app.register(fastifyEtag);
@@ -42,7 +63,13 @@ export async function frontend(app: FastifyInstance) {
       });
     }
 
-    const indexHtmlBuffer = Buffer.from(indexHtml!, "base64");
+    const indexHtmlContent = injectHtml(
+      Buffer.from(indexHtml!, "base64").toString(),
+      {
+        head: IS_BETA ? '<meta name="robots" content="noindex">' : "",
+      },
+    );
+    const indexHtmlBuffer = Buffer.from(indexHtmlContent);
     const indexHtmlHandler: RouteHandlerMethod = (_req, reply) => {
       return reply
         .header("Cache-Control", "public, no-cache, must-revalidate")

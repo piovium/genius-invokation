@@ -170,13 +170,15 @@ define skill {
   :combatStatus(AgileSwitch);
   :switchActive($.my.next);
   const bottles = :player.hands.filter((card) =>
-    [
-      PurrloinedTreasureFlask,
-      PurrloinedTreasureFlaskPyro,
-      PurrloinedTreasureFlaskHydro,
-      PurrloinedTreasureFlaskElectro,
-      PurrloinedTreasureFlaskCryo,
-    ].includes(card.definition.id as CardHandle),
+    (
+      [
+        PurrloinedTreasureFlask,
+        PurrloinedTreasureFlaskPyro,
+        PurrloinedTreasureFlaskHydro,
+        PurrloinedTreasureFlaskElectro,
+        PurrloinedTreasureFlaskCryo,
+      ] as CardHandle[]
+    ).includes(card.definition.id as CardHandle),
   );
   if (bottles.length === 0) {
     :createHandCard(PurrloinedTreasureFlask);
@@ -228,13 +230,15 @@ define skill {
       listenTo samePlayer;
       usage perRound, 2 { name usagePerRound1; };
       const bottles = :player.hands.filter((card) =>
-        [
-          PurrloinedTreasureFlask,
-          PurrloinedTreasureFlaskPyro,
-          PurrloinedTreasureFlaskHydro,
-          PurrloinedTreasureFlaskElectro,
-          PurrloinedTreasureFlaskCryo,
-        ].includes(card.definition.id as CardHandle),
+        (
+          [
+            PurrloinedTreasureFlask,
+            PurrloinedTreasureFlaskPyro,
+            PurrloinedTreasureFlaskHydro,
+            PurrloinedTreasureFlaskElectro,
+            PurrloinedTreasureFlaskCryo,
+          ] as CardHandle[]
+        ).includes(card.definition.id as CardHandle),
       );
       for (const bottle of bottles) {
         :attachCostReduction(bottle);

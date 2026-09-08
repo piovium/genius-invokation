@@ -263,10 +263,7 @@ define card {
           :player.hands.length > 0 // 有手牌（“如可能，舍弃”）
       );
       :setVariable("deductDiceTriggered", 1);
-      // 预计算时不触发弃牌
-      if (:skillInfo.environment !== "precalculate") {
-        :discardMaxCostHands(1);
-      }
+      :discardMaxCostHands(1);
       for (const st of :queryAll($.opp.typeStatus.def(Target))) {
         st.dispose();
       }
@@ -278,7 +275,7 @@ define card {
       :e.setFastAction();
     };
     skill {
-      id 3130063;
+      id 3130063 as private SwiftGlide;
       usage 2;
       cost DiceType.Aligned, 1;
       :switchActive($.my.next);

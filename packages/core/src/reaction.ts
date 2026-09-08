@@ -7,7 +7,7 @@
 
 import { DamageType, Reaction } from "@gi-tcg/typings";
 import type { SwirlableElement } from "./base/reaction";
-import type { ModifyReactionEventArg, SkillDescription } from "./base/skill";
+import { SkillContextOptions, type ModifyReactionEventArg, type SkillDescription } from "./base/skill";
 import type {
   CardHandle,
   CombatStatusHandle,
@@ -46,20 +46,13 @@ type ReactionAction = (context: TypedSkillContext<ReactionContextMeta>) => void;
 const descriptions: Partial<Record<Reaction, ReactionDescription>> = {};
 
 function defineReaction(reaction: Reaction, action: ReactionAction) {
-  descriptions[reaction] = (state, skillInfo, event) => {
-    const context = new SkillContext(
-      state,
-      {
-        ...skillInfo,
-        associatedExtensionId: null,
-        gtsSnippets: new Map(),
-      },
-      event,
-    );
-    Reflect.set(context, CALLED_FROM_REACTION, reaction);
-    action(context as unknown as TypedSkillContext<ReactionContextMeta>);
-    return context._terminate();
-  };
+  descriptions[reaction] = SkillContext.encapsulate(
+    SkillContextOptions.plain,
+    (context) => {
+      Reflect.set(context, CALLED_FROM_REACTION, reaction);
+      action(context as unknown as TypedSkillContext<ReactionContextMeta>);
+    },
+  );
 }
 
 function charactersExcept(context: TypedSkillContext<ReactionContextMeta>) {
@@ -90,8 +83,7 @@ function initialize() {
   });
 
   const swirl = (element: SwirlableElement): ReactionAction => {
-    return (context) =>
-      context.damage(element, 1, charactersExcept(context));
+    return (context) => context.damage(element, 1, charactersExcept(context));
   };
   defineReaction(Reaction.SwirlCryo, swirl(DamageType.Cryo));
   defineReaction(Reaction.SwirlHydro, swirl(DamageType.Hydro));
