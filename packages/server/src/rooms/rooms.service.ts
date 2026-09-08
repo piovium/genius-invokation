@@ -414,7 +414,7 @@ class Player implements PlayerIOWithError {
     }
   }
 
-  onError(e: GiTcgError) {
+  onError(e: unknown) {
     const message = inspect(e);
     this.errorSseSource.next({
       type: "error",
@@ -590,17 +590,13 @@ class Room {
         this.game = game;
         await game.start();
       } catch (e) {
-        if (e instanceof GiTcgError) {
-          player0.onError(e);
-          player1.onError(e);
-          sendDebugLog("gameErrorLog", {
-            em: inspect(e),
-            gv: this.config.gameVersion,
-            ...serializeGameStateLog(this.stateLog),
-          });
-        } else {
-          throw e;
-        }
+        player0.onError(e);
+        player1.onError(e);
+        sendDebugLog("gameErrorLog", {
+          em: inspect(e),
+          gv: this.config.gameVersion,
+          ...serializeGameStateLog(this.stateLog),
+        });
       } finally {
         this.stop();
       }
