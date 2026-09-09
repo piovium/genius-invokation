@@ -48,3 +48,7 @@
 实际 Dockerfile 已从无 node_modules 的上下文完成构建，部署镜像通过 HTTP、前端文件、迁移和退出检查。真实 Compose 在专用随机项目/全新数据库卷中验证 db healthy → migrate 成功 → server 启动、WS auth→ready、API 写入经数据库及服务重启持久化、重复迁移应用 0 条 SQL。首次 initdb 实测超过旧 60 秒健康等待窗口，现检查 TCP 并设置 120 秒启动宽限；相同业务断言复验通过。报告在 `temp/server-harness/compose-node/report.json`，包含先前失败记录引用和准确清理结果；仅删除测试创建的资源，既有卷全部保留。
 
 当前继续用独立临时构建比较初始化/打包方式的实际 RSS。未采用未经完整验收的变体，100/50 MiB 门槛、五分钟保留期和既有场景不变。
+
+后续隔离诊断中，原生 CommonJS、ASCII 源码与 Node `--max-opt=0 --max-semi-space-size=1 --max-old-space-size=52` 的组合通过注册用户 API 和存储预热，首五秒 RSS 峰值为 **107.74 MiB**，30 秒末为 **98.65 MiB**，仍未通过固定空闲窗口要求。相同组合将老生代限制降到 48 MiB 时启动 OOM。上述结果均未运行完整四局，不是正式验收，参数与构建方式尚未写入生产配置；继续验证初始化开销及允许堆随活跃对局增长的回收策略，并保留真实并发对局的容量验证。
+
+按用户要求，可检查且已验证的阶段提交及时推送至 `origin/codex/server-migration-harness`。临时构建、原始测量、堆快照、运行时凭证和本地容器数据保持在忽略目录内，不随分支上传。
