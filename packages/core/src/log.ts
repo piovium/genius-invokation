@@ -24,12 +24,11 @@ export interface GameStateLogEntry {
   readonly canResume: boolean;
 }
 
-interface StoreEntry {
-  key: any;
-  value: any;
-}
-
-function serializeImpl(store: StoreEntry[], v: unknown): any {
+function serializeImpl(
+  store: any[],
+  indices: WeakMap<object, number>,
+  v: unknown,
+): any {
   if (
     typeof v === "number" ||
     typeof v === "string" ||
@@ -38,14 +37,15 @@ function serializeImpl(store: StoreEntry[], v: unknown): any {
   ) {
     return v;
   }
-  const index = store.findIndex((entry) => entry.key === v);
-  if (index !== -1) {
+  const index = typeof v === "object" ? indices.get(v) : undefined;
+  if (index !== undefined) {
     return { $: index };
   }
   if (Array.isArray(v)) {
-    const result = v.map((obj) => serializeImpl(store, obj));
+    const result = v.map((obj) => serializeImpl(store, indices, obj));
     if (result.length >= 2) {
-      store.push({ key: v, value: result });
+      indices.set(v, store.length);
+      store.push(result);
       return { $: store.length - 1 };
     } else {
       return result;
@@ -55,15 +55,17 @@ function serializeImpl(store: StoreEntry[], v: unknown): any {
     return {
       __type: "map",
       entries: Array.from(v.entries()).map(([key, value]) => [
-        serializeImpl(store, key),
-        serializeImpl(store, value),
+        serializeImpl(store, indices, key),
+        serializeImpl(store, indices, value),
       ]),
     };
   }
   if (v instanceof Set) {
     return {
       __type: "set",
-      values: Array.from(v).map((value) => serializeImpl(store, value)),
+      values: Array.from(v).map((value) =>
+        serializeImpl(store, indices, value),
+      ),
     };
   }
   if (typeof v === "object") {
@@ -76,14 +78,16 @@ function serializeImpl(store: StoreEntry[], v: unknown): any {
         $$: v.__definition,
         id: v.id,
       };
-      store.push({ key: v, value: result });
+      indices.set(v, store.length);
+      store.push(result);
       return { $: store.length - 1 };
     }
     const result: any = {};
     for (const key in v) {
-      result[key] = serializeImpl(store, (v as Record<any, any>)[key]);
+      result[key] = serializeImpl(store, indices, (v as Record<any, any>)[key]);
     }
-    store.push({ key: v, value: result });
+    indices.set(v, store.length);
+    store.push(result);
     return { $: store.length - 1 };
   } else {
     return v;
@@ -109,24 +113,39 @@ export interface SerializedLog {
 export function serializeGameStateLog(
   log: readonly GameStateLogEntry[],
 ): SerializedLog {
+  const serializer = createGameStateLogSerializer();
+  for (const entry of log) serializer.append(entry);
+  return serializer.serialize();
+}
+
+/**
+ * Append immutable engine snapshots without retaining the original states.
+ * Weak keys preserve the existing reference encoding while allowing obsolete
+ * state graphs to be collected. Returned logs remain readable after later appends.
+ */
+export function createGameStateLogSerializer() {
   const logResult: SerializedLogEntry[] = [];
-  const store: StoreEntry[] = [];
-  for (const entry of log) {
+  const store: any[] = [];
+  const indices = new WeakMap<object, number>();
+  const append = (entry: GameStateLogEntry) => {
     const omittedState: MakePropPartial<GameState, "data"> = {
       ...entry.state,
     };
     delete omittedState.data;
-    const stateResult = serializeImpl(store, omittedState);
+    const stateResult = serializeImpl(store, indices, omittedState);
     logResult.push({
       s: stateResult,
       e: [],
       r: entry.canResume,
     });
-  }
+  };
   return {
-    v: CORE_VERSION,
-    store: store.map(({ value }) => value),
-    log: logResult,
+    append,
+    serialize: (): SerializedLog => ({
+      v: CORE_VERSION,
+      store: store.slice(),
+      log: logResult.slice(),
+    }),
   };
 }
 

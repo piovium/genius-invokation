@@ -30,6 +30,8 @@ export {
   DetailLogType,
   type DetailLogEntry,
   serializeGameStateLog,
+  createGameStateLogSerializer,
+  type SerializedLog,
   deserializeGameStateLog,
 } from "./log";
 export type * from "./base/state";

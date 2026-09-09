@@ -1,0 +1,241 @@
+{
+  "v": "0.20.8",
+  "store": [
+    {
+      "initialDiceCount": 8,
+      "initialHandsCount": 5,
+      "maxDiceCount": 16,
+      "maxHandsCount": 10,
+      "maxPileCount": 200,
+      "maxRoundsCount": 15,
+      "maxSummonsCount": 4,
+      "maxSupportsCount": 4,
+      "randomSeed": 20260910,
+      "unexpectedInsufficientDice": "skipConsume",
+      "hostWho": 0,
+      "hostRelatedExecution": false
+    },
+    {
+      "defaultRecreateBehavior": "overwrite",
+      "foodOmitInjuredOnly": false,
+      "discardMaxCostHandsAbortPreview": false,
+      "diceCostApplyAttachments": false
+    },
+    {
+      "who": 0,
+      "activeCharacterId": 0,
+      "characters": [],
+      "initialPile": [],
+      "pile": [],
+      "hands": [],
+      "dice": [],
+      "combatStatuses": [],
+      "summons": [],
+      "supports": [],
+      "declaredEnd": false,
+      "canCharged": false,
+      "canPlunging": false,
+      "hasDefeated": false,
+      "legendUsed": false,
+      "skipNextTurn": false,
+      "defeatedSwitching": false,
+      "roundSkillLog": {
+        "__type": "map",
+        "entries": []
+      },
+      "phaseDamageLog": [],
+      "phaseReactionLog": [],
+      "removedEntities": []
+    },
+    {
+      "who": 1,
+      "activeCharacterId": 0,
+      "characters": [],
+      "initialPile": [],
+      "pile": [],
+      "hands": [],
+      "dice": [],
+      "combatStatuses": [],
+      "summons": [],
+      "supports": [],
+      "declaredEnd": false,
+      "canCharged": false,
+      "canPlunging": false,
+      "hasDefeated": false,
+      "legendUsed": false,
+      "skipNextTurn": false,
+      "defeatedSwitching": false,
+      "roundSkillLog": {
+        "__type": "map",
+        "entries": []
+      },
+      "phaseDamageLog": [],
+      "phaseReactionLog": [],
+      "removedEntities": []
+    },
+    [
+      {
+        "$": 2
+      },
+      {
+        "$": 3
+      }
+    ],
+    {
+      "random": 20260910,
+      "id": -500000
+    },
+    {
+      "$$": "extensions",
+      "id": 91000003
+    },
+    {
+      "label": "shared",
+      "count": 42
+    },
+    [
+      {
+        "$": 7
+      },
+      {
+        "$": 7
+      }
+    ],
+    {
+      "shared": {
+        "$": 7
+      },
+      "list": {
+        "$": 8
+      },
+      "singleton": [
+        {
+          "$": 7
+        }
+      ],
+      "empty": [],
+      "map": {
+        "__type": "map",
+        "entries": [
+          [
+            {
+              "$": 7
+            },
+            "value"
+          ]
+        ]
+      },
+      "set": {
+        "__type": "set",
+        "values": [
+          {
+            "$": 7
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "$": 6
+      },
+      "state": {
+        "$": 9
+      }
+    },
+    {
+      "config": {
+        "$": 0
+      },
+      "versionBehavior": {
+        "$": 1
+      },
+      "players": {
+        "$": 4
+      },
+      "iterators": {
+        "$": 5
+      },
+      "phase": "initHands",
+      "prevPhase": null,
+      "currentTurn": 0,
+      "roundNumber": 0,
+      "winner": null,
+      "extensions": [
+        {
+          "$": 10
+        }
+      ]
+    },
+    {
+      "config": {
+        "$": 0
+      },
+      "versionBehavior": {
+        "$": 1
+      },
+      "players": {
+        "$": 4
+      },
+      "iterators": {
+        "$": 5
+      },
+      "phase": "action",
+      "prevPhase": null,
+      "currentTurn": 0,
+      "roundNumber": 1,
+      "winner": null,
+      "extensions": [
+        {
+          "$": 10
+        }
+      ]
+    },
+    {
+      "config": {
+        "$": 0
+      },
+      "versionBehavior": {
+        "$": 1
+      },
+      "players": {
+        "$": 4
+      },
+      "iterators": {
+        "$": 5
+      },
+      "phase": "gameEnd",
+      "prevPhase": null,
+      "currentTurn": 0,
+      "roundNumber": 2,
+      "winner": 0,
+      "extensions": [
+        {
+          "$": 10
+        }
+      ]
+    }
+  ],
+  "log": [
+    {
+      "s": {
+        "$": 11
+      },
+      "e": [],
+      "r": false
+    },
+    {
+      "s": {
+        "$": 12
+      },
+      "e": [],
+      "r": true
+    },
+    {
+      "s": {
+        "$": 13
+      },
+      "e": [],
+      "r": false
+    }
+  ]
+}
