@@ -1,0 +1,17 @@
+{
+  "name": "genius-tsgo-acceptance-workspace",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "harness:verify": "node harness/cli.mjs verify",
+    "harness:selftest": "node harness/cli.mjs selftest",
+    "harness:run": "node harness/cli.mjs run all",
+    "harness:status": "node harness/cli.mjs status",
+    "harness:task": "node harness/cli.mjs task",
+    "harness:finish": "node harness/cli.mjs finish",
+    "harness:preflight": "node harness/cli.mjs run preflight"
+  }
+}

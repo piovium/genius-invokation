@@ -1,0 +1,394 @@
+{
+  "schemaVersion": 1,
+  "version": "2.0.0",
+  "phase": "migration",
+  "tnbVersion": "6.0.3-bridge.16.tsgo.7.0.2",
+  "policy": {
+    "desktopEditRounds": 100,
+    "dataRuns": 3,
+    "requiredPlatforms": [
+      "win32",
+      "linux"
+    ],
+    "forbidEnvironment": [
+      "NO_TYPING",
+      "PUBLISH"
+    ],
+    "reportLimitBytes": 67108864,
+    "requireTnbRegression": true,
+    "desktopScenarios": [
+      "root-workspace",
+      "data-workspace",
+      "syntax-error",
+      "property-type-error",
+      "invalid-import",
+      "unsaved-edit",
+      "external-disk-edit",
+      "close-reopen",
+      "dependency-change",
+      "unicode-crlf-space-path",
+      "electron-extension-host"
+    ],
+    "coverageScenarios": [
+      "current-card",
+      "historical-card",
+      "import-only-file",
+      "cross-package-consumer"
+    ]
+  },
+  "repositories": {
+    "main": {
+      "path": "worktrees/genius-invokation",
+      "base": "e0be9cd6d3758026a301ef91c65e6bf419bd595e",
+      "name": "genius-invokation",
+      "manager": "pnpmMain",
+      "managerVersion": "12.0.0"
+    },
+    "gts": {
+      "path": "worktrees/gts",
+      "base": "cf58a100132ef02af61c6a22a49feb1968841f06",
+      "name": "@gi-tcg/gts",
+      "manager": "pnpmGts",
+      "managerVersion": "11.5.2"
+    },
+    "tnb": {
+      "path": "worktrees/typescript-native-bridge",
+      "base": "9281a12c7c4e42dc50c0c27a8dba4a0e93639ddc",
+      "name": "typescript-native-bridge",
+      "manager": "npm"
+    },
+    "web": {
+      "path": "worktrees/browser-routes",
+      "base": "e0be9cd6d3758026a301ef91c65e6bf419bd595e",
+      "name": "genius-invokation",
+      "manager": "pnpmMain",
+      "managerVersion": "12.0.0"
+    }
+  },
+  "roles": {
+    "integration": {
+      "repository": "main",
+      "paths": [
+        "package.json",
+        "pnpm-workspace.yaml",
+        "pnpm-lock.yaml",
+        ".vscode/",
+        ".github/",
+        "docs/"
+      ],
+      "gates": [
+        "environment",
+        "inventory",
+        "engine",
+        "data",
+        "coverage",
+        "checks",
+        "main-build",
+        "main-tests",
+        "memory",
+        "clean-install"
+      ]
+    },
+    "gts": {
+      "repository": "gts",
+      "paths": [
+        "packages/",
+        "examples/",
+        "package.json",
+        "pnpm-workspace.yaml",
+        "pnpm-lock.yaml",
+        "patches/"
+      ],
+      "gates": [
+        "engine",
+        "gts-build",
+        "gts-tests",
+        "desktop"
+      ]
+    },
+    "browser": {
+      "repository": "web",
+      "paths": [
+        "packages/custom-data-loader/"
+      ],
+      "gates": [
+        "web"
+      ]
+    },
+    "tnb": {
+      "repository": "tnb",
+      "paths": [
+        "patches/",
+        "tools/",
+        "typescript/",
+        "typescript-go/",
+        "README.md",
+        "package.json",
+        "package-lock.json"
+      ],
+      "gates": [
+        "tnb-guards",
+        "tnb-witnesses",
+        "tnb-navigation",
+        "tnb-volar"
+      ]
+    }
+  },
+  "gates": [
+    {
+      "id": "environment",
+      "covers": [
+        "E0"
+      ],
+      "kind": "environment",
+      "repository": "main",
+      "timeoutMs": 30000
+    },
+    {
+      "id": "inventory",
+      "covers": [
+        "C2"
+      ],
+      "kind": "inventory",
+      "repository": "main",
+      "timeoutMs": 30000
+    },
+    {
+      "id": "engine",
+      "covers": [
+        "E1"
+      ],
+      "kind": "engine",
+      "repository": "main",
+      "requires": [
+        "environment"
+      ],
+      "timeoutMs": 180000
+    },
+    {
+      "id": "data",
+      "covers": [
+        "C1"
+      ],
+      "kind": "data",
+      "repository": "main",
+      "requires": [
+        "engine",
+        "inventory"
+      ],
+      "timeoutMs": 600000
+    },
+    {
+      "id": "coverage",
+      "covers": [
+        "C2"
+      ],
+      "kind": "coverage",
+      "repository": "main",
+      "requires": [
+        "engine",
+        "inventory"
+      ],
+      "timeoutMs": 600000
+    },
+    {
+      "id": "checks",
+      "covers": [
+        "C3"
+      ],
+      "kind": "checks",
+      "repository": "main",
+      "requires": [
+        "engine",
+        "inventory"
+      ],
+      "timeoutMs": 600000
+    },
+    {
+      "id": "gts-build",
+      "covers": [
+        "R1"
+      ],
+      "kind": "command",
+      "repository": "gts",
+      "requires": [
+        "environment"
+      ],
+      "args": [
+        "build"
+      ],
+      "timeoutMs": 600000
+    },
+    {
+      "id": "gts-tests",
+      "covers": [
+        "R1"
+      ],
+      "kind": "command",
+      "repository": "gts",
+      "requires": [
+        "gts-build"
+      ],
+      "args": [
+        "exec",
+        "vitest",
+        "--run"
+      ],
+      "timeoutMs": 600000
+    },
+    {
+      "id": "desktop",
+      "covers": [
+        "L1",
+        "L2",
+        "L3",
+        "L4",
+        "E1"
+      ],
+      "kind": "session",
+      "case": "desktop",
+      "repository": "main",
+      "requires": [
+        "engine",
+        "gts-build"
+      ],
+      "timeoutMs": 1800000
+    },
+    {
+      "id": "main-build",
+      "covers": [
+        "R1"
+      ],
+      "kind": "command",
+      "repository": "main",
+      "requires": [
+        "engine"
+      ],
+      "args": [
+        "build",
+        "cbinding...,standalone..."
+      ],
+      "timeoutMs": 1800000
+    },
+    {
+      "id": "main-tests",
+      "covers": [
+        "R1"
+      ],
+      "kind": "command",
+      "repository": "main",
+      "requires": [
+        "main-build"
+      ],
+      "args": [
+        "-r",
+        "test"
+      ],
+      "timeoutMs": 1800000
+    },
+    {
+      "id": "web",
+      "covers": [
+        "R2",
+        "E1"
+      ],
+      "kind": "session",
+      "case": "web",
+      "repository": "main",
+      "requires": [
+        "engine",
+        "main-build"
+      ],
+      "timeoutMs": 1800000
+    },
+    {
+      "id": "memory",
+      "covers": [
+        "C1"
+      ],
+      "kind": "session",
+      "case": "memory",
+      "repository": "main",
+      "requires": [
+        "data"
+      ],
+      "timeoutMs": 1800000
+    },
+    {
+      "id": "clean-install",
+      "covers": [
+        "D1"
+      ],
+      "kind": "collector",
+      "repository": "main",
+      "requires": [
+        "main-build",
+        "checks"
+      ],
+      "timeoutMs": 1800000
+    },
+    {
+      "id": "tnb-guards",
+      "covers": [
+        "R1"
+      ],
+      "kind": "tnb-guards",
+      "repository": "tnb",
+      "condition": "tnb-changed",
+      "timeoutMs": 600000
+    },
+    {
+      "id": "tnb-witnesses",
+      "covers": [
+        "R1"
+      ],
+      "kind": "tnb-witnesses",
+      "repository": "tnb",
+      "condition": "tnb-changed",
+      "requires": [
+        "tnb-guards"
+      ],
+      "timeoutMs": 1800000
+    },
+    {
+      "id": "tnb-navigation",
+      "covers": [
+        "R1"
+      ],
+      "kind": "command",
+      "repository": "tnb",
+      "condition": "tnb-changed",
+      "requires": [
+        "tnb-guards"
+      ],
+      "args": [
+        "run",
+        "check:sim-nav"
+      ],
+      "timeoutMs": 1800000
+    },
+    {
+      "id": "tnb-volar",
+      "covers": [
+        "R1"
+      ],
+      "kind": "volar",
+      "repository": "tnb",
+      "condition": "tnb-changed",
+      "requires": [
+        "tnb-guards"
+      ],
+      "timeoutMs": 1800000
+    },
+    {
+      "id": "platforms",
+      "covers": [
+        "D1"
+      ],
+      "kind": "collector",
+      "repository": "main",
+      "timeoutMs": 1800000
+    }
+  ],
+  "adapters": {}
+}

@@ -1,0 +1,9 @@
+.tools/
+artifacts/
+node_modules/
+genius-invokation/
+gts/
+typescript-native-bridge/
+worktrees/
+harness/local.json
+

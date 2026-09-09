@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "digest": "2a7be5584c26268eb006d6801aa239acdd83a3ad02edf63f6db922daba5dc91a",
+  "files": {
+    ".gitattributes": "1d3d057b7bc05db45edbef3f9a7409cada6ef181fcdda0976160831037cfae15",
+    ".github/workflows/harness.yml": "da735cafbf06514c5a74f573f973fe89808239e7d13b4223389abadc286f1484",
+    ".gitignore": "8499620da1ddecfb7a1d4969b721f9278605d4386ad06b51114833e30b5091d4",
+    "AGENTS.md": "0bde8f8b7b5176e2f7c6e562b7b432cace3c6fc619a00bb395cdabf4dbdd2eb5",
+    "HARNESS.md": "d23be392061f0448fb0e2f164712495e356abd856c98f2b6a11fc22a729f8801",
+    "harness/REVIEW.md": "f10cea5da3d3c3f83b557a2a4a4f0d827315cb57a1fca8ccbeb226212ec63eb4",
+    "harness/baselines/main.json": "4ef134d1cfe2c7ab610418e4fd7aca86fabda45aa5acbb7a3db5d64712a759f4",
+    "harness/cli.mjs": "95a3d13ec58f067623363d62e631bb85437b87b2d94452ee620b6ce6d93d52f5",
+    "harness/collectors/README.md": "9309b61eca9a22e595db50461a372fe67dbbf50e579cd9a5ce4c11e9eda31f02",
+    "harness/contract.json": "58d409217e78fad638ca33a499b5a1043d883ef43c4050fbec8640b38571c5a6",
+    "harness/core.mjs": "cfd091b8bc18eb25c1c8ef2aa852260d6a5d47ea37ee02c71030b3c3ff32da46",
+    "harness/local.example.json": "e96b3499d40fff4fa8a27bf1acc64c53c286c894af8468ee050b47065dde60da",
+    "harness/probes/coverage.mjs": "517655befbad7c2347a6399ecad4fc40fa5d8d14076168e8a384e79c7bb778f6",
+    "harness/probes/engine.mjs": "6c552103cce018b97a63e267b7368ddf7f67e645e2abd72dab9f549b0b068c78",
+    "harness/probes/session-evidence.mjs": "03734df7e2d1ea724506f7a58d1839a36f9868369aededaae03fb7b06cf7c607",
+    "harness/runner.mjs": "f5060341daf9d0d14603c396cd0068e643707eef6018f1ac4033469297191e62",
+    "harness/session-evidence.example.json": "62f4c5ca67d2dc838cd0a473f6660aca029867be689aa73b561817fac47cfb93",
+    "harness/tests/core.test.mjs": "0dd9b684f0633ed416de4c6999bff3bf3cd983172bf8b99bae0d90e67a8820c5",
+    "harness/tests/probes.test.mjs": "20c8a10ae937eee4e4ab5eec6366d1326f12e86c2bc226ead3ddd32779da1e5e",
+    "harness/tests/runner.test.mjs": "8263823bbe317293156be8aa9b2e8ab713beb51f00575f7b8338f14477712441",
+    "harness/tests/session-evidence.test.mjs": "ea74a8fb6cd8be504ec7fbf222aa3208141ff557ec02e1e7ae172994a5482ac9",
+    "harness/windows-job.ps1": "82e64e70e941c0b771665b5714e64e2f106ad36db16278488e73b50ff56f5e8d",
+    "package.json": "442654cbf158007827d82a1f7f0e65e0bd1e464e98215cbace2e9ec855635cbf"
+  }
+}

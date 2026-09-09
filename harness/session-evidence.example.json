@@ -1,0 +1,207 @@
+{
+  "purpose": "Schema reference and synthetic examples for session-evidence.mjs. This file is deliberately NOT an acceptance trace and must not be registered as a production collector or approved expectation file.",
+  "validationBoundary": [
+    "The probe validates recorded observation semantics. PASS here cannot prove a real browser, editor, native engine or measured process ran.",
+    "The root runner must approve and seal the collector command and expectation file, supply a new nonce, verify actual tests executed, bind raw logs and source fingerprints, and reject reused output. A user-provided JSON file or these synthetic fixtures cannot mint an execution receipt.",
+    "Collectors must retain actual language-protocol response payloads and bind them to the source version when issued. Never derive expected values from the observed responses. Expected fixture text, diagnostics and features come from the separately reviewed expectation file.",
+    "The session schema checks GTS LSP and tsserver plus configured scenarios. Full desktop acceptance additionally needs the approved real-editor collector, root and packages/data workspace scenarios, syntax/property/import negatives, extension startup and platform evidence. Missing collectors or approved scenarios remain BLOCKED.",
+    "The tests in harness/tests/session-evidence.test.mjs use generated synthetic observations solely to test the gate. They are not real browser/desktop/memory acceptance evidence."
+  ],
+  "commandLine": {
+    "command": "node harness/probes/session-evidence.mjs --input <fresh-trace.json> --case desktop|web|memory --expectations <approved-expectations.json> --nonce <runner-nonce> --tnb-version <exact-contract-pin> [--rounds <positive-integer>]",
+    "rounds": "Defaults to 100. Production passes the sealed desktopEditRounds policy. Unit tests can explicitly use fewer rounds.",
+    "tnbVersion": "Required for desktop/web and compared exactly with every native session packageVersion. It must come from the runner contract, never from the trace. Memory mode does not assert engine identity; the separate engine gate does.",
+    "expectations": "Always required. The runner seals this independent file and the collector that consumes it. Missing input, expectation file, dependency or measurement availability yields BLOCKED.",
+    "nonce": "The trace always requires a nonempty runNonce. --nonce additionally compares it to this runner invocation. Production must always pass it.",
+    "exitCodes": { "0": "PASS: trace assertions only", "1": "FAIL: malformed, missing/failed assertions, stale or contradictory evidence", "2": "BLOCKED: unavailable input, approved expectations, required pin or measurement" },
+    "stdout": "One JSON object with status, case, verification, details and measured/derived metrics. Runtime faults are never converted to empty successful responses."
+  },
+  "traceSchema": {
+    "schemaVersion": "Exactly 1.",
+    "case": "Exactly desktop, web or memory; must match --case.",
+    "runNonce": "Fresh nonempty string supplied by the root runner.",
+    "problems": "Required array of raw runtime faults (panic, timeout, OOM, crash, rejected requests). Any item fails; no self-authored status/pass-count field is accepted.",
+    "sessions": "Required in desktop/web: at least two session objects. Every id is unique. Every approved fixture/route pair must appear. Each physical restart/reconnect gets a fresh id.",
+    "switches": "Required in web: both browser-local -> backend-tnb and backend-tnb -> browser-local. Not a summary boolean: capture transport lifecycle, before/after source and current markers.",
+    "outages": "Required in web: at least one backend outage, visible error with route/source observations, and successful fresh backend session reconnection.",
+    "memory": "Required only for memory: named baseline/candidate runs containing actual process samples.",
+    "unknownFields": "Unknown fields in schema objects are rejected. Native LSP result payloads retain their protocol fields. Duplicate session, sequence, source version, request, phase, process and expected-fixture identities are rejected.",
+    "unavailable": "Where a required dependency/session/measurement could not be collected, record an object {unavailable: <nonempty reason>}. This blocks the case; it is never zero memory or zero errors."
+  },
+  "approvedExpectationsSchema": {
+    "desktopOrWeb": {
+      "schemaVersion": 1,
+      "case": "desktop or web",
+      "fixtures": [
+        {
+          "id": "reviewed-scenario-id",
+          "routes": ["gts-lsp, tsserver, browser-local or backend-tnb as appropriate; list each required route separately"],
+          "fixture": "The complete fixture object below, reviewed independently and compared exactly against each matching session's fixture. List separate scenario IDs for each mandatory source/workspace/error class."
+        }
+      ]
+    },
+    "memory": {
+      "schemaVersion": 1,
+      "case": "memory",
+      "command": "pnpm --filter @gi-tcg/data check",
+      "totalMemoryKind": "working-set"
+    }
+  },
+  "sessionSchema": {
+    "id": "Unique identity of one actual service session.",
+    "route": "gts-lsp or tsserver for desktop; browser-local or backend-tnb for web.",
+    "identity": "SDK resolution and native-load observation described below.",
+    "fixtureId": "ID in the separately approved expectation file; that entry must approve this route.",
+    "fixture": "Exact independent source/diagnostic/feature expectations, not actual-result-derived assertions.",
+    "observations": "Ordered source, diagnostics and feature events. Sequence is exactly 1..N; atMs uses a shared monotonic run clock. Each event has this sessionId and fixture.uri and the actual source version.",
+    "closedAtMs": "Observed client/session disposal time if closed. No session event may occur after it. Mandatory when that session is retired by a switch or disconnect."
+  },
+  "identityExamples": {
+    "native": {
+      "packageName": "typescript-native-bridge",
+      "packageVersion": "6.0.3-bridge.16.tsgo.7.0.2",
+      "sdkPath": "C:/example/node_modules/typescript/lib",
+      "checker": "tsgo",
+      "nativeLibraryPath": "C:/example/node_modules/typescript/lib/bridge.node",
+      "nativeLoadLog": "SYNTHETIC EXAMPLE ONLY: TNB ACTIVE — typescript is the tsgo-backed fork"
+    },
+    "browserLocal": {
+      "packageName": "typescript",
+      "packageVersion": "6.0.3",
+      "sdkPath": "https://cdn.jsdelivr.net/npm/typescript@6.0.3/lib",
+      "checker": "typescript-js"
+    },
+    "notes": "Browser TypeScript is pinned to 6.0.3 and cannot claim a native load. Native sessions require exact contract version, package identity, resolved SDK path, native library path and original activation/load text. These observations require execution provenance; writing an activation string is not proof of a load."
+  },
+  "fixtureExample": {
+    "uri": "file:///workspace/example.gts",
+    "validText": "export function double(value: number) { return value * 2; }\nexport const answer: number = double(1);\n",
+    "badText": "export function double(value: number) { return value * 2; }\nexport const answer: number = double(\"wrong\");\n",
+    "diagnostic": {
+      "code": 2345,
+      "messageIncludes": "not assignable",
+      "range": { "start": { "line": 1, "character": 36 }, "end": { "line": 1, "character": 43 } }
+    },
+    "features": {
+      "hover": "double(value: number): number",
+      "completion": "double",
+      "signature": "double(value: number): number",
+      "definition": {
+        "uri": "file:///workspace/example.gts",
+        "range": { "start": { "line": 0, "character": 16 }, "end": { "line": 0, "character": 22 } },
+        "sourceText": "export function double(value: number) { return value * 2; }\nexport const answer: number = double(1);\n"
+      }
+    }
+  },
+  "observationSchema": {
+    "common": "All source/diagnostics/feature events: sequence (positive contiguous integer), sessionId, atMs (monotonic nonnegative milliseconds), kind, uri (fixture file URI), version (integer actual source revision). Desktop tsserver uses a .ts/.tsx fixture; GTS/browser routes use .gts.",
+    "source": {
+      "additionalFields": ["text", "phase", "cycle", "origin"],
+      "phase": "valid, bad or restored. Text must match the independently approved validText or badText exactly. Versions strictly increase, including source restoration.",
+      "cycle": "initial, external, or integer 1..rounds. Initial requires valid -> bad -> restored; every other cycle requires bad -> restored.",
+      "origin": "open for initial valid, editor for ordinary edits, filesystem for external edits. A real collector must actually change the appropriate source/disk, not merely relabel an editor event."
+    },
+    "diagnostics": {
+      "additionalFields": ["requestId", "response"],
+      "requestId": "Unique string/integer identifying the actual completed request or collector-correlated push-diagnostic operation. A push collector must prove which source revision it belongs to; never bind an unversioned stale notification to the latest text by assumption.",
+      "response": "Actual normalized array of LSP diagnostics. Each diagnostic has code, message, severity (1..4) and UTF-16 range. Normalize tsserver offsets against the exact source snapshot. Preserve actual diagnostic code/message/span; do not manufacture an empty result from absence of a response.",
+      "assertions": "Exactly one completed diagnostic response per required source phase/version. Valid/restored has no severity-1 errors. Bad contains the expected error code/message substring and exact source range. No generated __gts_ diagnostic symbols."
+    },
+    "feature": {
+      "additionalFields": ["requestId", "feature", "position", "response"],
+      "feature": "hover, definition, completion or signature. Each required valid/restored revision has all four actual responses; request IDs cannot be reused.",
+      "position": "Actual request position {line,character}, within the exact UTF-16 source snapshot.",
+      "response": "Retain the real protocol payload after mechanical tsserver-to-LSP shape normalization, if needed. No success boolean or count can replace the response.",
+      "hover": "contents string, MarkupContent, MarkedString or array. Text must contain approved hover expectation; empty, generated-symbol and ': any' hover are rejected.",
+      "definition": "Location, Location[] or LocationLink[]. Must include exact approved source URI and selection range.",
+      "completion": "CompletionItem[] or CompletionList with items[]. Must contain the approved label and no generated __gts_ completion symbols.",
+      "signature": "SignatureHelp with signatures[].label. Must contain approved signature text and no generated __gts_ signature symbols."
+    },
+    "requiredCoverage": "Desktop: initial triple, external pair, and default 100 real edit/restore pairs in BOTH services for EVERY approved scenario. Web: initial triple with all required features in EVERY recorded session, including sessions created by reconnect/switch. Closed sessions cannot be reused."
+  },
+  "sourceSnapshotSchema": {
+    "uri": "Source URI from the referenced session.",
+    "version": "Latest observed source version at this lifecycle timestamp.",
+    "text": "Exact editor buffer text, including line endings.",
+    "sha256": "Lowercase SHA-256 of UTF-8 text. The probe recomputes this and matches the corresponding source observation."
+  },
+  "switchSchema": {
+    "fromSessionId": "Existing active session before switch.",
+    "toSessionId": "Fresh session using the opposite route.",
+    "startedAtMs": "Monotonic switch start time.",
+    "readyAtMs": "Later time when new session is ready and current diagnostics displayed.",
+    "before": "Source snapshot immediately before switch.",
+    "after": "Source snapshot when ready. Same URI and exact text as before; version may differ with fresh session.",
+    "retired": {
+      "clientStoppedAtMs": "Actual old LanguageClient disposal; must equal old session.closedAtMs and be within switch interval.",
+      "workerTerminatedAtMs": "Actual old Worker termination, required when leaving browser-local.",
+      "socketClosedAtMs": "Actual old backend transport closure, required when leaving backend-tnb.",
+      "diagnosticsAfterStop": "Recorded old-client diagnostic notifications after disposal; must be []."
+    },
+    "diagnostics": {
+      "ownerSessionId": "New session identity.",
+      "uri": "Current source URI.",
+      "version": "Current source version.",
+      "response": "Actual displayed diagnostic array, matched against a completed new-session response before readyAtMs."
+    }
+  },
+  "outageSchema": {
+    "sessionId": "Disconnected backend-tnb session.",
+    "disconnectedAtMs": "Actual time old backend session closed.",
+    "source": "Latest source snapshot at disconnect.",
+    "observations": [
+      {
+        "atMs": "At least two distinct, ordered observations during the outage.",
+        "sessionId": "Same disconnected backend session identity.",
+        "activeRoute": "Must remain backend-tnb; no silent browser fallback.",
+        "visibleError": "Actual nonempty user-visible connection error text; never just console text.",
+        "sourceSha256": "Current source hash; must match the preserved source."
+      }
+    ],
+    "reconnectedSessionId": "Fresh backend-tnb session that completed its required diagnostics/features.",
+    "reconnectedAtMs": "Later successful readiness time.",
+    "reconnectedSource": "Current restored source snapshot with the same source text. Browser-local observations during this outage interval fail."
+  },
+  "memorySchema": {
+    "runs": "Exactly one baseline and one candidate run. Each succeeds, samples comparable fixed source sets with the same total-memory measure, and records the following fields.",
+    "run": {
+      "label": "baseline or candidate.",
+      "sourceFingerprint": "SHA-256 of normalized source inventory/content bound by the root runner. Must match between runs.",
+      "command": "Actual command, exactly matching approved memory expectations.",
+      "exitCode": "Actual measured command exit code; must be 0.",
+      "completedAtMs": "Nonnegative monotonic completion time in this run's clock.",
+      "stderr": "Raw stderr from the measured command. Panic/OOM/fatal error/timeout text fails.",
+      "measurement": {
+        "tool": "Sampler implementation/tool name, not a hand-authored PASS counter.",
+        "totalMemoryKind": "rss or working-set; must be the same for baseline and candidate and match approved expectations.",
+        "unit": "bytes (convert accurately in the collector).",
+        "intervalMs": "Positive nominal sampling interval. Gaps beyond twice this interval fail as incomplete measurement.",
+        "limitations": "Nonempty disclosure of sampling, platform and attribution limits. Sampled maxima are not claimed to be exact peaks.",
+        "processCoverage": "entire-checker-process-tree; include the V8 host, in-process Go memory through its total, and any child/native processes."
+      },
+      "processes": [
+        {
+          "pid": "Unique positive integer process ID.",
+          "parentPid": "null for the single checker root, otherwise another recorded process ID.",
+          "name": "Actual process/role name.",
+          "runtime": "v8 or native.",
+          "startedAtMs": "Observed process start.",
+          "endedAtMs": "Observed later process end, no later than command completion."
+        }
+      ],
+      "samples": [
+        {
+          "atMs": "Strictly increasing timestamp within the measured run. At least two samples; sampling covers startup and completion within twice intervalMs.",
+          "processes": [
+            {
+              "pid": "A recorded process ID, once per sample. Every live process must appear, every process must be measured at least once.",
+              "totalBytes": "Positive measured RSS/working-set including native memory, or {unavailable: reason} which blocks.",
+              "jsHeapUsedBytes": "Required measured nonnegative JS heap for each V8 process; absent for native-only processes. {unavailable: reason} blocks. Resident process memory and allocated V8 heap are different measures, so paging can make heap larger than RSS/working-set."
+            }
+          ]
+        }
+      ]
+    },
+    "interpretation": "The probe derives sampled peak process-tree bytes and JS heap, then reports baseline/candidate differences. It does not impose a 4 GiB ceiling, invent a savings percentage, call moved-to-Go memory free, or replace missing samples with a peak summary. Optimization acceptance remains the sealed contract's evidence-based policy."
+  }
+}
