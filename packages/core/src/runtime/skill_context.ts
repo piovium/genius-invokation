@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { clampVariable, VARIABLE_DEFAULT_UPPER_BOUND } from "../data/utils";
+import { clampVariable } from "../data/utils";
 import { Aura, DamageType, DiceType, Reaction } from "@gi-tcg/typings";
 
 import {
@@ -1481,13 +1481,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
       } (diff: ${info.diffValue}, direction: ${info.direction})`,
     );
 
-    if (info.newValue > VARIABLE_DEFAULT_UPPER_BOUND) {
-      this.mutator.log(
-        DetailLogType.Other,
-        `Variable value ${info.newValue} exceeds max limit, omitted`,
-      );
-      return;
-    }
     let state = this.get(target).latest();
     if (VARIABLE_NAME_CAN_EMIT_EVENTS.includes(info.varName)) {
       const modifyEventArg = new BeforeVariableEventArg(

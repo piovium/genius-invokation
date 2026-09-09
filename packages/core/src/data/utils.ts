@@ -15,7 +15,7 @@
 
 import type { VariableConfig } from "../base/entity";
 
-export const VARIABLE_DEFAULT_UPPER_BOUND = 2 ** 31 - 1;
+export const DEFAULT_VARIABLE_UPPER_BOUND = 2 ** 31 - 1;
 
 export function createVariable<const T extends number>(
   initialValue: T,
@@ -24,7 +24,7 @@ export function createVariable<const T extends number>(
   return {
     initialValue,
     lowerBound: 0,
-    upperBound: VARIABLE_DEFAULT_UPPER_BOUND,
+    upperBound: DEFAULT_VARIABLE_UPPER_BOUND,
     recreateBehavior: {
       type: forceOverwrite ? "overwrite" : "default",
     },
@@ -39,7 +39,7 @@ export function createVariableCanAppend(
   return {
     initialValue,
     lowerBound: 0,
-    upperBound: VARIABLE_DEFAULT_UPPER_BOUND,
+    upperBound: DEFAULT_VARIABLE_UPPER_BOUND,
     recreateBehavior: {
       type: "append",
       appendValue,
