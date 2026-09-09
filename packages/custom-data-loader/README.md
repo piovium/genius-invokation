@@ -122,8 +122,10 @@ docker build -f packages/custom-data-loader/Dockerfile.language-service \
 ```
 
 The image binds `0.0.0.0` inside its container; the example publishes its port only
-on the host's loopback for the reverse proxy. The runtime base is Node 26 on Debian
-bookworm/glibc. Test that image on the deployment architecture; a local Linux run
+on the host's loopback for the reverse proxy. The runtime base is the official
+Node 26.8.1 image on Debian bookworm/glibc, pinned by its multi-platform image
+digest. Host development checks use Node 26.8.2; both versions satisfy the
+repository's `^26.1.0` requirement. Test that image on the deployment architecture; a local Linux run
 is useful compatibility evidence but is not an execution of the image itself.
 
 The backend handles language analysis. Card compilation and execution keep using
