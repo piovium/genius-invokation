@@ -1,14 +1,15 @@
 # 真实 WebSocket 控制流程实验
 
-用户已选择直接使用二进制游戏消息。本目录通过真实 Bun 服务与 Node 原生 WebSocket 验证认证和 ACK 机制；不使用 mock socket 替代网络，不修改生产服务，不把脚本游戏的结果当作真实引擎/数据库/内存验收。
+用户已选择直接使用二进制游戏消息。本目录通过真实 Node 服务与 Node 原生 WebSocket 验证认证和 ACK 机制；不使用 mock socket 替代网络，不修改生产服务，不把脚本游戏的结果当作真实引擎/数据库/内存验收。
 
-本机运行（Node 24+、Bun 1.3.5；可用 `HARNESS_BUN` 指定可执行文件）：
+本机运行（Node 24+；服务与客户端使用同一个 Node 可执行文件）：
 
 ```powershell
+npm ci --prefix scripts/server-harness/experiments --ignore-scripts --no-audit --no-fund
 node scripts/server-harness/experiments/run.mjs --output temp/server-harness/experiments/windows.json
 ```
 
-缺少 Bun、任一场景失败、或真实服务未启动，均退出 1。报告保留每个场景的实际执行计数、关闭码、缓存规模、运行时和源码摘要，不输出测试 token。
+缺少 Node 或 ws 依赖、任一场景失败、或真实服务未启动，均退出 1。报告保留每个场景的实际执行计数、关闭码、缓存规模、运行时和源码摘要，不输出测试 token。
 
 在 Linux/Docker 运行同一套实验：
 

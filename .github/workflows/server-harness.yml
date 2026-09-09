@@ -28,9 +28,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.3.5
+      - name: Install isolated Node WebSocket experiment dependency
+        run: npm ci --prefix scripts/server-harness/experiments --ignore-scripts --no-audit --no-fund
       - name: Verify harness (fixture results are not application benchmarks)
         run: node --test scripts/server-harness/*.test.mjs scripts/server-harness/experiments/*.test.mjs scripts/server-harness/environment/*.test.mjs
       - name: Record real WebSocket fault experiments

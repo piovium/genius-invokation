@@ -1,16 +1,15 @@
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { encodeGameFrame, decodeGameFrame } from "../wire.mjs";
 
-export function bunAvailability() {
-  const command = process.env.HARNESS_BUN || "bun";
-  const result = spawnSync(command, ["--version"], { encoding: "utf8", windowsHide: true, timeout: 10000 });
-  return { available: !result.error && result.status === 0, command, version: result.status === 0 ? result.stdout.trim() : null, reason: result.error?.message || result.stderr?.trim() || "Bun is unavailable" };
+export function nodeAvailability() {
+  return { available: Number(process.versions.node.split('.')[0]) >= 24,
+    command: process.execPath, version: process.versions.node, reason: 'Node 24+ is required' };
 }
 
 export async function startExperimentServer() {
-  const runtime = bunAvailability();
-  if (!runtime.available) throw new Error(`Real WebSocket experiments require Bun: ${runtime.reason}. Set HARNESS_BUN to its executable.`);
+  const runtime = nodeAvailability();
+  if (!runtime.available) throw new Error(`Real WebSocket experiments require Node: ${runtime.reason}. Use Node 24+ and install the isolated experiment dependency.`);
   const child = spawn(runtime.command, [fileURLToPath(new URL("./server.mjs", import.meta.url)), "--selftest"], { stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
   let stderr = "";
   child.stderr.setEncoding("utf8");
@@ -30,7 +29,7 @@ export async function startExperimentServer() {
     try {
       await Promise.race([
         exited,
-        new Promise((_, reject) => { deadline = setTimeout(() => reject(new Error("Bun fixture failed to stop within 5 seconds")), 5000); }),
+        new Promise((_, reject) => { deadline = setTimeout(() => reject(new Error("Node fixture failed to stop within 5 seconds")), 5000); }),
       ]);
     } finally { clearTimeout(forced); clearTimeout(deadline); }
   };
@@ -38,8 +37,8 @@ export async function startExperimentServer() {
   try {
     ready = await new Promise((resolve, reject) => {
       let stdout = "";
-      const timer = setTimeout(() => finish(new Error(`Bun fixture startup timed out: ${stderr}`)), 10000);
-      const onExit = (code) => finish(new Error(`Bun fixture exited (${code}): ${stderr}`));
+      const timer = setTimeout(() => finish(new Error(`Node fixture startup timed out: ${stderr}`)), 10000);
+      const onExit = (code) => finish(new Error(`Node fixture exited (${code}): ${stderr}`));
       const onError = (error) => finish(error);
       const finish = (error, value) => {
         clearTimeout(timer);
@@ -70,7 +69,7 @@ export async function startExperimentServer() {
     return response.json();
   };
   return {
-    origin, baseUrl: `${origin}/api`, runtime: { name: "Bun", version: runtime.version, pid: child.pid }, stop,
+    origin, baseUrl: `${origin}/api`, runtime: { name: "Node", version: runtime.version, pid: child.pid }, stop,
     createRoom: (options = {}) => request("/__harness/rooms", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(options) }),
     stats: (roomId) => request(`/__harness/rooms/${encodeURIComponent(roomId)}/stats`),
   };

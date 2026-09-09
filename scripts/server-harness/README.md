@@ -2,20 +2,21 @@
 
 正式迁移现已获得用户授权并开始进行，进度、固定基线与完整验收项见 [MIGRATION.md](MIGRATION.md)。下文的 harness 建设记录及预算保持可复查，不能代替最终应用验收。
 
-先固定可运行的验证入口，再迁移 NestJS/Fastify + Prisma + SSE 到 Elysia（Bun）+ Drizzle + WebSocket。本目录只包含测试客户端、采样器和验收配置；本轮没有替换后端、ORM、前端通信或部署配置。
+先固定可运行的验证入口，再迁移 NestJS/Fastify + Prisma + SSE 到 Elysia（Node.js）+ Drizzle + WebSocket。本目录只包含测试客户端、采样器和验收配置；本轮没有替换后端、ORM、前端通信或部署配置。
 
 ## 立即自测
 
 在仓库根目录执行，Node 24+ 即可，**不需要安装 monorepo 依赖**：
 
 ```powershell
+npm ci --prefix scripts/server-harness/experiments --ignore-scripts --no-audit --no-fund
 node --test scripts/server-harness/*.test.mjs scripts/server-harness/experiments/*.test.mjs scripts/server-harness/environment/*.test.mjs
 node scripts/server-harness/doctor.mjs --output temp/server-harness/doctor.json
 ```
 
 `harness:check`、`harness:doctor` 是对应的 package scripts。doctor 只读检查生产基线所需的 Node 26.1+、pnpm 12、构建文件、Prisma 生成文件和 `DATABASE_URL` 是否设置；缺失返回 1，不读取 `.env`、安装依赖或改 lockfile。当前 harness 自测使用的 Node 24 与生产服务要求是两个独立条件。
 
-自测包含真实 HTTP/SSE fixture、独立服务进程与操作系统 RSS 读取，完成三局、重连、清理和报告检查；WebSocket 除可控 socket 单测外，还用真实 Bun 服务做认证、断线、丢 ACK、重发和二进制适配器实验，见 [实验入口](experiments/README.md) 和 [实测结果](experiments/RESULTS.md)。没有 Bun 时相关 node:test 明确跳过；独立实验命令会直接失败，不生成“成功”的替代结果。fixture 不运行完整游戏引擎，**自测和协议实验通过不能证明真实服务内存达标**。
+自测包含真实 HTTP/SSE fixture、独立服务进程与操作系统 RSS 读取，完成三局、重连、清理和报告检查；WebSocket 除可控 socket 单测外，还用真实 Node 服务做认证、断线、丢 ACK、重发和二进制适配器实验，见 [实验入口](experiments/README.md) 和 [实测结果](experiments/RESULTS.md)。实验依赖独立安装的 ws；缺失依赖时明确失败，不生成“成功”的替代结果。fixture 不运行完整游戏引擎，**自测和协议实验通过不能证明真实服务内存达标**。
 
 本路线现在独立位于 worktree `worktrees/server-migration-harness`、分支 `codex/server-migration-harness`。已确认：使用隔离 Linux/Docker 环境、自动创建测试库和账号，游戏消息直接用二进制；能够实测解决的疑问通过实验验证，不再逐项要求用户选择实现细节。
 
@@ -83,7 +84,7 @@ OS high-water mark 是进程生命周期峰值。只有在某局期间**新增�
 
 认证、确认、初始化、计时等小控制消息继续用 JSON 文本帧；适配器拒绝以 JSON 发送游戏状态和非空 RPC，也不接受 base64 动作回答。SSE 基线适配器仍读取旧编码。
 
-真实 Bun 实验验证的认证候选是连接后先认证，token 不放 URL：
+真实 Node 实验验证的认证候选是连接后先认证，token 不放 URL：
 
 ```json
 {"type":"auth","token":"<bearer token>"}
@@ -101,7 +102,7 @@ OS high-water mark 是进程生命周期峰值。只有在某局期间**新增�
 
 ACK 表示通过校验并已被接受，不能替代持久化承诺；本次脚本游戏在同一进程内同步接受并计数，进程重启、跨进程 worker、真实异步游戏引擎仍需要后续验证。动作错误继续用 commandError；正常关闭前应发完最后确认和通知，缺少终局不能用断流代替成功。认输控制消息在原适配器单测覆盖，尚未由这个二进制命令实验 fixture 验证。
 
-WebSocket 模式不回退 SSE，且检查旧 notification SSE 路由已关闭（404/405/410/426）。应用尚未迁移；实际服务器的慢消费者、代理超时、多房间并发、JWT/Origin/TLS 与重启恢复仍需在新服务接入时验证。实验观察到 Bun 1.3.5 拒绝超大帧时客户端收到 1006，而非显式 1009；报告保留该实际行为，不依赖未经验证的错误码。
+WebSocket 模式不回退 SSE，且检查旧 notification SSE 路由已关闭（404/405/410/426）。应用尚未迁移；实际服务器的慢消费者、代理超时、多房间并发、JWT/Origin/TLS 与重启恢复仍需在新服务接入时验证。超大帧实验保留实际关闭码，允许传输终止 1006 或明确大小错误 1009；平台更正后重新实测。
 
 ## 报告与退出码
 

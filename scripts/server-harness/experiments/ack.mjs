@@ -201,7 +201,7 @@ export async function runAckExperiments(server) {
     },
     recommendation: "Keep an explicit ACK after acceptance; on reconnect authenticate again, check the same game session, recover the current pending RPC, and only retry an uncertain command with the original RPC ID and identical bytes. Deduplicate by session/player/RPC ID plus payload digest with a bounded cache. Reject conflicts, future IDs, and evicted stale IDs without executing them.",
     limits: [
-      "The fixture proves one-process protocol behavior through real Bun TCP/WebSocket connections; it does not prove production game or database correctness.",
+      "The fixture proves one-process protocol behavior through real Node TCP/WebSocket connections; it does not prove production game or database correctness.",
       "The fixture uses a synchronous in-memory acceptance counter. Production acceptance and game execution must share an atomic boundary before ACK; a receipt-only ACK would not provide this result.",
       "The cache is volatile. Process restarts, cross-process workers, deployed proxies, and durable exactly-once execution are outside this experiment.",
       "A 32-entry cache demonstrates bounded retention only. This experiment does not establish the best production cache size or the 100/50 MiB game memory budgets.",

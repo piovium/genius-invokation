@@ -1,4 +1,4 @@
-// Real loopback WebSockets against an isolated Bun protocol fixture. These
+// Real loopback WebSockets against an isolated Node protocol fixture. These
 // experiments exercise authentication boundaries, not the production backend.
 import assert from "node:assert/strict";
 import { performance } from "node:perf_hooks";
@@ -187,9 +187,8 @@ export async function runAuthExperiments(server) {
     const oversizedFrame = JSON.stringify({ type: "auth", token: "x".repeat(128 * 1024) });
     probe.socket.send(oversizedFrame);
     const closed = await probe.waitClosed();
-    // Bun 1.3.5 terminates an over-limit connection without a close frame,
-    // observed as 1006 by Node. Preserve that result instead of claiming a
-    // 1009 protocol error was delivered. A later runtime may send 1009.
+    // Preserve the existing allowance for transport termination (1006) or
+    // an explicit size-error close (1009); record the actual observed code.
     assert.ok([1006, 1009].includes(closed.code), `Unexpected close for an oversized frame: ${closed.code}`);
     assert.equal(probe.messages.length, 0);
     const stats = await zeroConnections(server, room);
@@ -328,13 +327,13 @@ export async function runAuthExperiments(server) {
     passed: cases.every((result) => result.passed),
     caseCount: cases.length,
     cases,
-    scope: "Real loopback WebSocket traffic to a Bun server with signed fixture JWTs and a scripted game; game payloads use binary protobuf frames.",
+    scope: "Real loopback WebSocket traffic to a Node server with signed fixture JWTs and a scripted game; game payloads use binary protobuf frames.",
     proposal: "Authenticate each connection once before ready or game traffic; bind the token to the route player; reject repeated auth; close idle unauthenticated connections within a bounded timeout.",
     limitations: [
       "This fixture does not establish production Elysia authentication safety or validate the real backend JWT verifier, account database, reverse proxy, TLS, Origin policy, token redaction in deployment logs, or connection rate limits.",
       "The 16-connection timeout experiment verifies fixture resource counters returning to zero, not RSS budgets, denial-of-service resistance, or OS socket reclamation.",
       "Tampered alg=none and RS256 token headers are rejected, but modifying the signed header also invalidates the signature; these cases do not independently establish algorithm pinning.",
-      "An oversized auth frame verifies rejection and resource reclamation; Bun 1.3.5 was observed to terminate the connection with client-side code 1006 rather than sending an explicit 1009 close frame.",
+      "An oversized auth frame verifies rejection and resource reclamation; the actual close code is recorded, allowing transport termination (1006) or an explicit size error (1009).",
       "Expired credentials are tested at connection authentication; policy for tokens expiring during an already authenticated connection and production refresh behavior remains outside this experiment. The existing backend's 42-day token lifetime is unchanged.",
     ],
   };

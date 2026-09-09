@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { runAuthExperiments } from "./auth.mjs";
-import { bunAvailability, startExperimentServer } from "./helpers.mjs";
+import { nodeAvailability, startExperimentServer } from "./helpers.mjs";
 
-const runtime = bunAvailability();
+const runtime = nodeAvailability();
 
-test("real Bun WebSockets enforce authentication and reclaim unauthenticated connections", {
+test("real Node WebSockets enforce authentication and reclaim unauthenticated connections", {
   timeout: 60_000,
-  skip: !runtime.available ? `Bun is unavailable: ${runtime.reason}; run the experiment runner with Bun installed for acceptance` : false,
+  skip: !runtime.available ? `Node is unavailable: ${runtime.reason}; run the experiment runner with Node installed for acceptance` : false,
 }, async (context) => {
-  assert.equal(typeof globalThis.WebSocket, "function", "Use Node 22+ or Bun for the WebSocket experiment client");
+  assert.equal(typeof globalThis.WebSocket, "function", "Use Node 24+ for the WebSocket experiment client");
   const server = await startExperimentServer();
   try {
     const report = await runAuthExperiments(server);

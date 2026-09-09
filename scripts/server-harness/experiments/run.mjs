@@ -12,7 +12,7 @@ import { runAdapterExperiments } from "./adapter.mjs";
 const repository = fileURLToPath(new URL("../../../", import.meta.url));
 const { values } = parseArgs({ options: { output: { type: "string" }, help: { type: "boolean" } } });
 if (values.help) {
-  console.log("node scripts/server-harness/experiments/run.mjs [--output <report.json>]\nRequires real Bun (HARNESS_BUN may name its executable). Missing Bun or any failed case exits 1; no mocked fallback.");
+  console.log("node scripts/server-harness/experiments/run.mjs [--output <report.json>]\nRequires Node 24+ and the isolated ws dependency. Missing Node or any failed case exits 1; no mocked fallback.");
   process.exit(0);
 }
 const output = resolve(repository, values.output ?? "temp/server-harness/experiments/report.json");
@@ -39,6 +39,7 @@ try {
 const sourceHash = createHash("sha256");
 async function fingerprint(path) {
   for (const entry of (await readdir(path, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name))) {
+    if (entry.name === "node_modules") continue;
     if (entry.isDirectory()) await fingerprint(resolve(path, entry.name));
     else if (/\.(mjs|json)$/.test(entry.name)) {
       sourceHash.update(resolve(path, entry.name).slice(repository.length).replaceAll("\\", "/"));

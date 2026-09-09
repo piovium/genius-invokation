@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { bunAvailability, startExperimentServer } from "./helpers.mjs";
+import { nodeAvailability, startExperimentServer } from "./helpers.mjs";
 import { runAckExperiments } from "./ack.mjs";
 
-const bun = bunAvailability();
-test("real Bun WebSocket ACK loss, retries, conflicts, stale IDs, and concurrency", { skip: bun.available ? false : `Bun missing: ${bun.reason}`, timeout: 30000 }, async () => {
+const runtime = nodeAvailability();
+test("real Node WebSocket ACK loss, retries, conflicts, stale IDs, and concurrency", { skip: runtime.available ? false : `Node missing: ${runtime.reason}`, timeout: 30000 }, async () => {
   const server = await startExperimentServer();
   try {
     const result = await runAckExperiments(server);

@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { bunAvailability, startExperimentServer } from "./helpers.mjs";
+import { nodeAvailability, startExperimentServer } from "./helpers.mjs";
 import { runAdapterExperiments } from "./adapter.mjs";
 
-test("real Bun server exercises the binary harness adapter and lost-ACK recovery", {
-  timeout: 20000, skip: bunAvailability().available ? false : "Bun is required for real WebSocket experiments",
+test("real Node server exercises the binary harness adapter and lost-ACK recovery", {
+  timeout: 20000, skip: nodeAvailability().available ? false : "Node is required for real WebSocket experiments",
 }, async () => {
   const server = await startExperimentServer();
   try {

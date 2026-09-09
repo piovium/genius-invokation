@@ -71,7 +71,6 @@ async function checkFile(path) {
 async function diagnose() {
   const tasks = [
     probeVersion("pnpm"),
-    probeVersion("bun"),
     probeVersion("docker"),
     probeVersion("psql"),
     checkFile("packages/server/dist/main.js"),
@@ -87,7 +86,7 @@ async function diagnose() {
     }
     return result.value;
   });
-  const [pnpm, bun, docker, psql, ...files] = values;
+  const [pnpm, docker, psql, ...files] = values;
   const node = {
     version: process.versions.node,
     required: ">=26.1.0 <27.0.0",
@@ -117,10 +116,10 @@ async function diagnose() {
     readyForProductionBaseline: blockers.length === 0,
     blockers,
     runtime: { node, pnpm },
-    optionalTools: { bun, docker, psql },
+    optionalTools: { docker, psql },
     environment: { DATABASE_URL: databaseUrlSet },
     files,
-    scope: "Read-only prerequisite check. No .env files loaded; database connectivity and application startup are not tested. Bun is reported only for the future migration.",
+    scope: "Read-only prerequisite check. No .env files loaded; database connectivity and application startup are not tested. Both baseline and candidate use Node.js.",
   };
 }
 

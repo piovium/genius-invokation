@@ -1,6 +1,6 @@
 # 正式服务迁移记录
 
-用户在 harness 自测及独立复核完成后已授权正式迁移，要求继续使用 harness 限制并保留版本管理。本路线只使用 `worktrees/server-migration-harness` / `codex/server-migration-harness`，与工作区的 TNB/tsgo 任务分开。
+用户在 harness 自测及独立复核完成后已授权正式迁移，要求继续使用 harness 限制并保留版本管理。本路线只使用 `worktrees/server-migration-harness` / `codex/server-migration-harness`，与工作区的 TNB/tsgo 任务分开。部署及实验运行时均保留 Node.js；平台调整不改变协议功能、测试场景或内存预算。
 
 ## 固定基线
 
@@ -14,7 +14,7 @@
 当前状态为进行中。只有实际运行证据才能把项目改为完成。
 
 - [ ] 旧服务生产构建及 SSE 基线，包括真实游戏、回收期、持久化。
-- [ ] Elysia/Bun HTTP 服务及既有 OAuth、用户、牌组、房间、对局、指标、静态页面行为。
+- [ ] Elysia/Node.js HTTP 服务及既有 OAuth、用户、牌组、房间、对局、指标、静态页面行为。
 - [ ] Drizzle/PostgreSQL 数据访问，原有数据/DDL约束兼容、重复迁移、重启持久化。
 - [ ] 二进制 WebSocket 服务和浏览器客户端，认证、ACK、重连去重、认输、观战；移除 SSE。
 - [ ] 游戏回放完整保留，减少原状态图的内存保留；无截断记录或提前回收绕过预算。

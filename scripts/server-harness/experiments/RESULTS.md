@@ -1,15 +1,15 @@
 # 二进制 WebSocket 实测结果
 
-2026-09-10（Asia/Shanghai）。本轮只建设 harness，正式 Elysia/Drizzle 服务尚未迁移，真实游戏的 100/50 MiB 预算尚未测量。
+2026-09-10（Asia/Shanghai）。实验平台已更正为 Node.js，原 27 项场景及断言保持。正式迁移正在进行，实验结果不能代替真实游戏的 100/50 MiB 验收。
 
-游戏消息按用户决定使用原始 protobuf 二进制帧。认证和确认机制经过真实 Bun WebSocket 连接、主动断线及重发实验；不是 mock socket 的推断。
+游戏消息按用户决定使用原始 protobuf 二进制帧。认证和确认机制经过真实 Node WebSocket 连接、主动断线及重发实验；不是 mock socket 的推断。
 
 | 环境 | 客户端 / 服务端 | 认证 | ACK / 去重 | 实际 harness 适配器 | 结果 |
 | --- | --- | --- | --- | --- | --- |
-| Windows x64 | Node 24.14.0 / Bun 1.3.5 | 16 | 9 | 2 | 27/27 通过 |
-| 独立 WSL2 中的 Linux Docker x64 | Node 26.1.0 / Bun 1.3.5 | 16 | 9 | 2 | 27/27 通过 |
+| Windows x64 | Node 24.14.0 / Node 24.14.0 + ws 8.21.3 | 16 | 9 | 2 | 27/27 通过 |
+| 独立 WSL2 中的 Linux Docker x64 | Node 26.1.0 / Node 26.1.0 + ws 8.21.3 | 16 | 9 | 2 | 27/27 通过 |
 
-Linux 实验容器禁用外部网络，客户端和 Bun 服务通过容器内 loopback 通信。容器配置 384 MiB / 1 CPU，只用于隔离实验负载；该限制不是服务 RSS 验收，也不是内存优化结果。当前 WSL 内核不支持 swap limit，Docker 已报告该限制。
+Linux 实验容器禁用外部网络，客户端和 Node 服务通过容器内 loopback 通信。容器配置 384 MiB / 1 CPU，只用于隔离实验负载；该限制不是服务 RSS 验收，也不是内存优化结果。当前 WSL 内核不支持 swap limit，Docker 已报告该限制。
 
 ## 认证结果
 
@@ -19,7 +19,7 @@ Linux 实验容器禁用外部网络，客户端和 Bun 服务通过容器内 lo
 
 16 条未认证连接在实验所设的 700ms 超时后，待认证和已认证连接计数均回到 0。这证明连接资源计数会回收，未测量这些连接的 RSS，也未决定生产超时或连接数上限。
 
-128 KiB 级认证帧超过 fixture 的 64 KiB 限制时，Bun 1.3.5 终止连接，客户端实际收到 **1006 和 error 事件**，没有明确的 1009。实验确认无游戏数据、无动作执行、连接数归零；后续客户端应按实际断线恢复，不能依赖 1009。
+128 KiB 级认证帧超过 fixture 的 64 KiB 限制时，Node/ws 关闭连接，客户端在两个平台均实际收到 **1009**。原断言仍允许 1006 或 1009，不为更换平台放宽。实验确认无游戏数据、无动作执行、连接数归零；后续客户端应按实际断线恢复，不能依赖 1009。
 
 token 不放 URL；算法头篡改测试也被拒绝，但同时破坏了签名，因此不能单独证明生产 JWT 库的算法固定策略。真实服务的 JWT 校验、Origin、TLS、代理日志及连接中途凭证到期仍需接入时验证。
 
@@ -46,8 +46,8 @@ ACK 的语义是已经通过校验并接受；fixture 在同一进程中同步�
 
 按 [README](README.md) 中的命令重跑。生成的报告包括逐场景计数、关闭码、缓存规模、运行时、源码 SHA-256、开始/结束时间和失败详情，位于被 Git 忽略的本地路径：
 
-- `temp/server-harness/experiments/windows.json`
-- `temp/server-harness/experiments/linux-docker.json`
+- `temp/server-harness/experiments/windows-node.json`
+- `temp/server-harness/experiments/linux-docker-node.json`
 - `temp/server-harness/environment/report.json`：隔离 PostgreSQL 的 3 份原 SQL 迁移、2 个账号、身份 stub、数据库密码和 JWT 验证。
 
 独立环境重复初始化已实测保留凭据和已有账号创建时间。应用数据库行为与完整游戏内存基线仍通过主 harness 的 baseline/gate 入口另行测量；本报告不代替它们。
@@ -56,7 +56,7 @@ ACK 的语义是已经通过校验并接受；fixture 在同一进程中同步�
 
 Windows Node 24.14.0 和 Linux Docker Node 26.1.0 的完整自测各发现 123 项：**122 项通过、0 失败、1 项显式跳过**。跳过项需要访问真实 Docker 测试库，已在专用 WSL 环境开启 `HARNESS_DOCKER_ENVIRONMENT_SELFTEST=1` 单独执行，环境测试 **5/5 通过、0 跳过**。完整自测包含上面的网络实验，不把重复执行合计成新增场景。
 
-原始输出保存在 `temp/server-harness/verification/windows.log`、`linux-docker.log` 和 `environment-docker.log`。独立复核发现并修复以下误通过路径，均有回归负例：
+原始输出保存在 `temp/server-harness/verification/windows-node.log`、`temp/harness-node-selftest.log` 和 `environment-docker.log`。独立复核发现并修复以下误通过路径，均有回归负例：
 
 - ready 缺少 session 或 ACK 串 session；重连必须保留原 session。
 - 空闲期新增 OS 峰值被忽略、耗时过长的 RSS 读取被误算为有效覆盖。
@@ -64,3 +64,5 @@ Windows Node 24.14.0 和 Linux Docker Node 26.1.0 的完整自测各发现 123 �
 - Compose 被调用者同名环境变量覆盖，以及数据库走 trust 认证却被当作密码已验证。现在使用已验证凭据并检查错误密码明确拒绝。
 
 另外修复 Node 26 `parseEnv` 的 null-prototype 差异，凭据比较只输出布尔结果。快照隐私规则已对照 `core/io.ts` 独立复核；公开标签和提示保持原语义。mutation、RPC preview、真实部署认证和持久化恢复仍不在此次自测结论内。
+
+Node 平台复测的 Windows/Linux 源码摘要一致：`4b702514536565f3a73d0cc188b909e3f7567e73b88ba3e7efe88903b6d43a66`。摘要包含隔离实验锁文件，并排除安装生成的 node_modules。核心、协议、预算和场景定义保持；此前平台记录可从 harness 基线提交 86c8582f 复查。

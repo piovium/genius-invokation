@@ -1,10 +1,13 @@
-// HARNESS_SELFTEST: a loopback-only Bun WebSocket experiment, not application code.
+// HARNESS_SELFTEST: a loopback-only Node WebSocket experiment, not application code.
 // This in-memory model deliberately does not load Elysia, an ORM, or the game engine.
 import { createHash, createHmac, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
+import { createServer } from "node:http";
+import { createRequire } from "node:module";
+const { WebSocketServer } = createRequire(import.meta.url)("ws");
 import { encodeGameFrame, decodeGameFrame } from "../wire.mjs";
 
-if (!process.argv.includes("--selftest") || typeof Bun === "undefined") {
-  throw new Error("This fixture requires Bun and the explicit --selftest flag");
+if (!process.argv.includes("--selftest")) {
+  throw new Error("This fixture requires Node and the explicit --selftest flag");
 }
 
 const secret = randomBytes(32);
@@ -79,7 +82,7 @@ function actionResponse(ws, command) {
   if (fault !== "none") room.faultTriggered = true;
   if (fault === "before-accept") { ws.data.closing = true; ws.terminate(); return; }
 
-  // Atomic only within this single Bun process. A restart erases this fixture state.
+  // Atomic only within this single Node process. A restart erases this fixture state.
   const ack = { type: "ack", command: "actionResponse", id, sessionId: room.sessionId };
   player.executionCount++;
   player.nextRpcId++;
@@ -93,9 +96,8 @@ function actionResponse(ws, command) {
   }
 }
 
-const server = Bun.serve({
-  hostname: "127.0.0.1", port: 0,
-  async fetch(request, server) {
+const fixture = {
+  async fetch(request) {
     const url = new URL(request.url);
     if (url.pathname === "/__harness/rooms" && request.method === "POST") {
       const options = await request.json();
@@ -119,13 +121,11 @@ const server = Bun.serve({
       const room = rooms.get(wsMatch[1]);
       const player = room?.players.find((player) => player.playerId === wsMatch[2]);
       if (!room || !player) return new Response("Room or player not found", { status: 404 });
-      if (server.upgrade(request, { data: { room, player, authenticated: false, closing: false, authTimer: null } })) return;
       return new Response("Upgrade required", { status: 426 });
     }
     return new Response("Harness selftest only", { status: 404 });
   },
   websocket: {
-    maxPayloadLength: 64 * 1024,
     open(ws) {
       const { room } = ws.data;
       room.sockets.add(ws);
@@ -161,5 +161,43 @@ const server = Bun.serve({
     },
     close(ws) { ws.data.closing = true; clearTimeout(ws.data.authTimer); ws.data.room.sockets.delete(ws); },
   },
+};
+const server = createServer(async (incoming, outgoing) => {
+  try {
+    const chunks = [];
+    for await (const chunk of incoming) chunks.push(chunk);
+    const body = Buffer.concat(chunks);
+    const response = await fixture.fetch(new Request('http://127.0.0.1' + incoming.url, {
+      method: incoming.method, headers: incoming.headers,
+      ...(body.length ? { body } : {}),
+    }));
+    outgoing.writeHead(response.status, Object.fromEntries(response.headers));
+    outgoing.end(Buffer.from(await response.arrayBuffer()));
+  } catch { outgoing.writeHead(500); outgoing.end('Fixture request failed'); }
 });
-process.stdout.write(`${JSON.stringify({ type: "harness-ready", port: server.port })}\n`);
+const sockets = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024, perMessageDeflate: false });
+server.on('upgrade', (request, socket, head) => {
+  const match = new URL(request.url, 'http://127.0.0.1').pathname.match(/^\/api\/rooms\/([^/]+)\/players\/([^/]+)\/ws$/);
+  const room = match && rooms.get(match[1]);
+  const player = room?.players.find(player => player.playerId === match[2]);
+  if (!room || !player) { socket.end('HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n'); return; }
+  sockets.handleUpgrade(request, socket, head, ws => {
+    ws.data = { room, player, authenticated: false, closing: false, authTimer: null };
+    ws.on('message', (data, binary) => fixture.websocket.message(ws, binary ? data : data.toString()));
+    ws.on('close', () => fixture.websocket.close(ws));
+    // ws emits error before its protocol-error close (including maxPayload).
+    // Resource removal still happens only on the actual close event.
+    ws.on('error', () => {});
+    fixture.websocket.open(ws);
+  });
+});
+await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+process.stdout.write(JSON.stringify({ type: 'harness-ready', port: server.address().port }) + '\n');
+function stop() {
+  for (const socket of sockets.clients) socket.terminate();
+  sockets.close();
+  server.close();
+  server.closeAllConnections();
+}
+process.once('SIGTERM', stop);
+process.once('SIGINT', stop);
