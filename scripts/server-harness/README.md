@@ -1,5 +1,7 @@
 # 服务迁移 harness
 
+正式迁移现已获得用户授权并开始进行，进度、固定基线与完整验收项见 [MIGRATION.md](MIGRATION.md)。下文的 harness 建设记录及预算保持可复查，不能代替最终应用验收。
+
 先固定可运行的验证入口，再迁移 NestJS/Fastify + Prisma + SSE 到 Elysia（Bun）+ Drizzle + WebSocket。本目录只包含测试客户端、采样器和验收配置；本轮没有替换后端、ORM、前端通信或部署配置。
 
 ## 立即自测
