@@ -11,10 +11,41 @@ import {
   makeSeal,
   processVerdict,
   snapshot,
+  snapshotRepository,
   sourcePaths,
   treeDigest,
   verifySeal,
 } from "../core.mjs";
+
+test('task submodule fingerprints bind sources while acceptance still binds ignored runtime files', async t => {
+  const root = temporary(t);
+  const repo = path.join(root, 'repo');
+  const child = path.join(repo, 'vendor');
+  write(root, 'repo/vendor/.gitignore', 'node_modules/\ndist/\n');
+  write(root, 'repo/vendor/source.ts', 'export const n = 1;\n');
+  const commit = directory => {
+    git(directory, ['add', '.']);
+    git(directory, ['-c', 'user.name=Harness Fixture', '-c', 'user.email=harness@example.invalid', 'commit', '-qm', 'fixture']);
+    return git(directory, ['rev-parse', 'HEAD']);
+  };
+  git(child, ['init', '-q']); commit(child);
+  git(repo, ['init', '-q']); const base = commit(repo);
+  const spec = { path: 'repo', base };
+  const taskBefore = await snapshotRepository(root, spec, { includeRuntime: false });
+  const acceptanceBefore = await snapshotRepository(root, spec);
+  write(root, 'repo/vendor/node_modules/sdk/bridge.node', 'ignored native version one');
+  write(root, 'repo/vendor/dist/compiler.js', 'ignored compiler version one');
+  const taskAfter = await snapshotRepository(root, spec, { includeRuntime: false });
+  const acceptanceAfter = await snapshotRepository(root, spec);
+  assert.equal(taskBefore.source, taskAfter.source);
+  assert.equal(taskAfter.runtime, null);
+  assert.notEqual(acceptanceBefore.runtime, acceptanceAfter.runtime);
+  write(root, 'repo/vendor/source.ts', 'export const n = 2;\n');
+  const edited = await snapshotRepository(root, spec, { includeRuntime: false });
+  assert.notEqual(taskAfter.source, edited.source);
+  write(root, 'repo/vendor/new.ts', 'export const untracked = true;\n');
+  assert.notEqual(edited.source, (await snapshotRepository(root, spec, { includeRuntime: false })).source);
+});
 
 function temporary(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "gts-core-test-"));

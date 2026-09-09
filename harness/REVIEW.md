@@ -1,5 +1,13 @@
 # Harness 约束审查
 
+## 2.1.1 子模块边界修复与 CLI 采集器登记
+
+网页 worker 独立复核并批准此增量。职责、基线、gate、数量、平台、超时与原有断言均未更改；contract 仅更新版本并登记 data/checks 采集器。
+
+真实 TNB 续接误将 Git 报告的子模块根 `typescript` 判为职责 `typescript/` 之外。匹配现在同时检查 base/current 索引的 160000 gitlink 模式及 lstat：只接受目录或删除项，现存普通文件和坏链接替换拒绝。新增真实 Git 用例进一步发现 Git 会漏报坏 junction，现将已知 gitlink 的非法替换明确列入 changed，再按原职责拒绝；保留该负例，没有放宽断言。任务源码快照仅在 includeRuntime:false 下递归子模块源码、HEAD、status、diff；正式 includeRuntime:true 的完整 treeDigest 保持原样。新增用例证明 ignored SDK/native/dist 的变化仍改变正式验收指纹。两项定向测试最终 2 PASS、0 FAIL、0 skipped；完整封存自测仍需执行。
+
+CLI 采集器复用原 gtsc/tsc 的 noEmit 检查，固定原十包、三次独立 data 与精确 195 路径。被动记录实际进程、编译入口、SDK 与平台 addon，原生语义调用从真实 profile 读取。独立复核要求补齐原始子进程文件集合比对及 compiler→parent→addon 身份链，均已加入；Volar 虚拟 readFileSync 与原始磁盘哈希分开观测。复核后的四文件与登记版本字节一致。实际 f535c22 data 三次退出 0，开发 validator PASS；十二项真实证据及篡改测试全部 PASS，涵盖丢运行、改命令、漏进程、缺原生调用、错误 addon、失败子进程、重放 nonce 和少一个 GTS 文件。开发结果不是最终回执，登记路径下必须重新执行，其余缺失采集器继续 BLOCKED。
+
 本文件审查的是验收执行器，不是迁移通过报告。初轮范围仅为 harness；用户随后明确允许协调者在核心 harness 就绪后自行启动迁移。是否可分派产品任务由经审查并 seal 的 contract phase 及实际 harness 自测结果控制，不由任务模板存在与否推断。产品最终范围仍包含全部 GTS 相关开发路径使用 TNB/tsgo，以及网页本地／后台两条路线。
 
 ## 执行与证据边界

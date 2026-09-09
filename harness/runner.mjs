@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 import { codes, sha, stable, readJson, writeJson, inside, hashFile, verifySeal, git,
-  sourcePaths, snapshot, snapshotRepository, acquireLock, execute, processVerdict, requiredGateIds, fatalPattern, evidenceManifest } from './core.mjs';
+  sourcePaths, gitLinks, snapshot, snapshotRepository, acquireLock, execute, processVerdict, requiredGateIds, fatalPattern, evidenceManifest } from './core.mjs';
 
 export function validateContract(contract) {
   if (contract.schemaVersion !== 1 || !['harness-only', 'migration'].includes(contract.phase)) {
@@ -484,7 +484,19 @@ function scopeChanges(harness, role) {
   const base = harness.contract.repositories[role.repository].base;
   const changed = [...new Set([...git(repo, ['diff', '--name-only', '-z', '--no-renames', base, '--']).split('\0'),
     ...git(repo, ['ls-files', '-z', '--others', '--exclude-standard']).split('\0')].filter(Boolean))];
-  const outside = changed.filter(file => !role.paths.some(prefix => prefix.endsWith('/') ? file.startsWith(prefix) : file === prefix));
+  const submodules = new Set([...gitLinks(repo, base).keys(), ...gitLinks(repo).keys()]);
+  for (const file of submodules) {
+    const stat = fs.lstatSync(path.join(repo, file), { throwIfNoEntry: false });
+    if (stat && !stat.isDirectory()) {
+      submodules.delete(file);
+      // Git can treat a dangling link as an uninitialized submodule and omit
+      // it from diff output. Its invalid replacement still belongs in review.
+      if (!changed.includes(file)) changed.push(file);
+    }
+  }
+  const outside = changed.filter(file => !role.paths.some(prefix => prefix.endsWith('/')
+    ? file.startsWith(prefix) || file === prefix.slice(0, -1) && submodules.has(file)
+    : file === prefix));
   return { changed, outside };
 }
 export async function reviseTask(harness, file) {

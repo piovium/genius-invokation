@@ -1,6 +1,7 @@
 # Registering real product evidence
 
-No product adapter is registered yet. Add only the minimum glue around the
+The data/checks CLI adapter is registered. Other adapters remain blocked.
+Add only the minimum glue around the
 existing pnpm scripts, Vitest, Volar, TNB tsserver harness and actual editor/UI.
 This directory, its fixtures and assertions are sealed controls, owned by the
 coordinator and independently reviewed. Product workers cannot weaken them.

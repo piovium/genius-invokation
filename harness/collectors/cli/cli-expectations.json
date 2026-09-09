@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "flags": ["--noEmit", "--pretty", "false", "--listFiles"],
+  "heapMiB": 4096,
+  "minimumSemanticCalls": 1
+}

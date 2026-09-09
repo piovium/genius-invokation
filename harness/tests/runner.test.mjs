@@ -59,6 +59,44 @@ async function rewriteReceipt(directory, change) {
   fs.writeFileSync(file, JSON.stringify(receipt));
   fs.writeFileSync(path.join(directory, 'receipt.sha256'), await hashFile(file));
 }
+test('an explicitly owned submodule root is in scope without admitting same-name regular files', async t => {
+  const f = await fixture(t);
+  const child = path.join(f.repo, 'vendor');
+  f.write('repos/main/vendor/source.ts', 'export const n = 1;\n');
+  git(child, ['init', '-q']); git(child, ['add', '.']);
+  git(child, ['-c', 'user.name=Harness Fixture', '-c', 'user.email=harness@example.invalid', 'commit', '-qm', 'child']);
+  git(f.repo, ['add', 'vendor']);
+  git(f.repo, ['-c', 'user.name=Harness Fixture', '-c', 'user.email=harness@example.invalid', 'commit', '-qm', 'parent']);
+  f.contract.repositories.main.base = git(f.repo, ['rev-parse', 'HEAD']);
+  f.contract.roles.integration.paths = ['src/', 'vendor/', 'regular/'];
+  f.write('harness/contract.json', JSON.stringify(f.contract));
+  f.write('harness/seal.json', JSON.stringify(await makeSeal(f.root)));
+  const harness = await loadHarness(f.root);
+  execFileSync(process.execPath, [path.join(f.root, 'harness/cli.mjs'), 'selftest'], { cwd: f.root, encoding: 'utf8', timeout: 30000, windowsHide: true });
+  const task = await generateTask(harness, 'integration');
+  f.write('repos/main/vendor/source.ts', 'export const n = 2;\n');
+  assert.equal((await handoff(harness, task.file)).status, 'PASS');
+  assert.equal((await reviseTask(harness, task.file)).status, 'PASS');
+  f.write('repos/main/regular', 'not a submodule');
+  const rejected = await handoff(harness, task.file);
+  assert.equal(rejected.status, 'FAIL');
+  assert.deepEqual(rejected.outside, ['regular']);
+  await assert.rejects(reviseTask(harness, task.file), /out-of-scope/);
+  fs.unlinkSync(path.join(f.repo, 'regular'));
+  const retained = path.join(f.root, 'retained-vendor');
+  assert.equal(path.dirname(child), f.repo);
+  assert.equal(path.dirname(retained), f.root);
+  fs.renameSync(child, retained);
+  f.write('repos/main/vendor', 'regular file replacing an indexed gitlink');
+  assert.deepEqual((await handoff(harness, task.file)).outside, ['vendor']);
+  fs.unlinkSync(child);
+  fs.symlinkSync(path.join(f.root, 'missing-target'), child, process.platform === 'win32' ? 'junction' : 'dir');
+  assert.equal(fs.lstatSync(child).isSymbolicLink(), true);
+  assert.equal(fs.existsSync(child), false);
+  assert.deepEqual((await handoff(harness, task.file)).outside, ['vendor']);
+  fs.unlinkSync(child);
+  fs.renameSync(retained, child);
+});
 test('actual approved subprocess observations can finish a complete temporary contract', async t => {
   const f = await fixture(t);
   const run = await runSelection(f.harness, 'all');

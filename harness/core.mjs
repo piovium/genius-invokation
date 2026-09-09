@@ -88,6 +88,14 @@ export function sourcePaths(repo) {
   return [...new Set(git(repo, ['ls-files', '-z', '--cached', '--others', '--exclude-standard'])
     .split('\0').filter(Boolean))].sort();
 }
+export function gitLinks(repo, ref) {
+  const entries = git(repo, ref ? ['ls-tree', '-r', '-z', ref] : ['ls-files', '--stage', '-z']);
+  return new Map(entries.split('\0').filter(entry => entry.startsWith('160000 ')).map(entry => {
+    const tab = entry.indexOf('\t');
+    const metadata = entry.slice(0, tab).split(' ');
+    return [entry.slice(tab + 1), metadata[ref ? 2 : 1]];
+  }));
+}
 // Include ignored executables/dependencies as well as sources. Follow package links,
 // recording real targets; cycles are references, never silently omitted contents.
 export async function treeDigest(directory, { ignoreGit = true } = {}) {
@@ -126,12 +134,20 @@ export async function snapshotRepository(root, spec, { includeRuntime = true } =
   }
   git(repo, ['cat-file', '-e', `${spec.base}^{commit}`]);
   const rows = [];
+  const submodules = includeRuntime ? new Map() : gitLinks(repo);
   for (const relative of sourcePaths(repo)) {
     const file = path.resolve(repo, relative);
     if (!fs.existsSync(file)) rows.push([relative, 'deleted']);
     else {
       const stat = fs.lstatSync(file);
-      rows.push([relative, stat.isSymbolicLink() ? fs.readlinkSync(file)
+      if (!includeRuntime && stat.isDirectory() && submodules.has(relative)) {
+        // Task assignments bind submodule sources, just like top-level sources.
+        // Acceptance retains the complete runtime tree below, including ignored
+        // libraries, generated output and all linked installed dependencies.
+        const child = await snapshotRepository(root, { path: `${spec.path}/${relative}`, base: submodules.get(relative) }, { includeRuntime: false });
+        if (child.status !== 'PASS') throw new Error(`Submodule source unavailable: ${relative}`);
+        rows.push([relative, child.source]);
+      } else rows.push([relative, stat.isSymbolicLink() ? fs.readlinkSync(file)
         : stat.isDirectory() ? (await treeDigest(file)).digest : await hashFile(file)]);
     }
   }

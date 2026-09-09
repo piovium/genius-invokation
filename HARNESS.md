@@ -1,6 +1,6 @@
 # Genius Invokation → TNB / tsgo：执行与验收契约
 
-版本：2.1.0。日期：2026-09-10。**核心 harness 已完成自测及独立复核，`contract.phase = "migration"`；产品迁移进行中，尚未验收。**
+版本：2.1.1。日期：2026-09-10。**核心 harness 已完成自测及独立复核，`contract.phase = "migration"`；产品迁移进行中，尚未验收。**
 
 用户最新授权是“差不多就可以开干，你自己衡量进度”。协调者完成核心自测和独立复核后，可以审查并修改 phase、更新 seal、重新验证，然后生成新的多 agent 任务启动迁移，无需再次请求用户确认。此前中断的旧任务不得直接恢复。harness 自测成功、环境探测成功都不等于产品迁移成功。
 
@@ -56,6 +56,8 @@ GTS 已有 [PR #14](https://github.com/piovium/gts/pull/14)，分支 `origin/fix
 确需扩大集成职责时，必须先独立复核并将 `scopeTransitions` 纳入 contract/seal，固定旧任务 ID、旧 seal、旧任务文件哈希和扩展前后角色。扩展只能增加路径与 gate，不能更换仓库或基线；`revise` 会先按旧职责检查现有改动，拒绝事后追认越界修改。2.1.0 的明确扩展用于合入依赖 patch 和网页 agent 的提交。
 
 运行器为每种包管理器生成本次证据目录内的命令入口，使递归 `pnpm` 也使用配置中已指纹固定的 Node/包管理器。Windows 命令文件仅含 ASCII，通过环境变量传递中文目录；不关闭包管理器自身的依赖状态检查。
+
+2.1.1 修正已授权 Git 子模块的根路径识别：Git 报告的 `typescript` 对应职责表的 `typescript/`，仅实际 gitlink 目录或删除项可以按该边界匹配；普通文件或链接替换仍拒绝。任务派发只绑定子模块源码身份，与顶层源码一致；正式验收的完整依赖／生成物指纹没有改变。data/checks 已登记真实 CLI 采集器，其余缺失采集器仍 BLOCKED。职责、基线、数量、超时、平台和断言均保持原要求。
 
 未来需要真实产品行为的 collector 必须放在根 `harness/collectors/`，经过独立审查后登记到 contract 的 adapter 集合并纳入 seal。初始不登记产品 adapter。**缺 collector 永远是 BLOCKED**；不能用手写 `PASS` JSON、任意退出 0 的脚本或暂缺的采集器冒充产品验收。已有 probe 是可复用组件，不自动构成完整的 CLI／编辑器／网页 collector。
 

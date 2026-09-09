@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2.1.0",
+  "version": "2.1.1",
   "phase": "migration",
   "tnbVersion": "6.0.3-bridge.16.tsgo.7.0.2",
   "policy": {
@@ -391,7 +391,18 @@
       "timeoutMs": 1800000
     }
   ],
-  "adapters": {},
+  "adapters": {
+    "data": {
+      "collector": "harness/collectors/cli/cli-collector.mjs",
+      "validator": "harness/collectors/cli/cli-validator.mjs",
+      "expectations": "harness/collectors/cli/cli-expectations.json"
+    },
+    "checks": {
+      "collector": "harness/collectors/cli/cli-collector.mjs",
+      "validator": "harness/collectors/cli/cli-validator.mjs",
+      "expectations": "harness/collectors/cli/cli-expectations.json"
+    }
+  },
   "scopeTransitions": [
     {
       "role": "integration",
