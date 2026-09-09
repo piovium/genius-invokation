@@ -1,0 +1,57 @@
+diff --git a/lib/resolveModuleName.js b/lib/resolveModuleName.js
+index 209030033139abe7ff2fafc7d071ed385f5047b4..e36684452de21c16034ac5a72630aebd15e4a663 100644
+--- a/lib/resolveModuleName.js
++++ b/lib/resolveModuleName.js
+@@ -84,11 +84,7 @@ function createResolveModuleName(ts, getFileSize, host, languagePlugins, getSour
+     };
+     // fix https://github.com/vuejs/language-tools/issues/3332
+     function fileExists(fileName) {
+-        if (host.fileExists(fileName)) {
+-            const fileSize = getFileSize?.(fileName) ?? host.readFile(fileName)?.length ?? 0;
+-            return fileSize < 4 * 1024 * 1024;
+-        }
+-        return false;
++        return host.fileExists(fileName);
+     }
+ }
+ //# sourceMappingURL=resolveModuleName.js.map
+diff --git a/lib/node/proxyCreateProgram.js b/lib/node/proxyCreateProgram.js
+index 18fda80..e771750 100644
+--- a/lib/node/proxyCreateProgram.js
++++ b/lib/node/proxyCreateProgram.js
+@@ -95,6 +95,35 @@ function proxyCreateProgram(ts, original, create) {
+                 .map(plugin => plugin.typescript?.extraFileExtensions.map(({ extension }) => `.${extension}`) ?? [])
+                 .flat();
+             options.host = { ...originalHost };
++            // Native checkers consume virtual text directly without allocating JS ASTs.
++            // Keep the plain CompilerHost contract: this is not an LS snapshot host.
++            options.host.tnbGetSourceText = fileName => {
++                const text = originalHost.readFile(fileName);
++                const previous = sourceFileSnapshots.get(fileName)?.[1];
++                const snapshot = text === undefined ? undefined
++                    : previous?.getLength() === text.length && previous.getText(0, text.length) === text
++                        ? previous
++                        : {
++                            getChangeRange() { return undefined; },
++                            getLength() { return text.length; },
++                            getText(start, end) { return text.substring(start, end); },
++                        };
++                sourceFileSnapshots.set(fileName, [undefined, snapshot]);
++                const sourceScript = language.scripts.get(fileName);
++                if (!snapshot || !sourceScript) {
++                    return;
++                }
++                const serviceScript = sourceScript.generated?.languagePlugin.typescript?.getServiceScript(sourceScript.generated.root);
++                if (!serviceScript) {
++                    return { text, scriptKind: ts.getScriptKindFromFileName(fileName) };
++                }
++                const virtualText = serviceScript.code.snapshot.getText(0, serviceScript.code.snapshot.getLength());
++                return {
++                    text: serviceScript.preventLeadingOffset ? virtualText
++                        : text.split('\n').map(line => ' '.repeat(line.length)).join('\n') + virtualText,
++                    scriptKind: serviceScript.scriptKind,
++                };
++            };
+             options.host.getSourceFile = (fileName, languageVersionOrOptions, onError, shouldCreateNewSourceFile) => {
+                 const originalSourceFile = originalHost.getSourceFile(fileName, languageVersionOrOptions, onError, shouldCreateNewSourceFile);
+                 if (!sourceFileSnapshots.has(fileName)

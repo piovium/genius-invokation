@@ -1,0 +1,808 @@
+diff --git a/lib/_tsc.js b/lib/_tsc.js
+index 7abb764..704d6b0 100644
+--- a/lib/_tsc.js
++++ b/lib/_tsc.js
+@@ -101309,7 +101309,7 @@ function createProgram(_rootNamesOrOptions, _options, _host, _oldProgram, _confi
+     }
+   }
+   if (options.configFilePath) {
+-    return createTsgoProgram(rootNames, options, createProgramOptionsHost, projectReferences, configFileParsingDiagnostics);
++    return createTsgoProgram(rootNames, options, createProgramOptionsHost ?? createCompilerHost(options), projectReferences, configFileParsingDiagnostics);
+   }
+   const reportInvalidIgnoreDeprecations = memoize(() => createOptionValueDiagnostic("ignoreDeprecations", Diagnostics.Invalid_value_for_ignoreDeprecations));
+   let processingDefaultLibFiles;
+@@ -104883,18 +104883,19 @@ function scheduleScanSfEviction(evict) {
+   }, 5e3);
+   (_a9 = _scanSfEvictTimer.unref) == null ? void 0 : _a9.call(_scanSfEvictTimer);
+ }
+-function createSharedLightStub(hostFileName, configFilePath, metaEnabled, languageVersion, delegatesToLive) {
++function createSharedLightStub(hostFileName, configFilePath, metaEnabled, languageVersion, delegatesToLive, local) {
+   const tsgoPath = canonicalSourceFilePath(hostFileName);
+   let lazyText;
+   let lazyLineStarts;
+   let lazyNameTable;
+   const textOf = () => {
+     var _a9, _b;
+-    return lazyText ?? (lazyText = _syncedOverlayContentByFile.get(hostFileName) ?? ((_b = (_a9 = hostForOverlaySync()) == null ? void 0 : _a9.readFile) == null ? void 0 : _b.call(_a9, hostFileName)) ?? readDiskText(hostFileName) ?? "");
++    return lazyText ?? (lazyText = (local == null ? void 0 : local.text) ?? _syncedOverlayContentByFile.get(hostFileName) ?? ((_b = (_a9 = hostForOverlaySync()) == null ? void 0 : _a9.readFile) == null ? void 0 : _b.call(_a9, hostFileName)) ?? readDiskText(hostFileName) ?? "");
+   };
+   const lineStartsOf = () => lazyLineStarts ?? (lazyLineStarts = computeLineStarts(textOf()));
+   const full = () => {
+     var _a9;
++    if (local) return local.materialize(hostFileName);
+     if (!delegatesToLive) return void 0;
+     try {
+       return (_a9 = _lightStubMaterializerByConfig.get(configFilePath)) == null ? void 0 : _a9(hostFileName);
+@@ -104946,7 +104947,7 @@ function createSharedLightStub(hostFileName, configFilePath, metaEnabled, langua
+     },
+     languageVersion,
+     languageVariant: 0,
+-    scriptKind: inferScriptKind(hostFileName),
++    scriptKind: (local == null ? void 0 : local.scriptKind) ?? inferScriptKind(hostFileName),
+     isDeclarationFile: hostFileName.endsWith(".d.ts"),
+     hasNoDefaultLib: false,
+     get referencedFiles() {
+@@ -106353,9 +106354,11 @@ var _lastExtraFileExtensions;
+ var _lastAdditionalFilesByConfig = /* @__PURE__ */ new Map();
+ var _overlayHostCtx;
+ var _languageServiceHost;
++var _languageServiceHostByCompilerHost = /* @__PURE__ */ new WeakMap();
+ var _hasHostBoundFiles = false;
+-function tnbSetLanguageServiceHost(host) {
++function tnbSetLanguageServiceHost(host, compilerHost) {
+   _languageServiceHost = host;
++  _languageServiceHostByCompilerHost.set(compilerHost, host);
+ }
+ function getHostScriptContentForOverlay(fileName, options, compilerHost) {
+   return getHostScriptContent(hostForOverlaySync() ?? compilerHost, fileName, options);
+@@ -106699,6 +106702,10 @@ function resolveTsconfigPath(configFilePath, host) {
+ }
+ function getHostScriptContent(host, fileName, options) {
+   var _a9, _b, _c;
++  if (typeof (host == null ? void 0 : host.tnbGetSourceText) === "function") {
++    const content = host.tnbGetSourceText(fileName);
++    return content === void 0 ? void 0 : { ...content, fromHost: true };
++  }
+   let scriptKind = inferScriptKind(fileName);
+   const snap = (_a9 = host == null ? void 0 : host.getScriptSnapshot) == null ? void 0 : _a9.call(host, fileName);
+   if (snap) {
+@@ -109935,10 +109942,14 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+   const hostContentByFile = /* @__PURE__ */ new Map();
+   const overlays = [];
+   const names = /* @__PURE__ */ new Set();
+-  const lsHost = _languageServiceHost ?? host;
++  const lsHost = _languageServiceHostByCompilerHost.get(host) ?? host;
++  _languageServiceHost = lsHost;
++  const invalidateDisk = !(lsHost == null ? void 0 : lsHost.getScriptSnapshot) && !(host == null ? void 0 : host.tnbWatchSourceFile);
++  if (invalidateDisk) _hostSfStableGlobal.clear();
+   const programCtx = {
+     lsHost,
+-    overlayHostCtx: { host: lsHost, options, configFilePath }
++    overlayHostCtx: { host: lsHost, options, configFilePath },
++    pendingInvalidateDisk: invalidateDisk
+   };
+   let pendingExternalSet;
+   let externalChanged;
+@@ -109986,7 +109997,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+         if (!isOverlayCandidatePath(fn)) continue;
+         if (!(pendingExternalSet == null ? void 0 : pendingExternalSet.has(resolvedFn)) && !contentCanDiverge(fn, resolvedFn)) continue;
+         const content = getHostScriptContentForOverlay(resolvedFn, options, host);
+-        if (!content) continue;
++        if (!content) {
++          if (_syncedOverlayContentByFile.has(resolvedFn)) {
++            (programCtx.pendingClosedFiles ?? (programCtx.pendingClosedFiles = [])).push(resolvedFn);
++            forgetSyncedOverlay(resolvedFn);
++          }
++          continue;
++        }
+         if (!shouldSendHostOverlay(resolvedFn, content.text)) {
+           const synced = _syncedOverlayContentByFile.get(resolvedFn);
+           if (synced !== void 0 && synced !== content.text) {
+@@ -109997,14 +110014,14 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+           }
+           continue;
+         }
++        hostContentByFile.set(canonicalSourceFilePath(resolvedFn), content);
+         const entry = decideOverlayPush(resolvedFn, content.text, content.scriptKind);
+         if (!entry) continue;
+-        hostContentByFile.set(resolvedFn, content);
+         overlays.push(entry);
+       }
+     }
+   }
+-  const preferHostSourceFiles = overlays.length > 0 || !!(lsHost == null ? void 0 : lsHost.projectService);
++  const preferHostSourceFiles = hostContentByFile.size > 0 || !!(lsHost == null ? void 0 : lsHost.projectService);
+   programCtx.pendingOverlays = overlays.length > 0 ? overlays : void 0;
+   programCtx.pendingExternalChanged = externalChanged;
+   programCtx.pendingExtraFileExtensions = collectExtraFileExtensions(names, options);
+@@ -110197,17 +110214,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+     scanSfRecords.clear();
+   };
+   const hostForLs = () => programCtx.lsHost;
+-  const fileHasHostSourceContent = (name, hostFileName) => {
+-    const ls = hostForLs();
+-    return hostHasScriptSnapshot(ls, name, hostFileName) || hostContentByFile.has(hostFileName);
+-  };
+   const getLanguageServiceSourceFile = (hostFileName, requestFileName) => {
+     var _a10;
+     const ls = hostForLs();
+     const fromSnap = sourceFileFromHostSnapshot(ls, hostFileName, requestFileName, options.target ?? 99);
+     if (fromSnap) return fromSnap;
+     const hasSnapshot = hostHasScriptSnapshot(ls, requestFileName, hostFileName);
+-    const content = hostContentByFile.get(hostFileName);
++    const content = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
+     if ((content == null ? void 0 : content.text) && (!hasSnapshot || content.fromHost)) {
+       const scriptKind = resolveLanguageServiceScriptKind(ls, requestFileName, hostFileName, hasSnapshot);
+       const sf = createSourceFile(
+@@ -110296,7 +110309,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       }
+       if (hostHasScriptSnapshot(ls, fileName, hostFileName)) {
+         const snap = ((_c2 = ls == null ? void 0 : ls.getScriptSnapshot) == null ? void 0 : _c2.call(ls, fileName)) ?? ((_d = ls == null ? void 0 : ls.getScriptSnapshot) == null ? void 0 : _d.call(ls, hostFileName));
+-        const text2 = snap ? snap.getText(0, snap.getLength()) : ((_e = hostContentByFile.get(hostFileName)) == null ? void 0 : _e.text) ?? "";
++        const text2 = snap ? snap.getText(0, snap.getLength()) : ((_e = hostContentByFile.get(canonicalSourceFilePath(hostFileName))) == null ? void 0 : _e.text) ?? "";
+         const hostSf2 = createBoundHostSourceFile(hostFileName, fileName, text2);
+         if (hostSf2) {
+           ensureTnbVersion(hostSf2, hostFileName);
+@@ -110328,7 +110341,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       if (snap) {
+         hostText = snap.getText(0, snap.getLength());
+       } else {
+-        const cachedText = (_i = hostContentByFile.get(hostFileName)) == null ? void 0 : _i.text;
++        const cachedText = (_i = hostContentByFile.get(canonicalSourceFilePath(hostFileName))) == null ? void 0 : _i.text;
+         if (cachedText !== void 0) {
+           hostText = cachedText;
+         } else {
+@@ -110364,7 +110377,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+         return rememberStable(hostSf);
+       }
+     }
+-    const hostContent = hostContentByFile.get(hostFileName);
++    const hostContent = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
+     const text = (hostContent == null ? void 0 : hostContent.text) ?? ((_k = host == null ? void 0 : host.readFile) == null ? void 0 : _k.call(host, hostFileName)) ?? "";
+     const scriptKind = (hostContent == null ? void 0 : hostContent.scriptKind) ?? inferScriptKind(hostFileName);
+     const sf = createSkeletonSourceFile(hostFileName, text, options.target ?? 99, scriptKind);
+@@ -110417,7 +110430,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+     var _a10;
+     const hostFileName = resolveHostFileName(fileName, host);
+     if (diagnosticSfCache.has(hostFileName)) return diagnosticSfCache.get(hostFileName);
+-    const hostContent = hostContentByFile.get(fileName) ?? hostContentByFile.get(hostFileName);
++    const hostContent = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
+     const text = (hostContent == null ? void 0 : hostContent.text) ?? ((_a10 = host == null ? void 0 : host.readFile) == null ? void 0 : _a10.call(host, fileName)) ?? "";
+     const scriptKind = (hostContent == null ? void 0 : hostContent.scriptKind) ?? inferScriptKind(hostFileName);
+     const sf = createSkeletonSourceFile(hostFileName, text, options.target ?? 99, scriptKind);
+@@ -110430,6 +110443,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+   };
+   const preferLightProgramFiles = !preferHostSourceFiles && typeof ((_b = programCtx.lsHost) == null ? void 0 : _b.getScriptSnapshot) === "function";
+   const tsserverWalk = !!(lsHost == null ? void 0 : lsHost.projectService);
++  const hostWalkStubs = preferHostSourceFiles && !tsserverWalk ? /* @__PURE__ */ new Map() : void 0;
+   const builderMetaEnabled = !(options.tscBuild && !options.incremental && !options.composite);
+   let lsHostVersionSnapshot;
+   if (!tsserverWalk && typeof (lsHost == null ? void 0 : lsHost.getScriptVersion) === "function") {
+@@ -110442,11 +110456,21 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+   }
+   const getOrCreateLightSourceFile = (fileName) => {
+     const hostFileName = hostNameForQuery(resolveHostFileNameMemoized(fileName, host));
+-    let sf = _lightSfSharedByFile.get(hostFileName);
++    const content = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
++    const local = hostWalkStubs && (content || typeof (lsHost == null ? void 0 : lsHost.getScriptSnapshot) === "function");
++    const cache = local ? hostWalkStubs : _lightSfSharedByFile;
++    let sf = cache.get(hostFileName);
+     if (!sf) {
+-      sf = createSharedLightStub(hostFileName, configFilePath, builderMetaEnabled, options.target ?? 99, tsserverWalk);
++      sf = createSharedLightStub(
++        hostFileName,
++        configFilePath,
++        builderMetaEnabled,
++        options.target ?? 99,
++        tsserverWalk,
++        local ? { materialize: getOrCreateSourceFile, text: content == null ? void 0 : content.text, scriptKind: content == null ? void 0 : content.scriptKind } : void 0
++      );
+       ensureFileModuleMeta(sf);
+-      _lightSfSharedByFile.set(hostFileName, sf);
++      cache.set(hostFileName, sf);
+     }
+     return sf;
+   };
+@@ -110726,9 +110750,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       if (incHostName !== void 0) {
+         return getOrCreateSourceFile(incHostName);
+       }
+-      if (!tsserverWalk && fileHasHostSourceContent(pathStr, pathStr)) {
+-        return getOrCreateSourceFile(pathStr);
+-      }
+       return fullSfByName.get(hostNameForQuery(pathStr)) ?? getOrCreateLightSourceFile(pathStr);
+     },
+     getSourceFiles: () => {
+@@ -110739,8 +110760,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+         let sf;
+         if (preferLightProgramFiles) {
+           sf = fullSfByName.get(name) ?? getOrCreateLightSourceFile(name);
+-        } else if (!tsserverWalk && fileHasHostSourceContent(name, name)) {
+-          sf = getOrCreateSourceFile(name);
+         } else {
+           sf = fullSfByName.get(name) ?? getOrCreateLightSourceFile(name);
+         }
+@@ -110987,10 +111006,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+     // through the caller's writeFile (or the host's) so --noEmit, Volar output
+     // redirection, and build-mode writeFile wrapping stay in the host's control.
+     emit: (targetSourceFile, writeFile2, _ct, emitOnlyDtsFiles, customTransformers, forceDtsEmit) => {
+-      var _a10, _b2, _c2;
+-      const hasTransformers = customTransformers && [customTransformers.before, customTransformers.after, customTransformers.afterDeclarations].some((a) => a == null ? void 0 : a.length);
+-      if (hasTransformers) {
+-        throw new Error("tsgoChecker: Program.emit does not support customTransformers \u2014 tsgo cannot execute JS transformer functions");
++      var _a10, _b2, _c2, _d, _e;
++      const afterDeclarations = customTransformers == null ? void 0 : customTransformers.afterDeclarations;
++      if (((_a10 = customTransformers == null ? void 0 : customTransformers.before) == null ? void 0 : _a10.length) || ((_b2 = customTransformers == null ? void 0 : customTransformers.after) == null ? void 0 : _b2.length)) {
++        throw new Error("tsgoChecker: Program.emit does not support before/after customTransformers \u2014 tsgo cannot execute JS transformer functions");
++      }
++      if ((afterDeclarations == null ? void 0 : afterDeclarations.length) && (options.declarationMap || options.outFile)) {
++        throw new Error("tsgoChecker: afterDeclarations customTransformers require declarationMap=false and no outFile \u2014 transformed declaration maps and bundles are not supported");
+       }
+       if (options.noEmit && !forceDtsEmit) {
+         if (targetSourceFile) {
+@@ -111000,19 +111022,50 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       }
+       const file = (targetSourceFile == null ? void 0 : targetSourceFile.fileName) ? tsgoFileArg(targetSourceFile.fileName) : void 0;
+       const emitOnly = forceDtsEmit ? 3 : emitOnlyDtsFiles ? 2 : void 0;
+-      const res = (_b2 = (_a10 = liveProject().program) == null ? void 0 : _a10.emit) == null ? void 0 : _b2.call(_a10, { file, emitOnly, forceDtsEmit: !!forceDtsEmit });
++      const res = (_d = (_c2 = liveProject().program) == null ? void 0 : _c2.emit) == null ? void 0 : _d.call(_c2, { file, emitOnly, forceDtsEmit: !!forceDtsEmit });
+       const outputs = (res == null ? void 0 : res.outputFiles) ?? [];
+-      const write = typeof writeFile2 === "function" ? writeFile2 : (_c2 = host == null ? void 0 : host.writeFile) == null ? void 0 : _c2.bind(host);
++      const transformerDiagnostics = [];
++      const write = typeof writeFile2 === "function" ? writeFile2 : (_e = host == null ? void 0 : host.writeFile) == null ? void 0 : _e.bind(host);
+       const emittedFiles = options.listEmittedFiles ? [] : void 0;
+       const sourceFiles = targetSourceFile ? [targetSourceFile] : void 0;
+       for (const o of outputs) {
+         const outFileName = wireFileNameToHost(o.fileName);
+-        if (write) write(outFileName, o.text, !!o.writeByteOrderMark, void 0, sourceFiles, {});
++        let text = o.text;
++        if ((afterDeclarations == null ? void 0 : afterDeclarations.length) && /\.d\.(?:ts|mts|cts)$/.test(outFileName)) {
++          const declaration = createSourceFile(
++            outFileName,
++            text,
++            options.target ?? 99,
++            /*setParentNodes*/
++            true,
++            3 /* TS */
++          );
++          const transformed = transformNodes(
++            void 0,
++            void 0,
++            factory,
++            options,
++            [declaration],
++            afterDeclarations,
++            /*allowDtsFiles*/
++            true
++          );
++          try {
++            text = createPrinter({ removeComments: options.removeComments, newLine: options.newLine }, {
++              substituteNode: transformed.substituteNode,
++              onEmitNode: transformed.emitNodeWithNotification
++            }).printFile(transformed.transformed[0]);
++            transformerDiagnostics.push(...transformed.diagnostics ?? []);
++          } finally {
++            transformed.dispose();
++          }
++        }
++        if (write) write(outFileName, text, !!o.writeByteOrderMark, void 0, sourceFiles, {});
+         emittedFiles == null ? void 0 : emittedFiles.push(outFileName);
+       }
+       return {
+         emitSkipped: (res == null ? void 0 : res.emitSkipped) ?? false,
+-        diagnostics: mapTsgoDiagnostics(res == null ? void 0 : res.diagnostics, getDiagnosticSourceFile),
++        diagnostics: [...mapTsgoDiagnostics(res == null ? void 0 : res.diagnostics, getDiagnosticSourceFile), ...transformerDiagnostics],
+         emittedFiles,
+         sourceMaps: []
+       };
+@@ -112057,9 +112110,12 @@ function createTsgoChecker(program) {
+     const additionalFiles = _lastAdditionalFilesByConfig.get(configFilePath);
+     const externalChanged = programCtx == null ? void 0 : programCtx.pendingExternalChanged;
+     if (programCtx) programCtx.pendingExternalChanged = void 0;
++    const invalidateDisk = programCtx == null ? void 0 : programCtx.pendingInvalidateDisk;
++    if (programCtx) programCtx.pendingInvalidateDisk = void 0;
+     const syncHost = hostForOverlaySyncLocal();
+     const openFiles = syncHost ? collectTsgoOpenFileNames(syncHost) : [];
+-    let closedTabs;
++    let closedTabs = programCtx == null ? void 0 : programCtx.pendingClosedFiles;
++    if (programCtx) programCtx.pendingClosedFiles = void 0;
+     const tabRegistry = syncHost == null ? void 0 : syncHost.projectService;
+     if ((_a10 = tabRegistry == null ? void 0 : tabRegistry.openFiles) == null ? void 0 : _a10.forEach) {
+       const openTabs = /* @__PURE__ */ new Set();
+@@ -112069,7 +112125,7 @@ function createTsgoChecker(program) {
+         if (((_a11 = info == null ? void 0 : info.isScriptOpen) == null ? void 0 : _a11.call(info)) && info.fileName) openTabs.add(resolveHostFileName(info.fileName, syncHost));
+       });
+       const closed = [..._sessionSentOpenTabs].filter((f) => !openTabs.has(f));
+-      if (closed.length) closedTabs = closed;
++      if (closed.length) closedTabs = [.../* @__PURE__ */ new Set([...closedTabs ?? [], ...closed])];
+       _sessionSentOpenTabs.clear();
+       for (const f of openTabs) _sessionSentOpenTabs.add(f);
+       for (const f of closed) forgetSyncedOverlay(f);
+@@ -112083,7 +112139,7 @@ function createTsgoChecker(program) {
+       ...openFilesWithContent.length > 0 ? { openFilesWithContent } : {},
+       ...extraFileExtensions ? { extraFileExtensions } : {},
+       ...(additionalFiles == null ? void 0 : additionalFiles.length) ? { additionalFiles } : {},
+-      ...(externalChanged == null ? void 0 : externalChanged.length) ? { fileChanges: { changed: externalChanged } } : {},
++      ...invalidateDisk ? { fileChanges: { invalidateAll: true } } : (externalChanged == null ? void 0 : externalChanged.length) ? { fileChanges: { changed: externalChanged } } : {},
+       ...buildClose.closeParams ?? {},
+       ...prefetchDiagnostics ? { prefetchDiagnostics: true } : {}
+     };
+diff --git a/lib/typescript.js b/lib/typescript.js
+index a9218a0..9d9385a 100644
+--- a/lib/typescript.js
++++ b/lib/typescript.js
+@@ -103593,7 +103593,7 @@ function createProgram(_rootNamesOrOptions, _options, _host, _oldProgram, _confi
+     }
+   }
+   if (options.configFilePath) {
+-    return createTsgoProgram(rootNames, options, createProgramOptionsHost, projectReferences, configFileParsingDiagnostics);
++    return createTsgoProgram(rootNames, options, createProgramOptionsHost ?? createCompilerHost(options), projectReferences, configFileParsingDiagnostics);
+   }
+   const reportInvalidIgnoreDeprecations = memoize(() => createOptionValueDiagnostic("ignoreDeprecations", Diagnostics.Invalid_value_for_ignoreDeprecations));
+   let processingDefaultLibFiles;
+@@ -107169,18 +107169,19 @@ function scheduleScanSfEviction(evict) {
+   }, 5e3);
+   (_a9 = _scanSfEvictTimer.unref) == null ? void 0 : _a9.call(_scanSfEvictTimer);
+ }
+-function createSharedLightStub(hostFileName, configFilePath, metaEnabled, languageVersion, delegatesToLive) {
++function createSharedLightStub(hostFileName, configFilePath, metaEnabled, languageVersion, delegatesToLive, local) {
+   const tsgoPath = canonicalSourceFilePath(hostFileName);
+   let lazyText;
+   let lazyLineStarts;
+   let lazyNameTable;
+   const textOf = () => {
+     var _a9, _b;
+-    return lazyText ?? (lazyText = _syncedOverlayContentByFile.get(hostFileName) ?? ((_b = (_a9 = hostForOverlaySync()) == null ? void 0 : _a9.readFile) == null ? void 0 : _b.call(_a9, hostFileName)) ?? readDiskText(hostFileName) ?? "");
++    return lazyText ?? (lazyText = (local == null ? void 0 : local.text) ?? _syncedOverlayContentByFile.get(hostFileName) ?? ((_b = (_a9 = hostForOverlaySync()) == null ? void 0 : _a9.readFile) == null ? void 0 : _b.call(_a9, hostFileName)) ?? readDiskText(hostFileName) ?? "");
+   };
+   const lineStartsOf = () => lazyLineStarts ?? (lazyLineStarts = computeLineStarts(textOf()));
+   const full = () => {
+     var _a9;
++    if (local) return local.materialize(hostFileName);
+     if (!delegatesToLive) return void 0;
+     try {
+       return (_a9 = _lightStubMaterializerByConfig.get(configFilePath)) == null ? void 0 : _a9(hostFileName);
+@@ -107232,7 +107233,7 @@ function createSharedLightStub(hostFileName, configFilePath, metaEnabled, langua
+     },
+     languageVersion,
+     languageVariant: 0,
+-    scriptKind: inferScriptKind(hostFileName),
++    scriptKind: (local == null ? void 0 : local.scriptKind) ?? inferScriptKind(hostFileName),
+     isDeclarationFile: hostFileName.endsWith(".d.ts"),
+     hasNoDefaultLib: false,
+     get referencedFiles() {
+@@ -108639,9 +108640,11 @@ var _lastExtraFileExtensions;
+ var _lastAdditionalFilesByConfig = /* @__PURE__ */ new Map();
+ var _overlayHostCtx;
+ var _languageServiceHost;
++var _languageServiceHostByCompilerHost = /* @__PURE__ */ new WeakMap();
+ var _hasHostBoundFiles = false;
+-function tnbSetLanguageServiceHost(host) {
++function tnbSetLanguageServiceHost(host, compilerHost) {
+   _languageServiceHost = host;
++  _languageServiceHostByCompilerHost.set(compilerHost, host);
+ }
+ function getHostScriptContentForOverlay(fileName, options, compilerHost) {
+   return getHostScriptContent(hostForOverlaySync() ?? compilerHost, fileName, options);
+@@ -108985,6 +108988,10 @@ function resolveTsconfigPath(configFilePath, host) {
+ }
+ function getHostScriptContent(host, fileName, options) {
+   var _a9, _b, _c;
++  if (typeof (host == null ? void 0 : host.tnbGetSourceText) === "function") {
++    const content = host.tnbGetSourceText(fileName);
++    return content === void 0 ? void 0 : { ...content, fromHost: true };
++  }
+   let scriptKind = inferScriptKind(fileName);
+   const snap = (_a9 = host == null ? void 0 : host.getScriptSnapshot) == null ? void 0 : _a9.call(host, fileName);
+   if (snap) {
+@@ -112221,10 +112228,14 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+   const hostContentByFile = /* @__PURE__ */ new Map();
+   const overlays = [];
+   const names = /* @__PURE__ */ new Set();
+-  const lsHost = _languageServiceHost ?? host;
++  const lsHost = _languageServiceHostByCompilerHost.get(host) ?? host;
++  _languageServiceHost = lsHost;
++  const invalidateDisk = !(lsHost == null ? void 0 : lsHost.getScriptSnapshot) && !(host == null ? void 0 : host.tnbWatchSourceFile);
++  if (invalidateDisk) _hostSfStableGlobal.clear();
+   const programCtx = {
+     lsHost,
+-    overlayHostCtx: { host: lsHost, options, configFilePath }
++    overlayHostCtx: { host: lsHost, options, configFilePath },
++    pendingInvalidateDisk: invalidateDisk
+   };
+   let pendingExternalSet;
+   let externalChanged;
+@@ -112272,7 +112283,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+         if (!isOverlayCandidatePath(fn)) continue;
+         if (!(pendingExternalSet == null ? void 0 : pendingExternalSet.has(resolvedFn)) && !contentCanDiverge(fn, resolvedFn)) continue;
+         const content = getHostScriptContentForOverlay(resolvedFn, options, host);
+-        if (!content) continue;
++        if (!content) {
++          if (_syncedOverlayContentByFile.has(resolvedFn)) {
++            (programCtx.pendingClosedFiles ?? (programCtx.pendingClosedFiles = [])).push(resolvedFn);
++            forgetSyncedOverlay(resolvedFn);
++          }
++          continue;
++        }
+         if (!shouldSendHostOverlay(resolvedFn, content.text)) {
+           const synced = _syncedOverlayContentByFile.get(resolvedFn);
+           if (synced !== void 0 && synced !== content.text) {
+@@ -112283,14 +112300,14 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+           }
+           continue;
+         }
++        hostContentByFile.set(canonicalSourceFilePath(resolvedFn), content);
+         const entry = decideOverlayPush(resolvedFn, content.text, content.scriptKind);
+         if (!entry) continue;
+-        hostContentByFile.set(resolvedFn, content);
+         overlays.push(entry);
+       }
+     }
+   }
+-  const preferHostSourceFiles = overlays.length > 0 || !!(lsHost == null ? void 0 : lsHost.projectService);
++  const preferHostSourceFiles = hostContentByFile.size > 0 || !!(lsHost == null ? void 0 : lsHost.projectService);
+   programCtx.pendingOverlays = overlays.length > 0 ? overlays : void 0;
+   programCtx.pendingExternalChanged = externalChanged;
+   programCtx.pendingExtraFileExtensions = collectExtraFileExtensions(names, options);
+@@ -112483,17 +112500,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+     scanSfRecords.clear();
+   };
+   const hostForLs = () => programCtx.lsHost;
+-  const fileHasHostSourceContent = (name, hostFileName) => {
+-    const ls = hostForLs();
+-    return hostHasScriptSnapshot(ls, name, hostFileName) || hostContentByFile.has(hostFileName);
+-  };
+   const getLanguageServiceSourceFile = (hostFileName, requestFileName) => {
+     var _a10;
+     const ls = hostForLs();
+     const fromSnap = sourceFileFromHostSnapshot(ls, hostFileName, requestFileName, options.target ?? 99);
+     if (fromSnap) return fromSnap;
+     const hasSnapshot = hostHasScriptSnapshot(ls, requestFileName, hostFileName);
+-    const content = hostContentByFile.get(hostFileName);
++    const content = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
+     if ((content == null ? void 0 : content.text) && (!hasSnapshot || content.fromHost)) {
+       const scriptKind = resolveLanguageServiceScriptKind(ls, requestFileName, hostFileName, hasSnapshot);
+       const sf = createSourceFile(
+@@ -112582,7 +112595,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       }
+       if (hostHasScriptSnapshot(ls, fileName, hostFileName)) {
+         const snap = ((_c2 = ls == null ? void 0 : ls.getScriptSnapshot) == null ? void 0 : _c2.call(ls, fileName)) ?? ((_d = ls == null ? void 0 : ls.getScriptSnapshot) == null ? void 0 : _d.call(ls, hostFileName));
+-        const text2 = snap ? snap.getText(0, snap.getLength()) : ((_e = hostContentByFile.get(hostFileName)) == null ? void 0 : _e.text) ?? "";
++        const text2 = snap ? snap.getText(0, snap.getLength()) : ((_e = hostContentByFile.get(canonicalSourceFilePath(hostFileName))) == null ? void 0 : _e.text) ?? "";
+         const hostSf2 = createBoundHostSourceFile(hostFileName, fileName, text2);
+         if (hostSf2) {
+           ensureTnbVersion(hostSf2, hostFileName);
+@@ -112614,7 +112627,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       if (snap) {
+         hostText = snap.getText(0, snap.getLength());
+       } else {
+-        const cachedText = (_i = hostContentByFile.get(hostFileName)) == null ? void 0 : _i.text;
++        const cachedText = (_i = hostContentByFile.get(canonicalSourceFilePath(hostFileName))) == null ? void 0 : _i.text;
+         if (cachedText !== void 0) {
+           hostText = cachedText;
+         } else {
+@@ -112650,7 +112663,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+         return rememberStable(hostSf);
+       }
+     }
+-    const hostContent = hostContentByFile.get(hostFileName);
++    const hostContent = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
+     const text = (hostContent == null ? void 0 : hostContent.text) ?? ((_k = host == null ? void 0 : host.readFile) == null ? void 0 : _k.call(host, hostFileName)) ?? "";
+     const scriptKind = (hostContent == null ? void 0 : hostContent.scriptKind) ?? inferScriptKind(hostFileName);
+     const sf = createSkeletonSourceFile(hostFileName, text, options.target ?? 99, scriptKind);
+@@ -112703,7 +112716,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+     var _a10;
+     const hostFileName = resolveHostFileName(fileName, host);
+     if (diagnosticSfCache.has(hostFileName)) return diagnosticSfCache.get(hostFileName);
+-    const hostContent = hostContentByFile.get(fileName) ?? hostContentByFile.get(hostFileName);
++    const hostContent = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
+     const text = (hostContent == null ? void 0 : hostContent.text) ?? ((_a10 = host == null ? void 0 : host.readFile) == null ? void 0 : _a10.call(host, fileName)) ?? "";
+     const scriptKind = (hostContent == null ? void 0 : hostContent.scriptKind) ?? inferScriptKind(hostFileName);
+     const sf = createSkeletonSourceFile(hostFileName, text, options.target ?? 99, scriptKind);
+@@ -112716,6 +112729,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+   };
+   const preferLightProgramFiles = !preferHostSourceFiles && typeof ((_b = programCtx.lsHost) == null ? void 0 : _b.getScriptSnapshot) === "function";
+   const tsserverWalk = !!(lsHost == null ? void 0 : lsHost.projectService);
++  const hostWalkStubs = preferHostSourceFiles && !tsserverWalk ? /* @__PURE__ */ new Map() : void 0;
+   const builderMetaEnabled = !(options.tscBuild && !options.incremental && !options.composite);
+   let lsHostVersionSnapshot;
+   if (!tsserverWalk && typeof (lsHost == null ? void 0 : lsHost.getScriptVersion) === "function") {
+@@ -112728,11 +112742,21 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+   }
+   const getOrCreateLightSourceFile = (fileName) => {
+     const hostFileName = hostNameForQuery(resolveHostFileNameMemoized(fileName, host));
+-    let sf = _lightSfSharedByFile.get(hostFileName);
++    const content = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
++    const local = hostWalkStubs && (content || typeof (lsHost == null ? void 0 : lsHost.getScriptSnapshot) === "function");
++    const cache = local ? hostWalkStubs : _lightSfSharedByFile;
++    let sf = cache.get(hostFileName);
+     if (!sf) {
+-      sf = createSharedLightStub(hostFileName, configFilePath, builderMetaEnabled, options.target ?? 99, tsserverWalk);
++      sf = createSharedLightStub(
++        hostFileName,
++        configFilePath,
++        builderMetaEnabled,
++        options.target ?? 99,
++        tsserverWalk,
++        local ? { materialize: getOrCreateSourceFile, text: content == null ? void 0 : content.text, scriptKind: content == null ? void 0 : content.scriptKind } : void 0
++      );
+       ensureFileModuleMeta(sf);
+-      _lightSfSharedByFile.set(hostFileName, sf);
++      cache.set(hostFileName, sf);
+     }
+     return sf;
+   };
+@@ -113012,9 +113036,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       if (incHostName !== void 0) {
+         return getOrCreateSourceFile(incHostName);
+       }
+-      if (!tsserverWalk && fileHasHostSourceContent(pathStr, pathStr)) {
+-        return getOrCreateSourceFile(pathStr);
+-      }
+       return fullSfByName.get(hostNameForQuery(pathStr)) ?? getOrCreateLightSourceFile(pathStr);
+     },
+     getSourceFiles: () => {
+@@ -113025,8 +113046,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+         let sf;
+         if (preferLightProgramFiles) {
+           sf = fullSfByName.get(name) ?? getOrCreateLightSourceFile(name);
+-        } else if (!tsserverWalk && fileHasHostSourceContent(name, name)) {
+-          sf = getOrCreateSourceFile(name);
+         } else {
+           sf = fullSfByName.get(name) ?? getOrCreateLightSourceFile(name);
+         }
+@@ -113273,10 +113292,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+     // through the caller's writeFile (or the host's) so --noEmit, Volar output
+     // redirection, and build-mode writeFile wrapping stay in the host's control.
+     emit: (targetSourceFile, writeFile2, _ct, emitOnlyDtsFiles, customTransformers, forceDtsEmit) => {
+-      var _a10, _b2, _c2;
+-      const hasTransformers = customTransformers && [customTransformers.before, customTransformers.after, customTransformers.afterDeclarations].some((a) => a == null ? void 0 : a.length);
+-      if (hasTransformers) {
+-        throw new Error("tsgoChecker: Program.emit does not support customTransformers \u2014 tsgo cannot execute JS transformer functions");
++      var _a10, _b2, _c2, _d, _e;
++      const afterDeclarations = customTransformers == null ? void 0 : customTransformers.afterDeclarations;
++      if (((_a10 = customTransformers == null ? void 0 : customTransformers.before) == null ? void 0 : _a10.length) || ((_b2 = customTransformers == null ? void 0 : customTransformers.after) == null ? void 0 : _b2.length)) {
++        throw new Error("tsgoChecker: Program.emit does not support before/after customTransformers \u2014 tsgo cannot execute JS transformer functions");
++      }
++      if ((afterDeclarations == null ? void 0 : afterDeclarations.length) && (options.declarationMap || options.outFile)) {
++        throw new Error("tsgoChecker: afterDeclarations customTransformers require declarationMap=false and no outFile \u2014 transformed declaration maps and bundles are not supported");
+       }
+       if (options.noEmit && !forceDtsEmit) {
+         if (targetSourceFile) {
+@@ -113286,19 +113308,50 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       }
+       const file = (targetSourceFile == null ? void 0 : targetSourceFile.fileName) ? tsgoFileArg(targetSourceFile.fileName) : void 0;
+       const emitOnly = forceDtsEmit ? 3 : emitOnlyDtsFiles ? 2 : void 0;
+-      const res = (_b2 = (_a10 = liveProject().program) == null ? void 0 : _a10.emit) == null ? void 0 : _b2.call(_a10, { file, emitOnly, forceDtsEmit: !!forceDtsEmit });
++      const res = (_d = (_c2 = liveProject().program) == null ? void 0 : _c2.emit) == null ? void 0 : _d.call(_c2, { file, emitOnly, forceDtsEmit: !!forceDtsEmit });
+       const outputs = (res == null ? void 0 : res.outputFiles) ?? [];
+-      const write = typeof writeFile2 === "function" ? writeFile2 : (_c2 = host == null ? void 0 : host.writeFile) == null ? void 0 : _c2.bind(host);
++      const transformerDiagnostics = [];
++      const write = typeof writeFile2 === "function" ? writeFile2 : (_e = host == null ? void 0 : host.writeFile) == null ? void 0 : _e.bind(host);
+       const emittedFiles = options.listEmittedFiles ? [] : void 0;
+       const sourceFiles = targetSourceFile ? [targetSourceFile] : void 0;
+       for (const o of outputs) {
+         const outFileName = wireFileNameToHost(o.fileName);
+-        if (write) write(outFileName, o.text, !!o.writeByteOrderMark, void 0, sourceFiles, {});
++        let text = o.text;
++        if ((afterDeclarations == null ? void 0 : afterDeclarations.length) && /\.d\.(?:ts|mts|cts)$/.test(outFileName)) {
++          const declaration = createSourceFile(
++            outFileName,
++            text,
++            options.target ?? 99,
++            /*setParentNodes*/
++            true,
++            3 /* TS */
++          );
++          const transformed = transformNodes(
++            void 0,
++            void 0,
++            factory,
++            options,
++            [declaration],
++            afterDeclarations,
++            /*allowDtsFiles*/
++            true
++          );
++          try {
++            text = createPrinter({ removeComments: options.removeComments, newLine: options.newLine }, {
++              substituteNode: transformed.substituteNode,
++              onEmitNode: transformed.emitNodeWithNotification
++            }).printFile(transformed.transformed[0]);
++            transformerDiagnostics.push(...transformed.diagnostics ?? []);
++          } finally {
++            transformed.dispose();
++          }
++        }
++        if (write) write(outFileName, text, !!o.writeByteOrderMark, void 0, sourceFiles, {});
+         emittedFiles == null ? void 0 : emittedFiles.push(outFileName);
+       }
+       return {
+         emitSkipped: (res == null ? void 0 : res.emitSkipped) ?? false,
+-        diagnostics: mapTsgoDiagnostics(res == null ? void 0 : res.diagnostics, getDiagnosticSourceFile),
++        diagnostics: [...mapTsgoDiagnostics(res == null ? void 0 : res.diagnostics, getDiagnosticSourceFile), ...transformerDiagnostics],
+         emittedFiles,
+         sourceMaps: []
+       };
+@@ -114343,9 +114396,12 @@ function createTsgoChecker(program) {
+     const additionalFiles = _lastAdditionalFilesByConfig.get(configFilePath);
+     const externalChanged = programCtx == null ? void 0 : programCtx.pendingExternalChanged;
+     if (programCtx) programCtx.pendingExternalChanged = void 0;
++    const invalidateDisk = programCtx == null ? void 0 : programCtx.pendingInvalidateDisk;
++    if (programCtx) programCtx.pendingInvalidateDisk = void 0;
+     const syncHost = hostForOverlaySyncLocal();
+     const openFiles = syncHost ? collectTsgoOpenFileNames(syncHost) : [];
+-    let closedTabs;
++    let closedTabs = programCtx == null ? void 0 : programCtx.pendingClosedFiles;
++    if (programCtx) programCtx.pendingClosedFiles = void 0;
+     const tabRegistry = syncHost == null ? void 0 : syncHost.projectService;
+     if ((_a10 = tabRegistry == null ? void 0 : tabRegistry.openFiles) == null ? void 0 : _a10.forEach) {
+       const openTabs = /* @__PURE__ */ new Set();
+@@ -114355,7 +114411,7 @@ function createTsgoChecker(program) {
+         if (((_a11 = info == null ? void 0 : info.isScriptOpen) == null ? void 0 : _a11.call(info)) && info.fileName) openTabs.add(resolveHostFileName(info.fileName, syncHost));
+       });
+       const closed = [..._sessionSentOpenTabs].filter((f) => !openTabs.has(f));
+-      if (closed.length) closedTabs = closed;
++      if (closed.length) closedTabs = [.../* @__PURE__ */ new Set([...closedTabs ?? [], ...closed])];
+       _sessionSentOpenTabs.clear();
+       for (const f of openTabs) _sessionSentOpenTabs.add(f);
+       for (const f of closed) forgetSyncedOverlay(f);
+@@ -114369,7 +114425,7 @@ function createTsgoChecker(program) {
+       ...openFilesWithContent.length > 0 ? { openFilesWithContent } : {},
+       ...extraFileExtensions ? { extraFileExtensions } : {},
+       ...(additionalFiles == null ? void 0 : additionalFiles.length) ? { additionalFiles } : {},
+-      ...(externalChanged == null ? void 0 : externalChanged.length) ? { fileChanges: { changed: externalChanged } } : {},
++      ...invalidateDisk ? { fileChanges: { invalidateAll: true } } : (externalChanged == null ? void 0 : externalChanged.length) ? { fileChanges: { changed: externalChanged } } : {},
+       ...buildClose.closeParams ?? {},
+       ...prefetchDiagnostics ? { prefetchDiagnostics: true } : {}
+     };
+@@ -167481,7 +167537,6 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
+       getComments: (decls) => ts_JsDoc_exports.getJsDocCommentsFromDeclarations(decls),
+       getTags: (decls) => ts_JsDoc_exports.getJsDocTagsFromDeclarations(decls)
+     });
+-    tnbSetLanguageServiceHost(host);
+     let compilerHost = {
+       getSourceFile: getOrCreateSourceFile,
+       getSourceFileByPath: getOrCreateSourceFileByPath,
+@@ -167524,6 +167579,7 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
+       jsDocParsingMode: host.jsDocParsingMode,
+       getGlobalTypingsCacheLocation: maybeBind(host, host.getGlobalTypingsCacheLocation)
+     };
++    tnbSetLanguageServiceHost(host, compilerHost);
+     const originalGetSourceFile = compilerHost.getSourceFile;
+     const { getSourceFileWithCache } = changeCompilerHostLikeToUseCache(
+       compilerHost,
+diff --git a/package.json b/package.json
+index f8d9e92..bbaa3b0 100644
+--- a/package.json
++++ b/package.json
+@@ -1,59 +1,72 @@
+ {
+-	"name": "typescript-native-bridge",
+-	"version": "6.0.3-bridge.16.tsgo.7.0.2",
+-	"license": "Apache-2.0",
+-	"repository": {
+-		"type": "git",
+-		"url": "git+https://github.com/johnsoncodehk/typescript-native-bridge.git"
+-	},
+-	"engines": {
+-		"node": ">=20.19"
+-	},
+-	"publishConfig": {
+-		"access": "public"
+-	},
+-	"description": "Build host for a tsgo-backed TypeScript fork: pins upstream `microsoft/TypeScript` and `microsoft/typescript-go` as submodules and materializes a small patch set on top — a tsgoChecker overlay on TypeScript plus a cgo bridge (bridge.dylib) on typescript-go. The built fork (`lib/typescript.js`) is a drop-in `typescript` whose type checker runs in-process on tsgo via the NAPI bridge.",
+-	"main": "./lib/typescript.js",
+-	"types": "./lib/typescript.d.ts",
+-	"bin": {
+-		"tsc": "./bin/tsc",
+-		"tsserver": "./bin/tsserver"
+-	},
+-	"files": [
+-		"bin",
+-		"lib",
+-		"vendor",
+-		"NOTICE",
+-		"!**/*.map"
+-	],
+-	"scripts": {
+-		"setup": "git submodule update --init && npm run build:js && npm run build:bridge && npm run build:ts",
+-		"patch:tsgo": "node tools/patch-tsgo.js",
+-		"patch:ts": "node tools/patch-typescript.js",
+-		"save-patches": "node tools/save-tsgo-patches.js",
+-		"save-ts-patches": "node tools/save-typescript-patches.js",
+-		"bump:version": "node tools/bump-version.mjs",
+-		"check:enums": "node tools/check-enum-remap.mjs",
+-		"check:go-as-guards": "node tools/check-go-as-guards.mjs",
+-		"check:lib-sync": "node tools/check-lib-sync.mjs",
+-		"check:bundle-shape": "node tools/check-bundle-shape.mjs",
+-		"check:sourcefile-guard": "node tools/check-sourcefile-guard.mjs",
+-		"check:sim-nav": "node tools/sim-nav-parallel.mjs",
+-		"check:lib": "node tools/check-lib-sync.mjs && node tools/check-bundle-shape.mjs && node tools/check-skeleton-imports.mjs",
+-		"refresh": "npm run patch:ts && npm run patch:tsgo && npm run check:lib",
+-		"build:js": "node tools/patch-tsgo.js && cd typescript-go/_packages/native-preview && npm install --no-save @types/node && npx tsc -b && cd ../../.. && node tools/sync-vendor-native-preview.js",
+-		"build:lib": "npm run patch:ts && cd typescript && npm run build:compiler && npx hereby lkg && cd .. && node tools/patch-lib-shims.js && node tools/sync-bundled-libs.js && npm run check:bundle-shape",
+-		"build:ts": "node tools/patch-typescript.js && cd typescript && npm install && npm run build:compiler && npx hereby lkg && cd .. && node tools/patch-lib-shims.js && node tools/sync-bundled-libs.js",
+-		"build:bridge": "node tools/patch-tsgo.js && node tools/build-bridge.js"
+-	},
+-	"dependencies": {},
+-	"optionalDependencies": {
+-		"@typescript-native-bridge/darwin-arm64": "6.0.3-bridge.16.tsgo.7.0.2",
+-		"@typescript-native-bridge/darwin-x64": "6.0.3-bridge.16.tsgo.7.0.2",
+-		"@typescript-native-bridge/linux-x64": "6.0.3-bridge.16.tsgo.7.0.2",
+-		"@typescript-native-bridge/linux-arm64": "6.0.3-bridge.16.tsgo.7.0.2",
+-		"@typescript-native-bridge/linux-arm": "6.0.3-bridge.16.tsgo.7.0.2",
+-		"@typescript-native-bridge/win32-x64": "6.0.3-bridge.16.tsgo.7.0.2",
+-		"@typescript-native-bridge/win32-arm64": "6.0.3-bridge.16.tsgo.7.0.2"
+-	}
++  "name": "typescript-native-bridge",
++  "version": "6.0.3-bridge.16.tsgo.7.0.2",
++  "license": "Apache-2.0",
++  "repository": {
++    "type": "git",
++    "url": "git+https://github.com/johnsoncodehk/typescript-native-bridge.git"
++  },
++  "engines": {
++    "node": ">=20.19"
++  },
++  "publishConfig": {
++    "access": "public"
++  },
++  "description": "Build host for a tsgo-backed TypeScript fork: pins upstream `microsoft/TypeScript` and `microsoft/typescript-go` as submodules and materializes a small patch set on top — a tsgoChecker overlay on TypeScript plus a cgo bridge (bridge.dylib) on typescript-go. The built fork (`lib/typescript.js`) is a drop-in `typescript` whose type checker runs in-process on tsgo via the NAPI bridge.",
++  "main": "./lib/typescript.js",
++  "types": "./lib/typescript.d.ts",
++  "bin": {
++    "tsc": "./bin/tsc",
++    "tsserver": "./bin/tsserver"
++  },
++  "files": [
++    "bin",
++    "lib",
++    "vendor",
++    "NOTICE",
++    "!**/*.map"
++  ],
++  "scripts": {
++    "setup": "git submodule update --init && npm run build:js && npm run build:bridge && npm run build:ts",
++    "patch:tsgo": "node tools/patch-tsgo.js",
++    "patch:ts": "node tools/patch-typescript.js",
++    "save-patches": "node tools/save-tsgo-patches.js",
++    "save-ts-patches": "node tools/save-typescript-patches.js",
++    "bump:version": "node tools/bump-version.mjs",
++    "check:enums": "node tools/check-enum-remap.mjs",
++    "check:go-as-guards": "node tools/check-go-as-guards.mjs",
++    "check:lib-sync": "node tools/check-lib-sync.mjs",
++    "check:bundle-shape": "node tools/check-bundle-shape.mjs",
++    "check:sourcefile-guard": "node tools/check-sourcefile-guard.mjs",
++    "check:sim-nav": "node tools/sim-nav-parallel.mjs",
++    "check:lib": "node tools/check-lib-sync.mjs && node tools/check-bundle-shape.mjs && node tools/check-skeleton-imports.mjs",
++    "refresh": "npm run patch:ts && npm run patch:tsgo && npm run check:lib",
++    "build:js": "node tools/patch-tsgo.js && cd typescript-go/_packages/native-preview && npm install --no-save @types/node && npx tsc -b && cd ../../.. && node tools/sync-vendor-native-preview.js",
++    "build:lib": "npm run patch:ts && cd typescript && npm run build:compiler && npx hereby lkg && cd .. && node tools/patch-lib-shims.js && node tools/sync-bundled-libs.js && npm run check:bundle-shape",
++    "build:ts": "node tools/patch-typescript.js && cd typescript && npm install && npm run build:compiler && npx hereby lkg && cd .. && node tools/patch-lib-shims.js && node tools/sync-bundled-libs.js",
++    "build:bridge": "node tools/patch-tsgo.js && node tools/build-bridge.js"
++  },
++  "dependencies": {},
++  "optionalDependencies": {
++    "@typescript-native-bridge/darwin-arm64": "6.0.3-bridge.16.tsgo.7.0.2",
++    "@typescript-native-bridge/darwin-x64": "6.0.3-bridge.16.tsgo.7.0.2",
++    "@typescript-native-bridge/linux-x64": "6.0.3-bridge.16.tsgo.7.0.2",
++    "@typescript-native-bridge/linux-arm64": "6.0.3-bridge.16.tsgo.7.0.2",
++    "@typescript-native-bridge/linux-arm": "6.0.3-bridge.16.tsgo.7.0.2",
++    "@typescript-native-bridge/win32-x64": "6.0.3-bridge.16.tsgo.7.0.2",
++    "@typescript-native-bridge/win32-arm64": "6.0.3-bridge.16.tsgo.7.0.2"
++  },
++  "tnbLocalBuild": {
++    "kind": "unpublished-local-build",
++    "base": "848fa9ebae6cee8f8144e217563e2d17438c900b",
++    "sourceCommit": "848fa9ebae6cee8f8144e217563e2d17438c900b",
++    "submodulePins": {
++      "typescript": "050880ce59e30b356b686bd3144efe24f875ebc8",
++      "typescriptGo": "2bd066d87f5bafd315be9f40889d0a60b9e58e0b"
++    },
++    "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
++    "releaseMainSha256": "d5e2b1278788c8b3c5d96f3387e97349728aecd79a3b342485e7665854c22389",
++    "nativeSha256": "32be259fa2027f7b4ba26f78827293b187f1eb000eb5c6761dda171cd5c9a4cb",
++    "compilerSha256": "743cee1d1a8c17ea5b470a4206933c5fbb868103792d3c3089904a58a0b9d6e4"
++  }
+ }

@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-under-validation",
+  "installation": "Registry versions plus committed pnpm patchedDependencies; no local archives or sibling paths required.",
+  "native": {
+    "changed": false,
+    "resolution": "Platform-specific optional dependency from the pinned published TNB package; Windows and Linux use their own addon.",
+    "typescriptRevision": "050880ce59e30b356b686bd3144efe24f875ebc8",
+    "typescriptGoRevision": "2bd066d87f5bafd315be9f40889d0a60b9e58e0b"
+  },
+  "patches": [
+    {
+      "name": "@gi-tcg/gts-language-plugin",
+      "version": "0.7.7",
+      "release": {
+        "url": "https://registry.npmjs.org/@gi-tcg/gts-language-plugin/-/gts-language-plugin-0.7.7.tgz",
+        "integrity": "sha512-ufPRIlDb7ezJBGmyh4nNT8TmWr7sp7cLhQFTdmFzcNTpAygd1leposaNU8Pq4Ah9P/7RnJDYM0MdDFhROFGYwg==",
+        "sha256": "ceeb4710e79f80e056d08ebb2486c9c7918b88a370b76afbe688781eeeefaa40"
+      },
+      "patch": "patches/gi-tcg-gts-language-plugin@0.7.7.patch",
+      "patchSha256": "b9a650765ff41ccc309091cf5b02e1a7b1da21f5864c50d7b98ee95b4028550b",
+      "candidatePackSha256": "cdeeecf8a9c56497f86851be1dfb5c9fb9dd412785cb484cad281b98501649c3",
+      "source": {
+        "repository": "https://github.com/piovium/gts",
+        "revision": "a4b1229259653cdd020dc8f1929287c6f60295f6",
+        "published": false
+      }
+    },
+    {
+      "name": "@gi-tcg/gts-language-server",
+      "version": "0.7.7",
+      "release": {
+        "url": "https://registry.npmjs.org/@gi-tcg/gts-language-server/-/gts-language-server-0.7.7.tgz",
+        "integrity": "sha512-CYZWtYi0E7vhZ0LRZ90h2VyiZu5ZMCJPXTHDWtC09YyMFMddReDA3jCvmI2pXRs0pxhZd5DXWpzKQJHokTeZ0Q==",
+        "sha256": "4687a0c85b05e314d61feb205972139d916732986f2188112c9ebbf97a637ada"
+      },
+      "patch": "patches/gi-tcg-gts-language-server@0.7.7.patch",
+      "patchSha256": "a325a5595923636317af90e849c7a5cf9835d7caffa8313cca28536ffe2b9fb2",
+      "candidatePackSha256": "ef1b833119f7b8655851ae142e873c26e20babcbfbc82ddd87a957bc7a1b024e",
+      "source": {
+        "repository": "https://github.com/piovium/gts",
+        "revision": "660735cf9dcb9d95e3b10668fbe775e0b5a6e065",
+        "published": false
+      }
+    },
+    {
+      "name": "@gi-tcg/gts-runtime",
+      "version": "0.7.7",
+      "release": {
+        "url": "https://registry.npmjs.org/@gi-tcg/gts-runtime/-/gts-runtime-0.7.7.tgz",
+        "integrity": "sha512-NNg93UIO+YwEgfsA2n/FRR4MWP39L9QL80OAZevDb83I0P22SIca8SOeqefAFTpDw62Knp9r+gldfsf1emXuXw==",
+        "sha256": "00a219932ca563530ad55557290dd822023b77a67d90436bcec81972b6a8c7d9"
+      },
+      "patch": "patches/gi-tcg-gts-runtime@0.7.7.patch",
+      "patchSha256": "52d582912096574ad4d8f9cc5228e21c7c9529cbbdfd8f0c917bb19d163fab04",
+      "candidatePackSha256": "9d8f70e90f9554597932e59459de629b53d55efd4c554b83d83e5db579f5f6f6",
+      "source": {
+        "repository": "https://github.com/piovium/gts",
+        "revision": "a4b1229259653cdd020dc8f1929287c6f60295f6",
+        "published": false
+      }
+    },
+    {
+      "name": "@gi-tcg/gtsc",
+      "version": "0.7.7",
+      "release": {
+        "url": "https://registry.npmjs.org/@gi-tcg/gtsc/-/gtsc-0.7.7.tgz",
+        "integrity": "sha512-oOgv5Pz8QBIonEJepgJfeWoqmtKAiLSkak8y5jLXpAVCKccaWSvo5zx54m1kuryewvaPBHJosdu0koXEJWf8dQ==",
+        "sha256": "28ed677e85c60334af3ba4cf864517c08a179b08de2148011dfe995cc8217159"
+      },
+      "patch": "patches/gi-tcg-gtsc@0.7.7.patch",
+      "patchSha256": "2809292793ac3db8b2af277e982b4e1e0c7d716e0170b22e65c603e7f8de6303",
+      "candidatePackSha256": "a2b02ba59957e70339dff39a2fbc55f6459606ad1fed8fb7dc58ba25d1f05c63",
+      "source": {
+        "repository": "https://github.com/piovium/gts",
+        "revision": "a4b1229259653cdd020dc8f1929287c6f60295f6",
+        "published": false
+      }
+    },
+    {
+      "name": "typescript-native-bridge",
+      "version": "6.0.3-bridge.16.tsgo.7.0.2",
+      "release": {
+        "url": "https://registry.npmjs.org/typescript-native-bridge/-/typescript-native-bridge-6.0.3-bridge.16.tsgo.7.0.2.tgz",
+        "integrity": "sha512-bO+fh23fh4j0mK2NmlFOrlbR9Ke5cHpjOsDaM2czXlSXqxNchGdDVyAdaVCFz0DofkFOov96HLvQaP3W57F+CA==",
+        "sha256": "d5e2b1278788c8b3c5d96f3387e97349728aecd79a3b342485e7665854c22389"
+      },
+      "patch": "patches/typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2.patch",
+      "patchSha256": "851850fc778082058e2cd9b8b91019a5c3e3e92d1859d379d5dba57a777fb0bc",
+      "candidatePackSha256": "f9cc63439b4a07fb585de290888eee112d5463ac2088a0ce7ebfcbaf1cb8372f",
+      "source": {
+        "repository": "https://github.com/johnsoncodehk/typescript-native-bridge",
+        "revision": "848fa9ebae6cee8f8144e217563e2d17438c900b",
+        "published": false
+      }
+    },
+    {
+      "name": "@volar/typescript",
+      "version": "2.4.28",
+      "release": {
+        "integrity": "sha512-Ja6yvWrbis2QtN4ClAKreeUZPVYMARDYZl9LMEv1iQ1QdepB6wn0jTRxA9MftYmYa4DQ4k/DaSZpFPUfxl8giw=="
+      },
+      "patch": "patches/@volar__typescript.patch",
+      "patchSha256": "7a8cbe8be8d7d051499dab1dc35c3e317883d65daa563143692932b6a22371ce",
+      "changes": [
+        "Preserve the existing removal of the virtual-file size filter.",
+        "Use the CompilerHost text hook to avoid parsing duplicate JavaScript ASTs for native checking."
+      ],
+      "source": {
+        "kind": "repository-patch",
+        "encoding": "UTF-8 with LF line endings"
+      }
+    }
+  ]
+}

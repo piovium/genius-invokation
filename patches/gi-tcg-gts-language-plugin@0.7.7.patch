@@ -1,0 +1,13 @@
+diff --git a/package.json b/package.json
+index abe5bd1..113966d 100644
+--- a/package.json
++++ b/package.json
+@@ -25,7 +25,7 @@
+     "@gi-tcg/gts-transpiler": "0.7.7"
+   },
+   "peerDependencies": {
+-    "typescript": "npm:@typescript/typescript6@^6.0.1"
++    "typescript": "npm:typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2"
+   },
+   "scripts": {
+     "build": "tsdown --platform neutral"

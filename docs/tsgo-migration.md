@@ -27,8 +27,10 @@ Keep declaration generation enabled when preparing dependencies.
 Dependencies use exact registry versions and the repository's
 `patchedDependencies` mechanism. The lockfile and patch files must travel with
 the checkout; no sibling worktree, absolute local package link, or manually
-modified installation is required. Patch provenance will be recorded alongside
-the final reviewed dependency revisions before acceptance.
+modified installation is required. [Patch provenance](./tsgo-patches.json)
+records the released archive integrity, patch hashes and unpublished source
+revisions used for this candidate. These local source commits have not been
+pushed or published; the committed patches make installation self-contained.
 
 ## VS Code
 

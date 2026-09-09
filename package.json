@@ -28,7 +28,7 @@
     "@gi-tcg/unplugin-gts": "catalog:",
     "@gi-tcg/prettier-plugin-gts": "catalog:",
     "@microsoft/api-extractor": "^7.58.2",
-    "@types/node": "latest",
+    "@types/node": "26.4.1",
     "@typescript-eslint/eslint-plugin": "^8.57.2",
     "@typescript-eslint/parser": "^8.57.2",
     "dependency-graph": "^1.0.0",
