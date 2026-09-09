@@ -77,24 +77,36 @@ export function compareCoverage({ repo, baseline, actual, observed }) {
   }
 }
 
-function sourceInventory(repo) {
+export function sourceInventory(repo) {
   const files = [];
+  const root = fs.realpathSync.native(repo);
+  const active = new Set();
+  function contained(file) {
+    const real = fs.realpathSync.native(file);
+    const relative = path.relative(root, real);
+    if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+      throw new Error(`Source inventory link escapes repository: ${file}`);
+    }
+    return real;
+  }
   function visit(directory) {
+    const real = contained(directory);
+    if (active.has(real)) throw new Error(`Source inventory has a symbolic-link cycle: ${directory}`);
+    active.add(real);
+    try {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
       if (entry.name === ".git" || entry.name === "node_modules") continue;
       const file = path.join(directory, entry.name);
-      if (entry.isSymbolicLink()) {
-        // A silent skip could hide a source subtree; do not claim coverage.
-        throw new Error(`Source inventory cannot verify symbolic link: ${file}`);
-      }
-      if (entry.isDirectory()) visit(file);
-      else if (entry.isFile() && entry.name.toLowerCase().endsWith(".gts")) {
+      const stat = entry.isSymbolicLink() ? fs.statSync(contained(file)) : entry;
+      if (stat.isDirectory()) visit(file);
+      else if (stat.isFile() && entry.name.toLowerCase().endsWith(".gts")) {
         files.push(path.relative(repo, file));
       }
     }
+    } finally { active.delete(real); }
   }
   visit(repo);
-  return files;
+  return files.sort();
 }
 
 export function probeCoverage({ repo, inventory, observed }) {

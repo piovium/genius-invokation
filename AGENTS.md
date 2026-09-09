@@ -10,6 +10,8 @@ Future product tasks must be issued with `node harness/cli.mjs task ROLE`. It fa
 
 When reviewed harness changes supersede active tasks, use `node harness/cli.mjs revise OLD_TASK_FILE` after the new self-tests pass. It creates a new task record linked to the old one, preserving ownership and original baseline while retaining existing scoped changes. It cannot clear out-of-scope changes or bless old acceptance receipts. Communicate the new generated task to the worker; never edit an old task record to hide changes.
 
+A prospective scope expansion requires a separately reviewed, sealed contract.scopeTransitions entry binding the exact prior task ID, control digest, task-file hash, and both role specifications. It must preserve the repository, original baseline, existing paths and gates. Reassignment rejects changes already outside the original assignment. No generic force or permission flag exists.
+
 Use only the isolated worktrees named in the contract. Never modify the original genius-invokation/scripts/server-harness/memory.mjs or memory.test.mjs: another user process owns them. Do not copy mutable node_modules or dist between workers.
 
 A worker handoff must include its task file, git changes, exact commands and runner receipts. Workers do not declare migration complete. The coordinator runs final acceptance on the integrated tree and uses `node harness/cli.mjs finish RUN_DIRECTORY`; any missing, blocked, stale, subset-only or changed-during-run evidence prevents completion. Manually authored PASS JSON is not an acceptance result.

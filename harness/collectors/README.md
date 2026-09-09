@@ -8,7 +8,7 @@ coordinator and independently reviewed. Product workers cannot weaken them.
 Each contract.adapters[GATE] names three relative files in this directory:
 `collector`, `validator`, `expectations`. The collector is a Node module; the
 validator exports `validate(observation, {contract, expectations, nonce, root,
-gate})`, returning `{status: "PASS" | "FAIL" | "BLOCKED", reason}` after checking
+directory, gate})`, returning `{status: "PASS" | "FAIL" | "BLOCKED", reason}` after checking
 actual observations against separately reviewed expectations. Do not implement
 a validator that simply accepts an observation's status or expected values.
 
@@ -18,6 +18,8 @@ isolated repository, with bounded time/output and process-tree cleanup. Read:
 - `HARNESS_ROOT`, `HARNESS_RUN_DIRECTORY`, `HARNESS_OUTPUT`
 - `HARNESS_NONCE`, `HARNESS_GATE`, `HARNESS_SEAL`, `HARNESS_SOURCE_DIGEST`
 - `HARNESS_PLATFORM` (collector must also observe its actual process.platform)
+- `HARNESS_NODE`, `HARNESS_MANAGER`, `HARNESS_NPM` (resolved, fingerprinted runtimes;
+  recursive manager commands use the runner's per-run PATH shims)
 
 Write one JSON observation to HARNESS_OUTPUT. Its envelope must contain
 `runNonce`, `gateId`, `controlDigest`, `sourceDigest`, `platform`. Keep all raw

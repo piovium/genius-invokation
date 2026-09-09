@@ -185,3 +185,30 @@ test("CLI emits one JSON result and status-specific exit codes", (t) => {
     assert.equal(JSON.parse(result.stdout).status, status);
   }
 });
+
+test('contained directory links are traversed and cannot hide GTS sources', t => {
+  const repo = temporary(t);
+  for (const file of baseline) write(repo, file, '');
+  write(repo, 'proto/schema.proto', 'syntax = "proto3";');
+  fs.mkdirSync(path.join(repo, 'packages/typings'), { recursive: true });
+  fs.symlinkSync(path.join(repo, 'proto'), path.join(repo, 'packages/typings/proto'), 'junction');
+  const inventory = write(repo, 'inventory.json', JSON.stringify({ files: baseline }));
+  const observed = write(repo, 'observed.json', JSON.stringify({ files: baseline }));
+  assert.equal(probeCoverage({ repo, inventory, observed }).status, 'PASS');
+  write(repo, 'proto/new.gts', '');
+  const result = probeCoverage({ repo, inventory, observed });
+  assert.equal(result.status, 'FAIL');
+  assert.ok(result.details.unexpectedSources.includes('packages/typings/proto/new.gts'));
+});
+
+test('outside-root, cyclic and broken inventory links remain BLOCKED', t => {
+  for (const kind of ['outside', 'cycle', 'broken']) {
+    const repo = temporary(t);
+    for (const file of baseline) write(repo, file, '');
+    const inventory = write(repo, 'inventory.json', JSON.stringify({ files: baseline }));
+    const observed = write(repo, 'observed.json', JSON.stringify({ files: baseline }));
+    const target = kind === 'cycle' ? repo : kind === 'outside' ? temporary(t) : path.join(repo, 'missing');
+    fs.symlinkSync(target, path.join(repo, 'link'), 'junction');
+    assert.equal(probeCoverage({ repo, inventory, observed }).status, 'BLOCKED', kind);
+  }
+});

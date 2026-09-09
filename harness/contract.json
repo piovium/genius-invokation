@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2.0.1",
+  "version": "2.1.0",
   "phase": "migration",
   "tnbVersion": "6.0.3-bridge.16.tsgo.7.0.2",
   "policy": {
@@ -75,7 +75,9 @@
         ".vscode/",
         ".github/",
         "docs/",
-        ".gitattributes"
+        ".gitattributes",
+        "patches/",
+        "packages/custom-data-loader/"
       ],
       "gates": [
         "environment",
@@ -389,5 +391,65 @@
       "timeoutMs": 1800000
     }
   ],
-  "adapters": {}
+  "adapters": {},
+  "scopeTransitions": [
+    {
+      "role": "integration",
+      "previousTaskId": "4b87bd54-8292-4448-ab64-9525cacc482b",
+      "previousControlDigest": "b2027a47daaf56dd2d8331e56758cb26aa48ca1f08fc99ca60287f3a9fe23736",
+      "previousRecordSha256": "e5e945bf83c2541eeac5fb84db3e547e5e5128a88666a256e7febca04dd27211",
+      "from": {
+        "repository": "main",
+        "paths": [
+          "package.json",
+          "pnpm-workspace.yaml",
+          "pnpm-lock.yaml",
+          ".vscode/",
+          ".github/",
+          "docs/",
+          ".gitattributes"
+        ],
+        "gates": [
+          "environment",
+          "inventory",
+          "engine",
+          "data",
+          "coverage",
+          "checks",
+          "main-build",
+          "main-tests",
+          "memory",
+          "clean-install"
+        ]
+      },
+      "to": {
+        "repository": "main",
+        "paths": [
+          "package.json",
+          "pnpm-workspace.yaml",
+          "pnpm-lock.yaml",
+          ".vscode/",
+          ".github/",
+          "docs/",
+          ".gitattributes",
+          "patches/",
+          "packages/custom-data-loader/"
+        ],
+        "gates": [
+          "environment",
+          "inventory",
+          "engine",
+          "data",
+          "coverage",
+          "checks",
+          "main-build",
+          "main-tests",
+          "memory",
+          "clean-install"
+        ]
+      },
+      "reason": "Integrate reviewed immutable TNB/GTS/Volar registry patches and browser agent commits into main, with portable frozen installation.",
+      "review": "harness/REVIEW.md: 2.1.0 integration reassignment and runtime/coverage review"
+    }
+  ]
 }

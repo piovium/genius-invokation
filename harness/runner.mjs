@@ -34,6 +34,17 @@ export function validateContract(contract) {
     if (!contract.repositories[role.repository] || !role.paths?.length) throw new Error('Invalid role');
     if (role.gates.some(id => !ids.has(id))) throw new Error('Unknown role gate');
   }
+  for (const transition of contract.scopeTransitions ?? []) {
+    if (!/^[a-f0-9]{64}$/.test(transition.previousRecordSha256 ?? '')
+      || !/^[a-f0-9]{64}$/.test(transition.previousControlDigest ?? '')
+      || !transition.previousTaskId || !transition.reason || !transition.review
+      || stable(transition.to) !== stable(contract.roles[transition.role])
+      || transition.from?.repository !== transition.to?.repository
+      || !transition.from.paths.every(file => transition.to.paths.includes(file))
+      || !transition.from.gates.every(id => transition.to.gates.includes(id))) {
+      throw new Error('Invalid reviewed scope transition');
+    }
+  }
 }
 export async function loadHarness(root) {
   const seal = await verifySeal(root);
@@ -74,6 +85,7 @@ function safeEnvironment(contract) {
   if (keys.length) throw new Error(`Remove environment overrides before acceptance: ${keys.join(', ')}`);
 }
 async function command(context, gate, executable, args, label) {
+  const runtimeEnv = runtimeEnvironment(context, gate);
   const result = await execute({ executable, args,
     cwd: inside(context.root, context.contract.repositories[gate.repository].path),
     directory: context.directory, label, timeoutMs: gate.timeoutMs,
@@ -83,12 +95,33 @@ async function command(context, gate, executable, args, label) {
       HARNESS_PLATFORM: process.platform,
       HARNESS_RUN_DIRECTORY: context.directory,
       HARNESS_ROOT: context.root, HARNESS_OUTPUT: path.join(context.directory, `${gate.id}.observation.json`),
-      PATH: [path.dirname(context.runtimePaths.node), process.env.PATH ?? process.env.Path ?? ''].join(path.delimiter) },
+      ...runtimeEnv },
   });
   for (const stream of ['stdout', 'stderr']) {
     result[stream].sha256 = await hashFile(inside(context.directory, result[stream].file));
   }
   return result;
+}
+export function runtimeEnvironment(context, gate) {
+  const managerId = context.contract.repositories[gate.repository].manager;
+  const manager = context.runtimePaths[managerId];
+  const directory = path.join(context.directory, `runtime-${managerId ?? 'node'}`);
+  fs.mkdirSync(directory, { recursive: true });
+  const environment = { HARNESS_NODE: context.runtimePaths.node,
+    HARNESS_MANAGER: manager ?? '', HARNESS_NPM: context.runtimePaths.npm ?? '' };
+  for (const [name, variable] of [['pnpm', 'HARNESS_MANAGER'], ['npm', 'HARNESS_NPM']]) {
+    if (!environment[variable] || name === 'pnpm' && managerId === 'npm') continue;
+    // ASCII command files: non-ASCII workspace paths travel through environment
+    // variables, not through cmd.exe's legacy code-page decoding of a batch file.
+    const file = path.join(directory, name + (process.platform === 'win32' ? '.cmd' : ''));
+    const content = process.platform === 'win32'
+      ? `@echo off\r\n"%HARNESS_NODE%" "%${variable}%" %*\r\n`
+      : `#!/bin/sh\nexec "$HARNESS_NODE" "$${variable}" "$@"\n`;
+    if (!fs.existsSync(file)) fs.writeFileSync(file, content, { flag: 'wx', mode: 0o755 });
+    else if (fs.readFileSync(file, 'utf8') !== content) throw new Error('Runtime shim changed during run');
+  }
+  return { ...environment,
+    PATH: [directory, path.dirname(context.runtimePaths.node), process.env.PATH ?? process.env.Path ?? ''].join(path.delimiter) };
 }
 async function environmentGate(context, gate) {
   const commands = [];
@@ -150,7 +183,7 @@ async function validateObservation(context, gate, adapter, evidence) {
   if (typeof validate !== 'function') return verdict('FAIL', 'Approved adapter has no validate function');
   const result = await validate(evidence, {
     contract: context.contract, expectations: readJson(inside(context.root, adapter.expectations)),
-    nonce: context.nonce, root: context.root, gate,
+    nonce: context.nonce, root: context.root, directory: context.directory, gate,
   });
   if (!result || !['PASS', 'FAIL', 'BLOCKED'].includes(result.status)) return verdict('FAIL', 'Invalid validator result');
   if (result.status !== 'PASS') return result;
@@ -395,13 +428,27 @@ export async function generateTask(harness, roleName, previousFile) {
   const repo = before.repositories[role.repository];
   if (repo.status !== 'PASS') throw new Error('Task checkout unavailable');
   let previous;
+  let scopeTransition;
   if (previousFile) {
     previous = readTask(harness, previousFile);
     const base = harness.contract.repositories[role.repository].base;
-    if (previous.role !== roleName || stable(previous.roleSpec) !== stable(role)
+    if (previous.role !== roleName
       || previous.before?.repositories?.[role.repository]?.base !== base
       || previous.before.repositories[role.repository].head !== base) {
       throw new Error('Task revision cannot change ownership or its sealed starting baseline');
+    }
+    if (stable(previous.roleSpec) !== stable(role)) {
+      const digest = await hashFile(previousFile);
+      scopeTransition = harness.contract.scopeTransitions?.find(item => item.role === roleName
+        && item.previousTaskId === previous.id && item.previousControlDigest === previous.controlDigest
+        && item.previousRecordSha256 === digest && stable(item.from) === stable(previous.roleSpec)
+        && stable(item.to) === stable(role));
+      if (!scopeTransition) throw new Error('Task revision cannot change ownership without an exact reviewed scope transition');
+      // Expansion is prospective: it cannot retrospectively bless edits already
+      // outside the worker's original assignment.
+      if (scopeChanges(harness, previous.roleSpec).outside.length) {
+        throw new Error('Resolve out-of-scope changes under the original assignment before reassignment');
+      }
     }
     if (scopeChanges(harness, role).outside.length) throw new Error('Resolve out-of-scope changes before revising a task');
   } else if (repo.changed) throw new Error('Task checkout must start clean at its pinned base; use revise for an existing assignment');
@@ -410,7 +457,8 @@ export async function generateTask(harness, roleName, previousFile) {
   const record = { schemaVersion: 1, id, role: roleName, controlDigest: harness.seal.digest,
     before: previous?.before ?? before, roleSpec: role,
     ...(previous ? { previousTaskId: previous.id, previousControlDigest: previous.controlDigest,
-      revisionSnapshot: before, previousRecordSha256: await hashFile(previousFile) } : {}) };
+      revisionSnapshot: before, previousRecordSha256: await hashFile(previousFile),
+      ...(scopeTransition ? { scopeTransition } : {}) } : {}) };
   writeJson(path.join(directory, 'task.json'), record);
   const prompt = `Read ${path.join(harness.root, 'AGENTS.md')} and ${path.join(harness.root, 'HARNESS.md')} first.\n`
     + `Harness ${harness.contract.version}; seal ${harness.seal.digest}. Verify with node harness/cli.mjs verify in ${harness.root}.\n`

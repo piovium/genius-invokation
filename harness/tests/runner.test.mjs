@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { makeSeal, hashFile, writeJson, readJson, git, stable } from '../core.mjs';
 import { loadHarness, runSelection, verifyReceipt, finishRun, generateTask, reviseTask, handoff,
-  validateContract } from '../runner.mjs';
+  validateContract, runtimeEnvironment } from '../runner.mjs';
 
 const sourceRoot = fileURLToPath(new URL('../..', import.meta.url));
 const collector = `import fs from 'node:fs';
@@ -275,4 +275,53 @@ test('task revision retains scoped work and baseline while requiring new sealed 
   assert.equal(fs.readFileSync(path.join(f.repo, 'src/input.ts'), 'utf8'), 'export const n = 2;');
   f.write('repos/main/package.json', '{}');
   await assert.rejects(reviseTask(next, revised.file), /out-of-scope/);
+});
+
+test('scope expansion requires exact sealed review and rejects pre-existing violations', async t => {
+  const f = await fixture(t);
+  const selftest = () => execFileSync(process.execPath, [path.join(f.root, 'harness/cli.mjs'), 'selftest'],
+    { cwd: f.root, encoding: 'utf8', timeout: 30000, windowsHide: true });
+  selftest();
+  const first = await generateTask(f.harness, 'integration');
+  const record = readJson(first.file);
+  const original = fs.readFileSync(first.file, 'utf8');
+  f.contract.roles.integration = { ...record.roleSpec, paths: [...record.roleSpec.paths, 'patches/'] };
+  const reload = async () => {
+    f.write('harness/contract.json', JSON.stringify(f.contract));
+    f.write('harness/seal.json', JSON.stringify(await makeSeal(f.root)));
+    selftest();
+    return loadHarness(f.root);
+  };
+  await assert.rejects(reviseTask(await reload(), first.file), /exact reviewed scope transition/);
+  f.contract.scopeTransitions = [{ role: 'integration', previousTaskId: record.id,
+    previousControlDigest: record.controlDigest, previousRecordSha256: await hashFile(first.file),
+    from: record.roleSpec, to: f.contract.roles.integration,
+    reason: 'Integrate reviewed dependency patches', review: 'Independent fixture review' }];
+  const next = await reload();
+  f.write('repos/main/patches/too-early.patch', 'outside old assignment');
+  await assert.rejects(reviseTask(next, first.file), /original assignment/);
+  fs.unlinkSync(path.join(f.repo, 'patches/too-early.patch'));
+  const revised = await reviseTask(next, first.file);
+  assert.equal(fs.readFileSync(first.file, 'utf8'), original);
+  assert.deepEqual(readJson(revised.file).scopeTransition, f.contract.scopeTransitions[0]);
+  f.write('repos/main/patches/after-review.patch', 'newly authorized');
+  assert.equal((await handoff(next, revised.file)).status, 'PASS');
+  f.contract.scopeTransitions[0].previousRecordSha256 = '0'.repeat(64);
+  await assert.rejects(reviseTask(await reload(), first.file), /exact reviewed scope transition/);
+});
+
+test('recursive manager shim runs the configured Node and manager in Unicode paths', async t => {
+  const f = await fixture(t);
+  f.contract.repositories.main.manager = 'pnpmMain';
+  f.write('tools/中文 manager/cli.mjs', 'console.log(JSON.stringify({node:process.execPath,args:process.argv.slice(2)}));');
+  const context = { ...f.harness, contract: f.contract, directory: path.join(f.root, 'artifacts/runtime'),
+    runtimePaths: { node: process.execPath, pnpmMain: path.join(f.root, 'tools/中文 manager/cli.mjs') } };
+  const environment = runtimeEnvironment(context, f.contract.gates[0]);
+  const output = execFileSync(process.platform === 'win32' ? process.env.ComSpec : '/bin/sh',
+    process.platform === 'win32' ? ['/d', '/s', '/c', 'pnpm --probe'] : ['-c', 'pnpm --probe'],
+    { cwd: f.repo, env: { ...process.env, ...environment }, encoding: 'utf8', windowsHide: true });
+  assert.deepEqual(JSON.parse(output), { node: process.execPath, args: ['--probe'] });
+  const file = path.join(context.directory, 'runtime-pnpmMain', process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm');
+  fs.appendFileSync(file, '\nchanged');
+  assert.throws(() => runtimeEnvironment(context, f.contract.gates[0]), /changed during run/);
 });

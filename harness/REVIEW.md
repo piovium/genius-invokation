@@ -87,3 +87,11 @@ Windows 作业控制还完成两项实际检查：
 GTS worker 已独立只读复核 task revision：当前 seal 的自测、相同职责与原始 base/head、越界拒绝、新记录链接原记录均存在；handoff 仍从 sealed base 计算差异，不能通过续接缩小检查范围。新增临时仓库测试验证旧任务过期、未自测的新 seal 不能续接、保留已有范围内改动和基线、越界不能续接。任务只采所属仓库源码身份以避免扫描其他 worker 正在安装的依赖；正式 run/finish 的完整指纹不变。
 
 GTS tests 命令对齐已有 manifest 的 `pnpm test`（递归执行各包配置）；原来直接从根运行 Vitest 会误用样例配置。integration 角色增加 `.gitattributes`，用于实际复现的 Windows patch CRLF 解析问题；不允许删除 patch 或关闭安装脚本。此版本最后全量自测结果见 artifacts/selftest.json 指向的执行记录，不将旧版自测当新 seal 的通行证。
+
+## 2.1.0 integration reassignment and runtime/coverage review
+
+网页 worker 对本轮控制差异进行了独立只读复核并批准，未修改控制文件。复核确认：scopeTransitions 同时绑定旧任务 ID、seal、原始任务文件哈希以及 from/to 角色；扩大职责前仍按旧角色从固定 base 检查 committed/untracked 改动，不能追认已发生的越界；仓库与基线不变。明确扩展只用于主树的 `patches/` 和 `packages/custom-data-loader/` 集成。
+
+递归运行时入口通过 ASCII 命令文件和固定环境变量调用已指纹记录的 Node/包管理器，不关闭依赖状态检查。真实中文带空格路径测试确认 pnpm 使用指定入口；篡改生成入口被拒绝。覆盖探测跟随内部链接并保留别名路径，内部链接下新增 GTS 会改变清单；越界、循环、损坏链接仍 BLOCKED。validator 的 directory 来自本次 runner context，不接受 observation 自报路径。
+
+协调者在封存前运行 `node --test --test-reporter=tap harness/tests/probes.test.mjs harness/tests/runner.test.mjs`：43 PASS、0 FAIL、0 skipped，100723 ms；包括精确扩展授权缺失/原范围越界/旧任务不可变、真实 Unicode pnpm 调用和链接负例。独立复核只检查代码与新增测试，未重复执行此测试集。新 seal 仍须通过全部 selftest；分项产品实验不构成最终验收，未登记的 collectors 继续 BLOCKED。
