@@ -10,7 +10,7 @@ import devConfig from "../vite.config.ts";
 
 const packageRoot = fileURLToPath(new URL("../", import.meta.url));
 const artifactDirectory = process.env.GTS_BROWSER_ARTIFACTS;
-let vite, browser, page, backend, profile, defaultSource;
+let vite, browser, page, backend, profile, defaultSource, languageProxy;
 const dialogs = [];
 const events = [];
 const record = (kind, detail) =>
@@ -60,6 +60,8 @@ for (const signal of ["SIGTERM", "SIGINT"]) process.once(signal, () => service.c
       }
     });
   });
+  if (languageProxy)
+    languageProxy.options.target = `ws://127.0.0.1:${info.port}`;
   return {
     ...info,
     async close() {
@@ -80,7 +82,20 @@ beforeAll(async () => {
     configFile: false,
     root: packageRoot,
     cacheDir: path.join(profile, "vite-cache"),
-    server: { host: "127.0.0.1", port: 0 },
+    server: {
+      ...devConfig.server,
+      host: "127.0.0.1",
+      port: 0,
+      proxy: {
+        ...devConfig.server.proxy,
+        "/gts": {
+          ...devConfig.server.proxy["/gts"],
+          configure(proxy) {
+            languageProxy = proxy;
+          },
+        },
+      },
+    },
   });
   await vite.listen();
   browser = await puppeteer.launch({
@@ -437,6 +452,15 @@ test("backend checks GTS, loads cards, switches, retains undo and recovers", asy
   record("backend", { port: backend.port, engine: backend.engine });
   const unchanged = await content();
   await page.select('[aria-label="类型检查方式"]', "backend-tnb");
+  expect(
+    await page.$eval(
+      '[aria-label="类型检查服务地址"]',
+      (element) => element.value,
+    ),
+  ).toBe(page.url().replace(/^http/, "ws").replace(/\/$/, "") + "/gts");
+  await ready("backend-tnb-same-origin");
+  await checkSource("backend-tnb-same-origin");
+  await edit(unchanged);
   await page.$eval(
     '[aria-label="类型检查服务地址"]',
     (element, url) => {

@@ -41,15 +41,90 @@ alias. A stock TypeScript SDK is rejected. For an explicitly prepared TNB SDK:
 pnpm --filter @gi-tcg/custom-data-loader dev:language-server --tsdk /absolute/path/to/typescript-native-bridge/lib
 ```
 
-Select **TNB（tsgo）服务** with `ws://127.0.0.1:3001/gts`. `--port` changes the port.
-The service listens on loopback only, accepts pages served from localhost by
+Select **TNB（tsgo）服务**. The default address is `/gts` on the page's own origin;
+HTTPS pages use WSS automatically. Vite forwards this path to
+`ws://127.0.0.1:3001` during development. Set `GTS_LANGUAGE_SERVER_PROXY_TARGET`
+when the development backend uses a different address. `--port` changes the
+backend port. The service listens on loopback by default, accepts localhost pages
 default, and accepts additional page origins with repeated `--origin` arguments.
 Each connection gets its own temporary project and existing GTS Node language
 server process, using TNB through the GTS/Volar SDK interface. Closing the
-connection terminates that process and removes its temporary files. At most four
+connection terminates that process and removes its temporary files. By default four
 connections are accepted. `/health` reports the configured engine and active
 session count; successful diagnostic/feature requests are still needed to verify
 the checker actually works.
+
+## Deploying the example editor and checker
+
+The existing main game-server image does not contain this optional checker.
+Deploy the static editor and this Node service separately, with `/gts` forwarded
+by the same reverse proxy that serves the editor. The browser's local route
+continues to work while the checker is stopped.
+
+Build with the repository's Node 26 and pinned pnpm 12, including declarations:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm build "custom-data-loader..."
+pnpm --filter @gi-tcg/custom-data-loader build:web
+pnpm --filter @gi-tcg/custom-data-loader deploy --legacy --prod --frozen-lockfile /srv/gts-checker
+```
+
+Serve `packages/custom-data-loader/dist/web` as static files. The deployed
+checker includes `dist/gts`, its entry script, the shared workspace module and
+production dependencies, including the exact TNB alias and GTS language server.
+It starts directly with Node and needs no Vite or other development dependency:
+
+```sh
+cd /srv/gts-checker
+GTS_LANGUAGE_SERVER_ORIGINS=https://cards.example.org \
+  node scripts/language-server.mjs
+```
+
+Configure the process with `GTS_LANGUAGE_SERVER_HOST` (default `127.0.0.1`),
+`GTS_LANGUAGE_SERVER_PORT` (`3001`), `GTS_LANGUAGE_SERVER_ORIGINS` (comma-separated
+exact page origins), and `GTS_LANGUAGE_SERVER_MAX_SESSIONS` (`4`). CLI equivalents
+are `--host`, `--port`, repeated `--origin` and `--max-sessions`. `GTS_TSDK` or
+`--tsdk` selects an explicitly installed TNB SDK; normally use the shipped alias.
+For a separate checker domain or another proxy path, build the frontend with
+`VITE_GTS_LANGUAGE_SERVER_URL=wss://checker.example.org/gts` or `/api/gts`.
+The toolbar also lets a user replace and persist this address.
+
+For example, inside the HTTPS server block that already serves the editor:
+
+```nginx
+location = /gts {
+    proxy_pass http://127.0.0.1:3001/gts;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_read_timeout 300s;
+    proxy_send_timeout 300s;
+}
+```
+
+Set the allowed origin to the public page URL, such as `https://cards.example.org`.
+The reverse proxy preserves the browser's Origin header; setting an allowed
+origin does not replace any access control already used by the deployment.
+`GET http://127.0.0.1:3001/health` reports the configured engine and active sessions.
+Check both editor routes, real errors and repairs, disconnect/reconnect and
+simultaneous sessions after deployment; health alone does not check semantics.
+
+An optional image uses the same typed build and production deployment:
+
+```sh
+docker build -f packages/custom-data-loader/Dockerfile.language-service -t gts-checker .
+docker run --rm -p 127.0.0.1:3001:3001 \
+  -e GTS_LANGUAGE_SERVER_ORIGINS=https://cards.example.org gts-checker
+docker build -f packages/custom-data-loader/Dockerfile.language-service \
+  --target web-artifacts --output type=local,dest=./editor-static .
+```
+
+The image binds `0.0.0.0` inside its container; the example publishes its port only
+on the host's loopback for the reverse proxy. The runtime base is Node 26 on Debian
+bookworm/glibc. Test that image on the deployment architecture; a local Linux run
+is useful compatibility evidence but is not an execution of the image itself.
 
 The backend handles language analysis. Card compilation and execution keep using
 the existing `CustomDataLoader` and browser `esbuild-wasm` evaluator.

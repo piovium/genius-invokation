@@ -2,7 +2,15 @@
 export const LANGUAGE_WORKSPACE = "/workspace";
 export const BROWSER_TSDK_URL =
   "https://cdn.jsdelivr.net/npm/typescript@6.0.3/lib";
-export const DEFAULT_LANGUAGE_SERVER_URL = "ws://127.0.0.1:3001/gts";
+/** Resolve a deployment path against the page, including HTTPS → WSS. */
+export function languageServerUrl(pageUrl: string, configured = "/gts") {
+  const url = new URL(configured, pageUrl);
+  if (url.protocol === "https:") url.protocol = "wss:";
+  else if (url.protocol === "http:") url.protocol = "ws:";
+  if (!["ws:", "wss:"].includes(url.protocol))
+    throw new Error("Language service URL must use HTTP(S) or WS(S)");
+  return url.href;
+}
 
 export const LANGUAGE_GTS_CONFIG = {
   providerImportSource: "@gi-tcg/editor-provider",

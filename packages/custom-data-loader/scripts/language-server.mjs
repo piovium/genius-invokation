@@ -126,9 +126,13 @@ export async function resolveNativeSdk(tsdk) {
 
 export async function startLanguageServer({
   port = 3001,
+  host = "127.0.0.1",
   origins = [],
+  maxSessions = 4,
   tsdk,
 } = {}) {
+  if (!Number.isInteger(maxSessions) || maxSessions < 1)
+    throw new Error("maxSessions must be a positive integer");
   const engine = await resolveNativeSdk(tsdk);
   const files = createLanguageWorkspace(
     await readDeclarations(path.join(packageRoot, "dist/gts")),
@@ -136,6 +140,7 @@ export async function startLanguageServer({
   const entry = require.resolve("@gi-tcg/gts-language-server/node");
   const sessions = new Set();
   const pending = new Set();
+  const leases = new Set();
   const server = createServer((request, response) => {
     if (request.url === "/health") {
       response.writeHead(200, {
@@ -162,7 +167,7 @@ export async function startLanguageServer({
     if (
       request.url !== "/gts" ||
       !isAllowedOrigin(request.headers.origin, origins) ||
-      sessions.size + pending.size >= 4
+      leases.size >= maxSessions
     ) {
       socket.write("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n");
       socket.destroy();
@@ -173,6 +178,7 @@ export async function startLanguageServer({
     );
   });
   sockets.on("connection", (webSocket) => {
+    leases.add(webSocket);
     // Install the existing JSON-RPC reader immediately: it buffers initialize
     // while the isolated project files are written.
     const socket = {
@@ -204,6 +210,7 @@ export async function startLanguageServer({
           // directory is created by mkdtemp above and is never client-controlled.
           await rm(directory, { recursive: true, force: true });
           sessions.delete(cleanup);
+          leases.delete(webSocket);
         })());
       sessions.add(cleanup);
       webSocket.once("close", () => {
@@ -307,6 +314,7 @@ export async function startLanguageServer({
     pending.add(task);
     void task
       .catch((error) => {
+        leases.delete(webSocket);
         console.error(error);
         client.reader.dispose();
         client.writer.dispose();
@@ -316,7 +324,7 @@ export async function startLanguageServer({
   });
   await new Promise((resolve, reject) => {
     server.once("error", reject);
-    server.listen(port, "127.0.0.1", resolve);
+    server.listen(port, host, resolve);
   });
   const address = server.address();
   return {
@@ -340,9 +348,20 @@ if (
 ) {
   const { values } = parseArgs({
     options: {
-      port: { type: "string", default: "3001" },
+      port: {
+        type: "string",
+        default: process.env.GTS_LANGUAGE_SERVER_PORT ?? "3001",
+      },
+      host: {
+        type: "string",
+        default: process.env.GTS_LANGUAGE_SERVER_HOST ?? "127.0.0.1",
+      },
       origin: { type: "string", multiple: true },
-      tsdk: { type: "string" },
+      "max-sessions": {
+        type: "string",
+        default: process.env.GTS_LANGUAGE_SERVER_MAX_SESSIONS ?? "4",
+      },
+      tsdk: { type: "string", default: process.env.GTS_TSDK },
     },
   });
   const port = Number(values.port);
@@ -350,11 +369,17 @@ if (
     throw new Error("Invalid --port");
   const service = await startLanguageServer({
     port,
-    origins: values.origin,
+    host: values.host,
+    origins:
+      values.origin ??
+      process.env.GTS_LANGUAGE_SERVER_ORIGINS?.split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+    maxSessions: Number(values["max-sessions"]),
     tsdk: values.tsdk,
   });
   console.log(
-    `GTS ${service.engine.name}@${service.engine.version}: ws://127.0.0.1:${service.port}/gts`,
+    `GTS ${service.engine.name}@${service.engine.version}: ${values.host}:${service.port}/gts`,
   );
   for (const signal of ["SIGINT", "SIGTERM"])
     process.once(signal, () => {

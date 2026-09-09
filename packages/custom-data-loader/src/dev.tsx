@@ -34,7 +34,7 @@ import { createClient } from "@gi-tcg/web-ui-core";
 
 import "@gi-tcg/deck-builder/style.css";
 import "@gi-tcg/web-ui-core/style.css";
-import { DEFAULT_LANGUAGE_SERVER_URL } from "./dev-language-workspace";
+import { languageServerUrl } from "./dev-language-workspace";
 import type {
   LanguageServiceSettings,
   LanguageServiceStatus,
@@ -52,7 +52,10 @@ const MonacoEditor = (props: MonacoEditorProps) => {
   const settingsKey = "gi-tcg.editor.language-service";
   const initial: LanguageServiceSettings = {
     route: "browser-local",
-    serverUrl: DEFAULT_LANGUAGE_SERVER_URL,
+    serverUrl: languageServerUrl(
+      location.href,
+      import.meta.env.VITE_GTS_LANGUAGE_SERVER_URL,
+    ),
   };
   try {
     const saved = JSON.parse(localStorage.getItem(settingsKey) ?? "null");

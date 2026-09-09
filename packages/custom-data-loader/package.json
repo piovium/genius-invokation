@@ -4,6 +4,11 @@
   "version": "0.20.7+gi-6-0-0",
   "description": "Provides an easy way to load your custom data for GI-TCG",
   "type": "module",
+  "files": [
+    "dist",
+    "scripts/language-server.mjs",
+    "src/dev-language-workspace.ts"
+  ],
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -31,6 +36,8 @@
     "predev": "pnpm build",
     "dev": "vite",
     "dev:language-server": "node scripts/language-server.mjs",
+    "start:language-server": "node scripts/language-server.mjs",
+    "build:web": "vite build --outDir dist/web --emptyOutDir",
     "check": "tsc --noEmit",
     "test": "vitest",
     "test:browser": "vitest run --config vite.browser.config.ts",
@@ -39,7 +46,12 @@
   "dependencies": {
     "@gi-tcg/data": "workspace:*",
     "@gi-tcg/gts-transpiler": "catalog:",
-    "esbuild-wasm": "^0.27.3"
+    "@gi-tcg/gts-language-server": "catalog:",
+    "esbuild-wasm": "^0.27.3",
+    "typescript": "npm:typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2",
+    "vscode-uri": "3.1.0",
+    "vscode-ws-jsonrpc": "3.5.0",
+    "ws": "8.20.1"
   },
   "gamingTs": {
     "runtimeImportSource": "@gi-tcg/custom-data-loader/gts/runtime",
@@ -58,11 +70,11 @@
     "@gi-tcg/assets-manager": "workspace:*",
     "@gi-tcg/deck-builder": "workspace:*",
     "@gi-tcg/gts-language-client-code": "catalog:",
-    "@gi-tcg/gts-language-server": "catalog:",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/web-ui-core": "workspace:*",
     "dts-bundle-generator": "^9.5.1",
     "monaco-languageclient": "~10.7.0",
+    "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@~25.1.2",
     "puppeteer-core": "25.0.4",
     "rolldown": "^1.0.0-rc.15",
     "solid-js": "catalog:",
@@ -70,9 +82,6 @@
     "vite": "catalog:",
     "vite-plugin-solid": "catalog:",
     "vscode": "npm:@codingame/monaco-vscode-extension-api@~25.1.2",
-    "vscode-languageclient": "~9.0.1",
-    "vscode-uri": "3.1.0",
-    "vscode-ws-jsonrpc": "3.5.0",
-    "ws": "8.20.1"
+    "vscode-languageclient": "~9.0.1"
   }
 }

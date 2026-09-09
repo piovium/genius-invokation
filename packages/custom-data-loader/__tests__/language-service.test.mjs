@@ -8,6 +8,7 @@ import {
   createLanguageWorkspace,
   LANGUAGE_GTS_CONFIG,
   BROWSER_TSDK_URL,
+  languageServerUrl,
 } from "../src/dev-language-workspace.ts";
 import {
   isAllowedOrigin,
@@ -85,6 +86,26 @@ describe("shared browser and backend language project", () => {
 });
 
 describe("existing JSON-RPC transport adaptation", () => {
+  test("deployed pages connect to their own origin with the matching secure transport", () => {
+    expect(languageServerUrl("https://cards.example.org/editor/")).toBe(
+      "wss://cards.example.org/gts",
+    );
+    expect(languageServerUrl("http://localhost:5173/editor/")).toBe(
+      "ws://localhost:5173/gts",
+    );
+    expect(
+      languageServerUrl("https://cards.example.org/editor/", "/api/gts"),
+    ).toBe("wss://cards.example.org/api/gts");
+    expect(
+      languageServerUrl(
+        "https://cards.example.org/",
+        "wss://checker.example.org/gts",
+      ),
+    ).toBe("wss://checker.example.org/gts");
+    expect(() =>
+      languageServerUrl("https://cards.example.org/", "file:///gts"),
+    ).toThrow("Language service URL");
+  });
   test("URI mapping round-trips diagnostics, definitions and workspace edits without changing code", () => {
     const browser = "file:///workspace";
     const server = "file:///C:/Users/test%20user/Temp/gts-session/workspace";
