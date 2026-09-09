@@ -25,6 +25,8 @@
 
 在仓库根目录执行 docker build -f packages/server/Dockerfile .，运行镜像时提供 JWT_SECRET 与 DATABASE_URL。镜像先以 Node/pnpm 构建，运行层仅需 Node.js。Compose 先检查 PostgreSQL 健康，再运行一次迁移容器，最后启动服务；数据库使用持久化 volume。已有部署升级时继续挂载原数据库 volume，避免切换到空库。
 
+数据库健康检查连接 TCP，避免把 initdb 期间仅监听 Unix socket 的临时实例当作可用服务；首次初始化 volume 提供 120 秒启动宽限。TCP 就绪后即可执行迁移，无需等满宽限期。
+
 WebSocket 与 HTTP 共用端口 3000。反向代理需要转发 Upgrade，空闲超时应大于服务的心跳周期。metrics 仍位于 /metrics，API 使用 WEB_CLIENT_BASE_PATH + api。Redis、房间回放/S3、部署健康检查保留现有环境变量。收到退出信号后等待已有房间结束，Compose 提供 10 分钟退出宽限。
 
 ## 验证
