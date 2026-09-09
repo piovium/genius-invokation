@@ -13,73 +13,58 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { glob, readFile } from "node:fs/promises";
+import { cp, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
-import { build, type Plugin } from "rolldown";
+import { build } from "rolldown";
 import { replacePlugin } from "rolldown/plugins";
 import gts from "@gi-tcg/unplugin-gts/rolldown";
-
-const frontendDir = path.join(import.meta.dirname, "../../web-client/dist");
-
-const virtualFrontendId = "\0inline-frontend";
-
-const inlineFrontendPlugin: Plugin = {
-  name: "inline-frontend",
-  resolveId(source) {
-    if (source === "@gi-tcg/web-client") {
-      return virtualFrontendId;
-    }
-    return null;
-  },
-  async load(id) {
-    if (id !== virtualFrontendId) return null;
-    const contents: Record<string, string> = {};
-    for await (const dirent of glob(`${frontendDir}/**/*`, {
-      cwd: frontendDir,
-      withFileTypes: true,
-    })) {
-      if (dirent.isFile()) {
-        const filepath = path.resolve(dirent.parentPath, dirent.name);
-        const relativePath = path
-          .relative(frontendDir, filepath)
-          .replaceAll(path.sep, "/");
-        contents[relativePath] = (await readFile(filepath)).toString("base64");
-      }
-    }
-    return {
-      code: JSON.stringify(contents),
-      moduleType: "json",
-    };
-  },
-};
-
+import { generateDeckMetadata } from "./deck-metadata";
+const root = path.resolve(import.meta.dirname, "..");
+const output = path.join(root, "dist");
+// Validate and capture the local assets snapshot before replacing build output.
+const { outputDirectory: metadataDirectory } = await generateDeckMetadata();
+// Only this package's generated distribution is replaced.
+if (path.dirname(output) !== root || path.basename(output) !== "dist")
+  throw new Error("Unexpected build output path");
+await rm(output, { recursive: true, force: true });
+await mkdir(output, { recursive: true });
 await build({
-  input: `${import.meta.dirname}/../src/main.ts`,
+  input: {
+    main: path.join(root, "src/main.ts"),
+    migrate: path.join(root, "src/db/migrate.ts"),
+  },
   output: {
-    dir: `${import.meta.dirname}/../dist`,
+    dir: output,
     format: "esm",
     minify: true,
     sourcemap: true,
     assetFileNames: "[name].[ext]",
   },
-  external: [
-    "@nestjs/platform-express",
-    /^@nestjs\/microservices/,
-    /^@nestjs\/websockets/,
-    "@fastify/view",
-    "@fastify/static",
-  ],
+  external: ["pg-native", "bufferutil", "utf-8-validate"],
   plugins: [
-    inlineFrontendPlugin,
-    replacePlugin({
-      "process.env.NODE_ENV": '"production"',
-    }),
+    replacePlugin({ "process.env.NODE_ENV": '"production"' }),
     !!process.env.FROM_SOURCE && gts(),
   ],
   platform: "node",
   resolve: {
     conditionNames: process.env.FROM_SOURCE
-      ? ["development", "es2015", "module"]
-      : ["production", "es2015", "module"],
+      ? ["node", "development", "es2015", "module"]
+      : ["node", "production", "es2015", "module"],
   },
 });
+// Preserve actual browser assets and original migration SQL as files. The
+// server never imports a base64 object containing the complete frontend.
+await cp(
+  path.resolve(root, "../web-client/dist"),
+  path.join(output, "frontend"),
+  { recursive: true },
+);
+await cp(
+  path.join(root, "prisma/migrations"),
+  path.join(output, "prisma/migrations"),
+  { recursive: true },
+);
+await cp(
+  path.join(metadataDirectory, "deck-metadata-manifest.json"),
+  path.join(output, "deck-metadata-manifest.json"),
+);

@@ -35,10 +35,11 @@ export class DecksService {
   constructor(private readonly database: DatabaseService) {}
   async deckToCode(deck: Deck): Promise<DeckWithVersion> {
     try {
+      const requiredVersion = VERSIONS.indexOf(await verifyDeck(deck));
       return {
         ...deck,
         code: ASSETS_MANAGER.encode(deck),
-        requiredVersion: VERSIONS.indexOf(await verifyDeck(deck)),
+        requiredVersion,
       };
     } catch (error) {
       if (error instanceof Error) throw new BadRequestException(error.message);

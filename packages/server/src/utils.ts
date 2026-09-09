@@ -14,30 +14,15 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import type { Deck } from "@gi-tcg/typings";
-import {
-  DEFAULT_ASSETS_MANAGER,
-  type ActionCardRawData,
-  type AnyData,
-  type CharacterRawData,
+import type {
+  ActionCardRawData,
+  CharacterRawData,
 } from "@gi-tcg/assets-manager";
-import {
-  IsInt,
-  IsOptional,
-  IsPositive,
-  Max,
-  validate,
-  ValidationError,
-} from "class-validator";
+import { staticDecode, staticEncode } from "../generated/sharing";
+import deckMetadata from "../generated/deck-metadata";
 import { CURRENT_VERSION, VERSIONS, type Version } from "@gi-tcg/core";
 import { compare as semverCompare } from "semver";
-import {
-  plainToClass,
-  Transform,
-  type ClassConstructor,
-  type TransformFnParams,
-} from "class-transformer";
-import { createId as createCuid, isCuid } from "@paralleldrive/cuid2";
-import { BadRequestException } from "@nestjs/common";
+export { createGuestId, isGuestId } from "./auth/guest-id";
 
 export enum DeckVerificationErrorCode {
   SizeError = "SizeError",
@@ -55,13 +40,26 @@ export class DeckVerificationError extends Error {
   }
 }
 
-export const ASSETS_MANAGER = DEFAULT_ASSETS_MANAGER;
-
-ASSETS_MANAGER.prepareForSync();
-
-const getData = <T extends AnyData>(id: number): Promise<T | undefined> => {
-  return ASSETS_MANAGER.getData(id) as Promise<T | undefined>;
-};
+export const ASSETS_MANAGER = Object.freeze({
+  encode: staticEncode,
+  decode: staticDecode,
+});
+type CharacterMetadata = Pick<
+  CharacterRawData,
+  "id" | "shareId" | "tags" | "sinceVersion"
+>;
+type ActionCardMetadata = Pick<
+  ActionCardRawData,
+  | "id"
+  | "shareId"
+  | "tags"
+  | "sinceVersion"
+  | "relatedCharacterId"
+  | "relatedCharacterTags"
+>;
+const getData = <T extends CharacterMetadata | ActionCardMetadata>(
+  id: number,
+): T | undefined => deckMetadata[id] as T | undefined;
 
 const SINGLETON_REQUIRED_TAGS = ["GCG_TAG_LEGEND", "GCG_TAG_CARD_BLESSING"];
 
@@ -91,7 +89,7 @@ export async function verifyDeck({
   }
   const characterTags = [];
   for (const chId of characters) {
-    const character = await getData<CharacterRawData>(chId);
+    const character = getData<CharacterMetadata>(chId);
     if (!character) {
       throw new DeckVerificationError(
         DEC.NotFoundError,
@@ -109,15 +107,15 @@ export async function verifyDeck({
   }
   const cardCounts = new Map<number, number>();
   for (const cardId of cards) {
-    const card = await getData<ActionCardRawData>(cardId);
+    const card = getData<ActionCardMetadata>(cardId);
     if (!card) {
       throw new DeckVerificationError(
         DEC.NotFoundError,
         `card id ${cardId} not found`,
       );
     }
-    const cardMaxCount = SINGLETON_REQUIRED_TAGS.some(
-      (tag) => card?.tags.includes(tag),
+    const cardMaxCount = SINGLETON_REQUIRED_TAGS.some((tag) =>
+      card?.tags.includes(tag),
     )
       ? 1
       : 2;
@@ -181,44 +179,18 @@ export async function minimumRequiredVersionOfDeck({
   cards,
 }: Deck): Promise<Version> {
   return maxVersion(
-    await Promise.all(
-      [...characters, ...cards].map((p) =>
-        getData<CharacterRawData | ActionCardRawData>(p).then(
-          (d) => d?.sinceVersion as Version | undefined,
-        ),
-      ),
+    [...characters, ...cards].map(
+      (p) => getData<CharacterMetadata | ActionCardMetadata>(p)?.sinceVersion,
     ),
   );
 }
 
-export function parseStringToInt({ value }: TransformFnParams): number {
+export function parseStringToInt({ value }: { value: unknown }): number {
   return typeof value !== "string" || value.trim() === "" ? NaN : Number(value);
 }
 
-export function createGuestId() {
-  return `guest-${createCuid()}`;
-}
-
-export function isGuestId(id: unknown): id is string {
-  if (typeof id !== "string") {
-    return false;
-  }
-  const [tag, cuid] = id.split("-");
-  return tag === "guest" && !!cuid && isCuid(cuid);
-}
-
 export class PaginationDto {
-  @IsInt()
-  @IsPositive()
-  @IsOptional()
-  @Transform(parseStringToInt)
   skip?: number;
-
-  @IsInt()
-  @IsPositive()
-  @Max(30)
-  @IsOptional()
-  @Transform(parseStringToInt)
   take?: number;
 }
 
@@ -227,61 +199,9 @@ export interface PaginationResult<T> {
   data: T[];
 }
 
-type ValidationErrorWithConstraints = ValidationError & {
-  constraints?: Record<string, string>;
-};
-
-// https://github.com/nestjs/nest/blob/b6ea2a1899fe54f289e2c6188c843705c9072698/packages/common/pipes/validation.pipe.ts#L266
-
-function mapChildrenToValidationErrors(
-  error: ValidationError,
-  parentPath?: string,
-): ValidationErrorWithConstraints[] {
-  if (!(error.children && error.children.length)) {
-    return [error];
-  }
-  const validationErrors = [];
-  parentPath = parentPath ? `${parentPath}.${error.property}` : error.property;
-  for (const item of error.children) {
-    if (item.children && item.children.length) {
-      validationErrors.push(...mapChildrenToValidationErrors(item, parentPath));
-    }
-    validationErrors.push(prependConstraintsWithParentProp(parentPath, item));
-  }
-  return validationErrors;
-}
-
-function prependConstraintsWithParentProp(
-  parentPath: string,
-  error: ValidationError,
-): ValidationErrorWithConstraints {
-  const constraints: Record<string, string> = {};
-  for (const key in error.constraints) {
-    constraints[key] = `${parentPath}.${error.constraints[key]}`;
-  }
-  return {
-    ...error,
-    constraints,
-  };
-}
-
-function flattenValidationErrors(
-  validationErrors: ValidationError[],
-): string[] {
-  return validationErrors
-    .flatMap((error) => mapChildrenToValidationErrors(error))
-    .filter((item) => !!item.constraints)
-    .flatMap((item) => Object.values(item.constraints!));
-}
-
-export async function validateDto<T extends object>(
+export async function validateDto<T>(
   value: unknown,
-  type: ClassConstructor<T>,
+  type: { validate(value: unknown): T },
 ): Promise<T> {
-  const dto = plainToClass(type, value);
-  const errors = await validate(dto);
-  if (errors.length > 0) {
-    throw new BadRequestException(flattenValidationErrors(errors));
-  }
-  return dto;
+  return type.validate(value);
 }
