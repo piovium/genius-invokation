@@ -11,6 +11,8 @@
 
 在 packages/server/.env 设置 DATABASE_URL、JWT_SECRET；GitHub 登录另需 GH_CLIENT_ID、GH_CLIENT_SECRET。开发启动前执行 pnpm migrate，再运行 pnpm dev。开发和生产均连接真实 PostgreSQL，不再启动 Prisma/PGLite 模拟数据库。
 
+开发、类型检查与测试需要本地 assets-manager 数据快照。上面的完整构建会先生成该依赖；随后在 packages/server 执行 pnpm prepare:metadata，从 assets-manager/dist/data（FROM_SOURCE=1 时使用 src/data）生成牌组校验所需的精简元数据及来源哈希清单。该步骤只读取本地数据，不访问 CDN。pnpm dev、pnpm check 和通用测试命令会自动准备元数据；单独运行房间测试前需先执行此步骤。
+
 生产构建位于 dist/，包含 main.js、migrate.js、frontend/ 和原始 prisma/migrations/ SQL。运行 node dist/main.js。前端 JS、CSS、图片通过 Node 文件流 按请求返回，不内嵌 base64 或整体载入服务内存；保留 WEB_CLIENT_BASE_PATH、SPA 回退、MIME、ETag、sw.js 和 HTML 的 no-cache，以及带 hash 资源的 immutable 缓存行为。
 
 ## 数据库升级
@@ -29,7 +31,12 @@ WebSocket 与 HTTP 共用端口 3000。反向代理需要转发 Upgrade，空闲
 
 协议、真实对局、数据库写入与 RSS 的判定继续使用 ../../scripts/server-harness/README.md 约定的独立 harness。先运行其 environment/prepare.mjs 创建隔离数据库和账号，真实迁移验收使用 candidate.json；100 MiB 常驻、50 MiB 单局增量门槛未调整。
 
+以下命令在 packages/server 目录执行；pnpm test 覆盖 HTTP、认证、牌组元数据、房间和 WebSocket，test:rooms 与 test:http 可用于单独验证对应部分：
+
+    pnpm prepare:metadata
     pnpm check
+    pnpm test
+    pnpm test:rooms
     pnpm test:http
     pnpm test:db
 
