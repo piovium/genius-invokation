@@ -15,6 +15,12 @@
     ".filter-prod": "gnx scripts/filter.ts -P",
     "build": "pnpm .filter build",
     "test": "pnpm -r test",
+    "harness:check": "node --test scripts/server-harness/*.test.mjs scripts/server-harness/experiments/*.test.mjs scripts/server-harness/environment/*.test.mjs",
+    "harness:doctor": "node scripts/server-harness/doctor.mjs",
+    "harness:baseline": "node scripts/server-harness/run.mjs --config scripts/server-harness/baseline.json",
+    "harness:gate": "node scripts/server-harness/run.mjs --config scripts/server-harness/candidate.json",
+    "harness:experiments": "node scripts/server-harness/experiments/run.mjs",
+    "harness:environment": "node scripts/server-harness/environment/prepare.mjs",
     "publish": "pnpm -r publish",
     "build:no-typing": "NO_TYPING=1 pnpm build"
   },

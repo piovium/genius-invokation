@@ -1,0 +1,9 @@
+{
+  "mode": "gate",
+  "transport": "ws",
+  "baseUrl": "http://127.0.0.1:3000/api",
+  "idleMiB": 100,
+  "gameMiB": 50,
+  "storageTokenEnvs": ["HARNESS_USER_A_TOKEN", "HARNESS_USER_B_TOKEN"],
+  "outputDir": "temp/server-harness/candidate"
+}

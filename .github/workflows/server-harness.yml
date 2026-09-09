@@ -1,0 +1,42 @@
+name: Server migration harness self-test
+
+on:
+  pull_request:
+    paths:
+      - scripts/server-harness/**
+      - proto/**
+      - .github/workflows/server-harness.yml
+      - package.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  self-test:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: 26.1.0
+          - os: windows-latest
+            node: 24
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.5
+      - name: Verify harness (fixture results are not application benchmarks)
+        run: node --test scripts/server-harness/*.test.mjs scripts/server-harness/experiments/*.test.mjs scripts/server-harness/environment/*.test.mjs
+      - name: Record real WebSocket fault experiments
+        run: node scripts/server-harness/experiments/run.mjs --output temp/server-harness/experiments/ci.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: websocket-experiments-${{ matrix.os }}
+          path: temp/server-harness/experiments/ci.json

@@ -2,6 +2,8 @@
 
 对战平台后端可配合 Web 前端 `@gi-tcg/web-client` 使用。
 
+迁移前的协议、持久化及内存验证见 [服务迁移 harness](../../scripts/server-harness/README.md)。harness 独立于生产实现，可先用旧服务记录基线。
+
 ## 本地开发
 
 1. 安装依赖且构建所有依赖 packages（`core` `data` 等，可在根目录下执行 `pnpm build server` 以自动构建依赖）

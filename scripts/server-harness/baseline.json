@@ -1,0 +1,6 @@
+{
+  "mode": "baseline",
+  "transport": "sse",
+  "baseUrl": "http://127.0.0.1:3000/api",
+  "outputDir": "temp/server-harness/baseline"
+}

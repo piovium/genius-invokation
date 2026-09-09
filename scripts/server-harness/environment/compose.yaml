@@ -1,0 +1,53 @@
+name: gi-server-harness
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gi_server_harness
+      POSTGRES_USER: harness
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run environment/prepare.mjs first}
+      HARNESS_GH_TOKEN_A: ${HARNESS_GH_TOKEN_A:?Run environment/prepare.mjs first}
+      HARNESS_GH_TOKEN_B: ${HARNESS_GH_TOKEN_B:?Run environment/prepare.mjs first}
+    ports:
+      - "127.0.0.1:15432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ../../../packages/server/prisma/migrations:/harness/migrations:ro
+      - ./init-db.sh:/harness/init-db.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U harness -d gi_server_harness"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  identity:
+    image: node:26.1.0-alpine
+    restart: unless-stopped
+    command: ["node", "/harness/identity.mjs"]
+    environment:
+      HARNESS_GH_TOKEN_A: ${HARNESS_GH_TOKEN_A:?Run environment/prepare.mjs first}
+      HARNESS_GH_TOKEN_B: ${HARNESS_GH_TOKEN_B:?Run environment/prepare.mjs first}
+    ports:
+      - "127.0.0.1:19090:9090"
+    volumes:
+      - ./identity.mjs:/harness/identity.mjs:ro
+    read_only: true
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "node", "--input-type=module", "-e", "const r = await fetch('http://127.0.0.1:9090/healthz'); if (!r.ok) process.exit(1)"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 2s
+
+volumes:
+  postgres-data:
+    name: gi-server-harness-postgres-data
+
+networks:
+  default:
+    driver: bridge
