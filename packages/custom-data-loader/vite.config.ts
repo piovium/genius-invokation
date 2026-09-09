@@ -21,6 +21,9 @@ export default defineConfig({
   worker: {
     format: "es",
   },
+  optimizeDeps: {
+    include: ["@gi-tcg/gts-language-server/browser"],
+  },
   test: {
     environment: "node",
     env: {

@@ -30,8 +30,10 @@
   "scripts": {
     "predev": "pnpm build",
     "dev": "vite",
+    "dev:language-server": "node scripts/language-server.mjs",
     "check": "tsc --noEmit",
     "test": "vitest",
+    "test:browser": "vitest run --config vite.browser.config.ts",
     "build": "tsdown"
   },
   "dependencies": {
@@ -49,7 +51,9 @@
   "devDependencies": {
     "@codingame/monaco-vscode-api": "~25.1.2",
     "@codingame/monaco-vscode-editor-api": "~25.1.2",
+    "@codingame/monaco-vscode-files-service-override": "~25.1.2",
     "@codingame/monaco-vscode-keybindings-service-override": "~25.1.2",
+    "@codingame/monaco-vscode-textmate-service-override": "~25.1.2",
     "@codingame/monaco-vscode-theme-defaults-default-extension": "~25.1.2",
     "@gi-tcg/assets-manager": "workspace:*",
     "@gi-tcg/deck-builder": "workspace:*",
@@ -59,12 +63,16 @@
     "@gi-tcg/web-ui-core": "workspace:*",
     "dts-bundle-generator": "^9.5.1",
     "monaco-languageclient": "~10.7.0",
+    "puppeteer-core": "25.0.4",
     "rolldown": "^1.0.0-rc.15",
     "solid-js": "catalog:",
     "unplugin-dts": "^1.0.0",
     "vite": "catalog:",
     "vite-plugin-solid": "catalog:",
     "vscode": "npm:@codingame/monaco-vscode-extension-api@~25.1.2",
-    "vscode-languageclient": "~9.0.1"
+    "vscode-languageclient": "~9.0.1",
+    "vscode-uri": "3.1.0",
+    "vscode-ws-jsonrpc": "3.5.0",
+    "ws": "8.20.1"
   }
 }

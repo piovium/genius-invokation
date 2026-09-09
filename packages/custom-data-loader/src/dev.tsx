@@ -19,6 +19,7 @@ import {
   createSignal,
   on,
   onMount,
+  onCleanup,
   createMemo,
   type Component,
 } from "solid-js";
@@ -33,6 +34,11 @@ import { createClient } from "@gi-tcg/web-ui-core";
 
 import "@gi-tcg/deck-builder/style.css";
 import "@gi-tcg/web-ui-core/style.css";
+import { DEFAULT_LANGUAGE_SERVER_URL } from "./dev-language-workspace";
+import type {
+  LanguageServiceSettings,
+  LanguageServiceStatus,
+} from "./dev-editor";
 
 const root = document.querySelector("#root")!;
 
@@ -43,15 +49,110 @@ interface MonacoEditorProps {
 
 const MonacoEditor = (props: MonacoEditorProps) => {
   let container!: HTMLDivElement;
-  onMount(async () => {
-    const { setupEditor } = await import("./dev-editor");
-    const editor = await setupEditor(container, props.code ?? "");
-    editor.onDidChangeModelContent(() => {
-      const newCode = editor.getValue();
-      props.onCodeChange?.(newCode);
-    });
+  const settingsKey = "gi-tcg.editor.language-service";
+  const initial: LanguageServiceSettings = {
+    route: "browser-local",
+    serverUrl: DEFAULT_LANGUAGE_SERVER_URL,
+  };
+  try {
+    const saved = JSON.parse(localStorage.getItem(settingsKey) ?? "null");
+    if (saved?.route === "browser-local" || saved?.route === "backend-tnb")
+      initial.route = saved.route;
+    if (typeof saved?.serverUrl === "string" && saved.serverUrl)
+      initial.serverUrl = saved.serverUrl;
+  } catch {
+    /* Storage may be disabled; the editor still works. */
+  }
+  const [route, setRoute] = createSignal(initial.route);
+  const [serverUrl, setServerUrl] = createSignal(initial.serverUrl);
+  const [status, setStatus] = createSignal<LanguageServiceStatus>({
+    route: initial.route,
+    phase: "connecting",
+    message: "正在加载编辑器…",
   });
-  return <div class="editor" ref={container} />;
+  let controller:
+    | Awaited<ReturnType<(typeof import("./dev-editor"))["setupEditor"]>>
+    | undefined;
+  let disposed = false;
+  let changeSubscription: { dispose(): void } | undefined;
+  const connect = () => {
+    const settings = { route: route(), serverUrl: serverUrl() };
+    try {
+      localStorage.setItem(settingsKey, JSON.stringify(settings));
+    } catch {
+      /* Optional preference persistence. */
+    }
+    void controller?.connect(settings);
+  };
+  onMount(async () => {
+    try {
+      const { setupEditor } = await import("./dev-editor");
+      controller = await setupEditor(container, props.code ?? "", setStatus);
+      if (disposed) {
+        await controller.dispose();
+        return;
+      }
+      changeSubscription = controller.editor.onDidChangeModelContent(() => {
+        props.onCodeChange?.(controller!.editor.getValue());
+      });
+      connect();
+    } catch (error) {
+      setStatus({
+        route: route(),
+        phase: "error",
+        message: `编辑器加载失败：${error instanceof Error ? error.message : String(error)}`,
+      });
+    }
+  });
+  onCleanup(() => {
+    disposed = true;
+    changeSubscription?.dispose();
+    void controller?.dispose().catch(console.error);
+  });
+  return (
+    <>
+      <div class="language-service-toolbar">
+        <label>
+          类型检查
+          <select
+            aria-label="类型检查方式"
+            value={route()}
+            onChange={(event) => {
+              setRoute(
+                event.currentTarget.value as LanguageServiceSettings["route"],
+              );
+              connect();
+            }}
+          >
+            <option value="browser-local">浏览器本地</option>
+            <option value="backend-tnb">TNB（tsgo）服务</option>
+          </select>
+        </label>
+        <Show when={route() === "backend-tnb"}>
+          <label>
+            服务地址{" "}
+            <input
+              aria-label="类型检查服务地址"
+              type="url"
+              value={serverUrl()}
+              onInput={(event) => setServerUrl(event.currentTarget.value)}
+            />
+          </label>
+        </Show>
+        <button onClick={connect}>
+          {route() === "backend-tnb" ? "重新连接" : "重新检查"}
+        </button>
+        <span
+          role={status().phase === "error" ? "alert" : "status"}
+          data-language-status={status().phase}
+          classList={{ "language-service-error": status().phase === "error" }}
+        >
+          {status().message}
+        </span>
+      </div>
+      <div class="editor" ref={container} />
+    </>
+  );
 };
 
 const App = () => {
