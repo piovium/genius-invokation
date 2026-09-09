@@ -8,6 +8,8 @@ Only the coordinator owns HARNESS.md, this file, package.json, harness/contract.
 
 Future product tasks must be issued with `node harness/cli.mjs task ROLE`. It fails while contract.phase is harness-only or the current sealed self-tests have not passed. After core validation and independent review, the coordinator reviews the phase change, reseals controls, runs the harness self-tests, and then generates tasks. Dispatch the generated text verbatim with the concrete implementation objective appended. Do not use the earlier interrupted task prompts.
 
+When reviewed harness changes supersede active tasks, use `node harness/cli.mjs revise OLD_TASK_FILE` after the new self-tests pass. It creates a new task record linked to the old one, preserving ownership and original baseline while retaining existing scoped changes. It cannot clear out-of-scope changes or bless old acceptance receipts. Communicate the new generated task to the worker; never edit an old task record to hide changes.
+
 Use only the isolated worktrees named in the contract. Never modify the original genius-invokation/scripts/server-harness/memory.mjs or memory.test.mjs: another user process owns them. Do not copy mutable node_modules or dist between workers.
 
 A worker handoff must include its task file, git changes, exact commands and runner receipts. Workers do not declare migration complete. The coordinator runs final acceptance on the integrated tree and uses `node harness/cli.mjs finish RUN_DIRECTORY`; any missing, blocked, stale, subset-only or changed-during-run evidence prevents completion. Manually authored PASS JSON is not an acceptance result.

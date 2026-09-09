@@ -100,7 +100,6 @@ function runSemanticWorker(repo, version, scratch) {
         length: diagnostic.length ?? null,
         message: ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"),
       }));
-      program.dispose?.();
       return result;
     };
     const before = stats();

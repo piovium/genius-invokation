@@ -80,3 +80,10 @@ Windows 作业控制还完成两项实际检查：
 在协调者仍增补 evidence manifest 的过程中，独立运行 `node --test harness/tests/runner.test.mjs harness/tests/core.test.mjs` 得到 36 tests：34 PASS、2 FAIL、0 skipped，退出 1。通过项包括 subset 不可完成、缺 collector 不执行同名脚本、raw PASS 不能满足语义观察、篡改 nonce、phase 阻挡、源码／锁／未跟踪文件／ignored addon／构建产物变化使证据失效、foreign platform 阻挡，以及子进程超时收尾。两处失败是新增 manifest 先拒绝了输入，使旧测试预期的 `ENOENT`／`current assertions` 路径未被命中。已要求协调者修正测试；观察值重新校验测试必须同步更新 manifest 和 receipt hash，真正触达 validator，不能只放宽成“任意错误即通过”。最后 seal 应使用修正后的自测结果，本次中间运行不能作为 PASS 证据。
 
 最后对包管理器版本预检的 cwd 修复做了独立代码复核：`environmentContext` 将 pnpmMain 留在 contract 指定的 main、pnpmGts 指向 gts、npm 指向 tnb；`environmentGate` 使用该上下文执行，并先验证对应 checkout 可用；`verifyReceipt` 使用同一个函数核对实际 cwd，因此不能把在错误仓库执行的 `--version` 输出作为正确环境证据。新增 `preflight probes each package manager in its own repository` 用例让临时工具在错误目录退出 9，并断言四个命令及 GTS/TNB 的记录目录，覆盖了本次误触发包管理器自动切换的问题。此次复核没有发现缺陷，只检查代码和该回归用例，未重复运行全套测试或产品预检；最终执行结果以协调者重新 seal 后的原始 selftest receipt 为准。
+## 2.0.1 的真实运行修正
+
+发布包原生实验发现 probe 错误调用了非标准 `Program.dispose`。GTS worker 已从 stock TypeScript 的 Program 接口只读复核无该方法，协调者删除调用；不为探针要求 TNB 添加假 API。删除后原生负例能报告 TS2322，但恢复源码仍得到旧诊断；stock 对照会清除。这是待修的真实 TNB 状态刷新问题，恢复断言保持不变。
+
+GTS worker 已独立只读复核 task revision：当前 seal 的自测、相同职责与原始 base/head、越界拒绝、新记录链接原记录均存在；handoff 仍从 sealed base 计算差异，不能通过续接缩小检查范围。新增临时仓库测试验证旧任务过期、未自测的新 seal 不能续接、保留已有范围内改动和基线、越界不能续接。任务只采所属仓库源码身份以避免扫描其他 worker 正在安装的依赖；正式 run/finish 的完整指纹不变。
+
+GTS tests 命令对齐已有 manifest 的 `pnpm test`（递归执行各包配置）；原来直接从根运行 Vitest 会误用样例配置。integration 角色增加 `.gitattributes`，用于实际复现的 Windows patch CRLF 解析问题；不允许删除 patch 或关闭安装脚本。此版本最后全量自测结果见 artifacts/selftest.json 指向的执行记录，不将旧版自测当新 seal 的通行证。

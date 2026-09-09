@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { makeSeal, hashFile, writeJson, readJson, git, stable } from '../core.mjs';
-import { loadHarness, runSelection, verifyReceipt, finishRun, generateTask, handoff,
+import { loadHarness, runSelection, verifyReceipt, finishRun, generateTask, reviseTask, handoff,
   validateContract } from '../runner.mjs';
 
 const sourceRoot = fileURLToPath(new URL('../..', import.meta.url));
@@ -251,4 +251,28 @@ test('preflight probes each package manager in its own repository', async t => {
   assert.equal(receipt.results[0].commands.length, 4);
   assert.equal(path.basename(receipt.results[0].commands[2].cwd), 'gts');
   assert.equal(path.basename(receipt.results[0].commands[3].cwd), 'tnb');
+});
+test('task revision retains scoped work and baseline while requiring new sealed selftests', async t => {
+  const f = await fixture(t);
+  const cli = path.join(f.root, 'harness/cli.mjs');
+  const selftest = () => execFileSync(process.execPath, [cli, 'selftest'], { cwd: f.root, encoding: 'utf8', timeout: 30000, windowsHide: true });
+  selftest();
+  const first = await generateTask(f.harness, 'integration');
+  const original = fs.readFileSync(first.file, 'utf8');
+  f.write('repos/main/src/input.ts', 'export const n = 2;');
+  f.contract.version = 'next-reviewed-version';
+  f.write('harness/contract.json', JSON.stringify(f.contract));
+  f.write('harness/seal.json', JSON.stringify(await makeSeal(f.root)));
+  const next = await loadHarness(f.root);
+  await assert.rejects(handoff(next, first.file), /stale/);
+  await assert.rejects(reviseTask(next, first.file), /selftests must pass/);
+  selftest();
+  const revised = await reviseTask(next, first.file);
+  assert.equal(fs.readFileSync(first.file, 'utf8'), original);
+  assert.equal(readJson(revised.file).previousTaskId, readJson(first.file).id);
+  assert.equal(readJson(revised.file).before.repositories.main.base, f.contract.repositories.main.base);
+  assert.equal((await handoff(next, revised.file)).status, 'PASS');
+  assert.equal(fs.readFileSync(path.join(f.repo, 'src/input.ts'), 'utf8'), 'export const n = 2;');
+  f.write('repos/main/package.json', '{}');
+  await assert.rejects(reviseTask(next, revised.file), /out-of-scope/);
 });

@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { codes, sha, stable, hashFile, readJson, writeJson, inside, verifySeal,
   execute, processVerdict } from './core.mjs';
-import { loadHarness, runSelection, finishRun, generateTask, handoff, verifyReceipt } from './runner.mjs';
+import { loadHarness, runSelection, finishRun, generateTask, reviseTask, handoff, verifyReceipt } from './runner.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 async function selftest(harness) {
@@ -34,9 +34,9 @@ async function selftest(harness) {
 }
 async function main() {
   const [action, ...args] = process.argv.slice(2);
-  const arities = { verify: [0], selftest: [0], run: [1], status: [0, 1], task: [1], handoff: [1], finish: [1] };
+  const arities = { verify: [0], selftest: [0], run: [1], status: [0, 1], task: [1], revise: [1], handoff: [1], finish: [1] };
   if (!arities[action]?.includes(args.length) || args.some(arg => arg.startsWith('--'))) {
-    throw new Error('Usage: node harness/cli.mjs verify | selftest | run preflight|all|GATE | status [RUN_DIRECTORY] | task ROLE | handoff TASK_FILE | finish RUN_DIRECTORY');
+    throw new Error('Usage: node harness/cli.mjs verify | selftest | run preflight|all|GATE | status [RUN_DIRECTORY] | task ROLE | revise TASK_FILE | handoff TASK_FILE | finish RUN_DIRECTORY');
   }
   const harness = await loadHarness(root);
   if (action === 'verify') return { status: 'PASS', version: harness.contract.version, phase: harness.contract.phase,
@@ -44,6 +44,7 @@ async function main() {
   if (action === 'selftest') return selftest(harness);
   if (action === 'run') return runSelection(harness, args[0]);
   if (action === 'task') return generateTask(harness, args[0]);
+  if (action === 'revise') return reviseTask(harness, path.resolve(root, args[0]));
   if (action === 'handoff') return handoff(harness, path.resolve(root, args[0]));
   if (action === 'finish') return finishRun(harness, args[0]);
   if (args.length) {

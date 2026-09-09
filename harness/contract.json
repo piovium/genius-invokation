@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2.0.0",
+  "version": "2.0.1",
   "phase": "migration",
   "tnbVersion": "6.0.3-bridge.16.tsgo.7.0.2",
   "policy": {
@@ -74,7 +74,8 @@
         "pnpm-lock.yaml",
         ".vscode/",
         ".github/",
-        "docs/"
+        "docs/",
+        ".gitattributes"
       ],
       "gates": [
         "environment",
@@ -230,9 +231,7 @@
         "gts-build"
       ],
       "args": [
-        "exec",
-        "vitest",
-        "--run"
+        "test"
       ],
       "timeoutMs": 600000
     },

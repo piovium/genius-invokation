@@ -116,7 +116,7 @@ export async function treeDigest(directory, { ignoreGit = true } = {}) {
   await visit(directory, '.');
   return { digest: sha(stable(rows)), entries: rows.length };
 }
-export async function snapshotRepository(root, spec) {
+export async function snapshotRepository(root, spec, { includeRuntime = true } = {}) {
   const repo = inside(root, spec.path);
   if (!fs.existsSync(repo)) return { status: 'BLOCKED', reason: `Missing checkout: ${spec.path}` };
   const real = fs.realpathSync.native(repo);
@@ -139,9 +139,9 @@ export async function snapshotRepository(root, spec) {
   const changes = git(repo, ['status', '--porcelain=v1', '--untracked-files=all']);
   const diff = git(repo, ['diff', '--binary', spec.base, '--']);
   const source = sha(stable({ head, changes, rows, diff }));
-  const runtime = await treeDigest(repo);
+  const runtime = includeRuntime ? await treeDigest(repo) : null;
   return { status: 'PASS', path: real, base: spec.base, head, source,
-    runtime: runtime.digest, entries: runtime.entries,
+    runtime: runtime?.digest ?? null, entries: runtime?.entries ?? null,
     changed: head !== spec.base || !!changes || !!diff };
 }
 export async function snapshot(root, contract, runtimePaths = {}) {

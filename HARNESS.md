@@ -1,6 +1,6 @@
 # Genius Invokation → TNB / tsgo：执行与验收契约
 
-版本：2.0。日期：2026-09-10。**核心 harness 已完成自测及独立复核，`contract.phase = "migration"`；进入迁移基线阶段，产品迁移尚未验收。**
+版本：2.0.1。日期：2026-09-10。**核心 harness 已完成自测及独立复核，`contract.phase = "migration"`；进入迁移基线阶段，产品迁移尚未验收。**
 
 用户最新授权是“差不多就可以开干，你自己衡量进度”。协调者完成核心自测和独立复核后，可以审查并修改 phase、更新 seal、重新验证，然后生成新的多 agent 任务启动迁移，无需再次请求用户确认。此前中断的旧任务不得直接恢复。harness 自测成功、环境探测成功都不等于产品迁移成功。
 
@@ -47,6 +47,7 @@ GTS 已有 [PR #14](https://github.com/piovium/gts/pull/14)，分支 `origin/fix
 | `run all` | 按 contract 枚举全部适用 gate；缺真实 collector 保持 BLOCKED |
 | `status [RUN_DIRECTORY]` | 查看已记录的结果和缺口，不把缺失项推导为成功 |
 | `task ROLE` | 生成包含 seal、角色边界和验收要求的新任务；当前 seal 的 selftest 未通过则拒绝 |
+| `revise TASK_FILE` | 控制文件经审查更新后，以新 seal 续接已有任务；保留原基线及同范围改动，拒绝越界修改，旧验收回执仍须重跑 |
 | `handoff TASK_FILE` | 根据任务文件核验交接；交接不授予开始产品工作的权限，也不代表迁移完成 |
 | `finish RUN_DIRECTORY` | 协调者对最终集成树申请完整验收；缺失、过期、局部、运行期间变化或未通过的必需证据均拒绝 |
 

@@ -15,4 +15,3 @@ jobs:
           node-version: 24
       - run: npm run harness:verify
       - run: npm run harness:selftest
-

@@ -4,7 +4,7 @@ import crypto from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 import { codes, sha, stable, readJson, writeJson, inside, hashFile, verifySeal, git,
-  sourcePaths, snapshot, acquireLock, execute, processVerdict, requiredGateIds, fatalPattern, evidenceManifest } from './core.mjs';
+  sourcePaths, snapshot, snapshotRepository, acquireLock, execute, processVerdict, requiredGateIds, fatalPattern, evidenceManifest } from './core.mjs';
 
 export function validateContract(contract) {
   if (contract.schemaVersion !== 1 || !['harness-only', 'migration'].includes(contract.phase)) {
@@ -383,22 +383,39 @@ export async function finishRun(harness, directory) {
     && !receipt.results.some(row => row.id === 'platforms' && row.status === 'PASS')) missing.push('platforms collector: Windows and Linux execution proof');
   return verdict(missing.length ? 'BLOCKED' : 'PASS', missing.length ? 'Migration acceptance incomplete' : 'All sealed acceptance gates passed', { missing, directory: receipt.directory });
 }
-export async function generateTask(harness, roleName) {
+export async function generateTask(harness, roleName, previousFile) {
   if (harness.contract.phase !== 'migration') throw new Error('Product task dispatch paused: phase is harness-only');
   const role = harness.contract.roles[roleName];
   if (!role) throw new Error('Unknown task role');
   await verifyReadiness(harness);
-  const before = await snapshot(harness.root, harness.contract, harness.runtimePaths);
+  // Assignments bind source ownership. Acceptance runs independently fingerprint
+  // every executable input; do not rescan other workers' installing dependencies here.
+  const before = { repositories: { [role.repository]: await snapshotRepository(harness.root,
+    harness.contract.repositories[role.repository], { includeRuntime: false }) } };
   const repo = before.repositories[role.repository];
   if (repo.status !== 'PASS') throw new Error('Task checkout unavailable');
-  if (repo.changed) throw new Error('Task checkout must start clean at its pinned base; review/rebase contract before another task');
+  let previous;
+  if (previousFile) {
+    previous = readTask(harness, previousFile);
+    const base = harness.contract.repositories[role.repository].base;
+    if (previous.role !== roleName || stable(previous.roleSpec) !== stable(role)
+      || previous.before?.repositories?.[role.repository]?.base !== base
+      || previous.before.repositories[role.repository].head !== base) {
+      throw new Error('Task revision cannot change ownership or its sealed starting baseline');
+    }
+    if (scopeChanges(harness, role).outside.length) throw new Error('Resolve out-of-scope changes before revising a task');
+  } else if (repo.changed) throw new Error('Task checkout must start clean at its pinned base; use revise for an existing assignment');
   const id = crypto.randomUUID();
   const directory = path.join(harness.root, 'artifacts', 'tasks', id);
-  const record = { schemaVersion: 1, id, role: roleName, controlDigest: harness.seal.digest, before, roleSpec: role };
+  const record = { schemaVersion: 1, id, role: roleName, controlDigest: harness.seal.digest,
+    before: previous?.before ?? before, roleSpec: role,
+    ...(previous ? { previousTaskId: previous.id, previousControlDigest: previous.controlDigest,
+      revisionSnapshot: before, previousRecordSha256: await hashFile(previousFile) } : {}) };
   writeJson(path.join(directory, 'task.json'), record);
   const prompt = `Read ${path.join(harness.root, 'AGENTS.md')} and ${path.join(harness.root, 'HARNESS.md')} first.\n`
     + `Harness ${harness.contract.version}; seal ${harness.seal.digest}. Verify with node harness/cli.mjs verify in ${harness.root}.\n`
     + `Task record: ${path.join(directory, 'task.json')}\nRole: ${roleName}. Work only in ${repo.path}, base ${repo.base}.\n`
+    + (previous ? `Continues task ${previous.id}; retain its changes and original base. Previous task records are superseded.\n` : '')
     + `Allowed paths: ${role.paths.join(', ')}. Do not edit harness controls or other worktrees.\n`
     + `Required gates: ${role.gates.join(', ')}. Run evidence via node harness/cli.mjs run all from the harness root; coordinate the heavy-run lock.\n`
     + `Missing collectors are BLOCKED; request coordinator integration using existing project tests. Do not write PASS receipts.\n`
@@ -407,21 +424,33 @@ export async function generateTask(harness, roleName) {
   fs.writeFileSync(path.join(directory, 'prompt.md'), prompt, { flag: 'wx' });
   return { status: 'PASS', file: path.join(directory, 'task.json'), prompt };
 }
-export async function handoff(harness, file) {
-  if (harness.contract.phase !== 'migration') throw new Error('Product handoff paused: phase is harness-only');
+function readTask(harness, file) {
   const taskRoot = path.join(harness.root, 'artifacts', 'tasks');
   inside(taskRoot, path.relative(taskRoot, path.resolve(file)).split(path.sep).join('/'));
   const task = readJson(file);
   if (path.basename(path.dirname(file)) !== task.id || path.basename(file) !== 'task.json') throw new Error('Wrong task record location');
+  return task;
+}
+function scopeChanges(harness, role) {
+  const repo = inside(harness.root, harness.contract.repositories[role.repository].path);
+  const base = harness.contract.repositories[role.repository].base;
+  const changed = [...new Set([...git(repo, ['diff', '--name-only', '-z', '--no-renames', base, '--']).split('\0'),
+    ...git(repo, ['ls-files', '-z', '--others', '--exclude-standard']).split('\0')].filter(Boolean))];
+  const outside = changed.filter(file => !role.paths.some(prefix => prefix.endsWith('/') ? file.startsWith(prefix) : file === prefix));
+  return { changed, outside };
+}
+export async function reviseTask(harness, file) {
+  return generateTask(harness, readTask(harness, file).role, file);
+}
+export async function handoff(harness, file) {
+  if (harness.contract.phase !== 'migration') throw new Error('Product handoff paused: phase is harness-only');
+  const task = readTask(harness, file);
   if (task.controlDigest !== harness.seal.digest || stable(task.roleSpec) !== stable(harness.contract.roles[task.role])) throw new Error('Task contract is stale or modified');
   const role = task.roleSpec;
   const base = harness.contract.repositories[role.repository].base;
   if (task.before?.repositories?.[role.repository]?.base !== base
     || task.before.repositories[role.repository].head !== base) throw new Error('Task baseline differs from sealed contract');
-  const repo = inside(harness.root, harness.contract.repositories[role.repository].path);
-  const changed = [...new Set([...git(repo, ['diff', '--name-only', '-z', '--no-renames', base, '--']).split('\0'),
-    ...git(repo, ['ls-files', '-z', '--others', '--exclude-standard']).split('\0')].filter(Boolean))];
-  const outside = changed.filter(file => !role.paths.some(prefix => prefix.endsWith('/') ? file.startsWith(prefix) : file === prefix));
+  const { changed, outside } = scopeChanges(harness, role);
   return verdict(outside.length ? 'FAIL' : 'PASS', outside.length ? 'Changes outside assigned ownership' : 'Scope check passed; this is not product acceptance', { changed, outside, requiredGates: role.gates });
 }
 
