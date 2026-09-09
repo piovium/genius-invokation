@@ -53,6 +53,24 @@ export interface LanguageServiceStatus {
   message: string;
 }
 
+/** Optional local observation for diagnostics tools; no messages are retained. */
+export interface LanguageServiceEvent {
+  sessionId: string;
+  route: LanguageRoute;
+  atMs: number;
+  kind: string;
+  detail?: unknown;
+}
+const languageServiceListeners = new Set<
+  (event: LanguageServiceEvent) => void
+>();
+export function observeLanguageService(
+  listener: (event: LanguageServiceEvent) => void,
+) {
+  languageServiceListeners.add(listener);
+  return { dispose: () => languageServiceListeners.delete(listener) };
+}
+
 const GTS_LANGUAGE_ID = "gaming-ts";
 const WORKSPACE_URI = vscode.Uri.file("/workspace");
 const EXAMPLE_FILE_URI = vscode.Uri.file("/workspace/example.gts");
@@ -233,7 +251,12 @@ export async function setupEditor(
   let queue = Promise.resolve();
   let stopping = Promise.resolve();
   let active:
-    { client: MonacoLanguageClient; closeTransport(): void } | undefined;
+    | {
+        client: MonacoLanguageClient;
+        closeTransport(): void;
+        emit(kind: string, detail?: unknown): void;
+      }
+    | undefined;
 
   function stop() {
     const previous = active;
@@ -251,6 +274,7 @@ export async function setupEditor(
         );
       } finally {
         previous.closeTransport();
+        previous.emit("client-stopped");
       }
     });
     return stopping;
@@ -258,6 +282,22 @@ export async function setupEditor(
 
   function connect(settings: LanguageServiceSettings) {
     const current = ++generation;
+    const emit = (kind: string, detail?: unknown) => {
+      for (const listener of languageServiceListeners) {
+        try {
+          listener({
+            sessionId: `gts-editor-${current}`,
+            route: settings.route,
+            atMs: performance.timeOrigin + performance.now(),
+            kind,
+            detail,
+          });
+        } catch (error) {
+          console.error("Language service observer failed:", error);
+        }
+      }
+    };
+    emit("connect-requested");
     pending?.abort();
     const abort = new AbortController();
     pending = abort;
@@ -303,12 +343,25 @@ export async function setupEditor(
         const writer = worker
           ? new BrowserMessageWriter(worker)
           : new WebSocketMessageWriter(rpcSocket!);
+        const listen = reader.listen.bind(reader);
+        reader.listen = (callback) =>
+          listen((message) => {
+            emit("protocol-receive", message);
+            callback(message);
+          });
+        const write = writer.write.bind(writer);
+        writer.write = (message) => {
+          emit("protocol-send", message);
+          return write(message);
+        };
+        emit("transport-created", { kind: worker ? "worker" : "socket" });
         let transportClosed = false;
         const closeTransport = () => {
           if (transportClosed) return;
           transportClosed = true;
           reader.close();
           worker?.terminate();
+          if (worker) emit("worker-terminated");
           socket?.close();
           reader.dispose();
           writer.dispose();
@@ -349,16 +402,22 @@ export async function setupEditor(
             },
             middleware: {
               handleDiagnostics: (uri, diagnostics, next) => {
-                if (current === generation && active?.client === client)
+                if (current === generation && active?.client === client) {
                   next(uri, diagnostics);
+                  emit("diagnostics-displayed", {
+                    uri: uri.toString(),
+                    diagnostics,
+                  });
+                }
               },
             },
           },
         });
-        active = { client, closeTransport };
+        active = { client, closeTransport, emit };
         worker?.addEventListener("error", () => fail());
         socket?.addEventListener("error", () => fail());
         socket?.addEventListener("close", () => {
+          emit("socket-closed");
           if (!transportClosed) fail();
         });
         const cancelled = new Promise<never>((_, reject) => {
@@ -390,6 +449,7 @@ export async function setupEditor(
         };
         await Promise.race([start(), cancelled]);
         if (current === generation && !abort.signal.aborted && !disposed) {
+          emit("client-ready");
           onStatus({
             route: settings.route,
             phase: "ready",

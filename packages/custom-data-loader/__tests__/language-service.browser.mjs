@@ -4,7 +4,7 @@ import puppeteer from "puppeteer-core";
 import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawn } from "node:child_process";
 import devConfig from "../vite.config.ts";
 
@@ -524,3 +524,35 @@ test("backend checks GTS, loads cards, switches, retains undo and recovers", asy
     "No unhandled browser failures",
   ).toEqual([]);
 });
+
+// An independently reviewed acceptance collector can add its session evidence
+// scenario while retaining both behavioral tests and this real browser setup.
+if (process.env.GTS_BROWSER_SESSION_SCENARIO) {
+  test("both routes provide fresh version-bound session evidence", async () => {
+    const { run } = await import(
+      pathToFileURL(process.env.GTS_BROWSER_SESSION_SCENARIO).href
+    );
+    await run({
+      page,
+      browser,
+      expect,
+      record,
+      ready,
+      editorApi,
+      content,
+      edit,
+      languageFeatures,
+      languageWorkers,
+      sessions,
+      getBackend: () => backend,
+      async stopBackend() {
+        await backend?.close();
+        backend = undefined;
+      },
+      async startBackend(port) {
+        backend = await startBackend(port);
+        return backend;
+      },
+    });
+  });
+}

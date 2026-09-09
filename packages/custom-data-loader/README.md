@@ -83,6 +83,13 @@ receives actual browser console/protocol events and a screenshot. Both tests
 must pass: a selected test or successful initialization alone does not verify
 the complete behavior.
 
+Local diagnostics tools can subscribe to `observeLanguageService` from
+`src/dev-editor.ts` for raw protocol messages and session lifecycle events.
+The editor retains no observation history and observers cannot replace replies.
+An acceptance collector may set `GTS_BROWSER_SESSION_SCENARIO` to its reviewed
+ES module exporting `run(helpers)` to append a scenario to the same real browser
+test setup. The two normal behavioral tests still run in full.
+
 ## Module evaluator
 
 `loadMod` is asynchronous. In Node.js it uses the `node-vm` evaluator by
