@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test": "gnx --test tests/*.test.ts",
     "check": "tsc --noEmit",
     "dev": "vite",
     "build": "vite build",
@@ -15,7 +16,6 @@
     "@gi-tcg/deck-builder": "workspace:*",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/web-ui-core": "workspace:*",
-    "@server-sent-stream/web": "^1.0.3",
     "@solid-primitives/i18n": "^2.2.1",
     "@solid-primitives/storage": "^4.2.1",
     "@solidjs/router": "^0.13.5",
@@ -35,9 +35,11 @@
     "@iconify-json/mdi": "^1.2.3",
     "@rollup/plugin-babel": "^6.0.4",
     "@types/core-js": "^2.5.8",
+    "@types/ws": "^8.18.1",
     "@unocss/preset-icons": "catalog:",
     "unocss": "catalog:",
     "vite": "catalog:",
-    "vite-plugin-solid": "catalog:"
+    "vite-plugin-solid": "catalog:",
+    "ws": "8.21.3"
   }
 }

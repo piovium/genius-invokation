@@ -17,27 +17,12 @@ import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { Layout } from "../layouts/Layout";
 import { PlayerInfo, roomCodeToId, getPlayerAvatarUrl } from "../utils";
 import {
-  Show,
-  createSignal,
-  onMount,
-  createEffect,
-  onCleanup,
-  createResource,
-  Switch,
-  Match,
-  Component,
-  createUniqueId,
+  Show, createSignal, onMount, createEffect, onCleanup, createResource,
+  Switch, Match, Component, createUniqueId,
 } from "solid-js";
 import axios, { AxiosError } from "axios";
 import "@gi-tcg/web-ui-core/style.css";
-import EventSourceStream from "@server-sent-stream/web";
-import {
-  base64Decode,
-  base64Encode,
-  Notification,
-  RpcRequest,
-  RpcResponse,
-} from "@gi-tcg/typings";
+import { Notification, RpcRequest, RpcResponse, type GameRpcRequest, type GameRpcTimer } from "@gi-tcg/typings";
 import { Client, createClient, WebUiPlayerIO } from "@gi-tcg/web-ui-core";
 import { useMobile } from "../App";
 import { Dynamic } from "solid-js/web";
@@ -45,129 +30,20 @@ import { MobileChessboardLayout } from "../layouts/MobileChessboardLayout";
 import type { CancellablePlayerIO } from "@gi-tcg/core";
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
+import {
+  RoomConnection, RoomConnectionError, roomWebSocketUrl,
+  type RoomInitialized, type RoomEvent, type RoomConnectionState,
+} from "../room-connection";
 
-interface InitializedPayload {
-  who: 0 | 1;
-  config: {
-    watchable: boolean;
-    gameVersion: string;
-  };
-  myPlayerInfo: PlayerInfo;
-  oppPlayerInfo: PlayerInfo;
-}
-
-interface RpcTimer {
-  current: number;
-  total: number;
-}
-
-interface ActionRequestPayload {
-  id: number;
-  timer: RpcTimer;
-  request: string;
-}
-
-const SSE_RECONNECT_TIMEOUT = 30 * 1000;
-
-const createReconnectSse = <T,>(
-  url: string | (() => string),
-  onPayload: (payload: T) => void,
-  onError?: (e: Error) => void,
-): [fetch: () => void, abort: () => void] => {
-  let reconnectTimeout: number | null = null;
-  let abortController: AbortController | null = null;
-  let cancelled = false;
-  let activating = false;
-
-  const resetReconnectTimer = () => {
-    if (reconnectTimeout) {
-      clearTimeout(reconnectTimeout);
-    }
-    reconnectTimeout = setTimeout(() => {
-      console.warn?.("No data received, reconnecting...");
-      abortController?.abort();
-    }, SSE_RECONNECT_TIMEOUT);
-  };
-
-  const connect = () => {
-    if (cancelled) {
-      return;
-    }
-    if (activating) {
-      return;
-    }
-    activating = true;
-    abortController = new AbortController();
-    axios
-      .get(typeof url === "function" ? url() : url, {
-        headers: {
-          Accept: "text/event-stream",
-        },
-        responseType: "stream",
-        signal: abortController.signal,
-        adapter: "fetch",
-        validateStatus: () => true, // Accept all status codes
-      })
-      .then(async (response) => {
-        if (response.status !== 200) {
-          onError?.(
-            new AxiosError(
-              response.statusText,
-              `${response.status}`,
-              void 0,
-              void 0,
-              response,
-            ),
-          );
-          return;
-        }
-        console.log(`${url} CONNECTED`);
-        const data: ReadableStream = response.data;
-        const reader = data.pipeThrough(new EventSourceStream()).getReader();
-
-        activating = false;
-        resetReconnectTimer(); // Start the timer after connection is established
-
-        for (;;) {
-          const { value, done } = await reader.read();
-          if (done) {
-            break;
-          }
-          resetReconnectTimer(); // Reset the timer on receiving data
-          const payload = JSON.parse(value.data);
-          try {
-            onPayload(payload);
-          } catch (e) {
-            console.error("Error processing payload:", e);
-          }
-        }
-
-        if (reconnectTimeout) {
-          clearTimeout(reconnectTimeout);
-        }
-      })
-      .catch((error) => {
-        // network error / abort error, try reconnect later
-        onError?.(error);
-        setTimeout(connect, 1000);
-      });
-  };
-
-  return [
-    () => {
-      cancelled = false;
-      activating = false;
-      connect();
-    },
-    () => {
-      cancelled = true;
-      activating = false;
-      abortController?.abort();
-    },
-  ];
-};
-
+// A parameter change must destroy the previous room's connections and pending
+// UI promises even when the router reuses this route component.
 export default function Room() {
+  const params = useParams();
+  const [search] = useSearchParams();
+  return <Show keyed when={JSON.stringify([params.code, search.player, search.action])}>{(_key) => <ConnectedRoom />}</Show>;
+}
+
+function ConnectedRoom() {
   const { t, assetsManager, locale } = useI18n();
   const params = useParams();
   const [searchParams] = useSearchParams();
@@ -175,294 +51,265 @@ export default function Room() {
   const navigate = useNavigate();
   const code = params.code;
   const action = !!searchParams.action;
-  const playerId = searchParams.player;
+  const playerId = String(searchParams.player ?? "");
   const id = roomCodeToId(code);
   const { status } = useAuth();
   const [playerIo, setPlayerIo] = createSignal<WebUiPlayerIO>();
-  const [initialized, setInitialized] = createSignal<InitializedPayload>();
+  const [initialized, setInitialized] = createSignal<RoomInitialized>();
   const [loading, setLoading] = createSignal(true);
   const [failed, setFailed] = createSignal<null | string>(null);
   const [chessboard, setChessboard] = createSignal<Component>();
-
-  // Enable opp chessboard & spectator mode
+  const [connectionState, setConnectionState] = createSignal<RoomConnectionState>("connecting");
   const [observerMode, setObserverMode] = createSignal(false);
   const [oppPlayerIo, setOppPlayerIo] = createSignal<CancellablePlayerIO>();
-
-  const reportStreamError = async (e: Error) => {
-    if (e instanceof AxiosError) {
-      const data = e.response?.data as ReadableStream;
-      if (data && "pipeThrough" in data) {
-        const reader = data.pipeThrough(new TextDecoderStream()).getReader();
-        const { value, done } = await reader.read();
-        let message = `${value}`;
-        try {
-          message = JSON.parse(value ?? "{}").message;
-        } catch {}
-        if (initialized()) {
-          alert(message);
-        } else {
-          setLoading(false);
-          setFailed(message);
-        }
-        console.error(value);
-      }
-    }
-    console.error(e);
-  };
-
-  const initializeClient = (payload: InitializedPayload) => {
-    const onGiveUp = async () => {
-      try {
-        const { data } = await axios.post(
-          `rooms/${id}/players/${playerId}/giveUp`,
-        );
-      } catch (e) {
-        if (e instanceof AxiosError) {
-          alert(e.response?.data.message);
-        }
-        console.error(e);
-      }
-    };
-    if (!playerIo()) {
-      const [io, Ui] = createClient(payload.who, {
-        assetsManager: () => assetsManager(payload.config.gameVersion),
-        locale,
-        onGiveUp,
-        disableAction: !action,
-      });
-      setChessboard(() => Ui);
-      setPlayerIo(io);
-    }
-  };
-
-  const onActionRequested = async (payload: ActionRequestPayload) => {
-    const io = playerIo();
-    if (!io || payload.id === lastRpcId) {
-      return;
-    }
-    lastRpcId = payload.id;
-    setCurrentMyTimer(payload.timer);
-    const request = RpcRequest.decode(base64Decode(payload.request));
-    const response = await io.rpc(request).catch(() => void 0);
-    if (!response || lastRpcId !== payload.id) {
-      return;
-    }
-    setCurrentMyTimer(null);
-    try {
-      const reply = axios.post(
-        `rooms/${id}/players/${playerId}/actionResponse`,
-        {
-          id: payload.id,
-          response: base64Encode(RpcResponse.encode(response).finish()),
-        },
-      );
-      await reply;
-    } catch (e) {
-      if (e instanceof AxiosError) {
-        alert(e.response?.data.message);
-      }
-      console.error(e);
-    }
-  };
-
-  const deleteRoom = async () => {
-    if (!window.confirm(t("deleteRoomConfirm"))) {
-      return;
-    }
-    try {
-      const { data } = await axios.delete(`rooms/${id}`);
-      history.back();
-    } catch (e) {
-      if (e instanceof AxiosError) {
-        alert(e.response?.data.message);
-      }
-      console.error(e);
-    }
-  };
-
-  const [currentMyTimer, setCurrentMyTimer] = createSignal<RpcTimer | null>(
-    null,
-  );
-  const [currentOppTimer, setCurrentOppTimer] = createSignal<RpcTimer | null>(
-    null,
-  );
+  const [currentMyTimer, setCurrentMyTimer] = createSignal<GameRpcTimer | null>(null);
+  const [currentOppTimer, setCurrentOppTimer] = createSignal<GameRpcTimer | null>(null);
+  let myConnection: RoomConnection | undefined;
+  let oppConnection: RoomConnection | undefined;
+  let disposed = false;
+  let rpcEpoch = 0;
   let lastRpcId: number | null = null;
-  let countDownTimerIntervalId: number | null = null;
+  let countDownTimerIntervalId: number | undefined;
+
+  const allowWatchOpp = () => !action;
+  const cancelMyRequest = () => {
+    ++rpcEpoch;
+    lastRpcId = null;
+    playerIo()?.cancelRpc();
+    setCurrentMyTimer(null);
+  };
+  const reportConnectionError = (error: RoomConnectionError) => {
+    if (disposed) return;
+    cancelMyRequest();
+    setLoading(false);
+    setFailed(error.outcomeUnknown ? t("roomActionUnknown") : error.message);
+  };
+  const reportCommandError = (error: unknown) => {
+    if (disposed) return;
+    if (error instanceof RoomConnectionError) {
+      if (["DISPOSED", "NOT_CONNECTED", "STALE_LOCAL_RPC"].includes(error.code)) return;
+      if (error.code === "COMMAND_PENDING") { alert(t("roomCommandPending")); return; }
+      if (error.outcomeUnknown) { setFailed(t("roomActionUnknown")); return; }
+    }
+    alert(error instanceof Error ? error.message : String(error));
+  };
+
+  const initializeClient = (payload: RoomInitialized) => {
+    if (playerIo()) return;
+    const [io, Ui] = createClient(payload.who, {
+      assetsManager: () => assetsManager(payload.config.gameVersion),
+      locale,
+      onGiveUp: async () => {
+        try { await myConnection?.giveUp(); }
+        catch (error) { reportCommandError(error); }
+      },
+      disableAction: !action,
+    });
+    setChessboard(() => Ui);
+    setPlayerIo(io);
+  };
+
+  const onActionRequested = async (payload: GameRpcRequest) => {
+    const io = playerIo();
+    if (!io || disposed) return;
+    setCurrentMyTimer(payload.timer);
+    if (lastRpcId === payload.id) return;
+    const epoch = ++rpcEpoch;
+    lastRpcId = payload.id;
+    const session = myConnection?.sessionId;
+    const requestToken = myConnection?.requestToken;
+    const response = await io.rpc(RpcRequest.decode(payload.request)).catch(() => undefined);
+    // The same numeric ID can reappear after a reconnect. Generation and
+    // session checks keep a stale asynchronous UI answer out of the new view.
+    if (disposed || epoch !== rpcEpoch || session !== myConnection?.sessionId || !response || !action) return;
+    setCurrentMyTimer(null);
+    try { await myConnection?.sendResponse(payload.id, RpcResponse.encode(response).finish(), requestToken); }
+    catch (error) { reportCommandError(error); }
+    finally { if (epoch === rpcEpoch) lastRpcId = null; }
+  };
+
+  const onMyEvent = (payload: RoomEvent) => {
+    if (disposed) return;
+    setLoading(false);
+    switch (payload.type) {
+      case "initialized": {
+        const previous = initialized();
+        if (String(payload.myPlayerInfo.id) !== playerId || (previous && (payload.who !== previous.who || payload.config.gameVersion !== previous.config.gameVersion))) {
+          throw new RoomConnectionError("The room view changed unexpectedly. Reload the room before playing.", "SESSION_CHANGED");
+        }
+        const firstInitialization = !initialized();
+        setInitialized(payload);
+        initializeClient(payload);
+        if (firstInitialization && payload.config.watchable && allowWatchOpp()) setObserverMode(true);
+        break;
+      }
+      case "notification": {
+        const notification = Notification.decode(payload.data);
+        playerIo()?.notify(notification);
+        if (notification.state?.phase === 5) {
+          cancelMyRequest();
+          setCurrentOppTimer(null);
+          myConnection?.markFinished();
+        }
+        break;
+      }
+      case "rpc": {
+        if (payload.data) void onActionRequested(payload.data).catch((error) => {
+          myConnection?.dispose();
+          reportConnectionError(new RoomConnectionError(error instanceof Error ? error.message : "Invalid game request", "PROTOCOL_ERROR"));
+        });
+        else cancelMyRequest();
+        break;
+      }
+      case "oppRpc": setCurrentOppTimer(payload.oppTimer); break;
+      case "waiting": break;
+    }
+  };
+
+  const socketUrl = (watchingPlayerId: string | number) => roomWebSocketUrl(
+    axios.defaults.baseURL ?? "/api/", id, watchingPlayerId, window.location.href,
+  );
+  const token = () => localStorage.getItem("accessToken") ?? "";
+  createEffect(() => {
+    const watching = observerMode();
+    const opponent = initialized()?.oppPlayerInfo.id;
+    const io = playerIo();
+    if (!watching || opponent === undefined || !io) return;
+    const connection = new RoomConnection({
+      url: socketUrl(opponent), token,
+      onState: (state) => {
+        if (state === "reconnecting" || state === "failed") {
+          oppPlayerIo()?.cancelRpc?.();
+          io.oppController.close();
+          setOppPlayerIo();
+        }
+      },
+      onEvent: (payload) => {
+        if (disposed) return;
+        switch (payload.type) {
+          case "initialized": {
+            if (String(payload.myPlayerInfo.id) !== String(opponent)) throw new Error("Unexpected spectator player identity");
+            setOppPlayerIo(io.oppController.open());
+            break;
+          }
+          case "notification": {
+            const notification = Notification.decode(payload.data);
+            oppPlayerIo()?.notify(notification);
+            if (notification.state?.phase === 5) connection.markFinished();
+            break;
+          }
+          case "rpc": {
+            if (payload.data) {
+              setCurrentOppTimer(payload.data.timer);
+              void oppPlayerIo()?.rpc(RpcRequest.decode(payload.data.request)).catch(() => undefined);
+            } else {
+              oppPlayerIo()?.cancelRpc?.();
+              setCurrentOppTimer(null);
+            }
+            break;
+          }
+        }
+      },
+      onError: (error) => {
+        if (!disposed) { setObserverMode(false); alert(error.message); }
+      },
+    });
+    oppConnection = connection;
+    connection.start();
+    onCleanup(() => {
+      connection.dispose();
+      if (oppConnection === connection) oppConnection = undefined;
+      oppPlayerIo()?.cancelRpc?.();
+      io.oppController.close();
+      setOppPlayerIo();
+    });
+  });
+
   const countDownTimer = () => {
     const myTimer = currentMyTimer();
     if (myTimer) {
       const current = myTimer.current - 1;
-      setCurrentMyTimer({ ...myTimer, current });
-      if (current <= 0) {
-        playerIo()?.cancelRpc();
-        setCurrentMyTimer(null);
-      }
+      if (current <= 0) cancelMyRequest();
+      else setCurrentMyTimer({ ...myTimer, current });
     }
     const oppTimer = currentOppTimer();
     if (oppTimer) {
       const current = oppTimer.current - 1;
-      setCurrentOppTimer({ ...oppTimer, current });
       if (current <= 0) {
         oppPlayerIo()?.cancelRpc?.();
         setCurrentOppTimer(null);
-      }
-    }
-  };
-  const setActionTimer = () => {
-    countDownTimerIntervalId = window.setInterval(countDownTimer, 1000);
-  };
-  const cleanActionTimer = () => {
-    if (countDownTimerIntervalId) {
-      window.clearInterval(countDownTimerIntervalId);
+      } else setCurrentOppTimer({ ...oppTimer, current });
     }
   };
 
-  const [roomInfo] = createResource(() =>
-    axios.get<{ status: string }>(`rooms/${id}`).then((res) => res.data),
-  );
-
-  const [fetchMyNotification, abortMyNotification] = createReconnectSse(
-    `rooms/${id}/players/${playerId}/notification`,
-    (payload: any) => {
-      setLoading(false);
-      switch (payload.type) {
-        case "initialized": {
-          setInitialized(payload);
-          initializeClient(payload);
-          if (payload?.config?.watchable && allowWatchOpp()) {
-            setObserverMode(true);
-          }
-          break;
-        }
-        case "notification": {
-          const notification = Notification.decode(base64Decode(payload.data));
-          playerIo()?.notify(notification);
-          break;
-        }
-        case "oppRpc": {
-          setCurrentOppTimer(payload.oppTimer ?? null);
-          break;
-        }
-        case "rpc": {
-          const rpc: ActionRequestPayload | null = payload.data;
-          if (rpc) {
-            onActionRequested(rpc);
-          } else {
-            // 观战方收到 RPC 状态变化时取消 RPC（玩家已完成 RPC 无需取消）
-            if (!action) {
-              playerIo()?.cancelRpc();
-            }
-            setCurrentMyTimer(null);
-          }
-          break;
-        }
-        case "error": {
-          alert(t("fatalError", { message: payload.message }));
-          break;
-        }
-        default: {
-          console.log("%c%s", "color: green", JSON.stringify(payload));
-          break;
-        }
-      }
-    },
-    reportStreamError,
-  );
-
-  const getOppPlayerId = () => initialized()?.oppPlayerInfo.id;
-  const allowWatchOpp = () => !action;
-
-  const [fetchOppNotification, abortOppNotification] = createReconnectSse(
-    () => `rooms/${id}/players/${getOppPlayerId()}/notification`,
-    (payload: any) => {
-      switch (payload.type) {
-        case "initialized": {
-          const myPlayerIo = playerIo();
-          if (myPlayerIo) {
-            const oppPlayerIo = myPlayerIo.oppController.open();
-            setOppPlayerIo(oppPlayerIo);
-          }
-          break;
-        }
-        case "notification": {
-          const notification = Notification.decode(base64Decode(payload.data));
-          oppPlayerIo()?.notify(notification);
-          break;
-        }
-        case "rpc": {
-          const rpc: ActionRequestPayload | null = payload.data;
-          if (rpc) {
-            const request = RpcRequest.decode(base64Decode(rpc.request));
-            oppPlayerIo()
-              ?.rpc(request)
-              .catch(() => void 0);
-          } else {
-            oppPlayerIo()?.cancelRpc?.();
-            setCurrentOppTimer(null);
-          }
-          break;
-        }
-        case "error": {
-          break;
-        }
-        default: {
-          console.log("%c%s", "color: orange", JSON.stringify(payload));
-          break;
-        }
-      }
-    },
-    reportStreamError,
-  );
-
+  const [roomInfo] = createResource(() => axios.get<{ status: string }>(`rooms/${id}`).then((res) => res.data));
   createEffect(() => {
-    if (observerMode()) {
-      fetchOppNotification();
-    } else {
-      abortOppNotification();
-      playerIo()?.oppController.close();
-      setOppPlayerIo();
+    const error = roomInfo.error;
+    if (error && !disposed) {
+      myConnection?.dispose();
+      cancelMyRequest();
+      setLoading(false);
+      setFailed(error instanceof AxiosError ? String(error.response?.data?.message ?? error.message) : String(error));
     }
   });
-
+  const deleteRoom = async () => {
+    if (!window.confirm(t("deleteRoomConfirm"))) return;
+    try { await axios.delete(`rooms/${id}`); history.back(); }
+    catch (error) {
+      if (error instanceof AxiosError) alert(error.response?.data.message);
+      console.error(error);
+    }
+  };
   const downloadGameLog = async () => {
     try {
       const { data } = await axios.get(`rooms/${id}/gameLog`);
-      const blob = new Blob([JSON.stringify(data)], {
-        type: "application/json",
-      });
+      const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `gameLog.json`;
+      a.download = "gameLog.json";
       a.click();
       URL.revokeObjectURL(url);
       a.remove();
-    } catch (e) {
-      if (e instanceof AxiosError) {
-        alert(e.response?.data.message);
-      }
-      console.error(e);
+    } catch (error) {
+      if (error instanceof AxiosError) alert(error.response?.data.message);
+      console.error(error);
     }
   };
-
-  const getClientPlayerInfo = (playerInfo: PlayerInfo) => ({
-    name: playerInfo.name,
-    avatarUrl: getPlayerAvatarUrl(playerInfo),
-  });
-
+  const getClientPlayerInfo = (player: PlayerInfo) => ({ name: player.name, avatarUrl: getPlayerAvatarUrl(player) });
   let chessboardContainer: HTMLDivElement | undefined;
-
   const mobile = useMobile();
 
   onMount(() => {
-    fetchMyNotification();
-    setActionTimer();
+    if (roomInfo.error) return;
+    if (!playerId || !Number.isSafeInteger(id)) {
+      setLoading(false);
+      setFailed(t("roomInvalidLink"));
+      return;
+    }
+    myConnection = new RoomConnection({
+      url: socketUrl(playerId), token, onEvent: onMyEvent,
+      onState: (state) => {
+        if (disposed) return;
+        setConnectionState(state);
+        if (state === "reconnecting") cancelMyRequest();
+        if (state === "connected") { setLoading(false); setFailed(null); }
+      },
+      onError: reportConnectionError,
+    });
+    myConnection.start();
+    countDownTimerIntervalId = window.setInterval(countDownTimer, 1000);
   });
-
   onCleanup(() => {
+    disposed = true;
+    myConnection?.dispose();
+    oppConnection?.dispose();
+    window.clearInterval(countDownTimerIntervalId);
+    cancelMyRequest();
+    oppPlayerIo()?.cancelRpc?.();
+    playerIo()?.oppController.close();
     setInitialized();
     setPlayerIo();
-    cleanActionTimer();
   });
 
   return (
@@ -545,7 +392,15 @@ export default function Room() {
             {t("backHome")}
           </button>
         </div>
+        <Show when={connectionState() === "reconnecting" && !failed()}>
+          <div class="mb-3 alert alert-outline-info" role="status">{t("roomReconnecting")}</div>
+        </Show>
         <Switch>
+          <Match when={failed()}>
+            <div class="mb-3 alert alert-outline-error" role="alert">
+              {t("roomLoadFailed", { message: failed() ?? "" })}
+            </div>
+          </Match>
           <Match when={loading() || roomInfo.loading}>
             <div class="mb-3 alert alert-outline-info">{t("roomLoading")}</div>
           </Match>
@@ -570,11 +425,6 @@ export default function Room() {
                 </Match>
               </Switch>
             )}
-          </Match>
-          <Match when={failed()}>
-            <div class="mb-3 alert alert-outline-error">
-              {t("roomLoadFailed", { message: failed() ?? "" })}
-            </div>
           </Match>
         </Switch>
         <Show when={initialized()}>
