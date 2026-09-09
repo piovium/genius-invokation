@@ -13,71 +13,130 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import mime from "mime";
-import type { FastifyInstance, RouteHandlerMethod } from "fastify";
-import fastifyEtag from "@fastify/etag";
+import { readFile, stat } from "node:fs/promises";
+import { createReadStream } from "node:fs";
+import { Readable } from "node:stream";
+import { lookup } from "mrmime";
+import { resolve, sep } from "node:path";
+import { createHash } from "node:crypto";
 import { IS_BETA, WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
 
-const HTML_INJECTION_PLACEHOLDERS = {
+const PLACEHOLDERS = {
   head: "<!-- server:head -->",
   body: "<!-- server:body -->",
 } as const;
-
 export function injectHtml(
   html: string,
-  injections: Partial<Record<keyof typeof HTML_INJECTION_PLACEHOLDERS, string>>,
+  injections: Partial<Record<keyof typeof PLACEHOLDERS, string>>,
 ) {
-  return (Object.keys(HTML_INJECTION_PLACEHOLDERS) as Array<
-    keyof typeof HTML_INJECTION_PLACEHOLDERS
-  >).reduce(
+  return (Object.keys(PLACEHOLDERS) as (keyof typeof PLACEHOLDERS)[]).reduce(
     (result, position) =>
-      result.replace(
-        HTML_INJECTION_PLACEHOLDERS[position],
-        injections[position] ?? "",
-      ),
+      result.replace(PLACEHOLDERS[position], injections[position] ?? ""),
     html,
   );
 }
-
-export async function frontend(app: FastifyInstance) {
-  await app.register(fastifyEtag);
-
-  if (process.env.NODE_ENV === "production") {
-    const {
-      default: { "index.html": indexHtml, ...rest },
-    } = await import("@gi-tcg/web-client");
-
-    for (const [name, content] of Object.entries(rest)) {
-      const buffer = Buffer.from(content, "base64");
-      const type = mime.getType(name) ?? "application/octet-stream";
-      app.get(`${WEB_CLIENT_BASE_PATH}${name}`, (_req, reply) => {
-        reply
-          .header(
-            "Cache-Control",
-            name === "sw.js"
-              ? "public, no-cache, must-revalidate"
-              : "public, max-age=31536000, immutable",
-          )
-          .type(type)
-          .send(buffer);
-      });
+function matchesEtag(header: string | null, etag: string) {
+  return (
+    header
+      ?.split(",")
+      .some(
+        (item) =>
+          item.trim() === "*" ||
+          item.trim().replace(/^W\//, "") === etag.replace(/^W\//, ""),
+      ) ?? false
+  );
+}
+export function createFrontendHandler({
+  directory = process.env.FRONTEND_DIRECTORY ??
+    resolve(import.meta.dirname, "frontend"),
+  basePath = WEB_CLIENT_BASE_PATH,
+  beta = IS_BETA,
+} = {}) {
+  const root = resolve(directory);
+  const base =
+    "/" +
+    basePath.split("/").filter(Boolean).join("/") +
+    (basePath === "/" ? "" : "/");
+  const rootPath = base === "/" ? "/" : base.slice(0, -1);
+  let index: Promise<{ body: string; etag: string }> | undefined;
+  return async (request: Request): Promise<Response> => {
+    if (request.method !== "GET" && request.method !== "HEAD")
+      return new Response(null, { status: 405 });
+    const pathname = new URL(request.url).pathname;
+    if (
+      (pathname !== rootPath && !pathname.startsWith(base)) ||
+      pathname === base + "api" ||
+      pathname.startsWith(base + "api/")
+    )
+      return new Response(null, { status: 404 });
+    let name: string;
+    try {
+      name = decodeURIComponent(pathname.slice(base.length));
+    } catch {
+      return new Response(null, { status: 400 });
     }
-
-    const indexHtmlContent = injectHtml(
-      Buffer.from(indexHtml!, "base64").toString(),
-      {
-        head: IS_BETA ? '<meta name="robots" content="noindex">' : "",
-      },
-    );
-    const indexHtmlBuffer = Buffer.from(indexHtmlContent);
-    const indexHtmlHandler: RouteHandlerMethod = (_req, reply) => {
-      return reply
-        .header("Cache-Control", "public, no-cache, must-revalidate")
-        .type("text/html")
-        .send(indexHtmlBuffer);
-    };
-    const baseNoSuffix = WEB_CLIENT_BASE_PATH.replace(/(.+)\/$/, "$1");
-    app.get(baseNoSuffix, indexHtmlHandler);
-    app.get(`${WEB_CLIENT_BASE_PATH}*`, indexHtmlHandler);
-  }
+    if (
+      name.includes("\\") ||
+      name.includes("\0") ||
+      name.split("/").some((part) => part === ".." || part === ".")
+    )
+      return new Response(null, { status: 404 });
+    const path = resolve(root, name);
+    if (path !== root && !path.startsWith(root + sep))
+      return new Response(null, { status: 404 });
+    const info =
+      name && name !== "index.html" ? await stat(path).catch(() => null) : null;
+    if (info?.isFile()) {
+      const etag =
+        'W/"' + info.size.toString(16) + "-" + info.mtimeMs.toString(16) + '"';
+      const headers = {
+        "content-type": lookup(path) || "application/octet-stream",
+        etag,
+        "cache-control":
+          name === "sw.js"
+            ? "public, no-cache, must-revalidate"
+            : "public, max-age=31536000, immutable",
+      };
+      if (matchesEtag(request.headers.get("if-none-match"), etag))
+        return new Response(null, { status: 304, headers });
+      return new Response(
+        request.method === "HEAD"
+          ? null
+          : (Readable.toWeb(createReadStream(path)) as unknown as BodyInit),
+        { headers },
+      );
+    }
+    // Only the small HTML entry is read into memory for the existing beta tag
+    // injection. Large JS/CSS/image assets remain file responses.
+    index ??= readFile(resolve(root, "index.html"), "utf8")
+      .then((html) => {
+        const body = injectHtml(html, {
+          head: beta ? '<meta name="robots" content="noindex">' : "",
+        });
+        return {
+          body,
+          etag:
+            '"' + createHash("sha256").update(body).digest("base64url") + '"',
+        };
+      })
+      .catch((error) => {
+        index = undefined;
+        throw error;
+      });
+    try {
+      const entry = await index;
+      const headers = {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "public, no-cache, must-revalidate",
+        etag: entry.etag,
+      };
+      return matchesEtag(request.headers.get("if-none-match"), entry.etag)
+        ? new Response(null, { status: 304, headers })
+        : new Response(request.method === "HEAD" ? null : entry.body, {
+            headers,
+          });
+    } catch {
+      return new Response(null, { status: 404 });
+    }
+  };
 }

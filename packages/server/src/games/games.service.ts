@@ -13,11 +13,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../db/prisma.service";
-import type { Game as GameModel, PlayerOnGames } from "#prisma/client";
+import { count, desc, eq, inArray } from "drizzle-orm";
+import type { DatabaseService } from "../db/database.service";
+import {
+  games,
+  playerOnGames,
+  type GameModel,
+  type PlayerOnGames,
+} from "../db/schema";
 import type { PaginationDto, PaginationResult } from "../utils";
-import { MetricsService } from "../metrics/metrics.service";
+import type { MetricsService } from "../metrics/metrics.service";
 
 export interface AddGameOption {
   playerIds: number[];
@@ -26,103 +31,124 @@ export interface AddGameOption {
   data: string;
   winnerId: number | null;
 }
-
 interface GameNoData extends Omit<GameModel, "data"> {}
-
-@Injectable()
+const summaryColumns = {
+  id: games.id,
+  coreVersion: games.coreVersion,
+  gameVersion: games.gameVersion,
+  winnerId: games.winnerId,
+  createdAt: games.createdAt,
+};
 export class GamesService {
   constructor(
-    private prisma: PrismaService,
-    private metrics: MetricsService,
+    private readonly database: DatabaseService,
+    private readonly metrics: MetricsService,
   ) {}
-
   async addGame({ playerIds, ...data }: AddGameOption): Promise<GameModel> {
-    const playerOnGames = playerIds.map((id, who) => ({
-      playerId: id,
-      who,
-    }));
-    const game = await this.prisma.game.create({
-      data: {
-        ...data,
-        players: {
-          create: playerOnGames,
-        },
-      },
+    const game = await this.database.db.transaction(async (tx) => {
+      const [game] = await tx.insert(games).values(data).returning();
+      if (playerIds.length)
+        await tx
+          .insert(playerOnGames)
+          .values(
+            playerIds.map((playerId, who) => ({
+              playerId,
+              gameId: game!.id,
+              who,
+            })),
+          );
+      return game!;
     });
     this.metrics.incrementStoredGames();
     return game;
   }
-
   async getAllGames({
     skip = 0,
     take = 10,
   }: PaginationDto): Promise<PaginationResult<GameNoData>> {
-    const [data, count] = await this.prisma.game.findManyAndCount({
-      skip,
-      take,
-      omit: { data: true },
-      include: {
-        players: {
-          select: {
-            player: {
-              select: {
-                id: true,
-              },
-            },
-            who: true,
-          },
-        },
+    return this.database.db.transaction(
+      async (tx) => {
+        const rows = await tx
+          .select(summaryColumns)
+          .from(games)
+          .orderBy(desc(games.createdAt), desc(games.id))
+          .offset(skip)
+          .limit(take);
+        const [total] = await tx.select({ value: count() }).from(games);
+        const links = rows.length
+          ? await tx
+              .select()
+              .from(playerOnGames)
+              .where(
+                inArray(
+                  playerOnGames.gameId,
+                  rows.map((row) => row.id),
+                ),
+              )
+          : [];
+        return {
+          count: total!.value,
+          data: rows.map((row) => ({
+            ...row,
+            players: links
+              .filter((link) => link.gameId === row.id)
+              .sort((a, b) => a.who - b.who)
+              .map((link) => ({
+                player: { id: link.playerId },
+                who: link.who,
+              })),
+          })),
+        };
       },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-    return { count, data };
+      { isolationLevel: "repeatable read", accessMode: "read only" },
+    );
   }
-
   async getGame(gameId: number) {
-    return await this.prisma.game.findFirst({
-      where: {
-        id: gameId,
-      },
-      include: {
-        players: {
-          select: {
-            player: {
-              select: {
-                id: true,
-              },
-            },
-            who: true,
-          },
-        },
-      },
-    });
+    const [game] = await this.database.db
+      .select()
+      .from(games)
+      .where(eq(games.id, gameId))
+      .limit(1);
+    if (!game) return null;
+    const links = await this.database.db
+      .select()
+      .from(playerOnGames)
+      .where(eq(playerOnGames.gameId, gameId))
+      .orderBy(playerOnGames.who);
+    return {
+      ...game,
+      players: links.map((link) => ({
+        player: { id: link.playerId },
+        who: link.who,
+      })),
+    };
   }
-
   async gamesHasUser(
     userId: number,
     { skip = 0, take = 10 }: PaginationDto,
   ): Promise<PaginationResult<PlayerOnGames & { game: GameNoData }>> {
-    const [data, count] = await this.prisma.playerOnGames.findManyAndCount({
-      skip,
-      take,
-      where: {
-        playerId: userId,
+    return this.database.db.transaction(
+      async (tx) => {
+        const rows = await tx
+          .select({
+            playerId: playerOnGames.playerId,
+            gameId: playerOnGames.gameId,
+            who: playerOnGames.who,
+            game: summaryColumns,
+          })
+          .from(playerOnGames)
+          .innerJoin(games, eq(playerOnGames.gameId, games.id))
+          .where(eq(playerOnGames.playerId, userId))
+          .orderBy(desc(games.createdAt), desc(games.id))
+          .offset(skip)
+          .limit(take);
+        const [total] = await tx
+          .select({ value: count() })
+          .from(playerOnGames)
+          .where(eq(playerOnGames.playerId, userId));
+        return { count: total!.value, data: rows };
       },
-      include: {
-        game: {
-          omit: {
-            data: true,
-          },
-        },
-      },
-      orderBy: {
-        game: {
-          createdAt: "desc",
-        },
-      },
-    });
-    return { data, count };
+      { isolationLevel: "repeatable read", accessMode: "read only" },
+    );
   }
 }

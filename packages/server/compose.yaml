@@ -2,16 +2,24 @@ services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
 
   migrate:
     image: genius-invokation-server
     pull_policy: never
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/postgres
     depends_on:
-      - db
-    command: ["npx", "prisma", "migrate", "deploy"]
+      db:
+        condition: service_healthy
+    command: ["node", "migrate.js"]
     build:
       context: ../..
       dockerfile: packages/server/Dockerfile
@@ -22,14 +30,21 @@ services:
     image: genius-invokation-server
     pull_policy: never
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
-      JWT_SECRET: ${JWT_SECRET}
-      GH_CLIENT_ID: ${GH_CLIENT_ID}
-      GH_CLIENT_SECRET: ${GH_CLIENT_SECRET}
-      DEBUG_LOG_RECEIVE_URL: ${DEBUG_LOG_RECEIVE_URL}
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/postgres
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      GH_CLIENT_ID: ${GH_CLIENT_ID:-}
+      GH_CLIENT_SECRET: ${GH_CLIENT_SECRET:-}
+      GH_GET_USER_API_URL: ${GH_GET_USER_API_URL:-https://api.github.com/user}
+      GH_CODE_EXCHANGE_URL: ${GH_CODE_EXCHANGE_URL:-https://github.com/login/oauth/access_token}
+      DEBUG_LOG_RECEIVE_URL: ${DEBUG_LOG_RECEIVE_URL:-}
+      REDIS_URL: ${REDIS_URL:-}
+      HEALTHZ_HOST: ${HEALTHZ_HOST:-}
+    ports:
+      - "3000:3000"
     depends_on:
       migrate:
         condition: service_completed_successfully
+    stop_grace_period: 10m
 
 volumes:
   pgdata:

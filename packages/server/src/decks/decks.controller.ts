@@ -13,134 +13,94 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  NotFoundException,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  Query,
-} from "@nestjs/common";
-import { User } from "../auth/user.decorator";
-import {
-  ArrayMaxSize,
-  ArrayMinSize,
-  IsInt,
-  IsOptional,
-  Length,
-  Max,
-  Min,
-} from "class-validator";
-import { DecksService } from "./decks.service";
-import { PaginationDto, parseStringToInt } from "../utils";
-import { VERSIONS, type Version } from "@gi-tcg/core";
-import { Transform } from "class-transformer";
+import { Elysia, t } from "elysia";
 import type { Deck } from "@gi-tcg/typings";
-import { Public } from "../auth/auth.guard";
-
-export class DeckDto implements Deck {
-  @IsInt({ each: true })
-  @ArrayMinSize(3)
-  @ArrayMaxSize(3)
-  characters!: number[];
-
-  @IsInt({ each: true })
-  @ArrayMinSize(30)
-  @ArrayMaxSize(30)
-  cards!: number[];
+import { VERSIONS } from "@gi-tcg/core";
+import type { PaginationDto } from "../utils";
+import type { AuthService } from "../auth/auth.service";
+import { requireUser } from "../auth/auth.guard";
+import { NotFoundException } from "../errors";
+import { deckSchema, idSchema, nameSchema, paginationSchema } from "../http";
+import type { DecksService } from "./decks.service";
+export interface DeckDto extends Deck {}
+export interface CreateDeckDto extends DeckDto {
+  name: string;
 }
-
-export class CreateDeckDto extends DeckDto {
-  @Length(1, 64)
-  name!: string;
-}
-
-export class UpdateDeckDto {
-  @Length(1, 64)
-  @IsOptional()
+export interface UpdateDeckDto {
   name?: string;
-
-  @IsInt({ each: true })
-  @ArrayMinSize(3)
-  @ArrayMaxSize(3)
-  @IsOptional()
   characters?: number[];
-
-  @IsInt({ each: true })
-  @ArrayMinSize(30)
-  @ArrayMaxSize(30)
-  @IsOptional()
   cards?: number[];
 }
-
-export class QueryDeckDto extends PaginationDto {
-  @IsInt()
-  @Min(0)
-  @Max(VERSIONS.length - 1)
-  @IsOptional()
-  @Transform(parseStringToInt)
+export interface QueryDeckDto extends PaginationDto {
   requiredVersion?: number;
 }
-
-@Controller("decks")
-export class DecksController {
-  constructor(private decks: DecksService) {}
-
-  @HttpCode(HttpStatus.CREATED)
-  @Post()
-  async createDeck(@User() userId: number, @Body() deck: CreateDeckDto) {
-    const result = await this.decks.createDeck(userId, deck);
-    return {
-      id: result.id,
-      code: result.code,
-    };
-  }
-
-  @Post("version")
-  @Public()
-  verifyVersion(@Body() deck: CreateDeckDto) {
-    return this.decks.deckToCode(deck);
-  }
-
-  @Get()
-  async getAllDecks(@User() userId: number, @Query() pagination: QueryDeckDto) {
-    return await this.decks.getAllDecks(userId, pagination);
-  }
-
-  @Get(":deckId")
-  async getDeck(
-    @User() userId: number,
-    @Param("deckId", ParseIntPipe) deckId: number,
-  ) {
-    const deck = await this.decks.getDeck(userId, deckId);
-    if (deck === null) {
-      throw new NotFoundException();
-    }
-    return deck;
-  }
-
-
-  @Patch(":deckId")
-  async updateDeck(
-    @User() userId: number,
-    @Param("deckId", ParseIntPipe) deckId: number,
-    @Body() deck: UpdateDeckDto,
-  ) {
-    return await this.decks.updateDeck(userId, deckId, deck);
-  }
-
-  @Delete(":deckId")
-  async deleteDeck(
-    @User() userId: number,
-    @Param("deckId", ParseIntPipe) deckId: number,
-  ) {
-    await this.decks.deleteDeck(userId, deckId);
-    return { message: `deck ${deckId} deleted` };
-  }
+export function createDecksRoutes(decks: DecksService, auth: AuthService) {
+  return new Elysia({ prefix: "/decks" })
+    .post(
+      "/",
+      async ({ request, body, set }) => {
+        const result = await decks.createDeck(requireUser(request, auth), body);
+        set.status = 201;
+        return { id: result.id, code: result.code };
+      },
+      { body: t.Object({ ...deckSchema, name: nameSchema }) },
+    )
+    .post(
+      "/version",
+      ({ body, set }) => {
+        set.status = 201;
+        return decks.deckToCode(body);
+      },
+      { body: t.Object({ ...deckSchema, name: nameSchema }) },
+    )
+    .get(
+      "/",
+      ({ request, query }) =>
+        decks.getAllDecks(requireUser(request, auth), query),
+      {
+        query: t.Object({
+          ...paginationSchema,
+          requiredVersion: t.Optional(
+            t.Numeric({
+              minimum: 0,
+              maximum: VERSIONS.length - 1,
+              multipleOf: 1,
+            }),
+          ),
+        }),
+      },
+    )
+    .get(
+      "/:deckId",
+      async ({ request, params }) => {
+        const deck = await decks.getDeck(
+          requireUser(request, auth),
+          params.deckId,
+        );
+        if (!deck) throw new NotFoundException();
+        return deck;
+      },
+      { params: t.Object({ deckId: idSchema }) },
+    )
+    .patch(
+      "/:deckId",
+      ({ request, params, body }) =>
+        decks.updateDeck(requireUser(request, auth), params.deckId, body),
+      {
+        params: t.Object({ deckId: idSchema }),
+        body: t.Object({
+          name: t.Optional(nameSchema),
+          characters: t.Optional(deckSchema.characters),
+          cards: t.Optional(deckSchema.cards),
+        }),
+      },
+    )
+    .delete(
+      "/:deckId",
+      async ({ request, params }) => {
+        await decks.deleteDeck(requireUser(request, auth), params.deckId);
+        return { message: "deck " + params.deckId + " deleted" };
+      },
+      { params: t.Object({ deckId: idSchema }) },
+    );
 }

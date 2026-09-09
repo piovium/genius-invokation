@@ -13,64 +13,47 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {
-  Controller,
-  Get,
-  NotFoundException,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Body,
-} from "@nestjs/common";
-import { UsersService, type UserInfo } from "./users.service";
-import { User } from "../auth/user.decorator";
-import { Public } from "../auth/auth.guard";
-import { IsOptional, Length, Matches } from "class-validator";
-
-export class UpdateUserInfoDto {
-  @Matches(/^#[0-9a-fA-F]{6}$/)
-  @IsOptional()
+import { Elysia, t } from "elysia";
+import type { AuthService } from "../auth/auth.service";
+import { requireUser, requestIdentity } from "../auth/auth.guard";
+import { isUserJwtPayload } from "../auth/user.decorator";
+import { NotFoundException } from "../errors";
+import { idSchema, nameSchema } from "../http";
+import type { UsersService } from "./users.service";
+export interface UpdateUserInfoDto {
   chessboardColor?: string | null;
-
-  @Length(1, 64)
-  @IsOptional()
-  name?: string;
+  name?: string | null;
 }
-
-@Controller("users")
-export class UsersController {
-  constructor(private users: UsersService) {}
-
-  @Get("me")
-  @Public()
-  async me(@User() userId: number | null): Promise<UserInfo | null> {
-    if (userId === null) {
-      return null;
-    }
-    const user = await this.users.findById(userId);
-    if (!user) {
-      throw new NotFoundException();
-    }
-    return user;
-  }
-
-  @Patch("me")
-  async updateMe(
-    @User() userId: number | null,
-    @Body() userInfo: UpdateUserInfoDto,
-  ) {
-    if (userId === null) {
-      throw new NotFoundException();
-    }
-    return await this.users.updateUserInfo(userId, userInfo);
-  }
-
-  @Get(":id")
-  async getUser(@Param("id", ParseIntPipe) id: number): Promise<UserInfo> {
-    const user = await this.users.findById(id);
-    if (!user) {
-      throw new NotFoundException();
-    }
-    return user;
-  }
+export function createUsersRoutes(users: UsersService, auth: AuthService) {
+  return new Elysia({ prefix: "/users" })
+    .get("/me", async ({ request }) => {
+      const identity = requestIdentity(request, auth);
+      if (!isUserJwtPayload(identity)) return Response.json(null);
+      const user = await users.findById(identity.sub);
+      if (!user) throw new NotFoundException();
+      return user;
+    })
+    .patch(
+      "/me",
+      ({ request, body }) =>
+        users.updateUserInfo(requireUser(request, auth), body),
+      {
+        body: t.Object({
+          name: t.Optional(t.Union([nameSchema, t.Null()])),
+          chessboardColor: t.Optional(
+            t.Union([t.String({ pattern: "^#[0-9a-fA-F]{6}$" }), t.Null()]),
+          ),
+        }),
+      },
+    )
+    .get(
+      "/:id",
+      async ({ request, params }) => {
+        requireUser(request, auth);
+        const user = await users.findById(params.id);
+        if (!user) throw new NotFoundException();
+        return user;
+      },
+      { params: t.Object({ id: idSchema }) },
+    );
 }

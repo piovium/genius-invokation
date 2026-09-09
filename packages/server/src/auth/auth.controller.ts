@@ -13,51 +13,21 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Query,
-  Req,
-  Res,
-} from "@nestjs/common";
-import type { FastifyReply, FastifyRequest } from "fastify";
-import { IsNotEmpty } from "class-validator";
-import { AuthService } from "./auth.service";
-import { Public } from "./auth.guard";
-import { SERVER_HOST } from "@gi-tcg/config";
-
-class GitHubCallbackDto {
-  @IsNotEmpty()
-  code!: string;
-}
-
-@Controller("auth")
-export class AuthController {
-  constructor(private auth: AuthService) {}
-
-  @Public()
-  @HttpCode(HttpStatus.OK)
-  @Get("github/callback")
-  async login(
-    @Query() { code }: GitHubCallbackDto,
-    @Res() res: FastifyReply,
-  ) {
-    const { accessToken } = await this.auth.login(code);
-    res.type("text/html").send(
-      `<!DOCTYPE html>
-<title>Login Success</title>
-<p>Redirecting back...</p>
-<script>
-  window.addEventListener("error", (event) => {
-    document.body.innerHTML += \`\${event.type}: \${event.message}\\n\`;
-  });
-  window.opener.postMessage({ type: "login", token: "${accessToken}" }, "*");
-  window.close();
-</script>`,
-    );
-  }
+import { Elysia, t } from "elysia";
+import type { AuthService } from "./auth.service";
+export function createAuthRoutes(auth: AuthService) {
+  return new Elysia({ prefix: "/auth" }).get(
+    "/github/callback",
+    async ({ query, set }) => {
+      const { accessToken } = await auth.login(query.code);
+      set.headers["content-type"] = "text/html; charset=utf-8";
+      set.headers["cache-control"] = "no-store";
+      return (
+        '<!DOCTYPE html><title>Login Success</title><p>Redirecting back...</p><script>window.addEventListener("error", event => { document.body.append(document.createTextNode(event.type + ": " + event.message)); });window.opener.postMessage({type:"login",token:' +
+        JSON.stringify(accessToken) +
+        '},"*");window.close();</script>'
+      );
+    },
+    { query: t.Object({ code: t.String({ minLength: 1 }) }) },
+  );
 }

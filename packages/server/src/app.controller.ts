@@ -13,94 +13,72 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {
-  Controller,
-  Get,
-  Header,
-  Headers,
-  ImATeapotException,
-  ServiceUnavailableException,
-} from "@nestjs/common";
-import { Public } from "./auth/auth.guard";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { Elysia } from "elysia";
 import { CORE_VERSION, CURRENT_VERSION, VERSIONS } from "@gi-tcg/core";
-import simpleGit, { type LogResult } from "simple-git";
+import { ImATeapotException, ServiceUnavailableException } from "./errors";
 import { redis } from "./redis";
-
-const git = simpleGit();
-
-const fallbackGitLog = (): LogResult => {
-  const latestLog: LogResult["latest"] = {
-    message: "",
-    hash: "unknown",
-    author_email: "unknown@.local",
-    author_name: "unknown",
-    body: "",
-    date: new Date().toISOString(),
-    refs: "",
-  };
-  if (process.env.RAILWAY_SERVICE_NAME) {
-    latestLog.message = process.env.RAILWAY_GIT_COMMIT_MESSAGE || "";
-    latestLog.hash = process.env.RAILWAY_GIT_COMMIT_SHA || "unknown";
-    latestLog.author_email = `${process.env.RAILWAY_SERVICE_NAME}@${process.env.RAILWAY_PUBLIC_DOMAIN}`;
-    latestLog.author_name = process.env.RAILWAY_GIT_AUTHOR || "unknown";
-    latestLog.refs = `HEAD -> ${process.env.RAILWAY_GIT_BRANCH}, origin/${process.env.RAILWAY_GIT_BRANCH}`;
-  }
-  return {
-    latest: latestLog,
-    all: [latestLog],
-    total: 1,
-  };
-};
-
-@Controller()
-export class AppController {
-  constructor() {}
-
-  @Public()
-  @Get("/version")
-  async getVersion() {
-    const { latest } = await git.log({ maxCount: 1 }).catch(fallbackGitLog);
+const execute = promisify(execFile);
+let revision: Promise<Record<string, unknown>> | undefined;
+async function getRevision() {
+  try {
+    const { stdout } = await execute(
+      "git",
+      ["log", "-1", "--format=%H%x00%an%x00%ae%x00%aI%x00%D%x00%s%x00%b"],
+      { windowsHide: true },
+    );
+    const [hash, author_name, author_email, date, refs, message, body] = stdout
+      .trimEnd()
+      .split("\0");
+    return { hash, author_name, author_email, date, refs, message, body };
+  } catch {
     return {
-      revision: latest,
+      hash:
+        process.env.RAILWAY_GIT_COMMIT_SHA ||
+        process.env.GIT_COMMIT ||
+        "unknown",
+      author_name: process.env.RAILWAY_GIT_AUTHOR || "unknown",
+      author_email: process.env.RAILWAY_SERVICE_NAME
+        ? process.env.RAILWAY_SERVICE_NAME +
+          "@" +
+          process.env.RAILWAY_PUBLIC_DOMAIN
+        : "unknown@.local",
+      date: new Date().toISOString(),
+      refs: process.env.RAILWAY_GIT_BRANCH || "",
+      message: process.env.RAILWAY_GIT_COMMIT_MESSAGE || "",
+      body: "",
+    };
+  }
+}
+export function createAppRoutes() {
+  return new Elysia()
+    .get("/version", async () => ({
+      revision: await (revision ??= getRevision()),
       supportedGameVersions: VERSIONS,
       currentGameVersion: CURRENT_VERSION,
       coreVersion: CORE_VERSION,
-    };
-  }
-
-  @Public()
-  @Get("/data_code_analyzer_result")
-  @Header("Access-Control-Allow-Origin", "*")
-  async getDataCodeAnalyzerResult() {
-    const { analyzeResult } = await import("@gi-tcg/data-code-analyzer");
-    return analyzeResult;
-  }
-
-  @Public()
-  @Get("/teapot")
-  imATeapot() {
-    throw new ImATeapotException("I'm a teapot~");
-  }
-
-  @Public()
-  @Get("/hello")
-  getHello(): string {
-    return "Hello World!";
-  }
-
-  @Public()
-  @Get("/healthz")
-  async healthz(@Headers("host") host: string) {
-    if (process.env.REDIS_URL && host === process.env.HEALTHZ_HOST) {
-      const activeRoomsCount = await redis?.hlen("meta:active_rooms");
-      if (activeRoomsCount) {
-        await redis?.set("meta:deploying", Date.now());
-        await redis?.expire("meta:deploying", 1 * 60 * 60);
-        throw new ServiceUnavailableException(
-          `There are still ${activeRoomsCount} active rooms.`,
-        );
+    }))
+    .get("/data_code_analyzer_result", async ({ set }) => {
+      set.headers["access-control-allow-origin"] = "*";
+      return (await import("@gi-tcg/data-code-analyzer")).analyzeResult;
+    })
+    .get("/teapot", () => {
+      throw new ImATeapotException("I'm a teapot~");
+    })
+    .get("/hello", () => "Hello World!")
+    .get("/healthz", async ({ request }) => {
+      if (redis && request.headers.get("host") === process.env.HEALTHZ_HOST) {
+        const activeRoomsCount = await redis.hlen("meta:active_rooms");
+        if (activeRoomsCount) {
+          await redis.set("meta:deploying", Date.now());
+          await redis.expire("meta:deploying", 3600);
+          throw new ServiceUnavailableException(
+            "There are still " + activeRoomsCount + " active rooms.",
+          );
+        }
+        await redis.del("meta:deploying");
       }
-      await redis?.del("meta:deploying");
-    }
-  }
+      return "";
+    });
 }

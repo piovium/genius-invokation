@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Injectable } from "@nestjs/common";
 import { Counter, Gauge, Registry, collectDefaultMetrics } from "prom-client";
 
 export interface RoomMetricsSnapshot {
@@ -28,8 +27,7 @@ export interface RoomMetricsSnapshot {
 }
 
 type RoomMetricsProvider =
-  | (() => RoomMetricsSnapshot)
-  | (() => Promise<RoomMetricsSnapshot>);
+  (() => RoomMetricsSnapshot) | (() => Promise<RoomMetricsSnapshot>);
 
 const emptyRoomMetricsSnapshot = (): RoomMetricsSnapshot => ({
   activeRooms: 0,
@@ -41,11 +39,11 @@ const emptyRoomMetricsSnapshot = (): RoomMetricsSnapshot => ({
   },
 });
 
-@Injectable()
 export class MetricsService {
   private readonly registry = new Registry();
   private roomMetricsProvider: RoomMetricsProvider = emptyRoomMetricsSnapshot;
-  private roomMetricsSnapshotPromise: Promise<RoomMetricsSnapshot> | null = null;
+  private roomMetricsSnapshotPromise: Promise<RoomMetricsSnapshot> | null =
+    null;
   private readonly createdRoomsCounter: Counter<string>;
   private readonly startedRoomsCounter: Counter<string>;
   private readonly finishedRoomsCounter: Counter<string>;
@@ -118,7 +116,9 @@ export class MetricsService {
   }
 
   private collectRoomMetricsSnapshot() {
-    this.roomMetricsSnapshotPromise ??= Promise.resolve(this.roomMetricsProvider());
+    this.roomMetricsSnapshotPromise ??= Promise.resolve(
+      this.roomMetricsProvider(),
+    );
     return this.roomMetricsSnapshotPromise;
   }
 

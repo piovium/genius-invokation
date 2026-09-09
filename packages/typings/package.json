@@ -11,7 +11,10 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "development": ["./src/index.ts", "./dist/index.js"],
+      "development": [
+        "./src/index.ts",
+        "./dist/index.js"
+      ],
       "import": "./dist/index.js"
     }
   },
@@ -28,10 +31,14 @@
   ],
   "scripts": {
     "build:buf": "gnx scripts/buf.ts",
-    "build": "pnpm build:buf && tsdown"
+    "build:ts-proto": "gnx scripts/buf.ts --typescript",
+    "build": "pnpm build:ts-proto && tsdown"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.2.2",
     "execa": "catalog:"
+  },
+  "devDependencies": {
+    "ts-proto": "2.2.0"
   }
 }

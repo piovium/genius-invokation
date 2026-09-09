@@ -13,62 +13,41 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { createParamDecorator, type ExecutionContext } from "@nestjs/common";
-import { isGuestId } from "../utils";
+import { isGuestId } from "./guest-id";
 
-export function isUserJwtPayload(
-  payload: unknown,
-): payload is { user: 1; sub: number } {
+export type UserJwtPayload = {
+  user: 1;
+  sub: number;
+  iat?: number;
+  exp?: number;
+};
+export type GuestJwtPayload = {
+  user: 0;
+  sub: string;
+  iat?: number;
+  exp?: number;
+};
+export type JwtPayload = UserJwtPayload | GuestJwtPayload;
+export function isUserJwtPayload(payload: unknown): payload is UserJwtPayload {
   return (
     payload !== null &&
     typeof payload === "object" &&
     "user" in payload &&
     payload.user === 1 &&
     "sub" in payload &&
-    typeof payload.sub === "number"
+    Number.isSafeInteger(payload.sub) &&
+    Number(payload.sub) > 0
   );
 }
-
 export function isGuestJwtPayload(
   payload: unknown,
-): payload is { sub: string } {
+): payload is GuestJwtPayload {
   return (
     payload !== null &&
     typeof payload === "object" &&
+    "user" in payload &&
+    payload.user === 0 &&
     "sub" in payload &&
     isGuestId(payload.sub)
   );
 }
-
-export const User = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<{ auth?: unknown }>();
-    if (!isUserJwtPayload(request.auth)) {
-      return null;
-    }
-    return request.auth.sub;
-  },
-);
-
-export const Guest = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<{ auth?: unknown }>();
-    if (!isGuestJwtPayload(request.auth)) {
-      return null;
-    }
-    return request.auth.sub;
-  },
-);
-
-export const UserOrGuest = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest<{ auth?: unknown }>();
-    if (!request.auth) {
-      return null;
-    }
-    if (!(isUserJwtPayload(request.auth) || isGuestJwtPayload(request.auth))) {
-      return null;
-    }
-    return request.auth.sub;
-  },
-);

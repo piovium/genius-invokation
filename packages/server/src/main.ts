@@ -13,43 +13,27 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { NestFactory } from "@nestjs/core";
-import {
-  FastifyAdapter,
-  type NestFastifyApplication,
-} from "@nestjs/platform-fastify";
-import { AppModule } from "./app.module";
-import { RequestMethod, ValidationPipe } from "@nestjs/common";
-import { PrismaClientExceptionFilter } from "./db/prisma-exception.filter";
-import { WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
-import { frontend } from "./frontend";
+import { createApplication, listenApplication } from "./app.module";
+import { redis } from "./redis";
 
-const app = await NestFactory.create<NestFastifyApplication>(
-  AppModule,
-  new FastifyAdapter({
-    // http2: true,
-    keepAliveTimeout: 65000, // 65 seconds (should be longer than ping interval)
-    requestTimeout: 0, // Disable request timeout for SSE
-  }),
-);
-app.useGlobalPipes(new ValidationPipe({ transform: true }));
-app.useGlobalFilters(new PrismaClientExceptionFilter(app.getHttpAdapter()));
-app.setGlobalPrefix(`${WEB_CLIENT_BASE_PATH}api`, {
-  exclude: [{ path: "metrics", method: RequestMethod.GET }],
+const service = createApplication();
+await service.database.connect();
+const port = Number(process.env.PORT ?? 3000);
+if (!Number.isInteger(port) || port < 1 || port > 65535)
+  throw new Error("Invalid PORT");
+const server = await listenApplication(service, {
+  port,
+  hostname: process.env.HOST ?? "::",
 });
-await app.register(frontend);
-
-if (process.env.NODE_ENV !== "production") {
-  app.enableCors({
-    origin: "*",
-    methods: ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"],
-  });
+console.log("Server listening at " + server.url);
+let stopping = false;
+async function stop() {
+  if (stopping) return;
+  stopping = true;
+  await service.rooms.close();
+  await server.stop();
+  await service.database.close();
+  await redis?.quit();
 }
-
-await app.listen(process.env.PORT ?? 3000, "::", (err, address) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  console.log(`Server listening at ${address}`);
-});
+process.on("SIGINT", () => void stop());
+process.on("SIGTERM", () => void stop());

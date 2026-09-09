@@ -14,19 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Controller, Get, Res } from "@nestjs/common";
-import type { FastifyReply } from "fastify";
-import { Public } from "../auth/auth.guard";
-import { MetricsService } from "./metrics.service";
-
-@Controller()
-export class MetricsController {
-  constructor(private readonly metrics: MetricsService) {}
-
-  @Public()
-  @Get("/metrics")
-  async getMetrics(@Res({ passthrough: true }) reply: FastifyReply) {
-    reply.header("Content-Type", this.metrics.contentType);
-    return await this.metrics.getMetrics();
-  }
+import { Elysia } from "elysia";
+import type { MetricsService } from "./metrics.service";
+export function createMetricsRoutes(metrics: MetricsService) {
+  return new Elysia().get("/metrics", async ({ set }) => {
+    set.headers["content-type"] = metrics.contentType;
+    return metrics.getMetrics();
+  });
 }

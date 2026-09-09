@@ -13,81 +13,131 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Injectable, Logger, UnauthorizedException } from "@nestjs/common";
-import { UsersService } from "../users/users.service";
-import { JwtService } from "@nestjs/jwt";
-import axios from "axios";
+import { createHmac, timingSafeEqual } from "node:crypto";
+import { UnauthorizedException } from "../errors";
+import type { UsersService } from "../users/users.service";
+import {
+  isGuestJwtPayload,
+  isUserJwtPayload,
+  type JwtPayload,
+} from "./user.decorator";
 
 export const CODE_EXCHANGE_URL =
   process.env.GH_CODE_EXCHANGE_URL ||
-  `https://github.com/login/oauth/access_token`;
+  "https://github.com/login/oauth/access_token";
 export const GET_USER_API_URL =
-  process.env.GH_GET_USER_API_URL || `https://api.github.com/user`;
+  process.env.GH_GET_USER_API_URL || "https://api.github.com/user";
+const encode = (value: unknown) =>
+  Buffer.from(JSON.stringify(value)).toString("base64url");
+const TOKEN_LIFETIME_SECONDS = 42 * 24 * 60 * 60;
 
-@Injectable()
 export class AuthService {
+  private readonly secret: string;
   constructor(
-    private users: UsersService,
-    private jwtService: JwtService,
-  ) {}
-  private logger = new Logger(AuthService.name);
-
-  private async getGitHubId(code: string) {
-    const response = await axios.post(
-      CODE_EXCHANGE_URL,
-      {
+    private readonly users: Pick<UsersService, "create">,
+    secret = process.env.JWT_SECRET,
+    private readonly endpoints = {
+      exchange: CODE_EXCHANGE_URL,
+      user: GET_USER_API_URL,
+    },
+  ) {
+    if (!secret) throw new Error("JWT_SECRET is not set");
+    this.secret = secret;
+  }
+  private sign(payload: JwtPayload) {
+    const iat = Math.floor(Date.now() / 1000);
+    const content =
+      encode({ alg: "HS256", typ: "JWT" }) +
+      "." +
+      encode({ ...payload, iat, exp: iat + TOKEN_LIFETIME_SECONDS });
+    return (
+      content +
+      "." +
+      createHmac("sha256", this.secret).update(content).digest("base64url")
+    );
+  }
+  verify(token: string): JwtPayload | null {
+    if (typeof token !== "string" || token.length > 8192) return null;
+    try {
+      const parts = token.split(".");
+      if (
+        parts.length !== 3 ||
+        parts.some(
+          (part) =>
+            !/^[A-Za-z0-9_-]+$/.test(part) ||
+            Buffer.from(part, "base64url").toString("base64url") !== part,
+        )
+      )
+        return null;
+      const header = JSON.parse(Buffer.from(parts[0]!, "base64url").toString());
+      if (
+        header.alg !== "HS256" ||
+        (header.typ !== undefined && header.typ !== "JWT")
+      )
+        return null;
+      const expected = createHmac("sha256", this.secret)
+        .update(parts[0] + "." + parts[1])
+        .digest();
+      const signature = Buffer.from(parts[2]!, "base64url");
+      if (
+        signature.length !== expected.length ||
+        !timingSafeEqual(signature, expected)
+      )
+        return null;
+      const payload = JSON.parse(
+        Buffer.from(parts[1]!, "base64url").toString(),
+      );
+      const now = Math.floor(Date.now() / 1000);
+      if (
+        !Number.isSafeInteger(payload.exp) ||
+        payload.exp <= now ||
+        (payload.nbf !== undefined &&
+          (!Number.isFinite(payload.nbf) || payload.nbf > now))
+      )
+        return null;
+      if (!isUserJwtPayload(payload) && !isGuestJwtPayload(payload))
+        return null;
+      return payload;
+    } catch {
+      return null;
+    }
+  }
+  async login(code: string) {
+    const exchanged = await fetch(this.endpoints.exchange, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
         client_id: process.env.GH_CLIENT_ID,
         client_secret: process.env.GH_CLIENT_SECRET,
         code,
-      },
-      {
-        headers: {
-          Accept: "application/json",
-        },
-        validateStatus: () => true, // don't throw
-      },
-    );
-    if (response.status >= 400 || !response.data?.access_token) {
-      this.logger.error("Code exchange failure");
-      this.logger.error(code);
-      this.logger.error(response.data);
-      throw new UnauthorizedException(
-        `code exchange failure: ${response.data?.error_description}`,
-      );
-    }
-    const accessToken = response.data.access_token;
-    const userResponse = await axios.get(GET_USER_API_URL, {
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    const result = (await exchanged.json()) as { access_token?: string };
+    if (
+      !exchanged.ok ||
+      typeof result.access_token !== "string" ||
+      !result.access_token
+    )
+      throw new UnauthorizedException("GitHub code exchange failed");
+    const identity = await fetch(this.endpoints.user, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: `application/vnd.github+json`,
+        authorization: "Bearer " + result.access_token,
+        accept: "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
       },
-      validateStatus: () => true, // don't throw
+      signal: AbortSignal.timeout(15_000),
     });
-    if (userResponse.status >= 400) {
-      this.logger.error("Get User detail failure");
-      this.logger.error(userResponse.data);
-      throw new UnauthorizedException(
-        `get user detail failure: ${userResponse.data?.message}`,
-      );
-    }
-    return {
-      id: userResponse.data.id,
-      ghToken: accessToken,
-    };
+    const user = (await identity.json()) as { id?: number };
+    if (!identity.ok || !Number.isSafeInteger(user.id) || user.id! <= 0)
+      throw new UnauthorizedException("GitHub user lookup failed");
+    await this.users.create(user.id!, result.access_token);
+    return { accessToken: this.sign({ user: 1, sub: user.id! }) };
   }
-
-  async login(code: string) {
-    const { id, ghToken } = await this.getGitHubId(code);
-    await this.users.create(id, ghToken);
-    const payload = { user: 1, sub: id };
-    return {
-      accessToken: await this.jwtService.signAsync(payload),
-    };
-  }
-
   async signGuest(playerId: string) {
-    const payload = { user: 0, sub: playerId };
-    return await this.jwtService.signAsync(payload);
+    return this.sign({ user: 0, sub: playerId });
   }
 }

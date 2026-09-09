@@ -13,10 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Injectable, Logger, type OnModuleInit } from "@nestjs/common";
-import { PrismaService } from "../db/prisma.service";
-import axios from "axios";
+import { eq } from "drizzle-orm";
+import type { DatabaseService } from "../db/database.service";
+import { users } from "../db/schema";
 import { GET_USER_API_URL } from "../auth/auth.service";
+import { NotFoundException } from "../errors";
 import type { UpdateUserInfoDto } from "./users.controller";
 
 export interface UserInfo {
@@ -26,57 +27,83 @@ export interface UserInfo {
   avatarUrl: string;
   chessboardColor?: string | null;
 }
-
-@Injectable()
-export class UsersService implements OnModuleInit {
-  constructor(private prisma: PrismaService) {}
-
-  private logger = new Logger(UsersService.name);
-
-  async onModuleInit() {}
-
+export class UsersService {
+  constructor(private readonly database: DatabaseService) {}
   async findById(id: number): Promise<UserInfo | null> {
-    const user = await this.prisma.user.findFirst({
-      where: { id },
-    });
-    if (!user) {
-      return null;
-    }
-    const userResponse = await axios.get(GET_USER_API_URL, {
+    const [user] = await this.database.db
+      .select()
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
+    if (!user?.ghToken) return null;
+    const response = await fetch(GET_USER_API_URL, {
       headers: {
-        Authorization: `Bearer ${user.ghToken}`,
-        Accept: `application/vnd.github+json`,
+        authorization: "Bearer " + user.ghToken,
+        accept: "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
       },
-      validateStatus: () => true, // don't throw
+      signal: AbortSignal.timeout(15_000),
     });
-    if (userResponse.status !== 200) {
-      this.logger.error("Get User detail failure");
-      this.logger.error(userResponse.data);
-      this.logger.error(`Bearer ${user.ghToken}`);
+    if (!response.ok) {
+      await response.body?.cancel();
       return null;
     }
+    const identity = (await response.json()) as {
+      id?: number;
+      login?: string;
+      name?: string;
+      avatar_url?: string;
+    };
+    if (
+      identity.id !== user.id ||
+      typeof identity.login !== "string" ||
+      typeof identity.avatar_url !== "string"
+    )
+      return null;
     return {
       id: user.id,
-      login: userResponse.data.login,
-      name: user.name || userResponse.data.name,
-      avatarUrl: userResponse.data.avatar_url,
-      chessboardColor: user.chessboardColor ?? null,
+      login: identity.login,
+      name: user.name || identity.name,
+      avatarUrl: identity.avatar_url,
+      chessboardColor: user.chessboardColor,
     };
   }
-
   async create(id: number, ghToken: string) {
-    await this.prisma.user.upsert({
-      where: { id },
-      create: { id, ghToken },
-      update: { ghToken },
-    });
+    const [user] = await this.database.db
+      .insert(users)
+      .values({ id, ghToken })
+      .onConflictDoUpdate({ target: users.id, set: { ghToken } })
+      .returning();
+    return user!;
   }
-
-  async updateUserInfo(id: number, dto: UpdateUserInfoDto) {
-    await this.prisma.user.update({
-      where: { id },
-      data: dto,
-    });
+  async updateUserInfo(id: number, info: UpdateUserInfoDto) {
+    const patch = {
+      ...(info.name === undefined ? {} : { name: info.name }),
+      ...(info.chessboardColor === undefined
+        ? {}
+        : { chessboardColor: info.chessboardColor }),
+    };
+    const [user] = Object.keys(patch).length
+      ? await this.database.db
+          .update(users)
+          .set(patch)
+          .where(eq(users.id, id))
+          .returning({
+            id: users.id,
+            name: users.name,
+            chessboardColor: users.chessboardColor,
+            createdAt: users.createdAt,
+          })
+      : await this.database.db
+          .select({
+            id: users.id,
+            name: users.name,
+            chessboardColor: users.chessboardColor,
+            createdAt: users.createdAt,
+          })
+          .from(users)
+          .where(eq(users.id, id));
+    if (!user) throw new NotFoundException();
+    return user;
   }
 }

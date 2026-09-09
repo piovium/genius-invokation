@@ -1,12 +1,15 @@
-FROM ghcr.io/pnpm/pnpm:latest AS build
-RUN pnpm runtime set node 26 -g
+FROM ghcr.io/pnpm/pnpm:12 AS build
+RUN pnpm runtime set node 26.1.0 -g
 WORKDIR /app
 ARG DEFAULT_ASSETS_API_ENDPOINT
 COPY . .
 ENV FROM_SOURCE=1
-RUN pnpm install --frozen-lockfile && pnpm build:no-typing server...
+RUN pnpm --filter @gi-tcg/server... install --frozen-lockfile && pnpm build:no-typing server...
 
-FROM node:26 AS deploy
-COPY --from=build /app/packages/server/dist/* /app/packages/server/prisma /app/packages/server/prisma.config.ts ./
+FROM node:26.1.0-alpine AS deploy
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=build /app/packages/server/dist/ ./
+EXPOSE 3000
 
-CMD ["node", "--experimental-vm-modules", "--enable-source-maps", "main.js"]
+CMD ["node", "main.js"]
