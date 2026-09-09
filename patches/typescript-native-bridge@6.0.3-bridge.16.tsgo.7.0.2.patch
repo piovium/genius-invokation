@@ -1,5 +1,5 @@
 diff --git a/lib/_tsc.js b/lib/_tsc.js
-index 7abb764..704d6b0 100644
+index 7abb764..cbcda06 100644
 --- a/lib/_tsc.js
 +++ b/lib/_tsc.js
 @@ -101309,7 +101309,7 @@ function createProgram(_rootNamesOrOptions, _options, _host, _oldProgram, _confi
@@ -55,7 +55,23 @@ index 7abb764..704d6b0 100644
  }
  function getHostScriptContentForOverlay(fileName, options, compilerHost) {
    return getHostScriptContent(hostForOverlaySync() ?? compilerHost, fileName, options);
-@@ -106699,6 +106702,10 @@ function resolveTsconfigPath(configFilePath, host) {
+@@ -106376,6 +106379,15 @@ var _pendingExternalChangePaths = (_a5 = tnbBridgeProcessState()).pendingExterna
+ function tnbNoteExternalFileChange(fileName) {
+   _pendingExternalChangePaths.add(resolveHostFileName(fileName));
+ }
++function takeExternalFileChanges() {
++  if (!_pendingExternalChangePaths.size) return void 0;
++  const changed = new Set(_pendingExternalChangePaths);
++  _pendingExternalChangePaths.clear();
++  for (const fileName of changed) {
++    if (isStableHostSfPath(fileName)) _hostSfStableGlobal.delete(fileName);
++  }
++  return changed;
++}
+ function tnbNoteHostEdit(fileName, start, end, newText) {
+   const key = resolveHostFileName(fileName);
+   const pending = _pendingOverlayEditsByFile.get(key);
+@@ -106699,6 +106711,10 @@ function resolveTsconfigPath(configFilePath, host) {
  }
  function getHostScriptContent(host, fileName, options) {
    var _a9, _b, _c;
@@ -66,7 +82,7 @@ index 7abb764..704d6b0 100644
    let scriptKind = inferScriptKind(fileName);
    const snap = (_a9 = host == null ? void 0 : host.getScriptSnapshot) == null ? void 0 : _a9.call(host, fileName);
    if (snap) {
-@@ -109935,10 +109942,14 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -109935,10 +109951,14 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
    const hostContentByFile = /* @__PURE__ */ new Map();
    const overlays = [];
    const names = /* @__PURE__ */ new Set();
@@ -83,25 +99,45 @@ index 7abb764..704d6b0 100644
    };
    let pendingExternalSet;
    let externalChanged;
-@@ -109986,7 +109997,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -109960,11 +109980,9 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       }
+       return !!(((_c2 = lsHost == null ? void 0 : lsHost.getScriptSnapshot) == null ? void 0 : _c2.call(lsHost, fn)) ?? ((_d = lsHost == null ? void 0 : lsHost.getScriptSnapshot) == null ? void 0 : _d.call(lsHost, resolvedFn)));
+     };
+-    if (_pendingExternalChangePaths.size > 0) {
+-      pendingExternalSet = new Set(_pendingExternalChangePaths);
+-      _pendingExternalChangePaths.clear();
++    pendingExternalSet = takeExternalFileChanges();
++    if (pendingExternalSet) {
+       for (const f of pendingExternalSet) {
+-        if (isStableHostSfPath(f)) _hostSfStableGlobal.delete(f);
+         if (fileExistsOnDisk(f) && !_syncedOverlayContentByFile.has(f)) (externalChanged ?? (externalChanged = [])).push(f);
+       }
+     }
+@@ -109986,25 +110004,28 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
          if (!isOverlayCandidatePath(fn)) continue;
          if (!(pendingExternalSet == null ? void 0 : pendingExternalSet.has(resolvedFn)) && !contentCanDiverge(fn, resolvedFn)) continue;
          const content = getHostScriptContentForOverlay(resolvedFn, options, host);
 -        if (!content) continue;
+-        if (!shouldSendHostOverlay(resolvedFn, content.text)) {
+-          const synced = _syncedOverlayContentByFile.get(resolvedFn);
+-          if (synced !== void 0 && synced !== content.text) {
+-            forgetSyncedOverlay(resolvedFn);
+-            overlays.push({ fileName: resolvedFn, content: content.text, scriptKind: content.scriptKind });
+-          } else if (synced !== void 0) {
 +        if (!content) {
 +          if (_syncedOverlayContentByFile.has(resolvedFn)) {
 +            (programCtx.pendingClosedFiles ?? (programCtx.pendingClosedFiles = [])).push(resolvedFn);
-+            forgetSyncedOverlay(resolvedFn);
-+          }
-+          continue;
-+        }
-         if (!shouldSendHostOverlay(resolvedFn, content.text)) {
-           const synced = _syncedOverlayContentByFile.get(resolvedFn);
-           if (synced !== void 0 && synced !== content.text) {
-@@ -109997,14 +110014,14 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+             forgetSyncedOverlay(resolvedFn);
            }
            continue;
          }
++        if (!shouldSendHostOverlay(resolvedFn, content.text)) {
++          if (_syncedOverlayContentByFile.has(resolvedFn)) {
++            const entry2 = decideOverlayPush(resolvedFn, content.text, content.scriptKind);
++            if (entry2) overlays.push(entry2);
++          }
++          continue;
++        }
 +        hostContentByFile.set(canonicalSourceFilePath(resolvedFn), content);
          const entry = decideOverlayPush(resolvedFn, content.text, content.scriptKind);
          if (!entry) continue;
@@ -115,7 +151,7 @@ index 7abb764..704d6b0 100644
    programCtx.pendingOverlays = overlays.length > 0 ? overlays : void 0;
    programCtx.pendingExternalChanged = externalChanged;
    programCtx.pendingExtraFileExtensions = collectExtraFileExtensions(names, options);
-@@ -110197,17 +110214,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110197,17 +110218,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
      scanSfRecords.clear();
    };
    const hostForLs = () => programCtx.lsHost;
@@ -134,7 +170,7 @@ index 7abb764..704d6b0 100644
      if ((content == null ? void 0 : content.text) && (!hasSnapshot || content.fromHost)) {
        const scriptKind = resolveLanguageServiceScriptKind(ls, requestFileName, hostFileName, hasSnapshot);
        const sf = createSourceFile(
-@@ -110296,7 +110309,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110296,7 +110313,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
        }
        if (hostHasScriptSnapshot(ls, fileName, hostFileName)) {
          const snap = ((_c2 = ls == null ? void 0 : ls.getScriptSnapshot) == null ? void 0 : _c2.call(ls, fileName)) ?? ((_d = ls == null ? void 0 : ls.getScriptSnapshot) == null ? void 0 : _d.call(ls, hostFileName));
@@ -143,7 +179,7 @@ index 7abb764..704d6b0 100644
          const hostSf2 = createBoundHostSourceFile(hostFileName, fileName, text2);
          if (hostSf2) {
            ensureTnbVersion(hostSf2, hostFileName);
-@@ -110328,7 +110341,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110328,7 +110345,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
        if (snap) {
          hostText = snap.getText(0, snap.getLength());
        } else {
@@ -152,7 +188,7 @@ index 7abb764..704d6b0 100644
          if (cachedText !== void 0) {
            hostText = cachedText;
          } else {
-@@ -110364,7 +110377,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110364,7 +110381,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
          return rememberStable(hostSf);
        }
      }
@@ -161,7 +197,7 @@ index 7abb764..704d6b0 100644
      const text = (hostContent == null ? void 0 : hostContent.text) ?? ((_k = host == null ? void 0 : host.readFile) == null ? void 0 : _k.call(host, hostFileName)) ?? "";
      const scriptKind = (hostContent == null ? void 0 : hostContent.scriptKind) ?? inferScriptKind(hostFileName);
      const sf = createSkeletonSourceFile(hostFileName, text, options.target ?? 99, scriptKind);
-@@ -110417,7 +110430,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110417,7 +110434,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
      var _a10;
      const hostFileName = resolveHostFileName(fileName, host);
      if (diagnosticSfCache.has(hostFileName)) return diagnosticSfCache.get(hostFileName);
@@ -170,7 +206,7 @@ index 7abb764..704d6b0 100644
      const text = (hostContent == null ? void 0 : hostContent.text) ?? ((_a10 = host == null ? void 0 : host.readFile) == null ? void 0 : _a10.call(host, fileName)) ?? "";
      const scriptKind = (hostContent == null ? void 0 : hostContent.scriptKind) ?? inferScriptKind(hostFileName);
      const sf = createSkeletonSourceFile(hostFileName, text, options.target ?? 99, scriptKind);
-@@ -110430,6 +110443,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110430,6 +110447,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
    };
    const preferLightProgramFiles = !preferHostSourceFiles && typeof ((_b = programCtx.lsHost) == null ? void 0 : _b.getScriptSnapshot) === "function";
    const tsserverWalk = !!(lsHost == null ? void 0 : lsHost.projectService);
@@ -178,7 +214,7 @@ index 7abb764..704d6b0 100644
    const builderMetaEnabled = !(options.tscBuild && !options.incremental && !options.composite);
    let lsHostVersionSnapshot;
    if (!tsserverWalk && typeof (lsHost == null ? void 0 : lsHost.getScriptVersion) === "function") {
-@@ -110442,11 +110456,21 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110442,11 +110460,21 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
    }
    const getOrCreateLightSourceFile = (fileName) => {
      const hostFileName = hostNameForQuery(resolveHostFileNameMemoized(fileName, host));
@@ -203,7 +239,7 @@ index 7abb764..704d6b0 100644
      }
      return sf;
    };
-@@ -110726,9 +110750,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110726,9 +110754,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
        if (incHostName !== void 0) {
          return getOrCreateSourceFile(incHostName);
        }
@@ -213,7 +249,7 @@ index 7abb764..704d6b0 100644
        return fullSfByName.get(hostNameForQuery(pathStr)) ?? getOrCreateLightSourceFile(pathStr);
      },
      getSourceFiles: () => {
-@@ -110739,8 +110760,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110739,8 +110764,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
          let sf;
          if (preferLightProgramFiles) {
            sf = fullSfByName.get(name) ?? getOrCreateLightSourceFile(name);
@@ -222,7 +258,7 @@ index 7abb764..704d6b0 100644
          } else {
            sf = fullSfByName.get(name) ?? getOrCreateLightSourceFile(name);
          }
-@@ -110987,10 +111006,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110987,10 +111010,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
      // through the caller's writeFile (or the host's) so --noEmit, Volar output
      // redirection, and build-mode writeFile wrapping stay in the host's control.
      emit: (targetSourceFile, writeFile2, _ct, emitOnlyDtsFiles, customTransformers, forceDtsEmit) => {
@@ -240,7 +276,7 @@ index 7abb764..704d6b0 100644
        }
        if (options.noEmit && !forceDtsEmit) {
          if (targetSourceFile) {
-@@ -111000,19 +111022,50 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -111000,19 +111026,50 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
        }
        const file = (targetSourceFile == null ? void 0 : targetSourceFile.fileName) ? tsgoFileArg(targetSourceFile.fileName) : void 0;
        const emitOnly = forceDtsEmit ? 3 : emitOnlyDtsFiles ? 2 : void 0;
@@ -295,7 +331,7 @@ index 7abb764..704d6b0 100644
          emittedFiles,
          sourceMaps: []
        };
-@@ -112057,9 +112110,12 @@ function createTsgoChecker(program) {
+@@ -112057,9 +112114,12 @@ function createTsgoChecker(program) {
      const additionalFiles = _lastAdditionalFilesByConfig.get(configFilePath);
      const externalChanged = programCtx == null ? void 0 : programCtx.pendingExternalChanged;
      if (programCtx) programCtx.pendingExternalChanged = void 0;
@@ -309,7 +345,7 @@ index 7abb764..704d6b0 100644
      const tabRegistry = syncHost == null ? void 0 : syncHost.projectService;
      if ((_a10 = tabRegistry == null ? void 0 : tabRegistry.openFiles) == null ? void 0 : _a10.forEach) {
        const openTabs = /* @__PURE__ */ new Set();
-@@ -112069,7 +112125,7 @@ function createTsgoChecker(program) {
+@@ -112069,7 +112129,7 @@ function createTsgoChecker(program) {
          if (((_a11 = info == null ? void 0 : info.isScriptOpen) == null ? void 0 : _a11.call(info)) && info.fileName) openTabs.add(resolveHostFileName(info.fileName, syncHost));
        });
        const closed = [..._sessionSentOpenTabs].filter((f) => !openTabs.has(f));
@@ -318,7 +354,7 @@ index 7abb764..704d6b0 100644
        _sessionSentOpenTabs.clear();
        for (const f of openTabs) _sessionSentOpenTabs.add(f);
        for (const f of closed) forgetSyncedOverlay(f);
-@@ -112083,7 +112139,7 @@ function createTsgoChecker(program) {
+@@ -112083,7 +112143,7 @@ function createTsgoChecker(program) {
        ...openFilesWithContent.length > 0 ? { openFilesWithContent } : {},
        ...extraFileExtensions ? { extraFileExtensions } : {},
        ...(additionalFiles == null ? void 0 : additionalFiles.length) ? { additionalFiles } : {},
@@ -327,8 +363,73 @@ index 7abb764..704d6b0 100644
        ...buildClose.closeParams ?? {},
        ...prefetchDiagnostics ? { prefetchDiagnostics: true } : {}
      };
+@@ -112407,20 +112467,18 @@ function createTsgoChecker(program) {
+     const syncHost = hostForOverlaySyncLocal();
+     if (!syncHost) return;
+     const openFiles = collectTsgoOpenFileNames(syncHost, requestedFileName ? [requestedFileName] : void 0);
++    const externalChanges = takeExternalFileChanges();
+     const openFilesWithContent = [];
+     for (const hostFileName of openFiles) {
+       if (!isOverlayCandidatePath(hostFileName)) continue;
+       const content = getHostScriptContent(syncHost, hostFileName, ctx.options);
+-      if (!(content == null ? void 0 : content.text)) continue;
++      if (!content) continue;
+       const hostOnly = !fileExistsOnDisk(hostFileName);
+       const inTsgo = !!((_b = (_a10 = project == null ? void 0 : project.program) == null ? void 0 : _a10.getSourceFile) == null ? void 0 : _b.call(_a10, toTsgoFileName(hostFileName)));
+       if (!hostOnly && inTsgo && !shouldSendHostOverlay(hostFileName, content.text)) {
+-        const synced = _syncedOverlayContentByFile.get(hostFileName);
+-        if (synced !== void 0 && synced !== content.text) {
+-          forgetSyncedOverlay(hostFileName);
+-          openFilesWithContent.push({ fileName: hostFileName, content: content.text, scriptKind: content.scriptKind });
+-        } else if (synced !== void 0) {
+-          forgetSyncedOverlay(hostFileName);
++        if (_syncedOverlayContentByFile.has(hostFileName) || (externalChanges == null ? void 0 : externalChanges.has(hostFileName))) {
++          const entry = decideOverlayPush(hostFileName, content.text, content.scriptKind);
++          if (entry) openFilesWithContent.push(entry);
+         }
+         continue;
+       }
+@@ -112432,9 +112490,11 @@ function createTsgoChecker(program) {
+       }
+       openFilesWithContent.push({ fileName: hostFileName, content: content.text, scriptKind: content.scriptKind });
+     }
+-    if (!openFiles.length && !openFilesWithContent.length) return;
++    const pushed = new Set(openFilesWithContent.map((f) => f.fileName));
++    const changedFiles = externalChanges ? [...externalChanges].filter((f) => fileExistsOnDisk(f) && !_syncedOverlayContentByFile.has(f) && !pushed.has(f)) : [];
++    if (!openFiles.length && !openFilesWithContent.length && !changedFiles.length) return;
+     const pushKey = openFiles.join("\n");
+-    if (openFilesWithContent.length === 0 && _lastOverlayPushKeyByConfig.get(ctx.configFilePath) === pushKey) return;
++    if (openFilesWithContent.length === 0 && changedFiles.length === 0 && _lastOverlayPushKeyByConfig.get(ctx.configFilePath) === pushKey) return;
+     traceOverlaySync(
+       openFilesWithContent,
+       /*deduped*/
+@@ -112444,6 +112504,7 @@ function createTsgoChecker(program) {
+       openProject: openProjectParam(ctx.configFilePath, ctx.options),
+       ...openFiles.length > 0 ? { openFiles } : {},
+       openFilesWithContent,
++      ...changedFiles.length ? { fileChanges: { changed: changedFiles } } : {},
+       ..._lastExtraFileExtensions ? { extraFileExtensions: _lastExtraFileExtensions } : {},
+       // Host-injected extra roots (svelte2tsx/glint shims) — without them
+       // every hook-driven rebuild drops the ambient shim files from the
+@@ -112465,10 +112526,12 @@ function createTsgoChecker(program) {
+     installTsgoBackedSourceFileLoader(() => project);
+     for (const f of openFilesWithContent) {
+       commitSyncedOverlay(f);
+-      tsgoSfCache.delete(f.fileName);
+-      nodeIndexCache.delete(f.fileName);
+-      nodeAtPosCache.delete(f.fileName);
+-      (_e = (_d = programCtx == null ? void 0 : programCtx.thinProgram) == null ? void 0 : _d.__tnbInvalidateHostSourceFile) == null ? void 0 : _e.call(_d, f.fileName);
++    }
++    for (const fileName of [...pushed, ...changedFiles]) {
++      tsgoSfCache.delete(fileName);
++      nodeIndexCache.delete(fileName);
++      nodeAtPosCache.delete(fileName);
++      (_e = (_d = programCtx == null ? void 0 : programCtx.thinProgram) == null ? void 0 : _d.__tnbInvalidateHostSourceFile) == null ? void 0 : _e.call(_d, fileName);
+     }
+     _rpcTraceEvent(
+       "overlay.refresh.clearCaches",
 diff --git a/lib/typescript.js b/lib/typescript.js
-index a9218a0..9d9385a 100644
+index a9218a0..189668d 100644
 --- a/lib/typescript.js
 +++ b/lib/typescript.js
 @@ -103593,7 +103593,7 @@ function createProgram(_rootNamesOrOptions, _options, _host, _oldProgram, _confi
@@ -384,7 +485,23 @@ index a9218a0..9d9385a 100644
  }
  function getHostScriptContentForOverlay(fileName, options, compilerHost) {
    return getHostScriptContent(hostForOverlaySync() ?? compilerHost, fileName, options);
-@@ -108985,6 +108988,10 @@ function resolveTsconfigPath(configFilePath, host) {
+@@ -108662,6 +108665,15 @@ var _pendingExternalChangePaths = (_a5 = tnbBridgeProcessState()).pendingExterna
+ function tnbNoteExternalFileChange(fileName) {
+   _pendingExternalChangePaths.add(resolveHostFileName(fileName));
+ }
++function takeExternalFileChanges() {
++  if (!_pendingExternalChangePaths.size) return void 0;
++  const changed = new Set(_pendingExternalChangePaths);
++  _pendingExternalChangePaths.clear();
++  for (const fileName of changed) {
++    if (isStableHostSfPath(fileName)) _hostSfStableGlobal.delete(fileName);
++  }
++  return changed;
++}
+ function tnbNoteHostEdit(fileName, start, end, newText) {
+   const key = resolveHostFileName(fileName);
+   const pending = _pendingOverlayEditsByFile.get(key);
+@@ -108985,6 +108997,10 @@ function resolveTsconfigPath(configFilePath, host) {
  }
  function getHostScriptContent(host, fileName, options) {
    var _a9, _b, _c;
@@ -395,7 +512,7 @@ index a9218a0..9d9385a 100644
    let scriptKind = inferScriptKind(fileName);
    const snap = (_a9 = host == null ? void 0 : host.getScriptSnapshot) == null ? void 0 : _a9.call(host, fileName);
    if (snap) {
-@@ -112221,10 +112228,14 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -112221,10 +112237,14 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
    const hostContentByFile = /* @__PURE__ */ new Map();
    const overlays = [];
    const names = /* @__PURE__ */ new Set();
@@ -412,25 +529,45 @@ index a9218a0..9d9385a 100644
    };
    let pendingExternalSet;
    let externalChanged;
-@@ -112272,7 +112283,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -112246,11 +112266,9 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       }
+       return !!(((_c2 = lsHost == null ? void 0 : lsHost.getScriptSnapshot) == null ? void 0 : _c2.call(lsHost, fn)) ?? ((_d = lsHost == null ? void 0 : lsHost.getScriptSnapshot) == null ? void 0 : _d.call(lsHost, resolvedFn)));
+     };
+-    if (_pendingExternalChangePaths.size > 0) {
+-      pendingExternalSet = new Set(_pendingExternalChangePaths);
+-      _pendingExternalChangePaths.clear();
++    pendingExternalSet = takeExternalFileChanges();
++    if (pendingExternalSet) {
+       for (const f of pendingExternalSet) {
+-        if (isStableHostSfPath(f)) _hostSfStableGlobal.delete(f);
+         if (fileExistsOnDisk(f) && !_syncedOverlayContentByFile.has(f)) (externalChanged ?? (externalChanged = [])).push(f);
+       }
+     }
+@@ -112272,25 +112290,28 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
          if (!isOverlayCandidatePath(fn)) continue;
          if (!(pendingExternalSet == null ? void 0 : pendingExternalSet.has(resolvedFn)) && !contentCanDiverge(fn, resolvedFn)) continue;
          const content = getHostScriptContentForOverlay(resolvedFn, options, host);
 -        if (!content) continue;
+-        if (!shouldSendHostOverlay(resolvedFn, content.text)) {
+-          const synced = _syncedOverlayContentByFile.get(resolvedFn);
+-          if (synced !== void 0 && synced !== content.text) {
+-            forgetSyncedOverlay(resolvedFn);
+-            overlays.push({ fileName: resolvedFn, content: content.text, scriptKind: content.scriptKind });
+-          } else if (synced !== void 0) {
 +        if (!content) {
 +          if (_syncedOverlayContentByFile.has(resolvedFn)) {
 +            (programCtx.pendingClosedFiles ?? (programCtx.pendingClosedFiles = [])).push(resolvedFn);
-+            forgetSyncedOverlay(resolvedFn);
-+          }
-+          continue;
-+        }
-         if (!shouldSendHostOverlay(resolvedFn, content.text)) {
-           const synced = _syncedOverlayContentByFile.get(resolvedFn);
-           if (synced !== void 0 && synced !== content.text) {
-@@ -112283,14 +112300,14 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+             forgetSyncedOverlay(resolvedFn);
            }
            continue;
          }
++        if (!shouldSendHostOverlay(resolvedFn, content.text)) {
++          if (_syncedOverlayContentByFile.has(resolvedFn)) {
++            const entry2 = decideOverlayPush(resolvedFn, content.text, content.scriptKind);
++            if (entry2) overlays.push(entry2);
++          }
++          continue;
++        }
 +        hostContentByFile.set(canonicalSourceFilePath(resolvedFn), content);
          const entry = decideOverlayPush(resolvedFn, content.text, content.scriptKind);
          if (!entry) continue;
@@ -444,7 +581,7 @@ index a9218a0..9d9385a 100644
    programCtx.pendingOverlays = overlays.length > 0 ? overlays : void 0;
    programCtx.pendingExternalChanged = externalChanged;
    programCtx.pendingExtraFileExtensions = collectExtraFileExtensions(names, options);
-@@ -112483,17 +112500,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -112483,17 +112504,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
      scanSfRecords.clear();
    };
    const hostForLs = () => programCtx.lsHost;
@@ -463,7 +600,7 @@ index a9218a0..9d9385a 100644
      if ((content == null ? void 0 : content.text) && (!hasSnapshot || content.fromHost)) {
        const scriptKind = resolveLanguageServiceScriptKind(ls, requestFileName, hostFileName, hasSnapshot);
        const sf = createSourceFile(
-@@ -112582,7 +112595,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -112582,7 +112599,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
        }
        if (hostHasScriptSnapshot(ls, fileName, hostFileName)) {
          const snap = ((_c2 = ls == null ? void 0 : ls.getScriptSnapshot) == null ? void 0 : _c2.call(ls, fileName)) ?? ((_d = ls == null ? void 0 : ls.getScriptSnapshot) == null ? void 0 : _d.call(ls, hostFileName));
@@ -472,7 +609,7 @@ index a9218a0..9d9385a 100644
          const hostSf2 = createBoundHostSourceFile(hostFileName, fileName, text2);
          if (hostSf2) {
            ensureTnbVersion(hostSf2, hostFileName);
-@@ -112614,7 +112627,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -112614,7 +112631,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
        if (snap) {
          hostText = snap.getText(0, snap.getLength());
        } else {
@@ -481,7 +618,7 @@ index a9218a0..9d9385a 100644
          if (cachedText !== void 0) {
            hostText = cachedText;
          } else {
-@@ -112650,7 +112663,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -112650,7 +112667,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
          return rememberStable(hostSf);
        }
      }
@@ -490,7 +627,7 @@ index a9218a0..9d9385a 100644
      const text = (hostContent == null ? void 0 : hostContent.text) ?? ((_k = host == null ? void 0 : host.readFile) == null ? void 0 : _k.call(host, hostFileName)) ?? "";
      const scriptKind = (hostContent == null ? void 0 : hostContent.scriptKind) ?? inferScriptKind(hostFileName);
      const sf = createSkeletonSourceFile(hostFileName, text, options.target ?? 99, scriptKind);
-@@ -112703,7 +112716,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -112703,7 +112720,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
      var _a10;
      const hostFileName = resolveHostFileName(fileName, host);
      if (diagnosticSfCache.has(hostFileName)) return diagnosticSfCache.get(hostFileName);
@@ -499,7 +636,7 @@ index a9218a0..9d9385a 100644
      const text = (hostContent == null ? void 0 : hostContent.text) ?? ((_a10 = host == null ? void 0 : host.readFile) == null ? void 0 : _a10.call(host, fileName)) ?? "";
      const scriptKind = (hostContent == null ? void 0 : hostContent.scriptKind) ?? inferScriptKind(hostFileName);
      const sf = createSkeletonSourceFile(hostFileName, text, options.target ?? 99, scriptKind);
-@@ -112716,6 +112729,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -112716,6 +112733,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
    };
    const preferLightProgramFiles = !preferHostSourceFiles && typeof ((_b = programCtx.lsHost) == null ? void 0 : _b.getScriptSnapshot) === "function";
    const tsserverWalk = !!(lsHost == null ? void 0 : lsHost.projectService);
@@ -507,7 +644,7 @@ index a9218a0..9d9385a 100644
    const builderMetaEnabled = !(options.tscBuild && !options.incremental && !options.composite);
    let lsHostVersionSnapshot;
    if (!tsserverWalk && typeof (lsHost == null ? void 0 : lsHost.getScriptVersion) === "function") {
-@@ -112728,11 +112742,21 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -112728,11 +112746,21 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
    }
    const getOrCreateLightSourceFile = (fileName) => {
      const hostFileName = hostNameForQuery(resolveHostFileNameMemoized(fileName, host));
@@ -532,7 +669,7 @@ index a9218a0..9d9385a 100644
      }
      return sf;
    };
-@@ -113012,9 +113036,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -113012,9 +113040,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
        if (incHostName !== void 0) {
          return getOrCreateSourceFile(incHostName);
        }
@@ -542,7 +679,7 @@ index a9218a0..9d9385a 100644
        return fullSfByName.get(hostNameForQuery(pathStr)) ?? getOrCreateLightSourceFile(pathStr);
      },
      getSourceFiles: () => {
-@@ -113025,8 +113046,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -113025,8 +113050,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
          let sf;
          if (preferLightProgramFiles) {
            sf = fullSfByName.get(name) ?? getOrCreateLightSourceFile(name);
@@ -551,7 +688,7 @@ index a9218a0..9d9385a 100644
          } else {
            sf = fullSfByName.get(name) ?? getOrCreateLightSourceFile(name);
          }
-@@ -113273,10 +113292,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -113273,10 +113296,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
      // through the caller's writeFile (or the host's) so --noEmit, Volar output
      // redirection, and build-mode writeFile wrapping stay in the host's control.
      emit: (targetSourceFile, writeFile2, _ct, emitOnlyDtsFiles, customTransformers, forceDtsEmit) => {
@@ -569,7 +706,7 @@ index a9218a0..9d9385a 100644
        }
        if (options.noEmit && !forceDtsEmit) {
          if (targetSourceFile) {
-@@ -113286,19 +113308,50 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -113286,19 +113312,50 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
        }
        const file = (targetSourceFile == null ? void 0 : targetSourceFile.fileName) ? tsgoFileArg(targetSourceFile.fileName) : void 0;
        const emitOnly = forceDtsEmit ? 3 : emitOnlyDtsFiles ? 2 : void 0;
@@ -624,7 +761,7 @@ index a9218a0..9d9385a 100644
          emittedFiles,
          sourceMaps: []
        };
-@@ -114343,9 +114396,12 @@ function createTsgoChecker(program) {
+@@ -114343,9 +114400,12 @@ function createTsgoChecker(program) {
      const additionalFiles = _lastAdditionalFilesByConfig.get(configFilePath);
      const externalChanged = programCtx == null ? void 0 : programCtx.pendingExternalChanged;
      if (programCtx) programCtx.pendingExternalChanged = void 0;
@@ -638,7 +775,7 @@ index a9218a0..9d9385a 100644
      const tabRegistry = syncHost == null ? void 0 : syncHost.projectService;
      if ((_a10 = tabRegistry == null ? void 0 : tabRegistry.openFiles) == null ? void 0 : _a10.forEach) {
        const openTabs = /* @__PURE__ */ new Set();
-@@ -114355,7 +114411,7 @@ function createTsgoChecker(program) {
+@@ -114355,7 +114415,7 @@ function createTsgoChecker(program) {
          if (((_a11 = info == null ? void 0 : info.isScriptOpen) == null ? void 0 : _a11.call(info)) && info.fileName) openTabs.add(resolveHostFileName(info.fileName, syncHost));
        });
        const closed = [..._sessionSentOpenTabs].filter((f) => !openTabs.has(f));
@@ -647,7 +784,7 @@ index a9218a0..9d9385a 100644
        _sessionSentOpenTabs.clear();
        for (const f of openTabs) _sessionSentOpenTabs.add(f);
        for (const f of closed) forgetSyncedOverlay(f);
-@@ -114369,7 +114425,7 @@ function createTsgoChecker(program) {
+@@ -114369,7 +114429,7 @@ function createTsgoChecker(program) {
        ...openFilesWithContent.length > 0 ? { openFilesWithContent } : {},
        ...extraFileExtensions ? { extraFileExtensions } : {},
        ...(additionalFiles == null ? void 0 : additionalFiles.length) ? { additionalFiles } : {},
@@ -656,7 +793,72 @@ index a9218a0..9d9385a 100644
        ...buildClose.closeParams ?? {},
        ...prefetchDiagnostics ? { prefetchDiagnostics: true } : {}
      };
-@@ -167481,7 +167537,6 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
+@@ -114693,20 +114753,18 @@ function createTsgoChecker(program) {
+     const syncHost = hostForOverlaySyncLocal();
+     if (!syncHost) return;
+     const openFiles = collectTsgoOpenFileNames(syncHost, requestedFileName ? [requestedFileName] : void 0);
++    const externalChanges = takeExternalFileChanges();
+     const openFilesWithContent = [];
+     for (const hostFileName of openFiles) {
+       if (!isOverlayCandidatePath(hostFileName)) continue;
+       const content = getHostScriptContent(syncHost, hostFileName, ctx.options);
+-      if (!(content == null ? void 0 : content.text)) continue;
++      if (!content) continue;
+       const hostOnly = !fileExistsOnDisk(hostFileName);
+       const inTsgo = !!((_b = (_a10 = project == null ? void 0 : project.program) == null ? void 0 : _a10.getSourceFile) == null ? void 0 : _b.call(_a10, toTsgoFileName(hostFileName)));
+       if (!hostOnly && inTsgo && !shouldSendHostOverlay(hostFileName, content.text)) {
+-        const synced = _syncedOverlayContentByFile.get(hostFileName);
+-        if (synced !== void 0 && synced !== content.text) {
+-          forgetSyncedOverlay(hostFileName);
+-          openFilesWithContent.push({ fileName: hostFileName, content: content.text, scriptKind: content.scriptKind });
+-        } else if (synced !== void 0) {
+-          forgetSyncedOverlay(hostFileName);
++        if (_syncedOverlayContentByFile.has(hostFileName) || (externalChanges == null ? void 0 : externalChanges.has(hostFileName))) {
++          const entry = decideOverlayPush(hostFileName, content.text, content.scriptKind);
++          if (entry) openFilesWithContent.push(entry);
+         }
+         continue;
+       }
+@@ -114718,9 +114776,11 @@ function createTsgoChecker(program) {
+       }
+       openFilesWithContent.push({ fileName: hostFileName, content: content.text, scriptKind: content.scriptKind });
+     }
+-    if (!openFiles.length && !openFilesWithContent.length) return;
++    const pushed = new Set(openFilesWithContent.map((f) => f.fileName));
++    const changedFiles = externalChanges ? [...externalChanges].filter((f) => fileExistsOnDisk(f) && !_syncedOverlayContentByFile.has(f) && !pushed.has(f)) : [];
++    if (!openFiles.length && !openFilesWithContent.length && !changedFiles.length) return;
+     const pushKey = openFiles.join("\n");
+-    if (openFilesWithContent.length === 0 && _lastOverlayPushKeyByConfig.get(ctx.configFilePath) === pushKey) return;
++    if (openFilesWithContent.length === 0 && changedFiles.length === 0 && _lastOverlayPushKeyByConfig.get(ctx.configFilePath) === pushKey) return;
+     traceOverlaySync(
+       openFilesWithContent,
+       /*deduped*/
+@@ -114730,6 +114790,7 @@ function createTsgoChecker(program) {
+       openProject: openProjectParam(ctx.configFilePath, ctx.options),
+       ...openFiles.length > 0 ? { openFiles } : {},
+       openFilesWithContent,
++      ...changedFiles.length ? { fileChanges: { changed: changedFiles } } : {},
+       ..._lastExtraFileExtensions ? { extraFileExtensions: _lastExtraFileExtensions } : {},
+       // Host-injected extra roots (svelte2tsx/glint shims) — without them
+       // every hook-driven rebuild drops the ambient shim files from the
+@@ -114751,10 +114812,12 @@ function createTsgoChecker(program) {
+     installTsgoBackedSourceFileLoader(() => project);
+     for (const f of openFilesWithContent) {
+       commitSyncedOverlay(f);
+-      tsgoSfCache.delete(f.fileName);
+-      nodeIndexCache.delete(f.fileName);
+-      nodeAtPosCache.delete(f.fileName);
+-      (_e = (_d = programCtx == null ? void 0 : programCtx.thinProgram) == null ? void 0 : _d.__tnbInvalidateHostSourceFile) == null ? void 0 : _e.call(_d, f.fileName);
++    }
++    for (const fileName of [...pushed, ...changedFiles]) {
++      tsgoSfCache.delete(fileName);
++      nodeIndexCache.delete(fileName);
++      nodeAtPosCache.delete(fileName);
++      (_e = (_d = programCtx == null ? void 0 : programCtx.thinProgram) == null ? void 0 : _d.__tnbInvalidateHostSourceFile) == null ? void 0 : _e.call(_d, fileName);
+     }
+     _rpcTraceEvent(
+       "overlay.refresh.clearCaches",
+@@ -167481,7 +167544,6 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
        getComments: (decls) => ts_JsDoc_exports.getJsDocCommentsFromDeclarations(decls),
        getTags: (decls) => ts_JsDoc_exports.getJsDocTagsFromDeclarations(decls)
      });
@@ -664,7 +866,7 @@ index a9218a0..9d9385a 100644
      let compilerHost = {
        getSourceFile: getOrCreateSourceFile,
        getSourceFileByPath: getOrCreateSourceFileByPath,
-@@ -167524,6 +167579,7 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
+@@ -167524,6 +167586,7 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
        jsDocParsingMode: host.jsDocParsingMode,
        getGlobalTypingsCacheLocation: maybeBind(host, host.getGlobalTypingsCacheLocation)
      };
@@ -673,7 +875,7 @@ index a9218a0..9d9385a 100644
      const { getSourceFileWithCache } = changeCompilerHostLikeToUseCache(
        compilerHost,
 diff --git a/package.json b/package.json
-index f8d9e92..bbaa3b0 100644
+index f8d9e92..ea8877f 100644
 --- a/package.json
 +++ b/package.json
 @@ -1,59 +1,72 @@
@@ -794,8 +996,8 @@ index f8d9e92..bbaa3b0 100644
 +  },
 +  "tnbLocalBuild": {
 +    "kind": "unpublished-local-build",
-+    "base": "848fa9ebae6cee8f8144e217563e2d17438c900b",
-+    "sourceCommit": "848fa9ebae6cee8f8144e217563e2d17438c900b",
++    "base": "f535c221598e70e1e1a33d16e682f1a50f554000",
++    "sourceCommit": "f535c221598e70e1e1a33d16e682f1a50f554000",
 +    "submodulePins": {
 +      "typescript": "050880ce59e30b356b686bd3144efe24f875ebc8",
 +      "typescriptGo": "2bd066d87f5bafd315be9f40889d0a60b9e58e0b"
@@ -803,6 +1005,6 @@ index f8d9e92..bbaa3b0 100644
 +    "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 +    "releaseMainSha256": "d5e2b1278788c8b3c5d96f3387e97349728aecd79a3b342485e7665854c22389",
 +    "nativeSha256": "32be259fa2027f7b4ba26f78827293b187f1eb000eb5c6761dda171cd5c9a4cb",
-+    "compilerSha256": "743cee1d1a8c17ea5b470a4206933c5fbb868103792d3c3089904a58a0b9d6e4"
++    "compilerSha256": "4cf4c984cee84d50885931f682a754904a12fcedc168029ba4f6f660596469d3"
 +  }
  }

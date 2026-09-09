@@ -8,6 +8,17 @@ without constructing a second complete JavaScript syntax tree.
 The migration is still being validated. A successful install or an individual
 test is not the completed migration acceptance result.
 
+This is a work-in-progress checkpoint, not a release. Windows frozen installation
+and the full CI build have run successfully. Native data checks covered all 195
+GTS files in three independent successful runs. The complete package checks and
+recursive tests are still failing on bridge compatibility issues: declaration
+output paths, a type-only import sharing its name with a local value, and Vitest
+matcher interface merging. Fixes and full acceptance are still in progress.
+The real extension's 100-round sessions and clean Linux/container build and run
+are not yet accepted. Linux frozen installation succeeded; earlier Linux builds
+were blocked by external resource downloads. Do not treat this checkpoint as a
+verified server deployment.
+
 ## Install and check
 
 Use Node 26 (the package requires `^26.1.0`) and the pinned pnpm 12.0.0:
