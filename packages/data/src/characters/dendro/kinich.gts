@@ -40,7 +40,7 @@ define status {
     if (
       nightsoul &&
       nightsoul.getVariable("nightsoul") === 2 &&
-      master.hasStatus(GrapplePrepare)
+      !master.hasStatus(GrapplePrepare)
     ) {
       master.addStatus(GrapplePrepare);
       :consumeNightsoul(master, 2);
