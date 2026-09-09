@@ -1,6 +1,11 @@
 # Build from the repository root:
 # docker build -f packages/custom-data-loader/Dockerfile.language-service .
-FROM node:26.8.1-bookworm-slim@sha256:367679cf9792759492a486e4aa4b421764d71a9546a6dae8aab81a99eb797b3e AS build
+FROM node:26.8.1-bookworm-slim@sha256:367679cf9792759492a486e4aa4b421764d71a9546a6dae8aab81a99eb797b3e AS base
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends ca-certificates openssl \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM base AS build
 WORKDIR /workspace
 RUN npm install --global pnpm@12.0.0
 COPY . .
@@ -16,7 +21,7 @@ RUN pnpm --filter @gi-tcg/custom-data-loader deploy --legacy --prod --frozen-loc
 FROM scratch AS web-artifacts
 COPY --from=build /workspace/packages/custom-data-loader/dist/web/ /
 
-FROM node:26.8.1-bookworm-slim@sha256:367679cf9792759492a486e4aa4b421764d71a9546a6dae8aab81a99eb797b3e AS language-service
+FROM base AS language-service
 WORKDIR /app
 COPY --from=build --chown=node:node /release/ ./
 ENV NODE_ENV=production
