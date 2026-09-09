@@ -19,7 +19,7 @@ import type { ExtensionDefinition } from "../../base/extension";
 import type { GameState, TriggeredSkillDefinition } from "../../base/state";
 import { EXTENSION_ID_OFFSET } from "../../data/extension";
 import type { ExtensionHandle } from "../../data";
-import type { Computed } from "../../query/utils";
+import type { Computed } from "../../utils";
 import {
   SkillContextOptions,
   type EventArgOf,

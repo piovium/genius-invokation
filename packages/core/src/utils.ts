@@ -62,6 +62,12 @@ import type { ActionInfoWithModification } from "./preview";
 import type { PlayerConfig } from "./player";
 import type { MoveEntityM } from "./base/mutation";
 
+export type Computed<T, R = any> = {
+  [K in keyof T]: T[K];
+} extends infer O extends R
+  ? O
+  : never;
+
 export type Writable<T> = {
   -readonly [P in keyof T]: T[P];
 };

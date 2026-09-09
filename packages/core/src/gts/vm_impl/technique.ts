@@ -45,7 +45,7 @@ import type { UsagePerRoundVariableNames } from "../../base/entity";
 import { GiTcgDataError } from "../..";
 import { TechniqueNightsoulVM } from "./entity_auxilary";
 import type { DisposeEventArg } from "../../base/skill";
-import type { Computed } from "../../query/utils";
+import type { Computed } from "../../utils";
 
 class TechniqueSkillModel extends InitiativeSkillModel {
   private caller: TechniqueModel;
@@ -124,6 +124,7 @@ interface TechniqueSkillVMMeta extends InitiativeSkillVMMeta {
 const DEFAULT_TECHNIQUE_SKILL_VM_META = {
   ...DEFAULT_INITIATIVE_SKILL_VM_META,
   type: "equipment",
+  callingArea: "onStage",
   variables: null as never,
 } as const satisfies TechniqueSkillVMMeta;
 export type DefaultTechniqueSkillVMMeta<

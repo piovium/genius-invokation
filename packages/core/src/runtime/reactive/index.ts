@@ -63,7 +63,7 @@ type ReactiveState<
 export type RxEntityState<
   Meta extends ContextMetaBase,
   Ty extends ExEntityType,
-  Extra extends ExtraInfo<Ty> = ExtraInfo<Ty>,
+  Extra extends ExtraInfo<ExEntityType> = ExtraInfo<Ty>,
 > = ReactiveState<Meta, ExEntityState<Ty>, Extra>;
 
 type Primitive = string | number | boolean | bigint | symbol | null | undefined;

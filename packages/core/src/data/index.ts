@@ -53,6 +53,7 @@ export type {
   ExEntityType,
   HandleT,
 } from "./type";
+export { typeHint } from "./utils";
 export { DiceType, DamageType, Aura, Reaction } from "@gi-tcg/typings";
 export {
   $,

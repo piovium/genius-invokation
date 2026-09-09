@@ -17,6 +17,7 @@ import type { EntityArea } from "../base/entity";
 import type { ExEntityType } from "../data/type";
 import type { SExprSchema } from "./expr_schema";
 import type { CharacterVariableConfigs } from "../base/character";
+import type { Computed } from "../utils";
 
 export type IsExtends<T, U> = [T] extends [U] ? true : false;
 export type Related<T, U> =
@@ -25,11 +26,6 @@ export type Related<T, U> =
     : IsExtends<U, T> extends true
       ? true
       : false;
-export type Computed<T, R = any> = {
-  [K in keyof T]: T[K];
-} extends infer O extends R
-  ? O
-  : never;
 
 export type IsEqual<T, U> =
   (<G>() => G extends T ? 1 : 2) extends <G>() => G extends U ? 1 : 2

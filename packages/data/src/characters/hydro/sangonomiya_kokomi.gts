@@ -110,7 +110,7 @@ define skill {
     if (summon) {
       summon.addVariable("usage", 1);
     } else {
-      summon = :createEntity("summon", BakeKurage)!;
+      summon = :summon(BakeKurage)!;
       summon.setVariable("usage", 1);
     }
   }

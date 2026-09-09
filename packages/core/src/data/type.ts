@@ -21,7 +21,7 @@ import type {
   CharacterState,
   EntityState,
 } from "../base/state";
-import type { Computed } from "../query/utils";
+import type { Computed } from "../utils";
 
 interface HandleMeta {
   readonly id: number;

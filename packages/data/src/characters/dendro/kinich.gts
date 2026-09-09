@@ -13,7 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, DamageType, DiceType, Reaction } from "@gi-tcg/core/data";
+import {
+  $,
+  DamageType,
+  DiceType,
+  Reaction,
+  typeHint,
+  type CharacterState,
+} from "@gi-tcg/core/data";
 
 /**
  * @id 117091
@@ -27,32 +34,33 @@ define status {
   id 117091 as GrappleLink;
   since "v5.4.0";
   duration 2;
-  defineSnippet {
-    const nightsoul = :self.master.hasNightsoulsBlessing();
+  defineSnippet typeHint<CharacterState>() {
+    const master = :get(:e);
+    const nightsoul = master.hasNightsoulsBlessing();
     if (
       nightsoul &&
       nightsoul.getVariable("nightsoul") === 2 &&
-      !:self.master.hasStatus(GrapplePrepare)
+      master.hasStatus(GrapplePrepare)
     ) {
-      :self.master.addStatus(GrapplePrepare);
-      :consumeNightsoul(:self.master, 2);
+      master.addStatus(GrapplePrepare);
+      :consumeNightsoul(master, 2);
     }
   };
   on damaged {
     when :( :e.getReaction() === Reaction.Burning && !:e.target.isMine() );
     listenTo all;
     :gainNightsoul(:self.master);
-    :callSnippet();
+    :callSnippet(:self.master);
   };
   on beforeTechnique {
     when :( :e.techniqueCaller.id !== :self.master.id );
     listenTo samePlayer;
     :gainNightsoul(:self.master);
-    :callSnippet();
+    :callSnippet(:self.master);
   };
   on beforeAction {
     listenTo all;
-    :callSnippet();
+    :callSnippet(:self.master);
   };
   on selfDispose {
     void 0;

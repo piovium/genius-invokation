@@ -198,7 +198,7 @@ define card {
       if (exists) {
         exists.addVariable("usage", 1);
       } else {
-        :characterStatus(FontemerPearl, :self.master, {
+        :characterStatus(FontemerPearl, :e.targets[0], {
           overrideVariables: {
             usage: 1,
           },

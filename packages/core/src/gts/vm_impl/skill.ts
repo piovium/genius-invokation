@@ -76,7 +76,7 @@ import type { DiceRequirement, DiceType } from "@gi-tcg/typings";
 import { UsageVM, type UsageVMMeta } from "./variables";
 import { isCustomEvent } from "../../base/custom_event";
 import { GiTcgDataError } from "../../error";
-import type { Computed } from "../../query/utils";
+import type { Computed } from "../../utils";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 
 type GtsSkillOperation<Meta extends RwContextMeta> = (

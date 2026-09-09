@@ -83,7 +83,7 @@ import { $, DamageType, DiceType, type CustomEvent } from "../../data";
 import { GlobalUsageVM, PrepareVM, NightsoulVM } from "./entity_auxilary";
 import type { CharacterPassiveSkillEntry } from "../../data/registry";
 import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
-import type { Computed } from "../../query/utils";
+import type { Computed } from "../../utils";
 import type { AttachmentTag, ModificationGetter } from "../../base/attachment";
 import { getSubId } from "./sub_id";
 import type {
@@ -459,15 +459,15 @@ export type DefaultEntityVMMeta<
   AssociatedExtension = never,
 > = Computed<
   Omit<typeof DEFAULT_ENTITY_VM_META, "associatedExtension"> & {
-    type: T;
-    associatedExtension: AssociatedExtension;
+    readonly type: T;
+    readonly associatedExtension: AssociatedExtension;
   },
   EntityVMMeta
 >;
 
 type SnippetOperation<
   Meta extends EntityVMMeta,
-  ArgT,
+  EventArgT,
   Area extends CallingAreaType = CallingAreaType,
 > = (
   c: TypedSkillContext<
@@ -476,7 +476,7 @@ type SnippetOperation<
       callingArea: Area;
       associatedExtension: Meta["associatedExtension"];
       callerVars: Meta["variables"];
-      eventArgType: ArgT;
+      eventArgType: EventArgT;
       gtsSnippets: Meta["snippets"];
     }>
   >,
@@ -493,7 +493,10 @@ export type ThisWithType<
   T extends ExEntityType,
 > = Meta["type"] extends T ? AR.This<Meta> : never;
 
-export type PushMetaVar<Meta extends EntityVMMeta, Name extends string> = Computed<
+export type PushMetaVar<
+  Meta extends EntityVMMeta,
+  Name extends string,
+> = Computed<
   Omit<Meta, "variables"> & {
     readonly variables: Meta["variables"] | Name;
   }
@@ -506,10 +509,14 @@ class StagedOperationVM extends defineActionViewModel<
   ) => AR.Done
 >() {}
 
+export interface SnippetOperationVMMeta extends EntityVMMeta {
+  readonly snippetArgType: unknown;
+}
+
 class SnippetOperationVM extends defineActionViewModel<
-  <Meta extends EntityVMMeta>(
+  <Meta extends SnippetOperationVMMeta>(
     this: AR.This<Meta>,
-    operation: SnippetOperation<Meta, void>,
+    operation: SnippetOperation<Meta, Meta["snippetArgType"]>,
   ) => AR.Done
 >() {}
 
@@ -619,7 +626,7 @@ export class EntityViewModel extends defineViewModel(
           }
         >,
         SnippetOperationVM,
-        Meta
+        Computed<Meta & { readonly snippetArgType: void }>
       >;
       <Meta extends EntityVMMeta, const Name extends string>(
         this: AR.This<Meta>,
@@ -631,7 +638,7 @@ export class EntityViewModel extends defineViewModel(
           }
         >,
         SnippetOperationVM,
-        Meta
+        Computed<Meta & { readonly snippetArgType: void }>
       >;
       <Meta extends EntityVMMeta, ArgT>(
         this: AR.This<Meta>,
@@ -643,7 +650,7 @@ export class EntityViewModel extends defineViewModel(
           }
         >,
         SnippetOperationVM,
-        Meta
+        Computed<Meta & { readonly snippetArgType: ArgT }>
       >;
       <Meta extends EntityVMMeta, const Name extends string, ArgT>(
         this: AR.This<Meta>,
@@ -656,7 +663,7 @@ export class EntityViewModel extends defineViewModel(
           }
         >,
         SnippetOperationVM,
-        Meta
+        Computed<Meta & { readonly snippetArgType: ArgT }>
       >;
     }>((model, args, subView) => {
       let name: string;

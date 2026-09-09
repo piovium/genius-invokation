@@ -131,11 +131,7 @@ define card {
       usage 2;
       cost DiceType.Void, 2;
       :drawCards(2);
-      if (
-        (() => {
-          return :player.hands.some((card) => !:isInInitialPile(card));
-        })()
-      ) {
+      if (:player.hands.some((card) => !:isInInitialPile(card))) {
         :characterStatus(DiggingDownToPaydirt, :self.master);
       }
     };

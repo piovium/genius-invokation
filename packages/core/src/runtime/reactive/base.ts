@@ -29,20 +29,32 @@ export type ReactiveStateSymbol = typeof ReactiveStateSymbol;
 export const RawStateSymbol: unique symbol = Symbol("ReactiveState/RawState");
 export type RawStateSymbol = typeof RawStateSymbol;
 
-export const LatestStateSymbol: unique symbol = Symbol("ReactiveState/LatestState");
+export const LatestStateSymbol: unique symbol = Symbol(
+  "ReactiveState/LatestState",
+);
 export type LatestStateSymbol = typeof LatestStateSymbol;
 
-export interface ExtraInfo<Ty extends ExEntityType> {
-  variables: string;
-  areaType:
-    | (Ty extends "character" | "equipment" | "status" ? "characters" : never)
-    | (Ty extends "combatStatus" ? "combatStatuses" : never)
-    | (Ty extends "summon" ? "summons" : never)
-    | (Ty extends "support" ? "supports" : never)
-    | (Ty extends "eventCard" | "support" | "equipment" | "attachment"
-        ? "hands" | "pile"
-        : never)
-    | "removedEntities";
+export type RegularTypeAreaTypeMap<Ty extends ExEntityType> =
+  | (Ty extends "character" | "equipment" | "status" ? "characters" : never)
+  | (Ty extends "combatStatus" ? "combatStatuses" : never)
+  | (Ty extends "summon" ? "summons" : never)
+  | (Ty extends "support" ? "supports" : never)
+  | (Ty extends "eventCard" | "support" | "equipment" | "attachment"
+      ? "hands" | "pile"
+      : never);
+
+export type TypeAreaTypeMap<Ty extends ExEntityType> =
+  | RegularTypeAreaTypeMap<Ty>
+  | (Ty extends "character" ? never : "removedEntities");
+
+export interface RegularExtraInfo<Ty extends ExEntityType, Vars extends string = string> {
+  variables: Vars;
+  areaType: RegularTypeAreaTypeMap<Ty>;
+}
+
+export interface ExtraInfo<Ty extends ExEntityType, Vars extends string = string> {
+  variables: Vars;
+  areaType: TypeAreaTypeMap<Ty>;
 }
 
 export abstract class ReactiveStateBase implements IUnorderedQuery {

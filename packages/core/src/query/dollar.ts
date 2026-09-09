@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import type { Computed } from "../utils";
 import {
   createCompositeQuery,
   type CompositeQuery,
@@ -31,7 +32,6 @@ import {
   inInitialPileKey,
   toExpressionUnordered,
   UNARY_OPERATORS,
-  type Computed,
   type HeterogeneousMetaBase,
   type InferResult,
   type IQuery,

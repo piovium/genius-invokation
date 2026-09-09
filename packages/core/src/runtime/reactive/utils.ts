@@ -54,7 +54,12 @@ export interface PlainCharacterState extends Omit<
 > {
   readonly entities: readonly PlainEntityState[];
 }
-export interface PlainEntityState extends Omit<EntityState, StateSymbol> {}
+export interface PlainEntityState extends Omit<
+  EntityState,
+  StateSymbol | "attachments"
+> {
+  readonly attachments: readonly PlainAttachmentState[];
+}
 export interface PlainAttachmentState extends Omit<
   AttachmentState,
   StateSymbol

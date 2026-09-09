@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
  
+import type { Computed } from "../utils";
 import { mixins } from "../utils";
 import { BinaryMethods } from "./binary_methods";
 import type { SExprSchema } from "./expr_schema";
@@ -21,7 +22,6 @@ import { PrimaryMethods } from "./primary_methods";
 import { RelationMethods } from "./relation_methods";
 import {
   toExpressionUnordered,
-  type Computed,
   type Expression,
   type HeterogeneousMetaBase,
   type IUnorderedQuery,

@@ -124,8 +124,19 @@ export class Entity<Meta extends ContextMetaBase> extends ReadonlyEntity<Meta> {
   }
 }
 
+export interface ReadonlyEntityWithoutMaster<Meta extends ContextMetaBase>
+  extends Omit<ReadonlyEntity<Meta>, "master"> {}
+
+export interface EntityWithoutMaster<Meta extends ContextMetaBase>
+  extends Omit<Entity<Meta>, "master"> {}
+
 export type TypedEntity<
   Meta extends ContextMetaBase,
   Ty extends EntityType,
-  Extra extends ExtraInfo<Ty>,
-> = Meta["readonly"] extends true ? ReadonlyEntity<Meta> : Entity<Meta>;
+  Extra extends ExtraInfo<EntityType>,
+> = (Meta["readonly"] extends true
+  ? ReadonlyEntityWithoutMaster<Meta>
+  : EntityWithoutMaster<Meta>) &
+  (Extra["areaType"] extends "characters"
+    ? Pick<ReadonlyEntity<Meta>, "master">
+    : {});

@@ -104,7 +104,11 @@ import {
   type ApplyReactive,
   type RxEntityState,
 } from "./reactive";
-import { ReactiveStateSymbol } from "./reactive/base";
+import {
+  ReactiveStateSymbol,
+  type RegularExtraInfo,
+  type TypeAreaTypeMap,
+} from "./reactive/base";
 import { computeConvertDice, type CreateEntityOptions } from "../utils";
 import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "./skill";
 import type { LunarReaction } from "@gi-tcg/typings";
@@ -176,6 +180,17 @@ type Setter<T> = (draft: Draft<T>) => void;
 
 export type CallingAreaType = "onStage" | "offStage" | "disposed";
 
+type TypeOfCallingArea = {
+  onStage: "characters" | "combatStatuses" | "summons" | "supports";
+  offStage: "hands" | "pile";
+  disposed: "removedEntities";
+};
+
+type CallerAreaOfContextMeta<Meta extends ContextMetaBase> = Extract<
+  TypeAreaTypeMap<Meta["callerType"]>,
+  TypeOfCallingArea[Meta["callingArea"]]
+>;
+
 export type ContextMetaBase = {
   readonly: boolean;
   eventArgType: unknown;
@@ -230,7 +245,14 @@ export class SkillContext<Meta extends ContextMetaBase> {
    * 获取正在执行逻辑的实体的 `Character` 或 `Entity`。
    * @returns
    */
-  private readonly _self: RxEntityState<Meta, Meta["callerType"]>;
+  private readonly _self: RxEntityState<
+    Meta,
+    Meta["callerType"],
+    {
+      variables: Meta["callerVars"];
+      areaType: CallerAreaOfContextMeta<Meta>;
+    }
+  >;
 
   /** @internal */
   public _getEntityArea(id: number): EntityArea {
@@ -288,10 +310,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
     };
     this.mutator = new StateMutator(state, mutatorConfig);
     this.eventArg = applyReactive(this, eventArg);
-    this._self = applyReactive(this, this.skillInfo.caller) as RxEntityState<
-      Meta,
-      Meta["callerType"]
-    >;
+    this._self = applyReactive(
+      this,
+      this.skillInfo.caller,
+    ) as typeof this._self;
     this.callSnippet = new Proxy(
       (arg: any) => this._callSnippetByName("default", arg),
       {
@@ -597,20 +619,20 @@ export class SkillContext<Meta extends ContextMetaBase> {
 
   query<const Q extends IQuery>(
     arg: (($: IDollar) => Q) | Q,
-  ): RxEntityState<Meta, InferResult<Q>["type"]> | undefined {
+  ): RxEntityState<Meta, InferResult<Q>["type"], InferResult<Q>> | undefined {
     const results = this.queryAll(arg);
     return results[0];
   }
 
   queryAll<const Q extends IQuery>(
     arg: (($: IDollar) => Q) | Q,
-  ): RxEntityState<Meta, InferResult<Q>["type"]>[] {
+  ): RxEntityState<Meta, InferResult<Q>["type"], InferResult<Q>>[] {
     if (!(toExpression in arg)) {
       arg = arg($);
     }
     return runQuery(this.rawState, this.self.who, arg).map((state) =>
       this.get(state),
-    );
+    ) as RxEntityState<Meta, InferResult<Q>["type"], InferResult<Q>>[];
   }
 
   get<T extends ExEntityType>(id: number): RxEntityState<Meta, T>;
@@ -922,10 +944,15 @@ export class SkillContext<Meta extends ContextMetaBase> {
   ) {
     const targets = this.queryCoerceToCharacters(target);
     for (const target of targets) {
-      const { causeDefeated } = this.callAndEmit("heal", value, target.latest(), {
-        via: this.skillInfo,
-        kind,
-      });
+      const { causeDefeated } = this.callAndEmit(
+        "heal",
+        value,
+        target.latest(),
+        {
+          via: this.skillInfo,
+          kind,
+        },
+      );
       this.causeDefeated ||= causeDefeated;
     }
   }
@@ -1098,12 +1125,12 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return (this as any)[CALLED_FROM_REACTION] ?? null;
   }
 
-  createEntity<TypeT extends EntityType>(
-    type: TypeT,
-    id: HandleT<TypeT>,
+  createEntity<Ty extends EntityType>(
+    type: Ty,
+    id: HandleT<Ty>,
     area?: EntityArea,
     opt: CreateEntityOptions = {},
-  ): RxEntityState<Meta, TypeT> | null {
+  ): RxEntityState<Meta, Ty, RegularExtraInfo<Ty>> | null {
     const id2 = id as number;
     const def = this.state.data.entities.get(id2);
     if (typeof def === "undefined") {
@@ -1142,7 +1169,11 @@ export class SkillContext<Meta extends ContextMetaBase> {
       opt,
     );
     if (newState) {
-      return this.get<TypeT>(newState.id);
+      return this.get<Ty>(newState.id) as RxEntityState<
+        Meta,
+        Ty,
+        RegularExtraInfo<Ty>
+      >;
     } else {
       return null;
     }
@@ -1166,15 +1197,19 @@ export class SkillContext<Meta extends ContextMetaBase> {
       return null;
     }
   }
-  summon(
-    id: SummonHandle,
+  summon<const Id extends SummonHandle>(
+    id: Id,
     where: "my" | "opp" = "my",
     opt: CreateEntityOptions = {},
-  ) {
+  ): RxEntityState<
+    Meta,
+    "summon",
+    RegularExtraInfo<"summon", Id["_meta"]["variables"]>
+  > | null {
     if (where === "my") {
-      this.createEntity("summon", id, void 0, opt);
+      return this.createEntity("summon", id, void 0, opt);
     } else {
-      this.createEntity(
+      return this.createEntity(
         "summon",
         id,
         {
@@ -1253,15 +1288,19 @@ export class SkillContext<Meta extends ContextMetaBase> {
       reason: "unequip",
     });
   }
-  combatStatus(
-    id: CombatStatusHandle,
+  combatStatus<const Id extends CombatStatusHandle>(
+    id: Id,
     where: "my" | "opp" = "my",
     opt: CreateEntityOptions = {},
-  ) {
+  ): RxEntityState<
+    Meta,
+    "combatStatus",
+    RegularExtraInfo<"combatStatus", Id["_meta"]["variables"]>
+  > | null {
     if (where === "my") {
-      this.createEntity("combatStatus", id, void 0, opt);
+      return this.createEntity("combatStatus", id, void 0, opt);
     } else {
-      this.createEntity(
+      return this.createEntity(
         "combatStatus",
         id,
         {

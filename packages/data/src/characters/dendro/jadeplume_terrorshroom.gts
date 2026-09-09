@@ -13,7 +13,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, DamageType, DiceType } from "@gi-tcg/core/data";
+import {
+  $,
+  DamageType,
+  DiceType,
+  typeHint,
+  type CharacterState,
+} from "@gi-tcg/core/data";
 
 /**
  * @id 127011
@@ -25,17 +31,17 @@ import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 define status {
   id 127011 as RadicalVitalityStatus;
   variable vitality, 0;
-  defineSnippet addVitality {
-    const max = :self.master.hasEquipment(ProliferatingSpores) ? 4 : 3;
+  defineSnippet addVitality, typeHint<CharacterState>() {
+    const max = :get(:e).hasEquipment(ProliferatingSpores) ? 4 : 3;
     if (:getVariable("vitality") < max) {
       :addVariable("vitality", 1);
     }
   };
   on dealDamage {
-    :callSnippet.addVitality();
+    :callSnippet.addVitality(:self.master);
   };
   on damaged {
-    :callSnippet.addVitality();
+    :callSnippet.addVitality(:self.master);
   };
   on endPhase {
     when :{

@@ -68,7 +68,8 @@ import {
   type TechniqueVMMeta,
 } from "./technique";
 import type { CharacterState, CustomEvent } from "../../data";
-import type { Computed, IUnorderedQuery } from "../../query/utils";
+import type { IUnorderedQuery } from "../../query/utils";
+import type { Computed } from "../../utils";
 import { getSubId } from "./sub_id";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 import type {

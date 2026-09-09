@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import type { Computed } from "../utils";
 import type { CharacterTag, EntityTag, EntityType } from "..";
 import type { AttachmentTag } from "../base/attachment";
 import type {
@@ -28,7 +29,6 @@ import type {
 import type { PrimaryMethodsInternal, PrimaryQuery } from "./primary_query";
 import {
   type CharacterReq,
-  type Computed,
   type Constructor,
   type EntityOnCharacterReq,
   type HeterogeneousMetaBase,
