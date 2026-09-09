@@ -20,7 +20,7 @@ import type {
 } from "../../base/state";
 import { GiTcgDataError } from "../../error";
 import { type EntityArea, type EntityDefinition } from "../../base/entity";
-import { diceCostSizeOfCard, getEntityById } from "./utils";
+import { diceCostSizeOfCard, getEntityById, type PlainEntityState } from "./utils";
 import type { ContextMetaBase, SkillContext } from "../skill_context";
 import {
   LatestStateSymbol,
@@ -31,7 +31,10 @@ import {
 import type { AttachmentHandle } from "../../data/type";
 import type { ExtraInfo } from "./base";
 
-class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
+class ReadonlyEntity<Meta extends ContextMetaBase>
+  extends ReactiveStateBase
+  implements PlainEntityState
+{
   override get [ReactiveStateSymbol](): EntityType {
     return this.definition.type;
   }
@@ -56,6 +59,12 @@ class ReadonlyEntity<Meta extends ContextMetaBase> extends ReactiveStateBase {
   }
   get definition(): EntityDefinition {
     return this.state.definition;
+  }
+  get variables(): EntityVariables {
+    return this.state.variables;
+  }
+  get attachments(): EntityState["attachments"] {
+    return this.state.attachments;
   }
   get area(): EntityArea {
     return this.skillContext._getEntityArea(this.id);

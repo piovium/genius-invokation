@@ -34,6 +34,7 @@ import {
   getActiveCharacterIndex,
   nationOfCharacter,
   weaponOfCharacter,
+  type PlainCharacterState,
   type PlainEntityState,
 } from "./utils";
 import { isSkillDisabled, type CreateEntityOptions } from "../../utils";
@@ -61,7 +62,10 @@ export type CharacterPosition = "active" | "next" | "prev" | "standby";
  * 提供一些针对角色的便利方法，不需要 SkillContext 参与。
  * 仅当保证 GameState 不发生变化时使用。
  */
-export class CharacterBase extends ReactiveStateBase {
+export class CharacterBase
+  extends ReactiveStateBase
+  implements PlainCharacterState
+{
   override get [ReactiveStateSymbol](): "character" {
     return "character";
   }
@@ -143,6 +147,12 @@ export class CharacterBase extends ReactiveStateBase {
   get definition(): CharacterDefinition {
     return this.state.definition;
   }
+  get variables(): CharacterVariables {
+    return this.state.variables;
+  }
+  get entities(): readonly PlainEntityState[] {
+    return this.state.entities;
+  }
   get health(): number {
     return this.getVariable("health");
   }
@@ -203,7 +213,7 @@ export class ReadonlyCharacter<
     return state;
   }
 
-  get entities(): ApplyReactive<Meta, EntityState[]> {
+  override get entities(): ApplyReactive<Meta, EntityState[]> {
     return applyReactive(this.skillContext, this.state.entities);
   }
 

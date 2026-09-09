@@ -46,14 +46,13 @@ type ReactiveState<
   readonly [StateSymbol]: unknown;
   readonly definition: { readonly type: infer Ty extends ExEntityType };
 }
-  ? Omit<State, StateSymbol> &
-      (Ty extends "character"
-        ? TypedCharacter<Meta>
-        : Ty extends "attachment"
-          ? TypedAttachment<Meta>
-          : Ty extends EntityType
-            ? TypedEntity<Meta, Ty, Extra>
-            : never) &
+  ? (Ty extends "character"
+      ? TypedCharacter<Meta>
+      : Ty extends "attachment"
+        ? TypedAttachment<Meta>
+        : Ty extends EntityType
+          ? TypedEntity<Meta, Ty, Extra>
+          : never) &
       IUnorderedQuery<{
         type: Ty;
         areaType: Extra["areaType"];
@@ -164,21 +163,17 @@ export function applyReactive<Meta extends ContextMetaBase, T>(
     const Ctor = REACTIVE_CLASS_MAP[value[StateSymbol] as StateKind]!;
     const instance = new Ctor(skillContext, value.id);
     const proxyAndRevoke = Proxy.revocable(instance, {
-      get(target, prop, receiver) {
+      get(target, prop) {
         if (prop === RawStateSymbol) {
           return value;
         }
-        if (prop in target) {
-          return Reflect.get(target, prop, target);
-        } else {
-          return Reflect.get(target[LatestStateSymbol], prop, receiver);
-        }
+        return Reflect.get(target, prop, target);
       },
       has(target, prop) {
         if (prop === RawStateSymbol) {
           return true;
         }
-        return Reflect.has(target, prop) || Reflect.has(Ctor.prototype, prop);
+        return Reflect.has(target, prop);
       },
     });
     reactiveProxies.set(value, proxyAndRevoke);

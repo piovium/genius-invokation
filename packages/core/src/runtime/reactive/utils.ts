@@ -48,13 +48,19 @@ export {
   sortDice,
 } from "../../utils";
 
-export type PlainCharacterState = Omit<CharacterState, StateSymbol>;
-export type PlainEntityState = Omit<EntityState, StateSymbol>;
-export type PlainAttachmentState = Omit<AttachmentState, StateSymbol>;
+export interface PlainCharacterState extends Omit<
+  CharacterState,
+  StateSymbol | "entities"
+> {
+  readonly entities: readonly PlainEntityState[];
+}
+export interface PlainEntityState extends Omit<EntityState, StateSymbol> {}
+export interface PlainAttachmentState extends Omit<
+  AttachmentState,
+  StateSymbol
+> {}
 export type PlainAnyState =
-  | PlainCharacterState
-  | PlainEntityState
-  | PlainAttachmentState;
+  PlainCharacterState | PlainEntityState | PlainAttachmentState;
 export type ExPlainEntityState<TypeT extends ExEntityType> =
   TypeT extends "character"
     ? PlainCharacterState

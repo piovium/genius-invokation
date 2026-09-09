@@ -20,7 +20,7 @@ import type {
 } from "../../base/state";
 import { GiTcgDataError } from "../../error";
 import { type EntityArea, type EntityDefinition } from "../../base/entity";
-import { getEntityById } from "./utils";
+import { getEntityById, type PlainAttachmentState } from "./utils";
 import type { ContextMetaBase, SkillContext } from "../skill_context";
 import {
   LatestStateSymbol,
@@ -33,7 +33,7 @@ import type { RxEntityState } from ".";
 
 class ReadonlyAttachment<
   Meta extends ContextMetaBase,
-> extends ReactiveStateBase {
+> extends ReactiveStateBase implements PlainAttachmentState {
   override get [ReactiveStateSymbol](): "attachment" {
     return "attachment";
   }
@@ -59,6 +59,9 @@ class ReadonlyAttachment<
   }
   get definition(): AttachmentDefinition {
     return this.state.definition;
+  }
+  get variables(): EntityVariables {
+    return this.state.variables;
   }
   get area(): EntityArea {
     return this.skillContext._getEntityArea(this.id);
