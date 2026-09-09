@@ -13,261 +13,69 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  Sse,
-  UnauthorizedException,
-} from "@nestjs/common";
-import {
-  IsBase64,
-  IsBoolean,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  Length,
-  Max,
-  Min,
-  ValidateNested,
-  IsUrl,
-} from "class-validator";
-import { RoomsService, type PlayerId } from "./rooms.service";
-import { Guest, User, UserOrGuest } from "../auth/user.decorator";
-import { VERSIONS, type Version } from "@gi-tcg/core";
-import { DeckDto } from "../decks/decks.controller";
-import { Public } from "../auth/auth.guard";
-import { validateDto } from "../utils";
-import { AuthService } from "../auth/auth.service";
-import { ParsePlayerIdPipe } from "./rooms.pipe";
+import type { Deck } from '@gi-tcg/typings';
+import { VERSIONS } from '@gi-tcg/core';
+import { BadRequestException } from '../errors';
 
-export class CreateRoomDto {
-  @IsBoolean()
-  @IsOptional()
-  hostFirst?: boolean;
-
-  @IsInt()
-  @Min(0)
-  @Max(VERSIONS.length - 1)
-  @IsOptional()
-  gameVersion?: number;
-
-  @IsNumber()
-  @IsOptional()
-  @Min(0)
-  @Max(300)
-  initTotalActionTime?: number;
-
-  @IsNumber()
-  @IsOptional()
-  @Min(25)
-  @Max(300)
-  rerollTime?: number;
-
-  @IsNumber()
-  @IsOptional()
-  @Min(0)
-  @Max(300)
-  roundTotalActionTime?: number;
-
-  @IsNumber()
-  @IsOptional()
-  @Min(25)
-  @Max(300)
-  actionTime?: number;
-
-  @IsNumber()
-  @Min(0)
-  @Max(2147483546)
-  @IsOptional()
-  randomSeed?: number;
-
-  @IsBoolean()
-  @IsOptional()
-  watchable?: boolean;
-
-  @IsBoolean()
-  @IsOptional()
-  private?: boolean;
-
-  @IsBoolean()
-  @IsOptional()
-  allowGuest?: boolean;
+export interface CreateRoomDto {
+  hostFirst?: boolean; gameVersion?: number; initTotalActionTime?: number;
+  rerollTime?: number; roundTotalActionTime?: number; actionTime?: number;
+  randomSeed?: number; watchable?: boolean; private?: boolean; allowGuest?: boolean;
 }
+export interface UserCreateRoomDto extends CreateRoomDto { hostDeckId: number }
+export interface GuestJoinRoomDto { name: string; deck: Deck; avatarUrl?: string }
+export interface GuestCreateRoomDto extends CreateRoomDto, GuestJoinRoomDto {}
+export interface UserJoinRoomDto { deckId: number }
 
-export class UserCreateRoomDto extends CreateRoomDto {
-  @IsInt()
-  hostDeckId!: number;
+function object(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new BadRequestException('Expected a JSON object');
+  return value as Record<string, unknown>;
 }
-
-export class GuestCreateRoomDto extends CreateRoomDto {
-  @Length(1, 64)
-  name!: string;
-
-  @ValidateNested()
-  deck!: DeckDto;
-
-  @IsOptional()
-  @Length(1, 256)
-  avatarUrl?: string;
+function integer(value: unknown, field: string): number {
+  if (!Number.isSafeInteger(value)) throw new BadRequestException(field+' must be an integer');
+  return value as number;
 }
-
-export class UserJoinRoomDto {
-  @IsInt()
-  deckId!: number;
+function boundedString(value: unknown, field: string, max: number): string {
+  if (typeof value !== 'string' || [...value].length < 1 || [...value].length > max) throw new BadRequestException(field+' has invalid length');
+  return value;
 }
-
-export class GuestJoinRoomDto {
-  @Length(1, 64)
-  name!: string;
-
-  @ValidateNested()
-  deck!: DeckDto;
-
-  @IsOptional()
-  @Length(1, 256)
-  avatarUrl?: string;
+function deck(value: unknown): Deck {
+  const record = object(value);
+  const list = (value: unknown, count: number, field: string): number[] => {
+    if (!Array.isArray(value) || value.length !== count) throw new BadRequestException(field+' must contain '+count+' entries');
+    return value.map((id) => integer(id, field));
+  };
+  return { characters: list(record.characters,3,'characters'), cards: list(record.cards,30,'cards') };
 }
-
-export class PlayerActionResponseDto {
-  @IsInt()
-  id!: number;
-
-  @IsBase64()
-  response!: string;
+function guestFields(input: Record<string,unknown>): GuestJoinRoomDto {
+  return { name: boundedString(input.name,'name',64), deck: deck(input.deck),
+    ...(input.avatarUrl === undefined || input.avatarUrl === null ? {} : { avatarUrl: boundedString(input.avatarUrl,'avatarUrl',256) }) };
 }
-
-@Controller("rooms")
-@Public()
-export class RoomsController {
-  constructor(
-    private rooms: RoomsService,
-    private authService: AuthService,
-  ) {}
-
-  @Get()
-  getRooms(@User() userId: number | null) {
-    return this.rooms.getAllRooms(userId === null);
+function roomFields(input: Record<string,unknown>): CreateRoomDto {
+  const out: Record<string,unknown> = {};
+  for (const key of ['hostFirst','watchable','private','allowGuest']) {
+    if (input[key] === undefined || input[key] === null) continue;
+    if (typeof input[key] !== 'boolean') throw new BadRequestException(key+' must be boolean');
+    out[key] = input[key];
   }
-
-  @Post()
-  async createRoom(@User() userId: number | null, @Body() params: unknown) {
-    if (userId !== null) {
-      const dto = await validateDto(params, UserCreateRoomDto);
-      return this.rooms.createRoomFromUser(userId, dto);
-    } else {
-      const dto = await validateDto(params, GuestCreateRoomDto);
-      const { playerId, room } = await this.rooms.createRoomFromGuest(dto);
-      return {
-        accessToken: await this.authService.signGuest(playerId),
-        playerId,
-        room,
-      };
-    }
+  const limits = { gameVersion: [0,VERSIONS.length-1], initTotalActionTime:[0,300], rerollTime:[25,300], roundTotalActionTime:[0,300], actionTime:[25,300], randomSeed:[0,2147483546] } as const;
+  for (const [key,[min,max]] of Object.entries(limits)) {
+    const value = input[key];
+    if (value === undefined || value === null) continue;
+    if (typeof value !== 'number' || !Number.isFinite(value) || value<min || value>max || (key==='gameVersion'&&!Number.isInteger(value))) throw new BadRequestException(key+' is out of range');
+    out[key] = value;
   }
-
-  @Get("current")
-  getCurrentRoom(@UserOrGuest() playerId: number | string | null) {
-    if (playerId !== null) {
-      return this.rooms.currentRoom(playerId);
-    } else {
-      return null;
-    }
-  }
-
-  @Get(":roomId")
-  getRoom(
-    @User() userId: number | null,
-    @Param("roomId", ParseIntPipe) roomId: number,
-  ) {
-    const room = this.rooms.getRoom(roomId);
-    if (userId === null && !room.config.allowGuest) {
-      throw new UnauthorizedException(`This room does not allow guests`);
-    }
-    return room;
-  }
-
-  @Get(":roomId/gameLog")
-  getRoomGameLog(
-    @UserOrGuest() playerId: number | string | null,
-    @Param("roomId", ParseIntPipe) roomId: number,
-  ) {
-    if (playerId === null) {
-      throw new UnauthorizedException();
-    }
-    return this.rooms.getRoomGameLog(playerId, roomId);
-  }
-
-  @Delete(":roomId")
-  deleteRoom(
-    @UserOrGuest() playerId: number | string | null,
-    @Param("roomId", ParseIntPipe) roomId: number,
-  ) {
-    if (playerId === null) {
-      throw new UnauthorizedException();
-    }
-    return this.rooms.deleteRoom(playerId, roomId);
-  }
-
-  @Post(":roomId/players")
-  async joinRoom(
-    @User() userId: number | null,
-    @Param("roomId", ParseIntPipe) roomId: number,
-    @Body() params: object,
-  ) {
-    if (userId !== null) {
-      const dto = await validateDto(params, UserJoinRoomDto);
-      return this.rooms.joinRoomFromUser(userId, roomId, dto.deckId);
-    } else {
-      const dto = await validateDto(params, GuestJoinRoomDto);
-      const { playerId } = await this.rooms.joinRoomFromGuest(roomId, dto);
-      return {
-        accessToken: await this.authService.signGuest(playerId),
-        playerId,
-      };
-    }
-  }
-
-  @Sse(":roomId/players/:targetPlayerId/notification")
-  getNotification(
-    @UserOrGuest() playerId: number | string | null,
-    @Param("roomId", ParseIntPipe) roomId: number,
-    @Param("targetPlayerId", ParsePlayerIdPipe) targetPlayerId: string | number,
-  ) {
-    return this.rooms.playerNotification(roomId, playerId, targetPlayerId);
-  }
-
-  @Post(":roomId/players/:targetPlayerId/actionResponse")
-  postAction(
-    @UserOrGuest() playerId: number | string | null,
-    @Param("roomId", ParseIntPipe) roomId: number,
-    @Param("targetPlayerId", ParsePlayerIdPipe) targetPlayerId: number | string,
-    @Body() action: PlayerActionResponseDto,
-  ) {
-    if (playerId !== targetPlayerId) {
-      throw new UnauthorizedException(
-        `You can only post your own action responses`,
-      );
-    }
-    this.rooms.receivePlayerResponse(roomId, playerId, action);
-    return { message: "response received" };
-  }
-
-  @Post(":roomId/players/:targetPlayerId/giveUp")
-  postGiveUp(
-    @UserOrGuest() playerId: number | string | null,
-    @Param("roomId", ParseIntPipe) roomId: number,
-    @Param("targetPlayerId", ParsePlayerIdPipe) targetPlayerId: number | string,
-  ) {
-    if (playerId !== targetPlayerId) {
-      throw new UnauthorizedException(`You can only give up your own game`);
-    }
-    this.rooms.receivePlayerGiveUp(roomId, playerId);
-    return { message: "given up" };
-  }
+  return out;
+}
+export function parseCreateRoom(value: unknown, registered: true): UserCreateRoomDto;
+export function parseCreateRoom(value: unknown, registered: false): GuestCreateRoomDto;
+export function parseCreateRoom(value: unknown, registered: boolean) {
+  const input=object(value), config=roomFields(input);
+  return registered ? { ...config,hostDeckId:integer(input.hostDeckId,'hostDeckId') } : { ...config,...guestFields(input) };
+}
+export function parseJoinRoom(value: unknown, registered: true): UserJoinRoomDto;
+export function parseJoinRoom(value: unknown, registered: false): GuestJoinRoomDto;
+export function parseJoinRoom(value: unknown, registered: boolean) {
+  const input=object(value);
+  return registered ? { deckId:integer(input.deckId,'deckId') } : guestFields(input);
 }

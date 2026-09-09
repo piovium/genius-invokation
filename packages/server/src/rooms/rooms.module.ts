@@ -1,31 +1,57 @@
-// Copyright (C) 2024-2025 Guyutongxue
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import { Elysia } from 'elysia';
+import { UnauthorizedException } from '../errors';
+import type { AuthService } from '../auth/auth.service';
+import type { RoomsService } from './rooms.service';
+import { parseCreateRoom, parseJoinRoom } from './rooms.controller';
+import { parseRoomId } from './rooms.pipe';
 
-import { Module } from "@nestjs/common";
-import { RoomsService } from "./rooms.service";
-import { RoomsController } from "./rooms.controller";
-import { DecksModule } from "../decks/decks.module";
-import { UsersModule } from "../users/users.module";
-import { GamesModule } from "../games/games.module";
-import { AuthModule } from "../auth/auth.module";
-import { ParsePlayerIdPipe } from "./rooms.pipe";
-import { MetricsModule } from "../metrics/metrics.module";
-
-@Module({
-  imports: [DecksModule, UsersModule, GamesModule, AuthModule, MetricsModule],
-  providers: [RoomsService, ParsePlayerIdPipe],
-  controllers: [RoomsController],
-})
-export class RoomsModule {}
+export function createRoomsRoutes(rooms: RoomsService, auth: AuthService) {
+  const identity = (request: Request) => {
+    const header = request.headers.get('authorization');
+    if (!header) return null;
+    const bearer = /^Bearer (\S+)$/i.exec(header);
+    const payload = bearer ? auth.verify(bearer[1]!) : null;
+    if (!payload) throw new UnauthorizedException('Invalid bearer token');
+    return payload;
+  };
+  const requirePlayer = (request: Request) => {
+    const payload = identity(request);
+    if (!payload) throw new UnauthorizedException();
+    return payload.sub;
+  };
+  return new Elysia({ prefix: '/rooms' })
+    .get('/', ({ request }) => rooms.getAllRooms(identity(request)?.user !== 1))
+    .post('/', async ({ request, body, set }) => {
+      const payload = identity(request);
+      set.status = 201;
+      if (payload?.user === 1) return rooms.createRoomFromUser(payload.sub, parseCreateRoom(body, true));
+      const { room, playerId } = await rooms.createRoomFromGuest(parseCreateRoom(body, false));
+      return { room, playerId, accessToken: await auth.signGuest(playerId) };
+    })
+    .get('/current', ({ request }) => {
+      const player = identity(request)?.sub;
+      const room = player === undefined ? null : rooms.currentRoom(player);
+      return room === null ? Response.json(null) : room;
+    })
+    .get('/:roomId', ({ request, params }) => {
+      const room = rooms.getRoom(parseRoomId(params.roomId));
+      if (identity(request)?.user !== 1 && !room.config.allowGuest) throw new UnauthorizedException('This room does not allow guests');
+      return room;
+    })
+    .get('/:roomId/gameLog', ({ request, params }) => rooms.getRoomGameLog(requirePlayer(request), parseRoomId(params.roomId)))
+    .delete('/:roomId', ({ request, params }) => {
+      rooms.deleteRoom(requirePlayer(request), parseRoomId(params.roomId));
+      return { message: 'room deleted' };
+    })
+    .post('/:roomId/players', async ({ request, params, body, set }) => {
+      const payload = identity(request);
+      const roomId = parseRoomId(params.roomId);
+      set.status = 201;
+      if (payload?.user === 1) {
+        await rooms.joinRoomFromUser(payload.sub, roomId, parseJoinRoom(body, true).deckId);
+        return { message: 'joined' };
+      }
+      const { playerId } = await rooms.joinRoomFromGuest(roomId, parseJoinRoom(body, false));
+      return { playerId, accessToken: await auth.signGuest(playerId) };
+    });
+}

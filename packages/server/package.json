@@ -10,6 +10,8 @@
     "start": "node --env-file-if-exists=.env dist/main.js",
     "check": "pnpm prepare:metadata && tsc --noEmit",
     "migrate": "gnx --env-file-if-exists=.env src/db/migrate.ts",
+    "test": "pnpm prepare:metadata && gnx --test src/auth/auth.test.ts src/frontend.test.ts src/http.test.ts src/app.test.ts src/deck-metadata.test.ts src/rooms/*.test.ts",
+    "test:rooms": "gnx --test src/rooms/*.test.ts",
     "test:http": "pnpm prepare:metadata && gnx --test src/auth/auth.test.ts src/frontend.test.ts src/http.test.ts src/app.test.ts",
     "test:db": "pnpm prepare:metadata && gnx --test src/db/database.test.ts src/db/migrate.test.ts",
     "test:metadata": "pnpm prepare:metadata && gnx --test src/deck-metadata.test.ts"

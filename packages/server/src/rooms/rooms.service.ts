@@ -13,433 +13,40 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-  UnauthorizedException,
-} from "@nestjs/common";
-import {
-  type GameConfig,
-  type GameStateLogEntry,
-  GiTcgError,
-  Game as InternalGame,
-  type Notification,
-  type PlayerIO,
-  type RpcRequest,
-  type RpcResponse,
-  serializeGameStateLog,
-  CORE_VERSION,
-  VERSIONS,
-  CURRENT_VERSION,
-  type Version,
-  type GameState,
-  setAsyncContext,
-} from "@gi-tcg/core";
-import {
-  base64Decode,
-  base64Encode,
-  dispatchRpc,
-  Notification as PbNotification,
-  RpcRequest as PbRpcRequest,
-  RpcResponse as PbRpcResponse,
-  type Deck,
-} from "@gi-tcg/typings";
-import getData from "@gi-tcg/data";
-import { flip } from "@gi-tcg/utils";
-import {
-  BehaviorSubject,
-  defer,
-  Observable,
-  of,
-  ReplaySubject,
-  Subject,
-  concat,
-  filter,
-  finalize,
-  interval,
-  map,
-  mergeWith,
-  takeUntil,
-} from "rxjs";
-import { createGuestId, DeckVerificationError, verifyDeck } from "../utils";
-import {
-  MetricsService,
-  type RoomMetricsSnapshot,
-} from "../metrics/metrics.service";
-import type {
-  CreateRoomDto,
-  GuestCreateRoomDto,
-  GuestJoinRoomDto,
-  PlayerActionResponseDto,
-  UserCreateRoomDto,
-} from "./rooms.controller";
-import { DecksService } from "../decks/decks.service";
-import { UsersService } from "../users/users.service";
-import { GamesService } from "../games/games.service";
-import { inspect } from "node:util";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import semver from "semver";
-import { redis } from "../redis";
+import { BadRequestException, ConflictException, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '../errors';
+import { Game as InternalGame, createGameStateLogSerializer, CORE_VERSION, VERSIONS, CURRENT_VERSION, type GameState, setAsyncContext } from '@gi-tcg/core';
+import getData from '@gi-tcg/data';
+import { flip } from '@gi-tcg/utils';
+import { createGuestId, DeckVerificationError, verifyDeck } from '../utils';
+import { MetricsService, type RoomMetricsSnapshot } from '../metrics/metrics.service';
+import type { CreateRoomDto, GuestCreateRoomDto, GuestJoinRoomDto, UserCreateRoomDto } from './rooms.controller';
+import { DecksService } from '../decks/decks.service';
+import { UsersService } from '../users/users.service';
+import { GamesService } from '../games/games.service';
+import { inspect } from 'node:util';
+import { randomUUID } from 'node:crypto';
+import semver from 'semver';
+import { redis } from '../redis';
+import { Player } from './player';
+import { RoomCommandError, type PlayerInfo, type PlayerId, type RoomConfig, type CreateRoomConfig, type RoomSubscriber, type CommandAck } from './types';
+export type { PlayerId } from './types';
 
-const s3 = process.env.S3_ENDPOINT
-  ? new S3Client({
-      region: process.env.S3_REGION,
-      endpoint: process.env.S3_ENDPOINT,
-      credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
-      },
-    })
-  : null;
-
-interface RoomConfig extends Partial<GameConfig> {
-  initTotalActionTime: number; // defaults 45
-  rerollTime: number; // defaults 40
-  roundTotalActionTime: number; // defaults 60
-  actionTime: number; // defaults 25
-  watchable: boolean; // defaults true
-  private: boolean; // defaults false
-  allowGuest: boolean; // defaults true
-  gameVersion: Version; // defaults latest
+let s3Promise: Promise<import('@aws-sdk/client-s3').S3Client> | null = null;
+async function uploadReplay(roomId: number, gameData: string) {
+  if (!process.env.S3_ENDPOINT) return;
+  const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
+  const s3 = await (s3Promise ??= Promise.resolve(new S3Client({
+    region: process.env.S3_REGION, endpoint: process.env.S3_ENDPOINT,
+    credentials: { accessKeyId: process.env.S3_ACCESS_KEY_ID!, secretAccessKey: process.env.S3_SECRET_ACCESS_KEY! },
+  })));
+  const now = new Date().toISOString();
+  const date = now.slice(0,10), time = now.slice(11,19).replaceAll(':','');
+  const prefix = process.env.S3_PREFIX ? process.env.S3_PREFIX+'/' : '';
+  await s3.send(new PutObjectCommand({ Bucket: process.env.S3_BUCKET!, Key: prefix+'logs/'+date+'/'+time+'-'+roomId+'.json', Body: gameData, ContentType: 'application/json' }));
 }
 
-interface CreateRoomConfig extends RoomConfig {
-  hostWho: 0 | 1;
-}
-
-interface PlayerIOWithError extends PlayerIO {
-  // notify: (notification: NotificationMessage) => void;
-  // rpc: (method: RpcMethod, params: RpcRequest[RpcMethod]) => Promise<any>;
-  onError: (e: GiTcgError) => void;
-}
-
-type PlayerInfo = (
-  | {
-      isGuest: true;
-      id: string;
-    }
-  | {
-      isGuest: false;
-      id: number;
-    }
-) & {
-  name: string;
-  deck: Deck;
-  avatarUrl?: string;
-};
-
-export type PlayerId = PlayerInfo["id"];
-
-export interface RpcTimer {
-  current: number;
-  total: number;
-}
-
-export interface SSEWaiting {
-  type: "waiting";
-}
-
-export interface SSEPing {
-  type: "ping";
-}
-
-export interface SSEInitialized {
-  type: "initialized";
-  who: 0 | 1;
-  config: RoomConfig | null;
-  myPlayerInfo: PlayerInfo;
-  oppPlayerInfo: PlayerInfo;
-}
-
-export interface SSENotification {
-  type: "notification";
-  data: string;
-}
-export interface SSEError {
-  type: "error";
-  message: string;
-}
-export interface SSERpc {
-  type: "rpc";
-  /** The current RPC request. `null` means that the previous RPC has ended. */
-  data: {
-    id: number;
-    timer: RpcTimer;
-    request: string;
-  } | null;
-}
-export interface SSEOppRpc {
-  type: "oppRpc";
-  oppTimer: RpcTimer | null;
-}
-
-export type SSEPayload =
-  | SSEPing
-  | SSERpc
-  | SSEWaiting
-  | SSEInitialized
-  | SSENotification
-  | SSEOppRpc
-  | SSEError;
-
-interface RpcResolver {
-  id: number;
-  request: RpcRequest;
-  timeout: number;
-  readonly totalTimeout: number;
-  resolve: (response: any) => void;
-}
-
-// Keepalive ping interval (10 seconds to prevent proxy/gateway timeout)
-const pingInterval = interval(10 * 1000).pipe(
-  map((): SSEPing => ({ type: "ping" })),
-);
-
-class Player implements PlayerIOWithError {
-  private readonly completeSubject = new Subject<void>();
-  private readonly initializedSubject = new ReplaySubject<
-    SSEInitialized | SSEWaiting
-  >();
-  private readonly actionSubject = new Subject<SSERpc>();
-  private readonly oppRpcSubject = new Subject<SSEOppRpc>();
-
-  private readonly actionSseSource = defer(() =>
-    concat(of(this.currentAction()), this.actionSubject),
-  );
-  private readonly oppRpcSseSource = defer(() =>
-    concat(
-      of<SSEOppRpc>({
-        type: "oppRpc",
-        oppTimer: this._oppPlayer?.getTimer() ?? null,
-      }),
-      this.oppRpcSubject,
-    ),
-  );
-
-  private readonly errorSseSource = new BehaviorSubject<SSEError | null>(null);
-  private readonly notificationSseSource =
-    new BehaviorSubject<SSENotification | null>(null);
-
-  public readonly notificationSse$: Observable<SSEPayload> = concat<
-    (SSEPayload | null)[]
-  >(this.initializedSubject, this.notificationSseSource).pipe(
-    mergeWith(this.errorSseSource),
-    filter((data): data is SSEPayload => data !== null),
-    mergeWith(this.actionSseSource, this.oppRpcSseSource, pingInterval),
-    takeUntil(this.completeSubject),
-  );
-  constructor(public readonly playerInfo: PlayerInfo) {
-    this.initializedSubject.next({ type: "waiting" });
-  }
-
-  private _nextRpcId = 0;
-  private _rpcResolver: RpcResolver | null = null;
-  private _timeoutConfig: RoomConfig | null = null;
-  private _roundTimeout = Infinity;
-  private _initialRoundTimeout = Infinity;
-  private _mutationExtraTimeout = 0;
-
-  private _contiguousTimeoutRpcExecuted = 0;
-  private _oppPlayer: Player | null = null;
-
-  private _game: InternalGame | null = null;
-  private _who: 0 | 1 = 0;
-
-  setTimeoutConfig(config: RoomConfig) {
-    this._timeoutConfig = config;
-    this._initialRoundTimeout = this._roundTimeout =
-      this._timeoutConfig?.initTotalActionTime ?? Infinity;
-  }
-  resetRoundTimeout() {
-    this._initialRoundTimeout = this._roundTimeout =
-      this._timeoutConfig?.roundTotalActionTime ?? Infinity;
-  }
-  currentAction(): SSERpc {
-    if (this._rpcResolver) {
-      return {
-        type: "rpc",
-        data: {
-          id: this._rpcResolver.id,
-          timer: this.getTimer()!,
-          request: base64Encode(
-            PbRpcRequest.encode(this._rpcResolver.request).finish(),
-          ),
-        },
-      };
-    } else {
-      return { type: "rpc", data: null };
-    }
-  }
-  getTimer(): RpcTimer | null {
-    if (this._rpcResolver) {
-      return {
-        current: this._rpcResolver.timeout,
-        total: this._rpcResolver.totalTimeout,
-      };
-    } else {
-      return null;
-    }
-  }
-
-  receiveResponse(response: PlayerActionResponseDto) {
-    if (!this._rpcResolver) {
-      throw new NotFoundException(`No rpc now`);
-    } else if (this._rpcResolver.id !== response.id) {
-      console.error(this._rpcResolver, response);
-      throw new NotFoundException(`Rpc id not match`);
-    }
-    try {
-      const rpcResponse = PbRpcResponse.decode(base64Decode(response.response));
-      if (
-        !rpcResponse.response ||
-        rpcResponse.response.$case !== this._rpcResolver.request.request?.$case
-      ) {
-        throw new Error("RPC response method mismatch");
-      }
-      this._rpcResolver.resolve(rpcResponse);
-    } catch {
-      throw new BadRequestException("Invalid RPC response");
-    }
-  }
-
-  notify(notification: Notification) {
-    this.notificationSseSource.next({
-      type: "notification",
-      data: base64Encode(PbNotification.encode(notification).finish()),
-    });
-    this._mutationExtraTimeout += 0.5 * notification.mutation.length;
-  }
-  sendOppRpc(oppTimer: RpcTimer | null) {
-    this.oppRpcSubject.next({
-      type: "oppRpc",
-      oppTimer,
-    });
-  }
-
-  private timeoutRpc(request: RpcRequest): Promise<RpcResponse> {
-    this._contiguousTimeoutRpcExecuted++;
-    if (this.playerInfo.isGuest && this._contiguousTimeoutRpcExecuted >= 3) {
-      if (this._game && this._who !== null) {
-        this._game?.giveUp(this._who);
-      }
-      throw new Error(`Give up actions due to too many timeout of guest`);
-    }
-    return dispatchRpc({
-      action: async ({ action }) => {
-        const declareEndIdx = action.findIndex(
-          (c) => c.action?.$case === "declareEnd",
-        );
-        return {
-          chosenActionIndex: declareEndIdx,
-          usedDice: [],
-        };
-      },
-      chooseActive: async ({ candidateIds }) => ({
-        activeCharacterId: candidateIds[0]!,
-      }),
-      rerollDice: async () => ({
-        diceToReroll: [],
-      }),
-      switchHands: async () => ({
-        removedHandIds: [],
-      }),
-      selectCard: async ({ candidateDefinitionIds }) => ({
-        selectedDefinitionId: candidateDefinitionIds[0]!,
-      }),
-    })(request);
-  }
-
-  async rpc(request: RpcRequest): Promise<RpcResponse> {
-    const id = this._nextRpcId++;
-    // 计时器上限
-    let totalTimeout = this._initialRoundTimeout;
-    // 当前回合剩余时间
-    const roundTimeout = this._roundTimeout;
-    // 本行动可用时间
-    let timeout = Math.ceil(this._mutationExtraTimeout);
-    // 行动结束后，计算新的回合剩余时间
-    let setRoundTimeout: (remained: number) => void;
-    if (request.request?.$case === "rerollDice") {
-      const actionTimeout = this._timeoutConfig?.rerollTime ?? Infinity;
-      timeout += actionTimeout;
-      totalTimeout += actionTimeout;
-      setRoundTimeout = () => {
-        this._mutationExtraTimeout = 0;
-      };
-    } else {
-      const actionTimeout = this._timeoutConfig?.actionTime ?? Infinity;
-      timeout += roundTimeout + actionTimeout;
-      totalTimeout += actionTimeout;
-      setRoundTimeout = (remain) => {
-        this._roundTimeout = Math.min(roundTimeout, remain + 1);
-        this._mutationExtraTimeout = 0;
-      };
-    }
-    try {
-      return await new Promise<RpcResponse>((resolve, reject) => {
-        const resolver: RpcResolver = {
-          id,
-          request,
-          timeout,
-          totalTimeout,
-          resolve: (r) => {
-            clearInterval(interval);
-            setRoundTimeout(resolver.timeout);
-            this._contiguousTimeoutRpcExecuted = 0;
-            resolve(r);
-          },
-        };
-        this._rpcResolver = resolver;
-        this.actionSubject.next(this.currentAction());
-        this._oppPlayer?.sendOppRpc(this.getTimer()!);
-        const interval = setInterval(() => {
-          resolver.timeout--;
-          if (resolver.timeout <= -2) {
-            clearInterval(interval);
-            setRoundTimeout(0);
-            Promise.try(() => this.timeoutRpc(request))
-              .then((r) => resolve(r))
-              .catch((e) => reject(e));
-          }
-        }, 1000);
-      });
-    } finally {
-      this._rpcResolver = null;
-      this.actionSubject.next(this.currentAction());
-      this._oppPlayer?.sendOppRpc(null);
-    }
-  }
-
-  onError(e: unknown) {
-    const message = inspect(e);
-    this.errorSseSource.next({
-      type: "error",
-      message,
-    });
-  }
-  onInitialized(who: 0 | 1, game: InternalGame, oppPlayer: Player) {
-    this._who = who;
-    this._game = game;
-    this._oppPlayer = oppPlayer;
-    this.initializedSubject.next({
-      type: "initialized",
-      who,
-      config: this._timeoutConfig,
-      myPlayerInfo: this.playerInfo,
-      oppPlayerInfo: oppPlayer.playerInfo,
-    });
-    this.initializedSubject.complete();
-  }
-  complete() {
-    this.completeSubject.next();
-  }
-}
-
-type GameStopHandler = (room: Room, game: InternalGame | null) => void;
+interface GameStopInfo { hasGame: boolean; phase: string | null; winner: 0 | 1 | null }
+type GameStopHandler = (room: Room, info: GameStopInfo) => void | Promise<unknown>;
 
 enum RoomStatus {
   Waiting = "waiting",
@@ -455,7 +62,7 @@ interface RoomInfo {
   players: PlayerInfo[];
 }
 
-function sendDebugLog(name: string, message: any) {
+function sendDebugLog(name: string, message: unknown) {
   if (process.env.DEBUG_LOG_RECEIVE_URL) {
     fetch(process.env.DEBUG_LOG_RECEIVE_URL, {
       method: "POST",
@@ -483,11 +90,14 @@ class Room {
   public readonly config: RoomConfig;
   private host: Player | null = null;
   private participant: Player | null = null;
-  private stateLog: GameStateLogEntry[] = [];
+  private readonly stateLog = createGameStateLogSerializer();
+  public readonly sessionId: string = randomUUID();
+  private readonly giveUpAcks = new Map<PlayerId, CommandAck>();
   private terminated = false;
   private onStopHandlers: GameStopHandler[] = [];
   private startedAt: Date | null = null;
   private endedAt: Date | null = null;
+  private waitingTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     public readonly id: number,
@@ -515,12 +125,8 @@ class Room {
     return this.players.filter((player): player is Player => player !== null);
   }
   get status(): RoomStatus {
-    if (!this.game) {
-      return RoomStatus.Waiting;
-    }
-    if (this.terminated) {
-      return RoomStatus.Finished;
-    }
+    if (this.terminated && this.startedAt) return RoomStatus.Finished;
+    if (!this.game) return RoomStatus.Waiting;
     return RoomStatus.Playing;
   }
 
@@ -538,6 +144,9 @@ class Room {
     this.participant = player;
     return flip(this.hostWho);
   }
+  setWaitingTimeout(timer: ReturnType<typeof setTimeout>) {
+    this.waitingTimeout = timer;
+  }
   start() {
     if (this.terminated) {
       throw new ConflictException("room terminated");
@@ -546,6 +155,8 @@ class Room {
     if (player0 === null || player1 === null) {
       throw new ConflictException("player not ready");
     }
+    if (this.waitingTimeout) clearTimeout(this.waitingTimeout);
+    this.waitingTimeout = null;
     let state: GameState;
     try {
       player0.setTimeoutConfig(this.config);
@@ -556,6 +167,7 @@ class Room {
         versionBehavior: this.config.gameVersion,
         hostRelatedExecution: true,
         hostWho: this.hostWho,
+        randomSeed: this.config.randomSeed,
       });
     } catch (e) {
       this.stop();
@@ -566,7 +178,7 @@ class Room {
     this.startedAt = new Date();
     const game = new InternalGame(state);
     game.onPause = async (state, mutations, canResume) => {
-      this.stateLog.push({ state, canResume });
+      this.stateLog.append({ state, canResume });
       for (const mut of mutations) {
         if (mut.type === "changePhase" && mut.newPhase === "roll") {
           player0.resetRoundTimeout();
@@ -595,7 +207,7 @@ class Room {
         sendDebugLog("gameErrorLog", {
           em: inspect(e),
           gv: this.config.gameVersion,
-          ...serializeGameStateLog(this.stateLog),
+          ...this.stateLog.serialize(),
         });
       } finally {
         this.stop();
@@ -603,23 +215,30 @@ class Room {
     })();
   }
 
-  giveUp(userId: PlayerId) {
-    if (this.players[0]?.playerInfo.id === userId) {
-      this.game?.giveUp(0);
-    } else if (this.players[1]?.playerInfo.id === userId) {
-      this.game?.giveUp(1);
-    } else {
-      throw new NotFoundException(`Player ${userId} not found`);
-    }
+  giveUp(userId: PlayerId): CommandAck {
+    const old = this.giveUpAcks.get(userId);
+    if (old) return old;
+    const who = this.players.findIndex((p) => p?.playerInfo.id === userId);
+    if (who !== 0 && who !== 1) throw new NotFoundException('Player not found');
+    if (!this.startedAt) throw new RoomCommandError('GAME_FINISHED', 'No game is running');
+    const ack: CommandAck = { type: 'ack', command: 'giveUp', sessionId: this.sessionId };
+    this.giveUpAcks.set(userId, ack);
+    if (!this.terminated) this.game?.giveUp(who);
+    return ack;
   }
 
   stop() {
+    if (this.terminated) return;
     this.terminated = true;
+    if (this.waitingTimeout) clearTimeout(this.waitingTimeout);
+    this.waitingTimeout = null;
     this.endedAt = new Date();
+    const info: GameStopInfo = { hasGame: this.game !== null, phase: this.game?.state.phase ?? null, winner: this.game?.state.winner ?? null };
     this.players[0]?.complete();
     this.players[1]?.complete();
-    for (const cb of this.onStopHandlers) {
-      cb(this, this.game);
+    this.game = null;
+    for (const cb of this.onStopHandlers.splice(0)) {
+      Promise.resolve().then(() => cb(this, info)).catch((error) => console.error('Room finalization failed', this.id, error));
     }
   }
 
@@ -633,7 +252,7 @@ class Room {
       return player && { who, id: player.id, name: player.name };
     });
     return {
-      ...serializeGameStateLog(this.stateLog),
+      ...this.stateLog.serialize(),
       gv: this.config.gameVersion,
       m: {
         roomId: this.id,
@@ -664,7 +283,6 @@ function toShuffled<T>(array: readonly T[]): T[] {
   return result;
 }
 
-@Injectable()
 export class RoomsService {
   private logger = new Logger(RoomsService.name);
 
@@ -679,17 +297,12 @@ export class RoomsService {
     private metrics: MetricsService,
   ) {
     this.metrics.setRoomMetricsProvider(() => this.getRoomMetricsSnapshot());
-    const onShutdown = async () => {
-      console.log(`Waiting for ${this.rooms.size} rooms to stop...`);
-      if (!this.shutdownResolvers && this.rooms.size !== 0) {
-        this.shutdownResolvers = Promise.withResolvers();
-      }
-      await this.shutdownResolvers?.promise;
-      process.exit();
-    };
-    process.on("SIGINT", onShutdown);
-    process.on("SIGTERM", onShutdown);
-    process.on("SIGQUIT", onShutdown);
+  }
+
+  async close() {
+    this.shutdownResolvers ??= Promise.withResolvers();
+    if (this.rooms.size === 0) this.shutdownResolvers.resolve();
+    await this.shutdownResolvers.promise;
   }
 
   currentRoom(playerId: PlayerId) {
@@ -833,24 +446,30 @@ export class RoomsService {
     this.metrics.incrementCreatedRooms();
     this.logger.log(`Room ${room.id} created, host is ${playerInfo.name}`);
 
-    room.onStop(async (room, game) => {
-      if (game) {
+    room.onStop(async (room, info) => {
+      if (info.hasGame) {
         this.metrics.incrementFinishedRooms();
       }
-      let deploying = (await redis?.get("meta:deploying")) ?? null;
+      const deploying = await redis?.get("meta:deploying").catch((error) => {
+        this.logger.warn(`Failed to read maintenance status: ${error}`);
+        return null;
+      });
 
       const keepRoomDuration =
         (this.shutdownResolvers || deploying ? 1 : 5) * 60 * 1000;
       this.logger.log(
         `Room ${room.id} stopped, status ${room.status}, keep it for ${keepRoomDuration} ms`,
       );
-      this.logger.log(`Room ${room.id} game phase: ${game?.state.phase}`);
+      this.logger.log(`Room ${room.id} game phase: ${info.phase}`);
       if (room.status !== RoomStatus.Waiting) {
         await new Promise((r) => setTimeout(r, keepRoomDuration));
       }
       this.logger.log(`Room ${room.id} removed`);
-      await redis?.hdel("meta:active_rooms", String(room.id));
+      await redis?.hdel("meta:active_rooms", String(room.id)).catch((error) => {
+        this.logger.warn(`Failed to remove room ${room.id} from Redis: ${error}`);
+      });
 
+      for (const player of room.getPlayers()) player.dispose();
       this.rooms.delete(room.id);
       this.roomIdPool.push(room.id);
       if (this.rooms.size === 0) {
@@ -858,16 +477,16 @@ export class RoomsService {
       }
     });
 
-    room.setHost(new Player(playerInfo));
+    room.setHost(new Player(playerInfo, room.sessionId));
     // 闲置五分钟后删除房间
-    setTimeout(
+    room.setWaitingTimeout(setTimeout(
       () => {
         if (room.status === RoomStatus.Waiting) {
           room.stop();
         }
       },
       5 * 60 * 1000,
-    );
+    ));
     return room.getRoomInfo();
   }
 
@@ -953,41 +572,26 @@ export class RoomsService {
       }
     }
 
-    room.setParticipant(new Player(playerInfo));
+    room.setParticipant(new Player(playerInfo, room.sessionId));
     // Add to game database when room stopped
-    room.onStop((room, game) => {
-      if (!game) {
+    room.onStop((room, info) => {
+      if (!info.hasGame) {
         return;
       }
       const players = room.getPlayers();
+      const registered = players.every((player) => !player.playerInfo.isGuest);
+      if (!registered && !process.env.S3_ENDPOINT) return;
       const gameData = JSON.stringify(room.getStateLog());
-      if (s3) {
-        const now = new Date().toISOString();
-        const date = now.slice(0, 10);
-        const time = now.slice(11, 19).replaceAll(":", "");
-        const s3Prefix = process.env.S3_PREFIX;
-        const keyPrefix = s3Prefix ? `${s3Prefix}/` : "";
-        const command = new PutObjectCommand({
-          Bucket: process.env.S3_BUCKET!,
-          Key: `${keyPrefix}logs/${date}/${time}-${room.id}.json`,
-          Body: gameData,
-          ContentType: "application/json",
-        });
-        s3.send(command).catch((error) => {
-          this.logger.warn(
-            `Failed to upload room ${room.id} game log: ${error}`,
-          );
-        });
-      }
-      if (players.some((p) => p.playerInfo.isGuest)) {
+      void uploadReplay(room.id, gameData).catch((error) => this.logger.warn('Failed to upload room '+room.id+' game log: '+error));
+      if (!registered) {
         return;
       }
       const playerIds = players.map(
         (player) => player.playerInfo.id,
       ) as number[];
-      const winnerWho = game.state.winner;
+      const winnerWho = info.winner;
       const winnerId = winnerWho === null ? null : playerIds[winnerWho]!;
-      this.games.addGame({
+      return this.games.addGame({
         coreVersion: Room.CORE_VERSION,
         gameVersion: room.config.gameVersion,
         data: gameData,
@@ -1062,78 +666,28 @@ export class RoomsService {
     return result;
   }
 
-  playerNotification(
-    roomId: number,
-    visitorPlayerId: PlayerId | null,
-    watchingPlayerId: PlayerId,
-  ): Observable<{ data: SSEPayload }> {
+  subscribePlayer(roomId: number, visitorPlayerId: PlayerId | null, watchingPlayerId: PlayerId, subscriber: RoomSubscriber) {
     const room = this.rooms.get(roomId);
-    if (!room) {
-      throw new NotFoundException(`Room not found`);
-    }
+    if (!room) throw new NotFoundException('Room not found');
     const players = room.getPlayers();
-    const playerUserIds = players.map((player) => player.playerInfo.id);
-    if (!playerUserIds.includes(watchingPlayerId)) {
-      throw new NotFoundException(`Player ${watchingPlayerId} not in room`);
-    }
-    if (!room.config.watchable && visitorPlayerId !== watchingPlayerId) {
-      throw new UnauthorizedException(
-        `Room ${roomId} cannot be watched by other`,
-      );
-    }
-    if (
-      (playerUserIds as (PlayerId | null)[]).includes(visitorPlayerId) &&
-      visitorPlayerId !== watchingPlayerId
-    ) {
-      throw new UnauthorizedException(
-        `You cannot watch ${watchingPlayerId}, he is your opponent!`,
-      );
-    }
-    for (const player of players) {
-      if (player.playerInfo.id === watchingPlayerId) {
-        const observable = player.notificationSse$;
-        return observable.pipe(
-          finalize(() => {
-            if (
-              visitorPlayerId === watchingPlayerId &&
-              room.status !== RoomStatus.Finished
-            ) {
-              this.logger.warn(
-                `Player ${visitorPlayerId} disconnected from room ${roomId} while game not finished (status=${room.status})`,
-              );
-            }
-          }),
-          map((data) => ({ data })),
-        );
-      }
-    }
-    throw new InternalServerErrorException("unreachable");
+    const player = players.find((p) => p.playerInfo.id === watchingPlayerId);
+    if (!player) throw new NotFoundException('Player not in room');
+    if (!room.config.watchable && visitorPlayerId !== watchingPlayerId) throw new UnauthorizedException('Room cannot be watched by others');
+    if (players.some((p) => p.playerInfo.id === visitorPlayerId) && visitorPlayerId !== watchingPlayerId) throw new UnauthorizedException('You cannot watch your opponent');
+    return { sessionId: room.sessionId, ownPlayer: visitorPlayerId === watchingPlayerId, subscribe: () => player.subscribe(subscriber) };
   }
 
-  receivePlayerResponse(
-    roomId: number,
-    playerId: PlayerId,
-    response: PlayerActionResponseDto,
-  ) {
+  receivePlayerResponse(roomId: number, playerId: PlayerId, id: number, response: Uint8Array) {
     const room = this.rooms.get(roomId);
-    if (!room) {
-      throw new NotFoundException(`Room not found`);
-    }
-    const players = room.getPlayers();
-    for (const player of players) {
-      if (player.playerInfo.id === playerId) {
-        player.receiveResponse(response);
-        return;
-      }
-    }
-    throw new NotFoundException(`Player ${playerId} not in room`);
+    if (!room) throw new NotFoundException('Room not found');
+    const player = room.getPlayers().find((player) => player.playerInfo.id === playerId);
+    if (!player) throw new NotFoundException('Player not in room');
+    return player.receiveResponse(id, response);
   }
 
-  receivePlayerGiveUp(roomId: number, playerId: PlayerId) {
+  receivePlayerGiveUp(roomId: number, playerId: PlayerId): CommandAck {
     const room = this.rooms.get(roomId);
-    if (!room) {
-      throw new NotFoundException(`Room not found`);
-    }
-    room.giveUp(playerId);
+    if (!room) throw new NotFoundException('Room not found');
+    return room.giveUp(playerId);
   }
 }
