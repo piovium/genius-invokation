@@ -16,7 +16,7 @@
 import { eq } from "drizzle-orm";
 import type { Database } from "../db/database";
 import { users, type UserModel } from "../db/schema";
-import { GET_USER_API_URL } from "../auth/session";
+import { GET_USER_API_URL, GITHUB_REQUEST_TIMEOUT_MS } from "../auth/session";
 import { notFound } from "../errors";
 import type { UpdateUserInfoDto } from "./routes";
 
@@ -48,9 +48,6 @@ const updatedUserInfoColumns = {
   chessboardColor: users.chessboardColor,
   createdAt: users.createdAt,
 };
-
-/** GitHub is a third party, so a stalled request must not hold the caller forever. */
-const GITHUB_REQUEST_TIMEOUT_MS = 15_000;
 
 /** The subset of GitHub's `/user` response that this service reads. */
 interface GitHubAccount {

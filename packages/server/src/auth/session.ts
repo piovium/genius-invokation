@@ -9,6 +9,9 @@ export const CODE_EXCHANGE_URL =
 export const GET_USER_API_URL =
   process.env.GH_GET_USER_API_URL || "https://api.github.com/user";
 
+/** GitHub is a third party, so a stalled request must not hold the caller forever. */
+export const GITHUB_REQUEST_TIMEOUT_MS = 15_000;
+
 const TOKEN_LIFETIME_SECONDS = 42 * 24 * 60 * 60;
 /** Tokens beyond this length are not ours, so reject them before parsing. */
 const MAX_TOKEN_LENGTH = 8192;
@@ -127,7 +130,7 @@ export function createAuth({
         client_secret: process.env.GH_CLIENT_SECRET,
         code,
       }),
-      signal: AbortSignal.timeout(15_000),
+      signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
     });
     const { access_token: githubToken } = (await exchanged.json()) as {
       access_token?: string;
@@ -140,7 +143,7 @@ export function createAuth({
         accept: "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
       },
-      signal: AbortSignal.timeout(15_000),
+      signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
     });
     const account = (await identity.json()) as { id?: number };
     const userId =
