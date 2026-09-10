@@ -88,6 +88,7 @@ Windows 作业控制还完成两项实际检查：
 在协调者仍增补 evidence manifest 的过程中，独立运行 `node --test harness/tests/runner.test.mjs harness/tests/core.test.mjs` 得到 36 tests：34 PASS、2 FAIL、0 skipped，退出 1。通过项包括 subset 不可完成、缺 collector 不执行同名脚本、raw PASS 不能满足语义观察、篡改 nonce、phase 阻挡、源码／锁／未跟踪文件／ignored addon／构建产物变化使证据失效、foreign platform 阻挡，以及子进程超时收尾。两处失败是新增 manifest 先拒绝了输入，使旧测试预期的 `ENOENT`／`current assertions` 路径未被命中。已要求协调者修正测试；观察值重新校验测试必须同步更新 manifest 和 receipt hash，真正触达 validator，不能只放宽成“任意错误即通过”。最后 seal 应使用修正后的自测结果，本次中间运行不能作为 PASS 证据。
 
 最后对包管理器版本预检的 cwd 修复做了独立代码复核：`environmentContext` 将 pnpmMain 留在 contract 指定的 main、pnpmGts 指向 gts、npm 指向 tnb；`environmentGate` 使用该上下文执行，并先验证对应 checkout 可用；`verifyReceipt` 使用同一个函数核对实际 cwd，因此不能把在错误仓库执行的 `--version` 输出作为正确环境证据。新增 `preflight probes each package manager in its own repository` 用例让临时工具在错误目录退出 9，并断言四个命令及 GTS/TNB 的记录目录，覆盖了本次误触发包管理器自动切换的问题。此次复核没有发现缺陷，只检查代码和该回归用例，未重复运行全套测试或产品预检；最终执行结果以协调者重新 seal 后的原始 selftest receipt 为准。
+
 ## 2.0.1 的真实运行修正
 
 发布包原生实验发现 probe 错误调用了非标准 `Program.dispose`。GTS worker 已从 stock TypeScript 的 Program 接口只读复核无该方法，协调者删除调用；不为探针要求 TNB 添加假 API。删除后原生负例能报告 TS2322，但恢复源码仍得到旧诊断；stock 对照会清除。这是待修的真实 TNB 状态刷新问题，恢复断言保持不变。
@@ -158,7 +159,7 @@ Windows 上 TNB 任务源快照的完整读取耗时较长。候选仅替换 cor
 
 ## 2.3.0 sealed gaps, wiring invariants and a first-class delivery gate
 
-用户要求"先改 harness、最后一次改完做记录再开干"，并再次确认唯一交付面是 GTS 与 TNB：`@gi-tcg/gts-language-server` 与 GamingTS 扩展接入 TNB 后在真实编辑器可用；迁移期间在主仓库新增的实现与容器打包都属于必须删除的赘余。本版只改定义层，超时、次数、平台、路径、基线与既有断言全部保持原值，不放宽任何阈值。
+用户要求“先改 harness、最后一次改完做记录再开干”，并再次确认唯一交付面是 GTS 与 TNB：`@gi-tcg/gts-language-server` 与 GamingTS 扩展接入 TNB 后在真实编辑器可用；迁移期间在主仓库新增的实现与容器打包都属于必须删除的赘余。本版只改定义层，超时、次数、平台、路径、基线与既有断言全部保持原值，不放宽任何阈值。
 
 - **gate wiring 必须显式。** 每个 gate 要么由内置 kind（environment／inventory／engine）或已登记采集器执行，要么在 contract 中写明 `blocked` 理由；两者互斥，已登记却声明缺口同样拒绝。9 个尚未实现的采集器因此各自带上封存的缺口说明，`status` 与运行期 BLOCKED 都直接引用该理由；缺理由的 gate 现在让 `verify` 失败，而不是默默变成 BLOCKED。
 - **角色 gate 与仓库绑定。** 角色的 gate 必须在该角色自己的仓库执行。跨仓库 gate 只能由 contract 中显式声明的 `inheritedGates` 继承——目前只有 gts 角色继承 main 的 `engine`，这是 scope transition 的 `from.gates ⊆ to.gates` 约束留下的唯一合法例外，按声明接受、不存在隐含许可。
@@ -172,19 +173,19 @@ Windows 上 TNB 任务源快照的完整读取耗时较长。候选仅替换 cor
 
 ## 2.4.0 registered stdio language-server evidence
 
-用户要求"最后一次改完 harness，做记录再开干"。本版只登记交付面自己的采集器：`gts-lsp` 从 BLOCKED 变为可执行。gate 列表、依赖、repository、`timeoutMs` 900000、角色边界、三处基线、既有断言与其他 9 个仍 BLOCKED 的 gate 全部保持原值；contract 只新增一个 adapter 条目、删掉该 gate 的 `blocked` 理由并把版本改为 2.4.0。这一对字段互斥由 2.3.0 的 wiring 不变式强制，登记后仍声明缺口会让 `verify` 失败。
+用户要求“最后一次改完 harness，做记录再开干”。本版只登记交付面自己的采集器：`gts-lsp` 从 BLOCKED 变为可执行。gate 列表、依赖、repository、`timeoutMs` 900000、角色边界、三处基线、既有断言与其他 9 个仍 BLOCKED 的 gate 全部保持原值；contract 只新增一个 adapter 条目、删掉该 gate 的 `blocked` 理由并把版本改为 2.4.0。这一对字段互斥由 2.3.0 的 wiring 不变式强制，登记后仍声明缺口会让 `verify` 失败。
 
 **采集与判定分离。** `gts-lsp-collector.mjs` 只记录事实：它在 `HARNESS_RUN_DIRECTORY` 下建一次性工作区（故意不放产品树，避免运行期改动源码指纹），用 gate 的仓库解析 tsdk 与 `@volar/language-server`，以 stdio 启动 `packages/language-server/bin/gts-language-server.js`，按 expectations 的 23 步脚本打开 `current.gts`／`old_versions.gts`／`consumer.ts`，写原始 transcript、`TNB_TRACE_RPC` 轨迹、服务器日志与解析出的身份；它不写状态字段，只在服务器崩溃、超时或返回错误时以非零码退出。`gts-lsp-validator.mjs` 从这些原始记录和磁盘文件重新推导一切，`evaluate` 是纯函数：`initialize` 能力必须给出 `textDocumentSync=2` 与所需 provider；每个 didOpen／didChange 的版本必须严格递增（增量同步而非重放）；诊断必须逐项匹配 code／severity／source／精确 span／消息，且修复后重新为空；hover 必须含 `CharacterHandle<never>`；definition 必须落回客户端打开过的文档并匹配起始位置；completion 必须给出 fixture 属性；signature help 必须给出 `max(...values: number[]): number`；解析到的包必须是 `typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2` 且入口哈希与磁盘一致；原生 addon 路径必须在 checkout 内、包名符合 `@typescript-native-bridge/<platform>-<arch>`、版本同 pin、哈希与 `BRIDGE_LOAD` 的 `lib=` 一致；tsgo build info 必须是 7.0.2；RPC 轨迹必须 `ENTER`／`EXIT` 平衡、不少于 20 次且包含 `updateSnapshot`、`getSemanticDiagnostics`、`quickinfo`、`definitionAndBoundSpan`、`getCompletionsAtPosition`、`signatureHelp`；stderr 必须含 `TNB ACTIVE` 与 `[tsgo-profile]`，且证据中不得出现 `__gts_` 或致命输出。`validate` 另外复核三份证据文件的 SHA256、重新解析 checkout 并在缺 checkout 时返回 BLOCKED，而不是 FAIL。
 
-**试运行发现并修正的一处断言。** 第一次 trial 把 definition 的落点约束在仓库内，实际（也是正确）落点是运行目录里的一次性工作区文档。校验器因此改为要求 definition 命中"客户端已打开过的文档"，这比原来的仓库内约束更强：它证明映射回到真实文档，而不是虚拟源码。工作区放在运行目录同时也让 `artifacts/` 外的源码指纹在运行期间保持稳定。
+**试运行发现并修正的一处断言。** 第一次 trial 把 definition 的落点约束在仓库内，实际（也是正确）落点是运行目录里的一次性工作区文档。校验器因此改为要求 definition 命中“客户端已打开过的文档”，这比原来的仓库内约束更强：它证明映射回到真实文档，而不是虚拟源码。工作区放在运行目录同时也让 `artifacts/` 外的源码指纹在运行期间保持稳定。
 
-**自测。** `harness/tests/gts-lsp.test.mjs` 共 25 项：1 项正例、23 项反绕过负例，外加一项对封存 expectations 形状的互锁（步数、文档数、`--stdio`、增量同步、RPC 下限与必需原生方法、两条诊断码与 span 仍在），这样"有人悄悄掏空 expectations"会先让自测失败，而不是让 gate 变空通过。负例覆盖：删除诊断、位移 span、definition 越出客户端文档、记录文本与封存 fixture 不符（open 与 change 各一条）、RPC 失衡、缺原生方法、`BRIDGE_LOAD` 指向别处或缺进程身份、addon 哈希变化、编译器版本不符、超时与错误、步骤缺失／乱序／重复、文档版本回退、服务器失败或未报告退出码、缺少增量同步或能力、capabilities／已打开文档／tsdk 与记录不符、启动参数不是封存的 `--stdio`、cwd 不在运行目录、可执行文件不是 Node、泄漏 `__gts_`、`panic:` 致命输出、证据引用缺少哈希、证据引用越出运行目录（相对与绝对各一条）、证据文件被改写、证据属于别的 gate。IO 层的哈希校验、运行目录约束、"缺 checkout 返回 BLOCKED"单独覆盖，因此这套测试不依赖本机是否存在 gts worktree。真实产品证据只能来自 runner：本版 trial（`artifacts/harness-drafts/lsp-trial.mjs`，非验收）以 runner 相同的环境跑出 25 步、服务器 exit 0、`ENTER`／`EXIT` 平衡且远高于 20 次下限、validator PASS。
+**自测。** `harness/tests/gts-lsp.test.mjs` 共 25 项：1 项正例、23 项反绕过负例，外加一项对封存 expectations 形状的互锁（步数、文档数、`--stdio`、增量同步、RPC 下限与必需原生方法、两条诊断码与 span 仍在），这样“有人悄悄掏空 expectations”会先让自测失败，而不是让 gate 变空通过。负例覆盖：删除诊断、位移 span、definition 越出客户端文档、记录文本与封存 fixture 不符（open 与 change 各一条）、RPC 失衡、缺原生方法、`BRIDGE_LOAD` 指向别处或缺进程身份、addon 哈希变化、编译器版本不符、超时与错误、步骤缺失／乱序／重复、文档版本回退、服务器失败或未报告退出码、缺少增量同步或能力、capabilities／已打开文档／tsdk 与记录不符、启动参数不是封存的 `--stdio`、cwd 不在运行目录、可执行文件不是 Node、泄漏 `__gts_`、`panic:` 致命输出、证据引用缺少哈希、证据引用越出运行目录（相对与绝对各一条）、证据文件被改写、证据属于别的 gate。IO 层的哈希校验、运行目录约束、“缺 checkout 返回 BLOCKED”单独覆盖，因此这套测试不依赖本机是否存在 gts worktree。真实产品证据只能来自 runner：本版 trial（`artifacts/harness-drafts/lsp-trial.mjs`，非验收）以 runner 相同的环境跑出 25 步、服务器 exit 0、`ENTER`／`EXIT` 平衡且远高于 20 次下限、validator PASS。
 
 **独立复核（三轮，记录在此）。** 本版在升格前由独立 agent 只读复核采集器、校验器、expectations、wiring 变更与 HARNESS 文本；三轮都各自重跑了轻量自测并在当轮的文件版本上复核证据，第三轮另外独立重跑了真实 trial（`artifacts/harness-drafts/lsp-trial.mjs`：25 步、exit 0、`ENTER`／`EXIT` 各 69、validator PASS），并逐字节确认工作区里的三份 fixture 与封存文本相同。三轮均未修改任何控制文件。第四轮为确认轮：仅复核最终字节与新增用例（25/25 通过），未发现新问题、未修改文件。
 
-第一轮结论"有保留"：未发现可用产品证据伪造的绕过（诊断码与 span、修复后消失、hover／definition／completion／signature help、文档版本单调、RPC 平衡、`BRIDGE_LOAD` 与磁盘 addon、tsgo 版本全部从原始记录与磁盘重推；空期望也不能用不匹配的垃圾或全 skipped 蒙混），但指出 4 处自证面与 3 处过度声明：capabilities、客户端打开过的文档、tsdk 三项取自采集器写在 observation 里的摘要；`readEvidence` 未用 `inside()` 约束且哈希缺失时会静默跳过；`BRIDGE_LOAD` 的条数与必需片段写死在 validator 而非可复查的 expectations；本文档自称"复核记录见下"却尚未写下，负例计数与实际不符，三个测试标题超出其覆盖。
+第一轮结论“有保留”：未发现可用产品证据伪造的绕过（诊断码与 span、修复后消失、hover／definition／completion／signature help、文档版本单调、RPC 平衡、`BRIDGE_LOAD` 与磁盘 addon、tsgo 版本全部从原始记录与磁盘重推；空期望也不能用不匹配的垃圾或全 skipped 蒙混），但指出 4 处自证面与 3 处过度声明：capabilities、客户端打开过的文档、tsdk 三项取自采集器写在 observation 里的摘要；`readEvidence` 未用 `inside()` 约束且哈希缺失时会静默跳过；`BRIDGE_LOAD` 的条数与必需片段写死在 validator 而非可复查的 expectations；本文档自称“复核记录见下”却尚未写下，负例计数与实际不符，三个测试标题超出其覆盖。
 
-第二轮针对修改后的文件复核，结论"有保留但已接近可交付"，并发现一个第一轮漏掉的真实缺陷：采集团里的 fixture 从不落盘。`Object.entries(expectations.texts)` 产出的是 `[key, value]`，与 `entry.textId` 比较恒为 false，因此 `current.gts`／`old_versions.gts`／`consumer.ts` 从未写入一次性工作区；工程的 include 匹配不到任何文件，definition 指向一个现实中不存在的文档。已按文档条目逐个写入（若只修解构仍遍历 `texts`，`current.gts` 会被后续错误态文本覆盖），并新增"记录文本必须等于封存 fixture"的校验。
+第二轮针对修改后的文件复核，结论“有保留但已接近可交付”，并发现一个第一轮漏掉的真实缺陷：采集团里的 fixture 从不落盘。`Object.entries(expectations.texts)` 产出的是 `[key, value]`，与 `entry.textId` 比较恒为 false，因此 `current.gts`／`old_versions.gts`／`consumer.ts` 从未写入一次性工作区；工程的 include 匹配不到任何文件，definition 指向一个现实中不存在的文档。已按文档条目逐个写入（若只修解构仍遍历 `texts`，`current.gts` 会被后续错误态文本覆盖），并新增“记录文本必须等于封存 fixture”的校验。
 
 三轮之后收紧的不变式：capabilities、已打开文档集合与 tsdk 只取自已记录的交换与已解析的 checkout，采集器摘要必须与之逐字段一致；证据引用必须带 64 位哈希，路径必须落在运行目录内，哈希不匹配即拒绝；启动命令必须恰好是 `<checkout>/packages/language-server/bin/gts-language-server.js --stdio`，cwd 必须在运行目录内，可执行文件必须是 Node；磁盘侧的原生包名也参与比对；每次 didOpen／didChange 的文本必须等于封存 fixture。相对第一轮没有任何断言被放松（expectations 逐字段比对：23 步、两条诊断、hover／completion／signature／definition 期望、`minimumRpcCalls=20`、六个必需 RPC 方法、stderr 与 forbidden 片段、`--stdio`、`documentSyncKind=2`、五个必需能力，全部未变）。
 

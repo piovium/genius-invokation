@@ -10,16 +10,16 @@
 
 唯一交付面是 **GTS 仓库与 TNB**。其中本次真正要解决的问题是：`@gi-tcg/gts-language-server` 与 GamingTS VSCode 扩展接入 TNB 之后，在真实编辑器里可用。
 
-- 宿主、语言服务、扩展与 tsdk 选择都在 GTS worktree（`worktrees/gts`，含 `packages/vscode`、`packages/language-server`）内闭环验收；`web` gate、`browser` 角色、`repositories.web` 与 `harness/collectors/web/` 已移除。
+- 宿主、语言服务、扩展与 tsdk 选择都在 GTS worktree（`worktrees/gts`，含 `packages/vscode`、`packages/language-server`）内完成闭环验收；`web` gate、`browser` 角色、`repositories.web` 与 `harness/collectors/web/` 已移除。
 - 两种启动模式都要证据：开发路径（`--extensionDevelopmentPath`）与**打包安装的真实 VSIX**。
 - 语言服务实际加载的编译器必须是指定 pin 的 TNB 且真实走 tsgo：resolved module、精确版本、原生 addon 与 RPC 计数可核验。
 - 主仓库与网页不再有实现交付。浏览器双路线、custom-data-loader 语言服务实现、容器打包都不在目标内；此前留下的实现只作参考，不得据此追加工作或恢复验收项。
 
-**迁移期间在主仓库里新增的实现必须删除，不得与 GTS 版本并存。** 语言服务接入、容器打包（例如 `packages/custom-data-loader/Dockerfile.language-service` 的改动）和网页双路线都只作迁移参考；交付时主仓库只保留它原本需要的 GTS 消费路径和检查。判断标准是"少即是好"：任何在 GTS 已闭环、又在主仓库重复一遍的实现，都属于必须移除的赘余。
+**迁移期间在主仓库里新增的实现必须删除，不得与 GTS 版本并存。** 语言服务接入、容器打包（例如 `packages/custom-data-loader/Dockerfile.language-service` 的改动）和网页双路线都只作迁移参考；交付时主仓库只保留它原本需要的 GTS 消费路径和检查。判断标准是“少即是好”：任何在 GTS 已闭环、又在主仓库重复一遍的实现，都属于必须移除的赘余。
 
-有效源码必须无假诊断，真实错误必须检出并映射到源码，修复后诊断消失；全部既有检查和历史数据覆盖保留。禁止通过缩小 include、扩大 exclude、删除历史文件、增加宽泛 `any`／`@ts-ignore`／`@ts-nocheck`、放宽 strict、增加 skip 选项、关闭诊断或使用 `NO_TYPING=1` 获得通过。迁移暴露的相关真实类型问题采用保持语义的最小修复；涉及业务规则变化或无关既有错误时，先提交具体证据讨论。
+有效源码必须无假诊断，真实错误必须检出并映射到源码，修复后诊断消失；全部既有检查和历史数据覆盖保留。禁止通过缩小 include、扩大 exclude、删除历史文件、增加宽泛 `any`／`@ts-ignore`／`@ts-nocheck`、放宽 strict、增加 skip 选项、关闭诊断或使用 `NO_TYPING=1` 获得通过。迁移暴露的相关真实类型问题采用保持语义不变的最小修复；涉及业务规则变化或无关既有错误时，先提交具体证据讨论。
 
-**内存目标是尽可能降低实际占用。** 用户的 4 GB 是旧检查器 OOM 的背景，不是最终硬门槛。`--max-old-space-size=4096` 只限制 V8 old space，不限制 Go、RSS 或编辑器进程树。必须在可比负载下报告 JS heap、含 Go 的进程总内存、相关进程树总量和耗时；测不到的字段明确标缺失。不得把内存移到 Go／后台就称为总体改善，不预设未经测量的优化百分比。
+**内存目标是尽可能降低实际占用。** 用户的 4 GB 是旧检查器 OOM 的背景，不是最终硬门槛。`--max-old-space-size=4096` 只限制 V8 old space，不限制 Go、RSS 或编辑器进程树。必须在可比负载下报告 JS heap、含 Go 的进程总内存、相关进程树的总内存和耗时；测不到的字段明确标缺失。不得把内存移到 Go／后台就称为总体改善，不预设未经测量的优化百分比。
 
 ## 2. 固定工作区与基线
 
@@ -31,7 +31,7 @@
 | gts | `worktrees/gts`，`codex/tsgo-gts` | `cf58a100132ef02af61c6a22a49feb1968841f06` |
 | tnb | `worktrees/typescript-native-bridge`，`codex/tsgo-bridge` | `9281a12c7c4e42dc50c0c27a8dba4a0e93639ddc` |
 
-主仓库基线有 **195 个跟踪中的 GTS 文件、10 个现有 check 包**。完整逐路径清单和 `{name, path, check}` 以 harness 固定 inventory 为准；数量相同不能替代清单一致。10 个包均为 `@gi-tcg/` 前缀：data、core、card-data-viewer、custom-data-loader、deck-builder、detail-log-viewer、server、standalone、web-client、web-ui-core。data 使用 `gtsc --noEmit`，其余使用 `tsc --noEmit`。没有 check 的包应登记覆盖缺口，不能称 recursive check 已检查全仓每个项目。
+主仓库基线有 **195 个已跟踪的 GTS 文件、10 个现有 check 包**。完整逐路径清单和 `{name, path, check}` 以 harness 固定 inventory 为准；数量相同不能替代清单一致。10 个包均为 `@gi-tcg/` 前缀：data、core、card-data-viewer、custom-data-loader、deck-builder、detail-log-viewer、server、standalone、web-client、web-ui-core。data 使用 `gtsc --noEmit`，其余使用 `tsc --noEmit`。没有 check 的包应登记覆盖缺口，不能称 recursive check 已检查全仓每个项目。
 
 环境按各 manifest 和锁文件准备：主仓库 Node `^26.1.0`／pnpm `12.0.0`；GTS Node `>=26.0.0`／pnpm `11.5.2`，其 AGENTS 中的 `11.0.8` 已落后于 manifest。TNB 使用自身 npm 构建入口，候选版本精确固定为 `6.0.3-bridge.16.tsgo.7.0.2`。TNB 子模块 pin 分别是 TypeScript `050880ce59e30b356b686bd3144efe24f875ebc8`、typescript-go `2bd066d87f5bafd315be9f40889d0a60b9e58e0b`。
 
@@ -39,14 +39,14 @@ GTS 已有 [PR #14](https://github.com/piovium/gts/pull/14)，分支 `origin/fix
 
 ## 3. Harness 的控制文件与命令
 
-入口是根目录 `node harness/cli.mjs`。`harness/contract.json` 固定阶段、工作目录、角色边界、gate、命令、超时和平台要求；根 `AGENTS.md` 规定任务交接；`harness/REVIEW.md` 保存独立复核和尚未解决的缺口。使用本地运行时配置时，从 `harness/local.example.json` 填写 `harness/local.json`，不改变全局默认环境。
+入口是从仓库根目录运行的 `node harness/cli.mjs`。`harness/contract.json` 固定阶段、工作目录、角色边界、gate、命令、超时和平台要求；根 `AGENTS.md` 规定任务交接；`harness/REVIEW.md` 保存独立复核和尚未解决的缺口。使用本地运行时配置时，从 `harness/local.example.json` 填写 `harness/local.json`，不改变全局默认环境。
 
 | 命令 | 用途与边界 |
 | --- | --- |
 | `verify` | 核验当前控制文件与 seal；缺文件、新增文件或内容变化不能沿用旧 seal |
 | `selftest` | 运行 harness 自身测试，包括拒绝伪证据和绕过的负例；不运行产品迁移 |
 | `run preflight` | 当前允许的探测：environment 与 inventory；不安装依赖、不构建、不执行产品 check |
-| `run GATE` | 执行指定 gate 及其前置检查；局部成功不能用于完整验收；harness-only 阶段拒绝 |
+| `run GATE` | 执行指定 gate 及其前置检查；局部成功不能用于完整验收；harness-only 阶段直接拒绝 |
 | `run all` | 按 contract 枚举全部适用 gate；缺真实 collector 保持 BLOCKED |
 | `status [RUN_DIRECTORY]` | 查看已记录的结果和缺口，不把缺失项推导为成功 |
 | `task ROLE` | 生成包含 seal、角色边界和验收要求的新任务；当前 seal 的 selftest 未通过则拒绝 |
@@ -54,7 +54,7 @@ GTS 已有 [PR #14](https://github.com/piovium/gts/pull/14)，分支 `origin/fix
 | `handoff TASK_FILE` | 根据任务文件核验交接；交接不授予开始产品工作的权限，也不代表迁移完成 |
 | `finish RUN_DIRECTORY` | 协调者对最终集成树申请完整验收；缺失、过期、局部、运行期间变化或未通过的必需证据均拒绝 |
 
-未知参数拒绝，不能通过额外参数改写命令或跳过 gate。`harness-only` 阶段只允许 `run preflight`。协调者已完成核心自测和独立复核，按用户已有授权切换 phase；新的 seal 必须再通过 selftest 才能生成任务，不能跳过派发门禁。
+未知参数直接拒绝，不能通过额外参数改写命令或跳过 gate。`harness-only` 阶段只允许 `run preflight`。协调者已完成核心自测和独立复核，按用户已有授权切换 phase；新的 seal 必须再通过 selftest 才能生成任务，不能跳过派发门禁。
 
 确需扩大集成职责时，必须先独立复核并将 `scopeTransitions` 纳入 contract/seal，固定旧任务 ID、旧 seal、旧任务文件哈希和扩展前后角色。扩展只能增加路径与 gate，不能更换仓库或基线；`revise` 会先按旧职责检查现有改动，拒绝事后追认越界修改。2.1.0 的明确扩展用于合入依赖 patch 和网页 agent 的提交。
 
@@ -70,9 +70,9 @@ GTS 已有 [PR #14](https://github.com/piovium/gts/pull/14)，分支 `origin/fix
 
 2.2.0 把编辑器验收从主仓库改绑到 GTS worktree，并撤出网页路线。`desktop`（L1-L4）现在运行在 `worktrees/gts`，并新增同仓库的 `gts-engine` 证明语言服务上下文里的编译器身份；`web` gate、`browser` 角色、`repositories.web` 与 `harness/collectors/web/` 一并移除，桌面场景把 `data-workspace` 换成 `examples-workspace` 并按用户要求新增 `packed-vsix-install`。角色 gate 列表只增不减（保留 `engine`、新增 `gts-engine`），以满足 scope transition 的子集约束；对应 transition 绑定当前活跃 gts 任务的 ID、seal 与任务文件哈希。超时、次数、平台、两仓库基线与既有断言均未放宽。
 
-2.3.0 把"能不能执行"和"在哪里执行"变成封存的不变式，仍然不改动任何验收阈值。每个 gate 要么由内置实现（environment／inventory／engine）或已登记的采集器执行，要么在 contract 中写明 `blocked` 理由；两者互斥，缺一即拒绝加载，声明了理由的 gate 在运行期以该理由保持 BLOCKED。每个角色的 gate 必须落在该角色自己的仓库；跨仓库 gate 只能由 contract 中显式声明的 `inheritedGates` 继承（当前只有 gts 角色继承 main 的 `engine`），不存在隐含许可。`scopeTransitions` 除了自洽，还必须在旧任务记录仍存在时复核其哈希、controlDigest、角色与 `from` 角色规格；`artifacts/` 不封存，因此全新 checkout 跳过这项复核，不因缺少本地回执而失败。同一批还把交付面本身提升为一等 gate：新增 `gts-lsp`，不经编辑器即可用 stdio 驱动 `@gi-tcg/gts-language-server` 并核验 TNB 身份与 LSP 语义，当前同样为 BLOCKED。同一批把 Git 辅助超时拆成两条边界：索引查询保持 30 秒，枚举工作树（`--others`／`--untracked-files`）改用 300 秒。依据是 pin 的 TNB 子模块含约 14 万个文件，`typescript-go` 的 `ls-files --others` 实测 87.9 秒属于正常工作量而不是挂死；两条边界都仍然有界，gate 超时与全部验收阈值不变。
+2.3.0 把“能不能执行”和“在哪里执行”变成封存的不变式，仍然不改动任何验收阈值。每个 gate 要么由内置实现（environment／inventory／engine）或已登记的采集器执行，要么在 contract 中写明 `blocked` 理由；两者互斥，缺一即拒绝加载，声明了理由的 gate 在运行期以该理由保持 BLOCKED。每个角色的 gate 必须落在该角色自己的仓库；跨仓库 gate 只能由 contract 中显式声明的 `inheritedGates` 继承（当前只有 gts 角色继承 main 的 `engine`），不存在隐含许可。`scopeTransitions` 除了自洽，还必须在旧任务记录仍存在时复核其哈希、controlDigest、角色与 `from` 角色规格；`artifacts/` 不封存，因此全新 checkout 跳过这项复核，不因缺少本地回执而失败。同一批还把交付面本身提升为一等 gate：新增 `gts-lsp`，不经编辑器即可用 stdio 驱动 `@gi-tcg/gts-language-server` 并核验 TNB 身份与 LSP 语义，当前同样为 BLOCKED。同一批把 Git 辅助超时拆成两条边界：索引查询保持 30 秒，枚举工作树（`--others`／`--untracked-files`）改用 300 秒。依据是 pin 的 TNB 子模块含约 14 万个文件，`typescript-go` 的 `ls-files --others` 实测 87.9 秒属于正常工作量而不是挂死；两条边界都仍然有界，gate 超时与全部验收阈值不变。
 
-2.4.0 登记交付面自己的采集器，不改动任何 gate 定义、超时、角色边界、基线或既有断言。`gts-lsp` 现在由 `harness/collectors/lsp/` 的三个文件执行：collector 把封存的 fixture 写进运行目录下的一次性工作区，以 stdio 启动 GTS 的语言服务，记录原始协议应答、实时 RPC 轨迹、服务器日志以及从 checkout 解析出的编译器身份，自身不判定通过也不写状态字段；validator 从这些原始记录与磁盘重新推导每条结论——capabilities、客户端实际打开过的文档、tsdk 与每次编辑的文本也只取自已记录的交换、已解析的 checkout 和封存 fixture，采集器写下的摘要必须与之一致——包括诊断码与精确 span、修复后消失、hover／definition／completion／signature help 语义、增量同步、TNB 包名与精确版本、原生 addon 路径与哈希、tsgo 版本、`ENTER`／`EXIT` 平衡与 `BRIDGE_LOAD` 指向同一 addon，以及启动命令必须恰为 `<checkout>/packages/language-server/bin/gts-language-server.js --stdio` 、cwd 在运行目录内、可执行文件是 Node。证据引用必须带 64 位哈希并落在运行目录内；一项互锁自测固定 expectations 的关键形状，避免"掏空期望让 gate 空通过"。正负例固定在 `harness/tests/gts-lsp.test.mjs`。
+2.4.0 登记交付面自己的采集器，不改动任何 gate 定义、超时、角色边界、基线或既有断言。`gts-lsp` 现在由 `harness/collectors/lsp/` 的三个文件执行：collector 把封存的 fixture 写进运行目录下的一次性工作区，以 stdio 启动 GTS 的语言服务，记录原始协议应答、实时 RPC 轨迹、服务器日志以及从 checkout 解析出的编译器身份，自身不判定通过也不写状态字段；validator 从这些原始记录与磁盘重新推导每条结论——capabilities、客户端实际打开过的文档、tsdk 与每次编辑的文本也只取自已记录的交换、已解析的 checkout 和封存 fixture，采集器写下的摘要必须与之一致——包括诊断码与精确 span、修复后消失、hover／definition／completion／signature help 语义、增量同步、TNB 包名与精确版本、原生 addon 路径与哈希、tsgo 版本、`ENTER`／`EXIT` 平衡与 `BRIDGE_LOAD` 指向同一 addon，以及启动命令必须恰为 `<checkout>/packages/language-server/bin/gts-language-server.js --stdio`、cwd 在运行目录内、可执行文件是 Node。证据引用必须带 64 位哈希并落在运行目录内；一项互锁自测固定 expectations 的关键形状，避免“掏空期望让 gate 空通过”。正负例固定在 `harness/tests/gts-lsp.test.mjs`。
 
 未来需要真实产品行为的 collector 必须放在根 `harness/collectors/`，经过独立审查后登记到 contract 的 adapter 集合并纳入 seal。初始不登记产品 adapter。**缺 collector 永远是 BLOCKED**；不能用手写 `PASS` JSON、任意退出 0 的脚本或暂缺的采集器冒充产品验收。已有 probe 是可复用组件，不自动构成完整的 CLI／编辑器 collector。
 
@@ -89,7 +89,7 @@ Seal 覆盖 contract、执行器、断言、测试、说明和 CI 等控制文�
 现有 probe 的证据范围：
 
 - `engine.mjs --repo ABSOLUTE_CONTEXT --version EXACT_VERSION` 从实际包上下文解析 TypeScript，校验 TNB 身份与版本，在临时 TS 项目中验证错误→修复、原生 RPC 增量和已加载 addon，记录文件哈希。它只证明该编译器 API 路径，不能替代 data/check、LSP、tsserver、后台各自的引擎身份。
-- `coverage.mjs --repo ABSOLUTE_ROOT --inventory BASELINE_JSON --observed PROGRAM_JSON` 精确比较基线、磁盘和 program 的 GTS 路径集合。磁盘探测排除 `.git`、`node_modules`；跟随仓库内链接并保留路径，越界、循环或损坏的链接保持 BLOCKED，不静默忽略。观测格式是 `{ "files": [实际 program 的 GTS 路径] }`，非 GTS lib 列表不属于此输入。独立文件被实际检查的负例还须由 collector 执行。
+- `coverage.mjs --repo ABSOLUTE_ROOT --inventory BASELINE_JSON --observed PROGRAM_JSON` 精确比较基线、磁盘和 program 的 GTS 路径集合。磁盘探测排除 `.git`、`node_modules`；跟随仓库内链接并保留路径，越界、循环或损坏的链接保持 BLOCKED，不静默忽略。观测格式是 `{ "files": [实际 program 的 GTS 路径] }`，非 GTS lib 列表不属于此输入。独立文件确实被检查的负例同样必须由 collector 执行。
 - probe 输出 `PASS`／`FAIL`／`BLOCKED` JSON，退出码分别为 0／1／2。直接提交一份外部 observations JSON 不证明来源；正式验收还要求经过审查的 collector 和本次 run 的证据绑定。
 
 ## 5. 必需产品验收
@@ -143,6 +143,6 @@ Worker 交接包含生成的任务文件、精确 revision／diff、依赖产物
 | tnb-guards、tnb-witnesses、tnb-navigation、tnb-volar | 四个 TNB 采集器；guard 输出与 witness wiring 都不等于实际执行 |
 | platforms | 跨平台能力采集器；win32 已在本机准备，linux 仍需可用运行时与对应负例 |
 
-分批推进：L1 的 `gts-lsp` 采集器已登记；其余先 desktop（编辑器交付面的验收工具）与 platforms，再 coverage、memory、clean-install，最后 TNB 四件。采集器的期望值必须对着接近最终的产品状态生成，因此它们与产品修复并行推进，而不是提前冻结。
+分批推进：L1 的 `gts-lsp` 采集器已登记；其余先 desktop（编辑器交付面的验收工具）与 platforms，再 coverage、memory、clean-install，最后 TNB 四件。采集器的期望值必须依据接近最终的产品状态生成，因此它们与产品修复并行推进，而不是提前冻结。
 
 本文件规定目标和执行约束。实际自测结果见 REVIEW 与 runner 回执；未执行的产品 gates 不得由文档、计划、fixture 或探测成功升级为 PASS。

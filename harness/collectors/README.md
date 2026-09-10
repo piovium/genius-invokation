@@ -12,7 +12,7 @@ coordinator and independently reviewed. Product workers cannot weaken them.
 Each contract.adapters[GATE] names three relative files in this directory:
 `collector`, `validator`, `expectations`. The collector is a Node module; the
 validator exports `validate(observation, {contract, expectations, nonce, root,
-directory, gate})`, returning `{status: "PASS" | "FAIL" | "BLOCKED", reason}` after checking
+directory, gate})`, returning `{status: 'PASS' | 'FAIL' | 'BLOCKED', reason}` after checking
 actual observations against separately reviewed expectations. Do not implement
 a validator that simply accepts an observation's status or expected values.
 
