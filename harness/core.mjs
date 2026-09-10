@@ -92,9 +92,20 @@ export async function verifySeal(root) {
     || stable(expected) !== stable(actual)) throw new Error('Harness seal mismatch: controls changed, missing or added. Independent review and resealing required.');
   return actual;
 }
+// Git index queries are fast; enumerating untracked files walks the whole work
+// tree. The pinned TNB submodules contain ~140k files (measured 87.9 s for
+// `ls-files --others` in typescript-go), which is legitimate work rather than a
+// hang, so enumeration gets its own bound. Every other call keeps the tight
+// one, and both stay bounded so a real hang is still terminated.
+export const gitTimeoutMs = 30000;
+export const gitEnumerationTimeoutMs = 300000;
+export function enumeratesWorkTree(args) {
+  return args.some(arg => arg === '--others' || arg.startsWith('--untracked-files'));
+}
 export function git(repo, args) {
   const result = spawnSync('git', ['-C', repo, ...args], {
-    encoding: 'utf8', windowsHide: true, timeout: 30000, maxBuffer: 32 * 1024 * 1024,
+    encoding: 'utf8', windowsHide: true, timeout: enumeratesWorkTree(args) ? gitEnumerationTimeoutMs : gitTimeoutMs,
+    maxBuffer: 32 * 1024 * 1024,
   });
   if (result.error || result.status !== 0) throw new Error(`git ${args[0]} failed: ${result.error?.message ?? result.stderr}`);
   return result.stdout.trimEnd();

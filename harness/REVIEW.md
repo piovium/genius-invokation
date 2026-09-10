@@ -165,6 +165,7 @@ Windows 上 TNB 任务源快照的完整读取耗时较长。候选仅替换 cor
 - **scope transition 逐字节复核。** 除原有自洽检查外，被绑定的旧任务记录仍在本地时必须复核其 SHA256、controlDigest、角色与 `from` 角色规格。`artifacts/` 不封存，所以全新 checkout 跳过该复核而不失败。代价与收益都记在这里：把 `scopeTransitions[0].previousRecordSha256` 改成 `0…0` 之后，是控制核验本身在 `revise` 之前就拒绝，而不是留下一个可以事后追认的绑定。
 - **交付面成为一等 gate。** 新增 `gts-lsp`（repository gts，requires `gts-engine`、`gts-build`，covers L1／E1），不经编辑器、以 stdio 直连 `@gi-tcg/gts-language-server` 核验 LSP 语义与 TNB 产物身份。当前为 BLOCKED；编辑器证据不能替代语言服务自身的原生身份。
 - **HARNESS.md 新增 §8**，把仍未交付的验收工具和推进批次写进契约文本：先 desktop 与 platforms，再 coverage、memory、clean-install，最后 TNB 四件。采集器期望值要对接近最终的产品状态生成，因此与产品修复并行推进，而不是提前冻结。
+- **Git 辅助超时分成两条有界边界。** tnb 任务续接原先确定性失败：`snapshotRepository` 对 pin 的两个子模块做源码指纹时，`git ls-files --others` 在 `typescript-go` 上要遍历约 14 万个文件（`_submodules` 81371、`testdata` 49636）。实测 `ls-files --others --exclude-standard` 87.9 秒、`git ls-files` 0.2 秒、`typescript` 子模块 81500 个跟踪文件；30 秒的单一 Git 超时因此必然 ETIMEDOUT。现在索引查询仍用 `gitTimeoutMs = 30000`，只有枚举工作树（`--others`／`--untracked-files`）改用 `gitEnumerationTimeoutMs = 300000`，两者都仍有界，新增自测固定该分类；gate 超时与所有验收阈值不变。这是实测出的工具边界，不是因为验收失败而放宽上限。
 - **未做**（2.2.0 列出的其余缺口）：desktop 采集器改绑与登记、platforms 能力门、按产物身份判定的 TNB 触发规则。TNB 触发仍保守恒为必需；HARNESS.md §5 已规定只有证明没有 TNB 行为或产物改动之后才可审查放宽，本版不放宽。
 
 自测：本版新增 3 项负例（未声明缺口的 gate、wiring 与缺口并存、角色 gate 跨仓库）与 1 项 scope transition 记录复核，必须随全部封存自测通过后才允许派发；升格后旧 seal 与旧回执全部失效。回执见 artifacts/selftests/ 下本版记录，不把文档或草案当作通过证据。

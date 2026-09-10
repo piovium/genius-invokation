@@ -510,6 +510,70 @@
       "review": "harness/REVIEW.md: 2.2.0 GTS-owned editor acceptance and engine identity"
     },
     {
+      "role": "gts",
+      "previousTaskId": "22dee959-e961-47e4-825e-0ad9af9a8941",
+      "previousControlDigest": "00a91aafd8110bbd68bbe2ee06d937f54575043d20991ef5de34c2ac70f3f1e0",
+      "previousRecordSha256": "d499e60f89779e155a830962ff29c8f762b2f63051fe90e3a1f8c3eccf8eaa06",
+      "from": {
+        "repository": "gts",
+        "paths": [
+          "packages/",
+          "examples/",
+          "package.json",
+          "pnpm-workspace.yaml",
+          "pnpm-lock.yaml",
+          "patches/",
+          "docs/content/docs/internal/index.md",
+          "docs/content/docs/internal/build-plugins.md",
+          "docs/content/docs/internal/language-tooling.md",
+          "docs/content/docs/runtime-guide/index.mdx",
+          "docs/content/docs/runtime-guide/transpilation-output.mdx",
+          "docs/content/docs/user-guide/entity.mdx",
+          "docs/content/docs/user-guide/skill.mdx",
+          "docs/content/docs/user-guide/typescript-interop.mdx"
+        ],
+        "gates": [
+          "engine",
+          "gts-engine",
+          "gts-build",
+          "gts-tests",
+          "desktop"
+        ]
+      },
+      "to": {
+        "repository": "gts",
+        "paths": [
+          "packages/",
+          "examples/",
+          "package.json",
+          "pnpm-workspace.yaml",
+          "pnpm-lock.yaml",
+          "patches/",
+          "docs/content/docs/internal/index.md",
+          "docs/content/docs/internal/build-plugins.md",
+          "docs/content/docs/internal/language-tooling.md",
+          "docs/content/docs/runtime-guide/index.mdx",
+          "docs/content/docs/runtime-guide/transpilation-output.mdx",
+          "docs/content/docs/user-guide/entity.mdx",
+          "docs/content/docs/user-guide/skill.mdx",
+          "docs/content/docs/user-guide/typescript-interop.mdx"
+        ],
+        "gates": [
+          "engine",
+          "gts-engine",
+          "gts-build",
+          "gts-tests",
+          "desktop",
+          "gts-lsp"
+        ],
+        "inheritedGates": [
+          "engine"
+        ]
+      },
+      "reason": "Bind the delivery surface itself: add the gts-lsp gate to the GTS assignment so stdio language-server evidence with TNB identity is required, not implied by the editor session. Paths, baselines, every existing gate and every acceptance threshold are unchanged; the prior task is the active GTS assignment under seal 2.2.0.",
+      "review": "harness/REVIEW.md: 2.3.0 sealed gaps, wiring invariants and a first-class delivery gate"
+    },
+    {
       "role": "integration",
       "previousTaskId": "21742461-fe76-4346-b383-6bfbb5fad993",
       "previousControlDigest": "a695c4a0987cbb600ef7250f1222402427af2e5b1a47c48aca893315d5d19c38",

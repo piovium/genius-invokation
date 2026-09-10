@@ -6,8 +6,11 @@ import { setTimeout as delay } from "node:timers/promises";
 import { test } from "node:test";
 import {
   acquireLock,
+  enumeratesWorkTree,
   execute,
   git,
+  gitEnumerationTimeoutMs,
+  gitTimeoutMs,
   makeSeal,
   processVerdict,
   snapshot,
@@ -16,6 +19,16 @@ import {
   treeDigest,
   verifySeal,
 } from "../core.mjs";
+
+test("work-tree enumeration gets its own bounded Git timeout while index queries stay tight", () => {
+  assert.equal(enumeratesWorkTree(["ls-files", "-z", "--cached", "--others", "--exclude-standard"]), true);
+  assert.equal(enumeratesWorkTree(["status", "--porcelain=v1", "--untracked-files=all"]), true);
+  assert.equal(enumeratesWorkTree(["rev-parse", "HEAD"]), false);
+  assert.equal(enumeratesWorkTree(["cat-file", "-e", "deadbeef^{commit}"]), false);
+  // The pinned TNB submodules hold ~140k files, so the enumerating bound must
+  // exceed the index bound while both stay bounded.
+  assert.ok(gitEnumerationTimeoutMs >= 4 * gitTimeoutMs && gitTimeoutMs > 0);
+});
 
 test('task submodule fingerprints bind sources while acceptance still binds ignored runtime files', async t => {
   const root = temporary(t);
