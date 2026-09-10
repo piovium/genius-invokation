@@ -147,3 +147,24 @@ Windows 上 TNB 任务源快照的完整读取耗时较长。候选仅替换 cor
 复核的 core 候选 SHA256 为 8114c50e6ce7d92ec8b57cdfe74ecf4089076ab5f2538f3718edce7696adf7e5。artifact 证明 hash-performance-proof-xfDaT2/results.json 绑定该精确版本，覆盖空文件、Unicode/CRLF/NUL、块边界、大文件尾部、ENOENT、并发调用、同 size/mtime 内容重写及事件循环让出。完整 source snapshot trial hash-performance-full-trial-GmvgUH 单独保留；其 includeRuntime:false 仅用于任务源快照，不是最终 runtime 指纹证明。早期旧候选的 cold/warm 数据不能归为本候选的速度提升。新增 sealed tests 在真实临时文件验证上述外部行为；原完整 selftest 的 120 秒限制保持不变。
 
 补充前版声明实验的证据范围：后续在实际 rolldown-plugin-dts 调用中发现 config-less createProgram 没有进入原生。此前“stock/native 声明字节一致”只能说明加载对应包的输出一致，不能据此证明 native emitter 已执行。真实 web 负例现已检出并清除，但原 GTS build 原生断言仍 FAIL；应修复 TNB，不能删除断言。Linux nested detached 命令清理边界正在独立评估，本版不声称已修复或已完成 desktop / Linux 验收。
+
+## 2.2.0 GTS-owned editor acceptance and web withdrawal
+
+用户确认目标只覆盖 GTS 与 TNB：`@gi-tcg/gts-language-server` 与 GamingTS 扩展接入 TNB 后在真实编辑器可用，并把主仓库里的语言服务实现与网页双路线撤出（不画蛇添足）。本版因此把 `desktop`（L1-L4/E1）从主仓库改绑到 `worktrees/gts`，并新增同仓库的 `gts-engine`；`web` gate、`browser` 角色、`repositories.web` 与 `harness/collectors/web/` 全部移除，`harness/tests/collectors.test.mjs` 去掉对应 import（web 采集器测试随文件删除，自测总数 152→130，没有 skipped／todo）。桌面场景把 `data-workspace` 换成 `examples-workspace`，并新增 `packed-vsix-install`。
+
+承载约束与实现：scope transition 要求 `from.gates ⊆ to.gates`，因此 gts 角色保留 `engine` 并新增 `gts-engine`，不删除既有 gate；对应 transition 绑定活跃 gts 任务 `dc0fb908-8d11-444a-b4b5-5d8f9559dc8e`、seal `019dfeb2…` 与任务文件哈希 `9b27bb16…`。`runner.engineGate` 与 `verifyReceipt` 改为按 `gate.repository` 读取 `harness/baselines/<repo>.json`；新增的 `harness/baselines/gts.json` 以 LF 写入，否则 Git 检出字节检查失败（首次草稿即因 CRLF 被自测拒绝）。
+
+本版仍是候选：草稿 `artifacts/harness-drafts/batch-1` 先通过 verify 与完整自测，再升格到 root 并重新 seal、重跑 selftest；升格后旧回执（含 4 次 preflight）全部失效。**尚未登记**：desktop collector（该门仍为 BLOCKED，草稿在 `artifacts/harness-drafts/desktop` 且 blocked on Linux 进程清理与 packed VSIX 模式）、LSP 粒度门、按产物身份判定的 TNB 触发规则、平台能力门、validateContract 的角色／仓库交叉检查。
+
+## 2.3.0 sealed gaps, wiring invariants and a first-class delivery gate
+
+用户要求"先改 harness、最后一次改完做记录再开干"，并再次确认唯一交付面是 GTS 与 TNB：`@gi-tcg/gts-language-server` 与 GamingTS 扩展接入 TNB 后在真实编辑器可用；迁移期间在主仓库新增的实现与容器打包都属于必须删除的赘余。本版只改定义层，超时、次数、平台、路径、基线与既有断言全部保持原值，不放宽任何阈值。
+
+- **gate wiring 必须显式。** 每个 gate 要么由内置 kind（environment／inventory／engine）或已登记采集器执行，要么在 contract 中写明 `blocked` 理由；两者互斥，已登记却声明缺口同样拒绝。9 个尚未实现的采集器因此各自带上封存的缺口说明，`status` 与运行期 BLOCKED 都直接引用该理由；缺理由的 gate 现在让 `verify` 失败，而不是默默变成 BLOCKED。
+- **角色 gate 与仓库绑定。** 角色的 gate 必须在该角色自己的仓库执行。跨仓库 gate 只能由 contract 中显式声明的 `inheritedGates` 继承——目前只有 gts 角色继承 main 的 `engine`，这是 scope transition 的 `from.gates ⊆ to.gates` 约束留下的唯一合法例外，按声明接受、不存在隐含许可。
+- **scope transition 逐字节复核。** 除原有自洽检查外，被绑定的旧任务记录仍在本地时必须复核其 SHA256、controlDigest、角色与 `from` 角色规格。`artifacts/` 不封存，所以全新 checkout 跳过该复核而不失败。代价与收益都记在这里：把 `scopeTransitions[0].previousRecordSha256` 改成 `0…0` 之后，是控制核验本身在 `revise` 之前就拒绝，而不是留下一个可以事后追认的绑定。
+- **交付面成为一等 gate。** 新增 `gts-lsp`（repository gts，requires `gts-engine`、`gts-build`，covers L1／E1），不经编辑器、以 stdio 直连 `@gi-tcg/gts-language-server` 核验 LSP 语义与 TNB 产物身份。当前为 BLOCKED；编辑器证据不能替代语言服务自身的原生身份。
+- **HARNESS.md 新增 §8**，把仍未交付的验收工具和推进批次写进契约文本：先 desktop 与 platforms，再 coverage、memory、clean-install，最后 TNB 四件。采集器期望值要对接近最终的产品状态生成，因此与产品修复并行推进，而不是提前冻结。
+- **未做**（2.2.0 列出的其余缺口）：desktop 采集器改绑与登记、platforms 能力门、按产物身份判定的 TNB 触发规则。TNB 触发仍保守恒为必需；HARNESS.md §5 已规定只有证明没有 TNB 行为或产物改动之后才可审查放宽，本版不放宽。
+
+自测：本版新增 3 项负例（未声明缺口的 gate、wiring 与缺口并存、角色 gate 跨仓库）与 1 项 scope transition 记录复核，必须随全部封存自测通过后才允许派发；升格后旧 seal 与旧回执全部失效。回执见 artifacts/selftests/ 下本版记录，不把文档或草案当作通过证据。

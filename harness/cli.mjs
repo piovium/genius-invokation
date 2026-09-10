@@ -5,7 +5,8 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { codes, sha, stable, hashFile, readJson, writeJson, inside, verifySeal,
   execute, processVerdict } from './core.mjs';
-import { loadHarness, runSelection, finishRun, generateTask, reviseTask, handoff, verifyReceipt } from './runner.mjs';
+import { loadHarness, runSelection, finishRun, generateTask, reviseTask, handoff, verifyReceipt,
+  builtInGateKinds } from './runner.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 async function selftest(harness) {
@@ -55,8 +56,9 @@ async function main() {
   return { status: 'PASS', scope: 'configuration only', phase: harness.contract.phase,
     controlDigest: harness.seal.digest,
     gates: harness.contract.gates.map(gate => ({ id: gate.id, status: 'NOT_RUN',
-      wiring: ['environment', 'inventory', 'engine'].includes(gate.kind) ? 'built-in'
-        : harness.contract.adapters?.[gate.id] ? 'reviewed-adapter' : 'BLOCKED: collector not registered' })) };
+      wiring: builtInGateKinds.includes(gate.kind) ? 'built-in'
+        : harness.contract.adapters?.[gate.id] ? 'reviewed-adapter' : 'BLOCKED: no reviewed collector',
+      ...(gate.blocked ? { blocked: gate.blocked } : {}) })) };
 }
 try {
   const result = await main();

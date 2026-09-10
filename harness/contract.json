@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2.1.4",
+  "version": "2.3.0",
   "phase": "migration",
   "tnbVersion": "6.0.3-bridge.16.tsgo.7.0.2",
   "policy": {
@@ -18,7 +18,7 @@
     "requireTnbRegression": true,
     "desktopScenarios": [
       "root-workspace",
-      "data-workspace",
+      "examples-workspace",
       "syntax-error",
       "property-type-error",
       "invalid-import",
@@ -27,6 +27,7 @@
       "close-reopen",
       "dependency-change",
       "unicode-crlf-space-path",
+      "packed-vsix-install",
       "electron-extension-host"
     ],
     "coverageScenarios": [
@@ -56,13 +57,6 @@
       "base": "9281a12c7c4e42dc50c0c27a8dba4a0e93639ddc",
       "name": "typescript-native-bridge",
       "manager": "npm"
-    },
-    "web": {
-      "path": "worktrees/browser-routes",
-      "base": "e0be9cd6d3758026a301ef91c65e6bf419bd595e",
-      "name": "genius-invokation",
-      "manager": "pnpmMain",
-      "managerVersion": "12.0.0"
     }
   },
   "roles": {
@@ -115,18 +109,14 @@
       ],
       "gates": [
         "engine",
+        "gts-engine",
         "gts-build",
         "gts-tests",
-        "desktop"
-      ]
-    },
-    "browser": {
-      "repository": "web",
-      "paths": [
-        "packages/custom-data-loader/"
+        "desktop",
+        "gts-lsp"
       ],
-      "gates": [
-        "web"
+      "inheritedGates": [
+        "engine"
       ]
     },
     "tnb": {
@@ -203,7 +193,8 @@
         "engine",
         "inventory"
       ],
-      "timeoutMs": 600000
+      "timeoutMs": 600000,
+      "blocked": "No reviewed coverage collector is registered. Registering it requires real per-path program observations for every main-repository GTS file plus the current, historical, unimported and cross-package negative and repair scenarios."
     },
     {
       "id": "checks",
@@ -217,6 +208,18 @@
         "inventory"
       ],
       "timeoutMs": 600000
+    },
+    {
+      "id": "gts-engine",
+      "covers": [
+        "E1"
+      ],
+      "kind": "engine",
+      "repository": "gts",
+      "requires": [
+        "environment"
+      ],
+      "timeoutMs": 180000
     },
     {
       "id": "gts-build",
@@ -249,6 +252,21 @@
       "timeoutMs": 600000
     },
     {
+      "id": "gts-lsp",
+      "covers": [
+        "L1",
+        "E1"
+      ],
+      "kind": "collector",
+      "repository": "gts",
+      "requires": [
+        "gts-engine",
+        "gts-build"
+      ],
+      "timeoutMs": 900000,
+      "blocked": "No reviewed language-server collector is registered. The gate must drive @gi-tcg/gts-language-server over stdio with the real GamingTS provider set and prove diagnostics, hover, definition, completion and signature help, the resolved TNB package version, the loaded native addon and live RPC counters without an editor in the loop."
+    },
+    {
       "id": "desktop",
       "covers": [
         "L1",
@@ -259,12 +277,13 @@
       ],
       "kind": "session",
       "case": "desktop",
-      "repository": "main",
+      "repository": "gts",
       "requires": [
-        "engine",
+        "gts-engine",
         "gts-build"
       ],
-      "timeoutMs": 1800000
+      "timeoutMs": 1800000,
+      "blocked": "The desktop draft is bound to the retired main-repository workspace pair. Registering it requires rebinding the target to the GTS checkout, implementing the packed-VSIX install launch mode, completing the shared Linux process cleanup, and collecting real 100-round evidence."
     },
     {
       "id": "main-build",
@@ -299,21 +318,6 @@
       "timeoutMs": 1800000
     },
     {
-      "id": "web",
-      "covers": [
-        "R2",
-        "E1"
-      ],
-      "kind": "session",
-      "case": "web",
-      "repository": "main",
-      "requires": [
-        "engine",
-        "main-build"
-      ],
-      "timeoutMs": 1800000
-    },
-    {
       "id": "memory",
       "covers": [
         "C1"
@@ -324,7 +328,8 @@
       "requires": [
         "data"
       ],
-      "timeoutMs": 1800000
+      "timeoutMs": 1800000,
+      "blocked": "No reviewed memory session collector is registered. Per-service JS and native samples alone do not prove the editor process-tree total, which is what the memory target requires."
     },
     {
       "id": "clean-install",
@@ -337,7 +342,8 @@
         "main-build",
         "checks"
       ],
-      "timeoutMs": 1800000
+      "timeoutMs": 1800000,
+      "blocked": "No reviewed clean-checkout install collector is registered; the fresh-checkout install, check, build and SDK-selection evidence still has to be collected and validated."
     },
     {
       "id": "tnb-guards",
@@ -347,7 +353,8 @@
       "kind": "tnb-guards",
       "repository": "tnb",
       "condition": "tnb-changed",
-      "timeoutMs": 600000
+      "timeoutMs": 600000,
+      "blocked": "No reviewed TNB guard collector is registered; the four existing check:* guards have to be executed through the harness and validated against the pinned submodules and patches."
     },
     {
       "id": "tnb-witnesses",
@@ -360,7 +367,8 @@
       "requires": [
         "tnb-guards"
       ],
-      "timeoutMs": 1800000
+      "timeoutMs": 1800000,
+      "blocked": "No reviewed TNB witness collector is registered; witness group wiring output is not witness execution."
     },
     {
       "id": "tnb-navigation",
@@ -377,7 +385,8 @@
         "run",
         "check:sim-nav"
       ],
-      "timeoutMs": 1800000
+      "timeoutMs": 1800000,
+      "blocked": "No reviewed TNB navigation collector is registered for the simulated navigation suite."
     },
     {
       "id": "tnb-volar",
@@ -390,7 +399,8 @@
       "requires": [
         "tnb-guards"
       ],
-      "timeoutMs": 1800000
+      "timeoutMs": 1800000,
+      "blocked": "No reviewed TNB Volar collector is registered; the downstream Volar suite still has to be executed and validated with GamingTS semantics."
     },
     {
       "id": "platforms",
@@ -399,7 +409,8 @@
       ],
       "kind": "collector",
       "repository": "main",
-      "timeoutMs": 1800000
+      "timeoutMs": 1800000,
+      "blocked": "No reviewed cross-platform capability collector is registered; win32 is prepared locally, linux still needs a prepared runtime and a matching negative proof."
     }
   ],
   "adapters": {
@@ -432,19 +443,14 @@
       "collector": "harness/collectors/command/command-collector.mjs",
       "validator": "harness/collectors/command/command-validator.mjs",
       "expectations": "harness/collectors/command/command-expectations.json"
-    },
-    "web": {
-      "collector": "harness/collectors/web/web-collector.mjs",
-      "validator": "harness/collectors/web/web-validator.mjs",
-      "expectations": "harness/collectors/web/web-expectations.json"
     }
   },
   "scopeTransitions": [
     {
       "role": "gts",
-      "previousTaskId": "a40063cd-c453-4091-8ea8-ceb62837323a",
-      "previousControlDigest": "a695c4a0987cbb600ef7250f1222402427af2e5b1a47c48aca893315d5d19c38",
-      "previousRecordSha256": "4316299224577cdb42223a968ac099cbcc0be7a2291c0f2459ed389c75da3cf6",
+      "previousTaskId": "dc0fb908-8d11-444a-b4b5-5d8f9559dc8e",
+      "previousControlDigest": "019dfeb288775db2ef729f7fe7c991cbef3a0be3ba04495c98065de3cc1d1fd4",
+      "previousRecordSha256": "9b27bb161d6e7ee7c129e2ea0acd45964d180f80902466a5ea6036f2b0bc7ec1",
       "from": {
         "repository": "gts",
         "paths": [
@@ -453,13 +459,21 @@
           "package.json",
           "pnpm-workspace.yaml",
           "pnpm-lock.yaml",
-          "patches/"
+          "patches/",
+          "docs/content/docs/internal/index.md",
+          "docs/content/docs/internal/build-plugins.md",
+          "docs/content/docs/internal/language-tooling.md",
+          "docs/content/docs/runtime-guide/index.mdx",
+          "docs/content/docs/runtime-guide/transpilation-output.mdx",
+          "docs/content/docs/user-guide/entity.mdx",
+          "docs/content/docs/user-guide/skill.mdx",
+          "docs/content/docs/user-guide/typescript-interop.mdx"
         ],
-        "gates": [
-          "engine",
-          "gts-build",
-          "gts-tests",
-          "desktop"
+      "gates": [
+        "engine",
+        "gts-build",
+        "gts-tests",
+        "desktop"
         ]
       },
       "to": {
@@ -482,13 +496,18 @@
         ],
         "gates": [
           "engine",
+          "gts-engine",
           "gts-build",
           "gts-tests",
-          "desktop"
+          "desktop",
+          "gts-lsp"
+        ],
+        "inheritedGates": [
+          "engine"
         ]
       },
-      "reason": "Repair the exact eight documentation files whose obsolete URLs cause the original GTS prerender build to fail; preserve all pages and assertions.",
-      "review": "harness/REVIEW.md: 2.1.3 command and web collectors with exact documentation scope"
+      "reason": "Rebind editor acceptance to the GTS worktree and prove compiler identity there: the GamingTS extension and @gi-tcg/gts-language-server live in worktrees/gts, so L1-L4/E1 must run in that repository rather than the main checkout. Paths, baselines and every acceptance threshold are unchanged.",
+      "review": "harness/REVIEW.md: 2.2.0 GTS-owned editor acceptance and engine identity"
     },
     {
       "role": "integration",

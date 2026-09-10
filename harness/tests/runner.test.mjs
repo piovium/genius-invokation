@@ -41,7 +41,8 @@ async function fixture(t, { phase = 'migration', count = 1, collectorText = coll
     }, adapters: {}, gates: [] };
   for (let i = 0; i < count; i++) {
     const id = `gate-${i}`;
-    contract.gates.push({ id, kind: 'collector', repository: 'main', timeoutMs: 15000 });
+    contract.gates.push({ id, kind: 'collector', repository: 'main', timeoutMs: 15000,
+      ...(registered ? {} : { blocked: 'fixture gap: no reviewed collector is registered' }) });
     if (registered) contract.adapters[id] = { collector: 'harness/collectors/fixture.mjs',
       validator: 'harness/collectors/validate.mjs', expectations: 'harness/collectors/expectations.json' };
   }
@@ -266,6 +267,45 @@ test('contract rejects duplicate gates, unknown references and dependency cycles
   const unknown = structuredClone(f.contract); unknown.gates[0].requires = ['absent'];
   assert.throws(() => validateContract(unknown), /Unknown/);
 });
+test('a gate that cannot execute must declare its sealed gap and stays BLOCKED with that reason', async t => {
+  const f = await fixture(t, { registered: false });
+  const run = await runSelection(f.harness, 'all');
+  assert.equal(run.status, 'BLOCKED', stable(run));
+  assert.match(run.results[0].reason, /fixture gap: no reviewed collector is registered/);
+});
+test('undeclared gaps, wired gates carrying a gap and mis-bound role gates are rejected', async t => {
+  const f = await fixture(t);
+  const undeclared = structuredClone(f.contract); undeclared.adapters = {};
+  assert.throws(() => validateContract(undeclared), /no declared blocking reason/);
+  const wired = structuredClone(f.contract); wired.gates[0].blocked = 'leftover gap';
+  assert.throws(() => validateContract(wired), /Wired gate declares/);
+  const bound = structuredClone(f.contract);
+  bound.repositories.other = { path: 'repos/other', base: bound.repositories.main.base };
+  bound.gates.push({ id: 'foreign', kind: 'collector', repository: 'other', timeoutMs: 15000,
+    blocked: 'fixture gap: foreign collector is not implemented' });
+  bound.roles.integration.gates = ['gate-0', 'foreign'];
+  assert.throws(() => validateContract(bound), /different repository/);
+  bound.roles.integration.inheritedGates = ['foreign'];
+  validateContract(bound);
+  bound.roles.integration.inheritedGates = ['absent'];
+  assert.throws(() => validateContract(bound), /outside the role gate list/);
+});
+test('a scope transition must still match its bound prior task record when that record exists', async t => {
+  const f = await fixture(t);
+  const previousTaskId = '11111111-1111-4111-8111-111111111111';
+  const transition = { role: 'integration', previousTaskId,
+    previousControlDigest: 'a'.repeat(64), previousRecordSha256: 'b'.repeat(64),
+    from: { repository: 'main', paths: ['src/'], gates: ['gate-0'] },
+    to: structuredClone(f.contract.roles.integration), reason: 'fixture transition',
+    review: 'harness/REVIEW.md: fixture' };
+  const contract = { ...structuredClone(f.contract), scopeTransitions: [transition] };
+  validateContract(contract, { root: f.root });
+  const directory = path.join(f.root, 'artifacts/tasks', previousTaskId);
+  fs.mkdirSync(directory, { recursive: true });
+  fs.writeFileSync(path.join(directory, 'task.json'), JSON.stringify({ id: previousTaskId,
+    role: 'integration', controlDigest: 'c'.repeat(64), roleSpec: transition.from }));
+  assert.throws(() => validateContract(contract, { root: f.root }), /no longer matches/);
+});
 test('preflight probes each package manager in its own repository', async t => {
   const f = await fixture(t);
   for (const id of ['gts', 'tnb']) {
@@ -345,7 +385,11 @@ test('scope expansion requires exact sealed review and rejects pre-existing viol
   f.write('repos/main/patches/after-review.patch', 'newly authorized');
   assert.equal((await handoff(next, revised.file)).status, 'PASS');
   f.contract.scopeTransitions[0].previousRecordSha256 = '0'.repeat(64);
-  await assert.rejects(reviseTask(await reload(), first.file), /exact reviewed scope transition/);
+  // Control verification itself now refuses the tampered binding before any
+  // revision can be attempted.
+  let refusal = null;
+  try { await reload(); } catch (error) { refusal = error.stdout; }
+  assert.match(refusal, /no longer matches/);
 });
 
 test('recursive manager shim runs the configured Node and manager in Unicode paths', async t => {

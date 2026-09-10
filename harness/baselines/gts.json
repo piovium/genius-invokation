@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "base": "cf58a100132ef02af61c6a22a49feb1968841f06",
+  "files": [
+    "examples/local/test.gts",
+    "examples/local/test2.gts"
+  ],
+  "checkPackages": [
+    {
+      "path": "packages/vscode",
+      "name": "gamingts-vscode",
+      "command": null
+    },
+    {
+      "path": "packages/language-server",
+      "name": "@gi-tcg/gts-language-server",
+      "command": null
+    },
+    {
+      "path": "packages/language-plugin",
+      "name": "@gi-tcg/gts-language-plugin",
+      "command": null
+    },
+    {
+      "path": "packages/tsc",
+      "name": "@gi-tcg/gtsc",
+      "command": null
+    }
+  ]
+}

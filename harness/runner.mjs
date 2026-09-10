@@ -6,7 +6,9 @@ import { createRequire } from 'node:module';
 import { codes, sha, stable, readJson, writeJson, inside, hashFile, verifySeal, git,
   sourcePaths, gitLinks, snapshot, snapshotRepository, acquireLock, execute, processVerdict, requiredGateIds, fatalPattern, evidenceManifest } from './core.mjs';
 
-export function validateContract(contract) {
+export const builtInGateKinds = ['environment', 'inventory', 'engine'];
+
+export function validateContract(contract, { root } = {}) {
   if (contract.schemaVersion !== 1 || !['harness-only', 'migration'].includes(contract.phase)) {
     throw new Error('Unsupported contract or phase');
   }
@@ -30,9 +32,32 @@ export function validateContract(contract) {
   }
   ids.forEach(visit);
   for (const id of Object.keys(contract.adapters ?? {})) if (!ids.has(id)) throw new Error('Unknown adapter gate');
+  // A gate is executable only through a built-in implementation or a registered,
+  // sealed reviewed adapter. Every other gate must declare why it cannot run
+  // inside the sealed contract itself, so a missing collector stays a reviewed,
+  // visible gap instead of an implicit omission.
+  for (const gate of contract.gates) {
+    const wired = builtInGateKinds.includes(gate.kind) || contract.adapters?.[gate.id];
+    if (wired && gate.blocked) throw new Error(`Wired gate declares a blocking reason: ${gate.id}`);
+    if (!wired && !(typeof gate.blocked === 'string' && gate.blocked.trim())) {
+      throw new Error(`Gate has no implementation and no declared blocking reason: ${gate.id}`);
+    }
+  }
+  const gateById = id => contract.gates.find(gate => gate.id === id);
   for (const role of Object.values(contract.roles)) {
     if (!contract.repositories[role.repository] || !role.paths?.length) throw new Error('Invalid role');
     if (role.gates.some(id => !ids.has(id))) throw new Error('Unknown role gate');
+    // Acceptance must run where the owned sources live: a gate bound to another
+    // checkout reports on code the role cannot change. A cross-repository gate is
+    // only accepted when the sealed contract declares it as inherited from the
+    // role's reviewed prior assignment, never as an implied permission.
+    const inherited = role.inheritedGates ?? [];
+    if (inherited.some(id => !role.gates.includes(id))) {
+      throw new Error('Inherited gate is outside the role gate list');
+    }
+    if (role.gates.some(id => gateById(id).repository !== role.repository && !inherited.includes(id))) {
+      throw new Error(`Role gate is bound to a different repository: ${role.gates.join(', ')}`);
+    }
   }
   for (const transition of contract.scopeTransitions ?? []) {
     if (!/^[a-f0-9]{64}$/.test(transition.previousRecordSha256 ?? '')
@@ -45,11 +70,28 @@ export function validateContract(contract) {
       throw new Error('Invalid reviewed scope transition');
     }
   }
+  // The binding above is only self-consistent. When the bound task record is
+  // still present locally, recheck it: artifacts/ is deliberately unsealed, so a
+  // fresh checkout cannot perform this check and must not be failed for it.
+  if (root) {
+    for (const transition of contract.scopeTransitions ?? []) {
+      const file = path.join(root, 'artifacts', 'tasks', transition.previousTaskId, 'task.json');
+      if (!fs.existsSync(file)) continue;
+      const bytes = fs.readFileSync(file);
+      const record = JSON.parse(bytes);
+      if (sha(bytes) !== transition.previousRecordSha256
+        || record.controlDigest !== transition.previousControlDigest
+        || record.role !== transition.role
+        || stable(record.roleSpec) !== stable(transition.from)) {
+        throw new Error('Bound previous task record no longer matches its reviewed scope transition');
+      }
+    }
+  }
 }
 export async function loadHarness(root) {
   const seal = await verifySeal(root);
   const contract = readJson(inside(root, 'harness/contract.json'));
-  validateContract(contract);
+  validateContract(contract, { root });
   const localFile = inside(root, 'harness/local.json');
   const local = fs.existsSync(localFile) ? readJson(localFile) : {};
   const allowed = ['node', 'pnpmMain', 'pnpmGts', 'npm', 'volar'];
@@ -224,7 +266,9 @@ async function validateObservation(context, gate, adapter, evidence) {
 }
 async function adapterGate(context, gate) {
   const adapter = registeredAdapter(context, gate);
-  if (!adapter) return verdict('BLOCKED', `No independently reviewed collector/validator registered for ${gate.id}`);
+  if (!adapter) return verdict('BLOCKED', gate.blocked
+    ? `Declared blocking reason: ${gate.blocked}`
+    : `No independently reviewed collector/validator registered for ${gate.id}`);
   const cmd = await command(context, gate, context.runtimePaths.node,
     [inside(context.root, adapter.collector)], gate.id);
   const commands = [cmd];
@@ -239,10 +283,10 @@ async function adapterGate(context, gate) {
   return { ...result, commands, observation: { file, sha256: await hashFile(inside(context.directory, file)) } };
 }
 async function engineGate(context, gate) {
-  const baseline = readJson(inside(context.root, 'harness/baselines/main.json'));
+  const baseline = readJson(inside(context.root, `harness/baselines/${gate.repository}.json`));
   const commands = [], observations = [];
   for (const [index, pkg] of baseline.checkPackages.entries()) {
-    const repo = inside(context.root, `${context.contract.repositories.main.path}/${pkg.path}`);
+    const repo = inside(context.root, `${context.contract.repositories[gate.repository].path}/${pkg.path}`);
     const cmd = await command(context, gate, context.runtimePaths.node,
       [inside(context.root, 'harness/probes/engine.mjs'), '--repo', repo, '--version', context.contract.tnbVersion], `engine-${index}`);
     commands.push(cmd);
@@ -359,11 +403,11 @@ export async function verifyReceipt(harness, directory) {
         if (!correctVersion(id, fs.readFileSync(inside(directory, cmd.stdout.file), 'utf8').trim(), expected)) throw new Error('Environment version evidence mismatch');
       }
     } else if (gate.kind === 'engine') {
-      const packages = readJson(inside(harness.root, 'harness/baselines/main.json')).checkPackages;
+      const packages = readJson(inside(harness.root, `harness/baselines/${gate.repository}.json`)).checkPackages;
       const count = packages.length;
       if (row.commands?.length !== count || row.observations?.length !== count) throw new Error('Incomplete engine context evidence');
       for (const [index, cmd] of row.commands.entries()) {
-        const repo = inside(harness.root, `${harness.contract.repositories.main.path}/${packages[index].path}`);
+        const repo = inside(harness.root, `${harness.contract.repositories[gate.repository].path}/${packages[index].path}`);
         checkCommand(context, gate, cmd, [inside(harness.root, 'harness/probes/engine.mjs'), '--repo', repo, '--version', harness.contract.tnbVersion], `engine-${index}`);
         const observation = readJson(inside(directory, cmd.stdout.file));
         if (stable(observation) !== stable(row.observations[index])) throw new Error('Engine observation differs from raw probe output');
