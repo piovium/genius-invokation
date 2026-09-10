@@ -1,4 +1,5 @@
-/** Binary game messages shared by the server and browser. Control frames use JSON. */
+// Binary game messages shared by the server and browser.
+// Control frames use JSON.
 export interface GameRpcTimer {
   current: number;
   total: number;
@@ -15,8 +16,9 @@ export type GameWireFrame =
   | { type: "rpc"; data: GameRpcRequest }
   | { type: "actionResponse"; id: number; response: Uint8Array };
 
-/** "GI", then the protocol version both ends speak. */
+/** "GI" magic bytes that open every frame. */
 const MAGIC_BYTES = [0x47, 0x49] as const;
+/** Protocol version every frame carries. */
 const VERSION = 1;
 /** Kind byte of each frame variant. */
 const KIND = {
@@ -26,8 +28,9 @@ const KIND = {
 } as const;
 /** Known kind bytes, so the decoder rejects an unknown one in a single place. */
 const FRAME_KINDS: ReadonlySet<number> = new Set(Object.values(KIND));
-/** Header sizes: the fixed prefix, and that prefix plus two float64 BE timers. */
+/** Fixed header prefix: "GI" magic, version, kind byte and a uint32 BE id. */
 const HEADER_BYTES = 8;
+/** Two float64 BE timers, carried only by RPC frames. */
 const TIMER_BYTES = 16;
 const RPC_HEADER_BYTES = HEADER_BYTES + TIMER_BYTES;
 /** Byte offsets of the id and the two float64 BE RPC timers within the header. */

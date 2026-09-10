@@ -87,10 +87,10 @@ export const errorStatus = (statusCode: number, message: string) =>
 export function errorResponse(error: unknown) {
   if (error instanceof HttpError)
     return errorStatus(error.statusCode, error.message);
-  const conflictMessage = [...driverErrorChain(error)]
-    .flatMap((cause) => [cause.code, cause.errno])
-    .map(conflictMessageFor)
-    .find((message) => message !== undefined);
-  if (conflictMessage !== undefined) return errorStatus(409, conflictMessage);
+  for (const cause of driverErrorChain(error)) {
+    const message =
+      conflictMessageFor(cause.code) ?? conflictMessageFor(cause.errno);
+    if (message !== undefined) return errorStatus(409, message);
+  }
   return errorStatus(500, "Internal Server Error");
 }

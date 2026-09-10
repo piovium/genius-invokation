@@ -50,7 +50,7 @@ const BOOLEAN_ROOM_FIELDS = [
   "watchable",
   "private",
   "allowGuest",
-] as const;
+] as const satisfies readonly (keyof CreateRoomDto)[];
 
 /**
  * Accepted range of each numeric room field; `gameVersion` indexes VERSIONS.

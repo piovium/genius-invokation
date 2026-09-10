@@ -26,11 +26,13 @@ const PLACEHOLDERS = {
   body: "<!-- server:body -->",
 } as const;
 
+type PlaceholderName = keyof typeof PLACEHOLDERS;
+
 export function injectHtml(
   html: string,
-  injections: Partial<Record<keyof typeof PLACEHOLDERS, string>>,
+  injections: Partial<Record<PlaceholderName, string>>,
 ) {
-  return (Object.keys(PLACEHOLDERS) as (keyof typeof PLACEHOLDERS)[]).reduce(
+  return (Object.keys(PLACEHOLDERS) as PlaceholderName[]).reduce(
     (result, position) =>
       result.replace(PLACEHOLDERS[position], injections[position] ?? ""),
     html,
@@ -90,7 +92,9 @@ export function createFrontendHandler({
     if (path !== root && !path.startsWith(root + sep))
       return new Response(null, { status: 404 });
     const info =
-      name && name !== "index.html" ? await stat(path).catch(() => null) : null;
+      name !== "" && name !== "index.html"
+        ? await stat(path).catch(() => null)
+        : null;
     if (info?.isFile()) {
       const etag = `W/"${info.size.toString(16)}-${info.mtimeMs.toString(16)}"`;
       const headers = {

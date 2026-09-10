@@ -15,7 +15,7 @@ export interface GuestJwtPayload {
 }
 export type JwtPayload = UserJwtPayload | GuestJwtPayload;
 
-/** True when `value` is a whole number above zero a JS number holds exactly. */
+/** True when `value` is a positive integer that a JS number can represent exactly. */
 export const isPositiveSafeInteger = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value > 0;
 

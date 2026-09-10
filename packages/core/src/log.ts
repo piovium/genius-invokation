@@ -25,10 +25,10 @@ export interface GameStateLogEntry {
 }
 
 function serializeValue(
-  store: any[],
+  store: unknown[],
   indices: WeakMap<object, number>,
   value: unknown,
-): any {
+): unknown {
   if (
     typeof value === "number" ||
     typeof value === "string" ||
@@ -83,12 +83,8 @@ function serializeValue(
       return { $: store.length - 1 };
     }
     const result: any = {};
-    for (const key in value) {
-      result[key] = serializeValue(
-        store,
-        indices,
-        (value as Record<any, any>)[key],
-      );
+    for (const [key, child] of Object.entries(value)) {
+      result[key] = serializeValue(store, indices, child);
     }
     indices.set(value, store.length);
     store.push(result);
@@ -123,13 +119,17 @@ export function serializeGameStateLog(
 }
 
 /**
- * Append immutable engine snapshots without retaining the original states.
- * Weak keys preserve the existing reference encoding while allowing obsolete
- * state graphs to be collected. Returned logs remain readable after later appends.
+ * Encode immutable engine snapshots incrementally, preserving references
+ * shared within a state. The object-to-index map is a WeakMap, so a returned
+ * log stays valid after later appends while obsolete state graphs stay
+ * eligible for garbage collection.
  */
-export function createGameStateLogSerializer() {
+export function createGameStateLogSerializer(): {
+  append: (entry: GameStateLogEntry) => void;
+  serialize: () => SerializedLog;
+} {
   const serializedEntries: SerializedLogEntry[] = [];
-  const store: any[] = [];
+  const store: unknown[] = [];
   const indices = new WeakMap<object, number>();
   const append = (entry: GameStateLogEntry) => {
     const stateWithoutData: MakePropPartial<GameState, "data"> = {

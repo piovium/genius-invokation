@@ -8,6 +8,7 @@ import {
   RoomConnection,
   RoomConnectionError,
   roomWebSocketUrl,
+  type RoomConnectionState,
   type RoomEvent,
 } from "../src/room-connection";
 
@@ -39,7 +40,7 @@ async function settles(read: () => number, quietMs = 60, timeout = 2_000) {
   throw new Error("Fixture never stopped accepting connections");
 }
 
-/** Match the current `rpc` request, or any `rpc` with a decoded payload. */
+/** Match the `rpc` event for `id`, or any `rpc` event when `id` is omitted. */
 function isRpcEvent(id?: number) {
   return (event: RoomEvent): boolean =>
     event.type === "rpc" &&
@@ -274,7 +275,7 @@ type ConnectionOverrides = Partial<
 
 function client(server: RoomFixture, overrides: ConnectionOverrides = {}) {
   const events: RoomEvent[] = [];
-  const states: string[] = [];
+  const states: RoomConnectionState[] = [];
   const errors: RoomConnectionError[] = [];
   const connection = new RoomConnection({
     url: server.url,
@@ -326,17 +327,15 @@ async function connect(
  * lost ACK for the action that produced that snapshot can still be recovered.
  */
 async function clientAwaitingFinalAck(server: RoomFixture) {
-  let connection: RoomConnection;
   const c = client(server, {
     onEvent: (event) => {
       if (
         event.type === "notification" &&
         event.data[3] === PbPhaseType.GAME_END
       )
-        connection.markFinished();
+        c.connection.markFinished();
     },
   });
-  connection = c.connection;
   await until(() => c.connection.requestToken !== null);
   return c;
 }

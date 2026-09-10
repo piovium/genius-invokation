@@ -72,8 +72,8 @@ async function readMigrations(directory: string): Promise<MigrationSource[]> {
       let text: string;
       try {
         text = await readFile(path, "utf8");
-      } catch {
-        throw new Error(`Migration SQL is missing: ${path}`);
+      } catch (error) {
+        throw new Error(`Migration SQL is missing: ${path}`, { cause: error });
       }
       // Unix and Windows checkouts disagree on line endings; hash a single form.
       const normalized = text.replaceAll("\r\n", "\n");

@@ -1,5 +1,6 @@
 import { Game } from "../../src/game";
 import type { ExtensionDefinition } from "../../src/base/extension";
+import type { GameState } from "../../src/base/state";
 import type { GameData } from "../../src/data";
 import type { GameStateLogEntry } from "../../src/log";
 
@@ -44,14 +45,14 @@ export function logStates(): { entries: GameStateLogEntry[]; data: GameData } {
   const actionState = {
     ...startingState,
     roundNumber: 1,
-    phase: "action" as const,
-  };
+    phase: "action",
+  } satisfies GameState;
   const gameEndState = {
     ...actionState,
     roundNumber: 2,
-    winner: 0 as const,
-    phase: "gameEnd" as const,
-  };
+    winner: 0,
+    phase: "gameEnd",
+  } satisfies GameState;
   const entries: GameStateLogEntry[] = [
     { state: startingState, canResume: false },
     { state: actionState, canResume: true },

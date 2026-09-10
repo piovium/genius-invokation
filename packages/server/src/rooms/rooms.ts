@@ -361,8 +361,8 @@ function drawHostSeat(hostFirst: boolean | undefined): 0 | 1 {
 }
 
 /**
- * Refuses a deck that the room's game version cannot replay. A deck the engine
- * itself rejects is the caller's mistake too, so both cases answer 400.
+ * Refuses a deck that needs a newer game version than the room runs. A deck the
+ * engine itself rejects is the caller's mistake too, so both cases answer 400.
  */
 async function assertDeckPlayable(
   deck: PlayerInfo["deck"],
@@ -422,7 +422,7 @@ export interface Rooms {
     playerId: PlayerId,
     id: number,
     response: Uint8Array,
-  ): void;
+  ): CommandAck;
   receivePlayerGiveUp(roomId: number, playerId: PlayerId): CommandAck;
 }
 

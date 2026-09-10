@@ -84,7 +84,7 @@ function ConnectedRoom() {
   const navigate = useNavigate();
   const code = params.code;
   const action = !!searchParams.action;
-  const playerId = String(searchParams.player ?? "");
+  const playerId = searchParams.player ?? "";
   const id = roomCodeToId(code);
   const { status } = useAuth();
   const [playerIo, setPlayerIo] = createSignal<WebUiPlayerIO>();
