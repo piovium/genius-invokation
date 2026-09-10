@@ -114,8 +114,8 @@ export async function verifyDeck({
         `card id ${cardId} not found`,
       );
     }
-    const cardMaxCount = SINGLETON_REQUIRED_TAGS.some((tag) =>
-      card?.tags.includes(tag),
+    const cardMaxCount = SINGLETON_REQUIRED_TAGS.some(
+      (tag) => card?.tags.includes(tag),
     )
       ? 1
       : 2;

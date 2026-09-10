@@ -25,6 +25,7 @@ const PLACEHOLDERS = {
   head: "<!-- server:head -->",
   body: "<!-- server:body -->",
 } as const;
+
 export function injectHtml(
   html: string,
   injections: Partial<Record<keyof typeof PLACEHOLDERS, string>>,

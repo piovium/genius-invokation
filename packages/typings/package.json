@@ -11,10 +11,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "development": [
-        "./src/index.ts",
-        "./dist/index.js"
-      ],
+      "development": ["./src/index.ts", "./dist/index.js"],
       "import": "./dist/index.js"
     }
   },

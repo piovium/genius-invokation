@@ -1,4 +1,4 @@
-# @gi-tcg/server 对战平台后端
+# `@gi-tcg/server` 对战平台后端
 
 服务在 Node.js 上运行 Elysia，通过 Drizzle 访问 PostgreSQL。HTTP API、OAuth 凭证以及数据库表名、列和约束属于对外稳定接口。实时对局使用二进制 WebSocket：游戏状态传输 protobuf 字节，控制消息使用 JSON，不提供 SSE 回退。
 
