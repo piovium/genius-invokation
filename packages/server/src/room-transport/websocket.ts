@@ -49,6 +49,15 @@ interface Connection {
 
 type RouteParams = { roomId: string; targetPlayerId: string };
 
+/** The room operations the transport drives on behalf of a bound seat. */
+type RoomCommands = Pick<
+  Rooms,
+  "subscribePlayer" | "receivePlayerResponse" | "receivePlayerGiveUp"
+>;
+
+/** The one session capability the transport needs to bind a seat. */
+type AuthVerifier = Pick<Auth, "verify">;
+
 /** Resolves the seat named by a `.../rooms/:roomId/players/:playerId/ws` route. */
 function parseRoute(
   params: RouteParams,
@@ -95,9 +104,9 @@ const carriesGameFrame = (event: RoomEvent) =>
   event.type === "notification" ||
   (event.type === "rpc" && event.data !== null);
 
-/** Only the player sitting in the seat may act; spectators are read only. */
+/** Only the player sitting in the seat may act; spectators are read-only. */
 function actingPlayer(state: Connection, action: string): PlayerId {
-  if (state.visitor === null || state.visitor !== state.target) {
+  if (state.visitor !== state.target) {
     throw new RoomCommandError("FORBIDDEN", `Spectators cannot ${action}`);
   }
   return state.visitor;
@@ -116,11 +125,8 @@ export interface RoomWebSocketServer {
 
 /** No application frames are emitted before the immutable authenticated binding. */
 export function createRoomSocketHandlers(
-  rooms: Pick<
-    Rooms,
-    "subscribePlayer" | "receivePlayerResponse" | "receivePlayerGiveUp"
-  >,
-  auth: Pick<Auth, "verify">,
+  rooms: RoomCommands,
+  auth: AuthVerifier,
 ): RoomSocketHandlers {
   const states = new WeakMap<RawSocket, Connection>();
   let unauthenticated = 0;
@@ -144,9 +150,9 @@ export function createRoomSocketHandlers(
   }
   function send(raw: RawSocket, state: Connection, data: string | Uint8Array) {
     if (state.closed) return;
-    const bytes =
+    const byteLength =
       typeof data === "string" ? Buffer.byteLength(data) : data.byteLength;
-    if (raw.getBufferedAmount() + bytes > MAX_BUFFERED_BYTES) {
+    if (raw.getBufferedAmount() + byteLength > MAX_BUFFERED_BYTES) {
       close(raw, state, CLOSE_TRY_AGAIN_LATER, "SLOW_CONSUMER");
       return;
     }
@@ -198,11 +204,9 @@ export function createRoomSocketHandlers(
       clearTimeout(state.authTimer);
       sendJson(raw, state, { type: "ready", sessionId: binding.sessionId });
       if (state.closed) return;
-      // `subscribe` hands back its own unsubscribe function.
-      const unsubscribe: (() => void) | void = binding.subscribe();
-      if (typeof unsubscribe === "function") state.unsubscribe = unsubscribe;
+      state.unsubscribe = binding.subscribe();
       if (state.closed) {
-        state.unsubscribe?.();
+        state.unsubscribe();
         return;
       }
       state.pingTimer = setInterval(
@@ -311,15 +315,14 @@ export function createRoomSocketHandlers(
   };
 }
 
-/** Node's ws receives binary frames unchanged; the Elysia Node adapter currently
- * converts incoming WebSocket payloads to text before invoking route handlers. */
+/**
+ * Node's ws receives binary frames unchanged; the Elysia Node adapter currently
+ * converts incoming WebSocket payloads to text before invoking route handlers.
+ */
 export function attachRoomWebSocketServer(
   server: Server,
-  rooms: Pick<
-    Rooms,
-    "subscribePlayer" | "receivePlayerResponse" | "receivePlayerGiveUp"
-  >,
-  auth: Pick<Auth, "verify">,
+  rooms: RoomCommands,
+  auth: AuthVerifier,
   apiPrefix = "/api",
 ): RoomWebSocketServer {
   const handlers = createRoomSocketHandlers(rooms, auth);
