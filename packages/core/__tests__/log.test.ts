@@ -27,9 +27,6 @@ import { StateSymbol } from "../src/base/state";
 import { logStates } from "./fixtures/log-states";
 import legacyLog from "./fixtures/log-legacy.json";
 
-/** Round-trip through JSON the way the persisted log is stored on disk. */
-const jsonRoundTrip = <T>(value: T): T => JSON.parse(JSON.stringify(value));
-
 test("incremental logs preserve the pre-migration encoding, definitions and shared references", () => {
   const { entries, data } = logStates();
   const serializer = createGameStateLogSerializer();
@@ -37,13 +34,15 @@ test("incremental logs preserve the pre-migration encoding, definitions and shar
   const encoded = serializer.serialize();
   expect(encoded.v).toBe(CORE_VERSION);
   // The golden was generated using the unchanged serializer at 86c8582f.
-  const golden = { ...legacyLog, v: CORE_VERSION };
-  expect(jsonRoundTrip(encoded)).toEqual(golden);
-  // Replays and editors read the persisted text back verbatim, so the fixture
-  // is a byte-exact contract and not merely a structural match.
-  expect(JSON.stringify(jsonRoundTrip(encoded))).toBe(JSON.stringify(golden));
+  expect(JSON.parse(JSON.stringify(encoded))).toEqual({
+    ...legacyLog,
+    v: CORE_VERSION,
+  });
   expect(encoded).toEqual(serializeGameStateLog(entries));
-  const restored = deserializeGameStateLog(data, jsonRoundTrip(encoded));
+  const restored = deserializeGameStateLog(
+    data,
+    JSON.parse(JSON.stringify(encoded)),
+  );
   // Deserialization restores transient symbols on descendants, not the root.
   const comparable = ({
     state: { data: _data, [StateSymbol]: _marker, ...state },

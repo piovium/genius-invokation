@@ -18,11 +18,10 @@ import path from "node:path";
 import { build } from "rolldown";
 import { replacePlugin } from "rolldown/plugins";
 import gts from "@gi-tcg/unplugin-gts/rolldown";
-import { generateDeckMetadata } from "./deck-metadata";
+import { generateDeckMetadata, MANIFEST_FILE_NAME } from "./deck-metadata";
 
 const root = path.resolve(import.meta.dirname, "..");
 const output = path.join(root, "dist");
-const MANIFEST_FILE = "deck-metadata-manifest.json";
 // Any non-empty FROM_SOURCE selects the workspace sources over the built dist.
 const fromSource = Boolean(process.env.FROM_SOURCE);
 // Validate and capture the local assets snapshot before replacing build output.
@@ -63,8 +62,8 @@ await build({
     ],
   },
 });
-// Preserve actual browser assets and migration SQL as files. The
-// server never imports a base64 object containing the complete frontend.
+// Ship the browser assets, the migration SQL and the metadata manifest as real
+// files; the server streams them from disk instead of inlining them.
 await cp(
   path.resolve(root, "../web-client/dist"),
   path.join(output, "frontend"),
@@ -74,6 +73,6 @@ await cp(path.join(root, "drizzle"), path.join(output, "drizzle"), {
   recursive: true,
 });
 await cp(
-  path.join(metadataDirectory, MANIFEST_FILE),
-  path.join(output, MANIFEST_FILE),
+  path.join(metadataDirectory, MANIFEST_FILE_NAME),
+  path.join(output, MANIFEST_FILE_NAME),
 );

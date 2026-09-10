@@ -6,7 +6,7 @@ FROM ghcr.io/pnpm/pnpm:12 AS build
 ARG NODE_VERSION
 RUN pnpm runtime set node ${NODE_VERSION} -g
 WORKDIR /app
-# Read from the build environment by assets-manager's tsdown `env` map.
+# assets-manager's tsdown `env` map reads this at build time.
 ARG DEFAULT_ASSETS_API_ENDPOINT
 COPY . .
 # Let the build scripts consume workspace sources, not the published dist.

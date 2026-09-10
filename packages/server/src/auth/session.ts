@@ -12,6 +12,13 @@ export const GET_USER_API_URL =
 /** GitHub is a third party, so a stalled request must not hold the caller forever. */
 export const GITHUB_REQUEST_TIMEOUT_MS = 15_000;
 
+/** The headers GitHub's REST API wants from a caller's own access token. */
+export const githubApiHeaders = (token: string) => ({
+  authorization: `Bearer ${token}`,
+  accept: "application/vnd.github+json",
+  "X-GitHub-Api-Version": "2022-11-28",
+});
+
 const TOKEN_LIFETIME_SECONDS = 42 * 24 * 60 * 60;
 /** Tokens beyond this length are not ours, so reject them before parsing. */
 const MAX_TOKEN_LENGTH = 8192;
@@ -138,11 +145,7 @@ export function createAuth({
     if (!exchanged.ok || typeof githubToken !== "string" || !githubToken)
       throw unauthorized("GitHub code exchange failed");
     const identity = await fetch(endpoints.user, {
-      headers: {
-        authorization: `Bearer ${githubToken}`,
-        accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
+      headers: githubApiHeaders(githubToken),
       signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
     });
     const account = (await identity.json()) as { id?: number };

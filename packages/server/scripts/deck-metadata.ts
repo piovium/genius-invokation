@@ -1,13 +1,14 @@
 import { createHash } from "node:crypto";
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 const serverRoot = path.resolve(import.meta.dirname, "..");
 const assetsRoot = path.resolve(serverRoot, "../assets-manager");
 const SOURCE_DATA_DIRECTORY = "src/data";
 const DIST_DATA_DIRECTORY = "dist/data";
 const MANIFEST_FORMAT_VERSION = 1;
+/** Manifest file name: written here, and copied into the build output by build.ts. */
+export const MANIFEST_FILE_NAME = "deck-metadata-manifest.json";
 const categories = [
   "action_cards",
   "characters",
@@ -145,7 +146,7 @@ export async function generateDeckMetadata({
   await mkdir(path.join(outputDirectory, "data"), { recursive: true });
   await writeFile(
     path.join(outputDirectory, "deck-metadata.ts"),
-    `// Generated from assets-manager's raw snapshot; see deck-metadata-manifest.json.\nconst metadata: ${METADATA_TYPE} = ${metadataJson};\nexport default metadata;\n`,
+    `// Generated from assets-manager's raw snapshot; see ${MANIFEST_FILE_NAME}.\nconst metadata: ${METADATA_TYPE} = ${metadataJson};\nexport default metadata;\n`,
   );
   // Keep the existing codec byte-for-byte. Its sole runtime data import now
   // resolves to this same snapshot's share map, without initializing Manager.
@@ -155,7 +156,7 @@ export async function generateDeckMetadata({
     shareSource,
   );
   await writeFile(
-    path.join(outputDirectory, "deck-metadata-manifest.json"),
+    path.join(outputDirectory, MANIFEST_FILE_NAME),
     JSON.stringify(manifest, null, 2) + "\n",
   );
   return { index: metadataById, manifest, dataDirectory, outputDirectory };
@@ -164,7 +165,7 @@ export async function generateDeckMetadata({
 // Run the generator only when this file is the process entry point.
 const isCliEntry =
   process.argv[1] !== undefined &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+  path.resolve(process.argv[1]) === import.meta.filename;
 if (isCliEntry) {
   const { manifest } = await generateDeckMetadata();
   console.log(

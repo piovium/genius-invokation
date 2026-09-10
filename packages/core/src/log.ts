@@ -24,31 +24,92 @@ export interface GameStateLogEntry {
   readonly canResume: boolean;
 }
 
-/**
- * Markers of the persisted log format. They are a compatibility contract:
- * logs written by older versions must keep decoding, so neither these key
- * names nor the `map` / `set` tags may change.
- */
-const REF_MARKER = "$";
-const DEFINITION_REF_MARKER = "$$";
-const DEFINITION_FIELD = "__definition";
-const TYPE_MARKER = "__type";
-const ID_FIELD = "id";
-const MAP_TAG = "map";
-const SET_TAG = "set";
+function serializeValue(
+  store: any[],
+  indices: WeakMap<object, number>,
+  value: unknown,
+): any {
+  if (
+    typeof value === "number" ||
+    typeof value === "string" ||
+    typeof value === "boolean" ||
+    value === null
+  ) {
+    return value;
+  }
+  const index = typeof value === "object" ? indices.get(value) : undefined;
+  if (index !== undefined) {
+    return { $: index };
+  }
+  if (Array.isArray(value)) {
+    const result = value.map((obj) => serializeValue(store, indices, obj));
+    if (result.length >= 2) {
+      indices.set(value, store.length);
+      store.push(result);
+      return { $: store.length - 1 };
+    } else {
+      return result;
+    }
+  }
+  if (value instanceof Map) {
+    return {
+      __type: "map",
+      entries: Array.from(value.entries()).map(([key, value]) => [
+        serializeValue(store, indices, key),
+        serializeValue(store, indices, value),
+      ]),
+    };
+  }
+  if (value instanceof Set) {
+    return {
+      __type: "set",
+      values: Array.from(value).map((value) =>
+        serializeValue(store, indices, value),
+      ),
+    };
+  }
+  if (typeof value === "object") {
+    const proto = Object.getPrototypeOf(value);
+    if (proto !== Object.prototype && proto !== null) {
+      return null; // Non-plain objects are not serialized
+    }
+    if ("__definition" in value && "id" in value) {
+      const result: any = {
+        $$: value.__definition,
+        id: value.id,
+      };
+      indices.set(value, store.length);
+      store.push(result);
+      return { $: store.length - 1 };
+    }
+    const result: any = {};
+    for (const key in value) {
+      result[key] = serializeValue(
+        store,
+        indices,
+        (value as Record<any, any>)[key],
+      );
+    }
+    indices.set(value, store.length);
+    store.push(result);
+    return { $: store.length - 1 };
+  } else {
+    return value;
+  }
+}
 
-/**
- * Persisted shape of one log entry: `s` is the encoded state snapshot, `e` is
- * reserved for future data, and `r` marks snapshots the engine can resume from.
- */
+type MakePropPartial<T, K extends PropertyKey> = Omit<T, K> & {
+  [K2 in K]?: unknown;
+};
+
 interface SerializedLogEntry {
   s: unknown;
-  e: readonly [];
+  e: readonly []; // reserved
   r: boolean;
 }
 
 export interface SerializedLog {
-  v: string; // Core library version that produced this log
+  v: string; // 模拟核心库版本
   store: any[];
   log: SerializedLogEntry[];
 }
@@ -64,81 +125,24 @@ export function serializeGameStateLog(
 /**
  * Append immutable engine snapshots without retaining the original states.
  * Weak keys preserve the existing reference encoding while allowing obsolete
- * state graphs to be collected. Returned logs remain readable after later
- * appends.
+ * state graphs to be collected. Returned logs remain readable after later appends.
  */
 export function createGameStateLogSerializer() {
   const serializedEntries: SerializedLogEntry[] = [];
   const store: any[] = [];
   const indices = new WeakMap<object, number>();
-
-  const encode = (value: unknown): any => {
-    if (
-      typeof value === "number" ||
-      typeof value === "string" ||
-      typeof value === "boolean" ||
-      value === null
-    ) {
-      return value;
-    }
-    const index = typeof value === "object" ? indices.get(value) : undefined;
-    if (index !== undefined) return { [REF_MARKER]: index };
-    if (Array.isArray(value)) {
-      const result = value.map(encode);
-      // Short arrays are inlined verbatim; longer ones go through the store so
-      // that shared references survive a round trip.
-      if (result.length < 2) return result;
-      indices.set(value, store.length);
-      store.push(result);
-      return { [REF_MARKER]: store.length - 1 };
-    }
-    if (value instanceof Map) {
-      return {
-        [TYPE_MARKER]: MAP_TAG,
-        entries: Array.from(value.entries(), ([key, entryValue]) => [
-          encode(key),
-          encode(entryValue),
-        ]),
-      };
-    }
-    if (value instanceof Set) {
-      return {
-        [TYPE_MARKER]: SET_TAG,
-        values: Array.from(value, encode),
-      };
-    }
-    if (typeof value !== "object") return value;
-    const proto = Object.getPrototypeOf(value);
-    if (proto !== Object.prototype && proto !== null) {
-      return null; // Non-plain objects are not serialized
-    }
-    if (DEFINITION_FIELD in value && ID_FIELD in value) {
-      const ref: any = {
-        [DEFINITION_REF_MARKER]: value[DEFINITION_FIELD],
-        [ID_FIELD]: value[ID_FIELD],
-      };
-      indices.set(value, store.length);
-      store.push(ref);
-      return { [REF_MARKER]: store.length - 1 };
-    }
-    const plain: any = {};
-    for (const key in value) {
-      plain[key] = encode((value as Record<string, unknown>)[key]);
-    }
-    indices.set(value, store.length);
-    store.push(plain);
-    return { [REF_MARKER]: store.length - 1 };
-  };
-
-  const append = (entry: GameStateLogEntry): void => {
-    const { data: _data, ...stateWithoutData } = entry.state;
+  const append = (entry: GameStateLogEntry) => {
+    const stateWithoutData: MakePropPartial<GameState, "data"> = {
+      ...entry.state,
+    };
+    delete stateWithoutData.data;
+    const serializedState = serializeValue(store, indices, stateWithoutData);
     serializedEntries.push({
-      s: encode(stateWithoutData),
+      s: serializedState,
       e: [],
       r: entry.canResume,
     });
   };
-
   return {
     append,
     serialize: (): SerializedLog => ({
@@ -158,68 +162,89 @@ const VALID_DEF_KEYS = [
 type ValidDefKeys = (typeof VALID_DEF_KEYS)[number];
 
 function isValidDefKey(defKey: unknown): defKey is ValidDefKeys {
-  return (
-    typeof defKey === "string" && VALID_DEF_KEYS.some((key) => key === defKey)
+  return ["characters", "entities", "extensions", "attachments"].includes(
+    defKey as string,
   );
+}
+
+function deserializeImpl(
+  data: GameData,
+  store: readonly any[],
+  restoredStore: Record<number, any>,
+  v: unknown,
+): any {
+  if (Array.isArray(v)) {
+    return v.map((x) => deserializeImpl(data, store, restoredStore, x));
+  } else if (typeof v === "object" && v !== null) {
+    if ("$" in v && typeof v.$ === "number") {
+      if (!(v.$ in restoredStore)) {
+        const refTarget = store[v.$];
+        const restoredTarget = deserializeImpl(
+          data,
+          store,
+          restoredStore,
+          refTarget,
+        );
+        restoredStore[v.$] = restoredTarget;
+      }
+      return restoredStore[v.$];
+    }
+    if (
+      "$$" in v &&
+      "id" in v &&
+      typeof v.id === "number" &&
+      isValidDefKey(v.$$)
+    ) {
+      return data[v.$$].get(v.id);
+    }
+    if ("__type" in v) {
+      if (v.__type === "map" && "entries" in v && Array.isArray(v.entries)) {
+        return new Map(
+          v.entries.map(
+            ([key, value]: [any, any]) =>
+              [
+                deserializeImpl(data, store, restoredStore, key),
+                deserializeImpl(data, store, restoredStore, value),
+              ] as const,
+          ),
+        );
+      }
+      if (v.__type === "set" && "values" in v && Array.isArray(v.values)) {
+        return new Set(
+          v.values.map((value: any) =>
+            deserializeImpl(data, store, restoredStore, value),
+          ),
+        );
+      }
+    }
+    const result: any = {};
+    for (const key in v) {
+      result[key] = deserializeImpl(
+        data,
+        store,
+        restoredStore,
+        (v as Record<any, any>)[key],
+      );
+    }
+    return result;
+  } else {
+    return v;
+  }
 }
 
 export function deserializeGameStateLog(
   data: GameData,
   { store, log }: SerializedLog,
 ): GameStateLogEntry[] {
-  const restoredStore = new Map<number, any>();
-
-  const decode = (v: unknown): any => {
-    if (Array.isArray(v)) return v.map(decode);
-    if (typeof v !== "object" || v === null) return v;
-    if (REF_MARKER in v && typeof v[REF_MARKER] === "number") {
-      const index = v[REF_MARKER];
-      if (!restoredStore.has(index)) {
-        restoredStore.set(index, decode(store[index]));
-      }
-      return restoredStore.get(index);
-    }
-    if (
-      DEFINITION_REF_MARKER in v &&
-      ID_FIELD in v &&
-      typeof v[ID_FIELD] === "number" &&
-      isValidDefKey(v[DEFINITION_REF_MARKER])
-    ) {
-      return data[v[DEFINITION_REF_MARKER]].get(v[ID_FIELD]);
-    }
-    if (TYPE_MARKER in v) {
-      if (
-        v[TYPE_MARKER] === MAP_TAG &&
-        "entries" in v &&
-        Array.isArray(v.entries)
-      ) {
-        return new Map(
-          v.entries.map(
-            ([key, entryValue]: [any, any]) =>
-              [decode(key), decode(entryValue)] as const,
-          ),
-        );
-      }
-      if (
-        v[TYPE_MARKER] === SET_TAG &&
-        "values" in v &&
-        Array.isArray(v.values)
-      ) {
-        return new Set(v.values.map(decode));
-      }
-    }
-    const result: any = {};
-    for (const key in v) {
-      result[key] = decode((v as Record<string, unknown>)[key]);
-    }
-    return result;
-  };
-
+  const restoredStore: Record<number, any> = {};
   const result: GameStateLogEntry[] = [];
   for (const entry of log) {
-    const restoredState: Draft<GameState> = decode(entry.s);
-    // StateSymbol is transient and never serialized, so re-tag every restored
-    // node with the role the engine expects.
+    const restoredState: Draft<GameState> = deserializeImpl(
+      data,
+      store,
+      restoredStore,
+      entry.s,
+    );
     for (const player of restoredState.players) {
       player[StateSymbol] = "player";
       for (const ch of player.characters) {
@@ -274,8 +299,8 @@ export interface DetailLogEntry {
 export interface IDetailLogger {
   log(type: DetailLogType, value: string): void;
   /**
-   * Enter a nested log level until the returned `Disposable` is disposed.
-   * @returns A `Disposable` that returns to the previous level when disposed.
+   * Enter next level of log until the return value is disposed
+   * @returns A `Disposable` object that will return to the previous level of log when disposed
    */
   subLog(type: DetailLogType, value: string): Disposable;
 }
@@ -295,7 +320,8 @@ export class DetailLogger implements IDetailLogger {
     this._currentLogs.push(entry);
     this._parentLogs.push(this._currentLogs);
     this._currentLogs = entry.children;
-    return new DetailSubLogger(this);
+    const subLogger = new DetailSubLogger(this);
+    return subLogger;
   }
 
   public getLogs(): DetailLogEntry[] {

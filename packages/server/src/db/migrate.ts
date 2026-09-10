@@ -163,36 +163,45 @@ type ExpectedTable = (typeof expectedTables)[number];
 /** One column as the shipped DDL creates it, and as `information_schema` reports it. */
 type ColumnExpectation = readonly [type: string, nullable: boolean];
 
+// The column shapes the DDL uses, named once so the table below reads as one
+// shape per column rather than a pair of literals repeated on every row.
+const INTEGER_NOT_NULL: ColumnExpectation = ["integer", false];
+const INTEGER_NULLABLE: ColumnExpectation = ["integer", true];
+const TEXT_NOT_NULL: ColumnExpectation = ["text", false];
+const TEXT_NULLABLE: ColumnExpectation = ["text", true];
+const TIMESTAMP_NOT_NULL: ColumnExpectation = [TIMESTAMP, false];
+const JSONB_NOT_NULL: ColumnExpectation = ["jsonb", false];
+
 /** Every column the shipped DDL creates, keyed by table. */
 const expectedColumns = {
   User: {
-    id: ["integer", false],
-    ghToken: ["text", true],
-    createdAt: [TIMESTAMP, false],
-    chessboardColor: ["text", true],
-    name: ["text", true],
+    id: INTEGER_NOT_NULL,
+    ghToken: TEXT_NULLABLE,
+    createdAt: TIMESTAMP_NOT_NULL,
+    chessboardColor: TEXT_NULLABLE,
+    name: TEXT_NULLABLE,
   },
   Deck: {
-    id: ["integer", false],
-    name: ["text", false],
-    code: ["text", false],
-    requiredVersion: ["integer", false],
-    ownerUserId: ["integer", false],
-    createdAt: [TIMESTAMP, false],
-    updatedAt: [TIMESTAMP, false],
+    id: INTEGER_NOT_NULL,
+    name: TEXT_NOT_NULL,
+    code: TEXT_NOT_NULL,
+    requiredVersion: INTEGER_NOT_NULL,
+    ownerUserId: INTEGER_NOT_NULL,
+    createdAt: TIMESTAMP_NOT_NULL,
+    updatedAt: TIMESTAMP_NOT_NULL,
   },
   Game: {
-    id: ["integer", false],
-    coreVersion: ["text", false],
-    gameVersion: ["text", false],
-    data: ["jsonb", false],
-    winnerId: ["integer", true],
-    createdAt: [TIMESTAMP, false],
+    id: INTEGER_NOT_NULL,
+    coreVersion: TEXT_NOT_NULL,
+    gameVersion: TEXT_NOT_NULL,
+    data: JSONB_NOT_NULL,
+    winnerId: INTEGER_NULLABLE,
+    createdAt: TIMESTAMP_NOT_NULL,
   },
   PlayerOnGames: {
-    playerId: ["integer", false],
-    gameId: ["integer", false],
-    who: ["integer", false],
+    playerId: INTEGER_NOT_NULL,
+    gameId: INTEGER_NOT_NULL,
+    who: INTEGER_NOT_NULL,
   },
 } satisfies Record<ExpectedTable, Record<string, ColumnExpectation>>;
 

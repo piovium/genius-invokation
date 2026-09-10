@@ -46,7 +46,7 @@ import type { Games } from "../games/games";
 import { inspect } from "node:util";
 import { randomUUID } from "node:crypto";
 import semver from "semver";
-import { ACTIVE_ROOMS_KEY, DEPLOYING_FLAG_KEY, redis } from "../redis";
+import { redis } from "../redis";
 import { Player } from "./player";
 import {
   RoomCommandError,
@@ -102,14 +102,6 @@ const PLAYED_ROOM_RETENTION_MS = 5 * 60 * 1000;
 const DEPLOYING_ROOM_RETENTION_MS = 60 * 1000;
 /** Keeps the active-room registry honest if a process dies before removing its entry. */
 const ACTIVE_ROOM_TTL_SECONDS = 60 * 60;
-
-/**
- * The guest join check and the replay read check reject with the same wording,
- * so it is built here to keep the two responses byte-identical.
- */
-export function guestNotAllowedMessage(roomId: number): string {
-  return `Room ${roomId} does not allow guests`;
-}
 
 export enum RoomStatus {
   Waiting = "waiting",
@@ -184,7 +176,7 @@ class Room {
   getPlayers(): Player[] {
     return this.players.filter((player): player is Player => player !== null);
   }
-  /** The seat occupied by `playerId`, or undefined when they are not in the room. */
+  /** The player with `playerId`, or undefined when they are not in the room. */
   findPlayer(playerId: PlayerId): Player | undefined {
     return this.getPlayers().find(
       (player) => player.playerInfo.id === playerId,
@@ -192,6 +184,10 @@ class Room {
   }
   hasPlayer(playerId: PlayerId): boolean {
     return this.findPlayer(playerId) !== undefined;
+  }
+  /** A room still holding its ID and players: waiting or playing, not finished. */
+  get active(): boolean {
+    return this.status !== RoomStatus.Finished;
   }
   get status(): RoomStatus {
     // A room torn down before its game started never played, so it is not "finished".
@@ -506,8 +502,7 @@ export function createRooms(
 
   function currentRoom(playerId: PlayerId) {
     for (const room of rooms.values()) {
-      if (room.hasPlayer(playerId) && room.status !== RoomStatus.Finished)
-        return room.getRoomInfo();
+      if (room.hasPlayer(playerId) && room.active) return room.getRoomInfo();
     }
     return null;
   }
@@ -520,7 +515,7 @@ export function createRooms(
     };
     for (const room of rooms.values()) {
       snapshot.roomsByStatus[room.status]++;
-      if (room.status !== RoomStatus.Finished) {
+      if (room.active) {
         snapshot.activeRooms++;
         snapshot.roomPlayers += room.getPlayers().length;
       }
@@ -548,7 +543,7 @@ export function createRooms(
   }
 
   async function createRoom(playerInfo: PlayerInfo, params: CreateRoomDto) {
-    const deploying = (await redis?.get(DEPLOYING_FLAG_KEY)) ?? null;
+    const deploying = (await redis?.get("meta:deploying")) ?? null;
     if (shutdownResolvers || deploying !== null) {
       throw conflict(
         "Room creation is paused while the service restarts; try again shortly",
@@ -587,12 +582,10 @@ export function createRooms(
 
     room.onStop(async (info) => {
       if (info.hasGame) metrics.incrementFinishedRooms();
-      const deployingNow = await redis
-        ?.get(DEPLOYING_FLAG_KEY)
-        .catch((error) => {
-          logger.warn(`Failed to read maintenance status: ${error}`);
-          return null;
-        });
+      const deployingNow = await redis?.get("meta:deploying").catch((error) => {
+        logger.warn(`Failed to read maintenance status: ${error}`);
+        return null;
+      });
       const keepRoomDuration =
         shutdownResolvers || deployingNow
           ? DEPLOYING_ROOM_RETENTION_MS
@@ -605,7 +598,7 @@ export function createRooms(
         await new Promise((resolve) => setTimeout(resolve, keepRoomDuration));
       }
       logger.log(`Room ${room.id} removed`);
-      await redis?.hdel(ACTIVE_ROOMS_KEY, String(room.id)).catch((error) => {
+      await redis?.hdel("meta:active_rooms", String(room.id)).catch((error) => {
         logger.warn(`Failed to remove room ${room.id} from Redis: ${error}`);
       });
 
@@ -657,7 +650,7 @@ export function createRooms(
     if (room.status !== RoomStatus.Waiting)
       throw conflict(`Room ${roomId} is not waiting`);
     if (playerInfo.isGuest && !room.config.allowGuest)
-      throw unauthorized(guestNotAllowedMessage(roomId));
+      throw unauthorized(`Room ${roomId} does not allow guests`);
     const busy = getAllRooms(true).some((listed) =>
       listed.players.some((player) => player.id === playerInfo.id),
     );
@@ -694,12 +687,12 @@ export function createRooms(
     room.start();
     try {
       await redis?.hset(
-        ACTIVE_ROOMS_KEY,
+        "meta:active_rooms",
         String(roomId),
         JSON.stringify(room.config),
       );
       await redis?.hexpire(
-        ACTIVE_ROOMS_KEY,
+        "meta:active_rooms",
         ACTIVE_ROOM_TTL_SECONDS,
         "FIELDS",
         1,
@@ -707,7 +700,7 @@ export function createRooms(
       );
     } catch (e) {
       logger.warn(
-        `Failed to update ${ACTIVE_ROOMS_KEY} for room ${room.id}: ${e}`,
+        `Failed to update meta:active_rooms for room ${room.id}: ${e}`,
       );
     }
     metrics.incrementStartedRooms();
@@ -731,7 +724,7 @@ export function createRooms(
 
   function getAllRooms(guest: boolean): RoomInfo[] {
     const listed = (room: Room) =>
-      room.status !== RoomStatus.Finished &&
+      room.active &&
       !room.config.private &&
       !(guest && !room.config.allowGuest);
     return [...rooms.values()].filter(listed).map((room) => room.getRoomInfo());

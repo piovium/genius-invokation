@@ -11,18 +11,18 @@ export interface HttpListenOptions {
   port?: number;
 }
 
+export interface HttpServerHandle {
+  server: Server;
+  url: URL;
+  stop(): Promise<void>;
+}
+
 function requestHeaders({ rawHeaders }: IncomingMessage): Headers {
   const headers = new Headers();
   for (let index = 0; index < rawHeaders.length; index += 2) {
     headers.append(rawHeaders[index]!, rawHeaders[index + 1]!);
   }
   return headers;
-}
-
-export interface HttpServerHandle {
-  server: Server;
-  url: URL;
-  stop(): Promise<void>;
 }
 
 /**

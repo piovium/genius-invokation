@@ -15,7 +15,7 @@
 
 import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { Layout } from "../layouts/Layout";
-import { type PlayerInfo, roomCodeToId, getPlayerAvatarUrl } from "../utils";
+import { PlayerInfo, roomCodeToId, getPlayerAvatarUrl } from "../utils";
 import {
   Show,
   createSignal,
@@ -25,7 +25,7 @@ import {
   createResource,
   Switch,
   Match,
-  type Component,
+  Component,
   createUniqueId,
 } from "solid-js";
 import axios, { AxiosError } from "axios";
@@ -38,11 +38,7 @@ import {
   type GameRpcRequest,
   type GameRpcTimer,
 } from "@gi-tcg/typings";
-import {
-  type Client,
-  createClient,
-  type WebUiPlayerIO,
-} from "@gi-tcg/web-ui-core";
+import { Client, createClient, WebUiPlayerIO } from "@gi-tcg/web-ui-core";
 import { useMobile } from "../App";
 import { Dynamic } from "solid-js/web";
 import { MobileChessboardLayout } from "../layouts/MobileChessboardLayout";
@@ -57,53 +53,6 @@ import {
   type RoomEvent,
   type RoomConnectionState,
 } from "../room-connection";
-
-// Expected teardown events and request races: they need no user-visible message.
-const SILENT_COMMAND_ERRORS = new Set([
-  "DISPOSED",
-  "NOT_CONNECTED",
-  "STALE_LOCAL_RPC",
-]);
-
-// Both end-of-game buttons share one pill style inside a square wrapper.
-const GAME_END_BUTTON_CLASS =
-  "px-4 py-1 w-36 h-10 mt-20 font-bold font-size-4.5 text-yellow-800 bg-yellow-50 rounded-full border-yellow-800 b-2 active:bg-yellow-800 active:text-yellow-200 hover:shadow-[inset_0_0_16px_white] hover:border-white";
-const GAME_END_BUTTON_WRAPPER_CLASS = "flex flex-col justify-start w-36 h-30";
-
-// Surface the server's message when it exists, but always keep the raw error in
-// the console for debugging.
-function reportRequestError(error: unknown): void {
-  if (error instanceof AxiosError) alert(error.response?.data.message);
-  console.error(error);
-}
-
-// Advance a running countdown by one tick, expiring it when it reaches zero.
-function tickTimer(
-  timer: GameRpcTimer,
-  setTimer: (value: GameRpcTimer | null) => void,
-  onExpire: () => void,
-): void {
-  const current = timer.current - 1;
-  if (current <= 0) onExpire();
-  else setTimer({ ...timer, current });
-}
-
-// The chessboard only needs the public identity fields of either player.
-function getClientPlayerInfo(player: PlayerInfo) {
-  return { name: player.name, avatarUrl: getPlayerAvatarUrl(player) };
-}
-
-// The component keeps both end-of-game actions to one definition, so each
-// caller passes only its label and handler.
-function GameEndButton(props: { onClick: () => void; children: string }) {
-  return (
-    <div class={GAME_END_BUTTON_WRAPPER_CLASS}>
-      <button class={GAME_END_BUTTON_CLASS} onClick={props.onClick}>
-        {props.children}
-      </button>
-    </div>
-  );
-}
 
 // A parameter change must destroy the previous room's connections and pending
 // UI promises even when the router reuses this route component.
@@ -168,7 +117,8 @@ function ConnectedRoom() {
   const reportCommandError = (error: unknown) => {
     if (disposed) return;
     if (error instanceof RoomConnectionError) {
-      if (SILENT_COMMAND_ERRORS.has(error.code)) return;
+      if (["DISPOSED", "NOT_CONNECTED", "STALE_LOCAL_RPC"].includes(error.code))
+        return;
       if (error.code === "COMMAND_PENDING") {
         alert(t("roomCommandPending"));
         return;
@@ -252,7 +202,7 @@ function ConnectedRoom() {
             "SESSION_CHANGED",
           );
         }
-        const firstInitialization = !previous;
+        const firstInitialization = !initialized();
         setInitialized(payload);
         initializeClient(payload);
         if (firstInitialization && payload.config.watchable && allowWatchOpp())
@@ -364,13 +314,19 @@ function ConnectedRoom() {
 
   const countDownTimer = () => {
     const myTimer = currentMyTimer();
-    if (myTimer) tickTimer(myTimer, setCurrentMyTimer, cancelMyRequest);
+    if (myTimer) {
+      const current = myTimer.current - 1;
+      if (current <= 0) cancelMyRequest();
+      else setCurrentMyTimer({ ...myTimer, current });
+    }
     const oppTimer = currentOppTimer();
-    if (oppTimer)
-      tickTimer(oppTimer, setCurrentOppTimer, () => {
+    if (oppTimer) {
+      const current = oppTimer.current - 1;
+      if (current <= 0) {
         oppPlayerIo()?.cancelRpc?.();
         setCurrentOppTimer(null);
-      });
+      } else setCurrentOppTimer({ ...oppTimer, current });
+    }
   };
 
   const [roomInfo] = createResource(() =>
@@ -395,7 +351,8 @@ function ConnectedRoom() {
       await axios.delete(`rooms/${id}`);
       history.back();
     } catch (error) {
-      reportRequestError(error);
+      if (error instanceof AxiosError) alert(error.response?.data.message);
+      console.error(error);
     }
   };
   const downloadGameLog = async () => {
@@ -412,9 +369,14 @@ function ConnectedRoom() {
       URL.revokeObjectURL(url);
       a.remove();
     } catch (error) {
-      reportRequestError(error);
+      if (error instanceof AxiosError) alert(error.response?.data.message);
+      console.error(error);
     }
   };
+  const getClientPlayerInfo = (player: PlayerInfo) => ({
+    name: player.name,
+    avatarUrl: getPlayerAvatarUrl(player),
+  });
   let chessboardContainer: HTMLDivElement | undefined;
   const mobile = useMobile();
 
@@ -527,7 +489,9 @@ function ConnectedRoom() {
           </div>
           <button
             class="hidden group-data-[mobile]:peer-checked:inline-flex btn btn-outline-blue whitespace-normal text-center leading-tight min-h-10 px-4 py-2"
-            onClick={() => navigate("/")}
+            onClick={() => {
+              navigate("/");
+            }}
           >
             <i class="i-mdi-home" />
             {t("backHome")}
@@ -577,19 +541,36 @@ function ConnectedRoom() {
                 component={chessboard()}
                 rotation={mobile() ? 90 : 0}
                 autoHeight={!mobile()}
-                class={mobile() ? "mobile-chessboard h-100dvh w-100dvw" : ""}
-                chessboardColor={status().chessboardColor ?? undefined}
+                class={`${
+                  mobile() ? "mobile-chessboard h-100dvh w-100dvw" : ""
+                }`}
+                chessboardColor={status().chessboardColor ?? void 0}
                 timer={currentMyTimer() ?? currentOppTimer()}
                 myPlayerInfo={getClientPlayerInfo(payload().myPlayerInfo)}
                 oppPlayerInfo={getClientPlayerInfo(payload().oppPlayerInfo)}
                 gameEndExtra={
                   <div class="flex justify-center gap-20 mt-10">
-                    <GameEndButton onClick={downloadGameLog}>
-                      {t("downloadLog")}
-                    </GameEndButton>
-                    <GameEndButton onClick={() => navigate("/")}>
-                      {t("backHome")}
-                    </GameEndButton>
+                    <div class="flex flex-col justify-start w-36 h-30">
+                      <button
+                        class="px-4 py-1 w-36 h-10 mt-20 font-bold font-size-4.5 text-yellow-800 bg-yellow-50 rounded-full border-yellow-800 b-2 active:bg-yellow-800 active:text-yellow-200 hover:shadow-[inset_0_0_16px_white] hover:border-white"
+                        onClick={downloadGameLog}
+                      >
+                        {t("downloadLog")}
+                      </button>
+                      {/* <Show when={logtimer}>
+                        <span class="text-white/60 text-3">{logtimer}后到期</span>
+                      </Show> */}
+                    </div>
+                    <div class="flex flex-col justify-start w-36 h-30">
+                      <button
+                        class="px-4 py-1 w-36 h-10 mt-20 font-bold font-size-4.5 text-yellow-800 bg-yellow-50 rounded-full border-yellow-800 b-2 active:bg-yellow-800 active:text-yellow-200 hover:shadow-[inset_0_0_16px_white] hover:border-white"
+                        onClick={() => {
+                          navigate("/");
+                        }}
+                      >
+                        {t("backHome")}
+                      </button>
+                    </div>
                   </div>
                 }
                 spectatorMode={observerMode()}

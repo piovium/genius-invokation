@@ -94,8 +94,7 @@ export {
 import { Request as RpcRequest, Response as RpcResponse } from "./gen/rpc";
 import { ExposedMutation as PbExposedMutation } from "./gen/mutation";
 
-/** Collapse an intersection into one object type that tooling can print as-is. */
-type Simplify<T> = { [K in keyof T]: T[K] } & {};
+type Calculated<T> = { [K in keyof T]: T[K] } & {};
 
 export type OneofBase = { $case: string; value: object } | undefined;
 export type OneofCase<T extends OneofBase> = NonNullable<T>["$case"];
@@ -104,7 +103,7 @@ export type ExtractOneof<T extends OneofBase, K extends OneofCase<T>> = (T & {
   value: unknown;
 })["value"];
 export type FlattenOneof<T extends OneofBase> = {
-  [K in NonNullable<T>["$case"]]: Simplify<
+  [K in NonNullable<T>["$case"]]: Calculated<
     {
       $case: K;
     } & ExtractOneof<T, K>

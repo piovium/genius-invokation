@@ -1,11 +1,9 @@
-# Dependencies
 node_modules
-
-# Environment variables
+# Keep environment variables out of version control
 .env
 
 # Generated files
 generated
 
-# Editor settings
+# vscode
 .vscode/*

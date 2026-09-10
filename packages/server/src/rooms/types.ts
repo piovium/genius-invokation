@@ -62,7 +62,7 @@ export interface RoomSubscriber {
   close(code: number, reason: string): void;
 }
 
-/** Why a room command was refused; the transport maps each one to a wire code. */
+/** Why a room command was refused; the transport echoes the code to the client. */
 type CommandFailure =
   | "CONFLICT"
   | "STALE_RPC"

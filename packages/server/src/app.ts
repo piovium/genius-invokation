@@ -30,12 +30,12 @@ import { createDecksRoutes } from "./decks/routes";
 import { createGamesRoutes } from "./games/routes";
 import { createMetricsRoutes } from "./metrics/routes";
 import { createRoomsRoutes } from "./rooms/routes";
-import { createFrontendHandler, resolveWebClientPaths } from "./frontend";
+import { createFrontendHandler } from "./frontend";
 import { errorResponse, errorStatus } from "./errors";
 import { listenHttp, type HttpListenOptions } from "./http-server";
 import { attachRoomWebSocketServer } from "./room-transport/websocket";
 
-/** Preflight headers the development CORS shim echoes back. */
+/** Methods the development CORS shim advertises in its preflight reply. */
 const CORS_ALLOWED_METHODS = "HEAD,GET,POST,PUT,PATCH,DELETE,OPTIONS";
 
 export function createApplication({
@@ -51,7 +51,8 @@ export function createApplication({
   const games = createGames(database, metrics);
   const auth = createAuth({ users, secret });
   const rooms = createRooms(users, decks, games, metrics);
-  const { apiBase: prefix } = resolveWebClientPaths(basePath);
+  const rootPath = `/${basePath.split("/").filter(Boolean).join("/")}`;
+  const prefix = `${rootPath.replace(/\/$/, "")}/api`;
   const app = new Elysia({
     adapter: node(),
     strictPath: false,

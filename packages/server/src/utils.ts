@@ -40,20 +40,6 @@ export class DeckVerificationError extends Error {
   }
 }
 
-const { SizeError, NotFoundError, CountLimitError, RelationError } =
-  DeckVerificationErrorCode;
-
-function fail(code: DeckVerificationErrorCode, message: string): never {
-  throw new DeckVerificationError(code, message);
-}
-
-/** Occurrence count per value, so two tag lists can be compared as multisets. */
-function countBy<T>(values: Iterable<T>): Map<T, number> {
-  const counts = new Map<T, number>();
-  for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
-  return counts;
-}
-
 export const ASSETS_MANAGER = Object.freeze({
   encode: staticEncode,
   decode: staticDecode,
@@ -71,93 +57,121 @@ type ActionCardMetadata = Pick<
   | "relatedCharacterId"
   | "relatedCharacterTags"
 >;
-const getMetadata = <T extends CharacterMetadata | ActionCardMetadata>(
+const getData = <T extends CharacterMetadata | ActionCardMetadata>(
   id: number,
 ): T | undefined => deckMetadata[id] as T | undefined;
 
-const SINGLETON_REQUIRED_TAGS = new Set([
-  "GCG_TAG_LEGEND",
-  "GCG_TAG_CARD_BLESSING",
-]);
+const SINGLETON_REQUIRED_TAGS = ["GCG_TAG_LEGEND", "GCG_TAG_CARD_BLESSING"];
 
-const CHARACTER_COUNT = 3;
-const CARD_COUNT = 30;
-
-/** Validates a deck and returns the lowest game version that can play it. */
+/**
+ * 校验牌组合法性
+ * @param param0 牌组
+ * @returns 牌组可以打出的最低游戏版本
+ */
 export async function verifyDeck({
   characters,
   cards,
 }: Deck): Promise<Version> {
-  const characterSet = new Set(characters);
-  if (characterSet.size !== CHARACTER_COUNT) {
-    fail(SizeError, `deck must contain ${CHARACTER_COUNT} characters`);
-  }
-  if (cards.length !== CARD_COUNT) {
-    fail(SizeError, `deck must contain ${CARD_COUNT} cards`);
-  }
-  const characterTags: string[] = [];
+  const DEC = DeckVerificationErrorCode;
   const versions = new Set<string | undefined>();
-  for (const characterId of characters) {
-    const character = getMetadata<CharacterMetadata>(characterId);
+  const characterSet = new Set(characters);
+  if (characterSet.size !== 3) {
+    throw new DeckVerificationError(
+      DEC.SizeError,
+      "deck must contain 3 characters",
+    );
+  }
+  if (cards.length !== 30) {
+    throw new DeckVerificationError(
+      DEC.SizeError,
+      "deck must contain 30 cards",
+    );
+  }
+  const characterTags = [];
+  for (const chId of characters) {
+    const character = getData<CharacterMetadata>(chId);
     if (!character) {
-      fail(NotFoundError, `character id ${characterId} not found`);
+      throw new DeckVerificationError(
+        DEC.NotFoundError,
+        `character id ${chId} not found`,
+      );
     }
     if (typeof character.shareId !== "number") {
-      fail(NotFoundError, `character id ${characterId} not obtainable`);
+      throw new DeckVerificationError(
+        DEC.NotFoundError,
+        `character id ${chId} not obtainable`,
+      );
     }
     characterTags.push(...character.tags);
     versions.add(character.sinceVersion);
   }
-  const availableTags = countBy(characterTags);
   const cardCounts = new Map<number, number>();
   for (const cardId of cards) {
-    const card = getMetadata<ActionCardMetadata>(cardId);
+    const card = getData<ActionCardMetadata>(cardId);
     if (!card) {
-      fail(NotFoundError, `card id ${cardId} not found`);
+      throw new DeckVerificationError(
+        DEC.NotFoundError,
+        `card id ${cardId} not found`,
+      );
     }
-    const cardMaxCount = card.tags.some((tag) =>
-      SINGLETON_REQUIRED_TAGS.has(tag),
+    const cardMaxCount = SINGLETON_REQUIRED_TAGS.some((tag) =>
+      card?.tags.includes(tag),
     )
       ? 1
       : 2;
-    const count = (cardCounts.get(cardId) ?? 0) + 1;
-    if (count > cardMaxCount) {
-      fail(CountLimitError, `card id ${cardId} exceeds max count`);
-    }
-    cardCounts.set(cardId, count);
-    // The related-character rules only depend on the first copy of a card.
-    if (count > 1) continue;
-    if (typeof card.shareId !== "number") {
-      fail(RelationError, `card id ${cardId} not obtainable`);
-    }
-    if (
-      card.relatedCharacterId !== null &&
-      !characterSet.has(card.relatedCharacterId)
-    ) {
-      fail(RelationError, `card id ${cardId} related character not in deck`);
-    }
-    for (const [tag, required] of countBy(card.relatedCharacterTags)) {
-      if ((availableTags.get(tag) ?? 0) < required) {
-        fail(
-          RelationError,
-          `card id ${cardId} related character tags not in deck`,
+    if (cardCounts.has(cardId)) {
+      const count = cardCounts.get(cardId)! + 1;
+      if (count > cardMaxCount) {
+        throw new DeckVerificationError(
+          DEC.CountLimitError,
+          `card id ${cardId} exceeds max count`,
         );
       }
+      cardCounts.set(cardId, count);
+    } else {
+      if (typeof card.shareId !== "number") {
+        throw new DeckVerificationError(
+          DEC.RelationError,
+          `card id ${cardId} not obtainable`,
+        );
+      }
+      if (
+        card.relatedCharacterId !== null &&
+        !characters.includes(card.relatedCharacterId)
+      ) {
+        throw new DeckVerificationError(
+          DEC.RelationError,
+          `card id ${cardId} related character not in deck`,
+        );
+      }
+      const tempCharacterTags = [...characterTags];
+      for (const requiredTag of card.relatedCharacterTags) {
+        const idx = tempCharacterTags.indexOf(requiredTag);
+        if (idx === -1) {
+          throw new DeckVerificationError(
+            DEC.RelationError,
+            `card id ${cardId} related character tags not in deck`,
+          );
+        }
+        tempCharacterTags.splice(idx, 1);
+      }
+      cardCounts.set(cardId, 1);
+      versions.add(card.sinceVersion);
     }
-    versions.add(card.sinceVersion);
   }
   return maxVersion(versions);
 }
 
-const isVersion = (value: string | undefined): value is Version =>
-  value !== undefined && VERSIONS.includes(value as Version);
-
 function maxVersion(versions: Iterable<string | undefined>): Version {
-  const latest = [...versions]
-    .filter((value): value is string => Boolean(value))
+  const ver = [...versions]
+    .filter((v): v is string => !!v)
     .toSorted(semverCompare)
     .at(-1);
-  return isVersion(latest) ? latest : CURRENT_VERSION;
+  if (!VERSIONS.includes(ver as Version)) {
+    return CURRENT_VERSION;
+  } else {
+    return ver as Version;
+  }
 }
 
 export async function minimumRequiredVersionOfDeck({
@@ -166,10 +180,13 @@ export async function minimumRequiredVersionOfDeck({
 }: Deck): Promise<Version> {
   return maxVersion(
     [...characters, ...cards].map(
-      (id) =>
-        getMetadata<CharacterMetadata | ActionCardMetadata>(id)?.sinceVersion,
+      (p) => getData<CharacterMetadata | ActionCardMetadata>(p)?.sinceVersion,
     ),
   );
+}
+
+export function parseStringToInt({ value }: { value: unknown }): number {
+  return typeof value !== "string" || value.trim() === "" ? NaN : Number(value);
 }
 
 export class PaginationDto {
@@ -180,4 +197,11 @@ export class PaginationDto {
 export interface PaginationResult<T> {
   count: number;
   data: T[];
+}
+
+export async function validateDto<T>(
+  value: unknown,
+  type: { validate(value: unknown): T },
+): Promise<T> {
+  return type.validate(value);
 }

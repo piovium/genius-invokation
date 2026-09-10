@@ -18,12 +18,7 @@ import { promisify } from "node:util";
 import { Elysia } from "elysia";
 import { CORE_VERSION, CURRENT_VERSION, VERSIONS } from "@gi-tcg/core";
 import { teapot, unavailable } from "../errors";
-import {
-  ACTIVE_ROOMS_KEY,
-  DEPLOYING_FLAG_KEY,
-  DEPLOYING_FLAG_TTL_SECONDS,
-  redis,
-} from "../redis";
+import { redis } from "../redis";
 const execute = promisify(execFile);
 
 /** The `git log -1` fields the version endpoint reports back to clients. */
@@ -69,6 +64,9 @@ async function getRevision(): Promise<RevisionInfo> {
   }
 }
 
+/** Redis clears the deploying flag on its own if the deployment never does. */
+const DEPLOYING_FLAG_TTL_SECONDS = 3600;
+
 export function createAppRoutes() {
   return new Elysia()
     .get("/version", async () => ({
@@ -87,15 +85,15 @@ export function createAppRoutes() {
     .get("/hello", () => "Hello World!")
     .get("/healthz", async ({ request }) => {
       if (redis && request.headers.get("host") === process.env.HEALTHZ_HOST) {
-        const activeRooms = await redis.hlen(ACTIVE_ROOMS_KEY);
+        const activeRooms = await redis.hlen("meta:active_rooms");
         if (activeRooms) {
-          await redis.set(DEPLOYING_FLAG_KEY, Date.now());
-          await redis.expire(DEPLOYING_FLAG_KEY, DEPLOYING_FLAG_TTL_SECONDS);
+          await redis.set("meta:deploying", Date.now());
+          await redis.expire("meta:deploying", DEPLOYING_FLAG_TTL_SECONDS);
           throw unavailable(
             `There are still ${activeRooms} active rooms; finish them before deploying`,
           );
         }
-        await redis.del(DEPLOYING_FLAG_KEY);
+        await redis.del("meta:deploying");
       }
       return "";
     });

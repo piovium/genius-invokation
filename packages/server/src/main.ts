@@ -18,11 +18,7 @@ import { releaseIdleMemory } from "./memory";
 import { redis } from "./redis";
 
 const DEFAULT_PORT = 3_000;
-const DEFAULT_HOST = "::";
 const MAX_PORT = 65_535;
-
-/** The signals that trigger a graceful shutdown. */
-const STOP_SIGNALS = ["SIGINT", "SIGTERM"] as const;
 
 const service = createApplication();
 await service.database.connect();
@@ -35,7 +31,7 @@ if (!Number.isInteger(port) || port < 1 || port > MAX_PORT)
 
 const server = await listenApplication(service, {
   port,
-  hostname: process.env.HOST ?? DEFAULT_HOST,
+  hostname: process.env.HOST ?? "::",
 });
 console.log(`Server listening at ${server.url}`);
 releaseIdleMemory();
@@ -50,6 +46,6 @@ async function stop(): Promise<void> {
   await redis?.quit();
 }
 
-for (const signal of STOP_SIGNALS) {
+for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => void stop());
 }

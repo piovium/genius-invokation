@@ -25,132 +25,80 @@ const PLACEHOLDERS = {
   head: "<!-- server:head -->",
   body: "<!-- server:body -->",
 } as const;
-
-type InjectionPosition = keyof typeof PLACEHOLDERS;
-
-const PLACEHOLDER_ENTRIES = Object.entries(PLACEHOLDERS) as [
-  InjectionPosition,
-  string,
-][];
-
-const CACHE_CONTROL_REVALIDATE = "public, no-cache, must-revalidate";
-const CACHE_CONTROL_IMMUTABLE = "public, max-age=31536000, immutable";
-
-const INDEX_FILE = "index.html";
-
-/** `null` body with an explicit status, optionally carrying validator headers. */
-const emptyResponse = (status: number, headers?: HeadersInit) =>
-  new Response(null, { status, headers });
-
 export function injectHtml(
   html: string,
-  injections: Partial<Record<InjectionPosition, string>>,
-): string {
-  return PLACEHOLDER_ENTRIES.reduce(
-    (result, [position, placeholder]) =>
-      result.replace(placeholder, injections[position] ?? ""),
+  injections: Partial<Record<keyof typeof PLACEHOLDERS, string>>,
+) {
+  return (Object.keys(PLACEHOLDERS) as (keyof typeof PLACEHOLDERS)[]).reduce(
+    (result, position) =>
+      result.replace(PLACEHOLDERS[position], injections[position] ?? ""),
     html,
   );
 }
-
-const WEAK_ETAG_PREFIX = /^W\//;
-
-const stripWeakPrefix = (tag: string): string =>
-  tag.replace(WEAK_ETAG_PREFIX, "");
-
-/** `*` matches every validator; weak validators compare by their opaque tag. */
-function matchesEtag(header: string | null, etag: string): boolean {
-  if (!header) return false;
-  const target = stripWeakPrefix(etag);
-  return header.split(",").some((candidate) => {
-    const value = candidate.trim();
-    return value === "*" || stripWeakPrefix(value) === target;
-  });
-}
-
-/** Reject separators, NUL and traversal segments before touching disk. */
-function isUnsafeRelativePath(name: string): boolean {
+function matchesEtag(header: string | null, etag: string) {
   return (
-    name.includes("\\") ||
-    name.includes("\0") ||
-    name.split("/").some((segment) => segment === ".." || segment === ".")
+    header
+      ?.split(",")
+      .some(
+        (item) =>
+          item.trim() === "*" ||
+          item.trim().replace(/^W\//, "") === etag.replace(/^W\//, ""),
+      ) ?? false
   );
 }
-
-type IndexEntry = { body: string; etag: string };
-
-export interface FrontendHandlerOptions {
-  /** Directory holding the built web client. */
-  directory?: string;
-  /** Public prefix the client is served under. */
-  basePath?: string;
-  /** Inject the `noindex` robots tag that keeps beta builds out of search. */
-  beta?: boolean;
-}
-
-/**
- * Normalizes `WEB_CLIENT_BASE_PATH` once for every consumer. The API router
- * and the static handler have to agree on these strings, or a request for an
- * API route falls through to the SPA entry and answers 404 in the client.
- */
-export function resolveWebClientPaths(basePath: string): {
-  /** Assets are served under this prefix, which always ends in a slash. */
-  base: string;
-  /** The entry path without a trailing slash, as routes are matched. */
-  rootPath: string;
-  /** The prefix the API routes are grouped under. */
-  apiBase: string;
-} {
-  const segments = basePath.split("/").filter(Boolean);
-  const base = `/${segments.join("/")}${segments.length ? "/" : ""}`;
-  return {
-    base,
-    rootPath: base.slice(0, -1) || "/",
-    apiBase: `${base}api`,
-  };
-}
-
 export function createFrontendHandler({
   directory = process.env.FRONTEND_DIRECTORY ??
     resolve(import.meta.dirname, "frontend"),
   basePath = WEB_CLIENT_BASE_PATH,
   beta = IS_BETA,
-}: FrontendHandlerOptions = {}): (request: Request) => Promise<Response> {
+} = {}) {
   const root = resolve(directory);
-  const { base, rootPath, apiBase } = resolveWebClientPaths(basePath);
-  let index: Promise<IndexEntry> | undefined;
+  const base =
+    "/" +
+    basePath.split("/").filter(Boolean).join("/") +
+    (basePath === "/" ? "" : "/");
+  const rootPath = base === "/" ? "/" : base.slice(0, -1);
+  let index: Promise<{ body: string; etag: string }> | undefined;
   return async (request: Request): Promise<Response> => {
     if (request.method !== "GET" && request.method !== "HEAD")
-      return emptyResponse(405);
+      return new Response(null, { status: 405 });
     const pathname = new URL(request.url).pathname;
     if (
       (pathname !== rootPath && !pathname.startsWith(base)) ||
-      pathname === apiBase ||
-      pathname.startsWith(`${apiBase}/`)
+      pathname === base + "api" ||
+      pathname.startsWith(base + "api/")
     )
-      return emptyResponse(404);
+      return new Response(null, { status: 404 });
     let name: string;
     try {
       name = decodeURIComponent(pathname.slice(base.length));
     } catch {
-      return emptyResponse(400);
+      return new Response(null, { status: 400 });
     }
-    if (isUnsafeRelativePath(name)) return emptyResponse(404);
+    if (
+      name.includes("\\") ||
+      name.includes("\0") ||
+      name.split("/").some((part) => part === ".." || part === ".")
+    )
+      return new Response(null, { status: 404 });
     const path = resolve(root, name);
-    if (path !== root && !path.startsWith(`${root}${sep}`))
-      return emptyResponse(404);
+    if (path !== root && !path.startsWith(root + sep))
+      return new Response(null, { status: 404 });
     const info =
-      name && name !== INDEX_FILE ? await stat(path).catch(() => null) : null;
+      name && name !== "index.html" ? await stat(path).catch(() => null) : null;
     if (info?.isFile()) {
-      const etag = `W/"${info.size.toString(16)}-${info.mtimeMs.toString(16)}"`;
+      const etag =
+        'W/"' + info.size.toString(16) + "-" + info.mtimeMs.toString(16) + '"';
       const headers = {
         "content-type": lookup(path) || "application/octet-stream",
         etag,
         "cache-control":
-          name === "sw.js" ? CACHE_CONTROL_REVALIDATE : CACHE_CONTROL_IMMUTABLE,
+          name === "sw.js"
+            ? "public, no-cache, must-revalidate"
+            : "public, max-age=31536000, immutable",
       };
       if (matchesEtag(request.headers.get("if-none-match"), etag))
-        return emptyResponse(304, headers);
+        return new Response(null, { status: 304, headers });
       return new Response(
         request.method === "HEAD"
           ? null
@@ -158,16 +106,17 @@ export function createFrontendHandler({
         { headers },
       );
     }
-    // Only the HTML entry is read into memory, because beta builds inject a
-    // robots tag into it. Assets are always streamed from disk.
-    index ??= readFile(resolve(root, INDEX_FILE), "utf8")
+    // Only the small HTML entry is read into memory for the existing beta tag
+    // injection. Large JS/CSS/image assets remain file responses.
+    index ??= readFile(resolve(root, "index.html"), "utf8")
       .then((html) => {
         const body = injectHtml(html, {
           head: beta ? '<meta name="robots" content="noindex">' : "",
         });
         return {
           body,
-          etag: `"${createHash("sha256").update(body).digest("base64url")}"`,
+          etag:
+            '"' + createHash("sha256").update(body).digest("base64url") + '"',
         };
       })
       .catch((error) => {
@@ -178,16 +127,16 @@ export function createFrontendHandler({
       const entry = await index;
       const headers = {
         "content-type": "text/html; charset=utf-8",
-        "cache-control": CACHE_CONTROL_REVALIDATE,
+        "cache-control": "public, no-cache, must-revalidate",
         etag: entry.etag,
       };
       return matchesEtag(request.headers.get("if-none-match"), entry.etag)
-        ? emptyResponse(304, headers)
+        ? new Response(null, { status: 304, headers })
         : new Response(request.method === "HEAD" ? null : entry.body, {
             headers,
           });
     } catch {
-      return emptyResponse(404);
+      return new Response(null, { status: 404 });
     }
   };
 }

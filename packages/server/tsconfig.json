@@ -6,15 +6,12 @@
     "lib": ["ESNext", "DOM"],
     "types": ["node"],
     "allowJs": true,
-
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
-
     "useDefineForClassFields": true,
     "esModuleInterop": true,
-
     "skipLibCheck": true,
     "strict": true,
     "noUncheckedIndexedAccess": true

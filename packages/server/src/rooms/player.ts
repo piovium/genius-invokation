@@ -30,6 +30,10 @@ import {
 const ACK_CACHE_LIMIT = 32;
 /** Concurrent subscribers a single player may hold. */
 const SUBSCRIBER_LIMIT = 16;
+/** Handed to a caller whose RPC outlived the game, whether thrown or cancelled. */
+const GAME_FINISHED_MESSAGE = "Game finished";
+/** Both method guards report the same mismatch, so the text is defined once. */
+const METHOD_MISMATCH_MESSAGE = "RPC response method mismatch";
 
 interface PendingRpc {
   id: number;
@@ -172,7 +176,7 @@ export class Player implements PlayerIO {
     const req = request.request;
     const resp = response.response;
     if (!req || !resp || req.$case !== resp.$case)
-      throw new Error("RPC response method mismatch");
+      throw new Error(METHOD_MISMATCH_MESSAGE);
     const own = this.game?.state.players[this.who];
     const assertAvailableDice = (dice: readonly number[]) => {
       const remaining: number[] = [...(own?.dice ?? [])];
@@ -212,8 +216,7 @@ export class Player implements PlayerIO {
         assertAvailableDice(resp.value.diceToReroll);
         break;
       case "action": {
-        if (req.$case !== "action")
-          throw new Error("RPC response method mismatch");
+        if (req.$case !== "action") throw new Error(METHOD_MISMATCH_MESSAGE);
         const selected = req.value.action[resp.value.chosenActionIndex];
         if (!selected || selected.validity !== 0 || !selected.action)
           throw new Error("Selected action is not legal");
@@ -277,7 +280,7 @@ export class Player implements PlayerIO {
     })(request);
   }
   async rpc(request: RpcRequest): Promise<RpcResponse> {
-    if (this.completed) throw new Error("Game finished");
+    if (this.completed) throw new Error(GAME_FINISHED_MESSAGE);
     if (this.pending) throw new Error("Player already has a pending RPC");
     const id = this.nextRpcId++;
     const reroll = request.request?.$case === "rerollDice";
@@ -361,20 +364,20 @@ export class Player implements PlayerIO {
   complete() {
     if (this.completed) return;
     this.completed = true;
-    this.pending?.cancel(new Error("Game finished"));
+    this.pending?.cancel(new Error(GAME_FINISHED_MESSAGE));
     this.game = null;
     this.opponent = null;
-    for (const subscriber of this.subscribers)
-      subscriber.close(1000, "GAME_FINISHED");
-    this.subscribers.clear();
+    this.closeSubscribers(1000, "GAME_FINISHED");
   }
   dispose() {
     this.complete();
-    for (const subscriber of this.subscribers)
-      subscriber.close(1000, "ROOM_RELEASED");
-    this.subscribers.clear();
+    this.closeSubscribers(1000, "ROOM_RELEASED");
     this.latestNotification = null;
     this.latestError = null;
     this.accepted.clear();
+  }
+  private closeSubscribers(code: number, reason: string) {
+    for (const subscriber of this.subscribers) subscriber.close(code, reason);
+    this.subscribers.clear();
   }
 }

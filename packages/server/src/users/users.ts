@@ -16,7 +16,11 @@
 import { eq } from "drizzle-orm";
 import type { Database } from "../db/database";
 import { users, type UserModel } from "../db/schema";
-import { GET_USER_API_URL, GITHUB_REQUEST_TIMEOUT_MS } from "../auth/session";
+import {
+  GET_USER_API_URL,
+  GITHUB_REQUEST_TIMEOUT_MS,
+  githubApiHeaders,
+} from "../auth/session";
 import { notFound } from "../errors";
 import type { UpdateUserInfoDto } from "./routes";
 
@@ -76,11 +80,7 @@ export function createUsers(database: Database): Users {
         .limit(1);
       if (!user?.ghToken) return null;
       const response = await fetch(GET_USER_API_URL, {
-        headers: {
-          authorization: `Bearer ${user.ghToken}`,
-          accept: "application/vnd.github+json",
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
+        headers: githubApiHeaders(user.ghToken),
         signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
       });
       if (!response.ok) {
