@@ -21,10 +21,21 @@ import { teapot, unavailable } from "../errors";
 import { redis } from "../redis";
 const execute = promisify(execFile);
 
-/** The `git log` probe spawns a process, so its result is read once per process. */
-let cachedRevision: Promise<Record<string, unknown>> | undefined;
+/** The `git log -1` fields the version endpoint reports back to clients. */
+interface RevisionInfo {
+  hash?: string;
+  author_name?: string;
+  author_email?: string;
+  date?: string;
+  refs?: string;
+  message?: string;
+  body?: string;
+}
 
-async function getRevision() {
+/** The `git log` probe spawns a process, so its result is read once per process. */
+let cachedRevision: Promise<RevisionInfo> | undefined;
+
+async function getRevision(): Promise<RevisionInfo> {
   try {
     const { stdout } = await execute(
       "git",

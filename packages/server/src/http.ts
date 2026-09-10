@@ -4,6 +4,8 @@ import { badRequest } from "./errors";
 const PAGE_SIZE_LIMIT = 30;
 const MAX_INT32 = 2 ** 31 - 1;
 
+// `skip` stays positive to match the legacy validator; an omitted value falls
+// back to 0 in the services.
 export const paginationSchema = {
   skip: t.Optional(t.Numeric({ minimum: 1, multipleOf: 1 })),
   take: t.Optional(

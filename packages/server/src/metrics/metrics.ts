@@ -49,14 +49,17 @@ const emptyRoomMetricsSnapshot = (): RoomMetricsSnapshot => ({
   },
 });
 
-// Rooms are owned by the transport, so their state is read on scrape rather
-// than pushed to the registry.
-const roomGauges: ReadonlyArray<{
+/** One gauge that reports a slice of the transport-owned room state. */
+interface RoomGaugeDefinition {
   name: string;
   help: string;
   labelNames?: string[];
   report(gauge: Gauge<string>, snapshot: RoomMetricsSnapshot): void;
-}> = [
+}
+
+// Rooms are owned by the transport, so their state is read on scrape rather
+// than pushed to the registry.
+const roomGauges: ReadonlyArray<RoomGaugeDefinition> = [
   {
     name: "gi_rooms_active",
     help: "Number of non-finished rooms in the current server process",

@@ -35,6 +35,13 @@ import { errorResponse } from "./errors";
 import { listenHttp, type HttpListenOptions } from "./http-server";
 import { attachRoomWebSocketServer } from "./room-transport/websocket";
 
+/** Elysia's `status()` carrying the `{ statusCode, message }` body clients read. */
+const errorStatus = (statusCode: number, message: string) =>
+  status(statusCode, { statusCode, message });
+
+/** Preflight headers the development CORS shim echoes back. */
+const CORS_ALLOWED_METHODS = "HEAD,GET,POST,PUT,PATCH,DELETE,OPTIONS";
+
 export function createApplication({
   database = createDatabase(),
   secret = process.env.JWT_SECRET,
@@ -55,16 +62,15 @@ export function createApplication({
     strictPath: false,
   }).onError(({ code, error }) => {
     if (code === "VALIDATION" || code === "PARSE")
-      return status(400, { statusCode: 400, message: "Invalid request" });
-    if (code === "NOT_FOUND")
-      return status(404, { statusCode: 404, message: "Not Found" });
+      return errorStatus(400, "Invalid request");
+    if (code === "NOT_FOUND") return errorStatus(404, "Not Found");
     return errorResponse(error);
   });
   if (!production) {
+    // Development serves the Vite client from another origin.
     app.onRequest(({ request, set }) => {
       set.headers["access-control-allow-origin"] = "*";
-      set.headers["access-control-allow-methods"] =
-        "HEAD,GET,POST,PUT,PATCH,DELETE,OPTIONS";
+      set.headers["access-control-allow-methods"] = CORS_ALLOWED_METHODS;
       set.headers["access-control-allow-headers"] =
         request.headers.get("access-control-request-headers") ??
         "authorization,content-type";

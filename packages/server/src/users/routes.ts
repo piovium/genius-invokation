@@ -26,12 +26,17 @@ export interface UpdateUserInfoDto {
   name?: string | null;
 }
 
+/** Board colors are stored as an opaque `#rrggbb` string. */
+const CHESSBOARD_COLOR_PATTERN = "^#[0-9a-fA-F]{6}$";
+
 const updateUserInfoSchema = t.Object({
   name: t.Optional(t.Union([nameSchema, t.Null()])),
   chessboardColor: t.Optional(
-    t.Union([t.String({ pattern: "^#[0-9a-fA-F]{6}$" }), t.Null()]),
+    t.Union([t.String({ pattern: CHESSBOARD_COLOR_PATTERN }), t.Null()]),
   ),
 });
+
+const idParamsSchema = t.Object({ id: idSchema });
 
 export function createUsersRoutes(users: Users, auth: Auth) {
   return new Elysia({ prefix: "/users" })
@@ -58,6 +63,6 @@ export function createUsersRoutes(users: Users, auth: Auth) {
         if (!user) throw notFound();
         return user;
       },
-      { user: true, params: t.Object({ id: idSchema }) },
+      { user: true, params: idParamsSchema },
     );
 }

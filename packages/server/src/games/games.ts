@@ -64,6 +64,15 @@ const summaryColumns = {
   createdAt: games.createdAt,
 };
 
+/** Both history queries read a consistent snapshot that concurrent writes never shift. */
+const READ_ONLY_TRANSACTION = {
+  isolationLevel: "repeatable read",
+  accessMode: "read only",
+} as const;
+
+/** Page size the history endpoints use when the caller omits `take`. */
+const DEFAULT_PAGE_SIZE = 10;
+
 const toGamePlayer = ({ playerId, who }: PlayerOnGames): GamePlayer => ({
   player: { id: playerId },
   who,
@@ -90,40 +99,37 @@ export function createGames(database: Database, metrics: Metrics): Games {
       return game;
     },
 
-    async getAllGames({ skip = 0, take = 10 }) {
-      return database.db.transaction(
-        async (tx) => {
-          const rows = await tx
-            .select(summaryColumns)
-            .from(games)
-            .orderBy(desc(games.createdAt), desc(games.id))
-            .offset(skip)
-            .limit(take);
-          const [total] = await tx.select({ value: count() }).from(games);
-          const links = rows.length
-            ? await tx
-                .select()
-                .from(playerOnGames)
-                .where(
-                  inArray(
-                    playerOnGames.gameId,
-                    rows.map((row) => row.id),
-                  ),
-                )
-            : [];
-          const playersByGame = Map.groupBy(links, (link) => link.gameId);
-          return {
-            count: total!.value,
-            data: rows.map((row) => ({
-              ...row,
-              players: (playersByGame.get(row.id) ?? [])
-                .toSorted(bySeat)
-                .map(toGamePlayer),
-            })),
-          };
-        },
-        { isolationLevel: "repeatable read", accessMode: "read only" },
-      );
+    async getAllGames({ skip = 0, take = DEFAULT_PAGE_SIZE }) {
+      return database.db.transaction(async (tx) => {
+        const rows = await tx
+          .select(summaryColumns)
+          .from(games)
+          .orderBy(desc(games.createdAt), desc(games.id))
+          .offset(skip)
+          .limit(take);
+        const [total] = await tx.select({ value: count() }).from(games);
+        const links = rows.length
+          ? await tx
+              .select()
+              .from(playerOnGames)
+              .where(
+                inArray(
+                  playerOnGames.gameId,
+                  rows.map((row) => row.id),
+                ),
+              )
+          : [];
+        const playersByGame = Map.groupBy(links, (link) => link.gameId);
+        return {
+          count: total!.value,
+          data: rows.map((row) => ({
+            ...row,
+            players: (playersByGame.get(row.id) ?? [])
+              .toSorted(bySeat)
+              .map(toGamePlayer),
+          })),
+        };
+      }, READ_ONLY_TRANSACTION);
     },
 
     async getGame(gameId) {
@@ -141,30 +147,27 @@ export function createGames(database: Database, metrics: Metrics): Games {
       return { ...game, players: links.map(toGamePlayer) };
     },
 
-    async gamesHasUser(userId, { skip = 0, take = 10 }) {
-      return database.db.transaction(
-        async (tx) => {
-          const rows = await tx
-            .select({
-              playerId: playerOnGames.playerId,
-              gameId: playerOnGames.gameId,
-              who: playerOnGames.who,
-              game: summaryColumns,
-            })
-            .from(playerOnGames)
-            .innerJoin(games, eq(playerOnGames.gameId, games.id))
-            .where(eq(playerOnGames.playerId, userId))
-            .orderBy(desc(games.createdAt), desc(games.id))
-            .offset(skip)
-            .limit(take);
-          const [total] = await tx
-            .select({ value: count() })
-            .from(playerOnGames)
-            .where(eq(playerOnGames.playerId, userId));
-          return { count: total!.value, data: rows };
-        },
-        { isolationLevel: "repeatable read", accessMode: "read only" },
-      );
+    async gamesHasUser(userId, { skip = 0, take = DEFAULT_PAGE_SIZE }) {
+      return database.db.transaction(async (tx) => {
+        const rows = await tx
+          .select({
+            playerId: playerOnGames.playerId,
+            gameId: playerOnGames.gameId,
+            who: playerOnGames.who,
+            game: summaryColumns,
+          })
+          .from(playerOnGames)
+          .innerJoin(games, eq(playerOnGames.gameId, games.id))
+          .where(eq(playerOnGames.playerId, userId))
+          .orderBy(desc(games.createdAt), desc(games.id))
+          .offset(skip)
+          .limit(take);
+        const [total] = await tx
+          .select({ value: count() })
+          .from(playerOnGames)
+          .where(eq(playerOnGames.playerId, userId));
+        return { count: total!.value, data: rows };
+      }, READ_ONLY_TRANSACTION);
     },
   };
 }

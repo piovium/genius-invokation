@@ -83,7 +83,7 @@ const SINGLETON_REQUIRED_TAGS = new Set([
 const CHARACTER_COUNT = 3;
 const CARD_COUNT = 30;
 
-/** 校验牌组是否合法，返回该牌组可以打出的最低游戏版本。 */
+/** Validates a deck and returns the lowest game version that can play it. */
 export async function verifyDeck({
   characters,
   cards,

@@ -19,15 +19,18 @@ import type { Auth } from "../auth/session";
 import { idSchema, paginationSchema } from "../http";
 import type { Games } from "./games";
 
+const gameQuerySchema = t.Object(paginationSchema);
+const gameIdParamsSchema = t.Object({ gameId: idSchema });
+
 export function createGamesRoutes(games: Games, auth: Auth) {
   return new Elysia({ prefix: "/games" })
     .use(identity(auth))
     .get("/", ({ query }) => games.getAllGames(query), {
-      query: t.Object(paginationSchema),
+      query: gameQuerySchema,
       user: true,
     })
     .get("/mine", ({ user, query }) => games.gamesHasUser(user.sub, query), {
-      query: t.Object(paginationSchema),
+      query: gameQuerySchema,
       user: true,
     })
     .get(
@@ -37,6 +40,6 @@ export function createGamesRoutes(games: Games, auth: Auth) {
         const game = await games.getGame(params.gameId);
         return game ?? Response.json(null);
       },
-      { params: t.Object({ gameId: idSchema }), user: true },
+      { params: gameIdParamsSchema, user: true },
     );
 }

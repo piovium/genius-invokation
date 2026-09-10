@@ -49,6 +49,9 @@ const updatedUserInfoColumns = {
   createdAt: users.createdAt,
 };
 
+/** GitHub is a third party, so a stalled request must not hold the caller forever. */
+const GITHUB_REQUEST_TIMEOUT_MS = 15_000;
+
 /** The subset of GitHub's `/user` response that this service reads. */
 interface GitHubAccount {
   id?: number;
@@ -81,7 +84,7 @@ export function createUsers(database: Database): Users {
           accept: "application/vnd.github+json",
           "X-GitHub-Api-Version": "2022-11-28",
         },
-        signal: AbortSignal.timeout(15_000),
+        signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
       });
       if (!response.ok) {
         await response.body?.cancel();
