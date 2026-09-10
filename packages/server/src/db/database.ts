@@ -60,9 +60,10 @@ export function createSql(connectionString = process.env.DATABASE_URL) {
     connectionTimeoutMillis: 10_000,
     options: `-c search_path=${databaseSchema}`,
   });
-  pool.on("error", () =>
+  pool.on("error", (error) =>
     console.error(
       "PostgreSQL idle connection failed; the pool discards it and reconnects on demand",
+      error,
     ),
   );
   return Object.assign(createQueries(pool), {

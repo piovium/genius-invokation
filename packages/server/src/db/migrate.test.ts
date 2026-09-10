@@ -19,7 +19,7 @@ function scratchSchema() {
 }
 
 test(
-  "real PostgreSQL fresh migration is idempotent and preserves rows and foreign-key actions",
+  "real PostgreSQL migrations apply once, preserve rows on rerun, adopt a log-less database and reject foreign-key drift",
   {
     skip: !testUrl,
     timeout: 30_000,
@@ -72,6 +72,7 @@ test(
       assert.deepEqual(adopted.applied, []);
       const [kept] = await client`SELECT name FROM "User" WHERE id = 91000001`;
       assert.equal(kept!.name, "migration-probe");
+      // A logged migration this build does not ship means an unknown schema.
       await client`INSERT INTO "__drizzle_migrations" (name, hash, created_at) VALUES ('9999_future', 'future', 0)`;
       await assert.rejects(migrate(), /does not ship/);
       await client`DELETE FROM "__drizzle_migrations" WHERE name = '9999_future'`;

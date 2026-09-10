@@ -13,6 +13,16 @@ interface MigrationJournal {
   entries: { idx: number; version: string; when: number; tag: string }[];
 }
 
+/**
+ * One shipped migration: the journal tag it is logged under, the SQL as applied,
+ * and the digest of that SQL so a rerun can detect an edit.
+ */
+interface MigrationSource {
+  name: string;
+  text: string;
+  hash: string;
+}
+
 /** Migration file names as drizzle-kit writes them, e.g. `0000_init`. */
 const MIGRATION_TAG = /^\d{4}_[a-z0-9_]+$/;
 
@@ -36,7 +46,7 @@ async function findMigrationsDirectory() {
 }
 
 /** Read the journal and the SQL it names, refusing a layout drizzle-kit cannot have written. */
-async function readMigrations(directory: string) {
+async function readMigrations(directory: string): Promise<MigrationSource[]> {
   const journal = JSON.parse(
     await readFile(resolve(directory, "meta/_journal.json"), "utf8"),
   ) as MigrationJournal;
@@ -45,15 +55,17 @@ async function readMigrations(directory: string) {
       `Migrations in ${directory} must be a drizzle-kit PostgreSQL journal`,
     );
   const tags = new Set<string>();
+  // Entries are validated in journal order and only their reads overlap, so a
+  // duplicate tag is rejected whichever file finishes first.
   return await Promise.all(
     journal.entries.map(async (entry, index) => {
-      if (
-        entry.idx !== index ||
-        !MIGRATION_TAG.test(entry.tag) ||
-        tags.has(entry.tag)
-      )
+      if (entry.idx !== index)
         throw new Error(
-          `Migrations in ${directory} must be ordered entries named like 0000_init, got "${entry.tag}"`,
+          `Migrations in ${directory} must be ordered by idx, got ${entry.idx} at position ${index}`,
+        );
+      if (!MIGRATION_TAG.test(entry.tag) || tags.has(entry.tag))
+        throw new Error(
+          `Migrations in ${directory} must be uniquely named like 0000_init, got "${entry.tag}"`,
         );
       tags.add(entry.tag);
       const path = resolve(directory, `${entry.tag}.sql`);
@@ -86,17 +98,22 @@ export async function migrateDatabase(
   const client = createSql(connectionString);
   try {
     return await client.begin(async (tx) => {
+      // Instances may start together, so the run takes a transaction lock keyed
+      // by this database and schema: only one of them migrates.
       await tx`SELECT pg_advisory_xact_lock(hashtext(current_database()), hashtext(current_schema() || ':gi-server-migrations'))`;
-      const [migrationState] =
+      // A `SELECT` with no `FROM` always answers one row; `populated` reports
+      // whether the deployed tables are already here.
+      const [existing] =
         await tx`SELECT to_regclass('"User"') IS NOT NULL AS populated`;
-      if (!migrationState)
+      if (!existing)
         throw new Error("Cannot read the database migration state");
-      await tx.unsafe(
-        'CREATE TABLE IF NOT EXISTS "__drizzle_migrations" ("id" SERIAL PRIMARY KEY, "hash" TEXT NOT NULL, "created_at" BIGINT NOT NULL, "name" TEXT NOT NULL UNIQUE)',
-      );
-      const recorded = await tx.unsafe(
-        'SELECT name, hash FROM "__drizzle_migrations"',
-      );
+      await tx`CREATE TABLE IF NOT EXISTS "__drizzle_migrations" (
+        "id" SERIAL PRIMARY KEY,
+        "hash" TEXT NOT NULL,
+        "created_at" BIGINT NOT NULL,
+        "name" TEXT NOT NULL UNIQUE
+      )`;
+      const recorded = await tx`SELECT name, hash FROM "__drizzle_migrations"`;
       if (recorded.some((row) => !knownNames.has(row.name)))
         throw new Error(
           "Database records SQL migrations this server build does not ship; refusing an unknown schema",
@@ -115,7 +132,7 @@ export async function migrateDatabase(
       });
       const applied: string[] = [];
       const adopted: string[] = [];
-      if (migrationState.populated && appliedHashes.size === 0) {
+      if (existing.populated && appliedHashes.size === 0) {
         // Tables without a migration log: adopt them, but only once the live
         // schema is exactly what these migrations create.
         await verifyDeployedSchema(tx);
@@ -140,10 +157,16 @@ export async function migrateDatabase(
 /** `information_schema` spells a millisecond timestamp like this. */
 const TIMESTAMP = "timestamp without time zone";
 
+/** The tables the shipped DDL creates; also the list the verification query asks for. */
+const expectedTables = ["User", "Deck", "Game", "PlayerOnGames"] as const;
+
+type ExpectedTable = (typeof expectedTables)[number];
+
+/** One column as the shipped DDL creates it, and as `information_schema` reports it. */
 type ColumnExpectation = readonly [type: string, nullable: boolean];
 
-/** Every column the deployed DDL creates, in the order the migrations add them. */
-const expectedColumns: Record<string, Record<string, ColumnExpectation>> = {
+/** Every column the shipped DDL creates, keyed by table. */
+const expectedColumns = {
   User: {
     id: ["integer", false],
     ghToken: ["text", true],
@@ -173,56 +196,65 @@ const expectedColumns: Record<string, Record<string, ColumnExpectation>> = {
     gameId: ["integer", false],
     who: ["integer", false],
   },
-};
+} satisfies Record<ExpectedTable, Record<string, ColumnExpectation>>;
 
-type DefaultKind = "now" | "sequence" | "none";
-
-/** The deployed DDL defaults only `createdAt` and the `serial` id columns. */
-function defaultKind(table: string, name: string): DefaultKind {
-  if (name === "createdAt") return "now";
+/** The shipped DDL defaults only `createdAt` and the `serial` id columns. */
+function matchesExpectedDefault(
+  table: string,
+  name: string,
+  value: string | null,
+) {
+  if (name === "createdAt") return value === "CURRENT_TIMESTAMP";
   if (name === "id" && (table === "Game" || table === "Deck"))
-    return "sequence";
-  return "none";
+    return value?.startsWith("nextval(") ?? false;
+  return value === null;
 }
-
-const matchesDefault: Record<DefaultKind, (value: string | null) => boolean> = {
-  now: (value) => value === "CURRENT_TIMESTAMP",
-  sequence: (value) => value?.startsWith("nextval(") ?? false,
-  none: (value) => value === null,
-};
 
 /** Referential actions as the one-letter codes `pg_constraint` stores. */
 const FOREIGN_KEY_CODES = { contype: "f", confupdtype: "c", confdeltype: "r" };
 
-/** Deployed constraint: name, kind, `pg_get_constraintdef` text, action codes. */
-const expectedConstraints: readonly [
-  name: string,
-  kind: string,
-  definition: string,
-  codes?: Record<string, string>,
-][] = [
-  [
-    "PlayerOnGames_playerId_fkey",
-    "foreign key",
-    'FOREIGN KEY ("playerId") REFERENCES "User"(id) ON UPDATE CASCADE ON DELETE RESTRICT',
-    FOREIGN_KEY_CODES,
-  ],
-  [
-    "PlayerOnGames_gameId_fkey",
-    "foreign key",
-    'FOREIGN KEY ("gameId") REFERENCES "Game"(id) ON UPDATE CASCADE ON DELETE RESTRICT',
-    FOREIGN_KEY_CODES,
-  ],
-  [
-    "Deck_ownerUserId_fkey",
-    "foreign key",
-    'FOREIGN KEY ("ownerUserId") REFERENCES "User"(id) ON UPDATE CASCADE ON DELETE RESTRICT',
-    FOREIGN_KEY_CODES,
-  ],
-  ["User_pkey", "primary key", "PRIMARY KEY (id)"],
-  ["Game_pkey", "primary key", "PRIMARY KEY (id)"],
-  ["Deck_pkey", "primary key", "PRIMARY KEY (id)"],
-  ["PlayerOnGames_pkey", "primary key", 'PRIMARY KEY ("playerId", "gameId")'],
+/** A constraint the shipped DDL creates, as `pg_constraint` describes it. */
+interface ConstraintExpectation {
+  /** `conname`. */
+  name: string;
+  /** Human-readable `contype`, used when a mismatch is reported. */
+  kind: string;
+  /** `pg_get_constraintdef(oid)`, compared verbatim. */
+  definition: string;
+  /** `pg_constraint` action-code columns and the values they must hold. */
+  codes?: Record<string, string>;
+}
+
+const expectedConstraints: readonly ConstraintExpectation[] = [
+  {
+    name: "PlayerOnGames_playerId_fkey",
+    kind: "foreign key",
+    definition:
+      'FOREIGN KEY ("playerId") REFERENCES "User"(id) ON UPDATE CASCADE ON DELETE RESTRICT',
+    codes: FOREIGN_KEY_CODES,
+  },
+  {
+    name: "PlayerOnGames_gameId_fkey",
+    kind: "foreign key",
+    definition:
+      'FOREIGN KEY ("gameId") REFERENCES "Game"(id) ON UPDATE CASCADE ON DELETE RESTRICT',
+    codes: FOREIGN_KEY_CODES,
+  },
+  {
+    name: "Deck_ownerUserId_fkey",
+    kind: "foreign key",
+    definition:
+      'FOREIGN KEY ("ownerUserId") REFERENCES "User"(id) ON UPDATE CASCADE ON DELETE RESTRICT',
+    codes: FOREIGN_KEY_CODES,
+  },
+  { name: "User_pkey", kind: "primary key", definition: "PRIMARY KEY (id)" },
+  { name: "Game_pkey", kind: "primary key", definition: "PRIMARY KEY (id)" },
+  { name: "Deck_pkey", kind: "primary key", definition: "PRIMARY KEY (id)" },
+  {
+    name: "PlayerOnGames_pkey",
+    kind: "primary key",
+    definition: 'PRIMARY KEY ("playerId", "gameId")',
+  },
 ];
 
 /**
@@ -231,16 +263,21 @@ const expectedConstraints: readonly [
  * key or foreign key that drifted from the SQL.
  */
 async function verifyDeployedSchema(tx: SqlConnection) {
-  const columns =
-    await tx`SELECT table_name, column_name, data_type, is_nullable, datetime_precision, column_default FROM information_schema.columns WHERE table_schema = current_schema() AND table_name IN ('User','Deck','Game','PlayerOnGames')`;
+  const columns = await tx`
+    SELECT table_name, column_name, data_type, is_nullable, datetime_precision, column_default
+    FROM information_schema.columns
+    WHERE table_schema = current_schema() AND table_name = ANY(${expectedTables}::text[])
+  `;
   const columnByName = new Map(
     columns.map((column) => [
       `${column.table_name}.${column.column_name}`,
       column,
     ]),
   );
-  for (const [table, expectations] of Object.entries(expectedColumns))
-    for (const [name, [type, nullable]] of Object.entries(expectations)) {
+  for (const table of expectedTables)
+    for (const [name, [type, nullable]] of Object.entries(
+      expectedColumns[table],
+    )) {
       const column = columnByName.get(`${table}.${name}`);
       if (
         !column ||
@@ -251,7 +288,7 @@ async function verifyDeployedSchema(tx: SqlConnection) {
         throw new Error(
           `Existing database column differs from the deployed SQL schema: ${table}.${name}`,
         );
-      if (!matchesDefault[defaultKind(table, name)](column.column_default))
+      if (!matchesExpectedDefault(table, name, column.column_default))
         throw new Error(
           `Existing column default differs from deployed SQL: ${table}.${name}`,
         );
@@ -261,7 +298,7 @@ async function verifyDeployedSchema(tx: SqlConnection) {
   const constraintByName = new Map(
     constraints.map((constraint) => [constraint.conname, constraint]),
   );
-  for (const [name, kind, definition, codes] of expectedConstraints) {
+  for (const { name, kind, definition, codes } of expectedConstraints) {
     const constraint = constraintByName.get(name);
     const actionsMatch =
       codes === undefined ||
