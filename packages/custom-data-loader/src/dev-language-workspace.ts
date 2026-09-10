@@ -1,21 +1,26 @@
-/** The browser Worker and Node language server check the same small project. */
+/** Virtual project root shared by the browser Worker and Node language server. */
 export const LANGUAGE_WORKSPACE = "/workspace";
 export const BROWSER_TSDK_URL =
   "https://cdn.jsdelivr.net/npm/typescript@6.0.3/lib";
-/** Resolve a deployment path against the page, including HTTPS → WSS. */
-export function languageServerUrl(pageUrl: string, configured = "/gts") {
-  const url = new URL(configured, pageUrl);
-  if (url.protocol === "https:") url.protocol = "wss:";
-  else if (url.protocol === "http:") url.protocol = "ws:";
-  if (!["ws:", "wss:"].includes(url.protocol))
-    throw new Error("Language service URL must use HTTP(S) or WS(S)");
-  return url.href;
-}
 
 export const LANGUAGE_GTS_CONFIG = {
   providerImportSource: "@gi-tcg/editor-provider",
   runtimeImportSource: "@gi-tcg/editor-provider/runtime",
 };
+
+/** Resolve a deployment path against the page, including HTTPS → WSS. */
+export function languageServerUrl(pageUrl: string, configured = "/gts") {
+  const url = new URL(configured, pageUrl);
+  if (url.protocol === "https:") {
+    url.protocol = "wss:";
+  } else if (url.protocol === "http:") {
+    url.protocol = "ws:";
+  }
+  if (!["ws:", "wss:"].includes(url.protocol)) {
+    throw new Error("Language service URL must use HTTP(S) or WS(S)");
+  }
+  return url.href;
+}
 
 export function createLanguageWorkspace(
   providerDeclarations: Record<string, string>,
@@ -29,38 +34,36 @@ export function createLanguageWorkspace(
       "缺少编辑器类型声明，请先运行 custom-data-loader 的 build。",
     );
   }
+  const providerDirectory = `${LANGUAGE_WORKSPACE}/node_modules/@gi-tcg/editor-provider`;
+  const coreDirectory = `${LANGUAGE_WORKSPACE}/node_modules/@gi-tcg/core`;
   const files: Record<string, string> = {};
-  for (const [path, content] of Object.entries(providerDeclarations)) {
+  for (const [relativePath, content] of Object.entries(providerDeclarations)) {
     if (
-      path.startsWith("/") ||
-      path.split(/[\\/]/).includes("..") ||
-      !path.endsWith(".d.ts")
+      relativePath.startsWith("/") ||
+      relativePath.split(/[\\/]/).includes("..") ||
+      !relativePath.endsWith(".d.ts")
     ) {
-      throw new Error(`Invalid provider declaration path: ${path}`);
+      throw new Error(`Invalid provider declaration path: ${relativePath}`);
     }
-    files[
-      `${LANGUAGE_WORKSPACE}/node_modules/@gi-tcg/editor-provider/${path}`
-    ] = content;
+    files[`${providerDirectory}/${relativePath}`] = content;
   }
   return {
     ...files,
-    [`${LANGUAGE_WORKSPACE}/node_modules/@gi-tcg/editor-provider/package.json`]:
-      JSON.stringify({
-        name: "@gi-tcg/editor-provider",
-        type: "module",
-        exports: {
-          "./vm": "./vm.d.ts",
-          "./runtime": "./runtime.d.ts",
-          "./data": "./data.d.ts",
-        },
-      }),
-    [`${LANGUAGE_WORKSPACE}/node_modules/@gi-tcg/core/package.json`]:
-      JSON.stringify({
-        name: "@gi-tcg/core",
-        type: "module",
-        exports: { "./data": "./data.d.ts" },
-      }),
-    [`${LANGUAGE_WORKSPACE}/node_modules/@gi-tcg/core/data.d.ts`]:
+    [`${providerDirectory}/package.json`]: JSON.stringify({
+      name: "@gi-tcg/editor-provider",
+      type: "module",
+      exports: {
+        "./vm": "./vm.d.ts",
+        "./runtime": "./runtime.d.ts",
+        "./data": "./data.d.ts",
+      },
+    }),
+    [`${coreDirectory}/package.json`]: JSON.stringify({
+      name: "@gi-tcg/core",
+      type: "module",
+      exports: { "./data": "./data.d.ts" },
+    }),
+    [`${coreDirectory}/data.d.ts`]:
       'export * from "@gi-tcg/editor-provider/data";',
     [`${LANGUAGE_WORKSPACE}/package.json`]: JSON.stringify({
       private: true,

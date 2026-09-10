@@ -121,14 +121,15 @@ docker build -f packages/custom-data-loader/Dockerfile.language-service \
   --target web-artifacts --output type=local,dest=./editor-static .
 ```
 
-The image binds `0.0.0.0` inside its container; the example publishes its port only
-on the host's loopback for the reverse proxy. The runtime base is the official
-Node 26.8.1 image on Debian bookworm/glibc, pinned by its multi-platform image
-digest. Host development checks use Node 26.8.2; both versions satisfy the
-repository's `^26.1.0` requirement. Build and runtime stages share the system CA
-certificates and OpenSSL required by HTTPS downloads and native dependencies.
-Test that image on the deployment architecture; a local Linux run
-is useful compatibility evidence but is not an execution of the image itself.
+The image binds `0.0.0.0` inside the container. The example publishes the port on
+the host's loopback for the reverse proxy. It uses the official Node 26.8.1 image
+on Debian bookworm/glibc, pinned by its multi-platform digest. Build and runtime
+stages inherit CA certificates and OpenSSL from the shared base image for HTTPS
+downloads and native dependencies.
+
+Node 26.8.1 in the image and Node 26.8.2 used for host checks both satisfy the
+repository's `^26.1.0` requirement. Validate the built image on the architecture
+used for deployment.
 
 The backend handles language analysis. Card compilation and execution keep using
 the existing `CustomDataLoader` and browser `esbuild-wasm` evaluator.
