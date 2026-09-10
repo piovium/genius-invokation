@@ -1,0 +1,569 @@
+{
+  "schemaVersion": 2,
+  "commands": "Use each sealed gate's existing args verbatim.",
+  "buildPackages": {
+    "main": [
+      {
+        "path": "packages/assets-manager",
+        "tools": [
+          "scripts/fetch.ts",
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/index.js"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "AssetsManager": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/card-data-viewer",
+        "tools": [
+          "vite/bin/vite.js"
+        ],
+        "outputs": [
+          "dist/index.js",
+          "dist/style.css"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "createCardDataViewer": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/cbinding",
+        "tools": [
+          "scripts/prepare.ts"
+        ],
+        "outputs": [
+          "generated/js_code.cpp",
+          "include/gitcg/gitcg.h"
+        ],
+        "declarations": []
+      },
+      {
+        "path": "packages/config",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/index.js"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "IS_BETA": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/core",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/index.js"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "Game": "value"
+            }
+          },
+          {
+            "file": "dist/data.d.ts",
+            "exports": {
+              "Registry": "value"
+            }
+          },
+          {
+            "file": "dist/gts/runtime.d.ts",
+            "exports": {
+              "defineViewModel": "value"
+            }
+          },
+          {
+            "file": "dist/gts/vm.d.ts",
+            "exports": {
+              "default": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/data",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/index.js"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "default": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/data-code-analyzer",
+        "tools": [
+          "scripts/index.ts",
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/index.js"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "analyzeResult": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/deck-builder",
+        "tools": [
+          "vite/bin/vite.js"
+        ],
+        "outputs": [
+          "dist/index.js",
+          "dist/style.css"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "DeckBuilder": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/detail-log-viewer",
+        "tools": [
+          "vite/bin/vite.js"
+        ],
+        "outputs": [
+          "dist/index.js",
+          "dist/style.css"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "DetailLogViewer": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/standalone",
+        "tools": [
+          "vite/bin/vite.js"
+        ],
+        "outputs": [
+          "dist/index.html"
+        ],
+        "directories": [
+          "dist/assets"
+        ],
+        "declarations": []
+      },
+      {
+        "path": "packages/state-editor",
+        "tools": [
+          "vite/bin/vite.js"
+        ],
+        "outputs": [
+          "dist/index.js",
+          "dist/style.css"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "GameStateEditor": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/typings",
+        "tools": [
+          "scripts/buf.ts",
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/index.js"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "createRpcRequest": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/utils",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/index.js"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "toSortedBy": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/web-ui-core",
+        "tools": [
+          "vite/bin/vite.js"
+        ],
+        "outputs": [
+          "dist/index.js",
+          "dist/style.css"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "createClient": "value"
+            }
+          }
+        ]
+      }
+    ],
+    "gts": [
+      {
+        "path": "docs",
+        "tools": [
+          "vite/bin/vite.js"
+        ],
+        "outputs": [
+          ".output/server/index.mjs",
+          ".output/public/index.html"
+        ],
+        "directories": [
+          ".output/public"
+        ],
+        "declarations": []
+      },
+      {
+        "path": "examples/provider",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [],
+        "declarations": [
+          {
+            "file": "dist/vm.d.ts",
+            "exports": {
+              "default": "value"
+            }
+          },
+          {
+            "file": "dist/runtime.d.ts",
+            "exports": {
+              "defineViewModel": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "examples/web",
+        "tools": [
+          "vite/bin/vite.js"
+        ],
+        "outputs": [
+          "dist/index.html"
+        ],
+        "directories": [
+          "dist/assets"
+        ],
+        "declarations": []
+      },
+      {
+        "path": "packages/language-client-code",
+        "tools": [
+          "scripts/build_svg.ts"
+        ],
+        "outputs": [
+          "src/svg.ts"
+        ],
+        "declarations": []
+      },
+      {
+        "path": "packages/language-plugin",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/index.js"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "createGtsLanguagePlugin": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/language-server",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/node.js",
+          "dist/browser.js"
+        ],
+        "declarations": [
+          {
+            "file": "dist/node.d.ts",
+            "exports": {}
+          },
+          {
+            "file": "dist/browser.d.ts",
+            "exports": {
+              "GtsLanguageServerBrowserInitializationOptions": "type"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/prettier-plugin",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/index.js"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "default": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/runtime",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/index.js"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "defineViewModel": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/transpiler",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/index.js"
+        ],
+        "declarations": [
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "transpile": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/tsc",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/index.js"
+        ],
+        "declarations": []
+      },
+      {
+        "path": "packages/typescript-language-service-plugin",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/index.js"
+        ],
+        "declarations": []
+      },
+      {
+        "path": "packages/unplugin",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/bun.js",
+          "dist/esbuild.js",
+          "dist/index.js",
+          "dist/rolldown.js",
+          "dist/rollup.js",
+          "dist/rspack.js",
+          "dist/unloader.js",
+          "dist/unplugin.js",
+          "dist/vite.js",
+          "dist/webpack.js"
+        ],
+        "declarations": [
+          {
+            "file": "dist/bun.d.ts",
+            "exports": {
+              "default": "value"
+            }
+          },
+          {
+            "file": "dist/esbuild.d.ts",
+            "exports": {
+              "default": "value"
+            }
+          },
+          {
+            "file": "dist/index.d.ts",
+            "exports": {
+              "default": "value"
+            }
+          },
+          {
+            "file": "dist/rolldown.d.ts",
+            "exports": {
+              "default": "value"
+            }
+          },
+          {
+            "file": "dist/rollup.d.ts",
+            "exports": {
+              "default": "value"
+            }
+          },
+          {
+            "file": "dist/rspack.d.ts",
+            "exports": {
+              "default": "value"
+            }
+          },
+          {
+            "file": "dist/unloader.d.ts",
+            "exports": {
+              "default": "value"
+            }
+          },
+          {
+            "file": "dist/unplugin.d.ts",
+            "exports": {
+              "unpluginFactory": "value"
+            }
+          },
+          {
+            "file": "dist/vite.d.ts",
+            "exports": {
+              "default": "value"
+            }
+          },
+          {
+            "file": "dist/webpack.d.ts",
+            "exports": {
+              "default": "value"
+            }
+          }
+        ]
+      },
+      {
+        "path": "packages/vscode",
+        "tools": [
+          "tsdown/dist/run.mjs"
+        ],
+        "outputs": [
+          "dist/extension.js",
+          "dist/server.js"
+        ],
+        "declarations": []
+      }
+    ]
+  },
+  "testMinimums": {
+    "gts": {
+      "packages/runtime": 16,
+      "packages/transpiler": 42,
+      "packages/prettier-plugin": 25,
+      "examples/local": 1,
+      "packages/language-server": 3,
+      "packages/tsc": 2
+    },
+    "main": {
+      "packages/core": 29,
+      "packages/assets-manager": 11,
+      "packages/data-code-analyzer": 32,
+      "packages/test": 124,
+      "packages/custom-data-loader": 13
+    }
+  },
+  "typecheck": {
+    "main": {
+      "config": "tsconfig.vitest.json",
+      "typedFiles": [
+        "packages/core/__tests__/query.test-d.ts"
+      ],
+      "configFiles": [
+        "tsconfig.vitest.json",
+        "packages/core/tsconfig.json",
+        "packages/core/tsconfig.node.json"
+      ]
+    }
+  },
+  "notes": [
+    "main build package selection is the unchanged pnpm build cbinding...,standalone... dependency closure (14 packages).",
+    "GTS recursive build has 13 build packages; examples/local participates in tests, not build.",
+    "Outputs derive from existing manifests/configs. node.d.ts is a valid side-effect-only entry.",
+    "Freshness timestamps are recorded for investigation, not required for legal incremental rebuilds.",
+    "Public consumers are additional checks. No original package check/typecheck settings are relaxed."
+  ],
+  "originalTestChanges": {
+    "gts": {
+      "packages/transpiler/__tests__/transpile.test.ts": {
+        "before": "4e2d3457a05ee7d4210f9e22f49cc0f2d6d7524cff1a02d77101874a50aa794c",
+        "after": "839c1a650e49fe31a941a98d7fe91e385de52878acfa73a5078b00c2b4ad349d",
+        "reason": "Run the original Windows-skipped transpile test on Windows too; normalize fixture CRLF before comparing the unchanged snapshot. Original assertions retained. Reviewed Prettier-only formatting preserves the full AST and assertions."
+      }
+    }
+  }
+}

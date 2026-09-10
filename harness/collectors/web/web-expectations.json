@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "case": "web",
+  "fixtures": [
+    {
+      "id": "web-gts-usage",
+      "routes": ["browser-local", "backend-tnb"],
+      "fixture": {
+        "uri": "file:///workspace/example.gts",
+        "validText": "export function twice(value: number): number { return value * 2; }\nexport const answer: number = twice(1);\ndefine status {\n  name \"中文测试状态\" as HarnessStatus;\n  usage 2;\n}\n",
+        "badText": "export function twice(value: number): number { return value * 2; }\nexport const answer: number = twice(1);\ndefine status {\n  name \"中文测试状态\" as HarnessStatus;\n  usage \"wrong\";\n}\n",
+        "diagnostic": {
+          "code": 2345,
+          "messageIncludes": "Argument of type 'string' is not assignable to parameter of type 'number'.",
+          "range": {"start": {"line": 4, "character": 8}, "end": {"line": 4, "character": 15}}
+        },
+        "features": {
+          "hover": "twice(value: number): number",
+          "completion": "twice",
+          "signature": "value: number",
+          "definition": {
+            "uri": "file:///workspace/example.gts",
+            "range": {"start": {"line": 0, "character": 16}, "end": {"line": 0, "character": 21}},
+            "sourceText": "export function twice(value: number): number { return value * 2; }\nexport const answer: number = twice(1);\ndefine status {\n  name \"中文测试状态\" as HarnessStatus;\n  usage 2;\n}\n"
+          }
+        }
+      }
+    }
+  ]
+}

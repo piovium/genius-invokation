@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2.1.2",
+  "version": "2.1.3",
   "phase": "migration",
   "tnbVersion": "6.0.3-bridge.16.tsgo.7.0.2",
   "policy": {
@@ -79,7 +79,8 @@
         "patches/",
         "packages/custom-data-loader/",
         "vitest.setup.ts",
-        "packages/detail-log-viewer/src/DetailLogViewer.tsx"
+        "packages/detail-log-viewer/src/DetailLogViewer.tsx",
+        "packages/core/package.json"
       ],
       "gates": [
         "environment",
@@ -102,7 +103,15 @@
         "package.json",
         "pnpm-workspace.yaml",
         "pnpm-lock.yaml",
-        "patches/"
+        "patches/",
+        "docs/content/docs/internal/index.md",
+        "docs/content/docs/internal/build-plugins.md",
+        "docs/content/docs/internal/language-tooling.md",
+        "docs/content/docs/runtime-guide/index.mdx",
+        "docs/content/docs/runtime-guide/transpilation-output.mdx",
+        "docs/content/docs/user-guide/entity.mdx",
+        "docs/content/docs/user-guide/skill.mdx",
+        "docs/content/docs/user-guide/typescript-interop.mdx"
       ],
       "gates": [
         "engine",
@@ -403,41 +412,90 @@
       "collector": "harness/collectors/cli/cli-collector.mjs",
       "validator": "harness/collectors/cli/cli-validator.mjs",
       "expectations": "harness/collectors/cli/cli-expectations.json"
+    },
+    "main-build": {
+      "collector": "harness/collectors/command/command-collector.mjs",
+      "validator": "harness/collectors/command/command-validator.mjs",
+      "expectations": "harness/collectors/command/command-expectations.json"
+    },
+    "main-tests": {
+      "collector": "harness/collectors/command/command-collector.mjs",
+      "validator": "harness/collectors/command/command-validator.mjs",
+      "expectations": "harness/collectors/command/command-expectations.json"
+    },
+    "gts-build": {
+      "collector": "harness/collectors/command/command-collector.mjs",
+      "validator": "harness/collectors/command/command-validator.mjs",
+      "expectations": "harness/collectors/command/command-expectations.json"
+    },
+    "gts-tests": {
+      "collector": "harness/collectors/command/command-collector.mjs",
+      "validator": "harness/collectors/command/command-validator.mjs",
+      "expectations": "harness/collectors/command/command-expectations.json"
+    },
+    "web": {
+      "collector": "harness/collectors/web/web-collector.mjs",
+      "validator": "harness/collectors/web/web-validator.mjs",
+      "expectations": "harness/collectors/web/web-expectations.json"
     }
   },
   "scopeTransitions": [
     {
-      "role": "integration",
-      "previousTaskId": "43db8d15-0537-471c-be04-236ec391da7b",
-      "previousControlDigest": "28ce8be4b84b71f2872f26ec1a4f5c9f41763a802e202569bb751b393f9f5b90",
-      "previousRecordSha256": "ea7de7436b9885ac09ff873fc15f65cacff8c844d0b6adb708b2a390cc2f3d24",
+      "role": "gts",
+      "previousTaskId": "a40063cd-c453-4091-8ea8-ceb62837323a",
+      "previousControlDigest": "a695c4a0987cbb600ef7250f1222402427af2e5b1a47c48aca893315d5d19c38",
+      "previousRecordSha256": "4316299224577cdb42223a968ac099cbcc0be7a2291c0f2459ed389c75da3cf6",
       "from": {
-        "repository": "main",
+        "repository": "gts",
         "paths": [
+          "packages/",
+          "examples/",
           "package.json",
           "pnpm-workspace.yaml",
           "pnpm-lock.yaml",
-          ".vscode/",
-          ".github/",
-          "docs/",
-          ".gitattributes",
-          "patches/",
-          "packages/custom-data-loader/"
+          "patches/"
         ],
         "gates": [
-          "environment",
-          "inventory",
           "engine",
-          "data",
-          "coverage",
-          "checks",
-          "main-build",
-          "main-tests",
-          "memory",
-          "clean-install"
+          "gts-build",
+          "gts-tests",
+          "desktop"
         ]
       },
       "to": {
+        "repository": "gts",
+        "paths": [
+          "packages/",
+          "examples/",
+          "package.json",
+          "pnpm-workspace.yaml",
+          "pnpm-lock.yaml",
+          "patches/",
+          "docs/content/docs/internal/index.md",
+          "docs/content/docs/internal/build-plugins.md",
+          "docs/content/docs/internal/language-tooling.md",
+          "docs/content/docs/runtime-guide/index.mdx",
+          "docs/content/docs/runtime-guide/transpilation-output.mdx",
+          "docs/content/docs/user-guide/entity.mdx",
+          "docs/content/docs/user-guide/skill.mdx",
+          "docs/content/docs/user-guide/typescript-interop.mdx"
+        ],
+        "gates": [
+          "engine",
+          "gts-build",
+          "gts-tests",
+          "desktop"
+        ]
+      },
+      "reason": "Repair the exact eight documentation files whose obsolete URLs cause the original GTS prerender build to fail; preserve all pages and assertions.",
+      "review": "harness/REVIEW.md: 2.1.3 command and web collectors with exact documentation scope"
+    },
+    {
+      "role": "integration",
+      "previousTaskId": "21742461-fe76-4346-b383-6bfbb5fad993",
+      "previousControlDigest": "a695c4a0987cbb600ef7250f1222402427af2e5b1a47c48aca893315d5d19c38",
+      "previousRecordSha256": "72996cdd4e8133d3430a61219279e4c4f5d9731ea8c6779998303071d1c6c1ad",
+      "from": {
         "repository": "main",
         "paths": [
           "package.json",
@@ -465,8 +523,37 @@
           "clean-install"
         ]
       },
-      "reason": "Apply two minimal compiler compatibility fixes: disambiguate an imported type from its exported component, and remove conflicting redundant Vitest matcher inheritance while preserving all matcher names and argument checks.",
-      "review": "harness/REVIEW.md: 2.1.2 exact compiler compatibility ownership"
+      "to": {
+        "repository": "main",
+        "paths": [
+          "package.json",
+          "pnpm-workspace.yaml",
+          "pnpm-lock.yaml",
+          ".vscode/",
+          ".github/",
+          "docs/",
+          ".gitattributes",
+          "patches/",
+          "packages/custom-data-loader/",
+          "vitest.setup.ts",
+          "packages/detail-log-viewer/src/DetailLogViewer.tsx",
+          "packages/core/package.json"
+        ],
+        "gates": [
+          "environment",
+          "inventory",
+          "engine",
+          "data",
+          "coverage",
+          "checks",
+          "main-build",
+          "main-tests",
+          "memory",
+          "clean-install"
+        ]
+      },
+      "reason": "Declare the existing direct type dependencies required by core public declarations; stock and native emission share the same unresolved imports. Preserve source types and all diagnostics assertions.",
+      "review": "harness/REVIEW.md: 2.1.3 checkout bytes and declaration dependency scope"
     }
   ]
 }

@@ -3,6 +3,18 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 
+export function recordProcessLifetime(lifetimesByPid, start, end) {
+  if (!Number.isSafeInteger(start.pid) || start.pid <= 0
+    || !Number.isSafeInteger(start.parentPid) || start.parentPid <= 0
+    || !Number.isSafeInteger(start.at) || !Number.isSafeInteger(end.at) || end.at < start.at
+    || (lifetimesByPid.get(start.pid) ?? []).some(previous => start.at <= previous.end && end.at >= previous.start)) {
+    throw new Error('Incomplete independent native process lifetime/identity');
+  }
+  const lifetimes = lifetimesByPid.get(start.pid) ?? [];
+  lifetimes.push({ start: start.at, end: end.at });
+  lifetimesByPid.set(start.pid, lifetimes);
+}
+
 export async function validate(evidence, { root, directory, contract, gate, expectations, nonce }) {
   try {
     const { hashFile, inside, readJson, stable, processVerdict, fatalPattern } = await import(pathToFileURL(path.join(root, 'harness/core.mjs')).href);
@@ -20,7 +32,7 @@ export async function validate(evidence, { root, directory, contract, gate, expe
     if (!['data', 'checks'].includes(gate.id) || !Array.isArray(evidence.runs) || evidence.runs.length !== expected.length) {
       throw new Error('Missing complete independent CLI check runs');
     }
-    const seenPids = new Set();
+    const lifetimesByPid = new Map();
     for (const [index, run] of evidence.runs.entries()) {
       const pkg = expected[index];
       const cwd = inside(repo, pkg.path);
@@ -78,13 +90,13 @@ export async function validate(evidence, { root, directory, contract, gate, expe
           || compiler.module.sha256 !== await hashFile(compiler.module.path) || !/^[a-f0-9]{64}$/.test(compiler.compiledSha256)) throw new Error('CLI loaded a different compiler SDK');
       }
       if (starts.length !== 1 || ends.length !== 1 || ends[0].code !== 0
-        || seenPids.has(starts[0].pid) || events.some(event => event.pid !== starts[0].pid || event.runNonce !== nonce || event.gateId !== gate.id)
+        || events.some(event => event.pid !== starts[0].pid || event.runNonce !== nonce || event.gateId !== gate.id)
         || stable(starts[0].argv.slice(1)) !== stable([entry, ...expectations.flags]) || starts[0].cwd !== command.cwd
         || starts[0].executable.path !== fs.realpathSync.native(command.executable)
         || starts[0].executable.sha256 !== nodeHash
         || events[0] !== starts[0] || events.at(-1) !== ends[0]
-        || events.some((event, i) => event.at < Date.parse(command.startedAt) || event.at > Date.parse(command.startedAt) + command.durationMs + 100 || i > 0 && event.at < events[i - 1].at)) throw new Error('Incomplete independent native process lifetime/identity');
-      seenPids.add(starts[0].pid);
+        || events.some((event, i) => !Number.isSafeInteger(event.at) || event.at < Date.parse(command.startedAt) || event.at > Date.parse(command.startedAt) + command.durationMs + 100 || i > 0 && event.at < events[i - 1].at)) throw new Error('Incomplete independent native process lifetime/identity');
+      recordProcessLifetime(lifetimesByPid, starts[0], ends[0]);
       observedProcesses.push(starts[0]);
       for (const event of natives) {
         if (event.module.path !== nativePath || event.module.sha256 !== await hashFile(nativePath)

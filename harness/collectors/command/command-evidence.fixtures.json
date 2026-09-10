@@ -1,0 +1,189 @@
+{
+  "sourceRepo": "E:/360data/重要数据/我的文档/ChatGPT/2026-09-10-2/worktrees/gts",
+  "tests": {
+    "file": "artifacts/gts-baseline/native-final-848fa9e-tests.stdout.log",
+    "sha256": "9a81ec1c14fa149896fa46a0d6decf2ff6966291ce3f098088bc774dc3eb682a",
+    "text": "Scope: 14 of 15 workspace projects\npackages/runtime test$ vitest\npackages/transpiler test$ vitest\npackages/runtime test:  RUN  v4.1.6 E:/360data/重要数据/我的文档/ChatGPT/2026-09-10-2/worktrees/gts/packages/runtime\npackages/transpiler test:  RUN  v4.1.6 E:/360data/重要数据/我的文档/ChatGPT/2026-09-10-2/worktrees/gts/packages/transpiler\npackages/transpiler test:  Test Files  7 passed (7)\npackages/transpiler test:       Tests  42 passed (42)\npackages/transpiler test:    Start at  06:44:40\npackages/transpiler test:    Duration  804ms (transform 724ms, setup 0ms, import 1.88s, tests 89ms, environment 1ms)\npackages/runtime test:  Test Files  2 passed (2)\npackages/runtime test:       Tests  16 passed (16)\npackages/runtime test:    Start at  06:44:40\npackages/runtime test:    Duration  847ms (transform 200ms, setup 0ms, import 1.05s, tests 53ms, environment 0ms)\npackages/transpiler test: Done\npackages/runtime test: Done\npackages/prettier-plugin test$ vitest\npackages/prettier-plugin test:  RUN  v4.1.6 E:/360data/重要数据/我的文档/ChatGPT/2026-09-10-2/worktrees/gts/packages/prettier-plugin\npackages/prettier-plugin test:  Test Files  1 passed (1)\npackages/prettier-plugin test:       Tests  25 passed (25)\npackages/prettier-plugin test:    Start at  06:44:41\npackages/prettier-plugin test:    Duration  701ms (transform 192ms, setup 0ms, import 460ms, tests 65ms, environment 0ms)\npackages/prettier-plugin test: Done\nexamples/local test$ vitest\npackages/language-server test$ vitest run\npackages/tsc test$ vitest run\npackages/tsc test:  RUN  v4.1.6 E:/360data/重要数据/我的文档/ChatGPT/2026-09-10-2/worktrees/gts/packages/tsc\npackages/language-server test:  RUN  v4.1.6 E:/360data/重要数据/我的文档/ChatGPT/2026-09-10-2/worktrees/gts/packages/language-server\nexamples/local test:  RUN  v4.1.6 E:/360data/重要数据/我的文档/ChatGPT/2026-09-10-2/worktrees/gts/examples/local\nexamples/local test:  Test Files  1 passed (1)\nexamples/local test:       Tests  1 passed (1)\nexamples/local test:    Start at  06:44:42\nexamples/local test:    Duration  1.34s (transform 218ms, setup 0ms, import 67ms, tests 953ms, environment 0ms)\nexamples/local test: Done\npackages/tsc test: ▎ TNB ACTIVE — `typescript` is the tsgo-backed fork\npackages/language-server test:  Test Files  2 passed (2)\npackages/language-server test:       Tests  3 passed (3)\npackages/language-server test:    Start at  06:44:42\npackages/language-server test:    Duration  4.48s (transform 275ms, setup 0ms, import 1.04s, tests 4.09s, environment 0ms)\npackages/language-server test: Done\npackages/tsc test:  Test Files  2 passed (2)\npackages/tsc test:       Tests  2 passed (2)\npackages/tsc test:    Start at  06:44:42\npackages/tsc test:    Duration  7.90s (transform 517ms, setup 0ms, import 1.38s, tests 13.56s, environment 0ms)\npackages/tsc test: Done\n"
+  },
+  "skipped": {
+    "file": "artifacts/gts-baseline/stock-recursive-tests-ready.stdout.log",
+    "sha256": "7bbfa414711f508844fa4d67d72a5f39388e2886c33792b9ccd260a73447aaf1",
+    "text": "Scope: 14 of 15 workspace projects\npackages/runtime test$ vitest\npackages/transpiler test$ vitest\npackages/transpiler test:  RUN  v4.1.6 E:/360data/重要数据/我的文档/ChatGPT/2026-09-10-2/worktrees/gts/packages/transpiler\npackages/runtime test:  RUN  v4.1.6 E:/360data/重要数据/我的文档/ChatGPT/2026-09-10-2/worktrees/gts/packages/runtime\npackages/transpiler test:  Test Files  6 passed | 1 skipped (7)\npackages/transpiler test:       Tests  41 passed | 1 skipped (42)\npackages/transpiler test:    Start at  04:16:23\npackages/transpiler test:    Duration  780ms (transform 745ms, setup 0ms, import 1.69s, tests 83ms, environment 1ms)\npackages/transpiler test: Done\npackages/runtime test:  Test Files  2 passed (2)\npackages/runtime test:       Tests  16 passed (16)\npackages/runtime test:    Start at  04:16:23\npackages/runtime test:    Duration  876ms (transform 184ms, setup 0ms, import 878ms, tests 52ms, environment 0ms)\npackages/runtime test: Done\npackages/prettier-plugin test$ vitest\npackages/prettier-plugin test:  RUN  v4.1.6 E:/360data/重要数据/我的文档/ChatGPT/2026-09-10-2/worktrees/gts/packages/prettier-plugin\npackages/prettier-plugin test:  Test Files  1 passed (1)\npackages/prettier-plugin test:       Tests  25 passed (25)\npackages/prettier-plugin test:    Start at  04:16:25\npackages/prettier-plugin test:    Duration  703ms (transform 198ms, setup 0ms, import 428ms, tests 75ms, environment 0ms)\npackages/prettier-plugin test: Done\nexamples/local test$ vitest\nexamples/local test:  RUN  v4.1.6 E:/360data/重要数据/我的文档/ChatGPT/2026-09-10-2/worktrees/gts/examples/local\nexamples/local test:  Test Files  1 passed (1)\nexamples/local test:       Tests  1 passed (1)\nexamples/local test:    Start at  04:16:26\nexamples/local test:    Duration  733ms (transform 121ms, setup 0ms, import 37ms, tests 510ms, environment 0ms)\nexamples/local test: Done\n"
+  },
+  "buildFailures": [
+    {
+      "file": "artifacts/gts-baseline/native-final-848fa9e-build.stdout.log",
+      "sha256": "86a967985548b82f38c55afece895b5317494284c2519e2a2740f6e9e110a732",
+      "text": "[prerender] Prerendered 0 pages:\ndocs build: [unhandledRejection] [TypeError: fetch failed] {\ndocs build:   [cause]: AggregateError [EACCES]: \ndocs build:       at internalConnectMultiple (node:net:1430:18)\ndocs build:       at afterConnectMultiple (node:net:2099:7) {\ndocs build:     code: 'EACCES',\ndocs build:     [errors]: [ [Error], [Error] ]\ndocs build:   }\ndocs build: }\ndocs build: Done\nexamples/provider build$ tsdown\npackages/unplugin build$ tsdown\npackages/language-plugin build$ tsdown --platform neutral\npackages/prettier-plugin build$ tsdown --platform neutral\nexamples/provider build: ℹ tsdown v0.22.0 powered by rolldown v1.0.1\npackages/prettier-plugin build: ℹ tsdown v0.22.0 powered by rolldown v1.0.1\npackages/unplugin build: ℹ tsdown v0.22.0 powered by rolldown v1.0.1\npackages/language-plugin build: ℹ tsdown v0.22.0 powered by rolldown v1.0.1\npackages/prettier-plugin build: ℹ config file: E:\\360data\\重要数据\\我的文档\\ChatGPT\\2026-09-10-2\\worktrees\\gts\\packages\\prettier-plugin\\package.json \npackages/prettier-plugin build: ℹ entry: src\\index.ts\npackages/prettier-plugin build: ℹ tsconfig: tsconfig.json\npackages/prettier-plugin build: ℹ Build start\npackages/language-plugin build: ℹ config file: E:\\360data\\重要数据\\我的文档\\ChatGPT\\2026-09-10-2\\worktrees\\gts\\packages\\language-plugin\\package"
+    },
+    {
+      "file": "artifacts/gts-baseline/native-final-b25e311-build/native-final-b25e311-build.stdout.log",
+      "sha256": "60e9127d2dd626cb3cb606605207b822cb7cc7eeeda1a126727588a430d4920c",
+      "text": "[prerender] Prerendered 0 pages:\ndocs build: [unhandledRejection] [TypeError: fetch failed] {\ndocs build:   [cause]: AggregateError [EACCES]: \ndocs build:       at internalConnectMultiple (node:net:1430:18)\ndocs build:       at afterConnectMultiple (node:net:2099:7) {\ndocs build:     code: 'EACCES',\ndocs build:     [errors]: [ [Error], [Error] ]\ndocs build:   }\ndocs build: }\ndocs build: Done\nexamples/provider build$ tsdown\npackages/language-plugin build$ tsdown --platform neutral\npackages/prettier-plugin build$ tsdown --platform neutral\npackages/unplugin build$ tsdown\nexamples/provider build: ℹ tsdown v0.22.0 powered by rolldown v1.0.1\npackages/language-plugin build: ℹ tsdown v0.22.0 powered by rolldown v1.0.1\npackages/prettier-plugin build: ℹ tsdown v0.22.0 powered by rolldown v1.0.1\npackages/unplugin build: ℹ tsdown v0.22.0 powered by rolldown v1.0.1\npackages/language-plugin build: ℹ config file: E:\\360data\\重要数据\\我的文档\\ChatGPT\\2026-09-10-2\\worktrees\\gts\\packages\\language-plugin\\package.json \npackages/prettier-plugin build: ℹ config file: E:\\360data\\重要数据\\我的文档\\ChatGPT\\2026-09-10-2\\worktrees\\gts\\packages\\prettier-plugin\\package.json \npackages/language-plugin build: ℹ entry: src\\index.ts\npackages/language-plugin build: ℹ tsconfig: tsconfig.json\npackages/language-plugin build: ℹ Build"
+    }
+  ],
+  "baselineTests": {
+    "gts": [
+      {
+        "path": "examples/local",
+        "name": "@example/local",
+        "script": "vitest",
+        "files": [
+          "examples/local/import.test.ts"
+        ]
+      },
+      {
+        "path": "packages/prettier-plugin",
+        "name": "@gi-tcg/prettier-plugin-gts",
+        "script": "vitest",
+        "files": [
+          "packages/prettier-plugin/__tests__/format.test.ts"
+        ]
+      },
+      {
+        "path": "packages/runtime",
+        "name": "@gi-tcg/gts-runtime",
+        "script": "vitest",
+        "files": [
+          "packages/runtime/__tests__/simple_view_model.test.ts",
+          "packages/runtime/__tests__/view_model.test.ts"
+        ]
+      },
+      {
+        "path": "packages/transpiler",
+        "name": "@gi-tcg/gts-transpiler",
+        "script": "vitest",
+        "files": [
+          "packages/transpiler/__tests__/content_start.test.ts",
+          "packages/transpiler/__tests__/loose_plugin.test.ts",
+          "packages/transpiler/__tests__/minimal_missing_string.test.ts",
+          "packages/transpiler/__tests__/parse.test.ts",
+          "packages/transpiler/__tests__/resolve_config.test.ts",
+          "packages/transpiler/__tests__/shortcut_function_return_type.test.ts",
+          "packages/transpiler/__tests__/transpile.test.ts"
+        ]
+      }
+    ],
+    "main": [
+      {
+        "path": "packages/assets-manager",
+        "name": "@gi-tcg/assets-manager",
+        "script": "vitest",
+        "files": [
+          "packages/assets-manager/__tests__/manager.test.ts"
+        ]
+      },
+      {
+        "path": "packages/core",
+        "name": "@gi-tcg/core",
+        "script": "vitest",
+        "files": [
+          "packages/core/__tests__/game_io.test.ts",
+          "packages/core/__tests__/log.test.ts",
+          "packages/core/__tests__/query.test-d.ts",
+          "packages/core/__tests__/query.test.ts",
+          "packages/core/__tests__/random.test.ts",
+          "packages/core/__tests__/s_expr.test.ts",
+          "packages/core/__tests__/utils.test.ts",
+          "packages/core/__tests__/version.test.ts"
+        ]
+      },
+      {
+        "path": "packages/custom-data-loader",
+        "name": "@gi-tcg/custom-data-loader",
+        "script": "vitest",
+        "files": [
+          "packages/custom-data-loader/__tests__/loader.test.ts"
+        ]
+      },
+      {
+        "path": "packages/data-code-analyzer",
+        "name": "@gi-tcg/data-code-analyzer",
+        "script": "vitest",
+        "files": [
+          "packages/data-code-analyzer/__tests__/referenced_names.test.ts",
+          "packages/data-code-analyzer/__tests__/source_file.test.ts"
+        ]
+      },
+      {
+        "path": "packages/test",
+        "name": "@gi-tcg/test",
+        "script": "vitest",
+        "files": [
+          "packages/test/__tests__/abundant_phlogiston.test.tsx",
+          "packages/test/__tests__/abyss_lector_violet_lightning.test.tsx",
+          "packages/test/__tests__/adventure.test.tsx",
+          "packages/test/__tests__/albedo.test.tsx",
+          "packages/test/__tests__/alldevouring_narwhal.test.tsx",
+          "packages/test/__tests__/amber.test.tsx",
+          "packages/test/__tests__/baizhu.test.tsx",
+          "packages/test/__tests__/basic.test.tsx",
+          "packages/test/__tests__/bennett.test.tsx",
+          "packages/test/__tests__/blessing_of_the_divine.test.tsx",
+          "packages/test/__tests__/bond_of_life.test.tsx",
+          "packages/test/__tests__/calligraphy_tavern.test.tsx",
+          "packages/test/__tests__/chevreuse.test.tsx",
+          "packages/test/__tests__/collective_of_plenty.test.tsx",
+          "packages/test/__tests__/collei.test.tsx",
+          "packages/test/__tests__/cost_attachments.test.tsx",
+          "packages/test/__tests__/damage_combination.test.tsx",
+          "packages/test/__tests__/delayed_triggering.test.tsx",
+          "packages/test/__tests__/dice_deduct.test.tsx",
+          "packages/test/__tests__/ellin.test.tsx",
+          "packages/test/__tests__/emilie.test.tsx",
+          "packages/test/__tests__/emperor_of_fire_and_iron.test.tsx",
+          "packages/test/__tests__/empowerment.test.tsx",
+          "packages/test/__tests__/equip_on_defeated.test.tsx",
+          "packages/test/__tests__/eremite_floral_ringdancer.test.tsx",
+          "packages/test/__tests__/fixed_dice_overflow.test.tsx",
+          "packages/test/__tests__/flower_of_paradise_lost.test.tsx",
+          "packages/test/__tests__/freminet.test.tsx",
+          "packages/test/__tests__/fresh_wind_of_freedom.test.tsx",
+          "packages/test/__tests__/furina.test.tsx",
+          "packages/test/__tests__/game_end.test.tsx",
+          "packages/test/__tests__/ganyu.test.tsx",
+          "packages/test/__tests__/guardian_of_apeps_oasis.test.tsx",
+          "packages/test/__tests__/hci.test.tsx",
+          "packages/test/__tests__/hydro_hilichurl_rogue.test.tsx",
+          "packages/test/__tests__/hydro_tulpa.test.tsx",
+          "packages/test/__tests__/jahoda.test.tsx",
+          "packages/test/__tests__/kamisato_ayaka.test.tsx",
+          "packages/test/__tests__/kaveh.test.tsx",
+          "packages/test/__tests__/kid_kujirai.test.tsx",
+          "packages/test/__tests__/kinich.test.tsx",
+          "packages/test/__tests__/kusava.test.tsx",
+          "packages/test/__tests__/la_signora.test.tsx",
+          "packages/test/__tests__/lisa.test.tsx",
+          "packages/test/__tests__/listen_to_all.test.tsx",
+          "packages/test/__tests__/lumenstone_adjuvant.test.tsx",
+          "packages/test/__tests__/lunar_crystalize.test.tsx",
+          "packages/test/__tests__/lyresong.test.tsx",
+          "packages/test/__tests__/mavuika.test.tsx",
+          "packages/test/__tests__/memento_lens.test.tsx",
+          "packages/test/__tests__/mona.test.tsx",
+          "packages/test/__tests__/nahida.test.tsx",
+          "packages/test/__tests__/nasha_town.test.tsx",
+          "packages/test/__tests__/nightmare_omen.test.tsx",
+          "packages/test/__tests__/nilou.test.tsx",
+          "packages/test/__tests__/opera_epiclese.test.tsx",
+          "packages/test/__tests__/ororon.test.tsx",
+          "packages/test/__tests__/plunging.test.tsx",
+          "packages/test/__tests__/qucusaurus.test.tsx",
+          "packages/test/__tests__/query_active_inc_defeated.test.tsx",
+          "packages/test/__tests__/query_recent_opp_from.test.tsx",
+          "packages/test/__tests__/seymour.test.tsx",
+          "packages/test/__tests__/shikanoin_heizou.test.tsx",
+          "packages/test/__tests__/sigewinne.test.tsx",
+          "packages/test/__tests__/tartaglia.test.tsx",
+          "packages/test/__tests__/the_mausoleum_of_king_deshret.test.tsx",
+          "packages/test/__tests__/thunder_manifestation_talent.test.tsx",
+          "packages/test/__tests__/thundercloud.test.tsx",
+          "packages/test/__tests__/ultimate_overlords_mega_magic_sword.test.tsx",
+          "packages/test/__tests__/venti.test.tsx",
+          "packages/test/__tests__/wanderer.test.tsx",
+          "packages/test/__tests__/wangshu_inn.test.tsx"
+        ]
+      }
+    ]
+  }
+}

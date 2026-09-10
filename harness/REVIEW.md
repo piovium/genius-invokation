@@ -113,3 +113,29 @@ GTS worker independently reviewed the concrete compatibility patch: the DetailLo
 Sealed 2.1.1 selftests completed with 86 passed, zero failures/skips at artifacts/selftests/38dc1398-37e6-4959-aaff-29a9a6e1d3ae/receipt.json. The new seal must pass its own unchanged selftests before reassignment. Product acceptance remains incomplete.
 
 The first contract draft mistakenly retained the superseded 2.1.0 transition, whose target role no longer matched the current role; the unchanged validator rejected it before selftests. The corrected active contract contains only the transition from task 43db8d15. The old authorization remains in Git history and its immutable task record; it is not broadened to the new paths. No runner validation was changed.
+
+## 2.1.3 command and web collectors with exact documentation scope
+
+本增量登记真实采集器，不声明迁移通过。全部既有 gate、基线、源码覆盖、平台、次数、超时和语义断言保持不变。版本、adapter 登记及 GTS 的 8 个精确文档路径构成 contract 差异。
+
+GTS 原构建在修正 Nitro 的实际 IPv4／端口处理后能预渲染 31 页，但文档旧 URL 仍产生 404 和 `unhandledRejection`。原始开发证据保留在 `artifacts/harness-drafts/browser/gts-build-draft-eM55SK`，命令退出 0 仍被构建 validator 判为 FAIL。独立检查逐一确认链接目标存在；prospective transition 绑定任务 a40063cd-c453-4091-8ea8-ceb62837323a、原 seal 和任务文件哈希，只增加合同列出的 8 个文件。文档补丁保持页面、标题和代码示例，不通过移除页面获取成功。旧草案缺少 transition 必填的 reason/review 字段，组装检查已发现并补齐，原草案字节保留；不改变 scope 校验器。
+
+CLI 采集器的真实 10 包试跑被 Windows PID 合法复用误拒绝，原失败证据不改写。修复按 PID 的起止生命周期识别独立运行，严格不相交时允许复用；非法 PID／父 PID／时间、重叠、相接和重放均拒绝。实际旧记录及 9 个可移植生命周期回归用例验证该边界，native 身份、原命令、覆盖与运行数验证保持不变。
+
+command collector 执行原有 main/GTS build 和递归 Vitest 命令，通过被动 preload 核验真实工具入口、包脚本、测试数量、类型检查子进程、SDK 和原生语义调用。测试源文件和配置与固定 Git 基线比对；变更的原测试仅接受独立审查后的精确 before/after 哈希。transpile 测试的 Windows skip 移除与 CRLF 规范化保留原快照断言，后续 Prettier 格式补丁经独立完整 AST 对比，更新 after 哈希为 839c1a650e49fe31a941a98d7fe91e385de52878acfa73a5078b00c2b4ad349d，before 仍为固定原始基线。额外 public declaration consumer 验证公开导出可消费及非 any；它不能替代原检查或整份声明的有效性。
+
+Vitest 实跑会改变默认 results.json 中耗时／结果元数据，不能靠忽略整个 .vite 目录绕过完整运行时指纹。本实现从独立测试源码清单确定缓存键，仅对既有默认路径的 version/results/duration/failed schema 保存原始字节和本次生成字节，再恢复原始字节。键丢失、额外字段、备份损坏、链接替换和并发写入均拒绝覆盖，同时尽可能恢复其它已登记缓存。校验器只读验证，不在校验时修复证据。转换缓存、执行文件和其它生成物继续参与原完整快照。
+
+独立 supervisor 使用已有 core.execute 收回子进程树，在原 gate 总预算内预留 5000 ms 恢复缓存。命令、nonce、原始日志哈希、child observation、child lifetime 和内外时间包含关系均核验。真实独立 child 超时、退出 23 和成功三种用例证明父进程能从持久元数据恢复缓存，同时保留各自失败／成功结果。无论缓存恢复是否成功，失败命令都不能通过。
+
+web collector 复用既有三项 Chrome 测试和 raw 会话观测，核验两条路线实际 SDK、后台 native addon/RPC、诊断与源码版本、功能请求、卡牌载入、切换、释放、断连／重连和选择持久化。collector/validator/expectations/fixture 均进入 seal；可移植 parser fixture 只用于自测，不是当前产品证据。网页采集器使用同一缓存恢复 helper 和有界 supervisor。最近真实 main 试跑因 GTS 属性声明依赖不可解析导致漏诊断，维持 FAIL 并继续修复；登记采集器不追认旧试跑为通过。
+
+协调者独立审阅 TNB agent 编写的缓存和 supervisor，网页 agent 独立审阅 command／CLI 修改、contract 范围和格式补丁；协调者独立审阅网页 agent 的采集器。整个组装候选仍需独立核对文件清单后才能 seal，并以新 seal 下的完整 selftest 结果决定任务续接。正式集成验收仍必须重新运行 run all 和 finish，缺采集器／平台／真实产品证据继续拒绝完成。
+
+## 2.1.3 checkout bytes and declaration dependency scope
+
+首次 2.1.3 组装和超时自测原样保留：artifacts/harness-drafts/assembled-2.1.3 和 artifacts/selftests/e3295cf2-dac4-44b3-90b9-7767e50a4751。该次在并行 TNB 构建期间达到原 120 秒上限，不能作为 PASS。新候选不延长超时、不减少测试。提交前发现 5 个文本控制文件含 CRLF，Git 的既定 LF 规则会改变其字节；仅统一这些实际有差异的文本行尾，gzip fixture 保留二进制原样。新增自测在临时 Git 仓库对全部 sealed controls 实际 add/checkout-index，逐文件比较检出字节与 seal，防止本机通过而干净检出失败。
+
+网页真实错误仍保持 FAIL。stock/native 单文件与 bundled declaration 字节一致，均留下 gts-runtime 和 arktype/@ark/schema 的 4 条无法解析的声明依赖。精确映射至现有真实 .d.ts 的 artifact 实验 provider-resolver-OTBWt6 将这 4 条归零；provider-consumer-YuTC7c 的完整 usage number/string 负例恢复，未改 skipLibCheck 或断言。原 bundled declarations 的其它 102 条全图问题在 stock/native 的 code/file/start 完全相同，不能宣称整图无错。custom-loader 直接依赖在现有职责中；core 的独立声明从 core 目录解析，还需其 package.json 显式声明已使用的依赖。因此仅前瞻增加 packages/core/package.json，绑定原 integration task 的 ID、seal、文件哈希和原角色；原产品文件在授权前未改。旧 integration transition 留在历史中，新 contract 仅保留与当前目标角色一致的精确 transition。
+
+本候选必须独立 review、重新 seal 并通过完整自测，之后才能 revise 任务并实施该依赖修复。既有 gate、平台、基线、次数、预算、源码覆盖和语义断言不变。
