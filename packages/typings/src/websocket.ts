@@ -28,6 +28,10 @@ const KIND = {
 const HEADER_BYTES = 8;
 const TIMER_BYTES = 16;
 const RPC_HEADER_BYTES = HEADER_BYTES + TIMER_BYTES;
+/** Byte offsets of the id and the two float64 BE RPC timers within the header. */
+const ID_OFFSET = 4;
+const TIMER_CURRENT_OFFSET = 8;
+const TIMER_TOTAL_OFFSET = 16;
 const MAX_GAME_PAYLOAD_MIB = 8;
 export const MAX_GAME_PAYLOAD_BYTES = MAX_GAME_PAYLOAD_MIB * 1024 * 1024;
 export const MAX_GAME_FRAME_BYTES = MAX_GAME_PAYLOAD_BYTES + RPC_HEADER_BYTES;
@@ -39,6 +43,28 @@ function invalid(reason: string): never {
 /** Offset the protobuf payload starts at; RPC frames push it past the timers. */
 function payloadOffsetOf(kind: number): number {
   return kind === KIND.rpc ? RPC_HEADER_BYTES : HEADER_BYTES;
+}
+
+interface FrameHeader {
+  kind: number;
+  id: number;
+  payload: Uint8Array;
+}
+
+/** Split a frame into the header fields the binary envelope carries. */
+function describeFrame(frame: GameWireFrame): FrameHeader {
+  switch (frame.type) {
+    case "notification":
+      return { kind: KIND.notification, id: 0, payload: frame.data };
+    case "rpc":
+      return { kind: KIND.rpc, id: frame.data.id, payload: frame.data.request };
+    case "actionResponse":
+      return {
+        kind: KIND.actionResponse,
+        id: frame.id,
+        payload: frame.response,
+      };
+  }
 }
 
 function checkId(id: number): void {
@@ -69,26 +95,18 @@ export function encodeGameFrame(frame: GameWireFrame): Uint8Array<ArrayBuffer> {
   const type = frame?.type;
   if (type !== "notification" && type !== "rpc" && type !== "actionResponse")
     invalid("unsupported kind");
-  const kind = KIND[type];
-  const id =
-    type === "notification" ? 0 : type === "rpc" ? frame.data.id : frame.id;
-  const payload =
-    type === "notification"
-      ? frame.data
-      : type === "rpc"
-        ? frame.data.request
-        : frame.response;
+  const { kind, id, payload } = describeFrame(frame);
   checkId(id);
   checkPayload(payload);
   const payloadOffset = payloadOffsetOf(kind);
   const bytes = new Uint8Array(payloadOffset + payload.byteLength);
   const view = new DataView(bytes.buffer);
   bytes.set([...MAGIC_BYTES, VERSION, kind]);
-  view.setUint32(4, id, false);
+  view.setUint32(ID_OFFSET, id, false);
   if (type === "rpc") {
     checkTimer(frame.data.timer);
-    view.setFloat64(8, frame.data.timer.current, false);
-    view.setFloat64(16, frame.data.timer.total, false);
+    view.setFloat64(TIMER_CURRENT_OFFSET, frame.data.timer.current, false);
+    view.setFloat64(TIMER_TOTAL_OFFSET, frame.data.timer.total, false);
   }
   bytes.set(payload, payloadOffset);
   return bytes;
@@ -114,7 +132,7 @@ export function decodeGameFrame(
   const payloadOffset = payloadOffsetOf(kind);
   if (bytes.byteLength < payloadOffset) invalid("truncated RPC timer");
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  const id = view.getUint32(4, false);
+  const id = view.getUint32(ID_OFFSET, false);
   const payload = bytes.subarray(payloadOffset);
   checkPayload(payload);
   if (kind === KIND.notification) {
@@ -124,8 +142,8 @@ export function decodeGameFrame(
   if (kind === KIND.actionResponse)
     return { type: "actionResponse", id, response: payload };
   const timer = {
-    current: view.getFloat64(8, false),
-    total: view.getFloat64(16, false),
+    current: view.getFloat64(TIMER_CURRENT_OFFSET, false),
+    total: view.getFloat64(TIMER_TOTAL_OFFSET, false),
   };
   checkTimer(timer);
   return { type: "rpc", data: { id, timer, request: payload } };
