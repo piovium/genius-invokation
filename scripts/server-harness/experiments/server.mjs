@@ -167,37 +167,37 @@ const server = createServer(async (incoming, outgoing) => {
     const chunks = [];
     for await (const chunk of incoming) chunks.push(chunk);
     const body = Buffer.concat(chunks);
-    const response = await fixture.fetch(new Request('http://127.0.0.1' + incoming.url, {
+    const response = await fixture.fetch(new Request("http://127.0.0.1" + incoming.url, {
       method: incoming.method, headers: incoming.headers,
       ...(body.length ? { body } : {}),
     }));
     outgoing.writeHead(response.status, Object.fromEntries(response.headers));
     outgoing.end(Buffer.from(await response.arrayBuffer()));
-  } catch { outgoing.writeHead(500); outgoing.end('Fixture request failed'); }
+  } catch { outgoing.writeHead(500); outgoing.end("Fixture request failed"); }
 });
 const sockets = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024, perMessageDeflate: false });
-server.on('upgrade', (request, socket, head) => {
-  const match = new URL(request.url, 'http://127.0.0.1').pathname.match(/^\/api\/rooms\/([^/]+)\/players\/([^/]+)\/ws$/);
+server.on("upgrade", (request, socket, head) => {
+  const match = new URL(request.url, "http://127.0.0.1").pathname.match(/^\/api\/rooms\/([^/]+)\/players\/([^/]+)\/ws$/);
   const room = match && rooms.get(match[1]);
   const player = room?.players.find(player => player.playerId === match[2]);
-  if (!room || !player) { socket.end('HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n'); return; }
+  if (!room || !player) { socket.end("HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n"); return; }
   sockets.handleUpgrade(request, socket, head, ws => {
     ws.data = { room, player, authenticated: false, closing: false, authTimer: null };
-    ws.on('message', (data, binary) => fixture.websocket.message(ws, binary ? data : data.toString()));
-    ws.on('close', () => fixture.websocket.close(ws));
+    ws.on("message", (data, binary) => fixture.websocket.message(ws, binary ? data : data.toString()));
+    ws.on("close", () => fixture.websocket.close(ws));
     // ws emits error before its protocol-error close (including maxPayload).
     // Resource removal still happens only on the actual close event.
-    ws.on('error', () => {});
+    ws.on("error", () => {});
     fixture.websocket.open(ws);
   });
 });
-await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-process.stdout.write(JSON.stringify({ type: 'harness-ready', port: server.address().port }) + '\n');
+await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+process.stdout.write(JSON.stringify({ type: "harness-ready", port: server.address().port }) + "\n");
 function stop() {
   for (const socket of sockets.clients) socket.terminate();
   sockets.close();
   server.close();
   server.closeAllConnections();
 }
-process.once('SIGTERM', stop);
-process.once('SIGINT', stop);
+process.once("SIGTERM", stop);
+process.once("SIGINT", stop);

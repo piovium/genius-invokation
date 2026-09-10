@@ -120,8 +120,10 @@ export function redact(text, environment = {}) {
 }
 
 /**
- * 基线数据库 schema 来自冻结的旧服务源码快照。候选服务在清退 Prisma 后不再携带
- * 这份 SQL，因此旧服务迁移目录必须显式给出，不能回退到候选服务目录。
+ * The baseline database schema comes from the frozen old-service source snapshot.
+ * The candidate service no longer ships this SQL after retiring Prisma, so the
+ * old-service migration directory must be supplied explicitly and must never
+ * fall back to the candidate directory.
  */
 export async function resolveBaselineSqlDirectory(processEnvironment = process.env) {
   const directory = processEnvironment.HARNESS_BASELINE_SQL_DIR?.trim();

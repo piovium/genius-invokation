@@ -22,7 +22,7 @@ node scripts/server-harness/doctor.mjs --output temp/server-harness/doctor.json
 
 ## 迁移目标约束
 
-除协议行为与内存门槛外，迁移目标还固定两条硬约束，由 `scripts/server-harness/constraints.mjs` 只读静态检查：
+除协议行为与内存门槛外，迁移目标还固定三条硬约束，由 `scripts/server-harness/constraints.mjs` 只读静态检查：
 
 1. **Elysia 原生写法**：路由以 Elysia 插件组合（导入 `elysia` 并构造 `Elysia` 实例），请求校验用 `t`/TypeBox，鉴权、共享状态与横切逻辑用 `derive`/`resolve`/`macro`/`decorate`，错误用 `status` 与 `error`。不得保留 NestJS 形状的 `*.controller.ts`、`*.service.ts`、`*.module.ts`、`*.guard.ts` 等文件名，`@nestjs/*`、`reflect-metadata`、`class-validator`、`class-transformer` 依赖或导入，以及容器类和 `*Exception` 兼容类层次。
 2. **无 Prisma 遗留**：候选服务不得保留 `prisma/` 目录（schema、迁移 SQL、生成产物）、`prisma` 与 `@prisma/*` 依赖、lockfile 条目、`allowBuilds` 放行项，以及 `_prisma_migrations` 之类的历史兼容逻辑和文档说明。
@@ -33,9 +33,9 @@ npm run harness:constraints
 # 等价于：node scripts/server-harness/constraints.mjs --output temp/server-harness/constraints/report.json
 ```
 
-退出码 0 表示未发现违规，1 表示存在违规，2 表示用法或检查失败；stdout 始终是完整 JSON 报告，逐条给出规则、文件路径与行号，人读摘要写在 stderr。判定只覆盖代码、脚本、依赖清单、lockfile 与镜像，README 等文档里"不使用 Bun"这类说明性文字不算违规。Node 下没有 Elysia 原生 WebSocket，房间传输继续用 `ws` 包挂载，是需要登记的例外；harness 自身的基线工具为冻结的旧服务准备数据库，允许引用旧服务的 Prisma 迁移 SQL，但候选服务目录内的任何 Prisma 痕迹都算违规。
+退出码 0 表示未发现违规，1 表示存在违规，2 表示用法或检查失败；stdout 始终是完整 JSON 报告，逐条给出规则、文件路径与行号，人读摘要写在 stderr。判定只覆盖代码、脚本、依赖清单、lockfile 与镜像，README 等文档里“不使用 Bun”这类说明性文字不算违规。Node 下没有 Elysia 原生 WebSocket，房间传输继续用 `ws` 包挂载，是需要登记的例外；harness 自身的基线工具为冻结的旧服务准备数据库，允许引用旧服务的 Prisma 迁移 SQL，但候选服务目录内的任何 Prisma 痕迹都算违规。
 
-这两条约束目前尚未满足：检查输出就是待清理清单，因此它同时是下一步实现的任务清单。通过本检查只说明未发现 Prisma 遗留与 NestJS 兼容层写法，不代表功能或内存验收。
+这三条约束都纳入最终验收；检查失败时输出就是待清理清单，同时是下一步实现的任务清单。通过本检查只说明未发现 Prisma 遗留、NestJS 兼容层写法与 Bun 依赖，不代表功能或内存验收。
 
 ## 真实旧服务基线
 

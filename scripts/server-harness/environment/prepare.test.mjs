@@ -119,7 +119,8 @@ test("HARNESS_DOCKER_SELFTEST: inherited credentials cannot override the preserv
 test("baseline SQL must come from an explicit frozen old-service directory", async (t) => {
   await assert.rejects(resolveBaselineSqlDirectory({}), /HARNESS_BASELINE_SQL_DIR/);
   await assert.rejects(resolveBaselineSqlDirectory({ HARNESS_BASELINE_SQL_DIR: "   " }), /HARNESS_BASELINE_SQL_DIR/);
-  // 候选服务清退 Prisma 后不再提供迁移 SQL，因此相对路径不能被解释成仓库内目录。
+  // The candidate service no longer ships migration SQL after retiring Prisma, so a
+  // relative path must not resolve inside the repository.
   await assert.rejects(resolveBaselineSqlDirectory({ HARNESS_BASELINE_SQL_DIR: "packages/server/prisma/migrations" }), /absolute/);
   const folder = await mkdtemp(join(tmpdir(), "gi-harness-baseline-"));
   t.after(async () => {
@@ -131,7 +132,7 @@ test("baseline SQL must come from an explicit frozen old-service directory", asy
   await mkdir(join(folder, "20250101000000_init"));
   await mkdir(join(folder, "20250201000000_more"));
   await writeFile(join(folder, "20250101000000_init", "migration.sql"), "SELECT 1;\n");
-  // 缺 migration.sql 的目录必须失败，不能按空迁移继续。
+  // A directory without migration.sql must fail instead of counting as an empty migration.
   await assert.rejects(resolveBaselineSqlDirectory({ HARNESS_BASELINE_SQL_DIR: folder }), { code: "ENOENT" });
   await writeFile(join(folder, "20250201000000_more", "migration.sql"), "SELECT 2;\n");
   const resolved = await resolveBaselineSqlDirectory({ HARNESS_BASELINE_SQL_DIR: ` ${folder} ` });
