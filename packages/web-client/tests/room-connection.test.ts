@@ -338,6 +338,17 @@ async function clientAwaitingFinalAck(server: RoomFixture) {
   return c;
 }
 
+/**
+ * Assert the fixture has stopped opening sockets: wait for the connection count
+ * to settle, then confirm it stays put across one more quiet window.
+ */
+async function assertConnectionsSettled(server: RoomFixture, quietMs: number) {
+  await settles(() => server.stats.connections);
+  const count = server.stats.connections;
+  await delay(quietMs);
+  assert.equal(server.stats.connections, count);
+}
+
 describe("production binary game framing", () => {
   test("matches independent wire goldens and rejects corrupt envelopes", () => {
     const response = Uint8Array.of(0x12, 0);
@@ -556,10 +567,7 @@ test("retains only one uncertain command, and dispose cancels pending work and r
   assert.ok(disposedError instanceof RoomConnectionError);
   assert.equal(disposedError.code, "DISPOSED");
   assert.equal(disposedError.outcomeUnknown, true);
-  await settles(() => server.stats.connections);
-  const count = server.stats.connections;
-  await delay(50);
-  assert.equal(server.stats.connections, count);
+  await assertConnectionsSettled(server, 50);
   assert.equal(c.connection.hasPendingCommand, false);
 });
 
@@ -574,10 +582,7 @@ test("uncertain command recovery has an overall deadline even if every reconnect
   });
   assert.equal(server.stats.executions, 1);
   assert.equal(c.connection.hasPendingCommand, false);
-  await settles(() => server.stats.connections);
-  const count = server.stats.connections;
-  await delay(30);
-  assert.equal(server.stats.connections, count);
+  await assertConnectionsSettled(server, 30);
 });
 
 test("lost authentication response has a finite reconnect deadline", async () => {

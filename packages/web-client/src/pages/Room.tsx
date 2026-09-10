@@ -88,6 +88,23 @@ function tickTimer(
   else setTimer({ ...timer, current });
 }
 
+// The chessboard only needs the public identity fields of either player.
+function getClientPlayerInfo(player: PlayerInfo) {
+  return { name: player.name, avatarUrl: getPlayerAvatarUrl(player) };
+}
+
+// Both end-of-game actions are one pill button inside a square wrapper; keeping
+// them in a component lets each caller pass only its label and handler.
+function GameEndButton(props: { onClick: () => void; children: string }) {
+  return (
+    <div class={GAME_END_BUTTON_WRAPPER_CLASS}>
+      <button class={GAME_END_BUTTON_CLASS} onClick={props.onClick}>
+        {props.children}
+      </button>
+    </div>
+  );
+}
+
 // A parameter change must destroy the previous room's connections and pending
 // UI promises even when the router reuses this route component.
 export default function Room() {
@@ -398,10 +415,6 @@ function ConnectedRoom() {
       reportRequestError(error);
     }
   };
-  const getClientPlayerInfo = (player: PlayerInfo) => ({
-    name: player.name,
-    avatarUrl: getPlayerAvatarUrl(player),
-  });
   let chessboardContainer: HTMLDivElement | undefined;
   const mobile = useMobile();
 
@@ -571,22 +584,12 @@ function ConnectedRoom() {
                 oppPlayerInfo={getClientPlayerInfo(payload().oppPlayerInfo)}
                 gameEndExtra={
                   <div class="flex justify-center gap-20 mt-10">
-                    <div class={GAME_END_BUTTON_WRAPPER_CLASS}>
-                      <button
-                        class={GAME_END_BUTTON_CLASS}
-                        onClick={downloadGameLog}
-                      >
-                        {t("downloadLog")}
-                      </button>
-                    </div>
-                    <div class={GAME_END_BUTTON_WRAPPER_CLASS}>
-                      <button
-                        class={GAME_END_BUTTON_CLASS}
-                        onClick={() => navigate("/")}
-                      >
-                        {t("backHome")}
-                      </button>
-                    </div>
+                    <GameEndButton onClick={downloadGameLog}>
+                      {t("downloadLog")}
+                    </GameEndButton>
+                    <GameEndButton onClick={() => navigate("/")}>
+                      {t("backHome")}
+                    </GameEndButton>
                   </div>
                 }
                 spectatorMode={observerMode()}

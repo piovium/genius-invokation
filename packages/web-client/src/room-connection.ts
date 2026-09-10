@@ -134,6 +134,14 @@ export function roomWebSocketUrl(
  * rejection. Server-side deduplication is required for this retry protocol.
  */
 export class RoomConnection {
+  /**
+   * State for one room view. `onState` reports the coarse phase (connecting ->
+   * connected -> reconnecting -> closed/failed); the flags below stay separate
+   * because they describe orthogonal facts rather than one linear phase:
+   * `disposed`/`terminal` mean no socket will open again, `finished` means the
+   * game ended and only a lost final ACK is being recovered, and the
+   * per-generation `authenticated`/`synchronized` pair tracks the handshake.
+   */
   private socket: WebSocket | null = null;
   private removeSocketListeners: (() => void) | null = null;
   private generation = 0;
@@ -187,10 +195,9 @@ export class RoomConnection {
       (this.options.reconnectDeadlineMs ?? 30_000)
     ) {
       this.fail(
-        new RoomConnectionError(
+        this.connectionError(
           "Unable to reconnect to this game. Please reload the room.",
           "RECONNECT_TIMEOUT",
-          !!this.pending,
         ),
       );
       return;
@@ -230,10 +237,9 @@ export class RoomConnection {
         this.fail(
           error instanceof RoomConnectionError
             ? error
-            : new RoomConnectionError(
+            : this.connectionError(
                 error instanceof Error ? error.message : "Invalid game message",
                 "PROTOCOL_ERROR",
-                !!this.pending,
               ),
         );
       }
@@ -245,17 +251,17 @@ export class RoomConnection {
         event.code === CLOSE_MESSAGE_TOO_BIG
       ) {
         this.fail(
-          new RoomConnectionError(
+          this.connectionError(
             event.reason || "The server refused this room connection.",
             event.code === CLOSE_POLICY_VIOLATION
               ? "ACCESS_DENIED"
               : "MESSAGE_TOO_BIG",
-            !!this.pending,
           ),
         );
-      } else if (this.finished && !this.pending) {
-        this.stopFinishedConnection();
-      } else this.reconnect();
+      } else {
+        // reconnect() already settles a finished view with no pending command.
+        this.reconnect();
+      }
     };
     const onError = () => {
       if (active()) this.reconnect();
@@ -299,7 +305,7 @@ export class RoomConnection {
       return;
     }
     this.disconnectSocket();
-    if (!this.outageStarted) this.outageStarted = Date.now();
+    this.outageStarted ||= Date.now();
     if (this.reconnectTimer !== undefined) return;
     this.options.onState?.("reconnecting");
     const delay = Math.min(
@@ -338,10 +344,9 @@ export class RoomConnection {
         this.currentSessionId !== null &&
         value.sessionId !== this.currentSessionId
       )
-        throw new RoomConnectionError(
+        throw this.connectionError(
           "The room belongs to a different game session. Reload before playing.",
           "SESSION_CHANGED",
-          !!this.pending,
         );
       this.currentSessionId = value.sessionId;
       this.authenticated = true;
@@ -351,12 +356,11 @@ export class RoomConnection {
       return;
     }
     if (value.type === "error")
-      throw new RoomConnectionError(
+      throw this.connectionError(
         typeof value.message === "string"
           ? value.message
           : "The game stopped unexpectedly.",
         "SERVER_ERROR",
-        !!this.pending,
       );
     if (!this.authenticated)
       throw new Error("Control message received before authentication");
@@ -406,17 +410,14 @@ export class RoomConnection {
     const pending = this.pending;
     if (!pending || value.command !== pending.type || value.id !== pending.id)
       throw new Error("Unmatched command acknowledgement");
-    if (value.type === "ack" && value.sessionId !== pending.sessionId)
-      throw new Error("Acknowledgement belongs to a different game session");
-    if (
-      value.type === "commandError" &&
-      (typeof value.message !== "string" || typeof value.code !== "string")
-    )
-      throw new Error("Invalid command rejection");
-    this.pending = null;
-    clearTimeout(pending.deadline);
-    clearTimeout(pending.ackTimer);
+    // Only `ack` and `commandError` reach this handler. Each branch validates
+    // the fields it uses, so no type assertions are needed below.
     if (value.type === "ack") {
+      if (value.sessionId !== pending.sessionId)
+        throw new Error("Acknowledgement belongs to a different game session");
+      this.pending = null;
+      clearTimeout(pending.deadline);
+      clearTimeout(pending.ackTimer);
       if (pending.id !== undefined)
         this.acceptedRpcId = Math.max(this.acceptedRpcId, pending.id);
       pending.resolve();
@@ -425,9 +426,9 @@ export class RoomConnection {
         return;
       }
     } else {
-      pending.reject(
-        new RoomConnectionError(value.message as string, value.code as string),
-      );
+      if (typeof value.message !== "string" || typeof value.code !== "string")
+        throw new Error("Invalid command rejection");
+      this.rejectPending(new RoomConnectionError(value.message, value.code));
       // A rejected command is never retried. Refresh the state and remaining
       // timer before asking the UI again, including for INVALID_RESPONSE.
       this.reconnect();
@@ -452,29 +453,29 @@ export class RoomConnection {
 
   private writePending(): void {
     const pending = this.pending;
+    const socket = this.socket;
     if (
       !pending ||
       !this.authenticated ||
       !this.synchronized ||
-      !this.socket ||
+      !socket ||
       pending.sentGeneration === this.generation
     )
       return;
     if (pending.sessionId !== this.currentSessionId) {
       this.fail(
-        new RoomConnectionError(
+        this.connectionError(
           "Cannot retry a command in a different game session.",
           "SESSION_CHANGED",
-          true,
         ),
       );
       return;
     }
     try {
-      if (this.socket.bufferedAmount > MAX_GAME_FRAME_BYTES)
+      if (socket.bufferedAmount > MAX_GAME_FRAME_BYTES)
         throw new Error("Socket is congested");
       pending.sentGeneration = this.generation;
-      this.socket.send(pending.frame);
+      socket.send(pending.frame);
       pending.ackTimer = setTimeout(
         () => this.reconnect(),
         this.options.ackTimeoutMs ?? 5_000,
@@ -540,30 +541,30 @@ export class RoomConnection {
         ),
       );
     const sessionId = this.currentSessionId;
-    return new Promise((resolve, reject) => {
-      const deadline = setTimeout(
-        () =>
-          this.fail(
-            new RoomConnectionError(
-              "The command result is still unknown. Reload to synchronize the game.",
-              "COMMAND_TIMEOUT",
-              true,
-            ),
+    const { promise, resolve, reject } = Promise.withResolvers<void>();
+    const deadline = setTimeout(
+      () =>
+        this.fail(
+          new RoomConnectionError(
+            "The command result is still unknown. Reload to synchronize the game.",
+            "COMMAND_TIMEOUT",
+            true,
           ),
-        this.options.commandTimeoutMs ?? 30_000,
-      );
-      this.pending = {
-        type,
-        id,
-        frame,
-        sessionId,
-        resolve,
-        reject,
-        deadline,
-        sentGeneration: -1,
-      };
-      this.writePending();
-    });
+        ),
+      this.options.commandTimeoutMs ?? 30_000,
+    );
+    this.pending = {
+      type,
+      id,
+      frame,
+      sessionId,
+      resolve,
+      reject,
+      deadline,
+      sentGeneration: -1,
+    };
+    this.writePending();
+    return promise;
   }
 
   /** The UI decoded a terminal game snapshot. Finish pending ACK recovery first. */
@@ -588,6 +589,15 @@ export class RoomConnection {
     pending.reject(error);
   }
 
+  /**
+   * A failure only leaves the command's outcome ambiguous while an ACK is still
+   * awaited: without a pending command the server either never acted or
+   * already refused, so the caller may always stop safely.
+   */
+  private connectionError(message: string, code: string): RoomConnectionError {
+    return new RoomConnectionError(message, code, this.hasPendingCommand);
+  }
+
   private fail(error: RoomConnectionError): void {
     if (this.disposed || this.terminal) return;
     this.terminal = true;
@@ -603,8 +613,6 @@ export class RoomConnection {
     this.disposed = true;
     clearTimeout(this.reconnectTimer);
     this.disconnectSocket();
-    this.rejectPending(
-      new RoomConnectionError("Room view closed.", "DISPOSED", !!this.pending),
-    );
+    this.rejectPending(this.connectionError("Room view closed.", "DISPOSED"));
   }
 }
