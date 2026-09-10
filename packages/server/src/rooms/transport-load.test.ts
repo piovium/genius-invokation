@@ -11,6 +11,24 @@ import type { RoomEvent, RoomSubscriber } from "./types";
 
 // These are transport saturation tests. Room events are supplied directly;
 // full engine games and persistence are covered by the production harness.
+/**
+ * Spins the event loop until `check` holds. A disconnect is observable on the
+ * server one or more turns after the client sees its own close event, and that
+ * delay differs per platform, so the tests wait for the state instead of
+ * assuming a fixed number of turns.
+ */
+async function waitFor(
+  check: () => boolean,
+  message: string,
+  deadlineMs = 5000,
+) {
+  const deadline = Date.now() + deadlineMs;
+  while (!check()) {
+    assert.ok(Date.now() < deadline, message);
+    await nextTurn();
+  }
+}
+
 async function fixture() {
   const subscriptions = new Map<number, Set<RoomSubscriber>>();
   const rooms: Pick<
@@ -190,10 +208,14 @@ test(
             await closed;
           }),
         );
-        await nextTurn();
-        assert.equal(service.transport.webSockets.clients.size, 0);
-        for (const members of service.subscriptions.values())
-          assert.equal(members.size, 0);
+        await waitFor(
+          () =>
+            service.transport.webSockets.clients.size === 0 &&
+            [...service.subscriptions.values()].every(
+              (members) => members.size === 0,
+            ),
+          "every disconnected binding must be released before the next round",
+        );
       }
     } finally {
       await service.close();
