@@ -71,7 +71,7 @@ type ActionCardMetadata = Pick<
   | "relatedCharacterId"
   | "relatedCharacterTags"
 >;
-const getData = <T extends CharacterMetadata | ActionCardMetadata>(
+const getMetadata = <T extends CharacterMetadata | ActionCardMetadata>(
   id: number,
 ): T | undefined => deckMetadata[id] as T | undefined;
 
@@ -83,7 +83,7 @@ const SINGLETON_REQUIRED_TAGS = new Set([
 const CHARACTER_COUNT = 3;
 const CARD_COUNT = 30;
 
-/** 校验牌组合法性，返回该牌组可以打出的最低游戏版本。 */
+/** 校验牌组是否合法，返回该牌组可以打出的最低游戏版本。 */
 export async function verifyDeck({
   characters,
   cards,
@@ -98,7 +98,7 @@ export async function verifyDeck({
   const characterTags: string[] = [];
   const versions = new Set<string | undefined>();
   for (const characterId of characters) {
-    const character = getData<CharacterMetadata>(characterId);
+    const character = getMetadata<CharacterMetadata>(characterId);
     if (!character) {
       fail(NotFoundError, `character id ${characterId} not found`);
     }
@@ -111,7 +111,7 @@ export async function verifyDeck({
   const availableTags = countBy(characterTags);
   const cardCounts = new Map<number, number>();
   for (const cardId of cards) {
-    const card = getData<ActionCardMetadata>(cardId);
+    const card = getMetadata<ActionCardMetadata>(cardId);
     if (!card) {
       fail(NotFoundError, `card id ${cardId} not found`);
     }
@@ -166,13 +166,10 @@ export async function minimumRequiredVersionOfDeck({
 }: Deck): Promise<Version> {
   return maxVersion(
     [...characters, ...cards].map(
-      (id) => getData<CharacterMetadata | ActionCardMetadata>(id)?.sinceVersion,
+      (id) =>
+        getMetadata<CharacterMetadata | ActionCardMetadata>(id)?.sinceVersion,
     ),
   );
-}
-
-export function parseStringToInt({ value }: { value: unknown }): number {
-  return typeof value === "string" && value.trim() !== "" ? Number(value) : NaN;
 }
 
 export class PaginationDto {
@@ -183,11 +180,4 @@ export class PaginationDto {
 export interface PaginationResult<T> {
   count: number;
   data: T[];
-}
-
-export async function validateDto<T>(
-  value: unknown,
-  type: { validate(value: unknown): T },
-): Promise<T> {
-  return type.validate(value);
 }

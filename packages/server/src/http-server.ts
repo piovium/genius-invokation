@@ -57,7 +57,9 @@ export async function listenHttp(
                   if (receivedBodyBytes > MAX_REQUEST_BODY_BYTES) {
                     bodyTooLarge = true;
                     callback(new Error("Request body is too large"));
-                  } else callback(null, chunk);
+                    return;
+                  }
+                  callback(null, chunk);
                 },
               }),
             ),
@@ -93,13 +95,15 @@ export async function listenHttp(
       if (incoming.method === "HEAD" || !response.body) {
         await response.body?.cancel();
         outgoing.end();
-      } else {
-        await pipeline(Readable.fromWeb(response.body as never), outgoing);
+        return;
       }
+      await pipeline(Readable.fromWeb(response.body as never), outgoing);
     } catch {
-      if (!outgoing.headersSent)
-        outgoing.writeHead(bodyTooLarge ? 413 : 500).end();
-      else outgoing.destroy();
+      if (outgoing.headersSent) {
+        outgoing.destroy();
+        return;
+      }
+      outgoing.writeHead(bodyTooLarge ? 413 : 500).end();
     }
   });
   server.keepAliveTimeout = 65_000;

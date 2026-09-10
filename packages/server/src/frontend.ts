@@ -53,13 +53,18 @@ export function injectHtml(
   );
 }
 
+const WEAK_ETAG_PREFIX = /^W\//;
+
+const stripWeakPrefix = (tag: string): string =>
+  tag.replace(WEAK_ETAG_PREFIX, "");
+
 /** `*` matches every validator; weak validators compare by their opaque tag. */
 function matchesEtag(header: string | null, etag: string): boolean {
   if (!header) return false;
-  const target = etag.replace(/^W\//, "");
+  const target = stripWeakPrefix(etag);
   return header.split(",").some((candidate) => {
     const value = candidate.trim();
-    return value === "*" || value.replace(/^W\//, "") === target;
+    return value === "*" || stripWeakPrefix(value) === target;
   });
 }
 

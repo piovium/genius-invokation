@@ -8,11 +8,11 @@ import { status } from "elysia";
  * with Elysia's status() helper.
  */
 export class HttpError extends Error {
-  readonly statusCode: number;
-
-  constructor(statusCode: number, message: string) {
+  constructor(
+    readonly statusCode: number,
+    message: string,
+  ) {
     super(message);
-    this.statusCode = statusCode;
   }
 }
 export const badRequest = (message: string) => new HttpError(400, message);
@@ -66,7 +66,9 @@ function* driverErrorChain(error: unknown) {
   }
 }
 
-/** The two PostgreSQL integrity violations that are the client's fault, not ours. */
+/**
+ * The two PostgreSQL integrity violations that are the client's fault, not ours.
+ */
 const conflictMessageBySqlState: Record<string, string> = {
   "23505": "Record already exists",
   "23503": "Related record is missing or still in use",
@@ -84,17 +86,14 @@ export function errorResponse(error: unknown) {
       statusCode: error.statusCode,
       message: error.message,
     });
-  const codes = [...driverErrorChain(error)].flatMap((cause) => [
-    cause.code,
-    cause.errno,
-  ]);
-  const conflict = codes
+  const conflictMessage = [...driverErrorChain(error)]
+    .flatMap((cause) => [cause.code, cause.errno])
     .map((code) =>
       typeof code === "string" ? conflictMessageBySqlState[code] : undefined,
     )
     .find((message) => message !== undefined);
-  if (conflict !== undefined)
-    return status(409, { statusCode: 409, message: conflict });
+  if (conflictMessage !== undefined)
+    return status(409, { statusCode: 409, message: conflictMessage });
   return status(500, {
     statusCode: 500,
     message: "Internal Server Error",
