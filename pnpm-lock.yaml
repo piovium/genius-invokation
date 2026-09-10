@@ -349,6 +349,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@ark/schema':
+        specifier: ^0.56.0
+        version: 0.56.0
       '@gi-tcg/gts-runtime':
         specifier: 0.7.7
         version: 0.7.7(patch_hash=52d582912096574ad4d8f9cc5228e21c7c9529cbbdfd8f0c917bb19d163fab04)
@@ -358,6 +361,9 @@ importers:
       '@gi-tcg/utils':
         specifier: workspace:*
         version: link:../utils
+      arktype:
+        specifier: ^2.2.0
+        version: 2.2.0
       immer:
         specifier: ^11.1.4
         version: 11.1.4
@@ -383,6 +389,9 @@ importers:
       '@gi-tcg/gts-language-server':
         specifier: 0.7.7
         version: 0.7.7(patch_hash=a325a5595923636317af90e849c7a5cf9835d7caffa8313cca28536ffe2b9fb2)(@volar/language-service@2.4.28(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629)))(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))
+      '@gi-tcg/gts-runtime':
+        specifier: 0.7.7
+        version: 0.7.7(patch_hash=52d582912096574ad4d8f9cc5228e21c7c9529cbbdfd8f0c917bb19d163fab04)
       '@gi-tcg/gts-transpiler':
         specifier: 0.7.7
         version: 0.7.7
