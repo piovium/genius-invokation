@@ -1,8 +1,8 @@
 # Native (tsgo) GTS consumption
 
-The workspace consumes GTS through
-`typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2`, pinned as the workspace
-`typescript` in both the `overrides` and `catalog` sections of
+The workspace runs GTS on
+`typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2` (TNB), pinned as the
+workspace `typescript` in both the `overrides` and `catalog` sections of
 `pnpm-workspace.yaml`. Every package check therefore runs on tsgo: the ten
 workspace check scripts (`gtsc --noEmit` for `@gi-tcg/data`, `tsc --noEmit`
 for the other nine) and the recursive test suites all resolve `typescript` to
@@ -31,9 +31,9 @@ pnpm check
 pnpm -r test
 ```
 
-`pnpm check` runs the package check scripts with workspace concurrency set to
-one, which bounds the number of concurrent native checkers; it covers the whole
-data package, including the historical GTS sources.
+`pnpm check` runs the package check scripts one at a time, which bounds the
+number of concurrent native checkers; the `@gi-tcg/data` check type-checks
+every `.gts` source in that package.
 
 ## Patches
 

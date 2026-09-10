@@ -15,18 +15,7 @@
 
 import { expect } from "vitest";
 import * as matchers from "jest-extended";
-// Type-only import that merges jest-extended's matcher declarations into the
-// program without adding a second runtime import.
-import type {} from "jest-extended";
 
-declare module "vitest" {
-  // Vitest declares `toBeOneOf` and `toSatisfy` itself, with signatures that
-  // cannot be merged with jest-extended's, so those two stay Vitest's. The
-  // remaining matchers are added by jest-extended.
-  interface AsymmetricMatchersContaining extends Omit<
-    jest.Matchers<unknown>,
-    "toBeOneOf" | "toSatisfy"
-  > {}
-}
-
+// jest-extended's matchers reach Vitest's `Assertion` through
+// `JestAssertion extends jest.Matchers`, so no module augmentation is needed.
 expect.extend(matchers);

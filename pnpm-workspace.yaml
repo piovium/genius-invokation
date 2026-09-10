@@ -3,7 +3,7 @@ packages:
 
 overrides:
   "vite-plugin-solid>babel-preset-solid": 1.9.12
-  typescript: npm:typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2
+  typescript: &TS_SPEC npm:typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2
 
 catalog:
   axios: ^1.16.1
@@ -23,7 +23,7 @@ catalog:
   "@gi-tcg/prettier-plugin-gts": *GTS_VERSION
   "@gi-tcg/gts-language-client-code": *GTS_VERSION
   "@gi-tcg/gts-language-server": *GTS_VERSION
-  typescript: npm:typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2
+  typescript: *TS_SPEC
 
 patchedDependencies:
   "@volar/typescript@2.4.28": patches/@volar__typescript.patch
