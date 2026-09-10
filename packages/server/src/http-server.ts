@@ -94,6 +94,8 @@ export async function listenHttp(
       outgoing.statusCode = response.status;
       for (const [name, value] of response.headers)
         outgoing.setHeader(name, value);
+      // Iterating a Headers object folds repeated Set-Cookie values into one,
+      // so restore the raw list.
       const cookies = response.headers.getSetCookie();
       if (cookies.length) outgoing.setHeader("set-cookie", cookies);
       if (incoming.method === "HEAD" || !response.body) {

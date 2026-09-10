@@ -94,8 +94,8 @@ export function createMetrics(): Metrics {
     new Gauge({
       name,
       help,
-      // prom-client only defaults an absent labelNames; an explicit undefined
-      // would throw from Gauge.reset as the gauge is constructed.
+      // prom-client copies config over its own defaults, so an explicit
+      // undefined would throw from the reset() the constructor runs.
       labelNames: labelNames ?? [],
       registers: [registry],
       // prom-client invokes collect with the gauge bound as `this`.

@@ -67,7 +67,11 @@ function projectMetadata(record: Record<string, unknown>): DeckMetadata {
   return projected as unknown as DeckMetadata;
 }
 
-/** Project the generated asset snapshot, without requesting or caching CDN data. */
+/**
+ * Read assets-manager's local snapshot and write the generated metadata module,
+ * a copy of its sharing codec, and the manifest, without requesting or caching
+ * CDN data.
+ */
 export async function generateDeckMetadata({
   dataDirectory: requestedDataDirectory,
   outputDirectory = path.join(serverRoot, "generated"),

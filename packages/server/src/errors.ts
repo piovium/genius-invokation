@@ -52,11 +52,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * single failure can be several causes deep.
  */
 function* driverErrorChain(error: unknown) {
-  for (
-    let current = error, depth = 0;
-    depth < 4 && isRecord(current);
-    depth += 1
-  ) {
+  let current = error;
+  for (let depth = 0; depth < 4 && isRecord(current); depth += 1) {
     yield current;
     current = current.cause;
   }
@@ -65,14 +62,18 @@ function* driverErrorChain(error: unknown) {
 /**
  * The two PostgreSQL integrity violations that are the client's fault, not ours.
  */
-const conflictMessageBySqlState: Record<string, string> = {
-  "23505": "Record already exists",
-  "23503": "Related record is missing or still in use",
-};
+const conflictMessageBySqlState = new Map([
+  ["23505", "Record already exists"],
+  ["23503", "Related record is missing or still in use"],
+]);
+
+/** The conflict message for one driver error code, or undefined for any other. */
+const conflictMessageFor = (code: unknown) =>
+  typeof code === "string" ? conflictMessageBySqlState.get(code) : undefined;
 
 /**
- * The one error body clients read, built with Elysia's `status()`. The route
- * boundary in `app.ts` renders its own failures with the same helper.
+ * Render a `{ statusCode, message }` error body with Elysia's `status()`
+ * helper, used by `errorResponse` and the boundary in `app.ts`.
  */
 export const errorStatus = (statusCode: number, message: string) =>
   status(statusCode, { statusCode, message });
@@ -88,9 +89,7 @@ export function errorResponse(error: unknown) {
     return errorStatus(error.statusCode, error.message);
   const conflictMessage = [...driverErrorChain(error)]
     .flatMap((cause) => [cause.code, cause.errno])
-    .map((code) =>
-      typeof code === "string" ? conflictMessageBySqlState[code] : undefined,
-    )
+    .map(conflictMessageFor)
     .find((message) => message !== undefined);
   if (conflictMessage !== undefined) return errorStatus(409, conflictMessage);
   return errorStatus(500, "Internal Server Error");

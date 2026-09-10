@@ -36,17 +36,21 @@ export function injectHtml(
     html,
   );
 }
+
+/**
+ * Whether an If-None-Match list matches one entity tag. RFC 9110 requires the
+ * weak comparison here, which ignores the `W/` marker on either side.
+ */
 function matchesEtag(header: string | null, etag: string) {
+  const target = etag.replace(/^W\//, "");
   return (
-    header
-      ?.split(",")
-      .some(
-        (item) =>
-          item.trim() === "*" ||
-          item.trim().replace(/^W\//, "") === etag.replace(/^W\//, ""),
-      ) ?? false
+    header?.split(",").some((item) => {
+      const candidate = item.trim();
+      return candidate === "*" || candidate.replace(/^W\//, "") === target;
+    }) ?? false
   );
 }
+
 export function createFrontendHandler({
   directory = process.env.FRONTEND_DIRECTORY ??
     resolve(import.meta.dirname, "frontend"),
@@ -106,8 +110,9 @@ export function createFrontendHandler({
         { headers },
       );
     }
-    // Only the small HTML entry is read into memory for the existing beta tag
-    // injection. Large JS/CSS/image assets remain file responses.
+    // Only the small HTML entry is read into memory, so the beta flag can
+    // inject its noindex meta tag; the larger JS, CSS and image assets are
+    // always streamed from disk.
     index ??= readFile(resolve(root, "index.html"), "utf8")
       .then((html) => {
         const body = injectHtml(html, {
