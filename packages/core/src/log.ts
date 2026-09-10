@@ -37,9 +37,13 @@ const ID_FIELD = "id";
 const MAP_TAG = "map";
 const SET_TAG = "set";
 
+/**
+ * Persisted shape of one log entry: `s` is the encoded state snapshot, `e` is
+ * reserved for future data, and `r` marks snapshots the engine can resume from.
+ */
 interface SerializedLogEntry {
   s: unknown;
-  e: readonly []; // reserved
+  e: readonly [];
   r: boolean;
 }
 
@@ -81,6 +85,8 @@ export function createGameStateLogSerializer() {
     if (index !== undefined) return { [REF_MARKER]: index };
     if (Array.isArray(value)) {
       const result = value.map(encode);
+      // Short arrays are inlined verbatim; longer ones go through the store so
+      // that shared references survive a round trip.
       if (result.length < 2) return result;
       indices.set(value, store.length);
       store.push(result);
@@ -199,7 +205,7 @@ export function deserializeGameStateLog(
         "values" in v &&
         Array.isArray(v.values)
       ) {
-        return new Set(v.values.map((item: any) => decode(item)));
+        return new Set(v.values.map(decode));
       }
     }
     const result: any = {};

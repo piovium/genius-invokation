@@ -24,6 +24,8 @@ const KIND = {
   rpc: 2,
   actionResponse: 3,
 } as const;
+/** Known kind bytes, so the decoder rejects an unknown one in a single place. */
+const FRAME_KINDS: ReadonlySet<number> = new Set(Object.values(KIND));
 /** Header sizes: the fixed prefix, and that prefix plus two float64 BE timers. */
 const HEADER_BYTES = 8;
 const TIMER_BYTES = 16;
@@ -45,25 +47,40 @@ function payloadOffsetOf(kind: number): number {
   return kind === KIND.rpc ? RPC_HEADER_BYTES : HEADER_BYTES;
 }
 
-interface FrameHeader {
-  kind: number;
-  id: number;
-  payload: Uint8Array;
-}
+/** Header fields of a frame, tagged by the kind byte the envelope writes. */
+type FrameHeader =
+  | { kind: typeof KIND.notification; id: number; payload: Uint8Array }
+  | {
+      kind: typeof KIND.rpc;
+      id: number;
+      payload: Uint8Array;
+      timer: GameRpcTimer;
+    }
+  | { kind: typeof KIND.actionResponse; id: number; payload: Uint8Array };
 
-/** Split a frame into the header fields the binary envelope carries. */
-function describeFrame(frame: GameWireFrame): FrameHeader {
-  switch (frame.type) {
+/**
+ * Read the header fields the binary envelope carries. A frame with an unknown
+ * tag has no header at all, so both directions reject it on one code path.
+ */
+function describeFrame(frame: GameWireFrame): FrameHeader | undefined {
+  switch (frame?.type) {
     case "notification":
       return { kind: KIND.notification, id: 0, payload: frame.data };
     case "rpc":
-      return { kind: KIND.rpc, id: frame.data.id, payload: frame.data.request };
+      return {
+        kind: KIND.rpc,
+        id: frame.data.id,
+        payload: frame.data.request,
+        timer: frame.data.timer,
+      };
     case "actionResponse":
       return {
         kind: KIND.actionResponse,
         id: frame.id,
         payload: frame.response,
       };
+    default:
+      return undefined;
   }
 }
 
@@ -92,21 +109,20 @@ function checkTimer(timer: GameRpcTimer): void {
 
 /** MAGIC_BYTES, VERSION, kind byte, uint32 BE ID; RPC adds two float64 BE timers. */
 export function encodeGameFrame(frame: GameWireFrame): Uint8Array<ArrayBuffer> {
-  const type = frame?.type;
-  if (type !== "notification" && type !== "rpc" && type !== "actionResponse")
-    invalid("unsupported kind");
-  const { kind, id, payload } = describeFrame(frame);
+  const header = describeFrame(frame);
+  if (header === undefined) invalid("unsupported kind");
+  const { id, payload } = header;
   checkId(id);
   checkPayload(payload);
-  const payloadOffset = payloadOffsetOf(kind);
+  const payloadOffset = payloadOffsetOf(header.kind);
   const bytes = new Uint8Array(payloadOffset + payload.byteLength);
   const view = new DataView(bytes.buffer);
-  bytes.set([...MAGIC_BYTES, VERSION, kind]);
+  bytes.set([...MAGIC_BYTES, VERSION, header.kind]);
   view.setUint32(ID_OFFSET, id, false);
-  if (type === "rpc") {
-    checkTimer(frame.data.timer);
-    view.setFloat64(TIMER_CURRENT_OFFSET, frame.data.timer.current, false);
-    view.setFloat64(TIMER_TOTAL_OFFSET, frame.data.timer.total, false);
+  if (header.kind === KIND.rpc) {
+    checkTimer(header.timer);
+    view.setFloat64(TIMER_CURRENT_OFFSET, header.timer.current, false);
+    view.setFloat64(TIMER_TOTAL_OFFSET, header.timer.total, false);
   }
   bytes.set(payload, payloadOffset);
   return bytes;
@@ -123,12 +139,7 @@ export function decodeGameFrame(
     invalid("incorrect GI magic");
   if (bytes[2] !== VERSION) invalid("unsupported version");
   const kind = bytes[3];
-  if (
-    kind !== KIND.notification &&
-    kind !== KIND.rpc &&
-    kind !== KIND.actionResponse
-  )
-    invalid("unsupported kind");
+  if (!FRAME_KINDS.has(kind)) invalid("unsupported kind");
   const payloadOffset = payloadOffsetOf(kind);
   if (bytes.byteLength < payloadOffset) invalid("truncated RPC timer");
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);

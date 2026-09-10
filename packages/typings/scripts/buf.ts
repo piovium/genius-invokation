@@ -16,14 +16,15 @@
 import path from "node:path";
 import { $ } from "execa";
 
-/** The only option this script accepts; it selects the workspace ts-proto template. */
-const TYPESCRIPT_FLAG = "--typescript";
-const args = process.argv.slice(2);
-if (args.some((arg) => arg !== TYPESCRIPT_FLAG))
-  throw new Error("Unknown protocol generation option");
-const templateArgs = args.includes(TYPESCRIPT_FLAG)
-  ? ["--template", "buf.typescript.gen.yaml"]
-  : [];
+/** Flags this script accepts, mapped to the workspace template each one selects. */
+const TEMPLATES = new Map([["--typescript", "buf.typescript.gen.yaml"]]);
+const templateArgs = process.argv.slice(2).flatMap((flag) => {
+  const template = TEMPLATES.get(flag);
+  if (template === undefined)
+    throw new Error(`Unknown protocol generation option: ${flag}`);
+  return ["--template", template];
+});
+
 await $({
   cwd: path.resolve(import.meta.dirname, "../../.."),
 })`buf generate ${templateArgs}`;

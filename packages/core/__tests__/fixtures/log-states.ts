@@ -26,7 +26,7 @@ export function logStates(): { entries: GameStateLogEntry[]; data: GameData } {
       set: new Set([shared]),
     },
   };
-  const data = {
+  const data: GameData = {
     characters: new Map(),
     entities: new Map(),
     attachments: new Map(),

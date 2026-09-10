@@ -37,7 +37,11 @@ test("incremental logs preserve the pre-migration encoding, definitions and shar
   const encoded = serializer.serialize();
   expect(encoded.v).toBe(CORE_VERSION);
   // The golden was generated using the unchanged serializer at 86c8582f.
-  expect(jsonRoundTrip(encoded)).toEqual({ ...legacyLog, v: CORE_VERSION });
+  const golden = { ...legacyLog, v: CORE_VERSION };
+  expect(jsonRoundTrip(encoded)).toEqual(golden);
+  // Replays and editors read the persisted text back verbatim, so the fixture
+  // is a byte-exact contract and not merely a structural match.
+  expect(JSON.stringify(jsonRoundTrip(encoded))).toBe(JSON.stringify(golden));
   expect(encoded).toEqual(serializeGameStateLog(entries));
   const restored = deserializeGameStateLog(data, jsonRoundTrip(encoded));
   // Deserialization restores transient symbols on descendants, not the root.
