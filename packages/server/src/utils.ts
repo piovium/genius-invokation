@@ -40,6 +40,13 @@ export class DeckVerificationError extends Error {
   }
 }
 
+const { SizeError, NotFoundError, CountLimitError, RelationError } =
+  DeckVerificationErrorCode;
+
+function fail(code: DeckVerificationErrorCode, message: string): never {
+  throw new DeckVerificationError(code, message);
+}
+
 export const ASSETS_MANAGER = Object.freeze({
   encode: staticEncode,
   decode: staticDecode,
@@ -63,44 +70,30 @@ const getData = <T extends CharacterMetadata | ActionCardMetadata>(
 
 const SINGLETON_REQUIRED_TAGS = ["GCG_TAG_LEGEND", "GCG_TAG_CARD_BLESSING"];
 
-/**
- * 校验牌组合法性
- * @param param0 牌组
- * @returns 牌组可以打出的最低游戏版本
- */
+const CHARACTER_COUNT = 3;
+const CARD_COUNT = 30;
+
+/** 校验牌组合法性，返回该牌组可以打出的最低游戏版本。 */
 export async function verifyDeck({
   characters,
   cards,
 }: Deck): Promise<Version> {
-  const DEC = DeckVerificationErrorCode;
-  const versions = new Set<string | undefined>();
   const characterSet = new Set(characters);
-  if (characterSet.size !== 3) {
-    throw new DeckVerificationError(
-      DEC.SizeError,
-      "deck must contain 3 characters",
-    );
+  if (characterSet.size !== CHARACTER_COUNT) {
+    fail(SizeError, `deck must contain ${CHARACTER_COUNT} characters`);
   }
-  if (cards.length !== 30) {
-    throw new DeckVerificationError(
-      DEC.SizeError,
-      "deck must contain 30 cards",
-    );
+  if (cards.length !== CARD_COUNT) {
+    fail(SizeError, `deck must contain ${CARD_COUNT} cards`);
   }
-  const characterTags = [];
-  for (const chId of characters) {
-    const character = getData<CharacterMetadata>(chId);
+  const characterTags: string[] = [];
+  const versions = new Set<string | undefined>();
+  for (const characterId of characters) {
+    const character = getData<CharacterMetadata>(characterId);
     if (!character) {
-      throw new DeckVerificationError(
-        DEC.NotFoundError,
-        `character id ${chId} not found`,
-      );
+      fail(NotFoundError, `character id ${characterId} not found`);
     }
     if (typeof character.shareId !== "number") {
-      throw new DeckVerificationError(
-        DEC.NotFoundError,
-        `character id ${chId} not obtainable`,
-      );
+      fail(NotFoundError, `character id ${characterId} not obtainable`);
     }
     characterTags.push(...character.tags);
     versions.add(character.sinceVersion);
@@ -109,69 +102,54 @@ export async function verifyDeck({
   for (const cardId of cards) {
     const card = getData<ActionCardMetadata>(cardId);
     if (!card) {
-      throw new DeckVerificationError(
-        DEC.NotFoundError,
-        `card id ${cardId} not found`,
-      );
+      fail(NotFoundError, `card id ${cardId} not found`);
     }
     const cardMaxCount = SINGLETON_REQUIRED_TAGS.some((tag) =>
-      card?.tags.includes(tag),
+      card.tags.includes(tag),
     )
       ? 1
       : 2;
-    if (cardCounts.has(cardId)) {
-      const count = cardCounts.get(cardId)! + 1;
-      if (count > cardMaxCount) {
-        throw new DeckVerificationError(
-          DEC.CountLimitError,
-          `card id ${cardId} exceeds max count`,
-        );
-      }
-      cardCounts.set(cardId, count);
-    } else {
-      if (typeof card.shareId !== "number") {
-        throw new DeckVerificationError(
-          DEC.RelationError,
-          `card id ${cardId} not obtainable`,
-        );
-      }
-      if (
-        card.relatedCharacterId !== null &&
-        !characters.includes(card.relatedCharacterId)
-      ) {
-        throw new DeckVerificationError(
-          DEC.RelationError,
-          `card id ${cardId} related character not in deck`,
-        );
-      }
-      const tempCharacterTags = [...characterTags];
-      for (const requiredTag of card.relatedCharacterTags) {
-        const idx = tempCharacterTags.indexOf(requiredTag);
-        if (idx === -1) {
-          throw new DeckVerificationError(
-            DEC.RelationError,
-            `card id ${cardId} related character tags not in deck`,
-          );
-        }
-        tempCharacterTags.splice(idx, 1);
-      }
-      cardCounts.set(cardId, 1);
-      versions.add(card.sinceVersion);
+    const count = (cardCounts.get(cardId) ?? 0) + 1;
+    if (count > cardMaxCount) {
+      fail(CountLimitError, `card id ${cardId} exceeds max count`);
     }
+    cardCounts.set(cardId, count);
+    // The related-character rules only depend on the first copy of a card.
+    if (count > 1) continue;
+    if (typeof card.shareId !== "number") {
+      fail(RelationError, `card id ${cardId} not obtainable`);
+    }
+    if (
+      card.relatedCharacterId !== null &&
+      !characterSet.has(card.relatedCharacterId)
+    ) {
+      fail(RelationError, `card id ${cardId} related character not in deck`);
+    }
+    const remainingTags = [...characterTags];
+    for (const requiredTag of card.relatedCharacterTags) {
+      const index = remainingTags.indexOf(requiredTag);
+      if (index === -1) {
+        fail(
+          RelationError,
+          `card id ${cardId} related character tags not in deck`,
+        );
+      }
+      remainingTags.splice(index, 1);
+    }
+    versions.add(card.sinceVersion);
   }
   return maxVersion(versions);
 }
 
+const isVersion = (value: string | undefined): value is Version =>
+  value !== undefined && VERSIONS.includes(value as Version);
+
 function maxVersion(versions: Iterable<string | undefined>): Version {
-  const ver = [...versions]
-    .filter((v): v is string => !!v)
+  const latest = [...versions]
+    .filter((value): value is string => Boolean(value))
     .toSorted(semverCompare)
     .at(-1);
-  if (!VERSIONS.includes(ver as Version)) {
-    return CURRENT_VERSION;
-  } else {
-    return ver as Version;
-  }
+  return isVersion(latest) ? latest : CURRENT_VERSION;
 }
 
 export async function minimumRequiredVersionOfDeck({
@@ -180,13 +158,13 @@ export async function minimumRequiredVersionOfDeck({
 }: Deck): Promise<Version> {
   return maxVersion(
     [...characters, ...cards].map(
-      (p) => getData<CharacterMetadata | ActionCardMetadata>(p)?.sinceVersion,
+      (id) => getData<CharacterMetadata | ActionCardMetadata>(id)?.sinceVersion,
     ),
   );
 }
 
 export function parseStringToInt({ value }: { value: unknown }): number {
-  return typeof value !== "string" || value.trim() === "" ? NaN : Number(value);
+  return typeof value === "string" && value.trim() !== "" ? Number(value) : NaN;
 }
 
 export class PaginationDto {

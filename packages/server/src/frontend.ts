@@ -25,40 +25,60 @@ const PLACEHOLDERS = {
   head: "<!-- server:head -->",
   body: "<!-- server:body -->",
 } as const;
+
+type InjectionPosition = keyof typeof PLACEHOLDERS;
+
+const PLACEHOLDER_ENTRIES = Object.entries(PLACEHOLDERS) as [
+  InjectionPosition,
+  string,
+][];
+
+const CACHE_CONTROL_REVALIDATE = "public, no-cache, must-revalidate";
+const CACHE_CONTROL_IMMUTABLE = "public, max-age=31536000, immutable";
+
 export function injectHtml(
   html: string,
-  injections: Partial<Record<keyof typeof PLACEHOLDERS, string>>,
-) {
-  return (Object.keys(PLACEHOLDERS) as (keyof typeof PLACEHOLDERS)[]).reduce(
-    (result, position) =>
-      result.replace(PLACEHOLDERS[position], injections[position] ?? ""),
+  injections: Partial<Record<InjectionPosition, string>>,
+): string {
+  return PLACEHOLDER_ENTRIES.reduce(
+    (result, [position, placeholder]) =>
+      result.replace(placeholder, injections[position] ?? ""),
     html,
   );
 }
-function matchesEtag(header: string | null, etag: string) {
-  return (
-    header
-      ?.split(",")
-      .some(
-        (item) =>
-          item.trim() === "*" ||
-          item.trim().replace(/^W\//, "") === etag.replace(/^W\//, ""),
-      ) ?? false
-  );
+
+/** `*` matches every validator; weak validators compare by their opaque tag. */
+function matchesEtag(header: string | null, etag: string): boolean {
+  if (!header) return false;
+  const target = etag.replace(/^W\//, "");
+  return header.split(",").some((candidate) => {
+    const value = candidate.trim();
+    return value === "*" || value.replace(/^W\//, "") === target;
+  });
 }
+
+type IndexEntry = { body: string; etag: string };
+
+export interface FrontendHandlerOptions {
+  /** Directory holding the built web client. */
+  directory?: string;
+  /** Public prefix the client is served under. */
+  basePath?: string;
+  /** Inject the `noindex` robots tag that keeps beta builds out of search. */
+  beta?: boolean;
+}
+
 export function createFrontendHandler({
   directory = process.env.FRONTEND_DIRECTORY ??
     resolve(import.meta.dirname, "frontend"),
   basePath = WEB_CLIENT_BASE_PATH,
   beta = IS_BETA,
-} = {}) {
+}: FrontendHandlerOptions = {}): (request: Request) => Promise<Response> {
   const root = resolve(directory);
-  const base =
-    "/" +
-    basePath.split("/").filter(Boolean).join("/") +
-    (basePath === "/" ? "" : "/");
-  const rootPath = base === "/" ? "/" : base.slice(0, -1);
-  let index: Promise<{ body: string; etag: string }> | undefined;
+  const segments = basePath.split("/").filter(Boolean);
+  const base = `/${segments.join("/")}${segments.length ? "/" : ""}`;
+  const rootPath = base.slice(0, -1) || "/";
+  let index: Promise<IndexEntry> | undefined;
   return async (request: Request): Promise<Response> => {
     if (request.method !== "GET" && request.method !== "HEAD")
       return new Response(null, { status: 405 });
@@ -93,9 +113,7 @@ export function createFrontendHandler({
         "content-type": lookup(path) || "application/octet-stream",
         etag,
         "cache-control":
-          name === "sw.js"
-            ? "public, no-cache, must-revalidate"
-            : "public, max-age=31536000, immutable",
+          name === "sw.js" ? CACHE_CONTROL_REVALIDATE : CACHE_CONTROL_IMMUTABLE,
       };
       if (matchesEtag(request.headers.get("if-none-match"), etag))
         return new Response(null, { status: 304, headers });
@@ -106,8 +124,8 @@ export function createFrontendHandler({
         { headers },
       );
     }
-    // Only the small HTML entry is read into memory for the existing beta tag
-    // injection. Large JS/CSS/image assets remain file responses.
+    // Only the HTML entry is read into memory, because beta builds inject a
+    // robots tag into it. Assets are always streamed from disk.
     index ??= readFile(resolve(root, "index.html"), "utf8")
       .then((html) => {
         const body = injectHtml(html, {
@@ -127,7 +145,7 @@ export function createFrontendHandler({
       const entry = await index;
       const headers = {
         "content-type": "text/html; charset=utf-8",
-        "cache-control": "public, no-cache, must-revalidate",
+        "cache-control": CACHE_CONTROL_REVALIDATE,
         etag: entry.etag,
       };
       return matchesEtag(request.headers.get("if-none-match"), entry.etag)

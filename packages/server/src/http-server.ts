@@ -1,4 +1,4 @@
-import { createServer, type IncomingMessage } from "node:http";
+import { createServer, type IncomingMessage, type Server } from "node:http";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import type { AddressInfo } from "node:net";
@@ -10,22 +10,28 @@ export interface HttpListenOptions {
   port?: number;
 }
 
-function requestHeaders(incoming: IncomingMessage) {
+function requestHeaders({ rawHeaders }: IncomingMessage): Headers {
   const headers = new Headers();
-  for (let index = 0; index < incoming.rawHeaders.length; index += 2) {
-    headers.append(
-      incoming.rawHeaders[index]!,
-      incoming.rawHeaders[index + 1]!,
-    );
+  for (let index = 0; index < rawHeaders.length; index += 2) {
+    headers.append(rawHeaders[index]!, rawHeaders[index + 1]!);
   }
   return headers;
 }
 
-/** Stream Node HTTP requests and responses without loading static files into RAM. */
+export interface HttpServerHandle {
+  server: Server;
+  url: URL;
+  stop(): Promise<void>;
+}
+
+/**
+ * Serve a `fetch` handler over Node's HTTP server, streaming request and
+ * response bodies instead of buffering them in memory.
+ */
 export async function listenHttp(
   handler: (request: Request) => Response | Promise<Response>,
   { hostname = "127.0.0.1", port = 0 }: HttpListenOptions = {},
-) {
+): Promise<HttpServerHandle> {
   const server = createServer(async (incoming, outgoing) => {
     const abort = new AbortController();
     incoming.once("aborted", () => abort.abort());
@@ -57,6 +63,7 @@ export async function listenHttp(
             ),
           )
         : undefined;
+      // `duplex: "half"` is what undici requires from every streaming request.
       const init = {
         method: incoming.method,
         headers,
@@ -79,9 +86,8 @@ export async function listenHttp(
         return;
       }
       outgoing.statusCode = response.status;
-      response.headers.forEach((value, name) =>
-        outgoing.setHeader(name, value),
-      );
+      for (const [name, value] of response.headers)
+        outgoing.setHeader(name, value);
       const cookies = response.headers.getSetCookie();
       if (cookies.length) outgoing.setHeader("set-cookie", cookies);
       if (incoming.method === "HEAD" || !response.body) {
