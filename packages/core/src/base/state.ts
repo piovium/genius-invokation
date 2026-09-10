@@ -38,7 +38,11 @@ import type {
 import { randomSeed } from "../random";
 import type { Version } from "..";
 import { versionLt } from "./version";
-import type { AttachmentDefinition, AttachmentModification, AttachmentTag } from "./attachment";
+import type {
+  AttachmentDefinition,
+  AttachmentModification,
+  AttachmentTag,
+} from "./attachment";
 
 // 为不同层级的 state object 添加 marker symbol
 export type StateKind =
@@ -83,7 +87,7 @@ export interface GameConfig {
    * 是否启用房主-房客相关的结算执行顺序。
    * 1. 战斗开始时的事件响应顺序将改为房主 -> 房客，而非默认的 0 -> 1。
    * 2. HCI 事件的重排顺序将改为 0 -> 1，而非触发先后顺序。
-   * 
+   *
    * @defaults `false`
    */
   readonly hostRelatedExecution: boolean;
@@ -150,12 +154,7 @@ export interface IteratorState {
 }
 
 export type PhaseType =
-  | "initActives"
-  | "initHands"
-  | "roll"
-  | "action"
-  | "end"
-  | "gameEnd";
+  "initActives" | "initHands" | "roll" | "action" | "end" | "gameEnd";
 
 export interface GameState {
   readonly [StateSymbol]: "game";
@@ -221,10 +220,10 @@ export interface CharacterState {
 
 export type CharacterVariables = VariableOfConfig<CharacterVariableConfigs>;
 
-export interface EntityState {
+export interface EntityState<Ty extends EntityType = EntityType> {
   readonly [StateSymbol]: "entity";
   readonly id: number;
-  readonly definition: EntityDefinition;
+  readonly definition: EntityDefinition<Ty>;
   readonly variables: EntityVariables;
   readonly attachments: AttachmentState[];
 }

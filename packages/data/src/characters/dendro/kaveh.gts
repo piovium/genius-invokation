@@ -94,7 +94,10 @@ define status {
 define combatStatus {
   id 117083 as TheArtOfBudgetingInEffect;
   once deductOmniDiceCard {
-    when :( :e.action.skill.caller.definition.tags.includes("place") );
+    when :(
+      :e.action.skill.caller.definition.type === "support" &&
+        :e.action.skill.caller.definition.tags.includes("place")
+    );
     :e.deductOmniCost(2);
   };
 };

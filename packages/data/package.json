@@ -11,7 +11,10 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "development": ["./src/index.ts", "./dist/index.js"],
+      "development": [
+        "./src/index.ts",
+        "./dist/index.js"
+      ],
       "import": "./dist/index.js"
     },
     "./internal/*": "./src/*"
@@ -30,7 +33,7 @@
   ],
   "scripts": {
     "regenerate_data": "gnx ./scripts/generators/index.ts",
-    "check": "gtsc --noEmit",
+    "check": "NODE_OPTIONS=--max-old-space-size=8192 gtsc --noEmit",
     "build": "tsdown"
   },
   "gamingTs": {
