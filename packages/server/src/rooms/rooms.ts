@@ -212,12 +212,12 @@ class Room {
     if (player0 === null || player1 === null) {
       throw conflict(`Room ${this.id} is missing a player`);
     }
+    const seats = [player0, player1];
     if (this.waitingTimeout) clearTimeout(this.waitingTimeout);
     this.waitingTimeout = null;
     let state: GameState;
     try {
-      player0.setTimeoutConfig(this.config);
-      player1.setTimeoutConfig(this.config);
+      for (const player of seats) player.setTimeoutConfig(this.config);
       state = InternalGame.createInitialState({
         decks: [player0.playerInfo.deck, player1.playerInfo.deck],
         data: getData(this.config.gameVersion),
@@ -241,11 +241,9 @@ class Room {
           mutation.type === "changePhase" && mutation.newPhase === "roll",
       );
       if (roundRolled) {
-        player0.resetRoundTimeout();
-        player1.resetRoundTimeout();
+        for (const player of seats) player.resetRoundTimeout();
       }
     };
-    const seats = [player0, player1];
     game.onIoError = (error) => seats[error.who]?.onError(error);
     game.players[0].io = player0;
     game.players[1].io = player1;
@@ -256,8 +254,7 @@ class Room {
         this.game = game;
         await game.start();
       } catch (e) {
-        player0.onError(e);
-        player1.onError(e);
+        for (const player of seats) player.onError(e);
         sendDebugLog("gameErrorLog", {
           em: inspect(e),
           gv: this.config.gameVersion,
@@ -298,8 +295,7 @@ class Room {
       phase: this.game?.state.phase ?? null,
       winner: this.game?.state.winner ?? null,
     };
-    this.players[0]?.complete();
-    this.players[1]?.complete();
+    for (const player of this.players) player?.complete();
     this.game = null;
     for (const cb of this.onStopHandlers.splice(0)) {
       Promise.resolve()
@@ -438,6 +434,7 @@ export function createRooms(
   metrics: Metrics,
 ): Rooms {
   const logger = new Logger("rooms");
+  /** Room IDs are dealt from this shuffled pool and recycled on close. */
   const roomIdPool = toShuffled(Array.from({ length: 10000 }, (_, i) => i));
   const rooms = new Map<number, Room>();
   let shutdownResolvers: PromiseWithResolvers<void> | null = null;
@@ -459,7 +456,7 @@ export function createRooms(
   function requirePlayer(room: Room, playerId: PlayerId): Player {
     const player = room
       .getPlayers()
-      .find((player) => player.playerInfo.id === playerId);
+      .find((candidate) => candidate.playerInfo.id === playerId);
     if (!player) throw notFound(`Player ${playerId} is not in room ${room.id}`);
     return player;
   }
