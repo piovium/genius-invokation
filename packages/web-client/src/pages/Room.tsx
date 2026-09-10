@@ -93,8 +93,8 @@ function getClientPlayerInfo(player: PlayerInfo) {
   return { name: player.name, avatarUrl: getPlayerAvatarUrl(player) };
 }
 
-// Both end-of-game actions are one pill button inside a square wrapper; keeping
-// them in a component lets each caller pass only its label and handler.
+// The component keeps both end-of-game actions to one definition, so each
+// caller passes only its label and handler.
 function GameEndButton(props: { onClick: () => void; children: string }) {
   return (
     <div class={GAME_END_BUTTON_WRAPPER_CLASS}>
@@ -252,7 +252,7 @@ function ConnectedRoom() {
             "SESSION_CHANGED",
           );
         }
-        const firstInitialization = !initialized();
+        const firstInitialization = !previous;
         setInitialized(payload);
         initializeClient(payload);
         if (firstInitialization && payload.config.watchable && allowWatchOpp())

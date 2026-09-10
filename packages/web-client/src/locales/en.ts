@@ -106,7 +106,7 @@ export default {
   watchable: "Allow spectators",
   allowGuestJoin: "Allow guests",
   guestRecordWarning:
-    "Matches involving guests are not saved. If you want to report issues from a match, we recommend {{suggestion}}.",
+    "Matches involving guests are not saved. If you want to report issues from a match, we recommend that you {{suggestion}}.",
   disableGuestJoin: "disable guest access",
   useGithubLogin: "sign in with GitHub",
   chooseDeck: "Choose a deck",

@@ -66,12 +66,12 @@ interface PendingCommand {
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
+const isFiniteNumber = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value);
 const isRpcTimer = (value: unknown): value is GameRpcTimer =>
   isRecord(value) &&
-  typeof value.current === "number" &&
-  Number.isFinite(value.current) &&
-  typeof value.total === "number" &&
-  Number.isFinite(value.total);
+  isFiniteNumber(value.current) &&
+  isFiniteNumber(value.total);
 const isSessionId = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0 && value.length <= 128;
 const isRoomInitialized = (value: unknown): value is RoomInitialized => {
@@ -138,9 +138,10 @@ export class RoomConnection {
    * State for one room view. `onState` reports the coarse phase (connecting ->
    * connected -> reconnecting -> closed/failed); the flags below stay separate
    * because they describe orthogonal facts rather than one linear phase:
-   * `disposed`/`terminal` mean no socket will open again, `finished` means the
-   * game ended and only a lost final ACK is being recovered, and the
-   * per-generation `authenticated`/`synchronized` pair tracks the handshake.
+   * `disposed`/`terminal` mean no socket will open again (see `stopped`),
+   * `finished` means the game ended and only a lost final ACK is being
+   * recovered, and the per-generation `authenticated`/`synchronized` pair
+   * tracks the handshake.
    */
   private socket: WebSocket | null = null;
   private removeSocketListeners: (() => void) | null = null;
@@ -159,6 +160,11 @@ export class RoomConnection {
   private socketTimer?: ReturnType<typeof setTimeout>;
   private outageStarted = 0;
   private reconnectAttempt = 0;
+
+  /** No further socket may open: the view was disposed or has terminated. */
+  private get stopped(): boolean {
+    return this.disposed || this.terminal;
+  }
 
   constructor(private readonly options: ConnectionOptions) {
     const url = new URL(options.url);
@@ -189,7 +195,7 @@ export class RoomConnection {
   }
 
   private connect(): void {
-    if (this.disposed || this.terminal) return;
+    if (this.stopped) return;
     if (
       Date.now() - this.outageStarted >
       (this.options.reconnectDeadlineMs ?? 30_000)
@@ -215,8 +221,7 @@ export class RoomConnection {
     }
     this.socket = socket;
     socket.binaryType = "arraybuffer";
-    const active = () =>
-      !this.disposed && !this.terminal && generation === this.generation;
+    const active = () => !this.stopped && generation === this.generation;
     const onOpen = () => {
       if (!active()) return;
       try {
@@ -298,8 +303,14 @@ export class RoomConnection {
     if (this.pending) clearTimeout(this.pending.ackTimer);
   }
 
+  /** Cancel any scheduled reconnect and drop the current socket. */
+  private haltReconnect(): void {
+    clearTimeout(this.reconnectTimer);
+    this.disconnectSocket();
+  }
+
   private reconnect(): void {
-    if (this.disposed || this.terminal) return;
+    if (this.stopped) return;
     if (this.finished && !this.pending) {
       this.stopFinishedConnection();
       return;
@@ -439,8 +450,7 @@ export class RoomConnection {
     const generation = this.generation;
     queueMicrotask(() => {
       if (
-        this.disposed ||
-        this.terminal ||
+        this.stopped ||
         generation !== this.generation ||
         this.pending ||
         !this.synchronized
@@ -520,8 +530,7 @@ export class RoomConnection {
     id?: number,
   ): Promise<void> {
     if (
-      this.disposed ||
-      this.terminal ||
+      this.stopped ||
       !this.authenticated ||
       !this.synchronized ||
       !this.currentSessionId
@@ -575,8 +584,7 @@ export class RoomConnection {
 
   private stopFinishedConnection(): void {
     this.terminal = true;
-    clearTimeout(this.reconnectTimer);
-    this.disconnectSocket();
+    this.haltReconnect();
     this.options.onState?.("closed");
   }
 
@@ -599,10 +607,9 @@ export class RoomConnection {
   }
 
   private fail(error: RoomConnectionError): void {
-    if (this.disposed || this.terminal) return;
+    if (this.stopped) return;
     this.terminal = true;
-    clearTimeout(this.reconnectTimer);
-    this.disconnectSocket();
+    this.haltReconnect();
     this.rejectPending(error);
     this.options.onState?.("failed");
     this.options.onError?.(error);
@@ -611,8 +618,7 @@ export class RoomConnection {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
-    clearTimeout(this.reconnectTimer);
-    this.disconnectSocket();
+    this.haltReconnect();
     this.rejectPending(this.connectionError("Room view closed.", "DISPOSED"));
   }
 }
