@@ -4,6 +4,18 @@ import { createApplication, listenApplication } from "./app";
 import { createDatabase } from "./db/database";
 import { createGuestId } from "./auth/guest-id";
 
+const BASE_PATH = "/play/";
+// fetch() resolves against the server origin, where the configured base path
+// appears without its leading slash.
+const API_PREFIX = `${BASE_PATH.slice(1)}api/`;
+const apiPath = (path: string) => `${API_PREFIX}${path}`;
+
+interface VersionResponse {
+  coreVersion: string;
+  supportedGameVersions: string[];
+  currentGameVersion: string;
+}
+
 test("real Elysia HTTP serves public routes and metrics, guards protected APIs, and rejects paths outside the API prefix", async () => {
   // The pg pool stays lazy for routes that never touch the database, so an
   // unreachable URL is fine here; database-backed requests and restart
@@ -14,7 +26,7 @@ test("real Elysia HTTP serves public routes and metrics, guards protected APIs, 
   const service = createApplication({
     database,
     secret: "http-fixture-secret",
-    basePath: "/play/",
+    basePath: BASE_PATH,
     production: false,
   });
   const server = await listenApplication(service, {
@@ -27,39 +39,35 @@ test("real Elysia HTTP serves public routes and metrics, guards protected APIs, 
     (await request(path, init)).json();
   try {
     assert.equal(
-      await (await request("play/api/hello")).text(),
+      await (await request(apiPath("hello"))).text(),
       "Hello World!",
     );
-    const version = (await getJson("play/api/version")) as {
-      coreVersion: string;
-      supportedGameVersions: string[];
-      currentGameVersion: string;
-    };
+    const version = (await getJson(apiPath("version"))) as VersionResponse;
     assert.equal(typeof version.coreVersion, "string");
     assert.ok(
       version.supportedGameVersions.includes(version.currentGameVersion),
     );
-    for (const path of ["play/api/users/me", "play/api/rooms/current"]) {
+    for (const path of [apiPath("users/me"), apiPath("rooms/current")]) {
       assert.equal(await getJson(path), null);
     }
     const guestToken = await service.auth.signGuest(createGuestId());
-    const currentRoom = await request("play/api/rooms/current", {
+    const currentRoom = await request(apiPath("rooms/current"), {
       headers: { authorization: `Bearer ${guestToken}` },
     });
     assert.equal(currentRoom.status, 200);
     assert.equal(await currentRoom.json(), null);
     for (const path of ["decks", "games", "games/mine", "users/91000001"]) {
-      const response = await request(`play/api/${path}`);
+      const response = await request(apiPath(path));
       assert.equal(response.status, 401);
       assert.partialDeepStrictEqual(await response.json(), { statusCode: 401 });
     }
-    const teapot = await request("play/api/teapot");
+    const teapot = await request(apiPath("teapot"));
     assert.equal(teapot.status, 418);
     assert.partialDeepStrictEqual(await teapot.json(), {
       message: "I'm a teapot~",
     });
     for (const path of [
-      "play/api/rooms/1/players/1/notification",
+      apiPath("rooms/1/players/1/notification"),
       "api/hello",
     ]) {
       const missing = await request(path);
@@ -73,7 +81,7 @@ test("real Elysia HTTP serves public routes and metrics, guards protected APIs, 
       service.metrics.contentType,
     );
     assert.ok((await metrics.text()).includes("gi_rooms_active"));
-    const preflight = await request("play/api/decks", {
+    const preflight = await request(apiPath("decks"), {
       method: "OPTIONS",
       headers: {
         origin: "http://127.0.0.1:5173",

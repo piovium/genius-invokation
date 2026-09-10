@@ -16,8 +16,10 @@ const config: RoomConfig = {
   gameVersion: CURRENT_VERSION,
 };
 const request: RpcRequest = { request: { $case: "switchHands", value: {} } };
+// Protobuf-encoded Response { switchHands: {} }, matching `request` above.
 const response = Uint8Array.of(0x12, 0);
-const createPlayer = (id = "guest-test", sessionId = "session-test") => {
+const SESSION_ID = "session-test";
+const createPlayer = (id = "guest-test", sessionId = SESSION_ID) => {
   const instance = new Player(
     { id, isGuest: true, name: id, deck: { characters: [], cards: [] } },
     sessionId,
@@ -47,8 +49,9 @@ test("real Player accepts once synchronously across concurrent callers and repla
     const first = instance.receiveResponse(0, response);
     const duplicate = instance.receiveResponse(0, response);
     assert.equal(duplicate, first);
-    assert.equal(first.sessionId, "session-test");
+    assert.equal(first.sessionId, SESSION_ID);
     assert.throws(
+      // A different SwitchHandsResponse for the same RPC must be rejected.
       () => instance.receiveResponse(0, Uint8Array.of(0x12, 2, 8, 2)),
       hasCode("CONFLICT"),
     );

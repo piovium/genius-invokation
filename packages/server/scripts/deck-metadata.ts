@@ -5,6 +5,9 @@ import { fileURLToPath } from "node:url";
 
 const serverRoot = path.resolve(import.meta.dirname, "..");
 const assetsRoot = path.resolve(serverRoot, "../assets-manager");
+const SOURCE_DATA_DIRECTORY = "src/data";
+const DIST_DATA_DIRECTORY = "dist/data";
+const MANIFEST_FORMAT_VERSION = 1;
 const categories = [
   "action_cards",
   "characters",
@@ -41,7 +44,7 @@ async function resolveDataDirectory(explicit?: string): Promise<string> {
   const fromSource = Boolean(process.env.FROM_SOURCE);
   const preferred = path.join(
     assetsRoot,
-    fromSource ? "src/data" : "dist/data",
+    fromSource ? SOURCE_DATA_DIRECTORY : DIST_DATA_DIRECTORY,
   );
   try {
     await access(preferred);
@@ -51,7 +54,7 @@ async function resolveDataDirectory(explicit?: string): Promise<string> {
       throw new Error(
         "Build assets-manager source data before generating server deck metadata",
       );
-    return path.join(assetsRoot, "src/data");
+    return path.join(assetsRoot, SOURCE_DATA_DIRECTORY);
   }
 }
 
@@ -69,6 +72,8 @@ export async function generateDeckMetadata({
   outputDirectory = path.join(serverRoot, "generated"),
 }: { dataDirectory?: string; outputDirectory?: string } = {}) {
   const dataDirectory = await resolveDataDirectory(requestedDataDirectory);
+  // A null prototype keeps a raw id such as "__proto__" from colliding with
+  // inherited object keys.
   const metadataById: Record<string, DeckMetadata> = Object.create(null);
   const categoryCounts: Record<string, number> = {};
   const duplicateIds: { id: number; ignoredCategory: string }[] = [];
@@ -125,7 +130,7 @@ export async function generateDeckMetadata({
   sourceHashes["sharing.ts"] = hash(codecSource);
   const metadataJson = JSON.stringify(metadataById);
   const manifest = {
-    formatVersion: 1,
+    formatVersion: MANIFEST_FORMAT_VERSION,
     sourceDirectory: path
       .relative(assetsRoot, dataDirectory)
       .replaceAll(path.sep, "/"),
@@ -156,10 +161,11 @@ export async function generateDeckMetadata({
   return { index: metadataById, manifest, dataDirectory, outputDirectory };
 }
 
-if (
-  process.argv[1] &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
-) {
+// Run the generator only when this file is the process entry point.
+const isCliEntry =
+  process.argv[1] !== undefined &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isCliEntry) {
   const { manifest } = await generateDeckMetadata();
   console.log(
     `Generated ${manifest.recordCount} deck metadata records (${manifest.metadataBytes} bytes) from ${manifest.sourceDirectory}`,

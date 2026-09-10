@@ -10,6 +10,19 @@ import { attachRoomWebSocketServer } from "../room-transport/websocket";
 import { Player } from "./player";
 import type { Rooms } from "./rooms";
 
+const TEST_TIMEOUT_MS = 5000;
+const CONNECT_TIMEOUT_MS = 1000;
+const MESSAGE_TIMEOUT_MS = 3000;
+// Standard WebSocket close codes observed by these tests.
+const CLOSE_CODES = {
+  normal: 1000,
+  abnormal: 1006,
+  policyViolation: 1008,
+  messageTooBig: 1009,
+} as const;
+// Protobuf-encoded Response { switchHands: {} }: an empty but valid reply.
+const EMPTY_SWITCH_HANDS_RESPONSE = Uint8Array.of(0x12, 0);
+
 const cleanups = new Set<() => Promise<void>>();
 afterEach(async () => {
   for (const cleanup of cleanups) await cleanup();
@@ -51,7 +64,7 @@ async function connect(url: string) {
   await new Promise<void>((resolve, reject) => {
     const timer = setTimeout(
       () => reject(new Error(`WebSocket connect timed out: ${url}`)),
-      1000,
+      CONNECT_TIMEOUT_MS,
     );
     socket.addEventListener(
       "open",
@@ -81,7 +94,7 @@ async function connect(url: string) {
           encodeGameFrame({
             type: "actionResponse",
             id,
-            response: Uint8Array.of(0x12, 0),
+            response: EMPTY_SWITCH_HANDS_RESPONSE,
           }),
         ),
       ),
@@ -90,7 +103,7 @@ async function connect(url: string) {
         const timer = setTimeout(() => {
           waiters.delete(check);
           reject(new Error(`Expected message timed out: ${type}`));
-        }, 3000);
+        }, MESSAGE_TIMEOUT_MS);
         const check = () => {
           const entry = messages.find(
             (entry) => !entry.consumed && entry.value.type === type,
@@ -111,7 +124,7 @@ async function connect(url: string) {
       });
     },
     async close() {
-      if (closedCode === null) socket.close(1000);
+      if (closedCode === null) socket.close(CLOSE_CODES.normal);
       await closed.promise;
     },
   };
@@ -216,8 +229,8 @@ const switchHands: RpcRequest = {
 };
 
 test(
-  "Node ws sends real binary RPCs and a disconnected accepted response recovers its ACK once",
-  { timeout: 5000 },
+  "Node ws sends real binary RPCs and recovers an accepted ACK after the socket disconnects",
+  { timeout: TEST_TIMEOUT_MS },
   async () => {
     const server = await fixture({ dropAck: true });
     let executions = 0;
@@ -236,7 +249,7 @@ test(
         true,
       );
       first.respond(0);
-      assert.equal(await first.closed, 1006);
+      assert.equal(await first.closed, CLOSE_CODES.abnormal);
       await response;
       assert.equal(executions, 1);
       assert.equal(
@@ -265,7 +278,7 @@ test(
 
 test(
   "rejected first-frame auth is terminal even if valid auth and an action are already queued",
-  { timeout: 5000 },
+  { timeout: TEST_TIMEOUT_MS },
   async () => {
     const server = await fixture();
     const client = await connect(server.url);
@@ -273,7 +286,7 @@ test(
       client.send({ type: "auth", token: "invalid" });
       client.send({ type: "auth", token: server.token });
       client.respond(0);
-      assert.equal(await client.closed, 1008);
+      assert.equal(await client.closed, CLOSE_CODES.policyViolation);
       assert.equal(client.messages.length, 0);
     } finally {
       await client.close();
@@ -284,7 +297,7 @@ test(
 
 test(
   "explicit anonymous spectators authenticate for watchable rooms but cannot act",
-  { timeout: 5000 },
+  { timeout: TEST_TIMEOUT_MS },
   async () => {
     const server = await fixture({ watchable: true });
     const client = await connect(server.url);
@@ -307,7 +320,7 @@ test(
 
 test(
   "Node transport shutdown releases authenticated and unauthenticated sockets",
-  { timeout: 5000 },
+  { timeout: TEST_TIMEOUT_MS },
   async () => {
     const server = await fixture();
     const active = await connect(server.url);
@@ -323,13 +336,14 @@ test(
 
 test(
   "Node transport rejects an oversized incoming frame before authentication",
-  { timeout: 5000 },
+  { timeout: TEST_TIMEOUT_MS },
   async () => {
     const server = await fixture();
     const client = await connect(server.url);
     try {
+      // One byte over the transport's 64 KiB incoming frame limit.
       client.socket.send(new Uint8Array(64 * 1024 + 1));
-      assert.equal(await client.closed, 1009);
+      assert.equal(await client.closed, CLOSE_CODES.messageTooBig);
       assert.equal(client.messages.length, 0);
     } finally {
       await client.close();

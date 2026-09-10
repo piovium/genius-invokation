@@ -5,7 +5,9 @@ import { node } from "@elysiajs/node";
 import { nameSchema } from "./http";
 import { listenHttp } from "./http-server";
 
-test("HTTP name validation preserves the old 64 Unicode character limit", async () => {
+const MAX_NAME_LENGTH = 64;
+
+test("HTTP name validation preserves the old 64-character Unicode limit", async () => {
   const app = new Elysia({ adapter: node() }).post("/", ({ body }) => body, {
     body: t.Object({ name: nameSchema }),
   });
@@ -20,12 +22,22 @@ test("HTTP name validation preserves the old 64 Unicode character limit", async 
       body: JSON.stringify({ name }),
     });
   try {
-    for (const name of ["a".repeat(64), "😀".repeat(64), "中文名字"]) {
+    // Cover single-byte, surrogate-pair and multi-byte names: the limit counts
+    // Unicode code points, not UTF-16 units or encoded bytes.
+    for (const name of [
+      "a".repeat(MAX_NAME_LENGTH),
+      "😀".repeat(MAX_NAME_LENGTH),
+      "中文名字",
+    ]) {
       const response = await submitName(name);
       assert.equal(response.status, 200);
       assert.deepEqual(await response.json(), { name });
     }
-    for (const name of ["", "a".repeat(65), "😀".repeat(65)]) {
+    for (const name of [
+      "",
+      "a".repeat(MAX_NAME_LENGTH + 1),
+      "😀".repeat(MAX_NAME_LENGTH + 1),
+    ]) {
       const response = await submitName(name);
       assert.ok(response.status >= 400);
       assert.ok(response.status < 500);

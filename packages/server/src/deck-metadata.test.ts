@@ -16,6 +16,7 @@ import metadata from "../generated/deck-metadata";
 const root = path.resolve(import.meta.dirname, "..");
 const assetsRoot = path.resolve(root, "../assets-manager");
 const generated = path.join(root, "generated");
+const SCRATCH_PREFIX = "gi-deck-metadata-";
 const manifest = JSON.parse(
   await readFile(path.join(generated, "deck-metadata-manifest.json"), "utf8"),
 );
@@ -57,7 +58,7 @@ const expectedMetadataFields = [
   "relatedCharacterTags",
 ] as const;
 
-test("all real raw metadata fields, record order, duplicates and source hashes match the generated index", async () => {
+test("all real raw metadata fields, record order, duplicates, and source hashes match the generated index", async () => {
   const expected: Record<string, unknown> = {};
   const duplicates: { id: unknown; ignoredCategory: string }[] = [];
   for (const category of categories) {
@@ -124,8 +125,8 @@ test("all real raw metadata fields, record order, duplicates and source hashes m
   }
 });
 
-test("source and dist generation agree and the original static codec/share map remain byte-for-byte", async () => {
-  const folder = await mkdtemp(path.join(tmpdir(), "gi-deck-metadata-"));
+test("source and dist generation agree, and the copied codec and share map match their originals byte-for-byte", async () => {
+  const folder = await mkdtemp(path.join(tmpdir(), SCRATCH_PREFIX));
   try {
     const fromSource = await generateDeckMetadata({
       dataDirectory: path.join(assetsRoot, "src/data"),
@@ -164,16 +165,17 @@ test("source and dist generation agree and the original static codec/share map r
     for (const record of obtainable)
       assert.equal(shareMap[record.shareId!], record.id);
   } finally {
+    // Guard the recursive delete so only the scratch folder we created is removed.
     if (
       path.dirname(path.resolve(folder)) !== path.resolve(tmpdir()) ||
-      !path.basename(folder).startsWith("gi-deck-metadata-")
+      !path.basename(folder).startsWith(SCRATCH_PREFIX)
     )
       throw new Error("Unexpected generated test folder");
     await rm(folder, { recursive: true, force: true });
   }
 });
 
-test("original legal/illegal deck restrictions and every minimum version work with fetch forbidden", async () => {
+test("original deck restrictions and every minimum version are validated with fetch forbidden", async () => {
   const originalFetch = globalThis.fetch;
   let fetches = 0;
   globalThis.fetch = new Proxy(originalFetch, {

@@ -22,6 +22,8 @@ import { generateDeckMetadata } from "./deck-metadata";
 
 const root = path.resolve(import.meta.dirname, "..");
 const output = path.join(root, "dist");
+const MANIFEST_FILE = "deck-metadata-manifest.json";
+// Any non-empty FROM_SOURCE selects the workspace sources over the built dist.
 const fromSource = Boolean(process.env.FROM_SOURCE);
 // Validate and capture the local assets snapshot before replacing build output.
 const { outputDirectory: metadataDirectory } = await generateDeckMetadata();
@@ -31,6 +33,7 @@ if (path.dirname(output) !== root || path.basename(output) !== "dist")
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 await build({
+  // Two entry points: the server itself and the standalone migration CLI.
   input: {
     main: path.join(root, "src/main.ts"),
     migrate: path.join(root, "src/db/migrate.ts"),
@@ -42,6 +45,8 @@ await build({
     sourcemap: true,
     assetFileNames: "[name].[ext]",
   },
+  // Optional native add-ons: pg and ws load them lazily, so leave them external
+  // instead of bundling their binaries.
   external: ["pg-native", "bufferutil", "utf-8-validate"],
   plugins: [
     replacePlugin({ "process.env.NODE_ENV": '"production"' }),
@@ -69,6 +74,6 @@ await cp(path.join(root, "drizzle"), path.join(output, "drizzle"), {
   recursive: true,
 });
 await cp(
-  path.join(metadataDirectory, "deck-metadata-manifest.json"),
-  path.join(output, "deck-metadata-manifest.json"),
+  path.join(metadataDirectory, MANIFEST_FILE),
+  path.join(output, MANIFEST_FILE),
 );
