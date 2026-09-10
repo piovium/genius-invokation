@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 1,
+  "case": "desktop",
+  "fixtures": [
+    {
+      "id": "root-workspace/GTS",
+      "routes": [
+        "gts-lsp"
+      ],
+      "fixture": {
+        "uri": "file:///workspace/root-workspace/current.gts",
+        "validText": "// 芭芭拉：跨文件类型与位置映射\r\ndefine character {\r\n  id 1201 as Barbara;\r\n  since \"v3.3.0\";\r\n  tags hydro, catalyst, mondstadt;\r\n  health 10;\r\n  energy 3;\r\n};\r\nexport const shared: number = 1201;\r\n",
+        "badText": "// 芭芭拉：跨文件类型与位置映射\r\ndefine character {\r\n  id 1201 as Barbara;\r\n  since \"v3.3.0\";\r\n  tags hydro, catalyst, mondstadt;\r\n  health \"bad\";\r\n  energy 3;\r\n};\r\nexport const shared: number = 1201;\r\n",
+        "diagnostic": {
+          "code": 2345,
+          "messageIncludes": "not assignable to parameter of type 'number'",
+          "range": {
+            "start": {
+              "line": 5,
+              "character": 9
+            },
+            "end": {
+              "line": 5,
+              "character": 14
+            }
+          }
+        },
+        "features": {
+          "hover": "CharacterHandle",
+          "completion": "health",
+          "signature": "number",
+          "definition": {
+            "uri": "file:///workspace/root-workspace/current.gts",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 13
+              },
+              "end": {
+                "line": 2,
+                "character": 20
+              }
+            },
+            "sourceText": "// 芭芭拉：跨文件类型与位置映射\r\ndefine character {\r\n  id 1201 as Barbara;\r\n  since \"v3.3.0\";\r\n  tags hydro, catalyst, mondstadt;\r\n  health 10;\r\n  energy 3;\r\n};\r\nexport const shared: number = 1201;\r\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "root-workspace/TS",
+      "routes": [
+        "tsserver"
+      ],
+      "fixture": {
+        "uri": "file:///workspace/root-workspace/consumer.ts",
+        "validText": "import { Barbara, shared } from \"./current.gts\";\r\nimport { legacy } from \"./old_versions.gts\";\r\nexport const value: number = Barbara + legacy;\r\nexport const sharedValue: number = shared;\r\nMath.max(1, 2);\r\n",
+        "badText": "import { Barbara, shared } from \"./current.gts\";\r\nimport { legacy } from \"./old_versions.gts\";\r\nexport const value: number = Barbara + legacy;\r\nexport const sharedValue: number = shared;\r\nMath.max(1, 2);\r\n\r\nexport const independent: string = 1;\r\n",
+        "diagnostic": {
+          "code": 2322,
+          "messageIncludes": "not assignable to type 'string'",
+          "range": {
+            "start": {
+              "line": 6,
+              "character": 35
+            },
+            "end": {
+              "line": 6,
+              "character": 36
+            }
+          }
+        },
+        "features": {
+          "hover": "CharacterHandle",
+          "completion": "max",
+          "signature": "number",
+          "definition": {
+            "uri": "file:///workspace/root-workspace/current.gts",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 13
+              },
+              "end": {
+                "line": 2,
+                "character": 20
+              }
+            },
+            "sourceText": "// 芭芭拉：跨文件类型与位置映射\r\ndefine character {\r\n  id 1201 as Barbara;\r\n  since \"v3.3.0\";\r\n  tags hydro, catalyst, mondstadt;\r\n  health 10;\r\n  energy 3;\r\n};\r\nexport const shared: number = 1201;\r\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "root-workspace/TSX",
+      "routes": [
+        "tsserver"
+      ],
+      "fixture": {
+        "uri": "file:///workspace/root-workspace/component.tsx",
+        "validText": "import { shared } from \"./current.gts\";\r\ndeclare global {\r\n  namespace JSX {\r\n    interface IntrinsicElements { character: { id: number }; }\r\n  }\r\n}\r\nexport const node = <character id={shared} />;\r\nMath.max(1, 2);\r\n",
+        "badText": "import { shared } from \"./current.gts\";\r\ndeclare global {\r\n  namespace JSX {\r\n    interface IntrinsicElements { character: { id: number }; }\r\n  }\r\n}\r\nexport const node = <character id={shared} />;\r\nMath.max(1, 2);\r\n\r\nexport const independent: string = 1;\r\n",
+        "diagnostic": {
+          "code": 2322,
+          "messageIncludes": "not assignable to type 'string'",
+          "range": {
+            "start": {
+              "line": 9,
+              "character": 35
+            },
+            "end": {
+              "line": 9,
+              "character": 36
+            }
+          }
+        },
+        "features": {
+          "hover": "number",
+          "completion": "max",
+          "signature": "number",
+          "definition": {
+            "uri": "file:///workspace/root-workspace/current.gts",
+            "range": {
+              "start": {
+                "line": 8,
+                "character": 13
+              },
+              "end": {
+                "line": 8,
+                "character": 19
+              }
+            },
+            "sourceText": "// 芭芭拉：跨文件类型与位置映射\r\ndefine character {\r\n  id 1201 as Barbara;\r\n  since \"v3.3.0\";\r\n  tags hydro, catalyst, mondstadt;\r\n  health 10;\r\n  energy 3;\r\n};\r\nexport const shared: number = 1201;\r\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "examples-workspace/GTS",
+      "routes": [
+        "gts-lsp"
+      ],
+      "fixture": {
+        "uri": "file:///workspace/examples-workspace/current.gts",
+        "validText": "// 芭芭拉：跨文件类型与位置映射\r\ndefine character {\r\n  id 1201 as Barbara;\r\n  since \"v3.3.0\";\r\n  tags hydro, catalyst, mondstadt;\r\n  health 10;\r\n  energy 3;\r\n};\r\nexport const shared: number = 1201;\r\n",
+        "badText": "// 芭芭拉：跨文件类型与位置映射\r\ndefine character {\r\n  id 1201 as Barbara;\r\n  since \"v3.3.0\";\r\n  tags hydro, catalyst, mondstadt;\r\n  health \"bad\";\r\n  energy 3;\r\n};\r\nexport const shared: number = 1201;\r\n",
+        "diagnostic": {
+          "code": 2345,
+          "messageIncludes": "not assignable to parameter of type 'number'",
+          "range": {
+            "start": {
+              "line": 5,
+              "character": 9
+            },
+            "end": {
+              "line": 5,
+              "character": 14
+            }
+          }
+        },
+        "features": {
+          "hover": "CharacterHandle",
+          "completion": "health",
+          "signature": "number",
+          "definition": {
+            "uri": "file:///workspace/examples-workspace/current.gts",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 13
+              },
+              "end": {
+                "line": 2,
+                "character": 20
+              }
+            },
+            "sourceText": "// 芭芭拉：跨文件类型与位置映射\r\ndefine character {\r\n  id 1201 as Barbara;\r\n  since \"v3.3.0\";\r\n  tags hydro, catalyst, mondstadt;\r\n  health 10;\r\n  energy 3;\r\n};\r\nexport const shared: number = 1201;\r\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "examples-workspace/TS",
+      "routes": [
+        "tsserver"
+      ],
+      "fixture": {
+        "uri": "file:///workspace/examples-workspace/consumer.ts",
+        "validText": "import { Barbara, shared } from \"./current.gts\";\r\nimport { legacy } from \"./old_versions.gts\";\r\nexport const value: number = Barbara + legacy;\r\nexport const sharedValue: number = shared;\r\nMath.max(1, 2);\r\n",
+        "badText": "import { Barbara, shared } from \"./current.gts\";\r\nimport { legacy } from \"./old_versions.gts\";\r\nexport const value: number = Barbara + legacy;\r\nexport const sharedValue: number = shared;\r\nMath.max(1, 2);\r\n\r\nexport const independent: string = 1;\r\n",
+        "diagnostic": {
+          "code": 2322,
+          "messageIncludes": "not assignable to type 'string'",
+          "range": {
+            "start": {
+              "line": 6,
+              "character": 35
+            },
+            "end": {
+              "line": 6,
+              "character": 36
+            }
+          }
+        },
+        "features": {
+          "hover": "CharacterHandle",
+          "completion": "max",
+          "signature": "number",
+          "definition": {
+            "uri": "file:///workspace/examples-workspace/current.gts",
+            "range": {
+              "start": {
+                "line": 2,
+                "character": 13
+              },
+              "end": {
+                "line": 2,
+                "character": 20
+              }
+            },
+            "sourceText": "// 芭芭拉：跨文件类型与位置映射\r\ndefine character {\r\n  id 1201 as Barbara;\r\n  since \"v3.3.0\";\r\n  tags hydro, catalyst, mondstadt;\r\n  health 10;\r\n  energy 3;\r\n};\r\nexport const shared: number = 1201;\r\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "examples-workspace/TSX",
+      "routes": [
+        "tsserver"
+      ],
+      "fixture": {
+        "uri": "file:///workspace/examples-workspace/component.tsx",
+        "validText": "import { shared } from \"./current.gts\";\r\ndeclare global {\r\n  namespace JSX {\r\n    interface IntrinsicElements { character: { id: number }; }\r\n  }\r\n}\r\nexport const node = <character id={shared} />;\r\nMath.max(1, 2);\r\n",
+        "badText": "import { shared } from \"./current.gts\";\r\ndeclare global {\r\n  namespace JSX {\r\n    interface IntrinsicElements { character: { id: number }; }\r\n  }\r\n}\r\nexport const node = <character id={shared} />;\r\nMath.max(1, 2);\r\n\r\nexport const independent: string = 1;\r\n",
+        "diagnostic": {
+          "code": 2322,
+          "messageIncludes": "not assignable to type 'string'",
+          "range": {
+            "start": {
+              "line": 9,
+              "character": 35
+            },
+            "end": {
+              "line": 9,
+              "character": 36
+            }
+          }
+        },
+        "features": {
+          "hover": "number",
+          "completion": "max",
+          "signature": "number",
+          "definition": {
+            "uri": "file:///workspace/examples-workspace/current.gts",
+            "range": {
+              "start": {
+                "line": 8,
+                "character": 13
+              },
+              "end": {
+                "line": 8,
+                "character": 19
+              }
+            },
+            "sourceText": "// 芭芭拉：跨文件类型与位置映射\r\ndefine character {\r\n  id 1201 as Barbara;\r\n  since \"v3.3.0\";\r\n  tags hydro, catalyst, mondstadt;\r\n  health 10;\r\n  energy 3;\r\n};\r\nexport const shared: number = 1201;\r\n"
+          }
+        }
+      }
+    }
+  ]
+}

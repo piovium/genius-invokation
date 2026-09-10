@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "gate": "desktop",
+  "repository": "gts",
+  "fixtureModule": "packages/language-server/__tests__/fixture.ts",
+  "extension": {
+    "id": "Guyutongxue.gamingts-vscode",
+    "packageName": "gamingts-vscode",
+    "manifest": "packages/vscode/package.json",
+    "developmentPath": "packages/vscode",
+    "testDriver": "packages/vscode/__tests__/extension.cjs",
+    "packScript": "pack",
+    "packLabel": "desktop-pack",
+    "packOutputDirectory": "packed-vsix",
+    "packTimeoutMs": 1800000
+  },
+  "packed": {
+    "pluginPackages": [
+      "@gi-tcg/gts-typescript-language-service-plugin",
+      "@gi-tcg/gts-language-plugin",
+      "@gi-tcg/gts-transpiler"
+    ],
+    "pluginBundle": "dist/index.js"
+  },
+  "workspaces": [
+    {
+      "id": "root-workspace",
+      "relative": "",
+      "probeBase": "packages/language-server/__tests__"
+    },
+    {
+      "id": "examples-workspace",
+      "relative": "examples",
+      "probeBase": ""
+    }
+  ],
+  "descriptors": [
+    { "name": "GTS", "file": "current.gts", "route": "gts-lsp", "anchor": "as Barbara" },
+    { "name": "TS", "file": "consumer.ts", "route": "tsserver", "anchor": "as Barbara" },
+    { "name": "TSX", "file": "component.tsx", "route": "tsserver", "anchor": "const shared" }
+  ],
+  "probeFiles": ["current.gts", "old_versions.gts", "consumer.ts", "component.tsx"],
+  "probeSupport": ["package.json", "tsconfig.json"],
+  "launchModes": {
+    "development-path": {
+      "args": ["--extensionDevelopmentPath", "--user-data-dir", "--extensions-dir"],
+      "forbiddenArgs": ["--install-extension"]
+    },
+    "packed-vsix-install": {
+      "installArgs": ["--install-extension", "--extensions-dir", "--user-data-dir"],
+      "args": ["--user-data-dir", "--extensions-dir"],
+      "forbiddenArgs": ["--extensionDevelopmentPath"]
+    }
+  },
+  "runtime": {
+    "version": "1.137.0",
+    "win32": ".tools/vscode-1.137.0-win32-x64/Code.exe",
+    "linux": ".tools/vscode-1.137.0-linux-{arch}/code"
+  },
+  "native": {
+    "addonRelativePath": "native/bridge.node",
+    "nativePackageTemplate": "@typescript-native-bridge/{platform}-{arch}",
+    "preload": "desktop-native-preload.cjs",
+    "activationPattern": "TNB ACTIVE",
+    "requiredRoutes": ["gts-lsp", "tsserver"]
+  },
+  "scenarios": [
+    "root-workspace",
+    "examples-workspace",
+    "syntax-error",
+    "property-type-error",
+    "invalid-import",
+    "unsaved-edit",
+    "external-disk-edit",
+    "close-reopen",
+    "dependency-change",
+    "unicode-crlf-space-path",
+    "packed-vsix-install",
+    "electron-extension-host"
+  ],
+  "expectedDiagnostics": {
+    "syntaxError": 1109,
+    "invalidImport": [2307, 2882],
+    "invalidImportName": "missing-dependency.gts",
+    "propertyTypeError": 2345,
+    "dependencyChange": 2322
+  },
+  "logFiles": ["desktop.stdout.log", "desktop.stderr.log"]
+}
