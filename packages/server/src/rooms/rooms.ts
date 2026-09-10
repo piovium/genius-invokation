@@ -31,7 +31,6 @@ import {
   setAsyncContext,
 } from "@gi-tcg/core";
 import getData from "@gi-tcg/data";
-import { flip } from "@gi-tcg/utils";
 import { releaseIdleMemory } from "../memory";
 import { createGuestId, DeckVerificationError, verifyDeck } from "../utils";
 import type { Metrics, RoomMetricsSnapshot } from "../metrics/metrics";
@@ -166,9 +165,6 @@ class Room {
   getHost() {
     return this.host;
   }
-  getParticipant() {
-    return this.participant;
-  }
   private get players(): [Player | null, Player | null] {
     return this.hostWho === 0
       ? [this.host, this.participant]
@@ -179,6 +175,15 @@ class Room {
   }
   getPlayers(): Player[] {
     return this.players.filter((player): player is Player => player !== null);
+  }
+  /** The seat occupied by `playerId`, or undefined when they are not in the room. */
+  findPlayer(playerId: PlayerId): Player | undefined {
+    return this.getPlayers().find(
+      (player) => player.playerInfo.id === playerId,
+    );
+  }
+  hasPlayer(playerId: PlayerId): boolean {
+    return this.findPlayer(playerId) !== undefined;
   }
   get status(): RoomStatus {
     // A room torn down before its game started never played, so it is not "finished".
@@ -192,14 +197,12 @@ class Room {
       throw conflict(`Room ${this.id} already has a host`);
     }
     this.host = player;
-    return this.hostWho;
   }
   setParticipant(player: Player) {
     if (this.participant !== null) {
       throw conflict(`Room ${this.id} already has both players`);
     }
     this.participant = player;
-    return flip(this.hostWho);
   }
   setWaitingTimeout(timer: ReturnType<typeof setTimeout>) {
     this.waitingTimeout = timer;
@@ -266,12 +269,12 @@ class Room {
     })();
   }
 
-  giveUp(userId: PlayerId): CommandAck {
-    const previousAck = this.giveUpAcks.get(userId);
+  giveUp(playerId: PlayerId): CommandAck {
+    const previousAck = this.giveUpAcks.get(playerId);
     if (previousAck) return previousAck;
-    const who = this.players.findIndex((p) => p?.playerInfo.id === userId);
+    const who = this.players.findIndex((p) => p?.playerInfo.id === playerId);
     if (who !== 0 && who !== 1)
-      throw notFound(`Player ${userId} is not in room ${this.id}`);
+      throw notFound(`Player ${playerId} is not in room ${this.id}`);
     if (!this.startedAt)
       throw new RoomCommandError("GAME_FINISHED", "No game is running");
     const ack: CommandAck = {
@@ -279,7 +282,7 @@ class Room {
       command: "giveUp",
       sessionId: this.sessionId,
     };
-    this.giveUpAcks.set(userId, ack);
+    this.giveUpAcks.set(playerId, ack);
     if (!this.terminated) this.game?.giveUp(who);
     return ack;
   }
@@ -454,9 +457,7 @@ export function createRooms(
   }
 
   function requirePlayer(room: Room, playerId: PlayerId): Player {
-    const player = room
-      .getPlayers()
-      .find((candidate) => candidate.playerInfo.id === playerId);
+    const player = room.findPlayer(playerId);
     if (!player) throw notFound(`Player ${playerId} is not in room ${room.id}`);
     return player;
   }
@@ -497,10 +498,7 @@ export function createRooms(
 
   function currentRoom(playerId: PlayerId) {
     for (const room of rooms.values()) {
-      const seated = room
-        .getPlayers()
-        .some((player) => player.playerInfo.id === playerId);
-      if (seated && room.status !== RoomStatus.Finished)
+      if (room.hasPlayer(playerId) && room.status !== RoomStatus.Finished)
         return room.getRoomInfo();
     }
     return null;
@@ -658,7 +656,8 @@ export function createRooms(
     await assertDeckPlayable(playerInfo.deck, room.config.gameVersion);
 
     room.setParticipant(new Player(playerInfo, room.sessionId));
-    // Add to game database when room stopped
+    // A finished game is persisted once here: the replay goes to S3 when
+    // configured, and the registered seats additionally get a database row.
     room.onStop((info) => {
       if (!info.hasGame) return;
       const players = room.getPlayers();
@@ -712,9 +711,7 @@ export function createRooms(
     const room = requireRoom(roomId);
     if (room.status !== RoomStatus.Finished)
       throw conflict(`Room ${roomId} is not finished`);
-    const readable =
-      room.config.watchable ||
-      room.getPlayers().some((player) => player.playerInfo.id === playerId);
+    const readable = room.config.watchable || room.hasPlayer(playerId);
     if (!readable)
       throw unauthorized(
         `Room ${roomId} is not watchable, and you are not in the room`,
@@ -741,10 +738,7 @@ export function createRooms(
     const isSelf = visitorPlayerId === watchingPlayerId;
     if (!room.config.watchable && !isSelf)
       throw unauthorized(`Room ${roomId} cannot be watched by others`);
-    if (
-      !isSelf &&
-      room.getPlayers().some((p) => p.playerInfo.id === visitorPlayerId)
-    )
+    if (!isSelf && visitorPlayerId !== null && room.hasPlayer(visitorPlayerId))
       throw unauthorized(`You cannot watch your opponent in room ${roomId}`);
     return {
       sessionId: room.sessionId,

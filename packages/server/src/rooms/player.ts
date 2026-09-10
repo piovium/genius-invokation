@@ -175,7 +175,7 @@ export class Player implements PlayerIO {
       throw new Error("RPC response method mismatch");
     const own = this.game?.state.players[this.who];
     const assertAvailableDice = (dice: readonly number[]) => {
-      const remaining = [...(own?.dice ?? [])] as number[];
+      const remaining: number[] = [...(own?.dice ?? [])];
       for (const die of dice) {
         const index = remaining.indexOf(die);
         if (index < 0) throw new Error("Selected dice are not available");
@@ -276,9 +276,6 @@ export class Player implements PlayerIO {
       }),
     })(request);
   }
-  private clearPending(id: number) {
-    if (this.pending?.id === id) this.pending = null;
-  }
   async rpc(request: RpcRequest): Promise<RpcResponse> {
     if (this.completed) throw new Error("Game finished");
     if (this.pending) throw new Error("Player already has a pending RPC");
@@ -340,7 +337,6 @@ export class Player implements PlayerIO {
         this.opponent?.sendOppRpc(this.getTimer());
       });
     } finally {
-      this.clearPending(id);
       this.emit({ type: "rpc", data: null });
       this.opponent?.sendOppRpc(null);
     }
