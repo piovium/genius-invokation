@@ -28,14 +28,10 @@
   ],
   "scripts": {
     "build:buf": "gnx scripts/buf.ts",
-    "build:ts-proto": "gnx scripts/buf.ts --typescript",
-    "build": "pnpm build:ts-proto && tsdown"
+    "build": "pnpm build:buf && tsdown"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.2.2",
     "execa": "catalog:"
-  },
-  "devDependencies": {
-    "ts-proto": "2.2.0"
   }
 }
