@@ -4,7 +4,7 @@
 
 ## 实现约定
 
-路由、请求校验、鉴权、错误处理与插件组合统一使用 Elysia 原生写法：路由以 Elysia 插件组合，校验使用 `t`，鉴权与共享状态使用 `derive`/`resolve`/`macro`，错误使用 `status` 与 `error`。运行时固定 Node.js，数据访问统一经由 Drizzle 与 PostgreSQL。
+路由、请求校验、鉴权、错误处理与插件组合统一使用 Elysia 原生写法：路由通过 Elysia 插件组合，校验使用 `t`，鉴权与共享状态使用 `derive`/`resolve`/`macro`，错误使用 `status` 与 `error`。运行时固定 Node.js，数据访问统一经由 Drizzle 与 PostgreSQL。
 
 ## 开发与构建
 
@@ -17,11 +17,11 @@
 
 开发、类型检查和测试都需要 assets-manager 的本地数据快照，上面的构建命令会先生成它。`pnpm prepare:metadata` 从 `assets-manager/dist/data` 提取牌组校验字段，并生成记录来源哈希的清单；设置 `FROM_SOURCE=1` 时改用 `src/data`。该步骤只读取本地文件，不访问 CDN。`pnpm dev`、`pnpm check` 和 `pnpm test` 会自动完成这一步，单独运行房间测试前需要先手动执行。
 
-生产构建位于 `dist/`，包含 `main.js`、`migrate.js`、`frontend/` 与 `drizzle/` 下的迁移 SQL。使用 `node dist/main.js` 启动。前端 JS、CSS 和图片按请求通过 Node 文件流返回，无需将整个文件载入内存。`WEB_CLIENT_BASE_PATH` 控制资源与 API 前缀，未知路径回退到 SPA 入口（仅 `index.html` 读入内存）；响应携带 MIME 与 ETag，`sw.js` 与 HTML 使用 `no-cache`，文件名带哈希的资源使用 `immutable` 缓存。
+生产构建位于 `dist/`，包含 `main.js`、`migrate.js`、`frontend/` 目录，以及 `drizzle/` 下的迁移 SQL。使用 `node dist/main.js` 启动。前端 JS、CSS 和图片按请求通过 Node 文件流返回，无需将整个文件载入内存。`WEB_CLIENT_BASE_PATH` 控制资源与 API 前缀，未知路径回退到 SPA 入口（仅 `index.html` 读入内存）；响应携带 MIME 与 ETag，`sw.js` 与 HTML 使用 `no-cache`，文件名带哈希的资源使用 `immutable` 缓存。
 
 ## 数据库升级
 
-对已有 PostgreSQL 数据库执行 `node dist/migrate.js`，源码环境执行 `pnpm migrate`。迁移器在事务和 PostgreSQL advisory lock 保护下，按 `drizzle/meta/_journal.json` 的顺序执行 `drizzle/` 中的 SQL，并把已执行迁移的名称与校验和写入 `__drizzle_migrations`。这套迁移是这个服务自己的 Drizzle 迁移集：表名、列、默认值、主键与外键动作与既有部署一致，约束名沿用原名称，DDL 与约束都属于对外稳定接口。
+对已有 PostgreSQL 数据库执行 `node dist/migrate.js`，源码环境执行 `pnpm migrate`。迁移器在事务和 PostgreSQL advisory lock 保护下，按 `drizzle/meta/_journal.json` 的顺序执行 `drizzle/` 中的 SQL，并把已执行迁移的名称与校验和写入 `__drizzle_migrations`。这套迁移是本服务自有的 Drizzle 迁移集：表名、列、默认值、主键与外键动作与既有部署一致，约束名沿用原名称，DDL 与约束都属于对外稳定接口。
 
 空库按 journal 顺序执行全部 SQL。重复执行不会重新建表、重置序列或修改已有用户、牌组和对局。已经建好表、却没有迁移记录的库（由本服务早期版本或其它工具建立）先与本服务的 SQL 逐列、逐主键、逐外键比对，完全一致时整体接管并登记，不执行任何 SQL；比对不一致、迁移记录不完整、校验和不符，或列、主键、外键发生漂移时，迁移器报错并回滚事务。`MIGRATIONS_DIRECTORY` 可覆盖 SQL 目录，默认使用发行包内的 `drizzle/`。
 
@@ -34,6 +34,10 @@
 数据库健康检查连接 TCP，避免把 initdb 期间仅监听 Unix socket 的临时实例当作可用服务；首次初始化 volume 提供 120 秒启动宽限。TCP 就绪后即可执行迁移，无需等满宽限期。
 
 WebSocket 与 HTTP 共用端口 3000。反向代理需要转发 `Upgrade`，空闲超时应大于服务的心跳周期。指标位于 `/metrics`，API 前缀为 `WEB_CLIENT_BASE_PATH` 加 `api`。Redis、房间回放/S3 和部署健康检查沿用现有环境变量。收到退出信号后，服务等待已有房间结束；Compose 提供 10 分钟退出宽限。
+
+或者，通过 Railway 一键部署对战平台。Railway 非免费部署平台；如果想要在 Railway 上降低部署对战平台的成本，可以开启 `genius-invokation` 服务的 Serverless 选项，详情可参见 [Railway Serverless](https://docs.railway.com/reference/app-sleeping)。
+
+  [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/genius-invokation?referralCode=JF0EXE&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
 ## 验证
 
