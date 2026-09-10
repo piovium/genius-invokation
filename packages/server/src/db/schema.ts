@@ -10,7 +10,8 @@ import {
 
 // node-postgres parses JSONB on its own, and the stored replay is a JSON string
 // in its own right: Drizzle's generic jsonb mapper would parse that string a
-// second time, so this type passes both directions through untouched.
+// second time, so this type serializes on write and returns the driver value
+// unchanged on read.
 const persistedReplay = customType<{ data: unknown; driverData: unknown }>({
   dataType: () => "jsonb",
   toDriver: (value) => JSON.stringify(value),

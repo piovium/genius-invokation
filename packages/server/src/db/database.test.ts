@@ -30,7 +30,10 @@ function scratchSchema() {
 }
 
 /** Swap the deck-owner foreign key for one with the same name but other actions. */
-async function setDeckOwnerForeignKey(client: SqlConnection, onDelete: string) {
+async function setDeckOwnerForeignKey(
+  client: SqlConnection,
+  onDelete: "CASCADE" | "RESTRICT",
+) {
   await client.unsafe(
     'ALTER TABLE "Deck" DROP CONSTRAINT "Deck_ownerUserId_fkey"',
   );
@@ -74,6 +77,8 @@ test(
         "0002_user_add_name",
       ]);
       const legacy = createSql(url);
+      const readUsers = () =>
+        legacy`SELECT id, name, "ghToken", "createdAt" FROM "User" ORDER BY id`;
       let database: Database | undefined;
       try {
         await legacy`INSERT INTO "User" (id, name, "ghToken") VALUES (91000001, 'Existing A', 'existing-fake-a'), (91000002, 'Existing B', 'existing-fake-b')`;
@@ -91,15 +96,11 @@ test(
           await legacy`INSERT INTO "Deck" (name, code, "requiredVersion", "ownerUserId", "updatedAt") VALUES ('existing-deck', ${code}, 0, 91000001, '2025-12-01T00:00:00') RETURNING id`;
         // The deployed database predates this service's own migration log.
         await legacy`DROP TABLE "__drizzle_migrations"`;
-        const before =
-          await legacy`SELECT id, name, "ghToken", "createdAt" FROM "User" ORDER BY id`;
+        const before = await readUsers();
         const first = await migrateDatabase(url, migrationsDirectory);
         assert.deepEqual(first.adopted, names);
         assert.deepEqual(first.applied, []);
-        assert.deepEqual(
-          await legacy`SELECT id, name, "ghToken", "createdAt" FROM "User" ORDER BY id`,
-          before,
-        );
+        assert.deepEqual(await readUsers(), before);
         const repeated = await migrateDatabase(url, migrationsDirectory);
         assert.deepEqual(repeated.adopted, []);
         assert.deepEqual(repeated.applied, []);
@@ -127,11 +128,12 @@ test(
           data,
           winnerId: 91000002,
         });
-        assert.deepEqual((await games.getGame(game.id))?.players, [
+        const stored = await games.getGame(game.id);
+        assert.deepEqual(stored?.players, [
           { player: { id: 91000001 }, who: 0 },
           { player: { id: 91000002 }, who: 1 },
         ]);
-        assert.equal((await games.getGame(game.id))?.data, data);
+        assert.equal(stored?.data, data);
         assert.equal(
           (await games.gamesHasUser(91000002, {})).data[0]?.gameId,
           game.id,

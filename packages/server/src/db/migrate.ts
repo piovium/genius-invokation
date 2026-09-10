@@ -121,15 +121,13 @@ export async function migrateDatabase(
       const appliedHashes = new Map(
         recorded.map((row) => [row.name, row.hash] as const),
       );
-      const pending = sources.filter((source) => {
-        const appliedHash = appliedHashes.get(source.name);
-        if (appliedHash === undefined) return true;
-        if (appliedHash !== source.hash)
-          throw new Error(
-            `Previously applied SQL migration changed: ${source.name}`,
-          );
-        return false;
-      });
+      // An applied migration whose recorded hash changed was edited after it ran.
+      for (const { name, hash } of sources) {
+        const appliedHash = appliedHashes.get(name);
+        if (appliedHash !== undefined && appliedHash !== hash)
+          throw new Error(`Previously applied SQL migration changed: ${name}`);
+      }
+      const pending = sources.filter(({ name }) => !appliedHashes.has(name));
       const applied: string[] = [];
       const adopted: string[] = [];
       if (existing.populated && appliedHashes.size === 0) {
@@ -200,14 +198,14 @@ const expectedColumns = {
 
 /** The shipped DDL defaults only `createdAt` and the `serial` id columns. */
 function matchesExpectedDefault(
-  table: string,
-  name: string,
-  value: string | null,
+  table: ExpectedTable,
+  columnName: string,
+  columnDefault: string | null,
 ) {
-  if (name === "createdAt") return value === "CURRENT_TIMESTAMP";
-  if (name === "id" && (table === "Game" || table === "Deck"))
-    return value?.startsWith("nextval(") ?? false;
-  return value === null;
+  if (columnName === "createdAt") return columnDefault === "CURRENT_TIMESTAMP";
+  if (columnName === "id" && (table === "Game" || table === "Deck"))
+    return columnDefault?.startsWith("nextval(") ?? false;
+  return columnDefault === null;
 }
 
 /** Referential actions as the one-letter codes `pg_constraint` stores. */
