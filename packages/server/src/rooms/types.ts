@@ -11,9 +11,11 @@ export interface RoomConfig extends Partial<GameConfig> {
   allowGuest: boolean;
   gameVersion: Version;
 }
+
 export interface CreateRoomConfig extends RoomConfig {
   hostWho: 0 | 1;
 }
+
 export type PlayerInfo = (
   { isGuest: true; id: string } | { isGuest: false; id: number }
 ) & {
@@ -21,11 +23,16 @@ export type PlayerInfo = (
   deck: Deck;
   avatarUrl?: string;
 };
+
 export type PlayerId = PlayerInfo["id"];
+
+/** Seconds left on the current RPC and the budget it started from. */
 export interface RpcTimer {
   current: number;
   total: number;
 }
+
+/** Sent once the room starts: the seat, the room config and both players. */
 export interface Initialized {
   type: "initialized";
   who: 0 | 1;
@@ -33,6 +40,7 @@ export interface Initialized {
   myPlayerInfo: PlayerInfo;
   oppPlayerInfo: PlayerInfo;
 }
+
 export type RoomEvent =
   | Exclude<GameWireFrame, { type: "actionResponse" }>
   | { type: "waiting" | "ping" }
@@ -40,16 +48,20 @@ export type RoomEvent =
   | { type: "rpc"; data: null }
   | { type: "oppRpc"; oppTimer: RpcTimer | null }
   | { type: "error"; message: string };
+
 export interface CommandAck {
   type: "ack";
   command: "actionResponse" | "giveUp";
   sessionId: string;
+  /** The acknowledged RPC ID; a give-up acknowledgement has no RPC to echo. */
   id?: number;
 }
+
 export interface RoomSubscriber {
   send(event: RoomEvent): void;
   close(code: number, reason: string): void;
 }
+
 /** Why a room command was refused; the transport maps each one to a wire code. */
 type CommandFailure =
   | "CONFLICT"

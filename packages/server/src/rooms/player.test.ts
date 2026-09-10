@@ -17,7 +17,7 @@ const config: RoomConfig = {
 };
 const request: RpcRequest = { request: { $case: "switchHands", value: {} } };
 const response = Uint8Array.of(0x12, 0);
-const player = (id = "guest-test", sessionId = "session-test") => {
+const createPlayer = (id = "guest-test", sessionId = "session-test") => {
   const instance = new Player(
     { id, isGuest: true, name: id, deck: { characters: [], cards: [] } },
     sessionId,
@@ -29,7 +29,7 @@ const hasCode = (code: string) => (error: unknown) =>
   error instanceof RoomCommandError && error.code === code;
 
 test("real Player accepts once synchronously across concurrent callers and replays its original ACK", async () => {
-  const instance = player();
+  const instance = createPlayer();
   let accepted = 0;
   const pending = instance.rpc(request).then((value) => {
     accepted++;
@@ -65,7 +65,7 @@ test("real Player accepts once synchronously across concurrent callers and repla
 });
 
 test("the last 32 accepted RPCs remain recoverable while evicted commands never execute again", async () => {
-  const instance = player();
+  const instance = createPlayer();
   let executions = 0;
   try {
     for (let id = 0; id < 48; id++) {
@@ -88,7 +88,7 @@ test("the last 32 accepted RPCs remain recoverable while evicted commands never 
 });
 
 test("finished subscriptions expose the sync boundary and permit recovery of a lost final ACK", async () => {
-  const instance = player();
+  const instance = createPlayer();
   const pending = instance.rpc(request);
   const ack = instance.receiveResponse(0, response);
   await pending;
@@ -111,7 +111,7 @@ test("finished subscriptions expose the sync boundary and permit recovery of a l
 });
 
 test("completing a player cancels outstanding IO and its timeout instead of retaining a game", async () => {
-  const instance = player();
+  const instance = createPlayer();
   const pending = instance.rpc(request);
   const rejected = assert.rejects(pending, /Game finished/);
   instance.complete();
@@ -120,7 +120,10 @@ test("completing a player cancels outstanding IO and its timeout instead of reta
 });
 
 test("real engine switch-hands IO advances once and rejects invalid card choices before acceptance", async () => {
-  const players = [player("guest-one"), player("guest-two")] as const;
+  const players = [
+    createPlayer("guest-one"),
+    createPlayer("guest-two"),
+  ] as const;
   const game = new Game(
     Game.createInitialState({
       decks: [

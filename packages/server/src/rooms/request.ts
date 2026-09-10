@@ -45,17 +45,41 @@ export interface UserJoinRoomDto {
 /** How much of an offending value a 400 message repeats back. */
 const MAX_ECHOED_VALUE_LENGTH = 48;
 
+const BOOLEAN_ROOM_FIELDS = [
+  "hostFirst",
+  "watchable",
+  "private",
+  "allowGuest",
+] as const;
+
 /**
- * Renders an offending input for a 400 message. Long values are truncated, so a
- * large request body cannot inflate the response, and arrays are described by
- * their length rather than dumped.
+ * Accepted range of each numeric room field; `gameVersion` indexes VERSIONS.
+ */
+const NUMBER_ROOM_FIELDS: Record<
+  string,
+  { min: number; max: number; integer?: boolean }
+> = {
+  gameVersion: { min: 0, max: VERSIONS.length - 1, integer: true },
+  initTotalActionTime: { min: 0, max: 300 },
+  rerollTime: { min: 25, max: 300 },
+  roundTotalActionTime: { min: 0, max: 300 },
+  actionTime: { min: 25, max: 300 },
+  randomSeed: { min: 0, max: 2147483546 },
+};
+
+/**
+ * Renders an offending input for a 400 message: arrays are described by their
+ * length, strings are quoted, and long values are truncated so that a large
+ * request body cannot inflate the response.
  */
 function describeValue(value: unknown): string {
-  const text = Array.isArray(value)
-    ? `an array of ${value.length}`
-    : typeof value === "string"
-      ? JSON.stringify(value)
-      : String(value);
+  if (Array.isArray(value)) return truncateEcho(`an array of ${value.length}`);
+  if (typeof value === "string") return truncateEcho(JSON.stringify(value));
+  return truncateEcho(String(value));
+}
+
+/** Caps an echoed value at `MAX_ECHOED_VALUE_LENGTH` characters. */
+function truncateEcho(text: string): string {
   return text.length <= MAX_ECHOED_VALUE_LENGTH
     ? text
     : `${text.slice(0, MAX_ECHOED_VALUE_LENGTH)}...`;
@@ -73,6 +97,7 @@ function parseObject(value: unknown): Record<string, unknown> {
     );
   return value as Record<string, unknown>;
 }
+
 function parseInteger(value: unknown, field: string): number {
   if (!Number.isSafeInteger(value))
     throw badRequest(
@@ -80,6 +105,7 @@ function parseInteger(value: unknown, field: string): number {
     );
   return value as number;
 }
+
 function boundedString(value: unknown, field: string, max: number): string {
   if (typeof value !== "string")
     throw badRequest(
@@ -113,6 +139,8 @@ function parseDeck(value: unknown): Deck {
     cards: parseIdList(record.cards, 30, "cards"),
   };
 }
+
+/** Fields a guest supplies when creating a room and when joining one. */
 function guestFields(input: Record<string, unknown>): GuestJoinRoomDto {
   return {
     name: boundedString(input.name, "name", 64),
@@ -123,35 +151,16 @@ function guestFields(input: Record<string, unknown>): GuestJoinRoomDto {
   };
 }
 
-const BOOLEAN_ROOM_FIELDS = [
-  "hostFirst",
-  "watchable",
-  "private",
-  "allowGuest",
-] as const;
-
-/** Accepted range of each numeric room field; `gameVersion` indexes VERSIONS. */
-const NUMBER_ROOM_FIELDS: Record<
-  string,
-  { min: number; max: number; integer?: boolean }
-> = {
-  gameVersion: { min: 0, max: VERSIONS.length - 1, integer: true },
-  initTotalActionTime: { min: 0, max: 300 },
-  rerollTime: { min: 25, max: 300 },
-  roundTotalActionTime: { min: 0, max: 300 },
-  actionTime: { min: 25, max: 300 },
-  randomSeed: { min: 0, max: 2147483546 },
-};
-
+/** Validates the room-wide settings shared by account and guest creation. */
 function roomFields(input: Record<string, unknown>): CreateRoomDto {
-  const out: Record<string, unknown> = {};
+  const parsed: Record<string, unknown> = {};
   for (const key of BOOLEAN_ROOM_FIELDS) {
     if (isOmitted(input[key])) continue;
     if (typeof input[key] !== "boolean")
       throw badRequest(
         `${key} must be a boolean, but received ${describeValue(input[key])}`,
       );
-    out[key] = input[key];
+    parsed[key] = input[key];
   }
   for (const [key, { min, max, integer }] of Object.entries(
     NUMBER_ROOM_FIELDS,
@@ -168,10 +177,11 @@ function roomFields(input: Record<string, unknown>): CreateRoomDto {
       throw badRequest(
         `${key} must be ${integer ? "an integer" : "a number"} from ${min} to ${max}, but received ${describeValue(value)}`,
       );
-    out[key] = value;
+    parsed[key] = value;
   }
-  return out;
+  return parsed;
 }
+
 export function parseCreateRoom(
   value: unknown,
   registered: true,
@@ -180,7 +190,10 @@ export function parseCreateRoom(
   value: unknown,
   registered: false,
 ): GuestCreateRoomDto;
-export function parseCreateRoom(value: unknown, registered: boolean) {
+export function parseCreateRoom(
+  value: unknown,
+  registered: boolean,
+): UserCreateRoomDto | GuestCreateRoomDto {
   const input = parseObject(value);
   const config = roomFields(input);
   return registered
@@ -195,7 +208,10 @@ export function parseJoinRoom(
   value: unknown,
   registered: false,
 ): GuestJoinRoomDto;
-export function parseJoinRoom(value: unknown, registered: boolean) {
+export function parseJoinRoom(
+  value: unknown,
+  registered: boolean,
+): UserJoinRoomDto | GuestJoinRoomDto {
   const input = parseObject(value);
   return registered
     ? { deckId: parseInteger(input.deckId, "deckId") }

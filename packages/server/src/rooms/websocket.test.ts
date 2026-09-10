@@ -15,7 +15,7 @@ afterEach(async () => {
   for (const cleanup of cleanups) await cleanup();
 });
 
-function record(value: unknown): Record<string, unknown> {
+function asRecord(value: unknown): Record<string, unknown> {
   assert.ok(value && typeof value === "object" && !Array.isArray(value));
   return value as Record<string, unknown>;
 }
@@ -34,7 +34,7 @@ async function connect(url: string) {
   socket.addEventListener("message", ({ data }) => {
     const binary = typeof data !== "string";
     messages.push({
-      value: record(
+      value: asRecord(
         binary ? decodeGameFrame(new Uint8Array(data)) : JSON.parse(data),
       ),
       binary,
@@ -50,7 +50,7 @@ async function connect(url: string) {
   socket.addEventListener("error", () => {});
   await new Promise<void>((resolve, reject) => {
     const timer = setTimeout(
-      () => reject(new Error("WebSocket connect timed out: " + url)),
+      () => reject(new Error(`WebSocket connect timed out: ${url}`)),
       1000,
     );
     socket.addEventListener(
@@ -89,7 +89,7 @@ async function connect(url: string) {
       return new Promise<Record<string, unknown>>((resolve, reject) => {
         const timer = setTimeout(() => {
           waiters.delete(check);
-          reject(new Error("Expected message timed out: " + type));
+          reject(new Error(`Expected message timed out: ${type}`));
         }, 3000);
         const check = () => {
           const entry = messages.find(
@@ -103,7 +103,7 @@ async function connect(url: string) {
           } else if (closedCode !== null) {
             waiters.delete(check);
             clearTimeout(timer);
-            reject(new Error("Socket closed: " + closedCode));
+            reject(new Error(`Socket closed: ${closedCode}`));
           }
         };
         waiters.add(check);
@@ -175,9 +175,9 @@ async function fixture({ dropAck = false, watchable = false } = {}) {
       return { type: "ack", command: "giveUp", sessionId: player.sessionId };
     },
   };
-  const http = createServer((_request, response) => {
-    response.writeHead(404).end();
-  });
+  const http = createServer((_request, response) =>
+    response.writeHead(404).end(),
+  );
   const transport = attachRoomWebSocketServer(http, rooms, auth, "");
   transport.webSockets.on("connection", (socket) => {
     const terminateSocket = () => socket.terminate();
@@ -230,7 +230,7 @@ test(
       first.send({ type: "auth", token: server.token });
       const ready = await first.next("ready");
       const rpc = await first.next("rpc");
-      assert.equal(record(rpc.data).id, 0);
+      assert.equal(asRecord(rpc.data).id, 0);
       assert.equal(
         first.messages.find((entry) => entry.value.type === "rpc")?.binary,
         true,

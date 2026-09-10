@@ -26,8 +26,11 @@ import {
   type RpcTimer,
 } from "./types";
 
+/** Recent ACKs kept replayable so a reconnecting client can recover one. */
 const ACK_CACHE_LIMIT = 32;
+/** Concurrent subscribers a single player may hold. */
 const SUBSCRIBER_LIMIT = 16;
+
 interface PendingRpc {
   id: number;
   request: RpcRequest;
@@ -64,6 +67,10 @@ export class Player implements PlayerIO {
     public readonly sessionId: string,
   ) {}
 
+  /**
+   * Attaches a subscriber. A finished room still accepts one, so a reconnect
+   * can recover a lost final ACK before the room retention expires.
+   */
   subscribe(subscriber: RoomSubscriber): () => void {
     if (this.subscribers.size >= SUBSCRIBER_LIMIT)
       throw new Error("Too many room subscriptions");
@@ -76,8 +83,6 @@ export class Player implements PlayerIO {
       type: "oppRpc",
       oppTimer: this.opponent?.getTimer() ?? null,
     });
-    // A finished-room reconnect can still recover a lost final ACK. Keep it
-    // writable until the client leaves or the ordinary room-retention expires.
     return () => {
       this.subscribers.delete(subscriber);
     };
@@ -120,14 +125,14 @@ export class Player implements PlayerIO {
 
   receiveResponse(id: number, bytes: Uint8Array): CommandAck {
     const digest = createHash("sha256").update(bytes).digest("hex");
-    const old = this.accepted.get(id);
-    if (old) {
-      if (old.digest !== digest)
+    const cached = this.accepted.get(id);
+    if (cached) {
+      if (cached.digest !== digest)
         throw new RoomCommandError(
           "CONFLICT",
           "RPC ID already accepted with different response bytes",
         );
-      return old.ack;
+      return cached.ack;
     }
     const pending = this.pending;
     if (!pending || id !== pending.id) {
@@ -307,7 +312,8 @@ export class Player implements PlayerIO {
           this.pending = null;
           setRoundTimeout(timedOut ? 0 : pending.timeout);
           if (!timedOut) this.contiguousTimeouts = 0;
-          error ? reject(error) : resolve(value!);
+          if (error) reject(error);
+          else resolve(value!);
         };
         const pending: PendingRpc = {
           id,

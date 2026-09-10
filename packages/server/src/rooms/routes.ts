@@ -22,9 +22,9 @@ import { parseCreateRoom, parseJoinRoom } from "./request";
 import type { Rooms } from "./rooms";
 
 /**
- * The room API. Each handler asks the identity plugin for exactly the token it
- * needs: a guest listing hashes nothing, a room command cannot run without a
- * verified caller, and only a registered account may host a saved deck.
+ * The room API. Every handler names the token it needs: browsing and joining
+ * accept an anonymous caller, reading the game log or deleting a room requires
+ * a verified one, and only a registered account may host a saved deck.
  */
 export const createRoomsRoutes = (rooms: Rooms, auth: Auth) =>
   new Elysia({ prefix: "/rooms" })
@@ -58,9 +58,8 @@ export const createRoomsRoutes = (rooms: Rooms, auth: Auth) =>
       "/current",
       ({ identity }) => {
         const playerId = identity?.sub;
-        const room =
-          playerId === undefined ? null : rooms.currentRoom(playerId);
-        return room === null ? Response.json(null) : room;
+        if (playerId === undefined) return Response.json(null);
+        return rooms.currentRoom(playerId) ?? Response.json(null);
       },
       { identity: true },
     )
