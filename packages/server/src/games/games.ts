@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { count, desc, eq, inArray } from "drizzle-orm";
-import type { Database } from "../db/database";
+import { READ_ONLY_TRANSACTION, type Database } from "../db/database";
 import {
   games,
   playerOnGames,
@@ -68,12 +68,6 @@ const summaryColumns = {
   winnerId: games.winnerId,
   createdAt: games.createdAt,
 };
-
-/** Both history queries read a consistent snapshot that concurrent writes never shift. */
-const READ_ONLY_TRANSACTION = {
-  isolationLevel: "repeatable read",
-  accessMode: "read only",
-} as const;
 
 /** Page size the history endpoints use when the caller omits `take`. */
 const DEFAULT_PAGE_SIZE = 10;

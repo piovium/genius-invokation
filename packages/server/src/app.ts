@@ -30,7 +30,7 @@ import { createDecksRoutes } from "./decks/routes";
 import { createGamesRoutes } from "./games/routes";
 import { createMetricsRoutes } from "./metrics/routes";
 import { createRoomsRoutes } from "./rooms/routes";
-import { createFrontendHandler } from "./frontend";
+import { createFrontendHandler, resolveWebClientPaths } from "./frontend";
 import { errorResponse, errorStatus } from "./errors";
 import { listenHttp, type HttpListenOptions } from "./http-server";
 import { attachRoomWebSocketServer } from "./room-transport/websocket";
@@ -51,8 +51,7 @@ export function createApplication({
   const games = createGames(database, metrics);
   const auth = createAuth({ users, secret });
   const rooms = createRooms(users, decks, games, metrics);
-  const rootPath = `/${basePath.split("/").filter(Boolean).join("/")}`;
-  const prefix = `${rootPath.replace(/\/$/, "")}/api`;
+  const { apiBase: prefix } = resolveWebClientPaths(basePath);
   const app = new Elysia({
     adapter: node(),
     strictPath: false,

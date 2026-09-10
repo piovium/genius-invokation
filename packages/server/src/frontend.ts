@@ -88,6 +88,28 @@ export interface FrontendHandlerOptions {
   beta?: boolean;
 }
 
+/**
+ * Normalizes `WEB_CLIENT_BASE_PATH` once for every consumer. The API router
+ * and the static handler have to agree on these strings, or a request for an
+ * API route falls through to the SPA entry and answers 404 in the client.
+ */
+export function resolveWebClientPaths(basePath: string): {
+  /** Assets are served under this prefix, which always ends in a slash. */
+  base: string;
+  /** The entry path without a trailing slash, as routes are matched. */
+  rootPath: string;
+  /** The prefix the API routes are grouped under. */
+  apiBase: string;
+} {
+  const segments = basePath.split("/").filter(Boolean);
+  const base = `/${segments.join("/")}${segments.length ? "/" : ""}`;
+  return {
+    base,
+    rootPath: base.slice(0, -1) || "/",
+    apiBase: `${base}api`,
+  };
+}
+
 export function createFrontendHandler({
   directory = process.env.FRONTEND_DIRECTORY ??
     resolve(import.meta.dirname, "frontend"),
@@ -95,15 +117,12 @@ export function createFrontendHandler({
   beta = IS_BETA,
 }: FrontendHandlerOptions = {}): (request: Request) => Promise<Response> {
   const root = resolve(directory);
-  const segments = basePath.split("/").filter(Boolean);
-  const base = `/${segments.join("/")}${segments.length ? "/" : ""}`;
-  const rootPath = base.slice(0, -1) || "/";
+  const { base, rootPath, apiBase } = resolveWebClientPaths(basePath);
   let index: Promise<IndexEntry> | undefined;
   return async (request: Request): Promise<Response> => {
     if (request.method !== "GET" && request.method !== "HEAD")
       return emptyResponse(405);
     const pathname = new URL(request.url).pathname;
-    const apiBase = `${base}api`;
     if (
       (pathname !== rootPath && !pathname.startsWith(base)) ||
       pathname === apiBase ||

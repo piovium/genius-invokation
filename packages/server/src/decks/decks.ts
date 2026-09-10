@@ -15,7 +15,7 @@
 
 import { and, count, desc, eq, lte } from "drizzle-orm";
 import { badRequest, notFound } from "../errors";
-import type { Database } from "../db/database";
+import { READ_ONLY_TRANSACTION, type Database } from "../db/database";
 import { decks, type DeckModel } from "../db/schema";
 import type { CreateDeckDto, QueryDeckDto, UpdateDeckDto } from "./routes";
 import type { Deck } from "@gi-tcg/typings";
@@ -96,26 +96,23 @@ export function createDecks(database: Database): Decks {
           ? undefined
           : lte(decks.requiredVersion, requiredVersion),
       );
-      return database.db.transaction(
-        async (tx) => {
-          const models = await tx
-            .select()
-            .from(decks)
-            .where(where)
-            .orderBy(desc(decks.updatedAt), desc(decks.id))
-            .offset(skip)
-            .limit(take);
-          const [total] = await tx
-            .select({ value: count() })
-            .from(decks)
-            .where(where);
-          return {
-            count: total!.value,
-            data: models.map(withDeckContent),
-          };
-        },
-        { isolationLevel: "repeatable read", accessMode: "read only" },
-      );
+      return database.db.transaction(async (tx) => {
+        const models = await tx
+          .select()
+          .from(decks)
+          .where(where)
+          .orderBy(desc(decks.updatedAt), desc(decks.id))
+          .offset(skip)
+          .limit(take);
+        const [total] = await tx
+          .select({ value: count() })
+          .from(decks)
+          .where(where);
+        return {
+          count: total!.value,
+          data: models.map(withDeckContent),
+        };
+      }, READ_ONLY_TRANSACTION);
     },
     async getDeck(userId, deckId) {
       const [model] = await database.db

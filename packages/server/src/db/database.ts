@@ -94,6 +94,16 @@ export interface Database {
   close(): Promise<void>;
 }
 
+/**
+ * Options for the history queries that must read one consistent snapshot.
+ * Without them a concurrent insert shifts the page boundaries between the
+ * listed rows and the total count, so a page can repeat or drop entries.
+ */
+export const READ_ONLY_TRANSACTION = {
+  isolationLevel: "repeatable read",
+  accessMode: "read only",
+} as const;
+
 /** Build the database handle for a connection string. */
 export function createDatabase(connectionString?: string): Database {
   const sql = createSql(connectionString);
