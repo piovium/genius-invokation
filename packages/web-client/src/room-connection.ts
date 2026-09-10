@@ -75,7 +75,13 @@ const isRpcTimer = (value: unknown): value is GameRpcTimer =>
 const isSessionId = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0 && value.length <= 128;
 
-/** Build the same prefixed API URL as HTTP without ever putting credentials in it. */
+/** Largest JSON control message the client accepts from the server. */
+const MAX_CONTROL_MESSAGE_BYTES = 64 * 1024;
+
+/**
+ * Build a WebSocket URL whose path mirrors the HTTP API, converting the
+ * protocol and never carrying credentials or query parameters.
+ */
 export function roomWebSocketUrl(
   baseUrl: string,
   roomId: number | string,
@@ -302,7 +308,7 @@ export class RoomConnection {
       else this.options.onEvent(value);
       return;
     }
-    if (data.length > 64 * 1024)
+    if (data.length > MAX_CONTROL_MESSAGE_BYTES)
       throw new Error("Control message exceeds size limit");
     const value: unknown = JSON.parse(data);
     if (!isRecord(value) || typeof value.type !== "string")
@@ -524,6 +530,7 @@ export class RoomConnection {
           true,
         ),
       );
+    const sessionId = this.currentSessionId;
     return new Promise((resolve, reject) => {
       const deadline = setTimeout(
         () =>
@@ -540,7 +547,7 @@ export class RoomConnection {
         type,
         id,
         frame,
-        sessionId: this.currentSessionId!,
+        sessionId,
         resolve,
         reject,
         deadline,

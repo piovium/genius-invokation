@@ -15,7 +15,7 @@
 
 import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { Layout } from "../layouts/Layout";
-import { PlayerInfo, roomCodeToId, getPlayerAvatarUrl } from "../utils";
+import { type PlayerInfo, roomCodeToId, getPlayerAvatarUrl } from "../utils";
 import {
   Show,
   createSignal,
@@ -25,7 +25,7 @@ import {
   createResource,
   Switch,
   Match,
-  Component,
+  type Component,
   createUniqueId,
 } from "solid-js";
 import axios, { AxiosError } from "axios";
@@ -38,7 +38,11 @@ import {
   type GameRpcRequest,
   type GameRpcTimer,
 } from "@gi-tcg/typings";
-import { Client, createClient, WebUiPlayerIO } from "@gi-tcg/web-ui-core";
+import {
+  type Client,
+  createClient,
+  type WebUiPlayerIO,
+} from "@gi-tcg/web-ui-core";
 import { useMobile } from "../App";
 import { Dynamic } from "solid-js/web";
 import { MobileChessboardLayout } from "../layouts/MobileChessboardLayout";
@@ -53,6 +57,31 @@ import {
   type RoomEvent,
   type RoomConnectionState,
 } from "../room-connection";
+
+// Expected teardown events and request races: they need no user-visible message.
+const SILENT_COMMAND_ERRORS = new Set([
+  "DISPOSED",
+  "NOT_CONNECTED",
+  "STALE_LOCAL_RPC",
+]);
+
+// Surface the server's message when it exists, but always keep the raw error in
+// the console for debugging.
+function reportRequestError(error: unknown): void {
+  if (error instanceof AxiosError) alert(error.response?.data.message);
+  console.error(error);
+}
+
+// Advance a running countdown by one tick, expiring it when it reaches zero.
+function tickTimer(
+  timer: GameRpcTimer,
+  setTimer: (value: GameRpcTimer | null) => void,
+  onExpire: () => void,
+): void {
+  const current = timer.current - 1;
+  if (current <= 0) onExpire();
+  else setTimer({ ...timer, current });
+}
 
 // A parameter change must destroy the previous room's connections and pending
 // UI promises even when the router reuses this route component.
@@ -117,8 +146,7 @@ function ConnectedRoom() {
   const reportCommandError = (error: unknown) => {
     if (disposed) return;
     if (error instanceof RoomConnectionError) {
-      if (["DISPOSED", "NOT_CONNECTED", "STALE_LOCAL_RPC"].includes(error.code))
-        return;
+      if (SILENT_COMMAND_ERRORS.has(error.code)) return;
       if (error.code === "COMMAND_PENDING") {
         alert(t("roomCommandPending"));
         return;
@@ -314,19 +342,13 @@ function ConnectedRoom() {
 
   const countDownTimer = () => {
     const myTimer = currentMyTimer();
-    if (myTimer) {
-      const current = myTimer.current - 1;
-      if (current <= 0) cancelMyRequest();
-      else setCurrentMyTimer({ ...myTimer, current });
-    }
+    if (myTimer) tickTimer(myTimer, setCurrentMyTimer, cancelMyRequest);
     const oppTimer = currentOppTimer();
-    if (oppTimer) {
-      const current = oppTimer.current - 1;
-      if (current <= 0) {
+    if (oppTimer)
+      tickTimer(oppTimer, setCurrentOppTimer, () => {
         oppPlayerIo()?.cancelRpc?.();
         setCurrentOppTimer(null);
-      } else setCurrentOppTimer({ ...oppTimer, current });
-    }
+      });
   };
 
   const [roomInfo] = createResource(() =>
@@ -351,8 +373,7 @@ function ConnectedRoom() {
       await axios.delete(`rooms/${id}`);
       history.back();
     } catch (error) {
-      if (error instanceof AxiosError) alert(error.response?.data.message);
-      console.error(error);
+      reportRequestError(error);
     }
   };
   const downloadGameLog = async () => {
@@ -369,8 +390,7 @@ function ConnectedRoom() {
       URL.revokeObjectURL(url);
       a.remove();
     } catch (error) {
-      if (error instanceof AxiosError) alert(error.response?.data.message);
-      console.error(error);
+      reportRequestError(error);
     }
   };
   const getClientPlayerInfo = (player: PlayerInfo) => ({
@@ -489,9 +509,7 @@ function ConnectedRoom() {
           </div>
           <button
             class="hidden group-data-[mobile]:peer-checked:inline-flex btn btn-outline-blue whitespace-normal text-center leading-tight min-h-10 px-4 py-2"
-            onClick={() => {
-              navigate("/");
-            }}
+            onClick={() => navigate("/")}
           >
             <i class="i-mdi-home" />
             {t("backHome")}
@@ -541,10 +559,8 @@ function ConnectedRoom() {
                 component={chessboard()}
                 rotation={mobile() ? 90 : 0}
                 autoHeight={!mobile()}
-                class={`${
-                  mobile() ? "mobile-chessboard h-100dvh w-100dvw" : ""
-                }`}
-                chessboardColor={status().chessboardColor ?? void 0}
+                class={mobile() ? "mobile-chessboard h-100dvh w-100dvw" : ""}
+                chessboardColor={status().chessboardColor ?? undefined}
                 timer={currentMyTimer() ?? currentOppTimer()}
                 myPlayerInfo={getClientPlayerInfo(payload().myPlayerInfo)}
                 oppPlayerInfo={getClientPlayerInfo(payload().oppPlayerInfo)}
@@ -557,16 +573,11 @@ function ConnectedRoom() {
                       >
                         {t("downloadLog")}
                       </button>
-                      {/* <Show when={logtimer}>
-                        <span class="text-white/60 text-3">{logtimer}后到期</span>
-                      </Show> */}
                     </div>
                     <div class="flex flex-col justify-start w-36 h-30">
                       <button
                         class="px-4 py-1 w-36 h-10 mt-20 font-bold font-size-4.5 text-yellow-800 bg-yellow-50 rounded-full border-yellow-800 b-2 active:bg-yellow-800 active:text-yellow-200 hover:shadow-[inset_0_0_16px_white] hover:border-white"
-                        onClick={() => {
-                          navigate("/");
-                        }}
+                        onClick={() => navigate("/")}
                       >
                         {t("backHome")}
                       </button>
