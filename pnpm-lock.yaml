@@ -165,7 +165,7 @@ catalogs:
 overrides:
   vite-plugin-solid>babel-preset-solid: 1.9.12
 
-pnpmfileChecksum: sha256-DYjqCsfYZx8I67CiA8ZJ2wETbkGsS9Tdth8YXkCow8Q=
+pnpmfileChecksum: sha256-4XXQ1RuVEH9lVSy8a5E7oUrGOrj4z6zzyYgO1laCx0M=
 
 patchedDependencies:
   puppeteer-screen-recorder@3.0.6: 6cbd641eee294ce41aa766152d68847dba2aea1ad1b1f3c408d4a037142da208

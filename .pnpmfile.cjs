@@ -28,7 +28,7 @@ function readManifest(...segments) {
   return JSON.parse(readFileSync(path, "utf8"));
 }
 
-/** Names the server package loads at runtime; their peers are never dropped. */
+/** Packages the server loads at runtime; only these get their optional peers pruned. */
 const serverRuntimeDependencies = new Set(
   Object.keys(
     readManifest("packages", "server", "package.json")?.dependencies ?? {},
