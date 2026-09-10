@@ -372,18 +372,20 @@ function ConnectedRoom() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "gameLog.json";
+      a.download = `gameLog.json`;
       a.click();
       URL.revokeObjectURL(url);
       a.remove();
-    } catch (error) {
-      if (error instanceof AxiosError) alert(error.response?.data.message);
-      console.error(error);
+    } catch (e) {
+      if (e instanceof AxiosError) {
+        alert(e.response?.data.message);
+      }
+      console.error(e);
     }
   };
-  const getClientPlayerInfo = (player: PlayerInfo) => ({
-    name: player.name,
-    avatarUrl: getPlayerAvatarUrl(player),
+  const getClientPlayerInfo = (playerInfo: PlayerInfo) => ({
+    name: playerInfo.name,
+    avatarUrl: getPlayerAvatarUrl(playerInfo),
   });
   let chessboardContainer: HTMLDivElement | undefined;
   const mobile = useMobile();
