@@ -1,6 +1,7 @@
 import { createServer, type IncomingMessage, type Server } from "node:http";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
+import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 import type { AddressInfo } from "node:net";
 
 const MAX_REQUEST_BODY_BYTES = 1024 * 1024;
@@ -65,14 +66,17 @@ export async function listenHttp(
             ),
           )
         : undefined;
-      // `duplex: "half"` is what undici requires from every streaming request.
-      const init = {
+      // `duplex: "half"` is what undici requires from every streaming request,
+      // but the DOM `RequestInit` this project compiles against omits it.
+      const init: RequestInit & { duplex: "half" } = {
         method: incoming.method,
         headers,
-        body,
+        // The DOM and node:stream/web stream types are not assignable to each
+        // other even though undici accepts either one as a body.
+        body: body as unknown as BodyInit,
         duplex: "half",
         signal: abort.signal,
-      } as RequestInit;
+      };
       const response = await handler(
         new Request(
           new URL(
@@ -97,7 +101,10 @@ export async function listenHttp(
         outgoing.end();
         return;
       }
-      await pipeline(Readable.fromWeb(response.body as never), outgoing);
+      await pipeline(
+        Readable.fromWeb(response.body as unknown as NodeReadableStream),
+        outgoing,
+      );
     } catch {
       if (outgoing.headersSent) {
         outgoing.destroy();

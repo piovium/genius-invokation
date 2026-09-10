@@ -4,7 +4,7 @@
 
 ## 实现约定
 
-路由、校验、鉴权、错误处理与插件组合都使用 Elysia 原生写法：路由以插件组合，校验使用 `t`，鉴权与共享状态使用 `derive`/`resolve`/`macro`，错误使用 `status` 与 `error`。运行时固定 Node.js，数据访问统一经由 Drizzle 与 PostgreSQL。
+路由、校验、鉴权、错误处理与插件组合都使用 Elysia 原生写法：路由以插件组合，校验使用 `t`，鉴权与共享状态使用 `macro` 与 `resolve`，错误使用 `status` 与 `error`。运行时固定 Node.js，数据访问统一经由 Drizzle 与 PostgreSQL。
 
 ## 开发与构建
 
@@ -39,7 +39,7 @@ WebSocket 与 HTTP 共用端口 3000。反向代理需要转发 `Upgrade`，空�
 
 协议、真实对局、数据库写入和 RSS 由[独立 harness](../../scripts/server-harness/README.md) 验证。先运行其中的 `environment/prepare.mjs` 创建隔离数据库和账号，再使用 `candidate.json` 对候选服务运行验收；静态约束由仓库根目录的 `npm run harness:constraints` 检查，规则见 harness 说明。内存门槛为常驻 RSS 100 MiB、单局峰值增量 50 MiB。
 
-以下命令在 `packages/server` 执行。`pnpm test` 覆盖 HTTP、认证、牌组元数据、房间和 WebSocket；`test:rooms` 与 `test:http` 可单独验证对应部分：
+以下命令在 `packages/server` 执行。`pnpm test` 覆盖 HTTP、前端静态资源、认证、牌组元数据、房间和 WebSocket；`test:rooms` 与 `test:http` 可单独验证对应部分：
 
     pnpm prepare:metadata
     pnpm check

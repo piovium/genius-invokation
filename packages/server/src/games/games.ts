@@ -41,6 +41,11 @@ export interface GamePlayer {
   who: number;
 }
 
+/** A summary joined with its seats, as the paginated list query reports it. */
+export interface GameListEntry extends GameSummary {
+  players: GamePlayer[];
+}
+
 /** A stored game, replay included. */
 export interface GameDetails extends GameModel {
   players: GamePlayer[];
@@ -48,7 +53,7 @@ export interface GameDetails extends GameModel {
 
 export interface Games {
   addGame(option: AddGameOption): Promise<GameModel>;
-  getAllGames(query: PaginationDto): Promise<PaginationResult<GameSummary>>;
+  getAllGames(query: PaginationDto): Promise<PaginationResult<GameListEntry>>;
   getGame(gameId: number): Promise<GameDetails | null>;
   gamesHasUser(
     userId: number,

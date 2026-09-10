@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Elysia, status } from "elysia";
+import { Elysia } from "elysia";
 import { node } from "@elysiajs/node";
 import { WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
 import { createAppRoutes } from "./app/routes";
@@ -31,13 +31,9 @@ import { createGamesRoutes } from "./games/routes";
 import { createMetricsRoutes } from "./metrics/routes";
 import { createRoomsRoutes } from "./rooms/routes";
 import { createFrontendHandler } from "./frontend";
-import { errorResponse } from "./errors";
+import { errorResponse, errorStatus } from "./errors";
 import { listenHttp, type HttpListenOptions } from "./http-server";
 import { attachRoomWebSocketServer } from "./room-transport/websocket";
-
-/** Elysia's `status()` carrying the `{ statusCode, message }` body clients read. */
-const errorStatus = (statusCode: number, message: string) =>
-  status(statusCode, { statusCode, message });
 
 /** Preflight headers the development CORS shim echoes back. */
 const CORS_ALLOWED_METHODS = "HEAD,GET,POST,PUT,PATCH,DELETE,OPTIONS";

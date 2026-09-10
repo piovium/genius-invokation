@@ -42,9 +42,6 @@ export class Logger {
     if (process.env.LOG_LEVEL === "debug")
       console.debug(`[${this.context}]`, ...values);
   }
-  verbose(...values: unknown[]) {
-    this.debug(...values);
-  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -75,6 +72,13 @@ const conflictMessageBySqlState: Record<string, string> = {
 };
 
 /**
+ * The one error body clients read, built with Elysia's `status()`. The route
+ * boundary in `app.ts` renders its own failures with the same helper.
+ */
+export const errorStatus = (statusCode: number, message: string) =>
+  status(statusCode, { statusCode, message });
+
+/**
  * Render a boundary failure as an Elysia response.
  *
  * Driver failures are reported through stable HTTP statuses: SQL text, bind
@@ -82,20 +86,13 @@ const conflictMessageBySqlState: Record<string, string> = {
  */
 export function errorResponse(error: unknown) {
   if (error instanceof HttpError)
-    return status(error.statusCode, {
-      statusCode: error.statusCode,
-      message: error.message,
-    });
+    return errorStatus(error.statusCode, error.message);
   const conflictMessage = [...driverErrorChain(error)]
     .flatMap((cause) => [cause.code, cause.errno])
     .map((code) =>
       typeof code === "string" ? conflictMessageBySqlState[code] : undefined,
     )
     .find((message) => message !== undefined);
-  if (conflictMessage !== undefined)
-    return status(409, { statusCode: 409, message: conflictMessage });
-  return status(500, {
-    statusCode: 500,
-    message: "Internal Server Error",
-  });
+  if (conflictMessage !== undefined) return errorStatus(409, conflictMessage);
+  return errorStatus(500, "Internal Server Error");
 }
