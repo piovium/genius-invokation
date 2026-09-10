@@ -10,15 +10,15 @@ import { createGuestId } from "./guest-id";
 import { listenHttp } from "../http-server";
 
 function createTestJwt(payload: unknown, secret: string, alg = "HS256") {
-  const signingInput =
-    Buffer.from(JSON.stringify({ alg, typ: "JWT" })).toString("base64url") +
-    "." +
-    Buffer.from(JSON.stringify(payload)).toString("base64url");
-  return (
-    signingInput +
-    "." +
-    createHmac("sha256", secret).update(signingInput).digest("base64url")
+  const header = Buffer.from(JSON.stringify({ alg, typ: "JWT" })).toString(
+    "base64url",
   );
+  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const signingInput = `${header}.${body}`;
+  const signature = createHmac("sha256", secret)
+    .update(signingInput)
+    .digest("base64url");
+  return `${signingInput}.${signature}`;
 }
 
 test("OAuth callback returns executable HTML through the Node HTTP adapter", async () => {

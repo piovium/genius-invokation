@@ -3,7 +3,8 @@ import type { Auth } from "./session";
 
 /**
  * The OAuth popup page. It posts the token back to the opener and closes itself;
- * a script error would otherwise leave the popup silently blank, so it is shown.
+ * a script error would otherwise leave the popup silently blank, so the error is
+ * appended to the page instead.
  */
 const loginPage = (accessToken: string) =>
   `<!DOCTYPE html><title>Login Success</title><p>Redirecting back...</p><script>window.addEventListener("error", event => { document.body.append(document.createTextNode(event.type + ": " + event.message)); });window.opener.postMessage({type:"login",token:${JSON.stringify(accessToken)}},"*");window.close();</script>`;

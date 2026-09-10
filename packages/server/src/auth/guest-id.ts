@@ -1,11 +1,13 @@
 import { createId, isCuid } from "@paralleldrive/cuid2";
 
-/** Guest IDs are a cuid2 body behind a tag that tells them apart from account IDs. */
+/** The tag prefixing guest IDs, distinguishing them from account IDs. */
 const GUEST_TAG = "guest";
 
-export function createGuestId() {
+export function createGuestId(): string {
   return `${GUEST_TAG}-${createId()}`;
 }
+
+/** True when `id` is a string tagged as a guest and carrying a cuid2 body. */
 export function isGuestId(id: unknown): id is string {
   if (typeof id !== "string") return false;
   const [tag, cuid] = id.split("-");

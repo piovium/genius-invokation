@@ -10,6 +10,8 @@ export const GET_USER_API_URL =
   process.env.GH_GET_USER_API_URL || "https://api.github.com/user";
 
 const TOKEN_LIFETIME_SECONDS = 42 * 24 * 60 * 60;
+/** Tokens beyond this length are not ours, so reject them before parsing. */
+const MAX_TOKEN_LENGTH = 8192;
 const JWT_HEADER = { alg: "HS256", typ: "JWT" };
 
 const encodeJwtPart = (value: unknown) =>
@@ -63,7 +65,8 @@ export function createAuth({
   };
 
   const verify = (token: string): JwtPayload | null => {
-    if (typeof token !== "string" || token.length > 8192) return null;
+    if (typeof token !== "string" || token.length > MAX_TOKEN_LENGTH)
+      return null;
     try {
       const segments = token.split(".");
       if (

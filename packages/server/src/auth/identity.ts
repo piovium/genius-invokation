@@ -3,7 +3,10 @@ import { unauthorized } from "../errors";
 import { isUserJwtPayload, type JwtPayload, type UserJwtPayload } from "./jwt";
 import type { Auth } from "./session";
 
-/** Reads the bearer token of a request; `null` when it is missing or unusable. */
+/**
+ * Verifies the request's bearer token and returns its payload; `null` when the
+ * header is missing or unusable.
+ */
 export function readIdentity(request: Request, auth: Auth): JwtPayload | null {
   const [scheme, token] =
     request.headers.get("authorization")?.split(" ") ?? [];

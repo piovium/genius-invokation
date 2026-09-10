@@ -14,6 +14,7 @@ export interface GuestJwtPayload {
 }
 export type JwtPayload = UserJwtPayload | GuestJwtPayload;
 
+/** Checks the `user` discriminator and `sub` fields shared by both payload shapes. */
 function hasSubject(
   payload: unknown,
 ): payload is { user: unknown; sub: unknown } {
