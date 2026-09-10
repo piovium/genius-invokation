@@ -68,6 +68,10 @@ const withDeckContent = (model: DeckModel): DeckWithDeckModel => ({
   ...ASSETS_MANAGER.decode(model.code),
 });
 
+/** Scopes a deck row to its owner, so no caller reaches another user's deck. */
+const ownedDeck = (userId: number, deckId: number) =>
+  and(eq(decks.id, deckId), eq(decks.ownerUserId, userId));
+
 export function createDecks(database: Database): Decks {
   return {
     deckToCode,
@@ -117,7 +121,7 @@ export function createDecks(database: Database): Decks {
       const [model] = await database.db
         .select()
         .from(decks)
-        .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
+        .where(ownedDeck(userId, deckId))
         .limit(1);
       return model ? withDeckContent(model) : null;
     },
@@ -140,7 +144,7 @@ export function createDecks(database: Database): Decks {
           requiredVersion: encoded?.requiredVersion,
           updatedAt: new Date(),
         })
-        .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
+        .where(ownedDeck(userId, deckId))
         .returning();
       if (!model) throw notFound(`deck ${deckId} not found`);
       return model;
@@ -148,7 +152,7 @@ export function createDecks(database: Database): Decks {
     async deleteDeck(userId, deckId) {
       const deleted = await database.db
         .delete(decks)
-        .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
+        .where(ownedDeck(userId, deckId))
         .returning({ id: decks.id });
       if (!deleted.length) throw notFound(`deck ${deckId} not found`);
     },

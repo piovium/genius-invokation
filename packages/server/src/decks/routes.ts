@@ -27,11 +27,9 @@ export interface DeckDto extends Deck {}
 export interface CreateDeckDto extends DeckDto {
   name: string;
 }
-export interface UpdateDeckDto {
-  name?: string;
-  characters?: number[];
-  cards?: number[];
-}
+export type UpdateDeckDto = Partial<
+  Pick<CreateDeckDto, "name" | "characters" | "cards">
+>;
 export interface QueryDeckDto extends PaginationDto {
   requiredVersion?: number;
 }
@@ -43,6 +41,11 @@ const deckQuerySchema = t.Object({
   requiredVersion: t.Optional(
     t.Numeric({ minimum: 0, maximum: VERSIONS.length - 1, multipleOf: 1 }),
   ),
+});
+const updateDeckBodySchema = t.Object({
+  name: t.Optional(nameSchema),
+  characters: t.Optional(deckSchema.characters),
+  cards: t.Optional(deckSchema.cards),
 });
 
 export function createDecksRoutes(decks: Decks, auth: Auth) {
@@ -85,11 +88,7 @@ export function createDecksRoutes(decks: Decks, auth: Auth) {
       {
         user: true,
         params: deckIdParamsSchema,
-        body: t.Object({
-          name: t.Optional(nameSchema),
-          characters: t.Optional(deckSchema.characters),
-          cards: t.Optional(deckSchema.cards),
-        }),
+        body: updateDeckBodySchema,
       },
     )
     .delete(
