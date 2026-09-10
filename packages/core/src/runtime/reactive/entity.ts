@@ -42,7 +42,11 @@ class ReadonlyEntity<
   Ty extends EntityType,
   Extra extends ExtraInfo<EntityType>,
 >
-  extends ReactiveStateBase
+  extends ReactiveStateBase<{
+    readonly type: Ty;
+    readonly areaType: Extra["areaType"];
+    readonly variables: Extra["variables"];
+  }>
   implements PlainEntityState
 {
   override get [ReactiveStateSymbol](): Ty {

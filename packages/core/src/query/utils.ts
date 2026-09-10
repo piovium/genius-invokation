@@ -227,13 +227,16 @@ export interface MetaBase {
   variables: {};
 }
 
+export type CommonCharacterVariableNames =
+  NonIndexKeyOf<CharacterVariableConfigs>;
+
 export type TypingInfoFromMeta<M extends MetaBase> = {
   type: M["type"];
   areaType: M["areaType"];
   variables:
     | Extract<keyof M["variables"], string>
     | (IsEqual<M["type"], "character"> extends true
-        ? NonIndexKeyOf<CharacterVariableConfigs>
+        ? CommonCharacterVariableNames
         : never);
 };
 

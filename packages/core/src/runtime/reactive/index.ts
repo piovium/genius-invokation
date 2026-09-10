@@ -27,11 +27,12 @@ import {
 } from "./base";
 import type { ExEntityState, ExEntityType } from "../../data/type";
 import { Attachment, type TypedAttachment } from "./attachment";
+import type { TypingInfoBase } from "../../query/utils";
 
 type ReactiveClassCtor = new (
   skillContext: SkillContext<any>,
   id: number,
-) => ReactiveStateBase;
+) => ReactiveStateBase<TypingInfoBase>;
 
 export const NoReactiveSymbol: unique symbol = Symbol(
   "GiTcgCoreStateNoReactive",

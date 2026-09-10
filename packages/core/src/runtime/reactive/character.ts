@@ -18,7 +18,6 @@ import type {
   CharacterVariables,
   EntityState,
   GameState,
-  StateKind,
 } from "../../base/state";
 import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
 import type {
@@ -26,7 +25,7 @@ import type {
   NationTag,
   WeaponTag,
 } from "../../base/character";
-import type { EntityArea, EntityTag, EquipmentTag } from "../../base/entity";
+import type { EntityArea, EquipmentTag } from "../../base/entity";
 import {
   getEntityArea,
   getEntityById,
@@ -54,14 +53,9 @@ import {
   RawStateSymbol,
   ReactiveStateBase,
   ReactiveStateSymbol,
-  type RegularExtraInfo,
 } from "./base";
-import {
-  applyReactive,
-  type ApplyReactive,
-  type RegularRxEntityState,
-  type RxEntityState,
-} from ".";
+import { applyReactive, type RegularRxEntityState } from ".";
+import type { CommonCharacterVariableNames } from "../../query/utils";
 
 export type CharacterPosition = "active" | "next" | "prev" | "standby";
 
@@ -70,7 +64,11 @@ export type CharacterPosition = "active" | "next" | "prev" | "standby";
  * 仅当保证 GameState 不发生变化时使用。
  */
 export class CharacterBase
-  extends ReactiveStateBase
+  extends ReactiveStateBase<{
+    readonly type: "character";
+    readonly areaType: "characters";
+    readonly variables: CommonCharacterVariableNames;
+  }>
   implements PlainCharacterState
 {
   override get [ReactiveStateSymbol](): "character" {

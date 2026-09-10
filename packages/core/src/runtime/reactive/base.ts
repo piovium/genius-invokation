@@ -64,8 +64,8 @@ export interface ExtraInfo<
   areaType: TypeAreaTypeMap<Ty>;
 }
 
-export abstract class ReactiveStateBase implements IUnorderedQuery {
-  declare [typingInfo]: TypingInfoBase;
+export abstract class ReactiveStateBase<QueryTy extends TypingInfoBase> implements IUnorderedQuery<QueryTy> {
+  declare [typingInfo]: QueryTy;
   abstract readonly id: number;
   abstract get [ReactiveStateSymbol](): ExEntityType;
   declare [RawStateSymbol]: object;
