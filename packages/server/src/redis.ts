@@ -19,3 +19,14 @@ const redisUrl = process.env.REDIS_URL;
 
 /** `null` when `REDIS_URL` is unset; every caller already handles that absence. */
 export const redis = redisUrl ? new Redis(redisUrl) : null;
+
+/**
+ * The deployment protocol spans two modules: the health probe arms these
+ * entries and the room lifecycle consults the same ones, so the names and the
+ * flag's self-expiry are defined once here rather than retyped at each call.
+ */
+export const ACTIVE_ROOMS_KEY = "meta:active_rooms";
+export const DEPLOYING_FLAG_KEY = "meta:deploying";
+
+/** Redis clears the deploying flag if the deployment that set it never does. */
+export const DEPLOYING_FLAG_TTL_SECONDS = 3600;

@@ -19,7 +19,7 @@ import type { Auth } from "../auth/session";
 import { unauthorized } from "../errors";
 import { parseRoomId } from "./ids";
 import { parseCreateRoom, parseJoinRoom } from "./request";
-import type { Rooms } from "./rooms";
+import { guestNotAllowedMessage, type Rooms } from "./rooms";
 
 /**
  * The room API. Every handler names the token it needs: browsing and joining
@@ -69,7 +69,7 @@ export const createRoomsRoutes = (rooms: Rooms, auth: Auth) =>
         const roomId = parseRoomId(params.roomId);
         const room = rooms.getRoom(roomId);
         if (identity?.user !== 1 && !room.config.allowGuest)
-          throw unauthorized(`Room ${roomId} does not allow guests`);
+          throw unauthorized(guestNotAllowedMessage(roomId));
         return room;
       },
       { identity: true },
