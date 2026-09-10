@@ -1,3 +1,5 @@
+x-database-url: &database-url postgres://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/postgres
+
 services:
   db:
     image: postgres:17-alpine
@@ -16,7 +18,7 @@ services:
     image: genius-invokation-server
     pull_policy: never
     environment:
-      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/postgres
+      DATABASE_URL: *database-url
     depends_on:
       db:
         condition: service_healthy
@@ -31,7 +33,7 @@ services:
     image: genius-invokation-server
     pull_policy: never
     environment:
-      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/postgres
+      DATABASE_URL: *database-url
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
       GH_CLIENT_ID: ${GH_CLIENT_ID:-}
       GH_CLIENT_SECRET: ${GH_CLIENT_SECRET:-}

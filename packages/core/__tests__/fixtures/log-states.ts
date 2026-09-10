@@ -31,7 +31,7 @@ export function logStates() {
     attachments: new Map(),
     extensions: new Map([[definition.id, definition]]),
   };
-  const first = Game.createInitialState({
+  const startingState = Game.createInitialState({
     decks: [
       { characters: [], cards: [] },
       { characters: [], cards: [] },
@@ -40,17 +40,21 @@ export function logStates() {
     randomSeed: 20260910,
     versionBehavior: "v3.3.0",
   });
-  const second = { ...first, roundNumber: 1, phase: "action" as const };
-  const third = {
-    ...second,
+  const actionState = {
+    ...startingState,
+    roundNumber: 1,
+    phase: "action" as const,
+  };
+  const gameEndState = {
+    ...actionState,
     roundNumber: 2,
     winner: 0 as const,
     phase: "gameEnd" as const,
   };
   const entries: GameStateLogEntry[] = [
-    { state: first, canResume: false },
-    { state: second, canResume: true },
-    { state: third, canResume: false },
+    { state: startingState, canResume: false },
+    { state: actionState, canResume: true },
+    { state: gameEndState, canResume: false },
   ];
   return { entries, data };
 }
