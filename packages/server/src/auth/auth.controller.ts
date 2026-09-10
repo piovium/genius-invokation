@@ -18,14 +18,18 @@ import type { AuthService } from "./auth.service";
 export function createAuthRoutes(auth: AuthService) {
   return new Elysia({ prefix: "/auth" }).get(
     "/github/callback",
-    async ({ query, set }) => {
+    async ({ query }) => {
       const { accessToken } = await auth.login(query.code);
-      set.headers["content-type"] = "text/html; charset=utf-8";
-      set.headers["cache-control"] = "no-store";
-      return (
+      return new Response(
         '<!DOCTYPE html><title>Login Success</title><p>Redirecting back...</p><script>window.addEventListener("error", event => { document.body.append(document.createTextNode(event.type + ": " + event.message)); });window.opener.postMessage({type:"login",token:' +
-        JSON.stringify(accessToken) +
-        '},"*");window.close();</script>'
+          JSON.stringify(accessToken) +
+          '},"*");window.close();</script>',
+        {
+          headers: {
+            "content-type": "text/html; charset=utf-8",
+            "cache-control": "no-store",
+          },
+        },
       );
     },
     { query: t.Object({ code: t.String({ minLength: 1 }) }) },

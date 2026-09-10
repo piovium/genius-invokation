@@ -18,8 +18,11 @@ import { Elysia } from "elysia";
 import type { MetricsService } from "./metrics.service";
 
 export function createMetricsRoutes(metrics: MetricsService) {
-  return new Elysia().get("/metrics", async ({ set }) => {
-    set.headers["content-type"] = metrics.contentType;
-    return metrics.getMetrics();
-  });
+  return new Elysia().get(
+    "/metrics",
+    async () =>
+      new Response(await metrics.getMetrics(), {
+        headers: { "content-type": metrics.contentType },
+      }),
+  );
 }

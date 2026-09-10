@@ -1,7 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
+import { Elysia } from "elysia";
+import { node } from "@elysiajs/node";
 import { AuthService } from "./auth.service";
+import { createAuthRoutes } from "./auth.controller";
 import type { UsersService } from "../users/users.service";
 import { createGuestId } from "./guest-id";
 import { listenHttp } from "../http-server";
@@ -17,6 +20,40 @@ function createTestJwt(payload: unknown, secret: string, alg = "HS256") {
     createHmac("sha256", secret).update(signingInput).digest("base64url")
   );
 }
+
+test("OAuth callback returns executable HTML through the Node HTTP adapter", async () => {
+  const auth = new AuthService({} as UsersService, "unit-fixture-secret");
+  const accessToken = await auth.signGuest(createGuestId());
+  const codes: string[] = [];
+  auth.login = async (code) => {
+    codes.push(code);
+    return { accessToken };
+  };
+  const app = new Elysia({ adapter: node() }).use(createAuthRoutes(auth));
+  app.compile();
+  const server = await listenHttp((request) => app.fetch(request), {
+    hostname: "127.0.0.1",
+    port: 0,
+  });
+  try {
+    const response = await fetch(
+      new URL("auth/github/callback?code=fixture-code", server.url),
+    );
+    assert.equal(response.status, 200);
+    assert.equal(
+      response.headers.get("content-type"),
+      "text/html; charset=utf-8",
+    );
+    assert.equal(response.headers.get("cache-control"), "no-store");
+    const body = await response.text();
+    assert.match(body, /^<!DOCTYPE html>/);
+    assert.ok(body.includes(`token:${JSON.stringify(accessToken)}`));
+    assert.ok(body.includes("window.opener.postMessage"));
+    assert.deepEqual(codes, ["fixture-code"]);
+  } finally {
+    await server.stop();
+  }
+});
 
 test("existing user JWTs and new guest JWTs verify; tampering, expiry and algorithm confusion fail", async () => {
   const auth = new AuthService({} as UsersService, "unit-fixture-secret");

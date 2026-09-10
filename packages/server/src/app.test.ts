@@ -71,7 +71,10 @@ test("real Elysia HTTP keeps public routes, protected APIs, errors, metrics and 
     await wrongPrefix.body?.cancel();
     const metrics = await fetch(new URL("metrics", url));
     assert.equal(metrics.status, 200);
-    assert.ok(metrics.headers.get("content-type")?.includes("text/plain"));
+    assert.equal(
+      metrics.headers.get("content-type"),
+      service.metrics.contentType,
+    );
     assert.ok((await metrics.text()).includes("gi_rooms_active"));
     const preflight = await fetch(new URL("play/api/decks", url), {
       method: "OPTIONS",
