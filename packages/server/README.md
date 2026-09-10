@@ -6,7 +6,7 @@
 
 本路线要求 HTTP 路由、校验、鉴权、错误与插件组合全部使用 **Elysia 原生写法**，运行时保持 Node.js：依赖、脚本、`Bun.` 全局对象、`bun:` 模块与基础镜像都不得改用 Bun，也不得保留 harness 约束规则禁止的历史兼容层。
 
-可执行检查：在仓库根目录运行 `npm run harness:constraints`，规则与例外见 [harness 说明](../../scripts/server-harness/README.md)。当前检查为 0 违规：`prisma/` 目录、依赖与 lockfile 条目、源码中的 Prisma 引用都已清除，NestJS 风格的模块/控制器/服务文件与容器类也已全部改写成 Elysia 插件、`status()` 与工厂函数。该检查只看静态写法，不代表功能或内存验收。
+可执行检查：在仓库根目录运行 `npm run harness:constraints`，规则与例外见 [harness 说明](../../scripts/server-harness/README.md)。当前检查为 0 违规：旧 ORM 的 schema、迁移目录、依赖与 lockfile 条目，以及源码、构建脚本和文档里的引用都已清除；NestJS 风格的模块/控制器/服务文件名与容器类也已全部改写成 Elysia 插件、工厂函数与 `status()`。该检查只看静态写法，不代表功能或内存验收。
 
 ## 开发与构建
 
