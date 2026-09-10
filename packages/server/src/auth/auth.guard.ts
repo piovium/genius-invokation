@@ -18,12 +18,13 @@ import { isUserJwtPayload } from "./user.decorator";
 import { UnauthorizedException } from "../errors";
 
 export function requestIdentity(request: Request, auth: AuthService) {
-  const value = request.headers.get("authorization");
-  const parts = value?.split(" ");
+  const authorization = request.headers.get("authorization");
+  const parts = authorization?.split(" ");
   return parts?.length === 2 && parts[0] === "Bearer"
     ? auth.verify(parts[1]!)
     : null;
 }
+
 export function requireUser(request: Request, auth: AuthService) {
   const payload = requestIdentity(request, auth);
   if (!isUserJwtPayload(payload)) throw new UnauthorizedException();

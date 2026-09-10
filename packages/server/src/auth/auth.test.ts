@@ -6,13 +6,15 @@ import type { UsersService } from "../users/users.service";
 import { createGuestId } from "./guest-id";
 import { listenHttp } from "../http-server";
 
-function jwt(payload: unknown, secret: string, alg = "HS256") {
-  const body =
+function createTestJwt(payload: unknown, secret: string, alg = "HS256") {
+  const signingInput =
     Buffer.from(JSON.stringify({ alg, typ: "JWT" })).toString("base64url") +
     "." +
     Buffer.from(JSON.stringify(payload)).toString("base64url");
   return (
-    body + "." + createHmac("sha256", secret).update(body).digest("base64url")
+    signingInput +
+    "." +
+    createHmac("sha256", secret).update(signingInput).digest("base64url")
   );
 }
 
@@ -24,23 +26,26 @@ test("existing user JWTs and new guest JWTs verify; tampering, expiry and algori
     exp: Math.floor(Date.now() / 1000) + 60,
   };
   assert.equal(
-    auth.verify(jwt(payload, "unit-fixture-secret"))?.sub,
+    auth.verify(createTestJwt(payload, "unit-fixture-secret"))?.sub,
     payload.sub,
   );
-  const guest = createGuestId();
-  const signed = await auth.signGuest(guest);
-  assert.equal(auth.verify(signed)?.sub, guest);
+  const guestId = createGuestId();
+  const guestToken = await auth.signGuest(guestId);
+  assert.equal(auth.verify(guestToken)?.sub, guestId);
   const guestPayload = JSON.parse(
-    Buffer.from(signed.split(".")[1]!, "base64url").toString(),
+    Buffer.from(guestToken.split(".")[1]!, "base64url").toString(),
   );
   assert.equal(guestPayload.exp - guestPayload.iat, 42 * 86400);
   for (const token of [
-    jwt(payload, "other-secret"),
-    jwt(payload, "unit-fixture-secret", "none"),
-    jwt({ ...payload, exp: 1 }, "unit-fixture-secret"),
-    jwt({ ...payload, user: 2 }, "unit-fixture-secret"),
-    jwt({ ...payload, user: 0, sub: "not-a-guest-id" }, "unit-fixture-secret"),
-    signed + ".extra",
+    createTestJwt(payload, "other-secret"),
+    createTestJwt(payload, "unit-fixture-secret", "none"),
+    createTestJwt({ ...payload, exp: 1 }, "unit-fixture-secret"),
+    createTestJwt({ ...payload, user: 2 }, "unit-fixture-secret"),
+    createTestJwt(
+      { ...payload, user: 0, sub: "not-a-guest-id" },
+      "unit-fixture-secret",
+    ),
+    guestToken + ".extra",
     "a".repeat(8193),
   ])
     assert.equal(auth.verify(token), null);

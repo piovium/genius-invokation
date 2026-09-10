@@ -24,73 +24,77 @@ export interface GameStateLogEntry {
   readonly canResume: boolean;
 }
 
-function serializeImpl(
+function serializeValue(
   store: any[],
   indices: WeakMap<object, number>,
-  v: unknown,
+  value: unknown,
 ): any {
   if (
-    typeof v === "number" ||
-    typeof v === "string" ||
-    typeof v === "boolean" ||
-    v === null
+    typeof value === "number" ||
+    typeof value === "string" ||
+    typeof value === "boolean" ||
+    value === null
   ) {
-    return v;
+    return value;
   }
-  const index = typeof v === "object" ? indices.get(v) : undefined;
+  const index = typeof value === "object" ? indices.get(value) : undefined;
   if (index !== undefined) {
     return { $: index };
   }
-  if (Array.isArray(v)) {
-    const result = v.map((obj) => serializeImpl(store, indices, obj));
+  if (Array.isArray(value)) {
+    const result = value.map((obj) => serializeValue(store, indices, obj));
     if (result.length >= 2) {
-      indices.set(v, store.length);
+      indices.set(value, store.length);
       store.push(result);
       return { $: store.length - 1 };
     } else {
       return result;
     }
   }
-  if (v instanceof Map) {
+  if (value instanceof Map) {
     return {
       __type: "map",
-      entries: Array.from(v.entries()).map(([key, value]) => [
-        serializeImpl(store, indices, key),
-        serializeImpl(store, indices, value),
+      entries: Array.from(value.entries()).map(([key, value]) => [
+        serializeValue(store, indices, key),
+        serializeValue(store, indices, value),
       ]),
     };
   }
-  if (v instanceof Set) {
+  if (value instanceof Set) {
     return {
       __type: "set",
-      values: Array.from(v).map((value) =>
-        serializeImpl(store, indices, value),
+      values: Array.from(value).map((value) =>
+        serializeValue(store, indices, value),
       ),
     };
   }
-  if (typeof v === "object") {
-    const proto = Object.getPrototypeOf(v);
+  if (typeof value === "object") {
+    const proto = Object.getPrototypeOf(value);
     if (proto !== Object.prototype && proto !== null) {
       return null; // Non-plain objects are not serialized
     }
-    if ("__definition" in v && "id" in v) {
+    if ("__definition" in value && "id" in value) {
       const result: any = {
-        $$: v.__definition,
-        id: v.id,
+        $$: value.__definition,
+        id: value.id,
       };
-      indices.set(v, store.length);
+      indices.set(value, store.length);
       store.push(result);
       return { $: store.length - 1 };
     }
     const result: any = {};
-    for (const key in v) {
-      result[key] = serializeImpl(store, indices, (v as Record<any, any>)[key]);
+    for (const key in value) {
+      result[key] = serializeValue(
+        store,
+        indices,
+        (value as Record<any, any>)[key],
+      );
     }
-    indices.set(v, store.length);
+    indices.set(value, store.length);
     store.push(result);
     return { $: store.length - 1 };
   } else {
-    return v;
+    return value;
   }
 }
 
@@ -124,17 +128,17 @@ export function serializeGameStateLog(
  * state graphs to be collected. Returned logs remain readable after later appends.
  */
 export function createGameStateLogSerializer() {
-  const logResult: SerializedLogEntry[] = [];
+  const serializedEntries: SerializedLogEntry[] = [];
   const store: any[] = [];
   const indices = new WeakMap<object, number>();
   const append = (entry: GameStateLogEntry) => {
-    const omittedState: MakePropPartial<GameState, "data"> = {
+    const stateWithoutData: MakePropPartial<GameState, "data"> = {
       ...entry.state,
     };
-    delete omittedState.data;
-    const stateResult = serializeImpl(store, indices, omittedState);
-    logResult.push({
-      s: stateResult,
+    delete stateWithoutData.data;
+    const serializedState = serializeValue(store, indices, stateWithoutData);
+    serializedEntries.push({
+      s: serializedState,
       e: [],
       r: entry.canResume,
     });
@@ -144,7 +148,7 @@ export function createGameStateLogSerializer() {
     serialize: (): SerializedLog => ({
       v: CORE_VERSION,
       store: store.slice(),
-      log: logResult.slice(),
+      log: serializedEntries.slice(),
     }),
   };
 }

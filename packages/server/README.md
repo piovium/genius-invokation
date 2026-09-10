@@ -1,39 +1,41 @@
 # @gi-tcg/server 对战平台后端
 
-服务使用 Elysia / Node.js、Drizzle 和 PostgreSQL，实时对局使用二进制 WebSocket。原 HTTP API、OAuth 凭证和 PostgreSQL 表名、字段、约束继续兼容。游戏状态直接传 protobuf 字节，控制消息为 JSON；服务不提供 SSE 回退。
+服务使用 Node.js 运行 Elysia，通过 Drizzle 访问 PostgreSQL。HTTP API、OAuth 凭证以及数据库表名、字段和约束保持兼容。实时对局使用二进制 WebSocket：游戏状态传输 protobuf 字节，控制消息使用 JSON，不提供 SSE 回退。
 
 ## 开发与构建
 
-使用仓库要求的 Node 26.1+、pnpm 12 安装及构建，使用 Node.js 26.1+ 运行服务。安装服务及依赖：
+安装、构建和运行需要 Node.js 26.1+，包管理器使用 pnpm 12。在仓库根目录安装服务及其依赖并构建：
 
     pnpm --filter @gi-tcg/server... install --frozen-lockfile
     pnpm build:no-typing server...
 
-在 packages/server/.env 设置 DATABASE_URL、JWT_SECRET；GitHub 登录另需 GH_CLIENT_ID、GH_CLIENT_SECRET。开发启动前执行 pnpm migrate，再运行 pnpm dev。开发和生产均连接真实 PostgreSQL，不再启动 Prisma/PGLite 模拟数据库。
+在 `packages/server/.env` 设置 `DATABASE_URL` 和 `JWT_SECRET`；GitHub 登录还需要 `GH_CLIENT_ID` 和 `GH_CLIENT_SECRET`。随后在 `packages/server` 执行 `pnpm migrate`，再运行 `pnpm dev`。开发和生产均连接 PostgreSQL，不再启动 Prisma/PGLite 模拟数据库。
 
-开发、类型检查与测试需要本地 assets-manager 数据快照。上面的完整构建会先生成该依赖；随后在 packages/server 执行 pnpm prepare:metadata，从 assets-manager/dist/data（FROM_SOURCE=1 时使用 src/data）生成牌组校验所需的精简元数据及来源哈希清单。该步骤只读取本地数据，不访问 CDN。pnpm dev、pnpm check 和通用测试命令会自动准备元数据；单独运行房间测试前需先执行此步骤。
+开发、类型检查和测试需要 assets-manager 的本地数据快照。上面的构建命令会先生成该依赖。`pnpm prepare:metadata` 从 `assets-manager/dist/data` 提取牌组校验字段，并生成记录来源哈希的清单；设置 `FROM_SOURCE=1` 时使用 `src/data`。该步骤只读取本地文件，不访问 CDN。`pnpm dev`、`pnpm check` 和 `pnpm test` 会自动准备元数据；单独运行房间测试前需要先准备。
 
-生产构建位于 dist/，包含 main.js、migrate.js、frontend/ 和原始 prisma/migrations/ SQL。运行 node dist/main.js。前端 JS、CSS、图片通过 Node 文件流 按请求返回，不内嵌 base64 或整体载入服务内存；保留 WEB_CLIENT_BASE_PATH、SPA 回退、MIME、ETag、sw.js 和 HTML 的 no-cache，以及带 hash 资源的 immutable 缓存行为。
+生产构建位于 `dist/`，包含 `main.js`、`migrate.js`、`frontend/` 和原始 `prisma/migrations/` SQL。使用 `node dist/main.js` 启动。前端 JS、CSS 和图片按请求通过 Node 文件流返回，无需将整个文件载入内存。`WEB_CLIENT_BASE_PATH`、SPA 回退、MIME 和 ETag 行为保持兼容；`sw.js` 与 HTML 使用 `no-cache`，文件名带哈希的资源使用 `immutable` 缓存。
 
 ## 数据库升级
 
-已有 PostgreSQL 数据库执行 node dist/migrate.js（源码环境执行 pnpm migrate）。迁移器在事务和 advisory lock 下，验证并认领已完成的 \_prisma_migrations 记录与原始 SQL 校验和；已准备的隔离 harness 数据库可通过 \_HarnessMigration 记录认领。新的记录写入 \_\_drizzle_migrations，旧迁移记录和业务行保留。
+对已有 PostgreSQL 数据库执行 `node dist/migrate.js`，源码环境执行 `pnpm migrate`。迁移器在事务和 PostgreSQL advisory lock 保护下，核对 `_prisma_migrations` 中已完成的记录及原始 SQL 校验和，再将这些迁移登记到 `__drizzle_migrations`。已准备的隔离测试库可通过 `_HarnessMigration` 记录完成同样的核对。旧迁移记录和业务数据保留。
 
-空库按时间顺序执行原仓库 SQL。重复执行不重复建表、不重置序列或修改已有用户、牌组、对局；迁移日志不完整、校验和不符、未知已有表或列/主键/外键不一致时拒绝继续。DATABASE_URL 的 schema 参数用于选择现有 schema；迁移前需已创建该 schema。DATABASE_CONNECTION_LIMIT 控制连接池，默认 2。原 prisma/schema.prisma 和 SQL 保留作历史对照，运行时不依赖 Prisma。
+空库按时间顺序执行原仓库 SQL。重复执行不会重新建表、重置序列或修改已有用户、牌组和对局。迁移记录不完整、校验和不符、已有业务表缺少可验证的迁移记录，或列、主键、外键与原 SQL 不一致时，迁移器会报错并回滚事务。
+
+`DATABASE_URL` 的 `schema` 参数选择现有 schema，因此需在迁移前创建它。`DATABASE_CONNECTION_LIMIT` 设置连接池上限，默认为 2。原 `prisma/schema.prisma` 和 SQL 保留供历史对照，运行时不依赖 Prisma。
 
 ## 部署
 
-在仓库根目录执行 docker build -f packages/server/Dockerfile .，运行镜像时提供 JWT_SECRET 与 DATABASE_URL。镜像先以 Node/pnpm 构建，运行层仅需 Node.js。Compose 先检查 PostgreSQL 健康，再运行一次迁移容器，最后启动服务；数据库使用持久化 volume。已有部署升级时继续挂载原数据库 volume，避免切换到空库。
+在仓库根目录执行 `docker build -f packages/server/Dockerfile .`，运行镜像时提供 `JWT_SECRET` 与 `DATABASE_URL`。镜像使用 Node/pnpm 构建，运行层使用 Node.js。Compose 依次等待 PostgreSQL 就绪、运行迁移容器、启动服务。数据库使用持久化 volume；升级已有部署时继续挂载原 volume。
 
 数据库健康检查连接 TCP，避免把 initdb 期间仅监听 Unix socket 的临时实例当作可用服务；首次初始化 volume 提供 120 秒启动宽限。TCP 就绪后即可执行迁移，无需等满宽限期。
 
-WebSocket 与 HTTP 共用端口 3000。反向代理需要转发 Upgrade，空闲超时应大于服务的心跳周期。metrics 仍位于 /metrics，API 使用 WEB_CLIENT_BASE_PATH + api。Redis、房间回放/S3、部署健康检查保留现有环境变量。收到退出信号后等待已有房间结束，Compose 提供 10 分钟退出宽限。
+WebSocket 与 HTTP 共用端口 3000。反向代理需要转发 `Upgrade`，空闲超时应大于服务的心跳周期。指标位于 `/metrics`，API 前缀为 `WEB_CLIENT_BASE_PATH` 加 `api`。Redis、房间回放/S3 和部署健康检查沿用现有环境变量。收到退出信号后，服务等待已有房间结束；Compose 提供 10 分钟退出宽限。
 
 ## 验证
 
-协议、真实对局、数据库写入与 RSS 的判定继续使用 ../../scripts/server-harness/README.md 约定的独立 harness。先运行其 environment/prepare.mjs 创建隔离数据库和账号，真实迁移验收使用 candidate.json；100 MiB 常驻、50 MiB 单局增量门槛未调整。
+协议、真实对局、数据库写入和 RSS 使用[独立 harness](../../scripts/server-harness/README.md) 验证。先运行其中的 `environment/prepare.mjs` 创建隔离数据库和账号，再使用 `candidate.json` 进行迁移验收。内存门槛为常驻 RSS 100 MiB、单局峰值增量 50 MiB。
 
-以下命令在 packages/server 目录执行；pnpm test 覆盖 HTTP、认证、牌组元数据、房间和 WebSocket，test:rooms 与 test:http 可用于单独验证对应部分：
+以下命令在 `packages/server` 执行。`pnpm test` 覆盖 HTTP、认证、牌组元数据、房间和 WebSocket；`test:rooms` 与 `test:http` 可单独验证对应部分：
 
     pnpm prepare:metadata
     pnpm check
@@ -42,4 +44,4 @@ WebSocket 与 HTTP 共用端口 3000。反向代理需要转发 Upgrade，空闲
     pnpm test:http
     pnpm test:db
 
-数据库测试须显式设置 SERVER_DB_TEST_URL 指向隔离 gi_server_harness 数据库。测试只创建并回收自己随机命名的 schema，验证旧 Prisma 数据认领、约束、Drizzle 写入、事务回滚及独立进程重启后的持久化。测试及构建通过本身不等于真实内存达标。
+数据库测试须显式设置 `SERVER_DB_TEST_URL`，指向隔离的 `gi_server_harness` 数据库。测试创建并回收独立的随机 schema，验证旧 Prisma 迁移记录的登记、约束、Drizzle 写入、事务回滚，以及独立进程重启后的持久化。构建和功能测试通过后，仍需单独验证真实内存是否达标。

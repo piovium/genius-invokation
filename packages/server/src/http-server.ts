@@ -3,6 +3,8 @@ import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import type { AddressInfo } from "node:net";
 
+const MAX_REQUEST_BODY_BYTES = 1024 * 1024;
+
 export interface HttpListenOptions {
   hostname?: string;
   port?: number;
@@ -10,11 +12,12 @@ export interface HttpListenOptions {
 
 function requestHeaders(incoming: IncomingMessage) {
   const headers = new Headers();
-  for (let index = 0; index < incoming.rawHeaders.length; index += 2)
+  for (let index = 0; index < incoming.rawHeaders.length; index += 2) {
     headers.append(
       incoming.rawHeaders[index]!,
       incoming.rawHeaders[index + 1]!,
     );
+  }
   return headers;
 }
 
@@ -29,24 +32,24 @@ export async function listenHttp(
     outgoing.once("close", () => {
       if (!outgoing.writableFinished) abort.abort();
     });
-    let oversized = false;
+    let bodyTooLarge = false;
     try {
       const headers = requestHeaders(incoming);
-      if (Number(headers.get("content-length") ?? 0) > 1024 * 1024) {
+      if (Number(headers.get("content-length") ?? 0) > MAX_REQUEST_BODY_BYTES) {
         incoming.resume();
         outgoing.writeHead(413).end();
         return;
       }
       const hasBody = incoming.method !== "GET" && incoming.method !== "HEAD";
-      let length = 0;
+      let receivedBodyBytes = 0;
       const body = hasBody
         ? Readable.toWeb(
             incoming.pipe(
               new Transform({
                 transform(chunk, encoding, callback) {
-                  length += chunk.length;
-                  if (length > 1024 * 1024) {
-                    oversized = true;
+                  receivedBodyBytes += chunk.length;
+                  if (receivedBodyBytes > MAX_REQUEST_BODY_BYTES) {
+                    bodyTooLarge = true;
                     callback(new Error("Request body is too large"));
                   } else callback(null, chunk);
                 },
@@ -70,7 +73,7 @@ export async function listenHttp(
           init,
         ),
       );
-      if (oversized) {
+      if (bodyTooLarge) {
         await response.body?.cancel();
         outgoing.writeHead(413).end();
         return;
@@ -89,7 +92,7 @@ export async function listenHttp(
       }
     } catch {
       if (!outgoing.headersSent)
-        outgoing.writeHead(oversized ? 413 : 500).end();
+        outgoing.writeHead(bodyTooLarge ? 413 : 500).end();
       else outgoing.destroy();
     }
   });
@@ -103,15 +106,10 @@ export async function listenHttp(
     });
   });
   const address = server.address() as AddressInfo;
-  const url = new URL(
-    "http://" +
-      (address.address.includes(":")
-        ? "[" + address.address + "]"
-        : address.address) +
-      ":" +
-      address.port +
-      "/",
-  );
+  const addressHost = address.address.includes(":")
+    ? `[${address.address}]`
+    : address.address;
+  const url = new URL(`http://${addressHost}:${address.port}/`);
   return {
     server,
     url,

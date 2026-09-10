@@ -11,7 +11,7 @@ const categories = [
   "entities",
   "keywords",
 ] as const;
-const fields = [
+const metadataFields = [
   "id",
   "shareId",
   "tags",
@@ -52,11 +52,11 @@ export async function generateDeckMetadata({
       dataDirectory = path.join(assetsRoot, "src/data");
     }
   }
-  const index: Record<string, DeckMetadata> = Object.create(null);
+  const metadataById: Record<string, DeckMetadata> = Object.create(null);
   const categoryCounts: Record<string, number> = {};
   const duplicateIds: { id: number; ignoredCategory: string }[] = [];
   const sourceHashes: Record<string, string> = {};
-  const shareIds = new Map<number, number>();
+  const cardIdsByShareId = new Map<number, number>();
   for (const category of categories) {
     const relative = `CHS/${category}.json`;
     const text = await readFile(path.join(dataDirectory, relative), "utf8");
@@ -69,20 +69,20 @@ export async function generateDeckMetadata({
       if (!Number.isSafeInteger(raw.id))
         throw new Error(`${relative} contains an invalid id`);
       const projected: Record<string, unknown> = {};
-      for (const field of fields)
+      for (const field of metadataFields)
         if (Object.hasOwn(raw, field)) projected[field] = raw[field];
       const entry = projected as unknown as DeckMetadata;
       // Manager's category cache keeps the first record for each ID. Some
       // unobtainable action records also occur in entities with fewer fields.
       // Follow ALL_CATEGORIES order, preserving the action record's version.
-      if (Object.hasOwn(index, entry.id))
+      if (Object.hasOwn(metadataById, entry.id))
         duplicateIds.push({ id: entry.id, ignoredCategory: category });
-      else index[entry.id] = entry;
+      else metadataById[entry.id] = entry;
       if (typeof entry.shareId === "number") {
-        const previousId = shareIds.get(entry.shareId);
+        const previousId = cardIdsByShareId.get(entry.shareId);
         if (previousId !== undefined && previousId !== entry.id)
           throw new Error(`Duplicate shareId ${entry.shareId}`);
-        shareIds.set(entry.shareId, entry.id);
+        cardIdsByShareId.set(entry.shareId, entry.id);
       }
     }
   }
@@ -92,7 +92,7 @@ export async function generateDeckMetadata({
   );
   const shareMap: Record<string, number> = JSON.parse(shareSource);
   sourceHashes["share_id.json"] = hash(shareSource);
-  for (const [shareId, id] of shareIds) {
+  for (const [shareId, id] of cardIdsByShareId) {
     if (shareMap[shareId] !== id)
       throw new Error(`share_id.json disagrees with raw card ${id}`);
   }
@@ -100,7 +100,7 @@ export async function generateDeckMetadata({
     // The original generator also writes an "undefined" key for unobtainable
     // records. Preserve it in the unchanged sharing codec's input.
     if (shareId === "undefined") continue;
-    if (shareIds.get(Number(shareId)) !== id)
+    if (cardIdsByShareId.get(Number(shareId)) !== id)
       throw new Error(`Missing metadata for shareId ${shareId}`);
   }
   const codecSource = await readFile(
@@ -108,7 +108,7 @@ export async function generateDeckMetadata({
     "utf8",
   );
   sourceHashes["sharing.ts"] = hash(codecSource);
-  const json = JSON.stringify(index);
+  const json = JSON.stringify(metadataById);
   const manifest = {
     formatVersion: 1,
     sourceDirectory: path
@@ -117,10 +117,10 @@ export async function generateDeckMetadata({
     sourceHashes,
     categoryCounts,
     duplicateIds,
-    recordCount: Object.keys(index).length,
+    recordCount: Object.keys(metadataById).length,
     metadataSha256: hash(json),
     metadataBytes: Buffer.byteLength(json),
-    shareIdCount: shareIds.size,
+    shareIdCount: cardIdsByShareId.size,
   };
   await mkdir(path.join(outputDirectory, "data"), { recursive: true });
   await writeFile(
@@ -139,7 +139,7 @@ export async function generateDeckMetadata({
     path.join(outputDirectory, "deck-metadata-manifest.json"),
     JSON.stringify(manifest, null, 2) + "\n",
   );
-  return { index, manifest, dataDirectory, outputDirectory };
+  return { index: metadataById, manifest, dataDirectory, outputDirectory };
 }
 
 if (

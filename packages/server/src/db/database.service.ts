@@ -2,7 +2,7 @@ import { Pool, type PoolClient, type QueryResultRow } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
-interface SqlConnection {
+export interface SqlConnection {
   (
     strings: TemplateStringsArray,
     ...values: unknown[]
@@ -10,7 +10,7 @@ interface SqlConnection {
   unsafe(text: string, values?: unknown[]): Promise<QueryResultRow[]>;
 }
 
-function queries(connection: Pool | PoolClient): SqlConnection {
+function createQueries(connection: Pool | PoolClient): SqlConnection {
   const unsafe = async (text: string, values?: unknown[]) => {
     const result = await connection.query(text, values);
     // The original migration files contain multiple SQL statements. pg returns
@@ -37,25 +37,25 @@ export function createSql(connectionString = process.env.DATABASE_URL) {
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(databaseSchema))
     throw new Error("Invalid PostgreSQL schema name");
   url.searchParams.delete("schema");
-  const max = Number(process.env.DATABASE_CONNECTION_LIMIT ?? 2);
-  if (!Number.isSafeInteger(max) || max < 1)
+  const connectionLimit = Number(process.env.DATABASE_CONNECTION_LIMIT ?? 2);
+  if (!Number.isSafeInteger(connectionLimit) || connectionLimit < 1)
     throw new Error("DATABASE_CONNECTION_LIMIT must be a positive integer");
   const pool = new Pool({
     connectionString: url.toString(),
-    max,
+    max: connectionLimit,
     idleTimeoutMillis: 20_000,
     connectionTimeoutMillis: 10_000,
     options: "-c search_path=" + databaseSchema,
   });
   pool.on("error", () => console.error("PostgreSQL idle connection failed"));
-  return Object.assign(queries(pool), {
+  return Object.assign(createQueries(pool), {
     pool,
     close: () => pool.end(),
     async begin<T>(callback: (tx: SqlConnection) => Promise<T>) {
       const connection = await pool.connect();
       try {
         await connection.query("BEGIN");
-        const result = await callback(queries(connection));
+        const result = await callback(createQueries(connection));
         await connection.query("COMMIT");
         return result;
       } catch (error) {

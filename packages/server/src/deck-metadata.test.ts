@@ -47,6 +47,16 @@ const base: Deck = JSON.parse(
 const digest = (text: string) =>
   createHash("sha256").update(text).digest("hex");
 
+// Independent from the generator: changes to its projection must still be checked.
+const expectedMetadataFields = [
+  "id",
+  "shareId",
+  "tags",
+  "sinceVersion",
+  "relatedCharacterId",
+  "relatedCharacterTags",
+] as const;
+
 test("all real raw metadata fields, record order, duplicates and source hashes match the generated index", async () => {
   const expected: Record<string, unknown> = {};
   const duplicates: { id: unknown; ignoredCategory: string }[] = [];
@@ -67,14 +77,7 @@ test("all real raw metadata fields, record order, duplicates and source hashes m
       // verifier and minimum-version function, including missing properties.
       expected[id] = Object.fromEntries(
         Object.entries(record).filter(([key]) =>
-          [
-            "id",
-            "shareId",
-            "tags",
-            "sinceVersion",
-            "relatedCharacterId",
-            "relatedCharacterTags",
-          ].includes(key),
+          expectedMetadataFields.some((field) => field === key),
         ),
       );
     }
@@ -106,14 +109,7 @@ test("all real raw metadata fields, record order, duplicates and source hashes m
         );
         continue;
       }
-      for (const key of [
-        "id",
-        "shareId",
-        "tags",
-        "sinceVersion",
-        "relatedCharacterId",
-        "relatedCharacterTags",
-      ]) {
+      for (const key of expectedMetadataFields) {
         assert.deepEqual(
           englishRecord[key],
           record[key],
@@ -219,9 +215,12 @@ test("original legal/illegal deck restrictions and every minimum version work wi
       DecksService.prototype.deckToCode({ characters: [99999999], cards: [] }),
       { message: "deck must contain 3 characters" },
     );
-    await assert.rejects(DecksService.prototype.deckToCode(withCard(99999999)), {
-      message: "card id 99999999 not found",
-    });
+    await assert.rejects(
+      DecksService.prototype.deckToCode(withCard(99999999)),
+      {
+        message: "card id 99999999 not found",
+      },
+    );
     const hiddenCharacter = characters.find(
       (record) => typeof record.shareId !== "number",
     );

@@ -27,7 +27,7 @@ export const CODE_EXCHANGE_URL =
   "https://github.com/login/oauth/access_token";
 export const GET_USER_API_URL =
   process.env.GH_GET_USER_API_URL || "https://api.github.com/user";
-const encode = (value: unknown) =>
+const encodeJwtPart = (value: unknown) =>
   Buffer.from(JSON.stringify(value)).toString("base64url");
 const TOKEN_LIFETIME_SECONDS = 42 * 24 * 60 * 60;
 
@@ -47,9 +47,9 @@ export class AuthService {
   private sign(payload: JwtPayload) {
     const iat = Math.floor(Date.now() / 1000);
     const content =
-      encode({ alg: "HS256", typ: "JWT" }) +
+      encodeJwtPart({ alg: "HS256", typ: "JWT" }) +
       "." +
-      encode({ ...payload, iat, exp: iat + TOKEN_LIFETIME_SECONDS });
+      encodeJwtPart({ ...payload, iat, exp: iat + TOKEN_LIFETIME_SECONDS });
     return (
       content +
       "." +
@@ -59,33 +59,35 @@ export class AuthService {
   verify(token: string): JwtPayload | null {
     if (typeof token !== "string" || token.length > 8192) return null;
     try {
-      const parts = token.split(".");
+      const segments = token.split(".");
       if (
-        parts.length !== 3 ||
-        parts.some(
-          (part) =>
-            !/^[A-Za-z0-9_-]+$/.test(part) ||
-            Buffer.from(part, "base64url").toString("base64url") !== part,
+        segments.length !== 3 ||
+        segments.some(
+          (segment) =>
+            !/^[A-Za-z0-9_-]+$/.test(segment) ||
+            Buffer.from(segment, "base64url").toString("base64url") !== segment,
         )
       )
         return null;
-      const header = JSON.parse(Buffer.from(parts[0]!, "base64url").toString());
+      const header = JSON.parse(
+        Buffer.from(segments[0]!, "base64url").toString(),
+      );
       if (
         header.alg !== "HS256" ||
         (header.typ !== undefined && header.typ !== "JWT")
       )
         return null;
-      const expected = createHmac("sha256", this.secret)
-        .update(parts[0] + "." + parts[1])
+      const expectedSignature = createHmac("sha256", this.secret)
+        .update(segments[0] + "." + segments[1])
         .digest();
-      const signature = Buffer.from(parts[2]!, "base64url");
+      const suppliedSignature = Buffer.from(segments[2]!, "base64url");
       if (
-        signature.length !== expected.length ||
-        !timingSafeEqual(signature, expected)
+        suppliedSignature.length !== expectedSignature.length ||
+        !timingSafeEqual(suppliedSignature, expectedSignature)
       )
         return null;
       const payload = JSON.parse(
-        Buffer.from(parts[1]!, "base64url").toString(),
+        Buffer.from(segments[1]!, "base64url").toString(),
       );
       const now = Math.floor(Date.now() / 1000);
       if (

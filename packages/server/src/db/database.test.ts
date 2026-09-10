@@ -142,6 +142,24 @@ test(
         const moduleUrl = pathToFileURL(
           resolve(import.meta.dirname, "database.service.ts"),
         ).href;
+        const restartScript = `
+          import { DatabaseService } from ${JSON.stringify(moduleUrl)};
+
+          const database = new DatabaseService(process.env.SERVER_DB_TEST_URL);
+          try {
+            const rows = await database.client\`SELECT data, "winnerId" FROM "Game" WHERE id = ${game.id}\`;
+            if (
+              rows.length !== 1 ||
+              rows[0].winnerId !== 91000002 ||
+              JSON.parse(rows[0].data).m.roomId !== 54321
+            ) {
+              throw new Error("Persisted replay mismatch");
+            }
+            console.log("restart-persistence-ok");
+          } finally {
+            await database.close();
+          }
+        `;
         const { stdout } = await execute(
           process.execPath,
           [
@@ -149,7 +167,7 @@ test(
             import.meta.resolve("@gi-tcg/config/preload"),
             "--input-type=module",
             "-e",
-            `import { DatabaseService } from ${JSON.stringify(moduleUrl)}; const d = new DatabaseService(process.env.SERVER_DB_TEST_URL); try { const rows = await d.client\`SELECT data, "winnerId" FROM "Game" WHERE id = ${game.id}\`; if(rows.length!==1 || rows[0].winnerId!==91000002 || JSON.parse(rows[0].data).m.roomId!==54321) throw new Error('Persisted replay mismatch'); console.log('restart-persistence-ok'); } finally { await d.close(); }`,
+            restartScript,
           ],
           { env: { ...process.env, SERVER_DB_TEST_URL: url }, timeout: 15_000 },
         );

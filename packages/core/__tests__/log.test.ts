@@ -72,9 +72,9 @@ test("an earlier serialized snapshot stays readable after subsequent appends", (
   const serializer = createGameStateLogSerializer();
   serializer.append(entries[0]!);
   const snapshot = serializer.serialize();
-  const before = JSON.stringify(snapshot);
+  const snapshotBeforeAppend = JSON.stringify(snapshot);
   serializer.append(entries[1]!);
-  expect(JSON.stringify(snapshot)).toBe(before);
+  expect(JSON.stringify(snapshot)).toBe(snapshotBeforeAppend);
   expect(deserializeGameStateLog(data, snapshot)).toHaveLength(1);
   expect(serializer.serialize().log).toHaveLength(2);
 });
