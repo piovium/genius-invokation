@@ -2,9 +2,9 @@ import { decodeGameFrame, encodeGameFrame } from "@gi-tcg/typings";
 import type { IncomingMessage, Server } from "node:http";
 import type { Duplex } from "node:stream";
 import { WebSocket, WebSocketServer } from "ws";
-import type { AuthService } from "../auth/auth.service";
-import type { RoomsService } from "../rooms/rooms.service";
-import { parsePlayerId, parseRoomId } from "../rooms/rooms.pipe";
+import type { Auth } from "../auth/session";
+import type { Rooms } from "../rooms/rooms";
+import { parsePlayerId, parseRoomId } from "../rooms/ids";
 import {
   RoomCommandError,
   type PlayerId,
@@ -13,7 +13,11 @@ import {
 
 const MAX_UNAUTHENTICATED = 128;
 const MAX_BUFFERED_BYTES = 512 * 1024;
-const AUTH_TIMEOUT_MS = 5000;
+const MAX_TOKEN_LENGTH = 4_096;
+const AUTH_TIMEOUT_MS = 5_000;
+const PING_INTERVAL_MS = 10_000;
+const HEARTBEAT_INTERVAL_MS = 30_000;
+const CLOSE_DEADLINE_MS = 1_000;
 interface RawSocket {
   send(data: string | Uint8Array): boolean;
   close(code?: number, reason?: string): void;
@@ -35,14 +39,60 @@ interface Connection {
   unsubscribe?: () => void;
 }
 
+/** Resolves the seat named by a `.../rooms/:roomId/players/:playerId/ws` route. */
+function parseRoute(
+  params: Socket["data"]["params"],
+): { roomId: number; target: PlayerId } | null {
+  try {
+    return {
+      roomId: parseRoomId(params.roomId),
+      target: parsePlayerId(params.targetPlayerId),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Control frames are JSON objects; anything else stays opaque to the caller. */
+function parseControlFrame(message: unknown): Record<string, unknown> | null {
+  try {
+    const parsed: unknown =
+      typeof message === "string" ? JSON.parse(message) : message;
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))
+      return null;
+    return parsed as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+/** Only the player sitting in the seat may act; spectators are read only. */
+function actingPlayer(state: Connection, action: string): PlayerId {
+  if (state.visitor === null || state.visitor !== state.target) {
+    throw new RoomCommandError("FORBIDDEN", `Spectators cannot ${action}`);
+  }
+  return state.visitor;
+}
+
+export interface RoomSocketHandlers {
+  open(socket: Socket): void;
+  message(socket: Socket, message: unknown): void;
+  close(socket: Socket): void;
+}
+
+export interface RoomWebSocketServer {
+  webSockets: WebSocketServer;
+  close(): Promise<void>;
+}
+
 /** No application frames are emitted before the immutable authenticated binding. */
 export function createRoomSocketHandlers(
   rooms: Pick<
-    RoomsService,
+    Rooms,
     "subscribePlayer" | "receivePlayerResponse" | "receivePlayerGiveUp"
   >,
-  auth: Pick<AuthService, "verify">,
-) {
+  auth: Pick<Auth, "verify">,
+): RoomSocketHandlers {
   const states = new WeakMap<RawSocket, Connection>();
   let unauthenticated = 0;
   function release(raw: RawSocket, state: Connection) {
@@ -86,17 +136,14 @@ export function createRoomSocketHandlers(
         raw.close(1013, "AUTH_CAPACITY");
         return;
       }
-      let roomId: number, target: PlayerId;
-      try {
-        roomId = parseRoomId(socket.data.params.roomId);
-        target = parsePlayerId(socket.data.params.targetPlayerId);
-      } catch {
+      const route = parseRoute(socket.data.params);
+      if (!route) {
         raw.close(1008, "INVALID_ROUTE");
         return;
       }
       const state: Connection = {
-        roomId,
-        target,
+        roomId: route.roomId,
+        target: route.target,
         visitor: null,
         sessionId: null,
         authenticated: false,
@@ -115,29 +162,16 @@ export function createRoomSocketHandlers(
       if (!state || state.closed) return;
       const binary =
         message instanceof Uint8Array || message instanceof ArrayBuffer;
-      let control: Record<string, unknown> | null = null;
-      if (!binary) {
-        try {
-          const parsed: unknown =
-            typeof message === "string" ? JSON.parse(message) : message;
-          if (parsed && typeof parsed === "object" && !Array.isArray(parsed))
-            control = parsed as Record<string, unknown>;
-        } catch {
-          /* Auth and control errors are handled below, without echoing data. */
-        }
-      }
+      const control = binary ? null : parseControlFrame(message);
       if (!state.authenticated) {
-        if (
-          control?.type !== "auth" ||
-          typeof control.token !== "string" ||
-          control.token.length > 4096
-        ) {
+        const token = control?.type === "auth" ? control.token : undefined;
+        if (typeof token !== "string" || token.length > MAX_TOKEN_LENGTH) {
           close(raw, state, 1008, "AUTH_REQUIRED");
           return;
         }
-        const payload =
-          control.token === "" ? null : auth.verify(control.token);
-        if (control.token !== "" && !payload) {
+        // An empty token binds an anonymous spectator to the target seat.
+        const payload = token === "" ? null : auth.verify(token);
+        if (token !== "" && payload === null) {
           close(raw, state, 1008, "INVALID_TOKEN");
           return;
         }
@@ -167,14 +201,17 @@ export function createRoomSocketHandlers(
           clearTimeout(state.authTimer);
           sendJson(raw, state, { type: "ready", sessionId: binding.sessionId });
           if (state.closed) return;
-          state.unsubscribe = binding.subscribe();
+          // `subscribe` hands back its own unsubscribe function.
+          const unsubscribe: (() => void) | void = binding.subscribe();
+          if (typeof unsubscribe === "function")
+            state.unsubscribe = unsubscribe;
           if (state.closed) {
-            state.unsubscribe();
+            state.unsubscribe?.();
             return;
           }
           state.pingTimer = setInterval(
             () => sendJson(raw, state, { type: "ping" }),
-            10000,
+            PING_INTERVAL_MS,
           );
         } catch {
           close(raw, state, 1008, "FORBIDDEN");
@@ -185,7 +222,8 @@ export function createRoomSocketHandlers(
         close(raw, state, 1008, "DUPLICATE_AUTH");
         return;
       }
-      let command: "actionResponse" | "giveUp" = "actionResponse";
+      const command =
+        !binary && control?.type === "giveUp" ? "giveUp" : "actionResponse";
       let id: number | undefined;
       try {
         if (binary) {
@@ -199,48 +237,41 @@ export function createRoomSocketHandlers(
             return;
           }
           id = frame.id;
-          if (state.visitor !== state.target || state.visitor === null)
-            throw new RoomCommandError(
-              "FORBIDDEN",
-              "Spectators cannot submit actions",
-            );
+          const playerId = actingPlayer(state, "submit actions");
           sendJson(
             raw,
             state,
             rooms.receivePlayerResponse(
               state.roomId,
-              state.visitor,
+              playerId,
               frame.id,
               frame.response,
             ),
           );
         } else if (control?.type === "giveUp") {
-          command = "giveUp";
-          if (state.visitor !== state.target || state.visitor === null)
-            throw new RoomCommandError(
-              "FORBIDDEN",
-              "Spectators cannot give up a game",
-            );
+          const playerId = actingPlayer(state, "give up a game");
           sendJson(
             raw,
             state,
-            rooms.receivePlayerGiveUp(state.roomId, state.visitor),
+            rooms.receivePlayerGiveUp(state.roomId, playerId),
           );
         } else {
           close(raw, state, 1008, "BINARY_RESPONSE_REQUIRED");
         }
       } catch (error) {
-        if (error instanceof RoomCommandError)
-          sendJson(raw, state, {
-            type: "commandError",
-            command,
-            ...(id === undefined ? {} : { id }),
-            sessionId: state.sessionId,
-            code: error.code,
-            message: error.message,
-            ...(error.code === "STALE_RPC" ? { resyncRequired: true } : {}),
-          });
-        else close(raw, state, 1008, "INVALID_COMMAND");
+        if (!(error instanceof RoomCommandError)) {
+          close(raw, state, 1008, "INVALID_COMMAND");
+          return;
+        }
+        sendJson(raw, state, {
+          type: "commandError",
+          command,
+          ...(id === undefined ? {} : { id }),
+          sessionId: state.sessionId,
+          code: error.code,
+          message: error.message,
+          ...(error.code === "STALE_RPC" ? { resyncRequired: true } : {}),
+        });
       }
     },
     close(socket: Socket) {
@@ -255,12 +286,12 @@ export function createRoomSocketHandlers(
 export function attachRoomWebSocketServer(
   server: Server,
   rooms: Pick<
-    RoomsService,
+    Rooms,
     "subscribePlayer" | "receivePlayerResponse" | "receivePlayerGiveUp"
   >,
-  auth: Pick<AuthService, "verify">,
+  auth: Pick<Auth, "verify">,
   apiPrefix = "/api",
-) {
+): RoomWebSocketServer {
   const handlers = createRoomSocketHandlers(rooms, auth);
   const prefix = `/${apiPrefix}`.replace(/\/+/g, "/").replace(/\/$/, "");
   const route = new RegExp(
@@ -289,8 +320,10 @@ export function attachRoomWebSocketServer(
         roomId: decodeURIComponent(match[1]!),
         targetPlayerId: decodeURIComponent(match[2]!),
       };
-      parseRoomId(params.roomId);
-      parsePlayerId(params.targetPlayerId);
+      if (!parseRoute(params)) {
+        stream.end("HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n");
+        return;
+      }
     } catch {
       stream.end("HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n");
       return;
@@ -300,7 +333,10 @@ export function attachRoomWebSocketServer(
       let alive = true;
       const enforceCloseDeadline = () => {
         if (webSocket.readyState === WebSocket.CLOSED) return;
-        closeTimer ??= setTimeout(() => webSocket.terminate(), 1000);
+        closeTimer ??= setTimeout(
+          () => webSocket.terminate(),
+          CLOSE_DEADLINE_MS,
+        );
         closeTimer.unref();
       };
       const raw: RawSocket = {
@@ -329,7 +365,7 @@ export function attachRoomWebSocketServer(
         }
         alive = false;
         webSocket.ping();
-      }, 30000);
+      }, HEARTBEAT_INTERVAL_MS);
       heartbeat.unref();
       webSocket.on("pong", () => {
         alive = true;
@@ -357,6 +393,8 @@ export function attachRoomWebSocketServer(
         handlers.close(socket);
       });
       handlers.open(socket);
+      // `noServer` mode never emits this by itself, while listeners such as the
+      // transport tests track accepted sockets through it.
       wss.emit("connection", webSocket, request);
     });
   };

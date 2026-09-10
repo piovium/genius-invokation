@@ -13,21 +13,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { createApplication, listenApplication } from "./app.module";
+import { createApplication, listenApplication } from "./app";
 import { redis } from "./redis";
 
 const service = createApplication();
 await service.database.connect();
+
 const port = Number(process.env.PORT ?? 3000);
 if (!Number.isInteger(port) || port < 1 || port > 65535)
   throw new Error("Invalid PORT");
+
 const server = await listenApplication(service, {
   port,
   hostname: process.env.HOST ?? "::",
 });
-console.log("Server listening at " + server.url);
+console.log(`Server listening at ${server.url}`);
+
 let stopping = false;
-async function stop() {
+async function stop(): Promise<void> {
   if (stopping) return;
   stopping = true;
   await service.rooms.close();
@@ -35,5 +38,7 @@ async function stop() {
   await service.database.close();
   await redis?.quit();
 }
-process.on("SIGINT", () => void stop());
-process.on("SIGTERM", () => void stop());
+
+for (const signal of ["SIGINT", "SIGTERM"] as const) {
+  process.on(signal, () => void stop());
+}
