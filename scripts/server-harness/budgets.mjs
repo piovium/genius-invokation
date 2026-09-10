@@ -1,5 +1,7 @@
 const MIB = 1024 * 1024;
 
+const compareNumbers = (left, right) => left - right;
+
 function maximum(values) {
   return values.length ? values.reduce((max, value) => Math.max(max, value), 0) : null;
 }
@@ -8,22 +10,22 @@ function median(values) {
   if (!values.length) {
     return null;
   }
-  const sorted = [...values].sort((left, right) => left - right);
+  const sorted = values.toSorted(compareNumbers);
   const middle = Math.floor(sorted.length / 2);
   return sorted.length % 2
     ? sorted[middle]
     : (sorted[middle - 1] + sorted[middle]) / 2;
 }
 
-function mib(bytes) {
+function formatMiB(bytes) {
   return `${(bytes / MIB).toFixed(2)} MiB`;
 }
 
-function validBytes(value) {
+function isValidByteCount(value) {
   return Number.isSafeInteger(value) && value > 0;
 }
 
-function validTime(value) {
+function isValidTimestamp(value) {
   return Number.isFinite(value) && value >= 0;
 }
 
@@ -66,7 +68,6 @@ export function evaluateMemory(
     "An unchanged lifetime high-water mark cannot reveal a short game peak below an earlier process peak; sampled game peaks are lower bounds in that case.",
   ];
   const validSamples = [];
-  const phaseSamples = new Map();
   const gameIndices = new Set();
   const attributedPeaks = new Map();
   const attributedIdlePeaks = new Map();
@@ -82,7 +83,7 @@ export function evaluateMemory(
   }
 
   for (const [position, sample] of samples.entries()) {
-    if (!sample || !validBytes(sample.rssBytes)) {
+    if (!sample || !isValidByteCount(sample.rssBytes)) {
       violations.push(`Sample ${position} must contain a positive integer rssBytes.`);
       continue;
     }
@@ -91,15 +92,12 @@ export function evaluateMemory(
       continue;
     }
     validSamples.push(sample);
-    if (!phaseSamples.has(sample.phase)) {
-      phaseSamples.set(sample.phase, []);
-    }
-    phaseSamples.get(sample.phase).push(sample);
 
-    const match = /^(game|cleanup|idle):(\d+)$/.exec(sample.phase);
-    const gameIndex = match ? Number(match[2]) : null;
-    if (match) {
-      if (!Number.isSafeInteger(gameIndex) || String(gameIndex) !== match[2]) {
+    const phaseMatch = /^(game|cleanup|idle):(\d+)$/.exec(sample.phase);
+    const phaseKind = phaseMatch?.[1] ?? null;
+    const gameIndex = phaseMatch ? Number(phaseMatch[2]) : null;
+    if (phaseMatch) {
+      if (!Number.isSafeInteger(gameIndex) || String(gameIndex) !== phaseMatch[2]) {
         violations.push(`Sample ${position} contains an invalid game phase: ${sample.phase}.`);
       } else {
         gameIndices.add(gameIndex);
@@ -108,7 +106,7 @@ export function evaluateMemory(
 
     if (sample.peakRssBytes === null || sample.peakRssBytes === undefined) {
       samplesWithoutLifetimePeak++;
-    } else if (!validBytes(sample.peakRssBytes)) {
+    } else if (!isValidByteCount(sample.peakRssBytes)) {
       violations.push(`Sample ${position} contains an invalid peakRssBytes.`);
     } else {
       const peak = sample.peakRssBytes;
@@ -117,18 +115,18 @@ export function evaluateMemory(
         priorLifetimePeak !== null &&
         peak > priorLifetimePeak
       ) {
-        if (match && (match[1] === "game" || match[1] === "cleanup")) {
+        if (phaseKind === "game" || phaseKind === "cleanup") {
           attributedPeaks.set(gameIndex, Math.max(attributedPeaks.get(gameIndex) ?? 0, peak));
-        } else if (sample.phase === "cold-idle" || match?.[1] === "idle") {
+        } else if (sample.phase === "cold-idle" || phaseKind === "idle") {
           attributedIdlePeaks.set(sample.phase, Math.max(attributedIdlePeaks.get(sample.phase) ?? 0, peak));
         }
       }
       priorLifetimePeak = Math.max(priorLifetimePeak ?? 0, peak);
     }
 
-    const sampleStart = validTime(sample.sampleStartedAt)
+    const sampleStart = isValidTimestamp(sample.sampleStartedAt)
       ? sample.sampleStartedAt
-      : validTime(sample.timestamp)
+      : isValidTimestamp(sample.timestamp)
         ? sample.timestamp
         : null;
     if (sampleStart === null) {
@@ -141,20 +139,21 @@ export function evaluateMemory(
           sampleMaxGapMs = Math.max(sampleMaxGapMs ?? 0, sampleStart - previousSampleStart);
         }
       }
-      if (validTime(sample.timestamp) && sample.timestamp >= sampleStart) {
+      if (isValidTimestamp(sample.timestamp) && sample.timestamp >= sampleStart) {
         sampleMaxGapMs = Math.max(sampleMaxGapMs ?? 0, sample.timestamp - sampleStart);
       }
       previousSampleStart = sampleStart;
     }
   }
 
+  const phaseSamples = Map.groupBy(validSamples, (sample) => sample.phase);
   const coldIdle = phaseSamples.get("cold-idle") ?? [];
   const baselineRssBytes = median(coldIdle.map((sample) => sample.rssBytes));
   if (!coldIdle.length) {
     violations.push("Missing positive RSS samples for cold-idle.");
   }
 
-  const observedIndices = [...gameIndices].sort((left, right) => left - right);
+  const observedIndices = [...gameIndices].sort(compareNumbers);
   if (!observedIndices.some((index) => phaseSamples.has(`game:${index}`))) {
     violations.push("No game phase was sampled.");
   }
@@ -186,11 +185,11 @@ export function evaluateMemory(
   const idlePeakRssBytes = maximum(idlePhases.map((phase) => phase.peakRssBytes));
   for (const { phase, peakRssBytes: peak } of idlePhases) {
     if (peak > idleMiB * MIB) {
-      violations.push(`${phase} peak RSS ${mib(peak)} exceeds the idle budget ${mib(idleMiB * MIB)}.`);
+      violations.push(`${phase} peak RSS ${formatMiB(peak)} exceeds the idle budget ${formatMiB(idleMiB * MIB)}.`);
     }
   }
 
-  const games = [...gameIndices].sort((left, right) => left - right).map((index) => {
+  const games = [...gameIndices].sort(compareNumbers).map((index) => {
     const gameSamples = phaseSamples.get(`game:${index}`) ?? [];
     const cleanupSamples = phaseSamples.get(`cleanup:${index}`) ?? [];
     const idleSamples = phaseSamples.get(`idle:${index}`) ?? [];
@@ -212,7 +211,7 @@ export function evaluateMemory(
       ? null
       : Math.max(0, peakRssBytes - baselineRssBytes);
     if (incrementBytes !== null && incrementBytes > gameMiB * MIB) {
-      gameViolations.push(`Game ${index} RSS increment ${mib(incrementBytes)} exceeds the game budget ${mib(gameMiB * MIB)}.`);
+      gameViolations.push(`Game ${index} RSS increment ${formatMiB(incrementBytes)} exceeds the game budget ${formatMiB(gameMiB * MIB)}.`);
     }
     violations.push(...gameViolations);
     return {

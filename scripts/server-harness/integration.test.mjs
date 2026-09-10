@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
+import { once } from "node:events";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
@@ -13,7 +14,8 @@ const directory = dirname(fileURLToPath(import.meta.url));
 
 async function availablePort() {
   const reservation = createServer();
-  await new Promise((done, reject) => { reservation.once("error", reject); reservation.listen(0, "127.0.0.1", done); });
+  reservation.listen(0, "127.0.0.1");
+  await once(reservation, "listening");
   const { port } = reservation.address();
   await new Promise((done) => reservation.close(done));
   return port;
@@ -38,15 +40,13 @@ test("HARNESS_SELFTEST: CLI covers three games, reconnect, terminal EOF race and
     child = spawn(process.execPath, [join(directory, "run.mjs"), "--config", configFile], {
       cwd: resolve(directory, "../.."), windowsHide: true, shell: false, stdio: ["ignore", "pipe", "pipe"],
     });
-    let diagnostic = "";
-    child.stdout.on("data", (bytes) => { diagnostic += bytes; });
-    child.stderr.on("data", (bytes) => { diagnostic += bytes; });
-    const exit = await new Promise((done, reject) => {
-      child.once("error", reject);
-      child.once("close", (code, signal) => done({ code, signal }));
-    });
+    const chunks = [];
+    child.stdout.on("data", (chunk) => chunks.push(chunk));
+    child.stderr.on("data", (chunk) => chunks.push(chunk));
+    const [code, signal] = await once(child, "close");
+    const diagnostic = Buffer.concat(chunks).toString();
     const report = JSON.parse(await readFile(join(output, "report.json"), "utf8"));
-    assert.equal(exit.code, 0, `${diagnostic}\n${JSON.stringify(report.errors)}`);
+    assert.equal(code, 0, `exit ${code} signal ${signal}\n${diagnostic}\n${JSON.stringify(report.errors)}`);
     assert.equal(report.result, "baseline-recorded");
     assert.equal(report.behaviorPassed, true);
     assert.deepEqual(report.errors, []);

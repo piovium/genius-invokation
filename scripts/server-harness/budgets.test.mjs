@@ -60,7 +60,7 @@ test("fails closed for no samples, no games, missing phases, or invalid RSS", ()
   assert.ok(incomplete.violations.some((violation) => violation.includes("idle:1")));
 });
 
-test("an old startup lifetime peak is displayed without charging it to games", () => {
+test("an old startup lifetime peak is reported without being charged to games", () => {
   const result = evaluateMemory(readings([
     ["cold-idle", 80, 200],
     ["game:0", 100, 200],
@@ -158,7 +158,7 @@ test("leaked memory from an earlier game does not reset the next game's baseline
   assert.equal(result.games[1].passed, false);
 });
 
-test("an unbounded first high-water mark is not attributed to the first game", () => {
+test("a first lifetime high-water mark with no earlier reading is not attributed to a game", () => {
   const result = evaluateMemory(readings([
     ["cold-idle", 80],
     ["game:0", 90, 200],

@@ -1,4 +1,5 @@
 import { spawn, execFileSync } from "node:child_process";
+import { once } from "node:events";
 import { createWriteStream } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
@@ -19,13 +20,13 @@ const { values } = parseArgs({ options: {
   output: { type: "string" }, help: { type: "boolean" },
 } });
 if (values.help) {
-  console.log("Server migration harness (Node >=24, no npm install required)\n" +
-    "node scripts/server-harness/run.mjs --config <file.json> [--pid <server PID>]\n" +
-    "  [--base-url http://127.0.0.1:3000/api] [--transport sse|ws]\n" +
-    "  [--mode baseline|gate] [--output temp/server-harness/<name>]\n" +
-    "baseline: protocol failures exit 1, budget failures are recorded.\n" +
-    "gate: WebSocket + storage + memory budgets must all pass.\n" +
-    "Run only against an isolated test server/database; test games are persisted.");
+  console.log(`Server migration harness (Node >=24, no npm install required)
+node scripts/server-harness/run.mjs --config <file.json> [--pid <server PID>]
+  [--base-url http://127.0.0.1:3000/api] [--transport sse|ws]
+  [--mode baseline|gate] [--output temp/server-harness/<name>]
+baseline: protocol failures exit 1, budget failures are recorded.
+gate: WebSocket + storage + memory budgets must all pass.
+Run only against an isolated test server/database; test games are persisted.`);
   process.exit(0);
 }
 
@@ -43,7 +44,7 @@ const report = {
   kind: "server-measurement", mode: config.mode, transport: config.transport,
   environment: { platform: process.platform, arch: process.arch, harnessRuntime: process.version },
   workload: { cycles: config.cycles, idleDurationMs: config.idleDurationMs, actionDelayMs: config.actionDelayMs, cleanupTimeoutMs: config.cleanupTimeoutMs },
-  budgets: { idleMiB: config.idleMiB, gameIncrementMiB: config.gameMiB, unitBytes: 1048576, scope: "one server runtime process RSS, database and harness excluded" },
+  budgets: { idleMiB: config.idleMiB, gameIncrementMiB: config.gameMiB, unitBytes: 1024 * 1024, scope: "one server runtime process RSS, database and harness excluded" },
   games: [], storage: { passed: false, status: "not-run" }, errors: [],
 };
 let child;
@@ -61,7 +62,7 @@ try {
     });
     child.stdout.pipe(logStream, { end: false });
     child.stderr.pipe(logStream, { end: false });
-    await new Promise((done, reject) => { child.once("spawn", done); child.once("error", reject); });
+    await once(child, "spawn");
     config.pid = child.pid;
     report.environment.serverRuntimeCommand = config.launch.command;
   }
@@ -114,8 +115,9 @@ try {
   }
   if (sampler) {
     try { await sampler.stop(); } catch (error) { report.errors.push(error.message); }
-    report.memory = evaluateMemory(sampler.samples, { idleMiB: config.idleMiB, gameMiB: config.gameMiB, requiredGames: config.cycles + (storage ? 1 : 0) });
-    report.measurementCoverage = evaluateCoverage(sampler.samples, config.cycles + (storage ? 1 : 0));
+    const expectedGames = config.cycles + (storage ? 1 : 0);
+    report.memory = evaluateMemory(sampler.samples, { idleMiB: config.idleMiB, gameMiB: config.gameMiB, requiredGames: expectedGames });
+    report.measurementCoverage = evaluateCoverage(sampler.samples, expectedGames);
     await writeFile(resolve(output, "memory.ndjson"), sampler.samples.map((sample) => JSON.stringify(sample)).join("\n") + "\n");
   }
   if (child && child.exitCode === null && child.signalCode === null) {
