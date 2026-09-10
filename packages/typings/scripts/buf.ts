@@ -13,14 +13,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import path from "node:path";
 import { $ } from "execa";
 
+/** The only option this script accepts; it selects the workspace ts-proto template. */
+const TYPESCRIPT_FLAG = "--typescript";
 const args = process.argv.slice(2);
-if (args.some((arg) => arg !== "--typescript"))
+if (args.some((arg) => arg !== TYPESCRIPT_FLAG))
   throw new Error("Unknown protocol generation option");
-const templateArgs = args.includes("--typescript")
+const templateArgs = args.includes(TYPESCRIPT_FLAG)
   ? ["--template", "buf.typescript.gen.yaml"]
   : [];
 await $({
-  cwd: `${import.meta.dirname}/../../..`,
+  cwd: path.resolve(import.meta.dirname, "../../.."),
 })`buf generate ${templateArgs}`;

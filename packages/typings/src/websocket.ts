@@ -15,13 +15,30 @@ export type GameWireFrame =
   | { type: "rpc"; data: GameRpcRequest }
   | { type: "actionResponse"; id: number; response: Uint8Array };
 
+/** "GI", then the protocol version both ends speak. */
+const MAGIC_BYTES = [0x47, 0x49] as const;
+const VERSION = 1;
+/** Kind byte of each frame variant. */
+const KIND = {
+  notification: 1,
+  rpc: 2,
+  actionResponse: 3,
+} as const;
+/** Header sizes: the fixed prefix, and that prefix plus two float64 BE timers. */
 const HEADER_BYTES = 8;
-const RPC_HEADER_BYTES = 24;
-export const MAX_GAME_PAYLOAD_BYTES = 8 * 1024 * 1024;
+const TIMER_BYTES = 16;
+const RPC_HEADER_BYTES = HEADER_BYTES + TIMER_BYTES;
+const MAX_GAME_PAYLOAD_MIB = 8;
+export const MAX_GAME_PAYLOAD_BYTES = MAX_GAME_PAYLOAD_MIB * 1024 * 1024;
 export const MAX_GAME_FRAME_BYTES = MAX_GAME_PAYLOAD_BYTES + RPC_HEADER_BYTES;
 
 function invalid(reason: string): never {
   throw new Error(`Invalid binary game frame: ${reason}`);
+}
+
+/** Offset the protobuf payload starts at; RPC frames push it past the timers. */
+function payloadOffsetOf(kind: number): number {
+  return kind === KIND.rpc ? RPC_HEADER_BYTES : HEADER_BYTES;
 }
 
 function checkId(id: number): void {
@@ -33,7 +50,7 @@ function checkPayload(payload: Uint8Array): void {
   if (!(payload instanceof Uint8Array) || payload.byteLength === 0)
     invalid("missing protobuf payload");
   if (payload.byteLength > MAX_GAME_PAYLOAD_BYTES)
-    invalid("protobuf payload exceeds 8 MiB");
+    invalid(`protobuf payload exceeds ${MAX_GAME_PAYLOAD_MIB} MiB`);
 }
 
 function checkTimer(timer: GameRpcTimer): void {
@@ -47,36 +64,28 @@ function checkTimer(timer: GameRpcTimer): void {
     invalid("timer must contain finite numbers");
 }
 
-/** GI magic, version 1, kind byte, uint32 BE ID; RPC adds two float64 BE timers. */
+/** MAGIC_BYTES, VERSION, kind byte, uint32 BE ID; RPC adds two float64 BE timers. */
 export function encodeGameFrame(frame: GameWireFrame): Uint8Array<ArrayBuffer> {
-  const kind =
-    frame?.type === "notification"
-      ? 1
-      : frame?.type === "rpc"
-        ? 2
-        : frame?.type === "actionResponse"
-          ? 3
-          : invalid("unsupported kind");
+  const type = frame?.type;
+  if (type !== "notification" && type !== "rpc" && type !== "actionResponse")
+    invalid("unsupported kind");
+  const kind = KIND[type];
   const id =
-    frame.type === "notification"
-      ? 0
-      : frame.type === "rpc"
-        ? frame.data.id
-        : frame.id;
+    type === "notification" ? 0 : type === "rpc" ? frame.data.id : frame.id;
   const payload =
-    frame.type === "notification"
+    type === "notification"
       ? frame.data
-      : frame.type === "rpc"
+      : type === "rpc"
         ? frame.data.request
         : frame.response;
   checkId(id);
   checkPayload(payload);
-  const payloadOffset = kind === 2 ? RPC_HEADER_BYTES : HEADER_BYTES;
+  const payloadOffset = payloadOffsetOf(kind);
   const bytes = new Uint8Array(payloadOffset + payload.byteLength);
   const view = new DataView(bytes.buffer);
-  bytes.set([0x47, 0x49, 1, kind]);
+  bytes.set([...MAGIC_BYTES, VERSION, kind]);
   view.setUint32(4, id, false);
-  if (frame.type === "rpc") {
+  if (type === "rpc") {
     checkTimer(frame.data.timer);
     view.setFloat64(8, frame.data.timer.current, false);
     view.setFloat64(16, frame.data.timer.total, false);
@@ -92,21 +101,28 @@ export function decodeGameFrame(
   if (!(bytes instanceof Uint8Array))
     invalid("expected ArrayBuffer or Uint8Array");
   if (bytes.byteLength < HEADER_BYTES) invalid("truncated header");
-  if (bytes[0] !== 0x47 || bytes[1] !== 0x49) invalid("incorrect GI magic");
-  if (bytes[2] !== 1) invalid("unsupported version");
+  if (bytes[0] !== MAGIC_BYTES[0] || bytes[1] !== MAGIC_BYTES[1])
+    invalid("incorrect GI magic");
+  if (bytes[2] !== VERSION) invalid("unsupported version");
   const kind = bytes[3];
-  if (kind !== 1 && kind !== 2 && kind !== 3) invalid("unsupported kind");
-  const payloadOffset = kind === 2 ? RPC_HEADER_BYTES : HEADER_BYTES;
+  if (
+    kind !== KIND.notification &&
+    kind !== KIND.rpc &&
+    kind !== KIND.actionResponse
+  )
+    invalid("unsupported kind");
+  const payloadOffset = payloadOffsetOf(kind);
   if (bytes.byteLength < payloadOffset) invalid("truncated RPC timer");
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const id = view.getUint32(4, false);
   const payload = bytes.subarray(payloadOffset);
   checkPayload(payload);
-  if (kind === 1) {
+  if (kind === KIND.notification) {
     if (id !== 0) invalid("notification id must be zero");
     return { type: "notification", data: payload };
   }
-  if (kind === 3) return { type: "actionResponse", id, response: payload };
+  if (kind === KIND.actionResponse)
+    return { type: "actionResponse", id, response: payload };
   const timer = {
     current: view.getFloat64(8, false),
     total: view.getFloat64(16, false),
