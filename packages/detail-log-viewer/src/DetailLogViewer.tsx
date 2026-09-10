@@ -13,7 +13,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { DetailLogEntry as DetailLogEntryData, DetailLogType } from "@gi-tcg/core";
+import type {
+  DetailLogEntry as DetailLogEntryData,
+  DetailLogType,
+} from "@gi-tcg/core";
 import { For, Show, createEffect, createSignal } from "solid-js";
 import styles from "./style.css?inline";
 import { getNameSync } from "@gi-tcg/assets-manager";

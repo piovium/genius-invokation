@@ -15,11 +15,14 @@
 
 import { expect } from "vitest";
 import * as matchers from "jest-extended";
-import type { } from "jest-extended";
+import type {} from "jest-extended";
 
 declare module "vitest" {
-  interface AsymmetricMatchersContaining
-    extends Omit<jest.Matchers<unknown>, "toBeOneOf" | "toSatisfy"> {}
+  // Preserve Vitest's own signatures for the two shared asymmetric matchers.
+  interface AsymmetricMatchersContaining extends Omit<
+    jest.Matchers<unknown>,
+    "toBeOneOf" | "toSatisfy"
+  > {}
 }
 
 expect.extend(matchers);
