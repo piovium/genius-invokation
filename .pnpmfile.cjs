@@ -72,7 +72,9 @@ function dropUntargetedRuntimes(pkg) {
  * peer, so `peerDependenciesMeta` is trimmed in lockstep.
  */
 function dropUnusedOptionalPeers(pkg) {
-  for (const [peerName, meta] of Object.entries(pkg.peerDependenciesMeta ?? {})) {
+  for (const [peerName, meta] of Object.entries(
+    pkg.peerDependenciesMeta ?? {},
+  )) {
     if (meta?.optional !== true || declaredDependencyNames.has(peerName)) {
       continue;
     }
