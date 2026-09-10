@@ -21,7 +21,14 @@ test("gate cannot pass on SSE, absent storage coverage, or loosened budgets", ()
 test("measurement coverage cannot pass on only boundary samples", () => {
   assert.equal(evaluateCoverage([], 1).passed, false);
   assert.equal(evaluateCoverage([{ phase: "cold-idle", timestamp: 1 }], 1).passed, false);
-  const samples = completeTimingSamples();
+  const samples = [];
+  let timestamp = 0;
+  for (const phase of ["cold-idle", "game:0", "idle:0"]) {
+    for (let index = 0; index < 6; index++) {
+      timestamp += 1000;
+      samples.push({ phase, sampleStartedAt: timestamp - 10, timestamp });
+    }
+  }
   assert.equal(evaluateCoverage(samples, 1).passed, true);
   samples.at(-1).timestamp += 10000;
   assert.equal(evaluateCoverage(samples, 1).passed, false);

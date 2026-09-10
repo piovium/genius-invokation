@@ -76,9 +76,16 @@ async function diagnose() {
     checkFile("packages/server/dist/main.js"),
     checkFile("packages/assets-manager/src/data/deck.json"),
   ];
+  const results = await Promise.allSettled(tasks);
   // Each check handles expected absence itself. An unexpected check failure must
   // fail the doctor instead of accidentally claiming readiness.
-  const [pnpm, docker, psql, ...files] = await Promise.all(tasks);
+  const values = results.map((result) => {
+    if (result.status === "rejected") {
+      throw result.reason;
+    }
+    return result.value;
+  });
+  const [pnpm, docker, psql, ...files] = values;
   const node = {
     version: process.versions.node,
     required: ">=26.1.0 <27.0.0",

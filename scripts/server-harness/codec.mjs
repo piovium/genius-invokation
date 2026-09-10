@@ -79,22 +79,22 @@ function* fields(bytes, budget) {
     if (++budget.fields > MAX_FIELDS) fail("too many fields");
     const tag = uint32(varint(reader));
     const number = tag >>> 3;
-    const wireType = tag & 7;
+    const wire = tag & 7;
     if (number === 0) fail("field number zero");
     let value;
-    if (wireType === 0) {
+    if (wire === 0) {
       value = varint(reader);
     } else {
       let size;
-      if (wireType === 2) size = uint32(varint(reader));
-      else if (wireType === 1) size = 8;
-      else if (wireType === 5) size = 4;
-      else fail(`unsupported wire type ${wireType}`);
+      if (wire === 2) size = uint32(varint(reader));
+      else if (wire === 1) size = 8;
+      else if (wire === 5) size = 4;
+      else fail(`unsupported wire type ${wire}`);
       if (size > bytes.length - reader.offset) fail("truncated field");
       value = bytes.subarray(reader.offset, reader.offset + size);
       reader.offset += size;
     }
-    yield { number, wire: wireType, value };
+    yield { number, wire, value };
   }
 }
 

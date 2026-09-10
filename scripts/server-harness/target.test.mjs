@@ -10,9 +10,6 @@ import {
   verifyTarget,
 } from "./target.mjs";
 
-const closeServer = (server) => new Promise((resolve, reject) =>
-  server.close((error) => (error ? reject(error) : resolve())));
-
 test("Windows parsing requires the local port, exact PID, and LISTENING state", () => {
   const output = [
     "  Proto  Local Address          Foreign Address        State           PID",
@@ -64,7 +61,7 @@ test("verifies a real HTTP listener and rejects an existing unrelated PID or wro
   const server = createServer((request, response) => response.end("ok"));
   server.listen(0, "127.0.0.1");
   await once(server, "listening");
-  t.after(() => closeServer(server));
+  t.after(() => new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve())));
   const port = server.address().port;
 
   const child = spawn(process.execPath, ["-e", [
@@ -101,7 +98,7 @@ test("verifies a real IPv6 loopback listener when IPv6 is available", async (t) 
     }
     throw error;
   }
-  t.after(() => closeServer(server));
+  t.after(() => new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve())));
   const port = server.address().port;
   const result = await verifyTarget(process.pid, `http://[::1]:${port}`);
   assert.equal(result.pid, process.pid);
