@@ -139,3 +139,11 @@ web collector 复用既有三项 Chrome 测试和 raw 会话观测，核验两�
 网页真实错误仍保持 FAIL。stock/native 单文件与 bundled declaration 字节一致，均留下 gts-runtime 和 arktype/@ark/schema 的 4 条无法解析的声明依赖。精确映射至现有真实 .d.ts 的 artifact 实验 provider-resolver-OTBWt6 将这 4 条归零；provider-consumer-YuTC7c 的完整 usage number/string 负例恢复，未改 skipLibCheck 或断言。原 bundled declarations 的其它 102 条全图问题在 stock/native 的 code/file/start 完全相同，不能宣称整图无错。custom-loader 直接依赖在现有职责中；core 的独立声明从 core 目录解析，还需其 package.json 显式声明已使用的依赖。因此仅前瞻增加 packages/core/package.json，绑定原 integration task 的 ID、seal、文件哈希和原角色；原产品文件在授权前未改。旧 integration transition 留在历史中，新 contract 仅保留与当前目标角色一致的精确 transition。
 
 本候选必须独立 review、重新 seal 并通过完整自测，之后才能 revise 任务并实施该依赖修复。既有 gate、平台、基线、次数、预算、源码覆盖和语义断言不变。
+
+## 2.1.4 bounded file reads
+
+Windows 上 TNB 任务源快照的完整读取耗时较长。候选仅替换 core.hashFile 为一个固定 64 KiB 缓冲区的 SHA256 读循环，保持原 Promise API，在 open 之前分配缓冲区，finally 关闭文件，每 MiB 及每文件完成让出事件循环。root 与 browser 独立比较确认该函数前后的代码逐字节一致；sourcePaths、Git 调用、子模块、untracked 与 ignored 规则、遍历顺序、快照字段均未改变，不引入内容缓存。
+
+复核的 core 候选 SHA256 为 8114c50e6ce7d92ec8b57cdfe74ecf4089076ab5f2538f3718edce7696adf7e5。artifact 证明 hash-performance-proof-xfDaT2/results.json 绑定该精确版本，覆盖空文件、Unicode/CRLF/NUL、块边界、大文件尾部、ENOENT、并发调用、同 size/mtime 内容重写及事件循环让出。完整 source snapshot trial hash-performance-full-trial-GmvgUH 单独保留；其 includeRuntime:false 仅用于任务源快照，不是最终 runtime 指纹证明。早期旧候选的 cold/warm 数据不能归为本候选的速度提升。新增 sealed tests 在真实临时文件验证上述外部行为；原完整 selftest 的 120 秒限制保持不变。
+
+补充前版声明实验的证据范围：后续在实际 rolldown-plugin-dts 调用中发现 config-less createProgram 没有进入原生。此前“stock/native 声明字节一致”只能说明加载对应包的输出一致，不能据此证明 native emitter 已执行。真实 web 负例现已检出并清除，但原 GTS build 原生断言仍 FAIL；应修复 TNB，不能删除断言。Linux nested detached 命令清理边界正在独立评估，本版不声称已修复或已完成 desktop / Linux 验收。

@@ -30,7 +30,22 @@ export function inside(root, relative) {
 }
 export async function hashFile(file) {
   const hash = crypto.createHash('sha256');
-  for await (const chunk of fs.createReadStream(file)) hash.update(chunk);
+  const buffer = Buffer.allocUnsafe(64 * 1024);
+  const descriptor = fs.openSync(file, 'r');
+  let sinceYield = 0;
+  try {
+    for (;;) {
+      const length = fs.readSync(descriptor, buffer, 0, buffer.length, null);
+      if (!length) break;
+      hash.update(buffer.subarray(0, length));
+      sinceYield += length;
+      if (sinceYield >= 1024 * 1024) {
+        sinceYield = 0;
+        await new Promise(resolve => setImmediate(resolve));
+      }
+    }
+  } finally { fs.closeSync(descriptor); }
+  await new Promise(resolve => setImmediate(resolve));
   return hash.digest('hex');
 }
 export async function evidenceManifest(directory) {
