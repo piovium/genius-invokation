@@ -33,21 +33,24 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
+/** One message the test client received, and whether a waiter consumed it. */
+interface ReceivedMessage {
+  payload: Record<string, unknown>;
+  binary: boolean;
+  consumed: boolean;
+}
+
 async function connect(url: string) {
   const socket = new WebSocket(url);
   socket.binaryType = "arraybuffer";
-  const messages: {
-    value: Record<string, unknown>;
-    binary: boolean;
-    consumed: boolean;
-  }[] = [];
+  const messages: ReceivedMessage[] = [];
   const waiters = new Set<() => void>();
   const closed = Promise.withResolvers<number>();
   let closedCode: number | null = null;
   socket.addEventListener("message", ({ data }) => {
     const binary = typeof data !== "string";
     messages.push({
-      value: asRecord(
+      payload: asRecord(
         binary ? decodeGameFrame(new Uint8Array(data)) : JSON.parse(data),
       ),
       binary,
@@ -106,13 +109,13 @@ async function connect(url: string) {
         }, MESSAGE_TIMEOUT_MS);
         const check = () => {
           const entry = messages.find(
-            (entry) => !entry.consumed && entry.value.type === type,
+            (entry) => !entry.consumed && entry.payload.type === type,
           );
           if (entry) {
             entry.consumed = true;
             waiters.delete(check);
             clearTimeout(timer);
-            resolve(entry.value);
+            resolve(entry.payload);
           } else if (closedCode !== null) {
             waiters.delete(check);
             clearTimeout(timer);
@@ -161,6 +164,7 @@ async function fixture({ dropAck = false, watchable = false } = {}) {
   });
   const token = await auth.signGuest(playerId);
   let terminate: (() => void) | undefined;
+  let dropNextAck = dropAck;
   // Test-only room routing injects a disconnect at the acceptance/ACK boundary;
   // transport, JWT verification, protobuf encoding, and Player IO are real.
   const rooms: Pick<
@@ -178,8 +182,9 @@ async function fixture({ dropAck = false, watchable = false } = {}) {
     },
     receivePlayerResponse(_roomId, _playerId, id, bytes) {
       const ack = player.receiveResponse(id, bytes);
-      if (dropAck) {
-        dropAck = false;
+      // The injected disconnect fires once, when the first ACK would go out.
+      if (dropNextAck) {
+        dropNextAck = false;
         terminate?.();
       }
       return ack;
@@ -245,7 +250,7 @@ test(
       const rpc = await first.next("rpc");
       assert.equal(asRecord(rpc.data).id, 0);
       assert.equal(
-        first.messages.find((entry) => entry.value.type === "rpc")?.binary,
+        first.messages.find((entry) => entry.payload.type === "rpc")?.binary,
         true,
       );
       first.respond(0);
@@ -253,7 +258,7 @@ test(
       await response;
       assert.equal(executions, 1);
       assert.equal(
-        first.messages.some((entry) => entry.value.type === "ack"),
+        first.messages.some((entry) => entry.payload.type === "ack"),
         false,
       );
       const second = await connect(server.url);

@@ -33,7 +33,7 @@ const createPlayer = (id = "guest-test", sessionId = SESSION_ID) => {
   instance.setTimeoutConfig(config);
   return instance;
 };
-const hasCode = (code: string) => (error: unknown) =>
+const hasCode = (code: RoomCommandError["code"]) => (error: unknown) =>
   error instanceof RoomCommandError && error.code === code;
 
 test("real Player accepts once synchronously across concurrent callers and replays its original ACK", async () => {

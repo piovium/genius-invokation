@@ -92,7 +92,7 @@ function parseControlFrame(message: unknown): ControlFrame | null {
   }
 }
 
-/** Normalize every payload shape `ws` may deliver into one `Uint8Array`. */
+/** Every payload shape `ws` may deliver, normalized into one `Uint8Array`. */
 function toUint8Array(data: RawData | Uint8Array): Uint8Array {
   if (data instanceof ArrayBuffer) return new Uint8Array(data);
   if (Array.isArray(data)) return Buffer.concat(data);
@@ -104,7 +104,11 @@ function isBinaryFrame(message: unknown): message is Uint8Array | ArrayBuffer {
   return message instanceof Uint8Array || message instanceof ArrayBuffer;
 }
 
-/** Notifications and non-null RPCs travel as encoded game frames; the rest is JSON. */
+/**
+ * Notifications and non-null RPCs travel as encoded game frames; the rest is
+ * JSON. An arrow const rather than a declaration because that is what makes
+ * TypeScript infer the type predicate the encoder call below relies on.
+ */
 const carriesGameFrame = (event: RoomEvent) =>
   event.type === "notification" ||
   (event.type === "rpc" && event.data !== null);
@@ -182,8 +186,9 @@ export function createRoomSocketHandlers(
       return;
     }
     // An empty token binds an anonymous spectator to the target seat.
-    const payload = token === "" ? null : auth.verify(token);
-    if (token !== "" && payload === null) {
+    const anonymous = token === "";
+    const payload = anonymous ? null : auth.verify(token);
+    if (!anonymous && payload === null) {
       close(raw, state, CLOSE_POLICY_VIOLATION, "INVALID_TOKEN");
       return;
     }
@@ -341,8 +346,8 @@ export function attachRoomWebSocketServer(
     perMessageDeflate: false,
   });
   /** `noServer` upgrades never reach a route handler, so reject them inline. */
-  const reject = (stream: Duplex, status: string) =>
-    stream.end(`HTTP/1.1 ${status}\r\nConnection: close\r\n\r\n`);
+  const reject = (stream: Duplex, statusLine: string) =>
+    stream.end(`HTTP/1.1 ${statusLine}\r\nConnection: close\r\n\r\n`);
   const onUpgrade = (
     request: IncomingMessage,
     stream: Duplex,
