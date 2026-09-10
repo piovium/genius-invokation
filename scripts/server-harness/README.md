@@ -1,8 +1,8 @@
 # 服务迁移 harness
 
-正式迁移现已获得用户授权并开始进行，进度、固定基线与完整验收项见 [MIGRATION.md](MIGRATION.md)。下文的 harness 建设记录及预算保持可复查，不能代替最终应用验收。
+本 harness 用同一套场景比较 NestJS/Fastify + Prisma + SSE 旧服务与 Elysia（Node.js）+ Drizzle + WebSocket 候选服务。迁移进度、固定基线与应用验收证据见 [MIGRATION.md](MIGRATION.md)。
 
-先固定可运行的验证入口，再迁移 NestJS/Fastify + Prisma + SSE 到 Elysia（Node.js）+ Drizzle + WebSocket。本目录只包含测试客户端、采样器和验收配置；本轮没有替换后端、ORM、前端通信或部署配置。
+本目录包含测试客户端、RSS 采样器、隔离环境和协议实验。fixture 自测、真实服务行为检查与内存预算各有独立结果；harness 自测通过不能代替应用验收。
 
 ## 立即自测
 
@@ -22,7 +22,7 @@ node scripts/server-harness/doctor.mjs --output temp/server-harness/doctor.json
 
 ## 真实旧服务基线
 
-先按 `packages/server/README.md` 准备独立测试数据库和生产构建，使用项目要求的 Node/pnpm。运行目标是直接执行生产 `dist/main.js` 的 Node 进程，不能使用开发模式、watch、pnpm 包装器的 PID；生产内嵌前端资源也应保留在被测构建内。harness 在服务器所在主机运行，URL 使用 loopback，可指定自定义 API 前缀。
+使用 [MIGRATION.md](MIGRATION.md) 中固定的旧服务版本及对应构建说明，准备独立测试数据库和生产构建。运行目标是直接执行旧服务生产 `dist/main.js` 的 Node 进程，不能使用开发模式、watch、pnpm 包装器的 PID；旧构建内嵌的前端资源也应保留。harness 在服务器所在主机运行，URL 使用 loopback，可指定自定义 API 前缀。候选服务的构建与启动方式见 [服务说明](../../packages/server/README.md)。
 
 ```powershell
 # 在仓库根目录，12345 替换为正在运行的生产服务进程 PID
@@ -72,11 +72,11 @@ OS high-water mark 是进程生命周期峰值。只有在某局期间**新增�
 - 重连时恢复原来的 pending RPC ID 和请求；两方终局 winner 一致、结束回放可读。
 - 终局通知和断流同一时刻发生、最后动作确认晚于 SSE 结束的竞态。
 
-牌组与机器人策略固定，建房也提交固定 `randomSeed`；但当前 `Room.start()` 没把该配置传给引擎，所以旧服务的逐步局面仍含随机性。报告比较协议、覆盖与内存，不强行比较两个随机对局的完整日志字节。
+牌组与机器人策略固定，建房也提交固定 `randomSeed`；旧服务的 `Room.start()` 没把该配置传给引擎，因此旧基线的逐步局面仍含随机性。报告比较协议、覆盖与内存，不强行比较两个对局的完整日志字节。
 
 游客游戏在当前实现中不会写 Game 表。因此 Drizzle 验收需要两个注册测试账号的 bearer token：配置文件只写变量名 `HARNESS_USER_A_TOKEN`、`HARNESS_USER_B_TOKEN`，值放进环境。[隔离环境准备入口](environment/README.md) 自动创建数据库、账号和测试凭证，不需要真实 GitHub 凭证。harness 会测试牌组创建/读取/更新/归属隔离/删除，再进行一局注册用户对局，核验持久化回放、双方关联、胜者和各自历史列表。正式比较应让旧、新服务使用相同账号、预热和局数；默认不带数据库账号的三局 baseline 仅作游客流程检查。
 
-这些 API 检查覆盖持久化行为；历史 PostgreSQL 数据迁移、DDL/索引/约束等价性、重启后数据验证仍须在实际 Drizzle 迁移阶段补充，不能仅凭当前 gate 就部署。
+这些 API 检查覆盖持久化行为。历史 PostgreSQL 数据迁移、DDL/索引/约束等价性、重启后数据验证由应用迁移检查覆盖，结果见 [MIGRATION.md](MIGRATION.md)；不能仅凭本目录的 gate 判断部署就绪。
 
 ## 二进制 WebSocket 与控制流程实验
 
@@ -84,7 +84,7 @@ OS high-water mark 是进程生命周期峰值。只有在某局期间**新增�
 
 认证、确认、初始化、计时等小控制消息继续用 JSON 文本帧；适配器拒绝以 JSON 发送游戏状态和非空 RPC，也不接受 base64 动作回答。SSE 基线适配器仍读取旧编码。
 
-真实 Node 实验验证的认证候选是连接后先认证，token 不放 URL：
+协议实验与候选服务采用连接后先认证的流程，token 不放 URL：
 
 ```json
 {"type":"auth","token":"<bearer token>"}
@@ -100,14 +100,14 @@ OS high-water mark 是进程生命周期峰值。只有在某局期间**新增�
 
 实验显示，同样是 1006 断线、客户端没有收到 ACK，服务端可能执行了 0 次，也可能已经执行 1 次。因此缺失 ACK 应视为结果未知。重连后验证 sessionId、同步当前 RPC，只用原 ID 和原始字节重试；服务端按 session/player/RPC ID 与载荷摘要缓存接受结果。同 ID 同内容重发返回原 ACK、不重复执行；冲突、未来 ID、已淘汰的旧 ID 拒绝或要求重新同步。实验用 32 项缓存证明可以限制保留量，这个容量不是生产最优值的结论。
 
-ACK 表示通过校验并已被接受，不能替代持久化承诺；本次脚本游戏在同一进程内同步接受并计数，进程重启、跨进程 worker、真实异步游戏引擎仍需要后续验证。动作错误继续用 commandError；正常关闭前应发完最后确认和通知，缺少终局不能用断流代替成功。认输控制消息在原适配器单测覆盖，尚未由这个二进制命令实验 fixture 验证。
+ACK 表示通过校验并已被接受，不能替代持久化承诺。协议实验的脚本游戏在同一进程内同步接受并计数，这份证据不覆盖进程重启、跨进程 worker 或真实异步游戏引擎。动作错误继续用 commandError；正常关闭前应发完最后确认和通知，缺少终局不能用断流代替成功。认输控制消息在适配器单测覆盖，未包含在这个二进制命令实验 fixture 中；实际应用与浏览器的验证见 [MIGRATION.md](MIGRATION.md)。
 
-WebSocket 模式不回退 SSE，且检查旧 notification SSE 路由已关闭（404/405/410/426）。应用尚未迁移；实际服务器的慢消费者、代理超时、多房间并发、JWT/Origin/TLS 与重启恢复仍需在新服务接入时验证。超大帧实验保留实际关闭码，允许传输终止 1006 或明确大小错误 1009；平台更正后重新实测。
+WebSocket 模式不回退 SSE，且检查旧 notification SSE 路由已关闭（404/405/410/426）。实际服务器的慢消费者、代理超时、多房间并发、JWT/Origin/TLS 与重启恢复超出协议 fixture 的验证范围，应用检查结果见 [MIGRATION.md](MIGRATION.md)。超大帧实验保留实际关闭码，允许传输终止 1006 或明确大小错误 1009；两个 Node 平台的实测记录见 [RESULTS.md](experiments/RESULTS.md)。
 
 ## 报告与退出码
 
 ```powershell
-# 只有未来实现符合 WS 合约、且两个测试账号 token 已设置后才使用
+# 启动候选服务，并加载隔离环境生成的两个测试账号 token 后执行
 node scripts/server-harness/run.mjs --config scripts/server-harness/candidate.json --pid 12345
 ```
 
@@ -119,4 +119,4 @@ node scripts/server-harness/run.mjs --config scripts/server-harness/candidate.js
 - `memory.ndjson`：逐次原始 RSS/OS 峰值、阶段和时间，便于复算和比较。
 - `server.log`：仅 launch 模式，保留被测服务自己的输出，本地调试使用。
 
-后续顺序：先获得真实旧服务 baseline，再接入 Elysia + Drizzle 的相同 HTTP/持久化场景，然后实现这份 WS 合约、更新前端，最后重复同环境的内存/回收测试并补实际部署检查。本轮停在 harness，尚未做迁移或部署。
+旧服务基线、候选服务与部署检查使用各自的配置和证据。当前已完成项、未通过预算及待验证项统一记录在 [MIGRATION.md](MIGRATION.md)，避免把早期协议实验结论当成最新应用验收结果。

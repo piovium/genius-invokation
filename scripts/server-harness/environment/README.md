@@ -66,4 +66,4 @@ node --env-file=temp/server-harness/environment/runtime.env scripts/server-harne
 docker compose --project-name gi-server-harness --env-file temp/server-harness/environment/runtime.env --file scripts/server-harness/environment/compose.yaml stop
 ```
 
-这里准备的是旧服务基线及未来迁移验收所需的依赖。它不会启动或修改生产服务，也不代表 Elysia/Drizzle 迁移或 100/50 MiB 内存验收已经完成。
+这里准备的是旧服务基线及候选服务验收共用的隔离依赖。它不会启动生产服务；应用迁移与 100/50 MiB 内存验收结果见 [MIGRATION.md](../MIGRATION.md)。

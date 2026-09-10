@@ -17,12 +17,27 @@ import { useNavigate, useParams, useSearchParams } from "@solidjs/router";
 import { Layout } from "../layouts/Layout";
 import { PlayerInfo, roomCodeToId, getPlayerAvatarUrl } from "../utils";
 import {
-  Show, createSignal, onMount, createEffect, onCleanup, createResource,
-  Switch, Match, Component, createUniqueId,
+  Show,
+  createSignal,
+  onMount,
+  createEffect,
+  onCleanup,
+  createResource,
+  Switch,
+  Match,
+  Component,
+  createUniqueId,
 } from "solid-js";
 import axios, { AxiosError } from "axios";
 import "@gi-tcg/web-ui-core/style.css";
-import { Notification, RpcRequest, RpcResponse, type GameRpcRequest, type GameRpcTimer } from "@gi-tcg/typings";
+import {
+  Notification,
+  PbPhaseType,
+  RpcRequest,
+  RpcResponse,
+  type GameRpcRequest,
+  type GameRpcTimer,
+} from "@gi-tcg/typings";
 import { Client, createClient, WebUiPlayerIO } from "@gi-tcg/web-ui-core";
 import { useMobile } from "../App";
 import { Dynamic } from "solid-js/web";
@@ -31,8 +46,12 @@ import type { CancellablePlayerIO } from "@gi-tcg/core";
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
 import {
-  RoomConnection, RoomConnectionError, roomWebSocketUrl,
-  type RoomInitialized, type RoomEvent, type RoomConnectionState,
+  RoomConnection,
+  RoomConnectionError,
+  roomWebSocketUrl,
+  type RoomInitialized,
+  type RoomEvent,
+  type RoomConnectionState,
 } from "../room-connection";
 
 // A parameter change must destroy the previous room's connections and pending
@@ -40,7 +59,14 @@ import {
 export default function Room() {
   const params = useParams();
   const [search] = useSearchParams();
-  return <Show keyed when={JSON.stringify([params.code, search.player, search.action])}>{(_key) => <ConnectedRoom />}</Show>;
+  return (
+    <Show
+      keyed
+      when={JSON.stringify([params.code, search.player, search.action])}
+    >
+      {(_key) => <ConnectedRoom />}
+    </Show>
+  );
 }
 
 function ConnectedRoom() {
@@ -59,11 +85,15 @@ function ConnectedRoom() {
   const [loading, setLoading] = createSignal(true);
   const [failed, setFailed] = createSignal<null | string>(null);
   const [chessboard, setChessboard] = createSignal<Component>();
-  const [connectionState, setConnectionState] = createSignal<RoomConnectionState>("connecting");
+  const [connectionState, setConnectionState] =
+    createSignal<RoomConnectionState>("connecting");
   const [observerMode, setObserverMode] = createSignal(false);
   const [oppPlayerIo, setOppPlayerIo] = createSignal<CancellablePlayerIO>();
-  const [currentMyTimer, setCurrentMyTimer] = createSignal<GameRpcTimer | null>(null);
-  const [currentOppTimer, setCurrentOppTimer] = createSignal<GameRpcTimer | null>(null);
+  const [currentMyTimer, setCurrentMyTimer] = createSignal<GameRpcTimer | null>(
+    null,
+  );
+  const [currentOppTimer, setCurrentOppTimer] =
+    createSignal<GameRpcTimer | null>(null);
   let myConnection: RoomConnection | undefined;
   let oppConnection: RoomConnection | undefined;
   let disposed = false;
@@ -87,9 +117,16 @@ function ConnectedRoom() {
   const reportCommandError = (error: unknown) => {
     if (disposed) return;
     if (error instanceof RoomConnectionError) {
-      if (["DISPOSED", "NOT_CONNECTED", "STALE_LOCAL_RPC"].includes(error.code)) return;
-      if (error.code === "COMMAND_PENDING") { alert(t("roomCommandPending")); return; }
-      if (error.outcomeUnknown) { setFailed(t("roomActionUnknown")); return; }
+      if (["DISPOSED", "NOT_CONNECTED", "STALE_LOCAL_RPC"].includes(error.code))
+        return;
+      if (error.code === "COMMAND_PENDING") {
+        alert(t("roomCommandPending"));
+        return;
+      }
+      if (error.outcomeUnknown) {
+        setFailed(t("roomActionUnknown"));
+        return;
+      }
     }
     alert(error instanceof Error ? error.message : String(error));
   };
@@ -100,8 +137,11 @@ function ConnectedRoom() {
       assetsManager: () => assetsManager(payload.config.gameVersion),
       locale,
       onGiveUp: async () => {
-        try { await myConnection?.giveUp(); }
-        catch (error) { reportCommandError(error); }
+        try {
+          await myConnection?.giveUp();
+        } catch (error) {
+          reportCommandError(error);
+        }
       },
       disableAction: !action,
     });
@@ -118,14 +158,31 @@ function ConnectedRoom() {
     lastRpcId = payload.id;
     const session = myConnection?.sessionId;
     const requestToken = myConnection?.requestToken;
-    const response = await io.rpc(RpcRequest.decode(payload.request)).catch(() => undefined);
+    const response = await io
+      .rpc(RpcRequest.decode(payload.request))
+      .catch(() => undefined);
     // The same numeric ID can reappear after a reconnect. Generation and
     // session checks keep a stale asynchronous UI answer out of the new view.
-    if (disposed || epoch !== rpcEpoch || session !== myConnection?.sessionId || !response || !action) return;
+    if (
+      disposed ||
+      epoch !== rpcEpoch ||
+      session !== myConnection?.sessionId ||
+      !response ||
+      !action
+    )
+      return;
     setCurrentMyTimer(null);
-    try { await myConnection?.sendResponse(payload.id, RpcResponse.encode(response).finish(), requestToken); }
-    catch (error) { reportCommandError(error); }
-    finally { if (epoch === rpcEpoch) lastRpcId = null; }
+    try {
+      await myConnection?.sendResponse(
+        payload.id,
+        RpcResponse.encode(response).finish(),
+        requestToken,
+      );
+    } catch (error) {
+      reportCommandError(error);
+    } finally {
+      if (epoch === rpcEpoch) lastRpcId = null;
+    }
   };
 
   const onMyEvent = (payload: RoomEvent) => {
@@ -134,19 +191,28 @@ function ConnectedRoom() {
     switch (payload.type) {
       case "initialized": {
         const previous = initialized();
-        if (String(payload.myPlayerInfo.id) !== playerId || (previous && (payload.who !== previous.who || payload.config.gameVersion !== previous.config.gameVersion))) {
-          throw new RoomConnectionError("The room view changed unexpectedly. Reload the room before playing.", "SESSION_CHANGED");
+        if (
+          String(payload.myPlayerInfo.id) !== playerId ||
+          (previous &&
+            (payload.who !== previous.who ||
+              payload.config.gameVersion !== previous.config.gameVersion))
+        ) {
+          throw new RoomConnectionError(
+            "The room view changed unexpectedly. Reload the room before playing.",
+            "SESSION_CHANGED",
+          );
         }
         const firstInitialization = !initialized();
         setInitialized(payload);
         initializeClient(payload);
-        if (firstInitialization && payload.config.watchable && allowWatchOpp()) setObserverMode(true);
+        if (firstInitialization && payload.config.watchable && allowWatchOpp())
+          setObserverMode(true);
         break;
       }
       case "notification": {
         const notification = Notification.decode(payload.data);
         playerIo()?.notify(notification);
-        if (notification.state?.phase === 5) {
+        if (notification.state?.phase === PbPhaseType.GAME_END) {
           cancelMyRequest();
           setCurrentOppTimer(null);
           myConnection?.markFinished();
@@ -154,21 +220,34 @@ function ConnectedRoom() {
         break;
       }
       case "rpc": {
-        if (payload.data) void onActionRequested(payload.data).catch((error) => {
-          myConnection?.dispose();
-          reportConnectionError(new RoomConnectionError(error instanceof Error ? error.message : "Invalid game request", "PROTOCOL_ERROR"));
-        });
+        if (payload.data)
+          void onActionRequested(payload.data).catch((error) => {
+            myConnection?.dispose();
+            reportConnectionError(
+              new RoomConnectionError(
+                error instanceof Error ? error.message : "Invalid game request",
+                "PROTOCOL_ERROR",
+              ),
+            );
+          });
         else cancelMyRequest();
         break;
       }
-      case "oppRpc": setCurrentOppTimer(payload.oppTimer); break;
-      case "waiting": break;
+      case "oppRpc":
+        setCurrentOppTimer(payload.oppTimer);
+        break;
+      case "waiting":
+        break;
     }
   };
 
-  const socketUrl = (watchingPlayerId: string | number) => roomWebSocketUrl(
-    axios.defaults.baseURL ?? "/api/", id, watchingPlayerId, window.location.href,
-  );
+  const socketUrl = (watchingPlayerId: string | number) =>
+    roomWebSocketUrl(
+      axios.defaults.baseURL ?? "/api/",
+      id,
+      watchingPlayerId,
+      window.location.href,
+    );
   const token = () => localStorage.getItem("accessToken") ?? "";
   createEffect(() => {
     const watching = observerMode();
@@ -176,7 +255,8 @@ function ConnectedRoom() {
     const io = playerIo();
     if (!watching || opponent === undefined || !io) return;
     const connection = new RoomConnection({
-      url: socketUrl(opponent), token,
+      url: socketUrl(opponent),
+      token,
       onState: (state) => {
         if (state === "reconnecting" || state === "failed") {
           oppPlayerIo()?.cancelRpc?.();
@@ -188,20 +268,24 @@ function ConnectedRoom() {
         if (disposed) return;
         switch (payload.type) {
           case "initialized": {
-            if (String(payload.myPlayerInfo.id) !== String(opponent)) throw new Error("Unexpected spectator player identity");
+            if (String(payload.myPlayerInfo.id) !== String(opponent))
+              throw new Error("Unexpected spectator player identity");
             setOppPlayerIo(io.oppController.open());
             break;
           }
           case "notification": {
             const notification = Notification.decode(payload.data);
             oppPlayerIo()?.notify(notification);
-            if (notification.state?.phase === 5) connection.markFinished();
+            if (notification.state?.phase === PbPhaseType.GAME_END)
+              connection.markFinished();
             break;
           }
           case "rpc": {
             if (payload.data) {
               setCurrentOppTimer(payload.data.timer);
-              void oppPlayerIo()?.rpc(RpcRequest.decode(payload.data.request)).catch(() => undefined);
+              void oppPlayerIo()
+                ?.rpc(RpcRequest.decode(payload.data.request))
+                .catch(() => undefined);
             } else {
               oppPlayerIo()?.cancelRpc?.();
               setCurrentOppTimer(null);
@@ -211,7 +295,10 @@ function ConnectedRoom() {
         }
       },
       onError: (error) => {
-        if (!disposed) { setObserverMode(false); alert(error.message); }
+        if (!disposed) {
+          setObserverMode(false);
+          alert(error.message);
+        }
       },
     });
     oppConnection = connection;
@@ -242,20 +329,28 @@ function ConnectedRoom() {
     }
   };
 
-  const [roomInfo] = createResource(() => axios.get<{ status: string }>(`rooms/${id}`).then((res) => res.data));
+  const [roomInfo] = createResource(() =>
+    axios.get<{ status: string }>(`rooms/${id}`).then((res) => res.data),
+  );
   createEffect(() => {
     const error = roomInfo.error;
     if (error && !disposed) {
       myConnection?.dispose();
       cancelMyRequest();
       setLoading(false);
-      setFailed(error instanceof AxiosError ? String(error.response?.data?.message ?? error.message) : String(error));
+      setFailed(
+        error instanceof AxiosError
+          ? String(error.response?.data?.message ?? error.message)
+          : String(error),
+      );
     }
   });
   const deleteRoom = async () => {
     if (!window.confirm(t("deleteRoomConfirm"))) return;
-    try { await axios.delete(`rooms/${id}`); history.back(); }
-    catch (error) {
+    try {
+      await axios.delete(`rooms/${id}`);
+      history.back();
+    } catch (error) {
       if (error instanceof AxiosError) alert(error.response?.data.message);
       console.error(error);
     }
@@ -263,7 +358,9 @@ function ConnectedRoom() {
   const downloadGameLog = async () => {
     try {
       const { data } = await axios.get(`rooms/${id}/gameLog`);
-      const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+      const blob = new Blob([JSON.stringify(data)], {
+        type: "application/json",
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -276,7 +373,10 @@ function ConnectedRoom() {
       console.error(error);
     }
   };
-  const getClientPlayerInfo = (player: PlayerInfo) => ({ name: player.name, avatarUrl: getPlayerAvatarUrl(player) });
+  const getClientPlayerInfo = (player: PlayerInfo) => ({
+    name: player.name,
+    avatarUrl: getPlayerAvatarUrl(player),
+  });
   let chessboardContainer: HTMLDivElement | undefined;
   const mobile = useMobile();
 
@@ -288,12 +388,17 @@ function ConnectedRoom() {
       return;
     }
     myConnection = new RoomConnection({
-      url: socketUrl(playerId), token, onEvent: onMyEvent,
+      url: socketUrl(playerId),
+      token,
+      onEvent: onMyEvent,
       onState: (state) => {
         if (disposed) return;
         setConnectionState(state);
         if (state === "reconnecting") cancelMyRequest();
-        if (state === "connected") { setLoading(false); setFailed(null); }
+        if (state === "connected") {
+          setLoading(false);
+          setFailed(null);
+        }
       },
       onError: reportConnectionError,
     });
@@ -393,7 +498,9 @@ function ConnectedRoom() {
           </button>
         </div>
         <Show when={connectionState() === "reconnecting" && !failed()}>
-          <div class="mb-3 alert alert-outline-info" role="status">{t("roomReconnecting")}</div>
+          <div class="mb-3 alert alert-outline-info" role="status">
+            {t("roomReconnecting")}
+          </div>
         </Show>
         <Switch>
           <Match when={failed()}>
