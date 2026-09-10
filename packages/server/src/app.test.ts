@@ -1,13 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createApplication, listenApplication } from "./app.module";
-import { DatabaseService } from "./db/database.service";
+import { createApplication, listenApplication } from "./app";
+import { createDatabase } from "./db/database";
 import { createGuestId } from "./auth/guest-id";
 
 test("real Elysia HTTP keeps public routes, protected APIs, errors, metrics and API prefix", async () => {
   // The pg pool remains lazy for routes that never need the database.
   // Database-backed requests and restart persistence have separate live PG tests.
-  const database = new DatabaseService(
+  const database = createDatabase(
     "postgresql://unused:unused@127.0.0.1:1/unused",
   );
   const service = createApplication({

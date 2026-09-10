@@ -17,8 +17,8 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { Elysia } from "elysia";
 import { CORE_VERSION, CURRENT_VERSION, VERSIONS } from "@gi-tcg/core";
-import { teapot, unavailable } from "./errors";
-import { redis } from "./redis";
+import { teapot, unavailable } from "../errors";
+import { redis } from "../redis";
 const execute = promisify(execFile);
 let revision: Promise<Record<string, unknown>> | undefined;
 async function getRevision() {

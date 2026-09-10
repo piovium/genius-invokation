@@ -186,7 +186,7 @@ test("original legal/illegal deck restrictions and every minimum version work wi
     // Import after denying fetch, checking initialization as well as requests.
     const { ASSETS_MANAGER, verifyDeck, minimumRequiredVersionOfDeck } =
       await import("./utils");
-    const { DecksService } = await import("./decks/decks.service");
+    const { deckToCode } = await import("./decks/decks");
     assert.deepEqual(Object.keys(ASSETS_MANAGER).sort(), ["decode", "encode"]);
     assert.deepEqual(ASSETS_MANAGER.decode(ASSETS_MANAGER.encode(base)), base);
     // Real card 333009 (Tandoori Roast Chicken) was introduced in v3.7.0.
@@ -212,11 +212,11 @@ test("original legal/illegal deck restrictions and every minimum version work wi
     // This method does not touch its database; invoke the actual method to
     // preserve validation-error precedence over sharing-code encoding errors.
     await assert.rejects(
-      DecksService.prototype.deckToCode({ characters: [99999999], cards: [] }),
+      deckToCode({ characters: [99999999], cards: [] }),
       { message: "deck must contain 3 characters" },
     );
     await assert.rejects(
-      DecksService.prototype.deckToCode(withCard(99999999)),
+      deckToCode(withCard(99999999)),
       {
         message: "card id 99999999 not found",
       },

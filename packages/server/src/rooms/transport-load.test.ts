@@ -6,7 +6,7 @@ import { setImmediate as nextTurn } from "node:timers/promises";
 import { WebSocket } from "ws";
 import { decodeGameFrame } from "@gi-tcg/typings";
 import { attachRoomWebSocketServer } from "../room-transport/websocket";
-import type { RoomsService } from "./rooms.service";
+import type { Rooms } from "./rooms";
 import type { RoomEvent, RoomSubscriber } from "./types";
 
 // These are transport saturation tests. Room events are supplied directly;
@@ -14,7 +14,7 @@ import type { RoomEvent, RoomSubscriber } from "./types";
 async function fixture() {
   const subscriptions = new Map<number, Set<RoomSubscriber>>();
   const rooms: Pick<
-    RoomsService,
+    Rooms,
     "subscribePlayer" | "receivePlayerResponse" | "receivePlayerGiveUp"
   > = {
     subscribePlayer(roomId, visitor, target, subscriber) {

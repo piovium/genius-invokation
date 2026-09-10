@@ -14,46 +14,46 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Elysia, t } from "elysia";
-import type { AuthService } from "../auth/auth.service";
-import { requireUser, requestIdentity } from "../auth/auth.guard";
-import { isUserJwtPayload } from "../auth/user.decorator";
+import { identity } from "../auth/identity";
+import type { Auth } from "../auth/session";
 import { notFound } from "../errors";
 import { idSchema, nameSchema } from "../http";
-import type { UsersService } from "./users.service";
+import type { Users } from "./users";
+
 export interface UpdateUserInfoDto {
   chessboardColor?: string | null;
   name?: string | null;
 }
-export function createUsersRoutes(users: UsersService, auth: AuthService) {
-  return new Elysia({ prefix: "/users" })
-    .get("/me", async ({ request }) => {
-      const identity = requestIdentity(request, auth);
-      if (!isUserJwtPayload(identity)) return Response.json(null);
-      const user = await users.findById(identity.sub);
-      if (!user) throw notFound();
-      return user;
-    })
-    .patch(
+
+export const createUsersRoutes = (users: Users, auth: Auth) =>
+  new Elysia({ prefix: "/users" })
+    .use(identity(auth))
+    .get(
       "/me",
-      ({ request, body }) =>
-        users.updateUserInfo(requireUser(request, auth), body),
-      {
-        body: t.Object({
-          name: t.Optional(t.Union([nameSchema, t.Null()])),
-          chessboardColor: t.Optional(
-            t.Union([t.String({ pattern: "^#[0-9a-fA-F]{6}$" }), t.Null()]),
-          ),
-        }),
+      async ({ identity }) => {
+        // An explicit JSON null marks "no account"; an empty body would not parse.
+        if (identity?.user !== 1) return Response.json(null);
+        const user = await users.findById(identity.sub);
+        if (!user) throw notFound();
+        return user;
       },
+      { identity: true },
     )
+    .patch("/me", ({ user, body }) => users.updateUserInfo(user.sub, body), {
+      user: true,
+      body: t.Object({
+        name: t.Optional(t.Union([nameSchema, t.Null()])),
+        chessboardColor: t.Optional(
+          t.Union([t.String({ pattern: "^#[0-9a-fA-F]{6}$" }), t.Null()]),
+        ),
+      }),
+    })
     .get(
       "/:id",
-      async ({ request, params }) => {
-        requireUser(request, auth);
+      async ({ params }) => {
         const user = await users.findById(params.id);
         if (!user) throw notFound();
         return user;
       },
-      { params: t.Object({ id: idSchema }) },
+      { user: true, params: t.Object({ id: idSchema }) },
     );
-}

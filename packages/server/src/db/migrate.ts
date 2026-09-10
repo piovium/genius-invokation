@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 import { access, readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
-import { createSql, type SqlConnection } from "./database.service";
+import { createSql, type SqlConnection } from "./database";
 
-const hash = (value: string) =>
+const sha256 = (value: string) =>
   createHash("sha256").update(value).digest("hex");
 
 async function findMigrationDirectory() {
@@ -17,16 +17,16 @@ async function findMigrationDirectory() {
       await access(candidate);
       return candidate;
     } catch {
-      /* Source and packaged layouts differ. */
+      /* The packaged and source layouts differ; try the next candidate. */
     }
   }
   throw new Error("Migration SQL is missing from the server distribution");
 }
 
 /**
- * Apply this server's SQL migrations. A database whose schema was created from
- * the same files by other bookkeeping (the isolated fixture) is adopted after
- * its recorded checksums are verified.
+ * Apply the SQL migrations that ship with this server. A database whose schema
+ * was already created from those same files and recorded by other bookkeeping
+ * (the isolated test fixture) is adopted once its recorded checksums match.
  */
 export async function migrateDatabase(
   connectionString?: string,
@@ -52,11 +52,11 @@ export async function migrateDatabase(
       return {
         name,
         text,
-        hash: hash(normalized),
+        hash: sha256(normalized),
         acceptedHashes: new Set([
-          hash(text),
-          hash(normalized),
-          hash(normalized.replaceAll("\n", "\r\n")),
+          sha256(text),
+          sha256(normalized),
+          sha256(normalized.replaceAll("\n", "\r\n")),
         ]),
       };
     }),
@@ -84,12 +84,12 @@ export async function migrateDatabase(
         throw new Error("Database has migrations newer than this server build");
       const applied: string[] = [];
       const adopted: string[] = [];
-      for (const source of sources) {
+      for (const [index, source] of sources.entries()) {
         const existing = recorded.find((row) => row.name === source.name);
         if (existing) {
           if (existing.hash !== source.hash)
             throw new Error(
-              "Previously applied SQL migration changed: " + source.name,
+              `Previously applied SQL migration changed: ${source.name}`,
             );
           continue;
         }
@@ -97,11 +97,11 @@ export async function migrateDatabase(
         if (fixture) {
           if (!source.acceptedHashes.has(fixture.sha256))
             throw new Error(
-              "Adopted SQL migration checksum differs: " + source.name,
+              `Adopted SQL migration checksum differs: ${source.name}`,
             );
           adopted.push(source.name);
         } else {
-          if (source === sources[0] && migrationState.populated)
+          if (index === 0 && migrationState.populated)
             throw new Error(
               "Existing tables have no completed migration history; refusing to recreate or adopt an unknown schema",
             );
@@ -118,123 +118,139 @@ export async function migrateDatabase(
   }
 }
 
+/** `information_schema` spells a millisecond timestamp like this. */
+const TIMESTAMP = "timestamp without time zone";
+
+type ColumnExpectation = readonly [type: string, nullable: boolean];
+
+/** Every column the deployed DDL creates, in the order the migrations add them. */
+const expectedColumns: Record<string, Record<string, ColumnExpectation>> = {
+  User: {
+    id: ["integer", false],
+    ghToken: ["text", true],
+    createdAt: [TIMESTAMP, false],
+    chessboardColor: ["text", true],
+    name: ["text", true],
+  },
+  Deck: {
+    id: ["integer", false],
+    name: ["text", false],
+    code: ["text", false],
+    requiredVersion: ["integer", false],
+    ownerUserId: ["integer", false],
+    createdAt: [TIMESTAMP, false],
+    updatedAt: [TIMESTAMP, false],
+  },
+  Game: {
+    id: ["integer", false],
+    coreVersion: ["text", false],
+    gameVersion: ["text", false],
+    data: ["jsonb", false],
+    winnerId: ["integer", true],
+    createdAt: [TIMESTAMP, false],
+  },
+  PlayerOnGames: {
+    playerId: ["integer", false],
+    gameId: ["integer", false],
+    who: ["integer", false],
+  },
+};
+
+type DefaultKind = "now" | "sequence" | "none";
+
+/** `createdAt` defaults to `now()`, `serial` ids to a sequence, the rest to nothing. */
+function defaultKind(table: string, name: string): DefaultKind {
+  if (name === "createdAt") return "now";
+  if (name === "id" && (table === "Game" || table === "Deck"))
+    return "sequence";
+  return "none";
+}
+
+const matchesDefault: Record<DefaultKind, (value: string | null) => boolean> = {
+  now: (value) => value === "CURRENT_TIMESTAMP",
+  sequence: (value) => value?.startsWith("nextval(") ?? false,
+  none: (value) => value === null,
+};
+
+/** Referential actions as the one-letter codes `pg_constraint` stores. */
+const FOREIGN_KEY_CODES = { contype: "f", confupdtype: "c", confdeltype: "r" };
+
+/** Deployed constraint: name, kind, `pg_get_constraintdef` text, action codes. */
+const expectedConstraints: readonly [
+  name: string,
+  kind: string,
+  definition: string,
+  codes?: Record<string, string>,
+][] = [
+  [
+    "PlayerOnGames_playerId_fkey",
+    "foreign key",
+    'FOREIGN KEY ("playerId") REFERENCES "User"(id) ON UPDATE CASCADE ON DELETE RESTRICT',
+    FOREIGN_KEY_CODES,
+  ],
+  [
+    "PlayerOnGames_gameId_fkey",
+    "foreign key",
+    'FOREIGN KEY ("gameId") REFERENCES "Game"(id) ON UPDATE CASCADE ON DELETE RESTRICT',
+    FOREIGN_KEY_CODES,
+  ],
+  [
+    "Deck_ownerUserId_fkey",
+    "foreign key",
+    'FOREIGN KEY ("ownerUserId") REFERENCES "User"(id) ON UPDATE CASCADE ON DELETE RESTRICT',
+    FOREIGN_KEY_CODES,
+  ],
+  ["User_pkey", "primary key", "PRIMARY KEY (id)"],
+  ["Game_pkey", "primary key", "PRIMARY KEY (id)"],
+  ["Deck_pkey", "primary key", "PRIMARY KEY (id)"],
+  ["PlayerOnGames_pkey", "primary key", 'PRIMARY KEY ("playerId", "gameId")'],
+];
+
+/**
+ * Compare the live schema with the deployed DDL after both adoption and fresh
+ * creation: a matching migration log cannot excuse a column, default, primary
+ * key or foreign key that drifted from the SQL.
+ */
 async function verifyDeployedSchema(tx: SqlConnection) {
-  // Check constraints after both adoption and fresh creation. A matching log
-  // cannot excuse missing tables/columns or altered foreign-key actions.
   const columns =
     await tx`SELECT table_name, column_name, data_type, is_nullable, datetime_precision, column_default FROM information_schema.columns WHERE table_schema = current_schema() AND table_name IN ('User','Deck','Game','PlayerOnGames')`;
-  const expected = {
-    User: {
-      id: "integer",
-      ghToken: "text",
-      createdAt: "timestamp without time zone",
-      chessboardColor: "text",
-      name: "text",
-    },
-    Deck: {
-      id: "integer",
-      name: "text",
-      code: "text",
-      requiredVersion: "integer",
-      ownerUserId: "integer",
-      createdAt: "timestamp without time zone",
-      updatedAt: "timestamp without time zone",
-    },
-    Game: {
-      id: "integer",
-      coreVersion: "text",
-      gameVersion: "text",
-      data: "jsonb",
-      winnerId: "integer",
-      createdAt: "timestamp without time zone",
-    },
-    PlayerOnGames: {
-      playerId: "integer",
-      gameId: "integer",
-      who: "integer",
-    },
-  };
-  const nullable = new Set([
-    "User.ghToken",
-    "User.chessboardColor",
-    "User.name",
-    "Game.winnerId",
-  ]);
-  for (const [table, fields] of Object.entries(expected))
-    for (const [name, type] of Object.entries(fields)) {
-      const column = columns.find(
-        (row) => row.table_name === table && row.column_name === name,
-      );
+  const columnByName = new Map(
+    columns.map((column) => [
+      `${column.table_name}.${column.column_name}`,
+      column,
+    ]),
+  );
+  for (const [table, expectations] of Object.entries(expectedColumns))
+    for (const [name, [type, nullable]] of Object.entries(expectations)) {
+      const column = columnByName.get(`${table}.${name}`);
       if (
         !column ||
         column.data_type !== type ||
-        column.is_nullable !==
-          (nullable.has(table + "." + name) ? "YES" : "NO") ||
-        (type.startsWith("timestamp") && column.datetime_precision !== 3)
+        column.is_nullable !== (nullable ? "YES" : "NO") ||
+        (type === TIMESTAMP && column.datetime_precision !== 3)
       )
         throw new Error(
-          "Existing database column differs from the deployed SQL schema: " +
-            table +
-            "." +
-            name,
+          `Existing database column differs from the deployed SQL schema: ${table}.${name}`,
         );
-      const isSerial = name === "id" && (table === "Game" || table === "Deck");
-      if (
-        name === "createdAt"
-          ? column.column_default !== "CURRENT_TIMESTAMP"
-          : isSerial
-            ? !/^nextval\(/.test(column.column_default ?? "")
-            : column.column_default !== null
-      )
+      if (!matchesDefault[defaultKind(table, name)](column.column_default))
         throw new Error(
-          "Existing column default differs from deployed SQL: " +
-            table +
-            "." +
-            name,
+          `Existing column default differs from deployed SQL: ${table}.${name}`,
         );
     }
   const constraints =
     await tx`SELECT conname, contype, confupdtype, confdeltype, pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE connamespace = current_schema()::regnamespace`;
-  for (const [name, definition] of [
-    [
-      "PlayerOnGames_playerId_fkey",
-      'FOREIGN KEY ("playerId") REFERENCES "User"(id) ON UPDATE CASCADE ON DELETE RESTRICT',
-    ],
-    [
-      "PlayerOnGames_gameId_fkey",
-      'FOREIGN KEY ("gameId") REFERENCES "Game"(id) ON UPDATE CASCADE ON DELETE RESTRICT',
-    ],
-    [
-      "Deck_ownerUserId_fkey",
-      'FOREIGN KEY ("ownerUserId") REFERENCES "User"(id) ON UPDATE CASCADE ON DELETE RESTRICT',
-    ],
-  ]) {
-    const constraint = constraints.find((row) => row.conname === name);
-    if (
-      !constraint ||
-      constraint.contype !== "f" ||
-      constraint.confupdtype !== "c" ||
-      constraint.confdeltype !== "r" ||
-      constraint.definition !== definition
-    )
-      throw new Error(
-        "Existing foreign key differs from deployed SQL: " + name,
+  const constraintByName = new Map(
+    constraints.map((constraint) => [constraint.conname, constraint]),
+  );
+  for (const [name, kind, definition, codes] of expectedConstraints) {
+    const constraint = constraintByName.get(name);
+    const actionsMatch =
+      codes === undefined ||
+      Object.entries(codes).every(
+        ([field, code]) => constraint?.[field] === code,
       );
-  }
-  for (const [name, definition] of [
-    ["User_pkey", "PRIMARY KEY (id)"],
-    ["Game_pkey", "PRIMARY KEY (id)"],
-    ["Deck_pkey", "PRIMARY KEY (id)"],
-    ["PlayerOnGames_pkey", 'PRIMARY KEY ("playerId", "gameId")'],
-  ]) {
-    if (
-      !constraints.some(
-        (row) => row.conname === name && row.definition === definition,
-      )
-    )
-      throw new Error(
-        "Existing primary key differs from deployed SQL: " + name,
-      );
+    if (constraint?.definition !== definition || !actionsMatch)
+      throw new Error(`Existing ${kind} differs from deployed SQL: ${name}`);
   }
 }
 

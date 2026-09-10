@@ -17,11 +17,12 @@ import { Elysia, t } from "elysia";
 import type { Deck } from "@gi-tcg/typings";
 import { VERSIONS } from "@gi-tcg/core";
 import type { PaginationDto } from "../utils";
-import type { AuthService } from "../auth/auth.service";
-import { requireUser } from "../auth/auth.guard";
+import { identity } from "../auth/identity";
+import type { Auth } from "../auth/session";
 import { notFound } from "../errors";
 import { deckSchema, idSchema, nameSchema, paginationSchema } from "../http";
-import type { DecksService } from "./decks.service";
+import type { Decks } from "./decks";
+
 export interface DeckDto extends Deck {}
 export interface CreateDeckDto extends DeckDto {
   name: string;
@@ -34,16 +35,21 @@ export interface UpdateDeckDto {
 export interface QueryDeckDto extends PaginationDto {
   requiredVersion?: number;
 }
-export function createDecksRoutes(decks: DecksService, auth: AuthService) {
-  return new Elysia({ prefix: "/decks" })
+
+const deckBodySchema = t.Object({ ...deckSchema, name: nameSchema });
+const deckIdParamsSchema = t.Object({ deckId: idSchema });
+
+export const createDecksRoutes = (decks: Decks, auth: Auth) =>
+  new Elysia({ prefix: "/decks" })
+    .use(identity(auth))
     .post(
       "/",
-      async ({ request, body, set }) => {
-        const result = await decks.createDeck(requireUser(request, auth), body);
+      async ({ user, body, set }) => {
+        const result = await decks.createDeck(user.sub, body);
         set.status = 201;
         return { id: result.id, code: result.code };
       },
-      { body: t.Object({ ...deckSchema, name: nameSchema }) },
+      { user: true, body: deckBodySchema },
     )
     .post(
       "/version",
@@ -51,43 +57,37 @@ export function createDecksRoutes(decks: DecksService, auth: AuthService) {
         set.status = 201;
         return decks.deckToCode(body);
       },
-      { body: t.Object({ ...deckSchema, name: nameSchema }) },
+      { body: deckBodySchema },
     )
-    .get(
-      "/",
-      ({ request, query }) =>
-        decks.getAllDecks(requireUser(request, auth), query),
-      {
-        query: t.Object({
-          ...paginationSchema,
-          requiredVersion: t.Optional(
-            t.Numeric({
-              minimum: 0,
-              maximum: VERSIONS.length - 1,
-              multipleOf: 1,
-            }),
-          ),
-        }),
-      },
-    )
+    .get("/", ({ user, query }) => decks.getAllDecks(user.sub, query), {
+      user: true,
+      query: t.Object({
+        ...paginationSchema,
+        requiredVersion: t.Optional(
+          t.Numeric({
+            minimum: 0,
+            maximum: VERSIONS.length - 1,
+            multipleOf: 1,
+          }),
+        ),
+      }),
+    })
     .get(
       "/:deckId",
-      async ({ request, params }) => {
-        const deck = await decks.getDeck(
-          requireUser(request, auth),
-          params.deckId,
-        );
+      async ({ user, params }) => {
+        const deck = await decks.getDeck(user.sub, params.deckId);
         if (!deck) throw notFound();
         return deck;
       },
-      { params: t.Object({ deckId: idSchema }) },
+      { user: true, params: deckIdParamsSchema },
     )
     .patch(
       "/:deckId",
-      ({ request, params, body }) =>
-        decks.updateDeck(requireUser(request, auth), params.deckId, body),
+      ({ user, params, body }) =>
+        decks.updateDeck(user.sub, params.deckId, body),
       {
-        params: t.Object({ deckId: idSchema }),
+        user: true,
+        params: deckIdParamsSchema,
         body: t.Object({
           name: t.Optional(nameSchema),
           characters: t.Optional(deckSchema.characters),
@@ -97,10 +97,9 @@ export function createDecksRoutes(decks: DecksService, auth: AuthService) {
     )
     .delete(
       "/:deckId",
-      async ({ request, params }) => {
-        await decks.deleteDeck(requireUser(request, auth), params.deckId);
-        return { message: "deck " + params.deckId + " deleted" };
+      async ({ user, params }) => {
+        await decks.deleteDeck(user.sub, params.deckId);
+        return { message: `deck ${params.deckId} deleted` };
       },
-      { params: t.Object({ deckId: idSchema }) },
+      { user: true, params: deckIdParamsSchema },
     );
-}

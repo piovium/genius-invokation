@@ -1,65 +1,60 @@
-// Copyright (C) 2024-2025 Guyutongxue
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { unauthorized } from "../errors";
-import type { UsersService } from "../users/users.service";
-import {
-  isGuestJwtPayload,
-  isUserJwtPayload,
-  type JwtPayload,
-} from "./user.decorator";
+import type { Users } from "../users/users";
+import { isGuestJwtPayload, isUserJwtPayload, type JwtPayload } from "./jwt";
 
 export const CODE_EXCHANGE_URL =
   process.env.GH_CODE_EXCHANGE_URL ||
   "https://github.com/login/oauth/access_token";
 export const GET_USER_API_URL =
   process.env.GH_GET_USER_API_URL || "https://api.github.com/user";
+
+const TOKEN_LIFETIME_SECONDS = 42 * 24 * 60 * 60;
 const encodeJwtPart = (value: unknown) =>
   Buffer.from(JSON.stringify(value)).toString("base64url");
-const TOKEN_LIFETIME_SECONDS = 42 * 24 * 60 * 60;
 
-export class AuthService {
-  private readonly secret: string;
-  constructor(
-    private readonly users: Pick<UsersService, "create">,
-    secret = process.env.JWT_SECRET,
-    private readonly endpoints = {
-      exchange: CODE_EXCHANGE_URL,
-      user: GET_USER_API_URL,
-    },
-  ) {
-    if (!secret) throw new Error("JWT_SECRET is not set");
-    this.secret = secret;
-  }
-  private sign(payload: JwtPayload) {
+export interface AuthEndpoints {
+  exchange: string;
+  user: string;
+}
+
+export interface Auth {
+  /** Returns the payload of a well-formed, unexpired token; `null` otherwise. */
+  verify(token: string): JwtPayload | null;
+  /** Exchanges a GitHub OAuth code for this service's own access token. */
+  login(code: string): Promise<{ accessToken: string }>;
+  signGuest(playerId: string): Promise<string>;
+}
+
+export interface AuthOptions {
+  users: Pick<Users, "create">;
+  secret?: string;
+  endpoints?: AuthEndpoints;
+}
+
+export function createAuth({
+  users,
+  secret = process.env.JWT_SECRET,
+  endpoints = { exchange: CODE_EXCHANGE_URL, user: GET_USER_API_URL },
+}: AuthOptions): Auth {
+  if (!secret) throw new Error("JWT_SECRET is not set");
+
+  const sign = (payload: JwtPayload) => {
     const iat = Math.floor(Date.now() / 1000);
     const content =
       encodeJwtPart({ alg: "HS256", typ: "JWT" }) +
       "." +
       encodeJwtPart({ ...payload, iat, exp: iat + TOKEN_LIFETIME_SECONDS });
     return (
-      content +
-      "." +
-      createHmac("sha256", this.secret).update(content).digest("base64url")
+      content + "." + createHmac("sha256", secret).update(content).digest("base64url")
     );
-  }
-  verify(token: string): JwtPayload | null {
+  };
+
+  const verify = (token: string): JwtPayload | null => {
     if (typeof token !== "string" || token.length > 8192) return null;
     try {
       const segments = token.split(".");
+      // Every segment must be canonical base64url; anything else is a forgery.
       if (
         segments.length !== 3 ||
         segments.some(
@@ -77,7 +72,7 @@ export class AuthService {
         (header.typ !== undefined && header.typ !== "JWT")
       )
         return null;
-      const expectedSignature = createHmac("sha256", this.secret)
+      const expectedSignature = createHmac("sha256", secret)
         .update(segments[0] + "." + segments[1])
         .digest();
       const suppliedSignature = Buffer.from(segments[2]!, "base64url");
@@ -97,15 +92,15 @@ export class AuthService {
           (!Number.isFinite(payload.nbf) || payload.nbf > now))
       )
         return null;
-      if (!isUserJwtPayload(payload) && !isGuestJwtPayload(payload))
-        return null;
+      if (!isUserJwtPayload(payload) && !isGuestJwtPayload(payload)) return null;
       return payload;
     } catch {
       return null;
     }
-  }
-  async login(code: string) {
-    const exchanged = await fetch(this.endpoints.exchange, {
+  };
+
+  const login = async (code: string) => {
+    const exchanged = await fetch(endpoints.exchange, {
       method: "POST",
       headers: {
         accept: "application/json",
@@ -125,7 +120,7 @@ export class AuthService {
       !result.access_token
     )
       throw unauthorized("GitHub code exchange failed");
-    const identity = await fetch(this.endpoints.user, {
+    const identity = await fetch(endpoints.user, {
       headers: {
         authorization: "Bearer " + result.access_token,
         accept: "application/vnd.github+json",
@@ -136,10 +131,13 @@ export class AuthService {
     const user = (await identity.json()) as { id?: number };
     if (!identity.ok || !Number.isSafeInteger(user.id) || user.id! <= 0)
       throw unauthorized("GitHub user lookup failed");
-    await this.users.create(user.id!, result.access_token);
-    return { accessToken: this.sign({ user: 1, sub: user.id! }) };
-  }
-  async signGuest(playerId: string) {
-    return this.sign({ user: 0, sub: playerId });
-  }
+    await users.create(user.id!, result.access_token);
+    return { accessToken: sign({ user: 1, sub: user.id! }) };
+  };
+
+  return {
+    verify,
+    login,
+    signGuest: async (playerId: string) => sign({ user: 0, sub: playerId }),
+  };
 }

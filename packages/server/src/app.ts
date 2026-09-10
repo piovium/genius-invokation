@@ -16,38 +16,38 @@
 import { Elysia, status } from "elysia";
 import { node } from "@elysiajs/node";
 import { WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
-import { createAppRoutes } from "./app.controller";
-import { DatabaseService } from "./db/database.service";
-import { UsersService } from "./users/users.service";
-import { DecksService } from "./decks/decks.service";
-import { GamesService } from "./games/games.service";
-import { MetricsService } from "./metrics/metrics.service";
-import { RoomsService } from "./rooms/rooms.service";
-import { AuthService } from "./auth/auth.service";
-import { createAuthRoutes } from "./auth/auth.controller";
-import { createUsersRoutes } from "./users/users.controller";
-import { createDecksRoutes } from "./decks/decks.controller";
-import { createGamesRoutes } from "./games/games.controller";
-import { createMetricsRoutes } from "./metrics/metrics.controller";
-import { createRoomsRoutes } from "./rooms/rooms.module";
+import { createAppRoutes } from "./app/routes";
+import { createDatabase } from "./db/database";
+import { createUsers } from "./users/users";
+import { createDecks } from "./decks/decks";
+import { createGames } from "./games/games";
+import { createMetrics } from "./metrics/metrics";
+import { createRooms } from "./rooms/rooms";
+import { createAuth } from "./auth/session";
+import { createAuthRoutes } from "./auth/routes";
+import { createUsersRoutes } from "./users/routes";
+import { createDecksRoutes } from "./decks/routes";
+import { createGamesRoutes } from "./games/routes";
+import { createMetricsRoutes } from "./metrics/routes";
+import { createRoomsRoutes } from "./rooms/routes";
 import { createFrontendHandler } from "./frontend";
 import { errorResponse } from "./errors";
 import { listenHttp, type HttpListenOptions } from "./http-server";
 import { attachRoomWebSocketServer } from "./room-transport/websocket";
 
 export function createApplication({
-  database = new DatabaseService(),
+  database = createDatabase(),
   secret = process.env.JWT_SECRET,
   basePath = WEB_CLIENT_BASE_PATH,
   production = process.env.NODE_ENV === "production",
   frontendDirectory = process.env.FRONTEND_DIRECTORY,
 } = {}) {
-  const metrics = new MetricsService();
-  const users = new UsersService(database);
-  const decks = new DecksService(database);
-  const games = new GamesService(database, metrics);
-  const auth = new AuthService(users, secret);
-  const rooms = new RoomsService(users, decks, games, metrics);
+  const metrics = createMetrics();
+  const users = createUsers(database);
+  const decks = createDecks(database);
+  const games = createGames(database, metrics);
+  const auth = createAuth({ users, secret });
+  const rooms = createRooms(users, decks, games, metrics);
   const prefix =
     ("/" + basePath.split("/").filter(Boolean).join("/")).replace(/\/$/, "") +
     "/api";

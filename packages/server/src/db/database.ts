@@ -1,5 +1,5 @@
 import { Pool, type PoolClient, type QueryResultRow } from "pg";
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
 export interface SqlConnection {
@@ -10,24 +10,31 @@ export interface SqlConnection {
   unsafe(text: string, values?: unknown[]): Promise<QueryResultRow[]>;
 }
 
+/**
+ * Wrap one pool or pooled client as a tagged template that binds interpolated
+ * values as `$1`, `$2`, ... and that also exposes `unsafe()` for the SQL no
+ * template can build.
+ */
 function createQueries(connection: Pool | PoolClient): SqlConnection {
   const unsafe = async (text: string, values?: unknown[]) => {
     const result = await connection.query(text, values);
-    // The original migration files contain multiple SQL statements. pg returns
-    // one result per statement when the query has no parameters.
+    // A migration file holds several statements, and a parameterless query
+    // answers with one result per statement: report the rows of the last one.
     return Array.isArray(result) ? (result.at(-1)?.rows ?? []) : result.rows;
   };
   return Object.assign(
-    (strings: TemplateStringsArray, ...values: unknown[]) => {
-      let text = strings[0]!;
-      for (let index = 0; index < values.length; index++)
-        text += "$" + (index + 1) + strings[index + 1];
-      return unsafe(text, values);
-    },
+    (strings: TemplateStringsArray, ...values: unknown[]) =>
+      unsafe(
+        strings
+          .map((part, index) => (index === 0 ? part : `$${index}${part}`))
+          .join(""),
+        values,
+      ),
     { unsafe },
   );
 }
 
+/** Open a pg pool bound to the schema named in the connection string. */
 export function createSql(connectionString = process.env.DATABASE_URL) {
   if (!connectionString) throw new Error("DATABASE_URL is not set");
   const url = new URL(connectionString);
@@ -45,7 +52,7 @@ export function createSql(connectionString = process.env.DATABASE_URL) {
     max: connectionLimit,
     idleTimeoutMillis: 20_000,
     connectionTimeoutMillis: 10_000,
-    options: "-c search_path=" + databaseSchema,
+    options: `-c search_path=${databaseSchema}`,
   });
   pool.on("error", () => console.error("PostgreSQL idle connection failed"));
   return Object.assign(createQueries(pool), {
@@ -68,17 +75,25 @@ export function createSql(connectionString = process.env.DATABASE_URL) {
   });
 }
 
-export class DatabaseService {
-  readonly client: ReturnType<typeof createSql>;
-  readonly db;
-  constructor(connectionString?: string) {
-    this.client = createSql(connectionString);
-    this.db = drizzle(this.client.pool, { schema });
-  }
-  async connect() {
-    await this.client`SELECT 1`;
-  }
-  async close() {
-    await this.client.close();
-  }
+/** One pool's SQL tag and Drizzle query builder, with their lifecycle. */
+export interface Database {
+  readonly sql: ReturnType<typeof createSql>;
+  readonly db: NodePgDatabase<typeof schema>;
+  connect(): Promise<void>;
+  close(): Promise<void>;
+}
+
+/** Build the database handle for a connection string. */
+export function createDatabase(connectionString?: string): Database {
+  const sql = createSql(connectionString);
+  return {
+    sql,
+    db: drizzle(sql.pool, { schema }),
+    async connect() {
+      await sql`SELECT 1`;
+    },
+    async close() {
+      await sql.close();
+    },
+  };
 }

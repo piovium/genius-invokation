@@ -1,6 +1,6 @@
 import {
-  integer,
   customType,
+  integer,
   pgTable,
   primaryKey,
   serial,
@@ -8,16 +8,17 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 
-// node-postgres already parses JSONB. The legacy replay is itself a JSON string;
-// Drizzle's generic jsonb mapper would parse that string a second time.
+// node-postgres parses JSONB on its own, and the stored replay is a JSON string
+// in its own right: Drizzle's generic jsonb mapper would parse that string a
+// second time, so this type passes both directions through untouched.
 const persistedReplay = customType<{ data: unknown; driverData: unknown }>({
   dataType: () => "jsonb",
   toDriver: (value) => JSON.stringify(value),
   fromDriver: (value) => value,
 });
 
-// Match the deployed DDL exactly: quoted table/column names, timestamp
-// precision, defaults, relation actions and composite primary key all stay put.
+// Mirror the deployed DDL exactly: quoted identifiers, millisecond timestamp
+// precision, defaults, relation actions and the composite primary key.
 export const users = pgTable("User", {
   id: integer("id").primaryKey(),
   name: text("name"),

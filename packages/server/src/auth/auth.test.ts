@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 import { Elysia } from "elysia";
 import { node } from "@elysiajs/node";
-import { AuthService } from "./auth.service";
-import { createAuthRoutes } from "./auth.controller";
-import type { UsersService } from "../users/users.service";
+import { createAuth } from "./session";
+import { createAuthRoutes } from "./routes";
+import type { Users } from "../users/users";
 import { createGuestId } from "./guest-id";
 import { listenHttp } from "../http-server";
 
@@ -22,7 +22,7 @@ function createTestJwt(payload: unknown, secret: string, alg = "HS256") {
 }
 
 test("OAuth callback returns executable HTML through the Node HTTP adapter", async () => {
-  const auth = new AuthService({} as UsersService, "unit-fixture-secret");
+  const auth = createAuth({ users: {} as Users, secret: "unit-fixture-secret" });
   const accessToken = await auth.signGuest(createGuestId());
   const codes: string[] = [];
   auth.login = async (code) => {
@@ -56,7 +56,7 @@ test("OAuth callback returns executable HTML through the Node HTTP adapter", asy
 });
 
 test("existing user JWTs and new guest JWTs verify; tampering, expiry and algorithm confusion fail", async () => {
-  const auth = new AuthService({} as UsersService, "unit-fixture-secret");
+  const auth = createAuth({ users: {} as Users, secret: "unit-fixture-secret" });
   const payload = {
     user: 1,
     sub: 91000001,
@@ -110,10 +110,14 @@ test("OAuth exchanges code over real HTTP, saves identity token and returns a co
       create: async (id: number, ghToken: string) => {
         saved.push({ id, ghToken });
       },
-    } as unknown as UsersService;
-    const auth = new AuthService(users, "unit-fixture-secret", {
-      exchange: fixture.url + "exchange",
-      user: fixture.url + "user",
+    } as unknown as Users;
+    const auth = createAuth({
+      users,
+      secret: "unit-fixture-secret",
+      endpoints: {
+        exchange: fixture.url + "exchange",
+        user: fixture.url + "user",
+      },
     });
     const result = await auth.login("fixture-code");
     assert.equal(auth.verify(result.accessToken)?.sub, 91000001);

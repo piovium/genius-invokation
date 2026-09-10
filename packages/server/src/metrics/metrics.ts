@@ -91,7 +91,9 @@ export function createMetrics(): Metrics {
     new Gauge({
       name,
       help,
-      labelNames,
+      // prom-client only defaults an absent labelNames; an explicit undefined
+      // would reach Gauge.reset and crash on scrape.
+      labelNames: labelNames ?? [],
       registers: [registry],
       collect: async function () {
         report(this, await collectRoomMetrics());

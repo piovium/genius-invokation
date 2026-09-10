@@ -33,19 +33,16 @@ import {
 import getData from "@gi-tcg/data";
 import { flip } from "@gi-tcg/utils";
 import { createGuestId, DeckVerificationError, verifyDeck } from "../utils";
-import {
-  MetricsService,
-  type RoomMetricsSnapshot,
-} from "../metrics/metrics.service";
+import type { Metrics, RoomMetricsSnapshot } from "../metrics/metrics";
 import type {
   CreateRoomDto,
   GuestCreateRoomDto,
   GuestJoinRoomDto,
   UserCreateRoomDto,
-} from "./rooms.controller";
-import { DecksService } from "../decks/decks.service";
-import { UsersService } from "../users/users.service";
-import { GamesService } from "../games/games.service";
+} from "./request";
+import type { Decks } from "../decks/decks";
+import type { Users } from "../users/users";
+import type { Games } from "../games/games";
 import { inspect } from "node:util";
 import { randomUUID } from "node:crypto";
 import semver from "semver";
@@ -100,19 +97,22 @@ type GameStopHandler = (
   info: GameStopInfo,
 ) => void | Promise<unknown>;
 
-enum RoomStatus {
+export enum RoomStatus {
   Waiting = "waiting",
   Playing = "playing",
   Finished = "finished",
 }
 
-interface RoomInfo {
+export interface RoomInfo {
   id: number;
   config: RoomConfig;
   status: RoomStatus;
   watchable: boolean;
   players: PlayerInfo[];
 }
+
+/** The replay document a finished room publishes, as the client stores it. */
+export type StateLog = ReturnType<Room["getStateLog"]>;
 
 function sendDebugLog(name: string, message: unknown) {
   if (process.env.DEBUG_LOG_RECEIVE_URL) {
@@ -348,30 +348,79 @@ function toShuffled<T>(array: readonly T[]): T[] {
   return result;
 }
 
-export class RoomsService {
-  private logger = new Logger(RoomsService.name);
+/**
+ * The room registry: which rooms exist, who sits in them, and how each room's
+ * game is torn down. The state itself lives in the closure of `createRooms`, so
+ * callers can only reach it through the operations published below.
+ */
+export interface Rooms {
+  /** Resolves once the last room has been removed; used to drain on shutdown. */
+  close(): Promise<void>;
+  /** The unfinished room this player sits in, if any. */
+  currentRoom(playerId: PlayerId): RoomInfo | null;
+  createRoomFromUser(
+    userId: number,
+    params: UserCreateRoomDto,
+  ): Promise<{ room: RoomInfo }>;
+  createRoomFromGuest(
+    params: GuestCreateRoomDto,
+  ): Promise<{ playerId: string; room: RoomInfo }>;
+  deleteRoom(playerId: PlayerId, roomId: number): void;
+  joinRoomFromUser(
+    userId: number,
+    roomId: number,
+    deckId: number,
+  ): Promise<void>;
+  joinRoomFromGuest(
+    roomId: number,
+    params: GuestJoinRoomDto,
+  ): Promise<{ playerId: string }>;
+  getRoom(roomId: number): RoomInfo;
+  getRoomGameLog(playerId: PlayerId, roomId: number): StateLog;
+  getAllRooms(guest: boolean): RoomInfo[];
+  subscribePlayer(
+    roomId: number,
+    visitorPlayerId: PlayerId | null,
+    watchingPlayerId: PlayerId,
+    subscriber: RoomSubscriber,
+  ): RoomSubscription;
+  receivePlayerResponse(
+    roomId: number,
+    playerId: PlayerId,
+    id: number,
+    response: Uint8Array,
+  ): void;
+  receivePlayerGiveUp(roomId: number, playerId: PlayerId): CommandAck;
+}
 
-  private roomIdPool = toShuffled(Array.from({ length: 10000 }, (_, i) => i));
-  private rooms = new Map<number, Room>();
-  private shutdownResolvers: PromiseWithResolvers<void> | null = null;
+/** A spectator's live binding to one seat of a room. */
+interface RoomSubscription {
+  sessionId: string;
+  ownPlayer: boolean;
+  subscribe: () => void;
+}
 
-  constructor(
-    private users: UsersService,
-    private decks: DecksService,
-    private games: GamesService,
-    private metrics: MetricsService,
-  ) {
-    this.metrics.setRoomMetricsProvider(() => this.getRoomMetricsSnapshot());
+export function createRooms(
+  users: Users,
+  decks: Decks,
+  games: Games,
+  metrics: Metrics,
+): Rooms {
+  const logger = new Logger("rooms");
+  const roomIdPool = toShuffled(Array.from({ length: 10000 }, (_, i) => i));
+  const rooms = new Map<number, Room>();
+  let shutdownResolvers: PromiseWithResolvers<void> | null = null;
+
+  metrics.setRoomMetricsProvider(() => roomMetricsSnapshot());
+
+  async function close() {
+    shutdownResolvers ??= Promise.withResolvers();
+    if (rooms.size === 0) shutdownResolvers.resolve();
+    await shutdownResolvers.promise;
   }
 
-  async close() {
-    this.shutdownResolvers ??= Promise.withResolvers();
-    if (this.rooms.size === 0) this.shutdownResolvers.resolve();
-    await this.shutdownResolvers.promise;
-  }
-
-  currentRoom(playerId: PlayerId) {
-    for (const room of this.rooms.values()) {
+  function currentRoom(playerId: PlayerId) {
+    for (const room of rooms.values()) {
       if (room.status === RoomStatus.Finished) {
         continue;
       }
@@ -384,7 +433,7 @@ export class RoomsService {
     return null;
   }
 
-  private getRoomMetricsSnapshot(): RoomMetricsSnapshot {
+  function roomMetricsSnapshot(): RoomMetricsSnapshot {
     const snapshot: RoomMetricsSnapshot = {
       activeRooms: 0,
       roomPlayers: 0,
@@ -395,7 +444,7 @@ export class RoomsService {
       },
     };
 
-    for (const room of this.rooms.values()) {
+    for (const room of rooms.values()) {
       switch (room.status) {
         case RoomStatus.Waiting:
         case RoomStatus.Playing: {
@@ -415,15 +464,15 @@ export class RoomsService {
     return snapshot;
   }
 
-  async createRoomFromUser(userId: number, params: UserCreateRoomDto) {
-    const user = await this.users.findById(userId);
+  async function createRoomFromUser(userId: number, params: UserCreateRoomDto) {
+    const user = await users.findById(userId);
     if (user === null) {
       throw notFound(`User ${userId} not found`);
     }
-    if (this.currentRoom(userId) !== null) {
+    if (currentRoom(userId) !== null) {
       throw conflict(`User ${userId} is already in a room`);
     }
-    const deck = await this.decks.getDeck(userId, params.hostDeckId);
+    const deck = await decks.getDeck(userId, params.hostDeckId);
     if (deck === null) {
       throw notFound(`Deck ${params.hostDeckId} not found`);
     }
@@ -433,11 +482,11 @@ export class RoomsService {
       name: user.name ?? user.login,
       deck,
     };
-    const room = await this.createRoom(playerInfo, params);
+    const room = await createRoom(playerInfo, params);
     return { room };
   }
 
-  async createRoomFromGuest(params: GuestCreateRoomDto) {
+  async function createRoomFromGuest(params: GuestCreateRoomDto) {
     const playerId = createGuestId();
     const playerInfo: PlayerInfo = {
       isGuest: true,
@@ -446,16 +495,16 @@ export class RoomsService {
       deck: params.deck,
       avatarUrl: params.avatarUrl,
     };
-    const room = await this.createRoom(playerInfo, params);
+    const room = await createRoom(playerInfo, params);
     return {
       playerId,
       room,
     };
   }
 
-  private async createRoom(playerInfo: PlayerInfo, params: CreateRoomDto) {
+  async function createRoom(playerInfo: PlayerInfo, params: CreateRoomDto) {
     let deploying = (await redis?.get("meta:deploying")) ?? null;
-    if (this.shutdownResolvers || deploying !== null) {
+    if (shutdownResolvers || deploying !== null) {
       throw conflict(
         "Creating room is disabled now; we are planning a maintenance",
       );
@@ -501,46 +550,46 @@ export class RoomsService {
       }
     }
 
-    const roomId = this.roomIdPool[0];
+    const roomId = roomIdPool[0];
     if (typeof roomId === "undefined") {
       throw internalError("no room available");
     }
     const room = new Room(roomId, roomConfig);
-    this.rooms.set(roomId, room);
-    this.roomIdPool.shift();
-    this.metrics.incrementCreatedRooms();
-    this.logger.log(`Room ${room.id} created, host is ${playerInfo.name}`);
+    rooms.set(roomId, room);
+    roomIdPool.shift();
+    metrics.incrementCreatedRooms();
+    logger.log(`Room ${room.id} created, host is ${playerInfo.name}`);
 
     room.onStop(async (room, info) => {
       if (info.hasGame) {
-        this.metrics.incrementFinishedRooms();
+        metrics.incrementFinishedRooms();
       }
       const deploying = await redis?.get("meta:deploying").catch((error) => {
-        this.logger.warn(`Failed to read maintenance status: ${error}`);
+        logger.warn(`Failed to read maintenance status: ${error}`);
         return null;
       });
 
       const keepRoomDuration =
-        (this.shutdownResolvers || deploying ? 1 : 5) * 60 * 1000;
-      this.logger.log(
+        (shutdownResolvers || deploying ? 1 : 5) * 60 * 1000;
+      logger.log(
         `Room ${room.id} stopped, status ${room.status}, keep it for ${keepRoomDuration} ms`,
       );
-      this.logger.log(`Room ${room.id} game phase: ${info.phase}`);
+      logger.log(`Room ${room.id} game phase: ${info.phase}`);
       if (room.status !== RoomStatus.Waiting) {
         await new Promise((r) => setTimeout(r, keepRoomDuration));
       }
-      this.logger.log(`Room ${room.id} removed`);
+      logger.log(`Room ${room.id} removed`);
       await redis?.hdel("meta:active_rooms", String(room.id)).catch((error) => {
-        this.logger.warn(
+        logger.warn(
           `Failed to remove room ${room.id} from Redis: ${error}`,
         );
       });
 
       for (const player of room.getPlayers()) player.dispose();
-      this.rooms.delete(room.id);
-      this.roomIdPool.push(room.id);
-      if (this.rooms.size === 0) {
-        this.shutdownResolvers?.resolve();
+      rooms.delete(room.id);
+      roomIdPool.push(room.id);
+      if (rooms.size === 0) {
+        shutdownResolvers?.resolve();
       }
     });
 
@@ -559,8 +608,8 @@ export class RoomsService {
     return room.getRoomInfo();
   }
 
-  deleteRoom(playerId: PlayerId, roomId: number) {
-    const room = this.rooms.get(roomId);
+  function deleteRoom(playerId: PlayerId, roomId: number) {
+    const room = rooms.get(roomId);
     if (!room) {
       throw notFound(`Room ${roomId} not found`);
     }
@@ -575,12 +624,12 @@ export class RoomsService {
     room.stop();
   }
 
-  async joinRoomFromUser(userId: number, roomId: number, deckId: number) {
-    const user = await this.users.findById(userId);
+  async function joinRoomFromUser(userId: number, roomId: number, deckId: number) {
+    const user = await users.findById(userId);
     if (user === null) {
       throw notFound(`User ${userId} not found`);
     }
-    const deck = await this.decks.getDeck(userId, deckId);
+    const deck = await decks.getDeck(userId, deckId);
     if (deck === null) {
       throw notFound(`Deck ${deckId} not found`);
     }
@@ -590,10 +639,10 @@ export class RoomsService {
       name: user.name ?? user.login,
       deck,
     };
-    return this.joinRoom(playerInfo, roomId);
+    return joinRoom(playerInfo, roomId);
   }
 
-  async joinRoomFromGuest(roomId: number, params: GuestJoinRoomDto) {
+  async function joinRoomFromGuest(roomId: number, params: GuestJoinRoomDto) {
     const playerId = createGuestId();
     const playerInfo: PlayerInfo = {
       isGuest: true,
@@ -602,13 +651,13 @@ export class RoomsService {
       deck: params.deck,
       avatarUrl: params.avatarUrl,
     };
-    await this.joinRoom(playerInfo, roomId);
+    await joinRoom(playerInfo, roomId);
     return { playerId };
   }
 
-  private async joinRoom(playerInfo: PlayerInfo, roomId: number) {
-    const allRooms = this.getAllRooms(true);
-    const room = this.rooms.get(roomId);
+  async function joinRoom(playerInfo: PlayerInfo, roomId: number) {
+    const allRooms = getAllRooms(true);
+    const room = rooms.get(roomId);
     if (!room) {
       throw notFound(`Room ${roomId} not found`);
     }
@@ -650,7 +699,7 @@ export class RoomsService {
       if (!registered && !process.env.S3_ENDPOINT) return;
       const gameData = JSON.stringify(room.getStateLog());
       void uploadReplay(room.id, gameData).catch((error) =>
-        this.logger.warn(
+        logger.warn(
           "Failed to upload room " + room.id + " game log: " + error,
         ),
       );
@@ -662,7 +711,7 @@ export class RoomsService {
       ) as number[];
       const winnerWho = info.winner;
       const winnerId = winnerWho === null ? null : playerIds[winnerWho]!;
-      return this.games.addGame({
+      return games.addGame({
         coreVersion: Room.CORE_VERSION,
         gameVersion: room.config.gameVersion,
         data: gameData,
@@ -685,23 +734,23 @@ export class RoomsService {
         String(roomId),
       );
     } catch (e) {
-      this.logger.warn(
+      logger.warn(
         `Failed to update meta:active_rooms for room ${room.id}: ${e}`,
       );
     }
-    this.metrics.incrementStartedRooms();
+    metrics.incrementStartedRooms();
   }
 
-  getRoom(roomId: number): RoomInfo {
-    const room = this.rooms.get(roomId);
+  function getRoom(roomId: number): RoomInfo {
+    const room = rooms.get(roomId);
     if (!room) {
       throw notFound(`Room not found`);
     }
     return room.getRoomInfo();
   }
 
-  getRoomGameLog(playerId: PlayerId, roomId: number) {
-    const room = this.rooms.get(roomId);
+  function getRoomGameLog(playerId: PlayerId, roomId: number) {
+    const room = rooms.get(roomId);
     if (!room) {
       throw notFound(`Room not found`);
     }
@@ -720,9 +769,9 @@ export class RoomsService {
     }
   }
 
-  getAllRooms(guest: boolean): RoomInfo[] {
+  function getAllRooms(guest: boolean): RoomInfo[] {
     const result: RoomInfo[] = [];
-    for (const room of this.rooms.values()) {
+    for (const room of rooms.values()) {
       if (room.status === RoomStatus.Finished) {
         continue;
       }
@@ -737,13 +786,13 @@ export class RoomsService {
     return result;
   }
 
-  subscribePlayer(
+  function subscribePlayer(
     roomId: number,
     visitorPlayerId: PlayerId | null,
     watchingPlayerId: PlayerId,
     subscriber: RoomSubscriber,
   ) {
-    const room = this.rooms.get(roomId);
+    const room = rooms.get(roomId);
     if (!room) throw notFound("Room not found");
     const players = room.getPlayers();
     const player = players.find((p) => p.playerInfo.id === watchingPlayerId);
@@ -762,13 +811,13 @@ export class RoomsService {
     };
   }
 
-  receivePlayerResponse(
+  function receivePlayerResponse(
     roomId: number,
     playerId: PlayerId,
     id: number,
     response: Uint8Array,
   ) {
-    const room = this.rooms.get(roomId);
+    const room = rooms.get(roomId);
     if (!room) throw notFound("Room not found");
     const player = room
       .getPlayers()
@@ -777,9 +826,25 @@ export class RoomsService {
     return player.receiveResponse(id, response);
   }
 
-  receivePlayerGiveUp(roomId: number, playerId: PlayerId): CommandAck {
-    const room = this.rooms.get(roomId);
+  function receivePlayerGiveUp(roomId: number, playerId: PlayerId): CommandAck {
+    const room = rooms.get(roomId);
     if (!room) throw notFound("Room not found");
     return room.giveUp(playerId);
   }
+
+  return {
+    close,
+    currentRoom,
+    createRoomFromUser,
+    createRoomFromGuest,
+    deleteRoom,
+    joinRoomFromUser,
+    joinRoomFromGuest,
+    getRoom,
+    getRoomGameLog,
+    getAllRooms,
+    subscribePlayer,
+    receivePlayerResponse,
+    receivePlayerGiveUp,
+  };
 }

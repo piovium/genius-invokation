@@ -1,21 +1,72 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
 import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import { createHash, randomBytes } from "node:crypto";
 import { readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
+import { test } from "node:test";
 import { pathToFileURL } from "node:url";
-import { createSql, DatabaseService } from "./database.service";
-import { migrateDatabase } from "./migrate";
-import { DecksService } from "../decks/decks.service";
-import { GamesService } from "../games/games.service";
-import { MetricsService } from "../metrics/metrics.service";
+import { promisify } from "node:util";
+import { createDecks } from "../decks/decks";
+import { createGames } from "../games/games";
+import { createMetrics } from "../metrics/metrics";
 import { ASSETS_MANAGER } from "../utils";
+import {
+  createDatabase,
+  createSql,
+  type Database,
+  type SqlConnection,
+} from "./database";
+import { migrateDatabase } from "./migrate";
 
 const execute = promisify(execFile);
 const testUrl = process.env.SERVER_DB_TEST_URL;
 const migrationDirectory = resolve(import.meta.dirname, "../../migrations");
+
+/** Table the isolated harness fixture used to record the SQL it had applied. */
+const HARNESS_MIGRATION_DDL =
+  'CREATE TABLE "_HarnessMigration" ("name" TEXT PRIMARY KEY, "sha256" TEXT NOT NULL, "appliedAt" TIMESTAMPTZ NOT NULL DEFAULT now())';
+
+const sha256 = (value: string) =>
+  createHash("sha256").update(value).digest("hex");
+
+/** Scratch schema for one run; it is spliced into DDL, so keep it a bare identifier. */
+function scratchSchema() {
+  const name = `gi_migration_test_${randomBytes(8).toString("hex")}`;
+  if (!/^\w+$/.test(name)) throw new Error("Unexpected database test schema");
+  return name;
+}
+
+/**
+ * Build the fixture the isolated harness used before this service owned the
+ * database: apply every shipped SQL file and record it in `_HarnessMigration`,
+ * which the migrator then has to adopt.
+ */
+async function replayMigrations(client: SqlConnection) {
+  const names = (await readdir(migrationDirectory, { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+  for (const name of names) {
+    const source = await readFile(
+      resolve(migrationDirectory, name, "migration.sql"),
+      "utf8",
+    );
+    await client.unsafe(source);
+    await client`INSERT INTO "_HarnessMigration" ("name", "sha256") VALUES (${name}, ${sha256(source)})`;
+  }
+  return names;
+}
+
+/** Swap the deck-owner foreign key for one with the same name but other actions. */
+async function setDeckOwnerForeignKey(client: SqlConnection, onDelete: string) {
+  await client.unsafe(
+    'ALTER TABLE "Deck" DROP CONSTRAINT "Deck_ownerUserId_fkey"',
+  );
+  await client.unsafe(
+    `ALTER TABLE "Deck" ADD CONSTRAINT "Deck_ownerUserId_fkey" FOREIGN KEY ("ownerUserId") REFERENCES "User"(id) ON DELETE ${onDelete} ON UPDATE CASCADE`,
+  );
+}
+
 async function fixture(body: (url: string) => Promise<void>) {
   if (!testUrl) throw new Error("SERVER_DB_TEST_URL is required");
   const base = new URL(testUrl);
@@ -23,16 +74,14 @@ async function fixture(body: (url: string) => Promise<void>) {
     throw new Error(
       "Database tests require the isolated gi_server_harness database",
     );
-  const schema = "gi_migration_test_" + randomBytes(8).toString("hex");
+  const schema = scratchSchema();
   const admin = createSql(testUrl);
-  await admin.unsafe('CREATE SCHEMA "' + schema + '"');
+  await admin.unsafe(`CREATE SCHEMA "${schema}"`);
   try {
     base.searchParams.set("schema", schema);
     await body(base.toString());
   } finally {
-    if (!/^gi_migration_test_[a-f0-9]{16}$/.test(schema))
-      throw new Error("Unexpected database test schema");
-    await admin.unsafe('DROP SCHEMA "' + schema + '" CASCADE');
+    await admin.unsafe(`DROP SCHEMA "${schema}" CASCADE`);
     await admin.close();
   }
 }
@@ -46,25 +95,10 @@ test(
   async () => {
     await fixture(async (url) => {
       const legacy = createSql(url);
-      let database: DatabaseService | undefined;
+      let database: Database | undefined;
       try {
-        await legacy.unsafe(
-          'CREATE TABLE "_HarnessMigration" ("name" TEXT PRIMARY KEY, "sha256" TEXT NOT NULL, "appliedAt" TIMESTAMPTZ NOT NULL DEFAULT now())',
-        );
-        const names = (
-          await readdir(migrationDirectory, { withFileTypes: true })
-        )
-          .filter((entry) => entry.isDirectory())
-          .map((entry) => entry.name)
-          .sort();
-        for (const name of names) {
-          const source = await readFile(
-            resolve(migrationDirectory, name, "migration.sql"),
-            "utf8",
-          );
-          await legacy.unsafe(source);
-          await legacy`INSERT INTO "_HarnessMigration" ("name", "sha256") VALUES (${name}, ${createHash("sha256").update(source).digest("hex")})`;
-        }
+        await legacy.unsafe(HARNESS_MIGRATION_DDL);
+        const names = await replayMigrations(legacy);
         await legacy`INSERT INTO "User" (id, name, "ghToken") VALUES (91000001, 'Existing A', 'existing-fake-a'), (91000002, 'Existing B', 'existing-fake-b')`;
         const deck = JSON.parse(
           await readFile(
@@ -90,9 +124,9 @@ test(
         const repeated = await migrateDatabase(url, migrationDirectory);
         assert.deepEqual(repeated.adopted, []);
         assert.deepEqual(repeated.applied, []);
-        database = new DatabaseService(url);
-        const decks = new DecksService(database);
-        const games = new GamesService(database, new MetricsService());
+        database = createDatabase(url);
+        const decks = createDecks(database);
+        const games = createGames(database, createMetrics());
         assert.deepEqual(
           (await decks.getDeck(91000001, oldDeck!.id))?.characters,
           deck.characters,
@@ -137,14 +171,14 @@ test(
         database = undefined;
         // A fresh Node process opens its own pg pool and reads persisted bytes.
         const moduleUrl = pathToFileURL(
-          resolve(import.meta.dirname, "database.service.ts"),
+          resolve(import.meta.dirname, "database.ts"),
         ).href;
         const restartScript = `
-          import { DatabaseService } from ${JSON.stringify(moduleUrl)};
+          import { createDatabase } from ${JSON.stringify(moduleUrl)};
 
-          const database = new DatabaseService(process.env.SERVER_DB_TEST_URL);
+          const database = createDatabase(process.env.SERVER_DB_TEST_URL);
           try {
-            const rows = await database.client\`SELECT data, "winnerId" FROM "Game" WHERE id = ${game.id}\`;
+            const rows = await database.sql\`SELECT data, "winnerId" FROM "Game" WHERE id = ${game.id}\`;
             if (
               rows.length !== 1 ||
               rows[0].winnerId !== 91000002 ||
@@ -169,13 +203,13 @@ test(
           { env: { ...process.env, SERVER_DB_TEST_URL: url }, timeout: 15_000 },
         );
         assert.equal(stdout.trim(), "restart-persistence-ok");
-        database = new DatabaseService(url);
+        database = createDatabase(url);
+        const restarted = createDecks(database);
         assert.equal(
-          (await new DecksService(database).getDeck(91000001, oldDeck!.id))
-            ?.name,
+          (await restarted.getDeck(91000001, oldDeck!.id))?.name,
           "updated-deck",
         );
-        await new DecksService(database).deleteDeck(91000001, oldDeck!.id);
+        await restarted.deleteDeck(91000001, oldDeck!.id);
       } finally {
         await database?.close();
         await legacy.close();
@@ -196,22 +230,12 @@ test(
       assert.equal(result.applied.length, 3);
       const client = createSql(url);
       try {
-        await client.unsafe(
-          'ALTER TABLE "Deck" DROP CONSTRAINT "Deck_ownerUserId_fkey"',
-        );
-        await client.unsafe(
-          'ALTER TABLE "Deck" ADD CONSTRAINT "Deck_ownerUserId_fkey" FOREIGN KEY ("ownerUserId") REFERENCES "User"(id) ON DELETE CASCADE ON UPDATE CASCADE',
-        );
+        await setDeckOwnerForeignKey(client, "CASCADE");
         await assert.rejects(
           migrateDatabase(url, migrationDirectory),
           /foreign key differs/,
         );
-        await client.unsafe(
-          'ALTER TABLE "Deck" DROP CONSTRAINT "Deck_ownerUserId_fkey"',
-        );
-        await client.unsafe(
-          'ALTER TABLE "Deck" ADD CONSTRAINT "Deck_ownerUserId_fkey" FOREIGN KEY ("ownerUserId") REFERENCES "User"(id) ON DELETE RESTRICT ON UPDATE CASCADE',
-        );
+        await setDeckOwnerForeignKey(client, "RESTRICT");
         await client`UPDATE "__drizzle_migrations" SET hash = 'changed' WHERE name = '20251013090510_init'`;
         await assert.rejects(
           migrateDatabase(url, migrationDirectory),

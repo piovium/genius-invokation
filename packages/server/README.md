@@ -1,12 +1,12 @@
 # @gi-tcg/server 对战平台后端
 
-服务使用 Node.js 运行 Elysia，通过 Drizzle 访问 PostgreSQL。HTTP API、OAuth 凭证以及数据库表名、字段和约束保持兼容。实时对局使用二进制 WebSocket：游戏状态传输 protobuf 字节，控制消息使用 JSON，不提供 SSE 回退。
+服务在 Node.js 上运行 Elysia，通过 Drizzle 访问 PostgreSQL。HTTP API、OAuth 凭证以及数据库表名、字段和约束保持兼容。实时对局使用二进制 WebSocket：游戏状态传输 protobuf 字节，控制消息使用 JSON，不提供 SSE 回退。
 
 ## 迁移目标（进行中）
 
 本路线要求 HTTP 路由、校验、鉴权、错误与插件组合全部使用 **Elysia 原生写法**，运行时保持 Node.js：依赖、脚本、`Bun.` 全局对象、`bun:` 模块与基础镜像都不得改用 Bun，也不得保留 harness 约束规则禁止的历史兼容层。
 
-可执行检查：在仓库根目录运行 `npm run harness:constraints`，规则与例外见 [harness 说明](../../scripts/server-harness/README.md)。当前检查尚未通过，启动装配、错误处理与模块划分仍是过渡写法。
+可执行检查：在仓库根目录运行 `npm run harness:constraints`，规则与例外见 [harness 说明](../../scripts/server-harness/README.md)。当前检查为 0 违规：`prisma/` 目录、依赖与 lockfile 条目、源码中的 Prisma 引用都已清除，NestJS 风格的模块/控制器/服务文件与容器类也已全部改写成 Elysia 插件、`status()` 与工厂函数。该检查只看静态写法，不代表功能或内存验收。
 
 ## 开发与构建
 
@@ -17,7 +17,7 @@
 
 在 `packages/server/.env` 设置 `DATABASE_URL` 和 `JWT_SECRET`；GitHub 登录还需要 `GH_CLIENT_ID` 和 `GH_CLIENT_SECRET`。随后在 `packages/server` 执行 `pnpm migrate`，再运行 `pnpm dev`。开发和生产均连接 PostgreSQL，不再启动嵌入式模拟数据库。
 
-开发、类型检查和测试需要 assets-manager 的本地数据快照。上面的构建命令会先生成该依赖。`pnpm prepare:metadata` 从 `assets-manager/dist/data` 提取牌组校验字段，并生成记录来源哈希的清单；设置 `FROM_SOURCE=1` 时使用 `src/data`。该步骤只读取本地文件，不访问 CDN。`pnpm dev`、`pnpm check` 和 `pnpm test` 会自动准备元数据；单独运行房间测试前需要先准备。
+开发、类型检查和测试都需要 assets-manager 的本地数据快照，上面的构建命令会先生成它。`pnpm prepare:metadata` 从 `assets-manager/dist/data` 提取牌组校验字段，并生成记录来源哈希的清单；设置 `FROM_SOURCE=1` 时改用 `src/data`。该步骤只读取本地文件，不访问 CDN。`pnpm dev`、`pnpm check` 和 `pnpm test` 会自动完成这一步，单独运行房间测试前需要先手动执行。
 
 生产构建位于 `dist/`，包含 `main.js`、`migrate.js`、`frontend/` 与 `migrations/` 下的 SQL。使用 `node dist/main.js` 启动。前端 JS、CSS 和图片按请求通过 Node 文件流返回，无需将整个文件载入内存。`WEB_CLIENT_BASE_PATH`、SPA 回退、MIME 和 ETag 行为保持兼容；`sw.js` 与 HTML 使用 `no-cache`，文件名带哈希的资源使用 `immutable` 缓存。
 

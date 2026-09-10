@@ -3,12 +3,12 @@ import { afterEach, test } from "node:test";
 import { createServer } from "node:http";
 import { CURRENT_VERSION, type RpcRequest } from "@gi-tcg/core";
 import { decodeGameFrame, encodeGameFrame } from "@gi-tcg/typings";
-import { AuthService } from "../auth/auth.service";
+import { createAuth } from "../auth/session";
 import { createGuestId } from "../auth/guest-id";
 import { unauthorized } from "../errors";
 import { attachRoomWebSocketServer } from "../room-transport/websocket";
 import { Player } from "./player";
-import type { RoomsService } from "./rooms.service";
+import type { Rooms } from "./rooms";
 
 const cleanups = new Set<() => Promise<void>>();
 afterEach(async () => {
@@ -138,20 +138,20 @@ async function fixture({ dropAck = false, watchable = false } = {}) {
     private: true,
     allowGuest: true,
   });
-  const auth = new AuthService(
-    {
+  const auth = createAuth({
+    users: {
       create: async () => {
         throw new Error("OAuth is outside this room-transport test");
       },
     },
-    "independent-production-ws-test-secret",
-  );
+    secret: "independent-production-ws-test-secret",
+  });
   const token = await auth.signGuest(playerId);
   let terminate: (() => void) | undefined;
   // Test-only room routing injects a disconnect at the acceptance/ACK boundary;
   // transport, JWT verification, protobuf encoding, and Player IO are real.
   const rooms: Pick<
-    RoomsService,
+    Rooms,
     "subscribePlayer" | "receivePlayerResponse" | "receivePlayerGiveUp"
   > = {
     subscribePlayer(_roomId, visitor, target, subscriber) {
