@@ -1,6 +1,6 @@
 # Genius Invokation → TNB / tsgo：执行与验收契约
 
-版本：2.3.0。日期：2026-09-10。**核心 harness 已完成自测及独立复核，`contract.phase = "migration"`；产品迁移进行中，尚未验收。**
+版本：2.4.0。日期：2026-09-10。**核心 harness 已完成自测及独立复核，`contract.phase = "migration"`；产品迁移进行中，尚未验收。**
 
 用户最新授权是“差不多就可以开干，你自己衡量进度”。协调者完成核心自测和独立复核后，可以审查并修改 phase、更新 seal、重新验证，然后生成新的多 agent 任务启动迁移，无需再次请求用户确认。此前中断的旧任务不得直接恢复。harness 自测成功、环境探测成功都不等于产品迁移成功。
 
@@ -72,6 +72,8 @@ GTS 已有 [PR #14](https://github.com/piovium/gts/pull/14)，分支 `origin/fix
 
 2.3.0 把"能不能执行"和"在哪里执行"变成封存的不变式，仍然不改动任何验收阈值。每个 gate 要么由内置实现（environment／inventory／engine）或已登记的采集器执行，要么在 contract 中写明 `blocked` 理由；两者互斥，缺一即拒绝加载，声明了理由的 gate 在运行期以该理由保持 BLOCKED。每个角色的 gate 必须落在该角色自己的仓库；跨仓库 gate 只能由 contract 中显式声明的 `inheritedGates` 继承（当前只有 gts 角色继承 main 的 `engine`），不存在隐含许可。`scopeTransitions` 除了自洽，还必须在旧任务记录仍存在时复核其哈希、controlDigest、角色与 `from` 角色规格；`artifacts/` 不封存，因此全新 checkout 跳过这项复核，不因缺少本地回执而失败。同一批还把交付面本身提升为一等 gate：新增 `gts-lsp`，不经编辑器即可用 stdio 驱动 `@gi-tcg/gts-language-server` 并核验 TNB 身份与 LSP 语义，当前同样为 BLOCKED。同一批把 Git 辅助超时拆成两条边界：索引查询保持 30 秒，枚举工作树（`--others`／`--untracked-files`）改用 300 秒。依据是 pin 的 TNB 子模块含约 14 万个文件，`typescript-go` 的 `ls-files --others` 实测 87.9 秒属于正常工作量而不是挂死；两条边界都仍然有界，gate 超时与全部验收阈值不变。
 
+2.4.0 登记交付面自己的采集器，不改动任何 gate 定义、超时、角色边界、基线或既有断言。`gts-lsp` 现在由 `harness/collectors/lsp/` 的三个文件执行：collector 把封存的 fixture 写进运行目录下的一次性工作区，以 stdio 启动 GTS 的语言服务，记录原始协议应答、实时 RPC 轨迹、服务器日志以及从 checkout 解析出的编译器身份，自身不判定通过也不写状态字段；validator 从这些原始记录与磁盘重新推导每条结论——capabilities、客户端实际打开过的文档、tsdk 与每次编辑的文本也只取自已记录的交换、已解析的 checkout 和封存 fixture，采集器写下的摘要必须与之一致——包括诊断码与精确 span、修复后消失、hover／definition／completion／signature help 语义、增量同步、TNB 包名与精确版本、原生 addon 路径与哈希、tsgo 版本、`ENTER`／`EXIT` 平衡与 `BRIDGE_LOAD` 指向同一 addon，以及启动命令必须恰为 `<checkout>/packages/language-server/bin/gts-language-server.js --stdio` 且 cwd 在运行目录内。证据引用必须带 64 位哈希并落在运行目录内；一项互锁自测固定 expectations 的关键形状，避免"掏空期望让 gate 空通过"。正负例固定在 `harness/tests/gts-lsp.test.mjs`。
+
 未来需要真实产品行为的 collector 必须放在根 `harness/collectors/`，经过独立审查后登记到 contract 的 adapter 集合并纳入 seal。初始不登记产品 adapter。**缺 collector 永远是 BLOCKED**；不能用手写 `PASS` JSON、任意退出 0 的脚本或暂缺的采集器冒充产品验收。已有 probe 是可复用组件，不自动构成完整的 CLI／编辑器 collector。
 
 ## 4. Seal、证据与本地权限边界
@@ -130,18 +132,17 @@ Worker 交接包含生成的任务文件、精确 revision／diff、依赖产物
 
 ## 8. Harness 自身仍缺的验收工具
 
-以下 gate 在 contract 中已声明 `blocked`。它们是协调者尚未交付的验收工具，不是产品缺口，也不能被任何文档、计划、fixture 或探测升级为通过；只有全部实现并通过独立复核与重新 seal，`finish` 才可能给出 PASS。
+以下 gate 在 contract 中已声明 `blocked`。它们是协调者尚未交付的验收工具，不是产品缺口，也不能被任何文档、计划、fixture 或探测升级为通过；只有全部实现并通过独立复核与重新 seal，`finish` 才可能给出 PASS。`gts-lsp` 已于 2.4.0 登记，不再属于本表。
 
 | gate | 还缺什么 |
 | --- | --- |
 | desktop | 采集器仍绑定已退役的主仓库工作区对。需要改绑到 GTS checkout（仓库根与 `examples`）、补齐打包安装 VSIX 的启动模式、完成共享的 Linux 进程清理，再采集真实 100 轮证据 |
-| gts-lsp | 语言服务采集器本身：以 stdio 直连 `@gi-tcg/gts-language-server`，固定真实 provider 集，核验 LSP 语义与 TNB 产物身份 |
 | coverage | main 仓库 195 个 GTS 文件的逐路径 program 观测，以及当前／历史／未被 import／跨包消费的负例与修复场景 |
 | memory | 会话内存采集器；按服务采样不足以证明编辑器进程树总体内存 |
 | clean-install | 全新 checkout 的安装、检查、构建与工作区 SDK 选择证据 |
 | tnb-guards、tnb-witnesses、tnb-navigation、tnb-volar | 四个 TNB 采集器；guard 输出与 witness wiring 都不等于实际执行 |
 | platforms | 跨平台能力采集器；win32 已在本机准备，linux 仍需可用运行时与对应负例 |
 
-分批推进：先 desktop（唯一交付面的验收工具）与 platforms，再 coverage、memory、clean-install，最后 TNB 四件。采集器的期望值必须对着接近最终的产品状态生成，因此它们与产品修复并行推进，而不是提前冻结。
+分批推进：L1 的 `gts-lsp` 采集器已登记；其余先 desktop（编辑器交付面的验收工具）与 platforms，再 coverage、memory、clean-install，最后 TNB 四件。采集器的期望值必须对着接近最终的产品状态生成，因此它们与产品修复并行推进，而不是提前冻结。
 
 本文件规定目标和执行约束。实际自测结果见 REVIEW 与 runner 回执；未执行的产品 gates 不得由文档、计划、fixture 或探测成功升级为 PASS。

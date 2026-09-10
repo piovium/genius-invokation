@@ -1,6 +1,9 @@
 # Registering real product evidence
 
-The data/checks CLI adapter is registered. Other adapters remain blocked.
+Registered adapters: the data/checks CLI adapter, the command adapter used by
+main-build, main-tests, gts-build and gts-tests, and the gts-lsp stdio
+language-server adapter (`collectors/lsp/`). Every other adapter stays blocked
+with its declared reason in the contract.
 Add only the minimum glue around the
 existing pnpm scripts, Vitest, Volar, TNB tsserver harness and actual editor/UI.
 This directory, its fixtures and assertions are sealed controls, owned by the

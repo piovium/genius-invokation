@@ -1,0 +1,331 @@
+{
+  "schemaVersion": 1,
+  "description": "Reviewed expectations for the gts-lsp gate. The collector only records raw protocol answers; the validator re-derives every claim below from the hashed transcript, the live RPC trace and the resolved files on disk.",
+  "engine": {
+    "packageName": "typescript-native-bridge",
+    "version": "6.0.3-bridge.16.tsgo.7.0.2",
+    "tsgoBuildInfoVersion": "7.0.2",
+    "nativePackageTemplate": "@typescript-native-bridge/{platform}-{arch}",
+    "nativeAddonRelativePath": "native/bridge.node",
+    "bridgeLoad": {
+      "records": 1,
+      "requiredPatterns": [
+        "GODEBUG=",
+        "pid=\\d+",
+        "asyncpreemptoff=1"
+      ]
+    },
+    "minimumRpcCalls": 20,
+    "requiredRpcMethods": [
+      "updateSnapshot",
+      "getSemanticDiagnostics",
+      "quickinfo",
+      "definitionAndBoundSpan",
+      "getCompletionsAtPosition",
+      "signatureHelp"
+    ],
+    "requiredStderrFragments": [
+      "TNB ACTIVE",
+      "[tsgo-profile]"
+    ],
+    "forbiddenFragments": [
+      "__gts_",
+      "panic:",
+      "Uncaught",
+      "Unhandled rejection",
+      "heap out of memory"
+    ]
+  },
+  "server": {
+    "entry": "packages/language-server/bin/gts-language-server.js",
+    "args": [
+      "--stdio"
+    ],
+    "documentSyncKind": 2,
+    "requiredCapabilities": [
+      "hoverProvider",
+      "completionProvider",
+      "definitionProvider",
+      "signatureHelpProvider",
+      "semanticTokensProvider"
+    ]
+  },
+  "workspace": {
+    "packageJson": {
+      "type": "module",
+      "gamingTs": {
+        "providerImportSource": "{repository}/examples/provider",
+        "runtimeImportSource": "{repository}/packages/runtime/dist/index.js"
+      }
+    },
+    "tsconfig": {
+      "compilerOptions": {
+        "strict": true,
+        "noEmit": true,
+        "target": "ESNext",
+        "module": "Preserve",
+        "moduleResolution": "Bundler",
+        "jsx": "Preserve",
+        "types": [
+          "node"
+        ],
+        "allowImportingTsExtensions": true
+      },
+      "include": [
+        "./*.ts",
+        "./*.tsx",
+        "./*.gts"
+      ]
+    }
+  },
+  "texts": {
+    "current.base": "// 芭芭拉：跨文件类型与位置映射\r\ndefine character {\r\n  id 1201 as Barbara;\r\n  since \"v3.3.0\";\r\n  tags hydro, catalyst, mondstadt;\r\n  health 10;\r\n  energy 3;\r\n};\r\nexport const shared: number = 1201;\r\n",
+    "current.partialHealth": "// 芭芭拉：跨文件类型与位置映射\r\ndefine character {\r\n  id 1201 as Barbara;\r\n  since \"v3.3.0\";\r\n  tags hydro, catalyst, mondstadt;\r\n  hea;\r\n  energy 3;\r\n};\r\nexport const shared: number = 1201;\r\n",
+    "current.invalidHealthType": "// 芭芭拉：跨文件类型与位置映射\r\ndefine character {\r\n  id 1201 as Barbara;\r\n  since \"v3.3.0\";\r\n  tags hydro, catalyst, mondstadt;\r\n  health \"bad\";\r\n  energy 3;\r\n};\r\nexport const shared: number = 1201;\r\n",
+    "legacy.base": "import { Barbara } from \"./current.gts\";\r\nexport const legacy: number = Barbara;\r\n",
+    "legacy.string": "import { Barbara } from \"./current.gts\";\r\nexport const legacy: string = Barbara;\r\n",
+    "consumer.base": "import { Barbara, shared } from \"./current.gts\";\r\nimport { legacy } from \"./old_versions.gts\";\r\nexport const value: number = Barbara + legacy;\r\nexport const sharedValue: number = shared;\r\nMath.max(1, 2);\r\n"
+  },
+  "documents": [
+    {
+      "file": "current.gts",
+      "languageId": "gaming-ts",
+      "textId": "current.base"
+    },
+    {
+      "file": "old_versions.gts",
+      "languageId": "gaming-ts",
+      "textId": "legacy.base"
+    },
+    {
+      "file": "consumer.ts",
+      "languageId": "typescript",
+      "textId": "consumer.base"
+    }
+  ],
+  "steps": [
+    {
+      "id": "open-current-clean",
+      "op": "open",
+      "file": "current.gts"
+    },
+    {
+      "id": "diagnostics-current-clean",
+      "op": "diagnostics",
+      "file": "current.gts",
+      "expect": {
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "hover-character-handle",
+      "op": "hover",
+      "file": "current.gts",
+      "position": {
+        "line": 2,
+        "character": 15
+      },
+      "expect": {
+        "hoverContains": "CharacterHandle<never>"
+      }
+    },
+    {
+      "id": "edit-current-partial-health",
+      "op": "change",
+      "file": "current.gts",
+      "textId": "current.partialHealth"
+    },
+    {
+      "id": "completion-health",
+      "op": "completion",
+      "file": "current.gts",
+      "position": {
+        "line": 5,
+        "character": 5
+      },
+      "expect": {
+        "completionLabels": [
+          "health"
+        ]
+      }
+    },
+    {
+      "id": "edit-current-restore",
+      "op": "change",
+      "file": "current.gts",
+      "textId": "current.base"
+    },
+    {
+      "id": "diagnostics-current-restored",
+      "op": "diagnostics",
+      "file": "current.gts",
+      "expect": {
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "open-legacy-clean",
+      "op": "open",
+      "file": "old_versions.gts"
+    },
+    {
+      "id": "diagnostics-legacy-clean",
+      "op": "diagnostics",
+      "file": "old_versions.gts",
+      "expect": {
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "definition-legacy-to-character",
+      "op": "definition",
+      "file": "old_versions.gts",
+      "position": {
+        "line": 1,
+        "character": 31
+      },
+      "expect": {
+        "definitionFile": "current.gts",
+        "definitionStart": {
+          "line": 2,
+          "character": 13
+        }
+      }
+    },
+    {
+      "id": "open-consumer-clean",
+      "op": "open",
+      "file": "consumer.ts"
+    },
+    {
+      "id": "diagnostics-consumer-clean",
+      "op": "diagnostics",
+      "file": "consumer.ts",
+      "expect": {
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "definition-consumer-to-shared",
+      "op": "definition",
+      "file": "consumer.ts",
+      "position": {
+        "line": 3,
+        "character": 36
+      },
+      "expect": {
+        "definitionFile": "current.gts",
+        "definitionStart": {
+          "line": 8,
+          "character": 0
+        }
+      }
+    },
+    {
+      "id": "signature-max",
+      "op": "signatureHelp",
+      "file": "consumer.ts",
+      "position": {
+        "line": 4,
+        "character": 12
+      },
+      "expect": {
+        "signatureLabel": "max(...values: number[]): number"
+      }
+    },
+    {
+      "id": "edit-current-invalid-health-type",
+      "op": "change",
+      "file": "current.gts",
+      "textId": "current.invalidHealthType"
+    },
+    {
+      "id": "diagnostics-current-type-error",
+      "op": "diagnostics",
+      "file": "current.gts",
+      "expect": {
+        "diagnostics": [
+          {
+            "code": 2345,
+            "severity": 1,
+            "source": "ts",
+            "messageContains": "Argument of type 'string' is not assignable to parameter of type 'number'",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 9
+              },
+              "end": {
+                "line": 5,
+                "character": 14
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "edit-current-repair",
+      "op": "change",
+      "file": "current.gts",
+      "textId": "current.base"
+    },
+    {
+      "id": "diagnostics-current-repaired",
+      "op": "diagnostics",
+      "file": "current.gts",
+      "expect": {
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "edit-legacy-invalid-type",
+      "op": "change",
+      "file": "old_versions.gts",
+      "textId": "legacy.string"
+    },
+    {
+      "id": "diagnostics-legacy-cross-file",
+      "op": "diagnostics",
+      "file": "old_versions.gts",
+      "expect": {
+        "diagnostics": [
+          {
+            "code": 2322,
+            "severity": 1,
+            "source": "ts",
+            "messageContains": "is not assignable to type 'string'",
+            "range": {
+              "start": {
+                "line": 1,
+                "character": 13
+              },
+              "end": {
+                "line": 1,
+                "character": 19
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "edit-legacy-repair",
+      "op": "change",
+      "file": "old_versions.gts",
+      "textId": "legacy.base"
+    },
+    {
+      "id": "diagnostics-legacy-repaired",
+      "op": "diagnostics",
+      "file": "old_versions.gts",
+      "expect": {
+        "diagnostics": []
+      }
+    },
+    {
+      "id": "shutdown",
+      "op": "shutdown"
+    }
+  ]
+}

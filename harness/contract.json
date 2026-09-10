@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2.3.0",
+  "version": "2.4.0",
   "phase": "migration",
   "tnbVersion": "6.0.3-bridge.16.tsgo.7.0.2",
   "policy": {
@@ -263,8 +263,7 @@
         "gts-engine",
         "gts-build"
       ],
-      "timeoutMs": 900000,
-      "blocked": "No reviewed language-server collector is registered. The gate must drive @gi-tcg/gts-language-server over stdio with the real GamingTS provider set and prove diagnostics, hover, definition, completion and signature help, the resolved TNB package version, the loaded native addon and live RPC counters without an editor in the loop."
+      "timeoutMs": 900000
     },
     {
       "id": "desktop",
@@ -443,6 +442,11 @@
       "collector": "harness/collectors/command/command-collector.mjs",
       "validator": "harness/collectors/command/command-validator.mjs",
       "expectations": "harness/collectors/command/command-expectations.json"
+    },
+    "gts-lsp": {
+      "collector": "harness/collectors/lsp/gts-lsp-collector.mjs",
+      "validator": "harness/collectors/lsp/gts-lsp-validator.mjs",
+      "expectations": "harness/collectors/lsp/gts-lsp-expectations.json"
     }
   },
   "scopeTransitions": [
