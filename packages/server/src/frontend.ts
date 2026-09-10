@@ -87,8 +87,7 @@ export function createFrontendHandler({
     const info =
       name && name !== "index.html" ? await stat(path).catch(() => null) : null;
     if (info?.isFile()) {
-      const etag =
-        'W/"' + info.size.toString(16) + "-" + info.mtimeMs.toString(16) + '"';
+      const etag = `W/"${info.size.toString(16)}-${info.mtimeMs.toString(16)}"`;
       const headers = {
         "content-type": lookup(path) || "application/octet-stream",
         etag,
@@ -115,8 +114,7 @@ export function createFrontendHandler({
         });
         return {
           body,
-          etag:
-            '"' + createHash("sha256").update(body).digest("base64url") + '"',
+          etag: `"${createHash("sha256").update(body).digest("base64url")}"`,
         };
       })
       .catch((error) => {

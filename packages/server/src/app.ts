@@ -51,8 +51,8 @@ export function createApplication({
   const games = createGames(database, metrics);
   const auth = createAuth({ users, secret });
   const rooms = createRooms(users, decks, games, metrics);
-  const rootPath = `/${basePath.split("/").filter(Boolean).join("/")}`;
-  const prefix = `${rootPath.replace(/\/$/, "")}/api`;
+  const segments = basePath.split("/").filter(Boolean);
+  const prefix = `/${segments.join("/")}${segments.length ? "/" : ""}api`;
   const app = new Elysia({
     adapter: node(),
     strictPath: false,
@@ -71,7 +71,6 @@ export function createApplication({
         request.headers.get("access-control-request-headers") ??
         "authorization,content-type";
       if (request.method === "OPTIONS") {
-        set.status = 204;
         return new Response(null, { status: 204 });
       }
     });

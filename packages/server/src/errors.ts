@@ -3,9 +3,8 @@ import { status } from "elysia";
 /**
  * An HTTP failure raised by the game services.
  *
- * Elysia's own error classes carry nothing but a status, and this one keeps the
- * same shape: services throw it from any depth, the route boundary renders it
- * with Elysia's status() helper.
+ * Services throw it from any depth; the route boundary in `app.ts` renders it
+ * with Elysia's `status()` helper.
  */
 export class HttpError extends Error {
   constructor(
