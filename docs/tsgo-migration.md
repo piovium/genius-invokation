@@ -11,9 +11,10 @@ test is not the completed migration acceptance result.
 This is a work-in-progress checkpoint, not a release. Windows frozen installation
 and the full CI build have run successfully. Native data checks covered all 195
 GTS files in three independent successful runs. The complete package checks and
-recursive tests are still failing on bridge compatibility issues: declaration
-output paths, a type-only import sharing its name with a local value, and Vitest
-matcher interface merging. Fixes and full acceptance are still in progress.
+recursive tests exposed declaration output path incompatibility and two native
+compiler differences in type-only import names and Vitest matcher inheritance.
+This checkpoint includes the reviewed fixes; the complete build/check/test
+sequence must be rerun against this candidate before accepting them.
 The real extension's 100-round sessions and clean Linux/container build and run
 are not yet accepted. Linux frozen installation succeeded; earlier Linux builds
 were blocked by external resource downloads. Do not treat this checkpoint as a
@@ -40,8 +41,11 @@ Dependencies use exact registry versions and the repository's
 the checkout; no sibling worktree, absolute local package link, or manually
 modified installation is required. [Patch provenance](./tsgo-patches.json)
 records the released archive integrity, patch hashes and unpublished source
-revisions used for this candidate. These local source commits have not been
-pushed or published; the committed patches make installation self-contained.
+revisions used for this candidate. Source changes are saved on the
+[GTS branch](https://github.com/piovium/gts/tree/codex/tsgo-gts) and the
+[TNB fork branch](https://github.com/DrAbx123/typescript-native-bridge/tree/codex/tsgo-bridge).
+These changes have not been published to npm; the committed patches make
+installation self-contained.
 
 ## VS Code
 

@@ -86,11 +86,13 @@
         "sha256": "d5e2b1278788c8b3c5d96f3387e97349728aecd79a3b342485e7665854c22389"
       },
       "patch": "patches/typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2.patch",
-      "patchSha256": "049fcce87c2a86fefe83b306f60e08219f5cdb3c6e44bbf43101ae5f1ccbcfcb",
-      "candidatePackSha256": "bb3c444d4b301998b6e57d4fb3667f4f90f44a0550e0f22377d307d078c7511e",
+      "patchSha256": "08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629",
+      "candidatePackSha256": "9774faf4f0797286e868a62e9c333eb46317afbe9d8cbd317fe9c2818e5ff063",
       "source": {
-        "repository": "https://github.com/johnsoncodehk/typescript-native-bridge",
-        "revision": "f535c221598e70e1e1a33d16e682f1a50f554000",
+        "repository": "https://github.com/DrAbx123/typescript-native-bridge",
+        "upstream": "https://github.com/johnsoncodehk/typescript-native-bridge",
+        "branch": "codex/tsgo-bridge",
+        "revision": "b25e3117975310b4e330e7745c8c2fe28b462556",
         "published": false
       }
     },

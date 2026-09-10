@@ -1,5 +1,5 @@
 diff --git a/lib/_tsc.js b/lib/_tsc.js
-index 7abb764..cbcda06 100644
+index 7abb764..09ca4d3 100644
 --- a/lib/_tsc.js
 +++ b/lib/_tsc.js
 @@ -101309,7 +101309,7 @@ function createProgram(_rootNamesOrOptions, _options, _host, _oldProgram, _confi
@@ -239,7 +239,25 @@ index 7abb764..cbcda06 100644
      }
      return sf;
    };
-@@ -110726,9 +110754,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110647,6 +110675,17 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+     }
+     return liveProject();
+   };
++  const hostEmitFileName = (fileName) => {
++    if (fileName.endsWith(".tsbuildinfo")) return getTsBuildInfoEmitOutputFilePath(options) ?? fileName;
++    const outputDir = (/\.d\.(?:ts|mts|cts)(?:\.map)?$/.test(fileName) ? options.declarationDir || options.outDir : options.outDir) || void 0;
++    if (outputDir === void 0 || isRootedDiskPath(outputDir)) return fileName;
++    const currentDirectory = getDirectoryPath(configFilePath);
++    return combinePaths(outputDir, getRelativePathFromDirectory(
++      getNormalizedAbsolutePath(outputDir, currentDirectory),
++      fileName,
++      !_tsgoUseCaseSensitive
++    ));
++  };
+   const thinProgram = {
+     // Marks this as a tsgo-backed program: its SourceFiles come straight from
+     // tsgo and are never acquired via the LanguageService document registry.
+@@ -110726,9 +110765,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
        if (incHostName !== void 0) {
          return getOrCreateSourceFile(incHostName);
        }
@@ -249,7 +267,7 @@ index 7abb764..cbcda06 100644
        return fullSfByName.get(hostNameForQuery(pathStr)) ?? getOrCreateLightSourceFile(pathStr);
      },
      getSourceFiles: () => {
-@@ -110739,8 +110764,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110739,8 +110775,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
          let sf;
          if (preferLightProgramFiles) {
            sf = fullSfByName.get(name) ?? getOrCreateLightSourceFile(name);
@@ -258,7 +276,7 @@ index 7abb764..cbcda06 100644
          } else {
            sf = fullSfByName.get(name) ?? getOrCreateLightSourceFile(name);
          }
-@@ -110987,10 +111010,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110987,10 +111021,16 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
      // through the caller's writeFile (or the host's) so --noEmit, Volar output
      // redirection, and build-mode writeFile wrapping stay in the host's control.
      emit: (targetSourceFile, writeFile2, _ct, emitOnlyDtsFiles, customTransformers, forceDtsEmit) => {
@@ -273,10 +291,13 @@ index 7abb764..cbcda06 100644
 +      }
 +      if ((afterDeclarations == null ? void 0 : afterDeclarations.length) && (options.declarationMap || options.outFile)) {
 +        throw new Error("tsgoChecker: afterDeclarations customTransformers require declarationMap=false and no outFile \u2014 transformed declaration maps and bundles are not supported");
++      }
++      if (options.outFile) {
++        throw new Error("tsgoChecker: Program.emit does not support outFile bundles \u2014 tsgo emits individual files");
        }
        if (options.noEmit && !forceDtsEmit) {
          if (targetSourceFile) {
-@@ -111000,19 +111026,50 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -111000,19 +111040,52 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
        }
        const file = (targetSourceFile == null ? void 0 : targetSourceFile.fileName) ? tsgoFileArg(targetSourceFile.fileName) : void 0;
        const emitOnly = forceDtsEmit ? 3 : emitOnlyDtsFiles ? 2 : void 0;
@@ -289,8 +310,9 @@ index 7abb764..cbcda06 100644
        const emittedFiles = options.listEmittedFiles ? [] : void 0;
        const sourceFiles = targetSourceFile ? [targetSourceFile] : void 0;
        for (const o of outputs) {
-         const outFileName = wireFileNameToHost(o.fileName);
+-        const outFileName = wireFileNameToHost(o.fileName);
 -        if (write) write(outFileName, o.text, !!o.writeByteOrderMark, void 0, sourceFiles, {});
++        const outFileName = hostEmitFileName(wireFileNameToHost(o.fileName));
 +        let text = o.text;
 +        if ((afterDeclarations == null ? void 0 : afterDeclarations.length) && /\.d\.(?:ts|mts|cts)$/.test(outFileName)) {
 +          const declaration = createSourceFile(
@@ -324,14 +346,26 @@ index 7abb764..cbcda06 100644
 +        if (write) write(outFileName, text, !!o.writeByteOrderMark, void 0, sourceFiles, {});
          emittedFiles == null ? void 0 : emittedFiles.push(outFileName);
        }
++      const buildInfo = !targetSourceFile && !(res == null ? void 0 : res.emitSkipped) && !outputs.some((o) => o.fileName.endsWith(".tsbuildinfo")) ? thinProgram.emitBuildInfo(writeFile2, _ct) : void 0;
++      emittedFiles == null ? void 0 : emittedFiles.push(...(buildInfo == null ? void 0 : buildInfo.emittedFiles) ?? []);
        return {
-         emitSkipped: (res == null ? void 0 : res.emitSkipped) ?? false,
+-        emitSkipped: (res == null ? void 0 : res.emitSkipped) ?? false,
 -        diagnostics: mapTsgoDiagnostics(res == null ? void 0 : res.diagnostics, getDiagnosticSourceFile),
-+        diagnostics: [...mapTsgoDiagnostics(res == null ? void 0 : res.diagnostics, getDiagnosticSourceFile), ...transformerDiagnostics],
++        emitSkipped: ((res == null ? void 0 : res.emitSkipped) ?? false) || ((buildInfo == null ? void 0 : buildInfo.emitSkipped) ?? false),
++        diagnostics: [...mapTsgoDiagnostics(res == null ? void 0 : res.diagnostics, getDiagnosticSourceFile), ...transformerDiagnostics, ...(buildInfo == null ? void 0 : buildInfo.diagnostics) ?? []],
          emittedFiles,
          sourceMaps: []
        };
-@@ -112057,9 +112114,12 @@ function createTsgoChecker(program) {
+@@ -111049,7 +111122,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       const res = (_c2 = (_b2 = liveProject().program) == null ? void 0 : _b2.emitBuildInfo) == null ? void 0 : _c2.call(_b2, { build: !!options.tscBuild });
+       const outputs = (res == null ? void 0 : res.outputFiles) ?? [];
+       for (const o of outputs) {
+-        const outFileName = wireFileNameToHost(o.fileName);
++        const outFileName = hostEmitFileName(wireFileNameToHost(o.fileName));
+         let buildInfo;
+         try {
+           buildInfo = JSON.parse(o.text);
+@@ -112057,9 +112130,12 @@ function createTsgoChecker(program) {
      const additionalFiles = _lastAdditionalFilesByConfig.get(configFilePath);
      const externalChanged = programCtx == null ? void 0 : programCtx.pendingExternalChanged;
      if (programCtx) programCtx.pendingExternalChanged = void 0;
@@ -345,7 +379,7 @@ index 7abb764..cbcda06 100644
      const tabRegistry = syncHost == null ? void 0 : syncHost.projectService;
      if ((_a10 = tabRegistry == null ? void 0 : tabRegistry.openFiles) == null ? void 0 : _a10.forEach) {
        const openTabs = /* @__PURE__ */ new Set();
-@@ -112069,7 +112129,7 @@ function createTsgoChecker(program) {
+@@ -112069,7 +112145,7 @@ function createTsgoChecker(program) {
          if (((_a11 = info == null ? void 0 : info.isScriptOpen) == null ? void 0 : _a11.call(info)) && info.fileName) openTabs.add(resolveHostFileName(info.fileName, syncHost));
        });
        const closed = [..._sessionSentOpenTabs].filter((f) => !openTabs.has(f));
@@ -354,7 +388,7 @@ index 7abb764..cbcda06 100644
        _sessionSentOpenTabs.clear();
        for (const f of openTabs) _sessionSentOpenTabs.add(f);
        for (const f of closed) forgetSyncedOverlay(f);
-@@ -112083,7 +112143,7 @@ function createTsgoChecker(program) {
+@@ -112083,7 +112159,7 @@ function createTsgoChecker(program) {
        ...openFilesWithContent.length > 0 ? { openFilesWithContent } : {},
        ...extraFileExtensions ? { extraFileExtensions } : {},
        ...(additionalFiles == null ? void 0 : additionalFiles.length) ? { additionalFiles } : {},
@@ -363,7 +397,7 @@ index 7abb764..cbcda06 100644
        ...buildClose.closeParams ?? {},
        ...prefetchDiagnostics ? { prefetchDiagnostics: true } : {}
      };
-@@ -112407,20 +112467,18 @@ function createTsgoChecker(program) {
+@@ -112407,20 +112483,18 @@ function createTsgoChecker(program) {
      const syncHost = hostForOverlaySyncLocal();
      if (!syncHost) return;
      const openFiles = collectTsgoOpenFileNames(syncHost, requestedFileName ? [requestedFileName] : void 0);
@@ -389,7 +423,7 @@ index 7abb764..cbcda06 100644
          }
          continue;
        }
-@@ -112432,9 +112490,11 @@ function createTsgoChecker(program) {
+@@ -112432,9 +112506,11 @@ function createTsgoChecker(program) {
        }
        openFilesWithContent.push({ fileName: hostFileName, content: content.text, scriptKind: content.scriptKind });
      }
@@ -403,7 +437,7 @@ index 7abb764..cbcda06 100644
      traceOverlaySync(
        openFilesWithContent,
        /*deduped*/
-@@ -112444,6 +112504,7 @@ function createTsgoChecker(program) {
+@@ -112444,6 +112520,7 @@ function createTsgoChecker(program) {
        openProject: openProjectParam(ctx.configFilePath, ctx.options),
        ...openFiles.length > 0 ? { openFiles } : {},
        openFilesWithContent,
@@ -411,7 +445,7 @@ index 7abb764..cbcda06 100644
        ..._lastExtraFileExtensions ? { extraFileExtensions: _lastExtraFileExtensions } : {},
        // Host-injected extra roots (svelte2tsx/glint shims) — without them
        // every hook-driven rebuild drops the ambient shim files from the
-@@ -112465,10 +112526,12 @@ function createTsgoChecker(program) {
+@@ -112465,10 +112542,12 @@ function createTsgoChecker(program) {
      installTsgoBackedSourceFileLoader(() => project);
      for (const f of openFilesWithContent) {
        commitSyncedOverlay(f);
@@ -429,7 +463,7 @@ index 7abb764..cbcda06 100644
      _rpcTraceEvent(
        "overlay.refresh.clearCaches",
 diff --git a/lib/typescript.js b/lib/typescript.js
-index a9218a0..189668d 100644
+index a9218a0..331f330 100644
 --- a/lib/typescript.js
 +++ b/lib/typescript.js
 @@ -103593,7 +103593,7 @@ function createProgram(_rootNamesOrOptions, _options, _host, _oldProgram, _confi
@@ -669,7 +703,25 @@ index a9218a0..189668d 100644
      }
      return sf;
    };
-@@ -113012,9 +113040,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -112933,6 +112961,17 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+     }
+     return liveProject();
+   };
++  const hostEmitFileName = (fileName) => {
++    if (fileName.endsWith(".tsbuildinfo")) return getTsBuildInfoEmitOutputFilePath(options) ?? fileName;
++    const outputDir = (/\.d\.(?:ts|mts|cts)(?:\.map)?$/.test(fileName) ? options.declarationDir || options.outDir : options.outDir) || void 0;
++    if (outputDir === void 0 || isRootedDiskPath(outputDir)) return fileName;
++    const currentDirectory = getDirectoryPath(configFilePath);
++    return combinePaths(outputDir, getRelativePathFromDirectory(
++      getNormalizedAbsolutePath(outputDir, currentDirectory),
++      fileName,
++      !_tsgoUseCaseSensitive
++    ));
++  };
+   const thinProgram = {
+     // Marks this as a tsgo-backed program: its SourceFiles come straight from
+     // tsgo and are never acquired via the LanguageService document registry.
+@@ -113012,9 +113051,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
        if (incHostName !== void 0) {
          return getOrCreateSourceFile(incHostName);
        }
@@ -679,7 +731,7 @@ index a9218a0..189668d 100644
        return fullSfByName.get(hostNameForQuery(pathStr)) ?? getOrCreateLightSourceFile(pathStr);
      },
      getSourceFiles: () => {
-@@ -113025,8 +113050,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -113025,8 +113061,6 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
          let sf;
          if (preferLightProgramFiles) {
            sf = fullSfByName.get(name) ?? getOrCreateLightSourceFile(name);
@@ -688,7 +740,7 @@ index a9218a0..189668d 100644
          } else {
            sf = fullSfByName.get(name) ?? getOrCreateLightSourceFile(name);
          }
-@@ -113273,10 +113296,13 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -113273,10 +113307,16 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
      // through the caller's writeFile (or the host's) so --noEmit, Volar output
      // redirection, and build-mode writeFile wrapping stay in the host's control.
      emit: (targetSourceFile, writeFile2, _ct, emitOnlyDtsFiles, customTransformers, forceDtsEmit) => {
@@ -703,10 +755,13 @@ index a9218a0..189668d 100644
 +      }
 +      if ((afterDeclarations == null ? void 0 : afterDeclarations.length) && (options.declarationMap || options.outFile)) {
 +        throw new Error("tsgoChecker: afterDeclarations customTransformers require declarationMap=false and no outFile \u2014 transformed declaration maps and bundles are not supported");
++      }
++      if (options.outFile) {
++        throw new Error("tsgoChecker: Program.emit does not support outFile bundles \u2014 tsgo emits individual files");
        }
        if (options.noEmit && !forceDtsEmit) {
          if (targetSourceFile) {
-@@ -113286,19 +113312,50 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -113286,19 +113326,52 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
        }
        const file = (targetSourceFile == null ? void 0 : targetSourceFile.fileName) ? tsgoFileArg(targetSourceFile.fileName) : void 0;
        const emitOnly = forceDtsEmit ? 3 : emitOnlyDtsFiles ? 2 : void 0;
@@ -719,8 +774,9 @@ index a9218a0..189668d 100644
        const emittedFiles = options.listEmittedFiles ? [] : void 0;
        const sourceFiles = targetSourceFile ? [targetSourceFile] : void 0;
        for (const o of outputs) {
-         const outFileName = wireFileNameToHost(o.fileName);
+-        const outFileName = wireFileNameToHost(o.fileName);
 -        if (write) write(outFileName, o.text, !!o.writeByteOrderMark, void 0, sourceFiles, {});
++        const outFileName = hostEmitFileName(wireFileNameToHost(o.fileName));
 +        let text = o.text;
 +        if ((afterDeclarations == null ? void 0 : afterDeclarations.length) && /\.d\.(?:ts|mts|cts)$/.test(outFileName)) {
 +          const declaration = createSourceFile(
@@ -754,14 +810,26 @@ index a9218a0..189668d 100644
 +        if (write) write(outFileName, text, !!o.writeByteOrderMark, void 0, sourceFiles, {});
          emittedFiles == null ? void 0 : emittedFiles.push(outFileName);
        }
++      const buildInfo = !targetSourceFile && !(res == null ? void 0 : res.emitSkipped) && !outputs.some((o) => o.fileName.endsWith(".tsbuildinfo")) ? thinProgram.emitBuildInfo(writeFile2, _ct) : void 0;
++      emittedFiles == null ? void 0 : emittedFiles.push(...(buildInfo == null ? void 0 : buildInfo.emittedFiles) ?? []);
        return {
-         emitSkipped: (res == null ? void 0 : res.emitSkipped) ?? false,
+-        emitSkipped: (res == null ? void 0 : res.emitSkipped) ?? false,
 -        diagnostics: mapTsgoDiagnostics(res == null ? void 0 : res.diagnostics, getDiagnosticSourceFile),
-+        diagnostics: [...mapTsgoDiagnostics(res == null ? void 0 : res.diagnostics, getDiagnosticSourceFile), ...transformerDiagnostics],
++        emitSkipped: ((res == null ? void 0 : res.emitSkipped) ?? false) || ((buildInfo == null ? void 0 : buildInfo.emitSkipped) ?? false),
++        diagnostics: [...mapTsgoDiagnostics(res == null ? void 0 : res.diagnostics, getDiagnosticSourceFile), ...transformerDiagnostics, ...(buildInfo == null ? void 0 : buildInfo.diagnostics) ?? []],
          emittedFiles,
          sourceMaps: []
        };
-@@ -114343,9 +114400,12 @@ function createTsgoChecker(program) {
+@@ -113335,7 +113408,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       const res = (_c2 = (_b2 = liveProject().program) == null ? void 0 : _b2.emitBuildInfo) == null ? void 0 : _c2.call(_b2, { build: !!options.tscBuild });
+       const outputs = (res == null ? void 0 : res.outputFiles) ?? [];
+       for (const o of outputs) {
+-        const outFileName = wireFileNameToHost(o.fileName);
++        const outFileName = hostEmitFileName(wireFileNameToHost(o.fileName));
+         let buildInfo;
+         try {
+           buildInfo = JSON.parse(o.text);
+@@ -114343,9 +114416,12 @@ function createTsgoChecker(program) {
      const additionalFiles = _lastAdditionalFilesByConfig.get(configFilePath);
      const externalChanged = programCtx == null ? void 0 : programCtx.pendingExternalChanged;
      if (programCtx) programCtx.pendingExternalChanged = void 0;
@@ -775,7 +843,7 @@ index a9218a0..189668d 100644
      const tabRegistry = syncHost == null ? void 0 : syncHost.projectService;
      if ((_a10 = tabRegistry == null ? void 0 : tabRegistry.openFiles) == null ? void 0 : _a10.forEach) {
        const openTabs = /* @__PURE__ */ new Set();
-@@ -114355,7 +114415,7 @@ function createTsgoChecker(program) {
+@@ -114355,7 +114431,7 @@ function createTsgoChecker(program) {
          if (((_a11 = info == null ? void 0 : info.isScriptOpen) == null ? void 0 : _a11.call(info)) && info.fileName) openTabs.add(resolveHostFileName(info.fileName, syncHost));
        });
        const closed = [..._sessionSentOpenTabs].filter((f) => !openTabs.has(f));
@@ -784,7 +852,7 @@ index a9218a0..189668d 100644
        _sessionSentOpenTabs.clear();
        for (const f of openTabs) _sessionSentOpenTabs.add(f);
        for (const f of closed) forgetSyncedOverlay(f);
-@@ -114369,7 +114429,7 @@ function createTsgoChecker(program) {
+@@ -114369,7 +114445,7 @@ function createTsgoChecker(program) {
        ...openFilesWithContent.length > 0 ? { openFilesWithContent } : {},
        ...extraFileExtensions ? { extraFileExtensions } : {},
        ...(additionalFiles == null ? void 0 : additionalFiles.length) ? { additionalFiles } : {},
@@ -793,7 +861,7 @@ index a9218a0..189668d 100644
        ...buildClose.closeParams ?? {},
        ...prefetchDiagnostics ? { prefetchDiagnostics: true } : {}
      };
-@@ -114693,20 +114753,18 @@ function createTsgoChecker(program) {
+@@ -114693,20 +114769,18 @@ function createTsgoChecker(program) {
      const syncHost = hostForOverlaySyncLocal();
      if (!syncHost) return;
      const openFiles = collectTsgoOpenFileNames(syncHost, requestedFileName ? [requestedFileName] : void 0);
@@ -819,7 +887,7 @@ index a9218a0..189668d 100644
          }
          continue;
        }
-@@ -114718,9 +114776,11 @@ function createTsgoChecker(program) {
+@@ -114718,9 +114792,11 @@ function createTsgoChecker(program) {
        }
        openFilesWithContent.push({ fileName: hostFileName, content: content.text, scriptKind: content.scriptKind });
      }
@@ -833,7 +901,7 @@ index a9218a0..189668d 100644
      traceOverlaySync(
        openFilesWithContent,
        /*deduped*/
-@@ -114730,6 +114790,7 @@ function createTsgoChecker(program) {
+@@ -114730,6 +114806,7 @@ function createTsgoChecker(program) {
        openProject: openProjectParam(ctx.configFilePath, ctx.options),
        ...openFiles.length > 0 ? { openFiles } : {},
        openFilesWithContent,
@@ -841,7 +909,7 @@ index a9218a0..189668d 100644
        ..._lastExtraFileExtensions ? { extraFileExtensions: _lastExtraFileExtensions } : {},
        // Host-injected extra roots (svelte2tsx/glint shims) — without them
        // every hook-driven rebuild drops the ambient shim files from the
-@@ -114751,10 +114812,12 @@ function createTsgoChecker(program) {
+@@ -114751,10 +114828,12 @@ function createTsgoChecker(program) {
      installTsgoBackedSourceFileLoader(() => project);
      for (const f of openFilesWithContent) {
        commitSyncedOverlay(f);
@@ -858,7 +926,7 @@ index a9218a0..189668d 100644
      }
      _rpcTraceEvent(
        "overlay.refresh.clearCaches",
-@@ -167481,7 +167544,6 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
+@@ -167481,7 +167560,6 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
        getComments: (decls) => ts_JsDoc_exports.getJsDocCommentsFromDeclarations(decls),
        getTags: (decls) => ts_JsDoc_exports.getJsDocTagsFromDeclarations(decls)
      });
@@ -866,7 +934,7 @@ index a9218a0..189668d 100644
      let compilerHost = {
        getSourceFile: getOrCreateSourceFile,
        getSourceFileByPath: getOrCreateSourceFileByPath,
-@@ -167524,6 +167586,7 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
+@@ -167524,6 +167602,7 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
        jsDocParsingMode: host.jsDocParsingMode,
        getGlobalTypingsCacheLocation: maybeBind(host, host.getGlobalTypingsCacheLocation)
      };
@@ -875,7 +943,7 @@ index a9218a0..189668d 100644
      const { getSourceFileWithCache } = changeCompilerHostLikeToUseCache(
        compilerHost,
 diff --git a/package.json b/package.json
-index f8d9e92..ea8877f 100644
+index f8d9e92..7c24f19 100644
 --- a/package.json
 +++ b/package.json
 @@ -1,59 +1,72 @@
@@ -996,8 +1064,8 @@ index f8d9e92..ea8877f 100644
 +  },
 +  "tnbLocalBuild": {
 +    "kind": "unpublished-local-build",
-+    "base": "f535c221598e70e1e1a33d16e682f1a50f554000",
-+    "sourceCommit": "f535c221598e70e1e1a33d16e682f1a50f554000",
++    "base": "b25e3117975310b4e330e7745c8c2fe28b462556",
++    "sourceCommit": "b25e3117975310b4e330e7745c8c2fe28b462556",
 +    "submodulePins": {
 +      "typescript": "050880ce59e30b356b686bd3144efe24f875ebc8",
 +      "typescriptGo": "2bd066d87f5bafd315be9f40889d0a60b9e58e0b"
@@ -1005,6 +1073,6 @@ index f8d9e92..ea8877f 100644
 +    "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 +    "releaseMainSha256": "d5e2b1278788c8b3c5d96f3387e97349728aecd79a3b342485e7665854c22389",
 +    "nativeSha256": "32be259fa2027f7b4ba26f78827293b187f1eb000eb5c6761dda171cd5c9a4cb",
-+    "compilerSha256": "4cf4c984cee84d50885931f682a754904a12fcedc168029ba4f6f660596469d3"
++    "compilerSha256": "d25155a6d5cd6cbe27243390bed478c97b793f9471f4fa665aef390cacb3c89a"
 +  }
  }
