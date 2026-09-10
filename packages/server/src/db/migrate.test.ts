@@ -28,12 +28,12 @@ test(
     const base = new URL(testUrl!);
     if (base.pathname !== "/gi_server_harness")
       throw new Error("Use the isolated gi_server_harness database");
-    const name = scratchSchema();
+    const schema = scratchSchema();
     const admin = createSql(base.toString());
     let client: Client | undefined;
     try {
-      await admin.unsafe(`CREATE SCHEMA "${name}"`);
-      base.searchParams.set("schema", name);
+      await admin.unsafe(`CREATE SCHEMA "${schema}"`);
+      base.searchParams.set("schema", schema);
       const scopedUrl = base.toString();
       const migrate = () => migrateDatabase(scopedUrl, migrationsDirectory);
       const first = await migrate();
@@ -82,7 +82,7 @@ test(
       await assert.rejects(migrate(), /foreign key differs/);
     } finally {
       await client?.close();
-      await admin.unsafe(`DROP SCHEMA IF EXISTS "${name}" CASCADE`);
+      await admin.unsafe(`DROP SCHEMA IF EXISTS "${schema}" CASCADE`);
       await admin.close();
     }
   },

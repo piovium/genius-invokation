@@ -49,14 +49,14 @@ const digest = (text: string) =>
   createHash("sha256").update(text).digest("hex");
 
 // Independent from the generator: changes to its projection must still be checked.
-const expectedMetadataFields = [
+const expectedMetadataFields: readonly string[] = [
   "id",
   "shareId",
   "tags",
   "sinceVersion",
   "relatedCharacterId",
   "relatedCharacterTags",
-] as const;
+];
 
 test("all real raw metadata fields, record order, duplicates, and source hashes match the generated index", async () => {
   const expected: Record<string, unknown> = {};
@@ -78,7 +78,7 @@ test("all real raw metadata fields, record order, duplicates, and source hashes 
       // verifier and minimum-version function, including missing properties.
       expected[id] = Object.fromEntries(
         Object.entries(record).filter(([key]) =>
-          expectedMetadataFields.some((field) => field === key),
+          expectedMetadataFields.includes(key),
         ),
       );
     }

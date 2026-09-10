@@ -53,6 +53,19 @@ async function waitFor(
   }
 }
 
+/**
+ * Asserts the frame arrived as binary and is a notification, then returns its
+ * payload.
+ */
+function receiveNotification(bytes: unknown, binary: boolean): Uint8Array {
+  assert.equal(binary, true);
+  const frame = decodeGameFrame(new Uint8Array(bytes as Buffer));
+  assert.equal(frame.type, "notification");
+  if (frame.type !== "notification")
+    throw new Error("Expected a notification frame");
+  return frame.data;
+}
+
 async function fixture() {
   const subscriptions = new Map<number, Set<RoomSubscriber>>();
   const rooms: Pick<
@@ -143,13 +156,10 @@ test(
       const fast = await service.connect(20);
       const fastMessages: number[] = [];
       fast.on("message", (bytes, binary) => {
-        assert.equal(binary, true);
-        const frame = decodeGameFrame(new Uint8Array(bytes as Buffer));
-        assert.equal(frame.type, "notification");
-        if (frame.type === "notification")
-          fastMessages.push(
-            new DataView(frame.data.buffer, frame.data.byteOffset).getUint32(0),
-          );
+        const data = receiveNotification(bytes, binary);
+        fastMessages.push(
+          new DataView(data.buffer, data.byteOffset).getUint32(0),
+        );
       });
       slow.pause(); // Public ws API pauses reads from the actual client TCP socket.
       const slowClosed = once(slow, "close", {
@@ -222,14 +232,13 @@ test(
             type: "notification",
             data: Uint8Array.of(round, i),
           });
-        for (const [i, result] of (await Promise.all(received)).entries()) {
-          const [bytes, binary] = result;
-          assert.equal(binary, true);
-          const frame = decodeGameFrame(new Uint8Array(bytes as Buffer));
-          assert.equal(frame.type, "notification");
-          if (frame.type === "notification")
-            assert.deepEqual(frame.data, Uint8Array.of(round, i));
-        }
+        for (const [i, [bytes, binary]] of (
+          await Promise.all(received)
+        ).entries())
+          assert.deepEqual(
+            receiveNotification(bytes, binary),
+            Uint8Array.of(round, i),
+          );
         await Promise.all(
           sockets.map(async (socket) => {
             const closed = once(socket, "close", {

@@ -18,7 +18,13 @@ const config: RoomConfig = {
 const request: RpcRequest = { request: { $case: "switchHands", value: {} } };
 // Protobuf-encoded Response { switchHands: {} }, matching `request` above.
 const response = Uint8Array.of(0x12, 0);
+// A different SwitchHandsResponse for the same RPC ID: it removes hand id 2.
+const otherResponse = Uint8Array.of(0x12, 2, 8, 2);
 const SESSION_ID = "session-test";
+// The Player retains a bounded ACK window; issue more RPCs than it holds so
+// the oldest acknowledgements are evicted.
+const RPC_COUNT = 48;
+const RECOVERY_WINDOW = 32;
 const createPlayer = (id = "guest-test", sessionId = SESSION_ID) => {
   const instance = new Player(
     { id, isGuest: true, name: id, deck: { characters: [], cards: [] } },
@@ -52,7 +58,7 @@ test("real Player accepts once synchronously across concurrent callers and repla
     assert.equal(first.sessionId, SESSION_ID);
     assert.throws(
       // A different SwitchHandsResponse for the same RPC must be rejected.
-      () => instance.receiveResponse(0, Uint8Array.of(0x12, 2, 8, 2)),
+      () => instance.receiveResponse(0, otherResponse),
       hasCode("CONFLICT"),
     );
     assert.deepEqual(await pending, PbRpcResponse.decode(response));
@@ -71,20 +77,28 @@ test("the last 32 accepted RPCs remain recoverable while evicted commands never 
   const instance = createPlayer();
   let executions = 0;
   try {
-    for (let id = 0; id < 48; id++) {
+    for (let id = 0; id < RPC_COUNT; id++) {
       const pending = instance.rpc(request).then(() => {
         executions++;
       });
       instance.receiveResponse(id, response);
       await pending;
     }
+    const firstEvictedId = RPC_COUNT - RECOVERY_WINDOW - 1;
+    const firstRetainedId = RPC_COUNT - RECOVERY_WINDOW;
     assert.throws(
-      () => instance.receiveResponse(15, response),
+      () => instance.receiveResponse(firstEvictedId, response),
       hasCode("STALE_RPC"),
     );
-    assert.equal(instance.receiveResponse(16, response).id, 16);
-    assert.equal(instance.receiveResponse(47, response).id, 47);
-    assert.equal(executions, 48);
+    assert.equal(
+      instance.receiveResponse(firstRetainedId, response).id,
+      firstRetainedId,
+    );
+    assert.equal(
+      instance.receiveResponse(RPC_COUNT - 1, response).id,
+      RPC_COUNT - 1,
+    );
+    assert.equal(executions, RPC_COUNT);
   } finally {
     instance.dispose();
   }
@@ -165,7 +179,7 @@ test("real engine switch-hands IO advances once and rejects invalid card choices
     ]);
     assert.equal(game.state.phase, "initHands");
     assert.throws(
-      () => players[0].receiveResponse(id0, Uint8Array.of(0x12, 2, 8, 2)),
+      () => players[0].receiveResponse(id0, otherResponse),
       hasCode("INVALID_RESPONSE"),
     );
     assert.equal(game.state.phase, "initHands");

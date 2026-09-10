@@ -9,6 +9,12 @@ import type { Users } from "../users/users";
 import { createGuestId } from "./guest-id";
 import { listenHttp } from "../http-server";
 
+// The server caps tokens at 8 KiB; one byte past the cap must still be rejected.
+const MAX_TOKEN_LENGTH = 8192;
+const OVER_LONG_TOKEN = "a".repeat(MAX_TOKEN_LENGTH + 1);
+// Guest JWTs are issued for 42 days.
+const GUEST_TOKEN_TTL_SECONDS = 42 * 86400;
+
 function createTestJwt(payload: unknown, secret: string, alg = "HS256") {
   const header = Buffer.from(JSON.stringify({ alg, typ: "JWT" })).toString(
     "base64url",
@@ -78,7 +84,7 @@ test("existing user JWTs and new guest JWTs verify; tampering, expiry and algori
   const guestPayload = JSON.parse(
     Buffer.from(guestToken.split(".")[1]!, "base64url").toString(),
   );
-  assert.equal(guestPayload.exp - guestPayload.iat, 42 * 86400);
+  assert.equal(guestPayload.exp - guestPayload.iat, GUEST_TOKEN_TTL_SECONDS);
   for (const token of [
     createTestJwt(payload, "other-secret"),
     createTestJwt(payload, "unit-fixture-secret", "none"),
@@ -89,7 +95,7 @@ test("existing user JWTs and new guest JWTs verify; tampering, expiry and algori
       "unit-fixture-secret",
     ),
     guestToken + ".extra",
-    "a".repeat(8193),
+    OVER_LONG_TOKEN,
   ])
     assert.equal(auth.verify(token), null);
 });

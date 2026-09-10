@@ -35,8 +35,7 @@ test("real Elysia HTTP serves public routes and metrics, guards protected APIs, 
   });
   const request = (path: string, init?: RequestInit) =>
     fetch(new URL(path, server.url), init);
-  const getJson = async (path: string, init?: RequestInit) =>
-    (await request(path, init)).json();
+  const getJson = async (path: string) => (await request(path)).json();
   try {
     assert.equal(
       await (await request(apiPath("hello"))).text(),
