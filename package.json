@@ -14,7 +14,7 @@
     ".filter": "gnx scripts/filter.ts",
     ".filter-prod": "gnx scripts/filter.ts -P",
     "build": "pnpm .filter build",
-    "check": "pnpm --recursive --workspace-concurrency=1 check",
+    "check": "pnpm -r --workspace-concurrency=1 check",
     "test": "pnpm -r test",
     "publish": "pnpm -r publish",
     "build:no-typing": "NO_TYPING=1 pnpm build"

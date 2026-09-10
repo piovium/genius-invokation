@@ -17,7 +17,7 @@ import type {
   DetailLogEntry as DetailLogEntryData,
   DetailLogType,
 } from "@gi-tcg/core";
-import { For, Show, createEffect, createSignal } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
 import styles from "./style.css?inline";
 import { getNameSync } from "@gi-tcg/assets-manager";
 
