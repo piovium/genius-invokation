@@ -26,6 +26,8 @@ function isRpcId(value) {
   return Number.isSafeInteger(value) && value >= 0;
 }
 
+const commandKey = (command, id) => (command === "giveUp" ? command : `${command}:${id}`);
+
 function parseJson(text) {
   if (typeof text !== "string" || text.length > MAX_MESSAGE_CHARS) {
     throw new Error("Expected a bounded JSON text message");
@@ -334,12 +336,7 @@ async function connectWebSocket({
   let ready = false;
   let readyMetadata;
   let readySessionId;
-  let resolveReady;
-  let rejectReady;
-  const authenticated = new Promise((resolve, reject) => {
-    resolveReady = resolve;
-    rejectReady = reject;
-  });
+  const { promise: authenticated, resolve: resolveReady, reject: rejectReady } = Promise.withResolvers();
   const connectTimer = setTimeout(() => {
     mailbox.fail(new Error(`WebSocket authentication timed out (${timeoutMs}ms)`));
   }, timeoutMs);
@@ -392,7 +389,7 @@ async function connectWebSocket({
         if (value.type === "ack" && value.sessionId !== readySessionId) {
           throw new Error("WebSocket acknowledgement sessionId does not match ready session");
         }
-        const key = command === "giveUp" ? command : `${command}:${id}`;
+        const key = commandKey(command, id);
         const entry = pending.get(key);
         if (!entry) throw new Error("Unmatched WebSocket command acknowledgement");
         pending.delete(key);
@@ -454,7 +451,7 @@ async function connectWebSocket({
     const frame = type === "actionResponse"
       ? encodeGameFrame({ type, id, response })
       : JSON.stringify({ type });
-    const key = type === "giveUp" ? type : `${type}:${id}`;
+    const key = commandKey(type, id);
     if (pending.has(key)) throw new Error(`Command already pending: ${key}`);
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {

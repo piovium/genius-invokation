@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { once } from "node:events";
 import { createServer } from "node:http";
 import { setImmediate as immediate } from "node:timers/promises";
 import test from "node:test";
@@ -37,7 +38,8 @@ async function sseFixture(t, handler) {
       response.end('{"message":"ok"}');
     }
   });
-  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
   t.after(async () => {
     server.closeAllConnections();
     await new Promise((resolve) => server.close(resolve));

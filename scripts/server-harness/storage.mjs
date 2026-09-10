@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { waitUntil } from "./http.mjs";
 
-// Two existing, disposable test users. Tokens stay in the environment, never reports.
+// Two existing, disposable test users. Tokens stay in the environment, never in reports.
 export async function prepareStorage(api, deck, tokenEnvNames) {
   assert.equal(tokenEnvNames.length, 2, "Storage checks require two test users");
   const accounts = [];
@@ -58,7 +58,7 @@ export async function checkStoredGame(api, accounts, game, timeoutMs) {
     }
     return null;
   }, timeoutMs, "game persisted with matching replay room id");
-  const players = [...stored.players].sort((a, b) => a.who - b.who);
+  const players = stored.players.toSorted((a, b) => a.who - b.who);
   assert.deepEqual(players.map((p) => p.who), [0, 1]);
   assert.deepEqual(players.map((p) => p.player.id), accounts.map((p) => p.playerId));
   const winner = game.players[0].winner;

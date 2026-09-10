@@ -14,7 +14,7 @@ node scripts/server-harness/experiments/run.mjs --output temp/server-harness/exp
 在 Linux/Docker 运行同一套实验：
 
 ```sh
-# 工作树根目录；构建上下文只包含实验目录，避免发送 temp 下的数据库/WSL文件
+# 工作树根目录；构建上下文只包含实验目录，避免发送 temp 下的数据库/WSL 文件
 docker build -t gi-server-harness-experiments:local -f scripts/server-harness/experiments/Dockerfile scripts/server-harness/experiments
 docker run --rm --network=none --memory=384m --cpus=1 \
   --mount "type=bind,source=$PWD,target=/workspace" \

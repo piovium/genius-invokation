@@ -1,11 +1,12 @@
 #!/bin/sh
 set -eu
 
-# This script runs only inside the dedicated Compose PostgreSQL container.
+# This script runs only inside the dedicated Compose PostgreSQL container, and
+# it fails closed on the wrong database, user, tokens, or missing migrations.
 [ "${POSTGRES_DB:-}" = gi_server_harness ] || { echo 'Unexpected fixture database' >&2; exit 1; }
 [ "${POSTGRES_USER:-}" = harness ] || { echo 'Unexpected fixture database user' >&2; exit 1; }
 [ -n "${HARNESS_GH_TOKEN_A:-}" ] && [ -n "${HARNESS_GH_TOKEN_B:-}" ]
-test -d /harness/migrations
+[ -d /harness/migrations ]
 script_file=$(mktemp /tmp/gi-harness-migrations.XXXXXX)
 trap 'rm -f "$script_file"' EXIT HUP INT TERM
 
@@ -20,8 +21,9 @@ CREATE TABLE IF NOT EXISTS "_HarnessMigration" (
 );
 SQL
 
-# Lexical timestamp order is the frozen old service migration order. Preserve
-# the original SQL files and record their exact hashes; never silently reapply them.
+# The glob expands in lexical order, which is the frozen old service migration
+# order. Keep the source SQL files untouched and record their exact hashes: an
+# already-applied migration is skipped, and a changed checksum fails loudly.
 for migration in /harness/migrations/*/migration.sql; do
   test -f "$migration"
   migration_dir=${migration%/migration.sql}
@@ -44,6 +46,7 @@ INSERT INTO "_HarnessMigration" ("name", "sha256") VALUES ('$migration_name', '$
 SQL
 done
 
+# Seed the two fixture users with their synthetic GitHub tokens.
 cat >> "$script_file" <<'SQL'
 \getenv harness_token_a HARNESS_GH_TOKEN_A
 \getenv harness_token_b HARNESS_GH_TOKEN_B

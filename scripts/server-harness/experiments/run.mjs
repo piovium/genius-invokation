@@ -15,7 +15,8 @@ const { values } = parseArgs({
 });
 if (values.help) {
   console.log(
-    "node scripts/server-harness/experiments/run.mjs [--output <report.json>]\nRequires Node 24+ and the isolated ws dependency. Missing Node or any failed case exits 1; no mocked fallback.",
+    `node scripts/server-harness/experiments/run.mjs [--output <report.json>]
+Requires Node 24+ and the isolated ws dependency. Missing Node or any failed case exits 1; no mocked fallback.`,
   );
   process.exit(0);
 }
@@ -73,7 +74,7 @@ try {
 }
 const sourceHash = createHash("sha256");
 async function fingerprint(path) {
-  for (const entry of (await readdir(path, { withFileTypes: true })).sort(
+  for (const entry of (await readdir(path, { withFileTypes: true })).toSorted(
     (a, b) => a.name.localeCompare(b.name),
   )) {
     if (entry.name === "node_modules") continue;

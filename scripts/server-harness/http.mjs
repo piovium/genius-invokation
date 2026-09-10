@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
+import { setTimeout as delay } from "node:timers/promises";
 
-export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+export { delay };
 
 // Keep credentials and response bodies out of diagnostics/reports.
-export function createApi(baseUrl, timeoutMs = 10000) {
+export function createApi(baseUrl, timeoutMs = 10_000) {
   return async (path, { method = "GET", body, token, status = [200, 201, 204] } = {}) => {
     const response = await fetch(`${baseUrl.replace(/\/$/, "")}${path}`, {
       method,

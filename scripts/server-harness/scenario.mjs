@@ -135,10 +135,11 @@ export async function playGame({ api, config, deck, strategy, reconnect = false,
           if (who === 0 && !negativeChecked) {
             negativeChecked = true;
             const rejectedCommand = /actionResponse (returned HTTP (400|404|409)|rejected:)/;
-            const response = (base64) => config.transport === "ws" ? new Uint8Array(Buffer.from(base64, "base64")) : base64;
-            await assert.rejects(sessions[0].sendResponse(rpc.id + 100000, response("EgA=")), rejectedCommand);
+            const encodeResponse = (base64) =>
+              config.transport === "ws" ? new Uint8Array(Buffer.from(base64, "base64")) : base64;
+            await assert.rejects(sessions[0].sendResponse(rpc.id + 100000, encodeResponse("EgA=")), rejectedCommand);
             checks.push("wrong-rpc-id-rejected");
-            await assert.rejects(sessions[0].sendResponse(rpc.id, response("AA==")), rejectedCommand);
+            await assert.rejects(sessions[0].sendResponse(rpc.id, encodeResponse("AA==")), rejectedCommand);
             checks.push("malformed-rpc-rejected");
           }
           const answer = answerRpc(rpc.request, { strategy });

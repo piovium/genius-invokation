@@ -55,7 +55,7 @@ function notification(phase, round = 1, viewer = 0) {
   return { type: "notification", data: Buffer.concat([Buffer.from([0x0a, state.length]), state]).toString("base64") };
 }
 
-function initialized(room, who) {
+function initialized(who) {
   return { type: "initialized", who, config: { watchable: false, gameVersion: "v3.7.0" },
     myPlayerInfo: { id: playerIds[who] }, oppPlayerInfo: { id: playerIds[1 - who] } };
 }
@@ -68,7 +68,7 @@ function currentRpc(room, who) {
 }
 
 function replay(room, who, response) {
-  emit(response, initialized(room, who));
+  emit(response, initialized(who));
   emit(response, notification(room.finished ? 5 : Math.min(room.players[who].stage, 3), room.finished ? 15 : 1, who));
   if (!room.finished) emit(response, currentRpc(room, who));
 }
@@ -83,10 +83,13 @@ function finish(room) {
   setTimeout(() => rooms.delete(room.id), 150);
 }
 
+// Stage 4 always ends the player; stage 3 ends only after declaring end.
+const endsPlayerTurn = (player, hex) => player.stage === 4 || (player.stage === 3 && hex === "22020801");
+
 function advance(room, who, hex) {
   const player = room.players[who];
   notify(room, who, { type: "rpc", data: null });
-  if (player.stage === 4 || (player.stage === 3 && hex === "22020801")) player.done = true;
+  if (endsPlayerTurn(player, hex)) player.done = true;
   else player.stage++;
   if (room.players.every((entry) => entry.done)) finish(room);
   else if (!player.done) {
@@ -155,7 +158,7 @@ const server = createServer(async (request, response) => {
       const hex = typeof input.response === "string" ? Buffer.from(input.response, "base64").toString("hex") : "";
       const allowed = [["1200"], ["1a020801"], ["0a00"], ["2200", "22020801"], ["2200"]][player.stage];
       if (!allowed.includes(hex)) return json(response, 400, { message: "Fixture RPC response mismatch" });
-      const endsPlayer = player.stage === 4 || (player.stage === 3 && hex === "22020801");
+      const endsPlayer = endsPlayerTurn(player, hex);
       if (endsPlayer && room.players[1 - who].done) {
         advance(room, who, hex);
         // The final HTTP acknowledgement arrives after the stream has already ended.

@@ -2,6 +2,14 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { encodeGameFrame, decodeGameFrame } from "../wire.mjs";
 
+function withTimeout(promise, ms, message) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
 export function nodeAvailability() {
   return {
     available: Number(process.versions.node.split(".")[0]) >= 24,
@@ -38,21 +46,10 @@ export async function startExperimentServer() {
     stopped = true;
     if (child.exitCode === null && child.signalCode === null) child.kill();
     const forced = setTimeout(() => child.kill("SIGKILL"), 2000);
-    let deadline;
     try {
-      await Promise.race([
-        exited,
-        new Promise((_, reject) => {
-          deadline = setTimeout(
-            () =>
-              reject(new Error("Node fixture failed to stop within 5 seconds")),
-            5000,
-          );
-        }),
-      ]);
+      await withTimeout(exited, 5000, "Node fixture failed to stop within 5 seconds");
     } finally {
       clearTimeout(forced);
-      clearTimeout(deadline);
     }
   };
   let ready;
@@ -132,7 +129,7 @@ export function socketUrl(server, room, player = room.players[0]) {
   return `${server.baseUrl.replace(/^http/, "ws")}/rooms/${encodeURIComponent(room.roomId)}/players/${encodeURIComponent(player.playerId)}/ws`;
 }
 
-// A journal retains messages received before a close, including the ACK/close race.
+// Keep received messages even after a close, so an ACK racing the close can still be matched.
 export async function connectSocket(url, { timeoutMs = 3000 } = {}) {
   const socket = new WebSocket(url);
   socket.binaryType = "arraybuffer";
@@ -140,7 +137,7 @@ export async function connectSocket(url, { timeoutMs = 3000 } = {}) {
   const pending = new Set();
   let closed = null;
   let failure = null;
-  const { promise: closure, resolve: resolveClosed } = Promise.withResolvers();
+  const { promise: closedPromise, resolve: resolveClosed } = Promise.withResolvers();
   function drain() {
     for (const waiter of pending) {
       const index = messages.findIndex(
@@ -231,16 +228,7 @@ export async function connectSocket(url, { timeoutMs = 3000 } = {}) {
     },
     waitClosed(waitMs = timeoutMs) {
       if (closed) return Promise.resolve(closed);
-      let timer;
-      return Promise.race([
-        closure,
-        new Promise((_, reject) => {
-          timer = setTimeout(
-            () => reject(new Error("Expected WebSocket close timed out")),
-            waitMs,
-          );
-        }),
-      ]).finally(() => clearTimeout(timer));
+      return withTimeout(closedPromise, waitMs, "Expected WebSocket close timed out");
     },
     async close() {
       if (socket.readyState < 2) socket.close(1000, "SELFTEST_DONE");

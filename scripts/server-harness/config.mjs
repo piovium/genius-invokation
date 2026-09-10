@@ -24,13 +24,20 @@ export function validateConfig(input) {
   assert.ok(["baseline", "gate"].includes(config.mode), "mode must be baseline or gate");
   const url = new URL(config.baseUrl);
   assert.ok(["http:", "https:"].includes(url.protocol));
-  assert.ok(!url.username && !url.password && !url.search && !url.hash, "baseUrl must not contain credentials, query, or hash");
-  assert.ok(["localhost", "127.0.0.1", "[::1]"].includes(url.hostname), "Run this PID-based harness on the server host and use a loopback URL");
+  assert.ok(!url.username && !url.password && !url.search && !url.hash,
+    "baseUrl must not contain credentials, query, or hash");
+  assert.ok(["localhost", "127.0.0.1", "[::1]"].includes(url.hostname),
+    "Run this PID-based harness on the server host and use a loopback URL");
   config.baseUrl = config.baseUrl.replace(/\/$/, "");
-  for (const key of ["idleMiB", "gameMiB", "sampleIntervalMs", "idleDurationMs", "requestTimeoutMs", "startupTimeoutMs", "gameTimeoutMs", "cleanupTimeoutMs", "cycles"]) {
+  const positiveKeys = [
+    "idleMiB", "gameMiB", "sampleIntervalMs", "idleDurationMs", "requestTimeoutMs",
+    "startupTimeoutMs", "gameTimeoutMs", "cleanupTimeoutMs", "cycles",
+  ];
+  for (const key of positiveKeys) {
     assert.ok(Number.isFinite(config[key]) && config[key] > 0, `${key} must be positive`);
   }
-  assert.ok(Number.isInteger(config.cycles) && config.cycles >= 3, "At least three games cover combat, long game and reconnect");
+  assert.ok(Number.isInteger(config.cycles) && config.cycles >= 3,
+    "At least three games cover combat, long game and reconnect");
   assert.ok(Number.isFinite(config.actionDelayMs) && config.actionDelayMs >= 0);
   assert.ok(Array.isArray(config.storageTokenEnvs) && [0, 2].includes(config.storageTokenEnvs.length));
   assert.ok(config.storageTokenEnvs.every((name) => typeof name === "string" && /^[A-Z_][A-Z0-9_]*$/.test(name)));
@@ -46,9 +53,14 @@ export function validateConfig(input) {
     assert.ok(typeof config.launch.command === "string" && config.launch.command.length > 0);
     assert.ok(Array.isArray(config.launch.args) && config.launch.args.every((arg) => typeof arg === "string"));
     assert.ok(!config.pid, "Choose launch or pid, not both");
-    assert.ok(!/^(pnpm|npm|npx|cmd|powershell|pwsh|sh|bash)(\.(exe|cmd|ps1))?$/i.test(config.launch.command.split(/[\\/]/).at(-1)), "Launch the runtime directly, without a shell or package-manager wrapper");
+    const commandBasename = config.launch.command.split(/[\\/]/).at(-1);
+    assert.ok(
+      !/^(pnpm|npm|npx|cmd|powershell|pwsh|sh|bash)(\.(exe|cmd|ps1))?$/i.test(commandBasename),
+      "Launch the runtime directly, without a shell or package-manager wrapper",
+    );
   } else {
-    assert.ok(Number.isSafeInteger(config.pid) && config.pid > 0, "Set --pid to the server runtime PID or configure launch");
+    assert.ok(Number.isSafeInteger(config.pid) && config.pid > 0,
+      "Set --pid to the server runtime PID or configure launch");
   }
   return config;
 }
@@ -58,14 +70,15 @@ export function evaluateCoverage(samples, totalGames) {
   if (!Array.isArray(samples) || !Number.isSafeInteger(totalGames) || totalGames < 1) {
     return { passed: false, violations: ["Coverage requires a sample array and a positive integer game count"] };
   }
+  const samplesByPhase = Map.groupBy(samples, (sample) => sample?.phase);
   for (const phase of ["cold-idle", ...Array.from({ length: totalGames }, (_, index) => `idle:${index}`)]) {
-    const phaseSamples = samples.filter((sample) => sample?.phase === phase);
+    const phaseSamples = samplesByPhase.get(phase) ?? [];
     if (phaseSamples.length < 3 || phaseSamples.at(-1)?.timestamp - phaseSamples[0]?.timestamp < 5000) {
       violations.push(`${phase}: need >=3 samples spanning >=5000ms for migration acceptance`);
     }
   }
   for (let index = 0; index < totalGames; index++) {
-    if (samples.filter((sample) => sample?.phase === `game:${index}`).length < 3) {
+    if ((samplesByPhase.get(`game:${index}`)?.length ?? 0) < 3) {
       violations.push(`game:${index}: need >=3 samples during the game`);
     }
   }

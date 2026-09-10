@@ -13,7 +13,7 @@ Linux 实验容器禁用外部网络，客户端和 Node 服务通过容器内 l
 
 ## 认证结果
 
-首帧发送认证，成功后 `ready`，然后才发送游戏消息，在两种环境均可行。正确 token 绑定对应玩家；缺失、损坏、错误签名、过期、串号 token、认证前动作均被拒绝。
+首帧发送认证，成功后返回 `ready`，然后才发送游戏消息，在两种环境均可行。正确 token 绑定对应玩家；缺失、损坏、错误签名、过期、串号 token、认证前动作均被拒绝。
 
 认证失败必须把连接置为永久关闭状态：连续排队的「错误认证 → 正确认证 → 动作」产生 0 条游戏消息和 0 次执行，不能从拒绝状态恢复权限。已认证连接也不能再次认证切换玩家，重连须重新认证。
 
@@ -54,7 +54,7 @@ ACK 的语义是已经通过校验并接受；fixture 在同一进程中同步�
 
 ## Harness 自身验证与独立复核
 
-Windows Node 24.14.0 和 Linux Docker Node 26.1.0 的完整自测各发现 123 项：**122 项通过、0 失败、1 项显式跳过**。跳过项需要访问真实 Docker 测试库，已在专用 WSL 环境开启 `HARNESS_DOCKER_ENVIRONMENT_SELFTEST=1` 单独执行，环境测试 **5/5 通过、0 跳过**。完整自测包含上面的网络实验，不把重复执行合计成新增场景。
+Windows Node 24.14.0 和 Linux Docker Node 26.1.0 的完整自测各运行 123 项：**122 项通过、0 失败、1 项显式跳过**。跳过项需要访问真实 Docker 测试库，已在专用 WSL 环境开启 `HARNESS_DOCKER_ENVIRONMENT_SELFTEST=1` 单独执行，环境测试 **5/5 通过、0 跳过**。完整自测包含上面的网络实验，不把重复执行合计成新增场景。
 
 原始输出保存在 `temp/server-harness/verification/windows-node.log`、`temp/harness-node-selftest.log` 和 `environment-docker.log`。独立复核发现并修复以下误通过路径，均有回归负例：
 

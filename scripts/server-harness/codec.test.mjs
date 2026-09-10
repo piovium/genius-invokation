@@ -180,7 +180,6 @@ test("deck fixture contains three unique characters and 30 cards within duplicat
   assert.equal(new Set(deck.characters).size, 3);
   assert.equal(deck.characters.length, 3);
   assert.equal(deck.cards.length, 30);
-  const counts = new Map();
-  for (const id of deck.cards) counts.set(id, (counts.get(id) ?? 0) + 1);
-  assert.ok([...counts.values()].every((count) => count <= 2));
+  const copies = Map.groupBy(deck.cards, (id) => id);
+  assert.ok([...copies.values()].every((group) => group.length <= 2));
 });

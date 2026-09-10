@@ -44,13 +44,25 @@ function targetPort(pid, baseUrl) {
   }
   const hostname = url.hostname.toLowerCase();
   const ipv4 = hostname.split(".");
-  const loopbackV4 = ipv4.length === 4 && ipv4[0] === "127" && ipv4.every(
-    (part) => /^\d+$/.test(part) && Number(part) <= 255,
-  );
+  const loopbackV4 = ipv4.length === 4 && ipv4[0] === "127" &&
+    ipv4.every((part) => /^\d+$/.test(part) && Number(part) <= 255);
   if (hostname !== "localhost" && hostname !== "[::1]" && !loopbackV4) {
     throw new TypeError("baseUrl must point to localhost, an IPv4 loopback address, or [::1]");
   }
   return Number(url.port || (url.protocol === "https:" ? 443 : 80));
+}
+
+// Resolve a settled read to its value, mapping a missing source to null and
+// rethrowing anything else. A descriptor may close during inspection, but other
+// errors, especially access denial, must never be treated as a successful check.
+function settledValue(entry) {
+  if (entry.status === "fulfilled") {
+    return entry.value;
+  }
+  if (entry.reason.code !== "ENOENT") {
+    throw entry.reason;
+  }
+  return null;
 }
 
 async function ownsLinuxListener(pid, port) {
@@ -61,13 +73,13 @@ async function ownsLinuxListener(pid, port) {
   const inodes = new Set();
   let readableTables = 0;
   for (const table of tables) {
-    if (table.status === "fulfilled") {
-      readableTables++;
-      for (const inode of parseLinuxListeningInodes(table.value, port)) {
-        inodes.add(inode);
-      }
-    } else if (table.reason.code !== "ENOENT") {
-      throw table.reason;
+    const content = settledValue(table);
+    if (content === null) {
+      continue;
+    }
+    readableTables++;
+    for (const inode of parseLinuxListeningInodes(content, port)) {
+      inodes.add(inode);
     }
   }
   if (!readableTables) {
@@ -83,15 +95,13 @@ async function ownsLinuxListener(pid, port) {
   );
   let ownsListener = false;
   for (const link of links) {
-    if (link.status === "fulfilled") {
-      const socket = /^socket:\[(\d+)\]$/.exec(link.value);
-      if (socket && inodes.has(socket[1])) {
-        ownsListener = true;
-      }
-    } else if (link.reason.code !== "ENOENT") {
-      // A descriptor may close during inspection. Other errors, especially
-      // access denial, must never be treated as a successful ownership check.
-      throw link.reason;
+    const target = settledValue(link);
+    if (target === null) {
+      continue;
+    }
+    const socket = /^socket:\[(\d+)\]$/.exec(target);
+    if (socket && inodes.has(socket[1])) {
+      ownsListener = true;
     }
   }
   return ownsListener;
