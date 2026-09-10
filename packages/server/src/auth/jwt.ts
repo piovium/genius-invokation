@@ -14,7 +14,9 @@ export interface GuestJwtPayload {
 }
 export type JwtPayload = UserJwtPayload | GuestJwtPayload;
 
-function hasSubject(payload: unknown): payload is { user: unknown; sub: unknown } {
+function hasSubject(
+  payload: unknown,
+): payload is { user: unknown; sub: unknown } {
   return (
     typeof payload === "object" &&
     payload !== null &&

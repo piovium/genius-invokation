@@ -46,7 +46,9 @@ export function createAuth({
       "." +
       encodeJwtPart({ ...payload, iat, exp: iat + TOKEN_LIFETIME_SECONDS });
     return (
-      content + "." + createHmac("sha256", secret).update(content).digest("base64url")
+      content +
+      "." +
+      createHmac("sha256", secret).update(content).digest("base64url")
     );
   };
 
@@ -92,7 +94,8 @@ export function createAuth({
           (!Number.isFinite(payload.nbf) || payload.nbf > now))
       )
         return null;
-      if (!isUserJwtPayload(payload) && !isGuestJwtPayload(payload)) return null;
+      if (!isUserJwtPayload(payload) && !isGuestJwtPayload(payload))
+        return null;
       return payload;
     } catch {
       return null;

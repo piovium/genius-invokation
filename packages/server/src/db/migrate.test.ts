@@ -38,17 +38,15 @@ test(
     try {
       await admin.unsafe(`CREATE SCHEMA "${name}"`);
       base.searchParams.set("schema", name);
-      assert.equal(
-        (await migrateDatabase(base.toString(), migrationDirectory)).applied
-          .length,
-        3,
-      );
+      const first = await migrateDatabase(base.toString(), migrationDirectory);
+      assert.equal(first.applied.length, 3);
       client = createSql(base.toString());
       await client`INSERT INTO "User" (id, name) VALUES (91000001, 'migration-probe')`;
-      assert.deepEqual(
-        (await migrateDatabase(base.toString(), migrationDirectory)).applied,
-        [],
+      const repeated = await migrateDatabase(
+        base.toString(),
+        migrationDirectory,
       );
+      assert.deepEqual(repeated.applied, []);
       const [row] = await client`SELECT name FROM "User" WHERE id = 91000001`;
       assert.equal(row!.name, "migration-probe");
       const database = createDatabase(base.toString());

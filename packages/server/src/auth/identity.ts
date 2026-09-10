@@ -5,7 +5,8 @@ import type { Auth } from "./session";
 
 /** Reads the bearer token of a request; `null` when it is missing or unusable. */
 export function readIdentity(request: Request, auth: Auth): JwtPayload | null {
-  const [scheme, token] = request.headers.get("authorization")?.split(" ") ?? [];
+  const [scheme, token] =
+    request.headers.get("authorization")?.split(" ") ?? [];
   return scheme === "Bearer" && token ? auth.verify(token) : null;
 }
 

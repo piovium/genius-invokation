@@ -22,7 +22,10 @@ function createTestJwt(payload: unknown, secret: string, alg = "HS256") {
 }
 
 test("OAuth callback returns executable HTML through the Node HTTP adapter", async () => {
-  const auth = createAuth({ users: {} as Users, secret: "unit-fixture-secret" });
+  const auth = createAuth({
+    users: {} as Users,
+    secret: "unit-fixture-secret",
+  });
   const accessToken = await auth.signGuest(createGuestId());
   const codes: string[] = [];
   auth.login = async (code) => {
@@ -56,7 +59,10 @@ test("OAuth callback returns executable HTML through the Node HTTP adapter", asy
 });
 
 test("existing user JWTs and new guest JWTs verify; tampering, expiry and algorithm confusion fail", async () => {
-  const auth = createAuth({ users: {} as Users, secret: "unit-fixture-secret" });
+  const auth = createAuth({
+    users: {} as Users,
+    secret: "unit-fixture-secret",
+  });
   const payload = {
     user: 1,
     sub: 91000001,

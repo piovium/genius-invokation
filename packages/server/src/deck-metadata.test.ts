@@ -211,16 +211,12 @@ test("original legal/illegal deck restrictions and every minimum version work wi
     await rejects(withCard(99999999), "NotFoundError");
     // This method does not touch its database; invoke the actual method to
     // preserve validation-error precedence over sharing-code encoding errors.
-    await assert.rejects(
-      deckToCode({ characters: [99999999], cards: [] }),
-      { message: "deck must contain 3 characters" },
-    );
-    await assert.rejects(
-      deckToCode(withCard(99999999)),
-      {
-        message: "card id 99999999 not found",
-      },
-    );
+    await assert.rejects(deckToCode({ characters: [99999999], cards: [] }), {
+      message: "deck must contain 3 characters",
+    });
+    await assert.rejects(deckToCode(withCard(99999999)), {
+      message: "card id 99999999 not found",
+    });
     const hiddenCharacter = characters.find(
       (record) => typeof record.shareId !== "number",
     );

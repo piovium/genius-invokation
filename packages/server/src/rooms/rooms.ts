@@ -397,7 +397,8 @@ export interface Rooms {
 interface RoomSubscription {
   sessionId: string;
   ownPlayer: boolean;
-  subscribe: () => void;
+  /** Attaches the subscriber and returns the function that detaches it again. */
+  subscribe: () => () => void;
 }
 
 export function createRooms(
@@ -580,9 +581,7 @@ export function createRooms(
       }
       logger.log(`Room ${room.id} removed`);
       await redis?.hdel("meta:active_rooms", String(room.id)).catch((error) => {
-        logger.warn(
-          `Failed to remove room ${room.id} from Redis: ${error}`,
-        );
+        logger.warn(`Failed to remove room ${room.id} from Redis: ${error}`);
       });
 
       for (const player of room.getPlayers()) player.dispose();
@@ -624,7 +623,11 @@ export function createRooms(
     room.stop();
   }
 
-  async function joinRoomFromUser(userId: number, roomId: number, deckId: number) {
+  async function joinRoomFromUser(
+    userId: number,
+    roomId: number,
+    deckId: number,
+  ) {
     const user = await users.findById(userId);
     if (user === null) {
       throw notFound(`User ${userId} not found`);
@@ -699,9 +702,7 @@ export function createRooms(
       if (!registered && !process.env.S3_ENDPOINT) return;
       const gameData = JSON.stringify(room.getStateLog());
       void uploadReplay(room.id, gameData).catch((error) =>
-        logger.warn(
-          "Failed to upload room " + room.id + " game log: " + error,
-        ),
+        logger.warn("Failed to upload room " + room.id + " game log: " + error),
       );
       if (!registered) {
         return;
