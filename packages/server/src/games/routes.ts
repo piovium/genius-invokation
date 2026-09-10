@@ -14,33 +14,26 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Elysia, t } from "elysia";
-import type { AuthService } from "../auth/auth.service";
-import { requireUser } from "../auth/auth.guard";
+import { identity } from "../auth/identity";
+import type { Auth } from "../auth/session";
 import { idSchema, paginationSchema } from "../http";
-import type { GamesService } from "./games.service";
-export function createGamesRoutes(games: GamesService, auth: AuthService) {
+import type { Games } from "./games";
+
+export function createGamesRoutes(games: Games, auth: Auth) {
   return new Elysia({ prefix: "/games" })
-    .get(
-      "/",
-      ({ request, query }) => {
-        requireUser(request, auth);
-        return games.getAllGames(query);
-      },
-      { query: t.Object(paginationSchema) },
-    )
-    .get(
-      "/mine",
-      ({ request, query }) =>
-        games.gamesHasUser(requireUser(request, auth), query),
-      { query: t.Object(paginationSchema) },
-    )
+    .use(identity(auth))
+    .get("/", ({ query }) => games.getAllGames(query), {
+      query: t.Object(paginationSchema),
+      user: true,
+    })
+    .get("/mine", ({ user, query }) => games.gamesHasUser(user.sub, query), {
+      query: t.Object(paginationSchema),
+      user: true,
+    })
     .get(
       "/:gameId",
-      async ({ request, params }) => {
-        requireUser(request, auth);
-        const game = await games.getGame(params.gameId);
-        return game ?? Response.json(null);
-      },
-      { params: t.Object({ gameId: idSchema }) },
+      async ({ params }) =>
+        (await games.getGame(params.gameId)) ?? Response.json(null),
+      { params: t.Object({ gameId: idSchema }), user: true },
     );
 }

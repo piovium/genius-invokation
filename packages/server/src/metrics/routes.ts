@@ -15,9 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Elysia } from "elysia";
-import type { MetricsService } from "./metrics.service";
+import type { Metrics } from "./metrics";
 
-export function createMetricsRoutes(metrics: MetricsService) {
+/** Scraped by Prometheus, so it is mounted outside the API prefix. */
+export function createMetricsRoutes(metrics: Metrics) {
   return new Elysia().get(
     "/metrics",
     async () =>
