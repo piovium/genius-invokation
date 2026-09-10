@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2.1.1",
+  "version": "2.1.2",
   "phase": "migration",
   "tnbVersion": "6.0.3-bridge.16.tsgo.7.0.2",
   "policy": {
@@ -77,7 +77,9 @@
         "docs/",
         ".gitattributes",
         "patches/",
-        "packages/custom-data-loader/"
+        "packages/custom-data-loader/",
+        "vitest.setup.ts",
+        "packages/detail-log-viewer/src/DetailLogViewer.tsx"
       ],
       "gates": [
         "environment",
@@ -406,34 +408,10 @@
   "scopeTransitions": [
     {
       "role": "integration",
-      "previousTaskId": "4b87bd54-8292-4448-ab64-9525cacc482b",
-      "previousControlDigest": "b2027a47daaf56dd2d8331e56758cb26aa48ca1f08fc99ca60287f3a9fe23736",
-      "previousRecordSha256": "e5e945bf83c2541eeac5fb84db3e547e5e5128a88666a256e7febca04dd27211",
+      "previousTaskId": "43db8d15-0537-471c-be04-236ec391da7b",
+      "previousControlDigest": "28ce8be4b84b71f2872f26ec1a4f5c9f41763a802e202569bb751b393f9f5b90",
+      "previousRecordSha256": "ea7de7436b9885ac09ff873fc15f65cacff8c844d0b6adb708b2a390cc2f3d24",
       "from": {
-        "repository": "main",
-        "paths": [
-          "package.json",
-          "pnpm-workspace.yaml",
-          "pnpm-lock.yaml",
-          ".vscode/",
-          ".github/",
-          "docs/",
-          ".gitattributes"
-        ],
-        "gates": [
-          "environment",
-          "inventory",
-          "engine",
-          "data",
-          "coverage",
-          "checks",
-          "main-build",
-          "main-tests",
-          "memory",
-          "clean-install"
-        ]
-      },
-      "to": {
         "repository": "main",
         "paths": [
           "package.json",
@@ -459,8 +437,36 @@
           "clean-install"
         ]
       },
-      "reason": "Integrate reviewed immutable TNB/GTS/Volar registry patches and browser agent commits into main, with portable frozen installation.",
-      "review": "harness/REVIEW.md: 2.1.0 integration reassignment and runtime/coverage review"
+      "to": {
+        "repository": "main",
+        "paths": [
+          "package.json",
+          "pnpm-workspace.yaml",
+          "pnpm-lock.yaml",
+          ".vscode/",
+          ".github/",
+          "docs/",
+          ".gitattributes",
+          "patches/",
+          "packages/custom-data-loader/",
+          "vitest.setup.ts",
+          "packages/detail-log-viewer/src/DetailLogViewer.tsx"
+        ],
+        "gates": [
+          "environment",
+          "inventory",
+          "engine",
+          "data",
+          "coverage",
+          "checks",
+          "main-build",
+          "main-tests",
+          "memory",
+          "clean-install"
+        ]
+      },
+      "reason": "Apply two minimal compiler compatibility fixes: disambiguate an imported type from its exported component, and remove conflicting redundant Vitest matcher inheritance while preserving all matcher names and argument checks.",
+      "review": "harness/REVIEW.md: 2.1.2 exact compiler compatibility ownership"
     }
   ]
 }

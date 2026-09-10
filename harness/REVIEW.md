@@ -103,3 +103,13 @@ GTS tests 命令对齐已有 manifest 的 `pnpm test`（递归执行各包配置
 递归运行时入口通过 ASCII 命令文件和固定环境变量调用已指纹记录的 Node/包管理器，不关闭依赖状态检查。真实中文带空格路径测试确认 pnpm 使用指定入口；篡改生成入口被拒绝。覆盖探测跟随内部链接并保留别名路径，内部链接下新增 GTS 会改变清单；越界、循环、损坏链接仍 BLOCKED。validator 的 directory 来自本次 runner context，不接受 observation 自报路径。
 
 协调者在封存前运行 `node --test --test-reporter=tap harness/tests/probes.test.mjs harness/tests/runner.test.mjs`：43 PASS、0 FAIL、0 skipped，100723 ms；包括精确扩展授权缺失/原范围越界/旧任务不可变、真实 Unicode pnpm 调用和链接负例。独立复核只检查代码与新增测试，未重复执行此测试集。新 seal 仍须通过全部 selftest；分项产品实验不构成最终验收，未登记的 collectors 继续 BLOCKED。
+
+## 2.1.2 exact compiler compatibility ownership
+
+Browser worker independently compared the proposed contract against 2.1.1: only the version, two exact integration paths, and one bound scope transition changed. The previous task is 43db8d15-0537-471c-be04-236ec391da7b, control digest 28ce8be4b84b71f2872f26ec1a4f5c9f41763a802e202569bb751b393f9f5b90, and its actual task-file SHA256 is ea7de7436b9885ac09ff873fc15f65cacff8c844d0b6adb708b2a390cc2f3d24. From matches that original role exactly; to adds only vitest.setup.ts and packages/detail-log-viewer/src/DetailLogViewer.tsx. Repository, baseline, existing paths, gates, policy and adapters remain unchanged. Both product files were unchanged when reviewed.
+
+GTS worker independently reviewed the concrete compatibility patch: the DetailLogEntry import alias preserves the exported component and runtime behavior. Vitest Assertion already inherits jest.Matchers<void, T>; removing its conflicting redundant parent preserves all matcher keys. The two overlapping asymmetric names remain available through Vitest CustomMatcher. Stock and pinned native/TNB overlay checks retain valid calls and reject invalid calls. No suppression, broad any, reduced test coverage or business-rule change is involved.
+
+Sealed 2.1.1 selftests completed with 86 passed, zero failures/skips at artifacts/selftests/38dc1398-37e6-4959-aaff-29a9a6e1d3ae/receipt.json. The new seal must pass its own unchanged selftests before reassignment. Product acceptance remains incomplete.
+
+The first contract draft mistakenly retained the superseded 2.1.0 transition, whose target role no longer matched the current role; the unchanged validator rejected it before selftests. The corrected active contract contains only the transition from task 43db8d15. The old authorization remains in Git history and its immutable task record; it is not broadened to the new paths. No runner validation was changed.
