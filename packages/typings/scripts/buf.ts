@@ -18,7 +18,9 @@ import { $ } from "execa";
 const args = process.argv.slice(2);
 if (args.some((arg) => arg !== "--typescript"))
   throw new Error("Unknown protocol generation option");
-const template = args.includes("--typescript")
+const templateArgs = args.includes("--typescript")
   ? ["--template", "buf.typescript.gen.yaml"]
   : [];
-await $({ cwd: `${import.meta.dirname}/../../..` })`buf generate ${template}`;
+await $({
+  cwd: `${import.meta.dirname}/../../..`,
+})`buf generate ${templateArgs}`;

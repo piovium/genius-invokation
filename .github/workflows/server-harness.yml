@@ -31,9 +31,9 @@ jobs:
       - name: Install isolated Node WebSocket experiment dependency
         run: npm ci --prefix scripts/server-harness/experiments --ignore-scripts --no-audit --no-fund
       - name: Verify harness (fixture results are not application benchmarks)
-        run: node --test scripts/server-harness/*.test.mjs scripts/server-harness/experiments/*.test.mjs scripts/server-harness/environment/*.test.mjs
+        run: npm run harness:check
       - name: Record real WebSocket fault experiments
-        run: node scripts/server-harness/experiments/run.mjs --output temp/server-harness/experiments/ci.json
+        run: npm run harness:experiments -- --output temp/server-harness/experiments/ci.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
