@@ -18,20 +18,8 @@ import gts from "@gi-tcg/unplugin-gts/rolldown";
 import solid from "vite-plugin-solid";
 
 export default defineConfig({
-  server: {
-    proxy: {
-      "/gts": {
-        target:
-          process.env.GTS_LANGUAGE_SERVER_PROXY_TARGET ?? "ws://127.0.0.1:3001",
-        ws: true,
-      },
-    },
-  },
   worker: {
     format: "es",
-  },
-  optimizeDeps: {
-    include: ["@gi-tcg/gts-language-server/browser"],
   },
   test: {
     environment: "node",

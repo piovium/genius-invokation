@@ -107,6 +107,27 @@ settings:
 
 catalogs:
   default:
+    '@gi-tcg/gts-language-client-code':
+      specifier: ^0.7.7
+      version: 0.7.7
+    '@gi-tcg/gts-language-server':
+      specifier: ^0.7.7
+      version: 0.7.7
+    '@gi-tcg/gts-runtime':
+      specifier: ^0.7.7
+      version: 0.7.7
+    '@gi-tcg/gts-transpiler':
+      specifier: ^0.7.7
+      version: 0.7.7
+    '@gi-tcg/gtsc':
+      specifier: ^0.7.7
+      version: 0.7.7
+    '@gi-tcg/prettier-plugin-gts':
+      specifier: ^0.7.7
+      version: 0.7.7
+    '@gi-tcg/unplugin-gts':
+      specifier: ^0.7.7
+      version: 0.7.7
     '@unocss/preset-icons':
       specifier: ^66.3.3
       version: 66.3.3
@@ -141,21 +162,8 @@ catalogs:
 overrides:
   vite-plugin-solid>babel-preset-solid: 1.9.12
   typescript: npm:typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2
-  '@gi-tcg/gts-language-client-code': 0.7.7
-  '@gi-tcg/gts-language-plugin': 0.7.7
-  '@gi-tcg/gts-language-server': 0.7.7
-  '@gi-tcg/gts-runtime': 0.7.7
-  '@gi-tcg/gts-transpiler': 0.7.7
-  '@gi-tcg/gts-typescript-language-service-plugin': 0.7.7
-  '@gi-tcg/gtsc': 0.7.7
-  '@gi-tcg/prettier-plugin-gts': 0.7.7
-  '@gi-tcg/unplugin-gts': 0.7.7
 
 patchedDependencies:
-  '@gi-tcg/gts-language-plugin@0.7.7': b9a650765ff41ccc309091cf5b02e1a7b1da21f5864c50d7b98ee95b4028550b
-  '@gi-tcg/gts-language-server@0.7.7': a325a5595923636317af90e849c7a5cf9835d7caffa8313cca28536ffe2b9fb2
-  '@gi-tcg/gts-runtime@0.7.7': 52d582912096574ad4d8f9cc5228e21c7c9529cbbdfd8f0c917bb19d163fab04
-  '@gi-tcg/gtsc@0.7.7': 2809292793ac3db8b2af277e982b4e1e0c7d716e0170b22e65c603e7f8de6303
   '@volar/typescript@2.4.28': 7a8cbe8be8d7d051499dab1dc35c3e317883d65daa563143692932b6a22371ce
   puppeteer-screen-recorder@3.0.6: 6cbd641eee294ce41aa766152d68847dba2aea1ad1b1f3c408d4a037142da208
   typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2: 08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629
@@ -180,10 +188,10 @@ importers:
         specifier: workspace:*
         version: link:packages/config
       '@gi-tcg/prettier-plugin-gts':
-        specifier: 0.7.7
+        specifier: 'catalog:'
         version: 0.7.7(prettier@3.9.5)
       '@gi-tcg/unplugin-gts':
-        specifier: 0.7.7
+        specifier: 'catalog:'
         version: 0.7.7(esbuild@0.23.1)(rolldown@1.0.0-rc.12(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2))(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.4.1)(esbuild@0.23.1)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.23.1))
       '@microsoft/api-extractor':
         specifier: ^7.58.2
@@ -349,21 +357,15 @@ importers:
 
   packages/core:
     dependencies:
-      '@ark/schema':
-        specifier: ^0.56.0
-        version: 0.56.0
       '@gi-tcg/gts-runtime':
-        specifier: 0.7.7
-        version: 0.7.7(patch_hash=52d582912096574ad4d8f9cc5228e21c7c9529cbbdfd8f0c917bb19d163fab04)
+        specifier: 'catalog:'
+        version: 0.7.7
       '@gi-tcg/typings':
         specifier: workspace:*
         version: link:../typings
       '@gi-tcg/utils':
         specifier: workspace:*
         version: link:../utils
-      arktype:
-        specifier: ^2.2.0
-        version: 2.2.0
       immer:
         specifier: ^11.1.4
         version: 11.1.4
@@ -386,30 +388,12 @@ importers:
       '@gi-tcg/data':
         specifier: workspace:*
         version: link:../data
-      '@gi-tcg/gts-language-server':
-        specifier: 0.7.7
-        version: 0.7.7(patch_hash=a325a5595923636317af90e849c7a5cf9835d7caffa8313cca28536ffe2b9fb2)(@volar/language-service@2.4.28(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629)))(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))
-      '@gi-tcg/gts-runtime':
-        specifier: 0.7.7
-        version: 0.7.7(patch_hash=52d582912096574ad4d8f9cc5228e21c7c9529cbbdfd8f0c917bb19d163fab04)
       '@gi-tcg/gts-transpiler':
-        specifier: 0.7.7
+        specifier: 'catalog:'
         version: 0.7.7
       esbuild-wasm:
         specifier: ^0.27.3
         version: 0.27.7
-      typescript:
-        specifier: npm:typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2
-        version: typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629)
-      vscode-uri:
-        specifier: 3.1.0
-        version: 3.1.0
-      vscode-ws-jsonrpc:
-        specifier: 3.5.0
-        version: 3.5.0
-      ws:
-        specifier: 8.20.1
-        version: 8.20.1
     devDependencies:
       '@codingame/monaco-vscode-api':
         specifier: ~25.1.2
@@ -417,13 +401,7 @@ importers:
       '@codingame/monaco-vscode-editor-api':
         specifier: ~25.1.2
         version: 25.1.2
-      '@codingame/monaco-vscode-files-service-override':
-        specifier: ~25.1.2
-        version: 25.1.2
       '@codingame/monaco-vscode-keybindings-service-override':
-        specifier: ~25.1.2
-        version: 25.1.2
-      '@codingame/monaco-vscode-textmate-service-override':
         specifier: ~25.1.2
         version: 25.1.2
       '@codingame/monaco-vscode-theme-defaults-default-extension':
@@ -436,8 +414,11 @@ importers:
         specifier: workspace:*
         version: link:../deck-builder
       '@gi-tcg/gts-language-client-code':
-        specifier: 0.7.7
+        specifier: 'catalog:'
         version: 0.7.7(@codingame/monaco-vscode-extension-api@25.1.2)
+      '@gi-tcg/gts-language-server':
+        specifier: 'catalog:'
+        version: 0.7.7(@volar/language-service@2.4.28(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629)))(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))
       '@gi-tcg/typings':
         specifier: workspace:*
         version: link:../typings
@@ -447,15 +428,9 @@ importers:
       dts-bundle-generator:
         specifier: ^9.5.1
         version: 9.5.1
-      monaco-editor:
-        specifier: npm:@codingame/monaco-vscode-editor-api@~25.1.2
-        version: '@codingame/monaco-vscode-editor-api@25.1.2'
       monaco-languageclient:
         specifier: ~10.7.0
         version: 10.7.0
-      puppeteer-core:
-        specifier: 25.0.4
-        version: 25.0.4(supports-color@8.1.1)
       rolldown:
         specifier: ^1.0.0-rc.15
         version: 1.0.0-rc.15
@@ -491,11 +466,11 @@ importers:
         specifier: workspace:*
         version: link:../config
       '@gi-tcg/gts-transpiler':
-        specifier: 0.7.7
+        specifier: 'catalog:'
         version: 0.7.7
       '@gi-tcg/gtsc':
-        specifier: 0.7.7
-        version: 0.7.7(patch_hash=2809292793ac3db8b2af277e982b4e1e0c7d716e0170b22e65c603e7f8de6303)(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))
+        specifier: 'catalog:'
+        version: 0.7.7(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))
       '@microsoft/tsdoc':
         specifier: ^0.14.2
         version: 0.14.2
@@ -516,7 +491,7 @@ importers:
         specifier: workspace:*
         version: link:../data
       '@gi-tcg/gts-transpiler':
-        specifier: 0.7.7
+        specifier: 'catalog:'
         version: 0.7.7
       zimmerframe:
         specifier: ^1.1.5
@@ -690,7 +665,7 @@ importers:
         version: 3.36.0(supports-color@8.1.1)
     devDependencies:
       '@gi-tcg/unplugin-gts':
-        specifier: 0.7.7
+        specifier: 'catalog:'
         version: 0.7.7(esbuild@0.27.7)(rolldown@1.0.0-rc.15)(rollup@4.46.2)(unloader@0.9.0)(vite@8.0.8(@types/node@26.4.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.31.1)(tsx@4.21.0))(webpack@5.104.1(@swc/core@1.15.33)(esbuild@0.27.7))
       '@gi-tcg/web-client':
         specifier: workspace:*
@@ -6666,6 +6641,7 @@ packages:
   prom-client@15.1.3:
     resolution: {integrity: sha512-6ZiOBfCywsD4k1BN9IX0uZhF+tJkV8q8llP64G5Hajs4JOeVLPCwpPVcpXy3BwYiUGgyJzsJJQeOIv7+hDSq8g==}
     engines: {node: ^16 || ^18 || >=20}
+    deprecated: prom-client has been replaced by @prometheus-io/client
 
   proper-lockfile@4.1.2:
     resolution: {integrity: sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA==}
@@ -9845,7 +9821,7 @@ snapshots:
       remeda: 2.39.0
       vscode: '@codingame/monaco-vscode-extension-api@25.1.2'
 
-  '@gi-tcg/gts-language-plugin@0.7.7(patch_hash=b9a650765ff41ccc309091cf5b02e1a7b1da21f5864c50d7b98ee95b4028550b)(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))':
+  '@gi-tcg/gts-language-plugin@0.7.7(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))':
     dependencies:
       '@gi-tcg/gts-transpiler': 0.7.7
       '@volar/language-core': 2.4.28
@@ -9855,9 +9831,9 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@gi-tcg/gts-language-server@0.7.7(patch_hash=a325a5595923636317af90e849c7a5cf9835d7caffa8313cca28536ffe2b9fb2)(@volar/language-service@2.4.28(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629)))(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))':
+  '@gi-tcg/gts-language-server@0.7.7(@volar/language-service@2.4.28(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629)))(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))':
     dependencies:
-      '@gi-tcg/gts-language-plugin': 0.7.7(patch_hash=b9a650765ff41ccc309091cf5b02e1a7b1da21f5864c50d7b98ee95b4028550b)(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))
+      '@gi-tcg/gts-language-plugin': 0.7.7(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))
       '@gi-tcg/gts-transpiler': 0.7.7
       '@volar/language-server': 2.4.28(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))
       '@zenfs/core': 2.5.7
@@ -9869,7 +9845,7 @@ snapshots:
       - babel-plugin-macros
       - typescript
 
-  '@gi-tcg/gts-runtime@0.7.7(patch_hash=52d582912096574ad4d8f9cc5228e21c7c9529cbbdfd8f0c917bb19d163fab04)':
+  '@gi-tcg/gts-runtime@0.7.7':
     dependencies:
       ajv: 8.20.0
 
@@ -9887,9 +9863,9 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
 
-  '@gi-tcg/gtsc@0.7.7(patch_hash=2809292793ac3db8b2af277e982b4e1e0c7d716e0170b22e65c603e7f8de6303)(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))':
+  '@gi-tcg/gtsc@0.7.7(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))':
     dependencies:
-      '@gi-tcg/gts-language-plugin': 0.7.7(patch_hash=b9a650765ff41ccc309091cf5b02e1a7b1da21f5864c50d7b98ee95b4028550b)(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))
+      '@gi-tcg/gts-language-plugin': 0.7.7(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))
       '@volar/typescript': 2.4.28(patch_hash=7a8cbe8be8d7d051499dab1dc35c3e317883d65daa563143692932b6a22371ce)(typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629))
       typescript: typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2(patch_hash=08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629)
     transitivePeerDependencies:

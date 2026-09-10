@@ -4,15 +4,6 @@ packages:
 overrides:
   "vite-plugin-solid>babel-preset-solid": 1.9.12
   typescript: npm:typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2
-  "@gi-tcg/gts-language-client-code": &GTS_OVERRIDE_VERSION 0.7.7
-  "@gi-tcg/gts-language-plugin": *GTS_OVERRIDE_VERSION
-  "@gi-tcg/gts-language-server": *GTS_OVERRIDE_VERSION
-  "@gi-tcg/gts-runtime": *GTS_OVERRIDE_VERSION
-  "@gi-tcg/gts-transpiler": *GTS_OVERRIDE_VERSION
-  "@gi-tcg/gts-typescript-language-service-plugin": *GTS_OVERRIDE_VERSION
-  "@gi-tcg/gtsc": *GTS_OVERRIDE_VERSION
-  "@gi-tcg/prettier-plugin-gts": *GTS_OVERRIDE_VERSION
-  "@gi-tcg/unplugin-gts": *GTS_OVERRIDE_VERSION
 
 catalog:
   axios: ^1.16.1
@@ -38,10 +29,6 @@ patchedDependencies:
   "@volar/typescript@2.4.28": patches/@volar__typescript.patch
   puppeteer-screen-recorder@3.0.6: patches/puppeteer-screen-recorder@3.0.6.patch
   "typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2": patches/typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2.patch
-  "@gi-tcg/gts-language-plugin@0.7.7": patches/gi-tcg-gts-language-plugin@0.7.7.patch
-  "@gi-tcg/gts-language-server@0.7.7": patches/gi-tcg-gts-language-server@0.7.7.patch
-  "@gi-tcg/gts-runtime@0.7.7": patches/gi-tcg-gts-runtime@0.7.7.patch
-  "@gi-tcg/gtsc@0.7.7": patches/gi-tcg-gtsc@0.7.7.patch
 
 minimumReleaseAgeExclude:
   - "@gi-tcg/*"

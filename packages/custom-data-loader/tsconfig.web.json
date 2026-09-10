@@ -13,12 +13,7 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
 
-    "strict": true
+    "strict": true,
   },
-  "files": [
-    "src/dev.tsx",
-    "src/dev-editor.ts",
-    "src/dev-language-workspace.ts",
-    "src/vite-env.d.ts"
-  ]
+  "files": ["src/dev.tsx", "src/dev-editor.ts", "src/vite-env.d.ts"]
 }

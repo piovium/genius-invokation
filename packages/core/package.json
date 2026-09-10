@@ -57,11 +57,9 @@
     "gen:s_expr_schema": "gnx scripts/gen_s_expr_schema.ts"
   },
   "dependencies": {
-    "@ark/schema": "^0.56.0",
     "@gi-tcg/gts-runtime": "catalog:",
     "@gi-tcg/typings": "workspace:*",
     "@gi-tcg/utils": "workspace:*",
-    "arktype": "^2.2.0",
     "immer": "^11.1.4",
     "remeda": "^2.39.0"
   },
