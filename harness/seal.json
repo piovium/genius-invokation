@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "digest": "4100037f64f7a5ec13e13ac2aa5e1e55bb2bb14a83559080a8addb13361ecf4e",
+  "digest": "ae6bd4fd98629026da8859678f77191021ccc40db9f53ca8e44eec4b806c0310",
   "files": {
     ".gitattributes": "54c1559147f401051c357920cb6186ca40933d3c2cc15cc01778575b98ac8577",
     ".github/workflows/harness.yml": "839fcc0d8b54b32de1ebaed9171eb1e3d288009d5700ad7b9f3253c77c3a6162",
     ".gitignore": "152692094fe05fe19bcde39400c32a6d2d716def149a9c77f33da8a41795bb9d",
     "AGENTS.md": "4de9e80270037727c1f994d37ea2bc3649e8fdab105874dc21e465a591378e45",
     "HARNESS.md": "b96ec9996b75adc5c87202eaf196ba4f4a492d9578a5a51729ab9c1f0494ef37",
-    "harness/REVIEW.md": "e91820cc98d919a20c23d677f88a0e993ced786cf62139c606e4997067cb3285",
+    "harness/REVIEW.md": "4125694ceeb9c20469293b705e869edd3c402d381f5597431cf5b4203ae2378e",
     "harness/baselines/gts.json": "233ae24a074e95c33cf41f14ba8dba049929ee9e258aa3fc28f03713dade3587",
     "harness/baselines/main.json": "4ef134d1cfe2c7ab610418e4fd7aca86fabda45aa5acbb7a3db5d64712a759f4",
     "harness/cli.mjs": "ddc2d719817265981099ab4e27e69b400db0a42d49c4e9a12c5df5f02bf39948",

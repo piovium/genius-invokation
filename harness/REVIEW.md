@@ -180,7 +180,7 @@ Windows 上 TNB 任务源快照的完整读取耗时较长。候选仅替换 cor
 
 **自测。** `harness/tests/gts-lsp.test.mjs` 共 25 项：1 项正例、23 项反绕过负例，外加一项对封存 expectations 形状的互锁（步数、文档数、`--stdio`、增量同步、RPC 下限与必需原生方法、两条诊断码与 span 仍在），这样"有人悄悄掏空 expectations"会先让自测失败，而不是让 gate 变空通过。负例覆盖：删除诊断、位移 span、definition 越出客户端文档、记录文本与封存 fixture 不符（open 与 change 各一条）、RPC 失衡、缺原生方法、`BRIDGE_LOAD` 指向别处或缺进程身份、addon 哈希变化、编译器版本不符、超时与错误、步骤缺失／乱序／重复、文档版本回退、服务器失败或未报告退出码、缺少增量同步或能力、capabilities／已打开文档／tsdk 与记录不符、启动参数不是封存的 `--stdio`、cwd 不在运行目录、可执行文件不是 Node、泄漏 `__gts_`、`panic:` 致命输出、证据引用缺少哈希、证据引用越出运行目录（相对与绝对各一条）、证据文件被改写、证据属于别的 gate。IO 层的哈希校验、运行目录约束、"缺 checkout 返回 BLOCKED"单独覆盖，因此这套测试不依赖本机是否存在 gts worktree。真实产品证据只能来自 runner：本版 trial（`artifacts/harness-drafts/lsp-trial.mjs`，非验收）以 runner 相同的环境跑出 25 步、服务器 exit 0、`ENTER`／`EXIT` 平衡且远高于 20 次下限、validator PASS。
 
-**独立复核（三轮，记录在此）。** 本版在升格前由独立 agent 只读复核采集器、校验器、expectations、wiring 变更与 HARNESS 文本；三轮都各自重跑了轻量自测并在当轮的文件版本上复核证据，第三轮另外独立重跑了真实 trial（`artifacts/harness-drafts/lsp-trial.mjs`：25 步、exit 0、`ENTER`／`EXIT` 各 69、validator PASS），并逐字节确认工作区里的三份 fixture 与封存文本相同。三轮均未修改任何控制文件。
+**独立复核（三轮，记录在此）。** 本版在升格前由独立 agent 只读复核采集器、校验器、expectations、wiring 变更与 HARNESS 文本；三轮都各自重跑了轻量自测并在当轮的文件版本上复核证据，第三轮另外独立重跑了真实 trial（`artifacts/harness-drafts/lsp-trial.mjs`：25 步、exit 0、`ENTER`／`EXIT` 各 69、validator PASS），并逐字节确认工作区里的三份 fixture 与封存文本相同。三轮均未修改任何控制文件。第四轮为确认轮：仅复核最终字节与新增用例（25/25 通过），未发现新问题、未修改文件。
 
 第一轮结论"有保留"：未发现可用产品证据伪造的绕过（诊断码与 span、修复后消失、hover／definition／completion／signature help、文档版本单调、RPC 平衡、`BRIDGE_LOAD` 与磁盘 addon、tsgo 版本全部从原始记录与磁盘重推；空期望也不能用不匹配的垃圾或全 skipped 蒙混），但指出 4 处自证面与 3 处过度声明：capabilities、客户端打开过的文档、tsdk 三项取自采集器写在 observation 里的摘要；`readEvidence` 未用 `inside()` 约束且哈希缺失时会静默跳过；`BRIDGE_LOAD` 的条数与必需片段写死在 validator 而非可复查的 expectations；本文档自称"复核记录见下"却尚未写下，负例计数与实际不符，三个测试标题超出其覆盖。
 
