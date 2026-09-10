@@ -15,10 +15,10 @@ const artifact = file => ({ path: fs.realpathSync.native(file), sha256: digest(r
 function observe() {
   const directory = e.HARNESS_COMMAND_OBSERVATIONS;
   const instanceId = crypto.randomUUID();
-  const stem = process.pid + '-' + threadId + '-' + instanceId;
-  const file = path.join(directory, stem + '.jsonl');
-  const event = detail => fs.appendFileSync(file, JSON.stringify({ at: Date.now(), pid: process.pid,
-    threadId, instanceId, runNonce: e.HARNESS_NONCE, gateId: e.HARNESS_GATE, ...detail }) + '\n');
+  const stem = `${process.pid}-${threadId}-${instanceId}`;
+  const file = path.join(directory, `${stem}.jsonl`);
+  const event = detail => fs.appendFileSync(file, `${JSON.stringify({ at: Date.now(), pid: process.pid,
+    threadId, instanceId, runNonce: e.HARNESS_NONCE, gateId: e.HARNESS_GATE, ...detail })}\n`);
   event({ kind: 'start', parentPid: process.ppid, isMainThread, executable: artifact(process.execPath),
     preload: artifact(fileURLToPath(import.meta.url)), argv: process.argv, execArgv: process.execArgv,
     cwd: process.cwd(), entry: process.argv[1] && fs.existsSync(process.argv[1]) ? artifact(process.argv[1]) : null,
@@ -34,8 +34,9 @@ function observe() {
   }
   const noted = new Set();
   function note(file, kind = 'module', extra = {}) {
-    if (noted.has(kind + ':' + file)) return;
-    noted.add(kind + ':' + file);
+    const key = `${kind}:${file}`;
+    if (noted.has(key)) return;
+    noted.add(key);
     event({ kind, module: artifact(file), ...extra });
   }
   registerHooks({ load(url, context, nextLoad) {
@@ -65,7 +66,7 @@ function observe() {
   // Its original -p config, --noEmit, and incremental options remain verbatim.
   if (isMainThread && /[\\/]typescript(?:-native-bridge)?[\\/]bin[\\/]tsc$|[\\/]lib[\\/]_?tsc\.js$/.test(process.argv[1] ?? '')) {
     e.TNB_TRACE_RPC = '1';
-    e.TNB_TRACE_RPC_FILE = path.join(directory, stem + '.rpc.log');
+    e.TNB_TRACE_RPC_FILE = path.join(directory, `${stem}.rpc.log`);
     event({ kind: 'rpcTrace', file: path.basename(e.TNB_TRACE_RPC_FILE) });
   }
   process.on('exit', code => event({ kind: 'exit', code }));
@@ -77,16 +78,16 @@ export function consumerSource(packages, repo) {
   let index = 0;
   for (const item of packages) for (const entry of item.declarations ?? []) {
     const specifier = path.resolve(repo, item.path, entry.file).replaceAll('\\', '/');
-    lines.push('import type * as Entry' + index + ' from ' + JSON.stringify(specifier) + ';');
+    lines.push(`import type * as Entry${index} from ${JSON.stringify(specifier)};`);
     for (const [name, kind] of Object.entries(entry.exports)) {
-      const expr = kind === 'type' ? 'Entry' + index + '.' + name : 'typeof Entry' + index + '.' + name;
-      lines.push('type Verify' + index + '_' + name.replace(/\W/g, '_') + ' = Assert<NotAny<' + expr + '>>;');
+      const expression = kind === 'type' ? `Entry${index}.${name}` : `typeof Entry${index}.${name}`;
+      lines.push(`type Verify${index}_${name.replace(/\W/g, '_')} = Assert<NotAny<${expression}>>;`);
     }
     lines.push('// @ts-expect-error This invented public name must remain an error.',
-      'type Missing' + index + ' = Entry' + index + '.__harness_nonexistent_public_export__;');
+      `type Missing${index} = Entry${index}.__harness_nonexistent_public_export__;`);
     index++;
   }
-  return lines.join('\n') + '\n';
+  return `${lines.join('\n')}\n`;
 }
 
 export const consumerConfig = { compilerOptions: { strict: true, noEmit: true, target: 'ESNext', module: 'Preserve',
@@ -116,9 +117,9 @@ async function consume() {
   const manifest = JSON.parse(readDisk(manifestPath));
   const native = Object.values(require.cache).filter(m => /bridge\.node$/.test(m.filename)).map(m => artifact(m.filename));
   const rpcDelta = (ts.getTsgoProfileStats?.().rpcCount ?? 0) - before;
-  process.stdout.write(JSON.stringify({ source: artifact(filename), config: artifact(configFile), compiler: artifact(compilerFile),
+  process.stdout.write(`${JSON.stringify({ source: artifact(filename), config: artifact(configFile), compiler: artifact(compilerFile),
     manifest: { ...artifact(manifestPath), name: manifest.name, version: manifest.version }, native,
-    rpcDelta, options, diagnostics }) + '\n');
+    rpcDelta, options, diagnostics })}\n`);
   process.exitCode = diagnostics.length || rpcDelta < 1 || native.length < 1 ? 1 : 0;
 }
 
@@ -143,28 +144,31 @@ async function collect() {
   let command;
   try {
     command = await execute({ executable: e.HARNESS_NODE, args: [e.HARNESS_MANAGER, ...gate.args],
-    cwd: repo, directory: e.HARNESS_RUN_DIRECTORY, label: gate.id + '-execution', timeoutMs: gate.timeoutMs,
+    cwd: repo, directory: e.HARNESS_RUN_DIRECTORY, label: `${gate.id}-execution`, timeoutMs: gate.timeoutMs,
     limitBytes: contract.policy.reportLimitBytes, env: { HARNESS_COMMAND_OBSERVATIONS: observations,
-      NODE_OPTIONS: ((e.NODE_OPTIONS ?? '') + ' --import=' + import.meta.url).trim() } });
+      NODE_OPTIONS: `${e.NODE_OPTIONS ?? ''} --import=${import.meta.url}`.trim() } });
   } finally {
     resultCaches?.restoreVitestResultCaches(cacheDirectory);
   }
-  async function hashLogs(command) {
-    for (const stream of ['stdout', 'stderr']) command[stream].sha256 = await hashFile(path.join(e.HARNESS_RUN_DIRECTORY, command[stream].file));
+  async function hashLogs(logged) {
+    for (const stream of ['stdout', 'stderr']) {
+      logged[stream].sha256 = await hashFile(path.join(e.HARNESS_RUN_DIRECTORY, logged[stream].file));
+    }
   }
   await hashLogs(command);
   const afterOutputs = gate.id.endsWith('build') ? outputInventory(repo, packages, true) : [];
   let consumer;
   if (gate.id.endsWith('build') && processVerdict(command) === 'PASS') {
     fs.writeFileSync(path.join(e.HARNESS_RUN_DIRECTORY, 'public-consumer.ts'), consumerSource(packages, repo), { flag: 'wx' });
-    fs.writeFileSync(path.join(e.HARNESS_RUN_DIRECTORY, 'public-consumer.tsconfig.json'), JSON.stringify(consumerConfig, null, 2) + '\n', { flag: 'wx' });
+    fs.writeFileSync(path.join(e.HARNESS_RUN_DIRECTORY, 'public-consumer.tsconfig.json'),
+      `${JSON.stringify(consumerConfig, null, 2)}\n`, { flag: 'wx' });
     consumer = await execute({ executable: e.HARNESS_NODE, args: [fileURLToPath(import.meta.url)], cwd: repo,
       directory: e.HARNESS_RUN_DIRECTORY, label: 'public-consumer', timeoutMs: Math.min(gate.timeoutMs, 300000),
       limitBytes: contract.policy.reportLimitBytes,
       env: { HARNESS_COMMAND_CONSUMER: '1', HARNESS_COMMAND_REPO: repo } });
     await hashLogs(consumer);
   }
-  const files = fs.readdirSync(observations).sort().map(file => ({ file: 'command-observations/' + file,
+  const files = fs.readdirSync(observations).sort().map(file => ({ file: `command-observations/${file}`,
     sha256: digest(readDisk(path.join(observations, file))) }));
   writeJson(e.HARNESS_OUTPUT, { runNonce: e.HARNESS_NONCE, gateId: gate.id, controlDigest: e.HARNESS_SEAL,
     sourceDigest: e.HARNESS_SOURCE_DIGEST, platform: process.platform, command, packages, beforeOutputs, afterOutputs,
@@ -182,7 +186,7 @@ async function collectChild() {
   try { await collect(); }
   finally {
     fs.writeFileSync(path.join(e.HARNESS_RUN_DIRECTORY, 'command-child-lifetime.json'),
-      JSON.stringify({ ...lifetime, finishedAt: new Date().toISOString() }, null, 2) + '\n', { flag: 'wx', flush: true });
+      `${JSON.stringify({ ...lifetime, finishedAt: new Date().toISOString() }, null, 2)}\n`, { flag: 'wx', flush: true });
   }
 }
 
@@ -198,7 +202,7 @@ async function supervise() {
   const supervisor = await executeWithCacheRecovery({ execute: core.execute, gateTimeoutMs: gate.timeoutMs,
     cacheDirectory: path.join(e.HARNESS_RUN_DIRECTORY, 'test-result-cache'), executable: e.HARNESS_NODE,
     args: [fileURLToPath(import.meta.url), '--collector-child', e.HARNESS_NONCE], cwd: repo,
-    directory: e.HARNESS_RUN_DIRECTORY, label: gate.id + '-collector', limitBytes: contract.policy.reportLimitBytes,
+    directory: e.HARNESS_RUN_DIRECTORY, label: `${gate.id}-collector`, limitBytes: contract.policy.reportLimitBytes,
     env: { HARNESS_OUTPUT: childOutput, HARNESS_NONCE: e.HARNESS_NONCE, HARNESS_GATE: gate.id } });
   for (const stream of ['stdout', 'stderr']) {
     supervisor.command[stream].sha256 = await core.hashFile(path.join(e.HARNESS_RUN_DIRECTORY, supervisor.command[stream].file));
@@ -223,4 +227,3 @@ else if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(impo
   if (process.argv[2] === '--collector-child') await collectChild();
   else await supervise();
 }
-
