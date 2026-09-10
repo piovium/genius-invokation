@@ -26,12 +26,9 @@ function hasSubject(
 }
 
 export function isUserJwtPayload(payload: unknown): payload is UserJwtPayload {
-  return (
-    hasSubject(payload) &&
-    payload.user === 1 &&
-    Number.isSafeInteger(payload.sub) &&
-    Number(payload.sub) > 0
-  );
+  if (!hasSubject(payload) || payload.user !== 1) return false;
+  const { sub } = payload;
+  return typeof sub === "number" && Number.isSafeInteger(sub) && sub > 0;
 }
 export function isGuestJwtPayload(
   payload: unknown,

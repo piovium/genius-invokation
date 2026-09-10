@@ -75,7 +75,7 @@ export async function listenHttp(
         new Request(
           new URL(
             incoming.url ?? "/",
-            "http://" + (incoming.headers.host ?? "localhost"),
+            `http://${incoming.headers.host ?? "localhost"}`,
           ),
           init,
         ),

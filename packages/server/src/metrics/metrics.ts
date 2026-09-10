@@ -95,6 +95,7 @@ export function createMetrics(): Metrics {
       // would reach Gauge.reset and crash on scrape.
       labelNames: labelNames ?? [],
       registers: [registry],
+      // prom-client invokes collect with the gauge bound as `this`.
       collect: async function () {
         report(this, await collectRoomMetrics());
       },

@@ -17,6 +17,12 @@ const persistedReplay = customType<{ data: unknown; driverData: unknown }>({
   fromDriver: (value) => value,
 });
 
+/** Relations keep their parent row on delete and follow a rename, as the deployed DDL does. */
+const referentialActions = {
+  onDelete: "restrict",
+  onUpdate: "cascade",
+} as const;
+
 // Mirror the deployed DDL exactly: quoted identifiers, millisecond timestamp
 // precision, defaults, relation actions and the composite primary key.
 export const users = pgTable("User", {
@@ -43,16 +49,10 @@ export const playerOnGames = pgTable(
   {
     playerId: integer("playerId")
       .notNull()
-      .references(() => users.id, {
-        onDelete: "restrict",
-        onUpdate: "cascade",
-      }),
+      .references(() => users.id, referentialActions),
     gameId: integer("gameId")
       .notNull()
-      .references(() => games.id, {
-        onDelete: "restrict",
-        onUpdate: "cascade",
-      }),
+      .references(() => games.id, referentialActions),
     who: integer("who").notNull(),
   },
   (table) => [
@@ -69,7 +69,7 @@ export const decks = pgTable("Deck", {
   requiredVersion: integer("requiredVersion").notNull(),
   ownerUserId: integer("ownerUserId")
     .notNull()
-    .references(() => users.id, { onDelete: "restrict", onUpdate: "cascade" }),
+    .references(() => users.id, referentialActions),
   createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
     .notNull()
     .defaultNow(),

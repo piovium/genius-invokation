@@ -47,6 +47,13 @@ function fail(code: DeckVerificationErrorCode, message: string): never {
   throw new DeckVerificationError(code, message);
 }
 
+/** Occurrence count per value, so two tag lists can be compared as multisets. */
+function countBy<T>(values: Iterable<T>): Map<T, number> {
+  const counts = new Map<T, number>();
+  for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
+  return counts;
+}
+
 export const ASSETS_MANAGER = Object.freeze({
   encode: staticEncode,
   decode: staticDecode,
@@ -68,7 +75,10 @@ const getData = <T extends CharacterMetadata | ActionCardMetadata>(
   id: number,
 ): T | undefined => deckMetadata[id] as T | undefined;
 
-const SINGLETON_REQUIRED_TAGS = ["GCG_TAG_LEGEND", "GCG_TAG_CARD_BLESSING"];
+const SINGLETON_REQUIRED_TAGS = new Set([
+  "GCG_TAG_LEGEND",
+  "GCG_TAG_CARD_BLESSING",
+]);
 
 const CHARACTER_COUNT = 3;
 const CARD_COUNT = 30;
@@ -98,14 +108,15 @@ export async function verifyDeck({
     characterTags.push(...character.tags);
     versions.add(character.sinceVersion);
   }
+  const availableTags = countBy(characterTags);
   const cardCounts = new Map<number, number>();
   for (const cardId of cards) {
     const card = getData<ActionCardMetadata>(cardId);
     if (!card) {
       fail(NotFoundError, `card id ${cardId} not found`);
     }
-    const cardMaxCount = SINGLETON_REQUIRED_TAGS.some((tag) =>
-      card.tags.includes(tag),
+    const cardMaxCount = card.tags.some((tag) =>
+      SINGLETON_REQUIRED_TAGS.has(tag),
     )
       ? 1
       : 2;
@@ -125,16 +136,13 @@ export async function verifyDeck({
     ) {
       fail(RelationError, `card id ${cardId} related character not in deck`);
     }
-    const remainingTags = [...characterTags];
-    for (const requiredTag of card.relatedCharacterTags) {
-      const index = remainingTags.indexOf(requiredTag);
-      if (index === -1) {
+    for (const [tag, required] of countBy(card.relatedCharacterTags)) {
+      if ((availableTags.get(tag) ?? 0) < required) {
         fail(
           RelationError,
           `card id ${cardId} related character tags not in deck`,
         );
       }
-      remainingTags.splice(index, 1);
     }
     versions.add(card.sinceVersion);
   }

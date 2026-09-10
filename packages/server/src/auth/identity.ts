@@ -28,6 +28,20 @@ export function requireUserIdentity(
 }
 
 /**
+ * Builds one opt-in macro: enabled, it merges `read(request)` into the context
+ * under `field`; disabled, it contributes nothing.
+ */
+const inject =
+  (field: string, read: (request: Request) => unknown) => (enabled: boolean) =>
+    enabled
+      ? {
+          resolve: ({ request }: { request: Request }) => ({
+            [field]: read(request),
+          }),
+        }
+      : {};
+
+/**
  * Elysia plugin that hands the caller's token to the routes of a prefix:
  *
  * - `{ identity: true }` injects `identity`, `null` for anonymous callers;
@@ -39,28 +53,7 @@ export function requireUserIdentity(
  */
 export const identity = (auth: Auth) =>
   new Elysia({ name: "identity" }).macro({
-    identity: (enabled: boolean) =>
-      enabled
-        ? {
-            resolve: ({ request }) => ({
-              identity: readIdentity(request, auth),
-            }),
-          }
-        : {},
-    user: (enabled: boolean) =>
-      enabled
-        ? {
-            resolve: ({ request }) => ({
-              user: requireUserIdentity(request, auth),
-            }),
-          }
-        : {},
-    player: (enabled: boolean) =>
-      enabled
-        ? {
-            resolve: ({ request }) => ({
-              player: requireIdentity(request, auth),
-            }),
-          }
-        : {},
+    identity: inject("identity", (request) => readIdentity(request, auth)),
+    user: inject("user", (request) => requireUserIdentity(request, auth)),
+    player: inject("player", (request) => requireIdentity(request, auth)),
   });

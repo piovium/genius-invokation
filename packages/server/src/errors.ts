@@ -66,6 +66,12 @@ function* driverErrorChain(error: unknown) {
   }
 }
 
+/** The two PostgreSQL integrity violations that are the client's fault, not ours. */
+const conflictMessageBySqlState: Record<string, string> = {
+  "23505": "Record already exists",
+  "23503": "Related record is missing or still in use",
+};
+
 /**
  * Render a boundary failure as an Elysia response.
  *
@@ -82,13 +88,13 @@ export function errorResponse(error: unknown) {
     cause.code,
     cause.errno,
   ]);
-  if (codes.includes("23505"))
-    return status(409, { statusCode: 409, message: "Record already exists" });
-  if (codes.includes("23503"))
-    return status(409, {
-      statusCode: 409,
-      message: "Related record is missing or still in use",
-    });
+  const conflict = codes
+    .map((code) =>
+      typeof code === "string" ? conflictMessageBySqlState[code] : undefined,
+    )
+    .find((message) => message !== undefined);
+  if (conflict !== undefined)
+    return status(409, { statusCode: 409, message: conflict });
   return status(500, {
     statusCode: 500,
     message: "Internal Server Error",

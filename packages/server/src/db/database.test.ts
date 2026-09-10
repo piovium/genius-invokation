@@ -134,7 +134,7 @@ test(
         assert.equal(await decks.getDeck(91000002, oldDeck!.id), null);
         await assert.rejects(
           decks.updateDeck(91000002, oldDeck!.id, { name: "forbidden" }),
-          { status: 404 },
+          { statusCode: 404 },
         );
         await decks.updateDeck(91000001, oldDeck!.id, { name: "updated-deck" });
         const data = JSON.stringify({

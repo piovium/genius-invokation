@@ -48,13 +48,12 @@ export function createApplication({
   const games = createGames(database, metrics);
   const auth = createAuth({ users, secret });
   const rooms = createRooms(users, decks, games, metrics);
-  const prefix =
-    ("/" + basePath.split("/").filter(Boolean).join("/")).replace(/\/$/, "") +
-    "/api";
+  const rootPath = `/${basePath.split("/").filter(Boolean).join("/")}`;
+  const prefix = `${rootPath.replace(/\/$/, "")}/api`;
   const app = new Elysia({
     adapter: node(),
     strictPath: false,
-  }).onError(({ code, error, set }) => {
+  }).onError(({ code, error }) => {
     if (code === "VALIDATION" || code === "PARSE")
       return status(400, { statusCode: 400, message: "Invalid request" });
     if (code === "NOT_FOUND")

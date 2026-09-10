@@ -21,6 +21,7 @@ import gts from "@gi-tcg/unplugin-gts/rolldown";
 import { generateDeckMetadata } from "./deck-metadata";
 const root = path.resolve(import.meta.dirname, "..");
 const output = path.join(root, "dist");
+const fromSource = Boolean(process.env.FROM_SOURCE);
 // Validate and capture the local assets snapshot before replacing build output.
 const { outputDirectory: metadataDirectory } = await generateDeckMetadata();
 // Only this package's generated distribution is replaced.
@@ -43,11 +44,11 @@ await build({
   external: ["pg-native", "bufferutil", "utf-8-validate"],
   plugins: [
     replacePlugin({ "process.env.NODE_ENV": '"production"' }),
-    !!process.env.FROM_SOURCE && gts(),
+    fromSource && gts(),
   ],
   platform: "node",
   resolve: {
-    conditionNames: process.env.FROM_SOURCE
+    conditionNames: fromSource
       ? ["node", "development", "es2015", "module"]
       : ["node", "production", "es2015", "module"],
   },

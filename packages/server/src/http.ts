@@ -1,12 +1,18 @@
 import { t } from "elysia";
 import { badRequest } from "./errors";
+
+const PAGE_SIZE_LIMIT = 30;
+const MAX_INT32 = 2 ** 31 - 1;
+
 export const paginationSchema = {
   skip: t.Optional(t.Numeric({ minimum: 1, multipleOf: 1 })),
-  take: t.Optional(t.Numeric({ minimum: 1, maximum: 30, multipleOf: 1 })),
+  take: t.Optional(
+    t.Numeric({ minimum: 1, maximum: PAGE_SIZE_LIMIT, multipleOf: 1 }),
+  ),
 };
 export const idSchema = t.Numeric({
   minimum: 1,
-  maximum: 2147483647,
+  maximum: MAX_INT32,
   multipleOf: 1,
 });
 export const deckSchema = {

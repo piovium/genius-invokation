@@ -32,8 +32,11 @@ export function createGamesRoutes(games: Games, auth: Auth) {
     })
     .get(
       "/:gameId",
-      async ({ params }) =>
-        (await games.getGame(params.gameId)) ?? Response.json(null),
+      async ({ params }) => {
+        // A missing game is reported as a null body rather than a 404.
+        const game = await games.getGame(params.gameId);
+        return game ?? Response.json(null);
+      },
       { params: t.Object({ gameId: idSchema }), user: true },
     );
 }

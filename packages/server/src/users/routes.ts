@@ -15,6 +15,7 @@
 
 import { Elysia, t } from "elysia";
 import { identity } from "../auth/identity";
+import { isUserJwtPayload } from "../auth/jwt";
 import type { Auth } from "../auth/session";
 import { notFound } from "../errors";
 import { idSchema, nameSchema } from "../http";
@@ -25,14 +26,21 @@ export interface UpdateUserInfoDto {
   name?: string | null;
 }
 
-export const createUsersRoutes = (users: Users, auth: Auth) =>
-  new Elysia({ prefix: "/users" })
+const updateUserInfoSchema = t.Object({
+  name: t.Optional(t.Union([nameSchema, t.Null()])),
+  chessboardColor: t.Optional(
+    t.Union([t.String({ pattern: "^#[0-9a-fA-F]{6}$" }), t.Null()]),
+  ),
+});
+
+export function createUsersRoutes(users: Users, auth: Auth) {
+  return new Elysia({ prefix: "/users" })
     .use(identity(auth))
     .get(
       "/me",
       async ({ identity }) => {
         // An explicit JSON null marks "no account"; an empty body would not parse.
-        if (identity?.user !== 1) return Response.json(null);
+        if (!isUserJwtPayload(identity)) return Response.json(null);
         const user = await users.findById(identity.sub);
         if (!user) throw notFound();
         return user;
@@ -41,12 +49,7 @@ export const createUsersRoutes = (users: Users, auth: Auth) =>
     )
     .patch("/me", ({ user, body }) => users.updateUserInfo(user.sub, body), {
       user: true,
-      body: t.Object({
-        name: t.Optional(t.Union([nameSchema, t.Null()])),
-        chessboardColor: t.Optional(
-          t.Union([t.String({ pattern: "^#[0-9a-fA-F]{6}$" }), t.Null()]),
-        ),
-      }),
+      body: updateUserInfoSchema,
     })
     .get(
       "/:id",
@@ -57,3 +60,4 @@ export const createUsersRoutes = (users: Users, auth: Auth) =>
       },
       { user: true, params: t.Object({ id: idSchema }) },
     );
+}

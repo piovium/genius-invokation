@@ -62,6 +62,12 @@ export async function deckToCode(deck: Deck): Promise<DeckWithVersion> {
   }
 }
 
+/** A stored row joined with the deck content its code carries. */
+const withDeckContent = (model: DeckModel): DeckWithDeckModel => ({
+  ...model,
+  ...ASSETS_MANAGER.decode(model.code),
+});
+
 export function createDecks(database: Database): Decks {
   return {
     deckToCode,
@@ -101,10 +107,7 @@ export function createDecks(database: Database): Decks {
             .where(where);
           return {
             count: total!.value,
-            data: models.map((model) => ({
-              ...model,
-              ...ASSETS_MANAGER.decode(model.code),
-            })),
+            data: models.map(withDeckContent),
           };
         },
         { isolationLevel: "repeatable read", accessMode: "read only" },
@@ -116,29 +119,30 @@ export function createDecks(database: Database): Decks {
         .from(decks)
         .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
         .limit(1);
-      return model ? { ...model, ...ASSETS_MANAGER.decode(model.code) } : null;
+      return model ? withDeckContent(model) : null;
     },
-    async updateDeck(userId, deckId, deck) {
-      if ((deck.characters === undefined) !== (deck.cards === undefined))
-        throw badRequest("characters and cards must be provided together");
+    async updateDeck(userId, deckId, { name, characters, cards }) {
+      if ((characters === undefined) !== (cards === undefined)) {
+        const sent = characters === undefined ? "cards" : "characters";
+        throw badRequest(
+          `characters and cards must be updated together; this request sent only ${sent}`,
+        );
+      }
       const encoded =
-        deck.characters && deck.cards
-          ? await deckToCode({
-              characters: deck.characters,
-              cards: deck.cards,
-            })
+        characters !== undefined && cards !== undefined
+          ? await deckToCode({ characters, cards })
           : undefined;
       const [model] = await database.db
         .update(decks)
         .set({
-          name: deck.name,
+          name,
           code: encoded?.code,
           requiredVersion: encoded?.requiredVersion,
           updatedAt: new Date(),
         })
         .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
         .returning();
-      if (!model) throw notFound();
+      if (!model) throw notFound(`deck ${deckId} not found`);
       return model;
     },
     async deleteDeck(userId, deckId) {
@@ -146,7 +150,7 @@ export function createDecks(database: Database): Decks {
         .delete(decks)
         .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
         .returning({ id: decks.id });
-      if (!deleted.length) throw notFound();
+      if (!deleted.length) throw notFound(`deck ${deckId} not found`);
     },
   };
 }

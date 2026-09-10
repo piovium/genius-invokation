@@ -21,6 +21,8 @@ import type { Metrics } from "./metrics";
 export function createMetricsRoutes(metrics: Metrics) {
   return new Elysia().get(
     "/metrics",
+    // The Node adapter replaces a string response's Content-Type, so the scrape
+    // body is returned as a Response carrying prom-client's own type.
     async () =>
       new Response(await metrics.getMetrics(), {
         headers: { "content-type": metrics.contentType },

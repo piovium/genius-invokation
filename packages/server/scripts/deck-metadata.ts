@@ -22,6 +22,10 @@ const metadataFields = [
 const hash = (source: string) =>
   createHash("sha256").update(source).digest("hex");
 
+/** Shape emitted into the generated index; mirrors the `DeckMetadata` fields. */
+const METADATA_TYPE =
+  "Record<string, { id: number; shareId?: number; tags?: string[]; sinceVersion?: string; relatedCharacterId?: number | null; relatedCharacterTags?: string[] }>";
+
 export interface DeckMetadata {
   id: number;
   shareId?: number;
@@ -36,16 +40,17 @@ export async function generateDeckMetadata({
   dataDirectory,
   outputDirectory = path.join(serverRoot, "generated"),
 }: { dataDirectory?: string; outputDirectory?: string } = {}) {
+  const fromSource = Boolean(process.env.FROM_SOURCE);
   if (!dataDirectory) {
     const preferred = path.join(
       assetsRoot,
-      process.env.FROM_SOURCE ? "src/data" : "dist/data",
+      fromSource ? "src/data" : "dist/data",
     );
     try {
       await access(preferred);
       dataDirectory = preferred;
     } catch {
-      if (process.env.FROM_SOURCE)
+      if (fromSource)
         throw new Error(
           "Build assets-manager source data before generating server deck metadata",
         );
@@ -125,8 +130,7 @@ export async function generateDeckMetadata({
   await mkdir(path.join(outputDirectory, "data"), { recursive: true });
   await writeFile(
     path.join(outputDirectory, "deck-metadata.ts"),
-    `// Generated from assets-manager's raw snapshot; see deck-metadata-manifest.json.\n` +
-      `const metadata: Record<string, { id: number; shareId?: number; tags?: string[]; sinceVersion?: string; relatedCharacterId?: number | null; relatedCharacterTags?: string[] }> = ${json};\nexport default metadata;\n`,
+    `// Generated from assets-manager's raw snapshot; see deck-metadata-manifest.json.\nconst metadata: ${METADATA_TYPE} = ${json};\nexport default metadata;\n`,
   );
   // Keep the existing codec byte-for-byte. Its sole runtime data import now
   // resolves to this same snapshot's share map, without initializing Manager.

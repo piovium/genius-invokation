@@ -50,15 +50,18 @@ export interface RoomSubscriber {
   send(event: RoomEvent): void;
   close(code: number, reason: string): void;
 }
+/** Why a room command was refused; the transport maps each one to a wire code. */
+type CommandFailure =
+  | "CONFLICT"
+  | "STALE_RPC"
+  | "FUTURE_RPC"
+  | "INVALID_RESPONSE"
+  | "FORBIDDEN"
+  | "GAME_FINISHED";
+
 export class RoomCommandError extends Error {
   constructor(
-    public readonly code:
-      | "CONFLICT"
-      | "STALE_RPC"
-      | "FUTURE_RPC"
-      | "INVALID_RESPONSE"
-      | "FORBIDDEN"
-      | "GAME_FINISHED",
+    public readonly code: CommandFailure,
     message: string,
   ) {
     super(message);

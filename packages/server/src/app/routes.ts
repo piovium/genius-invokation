@@ -20,7 +20,10 @@ import { CORE_VERSION, CURRENT_VERSION, VERSIONS } from "@gi-tcg/core";
 import { teapot, unavailable } from "../errors";
 import { redis } from "../redis";
 const execute = promisify(execFile);
-let revision: Promise<Record<string, unknown>> | undefined;
+
+/** The `git log` probe spawns a process, so its result is read once per process. */
+let cachedRevision: Promise<Record<string, unknown>> | undefined;
+
 async function getRevision() {
   try {
     const { stdout } = await execute(
@@ -40,9 +43,7 @@ async function getRevision() {
         "unknown",
       author_name: process.env.RAILWAY_GIT_AUTHOR || "unknown",
       author_email: process.env.RAILWAY_SERVICE_NAME
-        ? process.env.RAILWAY_SERVICE_NAME +
-          "@" +
-          process.env.RAILWAY_PUBLIC_DOMAIN
+        ? `${process.env.RAILWAY_SERVICE_NAME}@${process.env.RAILWAY_PUBLIC_DOMAIN}`
         : "unknown@.local",
       date: new Date().toISOString(),
       refs: process.env.RAILWAY_GIT_BRANCH || "",
@@ -51,10 +52,14 @@ async function getRevision() {
     };
   }
 }
+
+/** Redis clears the deploying flag on its own if the deployment never does. */
+const DEPLOYING_FLAG_TTL_SECONDS = 3600;
+
 export function createAppRoutes() {
   return new Elysia()
     .get("/version", async () => ({
-      revision: await (revision ??= getRevision()),
+      revision: await (cachedRevision ??= getRevision()),
       supportedGameVersions: VERSIONS,
       currentGameVersion: CURRENT_VERSION,
       coreVersion: CORE_VERSION,
@@ -69,12 +74,12 @@ export function createAppRoutes() {
     .get("/hello", () => "Hello World!")
     .get("/healthz", async ({ request }) => {
       if (redis && request.headers.get("host") === process.env.HEALTHZ_HOST) {
-        const activeRoomsCount = await redis.hlen("meta:active_rooms");
-        if (activeRoomsCount) {
+        const activeRooms = await redis.hlen("meta:active_rooms");
+        if (activeRooms) {
           await redis.set("meta:deploying", Date.now());
-          await redis.expire("meta:deploying", 3600);
+          await redis.expire("meta:deploying", DEPLOYING_FLAG_TTL_SECONDS);
           throw unavailable(
-            "There are still " + activeRoomsCount + " active rooms.",
+            `There are still ${activeRooms} active rooms; finish them before deploying`,
           );
         }
         await redis.del("meta:deploying");

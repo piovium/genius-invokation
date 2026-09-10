@@ -49,6 +49,23 @@ const updatedUserInfoColumns = {
   createdAt: users.createdAt,
 };
 
+/** The subset of GitHub's `/user` response that this service reads. */
+interface GitHubAccount {
+  id?: number;
+  login?: string;
+  name?: string;
+  avatar_url?: string;
+}
+
+/**
+ * The fields the caller actually sent. Drizzle cannot `set` an empty object, so
+ * the emptiness of the patch decides between updating and reading the row back.
+ */
+const definedFields = <T extends object>(source: T): Partial<T> =>
+  Object.fromEntries(
+    Object.entries(source).filter(([, value]) => value !== undefined),
+  ) as Partial<T>;
+
 export function createUsers(database: Database): Users {
   return {
     async findById(id) {
@@ -60,7 +77,7 @@ export function createUsers(database: Database): Users {
       if (!user?.ghToken) return null;
       const response = await fetch(GET_USER_API_URL, {
         headers: {
-          authorization: "Bearer " + user.ghToken,
+          authorization: `Bearer ${user.ghToken}`,
           accept: "application/vnd.github+json",
           "X-GitHub-Api-Version": "2022-11-28",
         },
@@ -70,23 +87,18 @@ export function createUsers(database: Database): Users {
         await response.body?.cancel();
         return null;
       }
-      const identity = (await response.json()) as {
-        id?: number;
-        login?: string;
-        name?: string;
-        avatar_url?: string;
-      };
+      const account = (await response.json()) as GitHubAccount;
       if (
-        identity.id !== user.id ||
-        typeof identity.login !== "string" ||
-        typeof identity.avatar_url !== "string"
+        account.id !== user.id ||
+        typeof account.login !== "string" ||
+        typeof account.avatar_url !== "string"
       )
         return null;
       return {
         id: user.id,
-        login: identity.login,
-        name: user.name || identity.name,
-        avatarUrl: identity.avatar_url,
+        login: account.login,
+        name: user.name || account.name,
+        avatarUrl: account.avatar_url,
         chessboardColor: user.chessboardColor,
       };
     },
@@ -98,14 +110,10 @@ export function createUsers(database: Database): Users {
         .returning();
       return user!;
     },
-    async updateUserInfo(id, info) {
-      const patch = {
-        ...(info.name === undefined ? {} : { name: info.name }),
-        ...(info.chessboardColor === undefined
-          ? {}
-          : { chessboardColor: info.chessboardColor }),
-      };
-      const [user] = Object.keys(patch).length
+    async updateUserInfo(id, { name, chessboardColor }) {
+      const patch = definedFields({ name, chessboardColor });
+      const hasChanges = Object.keys(patch).length > 0;
+      const [user] = hasChanges
         ? await database.db
             .update(users)
             .set(patch)

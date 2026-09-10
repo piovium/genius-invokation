@@ -6,6 +6,9 @@ import { createSql, type SqlConnection } from "./database";
 const sha256 = (value: string) =>
   createHash("sha256").update(value).digest("hex");
 
+/** Shipped migrations are `<timestamp>_<name>` folders, e.g. `20251013090510_init`. */
+const MIGRATION_FOLDER = /^\d{14}_[A-Za-z0-9_]+$/;
+
 async function findMigrationDirectory() {
   if (process.env.MIGRATIONS_DIRECTORY)
     return resolve(process.env.MIGRATIONS_DIRECTORY);
@@ -20,7 +23,9 @@ async function findMigrationDirectory() {
       /* The packaged and source layouts differ; try the next candidate. */
     }
   }
-  throw new Error("Migration SQL is missing from the server distribution");
+  throw new Error(
+    "Migration SQL is missing from this server build; set MIGRATIONS_DIRECTORY or ship the migrations/ directory",
+  );
 }
 
 /**
@@ -37,11 +42,11 @@ export async function migrateDatabase(
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort();
-  if (
-    !names.length ||
-    names.some((name) => !/^\d{14}_[A-Za-z0-9_]+$/.test(name))
-  )
-    throw new Error("Invalid original SQL migration manifest");
+  if (!names.length || names.some((name) => !MIGRATION_FOLDER.test(name)))
+    throw new Error(
+      `Migrations in ${directory} must be folders named like 20251013090510_init`,
+    );
+  const knownNames = new Set(names);
   const sources = await Promise.all(
     names.map(async (name) => {
       const text = await readFile(
@@ -72,30 +77,36 @@ export async function migrateDatabase(
       const fixtureHistory = migrationState.fixture
         ? await tx.unsafe('SELECT name, sha256 FROM "_HarnessMigration"')
         : [];
-      if (fixtureHistory.some((row) => !names.includes(row.name)))
+      if (fixtureHistory.some((row) => !knownNames.has(row.name)))
         throw new Error("Database has migrations unknown to this server build");
+      const fixtureHashes = new Map(
+        fixtureHistory.map((row) => [row.name, row.sha256] as const),
+      );
       await tx.unsafe(
         'CREATE TABLE IF NOT EXISTS "__drizzle_migrations" ("id" SERIAL PRIMARY KEY, "hash" TEXT NOT NULL, "created_at" BIGINT NOT NULL, "name" TEXT NOT NULL UNIQUE)',
       );
       const recorded = await tx.unsafe(
         'SELECT name, hash FROM "__drizzle_migrations"',
       );
-      if (recorded.some((row) => !names.includes(row.name)))
+      if (recorded.some((row) => !knownNames.has(row.name)))
         throw new Error("Database has migrations newer than this server build");
+      const appliedHashes = new Map(
+        recorded.map((row) => [row.name, row.hash] as const),
+      );
       const applied: string[] = [];
       const adopted: string[] = [];
       for (const [index, source] of sources.entries()) {
-        const existing = recorded.find((row) => row.name === source.name);
-        if (existing) {
-          if (existing.hash !== source.hash)
+        const appliedHash = appliedHashes.get(source.name);
+        if (appliedHash !== undefined) {
+          if (appliedHash !== source.hash)
             throw new Error(
               `Previously applied SQL migration changed: ${source.name}`,
             );
           continue;
         }
-        const fixture = fixtureHistory.find((row) => row.name === source.name);
-        if (fixture) {
-          if (!source.acceptedHashes.has(fixture.sha256))
+        const fixtureHash = fixtureHashes.get(source.name);
+        if (fixtureHash !== undefined) {
+          if (!source.acceptedHashes.has(fixtureHash))
             throw new Error(
               `Adopted SQL migration checksum differs: ${source.name}`,
             );
@@ -158,7 +169,7 @@ const expectedColumns: Record<string, Record<string, ColumnExpectation>> = {
 
 type DefaultKind = "now" | "sequence" | "none";
 
-/** `createdAt` defaults to `now()`, `serial` ids to a sequence, the rest to nothing. */
+/** The deployed DDL defaults only `createdAt` and the `serial` id columns. */
 function defaultKind(table: string, name: string): DefaultKind {
   if (name === "createdAt") return "now";
   if (name === "id" && (table === "Game" || table === "Deck"))

@@ -69,6 +69,8 @@ const toGamePlayer = ({ playerId, who }: PlayerOnGames): GamePlayer => ({
   who,
 });
 
+const bySeat = (a: PlayerOnGames, b: PlayerOnGames) => a.who - b.who;
+
 export function createGames(database: Database, metrics: Metrics): Games {
   return {
     async addGame({ playerIds, ...data }) {
@@ -109,13 +111,13 @@ export function createGames(database: Database, metrics: Metrics): Games {
                   ),
                 )
             : [];
+          const playersByGame = Map.groupBy(links, (link) => link.gameId);
           return {
             count: total!.value,
             data: rows.map((row) => ({
               ...row,
-              players: links
-                .filter((link) => link.gameId === row.id)
-                .sort((a, b) => a.who - b.who)
+              players: (playersByGame.get(row.id) ?? [])
+                .toSorted(bySeat)
                 .map(toGamePlayer),
             })),
           };

@@ -6,16 +6,7 @@ import type { Auth } from "./session";
  * a script error would otherwise leave the popup silently blank, so it is shown.
  */
 const loginPage = (accessToken: string) =>
-  "<!DOCTYPE html>" +
-  "<title>Login Success</title>" +
-  "<p>Redirecting back...</p>" +
-  "<script>" +
-  'window.addEventListener("error", event => { document.body.append(document.createTextNode(event.type + ": " + event.message)); });' +
-  'window.opener.postMessage({type:"login",token:' +
-  JSON.stringify(accessToken) +
-  '},"*");' +
-  "window.close();" +
-  "</script>";
+  `<!DOCTYPE html><title>Login Success</title><p>Redirecting back...</p><script>window.addEventListener("error", event => { document.body.append(document.createTextNode(event.type + ": " + event.message)); });window.opener.postMessage({type:"login",token:${JSON.stringify(accessToken)}},"*");window.close();</script>`;
 
 export const createAuthRoutes = (auth: Auth) =>
   new Elysia({ prefix: "/auth" }).get(

@@ -39,14 +39,20 @@ export function createSql(connectionString = process.env.DATABASE_URL) {
   if (!connectionString) throw new Error("DATABASE_URL is not set");
   const url = new URL(connectionString);
   if (!["postgres:", "postgresql:"].includes(url.protocol))
-    throw new Error("DATABASE_URL must use PostgreSQL");
+    throw new Error(
+      `DATABASE_URL must use postgres:// or postgresql://, not ${url.protocol}//`,
+    );
   const databaseSchema = url.searchParams.get("schema") ?? "public";
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(databaseSchema))
-    throw new Error("Invalid PostgreSQL schema name");
+    throw new Error(
+      `The "schema" query parameter must be a bare PostgreSQL identifier, got "${databaseSchema}"`,
+    );
   url.searchParams.delete("schema");
   const connectionLimit = Number(process.env.DATABASE_CONNECTION_LIMIT ?? 2);
   if (!Number.isSafeInteger(connectionLimit) || connectionLimit < 1)
-    throw new Error("DATABASE_CONNECTION_LIMIT must be a positive integer");
+    throw new Error(
+      `DATABASE_CONNECTION_LIMIT must be a positive integer, got "${process.env.DATABASE_CONNECTION_LIMIT}"`,
+    );
   const pool = new Pool({
     connectionString: url.toString(),
     max: connectionLimit,
@@ -54,7 +60,11 @@ export function createSql(connectionString = process.env.DATABASE_URL) {
     connectionTimeoutMillis: 10_000,
     options: `-c search_path=${databaseSchema}`,
   });
-  pool.on("error", () => console.error("PostgreSQL idle connection failed"));
+  pool.on("error", () =>
+    console.error(
+      "PostgreSQL idle connection failed; the pool discards it and reconnects on demand",
+    ),
+  );
   return Object.assign(createQueries(pool), {
     pool,
     close: () => pool.end(),

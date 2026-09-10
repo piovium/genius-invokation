@@ -10,8 +10,18 @@ export const GET_USER_API_URL =
   process.env.GH_GET_USER_API_URL || "https://api.github.com/user";
 
 const TOKEN_LIFETIME_SECONDS = 42 * 24 * 60 * 60;
+const JWT_HEADER = { alg: "HS256", typ: "JWT" };
+
 const encodeJwtPart = (value: unknown) =>
   Buffer.from(JSON.stringify(value)).toString("base64url");
+
+/** A JWT segment must be canonical base64url; anything else is a forgery attempt. */
+const isCanonicalBase64Url = (segment: string) =>
+  /^[A-Za-z0-9_-]+$/.test(segment) &&
+  Buffer.from(segment, "base64url").toString("base64url") === segment;
+
+const decodeJwtPart = (segment: string) =>
+  JSON.parse(Buffer.from(segment, "base64url").toString());
 
 export interface AuthEndpoints {
   exchange: string;
@@ -41,41 +51,34 @@ export function createAuth({
 
   const sign = (payload: JwtPayload) => {
     const iat = Math.floor(Date.now() / 1000);
-    const content =
-      encodeJwtPart({ alg: "HS256", typ: "JWT" }) +
-      "." +
-      encodeJwtPart({ ...payload, iat, exp: iat + TOKEN_LIFETIME_SECONDS });
-    return (
-      content +
-      "." +
-      createHmac("sha256", secret).update(content).digest("base64url")
-    );
+    const content = `${encodeJwtPart(JWT_HEADER)}.${encodeJwtPart({
+      ...payload,
+      iat,
+      exp: iat + TOKEN_LIFETIME_SECONDS,
+    })}`;
+    const signature = createHmac("sha256", secret)
+      .update(content)
+      .digest("base64url");
+    return `${content}.${signature}`;
   };
 
   const verify = (token: string): JwtPayload | null => {
     if (typeof token !== "string" || token.length > 8192) return null;
     try {
       const segments = token.split(".");
-      // Every segment must be canonical base64url; anything else is a forgery.
       if (
         segments.length !== 3 ||
-        segments.some(
-          (segment) =>
-            !/^[A-Za-z0-9_-]+$/.test(segment) ||
-            Buffer.from(segment, "base64url").toString("base64url") !== segment,
-        )
+        segments.some((segment) => !isCanonicalBase64Url(segment))
       )
         return null;
-      const header = JSON.parse(
-        Buffer.from(segments[0]!, "base64url").toString(),
-      );
+      const header = decodeJwtPart(segments[0]!);
       if (
         header.alg !== "HS256" ||
         (header.typ !== undefined && header.typ !== "JWT")
       )
         return null;
       const expectedSignature = createHmac("sha256", secret)
-        .update(segments[0] + "." + segments[1])
+        .update(`${segments[0]}.${segments[1]}`)
         .digest();
       const suppliedSignature = Buffer.from(segments[2]!, "base64url");
       if (
@@ -83,9 +86,7 @@ export function createAuth({
         !timingSafeEqual(suppliedSignature, expectedSignature)
       )
         return null;
-      const payload = JSON.parse(
-        Buffer.from(segments[1]!, "base64url").toString(),
-      );
+      const payload = decodeJwtPart(segments[1]!);
       const now = Math.floor(Date.now() / 1000);
       if (
         !Number.isSafeInteger(payload.exp) ||
@@ -116,26 +117,30 @@ export function createAuth({
       }),
       signal: AbortSignal.timeout(15_000),
     });
-    const result = (await exchanged.json()) as { access_token?: string };
-    if (
-      !exchanged.ok ||
-      typeof result.access_token !== "string" ||
-      !result.access_token
-    )
+    const { access_token: githubToken } = (await exchanged.json()) as {
+      access_token?: string;
+    };
+    if (!exchanged.ok || typeof githubToken !== "string" || !githubToken)
       throw unauthorized("GitHub code exchange failed");
     const identity = await fetch(endpoints.user, {
       headers: {
-        authorization: "Bearer " + result.access_token,
+        authorization: `Bearer ${githubToken}`,
         accept: "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
       },
       signal: AbortSignal.timeout(15_000),
     });
-    const user = (await identity.json()) as { id?: number };
-    if (!identity.ok || !Number.isSafeInteger(user.id) || user.id! <= 0)
+    const account = (await identity.json()) as { id?: number };
+    const userId =
+      typeof account.id === "number" &&
+      Number.isSafeInteger(account.id) &&
+      account.id > 0
+        ? account.id
+        : null;
+    if (!identity.ok || userId === null)
       throw unauthorized("GitHub user lookup failed");
-    await users.create(user.id!, result.access_token);
-    return { accessToken: sign({ user: 1, sub: user.id! }) };
+    await users.create(userId, githubToken);
+    return { accessToken: sign({ user: 1, sub: userId }) };
   };
 
   return {

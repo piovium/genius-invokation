@@ -36,6 +36,12 @@ const PLACEHOLDER_ENTRIES = Object.entries(PLACEHOLDERS) as [
 const CACHE_CONTROL_REVALIDATE = "public, no-cache, must-revalidate";
 const CACHE_CONTROL_IMMUTABLE = "public, max-age=31536000, immutable";
 
+const INDEX_FILE = "index.html";
+
+/** `null` body with an explicit status, optionally carrying validator headers. */
+const emptyResponse = (status: number, headers?: HeadersInit) =>
+  new Response(null, { status, headers });
+
 export function injectHtml(
   html: string,
   injections: Partial<Record<InjectionPosition, string>>,
@@ -55,6 +61,15 @@ function matchesEtag(header: string | null, etag: string): boolean {
     const value = candidate.trim();
     return value === "*" || value.replace(/^W\//, "") === target;
   });
+}
+
+/** Reject separators, NUL and traversal segments before touching disk. */
+function isUnsafeRelativePath(name: string): boolean {
+  return (
+    name.includes("\\") ||
+    name.includes("\0") ||
+    name.split("/").some((segment) => segment === ".." || segment === ".")
+  );
 }
 
 type IndexEntry = { body: string; etag: string };
@@ -81,34 +96,29 @@ export function createFrontendHandler({
   let index: Promise<IndexEntry> | undefined;
   return async (request: Request): Promise<Response> => {
     if (request.method !== "GET" && request.method !== "HEAD")
-      return new Response(null, { status: 405 });
+      return emptyResponse(405);
     const pathname = new URL(request.url).pathname;
+    const apiBase = `${base}api`;
     if (
       (pathname !== rootPath && !pathname.startsWith(base)) ||
-      pathname === base + "api" ||
-      pathname.startsWith(base + "api/")
+      pathname === apiBase ||
+      pathname.startsWith(`${apiBase}/`)
     )
-      return new Response(null, { status: 404 });
+      return emptyResponse(404);
     let name: string;
     try {
       name = decodeURIComponent(pathname.slice(base.length));
     } catch {
-      return new Response(null, { status: 400 });
+      return emptyResponse(400);
     }
-    if (
-      name.includes("\\") ||
-      name.includes("\0") ||
-      name.split("/").some((part) => part === ".." || part === ".")
-    )
-      return new Response(null, { status: 404 });
+    if (isUnsafeRelativePath(name)) return emptyResponse(404);
     const path = resolve(root, name);
-    if (path !== root && !path.startsWith(root + sep))
-      return new Response(null, { status: 404 });
+    if (path !== root && !path.startsWith(`${root}${sep}`))
+      return emptyResponse(404);
     const info =
-      name && name !== "index.html" ? await stat(path).catch(() => null) : null;
+      name && name !== INDEX_FILE ? await stat(path).catch(() => null) : null;
     if (info?.isFile()) {
-      const etag =
-        'W/"' + info.size.toString(16) + "-" + info.mtimeMs.toString(16) + '"';
+      const etag = `W/"${info.size.toString(16)}-${info.mtimeMs.toString(16)}"`;
       const headers = {
         "content-type": lookup(path) || "application/octet-stream",
         etag,
@@ -116,7 +126,7 @@ export function createFrontendHandler({
           name === "sw.js" ? CACHE_CONTROL_REVALIDATE : CACHE_CONTROL_IMMUTABLE,
       };
       if (matchesEtag(request.headers.get("if-none-match"), etag))
-        return new Response(null, { status: 304, headers });
+        return emptyResponse(304, headers);
       return new Response(
         request.method === "HEAD"
           ? null
@@ -126,15 +136,14 @@ export function createFrontendHandler({
     }
     // Only the HTML entry is read into memory, because beta builds inject a
     // robots tag into it. Assets are always streamed from disk.
-    index ??= readFile(resolve(root, "index.html"), "utf8")
+    index ??= readFile(resolve(root, INDEX_FILE), "utf8")
       .then((html) => {
         const body = injectHtml(html, {
           head: beta ? '<meta name="robots" content="noindex">' : "",
         });
         return {
           body,
-          etag:
-            '"' + createHash("sha256").update(body).digest("base64url") + '"',
+          etag: `"${createHash("sha256").update(body).digest("base64url")}"`,
         };
       })
       .catch((error) => {
@@ -149,12 +158,12 @@ export function createFrontendHandler({
         etag: entry.etag,
       };
       return matchesEtag(request.headers.get("if-none-match"), entry.etag)
-        ? new Response(null, { status: 304, headers })
+        ? emptyResponse(304, headers)
         : new Response(request.method === "HEAD" ? null : entry.body, {
             headers,
           });
     } catch {
-      return new Response(null, { status: 404 });
+      return emptyResponse(404);
     }
   };
 }

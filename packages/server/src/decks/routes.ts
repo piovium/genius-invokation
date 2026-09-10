@@ -38,9 +38,15 @@ export interface QueryDeckDto extends PaginationDto {
 
 const deckBodySchema = t.Object({ ...deckSchema, name: nameSchema });
 const deckIdParamsSchema = t.Object({ deckId: idSchema });
+const deckQuerySchema = t.Object({
+  ...paginationSchema,
+  requiredVersion: t.Optional(
+    t.Numeric({ minimum: 0, maximum: VERSIONS.length - 1, multipleOf: 1 }),
+  ),
+});
 
-export const createDecksRoutes = (decks: Decks, auth: Auth) =>
-  new Elysia({ prefix: "/decks" })
+export function createDecksRoutes(decks: Decks, auth: Auth) {
+  return new Elysia({ prefix: "/decks" })
     .use(identity(auth))
     .post(
       "/",
@@ -61,22 +67,13 @@ export const createDecksRoutes = (decks: Decks, auth: Auth) =>
     )
     .get("/", ({ user, query }) => decks.getAllDecks(user.sub, query), {
       user: true,
-      query: t.Object({
-        ...paginationSchema,
-        requiredVersion: t.Optional(
-          t.Numeric({
-            minimum: 0,
-            maximum: VERSIONS.length - 1,
-            multipleOf: 1,
-          }),
-        ),
-      }),
+      query: deckQuerySchema,
     })
     .get(
       "/:deckId",
       async ({ user, params }) => {
         const deck = await decks.getDeck(user.sub, params.deckId);
-        if (!deck) throw notFound();
+        if (!deck) throw notFound(`deck ${params.deckId} not found`);
         return deck;
       },
       { user: true, params: deckIdParamsSchema },
@@ -103,3 +100,4 @@ export const createDecksRoutes = (decks: Decks, auth: Auth) =>
       },
       { user: true, params: deckIdParamsSchema },
     );
+}

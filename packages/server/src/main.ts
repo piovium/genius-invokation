@@ -16,12 +16,17 @@
 import { createApplication, listenApplication } from "./app";
 import { redis } from "./redis";
 
+const DEFAULT_PORT = 3_000;
+const MAX_PORT = 65_535;
+
 const service = createApplication();
 await service.database.connect();
 
-const port = Number(process.env.PORT ?? 3000);
-if (!Number.isInteger(port) || port < 1 || port > 65535)
-  throw new Error("Invalid PORT");
+const port = Number(process.env.PORT ?? DEFAULT_PORT);
+if (!Number.isInteger(port) || port < 1 || port > MAX_PORT)
+  throw new Error(
+    `PORT must be an integer between 1 and ${MAX_PORT}, received "${process.env.PORT}"`,
+  );
 
 const server = await listenApplication(service, {
   port,

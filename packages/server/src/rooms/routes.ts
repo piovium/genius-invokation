@@ -67,9 +67,10 @@ export const createRoomsRoutes = (rooms: Rooms, auth: Auth) =>
     .get(
       "/:roomId",
       ({ identity, params }) => {
-        const room = rooms.getRoom(parseRoomId(params.roomId));
+        const roomId = parseRoomId(params.roomId);
+        const room = rooms.getRoom(roomId);
         if (identity?.user !== 1 && !room.config.allowGuest)
-          throw unauthorized("This room does not allow guests");
+          throw unauthorized(`Room ${roomId} does not allow guests`);
         return room;
       },
       { identity: true },
