@@ -1,19 +1,19 @@
 # Native GTS development
 
-This branch uses `typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2`
-as the workspace `typescript` package. TNB runs semantic checking in tsgo.
-The GTS and Volar patches keep virtual GTS source text available to that checker
-without constructing a second complete JavaScript syntax tree.
+This branch consumes GTS through
+`typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2`, pinned as the workspace
+`typescript` in both the `overrides` and `catalog` sections of
+`pnpm-workspace.yaml`. Every package check therefore runs on tsgo: the ten
+workspace check scripts (`gtsc --noEmit` for `@gi-tcg/data`, `tsc --noEmit`
+for the other nine) and the recursive test suites all resolve `typescript` to
+the bridge.
 
-This candidate is still under validation. On Windows, frozen installation,
-the typed CI build, all ten package check commands and 209 recursive tests have
-passed. Test typechecking also completed without errors. Three independent
-native data checks covered all 195 GTS files on an earlier candidate; those
-runs still need repeating on the final candidate.
-
-Final harness acceptance is pending, including the extension's 100-round
-sessions and a clean Linux/container build and run. Linux frozen installation
-has passed; earlier Linux builds were blocked by external resource downloads.
+Only the integration surface this repository needs in order to consume GTS is
+kept here. The migration-time route that added a second, TNB-backed language
+service to the custom data loader — together with its container packaging and
+its Node language-server entry point — has been removed. The custom data
+loader keeps its original browser worker editor, which is unrelated to the
+native consumption path.
 
 ## Install and check
 
@@ -27,47 +27,32 @@ pnpm check
 pnpm -r test
 ```
 
-`pnpm check` runs the existing package check scripts with workspace concurrency
-set to one. It includes the complete data package and historical GTS sources.
-Keep declaration generation enabled when preparing dependencies.
+`pnpm check` runs the existing package check scripts with workspace
+concurrency set to one, which keeps the number of concurrent native checkers
+low. It covers the complete data package, including the historical GTS
+sources.
 
-Dependencies use exact registry versions with pnpm `patchedDependencies`.
-Keep the lockfile and patch files with the checkout.
-[Patch provenance](./tsgo-patches.json) records the release archive integrity,
-patch hashes and unpublished source revisions used for this candidate.
-The companion source changes are on the
-[GTS branch](https://github.com/piovium/gts/tree/codex/tsgo-gts) and the
-[TNB fork branch](https://github.com/DrAbx123/typescript-native-bridge/tree/codex/tsgo-bridge).
-The committed patches install these changes without requiring unpublished
-packages, sibling worktrees or manually modified dependencies.
+## Patches
 
-## VS Code
+Two patches are applied through pnpm `patchedDependencies`; both are required
+for this consumption path. [Patch provenance](./tsgo-patches.json) records the
+release archive integrity, patch hashes and unpublished source revisions.
 
-Install a GamingTS extension build with native SDK support from the GTS branch
-linked above. The published extension may not include these changes.
-Open this repository and select **TypeScript: Select TypeScript Version → Use
-Workspace Version**. The checked-in workspace SDK is
-`node_modules/typescript/lib`.
+- `typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2` — the in-process tsgo
+  host patch. It is what makes the pinned package usable as `typescript`.
+- `@volar/typescript@2.4.28` — adds the `tnbGetSourceText` compiler-host hook.
+  The GTS language plugin feeds translated GTS text through it, so the native
+  checker never has to build a second JavaScript syntax tree. TNB falls back to
+  `host.getSourceFile` when the hook is absent, which is functionally
+  equivalent but allocates the full JS AST. Measured on `gtsc --noEmit` over
+  `packages/data` (peak working set of the single Node process, three runs
+  each): ~5.8 GiB without the hook, ~4.3 GiB with it.
 
-GamingTS resolves the workspace's native SDK for both its GTS service and the
-TypeScript extension's TS/TSX service. Check the GamingTS startup log for the
-resolved SDK path. Restart the language services after changing the installed
-SDK.
-The extension also resolves dependencies from a `packages/data` workspace;
-testing that workspace is part of final acceptance.
+Other candidate patches were measured and are deliberately absent. See the
+`removedCandidates` section of the provenance file for the evidence.
 
-## Web editor
-
-The custom data editor offers **Browser** and **Backend** checking. Browser
-checking uses the pinned JavaScript TypeScript SDK in a Worker. Backend
-checking uses a local or remote TNB/tsgo process; it does not need the browser
-TypeScript SDK download. Both modes retain the same editor contents and undo
-history when switching. Backend connection failures remain visible until
-reconnection or an explicit mode change.
-
-See [the editor instructions](../packages/custom-data-loader/README.md) for the
-actual start commands, connection URL and mode selection. Card transpilation
-and execution still run in the browser in either checking mode.
+Patch files are kept with the checkout and are pinned to LF by `.gitattributes`
+(`*.patch text eol=lf`); a CRLF patch breaks pnpm patch application on Windows.
 
 ## Memory measurements
 
