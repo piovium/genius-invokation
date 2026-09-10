@@ -22,9 +22,9 @@ test('all sealed control bytes survive a real Git checkout including binary fixt
   }
   git(repository, ['init', '-q']);
   git(repository, ['add', '--force', '--', ...Object.keys(seal.files)]);
-  git(repository, ['checkout-index', '--all', '--prefix=' + checkout.replaceAll('\\', '/') + '/']);
+  git(repository, ['checkout-index', '--all', `--prefix=${checkout.replaceAll('\\', '/')}/`]);
   for (const [relative, expected] of Object.entries(seal.files)) {
     assert.equal(await hashFile(path.join(checkout, relative)), expected,
-      'Git filters or line endings change sealed control bytes: ' + relative);
+      `Git filters or line endings change sealed control bytes: ${relative}`);
   }
 });

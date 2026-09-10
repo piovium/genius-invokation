@@ -10,7 +10,8 @@ const directory = process.env.HARNESS_CLI_OBSERVATIONS;
 if (!directory) throw new Error('Missing native CLI observation directory');
 fs.mkdirSync(directory, { recursive: true });
 const file = path.join(directory, `${process.pid}.jsonl`);
-const event = value => fs.appendFileSync(file, JSON.stringify({ at: Date.now(), pid: process.pid, runNonce: process.env.HARNESS_NONCE, gateId: process.env.HARNESS_GATE, ...value }) + '\n');
+const event = value => fs.appendFileSync(file, `${JSON.stringify({ at: Date.now(), pid: process.pid,
+  runNonce: process.env.HARNESS_NONCE, gateId: process.env.HARNESS_GATE, ...value })}\n`);
 const artifact = file => ({ path: fs.realpathSync.native(file),
   sha256: crypto.createHash('sha256').update(readDiskFile(file)).digest('hex') });
 event({ kind: 'start', parentPid: process.ppid, executable: artifact(process.execPath), argv: process.argv, execArgv: process.execArgv, cwd: process.cwd() });

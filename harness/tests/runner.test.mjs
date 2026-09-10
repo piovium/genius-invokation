@@ -142,7 +142,7 @@ test('harness-only phase rejects product execution, dispatch and completion', as
   await assert.rejects(finishRun(f.harness, 'unused'), /harness-only/);
 });
 test('source mutation during collector execution invalidates the result', async t => {
-  const f = await fixture(t, { collectorText: collector + "\nfs.appendFileSync('src/input.ts','// changed\\n');" });
+  const f = await fixture(t, { collectorText: `${collector}\nfs.appendFileSync('src/input.ts','// changed\\n');` });
   const run = await runSelection(f.harness, 'all');
   assert.equal(run.status, 'FAIL');
   await assert.rejects(finishRun(f.harness, run.directory), /inputs changed/);

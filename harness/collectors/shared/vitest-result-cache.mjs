@@ -12,7 +12,7 @@ const same = (left, right) => process.platform === 'win32'
   ? left.toLowerCase() === right.toLowerCase() : left === right;
 const readJson = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const writeNew = (file, bytes) => fs.writeFileSync(file, bytes, { flag: 'wx', flush: true });
-const jsonNew = (file, value) => writeNew(file, JSON.stringify(value, null, 2) + '\n');
+const jsonNew = (file, value) => writeNew(file, `${JSON.stringify(value, null, 2)}\n`);
 
 function sourcePath(entry) {
   assert.equal(path.basename(entry.file), 'results.json', 'Only explicit Vitest results.json metadata is supported');
