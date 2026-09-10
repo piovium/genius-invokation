@@ -19,7 +19,7 @@ editor, which is unrelated to the native consumption path.
 
 Use the pinned toolchain: Node 26.1.0 and pnpm 12.0.0, as recorded in
 `mise.toml` and matched by `engines.node` (`^26.1.0`) and `packageManager`
-(`pnpm@12.0.0`). The first two commands are the ones CI runs
+(`pnpm@12.0.0`). CI runs the first two commands and `pnpm -r test`
 (`.github/workflows/main.yml`); `prisma:generate` is required by the server
 check, because the generated client is not committed.
 

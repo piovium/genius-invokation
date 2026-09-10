@@ -5,7 +5,7 @@
   "verification": "pnpm -r --workspace-concurrency=1 check (ten packages) and pnpm -r test pass with these patches applied.",
   "native": {
     "addonPatched": false,
-    "resolution": "Platform-specific optional dependency from the pinned published TNB package; Windows and Linux use their own addon.",
+    "resolution": "Platform-specific optional dependency from the pinned published TNB package; Windows, Linux and macOS use their own addon.",
     "addonSha256": {
       "win32-x64": "32be259fa2027f7b4ba26f78827293b187f1eb000eb5c6761dda171cd5c9a4cb"
     },
