@@ -20,6 +20,22 @@ async function until(check: () => boolean, timeout = 2_000) {
   }
 }
 
+/**
+ * Wait until `read` stops changing, so an attempt that was already in flight
+ * when the client gave up is not mistaken for a fresh reconnect.
+ */
+async function settles(read: () => number, quietMs = 60, timeout = 2_000) {
+  const end = Date.now() + timeout;
+  let seen = read();
+  while (Date.now() < end) {
+    await delay(quietMs);
+    const next = read();
+    if (next === seen) return;
+    seen = next;
+  }
+  throw new Error("Fixture never stopped accepting connections");
+}
+
 /** Match the current `rpc` request, or any `rpc` with a decoded payload. */
 function isRpcEvent(id?: number) {
   return (event: RoomEvent): boolean =>
@@ -540,6 +556,7 @@ test("retains only one uncertain command, and dispose cancels pending work and r
   assert.ok(disposedError instanceof RoomConnectionError);
   assert.equal(disposedError.code, "DISPOSED");
   assert.equal(disposedError.outcomeUnknown, true);
+  await settles(() => server.stats.connections);
   const count = server.stats.connections;
   await delay(50);
   assert.equal(server.stats.connections, count);
@@ -557,6 +574,7 @@ test("uncertain command recovery has an overall deadline even if every reconnect
   });
   assert.equal(server.stats.executions, 1);
   assert.equal(c.connection.hasPendingCommand, false);
+  await settles(() => server.stats.connections);
   const count = server.stats.connections;
   await delay(30);
   assert.equal(server.stats.connections, count);
