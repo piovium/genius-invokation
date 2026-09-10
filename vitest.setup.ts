@@ -18,8 +18,8 @@ import * as matchers from "jest-extended";
 import type { } from "jest-extended";
 
 declare module "vitest" {
-  interface Assertion<T = any> extends jest.Matchers<T> {}
-  interface AsymmetricMatchersContaining extends jest.Matchers<any> {}
+  interface AsymmetricMatchersContaining
+    extends Omit<jest.Matchers<unknown>, "toBeOneOf" | "toSatisfy"> {}
 }
 
 expect.extend(matchers);
