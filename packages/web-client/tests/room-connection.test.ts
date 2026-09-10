@@ -20,6 +20,21 @@ async function until(check: () => boolean, timeout = 2_000) {
   }
 }
 
+/** Match the current `rpc` request, or any `rpc` with a decoded payload. */
+function isRpcEvent(id?: number) {
+  return (event: RoomEvent): boolean =>
+    event.type === "rpc" &&
+    event.data !== null &&
+    (id === undefined || event.data.id === id);
+}
+
+/** Capture a promise's settlement so its rejection can be asserted later. */
+const outcomeOf = (promise: Promise<unknown>): Promise<unknown> =>
+  promise.then(
+    () => null,
+    (error) => error,
+  );
+
 const running: (() => void | Promise<void>)[] = [];
 afterEach(async () => {
   for (const stop of running.splice(0).reverse()) await stop();
@@ -81,7 +96,7 @@ async function fixture(options: FixtureOptions = {}) {
   });
   const sockets = new WebSocketServer({ server });
   sockets.on("connection", (ws, request) => {
-    const data = { authenticated: false, ordinal: ++stats.connections };
+    const conn = { authenticated: false, ordinal: ++stats.connections };
     stats.urls.push(request.url ?? "");
     peers.add(ws);
     ws.on("close", () => peers.delete(ws));
@@ -90,7 +105,7 @@ async function fixture(options: FixtureOptions = {}) {
         ? Buffer.concat(raw)
         : Buffer.from(raw instanceof ArrayBuffer ? new Uint8Array(raw) : raw);
       const message = isBinary ? new Uint8Array(bytes) : bytes.toString();
-      if (!data.authenticated) {
+      if (!conn.authenticated) {
         const auth = typeof message === "string" ? JSON.parse(message) : null;
         stats.tokens.push(auth?.token);
         if (
@@ -103,7 +118,7 @@ async function fixture(options: FixtureOptions = {}) {
           return;
         }
         if (options.silenceBeforeReady) return;
-        data.authenticated = true;
+        conn.authenticated = true;
         stats.authenticated++;
         control(ws, {
           type: "ready",
@@ -111,7 +126,7 @@ async function fixture(options: FixtureOptions = {}) {
             ? {}
             : {
                 sessionId:
-                  options.changeSessionOnReconnect && data.ordinal > 1
+                  options.changeSessionOnReconnect && conn.ordinal > 1
                     ? "replacement-session"
                     : session,
               }),
@@ -233,10 +248,12 @@ async function fixture(options: FixtureOptions = {}) {
   };
 }
 
-function client(
-  server: Awaited<ReturnType<typeof fixture>>,
-  extra: Partial<ConstructorParameters<typeof RoomConnection>[0]> = {},
-) {
+type RoomFixture = Awaited<ReturnType<typeof fixture>>;
+type ConnectionOverrides = Partial<
+  ConstructorParameters<typeof RoomConnection>[0]
+>;
+
+function client(server: RoomFixture, overrides: ConnectionOverrides = {}) {
   const events: RoomEvent[] = [];
   const states: string[] = [];
   const errors: RoomConnectionError[] = [];
@@ -251,20 +268,55 @@ function client(
     onEvent: (event) => events.push(event),
     onState: (state) => states.push(state),
     onError: (error) => errors.push(error),
-    ...extra,
+    ...overrides,
   });
   running.push(() => connection.dispose());
   connection.start();
+  const waitForRpc = (id?: number) => until(() => events.some(isRpcEvent(id)));
   return {
     connection,
     events,
     states,
     errors,
-    ready: () =>
-      until(() =>
-        events.some((event) => event.type === "rpc" && event.data !== null),
-      ),
+    /** Resolve once the connection has received its first RPC request. */
+    ready: () => waitForRpc(),
+    /** Resolve once the RPC request with `id` arrives. */
+    waitForRpc,
+    /** Resolve with the connection's single reported error. */
+    soleError: async () => {
+      await until(() => errors.length === 1);
+      return errors[0];
+    },
+    lastState: () => states.at(-1),
   };
+}
+
+/** A fixture, plus a client that has authenticated and received its first RPC. */
+async function connect(
+  options: FixtureOptions = {},
+  overrides: ConnectionOverrides = {},
+) {
+  const server = await fixture(options);
+  const c = client(server, overrides);
+  await c.ready();
+  return { server, c };
+}
+
+/**
+ * A client that marks its connection finished on the terminal snapshot, so the
+ * lost ACK for the action that produced that snapshot can still be recovered.
+ */
+async function clientAwaitingFinalAck(server: RoomFixture) {
+  let connection: RoomConnection;
+  const c = client(server, {
+    onEvent: (event) => {
+      if (event.type === "notification" && event.data[3] === 5)
+        connection.markFinished();
+    },
+  });
+  connection = c.connection;
+  await until(() => c.connection.requestToken !== null);
+  return c;
 }
 
 describe("production binary game framing", () => {
@@ -315,10 +367,8 @@ describe("production binary game framing", () => {
   });
 });
 
-test("real network authenticates before binary game data and waits for matching ACK", async () => {
-  const server = await fixture({ ackDelayMs: 30 });
-  const c = client(server);
-  await c.ready();
+test("the real socket authenticates before binary game data and waits for the matching ACK", async () => {
+  const { server, c } = await connect({ ackDelayMs: 30 });
   assert.equal(c.connection.sessionId, "fixture-game-session");
   assert.deepEqual(
     c.events.map((event) => event.type),
@@ -338,19 +388,16 @@ test("real network authenticates before binary game data and waits for matching 
     server.stats.urls.every((url) => !url.includes("fixture-token")),
     true,
   );
-  await until(() =>
-    c.events.some((event) => event.type === "rpc" && event.data?.id === 2),
-  );
+  await c.waitForRpc(2);
   assert.deepEqual(c.errors, []);
 });
 
 for (const fault of ["before-accept", "after-accept"] as const) {
-  test(`real ${fault} disconnect retries identical bytes after authenticating the same session`, async () => {
-    const server = await fixture({ fault });
-    const c = client(server);
-    await c.ready();
+  test(`${fault} disconnect retries the identical bytes after re-authenticating the same session`, async () => {
+    const { server, c } = await connect({ fault });
     const response = Uint8Array.of(0x12, 0);
     const answer = c.connection.sendResponse(1, response);
+    // The retry must resend the client's own copy, not the caller's buffer.
     response.fill(99);
     await answer;
     assert.equal(server.stats.executions, 1);
@@ -368,25 +415,18 @@ for (const fault of ["before-accept", "after-accept"] as const) {
 
 test("terminal snapshot still permits recovery of a lost final action ACK", async () => {
   const server = await fixture({ fault: "terminal-after-accept" });
-  let connection: RoomConnection;
-  const c = client(server, {
-    onEvent: (event) => {
-      if (event.type === "notification" && event.data[3] === 5)
-        connection.markFinished();
-    },
-  });
-  connection = c.connection;
-  await until(() => connection.requestToken !== null);
-  await connection.sendResponse(1, Uint8Array.of(0x12, 0));
+  const c = await clientAwaitingFinalAck(server);
+  await c.connection.sendResponse(1, Uint8Array.of(0x12, 0));
   assert.equal(server.stats.executions, 1);
   assert.deepEqual(server.stats.commands, [1, 1]);
-  assert.equal(c.states.at(-1), "closed");
+  assert.equal(c.lastState(), "closed");
 });
 
 test("anonymous spectators explicitly authenticate with an empty token", async () => {
-  const server = await fixture({ allowAnonymous: true });
-  const c = client(server, { token: () => "" });
-  await c.ready();
+  const { server, c } = await connect(
+    { allowAnonymous: true },
+    { token: () => "" },
+  );
   assert.deepEqual(server.stats.tokens, [""]);
   assert.equal(
     c.events.some((event) => event.type === "notification"),
@@ -397,39 +437,35 @@ test("anonymous spectators explicitly authenticate with an empty token", async (
 test("authentication refusal stops reconnecting and exposes a fatal error", async () => {
   const server = await fixture({ rejectAuth: true });
   const c = client(server);
-  await until(() => c.errors.length === 1);
+  const error = await c.soleError();
   await delay(30);
   assert.equal(server.stats.connections, 1);
-  assert.equal(c.errors[0].code, "ACCESS_DENIED");
+  assert.equal(error.code, "ACCESS_DENIED");
   assert.deepEqual(c.events, []);
 });
 
-test("missing ready session is rejected before game data can reach the UI", async () => {
+test("a ready frame without a session id is rejected before game data reaches the UI", async () => {
   const server = await fixture({ missingSession: true });
   const c = client(server);
-  await until(() => c.errors.length === 1);
-  assert.equal(c.errors[0].code, "PROTOCOL_ERROR");
+  const error = await c.soleError();
+  assert.equal(error.code, "PROTOCOL_ERROR");
   assert.deepEqual(c.events, []);
 });
 
 test("a foreign ACK cannot confirm the command", async () => {
-  const server = await fixture({ wrongAckSession: true });
-  const c = client(server);
-  await c.ready();
+  const { c } = await connect({ wrongAckSession: true });
   await assert.rejects(c.connection.sendResponse(1, Uint8Array.of(0x12, 0)), {
     code: "PROTOCOL_ERROR",
     outcomeUnknown: true,
   });
-  assert.equal(c.states.at(-1), "failed");
+  assert.equal(c.lastState(), "failed");
 });
 
-test("changed session on reconnect fails instead of replaying an uncertain action into it", async () => {
-  const server = await fixture({
+test("a changed session on reconnect fails instead of replaying an uncertain action", async () => {
+  const { server, c } = await connect({
     fault: "before-accept",
     changeSessionOnReconnect: true,
   });
-  const c = client(server);
-  await c.ready();
   await assert.rejects(c.connection.sendResponse(1, Uint8Array.of(0x12, 0)), {
     code: "SESSION_CHANGED",
     outcomeUnknown: true,
@@ -440,16 +476,12 @@ test("changed session on reconnect fails instead of replaying an uncertain actio
 
 for (const code of ["STALE_RPC", "CONFLICT", "FUTURE_RPC"]) {
   test(`${code} is a definite rejection followed by synchronization, without retrying the rejected bytes`, async () => {
-    const server = await fixture({ commandError: code });
-    const c = client(server);
-    await c.ready();
+    const { server, c } = await connect({ commandError: code });
     await assert.rejects(c.connection.sendResponse(1, Uint8Array.of(0x12, 0)), {
       code,
       outcomeUnknown: false,
     });
-    await until(() =>
-      c.events.some((event) => event.type === "rpc" && event.data?.id === 2),
-    );
+    await c.waitForRpc(2);
     await c.connection.sendResponse(2, Uint8Array.of(0x12, 0));
     assert.deepEqual(server.stats.commands, [1, 2]);
     assert.equal(server.stats.executions, 1);
@@ -457,17 +489,15 @@ for (const code of ["STALE_RPC", "CONFLICT", "FUTURE_RPC"]) {
 }
 
 test("stale asynchronous UI answer is rejected even when reconnect reuses the same RPC ID", async () => {
-  const server = await fixture();
-  const c = client(server);
-  await c.ready();
-  const oldRequestToken = c.connection.requestToken!;
+  const { server, c } = await connect();
+  const staleToken = c.connection.requestToken!;
   server.disconnect();
   await until(
     () =>
       server.stats.authenticated === 2 && c.connection.requestToken !== null,
   );
   await assert.rejects(
-    c.connection.sendResponse(1, Uint8Array.of(0x12, 0), oldRequestToken),
+    c.connection.sendResponse(1, Uint8Array.of(0x12, 0), staleToken),
     { code: "STALE_LOCAL_RPC" },
   );
   assert.equal(server.stats.executions, 0);
@@ -480,10 +510,8 @@ test("stale asynchronous UI answer is rejected even when reconnect reuses the sa
 });
 
 test("invalid response refreshes the same pending RPC without automatically replaying the rejected answer", async () => {
-  const server = await fixture({ commandError: "INVALID_RESPONSE" });
-  const c = client(server);
-  await c.ready();
-  const oldToken = c.connection.requestToken;
+  const { server, c } = await connect({ commandError: "INVALID_RESPONSE" });
+  const staleToken = c.connection.requestToken;
   await assert.rejects(c.connection.sendResponse(1, Uint8Array.of(0x12, 0)), {
     code: "INVALID_RESPONSE",
     outcomeUnknown: false,
@@ -491,22 +519,17 @@ test("invalid response refreshes the same pending RPC without automatically repl
   await until(
     () =>
       c.connection.requestToken !== null &&
-      c.connection.requestToken !== oldToken,
+      c.connection.requestToken !== staleToken,
   );
   assert.deepEqual(server.stats.commands, [1]);
   await c.connection.sendResponse(1, Uint8Array.of(0x12, 0));
   assert.equal(server.stats.executions, 1);
 });
 
-test("only one uncertain command is retained and dispose cancels pending work and reconnect timers", async () => {
-  const server = await fixture({ neverAck: true });
-  const c = client(server, { ackTimeoutMs: 20 });
-  await c.ready();
+test("retains only one uncertain command, and dispose cancels pending work and reconnect timers", async () => {
+  const { server, c } = await connect({ neverAck: true }, { ackTimeoutMs: 20 });
   const answer = c.connection.sendResponse(1, Uint8Array.of(0x12, 0));
-  const outcome = answer.then(
-    () => null,
-    (error) => error,
-  );
+  const outcome = outcomeOf(answer);
   await assert.rejects(c.connection.giveUp(), { code: "COMMAND_PENDING" });
   await until(() => c.states.includes("reconnecting"));
   c.connection.dispose();
@@ -521,9 +544,10 @@ test("only one uncertain command is retained and dispose cancels pending work an
 });
 
 test("uncertain command recovery has an overall deadline even if every reconnect authenticates", async () => {
-  const server = await fixture({ neverAck: true });
-  const c = client(server, { ackTimeoutMs: 15, commandTimeoutMs: 100 });
-  await c.ready();
+  const { server, c } = await connect(
+    { neverAck: true },
+    { ackTimeoutMs: 15, commandTimeoutMs: 100 },
+  );
   await assert.rejects(c.connection.sendResponse(1, Uint8Array.of(0x12, 0)), {
     code: "COMMAND_TIMEOUT",
     outcomeUnknown: true,
@@ -538,15 +562,13 @@ test("uncertain command recovery has an overall deadline even if every reconnect
 test("lost authentication response has a finite reconnect deadline", async () => {
   const server = await fixture({ silenceBeforeReady: true });
   const c = client(server, { authTimeoutMs: 15, reconnectDeadlineMs: 65 });
-  await until(() => c.errors.length === 1);
-  assert.equal(c.errors[0].code, "RECONNECT_TIMEOUT");
+  const error = await c.soleError();
+  assert.equal(error.code, "RECONNECT_TIMEOUT");
   assert.deepEqual(c.events, []);
 });
 
 test("surrender uses a same-session WebSocket ACK", async () => {
-  const server = await fixture();
-  const c = client(server);
-  await c.ready();
+  const { server, c } = await connect();
   await c.connection.giveUp();
   assert.equal(server.stats.surrenderExecutions, 1);
   assert.equal(server.stats.executions, 0);
@@ -555,17 +577,9 @@ test("surrender uses a same-session WebSocket ACK", async () => {
 
 test("lost surrender ACK is recovered after the terminal snapshot without surrendering twice", async () => {
   const server = await fixture({ fault: "terminal-after-accept" });
-  let connection: RoomConnection;
-  const c = client(server, {
-    onEvent: (event) => {
-      if (event.type === "notification" && event.data[3] === 5)
-        connection.markFinished();
-    },
-  });
-  connection = c.connection;
-  await until(() => connection.requestToken !== null);
-  await connection.giveUp();
+  const c = await clientAwaitingFinalAck(server);
+  await c.connection.giveUp();
   assert.equal(server.stats.surrenderExecutions, 1);
   assert.equal(server.stats.authenticated, 2);
-  assert.equal(c.states.at(-1), "closed");
+  assert.equal(c.lastState(), "closed");
 });
