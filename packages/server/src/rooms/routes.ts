@@ -98,7 +98,7 @@ export const createRoomsRoutes = (rooms: Rooms, auth: Auth) =>
       "/:roomId/players",
       async ({ identity, params, body }) => {
         const roomId = parseRoomId(params.roomId);
-        if (identity?.user === 1) {
+        if (isRegistered(identity)) {
           await rooms.joinRoomFromUser(
             identity.sub,
             roomId,

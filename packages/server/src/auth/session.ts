@@ -84,7 +84,8 @@ export function createAuth({
   };
 
   const verify = (token: string): JwtPayload | null => {
-    if (token.length > MAX_TOKEN_LENGTH) return null;
+    if (typeof token !== "string" || token.length > MAX_TOKEN_LENGTH)
+      return null;
     try {
       const segments = token.split(".");
       if (

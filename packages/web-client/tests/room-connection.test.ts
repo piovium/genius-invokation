@@ -40,7 +40,7 @@ async function settles(read: () => number, quietMs = 60, timeout = 2_000) {
   throw new Error("Fixture never stopped accepting connections");
 }
 
-/** Match the `rpc` event for `id`, or any `rpc` event when `id` is omitted. */
+/** Match the decoded `rpc` event for `id`, or any decoded one without `id`. */
 function isRpcEvent(id?: number) {
   return (event: RoomEvent): boolean =>
     event.type === "rpc" &&

@@ -106,8 +106,7 @@ function isBinaryFrame(message: unknown): message is Uint8Array | ArrayBuffer {
 
 /**
  * Notifications and non-null RPCs travel as encoded game frames; the rest is
- * JSON. An arrow const rather than a declaration because that is what makes
- * TypeScript infer the type predicate the encoder call below relies on.
+ * JSON.
  */
 const carriesGameFrame = (event: RoomEvent) =>
   event.type === "notification" ||

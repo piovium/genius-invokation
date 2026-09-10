@@ -88,6 +88,7 @@ const isRoomInitialized = (value: unknown): value is RoomInitialized => {
 
 /** Largest JSON control message the client accepts from the server. */
 const MAX_CONTROL_MESSAGE_BYTES = 64 * 1024;
+const textEncoder = new TextEncoder();
 
 /** WebSocket close code for an ordinary client-initiated shutdown. */
 const CLOSE_NORMAL = 1000;
@@ -343,7 +344,7 @@ export class RoomConnection {
       else this.options.onEvent(value);
       return;
     }
-    if (data.length > MAX_CONTROL_MESSAGE_BYTES)
+    if (textEncoder.encode(data).byteLength > MAX_CONTROL_MESSAGE_BYTES)
       throw new Error("Control message exceeds size limit");
     const value: unknown = JSON.parse(data);
     if (!isRecord(value) || typeof value.type !== "string")

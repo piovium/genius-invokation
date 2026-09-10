@@ -35,7 +35,7 @@
 
 WebSocket 与 HTTP 共用端口 3000。反向代理需要转发 `Upgrade`，空闲超时应大于服务的心跳周期。指标位于 `/metrics`，API 前缀为 `WEB_CLIENT_BASE_PATH` 加 `api`。Redis、房间回放/S3 和部署健康检查沿用现有环境变量。收到退出信号后，服务等待已有房间结束；Compose 提供 10 分钟退出宽限。
 
-或者，通过 Railway 一键部署对战平台。Railway 非免费部署平台；如果想要在 Railway 上降低部署对战平台的成本，可以开启 `genius-invokation` 服务的 Serverless 选项，详情可参见 [Railway Serverless](https://docs.railway.com/reference/app-sleeping)。
+- 或者，通过 Railway 一键部署对战平台。Railway 非免费部署平台；如果想要在 Railway 上降低部署对战平台的成本，可以开启 `genius-invokation` 服务的 Serverless 选项，详情可参见 [Railway Serverless](https://docs.railway.com/reference/app-sleeping)。
 
   [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/genius-invokation?referralCode=JF0EXE&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
