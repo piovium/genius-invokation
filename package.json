@@ -17,6 +17,7 @@
     "test": "pnpm -r test",
     "harness:check": "node --test scripts/server-harness/*.test.mjs scripts/server-harness/experiments/*.test.mjs scripts/server-harness/environment/*.test.mjs",
     "harness:doctor": "node scripts/server-harness/doctor.mjs",
+    "harness:constraints": "node scripts/server-harness/constraints.mjs",
     "harness:baseline": "node scripts/server-harness/run.mjs --config scripts/server-harness/baseline.json",
     "harness:gate": "node scripts/server-harness/run.mjs --config scripts/server-harness/candidate.json",
     "harness:experiments": "node scripts/server-harness/experiments/run.mjs",

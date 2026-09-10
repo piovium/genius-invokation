@@ -15,13 +15,28 @@
 
 - [x] 旧服务生产构建及 SSE 基线，包括真实游戏、回收期、持久化。
 - [x] Elysia/Node.js HTTP 服务及既有 OAuth、用户、牌组、房间、对局、指标、静态页面行为。
-- [x] Drizzle/PostgreSQL 数据访问，原有数据/DDL约束兼容、重复迁移、重启持久化。
+- [x] Drizzle/PostgreSQL 数据访问、DDL/约束兼容、重复迁移、重启持久化（当时包含把旧 `_prisma_migrations` 记录登记进 `__drizzle_migrations` 的兼容路径）。
 - [x] 二进制 WebSocket 服务和浏览器客户端，认证、ACK、重连去重、认输、观战；移除 SSE。
 - [x] 游戏回放完整保留，减少原状态图的内存保留；无截断记录或提前回收绕过预算。
 - [x] 对应单测、真实连接/数据库负测、应用构建与类型检查、浏览器流程验证。
 - [ ] 同一最终候选版本运行完整 harness gate：各空闲阶段 RSS 峰值 ≤100 MiB、单局峰值相对首次冷空闲 RSS 中位数的增量 ≤50 MiB。
 - [x] 重复游戏/慢消费者/并发连接及清理检查，部署配置和说明更新。
 - [ ] 对已完成功能整理代码和文档，修正语言错误、重复展开及不必要的复杂写法，并验证行为不变。尚在实验中的实现待功能确定后再整理。
+- [ ] 服务代码改为 Elysia 原生写法：插件组合与 `derive`/`resolve`/`macro`/`decorate`、`t` 校验、`status`/`error` 错误处理；移除 `*.controller.ts`/`*.service.ts`/`*.module.ts` 命名、容器类与 `*Exception` 兼容层。
+- [ ] 清除全部 Prisma 遗留：`prisma/` 目录与随构建发布的 SQL、依赖与 lockfile 条目、`allowBuilds` 放行项、`_prisma_migrations` 兼容导入逻辑及相关测试与文档；候选库只保留全新 Drizzle 迁移。
+- [ ] `node scripts/server-harness/constraints.mjs` 通过，并作为最终验收的必需证据之一。
+
+## 2026-09-10 目标变更：Elysia 原生 + 无 Prisma 遗留
+
+用户明确两条新的硬约束，并确认运行时不变：**继续使用 Node.js，不使用 Bun**；**Prisma 不得留下历史遗留**。据此调整目标：
+
+- 写法以 Elysia 原生为准：路由、校验、鉴权、错误与插件组合都用 Elysia 自身能力。此前按 NestJS 形状保留的 controller/service/module 命名、`createApplication` 手工装配的容器类、`errors.ts` 的 `*Exception` 层次都变成待清理项。
+- Prisma 全清范围：`packages/server/prisma/**`（schema、迁移 SQL、生成产物）、`pnpm-workspace.yaml` 的 `prisma` 与 `@prisma/engines` 放行项、lockfile 中的 `prisma` 与 `@prisma/*` 条目、`src/db/migrate.ts` 读取 `_prisma_migrations` 并登记进 `__drizzle_migrations` 的兼容路径、`db/database.test.ts` 与 `db/migrate.test.ts` 的旧迁移记录断言、`packages/server/scripts/build.ts` 的打包项与 `packages/server/README.md` 的相关说明。
+- 候选服务不再自带旧服务 SQL，harness 准备基线库改为从 `HARNESS_BASELINE_SQL_DIR` 指向的冻结旧服务源码读取并绑定校验和；该变量缺失、目录为空或缺 `migration.sql` 时 `prepare.mjs` 明确失败，不回退到候选目录。`doctor` 不再把 `packages/server/generated/prisma/client.ts` 当作前置条件。
+- 新增可执行闸门 `scripts/server-harness/constraints.mjs`（`npm run harness:constraints`），单测纳入 `harness:check` 的 glob，并在 harness CI 中作为独立步骤执行。当前检查失败，其输出即清理清单。
+- 「不使用 Bun」同样是可执行规则：依赖、`packageManager`、脚本命令、`Bun.` 全局对象、`bun:` 模块、Bun shebang 与 Bun 基础镜像都会被拒绝；文档中的说明性文字不参与判定。
+
+待实现阶段决定并记录的问题：现有生产库（含 `_prisma_migrations` 与业务数据）如何在不引入 Prisma 的前提下升级或重建；房间 WebSocket 在 Node 下继续使用 `ws` 挂载这一例外如何长期维护；`new Response` 显式响应头的写法在适配器行为变化后能否收敛回 Elysia 原生返回。
 
 ## 版本管理
 
@@ -69,3 +84,5 @@
 指标路由和房间辅助模块的整理仅调整命名及排版，原鉴权、ID 解析和调用顺序经独立审查保持一致。冻结源码快照叠加三个实际改动文件后，Node 26.1.0 的服务类型检查和现有应用/房间测试 11/11 通过。指标服务、protobuf 生成配置及补丁换行配置完成审阅，保留原样。
 
 新的内存诊断仍未找到达标版本：同进程 VM 上下文加载完整引擎的采样 RSS 增量为 59.75 MiB，释放引用 30 秒后为 111.85 MiB；Node 原生编译缓存的两组对照均确认真实命中，但命中后的首五秒空闲峰值分别为 118.88 MiB、116.59 MiB。两组缓存实验使用不同堆策略，后一组期间另有短暂运行时选项查询，不能用于精确性能比例比较。原始记录在 `temp/server-harness/vm-engine-lifecycle`、`temp/server-harness/compile-cache-experiment`；上述实验均无真实对局或主动 GC，未将 VM、缓存或实验参数用于生产。
+
+随后真实 HTTP 检查发现 Node 适配器会把字符串响应的显式 `Content-Type` 覆盖为 `text/plain`，导致 OAuth 回调脚本不能在浏览器执行，指标接口也丢失版本信息。两个路由现返回带明确响应头的原生 `Response`，保留原正文、鉴权顺序和错误处理。新增回归先复现失败；修复后服务测试 21/21 和类型检查通过。Chrome 152 经实际 Node 26.1.0 HTTP 服务验证合成登录回调：HTML 类型与 `no-store` 保留、主窗口收到登录消息、弹窗关闭，身份交换另由既有真实 HTTP 测试覆盖。本批完成专门代码审查，未更换适配器或依赖；完整内存 gate 仍未通过。原始记录在 `temp/server-harness/adapter-dependency-audit`，不随分支上传。

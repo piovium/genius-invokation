@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { ensureRuntimeEnvironment, newEnvironment, redact, signToken, TOKEN_LIFETIME_SECONDS, validateEnvironment, verifyToken } from "./prepare.mjs";
+import { ensureRuntimeEnvironment, newEnvironment, redact, resolveBaselineSqlDirectory, signToken, TOKEN_LIFETIME_SECONDS, validateEnvironment, verifyToken } from "./prepare.mjs";
 import { createIdentityServer, TEST_USERS } from "./identity.mjs";
 
 async function temporaryEnvironment(t) {
@@ -114,4 +114,27 @@ test("HARNESS_DOCKER_SELFTEST: inherited credentials cannot override the preserv
   assert.equal(report.accounts.length, 2);
   assert.equal(report.databasePasswordVerified, true);
   assert.equal(report.databaseWrongPasswordRejected, true);
+});
+
+test("baseline SQL must come from an explicit frozen old-service directory", async (t) => {
+  await assert.rejects(resolveBaselineSqlDirectory({}), /HARNESS_BASELINE_SQL_DIR/);
+  await assert.rejects(resolveBaselineSqlDirectory({ HARNESS_BASELINE_SQL_DIR: "   " }), /HARNESS_BASELINE_SQL_DIR/);
+  // 候选服务清退 Prisma 后不再提供迁移 SQL，因此相对路径不能被解释成仓库内目录。
+  await assert.rejects(resolveBaselineSqlDirectory({ HARNESS_BASELINE_SQL_DIR: "packages/server/prisma/migrations" }), /absolute/);
+  const folder = await mkdtemp(join(tmpdir(), "gi-harness-baseline-"));
+  t.after(async () => {
+    assert.equal(dirname(resolve(folder)), resolve(tmpdir()));
+    assert.ok(basename(folder).startsWith("gi-harness-baseline-"));
+    await rm(folder, { recursive: true, force: true });
+  });
+  await assert.rejects(resolveBaselineSqlDirectory({ HARNESS_BASELINE_SQL_DIR: folder }), /No baseline migrations/);
+  await mkdir(join(folder, "20250101000000_init"));
+  await mkdir(join(folder, "20250201000000_more"));
+  await writeFile(join(folder, "20250101000000_init", "migration.sql"), "SELECT 1;\n");
+  // 缺 migration.sql 的目录必须失败，不能按空迁移继续。
+  await assert.rejects(resolveBaselineSqlDirectory({ HARNESS_BASELINE_SQL_DIR: folder }), { code: "ENOENT" });
+  await writeFile(join(folder, "20250201000000_more", "migration.sql"), "SELECT 2;\n");
+  const resolved = await resolveBaselineSqlDirectory({ HARNESS_BASELINE_SQL_DIR: ` ${folder} ` });
+  assert.equal(resolved.directory, folder);
+  assert.deepEqual(resolved.migrations, ["20250101000000_init", "20250201000000_more"]);
 });

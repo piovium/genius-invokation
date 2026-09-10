@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
-import { chmod, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { chmod, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseEnv, promisify } from "node:util";
 import { TEST_USERS } from "./identity.mjs";
@@ -119,6 +119,29 @@ export function redact(text, environment = {}) {
   return result;
 }
 
+/**
+ * 基线数据库 schema 来自冻结的旧服务源码快照。候选服务在清退 Prisma 后不再携带
+ * 这份 SQL，因此旧服务迁移目录必须显式给出，不能回退到候选服务目录。
+ */
+export async function resolveBaselineSqlDirectory(processEnvironment = process.env) {
+  const directory = processEnvironment.HARNESS_BASELINE_SQL_DIR?.trim();
+  assert.ok(
+    directory,
+    "HARNESS_BASELINE_SQL_DIR must point at the frozen old service prisma/migrations directory; the candidate service no longer ships Prisma SQL",
+  );
+  assert.ok(isAbsolute(directory), "HARNESS_BASELINE_SQL_DIR must be an absolute path inside the fixture host");
+  const entries = await readdir(directory, { withFileTypes: true });
+  const migrations = entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+  assert.ok(migrations.length > 0, `No baseline migrations found in ${directory}`);
+  for (const name of migrations) {
+    await stat(join(directory, name, "migration.sql"));
+  }
+  return { directory, migrations };
+}
+
 async function docker(args, environment = {}, timeout = 600_000) {
   try {
     const { stdout } = await executeFile("docker", ["--host", dockerSocket, ...args], {
@@ -146,18 +169,18 @@ async function query(sql, environment) {
   return JSON.parse(await docker([...composeArgs(), "exec", "-T", "postgres", "sh", "-c", statement, "harness-query", sql], environment));
 }
 
-async function verifyServices(environment) {
+async function verifyServices(environment, baselineSql) {
   const rows = await query('SELECT json_agg(t ORDER BY t.id) FROM (SELECT "id", "name", "ghToken" FROM "User" WHERE "id" IN (91000001,91000002)) t', environment);
   assert.ok(Array.isArray(rows) && rows.length === 2, "Fixture database is missing one or both accounts");
   const wrongPassword = 'PGPASSWORD=harness-invalid-fixture-password psql --host=postgres --no-psqlrc --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" --command="SELECT 1"';
   await assert.rejects(docker([...composeArgs(), "exec", "-T", "postgres", "sh", "-c", wrongPassword], environment), /password authentication failed/);
-  const migrationDirectory = join(repository, "packages/server/prisma/migrations");
-  const sourceMigrations = (await readdir(migrationDirectory, { withFileTypes: true })).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
+  const migrationDirectory = baselineSql.directory;
+  const sourceMigrations = baselineSql.migrations;
   const applied = await query('SELECT json_agg(t ORDER BY t.name) FROM (SELECT "name", "sha256" FROM "_HarnessMigration") t', environment);
-  assert.ok(Array.isArray(applied) && applied.length === sourceMigrations.length, "Migration count differs from repository SQL");
+  assert.ok(Array.isArray(applied) && applied.length === sourceMigrations.length, "Migration count differs from the frozen baseline SQL");
   for (const [index, name] of sourceMigrations.entries()) {
     const checksum = createHash("sha256").update(await readFile(join(migrationDirectory, name, "migration.sql"))).digest("hex");
-    assert.ok(applied[index].name === name && applied[index].sha256 === checksum, "Applied migration differs from repository SQL");
+    assert.ok(applied[index].name === name && applied[index].sha256 === checksum, "Applied migration differs from the frozen baseline SQL");
   }
   const health = await fetch("http://127.0.0.1:19090/healthz", { signal: AbortSignal.timeout(10_000), redirect: "error" });
   assert.equal(health.status, 200, "Identity health check failed");
@@ -177,7 +200,7 @@ async function verifyServices(environment) {
   const unauthorized = await fetch(environment.GH_GET_USER_API_URL, { signal: AbortSignal.timeout(10_000), redirect: "error" });
   assert.equal(unauthorized.status, 401, "Identity fixture accepted a missing credential");
   await unauthorized.body?.cancel();
-  return { accounts: verified, migrations: sourceMigrations, migrationChecksumsVerified: true, identityHealthPassed: true, missingIdentityCredentialRejected: true, databasePasswordVerified: true, databaseWrongPasswordRejected: true };
+  return { accounts: verified, migrations: sourceMigrations, baselineSqlDirectory: migrationDirectory, migrationChecksumsVerified: true, identityHealthPassed: true, missingIdentityCredentialRejected: true, databasePasswordVerified: true, databaseWrongPasswordRejected: true };
 }
 
 export async function prepare() {
@@ -187,6 +210,7 @@ export async function prepare() {
   try {
     assert.equal(process.platform, "linux", "Run prepare.mjs inside the dedicated gi-server-harness WSL/Linux environment");
     if (process.env.WSL_DISTRO_NAME) assert.equal(process.env.WSL_DISTRO_NAME, PROJECT, "Use the dedicated gi-server-harness WSL distribution");
+    const baselineSql = await resolveBaselineSqlDirectory();
     await docker(["info", "--format", "{{.ServerVersion}}"], {}, 30_000);
     const volumes = await docker(["volume", "ls", "--filter", `name=^${volumeName}$`, "--format", "{{.Name}}"], {}, 30_000);
     const volumeExists = volumes.split("\n").includes(volumeName);
@@ -202,12 +226,12 @@ export async function prepare() {
     process.stdout.write("Starting isolated PostgreSQL 17 and local identity fixture...\n");
     await docker([...composeArgs(), "up", "-d", "--wait", "--wait-timeout", "120", "postgres", "identity"], environment);
     await docker([...composeArgs(), "exec", "-T", "postgres", "sh", "/harness/init-db.sh"], environment, 120_000);
-    Object.assign(report, await verifyServices(environment));
+    Object.assign(report, await verifyServices(environment, baselineSql));
     report.services = { postgres: "127.0.0.1:15432", identity: "127.0.0.1:19090" };
     report.composeNetwork = `${PROJECT}_default`;
     report.databaseExcludedFromServerRss = true;
     report.passed = true;
-    process.stdout.write(`Ready: two isolated accounts, ${report.migrations.length} repository migrations, identity lookup and JWT signatures verified.\n`);
+    process.stdout.write(`Ready: two isolated accounts, ${report.migrations.length} frozen baseline migrations, identity lookup and JWT signatures verified.\n`);
   } catch (error) {
     report.error = redact(error.message, environment);
     process.exitCode = 1;

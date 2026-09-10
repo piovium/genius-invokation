@@ -4,7 +4,10 @@ on:
   pull_request:
     paths:
       - scripts/server-harness/**
+      - packages/server/**
       - proto/**
+      - pnpm-workspace.yaml
+      - pnpm-lock.yaml
       - .github/workflows/server-harness.yml
       - package.json
   workflow_dispatch:
@@ -34,8 +37,15 @@ jobs:
         run: npm run harness:check
       - name: Record real WebSocket fault experiments
         run: npm run harness:experiments -- --output temp/server-harness/experiments/ci.json
+      - name: Verify migration goal constraints (Elysia native, no Prisma legacy)
+        run: npm run harness:constraints -- --output temp/server-harness/constraints/ci.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: websocket-experiments-${{ matrix.os }}
           path: temp/server-harness/experiments/ci.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: migration-constraints-${{ matrix.os }}
+          path: temp/server-harness/constraints/ci.json

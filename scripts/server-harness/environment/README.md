@@ -3,12 +3,13 @@
 在本工作树根目录的 PowerShell 中执行：
 
 ```powershell
-wsl -d gi-server-harness --exec node scripts/server-harness/environment/prepare.mjs
+wsl -d gi-server-harness --exec env HARNESS_BASELINE_SQL_DIR=/opt/gi-server-harness/baseline-source/packages/server/prisma/migrations node scripts/server-harness/environment/prepare.mjs
 ```
 
 也可以在专用 `gi-server-harness` WSL 发行版内，进入此工作树根目录后执行：
 
 ```sh
+export HARNESS_BASELINE_SQL_DIR=/opt/gi-server-harness/baseline-source/packages/server/prisma/migrations
 node scripts/server-harness/environment/prepare.mjs
 ```
 
@@ -33,7 +34,7 @@ wsl -d gi-server-harness --exec dockerd --host=unix:///var/run/docker.sock
 ## 准备结果
 
 - PostgreSQL 只发布在 `127.0.0.1:15432`，库名 `gi_server_harness`、数据库账号 `harness`，密码随机生成。
-- 按原仓库 `packages/server/prisma/migrations/*/migration.sql` 的时间顺序执行 SQL，记录每份原文件的 SHA-256，不依赖 Prisma 编译。重复运行只补未执行迁移；已执行 SQL 变动会报错。
+- 基线库按 `HARNESS_BASELINE_SQL_DIR` 指向的冻结旧服务源码中 `prisma/migrations/*/migration.sql` 的时间顺序执行 SQL，记录每份原文件的 SHA-256，不依赖 Prisma 编译。重复运行只补未执行迁移；已执行 SQL 变动会报错。候选服务清退 Prisma 后不再自带这份 SQL，因此该变量必须显式给出绝对路径；未设置、路径下没有迁移或迁移文件缺失时 `prepare.mjs` 明确失败，不回退到候选服务目录。
 - 自动创建账号 `91000001`、`91000002`，存入纯测试用途的随机假 GitHub token。
 - 身份服务只发布在 `127.0.0.1:19090`。`GET /github/user` 仅接受这两个假 token，返回对应 `{id, login, name, avatar_url}`；`GET /healthz` 返回带明确 fixture 标识的健康状态。服务没有外部请求代码，不会访问 GitHub；两个容器使用本项目独有的 bridge 网络。
 - 自动生成专用随机 JWT 密钥，并签发符合旧服务 `{user: 1, sub: id}` 格式、有效期 42 天的 HS256 JWT。

@@ -74,7 +74,6 @@ async function diagnose() {
     probeVersion("docker"),
     probeVersion("psql"),
     checkFile("packages/server/dist/main.js"),
-    checkFile("packages/server/generated/prisma/client.ts"),
     checkFile("packages/assets-manager/src/data/deck.json"),
   ];
   const results = await Promise.allSettled(tasks);

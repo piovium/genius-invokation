@@ -14,7 +14,7 @@ services:
       - "127.0.0.1:15432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ../../../packages/server/prisma/migrations:/harness/migrations:ro
+      - ${HARNESS_BASELINE_SQL_DIR:-./baseline-sql-unset}:/harness/migrations:ro
       - ./init-db.sh:/harness/init-db.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U harness -d gi_server_harness"]

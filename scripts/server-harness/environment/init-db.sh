@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS "_HarnessMigration" (
 );
 SQL
 
-# Lexical timestamp order is also the Prisma migration order. Preserve the
-# original SQL files and record their exact hashes; never silently reapply them.
+# Lexical timestamp order is the frozen old service migration order. Preserve
+# the original SQL files and record their exact hashes; never silently reapply them.
 for migration in /harness/migrations/*/migration.sql; do
   test -f "$migration"
   migration_dir=${migration%/migration.sql}

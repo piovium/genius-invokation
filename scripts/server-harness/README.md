@@ -1,6 +1,6 @@
 # 服务迁移 harness
 
-本 harness 用同一套场景比较 NestJS/Fastify + Prisma + SSE 旧服务与 Elysia（Node.js）+ Drizzle + WebSocket 候选服务。迁移进度、固定基线与应用验收证据见 [MIGRATION.md](MIGRATION.md)。
+本 harness 用同一套场景比较 NestJS/Fastify + Prisma + SSE 旧服务与 Elysia（Node.js，Elysia 原生写法）+ Drizzle + WebSocket 候选服务。迁移进度、固定基线与应用验收证据见 [MIGRATION.md](MIGRATION.md)。
 
 本目录包含测试客户端、RSS 采样器、隔离环境和协议实验。fixture 自测、真实服务行为检查与内存预算各有独立结果；harness 自测通过不能代替应用验收。
 
@@ -14,11 +14,28 @@ node --test scripts/server-harness/*.test.mjs scripts/server-harness/experiments
 node scripts/server-harness/doctor.mjs --output temp/server-harness/doctor.json
 ```
 
-`harness:check`、`harness:doctor` 是对应的 package scripts。doctor 只读检查生产基线所需的 Node 26.1+、pnpm 12、构建文件、Prisma 生成文件和 `DATABASE_URL` 是否设置；缺失返回 1，不读取 `.env`、安装依赖或改 lockfile。当前 harness 自测使用的 Node 24 与生产服务要求是两个独立条件。
+`harness:check`、`harness:doctor` 是对应的 package scripts。doctor 只读检查生产基线所需的 Node 26.1+、pnpm 12、构建文件和 `DATABASE_URL` 是否设置；缺失返回 1，不读取 `.env`、安装依赖或改 lockfile。当前 harness 自测使用的 Node 24 与生产服务要求是两个独立条件。
 
 自测包含真实 HTTP/SSE fixture、独立服务进程与操作系统 RSS 读取，完成三局、重连、清理和报告检查；WebSocket 除可控 socket 单测外，还用真实 Node 服务做认证、断线、丢 ACK、重发和二进制适配器实验，见 [实验入口](experiments/README.md) 和 [实测结果](experiments/RESULTS.md)。实验依赖独立安装的 ws；缺失依赖时明确失败，不生成“成功”的替代结果。fixture 不运行完整游戏引擎，**自测和协议实验通过不能证明真实服务内存达标**。
 
 本路线现在独立位于 worktree `worktrees/server-migration-harness`、分支 `codex/server-migration-harness`。已确认：使用隔离 Linux/Docker 环境、自动创建测试库和账号，游戏消息直接用二进制；能够实测解决的疑问通过实验验证，不再逐项要求用户选择实现细节。
+
+## 迁移目标约束
+
+除协议行为与内存门槛外，迁移目标还固定两条硬约束，由 `scripts/server-harness/constraints.mjs` 只读静态检查：
+
+1. **Elysia 原生写法**：路由以 Elysia 插件组合（导入 `elysia` 并构造 `Elysia` 实例），请求校验用 `t`/TypeBox，鉴权、共享状态与横切逻辑用 `derive`/`resolve`/`macro`/`decorate`，错误用 `status` 与 `error`。不得保留 NestJS 形状的 `*.controller.ts`、`*.service.ts`、`*.module.ts`、`*.guard.ts` 等文件名，`@nestjs/*`、`reflect-metadata`、`class-validator`、`class-transformer` 依赖或导入，以及容器类和 `*Exception` 兼容类层次。
+2. **无 Prisma 遗留**：候选服务不得保留 `prisma/` 目录（schema、迁移 SQL、生成产物）、`prisma` 与 `@prisma/*` 依赖、lockfile 条目、`allowBuilds` 放行项，以及 `_prisma_migrations` 之类的历史兼容逻辑和文档说明。
+3. **运行时固定 Node.js**：不得改用 Bun——不出现 `bun`、`bun-types`、`@types/bun` 依赖，不出现 `packageManager: bun@...`、调用 `bun` 的脚本、`Bun.` 全局对象、`bun:` 模块或 Bun 基础镜像。
+
+```powershell
+npm run harness:constraints
+# 等价于：node scripts/server-harness/constraints.mjs --output temp/server-harness/constraints/report.json
+```
+
+退出码 0 表示未发现违规，1 表示存在违规，2 表示用法或检查失败；stdout 始终是完整 JSON 报告，逐条给出规则、文件路径与行号，人读摘要写在 stderr。判定只覆盖代码、脚本、依赖清单、lockfile 与镜像，README 等文档里"不使用 Bun"这类说明性文字不算违规。Node 下没有 Elysia 原生 WebSocket，房间传输继续用 `ws` 包挂载，是需要登记的例外；harness 自身的基线工具为冻结的旧服务准备数据库，允许引用旧服务的 Prisma 迁移 SQL，但候选服务目录内的任何 Prisma 痕迹都算违规。
+
+这两条约束目前尚未满足：检查输出就是待清理清单，因此它同时是下一步实现的任务清单。通过本检查只说明未发现 Prisma 遗留与 NestJS 兼容层写法，不代表功能或内存验收。
 
 ## 真实旧服务基线
 
