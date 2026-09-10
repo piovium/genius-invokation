@@ -348,6 +348,8 @@ export class RoomConnection {
     const value: unknown = JSON.parse(data);
     if (!isRecord(value) || typeof value.type !== "string")
       throw new Error("Invalid control message");
+    // `ready` completes the handshake and `error` must stay readable without
+    // one; every other control message below requires authentication.
     if (value.type === "ready") {
       if (this.authenticated || !isSessionId(value.sessionId))
         throw new Error("Invalid ready session");

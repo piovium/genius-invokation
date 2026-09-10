@@ -136,8 +136,9 @@ export default {
   youAreSecond: "Your opponent go first",
   backHome: "Back to home",
   roomLoading: "Loading room...",
-  roomReconnecting: "Reconnecting and synchronizing the game…",
-  roomActionUnknown: "The last command could not be confirmed. Reload the room to synchronize before acting again.",
+  roomReconnecting: "Reconnecting and synchronizing the game...",
+  roomActionUnknown:
+    "The last command could not be confirmed. Reload the room to synchronize before acting again.",
   roomCommandPending: "Please wait for the previous command to be confirmed.",
   roomInvalidLink: "This room link is incomplete or invalid.",
   waitingForOpponent: "Waiting for an opponent to join...",

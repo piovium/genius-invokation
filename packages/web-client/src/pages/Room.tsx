@@ -54,6 +54,13 @@ import {
   type RoomConnectionState,
 } from "../room-connection";
 
+/** Command rejections a stale, reconnecting or closed view can ignore. */
+const IGNORED_COMMAND_ERRORS = new Set([
+  "DISPOSED",
+  "NOT_CONNECTED",
+  "STALE_LOCAL_RPC",
+]);
+
 // A parameter change must destroy the previous room's connections and pending
 // UI promises even when the router reuses this route component.
 export default function Room() {
@@ -117,8 +124,7 @@ function ConnectedRoom() {
   const reportCommandError = (error: unknown) => {
     if (disposed) return;
     if (error instanceof RoomConnectionError) {
-      if (["DISPOSED", "NOT_CONNECTED", "STALE_LOCAL_RPC"].includes(error.code))
-        return;
+      if (IGNORED_COMMAND_ERRORS.has(error.code)) return;
       if (error.code === "COMMAND_PENDING") {
         alert(t("roomCommandPending"));
         return;

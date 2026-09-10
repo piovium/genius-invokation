@@ -47,16 +47,15 @@ function payloadOffsetOf(kind: number): number {
   return kind === KIND.rpc ? RPC_HEADER_BYTES : HEADER_BYTES;
 }
 
-/** Header fields of a frame, tagged by the kind byte the envelope writes. */
-type FrameHeader =
-  | { kind: typeof KIND.notification; id: number; payload: Uint8Array }
-  | {
-      kind: typeof KIND.rpc;
-      id: number;
-      payload: Uint8Array;
-      timer: GameRpcTimer;
-    }
-  | { kind: typeof KIND.actionResponse; id: number; payload: Uint8Array };
+/**
+ * Header fields every frame carries (the uint32 id and the payload), tagged by
+ * the kind byte the envelope writes. Only an RPC frame adds timers.
+ */
+type FrameHeader = { id: number; payload: Uint8Array } & (
+  | { kind: typeof KIND.notification }
+  | { kind: typeof KIND.rpc; timer: GameRpcTimer }
+  | { kind: typeof KIND.actionResponse }
+);
 
 /**
  * Read the header fields the binary envelope carries. A frame with an unknown

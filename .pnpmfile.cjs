@@ -47,22 +47,15 @@ const declaredDependencyNames = new Set(
   ),
 );
 
-module.exports = {
-  hooks: {
-    readPackage(pkg) {
-      dropUntargetedRuntimes(pkg);
-      if (serverRuntimeDependencies.has(pkg.name)) dropUnusedOptionalPeers(pkg);
-      return pkg;
-    },
-  },
-};
-
 /** Drop every dependency on a runtime this workspace never targets. */
 function dropUntargetedRuntimes(pkg) {
-  for (const field of DEPENDENCY_FIELDS)
-    for (const name of Object.keys(pkg[field] ?? {}))
-      if (UNTARGETED_RUNTIMES.has(name) && !declaredDependencyNames.has(name))
+  for (const field of DEPENDENCY_FIELDS) {
+    for (const name of Object.keys(pkg[field] ?? {})) {
+      if (UNTARGETED_RUNTIMES.has(name) && !declaredDependencyNames.has(name)) {
         delete pkg[field][name];
+      }
+    }
+  }
 }
 
 /**
@@ -83,3 +76,13 @@ function dropUnusedOptionalPeers(pkg) {
     delete pkg.peerDependenciesMeta[peerName];
   }
 }
+
+module.exports = {
+  hooks: {
+    readPackage(pkg) {
+      dropUntargetedRuntimes(pkg);
+      if (serverRuntimeDependencies.has(pkg.name)) dropUnusedOptionalPeers(pkg);
+      return pkg;
+    },
+  },
+};
