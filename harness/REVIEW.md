@@ -190,3 +190,28 @@ Windows 上 TNB 任务源快照的完整读取耗时较长。候选仅替换 cor
 三轮之后收紧的不变式：capabilities、已打开文档集合与 tsdk 只取自已记录的交换与已解析的 checkout，采集器摘要必须与之逐字段一致；证据引用必须带 64 位哈希，路径必须落在运行目录内，哈希不匹配即拒绝；启动命令必须恰好是 `<checkout>/packages/language-server/bin/gts-language-server.js --stdio`，cwd 必须在运行目录内，可执行文件必须是 Node；磁盘侧的原生包名也参与比对；每次 didOpen／didChange 的文本必须等于封存 fixture。相对第一轮没有任何断言被放松（expectations 逐字段比对：23 步、两条诊断、hover／completion／signature／definition 期望、`minimumRpcCalls=20`、六个必需 RPC 方法、stderr 与 forbidden 片段、`--stdio`、`documentSyncKind=2`、五个必需能力，全部未变）。
 
 **派发与已知残余。** 本 seal 仍须通过全部封存自测，升格后 2.3.0 的 seal 与回执全部失效。已知残余（都在复核记录里写清，不是隐藏项）：`rpcTrace` 的计数与重新计数来自同一份 trace 文件，属漂移检测而非独立证据；`evaluate` 自身没有代码级步数下限，gate 强度依赖 expectations 的封存与复查，已用自测互锁缓解；steps 覆盖列表取自 observation（内容来自 transcript），不构成绕过但仍是自报；首次真实 `run gts-lsp` 才第一次承受 runner 的 before/after 源码指纹不变式（语言服务若往 checkout 写东西会 FAIL，方向是安全的）。仍未做（与 2.3.0 相同）：desktop 采集器改绑与登记、platforms 能力门、按产物身份判定的 TNB 触发规则。
+
+## 2.5.0 desktop session collector registration
+
+用户要求“最后一次改完 harness，做记录再开干”。这是同一批次里的第二个登记版：把编辑器交付面的采集器变成可执行，其余保持原值。contract 只做互斥的一对改动——新增 `adapters.desktop`、删掉 `desktop` 的 `blocked` 理由——并把版本改为 2.5.0；该 gate 的 `covers`、`kind`（session）、`case`、`repository`（gts）、`requires`（`gts-engine`、`gts-build`）、`timeoutMs` 1800000，`policy` 的 100 轮、两平台与 12 个场景，三处基线，以及剩下的 8 个仍 BLOCKED 的 gate 全部未变。本版没有新增任何验收阈值，也没有放宽任何既有断言。
+
+**采集器覆盖什么。** 目标已改绑到 GTS checkout：仓库根与 `examples` 两个工作区各起一次真实会话，开发路径（`--extensionDevelopmentPath`）与打包安装的 VSIX 两种模式由同一套参数不变式区分并交叉拒绝。VSIX 必须由本次 run 内的产品 pack 脚本、经封存的执行器与固定的 Node／包管理器产出，命令、退出码、原始 stdout／stderr、哈希、安装结果与解出的成员都留在运行目录；磁盘上另一个 `.vsix` 不能顶替。每个会话跑满 contract 的 100 轮编辑→诊断→查询→恢复，含关闭／重开、跨文件变化，以及中文、CRLF、含空格路径；原生预载按路由记录实际解析到的 SDK 与 addon。collector 只记录原始记录，从不写状态字段或结论；validator 从这些记录、磁盘和封存 fixture 重新推导，包括两种启动模式不能互串、文档版本单调、陈旧结果与隐式重启要被抓到、证据引用必须带哈希且落在运行目录内。Linux 的进程树清理接在每次启动的 `finally` 上（成功、失败、超时都走），结果写进启动记录并由 validator 要求：Linux 必须有 `executed`／`terminated` 记录且无存活者，win32 必须给出封存 job object 的说明。
+
+**本版能证明与不能证明的。** 已实测：从 checkout 解析出的身份（TNB `6.0.3-bridge.16.tsgo.7.0.2`、addon 22386688 字节 sha256 `32be259fa2027f7b4ba26f78827293b187f1eb000eb5c6761dda171cd5c9a4cb`、`Guyutongxue.gamingts-vscode@0.0.23`、真实 `Code.exe` 1.137.0）；Linux 清理模块在真实 Linux 内核上跑过（WSL2 6.6.87.2、Linux node v26.8.2）：一个 `setsid` 后离开进程组的后代加一个无标记后代，cleanup 报 `terminated: true`、对两个进程组分别发 kill、`survivors` 为空，事后三个 pid 全部消失；collector／validator 自测 33/33（24＋9，含本版按复核新增的三条负例）。未实测：desktop gate 从未端到端执行，真实 100 轮证据尚不存在（自测里的 100 轮是 `desktop-testkit.mjs` 的合成 fixture）；packed-vsix 模式没有在采集器里对真实 VSIX 走完安装（自测用真实 ZIP 代替）；Linux 桌面启动 NOT_RUN（本机没有 Linux VS Code 运行时）。因此登记只表示“可以执行”，通过仍只能来自 runner 在集成树上的回执。
+
+**已知残余，本版不改并解释理由。**
+
+1. `gts-lsp` expectations 的 `asyncpreemptoff=1` 片段：TNB 在写 `BRIDGE_LOAD` 之前刚把该值写进 `process.env.GODEBUG`（`worktrees/typescript-native-bridge/patches/typescript/overlay/src/compiler/tsgoChecker.ts` 的守卫），所以它只证明 TNB 自己的守卫执行过并打印，不证明 Go 运行时在本进程内接受了该设置。它是既有断言，删改属于动验收面，不是本版“不改不行”的部分，因此按记录流程留给后续（现状与理由同时写在 `artifacts/harness-known-weaknesses.md` 的 H1）。已知假失败面：宿主若把 `TNB_SKIP_ASYNC_PREEMPT_OFF=1` 传进来，该 gate 会 FAIL。
+2. `harness/core.mjs` 中 `if (id !== 'node')` 恒真（上一个分支以 `continue` 结束），是无害死代码；它位于度量工具的控制流上，本版不动，避免在同一批里边登记采集器边改度量工具。
+3. 封存按工作树字节计算，而 Git 依 `* text=auto eol=lf` 在 checkout 时写出 LF，所以带 CRLF 的工作树在 `git status` 里仍然“干净”，却会让“真实 checkout 字节不变”的自测失败。本版在 desktop 采集器里扫描到 9 个带 CRLF 行尾的文件（这个状态已无法从 Git 复原，因为 blob 一直是 LF），把它们归一为 LF；复核确认当前 66 个封存文件都不含 CR 字节，整份 `checkout-index` 往返比较通过。
+4. 产品侧缺口不是 harness 缺口：`desktop` 的 `dependency-change` 场景要求未保存的 `.gts` 改动在消费文件里产生 2322。迁移期删掉的 `packages/vscode/src/patch.ts` 曾把 `gaming-ts` 加进内置 TS 扩展的语言模式并把 GTS 插件排到最前；同一职责现在由 `contributes.typescriptServerPlugins` 与 `native_tsserver.ts` 的 tsserver 重定向承担，是否等价尚未实测，真实跑这个 gate 时该场景是第一个要看的点。
+
+**独立复核（两轮，记录在此）。** 本版升格前由两个独立 agent 只读复核：一人只攻 desktop 采集器与 wiring，一人独立验证五个码风提交的行为／事实等价并审计控制面改动。两人都只读，未修改任何文件，也没有重封 seal。
+
+第一轮（采集器）结论“有保留”：重放、过期、子集、手写摘要与预置 observation 都被拒绝，采集器从不写状态字段，Linux 清理确实接在 `finally` 上并被 validator 要求，打包步骤确实由本次 run 内的产品脚本执行；但指出打包侧判据弱于开发路径——VSIX 宿主的可执行文件可以用自证哈希蒙过（判据是 `A || B`，而 B 的两项都来自采集器），装机宿主的编辑器语义从未重放，probe 清理判据对相对路径失效，打包运行时只检查“是绝对路径”，而“可执行文件是 Node”的说法没有对应实现。按这些发现本版收紧三个判据：VSIX 宿主的可执行文件必须同时等于封存目标路径与其当前哈希；打包的 executable 与 argv[0] 必须分别是 Node 与包管理器；probe 清理改用恢复记录里的绝对路径并要求该目录不存在。三个判据各配一条负例自测，并用未修改的 validator 复跑确认这三条负例当时会失败，即它们不是空转。
+
+第二轮（码风与控制面）结论“安全”：基线与风格 tip 的测试名多重集、数字／十六进制／版本／路径 token 多重集逐项相同（唯一新增字面量是 `nativeLoads > 0` 需要的那个 `0`），散文改动只有引号字形与措辞，没有数字、哈希、日期、文件名或结论移动；控制面 diff 解析后只有三个叶子（版本、`desktop.blocked` 删除、`adapters.desktop` 新增），gate、依赖、超时、covers、policy、角色路径、仓库、基线与 scope transition 全部未动，runner 的 wiring 不变式与新 seal 的自测回执都为 PASS。
+
+**复核指出、本版不处理的残余（记录在案）。**（a）原始记录只是运行目录里的文件：任何能写该目录的进程都能伪造，`desktop-testkit.mjs` 本身就是“没有编辑器也能让 validator PASS”的证明，而产品侧的测试驱动 `packages/vscode/__tests__/extension.cjs` 不在 seal 内。因此 desktop 的 PASS 只能解释为“封存的采集器与校验器就本次测量记录达成一致”，不是编辑器进程存在的操作系统级证据，与 §4 声明的边界一致。（b）`pack.command` 是采集器写下的记录，只有产物内容按磁盘与 pin 重新推导，所以“这次 run 生产了该 VSIX”仍依赖采集器诚实。（c）装机宿主的编辑器语义没有像开发路径那样重放，只核对 runNonce、轮数、VS Code 版本与原生身份；`packed.package.members` 也是自报。（d）采集器给每次启动的上限是 900 秒，三次启动加打包在极慢的宿主上可能超过 gate 的 1800000 毫秒而被 runner 杀掉；方向是安全的（不会变成 PASS），本版不动超时。（e）打包运行时与包管理器的判据只核对绝对路径与文件名，不核对身份：复核实测一个只叫 `node.exe`／`pnpm.cjs` 的无关文件也能通过，而开发路径的 VSIX 可执行文件判据同时核对封存路径与哈希，不受影响。（f）packed 侧 probe 判据只读恢复记录里的 `recovery.probe`，`packed/desktop-sources.json` 与 `desktop-target.json` 里的 probe 不参与交叉核对，因此把 `recovery.probe` 改指一个不存在的新路径、而真实 probe 仍在磁盘上时照样通过。
+
+**确认轮（第三轮）。** 第三个独立 agent 只读复核最终字节：三条收紧的判据都亲手构造过伪造形状并被拒绝；三条新增负例在改回旧逻辑时会失败，证明它们不是空转；seal、192/192 自测、无 CR 字节与 checkout 往返都能复现。该轮指出的一处过度措辞（`HARNESS.md` 的“与开发路径同等严格”）、一处过期计数（自测 30/30）与一处无法从 Git 复核的扫描计数（9 个 CRLF 文件）已按本段改法修正，并新增上面（e）（f）两条残余。

@@ -381,3 +381,42 @@ test('the collector only records raw evidence and never writes a conclusion', as
     assert.match(rejected.reason, /must only record raw evidence/);
   }
 });
+test('the installed VSIX host must run the prepared VS Code executable', async t => {
+  const fixture = fixtureFor(t);
+  const stray = path.join(fixture.directory, 'packed-vsix', 'another-editor.exe');
+  fs.writeFileSync(stray, 'not the prepared editor');
+  editEvidence(fixture, fixture.observation.packedVsix.launch, launch => {
+    launch.executable = stray;
+    launch.executableSha256 = sha256(fs.readFileSync(stray));
+  });
+  const result = await run(fixture);
+  assert.equal(result.status, 'FAIL', result.reason);
+  assert.match(result.reason, /unverified VS Code executable/);
+});
+
+test('the product pack step must run through the pinned runtime and manager', async t => {
+  const wrongRuntime = fixtureFor(t);
+  wrongRuntime.observation.packedVsix.pack.command.executable =
+    path.join(wrongRuntime.directory, 'packed-vsix', 'python.exe');
+  const runtimeResult = await run(wrongRuntime);
+  assert.equal(runtimeResult.status, 'FAIL', runtimeResult.reason);
+  assert.match(runtimeResult.reason, /pinned Node runtime/);
+
+  const wrongManager = fixtureFor(t);
+  wrongManager.observation.packedVsix.pack.command.args[0] =
+    path.join(wrongManager.directory, 'runtime', 'yarn.js');
+  const managerResult = await run(wrongManager);
+  assert.equal(managerResult.status, 'FAIL', managerResult.reason);
+  assert.match(managerResult.reason, /pinned package manager/);
+});
+
+test('a left-behind packed probe project is rejected', async t => {
+  const fixture = fixtureFor(t);
+  const recoveryFile = path.join(fixture.directory, 'packed-vsix', 'desktop-recovery.json');
+  const recovery = JSON.parse(fs.readFileSync(recoveryFile, 'utf8'));
+  recovery.probe = path.dirname(recoveryFile);
+  fs.writeFileSync(recoveryFile, `${JSON.stringify(recovery, null, 2)}\n`);
+  const result = await run(fixture);
+  assert.equal(result.status, 'FAIL', result.reason);
+  assert.match(result.reason, /probe project was left behind/);
+});

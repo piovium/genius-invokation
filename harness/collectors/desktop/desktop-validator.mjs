@@ -177,7 +177,12 @@ function validatePackedVsix({ packed, directory, plan, contract, nonce, identity
     exitCode: pack.command?.exitCode, signal: pack.command?.signal, reason: pack.command?.reason,
   })}`);
   const packArgs = pack.command.args ?? [];
-  assert(path.isAbsolute(pack.command.executable), 'The pack step did not run the pinned Node runtime');
+  assert(path.isAbsolute(pack.command.executable)
+    && /^node(?:\.exe)?$/i.test(path.basename(pack.command.executable)),
+  'The pack step did not run the pinned Node runtime');
+  assert(path.isAbsolute(packArgs[0] ?? '')
+    && /^(?:pnpm(?:\.c?js|\.mjs)?|npm(?:-cli)?\.js|npm\.cmd)$/i.test(path.basename(packArgs[0])),
+  `The pack step did not run the pinned package manager: ${JSON.stringify(packArgs[0])}`);
   assert(path.isAbsolute(packArgs[0] ?? '') && packArgs[1] === '--filter'
     && packArgs[2] === plan.extension.packageName && packArgs[3] === 'run'
     && packArgs[4] === plan.extension.packScript,
@@ -203,9 +208,10 @@ function validatePackedVsix({ packed, directory, plan, contract, nonce, identity
   assert(launch.cleanup?.platform === process.platform,
     "packed-vsix-install: the launch carries another platform cleanup record");
   assertLaunchCleanup(launch, 'packed-vsix-install');
-  assert(path.resolve(launch.executable) === path.resolve(desktopRuntime({ root, plan }).executable)
-    || launch.executableSha256 === sha256(fs.readFileSync(launch.executable)),
-    'The packed VSIX launch used an unverified VS Code executable');
+  const packedRuntime = desktopRuntime({ root, plan });
+  assert(path.resolve(launch.executable) === path.resolve(packedRuntime.executable)
+    && launch.executableSha256 === sha256(fs.readFileSync(packedRuntime.executable)),
+  'The packed VSIX launch used an unverified VS Code executable');
   const installedDirectory = installedExtensionDirectory({ extensionsDirectory: launch.extensionsDirectory, plan });
   const installed = inspectInstalledExtension({ extensionPath: installedDirectory.directory, vsix: vsixPackage, plan });
   assert(installed.version === vsixPackage.version, 'The installed extension version differs from the VSIX');
@@ -234,8 +240,8 @@ function validatePackedVsix({ packed, directory, plan, contract, nonce, identity
   }
   const recovery = readJsonFile(evidenceFile(directory, 'packed-vsix/desktop-recovery.json'));
   assert(recovery.skipped === false, 'The packed VSIX workspace was not restored');
-  const target = readJsonFile(evidenceFile(directory, 'packed-vsix/desktop-target.json'));
-  assert(!fs.existsSync(target.probe) || !path.isAbsolute(target.probe), 'The packed VSIX probe project was left behind');
+  assert(path.isAbsolute(recovery.probe) && !fs.existsSync(recovery.probe),
+    'The packed VSIX probe project was left behind');
   return { vsixPackage, installed, services };
 }
 
@@ -324,6 +330,5 @@ export async function validate(observation, { contract, expectations, root, dire
 }
 
 export { fileKey };
-
 
 

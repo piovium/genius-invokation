@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2.4.0",
+  "version": "2.5.0",
   "phase": "migration",
   "tnbVersion": "6.0.3-bridge.16.tsgo.7.0.2",
   "policy": {
@@ -281,8 +281,7 @@
         "gts-engine",
         "gts-build"
       ],
-      "timeoutMs": 1800000,
-      "blocked": "The desktop draft is bound to the retired main-repository workspace pair. Registering it requires rebinding the target to the GTS checkout, implementing the packed-VSIX install launch mode, completing the shared Linux process cleanup, and collecting real 100-round evidence."
+      "timeoutMs": 1800000
     },
     {
       "id": "main-build",
@@ -447,6 +446,11 @@
       "collector": "harness/collectors/lsp/gts-lsp-collector.mjs",
       "validator": "harness/collectors/lsp/gts-lsp-validator.mjs",
       "expectations": "harness/collectors/lsp/gts-lsp-expectations.json"
+    },
+    "desktop": {
+      "collector": "harness/collectors/desktop/desktop-collector.mjs",
+      "validator": "harness/collectors/desktop/desktop-validator.mjs",
+      "expectations": "harness/collectors/desktop/desktop-expectations.json"
     }
   },
   "scopeTransitions": [

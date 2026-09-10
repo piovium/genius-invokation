@@ -76,6 +76,8 @@ GTS 已有 [PR #14](https://github.com/piovium/gts/pull/14)，分支 `origin/fix
 
 未来需要真实产品行为的 collector 必须放在根 `harness/collectors/`，经过独立审查后登记到 contract 的 adapter 集合并纳入 seal。初始不登记产品 adapter。**缺 collector 永远是 BLOCKED**；不能用手写 `PASS` JSON、任意退出 0 的脚本或暂缺的采集器冒充产品验收。已有 probe 是可复用组件，不自动构成完整的 CLI／编辑器 collector。
 
+2.5.0 登记编辑器交付面的采集器，不改动任何 gate 依赖、阈值、角色边界、基线或既有断言。`desktop` 从 BLOCKED 变为可执行，由 `harness/collectors/desktop/` 执行：目标已改绑到 GTS checkout（仓库根与 `examples` 两个工作区），开发路径（`--extensionDevelopmentPath`）与打包安装 VSIX 两种模式由同一套参数不变式区分并交叉拒绝，VSIX 必须由本次 run 内的产品 pack 脚本产出，其原始 stdout／stderr、哈希、安装结果与解出的成员都留在运行目录；共享的 Linux 进程树清理接在每次启动的 `finally` 上并把结果写进启动记录，win32 仍由封存的 job object 负责并在记录里说明。collector 只记录原始证据、从不写状态字段；validator 从这些记录与磁盘重新推导结论，并按独立复核收紧了三条打包侧判据（VSIX 宿主的可执行文件必须同时等于封存的目标路径与其当前哈希；打包步骤的可执行文件与 argv[0] 必须分别是 Node 与包管理器的形状；probe 清理以恢复记录的绝对路径核对且该目录必须不存在），各配一条负例自测固定。其中运行时与包管理器只核对路径形状与文件名，不核对身份，连同其余残余写在 REVIEW。原始记录仍只是运行目录里的文件，所以这个 gate 证明的是封存的采集器与校验器就本次测量记录达成一致，不是操作系统层面的“编辑器进程确实存在过”，信任边界与 §4 相同。100 轮、两平台、`timeoutMs` 1800000 与 `gts-engine`／`gts-build` 前置保持不变。同一批把 desktop 采集器目录里扫描到的 9 个带 CRLF 行尾的文件归一为 LF（该状态无法从 Git 复原，因为 blob 一直是 LF；复核只能确认结论侧：当前 66 个封存文件都不含 CR 字节，整份 checkout 往返比较通过）：封存按工作树字节计算，而 Git 依 `* text=auto eol=lf` 在 checkout 时写出 LF，这种混入不会出现在 `git status`，却会让“真实 checkout 字节不变”的自测失败。已知残余本版不改：`gts-lsp` expectations 里的 `asyncpreemptoff=1` 片段只证明 TNB 自己的守卫执行过并打印（`tsgoChecker.ts` 在写 `BRIDGE_LOAD` 前刚设置该变量），不证明 Go 运行时在本进程内接受了它；`harness/core.mjs` 一处恒真判断是无害死代码。两者连同复核指出的其余残余写在 REVIEW。
+
 ## 4. Seal、证据与本地权限边界
 
 Seal 覆盖 contract、执行器、断言、测试、说明和 CI 等控制文件。控制文件变化会使旧回执失效；协调者必须审查差异、取得独立复核并重新封存，不能修改 seal 来掩盖失败。产品 worker 不得削弱断言、删 gate 或改基线来完成自己的任务。
@@ -132,17 +134,16 @@ Worker 交接包含生成的任务文件、精确 revision／diff、依赖产物
 
 ## 8. Harness 自身仍缺的验收工具
 
-以下 gate 在 contract 中已声明 `blocked`。它们是协调者尚未交付的验收工具，不是产品缺口，也不能被任何文档、计划、fixture 或探测升级为通过；只有全部实现并通过独立复核与重新 seal，`finish` 才可能给出 PASS。`gts-lsp` 已于 2.4.0 登记，不再属于本表。
+以下 gate 在 contract 中已声明 `blocked`。它们是协调者尚未交付的验收工具，不是产品缺口，也不能被任何文档、计划、fixture 或探测升级为通过；只有全部实现并通过独立复核与重新 seal，`finish` 才可能给出 PASS。`gts-lsp` 已于 2.4.0 登记、`desktop` 已于 2.5.0 登记，两者都不再属于本表。
 
 | gate | 还缺什么 |
 | --- | --- |
-| desktop | 采集器仍绑定已退役的主仓库工作区对。需要改绑到 GTS checkout（仓库根与 `examples`）、补齐打包安装 VSIX 的启动模式、完成共享的 Linux 进程清理，再采集真实 100 轮证据 |
 | coverage | main 仓库 195 个 GTS 文件的逐路径 program 观测，以及当前／历史／未被 import／跨包消费的负例与修复场景 |
 | memory | 会话内存采集器；按服务采样不足以证明编辑器进程树总体内存 |
 | clean-install | 全新 checkout 的安装、检查、构建与工作区 SDK 选择证据 |
 | tnb-guards、tnb-witnesses、tnb-navigation、tnb-volar | 四个 TNB 采集器；guard 输出与 witness wiring 都不等于实际执行 |
 | platforms | 跨平台能力采集器；win32 已在本机准备，linux 仍需可用运行时与对应负例 |
 
-分批推进：L1 的 `gts-lsp` 采集器已登记；其余先 desktop（编辑器交付面的验收工具）与 platforms，再 coverage、memory、clean-install，最后 TNB 四件。采集器的期望值必须依据接近最终的产品状态生成，因此它们与产品修复并行推进，而不是提前冻结。
+分批推进：`gts-lsp`（2.4.0）与 `desktop`（2.5.0）的采集器已登记；其余先 platforms，再 coverage、memory、clean-install，最后 TNB 四件。采集器的期望值必须依据接近最终的产品状态生成，因此它们与产品修复并行推进，而不是提前冻结。登记只表示“可以执行”，真实通过仍只能来自 runner 在集成树上的回执。
 
 本文件规定目标和执行约束。实际自测结果见 REVIEW 与 runner 回执；未执行的产品 gates 不得由文档、计划、fixture 或探测成功升级为 PASS。
