@@ -65,6 +65,11 @@ const SILENT_COMMAND_ERRORS = new Set([
   "STALE_LOCAL_RPC",
 ]);
 
+// Both end-of-game buttons share one pill style inside a square wrapper.
+const GAME_END_BUTTON_CLASS =
+  "px-4 py-1 w-36 h-10 mt-20 font-bold font-size-4.5 text-yellow-800 bg-yellow-50 rounded-full border-yellow-800 b-2 active:bg-yellow-800 active:text-yellow-200 hover:shadow-[inset_0_0_16px_white] hover:border-white";
+const GAME_END_BUTTON_WRAPPER_CLASS = "flex flex-col justify-start w-36 h-30";
+
 // Surface the server's message when it exists, but always keep the raw error in
 // the console for debugging.
 function reportRequestError(error: unknown): void {
@@ -566,17 +571,17 @@ function ConnectedRoom() {
                 oppPlayerInfo={getClientPlayerInfo(payload().oppPlayerInfo)}
                 gameEndExtra={
                   <div class="flex justify-center gap-20 mt-10">
-                    <div class="flex flex-col justify-start w-36 h-30">
+                    <div class={GAME_END_BUTTON_WRAPPER_CLASS}>
                       <button
-                        class="px-4 py-1 w-36 h-10 mt-20 font-bold font-size-4.5 text-yellow-800 bg-yellow-50 rounded-full border-yellow-800 b-2 active:bg-yellow-800 active:text-yellow-200 hover:shadow-[inset_0_0_16px_white] hover:border-white"
+                        class={GAME_END_BUTTON_CLASS}
                         onClick={downloadGameLog}
                       >
                         {t("downloadLog")}
                       </button>
                     </div>
-                    <div class="flex flex-col justify-start w-36 h-30">
+                    <div class={GAME_END_BUTTON_WRAPPER_CLASS}>
                       <button
-                        class="px-4 py-1 w-36 h-10 mt-20 font-bold font-size-4.5 text-yellow-800 bg-yellow-50 rounded-full border-yellow-800 b-2 active:bg-yellow-800 active:text-yellow-200 hover:shadow-[inset_0_0_16px_white] hover:border-white"
+                        class={GAME_END_BUTTON_CLASS}
                         onClick={() => navigate("/")}
                       >
                         {t("backHome")}

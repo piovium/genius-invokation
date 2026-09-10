@@ -74,9 +74,34 @@ const isRpcTimer = (value: unknown): value is GameRpcTimer =>
   Number.isFinite(value.total);
 const isSessionId = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0 && value.length <= 128;
+const isRoomInitialized = (value: unknown): value is RoomInitialized => {
+  if (!isRecord(value) || !isRecord(value.config)) return false;
+  const { config } = value;
+  return (
+    (value.who === 0 || value.who === 1) &&
+    typeof config.watchable === "boolean" &&
+    typeof config.gameVersion === "string" &&
+    isRecord(value.myPlayerInfo) &&
+    isRecord(value.oppPlayerInfo)
+  );
+};
 
 /** Largest JSON control message the client accepts from the server. */
 const MAX_CONTROL_MESSAGE_BYTES = 64 * 1024;
+
+/** WebSocket close code for an ordinary client-initiated shutdown. */
+const CLOSE_NORMAL = 1000;
+/** The server refusing the connection, such as on failed authentication. */
+const CLOSE_POLICY_VIOLATION = 1008;
+/** The server rejecting a frame larger than its protocol limit. */
+const CLOSE_MESSAGE_TOO_BIG = 1009;
+
+/**
+ * A game endpoint must never embed credentials, query parameters or a
+ * fragment: the token is the only credential, sent in the first control frame.
+ */
+const isBareEndpointUrl = (url: URL): boolean =>
+  !url.search && !url.hash && !url.username && !url.password;
 
 /**
  * Build a WebSocket URL whose path mirrors the HTTP API, converting the
@@ -92,13 +117,7 @@ export function roomWebSocketUrl(
     baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`,
     documentUrl,
   );
-  if (
-    !["http:", "https:"].includes(base.protocol) ||
-    base.search ||
-    base.hash ||
-    base.username ||
-    base.password
-  )
+  if (!["http:", "https:"].includes(base.protocol) || !isBareEndpointUrl(base))
     throw new Error("Invalid room API URL");
   const url = new URL(
     `rooms/${encodeURIComponent(roomId)}/players/${encodeURIComponent(playerId)}/ws`,
@@ -135,13 +154,7 @@ export class RoomConnection {
 
   constructor(private readonly options: ConnectionOptions) {
     const url = new URL(options.url);
-    if (
-      !["ws:", "wss:"].includes(url.protocol) ||
-      url.search ||
-      url.hash ||
-      url.username ||
-      url.password
-    )
+    if (!["ws:", "wss:"].includes(url.protocol) || !isBareEndpointUrl(url))
       throw new Error(
         "WebSocket URL cannot contain credentials or query parameters",
       );
@@ -227,11 +240,16 @@ export class RoomConnection {
     };
     const onClose = (event: CloseEvent) => {
       if (!active()) return;
-      if (event.code === 1008 || event.code === 1009) {
+      if (
+        event.code === CLOSE_POLICY_VIOLATION ||
+        event.code === CLOSE_MESSAGE_TOO_BIG
+      ) {
         this.fail(
           new RoomConnectionError(
             event.reason || "The server refused this room connection.",
-            event.code === 1008 ? "ACCESS_DENIED" : "MESSAGE_TOO_BIG",
+            event.code === CLOSE_POLICY_VIOLATION
+              ? "ACCESS_DENIED"
+              : "MESSAGE_TOO_BIG",
             !!this.pending,
           ),
         );
@@ -269,8 +287,8 @@ export class RoomConnection {
     this.socket = null;
     this.authenticated = false;
     this.synchronized = false;
-    if (socket && socket.readyState < 2)
-      socket.close(1000, "Client reconnect or cleanup");
+    if (socket && socket.readyState <= WebSocket.OPEN)
+      socket.close(CLOSE_NORMAL, "Client reconnect or cleanup");
     if (this.pending) clearTimeout(this.pending.ackTimer);
   }
 
@@ -353,16 +371,9 @@ export class RoomConnection {
         this.options.onEvent({ type: "waiting" });
         return;
       case "initialized": {
-        if (
-          (value.who !== 0 && value.who !== 1) ||
-          !isRecord(value.config) ||
-          typeof value.config.watchable !== "boolean" ||
-          typeof value.config.gameVersion !== "string" ||
-          !isRecord(value.myPlayerInfo) ||
-          !isRecord(value.oppPlayerInfo)
-        )
+        if (!isRoomInitialized(value))
           throw new Error("Invalid room initialization");
-        this.options.onEvent(value as unknown as RoomInitialized);
+        this.options.onEvent(value);
         return;
       }
       case "rpc": {
@@ -372,12 +383,10 @@ export class RoomConnection {
         return;
       }
       case "oppRpc": {
-        if (value.oppTimer !== null && !isRpcTimer(value.oppTimer))
+        const { oppTimer } = value;
+        if (oppTimer !== null && !isRpcTimer(oppTimer))
           throw new Error("Invalid opponent timer");
-        this.options.onEvent({
-          type: "oppRpc",
-          oppTimer: value.oppTimer as GameRpcTimer | null,
-        });
+        this.options.onEvent({ type: "oppRpc", oppTimer });
         return;
       }
       default:

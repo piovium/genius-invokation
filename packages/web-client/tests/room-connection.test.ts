@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { once } from "node:events";
 import { createServer } from "node:http";
 import { WebSocketServer, type WebSocket as ServerWebSocket } from "ws";
-import { decodeGameFrame, encodeGameFrame } from "@gi-tcg/typings";
+import { decodeGameFrame, encodeGameFrame, PbPhaseType } from "@gi-tcg/typings";
 import {
   RoomConnection,
   RoomConnectionError,
@@ -142,7 +142,7 @@ async function fixture(options: FixtureOptions = {}) {
           encodeGameFrame({
             type: "notification",
             data: finished
-              ? Uint8Array.of(0x0a, 2, 8, 5)
+              ? Uint8Array.of(0x0a, 2, 8, PbPhaseType.GAME_END)
               : Uint8Array.of(0x0a, 0),
           }),
         );
@@ -310,7 +310,10 @@ async function clientAwaitingFinalAck(server: RoomFixture) {
   let connection: RoomConnection;
   const c = client(server, {
     onEvent: (event) => {
-      if (event.type === "notification" && event.data[3] === 5)
+      if (
+        event.type === "notification" &&
+        event.data[3] === PbPhaseType.GAME_END
+      )
         connection.markFinished();
     },
   });
