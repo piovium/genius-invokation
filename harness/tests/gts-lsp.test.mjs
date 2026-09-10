@@ -425,6 +425,28 @@ test('the IO layer rejects an evidence file that changed after recording', async
   assert.match(result.reason, /changed/);
 });
 
+test('the IO layer confines evidence references to the run directory', async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'gts-lsp-evidence-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'gts-lsp-root-'));
+  t.after(() => {
+    fs.rmSync(directory, { recursive: true, force: true });
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+  const { observation } = canonical();
+  const outside = path.join(os.tmpdir(), 'gts-lsp-transcript.json');
+  fs.writeFileSync(outside, '[]');
+  t.after(() => fs.rmSync(outside, { force: true }));
+  for (const reference of ['../gts-lsp.transcript.json', outside]) {
+    const escaping = clone(observation);
+    escaping.transcript.file = reference;
+    const result = await validate(escaping, {
+      contract: { repositories: { gts: { path: 'gts' } } }, expectations, root, directory, gate: { id: 'gts-lsp' },
+    });
+    assert.equal(result.status, 'FAIL', reference);
+    assert.match(result.reason, /leaves the run directory/);
+  }
+});
+
 test('evidence for another gate is rejected', async () => {
   const result = await validate(clone(canonical().observation), {
     contract: { repositories: { gts: { path: 'gts' } } }, expectations, root: os.tmpdir(), directory: os.tmpdir(),

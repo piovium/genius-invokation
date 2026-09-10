@@ -18,8 +18,9 @@ and the compiler identity behind them.
   native addon path and hash, tsgo build info version, balanced
   `ENTER`/`EXIT` counts including the required native calls, one
   `BRIDGE_LOAD` record naming that addon, a command line that is exactly
-  `gts-language-server.js --stdio` from inside the run directory, and the
-  absence of leaked `__gts_*` identifiers or fatal output. Capabilities, the
+  `gts-language-server.js --stdio` from inside the run directory started with
+  a Node executable, and the absence of leaked `__gts_*` identifiers or fatal
+  output. Capabilities, the
   set of opened documents and the tsdk are read from the recorded exchange and
   the resolved checkout, never from the collector's own summary, and any
   disagreement is a failure. `evaluate` is pure and unit-tested; `validate`
