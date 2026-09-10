@@ -1,8 +1,8 @@
 /**
- * Upstream packages advertise what they *could* run on, and pnpm resolves that
- * eagerly: optional peers become real packages, and a bundler plugin carries
- * the Bun toolchain its own type declarations need. This workspace runs on Node
- * and ships none of it, so both would only write dead packages into the lockfile.
+ * Upstream packages advertise more than this workspace uses: a runtime they
+ * *could* run on and an optional peer they *could* load. pnpm resolves both
+ * eagerly, so an unused one only adds dead packages to the lockfile; a bundler
+ * plugin, for instance, declares the Bun type package its own Bun entry needs.
  *
  * The rules are derived rather than hand-maintained. Anything a workspace
  * project names in a manifest survives, so only undeclared capabilities go.
@@ -35,7 +35,7 @@ const serverRuntimeDependencies = new Set(
   ),
 );
 
-/** Every name any workspace project declares, used to recognise peers in use. */
+/** Every name any workspace project declares, used to recognize peers in use. */
 const declaredDependencyNames = new Set(
   [
     readManifest("package.json"),
@@ -57,7 +57,7 @@ module.exports = {
   },
 };
 
-/** Drop every dependency on a runtime this workspace does not build for. */
+/** Drop every dependency on a runtime this workspace never targets. */
 function dropUntargetedRuntimes(pkg) {
   for (const field of DEPENDENCY_FIELDS)
     for (const name of Object.keys(pkg[field] ?? {}))
@@ -66,10 +66,11 @@ function dropUntargetedRuntimes(pkg) {
 }
 
 /**
- * A package the server loads at runtime advertises every runtime it could
- * target as an optional peer; drop the ones no workspace project declares.
- * Removing a peer from `peerDependencies` alone would turn it into a required
- * peer, so `peerDependenciesMeta` is trimmed in lockstep.
+ * A package the server loads at runtime advertises every optional peer it could
+ * use (native add-ons, alternative drivers, runtime type packages); drop the
+ * ones no workspace project declares. Removing a peer from `peerDependencies`
+ * alone would turn it into a required peer, so `peerDependenciesMeta` is
+ * trimmed in lockstep.
  */
 function dropUnusedOptionalPeers(pkg) {
   for (const [peerName, meta] of Object.entries(

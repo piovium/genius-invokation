@@ -6,9 +6,10 @@ FROM ghcr.io/pnpm/pnpm:12 AS build
 ARG NODE_VERSION
 RUN pnpm runtime set node ${NODE_VERSION} -g
 WORKDIR /app
+# Read from the build environment by assets-manager's tsdown `env` map.
 ARG DEFAULT_ASSETS_API_ENDPOINT
 COPY . .
-# Let the workspace scripts consume their sources instead of published dist.
+# Let the build scripts consume workspace sources, not the published dist.
 ENV FROM_SOURCE=1
 RUN pnpm --filter @gi-tcg/server... install --frozen-lockfile && pnpm build:no-typing server...
 

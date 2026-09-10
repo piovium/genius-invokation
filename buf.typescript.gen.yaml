@@ -1,6 +1,7 @@
-# `buf generate --typescript` (packages/typings' `build:ts-proto`) uses this
-# template so the workspace's pinned ts-proto plugin runs instead of the remote
-# one; keep its `opt` list in step with the ts-proto block in buf.gen.yaml.
+# `build:ts-proto` in packages/typings runs `buf generate --template
+# buf.typescript.gen.yaml`; the template points the ts-proto plugin at the
+# workspace's pinned copy instead of the remote one. Keep its `opt` list in step
+# with the ts-proto block in buf.gen.yaml.
 version: v2
 managed:
   enabled: true
