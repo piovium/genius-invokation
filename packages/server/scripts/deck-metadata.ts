@@ -22,10 +22,6 @@ const metadataFields = [
 const hash = (source: string) =>
   createHash("sha256").update(source).digest("hex");
 
-/** Shape emitted into the generated index; mirrors the `DeckMetadata` fields. */
-const METADATA_TYPE =
-  "Record<string, { id: number; shareId?: number; tags?: string[]; sinceVersion?: string; relatedCharacterId?: number | null; relatedCharacterTags?: string[] }>";
-
 export interface DeckMetadata {
   id: number;
   shareId?: number;
@@ -35,28 +31,44 @@ export interface DeckMetadata {
   relatedCharacterTags?: string[];
 }
 
+/** Shape emitted into the generated index; mirrors the `DeckMetadata` fields. */
+const METADATA_TYPE =
+  "Record<string, { id: number; shareId?: number; tags?: string[]; sinceVersion?: string; relatedCharacterId?: number | null; relatedCharacterTags?: string[] }>";
+
+/** Prefer the built snapshot, unless FROM_SOURCE demands the raw workspace data. */
+async function resolveDataDirectory(explicit?: string): Promise<string> {
+  if (explicit) return explicit;
+  const fromSource = Boolean(process.env.FROM_SOURCE);
+  const preferred = path.join(
+    assetsRoot,
+    fromSource ? "src/data" : "dist/data",
+  );
+  try {
+    await access(preferred);
+    return preferred;
+  } catch {
+    if (fromSource)
+      throw new Error(
+        "Build assets-manager source data before generating server deck metadata",
+      );
+    return path.join(assetsRoot, "src/data");
+  }
+}
+
+/** Keep only the fields the deck verifier and the sharing codec read. */
+function projectMetadata(record: Record<string, unknown>): DeckMetadata {
+  const projected: Record<string, unknown> = {};
+  for (const field of metadataFields)
+    if (Object.hasOwn(record, field)) projected[field] = record[field];
+  return projected as unknown as DeckMetadata;
+}
+
 /** Project the generated asset snapshot, without requesting or caching CDN data. */
 export async function generateDeckMetadata({
-  dataDirectory,
+  dataDirectory: requestedDataDirectory,
   outputDirectory = path.join(serverRoot, "generated"),
 }: { dataDirectory?: string; outputDirectory?: string } = {}) {
-  const fromSource = Boolean(process.env.FROM_SOURCE);
-  if (!dataDirectory) {
-    const preferred = path.join(
-      assetsRoot,
-      fromSource ? "src/data" : "dist/data",
-    );
-    try {
-      await access(preferred);
-      dataDirectory = preferred;
-    } catch {
-      if (fromSource)
-        throw new Error(
-          "Build assets-manager source data before generating server deck metadata",
-        );
-      dataDirectory = path.join(assetsRoot, "src/data");
-    }
-  }
+  const dataDirectory = await resolveDataDirectory(requestedDataDirectory);
   const metadataById: Record<string, DeckMetadata> = Object.create(null);
   const categoryCounts: Record<string, number> = {};
   const duplicateIds: { id: number; ignoredCategory: string }[] = [];
@@ -66,17 +78,15 @@ export async function generateDeckMetadata({
     const relative = `CHS/${category}.json`;
     const text = await readFile(path.join(dataDirectory, relative), "utf8");
     sourceHashes[relative] = hash(text);
-    const records: Record<string, unknown>[] = JSON.parse(text);
-    if (!Array.isArray(records))
+    const parsed: unknown = JSON.parse(text);
+    if (!Array.isArray(parsed))
       throw new Error(`${relative} must contain an array`);
+    const records = parsed as Record<string, unknown>[];
     categoryCounts[category] = records.length;
     for (const raw of records) {
       if (!Number.isSafeInteger(raw.id))
         throw new Error(`${relative} contains an invalid id`);
-      const projected: Record<string, unknown> = {};
-      for (const field of metadataFields)
-        if (Object.hasOwn(raw, field)) projected[field] = raw[field];
-      const entry = projected as unknown as DeckMetadata;
+      const entry = projectMetadata(raw);
       // Manager's category cache keeps the first record for each ID. Some
       // unobtainable action records also occur in entities with fewer fields.
       // Follow ALL_CATEGORIES order, preserving the action record's version.
@@ -113,7 +123,7 @@ export async function generateDeckMetadata({
     "utf8",
   );
   sourceHashes["sharing.ts"] = hash(codecSource);
-  const json = JSON.stringify(metadataById);
+  const metadataJson = JSON.stringify(metadataById);
   const manifest = {
     formatVersion: 1,
     sourceDirectory: path
@@ -123,14 +133,14 @@ export async function generateDeckMetadata({
     categoryCounts,
     duplicateIds,
     recordCount: Object.keys(metadataById).length,
-    metadataSha256: hash(json),
-    metadataBytes: Buffer.byteLength(json),
+    metadataSha256: hash(metadataJson),
+    metadataBytes: Buffer.byteLength(metadataJson),
     shareIdCount: cardIdsByShareId.size,
   };
   await mkdir(path.join(outputDirectory, "data"), { recursive: true });
   await writeFile(
     path.join(outputDirectory, "deck-metadata.ts"),
-    `// Generated from assets-manager's raw snapshot; see deck-metadata-manifest.json.\nconst metadata: ${METADATA_TYPE} = ${json};\nexport default metadata;\n`,
+    `// Generated from assets-manager's raw snapshot; see deck-metadata-manifest.json.\nconst metadata: ${METADATA_TYPE} = ${metadataJson};\nexport default metadata;\n`,
   );
   // Keep the existing codec byte-for-byte. Its sole runtime data import now
   // resolves to this same snapshot's share map, without initializing Manager.

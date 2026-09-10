@@ -1,3 +1,8 @@
+# Both services run the same locally built image.
+x-server-image: &server-image
+  image: genius-invokation-server
+  pull_policy: never
+
 x-database-url: &database-url postgres://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/postgres
 
 services:
@@ -15,8 +20,7 @@ services:
       start_period: 120s
 
   migrate:
-    image: genius-invokation-server
-    pull_policy: never
+    <<: *server-image
     environment:
       DATABASE_URL: *database-url
     depends_on:
@@ -30,8 +34,7 @@ services:
         DEFAULT_ASSETS_API_ENDPOINT: ${DEFAULT_ASSETS_API_ENDPOINT}
 
   server:
-    image: genius-invokation-server
-    pull_policy: never
+    <<: *server-image
     environment:
       DATABASE_URL: *database-url
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}

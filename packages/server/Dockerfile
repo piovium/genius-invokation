@@ -1,3 +1,5 @@
+# One Node version for both stages: a global ARG reaches every FROM, while a
+# stage must re-declare it to read its value inside a RUN.
 ARG NODE_VERSION=26.1.0
 
 FROM ghcr.io/pnpm/pnpm:12 AS build
@@ -6,6 +8,7 @@ RUN pnpm runtime set node ${NODE_VERSION} -g
 WORKDIR /app
 ARG DEFAULT_ASSETS_API_ENDPOINT
 COPY . .
+# Let the workspace scripts consume their sources instead of published dist.
 ENV FROM_SOURCE=1
 RUN pnpm --filter @gi-tcg/server... install --frozen-lockfile && pnpm build:no-typing server...
 

@@ -19,6 +19,7 @@ import { build } from "rolldown";
 import { replacePlugin } from "rolldown/plugins";
 import gts from "@gi-tcg/unplugin-gts/rolldown";
 import { generateDeckMetadata } from "./deck-metadata";
+
 const root = path.resolve(import.meta.dirname, "..");
 const output = path.join(root, "dist");
 const fromSource = Boolean(process.env.FROM_SOURCE);
@@ -48,9 +49,13 @@ await build({
   ],
   platform: "node",
   resolve: {
-    conditionNames: fromSource
-      ? ["node", "development", "es2015", "module"]
-      : ["node", "production", "es2015", "module"],
+    // Development builds consume the workspace sources; production builds consume dist.
+    conditionNames: [
+      "node",
+      fromSource ? "development" : "production",
+      "es2015",
+      "module",
+    ],
   },
 });
 // Preserve actual browser assets and migration SQL as files. The
