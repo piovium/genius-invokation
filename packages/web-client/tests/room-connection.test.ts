@@ -11,6 +11,9 @@ import {
   type RoomEvent,
 } from "../src/room-connection";
 
+/** WebSocket close code used to refuse a connection, mirroring the server. */
+const CLOSE_POLICY_VIOLATION = 1008;
+
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 async function until(check: () => boolean, timeout = 2_000) {
   const end = Date.now() + timeout;
@@ -130,7 +133,7 @@ async function fixture(options: FixtureOptions = {}) {
           (auth.token !== "fixture-token" &&
             !(options.allowAnonymous && auth.token === ""))
         ) {
-          ws.close(1008, "INVALID_TOKEN");
+          ws.close(CLOSE_POLICY_VIOLATION, "INVALID_TOKEN");
           return;
         }
         if (options.silenceBeforeReady) return;
@@ -232,7 +235,7 @@ async function fixture(options: FixtureOptions = {}) {
       }
       if (options.neverAck) return;
       const deliver = () => {
-        if (ws.readyState !== 1) return;
+        if (ws.readyState !== ws.OPEN) return;
         control(ws, ack);
         rpc(ws);
       };

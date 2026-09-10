@@ -202,7 +202,7 @@ function ConnectedRoom() {
             "SESSION_CHANGED",
           );
         }
-        const firstInitialization = !initialized();
+        const firstInitialization = !previous;
         setInitialized(payload);
         initializeClient(payload);
         if (firstInitialization && payload.config.watchable && allowWatchOpp())
@@ -269,7 +269,9 @@ function ConnectedRoom() {
         switch (payload.type) {
           case "initialized": {
             if (String(payload.myPlayerInfo.id) !== String(opponent))
-              throw new Error("Unexpected spectator player identity");
+              throw new Error(
+                "The spectator view reported a different player.",
+              );
             setOppPlayerIo(io.oppController.open());
             break;
           }

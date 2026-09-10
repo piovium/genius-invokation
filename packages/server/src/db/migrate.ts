@@ -55,9 +55,9 @@ async function readMigrations(directory: string): Promise<MigrationSource[]> {
       `Migrations in ${directory} must be a drizzle-kit PostgreSQL journal`,
     );
   const tags = new Set<string>();
-  // Entries are validated in journal order and only their reads overlap, so a
-  // duplicate tag is rejected whichever file finishes first.
-  return await Promise.all(
+  // Entries are validated synchronously in journal order, so a duplicate tag is
+  // caught at its own position before any read resolves.
+  return Promise.all(
     journal.entries.map(async (entry, index) => {
       if (entry.idx !== index)
         throw new Error(

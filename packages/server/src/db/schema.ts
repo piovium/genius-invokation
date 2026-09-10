@@ -12,7 +12,7 @@ import {
 // in its own right: Drizzle's generic jsonb mapper would parse that string a
 // second time, so this type serializes on write and returns the driver value
 // unchanged on read.
-const persistedReplay = customType<{ data: unknown; driverData: unknown }>({
+const persistedReplay = customType<{ data: string; driverData: string }>({
   dataType: () => "jsonb",
   toDriver: (value) => JSON.stringify(value),
   fromDriver: (value) => value,

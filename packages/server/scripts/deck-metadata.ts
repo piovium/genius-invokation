@@ -163,10 +163,7 @@ export async function generateDeckMetadata({
 }
 
 // Run the generator only when this file is the process entry point.
-const isCliEntry =
-  process.argv[1] !== undefined &&
-  path.resolve(process.argv[1]) === import.meta.filename;
-if (isCliEntry) {
+if (import.meta.main) {
   const { manifest } = await generateDeckMetadata();
   console.log(
     `Generated ${manifest.recordCount} deck metadata records (${manifest.metadataBytes} bytes) from ${manifest.sourceDirectory}`,

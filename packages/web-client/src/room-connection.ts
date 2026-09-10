@@ -413,8 +413,13 @@ export class RoomConnection {
     this.latestRpc = rpc;
     this.synchronized = true;
     if (this.pending) this.writePending();
-    else if (rpc === null || rpc.id > this.acceptedRpcId)
+    else if (this.shouldDeliverRpc(rpc))
       this.options.onEvent({ type: "rpc", data: rpc });
+  }
+
+  /** A null RPC clears the UI request; a newer id has not been shown yet. */
+  private shouldDeliverRpc(rpc: GameRpcRequest | null): boolean {
+    return rpc === null || rpc.id > this.acceptedRpcId;
   }
 
   private receiveAcknowledgement(value: Record<string, unknown>): void {
@@ -456,7 +461,7 @@ export class RoomConnection {
         !this.synchronized
       )
         return;
-      if (this.latestRpc === null || this.latestRpc.id > this.acceptedRpcId)
+      if (this.shouldDeliverRpc(this.latestRpc))
         this.options.onEvent({ type: "rpc", data: this.latestRpc });
     });
   }

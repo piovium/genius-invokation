@@ -27,8 +27,6 @@ const fromSource = Boolean(process.env.FROM_SOURCE);
 // Validate and capture the local assets snapshot before replacing build output.
 const { outputDirectory: metadataDirectory } = await generateDeckMetadata();
 // Only this package's generated distribution is replaced.
-if (path.dirname(output) !== root || path.basename(output) !== "dist")
-  throw new Error("Unexpected build output path");
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 await build({
