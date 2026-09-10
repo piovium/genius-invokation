@@ -7,11 +7,7 @@ import { migrateDatabase } from "./migrate";
 import { games } from "./schema";
 
 const testUrl = process.env.SERVER_DB_TEST_URL;
-const migrationDirectory = resolve(import.meta.dirname, "../../migrations");
-
-/** Table the isolated harness fixture used to record the SQL it had applied. */
-const HARNESS_MIGRATION_DDL =
-  'CREATE TABLE "_HarnessMigration" ("name" TEXT PRIMARY KEY, "sha256" TEXT NOT NULL, "appliedAt" TIMESTAMPTZ NOT NULL DEFAULT now())';
+const migrationsDirectory = resolve(import.meta.dirname, "../../drizzle");
 
 type Client = ReturnType<typeof createSql>;
 
@@ -23,7 +19,7 @@ function scratchSchema() {
 }
 
 test(
-  "real PostgreSQL fresh migration is idempotent and keeps rows and FK actions",
+  "real PostgreSQL fresh migration is idempotent and preserves rows and foreign-key actions",
   {
     skip: !testUrl,
     timeout: 30_000,
@@ -38,18 +34,17 @@ test(
     try {
       await admin.unsafe(`CREATE SCHEMA "${name}"`);
       base.searchParams.set("schema", name);
-      const first = await migrateDatabase(base.toString(), migrationDirectory);
+      const scopedUrl = base.toString();
+      const migrate = () => migrateDatabase(scopedUrl, migrationsDirectory);
+      const first = await migrate();
       assert.equal(first.applied.length, 3);
-      client = createSql(base.toString());
+      client = createSql(scopedUrl);
       await client`INSERT INTO "User" (id, name) VALUES (91000001, 'migration-probe')`;
-      const repeated = await migrateDatabase(
-        base.toString(),
-        migrationDirectory,
-      );
+      const repeated = await migrate();
       assert.deepEqual(repeated.applied, []);
       const [row] = await client`SELECT name FROM "User" WHERE id = 91000001`;
       assert.equal(row!.name, "migration-probe");
-      const database = createDatabase(base.toString());
+      const database = createDatabase(scopedUrl);
       try {
         const replay = JSON.stringify({ m: { roomId: 7 } });
         const [game] = await database.db
@@ -65,20 +60,25 @@ test(
       } finally {
         await database.close();
       }
-      await client.unsafe(HARNESS_MIGRATION_DDL);
-      await client`INSERT INTO "_HarnessMigration" ("name", "sha256") VALUES ('20990101000000_future', 'future')`;
-      await assert.rejects(
-        migrateDatabase(base.toString(), migrationDirectory),
-        /migrations unknown to this server build/,
-      );
-      await client`DROP TABLE "_HarnessMigration"`;
+      // A database whose log is gone but whose schema matches is adopted as a
+      // whole, never recreated.
+      await client`DROP TABLE "__drizzle_migrations"`;
+      const adopted = await migrate();
+      assert.deepEqual(adopted.adopted, [
+        "0000_init",
+        "0001_user_add_color",
+        "0002_user_add_name",
+      ]);
+      assert.deepEqual(adopted.applied, []);
+      const [kept] = await client`SELECT name FROM "User" WHERE id = 91000001`;
+      assert.equal(kept!.name, "migration-probe");
+      await client`INSERT INTO "__drizzle_migrations" (name, hash, created_at) VALUES ('9999_future', 'future', 0)`;
+      await assert.rejects(migrate(), /does not ship/);
+      await client`DELETE FROM "__drizzle_migrations" WHERE name = '9999_future'`;
       await client.unsafe(
         'ALTER TABLE "Deck" DROP CONSTRAINT "Deck_ownerUserId_fkey"',
       );
-      await assert.rejects(
-        migrateDatabase(base.toString(), migrationDirectory),
-        /foreign key differs/,
-      );
+      await assert.rejects(migrate(), /foreign key differs/);
     } finally {
       await client?.close();
       await admin.unsafe(`DROP SCHEMA IF EXISTS "${name}" CASCADE`);

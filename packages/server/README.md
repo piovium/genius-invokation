@@ -17,13 +17,13 @@
 
 开发、类型检查和测试都需要 assets-manager 的本地数据快照，上面的构建命令会先生成它。`pnpm prepare:metadata` 从 `assets-manager/dist/data` 提取牌组校验字段，并生成记录来源哈希的清单；设置 `FROM_SOURCE=1` 时改用 `src/data`。该步骤只读取本地文件，不访问 CDN。`pnpm dev`、`pnpm check` 和 `pnpm test` 会自动完成这一步，单独运行房间测试前需要先手动执行。
 
-生产构建位于 `dist/`，包含 `main.js`、`migrate.js`、`frontend/` 与 `migrations/` 下的 SQL。使用 `node dist/main.js` 启动。前端 JS、CSS 和图片按请求通过 Node 文件流返回，无需将整个文件载入内存。`WEB_CLIENT_BASE_PATH` 控制资源与 API 前缀，未知路径回退到 SPA 入口（仅 `index.html` 读入内存）；响应携带 MIME 与 ETag，`sw.js` 与 HTML 使用 `no-cache`，文件名带哈希的资源使用 `immutable` 缓存。
+生产构建位于 `dist/`，包含 `main.js`、`migrate.js`、`frontend/` 与 `drizzle/` 下的迁移 SQL。使用 `node dist/main.js` 启动。前端 JS、CSS 和图片按请求通过 Node 文件流返回，无需将整个文件载入内存。`WEB_CLIENT_BASE_PATH` 控制资源与 API 前缀，未知路径回退到 SPA 入口（仅 `index.html` 读入内存）；响应携带 MIME 与 ETag，`sw.js` 与 HTML 使用 `no-cache`，文件名带哈希的资源使用 `immutable` 缓存。
 
 ## 数据库升级
 
-对已有 PostgreSQL 数据库执行 `node dist/migrate.js`，源码环境执行 `pnpm migrate`。迁移器在事务和 PostgreSQL advisory lock 保护下执行 `migrations/` 中的 SQL，并把已执行迁移的名称与校验和写入 `__drizzle_migrations`。若 schema 已由同一批 SQL 通过 `_HarnessMigration` 记录创建（隔离测试夹具），迁移器核对记录中的校验和后直接接管，不重复执行；业务数据保留。`MIGRATIONS_DIRECTORY` 可覆盖 SQL 目录，默认使用发行包内的 `migrations/`。
+对已有 PostgreSQL 数据库执行 `node dist/migrate.js`，源码环境执行 `pnpm migrate`。迁移器在事务和 PostgreSQL advisory lock 保护下，按 `drizzle/meta/_journal.json` 的顺序执行 `drizzle/` 中的 SQL，并把已执行迁移的名称与校验和写入 `__drizzle_migrations`。这套迁移是这个服务自己的 Drizzle 迁移集：表名、列、默认值、主键与外键动作与既有部署一致，约束名沿用原名称，DDL 与约束都属于对外稳定接口。
 
-空库按时间顺序执行 `migrations/` 中的 SQL。重复执行不会重新建表、重置序列或修改已有用户、牌组和对局。迁移记录不完整、校验和不符、已有业务表缺少可验证的迁移记录，或列、主键、外键与 SQL 不一致时，迁移器会报错并回滚事务。
+空库按 journal 顺序执行全部 SQL。重复执行不会重新建表、重置序列或修改已有用户、牌组和对局。已经建好表、却没有迁移记录的库（由本服务早期版本或其它工具建立）先与本服务的 SQL 逐列、逐主键、逐外键比对，完全一致时整体接管并登记，不执行任何 SQL；比对不一致、迁移记录不完整、校验和不符，或列、主键、外键发生漂移时，迁移器报错并回滚事务。`MIGRATIONS_DIRECTORY` 可覆盖 SQL 目录，默认使用发行包内的 `drizzle/`。
 
 `DATABASE_URL` 的 `schema` 参数选择现有 schema，因此需在迁移前创建它。`DATABASE_CONNECTION_LIMIT` 设置连接池上限，默认为 2。
 
@@ -48,4 +48,4 @@ WebSocket 与 HTTP 共用端口 3000。反向代理需要转发 `Upgrade`，空�
     pnpm test:http
     pnpm test:db
 
-数据库测试须显式设置 `SERVER_DB_TEST_URL`，指向隔离的 `gi_server_harness` 数据库。测试创建并回收独立的随机 schema，验证同源 SQL 的接管与校验和、约束、Drizzle 写入、事务回滚，以及独立进程重启后的持久化。构建和功能测试通过后，仍需单独验证真实内存是否达标。
+数据库测试须显式设置 `SERVER_DB_TEST_URL`，指向隔离的 `gi_server_harness` 数据库。测试创建并回收独立的随机 schema，验证既有 schema 的接管与校验和、约束、Drizzle 写入、事务回滚，以及独立进程重启后的持久化。构建和功能测试通过后，仍需单独验证真实内存是否达标。

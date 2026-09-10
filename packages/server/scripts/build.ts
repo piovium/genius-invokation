@@ -60,7 +60,7 @@ await cp(
   path.join(output, "frontend"),
   { recursive: true },
 );
-await cp(path.join(root, "migrations"), path.join(output, "migrations"), {
+await cp(path.join(root, "drizzle"), path.join(output, "drizzle"), {
   recursive: true,
 });
 await cp(

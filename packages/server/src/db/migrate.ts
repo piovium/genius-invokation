@@ -1,20 +1,27 @@
 import { createHash } from "node:crypto";
-import { access, readFile, readdir } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createSql, type SqlConnection } from "./database";
 
 const sha256 = (value: string) =>
   createHash("sha256").update(value).digest("hex");
 
-/** Shipped migrations are `<timestamp>_<name>` folders, e.g. `20251013090510_init`. */
-const MIGRATION_FOLDER = /^\d{14}_[A-Za-z0-9_]+$/;
+/** The journal drizzle-kit writes beside the SQL it names, in apply order. */
+interface MigrationJournal {
+  version: string;
+  dialect: string;
+  entries: { idx: number; version: string; when: number; tag: string }[];
+}
 
-async function findMigrationDirectory() {
+/** Migration file names as drizzle-kit writes them, e.g. `0000_init`. */
+const MIGRATION_TAG = /^\d{4}_[a-z0-9_]+$/;
+
+async function findMigrationsDirectory() {
   if (process.env.MIGRATIONS_DIRECTORY)
     return resolve(process.env.MIGRATIONS_DIRECTORY);
   for (const candidate of [
-    resolve(import.meta.dirname, "migrations"),
-    resolve(import.meta.dirname, "../../migrations"),
+    resolve(import.meta.dirname, "drizzle"),
+    resolve(import.meta.dirname, "../../drizzle"),
   ]) {
     try {
       await access(candidate);
@@ -24,64 +31,66 @@ async function findMigrationDirectory() {
     }
   }
   throw new Error(
-    "Migration SQL is missing from this server build; set MIGRATIONS_DIRECTORY or ship the migrations/ directory",
+    "Migration SQL is missing from this server build; set MIGRATIONS_DIRECTORY or ship the drizzle/ directory",
+  );
+}
+
+/** Read the journal and the SQL it names, refusing a layout drizzle-kit cannot have written. */
+async function readMigrations(directory: string) {
+  const journal = JSON.parse(
+    await readFile(resolve(directory, "meta/_journal.json"), "utf8"),
+  ) as MigrationJournal;
+  if (journal.dialect !== "postgresql" || !Array.isArray(journal.entries))
+    throw new Error(
+      `Migrations in ${directory} must be a drizzle-kit PostgreSQL journal`,
+    );
+  const tags = new Set<string>();
+  return await Promise.all(
+    journal.entries.map(async (entry, index) => {
+      if (
+        entry.idx !== index ||
+        !MIGRATION_TAG.test(entry.tag) ||
+        tags.has(entry.tag)
+      )
+        throw new Error(
+          `Migrations in ${directory} must be ordered entries named like 0000_init, got "${entry.tag}"`,
+        );
+      tags.add(entry.tag);
+      const path = resolve(directory, `${entry.tag}.sql`);
+      let text: string;
+      try {
+        text = await readFile(path, "utf8");
+      } catch {
+        throw new Error(`Migration SQL is missing: ${path}`);
+      }
+      // Unix and Windows checkouts disagree on line endings; hash a single form.
+      const normalized = text.replaceAll("\r\n", "\n");
+      return { name: entry.tag, text: normalized, hash: sha256(normalized) };
+    }),
   );
 }
 
 /**
- * Apply the SQL migrations that ship with this server. A database whose schema
- * was already created from those same files and recorded by other bookkeeping
- * (the isolated test fixture) is adopted once its recorded checksums match.
+ * Apply the Drizzle migrations that ship with this server. A database whose
+ * tables already match those migrations is adopted as a whole: an older
+ * deployment, or one that lost its migration log, is compared against the
+ * shipped SQL instead of being recreated, so no business row is touched.
  */
 export async function migrateDatabase(
   connectionString?: string,
-  migrationDirectory?: string,
+  migrationsDirectory?: string,
 ) {
-  const directory = migrationDirectory ?? (await findMigrationDirectory());
-  const names = (await readdir(directory, { withFileTypes: true }))
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort();
-  if (!names.length || names.some((name) => !MIGRATION_FOLDER.test(name)))
-    throw new Error(
-      `Migrations in ${directory} must be folders named like 20251013090510_init`,
-    );
-  const knownNames = new Set(names);
-  const sources = await Promise.all(
-    names.map(async (name) => {
-      const text = await readFile(
-        resolve(directory, name, "migration.sql"),
-        "utf8",
-      );
-      const normalized = text.replaceAll("\r\n", "\n");
-      return {
-        name,
-        text,
-        hash: sha256(normalized),
-        acceptedHashes: new Set([
-          sha256(text),
-          sha256(normalized),
-          sha256(normalized.replaceAll("\n", "\r\n")),
-        ]),
-      };
-    }),
-  );
+  const directory = migrationsDirectory ?? (await findMigrationsDirectory());
+  const sources = await readMigrations(directory);
+  const knownNames = new Set(sources.map((source) => source.name));
   const client = createSql(connectionString);
   try {
     return await client.begin(async (tx) => {
       await tx`SELECT pg_advisory_xact_lock(hashtext(current_database()), hashtext(current_schema() || ':gi-server-migrations'))`;
       const [migrationState] =
-        await tx`SELECT to_regclass('"_HarnessMigration"') IS NOT NULL AS fixture, to_regclass('"User"') IS NOT NULL AS populated`;
+        await tx`SELECT to_regclass('"User"') IS NOT NULL AS populated`;
       if (!migrationState)
         throw new Error("Cannot read the database migration state");
-      const fixtureHistory = migrationState.fixture
-        ? await tx.unsafe('SELECT name, sha256 FROM "_HarnessMigration"')
-        : [];
-      if (fixtureHistory.some((row) => !knownNames.has(row.name)))
-        throw new Error("Database has migrations unknown to this server build");
-      const fixtureHashes = new Map(
-        fixtureHistory.map((row) => [row.name, row.sha256] as const),
-      );
       await tx.unsafe(
         'CREATE TABLE IF NOT EXISTS "__drizzle_migrations" ("id" SERIAL PRIMARY KEY, "hash" TEXT NOT NULL, "created_at" BIGINT NOT NULL, "name" TEXT NOT NULL UNIQUE)',
       );
@@ -89,38 +98,37 @@ export async function migrateDatabase(
         'SELECT name, hash FROM "__drizzle_migrations"',
       );
       if (recorded.some((row) => !knownNames.has(row.name)))
-        throw new Error("Database has migrations newer than this server build");
+        throw new Error(
+          "Database records SQL migrations this server build does not ship; refusing an unknown schema",
+        );
       const appliedHashes = new Map(
         recorded.map((row) => [row.name, row.hash] as const),
       );
+      const pending = sources.filter((source) => {
+        const appliedHash = appliedHashes.get(source.name);
+        if (appliedHash === undefined) return true;
+        if (appliedHash !== source.hash)
+          throw new Error(
+            `Previously applied SQL migration changed: ${source.name}`,
+          );
+        return false;
+      });
       const applied: string[] = [];
       const adopted: string[] = [];
-      for (const [index, source] of sources.entries()) {
-        const appliedHash = appliedHashes.get(source.name);
-        if (appliedHash !== undefined) {
-          if (appliedHash !== source.hash)
-            throw new Error(
-              `Previously applied SQL migration changed: ${source.name}`,
-            );
-          continue;
-        }
-        const fixtureHash = fixtureHashes.get(source.name);
-        if (fixtureHash !== undefined) {
-          if (!source.acceptedHashes.has(fixtureHash))
-            throw new Error(
-              `Adopted SQL migration checksum differs: ${source.name}`,
-            );
-          adopted.push(source.name);
-        } else {
-          if (index === 0 && migrationState.populated)
-            throw new Error(
-              "Existing tables have no completed migration history; refusing to recreate or adopt an unknown schema",
-            );
+      if (migrationState.populated && appliedHashes.size === 0) {
+        // Tables without a migration log: adopt them, but only once the live
+        // schema is exactly what these migrations create.
+        await verifyDeployedSchema(tx);
+        adopted.push(...pending.map((source) => source.name));
+      } else {
+        for (const source of pending) {
           await tx.unsafe(source.text);
           applied.push(source.name);
         }
-        await tx`INSERT INTO "__drizzle_migrations" (name, hash, created_at) VALUES (${source.name}, ${source.hash}, ${Date.now()})`;
       }
+      const recordedAt = Date.now();
+      for (const source of pending)
+        await tx`INSERT INTO "__drizzle_migrations" (name, hash, created_at) VALUES (${source.name}, ${source.hash}, ${recordedAt})`;
       await verifyDeployedSchema(tx);
       return { applied, adopted, total: sources.length, schemaVerified: true };
     });

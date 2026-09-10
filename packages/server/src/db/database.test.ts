@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { createHash, randomBytes } from "node:crypto";
-import { readFile, readdir } from "node:fs/promises";
+import { randomBytes } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { test } from "node:test";
 import { pathToFileURL } from "node:url";
@@ -20,41 +20,13 @@ import { migrateDatabase } from "./migrate";
 
 const execute = promisify(execFile);
 const testUrl = process.env.SERVER_DB_TEST_URL;
-const migrationDirectory = resolve(import.meta.dirname, "../../migrations");
-
-/** Table the isolated harness fixture used to record the SQL it had applied. */
-const HARNESS_MIGRATION_DDL =
-  'CREATE TABLE "_HarnessMigration" ("name" TEXT PRIMARY KEY, "sha256" TEXT NOT NULL, "appliedAt" TIMESTAMPTZ NOT NULL DEFAULT now())';
-
-const sha256 = (value: string) =>
-  createHash("sha256").update(value).digest("hex");
+const migrationsDirectory = resolve(import.meta.dirname, "../../drizzle");
 
 /** Scratch schema for one run; it is spliced into DDL, so keep it a bare identifier. */
 function scratchSchema() {
   const name = `gi_migration_test_${randomBytes(8).toString("hex")}`;
   if (!/^\w+$/.test(name)) throw new Error("Unexpected database test schema");
   return name;
-}
-
-/**
- * Build the fixture the isolated harness used before this service owned the
- * database: apply every shipped SQL file and record it in `_HarnessMigration`,
- * which the migrator then has to adopt.
- */
-async function replayMigrations(client: SqlConnection) {
-  const names = (await readdir(migrationDirectory, { withFileTypes: true }))
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort();
-  for (const name of names) {
-    const source = await readFile(
-      resolve(migrationDirectory, name, "migration.sql"),
-      "utf8",
-    );
-    await client.unsafe(source);
-    await client`INSERT INTO "_HarnessMigration" ("name", "sha256") VALUES (${name}, ${sha256(source)})`;
-  }
-  return names;
 }
 
 /** Swap the deck-owner foreign key for one with the same name but other actions. */
@@ -87,18 +59,23 @@ async function fixture(body: (url: string) => Promise<void>) {
 }
 
 test(
-  "a database created from the same SQL is adopted without loss; Drizzle ownership, transactions and process restart preserve it",
+  "a database that lost its migration log is adopted without loss; Drizzle ownership, transactions and process restart preserve it",
   {
     skip: !testUrl,
     timeout: 60_000,
   },
   async () => {
     await fixture(async (url) => {
+      const deployed = await migrateDatabase(url, migrationsDirectory);
+      const names = deployed.applied;
+      assert.deepEqual(names, [
+        "0000_init",
+        "0001_user_add_color",
+        "0002_user_add_name",
+      ]);
       const legacy = createSql(url);
       let database: Database | undefined;
       try {
-        await legacy.unsafe(HARNESS_MIGRATION_DDL);
-        const names = await replayMigrations(legacy);
         await legacy`INSERT INTO "User" (id, name, "ghToken") VALUES (91000001, 'Existing A', 'existing-fake-a'), (91000002, 'Existing B', 'existing-fake-b')`;
         const deck = JSON.parse(
           await readFile(
@@ -112,16 +89,18 @@ test(
         const code = ASSETS_MANAGER.encode(deck);
         const [oldDeck] =
           await legacy`INSERT INTO "Deck" (name, code, "requiredVersion", "ownerUserId", "updatedAt") VALUES ('existing-deck', ${code}, 0, 91000001, '2025-12-01T00:00:00') RETURNING id`;
+        // The deployed database predates this service's own migration log.
+        await legacy`DROP TABLE "__drizzle_migrations"`;
         const before =
           await legacy`SELECT id, name, "ghToken", "createdAt" FROM "User" ORDER BY id`;
-        const first = await migrateDatabase(url, migrationDirectory);
+        const first = await migrateDatabase(url, migrationsDirectory);
         assert.deepEqual(first.adopted, names);
         assert.deepEqual(first.applied, []);
         assert.deepEqual(
           await legacy`SELECT id, name, "ghToken", "createdAt" FROM "User" ORDER BY id`,
           before,
         );
-        const repeated = await migrateDatabase(url, migrationDirectory);
+        const repeated = await migrateDatabase(url, migrationsDirectory);
         assert.deepEqual(repeated.adopted, []);
         assert.deepEqual(repeated.applied, []);
         database = createDatabase(url);
@@ -226,19 +205,19 @@ test(
   },
   async () => {
     await fixture(async (url) => {
-      const result = await migrateDatabase(url, migrationDirectory);
+      const result = await migrateDatabase(url, migrationsDirectory);
       assert.equal(result.applied.length, 3);
       const client = createSql(url);
       try {
         await setDeckOwnerForeignKey(client, "CASCADE");
         await assert.rejects(
-          migrateDatabase(url, migrationDirectory),
+          migrateDatabase(url, migrationsDirectory),
           /foreign key differs/,
         );
         await setDeckOwnerForeignKey(client, "RESTRICT");
-        await client`UPDATE "__drizzle_migrations" SET hash = 'changed' WHERE name = '20251013090510_init'`;
+        await client`UPDATE "__drizzle_migrations" SET hash = 'changed' WHERE name = '0000_init'`;
         await assert.rejects(
-          migrateDatabase(url, migrationDirectory),
+          migrateDatabase(url, migrationsDirectory),
           /SQL migration changed/,
         );
       } finally {
