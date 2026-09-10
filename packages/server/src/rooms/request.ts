@@ -155,12 +155,13 @@ function guestFields(input: Record<string, unknown>): GuestJoinRoomDto {
 function roomFields(input: Record<string, unknown>): CreateRoomDto {
   const parsed: Record<string, unknown> = {};
   for (const key of BOOLEAN_ROOM_FIELDS) {
-    if (isOmitted(input[key])) continue;
-    if (typeof input[key] !== "boolean")
+    const value = input[key];
+    if (isOmitted(value)) continue;
+    if (typeof value !== "boolean")
       throw badRequest(
-        `${key} must be a boolean, but received ${describeValue(input[key])}`,
+        `${key} must be a boolean, but received ${describeValue(value)}`,
       );
-    parsed[key] = input[key];
+    parsed[key] = value;
   }
   for (const [key, { min, max, integer }] of Object.entries(
     NUMBER_ROOM_FIELDS,

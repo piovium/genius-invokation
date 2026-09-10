@@ -2,7 +2,7 @@ import { badRequest } from "../errors";
 import { isGuestId } from "../auth/guest-id";
 import type { PlayerId } from "./types";
 
-/** A room ID is the decimal text of a non-negative safe integer. */
+/** Digits only: the exponent, hex and float forms `Number` accepts are rejected. */
 const ROOM_ID_PATTERN = /^\d+$/;
 
 /** Parses an account ID or a `guest-` tagged ID from a path segment. */

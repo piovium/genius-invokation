@@ -95,7 +95,7 @@ export function createMetrics(): Metrics {
       name,
       help,
       // prom-client only defaults an absent labelNames; an explicit undefined
-      // would reach Gauge.reset and crash on scrape.
+      // would throw from Gauge.reset as the gauge is constructed.
       labelNames: labelNames ?? [],
       registers: [registry],
       // prom-client invokes collect with the gauge bound as `this`.

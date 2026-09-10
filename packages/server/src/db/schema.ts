@@ -24,6 +24,13 @@ const referentialActions = {
   onUpdate: "cascade",
 } as const;
 
+/**
+ * The deployed DDL stores timestamps at millisecond precision, so every column
+ * shares this shape.
+ */
+const millisecondTimestamp = (name: string) =>
+  timestamp(name, { precision: 3, mode: "date" });
+
 // Mirror the deployed DDL exactly: quoted identifiers, millisecond timestamp
 // precision, defaults, relation actions and the composite primary key.
 export const users = pgTable("User", {
@@ -31,9 +38,7 @@ export const users = pgTable("User", {
   name: text("name"),
   chessboardColor: text("chessboardColor"),
   ghToken: text("ghToken"),
-  createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
-    .notNull()
-    .defaultNow(),
+  createdAt: millisecondTimestamp("createdAt").notNull().defaultNow(),
 });
 export const games = pgTable("Game", {
   id: serial("id").primaryKey(),
@@ -41,9 +46,7 @@ export const games = pgTable("Game", {
   gameVersion: text("gameVersion").notNull(),
   data: persistedReplay("data").notNull(),
   winnerId: integer("winnerId"),
-  createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
-    .notNull()
-    .defaultNow(),
+  createdAt: millisecondTimestamp("createdAt").notNull().defaultNow(),
 });
 export const playerOnGames = pgTable(
   "PlayerOnGames",
@@ -71,10 +74,8 @@ export const decks = pgTable("Deck", {
   ownerUserId: integer("ownerUserId")
     .notNull()
     .references(() => users.id, referentialActions),
-  createdAt: timestamp("createdAt", { precision: 3, mode: "date" })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updatedAt", { precision: 3, mode: "date" }).notNull(),
+  createdAt: millisecondTimestamp("createdAt").notNull().defaultNow(),
+  updatedAt: millisecondTimestamp("updatedAt").notNull(),
 });
 export type UserModel = typeof users.$inferSelect;
 export type DeckModel = typeof decks.$inferSelect;
