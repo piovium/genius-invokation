@@ -15,4 +15,4 @@ ENV NODE_ENV=production
 COPY --from=build /app/packages/server/dist/ ./
 EXPOSE 3000
 
-CMD ["node", "main.js"]
+CMD ["node", "--expose-gc", "--max-semi-space-size=1", "main.js"]

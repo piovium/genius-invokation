@@ -7,7 +7,7 @@
     "dev": "pnpm prepare:metadata && gnx --env-file-if-exists=.env --watch src/main.ts",
     "prepare:metadata": "gnx scripts/deck-metadata.ts",
     "build": "gnx scripts/build.ts",
-    "start": "node --env-file-if-exists=.env dist/main.js",
+    "start": "node --expose-gc --max-semi-space-size=1 --env-file-if-exists=.env dist/main.js",
     "check": "pnpm prepare:metadata && tsc --noEmit",
     "migrate": "gnx --env-file-if-exists=.env src/db/migrate.ts",
     "test": "pnpm prepare:metadata && gnx --test src/auth/auth.test.ts src/frontend.test.ts src/http.test.ts src/app.test.ts src/deck-metadata.test.ts src/rooms/*.test.ts",

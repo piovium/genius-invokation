@@ -14,6 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { createApplication, listenApplication } from "./app";
+import { releaseIdleMemory } from "./memory";
 import { redis } from "./redis";
 
 const DEFAULT_PORT = 3_000;
@@ -33,6 +34,7 @@ const server = await listenApplication(service, {
   hostname: process.env.HOST ?? "::",
 });
 console.log(`Server listening at ${server.url}`);
+releaseIdleMemory();
 
 let stopping = false;
 async function stop(): Promise<void> {

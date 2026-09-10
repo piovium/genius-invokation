@@ -32,6 +32,7 @@ import {
 } from "@gi-tcg/core";
 import getData from "@gi-tcg/data";
 import { flip } from "@gi-tcg/utils";
+import { releaseIdleMemory } from "../memory";
 import { createGuestId, DeckVerificationError, verifyDeck } from "../utils";
 import type { Metrics, RoomMetricsSnapshot } from "../metrics/metrics";
 import type {
@@ -605,6 +606,7 @@ export function createRooms(
 
       for (const player of room.getPlayers()) player.dispose();
       rooms.delete(room.id);
+      releaseIdleMemory();
       roomIdPool.push(room.id);
       if (rooms.size === 0) shutdownResolvers?.resolve();
     });
