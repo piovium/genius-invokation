@@ -55,6 +55,18 @@ patch hashes and unpublished source revisions.
   working set of the single Node process, three runs each): ~5.8 GiB without
   the hook, ~4.3 GiB with it.
 
+  The hook itself belongs to GTS, not to this repository. `@gi-tcg/gtsc`
+  installs it on the compiler host when Volar creates the project, and a
+  dependency patch cannot deliver it to consumers, because
+  `patchedDependencies` only applies inside the install that declares it. This
+  branch still carries the hook in its own patch, because the installed
+  `@gi-tcg/gtsc@0.7.7` predates that change and its descriptor returns only
+  `languagePlugins`. **Removal trigger:** once a published GTS release provides
+  the hook, delete the `lib/node/proxyCreateProgram.js` hunk from
+  `patches/@volar__typescript.patch`, keep the `lib/resolveModuleName.js` hunk,
+  refresh the lockfile with `pnpm install --lockfile-only`, and re-run the
+  checks.
+
 Other candidate patches were measured and are deliberately absent. See the
 `removedCandidates` section of the provenance file for the evidence.
 

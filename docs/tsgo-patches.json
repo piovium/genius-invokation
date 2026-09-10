@@ -24,8 +24,9 @@
       "necessity": "Optional for correctness: the ten checks pass without this patch. It is kept because it lowers the peak memory of native checking.",
       "changes": [
         "Drop the 4 MiB cap that made module resolution treat files of 4 MiB or more as missing.",
-        "Use the CompilerHost text hook to avoid parsing duplicate JavaScript ASTs for native checking."
+        "Transient: install the CompilerHost text hook on Volar's program proxy, because the installed @gi-tcg/gtsc@0.7.7 does not set it itself."
       ],
+      "removalTrigger": "Delete the lib/node/proxyCreateProgram.js hunk once the installed @gi-tcg/gtsc sets host.tnbGetSourceText from its own project descriptor; the lib/resolveModuleName.js hunk stays.",
       "evidence": "Without the hook, gtsc --noEmit over packages/data peaked at 5.83-5.91 GiB working set (3 runs); with the hook, 4.27-4.30 GiB.",
       "source": {
         "kind": "repository-patch",
