@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { UnauthorizedException } from "../errors";
+import { unauthorized } from "../errors";
 import type { UsersService } from "../users/users.service";
 import {
   isGuestJwtPayload,
@@ -124,7 +124,7 @@ export class AuthService {
       typeof result.access_token !== "string" ||
       !result.access_token
     )
-      throw new UnauthorizedException("GitHub code exchange failed");
+      throw unauthorized("GitHub code exchange failed");
     const identity = await fetch(this.endpoints.user, {
       headers: {
         authorization: "Bearer " + result.access_token,
@@ -135,7 +135,7 @@ export class AuthService {
     });
     const user = (await identity.json()) as { id?: number };
     if (!identity.ok || !Number.isSafeInteger(user.id) || user.id! <= 0)
-      throw new UnauthorizedException("GitHub user lookup failed");
+      throw unauthorized("GitHub user lookup failed");
     await this.users.create(user.id!, result.access_token);
     return { accessToken: this.sign({ user: 1, sub: user.id! }) };
   }

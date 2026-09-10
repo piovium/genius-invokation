@@ -17,7 +17,7 @@ import { Elysia, t } from "elysia";
 import type { AuthService } from "../auth/auth.service";
 import { requireUser, requestIdentity } from "../auth/auth.guard";
 import { isUserJwtPayload } from "../auth/user.decorator";
-import { NotFoundException } from "../errors";
+import { notFound } from "../errors";
 import { idSchema, nameSchema } from "../http";
 import type { UsersService } from "./users.service";
 export interface UpdateUserInfoDto {
@@ -30,7 +30,7 @@ export function createUsersRoutes(users: UsersService, auth: AuthService) {
       const identity = requestIdentity(request, auth);
       if (!isUserJwtPayload(identity)) return Response.json(null);
       const user = await users.findById(identity.sub);
-      if (!user) throw new NotFoundException();
+      if (!user) throw notFound();
       return user;
     })
     .patch(
@@ -51,7 +51,7 @@ export function createUsersRoutes(users: UsersService, auth: AuthService) {
       async ({ request, params }) => {
         requireUser(request, auth);
         const user = await users.findById(params.id);
-        if (!user) throw new NotFoundException();
+        if (!user) throw notFound();
         return user;
       },
       { params: t.Object({ id: idSchema }) },

@@ -15,10 +15,7 @@ import { ASSETS_MANAGER } from "../utils";
 
 const execute = promisify(execFile);
 const testUrl = process.env.SERVER_DB_TEST_URL;
-const migrationDirectory = resolve(
-  import.meta.dirname,
-  "../../migrations",
-);
+const migrationDirectory = resolve(import.meta.dirname, "../../migrations");
 async function fixture(body: (url: string) => Promise<void>) {
   if (!testUrl) throw new Error("SERVER_DB_TEST_URL is required");
   const base = new URL(testUrl);

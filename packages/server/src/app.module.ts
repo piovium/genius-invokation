@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Elysia } from "elysia";
+import { Elysia, status } from "elysia";
 import { node } from "@elysiajs/node";
 import { WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
 import { createAppRoutes } from "./app.controller";
@@ -31,7 +31,7 @@ import { createGamesRoutes } from "./games/games.controller";
 import { createMetricsRoutes } from "./metrics/metrics.controller";
 import { createRoomsRoutes } from "./rooms/rooms.module";
 import { createFrontendHandler } from "./frontend";
-import { httpError } from "./errors";
+import { errorResponse } from "./errors";
 import { listenHttp, type HttpListenOptions } from "./http-server";
 import { attachRoomWebSocketServer } from "./room-transport/websocket";
 
@@ -55,17 +55,11 @@ export function createApplication({
     adapter: node(),
     strictPath: false,
   }).onError(({ code, error, set }) => {
-    if (code === "VALIDATION" || code === "PARSE") {
-      set.status = 400;
-      return { statusCode: 400, message: "Invalid request" };
-    }
-    if (code === "NOT_FOUND") {
-      set.status = 404;
-      return { statusCode: 404, message: "Not Found" };
-    }
-    const failure = httpError(error);
-    set.status = failure.status;
-    return failure.body;
+    if (code === "VALIDATION" || code === "PARSE")
+      return status(400, { statusCode: 400, message: "Invalid request" });
+    if (code === "NOT_FOUND")
+      return status(404, { statusCode: 404, message: "Not Found" });
+    return errorResponse(error);
   });
   if (!production) {
     app.onRequest(({ request, set }) => {

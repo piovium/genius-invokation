@@ -15,7 +15,7 @@
 
 import type { AuthService } from "./auth.service";
 import { isUserJwtPayload } from "./user.decorator";
-import { UnauthorizedException } from "../errors";
+import { unauthorized } from "../errors";
 
 export function requestIdentity(request: Request, auth: AuthService) {
   const authorization = request.headers.get("authorization");
@@ -27,6 +27,6 @@ export function requestIdentity(request: Request, auth: AuthService) {
 
 export function requireUser(request: Request, auth: AuthService) {
   const payload = requestIdentity(request, auth);
-  if (!isUserJwtPayload(payload)) throw new UnauthorizedException();
+  if (!isUserJwtPayload(payload)) throw unauthorized();
   return payload.sub;
 }

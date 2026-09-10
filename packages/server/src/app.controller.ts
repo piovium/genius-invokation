@@ -17,7 +17,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { Elysia } from "elysia";
 import { CORE_VERSION, CURRENT_VERSION, VERSIONS } from "@gi-tcg/core";
-import { ImATeapotException, ServiceUnavailableException } from "./errors";
+import { teapot, unavailable } from "./errors";
 import { redis } from "./redis";
 const execute = promisify(execFile);
 let revision: Promise<Record<string, unknown>> | undefined;
@@ -64,7 +64,7 @@ export function createAppRoutes() {
       return (await import("@gi-tcg/data-code-analyzer")).analyzeResult;
     })
     .get("/teapot", () => {
-      throw new ImATeapotException("I'm a teapot~");
+      throw teapot("I'm a teapot~");
     })
     .get("/hello", () => "Hello World!")
     .get("/healthz", async ({ request }) => {
@@ -73,7 +73,7 @@ export function createAppRoutes() {
         if (activeRoomsCount) {
           await redis.set("meta:deploying", Date.now());
           await redis.expire("meta:deploying", 3600);
-          throw new ServiceUnavailableException(
+          throw unavailable(
             "There are still " + activeRoomsCount + " active rooms.",
           );
         }

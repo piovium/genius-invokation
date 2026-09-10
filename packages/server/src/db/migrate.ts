@@ -20,9 +20,7 @@ async function findMigrationDirectory() {
       /* Source and packaged layouts differ. */
     }
   }
-  throw new Error(
-    "Migration SQL is missing from the server distribution",
-  );
+  throw new Error("Migration SQL is missing from the server distribution");
 }
 
 /**
@@ -75,9 +73,7 @@ export async function migrateDatabase(
         ? await tx.unsafe('SELECT name, sha256 FROM "_HarnessMigration"')
         : [];
       if (fixtureHistory.some((row) => !names.includes(row.name)))
-        throw new Error(
-          "Database has migrations unknown to this server build",
-        );
+        throw new Error("Database has migrations unknown to this server build");
       await tx.unsafe(
         'CREATE TABLE IF NOT EXISTS "__drizzle_migrations" ("id" SERIAL PRIMARY KEY, "hash" TEXT NOT NULL, "created_at" BIGINT NOT NULL, "name" TEXT NOT NULL UNIQUE)',
       );

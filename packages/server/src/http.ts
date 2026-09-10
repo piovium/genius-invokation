@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { BadRequestException } from "./errors";
+import { badRequest } from "./errors";
 export const paginationSchema = {
   skip: t.Optional(t.Numeric({ minimum: 1, multipleOf: 1 })),
   take: t.Optional(t.Numeric({ minimum: 1, maximum: 30, multipleOf: 1 })),
@@ -19,7 +19,7 @@ export const nameSchema = t
   .Transform(t.String({ minLength: 1, maxLength: 128 }))
   .Decode((name) => {
     if ([...name].length > 64)
-      throw new BadRequestException("Name must contain at most 64 characters");
+      throw badRequest("Name must contain at most 64 characters");
     return name;
   })
   .Encode((name) => name);

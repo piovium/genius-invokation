@@ -15,7 +15,7 @@
 
 import type { Deck } from "@gi-tcg/typings";
 import { VERSIONS } from "@gi-tcg/core";
-import { BadRequestException } from "../errors";
+import { badRequest } from "../errors";
 
 export interface CreateRoomDto {
   hostFirst?: boolean;
@@ -44,12 +44,12 @@ export interface UserJoinRoomDto {
 
 function parseObject(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value))
-    throw new BadRequestException("Expected a JSON object");
+    throw badRequest("Expected a JSON object");
   return value as Record<string, unknown>;
 }
 function parseInteger(value: unknown, field: string): number {
   if (!Number.isSafeInteger(value))
-    throw new BadRequestException(field + " must be an integer");
+    throw badRequest(field + " must be an integer");
   return value as number;
 }
 function boundedString(value: unknown, field: string, max: number): string {
@@ -58,16 +58,14 @@ function boundedString(value: unknown, field: string, max: number): string {
     value.length === 0 ||
     [...value].length > max
   )
-    throw new BadRequestException(field + " has invalid length");
+    throw badRequest(field + " has invalid length");
   return value;
 }
 function parseDeck(value: unknown): Deck {
   const record = parseObject(value);
   const list = (value: unknown, count: number, field: string): number[] => {
     if (!Array.isArray(value) || value.length !== count)
-      throw new BadRequestException(
-        field + " must contain " + count + " entries",
-      );
+      throw badRequest(field + " must contain " + count + " entries");
     return value.map((id) => parseInteger(id, field));
   };
   return {
@@ -89,7 +87,7 @@ function roomFields(input: Record<string, unknown>): CreateRoomDto {
   for (const key of ["hostFirst", "watchable", "private", "allowGuest"]) {
     if (input[key] === undefined || input[key] === null) continue;
     if (typeof input[key] !== "boolean")
-      throw new BadRequestException(key + " must be boolean");
+      throw badRequest(key + " must be boolean");
     out[key] = input[key];
   }
   const limits = {
@@ -110,7 +108,7 @@ function roomFields(input: Record<string, unknown>): CreateRoomDto {
       value > max ||
       (key === "gameVersion" && !Number.isInteger(value))
     )
-      throw new BadRequestException(key + " is out of range");
+      throw badRequest(key + " is out of range");
     out[key] = value;
   }
   return out;

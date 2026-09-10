@@ -1,67 +1,31 @@
-/** Small HTTP errors shared by the Elysia routes and game services. */
-export class HttpException extends Error {
-  constructor(
-    public readonly response: string | string[] | Record<string, unknown>,
-    public readonly status: number,
-  ) {
-    super(
-      typeof response === "string"
-        ? response
-        : Array.isArray(response)
-          ? response.join("; ")
-          : String(response.message ?? "Request failed"),
-    );
-    this.name = new.target.name;
-  }
-  getStatus() {
-    return this.status;
-  }
-  getResponse() {
-    return typeof this.response === "object" && !Array.isArray(this.response)
-      ? this.response
-      : { statusCode: this.status, message: this.response };
+import { status } from "elysia";
+
+/**
+ * An HTTP failure raised by the game services.
+ *
+ * Elysia's own error classes carry nothing but a status, and this one keeps the
+ * same shape: services throw it from any depth, the route boundary renders it
+ * with Elysia's status() helper.
+ */
+export class HttpError extends Error {
+  readonly statusCode: number;
+
+  constructor(statusCode: number, message: string) {
+    super(message);
+    this.statusCode = statusCode;
   }
 }
-export class BadRequestException extends HttpException {
-  constructor(message: string | string[] = "Bad Request") {
-    super(message, 400);
-  }
-}
-export class UnauthorizedException extends HttpException {
-  constructor(message = "Unauthorized") {
-    super(message, 401);
-  }
-}
-export class ForbiddenException extends HttpException {
-  constructor(message = "Forbidden") {
-    super(message, 403);
-  }
-}
-export class NotFoundException extends HttpException {
-  constructor(message = "Not Found") {
-    super(message, 404);
-  }
-}
-export class ConflictException extends HttpException {
-  constructor(message = "Conflict") {
-    super(message, 409);
-  }
-}
-export class ImATeapotException extends HttpException {
-  constructor(message = "I'm a teapot") {
-    super(message, 418);
-  }
-}
-export class InternalServerErrorException extends HttpException {
-  constructor(message = "Internal Server Error") {
-    super(message, 500);
-  }
-}
-export class ServiceUnavailableException extends HttpException {
-  constructor(message = "Service Unavailable") {
-    super(message, 503);
-  }
-}
+export const badRequest = (message: string) => new HttpError(400, message);
+export const unauthorized = (message = "Unauthorized") =>
+  new HttpError(401, message);
+export const forbidden = (message = "Forbidden") => new HttpError(403, message);
+export const notFound = (message = "Not Found") => new HttpError(404, message);
+export const conflict = (message = "Conflict") => new HttpError(409, message);
+export const teapot = (message = "I'm a teapot") => new HttpError(418, message);
+export const internalError = (message = "Internal Server Error") =>
+  new HttpError(500, message);
+export const unavailable = (message = "Service Unavailable") =>
+  new HttpError(503, message);
 
 export class Logger {
   constructor(private readonly context = "Server") {}
@@ -83,44 +47,50 @@ export class Logger {
   }
 }
 
-export function httpError(error: unknown): {
-  status: number;
-  body: Record<string, unknown>;
-} {
-  if (error instanceof HttpException)
-    return {
-      status: error.status,
-      body: error.getResponse() as Record<string, unknown>,
-    };
-  // Drizzle wraps driver errors in cause. Expose stable HTTP failures, never SQL
-  // text, bind values, OAuth tokens or database connection strings.
-  let cause = error;
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/**
+ * Drizzle wraps driver errors, each of which may carry its own SQLSTATE, so a
+ * single failure can be several causes deep.
+ */
+function* driverErrorChain(error: unknown) {
   for (
-    let depth = 0;
-    depth < 4 && cause && typeof cause === "object";
-    depth++
+    let current = error, depth = 0;
+    depth < 4 && isRecord(current);
+    depth += 1
   ) {
-    const codes = [
-      "code" in cause ? cause.code : null,
-      "errno" in cause ? cause.errno : null,
-    ];
-    if (codes.includes("23505"))
-      return {
-        status: 409,
-        body: { statusCode: 409, message: "Record already exists" },
-      };
-    if (codes.includes("23503"))
-      return {
-        status: 409,
-        body: {
-          statusCode: 409,
-          message: "Related record is missing or still in use",
-        },
-      };
-    cause = "cause" in cause ? cause.cause : null;
+    yield current;
+    current = current.cause;
   }
-  return {
-    status: 500,
-    body: { statusCode: 500, message: "Internal Server Error" },
-  };
+}
+
+/**
+ * Render a boundary failure as an Elysia response.
+ *
+ * Driver failures are reported through stable HTTP statuses: SQL text, bind
+ * values, OAuth tokens and connection strings must never reach the client.
+ */
+export function errorResponse(error: unknown) {
+  if (error instanceof HttpError)
+    return status(error.statusCode, {
+      statusCode: error.statusCode,
+      message: error.message,
+    });
+  const codes = [...driverErrorChain(error)].flatMap((cause) => [
+    cause.code,
+    cause.errno,
+  ]);
+  if (codes.includes("23505"))
+    return status(409, { statusCode: 409, message: "Record already exists" });
+  if (codes.includes("23503"))
+    return status(409, {
+      statusCode: 409,
+      message: "Related record is missing or still in use",
+    });
+  return status(500, {
+    statusCode: 500,
+    message: "Internal Server Error",
+  });
 }

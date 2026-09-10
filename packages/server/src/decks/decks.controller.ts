@@ -19,7 +19,7 @@ import { VERSIONS } from "@gi-tcg/core";
 import type { PaginationDto } from "../utils";
 import type { AuthService } from "../auth/auth.service";
 import { requireUser } from "../auth/auth.guard";
-import { NotFoundException } from "../errors";
+import { notFound } from "../errors";
 import { deckSchema, idSchema, nameSchema, paginationSchema } from "../http";
 import type { DecksService } from "./decks.service";
 export interface DeckDto extends Deck {}
@@ -77,7 +77,7 @@ export function createDecksRoutes(decks: DecksService, auth: AuthService) {
           requireUser(request, auth),
           params.deckId,
         );
-        if (!deck) throw new NotFoundException();
+        if (!deck) throw notFound();
         return deck;
       },
       { params: t.Object({ deckId: idSchema }) },

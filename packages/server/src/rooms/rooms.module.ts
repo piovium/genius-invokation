@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-import { UnauthorizedException } from "../errors";
+import { unauthorized } from "../errors";
 import type { AuthService } from "../auth/auth.service";
 import type { RoomsService } from "./rooms.service";
 import { parseCreateRoom, parseJoinRoom } from "./rooms.controller";
@@ -11,12 +11,12 @@ export function createRoomsRoutes(rooms: RoomsService, auth: AuthService) {
     if (!authorization) return null;
     const bearerMatch = /^Bearer (\S+)$/i.exec(authorization);
     const payload = bearerMatch ? auth.verify(bearerMatch[1]!) : null;
-    if (!payload) throw new UnauthorizedException("Invalid bearer token");
+    if (!payload) throw unauthorized("Invalid bearer token");
     return payload;
   };
   const requirePlayerId = (request: Request) => {
     const payload = readIdentity(request);
-    if (!payload) throw new UnauthorizedException();
+    if (!payload) throw unauthorized();
     return payload.sub;
   };
   return new Elysia({ prefix: "/rooms" })
@@ -44,7 +44,7 @@ export function createRoomsRoutes(rooms: RoomsService, auth: AuthService) {
     .get("/:roomId", ({ request, params }) => {
       const room = rooms.getRoom(parseRoomId(params.roomId));
       if (readIdentity(request)?.user !== 1 && !room.config.allowGuest)
-        throw new UnauthorizedException("This room does not allow guests");
+        throw unauthorized("This room does not allow guests");
       return room;
     })
     .get("/:roomId/gameLog", ({ request, params }) =>

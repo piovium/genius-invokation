@@ -17,7 +17,7 @@ import { eq } from "drizzle-orm";
 import type { DatabaseService } from "../db/database.service";
 import { users } from "../db/schema";
 import { GET_USER_API_URL } from "../auth/auth.service";
-import { NotFoundException } from "../errors";
+import { notFound } from "../errors";
 import type { UpdateUserInfoDto } from "./users.controller";
 
 export interface UserInfo {
@@ -103,7 +103,7 @@ export class UsersService {
           })
           .from(users)
           .where(eq(users.id, id));
-    if (!user) throw new NotFoundException();
+    if (!user) throw notFound();
     return user;
   }
 }

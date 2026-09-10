@@ -5,7 +5,7 @@ import { CURRENT_VERSION, type RpcRequest } from "@gi-tcg/core";
 import { decodeGameFrame, encodeGameFrame } from "@gi-tcg/typings";
 import { AuthService } from "../auth/auth.service";
 import { createGuestId } from "../auth/guest-id";
-import { UnauthorizedException } from "../errors";
+import { unauthorized } from "../errors";
 import { attachRoomWebSocketServer } from "../room-transport/websocket";
 import { Player } from "./player";
 import type { RoomsService } from "./rooms.service";
@@ -156,7 +156,7 @@ async function fixture({ dropAck = false, watchable = false } = {}) {
   > = {
     subscribePlayer(_roomId, visitor, target, subscriber) {
       if (target !== playerId || (visitor !== playerId && !watchable))
-        throw new UnauthorizedException();
+        throw unauthorized();
       return {
         sessionId: player.sessionId,
         ownPlayer: visitor === playerId,

@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { and, count, desc, eq, lte } from "drizzle-orm";
-import { BadRequestException, NotFoundException } from "../errors";
+import { badRequest, notFound } from "../errors";
 import type { DatabaseService } from "../db/database.service";
 import { decks, type DeckModel } from "../db/schema";
 import type {
@@ -42,7 +42,7 @@ export class DecksService {
         requiredVersion,
       };
     } catch (error) {
-      if (error instanceof Error) throw new BadRequestException(error.message);
+      if (error instanceof Error) throw badRequest(error.message);
       throw error;
     }
   }
@@ -107,9 +107,7 @@ export class DecksService {
   }
   async updateDeck(userId: number, deckId: number, deck: UpdateDeckDto) {
     if ((deck.characters === undefined) !== (deck.cards === undefined))
-      throw new BadRequestException(
-        "characters and cards must be provided together",
-      );
+      throw badRequest("characters and cards must be provided together");
     const encoded =
       deck.characters && deck.cards
         ? await this.deckToCode({
@@ -127,7 +125,7 @@ export class DecksService {
       })
       .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
       .returning();
-    if (!model) throw new NotFoundException();
+    if (!model) throw notFound();
     return model;
   }
   async deleteDeck(userId: number, deckId: number) {
@@ -135,6 +133,6 @@ export class DecksService {
       .delete(decks)
       .where(and(eq(decks.id, deckId), eq(decks.ownerUserId, userId)))
       .returning({ id: decks.id });
-    if (!deleted.length) throw new NotFoundException();
+    if (!deleted.length) throw notFound();
   }
 }

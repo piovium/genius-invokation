@@ -13,40 +13,92 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { BadRequestException, ConflictException, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '../errors';
-import { Game as InternalGame, createGameStateLogSerializer, CORE_VERSION, VERSIONS, CURRENT_VERSION, type GameState, setAsyncContext } from '@gi-tcg/core';
-import getData from '@gi-tcg/data';
-import { flip } from '@gi-tcg/utils';
-import { createGuestId, DeckVerificationError, verifyDeck } from '../utils';
-import { MetricsService, type RoomMetricsSnapshot } from '../metrics/metrics.service';
-import type { CreateRoomDto, GuestCreateRoomDto, GuestJoinRoomDto, UserCreateRoomDto } from './rooms.controller';
-import { DecksService } from '../decks/decks.service';
-import { UsersService } from '../users/users.service';
-import { GamesService } from '../games/games.service';
-import { inspect } from 'node:util';
-import { randomUUID } from 'node:crypto';
-import semver from 'semver';
-import { redis } from '../redis';
-import { Player } from './player';
-import { RoomCommandError, type PlayerInfo, type PlayerId, type RoomConfig, type CreateRoomConfig, type RoomSubscriber, type CommandAck } from './types';
-export type { PlayerId } from './types';
+import {
+  badRequest,
+  conflict,
+  internalError,
+  Logger,
+  notFound,
+  unauthorized,
+} from "../errors";
+import {
+  Game as InternalGame,
+  createGameStateLogSerializer,
+  CORE_VERSION,
+  VERSIONS,
+  CURRENT_VERSION,
+  type GameState,
+  setAsyncContext,
+} from "@gi-tcg/core";
+import getData from "@gi-tcg/data";
+import { flip } from "@gi-tcg/utils";
+import { createGuestId, DeckVerificationError, verifyDeck } from "../utils";
+import {
+  MetricsService,
+  type RoomMetricsSnapshot,
+} from "../metrics/metrics.service";
+import type {
+  CreateRoomDto,
+  GuestCreateRoomDto,
+  GuestJoinRoomDto,
+  UserCreateRoomDto,
+} from "./rooms.controller";
+import { DecksService } from "../decks/decks.service";
+import { UsersService } from "../users/users.service";
+import { GamesService } from "../games/games.service";
+import { inspect } from "node:util";
+import { randomUUID } from "node:crypto";
+import semver from "semver";
+import { redis } from "../redis";
+import { Player } from "./player";
+import {
+  RoomCommandError,
+  type PlayerInfo,
+  type PlayerId,
+  type RoomConfig,
+  type CreateRoomConfig,
+  type RoomSubscriber,
+  type CommandAck,
+} from "./types";
+export type { PlayerId } from "./types";
 
-let s3Promise: Promise<import('@aws-sdk/client-s3').S3Client> | null = null;
+let s3Promise: Promise<import("@aws-sdk/client-s3").S3Client> | null = null;
 async function uploadReplay(roomId: number, gameData: string) {
   if (!process.env.S3_ENDPOINT) return;
-  const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
-  const s3 = await (s3Promise ??= Promise.resolve(new S3Client({
-    region: process.env.S3_REGION, endpoint: process.env.S3_ENDPOINT,
-    credentials: { accessKeyId: process.env.S3_ACCESS_KEY_ID!, secretAccessKey: process.env.S3_SECRET_ACCESS_KEY! },
-  })));
+  const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
+  const s3 = await (s3Promise ??= Promise.resolve(
+    new S3Client({
+      region: process.env.S3_REGION,
+      endpoint: process.env.S3_ENDPOINT,
+      credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+      },
+    }),
+  ));
   const now = new Date().toISOString();
-  const date = now.slice(0,10), time = now.slice(11,19).replaceAll(':','');
-  const prefix = process.env.S3_PREFIX ? process.env.S3_PREFIX+'/' : '';
-  await s3.send(new PutObjectCommand({ Bucket: process.env.S3_BUCKET!, Key: prefix+'logs/'+date+'/'+time+'-'+roomId+'.json', Body: gameData, ContentType: 'application/json' }));
+  const date = now.slice(0, 10),
+    time = now.slice(11, 19).replaceAll(":", "");
+  const prefix = process.env.S3_PREFIX ? process.env.S3_PREFIX + "/" : "";
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: process.env.S3_BUCKET!,
+      Key: prefix + "logs/" + date + "/" + time + "-" + roomId + ".json",
+      Body: gameData,
+      ContentType: "application/json",
+    }),
+  );
 }
 
-interface GameStopInfo { hasGame: boolean; phase: string | null; winner: 0 | 1 | null }
-type GameStopHandler = (room: Room, info: GameStopInfo) => void | Promise<unknown>;
+interface GameStopInfo {
+  hasGame: boolean;
+  phase: string | null;
+  winner: 0 | 1 | null;
+}
+type GameStopHandler = (
+  room: Room,
+  info: GameStopInfo,
+) => void | Promise<unknown>;
 
 enum RoomStatus {
   Waiting = "waiting",
@@ -132,14 +184,14 @@ class Room {
 
   setHost(player: Player) {
     if (this.host !== null) {
-      throw new ConflictException("host already set");
+      throw conflict("host already set");
     }
     this.host = player;
     return this.hostWho;
   }
   setParticipant(player: Player) {
     if (this.participant !== null) {
-      throw new ConflictException("participant already set");
+      throw conflict("participant already set");
     }
     this.participant = player;
     return flip(this.hostWho);
@@ -149,11 +201,11 @@ class Room {
   }
   start() {
     if (this.terminated) {
-      throw new ConflictException("room terminated");
+      throw conflict("room terminated");
     }
     const [player0, player1] = this.players;
     if (player0 === null || player1 === null) {
-      throw new ConflictException("player not ready");
+      throw conflict("player not ready");
     }
     if (this.waitingTimeout) clearTimeout(this.waitingTimeout);
     this.waitingTimeout = null;
@@ -171,7 +223,7 @@ class Room {
       });
     } catch (e) {
       this.stop();
-      throw new InternalServerErrorException(
+      throw internalError(
         `Failed to create initial game state: ${e}; propably due to invalid decks`,
       );
     }
@@ -219,9 +271,14 @@ class Room {
     const old = this.giveUpAcks.get(userId);
     if (old) return old;
     const who = this.players.findIndex((p) => p?.playerInfo.id === userId);
-    if (who !== 0 && who !== 1) throw new NotFoundException('Player not found');
-    if (!this.startedAt) throw new RoomCommandError('GAME_FINISHED', 'No game is running');
-    const ack: CommandAck = { type: 'ack', command: 'giveUp', sessionId: this.sessionId };
+    if (who !== 0 && who !== 1) throw notFound("Player not found");
+    if (!this.startedAt)
+      throw new RoomCommandError("GAME_FINISHED", "No game is running");
+    const ack: CommandAck = {
+      type: "ack",
+      command: "giveUp",
+      sessionId: this.sessionId,
+    };
     this.giveUpAcks.set(userId, ack);
     if (!this.terminated) this.game?.giveUp(who);
     return ack;
@@ -233,12 +290,20 @@ class Room {
     if (this.waitingTimeout) clearTimeout(this.waitingTimeout);
     this.waitingTimeout = null;
     this.endedAt = new Date();
-    const info: GameStopInfo = { hasGame: this.game !== null, phase: this.game?.state.phase ?? null, winner: this.game?.state.winner ?? null };
+    const info: GameStopInfo = {
+      hasGame: this.game !== null,
+      phase: this.game?.state.phase ?? null,
+      winner: this.game?.state.winner ?? null,
+    };
     this.players[0]?.complete();
     this.players[1]?.complete();
     this.game = null;
     for (const cb of this.onStopHandlers.splice(0)) {
-      Promise.resolve().then(() => cb(this, info)).catch((error) => console.error('Room finalization failed', this.id, error));
+      Promise.resolve()
+        .then(() => cb(this, info))
+        .catch((error) =>
+          console.error("Room finalization failed", this.id, error),
+        );
     }
   }
 
@@ -353,14 +418,14 @@ export class RoomsService {
   async createRoomFromUser(userId: number, params: UserCreateRoomDto) {
     const user = await this.users.findById(userId);
     if (user === null) {
-      throw new NotFoundException(`User ${userId} not found`);
+      throw notFound(`User ${userId} not found`);
     }
     if (this.currentRoom(userId) !== null) {
-      throw new ConflictException(`User ${userId} is already in a room`);
+      throw conflict(`User ${userId} is already in a room`);
     }
     const deck = await this.decks.getDeck(userId, params.hostDeckId);
     if (deck === null) {
-      throw new NotFoundException(`Deck ${params.hostDeckId} not found`);
+      throw notFound(`Deck ${params.hostDeckId} not found`);
     }
     const playerInfo: PlayerInfo = {
       isGuest: false,
@@ -391,7 +456,7 @@ export class RoomsService {
   private async createRoom(playerInfo: PlayerInfo, params: CreateRoomDto) {
     let deploying = (await redis?.get("meta:deploying")) ?? null;
     if (this.shutdownResolvers || deploying !== null) {
-      throw new ConflictException(
+      throw conflict(
         "Creating room is disabled now; we are planning a maintenance",
       );
     }
@@ -424,13 +489,13 @@ export class RoomsService {
     try {
       const version = await verifyDeck(playerInfo.deck);
       if (semver.compare(version, roomConfig.gameVersion) > 0) {
-        throw new BadRequestException(
+        throw badRequest(
           `Deck version required ${version}, it's higher game version ${roomConfig.gameVersion}`,
         );
       }
     } catch (e) {
       if (e instanceof DeckVerificationError) {
-        throw new BadRequestException(`Deck verification failed: ${e.message}`);
+        throw badRequest(`Deck verification failed: ${e.message}`);
       } else {
         throw e;
       }
@@ -438,7 +503,7 @@ export class RoomsService {
 
     const roomId = this.roomIdPool[0];
     if (typeof roomId === "undefined") {
-      throw new InternalServerErrorException("no room available");
+      throw internalError("no room available");
     }
     const room = new Room(roomId, roomConfig);
     this.rooms.set(roomId, room);
@@ -466,7 +531,9 @@ export class RoomsService {
       }
       this.logger.log(`Room ${room.id} removed`);
       await redis?.hdel("meta:active_rooms", String(room.id)).catch((error) => {
-        this.logger.warn(`Failed to remove room ${room.id} from Redis: ${error}`);
+        this.logger.warn(
+          `Failed to remove room ${room.id} from Redis: ${error}`,
+        );
       });
 
       for (const player of room.getPlayers()) player.dispose();
@@ -479,29 +546,31 @@ export class RoomsService {
 
     room.setHost(new Player(playerInfo, room.sessionId));
     // 闲置五分钟后删除房间
-    room.setWaitingTimeout(setTimeout(
-      () => {
-        if (room.status === RoomStatus.Waiting) {
-          room.stop();
-        }
-      },
-      5 * 60 * 1000,
-    ));
+    room.setWaitingTimeout(
+      setTimeout(
+        () => {
+          if (room.status === RoomStatus.Waiting) {
+            room.stop();
+          }
+        },
+        5 * 60 * 1000,
+      ),
+    );
     return room.getRoomInfo();
   }
 
   deleteRoom(playerId: PlayerId, roomId: number) {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new NotFoundException(`Room ${roomId} not found`);
+      throw notFound(`Room ${roomId} not found`);
     }
     if (room.status !== RoomStatus.Waiting) {
-      throw new ConflictException(
+      throw conflict(
         `${roomId} has status ${room.status}, while only waiting room can be deleted`,
       );
     }
     if (room.getHost()?.playerInfo.id !== playerId) {
-      throw new UnauthorizedException(`You are not the host of room ${roomId}`);
+      throw unauthorized(`You are not the host of room ${roomId}`);
     }
     room.stop();
   }
@@ -509,11 +578,11 @@ export class RoomsService {
   async joinRoomFromUser(userId: number, roomId: number, deckId: number) {
     const user = await this.users.findById(userId);
     if (user === null) {
-      throw new NotFoundException(`User ${userId} not found`);
+      throw notFound(`User ${userId} not found`);
     }
     const deck = await this.decks.getDeck(userId, deckId);
     if (deck === null) {
-      throw new NotFoundException(`Deck ${deckId} not found`);
+      throw notFound(`Deck ${deckId} not found`);
     }
     const playerInfo: PlayerInfo = {
       isGuest: false,
@@ -541,32 +610,30 @@ export class RoomsService {
     const allRooms = this.getAllRooms(true);
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new NotFoundException(`Room ${roomId} not found`);
+      throw notFound(`Room ${roomId} not found`);
     }
     if (room.status !== RoomStatus.Waiting) {
-      throw new ConflictException(`Room ${roomId} is not waiting`);
+      throw conflict(`Room ${roomId} is not waiting`);
     }
     if (playerInfo.isGuest && !room.config.allowGuest) {
-      throw new UnauthorizedException(`Room ${roomId} does not allow guest`);
+      throw unauthorized(`Room ${roomId} does not allow guest`);
     }
     if (
       allRooms.some((room) => room.players.some((p) => p.id === playerInfo.id))
     ) {
-      throw new ConflictException(
-        `Player ${playerInfo.id} is already in a room`,
-      );
+      throw conflict(`Player ${playerInfo.id} is already in a room`);
     }
 
     try {
       const version = await verifyDeck(playerInfo.deck);
       if (semver.compare(version, room.config.gameVersion) > 0) {
-        throw new BadRequestException(
+        throw badRequest(
           `Deck version required ${version}, it's higher game version ${room.config.gameVersion}`,
         );
       }
     } catch (e) {
       if (e instanceof DeckVerificationError) {
-        throw new BadRequestException(`Deck verification failed: ${e.message}`);
+        throw badRequest(`Deck verification failed: ${e.message}`);
       } else {
         throw e;
       }
@@ -582,7 +649,11 @@ export class RoomsService {
       const registered = players.every((player) => !player.playerInfo.isGuest);
       if (!registered && !process.env.S3_ENDPOINT) return;
       const gameData = JSON.stringify(room.getStateLog());
-      void uploadReplay(room.id, gameData).catch((error) => this.logger.warn('Failed to upload room '+room.id+' game log: '+error));
+      void uploadReplay(room.id, gameData).catch((error) =>
+        this.logger.warn(
+          "Failed to upload room " + room.id + " game log: " + error,
+        ),
+      );
       if (!registered) {
         return;
       }
@@ -624,7 +695,7 @@ export class RoomsService {
   getRoom(roomId: number): RoomInfo {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new NotFoundException(`Room not found`);
+      throw notFound(`Room not found`);
     }
     return room.getRoomInfo();
   }
@@ -632,10 +703,10 @@ export class RoomsService {
   getRoomGameLog(playerId: PlayerId, roomId: number) {
     const room = this.rooms.get(roomId);
     if (!room) {
-      throw new NotFoundException(`Room not found`);
+      throw notFound(`Room not found`);
     }
     if (room.status !== RoomStatus.Finished) {
-      throw new ConflictException(`Room ${roomId} is not finished`);
+      throw conflict(`Room ${roomId} is not finished`);
     }
     if (
       room.config.watchable ||
@@ -643,7 +714,7 @@ export class RoomsService {
     ) {
       return room.getStateLog();
     } else {
-      throw new UnauthorizedException(
+      throw unauthorized(
         `Room ${roomId} is not watchable, and you are not in the room`,
       );
     }
@@ -666,28 +737,49 @@ export class RoomsService {
     return result;
   }
 
-  subscribePlayer(roomId: number, visitorPlayerId: PlayerId | null, watchingPlayerId: PlayerId, subscriber: RoomSubscriber) {
+  subscribePlayer(
+    roomId: number,
+    visitorPlayerId: PlayerId | null,
+    watchingPlayerId: PlayerId,
+    subscriber: RoomSubscriber,
+  ) {
     const room = this.rooms.get(roomId);
-    if (!room) throw new NotFoundException('Room not found');
+    if (!room) throw notFound("Room not found");
     const players = room.getPlayers();
     const player = players.find((p) => p.playerInfo.id === watchingPlayerId);
-    if (!player) throw new NotFoundException('Player not in room');
-    if (!room.config.watchable && visitorPlayerId !== watchingPlayerId) throw new UnauthorizedException('Room cannot be watched by others');
-    if (players.some((p) => p.playerInfo.id === visitorPlayerId) && visitorPlayerId !== watchingPlayerId) throw new UnauthorizedException('You cannot watch your opponent');
-    return { sessionId: room.sessionId, ownPlayer: visitorPlayerId === watchingPlayerId, subscribe: () => player.subscribe(subscriber) };
+    if (!player) throw notFound("Player not in room");
+    if (!room.config.watchable && visitorPlayerId !== watchingPlayerId)
+      throw unauthorized("Room cannot be watched by others");
+    if (
+      players.some((p) => p.playerInfo.id === visitorPlayerId) &&
+      visitorPlayerId !== watchingPlayerId
+    )
+      throw unauthorized("You cannot watch your opponent");
+    return {
+      sessionId: room.sessionId,
+      ownPlayer: visitorPlayerId === watchingPlayerId,
+      subscribe: () => player.subscribe(subscriber),
+    };
   }
 
-  receivePlayerResponse(roomId: number, playerId: PlayerId, id: number, response: Uint8Array) {
+  receivePlayerResponse(
+    roomId: number,
+    playerId: PlayerId,
+    id: number,
+    response: Uint8Array,
+  ) {
     const room = this.rooms.get(roomId);
-    if (!room) throw new NotFoundException('Room not found');
-    const player = room.getPlayers().find((player) => player.playerInfo.id === playerId);
-    if (!player) throw new NotFoundException('Player not in room');
+    if (!room) throw notFound("Room not found");
+    const player = room
+      .getPlayers()
+      .find((player) => player.playerInfo.id === playerId);
+    if (!player) throw notFound("Player not in room");
     return player.receiveResponse(id, response);
   }
 
   receivePlayerGiveUp(roomId: number, playerId: PlayerId): CommandAck {
     const room = this.rooms.get(roomId);
-    if (!room) throw new NotFoundException('Room not found');
+    if (!room) throw notFound("Room not found");
     return room.giveUp(playerId);
   }
 }
