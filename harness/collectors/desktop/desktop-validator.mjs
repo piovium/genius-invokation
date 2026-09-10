@@ -100,12 +100,15 @@ function loadExecution(directory, execution, { contract, plan, nonce, identity, 
   }
   const launchValue = readJsonFile(launch.file);
   assert(launchValue.mode === 'development-path', `${execution.workspaceId}: unexpected launch mode ${launchValue.mode}`);
-  assertLaunchArguments({ mode: launchValue.mode, args: launchValue.args, install: launchValue.installArgs });
+  assertLaunchArguments({ plan, mode: launchValue.mode, args: launchValue.args, install: launchValue.installArgs });
   const runtime = desktopRuntime({ root, plan });
   assert(path.resolve(launchValue.executable) === path.resolve(runtime.executable),
     `${execution.workspaceId}: the launch used another VS Code executable`);
   assert(launchValue.executableSha256 === sha256(fs.readFileSync(runtime.executable)),
     `${execution.workspaceId}: the VS Code executable changed`);
+  assert(path.resolve(launchValue.cliExecutable ?? '') === path.resolve(runtime.cliExecutable)
+    && launchValue.cliExecutableSha256 === sha256(fs.readFileSync(runtime.cliExecutable)),
+  `${execution.workspaceId}: the launch recorded an unverified VS Code CLI entry`);
   assert(path.resolve(launchValue.workspacePath) === path.resolve(execution.workspacePath),
     `${execution.workspaceId}: the launch opened another workspace`);
   assert(path.resolve(launchValue.targetFile) === path.join(workspaceDirectory, 'desktop-target.json'),
@@ -195,7 +198,7 @@ function validatePackedVsix({ packed, directory, plan, contract, nonce, identity
   const vsixPackage = inspectVsix({ file: vsix.file, expectedSha256: packed.vsix.sha256, plan, identity });
   const launch = readJsonFile(readRawEvidence(directory, packed.launch).file);
   assert(launch.mode === 'packed-vsix-install', 'The packed VSIX launch names another mode');
-  const checked = assertLaunchArguments({ mode: launch.mode, args: launch.args, install: launch.installArgs });
+  const checked = assertLaunchArguments({ plan, mode: launch.mode, args: launch.args, install: launch.installArgs });
   assert(path.resolve(checked.installExtension) === path.resolve(vsix.file), 'The recorded launch installed another VSIX');
   assert(path.resolve(launch.installExtensionFile ?? '') === path.resolve(vsix.file), 'The launch record names another VSIX artifact');
   assert(launch.installExtensionSha256 === packed.vsix.sha256, 'The installed VSIX changed after it was recorded');
@@ -212,9 +215,20 @@ function validatePackedVsix({ packed, directory, plan, contract, nonce, identity
   assert(path.resolve(launch.executable) === path.resolve(packedRuntime.executable)
     && launch.executableSha256 === sha256(fs.readFileSync(packedRuntime.executable)),
   'The packed VSIX launch used an unverified VS Code executable');
+  assert(path.resolve(launch.cliExecutable ?? '') === path.resolve(packedRuntime.cliExecutable)
+    && launch.cliExecutableSha256 === sha256(fs.readFileSync(packedRuntime.cliExecutable)),
+  'The packed VSIX install ran an unverified VS Code CLI entry');
+  assert(path.resolve(launch.install.executable ?? '') === path.resolve(packedRuntime.cliExecutable),
+    'The packed VSIX install process did not run the verified VS Code CLI entry');
+  const packedDriver = path.join(identity.repository, plan.extension.testDriver);
+  assert(path.resolve(launch.testFile ?? '') === path.resolve(packedDriver)
+    && launch.testSha256 === sha256(fs.readFileSync(packedDriver)),
+  'The packed VSIX extension test driver changed');
   const installedDirectory = installedExtensionDirectory({ extensionsDirectory: launch.extensionsDirectory, plan });
   const installed = inspectInstalledExtension({ extensionPath: installedDirectory.directory, vsix: vsixPackage, plan });
   assert(installed.version === vsixPackage.version, 'The installed extension version differs from the VSIX');
+  assert(path.resolve(checked.developmentPath ?? '') === path.resolve(installedDirectory.directory),
+  'The packed VSIX launch did not load the directory its VSIX was installed into');
   const packedReport = readRawEvidence(directory, packed.report);
   const packedValue = readJsonFile(packedReport.file);
   assert(packedValue.runNonce === nonce && packedValue.cycles === contract.policy.desktopEditRounds

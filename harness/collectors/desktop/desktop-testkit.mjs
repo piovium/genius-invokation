@@ -175,6 +175,8 @@ export function buildDesktopFixture({ root, directory = path.join(root, 'run'), 
   write(driverPath, '// synthetic review driver\n');
   const runtimePath = path.join(root, plan.runtime[platform].replace('{arch}', arch));
   write(runtimePath, 'synthetic Code executable\n');
+  const cliPath = path.join(root, plan.runtime.cliEntry[platform].replace('{arch}', arch));
+  write(cliPath, '// synthetic CLI entry\n');
   const managerPath = path.join(root, 'runtime', 'pnpm.cjs');
   write(managerPath, '// synthetic pinned manager\n');
   // The validator loads the sealed session probe from the run's own root, so
@@ -193,30 +195,34 @@ export function buildDesktopFixture({ root, directory = path.join(root, 'run'), 
   };
   const legacyText = 'import { Barbara } from "./current.gts";\r\nexport const BarbaraLegacy: number = Barbara;\r\n';
 
-  function buildLaunchRecord({ mode, host, vsix = null }) {
+  function buildLaunchRecord({ mode, host, vsix = null, installedExtension = null }) {
     const { workspacePath, workspaceDirectory } = host;
     const profile = path.join(workspaceDirectory, 'user-data');
     const extensionsDirectory = path.join(workspaceDirectory, 'extensions');
     fs.mkdirSync(profile, { recursive: true });
     fs.mkdirSync(extensionsDirectory, { recursive: true });
-    const { install, args } = launchArguments({ plan, mode, repository, profile, extensionsDirectory, workspace: workspacePath, vsix });
+    const { install, args } = launchArguments({ plan, mode, repository, profile, extensionsDirectory,
+      workspace: workspacePath, vsix, installedExtension });
     for (const name of ['desktop.stdout.log', 'desktop.stderr.log', 'desktop-install.stdout.log', 'desktop-install.stderr.log']) {
       write(path.join(workspaceDirectory, name), `${name}\n`);
     }
     writeSettings(profile, identity.tsdk);
     const elapsed = host.completedAtMs - host.startedAtMs;
-    const command = (label, argv) => ({
-      executable: runtimePath, args: argv, cwd: workspacePath,
+    const command = (label, argv, executable = runtimePath) => ({
+      executable, args: argv, cwd: workspacePath,
       startedAt: new Date(host.startedAtMs).toISOString(), durationMs: elapsed,
       exitCode: 0, signal: null, reason: null, fatal: false, bytes: 4096,
       stdout: { file: `${label}.stdout.log` }, stderr: { file: `${label}.stderr.log` },
     });
     return {
       runNonce: nonce, mode,
-      runtime: { platform, arch, version: plan.runtime.version, relative: plan.runtime[platform], executable: runtimePath },
+      runtime: { platform, arch, version: plan.runtime.version, relative: plan.runtime[platform],
+        executable: runtimePath, cliRelative: plan.runtime.cliEntry[platform], cliExecutable: cliPath },
       executable: runtimePath, executableSha256: sha256(fs.readFileSync(runtimePath)),
+      cliExecutable: cliPath, cliExecutableSha256: sha256(fs.readFileSync(cliPath)),
+      installedExtensionPath: installedExtension,
       args, installArgs: install,
-      install: install ? { ...command('desktop-install', install), label: 'desktop-install' } : null,
+      install: install ? { ...command('desktop-install', install, cliPath), label: 'desktop-install' } : null,
       command: command('desktop', args),
       developmentPath: args.includes('--extensionDevelopmentPath') ? args[args.indexOf('--extensionDevelopmentPath') + 1] : null,
       installExtension: install ? install[install.indexOf('--install-extension') + 1] : null,
@@ -540,7 +546,8 @@ export function buildDesktopFixture({ root, directory = path.join(root, 'run'), 
         skipped: false, workspaceId: host.workspaceId, probe: host.probe,
         removed: plan.probeFiles, modified: [], recoveredAtMs: host.completedAtMs,
       }));
-      const launch = buildLaunchRecord({ mode: 'packed-vsix-install', host, vsix: host.vsixPath });
+      const launch = buildLaunchRecord({ mode: 'packed-vsix-install', host, vsix: host.vsixPath,
+        installedExtension: installedRoot });
       write(path.join(packedDirectory, 'desktop-launch.json'), json(launch));
       const vsix = { file: `packed-vsix/${path.basename(host.vsixPath)}`,
         sha256: sha256(fs.readFileSync(host.vsixPath)), bytes: fs.statSync(host.vsixPath).size };

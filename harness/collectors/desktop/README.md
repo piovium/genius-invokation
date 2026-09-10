@@ -34,7 +34,17 @@ enforces.
   `development-path` loads the checkout with `--extensionDevelopmentPath` and
   installs nothing; `packed-vsix-install` installs a real `.vsix` with
   `--install-extension` into an isolated `--extensions-dir` +
-  `--user-data-dir` and never sets a development path. It also runs
+  `--user-data-dir` and then names that installed directory as the development
+  path. The second step is not cosmetic: VS Code starts an extension test driver
+  only when the environment carries both `extensionDevelopmentLocationURI` and
+  `extensionTestsLocationURI`, so a launch without a development path never
+  runs the driver at all, while naming the installed tree keeps the measured
+  code the archive's own bytes. The install itself runs the editor's CLI entry,
+  because the app binary ignores `--install-extension` and opens a window
+  instead, and the validator binds the recorded install process to that verified
+  entry too. Every argument the sealed plan lists as common is required in both
+  modes, not merely tolerated: a launch that drops `--extensionTestsPath` or
+  points at another driver is rejected. It also runs
   `desktop-linux-cleanup.mjs` from a `finally`, so a failed or timed-out launch
   is cleaned up like a successful one.
 - `desktop-vsix.mjs` writes the packed extension. `packVsix` runs the product's
@@ -67,7 +77,9 @@ enforces.
   (never from the observation) and pins it to the contract.
 - `desktop-expectations.json` holds the reviewed fixtures, expected diagnostic
   codes and feature responses. It is data, not logic. `desktop-plan.json` holds
-  the workspaces, launch modes, runtime paths, pack step and scenario list.
+  the workspaces, the per-mode launch rules, the runtime and CLI-entry paths,
+  the pack step and the scenario list; both the collector and the validator read
+  those rules instead of keeping a second copy of them.
 - `desktop-testkit.mjs` builds the synthetic fixture the self-tests use. It is
   not part of a real run and is never acceptance evidence.
 

@@ -215,3 +215,19 @@ Windows 上 TNB 任务源快照的完整读取耗时较长。候选仅替换 cor
 **复核指出、本版不处理的残余（记录在案）。**（a）原始记录只是运行目录里的文件：任何能写该目录的进程都能伪造，`desktop-testkit.mjs` 本身就是“没有编辑器也能让 validator PASS”的证明，而产品侧的测试驱动 `packages/vscode/__tests__/extension.cjs` 不在 seal 内。因此 desktop 的 PASS 只能解释为“封存的采集器与校验器就本次测量记录达成一致”，不是编辑器进程存在的操作系统级证据，与 §4 声明的边界一致。（b）`pack.command` 是采集器写下的记录，只有产物内容按磁盘与 pin 重新推导，所以“这次 run 生产了该 VSIX”仍依赖采集器诚实。（c）装机宿主的编辑器语义没有像开发路径那样重放，只核对 runNonce、轮数、VS Code 版本与原生身份；`packed.package.members` 也是自报。（d）采集器给每次启动的上限是 900 秒，三次启动加打包在极慢的宿主上可能超过 gate 的 1800000 毫秒而被 runner 杀掉；方向是安全的（不会变成 PASS），本版不动超时。（e）打包运行时与包管理器的判据只核对绝对路径与文件名，不核对身份：复核实测一个只叫 `node.exe`／`pnpm.cjs` 的无关文件也能通过，而开发路径的 VSIX 可执行文件判据同时核对封存路径与哈希，不受影响。（f）packed 侧 probe 判据只读恢复记录里的 `recovery.probe`，`packed/desktop-sources.json` 与 `desktop-target.json` 里的 probe 不参与交叉核对，因此把 `recovery.probe` 改指一个不存在的新路径、而真实 probe 仍在磁盘上时照样通过。
 
 **确认轮（第三轮）。** 第三个独立 agent 只读复核最终字节：三条收紧的判据都亲手构造过伪造形状并被拒绝；三条新增负例在改回旧逻辑时会失败，证明它们不是空转；seal、192/192 自测、无 CR 字节与 checkout 往返都能复现。该轮指出的一处过度措辞（`HARNESS.md` 的“与开发路径同等严格”）、一处过期计数（自测 30/30）与一处无法从 Git 复核的扫描计数（9 个 CRLF 文件）已按本段改法修正，并新增上面（e）（f）两条残余。
+
+## 2.6.0 packed-mode correction and a stricter packed evidence surface
+
+本版修正打包安装的实际执行方式，并按独立复核再收紧三条打包侧判据。gate 定义、依赖、超时、角色边界、基线与既有断言全部未动。
+
+**缺陷（实测，非推断）。** 旧设计让 `packed-vsix-install` 禁止 `--extensionDevelopmentPath`，而 VS Code 只在环境同时带 `extensionDevelopmentLocationURI` 与 `extensionTestsLocationURI` 时才加载扩展测试驱动：`.tools/vscode-1.137.0-win32-x64/645f29cc31/resources/app/out/vs/workbench/api/node/extensionHostProcess.js`（偏移 1272364）的 `_doHandleExtensionTests` 在两者缺一时抛 `6047`，而前者只能来自 `--extensionDevelopmentPath`（同一 app 的 `main.js` 里 `get extensionDevelopmentLocationURI(){return this.args.extensionDevelopmentPath}`）。也就是说该模式的驱动从不运行，packed 侧只能空转。第二条实测事实：CLI 专属的 `--install-extension` 交给 `Code.exe` 会挂住（40 秒仍在运行、未安装任何目录、只有普通窗口日志），必须走 `bin/code.cmd` 的 `ELECTRON_RUN_AS_NODE=1 … out/cli.js` 入口，实测退出 0 且输出 `Extension 'canary.vsix' was successfully installed.`。
+
+**修法。** 安装改由编辑器 CLI 入口执行，成功后解析出已安装目录并把它作为 packed 模式的 `--extensionDevelopmentPath`：驱动因此真正运行，而测量字节仍是 VSIX 自身的字节（采集器在启动前已证明已安装树等于归档成员）。启动参数由封存 `desktop-plan.json` 新增的逐模式规则表（`commonArgs` 与 `launchModes[mode].{args,installArgs,forbiddenArgs}`）驱动，采集器与 validator 各自读同一张表，不再各留一份。
+
+**本版收紧的三条（各配一条负例）。**（1）安装进程记录的可执行文件必须等于封存的 CLI 入口**路径**——字节完全相同但拷贝到别处的副本也拒绝（比只比哈希更严）。（2）两种模式的封存 common 参数从“允许”改为“必需”，删掉 `--extensionTestsPath` 或 `--user-data-dir` 即拒绝。（3）packed 宿主的 `testFile`／`testSha256` 必须等于封存驱动与其当前哈希。`desktop-testkit.mjs` 的安装记录同步改为执行 `cliPath`，否则夹具与真实采集器不一致。自测从 26 条增至 29 条（`node --test harness/tests/desktop-collector.test.mjs` 29/29 PASS），全量 `node --test harness/tests` 197/197 PASS。
+
+**独立复核（两轮，只读）。** 第一轮独立 agent 逐条核对 C1–C4：机制引文与偏移可复现、CLI 安装与二进制挂起都用真实 `Code.exe` + 合成金丝雀复现（dev path 存在时驱动日志 `DRIVER_RUN`，去掉后无任何驱动日志）、新设计与旧设计逐维对照“无一处变松”（旧的“任意额外 flag 放行”变为拒绝，未删除任何既有断言）。第二轮针对上述三条 delta 再复核，确认每条都会以预期消息拒绝，且 `install.executable` 用路径比较（相同字节的副本也拒）、大小写敏感（更严），四个文件没有任何检查被削弱，判定“足以用于重新 reseal”。
+
+**复核指出、本版不处理的残余（记录在案）。**（g）`assertArgumentNames` 只校验 flag 名是否出现，不校验 flag 与值的配对：把 `--extensions-dir` 的值 token 删掉仍会通过，`--extensionTestsPath` 的值也不与 `launch.testFile` 交叉核对。（h）驱动哈希绑定的是“当前磁盘文件”而非 sealed 基线，因此“改驱动并同步重记哈希”在被测记录内部自洽；这与既有 dev-path 的驱动校验是同一模式，属既有设计的延伸而非本版引入。（i）安装行为本身仍是自报证据：记录层面已闭合，运行层面没有对“确实执行了该 CLI 入口”的独立观测。以上连同上一版列出的 (a)–(f) 都是既有限制。
+
+**另一处未变的既有事实。** `packages/vscode/src/browser.ts` 的 `inlineCompilerOptions` 自 `d91a7cd` 起未被读取，但它属已发布接口，本轮还原审计把它恢复为声明保留（浏览器入口只声明不生效，属基线既存状况）。

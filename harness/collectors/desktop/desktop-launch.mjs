@@ -3,8 +3,19 @@
 // development path: the checkout's `packages/vscode` extension is loaded with
 //   `--extensionDevelopmentPath`, so it is deliberately not installed.
 // packed VSIX install: a real `.vsix` is installed with `--install-extension`
-//   into an isolated `--extensions-dir` + `--user-data-dir`, and the editor is
-//   then launched with no `--extensionDevelopmentPath` at all.
+//   into an isolated `--extensions-dir` + `--user-data-dir`, and the installed
+//   directory is then handed to the editor as `--extensionDevelopmentPath`.
+//
+// That last step is not optional. VS Code runs an extension test driver only
+// when the environment carries both `extensionDevelopmentLocationURI` and
+// `extensionTestsLocationURI`, and the first can only come from
+// `--extensionDevelopmentPath`; a launch that installs without naming a
+// development path therefore never starts the driver at all. Naming the
+// installed directory keeps the measured code the VSIX's own bytes, because
+// the collector proves the installed tree equals the archive before launching.
+//
+// The install runs the editor's CLI entry rather than the app binary: the
+// binary ignores `--install-extension` and merely opens a window.
 //
 // The mode is part of the raw evidence so the validator can reject evidence
 // that names one mode while the recorded arguments describe the other. The
@@ -19,33 +30,49 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { cleanupLaunchTree } from './desktop-linux-cleanup.mjs';
+import { installedExtensionDirectory } from './desktop-vsix.mjs';
+
+const launchTimeoutMs = 900000;
 
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 
-export const launchModes = ['development-path', 'packed-vsix-install'];
-
 export function desktopRuntime({ root, plan, platform = process.platform, arch = process.arch }) {
   const template = plan.runtime[platform];
-  if (!template) throw new Error(`Unsupported desktop platform ${platform}-${arch}`);
-  const relative = template.replace('{arch}', arch);
-  const executable = path.join(root, relative);
-  if (!fs.existsSync(executable)) throw new Error(`Missing prepared VS Code runtime: ${relative}`);
-  return { platform, arch, version: plan.runtime.version, relative, executable };
+  const cliTemplate = plan.runtime.cliEntry?.[platform];
+  if (!template || !cliTemplate) throw new Error(`Unsupported desktop platform ${platform}-${arch}`);
+  const resolve = (name, value) => {
+    const relative = value.replace('{arch}', arch);
+    const absolute = path.join(root, relative);
+    if (!fs.existsSync(absolute)) throw new Error(`Missing prepared VS Code ${name}: ${relative}`);
+    return { relative, absolute };
+  };
+  const executable = resolve('runtime', template);
+  const cli = resolve('CLI entry', cliTemplate);
+  return { platform, arch, version: plan.runtime.version,
+    relative: executable.relative, executable: executable.absolute,
+    cliRelative: cli.relative, cliExecutable: cli.absolute };
 }
 
-/** Every argument the launch is allowed to carry, keyed by the mode it belongs to. */
-export function launchArguments({ plan, mode, repository, profile, extensionsDirectory, workspace, vsix }) {
-  if (!launchModes.includes(mode)) throw new Error(`Unknown desktop launch mode ${mode}`);
+/** The launch arguments, assembled from the sealed plan's per-mode rules. */
+export function launchArguments({ plan, mode, repository, profile, extensionsDirectory, workspace, vsix, installedExtension = null }) {
+  if (!plan.launchModes[mode]) throw new Error(`Unknown desktop launch mode ${mode}`);
+  if (mode !== 'development-path' && !installedExtension) {
+    throw new Error(`The ${mode} launch needs the directory the editor installed into`);
+  }
   const common = ['--new-window', '--disable-workspace-trust', '--skip-welcome', '--skip-release-notes',
-    '--user-data-dir', profile, '--extensions-dir', extensionsDirectory];
-  const tests = ['--extensionTestsPath', path.join(repository, plan.extension.testDriver)];
-  const install = mode === 'packed-vsix-install'
-    ? ['--install-extension', vsix, '--extensions-dir', extensionsDirectory, '--user-data-dir', profile]
-    : null;
-  const args = mode === 'development-path'
-    ? [...common, '--disable-extensions', '--extensionDevelopmentPath', path.join(repository, plan.extension.developmentPath), ...tests, workspace]
-    : [...common, ...tests, workspace];
-  return { install, args };
+    '--user-data-dir', profile, '--extensions-dir', extensionsDirectory,
+    '--extensionTestsPath', path.join(repository, plan.extension.testDriver)];
+  const modeArgs = mode === 'development-path'
+    ? ['--disable-extensions', '--extensionDevelopmentPath', path.join(repository, plan.extension.developmentPath)]
+    : ['--extensionDevelopmentPath', installedExtension];
+  return { install: installArguments({ plan, mode, profile, extensionsDirectory, vsix }),
+    args: [...common, ...modeArgs, workspace] };
+}
+
+/** The separate install invocation, or null for the mode that installs nothing. */
+export function installArguments({ plan, mode, profile, extensionsDirectory, vsix }) {
+  if (!plan.launchModes[mode]?.installArgs) return null;
+  return ['--install-extension', vsix, '--extensions-dir', extensionsDirectory, '--user-data-dir', profile];
 }
 
 export function extensionDevelopmentPathOf(args) {
@@ -57,31 +84,49 @@ export function installExtensionOf(args) {
   return at < 0 ? null : args[at + 1] ?? '';
 }
 
-/**
- * The one place that decides which arguments each mode must and must not
- * carry. Both the collector and the validator apply it independently.
- */
-export function assertLaunchArguments({ mode, args, install }) {
-  if (!launchModes.includes(mode)) throw new Error(`Unknown desktop launch mode ${mode}`);
-  const developmentPath = extensionDevelopmentPathOf(args);
-  const installExtension = installExtensionOf(install ?? []);
-  if (mode === 'development-path') {
-    if (!developmentPath) throw new Error('The development path mode must set --extensionDevelopmentPath');
-    if (install) throw new Error('The development path mode must not install an extension');
-    if (installExtensionOf(args)) throw new Error('The development path mode must not pass --install-extension');
-  } else {
-    if (developmentPath) throw new Error('The packed VSIX mode must not set --extensionDevelopmentPath');
-    if (!install || !installExtension) throw new Error('The packed VSIX mode must install a real .vsix');
-    if (args.includes('--disable-extensions')) throw new Error('The packed VSIX mode must not disable installed extensions');
-    if (installExtensionOf(args)) throw new Error('The install step must be separate from the measured launch');
+/** Every flag an argument vector carries must be declared, and none forbidden. */
+function assertArgumentNames({ mode, args, allowed, required, forbidden }) {
+  for (const token of args) {
+    if (token.startsWith('--') && !allowed.has(token)) {
+      throw new Error(`The ${mode} launch carries an undeclared argument ${token}`);
+    }
   }
-  return { developmentPath, installExtension };
+  for (const token of required) {
+    if (!args.includes(token)) throw new Error(`The ${mode} launch must carry ${token}`);
+  }
+  for (const token of forbidden) {
+    if (args.includes(token)) throw new Error(`The ${mode} launch must not carry ${token}`);
+  }
 }
 
-export function desktopLaunchPlan({ plan, runtime, mode, args, install }) {
-  return { mode, timeoutMs: 900000, logFiles: [...plan.logFiles],
-    launch: { executable: runtime.executable, args },
-    install: install ? { executable: runtime.executable, args: install } : null };
+/** The install step's own arguments: present exactly for the mode that installs. */
+export function assertInstallArguments({ plan, mode, install }) {
+  const rules = plan.launchModes[mode];
+  if (!rules) throw new Error(`Unknown desktop launch mode ${mode}`);
+  if (!rules.installArgs) {
+    if (install) throw new Error(`The ${mode} mode must not install an extension`);
+    return null;
+  }
+  if (!install) throw new Error(`The ${mode} mode must install a real .vsix`);
+  assertArgumentNames({ mode, args: install, allowed: new Set(rules.installArgs),
+    required: rules.installArgs, forbidden: [] });
+  const installExtension = installExtensionOf(install);
+  if (!installExtension) throw new Error(`The ${mode} mode must install a real .vsix`);
+  return installExtension;
+}
+
+/**
+ * The one place that decides which arguments each mode must and must not
+ * carry. Both the collector and the validator apply it independently, and both
+ * read the sealed plan instead of keeping a second copy of its rules.
+ */
+export function assertLaunchArguments({ plan, mode, args, install }) {
+  const rules = plan.launchModes[mode];
+  if (!rules) throw new Error(`Unknown desktop launch mode ${mode}`);
+  assertArgumentNames({ mode, args, allowed: new Set([...plan.commonArgs, ...rules.args]),
+    required: [...plan.commonArgs, ...rules.args], forbidden: rules.forbiddenArgs ?? [] });
+  return { developmentPath: extensionDevelopmentPathOf(args),
+    installExtension: assertInstallArguments({ plan, mode, install }) };
 }
 
 function writeSettings(profile, tsdk) {
@@ -109,12 +154,9 @@ export async function launchDesktop({ core, root, contract, plan, directory, mod
   }
   fs.mkdirSync(extensionsDirectory, { recursive: true });
   writeSettings(profile, tsdk);
-  const { install, args } = launchArguments({ plan, mode, repository, profile, extensionsDirectory, workspace: workspacePath, vsix });
-  const checked = assertLaunchArguments({ mode, args, install });
   if (mode === 'packed-vsix-install' && !fs.existsSync(vsix)) {
     throw new Error(`The packed VSIX artifact is missing: ${vsix}`);
   }
-  const files = desktopLaunchPlan({ plan, runtime, mode, args, install });
   const preload = fileURLToPath(new URL('./desktop-native-preload.cjs', import.meta.url));
   const testFile = path.join(repository, plan.extension.testDriver);
   const environment = {
@@ -131,8 +173,9 @@ export async function launchDesktop({ core, root, contract, plan, directory, mod
   const record = {
     runNonce: nonce, mode, runtime, executable: runtime.executable,
     executableSha256: sha256(fs.readFileSync(runtime.executable)),
-    args, installArgs: install, install: null, command: null,
-    developmentPath: checked.developmentPath, installExtension: checked.installExtension,
+    cliExecutable: runtime.cliExecutable, cliExecutableSha256: sha256(fs.readFileSync(runtime.cliExecutable)),
+    args: null, installArgs: null, install: null, command: null,
+    developmentPath: null, installExtension: null, installedExtensionPath: null,
     installExtensionFile: vsix,
     installExtensionSha256: mode === 'packed-vsix-install' ? sha256(fs.readFileSync(vsix)) : null,
     profile, extensionsDirectory, workspacePath, repository, targetFile, rounds, tsdk, preload,
@@ -140,20 +183,38 @@ export async function launchDesktop({ core, root, contract, plan, directory, mod
     testFile, testSha256: sha256(fs.readFileSync(testFile)),
     display: runtime.platform === 'linux' ? process.env.DISPLAY ?? null : null,
     inheritedGodebug: process.env.GODEBUG ?? null,
-    timeoutMs: files.timeoutMs, environment,
+    timeoutMs: launchTimeoutMs, environment,
     startedAtMs: Date.now(),
   };
   try {
-    if (files.install) {
+    record.installArgs = installArguments({ plan, mode, profile, extensionsDirectory, vsix });
+    // The install runs first because its result names the directory the editor
+    // must then load: the packed mode measures the installed bytes, not the
+    // checkout, and VS Code refuses to start a test driver without a
+    // development path.
+    assertInstallArguments({ plan, mode, install: record.installArgs });
+    if (record.installArgs) {
       record.install = await core.execute({
-        executable: files.install.executable, args: files.install.args, cwd: repository,
-        directory, label: 'desktop-install', timeoutMs: files.timeoutMs,
-        limitBytes: contract.policy.reportLimitBytes, env: environment,
+        executable: runtime.cliExecutable, args: record.installArgs, cwd: repository,
+        directory, label: 'desktop-install', timeoutMs: launchTimeoutMs,
+        limitBytes: contract.policy.reportLimitBytes,
+        env: { ...environment, ELECTRON_RUN_AS_NODE: '1' },
       });
+      if (core.processVerdict(record.install) !== 'PASS') {
+        throw new Error(`The packed VSIX install failed: ${JSON.stringify({
+          exitCode: record.install.exitCode, signal: record.install.signal, reason: record.install.reason })}`);
+      }
+      record.installedExtensionPath = installedExtensionDirectory({ extensionsDirectory, plan }).directory;
     }
+    const { args } = launchArguments({ plan, mode, repository, profile, extensionsDirectory,
+      workspace: workspacePath, vsix, installedExtension: record.installedExtensionPath });
+    const checked = assertLaunchArguments({ plan, mode, args, install: record.installArgs });
+    record.args = args;
+    record.developmentPath = checked.developmentPath;
+    record.installExtension = checked.installExtension;
     record.command = await core.execute({
-      executable: files.launch.executable, args: files.launch.args, cwd: repository,
-      directory, label: 'desktop', timeoutMs: files.timeoutMs,
+      executable: runtime.executable, args, cwd: repository,
+      directory, label: 'desktop', timeoutMs: launchTimeoutMs,
       limitBytes: contract.policy.reportLimitBytes, env: environment,
     });
   } finally {
@@ -163,7 +224,7 @@ export async function launchDesktop({ core, root, contract, plan, directory, mod
     record.cleanup = await cleanupLaunchTree({ profile, extensionsDirectory, platform: runtime.platform });
   }
   record.completedAtMs = Date.now();
-  record.logs = files.logFiles.map(file => ({
+  record.logs = plan.logFiles.map(file => ({
     file, sha256: fs.existsSync(path.join(directory, file)) ? sha256(fs.readFileSync(path.join(directory, file))) : null,
   }));
   fs.writeFileSync(path.join(directory, 'desktop-launch.json'), `${JSON.stringify(record, null, 2)}\n`, { flag: 'wx', flush: true });

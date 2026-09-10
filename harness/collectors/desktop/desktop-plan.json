@@ -41,21 +41,34 @@
   ],
   "probeFiles": ["current.gts", "old_versions.gts", "consumer.ts", "component.tsx"],
   "probeSupport": ["package.json", "tsconfig.json"],
+  "commonArgs": [
+    "--new-window",
+    "--disable-workspace-trust",
+    "--skip-welcome",
+    "--skip-release-notes",
+    "--user-data-dir",
+    "--extensions-dir",
+    "--extensionTestsPath"
+  ],
   "launchModes": {
     "development-path": {
-      "args": ["--extensionDevelopmentPath", "--user-data-dir", "--extensions-dir"],
+      "args": ["--disable-extensions", "--extensionDevelopmentPath"],
       "forbiddenArgs": ["--install-extension"]
     },
     "packed-vsix-install": {
       "installArgs": ["--install-extension", "--extensions-dir", "--user-data-dir"],
-      "args": ["--user-data-dir", "--extensions-dir"],
-      "forbiddenArgs": ["--extensionDevelopmentPath"]
+      "args": ["--extensionDevelopmentPath"],
+      "forbiddenArgs": ["--disable-extensions", "--install-extension"]
     }
   },
   "runtime": {
     "version": "1.137.0",
     "win32": ".tools/vscode-1.137.0-win32-x64/Code.exe",
-    "linux": ".tools/vscode-1.137.0-linux-{arch}/code"
+    "linux": ".tools/vscode-1.137.0-linux-{arch}/code",
+    "cliEntry": {
+      "win32": ".tools/vscode-1.137.0-win32-x64/645f29cc31/resources/app/out/cli.js",
+      "linux": ".tools/vscode-1.137.0-linux-{arch}/resources/app/out/cli.js"
+    }
   },
   "native": {
     "addonRelativePath": "native/bridge.node",

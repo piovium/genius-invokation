@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2.5.0",
+  "version": "2.6.0",
   "phase": "migration",
   "tnbVersion": "6.0.3-bridge.16.tsgo.7.0.2",
   "policy": {

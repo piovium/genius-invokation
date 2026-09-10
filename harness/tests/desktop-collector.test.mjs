@@ -187,28 +187,34 @@ test('the two launch modes are distinguished by their arguments', () => {
   assert.equal(development.install, null, 'the development path installs nothing');
   assert.ok(development.args.includes('--extensionDevelopmentPath'));
   assert.ok(!development.args.includes('--install-extension'));
-  assert.deepEqual(assertLaunchArguments({ mode: 'development-path', args: development.args, install: development.install }),
+  assert.deepEqual(assertLaunchArguments({ plan, mode: 'development-path', args: development.args, install: development.install }),
     { developmentPath: path.join(repository, plan.extension.developmentPath), installExtension: null });
 
-  const packed = launchArguments({ plan, mode: 'packed-vsix-install', repository, profile, extensionsDirectory: extensions, workspace, vsix });
-  assert.ok(!packed.args.includes('--extensionDevelopmentPath'), 'the installed mode loads no development path');
+  // The installed mode loads the directory its own VSIX was unpacked into: the
+  // editor refuses to start a test driver without a development path, so the
+  // measured bytes can only come from the archive if that path is named.
+  const installedExtension = path.join(extensions, 'guyutongxue.gamingts-vscode-0.0.23');
+  const packed = launchArguments({ plan, mode: 'packed-vsix-install', repository, profile,
+    extensionsDirectory: extensions, workspace, vsix, installedExtension });
+  assert.equal(packed.args[packed.args.indexOf('--extensionDevelopmentPath') + 1], installedExtension);
   assert.ok(!packed.args.includes('--disable-extensions'));
-  assert.deepEqual(assertLaunchArguments({ mode: 'packed-vsix-install', args: packed.args, install: packed.install }),
-    { developmentPath: null, installExtension: vsix });
+  assert.deepEqual(assertLaunchArguments({ plan, mode: 'packed-vsix-install', args: packed.args, install: packed.install }),
+    { developmentPath: installedExtension, installExtension: vsix });
 
-  // Each mode refuses the other's arguments.
-  assert.throws(() => assertLaunchArguments({ mode: 'development-path', args: packed.args, install: packed.install }),
-    /must set --extensionDevelopmentPath/);
-  assert.throws(() => assertLaunchArguments({ mode: 'packed-vsix-install', args: development.args, install: packed.install }),
-    /must not set --extensionDevelopmentPath/);
-  assert.throws(() => assertLaunchArguments({ mode: 'packed-vsix-install', args: packed.args, install: null }),
+  // Each mode refuses the other's arguments, and neither may smuggle an install
+  // into the measured launch.
+  assert.throws(() => assertLaunchArguments({ plan, mode: 'development-path', args: packed.args, install: packed.install }),
+    /must carry --disable-extensions/);
+  assert.throws(() => assertLaunchArguments({ plan, mode: 'packed-vsix-install', args: development.args, install: packed.install }),
+    /--disable-extensions/);
+  assert.throws(() => assertLaunchArguments({ plan, mode: 'packed-vsix-install', args: packed.args, install: null }),
     /must install a real \.vsix/);
-  assert.throws(() => assertLaunchArguments({ mode: 'development-path', args: development.args, install: packed.install }),
+  assert.throws(() => assertLaunchArguments({ plan, mode: 'development-path', args: development.args, install: packed.install }),
     /must not install an extension/);
-  assert.throws(() => assertLaunchArguments({ mode: 'development-path', args: [...development.args, '--install-extension', vsix], install: null }),
-    /must not pass --install-extension/);
-  assert.throws(() => assertLaunchArguments({ mode: 'packed-vsix-install', args: [...packed.args, '--disable-extensions'], install: packed.install }),
-    /must not disable installed extensions/);
+  assert.throws(() => assertLaunchArguments({ plan, mode: 'development-path', args: [...development.args, '--install-extension', vsix], install: null }),
+    /undeclared argument --install-extension/);
+  assert.throws(() => assertLaunchArguments({ plan, mode: 'packed-vsix-install', args: [...packed.args, '--disable-extensions'], install: packed.install }),
+    /--disable-extensions/);
 });
 
 test('a measured launch that names another mode is rejected', async t => {
@@ -217,7 +223,8 @@ test('a measured launch that names another mode is rejected', async t => {
     launch.mode = 'packed-vsix-install';
     launch.args = launchArguments({ plan, mode: 'packed-vsix-install', repository: fixture.repository,
       profile: launch.profile, extensionsDirectory: launch.extensionsDirectory,
-      workspace: launch.workspacePath, vsix: path.join(fixture.directory, 'packed-vsix', 'other.vsix') }).args;
+      workspace: launch.workspacePath, vsix: path.join(fixture.directory, 'packed-vsix', 'other.vsix'),
+      installedExtension: path.join(launch.extensionsDirectory, 'guyutongxue.gamingts-vscode-0.0.23') }).args;
   });
   const result = await run(fixture);
   assert.equal(result.status, 'FAIL');
@@ -392,6 +399,64 @@ test('the installed VSIX host must run the prepared VS Code executable', async t
   const result = await run(fixture);
   assert.equal(result.status, 'FAIL', result.reason);
   assert.match(result.reason, /unverified VS Code executable/);
+});
+
+test('the installed VSIX mode must load the directory its VSIX was unpacked into', async t => {
+  const fixture = fixtureFor(t);
+  editEvidence(fixture, fixture.observation.packedVsix.launch, launch => {
+    const checkout = path.join(fixture.repository, plan.extension.developmentPath);
+    launch.args[launch.args.indexOf('--extensionDevelopmentPath') + 1] = checkout;
+    launch.developmentPath = checkout;
+  });
+  const result = await run(fixture);
+  assert.equal(result.status, 'FAIL', result.reason);
+  assert.match(result.reason, /did not load the directory its VSIX was installed into/);
+});
+
+test('the packed install must run the prepared VS Code CLI entry', async t => {
+  const fixture = fixtureFor(t);
+  const stray = path.join(fixture.directory, 'packed-vsix', 'another-cli.js');
+  fs.writeFileSync(stray, '// not the prepared CLI entry\n');
+  editEvidence(fixture, fixture.observation.packedVsix.launch, launch => {
+    launch.cliExecutable = stray;
+    launch.cliExecutableSha256 = sha256(fs.readFileSync(stray));
+  });
+  const result = await run(fixture);
+  assert.equal(result.status, 'FAIL', result.reason);
+  assert.match(result.reason, /unverified VS Code CLI entry/);
+});
+
+test('the packed install itself must execute the prepared VS Code CLI entry', async t => {
+  const fixture = fixtureFor(t);
+  const stray = path.join(fixture.directory, 'packed-vsix', 'another-cli.js');
+  fs.writeFileSync(stray, '// not the prepared CLI entry\n');
+  editEvidence(fixture, fixture.observation.packedVsix.launch, launch => {
+    launch.install.executable = stray;
+  });
+  const result = await run(fixture);
+  assert.equal(result.status, 'FAIL', result.reason);
+  assert.match(result.reason, /install process did not run the verified VS Code CLI entry/);
+});
+
+test('a measured launch must carry every sealed common argument', async t => {
+  const fixture = fixtureFor(t);
+  editEvidence(fixture, fixture.observation.packedVsix.launch, launch => {
+    const at = launch.args.indexOf('--extensionTestsPath');
+    launch.args.splice(at, 2);
+  });
+  const result = await run(fixture);
+  assert.equal(result.status, 'FAIL', result.reason);
+  assert.match(result.reason, /must carry --extensionTestsPath/);
+});
+
+test('the installed VSIX host must run the reviewed extension test driver', async t => {
+  const fixture = fixtureFor(t);
+  editEvidence(fixture, fixture.observation.packedVsix.launch, launch => {
+    launch.testSha256 = '0'.repeat(64);
+  });
+  const result = await run(fixture);
+  assert.equal(result.status, 'FAIL', result.reason);
+  assert.match(result.reason, /packed VSIX extension test driver changed/);
 });
 
 test('the product pack step must run through the pinned runtime and manager', async t => {
