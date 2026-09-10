@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import type { Category } from "@gi-tcg/assets-manager";
 
 const serverRoot = path.resolve(import.meta.dirname, "..");
 const assetsRoot = path.resolve(serverRoot, "../assets-manager");
@@ -14,7 +15,7 @@ const categories = [
   "characters",
   "entities",
   "keywords",
-] as const;
+] as const satisfies readonly Category[];
 const metadataFields = [
   "id",
   "shareId",
@@ -22,7 +23,7 @@ const metadataFields = [
   "sinceVersion",
   "relatedCharacterId",
   "relatedCharacterTags",
-] as const;
+] as const satisfies readonly (keyof DeckMetadata)[];
 const hash = (source: string) =>
   createHash("sha256").update(source).digest("hex");
 
@@ -83,7 +84,7 @@ export async function generateDeckMetadata({
   const categoryCounts: Record<string, number> = {};
   const duplicateIds: { id: number; ignoredCategory: string }[] = [];
   const sourceHashes: Record<string, string> = {};
-  const cardIdsByShareId = new Map<number, number>();
+  const idsByShareId = new Map<number, number>();
   for (const category of categories) {
     const relative = `CHS/${category}.json`;
     const text = await readFile(path.join(dataDirectory, relative), "utf8");
@@ -104,10 +105,10 @@ export async function generateDeckMetadata({
         duplicateIds.push({ id: entry.id, ignoredCategory: category });
       else metadataById[entry.id] = entry;
       if (typeof entry.shareId === "number") {
-        const previousId = cardIdsByShareId.get(entry.shareId);
+        const previousId = idsByShareId.get(entry.shareId);
         if (previousId !== undefined && previousId !== entry.id)
           throw new Error(`Duplicate shareId ${entry.shareId}`);
-        cardIdsByShareId.set(entry.shareId, entry.id);
+        idsByShareId.set(entry.shareId, entry.id);
       }
     }
   }
@@ -117,15 +118,15 @@ export async function generateDeckMetadata({
   );
   const shareMap: Record<string, number> = JSON.parse(shareSource);
   sourceHashes["share_id.json"] = hash(shareSource);
-  for (const [shareId, id] of cardIdsByShareId) {
+  for (const [shareId, id] of idsByShareId) {
     if (shareMap[shareId] !== id)
-      throw new Error(`share_id.json disagrees with raw card ${id}`);
+      throw new Error(`share_id.json disagrees with raw record ${id}`);
   }
   for (const [shareId, id] of Object.entries(shareMap)) {
     // The original generator also writes an "undefined" key for unobtainable
-    // records. Preserve it in the unchanged sharing codec's input.
+    // records. It stays in the codec's input, so skip it when cross-checking.
     if (shareId === "undefined") continue;
-    if (cardIdsByShareId.get(Number(shareId)) !== id)
+    if (idsByShareId.get(Number(shareId)) !== id)
       throw new Error(`Missing metadata for shareId ${shareId}`);
   }
   const codecSource = await readFile(
@@ -145,7 +146,7 @@ export async function generateDeckMetadata({
     recordCount: Object.keys(metadataById).length,
     metadataSha256: hash(metadataJson),
     metadataBytes: Buffer.byteLength(metadataJson),
-    shareIdCount: cardIdsByShareId.size,
+    shareIdCount: idsByShareId.size,
   };
   await mkdir(path.join(outputDirectory, "data"), { recursive: true });
   await writeFile(

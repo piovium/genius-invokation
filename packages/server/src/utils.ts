@@ -185,10 +185,6 @@ export async function minimumRequiredVersionOfDeck({
   );
 }
 
-export function parseStringToInt({ value }: { value: unknown }): number {
-  return typeof value !== "string" || value.trim() === "" ? NaN : Number(value);
-}
-
 export class PaginationDto {
   skip?: number;
   take?: number;
@@ -197,11 +193,4 @@ export class PaginationDto {
 export interface PaginationResult<T> {
   count: number;
   data: T[];
-}
-
-export async function validateDto<T>(
-  value: unknown,
-  type: { validate(value: unknown): T },
-): Promise<T> {
-  return type.validate(value);
 }
