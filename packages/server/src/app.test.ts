@@ -44,8 +44,8 @@ test("real Elysia HTTP serves public routes and metrics, guards protected APIs, 
     assert.ok(
       version.supportedGameVersions.includes(version.currentGameVersion),
     );
-    for (const path of [apiPath("users/me"), apiPath("rooms/current")]) {
-      assert.equal(await getJson(path), null);
+    for (const path of ["users/me", "rooms/current"]) {
+      assert.equal(await getJson(apiPath(path)), null);
     }
     const guestToken = await service.auth.signGuest(createGuestId());
     const currentRoom = await request(apiPath("rooms/current"), {

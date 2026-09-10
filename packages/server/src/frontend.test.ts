@@ -4,14 +4,14 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { createFrontendHandler } from "./frontend";
-import { listenHttp } from "./http-server";
+import { listenHttp, type HttpServerHandle } from "./http-server";
 
 const SCRATCH_PREFIX = "gi-frontend-test-";
 const SCRIPT_BODY = "console.log('fixture');";
 
 test("real file responses honor the base path and cover MIME types, cache validators, SPA fallback, and beta injection", async () => {
   const folder = await mkdtemp(join(tmpdir(), SCRATCH_PREFIX));
-  let server: Awaited<ReturnType<typeof listenHttp>> | undefined;
+  let server: HttpServerHandle | undefined;
   try {
     await writeFile(
       join(folder, "index.html"),

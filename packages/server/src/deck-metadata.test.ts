@@ -17,7 +17,10 @@ const root = path.resolve(import.meta.dirname, "..");
 const assetsRoot = path.resolve(root, "../assets-manager");
 const generated = path.join(root, "generated");
 const SCRATCH_PREFIX = "gi-deck-metadata-";
-const manifest = JSON.parse(
+type DeckMetadataManifest = Awaited<
+  ReturnType<typeof generateDeckMetadata>
+>["manifest"];
+const manifest: DeckMetadataManifest = JSON.parse(
   await readFile(path.join(generated, "deck-metadata-manifest.json"), "utf8"),
 );
 const source = path.resolve(assetsRoot, manifest.sourceDirectory);
@@ -189,7 +192,10 @@ test("original deck restrictions and every minimum version are validated with fe
     const { ASSETS_MANAGER, verifyDeck, minimumRequiredVersionOfDeck } =
       await import("./utils");
     const { deckToCode } = await import("./decks/decks");
-    assert.deepEqual(Object.keys(ASSETS_MANAGER).sort(), ["decode", "encode"]);
+    assert.deepEqual(Object.keys(ASSETS_MANAGER).toSorted(), [
+      "decode",
+      "encode",
+    ]);
     assert.deepEqual(ASSETS_MANAGER.decode(ASSETS_MANAGER.encode(base)), base);
     // Real card 333009 (Tandoori Roast Chicken) was introduced in v3.7.0.
     assert.equal(await verifyDeck(base), "v3.7.0");
