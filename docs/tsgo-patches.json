@@ -1,10 +1,14 @@
 {
   "schemaVersion": 1,
-  "status": "candidate-under-validation",
+  "status": "in use on codex/tsgo-integration",
   "installation": "Registry versions plus committed pnpm patchedDependencies; no local archives or sibling paths required.",
+  "verification": "pnpm -r --workspace-concurrency=1 check (ten packages) and pnpm -r test pass with these patches applied.",
   "native": {
-    "changed": false,
+    "addonPatched": false,
     "resolution": "Platform-specific optional dependency from the pinned published TNB package; Windows and Linux use their own addon.",
+    "addonSha256": {
+      "win32-x64": "32be259fa2027f7b4ba26f78827293b187f1eb000eb5c6761dda171cd5c9a4cb"
+    },
     "typescriptRevision": "050880ce59e30b356b686bd3144efe24f875ebc8",
     "typescriptGoRevision": "2bd066d87f5bafd315be9f40889d0a60b9e58e0b"
   },
@@ -17,8 +21,9 @@
       },
       "patch": "patches/@volar__typescript.patch",
       "patchSha256": "7a8cbe8be8d7d051499dab1dc35c3e317883d65daa563143692932b6a22371ce",
+      "necessity": "Optional for correctness: the ten checks pass without this patch. It is kept because it lowers the peak memory of native checking.",
       "changes": [
-        "Preserve the existing removal of the virtual-file size filter.",
+        "Drop the 4 MiB cap that made module resolution treat files of 4 MiB or more as missing.",
         "Use the CompilerHost text hook to avoid parsing duplicate JavaScript ASTs for native checking."
       ],
       "evidence": "Without the hook, gtsc --noEmit over packages/data peaked at 5.83-5.91 GiB working set (3 runs); with the hook, 4.27-4.30 GiB.",
@@ -38,6 +43,7 @@
       "patch": "patches/typescript-native-bridge@6.0.3-bridge.16.tsgo.7.0.2.patch",
       "patchSha256": "08d31035fad2c2bd7fda5a59cb925a9f5269d51d410c96e435a9c08fbbd97629",
       "candidatePackSha256": "9774faf4f0797286e868a62e9c333eb46317afbe9d8cbd317fe9c2818e5ff063",
+      "necessity": "Required: without this patch the pinned package cannot stand in for typescript.",
       "source": {
         "repository": "https://github.com/DrAbx123/typescript-native-bridge",
         "upstream": "https://github.com/johnsoncodehk/typescript-native-bridge",
