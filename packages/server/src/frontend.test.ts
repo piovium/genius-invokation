@@ -6,7 +6,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { createFrontendHandler } from "./frontend";
 import { listenHttp } from "./http-server";
 
-test("real file responses preserve prefix, MIME, cache validators, SPA fallback and beta injection", async () => {
+test("real file responses honor the base path and cover MIME types, cache validators, SPA fallback and beta injection", async () => {
   const folder = await mkdtemp(join(tmpdir(), "gi-frontend-test-"));
   let server: Awaited<ReturnType<typeof listenHttp>> | undefined;
   try {
@@ -24,20 +24,22 @@ test("real file responses preserve prefix, MIME, cache validators, SPA fallback 
       }),
       { hostname: "127.0.0.1", port: 0 },
     );
-    const script = await fetch(new URL("play/app-fixture.js", server.url));
+    const url = server.url;
+    const request = (path: string, init?: RequestInit) =>
+      fetch(new URL(path, url), init);
+    const script = await request("play/app-fixture.js");
     assert.match(script.headers.get("content-type") ?? "", /javascript/);
     assert.ok(script.headers.get("cache-control")?.includes("immutable"));
     assert.equal(await script.text(), "console.log('fixture');");
-    const conditional = await fetch(
-      new URL("play/app-fixture.js", server.url),
-      { headers: { "if-none-match": script.headers.get("etag")! } },
-    );
+    const conditional = await request("play/app-fixture.js", {
+      headers: { "if-none-match": script.headers.get("etag")! },
+    });
     assert.equal(conditional.status, 304);
-    const worker = await fetch(new URL("play/sw.js", server.url));
+    const worker = await request("play/sw.js");
     assert.ok(worker.headers.get("cache-control")?.includes("no-cache"));
     await worker.body?.cancel();
     for (const route of ["play", "play/", "play/rooms/123"]) {
-      const page: Response = await fetch(new URL(route, server.url));
+      const page = await request(route);
       assert.equal(page.status, 200);
       assert.ok(page.headers.get("cache-control")?.includes("no-cache"));
       assert.ok(
@@ -50,12 +52,13 @@ test("real file responses preserve prefix, MIME, cache validators, SPA fallback 
       "play/%2e%2e%2fsecret",
       "play/%5csecret",
     ]) {
-      const denied: Response = await fetch(new URL(route, server.url));
+      const denied = await request(route);
       assert.equal(denied.status, 404);
       await denied.body?.cancel();
     }
   } finally {
     await server?.stop();
+    // Guard the recursive delete so only the scratch folder we created is removed.
     if (
       dirname(resolve(folder)) !== resolve(tmpdir()) ||
       !basename(folder).startsWith("gi-frontend-test-")
