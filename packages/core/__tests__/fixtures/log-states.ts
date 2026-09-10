@@ -1,9 +1,10 @@
 import { Game } from "../../src/game";
 import type { ExtensionDefinition } from "../../src/base/extension";
+import type { GameData } from "../../src/data";
 import type { GameStateLogEntry } from "../../src/log";
 
 /** Stable input for the pre-migration replay encoding golden. */
-export function logStates() {
+export function logStates(): { entries: GameStateLogEntry[]; data: GameData } {
   const shared = { label: "shared", count: 42 };
   const definition: ExtensionDefinition = {
     __definition: "extensions",
