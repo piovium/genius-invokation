@@ -22,7 +22,7 @@ test(
     try {
       await admin.unsafe('CREATE SCHEMA "' + name + '"');
       base.searchParams.set("schema", name);
-      const folder = resolve(import.meta.dirname, "../../prisma/migrations");
+      const folder = resolve(import.meta.dirname, "../../migrations");
       assert.equal(
         (await migrateDatabase(base.toString(), folder)).applied.length,
         3,
@@ -52,14 +52,14 @@ test(
         await database.close();
       }
       await client.unsafe(
-        'CREATE TABLE "_prisma_migrations" (migration_name TEXT, checksum TEXT, finished_at TIMESTAMPTZ, rolled_back_at TIMESTAMPTZ)',
+        'CREATE TABLE "_HarnessMigration" ("name" TEXT PRIMARY KEY, "sha256" TEXT NOT NULL, "appliedAt" TIMESTAMPTZ NOT NULL DEFAULT now())',
       );
-      await client`INSERT INTO "_prisma_migrations" (migration_name, checksum, finished_at) VALUES ('20990101000000_future', 'future', now())`;
+      await client`INSERT INTO "_HarnessMigration" ("name", "sha256") VALUES ('20990101000000_future', 'future')`;
       await assert.rejects(
         migrateDatabase(base.toString(), folder),
-        /legacy migrations unknown/,
+        /migrations unknown to this server build/,
       );
-      await client`DELETE FROM "_prisma_migrations" WHERE migration_name = '20990101000000_future'`;
+      await client`DROP TABLE "_HarnessMigration"`;
       await client.unsafe(
         'ALTER TABLE "Deck" DROP CONSTRAINT "Deck_ownerUserId_fkey"',
       );

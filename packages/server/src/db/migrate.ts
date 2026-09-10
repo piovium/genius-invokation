@@ -10,8 +10,8 @@ async function findMigrationDirectory() {
   if (process.env.MIGRATIONS_DIRECTORY)
     return resolve(process.env.MIGRATIONS_DIRECTORY);
   for (const candidate of [
-    resolve(import.meta.dirname, "prisma/migrations"),
-    resolve(import.meta.dirname, "../../prisma/migrations"),
+    resolve(import.meta.dirname, "migrations"),
+    resolve(import.meta.dirname, "../../migrations"),
   ]) {
     try {
       await access(candidate);
@@ -21,11 +21,15 @@ async function findMigrationDirectory() {
     }
   }
   throw new Error(
-    "Original SQL migrations are missing from the server distribution",
+    "Migration SQL is missing from the server distribution",
   );
 }
 
-/** Apply the original SQL migrations or record verified legacy migrations. */
+/**
+ * Apply this server's SQL migrations. A database whose schema was created from
+ * the same files by other bookkeeping (the isolated fixture) is adopted after
+ * its recorded checksums are verified.
+ */
 export async function migrateDatabase(
   connectionString?: string,
   migrationDirectory?: string,
@@ -64,25 +68,15 @@ export async function migrateDatabase(
     return await client.begin(async (tx) => {
       await tx`SELECT pg_advisory_xact_lock(hashtext(current_database()), hashtext(current_schema() || ':gi-server-migrations'))`;
       const [migrationState] =
-        await tx`SELECT to_regclass('"_prisma_migrations"') IS NOT NULL AS prisma, to_regclass('"_HarnessMigration"') IS NOT NULL AS harness, to_regclass('"User"') IS NOT NULL AS populated`;
+        await tx`SELECT to_regclass('"_HarnessMigration"') IS NOT NULL AS fixture, to_regclass('"User"') IS NOT NULL AS populated`;
       if (!migrationState)
         throw new Error("Cannot read the database migration state");
-      const prismaHistory = migrationState.prisma
-        ? await tx.unsafe(
-            'SELECT migration_name AS name, checksum, finished_at, rolled_back_at FROM "_prisma_migrations"',
-          )
-        : [];
-      const fixtureHistory = migrationState.harness
+      const fixtureHistory = migrationState.fixture
         ? await tx.unsafe('SELECT name, sha256 FROM "_HarnessMigration"')
         : [];
-      if (
-        prismaHistory.some(
-          (row) => !row.rolled_back_at && !names.includes(row.name),
-        ) ||
-        fixtureHistory.some((row) => !names.includes(row.name))
-      )
+      if (fixtureHistory.some((row) => !names.includes(row.name)))
         throw new Error(
-          "Database has legacy migrations unknown to this server build",
+          "Database has migrations unknown to this server build",
         );
       await tx.unsafe(
         'CREATE TABLE IF NOT EXISTS "__drizzle_migrations" ("id" SERIAL PRIMARY KEY, "hash" TEXT NOT NULL, "created_at" BIGINT NOT NULL, "name" TEXT NOT NULL UNIQUE)',
@@ -103,22 +97,11 @@ export async function migrateDatabase(
             );
           continue;
         }
-        const legacy = prismaHistory.filter(
-          (row) => row.name === source.name && !row.rolled_back_at,
-        );
-        if (legacy.some((row) => !row.finished_at))
-          throw new Error(
-            "Incomplete Prisma migration must be resolved before adoption: " +
-              source.name,
-          );
         const fixture = fixtureHistory.find((row) => row.name === source.name);
-        if (legacy.length || fixture) {
-          if (
-            legacy.some((row) => !source.acceptedHashes.has(row.checksum)) ||
-            (fixture && !source.acceptedHashes.has(fixture.sha256))
-          )
+        if (fixture) {
+          if (!source.acceptedHashes.has(fixture.sha256))
             throw new Error(
-              "Legacy SQL migration checksum differs: " + source.name,
+              "Adopted SQL migration checksum differs: " + source.name,
             );
           adopted.push(source.name);
         } else {

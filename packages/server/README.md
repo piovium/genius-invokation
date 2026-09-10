@@ -4,9 +4,9 @@
 
 ## 迁移目标（进行中）
 
-本路线已确定两条硬约束：HTTP 路由、校验、鉴权、错误与插件组合全部使用 **Elysia 原生写法**；**不保留任何 Prisma 遗留**（`prisma/` 目录、依赖、`_prisma_migrations` 兼容路径、构建打包项与文档说明）。运行时保持 Node.js：依赖、脚本、`Bun.` 全局对象、`bun:` 模块与基础镜像都不得改用 Bun。
+本路线要求 HTTP 路由、校验、鉴权、错误与插件组合全部使用 **Elysia 原生写法**，运行时保持 Node.js：依赖、脚本、`Bun.` 全局对象、`bun:` 模块与基础镜像都不得改用 Bun，也不得保留 harness 约束规则禁止的历史兼容层。
 
-可执行检查：在仓库根目录运行 `npm run harness:constraints`，规则与例外见 [harness 说明](../../scripts/server-harness/README.md)。当前检查尚未通过；下文「生产构建」与「数据库升级」两节中关于 Prisma 的说明属于过渡状态，将在清退时删除。
+可执行检查：在仓库根目录运行 `npm run harness:constraints`，规则与例外见 [harness 说明](../../scripts/server-harness/README.md)。当前检查尚未通过，启动装配、错误处理与模块划分仍是过渡写法。
 
 ## 开发与构建
 
@@ -15,19 +15,19 @@
     pnpm --filter @gi-tcg/server... install --frozen-lockfile
     pnpm build:no-typing server...
 
-在 `packages/server/.env` 设置 `DATABASE_URL` 和 `JWT_SECRET`；GitHub 登录还需要 `GH_CLIENT_ID` 和 `GH_CLIENT_SECRET`。随后在 `packages/server` 执行 `pnpm migrate`，再运行 `pnpm dev`。开发和生产均连接 PostgreSQL，不再启动 Prisma/PGLite 模拟数据库。
+在 `packages/server/.env` 设置 `DATABASE_URL` 和 `JWT_SECRET`；GitHub 登录还需要 `GH_CLIENT_ID` 和 `GH_CLIENT_SECRET`。随后在 `packages/server` 执行 `pnpm migrate`，再运行 `pnpm dev`。开发和生产均连接 PostgreSQL，不再启动嵌入式模拟数据库。
 
 开发、类型检查和测试需要 assets-manager 的本地数据快照。上面的构建命令会先生成该依赖。`pnpm prepare:metadata` 从 `assets-manager/dist/data` 提取牌组校验字段，并生成记录来源哈希的清单；设置 `FROM_SOURCE=1` 时使用 `src/data`。该步骤只读取本地文件，不访问 CDN。`pnpm dev`、`pnpm check` 和 `pnpm test` 会自动准备元数据；单独运行房间测试前需要先准备。
 
-生产构建位于 `dist/`，包含 `main.js`、`migrate.js`、`frontend/` 和原始 `prisma/migrations/` SQL（过渡状态：随 Prisma 清退后不再打包该 SQL）。使用 `node dist/main.js` 启动。前端 JS、CSS 和图片按请求通过 Node 文件流返回，无需将整个文件载入内存。`WEB_CLIENT_BASE_PATH`、SPA 回退、MIME 和 ETag 行为保持兼容；`sw.js` 与 HTML 使用 `no-cache`，文件名带哈希的资源使用 `immutable` 缓存。
+生产构建位于 `dist/`，包含 `main.js`、`migrate.js`、`frontend/` 与 `migrations/` 下的 SQL。使用 `node dist/main.js` 启动。前端 JS、CSS 和图片按请求通过 Node 文件流返回，无需将整个文件载入内存。`WEB_CLIENT_BASE_PATH`、SPA 回退、MIME 和 ETag 行为保持兼容；`sw.js` 与 HTML 使用 `no-cache`，文件名带哈希的资源使用 `immutable` 缓存。
 
 ## 数据库升级
 
-对已有 PostgreSQL 数据库执行 `node dist/migrate.js`，源码环境执行 `pnpm migrate`。迁移器在事务和 PostgreSQL advisory lock 保护下，核对 `_prisma_migrations` 中已完成的记录及原始 SQL 校验和，再将这些迁移登记到 `__drizzle_migrations`。已准备的隔离测试库可通过 `_HarnessMigration` 记录完成同样的核对。旧迁移记录和业务数据保留。过渡状态：读取 `_prisma_migrations` 的兼容路径将随 Prisma 清退删除，届时只保留全新 Drizzle 迁移；已有库的升级方式在实现阶段按 harness 约束重新决定。
+对已有 PostgreSQL 数据库执行 `node dist/migrate.js`，源码环境执行 `pnpm migrate`。迁移器在事务和 PostgreSQL advisory lock 保护下执行 `migrations/` 中的 SQL，并把已执行迁移的名称与校验和写入 `__drizzle_migrations`。若 schema 已由同一批 SQL 通过 `_HarnessMigration` 记录创建（隔离测试夹具），迁移器核对记录中的校验和后直接接管，不重复执行；业务数据保留。`MIGRATIONS_DIRECTORY` 可覆盖 SQL 目录，默认使用发行包内的 `migrations/`。
 
-空库按时间顺序执行原仓库 SQL。重复执行不会重新建表、重置序列或修改已有用户、牌组和对局。迁移记录不完整、校验和不符、已有业务表缺少可验证的迁移记录，或列、主键、外键与原 SQL 不一致时，迁移器会报错并回滚事务。
+空库按时间顺序执行 `migrations/` 中的 SQL。重复执行不会重新建表、重置序列或修改已有用户、牌组和对局。迁移记录不完整、校验和不符、已有业务表缺少可验证的迁移记录，或列、主键、外键与 SQL 不一致时，迁移器会报错并回滚事务。
 
-`DATABASE_URL` 的 `schema` 参数选择现有 schema，因此需在迁移前创建它。`DATABASE_CONNECTION_LIMIT` 设置连接池上限，默认为 2。原 `prisma/schema.prisma` 和 SQL 目前保留供历史对照（过渡状态，将随 Prisma 清退删除），运行时不依赖 Prisma。
+`DATABASE_URL` 的 `schema` 参数选择现有 schema，因此需在迁移前创建它。`DATABASE_CONNECTION_LIMIT` 设置连接池上限，默认为 2。
 
 ## 部署
 
@@ -50,4 +50,4 @@ WebSocket 与 HTTP 共用端口 3000。反向代理需要转发 `Upgrade`，空�
     pnpm test:http
     pnpm test:db
 
-数据库测试须显式设置 `SERVER_DB_TEST_URL`，指向隔离的 `gi_server_harness` 数据库。测试创建并回收独立的随机 schema，验证旧 Prisma 迁移记录的登记（过渡状态，随 Prisma 清退删除）、约束、Drizzle 写入、事务回滚，以及独立进程重启后的持久化。构建和功能测试通过后，仍需单独验证真实内存是否达标。
+数据库测试须显式设置 `SERVER_DB_TEST_URL`，指向隔离的 `gi_server_harness` 数据库。测试创建并回收独立的随机 schema，验证同源 SQL 的接管与校验和、约束、Drizzle 写入、事务回滚，以及独立进程重启后的持久化。构建和功能测试通过后，仍需单独验证真实内存是否达标。

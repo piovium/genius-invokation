@@ -16,7 +16,7 @@ const persistedReplay = customType<{ data: unknown; driverData: unknown }>({
   fromDriver: (value) => value,
 });
 
-// Match the deployed Prisma SQL exactly: quoted table/column names, timestamp
+// Match the deployed DDL exactly: quoted table/column names, timestamp
 // precision, defaults, relation actions and composite primary key all stay put.
 export const users = pgTable("User", {
   id: integer("id").primaryKey(),

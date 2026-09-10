@@ -17,7 +17,7 @@ const execute = promisify(execFile);
 const testUrl = process.env.SERVER_DB_TEST_URL;
 const migrationDirectory = resolve(
   import.meta.dirname,
-  "../../prisma/migrations",
+  "../../migrations",
 );
 async function fixture(body: (url: string) => Promise<void>) {
   if (!testUrl) throw new Error("SERVER_DB_TEST_URL is required");
@@ -41,7 +41,7 @@ async function fixture(body: (url: string) => Promise<void>) {
 }
 
 test(
-  "existing Prisma rows are adopted without loss; Drizzle ownership, transactions and process restart preserve them",
+  "a database created from the same SQL is adopted without loss; Drizzle ownership, transactions and process restart preserve it",
   {
     skip: !testUrl,
     timeout: 60_000,
@@ -52,7 +52,7 @@ test(
       let database: DatabaseService | undefined;
       try {
         await legacy.unsafe(
-          'CREATE TABLE "_prisma_migrations" (id VARCHAR(36) PRIMARY KEY, checksum VARCHAR(64) NOT NULL, finished_at TIMESTAMPTZ, migration_name VARCHAR(255) NOT NULL, logs TEXT, rolled_back_at TIMESTAMPTZ, started_at TIMESTAMPTZ NOT NULL DEFAULT now(), applied_steps_count INTEGER NOT NULL DEFAULT 0)',
+          'CREATE TABLE "_HarnessMigration" ("name" TEXT PRIMARY KEY, "sha256" TEXT NOT NULL, "appliedAt" TIMESTAMPTZ NOT NULL DEFAULT now())',
         );
         const names = (
           await readdir(migrationDirectory, { withFileTypes: true })
@@ -66,7 +66,7 @@ test(
             "utf8",
           );
           await legacy.unsafe(source);
-          await legacy`INSERT INTO "_prisma_migrations" (id, checksum, migration_name, finished_at, applied_steps_count) VALUES (${crypto.randomUUID()}, ${createHash("sha256").update(source).digest("hex")}, ${name}, now(), 1)`;
+          await legacy`INSERT INTO "_HarnessMigration" ("name", "sha256") VALUES (${name}, ${createHash("sha256").update(source).digest("hex")})`;
         }
         await legacy`INSERT INTO "User" (id, name, "ghToken") VALUES (91000001, 'Existing A', 'existing-fake-a'), (91000002, 'Existing B', 'existing-fake-b')`;
         const deck = JSON.parse(

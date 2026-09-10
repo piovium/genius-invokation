@@ -52,18 +52,16 @@ await build({
       : ["node", "production", "es2015", "module"],
   },
 });
-// Preserve actual browser assets and original migration SQL as files. The
+// Preserve actual browser assets and migration SQL as files. The
 // server never imports a base64 object containing the complete frontend.
 await cp(
   path.resolve(root, "../web-client/dist"),
   path.join(output, "frontend"),
   { recursive: true },
 );
-await cp(
-  path.join(root, "prisma/migrations"),
-  path.join(output, "prisma/migrations"),
-  { recursive: true },
-);
+await cp(path.join(root, "migrations"), path.join(output, "migrations"), {
+  recursive: true,
+});
 await cp(
   path.join(metadataDirectory, "deck-metadata-manifest.json"),
   path.join(output, "deck-metadata-manifest.json"),
