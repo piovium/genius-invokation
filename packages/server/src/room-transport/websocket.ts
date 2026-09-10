@@ -76,12 +76,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-/** Control frames are JSON objects; anything else stays opaque to the caller. */
-function parseControlFrame(message: unknown): Record<string, unknown> | null {
+/** The JSON control frames a client may send instead of a game frame. */
+type ControlFrame = { type: "auth"; token: unknown } | { type: "giveUp" };
+
+/** Parses a control frame; any other payload stays opaque to the caller. */
+function parseControlFrame(message: unknown): ControlFrame | null {
   try {
     const parsed: unknown =
       typeof message === "string" ? JSON.parse(message) : message;
-    return isRecord(parsed) ? parsed : null;
+    if (!isRecord(parsed)) return null;
+    if (parsed.type === "auth") return { type: "auth", token: parsed.token };
+    return parsed.type === "giveUp" ? { type: "giveUp" } : null;
   } catch {
     return null;
   }
@@ -169,7 +174,7 @@ export function createRoomSocketHandlers(
   function subscribe(
     raw: RawSocket,
     state: Connection,
-    control: Record<string, unknown> | null,
+    control: ControlFrame | null,
   ) {
     const token = control?.type === "auth" ? control.token : undefined;
     if (typeof token !== "string" || token.length > MAX_TOKEN_LENGTH) {
@@ -222,7 +227,7 @@ export function createRoomSocketHandlers(
     raw: RawSocket,
     state: Connection,
     bytes: Uint8Array | null,
-    control: Record<string, unknown> | null,
+    control: ControlFrame | null,
   ) {
     if (control?.type === "auth") {
       close(raw, state, CLOSE_POLICY_VIOLATION, "DUPLICATE_AUTH");

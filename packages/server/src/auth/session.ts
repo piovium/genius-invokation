@@ -22,7 +22,11 @@ const isCanonicalBase64Url = (segment: string) =>
   /^[A-Za-z0-9_-]+$/.test(segment) &&
   Buffer.from(segment, "base64url").toString("base64url") === segment;
 
-const decodeJwtPart = (segment: string) =>
+/** A segment decodes to JSON chosen by the sender, so only an object is read for claims. */
+const isJsonObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const decodeJwtPart = (segment: string): unknown =>
   JSON.parse(Buffer.from(segment, "base64url").toString());
 
 export interface AuthEndpoints {
@@ -76,6 +80,7 @@ export function createAuth({
         return null;
       const header = decodeJwtPart(segments[0]!);
       if (
+        !isJsonObject(header) ||
         header.alg !== "HS256" ||
         (header.typ !== undefined && header.typ !== "JWT")
       )
@@ -92,10 +97,14 @@ export function createAuth({
       const payload = decodeJwtPart(segments[1]!);
       const now = Math.floor(Date.now() / 1000);
       if (
+        !isJsonObject(payload) ||
+        typeof payload.exp !== "number" ||
         !Number.isSafeInteger(payload.exp) ||
         payload.exp <= now ||
         (payload.nbf !== undefined &&
-          (!Number.isFinite(payload.nbf) || payload.nbf > now))
+          (typeof payload.nbf !== "number" ||
+            !Number.isFinite(payload.nbf) ||
+            payload.nbf > now))
       )
         return null;
       if (!isUserJwtPayload(payload) && !isGuestJwtPayload(payload))
