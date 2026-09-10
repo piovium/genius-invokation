@@ -80,4 +80,4 @@ export const decks = pgTable("Deck", {
 export type UserModel = typeof users.$inferSelect;
 export type DeckModel = typeof decks.$inferSelect;
 export type GameModel = typeof games.$inferSelect;
-export type PlayerOnGames = typeof playerOnGames.$inferSelect;
+export type PlayerOnGamesModel = typeof playerOnGames.$inferSelect;

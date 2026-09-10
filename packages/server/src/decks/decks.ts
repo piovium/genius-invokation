@@ -72,6 +72,9 @@ const withDeckContent = (model: DeckModel): DeckWithDeckModel => ({
 const ownedDeck = (userId: number, deckId: number) =>
   and(eq(decks.id, deckId), eq(decks.ownerUserId, userId));
 
+/** Page size the deck list uses when the caller omits `take`. */
+const DEFAULT_PAGE_SIZE = 100;
+
 export function createDecks(database: Database): Decks {
   return {
     deckToCode,
@@ -89,7 +92,10 @@ export function createDecks(database: Database): Decks {
         .returning();
       return model!;
     },
-    async getAllDecks(userId, { skip = 0, take = 100, requiredVersion }) {
+    async getAllDecks(
+      userId,
+      { skip = 0, take = DEFAULT_PAGE_SIZE, requiredVersion },
+    ) {
       const where = and(
         eq(decks.ownerUserId, userId),
         requiredVersion === undefined

@@ -19,7 +19,7 @@ import {
   games,
   playerOnGames,
   type GameModel,
-  type PlayerOnGames,
+  type PlayerOnGamesModel,
 } from "../db/schema";
 import type { Metrics } from "../metrics/metrics";
 import type { PaginationDto, PaginationResult } from "../utils";
@@ -58,7 +58,7 @@ export interface Games {
   gamesHasUser(
     userId: number,
     query: PaginationDto,
-  ): Promise<PaginationResult<PlayerOnGames & { game: GameSummary }>>;
+  ): Promise<PaginationResult<PlayerOnGamesModel & { game: GameSummary }>>;
 }
 
 const summaryColumns = {
@@ -72,30 +72,30 @@ const summaryColumns = {
 /** Page size the history endpoints use when the caller omits `take`. */
 const DEFAULT_PAGE_SIZE = 10;
 
-const toGamePlayer = ({ playerId, who }: PlayerOnGames): GamePlayer => ({
+const toGamePlayer = ({ playerId, who }: PlayerOnGamesModel): GamePlayer => ({
   player: { id: playerId },
   who,
 });
 
-const bySeat = (a: PlayerOnGames, b: PlayerOnGames) => a.who - b.who;
+const bySeat = (a: PlayerOnGamesModel, b: PlayerOnGamesModel) => a.who - b.who;
 
 export function createGames(database: Database, metrics: Metrics): Games {
   return {
-    async addGame({ playerIds, ...data }) {
-      const game = await database.db.transaction(async (tx) => {
-        const [game] = await tx.insert(games).values(data).returning();
+    async addGame({ playerIds, ...game }) {
+      const stored = await database.db.transaction(async (tx) => {
+        const [inserted] = await tx.insert(games).values(game).returning();
         if (playerIds.length)
           await tx.insert(playerOnGames).values(
             playerIds.map((playerId, who) => ({
               playerId,
-              gameId: game!.id,
+              gameId: inserted!.id,
               who,
             })),
           );
-        return game!;
+        return inserted!;
       });
       metrics.incrementStoredGames();
-      return game;
+      return stored;
     },
 
     async getAllGames({ skip = 0, take = DEFAULT_PAGE_SIZE }) {

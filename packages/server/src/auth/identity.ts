@@ -31,8 +31,8 @@ export function requireUserIdentity(
 }
 
 /**
- * Builds one opt-in macro: enabled, it merges `read(request)` into the context
- * under `field`; disabled, it contributes nothing.
+ * Builds one opt-in macro: when a route enables it, `read(request)` is added to
+ * the context as `field`; otherwise it contributes nothing.
  */
 const inject =
   (field: string, read: (request: Request) => unknown) => (enabled: boolean) =>
@@ -45,14 +45,14 @@ const inject =
       : {};
 
 /**
- * Elysia plugin that hands the caller's token to the routes of a prefix:
+ * Elysia plugin that resolves the caller's identity for the routes that mount it:
  *
  * - `{ identity: true }` injects `identity`, `null` for anonymous callers;
  * - `{ user: true }` requires a registered account and injects `user`;
  * - `{ player: true }` requires any authenticated caller and injects `player`.
  *
  * A macro resolves only for the routes that ask for it, so a route that reads no
- * identity never hashes a token.
+ * identity never verifies a token.
  */
 export const identity = (auth: Auth) =>
   new Elysia({ name: "identity" }).macro({

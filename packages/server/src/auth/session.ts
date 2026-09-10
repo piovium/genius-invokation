@@ -1,7 +1,12 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { unauthorized } from "../errors";
 import type { Users } from "../users/users";
-import { isGuestJwtPayload, isUserJwtPayload, type JwtPayload } from "./jwt";
+import {
+  isGuestJwtPayload,
+  isPositiveSafeInteger,
+  isUserJwtPayload,
+  type JwtPayload,
+} from "./jwt";
 
 export const CODE_EXCHANGE_URL =
   process.env.GH_CODE_EXCHANGE_URL ||
@@ -12,7 +17,7 @@ export const GET_USER_API_URL =
 /** GitHub is a third party, so a stalled request must not hold the caller forever. */
 export const GITHUB_REQUEST_TIMEOUT_MS = 15_000;
 
-/** The headers GitHub's REST API wants from a caller's own access token. */
+/** The headers GitHub's REST API expects with an access token. */
 export const githubApiHeaders = (token: string) => ({
   authorization: `Bearer ${token}`,
   accept: "application/vnd.github+json",
@@ -20,7 +25,7 @@ export const githubApiHeaders = (token: string) => ({
 });
 
 const TOKEN_LIFETIME_SECONDS = 42 * 24 * 60 * 60;
-/** Tokens beyond this length are not ours, so reject them before parsing. */
+/** A token longer than this cannot have been issued here, so reject it before parsing. */
 const MAX_TOKEN_LENGTH = 8192;
 const JWT_HEADER = { alg: "HS256", typ: "JWT" };
 
@@ -32,7 +37,7 @@ const isCanonicalBase64Url = (segment: string) =>
   /^[A-Za-z0-9_-]+$/.test(segment) &&
   Buffer.from(segment, "base64url").toString("base64url") === segment;
 
-/** A segment decodes to JSON chosen by the sender, so only an object is read for claims. */
+/** The sender chooses the JSON a segment decodes to, so every field is read through this guard. */
 const isJsonObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -149,12 +154,7 @@ export function createAuth({
       signal: AbortSignal.timeout(GITHUB_REQUEST_TIMEOUT_MS),
     });
     const account = (await identity.json()) as { id?: number };
-    const userId =
-      typeof account.id === "number" &&
-      Number.isSafeInteger(account.id) &&
-      account.id > 0
-        ? account.id
-        : null;
+    const userId = isPositiveSafeInteger(account.id) ? account.id : null;
     if (!identity.ok || userId === null)
       throw unauthorized("GitHub user lookup failed");
     await users.create(userId, githubToken);

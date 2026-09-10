@@ -6,6 +6,7 @@ export interface UserJwtPayload {
   iat?: number;
   exp?: number;
 }
+
 export interface GuestJwtPayload {
   user: 0;
   sub: string;
@@ -14,7 +15,11 @@ export interface GuestJwtPayload {
 }
 export type JwtPayload = UserJwtPayload | GuestJwtPayload;
 
-/** Checks that both claim fields shared by the payload shapes are present. */
+/** True when `value` is a whole number above zero a JS number holds exactly. */
+export const isPositiveSafeInteger = (value: unknown): value is number =>
+  typeof value === "number" && Number.isSafeInteger(value) && value > 0;
+
+/** Checks that the two claim fields every payload shape carries are present. */
 function hasSubject(
   payload: unknown,
 ): payload is { user: unknown; sub: unknown } {
@@ -28,8 +33,7 @@ function hasSubject(
 
 export function isUserJwtPayload(payload: unknown): payload is UserJwtPayload {
   if (!hasSubject(payload) || payload.user !== 1) return false;
-  const { sub } = payload;
-  return typeof sub === "number" && Number.isSafeInteger(sub) && sub > 0;
+  return isPositiveSafeInteger(payload.sub);
 }
 export function isGuestJwtPayload(
   payload: unknown,

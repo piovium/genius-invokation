@@ -70,8 +70,8 @@ test(
   async () => {
     await fixture(async (url) => {
       const deployed = await migrateDatabase(url, migrationsDirectory);
-      const names = deployed.applied;
-      assert.deepEqual(names, [
+      const migrationNames = deployed.applied;
+      assert.deepEqual(migrationNames, [
         "0000_init",
         "0001_user_add_color",
         "0002_user_add_name",
@@ -98,7 +98,7 @@ test(
         await legacy`DROP TABLE "__drizzle_migrations"`;
         const before = await readUsers();
         const first = await migrateDatabase(url, migrationsDirectory);
-        assert.deepEqual(first.adopted, names);
+        assert.deepEqual(first.adopted, migrationNames);
         assert.deepEqual(first.applied, []);
         assert.deepEqual(await readUsers(), before);
         const repeated = await migrateDatabase(url, migrationsDirectory);
