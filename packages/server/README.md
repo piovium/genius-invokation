@@ -41,8 +41,6 @@ WebSocket 与 HTTP 共用端口 3000。反向代理需要转发 `Upgrade`，空�
 
 ## 验证
 
-协议、真实对局、数据库写入和 RSS 使用[独立 harness](../../scripts/server-harness/README.md) 验证。先运行其中的 `environment/prepare.mjs` 创建隔离数据库和账号，再使用 `candidate.json` 对候选服务运行验收；静态约束由仓库根目录的 `npm run harness:constraints` 检查，规则见 harness 说明。内存预算为各空闲阶段的 RSS 峰值 ≤100 MiB、单局峰值相对首次冷空闲 RSS 中位数的增量 ≤50 MiB。
-
 以下命令在 `packages/server` 执行。`pnpm test` 覆盖 HTTP、认证、牌组元数据、房间和 WebSocket；`test:rooms` 与 `test:http` 可单独验证对应部分：
 
     pnpm prepare:metadata

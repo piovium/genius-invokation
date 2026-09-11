@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { test } from "node:test";
 import { pathToFileURL } from "node:url";
@@ -8,6 +7,7 @@ import { promisify } from "node:util";
 import { createDecks } from "../decks/decks";
 import { createGames } from "../games/games";
 import { createMetrics } from "../metrics/metrics";
+import { testDeck } from "../test-support";
 import { ASSETS_MANAGER } from "../utils";
 import {
   createDatabase,
@@ -73,15 +73,7 @@ test(
       let database: Database | undefined;
       try {
         await legacy`INSERT INTO "User" (id, name, "ghToken") VALUES (91000001, 'Existing A', 'existing-fake-a'), (91000002, 'Existing B', 'existing-fake-b')`;
-        const deck = JSON.parse(
-          await readFile(
-            resolve(
-              import.meta.dirname,
-              "../../../../scripts/server-harness/deck.json",
-            ),
-            "utf8",
-          ),
-        );
+        const deck = testDeck;
         const code = ASSETS_MANAGER.encode(deck);
         const [oldDeck] =
           await legacy`INSERT INTO "Deck" (name, code, "requiredVersion", "ownerUserId", "updatedAt") VALUES ('existing-deck', ${code}, 0, 91000001, '2025-12-01T00:00:00') RETURNING id`;

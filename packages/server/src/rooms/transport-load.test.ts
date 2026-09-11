@@ -36,7 +36,7 @@ const ROOMS_PER_ROUND = 8;
 const FIRST_ROOM_ID = 100;
 
 // These are transport saturation tests. Room events are supplied directly;
-// full engine games and persistence are covered by the production harness.
+// running a full engine game is out of scope for this file.
 /**
  * Spins the event loop until `check` holds. A disconnect is observable on the
  * server one or more turns after the client sees its own close event, and that

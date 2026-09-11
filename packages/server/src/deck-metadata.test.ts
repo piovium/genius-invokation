@@ -12,7 +12,7 @@ import type {
 } from "@gi-tcg/assets-manager";
 import { generateDeckMetadata } from "../scripts/deck-metadata";
 import metadata from "../generated/deck-metadata";
-import { removeScratchDirectory } from "./test-support";
+import { removeScratchDirectory, testDeck } from "./test-support";
 
 const root = path.resolve(import.meta.dirname, "..");
 const assetsRoot = path.resolve(root, "../assets-manager");
@@ -43,12 +43,7 @@ const raw = Object.fromEntries(
 ) as Record<(typeof categories)[number], Record<string, unknown>[]>;
 const cards = raw.action_cards as unknown as ActionCardRawData[];
 const characters = raw.characters as unknown as CharacterRawData[];
-const base: Deck = JSON.parse(
-  await readFile(
-    path.resolve(root, "../../scripts/server-harness/deck.json"),
-    "utf8",
-  ),
-);
+const base: Deck = testDeck;
 const digest = (text: string) =>
   createHash("sha256").update(text).digest("hex");
 
