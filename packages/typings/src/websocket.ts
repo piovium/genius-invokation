@@ -26,8 +26,6 @@ const KIND = {
   rpc: 2,
   actionResponse: 3,
 } as const;
-/** Known kind bytes, so the decoder rejects an unknown one in a single place. */
-const FRAME_KINDS: ReadonlySet<number> = new Set(Object.values(KIND));
 /** Fixed header prefix: "GI" magic, version, kind byte and a uint32 BE id. */
 const HEADER_BYTES = 8;
 /** Two float64 BE timers, carried only by RPC frames. */
@@ -139,23 +137,46 @@ export function decodeGameFrame(
     invalid("incorrect GI magic");
   if (bytes[VERSION_OFFSET] !== VERSION) invalid("unsupported version");
   const kind = bytes[KIND_OFFSET];
-  if (!FRAME_KINDS.has(kind)) invalid("unsupported kind");
   const payloadOffset = payloadOffsetOf(kind);
   if (bytes.byteLength < payloadOffset) invalid("truncated RPC timer");
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const id = view.getUint32(ID_OFFSET, false);
   const payload = bytes.subarray(payloadOffset);
   checkPayload(payload);
-  if (kind === KIND.notification) {
-    if (id !== 0) invalid("notification id must be zero");
-    return { type: "notification", data: payload };
+  // Switch rather than fall through, so an unknown kind fails closed here
+  // exactly as the encoder refuses to write one.
+  switch (kind) {
+    case KIND.notification:
+      if (id !== 0) invalid("notification id must be zero");
+      return { type: "notification", data: payload };
+    case KIND.actionResponse:
+      return { type: "actionResponse", id, response: payload };
+    case KIND.rpc: {
+      const timer = {
+        current: view.getFloat64(TIMER_CURRENT_OFFSET, false),
+        total: view.getFloat64(TIMER_TOTAL_OFFSET, false),
+      };
+      checkTimer(timer);
+      return { type: "rpc", data: { id, timer, request: payload } };
+    }
+    default:
+      return invalid("unsupported kind");
   }
-  if (kind === KIND.actionResponse)
-    return { type: "actionResponse", id, response: payload };
-  const timer = {
-    current: view.getFloat64(TIMER_CURRENT_OFFSET, false),
-    total: view.getFloat64(TIMER_TOTAL_OFFSET, false),
-  };
-  checkTimer(timer);
-  return { type: "rpc", data: { id, timer, request: payload } };
 }
+
+/** Codes the server puts on a rejected room command; control frames carry one. */
+export const ROOM_COMMAND_FAILURE_CODES = [
+  "CONFLICT",
+  "STALE_RPC",
+  "FUTURE_RPC",
+  "INVALID_RESPONSE",
+  "FORBIDDEN",
+  "GAME_FINISHED",
+] as const;
+export type RoomCommandFailureCode =
+  (typeof ROOM_COMMAND_FAILURE_CODES)[number];
+export const isRoomCommandFailureCode = (
+  value: unknown,
+): value is RoomCommandFailureCode =>
+  typeof value === "string" &&
+  (ROOM_COMMAND_FAILURE_CODES as readonly string[]).includes(value);

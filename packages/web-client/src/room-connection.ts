@@ -1,9 +1,12 @@
 import {
   decodeGameFrame,
   encodeGameFrame,
+  isRoomCommandFailureCode,
   MAX_GAME_FRAME_BYTES,
   type GameRpcRequest,
   type GameRpcTimer,
+  type GameWireFrame,
+  type RoomCommandFailureCode,
 } from "@gi-tcg/typings";
 import type { PlayerInfo } from "./utils";
 
@@ -18,17 +21,36 @@ export interface RoomInitialized {
 export type RoomEvent =
   | RoomInitialized
   | { type: "waiting" }
-  | { type: "notification"; data: Uint8Array }
+  // The server sends notification frames as they are encoded on the wire.
+  | Extract<GameWireFrame, { type: "notification" }>
   | { type: "rpc"; data: GameRpcRequest | null }
   | { type: "oppRpc"; oppTimer: GameRpcTimer | null };
 
 export type RoomConnectionState =
   "connecting" | "connected" | "reconnecting" | "closed" | "failed";
 
+/**
+ * Every code a connection failure can carry: the ones this module raises, plus
+ * the server's own rejection codes, which are echoed verbatim.
+ */
+export type RoomConnectionErrorCode =
+  | RoomCommandFailureCode
+  | "ACCESS_DENIED"
+  | "MESSAGE_TOO_BIG"
+  | "NOT_CONNECTED"
+  | "STALE_LOCAL_RPC"
+  | "COMMAND_PENDING"
+  | "COMMAND_TIMEOUT"
+  | "RECONNECT_TIMEOUT"
+  | "PROTOCOL_ERROR"
+  | "SERVER_ERROR"
+  | "SESSION_CHANGED"
+  | "DISPOSED";
+
 export class RoomConnectionError extends Error {
   constructor(
     message: string,
-    readonly code: string,
+    readonly code: RoomConnectionErrorCode,
     readonly outcomeUnknown = false,
   ) {
     super(message);
@@ -104,10 +126,11 @@ const CLOSE_POLICY_VIOLATION = 1008;
 const CLOSE_MESSAGE_TOO_BIG = 1009;
 
 /** Close codes that refuse the frame, each mapped to the client failure code. */
-const REFUSAL_CLOSE_CODES: ReadonlyMap<number, string> = new Map([
-  [CLOSE_POLICY_VIOLATION, "ACCESS_DENIED"],
-  [CLOSE_MESSAGE_TOO_BIG, "MESSAGE_TOO_BIG"],
-]);
+const REFUSAL_CLOSE_CODES: ReadonlyMap<number, RoomConnectionErrorCode> =
+  new Map([
+    [CLOSE_POLICY_VIOLATION, "ACCESS_DENIED"],
+    [CLOSE_MESSAGE_TOO_BIG, "MESSAGE_TOO_BIG"],
+  ]);
 
 /**
  * A game endpoint must never embed credentials, query parameters or a
@@ -453,9 +476,16 @@ export class RoomConnection {
         return;
       }
     } else {
-      if (typeof value.message !== "string" || typeof value.code !== "string")
+      if (typeof value.message !== "string")
         throw new Error("Invalid command rejection");
-      this.rejectPending(new RoomConnectionError(value.message, value.code));
+      // A code this build does not know is still a server-side refusal, so the
+      // message survives and the code stays inside the closed set.
+      this.rejectPending(
+        new RoomConnectionError(
+          value.message,
+          isRoomCommandFailureCode(value.code) ? value.code : "SERVER_ERROR",
+        ),
+      );
       // A rejected command is never retried. Refresh the state and remaining
       // timer before asking the UI again, including for INVALID_RESPONSE.
       this.reconnect();
@@ -618,7 +648,10 @@ export class RoomConnection {
    * awaited: without a pending command the server either never acted or
    * already refused, so the caller may always stop safely.
    */
-  private connectionError(message: string, code: string): RoomConnectionError {
+  private connectionError(
+    message: string,
+    code: RoomConnectionErrorCode,
+  ): RoomConnectionError {
     return new RoomConnectionError(message, code, this.hasPendingCommand);
   }
 

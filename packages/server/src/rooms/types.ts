@@ -1,5 +1,10 @@
 import type { GameConfig, Version } from "@gi-tcg/core";
-import type { Deck, GameRpcTimer, GameWireFrame } from "@gi-tcg/typings";
+import type {
+  Deck,
+  GameRpcTimer,
+  GameWireFrame,
+  RoomCommandFailureCode,
+} from "@gi-tcg/typings";
 
 export interface RoomConfig extends Partial<GameConfig> {
   initTotalActionTime: number;
@@ -65,18 +70,9 @@ export const CLOSE_POLICY_VIOLATION = 1008;
 export const CLOSE_INTERNAL_ERROR = 1011;
 export const CLOSE_TRY_AGAIN_LATER = 1013;
 
-/** Why a room command was refused; the transport echoes the code to the client. */
-type CommandFailure =
-  | "CONFLICT"
-  | "STALE_RPC"
-  | "FUTURE_RPC"
-  | "INVALID_RESPONSE"
-  | "FORBIDDEN"
-  | "GAME_FINISHED";
-
 export class RoomCommandError extends Error {
   constructor(
-    public readonly code: CommandFailure,
+    public readonly code: RoomCommandFailureCode,
     message: string,
   ) {
     super(message);

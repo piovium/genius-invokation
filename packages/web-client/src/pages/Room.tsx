@@ -50,13 +50,14 @@ import {
   RoomConnection,
   RoomConnectionError,
   roomWebSocketUrl,
+  type RoomConnectionErrorCode,
   type RoomInitialized,
   type RoomEvent,
   type RoomConnectionState,
 } from "../room-connection";
 
 /** Command rejections a stale, reconnecting or closed view can ignore. */
-const IGNORED_COMMAND_ERRORS = new Set([
+const IGNORED_COMMAND_ERRORS: ReadonlySet<RoomConnectionErrorCode> = new Set([
   "DISPOSED",
   "NOT_CONNECTED",
   "STALE_LOCAL_RPC",
@@ -348,9 +349,12 @@ function ConnectedRoom() {
       cancelMyRequest();
       setLoading(false);
       setFailed(
-        error instanceof AxiosError
-          ? String(error.response?.data?.message ?? error.message)
-          : String(error),
+        t("roomLoadFailed", {
+          message:
+            error instanceof AxiosError
+              ? String(error.response?.data?.message ?? error.message)
+              : String(error),
+        }),
       );
     }
   });
@@ -516,7 +520,7 @@ function ConnectedRoom() {
         <Switch>
           <Match when={failed()}>
             <div class="mb-3 alert alert-outline-error" role="alert">
-              {t("roomLoadFailed", { message: failed() ?? "" })}
+              {failed()}
             </div>
           </Match>
           <Match when={loading() || roomInfo.loading}>

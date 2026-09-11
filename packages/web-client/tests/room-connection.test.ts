@@ -4,7 +4,12 @@ import { once } from "node:events";
 import { createServer } from "node:http";
 import { setTimeout as delay } from "node:timers/promises";
 import { WebSocketServer, type WebSocket as ServerWebSocket } from "ws";
-import { decodeGameFrame, encodeGameFrame, PbPhaseType } from "@gi-tcg/typings";
+import {
+  decodeGameFrame,
+  encodeGameFrame,
+  Notification,
+  PbPhaseType,
+} from "@gi-tcg/typings";
 import {
   RoomConnection,
   RoomConnectionError,
@@ -333,7 +338,7 @@ async function clientAwaitingFinalAck(server: RoomFixture) {
     onEvent: (event) => {
       if (
         event.type === "notification" &&
-        event.data[3] === PbPhaseType.GAME_END
+        Notification.decode(event.data).state?.phase === PbPhaseType.GAME_END
       )
         c.connection.markFinished();
     },
