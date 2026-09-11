@@ -1981,6 +1981,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
   /** 舍弃一张行动牌，并触发其“舍弃时”效果。 */
   discard(...cards: PlainEntityState[]) {
     for (const c of cards) {
+      if (!c) {
+        continue;
+      }
       const card = this.get(c);
       const cardState = card.latest();
       const area = card.area;

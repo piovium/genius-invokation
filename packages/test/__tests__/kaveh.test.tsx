@@ -41,3 +41,17 @@ test("kaveh deal damage after dispose card", async () => {
   c.expect(target).toHaveVariable({ health: 6 });
   c.expect($.my.combatStatus.def(DendroCore)).toBeExist();
 });
+
+test("kaveh burst scan with empty pile does nothing", async () => {
+  const c = setup(
+    <State currentTurn="opp">
+      <Character opp active />
+      <Character my def={Kaveh} />
+      <CombatStatus my def={DendroCore} usage={1} />
+      <CombatStatus my def={BurstScan} usage={1} />
+    </State>,
+  );
+  await c.stepToNextAction();
+  c.expect($.my.combatStatus.def(DendroCore)).toHaveVariable({ usage: 1 });
+  c.expect($.my.combatStatus.def(BurstScan)).toHaveVariable({ usage: 1 });
+});
