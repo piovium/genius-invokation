@@ -29,7 +29,7 @@ export function pinnedMemberPaths({ plan, platform = process.platform, arch = pr
   };
 }
 
-function crc32(buffer) {
+export function crc32(buffer) {
   let crc = ~0;
   for (const byte of buffer) {
     crc ^= byte;
@@ -84,13 +84,18 @@ export function readCentralDirectory(bytes) {
   return entries;
 }
 
+/** The platform-architecture string VS Code names a packed artifact with. */
+function platformTarget({ platform = process.platform, arch = process.arch } = {}) {
+  return `${platform}-${arch === 'arm' ? 'armhf' : arch}`;
+}
+
 /**
  * The name the extension's own pack script gives its artifact. The VSIX carries
  * build timestamps, so its container hash differs between runs: only the hash
  * of the artifact this run measured is ever meaningful.
  */
 export function vsixOutputName({ manifest, platform = process.platform, arch = process.arch }) {
-  const target = `${platform}-${arch === 'arm' ? 'armhf' : arch}`;
+  const target = platformTarget({ platform, arch });
   return `${manifest.name}-${manifest.version}-${target}.vsix`;
 }
 
@@ -148,7 +153,7 @@ export function inspectVsix({ file, expectedSha256, plan, identity = null,
     throw new Error('The VSIX manifest identity disagrees with its package.json');
   }
   if (attributes.Version !== manifest.version) throw new Error('The VSIX manifest version disagrees with its package.json');
-  const target = `${platform}-${arch === 'arm' ? 'armhf' : arch}`;
+  const target = platformTarget({ platform, arch });
   if (attributes.TargetPlatform && attributes.TargetPlatform !== target) {
     throw new Error(`The VSIX targets ${attributes.TargetPlatform} instead of ${target}`);
   }

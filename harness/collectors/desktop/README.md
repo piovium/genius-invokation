@@ -50,8 +50,8 @@ enforces.
 - `desktop-vsix.mjs` writes the packed extension. `packVsix` runs the product's
   own pack script through the sealed executor
   (`HARNESS_NODE $HARNESS_MANAGER --filter gamingts-vscode run pack <output>`)
-  and the `.vsix` lands inside the run directory. Nothing is ever located on
-  disk: an artifact a human left behind is not evidence. `inspectVsix` reads
+  and the `.vsix` lands inside the run directory. Nothing is ever accepted from
+  what happens to be on disk: an artifact a human left behind is not evidence.
   the VSIX as a ZIP and requires the reviewed member set, the pinned TNB
   package name and version, and the native addon hash the checkout was measured
   with. The container hash changes between runs, so only the hash of the

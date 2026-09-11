@@ -63,8 +63,6 @@ export const diagnosticSet = values => [...new Set(values.map(diagnosticKey))].s
 
 export const diagnosticCommands = { 'gts-lsp': ['textDocument/diagnostic'], tsserver: ['syntacticDiagnosticsSync', 'semanticDiagnosticsSync'] };
 
-
-
 /**
  * Replay the recorded native IPC into a timeline of the exact text each
  * language service received, and bind every editor diagnostic answer to it.
@@ -181,7 +179,7 @@ export function auditProtocol({ nativeRuns, report, services }) {
   return bindings;
 }
 
-const featureCommand = {
+export const featureCommand = {
   hover: 'vscode.executeHoverProvider',
   definition: 'vscode.executeDefinitionProvider',
   completion: 'vscode.executeCompletionItemProvider',
@@ -212,5 +210,3 @@ export function auditEditorRequests(report) {
   }
   return pairs;
 }
-
-
