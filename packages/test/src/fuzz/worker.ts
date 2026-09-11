@@ -1,4 +1,4 @@
-// Copyright (C) 2024-2025 Guyutongxue
+// Copyright (C) 2026 Piovium Labs
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -13,18 +13,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import type { JSX } from "#jsx/jsx-runtime";
-import { setAsyncContext } from "@gi-tcg/core";
-import { TestController } from "./controller";
-import { buildState } from "./dsl";
+import { runShard, type ShardConfig } from "./cli";
 
-export * from "./dsl";
+/**
+ * fork 出的分片子进程入口：argv[2] 为 JSON 编码的 ShardConfig。
+ * 父进程通过 `execArgv` 继承 gnx 的加载器参数，因此这里可以直接 import .ts/.gts。
+ */
 
-await setAsyncContext(true);
-
-/** 根据 JSX 状态描述构造对局并立即开始，返回测试控制器 */
-export function setup(state: JSX.Element): TestController {
-  const c = new TestController(buildState(state));
-  c._start();
-  return c;
-}
+const config = JSON.parse(process.argv[2]!) as ShardConfig;
+runShard(config).then(
+  () => process.exit(0),
+  (e) => {
+    console?.error?.(e);
+    process.exit(1);
+  },
+);

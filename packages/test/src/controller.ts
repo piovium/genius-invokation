@@ -35,7 +35,7 @@ import {
   QueryFn,
 } from "@gi-tcg/core";
 import { CardHandle, CharacterHandle, SkillHandle } from "@gi-tcg/core/data";
-import { Ref } from "./setup";
+import { Ref } from "./dsl";
 import { StatesMatcher } from "./matcher";
 
 class IoResultPromise extends Promise<TestController> {

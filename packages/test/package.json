@@ -1,13 +1,15 @@
 {
   "name": "@gi-tcg/test",
   "private": true,
+  "type": "module",
   "imports": {
     "#test": "./src/main.ts",
     "#jsx/jsx-runtime": "./src/jsx/jsx-runtime.ts",
     "#jsx/jsx-dev-runtime": "./src/jsx/jsx-runtime.ts"
   },
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "fuzz": "NODE_OPTIONS=--enable-source-maps gnx src/fuzz/cli.ts"
   },
   "dependencies": {
     "@gi-tcg/core": "workspace:*",
