@@ -244,7 +244,6 @@ export function exposeMutation(
     case "pushPhaseDamageLog":
     case "pushPhaseReactionLog":
     case "clearPhaseLogs":
-    case "resetVariables":
     case "switchActive": // We will manually handle this
       return null;
     case "setPlayerFlag": {
@@ -392,6 +391,16 @@ export function exposeMutation(
         variableName: m.varName,
         variableValue: m.value,
         direction,
+      };
+    }
+    case "resetVariables": {
+      if (m.scope !== "usagePerRound") {
+        return null;
+      }
+      return {
+        $case: "resetVariables",
+        entityId: m.state.id,
+        entityDefinitionId: m.state.definition.id,
       };
     }
     case "transformDefinition": {
