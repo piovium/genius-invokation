@@ -3,8 +3,13 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "lib": ["ESNext", "DOM"],
-    "types": ["node"],
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "types": [
+      "node"
+    ],
     "allowJs": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
@@ -16,5 +21,8 @@
     "strict": true,
     "noUncheckedIndexedAccess": true
   },
-  "include": ["src", "scripts"]
+  "include": [
+    "src",
+    "scripts"
+  ]
 }
