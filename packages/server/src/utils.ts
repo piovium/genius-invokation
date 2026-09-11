@@ -22,7 +22,7 @@ import { staticDecode, staticEncode } from "../generated/sharing";
 import deckMetadata from "../generated/deck-metadata";
 import { CURRENT_VERSION, VERSIONS, type Version } from "@gi-tcg/core";
 import { compare as semverCompare } from "semver";
-export { createGuestId, isGuestId } from "./auth/guest-id";
+export { createGuestId } from "./auth/guest-id";
 
 export enum DeckVerificationErrorCode {
   SizeError = "SizeError",

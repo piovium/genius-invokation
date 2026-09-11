@@ -22,7 +22,7 @@ export const isPositiveSafeInteger = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value > 0;
 
 /** Checks that the two claim fields every payload shape carries are present. */
-function hasSubject(
+function hasIdentityClaims(
   payload: unknown,
 ): payload is { user: unknown; sub: unknown } {
   return (
@@ -34,11 +34,13 @@ function hasSubject(
 }
 
 export function isUserJwtPayload(payload: unknown): payload is UserJwtPayload {
-  if (!hasSubject(payload) || payload.user !== 1) return false;
+  if (!hasIdentityClaims(payload) || payload.user !== 1) return false;
   return isPositiveSafeInteger(payload.sub);
 }
 export function isGuestJwtPayload(
   payload: unknown,
 ): payload is GuestJwtPayload {
-  return hasSubject(payload) && payload.user === 0 && isGuestId(payload.sub);
+  return (
+    hasIdentityClaims(payload) && payload.user === 0 && isGuestId(payload.sub)
+  );
 }

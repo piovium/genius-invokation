@@ -1,20 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { Game, CURRENT_VERSION, type RpcRequest } from "@gi-tcg/core";
+import { Game, type RpcRequest } from "@gi-tcg/core";
 import { RpcResponse as PbRpcResponse } from "@gi-tcg/typings";
 import { Player } from "./player";
-import { RoomCommandError, type RoomConfig, type RoomEvent } from "./types";
+import { RoomCommandError, type RoomEvent } from "./types";
+import { guestPlayerInfo, testRoomConfig } from "./test-support";
 
-const config: RoomConfig = {
-  initTotalActionTime: 45,
-  rerollTime: 40,
-  roundTotalActionTime: 60,
-  actionTime: 25,
-  watchable: false,
-  private: true,
-  allowGuest: true,
-  gameVersion: CURRENT_VERSION,
-};
+const config = testRoomConfig();
 const request: RpcRequest = { request: { $case: "switchHands", value: {} } };
 // Protobuf-encoded Response { switchHands: {} }, matching `request` above.
 const response = Uint8Array.of(0x12, 0);
@@ -26,17 +18,14 @@ const SESSION_ID = "session-test";
 const RPC_COUNT = 48;
 const RECOVERY_WINDOW = 32;
 const createPlayer = (id = "guest-test", sessionId = SESSION_ID) => {
-  const instance = new Player(
-    { id, isGuest: true, name: id, deck: { characters: [], cards: [] } },
-    sessionId,
-  );
+  const instance = new Player(guestPlayerInfo(id), sessionId);
   instance.setTimeoutConfig(config);
   return instance;
 };
 const hasCode = (code: RoomCommandError["code"]) => (error: unknown) =>
   error instanceof RoomCommandError && error.code === code;
 
-test("real Player accepts once synchronously across concurrent callers and replays its original ACK", async () => {
+test("real Player accepts one RPC, validates its response once and replays the same ACK", async () => {
   const instance = createPlayer();
   let accepted = 0;
   const pending = instance.rpc(request).then((value) => {
@@ -127,7 +116,7 @@ test("finished subscriptions expose the sync boundary and permit recovery of a l
   assert.equal(closed, true);
 });
 
-test("completing a player cancels outstanding IO and its timeout instead of retaining a game", async () => {
+test("completing a player rejects its outstanding IO and clears the current action", async () => {
   const instance = createPlayer();
   const pending = instance.rpc(request);
   const rejected = assert.rejects(pending, /Game finished/);

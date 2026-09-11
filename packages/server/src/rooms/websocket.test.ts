@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 import { createServer } from "node:http";
-import { CURRENT_VERSION, type RpcRequest } from "@gi-tcg/core";
+import type { RpcRequest } from "@gi-tcg/core";
 import { decodeGameFrame, encodeGameFrame } from "@gi-tcg/typings";
 import { createAuth } from "../auth/session";
 import { createGuestId } from "../auth/guest-id";
@@ -11,6 +11,8 @@ import {
   type RoomCommands,
 } from "../room-transport/websocket";
 import { Player } from "./player";
+import type { RoomEvent } from "./types";
+import { guestPlayerInfo, testRoomConfig } from "./test-support";
 
 const TEST_TIMEOUT_MS = 5000;
 const CONNECT_TIMEOUT_MS = 1000;
@@ -34,6 +36,9 @@ function asRecord(value: unknown): Record<string, unknown> {
   assert.ok(value && typeof value === "object" && !Array.isArray(value));
   return value as Record<string, unknown>;
 }
+
+/** The frames the client waits for: room events plus the transport's own replies. */
+type ReceivedFrameType = RoomEvent["type"] | "ready" | "ack" | "commandError";
 
 /** One message the test client received, and whether a waiter consumed it. */
 interface ReceivedMessage {
@@ -103,7 +108,7 @@ async function connect(url: string) {
           }),
         ),
       ),
-    next(type: string) {
+    next(type: ReceivedFrameType) {
       return new Promise<Record<string, unknown>>((resolve, reject) => {
         const timer = setTimeout(() => {
           waiters.delete(check);
@@ -138,24 +143,10 @@ async function connect(url: string) {
 async function fixture({ dropAck = false, watchable = false } = {}) {
   const playerId = createGuestId();
   const player = new Player(
-    {
-      isGuest: true,
-      id: playerId,
-      name: "WS test",
-      deck: { characters: [], cards: [] },
-    },
+    guestPlayerInfo(playerId, "WS test"),
     "real-player-session",
   );
-  player.setTimeoutConfig({
-    initTotalActionTime: 45,
-    rerollTime: 40,
-    roundTotalActionTime: 60,
-    actionTime: 25,
-    gameVersion: CURRENT_VERSION,
-    watchable,
-    private: true,
-    allowGuest: true,
-  });
+  player.setTimeoutConfig(testRoomConfig({ watchable }));
   const auth = createAuth({
     users: {
       create: async () => {
