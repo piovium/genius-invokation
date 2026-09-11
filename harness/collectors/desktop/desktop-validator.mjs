@@ -228,7 +228,7 @@ function validatePackedVsix({ packed, directory, plan, contract, nonce, identity
   const installed = inspectInstalledExtension({ extensionPath: installedDirectory.directory, vsix: vsixPackage, plan });
   assert(installed.version === vsixPackage.version, 'The installed extension version differs from the VSIX');
   assert(path.resolve(checked.developmentPath ?? '') === path.resolve(installedDirectory.directory),
-    'The packed VSIX launch did not load the directory its VSIX was installed into');
+  'The packed VSIX launch did not load the directory its VSIX was installed into');
   const packedReport = readRawEvidence(directory, packed.report);
   const packedValue = readJsonFile(packedReport.file);
   assert(packedValue.runNonce === nonce && packedValue.cycles === contract.policy.desktopEditRounds
@@ -242,7 +242,7 @@ function validatePackedVsix({ packed, directory, plan, contract, nonce, identity
   for (const [route, service] of Object.entries(services)) {
     assert(service.observedIdentity.native.length === 1
       && service.observedIdentity.native[0].sha256 === identity.nativeAddonSha256,
-      `The installed extension's ${route} service loaded another native addon`);
+    `The installed extension's ${route} service loaded another native addon`);
     assert(service.observedIdentity.packageVersion === contract.tnbVersion,
       `The installed extension's ${route} service loaded another compiler`);
   }
@@ -344,3 +344,5 @@ export async function validate(observation, { contract, expectations, root, dire
 }
 
 export { fileKey };
+
+

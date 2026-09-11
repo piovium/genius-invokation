@@ -236,3 +236,4 @@ export async function launchDesktop({ core, root, contract, plan, directory, mod
   if (record.logs.some(log => log.sha256 === null)) throw new Error('The VS Code launch is missing an expected raw log');
   return record;
 }
+
