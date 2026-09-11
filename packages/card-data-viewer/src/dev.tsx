@@ -54,6 +54,19 @@ function App() {
             },
             attachment: [],
           },
+          {
+            id: -500004,
+            definitionId: 313001,
+            hasUsagePerRound: false,
+            variableName: "usage",
+            variableValue: 2,
+            equipment: 3,
+            definitionCost: [],
+            tags: 0,
+            type: 6,
+            descriptionDictionary: {},
+            attachment: [],
+          },
         ],
       },
       [
@@ -91,18 +104,18 @@ function App() {
     //     },
     //   ],
     // });
-    showState("entity", {
-      id: -5000001,
-      definitionId: 113041,
-      definitionCost: [],
-      tags: 0,
-      descriptionDictionary: {},
-      hasUsagePerRound: false,
-      variableName: "usage",
-      variableValue: 2,
-      type: 4,
-      attachment: []
-    });
+    // showState("entity", {
+    //   id: -5000001,
+    //   definitionId: 113041,
+    //   definitionCost: [],
+    //   tags: 0,
+    //   descriptionDictionary: {},
+    //   hasUsagePerRound: false,
+    //   variableName: "usage",
+    //   variableValue: 2,
+    //   type: 4,
+    //   attachment: [],
+    // });
     // showCard(212111);
     // showCharacter(1610);
     // showSkill(12111);

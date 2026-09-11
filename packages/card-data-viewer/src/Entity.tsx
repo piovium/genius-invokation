@@ -59,6 +59,36 @@ export function Character(props: CardDataProps) {
     () => [props.input.definitionId, assetsManager()] as const,
     ([defId, manager]) => manager.getData(defId) as Promise<CharacterRawData>,
   );
+  const equipmentDefinitionIds = createMemo(
+    () =>
+      state()
+        ?.entity.filter((entity) => typeof entity.equipment === "number")
+        .map((entity) => entity.definitionId) ?? [],
+  );
+  const [equipmentData] = createResource(
+    () => {
+      const definitionIds = equipmentDefinitionIds();
+      return definitionIds.length
+        ? ([definitionIds, assetsManager()] as const)
+        : undefined;
+    },
+    ([definitionIds, manager]) =>
+      Promise.all(
+        definitionIds.map(
+          (definitionId) =>
+            manager.getData(definitionId) as Promise<EntityRawData>,
+        ),
+      ),
+  );
+  const skills = createMemo(() => [
+    ...(data()?.skills ?? []),
+    ...(equipmentData()?.flatMap((equipment) =>
+      (equipment.skills ?? []).filter(
+        (skill) =>
+          skill.type === "GCG_SKILL_TAG_VEHICLE" && !skill.hidden,
+      ),
+    ) ?? []),
+  ]);
   const hpText = createMemo(() => {
     const st = state();
     if (st) {
@@ -92,7 +122,7 @@ export function Character(props: CardDataProps) {
               </dl>
               <Tags tags={data().tags} />
               <ul class="flex flex-col gap-[0.5em]">
-                <For each={data().skills}>
+                <For each={skills()}>
                   {(skill) => (
                     <Show when={!skill.hidden}>
                       <Skill
