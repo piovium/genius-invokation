@@ -16,6 +16,8 @@ import {
 } from "@gi-tcg/typings";
 import { checkDice } from "@gi-tcg/utils";
 import {
+  CLOSE_INTERNAL_ERROR,
+  CLOSE_NORMAL,
   RoomCommandError,
   type CommandAck,
   type Initialized,
@@ -96,7 +98,7 @@ export class Player implements PlayerIO {
       try {
         subscriber.send(event);
       } catch {
-        subscriber.close(1011, "DELIVERY_FAILED");
+        subscriber.close(CLOSE_INTERNAL_ERROR, "DELIVERY_FAILED");
         this.subscribers.delete(subscriber);
       }
     }
@@ -349,13 +351,18 @@ export class Player implements PlayerIO {
     this.emit(this.latestError);
   }
   onInitialized(who: 0 | 1, game: Game, opponent: Player) {
+    const config = this.timeoutConfig;
+    if (config === null)
+      throw new Error(
+        "Player timeouts must be configured before the room starts",
+      );
     this.who = who;
     this.game = game;
     this.opponent = opponent;
     this.initialized = {
       type: "initialized",
       who,
-      config: this.timeoutConfig,
+      config,
       myPlayerInfo: this.playerInfo,
       oppPlayerInfo: opponent.playerInfo,
     };
@@ -367,11 +374,11 @@ export class Player implements PlayerIO {
     this.pending?.cancel(new Error(GAME_FINISHED_MESSAGE));
     this.game = null;
     this.opponent = null;
-    this.closeSubscribers(1000, "GAME_FINISHED");
+    this.closeSubscribers(CLOSE_NORMAL, "GAME_FINISHED");
   }
   dispose() {
     this.complete();
-    this.closeSubscribers(1000, "ROOM_RELEASED");
+    this.closeSubscribers(CLOSE_NORMAL, "ROOM_RELEASED");
     this.latestNotification = null;
     this.latestError = null;
     this.accepted.clear();

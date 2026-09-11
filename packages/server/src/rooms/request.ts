@@ -78,11 +78,11 @@ function describeValue(value: unknown): string {
   return truncateEcho(String(value));
 }
 
-/** Caps an echoed value at `MAX_ECHOED_VALUE_LENGTH` characters. */
+/** Caps an echoed value at `MAX_ECHOED_VALUE_LENGTH` characters, ellipsis included. */
 function truncateEcho(text: string): string {
   return text.length <= MAX_ECHOED_VALUE_LENGTH
     ? text
-    : `${text.slice(0, MAX_ECHOED_VALUE_LENGTH)}...`;
+    : `${text.slice(0, MAX_ECHOED_VALUE_LENGTH - 3)}...`;
 }
 
 /** Absent and `null` mean the same thing for every optional room field. */

@@ -7,6 +7,9 @@ import { isJsonObject, type Auth } from "../auth/session";
 import type { Rooms } from "../rooms/rooms";
 import { parsePlayerId, parseRoomId } from "../rooms/ids";
 import {
+  CLOSE_INTERNAL_ERROR,
+  CLOSE_POLICY_VIOLATION,
+  CLOSE_TRY_AGAIN_LATER,
   RoomCommandError,
   type PlayerId,
   type RoomEvent,
@@ -16,16 +19,10 @@ import {
 const MAX_UNAUTHENTICATED = 128;
 const MAX_BUFFERED_BYTES = 512 * 1024;
 const MAX_FRAME_BYTES = 64 * 1024;
-const MAX_TOKEN_LENGTH = 4_096;
 const AUTH_TIMEOUT_MS = 5_000;
 const PING_INTERVAL_MS = 10_000;
 const HEARTBEAT_INTERVAL_MS = 30_000;
 const CLOSE_DEADLINE_MS = 1_000;
-
-/** RFC 6455 close codes: a rejected peer, a broken transport, or backpressure. */
-const CLOSE_POLICY_VIOLATION = 1008;
-const CLOSE_INTERNAL_ERROR = 1011;
-const CLOSE_TRY_AGAIN_LATER = 1013;
 
 /** `ws` reports a finished shutdown through a callback; promisify it to await one. */
 const closeWebSocketServer = promisify(WebSocketServer.prototype.close);
@@ -120,7 +117,7 @@ function actingPlayer(state: Connection, action: string): PlayerId {
   return state.visitor;
 }
 
-export interface RoomSocketHandlers {
+interface RoomSocketHandlers {
   open(socket: Socket): void;
   message(socket: Socket, message: unknown): void;
   close(socket: Socket): void;
@@ -132,7 +129,7 @@ export interface RoomWebSocketServer {
 }
 
 /** No application frames are emitted before the immutable authenticated binding. */
-export function createRoomSocketHandlers(
+function createRoomSocketHandlers(
   rooms: RoomCommands,
   auth: AuthVerifier,
 ): RoomSocketHandlers {
@@ -181,7 +178,7 @@ export function createRoomSocketHandlers(
     control: ControlFrame | null,
   ) {
     const token = control?.type === "auth" ? control.token : undefined;
-    if (typeof token !== "string" || token.length > MAX_TOKEN_LENGTH) {
+    if (typeof token !== "string") {
       close(raw, state, CLOSE_POLICY_VIOLATION, "AUTH_REQUIRED");
       return;
     }

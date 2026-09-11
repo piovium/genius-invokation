@@ -33,7 +33,7 @@ export type RpcTimer = GameRpcTimer;
 export interface Initialized {
   type: "initialized";
   who: 0 | 1;
-  config: RoomConfig | null;
+  config: RoomConfig;
   myPlayerInfo: PlayerInfo;
   oppPlayerInfo: PlayerInfo;
 }
@@ -58,6 +58,12 @@ export interface RoomSubscriber {
   send(event: RoomEvent): void;
   close(code: number, reason: string): void;
 }
+
+/** RFC 6455 close codes, named once for the room layer and its transport. */
+export const CLOSE_NORMAL = 1000;
+export const CLOSE_POLICY_VIOLATION = 1008;
+export const CLOSE_INTERNAL_ERROR = 1011;
+export const CLOSE_TRY_AGAIN_LATER = 1013;
 
 /** Why a room command was refused; the transport echoes the code to the client. */
 type CommandFailure =

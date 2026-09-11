@@ -62,9 +62,7 @@ async function waitFor(
 function receiveNotification(bytes: unknown, binary: boolean): Uint8Array {
   assert.equal(binary, true);
   const frame = decodeGameFrame(new Uint8Array(bytes as Buffer));
-  assert.equal(frame.type, "notification");
-  if (frame.type !== "notification")
-    throw new Error("Expected a notification frame");
+  assert.ok(frame.type === "notification", "Expected a notification frame");
   return frame.data;
 }
 

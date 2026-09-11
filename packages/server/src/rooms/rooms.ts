@@ -57,7 +57,6 @@ import {
   type RoomSubscriber,
   type CommandAck,
 } from "./types";
-export type { PlayerId } from "./types";
 
 /** Replay uploads are opt-in: without an endpoint there is nowhere to put them. */
 const replayEndpoint = process.env.S3_ENDPOINT;
