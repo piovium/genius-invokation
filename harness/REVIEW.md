@@ -1,5 +1,19 @@
 # Harness 约束审查
 
+## 2.8.0 可选 Volar 辅助依赖接线与 harness 等价风格整理
+
+本版把 `harness/local.json` 中已声明却从未接线的 `volar` 键接通，并落地两个只读批次的等价风格整理。gate 定义、阈值、角色边界、基线与既有断言一律未动；contract 只改版本号。
+
+**缺陷（实测，均已修正并补上用例）。**（1）新用例调用 `assert.notMatch`，而 `node:assert/strict` 只有 `assert.doesNotMatch`，该用例因此从未真正执行过。（2）漂移用例的 fixture 写入 `grammar.spec.ts.snap`，而身份扫描只哈希 `ts/tsx/mts/cts/js/mjs/cjs/json`，改写它不会改变身份，用例空转。（3）`volarReference` 无条件执行 `git status --porcelain=v1 --untracked-files=all`：本机 `C:\Users\Administrator\.git` 是一个仓库，`%TEMP%` 下的夹具因此落在它的工作树内，git 向上走到该仓库并枚举整个用户目录，`node harness/cli.mjs selftest` 以 120 s 超时在 197/212 处截断；现在只有 `git rev-parse --show-toplevel` 等于该目录自身时才记录 revision 与工作树状态，否则如实记 null，并新增一条“只落在别的仓库内部时记 null 身份”的回归用例。（4）已配置但缺席的 checkout 原本用提前 `return BLOCKED`，会盖过同一轮里真实的 guard 失败，现改为记入 BLOCKED 理由，使 FAIL 仍优先。
+
+**独立复核。** 第一轮独立复核（`artifacts/volar-style-landing-review/review.md`）在 digest `6d134ec5…` 上各项全部 APPROVE：范围仅限封存控制文件与 `HARNESS.md` 的版本段落；契约只改版本号，基线、gate 定义、阈值、期望模式的 `pattern` 与全部数值边界、既有断言均未改动；两批风格改动在非 Volar 文件上与独立暂存的 `after/` 字节一致，`core.mjs`／`runner.mjs` 的差异仅为 Volar 接线，`runner.mjs` 中删除的 `result.status === 'PASS' &&` 经核对为恒真死条件；自根校验确实阻止了祖先仓库回溯（复核方独立复现：修复前会把 `C:\Users\Administrator` 当作依赖身份并枚举其工作树，修复后如实记 null）；缺席记 BLOCKED、漂移记 FAIL，guard 失败优先于缺席 BLOCKED，不存在 FAIL→BLOCKED／PASS 的路径。
+
+复核同时指出一处必须处理的不确定性：身份扫描原先还受 1.5 s 墙钟预算约束，而校验器逐字段比对 `files`／`scannedFiles`，负载下同一个未改动的 checkout 会得到不同身份（复核方在同一进程内四次调用得到四个不同结果），配置 `volar` 后会把截断读成漂移并误判 FAIL。本版据此把扫描改为确定性的文件数上限（对排序后的候选取前 2000 个），截断由 `scanned`／`scannedFiles` 如实披露，并新增“同一棵树重扫可复现”与“guard 失败优先于缺席 BLOCKED”两条用例；确认轮（`artifacts/volar-style-landing-review/confirm.md`）只读复核该 delta。
+
+**seal 与自测。** 版本 2.7.0 → 2.8.0，seal 覆盖 71 个受控文件，`verify` PASS，`selftest` 219/219（0 fail/skip/todo）。
+
+**残余（记录在案，本版不处理）。**（a）`HARNESS_VOLAR_ROOT` 因 `runtimeEnvironment` 共用而出现在每个 gate 的运行时环境里，只有 tnb-guards 会读它，与 `HARNESS_MANAGER`／`HARNESS_NPM` 同属既有的共享模式。（b）身份扫描按排序后的前 2000 个文件截断：截断本身确定且可复现，但超出上限的部分不进入 `files`，即该 checkout 在未扫描区间内的漂移不被身份覆盖，观测以 `scanned:false` 与 `scannedFiles` 披露这一点。（c）`status --untracked-files=all` 在大 checkout 上仍可能耗时（受 300 s 枚举预算约束），且要求该 checkout 自身就是仓库根。（d）采集器记录的 `volarChangedDuringRun` 只进入观测，校验器不单独消费它（validator 通过重推身份覆盖同一事实）。（e）“IO 层重推身份不判漂移”的用例在临时 checkout 上仍会先因 TNB 依赖不可解析而 BLOCKED，因此它只证明身份本身不会造成 FAIL，没有走通重推一致的正向分支。（f）计数上限本身没有用例覆盖：夹具需超过 2000 个文件，而本机每文件哈希约 20 ms（实测 2005 个空文件建树 1.2 s、扫描 40 s），远超自测预算，因此上限行为只在带外验证；“墙钟改为计数”这一改动同样无法在不注入时钟的前提下用单测钉住。（g）`catch { rows.push([relative, 'unreadable']) }` 这条回退使身份依赖瞬时文件占用：某个文件在两次扫描之间被占用（或安全软件介入）会改变身份并被读成漂移；方向保守（宁可 FAIL），但不是确定性输入。（h）身份扫描在本机约 20 ms/文件（Volar checkout 的 485 个源文件约 10 s），而 `snapshot` 在 run 开始、结束与 `verifyReceipt` 各执行一次，接线 `volar` 后每个 run 因此增加约 30 s 固定开销。
+
 ## 2.7.0 tnb-guards 采集器登记
 
 协调者登记 `tnb-guards` gate 的采集器／校验器／期望值：在固定 TNB checkout 内用 `HARNESS_NODE` 执行四个既有 guard（`check:lib`、`check:enums`、`check:go-as-guards`、`check:sourcefile-guard`），原始日志按 `tnb-guards-` 前缀落盘并哈希。校验器只从原始日志与实时解析的 git 状态重新推导，拒绝仅声明 `status` 的观测、被跳过或隐藏的子进程、零命中报告、缺哈希／被改／越界日志以及错误 gate 的证据；期望值把通过绑到 pin（`6.0.3-bridge.16.tsgo.7.0.2`、子模块 `050880ce…`／`2bd066d8…`）。契约里该 gate 原有的 `blocked` 声明随登记移除，其余 gate 的声明、policy、roles、repositories 与基线一律未动。

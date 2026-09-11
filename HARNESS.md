@@ -1,6 +1,6 @@
 # Genius Invokation → TNB / tsgo：执行与验收契约
 
-版本：2.7.0。日期：2026-09-11。**核心 harness 已完成自测及独立复核，`contract.phase = "migration"`；产品迁移进行中，尚未验收。**
+版本：2.8.0。日期：2026-09-11。**核心 harness 已完成自测及独立复核，`contract.phase = "migration"`；产品迁移进行中，尚未验收。**
 
 用户最新授权是“差不多就可以开干，你自己衡量进度”。协调者完成核心自测和独立复核后，可以审查并修改 phase、更新 seal、重新验证，然后生成新的多 agent 任务启动迁移，无需再次请求用户确认。此前中断的旧任务不得直接恢复。harness 自测成功、环境探测成功都不等于产品迁移成功。
 
@@ -79,6 +79,8 @@ GTS 已有 [PR #14](https://github.com/piovium/gts/pull/14)，分支 `origin/fix
 2.5.0 登记编辑器交付面的采集器，不改动任何 gate 依赖、阈值、角色边界、基线或既有断言。`desktop` 从 BLOCKED 变为可执行，由 `harness/collectors/desktop/` 执行：目标已改绑到 GTS checkout（仓库根与 `examples` 两个工作区），开发路径（`--extensionDevelopmentPath`）与打包安装 VSIX 两种模式由同一套参数不变式区分并交叉拒绝，VSIX 必须由本次 run 内的产品 pack 脚本产出，其原始 stdout／stderr、哈希、安装结果与解出的成员都留在运行目录；共享的 Linux 进程树清理接在每次启动的 `finally` 上并把结果写进启动记录，win32 仍由封存的 job object 负责并在记录里说明。collector 只记录原始证据、从不写状态字段；validator 从这些记录与磁盘重新推导结论，并按独立复核收紧了三条打包侧判据（VSIX 宿主的可执行文件必须同时等于封存的目标路径与其当前哈希；打包步骤的可执行文件与 argv[0] 必须分别是 Node 与包管理器的形状；probe 清理以恢复记录的绝对路径核对且该目录必须不存在），各配一条负例自测固定。其中运行时与包管理器只核对路径形状与文件名，不核对身份，连同其余残余写在 REVIEW。原始记录仍只是运行目录里的文件，所以这个 gate 证明的是封存的采集器与校验器就本次测量记录达成一致，不是操作系统层面的“编辑器进程确实存在过”，信任边界与 §4 相同。100 轮、两平台、`timeoutMs` 1800000 与 `gts-engine`／`gts-build` 前置保持不变。同一批把 desktop 采集器目录里扫描到的 9 个带 CRLF 行尾的文件归一为 LF（该状态无法从 Git 复原，因为 blob 一直是 LF；复核只能确认结论侧：当前 66 个封存文件都不含 CR 字节，整份 checkout 往返比较通过）：封存按工作树字节计算，而 Git 依 `* text=auto eol=lf` 在 checkout 时写出 LF，这种混入不会出现在 `git status`，却会让“真实 checkout 字节不变”的自测失败。已知残余本版不改：`gts-lsp` expectations 里的 `asyncpreemptoff=1` 片段只证明 TNB 自己的守卫执行过并打印（`tsgoChecker.ts` 在写 `BRIDGE_LOAD` 前刚设置该变量），不证明 Go 运行时在本进程内接受了它；`harness/core.mjs` 一处恒真判断是无害死代码。两者连同复核指出的其余残余写在 REVIEW。
 
 2.6.0 修正打包安装的实际执行方式，并按独立复核再收紧三条打包侧判据，不改动任何 gate 定义、阈值、角色边界、基线或既有断言。此前 `packed-vsix-install` 禁止 `--extensionDevelopmentPath`，而 VS Code 只在环境同时带 `extensionDevelopmentLocationURI` 与 `extensionTestsLocationURI` 时才加载扩展测试驱动（`extensionHostProcess.js` 的 `_doHandleExtensionTests` 在两者缺一时抛 6047），前者只能来自 `--extensionDevelopmentPath`，因此该模式的驱动从不运行、packed 侧只能空转。现在安装先由编辑器 CLI 入口执行（应用二进制忽略 `--install-extension` 只开窗，`bin/code.cmd` 也以 `ELECTRON_RUN_AS_NODE=1` 调用 `out/cli.js`），再把解出的已安装目录作为该模式的开发路径，测量字节因此仍是 VSIX 自身的字节；两种模式的启动规则由封存 `desktop-plan.json` 的逐模式表驱动，采集器与 validator 各自读同一张表。复核同时收紧三条：安装进程记录的可执行文件必须等于封存的 CLI 入口路径（字节相同的副本也拒绝）；两种模式的封存 common 参数由“允许”改为“必需”；packed 宿主的 `testFile`／`testSha256` 必须等于封存驱动与其当前哈希。三条各配一条负例自测（26→29），全量自测 197/197 PASS。残余（参数只校验 flag 名不校验值时配对、驱动哈希绑定当前磁盘而非 sealed 基线、安装真实性仍是自报证据）均属既有设计，本版不动，写在 REVIEW。
+
+2.8.0 接通已声明却从未接线的可选 `volar` 局部依赖，并落地两批只读的等价风格整理；gate 定义、阈值、角色边界、基线与既有断言一律未动。runner 一直接受 `harness/local.json` 的 `volar` 键，却在构造运行时路径时把它滤掉，因此没有任何环节导出 `VOLAR_ROOT`，`check:sourcefile-guard` 只能如实报 `missing volar/vue` 而保持 BLOCKED。现在该键被解析为一条辅助依赖：run 的前后快照记录一份有界身份（解析后的路径、该 checkout 自身的 Git revision 与工作树状态、以及对决定 guard 工作量的源文件所作的限额扫描），`HARNESS_VOLAR_ROOT` 交给 tnb-guards 采集器，且仅在目录确实存在时作为 guard 自己的 `VOLAR_ROOT` 覆盖传入；缺失时该变量被省略，guard 的 `missing volar/vue` 分支照常运行，gate 仍是 BLOCKED 而非 PASS。身份只承认“本身即仓库根”的 checkout，否则 `git -C` 会向上走到无关的祖先仓库、把它当作依赖身份，并对整棵外部工作树做无界枚举。校验器要求落盘重推的身份与记录一致（不一致即 FAIL）；已配置但缺席的 checkout 记入 BLOCKED 理由而不是提前返回，以免盖过同一轮里真实的 guard 失败。风格整理只做死代码与未用导入的删除、重复表达式收敛到单一出处、重复字面量合并为局部助手。自测 212 → 219，`selftest` 219/219 PASS。
 
 ## 4. Seal、证据与本地权限边界
 
