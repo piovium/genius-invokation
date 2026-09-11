@@ -1,5 +1,13 @@
 # Harness 约束审查
 
+## 2.7.0 tnb-guards 采集器登记
+
+协调者登记 `tnb-guards` gate 的采集器／校验器／期望值：在固定 TNB checkout 内用 `HARNESS_NODE` 执行四个既有 guard（`check:lib`、`check:enums`、`check:go-as-guards`、`check:sourcefile-guard`），原始日志按 `tnb-guards-` 前缀落盘并哈希。校验器只从原始日志与实时解析的 git 状态重新推导，拒绝仅声明 `status` 的观测、被跳过或隐藏的子进程、零命中报告、缺哈希／被改／越界日志以及错误 gate 的证据；期望值把通过绑到 pin（`6.0.3-bridge.16.tsgo.7.0.2`、子模块 `050880ce…`／`2bd066d8…`）。契约里该 gate 原有的 `blocked` 声明随登记移除，其余 gate 的声明、policy、roles、repositories 与基线一律未动。
+
+独立复核（`artifacts/tnb-guards-review/review.md`）六项全 APPROVE：范围仅新增五个文件与 contract 的 adapter／`blocked` 改动；无任何既有断言、阈值、policy 或基线被削弱；合成观测证明校验器非透传；runner 对退出 0 的采集器才进入校验（失败→FAIL，已复核的不可用前置→BLOCKED，不会因非零退出被误判为 BLOCKED）；pin 与 `HARNESS.md` §2 一致；`node --test harness/tests/tnb-guards.test.mjs` 15/15。seal 覆盖新增五文件，重 seal 后 `verify` PASS（digest `c044d503…`）、`selftest` 212/212。
+
+本机没有已复核的 Volar checkout，`check:sourcefile-guard` 实测退出 1 并报 `missing volar/vue`，因此该 gate 目前如实报 BLOCKED，而不是 PASS；提供该依赖后四个 guard 可全部执行。其 PASS 仍只能来自集成树上的 runner 回执。
+
 ## 2.1.1 子模块边界修复与 CLI 采集器登记
 
 网页 worker 独立复核并批准此增量。职责、基线、gate、数量、平台、超时与原有断言均未更改；contract 仅更新版本并登记 data/checks 采集器。

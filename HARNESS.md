@@ -1,6 +1,6 @@
 # Genius Invokation → TNB / tsgo：执行与验收契约
 
-版本：2.4.0。日期：2026-09-10。**核心 harness 已完成自测及独立复核，`contract.phase = "migration"`；产品迁移进行中，尚未验收。**
+版本：2.7.0。日期：2026-09-11。**核心 harness 已完成自测及独立复核，`contract.phase = "migration"`；产品迁移进行中，尚未验收。**
 
 用户最新授权是“差不多就可以开干，你自己衡量进度”。协调者完成核心自测和独立复核后，可以审查并修改 phase、更新 seal、重新验证，然后生成新的多 agent 任务启动迁移，无需再次请求用户确认。此前中断的旧任务不得直接恢复。harness 自测成功、环境探测成功都不等于产品迁移成功。
 
@@ -136,16 +136,16 @@ Worker 交接包含生成的任务文件、精确 revision／diff、依赖产物
 
 ## 8. Harness 自身仍缺的验收工具
 
-以下 gate 在 contract 中已声明 `blocked`。它们是协调者尚未交付的验收工具，不是产品缺口，也不能被任何文档、计划、fixture 或探测升级为通过；只有全部实现并通过独立复核与重新 seal，`finish` 才可能给出 PASS。`gts-lsp` 已于 2.4.0 登记、`desktop` 已于 2.5.0 登记，两者都不再属于本表。
+以下 gate 在 contract 中已声明 `blocked`。它们是协调者尚未交付的验收工具，不是产品缺口，也不能被任何文档、计划、fixture 或探测升级为通过；只有全部实现并通过独立复核与重新 seal，`finish` 才可能给出 PASS。`gts-lsp` 已于 2.4.0 登记、`desktop` 已于 2.5.0 登记、`tnb-guards` 已于 2.7.0 登记，三者都不再属于本表。
 
 | gate | 还缺什么 |
 | --- | --- |
 | coverage | main 仓库 195 个 GTS 文件的逐路径 program 观测，以及当前／历史／未被 import／跨包消费的负例与修复场景 |
 | memory | 会话内存采集器；按服务采样不足以证明编辑器进程树总体内存 |
 | clean-install | 全新 checkout 的安装、检查、构建与工作区 SDK 选择证据 |
-| tnb-guards、tnb-witnesses、tnb-navigation、tnb-volar | 四个 TNB 采集器；guard 输出与 witness wiring 都不等于实际执行 |
+| tnb-witnesses、tnb-navigation、tnb-volar | 三个 TNB 采集器；witness wiring 输出与 `check:sim-nav` 的参数都不等于实际执行 |
 | platforms | 跨平台能力采集器；win32 已在本机准备，linux 仍需可用运行时与对应负例 |
 
-分批推进：`gts-lsp`（2.4.0）与 `desktop`（2.5.0）的采集器已登记；其余先 platforms，再 coverage、memory、clean-install，最后 TNB 四件。采集器的期望值必须依据接近最终的产品状态生成，因此它们与产品修复并行推进，而不是提前冻结。登记只表示“可以执行”，真实通过仍只能来自 runner 在集成树上的回执。
+分批推进：`gts-lsp`（2.4.0）、`desktop`（2.5.0）与 `tnb-guards`（2.7.0）的采集器已登记；其余先 platforms，再 coverage、memory、clean-install，最后 TNB 其余三件。采集器的期望值必须依据接近最终的产品状态生成，因此它们与产品修复并行推进，而不是提前冻结。登记只表示“可以执行”，真实通过仍只能来自 runner 在集成树上的回执。
 
 本文件规定目标和执行约束。实际自测结果见 REVIEW 与 runner 回执；未执行的产品 gates 不得由文档、计划、fixture 或探测成功升级为 PASS。
