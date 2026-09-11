@@ -79,14 +79,15 @@ export async function listenHttp(
         duplex: "half",
         signal: abort.signal,
       };
+      // Route on the request target alone: Elysia 1.4 misses every route when
+      // the URL authority is a bare host shorter than four characters, and the
+      // Host header that would supply one is client-controlled.
+      const { pathname, search } = new URL(
+        incoming.url ?? "/",
+        "http://localhost",
+      );
       const response = await handler(
-        new Request(
-          new URL(
-            incoming.url ?? "/",
-            `http://${incoming.headers.host ?? "localhost"}`,
-          ),
-          init,
-        ),
+        new Request(new URL(`${pathname}${search}`, "http://localhost"), init),
       );
       if (bodyTooLarge) {
         await response.body?.cancel();

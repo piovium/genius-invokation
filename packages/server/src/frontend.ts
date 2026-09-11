@@ -20,6 +20,7 @@ import { lookup } from "mrmime";
 import { resolve, sep } from "node:path";
 import { createHash } from "node:crypto";
 import { IS_BETA, WEB_CLIENT_BASE_PATH } from "@gi-tcg/config";
+import { apiMount } from "./mount";
 
 const PLACEHOLDERS = {
   head: "<!-- server:head -->",
@@ -79,12 +80,8 @@ export function createFrontendHandler({
   beta = IS_BETA,
 } = {}) {
   const root = resolve(directory);
-  // Must normalize to the same mount that `createApplication` gives the API.
-  const segments = basePath.split("/").filter(Boolean);
-  const base = `/${segments.join("/")}${segments.length ? "/" : ""}`;
-  const rootPath = base === "/" ? "/" : base.slice(0, -1);
   // The API subtree under the mount is served by Elysia, not this handler.
-  const apiBase = base + "api";
+  const { base, apiBase, rootPath } = apiMount(basePath);
   let index: Promise<{ body: string; etag: string }> | undefined;
   return async (request: Request): Promise<Response> => {
     if (request.method !== "GET" && request.method !== "HEAD")

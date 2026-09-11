@@ -26,8 +26,8 @@ export interface RoomMetricsSnapshot {
   };
 }
 
-export type RoomMetricsProvider =
-  (() => RoomMetricsSnapshot) | (() => Promise<RoomMetricsSnapshot>);
+export type RoomMetricsProvider = () =>
+  RoomMetricsSnapshot | Promise<RoomMetricsSnapshot>;
 
 export interface Metrics {
   setRoomMetricsProvider(provider: RoomMetricsProvider): void;

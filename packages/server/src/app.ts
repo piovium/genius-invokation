@@ -31,6 +31,7 @@ import { createGamesRoutes } from "./games/routes";
 import { createMetricsRoutes } from "./metrics/routes";
 import { createRoomsRoutes } from "./rooms/routes";
 import { createFrontendHandler } from "./frontend";
+import { apiMount } from "./mount";
 import { errorResponse, errorStatus } from "./errors";
 import { listenHttp, type HttpListenOptions } from "./http-server";
 import { attachRoomWebSocketServer } from "./room-transport/websocket";
@@ -51,8 +52,7 @@ export function createApplication({
   const games = createGames(database, metrics);
   const auth = createAuth({ users, secret });
   const rooms = createRooms(users, decks, games, metrics);
-  const segments = basePath.split("/").filter(Boolean);
-  const prefix = `/${segments.join("/")}${segments.length ? "/" : ""}api`;
+  const { apiBase: prefix } = apiMount(basePath);
   const app = new Elysia({
     adapter: node(),
     strictPath: false,
