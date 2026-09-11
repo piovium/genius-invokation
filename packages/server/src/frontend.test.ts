@@ -1,10 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, dirname, join, resolve } from "node:path";
+import { join } from "node:path";
 import { createFrontendHandler } from "./frontend";
 import { listenHttp, type HttpServerHandle } from "./http-server";
+import { removeScratchDirectory } from "./test-support";
 
 const SCRATCH_PREFIX = "gi-frontend-test-";
 const SCRIPT_BODY = "console.log('fixture');";
@@ -61,12 +62,6 @@ test("real file responses honor the base path and cover MIME types, cache valida
     }
   } finally {
     await server?.stop();
-    // Guard the recursive delete so only the scratch folder we created is removed.
-    if (
-      dirname(resolve(folder)) !== resolve(tmpdir()) ||
-      !basename(folder).startsWith(SCRATCH_PREFIX)
-    )
-      throw new Error("Unexpected temporary frontend path");
-    await rm(folder, { recursive: true, force: true });
+    await removeScratchDirectory(folder, SCRATCH_PREFIX);
   }
 });

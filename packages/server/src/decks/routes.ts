@@ -14,25 +14,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Elysia, t } from "elysia";
-import type { Deck } from "@gi-tcg/typings";
 import { VERSIONS } from "@gi-tcg/core";
-import type { PaginationDto } from "../utils";
 import { identity } from "../auth/identity";
 import type { Auth } from "../auth/session";
 import { notFound } from "../errors";
 import { deckSchema, idSchema, nameSchema, paginationSchema } from "../http";
 import type { Decks } from "./decks";
-
-export interface DeckDto extends Deck {}
-export interface CreateDeckDto extends DeckDto {
-  name: string;
-}
-export type UpdateDeckDto = Partial<
-  Pick<CreateDeckDto, "name" | "characters" | "cards">
->;
-export interface QueryDeckDto extends PaginationDto {
-  requiredVersion?: number;
-}
 
 const deckBodySchema = t.Object({ ...deckSchema, name: nameSchema });
 const deckIdParamsSchema = t.Object({ deckId: idSchema });
@@ -47,6 +34,11 @@ const updateDeckBodySchema = t.Object({
   characters: t.Optional(deckSchema.characters),
   cards: t.Optional(deckSchema.cards),
 });
+
+/** The schemas above are the wire contract, so the DTOs are their own types. */
+export type CreateDeckDto = typeof deckBodySchema.static;
+export type UpdateDeckDto = typeof updateDeckBodySchema.static;
+export type QueryDeckDto = typeof deckQuerySchema.static;
 
 export function createDecksRoutes(decks: Decks, auth: Auth) {
   return new Elysia({ prefix: "/decks" })

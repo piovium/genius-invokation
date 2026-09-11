@@ -21,11 +21,6 @@ import { notFound } from "../errors";
 import { idSchema, nameSchema } from "../http";
 import type { Users } from "./users";
 
-export interface UpdateUserInfoDto {
-  chessboardColor?: string | null;
-  name?: string | null;
-}
-
 /** Board colors are stored as an opaque `#rrggbb` string. */
 const CHESSBOARD_COLOR_PATTERN = "^#[0-9a-fA-F]{6}$";
 
@@ -35,6 +30,9 @@ const updateUserInfoSchema = t.Object({
     t.Union([t.String({ pattern: CHESSBOARD_COLOR_PATTERN }), t.Null()]),
   ),
 });
+
+/** The schema above is the wire contract, so the DTO is its own type. */
+export type UpdateUserInfoDto = typeof updateUserInfoSchema.static;
 
 const idParamsSchema = t.Object({ id: idSchema });
 

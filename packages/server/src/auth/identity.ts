@@ -7,24 +7,21 @@ import type { Auth } from "./session";
  * Verifies the request's bearer token and returns its payload; `null` when the
  * header is missing or unusable.
  */
-export function readIdentity(request: Request, auth: Auth): JwtPayload | null {
+function readIdentity(request: Request, auth: Auth): JwtPayload | null {
   const [scheme, token] =
     request.headers.get("authorization")?.split(" ") ?? [];
   return scheme === "Bearer" && token ? auth.verify(token) : null;
 }
 
 /** Throws 401 unless the request carries a valid token of any kind. */
-export function requireIdentity(request: Request, auth: Auth): JwtPayload {
+function requireIdentity(request: Request, auth: Auth): JwtPayload {
   const identity = readIdentity(request, auth);
   if (!identity) throw unauthorized();
   return identity;
 }
 
 /** Throws 401 unless the request carries a registered account's token. */
-export function requireUserIdentity(
-  request: Request,
-  auth: Auth,
-): UserJwtPayload {
+function requireUserIdentity(request: Request, auth: Auth): UserJwtPayload {
   const identity = requireIdentity(request, auth);
   if (!isUserJwtPayload(identity)) throw unauthorized();
   return identity;

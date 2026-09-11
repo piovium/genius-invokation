@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { CURRENT_VERSION, VERSIONS } from "@gi-tcg/core";
@@ -12,6 +12,7 @@ import type {
 } from "@gi-tcg/assets-manager";
 import { generateDeckMetadata } from "../scripts/deck-metadata";
 import metadata from "../generated/deck-metadata";
+import { removeScratchDirectory } from "./test-support";
 
 const root = path.resolve(import.meta.dirname, "..");
 const assetsRoot = path.resolve(root, "../assets-manager");
@@ -168,13 +169,7 @@ test("source and dist generation agree, and the copied codec and share map match
     for (const record of obtainable)
       assert.equal(shareMap[record.shareId!], record.id);
   } finally {
-    // Guard the recursive delete so only the scratch folder we created is removed.
-    if (
-      path.dirname(path.resolve(folder)) !== path.resolve(tmpdir()) ||
-      !path.basename(folder).startsWith(SCRATCH_PREFIX)
-    )
-      throw new Error("Unexpected generated test folder");
-    await rm(folder, { recursive: true, force: true });
+    await removeScratchDirectory(folder, SCRATCH_PREFIX);
   }
 });
 

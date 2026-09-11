@@ -45,7 +45,8 @@ export interface Decks {
 }
 
 /**
- * Encodes a deck and reports the oldest core version that can replay it.
+ * Encodes a deck and reports the index of the oldest game version that can
+ * replay it.
  * Database-free, so fixtures can exercise it without a server.
  */
 export async function deckToCode(deck: Deck): Promise<DeckWithVersion> {

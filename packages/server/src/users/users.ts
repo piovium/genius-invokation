@@ -33,12 +33,10 @@ export interface UserInfo {
 }
 
 /** The account columns an update reports back. */
-export interface UpdatedUserInfo {
-  id: number;
-  name: string | null;
-  chessboardColor: string | null;
-  createdAt: Date;
-}
+export type UpdatedUserInfo = Pick<
+  UserModel,
+  "id" | "name" | "chessboardColor" | "createdAt"
+>;
 
 export interface Users {
   findById(id: number): Promise<UserInfo | null>;

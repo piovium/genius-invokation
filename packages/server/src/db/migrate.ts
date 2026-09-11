@@ -133,9 +133,8 @@ export async function migrateDatabase(
       const applied: string[] = [];
       const adopted: string[] = [];
       if (existing.populated && appliedHashes.size === 0) {
-        // Tables without a migration log: adopt them, but only once the live
-        // schema is exactly what these migrations create.
-        await verifyDeployedSchema(tx);
+        // Tables without a migration log are adopted as a whole; the schema
+        // check below validates them before this transaction commits.
         adopted.push(...pending.map((source) => source.name));
       } else {
         for (const source of pending) {
@@ -219,7 +218,10 @@ function matchesExpectedDefault(
   return columnDefault === null;
 }
 
-/** Referential actions as the one-letter codes `pg_constraint` stores. */
+/**
+ * The `pg_constraint` columns a shipped foreign key must match: its kind, and
+ * the ON UPDATE / ON DELETE action codes.
+ */
 const FOREIGN_KEY_CODES = { contype: "f", confupdtype: "c", confdeltype: "r" };
 
 /** A constraint the shipped DDL creates, as `pg_constraint` describes it. */

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { Category } from "@gi-tcg/assets-manager";
+import { ALL_CATEGORIES } from "@gi-tcg/assets-manager";
 
 const serverRoot = path.resolve(import.meta.dirname, "..");
 const assetsRoot = path.resolve(serverRoot, "../assets-manager");
@@ -10,12 +10,6 @@ const DIST_DATA_DIRECTORY = "dist/data";
 const MANIFEST_FORMAT_VERSION = 1;
 /** Manifest file name: written here, and copied into the build output by build.ts. */
 export const MANIFEST_FILE_NAME = "deck-metadata-manifest.json";
-const categories = [
-  "action_cards",
-  "characters",
-  "entities",
-  "keywords",
-] as const satisfies readonly Category[];
 const metadataFields = [
   "id",
   "shareId",
@@ -81,7 +75,7 @@ export async function generateDeckMetadata({
   const duplicateIds: { id: number; ignoredCategory: string }[] = [];
   const sourceHashes: Record<string, string> = {};
   const idsByShareId = new Map<number, number>();
-  for (const category of categories) {
+  for (const category of ALL_CATEGORIES) {
     const relative = `CHS/${category}.json`;
     const text = await readFile(path.join(dataDirectory, relative), "utf8");
     sourceHashes[relative] = hash(text);
