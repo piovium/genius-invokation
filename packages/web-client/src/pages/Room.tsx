@@ -45,6 +45,7 @@ import { MobileChessboardLayout } from "../layouts/MobileChessboardLayout";
 import type { CancellablePlayerIO } from "@gi-tcg/core";
 import { useAuth } from "../auth";
 import { useI18n } from "../i18n";
+import { BACKEND_BASE_URL } from "../config";
 import {
   RoomConnection,
   RoomConnectionError,
@@ -249,7 +250,7 @@ function ConnectedRoom() {
 
   const socketUrl = (watchingPlayerId: string | number) =>
     roomWebSocketUrl(
-      axios.defaults.baseURL ?? "/api/",
+      BACKEND_BASE_URL,
       id,
       watchingPlayerId,
       window.location.href,

@@ -4,7 +4,7 @@
 
 ## 实现约定
 
-路由、请求校验、鉴权、错误处理与插件组合统一采用 Elysia 原生写法：路由由插件组合而成，校验使用 `t`，鉴权与共享状态使用 `derive`/`resolve`/`macro`，错误使用 `status` 与 `error`。运行时固定为 Node.js，数据访问统一经由 Drizzle 与 PostgreSQL。
+路由、请求校验、鉴权、错误处理与插件组合统一采用 Elysia 原生写法：路由由插件组合而成，校验使用 `t`，鉴权与共享状态由 `macro` 注入的 `resolve` 提供，错误统一使用 `status`。运行时固定为 Node.js，数据访问统一经由 Drizzle 与 PostgreSQL。
 
 ## 开发与构建
 

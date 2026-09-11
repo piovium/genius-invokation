@@ -15,17 +15,12 @@
 
 import { Elysia, status } from "elysia";
 import { identity } from "../auth/identity";
-import type { JwtPayload, UserJwtPayload } from "../auth/jwt";
+import { isUserJwtPayload } from "../auth/jwt";
 import type { Auth } from "../auth/session";
 import { unauthorized } from "../errors";
 import { parseRoomId } from "./ids";
 import { parseCreateRoom, parseJoinRoom } from "./request";
 import type { Rooms } from "./rooms";
-
-/** Registered accounts are the only callers whose token carries `user: 1`. */
-function isRegistered(identity: JwtPayload | null): identity is UserJwtPayload {
-  return identity?.user === 1;
-}
 
 /**
  * The room API. Every handler names the token it needs: browsing and joining
@@ -35,13 +30,17 @@ function isRegistered(identity: JwtPayload | null): identity is UserJwtPayload {
 export const createRoomsRoutes = (rooms: Rooms, auth: Auth) =>
   new Elysia({ prefix: "/rooms" })
     .use(identity(auth))
-    .get("/", ({ identity }) => rooms.getAllRooms(!isRegistered(identity)), {
-      identity: true,
-    })
+    .get(
+      "/",
+      ({ identity }) => rooms.getAllRooms(!isUserJwtPayload(identity)),
+      {
+        identity: true,
+      },
+    )
     .post(
       "/",
       async ({ identity, body }) => {
-        if (isRegistered(identity))
+        if (isUserJwtPayload(identity))
           return status(
             201,
             await rooms.createRoomFromUser(
@@ -74,7 +73,7 @@ export const createRoomsRoutes = (rooms: Rooms, auth: Auth) =>
       ({ identity, params }) => {
         const roomId = parseRoomId(params.roomId);
         const room = rooms.getRoom(roomId);
-        if (!isRegistered(identity) && !room.config.allowGuest)
+        if (!isUserJwtPayload(identity) && !room.config.allowGuest)
           throw unauthorized(`Room ${roomId} does not allow guests`);
         return room;
       },
@@ -98,7 +97,7 @@ export const createRoomsRoutes = (rooms: Rooms, auth: Auth) =>
       "/:roomId/players",
       async ({ identity, params, body }) => {
         const roomId = parseRoomId(params.roomId);
-        if (isRegistered(identity)) {
+        if (isUserJwtPayload(identity)) {
           await rooms.joinRoomFromUser(
             identity.sub,
             roomId,
