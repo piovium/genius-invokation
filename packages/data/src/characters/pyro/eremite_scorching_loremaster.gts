@@ -53,7 +53,7 @@ define combatStatus {
  */
 define card {
   id 123031 as SpiritOfOmenPyroScorpion;
-  since "v5.1.0";
+  since "v4.3.0";
   undiscoverable;
   technique {
     tags barrier;

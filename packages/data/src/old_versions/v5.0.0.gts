@@ -68,7 +68,8 @@ define skill {
  */
 define status {
   id 123033 as private PyroScorpionGuardianStance;
-  until "v5.0.0";
+  // v5.1.0 之后该状态被删去，手动将其标记为“主”版本
+  since "v4.3.0";
   conflictWith 123034;
   on decreaseDamaged {
     when :(
@@ -91,7 +92,8 @@ define status {
  */
 define status {
   id 123034 as private PyroScorpionGuardianStance01;
-  until "v5.0.0";
+  // v5.1.0 之后该状态被删去，手动将其标记为“主”版本
+  since "v4.3.0";
   conflictWith 123033;
   on decreaseDamaged {
     when :(

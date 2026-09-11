@@ -514,7 +514,10 @@ export class CharacterSkillModel extends InitiativeSkillModel {
     if (this.reserved) {
       return RESERVED;
     } else if (this.passiveSkillEntry) {
-      return this.passiveSkillEntry;
+      return {
+        ...this.passiveSkillEntry,
+        version: this.versionInfo ?? DEFAULT_VERSION_INFO,
+      };
     } else {
       return {
         type: "initiativeSkill",
