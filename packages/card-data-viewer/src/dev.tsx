@@ -26,50 +26,41 @@ function App() {
       locale: () => "zh-CN"
     });
   onMount(() => {
-    showState(
-      "character",
-      {
-        id: -500001,
-        definitionId: 1212,
-        aura: 0,
-        defeated: false,
-        health: 5,
-        maxHealth: 100,
-        energy: 2,
-        maxEnergy: 2,
-        tags: 0,
-        entity: [
-          {
-            id: -500002,
-            definitionId: 312015,
-            hasUsagePerRound: false,
-            variableName: "usage",
-            variableValue: 3,
-            equipment: 1,
-            definitionCost: [],
-            tags: 0,
-            type: 2,
-            descriptionDictionary: {
-              "[GCG_TOKEN_SHIELD]": "1",
-            },
-            attachment: [],
+    const skillId = Number(
+      new URLSearchParams(location.search).get("skill") ?? 12121,
+    );
+    showSkill(skillId, {
+      characterEntities: [
+        {
+          id: -500002,
+          definitionId: 312015,
+          hasUsagePerRound: false,
+          variableName: "usage",
+          variableValue: 3,
+          equipment: 1,
+          definitionCost: [],
+          tags: 0,
+          type: 2,
+          descriptionDictionary: {
+            "[GCG_TOKEN_SHIELD]": "1",
           },
-          {
-            id: -500004,
-            definitionId: 313001,
-            hasUsagePerRound: false,
-            variableName: "usage",
-            variableValue: 2,
-            equipment: 3,
-            definitionCost: [],
-            tags: 0,
-            type: 6,
-            descriptionDictionary: {},
-            attachment: [],
-          },
-        ],
-      },
-      [
+          attachment: [],
+        },
+        {
+          id: -500004,
+          definitionId: 313001,
+          hasUsagePerRound: false,
+          variableName: "usage",
+          variableValue: 2,
+          equipment: 3,
+          definitionCost: [],
+          tags: 0,
+          type: 6,
+          descriptionDictionary: {},
+          attachment: [],
+        },
+      ],
+      combatStatuses: [
         {
           id: -500003,
           definitionId: 111,
@@ -83,7 +74,7 @@ function App() {
           attachment: [],
         },
       ],
-    );
+    });
     // showState("card", {
     //   id: -5000001,
     //   definitionId: 330005,

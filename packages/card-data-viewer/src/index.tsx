@@ -39,7 +39,7 @@ import { translator } from "@solid-primitives/i18n";
 export interface RegisterResult {
   readonly CardDataViewer: () => JSX.Element;
   readonly showCharacter: (id: number, opt?: ShowCardDataViewerOption) => void;
-  readonly showSkill: (id: number, opt?: ShowCardDataViewerOption) => void;
+  readonly showSkill: (id: number, opt?: ShowSkillDataViewerOption) => void;
   readonly showCard: (id: number, opt?: ShowCardDataViewerOption) => void;
   readonly showState: {
     (
@@ -71,6 +71,11 @@ export interface ShowCardDataViewerOption {
   includesImage?: boolean;
 }
 
+export interface ShowSkillDataViewerOption extends ShowCardDataViewerOption {
+  characterEntities?: PbEntityState[];
+  combatStatuses?: PbEntityState[];
+}
+
 export function createCardDataViewer(
   option: CreateCardDataViewerOption = {},
 ): RegisterResult {
@@ -83,6 +88,7 @@ export function createCardDataViewer(
   const [shown, setShown] = createSignal(false);
   const [mainImageDefId, setMainImageDefId] = createSignal<number | null>(null);
   const [inputs, setInputs] = createSignal<ViewerInput[]>([]);
+  const [inlineSubEntities, setInlineSubEntities] = createSignal(false);
 
   const showDef = (
     definitionId: number,
@@ -90,6 +96,7 @@ export function createCardDataViewer(
     opt?: ShowCardDataViewerOption,
   ) => {
     setMainImageDefId(opt?.includesImage ? definitionId : null);
+    setInlineSubEntities(false);
     setInputs([
       {
         from: "definitionId",
@@ -124,6 +131,7 @@ export function createCardDataViewer(
           shown={shown()}
           inputs={inputs()}
           mainImageDefId={mainImageDefId()}
+          inlineSubEntities={inlineSubEntities()}
         />
       </AssetsContext.Provider>
     ),
@@ -133,8 +141,28 @@ export function createCardDataViewer(
     showCharacter: (id: number, opt?: ShowCardDataViewerOption) => {
       showDef(id, "character", opt);
     },
-    showSkill: (id: number, opt?: ShowCardDataViewerOption) => {
-      showDef(id, "skill", opt);
+    showSkill: (id: number, opt?: ShowSkillDataViewerOption) => {
+      const characterEntities = opt?.characterEntities ?? [];
+      const combatStatuses = opt?.combatStatuses ?? [];
+      setMainImageDefId(opt?.includesImage ? id : null);
+      setInlineSubEntities(
+        !!(opt?.characterEntities || opt?.combatStatuses),
+      );
+      setInputs([
+        {
+          from: "definitionId",
+          definitionId: id,
+          type: "skill",
+        },
+        ...characterEntities.map((st) =>
+          mapStateToInput(
+            st,
+            typeof st.equipment === "number" ? "equipment" : "status",
+          ),
+        ),
+        ...combatStatuses.map((st) => mapStateToInput(st, "combatStatus")),
+      ]);
+      setShown(true);
     },
     showState: (
       type: StateType,
@@ -151,6 +179,7 @@ export function createCardDataViewer(
       setMainImageDefId(
         options?.includesImage === false ? null : state.definitionId,
       );
+      setInlineSubEntities(false);
       setInputs([
         // main item
         mapStateToInput(state, type),

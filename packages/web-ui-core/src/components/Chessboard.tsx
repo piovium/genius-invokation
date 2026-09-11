@@ -1021,7 +1021,7 @@ type SelectingItem = (
     }
   | {
       type: "skill";
-      info: SkillInfo & { id: number };
+      info: SkillInfo & { id: number; who: 0 | 1; characterId?: number };
     }
   | {
       type: "externalCard";
@@ -1106,7 +1106,18 @@ export function Chessboard(props: ChessboardProps) {
     } else if (item.type === "entity") {
       dataViewerController.showState("entity", item.info.data);
     } else if (item.type === "skill") {
-      dataViewerController.showSkill(item.info.id);
+      const player = localProps.data.state.player[item.info.who];
+      const character = player.character.find(
+        (character) => character.id === item.info.characterId,
+      );
+      if (item.info.isTechnique || !character) {
+        dataViewerController.showSkill(item.info.id);
+      } else {
+        dataViewerController.showSkill(item.info.id, {
+          characterEntities: character.entity,
+          combatStatuses: player.combatStatus,
+        });
+      }
     } else if (item.type === "externalCard") {
       if (typeof item.info === "number") {
         dataViewerController.showCard(item.info, {
@@ -1749,7 +1760,16 @@ export function Chessboard(props: ChessboardProps) {
         localProps.onStepActionState?.(step, selectedDiceValue());
       }
     } else {
-      setSelectingItem({ type: "skill", info: { ...sk, id: sk.id } });
+      setSelectingItem({
+        type: "skill",
+        info: {
+          ...sk,
+          id: sk.id,
+          who: localProps.who,
+          characterId:
+            localProps.data.state.player[localProps.who].activeCharacterId,
+        },
+      });
       const step = localProps.actionState?.availableSteps.find(
         (s) => s.type === "clickSkillButton" && s.skillId === sk.id,
       );
@@ -1763,7 +1783,13 @@ export function Chessboard(props: ChessboardProps) {
     setShowDeclareEndButton(false);
     setSelectingItem({
       type: "skill",
-      info: { ...sk, id: sk.id as number },
+      info: {
+        ...sk,
+        id: sk.id as number,
+        who: flip(localProps.who),
+        characterId:
+          localProps.data.state.player[flip(localProps.who)].activeCharacterId,
+      },
     });
     setFocusingHands(false);
     setShowCardHint("myHand", null);

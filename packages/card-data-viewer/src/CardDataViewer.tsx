@@ -55,6 +55,7 @@ export type ViewerInput =
 export interface CardDataViewerProps {
   inputs: ViewerInput[];
   mainImageDefId: number | null;
+  inlineSubEntities: boolean;
 }
 
 export interface CardDataViewerContainerProps extends CardDataViewerProps {
@@ -116,6 +117,41 @@ function CardDataViewer(props: CardDataViewerProps) {
     setExplainKeyword((prev) => (prev === definitionId ? null : definitionId));
   };
 
+  const SubEntityList = () => (
+    <div class="flex flex-col gap-[0.5em] not-first:mt-[0.5em]">
+      <For each={subEntities()}>
+        {(entity) => (
+          <Switch>
+            <Match when={typeof entity === "string" && entity}>
+              {(entityType) => (
+                <h3
+                  class="w-full text-center rounded-full entity-category"
+                  bool:data-show-combine-button={showCombineButton(
+                    entityType(),
+                  )}
+                  onClick={() => {
+                    if (showCombineButton(entityType())) {
+                      setCombineCharEntities((v) => !v);
+                    }
+                  }}
+                >
+                  {t(entityType())}
+                </h3>
+              )}
+            </Match>
+            <Match when={true}>
+              <Entity
+                input={entity as ViewerInput}
+                asChild
+                onRequestExplain={onRequestExplain}
+              />
+            </Match>
+          </Switch>
+        )}
+      </For>
+    </div>
+  );
+
   return (
     <div class="gi-tcg-card-data-viewer reset">
       <ErrorBoundary
@@ -152,43 +188,15 @@ function CardDataViewer(props: CardDataViewerProps) {
           {(input) => (
             <div class="card-panel">
               <Skill input={input} onRequestExplain={onRequestExplain} />
+              <Show when={props.inlineSubEntities && subEntities().length}>
+                <SubEntityList />
+              </Show>
             </div>
           )}
         </For>
-        <Show when={subEntities()?.length}>
+        <Show when={!props.inlineSubEntities && subEntities().length}>
           <div class="card-panel">
-            <div class="flex flex-col gap-[0.5em]">
-              <For each={subEntities()}>
-                {(entity) => (
-                  <Switch>
-                    <Match when={typeof entity === "string" && entity}>
-                      {(entityType) => (
-                        <h3
-                          class="w-full text-center rounded-full entity-category"
-                          bool:data-show-combine-button={showCombineButton(
-                            entityType(),
-                          )}
-                          onClick={() => {
-                            if (showCombineButton(entityType())) {
-                              setCombineCharEntities((v) => !v);
-                            }
-                          }}
-                        >
-                          {t(entityType())}
-                        </h3>
-                      )}
-                    </Match>
-                    <Match when={true}>
-                      <Entity
-                        input={entity as ViewerInput}
-                        asChild
-                        onRequestExplain={onRequestExplain}
-                      />
-                    </Match>
-                  </Switch>
-                )}
-              </For>
-            </div>
+            <SubEntityList />
           </div>
         </Show>
         <Show when={explainKeyword()}>
