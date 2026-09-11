@@ -17,10 +17,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { launchArguments } from './desktop-launch.mjs';
 import { bindNativeServices, readNativeRuns, sha256, validateDesktopLifetimes } from './desktop-evidence.mjs';
 import { assertIdentity, resolveCheckoutIdentity } from './desktop-identity.mjs';
-import { auditEditorRequests, auditProtocol } from './desktop-protocol.mjs';
+import { auditEditorRequests, auditProtocol, featureCommand } from './desktop-protocol.mjs';
 import { deriveDesktopTrace } from './desktop-observations.mjs';
 import { deriveDesktopScenarios } from './desktop-scenarios.mjs';
-import { inspectInstalledExtension, inspectVsix, installedExtensionDirectory, vsixOutputName } from './desktop-vsix.mjs';
+import { crc32, inspectInstalledExtension, inspectVsix, installedExtensionDirectory, vsixOutputName } from './desktop-vsix.mjs';
 
 export const TEST_NONCE = 'synthetic-desktop-selftest-not-acceptance';
 
@@ -45,15 +45,6 @@ function writeSettings(profile, tsdk) {
     'typescript.tsserver.log': 'verbose', 'typescript.tsdk': tsdk,
   }));
 }
-
-const crc32 = buffer => {
-  let crc = ~0;
-  for (const byte of buffer) {
-    crc ^= byte;
-    for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
-  }
-  return ~crc >>> 0;
-};
 
 /** Build a real ZIP archive (mixed stored/deflated) from a member map. */
 export function buildZip(members) {
@@ -122,13 +113,6 @@ function featurePositions(descriptor, text) {
     completion: safe(at + 1), signature: safe(at + 1),
   };
 }
-
-const featureCommand = {
-  hover: 'vscode.executeHoverProvider',
-  definition: 'vscode.executeDefinitionProvider',
-  completion: 'vscode.executeCompletionItemProvider',
-  signature: 'vscode.executeSignatureHelpProvider',
-};
 
 /** The tsserver reply shape the raw VS Code command returns. */
 export function diagnosticCommandsFor(items) {
@@ -471,11 +455,11 @@ export function buildDesktopFixture({ root, directory = path.join(root, 'run'), 
   function commit() {
     const capture = relative => ({ file: relative, sha256: sha256(fs.readFileSync(path.join(directory, relative))) });
     const executions = [];
-    for (const host of fixture.hosts) {
+    const writeHostRecords = ({ host, nativeDirectory, mode, installedExtension = null, beforeLaunch = () => {} }) => {
       const workspaceDirectory = host.workspaceDirectory;
-      const nativeDirectory = path.join(workspaceDirectory, 'native');
       fs.rmSync(nativeDirectory, { recursive: true, force: true });
       fs.rmSync(host.probe, { recursive: true, force: true });
+      beforeLaunch();
       write(path.join(workspaceDirectory, 'report.json'), json(host.report));
       for (const [pid, rows] of host.nativeByPid) {
         write(path.join(nativeDirectory, `desktop-native-${pid}.jsonl`), `${rows.map(row => JSON.stringify(row)).join('\n')}\n`);
@@ -491,8 +475,13 @@ export function buildDesktopFixture({ root, directory = path.join(root, 'run'), 
         skipped: false, workspaceId: host.workspaceId, probe: host.probe,
         removed: plan.probeFiles, modified: [], recoveredAtMs: host.completedAtMs,
       }));
-      const launch = buildLaunchRecord({ mode: 'development-path', host });
+      const launch = buildLaunchRecord({ mode, host, vsix: mode === 'packed-vsix-install' ? host.vsixPath : null, installedExtension });
       write(path.join(workspaceDirectory, 'desktop-launch.json'), json(launch));
+      return launch;
+    };
+    for (const host of fixture.hosts) {
+      const nativeDirectory = path.join(host.workspaceDirectory, 'native');
+      const launch = writeHostRecords({ host, nativeDirectory, mode: 'development-path' });
       const nativeRuns = readNativeRuns(nativeDirectory, nonce, contract.policy.reportLimitBytes);
       const services = bindNativeServices({ nativeRuns, report: host.report, version: pin,
         activation: plan.native.activationPattern, routes: plan.native.requiredRoutes });
@@ -500,7 +489,7 @@ export function buildDesktopFixture({ root, directory = path.join(root, 'run'), 
         workspaceId: host.workspaceId, workspacePath: host.workspacePath, workspaceUri: host.workspaceUri,
         probe: host.probeRelative, sourceBindings: host.sourceBindings, sources: host.sourceBindings, support,
         report: host.report, reportFile: `${host.workspaceId}/report.json`,
-        reportSha256: sha256(fs.readFileSync(path.join(workspaceDirectory, 'report.json'))),
+        reportSha256: sha256(fs.readFileSync(path.join(host.workspaceDirectory, 'report.json'))),
         sourcesFile: capture(`${host.workspaceId}/desktop-sources.json`),
         targetFile: capture(`${host.workspaceId}/desktop-target.json`),
         launchFile: capture(`${host.workspaceId}/desktop-launch.json`),
@@ -516,39 +505,22 @@ export function buildDesktopFixture({ root, directory = path.join(root, 'run'), 
       const host = fixture.packedHost;
       const packedDirectory = host.workspaceDirectory;
       const nativeDirectory = path.join(packedDirectory, 'native');
-      fs.rmSync(nativeDirectory, { recursive: true, force: true });
-      fs.rmSync(host.probe, { recursive: true, force: true });
-      writeBytes(host.vsixPath, buildZip(host.members));
       const installedRoot = path.join(packedDirectory, 'extensions',
         `${extensionManifest.publisher}.${extensionManifest.name}-${extensionManifest.version}`.toLowerCase());
-      fs.rmSync(installedRoot, { recursive: true, force: true });
-      for (const [name, text] of Object.entries(host.members)) {
-        if (!name.startsWith('extension/')) continue;
-        const relative = name.slice('extension/'.length);
-        const content = relative === 'package.json'
-          ? Buffer.from(json({ ...JSON.parse(text),
-              __metadata: { installedTimestamp: host.completedAtMs, source: path.basename(host.vsixPath) } }))
-          : (Buffer.isBuffer(text) ? text : Buffer.from(text));
-        writeBytes(path.join(installedRoot, relative), content);
-      }
-      write(path.join(packedDirectory, 'report.json'), json(host.report));
-      for (const [pid, rows] of host.nativeByPid) {
-        write(path.join(nativeDirectory, `desktop-native-${pid}.jsonl`), `${rows.map(row => JSON.stringify(row)).join('\n')}\n`);
-      }
-      write(path.join(packedDirectory, 'desktop-sources.json'), json({
-        workspaceId: host.workspaceId, probe: host.probe, sources: host.sourceBindings, support,
-      }));
-      write(path.join(packedDirectory, 'desktop-target.json'), json({
-        workspacePath: host.workspacePath, healthStatement: 'health 10', files: host.files,
-        logicalUris: host.logicalUris, probe: host.probeRelative,
-      }));
-      write(path.join(packedDirectory, 'desktop-recovery.json'), json({
-        skipped: false, workspaceId: host.workspaceId, probe: host.probe,
-        removed: plan.probeFiles, modified: [], recoveredAtMs: host.completedAtMs,
-      }));
-      const launch = buildLaunchRecord({ mode: 'packed-vsix-install', host, vsix: host.vsixPath,
-        installedExtension: installedRoot });
-      write(path.join(packedDirectory, 'desktop-launch.json'), json(launch));
+      const launch = writeHostRecords({ host, nativeDirectory, mode: 'packed-vsix-install',
+        installedExtension: installedRoot, beforeLaunch: () => {
+          writeBytes(host.vsixPath, buildZip(host.members));
+          fs.rmSync(installedRoot, { recursive: true, force: true });
+          for (const [name, text] of Object.entries(host.members)) {
+            if (!name.startsWith('extension/')) continue;
+            const relative = name.slice('extension/'.length);
+            const content = relative === 'package.json'
+              ? Buffer.from(json({ ...JSON.parse(text),
+                  __metadata: { installedTimestamp: host.completedAtMs, source: path.basename(host.vsixPath) } }))
+              : (Buffer.isBuffer(text) ? text : Buffer.from(text));
+            writeBytes(path.join(installedRoot, relative), content);
+          }
+        } });
       const vsix = { file: `packed-vsix/${path.basename(host.vsixPath)}`,
         sha256: sha256(fs.readFileSync(host.vsixPath)), bytes: fs.statSync(host.vsixPath).size };
       const vsixPackage = inspectVsix({ file: host.vsixPath, expectedSha256: vsix.sha256, plan, identity });
