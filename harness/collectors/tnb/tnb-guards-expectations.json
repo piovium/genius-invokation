@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "description": "Reviewed expectations for the tnb-guards gate. It fixes the pinned repository inputs the pass is tied to (the checked-out TNB revision, the two submodule revisions and the exact bridge version) and, for each of the four existing TNB `check:*` guards, the exact scripts that must run, the exact completion report each script must print, and the real counts that must not collapse to zero. The collector only records raw child processes and files; the validator re-derives every claim from those raw, hash-checked logs and from git.",
+  "tnbVersion": "6.0.3-bridge.16.tsgo.7.0.2",
+  "submodules": {
+    "typescript": "050880ce59e30b356b686bd3144efe24f875ebc8",
+    "typescript-go": "2bd066d87f5bafd315be9f40889d0a60b9e58e0b"
+  },
+  "guards": [
+    {
+      "id": "check:lib",
+      "description": "Overlay/submodule sync, bundle shape and skeleton-imports guards. Each script is a separate observed child so a short-circuited later child cannot be hidden behind an earlier one.",
+      "commands": [
+        {
+          "script": "tools/check-lib-sync.mjs",
+          "required": [
+            "^check:lib-sync ok \\("
+          ],
+          "forbidden": [
+            "check:lib-sync failed:"
+          ]
+        },
+        {
+          "script": "tools/check-bundle-shape.mjs",
+          "required": [
+            "^check:bundle-shape ok \\("
+          ],
+          "forbidden": [
+            "check:bundle-shape failed:"
+          ]
+        },
+        {
+          "script": "tools/check-skeleton-imports.mjs",
+          "required": [
+            "^check:skeleton-imports ok \\("
+          ],
+          "forbidden": [
+            "check:skeleton-imports failed:"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "check:enums",
+      "description": "Fork/tsgo enum divergence remap guard. PASS without the exposed-enum coverage registry and without any auto-discovered SyntaxKind-scalar getter is a zero-match report and cannot pass.",
+      "commands": [
+        {
+          "script": "tools/check-enum-remap.mjs",
+          "required": [
+            "^PASS: every divergent, consumer-exposed enum field is remapped or validly exempt\\.$",
+            "^Auto-discovered SyntaxKind-scalar getters in node decoder: (?!\\(none\\))",
+            "^[a-z][\\w.]*\\s+(?:SyntaxKind|NodeFlags|ModifierFlags|TokenFlags|SymbolFlags|TypeFlags|ObjectFlags|SignatureFlags|ElementFlags|ScriptKind|FlowFlags|CheckFlags)\\s+"
+          ],
+          "forbidden": [
+            "^FAIL: [0-9]+ enum-remap coverage problem"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "check:go-as-guards",
+      "description": "Go As*() cast-family guard. The families are derived from the post-patch types.go and every reachable site is scanned; the sites-checked count is the review-frozen workload and may not silently drop to zero.",
+      "commands": [
+        {
+          "script": "tools/check-go-as-guards.mjs",
+          "required": [
+            "^VERDICT: PASS \\([0-9]+ sites checked\\)$"
+          ],
+          "forbidden": [
+            "^VERDICT: FAIL",
+            "^FAIL: "
+          ],
+          "counts": [
+            {
+              "label": "sites",
+              "pattern": "^VERDICT: PASS \\(([0-9]+) sites checked\\)$",
+              "min": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "check:sourcefile-guard",
+      "description": "Native SourceFile RPC liveness/spike guard (vue-tsc workload). It must run to completion: a missing vitest run summary, a zero total RPC count or a getSourceFile spike above the frozen ceiling is a failure, never a skip.",
+      "commands": [
+        {
+          "script": "tools/check-sourcefile-guard.mjs",
+          "required": [
+            "^check:sourcefile-guard ok \\(totalRpc=[0-9]+, getSourceFileRpc=[0-9]+, baseline<=[0-9]+\\)$"
+          ],
+          "forbidden": [
+            "check:sourcefile-guard failed:"
+          ],
+          "counts": [
+            {
+              "label": "totalRpc",
+              "pattern": "totalRpc=([0-9]+)",
+              "min": 1
+            },
+            {
+              "label": "getSourceFileRpc",
+              "pattern": "getSourceFileRpc=([0-9]+)",
+              "max": 240
+            },
+            {
+              "label": "baseline",
+              "pattern": "baseline<=([0-9]+)",
+              "exact": 240
+            }
+          ],
+          "blocked": [
+            {
+              "pattern": "missing volar/vue",
+              "reason": "check:sourcefile-guard cannot run here: its reviewed vue-tsc Volar checkout is not available to this collector (no VOLAR_ROOT override, no repository, no sibling checkout)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

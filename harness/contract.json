@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2.6.0",
+  "version": "2.7.0",
   "phase": "migration",
   "tnbVersion": "6.0.3-bridge.16.tsgo.7.0.2",
   "policy": {
@@ -351,8 +351,7 @@
       "kind": "tnb-guards",
       "repository": "tnb",
       "condition": "tnb-changed",
-      "timeoutMs": 600000,
-      "blocked": "No reviewed TNB guard collector is registered; the four existing check:* guards have to be executed through the harness and validated against the pinned submodules and patches."
+      "timeoutMs": 600000
     },
     {
       "id": "tnb-witnesses",
@@ -451,6 +450,11 @@
       "collector": "harness/collectors/desktop/desktop-collector.mjs",
       "validator": "harness/collectors/desktop/desktop-validator.mjs",
       "expectations": "harness/collectors/desktop/desktop-expectations.json"
+    },
+    "tnb-guards": {
+      "collector": "harness/collectors/tnb/tnb-guards-collector.mjs",
+      "validator": "harness/collectors/tnb/tnb-guards-validator.mjs",
+      "expectations": "harness/collectors/tnb/tnb-guards-expectations.json"
     }
   },
   "scopeTransitions": [
@@ -477,11 +481,11 @@
           "docs/content/docs/user-guide/skill.mdx",
           "docs/content/docs/user-guide/typescript-interop.mdx"
         ],
-      "gates": [
-        "engine",
-        "gts-build",
-        "gts-tests",
-        "desktop"
+        "gates": [
+          "engine",
+          "gts-build",
+          "gts-tests",
+          "desktop"
         ]
       },
       "to": {
