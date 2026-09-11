@@ -13,8 +13,8 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { isMainThread } = require('node:worker_threads');
 
-if (isMainThread && process.env.GTS_DESKTOP_NATIVE_DIRECTORY) {
-  const directory = process.env.GTS_DESKTOP_NATIVE_DIRECTORY;
+const directory = process.env.GTS_DESKTOP_NATIVE_DIRECTORY;
+if (isMainThread && directory) {
   fs.mkdirSync(directory, { recursive: true });
   const target = path.join(directory, `desktop-native-${process.pid}.jsonl`);
   const hash = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
