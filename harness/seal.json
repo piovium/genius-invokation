@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "digest": "a26029fb3967e735ece0144909602bce9585b6a812d287349ebdf89adb7436aa",
+  "digest": "03b8eb85d4c9da3ceebdfa6259f412b2571af20de20dab6b93ca8f7df3422560",
   "files": {
     ".gitattributes": "54c1559147f401051c357920cb6186ca40933d3c2cc15cc01778575b98ac8577",
     ".github/workflows/harness.yml": "839fcc0d8b54b32de1ebaed9171eb1e3d288009d5700ad7b9f3253c77c3a6162",
     ".gitignore": "152692094fe05fe19bcde39400c32a6d2d716def149a9c77f33da8a41795bb9d",
     "AGENTS.md": "9fb2f0a3bdd25a5419d14ef424feaa51e4ffbbd57866705b4a97e6c9a24cf276",
-    "HARNESS.md": "dde8ff71d4c3dc36264bad6fbcb5697b60a16d3d5c99a5b66d6ff005479fac9f",
-    "harness/REVIEW.md": "96b155c254506410099931e36b5f9621752cabf40fbf7885e3508c58c0d9a12b",
+    "HARNESS.md": "980bdf94c101f1298bbba5980418338a438cb3161aec0298496f8fa68990f5b1",
+    "harness/REVIEW.md": "cfdcd3e8b71fbb10f7f0821f9668025b18f728fdc14a2bb6825dfcea7722d4aa",
     "harness/baselines/gts.json": "233ae24a074e95c33cf41f14ba8dba049929ee9e258aa3fc28f03713dade3587",
     "harness/baselines/main.json": "4ef134d1cfe2c7ab610418e4fd7aca86fabda45aa5acbb7a3db5d64712a759f4",
     "harness/cli.mjs": "ddc2d719817265981099ab4e27e69b400db0a42d49c4e9a12c5df5f02bf39948",
@@ -48,7 +48,11 @@
     "harness/collectors/shared/fixtures/volar-vitest-results.json": "f32a344b1a74399e8563443ca953dce8775b2c58cac085ca0810ace108002f0b",
     "harness/collectors/shared/vitest-result-cache.mjs": "3fccb72ca87dfc8580774a05ba3c004a813d4aff549d13a3baa4f8ac87016e41",
     "harness/collectors/shared/vitest-result-cache.test.mjs": "7d6391291fd51c9af165a053133f9a1ad3e2bcfa7162ddd1a49f130453dd5d0d",
-    "harness/contract.json": "b5a73a0b164b4c8e03f6165b32681f99ea530f5c2a4a96534b378cffeea289cb",
+    "harness/collectors/tnb/README.md": "a5feb32d623710d73fbc57b8e8e02993f49dc322f1ceb6e943c876db56c1c34d",
+    "harness/collectors/tnb/tnb-guards-collector.mjs": "4084178277c314fe5cb026704f70211291f8dfe5832c346cb9362388482d7ef4",
+    "harness/collectors/tnb/tnb-guards-expectations.json": "6366b6a394963f85d2f6ff86e7b430d19d260a09fe414b3733c593c78d00db2b",
+    "harness/collectors/tnb/tnb-guards-validator.mjs": "1a56a74534879f006121cffbd8bb8189aa2e758b0fa9814d363c43259fd92084",
+    "harness/contract.json": "3a11748b54571dda03b26fd8ed22ab884f3a1b7ae70176abffadee6f8b0d86c9",
     "harness/core.mjs": "5ebf99609fd4eefa5a1f7826fcee3b2160a41f3641c3ede40ae85c4f9548229d",
     "harness/local.example.json": "e96b3499d40fff4fa8a27bf1acc64c53c286c894af8468ee050b47065dde60da",
     "harness/probes/coverage.mjs": "58fcd82f2861b0bf0580dcae04b85ae89eb9e040bf345295c232e9a27b1015dc",
@@ -66,6 +70,7 @@
     "harness/tests/probes.test.mjs": "8278e909996dcc63fe330a2621cd4a2038333530388f75b3077c37c953dcf914",
     "harness/tests/runner.test.mjs": "b27d578c8f03dfa855d4dfb8e7292ef8dd108867147f5827a1b826f136218ed8",
     "harness/tests/session-evidence.test.mjs": "6fa56dd2759d880986f31ad709895db891ad15eae6944cfb24fb663392d833d2",
+    "harness/tests/tnb-guards.test.mjs": "f66f837ae8c8f0f8068d838a3a33efafdd7547ef28019b95a31938d006bf96cd",
     "harness/windows-job.ps1": "82e64e70e941c0b771665b5714e64e2f106ad36db16278488e73b50ff56f5e8d",
     "package.json": "442654cbf158007827d82a1f7f0e65e0bd1e464e98215cbace2e9ec855635cbf"
   }
