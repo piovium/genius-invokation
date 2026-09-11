@@ -19,7 +19,7 @@ editor, which is unrelated to the native consumption path.
 
 Use the pinned toolchain: Node 26.1.0 and pnpm 12.0.0, as recorded in
 `mise.toml` and matched by `engines.node` (`^26.1.0`) and `packageManager`
-(`pnpm@12.0.0`). CI runs the first two commands and `pnpm -r test`
+(`pnpm@12.0.0`). CI runs the install, the build and `pnpm -r test`
 (`.github/workflows/main.yml`); `prisma:generate` is required by the server
 check, because the generated client is not committed.
 
@@ -60,9 +60,9 @@ patch hashes and unpublished source revisions.
   dependency patch cannot deliver it to consumers, because
   `patchedDependencies` only applies inside the install that declares it. This
   branch still carries the hook in its own patch, because the installed
-  `@gi-tcg/gtsc@0.7.7` predates that change and its descriptor returns only
-  `languagePlugins`. **Removal trigger:** once a published GTS release provides
-  the hook, delete the `lib/node/proxyCreateProgram.js` hunk from
+  `@gi-tcg/gtsc@0.7.7` predates that change, and its plugin descriptor returns
+  only `languagePlugins`. **Removal trigger:** once a published GTS release
+  provides the hook, delete the `lib/node/proxyCreateProgram.js` hunk from
   `patches/@volar__typescript.patch`, keep the `lib/resolveModuleName.js` hunk,
   refresh the lockfile with `pnpm install --lockfile-only`, and re-run the
   checks.
@@ -74,7 +74,7 @@ Patch files are stored with LF endings, enforced by `.gitattributes`
 (`*.patch text eol=lf`). pnpm matches patch context exactly, so a checkout that
 converted them to CRLF on Windows would stop them from applying.
 
-## Memory measurements
+## Comparing memory measurements
 
 The historical 4 GiB failure describes a V8 heap limit, not a limit on total
 memory. Compare elapsed time, the main JavaScript heap, and the complete
