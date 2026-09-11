@@ -755,7 +755,7 @@ export function createRooms(
     playerId: PlayerId,
     id: number,
     response: Uint8Array,
-  ) {
+  ): CommandAck {
     const room = requireRoom(roomId);
     return requirePlayer(room, playerId).receiveResponse(id, response);
   }

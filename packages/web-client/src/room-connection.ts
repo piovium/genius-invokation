@@ -90,6 +90,12 @@ const isRoomInitialized = (value: unknown): value is RoomInitialized => {
 const MAX_CONTROL_MESSAGE_BYTES = 64 * 1024;
 const textEncoder = new TextEncoder();
 
+/**
+ * Client send-congestion guard: the browser cannot close its own socket, so it
+ * only fails fast once a whole maximum frame is already queued.
+ */
+const MAX_BUFFERED_BYTES = MAX_GAME_FRAME_BYTES;
+
 /** WebSocket close code for an ordinary client-initiated shutdown. */
 const CLOSE_NORMAL = 1000;
 /** The server refusing the connection, such as on failed authentication. */
@@ -490,7 +496,7 @@ export class RoomConnection {
       return;
     }
     try {
-      if (socket.bufferedAmount > MAX_GAME_FRAME_BYTES)
+      if (socket.bufferedAmount > MAX_BUFFERED_BYTES)
         throw new Error("Socket is congested");
       pending.sentGeneration = this.generation;
       socket.send(pending.frame);

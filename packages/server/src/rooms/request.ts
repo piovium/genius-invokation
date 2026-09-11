@@ -52,20 +52,20 @@ const BOOLEAN_ROOM_FIELDS = [
   "allowGuest",
 ] as const satisfies readonly (keyof CreateRoomDto)[];
 
+/** Accepted range for one numeric room field. */
+type NumberFieldRange = { min: number; max: number; integer?: boolean };
+
 /**
  * Accepted range of each numeric room field; `gameVersion` indexes VERSIONS.
  */
-const NUMBER_ROOM_FIELDS: Record<
-  string,
-  { min: number; max: number; integer?: boolean }
-> = {
+const NUMBER_ROOM_FIELDS = {
   gameVersion: { min: 0, max: VERSIONS.length - 1, integer: true },
   initTotalActionTime: { min: 0, max: 300 },
   rerollTime: { min: 25, max: 300 },
   roundTotalActionTime: { min: 0, max: 300 },
   actionTime: { min: 25, max: 300 },
   randomSeed: { min: 0, max: 2147483546 },
-};
+} as const satisfies Partial<Record<keyof CreateRoomDto, NumberFieldRange>>;
 
 /**
  * Renders an offending input for a 400 message: arrays are described by their
@@ -163,7 +163,7 @@ function roomFields(input: Record<string, unknown>): CreateRoomDto {
       );
     parsed[key] = value;
   }
-  for (const [key, { min, max, integer }] of Object.entries(
+  for (const [key, { min, max, integer }] of Object.entries<NumberFieldRange>(
     NUMBER_ROOM_FIELDS,
   )) {
     const value = input[key];
