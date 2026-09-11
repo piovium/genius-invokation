@@ -38,7 +38,9 @@ const isCanonicalBase64Url = (segment: string) =>
   Buffer.from(segment, "base64url").toString("base64url") === segment;
 
 /** The sender chooses the JSON a segment decodes to, so every field is read through this guard. */
-const isJsonObject = (value: unknown): value is Record<string, unknown> =>
+export const isJsonObject = (
+  value: unknown,
+): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
 const decodeJwtPart = (segment: string): unknown =>

@@ -23,10 +23,11 @@ const MAX_PORT = 65_535;
 const service = createApplication();
 await service.database.connect();
 
-const port = Number(process.env.PORT ?? DEFAULT_PORT);
+const rawPort = process.env.PORT;
+const port = Number(rawPort ?? DEFAULT_PORT);
 if (!Number.isInteger(port) || port < 1 || port > MAX_PORT)
   throw new Error(
-    `PORT must be an integer between 1 and ${MAX_PORT}, received "${process.env.PORT}"`,
+    `PORT must be an integer between 1 and ${MAX_PORT}, received "${rawPort}"`,
   );
 
 const server = await listenApplication(service, {

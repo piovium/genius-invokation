@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { test } from "node:test";
@@ -17,18 +16,10 @@ import {
   type SqlConnection,
 } from "./database";
 import { migrateDatabase } from "./migrate";
+import { migrationsDirectory, scratchSchema } from "./test-support";
 
 const execute = promisify(execFile);
 const testUrl = process.env.SERVER_DB_TEST_URL;
-const migrationsDirectory = resolve(import.meta.dirname, "../../drizzle");
-
-/** Scratch schema for one run; it is spliced into DDL, so keep it a bare identifier. */
-function scratchSchema() {
-  const name = `gi_migration_test_${randomBytes(8).toString("hex")}`;
-  if (!/^\w+$/.test(name)) throw new Error("Unexpected database test schema");
-  return name;
-}
-
 /** Swap the deck-owner foreign key for one with the same name but other actions. */
 async function setDeckOwnerForeignKey(
   client: SqlConnection,
@@ -49,7 +40,7 @@ async function fixture(body: (url: string) => Promise<void>) {
     throw new Error(
       "Database tests require the isolated gi_server_harness database",
     );
-  const schema = scratchSchema();
+  const schema = scratchSchema("gi_migration_test");
   const admin = createSql(testUrl);
   await admin.unsafe(`CREATE SCHEMA "${schema}"`);
   try {

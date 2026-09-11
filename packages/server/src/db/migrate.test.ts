@@ -1,22 +1,12 @@
 import assert from "node:assert/strict";
-import { randomBytes } from "node:crypto";
-import { resolve } from "node:path";
 import { test } from "node:test";
 import { createDatabase, createSql } from "./database";
 import { migrateDatabase } from "./migrate";
 import { games } from "./schema";
+import { migrationsDirectory, scratchSchema } from "./test-support";
 
 const testUrl = process.env.SERVER_DB_TEST_URL;
-const migrationsDirectory = resolve(import.meta.dirname, "../../drizzle");
-
 type Client = ReturnType<typeof createSql>;
-
-/** Scratch schema for one run; it is spliced into DDL, so keep it a bare identifier. */
-function scratchSchema() {
-  const name = `gi_migration_probe_${randomBytes(8).toString("hex")}`;
-  if (!/^\w+$/.test(name)) throw new Error("Unexpected test schema name");
-  return name;
-}
 
 test(
   "real PostgreSQL migrations apply once, preserve rows on rerun, adopt a log-less database and reject foreign-key drift",
@@ -28,7 +18,7 @@ test(
     const base = new URL(testUrl!);
     if (base.pathname !== "/gi_server_harness")
       throw new Error("Use the isolated gi_server_harness database");
-    const schema = scratchSchema();
+    const schema = scratchSchema("gi_migration_probe");
     const admin = createSql(base.toString());
     let client: Client | undefined;
     try {

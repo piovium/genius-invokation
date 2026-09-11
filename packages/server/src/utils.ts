@@ -48,15 +48,8 @@ type CharacterMetadata = Pick<
   CharacterRawData,
   "id" | "shareId" | "tags" | "sinceVersion"
 >;
-type ActionCardMetadata = Pick<
-  ActionCardRawData,
-  | "id"
-  | "shareId"
-  | "tags"
-  | "sinceVersion"
-  | "relatedCharacterId"
-  | "relatedCharacterTags"
->;
+type ActionCardMetadata = CharacterMetadata &
+  Pick<ActionCardRawData, "relatedCharacterId" | "relatedCharacterTags">;
 const getData = <T extends CharacterMetadata | ActionCardMetadata>(
   id: number,
 ): T | undefined => deckMetadata[id] as T | undefined;

@@ -5,8 +5,10 @@ import { createServer } from "node:http";
 import { setImmediate as nextTurn } from "node:timers/promises";
 import { WebSocket } from "ws";
 import { decodeGameFrame } from "@gi-tcg/typings";
-import { attachRoomWebSocketServer } from "../room-transport/websocket";
-import type { Rooms } from "./rooms";
+import {
+  attachRoomWebSocketServer,
+  type RoomCommands,
+} from "../room-transport/websocket";
 import type { RoomEvent, RoomSubscriber } from "./types";
 
 const TEST_TIMEOUT_MS = 15_000;
@@ -68,10 +70,7 @@ function receiveNotification(bytes: unknown, binary: boolean): Uint8Array {
 
 async function fixture() {
   const subscriptions = new Map<number, Set<RoomSubscriber>>();
-  const rooms: Pick<
-    Rooms,
-    "subscribePlayer" | "receivePlayerResponse" | "receivePlayerGiveUp"
-  > = {
+  const rooms: RoomCommands = {
     subscribePlayer(roomId, visitor, target, subscriber) {
       assert.equal(visitor, null);
       assert.equal(target, 1);

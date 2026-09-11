@@ -2,6 +2,7 @@ import { once } from "node:events";
 import { createServer, type IncomingMessage, type Server } from "node:http";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
+import { promisify } from "node:util";
 import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 import type { AddressInfo } from "node:net";
 
@@ -131,10 +132,10 @@ export async function listenHttp(
     server,
     url,
     async stop() {
-      await new Promise<void>((resolve, reject) => {
-        server.close((error) => (error ? reject(error) : resolve()));
-        server.closeIdleConnections();
-      });
+      // Keep-alive sockets would otherwise hold the listener open past `close`.
+      const closed = promisify(server.close.bind(server))();
+      server.closeIdleConnections();
+      await closed;
     },
   };
 }

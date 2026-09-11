@@ -59,14 +59,19 @@ import {
 } from "./types";
 export type { PlayerId } from "./types";
 
+/** Replay uploads are opt-in: without an endpoint there is nowhere to put them. */
+const replayEndpoint = process.env.S3_ENDPOINT;
+const replayDirectory = process.env.S3_PREFIX;
+const replayPrefix = replayDirectory ? `${replayDirectory}/` : "";
+
 let s3Client: import("@aws-sdk/client-s3").S3Client | null = null;
 async function uploadReplay(roomId: number, gameData: string) {
-  if (!process.env.S3_ENDPOINT) return;
+  if (!replayEndpoint) return;
   const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
   if (s3Client === null) {
     s3Client = new S3Client({
       region: process.env.S3_REGION,
-      endpoint: process.env.S3_ENDPOINT,
+      endpoint: replayEndpoint,
       credentials: {
         accessKeyId: process.env.S3_ACCESS_KEY_ID!,
         secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
@@ -77,11 +82,10 @@ async function uploadReplay(roomId: number, gameData: string) {
   const timestamp = new Date().toISOString();
   const date = timestamp.slice(0, 10);
   const time = timestamp.slice(11, 19).replaceAll(":", "");
-  const prefix = process.env.S3_PREFIX ? `${process.env.S3_PREFIX}/` : "";
   await s3.send(
     new PutObjectCommand({
       Bucket: process.env.S3_BUCKET!,
-      Key: `${prefix}logs/${date}/${time}-${roomId}.json`,
+      Key: `${replayPrefix}logs/${date}/${time}-${roomId}.json`,
       Body: gameData,
       ContentType: "application/json",
     }),
@@ -666,7 +670,7 @@ export function createRooms(
       if (!info.hasGame) return;
       const players = room.getPlayers();
       const registered = players.every((player) => !player.playerInfo.isGuest);
-      if (!registered && !process.env.S3_ENDPOINT) return;
+      if (!registered && !replayEndpoint) return;
       const gameData = JSON.stringify(room.getStateLog());
       void uploadReplay(room.id, gameData).catch((error) =>
         logger.warn(`Failed to upload room ${room.id} game log: ${error}`),

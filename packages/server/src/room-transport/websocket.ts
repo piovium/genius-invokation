@@ -3,7 +3,7 @@ import type { IncomingMessage, Server } from "node:http";
 import type { Duplex } from "node:stream";
 import { promisify } from "node:util";
 import { WebSocket, WebSocketServer, type RawData } from "ws";
-import type { Auth } from "../auth/session";
+import { isJsonObject, type Auth } from "../auth/session";
 import type { Rooms } from "../rooms/rooms";
 import { parsePlayerId, parseRoomId } from "../rooms/ids";
 import {
@@ -54,7 +54,7 @@ interface Connection {
 type RouteParams = { roomId: string; targetPlayerId: string };
 
 /** The room operations the transport drives on behalf of a bound seat. */
-type RoomCommands = Pick<
+export type RoomCommands = Pick<
   Rooms,
   "subscribePlayer" | "receivePlayerResponse" | "receivePlayerGiveUp"
 >;
@@ -76,10 +76,6 @@ function parseRoute(
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 /** The JSON control frames a client may send instead of a game frame. */
 type ControlFrame = { type: "auth"; token: unknown } | { type: "giveUp" };
 
@@ -88,7 +84,7 @@ function parseControlFrame(message: unknown): ControlFrame | null {
   try {
     const parsed: unknown =
       typeof message === "string" ? JSON.parse(message) : message;
-    if (!isRecord(parsed)) return null;
+    if (!isJsonObject(parsed)) return null;
     if (parsed.type === "auth") return { type: "auth", token: parsed.token };
     return parsed.type === "giveUp" ? { type: "giveUp" } : null;
   } catch {

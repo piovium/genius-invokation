@@ -2,6 +2,7 @@ import { afterEach, describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { once } from "node:events";
 import { createServer } from "node:http";
+import { setTimeout as delay } from "node:timers/promises";
 import { WebSocketServer, type WebSocket as ServerWebSocket } from "ws";
 import { decodeGameFrame, encodeGameFrame, PbPhaseType } from "@gi-tcg/typings";
 import {
@@ -15,7 +16,6 @@ import {
 /** WebSocket close code used to refuse a connection, mirroring the server. */
 const CLOSE_POLICY_VIOLATION = 1008;
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 async function until(check: () => boolean, timeout = 2_000) {
   const end = Date.now() + timeout;
   while (!check()) {
@@ -254,8 +254,10 @@ async function fixture(options: FixtureOptions = {}) {
   running.push(async () => {
     for (const handle of timers) clearTimeout(handle);
     for (const ws of peers) ws.terminate();
-    await new Promise<void>((resolve) => sockets.close(() => resolve()));
-    await new Promise<void>((resolve) => server.close(() => resolve()));
+    sockets.close();
+    await once(sockets, "close");
+    server.close();
+    await once(server, "close");
   });
   const address = server.address();
   assert(address && typeof address !== "string");

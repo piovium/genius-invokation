@@ -17,11 +17,12 @@ export class HttpError extends Error {
 export const badRequest = (message: string) => new HttpError(400, message);
 export const unauthorized = (message = "Unauthorized") =>
   new HttpError(401, message);
-export const forbidden = (message = "Forbidden") => new HttpError(403, message);
 export const notFound = (message = "Not Found") => new HttpError(404, message);
 export const conflict = (message = "Conflict") => new HttpError(409, message);
 export const teapot = (message = "I'm a teapot") => new HttpError(418, message);
-export const internalError = (message = "Internal Server Error") =>
+/** The 500 body shared by `internalError` and the boundary fallback below. */
+const INTERNAL_ERROR_MESSAGE = "Internal Server Error";
+export const internalError = (message = INTERNAL_ERROR_MESSAGE) =>
   new HttpError(500, message);
 export const unavailable = (message = "Service Unavailable") =>
   new HttpError(503, message);
@@ -92,5 +93,5 @@ export function errorResponse(error: unknown) {
       conflictMessageFor(cause.code) ?? conflictMessageFor(cause.errno);
     if (message !== undefined) return errorStatus(409, message);
   }
-  return errorStatus(500, "Internal Server Error");
+  return errorStatus(500, INTERNAL_ERROR_MESSAGE);
 }

@@ -27,8 +27,8 @@ interface MigrationSource {
 const MIGRATION_TAG = /^\d{4}_[a-z0-9_]+$/;
 
 async function findMigrationsDirectory() {
-  if (process.env.MIGRATIONS_DIRECTORY)
-    return resolve(process.env.MIGRATIONS_DIRECTORY);
+  const configured = process.env.MIGRATIONS_DIRECTORY;
+  if (configured) return resolve(configured);
   for (const candidate of [
     resolve(import.meta.dirname, "drizzle"),
     resolve(import.meta.dirname, "../../drizzle"),

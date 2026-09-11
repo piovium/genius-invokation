@@ -67,7 +67,7 @@ type FrameHeader = { id: number; payload: Uint8Array } & (
  * tag has no header at all, so both directions reject it on one code path.
  */
 function describeFrame(frame: GameWireFrame): FrameHeader | undefined {
-  switch (frame?.type) {
+  switch (frame.type) {
     case "notification":
       return { kind: KIND.notification, id: 0, payload: frame.data };
     case "rpc":
@@ -94,8 +94,8 @@ function checkId(id: number): void {
 }
 
 function checkPayload(payload: Uint8Array): void {
-  if (!(payload instanceof Uint8Array) || payload.byteLength === 0)
-    invalid("missing protobuf payload");
+  if (!(payload instanceof Uint8Array)) invalid("payload must be a Uint8Array");
+  if (payload.byteLength === 0) invalid("missing protobuf payload");
   if (payload.byteLength > MAX_GAME_PAYLOAD_BYTES)
     invalid(`protobuf payload exceeds ${MAX_GAME_PAYLOAD_MIB} MiB`);
 }
@@ -103,11 +103,7 @@ function checkPayload(payload: Uint8Array): void {
 function checkTimer(timer: GameRpcTimer): void {
   // Animation time and the server's grace interval can make current exceed
   // total or fall below zero. Both values must still be finite.
-  if (
-    !timer ||
-    !Number.isFinite(timer.current) ||
-    !Number.isFinite(timer.total)
-  )
+  if (!Number.isFinite(timer.current) || !Number.isFinite(timer.total))
     invalid("timer must contain finite numbers");
 }
 

@@ -1,17 +1,19 @@
 import { isGuestId } from "./guest-id";
 
-export interface UserJwtPayload {
-  user: 1;
-  sub: number;
+/** The two standard time claims both payload shapes carry. */
+interface JwtTimeClaims {
   iat?: number;
   exp?: number;
 }
 
-export interface GuestJwtPayload {
+export interface UserJwtPayload extends JwtTimeClaims {
+  user: 1;
+  sub: number;
+}
+
+export interface GuestJwtPayload extends JwtTimeClaims {
   user: 0;
   sub: string;
-  iat?: number;
-  exp?: number;
 }
 export type JwtPayload = UserJwtPayload | GuestJwtPayload;
 
