@@ -137,6 +137,8 @@ async function main() {
     transcript.push({ ...entry, params, response: entry.response ?? null });
   };
   const started = () => ({ durationMs: null, timedOut: false, error: null, response: null });
+  const entryFor = (id, op, method, file = null) => ({ id, op, method, file,
+    languageId: null, version: null, ...started() });
   const request = async (entry, params) => {
     Object.assign(entry, started());
     const begin = Date.now();
@@ -165,10 +167,7 @@ async function main() {
     document.versions.push(document.version);
     return document.version;
   };
-  const initializeEntry = {
-    id: 'initialize', op: 'initialize', method: 'initialize', file: null, languageId: null,
-    version: null, durationMs: null, timedOut: false, error: null, response: null,
-  };
+  const initializeEntry = entryFor('initialize', 'initialize', 'initialize');
   const initializeParams = {
     processId: null,
     rootUri: uri(''),
@@ -190,15 +189,11 @@ async function main() {
   };
   await request(initializeEntry, initializeParams);
   record(initializeEntry, initializeParams);
-  record({ id: 'initialized', op: 'initialized', method: 'initialized', file: null, languageId: null,
-    version: null, durationMs: null, timedOut: false, error: null, response: null }, {});
+  record(entryFor('initialized', 'initialized', 'initialized'), {});
   connection.sendNotification('initialized', {});
 
   for (const step of expectations.steps) {
-    const entry = {
-      id: step.id, op: step.op, method: stepMethods[step.op], file: step.file ?? null,
-      languageId: null, version: null, durationMs: null, timedOut: false, error: null, response: null,
-    };
+    const entry = entryFor(step.id, step.op, stepMethods[step.op], step.file ?? null);
     const target = step.file ? uri(step.file) : null;
     const params = { textDocument: { uri: target } };
     if (step.op === 'open') {

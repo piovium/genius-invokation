@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 const ROUTES = new Set(['gts-lsp', 'tsserver', 'browser-local', 'backend-tnb']);
 const FEATURES = ['hover', 'definition', 'completion', 'signature'];
 const CASES = new Set(['desktop', 'web', 'memory']);
+const TNB_VERSION_PATTERN = /^\d+\.\d+\.\d+-bridge\.\d+\.tsgo\./;
 export const EDIT_ROUNDS = 100;
 const hash = text => createHash('sha256').update(text).digest('hex');
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -98,7 +99,7 @@ export function validateTrace(trace, caseName, { rounds = EDIT_ROUNDS, nonce, tn
       blocked.push('Missing expected TNB version: the runner must pass the exact contract pin, not a version inferred from this trace.');
       return result();
     }
-    check(/^\d+\.\d+\.\d+-bridge\.\d+\.tsgo\./.test(tnbVersion), 'expected TNB version is not an exact bridge pin');
+    check(TNB_VERSION_PATTERN.test(tnbVersion), 'expected TNB version is not an exact bridge pin');
     if (!array(expectations.fixtures, 'expectations.fixtures', 1)) return result();
     for (const fixture of expectations.fixtures) {
       if (!record(fixture, 'expectations.fixture')) continue;
@@ -227,6 +228,7 @@ export function validateTrace(trace, caseName, { rounds = EDIT_ROUNDS, nonce, tn
   }
 
   if (!array(trace.sessions, 'sessions', 2)) return result();
+  const caseRoutes = caseName === 'desktop' ? ['gts-lsp', 'tsserver'] : ['browser-local', 'backend-tnb'];
   const sessions = new Map();
   for (const [index, session] of trace.sessions.entries()) {
     const at = `sessions[${index}]`;
@@ -236,7 +238,7 @@ export function validateTrace(trace, caseName, { rounds = EDIT_ROUNDS, nonce, tn
     nonempty(session.id, `${at}.id`);
     check(!sessions.has(session.id), `${at}: duplicate session identity`);
     check(ROUTES.has(session.route), `${at}: unknown route`);
-    check(caseName === 'desktop' ? ['gts-lsp', 'tsserver'].includes(session.route) : ['browser-local', 'backend-tnb'].includes(session.route), `${at}: route outside requested case`);
+    check(caseRoutes.includes(session.route), `${at}: route outside requested case`);
     sessions.set(session.id, session);
     if (record(session.identity, `${at}.identity`)) {
       const identity = session.identity;
@@ -247,7 +249,7 @@ export function validateTrace(trace, caseName, { rounds = EDIT_ROUNDS, nonce, tn
         check(!/(@latest\b|\/latest\/)/i.test(identity.sdkPath ?? ''), `${at}: unpinned browser SDK path`);
         check(identity.nativeLibraryPath === undefined && identity.nativeLoadLog === undefined, `${at}: local route must not claim a native load`);
       } else {
-        check(identity.packageName === 'typescript-native-bridge' && /^\d+\.\d+\.\d+-bridge\.\d+\.tsgo\./.test(identity.packageVersion ?? '') && identity.checker === 'tsgo', `${at}: service did not resolve the expected TNB/tsgo engine`);
+        check(identity.packageName === 'typescript-native-bridge' && TNB_VERSION_PATTERN.test(identity.packageVersion ?? '') && identity.checker === 'tsgo', `${at}: service did not resolve the expected TNB/tsgo engine`);
         check(identity.packageVersion === tnbVersion, `${at}: TNB version differs from the exact contract pin`);
         check(string(identity.nativeLibraryPath) && /bridge\.(node|dylib|so|dll)$/i.test(identity.nativeLibraryPath), `${at}: native library observation is missing`);
         check(string(identity.nativeLoadLog) && /TNB ACTIVE/.test(identity.nativeLoadLog), `${at}: raw TNB activation/load log is missing`);
@@ -381,7 +383,7 @@ export function validateTrace(trace, caseName, { rounds = EDIT_ROUNDS, nonce, tn
   for (const [id, approved] of expectedFixtures) for (const route of approved.routes ?? []) {
     check([...sessions.values()].some(session => session.fixtureId === id && session.route === route), `missing approved scenario ${id}/${route}`);
   }
-  for (const route of caseName === 'desktop' ? ['gts-lsp', 'tsserver'] : ['browser-local', 'backend-tnb']) {
+  for (const route of caseRoutes) {
     check(routes.has(route), `missing required route ${route}`);
   }
   if (caseName === 'desktop') {

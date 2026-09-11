@@ -3,14 +3,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { codes, sha, stable, hashFile, readJson, writeJson, inside, verifySeal,
+import { codes, hashFile, writeJson, inside, verifySeal,
   execute, processVerdict } from './core.mjs';
 import { loadHarness, runSelection, finishRun, generateTask, reviseTask, handoff, verifyReceipt,
-  builtInGateKinds } from './runner.mjs';
+  builtInGateKinds, sealedSelftests, selftestCounts, selftestComplete } from './runner.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 async function selftest(harness) {
-  const tests = Object.keys(harness.seal.files).filter(file => /^harness\/tests\/.*\.test\.mjs$/.test(file));
+  const tests = sealedSelftests(harness.seal);
   if (!tests.length) throw new Error('No sealed selftests found');
   const directory = path.join(root, 'artifacts', 'selftests', crypto.randomUUID());
   const command = await execute({ executable: process.execPath,
@@ -19,10 +19,8 @@ async function selftest(harness) {
     env: { NODE_TEST_CONTEXT: undefined } });
   for (const stream of ['stdout', 'stderr']) command[stream].sha256 = await hashFile(inside(directory, command[stream].file));
   const tap = fs.readFileSync(inside(directory, command.stdout.file), 'utf8');
-  const counts = Object.fromEntries(['tests', 'pass', 'fail', 'cancelled', 'skipped', 'todo']
-    .map(key => [key, Number(tap.match(new RegExp(`^# ${key} (\\d+)$`, 'm'))?.[1] ?? NaN)]));
-  const status = processVerdict(command) === 'PASS' && counts.tests > 0 && counts.tests === counts.pass
-    && ['fail', 'cancelled', 'skipped', 'todo'].every(key => counts[key] === 0) ? 'PASS' : 'FAIL';
+  const counts = selftestCounts(tap);
+  const status = processVerdict(command) === 'PASS' && selftestComplete(counts) ? 'PASS' : 'FAIL';
   await verifySeal(root);
   const record = { schemaVersion: 1, status, controlDigest: harness.seal.digest, platform: process.platform,
     directory, command, counts, tests, finishedAt: new Date().toISOString() };

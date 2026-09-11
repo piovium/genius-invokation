@@ -1,11 +1,12 @@
 # Registering real product evidence
 
 Registered adapters: the data/checks CLI adapter, the command adapter used by
-main-build, main-tests, gts-build and gts-tests, and the gts-lsp stdio
-language-server adapter (`collectors/lsp/`). Every other adapter stays blocked
-with its declared reason in the contract.
-Add only the minimum glue around the
-existing pnpm scripts, Vitest, Volar, TNB tsserver harness and actual editor/UI.
+main-build, main-tests, gts-build and gts-tests, the gts-lsp stdio
+language-server adapter (`collectors/lsp/`), the desktop session adapter
+(`collectors/desktop/`) and the tnb-guards adapter (`collectors/tnb/`). Every
+gate without a registered adapter stays blocked with its declared reason in the
+contract. Add only the minimum glue around the existing pnpm scripts, Vitest,
+Volar, TNB tsserver harness and actual editor/UI.
 This directory, its fixtures and assertions are sealed controls, owned by the
 coordinator and independently reviewed. Product workers cannot weaken them.
 
@@ -33,7 +34,7 @@ and deletions, and revalidates the observation at finish. An envelope alone
 cannot pass. The collector's exit code must be zero and must not hide failing
 child processes. Never use discovery output as executed tests.
 
-For desktop/web/memory, supply `trace` using the session probe schema. Its
+For desktop/memory, supply `trace` using the session probe schema. Its
 validation always runs in addition to the adapter-specific assertions, with
 the sealed TNB pin and edit count. Desktop also needs actual scenario records
 for every contract.policy.desktopScenarios entry; the adapter must validate

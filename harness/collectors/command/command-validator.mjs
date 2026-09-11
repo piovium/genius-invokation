@@ -153,10 +153,10 @@ export function validateTestProcess(events, pkg, repo) {
   check(end.kind === 'exit' && end.code === 0, 'Vitest process did not exit successfully');
   check(events.some(event => event.kind === 'vitest' && /[\\/]vitest[\\/]vitest\.mjs$/.test(event.module.path)),
     'Package did not load the actual Vitest CLI');
-  const stdout = events.filter(event => event.kind === 'stdout')
+  const decode = kind => events.filter(event => event.kind === kind)
     .map(event => Buffer.from(event.base64, 'base64').toString('utf8')).join('');
-  const stderr = events.filter(event => event.kind === 'stderr')
-    .map(event => Buffer.from(event.base64, 'base64').toString('utf8')).join('');
+  const stdout = decode('stdout');
+  const stderr = decode('stderr');
   const report = testSummaries(stdout);
   check(report.summaries.length === 1 && report.files.length === 1 && report.executedTests >= pkg.minimumTests
     && report.passedFiles >= pkg.files.length && !report.failedTests && !report.skippedTests
