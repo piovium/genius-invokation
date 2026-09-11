@@ -680,6 +680,29 @@ export function updateHistory(
             break;
           }
           if (
+            m.fromWhere === PbEntityArea.CHARACTER &&
+            m.toWhere === PbEntityArea.CHARACTER &&
+            m.entity?.type === PbEntityType.EQUIPMENT
+          ) {
+            const { id, definitionId } = m.entity;
+            children.push({
+              type: "removeEntity",
+              who: history.recorder.area.get(id)?.who ?? (m.fromWho as 0 | 1),
+              masterDefinitionId:
+                history.recorder.getMasterDefinitionId(id),
+              entityDefinitionId: definitionId,
+              entityType: "equipment",
+            });
+            history.recorder.renewEntityArea(m);
+            children.push({
+              type: "createEntity",
+              who: m.toWho as 0 | 1,
+              masterDefinitionId:
+                history.recorder.getMasterDefinitionId(id),
+              entityDefinitionId: definitionId,
+              entityType: "equipment",
+            });
+          } else if (
             m.reason === PbMoveEntityReason.EQUIP ||
             m.reason === PbMoveEntityReason.CREATE_SUPPORT
           ) {
