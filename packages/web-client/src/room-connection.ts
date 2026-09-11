@@ -103,6 +103,12 @@ const CLOSE_POLICY_VIOLATION = 1008;
 /** The server rejecting a frame larger than its protocol limit. */
 const CLOSE_MESSAGE_TOO_BIG = 1009;
 
+/** Close codes that refuse the frame, each mapped to the client failure code. */
+const REFUSAL_CLOSE_CODES: ReadonlyMap<number, string> = new Map([
+  [CLOSE_POLICY_VIOLATION, "ACCESS_DENIED"],
+  [CLOSE_MESSAGE_TOO_BIG, "MESSAGE_TOO_BIG"],
+]);
+
 /**
  * A game endpoint must never embed credentials, query parameters or a
  * fragment: the token is the only credential, sent in the first control frame.
@@ -258,16 +264,12 @@ export class RoomConnection {
     };
     const onClose = (event: CloseEvent) => {
       if (!active()) return;
-      if (
-        event.code === CLOSE_POLICY_VIOLATION ||
-        event.code === CLOSE_MESSAGE_TOO_BIG
-      ) {
+      const refusalCode = REFUSAL_CLOSE_CODES.get(event.code);
+      if (refusalCode !== undefined) {
         this.fail(
           this.connectionError(
             event.reason || "The server refused this room connection.",
-            event.code === CLOSE_POLICY_VIOLATION
-              ? "ACCESS_DENIED"
-              : "MESSAGE_TOO_BIG",
+            refusalCode,
           ),
         );
       } else {

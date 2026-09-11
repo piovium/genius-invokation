@@ -1,6 +1,7 @@
 import { decodeGameFrame, encodeGameFrame } from "@gi-tcg/typings";
 import type { IncomingMessage, Server } from "node:http";
 import type { Duplex } from "node:stream";
+import { promisify } from "node:util";
 import { WebSocket, WebSocketServer, type RawData } from "ws";
 import type { Auth } from "../auth/session";
 import type { Rooms } from "../rooms/rooms";
@@ -25,6 +26,9 @@ const CLOSE_DEADLINE_MS = 1_000;
 const CLOSE_POLICY_VIOLATION = 1008;
 const CLOSE_INTERNAL_ERROR = 1011;
 const CLOSE_TRY_AGAIN_LATER = 1013;
+
+/** `ws` reports a finished shutdown through a callback; promisify it to await one. */
+const closeWebSocketServer = promisify(WebSocketServer.prototype.close);
 
 interface RawSocket {
   send(data: string | Uint8Array): boolean;
@@ -444,9 +448,7 @@ export function attachRoomWebSocketServer(
     async close() {
       server.off("upgrade", onUpgrade);
       for (const socket of wss.clients) socket.terminate();
-      await new Promise<void>((resolve, reject) =>
-        wss.close((error) => (error ? reject(error) : resolve())),
-      );
+      await closeWebSocketServer.call(wss);
     },
   };
 }

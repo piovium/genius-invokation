@@ -33,7 +33,9 @@ const HEADER_BYTES = 8;
 /** Two float64 BE timers, carried only by RPC frames. */
 const TIMER_BYTES = 16;
 const RPC_HEADER_BYTES = HEADER_BYTES + TIMER_BYTES;
-/** Byte offsets of the id and the two float64 BE RPC timers within the header. */
+/** Byte offsets within the fixed header: version, kind byte, id and RPC timers. */
+const VERSION_OFFSET = 2;
+const KIND_OFFSET = 3;
 const ID_OFFSET = 4;
 const TIMER_CURRENT_OFFSET = 8;
 const TIMER_TOTAL_OFFSET = 16;
@@ -139,8 +141,8 @@ export function decodeGameFrame(
   if (bytes.byteLength < HEADER_BYTES) invalid("truncated header");
   if (bytes[0] !== MAGIC_BYTES[0] || bytes[1] !== MAGIC_BYTES[1])
     invalid("incorrect GI magic");
-  if (bytes[2] !== VERSION) invalid("unsupported version");
-  const kind = bytes[3];
+  if (bytes[VERSION_OFFSET] !== VERSION) invalid("unsupported version");
+  const kind = bytes[KIND_OFFSET];
   if (!FRAME_KINDS.has(kind)) invalid("unsupported kind");
   const payloadOffset = payloadOffsetOf(kind);
   if (bytes.byteLength < payloadOffset) invalid("truncated RPC timer");

@@ -55,19 +55,21 @@ async function readMigrations(directory: string): Promise<MigrationSource[]> {
       `Migrations in ${directory} must be a drizzle-kit PostgreSQL journal`,
     );
   const tags = new Set<string>();
-  // Entries are validated synchronously in journal order, so a duplicate tag is
-  // caught at its own position before any read resolves.
+  // Validate the journal before reading any SQL, so a malformed entry is
+  // reported at its own position instead of racing the file reads.
+  for (const [index, entry] of journal.entries.entries()) {
+    if (entry.idx !== index)
+      throw new Error(
+        `Migrations in ${directory} must be ordered by idx, got ${entry.idx} at position ${index}`,
+      );
+    if (!MIGRATION_TAG.test(entry.tag) || tags.has(entry.tag))
+      throw new Error(
+        `Migrations in ${directory} must be uniquely named like 0000_init, got "${entry.tag}"`,
+      );
+    tags.add(entry.tag);
+  }
   return Promise.all(
-    journal.entries.map(async (entry, index) => {
-      if (entry.idx !== index)
-        throw new Error(
-          `Migrations in ${directory} must be ordered by idx, got ${entry.idx} at position ${index}`,
-        );
-      if (!MIGRATION_TAG.test(entry.tag) || tags.has(entry.tag))
-        throw new Error(
-          `Migrations in ${directory} must be uniquely named like 0000_init, got "${entry.tag}"`,
-        );
-      tags.add(entry.tag);
+    journal.entries.map(async (entry) => {
       const path = resolve(directory, `${entry.tag}.sql`);
       let text: string;
       try {

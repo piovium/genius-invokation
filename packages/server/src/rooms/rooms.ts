@@ -59,20 +59,21 @@ import {
 } from "./types";
 export type { PlayerId } from "./types";
 
-let s3Promise: Promise<import("@aws-sdk/client-s3").S3Client> | null = null;
+let s3Client: import("@aws-sdk/client-s3").S3Client | null = null;
 async function uploadReplay(roomId: number, gameData: string) {
   if (!process.env.S3_ENDPOINT) return;
   const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
-  const s3 = await (s3Promise ??= Promise.resolve(
-    new S3Client({
+  if (s3Client === null) {
+    s3Client = new S3Client({
       region: process.env.S3_REGION,
       endpoint: process.env.S3_ENDPOINT,
       credentials: {
         accessKeyId: process.env.S3_ACCESS_KEY_ID!,
         secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
       },
-    }),
-  ));
+    });
+  }
+  const s3 = s3Client;
   const timestamp = new Date().toISOString();
   const date = timestamp.slice(0, 10);
   const time = timestamp.slice(11, 19).replaceAll(":", "");

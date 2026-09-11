@@ -53,6 +53,25 @@ function matchesEtag(header: string | null, etag: string) {
   );
 }
 
+/**
+ * Answer a conditional GET or HEAD: a matching entity tag yields 304, and
+ * otherwise the body is produced lazily so a cache hit or a HEAD never opens
+ * the asset.
+ */
+function respondWith(
+  request: Request,
+  etag: string,
+  headers: Record<string, string>,
+  body: () => BodyInit,
+) {
+  const responseHeaders = { ...headers, etag };
+  if (matchesEtag(request.headers.get("if-none-match"), etag))
+    return new Response(null, { status: 304, headers: responseHeaders });
+  return new Response(request.method === "HEAD" ? null : body(), {
+    headers: responseHeaders,
+  });
+}
+
 export function createFrontendHandler({
   directory = process.env.FRONTEND_DIRECTORY ??
     resolve(import.meta.dirname, "frontend"),
@@ -65,6 +84,8 @@ export function createFrontendHandler({
     basePath.split("/").filter(Boolean).join("/") +
     (basePath === "/" ? "" : "/");
   const rootPath = base === "/" ? "/" : base.slice(0, -1);
+  // The API subtree under the mount is served by Elysia, not this handler.
+  const apiBase = base + "api";
   let index: Promise<{ body: string; etag: string }> | undefined;
   return async (request: Request): Promise<Response> => {
     if (request.method !== "GET" && request.method !== "HEAD")
@@ -72,8 +93,8 @@ export function createFrontendHandler({
     const pathname = new URL(request.url).pathname;
     if (
       (pathname !== rootPath && !pathname.startsWith(base)) ||
-      pathname === base + "api" ||
-      pathname.startsWith(base + "api/")
+      pathname === apiBase ||
+      pathname.startsWith(`${apiBase}/`)
     )
       return new Response(null, { status: 404 });
     let name: string;
@@ -97,21 +118,17 @@ export function createFrontendHandler({
         : null;
     if (info?.isFile()) {
       const etag = `W/"${info.size.toString(16)}-${info.mtimeMs.toString(16)}"`;
-      const headers = {
-        "content-type": lookup(path) || "application/octet-stream",
+      return respondWith(
+        request,
         etag,
-        "cache-control":
-          name === "sw.js"
-            ? "public, no-cache, must-revalidate"
-            : "public, max-age=31536000, immutable",
-      };
-      if (matchesEtag(request.headers.get("if-none-match"), etag))
-        return new Response(null, { status: 304, headers });
-      return new Response(
-        request.method === "HEAD"
-          ? null
-          : (Readable.toWeb(createReadStream(path)) as unknown as BodyInit),
-        { headers },
+        {
+          "content-type": lookup(path) || "application/octet-stream",
+          "cache-control":
+            name === "sw.js"
+              ? "public, no-cache, must-revalidate"
+              : "public, max-age=31536000, immutable",
+        },
+        () => Readable.toWeb(createReadStream(path)) as unknown as BodyInit,
       );
     }
     // Only the small HTML entry is read into memory, so the beta flag can
@@ -133,16 +150,15 @@ export function createFrontendHandler({
       });
     try {
       const entry = await index;
-      const headers = {
-        "content-type": "text/html; charset=utf-8",
-        "cache-control": "public, no-cache, must-revalidate",
-        etag: entry.etag,
-      };
-      return matchesEtag(request.headers.get("if-none-match"), entry.etag)
-        ? new Response(null, { status: 304, headers })
-        : new Response(request.method === "HEAD" ? null : entry.body, {
-            headers,
-          });
+      return respondWith(
+        request,
+        entry.etag,
+        {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "public, no-cache, must-revalidate",
+        },
+        () => entry.body,
+      );
     } catch {
       return new Response(null, { status: 404 });
     }

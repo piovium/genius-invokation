@@ -1,3 +1,4 @@
+import { once } from "node:events";
 import { createServer, type IncomingMessage, type Server } from "node:http";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
@@ -117,13 +118,10 @@ export async function listenHttp(
   });
   server.keepAliveTimeout = 65_000;
   server.headersTimeout = 15_000;
-  await new Promise<void>((resolve, reject) => {
-    server.once("error", reject);
-    server.listen({ host: hostname, port }, () => {
-      server.off("error", reject);
-      resolve();
-    });
-  });
+  // `listen` reports a bind failure through the 'error' event, which `once`
+  // turns into a rejection before 'listening' can resolve.
+  server.listen({ host: hostname, port });
+  await once(server, "listening");
   const address = server.address() as AddressInfo;
   const addressHost = address.address.includes(":")
     ? `[${address.address}]`
