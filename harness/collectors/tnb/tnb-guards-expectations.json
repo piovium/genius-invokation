@@ -112,7 +112,7 @@
           "blocked": [
             {
               "pattern": "missing volar/vue",
-              "reason": "check:sourcefile-guard cannot run here: its reviewed vue-tsc Volar checkout is not available to this collector (no VOLAR_ROOT override, no repository, no sibling checkout)"
+              "reason": "check:sourcefile-guard cannot run here: its reviewed vue-tsc Volar checkout was not available to this collector (no configured / present checkout, so no VOLAR_ROOT override and no sibling checkout)"
             }
           ]
         }

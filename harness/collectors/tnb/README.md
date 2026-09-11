@@ -13,6 +13,14 @@ worktree and ties the result to the exact pinned inputs.
   reports no verdict: it exits zero even when a guard fails, so "could not run in
   this environment" stays a justified BLOCKED, never a PASS. Only a broken
   collector (missing runner environment, unreadable contract) exits non-zero.
+- `tnb-guards-collector.mjs` also records the optional machine-local Volar
+  checkout the runner resolved from `harness/local.json` (a new `volar` entry,
+  resolved before the run and exported as `HARNESS_VOLAR_ROOT`): the resolved
+  path, the checkout git revision and working-tree state, and a bounded scan of
+  the sources that determine the guard workload. When the directory is present
+  the collector passes it to the guard as the guard's own `VOLAR_ROOT` override;
+  when it is absent the variable is omitted, the guard's honest `missing volar/vue`
+  branch runs, and the gate stays BLOCKED.
 - `tnb-guards-validator.mjs` re-derives every claim. `evaluate` is pure: it checks
   the recorded bridge version, the reported submodule revisions and HEAD against
   the checkout resolved from disk, then, for every guard, checks the recorded exit

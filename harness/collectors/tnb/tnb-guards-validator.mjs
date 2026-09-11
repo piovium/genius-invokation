@@ -9,7 +9,7 @@
 // run directory, requires its 64-digit hash and rejects a changed file.
 import fs from 'node:fs';
 import path from 'node:path';
-import { fatalPattern, git, gitLinks, hashFile, inside } from '../../core.mjs';
+import { fatalPattern, git, gitLinks, hashFile, inside, volarReference, volarReferenceMatches } from '../../core.mjs';
 
 const fail = reason => ({ status: 'FAIL', reason });
 
@@ -93,8 +93,30 @@ export function evaluate({ observation, logs, expectations, facts }) {
       return fail(`submodule ${name} is recorded at head ${recorded.head ?? 'missing'}, expected ${pin}`);
     }
   }
+  // The recorded Volar identity must agree with the facts re-derived from disk:
+  // if the collector saw this checkout, it is the one that produced the run and a
+  // changed or unwritable checkout is a FAIL. An unconfigured/absent checkout is
+  // not a failure of the wiring here: the guard's own missing-volar report is
+  // what keeps the gate BLOCKED.
+  const configured = observation.volar?.configured === true;
+  const material = configured && observation.volar?.present !== false;
+  if (material) {
+    let volarProblem;
+    try {
+      volarProblem = volarReferenceMatches(observation.volar, facts.volar, observation.volar.root);
+    } catch (error) {
+      volarProblem = `could not be re-derived: ${error.message}`;
+    }
+    if (volarProblem) return fail(`recorded Volar checkout ${volarProblem}`);
+  }
   const failures = [];
   const blocked = [];
+  // A configured checkout that was not there when the guards ran keeps the gate
+  // BLOCKED rather than PASS. It is recorded as one more blocked reason instead of
+  // an early return, so that a real guard failure still outranks it.
+  if (configured && observation.volar.present === false) {
+    blocked.push('the configured vue-tsc Volar checkout was not present when the guards ran');
+  }
   for (const guard of expectations.guards) {
     const record = Array.isArray(observation.guards) ? observation.guards.find(candidate => candidate?.id === guard.id) : undefined;
     if (!record) { failures.push(`${guard.id}: no recorded guard execution`); continue; }
@@ -147,6 +169,7 @@ export async function validate(evidence, { contract, expectations, root, directo
       packageVersion: JSON.parse(fs.readFileSync(path.join(repository, 'package.json'), 'utf8')).version,
       repository: fs.realpathSync.native(repository),
       submodules,
+      volar: await volarReference(evidence.volar ? evidence.volar.root : null),
     };
   } catch (error) {
     return { status: 'BLOCKED', reason: `Cannot resolve the pinned TNB inputs from the checkout: ${error.message}` };

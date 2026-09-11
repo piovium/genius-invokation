@@ -15,8 +15,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const e = process.env;
-const { execute, git, gitLinks, hashFile, readJson, writeJson, processVerdict } =
-  await import(new URL('../../core.mjs', import.meta.url).href);
+const { execute, git, gitLinks, hashFile, readJson, writeJson, processVerdict,
+  volarReference, volarReferenceMatches } = await import(new URL('../../core.mjs', import.meta.url).href);
 
 const required = ['HARNESS_ROOT', 'HARNESS_RUN_DIRECTORY', 'HARNESS_OUTPUT', 'HARNESS_NODE',
   'HARNESS_NONCE', 'HARNESS_GATE', 'HARNESS_SEAL', 'HARNESS_SOURCE_DIGEST'];
@@ -50,6 +50,15 @@ async function collect() {
     if (!gate || gate.kind !== 'tnb-guards' || gate.repository !== 'tnb') throw new Error('Unreviewed TNB guard gate');
     const repo = path.join(e.HARNESS_ROOT, contract.repositories.tnb.path);
     if (!fs.existsSync(path.join(repo, 'package.json'))) throw new Error(`Missing TNB checkout: ${repo}`);
+    // The runner resolves the optional machine-local Volar checkout from
+    // harness/local.json and exports it here. It is recorded as a bounded
+    // identity so a changed checkout invalidates the run, and it is passed to
+    // the guard as the guard's own VOLAR_ROOT override only when the directory
+    // is really present. When it is absent the variable is omitted and the
+    // guard's honest "missing volar/vue" branch runs and BLOCKS the gate.
+    const volarRoot = e.HARNESS_VOLAR_ROOT || null;
+    const volarBefore = await volarReference(volarRoot);
+    const volarEnvironment = volarBefore.present ? { VOLAR_ROOT: volarBefore.root } : {};
 
     observation.runDirectory = e.HARNESS_RUN_DIRECTORY;
     observation.repository = repo;
@@ -57,6 +66,7 @@ async function collect() {
     observation.tnbVersion = contract.tnbVersion;
     observation.head = git(repo, ['rev-parse', 'HEAD']);
     observation.submodules = submoduleRevisions(repo, Object.keys(expectations.submodules));
+    observation.volar = volarBefore;
 
     const started = Date.now();
     observation.guards = [];
@@ -73,7 +83,7 @@ async function collect() {
         const command = await execute({
           executable: e.HARNESS_NODE, args: [spec.script], cwd: repo,
           directory: e.HARNESS_RUN_DIRECTORY, label, timeoutMs: remaining,
-          limitBytes: contract.policy.reportLimitBytes, env: {},
+          limitBytes: contract.policy.reportLimitBytes, env: volarEnvironment,
         });
         for (const stream of ['stdout', 'stderr']) {
           command[stream].sha256 = await hashFile(path.join(e.HARNESS_RUN_DIRECTORY, command[stream].file));
@@ -91,7 +101,12 @@ async function collect() {
       }
       observation.guards.push(record);
     }
-    console.log(`tnb-guards: ${observation.guards.length} guards, ${observation.head}, ${observation.submodules.typescript?.head ?? '?'}`);
+    // A guard that wrote into a present checkout would change its identity
+    // mid-run; record that fact instead of letting a later reader discover it.
+    observation.volarAfter = await volarReference(volarRoot);
+    try { observation.volarChangedDuringRun = volarReferenceMatches(volarBefore, observation.volarAfter, volarBefore.root) !== null; }
+    catch { observation.volarChangedDuringRun = true; }
+    console.log(`tnb-guards: ${observation.guards.length} guards, volar=${volarBefore.present ? 'present' : 'absent'}, ${observation.head}`);
   } catch (error) {
     observation.error = error.stack ?? String(error);
     console.error(observation.error);

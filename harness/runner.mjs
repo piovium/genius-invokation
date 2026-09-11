@@ -88,6 +88,14 @@ export function validateContract(contract, { root } = {}) {
     }
   }
 }
+// A configured `volar` local.json entry names a machine-local checkout; it is an
+// *assist* (see core.mjs volarReference), not a runtime entry and not part of the
+// seal. It is resolved to an absolute path once, before any gate runs, so the
+// same value is recorded in the run's before/after snapshot and exported to the
+// collector.
+function resolvedVolarRoot(root, local) {
+  return local.volar ? path.resolve(root, local.volar) : null;
+}
 export async function loadHarness(root) {
   const seal = await verifySeal(root);
   const contract = readJson(inside(root, 'harness/contract.json'));
@@ -104,7 +112,9 @@ export async function loadHarness(root) {
   for (const key of allowed.filter(key => key !== 'volar')) {
     runtimePaths[key] = local[key] ? path.resolve(root, local[key]) : key === 'node' ? process.execPath : null;
   }
-  return { root, seal, contract, runtimePaths };
+  const volarPath = resolvedVolarRoot(root, local);
+  return { root, seal, contract, runtimePaths, volarPath,
+    assists: { volar: volarPath } };
 }
 const verdict = (status, reason, extra = {}) => ({ status, reason, ...extra });
 const environmentVersions = [['node', '^26.1.0'], ['pnpmMain', '12.0.0'], ['pnpmGts', '11.5.2'], ['npm', null]];
@@ -150,7 +160,10 @@ export function runtimeEnvironment(context, gate) {
   const directory = path.join(context.directory, `runtime-${managerId ?? 'node'}`);
   fs.mkdirSync(directory, { recursive: true });
   const environment = { HARNESS_NODE: context.runtimePaths.node,
-    HARNESS_MANAGER: manager ?? '', HARNESS_NPM: context.runtimePaths.npm ?? '' };
+    HARNESS_MANAGER: manager ?? '', HARNESS_NPM: context.runtimePaths.npm ?? '',
+    // The collector turns this into the guard's own VOLAR_ROOT override. Empty
+    // when no checkout is configured, so the guard's honest "missing" branch runs.
+    HARNESS_VOLAR_ROOT: context.volarPath ?? '' };
   for (const [name, variable] of [['pnpm', 'HARNESS_MANAGER'], ['npm', 'HARNESS_NPM']]) {
     if (!environment[variable] || name === 'pnpm' && managerId === 'npm') continue;
     // ASCII command files: non-ASCII workspace paths travel through environment
@@ -257,7 +270,7 @@ async function validateObservation(context, gate, adapter, evidence) {
       return verdict('BLOCKED', 'CLI negative/repair scenarios are incomplete');
     }
   }
-  if (result.status === 'PASS' && gate.id.endsWith('tests')
+  if (gate.id.endsWith('tests')
     && !(Number.isSafeInteger(evidence.executedTests) && evidence.executedTests > 0
       && evidence.failedTests === 0 && evidence.skippedTests === 0)) {
     return verdict('FAIL', 'No complete executed test suite (empty/skipped/failed tests)');
@@ -311,7 +324,7 @@ export async function runSelection(harness, selection) {
   if (!['all', 'preflight', ...contract.gates.map(gate => gate.id)].includes(selection)) throw new Error('Unknown gate selection');
   const release = acquireLock(root);
   try {
-    const before = await snapshot(root, contract, runtimePaths);
+    const before = await snapshot(root, contract, runtimePaths, { assists: harness.assists });
     const nonce = crypto.randomUUID();
     const directory = path.join(root, 'artifacts', 'runs', nonce);
     fs.mkdirSync(directory, { recursive: true });
@@ -346,7 +359,7 @@ export async function runSelection(harness, selection) {
       }
       results.push({ id, ...result });
     }
-    const after = await snapshot(root, contract, runtimePaths);
+    const after = await snapshot(root, contract, runtimePaths, { assists: harness.assists });
     const stableInputs = stable(before) === stable(after);
     const unchangedControls = (await verifySeal(root)).digest === seal.digest;
     const receipt = { schemaVersion: 1, nonce, directory, selection, controlDigest: seal.digest,
@@ -376,7 +389,7 @@ export async function verifyReceipt(harness, directory) {
   if (stable(receipt.artifacts) !== stable(await evidenceManifest(directory))) throw new Error('Evidence/log hash manifest mismatch (missing, added or modified file)');
   if (receipt.phase !== harness.contract.phase || !receipt.stableInputs || !receipt.unchangedControls
     || stable(receipt.before) !== stable(receipt.after)) throw new Error('Run inputs changed');
-  if (stable(await snapshot(harness.root, harness.contract, harness.runtimePaths)) !== stable(receipt.after)) throw new Error('Stale receipt: sources, dependencies, executable artifacts or environment changed');
+  if (stable(await snapshot(harness.root, harness.contract, harness.runtimePaths, { assists: harness.assists })) !== stable(receipt.after)) throw new Error('Stale receipt: sources, dependencies, executable artifacts or environment changed');
   if (!Array.isArray(receipt.results)) throw new Error('Missing gate results');
   const ids = new Set();
   const context = { ...harness, directory, nonce: receipt.nonce, before: receipt.before };
@@ -428,23 +441,23 @@ export async function verifyReceipt(harness, directory) {
 }
 
 async function verifyEngineObservation(observation, repo, version) {
-  const d = observation.details;
-  if (observation.status !== 'PASS' || d?.context !== repo || d.packageName !== 'typescript-native-bridge'
-    || d.packageVersion !== version || !d.native?.length
-    || !(d.counters?.afterNegative.rpcCount > d.counters?.before.rpcCount)
-    || !(d.counters?.afterPositive.rpcCount > d.counters?.afterNegative.rpcCount)
-    || d.fixture?.negative?.length !== 1 || d.fixture?.positive?.length !== 0
-    || d.fixture.negative[0].code !== 2322 || d.fixture.negative[0].category !== 1
-    || d.fixture.negative[0].start !== d.fixture.invalidSource.indexOf('probeValue')
-    || d.fixture.negative[0].length !== 'probeValue'.length
-    || d.process?.exitCode !== 0 || d.process.signal || d.process.error
-    || fatalPattern.test(d.process.stderr ?? '')) throw new Error('Incomplete native semantic engine proof');
+  const details = observation.details;
+  if (observation.status !== 'PASS' || details?.context !== repo || details.packageName !== 'typescript-native-bridge'
+    || details.packageVersion !== version || !details.native?.length
+    || !(details.counters?.afterNegative.rpcCount > details.counters?.before.rpcCount)
+    || !(details.counters?.afterPositive.rpcCount > details.counters?.afterNegative.rpcCount)
+    || details.fixture?.negative?.length !== 1 || details.fixture?.positive?.length !== 0
+    || details.fixture.negative[0].code !== 2322 || details.fixture.negative[0].category !== 1
+    || details.fixture.negative[0].start !== details.fixture.invalidSource.indexOf('probeValue')
+    || details.fixture.negative[0].length !== 'probeValue'.length
+    || details.process?.exitCode !== 0 || details.process.signal || details.process.error
+    || fatalPattern.test(details.process.stderr ?? '')) throw new Error('Incomplete native semantic engine proof');
   const require = createRequire(path.join(repo, 'package.json'));
   for (const [key, target] of [['module', 'typescript'], ['package', 'typescript/package.json']]) {
     const file = fs.realpathSync(require.resolve(target));
-    if (d[key]?.path !== file || d[key].sha256 !== await hashFile(file)) throw new Error('Actual SDK resolution differs from engine evidence');
+    if (details[key]?.path !== file || details[key].sha256 !== await hashFile(file)) throw new Error('Actual SDK resolution differs from engine evidence');
   }
-  for (const artifact of d.native) {
+  for (const artifact of details.native) {
     if (path.basename(artifact.path) !== 'bridge.node' || await hashFile(artifact.path) !== artifact.sha256) throw new Error('Native addon evidence changed');
   }
 }
@@ -558,13 +571,24 @@ export async function handoff(harness, file) {
   return verdict(outside.length ? 'FAIL' : 'PASS', outside.length ? 'Changes outside assigned ownership' : 'Scope check passed; this is not product acceptance', { changed, outside, requiredGates: role.gates });
 }
 
+export function sealedSelftests(seal) {
+  return Object.keys(seal.files).filter(file => /^harness\/tests\/.*\.test\.mjs$/.test(file));
+}
+export function selftestCounts(tap) {
+  return Object.fromEntries(['tests', 'pass', 'fail', 'cancelled', 'skipped', 'todo']
+    .map(key => [key, Number(tap.match(new RegExp(`^# ${key} (\\d+)$`, 'm'))?.[1] ?? NaN)]));
+}
+export function selftestComplete(counts) {
+  return counts.tests > 0 && counts.tests === counts.pass
+    && ['fail', 'cancelled', 'skipped', 'todo'].every(key => counts[key] === 0);
+}
 export async function verifyReadiness(harness) {
   const pointer = readJson(path.join(harness.root, 'artifacts', 'selftest.json'));
   const allowed = path.join(harness.root, 'artifacts', 'selftests');
   const file = inside(allowed, path.relative(allowed, pointer.file).split(path.sep).join('/'));
   if (await hashFile(file) !== pointer.sha256) throw new Error('Selftest receipt changed');
   const record = readJson(file);
-  const tests = Object.keys(harness.seal.files).filter(file => /^harness\/tests\/.*\.test\.mjs$/.test(file));
+  const tests = sealedSelftests(harness.seal);
   if (record.controlDigest !== harness.seal.digest || record.status !== 'PASS'
     || record.platform !== process.platform || record.directory !== path.dirname(file)
     || stable(record.tests) !== stable(tests) || !tests.length
@@ -576,9 +600,7 @@ export async function verifyReadiness(harness) {
     if (await hashFile(inside(record.directory, record.command[stream].file)) !== record.command[stream].sha256) throw new Error('Selftest log changed');
   }
   const tap = fs.readFileSync(inside(record.directory, record.command.stdout.file), 'utf8');
-  const counts = Object.fromEntries(['tests', 'pass', 'fail', 'cancelled', 'skipped', 'todo']
-    .map(key => [key, Number(tap.match(new RegExp(`^# ${key} (\\d+)$`, 'm'))?.[1] ?? NaN)]));
-  if (!(counts.tests > 0 && counts.tests === counts.pass
-    && ['fail', 'cancelled', 'skipped', 'todo'].every(key => counts[key] === 0))) throw new Error('Incomplete selftest run');
+  const counts = selftestCounts(tap);
+  if (!selftestComplete(counts)) throw new Error('Incomplete selftest run');
   return record;
 }

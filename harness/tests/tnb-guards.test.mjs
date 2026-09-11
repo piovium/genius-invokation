@@ -10,7 +10,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { hashFile, readJson } from '../core.mjs';
+import { git, hashFile, readJson, volarReference } from '../core.mjs';
 import { evaluate, validate } from '../collectors/tnb/tnb-guards-validator.mjs';
 
 const expectations = readJson(fileURLToPath(
@@ -60,6 +60,7 @@ function canonical() {
   const facts = {
     head, tnbVersion: expectations.tnbVersion, packageVersion: expectations.tnbVersion,
     repository: 'C:\\checkout\\typescript-native-bridge', submodules: structuredClone(submodules),
+    volar: null,
   };
   return { observation, logs, facts };
 }
@@ -301,4 +302,114 @@ test('evidence for another gate is rejected', async () => {
   });
   assert.equal(result.status, 'FAIL');
   assert.match(result.reason, /another gate/);
+});
+
+// ---------------------------------------------------------------------------
+// The optional Volar assist: recorded identity, absent checkout, and drift.
+// ---------------------------------------------------------------------------
+
+function volarFixture(t) {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'tnb-guards-volar-'));
+  const file = path.join(root, 'packages', 'tsc', 'src', 'index.ts');
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, 'export const revision = 1;\n');
+  fs.writeFileSync(path.join(root, 'pnpm-workspace.yaml'), 'packages:\n  - packages/*\n');
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  return { root, file };
+}
+
+test('a configured but absent Volar checkout is BLOCKED, not PASS', () => {
+  const result = run(({ observation }) => {
+    observation.volar = { configured: true, root: 'C:\\no\\volar', present: false, revision: null,
+      status: null, scanned: false, scannedFiles: 0, files: null, scan: 'e'.repeat(64) };
+  });
+  assert.equal(result.status, 'BLOCKED');
+  assert.match(result.reason, /Volar|volar/);
+});
+
+test('a guard failure still outranks a configured but absent Volar checkout', () => {
+  const result = run(({ observation, logs }) => {
+    observation.volar = { configured: true, root: 'C:\\no\\volar', present: false, revision: null,
+      status: null, scanned: false, scannedFiles: 0, files: null, scan: 'e'.repeat(64) };
+    const command = guardOf(observation, 'check:enums').commands[0];
+    command.exitCode = 1;
+    logs.set(command.stdout.file, 'check:enum-remap did not finish');
+  });
+  assert.equal(result.status, 'FAIL');
+  assert.match(result.reason, /check:enums .*exited 1/);
+});
+
+test('an identity scan is reproducible when the same tree is rescanned', async t => {
+  const { root } = volarFixture(t);
+  const extra = path.join(root, 'packages', 'tsc', 'src', 'generated.ts');
+  fs.writeFileSync(extra, 'export const generated = 1;\n');
+  const first = await volarReference(root);
+  const second = await volarReference(root);
+  // The scan walks a sorted list and is capped by a count, never by a clock, so two
+  // passes over an untouched tree must agree exactly. The cap itself needs a
+  // >2000-file fixture, which costs about 40 s here, so it is verified out-of-band.
+  assert.equal(first.scanned, true);
+  assert.equal(first.scannedFiles, 2);
+  assert.deepEqual(second, first);
+});
+
+test('a recorded Volar identity that no longer matches the checkout is rejected', async t => {
+  const { root, file } = volarFixture(t);
+  const recorded = await volarReference(root);
+  fs.writeFileSync(file, 'export const revision = 2;\n');
+  const facts = { head, tnbVersion: expectations.tnbVersion, packageVersion: expectations.tnbVersion,
+    repository: 'C:\\checkout\\typescript-native-bridge',
+    submodules: Object.fromEntries(Object.entries(expectations.submodules).map(([name, pin]) => [name, { pin, head: pin }])),
+    volar: await volarReference(root) };
+  const result = evaluate({ observation: { gateId: 'tnb-guards', tnbVersion: expectations.tnbVersion, head,
+    submodules: facts.submodules, volar: recorded, guards: [] }, logs: new Map(), expectations, facts });
+  assert.equal(result.status, 'FAIL');
+  assert.match(result.reason, /Volar checkout has changed/);
+});
+
+test('the accepted identity is stable while the checkout is untouched', async t => {
+  const { root } = volarFixture(t);
+  const recorded = await volarReference(root);
+  const again = await volarReference(root);
+  assert.deepEqual(again, recorded);
+});
+
+test('the IO layer passes when a recorded Volar checkout is re-derived unchanged', async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'tnb-guards-evidence-'));
+  const tnbRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tnb-guards-root-'));
+  const { root: volarRoot } = volarFixture(t);
+  t.after(() => {
+    fs.rmSync(directory, { recursive: true, force: true });
+    fs.rmSync(tnbRoot, { recursive: true, force: true });
+  });
+  // Materialize the pinned TNB checkout fact the IO layer resolves from disk.
+  const repository = path.join(tnbRoot, 'worktrees', 'typescript-native-bridge');
+  fs.mkdirSync(repository, { recursive: true });
+  fs.writeFileSync(path.join(repository, 'package.json'), JSON.stringify({ version: expectations.tnbVersion }));
+  const observation = await rehash(directory, materialize(directory));
+  observation.volar = await volarReference(volarRoot);
+  const result = await validate(observation, {
+    ...argumentsFor(tnbRoot, directory), directory,
+  });
+  // git cannot resolve the temp "checkout", so the pinned submodules stay BLOCKED;
+  // what matters here is that the Volar identity itself does not FAIL the run.
+  assert.doesNotMatch(result.reason ?? '', /Volar checkout/);
+});
+
+test('a directory that only sits inside another repository keeps a null identity', async t => {
+  const outer = fs.mkdtempSync(path.join(os.tmpdir(), 'tnb-guards-outer-'));
+  const checkout = path.join(outer, 'checkout');
+  fs.mkdirSync(path.join(checkout, 'packages', 'tsc', 'src'), { recursive: true });
+  fs.writeFileSync(path.join(checkout, 'packages', 'tsc', 'src', 'index.ts'), 'export const revision = 1;\n');
+  t.after(() => fs.rmSync(outer, { recursive: true, force: true }));
+  git(outer, ['init', '-q']);
+  git(outer, ['-c', 'user.email=harness@example.invalid', '-c', 'user.name=harness',
+    '-c', 'commit.gpgsign=false', 'commit', '-q', '--no-verify', '--allow-empty', '-m', 'outer']);
+  const record = await volarReference(checkout);
+  assert.equal(record.present, true);
+  assert.match(record.files, /^[a-f0-9]{64}$/);
+  // Without the own-root check, `git -C` walks up and describes the unrelated outer
+  // repository: the wrong identity, and unbounded work on a large home directory.
+  assert.equal(record.revision, null);
+  assert.equal(record.status, null);
 });

@@ -17,10 +17,11 @@ export function inside(root, relative) {
     || relative.includes('\\') || path.isAbsolute(relative) || /^[A-Za-z]:/.test(relative)) {
     throw new Error(`Invalid relative path: ${relative}`);
   }
+  const base = path.resolve(root);
   const resolved = path.resolve(root, relative);
-  if (!resolved.startsWith(path.resolve(root) + path.sep)) throw new Error(`Path escapes root: ${relative}`);
+  if (!resolved.startsWith(base + path.sep)) throw new Error(`Path escapes root: ${relative}`);
   let current = resolved;
-  while (current !== path.resolve(root)) {
+  while (current !== base) {
     if (fs.existsSync(current) && fs.lstatSync(current).isSymbolicLink()) {
       throw new Error(`Control/evidence path must not be a symlink: ${current}`);
     }
@@ -186,7 +187,93 @@ export async function snapshotRepository(root, spec, { includeRuntime = true } =
     runtime: runtime?.digest ?? null, entries: runtime?.entries ?? null,
     changed: head !== spec.base || !!changes || !!diff };
 }
-export async function snapshot(root, contract, runtimePaths = {}) {
+// A configured `volar` local.json entry names a machine-local checkout. It is an
+// *assist* for the tnb-guards gate, not a runtime entry: `snapshot` fingerprints
+// a runtime with `hashFile(real)` per entry and a full-tree digest, which throws
+// on a directory and would add minutes to every run over a Volar monorepo that
+// carries its own node_modules (the pinned one here is ~242 MiB). This helper
+// records a bounded, reproducible identity instead: the resolved path, the
+// checkout git revision and working-tree state, and a bounded scan of the source
+// files that determine the guard workload. The scan is capped by a fixed number of
+// *sorted* candidates and never by a wall-clock budget: a time-bounded scan returns
+// a different prefix whenever the disk is busy, and a reader re-deriving the
+// identity would have to read that as a changed checkout. Truncation is therefore
+// deterministic, and it is still disclosed through `scanned` and `scannedFiles`
+// instead of the record silently shrinking.
+export const volarScanMaxFiles = 2000;
+const volarScanDirectories = ['packages'];
+const volarScanExtensions = /\.(?:ts|tsx|mts|cts|js|mjs|cjs|json)$/i;
+const volarScanSkip = new Set(['node_modules', 'dist', 'out', '.git', '.turbo', '.cache']);
+function canonicalVolar(record) {
+  return { configured: record.configured, root: record.root, present: record.present,
+    revision: record.revision, status: record.status, scanned: record.scanned,
+    scannedFiles: record.scannedFiles, files: record.files };
+}
+function volarRecord(root, fields = {}) {
+  const record = { configured: root !== null, root, present: false, revision: null, status: null,
+    scanned: false, scannedFiles: 0, files: null, ...fields };
+  if (!record.scan) record.scan = sha(stable(canonicalVolar(record)));
+  return record;
+}
+function collectVolarFiles(directory, label, output) {
+  let entries;
+  try { entries = fs.readdirSync(directory, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name)); }
+  catch { return; }
+  for (const entry of entries) {
+    if (volarScanSkip.has(entry.name)) continue;
+    const file = path.join(directory, entry.name);
+    const relative = `${label}/${entry.name}`;
+    if (entry.isDirectory()) collectVolarFiles(file, relative, output);
+    else if (entry.isFile() && volarScanExtensions.test(entry.name)) output.push([relative, file]);
+  }
+}
+export async function volarReference(root) {
+  if (!root || !fs.existsSync(root)) return volarRecord(null);
+  let real;
+  try { real = fs.realpathSync.native(root); }
+  catch { return volarRecord(root); }
+  if (!fs.lstatSync(real).isDirectory()) return volarRecord(real);
+  const readGit = args => { try { return git(real, args); } catch { return null; } };
+  // Only a checkout that is its own repository root can be described by git: on a
+  // directory that merely sits *inside* some repository, `git -C` walks up and would
+  // record an unrelated ancestor repository's revision and work-tree state as this
+  // dependency's identity. Enumerating that foreign work tree is also unbounded work
+  // (a home directory that happens to be a repository is the usual trap), so the
+  // identity stays null instead of naming the wrong repository.
+  const top = readGit(['rev-parse', '--show-toplevel']);
+  let ownRoot = false;
+  try { ownRoot = top !== null && fs.realpathSync.native(top) === real; } catch { ownRoot = false; }
+  const revision = ownRoot ? readGit(['rev-parse', 'HEAD']) : null;
+  const status = ownRoot ? readGit(['status', '--porcelain=v1', '--untracked-files=all']) : null;
+  const candidates = [];
+  for (const name of volarScanDirectories) {
+    const directory = path.join(real, name);
+    if (fs.existsSync(directory)) collectVolarFiles(directory, name, candidates);
+  }
+  candidates.sort();
+  const rows = [];
+  for (const [relative, file] of candidates.slice(0, volarScanMaxFiles)) {
+    try { rows.push([relative, await hashFile(file)]); }
+    catch { rows.push([relative, 'unreadable']); }
+  }
+  const files = sha(stable(rows));
+  return volarRecord(real, { present: true, revision, status,
+    scanned: candidates.length <= volarScanMaxFiles, scannedFiles: rows.length, files });
+}
+export function volarReferenceMatches(recorded, actual, recordedPath) {
+  if (!recorded || typeof recorded !== 'object') return 'has no recorded Volar reference';
+  if (typeof recorded.scan !== 'string' || !/^[a-f0-9]{64}$/.test(recorded.scan)) return 'has no Volar identity scan hash';
+  if (recorded.scan !== sha(stable(canonicalVolar(recorded)))) return 'Volar reference was altered after recording';
+  const pathMatches = recordedPath === null ? actual.root === null : actual.root === recordedPath;
+  if (!pathMatches) {
+    return `cannot be resolved at its recorded path ${recordedPath ?? 'none'}`;
+  }
+  if (recorded.root !== recordedPath) return 'Volar reference path was altered after recording';
+  const same = ['present', 'root', 'revision', 'status', 'scanned', 'scannedFiles', 'files', 'configured'];
+  if (same.some(field => recorded[field] !== actual[field])) return 'has changed since the collector recorded it';
+  return null;
+}
+export async function snapshot(root, contract, runtimePaths = {}, { assists: assistPaths = {} } = {}) {
   const repositories = {};
   // Sequential disk hashing keeps memory and I/O bounded on the real data set.
   for (const [id, spec] of Object.entries(contract.repositories)) {
@@ -204,21 +291,23 @@ export async function snapshot(root, contract, runtimePaths = {}) {
         runtimes[id] = { path: real, sha256: await hashFile(real), libraries };
         continue;
       }
-      if (id !== 'node') {
-        let candidate = runtimeRoot;
-        while (true) {
-          if (fs.existsSync(path.join(candidate, 'package.json'))) { runtimeRoot = candidate; break; }
-          const parent = path.dirname(candidate);
-          if (parent === candidate) break;
-          candidate = parent;
-        }
+      let candidate = runtimeRoot;
+      while (true) {
+        if (fs.existsSync(path.join(candidate, 'package.json'))) { runtimeRoot = candidate; break; }
+        const parent = path.dirname(candidate);
+        if (parent === candidate) break;
+        candidate = parent;
       }
       const contents = await treeDigest(runtimeRoot);
       runtimes[id] = { path: real, sha256: await hashFile(real), root: runtimeRoot,
         tree: contents.digest, entries: contents.entries };
     } else runtimes[id] = { missing: file ?? true };
   }
-  return { repositories, runtimes, environment: {
+  const assists = {};
+  for (const [id, root] of Object.entries(assistPaths).sort(([a], [b]) => a.localeCompare(b))) {
+    assists[id] = await volarReference(root);
+  }
+  return { repositories, runtimes, assists, environment: {
     platform: process.platform, arch: process.arch, node: process.version,
     variables: Object.fromEntries(Object.entries(process.env)
       .filter(([key]) => /^(NODE_|TSGO_|TNB_|GODEBUG$|GOFLAGS$|CI$|PNPM_|npm_config_)/i.test(key))
