@@ -1912,10 +1912,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
       reason: "steal",
     });
     let overflowed = false;
-    if (this.oppPlayer.hands.length > this.state.config.maxHandsCount) {
+    if (this.player.hands.length > this.state.config.maxHandsCount) {
       this.mutate({
         type: "removeEntity",
-        from: { who, type: "hands", cardId: card.id },
+        from: { who: this.self.who, type: "hands", cardId: card.id },
         oldState: cardState,
         reason: "overflow",
       });
