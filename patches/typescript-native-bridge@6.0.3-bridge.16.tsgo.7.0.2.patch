@@ -1,5 +1,5 @@
 diff --git a/lib/_tsc.js b/lib/_tsc.js
-index 7abb764..b425695 100644
+index 7abb764..81341c1 100644
 --- a/lib/_tsc.js
 +++ b/lib/_tsc.js
 @@ -101309,7 +101309,7 @@ function createProgram(_rootNamesOrOptions, _options, _host, _oldProgram, _confi
@@ -16,7 +16,7 @@ index 7abb764..b425695 100644
    (_a9 = _scanSfEvictTimer.unref) == null ? void 0 : _a9.call(_scanSfEvictTimer);
  }
 -function createSharedLightStub(hostFileName, configFilePath, metaEnabled, languageVersion, delegatesToLive) {
-+function createSharedLightStub(hostFileName, configFilePath, metaEnabled, languageVersion, delegatesToLive, local) {
++function createSharedLightStub(hostFileName, configFilePath, metaEnabled, languageVersion, delegatesToLive, localDelegate) {
    const tsgoPath = canonicalSourceFilePath(hostFileName);
    let lazyText;
    let lazyLineStarts;
@@ -24,12 +24,12 @@ index 7abb764..b425695 100644
    const textOf = () => {
      var _a9, _b;
 -    return lazyText ?? (lazyText = _syncedOverlayContentByFile.get(hostFileName) ?? ((_b = (_a9 = hostForOverlaySync()) == null ? void 0 : _a9.readFile) == null ? void 0 : _b.call(_a9, hostFileName)) ?? readDiskText(hostFileName) ?? "");
-+    return lazyText ?? (lazyText = (local == null ? void 0 : local.text) ?? _syncedOverlayContentByFile.get(hostFileName) ?? ((_b = (_a9 = hostForOverlaySync()) == null ? void 0 : _a9.readFile) == null ? void 0 : _b.call(_a9, hostFileName)) ?? readDiskText(hostFileName) ?? "");
++    return lazyText ?? (lazyText = (localDelegate == null ? void 0 : localDelegate.text) ?? _syncedOverlayContentByFile.get(hostFileName) ?? ((_b = (_a9 = hostForOverlaySync()) == null ? void 0 : _a9.readFile) == null ? void 0 : _b.call(_a9, hostFileName)) ?? readDiskText(hostFileName) ?? "");
    };
    const lineStartsOf = () => lazyLineStarts ?? (lazyLineStarts = computeLineStarts(textOf()));
    const full = () => {
      var _a9;
-+    if (local) return local.materialize(hostFileName);
++    if (localDelegate) return localDelegate.materialize(hostFileName);
      if (!delegatesToLive) return void 0;
      try {
        return (_a9 = _lightStubMaterializerByConfig.get(configFilePath)) == null ? void 0 : _a9(hostFileName);
@@ -38,7 +38,7 @@ index 7abb764..b425695 100644
      languageVersion,
      languageVariant: 0,
 -    scriptKind: inferScriptKind(hostFileName),
-+    scriptKind: (local == null ? void 0 : local.scriptKind) ?? inferScriptKind(hostFileName),
++    scriptKind: (localDelegate == null ? void 0 : localDelegate.scriptKind) ?? inferScriptKind(hostFileName),
      isDeclarationFile: hostFileName.endsWith(".d.ts"),
      hasNoDefaultLib: false,
      get referencedFiles() {
@@ -188,24 +188,34 @@ index 7abb764..b425695 100644
          if (cachedText !== void 0) {
            hostText = cachedText;
          } else {
-@@ -110364,7 +110381,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -110364,11 +110381,11 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
          return rememberStable(hostSf);
        }
      }
 -    const hostContent = hostContentByFile.get(hostFileName);
-+    const hostContent = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
++    const canon = canonicalSourceFilePath(hostFileName);
++    const hostContent = hostContentByFile.get(canon);
      const text = (hostContent == null ? void 0 : hostContent.text) ?? ((_k = host == null ? void 0 : host.readFile) == null ? void 0 : _k.call(host, hostFileName)) ?? "";
      const scriptKind = (hostContent == null ? void 0 : hostContent.scriptKind) ?? inferScriptKind(hostFileName);
      const sf = createSkeletonSourceFile(hostFileName, text, options.target ?? 99, scriptKind);
-@@ -110417,7 +110434,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+-    const canon = canonicalSourceFilePath(hostFileName);
+     const anySf = sf;
+     anySf.path = canon;
+     anySf.resolvedPath = canon;
+@@ -110417,11 +110434,11 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
      var _a10;
      const hostFileName = resolveHostFileName(fileName, host);
      if (diagnosticSfCache.has(hostFileName)) return diagnosticSfCache.get(hostFileName);
 -    const hostContent = hostContentByFile.get(fileName) ?? hostContentByFile.get(hostFileName);
-+    const hostContent = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
++    const canon = canonicalSourceFilePath(hostFileName);
++    const hostContent = hostContentByFile.get(canon);
      const text = (hostContent == null ? void 0 : hostContent.text) ?? ((_a10 = host == null ? void 0 : host.readFile) == null ? void 0 : _a10.call(host, fileName)) ?? "";
      const scriptKind = (hostContent == null ? void 0 : hostContent.scriptKind) ?? inferScriptKind(hostFileName);
      const sf = createSkeletonSourceFile(hostFileName, text, options.target ?? 99, scriptKind);
+-    const canon = canonicalSourceFilePath(hostFileName);
+     const anyDiagSf = sf;
+     anyDiagSf.path = canon;
+     anyDiagSf.resolvedPath = canon;
 @@ -110430,6 +110447,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
    };
    const preferLightProgramFiles = !preferHostSourceFiles && typeof ((_b = programCtx.lsHost) == null ? void 0 : _b.getScriptSnapshot) === "function";
@@ -220,8 +230,8 @@ index 7abb764..b425695 100644
      const hostFileName = hostNameForQuery(resolveHostFileNameMemoized(fileName, host));
 -    let sf = _lightSfSharedByFile.get(hostFileName);
 +    const content = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
-+    const local = hostWalkStubs && (content || typeof (lsHost == null ? void 0 : lsHost.getScriptSnapshot) === "function");
-+    const cache = local ? hostWalkStubs : _lightSfSharedByFile;
++    const localStubs = hostWalkStubs && (content || typeof (lsHost == null ? void 0 : lsHost.getScriptSnapshot) === "function") ? hostWalkStubs : void 0;
++    const cache = localStubs ?? _lightSfSharedByFile;
 +    let sf = cache.get(hostFileName);
      if (!sf) {
 -      sf = createSharedLightStub(hostFileName, configFilePath, builderMetaEnabled, options.target ?? 99, tsserverWalk);
@@ -231,7 +241,7 @@ index 7abb764..b425695 100644
 +        builderMetaEnabled,
 +        options.target ?? 99,
 +        tsserverWalk,
-+        local ? { materialize: getOrCreateSourceFile, text: content == null ? void 0 : content.text, scriptKind: content == null ? void 0 : content.scriptKind } : void 0
++        localStubs ? { materialize: getOrCreateSourceFile, text: content == null ? void 0 : content.text, scriptKind: content == null ? void 0 : content.scriptKind } : void 0
 +      );
        ensureFileModuleMeta(sf);
 -      _lightSfSharedByFile.set(hostFileName, sf);
@@ -520,7 +530,7 @@ index 7abb764..b425695 100644
      _rpcTraceEvent(
        "overlay.refresh.clearCaches",
 diff --git a/lib/typescript.js b/lib/typescript.js
-index a9218a0..6bccb87 100644
+index a9218a0..6f257c5 100644
 --- a/lib/typescript.js
 +++ b/lib/typescript.js
 @@ -103593,7 +103593,7 @@ function createProgram(_rootNamesOrOptions, _options, _host, _oldProgram, _confi
@@ -537,7 +547,7 @@ index a9218a0..6bccb87 100644
    (_a9 = _scanSfEvictTimer.unref) == null ? void 0 : _a9.call(_scanSfEvictTimer);
  }
 -function createSharedLightStub(hostFileName, configFilePath, metaEnabled, languageVersion, delegatesToLive) {
-+function createSharedLightStub(hostFileName, configFilePath, metaEnabled, languageVersion, delegatesToLive, local) {
++function createSharedLightStub(hostFileName, configFilePath, metaEnabled, languageVersion, delegatesToLive, localDelegate) {
    const tsgoPath = canonicalSourceFilePath(hostFileName);
    let lazyText;
    let lazyLineStarts;
@@ -545,12 +555,12 @@ index a9218a0..6bccb87 100644
    const textOf = () => {
      var _a9, _b;
 -    return lazyText ?? (lazyText = _syncedOverlayContentByFile.get(hostFileName) ?? ((_b = (_a9 = hostForOverlaySync()) == null ? void 0 : _a9.readFile) == null ? void 0 : _b.call(_a9, hostFileName)) ?? readDiskText(hostFileName) ?? "");
-+    return lazyText ?? (lazyText = (local == null ? void 0 : local.text) ?? _syncedOverlayContentByFile.get(hostFileName) ?? ((_b = (_a9 = hostForOverlaySync()) == null ? void 0 : _a9.readFile) == null ? void 0 : _b.call(_a9, hostFileName)) ?? readDiskText(hostFileName) ?? "");
++    return lazyText ?? (lazyText = (localDelegate == null ? void 0 : localDelegate.text) ?? _syncedOverlayContentByFile.get(hostFileName) ?? ((_b = (_a9 = hostForOverlaySync()) == null ? void 0 : _a9.readFile) == null ? void 0 : _b.call(_a9, hostFileName)) ?? readDiskText(hostFileName) ?? "");
    };
    const lineStartsOf = () => lazyLineStarts ?? (lazyLineStarts = computeLineStarts(textOf()));
    const full = () => {
      var _a9;
-+    if (local) return local.materialize(hostFileName);
++    if (localDelegate) return localDelegate.materialize(hostFileName);
      if (!delegatesToLive) return void 0;
      try {
        return (_a9 = _lightStubMaterializerByConfig.get(configFilePath)) == null ? void 0 : _a9(hostFileName);
@@ -559,7 +569,7 @@ index a9218a0..6bccb87 100644
      languageVersion,
      languageVariant: 0,
 -    scriptKind: inferScriptKind(hostFileName),
-+    scriptKind: (local == null ? void 0 : local.scriptKind) ?? inferScriptKind(hostFileName),
++    scriptKind: (localDelegate == null ? void 0 : localDelegate.scriptKind) ?? inferScriptKind(hostFileName),
      isDeclarationFile: hostFileName.endsWith(".d.ts"),
      hasNoDefaultLib: false,
      get referencedFiles() {
@@ -709,24 +719,34 @@ index a9218a0..6bccb87 100644
          if (cachedText !== void 0) {
            hostText = cachedText;
          } else {
-@@ -112650,7 +112667,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+@@ -112650,11 +112667,11 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
          return rememberStable(hostSf);
        }
      }
 -    const hostContent = hostContentByFile.get(hostFileName);
-+    const hostContent = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
++    const canon = canonicalSourceFilePath(hostFileName);
++    const hostContent = hostContentByFile.get(canon);
      const text = (hostContent == null ? void 0 : hostContent.text) ?? ((_k = host == null ? void 0 : host.readFile) == null ? void 0 : _k.call(host, hostFileName)) ?? "";
      const scriptKind = (hostContent == null ? void 0 : hostContent.scriptKind) ?? inferScriptKind(hostFileName);
      const sf = createSkeletonSourceFile(hostFileName, text, options.target ?? 99, scriptKind);
-@@ -112703,7 +112720,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+-    const canon = canonicalSourceFilePath(hostFileName);
+     const anySf = sf;
+     anySf.path = canon;
+     anySf.resolvedPath = canon;
+@@ -112703,11 +112720,11 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
      var _a10;
      const hostFileName = resolveHostFileName(fileName, host);
      if (diagnosticSfCache.has(hostFileName)) return diagnosticSfCache.get(hostFileName);
 -    const hostContent = hostContentByFile.get(fileName) ?? hostContentByFile.get(hostFileName);
-+    const hostContent = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
++    const canon = canonicalSourceFilePath(hostFileName);
++    const hostContent = hostContentByFile.get(canon);
      const text = (hostContent == null ? void 0 : hostContent.text) ?? ((_a10 = host == null ? void 0 : host.readFile) == null ? void 0 : _a10.call(host, fileName)) ?? "";
      const scriptKind = (hostContent == null ? void 0 : hostContent.scriptKind) ?? inferScriptKind(hostFileName);
      const sf = createSkeletonSourceFile(hostFileName, text, options.target ?? 99, scriptKind);
+-    const canon = canonicalSourceFilePath(hostFileName);
+     const anyDiagSf = sf;
+     anyDiagSf.path = canon;
+     anyDiagSf.resolvedPath = canon;
 @@ -112716,6 +112733,7 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
    };
    const preferLightProgramFiles = !preferHostSourceFiles && typeof ((_b = programCtx.lsHost) == null ? void 0 : _b.getScriptSnapshot) === "function";
@@ -741,8 +761,8 @@ index a9218a0..6bccb87 100644
      const hostFileName = hostNameForQuery(resolveHostFileNameMemoized(fileName, host));
 -    let sf = _lightSfSharedByFile.get(hostFileName);
 +    const content = hostContentByFile.get(canonicalSourceFilePath(hostFileName));
-+    const local = hostWalkStubs && (content || typeof (lsHost == null ? void 0 : lsHost.getScriptSnapshot) === "function");
-+    const cache = local ? hostWalkStubs : _lightSfSharedByFile;
++    const localStubs = hostWalkStubs && (content || typeof (lsHost == null ? void 0 : lsHost.getScriptSnapshot) === "function") ? hostWalkStubs : void 0;
++    const cache = localStubs ?? _lightSfSharedByFile;
 +    let sf = cache.get(hostFileName);
      if (!sf) {
 -      sf = createSharedLightStub(hostFileName, configFilePath, builderMetaEnabled, options.target ?? 99, tsserverWalk);
@@ -752,7 +772,7 @@ index a9218a0..6bccb87 100644
 +        builderMetaEnabled,
 +        options.target ?? 99,
 +        tsserverWalk,
-+        local ? { materialize: getOrCreateSourceFile, text: content == null ? void 0 : content.text, scriptKind: content == null ? void 0 : content.scriptKind } : void 0
++        localStubs ? { materialize: getOrCreateSourceFile, text: content == null ? void 0 : content.text, scriptKind: content == null ? void 0 : content.scriptKind } : void 0
 +      );
        ensureFileModuleMeta(sf);
 -      _lightSfSharedByFile.set(hostFileName, sf);
@@ -1057,7 +1077,7 @@ index a9218a0..6bccb87 100644
      const { getSourceFileWithCache } = changeCompilerHostLikeToUseCache(
        compilerHost,
 diff --git a/package.json b/package.json
-index f8d9e92..49b900d 100644
+index f8d9e92..c00aeb0 100644
 --- a/package.json
 +++ b/package.json
 @@ -1,59 +1,72 @@
@@ -1178,8 +1198,8 @@ index f8d9e92..49b900d 100644
 +  },
 +  "tnbLocalBuild": {
 +    "kind": "unpublished-local-build",
-+    "base": "cd339d9f8d01c87b8ee0d28c3525f19967d11765",
-+    "sourceCommit": "cd339d9f8d01c87b8ee0d28c3525f19967d11765",
++    "base": "2890f547aa52777f372a3c91facac76b093784bd",
++    "sourceCommit": "2890f547aa52777f372a3c91facac76b093784bd",
 +    "submodulePins": {
 +      "typescript": "050880ce59e30b356b686bd3144efe24f875ebc8",
 +      "typescriptGo": "2bd066d87f5bafd315be9f40889d0a60b9e58e0b"
@@ -1187,6 +1207,6 @@ index f8d9e92..49b900d 100644
 +    "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 +    "releaseMainSha256": "d5e2b1278788c8b3c5d96f3387e97349728aecd79a3b342485e7665854c22389",
 +    "nativeSha256": "32be259fa2027f7b4ba26f78827293b187f1eb000eb5c6761dda171cd5c9a4cb",
-+    "compilerSha256": "a60c662cbde54ab29609c8ce535548911349b54607b4ca6748f0425bb2857001"
++    "compilerSha256": "0ab13072e10c3993eb0c589945b9fd5fdd9442b2e96fad83816d7104b6a52c0c"
 +  }
  }
