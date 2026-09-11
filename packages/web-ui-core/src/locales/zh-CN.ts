@@ -167,6 +167,8 @@ export default {
     myDiscardHand: "我方舍弃手牌",
     oppDiscardHand: "对方舍弃手牌",
 
+    cardVariableReset: "卡牌的触发效果限制次数已恢复",
+
     elementalTuning: "元素调和",
 
     myConvertToDice: "我方将{{count}}个元素骰转换为{{diceType}}骰",

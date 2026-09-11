@@ -480,6 +480,14 @@ export function updateHistory(
           }
           break;
         }
+        case "resetVariables": {
+          children.push({
+            type: "cardVariableReset",
+            who: history.recorder.area.get(m.entityId)?.who ?? 0,
+            cardDefinitionId: m.entityDefinitionId,
+          });
+          break;
+        }
         case "applyAura": {
           children.push({
             type: "apply",

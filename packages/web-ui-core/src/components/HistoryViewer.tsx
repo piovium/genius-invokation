@@ -419,6 +419,15 @@ const renderHistoryChild = async (
       };
       break;
     }
+    case "cardVariableReset": {
+      result = {
+        opp: opp(child.who),
+        imageId: child.cardDefinitionId,
+        title: renderName(child.cardDefinitionId),
+        content: t("history.cardVariableReset"),
+      };
+      break;
+    }
     case "removeEntity": {
       if (["status", "equipment", "attachment"].includes(child.entityType)) {
         result = {
