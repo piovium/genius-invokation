@@ -158,9 +158,10 @@ export function createRoomSocketHandlers(
   }
   function send(raw: RawSocket, state: Connection, data: string | Uint8Array) {
     if (state.closed) return;
-    const byteLength =
-      typeof data === "string" ? Buffer.byteLength(data) : data.byteLength;
-    if (raw.getBufferedAmount() + byteLength > MAX_BUFFERED_BYTES) {
+    // The budget bounds the queued backlog, not the frame about to be written:
+    // a game frame may exceed it on its own and is still attempted, while a
+    // consumer that is over budget once the queue is checked is dropped.
+    if (raw.getBufferedAmount() > MAX_BUFFERED_BYTES) {
       close(raw, state, CLOSE_TRY_AGAIN_LATER, "SLOW_CONSUMER");
       return;
     }

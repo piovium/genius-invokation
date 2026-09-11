@@ -434,7 +434,6 @@ export interface Rooms {
 /** A spectator's live binding to one seat of a room. */
 interface RoomSubscription {
   sessionId: string;
-  ownPlayer: boolean;
   /** Attaches the subscriber and returns the function that detaches it again. */
   subscribe: () => () => void;
 }
@@ -750,7 +749,6 @@ export function createRooms(
       throw unauthorized(`You cannot watch your opponent in room ${roomId}`);
     return {
       sessionId: room.sessionId,
-      ownPlayer: isSelf,
       subscribe: () => player.subscribe(subscriber),
     };
   }

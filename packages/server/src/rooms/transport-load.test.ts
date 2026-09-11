@@ -14,12 +14,12 @@ import type { RoomEvent, RoomSubscriber } from "./types";
 const TEST_TIMEOUT_MS = 15_000;
 const SOCKET_TIMEOUT_MS = 2000;
 const CLOSE_TIMEOUT_MS = 10_000;
-// Application-queue budget for a paused consumer, plus the overshoot the
-// transport allows for the frame that is in flight when the cap trips.
-const BUFFER_LIMIT_BYTES = 512 * 1024;
-const BUFFER_TOLERANCE_BYTES = 128;
 // Notification payload size used to fill the socket.
 const FRAME_BYTES = 16 * 1024;
+// Application-queue budget for a paused consumer. The backlog is checked
+// before each write, so the queue may hold one more frame when the cap trips.
+const BUFFER_LIMIT_BYTES = 512 * 1024;
+const BUFFER_TOLERANCE_BYTES = FRAME_BYTES;
 // Safety cap so a stalled eviction cannot loop forever.
 const SEND_LIMIT = 2048;
 // The real socket must fill before the application queue can trip.
@@ -78,7 +78,6 @@ async function fixture() {
       subscriptions.set(roomId, members);
       return {
         sessionId: `room-${roomId}`,
-        ownPlayer: false,
         subscribe() {
           members.add(subscriber);
           return () => {
@@ -256,6 +255,35 @@ test(
           "every disconnected binding must be released before the next round",
         );
       }
+    } finally {
+      await service.close();
+    }
+  },
+);
+
+test(
+  "a frame larger than the queue budget still reaches a drained consumer",
+  { timeout: TEST_TIMEOUT_MS },
+  async () => {
+    const service = await fixture();
+    try {
+      const peer = await service.connect(30);
+      const received = once(peer, "message", {
+        signal: AbortSignal.timeout(SOCKET_TIMEOUT_MS),
+      });
+      // The codec admits game frames well above the queue budget, so one such
+      // frame must be written instead of evicting a healthy consumer.
+      const data = new Uint8Array(BUFFER_LIMIT_BYTES + FRAME_BYTES);
+      new DataView(data.buffer).setUint32(0, 7);
+      service.emit(30, { type: "notification", data });
+      const [bytes, binary] = await received;
+      const payload = receiveNotification(bytes, binary);
+      assert.equal(payload.byteLength, data.byteLength);
+      assert.equal(
+        new DataView(payload.buffer, payload.byteOffset).getUint32(0),
+        7,
+      );
+      assert.equal(peer.readyState, WebSocket.OPEN);
     } finally {
       await service.close();
     }

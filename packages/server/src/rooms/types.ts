@@ -1,5 +1,5 @@
 import type { GameConfig, Version } from "@gi-tcg/core";
-import type { Deck, GameWireFrame } from "@gi-tcg/typings";
+import type { Deck, GameRpcTimer, GameWireFrame } from "@gi-tcg/typings";
 
 export interface RoomConfig extends Partial<GameConfig> {
   initTotalActionTime: number;
@@ -27,10 +27,7 @@ export type PlayerInfo = (
 export type PlayerId = PlayerInfo["id"];
 
 /** Seconds left on the current RPC and the budget it started from. */
-export interface RpcTimer {
-  current: number;
-  total: number;
-}
+export type RpcTimer = GameRpcTimer;
 
 /** Sent once the room starts: the seat, the room config and both players. */
 export interface Initialized {

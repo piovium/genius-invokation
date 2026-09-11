@@ -79,10 +79,9 @@ export function createFrontendHandler({
   beta = IS_BETA,
 } = {}) {
   const root = resolve(directory);
-  const base =
-    "/" +
-    basePath.split("/").filter(Boolean).join("/") +
-    (basePath === "/" ? "" : "/");
+  // Must normalize to the same mount that `createApplication` gives the API.
+  const segments = basePath.split("/").filter(Boolean);
+  const base = `/${segments.join("/")}${segments.length ? "/" : ""}`;
   const rootPath = base === "/" ? "/" : base.slice(0, -1);
   // The API subtree under the mount is served by Elysia, not this handler.
   const apiBase = base + "api";

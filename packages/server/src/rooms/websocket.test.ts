@@ -175,7 +175,6 @@ async function fixture({ dropAck = false, watchable = false } = {}) {
         throw unauthorized();
       return {
         sessionId: player.sessionId,
-        ownPlayer: visitor === playerId,
         subscribe: () => player.subscribe(subscriber),
       };
     },

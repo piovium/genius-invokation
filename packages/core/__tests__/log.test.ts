@@ -38,7 +38,11 @@ test("incremental logs preserve the pre-migration encoding, definitions and shar
     ...legacyLog,
     v: CORE_VERSION,
   });
-  expect(encoded).toEqual(serializeGameStateLog(entries));
+  // The one-shot public API must keep emitting the frozen pre-migration bytes.
+  expect(JSON.parse(JSON.stringify(serializeGameStateLog(entries)))).toEqual({
+    ...legacyLog,
+    v: CORE_VERSION,
+  });
   const restored = deserializeGameStateLog(
     data,
     JSON.parse(JSON.stringify(encoded)),
