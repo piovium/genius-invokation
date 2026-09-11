@@ -1,5 +1,5 @@
 diff --git a/lib/_tsc.js b/lib/_tsc.js
-index 7abb764..09ca4d3 100644
+index 7abb764..b425695 100644
 --- a/lib/_tsc.js
 +++ b/lib/_tsc.js
 @@ -101309,7 +101309,7 @@ function createProgram(_rootNamesOrOptions, _options, _host, _oldProgram, _confi
@@ -365,7 +365,64 @@ index 7abb764..09ca4d3 100644
          let buildInfo;
          try {
            buildInfo = JSON.parse(o.text);
-@@ -112057,9 +112130,12 @@ function createTsgoChecker(program) {
+@@ -111126,15 +111199,8 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       }
+     },
+     getModeForUsageLocation: (file, usage) => {
+-      var _a10, _b2;
+-      const id = programFileId(file);
+-      const pos = usagePosition(usage);
+-      if (!id || typeof pos !== "number") return void 0;
+-      try {
+-        return (_b2 = (_a10 = goProgram()) == null ? void 0 : _a10.getModeForUsageLocation) == null ? void 0 : _b2.call(_a10, id, pos);
+-      } catch {
+-        return void 0;
+-      }
++      ensureFileModuleMeta(file);
++      return getModeForUsageLocation(file, usage, optionsForFile(file));
+     },
+     getModeForResolutionAtIndex: (file, index) => {
+       if (!file) return void 0;
+@@ -111301,28 +111367,16 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       var _a10;
+       return (_a10 = getProgramResolutions().modules.get(file == null ? void 0 : file.path)) == null ? void 0 : _a10.get(moduleName, mode);
+     },
+-    // No resolution cache on the thin program; resolve through the checker
+-    // (tsgo RPC) so services' getReferenceAtPosition can produce stock's
+-    // file-start definition for module specifiers.
+-    getResolvedModuleFromModuleSpecifier: (moduleSpecifier, _sourceFile) => {
+-      var _a10, _b2, _c2;
+-      try {
+-        const sym = (_a10 = checker.resolveExternalModuleName) == null ? void 0 : _a10.call(checker, moduleSpecifier);
+-        const decl = (_b2 = sym == null ? void 0 : sym.declarations) == null ? void 0 : _b2[0];
+-        const sf = decl && (decl.kind === 308 /* SourceFile */ ? decl : (_c2 = decl.getSourceFile) == null ? void 0 : _c2.call(decl));
+-        const fileName = sf == null ? void 0 : sf.fileName;
+-        if (typeof fileName !== "string" || !fileName) return void 0;
+-        return {
+-          resolvedModule: {
+-            resolvedFileName: fileName,
+-            extension: extensionFromPathOrTs(fileName),
+-            isExternalLibraryImport: fileName.includes("/node_modules/")
+-          },
+-          failedLookupLocations: []
+-        };
+-      } catch {
+-        return void 0;
+-      }
++    // Stock reads the same mode-aware cache as getResolvedModule. Resolving
++    // symbols here loses package metadata and makes explainFiles bind and
++    // materialize every imported declaration during project loading.
++    getResolvedModuleFromModuleSpecifier: (moduleSpecifier, sourceFile) => {
++      sourceFile ?? (sourceFile = getSourceFileOfNode(moduleSpecifier));
++      Debug.assertIsDefined(
++        sourceFile,
++        "`moduleSpecifier` must have a `SourceFile` ancestor. Use `program.getResolvedModule` instead to provide the containing file and resolution mode."
++      );
++      return thinProgram.getResolvedModule(sourceFile, moduleSpecifier.text, thinProgram.getModeForUsageLocation(sourceFile, moduleSpecifier));
+     },
+     // Reads the lazily materialized type-reference resolution map.
+     getResolvedTypeReferenceDirective: (file, typeDirectiveName, mode) => {
+@@ -112057,9 +112111,12 @@ function createTsgoChecker(program) {
      const additionalFiles = _lastAdditionalFilesByConfig.get(configFilePath);
      const externalChanged = programCtx == null ? void 0 : programCtx.pendingExternalChanged;
      if (programCtx) programCtx.pendingExternalChanged = void 0;
@@ -379,7 +436,7 @@ index 7abb764..09ca4d3 100644
      const tabRegistry = syncHost == null ? void 0 : syncHost.projectService;
      if ((_a10 = tabRegistry == null ? void 0 : tabRegistry.openFiles) == null ? void 0 : _a10.forEach) {
        const openTabs = /* @__PURE__ */ new Set();
-@@ -112069,7 +112145,7 @@ function createTsgoChecker(program) {
+@@ -112069,7 +112126,7 @@ function createTsgoChecker(program) {
          if (((_a11 = info == null ? void 0 : info.isScriptOpen) == null ? void 0 : _a11.call(info)) && info.fileName) openTabs.add(resolveHostFileName(info.fileName, syncHost));
        });
        const closed = [..._sessionSentOpenTabs].filter((f) => !openTabs.has(f));
@@ -388,7 +445,7 @@ index 7abb764..09ca4d3 100644
        _sessionSentOpenTabs.clear();
        for (const f of openTabs) _sessionSentOpenTabs.add(f);
        for (const f of closed) forgetSyncedOverlay(f);
-@@ -112083,7 +112159,7 @@ function createTsgoChecker(program) {
+@@ -112083,7 +112140,7 @@ function createTsgoChecker(program) {
        ...openFilesWithContent.length > 0 ? { openFilesWithContent } : {},
        ...extraFileExtensions ? { extraFileExtensions } : {},
        ...(additionalFiles == null ? void 0 : additionalFiles.length) ? { additionalFiles } : {},
@@ -397,7 +454,7 @@ index 7abb764..09ca4d3 100644
        ...buildClose.closeParams ?? {},
        ...prefetchDiagnostics ? { prefetchDiagnostics: true } : {}
      };
-@@ -112407,20 +112483,18 @@ function createTsgoChecker(program) {
+@@ -112407,20 +112464,18 @@ function createTsgoChecker(program) {
      const syncHost = hostForOverlaySyncLocal();
      if (!syncHost) return;
      const openFiles = collectTsgoOpenFileNames(syncHost, requestedFileName ? [requestedFileName] : void 0);
@@ -423,7 +480,7 @@ index 7abb764..09ca4d3 100644
          }
          continue;
        }
-@@ -112432,9 +112506,11 @@ function createTsgoChecker(program) {
+@@ -112432,9 +112487,11 @@ function createTsgoChecker(program) {
        }
        openFilesWithContent.push({ fileName: hostFileName, content: content.text, scriptKind: content.scriptKind });
      }
@@ -437,7 +494,7 @@ index 7abb764..09ca4d3 100644
      traceOverlaySync(
        openFilesWithContent,
        /*deduped*/
-@@ -112444,6 +112520,7 @@ function createTsgoChecker(program) {
+@@ -112444,6 +112501,7 @@ function createTsgoChecker(program) {
        openProject: openProjectParam(ctx.configFilePath, ctx.options),
        ...openFiles.length > 0 ? { openFiles } : {},
        openFilesWithContent,
@@ -445,7 +502,7 @@ index 7abb764..09ca4d3 100644
        ..._lastExtraFileExtensions ? { extraFileExtensions: _lastExtraFileExtensions } : {},
        // Host-injected extra roots (svelte2tsx/glint shims) — without them
        // every hook-driven rebuild drops the ambient shim files from the
-@@ -112465,10 +112542,12 @@ function createTsgoChecker(program) {
+@@ -112465,10 +112523,12 @@ function createTsgoChecker(program) {
      installTsgoBackedSourceFileLoader(() => project);
      for (const f of openFilesWithContent) {
        commitSyncedOverlay(f);
@@ -463,7 +520,7 @@ index 7abb764..09ca4d3 100644
      _rpcTraceEvent(
        "overlay.refresh.clearCaches",
 diff --git a/lib/typescript.js b/lib/typescript.js
-index a9218a0..331f330 100644
+index a9218a0..6bccb87 100644
 --- a/lib/typescript.js
 +++ b/lib/typescript.js
 @@ -103593,7 +103593,7 @@ function createProgram(_rootNamesOrOptions, _options, _host, _oldProgram, _confi
@@ -829,7 +886,64 @@ index a9218a0..331f330 100644
          let buildInfo;
          try {
            buildInfo = JSON.parse(o.text);
-@@ -114343,9 +114416,12 @@ function createTsgoChecker(program) {
+@@ -113412,15 +113485,8 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       }
+     },
+     getModeForUsageLocation: (file, usage) => {
+-      var _a10, _b2;
+-      const id = programFileId(file);
+-      const pos = usagePosition(usage);
+-      if (!id || typeof pos !== "number") return void 0;
+-      try {
+-        return (_b2 = (_a10 = goProgram()) == null ? void 0 : _a10.getModeForUsageLocation) == null ? void 0 : _b2.call(_a10, id, pos);
+-      } catch {
+-        return void 0;
+-      }
++      ensureFileModuleMeta(file);
++      return getModeForUsageLocation(file, usage, optionsForFile(file));
+     },
+     getModeForResolutionAtIndex: (file, index) => {
+       if (!file) return void 0;
+@@ -113587,28 +113653,16 @@ function createTsgoProgram(rootNames, options, host, projectReferences, configFi
+       var _a10;
+       return (_a10 = getProgramResolutions().modules.get(file == null ? void 0 : file.path)) == null ? void 0 : _a10.get(moduleName, mode);
+     },
+-    // No resolution cache on the thin program; resolve through the checker
+-    // (tsgo RPC) so services' getReferenceAtPosition can produce stock's
+-    // file-start definition for module specifiers.
+-    getResolvedModuleFromModuleSpecifier: (moduleSpecifier, _sourceFile) => {
+-      var _a10, _b2, _c2;
+-      try {
+-        const sym = (_a10 = checker.resolveExternalModuleName) == null ? void 0 : _a10.call(checker, moduleSpecifier);
+-        const decl = (_b2 = sym == null ? void 0 : sym.declarations) == null ? void 0 : _b2[0];
+-        const sf = decl && (decl.kind === 308 /* SourceFile */ ? decl : (_c2 = decl.getSourceFile) == null ? void 0 : _c2.call(decl));
+-        const fileName = sf == null ? void 0 : sf.fileName;
+-        if (typeof fileName !== "string" || !fileName) return void 0;
+-        return {
+-          resolvedModule: {
+-            resolvedFileName: fileName,
+-            extension: extensionFromPathOrTs(fileName),
+-            isExternalLibraryImport: fileName.includes("/node_modules/")
+-          },
+-          failedLookupLocations: []
+-        };
+-      } catch {
+-        return void 0;
+-      }
++    // Stock reads the same mode-aware cache as getResolvedModule. Resolving
++    // symbols here loses package metadata and makes explainFiles bind and
++    // materialize every imported declaration during project loading.
++    getResolvedModuleFromModuleSpecifier: (moduleSpecifier, sourceFile) => {
++      sourceFile ?? (sourceFile = getSourceFileOfNode(moduleSpecifier));
++      Debug.assertIsDefined(
++        sourceFile,
++        "`moduleSpecifier` must have a `SourceFile` ancestor. Use `program.getResolvedModule` instead to provide the containing file and resolution mode."
++      );
++      return thinProgram.getResolvedModule(sourceFile, moduleSpecifier.text, thinProgram.getModeForUsageLocation(sourceFile, moduleSpecifier));
+     },
+     // Reads the lazily materialized type-reference resolution map.
+     getResolvedTypeReferenceDirective: (file, typeDirectiveName, mode) => {
+@@ -114343,9 +114397,12 @@ function createTsgoChecker(program) {
      const additionalFiles = _lastAdditionalFilesByConfig.get(configFilePath);
      const externalChanged = programCtx == null ? void 0 : programCtx.pendingExternalChanged;
      if (programCtx) programCtx.pendingExternalChanged = void 0;
@@ -843,7 +957,7 @@ index a9218a0..331f330 100644
      const tabRegistry = syncHost == null ? void 0 : syncHost.projectService;
      if ((_a10 = tabRegistry == null ? void 0 : tabRegistry.openFiles) == null ? void 0 : _a10.forEach) {
        const openTabs = /* @__PURE__ */ new Set();
-@@ -114355,7 +114431,7 @@ function createTsgoChecker(program) {
+@@ -114355,7 +114412,7 @@ function createTsgoChecker(program) {
          if (((_a11 = info == null ? void 0 : info.isScriptOpen) == null ? void 0 : _a11.call(info)) && info.fileName) openTabs.add(resolveHostFileName(info.fileName, syncHost));
        });
        const closed = [..._sessionSentOpenTabs].filter((f) => !openTabs.has(f));
@@ -852,7 +966,7 @@ index a9218a0..331f330 100644
        _sessionSentOpenTabs.clear();
        for (const f of openTabs) _sessionSentOpenTabs.add(f);
        for (const f of closed) forgetSyncedOverlay(f);
-@@ -114369,7 +114445,7 @@ function createTsgoChecker(program) {
+@@ -114369,7 +114426,7 @@ function createTsgoChecker(program) {
        ...openFilesWithContent.length > 0 ? { openFilesWithContent } : {},
        ...extraFileExtensions ? { extraFileExtensions } : {},
        ...(additionalFiles == null ? void 0 : additionalFiles.length) ? { additionalFiles } : {},
@@ -861,7 +975,7 @@ index a9218a0..331f330 100644
        ...buildClose.closeParams ?? {},
        ...prefetchDiagnostics ? { prefetchDiagnostics: true } : {}
      };
-@@ -114693,20 +114769,18 @@ function createTsgoChecker(program) {
+@@ -114693,20 +114750,18 @@ function createTsgoChecker(program) {
      const syncHost = hostForOverlaySyncLocal();
      if (!syncHost) return;
      const openFiles = collectTsgoOpenFileNames(syncHost, requestedFileName ? [requestedFileName] : void 0);
@@ -887,7 +1001,7 @@ index a9218a0..331f330 100644
          }
          continue;
        }
-@@ -114718,9 +114792,11 @@ function createTsgoChecker(program) {
+@@ -114718,9 +114773,11 @@ function createTsgoChecker(program) {
        }
        openFilesWithContent.push({ fileName: hostFileName, content: content.text, scriptKind: content.scriptKind });
      }
@@ -901,7 +1015,7 @@ index a9218a0..331f330 100644
      traceOverlaySync(
        openFilesWithContent,
        /*deduped*/
-@@ -114730,6 +114806,7 @@ function createTsgoChecker(program) {
+@@ -114730,6 +114787,7 @@ function createTsgoChecker(program) {
        openProject: openProjectParam(ctx.configFilePath, ctx.options),
        ...openFiles.length > 0 ? { openFiles } : {},
        openFilesWithContent,
@@ -909,7 +1023,7 @@ index a9218a0..331f330 100644
        ..._lastExtraFileExtensions ? { extraFileExtensions: _lastExtraFileExtensions } : {},
        // Host-injected extra roots (svelte2tsx/glint shims) — without them
        // every hook-driven rebuild drops the ambient shim files from the
-@@ -114751,10 +114828,12 @@ function createTsgoChecker(program) {
+@@ -114751,10 +114809,12 @@ function createTsgoChecker(program) {
      installTsgoBackedSourceFileLoader(() => project);
      for (const f of openFilesWithContent) {
        commitSyncedOverlay(f);
@@ -926,7 +1040,7 @@ index a9218a0..331f330 100644
      }
      _rpcTraceEvent(
        "overlay.refresh.clearCaches",
-@@ -167481,7 +167560,6 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
+@@ -167481,7 +167541,6 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
        getComments: (decls) => ts_JsDoc_exports.getJsDocCommentsFromDeclarations(decls),
        getTags: (decls) => ts_JsDoc_exports.getJsDocTagsFromDeclarations(decls)
      });
@@ -934,7 +1048,7 @@ index a9218a0..331f330 100644
      let compilerHost = {
        getSourceFile: getOrCreateSourceFile,
        getSourceFileByPath: getOrCreateSourceFileByPath,
-@@ -167524,6 +167602,7 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
+@@ -167524,6 +167583,7 @@ function createLanguageService(host, documentRegistry = createDocumentRegistry(h
        jsDocParsingMode: host.jsDocParsingMode,
        getGlobalTypingsCacheLocation: maybeBind(host, host.getGlobalTypingsCacheLocation)
      };
@@ -943,7 +1057,7 @@ index a9218a0..331f330 100644
      const { getSourceFileWithCache } = changeCompilerHostLikeToUseCache(
        compilerHost,
 diff --git a/package.json b/package.json
-index f8d9e92..7c24f19 100644
+index f8d9e92..49b900d 100644
 --- a/package.json
 +++ b/package.json
 @@ -1,59 +1,72 @@
@@ -1064,8 +1178,8 @@ index f8d9e92..7c24f19 100644
 +  },
 +  "tnbLocalBuild": {
 +    "kind": "unpublished-local-build",
-+    "base": "b25e3117975310b4e330e7745c8c2fe28b462556",
-+    "sourceCommit": "b25e3117975310b4e330e7745c8c2fe28b462556",
++    "base": "cd339d9f8d01c87b8ee0d28c3525f19967d11765",
++    "sourceCommit": "cd339d9f8d01c87b8ee0d28c3525f19967d11765",
 +    "submodulePins": {
 +      "typescript": "050880ce59e30b356b686bd3144efe24f875ebc8",
 +      "typescriptGo": "2bd066d87f5bafd315be9f40889d0a60b9e58e0b"
@@ -1073,6 +1187,6 @@ index f8d9e92..7c24f19 100644
 +    "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 +    "releaseMainSha256": "d5e2b1278788c8b3c5d96f3387e97349728aecd79a3b342485e7665854c22389",
 +    "nativeSha256": "32be259fa2027f7b4ba26f78827293b187f1eb000eb5c6761dda171cd5c9a4cb",
-+    "compilerSha256": "d25155a6d5cd6cbe27243390bed478c97b793f9471f4fa665aef390cacb3c89a"
++    "compilerSha256": "a60c662cbde54ab29609c8ce535548911349b54607b4ca6748f0425bb2857001"
 +  }
  }
