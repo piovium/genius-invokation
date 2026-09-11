@@ -96,6 +96,7 @@ define card {
  */
 define card {
   id 115114 as ShiningShadowhuntShellPyro;
+  since "v5.7.0";
   undiscoverable;
   cost DiceType.Pyro, 3;
   on selfDiscard, "=play" {
