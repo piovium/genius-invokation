@@ -4,7 +4,7 @@
 
 ## 实现约定
 
-路由、请求校验、鉴权、错误处理与插件组合统一采用 Elysia 原生写法：路由由插件组合而成，校验使用 `t`，鉴权与共享状态由 `macro` 注入的 `resolve` 提供，错误统一使用 `status`。运行时固定为 Node.js，数据访问统一经由 Drizzle 与 PostgreSQL。
+路由、请求校验、鉴权与错误处理统一采用 Elysia 原生写法：路由由插件组合而成，校验使用 `t`，鉴权与共享状态由 `macro` 注入的 `resolve` 提供，错误统一使用 `status`。运行时固定为 Node.js，数据访问统一经由 Drizzle 与 PostgreSQL。
 
 ## 开发与构建
 
@@ -23,13 +23,13 @@
 
 对已有 PostgreSQL 数据库执行 `node dist/migrate.js`，源码环境执行 `pnpm migrate`。迁移器在事务和 PostgreSQL advisory lock 保护下，按 `drizzle/meta/_journal.json` 的顺序执行 `drizzle/` 中的 SQL，并把已执行迁移的名称与校验和写入 `__drizzle_migrations`。这套迁移是本服务自有的 Drizzle 迁移集：表名、列、默认值、主键与外键动作与既有部署一致，约束名沿用原名称，DDL 与约束都属于对外稳定接口。
 
-空库按 journal 顺序执行全部 SQL。重复执行不会重新建表、重置序列或修改已有用户、牌组和对局。已经建好表、却没有迁移记录的库（由本服务早期版本或其它工具建立）先与本服务的 SQL 逐列、逐主键、逐外键比对，完全一致时整体接管并登记，不执行任何 SQL。比对不一致、迁移记录不完整、校验和不符，或列、主键、外键发生漂移时，迁移器会报错并回滚事务。`MIGRATIONS_DIRECTORY` 可覆盖 SQL 目录，默认使用发行包内的 `drizzle/`。
+空库按 journal 顺序执行全部 SQL。重复执行不会重新建表、重置序列或修改已有用户、牌组和对局。已经建好表、却没有迁移记录的库（由本服务早期版本或其它工具建立）先与本服务的 SQL 逐列、逐主键、逐外键比对，完全一致时整体接管并登记（只补写迁移记录，不执行任何迁移 SQL）。比对不一致（列、默认值、主键或外键漂移）、已应用迁移的校验和被改动，或迁移记录包含本构建未随包发布的迁移时，迁移器会报错并回滚事务；尚未执行的迁移会按 journal 顺序补执行。`MIGRATIONS_DIRECTORY` 可覆盖 SQL 目录，默认使用发行包内的 `drizzle/`。
 
 `DATABASE_URL` 的 `schema` 参数指定目标 schema，需在迁移前先创建它。`DATABASE_CONNECTION_LIMIT` 设置连接池上限，默认为 2。
 
 ## 部署
 
-在仓库根目录执行 `docker build -f packages/server/Dockerfile .`，运行镜像时提供 `JWT_SECRET` 与 `DATABASE_URL`。镜像使用 Node.js 与 pnpm 构建，运行层使用 Node.js。Compose 依次等待 PostgreSQL 就绪、运行迁移容器、启动服务。数据库使用持久化 volume；升级已有部署时继续挂载原 volume。
+在仓库根目录执行 `docker build -f packages/server/Dockerfile .`，运行镜像时提供 `JWT_SECRET` 与 `DATABASE_URL`；Compose 部署另用 `POSTGRES_PASSWORD` 覆盖数据库密码（默认 `postgres`，仅适用于本地）。构建层基于 pnpm 镜像，运行层使用 `node:26.1.0-alpine`。Compose 依次等待 PostgreSQL 就绪、运行迁移容器、启动服务。数据库使用持久化 volume；升级已有部署时继续挂载原 volume。
 
 数据库健康检查连接 TCP，避免把 initdb 期间仅监听 Unix socket 的临时实例当作可用服务；首次初始化 volume 提供 120 秒启动宽限。TCP 就绪后即可执行迁移，无需等满宽限期。
 
@@ -41,7 +41,7 @@ WebSocket 与 HTTP 共用端口 3000。反向代理需要转发 `Upgrade`，空�
 
 ## 验证
 
-协议、真实对局、数据库写入和 RSS 使用[独立 harness](../../scripts/server-harness/README.md) 验证。先运行其中的 `environment/prepare.mjs` 创建隔离数据库和账号，再使用 `candidate.json` 对候选服务运行验收；静态约束由仓库根目录的 `npm run harness:constraints` 检查，规则见 harness 说明。内存预算为常驻 RSS 100 MiB、单局峰值增量 50 MiB。
+协议、真实对局、数据库写入和 RSS 使用[独立 harness](../../scripts/server-harness/README.md) 验证。先运行其中的 `environment/prepare.mjs` 创建隔离数据库和账号，再使用 `candidate.json` 对候选服务运行验收；静态约束由仓库根目录的 `npm run harness:constraints` 检查，规则见 harness 说明。内存预算为各空闲阶段的 RSS 峰值 ≤100 MiB、单局峰值相对首次冷空闲 RSS 中位数的增量 ≤50 MiB。
 
 以下命令在 `packages/server` 执行。`pnpm test` 覆盖 HTTP、认证、牌组元数据、房间和 WebSocket；`test:rooms` 与 `test:http` 可单独验证对应部分：
 
