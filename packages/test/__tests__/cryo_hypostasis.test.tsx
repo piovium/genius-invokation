@@ -42,11 +42,11 @@ test("cryo crystal core survives lethal anemo damage followed by swirl supercond
 
   await c.me.skill(WindSpiritCreation);
 
-  // 冰扩散命中雷附着后台触发超导，穿透再次命中已降至 0 血的无相之冰。
+  // “双扩”穿透命中 0 血无相之冰
   c.expect(electroStandby).toHaveVariable({ health: 8, aura: Aura.None });
   c.expect(otherStandby).toHaveVariable({ health: 8 });
   c.expect(core).toBeCount(0);
-  // 同一批伤害中的两条致命事件只能消耗一次冰晶核心，不能再次将其击倒。
+  // 两次伤害后正常免于被击倒
   c.expect(hypostasis).toHaveVariable({ health: 1, alive: 1 });
   expect(c.state.players[1].activeCharacterId).toBe(hypostasis.id);
 });

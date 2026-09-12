@@ -173,6 +173,11 @@ export interface SkillInfo {
    * - `preview`：渲染预览数据
    */
   readonly environment: SkillEnvironment;
+  /** 结算模式。
+   * - `simple`：简单结算，不执行事件重排、伤害合并、击倒与免于被击倒等结算
+   * - `standard`：标准结算。
+   */
+  readonly finalizeMode: "simple" | "standard";
   /** @internal */
   readonly logger?: IDetailLogger;
 }
@@ -204,6 +209,7 @@ export function defineSkillInfo(init: InitSkillInfo): SkillInfo {
     plunging: false,
     prepared: false,
     environment: "normal",
+    finalizeMode: "standard",
     ...init,
   };
 }
@@ -229,7 +235,9 @@ export class SkillContextOptions {
     result.associatedExtensionId = extId;
     return result;
   }
-  static plain: Immutable<SkillContextOptions> = freeze(new SkillContextOptions());
+  static plain: Immutable<SkillContextOptions> = freeze(
+    new SkillContextOptions(),
+  );
 }
 
 export interface DamageInfo {
