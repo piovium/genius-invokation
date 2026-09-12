@@ -34,30 +34,25 @@ import {
   ReactiveStateSymbol,
 } from "./base";
 import type { AttachmentHandle } from "../../data/type";
-import type { ExtraInfo } from "./base";
+import type { TypingInfoBase } from "../../utils";
 import type { RxEntityState } from ".";
 
 class ReadonlyEntity<
   Meta extends ContextMetaBase,
-  Ty extends EntityType,
-  Extra extends ExtraInfo<EntityType>,
+  Info extends TypingInfoBase<EntityType>,
 >
-  extends ReactiveStateBase<{
-    readonly type: Ty;
-    readonly areaType: Extra["areaType"];
-    readonly variables: Extra["variables"];
-  }>
+  extends ReactiveStateBase<Info>
   implements PlainEntityState
 {
-  override get [ReactiveStateSymbol](): Ty {
+  override get [ReactiveStateSymbol](): Info["type"] {
     return this.definition.type;
   }
-  declare [RawStateSymbol]: EntityState<Ty>;
-  override get [LatestStateSymbol](): EntityState<Ty> {
+  declare [RawStateSymbol]: EntityState<Info["type"]>;
+  override get [LatestStateSymbol](): EntityState<Info["type"]> {
     const state = getEntityById(
       this.skillContext.rawState,
       this.id,
-    ) as EntityState<Ty>;
+    ) as EntityState<Info["type"]>;
     return state;
   }
 
@@ -68,11 +63,11 @@ class ReadonlyEntity<
     super();
   }
 
-  protected get state(): EntityState<Ty> {
+  protected get state(): EntityState<Info["type"]> {
     return this[LatestStateSymbol];
   }
-  get definition(): EntityDefinition<Ty> {
-    return this.state.definition as EntityDefinition<Ty>;
+  get definition(): EntityDefinition<Info["type"]> {
+    return this.state.definition as EntityDefinition<Info["type"]>;
   }
   get variables(): EntityVariables {
     return this.state.variables;
@@ -80,9 +75,9 @@ class ReadonlyEntity<
   get attachments(): AttachmentState[] {
     return this.state.attachments;
   }
-  get area(): EntityArea & { type: Extra["areaType"] } {
+  get area(): EntityArea & { type: Info["areaType"] } {
     return this.skillContext._getEntityArea(this.id) as EntityArea & {
-      type: Extra["areaType"];
+      type: Info["areaType"];
     };
   }
   get who() {
@@ -110,7 +105,7 @@ class ReadonlyEntity<
     return this.withAttachment(206 as AttachmentHandle);
   }
 
-  get master(): RxEntityState<Meta, "character"> {
+  get master(): RxEntityState<Meta, TypingInfoBase<"character">> {
     const area = this.area as EntityArea;
     if (area.type !== "characters") {
       throw new GiTcgDataError("master expect a character area");
@@ -121,9 +116,8 @@ class ReadonlyEntity<
 
 export class Entity<
   Meta extends ContextMetaBase,
-  Ty extends EntityType,
-  Extra extends ExtraInfo<EntityType>,
-> extends ReadonlyEntity<Meta, Ty, Extra> {
+  Info extends TypingInfoBase<EntityType>,
+> extends ReadonlyEntity<Meta, Info> {
   setVariable(prop: string, value: number) {
     this.skillContext.setVariable(prop, value, this.state);
   }
@@ -147,24 +141,21 @@ export class Entity<
 
 export interface ReadonlyEntityWithoutMaster<
   Meta extends ContextMetaBase,
-  Ty extends EntityType,
-  Extra extends ExtraInfo<EntityType>,
-> extends Omit<ReadonlyEntity<Meta, Ty, Extra>, "master"> {}
+  Info extends TypingInfoBase<EntityType>,
+> extends Omit<ReadonlyEntity<Meta, Info>, "master"> {}
 
 export interface EntityWithoutMaster<
   Meta extends ContextMetaBase,
-  Ty extends EntityType,
-  Extra extends ExtraInfo<EntityType>,
-> extends Omit<Entity<Meta, Ty, Extra>, "master"> {}
+  Info extends TypingInfoBase<EntityType>,
+> extends Omit<Entity<Meta, Info>, "master"> {}
 
 export type TypedEntity<
   Meta extends ContextMetaBase,
-  Ty extends EntityType,
-  Extra extends ExtraInfo<EntityType>,
-> = Extra["areaType"] extends "characters"
+  Info extends TypingInfoBase<EntityType>,
+> = Info["areaType"] extends "characters"
   ? Meta["readonly"] extends true
-    ? ReadonlyEntity<Meta, Ty, Extra>
-    : Entity<Meta, Ty, Extra>
+    ? ReadonlyEntity<Meta, Info>
+    : Entity<Meta, Info>
   : Meta["readonly"] extends true
-    ? ReadonlyEntityWithoutMaster<Meta, Ty, Extra>
-    : EntityWithoutMaster<Meta, Ty, Extra>;
+    ? ReadonlyEntityWithoutMaster<Meta, Info>
+    : EntityWithoutMaster<Meta, Info>;

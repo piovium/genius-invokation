@@ -98,7 +98,9 @@ define card {
       :e.increaseDamage(1);
     };
     on increaseSkillDamage {
-      when :( :e.via.definition.initiativeSkillConfig!.computed$costSize >= 5 );
+      when :(
+        (:e.via.definition.initiativeSkillConfig?.computed$costSize ?? 0) >= 5
+      );
       usage perRound, 1;
       :e.increaseDamage(2);
     };

@@ -55,7 +55,10 @@ import {
   ReactiveStateSymbol,
 } from "./base";
 import { applyReactive, type RegularRxEntityState } from ".";
-import type { CommonCharacterVariableNames } from "../../query/utils";
+import type {
+  CommonCharacterVariableNames,
+  RegularTypingInfo,
+} from "../../utils";
 
 export type CharacterPosition = "active" | "next" | "prev" | "standby";
 
@@ -64,11 +67,9 @@ export type CharacterPosition = "active" | "next" | "prev" | "standby";
  * 仅当保证 GameState 不发生变化时使用。
  */
 export class CharacterBase
-  extends ReactiveStateBase<{
-    readonly type: "character";
-    readonly areaType: "characters";
-    readonly variables: CommonCharacterVariableNames;
-  }>
+  extends ReactiveStateBase<
+    RegularTypingInfo<"character", CommonCharacterVariableNames>
+  >
   implements PlainCharacterState
 {
   override get [ReactiveStateSymbol](): "character" {

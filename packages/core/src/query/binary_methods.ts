@@ -12,7 +12,7 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 import {
   type CompositeQuery,
   createCompositeQuery,
@@ -25,8 +25,8 @@ import {
   type Constructor,
   type IUnorderedQuery,
   type MetaBase,
-  type TypingInfoBase,
 } from "./utils";
+import type { TypingInfoBase } from "../utils";
 
 type BinaryOperatorResult<
   T extends TypingInfoBase,

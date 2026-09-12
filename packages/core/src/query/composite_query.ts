@@ -25,8 +25,8 @@ import {
   type Expression,
   type IUnorderedQuery,
   type typingInfo,
-  type TypingInfoBase,
 } from "./utils";
+import type { TypingInfoBase } from "../utils";
 
 type UnionTy2<T extends TypingInfoBase, U extends TypingInfoBase> = {
   [K in keyof T & keyof U]: T[K] | U[K];
@@ -63,9 +63,9 @@ export type IntersectionTy<Metas extends TypingInfoBase[]> = Computed<
   TypingInfoBase
 >;
 
-class CompositeQueryImpl<Ty extends TypingInfoBase>
-  implements IUnorderedQuery<Ty>
-{
+class CompositeQueryImpl<
+  Ty extends TypingInfoBase,
+> implements IUnorderedQuery<Ty> {
   declare [typingInfo]: Ty;
   constructor(
     private readonly type: CompositeOperator,

@@ -39,10 +39,10 @@ import {
   type MetaBase,
   type NotFunctionPrototype,
   type RelatedToReq,
-  type TypingInfoBase,
   type TypingInfoFromMeta,
   type UnaryOperatorMetas,
 } from "./utils";
+import type { TypingInfoBase } from "../utils";
 
 type DollarUnaryOperatorMethods = {
   [K in keyof UnaryOperatorMetas]: {

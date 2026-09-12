@@ -20,8 +20,8 @@ import {
   toExpressionUnordered,
   type IUnorderedQuery,
   type typingInfo,
-  type TypingInfoBase,
 } from "../../query/utils";
+import type { TypingInfoBase } from "../../utils";
 
 export const ReactiveStateSymbol: unique symbol = Symbol("ReactiveState");
 export type ReactiveStateSymbol = typeof ReactiveStateSymbol;
@@ -34,40 +34,12 @@ export const LatestStateSymbol: unique symbol = Symbol(
 );
 export type LatestStateSymbol = typeof LatestStateSymbol;
 
-export type RegularTypeAreaTypeMap<Ty extends ExEntityType> =
-  | (Ty extends "character" | "equipment" | "status" ? "characters" : never)
-  | (Ty extends "combatStatus" ? "combatStatuses" : never)
-  | (Ty extends "summon" ? "summons" : never)
-  | (Ty extends "support" ? "supports" : never)
-  | (Ty extends "eventCard" | "support" | "equipment" | "attachment"
-      ? "hands" | "pile"
-      : never);
-
-export type TypeAreaTypeMap<Ty extends ExEntityType> =
-  | RegularTypeAreaTypeMap<Ty>
-  | (Ty extends "character" ? never : "removedEntities");
-
-/** ExtraInfo that do not includes removedEntities area. */
-export interface RegularExtraInfo<
-  Ty extends ExEntityType,
-  Vars extends string = string,
-> {
-  variables: Vars;
-  areaType: RegularTypeAreaTypeMap<Ty>;
-}
-
-export interface ExtraInfo<
-  Ty extends ExEntityType,
-  Vars extends string = string,
-> {
-  variables: Vars;
-  areaType: TypeAreaTypeMap<Ty>;
-}
-
-export abstract class ReactiveStateBase<QueryTy extends TypingInfoBase> implements IUnorderedQuery<QueryTy> {
+export abstract class ReactiveStateBase<
+  QueryTy extends TypingInfoBase,
+> implements IUnorderedQuery<QueryTy> {
   declare [typingInfo]: QueryTy;
   abstract readonly id: number;
-  abstract get [ReactiveStateSymbol](): ExEntityType;
+  abstract get [ReactiveStateSymbol](): QueryTy["type"];
   declare [RawStateSymbol]: object;
   abstract get [LatestStateSymbol](): object;
   [toExpressionUnordered](): SExprSchema.UnorderedQuery {

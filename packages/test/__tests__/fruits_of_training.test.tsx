@@ -1,4 +1,4 @@
-// Copyright (C) 2026 Guyutongxue
+﻿// Copyright (C) 2026 Guyutongxue
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -13,38 +13,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import { $, Character, ref, setup, State, Status, Support } from "#test";
+import { $, Character, ref, setup, State, Status } from "#test";
 import {
-  CollectiveOfPlenty,
-  Exercise,
-} from "@gi-tcg/data/internal/cards/support/place.gts";
-import { test } from "vitest";
+  FruitsOfTrainingInEffect01,
+  FruitsOfTrainingInEffect02,
+} from "@gi-tcg/data/internal/cards/event/other.gts";
 import {
   FatuiElectroCicinMage,
   SurgingThunderStatus,
   ThunderingShield,
 } from "@gi-tcg/data/internal/characters/electro/fatui_electro_cicin_mage.gts";
 import { Aura } from "@gi-tcg/typings";
+import { test } from "vitest";
 
-test("collective of plenty: recreating exercise heals when it crosses three layers", async () => {
-  const target = ref();
-  const c = setup(
-    <State>
-      <Character my active />
-      <Character my ref={target} health={8}>
-        <Status def={Exercise} v={{ layer: 2 }} />
-      </Character>
-      <Support my def={CollectiveOfPlenty} />
-    </State>,
-  );
-
-  await c.me.switch(target);
-
-  c.expect(target).toHaveVariable({ health: 9 });
-  c.expect($.def(Exercise)).toHaveVariable({ layer: 4 });
-});
-
-test("collective of plenty: does not gain exercise from an interrupted preparation", async () => {
+test("fruits of training: interrupted preparation triggers once for each character", async () => {
   const mage = ref();
   const next = ref();
   const c = setup(
@@ -56,9 +38,12 @@ test("collective of plenty: does not gain exercise from an interrupted preparati
         ref={mage}
         energy={2}
         aura={Aura.Pyro}
-      />
-      <Character my ref={next} />
-      <Support my def={CollectiveOfPlenty} />
+      >
+        <Status def={FruitsOfTrainingInEffect01} />
+      </Character>
+      <Character my ref={next}>
+        <Status def={FruitsOfTrainingInEffect01} />
+      </Character>
     </State>,
   );
 
@@ -66,6 +51,12 @@ test("collective of plenty: does not gain exercise from an interrupted preparati
 
   c.expect($.my.active).toBe(next);
   c.expect($.def(SurgingThunderStatus)).toNotExist();
-  c.expect($.def(Exercise).at($.id(mage.id))).toNotExist();
-  c.expect($.def(Exercise).at($.id(next.id))).toHaveVariable({ layer: 2 });
+  for (const character of [mage, next]) {
+    c.expect(
+      $.def(FruitsOfTrainingInEffect01).at($.id(character.id)),
+    ).toHaveVariable({ usage: 1 });
+    c.expect(
+      $.def(FruitsOfTrainingInEffect02).at($.id(character.id)),
+    ).toHaveVariable({ usage: 1 });
+  }
 });

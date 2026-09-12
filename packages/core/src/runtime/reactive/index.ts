@@ -22,12 +22,10 @@ import {
   RawStateSymbol,
   ReactiveStateBase,
   ReactiveStateSymbol,
-  type ExtraInfo,
-  type RegularExtraInfo,
 } from "./base";
-import type { ExEntityState, ExEntityType } from "../../data/type";
+import type { ExEntityType } from "../../data/type";
 import { Attachment, type TypedAttachment } from "./attachment";
-import type { TypingInfoBase } from "../../query/utils";
+import type { TypingInfoBase, RegularTypingInfo } from "../../utils";
 
 type ReactiveClassCtor = new (
   skillContext: SkillContext<any>,
@@ -39,33 +37,33 @@ export const NoReactiveSymbol: unique symbol = Symbol(
 );
 export type NoReactiveSymbol = typeof NoReactiveSymbol;
 
-type ReactiveState<
+export type RxEntityState<
   Meta extends ContextMetaBase,
-  State,
-  Extra extends ExtraInfo<any> = ExtraInfo<any>,
-> = State extends {
-  readonly [StateSymbol]: unknown;
-  readonly definition: { readonly type: infer Ty extends ExEntityType };
-}
-  ? Ty extends "character"
+  Info extends TypingInfoBase,
+> = {
+  [Ty in Info["type"]]: Ty extends "character"
     ? TypedCharacter<Meta>
     : Ty extends "attachment"
       ? TypedAttachment<Meta>
       : Ty extends EntityType
-        ? TypedEntity<Meta, Ty, Extra>
-        : never
-  : never;
-
-export type RxEntityState<
-  Meta extends ContextMetaBase,
-  Ty extends ExEntityType,
-  Extra extends ExtraInfo<Ty> = ExtraInfo<Ty>,
-> = ReactiveState<Meta, ExEntityState<Ty>, Extra>;
+        ? TypedEntity<
+            Meta,
+            {
+              type: Ty;
+              areaType: Extract<
+                Info["areaType"],
+                TypingInfoBase<Ty>["areaType"]
+              >;
+              variables: Info["variables"];
+            }
+          >
+        : never;
+}[Info["type"]];
 
 export type RegularRxEntityState<
   Meta extends ContextMetaBase,
   Ty extends ExEntityType,
-> = RxEntityState<Meta, Ty, RegularExtraInfo<Ty>>;
+> = RxEntityState<Meta, RegularTypingInfo<Ty>>;
 
 type Primitive = string | number | boolean | bigint | symbol | null | undefined;
 type AtomicObject =
@@ -85,9 +83,9 @@ export type ApplyReactive<
   ? A
   : A extends {
         readonly [StateSymbol]: unknown;
-        readonly definition: { readonly type: ExEntityType };
+        readonly definition: { readonly type: infer Ty extends ExEntityType };
       }
-    ? ReactiveState<Meta, A>
+    ? RxEntityState<Meta, TypingInfoBase<Ty>>
     : A extends ReadonlyMap<infer K, infer V>
       ? A // ReadonlyMap<K, ApplyReactive<Meta, V>>
       : A extends ReadonlySet<infer V>

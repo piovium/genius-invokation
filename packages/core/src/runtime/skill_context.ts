@@ -104,11 +104,12 @@ import {
   type ApplyReactive,
   type RxEntityState,
 } from "./reactive";
-import {
-  ReactiveStateSymbol,
-  type RegularExtraInfo,
-  type TypeAreaTypeMap,
-} from "./reactive/base";
+import { ReactiveStateSymbol } from "./reactive/base";
+import type {
+  TypingInfoBase,
+  RegularTypingInfo,
+  TypeAreaTypeMap,
+} from "../utils";
 import { computeConvertDice, type CreateEntityOptions } from "../utils";
 import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "./skill";
 import type { LunarReaction } from "@gi-tcg/typings";
@@ -220,14 +221,7 @@ type CallAndEmitResult<K extends MutatorMethodCanEmit> =
 
 type QueryState<Meta extends ContextMetaBase, Q extends IQuery> = RxEntityState<
   Meta,
-  InferResult<Q>["type"],
-  {
-    areaType: Extract<
-      InferResult<Q>["areaType"],
-      TypeAreaTypeMap<InferResult<Q>["type"]>
-    >;
-    variables: InferResult<Q>["variables"];
-  }
+  InferResult<Q>
 >;
 
 /**
@@ -259,8 +253,8 @@ export class SkillContext<Meta extends ContextMetaBase> {
    */
   public readonly self: RxEntityState<
     Meta,
-    Meta["callerType"],
     {
+      type: Meta["callerType"];
       variables: Meta["callerVars"];
       areaType: CallerAreaOfContextMeta<Meta>;
     }
@@ -646,16 +640,18 @@ export class SkillContext<Meta extends ContextMetaBase> {
     ) as any[];
   }
 
-  get<T extends ExEntityType>(id: number): RxEntityState<Meta, T>;
   get<T extends ExEntityType>(
-    rxState: RxEntityState<Meta, T>,
-  ): RxEntityState<Meta, T>;
+    id: number,
+  ): RxEntityState<Meta, TypingInfoBase<T>>;
+  get<T extends ExEntityType>(
+    rxState: RxEntityState<Meta, TypingInfoBase<T>>,
+  ): RxEntityState<Meta, TypingInfoBase<T>>;
   get(state: PlainEntityState): ApplyReactive<Meta, EntityStateO>;
   get(state: PlainCharacterState): ApplyReactive<Meta, CharacterStateO>;
   get(state: PlainAttachmentState): ApplyReactive<Meta, AttachmentStateO>;
   get<T extends ExEntityType>(
     state: ExPlainEntityState<T>,
-  ): RxEntityState<Meta, T>;
+  ): RxEntityState<Meta, TypingInfoBase<T>>;
   get(x: number | PlainAnyState): unknown {
     if (typeof x === "number") {
       return applyReactive(this, getEntityById(this.rawState, x));
@@ -671,14 +667,14 @@ export class SkillContext<Meta extends ContextMetaBase> {
       | ExPlainEntityState<TypeT>
       | ExPlainEntityState<TypeT>[]
       | GeneralQueryTargetArg,
-  ): RxEntityState<Meta, TypeT>[] {
+  ): RxEntityState<Meta, TypingInfoBase<TypeT>>[] {
     if (Array.isArray(q)) {
       return q.map((s) => this.get(s));
     } else if (ReactiveStateSymbol in q) {
       // Reactive states are also IQuery, check them before toExpression
-      return [q as RxEntityState<Meta, TypeT>];
+      return [q as RxEntityState<Meta, TypingInfoBase<TypeT>>];
     } else if (typeof q === "function" || toExpression in q) {
-      return this.queryAll(q) as RxEntityState<Meta, TypeT>[];
+      return this.queryAll(q) as RxEntityState<Meta, TypingInfoBase<TypeT>>[];
     } else {
       return [this.get(q)];
     }
@@ -686,7 +682,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
 
   private queryCoerceToCharacters(
     arg: CharacterTargetArg,
-  ): RxEntityState<Meta, "character">[] {
+  ): RxEntityState<Meta, TypingInfoBase<"character">>[] {
     const result = this.queryOrGet(arg);
     for (const r of result) {
       if (r.definition.type !== "character") {
@@ -695,7 +691,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         );
       }
     }
-    return result as RxEntityState<Meta, "character">[];
+    return result as RxEntityState<Meta, TypingInfoBase<"character">>[];
   }
 
   getExtensionState(): Meta["associatedExtension"]["type"] {
@@ -766,7 +762,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   private costSortedHands({
     who = "my",
     filter = () => true,
-  }: MaxCostHandsOpt): RxEntityState<Meta, EntityType>[] {
+  }: MaxCostHandsOpt): RxEntityState<Meta, TypingInfoBase<EntityType>>[] {
     const player = who === "my" ? this.player : this.oppPlayer;
     const sortData = new Map(
       this.getRawPlayer(who).hands.map(
@@ -783,7 +779,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   maxCostHands(
     count: number,
     opt: MaxCostHandsOpt = {},
-  ): RxEntityState<Meta, EntityType>[] {
+  ): RxEntityState<Meta, TypingInfoBase<EntityType>>[] {
     return this.costSortedHands(opt).slice(0, count);
   }
 
@@ -1144,7 +1140,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     id: HandleT<Ty>,
     area?: EntityArea,
     opt: CreateEntityOptions = {},
-  ): RxEntityState<Meta, Ty, RegularExtraInfo<Ty>> | null {
+  ): RxEntityState<Meta, RegularTypingInfo<Ty>> | null {
     const id2 = id as number;
     const def = this.state.data.entities.get(id2);
     if (typeof def === "undefined") {
@@ -1185,8 +1181,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     if (newState) {
       return this.get<Ty>(newState.id) as RxEntityState<
         Meta,
-        Ty,
-        RegularExtraInfo<Ty>
+        RegularTypingInfo<Ty>
       >;
     } else {
       return null;
@@ -1217,8 +1212,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     opt: CreateEntityOptions = {},
   ): RxEntityState<
     Meta,
-    "summon",
-    RegularExtraInfo<"summon", Id["_meta"]["variables"]>
+    RegularTypingInfo<"summon", Id["_meta"]["variables"]>
   > | null {
     if (where === "my") {
       return this.createEntity("summon", id, void 0, opt);
@@ -1312,8 +1306,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     opt: CreateEntityOptions = {},
   ): RxEntityState<
     Meta,
-    "combatStatus",
-    RegularExtraInfo<"combatStatus", Id["_meta"]["variables"]>
+    RegularTypingInfo<"combatStatus", Id["_meta"]["variables"]>
   > | null {
     if (where === "my") {
       return this.createEntity("combatStatus", id, void 0, opt);
@@ -1754,7 +1747,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   createHandCard(
     cardId: CardHandle,
     where: "my" | "opp" = "my",
-  ): RxEntityState<Meta, EntityType> | undefined {
+  ): RxEntityState<Meta, TypingInfoBase<EntityType>> | undefined {
     const player = this.getRawPlayer(where);
     const who = where === "my" ? this.self.who : flip(this.self.who);
     const cardDef = this.state.data.entities.get(cardId);

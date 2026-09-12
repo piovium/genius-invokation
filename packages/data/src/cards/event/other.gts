@@ -2286,7 +2286,9 @@ define status {
     when :(
       :e.entity.definition.type === "status" &&
         :e.entity.definition.tags.includes("preparingSkill") &&
-        :e.entity.cast<"status">().master.id !== :self.master.id
+        // 准备被切人中止，则所有角色都视为“其他角色”
+        (:e.entity.area.type !== "characters" ||
+          :e.entity.cast<"status">().master.id !== :self.master.id)
     );
     listenTo samePlayer;
     usage 2;
