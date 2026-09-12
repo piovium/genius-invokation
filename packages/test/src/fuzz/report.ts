@@ -64,7 +64,9 @@ const DATA_SRC = path.join(REPO_ROOT, "packages/data/src");
  * 这样产物可以随 MR 附件分享，也不暴露本机用户名与目录布局。
  */
 export function displayPath(p: string): string {
-  const rel = path.isAbsolute(p) ? path.relative(REPO_ROOT, p) : path.normalize(p);
+  const rel = path.isAbsolute(p)
+    ? path.relative(REPO_ROOT, p)
+    : path.normalize(p);
   return (rel === "" ? "." : rel).split(path.sep).join("/");
 }
 
@@ -165,34 +167,6 @@ export function getGtsIndex(): Map<number, DefLocation> {
   return index;
 }
 
-export function describeDef(id: number): string {
-  const loc = getGtsIndex().get(id);
-  return loc ? `${id}(${loc.name ?? loc.symbol})` : String(id);
-}
-
-/** 把文本中出现的已知定义 id 标注为 `id(名称)` */
-export function annotateIds(text: string): string {
-  const index = getGtsIndex();
-  return text.replace(/\b(\d{4,6})\b/g, (s) => {
-    const loc = index.get(Number(s));
-    return loc ? `${s}(${loc.name ?? loc.symbol})` : s;
-  });
-}
-
-function collectDefIds(texts: readonly string[]): number[] {
-  const index = getGtsIndex();
-  const ids = new Set<number>();
-  for (const text of texts) {
-    for (const m of text.matchAll(/\b(\d{4,6})\b/g)) {
-      const id = Number(m[1]);
-      if (index.has(id)) {
-        ids.add(id);
-      }
-    }
-  }
-  return [...ids].sort((a, b) => a - b);
-}
-
 // ---------- 渲染 ----------
 
 export function renderDetailLog(
@@ -226,10 +200,10 @@ function shortValue(v: unknown): string {
   const o = v as Record<string, unknown>;
   const def = o.definition as { id?: number } | undefined;
   if (typeof o.id === "number" && def && typeof def.id === "number") {
-    return `#${o.id}<${describeDef(def.id)}>`;
+    return `#${o.id}<${def.id}>`;
   }
   if (typeof o.id === "number" && "__definition" in o) {
-    return `def ${describeDef(o.id)}`;
+    return `def ${o.id}`;
   }
   if (v instanceof Map) {
     return `Map(${v.size})`;
@@ -346,7 +320,10 @@ export function writeArtifact(input: ArtifactInput): string {
     ),
   );
   writeReproScript(dir);
-  writeFileSync(path.join(dir, "report.md"), renderReport(input, caseJsonPath, meta));
+  writeFileSync(
+    path.join(dir, "report.md"),
+    renderReport(input, caseJsonPath, meta),
+  );
   return dir;
 }
 
@@ -370,13 +347,15 @@ function renderReport(
   lines.push(
     `- winner: ${result.winner} · rounds: ${result.rounds} · rpc: ${result.rpcCount} · ${result.durationMs} ms`,
   );
-  lines.push(`- core ${meta.coreVersion} · ${meta.node} · commit ${meta.gitCommit ?? "?"}`);
+  lines.push(
+    `- core ${meta.coreVersion} · ${meta.node} · commit ${meta.gitCommit ?? "?"}`,
+  );
   lines.push("");
 
   if (error) {
     lines.push("## 错误");
     lines.push("");
-    lines.push(fence(annotateIds(`${error.name}: ${error.message}`)));
+    lines.push(fence(`${error.name}: ${error.message}`));
     if (error.stack) {
       lines.push("");
       lines.push("### 栈");
@@ -395,7 +374,7 @@ function renderReport(
     lines.push("## 不变量违规");
     lines.push("");
     for (const v of result.violations) {
-      lines.push(`- **${v.rule}** \`${v.path}\`: ${annotateIds(v.message)}`);
+      lines.push(`- **${v.rule}** \`${v.path}\`: ${v.message}`);
     }
     lines.push("");
   }
@@ -410,36 +389,17 @@ function renderReport(
   }
 
   const recent = trace.slice(-20);
-  const texts = [
-    error ? `${error.message}\n${error.stack ?? ""}` : "",
-    ...recent.map((t) => t.response),
-    ...(setup.decks?.flatMap((d) => [...d.characters, ...d.cards].join(" ")) ?? []),
-    ...(result.violations?.map((v) => v.message) ?? []),
-  ];
-  const ids = collectDefIds(texts);
-  if (ids.length) {
-    lines.push("## 涉及的定义");
-    lines.push("");
-    const index = getGtsIndex();
-    for (const id of ids) {
-      const loc = index.get(id)!;
-      lines.push(
-        `- ${id} ${loc.name ?? ""} (\`${loc.symbol}\`) — \`${loc.file}:${loc.line}\``,
-      );
-    }
-    lines.push("");
-  }
 
   lines.push("## 对局设定");
   lines.push("");
   if (setup.decks) {
     setup.decks.forEach((deck, who) => {
       lines.push(
-        `- player ${who}${setup.offender === who ? " (offender)" : ""}: 角色 ${deck.characters
-          .map(describeDef)
-          .join(", ")}`,
+        `- player ${who}${setup.offender === who ? " (offender)" : ""}: 角色 ${deck.characters.join(
+          ", ",
+        )}`,
       );
-      lines.push(`  - 牌组(${deck.cards.length}): ${deck.cards.map(describeDef).join(", ")}`);
+      lines.push(`  - 牌组(${deck.cards.length}): ${deck.cards.join(", ")}`);
     });
   }
   lines.push("");
@@ -450,7 +410,7 @@ function renderReport(
   lines.push("|---|---|---|---|---|---|");
   for (const t of recent) {
     lines.push(
-      `| ${t.step} | ${t.who} | ${t.round}/${t.phase} | ${t.method} | ${t.request} | ${annotateIds(t.response)} |`,
+      `| ${t.step} | ${t.who} | ${t.round}/${t.phase} | ${t.method} | ${t.request} | ${t.response} |`,
     );
   }
   lines.push("");
@@ -488,11 +448,15 @@ function renderReport(
   lines.push("");
   lines.push(fence(reproCommand(caseJsonPath), "sh"));
   lines.push("");
-  lines.push("- 以上命令在仓库根目录执行（路径相对仓库根目录）；本目录下的 `repro.sh` 可在仓库内任意目录执行，产物目录放在哪里都行；");
+  lines.push(
+    "- 以上命令在仓库根目录执行（路径相对仓库根目录）；本目录下的 `repro.sh` 可在仓库内任意目录执行，产物目录放在哪里都行；",
+  );
   lines.push(
     "- `gameLog.json` 可在 standalone（`pnpm --filter @gi-tcg/standalone dev` → 导入日志）中逐暂停点回看棋盘、查看结算细节，并从最后一个可恢复点续跑；",
   );
-  lines.push("- `detail-log.txt` 为完整结算细节日志；`final-state.json` 为出错时的最终状态；");
+  lines.push(
+    "- `detail-log.txt` 为完整结算细节日志；`final-state.json` 为出错时的最终状态；",
+  );
   lines.push("- `case.json` 含完整决策记录（trace）与 mutation 摘要。");
   return lines.join("\n");
 }
@@ -512,7 +476,10 @@ export function writeHangArtifact(
   if (capture) {
     capture = { ...capture, frames: capture.frames.map(relativizePaths) };
   }
-  writeFileSync(caseJsonPath, JSON.stringify({ ...result, hang: capture }, null, 2));
+  writeFileSync(
+    caseJsonPath,
+    JSON.stringify({ ...result, hang: capture }, null, 2),
+  );
   writeReproScript(dir);
   const lines = [
     `# Fuzz case #${result.spec.index} — ${result.outcome}`,
@@ -525,15 +492,19 @@ export function writeHangArtifact(
   if (result.setup.decks) {
     lines.push("## 对局设定");
     lines.push("");
-    lines.push(`- version: ${result.setup.version} · dice: ${result.setup.dice} · randomSeed: ${result.setup.randomSeed}`);
+    lines.push(
+      `- version: ${result.setup.version} · dice: ${result.setup.dice} · randomSeed: ${result.setup.randomSeed}`,
+    );
     result.setup.decks.forEach((deck, who) => {
-      lines.push(`- player ${who}: 角色 ${deck.characters.map(describeDef).join(", ")}`);
-      lines.push(`  - 牌组(${deck.cards.length}): ${deck.cards.map(describeDef).join(", ")}`);
+      lines.push(`- player ${who}: 角色 ${deck.characters.join(", ")}`);
+      lines.push(`  - 牌组(${deck.cards.length}): ${deck.cards.join(", ")}`);
     });
     lines.push("");
   }
   if (capture) {
-    lines.push(`## 主线程调用栈（卡住 ${Math.round(capture.stuckForMs / 1000)}s 时由 watchdog 抓取）`);
+    lines.push(
+      `## 主线程调用栈（卡住 ${Math.round(capture.stuckForMs / 1000)}s 时由 watchdog 抓取）`,
+    );
     lines.push("");
     lines.push(fence(capture.frames.join("\n")));
     lines.push("");
@@ -549,7 +520,9 @@ export function writeHangArtifact(
   lines.push("");
   lines.push(fence(reproCommand(caseJsonPath), "sh"));
   lines.push("");
-  lines.push("repro 同样带 watchdog：再次卡住时会在 `repro/hang-<index>.json` 留下调用栈。复现命令在仓库根目录执行；`repro.sh` 在仓库内任意目录均可执行。");
+  lines.push(
+    "repro 同样带 watchdog：再次卡住时会在 `repro/hang-<index>.json` 留下调用栈。复现命令在仓库根目录执行；`repro.sh` 在仓库内任意目录均可执行。",
+  );
   writeFileSync(path.join(dir, "report.md"), lines.join("\n"));
   return dir;
 }
@@ -570,14 +543,21 @@ export function summarize(results: readonly CaseResult[]): {
   groups: SummaryGroup[];
 } {
   const counts: Record<string, number> = {};
-  const map = new Map<string, { outcome: string; versions: Set<string>; indices: number[]; rep?: string }>();
+  const map = new Map<
+    string,
+    { outcome: string; versions: Set<string>; indices: number[]; rep?: string }
+  >();
   for (const r of results) {
     counts[r.outcome] = (counts[r.outcome] ?? 0) + 1;
     if (r.outcome === "ok") {
       continue;
     }
     const key = r.key ?? `(${r.outcome})`;
-    const g = map.get(key) ?? { outcome: r.outcome, versions: new Set(), indices: [] };
+    const g = map.get(key) ?? {
+      outcome: r.outcome,
+      versions: new Set(),
+      indices: [],
+    };
     g.versions.add(r.setup.version);
     g.indices.push(r.spec.index);
     g.rep ??= r.artifactDir;
@@ -596,7 +576,10 @@ export function summarize(results: readonly CaseResult[]): {
   return { counts, groups };
 }
 
-export function writeSummary(outDir: string, results: readonly CaseResult[]): string {
+export function writeSummary(
+  outDir: string,
+  results: readonly CaseResult[],
+): string {
   const { counts, groups } = summarize(results);
   writeFileSync(
     path.join(outDir, "summary.json"),
@@ -613,10 +596,14 @@ export function writeSummary(outDir: string, results: readonly CaseResult[]): st
     lines.push(`## [${g.outcome}] ×${g.count} \`${g.key}\``);
     lines.push("");
     lines.push(`- versions: ${g.versions.join(", ")}`);
-    lines.push(`- cases: ${g.indices.join(", ")}${g.count > g.indices.length ? ", …" : ""}`);
+    lines.push(
+      `- cases: ${g.indices.join(", ")}${g.count > g.indices.length ? ", …" : ""}`,
+    );
     if (g.representative) {
       lines.push(`- 代表用例: \`${g.representative}\``);
-      lines.push(`- 复现: \`${reproCommand(path.join(g.representative, "case.json"))}\``);
+      lines.push(
+        `- 复现: \`${reproCommand(path.join(g.representative, "case.json"))}\``,
+      );
     }
     lines.push("");
   }
