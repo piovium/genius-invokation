@@ -40,7 +40,7 @@ define combatStatus {
     when :(
       :query(
         $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
-      )
+      ) && :player.pile.length > 0
     );
     listenTo all;
     :discard(:player.pile[0]);

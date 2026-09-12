@@ -53,7 +53,7 @@ define combatStatus {
  */
 define card {
   id 123031 as SpiritOfOmenPyroScorpion;
-  since "v5.1.0";
+  since "v4.3.0";
   undiscoverable;
   technique {
     tags barrier;
@@ -199,7 +199,8 @@ define card {
 define status {
   id 123033 as PyroScorpionGuardianStance01;
   tags barrier;
-  reserved;
+  // reserved;
+  // 作为旧版本的“主”版本，不删去
 };
 
 /**
@@ -211,5 +212,6 @@ define status {
 define status {
   id 123034 as PyroScorpionGuardianStance;
   tags barrier;
-  reserved;
+  // reserved;
+  // 作为旧版本的“主”版本，不删去
 };
