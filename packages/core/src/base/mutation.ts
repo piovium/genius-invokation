@@ -156,6 +156,7 @@ export interface ModifyEntityVarM {
   readonly type: "modifyEntityVar";
   state: AnyState;
   readonly varName: string;
+  oldValue: number; // output
   readonly value: number;
   readonly direction: "increase" | "decrease" | null;
 }
@@ -442,6 +443,7 @@ function doMutation(state: GameState, m: Mutation): GameState {
     case "modifyEntityVar": {
       const newState = produce(state, (draft) => {
         const entity = getEntityById(draft, m.state.id) as Draft<EntityState>;
+        m.oldValue = entity.variables[m.varName] ?? 0;
         entity.variables[m.varName] = m.value;
       });
       m.state = getEntityById(newState, m.state.id) as EntityState;

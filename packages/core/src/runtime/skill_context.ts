@@ -427,6 +427,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
               );
               this.mutate({
                 type: "modifyEntityVar",
+                oldValue: 0,
                 state: defeatedCh.latest(),
                 varName: "alive",
                 value: 0,
@@ -436,6 +437,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
                 defeatedCh.definition.specialEnergy?.variableName ?? "energy";
               this.mutate({
                 type: "modifyEntityVar",
+                oldValue: 0,
                 state: defeatedCh.latest(),
                 varName: energyVarName,
                 value: 0,
@@ -443,6 +445,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
               });
               this.mutate({
                 type: "modifyEntityVar",
+                oldValue: 0,
                 state: defeatedCh.latest(),
                 varName: "aura",
                 value: Aura.None,
@@ -933,6 +936,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       const finalValue = Math.min(value, maxEnergy - energy);
       this.mutate({
         type: "modifyEntityVar",
+        oldValue: 0,
         state: target,
         varName: "energy",
         value: energy + finalValue,
@@ -997,6 +1001,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       );
       this.mutate({
         type: "modifyEntityVar",
+        oldValue: 0,
         state: target,
         varName: "maxHealth",
         value: target.variables.maxHealth + value,
@@ -1118,6 +1123,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       );
       this.mutate({
         type: "modifyEntityVar",
+        oldValue: 0,
         direction: "decrease",
         state: ch.latest(),
         varName: "aura",
@@ -1549,6 +1555,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     }
     this.mutate({
       type: "modifyEntityVar",
+      oldValue: 0,
       state,
       varName: info.varName,
       value: info.newValue,

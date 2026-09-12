@@ -171,6 +171,7 @@ message ModifyEntityVarEM {
   string variable_name = 4;
   int32 variable_value = 5;
   ModifyDirection direction = 6;
+  int32 old_value = 7;
 }
 
 message ResetVariablesEM {

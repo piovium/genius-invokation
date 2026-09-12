@@ -390,6 +390,7 @@ export function exposeMutation(
         entityDefinitionId: m.state.definition.id,
         variableName: m.varName,
         variableValue: m.value,
+        oldValue: m.oldValue,
         direction,
       };
     }

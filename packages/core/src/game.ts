@@ -814,6 +814,7 @@ export class Game {
             }
             this.mutate({
               type: "modifyEntityVar",
+              oldValue: 0,
               state: activeCh(),
               varName: "energy",
               value: currentEnergy - requiredEnergy,

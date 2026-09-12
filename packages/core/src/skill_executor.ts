@@ -226,6 +226,7 @@ export class SkillExecutor {
           const newEnergy = Math.min(currentEnergy + 1, ch.variables.maxEnergy);
           this.mutate({
             type: "modifyEntityVar",
+            oldValue: 0,
             state: ch,
             varName: "energy",
             value: newEnergy,
@@ -541,6 +542,7 @@ export class SkillExecutor {
         if (currentSpot) {
           this.mutate({
             type: "modifyEntityVar",
+            oldValue: 0,
             state: currentSpot,
             varName: "exp",
             value: currentSpot.variables.exp + 1,
