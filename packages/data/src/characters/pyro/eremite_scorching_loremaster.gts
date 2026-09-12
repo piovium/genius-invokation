@@ -212,5 +212,6 @@ define status {
 define status {
   id 123034 as PyroScorpionGuardianStance;
   tags barrier;
-  reserved;
+  // reserved;
+  // 作为旧版本的“主”版本，不删去
 };
