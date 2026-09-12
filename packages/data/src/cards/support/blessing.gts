@@ -715,3 +715,20 @@ define card {
     };
   };
 };
+
+/**
+ * @id 331012
+ * @name 元素幻变：超载祝佑
+ * @description
+ * 元素幻变：雷元素火元素
+ * 投掷阶段：总是投出2个雷元素骰和2个火元素骰。
+ * 我方触发超载反应后：弃置此牌并从超载祝佑·追燃和超载祝佑·霆击中挑选一项加入手牌。
+ */
+define card {
+  id 331012 as ElementalTransfigurationOverloadBlessing;
+  since "v7.1.0";
+  cost DiceType.Aligned, 2;
+ support {
+    elementalBlessing;    // TODO
+  }
+}

@@ -148,7 +148,7 @@ define character {
   id 1108 as Qiqi;
   since "v4.0.0";
   tags cryo, sword, liyue;
-  health 10;
+  health 12;
   energy 3;
   skills AncientSwordArt, AdeptusArtHeraldOfFrost, AdeptusArtPreserverOfFortune;
 };

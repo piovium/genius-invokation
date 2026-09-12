@@ -1614,3 +1614,19 @@ define card {
     };
   };
 };
+
+/**
+ * @id 312046
+ * @name 昔时浮想之思
+ * @description
+ * 我方角色获得圣遗物以外的治疗后：此牌累积1层「渴盼」（最多累积到4层）。回合开始时，每有2层「渴盼」，治疗所附属角色1点。
+ * （角色最多装备1件「圣遗物」）
+ */
+define card {
+  id 312046 as RecollectionOfDaysPast;
+  since "v7.1.0";
+  cost DiceType.Aligned, 1;
+  artifact {
+    // TODO
+  }
+}

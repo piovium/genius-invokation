@@ -143,3 +143,21 @@ define card {
     };
   };
 };
+
+/**
+ * @id 215012
+ * @name 七循之理
+ * @description
+ * 快速行动：装备给我方的砂糖。
+ * 召唤大型风灵。
+ * 大型风灵在场时，我方附属了「天赋」的角色造成的伤害+1。
+ * （牌组中包含砂糖，才能加入牌组）
+ */
+define card {
+  id 215012 as SevenfoldTransmutation;
+  since "v7.1.0";
+  cost DiceType.Anemo, 3;
+  talent Sucrose {
+    // TODO
+  }
+}

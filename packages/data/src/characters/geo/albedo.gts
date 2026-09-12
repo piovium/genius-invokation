@@ -127,3 +127,33 @@ define card {
     };
   };
 };
+
+/**
+ * @id 116042
+ * @name 瑰银
+ * @description
+ * 我方角色进行下落攻击后：对所有敌方后台角色造成1点穿透伤害。
+ */
+define combatStatus {
+  id 116042 as SilverIsotoma;
+  since "v7.1.0";
+  // TODO
+}
+
+/**
+ * @id 216042
+ * @name 白芒之书
+ * @description
+ * 快速行动：装备给我方的阿贝多。
+ * 召唤阳华。
+ * 我方召唤阳华时，生成2层瑰银，并生成1个随机基础元素骰。
+ * （牌组中包含阿贝多，才能加入牌组）
+ */
+define card {
+  id 216042 as BookOfBlindingLight;
+  since "v7.1.0";
+  cost DiceType.Geo, 2;
+  talent Albedo {
+    // TODO
+  }
+}

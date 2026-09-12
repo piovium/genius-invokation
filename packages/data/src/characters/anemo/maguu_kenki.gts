@@ -111,7 +111,7 @@ define skill {
 define skill {
   id 25013 as FrostyAssault;
   skillType elemental;
-  cost DiceType.Cryo, 3;
+  cost DiceType.Anemo, 3;
   :summon(ShadowswordGallopingFrost);
   if (:self.hasEquipment(TranscendentAutomaton)) {
     :switchActive($.my.prev);

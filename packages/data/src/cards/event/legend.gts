@@ -495,3 +495,21 @@ define card {
   }
   :combatStatus(TheOtherSideOfTheFrostmoonInEffect);
 };
+
+/**
+ * @id 330014
+ * @name 三月重临
+ * @description
+ * 舍弃3张当前元素骰费用最高的手牌。
+ * 下个回合开始时，治疗我方场上所有角色3点。
+ * 下下个回合开始时，将所舍弃的3张牌加入手牌，并赋予这些牌3层费用降低。
+ * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
+ */
+define card {
+  id 330014 as ReturnOfTheThreeMoons;
+  since "v7.1.0";
+  cost DiceType.Aligned, 3;
+  legend;
+  // TODO
+
+}

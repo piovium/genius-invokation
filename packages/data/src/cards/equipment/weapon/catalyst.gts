@@ -319,7 +319,7 @@ define card {
  * @id 311111
  * @name 不灭月华
  * @description
- * 所附属角色生命值至少为11时：造成的伤害+2。
+ * 所附属角色生命值至少为11时：造成的伤害+2。（每回合一次）
  * 入场时：所附属角色获得1点最大生命值。
  * （「法器」角色才能装备。角色最多装备1件「武器」）
  */
@@ -329,6 +329,7 @@ define card {
   cost DiceType.Aligned, 2;
   weapon catalyst {
     on increaseSkillDamage {
+      usage perRound, 1;
       when :( :self.master.health >= 11 );
       :e.increaseDamage(2);
     };

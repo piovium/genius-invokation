@@ -119,3 +119,21 @@ define card {
     };
   };
 };
+
+/**
+ * @id 214022
+ * @name 苍雷奔涌
+ * @description
+ * 战斗行动：我方出战角色为雷泽时，装备此牌。
+ * 我方雷泽如果未附属雷狼，则自身附属持续回合为1的雷狼。
+ * 装备有此牌的雷泽附属雷狼期间，我方雷狼造成的伤害+1。
+ * （牌组中包含雷泽，才能加入牌组）
+ */
+define card {
+  id 214022 as SurgeOfLightning;
+  since "v7.1.0";
+  cost DiceType.Electro, 2;
+  talent Razor {
+    // TODO
+  }
+}

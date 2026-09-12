@@ -145,7 +145,7 @@ define character {
 define card {
   id 226031 as BeastlyCorrosion;
   since "v5.2.0";
-  cost DiceType.Geo, 3;
+  cost DiceType.Geo, 4;
   talent GoldenWolflord {
     on staged {
       :useSkill(HowlingRiftcall);

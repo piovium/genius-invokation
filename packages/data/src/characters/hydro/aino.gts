@@ -84,7 +84,7 @@ define skill {
  * @id 12164
  * @name 模块式高效运作
  * @description
- * 我方卡牌被赋予赋能时：如果我方场上存在冷静一下鸭，则使其可用次数+1，否则自身获得1点充能。（每回合1次）
+ * 【被动】我方卡牌被赋予赋能时：如果我方场上存在冷静一下鸭，则使其可用次数+1，否则自身获得1点充能。（每回合1次）
  */
 define skill {
   id 12164 as ModularEfficiencyProtocol;
@@ -129,7 +129,7 @@ define character {
  * @description
  * 战斗行动：我方出战角色为爱诺时，装备此牌。
  * 爱诺装备此牌后，立刻使用一次精密水冷仪。
- * 装备有此卡牌的爱诺在场时，我方触发感电、月感电、绽放及月绽放反应时：该次伤害+2，并且赋予我方当前元素骰费用最高的1张手牌赋能。（每回合1次）
+ * 装备有此卡牌的爱诺在场时，我方触发感电、月感电、绽放、月绽放、结晶（水）或月结晶反应时：该次伤害+2，并且赋予我方当前元素骰费用最高的1张手牌赋能。（每回合1次）
  * （牌组中包含爱诺，才能加入牌组）
  */
 define card {
@@ -149,6 +149,8 @@ define card {
             Reaction.LunarElectroCharged,
             Reaction.Bloom,
             Reaction.LunarBloom,
+            Reaction.CrystallizeHydro,
+            Reaction.LunarCrystallizeHydro,
           ] as (Reaction | null)[]
         ).includes(:e.getReaction())
       );

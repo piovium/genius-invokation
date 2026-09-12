@@ -209,7 +209,7 @@ define skill {
  * @name 月兆祝赐·檐上趱行
  * @description
  * 【被动】战斗开始时，生成手牌呼噜噜秘藏瓶。
- * 我方触发月反应或扩散反应后，使我方手牌中所有呼噜噜秘藏瓶附着费用降低。（每回合2次）
+ * 我方触发月曜反应或扩散反应后，使我方手牌中所有呼噜噜秘藏瓶附着费用降低。（每回合2次）
  */
 define skill {
   id 15164 as MoonsignBenedictionRooftopDash;
