@@ -94,20 +94,6 @@ export function normalizeKey(name: string, message: string): string {
   return `${name}: ${body}`.slice(0, 120);
 }
 
-let knownIssues: KnownIssue[] | null = null;
-export function loadKnownIssues(): KnownIssue[] {
-  if (!knownIssues) {
-    const file = path.join(HERE, "known-issues.json");
-    knownIssues = existsSync(file)
-      ? (JSON.parse(readFileSync(file, "utf-8")) as KnownIssue[])
-      : [];
-  }
-  return knownIssues;
-}
-export function matchKnownIssue(key: string): KnownIssue | undefined {
-  return loadKnownIssues().find((k) => key.startsWith(k.key));
-}
-
 // ---------- .gts 定义索引 ----------
 
 export interface DefLocation {
@@ -456,9 +442,6 @@ function renderReport(
       lines.push(`  - 牌组(${deck.cards.length}): ${deck.cards.map(describeDef).join(", ")}`);
     });
   }
-  if (setup.scenario) {
-    lines.push(fence(annotateIds(JSON.stringify(setup.scenario, null, 2)), "json"));
-  }
   lines.push("");
 
   lines.push(`## 最后 ${recent.length} 次决策`);
@@ -539,17 +522,14 @@ export function writeHangArtifact(
     `- ${result.error?.message ?? ""}`,
     "",
   ];
-  if (result.setup.decks || result.setup.scenario) {
+  if (result.setup.decks) {
     lines.push("## 对局设定");
     lines.push("");
     lines.push(`- version: ${result.setup.version} · dice: ${result.setup.dice} · randomSeed: ${result.setup.randomSeed}`);
-    result.setup.decks?.forEach((deck, who) => {
+    result.setup.decks.forEach((deck, who) => {
       lines.push(`- player ${who}: 角色 ${deck.characters.map(describeDef).join(", ")}`);
       lines.push(`  - 牌组(${deck.cards.length}): ${deck.cards.map(describeDef).join(", ")}`);
     });
-    if (result.setup.scenario) {
-      lines.push(fence(annotateIds(JSON.stringify(result.setup.scenario, null, 2)), "json"));
-    }
     lines.push("");
   }
   if (capture) {

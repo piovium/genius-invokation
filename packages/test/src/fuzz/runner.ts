@@ -26,7 +26,6 @@ import {
   type Version,
 } from "@gi-tcg/core";
 import { flip } from "@gi-tcg/utils";
-import { buildState } from "../dsl";
 import {
   agentToPlayerIo,
   createLegalAgent,
@@ -46,20 +45,13 @@ import { createPrng, deriveSeed, type Prng } from "./prng";
 import { createMaliciousAgent, type Injection } from "./protocol";
 import {
   displayPath,
-  matchKnownIssue,
   normalizeKey,
   relativizePaths,
   writeArtifact,
   type ErrorInfo,
 } from "./report";
-import { generateScenario, type ScenarioSummary } from "./scenario";
 
-/**
- * 单个 fuzz 用例的执行：建初始状态 → 装 IO 与 hook → start → 分类 → 落盘。
- * 三种模式共用这条流水线，只在"如何建初始状态"和"是否包装恶意玩家"上不同。
- */
-
-export type FuzzMode = "game" | "scenario" | "protocol";
+export type FuzzMode = "game" | "protocol";
 export type DiceMode = "random" | "omni" | "real";
 
 export interface FuzzOptions {
@@ -75,8 +67,6 @@ export interface FuzzOptions {
   readonly strictDice: boolean;
   /** 协议模式每次 rpc 注入非法响应的概率 */
   readonly maliceP: number;
-  /** 场景模式抽取"与角色相关"实体的概率 */
-  readonly relatedness: number;
 }
 
 /** 用例完全由 (campaignSeed, index, options) 决定 */
@@ -92,7 +82,12 @@ export function createCaseSpec(
   index: number,
   options: FuzzOptions,
 ): CaseSpec {
-  return { campaignSeed, index, caseSeed: deriveSeed(campaignSeed, index), options };
+  return {
+    campaignSeed,
+    index,
+    caseSeed: deriveSeed(campaignSeed, index),
+    options,
+  };
 }
 
 export type OutcomeKind =
@@ -105,8 +100,7 @@ export type OutcomeKind =
   | "hang"
   | "crash"
   | "budget-exhausted"
-  | "soft-warning"
-  | "known";
+  | "soft-warning";
 
 export const FAILURE_OUTCOMES: readonly OutcomeKind[] = [
   "engine-error",
@@ -124,7 +118,6 @@ export interface CaseSetup {
   readonly version: Version;
   readonly dice: "omni" | "real";
   readonly decks?: readonly [GeneratedDeck, GeneratedDeck];
-  readonly scenario?: ScenarioSummary;
   readonly offender?: 0 | 1;
   readonly randomSeed: number;
 }
@@ -175,7 +168,11 @@ export function toErrorInfo(e: unknown): ErrorInfo {
     const chain: string[] = [];
     let cause: unknown = e.cause;
     while (cause instanceof Error && chain.length < 5) {
-      chain.push(relativizePaths(`${cause.name}: ${cause.message}\n${cause.stack ?? ""}`));
+      chain.push(
+        relativizePaths(
+          `${cause.name}: ${cause.message}\n${cause.stack ?? ""}`,
+        ),
+      );
       cause = cause.cause;
     }
     return {
@@ -218,27 +215,14 @@ export function prepareCase(spec: CaseSpec): {
     maxRoundsCount: options.maxRounds,
     unexpectedInsufficientDice: options.strictDice ? "throw" : "skipConsume",
   } as const;
-  if (options.mode === "scenario") {
-    const scenario = generateScenario(pool, rng.split("scenario"), {
-      relatedness: options.relatedness,
-      maxRounds: options.maxRounds,
-      omni: dice === "omni",
-      gameConfig,
-    });
-    let nextId = -5_000_000;
-    return {
-      setup: { mode: "scenario", version, dice, scenario: scenario.summary, randomSeed },
-      initialState: buildState(scenario.tree, { data, nextId: () => nextId-- }),
-      rng,
-      data,
-    };
-  }
   const decks = [
     generateDeck(pool, rng.split("deck0"), options.deckShape),
     generateDeck(pool, rng.split("deck1"), options.deckShape),
   ] as const;
   const offender =
-    options.mode === "protocol" ? (rng.split("malice").int(0, 2) as 0 | 1) : undefined;
+    options.mode === "protocol"
+      ? (rng.split("malice").int(0, 2) as 0 | 1)
+      : undefined;
   return {
     setup: { mode: options.mode, version, dice, decks, offender, randomSeed },
     initialState: Game.createInitialState({
@@ -281,7 +265,11 @@ export async function runCase(
   for (const who of [0, 1] as const) {
     let agent: Agent = createLegalAgent(options.strategy);
     if (setup.offender === who) {
-      malicious = createMaliciousAgent(agent, rng.split("malice-agent"), options.maliceP);
+      malicious = createMaliciousAgent(
+        agent,
+        rng.split("malice-agent"),
+        options.maliceP,
+      );
       agent = malicious;
     }
     game.players[who].config = playerConfig;
@@ -329,7 +317,9 @@ export async function runCase(
   const originalWarn = con?.warn;
   if (con) {
     con.warn = (...args: unknown[]) => {
-      warnings.push(args.map((a) => (typeof a === "string" ? a : String(a))).join(" "));
+      warnings.push(
+        args.map((a) => (typeof a === "string" ? a : String(a))).join(" "),
+      );
     };
   }
   const timer = setTimeout(() => {
@@ -368,8 +358,7 @@ export async function runCase(
       const offender = setup.offender;
       const blamedOffender =
         ioErrors.length === 1 && ioErrors[0].who === offender;
-      const lost =
-        winner === flip(offender) && game.state.phase === "gameEnd";
+      const lost = winner === flip(offender) && game.state.phase === "gameEnd";
       const accepted =
         injected.expectation === "must-reject"
           ? !(blamedOffender && lost)
@@ -403,10 +392,6 @@ export async function runCase(
     key = normalizeKey("warn", warnings[0]);
   }
   let originalOutcome: OutcomeKind | undefined;
-  if (key && FAILURE_OUTCOMES.includes(outcome) && matchKnownIssue(key)) {
-    originalOutcome = outcome;
-    outcome = "known";
-  }
 
   let result: CaseResult = {
     spec,
