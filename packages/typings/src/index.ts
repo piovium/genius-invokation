@@ -74,6 +74,7 @@ export {
   ChooseActiveDoneEM,
   SelectCardDoneEM,
   HandleEventEM,
+  ResetVariablesEM,
 } from "./gen/mutation";
 export {
   Action,

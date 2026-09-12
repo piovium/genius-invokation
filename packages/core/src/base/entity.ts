@@ -22,18 +22,10 @@ import type { WeaponTag } from "./character";
 export type WeaponCardTag = Exclude<WeaponTag, "otherWeapon">;
 
 export type EquipmentTag =
-  | "talent"
-  | "artifact"
-  | "technique"
-  | "weapon"
-  | WeaponCardTag;
+  "talent" | "artifact" | "technique" | "weapon" | WeaponCardTag;
 
 export type SupportTag =
-  | "ally"
-  | "place"
-  | "item"
-  | "blessing"
-  | "adventureSpot";
+  "ally" | "place" | "item" | "blessing" | "adventureSpot";
 
 export type CardTag =
   | "legend" // 秘传
@@ -65,26 +57,20 @@ export type EntityTagMap = {
   summon: never;
 };
 
-export type EntityTag<Type extends EntityType = EntityType> =
-  | CommonEntityTag
-  | EntityTagMap[Type];
+export type EntityTag<Ty extends EntityType = EntityType> =
+  CommonEntityTag | EntityTagMap[Ty];
 
 export type EntityType =
-  | "eventCard"
-  | "status"
-  | "combatStatus"
-  | "equipment"
-  | "support"
-  | "summon";
+  "eventCard" | "status" | "combatStatus" | "equipment" | "support" | "summon";
 
-export interface EntityDefinition {
+export interface EntityDefinition<Ty extends EntityType = EntityType> {
   readonly __definition: "entities";
-  readonly type: EntityType;
+  readonly type: Ty;
   readonly id: number;
   readonly version: VersionInfo;
   readonly obtainable: boolean;
   readonly visibleVarName: string | null;
-  readonly tags: readonly EntityTag[];
+  readonly tags: readonly EntityTag<Ty>[];
   readonly hintText: string | null;
   readonly disableTuning: boolean;
   readonly varConfigs: EntityVariableConfigs;
@@ -97,10 +83,7 @@ export interface EntityDefinition {
 export type EntityArea =
   | {
       readonly type:
-        | "combatStatuses"
-        | "supports"
-        | "summons"
-        | "removedEntities";
+        "combatStatuses" | "supports" | "summons" | "removedEntities";
       readonly who: 0 | 1;
     }
   | {

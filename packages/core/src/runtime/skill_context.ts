@@ -218,6 +218,18 @@ type CallAndEmitResult<K extends MutatorMethodCanEmit> =
       ? void
       : never;
 
+type QueryState<Meta extends ContextMetaBase, Q extends IQuery> = RxEntityState<
+  Meta,
+  InferResult<Q>["type"],
+  {
+    areaType: Extract<
+      InferResult<Q>["areaType"],
+      TypeAreaTypeMap<InferResult<Q>["type"]>
+    >;
+    variables: InferResult<Q>["variables"];
+  }
+>;
+
 /**
  * GTS 中，用于描述技能的上下文对象。
  * 使用 `SkillContext.encapsulate` 创建的技能描述函数会在执行时创建一个 `SkillContext` 实例供使用。
@@ -245,7 +257,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
    * 获取正在执行逻辑的实体的 `Character` 或 `Entity`。
    * @returns
    */
-  private readonly _self: RxEntityState<
+  public readonly self: RxEntityState<
     Meta,
     Meta["callerType"],
     {
@@ -310,10 +322,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     };
     this.mutator = new StateMutator(state, mutatorConfig);
     this.eventArg = applyReactive(this, eventArg);
-    this._self = applyReactive(
-      this,
-      this.skillInfo.caller,
-    ) as typeof this._self;
+    this.self = applyReactive(this, this.skillInfo.caller) as typeof this.self;
     this.callSnippet = new Proxy(
       (arg: any) => this._callSnippetByName("default", arg),
       {
@@ -418,6 +427,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
               );
               this.mutate({
                 type: "modifyEntityVar",
+                oldValue: 0,
                 state: defeatedCh.latest(),
                 varName: "alive",
                 value: 0,
@@ -427,6 +437,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
                 defeatedCh.definition.specialEnergy?.variableName ?? "energy";
               this.mutate({
                 type: "modifyEntityVar",
+                oldValue: 0,
                 state: defeatedCh.latest(),
                 varName: energyVarName,
                 value: 0,
@@ -434,6 +445,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
               });
               this.mutate({
                 type: "modifyEntityVar",
+                oldValue: 0,
                 state: defeatedCh.latest(),
                 varName: "aura",
                 value: Aura.None,
@@ -577,10 +589,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return this.mutator.mutate(mut);
   }
 
-  get self() {
-    return this._self;
-  }
-
   get isPreview(): boolean {
     return this.skillInfo.environment === "preview";
   }
@@ -619,20 +627,20 @@ export class SkillContext<Meta extends ContextMetaBase> {
 
   query<const Q extends IQuery>(
     arg: (($: IDollar) => Q) | Q,
-  ): RxEntityState<Meta, InferResult<Q>["type"], InferResult<Q>> | undefined {
+  ): QueryState<Meta, Q> | undefined {
     const results = this.queryAll(arg);
     return results[0];
   }
 
   queryAll<const Q extends IQuery>(
     arg: (($: IDollar) => Q) | Q,
-  ): RxEntityState<Meta, InferResult<Q>["type"], InferResult<Q>>[] {
+  ): QueryState<Meta, Q>[] {
     if (!(toExpression in arg)) {
       arg = arg($);
     }
     return runQuery(this.rawState, this.self.who, arg).map((state) =>
       this.get(state),
-    ) as RxEntityState<Meta, InferResult<Q>["type"], InferResult<Q>>[];
+    ) as any[];
   }
 
   get<T extends ExEntityType>(id: number): RxEntityState<Meta, T>;
@@ -928,6 +936,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       const finalValue = Math.min(value, maxEnergy - energy);
       this.mutate({
         type: "modifyEntityVar",
+        oldValue: 0,
         state: target,
         varName: "energy",
         value: energy + finalValue,
@@ -992,6 +1001,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       );
       this.mutate({
         type: "modifyEntityVar",
+        oldValue: 0,
         state: target,
         varName: "maxHealth",
         value: target.variables.maxHealth + value,
@@ -1113,6 +1123,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       );
       this.mutate({
         type: "modifyEntityVar",
+        oldValue: 0,
         direction: "decrease",
         state: ch.latest(),
         varName: "aura",
@@ -1251,7 +1262,11 @@ export class SkillContext<Meta extends ContextMetaBase> {
       // Remove existing artifact/weapon/technique first
       for (const tag of ["artifact", "weapon", "technique"] as const) {
         if (def.tags.includes(tag)) {
-          const exist = t.entities.find((v) => v.definition.tags.includes(tag));
+          const exist = t.entities.find(
+            (v) =>
+              v.definition.type === "equipment" &&
+              v.definition.tags.includes(tag),
+          );
           if (exist) {
             // TODO: maybe better reason
             this.dispose(exist, {
@@ -1540,6 +1555,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     }
     this.mutate({
       type: "modifyEntityVar",
+      oldValue: 0,
       state,
       varName: info.varName,
       value: info.newValue,

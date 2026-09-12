@@ -359,7 +359,10 @@ define combatStatus {
     :callSnippet.checkCount();
   };
   on playCard {
-    when :( :e.card.definition.tags.includes("technique") );
+    when :(
+      :e.card.definition.type === "equipment" &&
+        :e.card.definition.tags.includes("technique")
+    );
     :addVariable("techniquesPlayedCount", 1);
     :callSnippet.checkCount();
   };

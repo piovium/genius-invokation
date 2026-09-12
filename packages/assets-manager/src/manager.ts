@@ -343,8 +343,10 @@ export class AssetsManager {
         description: "",
         hidden: false,
       };
-      if (!this.dataCacheSync.has(et.id)) {
-        this.dataCacheSync.set(et.id, data);
+      // May be registered by action_card. Merge.
+      const existing = this.dataCacheSync.get(et.id);
+      this.dataCacheSync.set(et.id, { ...existing, ...data });
+      if (!existing) {
         this.customDataNames.set(et.id, et.name);
         this.customDataImageUrls.set(et.id, et.cardFaceOrBuffIconUrl);
       }
@@ -637,4 +639,6 @@ export class AssetsManager {
   }
 }
 
-export const DEFAULT_ASSETS_MANAGER = new AssetsManager({ defaultDeckCompatible: true });
+export const DEFAULT_ASSETS_MANAGER = new AssetsManager({
+  defaultDeckCompatible: true,
+});

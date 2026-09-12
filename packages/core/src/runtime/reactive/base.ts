@@ -47,18 +47,25 @@ export type TypeAreaTypeMap<Ty extends ExEntityType> =
   | RegularTypeAreaTypeMap<Ty>
   | (Ty extends "character" ? never : "removedEntities");
 
-export interface RegularExtraInfo<Ty extends ExEntityType, Vars extends string = string> {
+/** ExtraInfo that do not includes removedEntities area. */
+export interface RegularExtraInfo<
+  Ty extends ExEntityType,
+  Vars extends string = string,
+> {
   variables: Vars;
   areaType: RegularTypeAreaTypeMap<Ty>;
 }
 
-export interface ExtraInfo<Ty extends ExEntityType, Vars extends string = string> {
+export interface ExtraInfo<
+  Ty extends ExEntityType,
+  Vars extends string = string,
+> {
   variables: Vars;
   areaType: TypeAreaTypeMap<Ty>;
 }
 
-export abstract class ReactiveStateBase implements IUnorderedQuery {
-  declare [typingInfo]: TypingInfoBase;
+export abstract class ReactiveStateBase<QueryTy extends TypingInfoBase> implements IUnorderedQuery<QueryTy> {
+  declare [typingInfo]: QueryTy;
   abstract readonly id: number;
   abstract get [ReactiveStateSymbol](): ExEntityType;
   declare [RawStateSymbol]: object;
@@ -69,9 +76,12 @@ export abstract class ReactiveStateBase implements IUnorderedQuery {
   [toExpression](): SExprSchema.Query {
     return this[toExpressionUnordered]();
   }
-  cast<Ty extends ExEntityType>(): this & {
-    readonly [ReactiveStateSymbol]: Ty;
-  } {
+  cast<Ty extends ExEntityType>(): Extract<
+    this,
+    {
+      readonly [ReactiveStateSymbol]: Ty;
+    }
+  > {
     return this as any;
   }
   latest(): this[LatestStateSymbol] {

@@ -18,7 +18,6 @@ import type {
   CharacterVariables,
   EntityState,
   GameState,
-  StateKind,
 } from "../../base/state";
 import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
 import type {
@@ -26,7 +25,7 @@ import type {
   NationTag,
   WeaponTag,
 } from "../../base/character";
-import type { EntityArea, EntityTag } from "../../base/entity";
+import type { EntityArea, EquipmentTag } from "../../base/entity";
 import {
   getEntityArea,
   getEntityById,
@@ -38,7 +37,11 @@ import {
   type PlainEntityState,
 } from "./utils";
 import { isSkillDisabled, type CreateEntityOptions } from "../../utils";
-import type { ContextMetaBase, HealOption, SkillContext } from "../skill_context";
+import type {
+  ContextMetaBase,
+  HealOption,
+  SkillContext,
+} from "../skill_context";
 import { Aura, DamageType, DiceType } from "@gi-tcg/typings";
 import type {
   AppliableDamageType,
@@ -51,10 +54,8 @@ import {
   ReactiveStateBase,
   ReactiveStateSymbol,
 } from "./base";
-import {
-  applyReactive,
-  type ApplyReactive,
-} from ".";
+import { applyReactive, type RegularRxEntityState } from ".";
+import type { CommonCharacterVariableNames } from "../../query/utils";
 
 export type CharacterPosition = "active" | "next" | "prev" | "standby";
 
@@ -63,7 +64,11 @@ export type CharacterPosition = "active" | "next" | "prev" | "standby";
  * 仅当保证 GameState 不发生变化时使用。
  */
 export class CharacterBase
-  extends ReactiveStateBase
+  extends ReactiveStateBase<{
+    readonly type: "character";
+    readonly areaType: "characters";
+    readonly variables: CommonCharacterVariableNames;
+  }>
   implements PlainCharacterState
 {
   override get [ReactiveStateSymbol](): "character" {
@@ -213,14 +218,20 @@ export class ReadonlyCharacter<
     return state;
   }
 
-  override get entities(): ApplyReactive<Meta, EntityState[]> {
-    return applyReactive(this.skillContext, this.state.entities);
+  override get entities(): readonly RegularRxEntityState<
+    Meta,
+    "status" | "equipment"
+  >[] {
+    return applyReactive(
+      this.skillContext,
+      this.state.entities,
+    ) as readonly any[];
   }
 
   isMine() {
     return this.area.who === this.skillContext.self.who;
   }
-  private hasEquipmentWithTag(tag: EntityTag) {
+  private hasEquipmentWithTag(tag: EquipmentTag) {
     return (
       this.entities.find(
         (v) =>
@@ -251,10 +262,12 @@ export class ReadonlyCharacter<
       ) ?? null
     );
   }
-  hasNightsoulsBlessing() {
+  hasNightsoulsBlessing(): RegularRxEntityState<Meta, "status"> | null {
     return (
-      this.entities.find((v) =>
-        v.definition.tags.includes("nightsoulsBlessing"),
+      this.entities.find(
+        (v): v is RegularRxEntityState<Meta, "status"> =>
+          v.definition.type === "status" &&
+          v.definition.tags.includes("nightsoulsBlessing"),
       ) ?? null
     );
   }

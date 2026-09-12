@@ -110,12 +110,13 @@ export type ExtensionHandle<T = unknown> = number & {
 
 export type ExEntityType = "character" | EntityType | "attachment";
 
-export type ExEntityState<TypeT extends ExEntityType> =
-  TypeT extends "character"
-    ? CharacterState
-    : TypeT extends "attachment"
-      ? AttachmentState
-      : EntityState;
+export type ExEntityState<Ty extends ExEntityType> = Ty extends "character"
+  ? CharacterState
+  : Ty extends "attachment"
+    ? AttachmentState
+    : Ty extends EntityType
+      ? EntityState<Ty>
+      : never;
 
 export type HandleT<
   T extends ExEntityType,

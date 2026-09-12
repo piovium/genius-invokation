@@ -20,10 +20,10 @@ import { AssetsManager } from "@gi-tcg/assets-manager";
 
 function App() {
   const enAssetsManager = new AssetsManager({ language: "CHS" });
-  const { CardDataViewer, showCharacter, showState, showCard, showSkill } =
+  const { CardDataViewer, showCharacter, showState, showCard } =
     createCardDataViewer({
       assetsManager: () => enAssetsManager,
-      locale: () => "zh-CN"
+      locale: () => "zh-CN",
     });
   onMount(() => {
     showState(
@@ -34,7 +34,7 @@ function App() {
         aura: 0,
         defeated: false,
         health: 5,
-        maxHealth: 100,
+        maxHealth: 21,
         energy: 2,
         maxEnergy: 2,
         tags: 0,
@@ -54,6 +54,19 @@ function App() {
             },
             attachment: [],
           },
+          {
+            id: -500004,
+            definitionId: 313001,
+            hasUsagePerRound: false,
+            variableName: "usage",
+            variableValue: 2,
+            equipment: 3,
+            definitionCost: [],
+            tags: 0,
+            type: 6,
+            descriptionDictionary: {},
+            attachment: [],
+          },
         ],
       },
       [
@@ -70,6 +83,9 @@ function App() {
           attachment: [],
         },
       ],
+      {
+        // skillOnly: 12111,
+      },
     );
     // showState("card", {
     //   id: -5000001,
@@ -91,18 +107,18 @@ function App() {
     //     },
     //   ],
     // });
-    showState("entity", {
-      id: -5000001,
-      definitionId: 113041,
-      definitionCost: [],
-      tags: 0,
-      descriptionDictionary: {},
-      hasUsagePerRound: false,
-      variableName: "usage",
-      variableValue: 2,
-      type: 4,
-      attachment: []
-    });
+    // showState("entity", {
+    //   id: -5000001,
+    //   definitionId: 113041,
+    //   definitionCost: [],
+    //   tags: 0,
+    //   descriptionDictionary: {},
+    //   hasUsagePerRound: false,
+    //   variableName: "usage",
+    //   variableValue: 2,
+    //   type: 4,
+    //   attachment: [],
+    // });
     // showCard(212111);
     // showCharacter(1610);
     // showSkill(12111);

@@ -31,9 +31,14 @@ import {
 import type { AttachmentDefinition } from "../../base/attachment";
 import type { RxEntityState } from ".";
 
-class ReadonlyAttachment<
-  Meta extends ContextMetaBase,
-> extends ReactiveStateBase implements PlainAttachmentState {
+class ReadonlyAttachment<Meta extends ContextMetaBase>
+  extends ReactiveStateBase<{
+    type: "attachment";
+    areaType: "hands" | "pile";
+    variables: string; // TODO
+  }>
+  implements PlainAttachmentState
+{
   override get [ReactiveStateSymbol](): "attachment" {
     return "attachment";
   }

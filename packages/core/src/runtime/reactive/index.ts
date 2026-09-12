@@ -23,15 +23,16 @@ import {
   ReactiveStateBase,
   ReactiveStateSymbol,
   type ExtraInfo,
+  type RegularExtraInfo,
 } from "./base";
 import type { ExEntityState, ExEntityType } from "../../data/type";
 import { Attachment, type TypedAttachment } from "./attachment";
-import type { IUnorderedQuery } from "../../query/utils";
+import type { TypingInfoBase } from "../../query/utils";
 
 type ReactiveClassCtor = new (
   skillContext: SkillContext<any>,
   id: number,
-) => ReactiveStateBase;
+) => ReactiveStateBase<TypingInfoBase>;
 
 export const NoReactiveSymbol: unique symbol = Symbol(
   "GiTcgCoreStateNoReactive",
@@ -46,25 +47,25 @@ type ReactiveState<
   readonly [StateSymbol]: unknown;
   readonly definition: { readonly type: infer Ty extends ExEntityType };
 }
-  ? (Ty extends "character"
-      ? TypedCharacter<Meta>
-      : Ty extends "attachment"
-        ? TypedAttachment<Meta>
-        : Ty extends EntityType
-          ? TypedEntity<Meta, Ty, Extra>
-          : never) &
-      IUnorderedQuery<{
-        type: Ty;
-        areaType: Extra["areaType"];
-        variables: Extra["variables"];
-      }>
+  ? Ty extends "character"
+    ? TypedCharacter<Meta>
+    : Ty extends "attachment"
+      ? TypedAttachment<Meta>
+      : Ty extends EntityType
+        ? TypedEntity<Meta, Ty, Extra>
+        : never
   : never;
 
 export type RxEntityState<
   Meta extends ContextMetaBase,
   Ty extends ExEntityType,
-  Extra extends ExtraInfo<ExEntityType> = ExtraInfo<Ty>,
+  Extra extends ExtraInfo<Ty> = ExtraInfo<Ty>,
 > = ReactiveState<Meta, ExEntityState<Ty>, Extra>;
+
+export type RegularRxEntityState<
+  Meta extends ContextMetaBase,
+  Ty extends ExEntityType,
+> = RxEntityState<Meta, Ty, RegularExtraInfo<Ty>>;
 
 type Primitive = string | number | boolean | bigint | symbol | null | undefined;
 type AtomicObject =

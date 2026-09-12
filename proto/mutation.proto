@@ -49,6 +49,7 @@ message ExposedMutation {
     HandleEventEM handle_event = 27;
     MoveEntityEM move_entity = 28;
     CreateAttachmentEM create_attachment = 29;
+    ResetVariablesEM reset_variables = 30;
   }
   reserved 17;
 }
@@ -170,6 +171,12 @@ message ModifyEntityVarEM {
   string variable_name = 4;
   int32 variable_value = 5;
   ModifyDirection direction = 6;
+  int32 old_value = 7;
+}
+
+message ResetVariablesEM {
+  sint32 entity_id = 1;
+  int32 entity_definition_id = 2;
 }
 
 message TransformDefinitionEM {

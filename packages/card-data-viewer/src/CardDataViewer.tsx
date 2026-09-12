@@ -32,7 +32,7 @@ import { ActionCard, Character, Entity, Keyword, Skill } from "./Entity";
 import { useAssetsManager } from "./context";
 import { CardFace } from "./CardFace";
 
-type MainStateType = "character" | "card" | "entity" | "skill" | "keyword";
+type MainStateType = "character" | "card" | "entity" | "keyword";
 type SubStateType =
   "equipment" | "status" | "equipAndStatus" | "combatStatus" | "attachment";
 
@@ -42,7 +42,7 @@ export type ViewerInput =
   | {
       from: "definitionId";
       definitionId: number;
-      type: StateType;
+      type: StateType | "skill";
     }
   | {
       from: "state";
@@ -87,23 +87,26 @@ function CardDataViewer(props: CardDataViewerProps) {
       }
     });
   });
-  const subEntities = () => {
+  const subEntities = createMemo(() => {
     const render: (ViewerInput | SubStateType)[] = [];
     const g = grouped();
     for (const t of [
+      "skill",
       "equipment",
       "status",
       "equipAndStatus",
       "combatStatus",
       "attachment",
-    ] as SubStateType[]) {
+    ] as const) {
       if (g[t]?.length) {
-        render.push(t);
+        if (t !== "skill") {
+          render.push(t);
+        }
         render.push(...g[t]);
       }
     }
     return render;
-  };
+  });
 
   const showCombineButton = (type: SubStateType) =>
     !!(
@@ -148,14 +151,7 @@ function CardDataViewer(props: CardDataViewerProps) {
             </div>
           )}
         </For>
-        <For each={grouped().skill}>
-          {(input) => (
-            <div class="card-panel">
-              <Skill input={input} onRequestExplain={onRequestExplain} />
-            </div>
-          )}
-        </For>
-        <Show when={subEntities()?.length}>
+        <Show when={subEntities().length}>
           <div class="card-panel">
             <div class="flex flex-col gap-[0.5em]">
               <For each={subEntities()}>
@@ -177,6 +173,12 @@ function CardDataViewer(props: CardDataViewerProps) {
                           {t(entityType())}
                         </h3>
                       )}
+                    </Match>
+                    <Match when={(entity as ViewerInput).type === "skill"}>
+                      <Skill
+                        input={entity as ViewerInput}
+                        onRequestExplain={onRequestExplain}
+                      />
                     </Match>
                     <Match when={true}>
                       <Entity

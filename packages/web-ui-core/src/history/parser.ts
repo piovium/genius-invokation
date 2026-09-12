@@ -61,29 +61,6 @@ export interface HistoryData {
   recorder: StateRecorder;
 }
 
-interface VariableRecordEntry {
-  oldValue: number;
-  newValue: number;
-}
-
-class VariableRecord {
-  readonly records: VariableRecordEntry[] = [];
-  constructor(private readonly initValue = 0) {}
-
-  set(current: number) {
-    const oldValue = this.records.at(-1)?.newValue ?? this.initValue;
-    this.records.push({
-      oldValue,
-      newValue: current,
-    });
-  }
-
-  take() {
-    const result = this.records.at(-1);
-    return result ?? null;
-  }
-}
-
 interface Area {
   who: 0 | 1;
   onStage: boolean;
@@ -110,16 +87,7 @@ const PB_ENTITY_TYPE_MAP: Record<PbEntityType, EntityType> = {
   [PbEntityType.EQUIPMENT]: "equipment",
 };
 
-/**
- * 收集所有的 ModifyEntityVarEM，以记录 VariableChangeHistoryChild
- * 等需要使用的旧值
- */
 export class StateRecorder {
-  readonly visibleVarRecords = new Map<number, VariableRecord>();
-  readonly energyVarRecords = new Map<number, VariableRecord>();
-  readonly maxHealthVarRecords = new Map<number, VariableRecord>();
-
-  readonly maxEnergies = new Map<number, number>();
   readonly entityInitStates = new Map<
     number,
     {
@@ -177,12 +145,6 @@ export class StateRecorder {
   ) {
     this.area.set(entity.id, area);
     this.entityInitStates.set(entity.id, { ...entity, type: entityType });
-    if (entity.variableName) {
-      this.visibleVarRecords.set(
-        entity.id,
-        new VariableRecord(entity.variableValue ?? 0),
-      );
-    }
   }
 
   private initializeAttachment(area: Area, attachment: PbAttachmentState) {
@@ -191,12 +153,6 @@ export class StateRecorder {
       ...attachment,
       type: "attachment",
     });
-    if (attachment.variableName) {
-      this.visibleVarRecords.set(
-        attachment.id,
-        new VariableRecord(attachment.variableValue ?? 0),
-      );
-    }
   }
 
   private initializeCharacter(who: 0 | 1, character: PbCharacterState) {
@@ -206,15 +162,6 @@ export class StateRecorder {
       masterDefinitionId: character.definitionId,
     };
     this.area.set(character.id, area);
-    this.energyVarRecords.set(
-      character.id,
-      new VariableRecord(character.energy),
-    );
-    this.maxHealthVarRecords.set(
-      character.id,
-      new VariableRecord(character.maxHealth),
-    );
-    this.maxEnergies.set(character.id, character.maxEnergy);
     for (const entity of character.entity) {
       this.initializeEntity(
         area,
@@ -231,52 +178,36 @@ export class StateRecorder {
     | IncreaseMaxHealthHistoryChild
     | EnergyHistoryChild
     | null {
-    const { entityId, entityDefinitionId, variableName, variableValue } =
+    const { entityId, entityDefinitionId, variableName, variableValue, oldValue } =
       varMut;
-    let record: VariableRecord | undefined;
-    if (
-      variableName === "energy" &&
-      (record = this.energyVarRecords.get(varMut.entityId))
-    ) {
-      record.set(variableValue);
-      const { oldValue = 0, newValue = 0 } = record.take() ?? {};
+    if (variableName === "energy") {
       return {
         type: "energy",
         who: this.area.get(entityId)?.who ?? 0,
         characterDefinitionId: entityDefinitionId,
         oldEnergy: oldValue,
-        newEnergy: newValue,
+        newEnergy: variableValue,
       };
     }
-    if (
-      variableName === "maxHealth" &&
-      (record = this.maxHealthVarRecords.get(varMut.entityId))
-    ) {
-      record.set(variableValue);
-      const { oldValue = 0, newValue = 0 } = record.take() ?? {};
+    if (variableName === "maxHealth") {
       return {
         type: "increaseMaxHealth",
         who: this.area.get(entityId)?.who ?? 0,
         characterDefinitionId: entityDefinitionId,
         oldMaxHealth: oldValue,
-        newMaxHealth: newValue,
+        newMaxHealth: variableValue,
       };
     }
 
     if (this.entityInitStates.get(entityId)?.variableName === variableName) {
-      const record = this.visibleVarRecords.get(entityId);
-      if (record) {
-        record.set(variableValue);
-        const { oldValue = 0, newValue = 0 } = record.take() ?? {};
-        return {
-          type: "variableChange",
-          who: this.area.get(entityId)?.who ?? 0,
-          cardDefinitionId: entityDefinitionId,
-          variableName,
-          oldValue,
-          newValue,
-        };
-      }
+      return {
+        type: "variableChange",
+        who: this.area.get(entityId)?.who ?? 0,
+        cardDefinitionId: entityDefinitionId,
+        variableName,
+        oldValue,
+        newValue: variableValue,
+      };
     }
     return null;
   }
@@ -480,6 +411,14 @@ export function updateHistory(
           }
           break;
         }
+        case "resetVariables": {
+          children.push({
+            type: "cardVariableReset",
+            who: history.recorder.area.get(m.entityId)?.who ?? 0,
+            cardDefinitionId: m.entityDefinitionId,
+          });
+          break;
+        }
         case "applyAura": {
           children.push({
             type: "apply",
@@ -672,6 +611,29 @@ export function updateHistory(
             break;
           }
           if (
+            m.fromWhere === PbEntityArea.CHARACTER &&
+            m.toWhere === PbEntityArea.CHARACTER &&
+            m.entity?.type === PbEntityType.EQUIPMENT
+          ) {
+            const { id, definitionId } = m.entity;
+            children.push({
+              type: "removeEntity",
+              who: history.recorder.area.get(id)?.who ?? (m.fromWho as 0 | 1),
+              masterDefinitionId:
+                history.recorder.getMasterDefinitionId(id),
+              entityDefinitionId: definitionId,
+              entityType: "equipment",
+            });
+            history.recorder.renewEntityArea(m);
+            children.push({
+              type: "createEntity",
+              who: m.toWho as 0 | 1,
+              masterDefinitionId:
+                history.recorder.getMasterDefinitionId(id),
+              entityDefinitionId: definitionId,
+              entityType: "equipment",
+            });
+          } else if (
             m.reason === PbMoveEntityReason.EQUIP ||
             m.reason === PbMoveEntityReason.CREATE_SUPPORT
           ) {

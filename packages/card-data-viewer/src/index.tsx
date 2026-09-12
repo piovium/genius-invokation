@@ -39,14 +39,13 @@ import { translator } from "@solid-primitives/i18n";
 export interface RegisterResult {
   readonly CardDataViewer: () => JSX.Element;
   readonly showCharacter: (id: number, opt?: ShowCardDataViewerOption) => void;
-  readonly showSkill: (id: number, opt?: ShowCardDataViewerOption) => void;
   readonly showCard: (id: number, opt?: ShowCardDataViewerOption) => void;
   readonly showState: {
     (
       type: "character",
       state: PbCharacterState,
       combatStatuses: PbEntityState[],
-      opt?: ShowCardDataViewerOption,
+      opt?: ShowCharacterStateOption,
     ): void;
     /**
      * - Pass in type = "entity" for on-stage entities (which reads `rawPlayingDescription`)
@@ -69,6 +68,10 @@ export interface CreateCardDataViewerOption {
 
 export interface ShowCardDataViewerOption {
   includesImage?: boolean;
+}
+
+export interface ShowCharacterStateOption extends ShowCardDataViewerOption {
+  skillOnly?: number;
 }
 
 export function createCardDataViewer(
@@ -133,27 +136,38 @@ export function createCardDataViewer(
     showCharacter: (id: number, opt?: ShowCardDataViewerOption) => {
       showDef(id, "character", opt);
     },
-    showSkill: (id: number, opt?: ShowCardDataViewerOption) => {
-      showDef(id, "skill", opt);
-    },
     showState: (
       type: StateType,
       state: PbCharacterState | PbEntityState,
       combatStatusesOrOpt?: PbEntityState[] | ShowCardDataViewerOption,
-      opt?: ShowCardDataViewerOption,
+      opt?: ShowCharacterStateOption,
     ) => {
       const extra =
         type === "character" ? (combatStatusesOrOpt as PbEntityState[]) : [];
       const options =
         type === "character"
-          ? opt
-          : (combatStatusesOrOpt as ShowCardDataViewerOption | undefined);
+          ? (opt as ShowCharacterStateOption | undefined)
+          : (combatStatusesOrOpt as ShowCharacterStateOption | undefined);
       setMainImageDefId(
-        options?.includesImage === false ? null : state.definitionId,
+        options?.includesImage === false ||
+          typeof options?.skillOnly === "number"
+          ? null
+          : state.definitionId,
       );
+      let mainItem = mapStateToInput(state, type);
+      if (
+        mainItem.type === "character" &&
+        typeof options?.skillOnly === "number"
+      ) {
+        mainItem = {
+          from: "definitionId",
+          type: "skill",
+          definitionId: options.skillOnly,
+        };
+      }
       setInputs([
         // main item
-        mapStateToInput(state, type),
+        mainItem,
         // character zone entities
         ...("entity" in state
           ? state.entity.map((st) =>

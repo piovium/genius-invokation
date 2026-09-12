@@ -14,13 +14,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type {
+  AttachmentState,
   EntityState,
   EntityType,
   EntityVariables,
 } from "../../base/state";
 import { GiTcgDataError } from "../../error";
 import { type EntityArea, type EntityDefinition } from "../../base/entity";
-import { diceCostSizeOfCard, getEntityById, type PlainEntityState } from "./utils";
+import {
+  diceCostSizeOfCard,
+  getEntityById,
+  type PlainEntityState,
+} from "./utils";
 import type { ContextMetaBase, SkillContext } from "../skill_context";
 import {
   LatestStateSymbol,
@@ -30,20 +35,29 @@ import {
 } from "./base";
 import type { AttachmentHandle } from "../../data/type";
 import type { ExtraInfo } from "./base";
+import type { RxEntityState } from ".";
 
-class ReadonlyEntity<Meta extends ContextMetaBase>
-  extends ReactiveStateBase
+class ReadonlyEntity<
+  Meta extends ContextMetaBase,
+  Ty extends EntityType,
+  Extra extends ExtraInfo<EntityType>,
+>
+  extends ReactiveStateBase<{
+    readonly type: Ty;
+    readonly areaType: Extra["areaType"];
+    readonly variables: Extra["variables"];
+  }>
   implements PlainEntityState
 {
-  override get [ReactiveStateSymbol](): EntityType {
+  override get [ReactiveStateSymbol](): Ty {
     return this.definition.type;
   }
-  declare [RawStateSymbol]: EntityState;
-  override get [LatestStateSymbol](): EntityState {
+  declare [RawStateSymbol]: EntityState<Ty>;
+  override get [LatestStateSymbol](): EntityState<Ty> {
     const state = getEntityById(
       this.skillContext.rawState,
       this.id,
-    ) as EntityState;
+    ) as EntityState<Ty>;
     return state;
   }
 
@@ -54,20 +68,22 @@ class ReadonlyEntity<Meta extends ContextMetaBase>
     super();
   }
 
-  protected get state(): EntityState {
+  protected get state(): EntityState<Ty> {
     return this[LatestStateSymbol];
   }
-  get definition(): EntityDefinition {
-    return this.state.definition;
+  get definition(): EntityDefinition<Ty> {
+    return this.state.definition as EntityDefinition<Ty>;
   }
   get variables(): EntityVariables {
     return this.state.variables;
   }
-  get attachments(): EntityState["attachments"] {
+  get attachments(): AttachmentState[] {
     return this.state.attachments;
   }
-  get area(): EntityArea {
-    return this.skillContext._getEntityArea(this.id);
+  get area(): EntityArea & { type: Extra["areaType"] } {
+    return this.skillContext._getEntityArea(this.id) as EntityArea & {
+      type: Extra["areaType"];
+    };
   }
   get who() {
     return this.area.who;
@@ -94,15 +110,20 @@ class ReadonlyEntity<Meta extends ContextMetaBase>
     return this.withAttachment(206 as AttachmentHandle);
   }
 
-  get master() {
-    if (this.area.type !== "characters") {
+  get master(): RxEntityState<Meta, "character"> {
+    const area = this.area as EntityArea;
+    if (area.type !== "characters") {
       throw new GiTcgDataError("master expect a character area");
     }
-    return this.skillContext.get<"character">(this.area.characterId);
+    return this.skillContext.get<"character">(area.characterId);
   }
 }
 
-export class Entity<Meta extends ContextMetaBase> extends ReadonlyEntity<Meta> {
+export class Entity<
+  Meta extends ContextMetaBase,
+  Ty extends EntityType,
+  Extra extends ExtraInfo<EntityType>,
+> extends ReadonlyEntity<Meta, Ty, Extra> {
   setVariable(prop: string, value: number) {
     this.skillContext.setVariable(prop, value, this.state);
   }
@@ -124,19 +145,26 @@ export class Entity<Meta extends ContextMetaBase> extends ReadonlyEntity<Meta> {
   }
 }
 
-export interface ReadonlyEntityWithoutMaster<Meta extends ContextMetaBase>
-  extends Omit<ReadonlyEntity<Meta>, "master"> {}
+export interface ReadonlyEntityWithoutMaster<
+  Meta extends ContextMetaBase,
+  Ty extends EntityType,
+  Extra extends ExtraInfo<EntityType>,
+> extends Omit<ReadonlyEntity<Meta, Ty, Extra>, "master"> {}
 
-export interface EntityWithoutMaster<Meta extends ContextMetaBase>
-  extends Omit<Entity<Meta>, "master"> {}
+export interface EntityWithoutMaster<
+  Meta extends ContextMetaBase,
+  Ty extends EntityType,
+  Extra extends ExtraInfo<EntityType>,
+> extends Omit<Entity<Meta, Ty, Extra>, "master"> {}
 
 export type TypedEntity<
   Meta extends ContextMetaBase,
   Ty extends EntityType,
   Extra extends ExtraInfo<EntityType>,
-> = (Meta["readonly"] extends true
-  ? ReadonlyEntityWithoutMaster<Meta>
-  : EntityWithoutMaster<Meta>) &
-  (Extra["areaType"] extends "characters"
-    ? Pick<ReadonlyEntity<Meta>, "master">
-    : {});
+> = Extra["areaType"] extends "characters"
+  ? Meta["readonly"] extends true
+    ? ReadonlyEntity<Meta, Ty, Extra>
+    : Entity<Meta, Ty, Extra>
+  : Meta["readonly"] extends true
+    ? ReadonlyEntityWithoutMaster<Meta, Ty, Extra>
+    : EntityWithoutMaster<Meta, Ty, Extra>;

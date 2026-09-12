@@ -486,6 +486,7 @@ export class StateMutator {
     });
     this.mutate({
       type: "modifyEntityVar",
+      oldValue: 0,
       state: target,
       varName: "aura",
       value: newAura,
@@ -569,6 +570,7 @@ export class StateMutator {
         );
         this.mutate({
           type: "modifyEntityVar",
+          oldValue: 0,
           state: targetState,
           varName: "alive",
           value: 1,
@@ -632,6 +634,7 @@ export class StateMutator {
         : targetState.variables.health + healInfo.value;
     this.mutate({
       type: "modifyEntityVar",
+      oldValue: 0,
       state: targetState,
       varName: "health",
       value: newHealth,
@@ -709,6 +712,7 @@ export class StateMutator {
     const finalHealth = Math.max(0, target.variables.health - damageInfo.value);
     this.mutate({
       type: "modifyEntityVar",
+      oldValue: 0,
       state: target,
       varName: "health",
       value: finalHealth,
@@ -1039,6 +1043,7 @@ export class StateMutator {
       for (const [varName, value] of Object.entries(newVariables)) {
         this.mutate({
           type: "modifyEntityVar",
+          oldValue: 0,
           state: oldState,
           varName,
           value,
@@ -1142,6 +1147,7 @@ export class StateMutator {
       for (const [varName, value] of Object.entries(newVariables)) {
         this.mutate({
           type: "modifyEntityVar",
+          oldValue: 0,
           state: oldState,
           varName,
           value,
