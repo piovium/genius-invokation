@@ -723,6 +723,9 @@ export class Game {
         const { chosenActionIndex, usedDice } = await this.rpc(who, "action", {
           action: actions.map(exposeAction),
         });
+        if (!Number.isInteger(chosenActionIndex)) {
+          throw new GiTcgIoError(who, `User chosen index is not an integer`);
+        }
         if (chosenActionIndex < 0 || chosenActionIndex >= actions.length) {
           throw new GiTcgIoError(who, `User chosen index out of range`);
         }
