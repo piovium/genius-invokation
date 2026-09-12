@@ -191,10 +191,34 @@ export type StateVariablesKey = Exclude<keyof StateVariables, number>;
 
 export type EntityAreaType = EntityArea["type"];
 
-export interface TypingInfoBase {
-  type: ExEntityType;
-  areaType: EntityAreaType;
-  variables: string;
+export type RegularTypeAreaTypeMap<Ty extends ExEntityType> =
+  | (Ty extends "character" | "equipment" | "status" ? "characters" : never)
+  | (Ty extends "combatStatus" ? "combatStatuses" : never)
+  | (Ty extends "summon" ? "summons" : never)
+  | (Ty extends "support" ? "supports" : never)
+  | (Ty extends "eventCard" | "support" | "equipment" | "attachment"
+      ? "hands" | "pile"
+      : never);
+
+export type TypeAreaTypeMap<Ty extends ExEntityType> =
+  | RegularTypeAreaTypeMap<Ty>
+  | (Ty extends "character" ? never : "removedEntities");
+
+export interface TypingInfoBase<
+  Ty extends ExEntityType = ExEntityType,
+  Vars extends string = string,
+> {
+  type: Ty;
+  areaType: TypeAreaTypeMap<Ty>;
+  variables: Vars;
+}
+
+/** Typing information excluding removed entities. */
+export interface RegularTypingInfo<
+  Ty extends ExEntityType,
+  Vars extends string = string,
+> extends TypingInfoBase<Ty, Vars> {
+  areaType: RegularTypeAreaTypeMap<Ty>;
 }
 
 export interface IQuery<Ty extends TypingInfoBase = TypingInfoBase> {
