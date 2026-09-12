@@ -709,8 +709,7 @@ define card {
     variable point, 1; // 神奇
     on playCard {
       when :(
-        !:isInInitialPile(:e.card) &&
-          :e.card.diceCost() >= :getVariable("point")
+        !:isInInitialPile(:e.card) && :e.playCost() >= :getVariable("point")
       );
       :generateDice("randomElement", 1);
       :addVariable("point", 1);

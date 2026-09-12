@@ -61,18 +61,14 @@ test.each([
     const diceBefore = c.state.players[0].dice.length;
 
     await c.me.card(threeCost, ...targets);
-    expect
-      .soft(c.expect(effect).states[0])
-      .toMatchObject({ variables: { usage: 3 } });
+    c.expect(effect).toHaveVariable({ usage: 3 });
     expect.soft(c.state.players[0].dice).toHaveLength(diceBefore - 2);
 
     const diceBeforeIncreasedCard = c.state.players[0].dice.length;
     await c.me.card(twoCost, ...targets);
-    expect
-      .soft(c.expect(effect).states[0])
-      .toMatchObject({ variables: { usage: 2 } });
-    expect
-      .soft(c.state.players[0].dice)
-      .toHaveLength(diceBeforeIncreasedCard - 3 + 1);
+    c.expect(effect).toHaveVariable({ usage: 2 });
+    expect(c.state.players[0].dice).toHaveLength(
+      diceBeforeIncreasedCard - 3 + 1,
+    );
   },
 );

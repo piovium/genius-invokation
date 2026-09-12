@@ -14,6 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {
+  type ActionInfo,
   type CoreSkillResult,
   defineSkillInfo,
   DisposeEventArg,
@@ -39,7 +40,11 @@ import {
   type EntityState,
   stringifyState,
 } from "./base/state";
-import { PbSkillType, type ExposedMutation } from "@gi-tcg/typings";
+import {
+  ActionValidity,
+  PbSkillType,
+  type ExposedMutation,
+} from "@gi-tcg/typings";
 import {
   allSkills,
   applyAttachmentModifications,
@@ -496,16 +501,18 @@ export class SkillExecutor {
           );
           continue;
         }
-        const { willBeEffectless } = applyAttachmentModifications(
-          this.state,
-          arg.card,
-        );
-        const playCardInfo: PlayCardInfo = {
+        const { shouldFast, requiredCost, willBeEffectless } =
+          applyAttachmentModifications(this.state, arg.card);
+        const playCardInfo: Extract<ActionInfo, PlayCardInfo> = {
           type: "playCard",
           who: arg.who,
           skill: skillInfo,
           targets: targets.targets,
           willBeEffectless,
+          cost: requiredCost,
+          fast: shouldFast,
+          autoSelectedDice: [],
+          validity: ActionValidity.VALID,
         };
         if (!arg.requestOption.viaSelect) {
           await this.handleEvent([

@@ -229,7 +229,9 @@ export class SkillContextOptions {
     result.associatedExtensionId = extId;
     return result;
   }
-  static plain: Immutable<SkillContextOptions> = freeze(new SkillContextOptions());
+  static plain: Immutable<SkillContextOptions> = freeze(
+    new SkillContextOptions(),
+  );
 }
 
 export interface DamageInfo {
@@ -755,9 +757,12 @@ export class ModifyUseSkillEventArg extends UseSkillEventArg {
 export class PlayCardEventArg extends PlayerEventArg {
   constructor(
     state: GameState,
-    public readonly playCardInfo: PlayCardInfo,
+    public readonly playCardInfo: Extract<ActionInfo, PlayCardInfo>,
   ) {
     super(state, playCardInfo.who);
+  }
+  playCost() {
+    return diceCostSize(this.playCardInfo.cost);
   }
   get card() {
     return this.playCardInfo.skill.caller;
