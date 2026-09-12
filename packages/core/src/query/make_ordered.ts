@@ -24,9 +24,9 @@ import {
   type IUnorderedQuery,
   type QueryVariables,
   type StateVariablesKey,
-  type TypingInfoBase,
   type VariableName,
 } from "./utils";
+import type { TypingInfoBase } from "../utils";
 
 const isUnorderedQuery = (query: unknown): query is IUnorderedQuery => {
   return !!query && typeof query === "object" && toExpressionUnordered in query;

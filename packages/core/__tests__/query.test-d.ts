@@ -5,10 +5,17 @@ import type { AttachmentHandle } from "../src/data/type";
 import type { ContextMetaBase } from "../src/runtime/skill_context";
 import type { RxEntityState } from "../src/runtime/reactive";
 import type { InferResult, IQuery } from "../src/query/utils";
+import type { TypingInfoBase } from "../src/utils";
 
 declare const infer: <Q extends IQuery>(q: Q) => InferResult<Q>;
-declare const reactiveCharacter: RxEntityState<ContextMetaBase, "character">;
-declare const reactiveStatus: RxEntityState<ContextMetaBase, "status">;
+declare const reactiveCharacter: RxEntityState<
+  ContextMetaBase,
+  TypingInfoBase<"character">
+>;
+declare const reactiveStatus: RxEntityState<
+  ContextMetaBase,
+  TypingInfoBase<"status">
+>;
 declare const summonId: SummonHandle;
 declare const characterId: CharacterHandle;
 declare const attachmentId: AttachmentHandle;
@@ -196,4 +203,46 @@ test("query types", () => {
   expectTypeOf(() =>
     $.my.character.orderBy("health").limit(1),
   ).returns.toExtend<IQuery>();
+});
+
+declare const reactiveEquipment: RxEntityState<
+  ContextMetaBase,
+  {
+    type: "equipment";
+    areaType: "characters";
+    variables: "usage";
+  }
+>;
+declare const reactiveHand: RxEntityState<
+  ContextMetaBase,
+  {
+    type: "equipment" | "support";
+    areaType: "hands";
+    variables: "usage";
+  }
+>;
+
+test("reactive states share query typing information", () => {
+  expectTypeOf(() => infer(reactiveEquipment)).returns.toEqualTypeOf<{
+    type: "equipment";
+    areaType: "characters";
+    variables: "usage";
+  }>();
+  expectTypeOf(reactiveEquipment.area.type).toEqualTypeOf<"characters">();
+  expectTypeOf(reactiveEquipment.master).toEqualTypeOf<
+    typeof reactiveCharacter
+  >();
+  expectTypeOf(() => infer(reactiveHand)).returns.toEqualTypeOf<
+    | { type: "equipment"; areaType: "hands"; variables: "usage" }
+    | { type: "support"; areaType: "hands"; variables: "usage" }
+  >();
+  expectTypeOf(() =>
+    infer(reactiveHand.cast<"equipment">()),
+  ).returns.toEqualTypeOf<{
+    type: "equipment";
+    areaType: "hands";
+    variables: "usage";
+  }>();
+  // @ts-expect-error cards in hand have no character master
+  reactiveHand.master;
 });

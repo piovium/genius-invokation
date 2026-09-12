@@ -52,51 +52,29 @@ import {
   inInitialPileKey,
   type VariableName,
   type QueryVariables,
+  type TypePatch,
 } from "./utils";
 
 type EventCardHandle = number & { readonly _eventCard: unique symbol };
 
-type PositionPatch<T extends MetaBase["position"]> = {
-  type: "character";
-  areaType: "characters";
+type PositionPatch<T extends MetaBase["position"]> = TypePatch<"character"> & {
   position: T;
 };
 
 type DefPatch<T extends HandleT<ExEntityType>> = (T extends EquipmentHandle
-  ? {
-      type: "equipment";
-      areaType: "characters" | "hands" | "pile";
-    }
+  ? TypePatch<"equipment">
   : T extends SupportHandle
-    ? {
-        type: "support";
-        areaType: "supports" | "hands" | "pile";
-      }
+    ? TypePatch<"support">
     : T extends StatusHandle
-      ? {
-          type: "status";
-          areaType: "characters";
-        }
+      ? TypePatch<"status">
       : T extends SummonHandle
-        ? {
-            type: "summon";
-            areaType: "summons";
-          }
+        ? TypePatch<"summon">
         : T extends CharacterHandle
-          ? {
-              type: "character";
-              areaType: "characters";
-            }
+          ? TypePatch<"character">
           : T extends AttachmentHandle
-            ? {
-                type: "attachment";
-                areaType: "hands" | "pile";
-              }
+            ? TypePatch<"attachment">
             : T extends EventCardHandle
-              ? {
-                  type: "eventCard";
-                  areaType: "hands" | "pile";
-                }
+              ? TypePatch<"eventCard">
               : {}) & {
   definition: T & { readonly _defSpecified: unique symbol };
   variables: { [K in T["_meta"]["variables"]]: 0 };
@@ -133,10 +111,8 @@ type AssignVarAndActionCard<
   Name extends StateVariablesKey,
 > = Assign<
   T,
-  {
+  TypePatch<HandsOrPileEntityType> & {
     variables: { [K in Name]: 0 };
-    type: "eventCard" | "equipment" | "support";
-    areaType: "characters" | "hands" | "pile" | "supports";
   }
 >;
 
@@ -192,18 +168,15 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     return this._self;
   }
   // area (by path)
-  get character(): Assign<Meta, { type: "character"; areaType: "characters" }> {
+  get character(): Assign<Meta, TypePatch<"character">> {
     this._internal.addConstraint(["area", "characters", "true"]);
     return this._self;
   }
-  get combatStatus(): Assign<
-    Meta,
-    { type: "combatStatus"; areaType: "combatStatuses" }
-  > {
+  get combatStatus(): Assign<Meta, TypePatch<"combatStatus">> {
     this._internal.addConstraint(["area", "combatStatuses", "true"]);
     return this._self;
   }
-  get summon(): Assign<Meta, { type: "summon"; areaType: "summons" }> {
+  get summon(): Assign<Meta, TypePatch<"summon">> {
     this._internal.addConstraint(["area", "summons", "true"]);
     return this._self;
   }
@@ -211,10 +184,7 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     this._internal.addConstraint(["area", "supports", "true"]);
     return this._self;
   }
-  get attachment(): Assign<
-    Meta,
-    { type: "attachment"; areaType: "hands" | "pile" }
-  > {
+  get attachment(): Assign<Meta, TypePatch<"attachment">> {
     this._internal.addConstraint(["type", "attachment"]);
     return this._self;
   }
@@ -250,28 +220,19 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
     return this._self;
   }
   // type
-  get typeEquipment(): Assign<
-    Meta,
-    { type: "equipment"; areaType: "characters" | "hands" | "pile" }
-  > {
+  get typeEquipment(): Assign<Meta, TypePatch<"equipment">> {
     this._internal.addConstraint(["type", "equipment"]);
     return this._self;
   }
-  get typeSupport(): Assign<
-    Meta,
-    { type: "support"; areaType: "supports" | "hands" | "pile" }
-  > {
+  get typeSupport(): Assign<Meta, TypePatch<"support">> {
     this._internal.addConstraint(["type", "support"]);
     return this._self;
   }
-  get typeStatus(): Assign<Meta, { type: "status"; areaType: "characters" }> {
+  get typeStatus(): Assign<Meta, TypePatch<"status">> {
     this._internal.addConstraint(["type", "status"]);
     return this._self;
   }
-  get typeEventCard(): Assign<
-    Meta,
-    { type: "eventCard"; areaType: "hands" | "pile" }
-  > {
+  get typeEventCard(): Assign<Meta, TypePatch<"eventCard">> {
     this._internal.addConstraint(["type", "eventCard"]);
     return this._self;
   }
@@ -313,14 +274,14 @@ class PrimaryMethodsImpl<Meta extends HeterogeneousMetaBase> {
   // defeated
   get onlyDefeated(): Assign<
     Meta,
-    { type: "character"; areaType: "characters"; defeated: "only" }
+    TypePatch<"character"> & { defeated: "only" }
   > {
     this._internal.setDefeatedConstraint("defeatedOnly");
     return this._self;
   }
   get includesDefeated(): Assign<
     Meta,
-    { type: "character"; areaType: "characters"; defeated: "includes" }
+    TypePatch<"character"> & { defeated: "includes" }
   > {
     this._internal.setDefeatedConstraint("all");
     return this._self;
@@ -444,15 +405,15 @@ type PrimaryMethodRestrictionConfig = {
   my: { who: "my" };
   opp: { who: "opp" };
 
-  character: { type: "character"; areaType: "characters" };
+  character: TypePatch<"character">;
   vCharacter: {
     type: "character" | EntityOnCharacterReq["type"];
     areaType: "characters";
   };
 
-  combatStatus: { type: "combatStatus"; areaType: "combatStatuses" };
-  summon: { type: "summon"; areaType: "summons" };
-  support: { type: "support"; areaType: "supports" | "hands" | "pile" };
+  combatStatus: TypePatch<"combatStatus">;
+  summon: TypePatch<"summon">;
+  support: TypePatch<"support">;
 
   hand: { type: HandsOrPileEntityType; areaType: "hands" };
   vHand: { type: HandsOrPileEntityType | "attachment"; areaType: "hands" };
@@ -460,17 +421,14 @@ type PrimaryMethodRestrictionConfig = {
   pile: { type: HandsOrPileEntityType; areaType: "pile" };
   vPile: { type: HandsOrPileEntityType | "attachment"; areaType: "pile" };
 
-  equipment: { type: "equipment"; areaType: "characters" | "hands" | "pile" };
-  typeEquipment: {
-    type: "equipment";
-    areaType: "characters" | "hands" | "pile";
-  };
+  equipment: TypePatch<"equipment">;
+  typeEquipment: TypePatch<"equipment">;
 
-  status: { type: "status"; areaType: "characters" };
-  typeStatus: { type: "status"; areaType: "characters" };
+  status: TypePatch<"status">;
+  typeStatus: TypePatch<"status">;
 
-  eventCard: { type: "eventCard"; areaType: "hands" | "pile" };
-  typeEventCard: { type: "eventCard"; areaType: "hands" | "pile" };
+  eventCard: TypePatch<"eventCard">;
+  typeEventCard: TypePatch<"eventCard">;
 
   active: { type: "character"; position: "active" };
   prev: { type: "character"; position: "prev" };

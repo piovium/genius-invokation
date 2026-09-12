@@ -30,13 +30,10 @@ import {
 } from "./base";
 import type { AttachmentDefinition } from "../../base/attachment";
 import type { RxEntityState } from ".";
+import type { TypingInfoBase, RegularTypingInfo } from "../../utils";
 
 class ReadonlyAttachment<Meta extends ContextMetaBase>
-  extends ReactiveStateBase<{
-    type: "attachment";
-    areaType: "hands" | "pile";
-    variables: string; // TODO
-  }>
+  extends ReactiveStateBase<RegularTypingInfo<"attachment">>
   implements PlainAttachmentState
 {
   override get [ReactiveStateSymbol](): "attachment" {
@@ -83,7 +80,10 @@ class ReadonlyAttachment<Meta extends ContextMetaBase>
     return this.state.variables[name];
   }
 
-  get master(): RxEntityState<Meta, "eventCard" | "support" | "equipment"> {
+  get master(): RxEntityState<
+    Meta,
+    TypingInfoBase<"eventCard" | "support" | "equipment">
+  > {
     if (this.area.type !== "hands" && this.area.type !== "pile") {
       throw new GiTcgDataError("master expect a hands/pile area");
     }
