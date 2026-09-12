@@ -380,6 +380,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
    * 对技能返回的事件列表预处理。
    */
   private preprocessEvent(): EventAndRequest[] {
+    if (this.skillInfo.finalizeMode === "simple") {
+      return [...this.currentEvents];
+    }
     const emittedEvents: EventAndRequest[] = [];
 
     const failedPlayers = new Set<0 | 1>();
@@ -2335,7 +2338,7 @@ type SkillContextMutativeProps =
   | "continueNextTurn"
   | "setExtensionState"
   | "switchCards"
-  | "reroll"
+  | "rerollDice"
   | "useSkill"
   | "selectAndSummon"
   | "selectAndCreateHandCard"
