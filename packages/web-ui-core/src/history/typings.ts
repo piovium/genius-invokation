@@ -50,6 +50,7 @@ export type HistoryChildren =
   | IncreaseMaxHealthHistoryChild
   | EnergyHistoryChild
   | VariableChangeHistoryChild
+  | CardVariableResetHistoryChild
   | RemoveEntityHistoryChild
   | PlayCardNoEffectHistoryChild
   | TransformDefinitionHistoryChild
@@ -389,6 +390,14 @@ export interface VariableChangeHistoryChild {
   variableName: string;
   oldValue: number;
   newValue: number;
+}
+
+// 卡牌每回合触发次数重置
+// content: Cardface <-> cardName \n "卡牌的触发效果限制次数已恢复"
+export interface CardVariableResetHistoryChild {
+  type: "cardVariableReset";
+  who: 0 | 1;
+  cardDefinitionId: number;
 }
 
 // 弃置状态|装备

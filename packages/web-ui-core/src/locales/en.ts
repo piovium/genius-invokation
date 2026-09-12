@@ -145,6 +145,7 @@ export default {
     loseEnergy: "Used {{count}} Energy, Energy {{old}}→{{next}}",
     myDiscardHand: "You discarded a card from your Hand",
     oppDiscardHand: "Your opponent discarded a card from their Hand",
+    cardVariableReset: "Number of times card effects can be triggered reset",
     elementalTuning: "Elemental Tuning",
     myConvertToDice: "You converted {{count}} Elemental Dice to {{diceType}} Dice",
     oppConvertToDice: "Your opponent converted {{count}} Elemental Dice to {{diceType}} Dice",
