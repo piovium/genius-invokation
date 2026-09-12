@@ -1021,7 +1021,8 @@ type SelectingItem = (
     }
   | {
       type: "skill";
-      info: SkillInfo & { id: number; who: 0 | 1; characterId?: number };
+      character: CharacterInfo;
+      info: { id: number };
     }
   | {
       type: "externalCard";
@@ -1106,18 +1107,12 @@ export function Chessboard(props: ChessboardProps) {
     } else if (item.type === "entity") {
       dataViewerController.showState("entity", item.info.data);
     } else if (item.type === "skill") {
-      const player = localProps.data.state.player[item.info.who];
-      const character = player.character.find(
-        (character) => character.id === item.info.characterId,
+      dataViewerController.showState(
+        "character",
+        item.character.data,
+        item.character.combatStatus.map((x) => x.data),
+        { skillOnly: item.info.id },
       );
-      if (item.info.isTechnique || !character) {
-        dataViewerController.showSkill(item.info.id);
-      } else {
-        dataViewerController.showSkill(item.info.id, {
-          characterEntities: character.entity,
-          combatStatuses: player.combatStatus,
-        });
-      }
     } else if (item.type === "externalCard") {
       if (typeof item.info === "number") {
         dataViewerController.showCard(item.info, {
@@ -1391,14 +1386,8 @@ export function Chessboard(props: ChessboardProps) {
   };
   const isTechnique = (id: SkillInfo["id"]): boolean =>
     typeof id === "number" && id.toString().length > 5;
-  const activeEnergy = (who: 0 | 1) => {
-    const player = localProps.data.state.player[who];
-    const { energy = 0, maxEnergy = 1 } =
-      player.character.find((ch) => ch.id === player.activeCharacterId) ?? {};
-    return { energy, maxEnergy };
-  };
   const energyPercentage = (who: 0 | 1): number => {
-    const { energy, maxEnergy } = activeEnergy(who);
+    const { energy = 0, maxEnergy = 1 } = activeCharacter(who)?.data ?? {};
     return Math.min(energy / maxEnergy, 1);
   };
   const mySkills = createMemo<SkillInfo[]>(() => {
@@ -1752,6 +1741,13 @@ export function Chessboard(props: ChessboardProps) {
     }
   };
 
+  const activeCharacter = (who: 0 | 1) => {
+    const player = localProps.data.state.player[who];
+    return children().characters.find(
+      (char) => char.id === player.activeCharacterId,
+    );
+  };
+
   const onSkillClick = (sk: SkillInfo) => {
     setShowDeclareEndButton(false);
     if (sk.id === "switchActive") {
@@ -1760,16 +1756,16 @@ export function Chessboard(props: ChessboardProps) {
         localProps.onStepActionState?.(step, selectedDiceValue());
       }
     } else {
-      setSelectingItem({
-        type: "skill",
-        info: {
-          ...sk,
-          id: sk.id,
-          who: localProps.who,
-          characterId:
-            localProps.data.state.player[localProps.who].activeCharacterId,
-        },
-      });
+      const character = activeCharacter(localProps.who);
+      if (character) {
+        setSelectingItem({
+          type: "skill",
+          character,
+          info: {
+            id: sk.id,
+          },
+        });
+      }
       const step = localProps.actionState?.availableSteps.find(
         (s) => s.type === "clickSkillButton" && s.skillId === sk.id,
       );
@@ -1781,16 +1777,16 @@ export function Chessboard(props: ChessboardProps) {
 
   const onOppSkillClick = (sk: SkillInfo) => {
     setShowDeclareEndButton(false);
-    setSelectingItem({
-      type: "skill",
-      info: {
-        ...sk,
-        id: sk.id as number,
-        who: flip(localProps.who),
-        characterId:
-          localProps.data.state.player[flip(localProps.who)].activeCharacterId,
-      },
-    });
+    const character = activeCharacter(flip(localProps.who));
+    if (character && typeof sk.id === "number") {
+      setSelectingItem({
+        type: "skill",
+        character,
+        info: {
+          id: sk.id,
+        },
+      });
+    }
     setFocusingHands(false);
     setShowCardHint("myHand", null);
   };

@@ -65,29 +65,25 @@ export function Character(props: CardDataProps) {
         ?.entity.filter((entity) => typeof entity.equipment === "number")
         .map((entity) => entity.definitionId) ?? [],
   );
-  const [equipmentData] = createResource(
-    () => {
-      const definitionIds = equipmentDefinitionIds();
-      return definitionIds.length
-        ? ([definitionIds, assetsManager()] as const)
-        : undefined;
-    },
+  const [techniqueData] = createResource(
+    () => [equipmentDefinitionIds(), assetsManager()] as const,
     ([definitionIds, manager]) =>
       Promise.all(
-        definitionIds.map(
-          (definitionId) =>
-            manager.getData(definitionId) as Promise<EntityRawData>,
+        definitionIds.map((definitionId) =>
+          (manager.getData(definitionId) as Promise<EntityRawData>)
+            .then(
+              (data) =>
+                data.skills.filter(
+                  (sk) => sk.type === "GCG_SKILL_TAG_VEHICLE",
+                ) ?? [],
+            )
+            .catch(() => []),
         ),
       ),
   );
   const skills = createMemo(() => [
     ...(data()?.skills ?? []),
-    ...(equipmentData()?.flatMap((equipment) =>
-      (equipment.skills ?? []).filter(
-        (skill) =>
-          skill.type === "GCG_SKILL_TAG_VEHICLE" && !skill.hidden,
-      ),
-    ) ?? []),
+    ...(techniqueData()?.flat() ?? []),
   ]);
   const hpText = createMemo(() => {
     const st = state();

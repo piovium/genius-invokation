@@ -32,7 +32,7 @@ import { ActionCard, Character, Entity, Keyword, Skill } from "./Entity";
 import { useAssetsManager } from "./context";
 import { CardFace } from "./CardFace";
 
-type MainStateType = "character" | "card" | "entity" | "skill" | "keyword";
+type MainStateType = "character" | "card" | "entity" | "keyword";
 type SubStateType =
   "equipment" | "status" | "equipAndStatus" | "combatStatus" | "attachment";
 
@@ -42,7 +42,7 @@ export type ViewerInput =
   | {
       from: "definitionId";
       definitionId: number;
-      type: StateType;
+      type: StateType | "skill";
     }
   | {
       from: "state";
@@ -55,7 +55,6 @@ export type ViewerInput =
 export interface CardDataViewerProps {
   inputs: ViewerInput[];
   mainImageDefId: number | null;
-  inlineSubEntities: boolean;
 }
 
 export interface CardDataViewerContainerProps extends CardDataViewerProps {
@@ -88,23 +87,26 @@ function CardDataViewer(props: CardDataViewerProps) {
       }
     });
   });
-  const subEntities = () => {
+  const subEntities = createMemo(() => {
     const render: (ViewerInput | SubStateType)[] = [];
     const g = grouped();
     for (const t of [
+      "skill",
       "equipment",
       "status",
       "equipAndStatus",
       "combatStatus",
       "attachment",
-    ] as SubStateType[]) {
+    ] as const) {
       if (g[t]?.length) {
-        render.push(t);
+        if (t !== "skill") {
+          render.push(t);
+        }
         render.push(...g[t]);
       }
     }
     return render;
-  };
+  });
 
   const showCombineButton = (type: SubStateType) =>
     !!(
@@ -116,41 +118,6 @@ function CardDataViewer(props: CardDataViewerProps) {
   const onRequestExplain = (definitionId: number | null) => {
     setExplainKeyword((prev) => (prev === definitionId ? null : definitionId));
   };
-
-  const SubEntityList = () => (
-    <div class="flex flex-col gap-[0.5em] not-first:mt-[0.5em]">
-      <For each={subEntities()}>
-        {(entity) => (
-          <Switch>
-            <Match when={typeof entity === "string" && entity}>
-              {(entityType) => (
-                <h3
-                  class="w-full text-center rounded-full entity-category"
-                  bool:data-show-combine-button={showCombineButton(
-                    entityType(),
-                  )}
-                  onClick={() => {
-                    if (showCombineButton(entityType())) {
-                      setCombineCharEntities((v) => !v);
-                    }
-                  }}
-                >
-                  {t(entityType())}
-                </h3>
-              )}
-            </Match>
-            <Match when={true}>
-              <Entity
-                input={entity as ViewerInput}
-                asChild
-                onRequestExplain={onRequestExplain}
-              />
-            </Match>
-          </Switch>
-        )}
-      </For>
-    </div>
-  );
 
   return (
     <div class="gi-tcg-card-data-viewer reset">
@@ -184,19 +151,46 @@ function CardDataViewer(props: CardDataViewerProps) {
             </div>
           )}
         </For>
-        <For each={grouped().skill}>
-          {(input) => (
-            <div class="card-panel">
-              <Skill input={input} onRequestExplain={onRequestExplain} />
-              <Show when={props.inlineSubEntities && subEntities().length}>
-                <SubEntityList />
-              </Show>
-            </div>
-          )}
-        </For>
-        <Show when={!props.inlineSubEntities && subEntities().length}>
+        <Show when={subEntities().length}>
           <div class="card-panel">
-            <SubEntityList />
+            <div class="flex flex-col gap-[0.5em]">
+              <For each={subEntities()}>
+                {(entity) => (
+                  <Switch>
+                    <Match when={typeof entity === "string" && entity}>
+                      {(entityType) => (
+                        <h3
+                          class="w-full text-center rounded-full entity-category"
+                          bool:data-show-combine-button={showCombineButton(
+                            entityType(),
+                          )}
+                          onClick={() => {
+                            if (showCombineButton(entityType())) {
+                              setCombineCharEntities((v) => !v);
+                            }
+                          }}
+                        >
+                          {t(entityType())}
+                        </h3>
+                      )}
+                    </Match>
+                    <Match when={(entity as ViewerInput).type === "skill"}>
+                      <Skill
+                        input={entity as ViewerInput}
+                        onRequestExplain={onRequestExplain}
+                      />
+                    </Match>
+                    <Match when={true}>
+                      <Entity
+                        input={entity as ViewerInput}
+                        asChild
+                        onRequestExplain={onRequestExplain}
+                      />
+                    </Match>
+                  </Switch>
+                )}
+              </For>
+            </div>
           </div>
         </Show>
         <Show when={explainKeyword()}>
