@@ -285,7 +285,6 @@ define character {
     EternalTides,
     MoonlitMelancholy,
     MoonsignBenedictionMoonlightLentUntoYou,
-    MoonsignBenedictionMoonlightLentUntoYou,
     MoondewCascadePassive;
   enabledLunarReactions Reaction.LunarElectroCharged,
     Reaction.LunarBloom,
