@@ -1320,9 +1320,6 @@ export class StateMutator {
       throw new GiTcgIoNotProvideError();
     }
     const removedHands = await this.config.howToSwitchHands(who);
-    if (new Set(removedHands).size !== removedHands.length) {
-      throw new GiTcgIoError(who, `switchHands return duplicate card ids`);
-    }
     const player = () => this.state.players[who];
     // swapIn: 从手牌到牌堆
     // swapOut: 从牌堆到手牌
