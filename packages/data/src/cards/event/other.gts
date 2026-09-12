@@ -2286,6 +2286,7 @@ define status {
     when :(
       :e.entity.definition.type === "status" &&
         :e.entity.definition.tags.includes("preparingSkill") &&
+        :e.entity.area.type === "characters" &&
         :e.entity.cast<"status">().master.id !== :self.master.id
     );
     listenTo samePlayer;
