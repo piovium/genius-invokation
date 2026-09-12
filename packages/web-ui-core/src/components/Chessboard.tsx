@@ -1386,6 +1386,12 @@ export function Chessboard(props: ChessboardProps) {
   };
   const isTechnique = (id: SkillInfo["id"]): boolean =>
     typeof id === "number" && id.toString().length > 5;
+  const activeCharacter = (who: 0 | 1) => {
+    const player = localProps.data.state.player[who];
+    return children().characters.find(
+      (char) => char.id === player.activeCharacterId,
+    );
+  };
   const energyPercentage = (who: 0 | 1): number => {
     const { energy = 0, maxEnergy = 1 } = activeCharacter(who)?.data ?? {};
     return Math.min(energy / maxEnergy, 1);
@@ -1739,13 +1745,6 @@ export function Chessboard(props: ChessboardProps) {
     if (entityInfo.clickStep) {
       localProps.onStepActionState?.(entityInfo.clickStep, selectedDiceValue());
     }
-  };
-
-  const activeCharacter = (who: 0 | 1) => {
-    const player = localProps.data.state.player[who];
-    return children().characters.find(
-      (char) => char.id === player.activeCharacterId,
-    );
   };
 
   const onSkillClick = (sk: SkillInfo) => {

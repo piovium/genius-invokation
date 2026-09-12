@@ -71,11 +71,8 @@ export function Character(props: CardDataProps) {
       Promise.all(
         definitionIds.map((definitionId) =>
           (manager.getData(definitionId) as Promise<EntityRawData>)
-            .then(
-              (data) =>
-                data.skills.filter(
-                  (sk) => sk.type === "GCG_SKILL_TAG_VEHICLE",
-                ) ?? [],
+            .then((data) =>
+              data.skills.filter((sk) => sk.type === "GCG_SKILL_TAG_VEHICLE"),
             )
             .catch(() => []),
         ),
