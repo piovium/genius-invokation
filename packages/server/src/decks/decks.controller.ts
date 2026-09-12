@@ -32,6 +32,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsInt,
+  IsPositive,
   IsOptional,
   Length,
   Max,
@@ -46,11 +47,13 @@ import { Public } from "../auth/auth.guard";
 
 export class DeckDto implements Deck {
   @IsInt({ each: true })
+  @IsPositive({ each: true })
   @ArrayMinSize(3)
   @ArrayMaxSize(3)
   characters!: number[];
 
   @IsInt({ each: true })
+  @IsPositive({ each: true })
   @ArrayMinSize(30)
   @ArrayMaxSize(30)
   cards!: number[];
@@ -67,12 +70,14 @@ export class UpdateDeckDto {
   name?: string;
 
   @IsInt({ each: true })
+  @IsPositive({ each: true })
   @ArrayMinSize(3)
   @ArrayMaxSize(3)
   @IsOptional()
   characters?: number[];
 
   @IsInt({ each: true })
+  @IsPositive({ each: true })
   @ArrayMinSize(30)
   @ArrayMaxSize(30)
   @IsOptional()

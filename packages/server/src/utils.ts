@@ -67,17 +67,15 @@ const SINGLETON_REQUIRED_TAGS = ["GCG_TAG_LEGEND", "GCG_TAG_CARD_BLESSING"];
 
 /**
  * 校验牌组合法性
- * @param param0 牌组
+ * @param deck 牌组
  * @returns 牌组可以打出的最低游戏版本
  */
-export async function verifyDeck({
-  characters,
-  cards,
-}: Deck): Promise<Version> {
+export async function verifyDeck(deck: Deck): Promise<Version> {
   const DEC = DeckVerificationErrorCode;
+  const { characters = [], cards = [] } = deck ?? {};
   const versions = new Set<string | undefined>();
   const characterSet = new Set(characters);
-  if (characterSet.size !== 3) {
+  if (characters.length !== 3 || characterSet.size !== 3) {
     throw new DeckVerificationError(
       DEC.SizeError,
       "deck must contain 3 characters",
@@ -116,8 +114,8 @@ export async function verifyDeck({
         `card id ${cardId} not found`,
       );
     }
-    const cardMaxCount = SINGLETON_REQUIRED_TAGS.some(
-      (tag) => card?.tags.includes(tag),
+    const cardMaxCount = SINGLETON_REQUIRED_TAGS.some((tag) =>
+      card?.tags.includes(tag),
     )
       ? 1
       : 2;
@@ -278,6 +276,9 @@ export async function validateDto<T extends object>(
   value: unknown,
   type: ClassConstructor<T>,
 ): Promise<T> {
+  if (value === null || typeof value !== "object") {
+    throw new BadRequestException("body must be a JSON object");
+  }
   const dto = plainToClass(type, value);
   const errors = await validate(dto);
   if (errors.length > 0) {
