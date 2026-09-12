@@ -55,7 +55,7 @@ define status {
   };
   on damaged {
     when :( :e.type === DamageType.Geo);
-    :addVariable("usage", -1);
+    :consumeUsage(1);
   }
 };
 
