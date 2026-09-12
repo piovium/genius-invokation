@@ -52,10 +52,11 @@ define status {
   on decreaseDamaged {
     usage 3;
     :e.decreaseDamage(1);
-    if (:e.type === DamageType.Geo) {
-      :addVariable("usage", -1);
-    }
   };
+  on damaged {
+    when :( :e.type === DamageType.Geo);
+    :addVariable("usage", -1);
+  }
 };
 
 /**
