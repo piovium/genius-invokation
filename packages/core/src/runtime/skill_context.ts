@@ -1928,10 +1928,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
       reason: "steal",
     });
     let overflowed = false;
-    if (this.oppPlayer.hands.length > this.state.config.maxHandsCount) {
+    if (this.player.hands.length > this.state.config.maxHandsCount) {
       this.mutate({
         type: "removeEntity",
-        from: { who, type: "hands", cardId: card.id },
+        from: { who: this.self.who, type: "hands", cardId: card.id },
         oldState: cardState,
         reason: "overflow",
       });
@@ -1997,6 +1997,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
   /** 舍弃一张行动牌，并触发其“舍弃时”效果。 */
   discard(...cards: PlainEntityState[]) {
     for (const c of cards) {
+      if (!c) {
+        continue;
+      }
       const card = this.get(c);
       const cardState = card.latest();
       const area = card.area;

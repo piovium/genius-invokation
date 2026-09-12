@@ -504,17 +504,20 @@ export class InitiativeSkillModel extends SkillModel {
 
 export class CharacterSkillModel extends InitiativeSkillModel {
   reserved = false;
-  passiveSkillEntry: CharacterPassiveSkillEntry | null = null;
+  passiveSkillEntry: CharacterPassiveSkillEntry | Reserved | null = null;
   override get ownerType() {
     return "character" as const;
   }
 
   getEntry():
     Reserved | CharacterInitiativeSkillEntry | CharacterPassiveSkillEntry {
-    if (this.reserved) {
+    if (this.reserved || this.passiveSkillEntry === RESERVED) {
       return RESERVED;
     } else if (this.passiveSkillEntry) {
-      return this.passiveSkillEntry;
+      return {
+        ...this.passiveSkillEntry,
+        version: this.versionInfo ?? this.passiveSkillEntry.version,
+      };
     } else {
       return {
         type: "initiativeSkill",
