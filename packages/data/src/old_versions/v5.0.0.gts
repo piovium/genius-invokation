@@ -1,11 +1,4 @@
-import {
-  $,
-  DamageType,
-  DiceType,
-  type SkillHandle,
-  type StatusHandle,
-  type SummonHandle,
-} from "@gi-tcg/core/data";
+import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 import { VioletArc } from "../characters/electro/lisa.gts";
 import {
   EremiteScorchingLoremaster,

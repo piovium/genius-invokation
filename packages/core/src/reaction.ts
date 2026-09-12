@@ -7,7 +7,11 @@
 
 import { DamageType, Reaction } from "@gi-tcg/typings";
 import type { SwirlableElement } from "./base/reaction";
-import { SkillContextOptions, type ModifyReactionEventArg, type SkillDescription } from "./base/skill";
+import {
+  SkillContextOptions,
+  type ModifyReactionEventArg,
+  type TriggeredSkillDefinition,
+} from "./base/skill";
 import type {
   CardHandle,
   CombatStatusHandle,
@@ -31,7 +35,7 @@ const CatalyzingField = 117 as CombatStatusHandle;
 const Thundercloud = 205 as SummonHandle;
 const LunarSymphony = 211 as CardHandle;
 
-export type ReactionDescription = SkillDescription<ModifyReactionEventArg>;
+export type ReactionDefinition = TriggeredSkillDefinition<"modifyReaction">;
 type ReactionContextMeta = {
   readonly: false;
   callerVars: never;
@@ -43,16 +47,26 @@ type ReactionContextMeta = {
 };
 type ReactionAction = (context: TypedSkillContext<ReactionContextMeta>) => void;
 
-const descriptions: Partial<Record<Reaction, ReactionDescription>> = {};
+const descriptions: Partial<Record<Reaction, ReactionDefinition>> = {};
 
 function defineReaction(reaction: Reaction, action: ReactionAction) {
-  descriptions[reaction] = SkillContext.encapsulate(
-    SkillContextOptions.plain,
-    (context) => {
-      Reflect.set(context, CALLED_FROM_REACTION, reaction);
-      action(context as unknown as TypedSkillContext<ReactionContextMeta>);
-    },
-  );
+  descriptions[reaction] = {
+    type: "skill",
+    id: reaction,
+    ownerType: "character",
+    skillType: null,
+    triggerOn: "modifyReaction",
+    initiativeSkillConfig: null,
+    filter: () => true,
+    usagePerRoundVariableName: null,
+    action: SkillContext.encapsulate(
+      SkillContextOptions.plain,
+      (context) => {
+        Reflect.set(context, CALLED_FROM_REACTION, reaction);
+        action(context as unknown as TypedSkillContext<ReactionContextMeta>);
+      },
+    ),
+  };
 }
 
 function charactersExcept(context: TypedSkillContext<ReactionContextMeta>) {
@@ -132,7 +146,7 @@ function initialize() {
 let initialized = false;
 export function getReactionDescription(
   reaction: Reaction,
-): ReactionDescription | null {
+): ReactionDefinition | null {
   if (!initialized) {
     initialized = true;
     initialize();

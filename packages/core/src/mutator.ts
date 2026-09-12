@@ -81,7 +81,7 @@ import {
   stringifyEntityArea,
 } from "./base/entity";
 import { getReaction, type NontrivialDamageType } from "./base/reaction";
-import { getReactionDescription, type ReactionDescription } from "./reaction";
+import { getReactionDescription, type ReactionDefinition } from "./reaction";
 import { exposeHealKind } from "./io";
 import type { AttachmentDefinition } from "./base/attachment";
 import type { LunarReaction } from "@gi-tcg/typings";
@@ -407,12 +407,9 @@ export class StateMutator {
 
   // --- INLINE SKILL HANDLING ---
 
-  private executeInlineSkill<Arg>(
-    skillDescription: SkillDescription<Arg>,
-    skill: SkillInfo,
-    arg: Arg,
-  ): CoreSkillResult {
+  private executeInlineSkill<Arg>(skill: SkillInfo, arg: Arg): CoreSkillResult {
     this.notify();
+    const skillDescription = skill.definition.action as SkillDescription<Arg>;
     const [newState, { innerNotify, error, ...result }] = skillDescription(
       this.state,
       skill,
@@ -444,6 +441,7 @@ export class StateMutator {
         plunging: false,
         prepared: false,
         environment: parentSkill.environment,
+        finalizeMode: "simple",
       }),
     );
     for (const info of infos) {
@@ -455,8 +453,7 @@ export class StateMutator {
         DetailLogType.Skill,
         `Using skill [skill:${info.definition.id}]`,
       );
-      const desc = info.definition.action as SkillDescription<EventArgOf<E>>;
-      const inlineResult = this.executeInlineSkill(desc, info, arg);
+      const inlineResult = this.executeInlineSkill(info, arg);
       events.push(...inlineResult.emittedEvents);
       causeDefeated ||= inlineResult.causeDefeated;
     }
@@ -531,14 +528,22 @@ export class StateMutator {
         events.push(...inlineResult.events);
         causeDefeated ||= inlineResult.causeDefeated;
       }
-      let reactionDescription: ReactionDescription | null;
+      let reactionDescription: ReactionDefinition | null;
       if (
         !modifyReactionEvent._cancelCoreEffects &&
         (reactionDescription = getReactionDescription(reaction))
       ) {
         const inlineResult = this.executeInlineSkill(
-          reactionDescription,
-          opt.via,
+          {
+            caller: opt.via.caller,
+            definition: reactionDescription,
+            requestBy: null,
+            charged: false,
+            plunging: false,
+            prepared: false,
+            environment: opt.via.environment,
+            finalizeMode: "simple",
+          },
           modifyReactionEvent,
         );
         events.push(...inlineResult.emittedEvents);

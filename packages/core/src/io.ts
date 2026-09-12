@@ -116,6 +116,11 @@ export function verifyRpcResponse<M extends RpcMethod>(
       ) {
         throw new Error("Invalid response of action: no chosenActionIndex");
       }
+      if (!Number.isInteger(response.chosenActionIndex)) {
+        throw new Error(
+          "Invalid response of action: chosenActionIndex is not an integer",
+        );
+      }
       if (
         !("usedDice" in response) ||
         !Array.isArray(response.usedDice) ||
@@ -164,6 +169,11 @@ export function verifyRpcResponse<M extends RpcMethod>(
         response.removedHandIds.some((d) => typeof d !== "number")
       ) {
         throw new Error("Invalid response of switchHands: no removedHandIds");
+      }
+      if (
+        new Set(response.removedHandIds).size !== response.removedHandIds.length
+      ) {
+        throw new Error("Invalid response of switchHands: duplicate card ids");
       }
       break;
     }
