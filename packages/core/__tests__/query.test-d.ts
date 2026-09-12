@@ -4,7 +4,8 @@ import type { CharacterHandle, SummonHandle } from "../src/data";
 import type { AttachmentHandle } from "../src/data/type";
 import type { ContextMetaBase } from "../src/runtime/skill_context";
 import type { RxEntityState } from "../src/runtime/reactive";
-import type { InferResult, IQuery, TypingInfoBase } from "../src/query/utils";
+import type { InferResult, IQuery } from "../src/query/utils";
+import type { TypingInfoBase } from "../src/utils";
 
 declare const infer: <Q extends IQuery>(q: Q) => InferResult<Q>;
 declare const reactiveCharacter: RxEntityState<

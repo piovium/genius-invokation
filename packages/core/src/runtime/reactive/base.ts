@@ -20,8 +20,8 @@ import {
   toExpressionUnordered,
   type IUnorderedQuery,
   type typingInfo,
-  type TypingInfoBase,
 } from "../../query/utils";
+import type { TypingInfoBase } from "../../utils";
 
 export const ReactiveStateSymbol: unique symbol = Symbol("ReactiveState");
 export type ReactiveStateSymbol = typeof ReactiveStateSymbol;

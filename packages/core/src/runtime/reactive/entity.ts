@@ -34,7 +34,7 @@ import {
   ReactiveStateSymbol,
 } from "./base";
 import type { AttachmentHandle } from "../../data/type";
-import type { TypingInfoBase } from "../../query/utils";
+import type { TypingInfoBase } from "../../utils";
 import type { RxEntityState } from ".";
 
 class ReadonlyEntity<

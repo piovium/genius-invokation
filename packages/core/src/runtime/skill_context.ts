@@ -109,7 +109,7 @@ import type {
   TypingInfoBase,
   RegularTypingInfo,
   TypeAreaTypeMap,
-} from "../query/utils";
+} from "../utils";
 import { computeConvertDice, type CreateEntityOptions } from "../utils";
 import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "./skill";
 import type { LunarReaction } from "@gi-tcg/typings";

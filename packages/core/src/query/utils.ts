@@ -13,11 +13,15 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { EntityArea } from "../base/entity";
 import type { ExEntityType } from "../data/type";
 import type { SExprSchema } from "./expr_schema";
-import type { CharacterVariableConfigs } from "../base/character";
-import type { Computed } from "../utils";
+import type {
+  Computed,
+  EntityAreaType,
+  TypingInfoBase,
+  RegularTypingInfo,
+  CommonCharacterVariableNames,
+} from "../utils";
 
 export type IsExtends<T, U> = [T] extends [U] ? true : false;
 export type Related<T, U> =
@@ -106,18 +110,6 @@ type _CheckFunctionPrototypePropertyExhausted = StaticAssert<
   IsExtends<keyof Function, keyof NotFunctionPrototype>
 >;
 
-export type NonIndexKeyOf<T> = keyof {
-  [
-    K in keyof T as string extends K
-      ? never
-      : number extends K
-        ? never
-        : symbol extends K
-          ? never
-          : K
-  ]: 0;
-};
-
 export type AnyTuple = [unknown, ...unknown[]] | [];
 
 export type Constructor<T = any> = new (...args: any[]) => T;
@@ -189,38 +181,6 @@ export interface StateVariables {
 
 export type StateVariablesKey = Exclude<keyof StateVariables, number>;
 
-export type EntityAreaType = EntityArea["type"];
-
-export type RegularTypeAreaTypeMap<Ty extends ExEntityType> =
-  | (Ty extends "character" | "equipment" | "status" ? "characters" : never)
-  | (Ty extends "combatStatus" ? "combatStatuses" : never)
-  | (Ty extends "summon" ? "summons" : never)
-  | (Ty extends "support" ? "supports" : never)
-  | (Ty extends "eventCard" | "support" | "equipment" | "attachment"
-      ? "hands" | "pile"
-      : never);
-
-export type TypeAreaTypeMap<Ty extends ExEntityType> =
-  | RegularTypeAreaTypeMap<Ty>
-  | (Ty extends "character" ? never : "removedEntities");
-
-export interface TypingInfoBase<
-  Ty extends ExEntityType = ExEntityType,
-  Vars extends string = string,
-> {
-  type: Ty;
-  areaType: TypeAreaTypeMap<Ty>;
-  variables: Vars;
-}
-
-/** Typing information excluding removed entities. */
-export interface RegularTypingInfo<
-  Ty extends ExEntityType,
-  Vars extends string = string,
-> extends TypingInfoBase<Ty, Vars> {
-  areaType: RegularTypeAreaTypeMap<Ty>;
-}
-
 export interface IQuery<Ty extends TypingInfoBase = TypingInfoBase> {
   [typingInfo]: Ty;
   [toExpression](): SExprSchema.Query;
@@ -250,9 +210,6 @@ export interface MetaBase {
   id: number;
   variables: {};
 }
-
-export type CommonCharacterVariableNames =
-  NonIndexKeyOf<CharacterVariableConfigs>;
 
 export type TypingInfoFromMeta<M extends MetaBase> = {
   type: M["type"];

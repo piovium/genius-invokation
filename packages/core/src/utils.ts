@@ -35,6 +35,7 @@ import {
   NATION_TAGS,
   WEAPON_TAGS,
   type CharacterDefinition,
+  type CharacterVariableConfigs,
   type CharacterTag,
   type ElementTag,
   type NationTag,
@@ -61,6 +62,7 @@ import {
 import type { ActionInfoWithModification } from "./preview";
 import type { PlayerConfig } from "./player";
 import type { MoveEntityM } from "./base/mutation";
+import type { ExEntityType } from "./data/type";
 
 export type Computed<T, R = any> = {
   [K in keyof T]: T[K];
@@ -71,6 +73,53 @@ export type Computed<T, R = any> = {
 export type Writable<T> = {
   -readonly [P in keyof T]: T[P];
 };
+
+export type NonIndexKeyOf<T> = keyof {
+  [
+    K in keyof T as string extends K
+      ? never
+      : number extends K
+        ? never
+        : symbol extends K
+          ? never
+          : K
+  ]: 0;
+};
+
+export type EntityAreaType = EntityArea["type"];
+
+export type RegularTypeAreaTypeMap<Ty extends ExEntityType> =
+  | (Ty extends "character" | "equipment" | "status" ? "characters" : never)
+  | (Ty extends "combatStatus" ? "combatStatuses" : never)
+  | (Ty extends "summon" ? "summons" : never)
+  | (Ty extends "support" ? "supports" : never)
+  | (Ty extends "eventCard" | "support" | "equipment" | "attachment"
+      ? "hands" | "pile"
+      : never);
+
+export type TypeAreaTypeMap<Ty extends ExEntityType> =
+  | RegularTypeAreaTypeMap<Ty>
+  | (Ty extends "character" ? never : "removedEntities");
+
+export interface TypingInfoBase<
+  Ty extends ExEntityType = ExEntityType,
+  Vars extends string = string,
+> {
+  type: Ty;
+  areaType: TypeAreaTypeMap<Ty>;
+  variables: Vars;
+}
+
+/** Typing information excluding removed entities. */
+export interface RegularTypingInfo<
+  Ty extends ExEntityType,
+  Vars extends string = string,
+> extends TypingInfoBase<Ty, Vars> {
+  areaType: RegularTypeAreaTypeMap<Ty>;
+}
+
+export type CommonCharacterVariableNames =
+  NonIndexKeyOf<CharacterVariableConfigs>;
 
 export function getEntityById(state: GameState, id: number): AnyState {
   for (const player of state.players) {

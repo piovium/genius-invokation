@@ -30,7 +30,7 @@ import {
 } from "./base";
 import type { AttachmentDefinition } from "../../base/attachment";
 import type { RxEntityState } from ".";
-import type { TypingInfoBase, RegularTypingInfo } from "../../query/utils";
+import type { TypingInfoBase, RegularTypingInfo } from "../../utils";
 
 class ReadonlyAttachment<Meta extends ContextMetaBase>
   extends ReactiveStateBase<RegularTypingInfo<"attachment">>

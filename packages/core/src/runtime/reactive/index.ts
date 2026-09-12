@@ -25,7 +25,7 @@ import {
 } from "./base";
 import type { ExEntityType } from "../../data/type";
 import { Attachment, type TypedAttachment } from "./attachment";
-import type { TypingInfoBase, RegularTypingInfo } from "../../query/utils";
+import type { TypingInfoBase, RegularTypingInfo } from "../../utils";
 
 type ReactiveClassCtor = new (
   skillContext: SkillContext<any>,

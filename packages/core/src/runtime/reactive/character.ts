@@ -58,7 +58,7 @@ import { applyReactive, type RegularRxEntityState } from ".";
 import type {
   CommonCharacterVariableNames,
   RegularTypingInfo,
-} from "../../query/utils";
+} from "../../utils";
 
 export type CharacterPosition = "active" | "next" | "prev" | "standby";
 
