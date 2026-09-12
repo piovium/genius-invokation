@@ -532,6 +532,9 @@ class Room {
     return this.hostWho;
   }
   setParticipant(player: Player) {
+    if (this.host?.playerInfo.id === player.playerInfo.id) {
+      throw new ConflictException("player already occupies the host seat");
+    }
     if (this.participant !== null) {
       throw new ConflictException("participant already set");
     }
@@ -614,6 +617,9 @@ class Room {
   }
 
   stop() {
+    if (this.terminated) {
+      return;
+    }
     this.terminated = true;
     this.endedAt = new Date();
     this.players[0]?.complete();
@@ -919,7 +925,6 @@ export class RoomsService {
   }
 
   private async joinRoom(playerInfo: PlayerInfo, roomId: number) {
-    const allRooms = this.getAllRooms(true);
     const room = this.rooms.get(roomId);
     if (!room) {
       throw new NotFoundException(`Room ${roomId} not found`);
@@ -930,9 +935,7 @@ export class RoomsService {
     if (playerInfo.isGuest && !room.config.allowGuest) {
       throw new UnauthorizedException(`Room ${roomId} does not allow guest`);
     }
-    if (
-      allRooms.some((room) => room.players.some((p) => p.id === playerInfo.id))
-    ) {
+    if (this.currentRoom(playerInfo.id) !== null) {
       throw new ConflictException(
         `Player ${playerInfo.id} is already in a room`,
       );
@@ -987,13 +990,17 @@ export class RoomsService {
       ) as number[];
       const winnerWho = game.state.winner;
       const winnerId = winnerWho === null ? null : playerIds[winnerWho]!;
-      this.games.addGame({
-        coreVersion: Room.CORE_VERSION,
-        gameVersion: room.config.gameVersion,
-        data: gameData,
-        winnerId,
-        playerIds,
-      });
+      this.games
+        .addGame({
+          coreVersion: Room.CORE_VERSION,
+          gameVersion: room.config.gameVersion,
+          data: gameData,
+          winnerId,
+          playerIds,
+        })
+        .catch((error) => {
+          this.logger.error(`Failed to store room ${room.id} game: ${error}`);
+        });
     });
     room.start();
     try {

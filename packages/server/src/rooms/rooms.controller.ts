@@ -35,8 +35,10 @@ import {
   Max,
   Min,
   ValidateNested,
-  IsUrl,
+  IsDefined,
+  IsObject,
 } from "class-validator";
+import { Type } from "class-transformer";
 import { RoomsService, type PlayerId } from "./rooms.service";
 import { Guest, User, UserOrGuest } from "../auth/user.decorator";
 import { VERSIONS, type Version } from "@gi-tcg/core";
@@ -109,7 +111,10 @@ export class GuestCreateRoomDto extends CreateRoomDto {
   @Length(1, 64)
   name!: string;
 
+  @IsDefined()
+  @IsObject()
   @ValidateNested()
+  @Type(() => DeckDto)
   deck!: DeckDto;
 
   @IsOptional()
@@ -126,7 +131,10 @@ export class GuestJoinRoomDto {
   @Length(1, 64)
   name!: string;
 
+  @IsDefined()
+  @IsObject()
   @ValidateNested()
+  @Type(() => DeckDto)
   deck!: DeckDto;
 
   @IsOptional()
