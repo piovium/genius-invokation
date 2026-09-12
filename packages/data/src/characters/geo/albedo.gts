@@ -137,7 +137,11 @@ define card {
 define combatStatus {
   id 116042 as SilverIsotoma;
   since "v7.1.0";
-  // TODO
+  on useSkill {
+    usage 2 { append; };
+    when :( :e.isPlungingAttack() );
+    :damage(DamageType.Piercing, 1, $.opp.standby);
+  }
 }
 
 /**
@@ -153,7 +157,15 @@ define card {
   id 216042 as BookOfBlindingLight;
   since "v7.1.0";
   cost DiceType.Geo, 2;
-  talent Albedo {
-    // TODO
+  talent Albedo, none {
+    on staged {
+      :summon(SolarIsotoma);
+    }
+    on entityEnter {
+      listenTo samePlayer;
+      when :( :e.entity.definition.id === SolarIsotoma );
+      :combatStatus(SilverIsotoma);
+      :generateDice("randomElement", 1);
+    }
   }
 }

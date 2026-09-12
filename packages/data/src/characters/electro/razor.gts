@@ -133,7 +133,17 @@ define card {
   id 214022 as SurgeOfLightning;
   since "v7.1.0";
   cost DiceType.Electro, 2;
-  talent Razor {
-    // TODO
+  talent Razor, action {
+    on staged {
+      if (!:e.targets[0].hasStatus(TheWolfWithin)) {
+        :characterStatus(TheWolfWithin, :e.targets[0], {
+          overrideVariables: { duration: 1 },
+        });
+      }
+    }
+    on increaseDamage {
+      when :( :e.source.definition.id === TheWolfWithin );
+      :e.increaseDamage(1);
+    }
   }
 }

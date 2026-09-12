@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, DiceType, flip } from "@gi-tcg/core/data";
+import { $, DiceType, flip, type CardHandle } from "@gi-tcg/core/data";
 import { DisperseTheCalamity, SanctifyTheDefiled } from "./other.gts";
 import { IneffectiveWhenPlayed } from "../../commons.gts";
 
@@ -510,6 +510,66 @@ define card {
   since "v7.1.0";
   cost DiceType.Aligned, 3;
   legend;
-  // TODO
-
+  :combatStatus(MoonlitRadiance);
+  :combatStatus(TheReturn);
 }
+
+/**
+ * @id 300011
+ * @name 月华
+ * @description
+ * 行动阶段开始时：治疗我方场上所有角色3点。
+ */
+define combatStatus {
+  id 300011 as MoonlitRadiance;
+  once actionPhase {
+    :heal(3, $.my.character);
+  };
+};
+
+/**
+ * @id 300012
+ * @name 重临
+ * @description
+ * 行动阶段开始时：若此牌倒计时为0，则将所舍弃的3张牌加入手牌，并赋予这些牌3层费用降低。
+ */
+define combatStatus {
+  id 300012 as TheReturn;
+  variable card0Id, 0;
+  variable card1Id, 0;
+  variable card2Id, 0;
+  on selfEnter {
+    const originalHandIds = :player.hands.map((card) => card.id);
+    const discardCards = :discardMaxCostHands(3);
+    const cardsToRecreate = discardCards.toSorted(
+      (a, b) => originalHandIds.indexOf(b.id) - originalHandIds.indexOf(a.id),
+    );
+    const slots = [...["card0Id", "card1Id", "card2Id"] as const];
+    for (const card of cardsToRecreate) {
+      const slot = slots.shift();
+      if (slot) {
+        :setVariable(slot, card.definition.id);
+      }
+    }
+  };
+  on actionPhase {
+    usage 2 { autoDispose false; };
+  };
+  on actionPhase {
+    when :( :getVariable("usage") <= 0 );
+    for (const cardId of [
+      :getVariable("card0Id"),
+      :getVariable("card1Id"),
+      :getVariable("card2Id"),
+    ]) {
+      if (!cardId) {
+        continue;
+      }
+      const card = :createHandCard(cardId as CardHandle);
+      if (card) {
+        :attachCostReduction(card, 3);
+      }
+    }
+    :dispose();
+  };
+};

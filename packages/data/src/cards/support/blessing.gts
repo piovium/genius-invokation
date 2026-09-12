@@ -717,6 +717,70 @@ define card {
 };
 
 /**
+ * @id 303121
+ * @name 超载祝佑·追燃
+ * @description
+ * 投掷阶段：总是投出2个雷元素骰和2个火元素骰。
+ * 敌方累计切换角色3次后：下次我方行动前，我方抓1张牌，然后自动免费打出费用最高的1张手牌。
+ */
+define card {
+  id 303121 as ThunderbombBlessinPyro;
+  cost DiceType.Pyro, 1;
+  undiscoverable;
+  support {
+    variable switchCount, 0;
+    on roll {
+      :e.fixDice(DiceType.Electro, 2);
+      :e.fixDice(DiceType.Pyro, 2);
+    };
+    on switchActive {
+      listenTo all;
+      when :( !:e.switchInfo.to.isMine() );
+      :addVariable("switchCount", 1);
+    };
+    on beforeAction {
+      when :( :getVariable("switchCount") >= 3 );
+      :drawCards(1);
+      const [target] = :maxCostHands(1);
+      if (target) {
+        :playCard(target, "random");
+      }
+      :addVariable("switchCount", -3);
+    };
+  };
+};
+
+/**
+ * @id 303122
+ * @name 超载祝佑·霆击
+ * @description
+ * 投掷阶段：总是投出2个雷元素骰和2个火元素骰。
+ * 敌方每切换一次角色后：对敌方出战角色造成1点穿透伤害，然后本回合此牌造成的穿透伤害+1（最多3）。
+ */
+define card {
+  id 303122 as ThunderbombBlessingElectro;
+  cost DiceType.Electro, 2;
+  undiscoverable;
+  support {
+    hint DamageType.Physical, ((st, self) => self.variables.damageValue);
+    variable damageValue, 1 { range 3; };
+    on roll {
+      :e.fixDice(DiceType.Electro, 2);
+      :e.fixDice(DiceType.Pyro, 2);
+    };
+    on switchActive {
+      listenTo all;
+      when :( !:e.switchInfo.to.isMine() );
+      :damage(DamageType.Piercing, :getVariable("damageValue"));
+      :addVariable("damageValue", 1);
+    };
+    on roundEnd {
+      :setVariable("damageValue", 1);
+    };
+  };
+};
+
+/**
  * @id 331012
  * @name 元素幻变：超载祝佑
  * @description
@@ -728,7 +792,19 @@ define card {
   id 331012 as ElementalTransfigurationOverloadBlessing;
   since "v7.1.0";
   cost DiceType.Aligned, 2;
- support {
-    elementalBlessing;    // TODO
-  }
+  support {
+    elementalBlessing DiceType.Electro, DiceType.Pyro;
+    on roll {
+      :e.fixDice(DiceType.Electro, 2);
+      :e.fixDice(DiceType.Pyro, 2);
+    };
+    on dealReaction {
+      when :( :e.type === Reaction.Overloaded );
+      :selectAndCreateHandCard([
+        ThunderbombBlessinPyro,
+        ThunderbombBlessingElectro,
+      ]);
+      :dispose();
+    };
+  };
 }

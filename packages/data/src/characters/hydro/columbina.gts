@@ -13,7 +13,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, DamageType, $ } from "@gi-tcg/core/data";
+import {
+  DiceType,
+  DamageType,
+  $,
+  Reaction,
+  pair,
+  flip,
+} from "@gi-tcg/core/data";
+import {
+  Conductive,
+  CostReduction,
+  LunarSymphony,
+  Thundercloud,
+} from "../../commons.gts";
 
 /**
  * @id 112171
@@ -27,8 +40,64 @@ import { DiceType, DamageType, $ } from "@gi-tcg/core/data";
 define combatStatus {
   id 112171 as LunarDomain;
   since "v7.1.0";
-  // TODO
-}
+  on increaseDamage {
+    // 月感电增伤2点
+    when :( :e.getReaction() === Reaction.LunarElectroCharged );
+    :e.increaseDamage(2);
+  };
+  on modifyReaction {
+    listenTo all;
+    when :(
+      !:e.target.isMine() &&
+        (
+          [
+            Reaction.LunarElectroCharged,
+            Reaction.LunarBloom,
+            Reaction.LunarCrystallizeHydro,
+          ] as Reaction[]
+        ).includes(:e.type)
+    );
+    :e.cancelCoreEffects();
+    if (:e.type === Reaction.LunarElectroCharged) {
+      :summon(Thundercloud, "my", {
+        overrideVariables: {
+          damageValue: 3,
+        },
+      });
+    } else if (:e.type === Reaction.LunarBloom) {
+      const candidates = :queryAll($.macros.myHandsNotFree);
+      if (candidates.length > 0) {
+        for (let i = 0; i < 3; i++) {
+          :attachCostReduction(:random(candidates));
+        }
+      }
+    } else if (:e.type === Reaction.LunarCrystallizeHydro) {
+      for (let i = 0; i < 3; i++) {
+        :createHandCard(LunarSymphony);
+      }
+    }
+  };
+  on reaction {
+    listenTo all;
+    when :(
+      !:e.target.isMine() &&
+        (
+          [
+            Reaction.LunarElectroCharged,
+            Reaction.LunarBloom,
+            Reaction.LunarCrystallizeHydro,
+          ] as Reaction[]
+        ).includes(:e.type)
+    );
+    usage 3;
+    if (:e.type === Reaction.LunarElectroCharged) {
+      const oppHands = :randomSubset(:queryAll($.opp.hand), 3);
+      for (const card of oppHands) {
+        :attach(Conductive, card);
+      }
+    }
+  };
+};
 
 /**
  * @id 112172
@@ -40,8 +109,11 @@ define combatStatus {
 define combatStatus {
   id 112172 as GravityRipple;
   since "v7.1.0";
-  // TODO
-}
+  on endPhase {
+    usage 2;
+    :damage(DamageType.Hydro, 1);
+  };
+};
 
 /**
  * @id 112173
@@ -50,10 +122,13 @@ define combatStatus {
  * 我方出战角色受到伤害时：抵消1点伤害。
  */
 define combatStatus {
-  id 112173 as Res;
+  id 112173 as ResColumbina;
   since "v7.1.0";
-  // TODO
-}
+  once decreaseDamaged {
+    when :( :e.target.isActive() );
+    :e.decreaseDamage(1);
+  };
+};
 
 /**
  * @id 12171
@@ -67,9 +142,8 @@ define skill {
   skillType normal;
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 2;
-  // TODO
-
-}
+  :damage(DamageType.Hydro, 1);
+};
 
 /**
  * @id 12172
@@ -81,9 +155,9 @@ define skill {
   id 12172 as EternalTides;
   skillType elemental;
   cost DiceType.Hydro, 3;
-  // TODO
-
-}
+  :damage(DamageType.Hydro, 1);
+  :combatStatus(GravityRipple);
+};
 
 /**
  * @id 12173
@@ -96,9 +170,9 @@ define skill {
   skillType burst;
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 3;
-  // TODO
-
-}
+  :combatStatus(LunarDomain);
+  :damage(DamageType.Hydro, 3);
+};
 
 /**
  * @id 12174
@@ -110,34 +184,90 @@ define skill {
 define skill {
   id 12174 as MoonsignBenedictionMoonlightLentUntoYou;
   skillType passive {
-    // TODO
-  }
-}
+    on reaction {
+      listenTo all;
+      when :(
+        !:e.target.isMine() &&
+          (
+            [
+              Reaction.LunarElectroCharged,
+              Reaction.LunarBloom,
+              Reaction.LunarCrystallizeHydro,
+            ] as Reaction[]
+          ).includes(:e.type)
+      );
+      usage perRound, 1 { name usagePerRound1; };
+      if (:e.type === Reaction.LunarElectroCharged) {
+        :damage(DamageType.Electro, 1, $.macros.oppActivePrioritized);
+      } else if (:e.type === Reaction.LunarBloom) {
+        :damage(DamageType.Dendro, 1, $.macros.oppActivePrioritized);
+      } else if (:e.type === Reaction.LunarCrystallizeHydro) {
+        :damage(DamageType.Geo, 1, $.macros.oppActivePrioritized);
+      }
+    };
+  };
+};
 
 /**
  * @id 12175
  * @name 月兆祝赐·借汝月光
  * @description
- * 
+ *
  */
 define skill {
   id 12175 as MoonsignBenedictionMoonlightLentUntoYou01;
   skillType passive;
   reserved;
-}
+};
+
+define extension {
+  idHint 12176 as LunarReactionExtension;
+  description "记录本局游戏受到月曜反应的次数";
+  schema ({ reactionCount: "pair<number>" });
+  initialState ({ reactionCount: pair(0) });
+  mutateWhen onReaction,
+    ((st, e) => {
+      if (
+        (
+          [
+            Reaction.LunarElectroCharged,
+            Reaction.LunarBloom,
+            Reaction.LunarCrystallizeHydro,
+          ] as Reaction[]
+        ).includes(e.type)
+      ) {
+        st.reactionCount[e.who]++;
+      }
+    });
+};
 
 /**
  * @id 12176
  * @name 月露泼降
  * @description
- * 
+ *
  */
 define skill {
   id 12176 as MoondewCascadePassive;
-  skillType normal;
-  // TODO
-
-}
+  skillType passive {
+    associateExtension LunarReactionExtension;
+    on useSkill {
+      asSkillType normal;
+      when :(
+        :getExtensionState().reactionCount[flip(:self.who)] >= 3 &&
+          :e.skill.definition.id === MoondewCascade &&
+          :query($.my.hand.with($.def(CostReduction)))
+      );
+      usage perRound, 1 { name usagePerRound2; };
+      const candidates = :queryAll($.my.hand.with($.def(CostReduction)));
+      if (candidates.length > 0) {
+        const target = :random(candidates);
+        :undrawCards([target], "top");
+        :damage(DamageType.Dendro, 1);
+      }
+    };
+  };
+};
 
 /**
  * @id 1217
@@ -151,8 +281,16 @@ define character {
   tags hydro, catalyst, nodkrai;
   health 10;
   energy 3;
-  skills MoondewCascade, EternalTides, MoonlitMelancholy, MoonsignBenedictionMoonlightLentUntoYou, MoonsignBenedictionMoonlightLentUntoYou, MoondewCascadePassive;
-}
+  skills MoondewCascade,
+    EternalTides,
+    MoonlitMelancholy,
+    MoonsignBenedictionMoonlightLentUntoYou,
+    MoonsignBenedictionMoonlightLentUntoYou,
+    MoondewCascadePassive;
+  enabledLunarReactions Reaction.LunarElectroCharged,
+    Reaction.LunarBloom,
+    Reaction.LunarCrystallizeHydro;
+};
 
 /**
  * @id 212171
@@ -170,6 +308,37 @@ define card {
   since "v7.1.0";
   cost DiceType.Hydro, 3;
   talent Columbina {
-    // TODO
-  }
-}
+    on staged {
+      :useSkill(EternalTides);
+    };
+    on reaction {
+      listenTo all;
+      when :(
+        !:e.target.isMine() &&
+          (
+            [
+              Reaction.LunarElectroCharged,
+              Reaction.LunarBloom,
+              Reaction.LunarCrystallizeHydro,
+            ] as Reaction[]
+          ).includes(:e.type)
+      );
+      usage perRound, 2;
+      if (:e.type === Reaction.LunarElectroCharged) {
+        :gainEnergy(1, $.macros.myFirstEnergyNotFull);
+      } else if (:e.type === Reaction.LunarBloom) {
+        :combatStatus(ResColumbina);
+      } else if (:e.type === Reaction.LunarCrystallizeHydro) {
+        const targetCard = :query(
+          $.my.hand
+            .def(LunarSymphony)
+            .orderBy(0, "-", $.keys.diceCost)
+            .limit(1),
+        );
+        if (targetCard) {
+          :playCard(targetCard, "random");
+        }
+      }
+    };
+  };
+};

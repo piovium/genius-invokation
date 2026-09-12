@@ -157,7 +157,22 @@ define card {
   id 215012 as SevenfoldTransmutation;
   since "v7.1.0";
   cost DiceType.Anemo, 3;
-  talent Sucrose {
-    // TODO
-  }
+  talent Sucrose, none {
+    on staged {
+      if (:e.targets[0].hasEquipment(ChaoticEntropy)) {
+        :summon(LargeWindSpirit01);
+      } else {
+        :summon(LargeWindSpirit);
+      }
+    };
+    on increaseSkillDamage {
+      listenTo samePlayer;
+      when :(
+        (:query($.my.summon.def(LargeWindSpirit)) ||
+          :query($.my.summon.def(LargeWindSpirit01))) &&
+          :query($.equipped.tag("talent").at($.id(:e.source.id)))
+      );
+      :e.increaseDamage(1);
+    };
+  };
 }

@@ -24,8 +24,12 @@ import { DiceType, DamageType, $ } from "@gi-tcg/core/data";
 define card {
   id 116121 as Aedon;
   since "v7.1.0";
-  // TODO
-}
+  cost DiceType.Aligned, 2;
+  undiscoverable;
+  tags action;
+  addTarget $.opp.character;
+  :damage(DamageType.Geo, 1, :e.targets[0]);
+};
 
 /**
  * @id 116122
@@ -38,8 +42,17 @@ define card {
 define combatStatus {
   id 116122 as NightingalesSong;
   since "v7.1.0";
-  // TODO
-}
+  on increaseDamage {
+    listenTo all;
+    when :( !:e.target.isMine() && :e.type === DamageType.Geo );
+    usage 1 { append; };
+    :e.increaseDamage(1);
+  };
+  on entityEnter {
+    when :( :e.entity.definition.type === "summon" );
+    :addVariable("usage", 1);
+  };
+};
 
 /**
  * @id 16121
@@ -52,9 +65,8 @@ define skill {
   skillType normal;
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
-  // TODO
-
-}
+  :damage(DamageType.Physical, 2);
+};
 
 /**
  * @id 16122
@@ -66,9 +78,9 @@ define skill {
   id 16122 as DawnbearingSongbird;
   skillType elemental;
   cost DiceType.Geo, 3;
-  // TODO
-
-}
+  :damage(DamageType.Geo, 3);
+  :createHandCard(Aedon);
+};
 
 /**
  * @id 16123
@@ -81,9 +93,11 @@ define skill {
   skillType burst;
   cost DiceType.Geo, 3;
   cost DiceType.Energy, 2;
-  // TODO
-
-}
+  :damage(DamageType.Geo, 3);
+  :combatStatus(NightingalesSong, "my", {
+    overrideVariables: { usage: 3 },
+  });
+};
 
 /**
  * @id 16124
@@ -94,9 +108,17 @@ define skill {
 define skill {
   id 16124 as MoonsignBenedictionUnwitheringInWinter;
   skillType passive {
-    // TODO
-  }
-}
+    on handCardInserted {
+      when :(
+        !:isInInitialPile(:e.card) &&
+          :e.card.area.type !== "removedEntities" &&
+          :e.card.diceCost() > 0
+      );
+      usage perRound, 1 { name usagePerRound1; };
+      :attachCostReduction(:e.card);
+    };
+  };
+};
 
 /**
  * @id 1612
@@ -110,8 +132,11 @@ define character {
   tags geo, pole, nodkrai;
   health 10;
   energy 2;
-  skills OathkeepersSpear, DawnbearingSongbird, ShadowlessReflection, MoonsignBenedictionUnwitheringInWinter;
-}
+  skills OathkeepersSpear,
+    DawnbearingSongbird,
+    ShadowlessReflection,
+    MoonsignBenedictionUnwitheringInWinter;
+};
 
 /**
  * @id 216121
@@ -126,7 +151,19 @@ define card {
   id 216121 as ElkWithFangedAntlers;
   since "v7.1.0";
   cost DiceType.Geo, 1;
-  talent Illuga {
-    // TODO
-  }
-}
+  talent Illuga, active {
+    variable consumedNightingales, 0;
+    on staged {
+      :combatStatus(NightingalesSong);
+    };
+    on consumeUsage {
+      listenTo samePlayer;
+      when :( :e.entity.definition.id === NightingalesSong );
+      :addVariable("consumedNightingales", -:e.info.diffValue);
+      while (:getVariable("consumedNightingales") >= 2) {
+        :createHandCard(Aedon);
+        :addVariable("consumedNightingales", -2);
+      }
+    };
+  };
+};

@@ -1627,6 +1627,20 @@ define card {
   since "v7.1.0";
   cost DiceType.Aligned, 1;
   artifact {
-    // TODO
-  }
+    variable longing, 0 { range 4; };
+    on healed {
+      listenTo samePlayer;
+      when :(
+        !(
+          :e.source.definition.type === "equipment" &&
+          :e.source.definition.tags.includes("artifact")
+        )
+      );
+      :addVariable("longing", 1);
+    };
+    on actionPhase {
+      const longing = :getVariable("longing");
+      :heal(Math.floor(longing / 2), :self.master);
+    };
+  };
 }
