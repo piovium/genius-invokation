@@ -2794,6 +2794,7 @@ define combatStatus {
         state: ch.latest(),
         varName: "health",
         value: 5,
+        oldValue: 0,
         direction: ch.health > 5 ? "decrease" : "increase",
       });
     }
@@ -2991,7 +2992,7 @@ define card {
 define combatStatus {
   id 303248 as ThePowerOfResearchInEffect;
   on playCard {
-    when :( :e.card.diceCost() >= 3 );
+    when :( :e.playCost() >= 3 );
     usage 3;
     :generateDice("randomElement", 1);
   };

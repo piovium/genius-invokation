@@ -13,12 +13,36 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Character, ref, setup, State, Equipment, Card, $ } from "#test";
+import { Character, ref, setup, State, Equipment, Card, $, Attachment } from "#test";
 import { GildedDreams, TenacityOfTheMillelith } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
 import { LeaveItToMe, Lyresong, TheBoarPrincess, TheBoarPrincessInEffect } from "@gi-tcg/data/internal/cards/event/other.gts";
 import { Ganyu } from "@gi-tcg/data/internal/characters/cryo/ganyu.gts";
 import { KamisatoAyaka } from "@gi-tcg/data/internal/characters/cryo/kamisato_ayaka.gts";
 import { expect, test } from "vitest";
+import { CostReduction, NoTuningAllowed } from "@gi-tcg/data/internal/commons.gts";
+
+test("lyresong: returned artifact has no attachments", async () => {
+  const target = ref();
+  const artifact = ref();
+  const c = setup(
+    <State>
+      <Character my ref={target} />
+      <Card my def={TenacityOfTheMillelith} ref={artifact}>
+        <Attachment def={CostReduction} v={{ layer: 2 }} />
+        <Attachment def={NoTuningAllowed} />
+      </Card>
+      <Card my def={Lyresong} />
+    </State>,
+  );
+  c.expect($.my.attachment.on($.id(artifact.id))).toBeCount(2);
+
+  await c.me.card(TenacityOfTheMillelith, target);
+  c.expect($.my.equipment.def(TenacityOfTheMillelith)).toBe(artifact);
+  await c.me.card(Lyresong, target);
+
+  c.expect($.my.hand.def(TenacityOfTheMillelith)).toBe(artifact);
+  c.expect($.my.attachment.on($.id(artifact.id))).toNotExist();
+});
 
 test("lyresong: first play deduct 2 omni", async () => {
   const target = ref();
