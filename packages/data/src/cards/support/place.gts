@@ -847,6 +847,7 @@ define card {
     on entityEnter {
       when :(
         :e.entity.definition.type === "status" &&
+        :e.entity.area.type === "characters" &&
           :e.entity.definition.tags.includes("preparingSkill")
       );
       const ch = :e.entity.cast<"status">().master;
