@@ -275,10 +275,12 @@ export type ReturnOfMeta<M extends MetaBase> = Computed<
   TypingInfoBase
 >;
 
-export type CharacterReq = {
-  type: "character";
-  areaType: "characters";
-};
+export type TypePatch<Ty extends ExEntityType> = Pick<
+  RegularTypingInfo<Ty>,
+  "type" | "areaType"
+>;
+
+export type CharacterReq = TypePatch<"character">;
 export type EntityOnCharacterReq = {
   type: "status" | "equipment";
   areaType: "characters";
@@ -287,10 +289,7 @@ export type CardReq = {
   type: "eventCard" | "equipment" | "support";
   areaType: "hands" | "pile";
 };
-export type AttachmentReq = {
-  type: "attachment";
-  areaType: "hands" | "pile";
-};
+export type AttachmentReq = TypePatch<"attachment">;
 
 type ReqBase = {
   type: MetaBase["type"];
