@@ -242,16 +242,6 @@ export class CardModel extends InitiativeSkillModel implements ICaller {
             reason: "eventCardPlayed",
             direct: true,
           });
-        } else {
-          // 打出时移除附属效果
-          for (const att of self.attachments) {
-            c.mutate({
-              type: "removeEntity",
-              from: c.self.area,
-              oldState: att,
-              reason: "other", // TODO: maybe better reason?
-            });
-          }
         }
       });
     }

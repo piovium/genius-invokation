@@ -1009,7 +1009,9 @@ export class Game {
         skill: skillInfo,
         targets: [],
         fast: skill.initiativeSkillConfig.shouldFast,
+        originalFast: skill.initiativeSkillConfig.shouldFast,
         cost: skill.initiativeSkillConfig.requiredCost,
+        originalCost: skill.initiativeSkillConfig.requiredCost,
         autoSelectedDice: [],
       };
       if (skillDisabled) {
@@ -1072,7 +1074,9 @@ export class Game {
           who,
           skill: skillInfo,
           cost: requiredCost,
+          originalCost: requiredCost,
           fast: shouldFast,
+          originalFast: shouldFast,
           autoSelectedDice: [],
           targets: [],
           willBeEffectless,
@@ -1120,7 +1124,9 @@ export class Game {
         result: tunedToType,
         allowTuningAnyDice: this.players[who].config.allowTuningAnyDice,
         fast: true,
+        originalFast: true,
         cost: VOID_1_DICE_REQUIREMENT,
+        originalCost: VOID_1_DICE_REQUIREMENT,
         autoSelectedDice: [],
         validity: disableTuning
           ? ActionValidity.DISABLED
@@ -1139,7 +1145,9 @@ export class Game {
           to: ch,
           fromReaction: false,
           fast: false,
+          originalFast: false,
           cost: VOID_1_DICE_REQUIREMENT,
+          originalCost: VOID_1_DICE_REQUIREMENT,
           autoSelectedDice: [],
           validity: ActionValidity.VALID,
         })),
@@ -1150,7 +1158,9 @@ export class Game {
       type: "declareEnd",
       who,
       fast: false,
+      originalFast: false,
       cost: EMPTY_DICE_REQUIREMENT,
+      originalCost: EMPTY_DICE_REQUIREMENT,
       autoSelectedDice: [],
       validity: ActionValidity.VALID,
     });

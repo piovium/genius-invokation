@@ -710,7 +710,7 @@ define card {
     on playCard {
       when :(
         !:isInInitialPile(:e.card) &&
-          :e.card.diceCost() >= :getVariable("point")
+          :e.originalPlayCost() >= :getVariable("point")
       );
       :generateDice("randomElement", 1);
       :addVariable("point", 1);

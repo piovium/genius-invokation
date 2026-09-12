@@ -2994,7 +2994,7 @@ define card {
 define combatStatus {
   id 303248 as ThePowerOfResearchInEffect;
   on playCard {
-    when :( :e.card.diceCost() >= 3 );
+    when :( :e.originalPlayCost() >= 3 );
     usage 3;
     :generateDice("randomElement", 1);
   };
