@@ -217,6 +217,7 @@ define card {
   talent Citlali, none {
     on dealDamage {
       when :(
+        !:e.target.isMine() &&
         :e.getReaction() === Reaction.Frozen ||
           :e.getReaction() === Reaction.Melt
       );
