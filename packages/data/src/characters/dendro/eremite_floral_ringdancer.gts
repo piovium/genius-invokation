@@ -42,7 +42,7 @@ define combatStatus {
   id 127033 as SpiritserpentsBlessing;
   since "v5.1.0";
   on increaseTechniqueDamage {
-    when :( :e.via.definition.id === 1230311 );
+    when :( :e.via.definition.id === 1270321 );
     usage 1 {
       append;
     };
