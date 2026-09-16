@@ -31,7 +31,7 @@ define status {
     :addVariable("level", 1);
   };
   on deductOmniDiceSkill {
-    when :( :e.action.skill.definition.id === PressurizedFloe );
+    when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
     if (:getVariable("level") >= 2) {
       :e.deductOmniCost(1);
     }
