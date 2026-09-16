@@ -103,6 +103,7 @@ define skill {
     };
     on entityDispose {
       when :(
+        :getVariable("drawCardsUsagePerRound") > 0 &&
         !:e.entity.isMine() &&
           (:e.entity.definition.type === "status" ||
             :e.entity.definition.type === "combatStatus") &&
