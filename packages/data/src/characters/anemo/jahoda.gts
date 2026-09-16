@@ -33,7 +33,7 @@ define card {
     when :(
       :e.switchInfo.to.definition.id === Jahoda &&
         ([Aura.Pyro, Aura.Hydro, Aura.Electro, Aura.Cryo] as Aura[]).includes(
-          :query($.opp.active)!.aura,
+          :query($.opp.active.includesDefeated)!.aura,
         )
     );
     const TRANSFORM_MAP: Partial<Record<Aura, CardHandle>> = {
@@ -42,7 +42,7 @@ define card {
       [Aura.Electro]: PurrloinedTreasureFlaskElectro,
       [Aura.Cryo]: PurrloinedTreasureFlaskCryo,
     };
-    const target = TRANSFORM_MAP[:query($.opp.active)!.aura];
+    const target = TRANSFORM_MAP[:query($.opp.active.includesDefeated)!.aura];
     if (target) {
       :transformDefinition(:self, target);
     }
