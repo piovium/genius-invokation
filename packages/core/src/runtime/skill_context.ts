@@ -193,6 +193,12 @@ type CallerAreaOfContextMeta<Meta extends ContextMetaBase> = Extract<
   TypeOfCallingArea[Meta["callingArea"]]
 >;
 
+type DiscardedTypingInfo = {
+  type: "eventCard" | "support" | "equipment";
+  areaType: "removedEntities";
+  variables: string;
+}
+
 export type ContextMetaBase = {
   readonly: boolean;
   eventArgType: unknown;
@@ -765,7 +771,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   private costSortedHands({
     who = "my",
     filter = () => true,
-  }: MaxCostHandsOpt): RxEntityState<Meta, TypingInfoBase<EntityType>>[] {
+  }: MaxCostHandsOpt = {}): RxEntityState<Meta, TypingInfoBase<EntityType>>[] {
     const player = who === "my" ? this.player : this.oppPlayer;
     const sortData = new Map(
       this.getRawPlayer(who).hands.map(
@@ -2057,16 +2063,32 @@ export class SkillContext<Meta extends ContextMetaBase> {
    * @param count 舍弃的牌数
    * @param option.allowPreview 总是允许预览（即使版本行为 `discardMaxCostHandsAbortPreview = true` 也如此）
    */
-  discardMaxCostHands(count: number, option: { allowPreview?: boolean } = {}) {
-    const disposed = this.maxCostHands(count);
+  discardMaxCostHands(
+    count: number,
+    option: { allowPreview?: boolean } = {},
+  ): RxEntityState<Meta, DiscardedTypingInfo>[] {
     if (
       this.state.versionBehavior.discardMaxCostHandsAbortPreview &&
       !option.allowPreview
     ) {
       this.abortPreview();
     }
-    this.discard(...disposed);
-    return disposed;
+    const discarded: RxEntityState<Meta, DiscardedTypingInfo>[] = [];
+    for (let i = 0; i < count; i++) {
+      const hands = this.getRawPlayer("my").hands.map((card) => ({
+        card,
+        cost: diceCostSizeOfCard(this.rawState, card),
+      }));
+      if (hands.length === 0) {
+        break;
+      }
+      const maxCost = Math.max(...hands.map(({ cost }) => cost));
+      const candidates = hands.filter(({ cost }) => cost === maxCost);
+      const { card } = this.random(candidates);
+      this.discard(card);
+      discarded.push(this.get(card) as RxEntityState<Meta, DiscardedTypingInfo>);
+    }
+    return discarded;
   }
 
   /**

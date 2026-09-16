@@ -112,9 +112,10 @@ define card {
   undiscoverable;
   tags action;
   filter :( :query($.my.hand.cost(3)) );
-  const hand = :query($.my.hand.cost(3));
-  if (hand) {
-    :discard(hand);
+  const hands = :queryAll($.my.hand.cost(3));
+  if (hands.length > 0) {
+    const target = :random(hands);
+    :discard(target);
     const skirk = :query(
       $.union($.my.character.def(Skirk), $.my.character.def(Skirk01)),
     );
@@ -163,12 +164,13 @@ define skill {
   skillType burst;
   cost DiceType.Cryo, 1;
   :convertDice(DiceType.Cryo, 2);
-  const hands = :player.hands
-    .filter((card) => card.diceCost() === 0)
-    .slice(0, 2);
-  if (hands.length > 0) {
-    :discard(...hands);
-    :self.addVariable("serpentsSubtlety", hands.length);
+  for (let i = 0; i < 2; i++) {
+    const hands = :player.hands.filter((card) => card.diceCost() === 0);
+    if (hands.length === 0) {
+      break;
+    }
+    :discard(:random(hands));
+    :self.addVariable("serpentsSubtlety", 1);
   }
 };
 
