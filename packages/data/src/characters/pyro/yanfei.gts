@@ -36,12 +36,11 @@ define status {
     :setVariable("triggerSeal", 1);
   };
   on useSkill {
-    when :(
-      :self.master.hasEquipment(RightOfFinalInterpretation) &&
-        :getVariable("triggerSeal")
-    );
-    :drawCards(1);
+    when :( :getVariable("triggerSeal") );
     :setVariable("triggerSeal", 0);
+    if (:self.master.hasEquipment(RightOfFinalInterpretation)) {
+      :drawCards(1);
+    }
     if (:getVariable("usage") === 0) {
       :dispose();
     }
