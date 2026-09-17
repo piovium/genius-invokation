@@ -167,11 +167,13 @@ define card {
     };
     on useSkill {
       when :( :e.skill.definition.id === RavagingConfession );
+      usage perRound, 1 { name "usagePerRound1"; };
       :createHandCard(ChangingShifts);
     };
     on entityEnter {
       when :( :e.entity.id === StrikeWhereItHurts );
       listenTo samePlayer;
+      usage perRound, 1 { name "usagePerRound1"; };
       :createHandCard(ChangingShifts);
     };
   };
