@@ -338,10 +338,6 @@ define card {
       when :( :e.viaSkillType("burst") );
       :e.increaseDamage(2);
     };
-    on increaseSkillDamage {
-      when :( :e.getReaction() );
-      :e.increaseDamage(1);
-    };
     on dealReaction {
       listenTo samePlayer;
       :addVariable("thought", 1);
