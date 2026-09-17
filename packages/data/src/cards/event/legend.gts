@@ -363,9 +363,6 @@ define card {
   support {
     variable spirit, 0;
     associateExtension FlamesOfWarExtension;
-    on staged {
-      :setVariable("spirit", :getExtensionState().spirit[:self.who]);
-    };
     on dealDamage {
       :setVariable("spirit", :getExtensionState().spirit[:self.who]);
     };
@@ -405,18 +402,36 @@ define card {
     if (myExistsFlame) {
       myExistsFlame.setVariable("spirit", spirit);
     } else {
-      :createEntity("support", FlamesOfWar, {
-        who: :self.who,
-        type: "supports",
-      });
+      :createEntity(
+        "support",
+        FlamesOfWar,
+        {
+          who: :self.who,
+          type: "supports",
+        },
+        {
+          overrideVariables: {
+            spirit,
+          },
+        },
+      );
     }
   }
   if (oppExistsFlame) {
   } else if (:remainingSupportCount("opp") > 0) {
-    :createEntity("support", FlamesOfWar, {
-      who: flip(:self.who),
-      type: "supports",
-    });
+    :createEntity(
+      "support",
+      FlamesOfWar,
+      {
+        who: flip(:self.who),
+        type: "supports",
+      },
+      {
+        overrideVariables: {
+          spirit: :getExtensionState().spirit[flip(:self.who)],
+        },
+      },
+    );
   }
 };
 
