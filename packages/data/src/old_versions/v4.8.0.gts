@@ -9,6 +9,7 @@ import {
   AnomalousAnatomy,
   StarfallShowerDisposeCard,
 } from "../characters/hydro/alldevouring_narwhal.gts";
+import { BondOfLifeOnDamaged, BondOfLifeOnEndPhase } from "../commons.gts";
 
 /**
  * @id 214041
@@ -171,9 +172,16 @@ define status {
     when :( :e.healInfo.healKind === "common" );
     usage 1 {
       append;
+      autoDecrease false;
     };
     const deducted = Math.min(:getVariable("usage"), :e.expectedValue);
     :e.decreaseHeal(deducted);
     :consumeUsage(deducted);
+  };
+  on endPhase {
+    :handleCustomEventInline(BondOfLifeOnEndPhase);
+  };
+  on damaged {
+    :handleCustomEventInline(BondOfLifeOnDamaged, :rawEventArg);
   };
 };
