@@ -11,7 +11,7 @@ import {
   InfluxBlast,
   MirrorMaiden,
 } from "../characters/hydro/mirror_maiden.gts";
-import { Barbara, LetTheShowBegin } from "../characters/hydro/barbara.gts";
+import { Barbara, LetTheShowBegin, MelodyLoop } from "../characters/hydro/barbara.gts";
 import {
   ElectroCrystalCore,
   ElectroHypostasis,
@@ -162,6 +162,11 @@ define card {
   talent Barbara {
     on staged {
       :useSkill(LetTheShowBegin);
+    };
+    on deductOmniDiceSwitch {
+      when :( :query($.my.summon.def(MelodyLoop)) );
+      usage perRound, 1;
+      :e.deductOmniCost(1);
     };
   };
 };
