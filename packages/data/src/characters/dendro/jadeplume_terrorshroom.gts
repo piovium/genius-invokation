@@ -38,9 +38,15 @@ define status {
     }
   };
   on dealDamage {
+    when :(
+      :e.type !== DamageType.Physical && :e.type !== DamageType.Piercing
+    );
     :callSnippet.addVitality(:self.master);
   };
   on damaged {
+    when :(
+      :e.type !== DamageType.Physical && :e.type !== DamageType.Piercing
+    );
     :callSnippet.addVitality(:self.master);
   };
   on endPhase {
