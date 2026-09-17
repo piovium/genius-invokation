@@ -44,6 +44,7 @@ define status {
   on useSkill {
     // 只有当使用技能前实体存在时才触发
     when :( :getVariable("enableUseSkillTriggering") );
+    :setVariable("enableUseSkillTriggering", 0);
     if (:getVariable("level") >= 4) {
       :damage(DamageType.Physical, 3);
     }
