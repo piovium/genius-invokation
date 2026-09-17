@@ -37,11 +37,13 @@ define status {
     }
     :setVariable("enableUseSkillTriggering", 1);
   };
+  on deductOmniDiceCard {
+    when :( :e.action.skill.caller.definition.id === MomentOfWakingAndResolve );
+    :setVariable("enableUseSkillTriggering", 1);
+  };
   on useSkill {
-    when :(
-      :e.skill.definition.id === PressurizedFloe &&
-        :getVariable("enableUseSkillTriggering")
-    );
+    // 只有当使用技能前实体存在时才触发
+    when :( :getVariable("enableUseSkillTriggering") );
     if (:getVariable("level") >= 4) {
       :damage(DamageType.Physical, 3);
     }
