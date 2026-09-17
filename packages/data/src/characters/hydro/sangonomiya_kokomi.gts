@@ -110,8 +110,11 @@ define skill {
     if (summon) {
       summon.addVariable("usage", 1);
     } else {
-      summon = :summon(BakeKurage)!;
-      summon.setVariable("usage", 1);
+      :summon(BakeKurage, "my", {
+        overrideVariables: {
+          usage: 1,
+        },
+      });
     }
   }
 };
