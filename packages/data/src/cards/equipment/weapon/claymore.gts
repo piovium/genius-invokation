@@ -184,9 +184,12 @@ define card {
       :e.increaseDamage(1);
     };
     on useSkill {
+      when :( :e.isSkillType("elemental") );
+      usage perRound, 1;
       :characterStatus(DesertWatchTakeTheInitiative, :self.master);
     };
     on damaged {
+      usage perRound, 1;
       :characterStatus(DesertWatchOffensiveDefense, :self.master);
     };
   };
