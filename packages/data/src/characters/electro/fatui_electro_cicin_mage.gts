@@ -192,6 +192,7 @@ define card {
       when :(
         (:query($.my.summon.def(ElectroCicin))?.getVariable("usage") ?? 0) >= 3
       );
+      listenTo samePlayer;
       usage perRound, 1;
       const cicin = :query($.my.summon.def(ElectroCicin));
       if (cicin) {
