@@ -40,7 +40,7 @@ define combatStatus {
 define combatStatus {
   id 111131 as ScopeOutSoftSpots;
   since "v5.2.0";
-  variable layer, 0 {
+  variable layer, 1 {
     append;
   };
   on useSkill {
@@ -106,11 +106,7 @@ define skill {
   skillType elemental;
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 1);
-  :combatStatus(ScopeOutSoftSpots, "my", {
-    overrideVariables: {
-      layer: 1,
-    },
-  });
+  :combatStatus(ScopeOutSoftSpots);
 };
 
 /**
