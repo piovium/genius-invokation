@@ -265,7 +265,7 @@ define card {
   cost DiceType.Aligned, 3;
   tags food;
   filter :( !:query($.my.combatStatus.def(ReviveOnCooldown)) );
-  addTarget $.my.character.includesDefeated;
+  addTarget $.my.character.onlyDefeated;
   :heal(1, :e.targets[0], { kind: "revive" });
   :characterStatus(Satiated, :e.targets[0]);
   :combatStatus(ReviveOnCooldown);
