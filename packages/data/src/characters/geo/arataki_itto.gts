@@ -61,9 +61,7 @@ define summon {
   on endPhase {
     :damage(DamageType.Geo, 1);
     :dispose();
-    :characterStatus(SuperlativeSuperstrength, ($) =>
-      $.my.character.def(AratakiItto),
-    );
+    :characterStatus(SuperlativeSuperstrength, $.my.character.def(AratakiItto));
   };
   on decreaseDamaged {
     when :( :e.target.isActive() );
@@ -76,9 +74,7 @@ define summon {
     usage 1 {
       name "addStatusUsage";
     };
-    :characterStatus(SuperlativeSuperstrength, ($) =>
-      $.my.character.def(AratakiItto),
-    );
+    :characterStatus(SuperlativeSuperstrength, $.my.character.def(AratakiItto));
   };
 };
 
