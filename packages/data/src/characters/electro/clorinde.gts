@@ -68,9 +68,12 @@ define status {
   id 114122 as DarkshatteringFlameInEffect;
   since "v5.3.0";
   oneDuration;
-  variable increaseDamageValue, 1 { range 3; };
-  once increaseSkillDamage {
-    :e.increaseDamage(:getVariable("increaseDamageValue"));
+  on increaseSkillDamage {
+    usage 1 {
+      append;
+      range 3;
+    };
+    :e.increaseDamage(1);
   };
 };
 
@@ -165,14 +168,7 @@ define card {
     on useSkill {
       when :( :hasPhaseReaction("my", (e) => e.relatedTo(DamageType.Electro)) );
       listenTo samePlayer;
-      const darkshatteringFlameInEffect = :self.master.hasStatus(
-        DarkshatteringFlameInEffect,
-      );
-      if (darkshatteringFlameInEffect) {
-        :addVariable("increaseDamageValue", 1, darkshatteringFlameInEffect);
-      } else {
-        :characterStatus(DarkshatteringFlameInEffect, :self.master);
-      }
+      :characterStatus(DarkshatteringFlameInEffect, :self.master);
     };
   };
 };
