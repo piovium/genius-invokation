@@ -93,6 +93,7 @@ define status {
  */
 define combatStatus {
   id 117083 as TheArtOfBudgetingInEffect;
+  oneDuration;
   once deductOmniDiceCard {
     when :(
       :e.action.skill.caller.definition.type === "support" &&
