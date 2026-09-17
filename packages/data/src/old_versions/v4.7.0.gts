@@ -418,6 +418,7 @@ define card {
           )
         );
       };
+      listenTo samePlayer;
       :e.increaseDamage(1);
     };
   };
