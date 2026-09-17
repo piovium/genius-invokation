@@ -171,7 +171,7 @@ define card {
       :createHandCard(ChangingShifts);
     };
     on entityEnter {
-      when :( :e.entity.id === StrikeWhereItHurts );
+      when :( :e.entity.definition.id === StrikeWhereItHurts );
       listenTo samePlayer;
       usage perRound, 1 { name "usagePerRound1"; };
       :createHandCard(ChangingShifts);
