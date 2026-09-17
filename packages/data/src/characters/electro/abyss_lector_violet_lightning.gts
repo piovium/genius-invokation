@@ -68,6 +68,7 @@ define status {
     const talent = :self.master.hasEquipment(ChainLightningCascade);
     if (talent) {
       :dispose(talent);
+      // 依据测试结果，官方不弃置124065，状态可在失去天赋后触发
       :query($.opp.active)?.loseEnergy(1);
     }
     :characterStatus(ElectricRebirthHoned, :self.master);

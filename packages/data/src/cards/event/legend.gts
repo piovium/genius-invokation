@@ -193,6 +193,7 @@ define combatStatus {
   oneDuration;
   on playCard {
     when :( :e.card.definition.type === "eventCard" );
+    // 实际无可用次数限制，以状态描述为准
     for (const hand of :player.hands) {
       if (hand.definition.type === "eventCard") {
         :attach(IneffectiveWhenPlayed, hand);

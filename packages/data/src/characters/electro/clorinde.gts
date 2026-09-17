@@ -68,6 +68,7 @@ define status {
   id 114122 as DarkshatteringFlameInEffect;
   since "v5.3.0";
   oneDuration;
+  // 只叠加可用次数，不叠加伤害
   on increaseSkillDamage {
     usage 1 {
       append;
