@@ -10,6 +10,7 @@ import {
   MeleeStance,
   RangedStance,
   Tartaglia,
+  Riptide2,
 } from "../characters/hydro/tartaglia.gts";
 import {
   GardenOfPurity,
@@ -47,9 +48,18 @@ define skill {
  * 持续回合：2
  */
 define status {
-  id 112043 as private Riptide;
-  until "v4.0.0";
+  id 112043 as Riptide;
   duration 2;
+  // 参见主注释
+  on selfDispose {
+    when :( :isSelfDisposeCausedByDefeatedHeuristically() );
+    const active = :query($.my.active.includesDefeated);
+    if (active?.variables.alive) {
+      active.addStatus(Riptide);
+    } else {
+      :combatStatus(Riptide2);
+    }
+  };
 };
 
 /**

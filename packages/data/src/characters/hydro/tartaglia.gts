@@ -79,7 +79,7 @@ define status {
 };
 
 define combatStatus {
-  id 112044 as private Riptide2;
+  id 112044 as Riptide2;
   once switchActive {
     :characterStatus(Riptide, $.my.active);
   };

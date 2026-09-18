@@ -47,6 +47,7 @@ import {
   type SkillInfo,
   type SkillContextOptions,
   type SkillDescription,
+  DisposeEventArg,
 } from "../base/skill";
 import {
   type CharacterState as CharacterStateO,
@@ -197,7 +198,7 @@ type DiscardedTypingInfo = {
   type: "eventCard" | "support" | "equipment";
   areaType: "removedEntities";
   variables: string;
-}
+};
 
 export type ContextMetaBase = {
   readonly: boolean;
@@ -829,6 +830,29 @@ export class SkillContext<Meta extends ContextMetaBase> {
       .toArray();
   }
 
+  isSelfDisposeCausedByDefeatedHeuristically<
+    This extends TypedSkillContext<any>,
+  >(
+    this: This["rawEventArg"] extends DisposeEventArg ? This : never,
+    extraDmgCond: (e2: DamageOrHealEventArg<DamageInfo>) => boolean = () =>
+      true,
+  ): boolean {
+    const eventArg = this.rawEventArg as DisposeEventArg;
+    if (eventArg.from.type !== "characters") {
+      return false;
+    }
+    const fromChId = eventArg.from.characterId;
+    if (this.get(fromChId).variables.alive) {
+      return false;
+    }
+    return this.hasPhaseDamage(
+      "all",
+      (e2) =>
+        e2.damageInfo.causeDefeated &&
+        e2.damageInfo.target.id === fromChId &&
+        extraDmgCond(e2),
+    );
+  }
   // MUTATIONS
 
   private get events() {
@@ -2086,7 +2110,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
       const candidates = hands.filter(({ cost }) => cost === maxCost);
       const { card } = this.random(candidates);
       this.discard(card);
-      discarded.push(this.get(card) as RxEntityState<Meta, DiscardedTypingInfo>);
+      discarded.push(
+        this.get(card) as RxEntityState<Meta, DiscardedTypingInfo>,
+      );
     }
     return discarded;
   }
