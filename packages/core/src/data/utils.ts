@@ -14,9 +14,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { VariableConfig } from "../base/entity";
-
-export const DEFAULT_VARIABLE_UPPER_BOUND = 2 ** 31 - 1;
-export const DEFAULT_VARIABLE_LOWER_BOUND = -(2 ** 31);
+import {
+  DEFAULT_VARIABLE_LOWER_BOUND,
+  DEFAULT_VARIABLE_UPPER_BOUND,
+} from "../base/mutation";
 
 export function createVariable<const T extends number>(
   initialValue: T,
@@ -57,13 +58,7 @@ export function typeHint<T>() {
   return {} as TypeHint<T>;
 }
 
-/** Clamp a variable to its declared inclusive bounds and the global int32 bounds. */
+/** Clamp a variable to its declared inclusive bounds. */
 export function clampVariable(value: number, config: VariableConfig): number {
-  return Math.min(
-    DEFAULT_VARIABLE_UPPER_BOUND,
-    Math.max(
-      DEFAULT_VARIABLE_LOWER_BOUND,
-      Math.min(config.upperBound, Math.max(config.lowerBound, value)),
-    ),
-  );
+  return Math.min(config.upperBound, Math.max(config.lowerBound, value));
 }

@@ -152,6 +152,9 @@ export interface RemoveEntityM {
     | "other";
 }
 
+export const DEFAULT_VARIABLE_UPPER_BOUND = 2 ** 31 - 1;
+export const DEFAULT_VARIABLE_LOWER_BOUND = -(2 ** 31);
+
 export interface ModifyEntityVarM {
   readonly type: "modifyEntityVar";
   state: AnyState;
@@ -441,6 +444,10 @@ function doMutation(state: GameState, m: Mutation): GameState {
       });
     }
     case "modifyEntityVar": {
+      // Not representable, skip.
+      if (m.value > DEFAULT_VARIABLE_UPPER_BOUND || m.value < DEFAULT_VARIABLE_LOWER_BOUND) {
+        return state;
+      }
       const newState = produce(state, (draft) => {
         const entity = getEntityById(draft, m.state.id) as Draft<EntityState>;
         m.oldValue = entity.variables[m.varName] ?? 0;
