@@ -27,6 +27,7 @@ import { $, DamageType, DiceType, type SummonHandle } from "@gi-tcg/core/data";
 define summon {
   id 121011 as CryoCicins;
   hint DamageType.Cryo, 1;
+  variable talentExtraDamage, 0;
   on endPhase {
     usage 2 {
       append;
@@ -35,17 +36,24 @@ define summon {
     :damage(DamageType.Cryo, 1);
   };
   on useSkill {
-    when :(
-      :e.skill.caller.definition.id === FatuiCryoCicinMage &&
-        :e.isSkillType("normal")
-    );
-    :addVariable("usage", 1);
+    when :( :e.skill.definition.id === CicinIcicle );
+    if (:getVariable("usage") < 3) {
+      :addVariable("usage", 1);
+    } else if (:query($.my.equipped.def(CicinsColdGlare))) {
+      :setVariable("talentExtraDamage", 1);
+    }
   };
   on damaged {
     when :(
       :e.target.definition.id === FatuiCryoCicinMage && :e.getReaction()
     );
     :consumeUsage();
+  };
+  // 天赋效果
+  on useSkill {
+    when :( :getVariable("talentExtraDamage") );
+    :setVariable("talentExtraDamage", 0);
+    :damage(DamageType.Cryo, 2);
   };
 };
 
@@ -107,7 +115,7 @@ define skill {
   const talent = :self.hasEquipment(CicinsColdGlare);
   const cicins = :query($.my.summon.def(CryoCicins));
   if (talent && cicins && cicins.getVariable("usage") >= 2) {
-    talent.setVariable("dealDamage", 1);
+    cicins.setVariable("talentExtraDamage", 1);
   }
   :summon(CryoCicins);
 };
@@ -157,14 +165,8 @@ define card {
   since "v3.7.0";
   cost DiceType.Cryo, 3;
   talent FatuiCryoCicinMage {
-    variable dealDamage, 0;
     on staged {
       :useSkill(MistySummons);
-    };
-    on useSkill {
-      when :( :getVariable("dealDamage") );
-      :damage(DamageType.Cryo, 2);
-      :setVariable("dealDamage", 0);
     };
   };
 };
