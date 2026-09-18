@@ -70,7 +70,6 @@ import {
   type GtsVariableOptions,
 } from "./variables";
 import {
-  DEFAULT_VARIABLE_UPPER_BOUND,
   createVariable,
   createVariableCanAppend,
   type TypeHint,
@@ -97,6 +96,7 @@ import type {
   TypedSkillContext,
 } from "../../runtime/skill_context";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
+import { DEFAULT_VARIABLE_UPPER_BOUND } from "../../base/mutation";
 
 /** A GTS definition's lazy description replacement. */
 export type EntityDescriptionDictionaryGetter<
@@ -412,11 +412,11 @@ export interface ICaller {
 }
 
 export const createVariableConfig = (
-  initialValue: number,
+  initial: number,
   options: GtsVariableOptions,
 ): VariableConfig => {
-  const config = createVariable(initialValue, options.forceOverwrite);
-  let { lowerBound, upperBound } = config;
+  let { initialValue, lowerBound, upperBound, recreateBehavior } =
+    createVariable(initial, options.forceOverwrite);
   if (typeof options.range === "number") {
     lowerBound = 0;
     upperBound = options.range;
@@ -424,34 +424,37 @@ export const createVariableConfig = (
     lowerBound = options.range[0];
     upperBound = options.range[1];
   }
-  lowerBound = Math.max(config.lowerBound, lowerBound);
-  upperBound = Math.min(config.upperBound, upperBound);
   if (lowerBound > upperBound) {
     throw new GiTcgDataError(
-      "Variable range must intersect int32 bounds and have min <= max",
+      "Variable range must have min <= max",
     );
   }
-  let { recreateBehavior } = config;
-  if (options.append !== undefined && options.append !== false) {
-    const appendLimit =
-      typeof options.append === "number"
-        ? options.append
-        : typeof options.append === "object"
-          ? (options.append.limit ?? upperBound)
-          : upperBound;
+  if (typeof options.append !== "undefined" && options.append !== false) {
+    let appendLimit: number;
+    let appendValue: number;
+    if (options.append === true) {
+      appendLimit = upperBound;
+      appendValue = initialValue;
+    } else if (typeof options.append === "number") {
+      appendLimit = options.append;
+      appendValue = initialValue;
+    } else {
+      appendLimit = options.append.limit ?? upperBound;
+      appendValue = options.append.value ?? initialValue;
+    }
     if (appendLimit > upperBound) {
       throw new GiTcgDataError(
         "Variable range upper bound must be >= append limit",
       );
     }
-    recreateBehavior = createVariableCanAppend(
-      initialValue,
+    recreateBehavior = {
+      type: "append",
       appendLimit,
-      typeof options.append === "object" ? options.append.value : undefined,
-    ).recreateBehavior;
+      appendValue,
+    };
   }
   return {
-    ...config,
+    initialValue,
     recreateBehavior,
     lowerBound,
     upperBound,
@@ -818,6 +821,7 @@ export class EntityViewModel extends defineViewModel(
       ): AR.DoneRewriteMeta<PushMetaVar<Meta, "shield">>;
     }>((model, [count, max = count]) => {
       model.tags.push("shield");
+      // TODO drop this convention
       model.setVariable("shield", count, {
         append: max === Infinity ? DEFAULT_VARIABLE_UPPER_BOUND : max,
       });

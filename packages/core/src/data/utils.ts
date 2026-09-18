@@ -33,24 +33,6 @@ export function createVariable<const T extends number>(
   };
 }
 
-export function createVariableCanAppend(
-  initialValue: number,
-  appendLimit = DEFAULT_VARIABLE_UPPER_BOUND,
-  appendValue?: number,
-): VariableConfig {
-  appendValue ??= initialValue;
-  return {
-    initialValue,
-    lowerBound: DEFAULT_VARIABLE_LOWER_BOUND,
-    upperBound: DEFAULT_VARIABLE_UPPER_BOUND,
-    recreateBehavior: {
-      type: "append",
-      appendLimit,
-      appendValue,
-    },
-  };
-}
-
 export interface TypeHint<T> {
   _type: T;
 }
