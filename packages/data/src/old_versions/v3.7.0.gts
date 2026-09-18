@@ -60,7 +60,7 @@ define skill {
   id 14054 as private Wavestrider;
   until "v3.7.0";
   skillType elemental;
-  noEnergy;
+  prepared;
   :damage(DamageType.Electro, 2);
 };
 
