@@ -26,7 +26,7 @@ define status {
   id 111121 as PersTimer;
   since "v5.0.0";
   variable level, 0;
-  variable enableUseSkillTriggering, 0;
+  variable triggerOnUseSkill, 0;
   on drawCard {
     :addVariable("level", 1);
   };
@@ -35,16 +35,11 @@ define status {
     if (:getVariable("level") >= 2) {
       :e.deductOmniCost(1);
     }
-    :setVariable("enableUseSkillTriggering", 1);
-  };
-  on deductOmniDiceCard {
-    when :( :e.action.skill.caller.definition.id === MomentOfWakingAndResolve );
-    :setVariable("enableUseSkillTriggering", 1);
   };
   on useSkill {
     // 只有当使用技能前实体存在时才触发
-    when :( :getVariable("enableUseSkillTriggering") );
-    :setVariable("enableUseSkillTriggering", 0);
+    when :( :getVariable("triggerOnUseSkill") );
+    :setVariable("triggerOnUseSkill", 0);
     if (:getVariable("level") >= 4) {
       :damage(DamageType.Physical, 3);
     }
@@ -125,7 +120,10 @@ define skill {
   skillType elemental;
   cost DiceType.Cryo, 3;
   :damage(DamageType.Cryo, 2);
-  if (!:self.hasStatus(PersTimer)) {
+  const existsTimer = :self.hasStatus(PersTimer);
+  if (existsTimer) {
+    existsTimer.setVariable("triggerOnUseSkill", 1);
+  } else {
     :characterStatus(PersTimer, :self);
   }
 };
