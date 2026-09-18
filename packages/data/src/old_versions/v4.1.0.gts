@@ -390,8 +390,7 @@ define status {
   // A custom shield that won't dispose by decreasing damage
   tags shield;
   variable shield, 2 {
-    append;
-    range 2;
+    append 2;
   };
   on decreaseDamaged {
     const shield = :getVariable("shield");

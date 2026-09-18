@@ -183,8 +183,7 @@ define combatStatus {
   on deductOmniDiceCard {
     when :( :e.action.skill.caller.definition.id === AwakenMyKindred );
     usage 1 {
-      append;
-      range 3;
+      append 3;
     };
     :e.deductOmniCost(1);
   };

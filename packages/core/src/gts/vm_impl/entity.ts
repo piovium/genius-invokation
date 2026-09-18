@@ -70,6 +70,7 @@ import {
   type GtsVariableOptions,
 } from "./variables";
 import {
+  DEFAULT_VARIABLE_UPPER_BOUND,
   createVariable,
   createVariableCanAppend,
   type TypeHint,
@@ -414,12 +415,7 @@ export const createVariableConfig = (
   initialValue: number,
   options: GtsVariableOptions,
 ): VariableConfig => {
-  const config = options.append
-    ? createVariableCanAppend(
-        initialValue,
-        typeof options.append === "object" ? options.append.value : undefined,
-      )
-    : createVariable(initialValue, options.forceOverwrite);
+  const config = createVariable(initialValue, options.forceOverwrite);
   let { lowerBound, upperBound } = config;
   if (typeof options.range === "number") {
     lowerBound = 0;
@@ -428,8 +424,35 @@ export const createVariableConfig = (
     lowerBound = options.range[0];
     upperBound = options.range[1];
   }
+  lowerBound = Math.max(config.lowerBound, lowerBound);
+  upperBound = Math.min(config.upperBound, upperBound);
+  if (lowerBound > upperBound) {
+    throw new GiTcgDataError(
+      "Variable range must intersect int32 bounds and have min <= max",
+    );
+  }
+  let { recreateBehavior } = config;
+  if (options.append !== undefined && options.append !== false) {
+    const appendLimit =
+      typeof options.append === "number"
+        ? options.append
+        : typeof options.append === "object"
+          ? (options.append.limit ?? upperBound)
+          : upperBound;
+    if (appendLimit > upperBound) {
+      throw new GiTcgDataError(
+        "Variable range upper bound must be >= append limit",
+      );
+    }
+    recreateBehavior = createVariableCanAppend(
+      initialValue,
+      appendLimit,
+      typeof options.append === "object" ? options.append.value : undefined,
+    ).recreateBehavior;
+  }
   return {
     ...config,
+    recreateBehavior,
     lowerBound,
     upperBound,
   };
@@ -796,8 +819,7 @@ export class EntityViewModel extends defineViewModel(
     }>((model, [count, max = count]) => {
       model.tags.push("shield");
       model.setVariable("shield", count, {
-        append: true,
-        range: max,
+        append: max === Infinity ? DEFAULT_VARIABLE_UPPER_BOUND : max,
       });
       const decreaseDmgSkill = new TriggeredSkillModel(
         model,

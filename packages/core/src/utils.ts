@@ -690,9 +690,16 @@ export function getInsertedStateVariables<T extends AnyState>({
           break;
         }
         case "append": {
+          if (oldValue > recreateBehavior.appendLimit) {
+            // 已超过叠加上限时，重复创建不会降低或继续增加该值。
+            break;
+          }
           const appendValue =
             incomingVariables[name] ?? recreateBehavior.appendValue;
-          newValues[name] = appendValue + oldValue;
+          newValues[name] = Math.min(
+            appendValue + oldValue,
+            recreateBehavior.appendLimit,
+          );
           break;
         }
         default: {

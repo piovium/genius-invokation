@@ -16,6 +16,7 @@
 import type { VariableConfig } from "../base/entity";
 
 export const DEFAULT_VARIABLE_UPPER_BOUND = 2 ** 31 - 1;
+export const DEFAULT_VARIABLE_LOWER_BOUND = -(2 ** 31);
 
 export function createVariable<const T extends number>(
   initialValue: T,
@@ -23,7 +24,7 @@ export function createVariable<const T extends number>(
 ): VariableConfig<T> {
   return {
     initialValue,
-    lowerBound: 0,
+    lowerBound: DEFAULT_VARIABLE_LOWER_BOUND,
     upperBound: DEFAULT_VARIABLE_UPPER_BOUND,
     recreateBehavior: {
       type: forceOverwrite ? "overwrite" : "default",
@@ -33,15 +34,17 @@ export function createVariable<const T extends number>(
 
 export function createVariableCanAppend(
   initialValue: number,
+  appendLimit = DEFAULT_VARIABLE_UPPER_BOUND,
   appendValue?: number,
 ): VariableConfig {
   appendValue ??= initialValue;
   return {
     initialValue,
-    lowerBound: 0,
+    lowerBound: DEFAULT_VARIABLE_LOWER_BOUND,
     upperBound: DEFAULT_VARIABLE_UPPER_BOUND,
     recreateBehavior: {
       type: "append",
+      appendLimit,
       appendValue,
     },
   };
@@ -54,7 +57,13 @@ export function typeHint<T>() {
   return {} as TypeHint<T>;
 }
 
-/** Clamp a variable to its declared inclusive bounds. */
+/** Clamp a variable to its declared inclusive bounds and the global int32 bounds. */
 export function clampVariable(value: number, config: VariableConfig): number {
-  return Math.min(config.upperBound, Math.max(config.lowerBound, value));
+  return Math.min(
+    DEFAULT_VARIABLE_UPPER_BOUND,
+    Math.max(
+      DEFAULT_VARIABLE_LOWER_BOUND,
+      Math.min(config.upperBound, Math.max(config.lowerBound, value)),
+    ),
+  );
 }
