@@ -129,6 +129,7 @@ define combatStatus {
 /**
  * @id 11171
  * @name 西风枪术·镝传
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -143,6 +144,7 @@ define skill {
 /**
  * @id 11172
  * @name 星霜的流旋
+ * @cost 3*Cryo
  * @description
  * 造成2点冰元素伤害，生成灵风。
  */
@@ -157,6 +159,7 @@ define skill {
 /**
  * @id 11173
  * @name 苍翎的颂愿
+ * @cost 3*Cryo, 2*Energy
  * @description
  * 治疗我方全体角色1点，生成鹰翎心得和鹰翎祝念。
  */
@@ -173,6 +176,7 @@ define skill {
 /**
  * @id 11174
  * @name 速射牵制
+ * @cost
  * @description
  * 【被动】自身使用技能后：下次我方造成的物理伤害+1。（每回合2次）
  */
@@ -191,6 +195,8 @@ define skill {
 /**
  * @id 1117
  * @name 米卡
+ * @hp 10
+ * @energy 2
  * @description
  * 翎羽如穗，绘摹殊境。
  */
@@ -209,6 +215,7 @@ define character {
 /**
  * @id 211171
  * @name 依随的策援
+ * @cost 3*Cryo
  * @description
  * 战斗行动：我方出战角色为米卡时，装备此牌。
  * 米卡装备此牌后，立刻使用一次星霜的流旋。

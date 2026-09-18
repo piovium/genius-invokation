@@ -103,6 +103,7 @@ define combatStatus {
 /**
  * @id 13171
  * @name 芒焰之翼斩
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -118,6 +119,7 @@ define skill {
 /**
  * @id 13172
  * @name 二元式·聚分熔炼
+ * @cost 3*Pyro
  * @description
  * 造成3点火元素伤害，自身附属精质转变。
  */
@@ -136,6 +138,7 @@ define skill {
 /**
  * @id 13173
  * @name 白化法·如光流变
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 造成1点火元素伤害，生成白化之是。
  */
@@ -151,6 +154,7 @@ define skill {
 /**
  * @id 13175
  * @name 光灵遵神数显现
+ * @cost
  * @description
  * 【被动】自身使用「普通攻击」后：将自身「元素爆发」切换为黑度法·如星阴燃。
  * 自身使用「元素战技」后：将自身「元素爆发」切换为白化法·如光流变。
@@ -174,6 +178,8 @@ define skill {
 /**
  * @id 1317
  * @name 杜林
+ * @hp 10
+ * @energy 2
  * @description
  * 启自笔下，翱于星间。
  */
@@ -189,6 +195,7 @@ define character {
 /**
  * @id 213171
  * @name 红土之逆
+ * @cost 4*Pyro, 2*Energy
  * @description
  * 战斗行动：我方出战角色为杜林时，装备此牌。
  * 杜林装备此牌后，根据自身当前「元素爆发」立刻使用一次白化法·如光流变或黑度法·如星阴燃。
@@ -223,6 +230,7 @@ define card {
 /**
  * @id 13174
  * @name 黑度法·如星阴燃
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 造成3点火元素伤害，生成黑度之否。
  */
@@ -238,6 +246,8 @@ define skill {
 /**
  * @id 6606
  * @name 杜林
+ * @hp 10
+ * @energy 2
  * @description
  * 
  */

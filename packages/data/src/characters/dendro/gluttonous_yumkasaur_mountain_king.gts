@@ -58,6 +58,7 @@ define status {
 /**
  * @id 27041
  * @name 沉重尾击
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -72,6 +73,7 @@ define skill {
 /**
  * @id 27042
  * @name 喷吐草实
+ * @cost 3*Dendro
  * @description
  * 造成2点草元素伤害，抓1张「料理」牌。
  */
@@ -86,6 +88,7 @@ define skill {
 /**
  * @id 27043
  * @name 榴果爆轰
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 造成5点火元素伤害。
  */
@@ -104,6 +107,7 @@ const GluttonousRexTriggerFromTalent = customEvent(
 /**
  * @id 27044
  * @name 贪食之王
+ * @cost
  * @description
  * 自身不会饱腹。
  * 我方打出「料理」牌后：随机附属1层食足力增或食足体健，或获得1点额外最大生命值。（每回合2次）
@@ -140,6 +144,7 @@ define skill {
 /**
  * @id 27045
  * @name 贪食之王
+ * @cost
  * @description
  * 自身不会饱腹。
  * 我方打出「料理」牌后：随机附属1层食足力增或食足体健，或获得1点额外最大生命值。（每回合2次）
@@ -159,6 +164,8 @@ define skill {
 /**
  * @id 2704
  * @name 贪食匿叶龙山王
+ * @hp 8
+ * @energy 2
  * @description
  * 自古老的年代存活至今，经历了无数战场的强大匿叶龙。
  */
@@ -178,6 +185,7 @@ define character {
 /**
  * @id 227041
  * @name 饕噬尽吞
+ * @cost 1*Dendro
  * @description
  * 快速行动：装备给我方的贪食匿叶龙山王，敌方抓1张牌，然后我方窃取1张当前元素骰费用最高的对方手牌。
  * 我方打出名称不存在于本局最初牌组的牌时：触发贪食之王1次。（每回合1次）

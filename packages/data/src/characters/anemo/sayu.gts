@@ -35,6 +35,7 @@ define summon {
 /**
  * @id 15074
  * @name 风风轮舞踢
+ * @cost
  * @description
  * （需准备1个行动轮）
  * 造成2点风元素伤害（或被扩散元素的伤害）。
@@ -69,6 +70,7 @@ define status {
 /**
  * @id 15071
  * @name 忍刀·终末番
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -83,6 +85,7 @@ define skill {
 /**
  * @id 15072
  * @name 呜呼流·风隐急进
+ * @cost 3*Anemo
  * @description
  * 造成1点风元素伤害，本角色准备技能：风风轮舞踢。
  * 如果当前技能引发了扩散，则风风轮舞踢将改为造成被扩散元素的伤害。
@@ -122,6 +125,7 @@ define skill {
 /**
  * @id 15073
  * @name 呜呼流·影貉缭乱
+ * @cost 3*Anemo, 2*Energy
  * @description
  * 造成1点风元素伤害，召唤不倒貉貉。
  */
@@ -137,6 +141,8 @@ define skill {
 /**
  * @id 1507
  * @name 早柚
+ * @hp 10
+ * @energy 2
  * @description
  * 一梦作伴，万野无踪。
  */
@@ -155,6 +161,7 @@ define character {
 /**
  * @id 215071
  * @name 偷懒的新方法
+ * @cost 3*Anemo
  * @description
  * 战斗行动：我方出战角色为早柚时，装备此牌。
  * 早柚装备此牌后，立刻使用一次呜呼流·风隐急进。

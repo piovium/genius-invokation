@@ -81,6 +81,7 @@ define status {
 /**
  * @id 14121
  * @name 逐影之誓
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成1点物理伤害。如果本角色附属夜巡，则此技能少花费1个无色元素。
  */
@@ -95,6 +96,7 @@ define skill {
 /**
  * @id 14122
  * @name 狩夜之巡
+ * @cost 2*Electro
  * @description
  * 自身附属夜巡，移除自身所有生命之契。然后根据所移除的层数，造成雷元素伤害，并治疗自身。（伤害和治疗最多4点）
  */
@@ -118,6 +120,7 @@ define skill {
 /**
  * @id 14123
  * @name 残光将终
+ * @cost 3*Electro, 2*Energy
  * @description
  * 造成3点雷元素伤害，自身附属4层生命之契。
  */
@@ -137,6 +140,8 @@ define skill {
 /**
  * @id 1412
  * @name 克洛琳德
+ * @hp 10
+ * @energy 2
  * @description
  * 洞灭魔影，持护长夜。
  */
@@ -152,6 +157,7 @@ define character {
 /**
  * @id 214121
  * @name 破夜的明焰
+ * @cost 2*Electro
  * @description
  * 战斗行动：我方出战角色为克洛琳德时，装备此牌。
  * 克洛琳德装备此牌后，立刻使用一次狩夜之巡。

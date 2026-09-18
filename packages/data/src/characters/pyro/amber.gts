@@ -57,6 +57,7 @@ define summon {
 /**
  * @id 13041
  * @name 神射手
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -71,6 +72,7 @@ define skill {
 /**
  * @id 13042
  * @name 爆弹玩偶
+ * @cost 3*Pyro
  * @description
  * 召唤兔兔伯爵。
  */
@@ -84,6 +86,7 @@ define skill {
 /**
  * @id 13043
  * @name 箭雨
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 造成2点火元素伤害，对所有敌方后台角色造成2点穿透伤害。
  */
@@ -99,6 +102,8 @@ define skill {
 /**
  * @id 1304
  * @name 安柏
+ * @hp 12
+ * @energy 2
  * @description
  * 如果想要成为一名伟大的牌手…
  * 首先，要有坐上牌桌的勇气。
@@ -115,6 +120,7 @@ define character {
 /**
  * @id 213041
  * @name 一触即发
+ * @cost 3*Pyro
  * @description
  * 战斗行动：我方出战角色为安柏时，装备此牌。
  * 安柏装备此牌后，立刻使用一次爆弹玩偶。

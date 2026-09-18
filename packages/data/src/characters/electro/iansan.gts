@@ -58,6 +58,7 @@ define combatStatus {
 /**
  * @id 14141
  * @name 负重锥击
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -72,6 +73,7 @@ define skill {
 /**
  * @id 14142
  * @name 电掣雷驰
+ * @cost 3*Electro
  * @description
  * 造成2点雷元素伤害，自身进入夜魂加持，获得1点「夜魂值」，生成1层敏捷切换。
  */
@@ -87,6 +89,7 @@ define skill {
 /**
  * @id 14143
  * @name 力的三原理
+ * @cost 3*Electro, 2*Energy
  * @description
  * 造成2点雷元素伤害，自身进入夜魂加持，获得1点「夜魂值」，生成动能标示。
  */
@@ -109,6 +112,7 @@ define skill {
 /**
  * @id 14144
  * @name 热量均衡计划
+ * @cost
  * @description
  * 【被动】自身处于夜魂加持时，我方角色准备技能或累计2次「切换角色」后，如果「夜魂值」为2，则治疗我方受伤最多的角色1点，否则，获得1点「夜魂值」。（每回合3次）
  */
@@ -165,6 +169,7 @@ define skill {
 /**
  * @id 14145
  * @name 热量均衡计划
+ * @cost
  * @description
  * 【被动】自身处于夜魂加持时，我方角色准备技能或累计2次「切换角色」后，如果「夜魂值」为2，则治疗我方受伤最多的角色1点，否则，获得1点「夜魂值」。（每回合3次）
  */
@@ -178,6 +183,7 @@ define skill {
 /**
  * @id 14146
  * @name 热量均衡计划
+ * @cost
  * @description
  * 【被动】自身处于夜魂加持时，我方角色准备技能或累计2次「切换角色」后，如果「夜魂值」为2，则治疗我方受伤最多的角色1点，否则，获得1点「夜魂值」。（每回合3次）
  */
@@ -191,6 +197,8 @@ define skill {
 /**
  * @id 1414
  * @name 伊安珊
+ * @hp 11
+ * @energy 2
  * @description
  * 早睡早起，低糖低盐。
  */
@@ -210,6 +218,7 @@ define character {
 /**
  * @id 214141
  * @name 「沃陆之邦」的训教
+ * @cost 3*Electro, 2*Energy
  * @description
  * 战斗行动：我方出战角色为伊安珊时，装备此牌。
  * 伊安珊装备此牌后，立刻使用一次力的三原理。

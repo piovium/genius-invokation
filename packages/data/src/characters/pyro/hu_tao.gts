@@ -57,6 +57,7 @@ define status {
 /**
  * @id 13071
  * @name 往生秘传枪法
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -71,6 +72,7 @@ define skill {
 /**
  * @id 13072
  * @name 蝶引来生
+ * @cost 2*Pyro
  * @description
  * 本角色附属彼岸蝶舞。
  */
@@ -84,6 +86,7 @@ define skill {
 /**
  * @id 13073
  * @name 安神秘法
+ * @cost 3*Pyro, 3*Energy
  * @description
  * 造成4点火元素伤害，治疗自身2点。如果本角色生命值不多于6，则造成的伤害和治疗各+1。
  */
@@ -104,6 +107,8 @@ define skill {
 /**
  * @id 1307
  * @name 胡桃
+ * @hp 12
+ * @energy 3
  * @description
  * 「送走，全送走。」
  */
@@ -119,6 +124,7 @@ define character {
 /**
  * @id 213071
  * @name 血之灶火
+ * @cost 2*Pyro
  * @description
  * 战斗行动：我方出战角色为胡桃时，装备此牌。
  * 胡桃装备此牌后，立刻使用一次蝶引来生。

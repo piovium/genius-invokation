@@ -58,6 +58,7 @@ define combatStatus {
 /**
  * @id 17111
  * @name 林麓旅踏
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成1点草元素伤害。
  */
@@ -72,6 +73,7 @@ define skill {
 /**
  * @id 17112
  * @name 圣言述咏·终宵永眠
+ * @cost 3*Dendro
  * @description
  * 造成1点草元素伤害，生成霜林圣域。如果我方手牌中存在附着有费用降低的卡牌，则移除随机1张牌的1层费用降低效果并改为生成可造成2点伤害的霜林圣域。
  */
@@ -98,6 +100,7 @@ define skill {
 /**
  * @id 17113
  * @name 圣言述咏·众心为月
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 赋予我方随机3张当前元素骰费用不为0的手牌费用降低。生成3层「苍色祷歌」。
  */
@@ -117,6 +120,7 @@ define skill {
 /**
  * @id 17114
  * @name 月兆祝赐·千籁恩宠
+ * @cost
  * @description
  * 【被动】本局游戏中，敌方受到绽放反应时，改为月绽放反应。
  * 敌方受到月绽放反应时：使我方牌组中随机1张卡牌附着费用降低。
@@ -138,6 +142,7 @@ define skill {
 /**
  * @id 17115
  * @name 月兆祝赐·千籁恩宠
+ * @cost
  * @description
  * 【被动】本局游戏中，敌方受到绽放反应时，改为月绽放反应。
  * 敌方受到月绽放反应时：使我方牌组中随机1张卡牌附着费用降低。
@@ -152,6 +157,8 @@ define skill {
 /**
  * @id 1711
  * @name 菈乌玛
+ * @hp 11
+ * @energy 2
  * @description
  * 镜中有月，月碎水中。
  */
@@ -171,6 +178,7 @@ define character {
 /**
  * @id 217111
  * @name 「唇啊，为我纺出歌与吟哦」
+ * @cost 3*Dendro
  * @description
  * 战斗行动：我方出战角色为菈乌玛时，装备此牌。
  * 菈乌玛装备此牌后，立刻使用一次圣言述咏·终宵永眠。

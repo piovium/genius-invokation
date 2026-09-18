@@ -205,6 +205,7 @@ define card {
 /**
  * @id 16111
  * @name 锐锋攫猎
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。若自身附属夜魂加持，则恢复1点「夜魂值」。
  */
@@ -226,6 +227,7 @@ define skill {
 /**
  * @id 16112
  * @name 音火锻淬
+ * @cost 2*Geo
  * @description
  * 本角色附属刃轮装束，进入夜魂加持并获得1点「夜魂值」。（角色进入夜魂加持后不可使用此技能）
  * （附属刃轮装束的角色可以使用特技：高速腾跃）
@@ -242,6 +244,7 @@ define skill {
 /**
  * @id 16113
  * @name 豹烈律动！
+ * @cost 3*Geo, 2*Energy
  * @description
  * 造成2点岩元素伤害，抓1张牌，并且治疗我方受伤最多的角色1点。每层「源音采样」·岩额外抓1张牌，每层其他属性的「源音采样」额外治疗1点。
  */
@@ -288,6 +291,7 @@ type SampleType = keyof typeof sampleMap;
 /**
  * @id 16114
  * @name 「源音采样」
+ * @cost
  * @description
  * 【被动】战斗开始时，初始生成3层「源音采样」·岩，若我方存在火、水、冰、雷的角色，则将1层「源音采样」·岩转化为对应元素的「源音采样」。
  */
@@ -333,6 +337,8 @@ define skill {
 /**
  * @id 1611
  * @name 希诺宁
+ * @hp 12
+ * @energy 2
  * @description
  * 嵴锋荡响，铄石显金
  */
@@ -349,6 +355,7 @@ define character {
 /**
  * @id 216111
  * @name 丛山锻火驰行
+ * @cost 2*Geo
  * @description
  * 战斗行动：我方出战角色为希诺宁时，装备此牌。
  * 希诺宁装备此牌后，立刻使用一次音火锻淬。

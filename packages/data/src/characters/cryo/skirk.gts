@@ -78,6 +78,7 @@ define status {
 /**
  * @id 111161
  * @name 诸武相授
+ * @cost
  * @description
  * 我方丝柯克附属七相一闪。
  * 回合开始或我方执行切换后：舍弃此牌，获得1点蛇之狡谋。
@@ -104,6 +105,7 @@ define card {
 /**
  * @id 111163
  * @name 虚境裂隙
+ * @cost
  * @description
  * 战斗行动：我方手牌中存在当前元素骰费用为3的手牌时，舍弃1张当前元素骰费用为3的手牌，我方丝柯克获得2点蛇之狡谋。
  */
@@ -126,6 +128,7 @@ define card {
 /**
  * @id 11161
  * @name 极恶技·断
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -140,6 +143,7 @@ define skill {
 /**
  * @id 11162
  * @name 极恶技·闪
+ * @cost 2*Cryo
  * @description
  * 获得2点蛇之狡谋，生成手牌诸武相授。（每回合1次）
  */
@@ -156,6 +160,7 @@ define skill {
 /**
  * @id 11165
  * @name 极恶技·尽
+ * @cost 1*Cryo
  * @description
  * 将2个非万能元素骰转化为冰元素骰，舍弃至多2张当前元素骰费用为0骰的卡牌，每舍弃1张，丝柯克获得1点蛇之狡谋。
  */
@@ -177,6 +182,7 @@ define skill {
 /**
  * @id 11163
  * @name 极恶技·灭
+ * @cost 3*Cryo, 2*_special_energy
  * @description
  * 消耗所有蛇之狡谋，造成等同于消耗蛇之狡谋数量的冰元素伤害，对后台角色造成2点穿透伤害，如果消耗了7点蛇之狡谋，则改为对后台角色造成3点穿透伤害。
  */
@@ -198,6 +204,7 @@ define skill {
 /**
  * @id 11164
  * @name 理外之理
+ * @cost
  * @description
  * 【被动】丝柯克无法获得充能，改为可以积累蛇之狡谋，最多7点。
  * 我方触发冻结/冰扩散/超导/冰结晶反应后：生成手牌 虚境裂隙。（每回合3次）
@@ -233,6 +240,7 @@ define skill {
 /**
  * @id 11167
  * @name 理外之理
+ * @cost
  * @description
  * 【被动】丝柯克无法获得充能，改为可以积累蛇之狡谋，最多7点。
  * 我方触发冻结/冰扩散/超导/冰结晶反应后：生成手牌 虚境裂隙。（每回合3次）
@@ -247,6 +255,8 @@ define skill {
 /**
  * @id 1116
  * @name 丝柯克
+ * @hp 10
+ * @energy -1
  * @description
  * 星海默然，覆灭无声。
  */
@@ -263,8 +273,10 @@ define character {
 /**
  * @id 6605
  * @name 丝柯克
+ * @hp 10
+ * @energy -1
  * @description
- *
+ * 
  */
 define character {
   id 6605 as Skirk01;
@@ -279,6 +291,7 @@ define character {
 /**
  * @id 211161
  * @name 湮远
+ * @cost 1*Cryo
  * @description
  * 快速行动：装备给我方的丝柯克。
  * 装备有此牌的丝柯克在场，我方打出或舍弃虚境裂隙时：对敌方出战角色造成1点冰元素伤害。（每回合1次）
@@ -305,6 +318,7 @@ define card {
 /**
  * @id 11166
  * @name 理外之理
+ * @cost
  * @description
  * 【被动】丝柯克无法获得充能，改为可以积累蛇之狡谋，最多7点。
  * 我方触发冻结/冰扩散/超导/冰结晶反应后：生成手牌 虚境裂隙。（每回合3次）

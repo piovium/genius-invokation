@@ -81,6 +81,7 @@ define combatStatus {
 /**
  * @id 13051
  * @name 烟火打扬
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -95,6 +96,7 @@ define skill {
 /**
  * @id 13052
  * @name 焰硝庭火舞
+ * @cost 1*Pyro
  * @description
  * 本角色附属庭火焰硝。（此技能不产生充能）
  */
@@ -113,6 +115,7 @@ define skill {
 /**
  * @id 13053
  * @name 琉金云间草
+ * @cost 3*Pyro, 3*Energy
  * @description
  * 造成3点火元素伤害，生成琉金火光。
  */
@@ -128,6 +131,8 @@ define skill {
 /**
  * @id 1305
  * @name 宵宫
+ * @hp 10
+ * @energy 3
  * @description
  * 花见坂第十一届全街邀请赛「长野原队」队长兼首发牌手。
  */
@@ -143,6 +148,7 @@ define character {
 /**
  * @id 213051
  * @name 长野原龙势流星群
+ * @cost 1*Pyro
  * @description
  * 战斗行动：我方出战角色为宵宫时，装备此牌。
  * 宵宫装备此牌后，立刻使用一次焰硝庭火舞。

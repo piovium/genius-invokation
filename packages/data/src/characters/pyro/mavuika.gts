@@ -75,6 +75,7 @@ define combatStatus {
 /**
  * @id 13155
  * @name 驰轮车·疾驰
+ * @cost
  * @description
  * 行动阶段开始时：生成2个万能元素骰。
  */
@@ -232,6 +233,7 @@ define combatStatus {
 /**
  * @id 13151
  * @name 以火织命
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -246,6 +248,7 @@ define skill {
 /**
  * @id 13152
  * @name 称名之刻
+ * @cost 3*Pyro
  * @description
  * 自身进入夜魂加持，获得2点「夜魂值」，并从3张驰轮车中挑选1张加入手牌。
  */
@@ -264,6 +267,7 @@ define skill {
 /**
  * @id 13153
  * @name 燔天之时
+ * @cost 4*Pyro, 3*Al_energy
  * @description
  * 本角色进入夜魂加持，获得1点「夜魂值」，消耗自身全部战意，对敌方前台造成等同于消耗战意数量的火元素伤害。
  * 若消耗了6点战意，则自身附属死生之炉。
@@ -285,6 +289,7 @@ define skill {
 /**
  * @id 13154
  * @name 战意
+ * @cost
  * @description
  * 角色不会获得充能。
  * 在我方消耗「夜魂值」或使用「普通攻击」后，获得1点战意。
@@ -313,6 +318,8 @@ define skill {
 /**
  * @id 1315
  * @name 玛薇卡
+ * @hp 10
+ * @energy -1
  * @description
  * 至明、至炽、至烈的再临之火。
  */
@@ -334,6 +341,7 @@ define character {
 /**
  * @id 213151
  * @name 「人之名」解放
+ * @cost 1*Pyro
  * @description
  * 从3张驰轮车中挑选1张加入手牌。
  * 我方打出特技牌后：若可能，玛薇卡恢复1点「夜魂值」。（每回合1次）

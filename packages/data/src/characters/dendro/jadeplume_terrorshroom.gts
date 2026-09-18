@@ -63,6 +63,7 @@ define status {
 /**
  * @id 27011
  * @name 菌王舞步
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -77,6 +78,7 @@ define skill {
 /**
  * @id 27012
  * @name 不稳定孢子云
+ * @cost 3*Dendro
  * @description
  * 造成3点草元素伤害。
  */
@@ -90,6 +92,7 @@ define skill {
 /**
  * @id 27013
  * @name 尾羽豪放
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 造成4点草元素伤害，消耗所有活化激能层数，每层使此伤害+1。
  */
@@ -109,6 +112,7 @@ define skill {
 /**
  * @id 27014
  * @name 活化激能
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属活化激能。
  */
@@ -127,6 +131,8 @@ define skill {
 /**
  * @id 2701
  * @name 翠翎恐蕈
+ * @hp 12
+ * @energy 2
  * @description
  * 悄声静听，可以听到幽林之中，蕈类王者巡视领土的脚步…
  */
@@ -142,6 +148,7 @@ define character {
 /**
  * @id 227011
  * @name 孢子增殖
+ * @cost 3*Dendro
  * @description
  * 战斗行动：我方出战角色为翠翎恐蕈时，装备此牌。
  * 翠翎恐蕈装备此牌后，立刻使用一次不稳定孢子云。

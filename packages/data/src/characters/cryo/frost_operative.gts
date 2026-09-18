@@ -37,6 +37,7 @@ define status {
 /**
  * @id 21041
  * @name 迅捷剑锋
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -51,6 +52,7 @@ define skill {
 /**
  * @id 21042
  * @name 霜刃截击
+ * @cost 3*Cryo
  * @description
  * 造成3点冰元素伤害。
  */
@@ -64,6 +66,7 @@ define skill {
 /**
  * @id 21043
  * @name 掠袭之刺
+ * @cost 3*Cryo, 2*Energy
  * @description
  * 造成5点冰元素伤害，本角色附属掠袭锐势。
  */
@@ -79,6 +82,7 @@ define skill {
 /**
  * @id 21044
  * @name 血契掠影
+ * @cost
  * @description
  * 【被动】本角色使用技能后：对敌方出战角色附属可用次数为（本技能最终伤害值-2）的生命之契。（最多5层）
  */
@@ -111,6 +115,8 @@ define skill {
 /**
  * @id 2104
  * @name 愚人众·霜役人
+ * @hp 11
+ * @energy 2
  * @description
  * 自幼就被选中的人，经长久年月的教化与训练，在无数次的汰换后才能成为所谓的「役人」。
  */
@@ -126,6 +132,7 @@ define character {
 /**
  * @id 221041
  * @name 冰雅刺剑
+ * @cost 3*Cryo
  * @description
  * 战斗行动：我方出战角色为愚人众·霜役人时，装备此牌。
  * 愚人众·霜役人装备此牌后，立刻使用一次霜刃截击。

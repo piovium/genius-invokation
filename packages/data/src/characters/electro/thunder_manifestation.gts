@@ -105,6 +105,7 @@ define combatStatus {
 /**
  * @id 24021
  * @name 轰霆翼斩
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成1点雷元素伤害。
  */
@@ -119,6 +120,7 @@ define skill {
 /**
  * @id 24022
  * @name 雷墙倾轧
+ * @cost 3*Electro
  * @description
  * 对附属有雷鸣探知的敌方角色造成3点雷元素伤害。（如果敌方不存在符合条件角色，则改为对出战角色造成伤害）
  */
@@ -137,6 +139,7 @@ define skill {
 /**
  * @id 24023
  * @name 轰雷禁锢
+ * @cost 3*Electro, 2*Energy
  * @description
  * 造成2点雷元素伤害，召唤轰雷禁锢。
  */
@@ -152,6 +155,7 @@ define skill {
 /**
  * @id 24024
  * @name 雷霆探知
+ * @cost
  * @description
  * 【被动】战斗开始时，在敌方场上生成雷霆探针。
  */
@@ -167,6 +171,8 @@ define skill {
 /**
  * @id 2402
  * @name 雷音权现
+ * @hp 10
+ * @energy 2
  * @description
  * 只要土地中的怨恨不消，那雷鸣也不会断绝吧。
  */
@@ -185,6 +191,7 @@ define character {
 /**
  * @id 224021
  * @name 悲号回唱
+ * @cost 3*Electro
  * @description
  * 战斗行动：我方出战角色为雷音权现时，装备此牌。
  * 雷音权现装备此牌后，立刻使用一次雷墙倾轧。

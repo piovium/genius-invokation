@@ -106,6 +106,7 @@ define combatStatus {
 /**
  * @id 17081
  * @name 旋规设矩
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -120,6 +121,7 @@ define skill {
 /**
  * @id 17082
  * @name 画则巧施
+ * @cost 3*Dendro
  * @description
  * 造成2点草元素伤害，生成迸发扫描。
  */
@@ -134,6 +136,7 @@ define skill {
 /**
  * @id 17083
  * @name 繁绘隅穹
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 造成3点草元素伤害，本角色附属梅赫拉克的助力，生成2层迸发扫描。
  */
@@ -152,6 +155,8 @@ define skill {
 /**
  * @id 1708
  * @name 卡维
+ * @hp 12
+ * @energy 2
  * @description
  * 体悟、仁爱与识美之知。
  */
@@ -167,6 +172,7 @@ define character {
 /**
  * @id 217081
  * @name 预算师的技艺
+ * @cost 3*Dendro
  * @description
  * 战斗行动：我方出战角色为卡维时，装备此牌。
  * 卡维装备此牌后，立刻使用一次画则巧施。

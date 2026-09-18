@@ -19,6 +19,7 @@ import { BonecrunchersEnergyBlock } from "../../cards/event/other.gts";
 /**
  * @id 22071
  * @name 尖牙噬咬
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -33,6 +34,7 @@ define skill {
 /**
  * @id 22072
  * @name 鳄齿锐波
+ * @cost 3*Hydro
  * @description
  * 造成3点水元素伤害，将至多1张当前元素骰费用最高的手牌置入牌组底，生成手牌噬骸能量块。
  */
@@ -49,6 +51,7 @@ define skill {
 /**
  * @id 22073
  * @name 凶鳄狂浪
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 造成4点水元素伤害，舍弃至多3张噬骸能量块，每舍弃1张，治疗我方受伤最多的角色1点，并使其获得1点最大生命值。
  */
@@ -72,6 +75,7 @@ define skill {
 /**
  * @id 22074
  * @name 圣骸感应
+ * @cost
  * @description
  * 【被动】我方打出或舍弃噬骸能量块后，治疗我方受伤最多的角色1点。
  */
@@ -92,6 +96,8 @@ define skill {
 /**
  * @id 2207
  * @name 圣骸角鳄
+ * @hp 11
+ * @energy 2
  * @description
  * 因为啃噬伟大的生命体，而扭曲异变的爬行动物，驾驭着多变的水流。
  */
@@ -107,6 +113,7 @@ define character {
 /**
  * @id 222071
  * @name 亡水溢流
+ * @cost 1*Hydro
  * @description
  * 快速行动：装备给我方的圣骸角鳄。
  * 入场时：生成手牌噬骸能量块。

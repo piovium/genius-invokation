@@ -26,6 +26,7 @@ import { ReforgeTheHolyBlade, WoodenToySword } from "../event/other.gts";
 /**
  * @id 321032
  * @name 沉玉谷
+ * @cost
  * @description
  * 冒险经历达到2时：生成2张手牌沉玉茶露。
  * 冒险经历达到4时：我方获得3层高效切换和敏捷切换。
@@ -84,6 +85,7 @@ define card {
 /**
  * @id 321033
  * @name 自体自身之塔
+ * @cost
  * @description
  * 入场时：对我方所有角色造成1点穿透伤害。
  * 冒险经历达到偶数次时：生成1个随机基础元素骰。
@@ -151,6 +153,7 @@ define summon {
 /**
  * @id 321034
  * @name 天蛇船
+ * @cost
  * @description
  * 冒险经历增加时：将1个元素骰转换为万能元素。
  * 冒险经历达到2时：抓1张牌。
@@ -238,6 +241,7 @@ define combatStatus {
 /**
  * @id 321040
  * @name 层岩巨渊
+ * @cost
  * @description
  * 入场时：在我方牌组中随机生成5张事件牌。
  * 冒险经历达到偶数次时：生成1个随机基础元素骰并抓1张牌。

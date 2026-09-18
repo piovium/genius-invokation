@@ -35,6 +35,7 @@ define status {
 /**
  * @id 63014
  * @name 红莲旋火
+ * @cost
  * @description
  * 造成3点火元素伤害。
  */
@@ -59,6 +60,7 @@ define status {
 /**
  * @id 63011
  * @name 红莲之蛾
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成1点火元素伤害。
  */
@@ -73,6 +75,7 @@ define skill {
 /**
  * @id 63012
  * @name 烬灭之鞭
+ * @cost 3*Pyro
  * @description
  * 造成2点火元素伤害，并使目标角色附属炽热。
  */
@@ -87,6 +90,7 @@ define skill {
 /**
  * @id 63013
  * @name 燃焰旋织
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 造成6点火元素伤害。
  */
@@ -101,8 +105,10 @@ define skill {
 /**
  * @id 6301
  * @name 焚尽的炽炎魔女
+ * @hp 10
+ * @energy 2
  * @description
- *
+ * 
  */
 define character {
   id 6301 as CrimsonWitchOfEmbers;

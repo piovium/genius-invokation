@@ -61,6 +61,7 @@ define status {
 /**
  * @id 14091
  * @name 指尖雷暴
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成1点雷元素伤害，并使敌方出战角色附属引雷。
  */
@@ -76,6 +77,7 @@ define skill {
 /**
  * @id 14092
  * @name 苍雷
+ * @cost 3*Electro
  * @description
  * 造成2点雷元素伤害；如果敌方出战角色未附属引雷，则使其附属引雷。
  */
@@ -95,6 +97,7 @@ define skill {
 /**
  * @id 14093
  * @name 蔷薇的雷光
+ * @cost 3*Electro, 2*Energy
  * @description
  * 造成2点雷元素伤害，召唤蔷薇雷光，使敌方出战角色附属引雷。
  */
@@ -111,6 +114,8 @@ define skill {
 /**
  * @id 1409
  * @name 丽莎
+ * @hp 10
+ * @energy 2
  * @description
  * 追寻魔导的奥秘，静待真相的机缘。
  */
@@ -126,6 +131,7 @@ define character {
 /**
  * @id 214091
  * @name 脉冲的魔女
+ * @cost 1*Electro
  * @description
  * 切换到装备有此牌的丽莎后：使敌方出战角色附属引雷。（每回合1次）
  * （牌组中包含丽莎，才能加入牌组）

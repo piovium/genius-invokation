@@ -62,6 +62,7 @@ define status {
 /**
  * @id 26011
  * @name Plama Lawa
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -76,6 +77,7 @@ define skill {
 /**
  * @id 26012
  * @name Movo Lawa
+ * @cost 3*Geo
  * @description
  * 造成3点物理伤害。
  */
@@ -89,6 +91,7 @@ define skill {
 /**
  * @id 26013
  * @name Upa Shato
+ * @cost 3*Geo, 2*Energy
  * @description
  * 造成5点物理伤害。
  */
@@ -103,6 +106,7 @@ define skill {
 /**
  * @id 26014
  * @name 魔化：岩盔
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属岩盔和坚岩之力。
  */
@@ -119,6 +123,8 @@ define skill {
 /**
  * @id 2601
  * @name 丘丘岩盔王
+ * @hp 10
+ * @energy 2
  * @description
  * 绕道而行吧，因为前方是属于「王」的领域。
  */
@@ -134,6 +140,7 @@ define character {
 /**
  * @id 226011
  * @name 重铸：岩盔
+ * @cost 4*Geo, 2*Energy
  * @description
  * 战斗行动：我方出战角色为丘丘岩盔王时，装备此牌。
  * 丘丘岩盔王装备此牌后，立刻使用一次Upa Shato。

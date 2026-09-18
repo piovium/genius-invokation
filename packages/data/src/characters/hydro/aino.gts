@@ -36,6 +36,7 @@ define summon {
 /**
  * @id 12161
  * @name 敲打修理法
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -50,6 +51,7 @@ define skill {
 /**
  * @id 12162
  * @name 妙思捕手
+ * @cost 3*Hydro
  * @description
  * 造成2点水元素伤害，生成1层敏捷切换。如果手牌中有卡牌具有赋能，则改为造成3点水元素伤害.
  */
@@ -68,6 +70,7 @@ define skill {
 /**
  * @id 12163
  * @name 精密水冷仪
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 造成2点水元素伤害，召唤冷静一下鸭。
  */
@@ -83,6 +86,7 @@ define skill {
 /**
  * @id 12164
  * @name 模块式高效运作
+ * @cost
  * @description
  * 我方卡牌被赋予赋能时：如果我方场上存在冷静一下鸭，则使其可用次数+1，否则自身获得1点充能。（每回合1次）
  */
@@ -108,6 +112,8 @@ define skill {
 /**
  * @id 1216
  * @name 爱诺
+ * @hp 10
+ * @energy 2
  * @description
  * 叮铃哐啷，奇思成真。
  */
@@ -126,6 +132,7 @@ define character {
 /**
  * @id 212161
  * @name 天才之为构造之责任
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 战斗行动：我方出战角色为爱诺时，装备此牌。
  * 爱诺装备此牌后，立刻使用一次精密水冷仪。

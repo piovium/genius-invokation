@@ -24,6 +24,7 @@ import {
 /**
  * @id 12104
  * @name 衡平推裁
+ * @cost
  * @description
  * （需准备1个行动轮）
  * 造成2点水元素伤害，如果本角色生命值至少为6，则此伤害+1并对自身造成1点穿透伤害。
@@ -84,6 +85,7 @@ define combatStatus {
 /**
  * @id 12101
  * @name 如水从平
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成1点水元素伤害。
  */
@@ -98,6 +100,7 @@ define skill {
 /**
  * @id 12102
  * @name 泪水啊，我必偿还
+ * @cost 3*Hydro
  * @description
  * 造成2点水元素伤害，生成源水之滴。
  */
@@ -112,6 +115,7 @@ define skill {
 /**
  * @id 12103
  * @name 潮水啊，我已归来
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 造成2点水元素伤害，对所有后台敌人造成1点穿透伤害，生成可用次数为2的源水之滴。
  */
@@ -132,8 +136,9 @@ define skill {
 /**
  * @id 12105
  * @name 源水之滴
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 12105 as SourcewaterDropletSkill;
@@ -156,6 +161,8 @@ define skill {
 /**
  * @id 1210
  * @name 那维莱特
+ * @hp 11
+ * @energy 2
  * @description
  * 凡高大者，无不蔑视。
  */
@@ -175,6 +182,7 @@ define character {
 /**
  * @id 212101
  * @name 古海孑遗的权柄
+ * @cost 1*Hydro, 2*Void
  * @description
  * 战斗行动：我方出战角色为那维莱特时，装备此牌。
  * 那维莱特装备此牌后，立刻使用一次如水从平。

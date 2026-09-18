@@ -34,6 +34,7 @@ define status {
 /**
  * @id 14021
  * @name 钢脊
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -48,6 +49,7 @@ define skill {
 /**
  * @id 14022
  * @name 利爪与苍雷
+ * @cost 3*Electro
  * @description
  * 造成3点雷元素伤害。
  */
@@ -61,6 +63,7 @@ define skill {
 /**
  * @id 14023
  * @name 雷牙
+ * @cost 3*Electro, 2*Energy
  * @description
  * 造成3点雷元素伤害，本角色附属雷狼。
  */
@@ -76,6 +79,8 @@ define skill {
 /**
  * @id 1402
  * @name 雷泽
+ * @hp 10
+ * @energy 2
  * @description
  * 「牌，难。」
  * 「但，有朋友…」
@@ -92,6 +97,7 @@ define character {
 /**
  * @id 214021
  * @name 觉醒
+ * @cost 3*Electro
  * @description
  * 战斗行动：我方出战角色为雷泽时，装备此牌。
  * 雷泽装备此牌后，立刻使用一次利爪与苍雷。

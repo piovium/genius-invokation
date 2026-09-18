@@ -83,6 +83,7 @@ define status {
 /**
  * @id 24031
  * @name 旋尾扇击
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -97,6 +98,7 @@ define skill {
 /**
  * @id 24032
  * @name 霰舞鱼群
+ * @cost 3*Electro
  * @description
  * 造成3点雷元素伤害。
  * 如果本角色已附属原海明珠，则使其可用次数+1。（每回合1次）
@@ -111,6 +113,7 @@ define skill {
 /**
  * @id 24033
  * @name 原海古雷
+ * @cost 3*Electro, 2*Energy
  * @description
  * 造成1点雷元素伤害，本角色附属原海明珠，召唤共鸣珊瑚珠。
  */
@@ -127,6 +130,7 @@ define skill {
 /**
  * @id 24034
  * @name 明珠甲胄
+ * @cost
  * @description
  * 【被动】战斗开始时，本角色附属原海明珠。
  */
@@ -142,8 +146,9 @@ define skill {
 /**
  * @id 24037
  * @name 霰舞鱼群
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 24037 as SwirlingSchoolOfFishPassive;
@@ -165,6 +170,8 @@ define skill {
 /**
  * @id 2403
  * @name 千年珍珠骏麟
+ * @hp 8
+ * @energy 2
  * @description
  * 矗立在原海异种顶端的两位霸主之一，因身姿修长优美，被诗人与作者视为孤傲而高洁的生灵，获称「骏麟」。
  */
@@ -184,6 +191,7 @@ define character {
 /**
  * @id 224031
  * @name 明珠固化
+ * @cost
  * @description
  * 我方出战角色为千年珍珠骏麟时，才能打出：入场时，使千年珍珠骏麟附属可用次数为1的原海明珠；如果已附属原海明珠，则使其可用次数+1。
  * 装备有此牌的千年珍珠骏麟所附属的原海明珠抵消召唤物伤害时，改为每回合2次不消耗可用次数。

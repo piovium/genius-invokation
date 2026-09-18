@@ -47,6 +47,7 @@ define combatStatus {
 /**
  * @id 13141
  * @name 斩首之邀
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害，若可能，消耗目标至多3层生命之契，提高等量伤害。
  */
@@ -66,6 +67,7 @@ define skill {
 /**
  * @id 13142
  * @name 万相化灰
+ * @cost 3*Pyro
  * @description
  * 在对方场上生成3层血偿勒令，然后造成2点火元素伤害。
  */
@@ -80,6 +82,7 @@ define skill {
 /**
  * @id 13143
  * @name 厄月将升
+ * @cost 3*Pyro, 3*Energy
  * @description
  * 造成4点火元素伤害，移除自身所有生命之契，每移除1层，治疗自身1点。
  */
@@ -101,6 +104,7 @@ define skill {
 /**
  * @id 13144
  * @name 唯厄月可知晓
+ * @cost
  * @description
  * 角色不会受到厄月将升以外的治疗。
  * 自身附属生命之契时：角色造成的物理伤害变为火元素伤害。
@@ -122,6 +126,7 @@ define skill {
 /**
  * @id 13146
  * @name 唯厄月可知晓
+ * @cost
  * @description
  * 角色不会受到厄月将升以外的治疗。
  * 自身附属生命之契时：角色造成的物理伤害变为火元素伤害。
@@ -136,6 +141,7 @@ define skill {
 /**
  * @id 13147
  * @name 唯厄月可知晓
+ * @cost
  * @description
  * 角色不会受到厄月将升以外的治疗。
  * 自身附属生命之契时：角色造成的物理伤害变为火元素伤害。
@@ -164,6 +170,8 @@ define skill {
 /**
  * @id 1314
  * @name 阿蕾奇诺
+ * @hp 10
+ * @energy 3
  * @description
  * 繁星晦暗，厄月孤存。
  */
@@ -183,6 +191,7 @@ define character {
 /**
  * @id 213141
  * @name 所有的仇与债皆由我偿…
+ * @cost 1*Pyro
  * @description
  * 战斗行动：我方出战角色为阿蕾奇诺时，对该角色打出，使阿蕾奇诺附属3层生命之契。
  * 装备有此牌的阿蕾奇诺受到伤害时：如果阿蕾奇诺附属了生命之契，则消耗1层生命之契，抵消1点伤害。

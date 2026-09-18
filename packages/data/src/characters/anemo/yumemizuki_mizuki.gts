@@ -18,6 +18,7 @@ import { ResistantForm } from "../../commons.gts";
 /**
  * @id 115142
  * @name 梦见风名物点心
+ * @cost
  * @description
  * 此卡牌进入手牌时：如果我方出战角色生命值大于5，则造成1点风元素伤害；否则治疗我方出战角色2点。效果结算后抓1张牌，随后弃置此卡牌。
  */
@@ -72,6 +73,7 @@ define status {
 /**
  * @id 15141
  * @name 梦我梦心
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成1点风元素伤害。
  */
@@ -86,6 +88,7 @@ define skill {
 /**
  * @id 15142
  * @name 秋沙歌枕巡礼
+ * @cost 3*Anemo
  * @description
  * 造成2点风元素伤害，自身附属梦浮。
  */
@@ -100,6 +103,7 @@ define skill {
 /**
  * @id 15143
  * @name 安乐秘汤疗法
+ * @cost 3*Anemo, 2*Energy
  * @description
  * 造成3点风元素伤害，生成1张梦见风名物点心，将其置于我方牌组顶部，并召唤小貘。
  */
@@ -116,6 +120,8 @@ define skill {
 /**
  * @id 1514
  * @name 梦见月瑞希
+ * @hp 10
+ * @energy 2
  * @description
  * 愁云拂散，梦间月明。
  */
@@ -133,6 +139,7 @@ define character {
 /**
  * @id 215141
  * @name 缠忆君影梦相见
+ * @cost 3*Anemo
  * @description
  * 战斗行动：我方出战角色为梦见月瑞希时，装备此牌。
  * 梦见月瑞希装备此牌后，立刻使用一次秋沙歌枕巡礼。

@@ -47,6 +47,7 @@ define combatStatus {
 /**
  * @id 16011
  * @name 千金掷
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成1点岩元素伤害。
  */
@@ -61,6 +62,7 @@ define skill {
 /**
  * @id 16012
  * @name 璇玑屏
+ * @cost 3*Geo
  * @description
  * 造成2点岩元素伤害，生成璇玑屏。
  */
@@ -75,6 +77,7 @@ define skill {
 /**
  * @id 16013
  * @name 天权崩玉
+ * @cost 3*Geo, 3*Energy
  * @description
  * 造成6点岩元素伤害；如果璇玑屏在场，就使此伤害+2。
  */
@@ -93,6 +96,8 @@ define skill {
 /**
  * @id 1601
  * @name 凝光
+ * @hp 10
+ * @energy 3
  * @description
  * 她保守着一个最大的秘密，那就是自己保守着璃月港的许多秘密。
  */
@@ -108,6 +113,7 @@ define character {
 /**
  * @id 216011
  * @name 储之千日，用之一刻
+ * @cost 3*Geo
  * @description
  * 战斗行动：我方出战角色为凝光时，装备此牌。
  * 凝光装备此牌后，立刻使用一次璇玑屏。

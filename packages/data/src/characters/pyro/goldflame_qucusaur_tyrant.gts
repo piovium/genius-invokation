@@ -64,6 +64,7 @@ define status {
 /**
  * @id 23061
  * @name 翼斩
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -78,6 +79,7 @@ define skill {
 /**
  * @id 23062
  * @name 升腾炽风
+ * @cost 3*Pyro
  * @description
  * 造成1点火元素伤害，自身附属2层飞旋。
  */
@@ -96,6 +98,7 @@ define skill {
 /**
  * @id 23063
  * @name 金焰爆轰
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 造成3点火元素伤害，对所有敌方后台角色造成1点穿透伤害，自身附属1层金焰形态。
  */
@@ -112,6 +115,7 @@ define skill {
 /**
  * @id 23064
  * @name 古老者的血脉
+ * @cost
  * @description
  * 【被动】偶数行动阶段开始时：自身附属1层金焰形态。
  */
@@ -128,6 +132,8 @@ define skill {
 /**
  * @id 2306
  * @name 金焰绒翼龙暴君
+ * @hp 11
+ * @energy 2
  * @description
  * 因承受了如今龙众的身躯无法驭使的伟力，而拥有超然形体的异种绒翼龙。
  */
@@ -143,6 +149,7 @@ define character {
 /**
  * @id 223061
  * @name 「焰主之祝」
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 战斗行动：我方出战角色为金焰绒翼龙暴君时，装备此牌。
  * 金焰绒翼龙暴君装备此牌后，立刻使用一次金焰爆轰。

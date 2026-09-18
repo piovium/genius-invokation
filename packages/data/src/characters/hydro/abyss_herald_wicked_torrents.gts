@@ -30,6 +30,7 @@ define status {
 /**
  * @id 22035
  * @name 涟锋旋刃
+ * @cost 3*Hydro
  * @description
  * 造成1点水元素伤害。
  */
@@ -121,6 +122,7 @@ define combatStatus {
 /**
  * @id 22031
  * @name 波刃锋斩
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -135,6 +137,7 @@ define skill {
 /**
  * @id 22032
  * @name 洄涡锋刃
+ * @cost 3*Hydro
  * @description
  * 造成1点水元素伤害，然后准备技能：涟锋旋刃。
  */
@@ -149,6 +152,7 @@ define skill {
 /**
  * @id 22033
  * @name 激流强震
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 造成3点水元素伤害。在对方场上生成暗流的诅咒。
  */
@@ -164,6 +168,7 @@ define skill {
 /**
  * @id 22034
  * @name 水之新生
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属水之新生。
  */
@@ -179,8 +184,9 @@ define skill {
 /**
  * @id 22037
  * @name 护罩碎裂
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 22037 as BrokenShield;
@@ -192,8 +198,9 @@ define skill {
 /**
  * @id 22038
  * @name 水之新生
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 22038 as WateryRebirth01;
@@ -205,6 +212,8 @@ define skill {
 /**
  * @id 2203
  * @name 深渊使徒·激流
+ * @hp 6
+ * @energy 2
  * @description
  * 断绝诸世，万物湮灭。
  */
@@ -235,6 +244,7 @@ define combatStatus {
 /**
  * @id 222031
  * @name 暗流涌动
+ * @cost 1*Hydro
  * @description
  * 入场时：如果装备有此牌的深渊使徒·激流已触发过水之新生，则在对方场上生成暗流的诅咒。
  * 装备有此牌的深渊使徒·激流被击倒或触发水之新生时：在对方场上生成暗流的诅咒。

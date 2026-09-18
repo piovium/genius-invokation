@@ -18,6 +18,7 @@ import { $, DamageType, Reaction, DiceType } from "@gi-tcg/core/data";
 /**
  * @id 113131
  * @name 超量装药弹头
+ * @cost 2*Pyro
  * @description
  * 战斗行动：对敌方「出战角色」造成1点火元素伤害。
  * 此牌被舍弃时：对敌方「出战角色」造成1点火元素伤害。
@@ -85,6 +86,7 @@ define combatStatus {
 /**
  * @id 13131
  * @name 线列枪刺·改
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -99,6 +101,7 @@ define skill {
 /**
  * @id 13132
  * @name 近迫式急促拦射
+ * @cost 3*Pyro
  * @description
  * 造成2点火元素伤害。
  * 此技能结算后：如果我方手牌中含有超量装药弹头，则舍弃1张并治疗我方受伤最多的角色1点。
@@ -117,6 +120,7 @@ define skill {
 /**
  * @id 13133
  * @name 圆阵掷弹爆轰术
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 造成2点火元素伤害，在敌方场上生成二重毁伤弹。
  */
@@ -132,6 +136,7 @@ define skill {
 /**
  * @id 13134
  * @name 纵阵武力统筹
+ * @cost
  * @description
  * 【被动】敌方角色受到超载反应伤害后：生成手牌超量装药弹头（每回合1次）
  */
@@ -152,6 +157,7 @@ define skill {
 /**
  * @id 13135
  * @name 近迫式急促拦射
+ * @cost
  * @description
  * 造成3点火元素伤害。
  * 此技能结算后：如果我方手牌中含有超量装药弹头，则舍弃1张并治疗我方受伤最多的角色1点。
@@ -180,6 +186,8 @@ define skill {
 /**
  * @id 1313
  * @name 夏沃蕾
+ * @hp 10
+ * @energy 2
  * @description
  * 知刑执法，公义责罪。
  */
@@ -199,6 +207,7 @@ define character {
 /**
  * @id 213131
  * @name 尖兵协同战法
+ * @cost 2*Pyro
  * @description
  * 队伍中包含火元素角色和雷元素角色且不包含其他元素的角色，才能打出：将此牌装备给夏沃蕾。
  * 装备有此牌的夏沃蕾在场，敌方角色受到超载反应伤害后：我方接下来造成的2次火元素伤害或雷元素伤害+1。（包括扩散反应造成的火元素伤害或雷元素伤害）

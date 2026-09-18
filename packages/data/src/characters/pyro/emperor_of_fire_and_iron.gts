@@ -18,6 +18,7 @@ import { $, DamageType, DiceType, type CardHandle } from "@gi-tcg/core/data";
 /**
  * @id 23046
  * @name 炽烈轰破
+ * @cost
  * @description
  * （需准备1个行动轮）
  * 造成1点火元素伤害，对敌方所有后台角色造成2点穿透伤害。本角色每附属有2层重甲蟹壳，就使此技能造成的火元素伤害+1。
@@ -70,6 +71,7 @@ define status {
 /**
  * @id 23041
  * @name 重钳碎击
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -84,6 +86,7 @@ define skill {
 /**
  * @id 23042
  * @name 烈焰燃绽
+ * @cost 3*Pyro
  * @description
  * 造成1点火元素伤害；如果本角色附属有至少7层重甲蟹壳，则此伤害+1。
  * 然后，本角色附属2层重甲蟹壳。
@@ -111,6 +114,7 @@ define skill {
 /**
  * @id 23043
  * @name 战阵爆轰
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 本角色准备技能：炽烈轰破。
  */
@@ -125,6 +129,7 @@ define skill {
 /**
  * @id 23044
  * @name 帝王甲胄
+ * @cost
  * @description
  * 【被动】战斗开始时：初始附属5层重甲蟹壳。
  * 我方执行任意行动后：如果我方场上存在重甲蟹壳以外的护盾状态或护盾出战状态，则将其全部移除；每移除1个，就使角色附属2层重甲蟹壳。
@@ -174,8 +179,9 @@ define skill {
 /**
  * @id 23047
  * @name 帝王甲胄
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 23047 as ImperialPanoply01;
@@ -187,6 +193,8 @@ define skill {
 /**
  * @id 2304
  * @name 铁甲熔火帝皇
+ * @hp 5
+ * @energy 2
  * @description
  * 矗立在原海异种顶端的两位霸主之一，不遇天敌，不倦狩猎并成长之蟹。有着半是敬畏，半是戏谑的「帝皇」之称。
  */
@@ -206,6 +214,7 @@ define character {
 /**
  * @id 223041
  * @name 熔火铁甲
+ * @cost 1*Pyro
  * @description
  * 入场时：对装备有此牌的铁甲熔火帝皇附着火元素。
  * 我方除重甲蟹壳以外的护盾状态或护盾出战状态被移除后：装备有此牌的铁甲熔火帝皇附属2层重甲蟹壳。（每回合1次）

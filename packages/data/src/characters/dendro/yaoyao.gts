@@ -75,6 +75,7 @@ define combatStatus {
 /**
  * @id 17041
  * @name 颠扑连环枪
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -89,6 +90,7 @@ define skill {
 /**
  * @id 17042
  * @name 云台团团降芦菔
+ * @cost 3*Dendro
  * @description
  * 召唤月桂·抛掷型。
  */
@@ -106,6 +108,7 @@ define skill {
 /**
  * @id 17043
  * @name 玉颗珊珊月中落
+ * @cost 4*Dendro, 2*Energy
  * @description
  * 造成1点草元素伤害，生成桂子仙机。
  */
@@ -121,6 +124,8 @@ define skill {
 /**
  * @id 1704
  * @name 瑶瑶
+ * @hp 10
+ * @energy 2
  * @description
  * 玲珑玉质，身含仙骨。
  */
@@ -136,6 +141,7 @@ define character {
 /**
  * @id 217041
  * @name 慈惠仁心
+ * @cost 3*Dendro
  * @description
  * 战斗行动：我方出战角色为瑶瑶时，装备此牌。
  * 瑶瑶装备此牌后，立刻使用一次云台团团降芦菔。

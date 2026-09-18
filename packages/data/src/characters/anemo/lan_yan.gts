@@ -31,6 +31,7 @@ define combatStatus {
 /**
  * @id 15121
  * @name 玄鸾画水
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成1点风元素伤害。
  */
@@ -45,6 +46,7 @@ define skill {
 /**
  * @id 15122
  * @name 凤缕随翦舞
+ * @cost 3*Anemo
  * @description
  * 生成2层凤缕护盾，获得1层高效切换，并造成1点风元素伤害，如果此技能引发了扩散，则额外生成1层凤缕护盾。
  */
@@ -72,6 +74,7 @@ define skill {
 /**
  * @id 15123
  * @name 鹍弦踏月出
+ * @cost 3*Anemo, 2*Energy
  * @description
  * 造成3点风元素伤害，生成2层凤缕护盾。
  */
@@ -89,6 +92,8 @@ define skill {
 /**
  * @id 1512
  * @name 蓝砚
+ * @hp 10
+ * @energy 2
  * @description
  * 巧燕衔枝，欣悦盈门。
  */
@@ -104,6 +109,7 @@ define character {
 /**
  * @id 215121
  * @name 舞袂翩兮扬玉霓
+ * @cost 3*Anemo
  * @description
  * 战斗行动：我方出战角色为蓝砚时，装备此牌。
  * 蓝砚装备此牌后，立刻使用一次凤缕随翦舞。

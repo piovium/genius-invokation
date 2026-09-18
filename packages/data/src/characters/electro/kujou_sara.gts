@@ -71,6 +71,7 @@ define summon {
 /**
  * @id 14061
  * @name 天狗传弓术
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -85,6 +86,7 @@ define skill {
 /**
  * @id 14062
  * @name 鸦羽天狗霆雷召咒
+ * @cost 3*Electro
  * @description
  * 造成1点雷元素伤害，召唤天狗咒雷·伏。
  */
@@ -99,6 +101,7 @@ define skill {
 /**
  * @id 14063
  * @name 煌煌千道镇式
+ * @cost 4*Electro, 2*Energy
  * @description
  * 造成2点雷元素伤害，召唤天狗咒雷·雷砾。
  */
@@ -114,6 +117,8 @@ define skill {
 /**
  * @id 1406
  * @name 九条裟罗
+ * @hp 10
+ * @energy 2
  * @description
  * 「此为，大义之举。」
  */
@@ -129,6 +134,7 @@ define character {
 /**
  * @id 214061
  * @name 我界
+ * @cost 3*Electro
  * @description
  * 战斗行动：我方出战角色为九条裟罗时，装备此牌。
  * 九条裟罗装备此牌后，立刻使用一次鸦羽天狗霆雷召咒。

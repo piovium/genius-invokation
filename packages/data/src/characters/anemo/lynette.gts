@@ -79,6 +79,7 @@ define status {
 /**
  * @id 15081
  * @name 迅捷礼刺剑
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -93,6 +94,7 @@ define skill {
 /**
  * @id 15082
  * @name 谜影障身法
+ * @cost 3*Anemo
  * @description
  * 造成3点风元素伤害，本回合第一次使用此技能、且自身生命值不多于8时治疗自身2点，但是附属攻袭余威。
  */
@@ -116,6 +118,7 @@ define skill {
 /**
  * @id 15083
  * @name 魔术·运变惊奇
+ * @cost 3*Anemo, 2*Energy
  * @description
  * 造成2点风元素伤害，召唤惊奇猫猫盒。
  */
@@ -131,6 +134,8 @@ define skill {
 /**
  * @id 1508
  * @name 琳妮特
+ * @hp 10
+ * @energy 2
  * @description
  * 水中窥月，洞见夜明。
  */
@@ -146,6 +151,7 @@ define character {
 /**
  * @id 215081
  * @name 如影流露的冷刃
+ * @cost 3*Anemo
  * @description
  * 战斗行动：我方出战角色为琳妮特时，装备此牌。
  * 琳妮特装备此牌后，立刻使用一次谜影障身法。

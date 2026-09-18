@@ -57,6 +57,7 @@ define combatStatus {
 /**
  * @id 12031
  * @name 因果点破
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成1点水元素伤害。
  */
@@ -71,6 +72,7 @@ define skill {
 /**
  * @id 12032
  * @name 水中幻愿
+ * @cost 3*Hydro
  * @description
  * 造成1点水元素伤害，召唤虚影。
  */
@@ -85,6 +87,7 @@ define skill {
 /**
  * @id 12033
  * @name 星命定轨
+ * @cost 3*Hydro, 3*Energy
  * @description
  * 造成4点水元素伤害，生成泡影。
  */
@@ -100,6 +103,7 @@ define skill {
 /**
  * @id 12034
  * @name 虚实流动
+ * @cost
  * @description
  * 【被动】此角色为出战角色，我方执行「切换角色」行动时：将此次切换视为「快速行动」而非「战斗行动」。（每回合1次）
  */
@@ -119,6 +123,8 @@ define skill {
 /**
  * @id 1203
  * @name 莫娜
+ * @hp 10
+ * @energy 3
  * @description
  * 无论胜负平弃，都是命当如此。
  */
@@ -137,6 +143,7 @@ define character {
 /**
  * @id 212031
  * @name 沉没的预言
+ * @cost 3*Hydro, 3*Energy
  * @description
  * 战斗行动：我方出战角色为莫娜时，装备此牌。
  * 莫娜装备此牌后，立刻使用一次星命定轨。
@@ -162,6 +169,7 @@ define card {
 /**
  * @id 212032
  * @name 天步真原
+ * @cost 1*Hydro, 1*Void
  * @description
  * 战斗行动：我方出战角色为莫娜时，装备此牌。
  * 莫娜装备此牌后，我方下次蒸发反应造成的伤害+2并立刻使用一次因果点破。

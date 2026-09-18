@@ -84,6 +84,7 @@ define combatStatus {
 /**
  * @id 26051
  * @name 重力应用程式·砸击
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -98,6 +99,7 @@ define skill {
 /**
  * @id 26052
  * @name 重力应用程式·点状抵消
+ * @cost 3*Geo
  * @description
  * 造成2点岩元素伤害，生成2层高效切换。
  */
@@ -116,6 +118,7 @@ define skill {
 /**
  * @id 26053
  * @name 重力应用程式·削减场域
+ * @cost 3*Geo, 2*Energy
  * @description
  * 造成3点岩元素伤害，生成低重力背景和振荡冲击，本回合中我方所有后台角色下次「普通攻击」少花费1个无色元素。
  */
@@ -133,6 +136,8 @@ define skill {
 /**
  * @id 2605
  * @name 实验性场力发生装置
+ * @hp 11
+ * @energy 2
  * @description
  * 枫丹动能工程科学研究院的作品，因为事故而失控，拥有「抵消」重力的效果。
  */
@@ -150,6 +155,7 @@ define character {
 /**
  * @id 226051
  * @name 重力场域
+ * @cost 1*Geo
  * @description
  * 快速行动：装备给我方的实验性场力发生装置。
  * 任意阵营宣布结束后：该阵营切换至下一名角色。

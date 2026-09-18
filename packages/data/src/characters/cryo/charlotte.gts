@@ -57,6 +57,7 @@ define status {
 /**
  * @id 11101
  * @name 冷色摄影律
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成1点冰元素伤害。
  */
@@ -71,6 +72,7 @@ define skill {
 /**
  * @id 11102
  * @name 取景·冰点构图法
+ * @cost 3*Cryo
  * @description
  * 造成1点冰元素伤害，目标附属瞬时剪影。
  */
@@ -85,6 +87,7 @@ define skill {
 /**
  * @id 11103
  * @name 定格·全方位确证
+ * @cost 3*Cryo, 2*Energy
  * @description
  * 造成1点冰元素伤害，治疗我方所有角色1点，召唤临事场域。
  */
@@ -101,6 +104,8 @@ define skill {
 /**
  * @id 1110
  * @name 夏洛蒂
+ * @hp 11
+ * @energy 2
  * @description
  * 「真实至上，故事超群！」
  */
@@ -118,6 +123,7 @@ define character {
 /**
  * @id 211101
  * @name 以有趣相关为要义
+ * @cost 3*Cryo
  * @description
  * 战斗行动：我方出战角色为夏洛蒂时，装备此牌。
  * 夏洛蒂装备此牌后，立刻使用一次取景·冰点构图法。

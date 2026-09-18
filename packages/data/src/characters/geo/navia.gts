@@ -18,6 +18,7 @@ import { $, DamageType, DiceType, Reaction } from "@gi-tcg/core/data";
 /**
  * @id 116081
  * @name 裂晶弹片
+ * @cost 1*Aligned
  * @description
  * 对敌方「出战角色」造成1点物理伤害，抓1张牌。
  */
@@ -68,6 +69,7 @@ define status {
 /**
  * @id 16081
  * @name 直率的辞绝
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -82,6 +84,7 @@ define skill {
 /**
  * @id 16082
  * @name 典仪式晶火
+ * @cost 3*Geo
  * @description
  * 造成3点岩元素伤害，本角色附属岩元素附魔；从手牌中舍弃至多5张裂晶弹片，每舍弃1张都使此伤害+1并抓1张牌。
  */
@@ -101,6 +104,7 @@ define skill {
 /**
  * @id 16083
  * @name 如霰澄天的鸣礼
+ * @cost 3*Geo, 2*Energy
  * @description
  * 造成1点岩元素伤害，对所有敌方后台角色造成1点穿透伤害。召唤金花礼炮，生成1张裂晶弹片加入手牌。
  */
@@ -118,6 +122,7 @@ define skill {
 /**
  * @id 16084
  * @name 互助关系网
+ * @cost
  * @description
  * 【被动】敌方角色受到结晶反应伤害后：生成3张裂晶弹片，随机置入我方牌库中。
  */
@@ -144,6 +149,8 @@ define skill {
 /**
  * @id 1608
  * @name 娜维娅
+ * @hp 10
+ * @energy 2
  * @description
  * 《飞翔的黄玫瑰》。
  */
@@ -162,6 +169,7 @@ define character {
 /**
  * @id 216081
  * @name 不明流通渠道
+ * @cost 3*Geo
  * @description
  * 战斗行动：我方出战角色为娜维娅时，装备此牌。
  * 娜维娅装备此牌后，立刻使用一次典仪式晶火。

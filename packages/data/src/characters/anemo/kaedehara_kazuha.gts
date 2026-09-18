@@ -43,6 +43,7 @@ define summon {
 /**
  * @id 15051
  * @name 我流剑术
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -278,6 +279,7 @@ define combatStatus {
 /**
  * @id 15052
  * @name 千早振
+ * @cost 3*Anemo
  * @description
  * 造成1点风元素伤害，本角色附属乱岚拨止。
  * 如果此技能引发了扩散，则将乱岚拨止转换为被扩散的元素。
@@ -314,6 +316,7 @@ define skill {
 /**
  * @id 15053
  * @name 万叶之一刀
+ * @cost 3*Anemo, 2*Energy
  * @description
  * 造成1点风元素伤害，召唤流风秋野。
  */
@@ -329,8 +332,9 @@ define skill {
 /**
  * @id 15054
  * @name 千早振
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 15054 as ChihayaburuPassive;
@@ -345,6 +349,8 @@ define skill {
 /**
  * @id 1505
  * @name 枫原万叶
+ * @hp 10
+ * @energy 2
  * @description
  * 拾花鸟之一趣，照月风之长路。
  */
@@ -360,6 +366,7 @@ define character {
 /**
  * @id 215051
  * @name 风物之诗咏
+ * @cost 3*Anemo
  * @description
  * 战斗行动：我方出战角色为枫原万叶时，装备此牌。
  * 枫原万叶装备此牌后，立刻使用一次千早振。

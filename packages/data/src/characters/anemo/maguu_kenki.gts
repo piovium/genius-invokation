@@ -75,6 +75,7 @@ define status {
 /**
  * @id 25011
  * @name 一文字
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -89,6 +90,7 @@ define skill {
 /**
  * @id 25012
  * @name 孤风刀势
+ * @cost 3*Anemo
  * @description
  * 召唤剑影·孤风。
  */
@@ -105,6 +107,7 @@ define skill {
 /**
  * @id 25013
  * @name 霜驰影突
+ * @cost 3*Cryo
  * @description
  * 召唤剑影·霜驰。
  */
@@ -121,6 +124,7 @@ define skill {
 /**
  * @id 25014
  * @name 机巧伪天狗抄
+ * @cost 3*Anemo, 3*Energy
  * @description
  * 造成4点风元素伤害，触发所有我方剑影召唤物的效果。（不消耗其可用次数）
  */
@@ -135,6 +139,8 @@ define skill {
 /**
  * @id 2501
  * @name 魔偶剑鬼
+ * @hp 10
+ * @energy 3
  * @description
  * 今日，其仍徘徊在因缘断绝之地。
  */
@@ -150,6 +156,7 @@ define character {
 /**
  * @id 225011
  * @name 机巧神通
+ * @cost 3*Anemo
  * @description
  * 战斗行动：我方出战角色为魔偶剑鬼时，装备此牌。
  * 魔偶剑鬼装备此牌后，立刻使用一次孤风刀势。

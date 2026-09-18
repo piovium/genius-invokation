@@ -56,6 +56,7 @@ define status {
 /**
  * @id 23051
  * @name 虚界玄爪
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -70,6 +71,7 @@ define skill {
 /**
  * @id 23052
  * @name 蚀灭火羽
+ * @cost 3*Pyro
  * @description
  * 造成3点火元素伤害，我方舍弃牌组顶部1张牌。
  */
@@ -87,6 +89,7 @@ define skill {
 /**
  * @id 23053
  * @name 斫劫源焰
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 造成1点火元素伤害，对所有敌方后台角色造成1点穿透伤害。双方舍弃牌组顶部3张牌，自身附属1层忿恨.
  */
@@ -110,6 +113,7 @@ define skill {
 /**
  * @id 23054
  * @name 忿恨
+ * @cost
  * @description
  * 【被动】我方每舍弃6张卡牌，自身附属1层忿恨。
  */
@@ -128,6 +132,7 @@ define skill {
 /**
  * @id 23056
  * @name 忿恨
+ * @cost
  * @description
  * 【被动】我方每舍弃6张卡牌，自身附属1层忿恨。
  */
@@ -141,6 +146,8 @@ define skill {
 /**
  * @id 2305
  * @name 蚀灭的源焰之主
+ * @hp 11
+ * @energy 2
  * @description
  * 被称为深渊浮灭主亦被称为「古斯托特」的虚界魔物，拥有侵蚀地脉之中的回忆并将之凝聚为实体的如同灾厄的权能。
  */
@@ -172,6 +179,7 @@ define status {
 /**
  * @id 223051
  * @name 罔极盛怒
+ * @cost 1*Pyro
  * @description
  * 快速行动：装备给我方的蚀灭的源焰之主。
  * 敌方打出名称不存在于本局最初牌组的牌时：所附属角色获得1点充能，下次造成的伤害+1。（每回合1次）

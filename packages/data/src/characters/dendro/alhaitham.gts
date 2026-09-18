@@ -46,6 +46,7 @@ define status {
 /**
  * @id 17061
  * @name 溯因反绎法
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -60,6 +61,7 @@ define skill {
 /**
  * @id 17062
  * @name 共相·理式摹写
+ * @cost 3*Dendro
  * @description
  * 造成2点草元素伤害，本角色附属琢光镜。
  */
@@ -74,6 +76,7 @@ define skill {
 /**
  * @id 17063
  * @name 殊境·显象缚结
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 造成4点草元素伤害；消耗琢光镜，此伤害提升所消耗琢光镜的持续回合值。
  * 如果消耗琢光镜的持续回合为0/1/2，则为角色附属持续回合为3/2/1的琢光镜。
@@ -109,6 +112,8 @@ define skill {
 /**
  * @id 1706
  * @name 艾尔海森
+ * @hp 10
+ * @energy 2
  * @description
  * 学识、思考及处事之道。
  */
@@ -126,6 +131,7 @@ define character {
 /**
  * @id 217061
  * @name 正理
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 战斗行动：我方出战角色为艾尔海森时，装备此牌。
  * 艾尔海森装备此牌后，立刻使用一次殊境·显象缚结。

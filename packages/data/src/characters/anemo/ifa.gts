@@ -126,6 +126,7 @@ define card {
 /**
  * @id 15151
  * @name 祛风妙仪
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成1点风元素伤害。
  */
@@ -140,6 +141,7 @@ define skill {
 /**
  * @id 15152
  * @name 空天疾护
+ * @cost 3*Anemo
  * @description
  * 造成2点风元素伤害，自身进入夜魂加持，获得2点「夜魂值」，并附属咔库库。（角色进入夜魂加持后不可使用此技能）
  * （附属咔库库的角色可以使用特技：援护射击）
@@ -157,6 +159,7 @@ define skill {
 /**
  * @id 15153
  * @name 复合镇静域
+ * @cost 3*Anemo, 2*Energy
  * @description
  * 造成2点风元素伤害，治疗我方受伤最多的角色2点。如果此技能引发了风元素相关反应，则敌方出战角色附属对应元素的镇静标记。
  */
@@ -191,6 +194,8 @@ define skill {
 /**
  * @id 1515
  * @name 伊法
+ * @hp 10
+ * @energy 2
  * @description
  * 急救如急袭。
  */
@@ -209,6 +214,7 @@ define character {
 /**
  * @id 215151
  * @name 温敷战术包扎
+ * @cost 1*Anemo
  * @description
  * 快速行动：装备给我方的伊法，治疗我方受伤最多的角色1点。
  * 装备有此牌的伊法在场时，我方触发风元素相关反应、感电或月感电反应后，治疗我方受伤最多的角色1点。（每回合2次）

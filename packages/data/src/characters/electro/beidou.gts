@@ -35,6 +35,7 @@ define status {
 /**
  * @id 14054
  * @name 踏潮
+ * @cost
  * @description
  * （需准备1个行动轮）
  * 造成3点雷元素伤害。
@@ -97,6 +98,7 @@ define combatStatus {
 /**
  * @id 14051
  * @name 征涛
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -111,6 +113,7 @@ define skill {
 /**
  * @id 14052
  * @name 捉浪
+ * @cost 3*Electro
  * @description
  * 本角色附属捉浪·涛拥之守并准备技能：踏潮。
  */
@@ -125,6 +128,7 @@ define skill {
 /**
  * @id 14053
  * @name 斫雷
+ * @cost 3*Electro, 3*Energy
  * @description
  * 造成2点雷元素伤害，生成雷兽之盾。
  */
@@ -140,6 +144,8 @@ define skill {
 /**
  * @id 1405
  * @name 北斗
+ * @hp 11
+ * @energy 3
  * @description
  * 「记住这一天，你差点赢了南十字船队老大的钱。」
  */
@@ -155,6 +161,7 @@ define character {
 /**
  * @id 214051
  * @name 霹雳连霄
+ * @cost 3*Electro
  * @description
  * 战斗行动：我方出战角色为北斗时，装备此牌。
  * 北斗装备此牌后，立刻使用一次捉浪。

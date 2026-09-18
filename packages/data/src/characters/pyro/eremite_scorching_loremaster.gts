@@ -77,6 +77,7 @@ define card {
 /**
  * @id 23031
  * @name 烧蚀之光
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成1点火元素伤害。
  */
@@ -91,6 +92,7 @@ define skill {
 /**
  * @id 23032
  * @name 炎晶迸击
+ * @cost 3*Pyro
  * @description
  * 造成3点火元素伤害，生成1层魔蝎祝福。
  */
@@ -105,6 +107,7 @@ define skill {
 /**
  * @id 23033
  * @name 厄灵苏醒·炎之魔蝎
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 造成3点火元素伤害。整场牌局限制1次，将1张厄灵·炎之魔蝎加入我方手牌。
  * （装备有厄灵·炎之魔蝎的角色可以使用特技：炙烧攻势）
@@ -120,6 +123,7 @@ define skill {
 /**
  * @id 23034
  * @name 厄灵之能
+ * @cost
  * @description
  * 【被动】此角色受到伤害后：如果此角色生命值不多于7，则获得1点充能。（每回合1次）
  */
@@ -146,6 +150,8 @@ define skill {
 /**
  * @id 2303
  * @name 镀金旅团·炽沙叙事人
+ * @hp 10
+ * @energy 2
  * @description
  * 如今仍然能记起许多故事的人，是不会背叛流淌在体内的沙漠血脉的。
  */
@@ -164,6 +170,7 @@ define character {
 /**
  * @id 223031
  * @name 魔蝎烈祸
+ * @cost 3*Pyro
  * @description
  * 战斗行动：我方出战角色为镀金旅团·炽沙叙事人时，装备此牌。
  * 镀金旅团·炽沙叙事人装备此牌后，立刻使用一次炎晶迸击。

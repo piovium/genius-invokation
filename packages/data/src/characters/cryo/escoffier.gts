@@ -89,6 +89,7 @@ define status {
 /**
  * @id 111152
  * @name 鎏金殿堂
+ * @cost
  * @description
  * 本回合中，目标角色下次造成的伤害+2。
  * （每回合每个角色最多食用1次「料理」）
@@ -103,6 +104,7 @@ define card {
 /**
  * @id 111153
  * @name 雾凇秋分
+ * @cost
  * @description
  * 治疗目标角色1点，目标角色获得1点额外最大生命值。
  * （每回合每个角色最多食用1次「料理」）
@@ -118,6 +120,7 @@ define card {
 /**
  * @id 111154
  * @name 白浪拂沙
+ * @cost 2*Void
  * @description
  * 所有我方角色获得饱腹，并且下次使用技能时少花费1个元素骰。
  * （每回合每个角色最多食用1次「料理」）
@@ -135,6 +138,7 @@ define card {
 /**
  * @id 111155
  * @name 一捧绿野
+ * @cost 1*Aligned
  * @description
  * 所有我方角色获得饱腹，并且下次造成的伤害+1。
  * （每回合每个角色最多食用1次「料理」）
@@ -176,6 +180,7 @@ define card {
 /**
  * @id 11151
  * @name 后厨手艺
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -190,6 +195,7 @@ define skill {
 /**
  * @id 11152
  * @name 低温烹饪
+ * @cost 3*Cryo
  * @description
  * 造成1点冰元素伤害，召唤厨艺机关·低温冷藏模式。
  */
@@ -204,6 +210,7 @@ define skill {
 /**
  * @id 11153
  * @name 花刀技法
+ * @cost 3*Cryo, 2*Energy
  * @description
  * 造成1点冰元素伤害，治疗我方所有角色2点。
  */
@@ -219,6 +226,7 @@ define skill {
 /**
  * @id 11154
  * @name 时时刻刻的即兴料理
+ * @cost
  * @description
  * 【被动】战斗开始时，生成全频谱多重任务厨艺机关。
  */
@@ -234,6 +242,8 @@ define skill {
 /**
  * @id 1115
  * @name 爱可菲
+ * @hp 10
+ * @energy 2
  * @description
  * 调霜焙巧，琢味求臻。
  */
@@ -252,6 +262,7 @@ define character {
 /**
  * @id 211151
  * @name 虹彩缤纷的甜点茶话
+ * @cost 4*Cryo
  * @description
  * 战斗行动：我方出战角色为爱可菲时，装备此牌。
  * 爱可菲装备此牌后，立刻使用一次低温烹饪。

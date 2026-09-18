@@ -119,6 +119,7 @@ define status {
 /**
  * @id 15091
  * @name 迴身箭术
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -133,6 +134,7 @@ define skill {
 /**
  * @id 15092
  * @name 非想风天
+ * @cost 3*Anemo
  * @description
  * 造成3点风元素伤害，本角色附属疾风示现。
  */
@@ -147,6 +149,7 @@ define skill {
 /**
  * @id 15093
  * @name 抟风秘道
+ * @cost 3*Anemo, 2*Energy
  * @description
  * 造成1点风元素伤害，召唤赫耀多方面体。
  */
@@ -167,6 +170,8 @@ define skill {
 /**
  * @id 1509
  * @name 珐露珊
+ * @hp 10
+ * @energy 2
  * @description
  * 机巧易解，世殊难算。
  */
@@ -182,6 +187,7 @@ define character {
 /**
  * @id 215091
  * @name 妙道合真
+ * @cost 3*Anemo, 2*Energy
  * @description
  * 战斗行动：我方出战角色为珐露珊时，装备此牌。
  * 珐露珊装备此牌后，立刻使用一次抟风秘道。

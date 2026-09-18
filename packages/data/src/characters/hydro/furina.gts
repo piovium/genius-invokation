@@ -18,6 +18,7 @@ import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 /**
  * @id 112113
  * @name 圣俗杂座
+ * @cost
  * @description
  * 在「始基力：荒性」和「始基力：芒性」之中，切换芙宁娜的形态。
  * 如果我方场上存在沙龙成员或众水的歌者，也切换其形态。
@@ -164,6 +165,7 @@ define combatStatus {
 /**
  * @id 12111
  * @name 独舞之邀
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成2点物理伤害。
  * 每回合1次：如果手牌中没有圣俗杂座，则生成手牌圣俗杂座。
@@ -179,6 +181,7 @@ define skill {
 /**
  * @id 12112
  * @name 孤心沙龙
+ * @cost 3*Hydro
  * @description
  * 芙宁娜当前处于「始基力：荒性」形态：召唤沙龙成员。
  * （芙宁娜处于「始基力：芒性」形态时，会改为召唤众水的歌者）
@@ -193,6 +196,7 @@ define skill {
 /**
  * @id 12113
  * @name 万众狂欢
+ * @cost 4*Hydro, 2*Energy
  * @description
  * 造成2点水元素伤害，生成普世欢腾。
  */
@@ -207,9 +211,10 @@ define skill {
 
 /**
  * @id 12114
- * @name
+ * @name 
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 12114 as Skill12114;
@@ -230,6 +235,7 @@ define skill {
 /**
  * @id 12115
  * @name 始基力：圣俗杂座
+ * @cost
  * @description
  * 【被动】战斗开始时，生成手牌圣俗杂座。
  */
@@ -245,6 +251,8 @@ define skill {
 /**
  * @id 1211
  * @name 芙宁娜
+ * @hp 12
+ * @energy 2
  * @description
  * 永世领唱，无尽圆舞。
  */
@@ -264,6 +272,7 @@ define character {
 /**
  * @id 12121
  * @name 独舞之邀
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成2点物理伤害。
  * 每回合1次：生成手牌圣俗杂座。
@@ -278,6 +287,7 @@ define skill {
 /**
  * @id 12122
  * @name 孤心沙龙
+ * @cost 3*Hydro
  * @description
  * 芙宁娜当前处于「始基力：芒性」形态：召唤众水的歌者。
  * （芙宁娜处于「始基力：荒性」形态时，会改为召唤沙龙成员）
@@ -292,8 +302,10 @@ define skill {
 /**
  * @id 1212
  * @name 芙宁娜
+ * @hp 12
+ * @energy 2
  * @description
- *
+ * 
  */
 define character {
   id 1212 as FurinaOusia;
@@ -311,6 +323,7 @@ define character {
 /**
  * @id 212111
  * @name 「诸君听我颂，共举爱之杯！」
+ * @cost 3*Hydro
  * @description
  * 战斗行动：我方出战角色为芙宁娜时，装备此牌。
  * 芙宁娜装备此牌后，立刻使用一次孤心沙龙。

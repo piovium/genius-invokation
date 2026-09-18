@@ -102,6 +102,7 @@ define summon {
 /**
  * @id 22061
  * @name 涌浪
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成1点水元素伤害。
  */
@@ -116,6 +117,7 @@ define skill {
 /**
  * @id 22062
  * @name 汛波
+ * @cost 3*Hydro
  * @description
  * 造成2点水元素伤害，随机触发我方1个「召唤物」的「结束阶段」效果。如果自身生命值不低于2，则自身受到1点穿透伤害。
  */
@@ -130,6 +132,7 @@ define skill {
 /**
  * @id 22063
  * @name 洪啸
+ * @cost 3*Hydro, 3*Energy
  * @description
  * 造成4点水元素伤害，触发我方所有「召唤物」的「结束阶段」效果。
  */
@@ -144,6 +147,7 @@ define skill {
 /**
  * @id 22064
  * @name 分流
+ * @cost
  * @description
  * 自身生命值不低于3，我方半幻人以外的「召唤物」离场时：自身受到2点穿透伤害，召唤1个独立的半幻人。（每回合1次）
  */
@@ -208,6 +212,7 @@ define skill {
 /**
  * @id 22065
  * @name 汛波
+ * @cost
  * @description
  * 造成2点水元素伤害，随机触发我方1个「召唤物」的「结束阶段」效果。如果自身生命值不低于2，则自身受到1点穿透伤害。
  */
@@ -220,6 +225,7 @@ define skill {
 /**
  * @id 22066
  * @name 汛波
+ * @cost
  * @description
  * 造成D__KEY__DAMAGE点D__KEY__ELEMENT，随机触发我方1个「召唤物」的「结束阶段」效果。如果自身生命值不低于2，则自身受到1点穿透伤害。
  */
@@ -232,6 +238,7 @@ define skill {
 /**
  * @id 22067
  * @name 洪啸
+ * @cost
  * @description
  * 造成4点水元素伤害，触发我方所有「召唤物」的「结束阶段」效果。
  */
@@ -244,6 +251,7 @@ define skill {
 /**
  * @id 22068
  * @name 洪啸
+ * @cost
  * @description
  * 造成D__KEY__DAMAGE点D__KEY__ELEMENT，触发我方所有「召唤物」的「结束阶段」效果。
  */
@@ -256,6 +264,8 @@ define skill {
 /**
  * @id 2206
  * @name 水形幻人
+ * @hp 10
+ * @energy 3
  * @description
  * 由无数的水滴凝聚成的，初具人形的魔物。
  */
@@ -293,6 +303,7 @@ define status {
 /**
  * @id 222061
  * @name 汇流
+ * @cost 2*Hydro
  * @description
  * 快速行动：装备给我方的水形幻人，使其附属元素生命·水。（角色总是附着水元素，并且免疫水元素伤害。持续回合：2）
  * 装备有此牌的水形幻人在场时，我方宣布结束后，如果所附属角色生命值不低于3，则所附属角色受到2点穿透伤害，召唤1个独立的半幻人。

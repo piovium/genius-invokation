@@ -88,6 +88,7 @@ define combatStatus {
 /**
  * @id 12041
  * @name 断雨
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -105,6 +106,7 @@ define skill {
 /**
  * @id 12042
  * @name 魔王武装·狂澜
+ * @cost 3*Hydro
  * @description
  * 切换为近战状态，然后造成2点水元素伤害，并使目标角色附属断流。
  */
@@ -120,6 +122,7 @@ define skill {
 /**
  * @id 12043
  * @name 极恶技·尽灭闪
+ * @cost 3*Hydro, 3*Energy
  * @description
  * 依据达达利亚当前所处的状态，进行不同的攻击：
  * 远程状态·魔弹一闪：造成5点水元素伤害，返还2点充能，目标角色附属断流。
@@ -142,6 +145,7 @@ define skill {
 /**
  * @id 12044
  * @name 遏浪
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属远程状态。
  * 角色所附属的近战状态效果结束时，重新附属远程状态。
@@ -165,8 +169,9 @@ define skill {
 /**
  * @id 12045
  * @name 远程状态
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 12045 as private RangedStanceSkill;
@@ -178,8 +183,9 @@ define skill {
 /**
  * @id 12046
  * @name 遏浪
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 12046 as private UnknownSkill;
@@ -190,6 +196,8 @@ define skill {
 /**
  * @id 1204
  * @name 达达利亚
+ * @hp 10
+ * @energy 3
  * @description
  * 牌局亦为战场，能者方可争先。
  */
@@ -208,6 +216,7 @@ define character {
 /**
  * @id 212041
  * @name 深渊之灾·凝水盛放
+ * @cost 3*Hydro
  * @description
  * 战斗行动：我方出战角色为达达利亚时，装备此牌。
  * 达达利亚装备此牌后，立刻使用一次魔王武装·狂澜。

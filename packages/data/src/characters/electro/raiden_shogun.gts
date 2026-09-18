@@ -66,6 +66,7 @@ define status {
 /**
  * @id 14071
  * @name 源流
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -80,6 +81,7 @@ define skill {
 /**
  * @id 14072
  * @name 神变·恶曜开眼
+ * @cost 3*Electro
  * @description
  * 召唤雷罚恶曜之眼。
  */
@@ -93,6 +95,7 @@ define skill {
 /**
  * @id 14073
  * @name 奥义·梦想真说
+ * @cost 3*Electro, 2*Energy
  * @description
  * 造成3点雷元素伤害，其他我方角色获得2点充能。
  */
@@ -108,6 +111,7 @@ define skill {
 /**
  * @id 14074
  * @name 诸愿百眼之轮
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属诸愿百眼之轮。
  */
@@ -126,6 +130,8 @@ define skill {
 /**
  * @id 1407
  * @name 雷电将军
+ * @hp 10
+ * @energy 2
  * @description
  * 鸣雷寂灭，浮世泡影。
  */
@@ -144,6 +150,7 @@ define character {
 /**
  * @id 214071
  * @name 万千的愿望
+ * @cost 3*Electro, 2*Energy
  * @description
  * 战斗行动：我方出战角色为雷电将军时，装备此牌。
  * 雷电将军装备此牌后，立刻使用一次奥义·梦想真说。

@@ -88,6 +88,7 @@ define summon {
 /**
  * @id 127021
  * @name 唤醒眷属
+ * @cost 2*Dendro
  * @description
  * 打出此牌或舍弃此牌时：召唤一个独立的增殖生命体。
  */
@@ -193,6 +194,7 @@ define combatStatus {
 /**
  * @id 27021
  * @name 失乡重击
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -207,6 +209,7 @@ define skill {
 /**
  * @id 27022
  * @name 生命流束
+ * @cost 3*Dendro
  * @description
  * 造成2点草元素伤害，抓1张唤醒眷属，生成1层绿洲之滋养。
  */
@@ -222,6 +225,7 @@ define skill {
 /**
  * @id 27023
  * @name 终景迸落
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 造成4点草元素伤害，抓1张唤醒眷属，生成2层绿洲之滋养。
  */
@@ -240,6 +244,7 @@ define skill {
 /**
  * @id 27024
  * @name 增殖感召
+ * @cost
  * @description
  * 【被动】战斗开始时，生成5张唤醒眷属，随机放入牌库。我方召唤4个增殖生命体后，此角色附属重燃的绿洲之心，并获得1点护盾。
  */
@@ -257,6 +262,8 @@ define skill {
 /**
  * @id 2702
  * @name 阿佩普的绿洲守望者
+ * @hp 10
+ * @energy 2
  * @description
  * 阿佩普曾独自沉溺于末日的风景当中。所有的人、神、龙、走兽、飞鸟与游鱼，所有记忆、智慧、话语与仇恨将都磨为无色尘粉，最后一轮明月之光则化作白焰之雨落在荒土之上。
  * ……
@@ -277,6 +284,7 @@ define character {
 /**
  * @id 227021
  * @name 万千子嗣
+ * @cost 2*Dendro
  * @description
  * 入场时：生成4张唤醒眷属，随机置入我方牌库。
  * 装备有此牌的阿佩普的绿洲守望者在场时:我方增殖生命体造成的伤害+1。

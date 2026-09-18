@@ -38,6 +38,7 @@ define status {
 /**
  * @id 14155
  * @name 闪烈降临·大火山崩落
+ * @cost
  * @description
  * 造成3点雷元素伤害，此技能视为下落攻击。
  */
@@ -95,6 +96,7 @@ define status {
 /**
  * @id 14151
  * @name 角力搏摔
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成1点雷元素伤害。此次技能为下落攻击时：造成的伤害+1，自身进入夜魂加持，并获得1点「夜魂值」。
  */
@@ -114,6 +116,7 @@ define skill {
 /**
  * @id 14152
  * @name 夜虹逐跃
+ * @cost 3*Electro
  * @description
  * 造成2点雷元素伤害，自身附属突驰烈进，进入夜魂加持，并获得1点「夜魂值」，然后我方切换到下一个角色。
  */
@@ -129,6 +132,7 @@ define skill {
 /**
  * @id 14153
  * @name 闪烈降临！
+ * @cost 3*Electro, 3*Energy
  * @description
  * 造成3点雷元素伤害，自身附属极限驱动。
  */
@@ -144,6 +148,7 @@ define skill {
 /**
  * @id 14154
  * @name 连势，三重腾跃！
+ * @cost
  * @description
  * 【被动】瓦雷莎使用技能后：如果自身「夜魂值」等于2，则消耗2点「夜魂值」，自身附属极限驱动。
  */
@@ -164,6 +169,7 @@ define skill {
 /**
  * @id 14156
  * @name 夜虹逐跃
+ * @cost
  * @description
  * 造成D__KEY__DAMAGE点D__KEY__ELEMENT，自身附属突驰烈进，进入夜魂加持，并获得1点「夜魂值」，然后我方切换到下一个角色。
  */
@@ -180,6 +186,8 @@ define skill {
 /**
  * @id 1415
  * @name 瓦雷莎
+ * @hp 10
+ * @energy 3
  * @description
  * 谨守恬安，豪勇锐进。
  */
@@ -201,6 +209,7 @@ define character {
 /**
  * @id 214151
  * @name 正义英雄的凯旋
+ * @cost 1*Electro
  * @description
  * 快速行动：装备给我方的瓦雷莎。
  * 瓦雷莎触发连势，三重腾跃！后：获得1点充能。

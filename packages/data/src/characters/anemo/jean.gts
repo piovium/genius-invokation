@@ -42,6 +42,7 @@ define summon {
 /**
  * @id 15021
  * @name 西风剑术
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -56,6 +57,7 @@ define skill {
 /**
  * @id 15022
  * @name 风压剑
+ * @cost 3*Anemo
  * @description
  * 造成3点风元素伤害，使对方强制切换到下一个角色。
  */
@@ -70,6 +72,7 @@ define skill {
 /**
  * @id 15023
  * @name 蒲公英之风
+ * @cost 4*Anemo, 2*Energy
  * @description
  * 治疗所有我方角色2点，召唤蒲公英领域。
  */
@@ -85,6 +88,8 @@ define skill {
 /**
  * @id 1502
  * @name 琴
+ * @hp 12
+ * @energy 2
  * @description
  * 在夺得最终的胜利之前，她总是认为自己做得还不够好。
  */
@@ -100,6 +105,7 @@ define character {
 /**
  * @id 215021
  * @name 蒲公英的国土
+ * @cost 4*Anemo, 2*Energy
  * @description
  * 战斗行动：我方出战角色为琴时，装备此牌。
  * 琴装备此牌后，立刻使用一次蒲公英之风。

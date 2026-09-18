@@ -86,6 +86,7 @@ define combatStatus {
 /**
  * @id 17051
  * @name 金匮针解
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成1点草元素伤害。
  */
@@ -100,6 +101,7 @@ define skill {
 /**
  * @id 17052
  * @name 太素诊要
+ * @cost 3*Dendro
  * @description
  * 造成1点草元素伤害，召唤游丝徵灵。
  */
@@ -114,6 +116,7 @@ define skill {
 /**
  * @id 17053
  * @name 愈气全形论
+ * @cost 4*Dendro, 2*Energy
  * @description
  * 生成脉摄宣明和无郤气护盾。
  */
@@ -129,6 +132,8 @@ define skill {
 /**
  * @id 1705
  * @name 白术
+ * @hp 11
+ * @energy 2
  * @description
  * 生老三千疾，何处可问医。
  */
@@ -144,6 +149,7 @@ define character {
 /**
  * @id 217051
  * @name 在地为化
+ * @cost 4*Dendro, 2*Energy
  * @description
  * 战斗行动：我方出战角色为白术时，装备此牌。
  * 白术装备此牌后，立刻使用一次愈气全形论。

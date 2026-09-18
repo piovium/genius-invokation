@@ -22,6 +22,7 @@ import {
 /**
  * @id 27055
  * @name 催萌腐草
+ * @cost
  * @description
  * 造成2点草元素伤害。
  */
@@ -47,6 +48,7 @@ define status {
 /**
  * @id 27051
  * @name 利爪猛击
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -61,6 +63,7 @@ define skill {
 /**
  * @id 27052
  * @name 掠能绿波
+ * @cost 3*Dendro
  * @description
  * 造成2点草元素伤害，从牌组中抓1张噬骸能量块。
  */
@@ -75,6 +78,7 @@ define skill {
 /**
  * @id 27053
  * @name 横生厄蔓
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 造成4点草元素伤害，如果手牌中存在噬骸能量块，则舍弃1张并准备技能催萌腐草。
  */
@@ -94,6 +98,7 @@ define skill {
 /**
  * @id 27054
  * @name 亡骸饥渴
+ * @cost
  * @description
  * 【被动】战斗开始时，生成2张噬骸能量块放入牌组底。我方每回合可以额外打出1张噬骸能量块。
  */
@@ -119,6 +124,7 @@ define skill {
 /**
  * @id 27056
  * @name 亡骸饥渴
+ * @cost
  * @description
  * 【被动】战斗开始时，生成2张噬骸能量块放入牌组底。我方每回合可以额外打出1张噬骸能量块。
  */
@@ -132,6 +138,8 @@ define skill {
 /**
  * @id 2705
  * @name 圣骸牙兽
+ * @hp 10
+ * @energy 2
  * @description
  * 因为啃噬伟大的生命体，而扭曲异变的掠食者。驱使着狂乱的蔓草之力。
  */
@@ -151,6 +159,7 @@ define character {
 /**
  * @id 227051
  * @name 亡草蔽日
+ * @cost 1*Dendro
  * @description
  * 快速行动：装备给我方的圣骸牙兽。
  * 我方打出或舍弃噬骸能量块时：抓1张牌。（每回合1次）

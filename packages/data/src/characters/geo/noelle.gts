@@ -60,6 +60,7 @@ define combatStatus {
 /**
  * @id 16021
  * @name 西风剑术·女仆
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -74,6 +75,7 @@ define skill {
 /**
  * @id 16022
  * @name 护心铠
+ * @cost 3*Geo
  * @description
  * 造成1点岩元素伤害，生成护体岩铠。
  */
@@ -88,6 +90,7 @@ define skill {
 /**
  * @id 16023
  * @name 大扫除
+ * @cost 4*Geo, 2*Energy
  * @description
  * 造成4点岩元素伤害，本角色附属大扫除。
  */
@@ -103,6 +106,8 @@ define skill {
 /**
  * @id 1602
  * @name 诺艾尔
+ * @hp 12
+ * @energy 2
  * @description
  * 整理牌桌这种事，真的可以交给她。
  */
@@ -118,6 +123,7 @@ define character {
 /**
  * @id 216021
  * @name 支援就交给我吧
+ * @cost 3*Geo
  * @description
  * 战斗行动：我方出战角色为诺艾尔时，装备此牌。
  * 诺艾尔装备此牌后，立刻使用一次护心铠。

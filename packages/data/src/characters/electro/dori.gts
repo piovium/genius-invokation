@@ -80,6 +80,7 @@ define summon {
 /**
  * @id 14101
  * @name 妙显剑舞·改
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -94,6 +95,7 @@ define skill {
 /**
  * @id 14102
  * @name 镇灵之灯·烦恼解决炮
+ * @cost 3*Electro
  * @description
  * 造成2点雷元素伤害，召唤售后服务弹。
  */
@@ -108,6 +110,7 @@ define skill {
 /**
  * @id 14103
  * @name 卡萨扎莱宫的无微不至
+ * @cost 3*Electro, 2*Energy
  * @description
  * 造成1点雷元素伤害，召唤灯中幽精。
  */
@@ -127,6 +130,8 @@ define skill {
 /**
  * @id 1410
  * @name 多莉
+ * @hp 10
+ * @energy 2
  * @description
  * 摩拉多多，快乐多多！
  */
@@ -144,6 +149,7 @@ define character {
 /**
  * @id 214101
  * @name 酌盈剂虚
+ * @cost 3*Electro, 2*Energy
  * @description
  * 战斗行动：我方出战角色为多莉时，装备此牌。
  * 多莉装备此牌后，立刻使用一次卡萨扎莱宫的无微不至。

@@ -48,6 +48,7 @@ define status {
 /**
  * @id 14041
  * @name 七圣枪术
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -62,6 +63,7 @@ define skill {
 /**
  * @id 14042
  * @name 秘仪·律渊渡魂
+ * @cost 3*Electro
  * @description
  * 造成3点雷元素伤害，
  * 启途誓使的「凭依」级数+1。
@@ -78,6 +80,7 @@ define skill {
 /**
  * @id 14043
  * @name 圣仪·煟煌随狼行
+ * @cost 4*Electro, 2*Energy
  * @description
  * 造成4点雷元素伤害，
  * 启途誓使的「凭依」级数+2。
@@ -95,6 +98,7 @@ define skill {
 /**
  * @id 14044
  * @name 行度誓惩
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属启途誓使。
  */
@@ -113,6 +117,8 @@ define skill {
 /**
  * @id 1404
  * @name 赛诺
+ * @hp 10
+ * @energy 2
  * @description
  * 卡牌中蕴藏的，是大风纪官如沙漠烈日般炙热的喜爱之情。
  */
@@ -131,6 +137,7 @@ define character {
 /**
  * @id 214041
  * @name 落羽的裁择
+ * @cost 3*Electro
  * @description
  * 战斗行动：我方出战角色为赛诺时，装备此牌。
  * 赛诺装备此牌后，立刻使用一次秘仪·律渊渡魂。

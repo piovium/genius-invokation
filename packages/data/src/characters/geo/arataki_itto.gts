@@ -107,6 +107,7 @@ define status {
 /**
  * @id 16051
  * @name 喧哗屋传说
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -121,6 +122,7 @@ define skill {
 /**
  * @id 16052
  * @name 魔杀绝技·赤牛发破！
+ * @cost 3*Geo
  * @description
  * 造成1点岩元素伤害，召唤阿丑，本角色附属乱神之怪力。
  */
@@ -136,6 +138,7 @@ define skill {
 /**
  * @id 16053
  * @name 最恶鬼王·一斗轰临！！
+ * @cost 3*Geo, 3*Energy
  * @description
  * 造成4点岩元素伤害，本角色附属怒目鬼王。
  */
@@ -151,6 +154,8 @@ define skill {
 /**
  * @id 1605
  * @name 荒泷一斗
+ * @hp 10
+ * @energy 3
  * @description
  * 「荒泷卡牌游戏王中王一斗」
  */
@@ -168,6 +173,7 @@ define character {
 /**
  * @id 216051
  * @name 荒泷第一
+ * @cost 1*Geo, 2*Void
  * @description
  * 战斗行动：我方出战角色为荒泷一斗时，装备此牌。
  * 荒泷一斗装备此牌后，立刻使用一次喧哗屋传说。

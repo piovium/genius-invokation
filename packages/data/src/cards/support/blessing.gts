@@ -84,6 +84,7 @@ define card {
 /**
  * @id 331004
  * @name 元素幻变：超导祝佑
+ * @cost 2*Aligned
  * @description
  * 元素幻变：冰元素雷元素
  * 投掷阶段：总是投出2个冰元素骰和2个雷元素骰。
@@ -182,6 +183,7 @@ define card {
 /**
  * @id 331005
  * @name 元素幻变：蒸发祝佑
+ * @cost 2*Aligned
  * @description
  * 元素幻变：水元素火元素
  * 投掷阶段：总是投出2个水元素骰和2个火元素骰。
@@ -268,6 +270,7 @@ define card {
 /**
  * @id 331006
  * @name 元素幻变：绽放祝佑
+ * @cost 2*Aligned
  * @description
  * 元素幻变：水元素草元素
  * 投掷阶段：总是投出2个水元素骰和2个草元素骰。
@@ -363,6 +366,7 @@ define card {
 /**
  * @id 331007
  * @name 元素幻变：火岩祝佑
+ * @cost 2*Aligned
  * @description
  * 元素幻变：火元素岩元素
  * 投掷阶段：总是投出2个火元素骰和2个岩元素骰。
@@ -447,6 +451,7 @@ define card {
 /**
  * @id 331008
  * @name 元素幻变：冰草祝佑
+ * @cost 2*Aligned
  * @description
  * 元素幻变：冰元素草元素
  * 投掷阶段：总是投出2个冰元素骰和2个草元素骰。
@@ -527,6 +532,7 @@ define card {
 /**
  * @id 331009
  * @name 元素幻变：雷风祝佑
+ * @cost 2*Aligned
  * @description
  * 元素幻变：雷元素风元素
  * 投掷阶段：总是投出2个雷元素骰和2个风元素骰。
@@ -605,6 +611,7 @@ define card {
 /**
  * @id 331010
  * @name 元素幻变：水风祝佑
+ * @cost 2*Aligned
  * @description
  * 元素幻变：水元素风元素
  * 投掷阶段：总是投出2个水元素骰和2个风元素骰。
@@ -690,6 +697,7 @@ define card {
 /**
  * @id 331011
  * @name 元素幻变：雷草祝佑
+ * @cost 2*Aligned
  * @description
  * 元素幻变：雷元素草元素
  * 投掷阶段：总是投出2个雷元素骰和2个草元素骰。

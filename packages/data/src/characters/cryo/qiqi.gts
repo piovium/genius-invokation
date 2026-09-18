@@ -74,6 +74,7 @@ define combatStatus {
 /**
  * @id 11081
  * @name 云来古剑法
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -88,6 +89,7 @@ define skill {
 /**
  * @id 11082
  * @name 仙法·寒病鬼差
+ * @cost 3*Cryo
  * @description
  * 召唤寒病鬼差。
  */
@@ -115,6 +117,7 @@ define extension {
 /**
  * @id 11083
  * @name 仙法·救苦度厄
+ * @cost 3*Cryo, 3*Energy
  * @description
  * 造成3点冰元素伤害，生成度厄真符。
  */
@@ -141,6 +144,8 @@ define skill {
 /**
  * @id 1108
  * @name 七七
+ * @hp 10
+ * @energy 3
  * @description
  * 流转不息，生生不绝。
  */
@@ -156,6 +161,7 @@ define character {
 /**
  * @id 211081
  * @name 起死回骸
+ * @cost 4*Cryo, 3*Energy
  * @description
  * 战斗行动：我方出战角色为七七时，装备此牌。
  * 七七装备此牌后，立刻使用一次仙法·救苦度厄。

@@ -65,6 +65,7 @@ define status {
 /**
  * @id 14131
  * @name 王家苇箭术
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -80,6 +81,7 @@ define skill {
 /**
  * @id 14132
  * @name 古仪·鸣砂掣雷
+ * @cost 2*Electro
  * @description
  * 敌方出战角色附着雷元素，我方切换到下一个角色。自身附属轰雷凝集。
  */
@@ -95,6 +97,7 @@ define skill {
 /**
  * @id 14133
  * @name 秘仪·瞑光贯影
+ * @cost 3*Electro, 4*Energy
  * @description
  * 造成3点雷元素伤害，自身附属寂想瞑影。
  */
@@ -112,6 +115,7 @@ const EnergyLost = customEvent("sethos/energyLost");
 /**
  * @id 14134
  * @name 黑鸢的密喻
+ * @cost
  * @description
  * 自身「普通攻击」不会获得充能。
  * 自身「普通攻击」后：如可能，消耗全部充能，对生命值最低的敌方造成等额+1的穿透伤害。
@@ -138,6 +142,8 @@ define skill {
 /**
  * @id 1413
  * @name 赛索斯
+ * @hp 10
+ * @energy 4
  * @description
  * 沙海来客，慧心慧业。
  */
@@ -156,6 +162,7 @@ define character {
 /**
  * @id 214131
  * @name 巡日塔门书
+ * @cost 1*Electro
  * @description
  * 我方赛索斯获得1点充能。
  * 我方赛索斯因黑鸢的密喻扣除充能后，获得1点充能。（每回合1次）

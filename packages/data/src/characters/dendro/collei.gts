@@ -62,6 +62,7 @@ define combatStatus {
 /**
  * @id 17011
  * @name 祈颂射艺
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -76,6 +77,7 @@ define skill {
 /**
  * @id 17012
  * @name 拂花偈叶
+ * @cost 3*Dendro
  * @description
  * 造成3点草元素伤害。
  */
@@ -96,6 +98,7 @@ define skill {
 /**
  * @id 17013
  * @name 猫猫秘宝
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 造成2点草元素伤害，召唤柯里安巴。
  */
@@ -111,6 +114,8 @@ define skill {
 /**
  * @id 1701
  * @name 柯莱
+ * @hp 11
+ * @energy 2
  * @description
  * 「大声喊出卡牌的名字会让它威力加倍…这一定是虚构的吧？」
  */
@@ -126,6 +131,7 @@ define character {
 /**
  * @id 217011
  * @name 飞叶迴斜
+ * @cost 3*Dendro
  * @description
  * 战斗行动：我方出战角色为柯莱时，装备此牌。
  * 柯莱装备此牌后，立刻使用一次拂花偈叶。

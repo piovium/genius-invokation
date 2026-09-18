@@ -82,6 +82,7 @@ define combatStatus {
 /**
  * @id 12081
  * @name 弦月舞步
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -96,6 +97,7 @@ define skill {
 /**
  * @id 12082
  * @name 七域舞步
+ * @cost 3*Hydro
  * @description
  * 造成3点水元素伤害，如果队伍中包含水元素角色和草元素角色且不包含其他元素的角色，就生成金杯的丰馈。
  */
@@ -119,6 +121,7 @@ define skill {
 /**
  * @id 12083
  * @name 浮莲舞步·远梦聆泉
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 造成2点水元素伤害，目标及下一个角色附属永世流沔。
  */
@@ -134,6 +137,8 @@ define skill {
 /**
  * @id 1208
  * @name 妮露
+ * @hp 10
+ * @energy 2
  * @description
  * 莲步轻舞，出尘醉梦。
  */
@@ -151,6 +156,7 @@ define character {
 /**
  * @id 212081
  * @name 星天的花雨
+ * @cost 3*Hydro
  * @description
  * 战斗行动：我方出战角色为妮露时，装备此牌。
  * 妮露装备此牌后，立刻使用一次七域舞步。

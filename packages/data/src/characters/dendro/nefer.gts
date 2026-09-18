@@ -19,6 +19,7 @@ import { RES } from "../../commons.gts";
 /**
  * @id 117121
  * @name 诳言之核
+ * @cost 5*Dendro
  * @description
  * 战斗行动：奈芙尔为出战角色时可以使用。
  * 奈芙尔使用技能：幻戏。
@@ -57,6 +58,7 @@ define combatStatus {
 /**
  * @id 17121
  * @name 游虵吐信
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成1点草元素伤害。
  */
@@ -71,6 +73,7 @@ define skill {
 /**
  * @id 17122
  * @name 弈术·千夜一舞
+ * @cost 3*Dendro
  * @description
  * 造成1点草元素伤害，自身附属1层抗性，我方下次行动前，赋予手牌中至多3张费用最高的诳言之核费用降低。
  */
@@ -86,6 +89,7 @@ define skill {
 /**
  * @id 17123
  * @name 圣约·真眸幻戏
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 造成4点草元素伤害，手牌中每有1张诳言之核，伤害+1。（至多+2）
  */
@@ -101,6 +105,7 @@ define skill {
 /**
  * @id 17124
  * @name 月兆祝赐·廊下暮影
+ * @cost
  * @description
  * 【被动】本局游戏中，敌方受到绽放反应时，改为月绽放反应。
  * 我方手牌中诳言之核少于3张，敌方受到月绽放反应时：生成手牌诳言之核。（每回合2次）
@@ -124,6 +129,7 @@ define skill {
 /**
  * @id 17125
  * @name 月兆祝赐·廊下暮影
+ * @cost
  * @description
  * 【被动】本局游戏中，敌方受到绽放反应时，改为月绽放反应。
  * 我方手牌中诳言之核少于3张，敌方受到月绽放反应时：生成手牌诳言之核。（每回合2次）
@@ -137,6 +143,7 @@ define skill {
 /**
  * @id 17126
  * @name 幻戏
+ * @cost
  * @description
  * 造成4点草元素伤害。
  */
@@ -151,6 +158,8 @@ define skill {
 /**
  * @id 1712
  * @name 奈芙尔
+ * @hp 10
+ * @energy 2
  * @description
  * 秘闻求解，索见诸心。
  */
@@ -171,6 +180,7 @@ define character {
 /**
  * @id 217121
  * @name 决胜于逆转之时
+ * @cost 3*Dendro
  * @description
  * 快速行动：装备给我方的奈芙尔。
  * 生成3张诳言之核，均匀地置入我方牌组中，并赋予我方手牌和牌组中所有诳言之核费用降低。

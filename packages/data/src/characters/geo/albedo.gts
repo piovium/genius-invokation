@@ -39,6 +39,7 @@ define summon {
 /**
  * @id 16041
  * @name 西风剑术·白
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -53,6 +54,7 @@ define skill {
 /**
  * @id 16042
  * @name 创生法·拟造阳华
+ * @cost 3*Geo
  * @description
  * 召唤阳华。
  */
@@ -66,6 +68,7 @@ define skill {
 /**
  * @id 16043
  * @name 诞生式·大地之潮
+ * @cost 3*Geo, 2*Energy
  * @description
  * 造成4点岩元素伤害，如果阳华在场，就使此伤害+2。
  */
@@ -84,6 +87,8 @@ define skill {
 /**
  * @id 1604
  * @name 阿贝多
+ * @hp 12
+ * @energy 2
  * @description
  * 黑土与白垩，赤成与黄金。
  */
@@ -101,6 +106,7 @@ define character {
 /**
  * @id 216041
  * @name 神性之陨
+ * @cost 3*Geo
  * @description
  * 战斗行动：我方出战角色为阿贝多时，装备此牌。
  * 阿贝多装备此牌后，立刻使用一次创生法·拟造阳华。

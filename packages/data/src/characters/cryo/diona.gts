@@ -59,6 +59,7 @@ define combatStatus {
 /**
  * @id 11021
  * @name 猎人射术
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -73,6 +74,7 @@ define skill {
 /**
  * @id 11022
  * @name 猫爪冻冻
+ * @cost 3*Cryo
  * @description
  * 造成2点冰元素伤害，生成猫爪护盾。
  */
@@ -91,6 +93,7 @@ define skill {
 /**
  * @id 11023
  * @name 最烈特调
+ * @cost 3*Cryo, 3*Energy
  * @description
  * 造成1点冰元素伤害，治疗此角色2点，召唤酒雾领域。
  */
@@ -107,6 +110,8 @@ define skill {
 /**
  * @id 1102
  * @name 迪奥娜
+ * @hp 12
+ * @energy 3
  * @description
  * 用1%的力气调酒，99%的力气…拒绝失败。
  */
@@ -122,6 +127,7 @@ define character {
 /**
  * @id 211021
  * @name 猫爪冰摇
+ * @cost 3*Cryo
  * @description
  * 战斗行动：我方出战角色为迪奥娜时，装备此牌。
  * 迪奥娜装备此牌后，立刻使用一次猫爪冻冻。

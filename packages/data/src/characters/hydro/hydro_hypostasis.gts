@@ -72,6 +72,7 @@ define status {
 /**
  * @id 22081
  * @name 水珠漫射
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成1点水元素伤害。
  */
@@ -86,6 +87,7 @@ define skill {
 /**
  * @id 22082
  * @name 涌动洪流
+ * @cost 3*Hydro
  * @description
  * 造成2点水元素伤害，然后准备技能：溢流。
  */
@@ -100,6 +102,7 @@ define skill {
 /**
  * @id 22083
  * @name 危祸之潮
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 造成3点水元素伤害，召唤水滴。
  */
@@ -115,6 +118,7 @@ define skill {
 /**
  * @id 22084
  * @name 水晶核心
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属水晶核心。如果场上存在水滴，消耗水晶核心时重新附属水晶核心，并使水滴可用次数-1。
  */
@@ -138,6 +142,7 @@ define skill {
 /**
  * @id 22085
  * @name 溢流
+ * @cost
  * @description
  * 造成1点水元素伤害。
  */
@@ -151,6 +156,7 @@ define skill {
 /**
  * @id 22086
  * @name 水晶核心
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属水晶核心。如果场上存在水滴，消耗水晶核心时重新附属水晶核心，并使水滴可用次数-1。
  */
@@ -163,6 +169,8 @@ define skill {
 /**
  * @id 2208
  * @name 无相之水
+ * @hp 8
+ * @energy 2
  * @description
  * 代号为「希伊」的高级水元素生命，有着强大的排异本能，会无情地驱逐试探它的人。
  */
@@ -182,6 +190,7 @@ define character {
 /**
  * @id 222081
  * @name 诡谲恶浪
+ * @cost 1*Hydro
  * @description
  * 快速行动：装备给我方的无相之水。
  * 无相之水或水滴造成伤害后，治疗我方受伤最多的魔物1点。（每回合3次）

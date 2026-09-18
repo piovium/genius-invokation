@@ -69,6 +69,7 @@ define combatStatus {
 /**
  * @id 12021
  * @name 古华剑法
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -83,6 +84,7 @@ define skill {
 /**
  * @id 12022
  * @name 画雨笼山
+ * @cost 3*Hydro
  * @description
  * 造成2点水元素伤害，本角色附着水元素，生成雨帘剑。
  */
@@ -102,6 +104,7 @@ define skill {
 /**
  * @id 12023
  * @name 裁雨留虹
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 造成2点水元素伤害，本角色附着水元素，生成虹剑势。
  */
@@ -118,6 +121,8 @@ define skill {
 /**
  * @id 1202
  * @name 行秋
+ * @hp 10
+ * @energy 2
  * @description
  * 「怎么最近小说里的主角，都是些私塾里的学生…」
  */
@@ -133,6 +138,7 @@ define character {
 /**
  * @id 212021
  * @name 重帘留香
+ * @cost 3*Hydro
  * @description
  * 战斗行动：我方出战角色为行秋时，装备此牌。
  * 行秋装备此牌后，立刻使用一次画雨笼山。

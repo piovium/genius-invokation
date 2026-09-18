@@ -34,6 +34,7 @@ define status {
 /**
  * @id 13011
  * @name 淬炼之剑
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -48,6 +49,7 @@ define skill {
 /**
  * @id 13012
  * @name 逆焰之刃
+ * @cost 3*Pyro
  * @description
  * 造成3点火元素伤害。每回合第三次使用本技能时，伤害+2。
  */
@@ -65,6 +67,7 @@ define skill {
 /**
  * @id 13013
  * @name 黎明
+ * @cost 4*Pyro, 3*Energy
  * @description
  * 造成8点火元素伤害，本角色附属火元素附魔。
  */
@@ -80,6 +83,8 @@ define skill {
 /**
  * @id 1301
  * @name 迪卢克
+ * @hp 10
+ * @energy 3
  * @description
  * 他的心是他最大的敌人。
  */
@@ -95,6 +100,7 @@ define character {
 /**
  * @id 213011
  * @name 流火焦灼
+ * @cost 3*Pyro
  * @description
  * 战斗行动：我方出战角色为迪卢克时，装备此牌。
  * 迪卢克装备此牌后，立刻使用一次逆焰之刃。

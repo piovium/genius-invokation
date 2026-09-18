@@ -82,6 +82,7 @@ define combatStatus {
 /**
  * @id 21011
  * @name 冰萤棱锥
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成1点冰元素伤害。
  */
@@ -96,6 +97,7 @@ define skill {
 /**
  * @id 21012
  * @name 雾虚摇唤
+ * @cost 3*Cryo
  * @description
  * 造成1点冰元素伤害，召唤冰萤。
  */
@@ -115,6 +117,7 @@ define skill {
 /**
  * @id 21013
  * @name 冰枝白花
+ * @cost 3*Cryo, 3*Energy
  * @description
  * 造成5点冰元素伤害，本角色附着冰元素，生成流萤护罩。
  */
@@ -131,6 +134,8 @@ define skill {
 /**
  * @id 2101
  * @name 愚人众·冰萤术士
+ * @hp 10
+ * @energy 3
  * @description
  * 至少在雾虚草耗尽之前，冰萤不会离她而去。
  */
@@ -146,6 +151,7 @@ define character {
 /**
  * @id 221011
  * @name 冰萤寒光
+ * @cost 3*Cryo
  * @description
  * 战斗行动：我方出战角色为愚人众·冰萤术士时，装备此牌。
  * 愚人众·冰萤术士装备此牌后，立刻使用一次雾虚摇唤。

@@ -99,6 +99,7 @@ define combatStatus {
 /**
  * @id 11071
  * @name 踏辰摄斗
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -113,6 +114,7 @@ define skill {
 /**
  * @id 11072
  * @name 仰灵威召将役咒
+ * @cost 3*Cryo
  * @description
  * 造成2点冰元素伤害，生成冰翎。
  */
@@ -131,6 +133,7 @@ define skill {
 /**
  * @id 11073
  * @name 神女遣灵真诀
+ * @cost 3*Cryo, 2*Energy
  * @description
  * 造成1点冰元素伤害，召唤箓灵。
  */
@@ -146,6 +149,8 @@ define skill {
 /**
  * @id 1107
  * @name 申鹤
+ * @hp 10
+ * @energy 2
  * @description
  * 红尘渺渺，因果烟消。
  */
@@ -161,6 +166,7 @@ define character {
 /**
  * @id 211071
  * @name 忘玄
+ * @cost 3*Cryo
  * @description
  * 战斗行动：我方出战角色为申鹤时，装备此牌。
  * 申鹤装备此牌后，立刻使用一次仰灵威召将役咒。

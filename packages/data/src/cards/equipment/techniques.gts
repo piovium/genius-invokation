@@ -20,6 +20,7 @@ import { AgileSwitch, EfficientSwitch } from "../../commons.gts";
 /**
  * @id 313001
  * @name 异色猎刀鳐
+ * @cost
  * @description
  * 特技：原海水刃
  * 可用次数：2
@@ -42,6 +43,7 @@ define card {
 /**
  * @id 313002
  * @name 匿叶龙
+ * @cost 1*Aligned
  * @description
  * 特技：钩物巧技
  * 可用次数：2
@@ -78,6 +80,7 @@ define card {
 /**
  * @id 313003
  * @name 鳍游龙
+ * @cost 2*Aligned
  * @description
  * 特技：游隙灵道
  * 可用次数：2
@@ -115,6 +118,7 @@ define status {
 /**
  * @id 313004
  * @name 嵴锋龙
+ * @cost 2*Aligned
  * @description
  * 特技：掘进突击
  * 可用次数：2
@@ -141,6 +145,7 @@ define card {
 /**
  * @id 313005
  * @name 暝视龙
+ * @cost 2*Aligned
  * @description
  * 特技：灵性援护
  * 可用次数：2
@@ -185,6 +190,7 @@ define status {
 /**
  * @id 313006
  * @name 绒翼龙
+ * @cost 1*Aligned
  * @description
  * 入场时：敌方出战角色附属目标。
  * 敌方附属有目标的角色切换为出战角色时：我方获得1层高效切换和敏捷切换，并移除对方所有角色的目标。
@@ -240,6 +246,7 @@ define status {
 /**
  * @id 313007
  * @name 浪船
+ * @cost 5*Aligned
  * @description
  * 入场时：为我方附属角色提供2点护盾。
  * 附属角色切换至后台时：此牌可用次数+1。
@@ -301,6 +308,7 @@ define status {
 /**
  * @id 313008
  * @name 突角龙
+ * @cost 4*Void
  * @description
  * 特技：昂扬状态
  * 可用次数：2
@@ -396,6 +404,7 @@ define combatStatus {
 /**
  * @id 313009
  * @name 呀！呀！
+ * @cost 2*Aligned
  * @description
  * 此卡牌入场时：创建呀——！。（我方打出特技牌时：若本局游戏我方累计打出了6张特技牌，我方出战角色获得3点护盾，然后造成3点物理伤害）
  * 特技：呀！呀！
@@ -425,6 +434,7 @@ define card {
 /**
  * @id 313010
  * @name 膨膨兽
+ * @cost 1*Aligned
  * @description
  * 特技：膨膨音波
  * 可用次数：2

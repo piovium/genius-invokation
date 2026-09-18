@@ -106,6 +106,7 @@ define summon {
 /**
  * @id 12141
  * @name 降温处理
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成1点水元素伤害。
  */
@@ -120,6 +121,7 @@ define skill {
 /**
  * @id 12142
  * @name 踏鲨破浪
+ * @cost 2*Hydro
  * @description
  * 自身附属咬咬鲨鱼，然后进入夜魂加持，并获得2点「夜魂值」。（角色进入夜魂加持后不可使用此技能）
  * （附属咬咬鲨鱼的角色可以使用特技：鲨鲨冲浪板）
@@ -136,6 +138,7 @@ define skill {
 /**
  * @id 12143
  * @name 爆瀑飞弹
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 造成2点水元素伤害，召唤鲨鲨飞弹。
  */
@@ -151,6 +154,8 @@ define skill {
 /**
  * @id 1214
  * @name 玛拉妮
+ * @hp 10
+ * @energy 2
  * @description
  * 流泉不息，踏浪前行。
  */
@@ -167,6 +172,7 @@ define character {
 /**
  * @id 212141
  * @name 夜域赐礼·波涛顶底
+ * @cost 1*Hydro
  * @description
  * 装备有此牌的玛拉妮切换为「出战角色」时：触发1个随机我方「召唤物」的「结束阶段」效果。（每回合1次）
  * （牌组中包含玛拉妮，才能加入牌组）

@@ -80,6 +80,7 @@ define combatStatus {
 /**
  * @id 11041
  * @name 灭邪四式
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -94,6 +95,7 @@ define skill {
 /**
  * @id 11042
  * @name 重华叠霜
+ * @cost 3*Cryo
  * @description
  * 造成3点冰元素伤害，生成重华叠霜领域。
  */
@@ -112,6 +114,7 @@ define skill {
 /**
  * @id 11043
  * @name 云开星落
+ * @cost 3*Cryo, 3*Energy
  * @description
  * 造成7点冰元素伤害。
  */
@@ -126,6 +129,8 @@ define skill {
 /**
  * @id 1104
  * @name 重云
+ * @hp 10
+ * @energy 3
  * @description
  * 「夏天啊，你还是悄悄过去吧…」
  */
@@ -141,6 +146,7 @@ define character {
 /**
  * @id 211041
  * @name 吐纳真定
+ * @cost 3*Cryo
  * @description
  * 战斗行动：我方出战角色为重云时，装备此牌。
  * 重云装备此牌后，立刻使用一次重华叠霜。

@@ -29,6 +29,7 @@ define status {
 /**
  * @id 25026
  * @name 终幕涤流
+ * @cost
  * @description
  * （需准备1个行动轮）
  * 对上一个敌方后台角色造成2点风元素伤害。（敌方没有后台角色时，改为对出战角色造成伤害）
@@ -58,6 +59,7 @@ define status {
 /**
  * @id 25025
  * @name 长延涤流
+ * @cost
  * @description
  * （需准备1个行动轮）
  * 对下一个敌方后台角色造成1点风元素伤害，然后准备技能：终幕涤流。（敌方没有后台角色时，改为对出战角色造成伤害）
@@ -119,6 +121,7 @@ define combatStatus {
 /**
  * @id 25021
  * @name 裂爪横击
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -133,6 +136,7 @@ define skill {
 /**
  * @id 25022
  * @name 暴风轰击
+ * @cost 3*Anemo
  * @description
  * 造成2点风元素伤害，目标角色附属坍毁。
  */
@@ -147,6 +151,7 @@ define skill {
 /**
  * @id 25023
  * @name 风龙涤流
+ * @cost 5*Anemo
  * @description
  * 造成2点风元素伤害，然后分别准备技能：长延涤流和终幕涤流。
  */
@@ -161,6 +166,7 @@ define skill {
 /**
  * @id 25024
  * @name 终天闭幕曲
+ * @cost 4*Anemo, 2*Energy
  * @description
  * 造成5点风元素伤害，所有敌方后台角色附属坍毁。
  */
@@ -176,6 +182,8 @@ define skill {
 /**
  * @id 2502
  * @name 特瓦林
+ * @hp 10
+ * @energy 2
  * @description
  * 「如果你曾是我，看见过你在蓝蓝的天上滑翔的孤高模样，见识过你的美丽身姿就好了。」
  * 「如此，你就会明白，这样的天空与大地，是值得为之奋战的。」
@@ -197,6 +205,7 @@ define character {
 /**
  * @id 225021
  * @name 毁裂风涡
+ * @cost 3*Anemo
  * @description
  * 战斗行动：我方出战角色为特瓦林时，装备此牌。
  * 特瓦林装备此牌后，立刻使用一次暴风轰击。

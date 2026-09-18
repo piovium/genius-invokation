@@ -65,6 +65,7 @@ define status {
 /**
  * @id 22021
  * @name 水弹
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成1点水元素伤害。
  */
@@ -79,6 +80,7 @@ define skill {
 /**
  * @id 22022
  * @name 潋波绽破
+ * @cost 3*Hydro
  * @description
  * 造成3点水元素伤害，目标角色附属水光破镜。
  */
@@ -97,6 +99,7 @@ define skill {
 /**
  * @id 22023
  * @name 粼镜折光
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 造成5点水元素伤害。
  */
@@ -111,6 +114,8 @@ define skill {
 /**
  * @id 2202
  * @name 愚人众·藏镜仕女
+ * @hp 10
+ * @energy 2
  * @description
  * 一切隐秘，都将深藏于潋光的水镜之中吧…
  */
@@ -126,6 +131,7 @@ define character {
 /**
  * @id 222021
  * @name 镜锢之笼
+ * @cost 3*Hydro
  * @description
  * 战斗行动：我方出战角色为愚人众·藏镜仕女时，装备此牌。
  * 愚人众·藏镜仕女装备此牌后，立刻使用一次潋波绽破。

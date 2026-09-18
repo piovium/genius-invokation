@@ -43,6 +43,7 @@ define status {
 /**
  * @id 25041
  * @name 半剑技术
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -57,6 +58,7 @@ define skill {
 /**
  * @id 25042
  * @name 低位撩斩
+ * @cost 3*Anemo
  * @description
  * 造成3点风元素伤害，抓1张牌。
  */
@@ -71,6 +73,7 @@ define skill {
 /**
  * @id 25043
  * @name 近卫姿态
+ * @cost 3*Anemo, 2*Energy
  * @description
  * 准备技能：舍身架势，然后准备技能：怒风循击。
  */
@@ -85,6 +88,7 @@ define skill {
 /**
  * @id 25044
  * @name 前驱气势
+ * @cost
  * @description
  * 【被动】我方触发扩散反应，或敌方失去护盾、 伤害抵消状态以及出战状态时，抓1张牌。（每回合2次）
  */
@@ -115,6 +119,7 @@ define skill {
 /**
  * @id 25045
  * @name 舍身架势
+ * @cost
  * @description
  * 造成3点风元素伤害，舍弃1张当前元素骰费用最高的手牌，准备技能:怒风循击。
  */
@@ -130,6 +135,7 @@ define skill {
 /**
  * @id 25046
  * @name 怒风循击
+ * @cost
  * @description
  * 造成3点风元素伤害，舍弃1张当前元素骰费用最高的手牌。
  */
@@ -144,6 +150,8 @@ define skill {
 /**
  * @id 2504
  * @name 黑蛇骑士·斩风之剑
+ * @hp 10
+ * @energy 2
  * @description
  * 「在宫廷当中颇具地位的近卫军人，『末光之剑』也曾是他们当中的一员。」
  */
@@ -164,6 +172,7 @@ define character {
 /**
  * @id 225041
  * @name 「曾如孤风阻隔黑灾蔓延…」
+ * @cost 3*Anemo
  * @description
  * 战斗行动：我方出战角色为黑蛇骑士·斩风之剑时，装备此牌。
  * 黑蛇骑士·斩风之剑装备此牌后，立刻使用一次低位撩斩。

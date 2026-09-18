@@ -50,6 +50,7 @@ define combatStatus {
 /**
  * @id 13021
  * @name 白案功夫
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -64,6 +65,7 @@ define skill {
 /**
  * @id 13022
  * @name 锅巴出击
+ * @cost 3*Pyro
  * @description
  * 召唤锅巴。
  */
@@ -80,6 +82,7 @@ define skill {
 /**
  * @id 13023
  * @name 旋火轮
+ * @cost 4*Pyro, 2*Energy
  * @description
  * 造成3点火元素伤害，生成旋火轮。
  */
@@ -95,6 +98,8 @@ define skill {
 /**
  * @id 1302
  * @name 香菱
+ * @hp 10
+ * @energy 2
  * @description
  * 身为一个厨师，她几乎什么都做得到。
  */
@@ -110,6 +115,7 @@ define character {
 /**
  * @id 213021
  * @name 交叉火力
+ * @cost 3*Pyro
  * @description
  * 战斗行动：我方出战角色为香菱时，装备此牌。
  * 香菱装备此牌后，立刻使用一次锅巴出击。

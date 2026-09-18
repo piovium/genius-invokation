@@ -72,6 +72,7 @@ define summon {
 /**
  * @id 26031
  * @name 王狼直击
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -86,6 +87,7 @@ define skill {
 /**
  * @id 26032
  * @name 兽境轰召
+ * @cost 3*Geo
  * @description
  * 造成2点岩元素伤害，目标角色附属2层黄金侵蚀，召唤兽境犬首。
  */
@@ -105,6 +107,7 @@ define skill {
 /**
  * @id 26033
  * @name 黄金侵绞
+ * @cost 3*Geo, 2*Energy
  * @description
  * 造成3点岩元素伤害，对所有敌方后台角色造成1点穿透伤害，并使所有敌方角色附属黄金侵蚀。
  */
@@ -121,6 +124,8 @@ define skill {
 /**
  * @id 2603
  * @name 黄金王兽
+ * @hp 10
+ * @energy 2
  * @description
  * 来自异界的扭曲魔兽，统领兽境群狼的王者，拥有指挥狼群溶解空间的权威。
  */
@@ -136,6 +141,7 @@ define character {
 /**
  * @id 226031
  * @name 异兽侵蚀
+ * @cost 3*Geo
  * @description
  * 战斗行动：我方出战角色为黄金王兽时，装备此牌。
  * 黄金王兽装备此牌后，立刻使用一次兽境轰召。

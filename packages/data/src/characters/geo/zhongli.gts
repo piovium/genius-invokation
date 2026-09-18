@@ -57,6 +57,7 @@ define combatStatus {
 /**
  * @id 16031
  * @name 岩雨
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -71,6 +72,7 @@ define skill {
 /**
  * @id 16032
  * @name 地心
+ * @cost 3*Geo
  * @description
  * 造成1点岩元素伤害，召唤岩脊。
  */
@@ -85,6 +87,7 @@ define skill {
 /**
  * @id 16033
  * @name 地心·磐礴
+ * @cost 5*Geo
  * @description
  * 造成3点岩元素伤害，召唤岩脊，生成玉璋护盾。
  */
@@ -100,6 +103,7 @@ define skill {
 /**
  * @id 16034
  * @name 天星
+ * @cost 3*Geo, 3*Energy
  * @description
  * 造成4点岩元素伤害，目标角色附属石化。
  */
@@ -115,6 +119,8 @@ define skill {
 /**
  * @id 1603
  * @name 钟离
+ * @hp 12
+ * @energy 3
  * @description
  * 韬玉之石，可明八荒；灿若天星，纵横无双 。
  */
@@ -130,6 +136,7 @@ define character {
 /**
  * @id 216031
  * @name 炊金馔玉
+ * @cost 5*Geo
  * @description
  * 战斗行动：我方出战角色为钟离时，装备此牌。
  * 钟离装备此牌后，立刻使用一次地心·磐礴。

@@ -37,6 +37,7 @@ define summon {
 /**
  * @id 121051
  * @name 浮彩
+ * @cost 2*Cryo
  * @description
  * 战斗行动：生成2层护盾。
  */
@@ -129,6 +130,7 @@ define combatStatus {
 /**
  * @id 121054
  * @name 浮彩·冰凌
+ * @cost
  * @description
  * 打出浮彩时：额外造成1点冰元素伤害。（重复选择将使造成的伤害+1）
  */
@@ -153,6 +155,7 @@ define combatStatus {
 /**
  * @id 121055
  * @name 浮彩·多重
+ * @cost
  * @description
  * 打出浮彩时：召唤浮彩分身。（重复选择时将使召唤的浮彩分身造成的伤害+1）
  */
@@ -177,6 +180,7 @@ define combatStatus {
 /**
  * @id 121056
  * @name 浮彩·实像
+ * @cost
  * @description
  * 打出浮彩时：抓1张牌。（重复选择将额外抓1张牌）
  */
@@ -201,6 +205,7 @@ define combatStatus {
 /**
  * @id 121057
  * @name 浮彩·支柱
+ * @cost
  * @description
  * 打出浮彩时：生成1层护盾。（重复选择时将额外生成1层护盾）
  */
@@ -225,6 +230,7 @@ define combatStatus {
 /**
  * @id 121058
  * @name 浮彩·坚冰
+ * @cost
  * @description
  * 打出浮彩时：使我方出战角色附属1层战斗计划。（重复选择时将额外附属1层战斗计划）
  */
@@ -249,6 +255,7 @@ define combatStatus {
 /**
  * @id 121059
  * @name 浮彩·迅影
+ * @cost
  * @description
  * 打出浮彩时：赋予我方费用最高的1张随机手牌费用降低。（重复选择时将额外赋予1层）
  */
@@ -274,6 +281,7 @@ define combatStatus {
 /**
  * @id 21051
  * @name 灵觉·寒星
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成1点冰元素伤害。
  */
@@ -301,6 +309,7 @@ define extension {
 /**
  * @id 21052
  * @name 千变的浮彩
+ * @cost 3*Cryo
  * @description
  * 造成1点冰元素伤害，将1张浮彩加入牌库中第3张的位置。如果是本局游戏前4次使用此技能，则从3个随机的浮彩强化效果中挑选1个。
  */
@@ -330,6 +339,7 @@ define skill {
 /**
  * @id 21053
  * @name 沍寒的图绘
+ * @cost 3*Cryo, 2*Energy
  * @description
  * 造成4点冰元素伤害，将1张浮彩加入手牌。
  */
@@ -345,6 +355,7 @@ define skill {
 /**
  * @id 21054
  * @name 斑斓的绚影
+ * @cost
  * @description
  * 【被动】战斗开始时，生成3张浮彩，均匀放入牌库。
  */
@@ -360,6 +371,8 @@ define skill {
 /**
  * @id 2105
  * @name 灵觉隐修的迷者
+ * @hp 10
+ * @energy 2
  * @description
  * 独自在外潜修的「烟谜主」的祭司。据说因为得到了「烟谜主」大灵的庇护而拥有比一般的祭司与萨满更强大的「灵觉」的能力。
  */
@@ -378,6 +391,7 @@ define character {
 /**
  * @id 221051
  * @name 流变的绘形
+ * @cost 1*Cryo
  * @description
  * 快速行动：装备给我方的灵觉隐修的迷者。
  * 生成1张浮彩加入手牌。

@@ -136,6 +136,7 @@ define status {
 /**
  * @id 26021
  * @name 碎岩冲撞
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -150,6 +151,7 @@ define skill {
 /**
  * @id 26022
  * @name 磅礴之气
+ * @cost 3*Geo
  * @description
  * 造成3点岩元素伤害，如果发生了结晶反应，则角色汲取对应元素的力量。
  * 如果本技能中角色未汲取元素的力量，则附属磐岩百相·元素凝晶。
@@ -182,6 +184,7 @@ define skill {
 /**
  * @id 26024
  * @name 山崩毁阵
+ * @cost 3*Geo, 2*Energy
  * @description
  * 造成4点岩元素伤害，每汲取过一种元素此伤害+1。
  */
@@ -198,6 +201,7 @@ define skill {
 /**
  * @id 26025
  * @name 磐岩百相
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属磐岩百相·元素汲取。
  */
@@ -216,6 +220,8 @@ define skill {
 /**
  * @id 2602
  * @name 若陀龙王
+ * @hp 10
+ * @energy 2
  * @description
  * 枷锁的隐隐震响与龙祖低沉的怒吼，同记忆一般在山峦间回荡。
  */
@@ -231,6 +237,7 @@ define character {
 /**
  * @id 66013
  * @name 霜刺破袭
+ * @cost 3*Cryo
  * @description
  * 造成3点冰元素伤害，此角色附属磐岩百相·元素凝晶。
  */
@@ -245,8 +252,10 @@ define skill {
 /**
  * @id 6601
  * @name 若陀龙王
+ * @hp 10
+ * @energy 2
  * @description
- *
+ * 
  */
 define character {
   id 6601 as AzhdahaCryo;
@@ -264,6 +273,7 @@ define character {
 /**
  * @id 66023
  * @name 洪流重斥
+ * @cost 3*Hydro
  * @description
  * 造成3点水元素伤害，此角色附属磐岩百相·元素凝晶。
  */
@@ -278,8 +288,10 @@ define skill {
 /**
  * @id 6602
  * @name 若陀龙王
+ * @hp 10
+ * @energy 2
  * @description
- *
+ * 
  */
 define character {
   id 6602 as AzhdahaHydro;
@@ -297,6 +309,7 @@ define character {
 /**
  * @id 66033
  * @name 炽焰重斥
+ * @cost 3*Pyro
  * @description
  * 造成3点火元素伤害，此角色附属磐岩百相·元素凝晶。
  */
@@ -311,8 +324,10 @@ define skill {
 /**
  * @id 6603
  * @name 若陀龙王
+ * @hp 10
+ * @energy 2
  * @description
- *
+ * 
  */
 define character {
   id 6603 as AzhdahaPyro;
@@ -330,6 +345,7 @@ define character {
 /**
  * @id 66043
  * @name 霆雷破袭
+ * @cost 3*Electro
  * @description
  * 造成3点雷元素伤害，此角色附属磐岩百相·元素凝晶。
  */
@@ -344,8 +360,10 @@ define skill {
 /**
  * @id 6604
  * @name 若陀龙王
+ * @hp 10
+ * @energy 2
  * @description
- *
+ * 
  */
 define character {
   id 6604 as AzhdahaElectro;
@@ -363,6 +381,7 @@ define character {
 /**
  * @id 226022
  * @name 晦朔千引
+ * @cost 2*Aligned
  * @description
  * 战斗行动：我方出战角色为若陀龙王时，对该角色打出。使若陀龙王附属磐岩百相·元素凝晶，然后生成每种我方角色所具有的元素类型的元素骰各1个。
  * （牌组中包含若陀龙王，才能加入牌组）

@@ -33,6 +33,7 @@ define combatStatus {
 /**
  * @id 11031
  * @name 仪典剑术
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -47,6 +48,7 @@ define skill {
 /**
  * @id 11032
  * @name 霜袭
+ * @cost 3*Cryo
  * @description
  * 造成3点冰元素伤害。
  */
@@ -60,6 +62,7 @@ define skill {
 /**
  * @id 11033
  * @name 凛冽轮舞
+ * @cost 4*Cryo, 2*Energy
  * @description
  * 造成1点冰元素伤害，生成寒冰之棱。
  */
@@ -75,6 +78,8 @@ define skill {
 /**
  * @id 1103
  * @name 凯亚
+ * @hp 10
+ * @energy 2
  * @description
  * 他很擅长在他人身上发掘出「骑士般的美德」。
  */
@@ -90,6 +95,7 @@ define character {
 /**
  * @id 211031
  * @name 冷血之剑
+ * @cost 3*Cryo
  * @description
  * 战斗行动：我方出战角色为凯亚时，装备此牌。
  * 凯亚装备此牌后，立刻使用一次霜袭。

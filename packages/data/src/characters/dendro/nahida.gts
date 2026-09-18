@@ -123,6 +123,7 @@ define combatStatus {
 /**
  * @id 17031
  * @name 行相
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成1点草元素伤害。
  */
@@ -137,6 +138,7 @@ define skill {
 /**
  * @id 17032
  * @name 所闻遍计
+ * @cost 3*Dendro
  * @description
  * 造成2点草元素伤害，目标角色附属蕴种印；如果在附属前目标角色已附属有蕴种印，就改为对所有敌方角色附属蕴种印。
  */
@@ -155,6 +157,7 @@ define skill {
 /**
  * @id 17033
  * @name 所闻遍计·真如
+ * @cost 5*Dendro
  * @description
  * 造成3点草元素伤害，所有敌方角色附属蕴种印。
  */
@@ -169,6 +172,7 @@ define skill {
 /**
  * @id 17034
  * @name 心景幻成
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 造成4点草元素伤害，生成摩耶之殿。
  */
@@ -191,6 +195,8 @@ define skill {
 /**
  * @id 1703
  * @name 纳西妲
+ * @hp 10
+ * @energy 2
  * @description
  * 白草净华，幽宫启蛰。
  */
@@ -206,6 +212,7 @@ define character {
 /**
  * @id 217031
  * @name 心识蕴藏之种
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 战斗行动：我方出战角色为纳西妲时，装备此牌。
  * 纳西妲装备此牌后，立刻使用一次心景幻成。

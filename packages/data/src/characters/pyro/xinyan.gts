@@ -45,6 +45,7 @@ define combatStatus {
 /**
  * @id 13121
  * @name 炎舞
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -59,6 +60,7 @@ define skill {
 /**
  * @id 13122
  * @name 热情拂扫
+ * @cost 3*Pyro
  * @description
  * 造成2点火元素伤害，随机舍弃1张当前元素骰费用最高的手牌，生成热情护盾。
  */
@@ -74,6 +76,7 @@ define skill {
 /**
  * @id 13123
  * @name 叛逆刮弦
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 造成3点物理伤害，对所有敌方后台角色造成2点穿透伤害；舍弃我方所有手牌，生成氛围烈焰。
  */
@@ -93,6 +96,8 @@ define skill {
 /**
  * @id 1312
  * @name 辛焱
+ * @hp 10
+ * @energy 2
  * @description
  * 摇滚时间到！
  */
@@ -108,6 +113,7 @@ define character {
 /**
  * @id 213121
  * @name 地狱里摇摆
+ * @cost 1*Pyro, 2*Void
  * @description
  * 战斗行动：我方出战角色为辛焱时，装备此牌。
  * 辛焱装备此牌后，立刻使用一次炎舞。

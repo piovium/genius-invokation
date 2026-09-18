@@ -112,6 +112,7 @@ define combatStatus {
 /**
  * @id 16101
  * @name 嵴之啮咬
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -126,6 +127,7 @@ define skill {
 /**
  * @id 16102
  * @name 出击，冲天转转！
+ * @cost 2*Geo
  * @description
  * 自身附属冲天转转，然后进入夜魂加持，并获得2点「夜魂值」。（角色进入夜魂加持后不可使用此技能）
  * （附属冲天转转的角色可以使用特技：转转冲击）
@@ -142,6 +144,7 @@ define skill {
 /**
  * @id 16103
  * @name 现在，认真时间！
+ * @cost 3*Geo, 3*Energy
  * @description
  * 造成3点岩元素伤害，生成超级钻钻领域。
  */
@@ -157,6 +160,8 @@ define skill {
 /**
  * @id 1610
  * @name 卡齐娜
+ * @hp 10
+ * @energy 3
  * @description
  * 眼泪与勇气熔铸出的宝石。
  */
@@ -173,6 +178,7 @@ define character {
 /**
  * @id 216101
  * @name 夜域赐礼·团结炉心
+ * @cost 1*Geo
  * @description
  * 我方冲天转转或冲天转转·脱离触发效果后，抓1张牌。（每回合1次）
  * （牌组中包含卡齐娜，才能加入牌组）

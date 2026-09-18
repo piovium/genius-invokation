@@ -92,6 +92,7 @@ define status {
 /**
  * @id 11051
  * @name 神里流·倾
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -106,6 +107,7 @@ define skill {
 /**
  * @id 11052
  * @name 神里流·冰华
+ * @cost 3*Cryo
  * @description
  * 造成3点冰元素伤害。
  */
@@ -119,6 +121,7 @@ define skill {
 /**
  * @id 11053
  * @name 神里流·霜灭
+ * @cost 3*Cryo, 3*Energy
  * @description
  * 造成4点冰元素伤害，召唤霜见雪关扉。
  */
@@ -134,6 +137,7 @@ define skill {
 /**
  * @id 11054
  * @name 神里流·霰步
+ * @cost
  * @description
  * 【被动】此角色被切换为「出战角色」时，附属冰元素附魔，本回合下次「普通攻击」造成的伤害+1。（每回合2次）。
  */
@@ -154,6 +158,7 @@ define skill {
 /**
  * @id 11055
  * @name 神里流·霰步
+ * @cost
  * @description
  * 【被动】此角色被切换为「出战角色」时，附属冰元素附魔，本回合下次「普通攻击」造成的伤害+1。（每回合2次）。
  */
@@ -174,6 +179,8 @@ define skill {
 /**
  * @id 1105
  * @name 神里绫华
+ * @hp 10
+ * @energy 3
  * @description
  * 如霜凝华，如鹭在庭。
  */
@@ -193,6 +200,7 @@ define character {
 /**
  * @id 211051
  * @name 寒天宣命祝词
+ * @cost 2*Cryo
  * @description
  * 装备有此牌的神里绫华生成的冰元素附魔会使所附属角色造成的冰元素伤害+1。
  * 切换到装备有此牌的神里绫华时：少花费1个元素骰。（每回合1次）

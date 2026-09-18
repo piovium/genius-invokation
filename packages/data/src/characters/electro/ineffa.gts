@@ -37,6 +37,7 @@ define summon {
 /**
  * @id 14171
  * @name 除尘旋刃
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -51,6 +52,7 @@ define skill {
 /**
  * @id 14172
  * @name 涤净模式·稳态载频
+ * @cost 3*Electro
  * @description
  * 生成2点护盾，召唤薇尔琪塔。
  */
@@ -67,6 +69,7 @@ define skill {
 /**
  * @id 14173
  * @name 至高律令·全域扫灭
+ * @cost 3*Electro, 2*Energy
  * @description
  * 造成4点雷元素伤害，召唤薇尔琪塔。
  */
@@ -82,6 +85,7 @@ define skill {
 /**
  * @id 14174
  * @name 月兆祝赐·象拟中继
+ * @cost
  * @description
  * 【被动】本局游戏中，敌方受到感电反应时，改为月感电反应。
  * 自身在场，敌方行动牌被赋予电击时：额外赋予不可调和状态。
@@ -103,6 +107,7 @@ define skill {
 /**
  * @id 14175
  * @name 月兆祝赐·象拟中继
+ * @cost
  * @description
  * 【被动】本局游戏中，敌方受到感电反应时，改为月感电反应。
  * 自身在场，敌方行动牌被赋予电击时：额外赋予不可调和状态。
@@ -116,6 +121,8 @@ define skill {
 /**
  * @id 1417
  * @name 伊涅芙
+ * @hp 10
+ * @energy 2
  * @description
  * 白铁锻身，赤心铸魂。
  */
@@ -135,6 +142,7 @@ define character {
 /**
  * @id 214171
  * @name 循环整流引擎
+ * @cost 1*Electro
  * @description
  * 快速行动：装备给我方的伊涅芙。
  * 赋予敌方随机1张手牌电击，然后重复1次。

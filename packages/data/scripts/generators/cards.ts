@@ -164,6 +164,7 @@ export async function generateCards() {
     target.push({
       id: card.id,
       name: card.name,
+      cost: inlineCostDescription(card.playCost),
       description: description,
       code: getCardCode(card),
     });

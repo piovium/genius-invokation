@@ -64,6 +64,7 @@ define combatStatus {
 /**
  * @id 13031
  * @name 好运剑
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -78,6 +79,7 @@ define skill {
 /**
  * @id 13032
  * @name 热情过载
+ * @cost 3*Pyro
  * @description
  * 造成3点火元素伤害。
  */
@@ -91,6 +93,7 @@ define skill {
 /**
  * @id 13033
  * @name 美妙旅程
+ * @cost 4*Pyro, 2*Energy
  * @description
  * 造成2点火元素伤害，生成鼓舞领域。
  */
@@ -110,6 +113,8 @@ define skill {
 /**
  * @id 1303
  * @name 班尼特
+ * @hp 10
+ * @energy 2
  * @description
  * 当你知道自己一定会输时，那你肯定也知道如何能赢。
  */
@@ -125,6 +130,7 @@ define character {
 /**
  * @id 213031
  * @name 冒险憧憬
+ * @cost 4*Pyro, 2*Energy
  * @description
  * 战斗行动：我方出战角色为班尼特时，装备此牌。
  * 班尼特装备此牌后，立刻使用一次美妙旅程。

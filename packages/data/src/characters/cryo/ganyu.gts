@@ -52,6 +52,7 @@ define combatStatus {
 /**
  * @id 11011
  * @name 流天射术
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -66,6 +67,7 @@ define skill {
 /**
  * @id 11012
  * @name 山泽麟迹
+ * @cost 3*Cryo
  * @description
  * 造成1点冰元素伤害，生成冰莲。
  */
@@ -93,6 +95,7 @@ define extension {
 /**
  * @id 11013
  * @name 霜华矢
+ * @cost 5*Cryo
  * @description
  * 造成2点冰元素伤害，对所有敌方后台角色造成2点穿透伤害。
  */
@@ -116,6 +119,7 @@ define skill {
 /**
  * @id 11014
  * @name 降众天华
+ * @cost 3*Cryo, 3*Energy
  * @description
  * 造成2点冰元素伤害，对所有敌方后台角色造成1点穿透伤害，召唤冰灵珠。
  */
@@ -132,6 +136,8 @@ define skill {
 /**
  * @id 1101
  * @name 甘雨
+ * @hp 12
+ * @energy 3
  * @description
  * 「既然是明早前要，那这份通稿，只要熬夜写完就好。」
  */
@@ -147,6 +153,7 @@ define character {
 /**
  * @id 211011
  * @name 唯此一心
+ * @cost 5*Cryo
  * @description
  * 战斗行动：我方出战角色为甘雨时，装备此牌。
  * 甘雨装备此牌后，立刻使用一次霜华矢。

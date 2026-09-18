@@ -66,6 +66,7 @@ define combatStatus {
 /**
  * @id 11111
  * @name 迅烈倾霜拳
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成1点冰元素伤害。
  */
@@ -80,6 +81,7 @@ define skill {
 /**
  * @id 11112
  * @name 冰牙突驰
+ * @cost 3*Cryo
  * @description
  * 造成2点冰元素伤害，本角色附属寒烈的惩裁。
  */
@@ -94,6 +96,7 @@ define skill {
 /**
  * @id 11113
  * @name 黑金狼噬
+ * @cost 3*Cryo, 3*Energy
  * @description
  * 造成2点冰元素伤害，生成余威冰锥。
  * 本角色在本回合中受到伤害或治疗每累计到2次时：此技能少花费1个元素骰（最多少花费2个）。
@@ -109,9 +112,10 @@ define skill {
 
 /**
  * @id 11114
- * @name
+ * @name 
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 11114 as Skill11114;
@@ -122,9 +126,10 @@ define skill {
 
 /**
  * @id 11115
- * @name
+ * @name 
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 11115 as Skill11115;
@@ -136,6 +141,7 @@ define skill {
 /**
  * @id 11116
  * @name 黑金狼噬
+ * @cost
  * @description
  * 本角色在本回合中受到伤害或治疗每累计到2次时：元素爆发少花费1个元素骰（最多少花费2个）。
  */
@@ -161,6 +167,8 @@ define skill {
 /**
  * @id 1111
  * @name 莱欧斯利
+ * @hp 11
+ * @energy 3
  * @description
  * 罪囚于斯，深水无漪。
  */
@@ -179,6 +187,7 @@ define character {
 /**
  * @id 211111
  * @name 予行恶者以惩惧
+ * @cost 1*Cryo, 2*Void
  * @description
  * 战斗行动：我方出战角色为莱欧斯利时，装备此牌。
  * 莱欧斯利装备此牌后，立刻使用一次迅烈倾霜拳。

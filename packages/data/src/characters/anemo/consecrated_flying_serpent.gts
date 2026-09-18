@@ -47,6 +47,7 @@ define combatStatus {
 /**
  * @id 25031
  * @name 旋尾迅击
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -61,6 +62,7 @@ define skill {
 /**
  * @id 25032
  * @name 盘绕风引
+ * @cost 3*Anemo
  * @description
  * 造成3点风元素伤害，抓1张牌。
  */
@@ -75,6 +77,7 @@ define skill {
 /**
  * @id 25033
  * @name 错落风涡
+ * @cost 3*Anemo, 2*Energy
  * @description
  * 造成2点风元素伤害，舍弃手牌中所有的噬骸能量块，每舍弃2张，此次伤害翻倍1次。
  */
@@ -97,6 +100,7 @@ define skill {
 /**
  * @id 25034
  * @name 不朽亡骸·风
+ * @cost
  * @description
  * 【被动】战斗开始时，生成6张噬骸能量块，均匀放入牌库。
  */
@@ -129,6 +133,8 @@ define skill {
 /**
  * @id 2503
  * @name 圣骸飞蛇
+ * @hp 10
+ * @energy 2
  * @description
  * 因为啃噬伟大的生命体，而扭曲异变的飞蛇，驾驭着凌厉的狂风。
  */
@@ -148,6 +154,7 @@ define character {
 /**
  * @id 225031
  * @name 亡风啸卷
+ * @cost 1*Anemo
  * @description
  * 入场时：生成1张噬骸能量块，置入我方手牌。
  * 装备有此牌的圣骸飞蛇在场，我方打出噬骸能量块后：本回合中，我方下次切换角色后生成1个出战角色类型的元素骰。

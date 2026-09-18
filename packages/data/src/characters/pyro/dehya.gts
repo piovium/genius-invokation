@@ -73,6 +73,7 @@ define status {
 /**
  * @id 13095
  * @name 焚落踢
+ * @cost
  * @description
  * 造成3点火元素伤害。
  */
@@ -97,6 +98,7 @@ define status {
 /**
  * @id 13091
  * @name 拂金剑斗术
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -111,6 +113,7 @@ define skill {
 /**
  * @id 13092
  * @name 熔铁流狱
+ * @cost 3*Pyro
  * @description
  * 召唤净焰剑狱领域；如果已存在净焰剑狱领域，就先造成1点火元素伤害。
  */
@@ -127,6 +130,7 @@ define skill {
 /**
  * @id 13093
  * @name 炎啸狮子咬
+ * @cost 4*Pyro, 2*Energy
  * @description
  * 造成3点火元素伤害，然后准备技能：焚落踢。
  */
@@ -142,8 +146,9 @@ define skill {
 /**
  * @id 13096
  * @name 净焰剑狱·赤鬃之血
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 13096 as FierySanctumRedmanesBlood;
@@ -165,6 +170,8 @@ define skill {
 /**
  * @id 1309
  * @name 迪希雅
+ * @hp 10
+ * @energy 2
  * @description
  * 鹫鸟的眼睛，狮子的灵魂，沙漠自由的女儿。
  */
@@ -184,6 +191,7 @@ define character {
 /**
  * @id 213091
  * @name 崇诚之真
+ * @cost 4*Pyro
  * @description
  * 战斗行动：我方出战角色为迪希雅时，装备此牌。
  * 迪希雅装备此牌后，立刻使用一次熔铁流狱。

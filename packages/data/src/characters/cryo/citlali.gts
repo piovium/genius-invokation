@@ -82,6 +82,7 @@ define combatStatus {
 /**
  * @id 11141
  * @name 宿灵捕影
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成1点冰元素伤害。
  */
@@ -96,6 +97,7 @@ define skill {
 /**
  * @id 11142
  * @name 霜昼黑星
+ * @cost 3*Cryo
  * @description
  * 造成1点冰元素伤害。
  * 自身进入夜魂加持，并获得1点「夜魂值」；生成1点白曜护盾和伊兹帕帕。（角色进入夜魂加持后不可使用此技能）
@@ -114,6 +116,7 @@ define skill {
 /**
  * @id 11143
  * @name 诸曜饬令
+ * @cost 3*Cryo, 2*Energy
  * @description
  * 造成2点冰元素伤害，对所有敌方后台角色造成1点穿透伤害。如可能，获得2点「夜魂值」。
  */
@@ -132,6 +135,7 @@ define skill {
 /**
  * @id 11144
  * @name 奥秘传唱
+ * @cost
  * @description
  * 我方进行挑选或造成元素反应伤害后：如可能，获得1点「夜魂值」。（每回合1次）
  */
@@ -166,6 +170,8 @@ define skill {
 /**
  * @id 1114
  * @name 茜特菈莉
+ * @hp 10
+ * @energy 2
  * @description
  * 谜烟流彩，曜石映心。
  */
@@ -206,6 +212,7 @@ define combatStatus {
 /**
  * @id 211141
  * @name 五重天的寒雨
+ * @cost 2*Cryo
  * @description
  * 敌方受到冻结或融化反应伤害后：我方下2次造成的水元素伤害和火元素伤害+1，并使茜特菈莉获得1点「夜魂值」。（每回合1次）
  * （牌组中包含茜特菈莉，才能加入牌组）

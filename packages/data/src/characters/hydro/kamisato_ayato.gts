@@ -63,6 +63,7 @@ define status {
 /**
  * @id 12061
  * @name 神里流·转
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -77,6 +78,7 @@ define skill {
 /**
  * @id 12062
  * @name 神里流·镜花
+ * @cost 3*Hydro
  * @description
  * 造成2点水元素伤害，本角色附属泷廻鉴花。
  */
@@ -91,6 +93,7 @@ define skill {
 /**
  * @id 12063
  * @name 神里流·水囿
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 造成1点水元素伤害，召唤清净之园囿。
  */
@@ -106,6 +109,8 @@ define skill {
 /**
  * @id 1206
  * @name 神里绫人
+ * @hp 11
+ * @energy 2
  * @description
  * 神守之柏，已焕新材。
  */
@@ -140,6 +145,7 @@ define status {
 /**
  * @id 212061
  * @name 镜华风姿
+ * @cost 3*Hydro
  * @description
  * 战斗行动：我方出战角色为神里绫人时，装备此牌。
  * 神里绫人装备此牌后，立刻使用一次神里流·镜花。

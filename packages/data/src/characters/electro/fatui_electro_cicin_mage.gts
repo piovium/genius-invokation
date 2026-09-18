@@ -71,6 +71,7 @@ define summon {
 /**
  * @id 24044
  * @name 霆电迸发
+ * @cost
  * @description
  * （需准备1个行动轮）
  * 造成2点雷元素伤害。
@@ -115,6 +116,7 @@ define combatStatus {
 /**
  * @id 24041
  * @name 轰闪落雷
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成1点雷元素伤害。
  */
@@ -129,6 +131,7 @@ define skill {
 /**
  * @id 24042
  * @name 雾虚之召
+ * @cost 3*Electro
  * @description
  * 召唤雷萤。
  */
@@ -142,6 +145,7 @@ define skill {
 /**
  * @id 24043
  * @name 霆雷之护
+ * @cost 3*Electro, 2*Energy
  * @description
  * 造成1点雷元素伤害，本角色附着雷元素，生成雷萤护罩并准备技能霆电迸发。
  */
@@ -159,6 +163,8 @@ define skill {
 /**
  * @id 2404
  * @name 愚人众·雷萤术士
+ * @hp 10
+ * @energy 2
  * @description
  * …正如雾虚草的气味会令雷萤迷醉，嗜虐的术士也贪恋着戏弄对手的快感…
  */
@@ -174,6 +180,7 @@ define character {
 /**
  * @id 224041
  * @name 雷萤浮闪
+ * @cost 3*Electro
  * @description
  * 战斗行动：我方出战角色为愚人众·雷萤术士时，装备此牌。
  * 愚人众·雷萤术士装备此牌后，立刻使用一次雾虚之召。

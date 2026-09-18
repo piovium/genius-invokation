@@ -122,6 +122,7 @@ define status {
 /**
  * @id 17091
  * @name 夜阳斗技
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -136,6 +137,7 @@ define skill {
 /**
  * @id 17092
  * @name 悬猎·游骋高狩
+ * @cost 3*Dendro
  * @description
  * 选一个我方角色，自身附属钩索链接并进入夜魂加持。造成1点草元素伤害，然后与所选角色交换位置。
  */
@@ -166,6 +168,7 @@ define skill {
 /**
  * @id 17093
  * @name 向伟大圣龙致意
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 造成1点草元素伤害，召唤伟大圣龙阿乔。
  */
@@ -180,9 +183,10 @@ define skill {
 
 /**
  * @id 17094
- * @name
+ * @name 
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 17094 as Untitled11;
@@ -193,6 +197,8 @@ define skill {
 /**
  * @id 1709
  * @name 基尼奇
+ * @hp 10
+ * @energy 2
  * @description
  * 悬木游火，受任皆偿。
  */
@@ -209,6 +215,7 @@ define character {
 /**
  * @id 217091
  * @name 夜域赐礼·索报皆偿
+ * @cost 1*Dendro
  * @description
  * 装备有此牌的基尼奇切换至前台或使用悬猎·游骋高狩时：若我方手牌不多于对方，则窃取1张当前元素骰费用最高的对方手牌，然后对手抓1张牌。（每回合1次）
  * （牌组中包含基尼奇，才能加入牌组）

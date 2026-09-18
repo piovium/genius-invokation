@@ -42,6 +42,18 @@ const tagDefs = [
     syntaxKind: TSDocTagSyntaxKind.BlockTag,
   }),
   new TSDocTagDefinition({
+    tagName: "@hp",
+    syntaxKind: TSDocTagSyntaxKind.BlockTag,
+  }),
+  new TSDocTagDefinition({
+    tagName: "@energy",
+    syntaxKind: TSDocTagSyntaxKind.BlockTag,
+  }),
+  new TSDocTagDefinition({
+    tagName: "@cost",
+    syntaxKind: TSDocTagSyntaxKind.BlockTag,
+  }),
+  new TSDocTagDefinition({
     tagName: "@outdated",
     syntaxKind: TSDocTagSyntaxKind.BlockTag,
   }),
@@ -82,6 +94,9 @@ interface CommentInfo {
   id: number;
   name: string;
   description: string;
+  hp?: number;
+  energy?: number;
+  cost?: string;
   code: string;
 }
 
@@ -182,6 +197,9 @@ async function getExistsComments(path: string): Promise<CommentInfo[]> {
     let id: number | null = null;
     let name: string | null = null;
     let description: string | null = null;
+    let hp: number | undefined;
+    let energy: number | undefined;
+    let cost: string | undefined;
     let outdated: string | null = null;
     for (const block of blocks) {
       switch (block.blockTag.tagNameWithUpperCase) {
@@ -198,6 +216,18 @@ async function getExistsComments(path: string): Promise<CommentInfo[]> {
         }
         case "@DESCRIPTION": {
           description = printNode(block.content).trim();
+          break;
+        }
+        case "@HP": {
+          hp = parseInt(printNode(block.content).trim());
+          break;
+        }
+        case "@ENERGY": {
+          energy = parseInt(printNode(block.content).trim());
+          break;
+        }
+        case "@COST": {
+          cost = printNode(block.content).trim();
           break;
         }
         case "@OUTDATED": {
@@ -217,7 +247,7 @@ async function getExistsComments(path: string): Promise<CommentInfo[]> {
     if (outdated !== null) {
       description = outdated;
     }
-    result.push({ range, id, name, description, code });
+    result.push({ range, id, name, description, hp, energy, cost, code });
   }
   return result;
 }
@@ -226,6 +256,9 @@ export interface SourceInfo {
   id: number;
   name: string;
   description: string;
+  hp?: number;
+  energy?: number;
+  cost?: string;
   code: string;
 }
 
@@ -249,6 +282,32 @@ function descriptionToLines(description: string): string[] {
 
 function writeDescriptionAsComment(description: string) {
   return descriptionToLines(description).join("\n * ");
+}
+
+function writeComment(
+  item: Pick<
+    SourceInfo,
+    "id" | "name" | "description" | "hp" | "energy" | "cost"
+  >,
+  outdated?: string,
+) {
+  const metadata = [
+    item.hp === undefined ? "" : `\n * @hp ${item.hp}`,
+    item.energy === undefined ? "" : `\n * @energy ${item.energy}`,
+    item.cost === undefined
+      ? ""
+      : `\n * @cost${item.cost.length > 0 ? ` ${item.cost}` : ""}`,
+  ].join("");
+  const outdatedComment =
+    outdated === undefined
+      ? ""
+      : `\n * @outdated\n * ${writeDescriptionAsComment(outdated)}`;
+  return `/**
+ * @id ${item.id}
+ * @name ${item.name}${metadata}
+ * @description
+ * ${writeDescriptionAsComment(item.description)}${outdatedComment}
+ */`;
 }
 
 function sameArray<T>(a: T[], b: T[]): boolean {
@@ -333,12 +392,17 @@ export async function writeSourceCode(
   }
   if (existsPath) {
     const existsComments = await getExistsComments(existsPath);
-    const rewriteInfos: (CommentInfo & { newDescription: string })[] = [];
+    const rewriteInfos: (CommentInfo & { newInfo: SourceInfo })[] = [];
     for (const item of infos) {
       const cmt = existsComments.find((c) => c.id === item.id);
       if (cmt) {
-        if (!sameDescription(cmt.description, item.description)) {
-          rewriteInfos.push({ ...cmt, newDescription: item.description });
+        if (
+          !sameDescription(cmt.description, item.description) ||
+          cmt.hp !== item.hp ||
+          cmt.energy !== item.energy ||
+          cmt.cost !== item.cost
+        ) {
+          rewriteInfos.push({ ...cmt, newInfo: item });
         }
       } else {
         newInfos.push(item);
@@ -348,14 +412,14 @@ export async function writeSourceCode(
     resultText = await readFile(existsPath, "utf-8");
     let offset = 0;
     for (const item of rewriteInfos) {
-      const newComment = `/**
- * @id ${item.id}
- * @name ${item.name}
- * @description
- * ${writeDescriptionAsComment(item.newDescription)}
- * @outdated
- * ${writeDescriptionAsComment(item.description)}
- */`;
+      const descriptionChanged = !sameDescription(
+        item.description,
+        item.newInfo.description,
+      );
+      const newComment = writeComment(
+        item.newInfo,
+        descriptionChanged ? item.description : undefined,
+      );
       resultText = replaceBetween(
         resultText,
         item.range.pos + offset,
@@ -364,16 +428,11 @@ export async function writeSourceCode(
       );
       offset += newComment.length - (item.range.end - item.range.pos);
       // console.log("=====\n",item.code);
-      if (SAVE_OLD_CODES) {
+      if (SAVE_OLD_CODES && descriptionChanged) {
         await appendFile(
           OLD_VERSION_PATH,
           `
-/**
- * @id ${item.id}
- * @name ${item.name}
- * @description
- * ${writeDescriptionAsComment(item.description)}
- */
+${writeComment(item)}
 ${setOldVersion(
   item.code.replace(/export /, "").replace(/ as /, " as private "),
 )}
@@ -388,12 +447,7 @@ ${setOldVersion(
     "\n" +
     newInfos
       .map(
-        (item) => `/**
- * @id ${item.id}
- * @name ${item.name}
- * @description
- * ${writeDescriptionAsComment(item.description)}
- */
+        (item) => `${writeComment(item)}
 ${item.code}
 `,
       )

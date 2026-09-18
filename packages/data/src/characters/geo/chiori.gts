@@ -203,6 +203,7 @@ define status {
 /**
  * @id 16091
  * @name 心织刀流
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -217,6 +218,7 @@ define skill {
 /**
  * @id 16092
  * @name 羽袖一触
+ * @cost 3*Geo
  * @description
  * 从3个千织的自动制御人形中挑选1个召唤。
  */
@@ -236,6 +238,7 @@ define skill {
 /**
  * @id 16093
  * @name 二刀之形·比翼
+ * @cost 3*Geo, 2*Energy
  * @description
  * 造成5点岩元素伤害。
  */
@@ -250,6 +253,8 @@ define skill {
 /**
  * @id 1609
  * @name 千织
+ * @hp 10
+ * @energy 2
  * @description
  * 千红曙染，裁锦缀织。
  */
@@ -265,6 +270,7 @@ define character {
 /**
  * @id 216091
  * @name 落染五色
+ * @cost 4*Geo
  * @description
  * 战斗行动：我方出战角色为千织时，装备此牌。
  * 千织装备此牌后，立刻使用一次羽袖一触。

@@ -68,6 +68,7 @@ define status {
 /**
  * @id 21031
  * @name 冰锥迸射
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成1点冰元素伤害。
  */
@@ -82,6 +83,7 @@ define skill {
 /**
  * @id 21032
  * @name 圆舞冰环
+ * @cost 3*Cryo
  * @description
  * 造成3点冰元素伤害，本角色附属四迸冰锥。
  */
@@ -96,6 +98,7 @@ define skill {
 /**
  * @id 21033
  * @name 冰棱轰坠
+ * @cost 3*Cryo, 2*Energy
  * @description
  * 造成2点冰元素伤害，对所有敌方后台角色造成1点穿透伤害，召唤刺击冰棱。
  */
@@ -112,6 +115,7 @@ define skill {
 /**
  * @id 21034
  * @name 冰晶核心
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属冰晶核心。
  */
@@ -149,6 +153,8 @@ define status {
 /**
  * @id 2103
  * @name 无相之冰
+ * @hp 8
+ * @energy 2
  * @description
  * 代号为「塔勒特」的高级冰元素生命。
  * 似乎很不擅长球类运动…
@@ -165,6 +171,7 @@ define character {
 /**
  * @id 221031
  * @name 严霜棱晶
+ * @cost 1*Cryo
  * @description
  * 我方出战角色为无相之冰时，才能打出：使其附属冰晶核心。
  * 装备有此牌的无相之冰触发冰晶核心后：对敌方出战角色附属严寒。

@@ -109,6 +109,7 @@ define status {
 /**
  * @id 23021
  * @name 拯救之焰
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成1点火元素伤害。
  */
@@ -123,6 +124,7 @@ define skill {
 /**
  * @id 23022
  * @name 炽烈箴言
+ * @cost 3*Pyro
  * @description
  * 造成3点火元素伤害。
  */
@@ -136,6 +138,7 @@ define skill {
 /**
  * @id 23023
  * @name 天陨预兆
+ * @cost 4*Pyro, 2*Energy
  * @description
  * 造成3点火元素伤害，召唤黯火炉心。
  */
@@ -151,6 +154,7 @@ define skill {
 /**
  * @id 23024
  * @name 火之新生
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属火之新生。
  */
@@ -166,8 +170,9 @@ define skill {
 /**
  * @id 23028
  * @name 火之新生
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 23028 as FieryRebirthSkill;
@@ -179,6 +184,8 @@ define skill {
 /**
  * @id 2302
  * @name 深渊咏者·渊火
+ * @hp 6
+ * @energy 2
  * @description
  * 章典示现，劝听箴言。
  */
@@ -198,6 +205,7 @@ define character {
 /**
  * @id 223021
  * @name 烬火重燃
+ * @cost 2*Pyro
  * @description
  * 入场时：如果装备有此牌的深渊咏者·渊火已触发过火之新生，就立刻弃置此牌，为角色附属渊火加护。
  * 装备有此牌的深渊咏者·渊火触发火之新生时：弃置此牌，为角色附属渊火加护。

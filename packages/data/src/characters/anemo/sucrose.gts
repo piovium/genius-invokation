@@ -66,6 +66,7 @@ define summon {
 /**
  * @id 15011
  * @name 简式风灵作成
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成1点风元素伤害。
  */
@@ -80,6 +81,7 @@ define skill {
 /**
  * @id 15012
  * @name 风灵作成·陆叁零捌
+ * @cost 3*Anemo
  * @description
  * 造成3点风元素伤害，使对方强制切换到前一个角色。
  */
@@ -94,6 +96,7 @@ define skill {
 /**
  * @id 15013
  * @name 禁·风灵作成·柒伍同构贰型
+ * @cost 3*Anemo, 2*Energy
  * @description
  * 造成1点风元素伤害，召唤大型风灵。
  */
@@ -113,6 +116,8 @@ define skill {
 /**
  * @id 1501
  * @name 砂糖
+ * @hp 10
+ * @energy 2
  * @description
  * 「没有实战过的牌组不值得判断强度！」
  */
@@ -130,6 +135,7 @@ define character {
 /**
  * @id 215011
  * @name 混元熵增论
+ * @cost 3*Anemo, 2*Energy
  * @description
  * 战斗行动：我方出战角色为砂糖时，装备此牌。
  * 砂糖装备此牌后，立刻使用一次禁·风灵作成·柒伍同构贰型。

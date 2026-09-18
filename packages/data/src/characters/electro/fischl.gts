@@ -60,6 +60,7 @@ define summon {
 /**
  * @id 14011
  * @name 罪灭之矢
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -74,6 +75,7 @@ define skill {
 /**
  * @id 14012
  * @name 夜巡影翼
+ * @cost 3*Electro
  * @description
  * 造成1点雷元素伤害，召唤奥兹。
  */
@@ -92,6 +94,7 @@ define skill {
 /**
  * @id 14013
  * @name 至夜幻现
+ * @cost 3*Electro, 3*Energy
  * @description
  * 造成4点雷元素伤害，对所有敌方后台角色造成2点穿透伤害。
  */
@@ -107,6 +110,8 @@ define skill {
 /**
  * @id 1401
  * @name 菲谢尔
+ * @hp 10
+ * @energy 3
  * @description
  * 「奥兹！我之眷属，展开羽翼，替我在幽夜中寻求全新的命运之线吧！」
  * 「小姐，我可没办法帮你换一张牌啊…」
@@ -123,6 +128,7 @@ define character {
 /**
  * @id 214011
  * @name 噬星魔鸦
+ * @cost 3*Electro
  * @description
  * 战斗行动：我方出战角色为菲谢尔时，装备此牌。
  * 菲谢尔装备此牌后，立刻使用一次夜巡影翼。
@@ -143,6 +149,7 @@ define card {
 /**
  * @id 214012
  * @name 宵世幻奏
+ * @cost 2*Electro
  * @description
  * 快速行动：装备给我方的菲谢尔。
  * 召唤奥兹。

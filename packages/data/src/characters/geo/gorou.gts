@@ -57,6 +57,7 @@ define combatStatus {
 /**
  * @id 16061
  * @name 呲牙裂扇箭
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -71,6 +72,7 @@ define skill {
 /**
  * @id 16062
  * @name 犬坂吠吠方圆阵
+ * @cost 3*Geo
  * @description
  * 造成2点岩元素伤害，生成大将旗指物。
  */
@@ -85,6 +87,7 @@ define skill {
 /**
  * @id 16063
  * @name 兽牙逐突形胜战法
+ * @cost 3*Geo, 2*Energy
  * @description
  * 造成2点岩元素伤害，生成大将旗指物，召唤大将威仪。
  */
@@ -101,6 +104,8 @@ define skill {
 /**
  * @id 1606
  * @name 五郎
+ * @hp 10
+ * @energy 2
  * @description
  * 锵锵领兵行！
  */
@@ -116,6 +121,7 @@ define character {
 /**
  * @id 216061
  * @name 犬奔·疾如风
+ * @cost 3*Geo
  * @description
  * 战斗行动：我方出战角色为五郎时，装备此牌。
  * 五郎装备此牌后，立刻使用一次犬坂吠吠方圆阵。

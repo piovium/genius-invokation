@@ -74,6 +74,7 @@ define combatStatus {
 /**
  * @id 14161
  * @name 宿灵闪箭
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -88,6 +89,7 @@ define skill {
 /**
  * @id 14162
  * @name 暝色缒索
+ * @cost 3*Electro
  * @description
  * 造成2点雷元素伤害，生成宿灵球。
  */
@@ -102,6 +104,7 @@ define skill {
 /**
  * @id 14163
  * @name 黯声回响
+ * @cost 3*Electro, 2*Energy
  * @description
  * 造成2点雷元素伤害，召唤超音灵眼。
  */
@@ -117,6 +120,7 @@ define skill {
 /**
  * @id 14164
  * @name 夜翳的通感
+ * @cost
  * @description
  * 【被动】我方触发感电或月感电反应后：如果可能，消耗2点「夜魂值」，造成1点雷元素伤害。
  * 我方造成此技能以外的水元素伤害或雷元素伤害后，自身进入夜魂加持，并获得1点「夜魂值」。（每回合1次）
@@ -155,6 +159,7 @@ define skill {
 /**
  * @id 14165
  * @name 夜翳的通感
+ * @cost
  * @description
  * 【被动】我方触发感电或月感电反应后：如果可能，消耗2点「夜魂值」，造成1点雷元素伤害。
  * 我方造成此技能以外的水元素伤害或雷元素伤害后，自身进入夜魂加持，并获得1点「夜魂值」。（每回合1次）
@@ -169,6 +174,8 @@ define skill {
 /**
  * @id 1416
  * @name 欧洛伦
+ * @hp 10
+ * @energy 2
  * @description
  * 难辨难明之形色。
  */
@@ -188,6 +195,7 @@ define character {
 /**
  * @id 214161
  * @name 林雾间的行迹
+ * @cost 1*Electro
  * @description
  * 快速行动：装备给我方的欧洛伦。
  * 我方每回合首次引发的感电反应造成的穿透伤害+1。

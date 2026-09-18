@@ -184,6 +184,7 @@ define combatStatus {
 /**
  * @id 22041
  * @name 碎涛旋跃
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -202,6 +203,7 @@ export const StarfallShowerDisposeCard = customEvent<EntityState>(
 /**
  * @id 22042
  * @name 迸落星雨
+ * @cost 3*Hydro
  * @description
  * 造成1点水元素伤害，此角色每有3点无尽食欲提供的额外最大生命，此伤害+1（最多+3）。然后舍弃1张当前元素骰费用最高的手牌。
  */
@@ -223,6 +225,7 @@ define skill {
 /**
  * @id 22043
  * @name 横噬鲸吞
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 造成1点水元素伤害，对敌方所有后台角色造成1点穿透伤害。召唤黑色幻影。
  */
@@ -239,6 +242,7 @@ define skill {
 /**
  * @id 22044
  * @name 无尽食欲
+ * @cost
  * @description
  * 【被动】战斗开始时，生成深噬之域。
  */
@@ -254,6 +258,7 @@ define skill {
 /**
  * @id 22045
  * @name 无尽食欲
+ * @cost
  * @description
  * 【被动】战斗开始时，生成深噬之域。
  */
@@ -266,6 +271,8 @@ define skill {
 /**
  * @id 2204
  * @name 吞星之鲸
+ * @hp 6
+ * @energy 2
  * @description
  * 在最魔幻的故事里或是最疯癫的诳语中，宇宙深处真正的星辰或许也如提瓦特一般充满了生机，而宇宙本身就如同海洋。
  * 或许宇宙渗入提瓦特的过程从未停止；也许更高的意志为它划定了边界是为了保护这个世界。
@@ -282,6 +289,7 @@ define character {
 /**
  * @id 222041
  * @name 无光鲸噬
+ * @cost 4*Hydro
  * @description
  * 战斗行动：我方出战角色为吞星之鲸时，装备此牌。
  * 吞星之鲸装备此牌后，立刻使用一次迸落星雨。

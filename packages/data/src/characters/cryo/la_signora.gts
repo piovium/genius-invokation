@@ -110,6 +110,7 @@ define combatStatus {
 /**
  * @id 21021
  * @name 霜锋霰舞
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成1点冰元素伤害。
  */
@@ -124,6 +125,7 @@ define skill {
 /**
  * @id 21022
  * @name 凛冽之刺
+ * @cost 3*Cryo
  * @description
  * 造成2点冰元素伤害，目标角色附属严寒。
  */
@@ -138,6 +140,7 @@ define skill {
 /**
  * @id 21023
  * @name 红莲冰茧
+ * @cost 3*Cryo, 2*Energy
  * @description
  * 造成4点冰元素伤害，治疗本角色2点。移除冰封的炽炎魔女，本角色永久转换为「焚尽的炽炎魔女」形态。
  */
@@ -154,6 +157,7 @@ define skill {
 /**
  * @id 21024
  * @name 邪眼之威
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属冰封的炽炎魔女。
  */
@@ -173,8 +177,9 @@ define skill {
 /**
  * @id 21025
  * @name 炽炎醒燃
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 21025 as InfernosAwakening; // 定义为：当移除冰封的炽炎魔女时，转换角色形态
@@ -189,6 +194,8 @@ define skill {
 /**
  * @id 2102
  * @name 「女士」
+ * @hp 10
+ * @energy 2
  * @description
  * 瞳仁中倒映着破晓的赤红，她最后展开烈焰之翼向黎明飞去。
  * 「但那并不是曙光，亲爱的罗莎琳。那是焚尽一切的火海。」
@@ -210,6 +217,7 @@ define character {
 /**
  * @id 221021
  * @name 苦痛奉还
+ * @cost 3*Aligned
  * @description
  * 我方出战角色为「女士」时，才能打出：入场时，生成3个「女士」当前元素类型的元素骰。
  * 角色受到至少为3点的伤害时：抵消1点伤害，然后根据「女士」的形态对敌方出战角色附属严寒或炽热。（每回合1次）

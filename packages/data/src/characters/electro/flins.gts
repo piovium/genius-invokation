@@ -47,6 +47,7 @@ define status {
 /**
  * @id 14185
  * @name 雷霆交响
+ * @cost
  * @description
  * 造成2点雷元素伤害，如果我方场上存在雷暴云，则造成的伤害额外+2。
  */
@@ -76,6 +77,7 @@ define status {
 /**
  * @id 14181
  * @name 扈圣魔枪
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -90,6 +92,7 @@ define skill {
 /**
  * @id 14182
  * @name 古律·孤灯遗秘
+ * @cost 2*Electro
  * @description
  * 每回合首次使用此技能时，造成1点雷元素伤害，自身附属幽焰显迹。再次使用此技能，消耗2点充能，自身准备技能：雷霆交响。
  */
@@ -107,6 +110,7 @@ define skill {
 /**
  * @id 14183
  * @name 旧仪·夜客致访
+ * @cost 4*Electro, 4*Energy
  * @description
  * 造成6点雷元素伤害，对所有敌方后台角色造成2点穿透伤害。
  */
@@ -122,6 +126,7 @@ define skill {
 /**
  * @id 14184
  * @name 月兆祝赐·旧世潜藏
+ * @cost
  * @description
  * 【被动】本局游戏中，敌方受到感电反应时，改为月感电反应。
  * 自身在场，敌方行动牌被赋予电击时：对敌方场上生命值最高的角色造成1点穿透伤害。
@@ -150,6 +155,7 @@ define skill {
 /**
  * @id 14186
  * @name 月兆祝赐·旧世潜藏
+ * @cost
  * @description
  * 【被动】本局游戏中，敌方受到感电反应时，改为月感电反应。
  * 自身在场，敌方行动牌被赋予电击时：对敌方场上生命值最高的角色造成1点穿透伤害。
@@ -164,6 +170,7 @@ define skill {
 /**
  * @id 14187
  * @name 古律·孤灯遗秘
+ * @cost
  * @description
  * （test）
  */
@@ -176,6 +183,8 @@ define skill {
 /**
  * @id 1418
  * @name 菲林斯
+ * @hp 10
+ * @energy 4
  * @description
  * 墓园灯火，引向深邃之暗。
  */
@@ -196,6 +205,7 @@ define character {
 /**
  * @id 214181
  * @name 拨开雪翳之幕
+ * @cost 1*Electro
  * @description
  * 快速行动：装备给我方的菲林斯。
  * 菲林斯获得1点充能。

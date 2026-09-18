@@ -35,6 +35,7 @@ define summon {
 /**
  * @id 12011
  * @name 水之浅唱
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成1点水元素伤害。
  */
@@ -49,6 +50,7 @@ define skill {
 /**
  * @id 12012
  * @name 演唱，开始♪
+ * @cost 3*Hydro
  * @description
  * 造成1点水元素伤害，召唤歌声之环。
  */
@@ -63,6 +65,7 @@ define skill {
 /**
  * @id 12013
  * @name 闪耀奇迹♪
+ * @cost 3*Hydro, 3*Energy
  * @description
  * 治疗所有我方角色4点。
  */
@@ -77,6 +80,8 @@ define skill {
 /**
  * @id 1201
  * @name 芭芭拉
+ * @hp 12
+ * @energy 3
  * @description
  * 无论何时都能治愈人心。
  */
@@ -92,6 +97,7 @@ define character {
 /**
  * @id 212011
  * @name 光辉的季节
+ * @cost 3*Hydro
  * @description
  * 战斗行动：我方出战角色为芭芭拉时，装备此牌。
  * 芭芭拉装备此牌后，立刻使用一次演唱，开始♪。

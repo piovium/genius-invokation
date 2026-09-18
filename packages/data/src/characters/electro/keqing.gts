@@ -56,6 +56,7 @@ define status {
 /**
  * @id 14031
  * @name 云来剑法
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -70,6 +71,7 @@ define skill {
 /**
  * @id 14032
  * @name 星斗归位
+ * @cost 3*Electro
  * @description
  * 造成3点雷元素伤害，生成手牌雷楔。
  */
@@ -100,6 +102,7 @@ define skill {
 /**
  * @id 14033
  * @name 天街巡游
+ * @cost 4*Electro, 3*Energy
  * @description
  * 造成4点雷元素伤害，对所有敌方后台角色造成3点穿透伤害。
  */
@@ -115,6 +118,8 @@ define skill {
 /**
  * @id 1403
  * @name 刻晴
+ * @hp 10
+ * @energy 3
  * @description
  * 她能构筑出许多从未设想过的牌组，拿下许多难以想象的胜利。
  */
@@ -130,6 +135,7 @@ define character {
 /**
  * @id 114031
  * @name 雷楔
+ * @cost 3*Electro
  * @description
  * 战斗行动：将刻晴切换到场上，立刻使用星斗归位。本次星斗归位会为刻晴附属雷元素附魔，但是不会再生成雷楔。
  * （刻晴使用星斗归位时，如果此牌在手中：不会再生成雷楔，而是改为舍弃此牌，并为刻晴附属雷元素附魔）
@@ -150,6 +156,7 @@ define card {
 /**
  * @id 214031
  * @name 抵天雷罚
+ * @cost 3*Electro
  * @description
  * 战斗行动：我方出战角色为刻晴时，装备此牌。
  * 刻晴装备此牌后，立刻使用一次星斗归位。

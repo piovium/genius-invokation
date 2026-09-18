@@ -65,6 +65,7 @@ define combatStatus {
 /**
  * @id 13111
  * @name 迅破枪势
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -79,6 +80,7 @@ define skill {
 /**
  * @id 13112
  * @name 烈烧佑命之侍护
+ * @cost 3*Pyro
  * @description
  * 造成2点火元素伤害，生成烈烧佑命护盾。
  */
@@ -93,6 +95,7 @@ define skill {
 /**
  * @id 13113
  * @name 真红炽火之大铠
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 造成2点火元素伤害，生成烈烧佑命护盾和炽火大铠。
  */
@@ -113,6 +116,8 @@ define skill {
 /**
  * @id 1311
  * @name 托马
+ * @hp 12
+ * @energy 2
  * @description
  * 渡来介者，赤袖丹心。
  */
@@ -128,6 +133,7 @@ define character {
 /**
  * @id 213111
  * @name 僚佐的才巧
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 战斗行动：我方出战角色为托马时，装备此牌。
  * 托马装备此牌后，立刻使用一次真红炽火之大铠。

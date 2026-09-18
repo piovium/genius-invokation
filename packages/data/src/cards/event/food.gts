@@ -19,6 +19,7 @@ import { BattlePlan, Satiated, SharpenTheBlade } from "../../commons.gts";
 /**
  * @id 333001
  * @name 绝云锅巴
+ * @cost
  * @description
  * 本回合中，目标角色下一次「普通攻击」造成的伤害+1。
  * （每回合每个角色最多食用1次「料理」）
@@ -49,6 +50,7 @@ define status {
 /**
  * @id 333002
  * @name 仙跳墙
+ * @cost 2*Void
  * @description
  * 本回合中，目标角色下一次「元素爆发」造成的伤害+3。
  * （每回合每个角色最多食用1次「料理」）
@@ -80,6 +82,7 @@ define status {
 /**
  * @id 333003
  * @name 莲花酥
+ * @cost 1*Aligned
  * @description
  * 本回合中，目标角色下次受到的伤害-3。
  * （每回合中每个角色最多食用1次「料理」）
@@ -111,6 +114,7 @@ define status {
 /**
  * @id 333004
  * @name 北地烟熏鸡
+ * @cost
  * @description
  * 本回合中，目标角色下一次「普通攻击」少花费1个无色元素。
  * （每回合每个角色最多食用1次「料理」）
@@ -141,6 +145,7 @@ define status {
 /**
  * @id 333005
  * @name 甜甜花酿鸡
+ * @cost
  * @description
  * 治疗目标角色1点。
  * （每回合每个角色最多食用1次「料理」）
@@ -155,6 +160,7 @@ define card {
 /**
  * @id 333006
  * @name 蒙德土豆饼
+ * @cost 1*Aligned
  * @description
  * 治疗目标角色2点。
  * （每回合每个角色最多食用1次「料理」）
@@ -172,6 +178,7 @@ define card {
 /**
  * @id 333007
  * @name 烤蘑菇披萨
+ * @cost 1*Aligned
  * @description
  * 治疗目标角色1点，两回合内结束阶段再治疗此角色1点。
  * （每回合每个角色最多食用1次「料理」）
@@ -223,6 +230,7 @@ define status {
 /**
  * @id 333008
  * @name 兽肉薄荷卷
+ * @cost 1*Aligned
  * @description
  * 目标角色在本回合结束前，之后3次「普通攻击」都少花费1个无色元素。
  * （每回合每个角色最多食用1次「料理」）
@@ -249,6 +257,7 @@ define combatStatus {
 /**
  * @id 333009
  * @name 提瓦特煎蛋
+ * @cost 2*Aligned
  * @description
  * 复苏目标角色，并治疗此角色1点。
  * （每回合中，最多通过「料理」复苏1个角色，并且每个角色最多食用1次「料理」）
@@ -268,6 +277,7 @@ define card {
 /**
  * @id 333010
  * @name 刺身拼盘
+ * @cost 1*Aligned
  * @description
  * 目标角色在本回合结束前，「普通攻击」造成的伤害+1。
  * （每回合每个角色最多食用1次「料理」）
@@ -299,6 +309,7 @@ define status {
 /**
  * @id 333011
  * @name 唐杜尔烤鸡
+ * @cost 2*Void
  * @description
  * 本回合中，所有我方角色下一次「元素战技」造成的伤害+2。
  * （每回合每个角色最多食用1次「料理」）
@@ -333,6 +344,7 @@ define status {
 /**
  * @id 333012
  * @name 黄油蟹蟹
+ * @cost 2*Void
  * @description
  * 本回合中，所有我方角色下次受到的伤害-2。
  * （每回合每个角色最多食用1次「料理」）
@@ -367,6 +379,7 @@ define status {
 /**
  * @id 333013
  * @name 炸鱼薯条
+ * @cost 2*Void
  * @description
  * 本回合中，所有我方角色下次使用技能时少花费1个元素骰。
  * （每回合每个角色最多食用1次「料理」）
@@ -400,6 +413,7 @@ define status {
 /**
  * @id 333014
  * @name 松茸酿肉卷
+ * @cost 2*Aligned
  * @description
  * 治疗目标角色2点，3回合内的结束阶段再治疗此角色1点。
  * （每回合每个角色最多食用1次「料理」）
@@ -434,6 +448,7 @@ define status {
 /**
  * @id 333015
  * @name 缤纷马卡龙
+ * @cost 2*Void
  * @description
  * 治疗目标角色1点，该角色接下来3次受到伤害后再治疗其1点。
  * （每回合每个角色最多食用1次「料理」）
@@ -504,6 +519,7 @@ define card {
 /**
  * @id 333016
  * @name 龙龙饼干
+ * @cost
  * @description
  * 本回合中，目标角色下一次使用「特技」少花费1个元素骰。
  * （每回合每个角色最多食用1次「料理」）
@@ -533,6 +549,7 @@ define status {
 /**
  * @id 333017
  * @name 宝石闪闪
+ * @cost 1*Aligned
  * @description
  * 目标角色获得1点额外最大生命值。
  * （每回合每个角色最多食用1次「料理」）
@@ -548,6 +565,7 @@ define card {
 /**
  * @id 333018
  * @name 咚咚嘭嘭
+ * @cost 1*Aligned
  * @description
  * 接下来3次名称不存在于初始牌组中的牌加入我方手牌时，目标我方角色治疗自身1点。
  * （每回合每个角色最多食用1次「料理」）
@@ -580,6 +598,7 @@ define status {
 /**
  * @id 333019
  * @name 温泉时光
+ * @cost 1*Aligned
  * @description
  * 治疗目标，其数值等同于我方场上召唤物的数量。
  * （每回合每个角色最多食用1次「料理」）
@@ -597,6 +616,7 @@ define card {
 /**
  * @id 333021
  * @name 奇瑰之汤·疗愈
+ * @cost
  * @description
  * 治疗目标角色2点。
  */
@@ -611,6 +631,7 @@ define card {
 /**
  * @id 333022
  * @name 奇瑰之汤·助佑
+ * @cost
  * @description
  * 本回合中，目标角色下次使用技能时少花费2个元素骰。
  */
@@ -656,6 +677,7 @@ define status {
 /**
  * @id 333023
  * @name 奇瑰之汤·激愤
+ * @cost
  * @description
  * 本回合中，目标角色下次造成的伤害+1。（最多生效2次）
  */
@@ -670,6 +692,7 @@ define card {
 /**
  * @id 333024
  * @name 奇瑰之汤·宁静
+ * @cost
  * @description
  * 本回合中，目标角色下次受到的伤害-2。
  */
@@ -700,6 +723,7 @@ define status {
 /**
  * @id 333025
  * @name 奇瑰之汤·安神
+ * @cost
  * @description
  * 本回合中，目标我方角色受到的伤害-1。（最多生效3次）
  */
@@ -732,6 +756,7 @@ define status {
 /**
  * @id 333026
  * @name 奇瑰之汤·鼓舞
+ * @cost
  * @description
  * 目标角色获得1点额外最大生命值。
  */
@@ -746,6 +771,7 @@ define card {
 /**
  * @id 333020
  * @name 奇瑰之汤
+ * @cost 1*Aligned
  * @description
  * 从3个随机效果中挑选1个，对目标角色生效。
  * （每回合每个角色最多食用1次「料理」）
@@ -772,6 +798,7 @@ define card {
 /**
  * @id 333027
  * @name 纵声欢唱
+ * @cost 3*Void
  * @description
  * 所有我方角色获得饱腹，抓2张牌，下2次切换角色少花费1个元素骰。
  * （每回合每个角色最多食用1次「料理」）
@@ -805,6 +832,7 @@ define combatStatus {
 /**
  * @id 333028
  * @name 丰稔之赐
+ * @cost 1*Aligned
  * @description
  * 治疗目标角色1点，目标角色之后2次准备技能时：治疗自身1点。
  * （每回合每个角色最多食用1次「料理」）
@@ -841,6 +869,7 @@ define status {
 /**
  * @id 333029
  * @name 沉玉茶露
+ * @cost
  * @description
  * 选择1个我方角色，我方下2次冒险或结束阶段时，治疗目标角色1点。
  * （每回合每个角色最多食用1次「料理」）
@@ -875,6 +904,7 @@ define status {
 /**
  * @id 333030
  * @name 转盘特调
+ * @cost 4*Aligned
  * @description
  * 目标角色获得4次随机增益效果，其中效果如下：
  * 治疗目标角色2点。
@@ -921,6 +951,7 @@ define status {
 /**
  * @id 333031
  * @name 白灵果派
+ * @cost 4*Aligned
  * @description
  * 本回合目标角色下2次使用技能少花费2个元素骰。
  * （每回合每个角色最多食用1次「料理」）

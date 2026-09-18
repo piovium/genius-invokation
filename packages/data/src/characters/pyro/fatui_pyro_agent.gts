@@ -67,6 +67,7 @@ define status {
 /**
  * @id 23011
  * @name 突刺
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -81,6 +82,7 @@ define skill {
 /**
  * @id 23012
  * @name 伺机而动
+ * @cost 3*Pyro
  * @description
  * 造成1点火元素伤害，本角色附属潜行。
  */
@@ -99,6 +101,7 @@ define skill {
 /**
  * @id 23013
  * @name 焚毁之锋
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 造成5点火元素伤害。
  */
@@ -113,6 +116,7 @@ define skill {
 /**
  * @id 23014
  * @name 潜行大师
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属潜行。
  */
@@ -128,6 +132,8 @@ define skill {
 /**
  * @id 2301
  * @name 愚人众·火之债务处理人
+ * @hp 11
+ * @energy 2
  * @description
  * 「死债不可免，活债更难逃…」
  */
@@ -143,6 +149,7 @@ define character {
 /**
  * @id 223011
  * @name 悉数讨回
+ * @cost 3*Pyro
  * @description
  * 战斗行动：我方出战角色为愚人众·火之债务处理人时，装备此牌。
  * 愚人众·火之债务处理人装备此牌后，立刻使用一次伺机而动。

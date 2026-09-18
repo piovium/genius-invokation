@@ -67,6 +67,7 @@ define status {
 /**
  * @id 11061
  * @name 西风剑术·宗室
+ * @cost 1*Cryo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -85,6 +86,7 @@ define skill {
 /**
  * @id 11062
  * @name 冰潮的涡旋
+ * @cost 3*Cryo
  * @description
  * 造成2点冰元素伤害，如果本角色未附属冷酷之心，则使其附属冷酷之心。
  */
@@ -106,6 +108,7 @@ define skill {
 /**
  * @id 11063
  * @name 凝浪之光剑
+ * @cost 3*Cryo, 2*Energy
  * @description
  * 造成2点冰元素伤害，召唤光降之剑。
  */
@@ -121,6 +124,8 @@ define skill {
 /**
  * @id 1106
  * @name 优菈
+ * @hp 10
+ * @energy 2
  * @description
  * 这只是一场游戏，无论是取胜或落败，你都不会因此被添上罪状。
  */
@@ -136,6 +141,7 @@ define character {
 /**
  * @id 211061
  * @name 战欲涌现
+ * @cost 3*Cryo, 2*Energy
  * @description
  * 战斗行动：我方出战角色为优菈时，装备此牌。
  * 优菈装备此牌后，立刻使用一次凝浪之光剑。

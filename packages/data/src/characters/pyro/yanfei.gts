@@ -71,6 +71,7 @@ define status {
 /**
  * @id 13081
  * @name 火漆制印
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成1点火元素伤害。
  */
@@ -85,6 +86,7 @@ define skill {
 /**
  * @id 13082
  * @name 丹书立约
+ * @cost 3*Pyro
  * @description
  * 造成3点火元素伤害，本角色附属丹火印。
  */
@@ -99,6 +101,7 @@ define skill {
 /**
  * @id 13083
  * @name 凭此结契
+ * @cost 3*Pyro, 2*Energy
  * @description
  * 造成4点火元素伤害，本角色附属丹火印和灼灼。
  */
@@ -115,6 +118,8 @@ define skill {
 /**
  * @id 1308
  * @name 烟绯
+ * @hp 10
+ * @energy 2
  * @description
  * 不期修古，不法常可。
  */
@@ -130,6 +135,7 @@ define character {
 /**
  * @id 213081
  * @name 最终解释权
+ * @cost 1*Pyro, 2*Void
  * @description
  * 战斗行动：我方出战角色为烟绯时，装备此牌。
  * 烟绯装备此牌后，立刻使用一次火漆制印。

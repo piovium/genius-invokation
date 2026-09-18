@@ -103,6 +103,8 @@ function getAuxiliaryOfCharacter(id: number): AuxiliaryFound {
     return {
       id: obj.id,
       name: obj.name,
+      cost:
+        "playCost" in obj ? inlineCostDescription(obj.playCost) : undefined,
       description: description,
       code: `define ${obj.kind} {
   id ${obj.id} as ${identifier(obj.englishName)};
@@ -127,6 +129,7 @@ function getTalentCard(id: number, name: string): SourceInfo[] {
     return {
       id: card.id,
       name: card.name,
+      cost: inlineCostDescription(card.playCost),
       description: card.description,
       code: getCardCode(
         card,
@@ -159,6 +162,7 @@ export async function generateCharacters() {
         return {
           id: sk.id,
           name: sk.name,
+          cost: inlineCostDescription(sk.playCost),
           description: sk.description,
           code: `define skill {
   id ${sk.id} as ${identifier(sk.englishName)};
@@ -181,6 +185,8 @@ export async function generateCharacters() {
     items.push({
       id: ch.id,
       name: ch.name,
+      hp: ch.hp,
+      energy: ch.maxEnergy,
       description: ch.storyText ?? "",
       code: `define character {
   id ${ch.id} as ${identifier(ch.englishName)};

@@ -101,6 +101,7 @@ define card {
 /**
  * @id 27031
  * @name 叶轮轻扫
+ * @cost 1*Dendro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -115,6 +116,7 @@ define skill {
 /**
  * @id 27032
  * @name 蔓延旋舞
+ * @cost 3*Dendro
  * @description
  * 造成3点草元素伤害，生成1层灵蛇祝福。
  */
@@ -129,6 +131,7 @@ define skill {
 /**
  * @id 27033
  * @name 厄灵苏醒·草之灵蛇
+ * @cost 3*Dendro, 2*Energy
  * @description
  * 造成4点草元素伤害。整场牌局限制1次，将1张厄灵·草之灵蛇加入我方手牌。
  * （装备有厄灵·草之灵蛇的角色可以使用特技：藤蔓锋鳞）
@@ -144,6 +147,7 @@ define skill {
 /**
  * @id 27034
  * @name 厄灵之能
+ * @cost
  * @description
  * 【被动】此角色受到伤害后：如果此角色生命值不多于7，则获得1点充能。（每回合1次）
  */
@@ -172,6 +176,8 @@ define skill {
 /**
  * @id 2703
  * @name 镀金旅团·叶轮舞者
+ * @hp 10
+ * @energy 2
  * @description
  * 「沙之民有音乐与舞蹈的传统，起初是对神的礼赞，后来则是讨取王者欢心的演艺与战斗的技术。」
  */
@@ -190,6 +196,7 @@ define character {
 /**
  * @id 227031
  * @name 灵蛇旋嘶
+ * @cost 3*Dendro
  * @description
  * 战斗行动：我方出战角色为镀金旅团·叶轮舞者时，装备此牌。
  * 镀金旅团·叶轮舞者装备此牌后，立刻使用一次蔓延旋舞。

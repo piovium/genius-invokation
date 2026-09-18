@@ -77,6 +77,7 @@ define status {
 /**
  * @id 24016
  * @name 猜拳三连击·布
+ * @cost
  * @description
  * （需准备1个行动轮）
  * 造成3点雷元素伤害。
@@ -102,6 +103,7 @@ define status {
 /**
  * @id 24015
  * @name 猜拳三连击·剪刀
+ * @cost
  * @description
  * （需准备1个行动轮）
  * 造成2点雷元素伤害，然后准备技能：猜拳三连击·布。
@@ -129,6 +131,7 @@ define status {
 /**
  * @id 24011
  * @name 雷晶投射
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成1点雷元素伤害。
  */
@@ -143,6 +146,7 @@ define skill {
 /**
  * @id 24012
  * @name 猜拳三连击
+ * @cost 5*Electro
  * @description
  * 造成2点雷元素伤害，然后分别准备技能：猜拳三连击·剪刀和猜拳三连击·布。
  */
@@ -157,6 +161,7 @@ define skill {
 /**
  * @id 24013
  * @name 雳霆镇锁
+ * @cost 3*Electro, 2*Energy
  * @description
  * 造成2点雷元素伤害，召唤雷锁镇域。
  */
@@ -172,6 +177,7 @@ define skill {
 /**
  * @id 24014
  * @name 雷晶核心
+ * @cost
  * @description
  * 【被动】战斗开始时，初始附属雷晶核心。
  */
@@ -187,6 +193,8 @@ define skill {
 /**
  * @id 2401
  * @name 无相之雷
+ * @hp 8
+ * @energy 2
  * @description
  * 代号为「阿莱夫」的高级雷元素生命。
  * 就算猜拳获胜，它一般也不会认输。
@@ -208,6 +216,7 @@ define character {
 /**
  * @id 224011
  * @name 汲能棱晶
+ * @cost 2*Electro
  * @description
  * 战斗行动：我方出战角色为无相之雷时，治疗该角色3点，并附属雷晶核心。
  * （牌组中包含无相之雷，才能加入牌组）

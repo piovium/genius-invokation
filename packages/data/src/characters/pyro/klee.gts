@@ -75,6 +75,7 @@ define combatStatus {
 /**
  * @id 13061
  * @name 砰砰
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成1点火元素伤害。
  */
@@ -89,6 +90,7 @@ define skill {
 /**
  * @id 13062
  * @name 蹦蹦炸弹
+ * @cost 3*Pyro
  * @description
  * 造成3点火元素伤害，本角色附属爆裂火花。
  */
@@ -107,6 +109,7 @@ define skill {
 /**
  * @id 13063
  * @name 轰轰火花
+ * @cost 3*Pyro, 3*Energy
  * @description
  * 造成3点火元素伤害，在对方场上生成轰轰火花。
  */
@@ -122,6 +125,8 @@ define skill {
 /**
  * @id 1306
  * @name 可莉
+ * @hp 10
+ * @energy 3
  * @description
  * 每一次抽牌，都可能带来一次「爆炸性惊喜」。
  */
@@ -137,6 +142,7 @@ define character {
 /**
  * @id 213061
  * @name 砰砰礼物
+ * @cost 3*Pyro
  * @description
  * 战斗行动：我方出战角色为可莉时，装备此牌。
  * 可莉装备此牌后，立刻使用一次蹦蹦炸弹。
@@ -157,6 +163,7 @@ define card {
 /**
  * @id 213062
  * @name 火花魔法
+ * @cost 1*Pyro
  * @description
  * 快速行动：装备给我方的可莉。
  * 可莉附属爆裂火花。

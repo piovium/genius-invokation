@@ -18,6 +18,7 @@ import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 /**
  * @id 13164
  * @name 踏云献瑞
+ * @cost
  * @description
  * 造成2点火元素伤害。
  */
@@ -86,6 +87,7 @@ define status {
 /**
  * @id 13161
  * @name 刃爪悬星
+ * @cost 1*Pyro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -100,6 +102,7 @@ define skill {
 /**
  * @id 13162
  * @name 瑞兽登高楼
+ * @cost 3*Pyro
  * @description
  * 造成1点火元素伤害，自身附属舞兽之法，我方切换到下一个角色。
  */
@@ -115,6 +118,7 @@ define skill {
 /**
  * @id 13163
  * @name 璨焰金猊舞
+ * @cost 3*Pyro, 3*Energy
  * @description
  * 造成2点火元素伤害，自身附属猊兽·文仔。
  */
@@ -130,6 +134,7 @@ define skill {
 /**
  * @id 13165
  * @name 踏云献瑞
+ * @cost
  * @description
  * 造成D__KEY__DAMAGE点物理伤害。
  */
@@ -142,6 +147,8 @@ define skill {
 /**
  * @id 1316
  * @name 嘉明
+ * @hp 10
+ * @energy 3
  * @description
  * 威姿劲步，踔厉猛进。
  */
@@ -157,6 +164,7 @@ define character {
 /**
  * @id 213161
  * @name 通明庇佑
+ * @cost 3*Pyro, 3*Energy
  * @description
  * 战斗行动：我方出战角色为嘉明时，装备此牌。
  * 嘉明装备此牌后，立刻使用一次璨焰金猊舞。

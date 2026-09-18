@@ -46,6 +46,7 @@ define status {
 /**
  * @id 26047
  * @name 大师之击
+ * @cost
  * @description
  * 造成3点岩元素伤害。
  */
@@ -71,6 +72,7 @@ define status {
 /**
  * @id 26045
  * @name 巨钺强袭
+ * @cost
  * @description
  * 造成3点岩元素伤害，准备技能大师之击。
  */
@@ -98,6 +100,7 @@ define status {
 /**
  * @id 26041
  * @name 顶位迅斩
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -112,6 +115,7 @@ define skill {
 /**
  * @id 26042
  * @name 斧盾震击
+ * @cost 3*Geo
  * @description
  * 造成3点岩元素伤害。
  */
@@ -125,6 +129,7 @@ define skill {
 /**
  * @id 26043
  * @name 坚岩姿态
+ * @cost 3*Geo, 2*Energy
  * @description
  * 自身附着岩元素，准备技能巨钺强袭，然后准备技能大师之击。
  */
@@ -140,6 +145,7 @@ define skill {
 /**
  * @id 26044
  * @name 攻阵气势
+ * @cost
  * @description
  * 【被动】如果敌方场上存在 伤害抵消、护盾状态；或存在 伤害抵消、护盾出战状态，则我方角色使用技能后，自身附属1层摧岩伟力。
  */
@@ -173,6 +179,7 @@ define skill {
 /**
  * @id 26046
  * @name 大师之击
+ * @cost
  * @description
  * 【被动】如果敌方场上存在护盾或减伤状态，我方角色使用技能后，自身附属1层摧岩伟力。
  */
@@ -185,6 +192,8 @@ define skill {
 /**
  * @id 2604
  * @name 黑蛇骑士·摧岩之钺
+ * @hp 12
+ * @energy 2
  * @description
  * 「在宫廷当中颇具地位的近卫军人，以名唤「至真之术」的剑斗技巧，扫除王家的敌人。」
  */
@@ -206,6 +215,7 @@ define character {
 /**
  * @id 226041
  * @name 「曾如磐石抵挡黑水奔流…」
+ * @cost 1*Geo
  * @description
  * 战斗行动：我方出战角色为黑蛇骑士·摧岩之钺时，装备此牌。
  * 打出或行动阶段开始时：使黑蛇骑士·摧岩之钺附着岩元素。

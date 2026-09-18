@@ -103,6 +103,7 @@ define card {
 /**
  * @id 22051
  * @name 镰刀旋斩
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -119,6 +120,7 @@ export const ShouldGainEnergy = customEvent("hydroHilichurl/shouldGainEnergy");
 /**
  * @id 22052
  * @name 狂澜镰击
+ * @cost 3*Hydro
  * @description
  * 造成3点水元素伤害。
  * 如果有敌方角色附属有冻结或水泡围困，则本角色获得1点充能。（每回合1次）
@@ -142,6 +144,7 @@ define skill {
 /**
  * @id 22053
  * @name 浮泡攻势
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 造成4点水元素伤害，生成手牌水泡史莱姆。
  * （装备有水泡史莱姆的角色可以使用特技：水泡战法）
@@ -158,8 +161,9 @@ define skill {
 /**
  * @id 22054
  * @name 狂澜镰击
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 22054 as SlashOfSurgingTidesPassive;
@@ -176,6 +180,8 @@ define skill {
 /**
  * @id 2205
  * @name 丘丘水行游侠
+ * @hp 11
+ * @energy 2
  * @description
  * 不属于任何部族的丘丘人流浪者，如同自我流放一般在荒野中四处漫游。
  */
@@ -194,6 +200,7 @@ define character {
 /**
  * @id 222051
  * @name 轻盈水沫
+ * @cost 3*Hydro
  * @description
  * 战斗行动：我方出战角色为丘丘水行游侠时，装备此牌。
  * 丘丘水行游侠装备此牌后，立刻使用一次狂澜镰击。

@@ -19,6 +19,7 @@ import { AgileSwitch } from "../../commons.gts";
 /**
  * @id 115161
  * @name 呼噜噜秘藏瓶
+ * @cost 4*Aligned
  * @description
  * 雅珂达切换为出战角色时:如果敌方出战角色附着有火/水/雷/冰元素，则将此牌转化为对应元素。
  * 战斗行动：对敌方出战角色造成2点风元素伤害，然后再造成1点风元素伤害。
@@ -55,6 +56,7 @@ define card {
 /**
  * @id 115162
  * @name 呼噜噜秘藏瓶·火
+ * @cost 4*Aligned
  * @description
  * 战斗行动：对敌方出战角色造成2点火元素伤害，然后再造成1点火元素伤害。
  */
@@ -72,6 +74,7 @@ define card {
 /**
  * @id 115163
  * @name 呼噜噜秘藏瓶·水
+ * @cost 4*Aligned
  * @description
  * 战斗行动：对敌方出战角色造成2点水元素伤害，然后再造成1点水元素伤害。
  */
@@ -89,6 +92,7 @@ define card {
 /**
  * @id 115164
  * @name 呼噜噜秘藏瓶·雷
+ * @cost 4*Aligned
  * @description
  * 战斗行动：对敌方出战角色造成2点雷元素伤害，然后再造成1点雷元素伤害。
  */
@@ -106,6 +110,7 @@ define card {
 /**
  * @id 115165
  * @name 呼噜噜秘藏瓶·冰
+ * @cost 4*Aligned
  * @description
  * 战斗行动：对敌方出战角色造成2点冰元素伤害，然后再造成1点冰元素伤害。
  */
@@ -145,6 +150,7 @@ define combatStatus {
 /**
  * @id 15161
  * @name 见机行矢
+ * @cost 1*Anemo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -159,6 +165,7 @@ define skill {
 /**
  * @id 15162
  * @name 奇策·财富分配方案
+ * @cost 3*Anemo
  * @description
  * 造成2点风元素伤害，生成1层敏捷切换，我方切换到下一个角色。如果手牌中没有任意元素的呼噜噜秘藏瓶，则生成手牌呼噜噜秘藏瓶；否则，赋予手牌中所有的呼噜噜秘藏瓶费用降低。
  */
@@ -192,6 +199,7 @@ define skill {
 /**
  * @id 15163
  * @name 秘器·猎人的七道具
+ * @cost 3*Anemo, 2*Energy
  * @description
  * 造成3点风元素伤害，生成猫型家用互助协调器。
  */
@@ -207,6 +215,7 @@ define skill {
 /**
  * @id 15164
  * @name 月兆祝赐·檐上趱行
+ * @cost
  * @description
  * 【被动】战斗开始时，生成手牌呼噜噜秘藏瓶。
  * 我方触发月反应或扩散反应后，使我方手牌中所有呼噜噜秘藏瓶附着费用降低。（每回合2次）
@@ -250,6 +259,7 @@ define skill {
 /**
  * @id 15165
  * @name 月兆祝赐·檐上趱行
+ * @cost
  * @description
  * 【被动】战斗开始时，生成手牌呼噜噜秘藏瓶。
  * 我方触发月反应或扩散反应后，使我方手牌中所有呼噜噜秘藏瓶附着费用降低。（每回合2次）
@@ -263,6 +273,8 @@ define skill {
 /**
  * @id 1516
  * @name 雅珂达
+ * @hp 10
+ * @energy 2
  * @description
  * 千虑秘闻，亦有一得。
  */
@@ -278,6 +290,7 @@ define character {
 /**
  * @id 215161
  * @name 暗巷的黠慧
+ * @cost 3*Anemo
  * @description
  * 战斗行动：我方出战角色为雅珂达时，装备此牌。
  * 雅珂达装备此牌后，立刻使用一次奇策·财富分配方案。

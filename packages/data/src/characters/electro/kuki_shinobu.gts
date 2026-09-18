@@ -35,6 +35,7 @@ define combatStatus {
 /**
  * @id 14111
  * @name 忍流飞刃斩
+ * @cost 1*Electro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -49,6 +50,7 @@ define skill {
 /**
  * @id 14112
  * @name 越祓雷草之轮
+ * @cost 3*Electro
  * @description
  * 生成越祓草轮。如果本角色生命值至少为6，则对自身造成2点穿透伤害。
  */
@@ -65,6 +67,7 @@ define skill {
 /**
  * @id 14113
  * @name 御咏鸣神刈山祭
+ * @cost 3*Electro, 2*Energy
  * @description
  * 造成4点雷元素伤害，治疗本角色2点。
  */
@@ -80,6 +83,8 @@ define skill {
 /**
  * @id 1411
  * @name 久岐忍
+ * @hp 10
+ * @energy 2
  * @description
  * 百业通才，鬼之副手。
  */
@@ -95,6 +100,7 @@ define character {
 /**
  * @id 214111
  * @name 割舍软弱之心
+ * @cost 4*Electro, 2*Energy
  * @description
  * 战斗行动：我方出战角色为久岐忍时，装备此牌。
  * 久岐忍装备此牌后，立刻使用一次御咏鸣神刈山祭。

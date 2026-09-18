@@ -57,6 +57,7 @@ define combatStatus {
 /**
  * @id 12151
  * @name 西风剑术·祭仪
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -71,6 +72,7 @@ define skill {
 /**
  * @id 12152
  * @name 圣浸的礼典
+ * @cost 3*Hydro
  * @description
  * 造成2点水元素伤害，生成雾雨秘迹。
  */
@@ -85,6 +87,7 @@ define skill {
 /**
  * @id 12153
  * @name 纯耀的祷咏
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 造成2点水元素伤害，生成2层护盾和2层西风之眷。
  */
@@ -105,6 +108,8 @@ define skill {
 /**
  * @id 1215
  * @name 塔利雅
+ * @hp 10
+ * @energy 2
  * @description
  * 悠悠圣歌，酿风成诗。
  */
@@ -120,6 +125,7 @@ define character {
 /**
  * @id 212151
  * @name 愿一切欢睦陪伴你
+ * @cost 3*Hydro, 2*Energy
  * @description
  * 战斗行动：我方出战角色为塔利雅时，装备此牌。
  * 塔利雅装备此牌后，立刻使用一次纯耀的祷咏。

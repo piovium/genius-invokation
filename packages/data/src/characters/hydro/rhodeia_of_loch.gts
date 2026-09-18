@@ -120,6 +120,7 @@ define summon {
 /**
  * @id 22011
  * @name 翻涌
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成1点水元素伤害。
  */
@@ -146,6 +147,7 @@ export const PREVIEW_MIMICS = [
 /**
  * @id 22012
  * @name 纯水幻造
+ * @cost 3*Hydro
  * @description
  * 随机召唤1种纯水幻形。（优先生成不同的类型）
  */
@@ -170,6 +172,7 @@ define skill {
 /**
  * @id 22013
  * @name 林野百态
+ * @cost 5*Hydro
  * @description
  * 随机召唤2种纯水幻形。（优先生成不同的类型）
  */
@@ -197,6 +200,7 @@ define skill {
 /**
  * @id 22014
  * @name 潮涌与激流
+ * @cost 3*Hydro, 3*Energy
  * @description
  * 造成4点水元素伤害；我方每有1个召唤物，再使此伤害+1。
  */
@@ -216,6 +220,8 @@ define skill {
 /**
  * @id 2201
  * @name 纯水精灵·洛蒂娅
+ * @hp 11
+ * @energy 3
  * @description
  * 「但，只要百川奔流，雨露不休，水就不会消失…」
  */
@@ -231,6 +237,7 @@ define character {
 /**
  * @id 222011
  * @name 百川奔流
+ * @cost 4*Hydro, 3*Energy
  * @description
  * 战斗行动：我方出战角色为纯水精灵·洛蒂娅时，装备此牌。
  * 纯水精灵·洛蒂娅装备此牌后，立刻使用一次潮涌与激流。
