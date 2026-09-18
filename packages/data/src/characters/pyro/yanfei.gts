@@ -24,13 +24,26 @@ import { $, DamageType, DiceType } from "@gi-tcg/core/data";
  */
 define status {
   id 113081 as ScarletSeal;
+  variable triggerSeal, 0;
   on increaseSkillDamage {
     when :( :e.viaChargedAttack() );
     usage 1 {
       append;
       range 2;
+      autoDispose false;
     };
     :e.increaseDamage(2);
+    :setVariable("triggerSeal", 1);
+  };
+  on useSkill {
+    when :( :getVariable("triggerSeal") );
+    :setVariable("triggerSeal", 0);
+    if (:self.master.hasEquipment(RightOfFinalInterpretation)) {
+      :drawCards(1);
+    }
+    if (:getVariable("usage") === 0) {
+      :dispose();
+    }
   };
 };
 
@@ -129,21 +142,12 @@ define card {
   cost DiceType.Pyro, 1;
   cost DiceType.Void, 2;
   talent Yanfei {
-    variable triggerSeal, 0;
     on staged {
       :useSkill(SealOfApproval);
     };
     on increaseSkillDamage {
       when :( :e.viaChargedAttack() && :e.target.health <= 6 );
       :e.increaseDamage(1);
-      if (:self.master.hasStatus(ScarletSeal)) {
-        :setVariable("triggerSeal", 1);
-      }
-    };
-    on useSkill {
-      when :( :getVariable("triggerSeal") );
-      :drawCards(1);
-      :setVariable("triggerSeal", 0);
     };
   };
 };

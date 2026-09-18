@@ -1,5 +1,6 @@
 import {
   $,
+  customEvent,
   DamageType,
   DiceType,
   type EquipmentHandle,
@@ -11,7 +12,11 @@ import {
   InfluxBlast,
   MirrorMaiden,
 } from "../characters/hydro/mirror_maiden.gts";
-import { Barbara, LetTheShowBegin, MelodyLoop } from "../characters/hydro/barbara.gts";
+import {
+  Barbara,
+  LetTheShowBegin,
+  MelodyLoop,
+} from "../characters/hydro/barbara.gts";
 import {
   ElectroCrystalCore,
   ElectroHypostasis,
@@ -31,8 +36,6 @@ import {
   Beidou,
   SummonerOfLightning,
   Tidecaller,
-  TidecallerSurfEmbrace,
-  Wavestrider,
 } from "../characters/electro/beidou.gts";
 import {
   KujouSara,
@@ -359,6 +362,55 @@ define card {
 };
 
 /**
+ * @id 14054
+ * @name 踏潮
+ * @description
+ * （需准备1个行动轮）
+ * 造成3点雷元素伤害。
+ */
+define skill {
+  id 14054 as Wavestrider;
+  until "v4.1.0";
+  skillType elemental;
+  prepared;
+  :damage(DamageType.Electro, 3);
+};
+
+/**
+ * @id 114051
+ * @name 捉浪·涛拥之守
+ * @description
+ * 本角色将在下次行动时，直接使用技能：踏潮。
+ * 准备技能期间：提供2点护盾，保护所附属的角色。
+ */
+define status {
+  id 114051 as private TidecallerSurfEmbrace;
+  until "v4.1.0";
+  prepare Wavestrider;
+  // A custom shield that won't dispose by decreasing damage
+  tags shield;
+  variable shield, 2 {
+    append;
+    range 2;
+  };
+  on decreaseDamaged {
+    const shield = :getVariable("shield");
+    if (shield > 0) {
+      const currentValue = :e.value;
+      const decreaseValue = Math.min(shield, currentValue);
+      :e.decreaseDamage(decreaseValue);
+      :addVariable("shield", -decreaseValue);
+    }
+  };
+  // ... and also apply talent effects.
+  on damaged {
+    :emitCustomEvent(TriggerBeidouTalent);
+  };
+};
+
+export const TriggerBeidouTalent = customEvent("beidou/triggerTalent");
+
+/**
  * @id 214051
  * @name 霹雳连霄
  * @description
@@ -375,19 +427,7 @@ define card {
     on staged {
       :useSkill(Tidecaller);
     };
-    on useSkill {
-      when :{
-        if (:e.skill.definition.id !== Wavestrider) {
-          return false;
-        }
-        const shield = :query(
-          $.typeStatus.def(TidecallerSurfEmbrace).at($.id(:self.master.id)),
-        );
-        if (shield && shield.getVariable("shield") === 2) {
-          return false;
-        }
-        return true;
-      };
+    on TriggerBeidouTalent {
       usage 2 {
         autoDispose false;
       };

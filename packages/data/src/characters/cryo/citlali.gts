@@ -215,10 +215,11 @@ define card {
   since "v5.7.0";
   cost DiceType.Cryo, 2;
   talent Citlali, none {
-    on dealDamage {
+    on damaged {
       when :(
-        :e.getReaction() === Reaction.Frozen ||
-          :e.getReaction() === Reaction.Melt
+        !:e.target.isMine() &&
+          (:e.getReaction() === Reaction.Frozen ||
+            :e.getReaction() === Reaction.Melt)
       );
       listenTo all;
       usage perRound, 1;
