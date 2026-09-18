@@ -1603,12 +1603,14 @@ define card {
       when :(
         :queryAll($.my.character).length === 1 && :e.isSkillType("normal")
       );
+      usage perRound, 2;
       :e.deductVoidCost(1);
     };
     on increaseDamage {
       when :(
         :queryAll($.my.character).length === 1 && :e.viaSkillType("normal")
       );
+      // 减少花费和增加伤害为独立效果，各自管理可用次数
       usage perRound, 2;
       :e.increaseDamage(1);
     };
