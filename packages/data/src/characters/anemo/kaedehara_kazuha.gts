@@ -31,7 +31,9 @@ import {
  */
 define summon {
   id 115052 as AutumnWhirlwind;
-  hint swirled, 1;
+  hint DamageType.Anemo, 1 {
+    dynamicPreset swirled;
+  };
   on endPhase {
     usage 3;
     :damage(:self.variables.hintIcon, 1);
