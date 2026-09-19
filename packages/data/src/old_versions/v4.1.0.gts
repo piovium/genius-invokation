@@ -26,7 +26,6 @@ import {
   Chongyun,
 } from "../characters/cryo/chongyun.gts";
 import { GuobaAttack, Xiangling } from "../characters/pyro/xiangling.gts";
-import { NiwabiEnshou, Yoimiya } from "../characters/pyro/yoimiya.gts";
 import {
   Candace,
   SacredRiteWagtailsTide,
@@ -270,43 +269,29 @@ define card {
 };
 
 /**
- * @id 13052
- * @name 焰硝庭火舞
+ * @id 113053
+ * @name 庭火焰硝
  * @description
- * 本角色附属庭火焰硝。（此技能不产生充能）
+ * 所附属角色普通攻击伤害+1，造成的物理伤害变为火元素伤害。
+ * 所附属角色使用普通攻击后：造成1点火元素伤害。
+ * 可用次数：2
  */
-define skill {
-  id 13052 as private NiwabiFiredance;
+define status {
+  id 113053 as private NiwabiEnshou01;
   until "v4.1.0";
-  skillType elemental;
-  cost DiceType.Pyro, 1;
-  noEnergy;
-  :characterStatus(NiwabiEnshou);
-};
-
-/**
- * @id 213051
- * @name 长野原龙势流星群
- * @description
- * 战斗行动：我方出战角色为宵宫时，装备此牌。
- * 宵宫装备此牌后，立刻使用一次焰硝庭火舞。
- * 装备有此牌的宵宫触发庭火焰硝后：额外造成1点火元素伤害。
- * （牌组中包含宵宫，才能加入牌组）
- */
-define card {
-  id 213051 as private NaganoharaMeteorSwarm;
-  until "v4.1.0";
-  cost DiceType.Pyro, 2;
-  talent Yoimiya {
-    on staged {
-      :useSkill(NiwabiFiredance);
-    };
-    on useSkill {
-      when :(
-        :e.isSkillType("normal") && :self.master.hasStatus(NiwabiEnshou)
-      );
-      :damage(DamageType.Pyro, 1);
-    };
+  conflictWith 113051;
+  on modifySkillDamageType {
+    when :( :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Pyro);
+  };
+  on increaseSkillDamage {
+    when :( :e.viaSkillType("normal") );
+    :e.increaseDamage(1);
+  };
+  on useSkill {
+    when :( :e.isSkillType("normal") );
+    usage 2;
+    :damage(DamageType.Pyro, 1);
   };
 };
 
