@@ -24,6 +24,10 @@ import { $, DamageType, DiceType, type CardHandle } from "@gi-tcg/core/data";
 define status {
   id 116071 as ShieldOfSwirlingClouds;
   shield 2;
+  on switchActive {
+    when :( :self.master.id === :e.switchInfo.from?.id );
+    :dispose();
+  };
 };
 
 /**
