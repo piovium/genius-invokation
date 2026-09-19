@@ -48,6 +48,9 @@ define status {
     when :( :e.viaSkillType("normal") );
     usage 2;
     :e.increaseDamage(2);
+    if (:self.master.hasEquipment(GalesOfReverie) && :e.via.charged) {
+      :characterStatus(Descent, :self.master);
+    }
   };
 };
 
@@ -134,10 +137,6 @@ define card {
   talent Wanderer {
     on staged {
       :useSkill(HanegaSongOfTheWind);
-    };
-    on dealDamage {
-      when :( :self.master.hasStatus(Windfavored) && :e.via.charged );
-      :characterStatus(Descent, :self.master);
     };
   };
 };
