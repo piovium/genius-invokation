@@ -304,38 +304,6 @@ define card {
   :characterStatus(EdictOfAbsolutionInEffect, :e.targets[0]);
 };
 
-define extension {
-  idHint 300006 as FlamesOfWarExtension;
-  schema ({
-    spirit: "pair<number>",
-    win: "pair<boolean>",
-  });
-  initialState ({
-    spirit: [0, 0],
-    win: [false, false],
-  });
-  description "记录双方斗争之火的「斗志」，并在行动阶段开始时设置斗争之火的胜者";
-  mutateWhen onDamageOrHeal,
-    ((st, e) => {
-      if (e.sourceWho !== e.targetWho) {
-        st.spirit[e.sourceWho] += e.damageInfo.value;
-      }
-    });
-  mutateWhen onActionPhase,
-    ((st) => {
-      const currentSpirits = [...st.spirit];
-      st.win = [false, false];
-      if (currentSpirits[0] >= currentSpirits[1]) {
-        st.win[0] = true;
-        st.spirit[0] = 0;
-      }
-      if (currentSpirits[0] <= currentSpirits[1]) {
-        st.win[1] = true;
-        st.spirit[1] = 0;
-      }
-    });
-};
-
 /**
  * @id 300007
  * @name 斗争之火（生效中）
@@ -363,20 +331,24 @@ define card {
   undiscoverable;
   support {
     variable spirit, 0;
-    associateExtension FlamesOfWarExtension;
     on dealDamage {
-      :setVariable("spirit", :getExtensionState().spirit[:self.who]);
+      :addVariable("spirit", :e.value);
     };
     on actionPhase {
-      :setVariable("spirit", :getExtensionState().spirit[:self.who]);
-      if (:getExtensionState().win[:self.who]) {
+      usage perRound, 1 {
+        name usagePerRound;
+      };
+      const mySpirit = :getVariable("spirit");
+      const oppSupport = :query($.opp.support.def(FlamesOfWar));
+      const oppSpirit = oppSupport?.getVariable("spirit") ?? 0;
+      if (mySpirit >= oppSpirit) {
         :characterStatus(FlamesOfWarInEffect, $.my.active);
+        :setVariable("spirit", 0);
+        // 判断胜利后，另一方的斗争之火不再结算
+        if (oppSupport) {
+          oppSupport.setVariable("usagePerRound", 0);
+        }
       }
-    };
-    on selfDispose {
-      :setExtensionState((st) => {
-        st.spirit[:self.who] = 0;
-      });
     };
   };
 };
@@ -392,47 +364,21 @@ define card {
   id 330010 as PilgrimageOfTheReturnOfTheSacredFlame;
   since "v5.3.0";
   legend;
-  associateExtension FlamesOfWarExtension;
-  const myExistsFlame = :query($.my.support.def(FlamesOfWar));
-  const oppExistsFlame = :query($.opp.support.def(FlamesOfWar));
-  if (myExistsFlame || :remainingSupportCount("my") > 0) {
-    :setExtensionState((st) => {
-      st.spirit[:self.who]++;
-    });
-    const spirit = :getExtensionState().spirit[:self.who];
-    if (myExistsFlame) {
-      myExistsFlame.setVariable("spirit", spirit);
-    } else {
-      :createEntity(
-        "support",
-        FlamesOfWar,
-        {
-          who: :self.who,
-          type: "supports",
-        },
-        {
-          overrideVariables: {
-            spirit,
-          },
-        },
-      );
-    }
+  let myFlame = :query($.my.support.def(FlamesOfWar)) ?? null;
+  type FlameEntity = typeof myFlame;
+  const oppFlame = :query($.opp.support.def(FlamesOfWar)) ?? null;
+  if (!myFlame) {
+    myFlame = :createEntity("support", FlamesOfWar, {
+      who: :self.who,
+      type: "supports",
+    }) as FlameEntity;
   }
-  if (oppExistsFlame) {
-  } else if (:remainingSupportCount("opp") > 0) {
-    :createEntity(
-      "support",
-      FlamesOfWar,
-      {
-        who: flip(:self.who),
-        type: "supports",
-      },
-      {
-        overrideVariables: {
-          spirit: :getExtensionState().spirit[flip(:self.who)],
-        },
-      },
-    );
+  myFlame?.addVariable("spirit", 1);
+  if (!oppFlame) {
+    :createEntity("support", FlamesOfWar, {
+      who: flip(:self.who),
+      type: "supports",
+    });
   }
 };
 
