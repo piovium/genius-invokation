@@ -123,6 +123,7 @@ define summon {
   tags barrier;
   hint DamageType.Hydro, "2";
   on decreaseDamaged {
+    when :( :e.target.isActive() );
     usage 2 {
       autoDispose false;
     };
