@@ -49,7 +49,7 @@ define combatStatus {
  */
 define combatStatus {
   id 117072 as ShieldOfSafeTransport;
-  shield 1, Infinity;
+  shield 1, open;
 };
 
 /**

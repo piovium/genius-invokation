@@ -25,7 +25,7 @@ import { EfficientSwitch } from "../../commons.gts";
 define combatStatus {
   id 115121 as SwallowwispShield;
   since "v5.8.0";
-  shield 1, Infinity;
+  shield 1, open;
 };
 
 /**

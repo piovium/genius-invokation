@@ -425,9 +425,7 @@ export const createVariableConfig = (
     upperBound = options.range[1];
   }
   if (lowerBound > upperBound) {
-    throw new GiTcgDataError(
-      "Variable range must have min <= max",
-    );
+    throw new GiTcgDataError("Variable range must have min <= max");
   }
   if (typeof options.append !== "undefined" && options.append !== false) {
     let appendLimit: number;
@@ -817,13 +815,12 @@ export class EntityViewModel extends defineViewModel(
       <Meta extends EntityVMMeta>(
         this: ThisWithType<Meta, "status" | "combatStatus">,
         count: number,
-        max?: number,
+        max?: number | "open",
       ): AR.DoneRewriteMeta<PushMetaVar<Meta, "shield">>;
     }>((model, [count, max = count]) => {
       model.tags.push("shield");
-      // TODO drop this convention
       model.setVariable("shield", count, {
-        append: max === Infinity ? DEFAULT_VARIABLE_UPPER_BOUND : max,
+        append: max === "open" ? DEFAULT_VARIABLE_UPPER_BOUND : max,
       });
       const decreaseDmgSkill = new TriggeredSkillModel(
         model,

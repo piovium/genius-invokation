@@ -313,7 +313,7 @@ define attachment {
  */
 define combatStatus {
   id 203 as Shield;
-  shield 1, Infinity;
+  shield 1, open;
 };
 
 /**
