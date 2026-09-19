@@ -24,12 +24,16 @@ import { $, DamageType, DiceType } from "@gi-tcg/core/data";
  */
 define status {
   id 115062 as Descent;
+  variable dealDamage, 0;
   on deductOmniDiceSwitch {
     when :( :self.master.isActive() );
     :e.deductOmniCost(1);
+    :setVariable("dealDamage", 1);
   };
   on switchActive {
-    when :( :self.master.id === :e.switchInfo.from?.id );
+    when :(
+      :self.master.id === :e.switchInfo.from?.id && :getVariable("dealDamage")
+    );
     usage 1;
     :damage(DamageType.Anemo, 1);
   };
