@@ -988,7 +988,7 @@ define card {
     on deductOmniDice {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
       const reward = :getVariable("reward");
-      const currentCost = :e.costSize();
+      const currentCost = :e.diceCostSize();
       const deduced = Math.min(reward, currentCost);
       :e.deductOmniCost(deduced);
       :addVariable("reward", -deduced);
@@ -1096,7 +1096,7 @@ define card {
     on deductOmniDice {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
       const reward = :getVariable("reward");
-      const currentCost = :e.costSize();
+      const currentCost = :e.diceCostSize();
       const deduced = Math.min(reward, currentCost);
       :e.deductOmniCost(deduced);
       :addVariable("reward", -deduced);

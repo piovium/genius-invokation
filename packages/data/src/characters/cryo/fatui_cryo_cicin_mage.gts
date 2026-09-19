@@ -30,8 +30,7 @@ define summon {
   variable talentExtraDamage, 0;
   on endPhase {
     usage 2 {
-      append;
-      range 3;
+      append 3;
     };
     :damage(DamageType.Cryo, 1);
   };

@@ -53,13 +53,15 @@ define summon {
 
 普通变量使用 `variable <名称>, <初值>;`。
 - 重复创建时：`{ append; }` 允许累加；`{ forceOverwrite; }` 要求重新设置为初值；否则执行常规逻辑：取当前值和初始值的最大值。
-- 指定取值范围：`{ range <上限>; }` 将变量取值限制在 `[0, 上限]`，该限制适用于 `setVariable`、 `addVariable` 和重复入场的叠加值。
+- 叠加上限：`{ append 3; }` 限制重复创建时最多叠加到 3；`{ append { limit 3; value 2; }; }` 还可指定每次叠加 2。当前值已超过叠加上限时，重复创建保持原值。`setVariable` 和 `addVariable` 不受叠加上限限制。
+- 指定取值范围：`{ range <上限>; }` 表示 `[0, 上限]`，`{ range [<下限>, <上限>]; }` 表示自定义范围。未指定时默认为 `[-2147483648, 2147483647]`；初始化、直接修改及重复创建均受取值范围和全局 int32 硬边界限制。
+- range 上限必须大于等于叠加上限。启用 append 但未指定 limit 时，默认取最终 range 上限（无 range 时为 `2147483647`），与声明顺序无关。
 
 ```gts
 define status {
   id 112091 as BreakthroughStatus;
   variable "break", 1 {
-    append;
+    append 3;
     range 3;
   };
   on endPhase {
@@ -70,7 +72,7 @@ define status {
 
 ## 护盾、持续回合与冲突
 
-- `shield <初值>[, <上限>];` 建立护盾变量并自动添加减伤逻辑；
+- `shield <初值>[, <叠加上限>];` 建立护盾变量并自动添加减伤逻辑；叠加上限默认为初值，仅限制重复创建，其他效果可以额外增加盾量；`<叠加上限>` 使用字符串 `open` 表示全局 int32 上限 `2147483647`；
 - `duration <回合数>;` 和 `oneDuration;` 分别建立持续回合变量和一回合持续变量，系统会在行动阶段开始时递减，归零时弃置；
 - `conflictWith [crossCharacter,] <实体 id>...;` 在入场时弃置同区域的冲突定义；`crossCharacter` 允许角色状态跨角色冲突；
 - `tags <标签>...;` 添加实体标签；`hint <图标>[, <提示文本>];` 设置界面提示；

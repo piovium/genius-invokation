@@ -196,26 +196,22 @@ define card {
   cost DiceType.Aligned, 2;
   weapon bow {
     variable fishing, 0 { range 2; };
-    variable additivePerRound, 0 {
-      visible false;
-    };
-    on roundEnd {
-      :setVariable("additivePerRound", 0);
-    };
     on playCard {
-      when :( !:isInInitialPile(:e.card) );
-      if (:getVariable("additivePerRound") < 2) {
-        :addVariable("fishing", 1);
-        :addVariable("additivePerRound", 1);
-      }
+      when :( !:isInInitialPile(:e.card) && :getVariable("fishing") < 2 );
+      usage perRound, 2 {
+        visible false;
+      };
+      :addVariable("fishing", 1);
     };
     on increaseSkillDamage {
+      when :( :getVariable("fishing") );
+      :e.increaseDamage(1);
+    };
+    on useSkill {
+      when :( :getVariable("fishing") );
       const fishing = :getVariable("fishing");
-      if (fishing > 0) {
-        :e.increaseDamage(1);
-        :drawCards(fishing);
-        :setVariable("fishing", 0);
-      }
+      :drawCards(fishing);
+      :setVariable("fishing", 0);
     };
   };
 };

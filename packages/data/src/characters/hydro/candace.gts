@@ -39,6 +39,10 @@ define skill {
 define status {
   id 112071 as HeronShield;
   shield 2;
+  on switchActive {
+    when :( :self.master.id === :e.switchInfo.from?.id );
+    :dispose();
+  };
 };
 
 /**

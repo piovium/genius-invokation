@@ -57,6 +57,7 @@ define combatStatus {
   since "v6.6.0";
   duration 2;
   on useSkill {
+    // 双方的[重力应用程式·削减场域]均不会触发
     when :( :e.skill.definition.id !== GravityApplicationFieldReduction );
     listenTo all;
     :characterStatus(Evasion, :e.skill.caller.cast<"character">());

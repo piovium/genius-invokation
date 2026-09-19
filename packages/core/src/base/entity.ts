@@ -99,7 +99,7 @@ export type EntityArea =
 
 export interface VariableConfig<ValueT extends number = number> {
   readonly initialValue: ValueT;
-  /** Inclusive lower bound; defaults to 0. */
+  /** Inclusive lower bound; defaults to -(2 ** 31). */
   readonly lowerBound: number;
   /** Inclusive upper bound; defaults to 2 ** 31 - 1. */
   readonly upperBound: number;
@@ -122,6 +122,8 @@ export type VariableRecreateBehavior<ValueT extends number = number> =
     }
   | {
       readonly type: "append";
+      /** Only limits accumulation on recreation, not direct variable changes. */
+      readonly appendLimit: number;
       readonly appendValue: ValueT;
     };
 

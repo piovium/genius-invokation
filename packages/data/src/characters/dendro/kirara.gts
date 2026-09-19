@@ -49,7 +49,7 @@ define combatStatus {
  */
 define combatStatus {
   id 117072 as ShieldOfSafeTransport;
-  shield 1, Infinity;
+  shield 1, open;
 };
 
 /**
@@ -64,8 +64,7 @@ define combatStatus {
   on switchActive {
     when :( :e.switchInfo.from?.definition.id === Kirara );
     usage 1 {
-      append;
-      range 2;
+      append 2;
     };
     :damage(DamageType.Dendro, 2);
     :drawCards(1);

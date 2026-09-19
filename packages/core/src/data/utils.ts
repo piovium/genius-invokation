@@ -14,8 +14,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { VariableConfig } from "../base/entity";
-
-export const DEFAULT_VARIABLE_UPPER_BOUND = 2 ** 31 - 1;
+import {
+  DEFAULT_VARIABLE_LOWER_BOUND,
+  DEFAULT_VARIABLE_UPPER_BOUND,
+} from "../base/mutation";
 
 export function createVariable<const T extends number>(
   initialValue: T,
@@ -23,26 +25,10 @@ export function createVariable<const T extends number>(
 ): VariableConfig<T> {
   return {
     initialValue,
-    lowerBound: 0,
+    lowerBound: DEFAULT_VARIABLE_LOWER_BOUND,
     upperBound: DEFAULT_VARIABLE_UPPER_BOUND,
     recreateBehavior: {
       type: forceOverwrite ? "overwrite" : "default",
-    },
-  };
-}
-
-export function createVariableCanAppend(
-  initialValue: number,
-  appendValue?: number,
-): VariableConfig {
-  appendValue ??= initialValue;
-  return {
-    initialValue,
-    lowerBound: 0,
-    upperBound: DEFAULT_VARIABLE_UPPER_BOUND,
-    recreateBehavior: {
-      type: "append",
-      appendValue,
     },
   };
 }

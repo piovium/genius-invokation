@@ -68,8 +68,7 @@ define summon {
   hint DamageType.Pyro, 1;
   on endPhase {
     usage 1 {
-      append;
-      range 2;
+      append 2;
     };
     :damage(DamageType.Pyro, 1);
   };
@@ -314,7 +313,7 @@ define attachment {
  */
 define combatStatus {
   id 203 as Shield;
-  shield 1, Infinity;
+  shield 1, open;
 };
 
 /**
