@@ -21,7 +21,6 @@ import {
 import {
   CicinIcicle,
   CicinsColdGlare,
-  FatuiCryoCicinMage,
 } from "../characters/cryo/fatui_cryo_cicin_mage.gts";
 import { Diona, IcyPaws } from "../characters/cryo/diona.gts";
 import { RainbowBladework } from "../characters/hydro/xingqiu.gts";

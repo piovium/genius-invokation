@@ -171,8 +171,6 @@ define skill {
   let mark: StatusHandle | null = null;
   switch (aura) {
     case Aura.CryoDendro:
-      mark = SedationMarkCryo;
-      break;
     case Aura.Cryo:
       mark = SedationMarkCryo;
       break;

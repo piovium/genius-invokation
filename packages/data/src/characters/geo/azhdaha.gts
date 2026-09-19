@@ -161,6 +161,7 @@ define skill {
   const targetAura = :query($.opp.active)?.aura;
   :damage(DamageType.Geo, 3);
   switch (targetAura) {
+    case Aura.CryoDendro:
     case Aura.Cryo:
       :transformDefinition(:self, AzhdahaCryo);
       break;
@@ -172,9 +173,6 @@ define skill {
       break;
     case Aura.Electro:
       :transformDefinition(:self, AzhdahaElectro);
-      break;
-    case Aura.CryoDendro:
-      :transformDefinition(:self, AzhdahaCryo);
       break;
     default:
       :characterStatus(StoneFacetsElementalCrystallization);
