@@ -53,6 +53,7 @@ define skill {
  */
 define status {
   id 112043 as Riptide;
+  until "v4.0.0";
   duration 2;
   // 参见主注释
   on selfDispose {
