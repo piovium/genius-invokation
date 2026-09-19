@@ -282,7 +282,6 @@ define card {
 define combatStatus {
   id 303182 as private StoneAndContractsInEffect;
   until "v4.2.0";
-  oneDuration;
   on actionPhase {
     :generateDice(DiceType.Omni, 3);
     :dispose();
