@@ -71,7 +71,6 @@ import {
 } from "./variables";
 import {
   createVariable,
-  createVariableCanAppend,
   type TypeHint,
 } from "../../data/utils";
 import {
