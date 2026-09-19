@@ -13,7 +13,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DiceType, DamageType, $, Aura, type CardHandle, Reaction } from "@gi-tcg/core/data";
+import {
+  DiceType,
+  DamageType,
+  $,
+  Aura,
+  type CardHandle,
+  Reaction,
+} from "@gi-tcg/core/data";
 import { AgileSwitch } from "../../commons.gts";
 
 /**
@@ -32,15 +39,22 @@ define card {
   on switchActive {
     when :(
       :e.switchInfo.to.definition.id === Jahoda &&
-        ([Aura.Pyro, Aura.Hydro, Aura.Electro, Aura.Cryo] as Aura[]).includes(
-          :query($.opp.active.includesDefeated)!.aura,
-        )
+        (
+          [
+            Aura.Pyro,
+            Aura.Hydro,
+            Aura.Electro,
+            Aura.Cryo,
+            Aura.CryoDendro,
+          ] as Aura[]
+        ).includes(:query($.opp.active.includesDefeated)!.aura)
     );
     const TRANSFORM_MAP: Partial<Record<Aura, CardHandle>> = {
       [Aura.Pyro]: PurrloinedTreasureFlaskPyro,
       [Aura.Hydro]: PurrloinedTreasureFlaskHydro,
       [Aura.Electro]: PurrloinedTreasureFlaskElectro,
       [Aura.Cryo]: PurrloinedTreasureFlaskCryo,
+      [Aura.CryoDendro]: PurrloinedTreasureFlaskCryo,
     };
     const target = TRANSFORM_MAP[:query($.opp.active.includesDefeated)!.aura];
     if (target) {
@@ -50,7 +64,7 @@ define card {
   :damage(DamageType.Anemo, 2);
   :eventBoundary();
   :damage(DamageType.Anemo, 1, $.macros.oppActivePrioritized);
-}
+};
 
 /**
  * @id 115162
@@ -67,7 +81,7 @@ define card {
   :damage(DamageType.Pyro, 2);
   :eventBoundary();
   :damage(DamageType.Pyro, 1, $.macros.oppActivePrioritized);
-}
+};
 
 /**
  * @id 115163
@@ -84,7 +98,7 @@ define card {
   :damage(DamageType.Hydro, 2);
   :eventBoundary();
   :damage(DamageType.Hydro, 1, $.macros.oppActivePrioritized);
-}
+};
 
 /**
  * @id 115164
@@ -101,7 +115,7 @@ define card {
   :damage(DamageType.Electro, 2);
   :eventBoundary();
   :damage(DamageType.Electro, 1, $.macros.oppActivePrioritized);
-}
+};
 
 /**
  * @id 115165
@@ -118,7 +132,7 @@ define card {
   :damage(DamageType.Cryo, 2);
   :eventBoundary();
   :damage(DamageType.Cryo, 1, $.macros.oppActivePrioritized);
-}
+};
 
 /**
  * @id 115166
@@ -140,7 +154,7 @@ define combatStatus {
     }
     :heal(2, $.macros.myMostInjured);
   };
-}
+};
 
 /**
  * @id 15161
@@ -154,7 +168,7 @@ define skill {
   cost DiceType.Anemo, 1;
   cost DiceType.Void, 2;
   :damage(DamageType.Physical, 2);
-}
+};
 
 /**
  * @id 15162
@@ -187,7 +201,7 @@ define skill {
       :attachCostReduction(bottle);
     }
   }
-}
+};
 
 /**
  * @id 15163
@@ -202,7 +216,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Anemo, 3);
   :combatStatus(PurrsonalCoordinatedAssistanceRobots);
-}
+};
 
 /**
  * @id 15164
@@ -245,7 +259,7 @@ define skill {
       }
     };
   };
-}
+};
 
 /**
  * @id 15165
@@ -258,7 +272,7 @@ define skill {
   id 15165 as MoonsignBenedictionRooftopDash01;
   skillType passive;
   reserved;
-}
+};
 
 /**
  * @id 1516
@@ -272,8 +286,11 @@ define character {
   tags anemo, bow, nodkrai;
   health 10;
   energy 2;
-  skills StrikeWhileTheArrowsHot, SavvyStrategySplittingTheSpoils, HiddenAcesSevenToolsOfTheHunter, MoonsignBenedictionRooftopDash;
-}
+  skills StrikeWhileTheArrowsHot,
+    SavvyStrategySplittingTheSpoils,
+    HiddenAcesSevenToolsOfTheHunter,
+    MoonsignBenedictionRooftopDash;
+};
 
 /**
  * @id 215161
@@ -304,4 +321,4 @@ define card {
       }
     };
   };
-}
+};

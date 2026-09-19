@@ -173,6 +173,9 @@ define skill {
     case Aura.Electro:
       :transformDefinition(:self, AzhdahaElectro);
       break;
+    case Aura.CryoDendro:
+      :transformDefinition(:self, AzhdahaCryo);
+      break;
     default:
       :characterStatus(StoneFacetsElementalCrystallization);
       break;
