@@ -296,6 +296,7 @@ define card {
  */
 define combatStatus {
   id 303236 as private IdRatherLoseMoneyMyselfInEffect;
+  until "v6.2.0";
   oneDuration;
   variable count, 0;
   on generateDice {
