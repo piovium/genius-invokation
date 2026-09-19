@@ -27,8 +27,7 @@ define status {
   on increaseSkillDamage {
     when :( :e.viaChargedAttack() );
     usage 1 {
-      append;
-      range 3;
+      append 3;
     };
     if (
       :self.master.hasEquipment(AratakiIchiban) && // 装备天赋

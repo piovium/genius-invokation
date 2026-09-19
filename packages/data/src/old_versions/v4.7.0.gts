@@ -87,8 +87,7 @@ define combatStatus {
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     usage 1 {
-      append;
-      range 4;
+      append 4;
     };
     if (
       :query($.my.equipped.def(DecorousHarmony)) &&
@@ -123,8 +122,7 @@ define combatStatus {
   on discard {
     when :( :e.via?.caller.id === :self.id );
     usage 1 {
-      append;
-      range 3;
+      append 3;
     };
     :query(
       $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
