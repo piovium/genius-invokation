@@ -44,7 +44,7 @@ define status {
 define combatStatus {
   id 111142 as OpalShield;
   since "v5.7.0";
-  shield 1, Infinity;
+  shield 1, open;
 };
 
 /**

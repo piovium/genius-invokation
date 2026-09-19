@@ -71,8 +71,7 @@ define status {
   // 只叠加可用次数，不叠加伤害
   on increaseSkillDamage {
     usage 1 {
-      append;
-      range 3;
+      append 3;
     };
     :e.increaseDamage(1);
   };
