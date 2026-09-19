@@ -149,6 +149,9 @@ define card {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 3;
   talent Mona {
+    on staged {
+      :useSkill(StellarisPhantasm);
+    };
     on increaseDamage {
       when :(
         :self.master.isActive() && :e.isReactionRelatedTo(DamageType.Hydro)
