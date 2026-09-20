@@ -264,12 +264,12 @@ define status {
   on damagedOrHealed {
     :addVariable("readiness", 1);
   };
-  once deductOmniDiceCard {
+  once deductAllDiceCard {
     when :(
       :e.hasOneOfCardTag("weapon", "artifact") &&
         :e.currentDiceCostSize() <= :getVariable("readiness")
     );
-    :e.deductOmniCost(:e.diceCostSize());
+    :e.deductAllCost();
     :setVariable("readiness", 0);
   };
 };
