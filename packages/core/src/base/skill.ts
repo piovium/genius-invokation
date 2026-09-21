@@ -1419,6 +1419,7 @@ export type EventMap = typeof EVENT_MAP;
 export type EventNames = keyof EventMap;
 
 export type InlineEventNames =
+  | "onCustomEvent"
   | "modifyDamage0"
   | "modifyDamage1"
   | "modifyDamage2"

@@ -219,6 +219,7 @@ define card {
   cost DiceType.Dendro, 1;
   talent Kinich, none {
     on switchActive {
+      // 对方没有手牌时不会触发该效果
       when :(
         :self.master.id === :e.switchInfo.to.id &&
           :player.hands.length <= :oppPlayer.hands.length &&

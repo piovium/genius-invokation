@@ -20,6 +20,7 @@ define status {
       :dispose(talent);
       :characterStatus(AegisOfAbyssalFlame, :self.master);
     }
+    :self.master.setVariable("fieryRebirthTriggered", 1);
     :dispose();
   };
 };
@@ -51,8 +52,21 @@ define status {
 define status {
   id 112071 as private HeronShield;
   until "v4.5.0";
-  shield 2;
   prepare HeronStrike;
+  // A custom shield that won't dispose by decreasing damage
+  tags shield;
+  variable shield, 2 {
+    append 2;
+  };
+  on decreaseDamaged {
+    const shield = :getVariable("shield");
+    if (shield > 0) {
+      const currentValue = :e.value;
+      const decreaseValue = Math.min(shield, currentValue);
+      :e.decreaseDamage(decreaseValue);
+      :addVariable("shield", -decreaseValue);
+    }
+  };
 };
 
 /**
@@ -80,7 +94,20 @@ define status {
   id 114051 as private TidecallerSurfEmbrace;
   until "v4.5.0";
   prepare Wavestrider;
-  shield 2;
+  // A custom shield that won't dispose by decreasing damage
+  tags shield;
+  variable shield, 2 {
+    append 2;
+  };
+  on decreaseDamaged {
+    const shield = :getVariable("shield");
+    if (shield > 0) {
+      const currentValue = :e.value;
+      const decreaseValue = Math.min(shield, currentValue);
+      :e.decreaseDamage(decreaseValue);
+      :addVariable("shield", -decreaseValue);
+    }
+  };
 };
 
 /**

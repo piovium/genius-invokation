@@ -40,7 +40,7 @@ define combatStatus {
   id 125032 as DeathlyCycloneInEffect;
   oneDuration;
   once switchActive {
-    :generateDice(:query($.my.active)!.element(), 1);
+    :generateDice(:query($.my.active.includesDefeated)!.element(), 1);
   };
 };
 

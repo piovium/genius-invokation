@@ -138,8 +138,7 @@ abstract class SkillModel {
 }
 
 export class TriggeredSkillModel extends SkillModel {
-  isDefaultDefeatedDispose = false;
-
+  bypassDefeatedFilter = false;
   asSkillType: CommonSkillType | null = null;
   caller: ICaller;
   detailedEventName: DetailedEventNames | CustomEvent;
@@ -256,14 +255,15 @@ export class TriggeredSkillModel extends SkillModel {
     // 2. 被动技能要求角色存活
     if (
       this.caller.type === "character" &&
-      this.detailedEventName !== "defeated"
+      this.detailedEventName !== "defeated" &&
+      !this.bypassDefeatedFilter
     ) {
       this.filters.push((c) => c.self.variables.alive);
     }
-    // 3. 状态和装备的技能默认要求角色存活，默认击倒弃置除外
+    // 3. 状态和装备的技能默认要求角色存活
     if (
-      !this.isDefaultDefeatedDispose &&
-      (this.caller.type === "status" || this.caller.type === "equipment")
+      (this.caller.type === "status" || this.caller.type === "equipment") &&
+      !this.bypassDefeatedFilter
     ) {
       this.filters.push((c) => {
         if (c.self.area.type === "characters") {
@@ -394,6 +394,12 @@ export const TriggeredSkillViewModel = defineViewModel(
       ): AR.Done;
     }>((model, [skillType]) => {
       model.asSkillType = skillType;
+    }),
+
+    bypassDefeatedFilter: h.simpleAttribute({
+      uniqueKey: "bypassDefeatedFilter",
+    })(function () {
+      this.bypassDefeatedFilter = true;
     }),
 
     "~action": h.attribute<{

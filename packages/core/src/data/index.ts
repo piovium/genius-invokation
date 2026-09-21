@@ -62,7 +62,7 @@ export {
   type InferResult,
   type InferResult as InferQueryResult,
 } from "../query";
-export { ListenTo, type TargetGetter } from "../runtime/skill";
+export { ListenTo, type TargetGetter, type DetailedEventArgOf } from "../runtime/skill";
 export type {
   PlainCharacterState as CharacterState,
   PlainEntityState as EntityState,

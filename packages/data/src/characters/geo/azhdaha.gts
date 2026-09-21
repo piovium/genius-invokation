@@ -161,6 +161,7 @@ define skill {
   const targetAura = :query($.opp.active)?.aura;
   :damage(DamageType.Geo, 3);
   switch (targetAura) {
+    case Aura.CryoDendro:
     case Aura.Cryo:
       :transformDefinition(:self, AzhdahaCryo);
       break;

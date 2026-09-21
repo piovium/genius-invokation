@@ -19,7 +19,7 @@ import {
   DiceType,
   type EquipmentHandle,
 } from "@gi-tcg/core/data";
-import { BondOfLife } from "../../commons.gts";
+import { BondOfLife, BondOfLifeOnDamaged } from "../../commons.gts";
 
 /**
  * @id 113141
@@ -59,7 +59,6 @@ define skill {
   const bond = :query($.typeStatus.def(BondOfLife).at($.opp.active));
   if (bond) {
     increasedValue = Math.min(3, bond.getVariable("usage"));
-    :consumeUsage(increasedValue, bond);
   }
   :damage(DamageType.Physical, 2 + increasedValue);
 };
@@ -152,6 +151,13 @@ define skill {
         :consumeUsage(1, bond);
       }
     };
+    // 生命之契：所附属角色受到伤害后：若伤害来自斩首之邀，减少3层。（无论增伤多少）
+    on BondOfLifeOnDamaged {
+      bypassDefeatedFilter;
+      listenTo all;
+      when :( !:e.entity.isMine() && :e.arg.via.definition.id === InvitationToABeheading )
+      :consumeUsage(3, :e.entity.cast<"status">());
+    }
   };
 };
 

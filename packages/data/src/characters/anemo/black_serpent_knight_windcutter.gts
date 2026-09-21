@@ -91,15 +91,11 @@ define skill {
 define skill {
   id 25044 as VanguardMomentum;
   skillType passive {
-    variable drawCardsUsagePerRound, 2;
     on dealReaction {
-      when :(
-        :getVariable("drawCardsUsagePerRound") > 0 &&
-          :e.relatedTo(DamageType.Anemo)
-      );
+      when :( :e.relatedTo(DamageType.Anemo) );
       listenTo samePlayer;
+      usage perRound, 2 { name "usagePerRound1"; };
       :drawCards(1);
-      :addVariable("drawCardsUsagePerRound", -1);
     };
     on entityDispose {
       when :(
@@ -110,11 +106,8 @@ define skill {
             :e.entity.definition.tags.includes("barrier"))
       );
       listenTo all;
+      usage perRound, 2 { name "usagePerRound1"; };
       :drawCards(1);
-      :addVariable("drawCardsUsagePerRound", -1);
-    };
-    on roundEnd {
-      :setVariable("drawCardsUsagePerRound", 2);
     };
   };
 };

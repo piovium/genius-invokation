@@ -42,9 +42,10 @@ define combatStatus {
   id 127033 as SpiritserpentsBlessing;
   since "v5.1.0";
   on increaseTechniqueDamage {
-    when :( :e.via.definition.id === 1230311 );
+    when :( :e.via.definition.id === VinyRazorscale );
     usage 1 {
       append;
+      autoDispose false;
     };
     :e.increaseDamage(1);
   };
@@ -73,7 +74,12 @@ define card {
         autoDecrease false;
       };
       :damage(DamageType.Dendro, 1);
-      if (!:query($.my.combatStatus.def(SpiritserpentsBlessing))) {
+      const blessing = :query($.my.combatStatus.def(SpiritserpentsBlessing));
+      if (blessing) {
+        if (blessing.getVariable("usage") <= 0) {
+          blessing.dispose();
+        }
+      } else {
         :consumeUsage(1);
       }
     };

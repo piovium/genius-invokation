@@ -86,12 +86,15 @@ define card {
  * 本回合中，我方角色下一次造成岩元素伤害后：如果我方存在提供「护盾」的出战状态，则为一个此类出战状态补充3点「护盾」。
  */
 define combatStatus {
-  id 303162 as private ElementalResonanceEnduringRockInEffect;
+  id 303162 as ElementalResonanceEnduringRockInEffect;
   until "v5.4.0";
   oneDuration;
-  once skillDamage {
-    when :( :e.type === DamageType.Geo );
-    :query($.my.combatStatus.tag("shield").limit(1))?.addVariable("shield", 3);
+  once useSkill {
+    when :(
+      :hasPhaseDamage("my", (e) => e.type === DamageType.Geo) &&
+        :query($.my.combatStatus.tag("shield"))
+    );
+    :query($.my.combatStatus.tag("shield"))?.addVariable("shield", 3);
   };
 };
 

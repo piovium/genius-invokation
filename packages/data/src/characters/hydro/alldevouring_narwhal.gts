@@ -195,7 +195,7 @@ define skill {
   :damage(DamageType.Physical, 2);
 };
 
-const StarfallShowerDisposeCard = customEvent<EntityState>(
+export const StarfallShowerDisposeCard = customEvent<EntityState>(
   "alldevouringNarwhal/starfallShowerDisposeCard",
 );
 

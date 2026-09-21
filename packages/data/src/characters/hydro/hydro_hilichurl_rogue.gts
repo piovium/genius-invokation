@@ -208,8 +208,8 @@ define card {
     on staged {
       :useSkill(SlashOfSurgingTides);
     };
-    on deductOmniDiceSkill {
-      when :( :e.isSkillType("technique") );
+    on deductOmniDiceTechnique {
+      listenTo samePlayer;
       usage perRound, 1;
       :e.deductOmniCost(1);
     };

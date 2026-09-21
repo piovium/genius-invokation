@@ -57,22 +57,11 @@ define status {
   };
   // 自身因元素反应伤害击倒而弃置时
   on selfDispose {
-    when :{
-      if (:e.from.type !== "characters") {
-        return;
-      }
-      const fromChId = :e.from.characterId;
-      if (:get(fromChId).variables.alive) {
-        return;
-      }
-      return :hasPhaseDamage(
-        "all",
-        (e) =>
-          e.getReaction() !== null &&
-          e.damageInfo.causeDefeated &&
-          e.damageInfo.target.id === fromChId,
-      );
-    };
+    when :(
+      :isSelfDisposeCausedByDefeatedHeuristically(
+        (e) => e.getReaction() !== null,
+      )
+    );
     :emitCustomEvent(TriggerOtherSeed);
   };
 };

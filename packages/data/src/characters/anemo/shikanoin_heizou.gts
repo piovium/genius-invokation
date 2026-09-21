@@ -39,11 +39,11 @@ define status {
         :self.getVariable("henkaku") >= 2
     );
     void 0;
-    // 使用 勠心拳 后，我方继续行动一个回合
+    // 使用[勠心拳]后，我方继续行动一个回合
     if (!:oppPlayer.declaredEnd) {
       :continueNextTurn();
     }
-    // 为 角色 添加 增伤数值
+    // 为角色添加增伤数值
     if (:self.master.hasEquipment(CuriousCasefiles)) {
       :self.master.setVariable("increaseDmg", 2);
     } else {
@@ -68,7 +68,7 @@ define skill {
   skillType elemental;
   prepared;
   void 0;
-  // 读取 角色 的 增伤数值，随后清空
+  // 读取角色的增伤数值，随后清空
   const increaseDmg = :self.getVariable("increaseDmg") ?? 0;
   :damage(DamageType.Anemo, 4 + increaseDmg);
   :self.setVariable("increaseDmg", 0);
@@ -84,6 +84,7 @@ define status {
   id 115131 as PreexistingGuilt;
   since "v5.8.0";
   prepare HeartstopperStrikeCharge;
+  // 准备技能释放失败不消耗增伤，可被下次使用
 };
 
 /**

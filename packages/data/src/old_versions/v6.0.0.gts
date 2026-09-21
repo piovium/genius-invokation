@@ -11,7 +11,7 @@ import { BonecrunchersEnergyBlockCombatStatus } from "../cards/event/other.gts";
  * @name 追影弹
  * @description
  * 加入手牌时：若我方出战角色为火/水/雷/冰，则将此牌转化为对应元素。
- * 打出或从手牌中舍弃此牌时：造成1点风元素伤害，然后将一张追影弹随机放进牌库。
+ * 打出或舍弃此牌时：造成1点风元素伤害，然后将一张追影弹随机放进牌库。
  */
 define card {
   id 115113 as private ShadowhuntShell;
@@ -39,7 +39,7 @@ define card {
  * @id 115114
  * @name 焕光追影弹·火
  * @description
- * 打出或从手牌中舍弃此牌时：造成1点火元素伤害，然后将一张追影弹随机放进牌库。
+ * 打出或舍弃此牌时：造成1点火元素伤害，然后将一张追影弹随机放进牌库。
  */
 define card {
   id 115114 as private ShiningShadowhuntShellPyro;
@@ -55,7 +55,7 @@ define card {
  * @id 115115
  * @name 焕光追影弹·水
  * @description
- * 打出或从手牌中舍弃此牌时：造成1点水元素伤害，然后将一张追影弹随机放进牌库。
+ * 打出或舍弃此牌时：造成1点水元素伤害，然后将一张追影弹随机放进牌库。
  */
 define card {
   id 115115 as private ShiningShadowhuntShellHydro;
@@ -71,7 +71,7 @@ define card {
  * @id 115116
  * @name 焕光追影弹·雷
  * @description
- * 打出或从手牌中舍弃此牌时：造成1点雷元素伤害，然后将一张追影弹随机放进牌库。
+ * 打出或舍弃此牌时：造成1点雷元素伤害，然后将一张追影弹随机放进牌库。
  */
 define card {
   id 115116 as private ShiningShadowhuntShellElectro;
@@ -87,7 +87,7 @@ define card {
  * @id 115117
  * @name 焕光追影弹·冰
  * @description
- * 打出或从手牌中舍弃此牌时：造成1点冰元素伤害，然后将一张追影弹随机放进牌库。
+ * 打出或舍弃此牌时：造成1点冰元素伤害，然后将一张追影弹随机放进牌库。
  */
 define card {
   id 115117 as private ShiningShadowhuntShellCryo;

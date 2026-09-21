@@ -22,7 +22,7 @@ import {
 } from "../characters/dendro/kaveh.gts";
 import {
   AnomalousAnatomy,
-  LightlessFeeding,
+  StarfallShowerDisposeCard,
 } from "../characters/hydro/alldevouring_narwhal.gts";
 
 /**
@@ -87,8 +87,7 @@ define combatStatus {
   on increaseSkillDamage {
     when :( :e.viaSkillType("normal") );
     usage 1 {
-      append;
-      range 4;
+      append 4;
     };
     if (
       :query($.my.equipped.def(DecorousHarmony)) &&
@@ -123,8 +122,7 @@ define combatStatus {
   on discard {
     when :( :e.via?.caller.id === :self.id );
     usage 1 {
-      append;
-      range 3;
+      append 3;
     };
     :query(
       $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
@@ -153,9 +151,7 @@ define skill {
   :damage(DamageType.Hydro, 1 + extraDmg);
   const [card] = :discardMaxCostHands(1, { allowPreview: true });
   if (card) {
-    if (:self.hasEquipment(LightlessFeeding)) {
-      :heal(card.diceCost(), :self);
-    }
+    :emitCustomEvent(StarfallShowerDisposeCard, card.latest());
   }
 };
 
@@ -420,6 +416,7 @@ define card {
           )
         );
       };
+      listenTo samePlayer;
       :e.increaseDamage(1);
     };
   };

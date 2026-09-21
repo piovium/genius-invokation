@@ -17,7 +17,10 @@ import {
   Refraction,
   Refraction01,
 } from "../characters/hydro/mirror_maiden.gts";
-import { SuperlativeSuperstrength } from "../characters/geo/arataki_itto.gts";
+import {
+  AratakiItto,
+  SuperlativeSuperstrength,
+} from "../characters/geo/arataki_itto.gts";
 import { LithicGuard } from "../cards/equipment/weapon/pole.gts";
 
 /**
@@ -115,6 +118,7 @@ define summon {
     :dispose();
   };
   on decreaseDamaged {
+    when :( :e.target.isActive() );
     usage 1 {
       autoDispose false;
     };
@@ -125,10 +129,7 @@ define summon {
     usage 1 {
       name "addStatusUsage";
     };
-    :characterStatus(
-      SuperlativeSuperstrength,
-      $.my.character.def(1605 as number),
-    );
+    :characterStatus(SuperlativeSuperstrength, $.my.character.def(AratakiItto));
   };
 };
 

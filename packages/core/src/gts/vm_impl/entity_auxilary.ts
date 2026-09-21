@@ -102,3 +102,16 @@ export const TechniqueNightsoulVM = defineSimpleViewModel(
     recursive: false,
   },
 );
+
+const GtsHintOptions = type({
+  /**
+   * swirled: convert once after an allied character/summon causes Swirl.
+   * chpeDamaged: convert once after an allied character takes Cryo/Hydro/Pyro/Electro damage.
+   */
+  "dynamicPreset?": '"swirled" | "chpeDamaged"',
+});
+
+export const HintVM = defineSimpleViewModel(GtsHintOptions, {
+  booleanSwitch: false,
+  recursive: false,
+});

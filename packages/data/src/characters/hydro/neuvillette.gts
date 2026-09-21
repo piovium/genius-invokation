@@ -76,8 +76,7 @@ define status {
 define combatStatus {
   id 112101 as SourcewaterDroplet;
   usage 1 {
-    append;
-    range 3;
+    append 3;
   };
 };
 

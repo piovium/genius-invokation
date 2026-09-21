@@ -59,6 +59,10 @@ define skill {
 define status {
   id 114051 as TidecallerSurfEmbrace;
   shield 2;
+  on switchActive {
+    when :( :self.master.id === :e.switchInfo.from?.id );
+    :dispose();
+  };
 };
 
 /**

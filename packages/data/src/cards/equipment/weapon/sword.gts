@@ -206,6 +206,7 @@ define card {
   weapon sword {
     variable lake, 0;
     on damagedOrHealed {
+      listenTo samePlayer;
       :addVariable("lake", 1);
     };
     on deductVoidDiceSkill {

@@ -27,7 +27,9 @@ import { $, DamageType, DiceType, type SkillHandle } from "@gi-tcg/core/data";
 define summon {
   id 115012 as LargeWindSpirit01;
   conflictWith 115011;
-  hint swirled, 2;
+  hint DamageType.Anemo, 2 {
+    dynamicPreset swirled;
+  };
   on endPhase {
     usage 3;
     :damage(:self.variables.hintIcon, 2);
@@ -52,7 +54,9 @@ define summon {
 define summon {
   id 115011 as LargeWindSpirit;
   conflictWith 115012;
-  hint swirled, 2;
+  hint DamageType.Anemo, 2 {
+    dynamicPreset swirled;
+  };
   on endPhase {
     usage 3;
     :damage(:self.variables.hintIcon, 2);

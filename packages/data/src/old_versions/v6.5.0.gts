@@ -156,8 +156,7 @@ define combatStatus {
   on switchActive {
     when :( :e.switchInfo.from?.definition.id === Kirara );
     usage 1 {
-      append;
-      range 2;
+      append 2;
     };
     :damage(DamageType.Dendro, 1);
     :drawCards(1);
@@ -271,6 +270,7 @@ define card {
       :e.deductOmniCost(1);
     };
     on beforeFastSwitch {
+      // 该效果官方也可以残留到下次生效
       when :( :getVariable("deductDiceTriggered") ); // 将此次切换视为「快速行动」
       :setVariable("deductDiceTriggered", 0);
       :e.setFastAction();

@@ -48,8 +48,7 @@ define combatStatus {
   on discard {
     when :( :e.via?.caller.id === :self.id );
     usage 1 {
-      append;
-      range 3;
+      append 3;
     };
     :query(
       $.my.combatStatus.def(DendroCore).union($.my.summon.def(BountifulCore)),
@@ -93,6 +92,7 @@ define status {
  */
 define combatStatus {
   id 117083 as TheArtOfBudgetingInEffect;
+  oneDuration;
   once deductOmniDiceCard {
     when :(
       :e.action.skill.caller.definition.type === "support" &&

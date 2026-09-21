@@ -35,7 +35,7 @@ define summon {
           .exclude($.has.typeStatus.def(HydroCrystalCore)),
       )
     ) {
-      :characterStatus(HydroCrystalCore, $.def(HydroHypostasis));
+      :characterStatus(HydroCrystalCore, $.my.character.def(HydroHypostasis));
     } else {
       :damage(DamageType.Hydro, 2);
     }

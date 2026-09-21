@@ -13,16 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  $,
-  customEvent,
-  DamageType,
-  DiceType,
-  type CombatStatusHandle,
-  type StatusHandle,
-} from "@gi-tcg/core/data";
+import { $, customEvent, DamageType, DiceType } from "@gi-tcg/core/data";
 
-const TalentShouldDrawCard = customEvent(
+const TalentShouldDrawCard = customEvent<0 | 1>(
   "thunderManifestation/talentShouldDrawCard",
 );
 
@@ -36,6 +29,7 @@ const TalentShouldDrawCard = customEvent(
 define status {
   id 124022 as LightningRod;
   conflictWith crossCharacter;
+  variable disposeDrawCard, 0;
   on increaseDamaged {
     when :(
       [
@@ -44,15 +38,17 @@ define status {
       ].includes(:e.source.definition.id)
     );
     :e.increaseDamage(1);
+    :setVariable("disposeDrawCard", 1);
     :dispose();
   };
   on damaged {
-    :emitCustomEvent(TalentShouldDrawCard);
+    :emitCustomEvent(TalentShouldDrawCard, :e.targetWho);
   };
   on selfDispose {
     // 雷音权现对已带有雷鸣探知的角色造成伤害会弃置雷鸣探知
     // 但此行为也会触发天赋的抽牌
-    :emitCustomEvent(TalentShouldDrawCard);
+    when :( :getVariable("disposeDrawCard") );
+    :emitCustomEvent(TalentShouldDrawCard, :e.who);
   };
 };
 
@@ -87,6 +83,7 @@ define combatStatus {
   id 124021 as LightningStrikeProbe;
   on useSkill {
     usage perRound, 1;
+    // 实际效果应为技能调用者而非出战角色
     :characterStatus(LightningRod, :e.skillCaller.cast<"character">());
   };
 };
@@ -200,6 +197,7 @@ define card {
       :useSkill(StrifefulLightning);
     };
     on TalentShouldDrawCard {
+      when :( :e.arg !== :self.who );
       listenTo all;
       usage perRound, 1;
       :drawCards(1);

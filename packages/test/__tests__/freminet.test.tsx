@@ -13,15 +13,75 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Card, Character, Equipment, setup, State, Status, $ } from "#test";
+import { Card, Character, Equipment, ref, setup, State, Status, $ } from "#test";
 import { PortablePowerSaw } from "@gi-tcg/data/internal/cards/equipment/weapon/claymore.gts";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
 import {
   Freminet,
+  MomentOfWakingAndResolve,
   PersTimer,
   PressurizedFloe,
 } from "@gi-tcg/data/internal/characters/cryo/freminet.gts";
-import { test } from "vitest";
+import { expect, test } from "vitest";
+
+test("Freminet: level 2 Pers Timer does not reduce talent card cost", async () => {
+  const freminet = ref();
+  const c = setup(
+    <State>
+      <Character opp active />
+      <Character my active def={Freminet} ref={freminet}>
+        <Status def={PersTimer} v={{ level: 2 }} />
+      </Character>
+      <Card my def={MomentOfWakingAndResolve} />
+      <Card my pile def={Paimon} />
+    </State>,
+  );
+  const initialDice = c.state.players[0].dice.length;
+
+  await c.me.card(MomentOfWakingAndResolve, freminet);
+
+  expect(c.state.players[0].dice).toHaveLength(initialDice - 3);
+});
+
+test("Freminet: level 2 Pers Timer is disposed after playing talent card", async () => {
+  const freminet = ref();
+  const c = setup(
+    <State>
+      <Character opp active />
+      <Character my active def={Freminet} ref={freminet}>
+        <Status def={PersTimer} v={{ level: 2 }} />
+      </Character>
+      <Card my def={MomentOfWakingAndResolve} />
+      <Card my pile def={Paimon} />
+    </State>,
+  );
+
+  await c.me.card(MomentOfWakingAndResolve, freminet);
+
+  c.expect($.opp.active).toHaveVariable({ health: 8 });
+  c.expect($.my.hand).toBeCount(1);
+  c.expect($.my.typeStatus.def(PersTimer)).toNotExist();
+});
+
+test("Freminet: level 1 Pers Timer remains after playing talent card", async () => {
+  const freminet = ref();
+  const c = setup(
+    <State>
+      <Character opp active />
+      <Character my active def={Freminet} ref={freminet}>
+        <Status def={PersTimer} v={{ level: 1 }} />
+      </Character>
+      <Card my def={MomentOfWakingAndResolve} />
+      <Card my pile def={Paimon} />
+    </State>,
+  );
+
+  await c.me.card(MomentOfWakingAndResolve, freminet);
+
+  c.expect($.opp.active).toHaveVariable({ health: 8 });
+  c.expect($.my.hand).toBeCount(1);
+  c.expect($.my.typeStatus.def(PersTimer)).toHaveVariable({ level: 2 });
+});
 
 test("Freminet: newly created Pers Timer don't trigger onUseSkill", async () => {
   const c = setup(

@@ -1,6 +1,7 @@
 import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 import {
   BakeKurage,
+  CeremonialGarment,
   TamakushiCasket,
 } from "../characters/hydro/sangonomiya_kokomi.gts";
 
@@ -35,6 +36,7 @@ define skill {
   cost DiceType.Hydro, 3;
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 3);
+  :characterStatus(CeremonialGarment);
   if (
     :self.hasEquipment(TamakushiCasket) &&
     :query($.my.summon.def(BakeKurage))

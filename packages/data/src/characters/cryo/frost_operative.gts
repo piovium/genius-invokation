@@ -14,7 +14,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { $, DamageType, DiceType } from "@gi-tcg/core/data";
-import { BondOfLife } from "../../commons.gts";
+import { BondOfLife, BondOfLifeOnEndPhase } from "../../commons.gts";
 
 /**
  * @id 121042
@@ -27,12 +27,10 @@ define status {
   id 121042 as OnslaughtStance;
   since "v4.8.0";
   duration 2;
-  on endPhase {
-    :damage(
-      DamageType.Piercing,
-      1,
-      $.opp.character.has($.typeStatus.def(BondOfLife)),
-    );
+  on BondOfLifeOnEndPhase {
+    listenTo all;
+    when :( !:e.entity.isMine() );
+    :damage(DamageType.Piercing, 1, :e.entity.cast<"status">().master);
   };
 };
 

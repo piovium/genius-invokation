@@ -1,5 +1,6 @@
 import {
   $,
+  customEvent,
   DamageType,
   DiceType,
   type EquipmentHandle,
@@ -11,7 +12,11 @@ import {
   InfluxBlast,
   MirrorMaiden,
 } from "../characters/hydro/mirror_maiden.gts";
-import { Barbara, LetTheShowBegin } from "../characters/hydro/barbara.gts";
+import {
+  Barbara,
+  LetTheShowBegin,
+  MelodyLoop,
+} from "../characters/hydro/barbara.gts";
 import {
   ElectroCrystalCore,
   ElectroHypostasis,
@@ -21,7 +26,6 @@ import {
   Chongyun,
 } from "../characters/cryo/chongyun.gts";
 import { GuobaAttack, Xiangling } from "../characters/pyro/xiangling.gts";
-import { NiwabiEnshou, Yoimiya } from "../characters/pyro/yoimiya.gts";
 import {
   Candace,
   SacredRiteWagtailsTide,
@@ -31,8 +35,6 @@ import {
   Beidou,
   SummonerOfLightning,
   Tidecaller,
-  TidecallerSurfEmbrace,
-  Wavestrider,
 } from "../characters/electro/beidou.gts";
 import {
   KujouSara,
@@ -43,7 +45,10 @@ import {
   PactswornPathclearer,
   SecretRiteChasmicSoulfarer,
 } from "../characters/electro/cyno.gts";
-import { BakeKurage } from "../characters/hydro/sangonomiya_kokomi.gts";
+import {
+  BakeKurage,
+  CeremonialGarment,
+} from "../characters/hydro/sangonomiya_kokomi.gts";
 import {
   Amber,
   BaronBunny,
@@ -160,6 +165,11 @@ define card {
     on staged {
       :useSkill(LetTheShowBegin);
     };
+    on deductOmniDiceSwitch {
+      when :( :query($.my.summon.def(MelodyLoop)) );
+      usage perRound, 1;
+      :e.deductOmniCost(1);
+    };
   };
 };
 
@@ -259,43 +269,29 @@ define card {
 };
 
 /**
- * @id 13052
- * @name 焰硝庭火舞
+ * @id 113053
+ * @name 庭火焰硝
  * @description
- * 本角色附属庭火焰硝。（此技能不产生充能）
+ * 所附属角色普通攻击伤害+1，造成的物理伤害变为火元素伤害。
+ * 所附属角色使用普通攻击后：造成1点火元素伤害。
+ * 可用次数：2
  */
-define skill {
-  id 13052 as private NiwabiFiredance;
+define status {
+  id 113053 as private NiwabiEnshou01;
   until "v4.1.0";
-  skillType elemental;
-  cost DiceType.Pyro, 1;
-  noEnergy;
-  :characterStatus(NiwabiEnshou);
-};
-
-/**
- * @id 213051
- * @name 长野原龙势流星群
- * @description
- * 战斗行动：我方出战角色为宵宫时，装备此牌。
- * 宵宫装备此牌后，立刻使用一次焰硝庭火舞。
- * 装备有此牌的宵宫触发庭火焰硝后：额外造成1点火元素伤害。
- * （牌组中包含宵宫，才能加入牌组）
- */
-define card {
-  id 213051 as private NaganoharaMeteorSwarm;
-  until "v4.1.0";
-  cost DiceType.Pyro, 2;
-  talent Yoimiya {
-    on staged {
-      :useSkill(NiwabiFiredance);
-    };
-    on useSkill {
-      when :(
-        :e.isSkillType("normal") && :self.master.hasStatus(NiwabiEnshou)
-      );
-      :damage(DamageType.Pyro, 1);
-    };
+  conflictWith 113051;
+  on modifySkillDamageType {
+    when :( :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Pyro);
+  };
+  on increaseSkillDamage {
+    when :( :e.viaSkillType("normal") );
+    :e.increaseDamage(1);
+  };
+  on useSkill {
+    when :( :e.isSkillType("normal") );
+    usage 2;
+    :damage(DamageType.Pyro, 1);
   };
 };
 
@@ -351,6 +347,54 @@ define card {
 };
 
 /**
+ * @id 14054
+ * @name 踏潮
+ * @description
+ * （需准备1个行动轮）
+ * 造成3点雷元素伤害。
+ */
+define skill {
+  id 14054 as Wavestrider;
+  until "v4.1.0";
+  skillType elemental;
+  prepared;
+  :damage(DamageType.Electro, 3);
+};
+
+/**
+ * @id 114051
+ * @name 捉浪·涛拥之守
+ * @description
+ * 本角色将在下次行动时，直接使用技能：踏潮。
+ * 准备技能期间：提供2点护盾，保护所附属的角色。
+ */
+define status {
+  id 114051 as private TidecallerSurfEmbrace;
+  until "v4.1.0";
+  prepare Wavestrider;
+  // A custom shield that won't dispose by decreasing damage
+  tags shield;
+  variable shield, 2 {
+    append 2;
+  };
+  on decreaseDamaged {
+    const shield = :getVariable("shield");
+    if (shield > 0) {
+      const currentValue = :e.value;
+      const decreaseValue = Math.min(shield, currentValue);
+      :e.decreaseDamage(decreaseValue);
+      :addVariable("shield", -decreaseValue);
+    }
+  };
+  // ... and also apply talent effects.
+  on damaged {
+    :emitCustomEvent(TriggerBeidouTalent);
+  };
+};
+
+export const TriggerBeidouTalent = customEvent("beidou/triggerTalent");
+
+/**
  * @id 214051
  * @name 霹雳连霄
  * @description
@@ -367,19 +411,7 @@ define card {
     on staged {
       :useSkill(Tidecaller);
     };
-    on useSkill {
-      when :{
-        if (:e.skill.definition.id !== Wavestrider) {
-          return false;
-        }
-        const shield = :query(
-          $.typeStatus.def(TidecallerSurfEmbrace).at($.id(:self.master.id)),
-        );
-        if (shield && shield.getVariable("shield") === 2) {
-          return false;
-        }
-        return true;
-      };
+    on TriggerBeidouTalent {
       usage 2 {
         autoDispose false;
       };
@@ -466,6 +498,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Hydro, 2);
   :heal(1, $.my.character);
+  :characterStatus(CeremonialGarment);
   if (
     :self.hasEquipment(TamakushiCasket) &&
     :query($.my.summon.def(BakeKurage))

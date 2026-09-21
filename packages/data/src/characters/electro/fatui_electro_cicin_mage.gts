@@ -66,14 +66,6 @@ define summon {
   on selfDispose {
     :query($.opp.combatStatus.def(CrushingThunder))?.dispose();
   };
-  on beforeAction {
-    when :(
-      :query($.my.equipped.def(ElectroCicinsGleam)) &&
-        :getVariable("usage") >= 3
-    );
-    :damage(DamageType.Electro, 1);
-    :consumeUsage();
-  };
 };
 
 /**
@@ -195,6 +187,17 @@ define card {
   talent FatuiElectroCicinMage {
     on staged {
       :useSkill(MistyCall);
+    };
+    on beforeAction {
+      when :(
+        (:query($.my.summon.def(ElectroCicin))?.getVariable("usage") ?? 0) >= 3
+      );
+      listenTo samePlayer;
+      usage perRound, 1;
+      const cicin = :query($.my.summon.def(ElectroCicin));
+      if (cicin) {
+        :triggerEndPhaseSkill(cicin);
+      }
     };
   };
 };

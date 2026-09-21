@@ -13,15 +13,46 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { $, Character, Equipment, ref, setup, State } from "#test";
+import {
+  $,
+  Character,
+  CombatStatus,
+  Equipment,
+  ref,
+  setup,
+  State,
+} from "#test";
 import {
   EremiteFloralRingdancer,
   SpiritOfOmenDendroSpiritserpent,
+  SpiritserpentsBlessing,
   SpiritSerpentsSwirl,
+  VinyRazorscale,
 } from "@gi-tcg/data/internal/characters/dendro/eremite_floral_ringdancer.gts";
 import { Mona } from "@gi-tcg/data/internal/characters/hydro/mona.gts";
 import { Baizhu } from "@gi-tcg/data/internal/characters/dendro/baizhu.gts";
+import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";
+
+test("viny razorscale: blessing increases damage without consuming technique usage", async () => {
+  const c = setup(
+    <State>
+      <Character opp active />
+      <Character my active def={EremiteFloralRingdancer} energy={1}>
+        <Equipment def={SpiritOfOmenDendroSpiritserpent} />
+      </Character>
+      <CombatStatus my def={SpiritserpentsBlessing} usage={1} />
+    </State>,
+  );
+
+  await c.me.skill(VinyRazorscale);
+
+  c.expect($.opp.active).toHaveVariable({ health: 8, aura: Aura.Dendro });
+  c.expect($.my.combatStatus.def(SpiritserpentsBlessing)).toNotExist();
+  c.expect(
+    $.my.typeEquipment.def(SpiritOfOmenDendroSpiritserpent),
+  ).toHaveVariable({ usage: 2 });
+});
 
 test("spirit of omen dendro spirit-serpent: each equipped card triggers once on switch", async () => {
   const char1 = ref();

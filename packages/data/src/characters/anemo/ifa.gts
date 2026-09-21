@@ -170,6 +170,7 @@ define skill {
   :heal(2, $.macros.myMostInjured);
   let mark: StatusHandle | null = null;
   switch (aura) {
+    case Aura.CryoDendro:
     case Aura.Cryo:
       mark = SedationMarkCryo;
       break;

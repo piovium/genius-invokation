@@ -1102,7 +1102,7 @@ define card {
   since "v3.7.0";
   cost DiceType.Aligned, 3;
   tags action;
-  addTarget $.my.character.exclude($.has($.typeStatus.tag("disableSkill")));
+  addTarget $.my.standby.exclude($.has($.typeStatus.tag("disableSkill")));
   :switchActive(:e.targets[0]);
   :useSkill("normal");
 };

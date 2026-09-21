@@ -27,8 +27,7 @@ define summon {
   hint DamageType.Hydro, "1";
   on endPhase {
     usage 2 {
-      append;
-      range 4;
+      append 4;
     };
     if (
       :query($.my.equipped.def(TamakushiCasket)) &&
@@ -110,8 +109,11 @@ define skill {
     if (summon) {
       summon.addVariable("usage", 1);
     } else {
-      summon = :summon(BakeKurage)!;
-      summon.setVariable("usage", 1);
+      :summon(BakeKurage, "my", {
+        overrideVariables: {
+          usage: 1,
+        },
+      });
     }
   }
 };

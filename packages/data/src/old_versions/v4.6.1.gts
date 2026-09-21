@@ -111,6 +111,7 @@ define status {
     usage 3;
     :e.increaseDamage(1);
     if (:self.master.hasEquipment(KyoukaFuushi) && :e.target.health <= 6) {
+      // 该版本的天赋牌效果只有1点增伤
       :e.increaseDamage(1);
     }
   };
