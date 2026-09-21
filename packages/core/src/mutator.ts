@@ -462,6 +462,12 @@ export class StateMutator {
 
   // --- BASIC MUTATIVE PRIMITIVES ---
 
+  private recordReaction(info: ReactionInfo): EventAndRequest {
+    const reactionEvent = new ReactionEventArg(this.state, info);
+    this.mutate({ type: "pushPhaseReactionLog", reactionEvent });
+    return ["onReaction", reactionEvent];
+  }
+
   apply(
     target: CharacterState,
     type: NontrivialDamageType,
@@ -515,6 +521,10 @@ export class StateMutator {
         via: opt.via,
         fromDamage: opt.fromDamage,
       };
+      // Damage queues its reaction before the remaining damage modifiers; only record for pure applies.
+      if (!opt.fromDamage) {
+        events.push(this.recordReaction(reactionInfo));
+      }
       const modifyReactionEvent = new ModifyReactionEventArg(
         this.state,
         reactionInfo,
@@ -549,12 +559,6 @@ export class StateMutator {
         events.push(...inlineResult.emittedEvents);
         causeDefeated ||= inlineResult.causeDefeated;
       }
-      const reactionEvent = new ReactionEventArg(this.state, reactionInfo);
-      this.mutate({
-        type: "pushPhaseReactionLog",
-        reactionEvent,
-      });
-      events.push(["onReaction", reactionEvent]);
     }
     return { events, causeDefeated };
   }
@@ -697,7 +701,17 @@ export class StateMutator {
         "modifyDamage3",
       ] as const) {
         if (eventName === "$REACTION") {
-          modifier.increaseDamageByReaction();
+          const reaction = modifier.increaseDamageByReaction();
+          if (reaction !== null) {
+            events.push(
+              this.recordReaction({
+                type: reaction,
+                target,
+                via: opt.via,
+                fromDamage: modifier.damageInfo,
+              }),
+            );
+          }
         } else {
           const innerResult = this.handleInlineEvent(
             opt.via,
