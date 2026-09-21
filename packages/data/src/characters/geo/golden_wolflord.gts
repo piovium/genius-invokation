@@ -140,7 +140,7 @@ define character {
 /**
  * @id 226031
  * @name 异兽侵蚀
- * @cost 3*Geo
+ * @cost 4*Geo
  * @description
  * 战斗行动：我方出战角色为黄金王兽时，装备此牌。
  * 黄金王兽装备此牌后，立刻使用一次兽境轰召。

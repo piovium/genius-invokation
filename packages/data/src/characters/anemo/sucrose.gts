@@ -157,6 +157,7 @@ define card {
 /**
  * @id 215012
  * @name 七循之理
+ * @cost 3*Anemo
  * @description
  * 快速行动：装备给我方的砂糖。
  * 召唤大型风灵。

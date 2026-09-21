@@ -133,6 +133,7 @@ define combatStatus {
 /**
  * @id 12171
  * @name 月露泼降
+ * @cost 1*Hydro, 2*Void
  * @description
  * 造成1点水元素伤害。
  * 本局游戏中，敌方累计受到3次月曜反应后，如果我方手牌中存在附着有费用降低的卡牌，则将随机1张附着有费用降低的手牌置于牌组顶，然后再造成1点草元素伤害。（每回合1次）
@@ -148,6 +149,7 @@ define skill {
 /**
  * @id 12172
  * @name 万古潮汐
+ * @cost 3*Hydro
  * @description
  * 造成1点水元素伤害，生成引力涟漪。
  */
@@ -162,6 +164,7 @@ define skill {
 /**
  * @id 12173
  * @name 她的乡愁
+ * @cost 3*Hydro, 3*Energy
  * @description
  * 造成3点水元素伤害，生成月之领域。
  */
@@ -177,6 +180,7 @@ define skill {
 /**
  * @id 12174
  * @name 月兆祝赐·借汝月光
+ * @cost
  * @description
  * 【被动】本局游戏中，敌方受到感电反应/绽放反应/结晶(水)反应时，改为月感电/月绽放/月结晶反应。
  * 敌方受到月感电/月绽放/月结晶反应后：造成1点雷元素伤害/草元素伤害/岩元素伤害。（每回合1次）
@@ -211,8 +215,9 @@ define skill {
 /**
  * @id 12175
  * @name 月兆祝赐·借汝月光
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 12175 as MoonsignBenedictionMoonlightLentUntoYou01;
@@ -244,8 +249,9 @@ define extension {
 /**
  * @id 12176
  * @name 月露泼降
+ * @cost
  * @description
- *
+ * 
  */
 define skill {
   id 12176 as MoondewCascadePassive;
@@ -272,6 +278,8 @@ define skill {
 /**
  * @id 1217
  * @name 哥伦比娅
+ * @hp 10
+ * @energy 3
  * @description
  * 月下白鸽，何以为家？
  */
@@ -294,6 +302,7 @@ define character {
 /**
  * @id 212171
  * @name 遍照花海，隐入群山
+ * @cost 3*Hydro
  * @description
  * 战斗行动：我方出战角色为哥伦比娅时，装备此牌。
  * 哥伦比娅装备此牌后，立刻使用一次万古潮汐。
@@ -345,6 +354,7 @@ define card {
 /**
  * @id 12177
  * @name 
+ * @cost
  * @description
  * 
  */

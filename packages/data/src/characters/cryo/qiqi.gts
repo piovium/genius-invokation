@@ -144,7 +144,7 @@ define skill {
 /**
  * @id 1108
  * @name 七七
- * @hp 10
+ * @hp 12
  * @energy 3
  * @description
  * 流转不息，生生不绝。

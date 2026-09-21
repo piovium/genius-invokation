@@ -153,6 +153,7 @@ define combatStatus {
 /**
  * @id 216042
  * @name 白芒之书
+ * @cost 2*Geo
  * @description
  * 快速行动：装备给我方的阿贝多。
  * 召唤阳华。

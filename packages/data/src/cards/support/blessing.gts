@@ -791,6 +791,7 @@ define card {
 /**
  * @id 331012
  * @name 元素幻变：超载祝佑
+ * @cost 2*Aligned
  * @description
  * 元素幻变：雷元素火元素
  * 投掷阶段：总是投出2个雷元素骰和2个火元素骰。

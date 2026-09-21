@@ -107,7 +107,7 @@ define skill {
 /**
  * @id 25013
  * @name 霜驰影突
- * @cost 3*Cryo
+ * @cost 3*Anemo
  * @description
  * 召唤剑影·霜驰。
  */

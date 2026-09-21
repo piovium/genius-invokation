@@ -472,6 +472,7 @@ define card {
 /**
  * @id 330014
  * @name 三月重临
+ * @cost 3*Aligned, 1*Legend
  * @description
  * 舍弃3张当前元素骰费用最高的手牌。
  * 下个回合开始时，治疗我方场上所有角色3点。

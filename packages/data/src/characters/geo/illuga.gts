@@ -18,6 +18,7 @@ import { DiceType, DamageType, $ } from "@gi-tcg/core/data";
 /**
  * @id 116121
  * @name 阿咚
+ * @cost 2*Aligned
  * @description
  * 战斗行动：选一个敌方角色，对其造成1点岩元素伤害。
  */
@@ -57,6 +58,7 @@ define combatStatus {
 /**
  * @id 16121
  * @name 守誓枪术
+ * @cost 1*Geo, 2*Void
  * @description
  * 造成2点物理伤害。
  */
@@ -71,6 +73,7 @@ define skill {
 /**
  * @id 16122
  * @name 衔莺破晓
+ * @cost 3*Geo
  * @description
  * 造成3点岩元素伤害，生成手牌阿咚。
  */
@@ -85,6 +88,7 @@ define skill {
 /**
  * @id 16123
  * @name 鉴照无影
+ * @cost 3*Geo, 2*Energy
  * @description
  * 造成3点岩元素伤害，生成可用次数为3的夜莺之歌。
  */
@@ -102,6 +106,7 @@ define skill {
 /**
  * @id 16124
  * @name 月兆祝赐·凌冬不凋
+ * @cost
  * @description
  * 【被动】名称不存在于本局最初牌组的牌加入我方手牌时，赋予其费用降低。（每回合1次）
  */
@@ -123,6 +128,8 @@ define skill {
 /**
  * @id 1612
  * @name 叶洛亚
+ * @hp 10
+ * @energy 2
  * @description
  * 普照魇夜，方启明昼。
  */
@@ -141,6 +148,7 @@ define character {
 /**
  * @id 216121
  * @name 噬枝之麋
+ * @cost 1*Geo
  * @description
  * 快速行动：我方出战角色为叶洛亚时，装备此牌。
  * 生成1层夜莺之歌。
