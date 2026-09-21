@@ -47,6 +47,7 @@ import {
   type SkillInfo,
   type SkillContextOptions,
   type SkillDescription,
+  DisposeEventArg,
 } from "../base/skill";
 import {
   type CharacterState as CharacterStateO,
@@ -192,6 +193,12 @@ type CallerAreaOfContextMeta<Meta extends ContextMetaBase> = Extract<
   TypeAreaTypeMap<Meta["callerType"]>,
   TypeOfCallingArea[Meta["callingArea"]]
 >;
+
+type DiscardedTypingInfo = {
+  type: "eventCard" | "support" | "equipment";
+  areaType: "removedEntities";
+  variables: string;
+};
 
 export type ContextMetaBase = {
   readonly: boolean;
@@ -765,7 +772,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   private costSortedHands({
     who = "my",
     filter = () => true,
-  }: MaxCostHandsOpt): RxEntityState<Meta, TypingInfoBase<EntityType>>[] {
+  }: MaxCostHandsOpt = {}): RxEntityState<Meta, TypingInfoBase<EntityType>>[] {
     const player = who === "my" ? this.player : this.oppPlayer;
     const sortData = new Map(
       this.getRawPlayer(who).hands.map(
@@ -823,6 +830,29 @@ export class SkillContext<Meta extends ContextMetaBase> {
       .toArray();
   }
 
+  isSelfDisposeCausedByDefeatedHeuristically<
+    This extends TypedSkillContext<any>,
+  >(
+    this: This["rawEventArg"] extends DisposeEventArg ? This : never,
+    extraDmgCond: (e2: DamageOrHealEventArg<DamageInfo>) => boolean = () =>
+      true,
+  ): boolean {
+    const eventArg = this.rawEventArg as DisposeEventArg;
+    if (eventArg.from.type !== "characters") {
+      return false;
+    }
+    const fromChId = eventArg.from.characterId;
+    if (this.get(fromChId).variables.alive) {
+      return false;
+    }
+    return this.hasPhaseDamage(
+      "all",
+      (e2) =>
+        e2.damageInfo.causeDefeated &&
+        e2.damageInfo.target.id === fromChId &&
+        extraDmgCond(e2),
+    );
+  }
   // MUTATIONS
 
   private get events() {
@@ -2057,16 +2087,34 @@ export class SkillContext<Meta extends ContextMetaBase> {
    * @param count 舍弃的牌数
    * @param option.allowPreview 总是允许预览（即使版本行为 `discardMaxCostHandsAbortPreview = true` 也如此）
    */
-  discardMaxCostHands(count: number, option: { allowPreview?: boolean } = {}) {
-    const disposed = this.maxCostHands(count);
+  discardMaxCostHands(
+    count: number,
+    option: { allowPreview?: boolean } = {},
+  ): RxEntityState<Meta, DiscardedTypingInfo>[] {
     if (
       this.state.versionBehavior.discardMaxCostHandsAbortPreview &&
       !option.allowPreview
     ) {
       this.abortPreview();
     }
-    this.discard(...disposed);
-    return disposed;
+    const discarded: RxEntityState<Meta, DiscardedTypingInfo>[] = [];
+    for (let i = 0; i < count; i++) {
+      const hands = this.getRawPlayer("my").hands.map((card) => ({
+        card,
+        cost: diceCostSizeOfCard(this.rawState, card),
+      }));
+      if (hands.length === 0) {
+        break;
+      }
+      const maxCost = Math.max(...hands.map(({ cost }) => cost));
+      const candidates = hands.filter(({ cost }) => cost === maxCost);
+      const { card } = this.random(candidates);
+      this.discard(card);
+      discarded.push(
+        this.get(card) as RxEntityState<Meta, DiscardedTypingInfo>,
+      );
+    }
+    return discarded;
   }
 
   /**

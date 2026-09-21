@@ -25,7 +25,9 @@ import { DamageType, DiceType, $ } from "@gi-tcg/core/data";
  */
 define summon {
   id 115034 as Stormeye;
-  hint swirled, 2;
+  hint DamageType.Anemo, 2 {
+    dynamicPreset swirled;
+  };
   on endPhase {
     usage 2;
     :damage(:getVariable("hintIcon"), 2);

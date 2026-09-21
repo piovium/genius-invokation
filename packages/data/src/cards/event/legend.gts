@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { $, DiceType, flip } from "@gi-tcg/core/data";
+import { $, DiceType, flip, type CardHandle } from "@gi-tcg/core/data";
 import { DisperseTheCalamity, SanctifyTheDefiled } from "./other.gts";
 import { IneffectiveWhenPlayed } from "../../commons.gts";
 
@@ -198,6 +198,7 @@ define combatStatus {
   oneDuration;
   on playCard {
     when :( :e.card.definition.type === "eventCard" );
+    // 实际无可用次数限制，以状态描述为准
     for (const hand of :player.hands) {
       if (hand.definition.type === "eventCard") {
         :attach(IneffectiveWhenPlayed, hand);
@@ -312,38 +313,6 @@ define card {
   :characterStatus(EdictOfAbsolutionInEffect, :e.targets[0]);
 };
 
-define extension {
-  idHint 300006 as FlamesOfWarExtension;
-  schema ({
-    spirit: "pair<number>",
-    win: "pair<boolean>",
-  });
-  initialState ({
-    spirit: [0, 0],
-    win: [false, false],
-  });
-  description "记录双方斗争之火的「斗志」，并在行动阶段开始时设置斗争之火的胜者";
-  mutateWhen onDamageOrHeal,
-    ((st, e) => {
-      if (e.sourceWho !== e.targetWho) {
-        st.spirit[e.sourceWho] += e.damageInfo.value;
-      }
-    });
-  mutateWhen onActionPhase,
-    ((st) => {
-      const currentSpirits = [...st.spirit];
-      st.win = [false, false];
-      if (currentSpirits[0] >= currentSpirits[1]) {
-        st.win[0] = true;
-        st.spirit[0] = 0;
-      }
-      if (currentSpirits[0] <= currentSpirits[1]) {
-        st.win[1] = true;
-        st.spirit[1] = 0;
-      }
-    });
-};
-
 /**
  * @id 300007
  * @name 斗争之火（生效中）
@@ -371,25 +340,26 @@ define card {
   undiscoverable;
   support {
     variable spirit, 0;
-    associateExtension FlamesOfWarExtension;
-    on staged {
-      :setExtensionState((st) => {
-        st.spirit[:self.who] = :getVariable("spirit");
-      });
-    };
     on dealDamage {
-      :setVariable("spirit", :getExtensionState().spirit[:self.who]);
-    };
-    on actionPhase {
-      :setVariable("spirit", :getExtensionState().spirit[:self.who]);
-      if (:getExtensionState().win[:self.who]) {
-        :characterStatus(FlamesOfWarInEffect, $.my.active);
+      if (!:e.target.isMine()) {
+        :addVariable("spirit", :e.value);
       }
     };
-    on selfDispose {
-      :setExtensionState((st) => {
-        st.spirit[:self.who] = 0;
-      });
+    on actionPhase {
+      usage perRound, 1 {
+        name usagePerRound;
+      };
+      const mySpirit = :getVariable("spirit");
+      const oppSupport = :query($.opp.support.def(FlamesOfWar));
+      const oppSpirit = oppSupport?.getVariable("spirit") ?? 0;
+      if (mySpirit > oppSpirit) {
+        :characterStatus(FlamesOfWarInEffect, $.my.active);
+        :setVariable("spirit", 0);
+        // 判断胜利后，另一方的斗争之火不再结算
+        if (oppSupport) {
+          oppSupport.setVariable("usagePerRound", 0);
+        }
+      }
     };
   };
 };
@@ -406,27 +376,17 @@ define card {
   id 330010 as PilgrimageOfTheReturnOfTheSacredFlame;
   since "v5.3.0";
   legend;
-  const myExistsFlame = :query($.my.support.def(FlamesOfWar));
-  const oppExistsFlame = :query($.opp.support.def(FlamesOfWar));
-  if (myExistsFlame) {
-    myExistsFlame.addVariable("spirit", 1);
-  } else if (:remainingSupportCount("my") > 0) {
-    :createEntity(
-      "support",
-      FlamesOfWar,
-      {
-        who: :self.who,
-        type: "supports",
-      },
-      {
-        overrideVariables: {
-          spirit: 1,
-        },
-      },
-    );
+  let myFlame = :query($.my.support.def(FlamesOfWar)) ?? null;
+  type FlameEntity = typeof myFlame;
+  const oppFlame = :query($.opp.support.def(FlamesOfWar)) ?? null;
+  if (!myFlame) {
+    myFlame = :createEntity("support", FlamesOfWar, {
+      who: :self.who,
+      type: "supports",
+    }) as FlameEntity;
   }
-  if (oppExistsFlame) {
-  } else if (:remainingSupportCount("opp") > 0) {
+  myFlame?.addVariable("spirit", 1);
+  if (!oppFlame) {
     :createEntity("support", FlamesOfWar, {
       who: flip(:self.who),
       type: "supports",
@@ -507,4 +467,82 @@ define card {
     :attachCostReduction(target);
   }
   :combatStatus(TheOtherSideOfTheFrostmoonInEffect);
+};
+
+/**
+ * @id 330014
+ * @name 三月重临
+ * @description
+ * 舍弃3张当前元素骰费用最高的手牌。
+ * 下个回合开始时，治疗我方场上所有角色3点。
+ * 下下个回合开始时，将所舍弃的3张牌加入手牌，并赋予这些牌3层费用降低。
+ * （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
+ */
+define card {
+  id 330014 as ReturnOfTheThreeMoons;
+  since "v7.1.0";
+  cost DiceType.Aligned, 3;
+  legend;
+  :combatStatus(MoonlitRadiance);
+  :combatStatus(TheReturn);
+}
+
+/**
+ * @id 300011
+ * @name 月华
+ * @description
+ * 行动阶段开始时：治疗我方场上所有角色3点。
+ */
+define combatStatus {
+  id 300011 as MoonlitRadiance;
+  once actionPhase {
+    :heal(3, $.my.character);
+  };
+};
+
+/**
+ * @id 300012
+ * @name 重临
+ * @description
+ * 行动阶段开始时：若此牌倒计时为0，则将所舍弃的3张牌加入手牌，并赋予这些牌3层费用降低。
+ */
+define combatStatus {
+  id 300012 as TheReturn;
+  variable card0Id, 0;
+  variable card1Id, 0;
+  variable card2Id, 0;
+  on selfEnter {
+    const originalHandIds = :player.hands.map((card) => card.id);
+    const discardCards = :discardMaxCostHands(3);
+    const cardsToRecreate = discardCards.toSorted(
+      (a, b) => originalHandIds.indexOf(b.id) - originalHandIds.indexOf(a.id),
+    );
+    const slots = [...["card0Id", "card1Id", "card2Id"] as const];
+    for (const card of cardsToRecreate) {
+      const slot = slots.shift();
+      if (slot) {
+        :setVariable(slot, card.definition.id);
+      }
+    }
+  };
+  on actionPhase {
+    usage 2 { autoDispose false; };
+  };
+  on actionPhase {
+    when :( :getVariable("usage") <= 0 );
+    for (const cardId of [
+      :getVariable("card0Id"),
+      :getVariable("card1Id"),
+      :getVariable("card2Id"),
+    ]) {
+      if (!cardId) {
+        continue;
+      }
+      const card = :createHandCard(cardId as CardHandle);
+      if (card) {
+        :attachCostReduction(card, 3);
+      }
+    }
+    :dispose();
+  };
 };

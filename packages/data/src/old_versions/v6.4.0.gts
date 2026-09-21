@@ -76,7 +76,7 @@ define status {
   id 111121 as private PersTimer;
   until "v6.4.0";
   variable level, 0;
-  variable enableUseSkillTriggering, 0;
+  variable triggerOnUseSkill, 0;
   on drawCard {
     :addVariable("level", 1);
   };
@@ -85,13 +85,11 @@ define status {
     if (:getVariable("level") >= 2) {
       :e.deductOmniCost(1);
     }
-    :setVariable("enableUseSkillTriggering", 1);
   };
   on useSkill {
-    when :(
-      :e.skill.definition.id === PressurizedFloe &&
-        :getVariable("enableUseSkillTriggering")
-    );
+    // 只有当使用技能前实体存在时才触发
+    when :( :getVariable("triggerOnUseSkill") );
+    :setVariable("triggerOnUseSkill", 0);
     if (:getVariable("level") >= 4) {
       :damage(DamageType.Physical, 2);
     }

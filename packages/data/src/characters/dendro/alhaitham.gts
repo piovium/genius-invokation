@@ -26,8 +26,7 @@ import { DamageType, DiceType } from "@gi-tcg/core/data";
 define status {
   id 117061 as ChisellightMirror;
   duration 2 {
-    append;
-    range 3;
+    append 3;
   };
   on modifySkillDamageType {
     when :( :e.type === DamageType.Physical );

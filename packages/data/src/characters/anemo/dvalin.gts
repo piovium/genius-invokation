@@ -222,7 +222,7 @@ define card {
     };
     on entityDispose {
       when :(
-        :query($.opp.typeStatus.def(TotalCollapse))?.id === :e.entity.id
+        :e.entity.definition.id === TotalCollapse && !:e.entity.isMine()
       );
       listenTo all;
       usage perRound, 1;

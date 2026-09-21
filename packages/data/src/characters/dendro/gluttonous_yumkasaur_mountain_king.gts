@@ -28,6 +28,7 @@ define status {
   on increaseSkillDamage {
     usage 1 {
       append;
+      autoDecrease false;
     };
     const currentUsage = :getVariable("usage");
     const effectiveLayers = Math.min(currentUsage, 2);

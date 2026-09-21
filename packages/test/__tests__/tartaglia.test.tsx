@@ -13,24 +13,33 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Support, DeclaredEnd, Status, $ } from "#test";
-import { Keqing, YunlaiSwordsmanship } from "@gi-tcg/data/internal/characters/electro/keqing.gts";
-import { Riptide, Tartaglia } from "@gi-tcg/data/internal/characters/hydro/tartaglia.gts";
+import { ref, setup, Character, State, Status, $ } from "#test";
+import {
+  Keqing,
+  YunlaiSwordsmanship,
+} from "@gi-tcg/data/internal/characters/electro/keqing.gts";
+import {
+  Riptide,
+  Tartaglia,
+} from "@gi-tcg/data/internal/characters/hydro/tartaglia.gts";
 import { test } from "vitest";
 
-test("riptide should propagate", async () => {
-  const oppNext = ref();
-  const c = setup(
-    <State>
-      <Character opp active health={1}>
-        <Status def={Riptide} />
-      </Character>
-      <Character opp ref={oppNext} />
-      <Character my active def={Keqing} />
-      <Character my def={Tartaglia} />
-    </State>,
-  );
-  await c.me.skill(YunlaiSwordsmanship);
-  await c.opp.chooseActive(oppNext);
-  c.expect($.typeStatus.def(Riptide).at($.id(oppNext.id))).toBeExist();
-});
+test.each(["v4.0.0", void 0] as const)(
+  "riptide should propagate",
+  async (version) => {
+    const oppNext = ref();
+    const c = setup(
+      <State dataVersion={version}>
+        <Character opp active health={1}>
+          <Status def={Riptide} />
+        </Character>
+        <Character opp ref={oppNext} />
+        <Character my active def={Keqing} />
+        <Character my def={Tartaglia} />
+      </State>,
+    );
+    await c.me.skill(YunlaiSwordsmanship);
+    await c.opp.chooseActive(oppNext);
+    c.expect($.typeStatus.def(Riptide).at($.id(oppNext.id))).toBeExist();
+  },
+);

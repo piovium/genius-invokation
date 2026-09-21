@@ -109,8 +109,8 @@ export async function generateCards() {
   let others: SourceInfo[] = [];
 
   for (const card of actionCards) {
-    if (card.id < 100) {
-      // 莫名其妙的元素附魔系列？
+    if (card.id <= 211) {
+      // 系统，不管
       continue;
     }
     if (Math.floor(card.id / 100000) === 1) {

@@ -1026,7 +1026,7 @@ define card {
     on deductOmniDice {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
       const reward = :getVariable("reward");
-      const currentCost = :e.costSize();
+      const currentCost = :e.diceCostSize();
       const deduced = Math.min(reward, currentCost);
       :e.deductOmniCost(deduced);
       :addVariable("reward", -deduced);
@@ -1137,7 +1137,7 @@ define card {
     on deductOmniDice {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
       const reward = :getVariable("reward");
-      const currentCost = :e.costSize();
+      const currentCost = :e.diceCostSize();
       const deduced = Math.min(reward, currentCost);
       :e.deductOmniCost(deduced);
       :addVariable("reward", -deduced);
@@ -1661,14 +1661,46 @@ define card {
       when :(
         :queryAll($.my.character).length === 1 && :e.isSkillType("normal")
       );
+      usage perRound, 2;
       :e.deductVoidCost(1);
     };
     on increaseDamage {
       when :(
         :queryAll($.my.character).length === 1 && :e.viaSkillType("normal")
       );
+      // 减少花费和增加伤害为独立效果，各自管理可用次数
       usage perRound, 2;
       :e.increaseDamage(1);
     };
   };
 };
+
+/**
+ * @id 312046
+ * @name 昔时浮想之思
+ * @description
+ * 我方角色获得圣遗物以外的治疗后：此牌累积1层「渴盼」（最多累积到4层）。回合开始时，每有2层「渴盼」，治疗所附属角色1点。
+ * （角色最多装备1件「圣遗物」）
+ */
+define card {
+  id 312046 as RecollectionOfDaysPast;
+  since "v7.1.0";
+  cost DiceType.Aligned, 1;
+  artifact {
+    variable longing, 0 { range 4; };
+    on healed {
+      listenTo samePlayer;
+      when :(
+        !(
+          :e.source.definition.type === "equipment" &&
+          :e.source.definition.tags.includes("artifact")
+        )
+      );
+      :addVariable("longing", 1);
+    };
+    on actionPhase {
+      const longing = :getVariable("longing");
+      :heal(Math.floor(longing / 2), :self.master);
+    };
+  };
+}

@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { $, Character, CombatStatus, ref, setup, State } from "#test";
+import { $, Character, CombatStatus, ref, setup, State, Support } from "#test";
+import { VaporizeBlessingRagingWaves } from "@gi-tcg/data/internal/cards/support/blessing.gts";
 import {
   Baizhu,
   HolisticRevivification,
@@ -23,6 +24,10 @@ import {
   Keqing,
   YunlaiSwordsmanship,
 } from "@gi-tcg/data/internal/characters/electro/keqing.gts";
+import {
+  Mona,
+  RippleOfFate,
+} from "@gi-tcg/data/internal/characters/hydro/mona.gts";
 import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";
 
@@ -91,4 +96,32 @@ test("baizhu shield: hit the death", async () => {
   // 对方选人后没受伤
   await c.opp.chooseActive(oppNext);
   c.expect(oppNext).toHaveVariable({ health: 10 });
+});
+
+test("baizhu shield: onReaction responses precede modifyDamage responses", async () => {
+  const mona = ref();
+  const baizhu = ref();
+  const c = setup(
+    <State>
+      <Character my active def={Mona} ref={mona} health={10} />
+      <Support my def={VaporizeBlessingRagingWaves} />
+      <Character
+        opp
+        active
+        def={Baizhu}
+        ref={baizhu}
+        health={11}
+        aura={Aura.Pyro}
+      />
+      <CombatStatus opp def={SeamlessShield} />
+    </State>,
+  );
+
+  await c.me.skill(RippleOfFate);
+
+  // 水伤触发蒸发并击破护盾：1 + 2 - 1 = 2，白术随后回 1
+  c.expect(baizhu).toHaveVariable({ health: 10 });
+  c.expect($.opp.combatStatus.def(SeamlessShield)).toNotExist();
+  // 狂浪先治疗满血莫娜（溢出），再结算移除护盾引发的盾反，莫娜最终 9 血
+  c.expect(mona).toHaveVariable({ health: 9, aura: Aura.Dendro });
 });

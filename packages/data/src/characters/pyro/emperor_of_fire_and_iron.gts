@@ -54,7 +54,7 @@ define status {
  */
 define status {
   id 123041 as ArmoredCrabCarapace;
-  shield 0, Infinity;
+  shield 0, open;
 };
 
 /**

@@ -504,7 +504,10 @@ export const detailedEventDictionary = {
   }),
   skillDamage: defineDescriptor("onDamageOrHeal", (e, r) => {
     return (
-      e.isDamageTypeDamage() && checkRelative(e.onTimeState, e.source.id, r)
+      e.isDamageTypeDamage() &&
+      checkRelative(e.onTimeState, e.source.id, r) &&
+      e.source.definition.type === "character" &&
+      e.damageInfo.fromReaction === null
     );
   }),
   damaged: defineDescriptor("onDamageOrHeal", (e, r) => {

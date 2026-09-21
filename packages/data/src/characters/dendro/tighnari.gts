@@ -27,8 +27,7 @@ define summon {
   hint DamageType.Dendro, 1;
   on endPhase {
     usage 1 {
-      append;
-      range 2;
+      append 2;
     };
     :damage(DamageType.Dendro, 1);
   };

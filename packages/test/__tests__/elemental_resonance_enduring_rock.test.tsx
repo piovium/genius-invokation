@@ -27,7 +27,7 @@ import {
 import { Noelle } from "@gi-tcg/data/internal/characters/geo/noelle.gts";
 import { test } from "vitest";
 
-test("v5.4.0 enduring rock: first Geo skill with The Bell grants 2 Rebellious Shield points", async () => {
+test("v5.4.0 enduring rock: first Geo skill with The Bell grants 4 shield points beyond the append limit", async () => {
   const c = setup(
     <State dataVersion="v5.4.0">
       <Character my active def={Navia}>
@@ -51,5 +51,5 @@ test("v5.4.0 enduring rock: first Geo skill with The Bell grants 2 Rebellious Sh
     $.my.combatStatus.def(ElementalResonanceEnduringRockInEffect),
   ).toNotExist();
   c.expect($.my.combatStatus.tag("shield")).toBeDefinition(RebelliousShield);
-  c.expect($.my.combatStatus.tag("shield")).toHaveVariable({ shield: 2 });
+  c.expect($.my.combatStatus.tag("shield")).toHaveVariable({ shield: 4 });
 });

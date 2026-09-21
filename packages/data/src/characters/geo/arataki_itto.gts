@@ -27,10 +27,16 @@ define status {
   on increaseSkillDamage {
     when :( :e.viaChargedAttack() );
     usage 1 {
-      append;
-      range 3;
+      append 3;
     };
-    :e.increaseDamage(1);
+    if (
+      :self.master.hasEquipment(AratakiIchiban) && // 装备天赋
+      :countOfSkill(AratakiItto, FightClubLegend) > 0 // 本回合使用过
+    ) {
+      :e.increaseDamage(2);
+    } else {
+      :e.increaseDamage(1);
+    }
   };
   on deductVoidDiceSkill {
     when :( :e.isChargedAttack() && :getVariable("usage") >= 2 );
@@ -54,9 +60,7 @@ define summon {
   on endPhase {
     :damage(DamageType.Geo, 1);
     :dispose();
-    :characterStatus(SuperlativeSuperstrength, ($) =>
-      $.my.character.def(AratakiItto),
-    );
+    :characterStatus(SuperlativeSuperstrength, $.my.character.def(AratakiItto));
   };
   on decreaseDamaged {
     when :( :e.target.isActive() );
@@ -69,9 +73,7 @@ define summon {
     usage 1 {
       name "addStatusUsage";
     };
-    :characterStatus(SuperlativeSuperstrength, ($) =>
-      $.my.character.def(AratakiItto),
-    );
+    :characterStatus(SuperlativeSuperstrength, $.my.character.def(AratakiItto));
   };
 };
 
@@ -113,15 +115,7 @@ define skill {
   skillType normal;
   cost DiceType.Geo, 1;
   cost DiceType.Void, 2;
-  if (
-    :self.hasEquipment(AratakiIchiban) && // 带有装备
-    :countOfSkill() > 0 && // 本回合使用过
-    :skillInfo.charged // 触发乱神之怪力（重击）
-  ) {
-    :damage(DamageType.Physical, 3);
-  } else {
-    :damage(DamageType.Physical, 2);
-  }
+  :damage(DamageType.Physical, 2);
 };
 
 /**

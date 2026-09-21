@@ -264,12 +264,12 @@ define status {
   on damagedOrHealed {
     :addVariable("readiness", 1);
   };
-  once deductOmniDiceCard {
+  once deductAllDiceCard {
     when :(
       :e.hasOneOfCardTag("weapon", "artifact") &&
         :e.currentDiceCostSize() <= :getVariable("readiness")
     );
-    :e.deductOmniCost(:e.diceCostSize());
+    :e.deductAllCost();
     :setVariable("readiness", 0);
   };
 };
@@ -296,6 +296,7 @@ define card {
  */
 define combatStatus {
   id 303236 as private IdRatherLoseMoneyMyselfInEffect;
+  until "v6.2.0";
   oneDuration;
   variable count, 0;
   on generateDice {

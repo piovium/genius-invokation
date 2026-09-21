@@ -137,6 +137,7 @@ define skill {
             Reaction.CrystallizeElectro,
             Reaction.CrystallizeHydro,
             Reaction.CrystallizePyro,
+            Reaction.LunarCrystallizeHydro,
           ] as Reaction[]
         ).includes(:e.getReaction()!) && !:e.target.isMine()
       );

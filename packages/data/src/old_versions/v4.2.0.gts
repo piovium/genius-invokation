@@ -123,6 +123,7 @@ define summon {
   tags barrier;
   hint DamageType.Hydro, "2";
   on decreaseDamaged {
+    when :( :e.target.isActive() );
     usage 2 {
       autoDispose false;
     };
@@ -280,7 +281,7 @@ define card {
  */
 define combatStatus {
   id 303182 as private StoneAndContractsInEffect;
-  oneDuration;
+  until "v4.2.0";
   on actionPhase {
     :generateDice(DiceType.Omni, 3);
     :dispose();

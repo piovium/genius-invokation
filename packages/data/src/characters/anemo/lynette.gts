@@ -42,7 +42,9 @@ define combatStatus {
  */
 define summon {
   id 115082 as BogglecatBox;
-  hint swirled, 1;
+  hint DamageType.Anemo, 1 {
+    dynamicPreset chpeDamaged;
+  };
   on endPhase {
     usage 2;
     :damage(:self.variables.hintIcon, 1);

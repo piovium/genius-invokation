@@ -45,8 +45,7 @@ define summon {
 define combatStatus {
   id 116061 as GeneralsWarBanner;
   duration 2 {
-    append;
-    range 3;
+    append 3;
   };
   on increaseSkillDamage {
     when :( :e.type === DamageType.Geo );

@@ -35,7 +35,7 @@ define summon {
           .exclude($.has.typeStatus.def(HydroCrystalCore)),
       )
     ) {
-      :characterStatus(HydroCrystalCore, $.def(HydroHypostasis));
+      :characterStatus(HydroCrystalCore, $.my.character.def(HydroHypostasis));
     } else {
       :damage(DamageType.Hydro, 2);
     }
@@ -193,7 +193,7 @@ define character {
  * @cost 1*Hydro
  * @description
  * 快速行动：装备给我方的无相之水。
- * 无相之水或水滴造成伤害后，治疗我方受伤最多的魔物1点。（每回合3次）
+ * 无相之水或水滴造成伤害后，治疗我方生命值最低的魔物1点。（每回合3次）
  * （牌组中包含无相之水，才能加入牌组）
  */
 define card {

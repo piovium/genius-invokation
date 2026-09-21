@@ -1350,7 +1350,7 @@ define card {
  * @name 涅朵奇卡
  * @cost 1*Aligned
  * @description
- * 我方触发月感电或月绽放反应时：我方出战角色附属战斗计划。（每回合1次）
+ * 我方触发月感电，月绽放或月结晶反应时：我方出战角色附属战斗计划。（每回合1次）
  */
 define card {
   id 322034 as Netochka;
@@ -1360,7 +1360,11 @@ define card {
     on dealReaction {
       when :(
         (
-          [Reaction.LunarElectroCharged, Reaction.LunarBloom] as Reaction[]
+          [
+            Reaction.LunarElectroCharged,
+            Reaction.LunarBloom,
+            Reaction.LunarCrystallizeHydro,
+          ] as Reaction[]
         ).includes(:e.type)
       );
       usage perRound, 1;

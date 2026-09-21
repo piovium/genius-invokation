@@ -71,7 +71,6 @@ import {
 } from "./variables";
 import {
   createVariable,
-  createVariableCanAppend,
   type TypeHint,
 } from "../../data/utils";
 import {
@@ -80,7 +79,12 @@ import {
   type TriggeredSkillVMMeta,
 } from "./skill";
 import { $, DamageType, DiceType, type CustomEvent } from "../../data";
-import { GlobalUsageVM, PrepareVM, NightsoulVM } from "./entity_auxilary";
+import {
+  GlobalUsageVM,
+  PrepareVM,
+  NightsoulVM,
+  HintVM,
+} from "./entity_auxilary";
 import type { CharacterPassiveSkillEntry } from "../../data/registry";
 import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
 import type { Computed } from "../../utils";
@@ -91,6 +95,7 @@ import type {
   TypedSkillContext,
 } from "../../runtime/skill_context";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
+import { DEFAULT_VARIABLE_UPPER_BOUND } from "../../base/mutation";
 
 /** A GTS definition's lazy description replacement. */
 export type EntityDescriptionDictionaryGetter<
@@ -406,16 +411,11 @@ export interface ICaller {
 }
 
 export const createVariableConfig = (
-  initialValue: number,
+  initial: number,
   options: GtsVariableOptions,
 ): VariableConfig => {
-  const config = options.append
-    ? createVariableCanAppend(
-        initialValue,
-        typeof options.append === "object" ? options.append.value : undefined,
-      )
-    : createVariable(initialValue, options.forceOverwrite);
-  let { lowerBound, upperBound } = config;
+  let { initialValue, lowerBound, upperBound, recreateBehavior } =
+    createVariable(initial, options.forceOverwrite);
   if (typeof options.range === "number") {
     lowerBound = 0;
     upperBound = options.range;
@@ -423,8 +423,36 @@ export const createVariableConfig = (
     lowerBound = options.range[0];
     upperBound = options.range[1];
   }
+  if (lowerBound > upperBound) {
+    throw new GiTcgDataError("Variable range must have min <= max");
+  }
+  if (typeof options.append !== "undefined" && options.append !== false) {
+    let appendLimit: number;
+    let appendValue: number;
+    if (options.append === true) {
+      appendLimit = upperBound;
+      appendValue = initialValue;
+    } else if (typeof options.append === "number") {
+      appendLimit = options.append;
+      appendValue = initialValue;
+    } else {
+      appendLimit = options.append.limit ?? upperBound;
+      appendValue = options.append.value ?? initialValue;
+    }
+    if (appendLimit > upperBound) {
+      throw new GiTcgDataError(
+        "Variable range upper bound must be >= append limit",
+      );
+    }
+    recreateBehavior = {
+      type: "append",
+      appendLimit,
+      appendValue,
+    };
+  }
   return {
-    ...config,
+    initialValue,
+    recreateBehavior,
     lowerBound,
     upperBound,
   };
@@ -786,13 +814,12 @@ export class EntityViewModel extends defineViewModel(
       <Meta extends EntityVMMeta>(
         this: ThisWithType<Meta, "status" | "combatStatus">,
         count: number,
-        max?: number,
+        max?: number | "open",
       ): AR.DoneRewriteMeta<PushMetaVar<Meta, "shield">>;
     }>((model, [count, max = count]) => {
       model.tags.push("shield");
       model.setVariable("shield", count, {
-        append: true,
-        range: max,
+        append: max === "open" ? DEFAULT_VARIABLE_UPPER_BOUND : max,
       });
       const decreaseDmgSkill = new TriggeredSkillModel(
         model,
@@ -905,18 +932,6 @@ export class EntityViewModel extends defineViewModel(
       addDescriptionReplacement(model, key, getter);
     }),
     hint: h.attribute<{
-      /**
-       * The hint icon will defaults to Anemo, but changed to a swirled element
-       * after my character/summon produced a swirling reaction.
-       */
-      <Meta extends EntityVMMeta>(
-        this: ThisWithType<Meta, "summon" | "support">,
-        icon: "swirled",
-        text?:
-          | number
-          | string
-          | EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
-      ): AR.DoneRewriteMeta<PushMetaVar<Meta, "hintIcon" | "swirledUsage">>;
       <Meta extends EntityVMMeta>(
         this: ThisWithType<Meta, "summon" | "support">,
         icon: DamageType | CombatStatusHandle | StatusHandle,
@@ -924,27 +939,56 @@ export class EntityViewModel extends defineViewModel(
           | number
           | string
           | EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
-      ): AR.DoneRewriteMeta<PushMetaVar<Meta, "hintIcon">>;
-    }>((model, [icon, text]) => {
-      if (icon === "swirled") {
-        icon = DamageType.Anemo;
-        const onDmgSkill = new TriggeredSkillModel(model, "dealDamage");
-        onDmgSkill.id = model.getSubId();
-        onDmgSkill.userFilters.push(function (c) {
-          const e = c.eventArg as DamageOrHealEventArg<DamageInfo>;
-          return (
-            ["character", "summon"].includes(e.source.definition.type) &&
-            e.isSwirl()
-          );
-        });
-        onDmgSkill.setUsage(1, { name: "swirledUsage", perRound: false });
-        onDmgSkill.action = function (c) {
-          const swirledType = (
-            c.eventArg as DamageOrHealEventArg<DamageInfo>
-          ).isSwirl()!;
-          c.setVariable("hintIcon", swirledType);
-        };
-        model.skillList.push(onDmgSkill.buildSkillDefinition());
+      ): AR.WithRewriteMeta<PushMetaVar<Meta, "hintIcon">, typeof HintVM>;
+    }>((model, [icon, text], subView) => {
+      const { dynamicPreset } = HintVM.parse(subView);
+      switch (dynamicPreset) {
+        case "swirled": {
+          const dealDmgSkill = new TriggeredSkillModel(model, "dealDamage");
+          dealDmgSkill.id = model.getSubId();
+          dealDmgSkill.userFilters.push(function (c) {
+            const e = c.eventArg as DamageOrHealEventArg<DamageInfo>;
+            return (
+              ["character", "summon"].includes(e.source.definition.type) &&
+              e.isSwirl()
+            );
+          });
+          dealDmgSkill.setUsage(1, {
+            name: "swirledUsage",
+            visible: false,
+            perRound: false,
+          });
+          dealDmgSkill.action = function (c) {
+            const e = c.eventArg as DamageOrHealEventArg<DamageInfo>;
+            c.setVariable("hintIcon", e.isSwirl()!);
+          };
+          model.skillList.push(dealDmgSkill.buildSkillDefinition());
+          break;
+        }
+        case "chpeDamaged": {
+          const onDmgSkill = new TriggeredSkillModel(model, "damaged");
+          onDmgSkill.id = model.getSubId();
+          onDmgSkill.userFilters.push(function (c) {
+            const e = c.eventArg as DamageOrHealEventArg<DamageInfo>;
+            return [
+              DamageType.Cryo,
+              DamageType.Hydro,
+              DamageType.Pyro,
+              DamageType.Electro,
+            ].some((type) => type === e.type);
+          });
+          onDmgSkill.setUsage(1, {
+            name: "chpeDamagedUsage",
+            visible: false,
+            perRound: false,
+          });
+          onDmgSkill.action = function (c) {
+            const e = c.eventArg as DamageOrHealEventArg<DamageInfo>;
+            c.setVariable("hintIcon", e.type);
+          };
+          model.skillList.push(onDmgSkill.buildSkillDefinition());
+          break;
+        }
       }
       model.setVariable("hintIcon", icon, { visible: false });
       if (typeof text === "function") {

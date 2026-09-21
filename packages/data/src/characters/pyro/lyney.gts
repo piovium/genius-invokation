@@ -27,8 +27,7 @@ define summon {
   hint DamageType.Pyro, 1;
   on endPhase {
     usage 1 {
-      append;
-      range 2;
+      append 2;
     };
     :damage(DamageType.Pyro, 1);
   };
@@ -170,12 +169,13 @@ define card {
     on staged {
       :useSkill(PropArrow);
     };
-    on increaseSkillDamage {
+    on increaseDamage {
       when :(
-        [Lyney as number, GrinmalkinHat as number].includes(
+        ([Lyney, GrinmalkinHat] as number[]).includes(
           :e.source.definition.id,
         ) && :e.target.aura === Aura.Pyro
       );
+      listenTo samePlayer;
       usage perRound, 1;
       :e.increaseDamage(2);
     };
