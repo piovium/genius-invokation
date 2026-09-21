@@ -986,12 +986,9 @@ export class ModifyDamage0EventArg extends ModifyDamageEventArgBase {
 }
 
 export class ModifyDamageByReactionEventArg extends ModifyDamageEventArgBase {
-  increaseDamageByReaction() {
+  increaseDamageByReaction(): Reaction | null {
     const damageInfo = super.damageInfo;
-    const { reaction } = getReaction({
-      ...damageInfo,
-      enabledLunarReactions: this.enabledLunarReactions,
-    });
+    const reaction = this.getReaction();
     switch (reaction) {
       case Reaction.Melt:
       case Reaction.Vaporize:
@@ -1020,6 +1017,7 @@ export class ModifyDamageByReactionEventArg extends ModifyDamageEventArgBase {
         // do nothing
         break;
     }
+    return reaction;
   }
 }
 
