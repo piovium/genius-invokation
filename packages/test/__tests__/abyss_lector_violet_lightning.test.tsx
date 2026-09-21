@@ -15,8 +15,9 @@
 
 import { ref, setup, Character, State, Card, $, Status } from "#test";
 import { TandooriRoastChicken } from "@gi-tcg/data/internal/cards/event/food.gts";
-import { AbyssLectorVioletLightning, ChainLightningCascade, ElectricRebirth, ElectricRebirthHoned } from "@gi-tcg/data/internal/characters/electro/abyss_lector_violet_lightning.gts";
+import { AbyssLectorVioletLightning, ChainLightningCascade, ElectricRebirth, ElectricRebirthHoned, ShockOfTheEnigmaticAbyss } from "@gi-tcg/data/internal/characters/electro/abyss_lector_violet_lightning.gts";
 import { JadeScreen, Ningguang, SparklingScatter } from "@gi-tcg/data/internal/characters/geo/ningguang.gts";
+import { Aura } from "@gi-tcg/typings";
 import { test } from "vitest";
 
 test("electro abyss talent: triggered on defeated", async () => {
@@ -45,4 +46,53 @@ test("electro abyss talent: triggered on defeated", async () => {
   c.expect(abyss).toHaveVariable({ alive: 0 });
   // 被夺取一点充能
   c.expect($.opp.active).toHaveVariable({ energy: 2 });
+})
+
+test("abyss lector: the enigmatic abyss steals energy from an electro-attached target", async () => {
+  // 规则集：如果目标附着雷元素且有充能->目标失去1点充能，我方一名角色获得1点充能；造成3点雷元素伤害
+  // 断言：目标充能 1 -> 0，我方咏者获得 1 点充能（再加上使用元素战技本身的 1 点），并受到 3 点雷伤。
+  const abyss = ref();
+  const target = ref();
+  const c = setup(
+    <State>
+      <Character opp active ref={target} health={10} energy={1} aura={Aura.Electro} />
+      <Character my active def={AbyssLectorVioletLightning} ref={abyss} energy={0} />
+    </State>
+  );
+  await c.me.skill(ShockOfTheEnigmaticAbyss);
+  c.expect(target).toHaveVariable({ health: 7, energy: 0, aura: Aura.Electro });
+  c.expect(abyss).toHaveVariable({ energy: 2 });
+})
+
+test("abyss lector: no energy is stolen when the target is not electro-attached", async () => {
+  // 规则集：如果目标附着雷元素且有充能->目标失去1点充能，我方一名角色获得1点充能
+  // 断言：目标未附着雷元素时不夺取充能，我方也不额外获得充能。
+  const abyss = ref();
+  const target = ref();
+  const c = setup(
+    <State>
+      <Character opp active ref={target} health={10} energy={1} />
+      <Character my active def={AbyssLectorVioletLightning} ref={abyss} energy={0} />
+    </State>
+  );
+  await c.me.skill(ShockOfTheEnigmaticAbyss);
+  c.expect(target).toHaveVariable({ health: 7, energy: 1, aura: Aura.Electro });
+  // 只有使用元素战技本身的 1 点充能
+  c.expect(abyss).toHaveVariable({ energy: 1 });
+})
+
+test("abyss lector: nobody gains energy when the electro-attached target has none", async () => {
+  // 规则集：如果目标附着雷元素且有充能->目标失去1点充能，我方一名角色获得1点充能
+  // 断言：目标虽附着雷元素但充能为 0，则不发生夺取，我方也不额外获得充能。
+  const abyss = ref();
+  const target = ref();
+  const c = setup(
+    <State>
+      <Character opp active ref={target} health={10} energy={0} aura={Aura.Electro} />
+      <Character my active def={AbyssLectorVioletLightning} ref={abyss} energy={0} />
+    </State>
+  );
+  await c.me.skill(ShockOfTheEnigmaticAbyss);
+  c.expect(target).toHaveVariable({ health: 7, energy: 0, aura: Aura.Electro });
+  c.expect(abyss).toHaveVariable({ energy: 1 });
 })

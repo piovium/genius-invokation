@@ -47,3 +47,23 @@ test("Ellin: discard records after characters defeated", async () => {
   expect(c.state.players[0].dice).toBeArrayOfSize(0);
   c.expect(ellin).toHaveVariable({ usagePerRound: 1 });
 });
+
+test("Ellin: deducts even when played after the skill was used", async () => {
+  // 规则集：先使用技能再使用艾琳，下一个技能也能减费
+  const c = setup(
+    <State>
+      <Character my def={Kaeya} />
+      <Card my def={Ellin} />
+      <DeclaredEnd opp />
+    </State>,
+  );
+  // 先使用技能：8 - 3 = 5
+  await c.me.skill(CeremonialBladework);
+  // 再打出艾琳：5 - 2 = 3
+  await c.me.card(Ellin);
+  c.expect($.my.support.def(Ellin)).toHaveVariable({ usagePerRound: 1 });
+  // 下一个技能仍减费 1：3 - (3 - 1) = 1
+  await c.me.skill(CeremonialBladework);
+  expect(c.state.players[0].dice).toBeArrayOfSize(1);
+  c.expect($.my.support.def(Ellin)).toHaveVariable({ usagePerRound: 0 });
+});

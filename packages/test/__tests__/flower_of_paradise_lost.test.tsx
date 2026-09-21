@@ -13,10 +13,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { ref, setup, Character, State, Card, Status, DeclaredEnd } from "#test";
+import { ref, setup, Character, State, Card, Status, Equipment, DiceCount, DeclaredEnd, $ } from "#test";
 import { FlowerOfParadiseLost } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
 import { Sucrose, WindSpiritCreation } from "@gi-tcg/data/internal/characters/anemo/sucrose.gts";
+import { Collei, FloralBrush } from "@gi-tcg/data/internal/characters/dendro/collei.gts";
+import { Diluc, SearingOnslaught } from "@gi-tcg/data/internal/characters/pyro/diluc.gts";
 import { ElementalLifeformHydro, HydroTulpa } from "@gi-tcg/data/internal/characters/hydro/hydro_tulpa.gts";
 import { Aura } from "@gi-tcg/typings";
 import { expect, test } from "vitest";
@@ -91,4 +93,61 @@ test("flower of paradise lost: actionPhase and reaction share the same usage per
   await c.me.skill(WindSpiritCreation);
   expect(myPlayer().dice).toBeArrayOfSize(4); // 7 - 3，不生成骰子
   expect(myPlayer().hands).toBeArrayOfSize(6); // 不抓牌
+});
+
+test("flower of paradise lost: crystal accumulates on dendro damage or dendro-related reaction, up to 5", async () => {
+  const c = setup(
+    <State>
+      <DeclaredEnd opp />
+      <Character opp active health={20} aura={Aura.Dendro} />
+      <Character my active def={Diluc}>
+        <Equipment def={FlowerOfParadiseLost} v={{ crystal: 3 }} />
+      </Character>
+      <Character my def={Collei} />
+      <DiceCount my count={12} />
+    </State>,
+  );
+  // 规则集：①对方受到伤害后：若为草元素伤害或引发了草元素相关反应，累积1层【花冠水晶】（上限5层）
+  // 火伤引发燃烧（草相关反应）：3 -> 4
+  await c.me.skill(SearingOnslaught);
+  c.expect($.my.typeEquipment.def(FlowerOfParadiseLost)).toHaveVariable({ crystal: 4 });
+  // 草伤（无反应）：4 -> 5
+  await c.me.switch(Collei);
+  await c.me.skill(FloralBrush);
+  c.expect($.my.typeEquipment.def(FlowerOfParadiseLost)).toHaveVariable({ crystal: 5 });
+  // 上限 5；无反应故②不发动，不生成骰子：12 - 3 - 1 - 3 - 3 = 2
+  await c.me.skill(FloralBrush);
+  c.expect($.my.typeEquipment.def(FlowerOfParadiseLost)).toHaveVariable({ crystal: 5 });
+  expect(c.state.players[0].dice).toBeArrayOfSize(2);
+});
+
+test("flower of paradise lost: at 4 crystals, reaction check happens before accumulation, so that damage cannot trigger", async () => {
+  const c = setup(
+    <State>
+      <DeclaredEnd opp />
+      <Character opp active health={20} aura={Aura.Pyro} />
+      <Character my active def={Collei}>
+        <Equipment def={FlowerOfParadiseLost} v={{ crystal: 4 }} />
+      </Character>
+      <Character my def={Diluc} />
+      <Card my pile def={Paimon} />
+      <Card my pile def={Paimon} />
+      <DiceCount my count={12} />
+    </State>,
+  );
+  // 规则集：注：触发元素反应的时机比【受到伤害后】早，即4层花冠造成伤害的场合，先检测是否5层，再累积【花冠水晶】（无法触发②）
+  // 草伤引发燃烧：反应时仅 4 层不发动，随后累积到 5；不生成骰子、不抓牌
+  await c.me.skill(FloralBrush);
+  c.expect($.my.typeEquipment.def(FlowerOfParadiseLost)).toHaveVariable({ crystal: 5 });
+  expect(c.state.players[0].dice).toBeArrayOfSize(9);
+  expect(c.state.players[0].hands).toBeArrayOfSize(0);
+  // 燃烧后无附着；再打一次草伤附着草元素，无反应不发动②
+  await c.me.skill(FloralBrush);
+  expect(c.state.players[0].dice).toBeArrayOfSize(6);
+  expect(c.state.players[0].hands).toBeArrayOfSize(0);
+  // 已 5 层：下一次我方触发元素反应（火伤于草附着引发燃烧）发动②：6 - 1 - 3 + 1 = 3 骰，抓 1 张
+  await c.me.switch(Diluc);
+  await c.me.skill(SearingOnslaught);
+  expect(c.state.players[0].dice).toBeArrayOfSize(3);
+  expect(c.state.players[0].hands).toBeArrayOfSize(1);
 });

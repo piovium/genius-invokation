@@ -196,4 +196,76 @@ describe("adventure", () => {
     c.expect($.my.def(ChenyuVale)).toHaveVariable({ exp: 2 });
     c.expect($.my.hand.def(ChenyuBrew)).toNotExist();
   });
+
+  test("spot lookup is my-side only", async () => {
+    // 规则集：「若我方场上不存在冒险地点：挑选一个冒险地点生成（初始冒险经历为0）」
+    // 对方场上的冒险地点不属于「我方场上」：仍需挑选生成，且对方的冒险经历不变
+    const c = setup(
+      <State>
+        <Support opp def={ChenyuVale} v={{ exp: 1 }} />
+        <Card my def={AnAncientSacrificeOfSacredBrocade} />
+      </State>,
+    );
+    await c.me.card(AnAncientSacrificeOfSacredBrocade);
+    await c.me.selectCard(TheChasm);
+    c.expect($.my.support.def(TheChasm)).toHaveVariable({ exp: 1 });
+    c.expect($.opp.support.def(ChenyuVale)).toHaveVariable({ exp: 1 });
+  });
+
+  test("support area full but adventure spot exists: 'after adventure' still triggers", async () => {
+    // 规则集：「注：场地已满且无冒险地点的场合，冒险能触发【挑选后】，但不能触发【冒险后】」
+    // 两个条件是并列的：场地已满但存在冒险地点时，冒险经历照常+1 并触发【冒险后】
+    const c = setup(
+      <State>
+        <Character my active health={5}>
+          <Status def={ChenyuBrewInEffect} />
+        </Character>
+        <Support my def={ChenyuVale} v={{ exp: 1 }} />
+        <Support my def={Paimon} />
+        <Support my def={Paimon} />
+        <Support my def={Paimon} />
+        <Card my def={AnAncientSacrificeOfSacredBrocade} />
+      </State>,
+    );
+    await c.me.card(AnAncientSacrificeOfSacredBrocade);
+    c.expect($.my.support.def(ChenyuVale)).toHaveVariable({ exp: 2 });
+    // 冒险地点结算：冒险经历达到2时生成2张沉玉茶露
+    c.expect($.my.hand.def(ChenyuBrew)).toBeCount(2);
+    // 冒险后：沉玉茶露（生效中）治疗1点
+    c.expect($.my.active).toHaveVariable({ health: 6 });
+  });
+
+  test.fails("adventure (exp>=2), spot should settle before 'after adventure'", async () => {
+    // 规则集：「冒险后：冒险经历增加后（冒险地点结算之后）」
+    // 即沉玉谷（冒险地点）的「冒险经历达到2时：生成2张沉玉茶露」应先于沉玉茶露（生效中）的【冒险后】治疗结算
+    // 当前引擎：冒险地点只是普通的 onAdventure 响应者，按通用响应顺序（出战角色区>…>支援区，
+    // core/src/utils.ts getAllEntitiesImpl；core/src/skill_executor.ts requestAdventure 分支）排在角色状态之后，
+    // 于是先治疗、老兵的容颜抓牌把手牌填满，沉玉谷再生成时手牌已满，2张沉玉茶露全部落空
+    const c = setup(
+      <State>
+        <Support my def={ChenyuVale} v={{ exp: 1 }} />
+        <Character my active health={1}>
+          <Equipment my def={VeteransVisage} v={{ count: 1 }} />
+          <Status my def={ChenyuBrewInEffect} />
+        </Character>
+        <Card my def={AnAncientSacrificeOfSacredBrocade} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my pile def={Paimon} />
+      </State>,
+    );
+    await c.me.card(AnAncientSacrificeOfSacredBrocade);
+    c.expect($.my.support.def(ChenyuVale)).toHaveVariable({ exp: 2 });
+    c.expect($.my.active).toHaveVariable({ health: 2 });
+    c.expect($.my.hand).toBeCount(10);
+    // 冒险地点先结算：第1张沉玉茶露进入手牌（第2张因手牌已满落空），随后的冒险后治疗与抓牌不再能挤掉它
+    c.expect($.my.hand.def(ChenyuBrew)).toBeCount(1);
+  });
 });

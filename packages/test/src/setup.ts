@@ -177,8 +177,10 @@ export namespace DiceCount {
   export interface Prop {
     my?: boolean;
     opp?: boolean;
-    count: number;
+    count?: number;
     type?: DiceType;
+    /** 显式指定骰子序列，优先于 count/type */
+    dice?: DiceType[];
   }
 }
 export function DiceCount(props: DiceCount.Prop): JSX.Element {
@@ -275,10 +277,12 @@ export function setup(state: JSX.Element): TestController {
       }
       continue;
     } else if (comp === DiceCount) {
-      const diceArr = Array.from(
-        { length: prop.count },
-        () => prop.type ?? DiceType.Omni,
-      );
+      const diceArr = prop.dice
+        ? [...prop.dice]
+        : Array.from(
+            { length: prop.count ?? 0 },
+            () => prop.type ?? DiceType.Omni,
+          );
       if (prop.my) {
         players[0].dice = diceArr;
       }

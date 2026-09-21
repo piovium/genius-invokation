@@ -47,3 +47,26 @@ test("ganyu: FrostflakeArrow usage clear after defeated", async () => {
   // 不触发天赋，仍然是后台-2
   c.expect($.opp.next).toHaveVariable({ health: 6 });
 });
+
+test("ganyu: talent raises piercing damage to 3 when FrostflakeArrow was used before", async () => {
+  // 规则：注：角色被击倒会清空使用列表，复活后技能无法触发天赋（此处验证未被击倒时「使用列表」正常生效）
+  const oppNext = ref();
+  const c = setup(
+    <State>
+      <DeclaredEnd opp />
+      <Character opp active health={10} />
+      <Character opp ref={oppNext} health={10} />
+      <Character opp health={10} />
+      <Character my active def={Ganyu}>
+        <Equipment def={UndividedHeart} />
+      </Character>
+      <DiceCount my count={16} />
+    </State>,
+  );
+  // 本场对局首次使用：后台穿透 2 点
+  await c.me.skill(FrostflakeArrow);
+  c.expect(oppNext).toHaveVariable({ health: 8 });
+  // 已在使用列表中：后台穿透改为 3 点
+  await c.me.skill(FrostflakeArrow);
+  c.expect(oppNext).toHaveVariable({ health: 5 });
+});

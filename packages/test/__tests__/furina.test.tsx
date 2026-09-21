@@ -15,7 +15,7 @@
 
 import { ref, setup, Character, State, Equipment, Card, Summon, CombatStatus, DeclaredEnd, Support, $, DiceCount, Status } from "#test";
 import { RainbowMacaronsInEffect } from "@gi-tcg/data/internal/cards/event/food.gts";
-import { FurinaPneuma, SalonMembers } from "@gi-tcg/data/internal/characters/hydro/furina.gts";
+import { FurinaPneuma, SalonMembers, SalonSolitairePneuma } from "@gi-tcg/data/internal/characters/hydro/furina.gts";
 import { test } from "vitest";
 
 test("furina: summon endPhase damage contains two skill", async () => {
@@ -38,4 +38,42 @@ test("furina: summon endPhase damage contains two skill", async () => {
   c.expect($.opp.active).toHaveVariable({ health: 2 });
   c.expect(macronsInEffect).toHaveVariable({ usage: 1 });
   c.expect(furina).toHaveVariable({ health: 11 });
+});
+
+test("salon members: consumes usage even when the condition is not met", async () => {
+  // 规则集：②结束阶段：如果我方存在生命值至少为6的角色->……可用次数：2（可叠加，最多叠加到4次，不满足条件也消耗次数）
+  // 断言：我方无生命值≥6的角色时，②不造成任何伤害，但可用次数仍然 2->1（①的1点水元素伤害照常）
+  const furina = ref();
+  const salonMembers = ref();
+  const c = setup(
+    <State>
+      <DeclaredEnd opp />
+      <Character opp active health={10} />
+      <Character my active def={FurinaPneuma} ref={furina} health={5} />
+      <Character my health={5} />
+      <Character my health={5} />
+      <Summon my def={SalonMembers} ref={salonMembers} />
+    </State>,
+  );
+  await c.me.end();
+  c.expect($.opp.active).toHaveVariable({ health: 9 });
+  // ②未发动：没有我方角色受到穿透伤害
+  c.expect(furina).toHaveVariable({ health: 5 });
+  c.expect($.my.character.var("health", "<", 5)).toNotExist();
+  c.expect(salonMembers).toHaveVariable({ usage: 1 });
+});
+
+test("salon members: stacking is capped at 4 uses", async () => {
+  // 规则集：可用次数：2（可叠加，最多叠加到4次，不满足条件也消耗次数）
+  // 断言：已有 3 次可用次数时再次召唤，叠加结果为 4 而不是 5
+  const salonMembers = ref();
+  const c = setup(
+    <State>
+      <Character opp active health={10} />
+      <Character my active def={FurinaPneuma} />
+      <Summon my def={SalonMembers} ref={salonMembers} usage={3} />
+    </State>,
+  );
+  await c.me.skill(SalonSolitairePneuma);
+  c.expect(salonMembers).toHaveVariable({ usage: 4 });
 });

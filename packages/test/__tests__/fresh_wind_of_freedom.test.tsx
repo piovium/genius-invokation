@@ -16,7 +16,7 @@
 import { ref, setup, Character, State, Equipment, Card, Summon, CombatStatus, DeclaredEnd, Support, $ } from "#test";
 import { GamblersEarrings } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
 import { FreshWindOfFreedom, FreshWindOfFreedomInEffect } from "@gi-tcg/data/internal/cards/event/legend.gts";
-import { CountdownToTheShow2, IdRatherLoseMoneyMyself } from "@gi-tcg/data/internal/cards/event/other.gts";
+import { CountdownToTheShow2, IdRatherLoseMoneyMyself, LeaveItToMe } from "@gi-tcg/data/internal/cards/event/other.gts";
 import { Vanarana } from "@gi-tcg/data/internal/cards/support/place.gts";
 import { LargeWindSpirit, Sucrose, WindSpiritCreation } from "@gi-tcg/data/internal/characters/anemo/sucrose.gts";
 import { CeremonialBladework, Icicle, Kaeya } from "@gi-tcg/data/internal/characters/cryo/kaeya.gts";
@@ -202,3 +202,155 @@ test("IdRatherLoseMoneyMyself: on endPhase, trigger generateDice", async () => {
   c.expect($.opp.combatStatus.def(Shield)).toNotExist();
   expect(c.state.players[1].dice).toBeArrayOfSize(10);
 })
+
+test("FreshWindOfFreedom: combat-action switch defeating opp, extra action right after the switch", async () => {
+  const myNext = ref();
+  const oppNext = ref();
+  const c = setup(
+    <State>
+      <Character opp active health={1} />
+      <Character opp ref={oppNext} />
+      <Character my active def={Kaeya} />
+      <Character my ref={myNext} def={Sucrose} />
+      <CombatStatus my def={Icicle} />
+      <CombatStatus my def={FreshWindOfFreedomInEffect} />
+    </State>,
+  );
+  // 规则集：切换角色（战斗行动）击倒对方角色的场合，在切换角色后之后执行一个额外行动
+  // 切换（战斗行动）触发冰棱击倒对方出战角色，对方选人
+  await c.me.switch(myNext);
+  await c.opp.chooseActive(oppNext);
+  c.expect($.my.combatStatus.def(FreshWindOfFreedomInEffect)).toNotExist();
+  // 切换结束后紧接着仍由我方行动
+  expect(c.state.currentTurn).toBe(0);
+  await c.me.skill(WindSpiritCreation);
+  // 额外行动用完后轮到对方
+  expect(c.state.currentTurn).toBe(1);
+});
+
+test("FreshWindOfFreedom: quick-action switch defeating opp, extra action after my next combat action", async () => {
+  const myNext = ref();
+  const oppNext = ref();
+  const c = setup(
+    <State>
+      <Character opp active health={1} />
+      <Character opp ref={oppNext} />
+      <Character my active def={Kaeya} />
+      <Character my ref={myNext} def={Sucrose} />
+      <CombatStatus my def={Icicle} />
+      <CombatStatus my def={FreshWindOfFreedomInEffect} />
+      <Card my def={LeaveItToMe} />
+    </State>,
+  );
+  // 规则集：切换角色（快速行动）击倒对方角色的场合，我方下次战斗行动后，再进行一次行动
+  await c.me.card(LeaveItToMe);
+  // 快速行动切换，冰棱击倒对方出战角色
+  await c.me.switch(myNext);
+  await c.opp.chooseActive(oppNext);
+  c.expect($.my.combatStatus.def(FreshWindOfFreedomInEffect)).toNotExist();
+  expect(c.state.currentTurn).toBe(0);
+  // 下次战斗行动后仍由我方再行动一次
+  await c.me.skill(WindSpiritCreation);
+  expect(c.state.currentTurn).toBe(0);
+  await c.me.skill(WindSpiritCreation);
+  expect(c.state.currentTurn).toBe(1);
+});
+
+test("FreshWindOfFreedom: not triggered after opp declared end", async () => {
+  const myNext = ref();
+  const oppNext = ref();
+  const c = setup(
+    <State>
+      <DeclaredEnd opp />
+      <Character opp active health={1} />
+      <Character opp ref={oppNext} />
+      <Character my active def={Kaeya} />
+      <Character my ref={myNext} def={Sucrose} />
+      <CombatStatus my def={Icicle} />
+      <CombatStatus my def={FreshWindOfFreedomInEffect} />
+    </State>,
+  );
+  // 规则集：对方或我方宣布结束后：自由的新风（出战状态）不能发动
+  // 对方已宣布结束，我方切换触发冰棱击倒对方出战角色
+  await c.me.switch(myNext);
+  await c.opp.chooseActive(oppNext);
+  // 未发动：状态仍在，对方也不会被跳过轮次
+  c.expect($.my.combatStatus.def(FreshWindOfFreedomInEffect)).toBeExist();
+  expect(c.state.players[1].skipNextTurn).toBe(false);
+  // 下回合对方（先宣布结束）正常先手
+  await c.me.end();
+  expect(c.state.roundNumber).toBe(2);
+  expect(c.state.currentTurn).toBe(1);
+});
+
+test("FreshWindOfFreedom: not triggered after I declared end", async () => {
+  const oppFirst = ref();
+  const oppNext = ref();
+  const c = setup(
+    <State>
+      <Character opp active ref={oppFirst} />
+      <Character opp ref={oppNext} health={1} />
+      <CombatStatus opp def={SecondaryExplosiveShells} />
+      <Character my active def={Sucrose} />
+      <CombatStatus my def={FreshWindOfFreedomInEffect} />
+    </State>,
+  );
+  // 规则集：对方或我方宣布结束后：自由的新风（出战状态）不能发动
+  await c.me.end();
+  // 我方已宣布结束，对方切换角色后二重毁伤弹击倒切入的角色
+  await c.opp.switch(oppNext);
+  await c.opp.chooseActive(oppFirst);
+  // 未发动：状态仍在，对方也不会被跳过轮次
+  c.expect($.my.combatStatus.def(FreshWindOfFreedomInEffect)).toBeExist();
+  expect(c.state.players[1].skipNextTurn).toBe(false);
+  // 下回合我方先手行动一次后即轮到对方，没有额外行动
+  await c.opp.end();
+  expect(c.state.roundNumber).toBe(2);
+  await c.me.skill(WindSpiritCreation);
+  expect(c.state.currentTurn).toBe(1);
+});
+
+test("FreshWindOfFreedom: declared-end flags are cleared when end phase begins", async () => {
+  const oppNext = ref();
+  const c = setup(
+    <State>
+      <Character opp active health={1} />
+      <Character opp ref={oppNext} />
+      <Character my active def={Xiangling} />
+      <Summon my def={Guoba} />
+    </State>,
+  );
+  // 规则集：结束阶段开始会清除【宣布结束】的状态
+  await c.me.end();
+  expect(c.state.players[0].declaredEnd).toBe(true);
+  await c.opp.end();
+  // 锅巴在结束阶段击倒对方出战角色，此时停在选人；双方的宣布结束标记均已清除
+  expect(c.state.phase).toBe("end");
+  expect(c.state.players[0].declaredEnd).toBe(false);
+  expect(c.state.players[1].declaredEnd).toBe(false);
+  await c.opp.chooseActive(oppNext);
+});
+
+test("FreshWindOfFreedom: not triggered when opp is defeated during opp's own turn in action phase", async () => {
+  const oppFirst = ref();
+  const oppNext = ref();
+  const c = setup(
+    <State currentTurn="opp">
+      <Character opp active ref={oppFirst} />
+      <Character opp ref={oppNext} health={1} />
+      <CombatStatus opp def={SecondaryExplosiveShells} />
+      <Character my active def={Sucrose} />
+      <CombatStatus my def={FreshWindOfFreedomInEffect} />
+    </State>,
+  );
+  // 规则集：对方角色被击倒后：若我方有行动权且所有玩家都没有宣布结束状态且（当前阶段为玩家行动或选择出战角色）->获得【额外行动】
+  // 行动阶段、双方均未宣布结束，但行动权在对方：对方切换后二重毁伤弹击倒切入的角色，不发动
+  await c.opp.switch(oppNext);
+  await c.opp.chooseActive(oppFirst);
+  c.expect($.my.combatStatus.def(FreshWindOfFreedomInEffect)).toBeExist();
+  expect(c.state.players[1].skipNextTurn).toBe(false);
+  // 对方战斗行动结束后轮到我方，我方行动一次后即轮到对方，没有额外行动
+  expect(c.state.currentTurn).toBe(0);
+  await c.me.skill(WindSpiritCreation);
+  expect(c.state.currentTurn).toBe(1);
+});

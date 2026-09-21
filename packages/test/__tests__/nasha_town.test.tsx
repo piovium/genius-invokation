@@ -14,7 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { ref, setup, Character, State, Support, Card } from "#test";
-import { BrokenSea } from "@gi-tcg/data/internal/cards/event/other.gts";
+import { BrokenSea, SunyataFlower } from "@gi-tcg/data/internal/cards/event/other.gts";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
 import { NashaTown } from "@gi-tcg/data/internal/cards/support/place.gts";
 import { test } from "vitest";
@@ -52,4 +52,22 @@ test("nasha town: not triggered when disposed by playing another support", async
   await c.me.card(Paimon, nashaTown);
   c.expect(nashaTown).toNotExist();
   c.expect(target).toHaveVariable({ health: 10 });
+});
+
+test("nasha town: triggered when disposed by sunyata flower", async () => {
+  // 规则集：被净觉花、破碎之海弃置的场合也能发动
+  // 可用次数为0（「被弃置时」能力的条件成立）时被净觉花弃置，应造成2点物理伤害
+  const target = ref();
+  const nashaTown = ref();
+  const c = setup(
+    <State>
+      <Character opp active ref={target} health={10} />
+      <Support my def={NashaTown} ref={nashaTown} v={{ usage: 0 }} />
+      <Card my def={SunyataFlower} />
+    </State>,
+  );
+
+  await c.me.card(SunyataFlower, nashaTown);
+  c.expect(nashaTown).toNotExist();
+  c.expect(target).toHaveVariable({ health: 8 });
 });
