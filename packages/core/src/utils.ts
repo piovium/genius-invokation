@@ -21,7 +21,7 @@ import {
   type DiceRequirement,
   type ReadonlyDiceRequirement,
 } from "@gi-tcg/typings";
-import { checkDice, chooseDiceValue, flip, toSortedBy } from "@gi-tcg/utils";
+import { checkDice, chooseDiceValue, diceIndex, flip, toSortedBy } from "@gi-tcg/utils";
 import type {
   AnyState,
   CharacterState,
@@ -1096,7 +1096,7 @@ export function sortDice(
     dice === DiceType.Omni ? -1 : 0,
     usefullDice.has(dice) ? -1 : 0,
     -countMap.get(dice)!,
-    dice,
+    diceIndex(dice),
   ]);
 }
 
@@ -1128,7 +1128,7 @@ export function computeConvertDice(
   remainingDice = toSortedBy(remainingDice, (dice) => [
     +usefulDice.has(dice),
     countMap.get(dice)!,
-    dice,
+    diceIndex(dice),
   ]);
   if (count === "all") {
     count = remainingDice.length;

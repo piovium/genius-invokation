@@ -86,7 +86,7 @@ import type {
   AttachmentHandle,
 } from "../data/type";
 import { CALLED_FROM_REACTION } from "../reaction";
-import { flip, toSortedBy } from "@gi-tcg/utils";
+import { diceIndex, flip, toSortedBy } from "@gi-tcg/utils";
 import { GiTcgDataError, GiTcgPreviewAbortedError } from "../error";
 import { DetailLogType } from "../log";
 import {
@@ -1677,7 +1677,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
     const sorted = toSortedBy(this.player.dice, (dice) => [
       +(dice === DiceType.Omni),
       -countMap.get(dice)!,
-      dice,
+      diceIndex(dice),
     ]);
     switch (strategy) {
       case "seq": {

@@ -17,10 +17,21 @@ import type { DiceType, ReadonlyDiceRequirement } from "@gi-tcg/typings";
 import { toSortedBy } from "./index";
 
 const VOID = 0;
+const ANEMO: typeof DiceType.Anemo = 5;
 const OMNI: typeof DiceType.Omni = 8;
 const ALIGNED: typeof DiceType.Aligned = 8;
 const ENERGY = 9;
 const LEGEND = 10;
+
+/**
+ * @brief 骰子类型编号排序依据。
+ * 
+ * 官方的骰子顺序为 冰水火雷岩草风，本项目枚举为 冰水火雷风岩草，
+ * 所以需要转换把风元素特判挪到最后。
+ */
+export const diceIndex = (dice: DiceType): number => {
+  return dice === ANEMO ? OMNI + 1 : dice;
+};
 
 /**
  * "智能"选骰算法（不检查能量和秘传揭令）
@@ -40,17 +51,23 @@ export function chooseDiceValue(
 ): DiceType[] {
   const result: DiceType[] = [];
   // 单独计算万能骰的数量
-  let omniDiceConut = disallowDice.has(OMNI) ? 0 : dice.filter((d) => d === OMNI).length;
+  let omniDiceConut = disallowDice.has(OMNI)
+    ? 0
+    : dice.filter((d) => d === OMNI).length;
 
   // 将持有的骰子按类型分组计算数量，移除disallowDice，移除万能骰
   const diceCountMap = dice.reduce((map, d) => {
     map.set(d, (map.get(d) ?? 0) + 1);
     return map;
   }, new Map<DiceType, number>());
-  const remainingDice = [...diceCountMap.entries()].map(([type, count]) => ({ type, count })).filter((d) => !(disallowDice.has(d.type) || d.type === OMNI));
+  const remainingDice = [...diceCountMap.entries()]
+    .map(([type, count]) => ({ type, count }))
+    .filter((d) => !(disallowDice.has(d.type) || d.type === OMNI));
 
   // 需要指定类型的骰子
-  const requiredBaseDice = required.entries().filter(([k]) => k > VOID && k < ALIGNED);
+  const requiredBaseDice = required
+    .entries()
+    .filter(([k]) => k > VOID && k < ALIGNED);
   for (const [requiredType, requiredCount] of requiredBaseDice) {
     const target = remainingDice.find((d) => d.type === requiredType);
     if (target && target.count + omniDiceConut >= requiredCount) {
@@ -84,7 +101,7 @@ export function chooseDiceValue(
       dice.count >= requiredCount ? -1 : 0,
       +targetDice.has(dice.type),
       Math.abs(dice.count - requiredCount),
-      dice.type,
+      diceIndex(dice.type),
     ]);
     // 最少同色数量
     const minSameCount = Math.max(0, requiredCount - omniDiceConut);
@@ -118,7 +135,7 @@ export function chooseDiceValue(
       +usefulDice.has(dice.type),
       +targetDice.has(dice.type),
       dice.count,
-      dice.type,
+      diceIndex(dice.type),
     ]);
     const flatRemainingDice: DiceType[] = [
       ...sortedDice.flatMap((d) => Array(d.count).fill(d.type)),
