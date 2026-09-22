@@ -174,7 +174,7 @@ export class EntityModel implements ICaller {
   #declaredUsages = new Map<string, DeclaredUsageInfo>();
   skillList: SkillDefinition[] = [];
   disposeWhenUsageIsZero = false;
-  disposeOnMasterDefeated = false;
+  disposeOnMasterDefeated: boolean;
   visibleVarName: string | null = null;
 
   hintText: string | null = null;
@@ -195,6 +195,7 @@ export class EntityModel implements ICaller {
       this.#contextOptions = new SkillContextOptions();
     }
     this.type = type;
+    this.disposeOnMasterDefeated = type === "status" || type === "equipment";
   }
 
   getSubId(): number {
@@ -203,7 +204,7 @@ export class EntityModel implements ICaller {
 
   /** Return all skills including implicit roundEnd */
   getSkills(): SkillDefinition[] {
-    if (this.type === "status" || this.type === "equipment") {
+    if (this.disposeOnMasterDefeated) {
       // add default defeated dispose skill
       const skillModel = new TriggeredSkillModel(this, "defeated");
       skillModel.id = this.getSubId();
