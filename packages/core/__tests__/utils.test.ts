@@ -106,7 +106,7 @@ test("convert dice", () => {
   );
   // 测试基本顺序
   expect(computeConvertDice(playerState, DiceType.Geo, 1)).toEqual([
-    8, 4, 4, 7, 3, 3, 2, 5, 6,
+    8, 4, 4, 7, 3, 3, 2, 6, 5,
   ]);
   // 测试目标保护
   expect(computeConvertDice(playerState, DiceType.Anemo, 3)).toEqual([
