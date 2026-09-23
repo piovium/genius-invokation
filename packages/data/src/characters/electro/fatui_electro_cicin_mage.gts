@@ -29,7 +29,7 @@ define combatStatus {
   };
   on playCard {
     when :(
-      :getVariable("playedCard") === 3 &&
+      :getVariable("playedCard") >= 3 &&
         (:query($.opp.summon.def(ElectroCicin))?.getVariable("usage") ?? 0) < 3
     );
     const cicin = :query($.opp.summon.def(ElectroCicin));
@@ -53,7 +53,7 @@ define summon {
   id 124041 as ElectroCicin;
   hint DamageType.Electro, 1;
   on endPhase {
-    usage 3 { range 3; };
+    usage 3;
     :damage(DamageType.Electro, 1);
   };
   on damaged {
