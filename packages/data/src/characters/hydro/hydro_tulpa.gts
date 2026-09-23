@@ -288,10 +288,17 @@ define character {
 define status {
   id 222062 as ElementalLifeformHydro;
   duration 2;
+  variable enableModification, 0;
   on selfEnter {
+    // 应当附着三次来清除所有元素并附着水元素：
+    // CyroDendro -> Dendro -> None -> Hydro
+    // 但是官方写成了两次，我们跟着错就好了
     :apply(DamageType.Hydro, :self.master);
+    :apply(DamageType.Hydro, :self.master);
+    :setVariable("enableModification", 1);
   };
   on modifyReaction {
+    when :( :getVariable("enableModification") );
     :apply(DamageType.Hydro, :self.master);
   };
   on decreaseDamaged {
