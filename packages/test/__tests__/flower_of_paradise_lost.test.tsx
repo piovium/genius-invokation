@@ -16,8 +16,14 @@
 import { ref, setup, Character, State, Card, Status, DeclaredEnd } from "#test";
 import { FlowerOfParadiseLost } from "@gi-tcg/data/internal/cards/equipment/artifacts.gts";
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
-import { Sucrose, WindSpiritCreation } from "@gi-tcg/data/internal/characters/anemo/sucrose.gts";
-import { ElementalLifeformHydro, HydroTulpa } from "@gi-tcg/data/internal/characters/hydro/hydro_tulpa.gts";
+import {
+  Sucrose,
+  WindSpiritCreation,
+} from "@gi-tcg/data/internal/characters/anemo/sucrose.gts";
+import {
+  ElementalLifeformHydro,
+  HydroTulpa,
+} from "@gi-tcg/data/internal/characters/hydro/hydro_tulpa.gts";
 import { Aura } from "@gi-tcg/typings";
 import { expect, test } from "vitest";
 
@@ -27,7 +33,12 @@ test("flower of paradise lost: actionPhase and reaction share the same usage per
     <State>
       <DeclaredEnd opp />
       <Character opp active def={HydroTulpa} aura={Aura.Hydro}>
-        <Status def={ElementalLifeformHydro} />
+        <Status
+          def={ElementalLifeformHydro}
+          v={{
+            enableModification: 1,
+          }}
+        />
       </Character>
       <Character my active def={Sucrose} ref={myActive} />
       <Card my def={FlowerOfParadiseLost} />
