@@ -827,6 +827,7 @@ define combatStatus {
 define card {
   id 332003 as TossUp;
   since "v3.3.0";
+  filter :( :player.dice.length > 0 );
   :rerollDice(2);
 };
 
