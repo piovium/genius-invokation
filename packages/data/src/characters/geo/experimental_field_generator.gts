@@ -78,7 +78,13 @@ define combatStatus {
   since "v6.6.0";
   duration 2;
   on endPhase {
-    :damage(DamageType.Piercing, 1, $.character.exclude($.has.def(Evasion)));
+    // 出伤顺序先我方后对方
+    :damage(DamageType.Piercing, 1, $.my.character.exclude($.has.def(Evasion)));
+    :damage(
+      DamageType.Piercing,
+      1,
+      $.opp.character.exclude($.has.def(Evasion)),
+    );
   };
 };
 
