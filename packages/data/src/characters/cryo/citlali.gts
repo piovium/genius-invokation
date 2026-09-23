@@ -229,7 +229,7 @@ define card {
           (:e.getReaction() === Reaction.Frozen ||
             :e.getReaction() === Reaction.Melt)
       );
-      listenTo all;
+      listenTo samePlayer;
       usage perRound, 1;
       :combatStatus(MamaloacosFrigidRainInEffect);
     };
