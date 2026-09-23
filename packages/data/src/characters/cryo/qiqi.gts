@@ -37,8 +37,11 @@ define summon {
     :heal(1, $.macros.myMostInjured);
   };
   on useSkill {
+    // 官方实现附带条件：我方存在生命值未满角色
     when :(
-      :e.skill.caller.definition.id === Qiqi && :e.isSkillType("normal")
+      :e.skill.caller.definition.id === Qiqi &&
+        :e.isSkillType("normal") &&
+        :query($.my.character.var("health", "<", "maxHealth"))
     );
     usage perRound, 1;
     :heal(1, $.my.active);
