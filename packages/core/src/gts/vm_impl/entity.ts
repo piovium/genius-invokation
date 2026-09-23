@@ -732,7 +732,6 @@ export class EntityViewModel extends defineViewModel(
       );
       replaceSkillModel.id = model.getSubId();
       replaceSkillModel.action = function (c) {
-        c.useSkill(skill, { asPrepared: true });
         if (options.nextStatus) {
           c.characterStatus(
             options.nextStatus,
@@ -740,6 +739,7 @@ export class EntityViewModel extends defineViewModel(
             options.nextStatusCreateOpt,
           );
         }
+        c.useSkill(skill, { asPrepared: true });
         c.dispose();
       };
       const switchActiveSkillModel = new TriggeredSkillModel(
