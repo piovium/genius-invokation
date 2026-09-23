@@ -69,10 +69,7 @@ import {
   type GtsUsageOptions,
   type GtsVariableOptions,
 } from "./variables";
-import {
-  createVariable,
-  type TypeHint,
-} from "../../data/utils";
+import { createVariable, type TypeHint } from "../../data/utils";
 import {
   TriggeredSkillModel,
   TriggeredSkillViewModel,
@@ -891,7 +888,12 @@ export class EntityViewModel extends defineViewModel(
         if (c.self.area.type !== "hands") {
           return;
         }
-        c.discard(self);
+        // 舍弃所有同名牌
+        for (const card of c.queryAll(
+          $.my.offStage.def(self.definition.id as SupportHandle),
+        )) {
+          c.discard(card);
+        }
         c.createEntity("support", self.definition.id as SupportHandle, {
           who: c.self.area.who,
           type: "supports",
