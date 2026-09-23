@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { DamageType, DiceType, $ } from "@gi-tcg/core/data";
+import { DamageType, DiceType, $, Aura } from "@gi-tcg/core/data";
 
 /**
  * @id 122061
@@ -295,7 +295,7 @@ define status {
     // 但是官方写成了两次，我们跟着错就好了
     :apply(DamageType.Hydro, :self.master);
     :apply(DamageType.Hydro, :self.master);
-    :setVariable("enableModification", 1);
+    :setVariable("enableModification", +(:self.master.aura === Aura.Hydro));
   };
   on modifyReaction {
     when :( :getVariable("enableModification") );
