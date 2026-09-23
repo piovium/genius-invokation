@@ -103,7 +103,7 @@ define skill {
   :damage(DamageType.Pyro, 1);
   :abortPreview();
   for (const player of [:player, :oppPlayer]) {
-    for (const card of player.pile.slice(0, 3)) {
+    for (const card of player.pile.slice(0, 3).toReversed()) {
       :discard(card);
     }
   }
