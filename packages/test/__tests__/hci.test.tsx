@@ -24,6 +24,7 @@ import {
   Support,
   Attachment,
   CombatStatus,
+  DeclaredEnd,
   $,
 } from "#test";
 import { describe, test, expect } from "vitest";
@@ -62,6 +63,42 @@ import { TowerOfIpsissimus } from "@gi-tcg/data/internal/cards/support/adventure
 import { Paimon } from "@gi-tcg/data/internal/cards/support/ally.gts";
 
 describe("HCI stuff", () => {
+  test("overflowed draws do not trigger onHandCardInserted but still trigger onDrawCard", async () => {
+    const myActive = ref();
+    const puffPops = ref();
+    const mausoleum = ref();
+    const c = setup(
+      <State>
+        <DeclaredEnd opp />
+        <Support opp def={TheMausoleumOfKingDeshret} ref={mausoleum} />
+        <Character my active ref={myActive} health={5}>
+          <Status def={PuffPopsInEffect} usage={3} ref={puffPops} />
+        </Character>
+        <Card my pile notInitial def={Strategize} />
+        <Card my pile notInitial def={Strategize} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+        <Card my def={Paimon} />
+      </State>,
+    );
+    c.expect($.my.hand).toBeCount(10);
+    await c.me.end();
+    // 手牌已满，结束阶段抓的两张牌均爆牌；赤王陵仍计入抓牌次数。
+    c.expect($.my.hand).toBeCount(10);
+    c.expect($.my.pile).toBeCount(0);
+    c.expect(mausoleum).toHaveVariable({ drawnCardCount: 2 });
+    // 爆牌不触发「加入手牌后」，咚咚嘭嘭不消耗次数，也不治疗。
+    c.expect(puffPops).toHaveVariable({ usage: 3 });
+    c.expect(myActive).toHaveVariable({ health: 5 });
+  });
+
   test("HCI event should be handled after other events", async () => {
     const myNext = ref();
     const c = setup(

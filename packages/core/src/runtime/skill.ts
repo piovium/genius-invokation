@@ -471,11 +471,13 @@ export const detailedEventDictionary = {
       (area.type === "hands" || e.overflowed)
     );
   }),
-  // 加入手牌后：行动牌移入手牌，且此时仍在同方
+  // 加入手牌后：行动牌移入手牌，未爆牌且此时仍在同方
   handCardInserted: defineDescriptor("onHandCardInserted", (e, r, curState) => {
     const area = getEntityArea(curState, e.card.id);
     return (
-      checkRelative(e.onTimeState, { who: e.who }, r) && area.who === e.who
+      checkRelative(e.onTimeState, { who: e.who }, r) &&
+      area.who === e.who &&
+      !e.overflowed
     );
   }),
   // 自身加入手牌后
