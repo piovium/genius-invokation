@@ -222,7 +222,8 @@ define card {
   since "v5.7.0";
   cost DiceType.Cryo, 2;
   talent Citlali, none {
-    on damaged {
+    // 对面自伤不触发；实际行为是：我方造成、对方受到的xxx伤害
+    on dealDamage {
       when :(
         !:e.target.isMine() &&
           (:e.getReaction() === Reaction.Frozen ||
