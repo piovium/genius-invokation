@@ -175,6 +175,7 @@ define status {
 /**
  * @id 116112
  * @name 刃轮装束
+ * @cost
  * @description
  * 所附属角色造成的物理伤害变为岩元素伤害。
  * 特技：高速腾跃

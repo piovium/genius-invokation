@@ -55,6 +55,7 @@ define status {
 /**
  * @id 122051
  * @name 水泡史莱姆
+ * @cost
  * @description
  * 特技：水泡战法
  * 可用次数：2

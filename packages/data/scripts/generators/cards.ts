@@ -57,10 +57,11 @@ export function getCardCode(card: EntityRawData) {
   }
   let mainCode = "";
   let extraCode = "";
+  const filteringTags = [...tags];
   if (type === "event") {
     mainCode = `\n  ${TODO_LINE}`;
   } else if (type === "equipment") {
-    const tag = tags.shift();
+    const tag = filteringTags.shift();
     if (tag === "artifact") {
       mainCode = `\n  artifact {\n    ${TODO_LINE}  }`;
     } else if (tag === "technique") {
@@ -74,7 +75,7 @@ export function getCardCode(card: EntityRawData) {
       extraCode = type === "equipment" ? "talent" : "eventTalent";
     }
   } else if (type === "support") {
-    const tag = tags.shift();
+    const tag = filteringTags.shift();
     if (tag === "blessing") {
       mainCode = `\n support {\n    elementalBlessing;    ${TODO_LINE}  }`;
     } else if (tag) {
@@ -83,7 +84,8 @@ export function getCardCode(card: EntityRawData) {
       mainCode = `\n  support {\n    ${TODO_LINE}  }`;
     }
   }
-  const tagCode = tags.length > 0 ? `\n  tags ${tags.join(", ")};` : "";
+  const tagCode =
+    filteringTags.length > 0 ? `\n  tags ${filteringTags.join(", ")};` : "";
   const cost = getCostCode(card.playCost);
   const code = `define card {
   id ${card.id} as ${identifier(card.englishName)};
@@ -142,7 +144,9 @@ export async function generateCards() {
       target = foods;
     } else if (type === "equipment") {
       if (typeof equipsCode[tags[0]] === "undefined") {
-        throw new Error(`${card.id} ${card.name} has unsupported equip type`);
+        throw new Error(
+          `${card.id} ${card.name} has unsupported equip type ${tags[0]}`,
+        );
       }
       target = equipsCode[tags[0]];
     } else if (type === "support") {

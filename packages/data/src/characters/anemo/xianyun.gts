@@ -77,6 +77,7 @@ define combatStatus {
 /**
  * @id 115102
  * @name 竹星
+ * @cost
  * @description
  * 特技：仙力助推
  * 可用次数：2

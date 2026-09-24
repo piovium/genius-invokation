@@ -85,12 +85,15 @@ function getAuxiliaryOfCharacter(id: number): AuxiliaryFound {
         )}) ${skill.description}`;
       }
     }
+    let { code } = getCardCode(obj);
     return {
       id: obj.id,
       name: obj.name,
-      cost: "playCost" in obj ? inlineCostDescription(obj.playCost) : undefined,
-      description: description,
-      code: `define ${obj.kind} {
+      cost: code ? inlineCostDescription(obj.playCost) : void 0,
+      description,
+      code:
+        code ??
+        `define ${obj.kind} {
   id ${obj.id} as ${identifier(obj.englishName)};
   since "${NEW_VERSION}";
   // TODO

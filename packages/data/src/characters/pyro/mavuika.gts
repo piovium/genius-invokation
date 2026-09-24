@@ -101,6 +101,7 @@ define status {
 /**
  * @id 113154
  * @name 驰轮车·跃升
+ * @cost 3*Void
  * @description
  * 此牌被舍弃后：对敌方出战角色造成1点火元素伤害。
  * 特技：跃升
@@ -135,6 +136,7 @@ define card {
 /**
  * @id 113155
  * @name 驰轮车·涉渡
+ * @cost 2*Void
  * @description
  * 此卡牌被打出时：随机触发我方1个「召唤物」的「结束阶段」效果。
  * 特技：涉渡
@@ -174,6 +176,7 @@ define card {
 /**
  * @id 113156
  * @name 驰轮车·疾驰
+ * @cost 1*Aligned
  * @description
  * 此卡牌可使用次数为0时：抓4张牌。
  * 特技：疾驰

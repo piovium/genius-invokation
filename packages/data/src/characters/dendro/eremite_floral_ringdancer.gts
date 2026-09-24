@@ -54,6 +54,7 @@ define combatStatus {
 /**
  * @id 127032
  * @name 厄灵·草之灵蛇
+ * @cost
  * @description
  * 特技：藤蔓锋鳞
  * 可用次数：2
