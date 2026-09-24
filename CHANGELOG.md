@@ -1,6 +1,34 @@
 # 更新日志
 
-**仅记录破坏性改动。**
+**仅记录破坏性改动。** 自 v0.21.0 起，改动内容将由 AI 生成。
+
+## v0.21.0
+
+### 资源与卡牌展示 API
+
+- `@gi-tcg/assets-manager` 升级至 static-data v5：`AssetsManagerOption.apiEndpoint` 改为 `apiBaseUrl`；传入服务根地址（例如 `https://static-data.piovium.org/`），不再包含 `/api/v4`，管理器会自动追加 `/api/v5`。导出常量和环境变量 `DEFAULT_ASSETS_API_ENDPOINT` 均改名为 `DEFAULT_STATIC_DATA_API_BASE_URL`。
+- 行动牌数据合入 `EntityRawData`，`ALL_CATEGORIES` 不再包含 `action_cards`，行动牌的 `category` 变为 `entities`。`ActionCardRawData` 仍保留为 `EntityRawData` 的弃用别名，`getCategory("action_cards")` 仍兼容，但返回新结构；按旧 category 分流的代码需调整。
+- 静态数据中的可空字段从可选属性改为必填的 `T | null`，包括 `shareId`、`sinceVersion`、描述、图标等；`CharacterRawData` 和行动牌数据移除 `obtainable`，改用 `shareId !== null` 判断。行动牌的 `cardFace` 也可能为 `null`；手工构造数据或只检查 `undefined` 的代码需更新。
+- 移除 `CustomActionCard` 和 `CustomData.actionCards`，自定义行动牌统一放入 `CustomData.entities`；图片字段从 `cardFaceUrl` 改为 `cardFaceOrBuffIconUrl`。`CustomEntity` 新增必填字段 `obtainable`、`tags`、`playCost`；`CustomDataLoader` 输出也采用此结构。
+- `@gi-tcg/card-data-viewer` 的 `RegisterResult` 移除 `showSkill(id, opt)`。展示角色技能改用 `showState("character", state, combatStatuses, { ...opt, skillOnly: skillId })`，需要同时提供角色状态和阵营状态。
+
+### Core 查询与数据定义 API
+
+- `$.macros.myEnergyNotFull` 改为 `$.macros.myFirstEnergyNotFull`，并且只返回第一个符合条件的角色；需要全部结果时使用 `$.my.character.var("energy", "<", "maxEnergy")`。
+- 查询回调中的未确认存在的变量改为 `number | undefined`，影响 `var(fn)`、`orderByFn(fn)` 等；`var(name, "!=", value)` 和 `var(fn)` 不再保证相关变量存在。需先收窄或提供默认值；`var(name, predicate)` 对缺失变量不再调用 predicate，而是直接排除该实体。
+- 定义句柄（`CharacterHandle`、`SummonHandle`、`HandleT` 等）增加 `_meta` 类型信息，`SummonHandle` 的品牌字段从 `sm` 改为 `_summon`；手工声明旧句柄类型的代码需更新，GTS 定义应重新生成类型。查询结果按实体类型和所在区域收窄，只有已确定在角色区的状态、装备才暴露 `.master`；查询时需限定所在区域。
+- 移除技能上下文及 reactive state 的 `addVariableWithMax`。固定上限改在 GTS 变量声明中设置 `range` 并使用 `addVariable`；动态上限需自行计算后调用 `setVariable`。`append` 上限仍仅限制重复创建，不替代 `range`。
+- 移除 `maxCostHands` 选项中的 `useTieBreak`，同费用时保留手牌顺序；`discardMaxCostHands` 改为逐张从当前最高费用候选中随机舍弃，会推进随机数状态。
+- `ModifyReactionEventArg` 移除 `cancelEffects()`、`reApplyTo()`、`increasePiercingOtherDamage()`；`ReactionInfo` 移除 `cancelEffects`、`postApply`、`piercingOtherDamage`。修改反应效果需通过 `cancelCoreEffects()` 取消核心效果，再在技能中显式实现所需附着或伤害。
+- GTS 的 `hint swirled;` 改为 `hint DamageType.Anemo { dynamicPreset swirled; };`；原先用 `shield <初值>, Infinity;` 表示无叠加上限的定义改用 `shield <初值>, open;`，其上限为 int32 最大值。
+- 自定义底层技能描述返回的 `SkillResult` 新增必填 `error`（成功时为 `null`）；`SkillInfo` 新增必填 `finalizeMode`；行动详情新增必填 `originalCost`、`originalFast`，`PlayCardEventArg` 构造参数改为带完整行动详情的打牌信息。手工构造这些对象的数据提供者需补齐字段。
+- `@gi-tcg/core/gts/vm` 导出的模型将 `wrapData` 改为 `contextOptions`，其中 `snippets` 改为 `gtsSnippets`；`EntityVMMeta` 等元信息增加 `id`。自定义 VM 扩展需同步调整。
+
+### IO、Mutation 与服务器协议
+
+- `ModifyEntityVarEM` 新增 `oldValue`（Protobuf 字段 `old_value = 7`），裸 `modifyEntityVar` mutation 也新增必填 `oldValue`。`ExposedMutation` 新增 `resetVariables` 分支（字段号 30），用于通知实体每回合次数重置。Protobuf 编码本身向后兼容，但手工构造 TypeScript 消息及穷尽匹配 mutation 的消费者需更新。
+- `PlayerIO.notify` 同步抛错或返回 rejected Promise 不再中断对局；`Game.onPause` 抛错或 reject 会终止对局并使 `Game.start()` reject。依赖回调异常控制流程的调用方需调整。
+- 服务器 SSE 的 `notification.data` 和 `rpc.data.request` 从 JSON 对象改为 Protobuf 二进制的 Base64 字符串，分别按 `Notification`、`RpcRequest` 解码；提交行动的 `response` 也改为完整 `RpcResponse` 消息编码后的 Base64 字符串，不能再提交原先的 RPC payload 对象。客户端与服务器需同步升级。
 
 ## 0.20.0
 - 迁移 Bun 至 Node.js。
