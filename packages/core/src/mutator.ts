@@ -487,29 +487,31 @@ export class StateMutator {
       targetAura: aura,
       enabledLunarReactions: opt.enabledLunarReactions,
     });
-    this.mutate({
-      type: "modifyEntityVar",
-      oldValue: 0,
-      state: target,
-      varName: "aura",
-      value: newAura,
-      direction: null,
-    });
-    if (!opt.fromDamage) {
-      this.notify({
-        mutations: [
-          {
-            $case: "applyAura",
-            elementType: type,
-            targetId: target.id,
-            targetDefinitionId: target.definition.id,
-            reactionType: reaction ?? PbReactionType.UNSPECIFIED,
-            oldAura: aura,
-            newAura,
-          },
-        ],
+    const applyAura = () => {
+      this.mutate({
+        type: "modifyEntityVar",
+        oldValue: 0,
+        state: target,
+        varName: "aura",
+        value: newAura,
+        direction: null,
       });
-    }
+      if (!opt.fromDamage) {
+        this.notify({
+          mutations: [
+            {
+              $case: "applyAura",
+              elementType: type,
+              targetId: target.id,
+              targetDefinitionId: target.definition.id,
+              reactionType: reaction ?? PbReactionType.UNSPECIFIED,
+              oldAura: aura,
+              newAura,
+            },
+          ],
+        });
+      }
+    };
     if (reaction !== null) {
       this.log(
         DetailLogType.Other,
@@ -538,6 +540,9 @@ export class StateMutator {
         events.push(...inlineResult.events);
         causeDefeated ||= inlineResult.causeDefeated;
       }
+      if (!modifyReactionEvent._cancelApplyAura) {
+        applyAura();
+      }
       let reactionDescription: ReactionDefinition | null;
       if (
         !modifyReactionEvent._cancelCoreEffects &&
@@ -559,6 +564,8 @@ export class StateMutator {
         events.push(...inlineResult.emittedEvents);
         causeDefeated ||= inlineResult.causeDefeated;
       }
+    } else {
+      applyAura();
     }
     return { events, causeDefeated };
   }

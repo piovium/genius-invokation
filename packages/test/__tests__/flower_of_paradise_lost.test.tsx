@@ -33,12 +33,7 @@ test("flower of paradise lost: actionPhase and reaction share the same usage per
     <State>
       <DeclaredEnd opp />
       <Character opp active def={HydroTulpa} aura={Aura.Hydro}>
-        <Status
-          def={ElementalLifeformHydro}
-          v={{
-            enableModification: 1,
-          }}
-        />
+        <Status def={ElementalLifeformHydro} />
       </Character>
       <Character my active def={Sucrose} ref={myActive} />
       <Card my def={FlowerOfParadiseLost} />
