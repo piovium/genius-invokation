@@ -145,10 +145,13 @@ define combatStatus {
   since "v7.1.0";
   on useSkill {
     usage 2 { append; };
-    when :( :e.isPlungingAttack() );
+    when :(
+      // 说是还会再检查一下出战
+      :e.isPlungingAttack() && :e.skillCaller.cast<"character">().isActive()
+    );
     :damage(DamageType.Piercing, 1, $.opp.standby);
-  }
-}
+  };
+};
 
 /**
  * @id 216042
@@ -167,12 +170,12 @@ define card {
   talent Albedo, none {
     on staged {
       :summon(SolarIsotoma);
-    }
+    };
     on entityEnter {
       listenTo samePlayer;
       when :( :e.entity.definition.id === SolarIsotoma );
       :combatStatus(SilverIsotoma);
       :generateDice("randomElement", 1);
-    }
-  }
-}
+    };
+  };
+};
