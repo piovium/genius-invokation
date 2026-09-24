@@ -763,7 +763,7 @@ export class StateMutator {
             reactionType: reaction ?? PbReactionType.UNSPECIFIED,
             causeDefeated: damageInfo.causeDefeated,
             oldAura: damageInfo.targetAura,
-            newAura,
+            newAura, // FIX ME: wrong for modifyReaction calls :e.cancelApplyAura()
             oldHealth: target.variables.health,
             newHealth: finalHealth,
             healKind: PbHealKind.NOT_A_HEAL,
