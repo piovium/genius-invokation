@@ -111,7 +111,11 @@ function getTalentCard(id: number, name: string): SourceInfo[] {
       c.tags.includes("GCG_TAG_TALENT") && Math.floor(c.id / 10) === 20000 + id,
   );
   return cards.flatMap((card) => {
-    const { code } = getCardCode(card);
+    const methodName = card.type === "GCG_CARD_MODIFY" ? "talent" : "eventTalent";
+    const { code } = getCardCode(
+      card,
+      `\n  ${methodName} ${identifier(name)} {\n    ${TODO_LINE}  }`,
+    );
     if (!code) {
       return [];
     }

@@ -50,15 +50,17 @@ function getCardTypeAndTags(card: EntityRawData) {
 
 export const TODO_LINE = "// TODO\n";
 
-export function getCardCode(card: EntityRawData) {
+export function getCardCode(card: EntityRawData, extra = "") {
   const { type, tags } = getCardTypeAndTags(card);
   if (type === null) {
     return { type, tags, code: null };
   }
   let mainCode = "";
-  let extraCode = "";
   const filteringTags = [...tags];
-  if (type === "event") {
+  if (extra) {
+    // Talent bodies are supplied by the character generator.
+    mainCode = extra;
+  } else if (type === "event") {
     mainCode = `\n  ${TODO_LINE}`;
   } else if (type === "equipment") {
     const tag = filteringTags.shift();
@@ -71,8 +73,6 @@ export function getCardCode(card: EntityRawData) {
       ["bow", "sword", "catalyst", "pole", "claymore"].includes(tag)
     ) {
       mainCode = `\n  weapon ${tag} {\n    ${TODO_LINE}  }`;
-    } else if (tag === "talent") {
-      extraCode = type === "equipment" ? "talent" : "eventTalent";
     }
   } else if (type === "support") {
     const tag = filteringTags.shift();
@@ -89,7 +89,7 @@ export function getCardCode(card: EntityRawData) {
   const cost = getCostCode(card.playCost);
   const code = `define card {
   id ${card.id} as ${identifier(card.englishName)};
-  since "${NEW_VERSION}";${cost}${tagCode}${extraCode}${mainCode}
+  since "${NEW_VERSION}";${cost}${tagCode}${mainCode}
 }`;
   return { type, tags, code };
 }

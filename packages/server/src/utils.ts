@@ -16,9 +16,9 @@
 import type { Deck } from "@gi-tcg/typings";
 import {
   DEFAULT_ASSETS_MANAGER,
-  type ActionCardRawData,
   type AnyData,
   type CharacterRawData,
+  type EntityRawData,
 } from "@gi-tcg/assets-manager";
 import {
   IsInt,
@@ -73,7 +73,7 @@ const SINGLETON_REQUIRED_TAGS = ["GCG_TAG_LEGEND", "GCG_TAG_CARD_BLESSING"];
 export async function verifyDeck(deck: Deck): Promise<Version> {
   const DEC = DeckVerificationErrorCode;
   const { characters = [], cards = [] } = deck ?? {};
-  const versions = new Set<string | undefined>();
+  const versions = new Set<string | null>();
   const characterSet = new Set(characters);
   if (characters.length !== 3 || characterSet.size !== 3) {
     throw new DeckVerificationError(
@@ -107,7 +107,7 @@ export async function verifyDeck(deck: Deck): Promise<Version> {
   }
   const cardCounts = new Map<number, number>();
   for (const cardId of cards) {
-    const card = await getData<ActionCardRawData>(cardId);
+    const card = await getData<EntityRawData>(cardId);
     if (!card) {
       throw new DeckVerificationError(
         DEC.NotFoundError,
@@ -162,7 +162,7 @@ export async function verifyDeck(deck: Deck): Promise<Version> {
   return maxVersion(versions);
 }
 
-function maxVersion(versions: Iterable<string | undefined>): Version {
+function maxVersion(versions: Iterable<string | null>): Version {
   const ver = [...versions]
     .filter((v): v is string => !!v)
     .toSorted(semverCompare)
@@ -181,8 +181,8 @@ export async function minimumRequiredVersionOfDeck({
   return maxVersion(
     await Promise.all(
       [...characters, ...cards].map((p) =>
-        getData<CharacterRawData | ActionCardRawData>(p).then(
-          (d) => d?.sinceVersion as Version | undefined,
+        getData<CharacterRawData | EntityRawData>(p).then(
+          (d) => d?.sinceVersion ?? null,
         ),
       ),
     ),
