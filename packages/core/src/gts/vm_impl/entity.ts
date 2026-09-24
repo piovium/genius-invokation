@@ -993,7 +993,10 @@ export class EntityViewModel extends defineViewModel(
           break;
         }
       }
-      model.setVariable("hintIcon", icon, { visible: false });
+      model.setVariable("hintIcon", icon, {
+        forceOverwrite: true,
+        visible: false,
+      });
       if (typeof text === "function") {
         const hintReplacement = "[GCG_TOKEN_HINT_TEXT]";
         model.hintText = `\${${hintReplacement}}`;

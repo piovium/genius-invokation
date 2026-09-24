@@ -782,7 +782,8 @@ define card {
       :damage(DamageType.Piercing, :getVariable("damageValue"));
       :addVariable("damageValue", 1);
     };
-    on roundEnd {
+    // 官方 bug：宿灵球出伤比重置还早
+    on roundBegin {
       :setVariable("damageValue", 1);
     };
   };
