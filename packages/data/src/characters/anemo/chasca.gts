@@ -30,6 +30,7 @@ define status {
 /**
  * @id 115112
  * @name 灵枪·仪式杖
+ * @cost
  * @description
  * 特技：多重瞄准。
  * 此牌被弃置时，所附属角色结束夜魂加持。

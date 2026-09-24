@@ -146,7 +146,11 @@ describe("CustomDataLoader GTS", () => {
         rawPlayingDescription: "Marked is active.",
       }),
     );
-    expect(customData[0].actionCards).toContainEqual(
+    expect(customData[0]).not.toHaveProperty("actionCards");
+    expect(
+      customData[0].entities.filter(({ id }) => id === 10_000_004),
+    ).toHaveLength(1);
+    expect(customData[0].entities).toContainEqual(
       expect.objectContaining({
         id: 10_000_004,
         name: "Impact",
@@ -154,9 +158,10 @@ describe("CustomDataLoader GTS", () => {
         rawDynamicDescription: "Impact has dynamic data.",
       }),
     );
-    expect(customData[0].actionCards[0]?.playCost).toEqual([
-      { type: DiceType.Omni, count: 1 },
-    ]);
+    expect(
+      customData[0].entities.find((entity) => entity.type === "eventCard")
+        ?.playCost,
+    ).toEqual([{ type: DiceType.Omni, count: 1 }]);
     expect(gameData.attachments.get(10_000_000)?.version.from).toBe(
       "customData",
     );
@@ -233,7 +238,7 @@ describe("CustomDataLoader GTS", () => {
     expect(customData[0].characters).not.toContainEqual(
       expect.objectContaining({ id: 20_000_000 }),
     );
-    expect(customData[0].actionCards).not.toContainEqual(
+    expect(customData[0].entities).not.toContainEqual(
       expect.objectContaining({ id: 20_000_001 }),
     );
     expect(overrideData).toEqual(

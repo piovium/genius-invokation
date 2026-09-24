@@ -186,7 +186,6 @@ export class CustomDataLoader {
       return customDataItems[0] ?? null;
     }, officialVersionResolver);
     const customData: CustomData = {
-      actionCards: [],
       characters: [],
       entities: [],
       skills: [],
@@ -247,23 +246,13 @@ export class CustomDataLoader {
         rawPlayingDescription: this.playingDescriptions.get(et.id) || undefined,
         cardFaceOrBuffIconUrl: this.images.get(id) ?? placeholderImageUrl(name),
         skills: et.skills.map(parseSkill),
+        rawDynamicDescription: this.dynamicDescriptions.get(id) ?? undefined,
+        obtainable: et.obtainable,
+        tags: [...et.tags],
+        playCost: serializePlayCost(
+          playSkillOfCard(et)?.initiativeSkillConfig.requiredCost,
+        ),
       });
-      if (["equipment", "support", "eventCard"].includes(et.type)) {
-        customData.actionCards.push({
-          id,
-          name,
-          type: et.type,
-          rawDescription: this.descriptions.get(id) ?? "",
-          rawPlayingDescription: this.playingDescriptions.get(id) || undefined,
-          rawDynamicDescription: this.dynamicDescriptions.get(id) || undefined,
-          cardFaceUrl: this.images.get(id) ?? placeholderImageUrl(name),
-          obtainable: et.obtainable,
-          tags: [...et.tags],
-          playCost: serializePlayCost(
-            playSkillOfCard(et)?.initiativeSkillConfig.requiredCost,
-          ),
-        });
-      }
     }
     for (const [id, attachment] of gameData.attachments) {
       collectCustomSkills(attachment.skills);

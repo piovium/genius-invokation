@@ -1,4 +1,3 @@
-
 export interface PlayCost {
   type: string;
   count: number;
@@ -13,9 +12,9 @@ export interface SkillRawData {
   playCost: PlayCost[];
   targetList: ChooseTarget[];
   hidden: boolean;
-  keyMap?: Record<string, any>;
-  iconHash?: string;
-  icon?: string;
+  keyMap: Record<string, any> | null;
+  iconHash: string | null;
+  icon: string | null;
 }
 export interface ChooseTarget {
   id: number;
@@ -25,27 +24,34 @@ export interface ChooseTarget {
   rawHintText: string;
   hintText: string;
 }
-
 export interface CharacterRawData {
+  subElements: string[];
   id: number;
-  /** @deprecated use `shareId` instead */
-  obtainable: boolean;
-  shareId?: number;
-  sinceVersion?: string;
+  shareId: number | null;
+  sinceVersion: string | null;
   name: string;
   englishName: string;
   tags: string[];
-  subElements: string[];
-  storyTitle?: string;
-  storyText?: string;
+  storyTitle: string | null;
+  storyText: string | null;
   skills: SkillRawData[];
   hp: number;
   maxEnergy: number;
   cardFace: string;
   icon: string;
 }
-
 export interface EntityRawData {
+  shownTokenName: string | null;
+  shareId: number | null;
+  sinceVersion: string | null;
+  targetList: ChooseTarget[];
+  relatedCharacterId: number | null;
+  relatedCharacterTags: string[];
+  storyTitle: string | null;
+  storyText: string | null;
+  rawDynamicDescription: string | null;
+  dynamicDescription: string | null;
+  playCost: PlayCost[];
   id: number;
   type: string;
   name: string;
@@ -54,12 +60,12 @@ export interface EntityRawData {
   skills: SkillRawData[];
   rawDescription: string;
   description: string;
-  rawPlayingDescription?: string;
-  playingDescription?: string;
+  rawPlayingDescription: string | null;
+  playingDescription: string | null;
   hidden: boolean;
   remainAfterDie: boolean;
-  persistEffectType?: string;
-  /** 
+  persistEffectType: string | null;
+  /**
    * 持续效果
    * GCG_PERSIST_EFFECT_EXPECTO_PATRONUM 蓝盾
    * GCG_PERSIST_EFFECT_PROTEGO 黄盾
@@ -70,43 +76,16 @@ export interface EntityRawData {
    * GCG_PERSIST_EFFECT_ATTACK_UP 强化
    * GCG_PERSIST_EFFECT_ATTACK_DOWN 虚弱
    */
-  buffType?: string;
-  hintType?: string;
-  shownToken?: string;
-  shownTokenName?: string;
-  shownIcon?: string;
-  /** summons only */
-  cardFace?: string;
+  buffType: string | null;
+  hintType: string | null;
+  shownToken: string | null;
+  shownIcon: string | null;
+  /** Card face when a corresponding view exists. */
+  cardFace: string | null;
   /** status / combat status only */
-  buffIcon?: string;
-  buffIconHash?: string;
+  buffIcon: string | null;
+  buffIconHash: string | null;
 }
-
-export interface ActionCardRawData {
-  id: number;
-  type: string;
-  /** @deprecated use `shareId` instead */
-  obtainable: boolean;
-  shareId?: number;
-  sinceVersion?: string;
-  name: string;
-  englishName: string;
-  tags: string[];
-  targetList: ChooseTarget[];
-  relatedCharacterId: number | null;
-  relatedCharacterTags: string[];
-  storyTitle?: string;
-  storyText?: string;
-  rawDescription: string;
-  description: string;
-  rawPlayingDescription?: string;
-  playingDescription?: string;
-  rawDynamicDescription?: string;
-  dynamicDescription?: string;
-  playCost: PlayCost[];
-  cardFace: string;
-}
-
 export interface KeywordRawData {
   id: number;
   rawName: string;
@@ -115,11 +94,9 @@ export interface KeywordRawData {
   description: string;
 }
 
-export const ALL_CATEGORIES = [
-  "action_cards",
-  "characters",
-  "entities",
-  "keywords",
-] as const;
+/** @deprecated Use EntityRawData instead. */
+export type ActionCardRawData = EntityRawData;
 
-export type Category = (typeof ALL_CATEGORIES)[number];
+export const ALL_CATEGORIES = ["characters", "entities", "keywords"] as const;
+/** Includes the deprecated action_cards compatibility category. */
+export type Category = (typeof ALL_CATEGORIES)[number] | "action_cards";

@@ -41,7 +41,7 @@ import type {
   HistoryHintBlock,
 } from "../history/typings";
 import { Image } from "./Image";
-import type { ActionCardRawData, EntityRawData } from "@gi-tcg/assets-manager";
+import type { EntityRawData } from "@gi-tcg/assets-manager";
 import TuningIcon from "../svg/TuningIcon.svg?fb";
 import DefeatedPreviewIcon from "../svg/DefeatedPreviewIcon.svg?fb";
 import RevivePreviewIcon from "../svg/RevivePreviewIcon.svg?fb";
@@ -1081,7 +1081,7 @@ const CardDescriptionPart = (props: { cardDefinitionId: number }) => {
       <Match when={data()}>
         {(data) => (
           <p class="whitespace-pre-wrap">
-            {(data() as ActionCardRawData | EntityRawData).description}
+            {(data() as EntityRawData).description}
           </p>
         )}
       </Match>

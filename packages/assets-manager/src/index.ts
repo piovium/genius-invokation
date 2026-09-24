@@ -31,7 +31,6 @@ export {
 export * from "./constants";
 export { getNameSync } from "./names";
 export type {
-  CustomActionCard,
   CustomAttachment,
   CustomCharacter,
   CustomData,

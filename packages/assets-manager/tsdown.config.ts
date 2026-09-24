@@ -22,7 +22,8 @@ export default defineConfig({
   dts: process.env.NO_TYPING ? false : { build: true },
   minify: true,
   env: {
-    DEFAULT_ASSETS_API_ENDPOINT: process.env.DEFAULT_ASSETS_API_ENDPOINT || "",
+    DEFAULT_STATIC_DATA_API_BASE_URL:
+      process.env.DEFAULT_STATIC_DATA_API_BASE_URL || "",
   },
   copy: "src/data",
   target: false,

@@ -15,10 +15,10 @@
 
 import { getCostCode, inlineCostDescription, isLegend } from "./cost";
 import { identifier, SourceInfo, writeSourceCode } from "./source";
-import { ActionCardRawData, actionCards, entities } from "./data";
+import { EntityRawData, entities } from "./data";
 import { NEW_VERSION } from "./config";
 
-export function getCardTypeAndTags(card: ActionCardRawData) {
+function getCardTypeAndTags(card: EntityRawData) {
   const TAG_MAP: Record<string, string> = {
     // GCG_TAG_TALENT: "talent", // use talent
     GCG_TAG_SLOWLY: "action",
@@ -44,19 +44,26 @@ export function getCardTypeAndTags(card: ActionCardRawData) {
     GCG_CARD_EVENT: "event",
     GCG_CARD_MODIFY: "equipment",
   };
-  const type = TYPE_MAP[card.type];
+  const type = TYPE_MAP[card.type] || null;
   return { type, tags };
 }
 
 export const TODO_LINE = "// TODO\n";
 
-export function getCardCode(card: ActionCardRawData, extra = ""): string {
+export function getCardCode(card: EntityRawData, extra = "") {
   const { type, tags } = getCardTypeAndTags(card);
+  if (type === null) {
+    return { type, tags, code: null };
+  }
   let mainCode = "";
-  if (type === "event") {
+  const filteringTags = [...tags];
+  if (extra) {
+    // Talent bodies are supplied by the character generator.
+    mainCode = extra;
+  } else if (type === "event") {
     mainCode = `\n  ${TODO_LINE}`;
   } else if (type === "equipment") {
-    const tag = tags.shift();
+    const tag = filteringTags.shift();
     if (tag === "artifact") {
       mainCode = `\n  artifact {\n    ${TODO_LINE}  }`;
     } else if (tag === "technique") {
@@ -68,7 +75,7 @@ export function getCardCode(card: ActionCardRawData, extra = ""): string {
       mainCode = `\n  weapon ${tag} {\n    ${TODO_LINE}  }`;
     }
   } else if (type === "support") {
-    const tag = tags.shift();
+    const tag = filteringTags.shift();
     if (tag === "blessing") {
       mainCode = `\n support {\n    elementalBlessing;    ${TODO_LINE}  }`;
     } else if (tag) {
@@ -77,12 +84,14 @@ export function getCardCode(card: ActionCardRawData, extra = ""): string {
       mainCode = `\n  support {\n    ${TODO_LINE}  }`;
     }
   }
-  const tagCode = tags.length > 0 ? `\n  tags ${tags.join(", ")};` : "";
+  const tagCode =
+    filteringTags.length > 0 ? `\n  tags ${filteringTags.join(", ")};` : "";
   const cost = getCostCode(card.playCost);
-  return `define card {
+  const code = `define card {
   id ${card.id} as ${identifier(card.englishName)};
-  since "${NEW_VERSION}";${cost}${tagCode}${extra}${mainCode}
+  since "${NEW_VERSION}";${cost}${tagCode}${mainCode}
 }`;
+  return { type, tags, code };
 }
 
 export async function generateCards() {
@@ -108,7 +117,7 @@ export async function generateCards() {
   let legends: SourceInfo[] = [];
   let others: SourceInfo[] = [];
 
-  for (const card of actionCards) {
+  for (const card of entities) {
     if (card.id <= 211) {
       // 系统，不管
       continue;
@@ -124,7 +133,10 @@ export async function generateCards() {
       // 神人
       continue;
     }
-    const { type, tags } = getCardTypeAndTags(card);
+    const { type, tags, code } = getCardCode(card);
+    if (!type) {
+      continue;
+    }
     let target: SourceInfo[];
     if (isLegend(card.playCost)) {
       target = legends;
@@ -132,7 +144,9 @@ export async function generateCards() {
       target = foods;
     } else if (type === "equipment") {
       if (typeof equipsCode[tags[0]] === "undefined") {
-        throw new Error(`${card.id} ${card.name} has unsupported equip type`);
+        throw new Error(
+          `${card.id} ${card.name} has unsupported equip type ${tags[0]}`,
+        );
       }
       target = equipsCode[tags[0]];
     } else if (type === "support") {
@@ -166,7 +180,7 @@ export async function generateCards() {
       name: card.name,
       cost: inlineCostDescription(card.playCost),
       description: description,
-      code: getCardCode(card),
+      code,
     });
   }
   return Promise.all([

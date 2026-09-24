@@ -13,18 +13,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import {
-  EntityRawData,
-  characters,
-  actionCards,
-  entities,
-  ActionCardRawData,
-} from "./data";
+import { EntityRawData, characters, entities } from "./data";
 
 import { snakeCase } from "case-anything";
 import { writeSourceCode, SourceInfo, identifier } from "./source";
 import { getCostCode, inlineCostDescription } from "./cost";
-import { getCardCode, getCardTypeAndTags, TODO_LINE } from "./cards";
+import { getCardCode, TODO_LINE } from "./cards";
 import { NEW_VERSION } from "./config";
 
 interface AuxiliaryFound {
@@ -44,8 +38,7 @@ function getAuxiliaryOfCharacter(id: number): AuxiliaryFound {
   type EntityRawDataWithKind = EntityRawData & { kind: string };
   const mySummons: EntityRawDataWithKind[] = [];
   const myStatuses: EntityRawDataWithKind[] = [];
-  const myCards: ((EntityRawData | ActionCardRawData) & { kind: string })[] =
-    [];
+  const myCards: (EntityRawData & { kind: string })[] = [];
   const myCombatStatuses: EntityRawDataWithKind[] = [];
   const myUnknownEntities: EntityRawDataWithKind[] = [];
   for (const obj of candidates) {
@@ -62,6 +55,7 @@ function getAuxiliaryOfCharacter(id: number): AuxiliaryFound {
       case "GCG_CARD_ONSTAGE":
         myCombatStatuses.push({ ...obj, kind: "combatStatus" });
         break;
+      case "GCG_CARD_EVENT":
       case "GCG_CARD_MODIFY":
       case "GCG_CARD_ASSIST":
         myCards.push({ ...obj, kind: "card" });
@@ -70,15 +64,6 @@ function getAuxiliaryOfCharacter(id: number): AuxiliaryFound {
         // beta data
         myUnknownEntities.push({ ...obj, kind: "unknown" });
         break;
-    }
-  }
-  for (const obj of actionCards) {
-    if (
-      obj.type === "GCG_CARD_EVENT" &&
-      Math.floor(obj.id / 10) === 10000 + id &&
-      !candidates.find((c) => c.id === obj.id)
-    ) {
-      myCards.push({ ...obj, kind: "card" });
     }
   }
   const items = [
@@ -100,13 +85,15 @@ function getAuxiliaryOfCharacter(id: number): AuxiliaryFound {
         )}) ${skill.description}`;
       }
     }
+    let { code } = getCardCode(obj);
     return {
       id: obj.id,
       name: obj.name,
-      cost:
-        "playCost" in obj ? inlineCostDescription(obj.playCost) : undefined,
-      description: description,
-      code: `define ${obj.kind} {
+      cost: code ? inlineCostDescription(obj.playCost) : void 0,
+      description,
+      code:
+        code ??
+        `define ${obj.kind} {
   id ${obj.id} as ${identifier(obj.englishName)};
   since "${NEW_VERSION}";
   // TODO
@@ -119,23 +106,28 @@ function getAuxiliaryOfCharacter(id: number): AuxiliaryFound {
 }
 
 function getTalentCard(id: number, name: string): SourceInfo[] {
-  const cards = actionCards.filter(
+  const cards = entities.filter(
     (c) =>
       c.tags.includes("GCG_TAG_TALENT") && Math.floor(c.id / 10) === 20000 + id,
   );
-  return cards.map((card) => {
-    const { type } = getCardTypeAndTags(card);
-    const methodName = type === "equipment" ? "talent" : "eventTalent";
-    return {
-      id: card.id,
-      name: card.name,
-      cost: inlineCostDescription(card.playCost),
-      description: card.description,
-      code: getCardCode(
-        card,
-        `\n  ${methodName} ${identifier(name)} {\n    ${TODO_LINE}  }`,
-      ),
-    };
+  return cards.flatMap((card) => {
+    const methodName = card.type === "GCG_CARD_MODIFY" ? "talent" : "eventTalent";
+    const { code } = getCardCode(
+      card,
+      `\n  ${methodName} ${identifier(name)} {\n    ${TODO_LINE}  }`,
+    );
+    if (!code) {
+      return [];
+    }
+    return [
+      {
+        id: card.id,
+        name: card.name,
+        cost: inlineCostDescription(card.playCost),
+        description: card.description,
+        code,
+      },
+    ];
   });
 }
 

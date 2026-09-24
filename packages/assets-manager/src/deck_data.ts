@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { ActionCardRawData, CharacterRawData } from "./data_types";
+import type { EntityRawData, CharacterRawData } from "./data_types";
 
 export interface DeckDataCharacterInfo {
   id: number;
@@ -40,10 +40,10 @@ export interface DeckData {
 
 export function getDeckData(
   characters: CharacterRawData[],
-  actionCards: ActionCardRawData[],
+  actionCards: EntityRawData[],
 ): DeckData {
-  const chs = characters.filter((ch) => !!ch.shareId);
-  const acs = actionCards.filter((ac) => !!ac.shareId);
+  const chs = characters.filter((ch) => ch.shareId !== null);
+  const acs = actionCards.filter((ac) => ac.shareId !== null);
 
   const allTags = [...new Set([...chs, ...acs].flatMap((x) => x.tags))];
 
@@ -62,7 +62,7 @@ export function getDeckData(
         {
           id: ch.id,
           tags: ch.tags,
-          version: allVersions.indexOf(ch.sinceVersion!),
+          version: allVersions.indexOf(ch.sinceVersion ?? "v3.3.0"),
         },
       ]),
     ),
@@ -73,7 +73,7 @@ export function getDeckData(
           id: ac.id,
           type: ac.type,
           tags: ac.tags,
-          version: allVersions.indexOf(ac.sinceVersion!),
+          version: allVersions.indexOf(ac.sinceVersion ?? "v3.3.0"),
           relatedCharacterId: ac.relatedCharacterId,
           relatedCharacterTag: (() => {
             const t = ac.relatedCharacterTags;

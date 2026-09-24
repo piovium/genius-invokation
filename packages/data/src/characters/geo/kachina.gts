@@ -58,6 +58,7 @@ define status {
 /**
  * @id 116102
  * @name 冲天转转
+ * @cost
  * @description
  * 附属角色切换至后台时：消耗1点夜魂值，召唤冲天转转·脱离。
  * 特技：转转冲击

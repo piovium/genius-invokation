@@ -151,7 +151,7 @@ define card {
 
 /**
  * @id 124053
- * @name 噬骸能量块
+ * @name 噬骸能量块（冷却中）
  * @description
  * 本回合无法再打出噬骸能量块。
  */
