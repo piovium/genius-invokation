@@ -12,19 +12,6 @@ export interface CustomPlayCost {
   count: number;
 }
 
-export interface CustomActionCard {
-  id: number;
-  name: string;
-  rawDescription: string;
-  rawPlayingDescription?: string;
-  rawDynamicDescription?: string;
-  cardFaceUrl: string;
-  obtainable: boolean;
-  type: EntityType;
-  tags: EntityTag[];
-  playCost: CustomPlayCost[];
-}
-
 export interface CustomCharacter {
   id: number;
   name: string;
@@ -53,8 +40,10 @@ export interface CustomEntity {
   rawPlayingDescription?: string;
   type: EntityType;
   cardFaceOrBuffIconUrl: string;
-  // tags: EntityTag[];
-  // hidden: boolean;
+  rawDynamicDescription?: string;
+  obtainable: boolean;
+  tags: EntityTag[];
+  playCost: CustomPlayCost[];
   skills: CustomSkill[];
 }
 
@@ -69,7 +58,6 @@ export interface CustomAttachment {
 }
 
 export interface CustomData {
-  actionCards: CustomActionCard[];
   characters: CustomCharacter[];
   entities: CustomEntity[];
   /** Standalone skills, including overrides whose character is official. */

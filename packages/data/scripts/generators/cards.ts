@@ -15,10 +15,10 @@
 
 import { getCostCode, inlineCostDescription, isLegend } from "./cost";
 import { identifier, SourceInfo, writeSourceCode } from "./source";
-import { ActionCardRawData, actionCards, entities } from "./data";
+import { EntityRawData, entities } from "./data";
 import { NEW_VERSION } from "./config";
 
-export function getCardTypeAndTags(card: ActionCardRawData) {
+function getCardTypeAndTags(card: EntityRawData) {
   const TAG_MAP: Record<string, string> = {
     // GCG_TAG_TALENT: "talent", // use talent
     GCG_TAG_SLOWLY: "action",
@@ -44,15 +44,19 @@ export function getCardTypeAndTags(card: ActionCardRawData) {
     GCG_CARD_EVENT: "event",
     GCG_CARD_MODIFY: "equipment",
   };
-  const type = TYPE_MAP[card.type];
+  const type = TYPE_MAP[card.type] || null;
   return { type, tags };
 }
 
 export const TODO_LINE = "// TODO\n";
 
-export function getCardCode(card: ActionCardRawData, extra = ""): string {
+export function getCardCode(card: EntityRawData) {
   const { type, tags } = getCardTypeAndTags(card);
+  if (type === null) {
+    return { type, tags, code: null };
+  }
   let mainCode = "";
+  let extraCode = "";
   if (type === "event") {
     mainCode = `\n  ${TODO_LINE}`;
   } else if (type === "equipment") {
@@ -66,6 +70,8 @@ export function getCardCode(card: ActionCardRawData, extra = ""): string {
       ["bow", "sword", "catalyst", "pole", "claymore"].includes(tag)
     ) {
       mainCode = `\n  weapon ${tag} {\n    ${TODO_LINE}  }`;
+    } else if (tag === "talent") {
+      extraCode = type === "equipment" ? "talent" : "eventTalent";
     }
   } else if (type === "support") {
     const tag = tags.shift();
@@ -79,10 +85,11 @@ export function getCardCode(card: ActionCardRawData, extra = ""): string {
   }
   const tagCode = tags.length > 0 ? `\n  tags ${tags.join(", ")};` : "";
   const cost = getCostCode(card.playCost);
-  return `define card {
+  const code = `define card {
   id ${card.id} as ${identifier(card.englishName)};
-  since "${NEW_VERSION}";${cost}${tagCode}${extra}${mainCode}
+  since "${NEW_VERSION}";${cost}${tagCode}${extraCode}${mainCode}
 }`;
+  return { type, tags, code };
 }
 
 export async function generateCards() {
@@ -108,7 +115,7 @@ export async function generateCards() {
   let legends: SourceInfo[] = [];
   let others: SourceInfo[] = [];
 
-  for (const card of actionCards) {
+  for (const card of entities) {
     if (card.id <= 211) {
       // 系统，不管
       continue;
@@ -124,7 +131,10 @@ export async function generateCards() {
       // 神人
       continue;
     }
-    const { type, tags } = getCardTypeAndTags(card);
+    const { type, tags, code } = getCardCode(card);
+    if (!type) {
+      continue;
+    }
     let target: SourceInfo[];
     if (isLegend(card.playCost)) {
       target = legends;
@@ -166,7 +176,7 @@ export async function generateCards() {
       name: card.name,
       cost: inlineCostDescription(card.playCost),
       description: description,
-      code: getCardCode(card),
+      code,
     });
   }
   return Promise.all([

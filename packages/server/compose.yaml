@@ -16,7 +16,7 @@ services:
       context: ../..
       dockerfile: packages/server/Dockerfile
       args:
-        DEFAULT_ASSETS_API_ENDPOINT: ${DEFAULT_ASSETS_API_ENDPOINT}
+        DEFAULT_STATIC_DATA_API_BASE_URL: ${DEFAULT_STATIC_DATA_API_BASE_URL}
 
   server:
     image: genius-invokation-server

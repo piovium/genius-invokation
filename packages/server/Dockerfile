@@ -1,7 +1,7 @@
 FROM ghcr.io/pnpm/pnpm:latest AS build
 RUN pnpm runtime set node 26 -g
 WORKDIR /app
-ARG DEFAULT_ASSETS_API_ENDPOINT
+ARG DEFAULT_STATIC_DATA_API_BASE_URL
 COPY . .
 ENV FROM_SOURCE=1
 RUN pnpm install --frozen-lockfile && pnpm build:no-typing server...

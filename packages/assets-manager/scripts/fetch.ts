@@ -16,13 +16,8 @@
 
 import path from "node:path";
 import {
-  ALL_CATEGORIES,
   getDeckData,
   AssetsManager,
-  type ActionCardRawData,
-  type CharacterRawData,
-  type EntityRawData,
-  type KeywordRawData,
   // @ts-ignore Cross-project import, but it should be fine
 } from "#src/index";
 import { mkdir, rm, writeFile } from "node:fs/promises";
@@ -47,35 +42,31 @@ const write = async (data: unknown, ...paths: string[]) => {
 
 for (const language of ["EN", "CHS"] as const) {
   const manager = new AssetsManager({ language });
-  const [actionCards, characters, entities, keywords] = (await Promise.all(
-    ALL_CATEGORIES.map((category) => manager.getCategory(category)),
-  )) as [
-    ActionCardRawData[],
-    CharacterRawData[],
-    EntityRawData[],
-    KeywordRawData[],
-  ];
+  const [characters, entities, keywords] = await Promise.all([
+    manager.getCategory("characters"),
+    manager.getCategory("entities"),
+    manager.getCategory("keywords"),
+  ]);
 
   const names = Object.fromEntries([
-    ...[...characters, ...actionCards, ...entities, ...keywords].flatMap(
-      (e) => [
-        [e.id, e.name],
-        ...("skills" in e ? e.skills.map((s) => [s.id, s.name]) : []),
-      ],
-    ),
+    ...[...characters, ...entities, ...keywords].flatMap((e) => [
+      [e.id, e.name],
+      ...("skills" in e ? e.skills.map((s) => [s.id, s.name]) : []),
+    ]),
   ]);
 
   await write(names, language, "names.json");
-  await write(actionCards, language, "action_cards.json");
   await write(characters, language, "characters.json");
   await write(entities, language, "entities.json");
   await write(keywords, language, "keywords.json");
 
   // language agnostic
   if (language === "CHS") {
-    const deckData = getDeckData(characters, actionCards);
+    const deckData = getDeckData(characters, entities);
     const shareMap = Object.fromEntries(
-      [...characters, ...actionCards].map((card) => [card.shareId, card.id]),
+      [...characters, ...entities]
+        .filter((card) => card.shareId !== null)
+        .map((card) => [card.shareId, card.id]),
     );
     await write(deckData, "deck.json");
     await write(shareMap, "share_id.json");

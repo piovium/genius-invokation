@@ -30,9 +30,9 @@ function App() {
     console.log(deck());
   });
   const assetsManager = new AssetsManager({
-    apiEndpoint: `https://static-data.piovium.org/api/v4`,
-    language: 'EN',
-  })
+    apiBaseUrl: `https://static-data.piovium.org/`,
+    language: "EN",
+  });
   return (
     <DeckBuilder
       assetsManager={assetsManager}

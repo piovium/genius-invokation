@@ -16,11 +16,11 @@
 import { IS_BETA } from "@gi-tcg/config";
 import type { Language } from "./manager";
 
-export const DEFAULT_ASSETS_API_ENDPOINT: string =
-  import.meta.env?.DEFAULT_ASSETS_API_ENDPOINT ||
+export const DEFAULT_STATIC_DATA_API_BASE_URL: string =
+  import.meta.env?.DEFAULT_STATIC_DATA_API_BASE_URL ||
   // @ts-expect-error Node.js typing
-  globalThis.process?.env.DEFAULT_ASSETS_API_ENDPOINT ||
-  "https://static-data.piovium.org/api/v4";
+  globalThis.process?.env.DEFAULT_STATIC_DATA_API_BASE_URL ||
+  "https://static-data.piovium.org/";
 
 const preferredLanguage =
   globalThis?.navigator?.languages?.[0] ??

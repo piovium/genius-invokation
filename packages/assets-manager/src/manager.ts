@@ -36,20 +36,16 @@ import { DiceType } from "@gi-tcg/typings";
 import { getDeckData, type DeckData } from "./deck_data";
 import { getStaticDeckData } from "./static_deck_data";
 import {
-  DEFAULT_ASSETS_API_ENDPOINT,
+  DEFAULT_STATIC_DATA_API_BASE_URL,
   DEFAULT_LANGUAGE,
   DEFAULT_VERSION,
 } from "./constants";
 import { limitFunction } from "p-limit";
-import type { Category } from "./data_types";
+import { type Category } from "./data_types";
 import { staticDecode, staticEncode } from "./sharing";
 
 export type AnyData =
-  | ActionCardRawData
-  | CharacterRawData
-  | EntityRawData
-  | KeywordRawData
-  | SkillRawData;
+  CharacterRawData | EntityRawData | KeywordRawData | SkillRawData;
 
 export interface GetDataOptions {}
 
@@ -86,7 +82,7 @@ export interface OverrideData {
 }
 
 export interface AssetsManagerOption {
-  apiEndpoint: string;
+  apiBaseUrl: string;
   version: AssetsVersion;
   language: Language;
   customData: CustomData[];
@@ -113,6 +109,7 @@ export class AssetsManager {
   private readonly customDataImageUrls = new Map<number, string>();
   private readonly dataOverrides = new Map<number, OverrideData>();
   private readonly options: AssetsManagerOption;
+  private readonly apiUrl: string;
   private readonly versionMap: AssetsVersionMap;
 
   private readonly limitedFetch: (
@@ -122,7 +119,7 @@ export class AssetsManager {
 
   constructor(options: Partial<AssetsManagerOption> = {}) {
     this.options = {
-      apiEndpoint: DEFAULT_ASSETS_API_ENDPOINT,
+      apiBaseUrl: DEFAULT_STATIC_DATA_API_BASE_URL,
       language: DEFAULT_LANGUAGE,
       version: DEFAULT_VERSION,
       customData: [],
@@ -131,6 +128,7 @@ export class AssetsManager {
       concurrency: 32,
       ...options,
     };
+    this.apiUrl = `${this.options.apiBaseUrl.replace(/\/+$/, "")}/api/v5`;
     for (const override of this.options.overrideData) {
       this.dataOverrides.set(override.id, {
         ...this.dataOverrides.get(override.id),
@@ -269,6 +267,9 @@ export class AssetsManager {
           description: "",
           playCost: genCost(skill.playCost, false),
           hidden: false,
+          keyMap: null,
+          iconHash: null,
+          icon: null,
           targetList: [],
         };
         this.dataCacheSync.set(skill.id, data);
@@ -280,8 +281,7 @@ export class AssetsManager {
     };
     setupSkill(data.skills);
     for (const ch of data.characters) {
-      const data: CharacterRawData = {
-        // @ts-expect-error
+      const data: CharacterRawData & { category: "characters" } = {
         category: "characters",
         id: ch.id,
         name: ch.name,
@@ -293,67 +293,67 @@ export class AssetsManager {
           .filter((s): s is string => !!s),
         cardFace: "",
         icon: "",
-        shareId: ch.obtainable ? Number.MAX_SAFE_INTEGER : undefined,
-        obtainable: ch.obtainable,
+        shareId: ch.obtainable ? Number.MAX_SAFE_INTEGER : null,
+        sinceVersion: null,
+        storyTitle: null,
+        storyText: null,
+        subElements: [],
         skills: setupSkill(ch.skills),
       };
       this.dataCacheSync.set(ch.id, data);
       this.customDataNames.set(ch.id, ch.name);
       this.customDataImageUrls.set(ch.id, ch.cardFaceUrl);
     }
-    for (const ac of data.actionCards) {
-      const data: ActionCardRawData = {
-        // @ts-expect-error
-        category: "action_cards",
-        id: ac.id,
-        type: ENTITY_TYPE_MAP[ac.type],
-        name: ac.name,
-        englishName: "",
-        rawDescription: ac.rawDescription,
-        rawPlayingDescription: ac.rawPlayingDescription,
-        rawDynamicDescription: ac.rawDynamicDescription,
-        description: "",
-        cardFace: "",
-        shareId: ac.obtainable ? Number.MAX_SAFE_INTEGER : undefined,
-        obtainable: ac.obtainable,
-        tags: ac.tags
-          .map((tag) => ENTITY_TAG_MAP[tag])
-          .filter((s): s is string => !!s),
-        playCost: genCost(ac.playCost, false),
-        targetList: [],
-        relatedCharacterId: null,
-        relatedCharacterTags: [],
-      };
-      this.dataCacheSync.set(ac.id, data);
-      this.customDataNames.set(ac.id, ac.name);
-      this.customDataImageUrls.set(ac.id, ac.cardFaceUrl);
-    }
+    const entityDefaults = {
+      shareId: null,
+      sinceVersion: null,
+      targetList: [],
+      relatedCharacterId: null,
+      relatedCharacterTags: [],
+      storyTitle: null,
+      storyText: null,
+      rawDynamicDescription: null,
+      dynamicDescription: null,
+      playCost: [],
+      playingDescription: null,
+      remainAfterDie: false,
+      persistEffectType: null,
+      buffType: null,
+      hintType: null,
+      shownToken: null,
+      shownTokenName: null,
+      shownIcon: null,
+      cardFace: null,
+      buffIcon: null,
+      buffIconHash: null,
+    } satisfies Partial<EntityRawData>;
     for (const et of data.entities) {
-      const data: EntityRawData = {
-        // @ts-expect-error
+      const data: EntityRawData & { category: "entities" } = {
+        ...entityDefaults,
         category: "entities",
         id: et.id,
         type: ENTITY_TYPE_MAP[et.type],
         name: et.name,
         englishName: "",
-        tags: [],
+        tags: et.tags
+          .map((tag) => ENTITY_TAG_MAP[tag])
+          .filter((s): s is string => !!s),
+        shareId: et.obtainable ? Number.MAX_SAFE_INTEGER : null,
+        playCost: genCost(et.playCost, false),
+        rawDynamicDescription: et.rawDynamicDescription ?? null,
         skills: setupSkill(et.skills),
         rawDescription: et.rawDescription,
-        rawPlayingDescription: et.rawPlayingDescription,
+        rawPlayingDescription: et.rawPlayingDescription ?? null,
         description: "",
         hidden: false,
       };
-      // May be registered by action_card. Merge.
-      const existing = this.dataCacheSync.get(et.id);
-      this.dataCacheSync.set(et.id, { ...existing, ...data });
-      if (!existing) {
-        this.customDataNames.set(et.id, et.name);
-        this.customDataImageUrls.set(et.id, et.cardFaceOrBuffIconUrl);
-      }
+      this.dataCacheSync.set(et.id, data);
+      this.customDataNames.set(et.id, et.name);
+      this.customDataImageUrls.set(et.id, et.cardFaceOrBuffIconUrl);
     }
     for (const attachment of data.attachments ?? []) {
-      const attachmentData: EntityRawData = {
-        // @ts-expect-error
+      const attachmentData: EntityRawData & { category: "entities" } = {
+        ...entityDefaults,
         category: "entities",
         id: attachment.id,
         type: "attachment",
@@ -362,7 +362,7 @@ export class AssetsManager {
         tags: [...attachment.tags],
         skills: setupSkill(attachment.skills),
         rawDescription: attachment.rawDescription,
-        rawPlayingDescription: attachment.rawPlayingDescription,
+        rawPlayingDescription: attachment.rawPlayingDescription ?? null,
         description: "",
         hidden: false,
         remainAfterDie: false,
@@ -419,7 +419,7 @@ export class AssetsManager {
       return this.dataCache.get(id)!;
     }
     const version = this.getDatumVersion(id);
-    const url = `${this.options.apiEndpoint}/datum/${version}/${this.options.language}/${id}`;
+    const url = `${this.apiUrl}/datum/${version}/${this.options.language}/${id}`;
     const promise = this.limitedFetch(url, FETCH_OPTION)
       .then((r) => r.json())
       .then((data) => {
@@ -440,7 +440,7 @@ export class AssetsManager {
     }
     const datumId = -id;
     const version = this.getDatumVersion(datumId);
-    const url = `${this.options.apiEndpoint}/datum/${version}/${this.options.language}/${datumId}`;
+    const url = `${this.apiUrl}/datum/${version}/${this.options.language}/${datumId}`;
     const promise = this.limitedFetch(url, FETCH_OPTION)
       .then((r) => r.json())
       .then((data) => {
@@ -456,6 +456,7 @@ export class AssetsManager {
     category: "characters",
     options?: GetCategoryOptions,
   ): Promise<CharacterRawData[]>;
+  /** @deprecated Request entities and filter with isActionCard instead. */
   async getCategory(
     category: "action_cards",
     options?: GetCategoryOptions,
@@ -471,27 +472,22 @@ export class AssetsManager {
   async getCategory(
     category: "all",
     options?: GetCategoryOptions,
-  ): Promise<
-    (ActionCardRawData | CharacterRawData | EntityRawData | KeywordRawData)[]
-  >;
+  ): Promise<AnyData[]>;
   async getCategory(
     category: Category | "all",
     options?: GetCategoryOptions,
-  ): Promise<
-    (ActionCardRawData | CharacterRawData | EntityRawData | KeywordRawData)[]
-  >;
+  ): Promise<AnyData[]>;
   async getCategory(
     category: Category | "all",
     options: GetCategoryOptions = {},
-  ): Promise<
-    (ActionCardRawData | CharacterRawData | EntityRawData | KeywordRawData)[]
-  > {
+  ): Promise<AnyData[]> {
     const version = this.getCategoryVersion(options.force ?? false);
-    const dataUrl = `${this.options.apiEndpoint}/data/${version}/${this.options.language}/${category}`;
+    const apiCategory = category === "action_cards" ? "entities" : category;
+    const dataUrl = `${this.apiUrl}/data/${version}/${this.options.language}/${apiCategory}`;
     const { data } = await this.limitedFetch(dataUrl, FETCH_OPTION).then((r) =>
       r.json(),
     );
-    return data;
+    return category === "action_cards" ? data.filter(isActionCard) : data;
   }
 
   async getImage(id: number, options: GetImageOptions = {}): Promise<Blob> {
@@ -522,7 +518,7 @@ export class AssetsManager {
     if (this.imageCache.has(cacheKey)) {
       return this.imageCache.get(cacheKey)!;
     }
-    const url = `${this.options.apiEndpoint}/image/raw/${imageName}`;
+    const url = `${this.apiUrl}/image/raw/${imageName}`;
     const promise = this.limitedFetch(url, FETCH_OPTION)
       .then((r) => r.blob())
       .then((blob) => {
@@ -540,12 +536,12 @@ export class AssetsManager {
     });
     const url =
       this.customDataImageUrls.get(id) ??
-      `${this.options.apiEndpoint}/image/${id}?${searchParams}`;
+      `${this.apiUrl}/image/${id}?${searchParams}`;
     return url;
   }
 
   getRawImageUrlSync(imageName: string): string {
-    return `${this.options.apiEndpoint}/image/raw/${imageName}`;
+    return `${this.apiUrl}/image/raw/${imageName}`;
   }
 
   async getImageUrl(
@@ -584,9 +580,7 @@ export class AssetsManager {
   private preparedSyncData: Promise<void> | undefined;
   private prepareSyncData() {
     return (this.preparedSyncData ??= (async () => {
-      let data: (
-        ActionCardRawData | CharacterRawData | EntityRawData | KeywordRawData
-      )[];
+      let data: AnyData[];
       try {
         data = await this.getCategory("all", { force: false });
       } catch (error) {
@@ -623,8 +617,8 @@ export class AssetsManager {
       .toArray() as CharacterRawData[];
     const actionCards = this.dataCacheSync
       .values()
-      .filter((data: any) => data.category === "action_cards")
-      .toArray() as ActionCardRawData[];
+      .filter((data: any) => data.category === "entities")
+      .toArray() as EntityRawData[];
     return getDeckData(characters, actionCards);
   }
 
@@ -637,6 +631,14 @@ export class AssetsManager {
   decode(code: string) {
     return staticDecode(code);
   }
+}
+
+function isActionCard(data: { type?: string }): boolean {
+  return (
+    data.type === "GCG_CARD_EVENT" ||
+    data.type === "GCG_CARD_MODIFY" ||
+    data.type === "GCG_CARD_ASSIST"
+  );
 }
 
 export const DEFAULT_ASSETS_MANAGER = new AssetsManager({

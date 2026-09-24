@@ -26,9 +26,8 @@ import {
 import type { PbCharacterState, PbEntityState } from "@gi-tcg/typings";
 import type { ViewerInput } from "./CardDataViewer";
 import type {
-  ActionCardRawData,
-  CharacterRawData,
   EntityRawData,
+  CharacterRawData,
   KeywordRawData,
   PlayCost,
   SkillRawData,
@@ -151,12 +150,11 @@ export function ActionCard(props: CardDataProps) {
   const { assetsManager, t } = useAssetsManager();
   const [data] = createResource(
     () => [props.input.definitionId, assetsManager()] as const,
-    ([defId, manager]) =>
-      manager.getData(defId) as Promise<ActionCardRawData | EntityRawData>,
+    ([defId, manager]) => manager.getData(defId) as Promise<EntityRawData>,
   );
   const rawDescription = createMemo(() => {
     const st = state();
-    const d = data() as ActionCardRawData | undefined;
+    const d = data() as EntityRawData | undefined;
     if (st) {
       if (props.input.type === "card" && d?.rawDynamicDescription) {
         return d.rawDynamicDescription;
@@ -180,9 +178,7 @@ export function ActionCard(props: CardDataProps) {
                   {typeTagText(data().type, t)}
                 </span>
                 <Show when={props.input.type === "card"}>
-                  <PlayCostList
-                    playCost={(data() as ActionCardRawData).playCost}
-                  />
+                  <PlayCostList playCost={(data() as EntityRawData).playCost} />
                 </Show>
               </div>
               <Tags tags={data().tags} />
@@ -267,7 +263,7 @@ export function Skill(props: ExpandableCardDataProps) {
                 {...props}
                 definitionId={props.input.definitionId}
                 description={data().rawDescription}
-                keyMap={data().keyMap}
+                keyMap={data().keyMap ?? {}}
                 onRequestExplain={props.onRequestExplain}
               />
             )}
@@ -420,7 +416,7 @@ export function Reference(props: ReferenceProps) {
             {(data) => (
               <Description
                 {...props}
-                keyMap={"keyMap" in data() ? data().keyMap : {}}
+                keyMap={"keyMap" in data() ? (data().keyMap ?? {}) : {}}
                 definitionId={props.definitionId}
                 description={data().rawDescription}
                 onAddReference={props.onAddReference}

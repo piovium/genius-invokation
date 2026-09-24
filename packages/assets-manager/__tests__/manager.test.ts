@@ -20,7 +20,7 @@ describe("version selection", () => {
   test("keeps string version behavior", async () => {
     const fetchMock = stubFetch();
     const manager = new AssetsManager({
-      apiEndpoint: API_ENDPOINT,
+      apiBaseUrl: API_ENDPOINT,
       language: "EN",
       version: "latest",
       concurrency: 0,
@@ -31,12 +31,12 @@ describe("version selection", () => {
 
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
-      `${API_ENDPOINT}/datum/latest/EN/1`,
+      `${API_ENDPOINT}/api/v5/datum/latest/EN/1`,
       expect.anything(),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
-      `${API_ENDPOINT}/data/latest/EN/characters`,
+      `${API_ENDPOINT}/api/v5/data/latest/EN/characters`,
       expect.anything(),
     );
   });
@@ -44,7 +44,7 @@ describe("version selection", () => {
   test("uses id versions and falls back to $base, including keywords", async () => {
     const fetchMock = stubFetch();
     const manager = new AssetsManager({
-      apiEndpoint: API_ENDPOINT,
+      apiBaseUrl: API_ENDPOINT,
       language: "CHS",
       version: {
         $base: "v7.0.0",
@@ -60,17 +60,17 @@ describe("version selection", () => {
 
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
-      `${API_ENDPOINT}/datum/v3.5.0/CHS/1`,
+      `${API_ENDPOINT}/api/v5/datum/v3.5.0/CHS/1`,
       expect.anything(),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
-      `${API_ENDPOINT}/datum/v7.0.0/CHS/2`,
+      `${API_ENDPOINT}/api/v5/datum/v7.0.0/CHS/2`,
       expect.anything(),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       3,
-      `${API_ENDPOINT}/datum/v4.2.0/CHS/-3`,
+      `${API_ENDPOINT}/api/v5/datum/v4.2.0/CHS/-3`,
       expect.anything(),
     );
   });
@@ -80,13 +80,13 @@ describe("category version selection", () => {
   test("uses $category for category and prepare requests", async () => {
     const fetchMock = stubFetch();
     const categoryManager = new AssetsManager({
-      apiEndpoint: API_ENDPOINT,
+      apiBaseUrl: API_ENDPOINT,
       language: "EN",
       version: { $base: "v7.0.0", $category: "mixed-s7" },
       concurrency: 0,
     });
     const prepareManager = new AssetsManager({
-      apiEndpoint: API_ENDPOINT,
+      apiBaseUrl: API_ENDPOINT,
       language: "EN",
       version: { $base: "v7.0.0", $category: "mixed-s7" },
       concurrency: 0,
@@ -97,12 +97,12 @@ describe("category version selection", () => {
 
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
-      `${API_ENDPOINT}/data/mixed-s7/EN/entities`,
+      `${API_ENDPOINT}/api/v5/data/mixed-s7/EN/entities`,
       expect.anything(),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
-      `${API_ENDPOINT}/data/mixed-s7/EN/all`,
+      `${API_ENDPOINT}/api/v5/data/mixed-s7/EN/all`,
       expect.anything(),
     );
   });
@@ -110,13 +110,13 @@ describe("category version selection", () => {
   test("falls back to $base when no custom resolution is configured", async () => {
     const fetchMock = stubFetch();
     const categoryManager = new AssetsManager({
-      apiEndpoint: API_ENDPOINT,
+      apiBaseUrl: API_ENDPOINT,
       language: "EN",
       version: { $base: "v7.0.0" },
       concurrency: 0,
     });
     const prepareManager = new AssetsManager({
-      apiEndpoint: API_ENDPOINT,
+      apiBaseUrl: API_ENDPOINT,
       language: "EN",
       version: { $base: "v7.0.0" },
       concurrency: 0,
@@ -127,12 +127,12 @@ describe("category version selection", () => {
 
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
-      `${API_ENDPOINT}/data/v7.0.0/EN/characters`,
+      `${API_ENDPOINT}/api/v5/data/v7.0.0/EN/characters`,
       expect.anything(),
     );
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
-      `${API_ENDPOINT}/data/v7.0.0/EN/all`,
+      `${API_ENDPOINT}/api/v5/data/v7.0.0/EN/all`,
       expect.anything(),
     );
   });
@@ -140,14 +140,14 @@ describe("category version selection", () => {
   test("rejects unsafe $base fallback unless force is true", async () => {
     const fetchMock = stubFetch();
     const overrideManager = new AssetsManager({
-      apiEndpoint: API_ENDPOINT,
+      apiBaseUrl: API_ENDPOINT,
       language: "EN",
       version: { $base: "v7.0.0" },
       overrideData: [{ id: 1, name: "overridden" }],
       concurrency: 0,
     });
     const versionManager = new AssetsManager({
-      apiEndpoint: API_ENDPOINT,
+      apiBaseUrl: API_ENDPOINT,
       language: "EN",
       version: { $base: "v7.0.0", 1: "v3.5.0" },
       concurrency: 0,
@@ -163,7 +163,7 @@ describe("category version selection", () => {
 
     expect(fetchMock).toHaveBeenCalledOnce();
     expect(fetchMock).toHaveBeenCalledWith(
-      `${API_ENDPOINT}/data/v7.0.0/EN/all`,
+      `${API_ENDPOINT}/api/v5/data/v7.0.0/EN/all`,
       expect.anything(),
     );
   });
@@ -171,7 +171,7 @@ describe("category version selection", () => {
   test("makes prepare a no-op when safe category resolution is unavailable", async () => {
     const fetchMock = stubFetch();
     const manager = new AssetsManager({
-      apiEndpoint: API_ENDPOINT,
+      apiBaseUrl: API_ENDPOINT,
       version: { $base: "v7.0.0" },
       overrideData: [{ id: 1, name: "overridden" }],
       concurrency: 0,
@@ -191,7 +191,7 @@ describe("category version selection", () => {
       }),
     );
     const manager = new AssetsManager({
-      apiEndpoint: API_ENDPOINT,
+      apiBaseUrl: API_ENDPOINT,
       concurrency: 0,
     });
 
@@ -222,7 +222,7 @@ describe("data overrides", () => {
     }));
     vi.stubGlobal("fetch", fetchMock);
     const manager = new AssetsManager({
-      apiEndpoint: API_ENDPOINT,
+      apiBaseUrl: API_ENDPOINT,
       concurrency: 0,
       overrideData: [
         { id: 1, name: "overridden", metadata: { replaced: true } },
@@ -257,7 +257,7 @@ describe("data overrides", () => {
     }));
     vi.stubGlobal("fetch", fetchMock);
     const manager = new AssetsManager({
-      apiEndpoint: API_ENDPOINT,
+      apiBaseUrl: API_ENDPOINT,
       concurrency: 0,
       overrideData: [{ id: 1, name: "overridden", hp: 12 }],
     });
@@ -274,7 +274,7 @@ describe("data overrides", () => {
     }));
     vi.stubGlobal("fetch", fetchMock);
     const manager = new AssetsManager({
-      apiEndpoint: API_ENDPOINT,
+      apiBaseUrl: API_ENDPOINT,
       concurrency: 0,
       overrideData: [{ id: 1, name: "overridden" }],
     });

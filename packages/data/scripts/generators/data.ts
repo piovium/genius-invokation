@@ -15,11 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 export type * from "@gi-tcg/assets-manager";
-import type { CharacterRawData, EntityRawData, ActionCardRawData } from "@gi-tcg/assets-manager";
+import type { CharacterRawData, EntityRawData } from "@gi-tcg/assets-manager";
 import { default as charactersRaw } from "@gi-tcg/assets-manager/data/CHS/characters";
 import { default as entitiesRaw } from "@gi-tcg/assets-manager/data/CHS/entities";
-import { default as actionCardRaw } from "@gi-tcg/assets-manager/data/CHS/action_cards";
 
 export const characters = charactersRaw as CharacterRawData[];
 export const entities = entitiesRaw as EntityRawData[];
-export const actionCards = actionCardRaw as ActionCardRawData[]; 

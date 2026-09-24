@@ -38,7 +38,7 @@ import {
 import type { DicePanelState } from "./components/DicePanel";
 import { DICE_COLOR } from "./components/Dice";
 import { checkDice } from "@gi-tcg/utils";
-import type { ActionCardRawData } from "@gi-tcg/assets-manager";
+import type { EntityRawData } from "@gi-tcg/assets-manager";
 import type { AssetsManager } from "@gi-tcg/assets-manager";
 import type { ReactionInfo } from "./components/Chessboard";
 import type { Translator } from "./locales";
@@ -70,15 +70,14 @@ function getDiceText(type: DiceType, t: Translator) {
   }
 }
 
-const actionCardsCache = new WeakMap<
-  AssetsManager,
-  readonly ActionCardRawData[]
->();
+const actionCardsCache = new WeakMap<AssetsManager, readonly EntityRawData[]>();
 
 export async function prepareActionCardsCache(
   assetsManager: AssetsManager,
 ): Promise<void> {
-  const actionCards = await assetsManager.getCategory("action_cards").catch(() => []);
+  const actionCards = await assetsManager
+    .getCategory("entities")
+    .catch(() => []);
   actionCardsCache.set(assetsManager, actionCards);
 }
 
