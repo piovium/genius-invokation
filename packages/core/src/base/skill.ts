@@ -1199,6 +1199,7 @@ export class ReactionEventArg extends CharacterEventArg {
 export class ModifyReactionEventArg extends ReactionEventArg {
   public readonly where: "my" | "opp";
   public readonly here: "my" | "opp";
+  _cancelApplyAura = false;
   _cancelCoreEffects = false;
   constructor(
     state: GameState,
@@ -1207,6 +1208,9 @@ export class ModifyReactionEventArg extends ReactionEventArg {
     super(state, _reactionInfo);
     [this.where, this.here] =
       this.viaWho === this.who ? ["my", "opp"] : ["opp", "my"];
+  }
+  cancelApplyAura() {
+    this._cancelApplyAura = true;
   }
   cancelCoreEffects() {
     this._cancelCoreEffects = true;
