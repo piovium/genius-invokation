@@ -587,7 +587,9 @@ export class EntityViewModel extends defineViewModel(
         this: AR.This<Meta>,
       ): HandleT<Meta["type"], Meta>;
       as(this: AR.This<ReservedMeta>): undefined;
-      required<Meta extends EntityVMMeta>(): Meta extends {
+      required<Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+      ): Meta extends {
         type: "summon" | "status" | "combatStatus";
       }
         ? true
