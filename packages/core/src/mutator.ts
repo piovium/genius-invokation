@@ -307,14 +307,21 @@ export class StateMutator {
       return;
     }
     if (this._mutationsToBeNotified.length > 0) {
+      // With the append-merge below, these pending mutations are emitted by
+      // the notify in this very call instead of being silently dropped;
+      // this warning now only flags unusual sequencing.
       console?.warn?.("Resetting state with pending mutations not notified");
       console?.warn?.(this._mutationsToBeNotified);
       console?.trace?.();
       // debugger;
     }
     this._state = newState;
-    this._mutationsToBeNotified = [...withMutations.stateMutations];
-    this._mutationsToBePause = [...withMutations.stateMutations];
+    // Append instead of overwrite: `withMutations.stateMutations` are the
+    // mutations just produced by the inline skill, but the queues may still
+    // hold mutations accumulated since the last notify/pause. Overwriting
+    // would drop those from the notification stream and `log[k].e` forever.
+    this._mutationsToBeNotified.push(...withMutations.stateMutations);
+    this._mutationsToBePause.push(...withMutations.stateMutations);
     this.notify({
       ...notifyOpt,
       mutations: withMutations.exposedMutations,
