@@ -85,11 +85,16 @@ define skill {
   id 14092 as VioletArc;
   skillType elemental;
   cost DiceType.Electro, 3;
-  const hasConductive = :query(
+  const hasConductive1 = :query(
     $.opp.active.has($.typeStatus.def(ConductiveLisa)),
   );
   :damage(DamageType.Electro, 2);
-  if (!hasConductive) {
+  const hasConductive2 = :query(
+    $.opp.active.has($.typeStatus.def(ConductiveLisa)),
+  );
+  // https://github.com/piovium/genius-invokation/issues/1095#issuecomment-5827995707
+  // 前后均未附属引雷的才附属
+  if (!hasConductive1 && !hasConductive2) {
     :characterStatus(ConductiveLisa, $.opp.active);
   }
 };
