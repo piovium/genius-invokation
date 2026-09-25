@@ -213,10 +213,24 @@ define card {
           :e.caller.isMine()
       );
       listenTo all;
-      usage perRound, 1;
+      usage perRound, 1 {
+        name usagePerRound1;
+        autoDecrease false;
+      };
       :e.cancelCoreEffects();
       const characters = $[:e.where].character;
       :damage(DamageType.Piercing, 2, characters.exclude(:e.target));
+    };
+    on reaction {
+      when :(
+        :e.type === Reaction.ElectroCharged &&
+          :e.reactionInfo.fromDamage &&
+          :e.caller.isMine()
+      );
+      listenTo all;
+      usage perRound, 1 {
+        name usagePerRound1;
+      };
     };
   };
 };

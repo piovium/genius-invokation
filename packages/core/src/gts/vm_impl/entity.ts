@@ -105,7 +105,6 @@ export type EntityDescriptionDictionaryGetter<
 
 interface DeclaredUsageInfo {
   autoDispose: boolean;
-  autoDecrease: boolean;
   perRound: boolean;
 }
 
@@ -374,7 +373,6 @@ export class EntityModel implements ICaller {
     const incomingDeclInfo: DeclaredUsageInfo = {
       perRound,
       autoDispose,
-      autoDecrease: option.autoDecrease !== false,
     };
     this.#setVariableImpl(name, count, {
       option,
