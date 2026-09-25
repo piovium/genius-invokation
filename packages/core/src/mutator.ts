@@ -314,7 +314,7 @@ export class StateMutator {
     }
     this._state = newState;
     this._mutationsToBeNotified = [...withMutations.stateMutations];
-    this._mutationsToBePause = [...withMutations.stateMutations];
+    this._mutationsToBePause.push(...withMutations.stateMutations);
     this.notify({
       ...notifyOpt,
       mutations: withMutations.exposedMutations,
