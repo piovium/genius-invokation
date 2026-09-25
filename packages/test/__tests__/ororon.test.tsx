@@ -15,6 +15,10 @@
 
 import { ref, setup, Character, State, Status, Equipment, $ } from "#test";
 import {
+  Sucrose,
+  WindSpiritCreation,
+} from "@gi-tcg/data/internal/characters/anemo/sucrose.gts";
+import {
   Ororon,
   NightsSling,
   NightsoulsBlessing,
@@ -41,6 +45,39 @@ test("ororon talent: first electro-charged deals 2 piercing damage", async () =>
   c.expect(oppActive).toHaveVariable({ health: 7, aura: Aura.None });
   c.expect(oppStandby).toHaveVariable({ health: 8 });
 });
+
+// https://github.com/piovium/genius-invokation/issues/1087
+test.each([
+  [Aura.Electro, Aura.Hydro],
+  [Aura.Hydro, Aura.Electro],
+])(
+  "ororon talent: swirl (%s into %s) boosts both simultaneous electro-charged reactions",
+  async (activeAura, standbyAura) => {
+    const oppActive = ref();
+    const oppStandby1 = ref();
+    const oppStandby2 = ref();
+    const talent = ref();
+    const c = setup(
+      <State>
+        <Character opp active ref={oppActive} aura={activeAura} />
+        <Character opp ref={oppStandby1} aura={standbyAura} />
+        <Character opp ref={oppStandby2} aura={standbyAura} />
+        <Character my active def={Sucrose} />
+        <Character my def={Ororon}>
+          <Equipment def={TrailsAmidstTheForestFog} ref={talent} />
+        </Character>
+      </State>,
+    );
+
+    await c.me.skill(WindSpiritCreation);
+
+    // Active: 1 Anemo + 2 * 2 piercing
+    c.expect(oppActive).toHaveVariable({ health: 5, aura: Aura.None });
+    // Standby: 1 swirl + 1 reaction bonus + 2 piercing
+    c.expect(oppStandby1).toHaveVariable({ health: 6, aura: Aura.None });
+    c.expect(oppStandby2).toHaveVariable({ health: 6, aura: Aura.None });
+  },
+);
 
 test("ororon passive: electro-charged at 1 nightsoul does NOT trigger passive damage", async () => {
   // 欧洛仑1点夜魂值，对方出战角色附着水元素，欧洛仑使用E技能触发感电
