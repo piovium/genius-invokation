@@ -568,7 +568,10 @@ export class SkillExecutor {
             .toArray();
           const selectCardInfo: SelectCardInfo = {
             type: "requestPlayCard",
-            cards: spots,
+            cards: this.mutator.randomSubset(
+              spots,
+              this.state.config.adventureSpotCandidatesCount,
+            ),
             target: "skipIfRequired",
           };
           const events = await this.mutator.selectCard(

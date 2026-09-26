@@ -394,6 +394,30 @@ export class StateMutator {
     return mut.value;
   }
 
+  random<T>(items: readonly T[]): T {
+    return items[this.stepRandom() % items.length];
+  }
+  private shuffleTail<T>(items: readonly T[], count: number): T[] {
+    const itemsCopy = [...items];
+    const stopIndex = Math.max(0, itemsCopy.length - count);
+    for (let i = itemsCopy.length - 1; i >= stopIndex; i--) {
+      const j = this.stepRandom() % (i + 1);
+      [itemsCopy[i], itemsCopy[j]] = [itemsCopy[j], itemsCopy[i]];
+    }
+    return itemsCopy;
+  }
+  shuffle<T>(items: readonly T[]): T[] {
+    return this.shuffleTail(items, items.length);
+  }
+  randomSubset<T>(items: readonly T[], count: number): T[] {
+    if (count <= 0) return [];
+    const partiallyShuffled = this.shuffleTail(
+      items,
+      Math.min(count, items.length),
+    );
+    return partiallyShuffled.slice(-count);
+  }
+
   randomDice(count: number, alwaysOmni?: boolean): readonly DiceType[] {
     if (alwaysOmni) {
       return new Array<DiceType>(count).fill(DiceType.Omni);

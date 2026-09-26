@@ -64,6 +64,7 @@ export interface GameConfig {
   readonly maxRoundsCount: number;
   readonly maxSupportsCount: number;
   readonly maxSummonsCount: number;
+  readonly adventureSpotCandidatesCount: number;
   readonly initialDiceCount: number;
   readonly maxDiceCount: number;
 
@@ -102,6 +103,7 @@ export const getDefaultGameConfig = (): GameConfig => ({
   maxRoundsCount: 15,
   maxSummonsCount: 4,
   maxSupportsCount: 4,
+  adventureSpotCandidatesCount: 4,
   randomSeed: randomSeed(),
   unexpectedInsufficientDice: "skipConsume",
   hostWho: 0,
