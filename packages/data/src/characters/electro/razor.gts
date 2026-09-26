@@ -140,6 +140,7 @@ define card {
   id 214022 as SurgeOfLightning;
   since "v7.1.0";
   cost DiceType.Electro, 2;
+  tags hexenzirkel;
   talent Razor, action {
     on staged {
       if (!:e.targets[0].hasStatus(TheWolfWithin)) {

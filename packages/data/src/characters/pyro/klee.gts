@@ -174,6 +174,7 @@ define card {
   id 213062 as SparkborneMagic;
   since "v7.0.0";
   cost DiceType.Pyro, 1;
+  tags hexenzirkel;
   talent Klee, none {
     on staged {
       if (:e.targets[0].hasEquipment(PoundingSurprise)) {

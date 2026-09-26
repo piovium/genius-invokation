@@ -32,7 +32,8 @@ export type CardTag =
   | "action" // 出战行动
   | "food"
   | "resonance" // 元素共鸣
-  | "abyss"; // 显示深渊特效
+  | "abyss" // 显示深渊特效
+  | "hexenzirkel"; // 魔导天赋
 
 export type CommonEntityTag =
   | "shield" // 护盾 & 显示黄盾特效

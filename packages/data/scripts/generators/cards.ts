@@ -37,6 +37,7 @@ function getCardTypeAndTags(card: EntityRawData) {
     GCG_TAG_ITEM: "item",
     GCG_TAG_WEAPON_CLAYMORE: "claymore",
     GCG_TAG_VEHICLE: "technique",
+    GCG_TAG_HEXENZIRKEL: "hexenzirkel",
   };
   const tags = card.tags.map((t) => TAG_MAP[t]).filter((t) => t);
   const TYPE_MAP: Record<string, string> = {
@@ -57,13 +58,28 @@ export function getCardCode(card: EntityRawData, extra = "") {
   }
   let mainCode = "";
   const filteringTags = [...tags];
+  const takeTag = (candidates: string[]) => {
+    const index = filteringTags.findIndex((tag) => candidates.includes(tag));
+    if (index < 0) {
+      return undefined;
+    }
+    return filteringTags.splice(index, 1)[0];
+  };
   if (extra) {
     // Talent bodies are supplied by the character generator.
     mainCode = extra;
   } else if (type === "event") {
     mainCode = `\n  ${TODO_LINE}`;
   } else if (type === "equipment") {
-    const tag = filteringTags.shift();
+    const tag = takeTag([
+      "artifact",
+      "technique",
+      "bow",
+      "sword",
+      "catalyst",
+      "pole",
+      "claymore",
+    ]);
     if (tag === "artifact") {
       mainCode = `\n  artifact {\n    ${TODO_LINE}  }`;
     } else if (tag === "technique") {
@@ -75,21 +91,26 @@ export function getCardCode(card: EntityRawData, extra = "") {
       mainCode = `\n  weapon ${tag} {\n    ${TODO_LINE}  }`;
     }
   } else if (type === "support") {
-    const tag = filteringTags.shift();
+    const isAdventureSpot = takeTag(["adventureSpot"]) !== undefined;
+    const adventureSpotCode = isAdventureSpot ? "    adventureSpot;\n" : "";
+    const tag = takeTag(["blessing", "ally", "place", "item"]);
     if (tag === "blessing") {
-      mainCode = `\n support {\n    elementalBlessing;    ${TODO_LINE}  }`;
+      mainCode = `\n  support {\n    elementalBlessing;\n${adventureSpotCode}    ${TODO_LINE}  }`;
     } else if (tag) {
-      mainCode = `\n  support ${tag} {\n    ${TODO_LINE}  }`;
+      mainCode = `\n  support ${tag} {\n${adventureSpotCode}    ${TODO_LINE}  }`;
     } else {
-      mainCode = `\n  support {\n    ${TODO_LINE}  }`;
+      mainCode = `\n  support {\n${adventureSpotCode}    ${TODO_LINE}  }`;
     }
   }
   const tagCode =
     filteringTags.length > 0 ? `\n  tags ${filteringTags.join(", ")};` : "";
   const cost = getCostCode(card.playCost);
+  const undiscoverable = card.tags.includes("GCG_TAG_NON_DISCOVERABLE")
+    ? "\n  undiscoverable;"
+    : "";
   const code = `define card {
   id ${card.id} as ${identifier(card.englishName)};
-  since "${NEW_VERSION}";${cost}${tagCode}${mainCode}
+  since "${NEW_VERSION}";${cost}${tagCode}${undiscoverable}${mainCode}
 }`;
   return { type, tags, code };
 }
@@ -143,19 +164,19 @@ export async function generateCards() {
     } else if (tags.includes("food")) {
       target = foods;
     } else if (type === "equipment") {
-      if (typeof equipsCode[tags[0]] === "undefined") {
+      const equipmentTag = tags.find((tag) => tag in equipsCode);
+      if (typeof equipmentTag === "undefined") {
         throw new Error(
-          `${card.id} ${card.name} has unsupported equip type ${tags[0]}`,
+          `${card.id} ${card.name} has unsupported equip type ${tags.join(", ")}`,
         );
       }
-      target = equipsCode[tags[0]];
+      target = equipsCode[equipmentTag];
     } else if (type === "support") {
-      if (typeof supportCode[tags[0]] === "undefined") {
-        target = supportCode.other;
-      } else if (tags.includes("adventureSpot")) {
+      if (tags.includes("adventureSpot")) {
         target = supportCode.adventureSpot;
       } else {
-        target = supportCode[tags[0]];
+        const supportTag = tags.find((tag) => tag in supportCode) ?? "other";
+        target = supportCode[supportTag];
       }
     } else {
       target = others;

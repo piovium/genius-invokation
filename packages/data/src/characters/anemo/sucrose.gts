@@ -168,6 +168,7 @@ define card {
   id 215012 as SevenfoldTransmutation;
   since "v7.1.0";
   cost DiceType.Anemo, 3;
+  tags hexenzirkel;
   talent Sucrose, none {
     on staged {
       if (:e.targets[0].hasEquipment(ChaoticEntropy)) {
