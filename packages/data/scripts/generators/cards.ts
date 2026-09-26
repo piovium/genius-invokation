@@ -96,11 +96,9 @@ export function getCardCode(card: EntityRawData, extra = "") {
       : "";
     const tag = takeTag(["blessing", "ally", "place", "item"]);
     if (tag === "blessing") {
-      mainCode = `\n  support {\n    elementalBlessing;\n${adventureSpotCode}    ${TODO_LINE}  }`;
-    } else if (tag) {
-      mainCode = `\n  support ${tag} {\n${adventureSpotCode}    ${TODO_LINE}  }`;
+      mainCode = `\n  support {\n    elementalBlessing;\n    ${TODO_LINE}  }`;
     } else {
-      mainCode = `\n  support {\n${adventureSpotCode}    ${TODO_LINE}  }`;
+      mainCode = `\n  support${tag ? ` ${tag}` : ""} {\n${adventureSpotCode}    ${TODO_LINE}  }`;
     }
   }
   const tagCode =
