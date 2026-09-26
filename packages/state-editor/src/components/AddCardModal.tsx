@@ -32,6 +32,7 @@ const ALL_ENTITY_TAGS: EntityTag[] = [
   "action",
   "food",
   "resonance",
+  "hexenzirkel",
   // CommonEntityTag
   "shield",
   "barrier",

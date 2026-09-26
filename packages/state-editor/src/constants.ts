@@ -78,6 +78,7 @@ export const TAG_LABELS: Record<EntityTag, string> = {
   food: "料理",
   resonance: "元素共鸣",
   abyss: "",
+  hexenzirkel: "魔导天赋",
   // CommonEntityTag
   shield: "护盾",
   barrier: "伤害降低",

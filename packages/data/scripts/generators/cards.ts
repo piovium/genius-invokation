@@ -61,7 +61,7 @@ export function getCardCode(card: EntityRawData, extra = "") {
   const takeTag = (candidates: string[]) => {
     const index = filteringTags.findIndex((tag) => candidates.includes(tag));
     if (index < 0) {
-      return undefined;
+      return;
     }
     return filteringTags.splice(index, 1)[0];
   };
@@ -91,8 +91,9 @@ export function getCardCode(card: EntityRawData, extra = "") {
       mainCode = `\n  weapon ${tag} {\n    ${TODO_LINE}  }`;
     }
   } else if (type === "support") {
-    const isAdventureSpot = takeTag(["adventureSpot"]) !== undefined;
-    const adventureSpotCode = isAdventureSpot ? "    adventureSpot;\n" : "";
+    const adventureSpotCode = takeTag(["adventureSpot"])
+      ? "    adventureSpot;\n"
+      : "";
     const tag = takeTag(["blessing", "ally", "place", "item"]);
     if (tag === "blessing") {
       mainCode = `\n  support {\n    elementalBlessing;\n${adventureSpotCode}    ${TODO_LINE}  }`;
