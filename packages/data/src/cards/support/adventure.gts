@@ -250,7 +250,6 @@ define combatStatus {
 define card {
   id 321040 as TheChasm;
   since "v6.5.0";
-  tags adventureSpot;
   undiscoverable;
   support place {
     adventureSpot;

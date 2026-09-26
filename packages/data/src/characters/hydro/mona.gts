@@ -184,6 +184,7 @@ define card {
   since "v7.0.0";
   cost DiceType.Hydro, 1;
   cost DiceType.Void, 1;
+  tags hexenzirkel;
   talent Mona {
     on staged {
       :combatStatus(MakotoOfTheHeavenStepsInEffect);

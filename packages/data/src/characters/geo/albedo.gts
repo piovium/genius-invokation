@@ -167,6 +167,7 @@ define card {
   id 216042 as BookOfBlindingLight;
   since "v7.1.0";
   cost DiceType.Geo, 2;
+  tags hexenzirkel;
   talent Albedo, none {
     on staged {
       :summon(SolarIsotoma);

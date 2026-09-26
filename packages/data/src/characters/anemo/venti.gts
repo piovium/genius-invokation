@@ -187,6 +187,7 @@ define card {
   id 215032 as TemporalWindsEulogy;
   since "v7.0.0";
   cost DiceType.Anemo, 3;
+  tags hexenzirkel;
   talent Venti, none {
     on staged {
       :summon(Stormeye);

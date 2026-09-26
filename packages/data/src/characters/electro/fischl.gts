@@ -160,6 +160,7 @@ define card {
   id 214012 as PhantasmalNocturne;
   since "v7.0.0";
   cost DiceType.Electro, 2;
+  tags hexenzirkel;
   talent Fischl, none {
     on staged {
       if (:e.targets[0].hasEquipment(StellarPredator)) {
