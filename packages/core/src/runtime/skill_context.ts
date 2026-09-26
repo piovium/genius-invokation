@@ -2334,27 +2334,13 @@ export class SkillContext<Meta extends ContextMetaBase> {
   }
 
   random<T>(items: readonly T[]): T {
-    return items[this.mutator.stepRandom() % items.length];
-  }
-  private shuffleTail<T>(items: readonly T[], count: number): T[] {
-    const itemsCopy = [...items];
-    const stopIndex = Math.max(0, itemsCopy.length - count);
-    for (let i = itemsCopy.length - 1; i >= stopIndex; i--) {
-      const j = this.mutator.stepRandom() % (i + 1);
-      [itemsCopy[i], itemsCopy[j]] = [itemsCopy[j], itemsCopy[i]];
-    }
-    return itemsCopy;
+    return this.mutator.random(items);
   }
   shuffle<T>(items: readonly T[]): T[] {
-    return this.shuffleTail(items, items.length);
+    return this.mutator.shuffle(items);
   }
   randomSubset<T>(items: readonly T[], count: number): T[] {
-    if (count <= 0) return [];
-    const partiallyShuffled = this.shuffleTail(
-      items,
-      Math.min(count, items.length),
-    );
-    return partiallyShuffled.slice(-count);
+    return this.mutator.randomSubset(items, count);
   }
 }
 

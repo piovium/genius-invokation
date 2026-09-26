@@ -566,18 +566,12 @@ export class SkillExecutor {
             .values()
             .filter((d) => d.tags.includes("adventureSpot"))
             .toArray();
-          const count = Math.min(
-            this.state.config.adventureSpotCandidatesCount,
-            spots.length,
-          );
-          const startIndex = spots.length - count;
-          for (let i = spots.length - 1; i >= startIndex; i--) {
-            const j = this.mutator.stepRandom() % (i + 1);
-            [spots[i], spots[j]] = [spots[j], spots[i]];
-          }
           const selectCardInfo: SelectCardInfo = {
             type: "requestPlayCard",
-            cards: spots.slice(startIndex),
+            cards: this.mutator.randomSubset(
+              spots,
+              this.state.config.adventureSpotCandidatesCount,
+            ),
             target: "skipIfRequired",
           };
           const events = await this.mutator.selectCard(
