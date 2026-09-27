@@ -1,31 +1,29 @@
 import path, { resolve } from "node:path";
-import { rollup } from "rollup";
-import json from "@rollup/plugin-json";
+import { rolldown } from "rolldown";
 import babel from "@rollup/plugin-babel";
-import commonjs from "@rollup/plugin-commonjs";
-import nodeResolve from "@rollup/plugin-node-resolve";
-import replace from "@rollup/plugin-replace";
-import terser from "@rollup/plugin-terser";
+import { replacePlugin as replace } from "rolldown/plugins";
 import { CORE_VERSION } from "@gi-tcg/core";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 
 async function writeGeneratedJsCodeCpp() {
-  const build = await rollup({
+  const build = await rolldown({
     input: `${import.meta.dirname}/../js/main.ts`,
     external: ["@gi-tcg/cbinding-io"],
+    context: "globalThis",
     plugins: [
-      json(),
-      replace({
-        preventAssignment: true,
-        values: {
+      replace(
+        {
           "import.meta.env.DEV": "void 0",
           "process.env.NODE_ENV": JSON.stringify("production"),
         },
-      }),
+        {
+          preventAssignment: true,
+        },
+      ),
       babel({
         extensions: [".mjs", ".js", ".ts"],
-        // We use v8 11.6
-        targets: "node 20.0",
+        // We use v8 14.8
+        targets: { node: "26.0" },
         presets: [
           "@babel/preset-typescript",
           [
@@ -39,25 +37,14 @@ async function writeGeneratedJsCodeCpp() {
         ],
         babelHelpers: "bundled",
       }),
-      commonjs(),
-      nodeResolve({
-        extensions: [".mjs", ".js", ".ts"],
-      }),
-      terser(),
     ],
-    onwarn: (warn, handler) => {
-      if (warn.code === "THIS_IS_UNDEFINED") {
-        return;
-      }
-      handler(warn);
-    },
-    context: void 0,
   });
 
   const {
     output: [chunk],
   } = await build.generate({
     format: "es",
+    minify: true,
   });
 
   const OUTPUT_FILEPATH = resolve(
@@ -85,7 +72,7 @@ namespace gitcg {
   namespace v1_0 {
     extern const char JS_CODE[] =
 ${chunk.code
-  .match(/.{1,4096}/g)!
+  .match(/[\s\S]{1,4096}/g)!
   .map((block) => `    R"${D_CHAR_SEQ}(${block})${D_CHAR_SEQ}"`)
   .join("\n")}
     ;

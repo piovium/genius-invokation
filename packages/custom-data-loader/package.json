@@ -59,7 +59,7 @@
     "@gi-tcg/web-ui-core": "workspace:*",
     "dts-bundle-generator": "^9.5.1",
     "monaco-languageclient": "~10.7.0",
-    "rolldown": "^1.0.0-rc.15",
+    "rolldown": "^1.2.11",
     "solid-js": "catalog:",
     "unplugin-dts": "^1.0.0",
     "vite": "catalog:",
