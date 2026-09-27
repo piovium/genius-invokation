@@ -15,6 +15,8 @@
 
 #include "state_createparam.h"
 
+#include <stdexcept>
+
 namespace gitcg {
 inline namespace v1_0 {
 
