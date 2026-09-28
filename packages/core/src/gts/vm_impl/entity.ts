@@ -21,6 +21,7 @@ import {
 import * as R from "remeda";
 import {
   USAGE_PER_ROUND_VARIABLE_NAMES,
+  type ConflictWithConfig,
   type DescriptionDictionary,
   type DescriptionDictionaryEntry,
   type DescriptionDictionaryKey,
@@ -171,6 +172,7 @@ export class EntityModel implements ICaller {
   skillList: SkillDefinition[] = [];
   disposeWhenUsageIsZero = false;
   disposeOnMasterDefeated: boolean;
+  conflictWith: ConflictWithConfig | null = null;
   visibleVarName: string | null = null;
 
   hintText: string | null = null;
@@ -290,6 +292,7 @@ export class EntityModel implements ICaller {
         varConfigs: Object.fromEntries(this.varConfigs),
         disposeWhenUsageIsZero: this.disposeWhenUsageIsZero,
         disposeOnMasterDefeated: this.disposeOnMasterDefeated,
+        conflictWith: this.conflictWith,
         hintText: this.hintText,
         skills,
         tags: this.tags as EntityTag[],
@@ -1016,42 +1019,12 @@ export class EntityViewModel extends defineViewModel(
         ...otherIds: number[]
       ): AR.Done;
     }>((model, args) => {
-      // 自身入场时，将位于相同实体区域（默认）或此方所有角色（crossCharacter）上的目标实体移除
-      let conflictIds = [model.id];
-      let mode: "default" | "crossCharacter" = "default";
-      if (args[0] === "crossCharacter") {
-        mode = "crossCharacter";
-        conflictIds.push(...(args.slice(1) as number[]));
-      } else {
-        conflictIds.push(...(args as number[]));
-      }
-      const enterSkill = new TriggeredSkillModel(model, "selfEnter");
-      enterSkill.id = model.getSubId();
-      enterSkill.action = function (c) {
-        const selfArea = c.self.area;
-        for (const entity of c.queryAll(
-          $.union(...conflictIds.map((id) => $.def(id))),
-        )) {
-          if (entity.id === c.self.id || c.self.who !== entity.who) {
-            continue;
-          }
-          const enteringArea: EntityArea = entity.area;
-          if (
-            enteringArea.type === "characters" &&
-            selfArea.type === "characters"
-          ) {
-            if (
-              mode === "crossCharacter" ||
-              enteringArea.characterId === selfArea.characterId
-            ) {
-              entity.dispose();
-            }
-          } else if (enteringArea.type === selfArea.type) {
-            entity.dispose();
-          }
-        }
+      const crossCharacter = args[0] === "crossCharacter";
+      const ids = (crossCharacter ? args.slice(1) : args) as number[];
+      model.conflictWith = {
+        ids: [model.id, ...ids],
+        crossCharacter,
       };
-      model.skillList.push(enterSkill.buildSkillDefinition());
     }),
     noDefaultDispose: h.attribute<{
       <Meta extends EntityVMMeta>(

@@ -1150,6 +1150,7 @@ export class StateMutator {
   insertEntityOnStage(
     stateOrDef: EntityState | { definition: EntityDefinition },
     area: EntityArea,
+    via: SkillInfo,
     opt: InsertEntityOptions = {},
   ): InsertEntityResult {
     if (area.type === "hands" || area.type === "pile") {
@@ -1168,7 +1169,7 @@ export class StateMutator {
         definition.id
       }] at ${stringifyEntityArea(area)}`,
     );
-    const entitiesAtArea = allEntitiesAtArea(this.state, area) as EntityState[];
+    let entitiesAtArea = allEntitiesAtArea(this.state, area) as EntityState[];
     // handle immuneControl vs disableSkill;
     // do not generate Frozen etc. on those characters
     const immuneControl = entitiesAtArea.find(
@@ -1188,6 +1189,23 @@ export class StateMutator {
       return { oldState: null, newState: null, events };
     }
     const oldState = shouldEnterOverride(entitiesAtArea, definition);
+    if (definition.conflictWith) {
+      const { ids, crossCharacter } = definition.conflictWith;
+      const candidates =
+        crossCharacter && area.type === "characters"
+          ? this.state.players[area.who].characters.flatMap((ch) => ch.entities)
+          : entitiesAtArea;
+      for (const entity of candidates) {
+        if (
+          entity.id !== oldState?.id &&
+          !("id" in stateOrDef && entity.id === stateOrDef.id) &&
+          ids.includes(entity.definition.id)
+        ) {
+          events.push(...this.dispose(entity, { via }));
+        }
+      }
+      entitiesAtArea = allEntitiesAtArea(this.state, area) as EntityState[];
+    }
     const newVariables = getInsertedStateVariables({
       state: this.state,
       oldState,
@@ -1593,19 +1611,12 @@ export class StateMutator {
           who,
           type: "summons",
         };
-        const { oldState, newState } = this.insertEntityOnStage(
+        const { events } = this.insertEntityOnStage(
           { definition: def },
           entityArea,
+          via,
         );
-        if (newState) {
-          const enterInfo = {
-            overridden: oldState,
-            newState,
-          };
-          return [["onEnter", new EnterEventArg(this.state, enterInfo)]];
-        } else {
-          return [];
-        }
+        return events;
       }
       case "requestPlayCard": {
         const cardDefinition = this.state.data.entities.get(selected);

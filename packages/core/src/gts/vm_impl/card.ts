@@ -273,6 +273,7 @@ export class CardModel extends InitiativeSkillModel implements ICaller {
         ? Object.fromEntries(this.innerModel.varConfigs)
         : {},
       disposeWhenUsageIsZero: this.innerModel?.disposeWhenUsageIsZero ?? false,
+      conflictWith: this.innerModel?.conflictWith ?? null,
       disposeOnMasterDefeated:
         this.innerModel?.disposeOnMasterDefeated ?? false,
       skills: [
