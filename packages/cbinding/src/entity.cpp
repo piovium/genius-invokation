@@ -15,6 +15,8 @@
 
 #include "entity.h"
 
+#include <stdexcept>
+
 namespace gitcg {
 inline namespace v1_0 {
 

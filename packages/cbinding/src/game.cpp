@@ -16,6 +16,7 @@
 #include "game.h"
 
 #include <cstring>
+#include <stdexcept>
 
 namespace gitcg {
 inline namespace v1_0 {

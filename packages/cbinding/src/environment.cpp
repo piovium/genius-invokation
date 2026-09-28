@@ -16,6 +16,7 @@
 #include "environment.h"
 
 #include <cstring>
+#include <stdexcept>
 
 #include "entity.h"
 #include "game.h"
@@ -51,8 +52,8 @@ constexpr v8::FunctionCallback io_fn_callback =
       auto isolate = args.GetIsolate();
       auto context = isolate->GetCurrentContext();
       auto data = context->GetEmbedderData(ENVIRONMENT_THIS_SLOT);
-      auto environment =
-          static_cast<Environment*>(data.As<v8::External>()->Value());
+      auto environment = static_cast<Environment*>(
+          data.As<v8::External>()->Value(v8::kExternalPointerTypeTagDefault));
       auto gameId = args[0].As<v8::Number>()->Value();
       int ioType = args[1].As<v8::Number>()->Value();
       auto who = args[2].As<v8::Number>()->Value();
@@ -106,7 +107,8 @@ constexpr v8::FunctionCallback io_fn_callback =
         case GITCG_INTERNAL_IO_ERROR: {
           auto handler = game->get_io_error_handler(who);
           if (handler) {
-            auto buf_data_copy = std::make_unique_for_overwrite<char[]>(buf_len + 1);
+            auto buf_data_copy =
+                std::make_unique_for_overwrite<char[]>(buf_len + 1);
             std::memcpy(buf_data_copy.get(), buf_data, buf_len);
             buf_data_copy[buf_len] = '\0';
             handler(player_data, buf_data_copy.get());
@@ -119,7 +121,7 @@ constexpr v8::FunctionCallback io_fn_callback =
 constexpr v8::Module::SyntheticModuleEvaluationSteps io_module_eval_callback =
     [](v8::Local<v8::Context> context,
        v8::Local<v8::Module> module) -> v8::MaybeLocal<v8::Value> {
-  auto isolate = context->GetIsolate();
+  auto isolate = v8::Isolate::GetCurrent();
   auto io_str = v8::String::NewFromUtf8Literal(isolate, "io");
   auto io_fn = v8::FunctionTemplate::New(isolate, io_fn_callback);
   auto io_fn_instance = io_fn->GetFunction(context).ToLocalChecked();
@@ -133,9 +135,9 @@ constexpr v8::Module::SyntheticModuleEvaluationSteps io_module_eval_callback =
 
 constexpr v8::Module::ResolveModuleCallback resolve_module_callback =
     [](v8::Local<v8::Context> context, v8::Local<v8::String> specifier,
-       v8::Local<v8::FixedArray> import_assertions,
+       v8::Local<v8::FixedArray> import_attributes,
        v8::Local<v8::Module> referrer) -> v8::MaybeLocal<v8::Module> {
-  auto isolate = context->GetIsolate();
+  auto isolate = v8::Isolate::GetCurrent();
   auto expected_specifier =
       v8::String::NewFromUtf8Literal(isolate, "@gi-tcg/cbinding-io");
   if (!specifier->StringEquals(expected_specifier)) {
@@ -147,7 +149,8 @@ constexpr v8::Module::ResolveModuleCallback resolve_module_callback =
   std::vector<v8::Local<v8::String>> export_names = {
       v8::String::NewFromUtf8Literal(isolate, "io")};
   auto io_module = v8::Module::CreateSyntheticModule(
-      isolate, specifier, export_names, io_module_eval_callback);
+      isolate, specifier, {export_names.data(), export_names.size()},
+      io_module_eval_callback);
   return io_module;
 };
 }  // namespace
@@ -190,14 +193,15 @@ Environment::Environment() {
   auto context = v8::Context::New(isolate);
   this->context.Reset(isolate, context);
   context->Enter();
-  context->SetEmbedderData(ENVIRONMENT_THIS_SLOT,
-                           v8::External::New(isolate, this));
+  context->SetEmbedderData(
+      ENVIRONMENT_THIS_SLOT,
+      v8::External::New(isolate, this, v8::kExternalPointerTypeTagDefault));
 
   v8::Local<v8::String> source_string =
       v8::String::NewFromUtf8(isolate, JS_CODE).ToLocalChecked();
   v8::Local<v8::String> resource_name =
       v8::String::NewFromUtf8Literal(isolate, "main.js");
-  v8::ScriptOrigin origin(isolate, resource_name, 0, 0, false, -1,
+  v8::ScriptOrigin origin(resource_name, 0, 0, false, -1,
                           v8::Local<v8::Value>{}, false, false, true);
   v8::ScriptCompiler::Source source(source_string, origin);
   auto main_module =
