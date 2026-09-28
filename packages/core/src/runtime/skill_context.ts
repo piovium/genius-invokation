@@ -1220,6 +1220,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       "insertEntityOnStage",
       { definition: def },
       area,
+      this.skillInfo,
       opt,
     );
     if (newState) {
@@ -1240,6 +1241,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       "insertEntityOnStage",
       this.get(state).latest(),
       area,
+      this.skillInfo,
       {
         moveReason: reason,
       },

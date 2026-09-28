@@ -64,6 +64,11 @@ export type EntityTag<Ty extends EntityType = EntityType> =
 export type EntityType =
   "eventCard" | "status" | "combatStatus" | "equipment" | "support" | "summon";
 
+export interface ConflictWithConfig {
+  readonly ids: readonly number[];
+  readonly crossCharacter: boolean;
+}
+
 export interface EntityDefinition<Ty extends EntityType = EntityType> {
   readonly __definition: "entities";
   readonly type: Ty;
@@ -77,6 +82,8 @@ export interface EntityDefinition<Ty extends EntityType = EntityType> {
   readonly varConfigs: EntityVariableConfigs;
   readonly disposeWhenUsageIsZero: boolean;
   readonly disposeOnMasterDefeated: boolean;
+  /** 自身入场时，将位于相同实体区域（默认）或此方所有角色（crossCharacter）上的目标实体移除 */
+  readonly conflictWith: ConflictWithConfig | null;
   readonly skills: readonly SkillDefinition[];
   readonly descriptionDictionary: DescriptionDictionary;
 }
