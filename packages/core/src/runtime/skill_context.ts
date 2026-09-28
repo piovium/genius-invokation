@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { Aura, DamageType, DiceType, Reaction } from "@gi-tcg/typings";
+import { clampVariable } from "../data/utils";
 
 import {
   type EntityArea,
@@ -1473,12 +1474,20 @@ export class SkillContext<Meta extends ContextMetaBase> {
   setVariable(prop: string, value: number, target: PlainAnyState): void;
   setVariable(prop: Meta["callerVars"], value: number): void;
   setVariable(prop: string, value: number, target?: PlainAnyState) {
-    target ??= this.self;
+    const state = this.get(target ?? this.self).latest();
+    value = clampVariable(value, state.definition.varConfigs[prop]);
+    const oldValue = state.variables[prop];
     this.callAndEmit(
       "setVariable",
-      prop,
-      value,
-      getRaw(target) as CharacterStateO | EntityStateO | AttachmentStateO,
+      state,
+      {
+        varName: prop,
+        oldValue,
+        newValue: value,
+        diffValue: value - oldValue,
+        direction: value >= oldValue ? "increase" : "decrease",
+        cancelled: false,
+      },
       this.skillInfo,
     );
   }

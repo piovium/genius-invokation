@@ -529,7 +529,21 @@ export class StateMutator {
       target.variables.usage > 0 &&
       target.definition.disposeWhenUsageIsZero
     ) {
-      events.push(...this.setVariable("usage", 0, target, via));
+      const oldValue = target.variables.usage;
+      events.push(
+        ...this.setVariable(
+          target,
+          {
+            varName: "usage",
+            oldValue,
+            newValue: 0,
+            diffValue: -oldValue,
+            direction: "decrease",
+            cancelled: false,
+          },
+          via,
+        ),
+      );
       target = getEntityById(this.state, target.id);
     }
     const arg = new DisposeEventArg(
@@ -554,31 +568,10 @@ export class StateMutator {
   }
 
   setVariable(
-    prop: string,
-    value: number,
-    target: AnyState,
-    via: SkillInfo,
-  ): ReadonlyEventList {
-    value = clampVariable(value, target.definition.varConfigs[prop]);
-    return this.setVariableImpl(
-      target,
-      {
-        varName: prop,
-        oldValue: target.variables[prop],
-        newValue: value,
-        diffValue: value - target.variables[prop],
-        direction: value >= target.variables[prop] ? "increase" : "decrease",
-        cancelled: false,
-      },
-      via,
-    );
-  }
-
-  private setVariableImpl(
     target: AnyState,
     info: VariableValueChangeInfo,
     via: SkillInfo,
-  ) {
+  ): ReadonlyEventList {
     using l = this.subLog(
       DetailLogType.Primitive,
       `Set ${stringifyState(target)}'s variable ${info.varName} to ${
