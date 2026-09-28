@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { clampVariable } from "../data/utils";
 import { Aura, DamageType, DiceType, Reaction } from "@gi-tcg/typings";
 
 import {
@@ -24,9 +23,8 @@ import {
   type EntityType,
   stringifyEntityArea,
 } from "../base/entity";
-import type { MoveEntityM, Mutation, RemoveEntityM } from "../base/mutation";
+import type { MoveEntityM, Mutation } from "../base/mutation";
 import {
-  type VariableValueChangeInfo,
   type DamageInfo,
   DamageOrHealEventArg,
   type EventAndRequest,
@@ -38,7 +36,6 @@ import {
   type PlayCardTarget,
   constructEventAndRequestArg,
   type UseSkillRequestOption,
-  BeforeVariableEventArg,
   CustomEventEventArg,
   ZeroHealthEventArg,
   ReactionEventArg,
@@ -91,6 +88,7 @@ import { GiTcgDataError, GiTcgPreviewAbortedError } from "../error";
 import { DetailLogType } from "../log";
 import {
   EventList,
+  type DisposeOption,
   type InsertPileStrategy,
   type InternalHealOption,
   type InternalNotifyOption,
@@ -113,7 +111,6 @@ import type {
   TypeAreaTypeMap,
 } from "../utils";
 import { computeConvertDice, type CreateEntityOptions } from "../utils";
-import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "./skill";
 import type { LunarReaction } from "@gi-tcg/typings";
 import {
   $,
@@ -155,16 +152,7 @@ export interface HealOption {
   kind?: HealKind;
 }
 
-export interface DisposeOption {
-  reason?: RemoveEntityM["reason"];
-  /**
-   * 是否直接弃置。
-   *
-   * 默认情况下，在弃置目标有 usage 的前提下，会先清空 usage 后再弃置，从而正确触发那夏镇等；
-   * 在部分系统内置结算中（如弃置已有支援区实体以打出支援牌时）不适用，此时需设置 `direct: true`
-   */
-  direct?: boolean;
-}
+export type { DisposeOption } from "../mutator";
 
 export interface GenerateDiceOption {
   randomIncludeOmni?: boolean;
@@ -1460,48 +1448,12 @@ export class SkillContext<Meta extends ContextMetaBase> {
     }
   }
 
-  dispose(
-    target?: EntityTargetArg,
-    { reason = "other", direct }: DisposeOption = {},
-  ) {
+  dispose(target?: EntityTargetArg, opt: DisposeOption = {}) {
     const targets = this.queryOrGet(
       target ?? (this.self.latest() as PlainEntityState),
     );
     for (const t of targets) {
-      let target = t.latest();
-      if (target.definition.type === "character") {
-        throw new GiTcgDataError(
-          `Character caller cannot be disposed. You may forget an argument when calling \`dispose\``,
-        );
-      }
-      using l = this.mutator.subLog(
-        DetailLogType.Primitive,
-        `Dispose ${stringifyState(target)} for ${reason}`,
-      );
-      if (
-        !direct &&
-        target.definition.type !== "attachment" &&
-        target.variables.usage &&
-        target.variables.usage > 0 &&
-        target.definition.disposeWhenUsageIsZero
-      ) {
-        this.setVariable("usage", 0, target);
-        target = t.latest();
-      }
-      this.emitEvent(
-        "onDispose",
-        this.rawState,
-        target as EntityStateO,
-        reason,
-        t.area,
-        this.skillInfo,
-      );
-      this.mutate({
-        type: "removeEntity",
-        from: t.area,
-        oldState: target,
-        reason,
-      });
+      this.callAndEmit("dispose", t.latest(), { ...opt, via: this.skillInfo });
     }
   }
 
@@ -1522,15 +1474,13 @@ export class SkillContext<Meta extends ContextMetaBase> {
   setVariable(prop: Meta["callerVars"], value: number): void;
   setVariable(prop: string, value: number, target?: PlainAnyState) {
     target ??= this.self;
-    value = clampVariable(value, target.definition.varConfigs[prop]);
-    this.setVariableImpl(target, {
-      varName: prop,
-      oldValue: target.variables[prop],
-      newValue: value,
-      diffValue: value - target.variables[prop],
-      direction: value >= target.variables[prop] ? "increase" : "decrease",
-      cancelled: false,
-    });
+    this.callAndEmit(
+      "setVariable",
+      prop,
+      value,
+      getRaw(target) as CharacterStateO | EntityStateO | AttachmentStateO,
+      this.skillInfo,
+    );
   }
 
   addVariable(prop: string, value: number, target: PlainAnyState): void;
@@ -1573,47 +1523,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
     if (current > 0) {
       this.addVariable(varName, -Math.min(count, current), this.self);
     }
-  }
-
-  private setVariableImpl(
-    target: PlainAnyState,
-    info: VariableValueChangeInfo,
-  ) {
-    using l = this.mutator.subLog(
-      DetailLogType.Primitive,
-      `Set ${stringifyState(target)}'s variable ${info.varName} to ${
-        info.newValue
-      } (diff: ${info.diffValue}, direction: ${info.direction})`,
-    );
-
-    let state = this.get(target).latest();
-    if (VARIABLE_NAME_CAN_EMIT_EVENTS.includes(info.varName)) {
-      const modifyEventArg = new BeforeVariableEventArg(
-        this.rawState,
-        state,
-        info,
-      );
-      this.callAndEmit(
-        "handleInlineEvent",
-        this.skillInfo,
-        "modifyChangeVariable",
-        modifyEventArg,
-      );
-      info = modifyEventArg.info;
-      if (info.cancelled) {
-        return;
-      }
-    }
-    this.mutate({
-      type: "modifyEntityVar",
-      oldValue: 0,
-      state,
-      varName: info.varName,
-      value: info.newValue,
-      direction: info.direction,
-    });
-    state = this.get(target).latest();
-    this.emitEvent("onChangeVariable", this.rawState, state, info);
   }
 
   transformDefinition<DefT extends EntityType | "character">(
