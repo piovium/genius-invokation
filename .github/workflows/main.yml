@@ -115,11 +115,24 @@ jobs:
           --build build
           --config ${{ matrix.build_type }}
       - name: Test C Binding
+        id: test-c-binding
         run: >
           ctest
           --output-on-failure
           -C ${{ matrix.build_type }}
         working-directory: build
+      - name: Diagnose Linux C Binding test failure
+        if: ${{ failure() && runner.os == 'Linux' && steps.test-c-binding.outcome == 'failure' }}
+        working-directory: build
+        run: |
+          gdb --batch \
+            -ex "set pagination off" \
+            -ex "set print frame-arguments all" \
+            -ex run \
+            -ex "thread apply all bt full" \
+            -ex "info registers" \
+            -ex "info sharedlibrary" \
+            --args ./gitcg-cbinding-test
       - name: Install C Binding
         run: >
           cmake
