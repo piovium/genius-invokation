@@ -9,7 +9,7 @@ include(FetchContent)
 FetchContent_Declare(
   v8-cmake
   GIT_REPOSITORY https://github.com/piovium/v8-cmake-barbara.git
-  GIT_TAG        880b04121e6b451ed83ad75d4910cb853198bed6
+  GIT_TAG        ee9857bfca130149314326efd12ac647e3f7d1b7
 )
 FetchContent_MakeAvailable(v8-cmake)
 
