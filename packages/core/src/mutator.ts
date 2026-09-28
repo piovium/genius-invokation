@@ -18,6 +18,7 @@ import { DetailLogType, type IDetailLogger } from "./log";
 import {
   type CreateEntityM,
   type MoveEntityM,
+  type RemoveEntityM,
   type Mutation,
   type StepIdM,
   type StepRandomM,
@@ -51,6 +52,9 @@ import {
 } from "./error";
 import {
   CharacterEventArg,
+  BeforeVariableEventArg,
+  DisposeEventArg,
+  type VariableValueChangeInfo,
   type CoreSkillResult,
   type DamageInfo,
   DamageOrHealEventArg,
@@ -85,6 +89,8 @@ import { getReactionDescription, type ReactionDefinition } from "./reaction";
 import { exposeHealKind } from "./io";
 import type { AttachmentDefinition } from "./base/attachment";
 import type { LunarReaction } from "@gi-tcg/typings";
+import { clampVariable } from "./data/utils";
+import { VARIABLE_NAME_CAN_EMIT_EVENTS } from "./runtime/skill";
 
 export interface NotifyOption {
   /** 即便没有积攒的 mutations，也执行 `onNotify`。适用于首次通知。 */
@@ -164,6 +170,21 @@ export interface ApplyOption extends DamageOption {
 export interface InternalHealOption {
   via: SkillInfo;
   kind: HealKind;
+}
+
+export interface DisposeOption {
+  reason?: RemoveEntityM["reason"];
+  /**
+   * 是否直接弃置。
+   *
+   * 默认情况下，在弃置目标有 usage 的前提下，会先清空 usage 后再弃置，从而正确触发那夏镇等；
+   * 在部分系统内置结算中（如弃置已有支援区实体以打出支援牌时）不适用，此时需设置 `direct: true`
+   */
+  direct?: boolean;
+}
+
+export interface InternalDisposeOption extends DisposeOption {
+  via: SkillInfo;
 }
 
 export interface DamageResult {
@@ -485,6 +506,115 @@ export class StateMutator {
   }
 
   // --- BASIC MUTATIVE PRIMITIVES ---
+
+  dispose(
+    target: AnyState,
+    { reason = "other", direct, via }: InternalDisposeOption,
+  ): ReadonlyEventList {
+    const events = new EventList();
+    target = getEntityById(this.state, target.id);
+    if (target.definition.type === "character") {
+      throw new GiTcgDataError(
+        `Character caller cannot be disposed. You may forget an argument when calling \`dispose\``,
+      );
+    }
+    using l = this.subLog(
+      DetailLogType.Primitive,
+      `Dispose ${stringifyState(target)} for ${reason}`,
+    );
+    if (
+      !direct &&
+      target.definition.type !== "attachment" &&
+      target.variables.usage &&
+      target.variables.usage > 0 &&
+      target.definition.disposeWhenUsageIsZero
+    ) {
+      const oldValue = target.variables.usage;
+      events.push(
+        ...this.setVariable(
+          target,
+          {
+            varName: "usage",
+            oldValue,
+            newValue: 0,
+            diffValue: -oldValue,
+            direction: "decrease",
+            cancelled: false,
+          },
+          via,
+        ),
+      );
+      target = getEntityById(this.state, target.id);
+    }
+    const arg = new DisposeEventArg(
+      this.state,
+      target as EntityState,
+      reason,
+      getEntityArea(this.state, target.id),
+      via,
+    );
+    this.log(
+      DetailLogType.Other,
+      `Event onDispose (${arg.toString()}) emitted`,
+    );
+    events.push(["onDispose", arg]);
+    this.mutate({
+      type: "removeEntity",
+      from: getEntityArea(this.state, target.id),
+      oldState: target,
+      reason,
+    });
+    return events;
+  }
+
+  setVariable(
+    target: AnyState,
+    info: VariableValueChangeInfo,
+    via: SkillInfo,
+  ): ReadonlyEventList {
+    using l = this.subLog(
+      DetailLogType.Primitive,
+      `Set ${stringifyState(target)}'s variable ${info.varName} to ${
+        info.newValue
+      } (diff: ${info.diffValue}, direction: ${info.direction})`,
+    );
+
+    const events = new EventList();
+    let state = getEntityById(this.state, target.id);
+    if (VARIABLE_NAME_CAN_EMIT_EVENTS.includes(info.varName)) {
+      const modifyEventArg = new BeforeVariableEventArg(
+        this.state,
+        state,
+        info,
+      );
+      const result = this.handleInlineEvent(
+        via,
+        "modifyChangeVariable",
+        modifyEventArg,
+      );
+      events.push(...result.events);
+      info = modifyEventArg.info;
+      if (info.cancelled) {
+        return events;
+      }
+    }
+    this.mutate({
+      type: "modifyEntityVar",
+      oldValue: 0,
+      state,
+      varName: info.varName,
+      value: info.newValue,
+      direction: info.direction,
+    });
+    state = getEntityById(this.state, target.id);
+    const arg = new VariableEventArg(this.state, state, info);
+    this.log(
+      DetailLogType.Other,
+      `Event onChangeVariable (${arg.toString()}) emitted`,
+    );
+    events.push(["onChangeVariable", arg]);
+    return events;
+  }
 
   private recordReaction(info: ReactionInfo): EventAndRequest {
     const reactionEvent = new ReactionEventArg(this.state, info);
