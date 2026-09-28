@@ -305,12 +305,12 @@ define card {
     on playCard {
       when :( :e.card.definition.id === VoidRift );
       usage perRound, 1 { name "usagePerRound1"; };
-      :damage(DamageType.Cryo, 1, $.opp.active);
+      :damage(DamageType.Cryo, 1);
     };
     on discard {
       when :( :e.entity.definition.id === VoidRift );
       usage perRound, 1 { name "usagePerRound1"; };
-      :damage(DamageType.Cryo, 1, $.opp.active);
+      :damage(DamageType.Cryo, 1);
     };
   };
 };
