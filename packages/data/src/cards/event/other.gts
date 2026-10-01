@@ -685,6 +685,7 @@ define card {
       :heal(expectHealth - currentHealth, chs[i], { kind: "distribution" });
     }
   }
+  :eventBoundary();
   :heal(1, $.my.character);
 };
 
