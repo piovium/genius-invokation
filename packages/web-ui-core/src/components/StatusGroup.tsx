@@ -33,6 +33,7 @@ function Status(props: StatusProps) {
       <Image
         imageId={defId()}
         class="h-5.5 w-5.5 m--0.25 max-h-5.5 max-w-5.5 place-self-center status-icon"
+        type="icon"
         fallback="state"
         bool:data-disposing={props.animation === "disposing"}
       />
@@ -104,7 +105,12 @@ export function AttachmentGroup(props: AttachmentGroupProps) {
     <div class={`flex flex-row ${props.class ?? ""}`}>
       <For each={attachments()}>
         {(defId) => (
-          <Image imageId={defId} class="h-6 w-6 mx--0.25" fallback="state" />
+          <Image
+            imageId={defId}
+            class="h-6 w-6 mx--0.25"
+            type="icon"
+            fallback="state"
+          />
         )}
       </For>
       <Show when={showEllipsis()}>
