@@ -181,6 +181,7 @@ define skill {
 define status {
   id 115051 as private MidareRanzan;
   until "v4.7.0";
+  conflictWith 115053, 115054, 115055, 115056;
   on modifySkillDamageType {
     when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Anemo);
@@ -190,6 +191,7 @@ define status {
     :e.increaseDamage(1);
   };
   on useSkill {
+    when :( :e.skill.definition.id !== Chihayaburu );
     :dispose();
   };
 };
@@ -204,6 +206,7 @@ define status {
 define status {
   id 115053 as private MidareRanzanCryo;
   until "v4.7.0";
+  conflictWith 115051, 115054, 115055, 115056;
   on modifySkillDamageType {
     when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Cryo);
@@ -213,29 +216,7 @@ define status {
     :e.increaseDamage(1);
   };
   on useSkill {
-    :dispose();
-  };
-};
-
-/**
- * @id 115056
- * @name 乱岚拨止·雷
- * @description
- * 所附属角色进行下落攻击时：造成的物理伤害变为雷元素伤害，且伤害+1。
- * 所附属角色使用技能后：移除此效果。
- */
-define status {
-  id 115056 as private MidareRanzanElectro;
-  until "v4.7.0";
-  on modifySkillDamageType {
-    when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
-    :e.changeDamageType(DamageType.Electro);
-  };
-  on increaseSkillDamage {
-    when :( :e.viaPlungingAttack() );
-    :e.increaseDamage(1);
-  };
-  on useSkill {
+    when :( :e.skill.definition.id !== Chihayaburu );
     :dispose();
   };
 };
@@ -250,6 +231,7 @@ define status {
 define status {
   id 115054 as private MidareRanzanHydro;
   until "v4.7.0";
+  conflictWith 115053, 115051, 115055, 115056;
   on modifySkillDamageType {
     when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Hydro);
@@ -259,6 +241,7 @@ define status {
     :e.increaseDamage(1);
   };
   on useSkill {
+    when :( :e.skill.definition.id !== Chihayaburu );
     :dispose();
   };
 };
@@ -273,6 +256,7 @@ define status {
 define status {
   id 115055 as private MidareRanzanPyro;
   until "v4.7.0";
+  conflictWith 115053, 115054, 115051, 115056;
   on modifySkillDamageType {
     when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Pyro);
@@ -282,6 +266,32 @@ define status {
     :e.increaseDamage(1);
   };
   on useSkill {
+    when :( :e.skill.definition.id !== Chihayaburu );
+    :dispose();
+  };
+};
+
+/**
+ * @id 115056
+ * @name 乱岚拨止·雷
+ * @description
+ * 所附属角色进行下落攻击时：造成的物理伤害变为雷元素伤害，且伤害+1。
+ * 所附属角色使用技能后：移除此效果。
+ */
+define status {
+  id 115056 as private MidareRanzanElectro;
+  until "v4.7.0";
+  conflictWith 115053, 115054, 115055, 115051;
+  on modifySkillDamageType {
+    when :( :e.viaPlungingAttack() && :e.type === DamageType.Physical );
+    :e.changeDamageType(DamageType.Electro);
+  };
+  on increaseSkillDamage {
+    when :( :e.viaPlungingAttack() );
+    :e.increaseDamage(1);
+  };
+  on useSkill {
+    when :( :e.skill.definition.id !== Chihayaburu );
     :dispose();
   };
 };
