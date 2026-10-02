@@ -783,7 +783,7 @@ define card {
       :addVariable("damageValue", 1);
     };
     // 官方 bug：宿灵球出伤比重置还早
-    on roundBegin {
+    on actionPhase {
       :setVariable("damageValue", 1);
     };
   };
