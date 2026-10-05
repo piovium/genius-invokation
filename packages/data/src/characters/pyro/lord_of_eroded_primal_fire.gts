@@ -27,7 +27,7 @@ define status {
   variable layer, 1 {
     append;
   };
-  on increaseDamage {
+  on increaseSkillDamage {
     :e.increaseDamage(:getVariable("layer"));
   };
 };
