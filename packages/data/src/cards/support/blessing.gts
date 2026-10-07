@@ -770,7 +770,7 @@ define card {
   cost DiceType.Electro, 2;
   undiscoverable;
   support {
-    hint DamageType.Physical, ((st, self) => self.variables.damageValue);
+    hint DamageType.Physical, ((st, self) => self.variables.damageValue!);
     variable damageValue, 1 { range 3; };
     on roll {
       :e.fixDice(DiceType.Electro, 2);

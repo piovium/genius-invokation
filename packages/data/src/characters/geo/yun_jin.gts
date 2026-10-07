@@ -42,7 +42,7 @@ define skill {
   skillType elemental;
   prepared;
   :query($.typeStatus.def(ShieldOfSwirlingClouds).at(:self))?.dispose();
-  if (:self.getVariable("discardOrTuneCardCount") > 0) {
+  if (:self.variables.discardOrTuneCardCount! > 0) {
     :damage(DamageType.Geo, 3);
   } else {
     :damage(DamageType.Geo, 2);

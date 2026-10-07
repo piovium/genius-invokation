@@ -77,7 +77,7 @@ define card {
       :damage(DamageType.Dendro, 1);
       const blessing = :query($.my.combatStatus.def(SpiritserpentsBlessing));
       if (blessing) {
-        if (blessing.getVariable("usage") <= 0) {
+        if (blessing.variables.usage <= 0) {
           blessing.dispose();
         }
       } else {

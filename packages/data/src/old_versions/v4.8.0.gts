@@ -118,7 +118,7 @@ define skill {
   cost DiceType.Hydro, 3;
   const st = :self.hasStatus(AnomalousAnatomy);
   const extraDmg = st
-    ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 4)
+    ? Math.min(Math.floor(st.variables.extraMaxHealth / 3), 4)
     : 0;
   :damage(DamageType.Hydro, 1 + extraDmg);
   const [card] = :discardMaxCostHands(1, { allowPreview: true });

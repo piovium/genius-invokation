@@ -44,7 +44,7 @@ define status {
   since "v6.0.0";
   variable cardCount, 0;
   replaceDescription "[GCG_TOKEN_COUNTER]",
-    ((c, self) => self.variables.cardCount);
+    ((c, self) => self.variables.cardCount!);
   on discard {
     :addVariable("cardCount", 1);
     if (:getVariable("cardCount") % 6 === 0) {

@@ -110,7 +110,7 @@ define combatStatus {
   on selfEnter {
     const cicin = :query($.my.summon.def(ElectroCicin));
     if (cicin) {
-      const usage = cicin.getVariable("usage");
+      const usage = cicin.variables.usage;
       :addVariable("shield", Math.min(usage, 3));
     }
   };

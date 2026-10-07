@@ -26,7 +26,7 @@ import { $, DamageType, DiceType } from "@gi-tcg/core/data";
 define summon {
   id 114081 as SesshouSakura;
   variable atk, 1;
-  hint DamageType.Electro, ((c, e) => e.variables.atk);
+  hint DamageType.Electro, ((c, e) => e.variables.atk!);
   on endPhase {
     usage 3 {
       append 6;

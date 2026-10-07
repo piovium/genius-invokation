@@ -27,7 +27,7 @@ define summon {
   id 121052 as RadiantReflection;
   since "v6.7.0";
   variable damageValue, 1;
-  hint DamageType.Cryo, ((st, self) => self.variables.damageValue);
+  hint DamageType.Cryo, ((st, self) => self.variables.damageValue!);
   on endPhase {
     usage 1;
     :damage(DamageType.Cryo, :getVariable("damageValue"));
@@ -69,7 +69,7 @@ define card {
   if (radiantHuesIcicleInEffect) {
     :damage(
       DamageType.Cryo,
-      radiantHuesIcicleInEffect.getVariable("damageValue"),
+      radiantHuesIcicleInEffect.variables.damageValue,
     );
   }
   // [浮彩·多重] 打出浮彩时：召唤浮彩分身。（浮彩分身造成的伤害等于此状态层数）
@@ -79,7 +79,7 @@ define card {
   if (radiantHuesEchoesInEffect) {
     :summon(RadiantReflection, "my", {
       overrideVariables: {
-        damageValue: radiantHuesEchoesInEffect.getVariable("damageValue"),
+        damageValue: radiantHuesEchoesInEffect.variables.damageValue,
       },
     });
   }
@@ -88,7 +88,7 @@ define card {
     $.my.combatStatus.def(RadiantHuesManifestationInEffect),
   );
   if (radiantHuesManifestationInEffect) {
-    :drawCards(radiantHuesManifestationInEffect.getVariable("drawValue"));
+    :drawCards(radiantHuesManifestationInEffect.variables.drawValue);
   }
   // [浮彩·坚冰] 打出浮彩时：使我方出战角色附属等于此状态层数层战斗计划。
   const radiantHuesSolidIceInEffect = :query(

@@ -63,7 +63,7 @@ define skill {
   const cards = :player.hands.filter(
     (card) => card.definition.id === BonecrunchersEnergyBlock,
   );
-  const drawn = :self.getVariable("elementalSkillDrawCardsCount");
+  const drawn = :self.variables.elementalSkillDrawCardsCount!;
   const count = Math.min(cards.length, 2 - drawn);
   :drawCards(count);
   :self.addVariable("elementalSkillDrawCardsCount", count);
@@ -146,7 +146,7 @@ define skill {
   cost DiceType.Hydro, 3;
   const st = :self.hasStatus(AnomalousAnatomy);
   const extraDmg = st
-    ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 5)
+    ? Math.min(Math.floor(st.variables.extraMaxHealth / 3), 5)
     : 0;
   :damage(DamageType.Hydro, 1 + extraDmg);
   const [card] = :discardMaxCostHands(1, { allowPreview: true });
@@ -609,7 +609,7 @@ define card {
       visible false;
     };
     replaceDescription "[GCG_TOKEN_COUNTER]",
-      ((st, self) => self.variables.playedCard);
+      ((st, self) => self.variables.playedCard!);
     on playCard {
       when :( :e.card.id !== :self.id );
       :addVariable("playedCard", 1);

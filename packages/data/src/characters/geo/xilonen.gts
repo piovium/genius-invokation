@@ -261,9 +261,9 @@ define skill {
     const st = :query($.my.typeStatus.def(def));
     if (st) {
       if (def === SourceSampleGeo) {
-        drawCount += st.getVariable("layer");
+        drawCount += st.variables.layer;
       } else {
-        healCount += st.getVariable("layer");
+        healCount += st.variables.layer;
       }
     }
   }
@@ -323,7 +323,7 @@ define skill {
     };
     on actionPhase {
       const nightsoul = :self.hasStatus(NightsoulsBlessing);
-      if (nightsoul && nightsoul.getVariable("nightsoul") >= 2) {
+      if (nightsoul && nightsoul.variables.nightsoul >= 2) {
         for (const [type, def] of Object.entries(sampleMap)) {
           if (:query($.my.typeStatus.def(def))) {
             :combatStatus(dmgBonusMap[Number(type) as SampleType], "opp");

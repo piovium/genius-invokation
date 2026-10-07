@@ -41,7 +41,7 @@ define status {
     );
     const costSubtelty = Math.min(
       2,
-      :self.master.getVariable("serpentsSubtlety"),
+      :self.master.getVariable("serpentsSubtlety")!,
     );
     :self.master.addVariable("serpentsSubtlety", -costSubtelty);
     :e.deductVoidCost(costSubtelty);
@@ -190,8 +190,8 @@ define skill {
   id 11163 as HavocRuin;
   skillType burst;
   cost DiceType.Cryo, 3;
-  filter :( :self.getVariable("serpentsSubtlety") >= 2 );
-  const subtilty = :self.getVariable("serpentsSubtlety");
+  filter :( :self.variables.serpentsSubtlety! >= 2 );
+  const subtilty = :self.variables.serpentsSubtlety!;
   :self.setVariable("serpentsSubtlety", 0);
   if (subtilty >= 7) {
     :damage(DamageType.Piercing, 3, $.opp.standby);

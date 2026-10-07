@@ -22,7 +22,10 @@ import {
   type typingInfo,
 } from "../../query/utils";
 import type { TypingInfoBase } from "../../utils";
-import { createReactiveVariables } from "./variable";
+import {
+  createReactiveVariables,
+  type ReadonlyReactiveVariables,
+} from "./variable";
 
 export const ReactiveStateSymbol: unique symbol = Symbol("ReactiveState");
 export type ReactiveStateSymbol = typeof ReactiveStateSymbol;
@@ -36,11 +39,11 @@ export const LatestStateSymbol: unique symbol = Symbol(
 export type LatestStateSymbol = typeof LatestStateSymbol;
 
 export abstract class ReactiveStateBase<
-  QueryTy extends TypingInfoBase,
-> implements IUnorderedQuery<QueryTy> {
-  declare [typingInfo]: QueryTy;
+  Info extends TypingInfoBase,
+> implements IUnorderedQuery<Info> {
+  declare [typingInfo]: Info;
   abstract readonly id: number;
-  abstract get [ReactiveStateSymbol](): QueryTy["type"];
+  abstract get [ReactiveStateSymbol](): Info["type"];
   declare [RawStateSymbol]: object;
   abstract get [LatestStateSymbol](): object;
   [toExpressionUnordered](): SExprSchema.UnorderedQuery {
@@ -62,5 +65,5 @@ export abstract class ReactiveStateBase<
   }
   abstract getVariable(name: string): number | undefined;
   abstract setVariable(name: string, value: number): void;
-  variables = createReactiveVariables(this);
+  variables: ReadonlyReactiveVariables<Info> = createReactiveVariables(this);
 }

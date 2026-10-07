@@ -192,7 +192,7 @@ define summon {
     forceOverwrite;
   };
   associateExtension DisposedSupportAndSummonsCountExtension;
-  hint DamageType.Physical, ((c, e) => e.variables.effect);
+  hint DamageType.Physical, ((c, e) => e.variables.effect!);
   on endPhase {
     usage 1 { range 6; };
     :damage(DamageType.Piercing, :getVariable("effect"));

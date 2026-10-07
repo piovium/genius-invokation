@@ -118,11 +118,11 @@ define summon {
   variable barrierUsage, 1 {
     visible false;
   };
-  hint DamageType.Electro, ((c, e) => e.variables.atk);
+  hint DamageType.Electro, ((c, e) => e.variables.atk!);
   on selfEnter {
     const domain = :query($.my.combatStatus.def(DeepDevourersDomain))!;
-    const maxCost = domain.getVariable("totalMaxCost");
-    const count = domain.getVariable("totalMaxCostCount");
+    const maxCost = domain.variables.totalMaxCost;
+    const count = domain.variables.totalMaxCostCount;
     if (count > 0) {
       :setVariable("atk", maxCost);
       :setVariable("usage", count);
@@ -178,7 +178,7 @@ define combatStatus {
     visible false;
   };
   replaceDescription "[GCG_TOKEN_SHIELD]",
-    ((_, self) => self.variables.extraMaxHealth);
+    ((_, self) => self.variables.extraMaxHealth!);
   on discardOrTuneCard {
     const cost = :e.diceCost();
     :addVariable("cardCount", 1);

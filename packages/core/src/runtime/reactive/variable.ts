@@ -17,8 +17,8 @@ import type { TypingInfoBase } from "../../utils";
 import type { ReactiveStateBase } from "./base";
 import type { CoreCharacterVariables } from "../../base/character";
 
-export type ReadonlyReactiveVariables<Ty extends TypingInfoBase> = Readonly<
-  ReactiveVariables<Ty>
+export type ReadonlyReactiveVariables<Info extends TypingInfoBase> = Readonly<
+  ReactiveVariables<Info>
 >;
 
 // https://github.com/microsoft/TypeScript/issues/46969
@@ -27,10 +27,10 @@ interface ExtraVariables {
 }
 
 // Query information guarantees presence; character metadata also constrains values.
-export type ReactiveVariables<Ty extends TypingInfoBase> = {
-  [name in Ty["variables"]]: number;
+export type ReactiveVariables<Info extends TypingInfoBase> = {
+  [name in Info["variables"]]: number;
 } & ExtraVariables &
-  (Ty["type"] extends "character"
+  (Info["type"] extends "character"
     ? {
         -readonly [
           K in keyof CoreCharacterVariables
@@ -38,9 +38,9 @@ export type ReactiveVariables<Ty extends TypingInfoBase> = {
       }
     : {});
 
-export function createReactiveVariables<Ty extends TypingInfoBase>(
-  state: ReactiveStateBase<Ty>,
-): ReactiveVariables<Ty> {
+export function createReactiveVariables<Info extends TypingInfoBase>(
+  state: ReactiveStateBase<Info>,
+): ReactiveVariables<Info> {
   const result = new Proxy(
     {},
     {
@@ -58,6 +58,6 @@ export function createReactiveVariables<Ty extends TypingInfoBase>(
         return false;
       },
     },
-  ) as ReactiveVariables<Ty>;
+  ) as ReactiveVariables<Info>;
   return result;
 }

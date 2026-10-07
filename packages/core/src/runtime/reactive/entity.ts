@@ -35,6 +35,7 @@ import {
 import type { AttachmentHandle } from "../../data/type";
 import type { TypingInfoBase } from "../../utils";
 import type { RxEntityState } from ".";
+import type { ReactiveVariables } from "./variable";
 
 class ReadonlyEntity<
   Meta extends ContextMetaBase,
@@ -115,8 +116,9 @@ class ReadonlyEntity<
 
 export class Entity<
   Meta extends ContextMetaBase,
-  Info extends TypingInfoBase<EntityType>,
-> extends ReadonlyEntity<Meta, Info> {
+  Ty extends TypingInfoBase<EntityType>,
+> extends ReadonlyEntity<Meta, Ty> {
+  declare variables: ReactiveVariables<Ty>;
   setVariable(prop: string, value: number) {
     this.skillContext.setVariable(prop, value, this.state);
   }

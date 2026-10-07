@@ -159,7 +159,7 @@ define skill {
       let shieldValue = 0;
       for (const shield of shields) {
         if (shield.definition.id === ArmoredCrabCarapace) {
-          shieldValue += shield.getVariable("shield");
+          shieldValue += shield.variables.shield!;
         } else {
           shieldValue += 2;
         }

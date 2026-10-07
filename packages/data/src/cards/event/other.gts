@@ -2406,7 +2406,7 @@ define summon {
   variable effect, 1 {
     forceOverwrite;
   };
-  hint DamageType.Physical, ((c, e) => e.variables.effect);
+  hint DamageType.Physical, ((c, e) => e.variables.effect!);
   on endPhase {
     usage 2;
     :damage(DamageType.Physical, :getVariable("effect"));
@@ -2425,7 +2425,7 @@ define summon {
   variable effect, 1 {
     forceOverwrite;
   };
-  hint ResistantForm, ((c, e) => e.variables.effect);
+  hint ResistantForm, ((c, e) => e.variables.effect!);
   on endPhase {
     usage 2;
     :combatStatus(EfficientSwitch, "my", {
@@ -2448,7 +2448,7 @@ define summon {
   variable effect, 1 {
     forceOverwrite;
   };
-  hint ResistantForm, ((c, e) => e.variables.effect);
+  hint ResistantForm, ((c, e) => e.variables.effect!);
   on endPhase {
     usage 2;
     :drawCards(:getVariable("effect"));
@@ -2467,7 +2467,7 @@ define summon {
   variable effect, 2 {
     forceOverwrite;
   };
-  hint DamageType.Heal, ((c, e) => e.variables.effect);
+  hint DamageType.Heal, ((c, e) => e.variables.effect!);
   on endPhase {
     usage 1;
     :heal(:getVariable("effect"), $.macros.myMostInjured);
@@ -2659,7 +2659,7 @@ define summon {
     forceOverwrite;
   };
   associateExtension DisposedSupportAndSummonsCountExtension;
-  hint DamageType.Physical, ((c, e) => e.variables.effect);
+  hint DamageType.Physical, ((c, e) => e.variables.effect!);
   on endPhase {
     usage 1 { range 5; };
     :damage(DamageType.Piercing, :getVariable("effect"));

@@ -57,6 +57,7 @@ import {
 } from "./base";
 import { applyReactive, type RegularRxEntityState } from ".";
 import type { RegularTypingInfo } from "../../utils";
+import type { ReactiveVariables } from "./variable";
 
 export type CharacterPosition = "active" | "next" | "prev" | "standby";
 
@@ -280,6 +281,9 @@ export class ReadonlyCharacter<
 export class Character<
   Meta extends ContextMetaBase,
 > extends ReadonlyCharacter<Meta> {
+  declare variables: ReactiveVariables<
+    RegularTypingInfo<"character", CoreCharacterVariableNames>
+  >;
   override setVariable(prop: string, value: number) {
     this.skillContext.setVariable(prop, value, this.state);
   }

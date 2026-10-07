@@ -134,7 +134,7 @@ define status {
   on useSkill {
     const nourishment = :query($.my.combatStatus.def(OasisNourishment));
     if (nourishment) {
-      const usage = nourishment.getVariable("usage");
+      const usage = nourishment.variables.usage;
       nourishment.dispose();
       :heal(usage, :self.master);
     }
