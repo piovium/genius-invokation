@@ -190,7 +190,7 @@ export class TriggeredSkillModel extends SkillModel {
       }
       this.usageOpt = { name, autoDecrease };
     }
-    this.userFilters.unshift((c) => c.self.getVariable(name) > 0);
+    this.userFilters.unshift((c) => c.self.getVariable(name)! > 0);
   }
 
   buildSkillDefinition(): SkillDefinition {

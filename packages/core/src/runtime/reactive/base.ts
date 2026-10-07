@@ -22,6 +22,7 @@ import {
   type typingInfo,
 } from "../../query/utils";
 import type { TypingInfoBase } from "../../utils";
+import { createReactiveVariables } from "./variable";
 
 export const ReactiveStateSymbol: unique symbol = Symbol("ReactiveState");
 export type ReactiveStateSymbol = typeof ReactiveStateSymbol;
@@ -59,4 +60,7 @@ export abstract class ReactiveStateBase<
   latest(): this[LatestStateSymbol] {
     return this[LatestStateSymbol];
   }
+  abstract getVariable(name: string): number | undefined;
+  abstract setVariable(name: string, value: number): void;
+  variables = createReactiveVariables(this);
 }

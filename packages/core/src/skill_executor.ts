@@ -227,8 +227,8 @@ export class SkillExecutor {
             DetailLogType.Other,
             `using skill gain 1 energy for ${stringifyState(ch)}`,
           );
-          const currentEnergy = ch.variables.energy;
-          const newEnergy = Math.min(currentEnergy + 1, ch.variables.maxEnergy);
+          const currentEnergy = ch.variables.energy!;
+          const newEnergy = Math.min(currentEnergy + 1, ch.variables.maxEnergy!);
           this.mutate({
             type: "modifyEntityVar",
             oldValue: 0,
@@ -554,7 +554,7 @@ export class SkillExecutor {
             oldValue: 0,
             state: currentSpot,
             varName: "exp",
-            value: currentSpot.variables.exp + 1,
+            value: currentSpot.variables.exp! + 1,
             direction: "increase",
           });
           await this.handleEvent([

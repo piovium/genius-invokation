@@ -17,9 +17,8 @@ import type {
   AttachmentState,
   EntityState,
   EntityType,
-  EntityVariables,
 } from "../../base/state";
-import { GiTcgDataError } from "../../error";
+import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
 import { type EntityArea, type EntityDefinition } from "../../base/entity";
 import {
   diceCostSizeOfCard,
@@ -69,9 +68,6 @@ class ReadonlyEntity<
   get definition(): EntityDefinition<Info["type"]> {
     return this.state.definition as EntityDefinition<Info["type"]>;
   }
-  get variables(): EntityVariables {
-    return this.state.variables;
-  }
   get attachments(): AttachmentState[] {
     return this.state.attachments;
   }
@@ -86,10 +82,13 @@ class ReadonlyEntity<
   isMine() {
     return this.area.who === this.skillContext.self.who;
   }
-  getVariable<Name extends string>(
-    name: Name,
-  ): NonNullable<EntityVariables[Name]> {
+  getVariable(name: string): number | undefined {
     return this.state.variables[name];
+  }
+  setVariable(name: string, value: number): void {
+    throw new GiTcgCoreInternalError(
+      "a call to setVariable have been fallback to this readonly implementation",
+    );
   }
 
   /** 当前元素骰费用 */

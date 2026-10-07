@@ -79,7 +79,7 @@ export interface EntityDefinition<Ty extends EntityType = EntityType> {
   readonly tags: readonly EntityTag<Ty>[];
   readonly hintText: string | null;
   readonly disableTuning: boolean;
-  readonly varConfigs: EntityVariableConfigs;
+  readonly varConfigs: VariableConfigs;
   readonly disposeWhenUsageIsZero: boolean;
   readonly disposeOnMasterDefeated: boolean;
   /** 自身入场时，将位于相同实体区域（默认）或此方所有角色（crossCharacter）上的目标实体移除 */
@@ -113,6 +113,8 @@ export interface VariableConfig<ValueT extends number = number> {
   readonly upperBound: number;
   readonly recreateBehavior: VariableRecreateBehavior<ValueT>;
 }
+
+export type VariableConfigs = Record<string, VariableConfig>;
 
 export type VariableRecreateBehavior<ValueT extends number = number> =
   | {
@@ -156,21 +158,6 @@ export const USAGE_PER_ROUND_VARIABLE_NAMES = [
 
 export type UsagePerRoundVariableNames =
   (typeof USAGE_PER_ROUND_VARIABLE_NAMES)[number];
-
-export type EntityVariableConfigs = {
-  readonly usage?: VariableConfig;
-  readonly duration?: VariableConfig;
-} & {
-  readonly [x in UsagePerRoundVariableNames]?: VariableConfig;
-} & {
-  readonly [x: string]: VariableConfig;
-};
-
-export type VariableOfConfig<C extends Record<string, VariableConfig>> = {
-  readonly [K in keyof C]: Required<C>[K] extends VariableConfig<infer T>
-    ? T
-    : never;
-};
 
 export type DescriptionDictionaryKey = `[${string}]`;
 export type DescriptionDictionaryEntry = (st: GameState, id: number) => string;

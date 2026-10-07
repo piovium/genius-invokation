@@ -605,12 +605,12 @@ export function exposeCharacter(
       : []),
     ...ch.entities,
   ]);
-  let energy = ch.variables.energy;
-  let maxEnergy = ch.variables.maxEnergy;
+  let energy = ch.variables.energy!;
+  let maxEnergy = ch.variables.maxEnergy!;
   let specialEnergyName: string | undefined = void 0;
   if (ch.definition.specialEnergy) {
     specialEnergyName = ch.definition.specialEnergy.variableName;
-    energy = ch.variables[specialEnergyName];
+    energy = ch.variables[specialEnergyName]!;
     maxEnergy = ch.definition.specialEnergy.slotSize;
   }
   return {
@@ -618,11 +618,11 @@ export function exposeCharacter(
     definitionId: ch.definition.id,
     defeated: !ch.variables.alive,
     entity: ch.entities.map((e) => exposeEntity(state, e, false)),
-    health: ch.variables.health,
+    health: ch.variables.health!,
     energy,
-    maxHealth: ch.variables.maxHealth,
+    maxHealth: ch.variables.maxHealth!,
     maxEnergy,
-    aura: ch.variables.aura,
+    aura: ch.variables.aura!,
     tags,
     specialEnergyName,
   };

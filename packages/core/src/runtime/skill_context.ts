@@ -975,7 +975,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         DetailLogType.Primitive,
         `Gain ${value} energy to ${stringifyState(target)}`,
       );
-      const { energy, maxEnergy } = target.variables;
+      const { energy = 0, maxEnergy = 0 } = target.variables;
       const finalValue = Math.min(value, maxEnergy - energy);
       this.mutate({
         type: "modifyEntityVar",
@@ -1047,7 +1047,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         oldValue: 0,
         state: target,
         varName: "maxHealth",
-        value: target.variables.maxHealth + value,
+        value: target.variables.maxHealth! + value,
         direction: "increase",
       });
       if (heal) {
@@ -1478,7 +1478,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   setVariable(prop: string, value: number, target?: PlainAnyState) {
     const state = this.get(target ?? this.self).latest();
     value = clampVariable(value, state.definition.varConfigs[prop]);
-    const oldValue = state.variables[prop];
+    const oldValue = state.variables[prop]!;
     this.callAndEmit(
       "setVariable",
       state,
@@ -1498,7 +1498,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   addVariable(prop: Meta["callerVars"], value: number): void;
   addVariable(prop: any, value: number, target?: PlainAnyState) {
     target ??= this.self;
-    const finalValue = value + target.variables[prop];
+    const finalValue = value + target.variables[prop]!;
     this.setVariable(prop, finalValue, target);
   }
 

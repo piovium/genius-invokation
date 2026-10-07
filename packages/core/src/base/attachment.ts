@@ -1,6 +1,6 @@
 import type { SkillDefinition } from "./skill";
 import type { VersionInfo } from "./version";
-import type { DescriptionDictionary, EntityVariableConfigs } from "./entity";
+import type { DescriptionDictionary, VariableConfigs } from "./entity";
 import type { GameState } from "..";
 import type { DiceType } from "@gi-tcg/typings";
 
@@ -48,7 +48,7 @@ export interface AttachmentDefinition {
   readonly tags: AttachmentTag[];
   readonly version: VersionInfo;
   readonly visibleVarName: string | null;
-  readonly varConfigs: EntityVariableConfigs;
+  readonly varConfigs: VariableConfigs;
   readonly descriptionDictionary: DescriptionDictionary;
   readonly skills: readonly SkillDefinition[];
   readonly modifications: ModificationGetter;
