@@ -899,7 +899,7 @@ class ModifyHealEventArgBase extends DamageOrHealEventArg<HealInfo> {
       Math.ceil(healInfo.expectedValue + this._increased - this._decreased),
     );
     const targetLoss =
-      healInfo.target.variables.maxHealth! - healInfo.target.variables.health!;
+      healInfo.target.variables.maxHealth - healInfo.target.variables.health;
     const value = Math.min(expectedValue, targetLoss);
     return {
       ...healInfo,
@@ -953,7 +953,7 @@ export class ModifyDamageEventArgBase extends DamageOrHealEventArg<DamageInfo> {
   protected _log = "";
 
   override get damageInfo(): DamageInfo {
-    const targetHealth = super.damageInfo.target.variables.health!;
+    const targetHealth = super.damageInfo.target.variables.health;
     const type = this._newDamageType ?? super.damageInfo.type;
     let value = super.damageInfo.value;
     value = value + this._increased; // 加

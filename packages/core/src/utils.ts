@@ -780,7 +780,7 @@ export function applyAutoSelectedDiceToAction(
     };
   }
   const energy =
-    player.characters[getActiveCharacterIndex(player)].variables.energy!;
+    player.characters[getActiveCharacterIndex(player)].variables.energy;
   const requiredEnergy = actionInfo.cost.get(DiceType.Energy) ?? 0;
   if (energy < requiredEnergy) {
     return {

@@ -13,7 +13,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { CharacterState, EntityState, GameState } from "../../base/state";
+import type {
+  CharacterState,
+  CharacterVariables,
+  EntityState,
+  GameState,
+} from "../../base/state";
 import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
 import type {
   CharacterDefinition,
@@ -100,7 +105,7 @@ export class CharacterBase
   get id() {
     return this._id;
   }
-  getVariable(name: string): number | undefined {
+  getVariable<Name extends string>(name: Name): CharacterVariables[Name] {
     return this.state.variables[name];
   }
   setVariable(name: string, value: number): void {
@@ -158,19 +163,19 @@ export class CharacterBase
     return this.state.entities;
   }
   get health(): number {
-    return this.getVariable("health")!;
+    return this.getVariable("health");
   }
   get energy(): number {
-    return this.getVariable("energy")!;
+    return this.getVariable("energy");
   }
   get aura(): Aura {
-    return this.getVariable("aura")!;
+    return this.getVariable("aura");
   }
   get maxHealth(): number {
-    return this.getVariable("maxHealth")!;
+    return this.getVariable("maxHealth");
   }
   get maxEnergy(): number {
-    return this.getVariable("maxEnergy")!;
+    return this.getVariable("maxEnergy");
   }
   isActive() {
     return this.satisfyPosition("active");
@@ -321,7 +326,7 @@ export class Character<
     this.unequip(weapon);
   }
   loseEnergy(count = 1): number {
-    const originalValue = this.state.variables.energy!;
+    const originalValue = this.state.variables.energy;
     const finalValue = Math.max(0, originalValue - count);
     this.skillContext.setVariable("energy", finalValue, this.state);
     return originalValue - finalValue;

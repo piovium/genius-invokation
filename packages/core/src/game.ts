@@ -804,7 +804,7 @@ export class Game {
           });
           // 消耗能量
           const requiredEnergy = actionInfo.cost.get(DiceType.Energy) ?? 0;
-          const currentEnergy = activeCh().variables.energy!;
+          const currentEnergy = activeCh().variables.energy;
           if (requiredEnergy > 0) {
             if (currentEnergy < requiredEnergy) {
               throw new GiTcgIoError(

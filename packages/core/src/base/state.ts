@@ -19,12 +19,9 @@ import { DiceType } from "@gi-tcg/typings";
 import type {
   CharacterDefinition,
   CharacterTag,
+  CoreCharacterVariables,
 } from "./character";
-import type {
-  EntityDefinition,
-  EntityTag,
-  EntityType,
-} from "./entity";
+import type { EntityDefinition, EntityTag, EntityType } from "./entity";
 import type { GameData } from "../data/registry";
 import type { ExtensionDefinition } from "./extension";
 import type {
@@ -213,12 +210,14 @@ export interface Variables {
   readonly [name: string]: number | undefined;
 }
 
+export interface CharacterVariables extends Variables, CoreCharacterVariables {}
+
 export interface CharacterState {
   readonly [StateSymbol]: "character";
   readonly id: number;
   readonly definition: CharacterDefinition;
   readonly entities: readonly EntityState[];
-  readonly variables: Variables;
+  readonly variables: CharacterVariables;
 }
 
 export interface EntityState<Ty extends EntityType = EntityType> {
@@ -228,7 +227,6 @@ export interface EntityState<Ty extends EntityType = EntityType> {
   readonly variables: Variables;
   readonly attachments: AttachmentState[];
 }
-
 
 export interface AttachmentState {
   readonly [StateSymbol]: "attachment";

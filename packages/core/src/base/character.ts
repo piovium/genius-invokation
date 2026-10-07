@@ -14,18 +14,16 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { SkillDefinition } from "./skill";
-import type { EntityDefinition, VariableConfigs } from "./entity";
+import type {
+  EntityDefinition,
+  VariableConfig,
+  VariableConfigs,
+} from "./entity";
 import type { WithVersionInfo } from "./version";
-import type { LunarReaction } from "@gi-tcg/typings";
+import type { Aura, LunarReaction } from "@gi-tcg/typings";
 
 export type ElementTag =
-  | "cryo"
-  | "hydro"
-  | "pyro"
-  | "electro"
-  | "anemo"
-  | "geo"
-  | "dendro";
+  "cryo" | "hydro" | "pyro" | "electro" | "anemo" | "geo" | "dendro";
 
 export const WEAPON_TAGS = [
   "sword",
@@ -61,18 +59,14 @@ export type ArkheTag =
   | "pneuma" // 荒
   | "ousia"; // 芒
 
-export type CharacterTag =
-  | ElementTag
-  | WeaponTag
-  | NationTag
-  | ArkheTag;
+export type CharacterTag = ElementTag | WeaponTag | NationTag | ArkheTag;
 
 export interface CharacterDefinition extends WithVersionInfo {
   readonly __definition: "characters";
   readonly type: "character";
   readonly id: number;
   readonly tags: readonly CharacterTag[];
-  readonly varConfigs: VariableConfigs;
+  readonly varConfigs: CharacterVariableConfigs;
   readonly skills: readonly SkillDefinition[];
   readonly associatedNightsoulsBlessing: EntityDefinition | null;
   readonly enabledLunarReactions: readonly LunarReaction[];
@@ -84,4 +78,20 @@ export interface SpecialEnergyConfig {
   readonly slotSize: number;
 }
 
-export type CoreCharacterVariableNames = "health" | "energy" | "maxHealth" | "maxEnergy" | "aura" | "alive";
+/** Variables present on every character, including their value constraints. */
+export interface CoreCharacterVariables {
+  readonly health: number;
+  readonly energy: number;
+  readonly maxHealth: number;
+  readonly maxEnergy: number;
+  readonly aura: Aura;
+  readonly alive: 0 | 1;
+}
+
+export type CoreCharacterVariableNames = keyof CoreCharacterVariables;
+
+export type CharacterVariableConfigs = VariableConfigs & {
+  readonly [K in CoreCharacterVariableNames]: VariableConfig<
+    CoreCharacterVariables[K]
+  >;
+};

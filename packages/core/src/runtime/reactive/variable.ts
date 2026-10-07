@@ -13,44 +13,51 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import type { TypingInfoBase } from "../../utils";
 import type { ReactiveStateBase } from "./base";
+import type { CoreCharacterVariables } from "../../base/character";
+
+export type ReadonlyReactiveVariables<Ty extends TypingInfoBase> = Readonly<
+  ReactiveVariables<Ty>
+>;
 
 // https://github.com/microsoft/TypeScript/issues/46969
-interface ReadonlyExtraVariables {
-  readonly [name: string]: number | undefined;
-}
-
-export type ReadonlyReactiveVariables<Ty extends TypingInfoBase> = {
-  readonly [name in Ty["variables"]]: number;
-} & ReadonlyExtraVariables;
-
 interface ExtraVariables {
   [name: string]: number | undefined;
 }
 
+// Query information guarantees presence; character metadata also constrains values.
 export type ReactiveVariables<Ty extends TypingInfoBase> = {
   [name in Ty["variables"]]: number;
-} & ExtraVariables;
+} & ExtraVariables &
+  (Ty["type"] extends "character"
+    ? {
+        -readonly [
+          K in keyof CoreCharacterVariables
+        ]: CoreCharacterVariables[K];
+      }
+    : {});
 
 export function createReactiveVariables<Ty extends TypingInfoBase>(
-  state: ReactiveStateBase<Ty>
+  state: ReactiveStateBase<Ty>,
 ): ReactiveVariables<Ty> {
-  const result = new Proxy({}, {
-    get(_, prop) {
-      if (typeof prop === "string") {
-        return state.getVariable(prop);
-      }
-      return undefined;
+  const result = new Proxy(
+    {},
+    {
+      get(_, prop) {
+        if (typeof prop === "string") {
+          return state.getVariable(prop);
+        }
+        return undefined;
+      },
+      set(_, prop, value) {
+        if (typeof prop === "string") {
+          state.setVariable(prop, value);
+          return true;
+        }
+        return false;
+      },
     },
-    set(_, prop, value) {
-      if (typeof prop === "string") {
-        state.setVariable(prop, value);
-        return true;
-      }
-      return false;
-    }
-  }) as ReactiveVariables<Ty>;
+  ) as ReactiveVariables<Ty>;
   return result;
 }

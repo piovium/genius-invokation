@@ -975,7 +975,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         DetailLogType.Primitive,
         `Gain ${value} energy to ${stringifyState(target)}`,
       );
-      const { energy = 0, maxEnergy = 0 } = target.variables;
+      const { energy, maxEnergy } = target.variables;
       const finalValue = Math.min(value, maxEnergy - energy);
       this.mutate({
         type: "modifyEntityVar",
@@ -1047,7 +1047,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
         oldValue: 0,
         state: target,
         varName: "maxHealth",
-        value: target.variables.maxHealth! + value,
+        value: target.variables.maxHealth + value,
         direction: "increase",
       });
       if (heal) {

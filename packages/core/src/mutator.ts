@@ -630,7 +630,7 @@ export class StateMutator {
     }
     const events = new EventList();
     let causeDefeated = false;
-    const aura = target.variables.aura!;
+    const aura = target.variables.aura;
     const { newAura, reaction } = getReaction({
       type,
       targetAura: aura,
@@ -762,7 +762,7 @@ export class StateMutator {
       `Heal ${value} to ${stringifyState(targetState)}`,
     );
     const targetInjury =
-      targetState.variables.maxHealth! - targetState.variables.health!;
+      targetState.variables.maxHealth - targetState.variables.health;
     const finalValue = Math.min(value, targetInjury);
 
     const healId = this.stepId();
@@ -796,7 +796,7 @@ export class StateMutator {
     const newHealth =
       opt.kind === "immuneDefeated"
         ? healInfo.value
-        : targetState.variables.health! + healInfo.value;
+        : targetState.variables.health + healInfo.value;
     this.mutate({
       type: "modifyEntityVar",
       oldValue: 0,
@@ -818,10 +818,10 @@ export class StateMutator {
           isSkillMainDamage: false,
           reactionType: PbReactionType.UNSPECIFIED,
           causeDefeated: false,
-          oldAura: targetState.variables.aura!,
-          newAura: targetState.variables.aura!,
-          oldHealth: targetState.variables.health!,
-          newHealth: targetState.variables.health! + healInfo.value,
+          oldAura: targetState.variables.aura,
+          newAura: targetState.variables.aura,
+          oldHealth: targetState.variables.health,
+          newHealth: targetState.variables.health + healInfo.value,
           healKind: exposeHealKind(healInfo.healKind),
         },
       ],
@@ -886,7 +886,7 @@ export class StateMutator {
     );
     const finalHealth = Math.max(
       0,
-      target.variables.health! - damageInfo.value,
+      target.variables.health - damageInfo.value,
     );
     this.mutate({
       type: "modifyEntityVar",
@@ -916,7 +916,7 @@ export class StateMutator {
             causeDefeated: damageInfo.causeDefeated,
             oldAura: damageInfo.targetAura,
             newAura, // FIX ME: wrong for modifyReaction calls :e.cancelApplyAura()
-            oldHealth: target.variables.health!,
+            oldHealth: target.variables.health,
             newHealth: finalHealth,
             healKind: PbHealKind.NOT_A_HEAL,
           },
