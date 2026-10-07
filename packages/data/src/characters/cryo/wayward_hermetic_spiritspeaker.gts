@@ -27,7 +27,7 @@ define summon {
   id 121052 as RadiantReflection;
   since "v6.7.0";
   variable damageValue, 1;
-  hint DamageType.Cryo, ((st, self) => self.variables.damageValue!);
+  hint DamageType.Cryo, ((st, self) => self.variables.damageValue);
   on endPhase {
     usage 1;
     :damage(DamageType.Cryo, :getVariable("damageValue"));

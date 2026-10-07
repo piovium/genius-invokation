@@ -29,7 +29,7 @@ define combatStatus {
     visible false;
   };
   replaceDescription "[GCG_TOKEN_COUNTER]",
-    ((st, self) => self.variables.playedCard!);
+    ((st, self) => self.variables.playedCard);
   on playCard {
     :addVariable("playedCard", 1);
   };

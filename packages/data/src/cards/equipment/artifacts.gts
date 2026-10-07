@@ -753,7 +753,7 @@ define card {
     };
     variable bubble, 0 { range 2; };
     replaceDescription "[GCG_TOKEN_SHIELD]",
-      ((_, self) => self.variables.healedPts!);
+      ((_, self) => self.variables.healedPts);
     on healed {
       listenTo samePlayer;
       :addVariable("healedPts", :e.value);
@@ -792,7 +792,7 @@ define card {
     };
     variable bubble, 0 { range 2; };
     replaceDescription "[GCG_TOKEN_SHIELD]",
-      ((_, self) => self.variables.healedPts!);
+      ((_, self) => self.variables.healedPts);
     on staged {
       :heal(2, :e.targets[0]);
     };

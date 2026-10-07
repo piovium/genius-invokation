@@ -31,7 +31,7 @@ define combatStatus {
     visible false;
   };
   replaceDescription "[GCG_TOKEN_COUNTER]",
-    ((_, self) => self.variables.damageValue!);
+    ((_, self) => self.variables.damageValue);
   on endPhase {
     usage 2;
     :damage(DamageType.Dendro, :getVariable("damageValue"));

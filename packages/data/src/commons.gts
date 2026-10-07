@@ -266,8 +266,8 @@ define card {
  */
 define summon {
   id 212 as Moondrift;
-  hint DamageType.Geo, ((st, self) => self.variables.effect!);
   variable effect, 1 { append; };
+  hint DamageType.Geo, ((st, self) => self.variables.effect);
   on endPhase {
     usage 2;
     :damage(DamageType.Geo, :getVariable("effect"));
@@ -290,7 +290,7 @@ define summon {
 define attachment {
   id 201 as CostIncrease;
   variable layer, 1 { append; };
-  addCost ((st, self) => self.variables.layer!);
+  addCost ((st, self) => self.variables.layer);
 };
 
 /**
@@ -302,7 +302,7 @@ define attachment {
 define attachment {
   id 202 as CostReduction;
   variable layer, 1 { append; };
-  deductCost ((st, self) => self.variables.layer!);
+  deductCost ((st, self) => self.variables.layer);
 };
 
 /**
@@ -346,7 +346,7 @@ define attachment {
 define summon {
   id 205 as Thundercloud;
   variable damageValue, 2, { forceOverwrite; };
-  hint DamageType.Electro, ((st, self) => self.variables.damageValue!);
+  hint DamageType.Electro, ((st, self) => self.variables.damageValue);
   on endPhase {
     usage 1 { append; };
     :damage(DamageType.Electro, :getVariable("damageValue"));

@@ -572,7 +572,7 @@ export class CardViewModel extends InitiativeSkillViewModel
       <Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
         key: DescriptionDictionaryKey,
-        getter: EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
+        getter: EntityDescriptionDictionaryGetter<Meta>,
       ): AR.Done;
     }>((model, [key, getter]) => {
       addDescriptionReplacement(model, key, getter);
