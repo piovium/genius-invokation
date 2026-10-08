@@ -133,7 +133,7 @@ define status {
       append;
       autoDecrease false;
     };
-    const deducted = Math.min(:getVariable("usage"), :e.expectedValue);
+    const deducted = Math.min(:variables.usage, :e.expectedValue);
     :e.decreaseHeal(deducted);
     :consumeUsage(deducted);
   };
@@ -270,13 +270,13 @@ define summon {
   hint DamageType.Geo, ((st, self) => self.variables.effect);
   on endPhase {
     usage 2;
-    :damage(DamageType.Geo, :getVariable("effect"));
+    :damage(DamageType.Geo, :variables.effect);
   };
   on gainEffect {
     when :( :e.entity.id === :self.id );
-    if (:getVariable("effect") >= 3) {
+    if (:variables.effect >= 3) {
       :damage(DamageType.Geo, 3);
-      :setVariable("effect", 1);
+      :variables.effect = 1;
     }
   };
 };
@@ -330,7 +330,7 @@ define attachment {
     when :( :self.area.type === "hands" );
     const target = :query($.macros.myMaxHealth);
     if (target) {
-      :damage(DamageType.Piercing, :getVariable("layer"), target);
+      :damage(DamageType.Piercing, :variables.layer, target);
     }
   };
 };
@@ -349,7 +349,7 @@ define summon {
   hint DamageType.Electro, ((st, self) => self.variables.damageValue);
   on endPhase {
     usage 1 { append; };
-    :damage(DamageType.Electro, :getVariable("damageValue"));
+    :damage(DamageType.Electro, :variables.damageValue);
   };
   defineSnippet giveOppRandomCardConductive {
     if (:oppPlayer.hands.length === 0) {

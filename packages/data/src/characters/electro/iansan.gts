@@ -137,7 +137,7 @@ define skill {
     on entityEnter {
       when :(
         :self.hasNightsoulsBlessing() &&
-          :getVariable("gainNightsoulPassiveUsagePerRound") &&
+          :variables.gainNightsoulPassiveUsagePerRound &&
           :e.entity.definition.type === "status" &&
           :e.entity.definition.tags.includes("preparingSkill")
       );
@@ -154,14 +154,14 @@ define skill {
     on switchActive {
       when :(
         :self.hasNightsoulsBlessing() &&
-          :getVariable("gainNightsoulPassiveUsagePerRound") &&
-          :getVariable("switchCount") % 2 === 0
+          :variables.gainNightsoulPassiveUsagePerRound &&
+          :variables.switchCount! % 2 === 0
       );
       listenTo samePlayer;
       :callSnippet();
     };
     on roundEnd {
-      :setVariable("gainNightsoulPassiveUsagePerRound", 3);
+      :variables.gainNightsoulPassiveUsagePerRound = 3;
     };
   };
 };

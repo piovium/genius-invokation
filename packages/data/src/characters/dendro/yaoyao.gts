@@ -28,7 +28,7 @@ define summon {
   hint DamageType.Dendro, "1";
   on endPhase {
     usage 2;
-    if (:getVariable("usage") === 1) {
+    if (:variables.usage === 1) {
       :damage(DamageType.Dendro, 2);
       :heal(2, $.macros.myMostInjured);
     } else {

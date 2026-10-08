@@ -30,7 +30,7 @@ define status {
       append;
       autoDecrease false;
     };
-    const currentUsage = :getVariable("usage");
+    const currentUsage = :variables.usage;
     const effectiveLayers = Math.min(currentUsage, 2);
     :e.increaseDamage(effectiveLayers);
     :consumeUsage(effectiveLayers);

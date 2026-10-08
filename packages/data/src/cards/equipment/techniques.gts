@@ -353,17 +353,15 @@ define combatStatus {
   associateExtension TechniquesPlayedCountExtension;
   variable techniquesPlayedCount, 0;
   defineSnippet checkCount {
-    if (:getVariable("techniquesPlayedCount") >= 6) {
+    if (:variables.techniquesPlayedCount >= 6) {
       :characterStatus(SaurianBuddyCheers, $.my.active);
       :damage(DamageType.Physical, 3);
       :dispose();
     }
   };
   on selfEnter {
-    :setVariable(
-      "techniquesPlayedCount",
-      :getExtensionState().techniquesPlayedCount[:self.who],
-    );
+    :variables.techniquesPlayedCount =
+      :getExtensionState().techniquesPlayedCount[:self.who];
     :callSnippet.checkCount();
   };
   on playCard {

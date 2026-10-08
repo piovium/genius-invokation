@@ -39,7 +39,7 @@ define card {
       );
       listenTo all;
       :addVariable("progress", 1);
-      if (:getVariable("progress") >= 3) {
+      if (:variables.progress >= 3) {
         :generateDice("randomElement", 3);
         :dispose();
         return;
@@ -86,14 +86,14 @@ define combatStatus {
   };
   on deductOmniDiceSwitch {
     :e.deductOmniCost(1);
-    :setVariable("triggered", 1);
+    :variables.triggered = 1;
   };
   on beforeFastSwitch {
     :e.setFastAction();
-    :setVariable("triggered", 1);
+    :variables.triggered = 1;
   };
   on switchActive {
-    when :( :getVariable("triggered") );
+    when :( :variables.triggered );
     :dispose();
   };
 };
@@ -133,7 +133,7 @@ define card {
     variable clue, 0;
     on useSkill {
       :addVariable("clue", 1);
-      if (:getVariable("clue") >= 3) {
+      if (:variables.clue >= 3) {
         :drawCards(3);
         :dispose();
       }
@@ -208,7 +208,7 @@ define card {
       usage perRound, 1;
       :e.deductOmniCost(2);
       :addVariable("totalUsage", -1);
-      if (:getVariable("totalUsage") <= 0) {
+      if (:variables.totalUsage <= 0) {
         :dispose();
       }
     };
@@ -239,14 +239,14 @@ define card {
       :addVariable("playedCard", 1);
     };
     on playCard {
-      when :( :getVariable("playedCard") === 3 );
+      when :( :variables.playedCard === 3 );
       usage perRound, 1;
       usage 3;
       :drawCards(1);
       :generateDice(DiceType.Omni, 1);
     };
     on actionPhase {
-      :setVariable("playedCard", 0);
+      :variables.playedCard = 0;
     };
   };
 };
@@ -269,19 +269,19 @@ define card {
       visible false;
     };
     on actionPhase {
-      const memory = :getVariable("memory");
+      const memory = :variables.memory;
       if (memory < 2) {
         const disposed = :discardMaxCostHands(2 - memory);
         const count = disposed.length;
         :addVariable("memory", count);
       }
-      :setVariable("cardPlayed", 0);
+      :variables.cardPlayed = 0;
     };
     on playCard {
-      :setVariable("cardPlayed", 1);
+      :variables.cardPlayed = 1;
     };
     on deductOmniDiceSkill {
-      when :( !:getVariable("cardPlayed") && :getVariable("memory") > 0 );
+      when :( !:variables.cardPlayed && :variables.memory > 0 );
       :e.deductOmniCost(1);
       :addVariable("memory", -1);
     };

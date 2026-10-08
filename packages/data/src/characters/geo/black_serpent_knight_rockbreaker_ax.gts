@@ -165,13 +165,13 @@ define skill {
         );
       };
       listenTo samePlayer;
-      :setVariable("shouldAttachCatalysisOfStone", 1);
+      :variables.shouldAttachCatalysisOfStone = 1;
     };
     on useSkill {
-      when :( :getVariable("shouldAttachCatalysisOfStone") );
+      when :( :variables.shouldAttachCatalysisOfStone );
       listenTo samePlayer;
       :characterStatus(MightOfStone, :self);
-      :setVariable("shouldAttachCatalysisOfStone", 0);
+      :variables.shouldAttachCatalysisOfStone = 0;
     };
   };
 };

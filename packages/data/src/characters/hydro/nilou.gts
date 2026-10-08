@@ -37,7 +37,7 @@ define summon {
     }
   };
   on declareEnd {
-    when :( :getVariable("usage") >= 2 );
+    when :( :variables.usage >= 2 );
     if (:query($.my.equipped.def(TheStarrySkiesTheirFlowersRain))) {
       :damage(DamageType.Dendro, 3);
     } else {

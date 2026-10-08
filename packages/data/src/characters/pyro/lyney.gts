@@ -45,11 +45,11 @@ define status {
   variable surplus, 1 { range 3; };
   on increaseSkillDamage {
     when :( :e.via.definition.id === BewilderingLights );
-    :e.increaseDamage(:getVariable("surplus"));
+    :e.increaseDamage(:variables.surplus);
   };
   on useSkill {
     when :( :e.skill.definition.id === BewilderingLights );
-    const surplus = :getVariable("surplus");
+    const surplus = :variables.surplus;
     :heal(surplus, :self.master);
     :dispose();
   };

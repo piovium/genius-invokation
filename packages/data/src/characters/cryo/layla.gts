@@ -60,7 +60,7 @@ define combatStatus {
   };
   on useSkill {
     :addVariable("star", 1);
-    if (:getVariable("star") >= 4) {
+    if (:variables.star >= 4) {
       :addVariable("star", -4);
       :damage(DamageType.Cryo, 1);
       if (:query($.my.equipped.def(LightsRemit))) {

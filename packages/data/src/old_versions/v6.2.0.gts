@@ -231,13 +231,13 @@ define card {
     replaceDescription "[GCG_TOKEN_COUNTER]",
       ((_, { area }, ext) => ext.defIds[area.who].length);
     on staged {
-      :setVariable("supp", :getExtensionState().defIds[:self.who].length);
+      :variables.supp = :getExtensionState().defIds[:self.who].length;
     };
     on playCard {
-      :setVariable("supp", :getExtensionState().defIds[:self.who].length);
+      :variables.supp = :getExtensionState().defIds[:self.who].length;
     };
     on increaseSkillDamage {
-      const supp = :getVariable("supp");
+      const supp = :variables.supp;
       if (supp >= 8) {
         :e.increaseDamage(3);
       } else if (supp >= 4) {
@@ -267,10 +267,10 @@ define status {
   once deductAllDiceCard {
     when :(
       :e.hasOneOfCardTag("weapon", "artifact") &&
-        :e.currentDiceCostSize() <= :getVariable("readiness")
+        :e.currentDiceCostSize() <= :variables.readiness
     );
     :e.deductAllCost();
-    :setVariable("readiness", 0);
+    :variables.readiness = 0;
   };
 };
 
@@ -306,9 +306,9 @@ define combatStatus {
     );
     listenTo all;
     :addVariable("count", 1);
-    if (:getVariable("count") === 2) {
+    if (:variables.count === 2) {
       :generateDice(DiceType.Omni, 1);
-      :setVariable("count", 0);
+      :variables.count = 0;
     }
   };
 };
@@ -328,7 +328,7 @@ define card {
   support place {
     adventureSpot;
     on adventure {
-      when :( :getVariable("exp") >= 2 );
+      when :( :variables.exp >= 2 );
       usage 1 {
         name "stage1";
         visible false;
@@ -337,7 +337,7 @@ define card {
       :createHandCard(ChenyuBrew);
     };
     on adventure {
-      when :( :getVariable("exp") >= 4 );
+      when :( :variables.exp >= 4 );
       usage 1 {
         name "stage2";
         visible false;
@@ -354,7 +354,7 @@ define card {
       });
     };
     on adventure {
-      when :( :getVariable("exp") >= 7 );
+      when :( :variables.exp >= 7 );
       usage 1 {
         name "stage3";
         visible false;

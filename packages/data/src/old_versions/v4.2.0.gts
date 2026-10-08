@@ -130,7 +130,7 @@ define summon {
     :e.decreaseDamage(1);
   };
   on endPhase {
-    when :( :getVariable("usage") <= 0 );
+    when :( :variables.usage <= 0 );
     :damage(DamageType.Hydro, 2);
     :dispose();
   };
@@ -157,7 +157,7 @@ define summon {
     :e.decreaseDamage(1);
   };
   on endPhase {
-    when :( :getVariable("usage") <= 0 );
+    when :( :variables.usage <= 0 );
     :damage(DamageType.Hydro, 2);
     :dispose();
   };
@@ -202,15 +202,15 @@ define card {
     on healed {
       listenTo samePlayer;
       :addVariable("healedPts", :e.value);
-      const totalPts = :getVariable("healedPts");
+      const totalPts = :variables.healedPts;
       const generatedBubbleCount = Math.floor(totalPts / 3);
       const restPts = totalPts % 3;
       :addVariable("bubble", generatedBubbleCount);
-      :setVariable("healedPts", restPts);
+      :variables.healedPts = restPts;
     };
     on increaseSkillDamage {
-      const bubbleCount = :getVariable("bubble");
-      :setVariable("bubble", 0);
+      const bubbleCount = :variables.bubble;
+      :variables.bubble = 0;
       :e.increaseDamage(bubbleCount);
     };
   };
@@ -235,8 +235,7 @@ define card {
     };
     on deductAllDiceCard {
       when :(
-        :e.hasCardTag("artifact") &&
-          :getVariable("material") >= :e.diceCostSize()
+        :e.hasCardTag("artifact") && :variables.material >= :e.diceCostSize()
       );
       usage perRound, 1;
       :addVariable("material", -:e.diceCostSize());
@@ -264,7 +263,7 @@ define card {
     };
     on deductAllDiceCard {
       when :(
-        :e.hasCardTag("weapon") && :getVariable("material") >= :e.diceCostSize()
+        :e.hasCardTag("weapon") && :variables.material >= :e.diceCostSize()
       );
       usage perRound, 1;
       :addVariable("material", -:e.diceCostSize());

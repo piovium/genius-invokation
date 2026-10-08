@@ -28,11 +28,11 @@ define status {
   on deductOmniDiceSwitch {
     when :( :self.master.isActive() );
     :e.deductOmniCost(1);
-    :setVariable("dealDamage", 1);
+    :variables.dealDamage = 1;
   };
   on switchActive {
     when :(
-      :self.master.id === :e.switchInfo.from?.id && :getVariable("dealDamage")
+      :self.master.id === :e.switchInfo.from?.id && :variables.dealDamage
     );
     usage 1;
     :damage(DamageType.Anemo, 1);

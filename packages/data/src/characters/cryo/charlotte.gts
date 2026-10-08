@@ -45,7 +45,7 @@ define status {
     usage 2;
     if (
       ([Aura.Cryo, Aura.CryoDendro] as Aura[]).includes(:self.master.aura) &&
-      :getVariable("usage") === 1
+      :variables.usage === 1
     ) {
       :damage(DamageType.Cryo, 2, :self.master);
     } else {

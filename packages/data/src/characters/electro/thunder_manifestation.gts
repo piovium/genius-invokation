@@ -38,7 +38,7 @@ define status {
       ].includes(:e.source.definition.id)
     );
     :e.increaseDamage(1);
-    :setVariable("disposeDrawCard", 1);
+    :variables.disposeDrawCard = 1;
     :dispose();
   };
   on damaged {
@@ -47,7 +47,7 @@ define status {
   on selfDispose {
     // 雷音权现对已带有雷鸣探知的角色造成伤害会弃置雷鸣探知
     // 但此行为也会触发天赋的抽牌
-    when :( :getVariable("disposeDrawCard") );
+    when :( :variables.disposeDrawCard );
     :emitCustomEvent(TalentShouldDrawCard, :e.who);
   };
 };

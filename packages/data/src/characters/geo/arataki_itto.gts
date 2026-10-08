@@ -39,7 +39,7 @@ define status {
     }
   };
   on deductVoidDiceSkill {
-    when :( :e.isChargedAttack() && :getVariable("usage") >= 2 );
+    when :( :e.isChargedAttack() && :variables.usage >= 2 );
     :e.deductVoidCost(1);
   };
 };

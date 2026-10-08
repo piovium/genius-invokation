@@ -174,7 +174,7 @@ define summon {
     }
   };
   on endPhase {
-    :damage(DamageType.Physical, 2 + :getVariable("usage"));
+    :damage(DamageType.Physical, 2 + :variables.usage);
     :dispose();
   };
 };

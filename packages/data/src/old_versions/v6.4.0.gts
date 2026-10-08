@@ -60,7 +60,7 @@ define summon {
     }
   };
   on endPhase {
-    :damage(DamageType.Physical, 3 + :getVariable("usage"));
+    :damage(DamageType.Physical, 3 + :variables.usage);
     :dispose();
   };
 };
@@ -82,18 +82,18 @@ define status {
   };
   on deductOmniDiceSkill {
     when :( :e.action.skill.definition.id === PressurizedFloe );
-    if (:getVariable("level") >= 2) {
+    if (:variables.level >= 2) {
       :e.deductOmniCost(1);
     }
   };
   on useSkill {
     // 只有当使用技能前实体存在时才触发
-    when :( :getVariable("triggerOnUseSkill") );
-    :setVariable("triggerOnUseSkill", 0);
-    if (:getVariable("level") >= 4) {
+    when :( :variables.triggerOnUseSkill );
+    :variables.triggerOnUseSkill = 0;
+    if (:variables.level >= 4) {
       :damage(DamageType.Physical, 2);
     }
-    if (:getVariable("level") >= 2) {
+    if (:variables.level >= 2) {
       :dispose();
     }
   };
@@ -189,7 +189,7 @@ define card {
       :convertDice(DiceType.Omni, 1);
     };
     on adventure {
-      when :( :getVariable("exp") >= 2 );
+      when :( :variables.exp >= 2 );
       usage 1 {
         name "stage1";
         visible false;
@@ -197,7 +197,7 @@ define card {
       :drawCards(1);
     };
     on adventure {
-      when :( :getVariable("exp") >= 4 );
+      when :( :variables.exp >= 4 );
       usage 1 {
         name "stage2";
         visible false;
@@ -207,7 +207,7 @@ define card {
       });
     };
     on adventure {
-      when :( :getVariable("exp") >= 6 );
+      when :( :variables.exp >= 6 );
       usage 1 {
         name "stage3";
         visible false;

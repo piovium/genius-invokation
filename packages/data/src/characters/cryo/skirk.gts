@@ -232,7 +232,7 @@ define skill {
       :createHandCard(VoidRift);
     };
     on roundEnd {
-      :setVariable("canE", 1);
+      :variables.canE = 1;
     };
   };
 };

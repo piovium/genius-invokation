@@ -150,7 +150,7 @@ define card {
   weapon catalyst {
     variable extraDamage, 0 { range 2; };
     on increaseSkillDamage {
-      :e.increaseDamage(:getVariable("extraDamage"));
+      :e.increaseDamage(:variables.extraDamage);
     };
     on endPhase {
       :addVariable("extraDamage", 1);
@@ -219,12 +219,12 @@ define card {
       :addVariable("count", 1);
     };
     on damagedOrHealed {
-      when :( :getVariable("count") === 2 );
+      when :( :variables.count === 2 );
       usage perRound, 1;
       :characterStatus(AeonWave, :self.master);
     };
     on roundEnd {
-      :setVariable("count", 0);
+      :variables.count = 0;
     };
   };
 };
@@ -363,7 +363,7 @@ define status {
     range 2;
   };
   once increaseSkillDamage {
-    :e.increaseDamage(:getVariable("increaseDmg"));
+    :e.increaseDamage(:variables.increaseDmg);
   };
 };
 

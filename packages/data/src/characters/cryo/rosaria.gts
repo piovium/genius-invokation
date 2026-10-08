@@ -44,14 +44,14 @@ define combatStatus {
     append;
   };
   on useSkill {
-    const layer = :getVariable("layer");
+    const layer = :variables.layer;
     const buf = Array.from({ length: 10 }, (_, i) => i < layer);
     const take = :random(buf);
     if (take) {
       :combatStatus(StrikeWhereItHurts);
       const newLayer = Math.floor(layer / 2);
       if (newLayer > 0) {
-        :setVariable("layer", newLayer);
+        :variables.layer = newLayer;
       } else {
         :dispose();
       }

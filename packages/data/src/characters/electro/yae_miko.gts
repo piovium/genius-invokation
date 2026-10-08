@@ -31,11 +31,11 @@ define summon {
     usage 3 {
       append 6;
     };
-    :damage(DamageType.Electro, :getVariable("atk"));
+    :damage(DamageType.Electro, :variables.atk);
   };
   on declareEnd {
-    when :( :getVariable("usage") >= 4 );
-    :damage(DamageType.Electro, :getVariable("atk"));
+    when :( :variables.usage >= 4 );
+    :damage(DamageType.Electro, :variables.atk);
     :consumeUsage();
   };
 };

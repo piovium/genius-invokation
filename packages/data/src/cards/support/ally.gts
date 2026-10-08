@@ -114,8 +114,7 @@ define card {
     };
     on deductAllDiceCard {
       when :(
-        :e.hasCardTag("artifact") &&
-          :getVariable("material") >= :e.diceCostSize()
+        :e.hasCardTag("artifact") && :variables.material >= :e.diceCostSize()
       );
       usage perRound, 1;
       :addVariable("material", -:e.diceCostSize());
@@ -153,7 +152,7 @@ define card {
     };
     on deductAllDiceCard {
       when :(
-        :e.hasCardTag("weapon") && :getVariable("material") >= :e.diceCostSize()
+        :e.hasCardTag("weapon") && :variables.material >= :e.diceCostSize()
       );
       usage perRound, 1;
       :addVariable("material", -:e.diceCostSize());
@@ -225,7 +224,7 @@ define card {
     variable pigeon, 1;
     on actionPhase {
       :addVariable("pigeon", 1);
-      if (:getVariable("pigeon") === 3) {
+      if (:variables.pigeon === 3) {
         :drawCards(1);
         :generateDice(DiceType.Omni, 1);
         :dispose();
@@ -248,11 +247,11 @@ define card {
   support ally {
     variable collected, 0;
     on endPhase {
-      const absorbed = :absorbDice("diff", 3 - :getVariable("collected"));
+      const absorbed = :absorbDice("diff", 3 - :variables.collected);
       :addVariable("collected", absorbed.length);
     };
     on actionPhase {
-      if (:getVariable("collected") >= 3) {
+      if (:variables.collected >= 3) {
         :drawCards(2);
         :generateDice(DiceType.Omni, 2);
         :dispose();
@@ -283,7 +282,7 @@ define card {
       );
       listenTo all;
       :addVariable("inspiration", 1);
-      if (:getVariable("inspiration") >= 3) {
+      if (:variables.inspiration >= 3) {
         :drawCards(2);
         :dispose();
       }
@@ -380,8 +379,7 @@ define card {
     };
     on deductOmniDiceCard {
       when :(
-        :e.hasOneOfCardTag("weapon", "artifact") &&
-          :getVariable("progress") >= 3
+        :e.hasOneOfCardTag("weapon", "artifact") && :variables.progress >= 3
       );
       :e.deductOmniCost(2);
       :dispose();
@@ -639,23 +637,23 @@ define card {
   support ally {
     variable experience, 0;
     on staged {
-      :setVariable(
-        "experience",
-        Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
+      :variables.experience = Math.min(
+        :getExtensionState().disposedSupportCount[:self.who],
+        6,
       );
     };
     on entityDispose {
       when :( :e.entity.definition.type === "support" );
-      :setVariable(
-        "experience",
-        Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
+      :variables.experience = Math.min(
+        :getExtensionState().disposedSupportCount[:self.who],
+        6,
       );
     };
     on useSkill {
       when :(
         :e.isSkillType("burst") &&
           !:e.skillCaller.cast<"character">().hasStatus(SandsAndDream) && // 多个婕德不重复触发
-          :getVariable("experience") >= 6
+          :variables.experience >= 6
       );
       :characterStatus(SandsAndDream, $.my.active);
       :dispose();
@@ -706,16 +704,16 @@ define card {
     variable count, 0;
     on staged {
       const count = :getExtensionState().damages[flip(:self.who)].length;
-      :setVariable("count", Math.min(count, 4));
+      :variables.count = Math.min(count, 4);
     };
     on damaged {
       when :( !:e.target.isMine() );
       listenTo all;
       const count = :getExtensionState().damages[flip(:self.who)].length;
-      :setVariable("count", Math.min(count, 4));
+      :variables.count = Math.min(count, 4);
     };
     on endPhase {
-      const count = :getVariable("count");
+      const count = :variables.count;
       if (count >= 3) {
         :drawCards(count);
         :dispose();
@@ -760,7 +758,7 @@ define card {
     on playCard {
       when :( :e.card.definition.id === TaroumarusSavings );
       :addVariable("count", 1);
-      if (:getVariable("count") >= 2) {
+      if (:variables.count >= 2) {
         :summon(TaromaruEnraged);
         :dispose();
       }
@@ -783,7 +781,7 @@ define card {
     on endPhase {
       usage 2;
       :createPileCards(CalledInForCleanup, 1, "topRange5");
-      if (:getVariable("usage") === 1) {
+      if (:variables.usage === 1) {
         :drawCards(1);
       }
     };
@@ -807,7 +805,7 @@ define card {
       :addVariable("clue", 1);
     };
     on endPhase {
-      when :( :getVariable("clue") >= 2 );
+      when :( :variables.clue >= 2 );
       :addVariable("clue", -2);
       const top = :oppPlayer.pile[0];
       if (top) {
@@ -1061,7 +1059,7 @@ define card {
     variable progress, 0;
     on actionPhase {
       :addVariable("progress", 1);
-      if (:getVariable("progress") >= 1) {
+      if (:variables.progress >= 1) {
         :heal(2, $.macros.myMostInjured);
         :dispose();
       }
@@ -1083,7 +1081,7 @@ define card {
     variable progress, 0;
     on actionPhase {
       :addVariable("progress", 1);
-      if (:getVariable("progress") >= 2) {
+      if (:variables.progress >= 2) {
         :heal(4, $.macros.myMostInjured);
         :dispose();
       }
@@ -1105,7 +1103,7 @@ define card {
     variable progress, 0;
     on actionPhase {
       :addVariable("progress", 1);
-      if (:getVariable("progress") >= 3) {
+      if (:variables.progress >= 3) {
         :heal(6, $.macros.myMostInjured);
         :dispose();
       }
@@ -1150,7 +1148,7 @@ define card {
     variable progress, 0;
     on actionPhase {
       :addVariable("progress", 1);
-      if (:getVariable("progress") >= 1) {
+      if (:variables.progress >= 1) {
         :drawCards(2);
         :dispose();
       }
@@ -1172,7 +1170,7 @@ define card {
     variable progress, 0;
     on actionPhase {
       :addVariable("progress", 1);
-      if (:getVariable("progress") >= 2) {
+      if (:variables.progress >= 2) {
         :drawCards(4);
         :dispose();
       }
@@ -1194,7 +1192,7 @@ define card {
     variable progress, 0;
     on actionPhase {
       :addVariable("progress", 1);
-      if (:getVariable("progress") >= 3) {
+      if (:variables.progress >= 3) {
         :drawCards(6);
         :dispose();
       }
@@ -1244,7 +1242,7 @@ define card {
     variable progress, 0;
     on actionPhase {
       :addVariable("progress", 1);
-      if (:getVariable("progress") >= 1) {
+      if (:variables.progress >= 1) {
         :generateDice("randomElement", 1);
         :dispose();
       }
@@ -1266,7 +1264,7 @@ define card {
     variable progress, 0;
     on actionPhase {
       :addVariable("progress", 1);
-      if (:getVariable("progress") >= 2) {
+      if (:variables.progress >= 2) {
         :generateDice("randomElement", 2);
         :dispose();
       }
@@ -1288,7 +1286,7 @@ define card {
     variable progress, 0;
     on actionPhase {
       :addVariable("progress", 1);
-      if (:getVariable("progress") >= 3) {
+      if (:variables.progress >= 3) {
         :generateDice("randomElement", 3);
         :dispose();
       }

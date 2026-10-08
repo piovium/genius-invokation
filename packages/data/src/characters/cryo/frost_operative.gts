@@ -94,8 +94,8 @@ define skill {
       :addVariable("damageValue", :e.damageInfo.value);
     };
     on useSkill {
-      const usage = Math.min(:getVariable("damageValue") - 2, 5);
-      :setVariable("damageValue", 0);
+      const usage = Math.min(:variables.damageValue! - 2, 5);
+      :variables.damageValue = 0;
       if (usage > 0) {
         :characterStatus(BondOfLife, $.opp.active, {
           overrideVariables: { usage },

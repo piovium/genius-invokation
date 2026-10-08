@@ -218,12 +218,12 @@ define card {
       :addVariable("lake", 1);
     };
     on deductVoidDiceSkill {
-      when :( :e.isSkillType("normal") && :getVariable("lake") >= 12 );
+      when :( :e.isSkillType("normal") && :variables.lake >= 12 );
       usage perRound, 1;
       :e.deductVoidCost(2);
     };
     on increaseSkillDamage {
-      when :( :e.viaSkillType("normal") && :getVariable("lake") >= 12 );
+      when :( :e.viaSkillType("normal") && :variables.lake >= 12 );
       usage perRound, 1;
       :addVariable("lake", -12);
       :e.increaseDamage(1);
@@ -270,10 +270,10 @@ define card {
       :addVariable("solidarity", 1);
     };
     on increaseSkillDamage {
-      when :( :getVariable("solidarity") > 0 );
+      when :( :variables.solidarity > 0 );
       :e.increaseDamage(1);
-      :drawCards(:getVariable("solidarity"));
-      :setVariable("solidarity", 0);
+      :drawCards(:variables.solidarity);
+      :variables.solidarity = 0;
     };
   };
 };

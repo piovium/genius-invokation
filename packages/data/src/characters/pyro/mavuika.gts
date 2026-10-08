@@ -202,7 +202,7 @@ define card {
         FlamestriderFullThrottleInEffectPrepareStatus,
         :self.master,
       );
-      if (:getVariable("usage") === 1) {
+      if (:variables.usage === 1) {
         :drawCards(4);
       }
     };

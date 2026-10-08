@@ -38,14 +38,11 @@ define status {
     usage 1 {
       append 5;
     };
-    :damage(DamageType.Piercing, :getVariable("usage"), :self.master);
+    :damage(DamageType.Piercing, :variables.usage, :self.master);
   };
   on selfEnter {
-    if (
-      !:query($.opp.equipped.def(BeastlyCorrosion)) &&
-      :getVariable("usage") > 3
-    ) {
-      :setVariable("usage", 3);
+    if (!:query($.opp.equipped.def(BeastlyCorrosion)) && :variables.usage > 3) {
+      :variables.usage = 3;
     }
   };
 };

@@ -204,21 +204,21 @@ define card {
   weapon bow {
     variable fishing, 0 { range 2; };
     on playCard {
-      when :( !:isInInitialPile(:e.card) && :getVariable("fishing") < 2 );
+      when :( !:isInInitialPile(:e.card) && :variables.fishing < 2 );
       usage perRound, 2 {
         visible false;
       };
       :addVariable("fishing", 1);
     };
     on increaseSkillDamage {
-      when :( :getVariable("fishing") );
+      when :( :variables.fishing );
       :e.increaseDamage(1);
     };
     on useSkill {
-      when :( :getVariable("fishing") );
-      const fishing = :getVariable("fishing");
+      when :( :variables.fishing );
+      const fishing = :variables.fishing;
       :drawCards(fishing);
-      :setVariable("fishing", 0);
+      :variables.fishing = 0;
     };
   };
 };
@@ -296,7 +296,7 @@ define card {
       listenTo samePlayer;
       :addVariable("agile", 1);
       if (
-        :getVariable("agile") >= 2 &&
+        :variables.agile >= 2 &&
         :self.master.energy < :self.master.maxEnergy
       ) {
         :addVariable("agile", -2);

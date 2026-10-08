@@ -30,7 +30,7 @@ define summon {
   hint DamageType.Cryo, ((st, self) => self.variables.damageValue);
   on endPhase {
     usage 1;
-    :damage(DamageType.Cryo, :getVariable("damageValue"));
+    :damage(DamageType.Cryo, :variables.damageValue);
   };
 };
 

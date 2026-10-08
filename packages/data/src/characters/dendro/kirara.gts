@@ -34,10 +34,10 @@ define combatStatus {
     :addVariable("playedCard", 1);
   };
   on playCard {
-    when :( :getVariable("playedCard") === 2 );
+    when :( :variables.playedCard === 2 );
     usage 2;
     :damage(DamageType.Dendro, 1, $.my.active);
-    :setVariable("playedCard", 0);
+    :variables.playedCard = 0;
   };
 };
 

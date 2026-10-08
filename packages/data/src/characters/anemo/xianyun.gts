@@ -192,9 +192,9 @@ define card {
     };
     on increaseSkillDamage {
       when :( :e.via.definition.id === WordOfWindAndFlower );
-      const feather = :getVariable("feather");
+      const feather = :variables.feather;
       :e.increaseDamage(feather);
-      :setVariable("feather", 0);
+      :variables.feather = 0;
     };
   };
 };

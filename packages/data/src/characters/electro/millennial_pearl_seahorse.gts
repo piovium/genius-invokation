@@ -58,7 +58,7 @@ define status {
   tags barrier;
   variable decreaseDamageFromSummon, 0;
   on roundEnd {
-    :setVariable("decreaseDamageFromSummon", 0);
+    :variables.decreaseDamageFromSummon = 0;
   };
   on decreaseDamaged {
     usage 2 {
@@ -67,7 +67,7 @@ define status {
     :e.decreaseDamage(1);
     if (:e.source.definition.type === "summon") {
       const maxTime = :self.master.hasEquipment(PearlSolidification) ? 2 : 1;
-      if (:getVariable("decreaseDamageFromSummon") < maxTime) {
+      if (:variables.decreaseDamageFromSummon < maxTime) {
         :addVariable("decreaseDamageFromSummon", 1);
         return; // 不扣除使用次数
       }

@@ -34,7 +34,7 @@ define combatStatus {
     ((_, self) => self.variables.damageValue);
   on endPhase {
     usage 2;
-    :damage(DamageType.Dendro, :getVariable("damageValue"));
+    :damage(DamageType.Dendro, :variables.damageValue);
   };
 };
 

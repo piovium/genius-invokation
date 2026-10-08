@@ -169,9 +169,9 @@ define skill {
     on useSkill {
       when :(
         :e.skill.definition.id === ShortrangeRapidInterdictionFire &&
-          :getVariable("canShot")
+          :variables.canShot
       );
-      :setVariable("canShot", 0);
+      :variables.canShot = 0;
       const ball = :player.hands.find(
         (card) => card.definition.id === OverchargedBall,
       );

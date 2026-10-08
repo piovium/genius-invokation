@@ -29,14 +29,14 @@ define combatStatus {
   };
   on playCard {
     when :(
-      :getVariable("playedCard") >= 3 &&
+      :variables.playedCard >= 3 &&
         (:query($.opp.summon.def(ElectroCicin))?.getVariable("usage") ?? 0) < 3
     );
     const cicin = :query($.opp.summon.def(ElectroCicin));
     if (cicin) {
       cicin.addVariable("usage", 1);
     }
-    :setVariable("playedCard", 0);
+    :variables.playedCard = 0;
   };
 };
 
