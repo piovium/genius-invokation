@@ -484,9 +484,9 @@ define card {
     variable forbidden, 0 { range 6; };
     on damagedOrHealed {
       when :( :e.target.isActive() );
-      :addVariable("forbidden", 1);
+      :variables.forbidden += 1;
       if (:variables.forbidden >= 6 && :oppPlayer.hands.length > 0) {
-        :addVariable("forbidden", -6);
+        :variables.forbidden -= 6;
         const candidates = :oppPlayer.hands.filter(
           (card) => !card.withAttachment(IneffectiveWhenPlayed),
         );
@@ -568,7 +568,7 @@ define card {
     on drawCard {
       when :( :e.who !== :self.who );
       listenTo all;
-      :addVariable("drawnCardCount", 1);
+      :variables.drawnCardCount += 1;
       if (:variables.drawnCardCount === 4) {
         :combatStatus(TheMausoleumOfKingDeshretInEffect, "opp");
         :dispose();
@@ -591,7 +591,7 @@ define card {
   support place {
     variable progress, 0;
     on discardOrTuneCard {
-      :addVariable("progress", 1);
+      :variables.progress += 1;
       const progress = :variables.progress;
       if (progress % 3 === 0) {
         :generateDice(DiceType.Omni, 1);
@@ -635,7 +635,7 @@ define card {
   support place {
     variable flame, 0;
     on useSkillOrTechnique {
-      :addVariable("flame", 1);
+      :variables.flame += 1;
       const flame = :variables.flame;
       switch (flame) {
         case 2: {
@@ -701,9 +701,9 @@ define card {
         !player.initialPile.some((card) => card.id === :e.card.definition.id)
       ) {
         if (isMine) {
-          :addVariable("attention", 1);
+          :variables.attention += 1;
         } else if (:variables.attention > 0) {
-          :addVariable("attention", -1);
+          :variables.attention -= 1;
         }
       }
     };
@@ -736,7 +736,7 @@ define card {
         !:isInInitialPile(:e.card) && :e.originalPlayCost() >= :variables.point
       );
       :generateDice("randomElement", 1);
-      :addVariable("point", 1);
+      :variables.point += 1;
     };
   };
 };
@@ -794,7 +794,7 @@ define card {
   support place {
     variable disposedCardCount, 0;
     on discard {
-      :addVariable("disposedCardCount", 1);
+      :variables.disposedCardCount += 1;
     };
     on discard {
       when :( :variables.disposedCardCount >= 2 );
@@ -1026,11 +1026,11 @@ define card {
           :e.entity.definition.id,
         )
       );
-      :addVariable("count", 1);
+      :variables.count += 1;
     };
     on actionPhase {
       when :( :variables.count >= 3 );
-      :addVariable("count", -3);
+      :variables.count -= 3;
       :generateDice("randomElement", 1);
     };
   };

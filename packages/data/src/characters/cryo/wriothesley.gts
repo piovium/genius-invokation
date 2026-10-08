@@ -153,7 +153,7 @@ define skill {
       :variables.damageOrHealCount = 0;
     };
     on damagedOrHealed {
-      :addVariable("damageOrHealCount", 1);
+      :variables.damageOrHealCount! += 1;
     };
     on deductOmniDiceSkill {
       when :( :e.isSkillType("burst") );
@@ -206,11 +206,11 @@ define card {
       :useSkill(ForcefulFistsOfFrost);
     };
     on damagedOrHealed {
-      :addVariable("count", 1);
+      :variables.count += 1;
     };
     on increaseSkillDamage {
       when :( :variables.count >= 3 );
-      :addVariable("count", -3);
+      :variables.count -= 3;
       :e.increaseDamage(1);
     };
   };

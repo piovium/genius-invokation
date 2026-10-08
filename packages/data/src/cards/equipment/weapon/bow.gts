@@ -208,7 +208,7 @@ define card {
       usage perRound, 2 {
         visible false;
       };
-      :addVariable("fishing", 1);
+      :variables.fishing += 1;
     };
     on increaseSkillDamage {
       when :( :variables.fishing );
@@ -294,12 +294,12 @@ define card {
     };
     on dealReaction {
       listenTo samePlayer;
-      :addVariable("agile", 1);
+      :variables.agile += 1;
       if (
         :variables.agile >= 2 &&
         :self.master.energy < :self.master.maxEnergy
       ) {
-        :addVariable("agile", -2);
+        :variables.agile -= 2;
         :gainEnergy(1, :self.master);
       }
     };

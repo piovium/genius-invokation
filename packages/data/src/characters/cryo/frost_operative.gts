@@ -91,7 +91,7 @@ define skill {
   skillType passive {
     variable damageValue, 0;
     on skillDamage {
-      :addVariable("damageValue", :e.damageInfo.value);
+      :variables.damageValue! += :e.damageInfo.value;
     };
     on useSkill {
       const usage = Math.min(:variables.damageValue! - 2, 5);

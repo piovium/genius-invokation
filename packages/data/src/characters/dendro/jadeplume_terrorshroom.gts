@@ -34,7 +34,7 @@ define status {
   defineSnippet addVitality, typeHint<CharacterState>() {
     const max = :get(:e).hasEquipment(ProliferatingSpores) ? 4 : 3;
     if (:variables.vitality < max) {
-      :addVariable("vitality", 1);
+      :variables.vitality += 1;
     }
   };
   on dealDamage {

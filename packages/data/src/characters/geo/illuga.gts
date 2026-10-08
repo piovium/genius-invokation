@@ -51,7 +51,7 @@ define combatStatus {
   };
   on entityEnter {
     when :( :e.entity.definition.type === "summon" );
-    :addVariable("usage", 1);
+    :variables.usage += 1;
   };
 };
 
@@ -167,10 +167,10 @@ define card {
     on consumeUsage {
       listenTo samePlayer;
       when :( :e.entity.definition.id === NightingalesSong );
-      :addVariable("consumedNightingales", -:e.info.diffValue);
+      :variables.consumedNightingales -= :e.info.diffValue;
       while (:variables.consumedNightingales >= 2) {
         :createHandCard(Aedon);
-        :addVariable("consumedNightingales", -2);
+        :variables.consumedNightingales -= 2;
       }
     };
   };

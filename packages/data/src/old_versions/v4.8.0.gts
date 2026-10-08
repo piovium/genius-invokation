@@ -67,7 +67,7 @@ define combatStatus {
   };
   on discardOrTuneCard {
     const cost = :e.diceCost();
-    :addVariable("cardCount", 1);
+    :variables.cardCount += 1;
     switch (:variables.cardCount) {
       case 1: {
         :variables.card0Cost = cost;
@@ -97,7 +97,7 @@ define combatStatus {
     }
     const previousTotalMaxCost = :variables.totalMaxCost;
     if (cost === previousTotalMaxCost) {
-      :addVariable("totalMaxCostCount", 1);
+      :variables.totalMaxCostCount += 1;
     } else if (cost > previousTotalMaxCost) {
       :variables.totalMaxCost = cost;
       :variables.totalMaxCostCount = 1;
@@ -147,7 +147,7 @@ define card {
       usage perRound, 2;
       :discardMaxCostHands(1);
       :e.decreaseDamage(1);
-      :addVariable("solidarity", 1);
+      :variables.solidarity += 1;
     };
     on increaseSkillDamage {
       when :( :variables.solidarity > 0 );

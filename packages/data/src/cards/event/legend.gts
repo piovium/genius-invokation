@@ -342,7 +342,7 @@ define card {
     variable spirit, 0;
     on dealDamage {
       if (!:e.target.isMine()) {
-        :addVariable("spirit", :e.value);
+        :variables.spirit += :e.value;
       }
     };
     on actionPhase {

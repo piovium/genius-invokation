@@ -49,7 +49,7 @@ define status {
       :self.master.setVariable("increaseDmg", 1);
     }
     // 消耗 2 层变格
-    :addVariable("henkaku", -2);
+    :variables.henkaku -= 2;
     if (:variables.henkaku <= 0) {
       :dispose();
     }

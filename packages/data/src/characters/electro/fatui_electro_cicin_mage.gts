@@ -25,7 +25,7 @@ define combatStatus {
   id 124044 as CrushingThunder;
   variable playedCard, 0;
   on playCard {
-    :addVariable("playedCard", 1);
+    :variables.playedCard += 1;
   };
   on playCard {
     when :(
@@ -111,7 +111,7 @@ define combatStatus {
     const cicin = :query($.my.summon.def(ElectroCicin));
     if (cicin) {
       const usage = cicin.variables.usage;
-      :addVariable("shield", Math.min(usage, 3));
+      :variables.shield += Math.min(usage, 3);
     }
   };
 };

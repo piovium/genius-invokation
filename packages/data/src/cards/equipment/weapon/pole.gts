@@ -229,7 +229,7 @@ define card {
       :e.increaseDamage(:variables.extraDamage);
     };
     on useSkill {
-      :addVariable("extraDamage", 1);
+      :variables.extraDamage += 1;
     };
   };
 };
@@ -256,9 +256,9 @@ define card {
     on damagedOrHealed {
       when :( :e.target.isActive() );
       listenTo samePlayer;
-      :addVariable("justice", 1);
+      :variables.justice += 1;
       if (:variables.justice >= 4) {
-        :addVariable("justice", -4);
+        :variables.justice -= 4;
         :gainEnergy(1, :self.master);
       }
     };
@@ -287,7 +287,7 @@ define card {
       usage perRound, 1;
       :discardMaxCostHands(1);
       :e.decreaseDamage(1);
-      :addVariable("solidarity", 1);
+      :variables.solidarity += 1;
     };
     on increaseSkillDamage {
       when :( :variables.solidarity > 0 );

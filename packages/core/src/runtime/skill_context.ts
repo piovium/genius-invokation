@@ -1503,7 +1503,9 @@ export class SkillContext<Meta extends ContextMetaBase> {
     );
   }
 
+  /** @deprecated Use `get(target).variables` with `+=` or `-=` instead. */
   addVariable(prop: string, value: number, target: PlainAnyState): void;
+  /** @deprecated Use `variables` with `+=` or `-=` instead. */
   addVariable(prop: Meta["callerVars"], value: number): void;
   addVariable(prop: any, value: number, target?: PlainAnyState) {
     target ??= this.self;

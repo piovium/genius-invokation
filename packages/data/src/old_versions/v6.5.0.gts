@@ -196,7 +196,7 @@ define card {
       :e.increaseDamage(:variables.extraDamage);
     };
     on endPhase {
-      :addVariable("extraDamage", 1);
+      :variables.extraDamage += 1;
     };
   };
 };
@@ -222,9 +222,9 @@ define card {
     on damagedOrHealed {
       when :( :e.target.isActive() );
       listenTo samePlayer;
-      :addVariable("justice", 1);
+      :variables.justice += 1;
       if (:variables.justice >= 3) {
-        :addVariable("justice", -3);
+        :variables.justice -= 3;
         :gainEnergy(1, :self.master);
       }
     };
@@ -299,9 +299,9 @@ define card {
     variable forbidden, 0 { range 5; };
     on damagedOrHealed {
       when :( :e.target.isActive() );
-      :addVariable("forbidden", 1);
+      :variables.forbidden += 1;
       if (:variables.forbidden >= 5 && :oppPlayer.hands.length > 0) {
-        :addVariable("forbidden", -5);
+        :variables.forbidden -= 5;
         const candidates = :oppPlayer.hands.filter(
           (card) => !card.withAttachment(IneffectiveWhenPlayed),
         );

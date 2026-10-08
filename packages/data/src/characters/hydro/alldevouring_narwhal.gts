@@ -135,7 +135,7 @@ define combatStatus {
   on discardOrTuneCard {
     when :( :e.from.type === "hands" || :e.isTuning() );
     const cost = :e.diceCost();
-    :addVariable("cardCount", 1);
+    :variables.cardCount += 1;
     switch (:variables.cardCount) {
       case 1: {
         :variables.card0Cost = cost;
@@ -152,14 +152,14 @@ define combatStatus {
         const distinctCostCount = new Set([card0Cost, card1Cost, card2Cost])
           .size;
         const extraMaxHealth = 4 - distinctCostCount;
-        :addVariable("extraMaxHealth", extraMaxHealth);
+        :variables.extraMaxHealth += extraMaxHealth;
         :variables.cardCount = 0;
         break;
       }
     }
     const previousTotalMaxCost = :variables.totalMaxCost;
     if (cost === previousTotalMaxCost) {
-      :addVariable("totalMaxCostCount", 1);
+      :variables.totalMaxCostCount += 1;
     } else if (cost > previousTotalMaxCost) {
       :variables.totalMaxCost = cost;
       :variables.totalMaxCostCount = 1;

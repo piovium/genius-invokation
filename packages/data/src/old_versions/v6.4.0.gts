@@ -78,7 +78,7 @@ define status {
   variable level, 0;
   variable triggerOnUseSkill, 0;
   on drawCard {
-    :addVariable("level", 1);
+    :variables.level += 1;
   };
   on deductOmniDiceSkill {
     when :( :e.action.skill.definition.id === PressurizedFloe );

@@ -188,7 +188,7 @@ define card {
     on switchActive {
       listenTo samePlayer;
       usage perRound, 2;
-      :addVariable("feather", 1);
+      :variables.feather += 1;
     };
     on increaseSkillDamage {
       when :( :e.via.definition.id === WordOfWindAndFlower );

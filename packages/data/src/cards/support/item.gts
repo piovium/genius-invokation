@@ -38,7 +38,7 @@ define card {
         )
       );
       listenTo all;
-      :addVariable("progress", 1);
+      :variables.progress += 1;
       if (:variables.progress >= 3) {
         :generateDice("randomElement", 3);
         :dispose();
@@ -132,7 +132,7 @@ define card {
   support item {
     variable clue, 0;
     on useSkill {
-      :addVariable("clue", 1);
+      :variables.clue += 1;
       if (:variables.clue >= 3) {
         :drawCards(3);
         :dispose();
@@ -207,7 +207,7 @@ define card {
       };
       usage perRound, 1;
       :e.deductOmniCost(2);
-      :addVariable("totalUsage", -1);
+      :variables.totalUsage -= 1;
       if (:variables.totalUsage <= 0) {
         :dispose();
       }
@@ -236,7 +236,7 @@ define card {
       ((st, self) => self.variables.playedCard);
     on playCard {
       when :( :e.card.id !== :self.id );
-      :addVariable("playedCard", 1);
+      :variables.playedCard += 1;
     };
     on playCard {
       when :( :variables.playedCard === 3 );
@@ -273,7 +273,7 @@ define card {
       if (memory < 2) {
         const disposed = :discardMaxCostHands(2 - memory);
         const count = disposed.length;
-        :addVariable("memory", count);
+        :variables.memory += count;
       }
       :variables.cardPlayed = 0;
     };
@@ -283,7 +283,7 @@ define card {
     on deductOmniDiceSkill {
       when :( !:variables.cardPlayed && :variables.memory > 0 );
       :e.deductOmniCost(1);
-      :addVariable("memory", -1);
+      :variables.memory -= 1;
     };
   };
 };

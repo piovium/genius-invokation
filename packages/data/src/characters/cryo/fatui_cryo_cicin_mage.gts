@@ -37,7 +37,7 @@ define summon {
   on useSkill {
     when :( :e.skill.definition.id === CicinIcicle );
     if (:variables.usage < 3) {
-      :addVariable("usage", 1);
+      :variables.usage += 1;
     } else if (:query($.my.equipped.def(CicinsColdGlare))) {
       :variables.talentExtraDamage = 1;
     }
@@ -70,7 +70,7 @@ define combatStatus {
     const cicins = :query($.my.summon.def(CryoCicins));
     if (cicins) {
       const extraShield = Math.min(cicins.variables.usage, 3);
-      :addVariable("shield", extraShield);
+      :variables.shield += extraShield;
     }
   };
 };

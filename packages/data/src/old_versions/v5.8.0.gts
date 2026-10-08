@@ -375,12 +375,12 @@ define card {
           :self.master.isActive()
       );
       listenTo all;
-      :addVariable("crystal", 1);
+      :variables.crystal += 1;
       const crystal = :variables.crystal;
       const hands = :player.hands.length;
       if (crystal >= hands && :variables.generatedCount < 2) {
         :generateDice("randomElement", 1);
-        :addVariable("generatedCount", 1);
+        :variables.generatedCount += 1;
       }
     };
   };
@@ -414,12 +414,12 @@ define card {
             :e.isReactionRelatedTo(DamageType.Dendro))
       );
       listenTo all;
-      :addVariable("crystal", 2);
+      :variables.crystal += 2;
       const crystal = :variables.crystal;
       const hands = :player.hands.length;
       if (crystal >= hands && :variables.generatedCount < 2) {
         :generateDice(DiceType.Omni, 1);
-        :addVariable("generatedCount", 1);
+        :variables.generatedCount += 1;
       }
     };
   };

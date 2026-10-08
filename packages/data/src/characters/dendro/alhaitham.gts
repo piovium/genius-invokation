@@ -38,7 +38,7 @@ define status {
   };
   on useSkill {
     when :( :e.isChargedAttack() );
-    :addVariable("duration", 1);
+    :variables.duration += 1;
   };
 };
 

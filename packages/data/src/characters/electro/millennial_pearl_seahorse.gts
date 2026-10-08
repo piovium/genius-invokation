@@ -68,7 +68,7 @@ define status {
     if (:e.source.definition.type === "summon") {
       const maxTime = :self.master.hasEquipment(PearlSolidification) ? 2 : 1;
       if (:variables.decreaseDamageFromSummon < maxTime) {
-        :addVariable("decreaseDamageFromSummon", 1);
+        :variables.decreaseDamageFromSummon += 1;
         return; // 不扣除使用次数
       }
     }

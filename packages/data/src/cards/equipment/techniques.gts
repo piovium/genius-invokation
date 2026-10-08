@@ -273,7 +273,7 @@ define card {
     };
     on switchActive {
       when :( :e.switchInfo.from?.id === :self.master.id );
-      :addVariable("usage", 1);
+      :variables.usage += 1;
     };
   };
 };
@@ -369,7 +369,7 @@ define combatStatus {
       :e.card.definition.type === "equipment" &&
         :e.card.definition.tags.includes("technique")
     );
-    :addVariable("techniquesPlayedCount", 1);
+    :variables.techniquesPlayedCount += 1;
     :callSnippet.checkCount();
   };
 };

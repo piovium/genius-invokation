@@ -64,7 +64,7 @@ define status {
       const currentValue = :e.value;
       const decreaseValue = Math.min(shield, currentValue);
       :e.decreaseDamage(decreaseValue);
-      :addVariable("shield", -decreaseValue);
+      :variables.shield -= decreaseValue;
     }
   };
 };
@@ -105,7 +105,7 @@ define status {
       const currentValue = :e.value;
       const decreaseValue = Math.min(shield, currentValue);
       :e.decreaseDamage(decreaseValue);
-      :addVariable("shield", -decreaseValue);
+      :variables.shield -= decreaseValue;
     }
   };
 };

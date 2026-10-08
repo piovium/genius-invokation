@@ -201,11 +201,11 @@ define card {
     };
     on healed {
       listenTo samePlayer;
-      :addVariable("healedPts", :e.value);
+      :variables.healedPts += :e.value;
       const totalPts = :variables.healedPts;
       const generatedBubbleCount = Math.floor(totalPts / 3);
       const restPts = totalPts % 3;
-      :addVariable("bubble", generatedBubbleCount);
+      :variables.bubble += generatedBubbleCount;
       :variables.healedPts = restPts;
     };
     on increaseSkillDamage {
@@ -231,14 +231,14 @@ define card {
   support ally {
     variable material, 2;
     on endPhase {
-      :addVariable("material", 1);
+      :variables.material += 1;
     };
     on deductAllDiceCard {
       when :(
         :e.hasCardTag("artifact") && :variables.material >= :e.diceCostSize()
       );
       usage perRound, 1;
-      :addVariable("material", -:e.diceCostSize());
+      :variables.material -= :e.diceCostSize();
       :e.deductAllCost();
     };
   };
@@ -259,14 +259,14 @@ define card {
   support ally {
     variable material, 2;
     on endPhase {
-      :addVariable("material", 1);
+      :variables.material += 1;
     };
     on deductAllDiceCard {
       when :(
         :e.hasCardTag("weapon") && :variables.material >= :e.diceCostSize()
       );
       usage perRound, 1;
-      :addVariable("material", -:e.diceCostSize());
+      :variables.material -= :e.diceCostSize();
       :e.deductAllCost();
     };
   };
