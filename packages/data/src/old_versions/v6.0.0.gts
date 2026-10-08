@@ -121,8 +121,8 @@ define summon {
   hint DamageType.Electro, ((c, e) => e.variables.atk);
   on selfEnter {
     const domain = :query($.my.combatStatus.def(DeepDevourersDomain))!;
-    const maxCost = domain.getVariable("totalMaxCost");
-    const count = domain.getVariable("totalMaxCostCount");
+    const maxCost = domain.variables.totalMaxCost;
+    const count = domain.variables.totalMaxCostCount;
     if (count > 0) {
       :setVariable("atk", maxCost);
       :setVariable("usage", count);

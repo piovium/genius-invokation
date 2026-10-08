@@ -25,12 +25,7 @@ import {
   applyMutation,
   stringifyMutation,
 } from "./base/mutation";
-import {
-  type EntityState,
-  type EntityVariables,
-  StateSymbol,
-  stringifyState,
-} from "./base/state";
+import { type EntityState, StateSymbol, stringifyState } from "./base/state";
 import {
   allEntitiesAtArea,
   allSkills,
@@ -889,7 +884,10 @@ export class StateMutator {
       DetailLogType.Other,
       `Damage info: ${damageInfo.log || "(no modification)"}`,
     );
-    const finalHealth = Math.max(0, target.variables.health - damageInfo.value);
+    const finalHealth = Math.max(
+      0,
+      target.variables.health - damageInfo.value,
+    );
     this.mutate({
       type: "modifyEntityVar",
       oldValue: 0,
@@ -1244,7 +1242,7 @@ export class StateMutator {
           oldValue: 0,
           state: oldState,
           varName,
-          value,
+          value: value!,
           direction: "increase",
         });
       }
@@ -1348,7 +1346,7 @@ export class StateMutator {
           oldValue: 0,
           state: oldState,
           varName,
-          value,
+          value: value!,
           direction: "increase",
         });
       }

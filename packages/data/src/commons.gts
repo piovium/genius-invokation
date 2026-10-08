@@ -266,8 +266,8 @@ define card {
  */
 define summon {
   id 212 as Moondrift;
-  hint DamageType.Geo, ((st, self) => self.variables.effect);
   variable effect, 1 { append; };
+  hint DamageType.Geo, ((st, self) => self.variables.effect);
   on endPhase {
     usage 2;
     :damage(DamageType.Geo, :getVariable("effect"));

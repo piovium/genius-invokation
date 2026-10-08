@@ -66,10 +66,7 @@ define card {
     $.my.combatStatus.def(RadiantHuesIcicleInEffect),
   );
   if (radiantHuesIcicleInEffect) {
-    :damage(
-      DamageType.Cryo,
-      radiantHuesIcicleInEffect.getVariable("damageValue"),
-    );
+    :damage(DamageType.Cryo, radiantHuesIcicleInEffect.variables.damageValue);
   }
   // [浮彩·多重] 打出浮彩时：召唤浮彩分身。（浮彩分身造成的伤害等于此状态层数）
   const radiantHuesEchoesInEffect = :query(
@@ -87,7 +84,7 @@ define card {
     $.my.combatStatus.def(RadiantHuesManifestationInEffect),
   );
   if (radiantHuesManifestationInEffect) {
-    :drawCards(radiantHuesManifestationInEffect.getVariable("drawValue"));
+    :drawCards(radiantHuesManifestationInEffect.variables.drawValue);
   }
   // [浮彩·坚冰] 打出浮彩时：使我方出战角色附属等于此状态层数层战斗计划。
   const radiantHuesSolidIceInEffect = :query(

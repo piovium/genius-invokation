@@ -30,7 +30,7 @@ import type { TypingInfoBase, RegularTypingInfo } from "../../utils";
 type ReactiveClassCtor = new (
   skillContext: SkillContext<any>,
   id: number,
-) => ReactiveStateBase<TypingInfoBase>;
+) => object;
 
 export const NoReactiveSymbol: unique symbol = Symbol(
   "GiTcgCoreStateNoReactive",

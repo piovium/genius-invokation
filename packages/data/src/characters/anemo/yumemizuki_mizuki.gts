@@ -46,11 +46,11 @@ define card {
 define summon {
   id 115143 as MiniBaku;
   since "v6.0.0";
-  hint ResistantForm, ((c, self) => self.variables.usage!);
   on endPhase {
     usage 3;
     :createPileCards(YumemiStyleSpecialSnacks, 1, "top");
   };
+  hint ResistantForm, ((c, self) => self.variables.usage);
 };
 
 /**

@@ -44,8 +44,8 @@ define summon {
   hint DamageType.Electro, ((c, e) => e.variables.atk);
   on selfEnter {
     const domain = :query($.my.combatStatus.def(DeepDevourersDomain))!;
-    const maxCost = domain.getVariable("totalMaxCost");
-    const count = domain.getVariable("totalMaxCostCount");
+    const maxCost = domain.variables.totalMaxCost;
+    const count = domain.variables.totalMaxCostCount;
     if (count > 0) {
       :setVariable("atk", maxCost);
       :setVariable("usage", count);
@@ -213,7 +213,7 @@ define skill {
   cost DiceType.Hydro, 3;
   const st = :self.hasStatus(AnomalousAnatomy);
   const extraDmg = st
-    ? Math.min(Math.floor(st.getVariable("extraMaxHealth") / 3), 3)
+    ? Math.min(Math.floor(st.variables.extraMaxHealth / 3), 3)
     : 0;
   :damage(DamageType.Hydro, 1 + extraDmg);
   const [card] = :discardMaxCostHands(1, { allowPreview: true });

@@ -59,7 +59,7 @@ define skill {
   let increasedValue = 0;
   const bond = :query($.typeStatus.def(BondOfLife).at($.opp.active));
   if (bond) {
-    increasedValue = Math.min(3, bond.getVariable("usage"));
+    increasedValue = Math.min(3, bond.variables.usage);
   }
   :damage(DamageType.Physical, 2 + increasedValue);
 };
@@ -95,7 +95,7 @@ define skill {
   const bond = :query($.typeStatus.def(BondOfLife).at($.my.active));
   let healValue = 0;
   if (bond) {
-    healValue = bond.getVariable("usage");
+    healValue = bond.variables.usage;
     bond.dispose();
   }
   :heal(healValue, :self);

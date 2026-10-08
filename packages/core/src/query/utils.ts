@@ -20,8 +20,8 @@ import type {
   EntityAreaType,
   TypingInfoBase,
   RegularTypingInfo,
-  CommonCharacterVariableNames,
 } from "../utils";
+import type { CoreCharacterVariableNames } from "../base/character";
 
 export type IsExtends<T, U> = [T] extends [U] ? true : false;
 export type Related<T, U> =
@@ -217,7 +217,7 @@ export type TypingInfoFromMeta<M extends MetaBase> = {
   variables:
     | Extract<keyof M["variables"], string>
     | (IsEqual<M["type"], "character"> extends true
-        ? CommonCharacterVariableNames
+        ? CoreCharacterVariableNames
         : never);
 };
 

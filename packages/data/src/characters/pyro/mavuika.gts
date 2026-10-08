@@ -279,9 +279,9 @@ define skill {
   id 13153 as HourOfBurningSkies;
   skillType burst;
   cost DiceType.Pyro, 4;
-  filter :( :self.getVariable("fightingSpirit") >= 3 );
+  filter :( :self.variables.fightingSpirit! >= 3 );
   :gainNightsoul(:self, 1);
-  const spirit = :self.getVariable("fightingSpirit");
+  const spirit = :self.variables.fightingSpirit!;
   :damage(DamageType.Pyro, spirit);
   if (spirit >= 6) {
     :characterStatus(CrucibleOfDeathAndLife);

@@ -23,7 +23,7 @@ import {
 import { Aura, type LunarReaction } from "@gi-tcg/typings";
 import type {
   CharacterTag,
-  CharacterCoreVariableConfigs,
+  CoreCharacterVariableNames,
   SpecialEnergyConfig,
 } from "../../base/character";
 import type {
@@ -85,7 +85,7 @@ export interface CharacterVMMeta {
 
 export const DEFAULT_CHARACTER_VM_META = {
   id: 0 as number,
-  variables: "" as keyof CharacterCoreVariableConfigs & {},
+  variables: "" as CoreCharacterVariableNames,
 } as const satisfies CharacterVMMeta;
 
 export class CharacterViewModel extends defineViewModel(

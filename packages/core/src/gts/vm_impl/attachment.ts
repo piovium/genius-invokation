@@ -24,10 +24,21 @@ import {
   EntityModel,
   EntityViewModel,
   type DefaultEntityVMMeta,
+  type EntityVMMeta,
 } from "./entity";
 import type { DiceType } from "@gi-tcg/typings";
+import type { AR } from "@gi-tcg/gts-runtime";
 
-export type CostCountFn = (state: GameState, self: AttachmentState) => number;
+export interface AttachmentStateCb<
+  Vars extends string,
+> extends AttachmentState {
+  readonly variables: Readonly<Record<Vars, number>>;
+}
+
+export type CostCountFn<Vars extends string = never> = (
+  state: GameState,
+  self: AttachmentStateCb<Vars>,
+) => number;
 
 export class AttachmentModel extends EntityModel {
   modifications: (
@@ -52,17 +63,21 @@ export class AttachmentViewModel extends EntityViewModel
       this.tags.push(...tags);
     }),
 
-    addCost: h.simpleAttribute({
-      uniqueKey: "cost",
-    })(function (value: number | CostCountFn) {
-      this.modifications.push(
+    addCost: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+        value: number | CostCountFn<Meta["variables"]>,
+      ): AR.Done;
+      uniqueKey(): "cost";
+    }>((model, [value]) => {
+      model.modifications.push(
         typeof value === "number"
           ? {
               type: "increaseCardCost",
               value,
             }
           : (st, id) => {
-              const self = getEntityById(st, id) as AttachmentState;
+              const self = getEntityById(st, id) as AttachmentStateCb<any>;
               return {
                 type: "increaseCardCost",
                 value: value(st, self),
@@ -70,17 +85,21 @@ export class AttachmentViewModel extends EntityViewModel
             },
       );
     }),
-    deductCost: h.simpleAttribute({
-      uniqueKey: "cost",
-    })(function (value: number | CostCountFn) {
-      this.modifications.push(
+    deductCost: h.attribute<{
+      <Meta extends EntityVMMeta>(
+        this: AR.This<Meta>,
+        value: number | CostCountFn<Meta["variables"]>,
+      ): AR.Done;
+      uniqueKey(): "cost";
+    }>((model, [value]) => {
+      model.modifications.push(
         typeof value === "number"
           ? {
               type: "decreaseCardCost",
               value,
             }
           : (st, id) => {
-              const self = getEntityById(st, id) as AttachmentState;
+              const self = getEntityById(st, id) as AttachmentStateCb<any>;
               return {
                 type: "decreaseCardCost",
                 value: value(st, self),

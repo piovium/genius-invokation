@@ -554,7 +554,7 @@ export class SkillExecutor {
             oldValue: 0,
             state: currentSpot,
             varName: "exp",
-            value: currentSpot.variables.exp + 1,
+            value: currentSpot.variables.exp! + 1,
             direction: "increase",
           });
           await this.handleEvent([

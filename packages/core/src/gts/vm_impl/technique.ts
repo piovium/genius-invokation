@@ -87,7 +87,7 @@ class TechniqueSkillModel extends InitiativeSkillModel {
       }
       this.usageOpt = { name, autoDecrease };
     }
-    this.userFilters.unshift((c) => c.self.getVariable(name) > 0);
+    this.userFilters.unshift((c) => c.self.getVariable(name)! > 0);
   }
 
   override buildSkillDefinition() {
@@ -272,7 +272,7 @@ export const TechniqueViewModel = EntityViewModel
         );
         if (
           nightsoulBlessing &&
-          nightsoulBlessing.getVariable("nightsoul") <= 0
+          nightsoulBlessing.getVariable("nightsoul")! <= 0
         ) {
           c.dispose();
         }

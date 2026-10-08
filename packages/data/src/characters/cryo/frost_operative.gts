@@ -103,7 +103,7 @@ define skill {
         if (:self.hasEquipment(RimeflowRapier)) {
           const bondSt = :query($.typeStatus.def(BondOfLife).at($.opp.active));
           if (bondSt) {
-            const oldUsage = bondSt.getVariable("usage");
+            const oldUsage = bondSt.variables.usage;
             bondSt.setVariable("usage", oldUsage * 2);
           }
         }

@@ -36,7 +36,7 @@ define status {
   on useSkill {
     when :(
       :e.skill.definition.id === HeartstopperStrike &&
-        :self.getVariable("henkaku") >= 2
+        :getVariable("henkaku") >= 2
     );
     void 0;
     // 使用[勠心拳]后，我方继续行动一个回合

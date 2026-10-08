@@ -1478,7 +1478,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   setVariable(prop: string, value: number, target?: PlainAnyState) {
     const state = this.get(target ?? this.self).latest();
     value = clampVariable(value, state.definition.varConfigs[prop]);
-    const oldValue = state.variables[prop];
+    const oldValue = state.variables[prop]!;
     this.callAndEmit(
       "setVariable",
       state,
@@ -1498,7 +1498,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
   addVariable(prop: Meta["callerVars"], value: number): void;
   addVariable(prop: any, value: number, target?: PlainAnyState) {
     target ??= this.self;
-    const finalValue = value + target.variables[prop];
+    const finalValue = value + target.variables[prop]!;
     this.setVariable(prop, finalValue, target);
   }
 

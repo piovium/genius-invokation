@@ -21,21 +21,27 @@ import {
   type DiceRequirement,
   type ReadonlyDiceRequirement,
 } from "@gi-tcg/typings";
-import { checkDice, chooseDiceValue, diceIndex, flip, toSortedBy } from "@gi-tcg/utils";
+import {
+  checkDice,
+  chooseDiceValue,
+  diceIndex,
+  flip,
+  toSortedBy,
+} from "@gi-tcg/utils";
 import type {
   AnyState,
   CharacterState,
   EntityState,
-  EntityVariables,
   GameState,
   PlayerState,
+  Variables,
 } from "./base/state";
 import type { EntityArea, EntityDefinition, EntityType } from "./base/entity";
 import {
   NATION_TAGS,
   WEAPON_TAGS,
   type CharacterDefinition,
-  type CharacterVariableConfigs,
+  type CoreCharacterVariableNames,
   type CharacterTag,
   type ElementTag,
   type NationTag,
@@ -117,9 +123,6 @@ export interface RegularTypingInfo<
 > extends TypingInfoBase<Ty, Vars> {
   areaType: RegularTypeAreaTypeMap<Ty>;
 }
-
-export type CommonCharacterVariableNames =
-  NonIndexKeyOf<CharacterVariableConfigs>;
 
 export function getEntityById(state: GameState, id: number): AnyState {
   for (const player of state.players) {
@@ -628,7 +631,7 @@ export interface CreateEntityOptions {
   /** 若覆盖创建，只修改 `overrideVariables` 中指定的变量 */
   readonly modifyOverriddenVariablesOnly?: boolean;
   /** 创建实体时，覆盖默认变量 */
-  readonly overrideVariables?: Partial<EntityVariables>;
+  readonly overrideVariables?: Partial<Variables>;
 }
 
 export interface InsertEntityOptions extends CreateEntityOptions {
@@ -649,7 +652,7 @@ export function getInsertedStateVariables<T extends AnyState>({
   /** 带创建的实体，提供 variables 和 definitions */
   newStateTemplate: Partial<T> & { definition: {} };
   opt?: InsertEntityOptions;
-}): EntityVariables {
+}): Variables {
   const definition = newStateTemplate.definition;
   const incomingVariables =
     newStateTemplate.variables ?? opt?.overrideVariables ?? {};

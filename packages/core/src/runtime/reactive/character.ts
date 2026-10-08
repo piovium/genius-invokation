@@ -22,6 +22,7 @@ import type {
 import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
 import type {
   CharacterDefinition,
+  CoreCharacterVariableNames,
   NationTag,
   WeaponTag,
 } from "../../base/character";
@@ -55,10 +56,8 @@ import {
   ReactiveStateSymbol,
 } from "./base";
 import { applyReactive, type RegularRxEntityState } from ".";
-import type {
-  CommonCharacterVariableNames,
-  RegularTypingInfo,
-} from "../../utils";
+import type { RegularTypingInfo } from "../../utils";
+import type { ReactiveVariables } from "./variable";
 
 export type CharacterPosition = "active" | "next" | "prev" | "standby";
 
@@ -68,7 +67,7 @@ export type CharacterPosition = "active" | "next" | "prev" | "standby";
  */
 export class CharacterBase
   extends ReactiveStateBase<
-    RegularTypingInfo<"character", CommonCharacterVariableNames>
+    RegularTypingInfo<"character", CoreCharacterVariableNames>
   >
   implements PlainCharacterState
 {
@@ -106,6 +105,14 @@ export class CharacterBase
   }
   get id() {
     return this._id;
+  }
+  getVariable<Name extends string>(name: Name): CharacterVariables[Name] {
+    return this.state.variables[name];
+  }
+  setVariable(name: string, value: number): void {
+    throw new GiTcgCoreInternalError(
+      "a call to setVariable have been fallback to this readonly implementation",
+    );
   }
   positionIndex() {
     const player = this.gameState.players[this.who];
@@ -153,9 +160,6 @@ export class CharacterBase
   get definition(): CharacterDefinition {
     return this.state.definition;
   }
-  get variables(): CharacterVariables {
-    return this.state.variables;
-  }
   get entities(): readonly PlainEntityState[] {
     return this.state.entities;
   }
@@ -188,9 +192,6 @@ export class CharacterBase
   }
   nationTags(): NationTag[] {
     return nationOfCharacter(this.definition);
-  }
-  getVariable<Name extends string>(name: Name): CharacterVariables[Name] {
-    return this.state.variables[name];
   }
 }
 
@@ -280,6 +281,12 @@ export class ReadonlyCharacter<
 export class Character<
   Meta extends ContextMetaBase,
 > extends ReadonlyCharacter<Meta> {
+  declare variables: ReactiveVariables<
+    RegularTypingInfo<"character", CoreCharacterVariableNames>
+  >;
+  override setVariable(prop: string, value: number) {
+    this.skillContext.setVariable(prop, value, this.state);
+  }
   gainEnergy(value = 1) {
     this.skillContext.gainEnergy(value, this.state);
   }
@@ -327,9 +334,6 @@ export class Character<
     const finalValue = Math.max(0, originalValue - count);
     this.skillContext.setVariable("energy", finalValue, this.state);
     return originalValue - finalValue;
-  }
-  setVariable(prop: string, value: number) {
-    this.skillContext.setVariable(prop, value, this.state);
   }
   addVariable(prop: string, value: number) {
     this.skillContext.addVariable(prop, value, this.state);

@@ -13,20 +13,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { Aura } from "@gi-tcg/typings";
 import type { SkillDefinition } from "./skill";
-import type { EntityDefinition, VariableConfig } from "./entity";
+import type {
+  EntityDefinition,
+  VariableConfig,
+  VariableConfigs,
+} from "./entity";
 import type { WithVersionInfo } from "./version";
-import type { LunarReaction } from "@gi-tcg/typings";
+import type { Aura, LunarReaction } from "@gi-tcg/typings";
 
 export type ElementTag =
-  | "cryo"
-  | "hydro"
-  | "pyro"
-  | "electro"
-  | "anemo"
-  | "geo"
-  | "dendro";
+  "cryo" | "hydro" | "pyro" | "electro" | "anemo" | "geo" | "dendro";
 
 export const WEAPON_TAGS = [
   "sword",
@@ -62,11 +59,7 @@ export type ArkheTag =
   | "pneuma" // 荒
   | "ousia"; // 芒
 
-export type CharacterTag =
-  | ElementTag
-  | WeaponTag
-  | NationTag
-  | ArkheTag;
+export type CharacterTag = ElementTag | WeaponTag | NationTag | ArkheTag;
 
 export interface CharacterDefinition extends WithVersionInfo {
   readonly __definition: "characters";
@@ -85,16 +78,20 @@ export interface SpecialEnergyConfig {
   readonly slotSize: number;
 }
 
-export interface CharacterCoreVariableConfigs {
-  readonly health: VariableConfig;
-  readonly energy: VariableConfig;
-  readonly maxHealth: VariableConfig;
-  readonly maxEnergy: VariableConfig;
-  readonly aura: VariableConfig<Aura>;
-  readonly alive: VariableConfig<0 | 1>;
-
+/** Variables present on every character, including their value constraints. */
+export interface CoreCharacterVariables {
+  readonly health: number;
+  readonly energy: number;
+  readonly maxHealth: number;
+  readonly maxEnergy: number;
+  readonly aura: Aura;
+  readonly alive: 0 | 1;
 }
 
-export interface CharacterVariableConfigs extends CharacterCoreVariableConfigs {
-  readonly [x: string]: VariableConfig;
-}
+export type CoreCharacterVariableNames = keyof CoreCharacterVariables;
+
+export type CharacterVariableConfigs = VariableConfigs & {
+  readonly [K in CoreCharacterVariableNames]: VariableConfig<
+    CoreCharacterVariables[K]
+  >;
+};

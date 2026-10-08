@@ -19,15 +19,9 @@ import { DiceType } from "@gi-tcg/typings";
 import type {
   CharacterDefinition,
   CharacterTag,
-  CharacterVariableConfigs,
+  CoreCharacterVariables,
 } from "./character";
-import type {
-  EntityDefinition,
-  EntityTag,
-  EntityType,
-  EntityVariableConfigs,
-  VariableOfConfig,
-} from "./entity";
+import type { EntityDefinition, EntityTag, EntityType } from "./entity";
 import type { GameData } from "../data/registry";
 import type { ExtensionDefinition } from "./extension";
 import type {
@@ -212,6 +206,12 @@ export interface PlayerState {
   readonly removedEntities: readonly AnyState[];
 }
 
+export interface Variables {
+  readonly [name: string]: number | undefined;
+}
+
+export interface CharacterVariables extends Variables, CoreCharacterVariables {}
+
 export interface CharacterState {
   readonly [StateSymbol]: "character";
   readonly id: number;
@@ -220,23 +220,19 @@ export interface CharacterState {
   readonly variables: CharacterVariables;
 }
 
-export type CharacterVariables = VariableOfConfig<CharacterVariableConfigs>;
-
 export interface EntityState<Ty extends EntityType = EntityType> {
   readonly [StateSymbol]: "entity";
   readonly id: number;
   readonly definition: EntityDefinition<Ty>;
-  readonly variables: EntityVariables;
+  readonly variables: Variables;
   readonly attachments: AttachmentState[];
 }
-
-export type EntityVariables = VariableOfConfig<EntityVariableConfigs>;
 
 export interface AttachmentState {
   readonly [StateSymbol]: "attachment";
   readonly id: number;
   readonly definition: AttachmentDefinition;
-  readonly variables: EntityVariables;
+  readonly variables: Variables;
 }
 
 export type AnyState = CharacterState | EntityState | AttachmentState;

@@ -610,7 +610,7 @@ export function exposeCharacter(
   let specialEnergyName: string | undefined = void 0;
   if (ch.definition.specialEnergy) {
     specialEnergyName = ch.definition.specialEnergy.variableName;
-    energy = ch.variables[specialEnergyName];
+    energy = ch.variables[specialEnergyName]!;
     maxEnergy = ch.definition.specialEnergy.slotSize;
   }
   return {

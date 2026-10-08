@@ -69,7 +69,7 @@ define combatStatus {
   on selfEnter {
     const cicins = :query($.my.summon.def(CryoCicins));
     if (cicins) {
-      const extraShield = Math.min(cicins.getVariable("usage"), 3);
+      const extraShield = Math.min(cicins.variables.usage, 3);
       :addVariable("shield", extraShield);
     }
   };
@@ -115,7 +115,7 @@ define skill {
   :damage(DamageType.Cryo, 1);
   const talent = :self.hasEquipment(CicinsColdGlare);
   const cicins = :query($.my.summon.def(CryoCicins));
-  if (talent && cicins && cicins.getVariable("usage") >= 2) {
+  if (talent && cicins && cicins.variables.usage >= 2) {
     cicins.setVariable("talentExtraDamage", 1);
   }
   :summon(CryoCicins);

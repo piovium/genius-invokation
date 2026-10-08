@@ -28,10 +28,12 @@ import {
   type EntityArea,
   type EntityDefinition,
   type EntityTag,
+  type EntityType,
   type VariableConfig,
 } from "../../base/entity";
 import type {
   AttachmentDefinition,
+  AttachmentState,
   EntityState,
   GameState,
 } from "../../base/state";
@@ -94,14 +96,22 @@ import type {
 } from "../../runtime/skill_context";
 import { RESERVED, type Reserved, type ReservedMeta } from "./reserved";
 import { DEFAULT_VARIABLE_UPPER_BOUND } from "../../base/mutation";
+import type { AttachmentStateCb } from "./attachment";
+
+export interface EntityStateCb<Meta extends EntityVMMeta> extends EntityState<
+  Extract<Meta["type"], EntityType>
+> {
+  readonly area: EntityArea;
+  readonly variables: Readonly<Record<Meta["variables"], number>>;
+}
 
 /** A GTS definition's lazy description replacement. */
-export type EntityDescriptionDictionaryGetter<
-  AssociatedExt extends ExtensionHandle,
-> = (
+export type EntityDescriptionDictionaryGetter<Meta extends EntityVMMeta> = (
   state: GameState,
-  self: EntityState & { readonly area: EntityArea },
-  extensionState: AssociatedExt["type"],
+  self: Meta["type"] extends "attachment"
+    ? AttachmentStateCb<Meta["variables"]>
+    : EntityStateCb<Meta>,
+  extensionState: Meta["associatedExtension"]["type"],
 ) => string | number;
 
 interface DeclaredUsageInfo {
@@ -134,7 +144,7 @@ export interface IDescriptionReplaceable {
 export function addDescriptionReplacement(
   model: IDescriptionReplaceable,
   key: DescriptionDictionaryKey,
-  getter: EntityDescriptionDictionaryGetter<any>,
+  getter: EntityDescriptionDictionaryGetter<EntityVMMeta>,
 ) {
   if (Reflect.has(model.descriptionDictionary, key)) {
     throw new GiTcgDataError(`Description key ${key} already exists`);
@@ -144,7 +154,9 @@ export function addDescriptionReplacement(
     const ext = st.extensions.find((ext) => ext.definition.id === extId);
     const self = getEntityById(st, id) as EntityState;
     const area = getEntityArea(st, id);
-    return String(getter(st, { ...self, area }, ext?.state));
+    return String(
+      getter(st, { ...self, area } as EntityStateCb<any>, ext?.state),
+    );
   };
   model.descriptionDictionary[key] = entry;
 }
@@ -234,7 +246,7 @@ export class EntityModel implements ICaller {
         // 扣除持续回合数
         if (hasDuration) {
           self.addVariable("duration", -1);
-          if (self.getVariable("duration") <= 0) {
+          if (self.getVariable("duration")! <= 0) {
             self.dispose();
           }
         }
@@ -932,7 +944,7 @@ export class EntityViewModel extends defineViewModel(
       <Meta extends EntityVMMeta>(
         this: AR.This<Meta>,
         key: DescriptionDictionaryKey,
-        getter: EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
+        getter: EntityDescriptionDictionaryGetter<Meta>,
       ): AR.Done;
     }>((model, [key, getter]) => {
       addDescriptionReplacement(model, key, getter);
@@ -941,10 +953,7 @@ export class EntityViewModel extends defineViewModel(
       <Meta extends EntityVMMeta>(
         this: ThisWithType<Meta, "summon" | "support">,
         icon: DamageType | CombatStatusHandle | StatusHandle,
-        text?:
-          | number
-          | string
-          | EntityDescriptionDictionaryGetter<Meta["associatedExtension"]>,
+        text?: number | string | EntityDescriptionDictionaryGetter<Meta>,
       ): AR.WithRewriteMeta<PushMetaVar<Meta, "hintIcon">, typeof HintVM>;
     }>((model, [icon, text], subView) => {
       const { dynamicPreset } = HintVM.parse(subView);

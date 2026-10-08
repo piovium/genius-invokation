@@ -13,13 +13,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type {
-  AttachmentState,
-  EntityState,
-  EntityVariables,
-} from "../../base/state";
-import { GiTcgDataError } from "../../error";
-import { type EntityArea, type EntityDefinition } from "../../base/entity";
+import type { AttachmentState } from "../../base/state";
+import { GiTcgCoreInternalError, GiTcgDataError } from "../../error";
+import { type EntityArea } from "../../base/entity";
 import { getEntityById, type PlainAttachmentState } from "./utils";
 import type { ContextMetaBase, SkillContext } from "../skill_context";
 import {
@@ -31,6 +27,7 @@ import {
 import type { AttachmentDefinition } from "../../base/attachment";
 import type { RxEntityState } from ".";
 import type { TypingInfoBase, RegularTypingInfo } from "../../utils";
+import type { ReactiveVariables } from "./variable";
 
 class ReadonlyAttachment<Meta extends ContextMetaBase>
   extends ReactiveStateBase<RegularTypingInfo<"attachment">>
@@ -62,9 +59,6 @@ class ReadonlyAttachment<Meta extends ContextMetaBase>
   get definition(): AttachmentDefinition {
     return this.state.definition;
   }
-  get variables(): EntityVariables {
-    return this.state.variables;
-  }
   get area(): EntityArea {
     return this.skillContext._getEntityArea(this.id);
   }
@@ -74,10 +68,13 @@ class ReadonlyAttachment<Meta extends ContextMetaBase>
   isMine() {
     return this.area.who === this.skillContext.self.who;
   }
-  getVariable<Name extends string>(
-    name: Name,
-  ): NonNullable<EntityVariables[Name]> {
+  getVariable(name: string): number | undefined {
     return this.state.variables[name];
+  }
+  setVariable(name: string, value: number): void {
+    throw new GiTcgCoreInternalError(
+      "a call to setVariable have been fallback to this readonly implementation",
+    );
   }
 
   get master(): RxEntityState<
@@ -96,6 +93,7 @@ class ReadonlyAttachment<Meta extends ContextMetaBase>
 export class Attachment<
   Meta extends ContextMetaBase,
 > extends ReadonlyAttachment<Meta> {
+  declare variables: ReactiveVariables<RegularTypingInfo<"attachment">>;
   setVariable(prop: string, value: number) {
     this.skillContext.setVariable(prop, value, this.state);
   }
