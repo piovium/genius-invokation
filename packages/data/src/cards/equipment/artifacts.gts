@@ -757,15 +757,15 @@ define card {
     on healed {
       listenTo samePlayer;
       :addVariable("healedPts", :e.value);
-      const totalPts = :getVariable("healedPts");
+      const totalPts = :variables.healedPts;
       const generatedBubbleCount = Math.floor(totalPts / 3);
       const restPts = totalPts % 3;
       :addVariable("bubble", generatedBubbleCount);
-      :setVariable("healedPts", restPts);
+      :variables.healedPts = restPts;
     };
     on increaseSkillDamage {
-      const bubbleCount = :getVariable("bubble");
-      :setVariable("bubble", 0);
+      const bubbleCount = :variables.bubble;
+      :variables.bubble = 0;
       :e.increaseDamage(bubbleCount);
     };
   };
@@ -799,15 +799,15 @@ define card {
     on healed {
       listenTo samePlayer;
       :addVariable("healedPts", :e.value);
-      const totalPts = :getVariable("healedPts");
+      const totalPts = :variables.healedPts;
       const generatedBubbleCount = Math.floor(totalPts / 3);
       const restPts = totalPts % 3;
       :addVariable("bubble", generatedBubbleCount);
-      :setVariable("healedPts", restPts);
+      :variables.healedPts = restPts;
     };
     on increaseSkillDamage {
-      const bubbleCount = :getVariable("bubble");
-      :setVariable("bubble", 0);
+      const bubbleCount = :variables.bubble;
+      :variables.bubble = 0;
       :e.increaseDamage(bubbleCount);
     };
   };
@@ -965,9 +965,9 @@ define card {
       :drawCards(1);
     };
     on endPhase {
-      when :( :getVariable("shouldHeal") );
+      when :( :variables.shouldHeal );
       :heal(1, :self.master);
-      :setVariable("shouldHeal", 0);
+      :variables.shouldHeal = 0;
     };
   };
 };
@@ -989,12 +989,12 @@ define card {
   artifact {
     variable count, 0;
     on roundEnd {
-      :setVariable("count", 0);
+      :variables.count = 0;
     };
     on damagedOrHealed {
-      if (:getVariable("count") < 2) {
+      if (:variables.count < 2) {
         :addVariable("count", 1);
-        const v = :getVariable("count");
+        const v = :variables.count;
         if (v === 1) {
           :generateDice(:self.master.element(), 1);
         } else if (v === 2) {
@@ -1025,7 +1025,7 @@ define card {
     };
     on deductOmniDice {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
-      const reward = :getVariable("reward");
+      const reward = :variables.reward;
       const currentCost = :e.diceCostSize();
       const deduced = Math.min(reward, currentCost);
       :e.deductOmniCost(deduced);
@@ -1066,7 +1066,7 @@ define card {
     variable crystal, 0 { range 2; };
     on damaged {
       when :(
-        :getVariable("crystal") < 2 &&
+        :variables.crystal < 2 &&
           !:e.target.isMine() &&
           (:e.type === DamageType.Dendro ||
             :e.isReactionRelatedTo(DamageType.Dendro))
@@ -1075,7 +1075,7 @@ define card {
       :addVariable("crystal", 1);
     };
     on actionPhase {
-      when :( :getVariable("crystal") === 2 );
+      when :( :variables.crystal === 2 );
       :combatStatus(AmethystCrownInEffect);
     };
   };
@@ -1099,12 +1099,12 @@ define card {
   artifact {
     variable count, 0;
     on roundEnd {
-      :setVariable("count", 0);
+      :variables.count = 0;
     };
     on damagedOrHealed {
-      if (:getVariable("count") < 4) {
+      if (:variables.count < 4) {
         :addVariable("count", 1);
-        const v = :getVariable("count");
+        const v = :variables.count;
         if (v === 1 || v === 4) {
           :generateDice(:self.master.element(), 1);
         } else if (v === 2) {
@@ -1136,7 +1136,7 @@ define card {
     };
     on deductOmniDice {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
-      const reward = :getVariable("reward");
+      const reward = :variables.reward;
       const currentCost = :e.diceCostSize();
       const deduced = Math.min(reward, currentCost);
       :e.deductOmniCost(deduced);
@@ -1162,7 +1162,7 @@ define card {
     variable crystal, 0;
     on damaged {
       when :(
-        :getVariable("crystal") < 5 &&
+        :variables.crystal < 5 &&
           !:e.target.isMine() &&
           (:e.type === DamageType.Dendro ||
             :e.isReactionRelatedTo(DamageType.Dendro))
@@ -1171,13 +1171,13 @@ define card {
       :addVariable("crystal", 1);
     };
     on actionPhase {
-      when :( :getVariable("crystal") === 5 );
+      when :( :variables.crystal === 5 );
       usage perRound, 2 { name "usagePerRound1"; };
       :generateDice(DiceType.Omni, 1);
       :drawCards(1);
     };
     on reaction {
-      when :( :getVariable("crystal") === 5 && :e.caller.isMine() );
+      when :( :variables.crystal === 5 && :e.caller.isMine() );
       listenTo all;
       usage perRound, 2 { name "usagePerRound1"; };
       :generateDice(DiceType.Omni, 1);
@@ -1390,7 +1390,7 @@ define status {
     append;
   };
   once increaseDamaged {
-    :e.increaseDamage(:getVariable("layer"));
+    :e.increaseDamage(:variables.layer);
   };
 };
 
@@ -1700,7 +1700,7 @@ define card {
       :addVariable("longing", 1);
     };
     on actionPhase {
-      const longing = :getVariable("longing");
+      const longing = :variables.longing;
       :heal(Math.floor(longing / 2), :self.master);
     };
   };

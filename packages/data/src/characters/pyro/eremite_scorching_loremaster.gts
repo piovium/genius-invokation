@@ -35,7 +35,7 @@ define combatStatus {
   };
   on increaseTechniqueDamage {
     when :( :e.via.definition.id === 1230311 );
-    :e.increaseDamage(:getVariable("blessing"));
+    :e.increaseDamage(:variables.blessing);
     :dispose();
   };
 };

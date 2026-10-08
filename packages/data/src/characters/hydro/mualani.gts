@@ -45,7 +45,7 @@ define status {
       :e.source.definition.id === Mualani ||
         :e.source.definition.id === SharkMissile
     );
-    :e.increaseDamage(2 * :getVariable("count"));
+    :e.increaseDamage(2 * :variables.count);
     :dispose();
   };
 };

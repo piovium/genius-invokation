@@ -35,7 +35,7 @@ define summon {
     :e.decreaseDamage(2);
   };
   on endPhase {
-    when :( :getVariable("usage") <= 0 );
+    when :( :variables.usage <= 0 );
     :damage(DamageType.Pyro, 2);
     :dispose();
   };

@@ -53,7 +53,7 @@ define status {
       :e.via.definition.id === VioletArc ||
         :e.source.definition.id === LightningRoseSummon
     );
-    :e.increaseDamage(:getVariable("conductive"));
+    :e.increaseDamage(:variables.conductive);
     :dispose();
   };
 };

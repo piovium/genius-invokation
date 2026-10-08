@@ -112,7 +112,7 @@ define combatStatus {
   variable reductCount, 1 { append; };
   on deductOmniDiceCard {
     when :( :e.action.skill.caller.definition.id === RadiantHues );
-    :e.deductOmniCost(:getVariable("reductCount"));
+    :e.deductOmniCost(:variables.reductCount);
   };
 };
 
@@ -169,11 +169,11 @@ define card {
       :convertDice(DiceType.Omni, 1);
     };
     on adventure {
-      when :( :getVariable("exp") !== 1 );
+      when :( :variables.exp !== 1 );
       :convertDice(DiceType.Omni, 1);
     };
     on adventure {
-      when :( :getVariable("exp") >= 2 );
+      when :( :variables.exp >= 2 );
       usage 1 {
         name "stage1";
         visible false;
@@ -181,7 +181,7 @@ define card {
       :drawCards(2);
     };
     on adventure {
-      when :( :getVariable("exp") >= 4 );
+      when :( :variables.exp >= 4 );
       usage 1 {
         name "stage2";
         visible false;
@@ -191,7 +191,7 @@ define card {
       });
     };
     on adventure {
-      when :( :getVariable("exp") >= 6 );
+      when :( :variables.exp >= 6 );
       usage 1 {
         name "stage3";
         visible false;

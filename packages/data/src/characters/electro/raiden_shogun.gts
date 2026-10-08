@@ -53,13 +53,13 @@ define status {
   };
   on increaseSkillDamage {
     when :( :e.via.definition.id === SecretArtMusouShinsetsu );
-    const currentVal = :getVariable("chakra");
+    const currentVal = :variables.chakra;
     if (:self.master.hasEquipment(WishesUnnumbered)) {
       :e.increaseDamage(currentVal * 2);
     } else {
       :e.increaseDamage(currentVal);
     }
-    :setVariable("chakra", 0);
+    :variables.chakra = 0;
   };
 };
 

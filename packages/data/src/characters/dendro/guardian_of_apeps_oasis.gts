@@ -163,7 +163,7 @@ define combatStatus {
     );
     listenTo samePlayer;
     :addVariable("organismCount", 1);
-    if (:getVariable("organismCount") === 4) {
+    if (:variables.organismCount === 4) {
       const apep = :query($.my.character.def(GuardianOfApepsOasis));
       apep?.addStatus(ReignitedHeartOfOasis);
       apep?.addStatus(OasissAegis);

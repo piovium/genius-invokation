@@ -28,7 +28,7 @@ define status {
     append;
   };
   on increaseSkillDamage {
-    :e.increaseDamage(:getVariable("layer"));
+    :e.increaseDamage(:variables.layer);
   };
 };
 
@@ -47,7 +47,7 @@ define status {
     ((c, self) => self.variables.cardCount);
   on discard {
     :addVariable("cardCount", 1);
-    if (:getVariable("cardCount") % 6 === 0) {
+    if (:variables.cardCount % 6 === 0) {
       :characterStatus(Resentment, :self.master);
     }
   };

@@ -32,15 +32,15 @@ define status {
       autoDispose false;
     };
     :e.increaseDamage(2);
-    :setVariable("triggerSeal", 1);
+    :variables.triggerSeal = 1;
   };
   on useSkill {
-    when :( :getVariable("triggerSeal") );
-    :setVariable("triggerSeal", 0);
+    when :( :variables.triggerSeal );
+    :variables.triggerSeal = 0;
     if (:self.master.hasEquipment(RightOfFinalInterpretation)) {
       :drawCards(1);
     }
-    if (:getVariable("usage") === 0) {
+    if (:variables.usage === 0) {
       :dispose();
     }
   };

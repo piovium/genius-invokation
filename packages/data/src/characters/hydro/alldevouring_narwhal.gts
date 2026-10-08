@@ -47,25 +47,25 @@ define summon {
     const maxCost = domain.variables.totalMaxCost;
     const count = domain.variables.totalMaxCostCount;
     if (count > 0) {
-      :setVariable("atk", maxCost);
-      :setVariable("usage", count);
+      :variables.atk = maxCost;
+      :variables.usage = count;
     } else {
       :dispose();
     }
   };
   on endPhase {
-    :damage(DamageType.Electro, :getVariable("atk"));
+    :damage(DamageType.Electro, :variables.atk);
     :consumeUsage();
   };
   on decreaseDamaged {
-    when :( :getVariable("barrierUsage") && :e.target.isActive() );
+    when :( :variables.barrierUsage && :e.target.isActive() );
     :e.decreaseDamage(1);
-    :setVariable("barrierUsage", 0);
+    :variables.barrierUsage = 0;
   };
   on damaged {
-    when :( !:getVariable("barrierUsage") );
+    when :( !:variables.barrierUsage );
     :consumeUsage(2);
-    :setVariable("barrierUsage", 1);
+    :variables.barrierUsage = 1;
   };
 };
 
@@ -136,38 +136,38 @@ define combatStatus {
     when :( :e.from.type === "hands" || :e.isTuning() );
     const cost = :e.diceCost();
     :addVariable("cardCount", 1);
-    switch (:getVariable("cardCount")) {
+    switch (:variables.cardCount) {
       case 1: {
-        :setVariable("card0Cost", cost);
+        :variables.card0Cost = cost;
         break;
       }
       case 2: {
-        :setVariable("card1Cost", cost);
+        :variables.card1Cost = cost;
         break;
       }
       case 3: {
-        const card0Cost = :getVariable("card0Cost");
-        const card1Cost = :getVariable("card1Cost");
+        const card0Cost = :variables.card0Cost;
+        const card1Cost = :variables.card1Cost;
         const card2Cost = cost;
         const distinctCostCount = new Set([card0Cost, card1Cost, card2Cost])
           .size;
         const extraMaxHealth = 4 - distinctCostCount;
         :addVariable("extraMaxHealth", extraMaxHealth);
-        :setVariable("cardCount", 0);
+        :variables.cardCount = 0;
         break;
       }
     }
-    const previousTotalMaxCost = :getVariable("totalMaxCost");
+    const previousTotalMaxCost = :variables.totalMaxCost;
     if (cost === previousTotalMaxCost) {
       :addVariable("totalMaxCostCount", 1);
     } else if (cost > previousTotalMaxCost) {
-      :setVariable("totalMaxCost", cost);
-      :setVariable("totalMaxCostCount", 1);
+      :variables.totalMaxCost = cost;
+      :variables.totalMaxCostCount = 1;
     }
   };
   on endPhase {
     // 文本有误，实为结束阶段时
-    const extraMaxHealth = :getVariable("extraMaxHealth");
+    const extraMaxHealth = :variables.extraMaxHealth;
     if (extraMaxHealth) {
       const narwhal = :query($.my.character.def(AlldevouringNarwhal));
       if (narwhal) {
@@ -176,7 +176,7 @@ define combatStatus {
         });
         :increaseMaxHealth(extraMaxHealth, narwhal);
       }
-      :setVariable("extraMaxHealth", 0);
+      :variables.extraMaxHealth = 0;
     }
   };
 };

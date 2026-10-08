@@ -283,18 +283,18 @@ define card {
     };
     on endPhase {
       const absorbed = :absorbDice("seq", 2);
-      :setVariable("count", absorbed.length);
-      :setVariable("d1", absorbed[0] ?? 0);
-      :setVariable("d2", absorbed[1] ?? 0);
+      :variables.count = absorbed.length;
+      :variables.d1 = absorbed[0] ?? 0;
+      :variables.d2 = absorbed[1] ?? 0;
     };
     on actionPhase {
-      if (:getVariable("count") === 2) {
-        :generateDice(:getVariable("d1"), 1);
-        :generateDice(:getVariable("d2"), 1);
-      } else if (:getVariable("count") === 1) {
-        :generateDice(:getVariable("d1"), 1);
+      if (:variables.count === 2) {
+        :generateDice(:variables.d1, 1);
+        :generateDice(:variables.d2, 1);
+      } else if (:variables.count === 1) {
+        :generateDice(:variables.d1, 1);
       }
-      :setVariable("count", 0);
+      :variables.count = 0;
     };
   };
 };
@@ -485,7 +485,7 @@ define card {
     on damagedOrHealed {
       when :( :e.target.isActive() );
       :addVariable("forbidden", 1);
-      if (:getVariable("forbidden") >= 6 && :oppPlayer.hands.length > 0) {
+      if (:variables.forbidden >= 6 && :oppPlayer.hands.length > 0) {
         :addVariable("forbidden", -6);
         const candidates = :oppPlayer.hands.filter(
           (card) => !card.withAttachment(IneffectiveWhenPlayed),
@@ -569,7 +569,7 @@ define card {
       when :( :e.who !== :self.who );
       listenTo all;
       :addVariable("drawnCardCount", 1);
-      if (:getVariable("drawnCardCount") === 4) {
+      if (:variables.drawnCardCount === 4) {
         :combatStatus(TheMausoleumOfKingDeshretInEffect, "opp");
         :dispose();
       }
@@ -592,7 +592,7 @@ define card {
     variable progress, 0;
     on discardOrTuneCard {
       :addVariable("progress", 1);
-      const progress = :getVariable("progress");
+      const progress = :variables.progress;
       if (progress % 3 === 0) {
         :generateDice(DiceType.Omni, 1);
       }
@@ -636,7 +636,7 @@ define card {
     variable flame, 0;
     on useSkillOrTechnique {
       :addVariable("flame", 1);
-      const flame = :getVariable("flame");
+      const flame = :variables.flame;
       switch (flame) {
         case 2: {
           :generateDice("randomElement", 1);
@@ -702,13 +702,13 @@ define card {
       ) {
         if (isMine) {
           :addVariable("attention", 1);
-        } else if (:getVariable("attention") > 0) {
+        } else if (:variables.attention > 0) {
           :addVariable("attention", -1);
         }
       }
     };
     on actionPhase {
-      const attention = :getVariable("attention");
+      const attention = :variables.attention;
       if (attention >= 3) {
         :generateDice("randomElement", 1);
       }
@@ -733,8 +733,7 @@ define card {
     variable point, 1; // 神奇
     on playCard {
       when :(
-        !:isInInitialPile(:e.card) &&
-          :e.originalPlayCost() >= :getVariable("point")
+        !:isInInitialPile(:e.card) && :e.originalPlayCost() >= :variables.point
       );
       :generateDice("randomElement", 1);
       :addVariable("point", 1);
@@ -798,8 +797,8 @@ define card {
       :addVariable("disposedCardCount", 1);
     };
     on discard {
-      when :( :getVariable("disposedCardCount") >= 2 );
-      :setVariable("disposedCardCount", 0);
+      when :( :variables.disposedCardCount >= 2 );
+      :variables.disposedCardCount = 0;
       :characterStatus(FlowerfeatherClanInEffect, $.my.next);
     };
   };
@@ -820,11 +819,11 @@ define card {
   support place {
     variable intuition, 4;
     on selectCard {
-      const newValue = Math.max(0, :getVariable("intuition") - 1);
-      :setVariable("intuition", newValue);
+      const newValue = Math.max(0, :variables.intuition - 1);
+      :variables.intuition = newValue;
     };
     on actionPhase {
-      when :( :getVariable("intuition") === 0 );
+      when :( :variables.intuition === 0 );
       const cards = :allCardDefinitions("support").filter(
         (card) => originalDiceCostOfCard(card) === 2,
       );
@@ -849,12 +848,12 @@ define status {
   };
   on selfEnter {
     when :(
-      (:e.overridden?.variables.layer ?? 0) < 3 && :getVariable("layer") >= 3
+      (:e.overridden?.variables.layer ?? 0) < 3 && :variables.layer >= 3
     );
     :heal(1, :self.master);
   };
   on increaseSkillDamage {
-    when :( :getVariable("layer") === 5 );
+    when :( :variables.layer === 5 );
     :e.increaseDamage(1);
   };
 };
@@ -1002,7 +1001,7 @@ define card {
       :adventure();
     };
     on adventure {
-      when :( :getVariable("usage") === 0 );
+      when :( :variables.usage === 0 );
       :dispose();
     };
   };
@@ -1030,7 +1029,7 @@ define card {
       :addVariable("count", 1);
     };
     on actionPhase {
-      when :( :getVariable("count") >= 3 );
+      when :( :variables.count >= 3 );
       :addVariable("count", -3);
       :generateDice("randomElement", 1);
     };
@@ -1112,7 +1111,7 @@ define card {
       }
     };
     on selfDispose {
-      when :( :getVariable("usage") === 0 );
+      when :( :variables.usage === 0 );
       :damage(DamageType.Physical, 2);
     };
   };

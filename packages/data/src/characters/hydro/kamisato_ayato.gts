@@ -165,13 +165,13 @@ define card {
     on useSkill {
       when :( :e.isSkillType("normal") );
       if (
-        :getVariable("skillIsUsedWithKanka") &&
-        !:getVariable("deductEffectHasBeenTriggeredFromThisCard")
+        :variables.skillIsUsedWithKanka &&
+        !:variables.deductEffectHasBeenTriggeredFromThisCard
       ) {
         :characterStatus(KyoukaFuushiInEffect, :self.master);
       }
-      :setVariable("deductEffectHasBeenTriggeredFromThisCard", 0);
-      :setVariable("skillIsUsedWithKanka", 0);
+      :variables.deductEffectHasBeenTriggeredFromThisCard = 0;
+      :variables.skillIsUsedWithKanka = 0;
     };
   };
 };

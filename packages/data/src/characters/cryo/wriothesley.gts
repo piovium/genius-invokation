@@ -150,14 +150,14 @@ define skill {
   skillType passive {
     variable damageOrHealCount, 0;
     on roundEnd {
-      :setVariable("damageOrHealCount", 0);
+      :variables.damageOrHealCount = 0;
     };
     on damagedOrHealed {
       :addVariable("damageOrHealCount", 1);
     };
     on deductOmniDiceSkill {
       when :( :e.isSkillType("burst") );
-      const cnt = :getVariable("damageOrHealCount");
+      const cnt = :variables.damageOrHealCount!;
       const deducted = Math.min(Math.floor(cnt / 2), 2);
       :e.deductOmniCost(deducted);
     };
@@ -209,7 +209,7 @@ define card {
       :addVariable("count", 1);
     };
     on increaseSkillDamage {
-      when :( :getVariable("count") >= 3 );
+      when :( :variables.count >= 3 );
       :addVariable("count", -3);
       :e.increaseDamage(1);
     };

@@ -30,7 +30,7 @@ define summon {
   };
   on endPhase {
     usage 2;
-    :damage(:getVariable("hintIcon"), 2);
+    :damage(:variables.hintIcon, 2);
     :switchActive($.recentOppFrom.my.active);
   };
 };

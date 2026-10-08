@@ -36,7 +36,7 @@ define summon {
   };
   on increaseDamage {
     when :{
-      const color = :getVariable("hintIcon");
+      const color = :variables.hintIcon;
       return color !== DamageType.Anemo && color === :e.type;
     };
     :e.increaseDamage(1);

@@ -68,18 +68,18 @@ define combatStatus {
   on discardOrTuneCard {
     const cost = :e.diceCost();
     :addVariable("cardCount", 1);
-    switch (:getVariable("cardCount")) {
+    switch (:variables.cardCount) {
       case 1: {
-        :setVariable("card0Cost", cost);
+        :variables.card0Cost = cost;
         break;
       }
       case 2: {
-        :setVariable("card1Cost", cost);
+        :variables.card1Cost = cost;
         break;
       }
       case 3: {
-        const card0Cost = :getVariable("card0Cost");
-        const card1Cost = :getVariable("card1Cost");
+        const card0Cost = :variables.card0Cost;
+        const card1Cost = :variables.card1Cost;
         const card2Cost = cost;
         const distinctCostCount = new Set([card0Cost, card1Cost, card2Cost])
           .size;
@@ -91,16 +91,16 @@ define combatStatus {
             :increaseMaxHealth(1, narwhal);
           }
         }
-        :setVariable("cardCount", 0);
+        :variables.cardCount = 0;
         break;
       }
     }
-    const previousTotalMaxCost = :getVariable("totalMaxCost");
+    const previousTotalMaxCost = :variables.totalMaxCost;
     if (cost === previousTotalMaxCost) {
       :addVariable("totalMaxCostCount", 1);
     } else if (cost > previousTotalMaxCost) {
-      :setVariable("totalMaxCost", cost);
-      :setVariable("totalMaxCostCount", 1);
+      :variables.totalMaxCost = cost;
+      :variables.totalMaxCostCount = 1;
     }
   };
 };
@@ -150,10 +150,10 @@ define card {
       :addVariable("solidarity", 1);
     };
     on increaseSkillDamage {
-      when :( :getVariable("solidarity") > 0 );
+      when :( :variables.solidarity > 0 );
       :e.increaseDamage(1);
-      :drawCards(:getVariable("solidarity"));
-      :setVariable("solidarity", 0);
+      :drawCards(:variables.solidarity);
+      :variables.solidarity = 0;
     };
   };
 };
@@ -174,7 +174,7 @@ define status {
       append;
       autoDecrease false;
     };
-    const deducted = Math.min(:getVariable("usage"), :e.expectedValue);
+    const deducted = Math.min(:variables.usage, :e.expectedValue);
     :e.decreaseHeal(deducted);
     :consumeUsage(deducted);
   };

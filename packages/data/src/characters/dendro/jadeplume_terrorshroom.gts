@@ -33,7 +33,7 @@ define status {
   variable vitality, 0;
   defineSnippet addVitality, typeHint<CharacterState>() {
     const max = :get(:e).hasEquipment(ProliferatingSpores) ? 4 : 3;
-    if (:getVariable("vitality") < max) {
+    if (:variables.vitality < max) {
       :addVariable("vitality", 1);
     }
   };
@@ -52,9 +52,9 @@ define status {
   on endPhase {
     when :{
       const max = :self.master.hasEquipment(ProliferatingSpores) ? 4 : 3;
-      return :getVariable("vitality") >= max;
+      return :variables.vitality >= max;
     };
-    :setVariable("vitality", 0);
+    :variables.vitality = 0;
     const ch = :self.master;
     ch.loseEnergy(ch.energy);
   };

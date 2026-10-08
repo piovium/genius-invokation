@@ -223,10 +223,10 @@ define card {
   weapon pole {
     variable extraDamage, 1 { range 3; };
     on roundEnd {
-      :setVariable("extraDamage", 1);
+      :variables.extraDamage = 1;
     };
     on increaseSkillDamage {
-      :e.increaseDamage(:getVariable("extraDamage"));
+      :e.increaseDamage(:variables.extraDamage);
     };
     on useSkill {
       :addVariable("extraDamage", 1);
@@ -257,7 +257,7 @@ define card {
       when :( :e.target.isActive() );
       listenTo samePlayer;
       :addVariable("justice", 1);
-      if (:getVariable("justice") >= 4) {
+      if (:variables.justice >= 4) {
         :addVariable("justice", -4);
         :gainEnergy(1, :self.master);
       }
@@ -290,10 +290,10 @@ define card {
       :addVariable("solidarity", 1);
     };
     on increaseSkillDamage {
-      when :( :getVariable("solidarity") > 0 );
+      when :( :variables.solidarity > 0 );
       :e.increaseDamage(1);
-      :drawCards(:getVariable("solidarity"));
-      :setVariable("solidarity", 0);
+      :drawCards(:variables.solidarity);
+      :variables.solidarity = 0;
     };
   };
 };

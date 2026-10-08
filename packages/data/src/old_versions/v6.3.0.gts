@@ -189,7 +189,7 @@ define card {
       :addVariable("forbidden", 1);
     };
     on actionPhase {
-      when :( :getVariable("forbidden") >= 4 );
+      when :( :variables.forbidden >= 4 );
       :combatStatus(StrictProhibited, "opp");
       :addVariable("forbidden", -4);
     };

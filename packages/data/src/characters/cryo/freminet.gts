@@ -32,18 +32,18 @@ define status {
   };
   on deductOmniDiceSkill {
     when :( :e.action.skill.definition.id === PressurizedFloe );
-    if (:getVariable("level") >= 2) {
+    if (:variables.level >= 2) {
       :e.deductOmniCost(1);
     }
   };
   on useSkill {
     // 只有当使用技能前实体存在时才触发
-    when :( :getVariable("triggerOnUseSkill") );
-    :setVariable("triggerOnUseSkill", 0);
-    if (:getVariable("level") >= 4) {
+    when :( :variables.triggerOnUseSkill );
+    :variables.triggerOnUseSkill = 0;
+    if (:variables.level >= 4) {
       :damage(DamageType.Physical, 3);
     }
-    if (:getVariable("level") >= 2) {
+    if (:variables.level >= 2) {
       :dispose();
     }
   };
@@ -83,9 +83,9 @@ define status {
     :addVariable("drawnCard", 1);
   };
   on drawCard {
-    when :( :getVariable("drawnCard") === 3 );
+    when :( :variables.drawnCard === 3 );
     :characterStatus(SubnauticalShield, :self.master);
-    :setVariable("drawnCard", 0);
+    :variables.drawnCard = 0;
   };
   on useSkill {
     when :( :e.isSkillType("normal") || :e.isSkillType("elemental") );

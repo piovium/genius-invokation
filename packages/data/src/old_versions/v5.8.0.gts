@@ -366,7 +366,7 @@ define card {
     };
     variable crystal, 0;
     on roundEnd {
-      :setVariable("generatedCount", 0);
+      :variables.generatedCount = 0;
     };
     on damaged {
       when :(
@@ -376,9 +376,9 @@ define card {
       );
       listenTo all;
       :addVariable("crystal", 1);
-      const crystal = :getVariable("crystal");
+      const crystal = :variables.crystal;
       const hands = :player.hands.length;
-      if (crystal >= hands && :getVariable("generatedCount") < 2) {
+      if (crystal >= hands && :variables.generatedCount < 2) {
         :generateDice("randomElement", 1);
         :addVariable("generatedCount", 1);
       }
@@ -404,7 +404,7 @@ define card {
       visible false;
     };
     on roundEnd {
-      :setVariable("generatedCount", 0);
+      :variables.generatedCount = 0;
     };
     on damaged {
       when :(
@@ -415,9 +415,9 @@ define card {
       );
       listenTo all;
       :addVariable("crystal", 2);
-      const crystal = :getVariable("crystal");
+      const crystal = :variables.crystal;
       const hands = :player.hands.length;
-      if (crystal >= hands && :getVariable("generatedCount") < 2) {
+      if (crystal >= hands && :variables.generatedCount < 2) {
         :generateDice(DiceType.Omni, 1);
         :addVariable("generatedCount", 1);
       }

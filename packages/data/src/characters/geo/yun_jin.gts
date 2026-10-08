@@ -151,7 +151,7 @@ define skill {
       :addVariable("discardOrTuneCardCount", 1);
     };
     on roundEnd {
-      :setVariable("discardOrTuneCardCount", 0);
+      :variables.discardOrTuneCardCount = 0;
     };
   };
 };

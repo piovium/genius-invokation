@@ -57,7 +57,7 @@ define combatStatus {
     visible false; // 每回合一次不消耗可用次数
   };
   on roundEnd {
-    :setVariable("noUsageEffect", 1);
+    :variables.noUsageEffect = 1;
   };
   on increaseDamage {
     when :(
@@ -68,8 +68,8 @@ define combatStatus {
       autoDecrease false;
     };
     :e.increaseDamage(1);
-    if (:e.viaSkillType("normal") && :getVariable("noUsageEffect")) {
-      :setVariable("noUsageEffect", 0);
+    if (:e.viaSkillType("normal") && :variables.noUsageEffect) {
+      :variables.noUsageEffect = 0;
     } else {
       :consumeUsage();
     }

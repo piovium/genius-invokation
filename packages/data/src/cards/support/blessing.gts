@@ -231,7 +231,7 @@ define card {
     on playCard {
       when :<boolean>( :e.card.definition.id !== BloomBlessingAmrita );
       :addVariable("playCount", 1);
-      if (:getVariable("playCount") === 2) {
+      if (:variables.playCount === 2) {
         const target = :query($.macros.myMostInjured);
         if (target) {
           :increaseMaxHealth(2, target);
@@ -239,7 +239,7 @@ define card {
       }
     };
     on roundEnd {
-      :setVariable("playCount", 0);
+      :variables.playCount = 0;
     };
   };
 };
@@ -747,7 +747,7 @@ define card {
       :addVariable("switchCount", 1);
     };
     on beforeAction {
-      when :( :getVariable("switchCount") >= 3 );
+      when :( :variables.switchCount >= 3 );
       :drawCards(1);
       const [target] = :maxCostHands(1);
       if (target) {
@@ -779,12 +779,12 @@ define card {
     on switchActive {
       listenTo all;
       when :( !:e.switchInfo.to.isMine() );
-      :damage(DamageType.Piercing, :getVariable("damageValue"));
+      :damage(DamageType.Piercing, :variables.damageValue);
       :addVariable("damageValue", 1);
     };
     // 官方 bug：宿灵球出伤比重置还早
     on actionPhase {
-      :setVariable("damageValue", 1);
+      :variables.damageValue = 1;
     };
   };
 };

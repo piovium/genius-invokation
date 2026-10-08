@@ -700,8 +700,8 @@ define status {
   oneDuration;
   variable reignite, 1;
   on beforeDefeated {
-    when :( :player.dice.length >= :getVariable("reignite") );
-    :absorbDice("seq", :getVariable("reignite"));
+    when :( :player.dice.length >= :variables.reignite );
+    :absorbDice("seq", :variables.reignite);
     :immune(1);
     :addVariable("reignite", 1);
   };
@@ -736,7 +736,7 @@ define combatStatus {
     forceOverwrite;
   };
   once actionPhase {
-    const cardDefId = :getVariable("cardDefId") as CardHandle;
+    const cardDefId = :variables.cardDefId as CardHandle;
     if (cardDefId) {
       :createHandCard(cardDefId);
     }
@@ -1573,7 +1573,7 @@ define combatStatus {
     range 2;
   };
   once increaseSkillDamage {
-    :e.increaseDamage(:getVariable("damage"));
+    :e.increaseDamage(:variables.damage);
   };
 };
 
@@ -2409,7 +2409,7 @@ define summon {
   hint DamageType.Physical, ((c, e) => e.variables.effect);
   on endPhase {
     usage 2;
-    :damage(DamageType.Physical, :getVariable("effect"));
+    :damage(DamageType.Physical, :variables.effect);
   };
 };
 
@@ -2430,7 +2430,7 @@ define summon {
     usage 2;
     :combatStatus(EfficientSwitch, "my", {
       overrideVariables: {
-        usage: :getVariable("effect"),
+        usage: :variables.effect,
       },
     });
   };
@@ -2451,7 +2451,7 @@ define summon {
   hint ResistantForm, ((c, e) => e.variables.effect);
   on endPhase {
     usage 2;
-    :drawCards(:getVariable("effect"));
+    :drawCards(:variables.effect);
   };
 };
 
@@ -2470,7 +2470,7 @@ define summon {
   hint DamageType.Heal, ((c, e) => e.variables.effect);
   on endPhase {
     usage 1;
-    :heal(:getVariable("effect"), $.macros.myMostInjured);
+    :heal(:variables.effect, $.macros.myMostInjured);
   };
 };
 
@@ -2568,7 +2568,7 @@ define combatStatus {
     range 2;
   };
   once endPhase {
-    :createPileCards(HarvestTime, :getVariable("cardCount"), "random");
+    :createPileCards(HarvestTime, :variables.cardCount, "random");
   };
 };
 
@@ -2662,7 +2662,7 @@ define summon {
   hint DamageType.Physical, ((c, e) => e.variables.effect);
   on endPhase {
     usage 1 { range 5; };
-    :damage(DamageType.Piercing, :getVariable("effect"));
+    :damage(DamageType.Piercing, :variables.effect);
   };
   on selfEnter {
     const ext = :getExtensionState();
@@ -2889,7 +2889,7 @@ define combatStatus {
   id 303247 as PlanToSaveTheWorldInEffect;
   duration 2;
   on endPhase {
-    when :( :getVariable("duration") === 1 );
+    when :( :variables.duration === 1 );
     const actives = :queryAll($.active);
     for (const ch of actives) {
       :mutate({

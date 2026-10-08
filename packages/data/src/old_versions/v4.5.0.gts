@@ -59,7 +59,7 @@ define status {
     append 2;
   };
   on decreaseDamaged {
-    const shield = :getVariable("shield");
+    const shield = :variables.shield;
     if (shield > 0) {
       const currentValue = :e.value;
       const decreaseValue = Math.min(shield, currentValue);
@@ -100,7 +100,7 @@ define status {
     append 2;
   };
   on decreaseDamaged {
-    const shield = :getVariable("shield");
+    const shield = :variables.shield;
     if (shield > 0) {
       const currentValue = :e.value;
       const decreaseValue = Math.min(shield, currentValue);
@@ -186,21 +186,21 @@ define card {
     associateExtension DisposedSupportCountExtension;
     variable experience, 0;
     on staged {
-      :setVariable(
-        "experience",
-        Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
+      :variables.experience = Math.min(
+        :getExtensionState().disposedSupportCount[:self.who],
+        6,
       );
     };
     on entityDispose {
       when :( :e.entity.definition.type === "support" );
-      :setVariable(
-        "experience",
-        Math.min(:getExtensionState().disposedSupportCount[:self.who], 6),
+      :variables.experience = Math.min(
+        :getExtensionState().disposedSupportCount[:self.who],
+        6,
       );
     };
     on useSkill {
       when :( :e.isSkillType("burst") );
-      const exp = :getVariable("experience");
+      const exp = :variables.experience;
       if (exp >= 5) {
         :generateDice(DiceType.Omni, exp - 2);
         :dispose();

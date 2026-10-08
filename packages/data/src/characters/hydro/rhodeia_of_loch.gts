@@ -35,7 +35,7 @@ define summon {
     :e.decreaseDamage(1);
   };
   on endPhase {
-    when :( :getVariable("usage") <= 0 );
+    when :( :variables.usage <= 0 );
     :damage(DamageType.Hydro, 2);
     :dispose();
   };
@@ -111,7 +111,7 @@ define summon {
     :e.decreaseDamage(1);
   };
   on endPhase {
-    when :( :getVariable("usage") <= 0 );
+    when :( :variables.usage <= 0 );
     :damage(DamageType.Hydro, 2);
     :dispose();
   };

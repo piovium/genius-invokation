@@ -28,19 +28,19 @@ define status {
   id 114041 as PactswornPathclearer;
   variable reliance, 0;
   on endPhase {
-    const newVal = :getVariable("reliance") + 1;
+    const newVal = :variables.reliance + 1;
     if (newVal >= 8) {
-      :setVariable("reliance", newVal - 6);
+      :variables.reliance = newVal - 6;
     } else {
-      :setVariable("reliance", newVal);
+      :variables.reliance = newVal;
     }
   };
   on modifySkillDamageType {
-    when :( :getVariable("reliance") >= 2 && :e.type === DamageType.Physical );
+    when :( :variables.reliance >= 2 && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
   };
   on increaseSkillDamage {
-    when :( :getVariable("reliance") >= 4 );
+    when :( :variables.reliance >= 4 );
     :e.increaseDamage(2);
   };
 };

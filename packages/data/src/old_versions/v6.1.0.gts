@@ -195,7 +195,7 @@ define summon {
   hint DamageType.Physical, ((c, e) => e.variables.effect);
   on endPhase {
     usage 1 { range 6; };
-    :damage(DamageType.Piercing, :getVariable("effect"));
+    :damage(DamageType.Piercing, :variables.effect);
   };
   on selfEnter {
     const ext = :getExtensionState();

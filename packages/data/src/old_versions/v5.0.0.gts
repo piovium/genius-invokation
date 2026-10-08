@@ -29,7 +29,7 @@ define status {
   };
   on increaseDamaged {
     when :( :e.via.definition.id === VioletArc );
-    :e.increaseDamage(:getVariable("conductive"));
+    :e.increaseDamage(:variables.conductive);
     :dispose();
   };
 };

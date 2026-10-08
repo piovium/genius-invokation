@@ -278,13 +278,13 @@ define card {
     replaceDescription "[GCG_TOKEN_COUNTER]",
       ((_, { area }, ext) => ext.defIds[area.who].length);
     on staged {
-      :setVariable("supp", :getExtensionState().defIds[:self.who].length);
+      :variables.supp = :getExtensionState().defIds[:self.who].length;
     };
     on playCard {
-      :setVariable("supp", :getExtensionState().defIds[:self.who].length);
+      :variables.supp = :getExtensionState().defIds[:self.who].length;
     };
     on increaseSkillDamage {
-      const supp = :getVariable("supp");
+      const supp = :variables.supp;
       if (supp >= 9) {
         :e.increaseDamage(3);
       } else if (supp >= 4) {
@@ -321,10 +321,10 @@ define card {
       :addVariable("stoic", 1);
     };
     on increaseSkillDamage {
-      when :( :getVariable("stoic") > 0 );
+      when :( :variables.stoic > 0 );
       :e.increaseDamage(1);
-      :drawCards(:getVariable("stoic"));
-      :setVariable("stoic", 0);
+      :drawCards(:variables.stoic);
+      :variables.stoic = 0;
     };
   };
 };
@@ -351,7 +351,7 @@ define card {
     on dealReaction {
       listenTo samePlayer;
       :addVariable("thought", 1);
-      if (:getVariable("thought") >= 2) {
+      if (:variables.thought >= 2) {
         :addVariable("thought", -2);
         :gainEnergy(1, :self.master);
       }

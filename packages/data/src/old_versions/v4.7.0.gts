@@ -447,19 +447,19 @@ define status {
   until "v4.7.0";
   variable reliance, 0;
   on endPhase {
-    const newVal = :getVariable("reliance") + 1;
+    const newVal = :variables.reliance + 1;
     if (newVal >= 6) {
-      :setVariable("reliance", newVal - 4);
+      :variables.reliance = newVal - 4;
     } else {
-      :setVariable("reliance", newVal);
+      :variables.reliance = newVal;
     }
   };
   on modifySkillDamageType {
-    when :( :getVariable("reliance") >= 2 && :e.type === DamageType.Physical );
+    when :( :variables.reliance >= 2 && :e.type === DamageType.Physical );
     :e.changeDamageType(DamageType.Electro);
   };
   on increaseSkillDamage {
-    when :( :getVariable("reliance") >= 4 );
+    when :( :variables.reliance >= 4 );
     :e.increaseDamage(2);
   };
 };
@@ -615,14 +615,14 @@ define card {
       :addVariable("playedCard", 1);
     };
     on playCard {
-      when :( :getVariable("playedCard") === 3 );
+      when :( :variables.playedCard === 3 );
       usage perRound, 1;
       usage 3;
       :drawCards(1);
       :generateDice(DiceType.Omni, 1);
     };
     on actionPhase {
-      :setVariable("playedCard", 0);
+      :variables.playedCard = 0;
     };
   };
 };
@@ -661,19 +661,19 @@ define card {
       visible false;
     };
     on actionPhase {
-      const memory = :getVariable("memory");
+      const memory = :variables.memory;
       if (memory < 2) {
         const disposed = :discardMaxCostHands(2 - memory);
         const count = disposed.length;
         :addVariable("memory", count);
       }
-      :setVariable("cardPlayed", 0);
+      :variables.cardPlayed = 0;
     };
     on playCard {
-      :setVariable("cardPlayed", 1);
+      :variables.cardPlayed = 1;
     };
     on deductOmniDiceSkill {
-      when :( !:getVariable("cardPlayed") && :getVariable("memory") > 0 );
+      when :( !:variables.cardPlayed && :variables.memory > 0 );
       :e.deductOmniCost(1);
       :addVariable("memory", -1);
     };

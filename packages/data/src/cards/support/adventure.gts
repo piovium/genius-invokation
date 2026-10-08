@@ -39,7 +39,7 @@ define card {
   support place {
     adventureSpot;
     on adventure {
-      when :( :getVariable("exp") >= 2 );
+      when :( :variables.exp >= 2 );
       usage 1 {
         name "stage1";
         visible false;
@@ -48,7 +48,7 @@ define card {
       :createHandCard(ChenyuBrew);
     };
     on adventure {
-      when :( :getVariable("exp") >= 4 );
+      when :( :variables.exp >= 4 );
       usage 1 {
         name "stage2";
         visible false;
@@ -65,7 +65,7 @@ define card {
       });
     };
     on adventure {
-      when :( :getVariable("exp") >= 8 );
+      when :( :variables.exp >= 8 );
       usage 1 {
         name "stage3";
         visible false;
@@ -102,11 +102,11 @@ define card {
       :damage(DamageType.Piercing, 1, $.my.character);
     };
     on adventure {
-      when :( :getVariable("exp") % 2 === 0 );
+      when :( :variables.exp % 2 === 0 );
       :generateDice("randomElement", 1);
     };
     on adventure {
-      when :( :getVariable("exp") >= 5 );
+      when :( :variables.exp >= 5 );
       usage 1 {
         name "stage5";
         visible false;
@@ -114,7 +114,7 @@ define card {
       :createHandCard(WoodenToySword);
     };
     on adventure {
-      when :( :getVariable("exp") >= 12 );
+      when :( :variables.exp >= 12 );
       usage 1 {
         name "stage12";
         visible false;
@@ -171,11 +171,11 @@ define card {
       :convertDice(DiceType.Omni, 1);
     };
     on adventure {
-      when :( :getVariable("exp") !== 1 );
+      when :( :variables.exp !== 1 );
       :convertDice(DiceType.Omni, 1);
     };
     on adventure {
-      when :( :getVariable("exp") >= 2 );
+      when :( :variables.exp >= 2 );
       usage 1 {
         name "stage1";
         visible false;
@@ -183,7 +183,7 @@ define card {
       :drawCards(1);
     };
     on adventure {
-      when :( :getVariable("exp") >= 4 );
+      when :( :variables.exp >= 4 );
       usage 1 {
         name "stage2";
         visible false;
@@ -193,7 +193,7 @@ define card {
       });
     };
     on adventure {
-      when :( :getVariable("exp") >= 6 );
+      when :( :variables.exp >= 6 );
       usage 1 {
         name "stage3";
         visible false;
@@ -219,12 +219,12 @@ define combatStatus {
   id 301042 as TheChasmInEffect;
   variable cardsPlayed, 0;
   on roundEnd {
-    :setVariable("cardsPlayed", 0);
+    :variables.cardsPlayed = 0;
   };
   on playCard {
     when :( !:isInInitialPile(:e.card) );
     :addVariable("cardsPlayed", 1);
-    if (:getVariable("cardsPlayed") >= 2) {
+    if (:variables.cardsPlayed >= 2) {
       const chasm = :query($.my.support.def(TheChasm));
       if (chasm) {
         :dispose(chasm);
@@ -266,12 +266,12 @@ define card {
       }
     };
     on adventure {
-      when :( :getVariable("exp") % 2 === 0 );
+      when :( :variables.exp % 2 === 0 );
       :generateDice("randomElement", 1);
       :drawCards(1);
     };
     on adventure {
-      when :( :getVariable("exp") >= 10 );
+      when :( :variables.exp >= 10 );
       usage 1 {
         name "stage3";
         visible false;

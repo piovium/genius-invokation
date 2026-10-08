@@ -324,7 +324,7 @@ define status {
   oneDuration;
   variable increasedDamage, 1;
   on increaseSkillDamage {
-    :e.increaseDamage(:getVariable("increasedDamage"));
+    :e.increaseDamage(:variables.increasedDamage);
   };
 };
 
@@ -349,12 +349,12 @@ define card {
       usage perRound, 1 {
         name usagePerRound;
       };
-      const mySpirit = :getVariable("spirit");
+      const mySpirit = :variables.spirit;
       const oppSupport = :query($.opp.support.def(FlamesOfWar));
       const oppSpirit = oppSupport?.getVariable("spirit") ?? 0;
       if (mySpirit > oppSpirit) {
         :characterStatus(FlamesOfWarInEffect, $.my.active);
-        :setVariable("spirit", 0);
+        :variables.spirit = 0;
         // 判断胜利后，另一方的斗争之火不再结算
         if (oppSupport) {
           oppSupport.setVariable("usagePerRound", 0);
@@ -522,7 +522,7 @@ define combatStatus {
     for (const card of cardsToRecreate) {
       const slot = slots.shift();
       if (slot) {
-        :setVariable(slot, card.definition.id);
+        :variables[slot] = card.definition.id;
       }
     }
   };
@@ -530,11 +530,11 @@ define combatStatus {
     usage 2 { autoDispose false; };
   };
   on actionPhase {
-    when :( :getVariable("usage") <= 0 );
+    when :( :variables.usage <= 0 );
     for (const cardId of [
-      :getVariable("card0Id"),
-      :getVariable("card1Id"),
-      :getVariable("card2Id"),
+      :variables.card0Id,
+      :variables.card1Id,
+      :variables.card2Id,
     ]) {
       if (!cardId) {
         continue;

@@ -145,7 +145,7 @@ define skill {
     variable gainNightsoulUsagePerRound, 1;
     on selectCard {
       when :(
-        :getVariable("gainNightsoulUsagePerRound") > 0 &&
+        :variables.gainNightsoulUsagePerRound! > 0 &&
           :self.hasStatus(NightsoulsBlessing)
       );
       :gainNightsoul(:self);
@@ -154,7 +154,7 @@ define skill {
     on dealDamage {
       when :(
         :e.getReaction() &&
-          :getVariable("gainNightsoulUsagePerRound") > 0 &&
+          :variables.gainNightsoulUsagePerRound! > 0 &&
           :self.hasStatus(NightsoulsBlessing)
       );
       listenTo samePlayer;
@@ -162,7 +162,7 @@ define skill {
       :addVariable("gainNightsoulUsagePerRound", -1);
     };
     on roundEnd {
-      :setVariable("gainNightsoulUsagePerRound", 1);
+      :variables.gainNightsoulUsagePerRound = 1;
     };
   };
 };

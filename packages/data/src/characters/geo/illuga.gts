@@ -168,7 +168,7 @@ define card {
       listenTo samePlayer;
       when :( :e.entity.definition.id === NightingalesSong );
       :addVariable("consumedNightingales", -:e.info.diffValue);
-      while (:getVariable("consumedNightingales") >= 2) {
+      while (:variables.consumedNightingales >= 2) {
         :createHandCard(Aedon);
         :addVariable("consumedNightingales", -2);
       }

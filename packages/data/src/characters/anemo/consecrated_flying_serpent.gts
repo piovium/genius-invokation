@@ -26,7 +26,7 @@ define status {
   id 125031 as BonecrunchersEnergyBlockAccumulated;
   variable stack, 0;
   once multiplySkillDamage {
-    :e.multiplyDamage(2 ** :getVariable("stack"));
+    :e.multiplyDamage(2 ** :variables.stack);
   };
 };
 
@@ -125,7 +125,7 @@ define skill {
     // keep for v4.7.0
     variable elementalSkillDrawCardsCount, 0;
     on roundEnd {
-      :setVariable("elementalSkillDrawCardsCount", 0);
+      :variables.elementalSkillDrawCardsCount = 0;
     };
   };
 };

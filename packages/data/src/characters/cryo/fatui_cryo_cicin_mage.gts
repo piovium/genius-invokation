@@ -36,10 +36,10 @@ define summon {
   };
   on useSkill {
     when :( :e.skill.definition.id === CicinIcicle );
-    if (:getVariable("usage") < 3) {
+    if (:variables.usage < 3) {
       :addVariable("usage", 1);
     } else if (:query($.my.equipped.def(CicinsColdGlare))) {
-      :setVariable("talentExtraDamage", 1);
+      :variables.talentExtraDamage = 1;
     }
   };
   on damaged {
@@ -50,8 +50,8 @@ define summon {
   };
   // 天赋效果
   on useSkill {
-    when :( :getVariable("talentExtraDamage") );
-    :setVariable("talentExtraDamage", 0);
+    when :( :variables.talentExtraDamage );
+    :variables.talentExtraDamage = 0;
     :damage(DamageType.Cryo, 2);
   };
 };

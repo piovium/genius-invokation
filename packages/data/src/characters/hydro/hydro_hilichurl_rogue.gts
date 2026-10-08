@@ -82,7 +82,7 @@ define card {
       prepared;
       :damage(DamageType.Hydro, 1);
       :characterStatus(MistBubblePrison, $.opp.active);
-      if (:getVariable("usage") === 0) {
+      if (:variables.usage === 0) {
         :dispose();
       }
     };
@@ -93,7 +93,7 @@ define card {
         return (
           ch.id === :e.switchInfo.from?.id &&
           !!ch.hasStatus(MistBubbleLockdownPreparing) &&
-          :getVariable("usage") === 0
+          :variables.usage === 0
         );
       };
       :dispose();

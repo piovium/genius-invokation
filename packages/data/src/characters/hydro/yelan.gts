@@ -33,7 +33,7 @@ define status {
     :addVariable("break", 1);
   };
   on modifySkillDamageType {
-    when :( :e.viaSkillType("normal") && :getVariable("break") >= 2 );
+    when :( :e.viaSkillType("normal") && :variables.break >= 2 );
     :addVariable("break", -2);
     :e.changeDamageType(DamageType.Hydro);
     :drawCards(1);

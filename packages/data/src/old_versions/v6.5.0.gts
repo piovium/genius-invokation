@@ -193,7 +193,7 @@ define card {
   weapon catalyst {
     variable extraDamage, 0 { range 2; };
     on increaseSkillDamage {
-      :e.increaseDamage(:getVariable("extraDamage"));
+      :e.increaseDamage(:variables.extraDamage);
     };
     on endPhase {
       :addVariable("extraDamage", 1);
@@ -223,7 +223,7 @@ define card {
       when :( :e.target.isActive() );
       listenTo samePlayer;
       :addVariable("justice", 1);
-      if (:getVariable("justice") >= 3) {
+      if (:variables.justice >= 3) {
         :addVariable("justice", -3);
         :gainEnergy(1, :self.master);
       }
@@ -262,7 +262,7 @@ define card {
           :e.action.to.id === :self.master.id && // 附属角色切换为出战角色
           :player.hands.length > 0 // 有手牌（“如可能，舍弃”）
       );
-      :setVariable("deductDiceTriggered", 1);
+      :variables.deductDiceTriggered = 1;
       :discardMaxCostHands(1);
       for (const st of :queryAll($.opp.typeStatus.def(Target))) {
         st.dispose();
@@ -271,8 +271,8 @@ define card {
     };
     on beforeFastSwitch {
       // 该效果官方也可以残留到下次生效
-      when :( :getVariable("deductDiceTriggered") ); // 将此次切换视为「快速行动」
-      :setVariable("deductDiceTriggered", 0);
+      when :( :variables.deductDiceTriggered ); // 将此次切换视为「快速行动」
+      :variables.deductDiceTriggered = 0;
       :e.setFastAction();
     };
     skill {
@@ -300,7 +300,7 @@ define card {
     on damagedOrHealed {
       when :( :e.target.isActive() );
       :addVariable("forbidden", 1);
-      if (:getVariable("forbidden") >= 5 && :oppPlayer.hands.length > 0) {
+      if (:variables.forbidden >= 5 && :oppPlayer.hands.length > 0) {
         :addVariable("forbidden", -5);
         const candidates = :oppPlayer.hands.filter(
           (card) => !card.withAttachment(IneffectiveWhenPlayed),
@@ -329,7 +329,7 @@ define card {
   support place {
     adventureSpot;
     on adventure {
-      when :( :getVariable("exp") >= 2 );
+      when :( :variables.exp >= 2 );
       usage 1 {
         name "stage1";
         visible false;
@@ -338,7 +338,7 @@ define card {
       :createHandCard(ChenyuBrew);
     };
     on adventure {
-      when :( :getVariable("exp") >= 4 );
+      when :( :variables.exp >= 4 );
       usage 1 {
         name "stage2";
         visible false;
@@ -355,7 +355,7 @@ define card {
       });
     };
     on adventure {
-      when :( :getVariable("exp") >= 8 );
+      when :( :variables.exp >= 8 );
       usage 1 {
         name "stage3";
         visible false;
