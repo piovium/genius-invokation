@@ -20,7 +20,7 @@ define status {
       :dispose(talent);
       :characterStatus(AegisOfAbyssalFlame, :self.master);
     }
-    :self.master.setVariable("fieryRebirthTriggered", 1);
+    :self.master.variables.fieryRebirthTriggered = 1;
     :dispose();
   };
 };
@@ -64,7 +64,7 @@ define status {
       const currentValue = :e.value;
       const decreaseValue = Math.min(shield, currentValue);
       :e.decreaseDamage(decreaseValue);
-      :addVariable("shield", -decreaseValue);
+      :variables.shield -= decreaseValue;
     }
   };
 };
@@ -105,7 +105,7 @@ define status {
       const currentValue = :e.value;
       const decreaseValue = Math.min(shield, currentValue);
       :e.decreaseDamage(decreaseValue);
-      :addVariable("shield", -decreaseValue);
+      :variables.shield -= decreaseValue;
     }
   };
 };

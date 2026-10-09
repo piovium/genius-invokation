@@ -215,7 +215,7 @@ define card {
     variable lake, 0;
     on damagedOrHealed {
       listenTo samePlayer;
-      :addVariable("lake", 1);
+      :variables.lake += 1;
     };
     on deductVoidDiceSkill {
       when :( :e.isSkillType("normal") && :variables.lake >= 12 );
@@ -225,7 +225,7 @@ define card {
     on increaseSkillDamage {
       when :( :e.viaSkillType("normal") && :variables.lake >= 12 );
       usage perRound, 1;
-      :addVariable("lake", -12);
+      :variables.lake -= 12;
       :e.increaseDamage(1);
       :heal(1, :self.master);
     };
@@ -267,7 +267,7 @@ define card {
       usage perRound, 1;
       :discardMaxCostHands(1);
       :e.decreaseDamage(1);
-      :addVariable("solidarity", 1);
+      :variables.solidarity += 1;
     };
     on increaseSkillDamage {
       when :( :variables.solidarity > 0 );

@@ -44,12 +44,12 @@ define status {
     }
     // 为角色添加增伤数值
     if (:self.master.hasEquipment(CuriousCasefiles)) {
-      :self.master.setVariable("increaseDmg", 2);
+      :self.master.variables.increaseDmg = 2;
     } else {
-      :self.master.setVariable("increaseDmg", 1);
+      :self.master.variables.increaseDmg = 1;
     }
     // 消耗 2 层变格
-    :addVariable("henkaku", -2);
+    :variables.henkaku -= 2;
     if (:variables.henkaku <= 0) {
       :dispose();
     }
@@ -69,9 +69,9 @@ define skill {
   prepared;
   void 0;
   // 读取角色的增伤数值，随后清空
-  const increaseDmg = :self.getVariable("increaseDmg") ?? 0;
+  const increaseDmg = :self.variables.increaseDmg ?? 0;
   :damage(DamageType.Anemo, 4 + increaseDmg);
-  :self.setVariable("increaseDmg", 0);
+  :self.variables.increaseDmg = 0;
 };
 
 /**

@@ -54,9 +54,9 @@ define summon {
       :e.skill.definition.id === IcetideVortex &&
       :e.skillCaller.cast<"character">().hasEquipment(WellspringOfWarlust)
     ) {
-      :self.addVariable("usage", 3);
+      :self.variables.usage += 3;
     } else {
-      :self.addVariable("usage", 2);
+      :self.variables.usage += 2;
     }
   };
   on endPhase {
@@ -78,7 +78,7 @@ define status {
   variable level, 0;
   variable triggerOnUseSkill, 0;
   on drawCard {
-    :addVariable("level", 1);
+    :variables.level += 1;
   };
   on deductOmniDiceSkill {
     when :( :e.action.skill.definition.id === PressurizedFloe );

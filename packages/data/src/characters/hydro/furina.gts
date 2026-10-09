@@ -46,14 +46,14 @@ define card {
     const summon = :query($.my.summon.def(SalonMembers));
     if (summon) {
       :transformDefinition(summon, SingerOfManyWaters);
-      summon.setVariable("hintIcon", DamageType.Heal);
+      summon.variables.hintIcon = DamageType.Heal;
     }
   } else {
     :transformDefinition(furina, FurinaPneuma);
     const summon = :query($.my.summon.def(SingerOfManyWaters));
     if (summon) {
       :transformDefinition(summon, SalonMembers);
-      summon.setVariable("hintIcon", DamageType.Hydro);
+      summon.variables.hintIcon = DamageType.Hydro;
     }
   }
 };

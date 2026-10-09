@@ -110,7 +110,7 @@ define skill {
   if (:self.hasEquipment(TamakushiCasket)) {
     let summon = :query($.my.summon.def(BakeKurage));
     if (summon) {
-      summon.addVariable("usage", 1);
+      summon.variables.usage += 1;
     } else {
       :summon(BakeKurage, "my", {
         overrideVariables: {

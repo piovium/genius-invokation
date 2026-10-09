@@ -86,7 +86,7 @@ define skill {
   :summon(GrinmalkinHat);
   const surplusSt = :self.hasStatus(PropSurplus);
   if (surplusSt) {
-    :addVariable("surplus", 1, surplusSt);
+    surplusSt.variables.surplus += 1;
   } else {
     :self.addStatus(PropSurplus);
   }
@@ -125,7 +125,7 @@ define skill {
   :summon(GrinmalkinHat);
   const surplusSt = :self.hasStatus(PropSurplus);
   if (surplusSt) {
-    :addVariable("surplus", 1, surplusSt);
+    surplusSt.variables.surplus += 1;
   } else {
     :self.addStatus(PropSurplus);
   }

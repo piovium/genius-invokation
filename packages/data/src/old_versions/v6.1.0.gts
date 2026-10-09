@@ -201,7 +201,7 @@ define summon {
     const ext = :getExtensionState();
     const addUsage = ext.disposedSupportCount[:self.who];
     const addDmg = ext.disposedSummonsCount[:self.who];
-    :addVariable("usage", addUsage);
-    :addVariable("effect", addDmg);
+    :variables.usage += addUsage;
+    :variables.effect += addDmg;
   };
 };

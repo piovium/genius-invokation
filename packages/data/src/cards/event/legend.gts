@@ -342,7 +342,7 @@ define card {
     variable spirit, 0;
     on dealDamage {
       if (!:e.target.isMine()) {
-        :addVariable("spirit", :e.value);
+        :variables.spirit += :e.value;
       }
     };
     on actionPhase {
@@ -351,13 +351,13 @@ define card {
       };
       const mySpirit = :variables.spirit;
       const oppSupport = :query($.opp.support.def(FlamesOfWar));
-      const oppSpirit = oppSupport?.getVariable("spirit") ?? 0;
+      const oppSpirit = oppSupport?.variables.spirit ?? 0;
       if (mySpirit > oppSpirit) {
         :characterStatus(FlamesOfWarInEffect, $.my.active);
         :variables.spirit = 0;
         // 判断胜利后，另一方的斗争之火不再结算
         if (oppSupport) {
-          oppSupport.setVariable("usagePerRound", 0);
+          oppSupport.variables.usagePerRound = 0;
         }
       }
     };

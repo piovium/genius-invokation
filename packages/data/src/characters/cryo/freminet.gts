@@ -28,7 +28,7 @@ define status {
   variable level, 0;
   variable triggerOnUseSkill, 0;
   on drawCard {
-    :addVariable("level", 1);
+    :variables.level += 1;
   };
   on deductOmniDiceSkill {
     when :( :e.action.skill.definition.id === PressurizedFloe );
@@ -80,7 +80,7 @@ define status {
   replaceDescription "[GCG_TOKEN_COUNTER]",
     ((st, self) => self.variables.drawnCard);
   on drawCard {
-    :addVariable("drawnCard", 1);
+    :variables.drawnCard += 1;
   };
   on drawCard {
     when :( :variables.drawnCard === 3 );
@@ -124,7 +124,7 @@ define skill {
   :damage(DamageType.Cryo, 2);
   const existsTimer = :self.hasStatus(PersTimer);
   if (existsTimer) {
-    existsTimer.setVariable("triggerOnUseSkill", 1);
+    existsTimer.variables.triggerOnUseSkill = 1;
   } else {
     :characterStatus(PersTimer, :self);
   }

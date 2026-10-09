@@ -126,12 +126,12 @@ define skill {
       if (!nightsoul) {
         return;
       }
-      if (nightsoul.getVariable("nightsoul") === 2) {
+      if (nightsoul.variables.nightsoul === 2) {
         :heal(1, $.macros.myMostInjured);
       } else {
         :gainNightsoul(:self);
       }
-      :addVariable("gainNightsoulPassiveUsagePerRound", -1);
+      :variables.gainNightsoulPassiveUsagePerRound! -= 1;
     };
     // 我方角色准备技能
     on entityEnter {
@@ -148,7 +148,7 @@ define skill {
     on switchActive {
       when :( :self.hasNightsoulsBlessing() );
       listenTo samePlayer;
-      :addVariable("switchCount", 1);
+      :variables.switchCount! += 1;
     };
     // ……「切换角色」后
     on switchActive {

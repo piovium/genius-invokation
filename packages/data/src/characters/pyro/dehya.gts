@@ -157,7 +157,7 @@ define skill {
       when :( :e.target.id !== :self.id );
       listenTo samePlayer;
       const protection = :query($.my.combatStatus.def(FierySanctumsProtection));
-      if (protection?.getVariable("usage") === 0) {
+      if (protection?.variables.usage === 0) {
         protection.dispose();
         if (:self.health >= 7) {
           :damage(DamageType.Piercing, 1, :self);

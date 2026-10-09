@@ -223,7 +223,7 @@ define combatStatus {
   };
   on playCard {
     when :( !:isInInitialPile(:e.card) );
-    :addVariable("cardsPlayed", 1);
+    :variables.cardsPlayed += 1;
     if (:variables.cardsPlayed >= 2) {
       const chasm = :query($.my.support.def(TheChasm));
       if (chasm) {

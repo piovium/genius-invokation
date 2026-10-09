@@ -25,7 +25,7 @@ define status {
     range 4;
   };
   on endPhase {
-    :addVariable("conductive", 1);
+    :variables.conductive += 1;
   };
   on increaseDamaged {
     when :( :e.via.definition.id === VioletArc );

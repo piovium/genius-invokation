@@ -42,7 +42,7 @@ import {
   type TypingInfoFromMeta,
   type UnaryOperatorMetas,
 } from "./utils";
-import type { TypingInfoBase } from "../utils";
+import type { AnyTypingInfo } from "../utils";
 
 type DollarUnaryOperatorMethods = {
   [K in keyof UnaryOperatorMetas]: {
@@ -116,13 +116,13 @@ export class Dollar {
     });
   }
 
-  intersection<T extends TypingInfoBase[]>(
+  intersection<T extends AnyTypingInfo[]>(
     ...args: { [K in keyof T]: IUnorderedQuery<T[K]> }
   ): CompositeQuery<IntersectionTy<T>> {
     return createCompositeQuery("intersection", args);
   }
 
-  union<T extends TypingInfoBase[]>(
+  union<T extends AnyTypingInfo[]>(
     ...args: { [K in keyof T]: IUnorderedQuery<T[K]> }
   ): CompositeQuery<UnionTy<T>> {
     return createCompositeQuery("union", args);

@@ -286,7 +286,7 @@ define skill {
   if (spirit >= 6) {
     :characterStatus(CrucibleOfDeathAndLife);
   }
-  :self.setVariable("fightingSpirit", 0);
+  :self.variables.fightingSpirit = 0;
 };
 
 /**
@@ -304,12 +304,12 @@ define skill {
     variable fightingSpirit, 0 { range 6; };
     on consumeNightsoul {
       listenTo samePlayer;
-      :addVariable("fightingSpirit", 1);
+      :variables.fightingSpirit! += 1;
     };
     on useSkill {
       listenTo samePlayer;
       when :( :e.isSkillType("normal") );
-      :addVariable("fightingSpirit", 1);
+      :variables.fightingSpirit! += 1;
     };
     on useSkill {
       when :( :e.isSkillType("elemental") || :e.isSkillType("burst") );

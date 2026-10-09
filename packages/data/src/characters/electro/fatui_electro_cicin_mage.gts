@@ -25,16 +25,16 @@ define combatStatus {
   id 124044 as CrushingThunder;
   variable playedCard, 0;
   on playCard {
-    :addVariable("playedCard", 1);
+    :variables.playedCard += 1;
   };
   on playCard {
     when :(
       :variables.playedCard >= 3 &&
-        (:query($.opp.summon.def(ElectroCicin))?.getVariable("usage") ?? 0) < 3
+        (:query($.opp.summon.def(ElectroCicin))?.variables.usage ?? 0) < 3
     );
     const cicin = :query($.opp.summon.def(ElectroCicin));
     if (cicin) {
-      cicin.addVariable("usage", 1);
+      cicin.variables.usage += 1;
     }
     :variables.playedCard = 0;
   };
@@ -111,7 +111,7 @@ define combatStatus {
     const cicin = :query($.my.summon.def(ElectroCicin));
     if (cicin) {
       const usage = cicin.variables.usage;
-      :addVariable("shield", Math.min(usage, 3));
+      :variables.shield += Math.min(usage, 3);
     }
   };
 };
@@ -200,7 +200,7 @@ define card {
     };
     on beforeAction {
       when :(
-        (:query($.my.summon.def(ElectroCicin))?.getVariable("usage") ?? 0) >= 3
+        (:query($.my.summon.def(ElectroCicin))?.variables.usage ?? 0) >= 3
       );
       listenTo samePlayer;
       usage perRound, 1;

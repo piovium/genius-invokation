@@ -33,13 +33,13 @@ import {
   ReactiveStateSymbol,
 } from "./base";
 import type { AttachmentHandle } from "../../data/type";
-import type { TypingInfoBase } from "../../utils";
+import type { AnyTypingInfo, TypingInfoBase } from "../../utils";
 import type { RxEntityState } from ".";
 import type { ReactiveVariables } from "./variable";
 
 class ReadonlyEntity<
   Meta extends ContextMetaBase,
-  Info extends TypingInfoBase<EntityType>,
+  Info extends AnyTypingInfo<EntityType>,
 >
   extends ReactiveStateBase<Info>
   implements PlainEntityState
@@ -116,7 +116,7 @@ class ReadonlyEntity<
 
 export class Entity<
   Meta extends ContextMetaBase,
-  Ty extends TypingInfoBase<EntityType>,
+  Ty extends AnyTypingInfo<EntityType>,
 > extends ReadonlyEntity<Meta, Ty> {
   declare variables: ReactiveVariables<Ty>;
   setVariable(prop: string, value: number) {
@@ -142,17 +142,17 @@ export class Entity<
 
 export interface ReadonlyEntityWithoutMaster<
   Meta extends ContextMetaBase,
-  Info extends TypingInfoBase<EntityType>,
+  Info extends AnyTypingInfo<EntityType>,
 > extends Omit<ReadonlyEntity<Meta, Info>, "master"> {}
 
 export interface EntityWithoutMaster<
   Meta extends ContextMetaBase,
-  Info extends TypingInfoBase<EntityType>,
+  Info extends AnyTypingInfo<EntityType>,
 > extends Omit<Entity<Meta, Info>, "master"> {}
 
 export type TypedEntity<
   Meta extends ContextMetaBase,
-  Info extends TypingInfoBase<EntityType>,
+  Info extends AnyTypingInfo<EntityType>,
 > = Info["areaType"] extends "characters"
   ? Meta["readonly"] extends true
     ? ReadonlyEntity<Meta, Info>

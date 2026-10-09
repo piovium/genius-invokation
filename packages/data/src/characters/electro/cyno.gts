@@ -74,7 +74,7 @@ define skill {
   cost DiceType.Electro, 3;
   :damage(DamageType.Electro, 3);
   const status = :self.hasStatus(PactswornPathclearer)!;
-  status.addVariable("reliance", 1);
+  status.variables.reliance += 1;
 };
 
 /**
@@ -92,7 +92,7 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 4);
   const status = :self.hasStatus(PactswornPathclearer)!;
-  status.addVariable("reliance", 2);
+  status.variables.reliance += 2;
 };
 
 /**
@@ -156,7 +156,7 @@ define card {
       when :{
         const status = :self.master.hasStatus(PactswornPathclearer)!;
         return (
-          :getVariable("reliance", status) >= 2 &&
+          status.variables.reliance >= 2 &&
           :e.via.definition.id === SecretRiteChasmicSoulfarer
         );
       };

@@ -148,7 +148,7 @@ define skill {
   skillType passive {
     variable discardOrTuneCardCount, 0;
     on discardOrTuneCard {
-      :addVariable("discardOrTuneCardCount", 1);
+      :variables.discardOrTuneCardCount! += 1;
     };
     on roundEnd {
       :variables.discardOrTuneCardCount = 0;

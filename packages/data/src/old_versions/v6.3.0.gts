@@ -186,12 +186,12 @@ define card {
     variable forbidden, 0 { range 4; };
     on damagedOrHealed {
       when :( :e.target.isActive() );
-      :addVariable("forbidden", 1);
+      :variables.forbidden += 1;
     };
     on actionPhase {
       when :( :variables.forbidden >= 4 );
       :combatStatus(StrictProhibited, "opp");
-      :addVariable("forbidden", -4);
+      :variables.forbidden -= 4;
     };
   };
 };

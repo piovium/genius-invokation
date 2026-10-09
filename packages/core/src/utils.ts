@@ -109,17 +109,20 @@ export type TypeAreaTypeMap<Ty extends ExEntityType> =
 
 export interface TypingInfoBase<
   Ty extends ExEntityType = ExEntityType,
-  Vars extends string = string,
+  Vars extends string = never,
 > {
   type: Ty;
   areaType: TypeAreaTypeMap<Ty>;
   variables: Vars;
 }
 
+export type AnyTypingInfo<Ty extends ExEntityType = ExEntityType> =
+  TypingInfoBase<Ty, string>;
+
 /** Typing information excluding removed entities. */
 export interface RegularTypingInfo<
   Ty extends ExEntityType,
-  Vars extends string = string,
+  Vars extends string = never,
 > extends TypingInfoBase<Ty, Vars> {
   areaType: RegularTypeAreaTypeMap<Ty>;
 }

@@ -88,7 +88,7 @@ define combatStatus {
     );
     // 对方场上蕴种印的可用次数+1
     for (const state of :queryAll($.opp.typeStatus.def(SeedOfSkandha))) {
-      state.addVariable("usage", 1);
+      state.variables.usage += 1;
     }
   };
 };
@@ -115,7 +115,7 @@ define combatStatus {
     );
     // 对方场上蕴种印的可用次数+1
     for (const state of :queryAll($.opp.typeStatus.def(SeedOfSkandha))) {
-      state.addVariable("usage", 1);
+      state.variables.usage += 1;
     }
   };
 };

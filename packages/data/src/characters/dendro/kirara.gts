@@ -31,7 +31,7 @@ define combatStatus {
   replaceDescription "[GCG_TOKEN_COUNTER]",
     ((st, self) => self.variables.playedCard);
   on playCard {
-    :addVariable("playedCard", 1);
+    :variables.playedCard += 1;
   };
   on playCard {
     when :( :variables.playedCard === 2 );

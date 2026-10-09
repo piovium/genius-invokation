@@ -37,13 +37,10 @@ define status {
   noDefaultDispose;
   on deductVoidDiceSkill {
     when :(
-      :e.isSkillType("normal") && :self.master.getVariable("serpentsSubtlety")
+      :e.isSkillType("normal") && :self.master.variables.serpentsSubtlety
     );
-    const costSubtelty = Math.min(
-      2,
-      :self.master.getVariable("serpentsSubtlety")!,
-    );
-    :self.master.addVariable("serpentsSubtlety", -costSubtelty);
+    const costSubtelty = Math.min(2, :self.master.variables.serpentsSubtlety!);
+    :self.master.variables.serpentsSubtlety! -= costSubtelty;
     :e.deductVoidCost(costSubtelty);
   };
   on modifySkillDamageType {
@@ -151,10 +148,10 @@ define skill {
   id 11162 as HavocWarp;
   skillType elemental;
   cost DiceType.Cryo, 2;
-  filter :( :self.definition.id === Skirk && :self.getVariable("canE") );
-  :self.addVariable("serpentsSubtlety", 2);
+  filter :( :self.definition.id === Skirk && :self.variables.canE );
+  :self.variables.serpentsSubtlety! += 2;
   :createHandCard(MutualWeaponsMentorship);
-  :self.setVariable("canE", 0);
+  :self.variables.canE = 0;
 };
 
 /**
@@ -175,7 +172,7 @@ define skill {
       break;
     }
     :discard(:random(hands));
-    :self.addVariable("serpentsSubtlety", 1);
+    :self.variables.serpentsSubtlety! += 1;
   }
 };
 
@@ -192,7 +189,7 @@ define skill {
   cost DiceType.Cryo, 3;
   filter :( :self.variables.serpentsSubtlety! >= 2 );
   const subtilty = :self.variables.serpentsSubtlety!;
-  :self.setVariable("serpentsSubtlety", 0);
+  :self.variables.serpentsSubtlety = 0;
   if (subtilty >= 7) {
     :damage(DamageType.Piercing, 3, $.opp.standby);
   } else {

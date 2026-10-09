@@ -153,7 +153,7 @@ define card {
       :e.increaseDamage(:variables.extraDamage);
     };
     on endPhase {
-      :addVariable("extraDamage", 1);
+      :variables.extraDamage += 1;
     };
   };
 };
@@ -216,7 +216,7 @@ define card {
       :e.increaseDamage(1);
     };
     on damagedOrHealed {
-      :addVariable("count", 1);
+      :variables.count += 1;
     };
     on damagedOrHealed {
       when :( :variables.count === 2 );

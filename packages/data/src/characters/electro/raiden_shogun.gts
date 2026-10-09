@@ -49,7 +49,7 @@ define status {
   on useSkill {
     when :( :e.isSkillType("burst") && :e.skill.caller.id !== :self.master.id );
     listenTo samePlayer;
-    :addVariable("chakra", 1);
+    :variables.chakra += 1;
   };
   on increaseSkillDamage {
     when :( :e.via.definition.id === SecretArtMusouShinsetsu );

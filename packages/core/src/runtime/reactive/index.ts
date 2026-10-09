@@ -25,7 +25,11 @@ import {
 } from "./base";
 import type { ExEntityType } from "../../data/type";
 import { Attachment, type TypedAttachment } from "./attachment";
-import type { TypingInfoBase, RegularTypingInfo } from "../../utils";
+import type {
+  AnyTypingInfo,
+  TypingInfoBase,
+  RegularTypingInfo,
+} from "../../utils";
 
 type ReactiveClassCtor = new (
   skillContext: SkillContext<any>,
@@ -39,23 +43,18 @@ export type NoReactiveSymbol = typeof NoReactiveSymbol;
 
 export type RxEntityState<
   Meta extends ContextMetaBase,
-  Info extends TypingInfoBase,
+  Info extends AnyTypingInfo,
 > = {
   [Ty in Info["type"]]: Ty extends "character"
     ? TypedCharacter<Meta>
     : Ty extends "attachment"
-      ? TypedAttachment<Meta>
+      ? TypedAttachment<Meta, Info["variables"]>
       : Ty extends EntityType
         ? TypedEntity<
             Meta,
             {
               type: Ty;
-              areaType: Extract<
-                Info["areaType"],
-                TypingInfoBase<Ty>["areaType"]
-              >;
-              variables: Info["variables"];
-            }
+            } & Omit<Info, "type">
           >
         : never;
 }[Info["type"]];

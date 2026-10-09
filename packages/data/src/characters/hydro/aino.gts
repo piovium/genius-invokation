@@ -101,7 +101,7 @@ define skill {
       };
       const ducky = :query($.my.summon.def(CoolYourJetsDucky));
       if (ducky) {
-        ducky.addVariable("usage", 1);
+        ducky.variables.usage += 1;
       } else {
         :gainEnergy(1, :self);
       }

@@ -383,7 +383,7 @@ define status {
       const currentValue = :e.value;
       const decreaseValue = Math.min(shield, currentValue);
       :e.decreaseDamage(decreaseValue);
-      :addVariable("shield", -decreaseValue);
+      :variables.shield -= decreaseValue;
     }
   };
   // ... and also apply talent effects.
@@ -461,7 +461,7 @@ define card {
     on increaseSkillDamage {
       when :{
         const status = :self.master.hasStatus(PactswornPathclearer)!;
-        const reliance = :getVariable("reliance", status);
+        const reliance = status.variables.reliance;
         return (
           (reliance === 3 || reliance === 5) &&
           :e.via.definition.id === SecretRiteChasmicSoulfarer
@@ -727,7 +727,7 @@ define skill {
   const damageValue = 2 + summons.length * 2;
   :damage(DamageType.Hydro, damageValue);
   if (:self.hasEquipment(StreamingSurge)) {
-    summons.forEach((s) => s.addVariable("usage", 1));
+    summons.forEach((s) => (s.variables.usage! += 1));
   }
 };
 

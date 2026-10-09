@@ -73,7 +73,7 @@ define combatStatus {
       if (:e.entity.definition.id !== NightsoulsBlessing) {
         return false;
       }
-      return :e.entity.getVariable("nightsoul") === 2;
+      return :e.entity.variables.nightsoul === 2;
     };
     :damage(DamageType.Cryo, 1, $.macros.oppActivePrioritized);
   };
@@ -149,7 +149,7 @@ define skill {
           :self.hasStatus(NightsoulsBlessing)
       );
       :gainNightsoul(:self);
-      :addVariable("gainNightsoulUsagePerRound", -1);
+      :variables.gainNightsoulUsagePerRound! -= 1;
     };
     on dealDamage {
       when :(
@@ -159,7 +159,7 @@ define skill {
       );
       listenTo samePlayer;
       :gainNightsoul(:self);
-      :addVariable("gainNightsoulUsagePerRound", -1);
+      :variables.gainNightsoulUsagePerRound! -= 1;
     };
     on roundEnd {
       :variables.gainNightsoulUsagePerRound = 1;

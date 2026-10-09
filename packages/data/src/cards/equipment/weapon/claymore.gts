@@ -318,7 +318,7 @@ define card {
       usage perRound, 1;
       :discardMaxCostHands(1);
       :e.decreaseDamage(1);
-      :addVariable("stoic", 1);
+      :variables.stoic += 1;
     };
     on increaseSkillDamage {
       when :( :variables.stoic > 0 );
@@ -350,9 +350,9 @@ define card {
     };
     on dealReaction {
       listenTo samePlayer;
-      :addVariable("thought", 1);
+      :variables.thought += 1;
       if (:variables.thought >= 2) {
-        :addVariable("thought", -2);
+        :variables.thought -= 2;
         :gainEnergy(1, :self.master);
       }
     };

@@ -262,7 +262,7 @@ define status {
   since "v4.4.0";
   variable readiness, 0 { range 2; };
   on damagedOrHealed {
-    :addVariable("readiness", 1);
+    :variables.readiness += 1;
   };
   once deductAllDiceCard {
     when :(
@@ -305,7 +305,7 @@ define combatStatus {
         :e.via.caller.definition.id !== :self.definition.id
     );
     listenTo all;
-    :addVariable("count", 1);
+    :variables.count += 1;
     if (:variables.count === 2) {
       :generateDice(DiceType.Omni, 1);
       :variables.count = 0;

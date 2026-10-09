@@ -91,7 +91,7 @@ define skill {
   skillType passive {
     variable damageValue, 0;
     on skillDamage {
-      :addVariable("damageValue", :e.damageInfo.value);
+      :variables.damageValue! += :e.damageInfo.value;
     };
     on useSkill {
       const usage = Math.min(:variables.damageValue! - 2, 5);
@@ -104,7 +104,7 @@ define skill {
           const bondSt = :query($.typeStatus.def(BondOfLife).at($.opp.active));
           if (bondSt) {
             const oldUsage = bondSt.variables.usage;
-            bondSt.setVariable("usage", oldUsage * 2);
+            bondSt.variables.usage = oldUsage * 2;
           }
         }
       }

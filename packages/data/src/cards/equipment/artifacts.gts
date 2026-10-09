@@ -756,11 +756,11 @@ define card {
       ((_, self) => self.variables.healedPts);
     on healed {
       listenTo samePlayer;
-      :addVariable("healedPts", :e.value);
+      :variables.healedPts += :e.value;
       const totalPts = :variables.healedPts;
       const generatedBubbleCount = Math.floor(totalPts / 3);
       const restPts = totalPts % 3;
-      :addVariable("bubble", generatedBubbleCount);
+      :variables.bubble += generatedBubbleCount;
       :variables.healedPts = restPts;
     };
     on increaseSkillDamage {
@@ -798,11 +798,11 @@ define card {
     };
     on healed {
       listenTo samePlayer;
-      :addVariable("healedPts", :e.value);
+      :variables.healedPts += :e.value;
       const totalPts = :variables.healedPts;
       const generatedBubbleCount = Math.floor(totalPts / 3);
       const restPts = totalPts % 3;
-      :addVariable("bubble", generatedBubbleCount);
+      :variables.bubble += generatedBubbleCount;
       :variables.healedPts = restPts;
     };
     on increaseSkillDamage {
@@ -961,7 +961,7 @@ define card {
     on damaged {
       when :( :self.master.isActive() );
       usage perRound, 1;
-      :addVariable("shouldHeal", 1);
+      :variables.shouldHeal += 1;
       :drawCards(1);
     };
     on endPhase {
@@ -993,7 +993,7 @@ define card {
     };
     on damagedOrHealed {
       if (:variables.count < 2) {
-        :addVariable("count", 1);
+        :variables.count += 1;
         const v = :variables.count;
         if (v === 1) {
           :generateDice(:self.master.element(), 1);
@@ -1021,7 +1021,7 @@ define card {
     variable reward, 0 { range 2; };
     on endPhase {
       when :( !:self.master.isActive() );
-      :addVariable("reward", 1);
+      :variables.reward += 1;
     };
     on deductOmniDice {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
@@ -1029,7 +1029,7 @@ define card {
       const currentCost = :e.diceCostSize();
       const deduced = Math.min(reward, currentCost);
       :e.deductOmniCost(deduced);
-      :addVariable("reward", -deduced);
+      :variables.reward -= deduced;
     };
   };
 };
@@ -1072,7 +1072,7 @@ define card {
             :e.isReactionRelatedTo(DamageType.Dendro))
       );
       listenTo all;
-      :addVariable("crystal", 1);
+      :variables.crystal += 1;
     };
     on actionPhase {
       when :( :variables.crystal === 2 );
@@ -1103,7 +1103,7 @@ define card {
     };
     on damagedOrHealed {
       if (:variables.count < 4) {
-        :addVariable("count", 1);
+        :variables.count += 1;
         const v = :variables.count;
         if (v === 1 || v === 4) {
           :generateDice(:self.master.element(), 1);
@@ -1132,7 +1132,7 @@ define card {
     variable reward, 0 { range 4; };
     on endPhase {
       when :( !:self.master.isActive() );
-      :addVariable("reward", 2);
+      :variables.reward += 2;
     };
     on deductOmniDice {
       when :( :e.isSkillOrTalentOf(:self.master, "elemental") );
@@ -1140,7 +1140,7 @@ define card {
       const currentCost = :e.diceCostSize();
       const deduced = Math.min(reward, currentCost);
       :e.deductOmniCost(deduced);
-      :addVariable("reward", -deduced);
+      :variables.reward -= deduced;
     };
   };
 };
@@ -1168,7 +1168,7 @@ define card {
             :e.isReactionRelatedTo(DamageType.Dendro))
       );
       listenTo all;
-      :addVariable("crystal", 1);
+      :variables.crystal += 1;
     };
     on actionPhase {
       when :( :variables.crystal === 5 );
@@ -1697,7 +1697,7 @@ define card {
           :e.source.definition.tags.includes("artifact")
         )
       );
-      :addVariable("longing", 1);
+      :variables.longing += 1;
     };
     on actionPhase {
       const longing = :variables.longing;

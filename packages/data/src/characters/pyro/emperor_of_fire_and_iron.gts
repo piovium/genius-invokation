@@ -29,9 +29,8 @@ define skill {
   prepared;
   :damage(DamageType.Piercing, 2, $.opp.standby);
   const value =
-    :query($.typeStatus.def(ArmoredCrabCarapace).at(:self))?.getVariable(
-      "shield",
-    ) ?? 0;
+    :query($.typeStatus.def(ArmoredCrabCarapace).at(:self))?.variables.shield ??
+    0;
   :damage(DamageType.Pyro, 1 + Math.floor(value / 2));
 };
 
@@ -96,9 +95,8 @@ define skill {
   skillType elemental;
   cost DiceType.Pyro, 3;
   const value =
-    :query($.typeStatus.def(ArmoredCrabCarapace).at(:self))?.getVariable(
-      "shield",
-    ) ?? 0;
+    :query($.typeStatus.def(ArmoredCrabCarapace).at(:self))?.variables.shield ??
+    0;
   if (value >= 7) {
     :damage(DamageType.Pyro, 2);
   } else {
@@ -181,7 +179,7 @@ define skill {
  * @name 帝王甲胄
  * @cost
  * @description
- * 
+ *
  */
 define skill {
   id 23047 as ImperialPanoply01;

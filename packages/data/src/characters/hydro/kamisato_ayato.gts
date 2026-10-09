@@ -55,7 +55,7 @@ define status {
     :e.increaseDamage(1);
     const talent = :self.master.hasEquipment(KyoukaFuushi);
     if (talent) {
-      talent.setVariable("skillIsUsedWithKanka", 1);
+      talent.variables.skillIsUsedWithKanka = 1;
     }
   };
 };
@@ -137,7 +137,7 @@ define status {
     :e.deductVoidCost(2);
     const talent = :self.master.hasEquipment(KyoukaFuushi);
     if (talent) {
-      talent.setVariable("deductEffectHasBeenTriggeredFromThisCard", 1);
+      talent.variables.deductEffectHasBeenTriggeredFromThisCard = 1;
     }
   };
 };

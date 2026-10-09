@@ -26,20 +26,17 @@ import {
   type IUnorderedQuery,
   type MetaBase,
 } from "./utils";
-import type { TypingInfoBase } from "../utils";
+import type { AnyTypingInfo } from "../utils";
 
-type BinaryOperatorResult<
-  T extends TypingInfoBase,
-  U extends TypingInfoBase,
-> = {
+type BinaryOperatorResult<T extends AnyTypingInfo, U extends AnyTypingInfo> = {
   orElse: UnionTy<[T, U]>;
   exclude: T;
   union: UnionTy<[T, U]>;
   intersection: IntersectionTy<[T, U]>;
 };
 
-export type BinaryMethods<T extends TypingInfoBase> = {
-  [K in BinaryOperator]: <U extends TypingInfoBase>(
+export type BinaryMethods<T extends AnyTypingInfo> = {
+  [K in BinaryOperator]: <U extends AnyTypingInfo>(
     rhs: IUnorderedQuery<U>,
   ) => CompositeQuery<BinaryOperatorResult<T, U>[K]>;
 };
@@ -56,5 +53,5 @@ class BinaryMethodsImpl {
   }
 }
 export const BinaryMethods = BinaryMethodsImpl as Constructor<
-  BinaryMethods<TypingInfoBase>
+  BinaryMethods<AnyTypingInfo>
 >;

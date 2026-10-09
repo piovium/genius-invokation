@@ -66,7 +66,7 @@ define skill {
   const drawn = :self.variables.elementalSkillDrawCardsCount!;
   const count = Math.min(cards.length, 2 - drawn);
   :drawCards(count);
-  :self.addVariable("elementalSkillDrawCardsCount", count);
+  :self.variables.elementalSkillDrawCardsCount! += count;
 };
 
 /**
@@ -493,11 +493,11 @@ define skill {
   cost DiceType.Energy, 2;
   :damage(DamageType.Electro, 4);
   const status = :self.hasStatus(PactswornPathclearer)!;
-  const newVal = :getVariable("reliance", status) + 2;
+  const newVal = status.variables.reliance + 2;
   if (newVal >= 6) {
-    :setVariable("reliance", newVal - 4, status);
+    status.variables.reliance = newVal - 4;
   } else {
-    :setVariable("reliance", newVal, status);
+    status.variables.reliance = newVal;
   }
 };
 
@@ -522,7 +522,7 @@ define card {
       when :{
         const status = :self.master.hasStatus(PactswornPathclearer)!;
         return (
-          :getVariable("reliance", status) % 2 === 0 &&
+          status.variables.reliance % 2 === 0 &&
           :e.via.definition.id === SecretRiteChasmicSoulfarer
         );
       };
@@ -612,7 +612,7 @@ define card {
       ((st, self) => self.variables.playedCard);
     on playCard {
       when :( :e.card.id !== :self.id );
-      :addVariable("playedCard", 1);
+      :variables.playedCard += 1;
     };
     on playCard {
       when :( :variables.playedCard === 3 );
@@ -665,7 +665,7 @@ define card {
       if (memory < 2) {
         const disposed = :discardMaxCostHands(2 - memory);
         const count = disposed.length;
-        :addVariable("memory", count);
+        :variables.memory += count;
       }
       :variables.cardPlayed = 0;
     };
@@ -675,7 +675,7 @@ define card {
     on deductOmniDiceSkill {
       when :( !:variables.cardPlayed && :variables.memory > 0 );
       :e.deductOmniCost(1);
-      :addVariable("memory", -1);
+      :variables.memory -= 1;
     };
   };
 };

@@ -39,7 +39,7 @@ define status {
     const nightsoul = master.hasNightsoulsBlessing();
     if (
       nightsoul &&
-      nightsoul.getVariable("nightsoul") === 2 &&
+      nightsoul.variables.nightsoul === 2 &&
       !master.hasStatus(GrapplePrepare)
     ) {
       master.addStatus(GrapplePrepare);
@@ -161,7 +161,7 @@ define skill {
       :stealHandCard(targetCard);
     }
     :drawCards(1, { who: "opp" });
-    :addVariable("usagePerRound", -1, talent);
+    talent.variables.usagePerRound -= 1;
   }
 };
 

@@ -55,7 +55,11 @@ import {
   ReactiveStateBase,
   ReactiveStateSymbol,
 } from "./base";
-import { applyReactive, type RegularRxEntityState } from ".";
+import {
+  applyReactive,
+  type RegularRxEntityState,
+  type RxEntityState,
+} from ".";
 import type { RegularTypingInfo } from "../../utils";
 import type { ReactiveVariables } from "./variable";
 
@@ -250,27 +254,40 @@ export class ReadonlyCharacter<
   hasTechnique() {
     return this.hasEquipmentWithTag("technique");
   }
-  hasEquipment(id: EquipmentHandle) {
+  hasEquipment<const Id extends EquipmentHandle>(
+    id: Id,
+  ): RxEntityState<
+    Meta,
+    RegularTypingInfo<"equipment", Id["_meta"]["variables"]>
+  > | null {
     return (
-      this.entities.find(
+      (this.entities.find(
         (v) => v.definition.type === "equipment" && v.definition.id === id,
-      ) ?? null
+      ) as any) ?? null
     );
   }
-  hasStatus(id: StatusHandle) {
+  hasStatus<const Id extends StatusHandle>(
+    id: Id,
+  ): RxEntityState<
+    Meta,
+    RegularTypingInfo<"status", Id["_meta"]["variables"]>
+  > | null {
     return (
-      this.entities.find(
+      (this.entities.find(
         (v) => v.definition.type === "status" && v.definition.id === id,
-      ) ?? null
+      ) as any) ?? null
     );
   }
-  hasNightsoulsBlessing(): RegularRxEntityState<Meta, "status"> | null {
+  hasNightsoulsBlessing(): RxEntityState<
+    Meta,
+    RegularTypingInfo<"status", "nightsoul">
+  > | null {
     return (
-      this.entities.find(
-        (v): v is RegularRxEntityState<Meta, "status"> =>
+      (this.entities.find(
+        (v) =>
           v.definition.type === "status" &&
           v.definition.tags.includes("nightsoulsBlessing"),
-      ) ?? null
+      ) as any) ?? null
     );
   }
   isSkillDisabled(): boolean {
