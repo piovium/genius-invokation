@@ -55,7 +55,11 @@ import {
   ReactiveStateBase,
   ReactiveStateSymbol,
 } from "./base";
-import { applyReactive, type RegularRxEntityState } from ".";
+import {
+  applyReactive,
+  type RegularRxEntityState,
+  type RxEntityState,
+} from ".";
 import type { RegularTypingInfo } from "../../utils";
 import type { ReactiveVariables } from "./variable";
 
@@ -257,11 +261,16 @@ export class ReadonlyCharacter<
       ) ?? null
     );
   }
-  hasStatus(id: StatusHandle) {
+  hasStatus<const Id extends StatusHandle>(
+    id: Id,
+  ): RxEntityState<
+    Meta,
+    RegularTypingInfo<"status", Id["_meta"]["variables"]>
+  > | null {
     return (
-      this.entities.find(
+      (this.entities.find(
         (v) => v.definition.type === "status" && v.definition.id === id,
-      ) ?? null
+      ) as any) ?? null
     );
   }
   hasNightsoulsBlessing(): RegularRxEntityState<Meta, "status"> | null {
