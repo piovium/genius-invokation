@@ -21,7 +21,7 @@ import {
   type IUnorderedQuery,
   type typingInfo,
 } from "../../query/utils";
-import type { TypingInfoBase } from "../../utils";
+import type { AnyTypingInfo } from "../../utils";
 import {
   createReactiveVariables,
   type ReadonlyReactiveVariables,
@@ -39,7 +39,7 @@ export const LatestStateSymbol: unique symbol = Symbol(
 export type LatestStateSymbol = typeof LatestStateSymbol;
 
 export abstract class ReactiveStateBase<
-  Info extends TypingInfoBase,
+  Info extends AnyTypingInfo,
 > implements IUnorderedQuery<Info> {
   declare [typingInfo]: Info;
   abstract readonly id: number;

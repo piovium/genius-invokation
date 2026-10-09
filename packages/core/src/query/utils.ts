@@ -18,7 +18,7 @@ import type { SExprSchema } from "./expr_schema";
 import type {
   Computed,
   EntityAreaType,
-  TypingInfoBase,
+  AnyTypingInfo,
   RegularTypingInfo,
 } from "../utils";
 import type { CoreCharacterVariableNames } from "../base/character";
@@ -181,24 +181,24 @@ export interface StateVariables {
 
 export type StateVariablesKey = Exclude<keyof StateVariables, number>;
 
-export interface IQuery<Ty extends TypingInfoBase = TypingInfoBase> {
+export interface IQuery<Ty extends AnyTypingInfo = AnyTypingInfo> {
   [typingInfo]: Ty;
   [toExpression](): SExprSchema.Query;
 }
 
 export interface IUnorderedQuery<
-  Ty extends TypingInfoBase = TypingInfoBase,
+  Ty extends AnyTypingInfo = AnyTypingInfo,
 > extends IQuery<Ty> {
   [toExpressionUnordered]: () => SExprSchema.UnorderedQuery;
 }
 
 export type InferResult<Q extends IQuery> = Computed<
   Q[TypingInfoSymbol],
-  TypingInfoBase
+  AnyTypingInfo
 >;
 
 export type HeterogeneousMetaBase = MetaBase & {
-  returns: "identical" | TypingInfoBase;
+  returns: "identical" | AnyTypingInfo;
 };
 export interface MetaBase {
   type: ExEntityType;
@@ -225,11 +225,11 @@ export type ReturnOfMeta<M extends MetaBase> = Computed<
   M extends HeterogeneousMetaBase
     ? M["returns"] extends "identical"
       ? TypingInfoFromMeta<M>
-      : M["returns"] extends TypingInfoBase
+      : M["returns"] extends AnyTypingInfo
         ? M["returns"]
         : never
     : M,
-  TypingInfoBase
+  AnyTypingInfo
 >;
 
 export type TypePatch<Ty extends ExEntityType> = Pick<
@@ -309,17 +309,17 @@ type PropsRelated<T, U, Props extends keyof T & keyof U> = {
   : false;
 
 export type RelatedToReq<
-  Input extends TypingInfoBase,
+  Input extends AnyTypingInfo,
   Req extends ReqBase,
 > = PropsRelated<Input, Req, "type" | "areaType">;
 
-export type VariableName<Ty extends TypingInfoBase> =
+export type VariableName<Ty extends AnyTypingInfo> =
   | Ty["variables"]
   | (string & {})
   | typeof diceCostKey
   | typeof inInitialPileKey;
 
-export type QueryVariables<Ty extends TypingInfoBase> = StateVariables &
+export type QueryVariables<Ty extends AnyTypingInfo> = StateVariables &
   Record<Ty["variables"], number>;
 
 export function variableKeyToExpr(

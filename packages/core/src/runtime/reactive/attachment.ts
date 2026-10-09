@@ -29,8 +29,11 @@ import type { RxEntityState } from ".";
 import type { TypingInfoBase, RegularTypingInfo } from "../../utils";
 import type { ReactiveVariables } from "./variable";
 
-class ReadonlyAttachment<Meta extends ContextMetaBase>
-  extends ReactiveStateBase<RegularTypingInfo<"attachment">>
+class ReadonlyAttachment<
+  Meta extends ContextMetaBase,
+  Vars extends string = never,
+>
+  extends ReactiveStateBase<RegularTypingInfo<"attachment", Vars>>
   implements PlainAttachmentState
 {
   override get [ReactiveStateSymbol](): "attachment" {
@@ -92,8 +95,9 @@ class ReadonlyAttachment<Meta extends ContextMetaBase>
 
 export class Attachment<
   Meta extends ContextMetaBase,
-> extends ReadonlyAttachment<Meta> {
-  declare variables: ReactiveVariables<RegularTypingInfo<"attachment">>;
+  Vars extends string = never,
+> extends ReadonlyAttachment<Meta, Vars> {
+  declare variables: ReactiveVariables<RegularTypingInfo<"attachment", Vars>>;
   setVariable(prop: string, value: number) {
     this.skillContext.setVariable(prop, value, this.state);
   }
@@ -114,5 +118,9 @@ export class Attachment<
   }
 }
 
-export type TypedAttachment<Meta extends ContextMetaBase> =
-  Meta["readonly"] extends true ? ReadonlyAttachment<Meta> : Attachment<Meta>;
+export type TypedAttachment<
+  Meta extends ContextMetaBase,
+  Vars extends string = never,
+> = Meta["readonly"] extends true
+  ? ReadonlyAttachment<Meta, Vars>
+  : Attachment<Meta, Vars>;

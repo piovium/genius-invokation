@@ -1043,7 +1043,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Aligned, 1;
   addTarget $.my.summon;
-  :e.targets[0].variables.usage += 1;
+  :e.targets[0].variables.usage! += 1;
 };
 
 /**
@@ -2124,7 +2124,7 @@ define card {
   addTarget $.my.character.has($.equipped.tag("technique"));
   const technique = :e.targets[0].hasTechnique();
   if (technique && technique.definition.varConfigs.usage) {
-    technique.variables.usage += 1;
+    technique.variables.usage! += 1;
   }
 };
 

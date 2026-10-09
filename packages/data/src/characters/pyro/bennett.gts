@@ -35,7 +35,7 @@ define combatStatus {
     :e.increaseDamage(2);
   };
   on useSkill {
-    when :( :e.skillCaller.variables.health <= 6 );
+    when :( :e.skillCaller.cast<"character">().variables.health <= 6 );
     :heal(2, :e.skillCaller.cast<"character">());
   };
 };
@@ -56,7 +56,7 @@ define combatStatus {
     :e.increaseDamage(2);
   };
   on useSkill {
-    when :( :e.skillCaller.variables.health <= 6 );
+    when :( :e.skillCaller.cast<"character">().variables.health <= 6 );
     :heal(2, :e.skillCaller.cast<"character">());
   };
 };

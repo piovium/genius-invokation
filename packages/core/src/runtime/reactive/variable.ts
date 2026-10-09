@@ -13,11 +13,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { TypingInfoBase } from "../../utils";
+import type { AnyTypingInfo } from "../../utils";
 import type { ReactiveStateBase } from "./base";
 import type { CoreCharacterVariables } from "../../base/character";
 
-export type ReadonlyReactiveVariables<Info extends TypingInfoBase> = Readonly<
+export type ReadonlyReactiveVariables<Info extends AnyTypingInfo> = Readonly<
   ReactiveVariables<Info>
 >;
 
@@ -27,7 +27,7 @@ interface ExtraVariables {
 }
 
 // Query information guarantees presence; character metadata also constrains values.
-export type ReactiveVariables<Info extends TypingInfoBase> = {
+export type ReactiveVariables<Info extends AnyTypingInfo> = {
   [name in Info["variables"]]: number;
 } & ExtraVariables &
   (Info["type"] extends "character"
@@ -38,7 +38,7 @@ export type ReactiveVariables<Info extends TypingInfoBase> = {
       }
     : {});
 
-export function createReactiveVariables<Info extends TypingInfoBase>(
+export function createReactiveVariables<Info extends AnyTypingInfo>(
   state: ReactiveStateBase<Info>,
 ): ReactiveVariables<Info> {
   const result = new Proxy(

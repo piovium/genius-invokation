@@ -22,49 +22,48 @@ import {
   toExpression,
   toExpressionUnordered,
   type CompositeOperator,
-  type Expression,
   type IUnorderedQuery,
   type typingInfo,
 } from "./utils";
-import type { TypingInfoBase } from "../utils";
+import type { AnyTypingInfo } from "../utils";
 
-type UnionTy2<T extends TypingInfoBase, U extends TypingInfoBase> = {
+type UnionTy2<T extends AnyTypingInfo, U extends AnyTypingInfo> = {
   [K in keyof T & keyof U]: T[K] | U[K];
 };
-export type UnionTy<Metas extends TypingInfoBase[]> = Computed<
+export type UnionTy<Metas extends AnyTypingInfo[]> = Computed<
   Metas extends readonly [
-    infer First extends TypingInfoBase,
-    ...infer Rest extends TypingInfoBase[],
+    infer First extends AnyTypingInfo,
+    ...infer Rest extends AnyTypingInfo[],
   ]
     ? UnionTy2<First, UnionTy<Rest>>
     : Metas extends readonly (infer Element)[]
       ? Element
       : never,
-  TypingInfoBase
+  AnyTypingInfo
 >;
 
 type IntersectionTy2<
-  Meta1 extends TypingInfoBase,
-  Meta2 extends TypingInfoBase,
+  Meta1 extends AnyTypingInfo,
+  Meta2 extends AnyTypingInfo,
 > = {
   [K in keyof Meta1 & keyof Meta2]: Meta1[K] & Meta2[K];
 };
-export type IntersectionTy<Metas extends TypingInfoBase[]> = Computed<
+export type IntersectionTy<Metas extends AnyTypingInfo[]> = Computed<
   Metas extends readonly [
-    infer First extends TypingInfoBase,
-    ...infer Rest extends TypingInfoBase[],
+    infer First extends AnyTypingInfo,
+    ...infer Rest extends AnyTypingInfo[],
   ]
     ? IntersectionTy2<First, IntersectionTy<Rest>>
     : Metas extends readonly []
-      ? TypingInfoBase
+      ? AnyTypingInfo
       : Metas extends readonly (infer Element)[]
         ? Element
         : never,
-  TypingInfoBase
+  AnyTypingInfo
 >;
 
 class CompositeQueryImpl<
-  Ty extends TypingInfoBase,
+  Ty extends AnyTypingInfo,
 > implements IUnorderedQuery<Ty> {
   declare [typingInfo]: Ty;
   constructor(
@@ -110,14 +109,14 @@ const CompositeQuery = mixins(CompositeQueryImpl, [
   MakeOrderedMethods,
 ]) as any;
 
-export const createCompositeQuery = <Ty extends TypingInfoBase>(
+export const createCompositeQuery = <Ty extends AnyTypingInfo>(
   type: CompositeOperator,
   operands: IUnorderedQuery[],
 ): CompositeQuery<Ty> => {
   return new CompositeQuery(type, operands);
 };
 
-export type CompositeQuery<Ty extends TypingInfoBase> = Computed<
+export type CompositeQuery<Ty extends AnyTypingInfo> = Computed<
   CompositeQueryImpl<Ty> & BinaryMethods<Ty> & MakeOrderedMethods<Ty>,
   IUnorderedQuery<Ty>
 >;

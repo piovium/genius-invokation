@@ -979,7 +979,7 @@ define card {
           (SIMULANKA_SUMMONS as number[]).includes(:e.entity.definition.id)
       );
       usage 2;
-      :e.entity.cast<"summon">().variables.effect += 1;
+      :e.entity.cast<"summon">().variables.effect! += 1;
     };
   };
 };

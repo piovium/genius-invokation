@@ -949,7 +949,7 @@ define combatStatus {
   id 301037 as ConstellationMetropoleInEffect02;
   once entityEnter {
     when :( :e.entity.definition.id === ToyGuardSummon );
-    :e.entity.cast<"summon">().variables.effect += 1;
+    :e.entity.cast<"summon">().variables.effect! += 1;
   };
 };
 

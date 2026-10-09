@@ -1184,12 +1184,15 @@ export class SkillContext<Meta extends ContextMetaBase> {
     return (this as any)[CALLED_FROM_REACTION] ?? null;
   }
 
-  createEntity<Ty extends EntityType>(
+  createEntity<Ty extends EntityType, const Id extends HandleT<Ty>>(
     type: Ty,
-    id: HandleT<Ty>,
+    id: Id,
     area?: EntityArea,
     opt: CreateEntityOptions = {},
-  ): RxEntityState<Meta, RegularTypingInfo<Ty>> | null {
+  ): RxEntityState<
+    Meta,
+    RegularTypingInfo<Ty, Id["_meta"]["variables"]>
+  > | null {
     const id2 = id as number;
     const def = this.state.data.entities.get(id2);
     if (typeof def === "undefined") {
@@ -1229,10 +1232,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       opt,
     );
     if (newState) {
-      return this.get<Ty>(newState.id) as RxEntityState<
-        Meta,
-        RegularTypingInfo<Ty>
-      >;
+      return this.get<Ty>(newState.id) as any;
     } else {
       return null;
     }
@@ -1395,8 +1395,14 @@ export class SkillContext<Meta extends ContextMetaBase> {
     value: number,
     isIncrease: boolean,
   ) {
-    const CostIncrease = 201 as AttachmentHandle;
-    const CostReduction = 202 as AttachmentHandle;
+    const CostIncrease = 201 as AttachmentHandle<{
+      id: 201;
+      variables: "layer";
+    }>;
+    const CostReduction = 202 as AttachmentHandle<{
+      id: 202;
+      variables: "layer";
+    }>;
     const [consumeDef, incomingDef] = isIncrease
       ? [CostReduction, CostIncrease]
       : [CostIncrease, CostReduction];
@@ -1464,7 +1470,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       this.callAndEmit("dispose", t.latest(), { ...opt, via: this.skillInfo });
     }
   }
-  
+
   getVariable(prop: string, target: PlainAnyState): number;
   /** @deprecated Use `variables` instead. */
   getVariable(prop: Meta["callerVars"]): number;
@@ -2074,7 +2080,10 @@ export class SkillContext<Meta extends ContextMetaBase> {
       if (!nightsoulStatus) {
         nightsoulStatus = this.createEntity(
           "status",
-          target.definition.associatedNightsoulsBlessing.id as StatusHandle,
+          target.definition.associatedNightsoulsBlessing.id as StatusHandle<{
+            id: number;
+            variables: "nightsoul";
+          }>,
           target.area,
           {
             modifyOverriddenVariablesOnly: true,
