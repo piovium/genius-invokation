@@ -104,7 +104,7 @@ define skill {
   const radicalVitalityStatus = :query(
     $.typeStatus.def(RadicalVitalityStatus).at(:self),
   );
-  const val = radicalVitalityStatus?.getVariable("vitality") ?? 0;
+  const val = radicalVitalityStatus?.variables.vitality ?? 0;
   :damage(DamageType.Dendro, 4 + val);
   radicalVitalityStatus?.setVariable("vitality", 0);
 };

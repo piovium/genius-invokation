@@ -30,7 +30,7 @@ define combatStatus {
   on playCard {
     when :(
       :variables.playedCard >= 3 &&
-        (:query($.opp.summon.def(ElectroCicin))?.getVariable("usage") ?? 0) < 3
+        (:query($.opp.summon.def(ElectroCicin))?.variables.usage ?? 0) < 3
     );
     const cicin = :query($.opp.summon.def(ElectroCicin));
     if (cicin) {
@@ -200,7 +200,7 @@ define card {
     };
     on beforeAction {
       when :(
-        (:query($.my.summon.def(ElectroCicin))?.getVariable("usage") ?? 0) >= 3
+        (:query($.my.summon.def(ElectroCicin))?.variables.usage ?? 0) >= 3
       );
       listenTo samePlayer;
       usage perRound, 1;

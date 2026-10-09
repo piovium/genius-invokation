@@ -351,7 +351,7 @@ define card {
       };
       const mySpirit = :variables.spirit;
       const oppSupport = :query($.opp.support.def(FlamesOfWar));
-      const oppSpirit = oppSupport?.getVariable("spirit") ?? 0;
+      const oppSpirit = oppSupport?.variables.spirit ?? 0;
       if (mySpirit > oppSpirit) {
         :characterStatus(FlamesOfWarInEffect, $.my.active);
         :variables.spirit = 0;

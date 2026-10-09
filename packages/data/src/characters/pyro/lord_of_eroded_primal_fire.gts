@@ -98,7 +98,7 @@ define skill {
   skillType burst;
   cost DiceType.Pyro, 3;
   cost DiceType.Energy, 2;
-  const layer = :self.hasStatus(Resentment)?.getVariable("layer") ?? 0;
+  const layer = :self.hasStatus(Resentment)?.variables.layer ?? 0;
   :damage(DamageType.Piercing, layer + 1, $.opp.standby);
   :damage(DamageType.Pyro, 1);
   :abortPreview();

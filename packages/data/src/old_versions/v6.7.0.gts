@@ -132,7 +132,7 @@ define skill {
   const swiftShadowStatus = :query(
     $.my.combatStatus.def(RadiantHuesSwiftShadowInEffect),
   );
-  const swiftShadowStacks = swiftShadowStatus?.getVariable("reductCount") ?? 0;
+  const swiftShadowStacks = swiftShadowStatus?.variables.reductCount ?? 0;
   const candidates = :randomSubset(
     [
       RadiantHuesIcicle,
