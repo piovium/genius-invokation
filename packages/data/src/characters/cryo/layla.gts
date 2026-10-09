@@ -30,7 +30,7 @@ define summon {
     :damage(DamageType.Cryo, 1);
     const star = :query($.my.combatStatus.def(ShootingStar));
     if (star) {
-      star.addVariable("star", 1);
+      star.variables.star += 1;
     }
   };
 };

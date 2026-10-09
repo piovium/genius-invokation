@@ -34,7 +34,7 @@ define combatStatus {
     );
     const cicin = :query($.opp.summon.def(ElectroCicin));
     if (cicin) {
-      cicin.addVariable("usage", 1);
+      cicin.variables.usage += 1;
     }
     :variables.playedCard = 0;
   };

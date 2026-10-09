@@ -76,7 +76,7 @@ define status {
       :dispose(talent);
       :characterStatus(AegisOfAbyssalFlame, :self.master);
     }
-    :self.master.setVariable("fieryRebirthTriggered", 1);
+    :self.master.variables.fieryRebirthTriggered = 1;
     :characterStatus(FieryRebirthHoned, :self.master);
     :dispose();
   };
@@ -217,7 +217,7 @@ define card {
   cost DiceType.Pyro, 2;
   talent AbyssLectorFathomlessFlames, none {
     on staged {
-      if (:e.targets[0].getVariable("fieryRebirthTriggered")) {
+      if (:e.targets[0].variables.fieryRebirthTriggered) {
         :characterStatus(AegisOfAbyssalFlame, :e.targets[0]);
         :dispose();
       }

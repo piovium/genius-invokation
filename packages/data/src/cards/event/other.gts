@@ -1043,7 +1043,7 @@ define card {
   since "v3.3.0";
   cost DiceType.Aligned, 1;
   addTarget $.my.summon;
-  :e.targets[0].addVariable("usage", 1);
+  :e.targets[0].variables.usage += 1;
 };
 
 /**
@@ -2124,7 +2124,7 @@ define card {
   addTarget $.my.character.has($.equipped.tag("technique"));
   const technique = :e.targets[0].hasTechnique();
   if (technique && technique.definition.varConfigs.usage) {
-    :addVariable("usage", 1, technique);
+    technique.variables.usage += 1;
   }
 };
 
@@ -2932,8 +2932,8 @@ define card {
   addTarget $.my.support;
   :dispose(:e.targets[0]);
   for (const summon of :queryAll(SIMULANKA_QUERY)) {
-    summon.addVariable("effect", 1);
-    summon.addVariable("usage", 1);
+    summon.variables.effect += 1;
+    summon.variables.usage += 1;
   }
 };
 

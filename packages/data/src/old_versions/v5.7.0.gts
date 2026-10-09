@@ -120,7 +120,7 @@ define skill {
       :stealHandCard(targetCard);
     }
     :drawCards(1, { who: "opp" });
-    :addVariable("usagePerRound", -1, talent);
+    talent.variables.usagePerRound -= 1;
   }
 };
 

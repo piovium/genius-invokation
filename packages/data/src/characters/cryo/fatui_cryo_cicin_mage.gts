@@ -116,7 +116,7 @@ define skill {
   const talent = :self.hasEquipment(CicinsColdGlare);
   const cicins = :query($.my.summon.def(CryoCicins));
   if (talent && cicins && cicins.variables.usage >= 2) {
-    cicins.setVariable("talentExtraDamage", 1);
+    cicins.variables.talentExtraDamage = 1;
   }
   :summon(CryoCicins);
 };

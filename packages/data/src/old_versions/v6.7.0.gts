@@ -57,7 +57,7 @@ define card {
   if (radiantHuesPillarInEffect) {
     :combatStatus(Shield, "my", {
       overrideVariables: {
-        shield: radiantHuesPillarInEffect.getVariable("shieldValue"),
+        shield: radiantHuesPillarInEffect.variables.shieldValue,
       },
     });
   }
@@ -75,7 +75,7 @@ define card {
   if (radiantHuesEchoesInEffect) {
     :summon(RadiantReflection, "my", {
       overrideVariables: {
-        damageValue: radiantHuesEchoesInEffect.getVariable("damageValue"),
+        damageValue: radiantHuesEchoesInEffect.variables.damageValue,
       },
     });
   }
@@ -93,7 +93,7 @@ define card {
   if (radiantHuesSolidIceInEffect) {
     :characterStatus(BattlePlan, $.my.active, {
       overrideVariables: {
-        usage: radiantHuesSolidIceInEffect.getVariable("layer"),
+        usage: radiantHuesSolidIceInEffect.variables.layer,
       },
     });
   }

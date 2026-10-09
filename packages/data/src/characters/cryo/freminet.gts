@@ -124,7 +124,7 @@ define skill {
   :damage(DamageType.Cryo, 2);
   const existsTimer = :self.hasStatus(PersTimer);
   if (existsTimer) {
-    existsTimer.setVariable("triggerOnUseSkill", 1);
+    existsTimer.variables.triggerOnUseSkill = 1;
   } else {
     :characterStatus(PersTimer, :self);
   }

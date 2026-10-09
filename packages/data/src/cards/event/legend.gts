@@ -357,7 +357,7 @@ define card {
         :variables.spirit = 0;
         // 判断胜利后，另一方的斗争之火不再结算
         if (oppSupport) {
-          oppSupport.setVariable("usagePerRound", 0);
+          oppSupport.variables.usagePerRound = 0;
         }
       }
     };

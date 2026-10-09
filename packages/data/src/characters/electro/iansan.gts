@@ -126,7 +126,7 @@ define skill {
       if (!nightsoul) {
         return;
       }
-      if (nightsoul.getVariable("nightsoul") === 2) {
+      if (nightsoul.variables.nightsoul === 2) {
         :heal(1, $.macros.myMostInjured);
       } else {
         :gainNightsoul(:self);

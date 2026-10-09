@@ -162,7 +162,7 @@ define skill {
         name "usagePerRound1";
       };
       const pearl = :self.hasStatus(FontemerPearl)!;
-      pearl.addVariable("usage", 1);
+      pearl.variables.usage += 1;
     };
   };
 };
@@ -204,7 +204,7 @@ define card {
     on staged {
       const exists = :e.targets[0].hasStatus(FontemerPearl);
       if (exists) {
-        exists.addVariable("usage", 1);
+        exists.variables.usage += 1;
       } else {
         :characterStatus(FontemerPearl, :e.targets[0], {
           overrideVariables: {

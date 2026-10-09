@@ -97,7 +97,7 @@ define status {
     if (talent) {
       :combatStatus(CurseOfTheUndercurrent, "opp");
     }
-    :self.master.setVariable("wateryRebirthTriggered", 1);
+    :self.master.variables.wateryRebirthTriggered = 1;
     :characterStatus(WateryRebirthHoned, :self.master);
     :dispose();
   };
@@ -257,7 +257,7 @@ define card {
   talent AbyssHeraldWickedTorrents, none {
     on staged {
       :combatStatus(SurgingUndercurrentCombatStatus);
-      if (:e.targets[0].getVariable("wateryRebirthTriggered")) {
+      if (:e.targets[0].variables.wateryRebirthTriggered) {
         :combatStatus(CurseOfTheUndercurrent, "opp");
       }
     };

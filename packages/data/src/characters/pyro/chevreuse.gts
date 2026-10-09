@@ -113,7 +113,7 @@ define skill {
   :damage(DamageType.Pyro, 2);
   // 使用技能时、使用技能后都存在弹头时，才舍弃之
   if (:query($.my.hand.def(OverchargedBall))) {
-    :self.setVariable("canShot", 1);
+    :self.variables.canShot = 1;
   }
 };
 

@@ -1464,11 +1464,7 @@ export class SkillContext<Meta extends ContextMetaBase> {
       this.callAndEmit("dispose", t.latest(), { ...opt, via: this.skillInfo });
     }
   }
-
-  // NOTICE: getVariable/setVariable/addVariable 应当将 caller 的严格版声明放在最后一个
-  // 因为 (...args: infer R) 只能获取到重载列表中的最后一个，而严格版供链式上下文操作使用
-
-  /** @deprecated Use `get(target).variables` instead. */
+  
   getVariable(prop: string, target: PlainAnyState): number;
   /** @deprecated Use `variables` instead. */
   getVariable(prop: Meta["callerVars"]): number;
@@ -1480,7 +1476,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
     }
   }
 
-  /** @deprecated Use `get(target).variables` instead. */
   setVariable(prop: string, value: number, target: PlainAnyState): void;
   /** @deprecated Use `variables` instead. */
   setVariable(prop: Meta["callerVars"], value: number): void;
@@ -1503,7 +1498,6 @@ export class SkillContext<Meta extends ContextMetaBase> {
     );
   }
 
-  /** @deprecated Use `get(target).variables` with `+=` or `-=` instead. */
   addVariable(prop: string, value: number, target: PlainAnyState): void;
   /** @deprecated Use `variables` with `+=` or `-=` instead. */
   addVariable(prop: Meta["callerVars"], value: number): void;

@@ -58,7 +58,7 @@ define card {
   if (radiantHuesPillarInEffect) {
     :combatStatus(Shield, "my", {
       overrideVariables: {
-        shield: radiantHuesPillarInEffect.getVariable("shieldValue"),
+        shield: radiantHuesPillarInEffect.variables.shieldValue,
       },
     });
   }
@@ -97,7 +97,7 @@ define card {
   if (radiantHuesSolidIceInEffect) {
     :characterStatus(BattlePlan, $.my.active, {
       overrideVariables: {
-        usage: radiantHuesSolidIceInEffect.getVariable("layer"),
+        usage: radiantHuesSolidIceInEffect.variables.layer,
       },
     });
   }
@@ -110,7 +110,7 @@ define card {
     if (maxCostHand) {
       :attachCostReduction(
         maxCostHand,
-        radiantHuesSwiftShadowInEffect.getVariable("reductCount"),
+        radiantHuesSwiftShadowInEffect.variables.reductCount,
       );
     }
   }

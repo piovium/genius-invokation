@@ -250,7 +250,7 @@ define card {
   cost DiceType.Geo, 2;
   const moondrift = :query($.my.summon.def(Moondrift));
   if (moondrift) {
-    moondrift.addVariable("effect", 1);
+    moondrift.variables.effect += 1;
   } else {
     :summon(Moondrift);
   }

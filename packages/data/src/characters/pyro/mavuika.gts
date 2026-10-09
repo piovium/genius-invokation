@@ -286,7 +286,7 @@ define skill {
   if (spirit >= 6) {
     :characterStatus(CrucibleOfDeathAndLife);
   }
-  :self.setVariable("fightingSpirit", 0);
+  :self.variables.fightingSpirit = 0;
 };
 
 /**

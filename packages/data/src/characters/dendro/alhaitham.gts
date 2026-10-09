@@ -86,7 +86,7 @@ define skill {
   cost DiceType.Dendro, 3;
   cost DiceType.Energy, 2;
   const mirror = :self.hasStatus(ChisellightMirror);
-  const duration = mirror ? :getVariable("duration", mirror) : 0;
+  const duration = mirror ? mirror.variables.duration : 0;
   const damageValue = 4 + duration;
   if (mirror) {
     :dispose(mirror);

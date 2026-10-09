@@ -168,9 +168,9 @@ define summon {
       :e.skill.definition.id === IcetideVortex &&
       :e.skill.caller.cast<"character">().hasEquipment(WellspringOfWarlust)
     ) {
-      :self.addVariable("usage", 3);
+      :self.variables.usage += 3;
     } else {
-      :self.addVariable("usage", 2);
+      :self.variables.usage += 2;
     }
   };
   on endPhase {

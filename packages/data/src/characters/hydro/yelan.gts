@@ -84,7 +84,7 @@ define skill {
   cost DiceType.Hydro, 3;
   :damage(DamageType.Hydro, 3);
   const breakSt = :self.hasStatus(BreakthroughStatus)!;
-  breakSt.addVariable("break", 2);
+  breakSt.variables.break += 2;
 };
 
 /**

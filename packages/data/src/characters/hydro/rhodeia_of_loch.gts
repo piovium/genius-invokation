@@ -213,7 +213,7 @@ define skill {
   const damageValue = 4 + summons.length;
   :damage(DamageType.Hydro, damageValue);
   if (:self.hasEquipment(StreamingSurge)) {
-    summons.forEach((s) => s.addVariable("usage", 1));
+    summons.forEach((s) => (s.variables.usage! += 1));
   }
 };
 

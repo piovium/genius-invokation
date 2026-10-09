@@ -32,7 +32,7 @@ define card {
       when :{
         const status = :self.master.hasStatus(PactswornPathclearer)!;
         return (
-          :getVariable("reliance", status) >= 2 &&
+          status.variables.reliance >= 2 &&
           :e.via.definition.id === SecretRiteChasmicSoulfarer
         );
       };

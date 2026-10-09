@@ -97,8 +97,8 @@ define skill {
   skillType elemental;
   cost DiceType.Electro, 3;
   const sakura = :query($.my.summon.def(SesshouSakura));
-  if (sakura && sakura.getVariable("atk") === 1) {
-    sakura.addVariable("atk", 1);
+  if (sakura && sakura.variables.atk === 1) {
+    sakura.variables.atk += 1;
   }
   :summon(SesshouSakura);
 };

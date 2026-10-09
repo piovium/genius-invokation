@@ -104,7 +104,7 @@ define skill {
           const bondSt = :query($.typeStatus.def(BondOfLife).at($.opp.active));
           if (bondSt) {
             const oldUsage = bondSt.variables.usage;
-            bondSt.setVariable("usage", oldUsage * 2);
+            bondSt.variables.usage = oldUsage * 2;
           }
         }
       }
