@@ -26,7 +26,7 @@ import { test } from "vitest";
 import { GaleBlade, Jean } from "@gi-tcg/data/internal/characters/anemo/jean.gts";
 import { Albedo, DescentOfDivinity, FavoniusBladeworkWeiss, SolarIsotoma } from "@gi-tcg/data/internal/characters/geo/albedo.gts";
 
-test("Effect-caused switchActive should mark canPlunging", async () => {
+test("Effect-caused switchActive should grant plunging eligibility", async () => {
   const c = setup(
     <State currentTurn="opp">
       <Character opp active def={Jean} health={10} />

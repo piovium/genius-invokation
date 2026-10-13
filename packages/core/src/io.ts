@@ -254,6 +254,7 @@ export function exposeMutation(
     case "pushPhaseDamageLog":
     case "pushPhaseReactionLog":
     case "clearPhaseLogs":
+    case "setPlungingStatus":
     case "switchActive": // We will manually handle this
       return null;
     case "setPlayerFlag": {

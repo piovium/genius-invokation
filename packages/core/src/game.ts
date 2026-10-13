@@ -34,6 +34,7 @@ import {
   getVersionBehavior,
   StateSymbol,
   stringifyState,
+  PlungingStatus,
   type EntityState,
   type AnyState,
   type CharacterState,
@@ -203,7 +204,7 @@ function initPlayerState(
     supports: [],
     declaredEnd: false,
     canCharged: false,
-    canPlunging: false,
+    plungingStatus: PlungingStatus.NONE,
     hasDefeated: false,
     legendUsed: false,
     skipNextTurn: false,
@@ -965,14 +966,17 @@ export class Game {
     }
     await this.handleEvent("onRoundEnd", new EventArg(this.state));
     for (const who of [0, 1] as const) {
-      for (const flagName of ["hasDefeated", "canPlunging"] as const) {
-        this.mutate({
-          type: "setPlayerFlag",
-          who,
-          flagName,
-          value: false,
-        });
-      }
+      this.mutate({
+        type: "setPlungingStatus",
+        who,
+        value: PlungingStatus.NONE,
+      });
+      this.mutate({
+        type: "setPlayerFlag",
+        who,
+        flagName: "hasDefeated",
+        value: false,
+      });
     }
     this.mutate({
       type: "clearRoundLogs",

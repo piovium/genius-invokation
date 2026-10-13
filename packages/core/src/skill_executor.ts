@@ -39,6 +39,7 @@ import {
   type CharacterState,
   type EntityState,
   stringifyState,
+  PlungingStatus,
 } from "./base/state";
 import {
   ActionValidity,
@@ -111,18 +112,6 @@ export class SkillExecutor {
     const skillDef = skillInfo.definition;
     const callerArea = getEntityArea(this.state, skillInfo.caller.id);
 
-    // 重置下落攻击判定。
-    // 官方描述：“角色被切换为「出战角色」后，本回合内的下一次使用技能（非特技）若为「普通攻击」，则被视为「下落攻击」”
-    // 本次技能使用后便不再判定下落攻击， canPlunging 更新为 false
-    if (isCharacterInitiativeSkill(skillInfo)) {
-      this.mutate({
-        type: "setPlayerFlag",
-        who: callerArea.who,
-        flagName: "canPlunging",
-        value: false,
-      });
-    }
-
     const oldState = this.state;
     this.mutator.notify();
     const [newState, { innerNotify, emittedEvents, error, causeDefeated }] = (0,
@@ -191,9 +180,21 @@ export class SkillExecutor {
     this.mutator.resetState(newState, innerNotify);
     if (error) {
       throw error;
-    } else {
-      return { emittedEvents, causeDefeated };
     }
+    // 技能本体结算完毕后消耗下落资格；技能引发的后续事件仍可重新获得资格。
+    if (isCharacterInitiativeSkill(skillInfo)) {
+      const who = callerArea.who;
+      this.mutate({
+        type: "setPlungingStatus",
+        who,
+        value:
+          this.state.players[who].plungingStatus === PlungingStatus.ELIGIBLE
+            ? PlungingStatus.CONSUMED
+            : PlungingStatus.NONE,
+      });
+    }
+
+    return { emittedEvents, causeDefeated };
   }
 
   async finalizeSkill(
@@ -610,6 +611,13 @@ export class SkillExecutor {
           DetailLogType.Event,
           `Handling event ${name} (${arg.toString()}):`,
         );
+        if (arg instanceof UseSkillEventArg) {
+          arg._getCurrentState = () => this.state;
+          arg._plungingStatus =
+            name === "onUseSkill"
+              ? PlungingStatus.CONSUMED
+              : PlungingStatus.ELIGIBLE;
+        }
         const callerAndSkills = this.broadcastEvent(event);
         for (const { caller, skill } of callerAndSkills) {
           const skillInfo = defineSkillInfo({
@@ -621,6 +629,16 @@ export class SkillExecutor {
             continue;
           }
           await this.finalizeSkill(skillInfo, arg);
+        }
+        if (
+          name === "onUseSkill" &&
+          this.state.players[arg.who].plungingStatus === PlungingStatus.CONSUMED
+        ) {
+          this.mutate({
+            type: "setPlungingStatus",
+            who: arg.who,
+            value: PlungingStatus.NONE,
+          });
         }
       }
     }

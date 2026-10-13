@@ -1,6 +1,7 @@
 import {
   CURRENT_VERSION,
   StateSymbol,
+  PlungingStatus,
   getVersionBehavior,
   type AttachmentDefinition,
   type AttachmentState,
@@ -9,12 +10,12 @@ import {
   type CharacterVariables,
   type EntityDefinition,
   type EntityState,
-  type EntityVariables,
   type ExtensionState,
   type GameData,
   type GameConfig,
   type GameState,
   type PlayerState,
+  type Variables,
 } from "@gi-tcg/core";
 import getData from "@gi-tcg/data";
 import type { Draft } from "immer";
@@ -37,13 +38,13 @@ function buildCharacterVariables(
 
 function buildEntityVariables(
   definition: EntityDefinition | AttachmentDefinition,
-): EntityVariables {
+): Variables {
   return Object.fromEntries(
     Object.entries(definition.varConfigs).map(([key, value]) => [
       key,
       value.initialValue,
     ]),
-  ) as EntityVariables;
+  ) as Variables;
 }
 
 export function createCharacterState(
@@ -108,7 +109,7 @@ function buildDefaultPlayerState(who: 0 | 1, data: GameData): PlayerState {
     declaredEnd: false,
     hasDefeated: false,
     canCharged: false,
-    canPlunging: false,
+    plungingStatus: PlungingStatus.NONE,
     legendUsed: false,
     skipNextTurn: false,
     defeatedSwitching: false,

@@ -1,5 +1,6 @@
+import { PlungingStatus } from "@gi-tcg/core";
 import { For, createMemo, createSignal } from "solid-js";
-import { BooleanField, SectionTitle, Surface } from "./Fields";
+import { BooleanField, SelectField, SectionTitle, Surface } from "./Fields";
 import { RoundSkillModal } from "./RoundSkillModal";
 import { ListItem, type ListItemButton } from "./ListItem";
 import { AddButton } from "./AddButton";
@@ -53,10 +54,23 @@ export function PlayerInfoSection() {
               value={player().canCharged}
               onChange={(value) => updatePlayerField("canCharged", value)}
             />
-            <BooleanField
-              label="可视为下落攻击"
-              value={player().canPlunging}
-              onChange={(value) => updatePlayerField("canPlunging", value)}
+            <SelectField
+              label="下落攻击状态"
+              value={player().plungingStatus}
+              options={[
+                { value: PlungingStatus.NONE, label: "无" },
+                { value: PlungingStatus.ELIGIBLE, label: "可下落攻击" },
+                {
+                  value: PlungingStatus.CONSUMED,
+                  label: "已消耗（技能后结算中）",
+                },
+              ]}
+              onChange={(value) =>
+                updatePlayerField(
+                  "plungingStatus",
+                  Number(value) as PlungingStatus,
+                )
+              }
             />
             <BooleanField
               label="已使用秘传"

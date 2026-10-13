@@ -33,7 +33,7 @@ export {
   deserializeGameStateLog,
 } from "./log";
 export type * from "./base/state";
-export { StateSymbol, getVersionBehavior } from "./base/state";
+export { StateSymbol, PlungingStatus, getVersionBehavior } from "./base/state";
 export { type Mutation } from "./base/mutation";
 export { type CommonSkillType } from "./base/skill";
 export {

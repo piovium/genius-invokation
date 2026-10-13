@@ -28,6 +28,7 @@ import {
 } from "@gi-tcg/typings";
 import {
   CURRENT_VERSION,
+  PlungingStatus,
   deserializeGameStateLog,
   GiTcgIoError,
   Game as InternalGame,
@@ -313,10 +314,14 @@ class State {
         return +this.state.players[1].canCharged;
       }
       case c.GITCG_ATTR_STATE_PLAYER_CAN_PLUNGING_0: {
-        return +this.state.players[0].canPlunging;
+        return +(
+          this.state.players[0].plungingStatus === PlungingStatus.ELIGIBLE
+        );
       }
       case c.GITCG_ATTR_STATE_PLAYER_CAN_PLUNGING_1: {
-        return +this.state.players[1].canPlunging;
+        return +(
+          this.state.players[1].plungingStatus === PlungingStatus.ELIGIBLE
+        );
       }
       case c.GITCG_ATTR_STATE_PLAYER_LEGEND_USED_0: {
         return +this.state.players[0].legendUsed;

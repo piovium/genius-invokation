@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { PlungingStatus } from "./base/state";
 import { clampVariable } from "./data/utils";
 import type { Draft } from "immer";
 import {
@@ -728,7 +729,11 @@ export function getInsertedStateVariables<T extends AnyState>({
   }
 }
 
-export function isChargedPlunging(skill: SkillDefinition, player: PlayerState) {
+export function isChargedPlunging(
+  skill: SkillDefinition,
+  player: PlayerState,
+  plungingStatus = PlungingStatus.ELIGIBLE,
+) {
   if (!skill.initiativeSkillConfig) {
     return { charged: false, plunging: false };
   }
@@ -743,7 +748,7 @@ export function isChargedPlunging(skill: SkillDefinition, player: PlayerState) {
     et.definition.tags.includes("normalAsPlunging"),
   );
   charged ||= player.canCharged;
-  plunging ||= player.canPlunging || asPlunging;
+  plunging ||= player.plungingStatus === plungingStatus || asPlunging;
   return { charged, plunging };
 }
 

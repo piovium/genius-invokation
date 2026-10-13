@@ -16,7 +16,11 @@
 import { test, expect } from "vitest";
 import { shuffle, sortDice, computeConvertDice } from "../src/utils";
 import { DiceType } from "@gi-tcg/typings";
-import { StateSymbol, type PlayerState } from "../src/base/state";
+import {
+  PlungingStatus,
+  StateSymbol,
+  type PlayerState,
+} from "../src/base/state";
 import type { ElementTag } from "../src/base/character";
 import { chooseDiceValue } from "@gi-tcg/utils";
 
@@ -65,7 +69,7 @@ const makePlayerState = (
   supports: [],
   combatStatuses: [],
   canCharged: false,
-  canPlunging: false,
+  plungingStatus: PlungingStatus.NONE,
   declaredEnd: false,
   skipNextTurn: false,
   hasDefeated: false,

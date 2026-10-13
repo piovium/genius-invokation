@@ -25,7 +25,7 @@ import {
   applyMutation,
   stringifyMutation,
 } from "./base/mutation";
-import { type EntityState, StateSymbol, stringifyState } from "./base/state";
+import { type EntityState, StateSymbol, PlungingStatus, stringifyState } from "./base/state";
 import {
   allEntitiesAtArea,
   allSkills,
@@ -1463,10 +1463,9 @@ export class StateMutator {
       ],
     });
     this.mutate({
-      type: "setPlayerFlag",
+      type: "setPlungingStatus",
       who: switchInfo.who,
-      flagName: "canPlunging",
-      value: true,
+      value: PlungingStatus.ELIGIBLE,
     });
   }
 

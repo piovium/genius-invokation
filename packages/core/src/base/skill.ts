@@ -31,6 +31,7 @@ import {
   type GameState,
   type AttachmentState,
   stringifyState,
+  PlungingStatus,
 } from "./state";
 import type { Mutation } from "./mutation";
 import {
@@ -59,6 +60,7 @@ import {
   getEntityArea,
   getEntityById,
   isCharacterInitiativeSkill,
+  isChargedPlunging,
   mixins,
   normalizeCost,
 } from "../utils";
@@ -700,12 +702,17 @@ export class SwitchActiveEventArg extends EventArg {
 }
 
 export class UseSkillEventArg extends PlayerEventArg {
+  // Refreshed by the executor so earlier event handlers can change the condition.
+  _getCurrentState: () => GameState;
+  _plungingStatus = PlungingStatus.ELIGIBLE;
+
   constructor(
     state: GameState,
     public readonly callerArea: EntityArea,
     protected readonly _skillInfo: InitiativeSkillInfo,
   ) {
     super(state, callerArea.who);
+    this._getCurrentState = () => state;
   }
   get skill() {
     return this._skillInfo;
@@ -737,7 +744,11 @@ export class UseSkillEventArg extends PlayerEventArg {
     return this.skill.charged;
   }
   isPlungingAttack(): this is ActionEventArg<UseSkillInfo> {
-    return this.skill.plunging;
+    return isChargedPlunging(
+      this.skill.definition,
+      this._getCurrentState().players[this.who],
+      this._plungingStatus,
+    ).plunging;
   }
 }
 

@@ -167,6 +167,12 @@ export interface GameState {
   readonly extensions: readonly ExtensionState[];
 }
 
+export enum PlungingStatus {
+  NONE,
+  ELIGIBLE,
+  CONSUMED,
+}
+
 export interface PlayerState {
   readonly [StateSymbol]: "player";
   readonly who: 0 | 1;
@@ -182,7 +188,7 @@ export interface PlayerState {
   readonly declaredEnd: boolean;
   readonly hasDefeated: boolean;
   readonly canCharged: boolean;
-  readonly canPlunging: boolean;
+  readonly plungingStatus: PlungingStatus;
   readonly legendUsed: boolean;
   readonly skipNextTurn: boolean;
   /**

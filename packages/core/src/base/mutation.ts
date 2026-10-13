@@ -26,6 +26,7 @@ import {
   stringifyState,
   type AnyState,
   StateSymbol,
+  type PlungingStatus,
   type StateKind,
   type AttachmentState,
 } from "./state";
@@ -197,6 +198,12 @@ export type PlayerFlag = {
   [P in keyof PlayerState]: PlayerState[P] extends boolean ? P : never;
 }[keyof PlayerState];
 
+export interface SetPlungingStatusM {
+  readonly type: "setPlungingStatus";
+  readonly who: 0 | 1;
+  readonly value: PlungingStatus;
+}
+
 export interface SetPlayerFlagM {
   readonly type: "setPlayerFlag";
   readonly who: 0 | 1;
@@ -256,6 +263,7 @@ export type Mutation =
   | ResetVariablesM
   | ResetDiceM
   | SetPlayerFlagM
+  | SetPlungingStatusM
   | MutateExtensionStateM
   | PushRoundSkillLogM
   | RemoveRoundSkillLogM
@@ -505,6 +513,11 @@ function doMutation(state: GameState, m: Mutation): GameState {
         draft.players[m.who].dice = sortDice(state.players[m.who], m.value);
       });
     }
+    case "setPlungingStatus": {
+      return produce(state, (draft) => {
+        draft.players[m.who].plungingStatus = m.value;
+      });
+    }
     case "setPlayerFlag": {
       return produce(state, (draft) => {
         draft.players[m.who][m.flagName] = m.value;
@@ -643,6 +656,9 @@ export function stringifyMutation(m: Mutation): string | null {
     }
     case "resetDice": {
       return `Reset dice of player ${m.who} to ${JSON.stringify(m.value)}`;
+    }
+    case "setPlungingStatus": {
+      return `Set player ${m.who} plunging status to ${m.value}`;
     }
     case "setPlayerFlag": {
       return `Set player ${m.who} flag ${m.flagName} to ${m.value}`;
