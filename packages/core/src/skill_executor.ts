@@ -101,9 +101,7 @@ export class SkillExecutor {
     }
     using l = this.mutator.subLog(
       DetailLogType.Skill,
-      `Using skill [skill:${skillInfo.definition.id}]${
-        skillInfo.charged ? " (charged)" : ""
-      }${skillInfo.plunging ? " (plunging)" : ""}`,
+      `Using skill [skill:${skillInfo.definition.id}]`,
     );
     this.mutator.log(
       DetailLogType.Other,
@@ -181,7 +179,6 @@ export class SkillExecutor {
     if (error) {
       throw error;
     }
-    // 技能本体结算完毕后消耗下落资格；技能引发的后续事件仍可重新获得资格。
     if (isCharacterInitiativeSkill(skillInfo)) {
       const who = callerArea.who;
       this.mutate({
@@ -437,13 +434,10 @@ export class SkillExecutor {
           continue;
         }
         const { caller, skill } = skillAndCaller;
-        const { charged, plunging } = isChargedPlunging(skill, player);
         const skillInfo = defineSkillInfo({
           caller,
           definition: skill,
           requestBy: arg.via,
-          charged,
-          plunging,
           prepared: arg.requestOption.asPrepared ?? false,
         });
         const callerArea = getEntityArea(this.state, caller.id);
@@ -611,13 +605,6 @@ export class SkillExecutor {
           DetailLogType.Event,
           `Handling event ${name} (${arg.toString()}):`,
         );
-        if (arg instanceof UseSkillEventArg) {
-          arg._getCurrentState = () => this.state;
-          arg._plungingStatus =
-            name === "onUseSkill"
-              ? PlungingStatus.CONSUMED
-              : PlungingStatus.ELIGIBLE;
-        }
         const callerAndSkills = this.broadcastEvent(event);
         for (const { caller, skill } of callerAndSkills) {
           const skillInfo = defineSkillInfo({

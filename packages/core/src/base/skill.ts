@@ -60,15 +60,14 @@ import {
   getEntityArea,
   getEntityById,
   isCharacterInitiativeSkill,
-  isChargedPlunging,
   mixins,
   normalizeCost,
+  isChargedPlunging,
 } from "../utils";
 import type { IDetailLogger } from "../log";
 import type { CustomEvent } from "./custom_event";
 import { getRaw, NoReactiveSymbol } from "../runtime/reactive";
 import type { PlainCharacterState } from "../runtime/reactive/utils";
-import type { AppliableDamageType } from "../data/type";
 import type { MoveEntityM, RemoveEntityM } from "./mutation";
 import type { LunarReaction } from "@gi-tcg/typings";
 import type { DamageOption, ReadonlyEventList } from "../mutator";
@@ -162,10 +161,6 @@ export interface SkillInfo {
    * 则此字段指定上述技能的 `SkillInfo`
    */
   readonly requestBy: SkillInfo | null;
-  /** 重击 */
-  readonly charged: boolean;
-  /** 下落攻击 */
-  readonly plunging: boolean;
   /** 准备技能 */
   readonly prepared: boolean;
   /**
@@ -207,8 +202,6 @@ export function defineSkillInfo(init: InitSkillInfo): SkillInfo;
 export function defineSkillInfo(init: InitSkillInfo): SkillInfo {
   return {
     requestBy: null,
-    charged: false,
-    plunging: false,
     prepared: false,
     environment: "normal",
     finalizeMode: "standard",
@@ -502,12 +495,6 @@ export class ActionEventArg<
       return false;
     }
   }
-  isChargedAttack(): this is ActionEventArg<UseSkillInfo> {
-    return this.isUseSkill() && this.action.skill.charged;
-  }
-  isPlungingAttack(): this is ActionEventArg<UseSkillInfo> {
-    return this.isUseSkill() && this.action.skill.plunging;
-  }
   hasCardTag(tag: EquipmentTag | SupportTag | CardTag) {
     if (this.action.type === "playCard") {
       return this.action.skill.caller.definition.tags.includes(tag);
@@ -702,17 +689,12 @@ export class SwitchActiveEventArg extends EventArg {
 }
 
 export class UseSkillEventArg extends PlayerEventArg {
-  // Refreshed by the executor so earlier event handlers can change the condition.
-  _getCurrentState: () => GameState;
-  _plungingStatus = PlungingStatus.ELIGIBLE;
-
   constructor(
     state: GameState,
     public readonly callerArea: EntityArea,
     protected readonly _skillInfo: InitiativeSkillInfo,
   ) {
     super(state, callerArea.who);
-    this._getCurrentState = () => state;
   }
   get skill() {
     return this._skillInfo;
@@ -739,37 +721,6 @@ export class UseSkillEventArg extends PlayerEventArg {
   }
   isSkillType(skillType: CommonSkillType): boolean {
     return this.skill.definition.skillType === skillType;
-  }
-  isChargedAttack(): this is ActionEventArg<UseSkillInfo> {
-    return this.skill.charged;
-  }
-  isPlungingAttack(): this is ActionEventArg<UseSkillInfo> {
-    return isChargedPlunging(
-      this.skill.definition,
-      this._getCurrentState().players[this.who],
-      this._plungingStatus,
-    ).plunging;
-  }
-}
-
-export class ModifyUseSkillEventArg extends UseSkillEventArg {
-  private _forcePlunging = false;
-  private _forceCharged = false;
-
-  forcePlunging() {
-    this._forcePlunging = true;
-  }
-  forceCharged() {
-    this._forceCharged = true;
-  }
-
-  override get skill() {
-    const skillInfo = super.skill;
-    return {
-      ...skillInfo,
-      charged: this._forceCharged || skillInfo.charged,
-      plunging: this._forcePlunging || skillInfo.plunging,
-    };
   }
 }
 
@@ -874,12 +825,6 @@ export class DamageOrHealEventArg<
   }
   viaSkillType(skillType: CommonSkillType): boolean {
     return this.via.definition.skillType === skillType;
-  }
-  viaChargedAttack(): boolean {
-    return this.via.charged;
-  }
-  viaPlungingAttack(): boolean {
-    return this.via.plunging;
   }
   get log() {
     return this.damageInfo.log ?? "";

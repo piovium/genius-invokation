@@ -58,11 +58,11 @@ export function PlayerInfoSection() {
               label="下落攻击状态"
               value={player().plungingStatus}
               options={[
-                { value: PlungingStatus.NONE, label: "无" },
-                { value: PlungingStatus.ELIGIBLE, label: "可下落攻击" },
+                { value: PlungingStatus.NONE, label: "NONE" },
+                { value: PlungingStatus.ELIGIBLE, label: "ELIGIBLE" },
                 {
                   value: PlungingStatus.CONSUMED,
-                  label: "已消耗（技能后结算中）",
+                  label: "CONSUMED",
                 },
               ]}
               onChange={(value) =>
