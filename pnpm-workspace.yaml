@@ -50,3 +50,7 @@ allowBuilds:
   puppeteer: true
 
 shellEmulator: true
+
+# 傻逼 pnpm 还管这个
+skills:
+  dirs: []
