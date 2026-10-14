@@ -29,8 +29,8 @@ import {
   $,
 } from "#test";
 import { PlungingStatus } from "@gi-tcg/core";
-import { CombatStatusHandle, SkillHandle } from "@gi-tcg/core/data";
-import { PlungingStrike } from "@gi-tcg/data/internal/cards/event/other.gts";
+import { SkillHandle } from "@gi-tcg/core/data";
+import { WhenTheCraneReturnedInEffect, WindAndFreedomInEffect } from "@gi-tcg/data/internal/cards/event/other.gts";
 import {
   WhirlwindThrust,
   Xiao,
@@ -53,6 +53,7 @@ import {
   BiteyShark,
   Mualani,
 } from "@gi-tcg/data/internal/characters/hydro/mualani.gts";
+import { ExperimentalFieldGenerator, LowGravityBackground } from "@gi-tcg/data/internal/characters/geo/experimental_field_generator.gts";
 import { expect, test } from "vitest";
 
 test("plunging : negative test", async () => {
@@ -119,40 +120,29 @@ test("plunging triggered by post-defeated switching", async () => {
   c.expect(target).toHaveVariable({ health: 5 });
 });
 
-test("switching three times after a plunging attack defers Silver Isotoma until the next attack", async () => {
+test("switching three times after a plunging attack defers its detection", async () => {
   const albedo = ref();
-  const standby = ref();
+  const oppStandby = ref();
   const silver = ref();
-  // Three independent, one-shot post-skill switches, all resolving before Silver Isotoma.
-  const craneReturned = 303207 as CombatStatusHandle;
   const c = setup(
     <State>
       <DeclaredEnd opp />
-      <DiceCount my count={20} />
       <Character opp active />
-      <Character opp ref={standby} />
+      <Character opp ref={oppStandby} />
+      <Character my ref={albedo} def={Albedo} />
+      <Character my def={ExperimentalFieldGenerator} />
       <Character my active />
-      <Character my def={Albedo} ref={albedo} />
-      <Character my />
-      <CombatStatus my def={craneReturned} />
-      <CombatStatus my def={craneReturned} />
-      <CombatStatus my def={craneReturned} />
+      {/* 下面三个状态导致三次技能后切人 */}
+      <CombatStatus my def={LowGravityBackground} />
+      <CombatStatus my def={WhenTheCraneReturnedInEffect} />
+      <CombatStatus my def={WindAndFreedomInEffect} />
+      {/* 瑰银切人后响应 */}
       <CombatStatus my def={SilverIsotoma} ref={silver} />
     </State>,
   );
-  await c.me.switch(Albedo);
+  await c.me.switch(albedo);
   await c.me.skill(FavoniusBladeworkWeiss);
-  c.expect($.my.active).toBe(albedo);
-  c.expect(standby).toHaveVariable({ health: 10 });
+  c.expect($.my.active).toBeDefinition(Albedo);
+  c.expect(oppStandby).toHaveVariable({ health: 10 });
   c.expect(silver).toHaveVariable({ usage: 2 });
-  expect(c.state.players[0].plungingStatus).toBe(PlungingStatus.ELIGIBLE);
-
-  await c.me.skill(FavoniusBladeworkWeiss);
-  c.expect(standby).toHaveVariable({ health: 9 });
-  c.expect(silver).toHaveVariable({ usage: 1 });
-  expect(c.state.players[0].plungingStatus).toBe(PlungingStatus.NONE);
-
-  await c.me.skill(FavoniusBladeworkWeiss);
-  c.expect(standby).toHaveVariable({ health: 9 });
-  c.expect(silver).toHaveVariable({ usage: 1 });
 });

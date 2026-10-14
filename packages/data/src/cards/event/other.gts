@@ -926,7 +926,7 @@ define card {
  * 我方下一次使用技能后：将下一个我方后台角色切换到场上。
  */
 define combatStatus {
-  id 303207 as private WhenTheCraneReturnedInEffect;
+  id 303207 as WhenTheCraneReturnedInEffect;
   since "v3.3.0";
   once useSkill {
     :switchActive($.my.next);
